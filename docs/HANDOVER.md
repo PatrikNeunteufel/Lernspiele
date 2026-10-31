@@ -1,6 +1,15 @@
 # Handover — Lernspiele
 
 ## Stand
+**2026-10-31, nach LERN_Session1** ([Report](report/LERN_Session1_2026-10-31.md)): 26 Spiele, alle 130
+Kombinationen Spiel × Stufe laden fehlerfrei; Inhaltslisten noch ungeprüft; alles committet bis
+`0962a6c` (Report und Handover-Nachtrag dieses Abschlusses noch nicht).
+
+**Nächste Session — Plan:** Entscheid a umsetzen: fünf Spiele für die Lücken der 1./2. Klasse —
+Zehner-Ergänzer (Mathe), Silben-Klatscher, Reim-Paare, ABC-Sortierer (Deutsch),
+Lebensraum-Zuordnung (NMG). Je Lehrplanstelle vorher an sg.lehrplan.ch prüfen; neue Listen in
+eigene Dateien und in die Prüfliste.
+
 Technik: HTML/CSS/JS ohne Build (Entscheid LERN-1). Gemeinsamer Rahmen `spiele/gemeinsam/`:
 `spiel.js` (Stufenskala, Spieler/Profil/Protokoll, Stufenwahl, Timer, Zeitmessung, Eule, Tastatur,
 Sterne), `katalog.js` (Themen, Spiele, Lernziele, Vorgabezeiten), `auswertung.js` (didaktische
@@ -66,6 +75,7 @@ zwischen Startseite und Spielen teilt — Chrome/Edge oder der Server sind siche
 | LERN-8 | Einstellung Reihenfolge der Teile je Spiel oder je Spieler | erledigt 2026-10-31 (LERN_Session1) | Profil auf der Startseite; Baukasten, Tresor |
 | LERN-9 | Mischspiel über mehrere Themen, gewichtet nach Fokus | später | Profil-Fokus ist dafür angelegt |
 | LERN-10 | Spielideen aus dem Lehrplan Volksschule SG, alle Fächer 1.–6. Kl. | erledigt 2026-10-31 (LERN_Session1) | docs/spielideen/lehrplan_sg_spielideen.md |
-| LERN-11 | Wortlisten Deutsch prüfen lassen | offen (Prüfung durch Patrik oder Lehrperson, Entscheid a) | Prüfliste docs/pruefung/wortlisten_zur_pruefung.md; nach Korrekturen in woerter.js neu erzeugen mit `node tools/pruefliste_wortlisten.js > docs/pruefung/wortlisten_zur_pruefung.md` |
+| LERN-11 | Inhaltslisten prüfen lassen (Deutsch, Englisch) | offen (Prüfung durch Patrik oder Lehrperson, Entscheid a) | Prüfliste docs/pruefung/wortlisten_zur_pruefung.md; nach Korrekturen in woerter.js neu erzeugen mit `node tools/pruefliste_wortlisten.js > docs/pruefung/wortlisten_zur_pruefung.md` |
 | LERN-12 | Timer, Zeitmessung und didaktische Statistik | erledigt 2026-10-31 (LERN_Session1) | spiel.js, auswertung.js, statistik.html |
-| LERN-13 | Weitere Spiele aus der Top-15-Liste | in Arbeit seit 2026-10-31 (LERN_Session1); 13 von 15 gebaut, insgesamt 19 von 74 Ideen | offen aus Top 15: Schweiz-Karten-Suche und Roboter-Pfad (Kartendaten/Lizenz klären) |
+| LERN-13 | Weitere Spiele aus der Top-15-Liste | in Arbeit seit 2026-10-31 (LERN_Session1); 13 von 15 gebaut, insgesamt 19 von 74 Ideen | offen aus Top 15: Schweiz-Karten-Suche und Roboter-Pfad (Kartendaten/Lizenz klären); nächste Gruppe siehe Plan oben |
+| LERN-14 | Testskript für die Aufgabengeneratoren aller Spiele (Node) | offen | Report LERN_Session1, Stolperfallen |
