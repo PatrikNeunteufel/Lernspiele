@@ -1869,3 +1869,917 @@ Preis je Stück in Rappen: kleinster bis grösster Wert, den das Spiel wählt.
 | 🏊 | Badi | die Badi | der Badi | ☐ |
 | 🌻 | Garten | der Garten | dem Garten | ☐ |
 | 🚒 | Feuerwehr | die Feuerwehr | der Feuerwehr | ☐ |
+
+## 28. Wort-Zwillinge (Lehrplan SG FS1E.2.B.1) — Parallelwörter
+
+| Englisch | Deutsch | Bild | Liste | ☐ |
+|---|---|---|---|---|
+| hand | Hand | ✋ | gleich | ☐ |
+| ball | Ball | ⚽ | gleich | ☐ |
+| baby | Baby | 👶 | gleich | ☐ |
+| banana | Banane | 🍌 | gleich | ☐ |
+| tomato | Tomate | 🍅 | gleich | ☐ |
+| zebra | Zebra | 🦓 | gleich | ☐ |
+| kangaroo | Känguru | 🦘 | gleich | ☐ |
+| pizza | Pizza | 🍕 | gleich | ☐ |
+| guitar | Gitarre | 🎸 | gleich | ☐ |
+| hamster | Hamster | 🐹 | gleich | ☐ |
+| elephant | Elefant | 🐘 | gleich | ☐ |
+| giraffe | Giraffe | 🦒 | gleich | ☐ |
+| crocodile | Krokodil | 🐊 | gleich | ☐ |
+| camel | Kamel | 🐫 | gleich | ☐ |
+| tiger | Tiger | 🐯 | gleich | ☐ |
+| bus | Bus | 🚌 | gleich | ☐ |
+| taxi | Taxi | 🚕 | gleich | ☐ |
+| butter | Butter | 🧈 | gleich | ☐ |
+| chocolate | Schokolade | 🍫 | gleich | ☐ |
+| rocket | Rakete | 🚀 | gleich | ☐ |
+| robot | Roboter | 🤖 | gleich | ☐ |
+| penguin | Pinguin | 🐧 | gleich | ☐ |
+| dolphin | Delfin | 🐬 | gleich | ☐ |
+| salad | Salat | 🥗 | gleich | ☐ |
+| finger | Finger |  | gleich | ☐ |
+| arm | Arm |  | gleich | ☐ |
+| winter | Winter |  | gleich | ☐ |
+| name | Name |  | gleich | ☐ |
+| house | Haus | 🏠 | aehnlich | ☐ |
+| mouse | Maus | 🐭 | aehnlich | ☐ |
+| book | Buch | 📖 | aehnlich | ☐ |
+| water | Wasser | 💧 | aehnlich | ☐ |
+| milk | Milch | 🥛 | aehnlich | ☐ |
+| bread | Brot | 🍞 | aehnlich | ☐ |
+| fish | Fisch | 🐟 | aehnlich | ☐ |
+| ship | Schiff | 🚢 | aehnlich | ☐ |
+| bed | Bett | 🛏️ | aehnlich | ☐ |
+| foot | Fuss | 🦶 | aehnlich | ☐ |
+| cat | Katze | 🐱 | aehnlich | ☐ |
+| father | Vater | 👨 | aehnlich | ☐ |
+| mother | Mutter | 👩 | aehnlich | ☐ |
+| brother | Bruder | 👦 | aehnlich | ☐ |
+| sister | Schwester | 👧 | aehnlich | ☐ |
+| sun | Sonne | ☀️ | aehnlich | ☐ |
+| moon | Mond | 🌙 | aehnlich | ☐ |
+| star | Stern | ⭐ | aehnlich | ☐ |
+| salt | Salz | 🧂 | aehnlich | ☐ |
+| heart | Herz | ❤️ | aehnlich | ☐ |
+| fire | Feuer | 🔥 | aehnlich | ☐ |
+| ice | Eis | 🧊 | aehnlich | ☐ |
+| apple | Apfel | 🍎 | aehnlich | ☐ |
+| cow | Kuh | 🐄 | aehnlich | ☐ |
+| sheep | Schaf | 🐑 | aehnlich | ☐ |
+| three | drei | 3️⃣ | aehnlich | ☐ |
+| eight | acht | 8️⃣ | aehnlich | ☐ |
+| nine | neun | 9️⃣ | aehnlich | ☐ |
+| green | grün | 🟩 | aehnlich | ☐ |
+| brown | braun | 🟫 | aehnlich | ☐ |
+| garden | Garten |  | aehnlich | ☐ |
+| glass | Glas |  | aehnlich | ☐ |
+| grass | Gras |  | aehnlich | ☐ |
+| knee | Knie |  | aehnlich | ☐ |
+| hair | Haar |  | aehnlich | ☐ |
+| summer | Sommer |  | aehnlich | ☐ |
+
+### Falsche Freunde
+
+| Englisch | Bedeutung | sieht aus wie | Bild | ☐ |
+|---|---|---|---|---|
+| gift | Geschenk | Gift | 🎁 | ☐ |
+| kind | nett | Kind |  | ☐ |
+| fast | schnell | fast |  | ☐ |
+| also | auch | also |  | ☐ |
+| where | wo | wer |  | ☐ |
+| who | wer | wo |  | ☐ |
+| chef | Koch / Köchin | Chef | 🧑‍🍳 | ☐ |
+| brave | mutig | brav |  | ☐ |
+| handy | praktisch | Handy |  | ☐ |
+| become | werden | bekommen |  | ☐ |
+| rat | Ratte | Rat | 🐀 | ☐ |
+| hut | Hütte | Hut | 🛖 | ☐ |
+| bad | schlecht | Bad |  | ☐ |
+| chips | Pommes frites | Chips | 🍟 | ☐ |
+| art | Kunst | Art | 🎨 | ☐ |
+| map | Landkarte | Mappe | 🗺️ | ☐ |
+
+## 29. Sentence-Builder (Lehrplan SG FS1E.5.D.1)
+
+Britisches Englisch (have got).
+
+| Englisch | Deutsch | Liste | ☐ |
+|---|---|---|---|
+| I like cats. | Ich mag Katzen. | ich-saetze | ☐ |
+| I like apples. | Ich mag Äpfel. | ich-saetze | ☐ |
+| I can swim. | Ich kann schwimmen. | ich-saetze | ☐ |
+| I am nine. | Ich bin neun. | ich-saetze | ☐ |
+| I am happy. | Ich bin fröhlich. | ich-saetze | ☐ |
+| I can sing. | Ich kann singen. | ich-saetze | ☐ |
+| I like pizza. | Ich mag Pizza. | ich-saetze | ☐ |
+| I can dance. | Ich kann tanzen. | ich-saetze | ☐ |
+| I am ten. | Ich bin zehn. | ich-saetze | ☐ |
+| I like dogs. | Ich mag Hunde. | ich-saetze | ☐ |
+| I have got a dog. | Ich habe einen Hund. | ich-saetze | ☐ |
+| I have got a red pencil. | Ich habe einen roten Bleistift. | ich-saetze | ☐ |
+| I can play football. | Ich kann Fussball spielen. | ich-saetze | ☐ |
+| I like ice cream. | Ich mag Glace. | ich-saetze | ☐ |
+| I have got two sisters. | Ich habe zwei Schwestern. | ich-saetze | ☐ |
+| I can ride a bike. | Ich kann Velo fahren. | ich-saetze | ☐ |
+| I like my school. | Ich mag meine Schule. | ich-saetze | ☐ |
+| I have got a blue bag. | Ich habe eine blaue Tasche. | ich-saetze | ☐ |
+| I am from Switzerland. | Ich komme aus der Schweiz. | ich-saetze | ☐ |
+| She has got a cat. | Sie hat eine Katze. | er-sie-saetze | ☐ |
+| He has got a bike. | Er hat ein Velo. | er-sie-saetze | ☐ |
+| She likes bananas. | Sie mag Bananen. | er-sie-saetze | ☐ |
+| He likes football. | Er mag Fussball. | er-sie-saetze | ☐ |
+| Tom is ten. | Tom ist zehn. | er-sie-saetze | ☐ |
+| Anna has got long hair. | Anna hat lange Haare. | er-sie-saetze | ☐ |
+| My brother likes pizza. | Mein Bruder mag Pizza. | er-sie-saetze | ☐ |
+| The dog is big. | Der Hund ist gross. | er-sie-saetze | ☐ |
+| It is sunny. | Es ist sonnig. | er-sie-saetze | ☐ |
+| Lisa plays the piano. | Lisa spielt Klavier. | er-sie-saetze | ☐ |
+| Max eats an apple. | Max isst einen Apfel. | er-sie-saetze | ☐ |
+| My cat sleeps a lot. | Meine Katze schläft viel. | er-sie-saetze | ☐ |
+| She can sing. | Sie kann singen. | er-sie-saetze | ☐ |
+| He can run fast. | Er kann schnell rennen. | er-sie-saetze | ☐ |
+| My sister can dance. | Meine Schwester kann tanzen. | er-sie-saetze | ☐ |
+| Do you like cats? | Magst du Katzen? | fragen | ☐ |
+| Have you got a pet? | Hast du ein Haustier? | fragen | ☐ |
+| Can you swim? | Kannst du schwimmen? | fragen | ☐ |
+| Are you nine? | Bist du neun? | fragen | ☐ |
+| Is it red? | Ist es rot? | fragen | ☐ |
+| Does she like pizza? | Mag sie Pizza? | fragen | ☐ |
+| Has he got a bike? | Hat er ein Velo? | fragen | ☐ |
+| What is your name? | Wie heisst du? | fragen | ☐ |
+| How old are you? | Wie alt bist du? | fragen | ☐ |
+| Where is my bag? | Wo ist meine Tasche? | fragen | ☐ |
+| Can she dance? | Kann sie tanzen? | fragen | ☐ |
+| Do you like ice cream? | Magst du Glace? | fragen | ☐ |
+| Is your dog big? | Ist dein Hund gross? | fragen | ☐ |
+| I don't like spiders. | Ich mag keine Spinnen. | verneinung | ☐ |
+| She doesn't like milk. | Sie mag keine Milch. | verneinung | ☐ |
+| I haven't got a cat. | Ich habe keine Katze. | verneinung | ☐ |
+| He hasn't got a bike. | Er hat kein Velo. | verneinung | ☐ |
+| I can't swim. | Ich kann nicht schwimmen. | verneinung | ☐ |
+| It isn't cold. | Es ist nicht kalt. | verneinung | ☐ |
+| We don't like rain. | Wir mögen keinen Regen. | verneinung | ☐ |
+| Tom can't sing. | Tom kann nicht singen. | verneinung | ☐ |
+| I am not tired. | Ich bin nicht müde. | verneinung | ☐ |
+| My dog doesn't like cats. | Mein Hund mag keine Katzen. | verneinung | ☐ |
+| They aren't at school. | Sie sind nicht in der Schule. | verneinung | ☐ |
+| He isn't hungry. | Er hat keinen Hunger. | verneinung | ☐ |
+
+### Verwechsler (falsche Form als zusätzliche Karte)
+
+| richtig | falsch | ☐ |
+|---|---|---|
+| has | have | ☐ |
+| have | has | ☐ |
+| Has | Have | ☐ |
+| Have | Has | ☐ |
+| likes | like | ☐ |
+| like | likes | ☐ |
+| is | are | ☐ |
+| are | is | ☐ |
+| Is | Are | ☐ |
+| Are | Is | ☐ |
+| am | is | ☐ |
+| Do | Does | ☐ |
+| Does | Do | ☐ |
+| plays | play | ☐ |
+| eats | eat | ☐ |
+| sleeps | sleep | ☐ |
+| don't | doesn't | ☐ |
+| doesn't | don't | ☐ |
+| haven't | hasn't | ☐ |
+| hasn't | haven't | ☐ |
+| isn't | aren't | ☐ |
+| aren't | isn't | ☐ |
+
+## 30. Listen & Tap (Lehrplan SG FS1E.1.A.1) — Formen
+
+Die Einzelwörter kommen aus Word-Match (Teil 9).
+
+| Form | Angabe | ☐ |
+|---|---|---|
+| circle | ☐ |
+| square | ☐ |
+| heart | ☐ |
+
+### Farben
+
+| Farbe | Bilder | ☐ |
+|---|---|---|
+| red | 🔴 · 🟥 · ❤️ | ☐ |
+| orange | 🟠 · 🟧 · 🧡 | ☐ |
+| yellow | 🟡 · 🟨 · 💛 | ☐ |
+| green | 🟢 · 🟩 · 💚 | ☐ |
+| blue | 🔵 · 🟦 · 💙 | ☐ |
+| purple | 🟣 · 🟪 · 💜 | ☐ |
+| brown | 🟤 · 🟫 · 🤎 | ☐ |
+| black | ⚫ · ⬛ · 🖤 | ☐ |
+
+### Anweisungen
+
+| Anweisung | ☐ |
+|---|---|
+| Touch the | ☐ |
+| Point to the | ☐ |
+| Find the | ☐ |
+
+### Wo ist das Tier? — Tiere
+
+| Englisch | Bild | ☐ |
+|---|---|---|
+| cat | 🐱 | ☐ |
+| dog | 🐶 | ☐ |
+| mouse | 🐭 | ☐ |
+| frog | 🐸 | ☐ |
+| bird | 🐦 | ☐ |
+| duck | 🦆 | ☐ |
+
+### Wo ist das Tier? — Orte
+
+| Ding | Präposition | ☐ |
+|---|---|---|
+| table | on | ☐ |
+| table | under | ☐ |
+| table | next to | ☐ |
+| box | in | ☐ |
+| box | on | ☐ |
+| box | next to | ☐ |
+
+## 31. Glace-Kombinator (Lehrplan SG MA.3.B.2) — Sorten
+
+| Sorte | Farbe | Buchstabe | ☐ |
+|---|---|---|---|
+| Vanille | #f3e2a4 | V | ☐ |
+| Schokolade | #7a4a2a | S | ☐ |
+| Erdbeere | #f48fb1 | E | ☐ |
+| Zitrone | #fff04d | Z | ☐ |
+| Pistazie | #9cc97a | P | ☐ |
+| Himbeere | #d81b60 | H | ☐ |
+| Mango | #ffa630 | M | ☐ |
+| Caramel | #c27c3a | C | ☐ |
+| Blaubeere | #5c6bc0 | B | ☐ |
+| Kokos | #ffffff | K | ☐ |
+
+### Kleider
+
+| Gruppe | Bild | Name | ☐ |
+|---|---|---|---|
+| oberteil | 👕 | T-Shirt | ☐ |
+| oberteil | 👚 | Bluse | ☐ |
+| oberteil | 🧥 | Jacke | ☐ |
+| oberteil | 🎽 | Trägershirt | ☐ |
+| hose | 👖 | lange Hose | ☐ |
+| hose | 🩳 | kurze Hose | ☐ |
+| schuhe | 👟 | Turnschuhe | ☐ |
+| schuhe | 🥾 | Wanderschuhe | ☐ |
+| schuhe | 👢 | Stiefel | ☐ |
+| schuhe | 🩴 | Flipflops | ☐ |
+| schuhe | 👡 | Sandalen | ☐ |
+| schuhe | 👞 | Halbschuhe | ☐ |
+| kopf | 🧢 | Kappe | ☐ |
+| kopf | 👒 | Sonnenhut | ☐ |
+| kopf | 🎩 | Zylinder | ☐ |
+
+## 32. Früher und heute (Lehrplan SG NMG.9.2) — Paare
+
+„svg:…“ = im Spiel gezeichnet.
+
+| Gruppe | Bild früher | früher | Bild heute | heute | früher eindeutig | ☐ |
+|---|---|---|---|---|---|---|
+| licht | 🪔 | Öllampe | 💡 | Lampe mit Strom | ja | ☐ |
+| nachrichten | ☎️ | altes Telefon mit Kabel | 📱 | Handy | ja | ☐ |
+| nachrichten | 🪶 | mit Feder und Tinte schreiben | 💻 | am Computer schreiben | ja | ☐ |
+| nachrichten | ✉️ | Brief | 📧 | E-Mail | nein | ☐ |
+| waschen | svg:waschbrett | Waschbrett | svg:waschmaschine | Waschmaschine | ja | ☐ |
+| reisen | 🐎 | mit dem Pferd reisen | 🚗 | mit dem Auto reisen | ja | ☐ |
+| reisen | 🚂 | Dampflokomotive | 🚄 | Schnellzug | ja | ☐ |
+| reisen | ⛵ | mit dem Segelschiff übers Meer | ✈️ | mit dem Flugzeug übers Meer | ja | ☐ |
+| wasser | 🪣 | Wasser am Brunnen holen | 🚰 | Wasser aus dem Hahn | ja | ☐ |
+| feld | 🐂 | Ochse zieht den Pflug | 🚜 | Traktor | ja | ☐ |
+
+### Reihen vom ältesten zum neusten
+
+| Gruppe | Thema | Reihe (Bild / Ding) | ☐ |
+|---|---|---|---|
+| licht | Licht | 🔥 / Feuer · 🕯️ / Kerze · 💡 / Lampe mit Strom | ☐ |
+| reisen | Reisen | 🚶 / zu Fuss · 🐎 / mit dem Pferd · 🚂 / mit der Dampflokomotive · ✈️ / mit dem Flugzeug | ☐ |
+| reisen | Übers Meer | ⛵ / Segelschiff · 🚢 / Dampfschiff · ✈️ / Flugzeug | ☐ |
+| nachrichten | Nachrichten | ✉️ / Brief · ☎️ / Telefon mit Kabel · 📱 / Handy | ☐ |
+| nachrichten | Schreiben | 🪶 / Feder und Tinte · 🖊️ / Kugelschreiber · 💻 / Computer | ☐ |
+| feld | Feld bearbeiten | 🧑‍🌾 / von Hand mit der Hacke · 🐂 / Ochse mit Pflug · 🚜 / Traktor | ☐ |
+| waschen | Wäsche waschen | 🏞️ / am Bach · svg:waschbrett / Waschbrett · svg:waschmaschine / Waschmaschine | ☐ |
+
+### Gab es das schon?
+
+| Bild | Ding | vor 60 Jahren | vor 100 Jahren | ☐ |
+|---|---|---|---|---|
+| 🚗 | Auto | ja | ja | ☐ |
+| 🚂 | Eisenbahn | ja | ja | ☐ |
+| 🚲 | Velo | ja | ja | ☐ |
+| ✈️ | Flugzeug | ja | ja | ☐ |
+| ☎️ | Telefon mit Kabel | ja | ja | ☐ |
+| 📻 | Radio | ja | ja | ☐ |
+| 💡 | Lampe mit Strom | ja | ja | ☐ |
+| 📷 | Fotoapparat | ja | ja | ☐ |
+| 📺 | Fernseher | ja | nein | ☐ |
+| 🖊️ | Kugelschreiber | ja | nein | ☐ |
+| 📱 | Handy | nein | nein | ☐ |
+| 🌐 | Internet | nein | nein | ☐ |
+| 📧 | E-Mail | nein | nein | ☐ |
+| 💻 | Laptop | nein | nein | ☐ |
+
+## 33. Schulweg-Profi (Lehrplan SG NMG.1.2) — sicher oder gefährlich
+
+Verkehrsregeln aus dem Gedächtnis belegt (SVG, VTS) — bitte besonders prüfen.
+
+| Bild | Situation | sicher | ☐ |
+|---|---|---|---|
+| ✋ | Am Strassenrand stehen bleiben und warten | ja | ☐ |
+| 👀 | Nach links und rechts schauen, bevor du gehst | ja | ☐ |
+| 🚶 | Auf dem Trottoir gehen | ja | ☐ |
+| 🦺 | Im Dunkeln Leuchtstreifen tragen | ja | ☐ |
+| 🚴 | Mit Helm Velo fahren | ja | ☐ |
+| 🧑‍🧒 | Mit einem Erwachsenen an der Hand über die Strasse gehen | ja | ☐ |
+| ⚽ | Dem Ball auf die Strasse nachrennen | nein | ☐ |
+| 🏃 | Ohne zu schauen über die Strasse rennen | nein | ☐ |
+| 🚗 | Zwischen parkierten Autos auf die Strasse gehen | nein | ☐ |
+| 📱 | Beim Überqueren der Strasse aufs Handy schauen | nein | ☐ |
+| 🌑 | Im Dunkeln mit dunklen Kleidern unterwegs sein | nein | ☐ |
+| 🚦 | Bei Rot über die Strasse gehen | nein | ☐ |
+
+### Merksatz
+
+| Bild | Mundart | Hochdeutsch | ☐ |
+|---|---|---|---|
+| ✋ | warte | warten | ☐ |
+| 👀 | luege | schauen | ☐ |
+| 👂 | lose | hören | ☐ |
+| 🚶 | laufe | gehen | ☐ |
+
+### Fragen
+
+| ab Stufe | Liste | Bild | Frage | richtig | falsch | falsch | Erklärung | ☐ |
+|---|---|---|---|---|---|---|---|---|
+| 2 | queren | ampel:rot | Das Männchen ist rot. Was machst du? | warten | gehen | rennen | Bei Rot wartest du am Strassenrand. | ☐ |
+| 2 | queren | ampel:gruen | Das Männchen ist grün. Was machst du? | schauen, dann gehen | rennen, ohne zu schauen | stehen bleiben, bis es rot ist | Bei Grün darfst du gehen. Schau trotzdem, ob alle Autos anhalten. | ☐ |
+| 2 | queren | 🎨 | Welche Farbe hat der Fussgängerstreifen in der Schweiz? | gelb | weiss | rot | In der Schweiz sind die Fussgängerstreifen gelb. | ☐ |
+| 2 | queren | 🚦 | Wo wartest du, bis du über die Strasse gehen kannst? | auf dem Trottoir am Rand | auf der Strasse | mitten auf dem Fussgängerstreifen | Auf dem Trottoir bist du sicher, bis du gehen kannst. | ☐ |
+| 2 | queren | 👂 | Warum hörst du gut hin, bevor du über die Strasse gehst? | Manchmal hört man ein Auto, bevor man es sieht. | Damit es nicht langweilig ist. | Weil die Strasse spricht. | Ohren helfen den Augen: Ein Motor ist oft schon zu hören, bevor das Auto um die Ecke kommt. | ☐ |
+| 2 | queren | 🚑 | Ein Krankenwagen kommt mit Blaulicht und Sirene. Was machst du? | am Rand warten, bis er vorbei ist | schnell über die Strasse rennen | auf die Strasse gehen und winken | Fahrzeuge mit Blaulicht und Sirene haben immer Vortritt. | ☐ |
+| 2 | queren | 🚸 | Wo gehst du am sichersten über die Strasse? | auf dem Fussgängerstreifen | zwischen parkierten Autos | in einer Kurve | Auf dem Fussgängerstreifen rechnen die Autofahrer mit dir. | ☐ |
+| 2 | queren | 🦶 | Du stehst am Fussgängerstreifen. Was machst du zuerst? | warten | laufen | rennen | Zuerst wartest du am Rand, dann schaust und hörst du. | ☐ |
+| 3 | queren | 🚗 | Ein Auto hält vor dem Fussgängerstreifen. Wann gehst du los? | wenn die Räder stillstehen | wenn es langsamer wird | sofort, ohne zu schauen | Rad steht, Kind geht: Erst wenn das Auto ganz steht, gehst du. | ☐ |
+| 3 | queren | ↔️ | Von welcher Seite kommen die Autos auf der Strassenseite nahe bei dir? | von links | von rechts |  | In der Schweiz fahren die Autos rechts. Auf der nahen Seite kommen sie von links. | ☐ |
+| 3 | queren | 🚌 | Du steigst aus dem Bus und willst über die Strasse. Was machst du? | warten, bis der Bus weggefahren ist | vorne am Bus vorbei rennen | hinten am Bus vorbei rennen | Wenn der Bus weg ist, siehst du die Autos — und sie sehen dich. | ☐ |
+| 3 | queren | 🚙 | Warum ist es gefährlich, zwischen parkierten Autos über die Strasse zu gehen? | Die Autofahrer sehen dich nicht. | Dort ist der Weg länger. | Dort ist es zu laut. | Hinter einem parkierten Auto bist du versteckt. Die Autofahrer sehen dich erst spät. | ☐ |
+| 3 | queren | ⚽ | Dein Ball rollt auf die Strasse. Was machst du? | am Rand stehen bleiben | sofort nachrennen | rufen und hinterherrennen | Bleib stehen. Erst wenn kein Auto kommt, holst du den Ball — oder du fragst einen Erwachsenen. | ☐ |
+| 3 | queren | 🌙 | Es ist dunkel. Wie sehen dich die Autofahrer schon von weitem? | mit hellen Kleidern und Leuchtstreifen | mit dunklen Kleidern | mit einer Mütze | Helle Kleider und Leuchtstreifen sieht man im Scheinwerferlicht schon von weitem. | ☐ |
+| 6 | queren | 🛣️ | Es gibt kein Trottoir. Wo gehst du? | am linken Strassenrand, den Autos entgegen | am rechten Strassenrand | in der Mitte der Strasse | So siehst du die Autos kommen. Das verlangt das Strassenverkehrsgesetz. | ☐ |
+| 6 | queren | 🚗 | Warum kann ein Auto nicht sofort anhalten? | Es braucht einen Bremsweg. | Es fährt zu leise. | Autos halten nur bei Rot. | Auch mit voller Bremse rollt ein Auto noch ein Stück weiter, bis es steht. | ☐ |
+| 6 | queren | 🛣️ | Ein Auto hält, aber auf der zweiten Spur kommt noch eines. Was machst du? | warten und schauen, ob auch das zweite hält | losgehen, weil das erste hält | schnell rennen | Jede Spur zählt: Erst wenn auch das zweite Auto steht, gehst du. | ☐ |
+| 5 | velo | 🚲 | Auf welcher Seite der Strasse fährst du Velo? | rechts | links | in der Mitte | In der Schweiz fahren alle Fahrzeuge rechts. | ☐ |
+| 5 | velo | ↩️ | Du willst mit dem Velo links abbiegen. Was machst du vorher? | zurückschauen und den linken Arm ausstrecken | einfach abbiegen | klingeln und sofort abbiegen | Mit dem Handzeichen zeigst du den anderen, wohin du fährst. | ☐ |
+| 5 | velo | 🔴 | Welche Farbe hat das Licht hinten am Velo? | rot | weiss | grün | Vorne leuchtet das Velolicht weiss, hinten rot. | ☐ |
+| 5 | velo | 🔦 | Welche Farbe hat das Licht vorne am Velo? | weiss | rot | blau | Vorne leuchtet das Velolicht weiss, hinten rot. | ☐ |
+| 5 | velo | 🔔 | Was braucht ein Velo, damit andere dich hören? | eine Glocke | einen Korb | einen Gepäckträger | Eine Glocke gehört an jedes Velo. | ☐ |
+| 5 | velo | 🚴 | Was schützt beim Velofahren deinen Kopf? | ein Velohelm | eine Mütze | eine Sonnenbrille | Der Helm schützt den Kopf, wenn du stürzt. | ☐ |
+| 5 | velo | 🚲 | Wie viele Bremsen braucht ein Velo? | zwei | eine | keine | Ein Velo braucht zwei Bremsen: eine vorne und eine hinten. | ☐ |
+| 5 | velo | 🚚 | Ein Lastwagen will rechts abbiegen. Wo ist es für dich gefährlich? | rechts neben dem Lastwagen | weit hinter dem Lastwagen | auf dem anderen Trottoir | Rechts neben dem Lastwagen sieht dich der Fahrer nicht. Das ist der tote Winkel. | ☐ |
+| 6 | velo | 🌙 | Du fährst im Dunkeln Velo. Was muss am Velo leuchten? | Licht vorne und hinten | nur das Licht hinten | nichts, die Strassenlampen reichen | Im Dunkeln brauchst du Licht vorne und hinten, damit man dich sieht. | ☐ |
+
+### Signale
+
+| Signal | Bedeutung | auch richtig | ☐ |
+|---|---|---|---|
+| stop | Ganz anhalten und den anderen den Vortritt lassen |  | ☐ |
+| einfahrt-verboten | Hier darf kein Fahrzeug hineinfahren | Hier dürfen keine Velos fahren | ☐ |
+| fussgaengerstreifen | Hier ist ein Fussgängerstreifen |  | ☐ |
+| fussweg | Weg nur für Fussgänger | Hier dürfen keine Velos fahren | ☐ |
+| radweg | Weg für Velos | Hier dürfen keine Fussgänger gehen | ☐ |
+| verbot-fussgaenger | Hier dürfen keine Fussgänger gehen |  | ☐ |
+| verbot-velo | Hier dürfen keine Velos fahren |  | ☐ |
+
+## 34. Wetter und Jahreszeiten (Lehrplan SG NMG.4.4) — Jahreszeiten
+
+| ab Stufe | Bild | Beobachtung | Jahreszeit | ☐ |
+|---|---|---|---|---|
+| 1 | ⛄ | Einen Schneemann bauen | Winter | ☐ |
+| 1 | 🛷 | Schlitteln | Winter | ☐ |
+| 1 | ⛷️ | Ski fahren im Schnee | Winter | ☐ |
+| 1 | 🌷 | Die Tulpen blühen | Frühling | ☐ |
+| 1 | 🌸 | Die Kirschbäume blühen | Frühling | ☐ |
+| 1 | 🏊 | Im See baden | Sommer | ☐ |
+| 1 | 🥵 | Es ist sehr heiss | Sommer | ☐ |
+| 1 | 🍂 | Die Blätter werden bunt und fallen | Herbst | ☐ |
+| 1 | 🌰 | Kastanien sammeln | Herbst | ☐ |
+| 1 | 🎃 | Kürbisse ernten | Herbst | ☐ |
+| 3 | ⛈️ | Am Nachmittag gibt es oft heftige Gewitter | Sommer | ☐ |
+| 3 | 🍒 | Die Kirschen sind reif | Sommer | ☐ |
+| 3 | ☀️ | Die Tage sind am längsten | Sommer | ☐ |
+| 3 | 🐦 | Die Schwalben kommen aus dem Süden zurück | Frühling | ☐ |
+| 3 | 🌱 | Die Bäume bekommen neue Blätter | Frühling | ☐ |
+| 3 | 🐸 | Die Frösche wandern zum Weiher | Frühling | ☐ |
+| 3 | 🐿️ | Die Eichhörnchen verstecken Vorräte | Herbst | ☐ |
+| 3 | 🍇 | Die Trauben werden geerntet | Herbst | ☐ |
+| 3 | 🌙 | Die Nächte sind am längsten | Winter | ☐ |
+| 3 | 🦔 | Der Igel hält Winterschlaf | Winter | ☐ |
+| 3 | 🌳 | Die Laubbäume sind kahl | Winter | ☐ |
+
+### Kleidung
+
+| Bild | Wetter | richtig | falsch | falsch | ☐ |
+|---|---|---|---|---|---|
+| 🌧️ | Es regnet stark. | ☂️ Regenschirm | 🕶️ Sonnenbrille | 🩳 kurze Hosen | ☐ |
+| 🌧️ | Es regnet. Du gehst zur Schule. | 🧥 Regenjacke | 👙 Badekleid | 🩴 Flipflops | ☐ |
+| ☀️ | Die Sonne scheint, es ist heiss. | 🧴 Sonnencreme | 🧤 Handschuhe | 🧣 Schal | ☐ |
+| 🥵 | Ein heisser Sommertag. | 🩳 kurze Hosen | 🧤 Handschuhe | 🧣 Schal | ☐ |
+| 😎 | Du bist lange draussen an der Sonne. | 👒 Sonnenhut | 🧤 Handschuhe | 🧣 Schal | ☐ |
+| 🌨️ | Es schneit und ist kalt. | 🧤 Handschuhe | 🩳 kurze Hosen | 🩴 Flipflops | ☐ |
+| 🥶 | Es ist eisig kalt. | 🧣 Schal und Mütze | 👕 nur ein T-Shirt | 👙 Badekleid | ☐ |
+| 🌬️ | Es ist windig und kühl. | 🧥 Jacke | 👙 Badekleid | 🩴 Flipflops | ☐ |
+
+### Wettersymbole
+
+| Bild | Name | ☐ |
+|---|---|---|
+| ☀️ | sonnig | ☐ |
+| ⛅ | teilweise bewölkt | ☐ |
+| ☁️ | bedeckt | ☐ |
+| 🌧️ | Regen | ☐ |
+| ⛈️ | Gewitter | ☐ |
+| 🌨️ | Schnee | ☐ |
+| 🌫️ | Nebel | ☐ |
+| 🌬️ | Wind | ☐ |
+
+### Fragen
+
+| ab Stufe | Bild | Frage | richtig | falsch | falsch | Erklärung | ☐ |
+|---|---|---|---|---|---|---|---|
+| 5 | 🌫️ | Woraus besteht Nebel? | aus winzigen Wassertröpfchen | aus Rauch | aus Staub | Nebel ist eine Wolke am Boden: viele winzige Wassertröpfchen in der Luft. | ☐ |
+| 5 | 🧊 | Was ist Hagel? | Körner aus Eis | grosse Regentropfen | Schneeflocken | Hagelkörner sind Eis. Sie entstehen in hohen Gewitterwolken. | ☐ |
+| 5 | ⚡ | Warum hört man den Donner erst nach dem Blitz? | Licht ist schneller als Schall. | Der Donner ist leiser. | Der Donner kommt erst am Boden an. | Das Licht des Blitzes ist fast sofort da, der Schall braucht für einen Kilometer etwa drei Sekunden. | ☐ |
+| 5 | 🌈 | Wann kannst du einen Regenbogen sehen? | wenn die Sonne scheint und es regnet | wenn es schneit | in der Nacht | Die Sonne scheint von hinten auf die Regentropfen vor dir. | ☐ |
+| 5 | 🌡️ | Womit misst man die Temperatur? | mit dem Thermometer | mit dem Regenmesser | mit dem Kompass | Das Thermometer zeigt die Temperatur in Grad Celsius (°C). | ☐ |
+| 5 | 🌧️ | Womit misst man, wie viel es geregnet hat? | mit dem Regenmesser | mit dem Thermometer | mit der Waage | Im Regenmesser sammelt sich das Wasser. Man liest ab, wie hoch es steht. | ☐ |
+| 5 | 🧊 | Bei welcher Temperatur gefriert Wasser zu Eis? | bei 0 °C | bei 10 °C | bei 100 °C | Unter 0 °C wird Wasser zu Eis, darum ist es dann draussen glatt. | ☐ |
+| 5 | ⛈️ | Ein Gewitter kommt. Wo bist du am sichersten? | in einem Haus | unter einem einzelnen Baum | auf einem Hügel | Blitze schlagen gern in hohe, einzeln stehende Dinge ein. Im Haus bist du geschützt. | ☐ |
+| 6 | ☀️ | Warum ist es im Sommer wärmer als im Winter? | Die Sonne steht höher und scheint länger. | Die Erde ist dann näher bei der Sonne. | Im Sommer gibt es mehr Wolken. | Im Sommer steht die Sonne hoch am Himmel, und die Tage sind lang. | ☐ |
+| 6 | 📅 | Wann ist bei uns der längste Tag des Jahres? | um den 21. Juni | um den 21. Dezember | um den 1. Januar | Um den 21. Juni ist es am längsten hell. Dann beginnt der Sommer. | ☐ |
+| 6 | 📅 | Wann ist bei uns der kürzeste Tag des Jahres? | um den 21. Dezember | um den 21. Juni | um den 21. März | Um den 21. Dezember ist es am kürzesten hell. Dann beginnt der Winter. | ☐ |
+| 6 | 🏔️ | Was ist der Föhn? | ein warmer, trockener Wind von den Bergen herab | ein kalter Wind vom Meer | ein Regenwind aus dem Norden | Beim Föhn fällt die Luft von den Alpen herab und wird dabei warm und trocken. | ☐ |
+| 6 | 💧 | Was geschieht mit einer Pfütze, wenn lange die Sonne scheint? | Das Wasser verdunstet. | Das Wasser gefriert. | Das Wasser wird mehr. | Die Wärme macht aus dem Wasser Wasserdampf. Er steigt in die Luft. | ☐ |
+| 6 | ☁️ | Woraus bestehen Wolken? | aus winzigen Wassertröpfchen oder Eiskristallen | aus Rauch | aus Watte | Wolken sind wie Nebel hoch oben am Himmel. | ☐ |
+
+## 35. Zeitstrahl-Sortierer (Lehrplan SG NMG.9.1) — Lebensabschnitte
+
+| Bild | Abschnitt | ☐ |
+|---|---|---|
+| 👶 | Baby | ☐ |
+| 🧸 | Kleinkind | ☐ |
+| 🎒 | Schulkind | ☐ |
+| 🛹 | Jugendliche | ☐ |
+| 🧑 | Erwachsene | ☐ |
+| 👵 | alte Menschen | ☐ |
+
+### Ereignisse im Leben
+
+Eintrittsalter für den Kanton St. Gallen.
+
+| Alter | Bild | Ereignis | ☐ |
+|---|---|---|---|
+| 0 | 🍼 | Geburt | ☐ |
+| 4 | 🖍️ | in den Kindergarten kommen | ☐ |
+| 6 | ✏️ | in die 1. Klasse kommen | ☐ |
+| 9 | 📚 | in die 4. Klasse kommen | ☐ |
+| 12 | 🏫 | in die Oberstufe kommen | ☐ |
+| 18 | 🗳️ | volljährig werden | ☐ |
+
+### Generationen
+
+| Generation | Bild | Person | ☐ |
+|---|---|---|---|
+| 0 | 🧒 | das Kind | ☐ |
+| 1 | 👩 | die Mutter | ☐ |
+| 1 | 👨 | der Vater | ☐ |
+| 2 | 👵 | die Grossmutter | ☐ |
+| 2 | 👴 | der Grossvater | ☐ |
+| 3 | 🧓 | die Urgrossmutter | ☐ |
+| 3 | 🧓 | der Urgrossvater | ☐ |
+
+### Ereignisse mit Jahrzahl
+
+Jahrzahlen bitte nachprüfen.
+
+| Jahr | Jahrzahl | Bild | Ereignis | Zeitalter | ☐ |
+|---|---|---|---|---|---|
+| 612 | 612 | ⛪ | Der Mönch Gallus lässt sich an der Steinach nieder — so beginnt St. Gallen | Mittelalter | ☐ |
+| 1291 | 1291 | 📜 | Uri, Schwyz und Unterwalden schliessen den Bundesbrief | Mittelalter | ☐ |
+| 1450 | um 1450 | 📖 | Gutenberg druckt Bücher mit beweglichen Buchstaben |  | ☐ |
+| 1492 | 1492 | ⛵ | Kolumbus erreicht Amerika |  | ☐ |
+| 1803 | 1803 | 🏛️ | St. Gallen wird ein Kanton | Neuzeit | ☐ |
+| 1847 | 1847 | 🚂 | Die erste Eisenbahn der Schweiz fährt von Zürich nach Baden | Neuzeit | ☐ |
+| 1848 | 1848 | 🇨🇭 | Die Schweiz wird ein Bundesstaat | Neuzeit | ☐ |
+| 1886 | 1886 | 🚗 | Carl Benz baut das erste Auto mit Benzinmotor | Neuzeit | ☐ |
+| 1903 | 1903 | ✈️ | Die Brüder Wright fliegen mit dem ersten Motorflugzeug | Neuzeit | ☐ |
+| 1969 | 1969 | 🌕 | Die ersten Menschen landen auf dem Mond | Neuzeit | ☐ |
+| 1971 | 1971 | 🗳️ | Die Frauen dürfen in der Schweiz eidgenössisch abstimmen und wählen | Neuzeit | ☐ |
+| 2016 | 2016 | 🚄 | Der Gotthard-Basistunnel wird eröffnet | Neuzeit | ☐ |
+
+### Zeitalter
+
+| Bild | Zeitalter | ☐ |
+|---|---|---|
+| 🪨 | Steinzeit | ☐ |
+| 🏛️ | Römerzeit | ☐ |
+| 🏰 | Mittelalter | ☐ |
+| 🏭 | Neuzeit | ☐ |
+
+### Merkmale der Zeitalter
+
+| Zeitalter | Bild | Merkmal | ☐ |
+|---|---|---|---|
+| Steinzeit | 🦣 | Menschen jagen Mammuts | ☐ |
+| Steinzeit | 🪓 | Werkzeuge aus Feuerstein | ☐ |
+| Steinzeit | 🛖 | Pfahlbauten am Seeufer | ☐ |
+| Römerzeit | 🛣️ | Soldaten bauen Strassen über die Alpenpässe | ☐ |
+| Römerzeit | 🏺 | In Augusta Raurica wohnen Römer | ☐ |
+| Mittelalter | 🏰 | Ritter wohnen auf Burgen | ☐ |
+| Mittelalter | 📜 | Mönche schreiben Bücher von Hand ab | ☐ |
+| Neuzeit | 🏭 | In Fabriken arbeiten Maschinen | ☐ |
+| Neuzeit | 🚂 | Die ersten Eisenbahnen fahren | ☐ |
+| Neuzeit | 💡 | Die Häuser bekommen elektrisches Licht | ☐ |
+
+## 36. Stromkreis-Bauer (Lehrplan SG NMG.5.2) — Leiter und Nichtleiter
+
+| Bild | Gegenstand | leitet | knifflig | ☐ |
+|---|---|---|---|---|
+| 📎 | Büroklammer | ja | nein | ☐ |
+| 🔑 | Schlüssel | ja | nein | ☐ |
+| 🪙 | Münze | ja | nein | ☐ |
+| 🔩 | Schraube | ja | nein | ☐ |
+| 🥄 | Löffel aus Metall | ja | nein | ☐ |
+| ⛓️ | Eisenkette | ja | nein | ☐ |
+| 🪡 | Nähnadel | ja | nein | ☐ |
+| 🧷 | Sicherheitsnadel | ja | nein | ☐ |
+| ✏️ | Bleistiftmine (Graphit) | ja | ja | ☐ |
+| 🪵 | Holzstück | nein | nein | ☐ |
+| 🧶 | Wollfaden | nein | nein | ☐ |
+| 📄 | Blatt Papier | nein | nein | ☐ |
+| 🪨 | Kieselstein | nein | nein | ☐ |
+| 🎈 | Luftballon | nein | nein | ☐ |
+| 🥢 | Essstäbchen aus Holz | nein | nein | ☐ |
+| 🪥 | Zahnbürste | nein | nein | ☐ |
+| 🧦 | Socke | nein | nein | ☐ |
+| 🖍️ | Wachsmalstift | nein | nein | ☐ |
+| 🧽 | trockener Schwamm | nein | nein | ☐ |
+| 🥄 | Löffel aus Kunststoff | nein | ja | ☐ |
+
+### Schaltungen
+
+Kurzschrift im Kopf von bauteile.js; ob die Lampe brennt, rechnet das Spiel aus.
+
+| Liste | Aufbau | Zusatz | ☐ |
+|---|---|---|---|
+| einfach | L D D |  | ☐ |
+| einfach | D L D |  | ☐ |
+| einfach | D D L |  | ☐ |
+| einfach | L X D |  | ☐ |
+| einfach | L D X |  | ☐ |
+| einfach | X L D |  | ☐ |
+| einfach | D L X |  | ☐ |
+| einfach | X D L |  | ☐ |
+| einfach | D X L |  | ☐ |
+| einfach | L D D | pol | ☐ |
+| einfach | D L D | pol | ☐ |
+| einfach | D D L | pol | ☐ |
+| einfach | L D D | umgekehrt | ☐ |
+| einfach | D L D | umgekehrt | ☐ |
+| einfach | D D L | umgekehrt | ☐ |
+| einfach | L X D | umgekehrt | ☐ |
+| schalter | L S1 D |  | ☐ |
+| schalter | L D S1 |  | ☐ |
+| schalter | S1 L D |  | ☐ |
+| schalter | D L S1 |  | ☐ |
+| schalter | S1 D L |  | ☐ |
+| schalter | D S1 L |  | ☐ |
+| schalter | L S0 D |  | ☐ |
+| schalter | L D S0 |  | ☐ |
+| schalter | S0 L D |  | ☐ |
+| schalter | D L S0 |  | ☐ |
+| schalter | S0 D L |  | ☐ |
+| schalter | D S0 L |  | ☐ |
+| schalter | L S1 X |  | ☐ |
+| schalter | X S1 L |  | ☐ |
+| schalter | S1 L X |  | ☐ |
+| leiter | L G D |  | ☐ |
+| leiter | L D G |  | ☐ |
+| leiter | G L D |  | ☐ |
+| leiter | D L G |  | ☐ |
+| leiter | G D L |  | ☐ |
+| leiter | D G L |  | ☐ |
+| kurzschluss | L D D | kurz:batterie | ☐ |
+| kurzschluss | D L D | kurz:batterie | ☐ |
+| kurzschluss | D D L | kurz:batterie | ☐ |
+| kurzschluss | L S1 D | kurz:batterie | ☐ |
+| kurzschluss | L S0 D | kurz:batterie | ☐ |
+| kurzschluss | L D D | kurz:oben | ☐ |
+| kurzschluss | D L D | kurz:rechts | ☐ |
+| kurzschluss | D D L | kurz:unten | ☐ |
+| kurzschluss | L S0 D | kurz:rechts | ☐ |
+| kurzschluss | S0 L D | kurz:oben | ☐ |
+| kurzschluss | D L S0 | kurz:unten | ☐ |
+| kurzschluss | L D D | kurz:rechts | ☐ |
+| kurzschluss | D L D | kurz:oben | ☐ |
+| kurzschluss | L S1 D | kurz:rechts | ☐ |
+| serie-parallel | LA LB D |  | ☐ |
+| serie-parallel | LA D LB |  | ☐ |
+| serie-parallel | D LA LB |  | ☐ |
+| serie-parallel | LA0 LB D |  | ☐ |
+| serie-parallel | LA LB0 D |  | ☐ |
+| serie-parallel | LA D LB0 |  | ☐ |
+| serie-parallel | LA LB S0 |  | ☐ |
+| serie-parallel | LA LB S1 |  | ☐ |
+| serie-parallel | LA X LB |  | ☐ |
+| serie-parallel | D [LA D / LB D] D |  | ☐ |
+| serie-parallel | D [LA0 D / LB D] D |  | ☐ |
+| serie-parallel | D [LA D / LB0 D] D |  | ☐ |
+| serie-parallel | D [LA S0 / LB D] D |  | ☐ |
+| serie-parallel | D [LA D / LB S0] D |  | ☐ |
+| serie-parallel | D [LA S1 / LB S0] D |  | ☐ |
+| serie-parallel | D [LA D / LB D] S0 |  | ☐ |
+| serie-parallel | S1 [LA D / LB D] D |  | ☐ |
+| serie-parallel | D [LA D / LB D] X |  | ☐ |
+| serie-parallel | D [LA X / LB D] D |  | ☐ |
+| serie-parallel | S0 [LA D / LB D] D |  | ☐ |
+| serie-parallel | LA LB D | kurz:oben | ☐ |
+| serie-parallel | LA LB D | kurz:rechts | ☐ |
+| serie-parallel | LA D LB | kurz:unten | ☐ |
+| serie-parallel | LA LB LC |  | ☐ |
+| serie-parallel | LA LB0 LC |  | ☐ |
+| serie-parallel | LA [LB D / LC D] D |  | ☐ |
+| serie-parallel | LA [LB0 D / LC D] D |  | ☐ |
+| serie-parallel | LA [LB S0 / LC D] D |  | ☐ |
+| serie-parallel | LA0 [LB D / LC D] D |  | ☐ |
+| serie-parallel | D [LB D / LC D] LA |  | ☐ |
+| serie-parallel | D [LB D / LC S0] LA |  | ☐ |
+| serie-parallel | D [LA D / LB D] D | kurz:zweig1 | ☐ |
+| serie-parallel | LA [LB D / LC D] D | kurz:zweig2 | ☐ |
+| serie-parallel | D [LA D / LB D] D | kurz:batterie | ☐ |
+
+## 37. Plan-Leser (Lehrplan SG NMG.8.5) — Dinge auf dem Plan — schulzimmer
+
+Zeichen frei erfunden.
+
+| Name | Dativ | Mehrzahl | Zeichen | Farbe | ☐ |
+|---|---|---|---|---|---|
+| die Wandtafel | der Wandtafel |  | balken | 7 | ☐ |
+| das Lehrerpult | dem Lehrerpult |  | quadrat | 3 | ☐ |
+| der Schrank | dem Schrank |  | sechseck | 1 | ☐ |
+| das Lavabo | dem Lavabo |  | ring | 6 | ☐ |
+| die Türe | der Türe |  | dreieck | 2 | ☐ |
+| das Bücherregal | dem Bücherregal |  | x | 5 | ☐ |
+| der Computer | dem Computer |  | raute | 6 | ☐ |
+| die Leseecke | der Leseecke |  | halbkreis | 4 | ☐ |
+| der Abfalleimer | dem Abfalleimer |  | kreis | 7 | ☐ |
+| die Garderobe | der Garderobe |  | kreuz | 1 | ☐ |
+| das Schülerpult | dem Schülerpult | Schülerpulte | rechteck | 4 | ☐ |
+| die Pflanze | der Pflanze | Pflanzen | baum | 5 | ☐ |
+
+## 37. Plan-Leser (Lehrplan SG NMG.8.5) — Dinge auf dem Plan — quartier
+
+Zeichen frei erfunden.
+
+| Name | Dativ | Mehrzahl | Zeichen | Farbe | ☐ |
+|---|---|---|---|---|---|
+| die Schule | der Schule |  | quadrat | 6 | ☐ |
+| die Kirche | der Kirche |  | kreuz | 1 | ☐ |
+| die Bäckerei | der Bäckerei |  | kreis | 3 | ☐ |
+| die Post | der Post |  | stern | 4 | ☐ |
+| der Spielplatz | dem Spielplatz |  | dreieck | 5 | ☐ |
+| der Brunnen | dem Brunnen |  | ring | 6 | ☐ |
+| die Bushaltestelle | der Bushaltestelle |  | H | 4 | ☐ |
+| das Feuerwehrdepot | dem Feuerwehrdepot |  | raute | 2 | ☐ |
+| der Bahnhof | dem Bahnhof |  | balken | 7 | ☐ |
+| der Weiher | dem Weiher |  | welle | 6 | ☐ |
+| die Turnhalle | der Turnhalle |  | sechseck | 3 | ☐ |
+| das Spital | dem Spital |  | halbkreis | 2 | ☐ |
+| der Baum | dem Baum | Bäume | baum | 5 | ☐ |
+| das Wohnhaus | dem Wohnhaus | Wohnhäuser | haus | 7 | ☐ |
+
+## 38. Echt oder erfunden? (Lehrplan SG NMG.9.4) — Sätze
+
+| Bild | Satz | kann es geben | Stufe 1 | ☐ |
+|---|---|---|---|---|
+| 🐶 | Der Hund bellt laut. | ja | ja | ☐ |
+| 🐶 | Der Hund liest die Zeitung vor. | nein | ja | ☐ |
+| 🐱 | Die Katze schläft auf dem Sofa. | ja | ja | ☐ |
+| 🐱 | Die Katze backt einen Kuchen. | nein | ja | ☐ |
+| 🐄 | Die Kuh frisst Gras auf der Weide. | ja | ja | ☐ |
+| 🐄 | Die Kuh fliegt über das Dach. | nein | ja | ☐ |
+| 🐟 | Der Fisch schwimmt im Teich. | ja | ja | ☐ |
+| 🐟 | Der Fisch singt ein Lied. | nein | ja | ☐ |
+| 🍎 | Der Apfel fällt vom Baum. | ja | ja | ☐ |
+| 🍎 | Der Apfel erzählt der Birne einen Witz. | nein | ja | ☐ |
+| 🚌 | Der Bus hält an der Haltestelle. | ja | ja | ☐ |
+| 🚌 | Der Bus fliegt zum Mond. | nein | ja | ☐ |
+| 🌳 | Im Herbst fallen die Blätter vom Baum. | ja | nein | ☐ |
+| 🌳 | Der Baum geht im Wald spazieren. | nein | ja | ☐ |
+| ⛄ | Die Kinder bauen einen Schneemann. | ja | ja | ☐ |
+| ⛄ | Der Schneemann geht im Sommer baden. | nein | nein | ☐ |
+| 🐸 | Der Frosch springt ins Wasser. | ja | ja | ☐ |
+| 🐸 | Der Frosch trägt eine Krone und spricht. | nein | nein | ☐ |
+| 🚲 | Lena fährt mit dem Velo zur Schule. | ja | ja | ☐ |
+| 🚲 | Das Velo fährt ganz allein zum Bäcker. | nein | nein | ☐ |
+| 🐦 | Der Vogel baut ein Nest. | ja | ja | ☐ |
+| 🐦 | Der Vogel strickt sich eine Mütze. | nein | nein | ☐ |
+| 🐌 | Die Schnecke kriecht langsam über den Weg. | ja | nein | ☐ |
+| 🐌 | Die Schnecke rennt schneller als ein Auto. | nein | nein | ☐ |
+| 🐝 | Die Biene fliegt von Blüte zu Blüte. | ja | nein | ☐ |
+| 🐝 | Die Biene fährt mit dem Zug in die Ferien. | nein | nein | ☐ |
+| 🌧️ | Es regnet, und die Strasse wird nass. | ja | nein | ☐ |
+| 🌧️ | Es regnet Bonbons vom Himmel. | nein | nein | ☐ |
+| 🐘 | Der Elefant trinkt mit dem Rüssel. | ja | nein | ☐ |
+| 🐘 | Der Elefant passt in eine Zündholzschachtel. | nein | nein | ☐ |
+| 🦉 | Die Eule ist in der Nacht wach. | ja | nein | ☐ |
+| 🦉 | Die Eule erklärt den Kindern das Einmaleins. | nein | nein | ☐ |
+| 🐴 | Ein Pferd frisst Heu im Stall. | ja | nein | ☐ |
+| 🦄 | Ein Einhorn grast auf der Wiese. | nein | nein | ☐ |
+
+### Merkmale
+
+| Schlüssel | Merkmal | ☐ |
+|---|---|---|
+| tier | Ein Tier spricht wie ein Mensch. | ☐ |
+| ding | Ein Ding bewegt sich oder spricht von selbst. | ☐ |
+| wesen | Ein Fabelwesen kommt vor (Drache, Riese, Fee). | ☐ |
+| zauber | Jemand zaubert. | ☐ |
+| mensch | Ein Mensch kann etwas, das kein Mensch kann. | ☐ |
+
+### Geschichten
+
+Nummer des erfundenen Satzes, −1 = alles echt.
+
+| Sätze | erfundener Satz | Merkmal | ☐ |
+|---|---|---|---|
+| Mia geht mit ihrem Grossvater in den Wald. · Sie sammeln Tannzapfen und Moos. · Zu Hause basteln sie daraus einen Igel. | -1 |  | ☐ |
+| Luca hat Geburtstag. · Seine Freunde kommen zum Spielen. · Am Abend ist er müde und schläft schnell ein. | -1 |  | ☐ |
+| Es schneit die ganze Nacht. · Am Morgen ist der Garten weiss. · Nora zieht ihre Stiefel an und geht hinaus. | -1 |  | ☐ |
+| Ben verliert einen Zahn. · Er legt ihn in eine kleine Dose. · Seine Mutter sagt: «Bald wächst ein neuer.» | -1 |  | ☐ |
+| Die Klasse besucht einen Bauernhof. · Die Kinder dürfen die Kälber streicheln. · Zum Zvieri gibt es Brot und Käse. | -1 |  | ☐ |
+| Im Herbst ernten Aylin und ihr Vater Äpfel. · Sie füllen zwei Körbe. · Daraus kocht die Familie Apfelmus. | -1 |  | ☐ |
+| Tim sucht seine Katze. · Er ruft und ruft. · Endlich findet er sie schlafend im Wäschekorb. | -1 |  | ☐ |
+| Es ist heiss. · Lea und Jonas gehen in die Badi. · Danach kaufen sie sich ein Glace. | -1 |  | ☐ |
+| Elif übt Velofahren ohne Stützräder. · Zuerst fällt sie zweimal um. · Dann klappt es, und sie fährt eine ganze Runde. | -1 |  | ☐ |
+| Der Bus hat Verspätung. · Die Kinder warten an der Haltestelle. · Nach fünf Minuten kommt er endlich. | -1 |  | ☐ |
+| Noah pflanzt eine Sonnenblume. · Er giesst sie jeden Tag. · Im Sommer ist sie grösser als er. | -1 |  | ☐ |
+| Am Abend zieht ein Gewitter auf. · Es blitzt und donnert. · Die Familie bleibt im Haus, bis es vorbei ist. | -1 |  | ☐ |
+| Mia geht mit ihrem Grossvater in den Wald. · Ein Fuchs sagt zu ihnen: «Guten Tag, ihr zwei!» · Dann sammeln sie Tannzapfen. | 1 | tier | ☐ |
+| Luca hat Geburtstag. · Er bläst die Kerzen auf dem Kuchen aus. · Da schwebt er plötzlich wie ein Ballon bis zur Zimmerdecke. | 2 | mensch | ☐ |
+| Es schneit die ganze Nacht. · Am Morgen winkt der Schneemann im Garten den Kindern zu. · Nora zieht ihre Stiefel an. | 1 | ding | ☐ |
+| Ben verliert einen Zahn. · Er legt ihn unter das Kopfkissen. · In der Nacht kommt eine winzige Fee mit Flügeln und holt ihn ab. | 2 | wesen | ☐ |
+| Die Klasse besucht einen Bauernhof. · Eine Kuh erklärt den Kindern, wie man Käse macht. · Zum Zvieri gibt es Brot und Käse. | 1 | tier | ☐ |
+| Aylin pflückt Äpfel. · Ein Mann schwingt einen Zauberstab, und alle Äpfel werden zu Gold. · Aylin staunt. | 1 | zauber | ☐ |
+| Tim sucht seine Katze. · Er findet sie im Garten. · Die Katze sagt: «Ich habe nur eine Maus gesucht.» | 2 | tier | ☐ |
+| Lea und Jonas gehen in die Badi. · Im Becken schwimmt ein grüner Drache mit drei Köpfen. · Danach kaufen sie sich ein Glace. | 1 | wesen | ☐ |
+| Elif übt Velofahren. · Ihr Velo sagt: «Halt dich gut fest!» · Bald fährt sie eine ganze Runde. | 1 | ding | ☐ |
+| Der Bus hat Verspätung. · Als er kommt, ruft er: «Entschuldigung, ich habe verschlafen!» · Die Kinder steigen ein. | 1 | ding | ☐ |
+| Noah klettert auf einen Baum. · Oben breitet er die Arme aus und fliegt wie ein Vogel davon. · Am Abend ist er wieder zu Hause. | 1 | mensch | ☐ |
+| Am Abend zieht ein Gewitter auf. · Ein Riese, so gross wie ein Berg, schaut zum Fenster herein. · Die Familie bleibt im Haus. | 1 | wesen | ☐ |
+| Mila soll ihr Zimmer aufräumen. · Sie zaubert mit ihrem Zauberstab, und schon ist alles ordentlich. · Dann darf sie spielen. | 1 | zauber | ☐ |
+| Jan geht mit seinem Hund spazieren. · Plötzlich wird Jan unsichtbar. · Der Hund bellt ganz aufgeregt. | 1 | mensch | ☐ |
+| Sara kocht Tee. · Die Teekanne hüpft vom Tisch und tanzt durch die Küche. · Dann trinkt Sara ihren Tee. | 1 | ding | ☐ |
+
+### Erstaunlich, aber wahr?
+
+Fakten bitte nachprüfen.
+
+| Satz | stimmt | ☐ |
+|---|---|---|
+| Ein Krake hat drei Herzen. | ja | ☐ |
+| Pinguine sind Vögel, aber sie können nicht fliegen. | ja | ☐ |
+| Ein Wal ist kein Fisch, sondern ein Säugetier. | ja | ☐ |
+| Fledermäuse hängen beim Schlafen mit dem Kopf nach unten. | ja | ☐ |
+| Bienen zeigen anderen Bienen mit einem Tanz, wo es Blüten hat. | ja | ☐ |
+| Unter dem weissen Fell hat der Eisbär eine schwarze Haut. | ja | ☐ |
+| Eine Giraffe hat im langen Hals gleich viele Halswirbel wie ein Mensch. | ja | ☐ |
+| Ein Chamäleon kann seine Farbe ändern. | ja | ☐ |
+| Es gibt Fische, die selbst leuchten. | ja | ☐ |
+| Der Mond leuchtet nicht selbst. Die Sonne beleuchtet ihn. | ja | ☐ |
+| Ein Einsiedlerkrebs zieht in ein grösseres Schneckenhaus um, wenn er wächst. | ja | ☐ |
+| Ein Specht klopft mit dem Schnabel Löcher in Baumstämme. | ja | ☐ |
+| Der Magen einer Kuh hat vier Teile. | ja | ☐ |
+| Ein Krake hat zwanzig Arme. | nein | ☐ |
+| Pinguine fliegen im Winter in den Süden. | nein | ☐ |
+| Ein Wal atmet unter Wasser mit Kiemen. | nein | ☐ |
+| Fledermäuse legen Eier. | nein | ☐ |
+| Bienen machen Honig aus Sand. | nein | ☐ |
+| Ein Igel kann seine Stacheln wie Pfeile abschiessen. | nein | ☐ |
+| Spinnen haben sechs Beine. | nein | ☐ |
+| Der Mond ist eine grosse Lampe, die am Abend eingeschaltet wird. | nein | ☐ |
+| Eine Schnecke kann aus ihrem Haus ausziehen und sich ein neues suchen. | nein | ☐ |
+| Ein Chamäleon kann sich ganz unsichtbar machen. | nein | ☐ |
+| Ein Specht baut sein Nest aus Steinen. | nein | ☐ |
+| Fische müssen nicht atmen. | nein | ☐ |
+
+### Textsorten
+
+| Sorte | Angaben | ☐ |
+|---|---|---|
+| maerchen | name: Märchen; merkmal: Es beginnt mit «Es war einmal», und es gibt Zauber oder Fabelwesen. | ☐ |
+| sage | name: Sage; merkmal: Sie spielt an einem Ort, den es wirklich gibt, und erzählt etwas Seltsames. | ☐ |
+| fabel | name: Fabel; merkmal: Tiere sprechen wie Menschen, und am Schluss steht eine Lehre. | ☐ |
+| sachtext | name: Sachtext; merkmal: Er erklärt, wie etwas wirklich ist. | ☐ |
+
+### Texte zu den Textsorten
+
+Selbst geschrieben; die Sagen spielen an echten Orten.
+
+| Sorte | Text | ☐ |
+|---|---|---|
+| maerchen | Es war einmal ein armer Müllerssohn. Eines Tages schenkte ihm eine alte Frau einen Zauberstein. Wer den Stein drehte, dem wurden drei Wünsche erfüllt. | ☐ |
+| maerchen | Es war einmal eine Königstochter, die konnte nicht lachen. Da kam ein junger Schneider mit einer Gans, die goldene Eier legte. Als die Gans zu tanzen begann, musste die Königstochter laut lachen. | ☐ |
+| maerchen | Es war einmal ein Schäfer, der fand im Wald einen goldenen Schlüssel. Damit öffnete er eine Tür im Felsen. Dahinter sassen sieben Zwerge und schliefen. | ☐ |
+| maerchen | Es war einmal eine Prinzessin, die ein böser Zauberer in eine Eule verwandelt hatte. Nur ein mutiger Hirte konnte den Zauber lösen. | ☐ |
+| sage | Am Säntis erzählen die Leute von einem Senn, der vor langer Zeit ganz allein auf der Alp lebte. In stürmischen Nächten soll man noch heute seinen Jodel über die Felsen hören. | ☐ |
+| sage | Am Ufer des Bodensees, so erzählt man, lag einst ein Dorf. Weil die Leute dort geizig waren, versank es in einer Nacht im See. Bei ruhigem Wasser soll man manchmal Glocken läuten hören. | ☐ |
+| sage | Im Toggenburg liegt ein grosser Felsblock mitten in einer Wiese. Die Alten sagen, ein Riese habe ihn vor vielen hundert Jahren dorthin geworfen. | ☐ |
+| sage | Auf einer Burg über dem Rheintal soll ein Ritter einen Schatz versteckt haben. Wer ihn in der Neujahrsnacht sucht, hört nur den Wind in den Mauern. | ☐ |
+| fabel | Eine Maus und ein Elefant wollten über einen Bach. Der Elefant lachte: «Du bist viel zu klein!» Doch im Schlamm blieb er stecken, und die Maus holte Hilfe. Lehre: Auch die Kleinen können den Grossen helfen. | ☐ |
+| fabel | Ein Spatz prahlte: «Ich bin der schnellste Vogel im Wald!» Er flog so wild, dass er gegen einen Ast prallte. Die Eule sagte ruhig: «Wer prahlt, schaut nicht, wohin er fliegt.» | ☐ |
+| fabel | Zwei Ziegen trafen sich auf einem schmalen Steg. «Geh zurück!», rief die eine. «Nein, du!», rief die andere. Sie stiessen mit den Hörnern, bis beide ins Wasser fielen. Lehre: Wer nachgibt, kommt weiter. | ☐ |
+| fabel | Ein Eichhörnchen versteckte alle Nüsse nur für sich. Im Winter fand es die Verstecke nicht mehr. Da teilten die anderen Eichhörnchen ihre Nüsse mit ihm. Lehre: Teilen macht alle satt. | ☐ |
+| sachtext | Der Igel ist ein Säugetier. Er frisst Käfer, Würmer und Schnecken. Im Winter hält er Winterschlaf in einem Nest aus Laub. | ☐ |
+| sachtext | Die Biene sammelt Nektar aus Blüten. Im Bienenstock wird daraus Honig. Ein Bienenvolk hat eine Königin, die Eier legt. | ☐ |
+| sachtext | Der Säntis ist ein Berg in der Ostschweiz. Er ist 2502 Meter hoch. Auf dem Gipfel steht eine Wetterstation. | ☐ |
+| sachtext | Ein Apfelbaum blüht im Frühling. Bienen tragen den Blütenstaub von Blüte zu Blüte. Im Herbst wachsen dort, wo Blüten waren, Äpfel. | ☐ |
+
+## 39. Gedicht-Baukasten (Lehrplan SG D.6.C.1) — Zweizeiler
+
+Alle Verse selbst verfasst.
+
+| Vers 1 | Vers 2 | Reimwort | Wahl | Wahl | Wahl | ☐ |
+|---|---|---|---|---|---|---|
+| Im Garten steht ein grosser Baum, | darunter träum ich einen {}. | Traum | Tag | Film | Schaum | ☐ |
+| Die Sonne lacht, der Himmel blau, | im Park spaziert die alte {}. | Frau | Dame | Katze | Bau | ☐ |
+| Der Hase hoppelt übers Feld, | er rennt so schnell wie ein {}. | Held | Pferd | Auto | Zelt | ☐ |
+| Die Maus sitzt still in ihrem Loch, | der Kater wartet draussen {}. | noch | lange | dort | Koch | ☐ |
+| Im Winter fällt der weisse Schnee, | ich trinke heissen {}. | Tee | Kakao | Saft | See | ☐ |
+| Der Frosch sitzt quakend auf dem Stein | und fängt sich eine Fliege {}. | ein | schnell | weg | Bein | ☐ |
+| Der Wind, der bläst mir ins Gesicht, | den Drachen halten kann ich {}. | nicht | kaum | gut | Licht | ☐ |
+| Die Schnecke kriecht ganz langsam fort, | bald ist sie an dem nächsten {}. | Ort | Platz | Baum | Wort | ☐ |
+| Ich habe Hunger, grosse Not, | da backt mir Opa frisches {}. | Brot | Gipfeli | Zopf | Boot | ☐ |
+| Am Himmel fliegt ein Flugzeug hin, | ich frage mich, wo ich morgen {}. | bin | wohne | schlafe | Kinn | ☐ |
+| Die Katze schleicht durchs hohe Gras, | die Mäusejagd macht ihr viel {}. | Spass | Freude | Mühe | Glas | ☐ |
+| Im Herbst wird es schon früher Nacht, | wir haben uns ein Feuer {}. | gemacht | angezündet | gebaut | gelacht | ☐ |
+| Ich habe einen kleinen Hund, | sein Fell ist weich, sein Bauch ist {}. | rund | dick | warm | Mund | ☐ |
+| Die Glocke läutet: bim, bam, bum, | die Pause ist schon wieder {}. | um | vorbei | fertig | dumm | ☐ |
+| Ein Vogel singt ein frohes Lied, | weil er die erste Sonne {}. | sieht | spürt | mag | zieht | ☐ |
+| Wir spielen Fussball auf dem Platz, | der Ball fliegt hoch mit einem {}. | Satz | Sprung | Knall | Schatz | ☐ |
+
+### Vierzeiler — paarreim
+
+| Verse | ☐ |
+|---|---|
+| Die Sonne scheint, der Tag ist warm, · die Bienen fliegen aus im Schwarm, · sie summen laut von Blatt zu Blatt · und trinken sich am Nektar satt. | ☐ |
+| Am Morgen kräht der Hahn so laut, · dass jeder aus dem Fenster schaut, · die Katze springt erschreckt vom Tisch, · und Mama bringt den Zopf ganz frisch. | ☐ |
+| Der Schnee fällt leise auf das Haus, · die Kinder rennen schnell hinaus, · sie rollen Kugeln, Stück für Stück, · und kommen nass und froh zurück. | ☐ |
+| Ich fahre mit dem Velo weit, · denn heute habe ich viel Zeit, · ich fahre bis zum See hinunter · und werde froh und immer munter. | ☐ |
+| Die Katze liegt auf meinem Bett, · sie schnurrt und findet es so nett, · die Maus schleicht leise nun vorbei · und pfeift ein Liedchen, eins, zwei, drei. | ☐ |
+| Im Herbst, da tanzt das bunte Laub, · es wirbelt mit im Strassenstaub, · der Igel sucht sich Laub zum Nest · und schläft den ganzen Winter fest. | ☐ |
+| Wir gehen heute in den Zoo, · die Kinder sind darüber froh, · der Löwe gähnt, der Affe lacht, · das Nilpferd schläft bei Tag und Nacht. | ☐ |
+| Der Regen klopft ans Fensterglas, · ich weiss, das macht den Blumen Spass, · ich zieh die gelben Stiefel an · und springe in die Pfützen dann. | ☐ |
+
+### Vierzeiler — kreuzreim
+
+| Verse | ☐ |
+|---|---|
+| Der Mond steht hoch am Himmelszelt, · die Sterne leuchten fein, · es schläft die ganze weite Welt, · nur der Uhu wacht allein. | ☐ |
+| Im Frühling summt die erste Biene, · der Schnee ist längst vorbei, · sie fliegt zur Blüte der Lupine, · das Huhn legt froh ein Ei. | ☐ |
+| Ich hab ein kleines Boot gebaut · aus Holz und einem Tuch, · es schwimmt davon, ich ruf ganz laut, · jetzt such ich es und such. | ☐ |
+| Am Sonntag gehen wir zum See, · die Enten schwimmen dort, · ich werfe Brot und trinke Tee, · dann fliegen alle fort. | ☐ |
+| Die Schule ist für heute aus, · wir packen schnell die Sachen, · dann rennen alle froh nach Haus · und spielen, toben, lachen. | ☐ |
+| Der Bauer fährt aufs grosse Feld, · die Sonne brennt so heiss, · er hat den Acker gut bestellt · und wischt sich ab den Schweiss. | ☐ |
+| Der Fuchs schleicht leise durch den Wald, · er sucht nach einer Maus, · die Nacht ist dunkel, still und kalt, · die Maus bleibt schlau im Haus. | ☐ |
+| Wenn draussen leise Flocken fallen, · dann wird die Stube warm, · man hört die frohen Stimmen schallen, · die Katze schnurrt im Arm. | ☐ |
+
+### Vierzeiler — umarmend
+
+| Verse | ☐ |
+|---|---|
+| Im Sommer sind die Tage lang, · wir baden in dem kühlen Rhein · und essen Glace im Sonnenschein, · bis abends tönt der Amselsang. | ☐ |
+| Die Wolken ziehen übers Land, · der Wind bläst kalt und laut, · und jeder, der nach oben schaut, · sieht Schiffe, Burgen, Elefant. | ☐ |
+| Der Igel schläft im Blätterhaus, · er hat sich eingerollt · und träumt von Käfern, ganz aus Gold, · und schläft bis in den März hinaus. | ☐ |
+| Mein Grossvater erzählt so gern · von Zeiten, lang vorbei, · und wie er einst als Bub so frei · geschaut hat in den hellsten Stern. | ☐ |
+| Am Bach, da steht ein alter Steg, · die Fische schwimmen schnell · und glitzern silberhell, · dann geh ich still auf meinem Weg. | ☐ |
+| Die Glocke läutet laut im Turm, · es ist schon Mittagszeit, · und bis nach Haus ist es nicht weit, · drum renn ich heim im Sturm. | ☐ |
+
+### Gedichte mit Strophen
+
+| Titel | Strophen (Reimschema / Verse) | ☐ |
+|---|---|---|
+| Die Schwalbe | paarreim / Im Frühling kommt die Schwalbe her, / sie fliegt hoch übers Land und Meer, / sie baut ein Nest aus Lehm am Haus, / und bald schaun kleine Köpfe raus. · paarreim / Im Herbst wird es ihr hier zu kalt, / sie sammelt sich mit andern bald, / dann zieht sie fort mit ihrem Schwarm / nach Afrika, dort ist es warm. | ☐ |
+| Die Ente | paarreim / Die Ente schwimmt im kühlen Teich, / ihr Federkleid ist warm und weich. · paarreim / Sie taucht hinab bis auf den Grund / und schnappt sich einen Wurm, ganz rund. · paarreim / Dann schüttelt sie sich, plitsch und platsch, / und watschelt heim durch Schlamm und Matsch. | ☐ |
+| Winter | kreuzreim / Der Winter kommt mit Eis und Schnee, / die Bäume stehen kahl, / es friert der kleine Gartensee, / die Sonne scheint nur schmal. · kreuzreim / Wir fahren Schlitten auf dem Hang, / die Wangen werden rot, / und abends trinken wir noch lang / den Tee mit Honigbrot. | ☐ |
+| Der Käfer | paarreim / Ein Käfer krabbelt übers Blatt, / er ist vom vielen Laufen matt. · paarreim / Er ruht sich aus im Sonnenlicht / und rührt sich eine Weile nicht. · paarreim / Dann fliegt er summend in die Höh / und landet sanft im grünen Klee. | ☐ |
+| Gute Nacht | umarmend / Am Abend wird es still im Haus, / die Lampe leuchtet warm, / die Katze schläft in meinem Arm, / dann geht auch bald das Licht aus. · umarmend / Ich mache meine Augen zu, / der Mond schaut still herein, / ich träume von dem Sonnenschein, / und alles kommt zur Ruh. | ☐ |

@@ -138,6 +138,36 @@ function zeichneStatistik(box, neu) {
       el("thead", {}, el("tr", {}, el("th", { text: "Spiel" }), ...SKALA.map(st => el("th", { text: `${st.icon} ${st.nr}` })))),
       el("tbody", {}, ...spielZeilen))) : el("p", { class: "leise-text", text: "Noch keine Runde gespielt." })));
 
+  // ----- Endlos-Rekorde und Rangliste (Vorgabe Patrik 2026-10-31) -----
+  // Je Spiel, Stufe und Timer (ohne / mit Sekunden) der beste Wert und der Platz unter allen Kindern.
+  const modi = new Map();
+  for (const e of LS.rekorde()) {
+    if (e.name !== gewaehlt || (!zeigeTest && e.test)) continue;
+    const k = `${e.spiel}|${e.stufe}|${e.timer ?? ""}`;
+    if (!modi.has(k) || e.punkte > modi.get(k).punkte) modi.set(k, e);
+  }
+  const rekordZeilen = [...modi.values()]
+    .sort((a, b) => spielName(a.spiel).localeCompare(spielName(b.spiel), "de") || a.stufe.localeCompare(b.stufe))
+    .map(e => {
+      const rang = LS.ranglisteFuer(e.spiel, e.stufe, e.timer ?? null);
+      const platz = rang.findIndex(r => r.name === gewaehlt) + 1;
+      return el("tr", {},
+        el("td", { text: spielName(e.spiel) }),
+        el("td", { text: stufeName(e.stufe) }),
+        el("td", { text: e.timer ? `⏱ ${e.timer} s` : "ohne" }),
+        el("td", { class: "zahl", text: String(e.punkte) }),
+        el("td", { text: platz ? `${platz}. von ${rang.length}` : "—" }),
+        el("td", { class: "leise-text", text: rang.slice(0, 3).map((r, i) => `${i + 1}. ${r.name} ${r.punkte}`).join(" · ") }));
+    });
+  seite.append(karte(
+    el("h2", { text: "♾ Endlos-Rekorde" }),
+    el("p", { class: "leise-text", style: "margin-top:0", text: "Im Endlos-Modus zählt, wie viele Aufgaben hintereinander ohne Fehler gelingen. Rangliste: bester Wert je Kind; verglichen wird nur bei gleicher Stufe und gleichem Timer." }),
+    rekordZeilen.length
+      ? el("div", { class: "tabelle-rahmen" }, el("table", {},
+          el("thead", {}, el("tr", {}, ...["Spiel", "Stufe", "Timer", "Rekord", "Platz", "Beste"].map((t, i) => el("th", { class: i === 3 ? "zahl" : "", text: t })))),
+          el("tbody", {}, ...rekordZeilen)))
+      : el("p", { class: "leise-text", text: "Noch keine Endlos-Runde gespielt. Im Spiel unter den Stufen: ♾ Endlos." })));
+
   // ----- Vergleich (nur Aufsicht) -----
   const kinder = namen.filter(n => !LS.istAufsicht(n) || zeigeTest);
   if (aufsicht && kinder.length > 1) {
@@ -231,7 +261,9 @@ function zeichneStatistik(box, neu) {
   /** Profile und Runden der genannten Personen als JSON-Datei; PIN-Hashes bleiben auf dem Gerät. */
   function sichern(wer) {
     const profile = Object.fromEntries(wer.map(n => { const { pin, ...rest } = LS.lies("profile", {})[n] || {}; return [n, rest]; }));
-    const daten = { version: 1, gesichert: new Date().toISOString(), profile, protokoll: LS.protokoll().filter(e => sichtbareRunde(e) && e.name in profile) };
+    const daten = { version: 1, gesichert: new Date().toISOString(), profile,
+      protokoll: LS.protokoll().filter(e => sichtbareRunde(e) && e.name in profile),
+      rekorde: LS.rekorde().filter(e => sichtbareRunde(e) && e.name in profile) };
     // Das Muster lernspiele-*.json hält .gitignore aus dem Repo heraus.
     const namen = Object.keys(profile).map(n => n.replace(/[^\p{L}\p{N}_-]+/gu, "_")).filter(Boolean).join("-");
     const dateiname = `lernspiele-${namen ? namen + "-" : ""}${new Date().toISOString().slice(0, 10)}.json`;

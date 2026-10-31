@@ -28,6 +28,7 @@ const GEBAUT_ALS = {
   "Schwimmt-oder-sinkt-Labor": "schwimmt-sinkt", "Magnet-Pole": "magnet-labor", "Mondphasen-Ordnen": "himmels-forscher",
   "Kompass-Spiel": "kompass", "Znüni-Teller": "znueni-teller", "Word-Match": "word-match", "Instrumenten-Memory": "instrumente",
   "Jahreskreis-Ordner": "jahreskreis", "Laut-Detektiv": "anlaut-angel",
+  "Früher-heute-Paare": "frueher-heute", "Wetter-Jahreszeiten": "wetter-jahreszeiten",
 };
 const ERSETZT = {
   "Folgen-Fortsetzer": "ersetzt: Zahlenfolgen übt der Muster-Fortsetzer (Stufen 5–6), den OP 4. Klasse (MA.3.A.3.d) die Preis-Tabelle",

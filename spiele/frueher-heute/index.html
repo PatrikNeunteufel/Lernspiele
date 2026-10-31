@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Früher und heute</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  .fh-svg svg { width: 1.25em; height: 1.25em; display: block; margin: 0 auto; }
+  .fh-inhalt { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .fh-zeile { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
+  .fh-ding { background: #fff; border: 4px solid var(--rand); border-radius: 18px; padding: 6px 14px; text-align: center; font-weight: 900; font-size: clamp(16px, 3.6vw, 22px); }
+  .fh-ding .bild { font-size: clamp(40px, 9vw, 56px); line-height: 1.1; display: block; }
+  .fh-ding.fh-luecke { border-style: dashed; color: var(--text-leise); min-width: 80px; }
+  .fh-pfeil { font-size: 28px; color: var(--text-leise); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🕰️ Früher und heute</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="dinge.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.9.2 (Zeit, Dauer und Wandel): b/c (Grundanspruch 1. Zyklus) alte und moderne
+// Dinge vergleichen, Veränderungen beschreiben; e (2. Zyklus) früher und heute vergleichen, etwa zur
+// Zeit der Grosseltern. Inhalte in dinge.js.
+
+const { waehle, mische, el } = LS;
+const ID = "frueher-heute";
+
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : FH_LISTEN);
+const PAARE = FREI.has("paare") ? FH_PAARE : [];
+const REIHEN = FREI.has("reihen") ? FH_REIHEN : [];
+const GROSS = FREI.has("grosseltern") ? FH_GROSSELTERN : [];
+
+const KORB = { frueher: { bild: "🕰️", text: "früher" }, heute: { bild: "✨", text: "heute" } };
+const GAB_ES = { ja: { bild: "✅", text: "gab es schon" }, nein: { bild: "❌", text: "noch nicht" } };
+
+/** Bild und Gruppe eines Dings aus den Paaren (Namen sind eindeutig). */
+function paarDing(name) {
+  for (const [gruppe, b1, n1, b2, n2] of FH_PAARE) {
+    if (n1 === name) return { gruppe, bild: b1, zeit: "frueher" };
+    if (n2 === name) return { gruppe, bild: b2, zeit: "heute" };
+  }
+  return null;
+}
+
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
+const ARTEN = {
+  /** Stufe 1: Ist das ein Ding von früher oder von heute? */
+  korb() {
+    const dinge = PAARE.flatMap(p => [...(p[5] ? [[p[1], p[2], "frueher"]] : []), [p[3], p[4], "heute"]]);
+    if (!dinge.length) return null;
+    const [bild, name, richtig] = waehle(dinge);
+    return { art: "korb", bild, name, richtig };
+  },
+  /** Paar finden: vor = von früher zu heute, sonst von heute zurück; n Auswahlknöpfe. */
+  paar(vor, n) {
+    if (!PAARE.length) return null;
+    const p = waehle(PAARE);
+    const [gruppe] = p;
+    const [bild, name, richtig] = vor ? [p[1], p[2], p[4]] : [p[3], p[4], p[2]];
+    const fremd = [...new Set(PAARE.filter(q => q[0] !== gruppe).map(q => (vor ? q[4] : q[2])))];
+    if (fremd.length < n - 1) return null;
+    return { art: "paar", vor, bild, name, richtig, optionen: mische([richtig, ...mische(fremd).slice(0, n - 1)]) };
+  },
+  /** Drei Dinge einer Reihe (aus einer längeren drei in der richtigen Folge) ordnen; ganz = alle. */
+  ordnen(ganz = false) {
+    if (!REIHEN.length) return null;
+    const [, thema, dinge] = waehle(REIHEN);
+    let reihe = dinge;
+    if (!ganz && dinge.length > 3) {
+      const weg = Math.floor(Math.random() * dinge.length);
+      reihe = dinge.filter((_, i) => i !== weg);
+    }
+    return { art: "ordnen", thema, reihe };
+  },
+  /** Was kam dazwischen? Erstes und letztes von drei aufeinanderfolgenden Dingen sind gegeben. */
+  dazwischen() {
+    if (!REIHEN.length) return null;
+    const [gruppe, thema, dinge] = waehle(REIHEN);
+    const i = Math.floor(Math.random() * (dinge.length - 2));
+    const [vor, mitte, nach] = dinge.slice(i, i + 3);
+    // Ablenker: Dinge aus Reihen anderer Gruppen, die in dieser Reihe nicht vorkommen
+    const namen = new Set(dinge.map(d => d[1]));
+    const fremd = REIHEN.filter(r => r[0] !== gruppe).flatMap(r => r[2]).filter(d => !namen.has(d[1]));
+    const andere = [];
+    for (const d of mische(fremd)) if (!andere.some(a => a[1] === d[1]) && andere.length < 2) andere.push(d);
+    if (andere.length < 2) return null;
+    return { art: "dazwischen", thema, vor, nach, richtig: mitte[1], optionen: mische([mitte, ...andere]) };
+  },
+  /** Gab es das schon vor etwa 60 oder 100 Jahren? */
+  gross(jahre) {
+    if (!GROSS.length) return null;
+    const [bild, name, vor60, vor100] = waehle(GROSS);
+    return { art: "gross", jahre, bild, name, richtig: (jahre === 60 ? vor60 : vor100) ? "ja" : "nein" };
+  },
+};
+
+// Je Stufe die Arten (mehrfach genannt = häufiger).
+const STUFE = {
+  s1: [() => ARTEN.korb()],
+  s2: [() => ARTEN.paar(true, 3)],
+  s3: [() => ARTEN.paar(true, 4), () => ARTEN.ordnen()],
+  s4: [() => ARTEN.paar(false, 4), () => ARTEN.dazwischen()],
+  s5: [() => ARTEN.gross(60)],
+  // Königsstufe: vor 100 Jahren, ganze Reihen, Paare zurück — alles gemischt
+  s6: [() => ARTEN.gross(100), () => ARTEN.gross(60), () => ARTEN.ordnen(true), () => ARTEN.paar(false, 4), () => ARTEN.dazwischen()],
+};
+
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Früher oder heute? Das Ding in den richtigen Korb.",
+  s2: "Ein Ding von früher: Was nimmt man heute dafür?",
+  s3: "Paare finden und drei Dinge der Zeit nach ordnen.",
+  s4: "Von heute zurück nach früher. Was kam dazwischen?",
+  s5: "Gab es das schon, als die Grosseltern Kinder waren?",
+  s6: "Vor 100 Jahren, ganze Reihen — alles gemischt.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Ist 'teil' eine Teilfolge (gleiche Reihenfolge) von 'ganz'? */
+const teilfolge = (teil, ganz) => { let i = 0; for (const d of ganz) if (i < teil.length && d === teil[i]) i++; return i === teil.length; };
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (dinge.js). */
+function herkunft(a) {
+  if (a.art === "korb" || a.art === "paar") {
+    const namen = a.art === "korb" ? [a.name] : [a.name, ...a.optionen];
+    return [namen.every(n => paarDing(n)) ? "paare" : "?"];
+  }
+  if (a.art === "gross") return [FH_GROSSELTERN.some(g => g[1] === a.name) ? "grosseltern" : "?"];
+  const namen = a.art === "ordnen" ? a.reihe.map(d => d[1]) : [a.vor[1], ...a.optionen.map(d => d[1]), a.nach[1]];
+  return [namen.every(n => FH_REIHEN.some(r => r[2].some(d => d[1] === n))) ? "reihen" : "?"];
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
+  if (a.art === "korb") {
+    const d = paarDing(a.name);
+    if (d.zeit !== a.richtig) m.push("Korb falsch");
+    if (d.zeit === "frueher" && !FH_PAARE.find(p => p[2] === a.name)[5]) m.push("Ding von früher, das man auch heute braucht");
+  }
+  if (a.art === "paar") {
+    const p = FH_PAARE.find(q => q[a.vor ? 2 : 4] === a.name);
+    if (p[a.vor ? 4 : 2] !== a.richtig) m.push("Paar falsch");
+    if (a.optionen.some(o => o !== a.richtig && paarDing(o).gruppe === p[0])) m.push("Ablenker aus derselben Gruppe — zwei Antworten passen");
+  }
+  if (a.optionen) {
+    const namen = a.optionen.map(o => (Array.isArray(o) ? o[1] : o));
+    if (!namen.includes(a.richtig) || new Set(namen).size !== namen.length) m.push("Auswahl doppelt oder ohne Lösung");
+  }
+  if (a.art === "ordnen" && !FH_REIHEN.some(r => r[1] === a.thema && teilfolge(a.reihe.map(d => d[1]), r[2].map(d => d[1])))) m.push("Reihenfolge falsch");
+  if (a.art === "dazwischen") {
+    const r = FH_REIHEN.find(x => x[1] === a.thema);
+    const namen = r[2].map(d => d[1]);
+    const i = namen.indexOf(a.vor[1]);
+    if (namen[i + 1] !== a.richtig || namen[i + 2] !== a.nach[1]) m.push("Mitte falsch");
+    if (a.optionen.some(o => o[1] !== a.richtig && FH_REIHEN.some(x => x[0] === r[0] && x[2].some(d => d[1] === o[1])))) m.push("Ablenker aus derselben Gruppe");
+  }
+  if (a.art === "gross") {
+    const g = FH_GROSSELTERN.find(x => x[1] === a.name);
+    if (((a.jahre === 60 ? g[2] : g[3]) ? "ja" : "nein") !== a.richtig) m.push("Antwort falsch");
+  }
+  if (/ß/.test(JSON.stringify(a))) m.push("ß im Text");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+// Für Waschbrett und Waschmaschine gibt es kein Emoji.
+const SVG = {
+  waschbrett: `<svg viewBox="0 0 60 80" aria-hidden="true"><rect x="8" y="2" width="44" height="76" rx="5" fill="#b7814f"/><rect x="14" y="18" width="32" height="52" rx="2" fill="#d4d9e0"/>${
+    Array.from({ length: 9 }, (_, i) => `<line x1="15" y1="${22 + i * 5.5}" x2="45" y2="${22 + i * 5.5}" stroke="#8d96a3" stroke-width="2.4"/>`).join("")}</svg>`,
+  waschmaschine: `<svg viewBox="0 0 64 72" aria-hidden="true"><rect x="4" y="4" width="56" height="64" rx="7" fill="#f4f6f9" stroke="#8a94a6" stroke-width="3"/><line x1="4" y1="18" x2="60" y2="18" stroke="#8a94a6" stroke-width="2"/><circle cx="14" cy="11" r="3.5" fill="#8a94a6"/><rect x="34" y="8" width="20" height="6" rx="2" fill="#cfd5de"/><circle cx="32" cy="43" r="17" fill="#cfe6ff" stroke="#8a94a6" stroke-width="4"/><path d="M19 47 q6.5 -6 13 0 q6.5 6 13 0" stroke="#4d93dc" fill="none" stroke-width="3"/></svg>`,
+};
+
+const istSvg = bild => bild.startsWith("svg:");
+function bildEl(bild) {
+  return istSvg(bild) ? el("span", { class: "bild fh-svg", html: SVG[bild.slice(4)] }) : el("span", { class: "bild", text: bild });
+}
+/** Knopfinhalt für LS.auswahl / LS.reihenfolge: Emoji als Text, eigene Bilder als Element. */
+const inhalt = (bild, text) => (istSvg(bild) ? el("span", { class: "fh-inhalt" }, bildEl(bild), el("span", { text })) : { bild, text });
+const ablageText = ([bild, text]) => (istSvg(bild) ? text : `${bild} ${text}`);
+const ding = (bild, text, extra = "") => el("div", { class: "fh-ding" + extra }, bild ? bildEl(bild) : null, el("span", { text }));
+
+/** Karte mit Körben; eigene Bilder kommen nach dem Bauen in die Karte. */
+function karteInKorb(ctx, a, opt) {
+  const { karte } = LS.koerbe(ctx, { karte: { bild: istSvg(a.bild) ? "" : a.bild, text: a.name }, ...opt });
+  if (istSvg(a.bild)) karte.prepend(bildEl(a.bild));
+}
+
+LS.spiel({
+  id: ID,
+  einleitung: "Wie hat man früher Licht gemacht, Wäsche gewaschen, telefoniert? Finde heraus, was sich verändert hat!",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const f = ctx.flaeche;
+    if (a.art === "korb") {
+      f.append(el("div", { class: "frage", text: "Ist das von früher oder von heute?" }));
+      karteInKorb(ctx, a, {
+        koerbe: ["frueher", "heute"], richtig: a.richtig, korbInhalt: k => KORB[k],
+        farbe: k => (k === "frueher" ? "var(--deko-3)" : "var(--deko-6)"),
+        hinweis: "Braucht man das noch jeden Tag — oder sieht man es fast nur noch im Museum?",
+        loesung: `${a.name}: ${KORB[a.richtig].text}.`,
+      });
+    } else if (a.art === "paar") {
+      const bilder = Object.fromEntries(a.optionen.map(o => [o, paarDing(o).bild]));
+      f.append(el("div", { class: "frage", text: a.vor ? "Früher war es so. Was nimmt man heute dafür?" : "Heute ist es so. Was nahm man früher dafür?" }),
+        el("div", { class: "fh-zeile" }, ding(a.bild, a.name)));
+      const loesung = a.vor ? `Früher: ${a.name} — heute: ${a.richtig}.` : `Heute: ${a.name} — früher: ${a.richtig}.`;
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 170, inhalt: o => inhalt(bilder[o], o),
+        hinweis: "Wozu braucht man das? Such das Ding, das dieselbe Arbeit macht.", loesung, lob: `Richtig! ${loesung}`,
+      });
+    } else if (a.art === "ordnen") {
+      const loesung = a.reihe.map(d => d[1]).join(" → ");
+      f.append(el("div", { class: "frage", text: `${a.thema}: Was gab es zuerst? Tipp vom ältesten zum neusten.` }));
+      LS.reihenfolge(ctx, {
+        reihe: a.reihe, breite: 140, pfeile: true, inhalt: ([bild, text]) => inhalt(bild, text), ablage: ablageText,
+        hinweis: "Was ist ganz einfach und braucht keine Maschine? Das gab es zuerst.", loesung, lob: `Richtig! ${loesung}`,
+      });
+    } else if (a.art === "dazwischen") {
+      const loesung = `${a.vor[1]} → ${a.richtig} → ${a.nach[1]}`;
+      f.append(el("div", { class: "frage", text: `${a.thema}: Was kam dazwischen?` }),
+        el("div", { class: "fh-zeile" }, ding(a.vor[0], a.vor[1]), el("span", { class: "fh-pfeil", text: "→" }),
+          ding("", "?", " fh-luecke"), el("span", { class: "fh-pfeil", text: "→" }), ding(a.nach[0], a.nach[1])));
+      LS.auswahl(ctx, {
+        optionen: a.optionen.map(o => o[1]), richtig: a.richtig, breite: 160,
+        inhalt: n => { const o = a.optionen.find(x => x[1] === n); return inhalt(o[0], o[1]); },
+        hinweis: "Was davon gehört zum selben Thema? Es ist neuer als das Erste und älter als das Letzte.", loesung, lob: `Richtig! ${loesung}`,
+      });
+    } else {
+      const wer = a.jahre === 60 ? "deine Grosseltern" : "deine Urgrosseltern";
+      f.append(el("div", { class: "frage", text: `Vor etwa ${a.jahre} Jahren waren ${wer} Kinder. Gab es das damals schon?` }));
+      karteInKorb(ctx, a, {
+        koerbe: ["ja", "nein"], richtig: a.richtig, korbInhalt: k => GAB_ES[k],
+        farbe: k => (k === "ja" ? "var(--deko-5)" : "var(--deko-7)"),
+        hinweis: a.jahre === 60 ? "Denk an die Zeit vor etwa 60 Jahren: Was kam erst dazu, als deine Eltern schon gross waren?"
+          : "Vor 100 Jahren waren deine Grosseltern nicht einmal geboren. Was ist erst viel später dazugekommen?",
+        loesung: `${a.name}: ${a.richtig === "ja" ? "Das gab es vor " + a.jahre + " Jahren schon." : "Das gab es vor " + a.jahre + " Jahren noch nicht."}`,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Schau genau hin: Wozu braucht man das?");
+  },
+});
+</script>
+</body>
+</html>

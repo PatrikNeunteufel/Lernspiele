@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Netz-Falter</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .regel { text-align: center; color: var(--text-leise); font-weight: 700; margin: -4px 0 10px; }
+  .netz { display: flex; justify-content: center; margin: 0 auto 14px; }
+  .netz svg { display: block; max-width: 100%; height: auto; }
+  .netz .tippbar { cursor: pointer; }
+  .netz .tippbar:hover { fill: #eef0ff; }
+  .netz .daneben { fill: var(--hinweis-hell); }
+  .netz .geloest { fill: var(--gut-hell); stroke: var(--gut); }
+  .netz-wahl .wahl-knopf { min-height: 110px; }
+  .netz-wahl .wahl-knopf svg { display: block; max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📦 Netz-Falter</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="netze.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.C.3: Vorstellungen zu Körpern — d (2. Zyklus) „Würfelnetze im Kopf falten“:
+// Ist das ein Würfelnetz? Welche Fläche liegt gegenüber? Darüber Quader-, Prismen- und
+// Pyramidennetze. Jede Antwort wird durch Zurückfalten berechnet (netze.js), nicht nachgeschlagen.
+
+const { zufall, waehle, mische, el } = LS;
+
+// ---------- Sechslinge (Hexominos): alle 35, durch Anbauen ----------
+function normal(z) {
+  const mx = Math.min(...z.map(a => a[0])), my = Math.min(...z.map(a => a[1]));
+  return z.map(([x, y]) => [x - mx, y - my]).sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+}
+const schluessel = z => normal(z).map(a => a.join(",")).join(" ");
+function lagen(z) {
+  const r = [];
+  let w = normal(z);
+  for (let s = 0; s < 2; s++) { for (let d = 0; d < 4; d++) { r.push(w); w = normal(w.map(([x, y]) => [-y, x])); } w = normal(w.map(([x, y]) => [-x, y])); }
+  return r;
+}
+const formSchluessel = z => lagen(z).map(schluessel).sort()[0];
+function polyominos(k) {
+  let stufe = new Map([[formSchluessel([[0, 0]]), [[0, 0]]]]);
+  for (let n = 2; n <= k; n++) {
+    const neu = new Map();
+    for (const z of stufe.values()) for (const [x, y] of z) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const p = [x + dx, y + dy];
+      if (z.some(q => q[0] === p[0] && q[1] === p[1])) continue;
+      const w = normal([...z, p]);
+      const f = formSchluessel(w);
+      if (!neu.has(f)) neu.set(f, w);
+    }
+    stufe = neu;
+  }
+  return [...stufe.values()];
+}
+const quadrat = ([x, y]) => [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]];
+const alsNetz = zellen => zellen.map(quadrat);
+
+/** Körper aus einer Beschreibung (die Aufgabe bleibt so reine Daten). */
+function baue(k) {
+  if (k.typ === "quader") return NETZ.quader(...k.masse);
+  if (k.typ === "prisma") return NETZ.dreiecksprisma(2);
+  return NETZ.pyramide(1.4, 1.2);
+}
+const WUERFEL = { typ: "quader", masse: [1, 1, 1] };
+const istNetz = (k, netz) => NETZ.falte(baue(k), netz).length > 0;
+
+const HEXOMINOS = polyominos(6);
+const WUERFELNETZE = HEXOMINOS.filter(z => istNetz(WUERFEL, alsNetz(z)));
+const KEINE_NETZE = HEXOMINOS.filter(z => !istNetz(WUERFEL, alsNetz(z)));
+
+// ---------- Stufen ----------
+const STUFE = {
+  s1: { arten: ["wahl3"] },
+  s2: { arten: ["janein"] },
+  s3: { arten: ["gegenueber", "gegenueber", "janein"] },
+  s4: { arten: ["gegenueber", "wuerfelzahl", "ergaenzen"] },
+  s5: { arten: ["quaderGegenueber", "quaderJanein"], quader: [[1, 1, 2], [1, 2, 2], [1, 1, 3], [1, 2, 3]] },
+  s6: { arten: ["koerper", "koerper", "koerperJanein"], quader: [[1, 1, 2], [1, 2, 2], [1, 1, 3]] },
+};
+const TIPP_ARTEN = ["gegenueber", "quaderGegenueber", "ergaenzen"];
+const BREITE = 300;                   // Breite des Netzbildes in px
+const einheit = netz => Math.min(70, BREITE / NETZ.groesse(netz)[0]);
+
+/**
+ * Netz drehen, bis es möglichst schmal ist (Rechtecknetze nur um 90°, sonst in 15°-Schritten);
+ * dann in die Ecke schieben.
+ */
+function ausrichten(netz, rechtwinklig) {
+  const winkel = rechtwinklig ? [0, Math.PI / 2] : [...Array(12).keys()].map(k => (k * Math.PI) / 12);
+  let beste = null;
+  for (const w of winkel) {
+    const n = NETZ.drehe(netz, w);
+    const [b, h] = NETZ.groesse(n);
+    if (!beste || b < beste.b - 1e-6 || (Math.abs(b - beste.b) < 1e-6 && h < beste.h)) beste = { n, b, h };
+  }
+  return beste.n;
+}
+
+function abwicklung(k, rechtwinklig = true) {
+  const K = baue(k);
+  for (let v = 0; v < 200; v++) {
+    const n = NETZ.abwickeln(K);
+    if (!n) continue;
+    const r = ausrichten(n, rechtwinklig);
+    if (NETZ.groesse(r)[0] * 44 <= BREITE && NETZ.groesse(r)[1] <= 9) return r;
+  }
+  throw new Error("keine Abwicklung");
+}
+
+/** Mit Zufallslage: ein Sechsling als Netz. */
+const sechsling = z => alsNetz(waehle(lagen(z)));
+
+/** Welches Vieleck liegt gegenüber von i? (aus der ersten Faltung) */
+function gegenueberVon(k, netz, i) {
+  const K = baue(k);
+  const zu = NETZ.falte(K, netz)[0];
+  return zu.indexOf(NETZ.gegenueber(K, zu[i]));
+}
+
+/** Mit 50 % ein echtes Netz, sonst eines mit einer umgehängten Fläche, das sich nicht falten lässt. */
+function vielleichtNetz(k, rechtwinklig) {
+  const ja = Math.random() < 0.5;
+  for (let v = 0; v < 300; v++) {
+    let n = abwicklung(k, rechtwinklig);
+    if (!ja) {
+      n = NETZ.umhaengen(n);
+      if (!n || istNetz(k, n)) continue;
+      n = ausrichten(n, rechtwinklig);
+      if (NETZ.groesse(n)[0] * 44 > BREITE || NETZ.groesse(n)[1] > 9) continue;
+    }
+    return { netz: n, richtig: ja ? "ja" : "nein" };
+  }
+  throw new Error("kein Netz");
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  if (art === "wahl3") {
+    const optionen = mische([waehle(WUERFELNETZE), ...mische(KEINE_NETZE).slice(0, 2)]).map(sechsling);
+    return { art, k: WUERFEL, optionen, richtig: optionen.findIndex(n => istNetz(WUERFEL, n)) };
+  }
+  if (art === "janein") {
+    const ja = Math.random() < 0.5;
+    return { art, k: WUERFEL, netz: sechsling(waehle(ja ? WUERFELNETZE : KEINE_NETZE)), richtig: ja ? "ja" : "nein" };
+  }
+  if (art === "gegenueber" || art === "quaderGegenueber") {
+    const k = art === "gegenueber" ? WUERFEL : { typ: "quader", masse: mische(waehle(p.quader)) };
+    const netz = abwicklung(k);
+    const markiert = zufall(0, netz.length - 1);
+    return { art, k, netz, markiert, richtig: gegenueberVon(k, netz, markiert) };
+  }
+  if (art === "wuerfelzahl") {
+    // Spielwürfel: gegenüber zusammen 7. Drei Flächen (je eine aus jedem Paar) tragen Augen,
+    // das Fragezeichen liegt einer davon gegenüber.
+    const netz = abwicklung(WUERFEL);
+    const paare = [];
+    for (let i = 0; i < 6; i++) { const j = gegenueberVon(WUERFEL, netz, i); if (i < j) paare.push(mische([i, j])); }
+    const augen = new Array(6).fill(null);
+    const zahlen = mische([[1, 6], [2, 5], [3, 4]]).map(mische);
+    paare.forEach(([gezeigt], i) => { augen[gezeigt] = zahlen[i][0]; });
+    const welches = zufall(0, 2);
+    const frage = paare[welches][1];
+    const loesung = 7 - augen[paare[welches][0]];
+    return { art, k: WUERFEL, netz, augen, frage, optionen: mische(zahlen.map(z => z[1])), richtig: loesung };
+  }
+  if (art === "ergaenzen") {
+    for (let v = 0; v < 200; v++) {
+      const ganz = abwicklung(WUERFEL);
+      const zellen = ganz.map(P => [Math.round(Math.min(...P.map(q => q[0]))), Math.round(Math.min(...P.map(q => q[1])))]);
+      const kleben = NETZ.klebekanten(ganz);
+      const blaetter = zellen.map((_, i) => i).filter(i => kleben.filter(e => e[0] === i).length === 1);
+      const weg = waehle(blaetter);
+      const rest = zellen.filter((_, i) => i !== weg);
+      const belegt = new Set(rest.map(z => z.join(",")));
+      const frei = new Map();
+      for (const [x, y] of rest) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const z = [x + dx, y + dy];
+        if (!belegt.has(z.join(","))) frei.set(z.join(","), z);
+      }
+      const falsch = mische([...frei.values()].filter(z => !istNetz(WUERFEL, alsNetz([...rest, z])))).slice(0, 3);
+      if (falsch.length < 2) continue;
+      const kandidaten = mische([zellen[weg], ...falsch]);
+      const alle = [...rest, ...kandidaten];
+      const mx = Math.min(...alle.map(z => z[0])), my = Math.min(...alle.map(z => z[1]));
+      const schieb = z => [z[0] - mx, z[1] - my];
+      const b = Math.max(...alle.map(z => z[0])) - mx + 1;
+      if (b * 44 > BREITE) continue;
+      return { art, k: WUERFEL, rest: rest.map(schieb), kandidaten: kandidaten.map(schieb), richtig: kandidaten.indexOf(zellen[weg]) };
+    }
+    throw new Error("keine Ergänzung");
+  }
+  if (art === "quaderJanein") {
+    const k = { typ: "quader", masse: mische(waehle(p.quader)) };
+    return { art, k, ...vielleichtNetz(k, true) };
+  }
+  if (art === "koerperJanein") {
+    const k = waehle([{ typ: "prisma" }, { typ: "pyramide" }]);
+    return { art, k, ...vielleichtNetz(k, false) };
+  }
+  // koerper: Welcher Körper entsteht? (Würfel ist auch ein Quader — dann fehlt „Quader“ unter den Antworten.)
+  const k = waehle([WUERFEL, { typ: "quader", masse: mische(waehle(p.quader)) }, { typ: "prisma" }, { typ: "pyramide" }]);
+  const name = baue(k).name;
+  const optionen = name === "Würfel" ? ["Würfel", "Dreiecksprisma", "Pyramide"] : ["Würfel", "Quader", "Dreiecksprisma", "Pyramide"];
+  return { art, k, netz: abwicklung(k, k.typ === "quader"), optionen, richtig: name };
+}
+
+// ---------- Prüfung: alles durch Falten ----------
+
+/** Formen der Flächen eines Netzes: Dreiecke, Quadrate, andere Rechtecke. */
+function flaechenFormen(netz) {
+  const d = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
+  const f = { dreieck: 0, quadrat: 0, rechteck: 0, andere: 0 };
+  for (const P of netz) {
+    if (P.length === 3) { f.dreieck++; continue; }
+    const seiten = P.map((p, i) => d(p, P[(i + 1) % 4]));
+    const rechtwinklig = Math.abs(d(P[0], P[2]) - d(P[1], P[3])) < 1e-4 && Math.abs(seiten[0] - seiten[2]) < 1e-4;
+    if (P.length !== 4 || !rechtwinklig) f.andere++;
+    else if (Math.abs(seiten[0] - seiten[1]) < 1e-4) f.quadrat++; else f.rechteck++;
+  }
+  return f;
+}
+/** Welcher Körper kann es nach den Flächen allein sein? */
+function koerperNachFlaechen(netz) {
+  const f = flaechenFormen(netz);
+  if (f.andere) return null;
+  if (f.quadrat === 6) return "Würfel";
+  if (f.quadrat + f.rechteck === 6 && !f.dreieck) return "Quader";
+  if (f.dreieck === 2 && f.quadrat + f.rechteck === 3) return "Dreiecksprisma";
+  if (f.dreieck === 4 && f.quadrat === 1 && !f.rechteck) return "Pyramide";
+  return null;
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!STUFE[stufe].arten.includes(a.art)) m.push("Aufgabenart nicht in dieser Stufe");
+  if (HEXOMINOS.length !== 35 || WUERFELNETZE.length !== 11) m.push("nicht 35 Sechslinge mit 11 Würfelnetzen");
+  const K = baue(a.k);
+  const faltungen = n => NETZ.falte(K, n);
+  const tippGross = n => einheit(n) >= 44;
+  if (a.art === "wahl3") {
+    const netze = a.optionen.map(n => faltungen(n).length > 0);
+    if (netze.filter(Boolean).length !== 1 || !netze[a.richtig]) m.push("nicht genau ein Würfelnetz");
+    if (new Set(a.optionen.map(n => formSchluessel(n.map(P => P[0])))).size !== 3) m.push("zwei gleiche Formen");
+  }
+  if (a.netz) {
+    if (!NETZ.gueltigeLage(a.netz)) m.push("Flächen überlappen oder berühren sich unsauber");
+    if (a.netz.some(P => NETZ.flaeche2(P) <= 0)) m.push("Fläche falsch herum");
+  }
+  if (["janein", "quaderJanein", "koerperJanein"].includes(a.art)) {
+    if ((faltungen(a.netz).length > 0 ? "ja" : "nein") !== a.richtig) m.push("Ja/Nein stimmt nicht mit dem Falten überein");
+  }
+  if (a.art === "gegenueber" || a.art === "quaderGegenueber") {
+    const f = faltungen(a.netz);
+    if (!f.length) m.push("kein Netz");
+    // Jede Faltung muss dasselbe Gegenüber ergeben (unabhängig davon, wie man den Körper dreht).
+    const gegen = new Set(f.map(zu => zu.indexOf(NETZ.gegenueber(K, zu[a.markiert]))));
+    if (gegen.size !== 1 || !gegen.has(a.richtig) || a.richtig === a.markiert) m.push("Gegenüber nicht eindeutig");
+    if (!tippGross(a.netz)) m.push("Felder kleiner als 44 px");
+  }
+  if (a.art === "wuerfelzahl") {
+    const zu = faltungen(a.netz)[0];
+    if (!zu) m.push("kein Netz");
+    else {
+      const gegen = i => zu.indexOf(NETZ.gegenueber(K, zu[i]));
+      const gezeigt = a.augen.map((x, i) => (x == null ? -1 : i)).filter(i => i >= 0);
+      if (gezeigt.length !== 3 || gezeigt.some(i => gezeigt.includes(gegen(i)))) m.push("gezeigte Augen nicht aus drei Paaren");
+      if (a.augen[a.frage] != null || !gezeigt.includes(gegen(a.frage))) m.push("Fragezeichen liegt keiner Zahl gegenüber");
+      if (7 - a.augen[gegen(a.frage)] !== a.richtig) m.push("Lösung nicht 7 minus Gegenüber");
+      const treffer = a.optionen.filter(o => o === a.richtig).length;
+      if (treffer !== 1 || new Set(a.optionen).size !== a.optionen.length) m.push("Antworten nicht eindeutig");
+      if (a.optionen.some(o => gezeigt.some(i => a.augen[i] === o))) m.push("Antwort schon auf dem Netz");
+    }
+  }
+  if (a.art === "ergaenzen") {
+    const passt = a.kandidaten.map(z => faltungen(alsNetz([...a.rest, z])).length > 0);
+    if (passt.filter(Boolean).length !== 1 || !passt[a.richtig]) m.push("nicht genau ein passendes Feld");
+    if (!tippGross(alsNetz([...a.rest, ...a.kandidaten]))) m.push("Felder kleiner als 44 px");
+  }
+  if (a.art === "koerper") {
+    if (!faltungen(a.netz).length) m.push("Netz faltet nicht");
+    const nachFlaechen = koerperNachFlaechen(a.netz);
+    if (nachFlaechen !== a.richtig || K.name !== a.richtig) m.push("Körper stimmt nicht");
+    if (a.richtig === "Würfel" && a.optionen.includes("Quader")) m.push("Würfel ist auch ein Quader: zwei richtige Antworten");
+    if (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length) m.push("Antworten fehlerhaft");
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+const AUGEN = {
+  1: [[0.5, 0.5]], 2: [[0.27, 0.27], [0.73, 0.73]], 3: [[0.25, 0.25], [0.5, 0.5], [0.75, 0.75]],
+  4: [[0.27, 0.27], [0.73, 0.27], [0.27, 0.73], [0.73, 0.73]], 5: [[0.25, 0.25], [0.75, 0.25], [0.5, 0.5], [0.25, 0.75], [0.75, 0.75]],
+  6: [[0.27, 0.22], [0.27, 0.5], [0.27, 0.78], [0.73, 0.22], [0.73, 0.5], [0.73, 0.78]],
+};
+
+/**
+ * Netz als SVG. opt.markiert: Vieleck farbig; opt.augen[i]: Augenzahl; opt.frage: Vieleck mit „?“;
+ * opt.gestrichelt: Vielecke gestrichelt (Kandidaten); opt.u: Pixel je Einheit.
+ */
+function netzSvg(netz, opt = {}) {
+  const u = opt.u || einheit(netz);
+  const [b, h] = NETZ.groesse(netz);
+  const X = p => (p[0] * u + 4).toFixed(1), Y = p => ((h - p[1]) * u + 4).toFixed(1);
+  const teile = netz.map((P, i) => {
+    const fill = i === opt.markiert ? "var(--deko-2)" : "#fff";
+    const strich = opt.gestrichelt?.includes(i) ? ' stroke-dasharray="6 5" stroke="var(--knopf)"' : ' stroke="var(--text)"';
+    return `<polygon data-i="${i}" points="${P.map(p => `${X(p)},${Y(p)}`).join(" ")}" fill="${fill}"${strich} stroke-width="2.5" stroke-linejoin="round"/>`;
+  });
+  netz.forEach((P, i) => {
+    const mitte = [P.reduce((s, p) => s + p[0], 0) / P.length, P.reduce((s, p) => s + p[1], 0) / P.length];
+    if (opt.augen?.[i]) {
+      for (const [s, t] of AUGEN[opt.augen[i]]) {
+        const q = [P[0][0] + s * (P[1][0] - P[0][0]) + t * (P[3][0] - P[0][0]), P[0][1] + s * (P[1][1] - P[0][1]) + t * (P[3][1] - P[0][1])];
+        teile.push(`<circle cx="${X(q)}" cy="${Y(q)}" r="${(u * 0.09).toFixed(1)}" fill="var(--text)" pointer-events="none"/>`);
+      }
+    }
+    if (i === opt.frage) teile.push(`<text x="${X(mitte)}" y="${(Number(Y(mitte)) + u * 0.22).toFixed(1)}" font-size="${(u * 0.6).toFixed(0)}" font-weight="900" text-anchor="middle" fill="var(--knopf)" pointer-events="none">?</text>`);
+  });
+  const svg = el("span", { html: `<svg viewBox="0 0 ${(b * u + 8).toFixed(0)} ${(h * u + 8).toFixed(0)}" width="${(b * u + 8).toFixed(0)}" height="${(h * u + 8).toFixed(0)}" aria-hidden="true">${teile.join("")}</svg>` });
+  return { svg, flaechen: svg.querySelectorAll("polygon") };
+}
+
+/** Reihe/Spalte eines Feldes (Mitte), von oben links gezählt — für den Lösungstext. */
+function ort(netz, P) {
+  const h = NETZ.groesse(netz)[1];
+  const mx = P.reduce((s, p) => s + p[0], 0) / P.length, my = P.reduce((s, p) => s + p[1], 0) / P.length;
+  return `Reihe ${Math.floor(h - my) + 1}, Spalte ${Math.floor(mx) + 1}`;
+}
+
+const FRAGEN = {
+  wahl3: "Welches ist ein <b>Würfelnetz</b>?",
+  janein: "Kann man aus diesem Netz einen <b>Würfel</b> falten?",
+  gegenueber: "Falte den Würfel im Kopf: Welche Fläche liegt der <b>farbigen</b> gegenüber? Tipp sie an.",
+  quaderGegenueber: "Falte den Quader im Kopf: Welche Fläche liegt der <b>farbigen</b> gegenüber? Tipp sie an.",
+  wuerfelzahl: "Welche Augenzahl gehört auf das Feld mit dem <b>?</b>",
+  ergaenzen: "Eine Fläche fehlt noch. Welches <b>gestrichelte</b> Feld macht das Würfelnetz fertig?",
+  quaderJanein: "Kann man aus diesem Netz einen <b>Quader</b> falten?",
+  koerper: "Welcher <b>Körper</b> entsteht, wenn du dieses Netz faltest?",
+};
+const FALT_HINWEIS = "Falte in Gedanken Fläche für Fläche: Liegen zwei Flächen aufeinander, oder bleibt eine Seite offen?";
+
+/** Antippen eines Feldes im Netz (Gegenüber, Ergänzen). */
+function tippAufgabe(ctx, { netz, svgOpt, tippbar, richtig, hinweis, loesung }) {
+  const { svg, flaechen } = netzSvg(netz, svgOpt);
+  ctx.flaeche.append(el("div", { class: "netz" }, svg));
+  ctx.loesung(loesung);
+  let fertig = false;
+  for (const i of tippbar) {
+    const f = flaechen[i];
+    f.classList.add("tippbar");
+    f.setAttribute("role", "button");
+    f.setAttribute("aria-label", `Feld ${ort(netz, netz[i])}`);
+    f.addEventListener("click", () => {
+      if (fertig) return;
+      if (i === richtig) { fertig = true; f.classList.add("geloest"); ctx.richtig(); return; }
+      f.classList.add("daneben");
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) { fertig = true; flaechen[richtig].classList.add("geloest"); }
+    });
+  }
+}
+
+LS.spiel({
+  id: "netz-falter",
+  einleitung: "Schneiden, falten, kleben – im Kopf! Finde Würfelnetze und sag, welche Flächen sich gegenüberliegen.",
+  anzahl: 6,
+  stufen: {
+    s1: "Welches der drei ist ein Würfelnetz?",
+    s2: "Würfelnetz – ja oder nein?",
+    s3: "Welche Fläche liegt gegenüber?",
+    s4: "Spielwürfel-Augen, fehlende Fläche ergänzen.",
+    s5: "Quadernetze: gegenüber, ja oder nein?",
+    s6: "Endgegner: Prismen und Pyramiden – welcher Körper entsteht?",
+  },
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const frage = a.art === "koerperJanein"
+      ? `Kann man aus diesem Netz ${a.k.typ === "prisma" ? "ein <b>Dreiecksprisma</b>" : "eine <b>Pyramide</b>"} falten?`
+      : FRAGEN[a.art];
+    ctx.flaeche.append(el("div", { class: "frage", html: frage }));
+
+    if (a.art === "wahl3") {
+      ctx.kennung("wahl3|" + a.optionen.map(n => schluessel(n.map(P => P[0]))).join("|"));
+      const box = LS.auswahl(ctx, {
+        optionen: [0, 1, 2], richtig: a.richtig, breite: 96,
+        inhalt: i => netzSvg(a.optionen[i], { u: 18 }).svg,
+        loesung: `Es ist das ${a.richtig + 1}. Bild.`,
+        hinweis: FALT_HINWEIS,
+      });
+      box.classList.add("netz-wahl");
+      return;
+    }
+    if (["janein", "quaderJanein", "koerperJanein"].includes(a.art)) {
+      ctx.flaeche.append(el("div", { class: "netz" }, netzSvg(a.netz, { u: Math.min(einheit(a.netz), 56) }).svg));
+      const koerperName = { quaderJanein: "Quader", koerperJanein: baue(a.k).name }[a.art] || "Würfel";
+      const mitArtikel = { Würfel: "einen Würfel", Quader: "einen Quader", Dreiecksprisma: "ein Dreiecksprisma", Pyramide: "eine Pyramide" }[koerperName];
+      LS.auswahl(ctx, {
+        optionen: ["ja", "nein"], richtig: a.richtig, breite: 120,
+        inhalt: v => ({ bild: v === "ja" ? "✅" : "❌", text: v === "ja" ? "Ja" : "Nein" }),
+        loesung: a.richtig === "ja" ? `Ja, daraus kann man ${mitArtikel} falten.`
+          : "Nein, beim Falten liegen zwei Flächen aufeinander, und eine Seite bleibt offen.",
+        hinweis: FALT_HINWEIS,
+      });
+      return;
+    }
+    if (a.art === "koerper") {
+      ctx.flaeche.append(el("div", { class: "netz" }, netzSvg(a.netz, { u: Math.min(einheit(a.netz), 56) }).svg));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 130,
+        loesung: `Es entsteht ${{ Würfel: "ein Würfel", Quader: "ein Quader", Dreiecksprisma: "ein Dreiecksprisma", Pyramide: "eine Pyramide" }[a.richtig]}.`,
+        hinweis: "Zähl die Flächen: Wie viele Dreiecke, wie viele Vierecke? Sind alle Vierecke gleich gross?",
+      });
+      return;
+    }
+    if (a.art === "wuerfelzahl") {
+      ctx.flaeche.append(el("div", { class: "regel", text: "Beim Spielwürfel ergeben gegenüberliegende Seiten zusammen immer 7." }),
+        el("div", { class: "netz" }, netzSvg(a.netz, { augen: a.augen, frage: a.frage }).svg));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 70,
+        loesung: `Auf das Fragezeichen gehören ${a.richtig} Augen.`,
+        hinweis: "Welche Fläche liegt dem Fragezeichen gegenüber? Zusammen müssen es 7 Augen sein.",
+      });
+      return;
+    }
+    if (a.art === "ergaenzen") {
+      const netz = alsNetz([...a.rest, ...a.kandidaten]);
+      const kand = a.kandidaten.map((_, j) => a.rest.length + j);
+      tippAufgabe(ctx, {
+        netz, svgOpt: { gestrichelt: kand }, tippbar: kand, richtig: kand[a.richtig],
+        hinweis: "Mit diesem Feld liegen beim Falten zwei Flächen aufeinander. Probier ein anderes!",
+        loesung: `Das Feld in ${ort(netz, netz[kand[a.richtig]])} macht das Netz fertig.`,
+      });
+      return;
+    }
+    // gegenueber, quaderGegenueber
+    tippAufgabe(ctx, {
+      netz: a.netz, svgOpt: { markiert: a.markiert }, tippbar: a.netz.map((_, i) => i).filter(i => i !== a.markiert), richtig: a.richtig,
+      hinweis: "Diese Fläche berührt die farbige beim Falten. Gegenüber heisst: ganz auf der anderen Seite.",
+      loesung: `Gegenüber liegt das Feld in ${ort(a.netz, a.netz[a.richtig])}.`,
+    });
+  },
+});
+</script>
+</body>
+</html>

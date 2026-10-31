@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wetter und Jahreszeiten</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  .wj-bild { text-align: center; font-size: clamp(56px, 13vw, 80px); line-height: 1.1; margin: 0 0 8px; }
+  .wj-thermo { display: block; margin: 0 auto 12px; height: min(52vh, 380px); width: auto; max-width: 100%; }
+  .wj-thermo text { font-family: inherit; font-weight: 800; fill: var(--text); }
+  .wj-bericht { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 560px; margin: 0 auto 14px; }
+  .wj-tag { background: #fff; border: 3px solid var(--rand); border-radius: 16px; padding: 6px 2px; text-align: center; }
+  .wj-tag b { display: block; font-size: clamp(14px, 3.4vw, 18px); }
+  .wj-tag .wj-symbol { display: block; font-size: clamp(34px, 9vw, 48px); line-height: 1.2; }
+  .wj-tag .wj-grad { font-size: clamp(18px, 4.4vw, 24px); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🌦️ Wetter und Jahreszeiten</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="wetter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.4.4 (Wetter): Wetterphänomene beobachten und beschreiben, den Jahreszeiten
+// zuordnen; mit Thermometer und Regenmesser messen; Wettersymbole und Wetterbericht lesen
+// (Orientierungspunkt 2. Zyklus). Inhalte in wetter.js; Thermometer und Wetterbericht rechnet das Spiel.
+
+const { zufall, waehle, mische, el, zahlText } = LS;
+const ID = "wetter-jahreszeiten";
+
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : WJ_LISTEN);
+const JAHRESZEITEN = FREI.has("jahreszeiten") ? WJ_JAHRESZEITEN : [];
+const KLEIDUNG = FREI.has("kleidung") ? WJ_KLEIDUNG : [];
+const SYMBOLE = FREI.has("symbole") ? WJ_SYMBOLE : [];
+const FRAGEN = FREI.has("fragen") ? WJ_FRAGEN : [];
+
+const ZEITEN = ["Frühling", "Sommer", "Herbst", "Winter"];
+// Korb-Bilder, die auf keiner Karte vorkommen (sonst verrät das Bild den Korb)
+const ZEIT_KORB = { Frühling: { bild: "🌼", text: "Frühling" }, Sommer: { bild: "🌞", text: "Sommer" }, Herbst: { bild: "🍁", text: "Herbst" }, Winter: { bild: "🧊", text: "Winter" } };
+const ZEIT_FARBE = { Frühling: "var(--deko-5)", Sommer: "var(--deko-4)", Herbst: "var(--deko-3)", Winter: "var(--deko-6)" };
+const TAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+const grad = v => `${zahlText(v)} °C`;
+
+// Thermometer je Stufe: Skala von … bis, Strich alle 'strich' Grad, Zahl alle 'zahl' Grad.
+const THERMO = {
+  s2: { von: 0, bis: 40, strich: 5, zahl: 10 },
+  s3: { von: -20, bis: 30, strich: 2, zahl: 10 },
+  s4: { von: -10, bis: 30, strich: 1, zahl: 10 },
+  s6: { von: -20, bis: 30, strich: 1, zahl: 10 },
+};
+
+// Wetterbericht: Symbol und Temperaturbereich je Jahreszeit (Mittelland, Tageshöchstwert)
+const BERICHT = {
+  sommer: { "☀️": [25, 32], "⛅": [21, 27], "☁️": [17, 23], "🌧️": [14, 19], "⛈️": [22, 27] },
+  winter: { "☀️": [1, 6], "⛅": [-1, 5], "☁️": [0, 4], "🌨️": [-4, 1], "🌫️": [-3, 2] },
+};
+// Fragen an den Wetterbericht: genau ein Tag mit diesem Wetter; „ohne“ kommt an den anderen Tagen
+// nie vor (beim Gewitter regnet es auch, beim Schneefall sieht man auch nicht weit).
+const BERICHT_FRAGEN = {
+  regen: { zeit: "sommer", symbole: ["🌧️"], ohne: ["⛈️"], frage: "An welchem Tag brauchst du einen Regenschirm?" },
+  gewitter: { zeit: "sommer", symbole: ["⛈️"], ohne: [], frage: "An welchem Tag kann es blitzen und donnern?" },
+  schnee: { zeit: "winter", symbole: ["🌨️"], ohne: [], frage: "An welchem Tag kannst du einen Schneemann bauen?" },
+  nebel: { zeit: "winter", symbole: ["🌫️"], ohne: ["🌨️"], frage: "An welchem Tag siehst du draussen kaum weit?" },
+};
+const symbolName = s => WJ_SYMBOLE.find(x => x[0] === s)?.[1];
+
+/** Optionen um einen richtigen Wert: alle verschieden, innerhalb von von … bis. */
+function zahlOptionen(richtig, kandidaten, von, bis) {
+  const andere = [...new Set(kandidaten)].filter(v => v !== richtig && v >= von && v <= bis);
+  return mische([richtig, ...mische(andere).slice(0, 3)]);
+}
+
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
+const ARTEN = {
+  zeit(n) {
+    const liste = JAHRESZEITEN.filter(z => z[0] <= n);
+    if (!liste.length) return null;
+    const [, bild, text, richtig] = waehle(liste);
+    return { art: "zeit", bild, text, richtig };
+  },
+  kleidung() {
+    if (!KLEIDUNG.length) return null;
+    const [bild, text, richtig, f1, f2] = waehle(KLEIDUNG);
+    return { art: "kleidung", bild, text, richtig, optionen: mische([richtig, f1, f2]) };
+  },
+  symbol() {
+    if (SYMBOLE.length < 3) return null;
+    const [bild, richtig] = waehle(SYMBOLE);
+    return { art: "symbol", bild, richtig, optionen: mische([richtig, ...mische(SYMBOLE.filter(s => s[1] !== richtig)).slice(0, 2).map(s => s[1])]) };
+  },
+  thermo(stufe) {
+    const t = THERMO[stufe];
+    const werte = [];
+    for (let v = t.von; v <= t.bis; v += t.strich) werte.push(v);
+    const richtig = waehle(werte);
+    const s = t.strich;
+    const kand = [-richtig, richtig + s, richtig - s, richtig + 2 * s, richtig - 2 * s, richtig + t.zahl, richtig - t.zahl];
+    return { art: "thermo", stufe, richtig, optionen: zahlOptionen(richtig, kand, t.von, t.bis) };
+  },
+  /** Temperaturunterschied; ueberNull: Morgen unter null, Mittag über null. */
+  differenz(ueberNull) {
+    const morgen = ueberNull ? zufall(-9, -1) : zufall(2, 12);
+    const mittag = ueberNull ? zufall(1, 12) : morgen + zufall(3, 12);
+    const richtig = mittag - morgen;
+    const kand = [Math.abs(mittag) - Math.abs(morgen), Math.abs(Math.abs(mittag) - Math.abs(morgen)), richtig + 1, richtig - 1, richtig + 2, richtig - 2];
+    return { art: "differenz", morgen, mittag, richtig, optionen: zahlOptionen(richtig, kand.filter(v => v > 0), 1, 40) };
+  },
+  bericht() {
+    if (!SYMBOLE.length) return null;
+    const art = waehle(["wetter", "wetter", "waermster", "ablesen"]);
+    const start = zufall(0, 3);
+    const tage = TAGE.slice(start, start + 4);
+    if (art === "wetter") {
+      const moeglich = Object.keys(BERICHT_FRAGEN).filter(k => BERICHT_FRAGEN[k].symbole.every(s => symbolName(s) && SYMBOLE.some(x => x[0] === s)));
+      if (!moeglich.length) return null;
+      const f = BERICHT_FRAGEN[waehle(moeglich)];
+      const bereich = BERICHT[f.zeit];
+      const ziel = zufall(0, 3);
+      const sonst = Object.keys(bereich).filter(s => !f.symbole.includes(s) && !f.ohne.includes(s));
+      const symbole = tage.map((_, i) => (i === ziel ? waehle(f.symbole) : waehle(sonst)));
+      const grade = symbole.map(s => zufall(...bereich[s]));
+      return { art: "bericht", zeit: f.zeit, frage: f.frage, tage, symbole, grade, richtig: tage[ziel], optionen: tage.slice() };
+    }
+    // Wärmster Tag oder ablesen: Temperaturen alle verschieden
+    const zeit = waehle(["sommer", "winter"]);
+    const symbole = tage.map(() => waehle(Object.keys(BERICHT[zeit])));
+    const grade = symbole.map(s => zufall(...BERICHT[zeit][s]));
+    if (new Set(grade).size < 4) return null;
+    if (art === "waermster") {
+      const kalt = Math.random() < 0.5;
+      const ziel = grade.indexOf(kalt ? Math.min(...grade) : Math.max(...grade));
+      return { art: "bericht", zeit, frage: `Welcher Tag ist am ${kalt ? "kältesten" : "wärmsten"}?`, tage, symbole, grade, richtig: tage[ziel], optionen: tage.slice() };
+    }
+    const ziel = zufall(0, 3);
+    return { art: "bericht", zeit, frage: `Wie warm wird es am ${tage[ziel]}?`, tage, symbole, grade, richtig: grad(grade[ziel]), optionen: mische(grade.map(grad)) };
+  },
+  frage(n, nurAb = false) {
+    const liste = FRAGEN.filter(f => (nurAb ? f[0] === n : f[0] <= n));
+    if (!liste.length) return null;
+    const [, bild, frage, richtig, f1, f2, erklaerung] = waehle(liste);
+    return { art: "frage", bild, frage, richtig, optionen: mische([richtig, f1, f2]), erklaerung };
+  },
+};
+
+// Der Wetterbericht zieht manchmal Temperaturen, die nicht alle verschieden sind; dann neu ziehen.
+const nochmal = (art, mal = 20) => () => { for (let i = 0; i < mal; i++) { const a = art(); if (a) return a; } return null; };
+
+// Je Stufe die Arten (mehrfach genannt = häufiger).
+const STUFE = {
+  s1: [() => ARTEN.zeit(1)],
+  s2: [() => ARTEN.kleidung(), () => ARTEN.kleidung(), () => ARTEN.thermo("s2")],
+  s3: [() => ARTEN.zeit(3), () => ARTEN.symbol(), () => ARTEN.thermo("s3")],
+  s4: [nochmal(() => ARTEN.bericht()), nochmal(() => ARTEN.bericht()), () => ARTEN.thermo("s4"), () => ARTEN.differenz(false)],
+  s5: [() => ARTEN.frage(5)],
+  // Königsstufe: schwerste Fragen, Wetterbericht, Thermometer auf 1 °C bis −20 °C, über null rechnen
+  s6: [() => ARTEN.frage(6, true), () => ARTEN.frage(6), nochmal(() => ARTEN.bericht()), () => ARTEN.thermo("s6"), () => ARTEN.differenz(true),
+    () => ARTEN.zeit(3), () => ARTEN.kleidung()],
+};
+
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Zu welcher Jahreszeit passt das?",
+  s2: "Was ziehst du an? Thermometer in 5er-Schritten.",
+  s3: "Natur und Jahreszeit, Wettersymbole, Minusgrade.",
+  s4: "Wetterbericht lesen, auf 1 °C genau ablesen.",
+  s5: "Nebel, Hagel, Donner: Wetterwissen.",
+  s6: "Föhn, längster Tag, von Minus zu Plus — alles gemischt.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (wetter.js). */
+function herkunft(a) {
+  if (a.art === "zeit") return [WJ_JAHRESZEITEN.some(z => z[2] === a.text) ? "jahreszeiten" : "?"];
+  if (a.art === "kleidung") return [WJ_KLEIDUNG.some(k => k[1] === a.text) ? "kleidung" : "?"];
+  if (a.art === "symbol" || a.art === "bericht") return [(a.symbole || [a.bild]).every(s => symbolName(s)) ? "symbole" : "?"];
+  if (a.art === "frage") return [WJ_FRAGEN.some(f => f[2] === a.frage) ? "fragen" : "?"];
+  return [];
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
+  if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length || a.optionen.length < 2)) m.push("Auswahl doppelt oder ohne Lösung");
+  if (a.art === "zeit") {
+    const z = WJ_JAHRESZEITEN.find(x => x[2] === a.text);
+    if (z[3] !== a.richtig) m.push("Jahreszeit falsch");
+    if (z[0] > STUFE_NR[stufe]) m.push("Beobachtung aus einer höheren Stufe");
+  }
+  if (a.art === "kleidung" && WJ_KLEIDUNG.find(k => k[1] === a.text)[2] !== a.richtig) m.push("Kleidung falsch");
+  if (a.art === "symbol" && symbolName(a.bild) !== a.richtig) m.push("Symbol falsch benannt");
+  if (a.art === "frage" && WJ_FRAGEN.find(f => f[2] === a.frage)[3] !== a.richtig) m.push("Lösung falsch");
+  if (a.art === "thermo") {
+    const t = THERMO[a.stufe];
+    if (a.stufe !== stufe) m.push("Thermometer einer anderen Stufe");
+    if (a.richtig < t.von || a.richtig > t.bis || (a.richtig - t.von) % t.strich) m.push("Wert nicht auf einem Strich");
+    if (a.optionen.some(o => o < t.von || o > t.bis)) m.push("Option ausserhalb der Skala");
+  }
+  if (a.art === "differenz" && a.mittag - a.morgen !== a.richtig) m.push("Unterschied falsch");
+  if (a.art === "bericht") {
+    // Genau ein Tag passt
+    const f = Object.values(BERICHT_FRAGEN).find(x => x.frage === a.frage);
+    let passend;
+    if (f) passend = a.tage.filter((_, i) => f.symbole.includes(a.symbole[i]) || f.ohne.includes(a.symbole[i]));
+    else if (/kältesten|wärmsten/.test(a.frage)) {
+      const ziel = /kältesten/.test(a.frage) ? Math.min(...a.grade) : Math.max(...a.grade);
+      passend = a.tage.filter((_, i) => a.grade[i] === ziel);
+    } else {
+      const tag = a.frage.match(/am (\w+)\?/)[1];
+      passend = [grad(a.grade[a.tage.indexOf(tag)])];
+      if (new Set(a.grade).size !== 4) m.push("Temperaturen doppelt");
+    }
+    if (passend.length !== 1 || passend[0] !== a.richtig) m.push(`nicht genau eine richtige Antwort (${passend.join(", ")})`);
+    for (let i = 0; i < 4; i++) {
+      const bereich = BERICHT[a.zeit]?.[a.symbole[i]];
+      if (!bereich || a.grade[i] < bereich[0] || a.grade[i] > bereich[1]) m.push("Temperatur passt nicht zum Wetter");
+    }
+  }
+  if (/ß/.test(JSON.stringify(a))) m.push("ß im Text");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+/** Senkrechtes Thermometer mit Skala; die rote Säule endet beim Wert. */
+function thermometer(t, wert) {
+  const oben = 24, unten = 330, x = 60;
+  const y = v => unten - ((v - t.von) / (t.bis - t.von)) * (unten - oben);
+  let skala = "";
+  for (let v = t.von; v <= t.bis; v += t.strich) {
+    const gross = v % t.zahl === 0;
+    skala += `<line x1="${x + 14}" y1="${y(v)}" x2="${x + (gross ? 34 : 24)}" y2="${y(v)}" stroke="#2d3047" stroke-width="${gross ? 2.5 : 1.3}"/>`;
+    if (gross) skala += `<text x="${x + 40}" y="${y(v) + 6}" font-size="17">${zahlText(v)}</text>`;
+  }
+  const null0 = t.von < 0 ? `<line x1="${x - 14}" y1="${y(0)}" x2="${x + 34}" y2="${y(0)}" stroke="#2d3047" stroke-width="1" stroke-dasharray="3 3"/>` : "";
+  return el("div", { html: `<svg class="wj-thermo" viewBox="0 0 140 380" role="img" aria-label="Thermometer">
+    <text x="${x - 10}" y="14" font-size="16">°C</text>
+    <rect x="${x - 9}" y="${oben - 10}" width="18" height="${unten - oben + 30}" rx="9" fill="#fff" stroke="#8a94a6" stroke-width="3"/>
+    <circle cx="${x}" cy="${unten + 26}" r="18" fill="#e5322d" stroke="#8a94a6" stroke-width="3"/>
+    <rect x="${x - 5}" y="${y(wert)}" width="10" height="${unten + 20 - y(wert)}" fill="#e5322d"/>
+    ${null0}${skala}</svg>` });
+}
+
+function berichtEl(a) {
+  return el("div", { class: "wj-bericht", role: "table", "aria-label": "Wetterbericht" },
+    ...a.tage.map((tag, i) => el("div", { class: "wj-tag" }, el("b", { text: tag }),
+      el("span", { class: "wj-symbol", text: a.symbole[i], title: symbolName(a.symbole[i]) || "" }),
+      el("span", { class: "wj-grad", text: grad(a.grade[i]) }))));
+}
+
+LS.spiel({
+  id: ID,
+  einleitung: "Sonne, Regen, Schnee — welches Wetter passt zu welcher Jahreszeit? Und wie warm ist es?",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const f = ctx.flaeche;
+    if (a.art === "zeit") {
+      f.append(el("div", { class: "frage", text: "Zu welcher Jahreszeit passt das am besten?" }));
+      LS.koerbe(ctx, {
+        karte: { bild: a.bild, text: a.text }, koerbe: ZEITEN, richtig: a.richtig, korbInhalt: z => ZEIT_KORB[z], farbe: z => ZEIT_FARBE[z],
+        hinweis: "Denk an draussen: Wie warm ist es? Was blüht, was wächst, was machen die Tiere?",
+        loesung: `${a.text}: ${a.richtig}.`,
+      });
+    } else if (a.art === "kleidung") {
+      f.append(el("div", { class: "wj-bild", text: a.bild }), el("div", { class: "frage", text: `${a.text} Was passt jetzt?` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 170,
+        inhalt: o => { const [bild, ...rest] = o.split(" "); return { bild, text: rest.join(" ") }; },
+        hinweis: "Was hält dich trocken oder warm? Was schützt dich vor zu viel Hitze?",
+        loesung: `${a.text} ${a.richtig.split(" ").slice(1).join(" ")} passt.`,
+      });
+    } else if (a.art === "symbol") {
+      f.append(el("div", { class: "frage", text: "Was zeigt dieses Wettersymbol?" }), el("div", { class: "wj-bild", text: a.bild }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 170,
+        hinweis: "Schau genau: Was siehst du? Sonne, Wolken, Tropfen, Flocken oder einen Blitz?",
+        loesung: `${a.bild} heisst ${a.richtig}.`,
+      });
+    } else if (a.art === "thermo") {
+      f.append(el("div", { class: "frage", text: "Wie warm ist es? Lies das Thermometer ab." }), thermometer(THERMO[a.stufe], a.richtig));
+      LS.auswahl(ctx, {
+        optionen: a.optionen.map(grad), richtig: grad(a.richtig), breite: 110,
+        hinweis: a.richtig < 0 ? "Schau, wo die rote Säule aufhört. Unter dem Strich bei 0 sind es Minusgrade."
+          : "Schau, wo die rote Säule aufhört. Zähl die Striche von der nächsten Zahl aus.",
+        loesung: `Das Thermometer zeigt ${grad(a.richtig)}.`,
+      });
+    } else if (a.art === "differenz") {
+      f.append(el("div", { class: "frage", text: `Am Morgen ist es ${grad(a.morgen)}, am Mittag ${grad(a.mittag)}. Um wie viele Grad ist es wärmer geworden?` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen.map(v => `${v} Grad`), richtig: `${a.richtig} Grad`, breite: 110,
+        hinweis: a.morgen < 0 ? "Zähl zuerst bis 0, dann weiter bis zur Temperatur am Mittag." : "Wie viele Grad fehlen von der Temperatur am Morgen bis zu der am Mittag?",
+        loesung: `Von ${grad(a.morgen)} bis ${grad(a.mittag)} sind es ${a.richtig} Grad.`,
+      });
+    } else if (a.art === "bericht") {
+      f.append(el("div", { class: "frage", text: `Wetterbericht: ${a.frage}` }), berichtEl(a));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 120,
+        hinweis: "Lies jeden Tag: Welches Bild und welche Zahl stehen darunter?",
+        loesung: `${a.frage} ${a.richtig}.`,
+      });
+    } else {
+      f.append(el("div", { class: "wj-bild", text: a.bild }), el("div", { class: "frage", text: a.frage }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 220,
+        hinweis: "Denk an das, was du beim Wetter schon beobachtet hast.",
+        loesung: `${a.richtig.replace(/\.$/, "")}. ${a.erklaerung}`, lob: `Richtig! ${a.erklaerung}`,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Schau genau hin — wie beim Wetter draussen!");
+  },
+});
+</script>
+</body>
+</html>

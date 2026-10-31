@@ -145,6 +145,17 @@ button { font-family: inherit; }
 }
 
 .fortschritt span.aktiv { transform: scale(1.3); background: #fff; border-color: var(--knopf); }
+
+/* Endlos-Modus: Zähler statt Punkte, Wahl im Startbild, Rangliste am Schluss */
+.fortschritt.endlos { font-size: 26px; font-weight: 900; color: var(--knopf); }
+.endlos-wahl { margin-top: 16px; padding-top: 12px; border-top: 2px dashed var(--rand); display: flex; flex-direction: column; gap: 8px; }
+.endlos-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; }
+.endlos-knoepfe small { font-size: 14px; color: var(--text-leise); }
+.rangliste { margin: 12px auto; max-width: 320px; text-align: left; }
+.rangliste ol { margin: 6px 0 0; padding-left: 1.6em; }
+.rangliste li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 8px; border-radius: 8px; }
+.rangliste li.ich { background: var(--gut-hell); font-weight: 800; }
+.rangliste li::marker { font-weight: 800; }
 .fortschritt span.fertig { background: var(--gut); }
 
 /* ---------- Knöpfe ---------- */

@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pentomino-Puzzle</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 12px; }
+  .frage b { color: var(--knopf); }
+  /* Spielfeld: Zellgrösse so, dass auch 6 Spalten auf 375 px passen (≥ 44 px je Feld). */
+  .brett { display: grid; gap: 3px; margin: 0 auto 14px; width: max-content; max-width: 100%; }
+  .brett .feld, .brett .leer { width: var(--z); height: var(--z); }
+  .brett .feld { border: none; border-radius: 7px; padding: 0; background: #fff; box-shadow: inset 0 0 0 2px var(--rand); cursor: pointer; }
+  .brett .feld.belegt { background: var(--f); box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .12); }
+  .brett .feld.voll { background: var(--rand); box-shadow: none; cursor: default; }
+  .brett .feld.luecke { background: #fff; box-shadow: inset 0 0 0 3px var(--knopf); cursor: default; }
+  .teile { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 0 auto 10px; max-width: 640px; }
+  .teil { min-width: 72px; min-height: 72px; padding: 6px; border: none; border-radius: 14px; background: #fff;
+    box-shadow: 0 4px 0 var(--rand), inset 0 0 0 2px var(--rand); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .teil.teil-aktiv { box-shadow: 0 4px 0 var(--knopf-dunkel), inset 0 0 0 4px var(--knopf); background: #eef0ff; }
+  .teil svg, .wahl-knopf svg { display: block; }
+  .werkzeug { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 4px; }
+  .vorlage-teil { display: flex; justify-content: center; margin: 0 0 14px; }
+  .pento-wahl .wahl-knopf { min-height: 88px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧩 Pentomino-Puzzle</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.A.2: Figuren im Raster abbilden und zerlegen — e (OP 2. Zyklus) „Flächen
+// parkettieren“. Das Kind legt Vierlinge (Tetrominos) und Fünflinge (Pentominos) in einen Umriss,
+// dreht und spiegelt sie per Knopf, und erkennt gleiche Formen in anderer Lage.
+
+const { zufall, waehle, mische, el } = LS;
+
+// ---------- Polyominos: Felder [x, y], y nach unten ----------
+
+/** Verschoben in die Ecke oben links und sortiert (Zeile, dann Spalte). */
+function normal(zellen) {
+  const mx = Math.min(...zellen.map(z => z[0])), my = Math.min(...zellen.map(z => z[1]));
+  return zellen.map(([x, y]) => [x - mx, y - my]).sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+}
+const schluessel = zellen => normal(zellen).map(z => z.join(",")).join(" ");
+const drehe = zellen => normal(zellen.map(([x, y]) => [-y, x]));      // Vierteldrehung
+const spiegle = zellen => normal(zellen.map(([x, y]) => [-x, y]));    // an einer senkrechten Achse
+
+/** Die acht Lagen: 0–3 gedreht, 4–7 gespiegelt und gedreht (mit Doppelten bei symmetrischen Teilen). */
+function lagen(zellen) {
+  const alle = [];
+  let z = normal(zellen);
+  for (let s = 0; s < 2; s++) { for (let d = 0; d < 4; d++) { alle.push(z); z = drehe(z); } z = spiegle(z); }
+  return alle;
+}
+/** Gleiche Form, wenn man drehen UND spiegeln darf (freies Polyomino). */
+const formSchluessel = z => lagen(z).map(schluessel).sort()[0];
+/** Gleiche Form, wenn man nur drehen darf. */
+const drehSchluessel = z => lagen(z).slice(0, 4).map(schluessel).sort()[0];
+/** Verschiedene Lagen (feste Polyominos) einer Form. */
+const verschiedeneLagen = z => [...new Map(lagen(z).map(l => [schluessel(l), l])).values()];
+const istChiral = z => drehSchluessel(z) !== drehSchluessel(spiegle(z));
+
+/** Alle freien Polyominos mit k Feldern — durch Anbauen eines Feldes an alle mit k − 1 Feldern. */
+function polyominos(k) {
+  let stufe = new Map([[formSchluessel([[0, 0]]), [[0, 0]]]]);
+  for (let n = 2; n <= k; n++) {
+    const neu = new Map();
+    for (const z of stufe.values()) for (const [x, y] of z) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const p = [x + dx, y + dy];
+      if (z.some(q => q[0] === p[0] && q[1] === p[1])) continue;
+      const w = normal([...z, p]);
+      const fk = formSchluessel(w);
+      if (!neu.has(fk)) neu.set(fk, w);
+    }
+    stufe = neu;
+  }
+  return [...stufe.values()];
+}
+const FORMEN = { 4: polyominos(4), 5: polyominos(5) }; // 5 Vierlinge, 12 Fünflinge
+
+// ---------- Stufen ----------
+// legen: teile = Anzahl Teile im Umriss; rechteck = mögliche Rechtecke [Breite, Höhe] (sonst freier
+// Umriss bis max); verschieden = jedes Teil nur einmal. luecke: Brett [Breite, Höhe].
+const STUFE = {
+  s1: { k: 4, arten: ["gleich", "luecke", "legen"], legen: { teile: 2, max: [4, 4], rechteck: [[4, 2], [2, 4]] }, luecke: [4, 4] },
+  s2: { k: 4, arten: ["legen", "legen", "luecke", "gleich"], legen: { teile: 3, max: [5, 5], rechteck: [[4, 3], [3, 4]] }, luecke: [5, 4] },
+  s3: { k: 5, arten: ["gleich", "luecke", "legen"], legen: { teile: 2, max: [5, 5], verschieden: true }, luecke: [5, 4] },
+  s4: { k: 5, arten: ["legen", "legen", "luecke"], legen: { teile: 3, max: [6, 6], rechteck: [[5, 3], [3, 5]], verschieden: true }, luecke: [6, 5] },
+  s5: { k: 5, arten: ["legen", "legen", "drehen"], legen: { teile: 4, max: [6, 6], rechteck: [[5, 4], [4, 5]], verschieden: true }, drehen: { spiegelbilder: 1 } },
+  s6: { k: 5, arten: ["legen", "legen", "drehen"], legen: { teile: 0, max: [6, 6], rechteck: [[5, 5], [6, 5], [5, 6]], nurRechteck: true, verschieden: true }, drehen: { spiegelbilder: 3 } },
+};
+
+const FARBEN = ["var(--deko-1)", "var(--deko-3)", "var(--deko-5)", "var(--deko-2)", "var(--deko-4)", "var(--deko-6)"];
+const fk = (x, y) => `${x},${y}`;
+
+/** Zufällige Kachelung eines Rechtecks (Rückverfolgung, Teile in zufälliger Reihenfolge). */
+function kachleRechteck(b, h, k, verschieden) {
+  const formen = FORMEN[k];
+  const lagenJeForm = formen.map(verschiedeneLagen);
+  for (let versuch = 0; versuch < 20; versuch++) {
+    const belegt = new Set();
+    const benutzt = new Set();
+    const loesung = [];
+    let schritte = 0;
+    const gehe = () => {
+      if (++schritte > 4000) return false;
+      let frei = null;
+      for (let y = 0; y < h && !frei; y++) for (let x = 0; x < b; x++) if (!belegt.has(fk(x, y))) { frei = [x, y]; break; }
+      if (!frei) return true;
+      for (const f of mische(formen.map((_, i) => i))) {
+        if (verschieden && benutzt.has(f)) continue;
+        for (const lage of mische(lagenJeForm[f])) {
+          // Das erste Feld der Lage (oben links) kommt auf das erste freie Feld.
+          const dx = frei[0] - lage[0][0], dy = frei[1] - lage[0][1];
+          const zellen = lage.map(([x, y]) => [x + dx, y + dy]);
+          if (!zellen.every(([x, y]) => x >= 0 && y >= 0 && x < b && y < h && !belegt.has(fk(x, y)))) continue;
+          zellen.forEach(([x, y]) => belegt.add(fk(x, y)));
+          benutzt.add(f);
+          loesung.push(zellen);
+          if (gehe()) return true;
+          loesung.pop();
+          benutzt.delete(f);
+          zellen.forEach(([x, y]) => belegt.delete(fk(x, y)));
+        }
+      }
+      return false;
+    };
+    if (gehe()) return loesung;
+  }
+  return null;
+}
+
+/** Hat die Fläche ein Loch (ein leeres Feld, das von aussen nicht erreichbar ist)? */
+function hatLoch(felder, b, h) {
+  const aussen = new Set();
+  const stapel = [[-1, -1]];
+  while (stapel.length) {
+    const [x, y] = stapel.pop();
+    const k = fk(x, y);
+    if (x < -1 || y < -1 || x > b || y > h || aussen.has(k) || felder.has(k)) continue;
+    aussen.add(k);
+    stapel.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+  }
+  return (b + 2) * (h + 2) - aussen.size !== felder.size;
+}
+
+/** Freier Umriss: Teile nacheinander so anlegen, dass sie an die bisherigen grenzen. */
+function freierUmriss(k, teile, [maxB, maxH], verschieden) {
+  for (let versuch = 0; versuch < 200; versuch++) {
+    const wahl = verschieden ? mische(FORMEN[k].map((_, i) => i)).slice(0, teile) : Array.from({ length: teile }, () => zufall(0, FORMEN[k].length - 1));
+    const belegt = new Set();
+    const loesung = [];
+    let ok = true;
+    for (const f of wahl) {
+      const lage = waehle(verschiedeneLagen(FORMEN[k][f]));
+      if (!loesung.length) { loesung.push(lage); lage.forEach(([x, y]) => belegt.add(fk(x, y))); continue; }
+      const plaetze = [];
+      for (let dx = -6; dx <= 6; dx++) for (let dy = -6; dy <= 6; dy++) {
+        const zellen = lage.map(([x, y]) => [x + dx, y + dy]);
+        if (zellen.some(([x, y]) => belegt.has(fk(x, y)))) continue;
+        if (!zellen.some(([x, y]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, c]) => belegt.has(fk(x + a, y + c))))) continue;
+        // Der Umriss bleibt in maxB × maxH (sonst passt er auf dem Handy nicht).
+        const alle = [...loesung.flat(), ...zellen];
+        const bb = Math.max(...alle.map(z => z[0])) - Math.min(...alle.map(z => z[0])) + 1;
+        const hh = Math.max(...alle.map(z => z[1])) - Math.min(...alle.map(z => z[1])) + 1;
+        if (bb > maxB || hh > maxH) continue;
+        plaetze.push(zellen);
+      }
+      const platz = plaetze.length ? waehle(plaetze) : null;
+      if (!platz) { ok = false; break; }
+      loesung.push(platz);
+      platz.forEach(([x, y]) => belegt.add(fk(x, y)));
+    }
+    if (!ok) continue;
+    const alle = loesung.flat();
+    const mx = Math.min(...alle.map(z => z[0])), my = Math.min(...alle.map(z => z[1]));
+    const verschoben = loesung.map(t => t.map(([x, y]) => [x - mx, y - my]));
+    const b = Math.max(...alle.map(z => z[0])) - mx + 1, h = Math.max(...alle.map(z => z[1])) - my + 1;
+    if (b > maxB || h > maxH) continue;
+    const felder = new Set(verschoben.flat().map(([x, y]) => fk(x, y)));
+    if (hatLoch(felder, b, h)) continue;
+    return { b, h, loesung: verschoben };
+  }
+  return null;
+}
+
+function legenAufgabe(p) {
+  const l = p.legen;
+  const rechteck = l.rechteck && (l.nurRechteck || Math.random() < 0.5);
+  let b, h, loesung;
+  if (rechteck) {
+    [b, h] = waehle(l.rechteck);
+    loesung = kachleRechteck(b, h, p.k, l.verschieden);
+  }
+  for (let v = 0; !loesung; v++) {
+    if (rechteck) loesung = kachleRechteck(b, h, p.k, l.verschieden);
+    else ({ b, h, loesung } = freierUmriss(p.k, l.teile, l.max, l.verschieden) || {});
+    if (v > 50) throw new Error("kein Umriss gefunden");
+  }
+  const felder = loesung.flat().map(([x, y]) => fk(x, y));
+  // Die Teile liegen unten in zufälliger Reihenfolge und Lage (auch gespiegelt).
+  const reihenfolge = mische(loesung.map((_, i) => i));
+  const teile = reihenfolge.map(i => waehle(verschiedeneLagen(loesung[i])));
+  const plaetze = reihenfolge.map(i => loesung[i]);
+  return { art: "legen", k: p.k, b, h, felder, teile, plaetze, rechteck: felder.length === b * h, verschieden: !!l.verschieden };
+}
+
+/** Eine Form in anderer Lage als 'lage' (falls sie mehr als eine Lage hat). */
+function andereLage(form, lage, nurDrehen = false) {
+  const kandidaten = (nurDrehen ? lagen(form).slice(0, 4) : verschiedeneLagen(form)).filter(l => schluessel(l) !== schluessel(lage));
+  return kandidaten.length ? waehle(kandidaten) : lage;
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  const formen = FORMEN[p.k];
+  if (art === "legen") return legenAufgabe(p);
+  if (art === "gleich") {
+    const [f, ...andere] = mische(formen.map((_, i) => i));
+    const vorlage = waehle(verschiedeneLagen(formen[f]));
+    const optionen = mische([andereLage(formen[f], vorlage), ...andere.slice(0, 3).map(i => waehle(verschiedeneLagen(formen[i])))]);
+    return { art, k: p.k, vorlage, optionen, richtig: optionen.findIndex(o => formSchluessel(o) === formSchluessel(vorlage)) };
+  }
+  if (art === "drehen") {
+    // Nur Teile ohne Drehsymmetrie: dann gibt es vier verschiedene Spiegelbild-Lagen.
+    const chirale = formen.filter(f => istChiral(f) && new Set(lagen(f).slice(0, 4).map(schluessel)).size === 4);
+    const form = waehle(chirale);
+    const vorlage = waehle(lagen(form).slice(0, 4));
+    const gedreht = andereLage(form, vorlage, true);
+    const bilder = mische(lagen(spiegle(vorlage)).slice(0, 4)).slice(0, p.drehen.spiegelbilder);
+    const fremde = mische(formen.filter(f => formSchluessel(f) !== formSchluessel(form))).slice(0, 3 - bilder.length).map(f => waehle(verschiedeneLagen(f)));
+    const optionen = mische([gedreht, ...bilder, ...fremde]);
+    return { art, k: p.k, vorlage, optionen, richtig: optionen.findIndex(o => schluessel(o) === schluessel(gedreht)) };
+  }
+  // luecke: ein Brett, in dem genau ein Teil fehlt
+  const [b, h] = p.luecke;
+  const [f, ...andere] = mische(formen.map((_, i) => i));
+  const lage = waehle(verschiedeneLagen(formen[f]).filter(l => l.every(([x, y]) => x < b && y < h)));
+  const lb =Math.max(...lage.map(z => z[0])) + 1, lh = Math.max(...lage.map(z => z[1])) + 1;
+  const dx = zufall(0, b - lb), dy = zufall(0, h - lh);
+  const luecke = lage.map(([x, y]) => [x + dx, y + dy]);
+  const optionen = mische([andereLage(formen[f], lage), ...andere.slice(0, 3).map(i => waehle(verschiedeneLagen(formen[i])))]);
+  return { art, k: p.k, b, h, luecke, optionen, richtig: optionen.findIndex(o => formSchluessel(o) === formSchluessel(lage)) };
+}
+
+/** Zusammenhängend über Kanten? */
+function zusammenhaengend(zellen) {
+  const menge = new Set(zellen.map(([x, y]) => fk(x, y)));
+  const gesehen = new Set([fk(...zellen[0])]);
+  const stapel = [zellen[0]];
+  while (stapel.length) {
+    const [x, y] = stapel.pop();
+    for (const [a, c] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const k = fk(x + a, y + c);
+      if (menge.has(k) && !gesehen.has(k)) { gesehen.add(k); stapel.push([x + a, y + c]); }
+    }
+  }
+  return gesehen.size === menge.size;
+}
+
+/** Mängel einer Aufgabe — rechnerisch nachgeprüft, nicht gegen eine Tabelle. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (FORMEN[4].length !== 5 || FORMEN[5].length !== 12) m.push("falsche Anzahl Vierlinge/Fünflinge");
+  if (a.k !== p.k) m.push("falsche Teilgrösse für die Stufe");
+  const istTeil = z => z.length === a.k && zusammenhaengend(z) && new Set(z.map(q => q.join(","))).size === a.k;
+  if (a.art === "legen") {
+    if (a.b > p.legen.max[0] || a.h > p.legen.max[1]) m.push("Umriss zu gross für 375 px");
+    if (p.legen.teile && !a.rechteck && a.teile.length !== p.legen.teile) m.push("falsche Anzahl Teile");
+    if (a.teile.length !== a.plaetze.length) m.push("Teile und Lösung passen nicht zusammen");
+    const region = new Set(a.felder);
+    if (region.size !== a.felder.length) m.push("doppelte Felder im Umriss");
+    if (a.rechteck && (region.size !== a.b * a.h || !p.legen.rechteck?.some(([b, h]) => b === a.b && h === a.h))) m.push("Rechteck stimmt nicht");
+    if (p.legen.nurRechteck && !a.rechteck) m.push("Königsstufe ohne Rechteck");
+    if (!a.rechteck && hatLoch(region, a.b, a.h)) m.push("Umriss mit Loch");
+    const gelegt = new Set();
+    a.plaetze.forEach((platz, i) => {
+      if (!istTeil(platz) || !istTeil(a.teile[i])) m.push("kein gültiges Teil");
+      // Der Platz ist das Teil i, gedreht oder gespiegelt
+      if (formSchluessel(platz) !== formSchluessel(a.teile[i])) m.push("Lösung legt ein anderes Teil");
+      for (const [x, y] of platz) {
+        const k = fk(x, y);
+        if (!region.has(k)) m.push("Lösung ragt aus dem Umriss");
+        if (gelegt.has(k)) m.push("Lösung überlappt");
+        gelegt.add(k);
+      }
+    });
+    if (gelegt.size !== region.size) m.push("Lösung deckt den Umriss nicht ganz");
+    if (a.verschieden && new Set(a.teile.map(formSchluessel)).size !== a.teile.length) m.push("Teil doppelt");
+    return m;
+  }
+  if (a.optionen.length !== 4) m.push("nicht vier Antworten");
+  if (!a.optionen.every(istTeil)) m.push("Antwort ist kein gültiges Teil");
+  if (new Set(a.optionen.map(schluessel)).size !== a.optionen.length) m.push("doppelte Antworten");
+  if (a.art === "gleich" || a.art === "luecke") {
+    const ziel = formSchluessel(a.art === "gleich" ? a.vorlage : a.luecke);
+    const treffer = a.optionen.map((o, i) => (formSchluessel(o) === ziel ? i : -1)).filter(i => i >= 0);
+    if (treffer.length !== 1 || treffer[0] !== a.richtig) m.push("nicht genau eine passende Form");
+    if (new Set(a.optionen.map(formSchluessel)).size !== 4) m.push("zwei Antworten mit gleicher Form");
+    const vorlage = a.art === "gleich" ? a.vorlage : a.luecke;
+    if (verschiedeneLagen(vorlage).length > 1 && schluessel(a.optionen[a.richtig]) === schluessel(vorlage)) m.push("richtige Antwort in derselben Lage");
+    if (a.art === "luecke") {
+      if (!istTeil(a.luecke)) m.push("Lücke ist kein Teil");
+      if (a.luecke.some(([x, y]) => x < 0 || y < 0 || x >= a.b || y >= a.h)) m.push("Lücke ausserhalb des Bretts");
+    }
+  }
+  if (a.art === "drehen") {
+    if (!istChiral(a.vorlage)) m.push("symmetrisches Teil: Spiegelbild wäre auch richtig");
+    if (new Set(lagen(a.vorlage).slice(0, 4).map(schluessel)).size !== 4) m.push("Teil mit Drehsymmetrie");
+    const ziel = drehSchluessel(a.vorlage);
+    const treffer = a.optionen.map((o, i) => (drehSchluessel(o) === ziel ? i : -1)).filter(i => i >= 0);
+    if (treffer.length !== 1 || treffer[0] !== a.richtig) m.push("nicht genau ein gedrehtes Teil");
+    if (schluessel(a.optionen[a.richtig]) === schluessel(a.vorlage)) m.push("richtige Antwort nicht gedreht");
+    const spiegel = a.optionen.filter(o => drehSchluessel(o) === drehSchluessel(spiegle(a.vorlage))).length;
+    if (spiegel !== p.drehen.spiegelbilder) m.push("falsche Zahl Spiegelbilder");
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+/** Ein Teil als SVG (Felder der Grösse g). */
+function teilSvg(zellen, farbe, g = 13) {
+  const b = Math.max(...zellen.map(z => z[0])) + 1, h = Math.max(...zellen.map(z => z[1])) + 1;
+  const rechtecke = zellen.map(([x, y]) => `<rect x="${x * g + 1}" y="${y * g + 1}" width="${g - 2}" height="${g - 2}" rx="2" fill="${farbe}"/>`).join("");
+  return el("span", { html: `<svg viewBox="0 0 ${b * g} ${h * g}" width="${b * g}" height="${h * g}" aria-hidden="true">${rechtecke}</svg>` });
+}
+
+const zellGroesse = b => `min(56px, calc((100vw - 52px - ${(b - 1) * 3}px) / ${b}))`;
+
+function auswahlAufgabe(ctx, a) {
+  const LOESUNG = `Es ist das ${a.richtig + 1}. Teil von links.`;
+  const frage = {
+    gleich: "Welches Teil hat <b>dieselbe Form</b>? Es darf gedreht oder gespiegelt sein.",
+    luecke: "Welches Teil passt genau in die <b>Lücke</b>?",
+    drehen: "Welches Teil ist dasselbe, nur <b>gedreht</b>? Spiegeln (umklappen) gilt hier nicht!",
+  }[a.art];
+  ctx.flaeche.append(el("div", { class: "frage", html: frage }));
+  if (a.art === "luecke") {
+    const brett = el("div", { class: "brett", "aria-label": "Brett mit Lücke" });
+    brett.style.gridTemplateColumns = `repeat(${a.b}, auto)`;
+    brett.style.setProperty("--z", zellGroesse(a.b));
+    const loch = new Set(a.luecke.map(([x, y]) => fk(x, y)));
+    for (let y = 0; y < a.h; y++) for (let x = 0; x < a.b; x++) brett.append(el("div", { class: "feld " + (loch.has(fk(x, y)) ? "luecke" : "voll") }));
+    ctx.flaeche.append(brett);
+    ctx.kennung("luecke|" + schluessel(a.luecke) + "|" + a.luecke[0].join(","));
+  } else {
+    ctx.flaeche.append(el("div", { class: "vorlage-teil" }, teilSvg(a.vorlage, "var(--deko-6)", 26)));
+    ctx.kennung(a.art + "|" + schluessel(a.vorlage));
+  }
+  const box = LS.auswahl(ctx, {
+    optionen: a.optionen.map((_, i) => i),
+    richtig: a.richtig,
+    inhalt: i => teilSvg(a.optionen[i], "var(--deko-3)", 13),
+    breite: 70,
+    loesung: LOESUNG,
+    hinweis: a.art === "drehen"
+      ? "Dieses Teil bekommst du nur durch Umklappen. Dreh das Teil im Kopf Schritt für Schritt."
+      : "Diese Form ist anders. Zähl die Felder in jeder Reihe und dreh das Teil im Kopf.",
+  });
+  box.classList.add("pento-wahl");
+}
+
+function legen(ctx, a) {
+  const n = a.teile.length;
+  const loesungsKarte = [];
+  for (let y = 0; y < a.h; y++) {
+    const zeile = [];
+    for (let x = 0; x < a.b; x++) {
+      const i = a.plaetze.findIndex(pl => pl.some(([px, py]) => px === x && py === y));
+      zeile.push(i < 0 ? "·" : String(i + 1));
+    }
+    loesungsKarte.push(zeile.join(""));
+  }
+  const LOESUNG = `So passen alle Teile (Zahl = Teil von links): ${loesungsKarte.join(" / ")}`;
+  ctx.loesung(LOESUNG);
+  ctx.kennung("legen|" + [...a.felder].sort().join(" ") + "|" + a.teile.map(formSchluessel).sort().join("/"));
+
+  ctx.flaeche.append(el("div", { class: "frage", html: `Lege alle ${n} Teile so, dass der Umriss <b>ganz voll</b> ist.` }));
+  const region = new Set(a.felder);
+  const brett = el("div", { class: "brett" });
+  brett.style.gridTemplateColumns = `repeat(${a.b}, auto)`;
+  brett.style.setProperty("--z", zellGroesse(a.b));
+  const zellen = {};
+  const belegt = new Map();          // Feld → Teil
+  const gelegt = new Map();          // Teil → Felder
+  const lage = a.teile.map(t => t);  // aktuelle Lage je Teil (unten im Vorrat)
+  let gewaehlt = 0;
+  let fertig = false;
+
+  for (let y = 0; y < a.h; y++) for (let x = 0; x < a.b; x++) {
+    const k = fk(x, y);
+    if (!region.has(k)) { brett.append(el("div", { class: "leer" })); continue; }
+    const z = el("button", { type: "button", class: "feld", "aria-label": `Feld Zeile ${y + 1}, Spalte ${x + 1}`, onclick: () => tippe(x, y) });
+    zellen[k] = z;
+    brett.append(z);
+  }
+  const vorrat = el("div", { class: "teile" });
+  const drehKnopf = el("button", { type: "button", class: "knopf hell klein", text: "⟳ Drehen", onclick: () => veraendere(drehe) });
+  const spiegelKnopf = el("button", { type: "button", class: "knopf hell klein", text: "⇋ Spiegeln", onclick: () => veraendere(spiegle) });
+  const neuKnopf = el("button", { type: "button", class: "knopf hell klein", text: "↺ Alles zurück", onclick: () => { if (fertig) return; [...gelegt.keys()].forEach(nimmWeg); gewaehlt = 0; zeichne(); } });
+  const tippKnopf = el("button", { type: "button", class: "knopf hell klein", text: "💡 Tipp", onclick: hilfe });
+  ctx.flaeche.append(brett, vorrat, el("div", { class: "werkzeug" }, drehKnopf, spiegelKnopf, neuKnopf, tippKnopf));
+
+  function zeichne() {
+    for (const [k, z] of Object.entries(zellen)) {
+      const i = belegt.get(k);
+      z.classList.toggle("belegt", i !== undefined);
+      if (i !== undefined) z.style.setProperty("--f", FARBEN[i % FARBEN.length]);
+    }
+    vorrat.innerHTML = "";
+    for (let i = 0; i < n; i++) {
+      if (gelegt.has(i)) continue;
+      const t = el("button", { type: "button", class: "teil" + (i === gewaehlt ? " teil-aktiv" : ""), "aria-label": `Teil ${i + 1}`,
+        onclick: () => { if (fertig) return; gewaehlt = i; LS.ton("tipp"); zeichne(); } }, teilSvg(lage[i], FARBEN[i % FARBEN.length], 14));
+      vorrat.append(t);
+    }
+    const offen = gewaehlt !== null && !gelegt.has(gewaehlt);
+    drehKnopf.disabled = spiegelKnopf.disabled = !offen || fertig;
+  }
+
+  function veraendere(fn) {
+    if (fertig || gewaehlt === null || gelegt.has(gewaehlt)) return;
+    lage[gewaehlt] = fn(lage[gewaehlt]);
+    LS.ton("tipp");
+    zeichne();
+  }
+
+  function lege(i, felder) {
+    felder.forEach(([x, y]) => belegt.set(fk(x, y), i));
+    gelegt.set(i, felder);
+    lage[i] = normal(felder);
+  }
+  function nimmWeg(i) {
+    for (const [x, y] of gelegt.get(i) || []) belegt.delete(fk(x, y));
+    gelegt.delete(i);
+  }
+  const naechstesOffenes = () => { for (let i = 0; i < n; i++) if (!gelegt.has(i)) return i; return null; };
+  const voll = () => belegt.size === region.size;
+
+  function tippe(x, y) {
+    if (fertig) return;
+    const k = fk(x, y);
+    if (belegt.has(k)) { // gelegtes Teil zurück in den Vorrat
+      const i = belegt.get(k);
+      nimmWeg(i);
+      gewaehlt = i;
+      LS.ton("tipp");
+      zeichne();
+      return;
+    }
+    if (gewaehlt === null) { ctx.sag("Tipp zuerst unten ein Teil an.", "hinweis"); return; }
+    // Das Teil so legen, dass es das angetippte Feld deckt — möglichst mit seiner Mitte dort.
+    const t = lage[gewaehlt];
+    const mx = t.reduce((s, z) => s + z[0], 0) / t.length, my = t.reduce((s, z) => s + z[1], 0) / t.length;
+    let beste = null;
+    for (const [qx, qy] of t) {
+      const felder = t.map(([a1, b1]) => [a1 + x - qx, b1 + y - qy]);
+      if (!felder.every(([fx, fy]) => region.has(fk(fx, fy)) && !belegt.has(fk(fx, fy)))) continue;
+      const d = (qx - mx) ** 2 + (qy - my) ** 2;
+      if (!beste || d < beste.d) beste = { felder, d };
+    }
+    if (!beste) { ctx.sag("So passt das Teil hier nicht. Dreh oder spiegle es – oder probier eine andere Stelle.", "hinweis"); return; }
+    lege(gewaehlt, beste.felder);
+    LS.ton("huepf");
+    gewaehlt = naechstesOffenes();
+    zeichne();
+    if (voll()) { fertig = true; zeichne(); ctx.richtig(); }
+  }
+
+  /** Ein Teil der Lösung richtig hinlegen (Teile mit gleicher Form zählen gleich). */
+  function legeEinRichtiges() {
+    const gleich = (i, platz) => formSchluessel(lage[i]) === formSchluessel(platz);
+    const ort = felder => felder.map(z => z.join(",")).sort().join(" ");
+    // Ein Platz ist erledigt, wenn genau dort ein Teil liegt (es hat dann dieselbe Form).
+    const liegtDa = platz => { const i = belegt.get(fk(...platz[0])); return i !== undefined && ort(gelegt.get(i)) === ort(platz); };
+    const j = a.plaetze.findIndex(pl => !liegtDa(pl));
+    if (j < 0) return;
+    const platz = a.plaetze[j];
+    const gut = new Set(a.plaetze.filter(liegtDa).map(pl => belegt.get(fk(...pl[0]))));
+    let i = [...Array(n).keys()].find(t => !gelegt.has(t) && gleich(t, platz));
+    if (i === undefined) i = [...gelegt.keys()].find(t => !gut.has(t) && gleich(t, platz));
+    for (const [x, y] of platz) { const w = belegt.get(fk(x, y)); if (w !== undefined) nimmWeg(w); }
+    if (gelegt.has(i)) nimmWeg(i);
+    lege(i, platz);
+  }
+
+  function hilfe() {
+    if (fertig) return;
+    ctx.falsch("Ein Teil liegt jetzt am richtigen Platz. Schaffst du den Rest?", LOESUNG);
+    if (ctx.vorbei()) { // aufgelöst: die ganze Lösung zeigen
+      fertig = true;
+      [...gelegt.keys()].forEach(nimmWeg);
+      a.plaetze.forEach((pl, i) => lege(i, pl));
+      zeichne();
+      return;
+    }
+    legeEinRichtiges();
+    gewaehlt = naechstesOffenes();
+    zeichne();
+    if (voll()) { fertig = true; zeichne(); ctx.richtig("Jetzt passt alles!"); }
+  }
+
+  zeichne();
+  if (ctx.nr === 0) ctx.sag("Tipp ein Teil an, dreh oder spiegle es und tipp dann ins Feld. Ein gelegtes Teil nimmst du mit Antippen wieder weg.");
+}
+
+LS.spiel({
+  id: "pentomino-puzzle",
+  einleitung: "Puzzle-Zeit! Leg die Teile in den Umriss – du darfst sie drehen und spiegeln.",
+  anzahl: 6,
+  stufen: {
+    s1: "Vierlinge: gleiche Formen finden und zwei Teile legen.",
+    s2: "Drei Vierlinge in einen Umriss legen.",
+    s3: "Fünflinge (Pentominos): Formen finden und zwei Teile legen.",
+    s4: "Drei Pentominos legen, auch in Rechtecke.",
+    s5: "Vier Pentominos parkettieren; gedreht oder gespiegelt?",
+    s6: "Endgegner: fünf oder sechs Pentominos ins Rechteck, Spiegelbilder erkennen.",
+  },
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "legen") legen(ctx, a); else auswahlAufgabe(ctx, a);
+  },
+});
+</script>
+</body>
+</html>

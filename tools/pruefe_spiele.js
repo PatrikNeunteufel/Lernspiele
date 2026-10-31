@@ -48,7 +48,7 @@ function skripte(seitenPfad, html) {
 
 // Treiber im Kontext: Runden spielen, bis opt.runden protokolliert sind oder die Klicks ausgehen.
 const TREIBER = `
-(function treiber(runden, maxKlicks) {
+(function treiber(runden, maxKlicks, endlos) {
   const buehne = document.querySelector(".buehne");
   const funde = [];
   // Je Fund nur einmal melden (Schlüssel: der gefundene Ausschnitt, nicht der Klick davor).
@@ -63,7 +63,8 @@ const TREIBER = `
     const stelle = t.slice(Math.max(0, m.index - 60), m.index + 40).replace(/\\s+/g, " ");
     melde("Text", wo + ": «" + stelle + "»", stelle);
   };
-  const protokoll = () => JSON.parse(localStorage.getItem("lernspiele:protokoll") || "[]");
+  // Endlos-Runden landen als Rekord, nicht im Protokoll.
+  const protokoll = () => JSON.parse(localStorage.getItem(endlos ? "lernspiele:rekorde" : "lernspiele:protokoll") || "[]");
   // Verrät ein Hinweis die Lösung? Die Lösung ist der Text des Knopfs, dessen Klick die Aufgabe
   // löst (bei Zifferntastaturen das Ergebnis hinter dem letzten „=“ des Lösungstexts); geprüft
   // werden alle Hinweise davor in derselben Aufgabe. Kein Verrat ist es, wenn die Lösung schon in
@@ -86,6 +87,7 @@ const TREIBER = `
   LS.pruefung.haken = (art, a) => {
     // Neue Aufgabe: Hinweise einer übersprungenen Aufgabe mit derselben Nummer vergessen.
     if (art === "aufgabe") { hinweise.delete(a.nr); return; }
+    if (art === "gestellt" && endlos) return; // Endlos: eigene Regel (keine der letzten 30)
     if (art === "gestellt") {
       if (a.nr === 0) { gestellt = new Map(); letzte = null; }
       if (!a.kennung) return;
@@ -130,7 +132,7 @@ const TREIBER = `
       && !b.closest(".testhilfe"));
     if (!knoepfe.length) { __uhr.weiter(2000); if (++ohneFortschritt > 50) { melde("Hänger", "keine Knöpfe mehr"); break; } continue; }
     // Weiter- und Nochmal-Knöpfe bevorzugen, damit die Runde vorankommt; selten eine Testhilfe.
-    const vor = knoepfe.filter(b => /Weiter|Nochmal|Prüfen|OK/.test(b.textContent));
+    const vor = knoepfe.filter(b => /Weiter|Nochmal|Prüfen|OK|Ergebnis/.test(b.textContent));
     const hilfe = buehne.querySelectorAll(".testhilfe button");
     const k = hilfe.length && Math.random() < 0.03 ? hilfe[Math.floor(Math.random() * hilfe.length)]
       : vor.length && Math.random() < 0.4 ? vor[Math.floor(Math.random() * vor.length)] : knoepfe[Math.floor(Math.random() * knoepfe.length)];
@@ -145,6 +147,7 @@ const TREIBER = `
     letzterText = jetzt;
   }
   for (const e of protokoll()) {
+    if (endlos) { if (!Number.isInteger(e.punkte) || e.punkte < 0 || !Number.isFinite(e.dauer)) melde("Rekord", JSON.stringify(e).slice(0, 160)); continue; }
     if (!(e.sterne >= 1 && e.sterne <= 3) || !Number.isFinite(e.fehler) || !Number.isFinite(e.dauer)) melde("Protokoll", JSON.stringify(e).slice(0, 160));
     for (const f of e.fehlerAufgaben || []) if (${VERDAECHTIG}.test(f.text + " " + f.loesung)) melde("Protokoll", "Fehleraufgabe: " + (f.text + " → " + f.loesung).slice(0, 160));
   }
@@ -190,11 +193,11 @@ function rahmenKlassenImStil(html, reserviert) {
  * Kind, für das nur dieses Spiel und nur diese Listen freigegeben sind (Entscheid L4 a); bietet das
  * Spiel die Stufe dann nicht an, ist das kein Fehler (ergebnis.angeboten = false).
  */
-function pruefe(id, stufe, liste = null) {
+function pruefe(id, stufe, liste = null, endlos = false) {
   const seitenPfad = path.join(SPIELE_DIR, id, "index.html");
   const html = fs.readFileSync(seitenPfad, "utf8");
   const body = (html.match(/<body[^>]*>([\s\S]*)<\/body>/) || [, html])[1].replace(/<script[\s\S]*?<\/script>/g, "");
-  const kontext = vm.createContext({ __seite: { html: body, search: "?stufe=" + stufe, seed: opt.seed }, console, URL, URLSearchParams, structuredClone });
+  const kontext = vm.createContext({ __seite: { html: body, search: "?stufe=" + stufe + (endlos ? "&endlos=1" : ""), seed: opt.seed }, console, URL, URLSearchParams, structuredClone });
   const ergebnis = { id, stufe, fehler: [], hinweise: [], angeboten: true };
   const lauf = (code, name, ms) => vm.runInContext(code, kontext, { filename: name, timeout: ms });
   try {
@@ -219,7 +222,7 @@ function pruefe(id, stufe, liste = null) {
       ergebnis.generator = gen;
       for (const f of gen.funde) ergebnis.fehler.push("Generator: " + f);
     }
-    const t = lauf(TREIBER, "treiber", 60000)(opt.runden, opt.maxKlicks);
+    const t = lauf(TREIBER, "treiber", 60000)(opt.runden, opt.maxKlicks, endlos);
     ergebnis.runden = t.runden;
     ergebnis.klicks = t.klicks;
     for (const f of t.funde) (f.art === "Hänger" ? ergebnis.hinweise : ergebnis.fehler).push(`${f.art}: ${f.text}`);
@@ -251,6 +254,25 @@ for (const id of ids) {
     fehlerZahl += e.fehler.length;
   }
 }
+// Endlos-Modus: je Spiel und Stufe mit endlos im Katalog einige Endlos-Runden (--endlos=0 schaltet ab).
+if (opt.endlos !== 0) {
+  const kat = vm.createContext({ LS: { SKALA: [] } });
+  vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", "katalog.js"), "utf8") + ";this.SPIELE = SPIELE;", kat);
+  const mitEndlos = kat.SPIELE.filter(s => s.endlos && ids.includes(s.id));
+  if (mitEndlos.length) console.log(`\nEndlos-Modus (${mitEndlos.length} Spiele):\n`);
+  for (const s of mitEndlos) {
+    const zeile = [];
+    for (const stufe of s.endlos) {
+      const e = pruefe(s.id, stufe, null, true);
+      for (const f of e.fehler) console.log(`    FEHLER  ${s.id} ${stufe} endlos: ${f}`);
+      for (const h of e.hinweise) if (!/^nur \d+ von/.test(h)) console.log(`    hinweis ${s.id} ${stufe} endlos: ${h}`);
+      fehlerZahl += e.fehler.length;
+      zeile.push(`${stufe}:${e.runden ?? "-"}`);
+    }
+    console.log(`♾ ${s.id.padEnd(24)} ${zeile.join(" ")}`);
+  }
+}
+
 // Als Kind: je Spiel mit Inhaltslisten (Katalog) jede Liste einzeln freigegeben.
 if (opt.kind !== 0) {
   const katalog = vm.createContext({ LS: { SKALA: [] } });

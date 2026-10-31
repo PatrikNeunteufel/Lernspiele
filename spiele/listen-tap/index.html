@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listen &amp; Tap</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(17px, 3.8vw, 22px); font-weight: 800; margin: 2px 0 10px; color: var(--text-leise); }
+  .lt-hoer { display: block; margin: 0 auto 14px; border: none; border-radius: 999px; padding: 12px 26px; font-family: inherit;
+    font-size: clamp(20px, 4.4vw, 26px); font-weight: 900; background: var(--deko-5); color: #fff; box-shadow: 0 5px 0 var(--deko-7); cursor: pointer; }
+  .lt-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-7); }
+  .lt-wahl .wahl-knopf .bild { font-size: clamp(42px, 10vw, 58px); }
+  .lt-wahl .wahl-knopf { min-height: 96px; }
+  /* Gezeichnete Szene: Tier und Tisch oder Kiste */
+  .lt-szene { position: relative; display: block; width: 110px; height: 90px; }
+  .lt-ding { position: absolute; }
+  .lt-tier { position: absolute; font-size: 30px; line-height: 1; left: 40px; z-index: 1; }
+  .lt-table .lt-ding { left: 20px; width: 70px; top: 40px; height: 8px; background: var(--deko-7); border-radius: 3px; }
+  .lt-table .lt-ding::before, .lt-table .lt-ding::after { content: ""; position: absolute; top: 8px; width: 6px; height: 40px; background: var(--deko-7); }
+  .lt-table .lt-ding::before { left: 4px; }
+  .lt-table .lt-ding::after { right: 4px; }
+  .lt-table.lt-on .lt-tier { top: 9px; }
+  .lt-table.lt-under .lt-tier { top: 56px; }
+  .lt-table.lt-next-to .lt-ding { left: 4px; width: 58px; }
+  .lt-table.lt-next-to .lt-tier { left: 74px; top: 58px; }
+  .lt-box .lt-ding { left: 28px; width: 54px; top: 50px; height: 38px; background: var(--deko-3); border-radius: 4px; z-index: 2; }
+  .lt-box.lt-in .lt-tier { top: 30px; }
+  .lt-box.lt-on .lt-tier { top: 19px; }
+  .lt-box.lt-next-to .lt-ding { left: 6px; }
+  .lt-box.lt-next-to .lt-tier { left: 70px; top: 58px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>👂 Listen &amp; Tap</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../word-match/woerter.js"></script>
+<script src="hoeren.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS1E.1.A.1: a vertraute Wörter verstehen, b einfache Anleitungen verstehen (mit Bild
+// oder Gestik), c kurze, einfache Sätze verstehen. Gehört wird über die Stimme des Geräts.
+// Basisklasse 4 (Orientierungspunkt 2. Zyklus). Einzelwörter aus word-match/woerter.js, Sätze in hoeren.js.
+
+const { waehle, mische, el } = LS;
+const ID = "listen-tap";
+
+// Freigabe (Entscheid L4 a): Die Wortlisten von Word-Match (Verweis im Katalog, gleiche Ids) und zwei
+// eigene. Kennt der Katalog die Listen des Spiels noch nicht, gilt alles als frei. Wetter fehlt mit
+// Absicht (höchstens acht Listen je Spiel).
+const WM_THEMEN = ["farben", "tiere", "zahlen", "essen", "familie", "koerper", "schule"];
+const LISTEN = [...new Set(WM_THEMEN.map(t => THEMEN_EN[t].liste)), ...HOER_LISTEN];
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : LISTEN);
+const ALLE_VERBEN = ANWEISUNG_VERBEN;
+
+/** "cat|table|under" ↔ Teile einer Szene. */
+const ort = (tier, ding, praep) => `${tier}|${ding}|${praep}`;
+const teile = schluessel => schluessel.split("|");
+const TIER_BILD = Object.fromEntries(WO_TIERE);
+
+// Jede Art liefert null, wenn die freien Listen für sie nicht genug hergeben.
+const ARTEN = {
+  /** Ein Wort hören → Bild aus demselben Thema antippen. */
+  wort(themen, n) {
+    const frei = themen.filter(t => FREI.has(THEMEN_EN[t].liste) && THEMEN_EN[t].woerter.length >= n);
+    if (!frei.length) return null;
+    const themaId = waehle(frei);
+    const woerter = THEMEN_EN[themaId].woerter;
+    const [en, de, bild] = waehle(woerter);
+    const andere = mische(woerter.filter(w => w[0] !== en)).slice(0, n - 1).map(w => w[2]);
+    return { art: "wort", themaId, sprich: en, richtig: bild, optionen: mische([bild, ...andere]), loesung: `${bild} ${en} = ${de}` };
+  },
+  /** „Touch the red heart.“ — unter den Bildern dieselbe Farbe in anderer Form und dieselbe Form in anderer Farbe. */
+  anweisung(n, verben) {
+    if (!FREI.has("anweisungen")) return null;
+    const farben = Object.keys(ANWEISUNG_FARBEN);
+    const bild = (f, i) => ANWEISUNG_FARBEN[f][i];
+    const farbe = waehle(farben);
+    const form = LS.zufall(0, ANWEISUNG_FORMEN.length - 1);
+    const andereFarbe = waehle(farben.filter(f => f !== farbe));
+    const andereForm = waehle([0, 1, 2].filter(i => i !== form));
+    const pflicht = [bild(farbe, form), bild(farbe, andereForm), bild(andereFarbe, form)];
+    const rest = mische(farben.flatMap(f => [0, 1, 2].map(i => bild(f, i))).filter(b => !pflicht.includes(b))).slice(0, n - 3);
+    const text = `${waehle(verben)} ${farbe} ${ANWEISUNG_FORMEN[form]}.`;
+    return { art: "anweisung", farbe, form: ANWEISUNG_FORMEN[form], sprich: text, richtig: pflicht[0], optionen: mische([...pflicht, ...rest]),
+      loesung: `„${text}“ → ${pflicht[0]}` };
+  },
+  /** „The cat is under the table.“ — gleichesTier: nur der Ort ändert sich; sonst auch das Tier. */
+  wo(n, gleichesTier) {
+    if (!FREI.has("wo-ist")) return null;
+    const [tier] = waehle(WO_TIERE);
+    const [ding, praep] = waehle(WO_ORTE);
+    const richtig = ort(tier, ding, praep);
+    const alle = WO_TIERE.flatMap(([t]) => WO_ORTE.map(([d, p]) => ort(t, d, p)));
+    let andere;
+    if (gleichesTier) andere = mische(WO_ORTE.map(([d, p]) => ort(tier, d, p)).filter(o => o !== richtig)).slice(0, n - 1);
+    else {
+      // mindestens: gleiches Tier an anderem Ort und anderes Tier am gleichen Ort
+      const gleicherOrt = ort(waehle(WO_TIERE.filter(([t]) => t !== tier))[0], ding, praep);
+      const gleichesT = waehle(WO_ORTE.map(([d, p]) => ort(tier, d, p)).filter(o => o !== richtig));
+      const rest = mische(alle.filter(o => ![richtig, gleicherOrt, gleichesT].includes(o))).slice(0, n - 3);
+      andere = [gleicherOrt, gleichesT, ...rest];
+    }
+    const text = `The ${tier} is ${praep} the ${ding}.`;
+    return { art: "wo", sprich: text, richtig, optionen: mische([richtig, ...andere]), gleichesTier, loesung: `„${text}“` };
+  },
+};
+
+// Je Stufe die Arten. Basisklasse 4: s1 = 3. Klasse, s5 = 5. Klasse.
+const STUFE = {
+  s1: [() => ARTEN.wort(["farben", "tiere", "zahlen"], 4)],
+  s2: [() => ARTEN.wort(WM_THEMEN, 4)],
+  s3: [() => ARTEN.anweisung(4, ALLE_VERBEN.slice(0, 1)), () => ARTEN.wort(WM_THEMEN, 4)],
+  s4: [() => ARTEN.wo(4, true), () => ARTEN.anweisung(4, ALLE_VERBEN.slice(0, 1))],
+  s5: [() => ARTEN.wo(4, false), () => ARTEN.anweisung(6, ALLE_VERBEN)],
+  // Königsstufe: sechs Bilder, Tier und Ort ändern sich, alle Anweisungen, Wörter aus allen Themen
+  s6: [() => ARTEN.wo(6, false), () => ARTEN.anweisung(6, ALLE_VERBEN), () => ARTEN.wort(WM_THEMEN, 6)],
+};
+
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Ein Wort hören: Farben, Tiere, Zahlen.",
+  s2: "Mehr Wörter: Essen, Familie, Körper, Schule.",
+  s3: "Kleine Anweisungen: „Touch the red heart.“",
+  s4: "Wo ist das Tier? „The cat is under the table.“",
+  s5: "Welches Tier, welcher Ort? Dazu „Point to …“, „Find …“.",
+  s6: "Endgegner: sechs Bilder, Sätze und Anweisungen gemischt.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+  if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Möglichkeit");
+  const n = { s1: 4, s2: 4, s3: 4, s4: 4, s5: a.art === "wo" ? 4 : 6, s6: 6 }[stufe];
+  if (a.optionen.length !== n) m.push(`${a.optionen.length} statt ${n} Bilder`);
+  if (a.art === "wort") {
+    const thema = THEMEN_EN[a.themaId];
+    if (!FREI.has(thema.liste)) m.push("Wort nicht aus einer freien Liste");
+    const w = thema.woerter.find(x => x[0] === a.sprich);
+    if (!w || w[2] !== a.richtig) m.push("Bild passt nicht zum Wort");
+    if (a.optionen.some(o => !thema.woerter.some(x => x[2] === o))) m.push("Bild nicht aus dem Thema");
+    if (stufe === "s1" && !["farben", "tiere", "zahlen"].includes(a.themaId)) m.push("Thema nicht in Stufe 1");
+  } else if (a.art === "anweisung") {
+    if (!FREI.has("anweisungen")) m.push("Anweisung nicht aus einer freien Liste");
+    if (ANWEISUNG_FARBEN[a.farbe]?.[ANWEISUNG_FORMEN.indexOf(a.form)] !== a.richtig) m.push("Bild passt nicht zur Anweisung");
+    if (!a.sprich.endsWith(` ${a.farbe} ${a.form}.`)) m.push("gesprochener Text passt nicht");
+    const farbeVon = b => Object.keys(ANWEISUNG_FARBEN).find(f => ANWEISUNG_FARBEN[f].includes(b));
+    const formVon = b => ANWEISUNG_FARBEN[farbeVon(b)].indexOf(b);
+    if (!a.optionen.some(o => o !== a.richtig && farbeVon(o) === a.farbe) || !a.optionen.some(o => o !== a.richtig && formVon(o) === formVon(a.richtig)))
+      m.push("es fehlt ein Bild mit gleicher Farbe oder gleicher Form");
+    if (["s3", "s4"].includes(stufe) && !a.sprich.startsWith(ALLE_VERBEN[0])) m.push("Anweisung zu schwer für die Stufe");
+  } else {
+    if (!FREI.has("wo-ist")) m.push("Satz nicht aus einer freien Liste");
+    const [tier, ding, praep] = teile(a.richtig);
+    if (a.sprich !== `The ${tier} is ${praep} the ${ding}.`) m.push("gesprochener Satz passt nicht zum Bild");
+    if (a.optionen.some(o => { const [t, d, p] = teile(o); return !TIER_BILD[t] || !WO_ORTE.some(x => x[0] === d && x[1] === p); })) m.push("unbekannte Szene");
+    if (stufe === "s4" && a.optionen.some(o => teile(o)[0] !== tier)) m.push("Stufe 4: nur ein Tier");
+  }
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  return m;
+}
+
+/** Inhalt eines Antwortknopfs: Emoji oder gezeichnete Szene. */
+function bildInhalt(a, wert) {
+  if (a.art !== "wo") return { bild: wert };
+  const [tier, ding, praep] = teile(wert);
+  const szene = el("span", { class: `lt-szene lt-${ding} lt-${praep.replace(" ", "-")}`, "aria-label": `${tier} ${praep} ${ding}` });
+  szene.append(el("span", { class: "lt-ding" }), el("span", { class: "lt-tier", text: TIER_BILD[tier] }));
+  return szene;
+}
+
+const SPIEL = {
+  id: ID,
+  einleitung: "Listen! Hör gut zu und tipp auf das richtige Bild. Mit 🔊 hörst du es nochmal.",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.kennung(a.sprich);
+    ctx.flaeche.append(el("div", { class: "frage", text: a.art === "anweisung" ? "Hör zu und tu, was du hörst." : "Hör zu: Welches Bild passt?" }));
+    ctx.flaeche.append(el("button", { type: "button", class: "lt-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => LS.sprich(a.sprich, "en") }));
+    const hinweis = a.art === "wo" ? "Hör genau hin: Welches Tier? Und wo ist es? Tipp auf 🔊."
+      : a.art === "anweisung" ? "Hör genau hin: Welche Farbe? Welche Form? Tipp auf 🔊."
+      : "Hör nochmal genau hin! Tipp auf 🔊.";
+    const box = LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.richtig, inhalt: w => bildInhalt(a, w),
+      breite: a.art === "wo" ? 130 : 110, hinweis, loesung: a.loesung, lob: waehle(["Great!", "Well done!", "Super!", "Yes!"]),
+    });
+    box.classList.add("lt-wahl");
+    // Nach dem dritten Fehlversuch das richtige Bild zeigen.
+    box.addEventListener("click", () => {
+      if (ctx.vorbei()) box.children[a.optionen.indexOf(a.richtig)]?.classList.add("richtig");
+    });
+    LS.sprich(a.sprich, "en");
+    if (ctx.nr === 0) ctx.sag("Hör zu und tipp auf das Bild. Mit 🔊 hörst du es nochmal.");
+  },
+};
+
+// Startet sofort, wenn eine englische Stimme da ist; sonst wartet es kurz oder erklärt, dass sie fehlt.
+LS.spielMitStimme(SPIEL, "en");
+</script>
+</body>
+</html>

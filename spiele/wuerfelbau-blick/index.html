@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Würfelbau-Blick</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .bau { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; margin: 0 auto 14px; }
+  .bau svg { display: block; width: min(280px, 78vw); height: auto; }
+  .bau.klein svg { width: min(200px, 56vw); }
+  .regel { text-align: center; color: var(--text-leise); font-weight: 700; font-size: 15px; margin: 0 0 10px; }
+  .ansichten { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; margin: 0 auto 14px; }
+  .ansicht-karte { display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 800; color: var(--text-leise); font-size: 15px; }
+  .ansicht-karte svg { display: block; }
+  .wuerfel-wahl .wahl-knopf { min-height: 96px; }
+  .wuerfel-wahl .wahl-knopf svg { display: block; max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧊 Würfelbau-Blick</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.C.1: Körper darstellen — e (OP 2. Zyklus) „Ansichten von Würfelgebäuden
+// zuordnen“; darüber Baupläne (Grundriss mit Höhenzahlen) und Ansichten von hinten und links.
+//
+// Ein Gebäude steht auf einer Grundplatte mit n Spalten (c, von vorne gesehen links → rechts) und
+// m Reihen (r, vorne 0 → hinten); h(c, r) Würfel je Feld, ohne Lücken (Würfel liegen aufeinander).
+// Das Bild ist isometrisch, von vorne rechts oben gesehen: sichtbar sind Oberseiten, Vorderseiten
+// und rechte Seiten. Gezeichnet wird je Dreieck des isometrischen Gitters die nächste Fläche.
+// Damit jede Antwort eindeutig ist, kommen nur Gebäude vor, deren Bild kein anderes Gebäude auf
+// derselben Platte ergibt — das wird für alle Gebäude der Platte ausgerechnet.
+
+const { zufall, waehle, mische, el } = LS;
+
+// Punkt (c, r, z) → isometrisches Gitter (a, b); Tiefe = Nähe zum Betrachter (vorne rechts oben).
+const proj = (c, r, z) => [c + r, c - r - 2 * z];
+const tiefe = (c, r, z) => c - r + z;
+
+/** Dreiecke und Flächen einer Platte n × m mit höchstens H Würfeln je Feld. */
+function modell(n, m, H) {
+  const triIndex = new Map(), dreiecke = [];
+  const sigIndex = new Map(), sigArt = [];
+  const kanten = new Map(); // Kante → Dreiecke
+  function dreieck(pts) {
+    const k = pts.map(p => p.join(",")).sort().join("|");
+    if (!triIndex.has(k)) {
+      triIndex.set(k, dreiecke.length);
+      dreiecke.push(pts);
+      for (let i = 0; i < 3; i++) {
+        const ek = [pts[i], pts[(i + 1) % 3]].map(p => p.join(",")).sort().join("|");
+        if (!kanten.has(ek)) kanten.set(ek, { pts: [pts[i], pts[(i + 1) % 3]], t: [] });
+        kanten.get(ek).t.push(triIndex.get(k));
+      }
+    }
+    return triIndex.get(k);
+  }
+  function flaeche(art, ecken, slot) {
+    const q = ecken.map(e => proj(...e));
+    const l = (i, j) => 0.75 * (q[i][0] - q[j][0]) ** 2 + 0.25 * (q[i][1] - q[j][1]) ** 2;
+    const teile = l(0, 2) <= l(1, 3) ? [[0, 1, 2], [0, 2, 3]] : [[1, 2, 3], [1, 3, 0]];
+    // Flächen, die im Bild genau aufeinander fallen, sehen gleich aus: gleiche Signatur.
+    const sk = art + ":" + q[0].join(",");
+    if (!sigIndex.has(sk)) { sigIndex.set(sk, sigArt.length); sigArt.push(art); }
+    const s = sigIndex.get(sk);
+    return teile.map(d => ({ t: dreieck(d.map(i => q[i])), tiefe: d.reduce((x, i) => x + tiefe(...ecken[i]), 0), s, slot }));
+  }
+  const slots = [];
+  for (let c = 0; c < n; c++) for (let r = 0; r < m; r++) for (let z = 0; z < H; z++) {
+    const id = (c * m + r) * H + z;
+    slots[id] = [
+      ...flaeche("oben", [[c, r, z + 1], [c + 1, r, z + 1], [c + 1, r + 1, z + 1], [c, r + 1, z + 1]], id),
+      ...flaeche("vorne", [[c, r, z], [c + 1, r, z], [c + 1, r, z + 1], [c, r, z + 1]], id),
+      ...flaeche("rechts", [[c + 1, r, z], [c + 1, r + 1, z], [c + 1, r + 1, z + 1], [c + 1, r, z + 1]], id),
+    ];
+  }
+  const boden = [];
+  for (let c = 0; c < n; c++) for (let r = 0; r < m; r++) boden.push(...flaeche("boden", [[c, r, 0], [c + 1, r, 0], [c + 1, r + 1, 0], [c, r + 1, 0]], -1));
+  // Für das schnelle Durchrechnen aller Gebäude: Flächen je Würfelplatz als Zahlenfelder (6 Dreiecke je Würfel).
+  const ft = new Int32Array(slots.length * 6), fd = new Int32Array(slots.length * 6), fs = new Int32Array(slots.length * 6);
+  slots.forEach((liste, id) => liste.forEach((e, j) => { ft[id * 6 + j] = e.t; fd[id * 6 + j] = e.tiefe; fs[id * 6 + j] = e.s; }));
+  const bt = Int32Array.from(boden.map(e => e.t)), bd = Int32Array.from(boden.map(e => e.tiefe)), bs = Int32Array.from(boden.map(e => e.s));
+  return { n, m, H, slots, boden, dreiecke, sigArt, kanten: [...kanten.values()], T: dreiecke.length, ft, fd, fs, bt, bd, bs,
+    puffer: { tief: new Int32Array(dreiecke.length), s: new Int32Array(dreiecke.length), wer: new Int32Array(dreiecke.length) } };
+}
+
+/**
+ * Bild eines Gebäudes: je Dreieck die Signatur der nächsten Fläche (−1 = leer) und ihr Würfel.
+ * Mit eigen = false werden die Puffer des Modells wiederverwendet (schnell, nur für vorrat()).
+ */
+function bild(M, plan, eigen = true) {
+  const T = M.T, { ft, fd, fs, bt, bd, bs, n, m, H } = M;
+  const tief = eigen ? new Int32Array(T) : M.puffer.tief, s = eigen ? new Int32Array(T) : M.puffer.s, wer = eigen ? new Int32Array(T) : M.puffer.wer;
+  tief.fill(-1000000); s.fill(-1); wer.fill(-1);
+  for (let j = 0; j < bt.length; j++) { const t = bt[j]; if (bd[j] > tief[t]) { tief[t] = bd[j]; s[t] = bs[j]; wer[t] = -1; } }
+  for (let c = 0; c < n; c++) for (let r = 0; r < m; r++) {
+    const hoehe = plan[c * m + r];
+    for (let z = 0; z < hoehe; z++) {
+      const id = (c * m + r) * H + z;
+      for (let j = id * 6, e = id * 6 + 6; j < e; j++) { const t = ft[j]; if (fd[j] > tief[t]) { tief[t] = fd[j]; s[t] = fs[j]; wer[t] = id; } }
+    }
+  }
+  return { s, wer };
+}
+
+function bildHash(s) {
+  const imul = Math.imul;
+  let a = 2166136261, b = 5381;
+  for (let i = 0; i < s.length; i++) { a = imul(a ^ (s[i] + 7), 16777619); b = (imul(b, 33) + s[i] + 3) | 0; }
+  return (a >>> 0) * 2097152 + (b >>> 11); // als ganze Zahl < 2^53: schneller als Text im Map-Schlüssel
+}
+const gleichesBild = (x, y) => x.length === y.length && x.every((v, i) => v === y[i]);
+
+/**
+ * Alle Gebäude einer Platte, nach Bild gruppiert (einmal je Platte gerechnet, 3 × 3 mit Höhe 3:
+ * 262 144 Gebäude). eindeutig: Gebäude, deren Bild kein anderes Gebäude ergibt.
+ */
+const VORRAT = new Map();
+function vorrat(n, m, H) {
+  const k = `${n},${m},${H}`;
+  if (VORRAT.has(k)) return VORRAT.get(k);
+  const M = modell(n, m, H);
+  const N = n * m, basis = H + 1, gruppen = new Map();
+  const plan = new Int32Array(N);
+  const gesamt = basis ** N;
+  for (let idx = 0; idx < gesamt; idx++) {
+    const h = bildHash(bild(M, plan, false).s);
+    const g = gruppen.get(h);
+    if (g === undefined) gruppen.set(h, idx); else if (typeof g === "number") gruppen.set(h, [g, idx]); else g.push(idx);
+    for (let i = 0; i < N; i++) { if (++plan[i] < basis) break; plan[i] = 0; } // nächster Bauplan (Zählwerk)
+  }
+  for (const [h, g] of gruppen) if (typeof g === "number") gruppen.set(h, [g]);
+  const ausIndex = idx => { const p = []; for (let i = 0; i < N; i++) { p.push(idx % basis); idx = Math.floor(idx / basis); } return p; };
+  const eindeutig = [...gruppen.values()].filter(g => g.length === 1).map(g => ausIndex(g[0]));
+  const v = { M, gruppen, eindeutig, ausIndex };
+  VORRAT.set(k, v);
+  return v;
+}
+
+/** Ergibt ein anderes Gebäude dasselbe Bild? (genau verglichen, nicht nur über den Hash) */
+function mehrdeutig(n, m, H, plan) {
+  const v = vorrat(n, m, H);
+  const s = bild(v.M, plan).s;
+  return (v.gruppen.get(bildHash(s)) || []).map(v.ausIndex)
+    .some(p => p.join() !== plan.join() && gleichesBild(bild(v.M, p).s, s));
+}
+
+// ---------- Eigenschaften eines Gebäudes ----------
+
+const anzahl = plan => plan.reduce((x, y) => x + y, 0);
+const h = (a, c, r) => a.plan[c * a.m + r];
+const seq = k => [...Array(k).keys()];
+
+/** Ansicht als Raster (Zeilen von oben nach unten); werte 0/1, beim Bauplan die Höhen. */
+function ansicht(a, seite) {
+  const { n, m, H } = a;
+  const saeule = hoehen => seq(H).reverse().map(z => hoehen.map(x => (z < x ? 1 : 0)));
+  const vorneH = seq(n).map(c => Math.max(...seq(m).map(r => h(a, c, r))));
+  const rechtsH = seq(m).map(r => Math.max(...seq(n).map(c => h(a, c, r))));
+  if (seite === "vorne") return saeule(vorneH);
+  if (seite === "hinten") return saeule(vorneH.slice().reverse());   // von hinten: rechts ↔ links
+  if (seite === "rechts") return saeule(rechtsH);                    // vorne links, hinten rechts
+  if (seite === "links") return saeule(rechtsH.slice().reverse());
+  const grund = seq(m).reverse().map(r => seq(n).map(c => h(a, c, r))); // hinten oben, vorne unten
+  return seite === "plan" ? grund : grund.map(z => z.map(x => (x > 0 ? 1 : 0)));
+}
+const rasterText = g => g.map(z => z.join("")).join("/");
+
+/** Alle Würfel mindestens teilweise sichtbar? */
+function alleSichtbar(a) {
+  const M = vorrat(a.n, a.m, a.H).M;
+  const { wer } = bild(M, a.plan);
+  const gesehen = new Set(wer);
+  return seq(a.n).every(c => seq(a.m).every(r => seq(h(a, c, r)).every(z => gesehen.has((c * a.m + r) * a.H + z))));
+}
+
+function zusammenhaengend(a) {
+  const felder = [];
+  for (let c = 0; c < a.n; c++) for (let r = 0; r < a.m; r++) if (h(a, c, r) > 0) felder.push(c + "," + r);
+  if (!felder.length) return false;
+  const menge = new Set(felder), gesehen = new Set([felder[0]]), stapel = [felder[0]];
+  while (stapel.length) {
+    const [c, r] = stapel.pop().split(",").map(Number);
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const k = c + dc + "," + (r + dr);
+      if (menge.has(k) && !gesehen.has(k)) { gesehen.add(k); stapel.push(k); }
+    }
+  }
+  return gesehen.size === menge.size;
+}
+
+// ---------- Stufen ----------
+// platten: [n, m]; H: höchste Säule; wuerfel: [min, max]; sichtbar: jeder Würfel ist zu sehen.
+const STUFE = {
+  s1: { platten: [[2, 2], [3, 2], [2, 3]], H: 2, wuerfel: [3, 6], sichtbar: true, arten: ["zaehlen"] },
+  s2: { platten: [[3, 3], [3, 2], [2, 3]], H: 2, wuerfel: [4, 9], arten: ["zaehlen", "zaehlen", "oben"] },
+  s3: { platten: [[3, 3]], H: 2, wuerfel: [4, 10], arten: ["oben", "vorne", "rechts"] },
+  s4: { platten: [[3, 3]], H: 3, wuerfel: [5, 14], arten: ["vorne", "rechts", "oben", "seite"] },
+  s5: { platten: [[3, 3]], H: 3, wuerfel: [5, 14], arten: ["plan", "planZuBau", "zaehlen"] },
+  s6: { platten: [[3, 3]], H: 3, wuerfel: [6, 16], arten: ["hinten", "links", "dreiAnsichten"] },
+};
+
+const FRAGEN = {
+  zaehlen: "Aus wie vielen <b>Würfeln</b> besteht das Gebäude?",
+  oben: "Welches Bild zeigt das Gebäude <b>von oben</b>? (vorne ist unten)",
+  vorne: "Welches Bild zeigt das Gebäude <b>von vorne</b>?",
+  rechts: "Welches Bild zeigt das Gebäude <b>von rechts</b>?",
+  hinten: "Welches Bild zeigt das Gebäude <b>von hinten</b>?",
+  links: "Welches Bild zeigt das Gebäude <b>von links</b>?",
+  seite: "Von wo aus siehst du das Gebäude so?",
+  plan: "Welcher <b>Bauplan</b> passt? Die Zahl sagt, wie viele Würfel aufeinander stehen (vorne ist unten).",
+  planZuBau: "Welches Gebäude passt zu diesem <b>Bauplan</b>? (vorne ist unten)",
+  dreiAnsichten: "Welches Gebäude passt zu <b>allen drei</b> Ansichten?",
+};
+const SEITEN_TEXT = { vorne: "von vorne", rechts: "von rechts", oben: "von oben" };
+
+function gebaeude(p, bedingung = () => true) {
+  const [n, m] = waehle(p.platten);
+  const pool = vorrat(n, m, p.H).eindeutig;
+  for (let v = 0; v < 2000; v++) {
+    const a = { n, m, H: p.H, plan: waehle(pool) };
+    const w = anzahl(a.plan);
+    if (w < p.wuerfel[0] || w > p.wuerfel[1] || !zusammenhaengend(a)) continue;
+    if (p.sichtbar && !alleSichtbar(a)) continue;
+    if (!bedingung(a)) continue;
+    return a;
+  }
+  throw new Error("kein passendes Gebäude");
+}
+
+/** Abgewandelte Baupläne: gespiegelt, gedreht, eine Säule anders. */
+function abwandlungen(a) {
+  const { n, m, H } = a;
+  const neu = f => { const p = []; for (let c = 0; c < n; c++) for (let r = 0; r < m; r++) p.push(f(c, r)); return p; };
+  const liste = [
+    neu((c, r) => h(a, n - 1 - c, r)),            // links ↔ rechts
+    neu((c, r) => h(a, c, m - 1 - r)),            // vorne ↔ hinten
+  ];
+  if (n === m) liste.push(neu((c, r) => h(a, r, c)), neu((c, r) => h(a, m - 1 - r, c)));
+  for (let i = 0; i < 12; i++) {
+    const p = a.plan.slice();
+    const j = zufall(0, p.length - 1);
+    p[j] = Math.max(0, Math.min(H, p[j] + waehle([-1, 1])));
+    liste.push(p);
+  }
+  return mische(liste).filter(p => p.join() !== a.plan.join() && anzahl(p) > 0);
+}
+
+/** Vier verschiedene Antworten, die erste ist richtig; dann gemischt. */
+function vierOptionen(richtig, kandidaten, text) {
+  const optionen = [richtig];
+  for (const k of kandidaten) if (optionen.length < 4 && !optionen.some(o => text(o) === text(k))) optionen.push(k);
+  if (optionen.length < 4) return null;
+  const gemischt = mische(optionen);
+  return { optionen: gemischt, richtig: gemischt.findIndex(o => text(o) === text(richtig)) };
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let v = 0; v < 200; v++) {
+    if (art === "zaehlen") {
+      const a = gebaeude(p);
+      const w = anzahl(a.plan);
+      const o = vierOptionen(w, mische([w - 2, w - 1, w + 1, w + 2, w + 3].filter(x => x > 0)), String);
+      return { art, ...a, ...o };
+    }
+    if (["oben", "vorne", "rechts", "hinten", "links"].includes(art)) {
+      // von hinten/links: nur Gebäude, bei denen das Bild von vorne/rechts anders aussieht
+      const gegen = { hinten: "vorne", links: "rechts" }[art];
+      const a = gebaeude(p, b => !gegen || rasterText(ansicht(b, art)) !== rasterText(ansicht(b, gegen)));
+      const kandidaten = [
+        ...(gegen ? [ansicht(a, gegen)] : []),
+        ...["vorne", "rechts", "hinten", "links"].filter(s => s !== art && art !== "oben").map(s => ansicht(a, s)),
+        ...abwandlungen(a).map(plan => ansicht({ ...a, plan }, art === "oben" ? "oben" : art)),
+      ];
+      const o = vierOptionen(ansicht(a, art), kandidaten, rasterText);
+      if (o) return { art, ...a, ...o };
+      continue;
+    }
+    if (art === "seite") {
+      const a = gebaeude(p);
+      const bilder = ["vorne", "rechts", "oben"].map(s => rasterText(ansicht(a, s)));
+      if (new Set(bilder).size < 3) continue;
+      const optionen = ["vorne", "rechts", "oben"];
+      return { art, ...a, gezeigt: waehle(optionen), optionen, richtig: null };
+    }
+    if (art === "plan") {
+      const a = gebaeude(p);
+      const o = vierOptionen(a.plan, abwandlungen(a), x => x.join());
+      if (o) return { art, ...a, ...o };
+      continue;
+    }
+    // planZuBau, dreiAnsichten: vier Gebäude zur Wahl, jedes mit eindeutigem Bild
+    const a = gebaeude(p);
+    const passt = art === "planZuBau"
+      ? plan => plan.join() === a.plan.join()
+      : plan => ["vorne", "rechts", "oben"].every(s => rasterText(ansicht({ ...a, plan }, s)) === rasterText(ansicht(a, s)));
+    const kandidaten = abwandlungen(a).filter(plan => !passt(plan) && !mehrdeutig(a.n, a.m, a.H, plan));
+    const o = vierOptionen(a.plan, kandidaten, x => x.join());
+    if (o) return { art, ...a, ...o };
+  }
+  throw new Error("keine Aufgabe gefunden");
+}
+
+/** Mängel — rechnerisch: Eindeutigkeit des Bildes über alle Gebäude der Platte, Antworten aus dem Bauplan. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.platten.some(([n, mm]) => n === a.n && mm === a.m) || a.H !== p.H) m.push("falsche Platte");
+  if (a.plan.length !== a.n * a.m || a.plan.some(x => x < 0 || x > a.H || !Number.isInteger(x))) m.push("ungültiger Bauplan");
+  const w = anzahl(a.plan);
+  if (w < p.wuerfel[0] || w > p.wuerfel[1]) m.push("Würfelzahl ausserhalb der Stufe");
+  if (!zusammenhaengend(a)) m.push("Gebäude nicht zusammenhängend");
+  if (mehrdeutig(a.n, a.m, a.H, a.plan)) m.push("Bild mehrdeutig: ein anderes Gebäude sieht gleich aus");
+  if (p.sichtbar && !alleSichtbar(a)) m.push("versteckter Würfel auf Stufe 1");
+  const genauEine = (werte, soll, text) => {
+    const t = werte.map(text);
+    if (new Set(t).size !== t.length) m.push("doppelte Antworten");
+    const treffer = t.map((x, i) => (x === text(soll) ? i : -1)).filter(i => i >= 0);
+    if (treffer.length !== 1 || treffer[0] !== a.richtig) m.push("nicht genau eine richtige Antwort");
+  };
+  if (a.art === "zaehlen") genauEine(a.optionen, w, String);
+  else if (["oben", "vorne", "rechts", "hinten", "links"].includes(a.art)) genauEine(a.optionen, ansicht(a, a.art), rasterText);
+  else if (a.art === "plan") genauEine(a.optionen, a.plan, x => x.join());
+  else if (a.art === "seite") {
+    const bilder = a.optionen.map(s => rasterText(ansicht(a, s)));
+    if (new Set(bilder).size !== 3) m.push("zwei Seiten sehen gleich aus");
+  } else {
+    const passt = plan => (a.art === "planZuBau" ? plan.join() === a.plan.join()
+      : ["vorne", "rechts", "oben"].every(s => rasterText(ansicht({ ...a, plan }, s)) === rasterText(ansicht(a, s))));
+    const treffer = a.optionen.map((o, i) => (passt(o) ? i : -1)).filter(i => i >= 0);
+    if (treffer.length !== 1 || a.optionen[treffer[0]].join() !== a.plan.join() || treffer[0] !== a.richtig) m.push("nicht genau ein passendes Gebäude");
+    if (new Set(a.optionen.map(o => o.join())).size !== 4) m.push("doppelte Gebäude");
+    if (a.optionen.some(o => mehrdeutig(a.n, a.m, a.H, o))) m.push("Antwortbild mehrdeutig");
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+/** Isometrisches Bild als SVG: Dreiecke mit Farbe je Flächenart, Linien zwischen verschiedenen Flächen. */
+function bauSvg(a, mitBeschriftung = true) {
+  const M = vorrat(a.n, a.m, a.H).M;
+  const { s } = bild(M, a.plan);
+  const g = 30, X = q => q[0] * g * Math.sqrt(3) / 2, Y = q => q[1] * g / 2;
+  // Oben hell, vorne Grundfarbe, rechts dieselbe Farbe abgedunkelt — wie im Licht von links oben.
+  const farbe = { oben: "var(--deko-4)", vorne: "var(--deko-6)", rechts: "var(--deko-6)", boden: "var(--rand)" };
+  const teile = [];
+  M.dreiecke.forEach((pts, t) => {
+    if (s[t] < 0) return;
+    const art = M.sigArt[s[t]];
+    teile.push(`<polygon points="${pts.map(q => `${X(q).toFixed(1)},${Y(q).toFixed(1)}`).join(" ")}" fill="${farbe[art]}" stroke="${farbe[art]}" stroke-width="0.8" stroke-linejoin="round"${art === "rechts" ? ' style="filter:brightness(.68)"' : ""}/>`);
+  });
+  for (const k of M.kanten) {
+    const [t1, t2] = k.t;
+    const s1 = s[t1], s2 = t2 === undefined ? -1 : s[t2];
+    if (s1 === s2 || (s1 < 0 && s2 < 0)) continue;
+    const boden = [s1, s2].every(x => x < 0 || M.sigArt[x] === "boden");
+    teile.push(`<line x1="${X(k.pts[0]).toFixed(1)}" y1="${Y(k.pts[0]).toFixed(1)}" x2="${X(k.pts[1]).toFixed(1)}" y2="${Y(k.pts[1]).toFixed(1)}" stroke="${boden ? "var(--text-leise)" : "var(--text)"}" stroke-width="${boden ? 1 : 1.8}" stroke-linecap="round"/>`);
+  }
+  // Rahmen des ganzen Modells (Platte + höchste Säulen), damit alle Bilder gleich gross sind.
+  const alle = M.dreiecke.flat();
+  let x0 = Math.min(...alle.map(X)), x1 = Math.max(...alle.map(X)), y0 = Math.min(...alle.map(Y)), y1 = Math.max(...alle.map(Y));
+  if (mitBeschriftung) {
+    const vl = proj(a.n / 2, 0, 0), rl = proj(a.n, a.m / 2, 0);
+    teile.push(`<text x="${(X(vl) - 30).toFixed(1)}" y="${(Y(vl) + 24).toFixed(1)}" font-size="15" font-weight="800" fill="var(--text)" text-anchor="middle">vorne</text>`);
+    teile.push(`<text x="${(X(rl) + 30).toFixed(1)}" y="${(Y(rl) + 24).toFixed(1)}" font-size="15" font-weight="800" fill="var(--text)" text-anchor="middle">rechts</text>`);
+    x0 -= 60; x1 += 60; y1 += 32;
+  }
+  x0 -= 4; y0 -= 4; x1 += 4; y1 += 4;
+  return el("span", { html: `<svg viewBox="${x0.toFixed(1)} ${y0.toFixed(1)} ${(x1 - x0).toFixed(1)} ${(y1 - y0).toFixed(1)}" width="${Math.round(x1 - x0)}" height="${Math.round(y1 - y0)}" aria-hidden="true">${teile.join("")}</svg>` });
+}
+
+/** Ansicht oder Bauplan als Raster; vorneUnten: dünner Balken unter dem Raster (Seite „vorne“). */
+function rasterSvg(raster, { zahlen = false, vorneUnten = false, g = 22 } = {}) {
+  const hoehe = raster.length, breite = raster[0].length;
+  const teile = [];
+  raster.forEach((zeile, y) => zeile.forEach((v, x) => {
+    const voll = v > 0;
+    teile.push(`<rect x="${x * g + 2}" y="${y * g + 2}" width="${g}" height="${g}" fill="${voll && !zahlen ? "var(--deko-6)" : voll ? "var(--hinweis-hell)" : "#fff"}" stroke="${voll && !zahlen ? "var(--text)" : "var(--rand)"}" stroke-width="1.5"/>`);
+    if (zahlen && v > 0) teile.push(`<text x="${x * g + 2 + g / 2}" y="${y * g + 2 + g * 0.72}" font-size="${g * 0.62}" font-weight="900" text-anchor="middle" fill="var(--text)">${v}</text>`);
+  }));
+  const extra = vorneUnten ? 8 : 0;
+  if (vorneUnten) teile.push(`<rect x="2" y="${hoehe * g + 5}" width="${breite * g}" height="4" rx="2" fill="var(--text-leise)"/>`);
+  return el("span", { html: `<svg viewBox="0 0 ${breite * g + 4} ${hoehe * g + 4 + extra}" width="${breite * g + 4}" height="${hoehe * g + 4 + extra}" aria-hidden="true">${teile.join("")}</svg>` });
+}
+
+LS.spiel({
+  id: "wuerfelbau-blick",
+  einleitung: "Schau genau hin! Zähl die Würfel und finde heraus, wie das Gebäude von vorne, von rechts und von oben aussieht.",
+  anzahl: 6,
+  stufen: {
+    s1: "Kleine Gebäude: Würfel zählen.",
+    s2: "Grössere Gebäude zählen, Ansicht von oben.",
+    s3: "Ansichten von oben, vorne und rechts.",
+    s4: "Höhere Gebäude: Ansichten, und von wo aus schaust du?",
+    s5: "Baupläne mit Zahlen lesen und zuordnen.",
+    s6: "Endgegner: von hinten, von links, und drei Ansichten zugleich.",
+  },
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.flaeche.append(el("div", { class: "frage", html: FRAGEN[a.art] }));
+    const zeigeBau = !["planZuBau", "dreiAnsichten"].includes(a.art);
+    if (zeigeBau) ctx.flaeche.append(el("div", { class: "bau" }, bauSvg(a)));
+    const nr = i => `Es ist das ${i + 1}. Bild.`;
+
+    if (a.art === "zaehlen") {
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.optionen[a.richtig], breite: 70,
+        loesung: `Es sind ${anzahl(a.plan)} Würfel.`,
+        hinweis: "Zähl Säule für Säule – und denk an die Würfel, die unten tragen.",
+      });
+      return;
+    }
+    if (a.art === "seite") {
+      ctx.flaeche.append(el("div", { class: "ansichten" }, el("div", { class: "ansicht-karte" }, rasterSvg(ansicht(a, a.gezeigt), { g: 30 }))));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.gezeigt, inhalt: s => SEITEN_TEXT[s], breite: 90,
+        loesung: `So sieht es ${SEITEN_TEXT[a.gezeigt]} aus.`,
+        hinweis: "Stell dich in Gedanken auf diese Seite: Wie hoch ist jede Säule, die du siehst?",
+      });
+      return;
+    }
+    if (a.art === "planZuBau") ctx.flaeche.append(el("div", { class: "ansichten" }, el("div", { class: "ansicht-karte" }, rasterSvg(ansicht(a, "plan"), { zahlen: true, vorneUnten: true, g: 34 }), "Bauplan")));
+    if (a.art === "dreiAnsichten") {
+      ctx.flaeche.append(el("div", { class: "ansichten" }, ...["vorne", "rechts", "oben"].map(s =>
+        el("div", { class: "ansicht-karte" }, rasterSvg(ansicht(a, s), { vorneUnten: s === "oben", g: 22 }), SEITEN_TEXT[s]))));
+    }
+    const istBau = ["planZuBau", "dreiAnsichten"].includes(a.art);
+    if (istBau) ctx.flaeche.append(el("div", { class: "regel", text: "Bei jedem Gebäude ist vorne unten links, rechts unten rechts." }));
+    const box = LS.auswahl(ctx, {
+      optionen: a.optionen.map((_, i) => i), richtig: a.richtig, breite: istBau ? 140 : 90,
+      inhalt: i => (istBau ? bauSvg({ ...a, plan: a.optionen[i] }, false)
+        : a.art === "plan" ? rasterSvg(ansicht({ ...a, plan: a.optionen[i] }, "plan"), { zahlen: true, vorneUnten: true })
+        : rasterSvg(a.optionen[i], { vorneUnten: a.art === "oben" })),
+      loesung: nr(a.richtig),
+      hinweis: {
+        oben: "Von oben siehst du nur die Felder, auf denen etwas steht – egal wie hoch.",
+        vorne: "Von vorne zählt in jeder Spalte die höchste Säule.",
+        rechts: "Von rechts gesehen: Was ganz vorne steht, ist jetzt links.",
+        hinten: "Von hinten ist alles vertauscht: Was von vorne links ist, ist jetzt rechts.",
+        links: "Von links gesehen: Was ganz vorne steht, ist jetzt rechts.",
+        plan: "Vergleiche Feld für Feld: Wie viele Würfel stehen dort aufeinander?",
+        planZuBau: "Such zuerst die höchste Säule im Bauplan und schau, wo sie steht.",
+        dreiAnsichten: "Prüf jedes Gebäude: Passt es von vorne? Von rechts? Von oben?",
+      }[a.art],
+    });
+    box.classList.add("wuerfel-wahl");
+  },
+});
+</script>
+</body>
+</html>

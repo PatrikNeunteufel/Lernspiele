@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zielzahl-Jagd</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .zz-ziel { text-align: center; margin: 0 0 10px; }
+  .zz-ziel .ziel-zahl { display: inline-block; font-size: clamp(44px, 11vw, 72px); font-weight: 900; color: #fff; background: var(--deko-2);
+    border-radius: 22px; padding: 2px 26px; box-shadow: 0 6px 0 rgba(0, 0, 0, .15); font-variant-numeric: tabular-nums; }
+  .zz-ziel small { display: block; font-size: 15px; font-weight: 800; color: var(--text-leise); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+  .zz-karten { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 6px auto 12px; max-width: 560px; min-height: 92px; }
+  .zz-karte { min-width: 78px; height: 86px; padding: 0 12px; border: 4px solid var(--rand); border-radius: 18px; background: #fff; color: var(--text);
+    font: inherit; font-size: clamp(30px, 8vw, 42px); font-weight: 900; cursor: pointer; box-shadow: 0 5px 0 var(--rand); font-variant-numeric: tabular-nums; }
+  .zz-karte.zz-neu { border-color: var(--deko-5); }
+  .zz-karte.zz-an { border-color: var(--knopf); background: #eef0ff; transform: translateY(-4px); box-shadow: 0 9px 0 var(--knopf); }
+  .zz-zeichen { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 auto 10px; }
+  .zz-op { width: 66px; height: 66px; border-radius: 50%; border: none; background: var(--deko-6); color: #fff; font: inherit;
+    font-size: 34px; font-weight: 900; cursor: pointer; box-shadow: 0 5px 0 rgba(0, 0, 0, .2); }
+  .zz-op.zz-an { background: var(--deko-3); transform: translateY(-3px); }
+  .zz-weg { list-style: none; padding: 0; margin: 0 auto 8px; text-align: center; font-size: clamp(20px, 4.6vw, 26px); font-weight: 800; min-height: 32px; }
+  .zz-weg li { margin: 2px 0; }
+  .zz-unten { display: flex; justify-content: center; }
+  @media (max-width: 420px) { .zz-karte { min-width: 64px; height: 74px; } .zz-op { width: 56px; height: 56px; font-size: 28px; } }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎯 Zielzahl-Jagd</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.B.1.e/f (Orientierungspunkt 2. Zyklus, 4. Klasse): Operationen variieren,
+// offene Aufgaben. Aus Zahlenkarten und +, −, ×, : die Zielzahl bilden — jede richtige Rechnung gilt.
+//
+// Rechnen in Schritten (Entscheid LERN_Session3, Annahme): Das Kind nimmt zwei Karten und ein
+// Rechenzeichen; das Ergebnis wird eine neue Karte. Jeder Schritt ist eine einzelne Rechnung, also
+// braucht es weder „Punkt vor Strich“ noch Klammern — eine Folge von Schritten entspricht einer
+// vollständig geklammerten Rechnung. Es zählt jedes Zwischenergebnis, das die Zielzahl trifft
+// (Stufen 1–5); in der Königsstufe müssen alle Karten verbraucht sein. Zwischenergebnisse sind
+// ganze Zahlen ab 1: Minus nur grössere minus kleinere Zahl, Geteilt nur, wenn es aufgeht.
+// Der Generator wählt die Zielzahl aus den Zahlen, die sich mit den Karten bilden lassen; eine
+// Lösung steht in ctx.loesung.
+
+const { zufall, waehle, mische, el } = LS;
+
+const GROSS = [25, 50, 75, 100];
+// karten(): Startkarten; ops: Rechenzeichen; ziel: [min, max]; minKarten: so viele Karten braucht
+// die kürzeste Lösung mindestens; alle: alle Karten verbrauchen.
+const verschiedene = (n, a, b) => { const s = new Set(); while (s.size < n) s.add(zufall(a, b)); return [...s]; };
+const STUFE = {
+  s1: { karten: () => verschiedene(3, 1, 10), ops: ["+", "−"], ziel: [5, 20], minKarten: 2 },
+  s2: { karten: () => verschiedene(3, 2, 10), ops: ["+", "−", "×"], ziel: [10, 50], minKarten: 2 },
+  s3: { karten: () => verschiedene(4, 1, 10), ops: ["+", "−", "×", ":"], ziel: [10, 100], minKarten: 2 },
+  s4: { karten: () => verschiedene(4, 1, 10), ops: ["+", "−", "×", ":"], ziel: [30, 200], minKarten: 3 },
+  s5: { karten: () => [...verschiedene(3, 1, 10), waehle(GROSS)], ops: ["+", "−", "×", ":"], ziel: [100, 999], minKarten: 3 },
+  s6: { karten: () => (Math.random() < 0.5 ? [...verschiedene(3, 1, 10), waehle(GROSS)] : verschiedene(4, 2, 12)), ops: ["+", "−", "×", ":"], ziel: [50, 999], minKarten: 4, alle: true },
+};
+const GROESSTE = 10000; // grösstes Zwischenergebnis
+
+/** Ein Rechenschritt: Ergebnis oder null (kleiner als 1, nicht ganz, zu gross). */
+function rechne(a, op, b) {
+  const w = op === "+" ? a + b : op === "−" ? a - b : op === "×" ? a * b : b && a % b === 0 ? a / b : NaN;
+  return Number.isInteger(w) && w >= 1 && w <= GROESSTE ? w : null;
+}
+const schrittText = (a, op, b) => `${a} ${op} ${b} = ${rechne(a, op, b)}`;
+
+/**
+ * Alle Zahlen, die sich mit den Karten bilden lassen: Map Zahl → { n: Karten, weg: [Schritte] }
+ * mit der kürzesten gefundenen Lösung. alle: nur Zahlen, für die alle Karten verbraucht sind.
+ */
+function erreichbar(karten, ops, alle) {
+  const ergebnis = new Map();
+  const besucht = new Set();
+  const merke = k => { const alt = ergebnis.get(k.w); if (!alt || k.n < alt.n) ergebnis.set(k.w, { n: k.n, weg: k.weg }); };
+  (function weiter(liste) {
+    const schluessel = liste.map(k => `${k.w}:${k.n}`).sort().join(",");
+    if (besucht.has(schluessel)) return;
+    besucht.add(schluessel);
+    if (liste.length === 1) { if (alle) merke(liste[0]); return; }
+    for (let i = 0; i < liste.length; i++) for (let j = 0; j < liste.length; j++) {
+      if (i === j) continue;
+      const a = liste[i], b = liste[j];
+      for (const op of ops) {
+        if ((op === "+" || op === "×") && i > j) continue; // vertauschbar: nur einmal
+        const w = rechne(a.w, op, b.w);
+        if (w === null) continue;
+        const neu = { w, n: a.n + b.n, weg: [...a.weg, ...b.weg, schrittText(a.w, op, b.w)] };
+        if (!alle) merke(neu);
+        weiter([...liste.filter((_, k) => k !== i && k !== j), neu]);
+      }
+    }
+  })(karten.map(w => ({ w, n: 1, weg: [] })));
+  return ergebnis;
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let v = 0; v < 200; v++) {
+    const karten = p.karten();
+    const moeglich = [...erreichbar(karten, p.ops, p.alle)]
+      .filter(([w, l]) => w >= p.ziel[0] && w <= p.ziel[1] && l.n >= p.minKarten && !karten.includes(w));
+    if (!moeglich.length) continue;
+    const [ziel, l] = waehle(moeglich);
+    return { karten: mische(karten), ziel, weg: l.weg };
+  }
+  return null;
+}
+
+/** Prüft einen Lösungsweg mit den Startkarten: jede Karte höchstens einmal, jeder Schritt richtig. */
+function wegGueltig(karten, weg, ops, ziel, alle) {
+  const vorrat = karten.slice();
+  let letzte = null;
+  for (const s of weg) {
+    const m = s.match(/^(\d+) (\S) (\d+) = (\d+)$/);
+    if (!m) return false;
+    const [a, op, b, w] = [Number(m[1]), m[2], Number(m[3]), Number(m[4])];
+    if (!ops.includes(op) || rechne(a, op, b) !== w) return false;
+    for (const x of [a, b]) { const i = vorrat.indexOf(x); if (i < 0) return false; vorrat.splice(i, 1); }
+    vorrat.push(w);
+    letzte = w;
+  }
+  return letzte === ziel && (!alle || vorrat.length === 1);
+}
+
+/** Mängel für tools/pruefe_spiele.js. Offene Aufgabe: geprüft wird, dass es mindestens eine Lösung gibt. */
+function pruefeAufgabe(a, stufe) {
+  const p = STUFE[stufe];
+  if (!a) return ["keine Aufgabe"];
+  const m = [];
+  if (a.karten.length !== (stufe === "s1" || stufe === "s2" ? 3 : 4)) m.push("falsche Zahl von Karten");
+  if (new Set(a.karten).size !== a.karten.length) m.push("Karten doppelt");
+  if (a.karten.includes(a.ziel)) m.push("Zielzahl liegt schon als Karte da");
+  if (a.ziel < p.ziel[0] || a.ziel > p.ziel[1]) m.push("Zielzahl ausserhalb des Zahlenraums");
+  if (!wegGueltig(a.karten, a.weg, p.ops, a.ziel, p.alle)) m.push("Lösungsweg ungültig: " + a.weg.join(", "));
+  const l = erreichbar(a.karten, p.ops, p.alle).get(a.ziel);
+  if (!l) m.push("Zielzahl nicht erreichbar");
+  else if (l.n < p.minKarten) m.push("Zielzahl mit zu wenig Karten erreichbar");
+  return m;
+}
+
+LS.spiel({
+  id: "zielzahl-jagd",
+  einleitung: "Triff die Zielzahl! Nimm zwei Karten und ein Rechenzeichen — das Ergebnis wird eine neue Karte. Jeder richtige Weg gilt.",
+  anzahl: 6,
+  stufen: {
+    s1: "Drei Karten, plus und minus: Triff die 15!",
+    s2: "Mit mal: Aus 3, 5 und 7 wird 22.",
+    s3: "Vier Karten, alle vier Rechenzeichen.",
+    s4: "Grössere Zielzahlen — mindestens drei Karten.",
+    s5: "Mit 25, 50, 75 oder 100 bis 999.",
+    s6: "Endgegner: Alle vier Karten müssen in die Rechnung.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const a = aufgabeErzeugen(ctx.stufe);
+    const loesung = a.weg.join(", ");
+    ctx.loesung(loesung);
+    ctx.kennung(`${a.karten.slice().sort((x, y) => x - y).join(",")}→${a.ziel}`);
+
+    ctx.flaeche.append(
+      el("div", { class: "auftrag", text: p.alle ? "Benutze alle Karten und triff die Zielzahl!" : "Rechne mit den Karten, bis du die Zielzahl hast!" }),
+      el("div", { class: "zz-ziel" }, el("small", { text: "Zielzahl" }), el("span", { class: "ziel-zahl", text: String(a.ziel) })));
+    const kartenBox = el("div", { class: "zz-karten" });
+    const zeichenBox = el("div", { class: "zz-zeichen" });
+    const wegListe = el("ol", { class: "zz-weg", "aria-live": "polite" });
+    const neu = el("button", { type: "button", class: "knopf hell klein", text: "↺ Von vorn", onclick: () => { LS.ton("tipp"); start(); } });
+    ctx.flaeche.append(kartenBox, zeichenBox, wegListe, el("div", { class: "zz-unten" }, neu));
+
+    let karten; // [{ w, neu }]
+    let erste = null; // Index der gewählten Karte
+    let op = null;
+
+    function start() {
+      karten = a.karten.map(w => ({ w, neu: false }));
+      erste = null; op = null;
+      wegListe.innerHTML = "";
+      zeichne();
+    }
+
+    function zeichne() {
+      kartenBox.innerHTML = "";
+      karten.forEach((k, i) => kartenBox.append(el("button", {
+        type: "button", class: "zz-karte" + (k.neu ? " zz-neu" : "") + (i === erste ? " zz-an" : ""), text: String(k.w),
+        "aria-pressed": String(i === erste), onclick: () => karte(i),
+      })));
+      zeichenBox.innerHTML = "";
+      for (const z of p.ops) zeichenBox.append(el("button", {
+        type: "button", class: "zz-op" + (z === op ? " zz-an" : ""), text: z, "aria-label": { "+": "plus", "−": "minus", "×": "mal", ":": "geteilt durch" }[z],
+        onclick: () => zeichen(z),
+      }));
+    }
+
+    function zeichen(z) {
+      if (ctx.vorbei()) return;
+      if (erste === null) { ctx.sag("Tipp zuerst eine Karte an, dann das Rechenzeichen."); return; }
+      op = z;
+      LS.ton("tipp");
+      zeichne();
+    }
+
+    function karte(i) {
+      if (ctx.vorbei()) return;
+      if (erste === null || op === null) {
+        // erste Karte wählen (oder abwählen)
+        erste = erste === i ? null : i;
+        op = null;
+        LS.ton("tipp");
+        zeichne();
+        return;
+      }
+      if (i === erste) { erste = null; op = null; zeichne(); return; }
+      const x = karten[erste].w, y = karten[i].w;
+      const w = rechne(x, op, y);
+      if (w === null) {
+        ctx.sag(op === "−" ? `${x} − ${y} geht hier nicht — nimm die grössere Zahl zuerst.`
+          : op === ":" ? `${x} : ${y} geht nicht auf. Probier eine andere Rechnung.`
+          : "Das wird zu gross. Probier eine andere Rechnung.", "hinweis");
+        erste = null; op = null;
+        zeichne();
+        return;
+      }
+      wegListe.append(el("li", { text: schrittText(x, op, y) }));
+      karten = [...karten.filter((_, k) => k !== erste && k !== i), { w, neu: true }];
+      erste = null; op = null;
+      LS.ton("tipp");
+      zeichne();
+      const fertig = !p.alle || karten.length === 1;
+      if (w === a.ziel && fertig) { ctx.richtig(`Treffer! ${a.ziel} — dein Weg stimmt.`); return; }
+      if (w === a.ziel) { ctx.sag("Die Zielzahl ist da — aber du musst alle Karten benutzen!", "hinweis"); return; }
+      if (karten.length === 1) {
+        ctx.falsch(p.alle ? `Alle Karten verbraucht, aber nicht ${a.ziel}. Versuch einen anderen Weg — vielleicht zuerst mal rechnen?`
+          : `Keine Karten mehr, und ${a.ziel} ist nicht dabei. Versuch einen anderen Weg!`, loesung);
+        if (!ctx.vorbei()) start();
+      }
+    }
+
+    start();
+    if (ctx.nr === 0) ctx.sag(p.alle ? "Diesmal müssen alle Karten in die Rechnung." : "Tipp: Karte, Rechenzeichen, Karte. Mit ↺ fängst du neu an.");
+  },
+});
+</script>
+</body>
+</html>

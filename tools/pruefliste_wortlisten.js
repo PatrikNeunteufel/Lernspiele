@@ -287,4 +287,69 @@ const { ARTIKEL: PREIS_ARTIKEL } = lade("spiele/preis-tabelle/artikel.js", ["ART
 tabelle("## 26. Preis-Tabelle (Lehrplan SG MA.3.A.3) — Artikel", "Preis je Stück in Rappen: kleinster bis grösster Wert, den das Spiel wählt.", ["Bild", "Einzahl", "Mehrzahl", "von Rp.", "bis Rp."], PREIS_ARTIKEL);
 const { ORTE } = lade("spiele/kompass/orte.js", ["ORTE"]);
 tabelle("## 27. Kompass-Spiel (Lehrplan SG NMG.8.4) — Orte auf dem Plan", null, ["Bild", "Name", "Nominativ", "Dativ"], ORTE);
+
+// LERN_Session3, zweites Paket (Entscheid G1 a). Zellen mit Listen werden mit „ · “ verbunden,
+// verschachtelte Listen mit „ / “; true/false als ja/nein.
+const zelle = x => Array.isArray(x) ? x.map(y => (Array.isArray(y) ? y.map(zelle).join(" / ") : zelle(y))).join(" · ")
+  : x === true ? "ja" : x === false ? "nein" : x && typeof x === "object" ? Object.entries(x).map(([k, v]) => `${k}: ${zelle(v)}`).join("; ") : x;
+const zeilenVon = daten => (Array.isArray(daten) ? daten : Object.entries(daten).map(([k, v]) => [k, v])).map(e => (Array.isArray(e) ? e.map(zelle) : [zelle(e)]));
+/** Tabelle mit Kopf; ein Objekt { gruppe: [...] } wird je Gruppe zu einer eigenen Tabelle. */
+const teil = (titel, hinweis, kopf, daten) => {
+  if (!Array.isArray(daten) && Object.values(daten).every(Array.isArray) && Object.values(daten).every(v => v.every(Array.isArray))) {
+    for (const [gruppe, liste] of Object.entries(daten)) tabelle(`${titel} — ${gruppe}`, hinweis, kopf, zeilenVon(liste));
+  } else tabelle(titel, hinweis, kopf, zeilenVon(daten));
+};
+
+const WZ = lade("spiele/wort-zwillinge/woerter.js", ["ZWILLINGE", "FALSCHE_FREUNDE"]);
+teil("## 28. Wort-Zwillinge (Lehrplan SG FS1E.2.B.1) — Parallelwörter", null, ["Englisch", "Deutsch", "Bild", "Liste"], WZ.ZWILLINGE);
+teil("### Falsche Freunde", null, ["Englisch", "Bedeutung", "sieht aus wie", "Bild"], WZ.FALSCHE_FREUNDE);
+const SB = lade("spiele/sentence-builder/saetze.js", ["SAETZE", "VERWECHSLER"]);
+teil("## 29. Sentence-Builder (Lehrplan SG FS1E.5.D.1)", "Britisches Englisch (have got).", ["Englisch", "Deutsch", "Liste"], SB.SAETZE);
+teil("### Verwechsler (falsche Form als zusätzliche Karte)", null, ["richtig", "falsch"], SB.VERWECHSLER);
+const LT = lade("spiele/listen-tap/hoeren.js", ["ANWEISUNG_FORMEN", "ANWEISUNG_FARBEN", "ANWEISUNG_VERBEN", "WO_TIERE", "WO_ORTE"]);
+teil("## 30. Listen & Tap (Lehrplan SG FS1E.1.A.1) — Formen", "Die Einzelwörter kommen aus Word-Match (Teil 9).", ["Form", "Angabe"], LT.ANWEISUNG_FORMEN);
+teil("### Farben", null, ["Farbe", "Bilder"], LT.ANWEISUNG_FARBEN);
+teil("### Anweisungen", null, ["Anweisung"], LT.ANWEISUNG_VERBEN);
+teil("### Wo ist das Tier? — Tiere", null, ["Englisch", "Bild"], LT.WO_TIERE);
+teil("### Wo ist das Tier? — Orte", null, ["Ding", "Präposition"], LT.WO_ORTE);
+const GK = lade("spiele/glace-kombinator/inhalte.js", ["GLACE_SORTEN", "KLEIDER"]);
+teil("## 31. Glace-Kombinator (Lehrplan SG MA.3.B.2) — Sorten", null, ["Sorte", "Farbe", "Buchstabe"], GK.GLACE_SORTEN);
+teil("### Kleider", null, ["Gruppe", "Bild", "Name"], GK.KLEIDER);
+const FH = lade("spiele/frueher-heute/dinge.js", ["FH_PAARE", "FH_REIHEN", "FH_GROSSELTERN"]);
+teil("## 32. Früher und heute (Lehrplan SG NMG.9.2) — Paare", "„svg:…“ = im Spiel gezeichnet.", ["Gruppe", "Bild früher", "früher", "Bild heute", "heute", "früher eindeutig"], FH.FH_PAARE);
+teil("### Reihen vom ältesten zum neusten", null, ["Gruppe", "Thema", "Reihe (Bild / Ding)"], FH.FH_REIHEN);
+teil("### Gab es das schon?", null, ["Bild", "Ding", "vor 60 Jahren", "vor 100 Jahren"], FH.FH_GROSSELTERN);
+const SW = lade("spiele/schulweg-profi/situationen.js", ["SW_SICHER", "SW_MERKSATZ", "SW_FRAGEN", "SW_SIGNALE"]);
+teil("## 33. Schulweg-Profi (Lehrplan SG NMG.1.2) — sicher oder gefährlich", "Verkehrsregeln aus dem Gedächtnis belegt (SVG, VTS) — bitte besonders prüfen.", ["Bild", "Situation", "sicher"], SW.SW_SICHER);
+teil("### Merksatz", null, ["Bild", "Mundart", "Hochdeutsch"], SW.SW_MERKSATZ);
+teil("### Fragen", null, ["ab Stufe", "Liste", "Bild", "Frage", "richtig", "falsch", "falsch", "Erklärung"], SW.SW_FRAGEN);
+teil("### Signale", null, ["Signal", "Bedeutung", "auch richtig"], SW.SW_SIGNALE);
+const WJ = lade("spiele/wetter-jahreszeiten/wetter.js", ["WJ_JAHRESZEITEN", "WJ_KLEIDUNG", "WJ_SYMBOLE", "WJ_FRAGEN"]);
+teil("## 34. Wetter und Jahreszeiten (Lehrplan SG NMG.4.4) — Jahreszeiten", null, ["ab Stufe", "Bild", "Beobachtung", "Jahreszeit"], WJ.WJ_JAHRESZEITEN);
+teil("### Kleidung", null, ["Bild", "Wetter", "richtig", "falsch", "falsch"], WJ.WJ_KLEIDUNG);
+teil("### Wettersymbole", null, ["Bild", "Name"], WJ.WJ_SYMBOLE);
+teil("### Fragen", null, ["ab Stufe", "Bild", "Frage", "richtig", "falsch", "falsch", "Erklärung"], WJ.WJ_FRAGEN);
+const ZS = lade("spiele/zeitstrahl-sortierer/zeitstrahl.js", ["ZS_ABSCHNITTE", "ZS_LEBEN", "ZS_GENERATIONEN", "ZS_EREIGNISSE", "ZS_EPOCHEN", "ZS_MERKMALE"]);
+teil("## 35. Zeitstrahl-Sortierer (Lehrplan SG NMG.9.1) — Lebensabschnitte", null, ["Bild", "Abschnitt"], ZS.ZS_ABSCHNITTE);
+teil("### Ereignisse im Leben", "Eintrittsalter für den Kanton St. Gallen.", ["Alter", "Bild", "Ereignis"], ZS.ZS_LEBEN);
+teil("### Generationen", null, ["Generation", "Bild", "Person"], ZS.ZS_GENERATIONEN);
+teil("### Ereignisse mit Jahrzahl", "Jahrzahlen bitte nachprüfen.", ["Jahr", "Jahrzahl", "Bild", "Ereignis", "Zeitalter"], ZS.ZS_EREIGNISSE);
+teil("### Zeitalter", null, ["Bild", "Zeitalter"], ZS.ZS_EPOCHEN);
+teil("### Merkmale der Zeitalter", null, ["Zeitalter", "Bild", "Merkmal"], ZS.ZS_MERKMALE);
+const ST = lade("spiele/stromkreis-bauer/bauteile.js", ["GEGENSTAENDE", "SCHALTUNGEN"]);
+teil("## 36. Stromkreis-Bauer (Lehrplan SG NMG.5.2) — Leiter und Nichtleiter", null, ["Bild", "Gegenstand", "leitet", "knifflig"], ST.GEGENSTAENDE);
+teil("### Schaltungen", "Kurzschrift im Kopf von bauteile.js; ob die Lampe brennt, rechnet das Spiel aus.", ["Liste", "Aufbau", "Zusatz"], ST.SCHALTUNGEN);
+const PL = lade("spiele/plan-leser/plaene.js", ["PLAN_DINGE"]);
+teil("## 37. Plan-Leser (Lehrplan SG NMG.8.5) — Dinge auf dem Plan", "Zeichen frei erfunden.", ["Name", "Dativ", "Mehrzahl", "Zeichen", "Farbe"], PL.PLAN_DINGE);
+const EE = lade("spiele/echt-oder-erfunden/texte.js", ["AUSSAGEN", "MERKMALE", "GESCHICHTEN", "STAUNEN", "TEXTSORTEN", "TEXTSORTEN_TEXTE"]);
+teil("## 38. Echt oder erfunden? (Lehrplan SG NMG.9.4) — Sätze", null, ["Bild", "Satz", "kann es geben", "Stufe 1"], EE.AUSSAGEN);
+teil("### Merkmale", null, ["Schlüssel", "Merkmal"], EE.MERKMALE);
+teil("### Geschichten", "Nummer des erfundenen Satzes, −1 = alles echt.", ["Sätze", "erfundener Satz", "Merkmal"], EE.GESCHICHTEN);
+teil("### Erstaunlich, aber wahr?", "Fakten bitte nachprüfen.", ["Satz", "stimmt"], EE.STAUNEN);
+teil("### Textsorten", null, ["Sorte", "Angaben"], EE.TEXTSORTEN);
+teil("### Texte zu den Textsorten", "Selbst geschrieben; die Sagen spielen an echten Orten.", ["Sorte", "Text"], EE.TEXTSORTEN_TEXTE);
+const GB = lade("spiele/gedicht-baukasten/gedichte.js", ["REIMPAARE", "VIERZEILER", "STROPHEN_GEDICHTE"]);
+teil("## 39. Gedicht-Baukasten (Lehrplan SG D.6.C.1) — Zweizeiler", "Alle Verse selbst verfasst.", ["Vers 1", "Vers 2", "Reimwort", "Wahl", "Wahl", "Wahl"], GB.REIMPAARE);
+teil("### Vierzeiler", null, ["Verse"], Object.fromEntries(Object.entries(GB.VIERZEILER).map(([k, v]) => [k, v.map(g => [g])])));
+teil("### Gedichte mit Strophen", null, ["Titel", "Strophen (Reimschema / Verse)"], GB.STROPHEN_GEDICHTE);
 process.stdout.write(zeilen.join("\n"));

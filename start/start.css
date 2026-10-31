@@ -98,6 +98,8 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
 .marke { font-size: 13px; font-weight: 800; border-radius: 999px; padding: 2px 10px; background: #eef0fb; }
 .marke.fokus { background: #fff1c2; }
 .marke.warnung { background: var(--hinweis-hell); color: #9a4b00; }
+a.marke.endlos-link { color: var(--knopf); text-decoration: none; background: #e6e9ff; }
+a.marke.endlos-link:hover { text-decoration: underline; }
 
 .stufenknoepfe { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 6px; }
 .stufenknopf {

@@ -72,6 +72,8 @@ function zeichneSpiele(box, neu) {
     const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") });
     k.style.setProperty("--f", s.farbe);
     const marken = s.lernziele.map(l => el("span", { class: "marke" + (fokus.includes(l.lz) ? " fokus" : ""), text: (fokus.includes(l.lz) ? "⭐ " : "") + l.lz }));
+    // Endlos startet im Startbild des Spiels (dort Stufe und Timer wählen); die Stufenknöpfe springen direkt in eine Runde.
+    if (s.endlos?.length) marken.push(el("a", { class: "marke endlos-link", href: s.pfad, title: "Endlos-Modus: so viele wie möglich ohne Fehler — Stufe im Spiel wählen", text: "♾ Endlos spielen" }));
     if (aufsicht && !frei) marken.unshift(el("span", { class: "marke warnung", text: "🔒 für Kinder nicht sichtbar" }));
     k.append(
       el("button", { type: "button", class: "stern-knopf", "aria-pressed": String(favorit), "aria-label": favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten",

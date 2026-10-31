@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spelling-Bee</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(17px, 3.8vw, 22px); font-weight: 800; margin: 2px 0 8px; color: var(--text-leise); }
+  .spb-hoer { display: block; margin: 0 auto 10px; border: none; border-radius: 999px; padding: 12px 26px; font-family: inherit;
+    font-size: clamp(20px, 4.4vw, 26px); font-weight: 900; background: var(--deko-4); color: var(--text); box-shadow: 0 5px 0 var(--deko-3); cursor: pointer; }
+  .spb-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-3); }
+  .spb-bild { text-align: center; font-size: clamp(56px, 13vw, 84px); line-height: 1.1; margin-bottom: 4px; }
+  .wortkarte { text-align: center; font-size: clamp(28px, 6vw, 40px); font-weight: 900; letter-spacing: 2px; color: var(--deko-6); margin-bottom: 6px; }
+  .spb-de { text-align: center; font-size: clamp(18px, 4vw, 22px); font-weight: 700; color: var(--text-leise); margin-bottom: 6px; }
+  .spb-felder { display: flex; justify-content: center; gap: 6px; min-height: 58px; margin: 6px 0 14px; flex-wrap: wrap; }
+  .spb-felder span { width: clamp(30px, 8vw, 44px); height: 54px; border-bottom: 4px solid var(--deko-6); display: flex; align-items: center;
+    justify-content: center; font-size: clamp(24px, 6vw, 32px); font-weight: 900; }
+  .spb-kacheln { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; max-width: 640px; margin: 0 auto; }
+  .spb-kachel { width: 52px; height: 58px; border: none; border-radius: 12px; font-family: inherit; font-size: 28px; font-weight: 900;
+    background: #fff; color: var(--text); box-shadow: 0 4px 0 var(--rand); cursor: pointer; }
+  .spb-kachel:disabled { opacity: .25; }
+  .spb-kachel.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🐝 Spelling-Bee</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../word-match/woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS1E.5.E.1: a Wörter korrekt abschreiben und, auch lautgetreu, aufschreiben;
+// b häufige Wörter richtig schreiben. Das Wort wird über die Stimme des Geräts gesprochen und aus
+// Buchstaben gelegt. Basisklasse 4 (Orientierungspunkt 2. Zyklus). Wörter aus word-match/woerter.js
+// (Verweis im Katalog, gleiche Listen-Ids). Die Wendungen bleiben weg, sie sind keine Einzelwörter;
+// das Wetter auch: Seine fünf Wörter allein ergeben keine Runde mit acht verschiedenen Aufgaben.
+
+const { waehle, mische, el } = LS;
+const ID = "spelling-bee";
+const ABC = "abcdefghijklmnopqrstuvwxyz";
+
+const WM_THEMEN = ["farben", "tiere", "zahlen", "essen", "familie", "koerper", "schule"];
+const LISTEN = [...new Set(WM_THEMEN.map(t => THEMEN_EN[t].liste))];
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : LISTEN);
+const FREIE_WOERTER = WM_THEMEN.map(t => THEMEN_EN[t]).filter(t => FREI.has(t.liste)).flatMap(t => t.woerter);
+
+/** Buchstaben, die man leicht verwechselt (Laut oder Bild) — für die überzähligen Kacheln der Königsstufe. */
+const VERWECHSELBAR = { a: "eu", e: "ai", i: "ey", o: "ua", u: "oa", b: "pd", p: "bq", d: "tb", t: "d", c: "ks", k: "cg", g: "kj",
+  s: "zc", z: "s", v: "wf", w: "v", f: "v", m: "n", n: "m", r: "l", l: "r", y: "i", j: "g", q: "k", x: "ks", h: "" };
+
+// Je Stufe: Bild zeigen, Wort zeigen (abschreiben), deutsches Wort zeigen, Wortlänge, überzählige Kacheln.
+// Basisklasse 4: s1 = 3. Klasse, s5 = 5. Klasse.
+const STUFE = {
+  s1: { bild: true, wort: true, max: 5, extra: 0 },
+  s2: { bild: true, max: 5, extra: 0 },
+  s3: { bild: true, max: 7, extra: 0 },
+  s4: { deutsch: true, extra: 1 },
+  s5: { min: 5, extra: 2 },
+  s6: { extra: 3, verwechselbar: true },
+};
+
+/**
+ * Wörter der Stufe aus den freien Listen. Geben die freien Listen zu wenige Wörter der passenden
+ * Länge her, nimmt die Stufe die acht kürzesten (bzw. längsten) — so läuft keine Stufe leer
+ * und eine Runde mit acht Aufgaben geht auf (höchstens eine Aufgabe zweimal).
+ */
+function vorrat(stufe) {
+  const st = STUFE[stufe];
+  const passt = FREIE_WOERTER.filter(w => (!st.max || w[0].length <= st.max) && (!st.min || w[0].length >= st.min));
+  if (passt.length >= 8 || (!st.max && !st.min)) return passt;
+  return FREIE_WOERTER.slice().sort((a, b) => (st.max ? a[0].length - b[0].length : b[0].length - a[0].length)).slice(0, 8);
+}
+
+/** n Buchstaben, die im Wort nicht vorkommen; verwechselbar: zuerst solche, die Buchstaben des Worts ähneln. */
+function ueberzaehlig(ziel, n, verwechselbar) {
+  const fehlt = b => !ziel.includes(b);
+  const nah = verwechselbar ? mische([...new Set([...ziel].flatMap(b => [...(VERWECHSELBAR[b] || "")]))].filter(fehlt)) : [];
+  const rest = mische([...ABC].filter(b => fehlt(b) && !nah.includes(b)));
+  return [...nah, ...rest].slice(0, n);
+}
+
+/** Eine Aufgabe: Wort, Kacheln (Buchstaben des Worts und überzählige), was gezeigt wird. */
+function aufgabeErzeugen(stufe) {
+  const woerter = vorrat(stufe);
+  if (!woerter.length) return null;
+  const [en, de, bild] = waehle(woerter);
+  const st = STUFE[stufe];
+  const extra = ueberzaehlig(en, st.extra, !!st.verwechselbar);
+  return { en, de, bild, extra, kacheln: mische([...en, ...extra]), loesung: `${bild} ${en} = ${de}` };
+}
+
+const STUFEN_TEXT = {
+  s1: "Abschreiben: Wort sehen, hören und aus Buchstaben legen.",
+  s2: "Kurze Wörter: Bild und Ton, ohne geschriebenes Wort.",
+  s3: "Längere Wörter mit Bild und Ton.",
+  s4: "Nur hören (mit deutschem Wort) — ein Buchstabe ist zu viel.",
+  s5: "Lange Wörter nur hören — zwei Buchstaben sind zu viel.",
+  s6: "Endgegner: nur hören, drei Buchstaben zum Verwechseln.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => vorrat(s).length));
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!vorrat(stufe).some(w => w[0] === a.en && w[1] === a.de && w[2] === a.bild)) m.push("Wort nicht aus den freien Listen der Stufe");
+  if (!/^[a-z]+$/.test(a.en)) m.push("Wort mit Zeichen, die keine Kleinbuchstaben sind");
+  const rest = a.kacheln.slice();
+  for (const b of a.en) { const i = rest.indexOf(b); if (i < 0) m.push("Buchstabe fehlt in den Kacheln"); else rest.splice(i, 1); }
+  if (rest.length !== STUFE[stufe].extra) m.push(`${rest.length} statt ${STUFE[stufe].extra} überzählige Kacheln`);
+  if (rest.some(b => a.en.includes(b))) m.push("überzählige Kachel kommt im Wort vor");
+  if (new Set(a.extra).size !== a.extra.length) m.push("überzählige Kachel doppelt");
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  return m;
+}
+
+const SPIEL = {
+  id: ID,
+  einleitung: "Spelling Bee! Hör das englische Wort und leg es aus Buchstaben. Mit 🔊 hörst du es nochmal.",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const st = STUFE[ctx.stufe];
+    const ziel = a.en;
+    ctx.kennung(ziel);
+    ctx.loesung(a.loesung);
+    ctx.flaeche.append(el("div", { class: "frage", text: st.wort ? "Hör zu, schau genau und leg das Wort:" : "Hör zu und leg das Wort:" }));
+    ctx.flaeche.append(el("button", { type: "button", class: "spb-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => LS.sprich(ziel, "en") }));
+    if (st.bild) ctx.flaeche.append(el("div", { class: "spb-bild", text: a.bild }));
+    if (st.wort) ctx.flaeche.append(el("div", { class: "wortkarte", text: ziel }));
+    if (st.deutsch) ctx.flaeche.append(el("div", { class: "spb-de", text: `auf Deutsch: ${a.de}` }));
+    const felder = el("div", { class: "spb-felder", "aria-live": "polite" });
+    const slots = [...ziel].map(() => { const s = el("span"); felder.append(s); return s; });
+    const kacheln = el("div", { class: "spb-kacheln" });
+    let pos = 0;
+    let fertig = false;
+    for (const b of a.kacheln) {
+      const k = el("button", { type: "button", class: "spb-kachel", text: b });
+      k.addEventListener("click", () => {
+        if (fertig || k.disabled) return;
+        if (b === ziel[pos]) {
+          slots[pos].textContent = b; pos++; k.disabled = true; LS.ton("tipp");
+          if (pos === ziel.length) { fertig = true; LS.sprich(ziel, "en"); ctx.richtig(`Great! ${ziel}`); }
+          return;
+        }
+        k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+        const hinweis = !ziel.includes(b) ? `„${b}“ kommt im Wort nicht vor. Hör nochmal genau hin: 🔊`
+          : st.wort ? `Der nächste Buchstabe ist nicht „${b}“. Schau genau auf das Wort.`
+          : `Der nächste Buchstabe ist nicht „${b}“. Hör nochmal genau hin: 🔊`;
+        ctx.falsch(hinweis, a.loesung);
+        if (ctx.vorbei()) { fertig = true; slots.forEach((s, i) => { s.textContent = ziel[i]; }); }
+      });
+      kacheln.append(k);
+    }
+    ctx.flaeche.append(felder, kacheln);
+    LS.sprich(ziel, "en");
+    if (ctx.nr === 0) ctx.sag("Tipp die Buchstaben der Reihe nach an. Mit 🔊 hörst du das Wort nochmal.");
+  },
+};
+
+// Startet sofort, wenn eine englische Stimme da ist; sonst wartet es kurz oder erklärt, dass sie fehlt.
+LS.spielMitStimme(SPIEL, "en");
+</script>
+</body>
+</html>

@@ -65,3 +65,64 @@ ist dagegen `.d`, proportionale Tabellen mit Geld.
 
 Alle neuen Inhaltslisten gelten als **ungeprüft** und stehen in der Prüfliste in den Teilen
 22–27 (`docs/pruefung/wortlisten_zur_pruefung.md`).
+
+## Zweites Paket: 19 Spiele aus den übrigen Ideen (Entscheid Patrik G1 a, G2 a)
+
+Alle 19 Spiele sind im Katalog als `neu` eingetragen und damit für Kinder gesperrt, bis sie angesehen
+sind. Die Codes stammen aus [lehrplan_sg_spielideen.md](../spielideen/lehrplan_sg_spielideen.md);
+an sg.lehrplan.ch sind sie in dieser Sitzung nicht neu nachgelesen.
+
+| Lernziel | Spiel | Basisklasse | Stufen im Spiel (s1 → s6) |
+|---|---|---|---|
+| MA.2.A.2 Abbilden, zerlegen (`.e` OP parkettieren) | Pentomino-Puzzle | 4 | Vierlinge vergleichen → 3 Vierlinge legen → Fünflinge → 3 Pentominos, Rechteck → 4 Pentominos, „nur gedreht“ → 5–6 Pentominos |
+| MA.2.C.1 Würfelgebäude (`.e` OP Ansichten) | Würfelbau-Blick | 4 | Würfel zählen → Ansicht von oben → Ansichten vorne/oben/rechts → Höhe 3, „von wo?“ → Bauplan → Ansicht von hinten/links |
+| MA.2.C.3 Netze (`.d`) | Netz-Falter | 4 | Würfelnetz wählen → ja/nein → Gegenüber → Spielwürfel → Quadernetze → Prisma, Pyramide |
+| MA.1.B.3 Hilfsmittel (`.d` OP Flussdiagramm) | Rechen-Maschine | 4 | ein Kasten → zwei → mit ×/: und Regel finden → drei Kästen → bis 10 000 → Weiche |
+| MA.1.B.1 Erforschen (`.e/.f` offene Aufgaben) | Zielzahl-Jagd | 4 | 3 Karten, + − → mit × → 4 Karten, alle Zeichen → Zielzahl bis 200 → bis 999 → alle Karten verbrauchen |
+| MA.3.B.2 Kombinatorik (`.b` OP) | Glace-Kombinator | 4 | Kleider 2×2 → Becher → Becher und Cornet, zählen → doppelte Sorten → Türme → 3 Kugeln, 4 Gruppen |
+| MI.2.2 Informatik (`.a`) | Roboter-Pfad | 2 | befolgen → legen → mit Steinen → falsche Karte → Wiederholungen → Bedingungen |
+| NMG.9.2 Früher – heute (`.b/.c`, `.e`) | Früher und heute | 2 | früher oder heute → Ersatz von heute → Paare, Reihen → umgekehrt → vor 60 Jahren → vor 100 Jahren |
+| NMG.1.2 Gefahren (`.b`) | Schulweg-Profi | 2 | sicher/gefährlich → Lichtsignal, Merksatz → queren → Signale → Velo → ohne Trottoir, gemischt |
+| NMG.4.4 Wetter (`1c/1d` OP) | Wetter und Jahreszeiten | 4 | Jahreszeiten → Kleidung, Thermometer → Symbole → Wetterbericht → Wetterwissen → Föhn, gemischt |
+| NMG.9.1 Zeitbegriffe (`.e/.f` OP) | Zeitstrahl-Sortierer | 4 | Lebensabschnitte → Generationen → Familie auf dem Zeitstrahl → Alter rechnen → Jahrzahlen, Zeitalter → Jahrhundert, 4 Generationen |
+| NMG.5.2 Elektrizität (`1b`, `1c/1d`) | Stromkreis-Bauer | 4 | geschlossen/offen → Schalter → Leiter → Kurzschluss → Serie/parallel → drei Lampen |
+| NMG.8.5 Orientierung (`.c`–`.f`) | Plan-Leser | 4 | Zeichen → Lage → Massstab → Weglänge → Weg beschreiben → vier Wegstücke |
+| NMG.9.4 Fiktion und Realität (`.a`, `.c`) | Echt oder erfunden? | 2 | eindeutige Sätze → alle Sätze → Geschichten → erstaunliche Fakten → Merkmal → Textsorten |
+| D.6.C.1 Literarische Gestaltung (`.e` OP) | Gedicht-Baukasten | 4 | Reimwort → Reimfalle → Vers, Strophe → Verse ordnen → Reimschema → Strophen |
+| FS1E.2.B.1 Lesestrategien (`.b`) | Wort-Zwillinge | 4 | gleiche Wörter → ähnliche → Englisch → Deutsch → Deutsch → Englisch → falsche Freunde → gemischt |
+| FS1E.5.D.1 Satzstrukturen (`.a/.b`) | Sentence-Builder | 4 | Ich-Sätze → länger → 3. Person → mit falscher Karte → Fragen, Verneinung → gemischt |
+| FS1E.1.A.1 Hörverstehen (`.a`–`.c`) | Listen & Tap | 4 | Wort hören → mehr Themen → Farbe und Form → „The cat is under the table“ → mehr Bilder → gemischt |
+| FS1E.5.E.1 Rechtschreibung (`.a/.b`) | Spelling-Bee | 4 | abschreiben → Bild und Ton → bis 7 Buchstaben → nur Ton → lange Wörter → Verwechsler |
+
+Endlos-Modus: Rechen-Maschine, Zielzahl-Jagd, Roboter-Pfad, Würfelbau-Blick, Netz-Falter (ausser Stufe 2).
+Nicht gebaut: Tipp-Trainer (braucht eine Tastatur), Schweiz-Karten-Suche (Kartendaten mit Lizenz),
+Mots-Match (Französisch ab 5. Klasse).
+
+### Annahmen, mit dem Lehrmittel abzugleichen
+
+**Mathematik**
+- Pentomino-Puzzle: Stufen 5–6 über dem OP sind eine eigene Fortsetzung; Wörter „Vierling/Fünfling“, „spiegeln (umklappen)“.
+- Würfelbau-Blick: Blick von vorne rechts oben, Ansicht von oben mit „vorne unten“, Bauplan mit Höhenzahlen (ohne 0); zählt Stufe 5 tragende, unsichtbare Würfel mit?
+- Netz-Falter: Begriffe „Dreiecksprisma“ und „Pyramide“ (quadratische Grundfläche); kommen Prismen und Pyramiden in der 5./6. Klasse vor?
+- Zielzahl-Jagd: Gerechnet wird in Schritten (zwei Karten → neue Karte) statt mit Punkt vor Strich und Klammern.
+- Rechen-Maschine: Heissen die Kästen „Rechenmaschine“, „Zahlenautomat“ oder „Flussdiagramm“? Weiche „gerade?“ in Stufe 6.
+- Glace-Kombinator: Becher = „Reihenfolge egal“, Cornet = „Reihenfolge zählt“; Namen der Kleider (Trägershirt, Zylinder, Halbschuhe).
+- Roboter-Pfad: Befehle „vor / links / rechts“ mit ↺ ↻, Raster A1–F6, „Wiederhole n-mal“, „Wenn vorne frei“.
+- Rechen-Maschine, Zielzahl-Jagd, Glace-Kombinator: Malzeichen × wie in den übrigen Spielen.
+
+**NMG**
+- Schulweg-Profi: Signale vereinfacht nachgebaut (mit der Signalisationsverordnung abgleichen); Merksatz „Warte, luege, lose, laufe“ in Mundart; Glocken- und Bremsenpflicht und „ohne Trottoir links gehen“ aus dem Gedächtnis belegt.
+- Wetter und Jahreszeiten: Gehören Thermometer und Wettersymbole zum OP 1c/1d? Zuordnungen „am besten“ (Kirschen → Sommer, Frösche wandern → Frühling); Temperaturbereiche im Wetterbericht.
+- Früher und heute: „vor etwa 60 Jahren“ für die Kindheit der Grosseltern; Fernseher und Kugelschreiber vor 60 bzw. 100 Jahren.
+- Zeitstrahl-Sortierer: Jahrzahlen (Gallus 612, Kanton St. Gallen 1803, Eisenbahn 1847, Bundesstaat 1848, Frauenstimmrecht 1971, Gotthard-Basistunnel 2016); Zeitalter vereinfacht (ohne Bronze- und Eisenzeit); Eintrittsalter für den Kanton St. Gallen.
+- Stromkreis-Bauer: Bleistiftmine leitet (schwach), Kieselstein als Nichtleiter; Schaltzeichen statt Bildzeichnungen; „Lampe brennt“ statt „leuchtet“.
+- Plan-Leser: Massstab 1 Feld = 10 m (Schulzimmer 1 m); Lage auf dem Plan („rechts neben“, „direkt über“); Wege aus der Sicht des Gehenden; Zeichen frei erfunden.
+- Echt oder erfunden?: Sagen selbst geschrieben, aber an echten Orten; Fakten (Krake drei Herzen, Giraffe sieben Halswirbel, Eisbär mit schwarzer Haut, Kuhmagen vier Teile).
+
+**Deutsch und Englisch**
+- Gedicht-Baukasten: Reime fürs Schweizer Ohr (Gras/Spass, Zoo/froh); Begriffe „umarmender Reim“, aabb/abab/abba.
+- Wort-Zwillinge, Sentence-Builder, Listen & Tap, Spelling-Bee: britisches Englisch mit „have got“; Zuordnung der Lehrplan-Buchstaben zu den Stufen.
+- Wort-Zwillinge: falsche Freunde für die 5. Klasse (kind, handy, chef, art, map, become, chips).
+- Listen & Tap: Anweisungen „Touch / Point to / Find the …“; die Sprachausgabe hängt vom Gerät ab.
+
+Die Inhaltslisten des zweiten Pakets stehen in der Prüfliste in den Teilen 28–39.

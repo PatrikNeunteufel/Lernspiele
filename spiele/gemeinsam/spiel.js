@@ -277,13 +277,16 @@ const LS = (() => {
     delete alle[name];
     schreibe("profile", alle);
     schreibe("protokoll", protokoll().filter(e => e.name !== name));
+    schreibe("rekorde", rekorde().filter(e => e.name !== name));
     if (lies("spieler", null) === name) schreibe("spieler", null);
   }
 
   /** Spielstand zurücksetzen: die Runden eines Kindes löschen — alle oder nur die eines Spiels.
       Profil, Klasse, Fokus und Timer bleiben. */
   function loescheRunden(name, spielId = null) {
-    schreibe("protokoll", protokoll().filter(e => e.name !== name || (spielId && e.spiel !== spielId)));
+    const bleibt = e => e.name !== name || (spielId && e.spiel !== spielId);
+    schreibe("protokoll", protokoll().filter(bleibt));
+    schreibe("rekorde", rekorde().filter(bleibt));
   }
 
   /**
@@ -297,6 +300,10 @@ const LS = (() => {
     const bekannt = new Set(runden.map(schluessel));
     const neu = daten.protokoll.filter(e => e && e.name && e.zeit && !bekannt.has(schluessel(e)));
     schreibe("protokoll", [...runden, ...neu].sort((a, b) => (a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0)));
+    // Endlos-Rekorde ebenso: gleiche Runde (Kind, Zeit, Spiel, Stufe) zählt einmal.
+    const alteRekorde = rekorde();
+    const bekannteRekorde = new Set(alteRekorde.map(schluessel));
+    schreibe("rekorde", [...alteRekorde, ...(daten.rekorde || []).filter(e => e && e.name && e.zeit && !bekannteRekorde.has(schluessel(e)))]);
     const alle = profile();
     const neueKinder = Object.keys(daten.profile).filter(n => !(n in alle));
     for (const n of neueKinder) alle[n] = { ...LEERES_PROFIL, ...daten.profile[n] };
@@ -329,10 +336,85 @@ const LS = (() => {
   const protokoll = () => lies("protokoll", []);
   function protokolliere(eintrag) { schreibe("protokoll", [...protokoll(), eintrag]); }
 
+  // ---------- Endlos-Rekorde (Vorgabe Patrik 2026-10-31) ----------
+  // lernspiele:rekorde = [{ name, zeit, spiel, stufe, timer (Sekunden oder null), punkte, dauer,
+  //   alles?, test?, hilfe? }] — eine Zeile je Endlos-Runde, getrennt vom Protokoll der Runden.
+  // Verglichen wird nur bei gleichem Timer (ohne, oder mit derselben Zeit je Aufgabe). Das Format ist
+  // so gewählt, dass es später auch an einen Server gehen könnte (Rangliste nach Alter, Klasse, Region
+  // — noch Idee); heute bleibt alles im Browser.
+  const rekorde = () => lies("rekorde", []);
+  function speichereRekord(eintrag) { schreibe("rekorde", [...rekorde(), eintrag]); }
+  /** Stufen, die den Endlos-Modus anbieten (Katalog: endlos). */
+  const endlosStufen = spielId => katalogEintrag(spielId)?.endlos || [];
+  const gleicherModus = (e, spiel, stufe, timer) => e.spiel === spiel && e.stufe === stufe && (e.timer ?? null) === (timer ?? null);
+  function besterRekord(name, spiel, stufe, timer) {
+    return rekorde().filter(e => e.name === name && gleicherModus(e, spiel, stufe, timer)).reduce((m, e) => Math.max(m, e.punkte), 0);
+  }
+  /** Rangliste: bester Wert je Spieler, ohne Testrunden und ohne Aufsicht, absteigend. */
+  function ranglisteFuer(spiel, stufe, timer) {
+    const beste = new Map();
+    for (const e of rekorde()) {
+      if (e.test || istAufsicht(e.name) || !gleicherModus(e, spiel, stufe, timer)) continue;
+      if (!beste.has(e.name) || e.punkte > beste.get(e.name).punkte) beste.set(e.name, e);
+    }
+    return [...beste.values()].sort((a, b) => b.punkte - a.punkte || (a.zeit < b.zeit ? -1 : 1));
+  }
+
   function besteSterne(name, spiel, stufe) {
     return protokoll()
       .filter(e => e.name === name && e.spiel === spiel && e.stufe === stufe)
       .reduce((m, e) => Math.max(m, e.sterne), 0);
+  }
+
+  // ---------- Sprachausgabe (Entscheid G2 a) ----------
+  // Offline nur über die Stimmen des Geräts (speechSynthesis); welche es gibt, hängt vom Gerät ab.
+
+  // Bevorzugte Varianten: britisches Englisch wie im Schweizer Lehrmittel, Schweizer bzw. deutsches Deutsch.
+  const BEVORZUGT = { en: ["en-gb", "en"], de: ["de-ch", "de-de", "de"] };
+  /** Stimme für eine Sprache ("en", "de", …) oder null; zuerst die bevorzugte Variante. */
+  function stimme(sprache) {
+    try {
+      const stimmen = speechSynthesis.getVoices();
+      for (const lang of BEVORZUGT[sprache] || [sprache]) {
+        const v = stimmen.find(s => (s.lang || "").toLowerCase().replace("_", "-").startsWith(lang));
+        if (v) return v;
+      }
+      return null;
+    } catch { return null; }
+  }
+  /** Gibt es eine Stimme für die Sprache? Wartet kurz, weil manche Browser die Stimmen erst nachladen. */
+  function stimmeBereit(sprache) {
+    if (stimme(sprache)) return Promise.resolve(true);
+    return new Promise(fertig => {
+      let erledigt = false;
+      const ende = () => { if (!erledigt) { erledigt = true; fertig(!!stimme(sprache)); } };
+      try { speechSynthesis.addEventListener("voiceschanged", ende, { once: true }); } catch { /* ohne Ereignis */ }
+      setTimeout(ende, 1500);
+    });
+  }
+  /** Text vorlesen (ruhiges Tempo); false, wenn es keine Stimme gibt. */
+  function sprich(text, sprache = "en") {
+    const v = stimme(sprache);
+    if (!v) return false;
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.voice = v;
+      u.lang = v.lang;
+      u.rate = 0.85;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+      return true;
+    } catch { return false; }
+  }
+  /**
+   * Spiel starten, das eine Stimme braucht: sofort, wenn sie schon da ist (so auch im Testskript),
+   * sonst nach stimmeBereit. Ohne Stimme erklärt die Eule es und bietet keine Runde an.
+   */
+  function spielMitStimme(def, sprache = "en") {
+    const ohne = () => spiel({ ...def, stufen: {},
+      einleitung: "Oh! Dieses Gerät hat keine passende Stimme, darum kannst du hier nichts hören. Bitte einen Erwachsenen, eine Stimme einzuschalten, oder spiel ein anderes Spiel." });
+    if (stimme(sprache)) spiel(def);
+    else stimmeBereit(sprache).then(ok => (ok ? spiel(def) : ohne()));
   }
 
   // ---------- Töne ----------
@@ -761,6 +843,19 @@ const LS = (() => {
         stufen.append(knopf);
       }
       karte.append(stufen);
+      // Endlos: so viele wie möglich bis zum ersten Fehler — nur Stufen mit genug verschiedenen Aufgaben (Katalog).
+      const endlosListe = stufenListe.filter(st => endlosStufen(def.id).includes(st.id));
+      if (endlosListe.length) {
+        const mitTimer = st => (timerFuer(name, def.id, st.id).an ? timerFuer(name, def.id, st.id).sekunden : null);
+        karte.append(el("div", { class: "endlos-wahl" },
+          el("b", { text: "♾ Endlos — wie viele schaffst du ohne Fehler?" }),
+          el("div", { class: "endlos-knoepfe" }, ...endlosListe.map(st => {
+            const rekord = besterRekord(name, def.id, st.id, mitTimer(st));
+            const k = el("button", { class: "knopf hell klein", type: "button", onclick: () => runde(st, true) },
+              `${st.icon} ${st.nr}`, el("small", { text: rekord ? ` · Rekord ${rekord}` : "" }));
+            return k;
+          }))));
+      }
       buehne.append(karte);
     }
 
@@ -773,11 +868,16 @@ const LS = (() => {
         .slice(0, 240);
     }
 
-    function runde(stufe) {
+    /**
+     * Eine Runde. endlos (Vorgabe Patrik 2026-10-31): Aufgaben, bis die erste falsch ist oder die Zeit
+     * um ist; gezählt werden die richtigen. Rekord je Spieler, Spiel, Stufe und mit/ohne Timer.
+     */
+    function runde(stufe, endlos = false) {
       if (!zugang()) return;
       const name = aktuellerSpieler();
       const timer = timerFuer(name, def.id, stufe.id);
       let nr = 0;
+      let geschafft = 0; // Endlos: richtig gelöste Aufgaben
       let fehler = 0;
       const beginn = Date.now();
       const fehlerAufgaben = [];
@@ -785,15 +885,19 @@ const LS = (() => {
       let uhr = null;            // laufender Timer der aktuellen Aufgabe
       // Wiederholungen (Vorgabe Patrik 2026-10-31): In einer Runde kommt höchstens eine Aufgabe ein
       // zweites Mal, nie direkt hintereinander. Gibt die Stufe nicht genug verschiedene Aufgaben her,
-      // endet die Runde früher (anzahl wird kleiner).
-      let anzahl = def.anzahl;
+      // endet die Runde früher (anzahl wird kleiner). Endlos: keine der letzten 30 Aufgaben nochmal;
+      // findet sich keine neue mehr, ist alles geschafft.
+      let anzahl = endlos ? Infinity : def.anzahl;
       const gestellt = new Map(); // Kennung → wie oft gestellt
       let wiederholt = false;
       let letzte = null;
+      const zuletzt = []; // Endlos: die letzten Kennungen
+      let allesGeschafft = false;
       buehne.innerHTML = "";
 
-      const punkte = el("div", { class: "fortschritt" });
-      for (let i = 0; i < def.anzahl; i++) punkte.append(el("span"));
+      const punkte = el("div", { class: "fortschritt" + (endlos ? " endlos" : "") });
+      if (endlos) punkte.textContent = "♾ 0";
+      else for (let i = 0; i < def.anzahl; i++) punkte.append(el("span"));
       const karte = el("div", { class: "karte" });
       const flaeche = el("div");
       const eule = euleZeile();
@@ -817,8 +921,9 @@ const LS = (() => {
 
       function naechste() {
         clearTimeout(uhr);
-        if (nr >= anzahl) return schluss();
-        [...punkte.children].forEach((p, i) => {
+        if (nr >= anzahl) return endlos ? schlussEndlos() : schluss();
+        if (endlos) punkte.textContent = `♾ ${geschafft}`;
+        else [...punkte.children].forEach((p, i) => {
           p.classList.toggle("fertig", i < nr);
           p.classList.toggle("aktiv", i === nr);
         });
@@ -878,8 +983,20 @@ const LS = (() => {
             fehlerEintrag("").zeitUm = true;
             zeitleiste.classList.add("um");
             ton("falsch");
+            if (endlos) return endlosVorbei("⏰ Die Zeit ist um!");
             eule.sag("⏰ Die Zeit ist um! Mach die Aufgabe trotzdem fertig.", "hinweis");
           }, timer.sekunden * 1000);
+        }
+
+        /** Endlos: erste falsche Antwort oder Zeit um — Lösung zeigen, dann zum Ergebnis. */
+        function endlosVorbei(text) {
+          erledigt = true;
+          abschliessen(false);
+          const loesung = loesungVorab;
+          eule.sag(`${text}${loesung ? ` Schau mal: ${loesung}` : ""}`, "hinweis");
+          const weiter = el("button", { class: "knopf", type: "button", text: "Zum Ergebnis ➜", onclick: schlussEndlos });
+          flaeche.append(el("div", { class: "knopfzeile" }, weiter));
+          weiter.focus();
         }
 
         const ctx = {
@@ -906,7 +1023,8 @@ const LS = (() => {
             ton("richtig");
             eule.sag(text || waehle(LOB), "gut");
             nr++;
-            setTimeout(naechste, 1300);
+            if (endlos) { geschafft++; punkte.textContent = `♾ ${geschafft}`; }
+            setTimeout(naechste, endlos ? 900 : 1300);
           },
           falsch(hinweis, loesungText) {
             if (erledigt) return;
@@ -914,8 +1032,12 @@ const LS = (() => {
             fehler++;
             fehlerEintrag(loesungText).versuche = versuche;
             ton("falsch");
-            const aufgeloest = versuche >= 3 && !!loesungText;
+            const aufgeloest = endlos || (versuche >= 3 && !!loesungText);
             pruefung.haken?.("falsch", { nr, hinweis: hinweis || "", loesung: loesungText || "", aufgeloest, flaeche, vorab: loesungVorab });
+            if (endlos) {
+              if (loesungText && !loesungVorab) loesungVorab = loesungText;
+              return endlosVorbei("Schade, das war nicht richtig.");
+            }
             if (aufgeloest) {
               erledigt = true;
               abschliessen(false);
@@ -934,14 +1056,20 @@ const LS = (() => {
           def.aufgabe(ctx);
           const k = kennung(flaeche, loesungVorab, eigeneKennung);
           const n = k ? gestellt.get(k) || 0 : 0;
-          if (n === 0 || (n === 1 && !wiederholt && k !== letzte)) {
+          if (endlos ? !k || !zuletzt.includes(k) : n === 0 || (n === 1 && !wiederholt && k !== letzte)) {
+            if (endlos && k) { zuletzt.push(k); if (zuletzt.length > 30) zuletzt.shift(); }
             if (n) wiederholt = true;
             if (k) gestellt.set(k, n + 1);
             letzte = k;
             pruefung.haken?.("gestellt", { nr, kennung: k });
             break;
           }
-          if (versuch >= 60) { clearTimeout(uhr); anzahl = nr; return schluss(); }
+          if (versuch >= 60) {
+            clearTimeout(uhr);
+            anzahl = nr;
+            if (endlos) { allesGeschafft = true; return schlussEndlos(); }
+            return schluss();
+          }
           flaeche.innerHTML = "";
           loesungVorab = null;
           eigeneKennung = null;
@@ -1013,12 +1141,53 @@ const LS = (() => {
           : "Du hast durchgehalten! Spiel nochmal, dann wird es leichter.", "gut");
       }
 
+      /** Endlos: Ergebnis speichern, Rekord und Rangliste zeigen. */
+      function schlussEndlos() {
+        clearTimeout(uhr);
+        const mitTimer = timer.an ? timer.sekunden : null;
+        const vorher = besterRekord(name, def.id, stufe.id, mitTimer);
+        speichereRekord({
+          name, zeit: new Date().toISOString(), spiel: def.id, stufe: stufe.id, timer: mitTimer, punkte: geschafft,
+          dauer: Math.round((Date.now() - beginn) / 1000),
+          ...(allesGeschafft ? { alles: true } : {}), ...(test ? { test: true } : {}), ...(hilfen ? { hilfe: hilfen } : {}),
+        });
+        const neuerRekord = geschafft > 0 && geschafft > vorher;
+        ton("fertig");
+        if (neuerRekord) konfetti();
+        buehne.innerHTML = "";
+        const karte = el("div", { class: "karte schluss mitte" });
+        const eule = euleZeile();
+        karte.append(
+          el("div", { class: "auftrag", text: `♾ ${geschafft} richtig in Folge!` }),
+          eule.element,
+          rangliste(def.id, stufe.id, mitTimer, name),
+          el("div", { class: "knopfzeile" },
+            el("button", { class: "knopf gruen", type: "button", text: "♾ Nochmal", onclick: () => runde(stufe, true) }),
+            el("button", { class: "knopf hell", type: "button", text: "Andere Stufe", onclick: stufenwahl })));
+        buehne.append(karte);
+        eule.sag(allesGeschafft ? "Unglaublich — du hast alle Aufgaben dieser Stufe geschafft! 🏆"
+          : neuerRekord ? `Neuer Rekord, ${name}! 🎉` + (vorher ? ` Vorher waren es ${vorher}.` : "")
+          : vorher ? `Dein Rekord bleibt ${vorher}. Gleich nochmal?` : "Gut gemacht! Schaffst du nächstes Mal mehr?", "gut");
+      }
+
       naechste();
     }
 
-    // ?stufe=<id> startet direkt in dieser Stufe (Startseite verlinkt so ein erweitertes Lernziel).
-    const direkt = stufenListe.find(st => st.id === new URLSearchParams(location.search).get("stufe"));
-    if (direkt) runde(direkt);
+    /** Rangliste als kleine Tabelle: bester Wert je Spieler (ohne Testrunden), der eigene hervorgehoben. */
+    function rangliste(spiel, stufeId, mitTimer, ich) {
+      const liste = ranglisteFuer(spiel, stufeId, mitTimer);
+      if (!liste.length) return el("div");
+      return el("div", { class: "rangliste" },
+        el("b", { text: `Rangliste ${mitTimer ? `(mit Timer ${mitTimer} s)` : "(ohne Timer)"}` }),
+        el("ol", {}, ...liste.slice(0, 10).map(r => el("li", { class: r.name === ich ? "ich" : "" },
+          el("span", { text: r.name }), el("b", { text: String(r.punkte) })))));
+    }
+
+    // ?stufe=<id> startet direkt in dieser Stufe (Startseite verlinkt so ein erweitertes Lernziel),
+    // mit &endlos=1 im Endlos-Modus, wenn die Stufe ihn anbietet.
+    const adresse = new URLSearchParams(location.search);
+    const direkt = stufenListe.find(st => st.id === adresse.get("stufe"));
+    if (direkt) runde(direkt, adresse.get("endlos") === "1" && endlosStufen(def.id).includes(direkt.id));
     else stufenwahl();
   }
 
@@ -1040,7 +1209,8 @@ const LS = (() => {
     reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein",
       "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
       "spieler-zeile",
-      "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "zeitleiste", "zeitbalken", "testhilfe"],
+      "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "zeitleiste", "zeitbalken", "testhilfe",
+      "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ich"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
@@ -1052,6 +1222,7 @@ const LS = (() => {
     freigabe, spielFrei, spielZuPruefen, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, vorgabeZeit, timerFuer, setzeTimerSpiel, zeitVorschlag,
+    stimmeBereit, sprich, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen,
     protokoll, besteSterne, auswahl, reihenfolge, fliegen, koerbe, pruefung, RAHMEN_KLASSEN,
   };
 })();

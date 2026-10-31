@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stromkreis-Bauer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 6px; }
+  .strom-zusatz { text-align: center; font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; color: var(--text-leise); margin: 0 0 6px; }
+  .schaltbild { display: block; width: min(440px, 100%); margin: 0 auto 10px; }
+  .schaltbild .draht { fill: none; stroke: var(--text); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+  .schaltbild .bruecke { fill: none; stroke: var(--deko-3); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+  .schaltbild .deckel { fill: var(--karte); }
+  .schaltbild .platte { stroke: var(--text); stroke-linecap: butt; }
+  .schaltbild .lampe { fill: #fff; stroke: var(--text); stroke-width: 3; }
+  .schaltbild .kreuz { stroke: var(--text); stroke-width: 2.5; }
+  .schaltbild .strahlen { stroke: #f5b301; stroke-width: 3; stroke-linecap: round; display: none; }
+  .schaltbild .lampe-g.an .lampe { fill: #ffd43b; }
+  .schaltbild .lampe-g.an .strahlen { display: inline; }
+  .schaltbild .fassung { fill: none; stroke: var(--text-leise); stroke-width: 3; stroke-dasharray: 5 4; }
+  .schaltbild .punkt { fill: var(--text); }
+  .schaltbild .ende { fill: var(--karte); stroke: var(--text); stroke-width: 2; }
+  .schaltbild .bruecke-punkt { fill: var(--deko-3); }
+  .schaltbild .klemme { fill: var(--deko-7); }
+  .schaltbild text { font-family: var(--schrift); font-weight: 900; fill: var(--text); }
+  .schaltbild .pol { font-size: 24px; }
+  .schaltbild .name { font-size: 20px; fill: var(--deko-6); }
+  .schaltbild .ding { font-size: 26px; }
+  .schaltbild .ding-name { font-size: 12px; font-weight: 800; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>💡 Stromkreis-Bauer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="bauteile.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.5.2 (Elektrizität): 1a Batterie und Pole (1. Zyklus); 1b einfacher Stromkreis mit
+// Batterie, Lampe, Schalter, Leiter und Nichtleiter (2. Zyklus, Orientierungspunkt Ende 4. Klasse);
+// 1c/1d Serie- und Parallelschaltung. Basisklasse 4: s1 3. Klasse, s5 5. Klasse, s6 Königsstufe.
+// Ob eine Lampe brennt, rechnet das Spiel aus dem Schaltbild aus (Knotenregel, Lampen als gleiche
+// Widerstände, Drähte ohne Widerstand): Kurzschluss = Plus- und Minuspol sind ohne Lampe verbunden,
+// dann brennt keine Lampe. Schaltungen und Gegenstände stehen in bauteile.js.
+
+const { waehle, mische, el } = LS;
+const ID = "stromkreis-bauer";
+const SVG = "http://www.w3.org/2000/svg";
+
+// ---------- Schaltungen lesen ----------
+
+/** Aufbau-Text aus bauteile.js → { parallel, oben, rechts, unten, zweige, pol, umgekehrt, kurz }. */
+function aufbau(text, zusatz) {
+  const z = { pol: zusatz === "pol", umgekehrt: zusatz === "umgekehrt", kurz: zusatz.startsWith("kurz:") ? zusatz.slice(5) : null };
+  const m = text.match(/^(\S+) \[(.+) \/ (.+)\] (\S+)$/);
+  if (m) return { parallel: true, oben: m[1], zweige: [m[2].split(" "), m[3].split(" ")], unten: m[4], ...z };
+  const [oben, rechts, unten] = text.split(" ");
+  return { parallel: false, oben, rechts, unten, ...z };
+}
+
+const SCH = SCHALTUNGEN.map(([liste, text, zusatz], i) => ({ i, liste, text, zusatz, ...aufbau(text, zusatz) }));
+const plaetze = s => (s.parallel ? [s.oben, ...s.zweige.flat(), s.unten] : [s.oben, s.rechts, s.unten]);
+const istLampe = c => /^L[ABC]?0?$/.test(c);
+const lampeName = c => (/^L[ABC]/.test(c) ? c[1] : "L");
+/** Namen der Lampen (auch herausgedrehte) in der Reihenfolge A, B, C. */
+const lampenVon = s => plaetze(s).filter(istLampe).map(lampeName).sort();
+const herausgedreht = s => plaetze(s).filter(c => /^L[ABC]0$/.test(c)).map(lampeName).sort();
+
+// ---------- Physik ----------
+
+/** Knoten und Leitungen: Drähte, geschlossene Schalter und leitende Gegenstände ohne Widerstand, Lampen mit gleichem Widerstand. */
+function netz(s, leitet) {
+  const kanten = [];
+  const P = 0, M = 1;
+  let n = 2;
+  const neu = () => n++;
+  const glied = (c, a, b) => {
+    if (c === "D" || c === "S1" || (c === "G" && leitet)) kanten.push({ a, b, lampe: null });
+    else if (/^L[ABC]?$/.test(c)) kanten.push({ a, b, lampe: lampeName(c) });
+  };
+  const ort = { batterie: [P, M] };
+  if (!s.parallel) {
+    const n1 = neu(), n2 = neu(), ende = s.pol ? P : M;
+    glied(s.oben, P, n1); glied(s.rechts, n1, n2); glied(s.unten, n2, ende);
+    Object.assign(ort, { oben: [P, n1], rechts: [n1, n2], unten: [n2, ende] });
+  } else {
+    const a = neu(), b = neu();
+    glied(s.oben, P, a);
+    glied(s.unten, b, M);
+    Object.assign(ort, { oben: [P, a], unten: [b, M] });
+    s.zweige.forEach(([z1, z2], i) => {
+      const m = neu();
+      glied(z1, a, m);
+      glied(z2, m, b);
+      ort["zweig" + (i + 1)] = [a, m];
+    });
+  }
+  if (s.kurz) kanten.push({ a: ort[s.kurz][0], b: ort[s.kurz][1], lampe: null });
+  return { kanten, knoten: n, P, M };
+}
+
+/** Welche Lampen brennen? { kurzschluss, brennt: Set der Namen } — Knotenregel mit Gauss-Elimination. */
+function loese(nz) {
+  const eltern = [...Array(nz.knoten).keys()];
+  const f = x => (eltern[x] === x ? x : (eltern[x] = f(eltern[x])));
+  for (const k of nz.kanten) if (!k.lampe) eltern[f(k.a)] = f(k.b);
+  const P = f(nz.P), M = f(nz.M);
+  const brennt = new Set();
+  if (P === M) return { kurzschluss: true, brennt };
+  const lampen = nz.kanten.filter(k => k.lampe).map(k => ({ name: k.lampe, a: f(k.a), b: f(k.b) })).filter(k => k.a !== k.b);
+  // Gruppen, die der Strom vom Pluspol über Lampen erreicht
+  const erreicht = new Set([P]);
+  for (let neu = true; neu;) {
+    neu = false;
+    for (const k of lampen) for (const [x, y] of [[k.a, k.b], [k.b, k.a]]) if (erreicht.has(x) && !erreicht.has(y)) { erreicht.add(y); neu = true; }
+  }
+  if (!erreicht.has(M)) return { kurzschluss: false, brennt };
+  const unbekannt = [...erreicht].filter(x => x !== P && x !== M);
+  const idx = new Map(unbekannt.map((x, i) => [x, i]));
+  const u = unbekannt.length;
+  const A = unbekannt.map(() => Array(u + 1).fill(0));
+  for (const k of lampen) {
+    if (!erreicht.has(k.a)) continue;
+    for (const [x, y] of [[k.a, k.b], [k.b, k.a]]) {
+      if (!idx.has(x)) continue;
+      const r = idx.get(x);
+      A[r][r] += 1;
+      if (y === P) A[r][u] += 1;
+      else if (y !== M) A[r][idx.get(y)] -= 1;
+    }
+  }
+  for (let c = 0; c < u; c++) {
+    let p = c;
+    for (let r = c + 1; r < u; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+    [A[c], A[p]] = [A[p], A[c]];
+    for (let r = 0; r < u; r++) {
+      if (r === c || !A[r][c]) continue;
+      const q = A[r][c] / A[c][c];
+      for (let k = c; k <= u; k++) A[r][k] -= q * A[c][k];
+    }
+  }
+  const V = x => (x === P ? 1 : x === M ? 0 : A[idx.get(x)][u] / A[idx.get(x)][idx.get(x)]);
+  for (const k of lampen) if (erreicht.has(k.a) && Math.abs(V(k.a) - V(k.b)) > 1e-9) brennt.add(k.name);
+  return { kurzschluss: false, brennt };
+}
+
+const ergebnis = (s, g) => loese(netz(s, g ? g[2] : false));
+
+// Was hindert die Lampe am Brennen? Jeder Mangel lässt sich einzeln beheben.
+const GRUENDE = {
+  schalter: "Der Schalter ist offen.",
+  draht: "Ein Draht ist nicht angeschlossen.",
+  gegenstand: "Der Gegenstand leitet den Strom nicht.",
+  pol: "Beide Drähte sind am gleichen Pol.",
+  kurz: "Kurzschluss: Der Strom fliesst an der Lampe vorbei.",
+};
+function maengel(s, g) {
+  const m = [];
+  for (const c of plaetze(s)) {
+    if (c === "S0") m.push("schalter");
+    if (c === "X") m.push("draht");
+    if (c === "G" && !g[2]) m.push("gegenstand");
+  }
+  if (s.pol) m.push("pol");
+  if (s.kurz) m.push("kurz");
+  return m;
+}
+/** Dieselbe Schaltung mit behobenem Mangel. */
+function behoben(s, mangel) {
+  const t = { ...s, oben: s.oben, rechts: s.rechts, unten: s.unten, zweige: s.zweige };
+  const ersetze = c => (mangel === "schalter" && c === "S0" ? "S1" : mangel === "draht" && c === "X" ? "D" : c);
+  t.oben = ersetze(s.oben); t.unten = ersetze(s.unten);
+  if (s.parallel) t.zweige = s.zweige.map(z => z.map(ersetze)); else t.rechts = ersetze(s.rechts);
+  if (mangel === "pol") t.pol = false;
+  if (mangel === "kurz") t.kurz = null;
+  return t;
+}
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : STROM_LISTEN);
+const SCH_FREI = SCH.filter(s => FREI.has(s.liste));
+const DINGE = FREI.has("leiter") ? GEGENSTAENDE.map((g, i) => i) : [];
+
+/** Alle Paare (Schaltung, Gegenstand oder null) aus den freien Listen, die die Bedingung erfüllen. */
+function paare(bedingung, dingFilter = () => true) {
+  const liste = [];
+  for (const s of SCH_FREI) {
+    if (plaetze(s).includes("G")) { for (const d of DINGE) if (dingFilter(GEGENSTAENDE[d]) && bedingung(s, GEGENSTAENDE[d])) liste.push([s.i, d]); }
+    else if (bedingung(s, null)) liste.push([s.i, null]);
+  }
+  return liste;
+}
+
+const eineLampe = s => lampenVon(s).length === 1;
+/** Taugt die Schaltung für „Warum brennt die Lampe nicht?“: genau ein Mangel, und ohne ihn brennt sie. */
+function warumGrund(s, g) {
+  if (!eineLampe(s) || ergebnis(s, g).brennt.size) return null;
+  const m = maengel(s, g);
+  if (m.length !== 1) return null;
+  const t = behoben(s, m[0]);
+  return ergebnis(t, m[0] === "gegenstand" ? [g[0], g[1], true] : g).brennt.size ? m[0] : null;
+}
+
+const welcheText = (brennt, alle) => {
+  const b = [...brennt].sort();
+  if (!b.length) return "keine";
+  if (b.length === alle.length) return b.length === 2 ? `${b[0]} und ${b[1]}` : `${b.slice(0, -1).join(", ")} und ${b[b.length - 1]}`;
+  return "nur " + (b.length === 1 ? b[0] : `${b.slice(0, -1).join(", ")} und ${b[b.length - 1]}`);
+};
+/** Alle Teilmengen der Lampen als Antworttext. */
+function teilmengen(alle) {
+  const t = [];
+  for (let m = 0; m < 1 << alle.length; m++) t.push(welcheText(new Set(alle.filter((_, i) => m & (1 << i))), alle));
+  return t;
+}
+
+// ---------- Aufgabenarten (null, wenn die freien Listen nichts hergeben) ----------
+
+const ARTEN = {
+  /** Brennt die Lampe? Ja und nein etwa gleich oft. */
+  brennt(listen, dingFilter = g => !g[3]) {
+    const alle = paare((s, g) => listen(s) && eineLampe(s), dingFilter);
+    if (!alle.length) return null;
+    const ja = alle.filter(([i, d]) => ergebnis(SCH[i], GEGENSTAENDE[d]).brennt.size);
+    const nein = alle.filter(p => !ja.includes(p));
+    const [i, d] = waehle(ja.length && nein.length ? (Math.random() < 0.5 ? ja : nein) : alle);
+    return { art: "brennt", sch: i, ding: d, richtig: ja.some(p => p[0] === i && p[1] === d) ? "ja" : "nein", optionen: ["ja", "nein"] };
+  },
+  /** Gegenstand in den Korb: leitet er den Strom? */
+  korb(dingFilter = g => !g[3]) {
+    const liste = DINGE.filter(d => dingFilter(GEGENSTAENDE[d]));
+    if (!liste.length) return null;
+    const d = waehle(liste);
+    return { art: "korb", sch: null, ding: d, richtig: GEGENSTAENDE[d][2] ? "leitet" : "nicht", optionen: ["leitet", "nicht"] };
+  },
+  /** Warum brennt die Lampe nicht? */
+  warum() {
+    const alle = paare((s, g) => !!warumGrund(s, g), () => true);
+    if (!alle.length) return null;
+    const [i, d] = waehle(alle);
+    const richtig = warumGrund(SCH[i], GEGENSTAENDE[d]);
+    const andere = mische(Object.keys(GRUENDE).filter(k => k !== richtig)).slice(0, 2);
+    return { art: "warum", sch: i, ding: d, richtig, optionen: mische([richtig, ...andere]) };
+  },
+  /** Kurzschluss-Schaltungen: brennt die Lampe, oder gibt es einen Kurzschluss? */
+  kurz() {
+    const liste = SCH_FREI.filter(s => s.liste === "kurzschluss");
+    if (!liste.length) return null;
+    const s = waehle(liste);
+    const e = ergebnis(s, null);
+    if (Math.random() < 0.5) return { art: "brennt", sch: s.i, ding: null, richtig: e.brennt.size ? "ja" : "nein", optionen: ["ja", "nein"] };
+    return { art: "kurzfrage", sch: s.i, ding: null, richtig: e.kurzschluss ? "ja" : "nein", optionen: ["ja", "nein"] };
+  },
+  /** Welche Lampen brennen? maxLampen: 2 (Stufe 5) oder 3; mitKurz: auch Schaltungen mit zusätzlichem Draht. */
+  welche(maxLampen, mitKurz) {
+    const liste = SCH_FREI.filter(s => s.liste === "serie-parallel" && lampenVon(s).length <= maxLampen && (mitKurz || !s.kurz));
+    if (!liste.length) return null;
+    const s = waehle(liste);
+    const alle = lampenVon(s);
+    const richtig = welcheText(ergebnis(s, null).brennt, alle);
+    const andere = mische(teilmengen(alle).filter(t => t !== richtig)).slice(0, 3);
+    return { art: "welche", sch: s.i, ding: null, richtig, optionen: mische([richtig, ...andere]) };
+  },
+};
+
+const nurListe = l => s => s.liste === l;
+// Je Stufe die Arten (mehrfach genannt = häufiger).
+const STUFE = {
+  s1: [() => ARTEN.brennt(s => s.liste === "einfach" && !s.zusatz)],
+  s2: [() => ARTEN.brennt(nurListe("einfach")), () => ARTEN.brennt(nurListe("schalter"))],
+  s3: [() => ARTEN.brennt(nurListe("leiter")), () => ARTEN.korb(), () => ARTEN.brennt(nurListe("schalter"))],
+  s4: [() => ARTEN.warum(), () => ARTEN.warum(), () => ARTEN.kurz(), () => ARTEN.brennt(nurListe("leiter"), g => g[3])],
+  s5: [() => ARTEN.welche(2, false)],
+  // Königsstufe: drei Lampen, Kurzschluss über eine Lampe, dazu Warum und Kurzschluss gemischt
+  s6: [() => ARTEN.welche(3, true), () => ARTEN.welche(3, true), () => ARTEN.kurz(), () => ARTEN.warum(), () => ARTEN.korb(() => true)],
+};
+
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Batterie, Lampe, Drähte: Ist der Stromkreis geschlossen?",
+  s2: "Mit Schalter, und beide Drähte am selben Pol.",
+  s3: "Leiter oder Nichtleiter: Was leitet den Strom?",
+  s4: "Kurzschluss! Und: Warum brennt die Lampe nicht?",
+  s5: "Zwei Lampen in Serie oder parallel.",
+  s6: "Drei Lampen, Kurzschluss über eine Lampe, alles gemischt.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+// ---------- Prüfung (tools/pruefe_spiele.js) ----------
+
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  const s = a.sch === null ? null : SCH[a.sch];
+  const g = a.ding === null ? null : GEGENSTAENDE[a.ding];
+  if (s && !FREI.has(s.liste)) m.push(`Schaltung nicht aus einer freien Liste (${s.liste})`);
+  if (g && !FREI.has("leiter")) m.push("Gegenstand nicht aus einer freien Liste");
+  if (s && plaetze(s).includes("G") !== !!g) m.push("Gegenstand und Lücke passen nicht");
+  if (new Set(a.optionen).size !== a.optionen.length || a.optionen.filter(o => o === a.richtig).length !== 1) m.push("Antworten doppelt oder richtige fehlt");
+  if (JSON.stringify(a).includes("ß") || (g && g[1].includes("ß"))) m.push("ß");
+  if (s && plaetze(s).some(c => !/^(D|S0|S1|X|G|L[ABC]?0?)$/.test(c))) m.push("unbekanntes Bauteil " + s.text);
+  const e = s ? ergebnis(s, g) : null;
+  if (a.art === "brennt") {
+    if (!eineLampe(s)) m.push("Brennt-Frage mit mehreren Lampen");
+    if (a.richtig !== (e.brennt.size ? "ja" : "nein")) m.push("Lösung falsch");
+  } else if (a.art === "kurzfrage") {
+    if (a.richtig !== (e.kurzschluss ? "ja" : "nein")) m.push("Lösung falsch");
+  } else if (a.art === "korb") {
+    if (a.richtig !== (g[2] ? "leitet" : "nicht")) m.push("Lösung falsch");
+  } else if (a.art === "warum") {
+    if (warumGrund(s, g) !== a.richtig) m.push("Grund falsch oder nicht eindeutig");
+  } else if (a.art === "welche") {
+    if (a.richtig !== welcheText(e.brennt, lampenVon(s))) m.push("Lösung falsch");
+    if (e.kurzschluss && e.brennt.size) m.push("Kurzschluss, aber Lampe brennt");
+  }
+  // Stufen
+  if (stufe === "s1" && (s.liste !== "einfach" || s.zusatz)) m.push("Stufe 1 nur einfache Schaltungen");
+  if (stufe === "s5" && (a.art !== "welche" || lampenVon(s).length > 2 || s.kurz)) m.push("Stufe 5 nur zwei Lampen ohne Kurzschluss");
+  if (g && g[3] && ["s1", "s2", "s3"].includes(stufe)) m.push("knifflige Gegenstände erst ab Stufe 4");
+  if (stufe === "s4" && a.art === "brennt" && g && !g[3]) m.push("Stufe 4: Gegenstand nicht knifflig");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+// Plätze im Bild: x, y, senkrecht? Die Batterie steht links bei (40|125).
+const ORTE_SERIE = { oben: [170, 40, false], rechts: [300, 125, true], unten: [170, 210, false] };
+const ORTE_PARALLEL = { oben: [110, 40, false], unten: [110, 210, false], zweig1: [[200, 90], [200, 160]], zweig2: [[300, 90], [300, 160]] };
+// Zusätzlicher Draht (Kurzschluss-Brücke): [Pfad, Anfang x, y, Ende x, y]
+const BRUECKEN_SERIE = {
+  batterie: ["M40 92H12V158H40", 40, 92, 40, 158], oben: ["M136 40V12H204V40", 136, 40, 204, 40],
+  rechts: ["M300 91H328V159H300", 300, 91, 300, 159], unten: ["M136 210V238H204V210", 136, 210, 204, 210],
+};
+const BRUECKEN_PARALLEL = {
+  batterie: ["M40 92H12V158H40", 40, 92, 40, 158], oben: ["M76 40V12H144V40", 76, 40, 144, 40],
+  unten: ["M76 210V238H144V210", 76, 210, 144, 210],
+  zweig1: ["M200 62H226V118H200", 200, 62, 200, 118], zweig2: ["M300 62H328V118H300", 300, 62, 300, 118],
+};
+
+const STRAHLEN = [0, 45, 90, 135, 180, 225, 270, 315].map(w => {
+  const r = w * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
+  return `M${(19 * c).toFixed(1)} ${(19 * s).toFixed(1)}L${(27 * c).toFixed(1)} ${(27 * s).toFixed(1)}`;
+}).join("");
+
+/** Ein Bauteil an (x|y); waagrecht gezeichnet und bei senkrecht gedreht. Beschriftungen stehen aufrecht daneben. */
+function bauteil(c, x, y, senkrecht, g) {
+  if (c === "D") return "";
+  let teil = '<rect class="deckel" x="-24" y="-18" width="48" height="36"/>';
+  let text = "";
+  const neben = (t, klasse) => (senkrecht
+    ? `<text class="${klasse}" x="${x - 34}" y="${y + 7}" text-anchor="end">${t}</text>`
+    : `<text class="${klasse}" x="${x}" y="${y < 125 ? y + 44 : y - 30}" text-anchor="middle">${t}</text>`);
+  if (istLampe(c)) {
+    const name = lampeName(c);
+    if (c.endsWith("0")) teil += '<path class="draht" d="M-24 0H-15M15 0H24"/><circle class="fassung" r="15"/>';
+    else teil += `<g class="lampe-g" data-lampe="${name}"><path class="strahlen" d="${STRAHLEN}"/><path class="draht" d="M-24 0H-15M15 0H24"/><circle class="lampe" r="15"/><path class="kreuz" d="M-10.6 -10.6L10.6 10.6M-10.6 10.6L10.6 -10.6"/></g>`;
+    if (name !== "L") text += neben(name, "name");
+  } else if (c === "S1") {
+    teil += '<path class="draht" d="M-24 0H-13M13 0H24M-13 0L13 0"/><circle class="punkt" cx="-13" r="3.5"/><circle class="punkt" cx="13" r="3.5"/>';
+  } else if (c === "S0") {
+    teil += '<path class="draht" d="M-24 0H-13M13 0H24M-13 0L9 -14"/><circle class="punkt" cx="-13" r="3.5"/><circle class="punkt" cx="13" r="3.5"/>';
+  } else if (c === "X") {
+    teil += '<path class="draht" d="M-24 0H-7M24 0H12L4 -13"/><circle class="ende" cx="-7" r="3"/><circle class="ende" cx="4" cy="-13" r="3"/>';
+  } else if (c === "G") {
+    teil += '<path class="draht" d="M-24 0H-15M15 0H24"/><rect class="klemme" x="-19" y="-5" width="7" height="10" rx="2"/><rect class="klemme" x="12" y="-5" width="7" height="10" rx="2"/>';
+    text += `<text class="ding" x="${x}" y="${y + 9}" text-anchor="middle">${g[0]}</text>` + neben(g[1], "ding-name");
+  }
+  return `<g transform="translate(${x} ${y})${senkrecht ? " rotate(90)" : ""}">${teil}</g>${text}`;
+}
+
+/** Schaltbild als SVG-Element. */
+function schaltbild(s, g) {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", "0 0 340 250");
+  svg.setAttribute("class", "schaltbild");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", "Schaltbild");
+  let teile = "";
+  // Drähte
+  if (s.parallel) teile += '<path class="draht" d="M40 103V40H300V210H40V147M200 40V210"/><circle class="punkt" cx="200" cy="40" r="5"/><circle class="punkt" cx="200" cy="210" r="5"/>';
+  else if (s.pol) teile += '<path class="draht" d="M40 103V40H300V210H14V86H40"/><circle class="punkt" cx="40" cy="86" r="5"/>';
+  else teile += '<path class="draht" d="M40 103V40H300V210H40V147"/>';
+  // Batterie: lange dünne Platte = Pluspol, kurze dicke = Minuspol
+  const [yPlus, yMinus] = s.umgekehrt ? [133, 117] : [117, 133];
+  teile += '<rect class="deckel" x="20" y="104" width="40" height="42"/>';
+  teile += s.pol ? '<path class="draht" d="M40 103V117M40 133V143"/><circle class="ende" cx="40" cy="146" r="3"/>' : '<path class="draht" d="M40 103V117M40 133V147"/>';
+  teile += `<path class="platte" d="M22 ${yPlus}H58" stroke-width="3"/><path class="platte" d="M32 ${yMinus}H48" stroke-width="8"/>`;
+  teile += `<text class="pol" x="68" y="${yPlus + 8}">+</text><text class="pol" x="68" y="${yMinus + 8}">−</text>`;
+  // Bauteile
+  if (s.parallel) {
+    teile += bauteil(s.oben, ...ORTE_PARALLEL.oben, g) + bauteil(s.unten, ...ORTE_PARALLEL.unten, g);
+    s.zweige.forEach((z, i) => z.forEach((c, j) => { teile += bauteil(c, ...ORTE_PARALLEL["zweig" + (i + 1)][j], true, g); }));
+  } else {
+    for (const ort of ["oben", "rechts", "unten"]) teile += bauteil(s[ort], ...ORTE_SERIE[ort], g);
+  }
+  if (s.kurz) {
+    const [d, x1, y1, x2, y2] = (s.parallel ? BRUECKEN_PARALLEL : BRUECKEN_SERIE)[s.kurz];
+    teile += `<path class="bruecke" d="${d}"/><circle class="bruecke-punkt" cx="${x1}" cy="${y1}" r="5"/><circle class="bruecke-punkt" cx="${x2}" cy="${y2}" r="5"/>`;
+  }
+  svg.innerHTML = teile;
+  return svg;
+}
+
+function zeigeLicht(svg, brennt) {
+  for (const l of svg.querySelectorAll(".lampe-g")) l.classList.toggle("an", brennt.has(l.getAttribute("data-lampe")));
+}
+
+// ---------- Spiel ----------
+
+const ANTWORT = {
+  brennt: { ja: { bild: "💡", text: "Sie brennt" }, nein: { bild: "⚫", text: "Sie brennt nicht" } },
+  kurzfrage: { ja: { bild: "⚠️", text: "Ja, Kurzschluss" }, nein: { bild: "✅", text: "Nein" } },
+  korb: { leitet: { bild: "⚡", text: "leitet Strom" }, nicht: { bild: "🚫", text: "leitet nicht" } },
+};
+const HINWEIS = {
+  brennt: "Fahre mit dem Finger vom Pluspol (+) durch die Lampe zum Minuspol (−). Ist der Weg überall geschlossen?",
+  kurz: "Schau dir den orangen Draht genau an: Kann der Strom einen Weg ohne Lampe nehmen?",
+  kurzfrage: "Ein Kurzschluss heisst: Plus und Minus sind direkt verbunden, ohne Lampe dazwischen.",
+  korb: "Ist der Gegenstand aus Metall? Oder aus Holz, Kunststoff, Gummi, Papier, Stoff, Wachs oder Stein?",
+  warum: "Suche die Stelle, an der der Strom nicht weiterkommt oder die Lampe umgeht.",
+  welche: "Verfolge den Strom von + nach −. Ein Weg durch eine Lampe muss ganz geschlossen sein.",
+};
+
+function loesungText(a, s, g, e) {
+  if (a.art === "korb") return `${g[1]}: ${g[2] ? "leitet den Strom" : "leitet den Strom nicht"}.`;
+  if (a.art === "kurzfrage") return e.kurzschluss ? "Ja, das ist ein Kurzschluss: Plus und Minus sind ohne Lampe verbunden." : "Nein, kein Kurzschluss: Der Strom muss durch die Lampe.";
+  if (a.art === "warum") return GRUENDE[a.richtig];
+  if (a.art === "welche") return e.brennt.size ? `Es brennen: ${welcheText(e.brennt, lampenVon(s))}.` : "Keine Lampe brennt.";
+  if (e.brennt.size) return "Die Lampe brennt: Der Stromkreis ist geschlossen.";
+  const m = maengel(s, g);
+  return "Die Lampe brennt nicht. " + (m.length ? m.map(k => GRUENDE[k]).join(" ") : "");
+}
+
+LS.spiel({
+  id: ID,
+  einleitung: "Batterie, Drähte, Lampe: Brennt das Licht? Bau im Kopf mit! Experimentiere nur mit Batterien, nie mit der Steckdose.",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const s = a.sch === null ? null : SCH[a.sch];
+    const g = a.ding === null ? null : GEGENSTAENDE[a.ding];
+    const e = s ? ergebnis(s, g) : null;
+    const loesung = loesungText(a, s, g, e);
+    ctx.kennung(`${a.art}|${a.sch}|${a.ding}`);
+    if (a.art === "korb") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Leitet das den Strom?" }));
+      LS.koerbe(ctx, {
+        karte: { bild: g[0], text: g[1] }, koerbe: a.optionen, richtig: a.richtig, korbInhalt: k => ANTWORT.korb[k],
+        hinweis: HINWEIS.korb, loesung,
+      });
+      return;
+    }
+    const frage = { brennt: "Brennt die Lampe?", kurzfrage: "Gibt es einen Kurzschluss?", warum: "Warum brennt die Lampe nicht?", welche: "Welche Lampen brennen?" }[a.art];
+    ctx.flaeche.append(el("div", { class: "frage", text: frage }));
+    const raus = herausgedreht(s);
+    const zusatz = [
+      g ? `In der Lücke: ${g[1]}` : "",
+      raus.length ? `Lampe ${raus.join(" und ")} ist herausgedreht.` : "",
+      s.kurz ? "Orange: ein zusätzlicher Draht." : "",
+    ].filter(Boolean).join(" · ");
+    if (zusatz) ctx.flaeche.append(el("div", { class: "strom-zusatz auftrag", text: zusatz }));
+    const bild = schaltbild(s, g);
+    ctx.flaeche.append(bild);
+    const hinweis = a.art === "brennt" && s.kurz ? HINWEIS.kurz : HINWEIS[a.art];
+    const inhalt = a.art === "warum" ? k => GRUENDE[k] : a.art === "welche" ? k => k : k => ANTWORT[a.art][k];
+    LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.richtig, inhalt, hinweis, loesung, breite: a.art === "warum" ? 260 : 150,
+      beiRichtig: () => zeigeLicht(bild, e.brennt),
+    });
+    if (ctx.nr === 0) ctx.sag("Schau das Schaltbild genau an. Wo kann der Strom fliessen?");
+  },
+});
+</script>
+</body>
+</html>

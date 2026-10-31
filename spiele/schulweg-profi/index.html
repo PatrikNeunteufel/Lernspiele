@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schulweg-Profi</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  .sw-bild { text-align: center; font-size: clamp(52px, 12vw, 72px); line-height: 1.1; margin: 0 0 10px; }
+  /* Signale nach der Signalisationsverordnung, vereinfacht */
+  .sw-signal { position: relative; width: 104px; height: 104px; margin: 0 auto 12px; display: grid; place-items: center; box-sizing: border-box; }
+  .sw-signal.sw-klein { width: 76px; height: 76px; margin: 0; }
+  .sw-signal svg { width: 100%; height: 100%; display: block; }
+  .sw-piktogramm { font-size: 50px; line-height: 1; filter: brightness(0); position: relative; }
+  .sw-klein .sw-piktogramm { font-size: 36px; }
+  .sw-verbot { border-radius: 50%; background: #fff; border: 13px solid #d52b1e; }
+  .sw-klein.sw-verbot { border-width: 9px; }
+  .sw-gebot { border-radius: 50%; background: #1f5fae; border: 3px solid #fff; box-shadow: 0 0 0 2px #1f5fae; }
+  .sw-gebot .sw-piktogramm, .sw-hinweis .sw-weiss { filter: brightness(0) invert(1); }
+  .sw-hinweis { border-radius: 10px; background: #1f5fae; border: 3px solid #fff; box-shadow: 0 0 0 2px #1f5fae; }
+  .sw-hinweis .sw-dreieck { position: absolute; inset: 10% 8% 12%; background: #fff; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  .sw-hinweis .sw-piktogramm { font-size: 34px; top: 8px; }
+  .sw-klein.sw-hinweis .sw-piktogramm { font-size: 24px; top: 6px; }
+  /* Fussgänger-Lichtsignal: oben rot (stehen), unten grün (gehen) */
+  .sw-ampel { width: 74px; margin: 0 auto 12px; padding: 8px; background: #2b2f36; border-radius: 14px; display: grid; gap: 8px; }
+  .sw-licht { width: 58px; height: 58px; border-radius: 50%; background: #474d57; display: grid; place-items: center; font-size: 34px; }
+  .sw-licht span { filter: brightness(0); opacity: .35; }
+  .sw-licht.an.rot { background: #e5322d; }
+  .sw-licht.an.gruen { background: #1fa84f; }
+  .sw-licht.an span { opacity: 1; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🚸 Schulweg-Profi</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="situationen.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.1.2.b (Grundanspruch 1. Zyklus): sich vor Gefahren schützen, zum Beispiel im
+// Strassenverkehr. Schweizer Regeln und Signale; Inhalte und Quellen in situationen.js.
+
+const { waehle, mische, el } = LS;
+const ID = "schulweg-profi";
+
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : SW_LISTEN);
+const SICHER = FREI.has("sicher-gefaehrlich") ? SW_SICHER : [];
+const SIGNALE = FREI.has("signale") ? SW_SIGNALE : [];
+const FRAGEN = SW_FRAGEN.filter(f => FREI.has(f[1]));
+
+const KORB = { sicher: { bild: "✅", text: "sicher" }, gefaehrlich: { bild: "⚠️", text: "gefährlich" } };
+const HINWEIS = {
+  queren: "Überleg: Wo sehen dich die Autofahrer gut, und wann ist es ganz sicher?",
+  velo: "Überleg: Was hilft, dass dich alle sehen und hören? Was schützt dich?",
+};
+
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
+const ARTEN = {
+  korb() {
+    if (!SICHER.length) return null;
+    const [bild, text, sicher] = waehle(SICHER);
+    return { art: "korb", bild, text, richtig: sicher ? "sicher" : "gefaehrlich" };
+  },
+  /** Fragen einer Liste bis zu dieser Stufe; nurAb: nur Fragen genau dieser Stufe. */
+  frage(liste, n, nurAb = false) {
+    const passend = FRAGEN.filter(f => (!liste || f[1] === liste) && (nurAb ? f[0] === n : f[0] <= n));
+    if (!passend.length) return null;
+    const [ab, l, bild, frage, richtig, f1, f2, erklaerung] = waehle(passend);
+    return { art: "frage", ab, liste: l, bild, frage, richtig, optionen: mische([richtig, f1, f2].filter(Boolean)), erklaerung };
+  },
+  merksatz() {
+    return FREI.has("queren") ? { art: "merksatz", reihe: SW_MERKSATZ.map(m => m[1]) } : null;
+  },
+  /** Signal → Bedeutung (vor) oder Bedeutung → Signal; Ablenker passen nie auch. */
+  signal(vor) {
+    if (SIGNALE.length < 3) return null;
+    const [schluessel, bedeutung, auch] = waehle(SIGNALE);
+    const andere = mische(SIGNALE.filter(s => s[0] !== schluessel && (vor ? !auch.includes(s[1]) : !s[2].includes(bedeutung)))).slice(0, 2);
+    if (andere.length < 2) return null;
+    return vor
+      ? { art: "signal", vor, schluessel, bedeutung, richtig: bedeutung, optionen: mische([bedeutung, ...andere.map(s => s[1])]) }
+      : { art: "signal", vor, schluessel, bedeutung, richtig: schluessel, optionen: mische([schluessel, ...andere.map(s => s[0])]) };
+  },
+};
+
+// Je Stufe die Arten (mehrfach genannt = häufiger).
+const STUFE = {
+  s1: [() => ARTEN.korb()],
+  s2: [() => ARTEN.frage("queren", 2), () => ARTEN.frage("queren", 2), () => ARTEN.merksatz()],
+  s3: [() => ARTEN.frage("queren", 3, true), () => ARTEN.frage("queren", 3)],
+  s4: [() => ARTEN.signal(true), () => ARTEN.signal(false)],
+  s5: [() => ARTEN.frage("velo", 5)],
+  // Königsstufe: die schwersten Fragen, Signale in beide Richtungen, dazu alles andere
+  s6: [() => ARTEN.frage(null, 6, true), () => ARTEN.frage(null, 6), () => ARTEN.signal(false), () => ARTEN.signal(true), () => ARTEN.korb()],
+};
+
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Sicher oder gefährlich?",
+  s2: "Lichtsignal und Fussgängerstreifen: Warte, luege, lose, laufe.",
+  s3: "Rad steht, Kind geht — sicher über die Strasse.",
+  s4: "Was bedeutet das Signal?",
+  s5: "Sicher Velo fahren: Licht, Bremsen, Handzeichen.",
+  s6: "Ohne Trottoir, zwei Spuren, toter Winkel — alles gemischt.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (situationen.js). */
+function herkunft(a) {
+  if (a.art === "korb") return [SW_SICHER.some(s => s[1] === a.text) ? "sicher-gefaehrlich" : "?"];
+  if (a.art === "merksatz") return ["queren"];
+  if (a.art === "signal") return [SW_SIGNALE.some(s => s[0] === a.schluessel) ? "signale" : "?"];
+  return [SW_FRAGEN.find(f => f[3] === a.frage)?.[1] || "?"];
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
+  if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
+  if (a.art === "korb" && (SW_SICHER.find(s => s[1] === a.text)[2] ? "sicher" : "gefaehrlich") !== a.richtig) m.push("Korb falsch");
+  if (a.art === "frage") {
+    const f = SW_FRAGEN.find(x => x[3] === a.frage);
+    if (f[4] !== a.richtig) m.push("Lösung falsch");
+    if (f[0] > STUFE_NR[stufe]) m.push("Frage aus einer höheren Stufe");
+  }
+  if (a.art === "signal") {
+    const s = SW_SIGNALE.find(x => x[0] === a.schluessel);
+    if (a.vor ? s[1] !== a.richtig : s[0] !== a.richtig) m.push("Lösung falsch");
+    // Genau eine richtige Antwort: kein Ablenker, der auch passt
+    const zweite = a.vor ? a.optionen.filter(o => o !== a.richtig && s[2].includes(o))
+      : a.optionen.filter(o => o !== a.richtig && SW_SIGNALE.find(x => x[0] === o)[2].includes(s[1]));
+    if (zweite.length) m.push(`Ablenker passt auch: ${zweite.join(", ")}`);
+  }
+  if (a.art === "merksatz" && a.reihe.join() !== "warte,luege,lose,laufe") m.push("Merksatz falsch");
+  if (/ß/.test(JSON.stringify(a))) m.push("ß im Text");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+// Namen der Signale für den Lösungstext (wie das Kind sie sieht)
+const SIGNAL_NAME = { "stop": "das rote Achteck mit STOP", "einfahrt-verboten": "der rote Kreis mit weissem Balken",
+  "fussgaengerstreifen": "das blaue Quadrat mit dem Fussgänger im Dreieck", "fussweg": "der blaue Kreis mit dem Fussgänger",
+  "radweg": "der blaue Kreis mit dem Velo", "verbot-fussgaenger": "der weisse Kreis mit rotem Rand und Fussgänger",
+  "verbot-velo": "der weisse Kreis mit rotem Rand und Velo" };
+
+const pikto = (zeichen, extra = "") => el("span", { class: "sw-piktogramm" + extra, text: zeichen });
+
+/** Signal als Element; klein für die Auswahlknöpfe. */
+function signalEl(schluessel, klein = false) {
+  const k = "sw-signal" + (klein ? " sw-klein" : "");
+  const name = SW_SIGNALE.find(s => s[0] === schluessel)[1];
+  switch (schluessel) {
+    case "stop":
+      return el("div", { class: k, role: "img", "aria-label": name, html:
+        `<svg viewBox="0 0 100 100"><polygon points="30,2 70,2 98,30 98,70 70,98 30,98 2,70 2,30" fill="#d52b1e" stroke="#fff" stroke-width="4"/>
+         <text x="50" y="62" text-anchor="middle" font-size="30" font-weight="900" font-family="Arial, sans-serif" fill="#fff">STOP</text></svg>` });
+    case "einfahrt-verboten":
+      return el("div", { class: k, role: "img", "aria-label": name, html:
+        `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#d52b1e" stroke="#fff" stroke-width="3"/><rect x="18" y="41" width="64" height="18" fill="#fff"/></svg>` });
+    case "fussgaengerstreifen":
+      return el("div", { class: k + " sw-hinweis", role: "img", "aria-label": name }, el("div", { class: "sw-dreieck" }), pikto("🚶"));
+    case "fussweg": return el("div", { class: k + " sw-gebot", role: "img", "aria-label": name }, pikto("🚶"));
+    case "radweg": return el("div", { class: k + " sw-gebot", role: "img", "aria-label": name }, pikto("🚲"));
+    case "verbot-fussgaenger": return el("div", { class: k + " sw-verbot", role: "img", "aria-label": name }, pikto("🚶"));
+    default: return el("div", { class: k + " sw-verbot", role: "img", "aria-label": name }, pikto("🚲"));
+  }
+}
+
+function ampelEl(farbe) {
+  return el("div", { class: "sw-ampel", role: "img", "aria-label": farbe === "rot" ? "Lichtsignal: rotes Männchen" : "Lichtsignal: grünes Männchen" },
+    el("div", { class: "sw-licht rot" + (farbe === "rot" ? " an" : "") }, el("span", { text: "🧍" })),
+    el("div", { class: "sw-licht gruen" + (farbe === "gruen" ? " an" : "") }, el("span", { text: "🚶" })));
+}
+
+const bildEl = bild => (bild.startsWith("ampel:") ? ampelEl(bild.slice(6)) : el("div", { class: "sw-bild", text: bild }));
+const ohnePunkt = t => t.replace(/\.$/, "");
+
+LS.spiel({
+  id: ID,
+  einleitung: "Auf dem Schulweg gibt es viel zu beachten. Weisst du, wie du sicher ankommst?",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const f = ctx.flaeche;
+    if (a.art === "korb") {
+      f.append(el("div", { class: "frage", text: "Ist das sicher oder gefährlich?" }));
+      LS.koerbe(ctx, {
+        karte: { bild: a.bild, text: a.text }, koerbe: ["sicher", "gefaehrlich"], richtig: a.richtig, korbInhalt: k => KORB[k],
+        farbe: k => (k === "sicher" ? "var(--deko-5)" : "var(--deko-3)"),
+        hinweis: "Stell dir vor, ein Auto kommt. Sieht dich der Fahrer, und kannst du rechtzeitig stehen bleiben?",
+        loesung: `${a.text}: ${KORB[a.richtig].text}.`,
+      });
+    } else if (a.art === "merksatz") {
+      f.append(el("div", { class: "frage", text: "Am Fussgängerstreifen: Was kommt zuerst? Tipp der Reihe nach." }));
+      LS.reihenfolge(ctx, {
+        reihe: a.reihe, breite: 130, pfeile: true,
+        inhalt: w => { const [bild, , hoch] = SW_MERKSATZ.find(x => x[1] === w); return { bild, text: w, klein: hoch }; },
+        hinweis: "Was machst du, bevor sich deine Füsse bewegen? Augen und Ohren helfen dir.",
+        loesung: "Warte, luege, lose, laufe.", lob: "Genau: Warte, luege, lose, laufe!",
+      });
+    } else if (a.art === "signal") {
+      if (a.vor) {
+        f.append(el("div", { class: "frage", text: "Was bedeutet dieses Signal?" }), signalEl(a.schluessel));
+        LS.auswahl(ctx, {
+          optionen: a.optionen, richtig: a.richtig, breite: 220,
+          hinweis: "Schau Form und Farbe an: Rund mit rotem Rand heisst, etwas ist verboten. Rund und blau zeigt, wer den Weg benutzen muss.",
+          loesung: `Das Signal bedeutet: ${a.bedeutung}.`,
+        });
+      } else {
+        f.append(el("div", { class: "frage", text: `Welches Signal bedeutet: ${a.bedeutung}?` }));
+        LS.auswahl(ctx, {
+          optionen: a.optionen, richtig: a.richtig, breite: 110, inhalt: s => signalEl(s, true),
+          hinweis: "Schau Form und Farbe an: Rund mit rotem Rand heisst, etwas ist verboten. Rund und blau zeigt, wer den Weg benutzen muss.",
+          loesung: `${a.bedeutung}: ${SIGNAL_NAME[a.schluessel]}.`,
+        });
+      }
+    } else {
+      f.append(bildEl(a.bild), el("div", { class: "frage", text: a.frage }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 220,
+        hinweis: HINWEIS[a.liste], loesung: `${ohnePunkt(a.richtig)}. ${a.erklaerung}`, lob: `Richtig! ${a.erklaerung}`,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Denk an deinen Schulweg. Was ist sicher?");
+  },
+});
+
+</script>
+</body>
+</html>

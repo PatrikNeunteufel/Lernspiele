@@ -53,3 +53,19 @@
 - Statistik: Dateiname mit Namen; Spielstand zurücksetzen; Einlesen führt zusammen (Entscheid a).
 - Handy: Punkte-Blitz und Zahlen-Waage passen in 375 px; README.md; Prüfliste Teil 5–21.
 - Session-Abschluss: Report docs/report/LERN_Session2_2026-10-31.md, Handover neu gefasst.
+
+## 2026-10-31 — LERN_Session3
+- Prüfer „Hinweis verrät die Lösung“ (LERN-19) im Testskript; neun verratende Hinweise korrigiert.
+- Testhilfen 🔑/⏭ und `ctx.loesung()` in allen Spielen; Testspieler später in der Rolle Aufsicht (L2 a).
+- Neun Spiele zum OP 4. Klasse (T3 a), Preis-Tabelle statt Folgen-Fortsetzer.
+- Vergleichs-Krokodil: Schlusskarte (Klassenkonflikt `.mitte`); Prüfung reservierter Rahmen-Klassen,
+  `LS.RAHMEN_KLASSEN`, `docs/rahmen.md` (R1 a).
+- Startseite als eine Seite mit Tabs, Anmeldung mit Aufsicht und PIN, Fach-Gruppen, Favoriten,
+  Kompaktansicht, Verwaltung (L1 a – L3 a); `start/`, `statistik.html` leitet um.
+- Prüfstand und Freigabe je Spiel und Inhaltsliste (L4 a): 162 Listen, Verweise `von`, Zusatzlisten;
+  standardmässig frei, was nichts zu prüfen hat; Annahmen sperren nicht (F1 a).
+- Wiederholungsregel je Runde, `ctx.kennung()`; Checkliste `docs/checkliste.md` (`tools/checkliste.js`).
+- 19 weitere Spiele (G1 a), Sprachausgabe für Englisch (G2 a, `LS.spielMitStimme`).
+- Endlos-Modus mit Rekorden und Rangliste in 34 Spielen.
+- Prüfliste Teile 22–39; Lernziele in docs/lernziele/lehrplan_sg_session3.md.
+- Session-Abschluss: Report docs/report/LERN_Session3_2026-10-31.md, Handover nachgeführt.

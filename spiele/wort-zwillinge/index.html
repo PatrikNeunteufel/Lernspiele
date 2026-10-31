@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wort-Zwillinge</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 4px 0 8px; color: var(--text-leise); }
+  .wortkarte { text-align: center; font-size: clamp(34px, 8vw, 54px); font-weight: 900; margin: 4px auto 16px; color: var(--deko-6);
+    background: #fff; border-radius: 18px; box-shadow: 0 5px 0 var(--rand); padding: 10px 18px; max-width: 520px; overflow-wrap: anywhere; }
+  .wortkarte.freund { color: var(--deko-3); }
+  .zw-wahl .wahl-knopf .bild { font-size: clamp(42px, 10vw, 58px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>👯 Wort-Zwillinge</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS1E.2.B.1.b: Parallelwörter (Wörter, die im Englischen und Deutschen ähnlich sind)
+// beim Lesen erkennen und so den Sinn erschliessen. Obere Stufen: falsche Freunde (gift ≠ Gift).
+// Basisklasse 4 (Orientierungspunkt 2. Zyklus, 2. Lernjahr Englisch in SG). Inhalte in woerter.js.
+
+const { waehle, mische, el } = LS;
+const ID = "wort-zwillinge";
+
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ZWILLINGE_LISTEN);
+const PAARE = ZWILLINGE.filter(z => FREI.has(z[3]));
+const FREUNDE = FREI.has("falsche-freunde") ? FALSCHE_FREUNDE : [];
+const paareAus = listen => PAARE.filter(z => listen.includes(z[3]));
+
+/** n-1 andere Paare, deren englisches Wort dem Ziel ähnelt: gleicher Anfangsbuchstabe, ähnliche Länge. */
+function aehnlicheEn(ziel, pool, n) {
+  const nah = z => (z[0][0] === ziel[0][0] ? 0 : 10) + Math.abs(z[0].length - ziel[0].length) + Math.random() * 3;
+  return pool.filter(z => z !== ziel).sort((a, b) => nah(a) - nah(b)).slice(0, n - 1);
+}
+
+// Jede Art liefert null, wenn die freien Listen für sie nicht genug hergeben.
+const ARTEN = {
+  /** Englisches Wort lesen → Bild wählen. */
+  bild(listen, n) {
+    const pool = paareAus(listen).filter(z => z[2]);
+    if (pool.length < n) return null;
+    const ziel = waehle(pool);
+    const andere = mische(pool.filter(z => z !== ziel)).slice(0, n - 1);
+    return { art: "bild", en: ziel[0], de: ziel[1], zeige: ziel[0], richtig: ziel[2], optionen: mische([ziel, ...andere].map(z => z[2])),
+      loesung: `${ziel[2]} ${ziel[0]} = ${ziel[1]}` };
+  },
+  /** Englisches Wort lesen → deutschen Zwilling wählen. */
+  deutsch(listen, n) {
+    const pool = paareAus(listen);
+    if (pool.length < n) return null;
+    const ziel = waehle(pool);
+    const andere = mische(pool.filter(z => z !== ziel)).slice(0, n - 1);
+    return { art: "deutsch", en: ziel[0], de: ziel[1], zeige: ziel[0], richtig: ziel[1], optionen: mische([ziel, ...andere].map(z => z[1])),
+      loesung: `${ziel[0]} = ${ziel[1]}` };
+  },
+  /** Deutsches Wort → englischen Zwilling unter ähnlich aussehenden Wörtern finden. */
+  englisch(listen, n) {
+    const pool = paareAus(listen);
+    if (pool.length < n) return null;
+    const ziel = waehle(pool);
+    return { art: "englisch", en: ziel[0], de: ziel[1], zeige: ziel[1], richtig: ziel[0],
+      optionen: mische([ziel, ...aehnlicheEn(ziel, pool, n)].map(z => z[0])), loesung: `${ziel[1]} = ${ziel[0]}` };
+  },
+  /** Falscher Freund: Was heisst das englische Wort wirklich? Unter den Antworten steht das deutsche Wort, das gleich aussieht. */
+  freund(n) {
+    if (FREUNDE.length < n - 1) return null;
+    const [en, bedeutung, falsch] = waehle(FREUNDE);
+    const andere = mische(FREUNDE.map(f => f[1]).filter(b => b !== bedeutung && b !== falsch)).slice(0, n - 2);
+    return { art: "freund", en, de: bedeutung, falsch, zeige: en, richtig: bedeutung, optionen: mische([bedeutung, falsch, ...andere]),
+      loesung: `${en} heisst „${bedeutung}“, nicht „${falsch}“.` };
+  },
+  /** Ein Wortpaar: echte Zwillinge oder falsche Freunde? Braucht Zwillinge und falsche Freunde. */
+  entscheid() {
+    if (!PAARE.length || !FREUNDE.length) return null;
+    if (Math.random() < 0.5) {
+      const [en, de] = waehle(PAARE);
+      return { art: "entscheid", en, de, zeige: `${en} – ${de}`, richtig: "zwillinge", optionen: ["zwillinge", "freunde"], loesung: `Echte Zwillinge: ${en} = ${de}.` };
+    }
+    const [en, bedeutung, falsch] = waehle(FREUNDE);
+    return { art: "entscheid", en, de: bedeutung, falsch, zeige: `${en} – ${falsch}`, richtig: "freunde", optionen: ["zwillinge", "freunde"],
+      loesung: `Falsche Freunde: ${en} heisst „${bedeutung}“, nicht „${falsch}“.` };
+  },
+};
+
+// Je Stufe die Arten (mehrfach genannt = häufiger). Basisklasse 4: s1 = 3. Klasse, s5 = 5. Klasse.
+const STUFE = {
+  s1: [() => ARTEN.bild(["gleich"], 3)],
+  s2: [() => ARTEN.bild(["gleich", "aehnlich"], 4)],
+  s3: [() => ARTEN.deutsch(["gleich", "aehnlich"], 4), () => ARTEN.bild(["aehnlich"], 4)],
+  s4: [() => ARTEN.englisch(["gleich", "aehnlich"], 4), () => ARTEN.deutsch(["aehnlich"], 4)],
+  s5: [() => ARTEN.freund(4)],
+  // Königsstufe: falsche Freunde, Zwilling oder falscher Freund entscheiden, englischen Zwilling unter fünf ähnlichen finden
+  s6: [() => ARTEN.freund(4), () => ARTEN.entscheid(), () => ARTEN.englisch(["gleich", "aehnlich"], 5)],
+};
+
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Fast gleich: hand – Hand. Welches Bild passt?",
+  s2: "Mehr Zwillinge mit Bild: house, water, mouse.",
+  s3: "Englisch → Deutsch: Welches deutsche Wort ist der Zwilling?",
+  s4: "Deutsch → Englisch: den Zwilling unter ähnlichen Wörtern finden.",
+  s5: "Falsche Freunde: Sie sehen deutsch aus, bedeuten aber etwas anderes.",
+  s6: "Endgegner: echte Zwillinge oder falsche Freunde?",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  const erlaubt = { s1: ["bild"], s2: ["bild"], s3: ["deutsch", "bild"], s4: ["englisch", "deutsch"], s5: ["freund"], s6: ["freund", "entscheid", "englisch"] }[stufe];
+  if (!erlaubt.includes(a.art)) m.push(`Art ${a.art} gehört nicht in die Stufe`);
+  if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+  if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Möglichkeit");
+  const paar = ZWILLINGE.find(z => z[0] === a.en);
+  const freund = FALSCHE_FREUNDE.find(f => f[0] === a.en && f[1] === a.de);
+  if (a.art === "freund" || (a.art === "entscheid" && a.richtig === "freunde")) {
+    if (!freund || !FREI.has("falsche-freunde")) m.push("falscher Freund nicht aus einer freien Liste");
+    if (a.art === "freund" && !a.optionen.includes(freund?.[2])) m.push("das gleich aussehende deutsche Wort fehlt unter den Antworten");
+    if (a.art === "freund" && a.optionen.some(o => o !== a.richtig && o !== freund?.[2] && !FALSCHE_FREUNDE.some(f => f[1] === o))) m.push("Antwort nicht aus der Liste");
+  } else {
+    if (!paar || paar[1] !== a.de || !FREI.has(paar[3])) m.push("Wortpaar nicht aus einer freien Liste");
+    if (a.art === "bild" && a.richtig !== paar?.[2]) m.push("Bild passt nicht zum Wort");
+    if (["s1"].includes(stufe) && paar?.[3] !== "gleich") m.push("Stufe 1 nur mit fast gleichen Wörtern");
+    const spalte = { bild: 2, deutsch: 1, englisch: 0 }[a.art];
+    if (spalte !== undefined && a.optionen.some(o => !PAARE.some(z => z[spalte] === o))) m.push("Antwort nicht aus einer freien Liste");
+  }
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  if (new Set(ZWILLINGE.map(z => z[0])).size !== ZWILLINGE.length || new Set(ZWILLINGE.map(z => z[1])).size !== ZWILLINGE.length) m.push("Wort doppelt in der Liste");
+  return m;
+}
+
+const FRAGE = {
+  bild: "Was heisst das? Tipp auf das Bild.",
+  deutsch: "Welches deutsche Wort ist der Zwilling?",
+  englisch: "Wie heisst der englische Zwilling?",
+  freund: "⚠️ Achtung, falscher Freund! Was heisst das wirklich?",
+  entscheid: "Echte Zwillinge oder falsche Freunde?",
+};
+const HINWEIS = {
+  bild: "Lies das Wort halblaut. Klingt es wie ein deutsches Wort?",
+  deutsch: "Lies das englische Wort laut. Welches deutsche Wort klingt ähnlich?",
+  englisch: "Sprich das deutsche Wort und dann die englischen Wörter. Welches klingt ähnlich?",
+  entscheid: "Bedeuten die beiden Wörter wirklich dasselbe?",
+};
+const ENTSCHEID = { zwillinge: { bild: "👯", text: "echte Zwillinge" }, freunde: { bild: "⚠️", text: "falsche Freunde" } };
+
+LS.spiel({
+  id: ID,
+  einleitung: "Viele englische Wörter haben einen deutschen Zwilling: house – Haus! Findest du sie? Aber Vorsicht vor falschen Freunden.",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.flaeche.append(el("div", { class: "frage", text: FRAGE[a.art] }));
+    ctx.flaeche.append(el("div", { class: "wortkarte" + (a.art === "freund" ? " freund" : ""), text: a.zeige }));
+    const hinweis = a.art === "freund"
+      ? w => (w === a.falsch ? "Das ist der falsche Freund! Er sieht nur gleich aus." : "Vorsicht: Es sieht deutsch aus, bedeutet aber etwas anderes!")
+      : HINWEIS[a.art];
+    const lob = a.art === "freund" ? `Genau! ${a.en} heisst „${a.de}“.` : a.art === "entscheid" ? `Richtig! ${a.loesung}` : `Yes! ${a.loesung}`;
+    LS.auswahl(ctx, {
+      optionen: a.optionen,
+      richtig: a.richtig,
+      inhalt: a.art === "bild" ? w => ({ bild: w }) : a.art === "entscheid" ? w => ENTSCHEID[w] : undefined,
+      breite: a.art === "bild" ? 110 : 150,
+      hinweis,
+      loesung: a.loesung,
+      lob,
+      beiRichtig: () => LS.sprich(a.en, "en"),
+    }).classList.add("zw-wahl");
+    if (ctx.nr === 0) ctx.sag("Lies das Wort und tipp auf die richtige Antwort.");
+  },
+});
+</script>
+</body>
+</html>

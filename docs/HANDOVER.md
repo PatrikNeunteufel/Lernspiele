@@ -1,12 +1,12 @@
 # Handover — Lernspiele
 
 ## Stand
-**2026-10-31, LERN_Session3 (laufend)**:
-- **Spiele:** 65 Spiele in 20 Themen, je sechs Stufen bezogen auf eine Basisklasse. Neu sind neun
-  Spiele zum Orientierungspunkt der 4. Klasse, siehe
-  [lehrplan_sg_session3.md](lernziele/lehrplan_sg_session3.md).
-- **Tests:** `node tools/pruefe_spiele.js` meldet für alle 390 Kombinationen Spiel × Stufe keine
-  Fehler, mit den Startwerten 1–5. Neu prüft das Skript:
+**2026-10-31, nach LERN_Session3** ([Report](report/LERN_Session3_2026-10-31.md)):
+- **Spiele:** 84 Spiele in 28 Themen, je sechs Stufen bezogen auf eine Basisklasse. Neu in dieser
+  Sitzung: 28 Spiele (9 zum Orientierungspunkt der 4. Klasse, 19 aus den übrigen Ideen), siehe
+  [lehrplan_sg_session3.md](lernziele/lehrplan_sg_session3.md). Offen sind noch 3 Ideen.
+- **Tests:** `node tools/pruefe_spiele.js` prüft alle 504 Kombinationen Spiel × Stufe, dazu den
+  Endlos-Modus und jede Inhaltsliste als Kind. Neu prüft das Skript:
   - Hinweise, die die Lösung verraten (LERN-19);
   - die Testhilfen;
   - Rahmen-Klassen, die ein Spiel im eigenen Stil umdefiniert.
@@ -15,20 +15,24 @@
   - Tabs: Spiele, Profil, Statistik, Verwaltung.
   - Spiele nach Fach und Thema auf- und zuklappbar, Favoriten, Kompaktansicht.
   - Die Aufsicht spielt als Tester, mit Testhilfen und mit Runden, die nicht zählen.
-- **Freigabe:** Standardmässig frei ist, was nichts mehr zu prüfen hat. Gesperrt sind die neun neuen
-  Spiele (`neu`, bis angesehen) und Spiele, deren Inhaltslisten alle ungeprüft sind (120 Listen in
-  29 Spielen, gemeinsam genutzte als Verweis). Heute für Kinder frei: 32 von 65 Spielen.
+- **Freigabe:** Standardmässig frei ist, was nichts mehr zu prüfen hat. Gesperrt sind die 28 neuen
+  Spiele (`neu`, bis angesehen) und Spiele, deren Inhaltslisten alle ungeprüft sind (162 Listen,
+  gemeinsam genutzte als Verweis). Heute für Kinder frei: 32 von 84 Spielen.
 - **Wiederholungen:** In einer Runde höchstens eine Aufgabe ein zweites Mal, nie direkt
   hintereinander; kleine Stufen haben kürzere Runden.
-- **Testskript, neue Prüfung:** jede Liste als Kind einzeln freigegeben, 128 Fälle fehlerfrei.
+- **Endlos-Modus:** 34 Spiele, die ihre Aufgaben berechnen, bis zum ersten Fehler, mit oder ohne
+  Timer; Rekorde und Rangliste (rahmen.md Abschnitt 7).
+- **Sprachausgabe:** `LS.sprich`, `LS.spielMitStimme` (Listen & Tap, Spelling-Bee); britische Stimme
+  bevorzugt, ohne Stimme keine Runde.
 - **Offen:**
   - Inhalte und Spiele prüfen; Stand in [checkliste.md](checkliste.md).
   - Noch kein Kind hat gespielt.
   - Die neue Startseite und die neuen Spiele hat noch niemand im Browser angesehen.
-  - Session 3 ist nicht committet.
+  - Der letzte Teil von Session 3 (zweites Paket, Endlos, Sprachausgabe) ist nicht committet.
 
 **Nächste Session — Plan:**
-1. Startseite und die neun neuen Spiele auf Desktop, Tablet und Handy ansehen. Danach im Katalog
+1. Startseite und die 28 neuen Spiele auf Desktop, Tablet und Handy ansehen, dazu die
+   Sprachausgabe auf dem Tablet der Kinder. Danach im Katalog
    `geprueft` eintragen und die Checkliste neu erzeugen.
 2. LERN-11: die Prüfliste einarbeiten; geprüfte Listen im Katalog `geprueft`.
 3. LERN-4: Testrunde mit den Kindern.
@@ -94,9 +98,9 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-8 | Einstellung Reihenfolge der Teile je Spiel oder je Spieler | erledigt 2026-10-31 (LERN_Session1) | Profil auf der Startseite |
 | LERN-9 | Mischspiel über mehrere Themen, gewichtet nach Fokus | später | Profil-Fokus ist dafür angelegt |
 | LERN-10 | Spielideen aus dem Lehrplan Volksschule SG, alle Fächer 1.–6. Kl. | erledigt 2026-10-31 (LERN_Session1) | docs/spielideen/lehrplan_sg_spielideen.md |
-| LERN-11 | Inhaltslisten prüfen lassen | offen (Prüfung durch Patrik oder Lehrperson, Entscheid a) | docs/pruefung/wortlisten_zur_pruefung.md (1199 Einträge, Teil 1–21) |
+| LERN-11 | Inhaltslisten prüfen lassen | offen (Prüfung durch Patrik oder Lehrperson, Entscheid a) | docs/pruefung/wortlisten_zur_pruefung.md (Teile 1–39); geprüfte Listen im Katalog `geprueft` |
 | LERN-12 | Timer, Zeitmessung und didaktische Statistik | erledigt 2026-10-31 (LERN_Session1) | spiel.js, auswertung.js, statistik.html |
-| LERN-13 | Weitere Spiele aus den Spielideen | in Arbeit seit 2026-10-31 (LERN_Session2); 65 Spiele gebaut | lernziele/lehrplan_sg_session3.md; offen u. a. Schweiz-Karten-Suche, Roboter-Pfad (Kartendaten/Lizenz) |
+| LERN-13 | Weitere Spiele aus den Spielideen | in Arbeit seit 2026-10-31 (LERN_Session2); 84 Spiele gebaut, 3 Ideen offen | checkliste.md; offen Tipp-Trainer, Schweiz-Karten-Suche (Kartendaten/Lizenz), Mots-Match |
 | LERN-14 | Testskript für die Aufgabengeneratoren aller Spiele (Node) | erledigt 2026-10-31 (LERN_Session2) | tools/pruefe_spiele.js |
 | LERN-15 | Stufenskala mit Basisklasse und Königsstufe | erledigt 2026-10-31 (LERN_Session2, Entscheid Patrik) | CLAUDE.md; docs/lernziele/lehrplan_sg_session2.md |
 | LERN-16 | Spielstand zurücksetzen und zwischen Geräten abgleichen | erledigt 2026-10-31 (LERN_Session2, Entscheid a: Zusammenführen) | statistik.html, LS.zusammenfuehren |
@@ -104,7 +108,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-18 | Kiosk-Kasse Stufe 3–4 (Franken/Rappen) auf Basisklasse 2 prüfen | offen | docs/lernziele/lehrplan_sg_session2.md, Bekannte Grenzen |
 | LERN-19 | Prüfer: Hinweis verrät die Lösung automatisch erkennen | erledigt 2026-10-31 (LERN_Session3) | tools/pruefe_spiele.js, LS.pruefung.haken |
 | LERN-20 | Testspieler und Testhilfen (Entscheid T1 a, T2 a) | erledigt 2026-10-31 (LERN_Session3; heute Rolle Aufsicht, L2 a) | spiel.js (ctx.loesung), rahmen.md Abschnitt 6 |
-| LERN-21 | Neun neue Spiele (OP 4. Klasse) auf Desktop, Tablet und Handy ansehen | offen | checkliste.md |
+| LERN-21 | 28 neue Spiele und die Startseite auf Desktop, Tablet und Handy ansehen | offen | checkliste.md |
 | LERN-22 | Startseite mit Anmeldung, Tabs, Gruppen, Favoriten; Rollen Kind/Aufsicht mit PIN (L1–L3 a) | erledigt 2026-10-31 (LERN_Session3), im Browser noch nicht angesehen | rahmen.md Abschnitt 6, start/ |
 | LERN-23 | Prüfstand und Freigabe je Spiel und Inhaltsliste (L4 a) | erledigt 2026-10-31 (LERN_Session3) | katalog.js (geprueft, listen), Tab Verwaltung |
 | LERN-24 | Checkliste Klasse → Fach → Thema → Spiel | erledigt 2026-10-31 (LERN_Session3) | checkliste.md, tools/checkliste.js |

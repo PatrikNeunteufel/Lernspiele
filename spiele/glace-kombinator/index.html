@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glace-Kombinator</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4.2vw, 24px); font-weight: 700; color: var(--text-leise); margin: -4px 0 10px; }
+  .gl-zaehler { text-align: center; font-size: 20px; font-weight: 800; margin: 0 0 8px; }
+  .gl-kugel { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%;
+    border: 2px solid rgba(0, 0, 0, .18); font-weight: 900; font-size: 18px; flex: none; }
+  .gl-kugel.gl-leer { background: #fff; border: 3px dashed var(--rand); color: #c5c9de; }
+  .gl-glace { display: inline-flex; flex-direction: column; align-items: center; }
+  .gl-glace .gl-kugeln { display: flex; gap: 0; }
+  .gl-glace.gl-turm .gl-kugeln { flex-direction: column-reverse; }
+  .gl-glace.gl-turm .gl-kugel + .gl-kugel { margin-bottom: -8px; }
+  .gl-glace.gl-becher .gl-kugel + .gl-kugel { margin-left: -6px; }
+  .gl-becher .gl-unten { width: 64px; height: 22px; background: var(--deko-5); border-radius: 0 0 16px 16px; margin-top: -6px; }
+  .gl-turm .gl-unten { width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 34px solid #d9a066; margin-top: -4px; }
+  .gl-bau { display: flex; justify-content: center; align-items: flex-end; gap: 10px; min-height: 96px; margin: 0 0 10px; }
+  .gl-bau b { font-size: 16px; color: var(--text-leise); }
+  .gl-sorten { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(112px, 100%), 1fr)); gap: 10px; max-width: 640px; margin: 0 auto 12px; }
+  .gl-sorte { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border: 3px solid var(--rand); border-radius: 18px;
+    background: #fff; font: inherit; font-size: 17px; font-weight: 800; color: var(--text); cursor: pointer; box-shadow: 0 5px 0 var(--rand); }
+  .gl-sorte .gl-kugel { width: 52px; height: 52px; font-size: 22px; }
+  .gl-sorte .gl-bild { font-size: 40px; line-height: 1.1; }
+  .gl-sorte.gl-an { border-color: var(--knopf); background: #eef0ff; }
+  .gl-gruppe { margin: 0 auto 10px; max-width: 640px; }
+  .gl-gruppe > b { display: block; font-size: 15px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-leise); margin: 0 0 4px 4px; }
+  .gl-gefunden { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 14px; margin: 6px auto 4px; max-width: 680px; min-height: 40px; }
+  .gl-gefunden > * { padding: 6px; border-radius: 14px; }
+  .gl-gefunden .gl-neu { background: var(--gut-hell); }
+  .gl-gefunden .gl-doppelt { background: var(--hinweis-hell); }
+  .gl-gefunden .gl-platz { min-width: 58px; min-height: 58px; border: 3px dashed var(--rand); display: flex; align-items: center; justify-content: center; color: #c5c9de; font-size: 24px; font-weight: 900; }
+  .gl-set { display: inline-flex; gap: 2px; font-size: 32px; line-height: 1.1; }
+  .gl-liste { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; margin: 0 auto 12px; max-width: 640px; }
+  .gl-liste > span { display: inline-flex; flex-direction: column; align-items: center; font-size: 15px; font-weight: 800; }
+  .gl-liste .gl-bild { font-size: 34px; }
+  .gl-anzeige { margin: 0 auto 10px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🍨 Glace-Kombinator</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="inhalte.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.B.2: a (Grundanspruch 1. Zyklus) Anordnungen variieren; b (Orientierungspunkt
+// 2. Zyklus, 4. Klasse) systematisch kombinieren — z. B. Glace mit zwei Kugeln aus mehreren Sorten,
+// Kleider kombinieren. Das Kind legt alle Möglichkeiten (das Spiel erkennt Doppelte) oder bestimmt
+// ihre Anzahl. Becher = Reihenfolge egal; Cornet = es zählt, welche Kugel unten und welche oben ist.
+// Sorten und Kleider in inhalte.js.
+
+const { zufall, waehle, mische, el } = LS;
+const ID = "glace-kombinator";
+
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : GLACE_LISTEN);
+const SORTEN = FREI.has("sorten") ? GLACE_SORTEN.map(s => s[0]) : [];
+const TEILE = FREI.has("kleider") ? KLEIDER : [];
+const SORTE = Object.fromEntries(GLACE_SORTEN.map(s => [s[0], s]));
+const TEIL = Object.fromEntries(KLEIDER.map(t => [t[2], t]));
+const sortenIndex = name => GLACE_SORTEN.findIndex(s => s[0] === name);
+const teilIndex = name => KLEIDER.findIndex(t => t[2] === name);
+const GRUPPEN = Object.keys(KLEIDER_GRUPPEN);
+
+// ---------- Aufgaben ----------
+// glace: { typ: "glace", art: "legen" | "zaehlen", sorten, kugeln (2 oder 3), reihenfolge (Cornet), gleich (zweimal dieselbe erlaubt) }
+// turm:  { typ: "turm", art, sorten } — alle Sorten übereinander, jede einmal (Anordnungen)
+// kleider: { typ: "kleider", art, gruppen: [{ g, teile: [Namen] }] } — aus jeder Gruppe ein Stück
+
+function glace(art, n, kugeln = 2, reihenfolge = false, gleich = false) {
+  if (SORTEN.length < n) return null;
+  const sorten = mische(SORTEN).slice(0, n).sort((a, b) => sortenIndex(a) - sortenIndex(b));
+  return { typ: "glace", art, sorten, kugeln, reihenfolge, gleich };
+}
+function turm(art, n) {
+  if (SORTEN.length < n) return null;
+  return { typ: "turm", art, sorten: mische(SORTEN).slice(0, n).sort((a, b) => sortenIndex(a) - sortenIndex(b)) };
+}
+/** Kleider aus so vielen Gruppen, wie 'groessen' Zahlen hat; je Gruppe höchstens so viele Stücke. */
+function kleider(art, groessen) {
+  const moeglich = GRUPPEN.filter(g => TEILE.filter(t => t[0] === g).length >= 2);
+  if (moeglich.length < groessen.length) return null;
+  const gruppen = mische(moeglich).slice(0, groessen.length).sort((a, b) => GRUPPEN.indexOf(a) - GRUPPEN.indexOf(b));
+  return {
+    typ: "kleider", art,
+    gruppen: gruppen.map((g, i) => {
+      const da = TEILE.filter(t => t[0] === g);
+      return { g, teile: mische(da).slice(0, Math.min(groessen[i], da.length)).map(t => t[2]).sort((a, b) => teilIndex(a) - teilIndex(b)) };
+    }),
+  };
+}
+
+// Je Stufe die Arten (mehrfach genannt = häufiger); jede liefert null, wenn die freien Listen nichts hergeben.
+const STUFE = {
+  s1: [() => kleider("legen", [2, waehle([2, 3])])],
+  s2: [() => kleider("legen", [3, waehle([2, 3])]), () => glace("legen", waehle([3, 4]))],
+  s3: [() => glace("legen", waehle([4, 5])), () => glace("legen", 3, 2, true), () => glace("zaehlen", waehle([4, 5])),
+    () => glace("zaehlen", waehle([3, 4]), 2, true), () => kleider("zaehlen", [zufall(2, 4), zufall(2, 4)])],
+  s4: [() => glace("legen", waehle([3, 4]), 2, false, true), () => glace("legen", 3, 2, true, true),
+    () => glace("zaehlen", waehle([5, 6]), 2, Math.random() < 0.5), () => glace("zaehlen", waehle([4, 5]), 2, Math.random() < 0.5, true),
+    () => kleider("zaehlen", [zufall(2, 3), zufall(2, 3), zufall(2, 3)])],
+  s5: [() => turm("legen", 3), () => glace("zaehlen", zufall(6, 8), 2, Math.random() < 0.5, Math.random() < 0.5),
+    () => kleider("zaehlen", [zufall(2, 4), zufall(2, 4), zufall(2, 4)])],
+  // Königsstufe: drei Kugeln, Türme aus vier Sorten, Sets aus vier Gruppen; dazu die grösste Legeaufgabe.
+  s6: [() => glace("zaehlen", zufall(4, 6), 3), () => glace("zaehlen", zufall(4, 5), 3, true), () => turm("zaehlen", 4),
+    () => kleider("zaehlen", [zufall(2, 4), zufall(2, 4), zufall(2, 4), zufall(2, 3)]), () => glace("legen", 5)],
+};
+
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+// ---------- Kombinationen ----------
+/** Schlüssel einer Kombination: im Becher ohne Reihenfolge (sortiert), sonst wie gelegt. */
+function schluessel(a, kombi) {
+  const k = a.typ === "glace" && !a.reihenfolge ? kombi.slice().sort((x, y) => sortenIndex(x) - sortenIndex(y)) : kombi;
+  return k.join("|");
+}
+
+/** Alle Kombinationen, systematisch geordnet (durch Aufzählen, nicht mit der Formel). */
+function alleKombis(a) {
+  const liste = [];
+  const gesehen = new Set();
+  const dazu = k => { const s = schluessel(a, k); if (!gesehen.has(s)) { gesehen.add(s); liste.push(k); } };
+  if (a.typ === "kleider") {
+    (function weiter(i, bisher) {
+      if (i === a.gruppen.length) { dazu(bisher); return; }
+      for (const t of a.gruppen[i].teile) weiter(i + 1, [...bisher, t]);
+    })(0, []);
+    return liste;
+  }
+  const laenge = a.typ === "turm" ? a.sorten.length : a.kugeln;
+  const gleich = a.typ === "glace" && a.gleich;
+  (function weiter(bisher) {
+    if (bisher.length === laenge) { dazu(bisher); return; }
+    for (const s of a.sorten) if (gleich || !bisher.includes(s)) weiter([...bisher, s]);
+  })([]);
+  return liste;
+}
+
+const fak = n => (n <= 1 ? 1 : n * fak(n - 1));
+
+/** Anzahl mit der Formel und der Rechenweg für die Lösung („… = 6“). */
+function formel(a) {
+  if (a.typ === "kleider") {
+    const N = a.gruppen.reduce((p, g) => p * g.teile.length, 1);
+    return { N, text: a.gruppen.map(g => `${g.teile.length} ${KLEIDER_GRUPPEN[g.g].name}`).join(" × ") + ` = ${N}` };
+  }
+  const n = a.sorten.length;
+  if (a.typ === "turm") {
+    const N = fak(n);
+    return { N, text: `unten ${n} Möglichkeiten, dann ${[...Array(n - 1)].map((_, i) => n - 1 - i).join(", ")}: ${[...Array(n)].map((_, i) => n - i).join(" × ")} = ${N}` };
+  }
+  if (a.kugeln === 3) {
+    const P = n * (n - 1) * (n - 2);
+    if (a.reihenfolge) return { N: P, text: `${n} × ${n - 1} × ${n - 2} = ${P}` };
+    return { N: P / 6, text: `${n} × ${n - 1} × ${n - 2} = ${P} Reihenfolgen; jede Glace kommt 6-mal vor: ${P} : 6 = ${P / 6}` };
+  }
+  if (a.reihenfolge && a.gleich) return { N: n * n, text: `${n} Sorten unten × ${n} Sorten oben = ${n * n}` };
+  if (a.reihenfolge) return { N: n * (n - 1), text: `${n} Sorten unten × ${n - 1} andere oben = ${n * (n - 1)}` };
+  const C = n * (n - 1) / 2;
+  if (a.gleich) return { N: C + n, text: `${n} mit zwei gleichen Kugeln + ${C} mit zwei verschiedenen = ${C + n}` };
+  return { N: C, text: `${n} × ${n - 1} = ${n * (n - 1)}, aber jede Glace ist doppelt gezählt: ${n * (n - 1)} : 2 = ${C}` };
+}
+
+/** Name einer Kombination für Lösung und Vorlesen. */
+function kombiText(a, k) {
+  if (a.typ === "kleider") return k.join(" + ");
+  if (a.typ === "turm" || a.reihenfolge) return `${k.join(" / ")}`;
+  return k.join(" + ");
+}
+function legenLoesung(a) {
+  const pre = a.typ === "turm" || a.reihenfolge ? "von unten nach oben: " : "";
+  return pre + alleKombis(a).map(k => kombiText(a, k)).join("; ");
+}
+
+function regelText(a) {
+  if (a.typ === "kleider") return "Ein Set: aus jeder Gruppe genau ein Stück.";
+  if (a.typ === "turm") return `Ein Cornet mit allen ${a.sorten.length} Sorten übereinander, jede einmal. Die Reihenfolge zählt.`;
+  if (a.kugeln === 3) return a.reihenfolge ? "Cornet mit 3 verschiedenen Kugeln übereinander. Die Reihenfolge zählt."
+    : "Becher mit 3 verschiedenen Kugeln. Die Reihenfolge ist egal.";
+  const gleich = a.gleich ? "Auch zweimal dieselbe Sorte ist erlaubt." : "Zwei verschiedene Sorten.";
+  return a.reihenfolge ? `Cornet mit 2 Kugeln: Es zählt, welche unten und welche oben ist. ${gleich}`
+    : `Becher mit 2 Kugeln: Die Reihenfolge ist egal. ${gleich}`;
+}
+
+// ---------- Mängel für tools/pruefe_spiele.js ----------
+const STUFEN_TEXT = {
+  s1: "Kleider kombinieren: Welche Sets gibt es?",
+  s2: "Alle Glace mit 2 Kugeln im Becher finden.",
+  s3: "Becher oder Cornet? Alle finden und zählen.",
+  s4: "Auch zweimal dieselbe Sorte — wie viele gibt es?",
+  s5: "Viele Sorten zählen, Cornet-Türme bauen.",
+  s6: "Endgegner: 3 Kugeln, Türme aus 4 Sorten, ganze Kleider-Sets.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  const N = alleKombis(a).length;
+  const f = formel(a);
+  if (f.N !== N) m.push(`Formel ${f.N} statt ${N} Kombinationen`);
+  if (f.text.split("=").pop().trim() !== String(N)) m.push("Lösungstext endet nicht mit der Anzahl");
+  if (a.art === "legen" && (N < 3 || N > 10)) m.push(`${N} Kombinationen zum Legen (erlaubt 3 bis 10)`);
+  if (a.art === "zaehlen" && N < 4) m.push("zu wenige Kombinationen zum Zählen");
+  if (a.typ === "kleider") {
+    if (a.gruppen.some(g => !g.teile.every(t => TEILE.some(x => x[2] === t && x[0] === g.g)))) m.push("Kleidungsstück nicht aus einer freien Liste oder falscher Gruppe");
+    if (new Set(a.gruppen.map(g => g.g)).size !== a.gruppen.length) m.push("Gruppe doppelt");
+    if (a.gruppen.some(g => g.teile.length < 2 || new Set(g.teile).size !== g.teile.length)) m.push("Gruppe mit weniger als 2 oder doppelten Stücken");
+  } else {
+    if (!a.sorten.every(s => SORTEN.includes(s))) m.push("Sorte nicht aus einer freien Liste");
+    if (new Set(a.sorten).size !== a.sorten.length) m.push("Sorte doppelt");
+    if (new Set(a.sorten.map(s => SORTE[s][2])).size !== a.sorten.length) m.push("Buchstabe auf den Kugeln doppelt");
+  }
+  if (/ß/.test(JSON.stringify(a) + f.text + regelText(a) + legenLoesung(a))) m.push("ß im Text");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+/** Helle Kugel → dunkle Schrift, dunkle Kugel → weisse Schrift. */
+function schrift(hex) {
+  const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? "#2d3047" : "#fff";
+}
+function kugel(name) {
+  if (!name) return el("span", { class: "gl-kugel gl-leer", text: "?" });
+  const [, farbe, buchstabe] = SORTE[name];
+  return el("span", { class: "gl-kugel", style: `background:${farbe};color:${schrift(farbe)}`, title: name, text: buchstabe });
+}
+/** Eine Glace: im Becher nebeneinander, im Cornet übereinander (erste Kugel unten). */
+function glaceBild(a, kombi, laenge) {
+  const turmArt = a.typ === "turm" || a.reihenfolge;
+  const kugeln = el("span", { class: "gl-kugeln" });
+  for (let i = 0; i < laenge; i++) kugeln.append(kugel(kombi[i]));
+  return el("span", { class: "gl-glace " + (turmArt ? "gl-turm" : "gl-becher"), "aria-label": kombi.filter(Boolean).join(", ") || "leer" },
+    kugeln, el("span", { class: "gl-unten" }));
+}
+function setBild(a, kombi) {
+  return el("span", { class: "gl-set", "aria-label": kombi.filter(Boolean).join(", ") },
+    ...a.gruppen.map((g, i) => el("span", { text: kombi[i] ? TEIL[kombi[i]][1] : "▫️" })));
+}
+const bild = (a, kombi) => (a.typ === "kleider" ? setBild(a, kombi) : glaceBild(a, kombi, a.typ === "turm" ? a.sorten.length : a.kugeln));
+
+function legen(ctx, a) {
+  const alle = alleKombis(a);
+  const N = alle.length;
+  ctx.loesung(legenLoesung(a));
+  const glaceArt = a.typ !== "kleider";
+  ctx.flaeche.append(el("div", { class: "auftrag", text: glaceArt ? "Finde alle Glace!" : "Finde alle Kleider-Sets!" }),
+    el("div", { class: "frage", text: regelText(a) }));
+  const zaehler = el("div", { class: "gl-zaehler", "aria-live": "polite" });
+  const bau = el("div", { class: "gl-bau" });
+  const wahl = el("div");
+  const gefundenBox = el("div", { class: "gl-gefunden" });
+  // Funde oben, damit sie auch auf dem Handy neben den Sorten sichtbar bleiben (Doppelte leuchten auf).
+  ctx.flaeche.append(zaehler, gefundenBox, bau, wahl);
+
+  const gefunden = new Map(); // Schlüssel → Kombination, in der Reihenfolge des Findens
+  let aktuell = glaceArt ? [] : a.gruppen.map(() => null);
+  let doppelte = 0;
+  let markiert = null; // { schluessel, art: "gl-neu" | "gl-doppelt" }
+
+  function zeichneGefunden() {
+    zaehler.textContent = `${gefunden.size} von ${N} gefunden`;
+    gefundenBox.innerHTML = "";
+    // Hilfe nach Doppelten: ab dem zweiten der Reihe nach geordnet, ab dem dritten mit leeren Plätzen.
+    const liste = doppelte >= 2 ? alle.filter(k => doppelte >= 3 || gefunden.has(schluessel(a, k))) : [...gefunden.values()];
+    for (const k of liste) {
+      const s = schluessel(a, k);
+      if (!gefunden.has(s)) { gefundenBox.append(el("span", { class: "gl-platz", text: "?" })); continue; }
+      const b = bild(a, k);
+      const huelle = el("span", { class: markiert && markiert.s === s ? markiert.art : "" }, b);
+      gefundenBox.append(huelle);
+    }
+  }
+  function zeichneBau() {
+    bau.innerHTML = "";
+    bau.append(el("b", { text: glaceArt ? "Deine Glace:" : "Dein Set:" }), bild(a, aktuell));
+    for (const k of wahl.querySelectorAll(".gl-sorte")) k.classList.toggle("gl-an", aktuell.includes(k.dataset.name));
+  }
+
+  function fertigGelegt(kombi) {
+    const s = schluessel(a, kombi);
+    aktuell = glaceArt ? [] : a.gruppen.map(() => null);
+    if (gefunden.has(s)) {
+      doppelte++;
+      markiert = { s, art: "gl-doppelt" };
+      zeichneBau();
+      zeichneGefunden();
+      const umgedreht = a.typ === "glace" && !a.reihenfolge && kombi.join("|") !== s;
+      const tipp = doppelte >= 3 ? " Die leeren Plätze zeigen, was noch fehlt."
+        : doppelte === 2 ? " Ich ordne deine Funde der Reihe nach — siehst du, was fehlt?"
+        : glaceArt ? " Geh der Reihe nach vor: zuerst alle mit der ersten Sorte." : " Nimm ein Stück und kombiniere es der Reihe nach mit allen anderen.";
+      ctx.falsch((umgedreht ? "Im Becher ist das dieselbe Glace — die Reihenfolge ist egal."
+        : glaceArt ? "Diese Glace hast du schon!" : "Dieses Set hast du schon!") + tipp);
+      return;
+    }
+    gefunden.set(s, kombi);
+    markiert = { s, art: "gl-neu" };
+    LS.ton("huepf");
+    zeichneBau();
+    zeichneGefunden();
+    if (gefunden.size === N) ctx.richtig(`Alle ${N} gefunden — super systematisch!`);
+  }
+
+  if (glaceArt) {
+    const laenge = a.typ === "turm" ? a.sorten.length : a.kugeln;
+    const gleich = a.typ === "glace" && a.gleich;
+    const box = el("div", { class: "gl-sorten" });
+    for (const name of a.sorten) {
+      const k = el("button", { type: "button", class: "gl-sorte", "data-name": name }, el("span", { "aria-hidden": "true" }, kugel(name)), el("span", { text: name }));
+      k.addEventListener("click", () => {
+        if (ctx.vorbei()) return;
+        if (!gleich && aktuell.includes(name)) { ctx.sag("Jede Sorte nur einmal! Nimm eine andere.", "hinweis"); return; }
+        aktuell.push(name);
+        LS.ton("tipp");
+        if (aktuell.length === laenge) fertigGelegt(aktuell); else zeichneBau();
+      });
+      box.append(k);
+    }
+    wahl.append(box);
+  } else {
+    a.gruppen.forEach((g, i) => {
+      const box = el("div", { class: "gl-sorten" });
+      for (const name of g.teile) {
+        const k = el("button", { type: "button", class: "gl-sorte", "data-name": name }, el("span", { class: "gl-bild", "aria-hidden": "true", text: TEIL[name][1] }), el("span", { text: name }));
+        k.addEventListener("click", () => {
+          if (ctx.vorbei()) return;
+          aktuell[i] = name;
+          LS.ton("tipp");
+          if (aktuell.every(Boolean)) fertigGelegt(aktuell.slice()); else zeichneBau();
+        });
+        box.append(k);
+      }
+      wahl.append(el("div", { class: "gl-gruppe" }, el("b", { text: KLEIDER_GRUPPEN[g.g].name }), box));
+    });
+  }
+  zeichneBau();
+  zeichneGefunden();
+  if (ctx.nr === 0) ctx.sag(glaceArt ? "Tipp die Sorten an — jede neue Glace kommt unten dazu." : "Tipp aus jeder Gruppe ein Stück an.");
+}
+
+function zaehlen(ctx, a) {
+  const f = formel(a);
+  const loesung = f.text;
+  ctx.loesung(loesung);
+  const glaceArt = a.typ !== "kleider";
+  ctx.flaeche.append(el("div", { class: "auftrag", text: glaceArt ? "Wie viele verschiedene Glace gibt es?" : "Wie viele verschiedene Kleider-Sets gibt es?" }),
+    el("div", { class: "frage", text: regelText(a) }));
+  if (glaceArt) {
+    ctx.flaeche.append(el("div", { class: "gl-liste vorgabe" }, ...a.sorten.map(s => el("span", {}, kugel(s), el("span", { text: s })))));
+  } else {
+    for (const g of a.gruppen) ctx.flaeche.append(el("div", { class: "gl-gruppe" }, el("b", { text: KLEIDER_GRUPPEN[g.g].name }),
+      el("div", { class: "gl-liste vorgabe" }, ...g.teile.map(t => el("span", {}, el("span", { class: "gl-bild", text: TEIL[t][1] }), el("span", { text: t }))))));
+  }
+  const anzeige = el("div", { class: "anzeige leer gl-anzeige", "aria-label": "Anzahl" });
+  ctx.flaeche.append(anzeige);
+  const n = glaceArt ? a.sorten.length : 0;
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 4,
+    onOk(w) {
+      if (ctx.vorbei()) return;
+      if (w === f.N) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+      anzeige.classList.add("falsch");
+      let hinweis;
+      if (a.typ === "kleider") {
+        hinweis = w === a.gruppen.reduce((s, g) => s + g.teile.length, 0)
+          ? "Zu jedem Stück passen alle Stücke der anderen Gruppen — da muss man mal rechnen, nicht plus."
+          : "Nimm das erste Stück der ersten Gruppe: Wie viele Sets gibt es damit? Und mit den anderen Stücken?";
+      } else if (a.typ === "glace" && !a.reihenfolge && a.kugeln === 2 && w === n * (n - 1)) {
+        hinweis = "Im Becher ist die Reihenfolge egal. Hast du jede Glace doppelt gezählt?";
+      } else if (a.typ === "glace" && !a.reihenfolge && a.kugeln === 3 && w === n * (n - 1) * (n - 2)) {
+        hinweis = "Im Becher ist die Reihenfolge egal. Jede Glace hast du mehrfach gezählt — wie oft lassen sich 3 Kugeln umstellen?";
+      } else if (a.typ === "glace" && a.reihenfolge && 2 * w === f.N) {
+        hinweis = "Beim Cornet zählt die Reihenfolge: Kugel A unten und B oben ist eine andere Glace als B unten und A oben.";
+      } else if (a.typ === "glace" && a.gleich && w === f.N - n) {
+        hinweis = "Auch zweimal dieselbe Sorte ist erlaubt — hast du die mitgezählt?";
+      } else {
+        hinweis = a.typ === "turm" ? "Wie viele Sorten können unten sein? Und wie viele dann noch darüber?"
+          : "Geh der Reihe nach vor: zuerst alle Glace mit der ersten Sorte, dann mit der zweiten …";
+      }
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(tasten.element);
+  if (ctx.nr === 0) ctx.sag("Du kannst sie in Gedanken legen — oder geschickt rechnen.");
+}
+
+LS.spiel({
+  id: ID,
+  einleitung: "Wie viele verschiedene Glace kannst du machen? Probier alle Möglichkeiten — aber keine doppelt!",
+  anzahl: 6,
+  stufen: STUFEN,
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "legen") legen(ctx, a); else zaehlen(ctx, a);
+  },
+});
+</script>
+</body>
+</html>

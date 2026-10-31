@@ -5,7 +5,7 @@ wird in den Quellen: ein Spiel als angesehen bzw. eine Inhaltsliste als geprüft
 im Katalog (`spiele/gemeinsam/katalog.js`), Annahmen in `docs/lernziele/`, Ideen in
 `docs/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
-**Stand:** 65 Spiele gebaut, 22 Ideen offen · für Kinder frei: 32 von 65 · 0 von 9 neuen Spielen angesehen · 0 von 120 Inhaltslisten geprüft.
+**Stand:** 84 Spiele gebaut, 3 Ideen offen · für Kinder frei: 32 von 84 · 0 von 28 neuen Spielen angesehen · 0 von 162 Inhaltslisten geprüft.
 
 Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit
 Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.
@@ -53,20 +53,6 @@ Je gebautem Spiel:
 
 - [x] **Formen-Detektiv** (`formen-detektiv`) — für Kinder frei
 
-### NMG
-
-#### neues Thema (NMG.9.2)
-
-- [ ] Früher-heute-Paare — Idee, Klassen 1–4
-
-#### neues Thema (NMG.4.4)
-
-- [ ] Wetter-Jahreszeiten — Idee, Klassen 1–4
-
-#### neues Thema (NMG.1.2)
-
-- [ ] Schulweg-Profi — Idee, Klassen 1–3
-
 ## 2. Klasse
 
 ### Mathe
@@ -99,14 +85,14 @@ Je gebautem Spiel:
 
 - [x] ~~Folgen-Fortsetzer~~ — ersetzt: Zahlenfolgen übt der Muster-Fortsetzer (Stufen 5–6), den OP 4. Klasse (MA.3.A.3.d) die Preis-Tabelle
 
-#### neues Thema (MA.3.B)
-
-- [ ] Glace-Kombinator — Idee, Klassen 2–6
-
 ### NMG
 
 #### Zeit
 
+- [x] **Früher und heute** (`frueher-heute`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 3 Listen (offen: Paare: Ding von früher und Ding von heute (Waschbrett – Waschmaschine); Reihen vom ältesten zum neusten (Feuer – Kerze – Lampe mit Strom); Gab es das vor 60 und vor 100 Jahren schon?)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Jahreskreis-Ordner** (`jahreskreis`) — für Kinder frei
 
 #### Tiere
@@ -136,15 +122,20 @@ Je gebautem Spiel:
 - [x] **Schwimmt oder sinkt?** (`schwimmt-sinkt`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
   - [ ] Inhalte geprüft: 0 von 4 Listen (offen: Schwimmt es oder sinkt es? (Dinge im Wasser); Aus welchem Material ist das?; Fragen zu Eigenschaften von Stoffen (durchsichtig, Wärme, biegsam); Fragen: Warum schwimmt oder sinkt etwas?)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session2.md`
-- [ ] Stromkreis-Bauer — Idee, Klassen 2–6
 
-#### Form und Raum
+#### Sicher unterwegs
 
-- [ ] Plan-Leser — Idee, Klassen 2–4
+- [x] **Schulweg-Profi** (`schulweg-profi`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 4 Listen (offen: Sicher oder gefährlich? (Situationen auf dem Schulweg); Über die Strasse gehen: Lichtsignal, Fussgängerstreifen, Warte-luege-lose-laufe; Verkehrssignale und ihre Bedeutung; Velo fahren: Licht, Bremsen, Handzeichen, toter Winkel)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
-#### neues Thema (NMG.9.4)
+#### Geschichten
 
-- [ ] Echt-oder-erfunden — Idee, Klassen 2–5
+- [x] **Echt oder erfunden?** (`echt-oder-erfunden`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 4 Listen (offen: Kurze Sätze mit Bild: kann es geben oder erfunden; Kurze Geschichten, echt oder mit einem erfundenen Satz; Erstaunlich, aber wahr? Sätze über Tiere und Natur; Märchen, Sage, Fabel, Sachtext (selbst geschriebene Ausschnitte))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
 ### Deutsch
 
@@ -183,9 +174,11 @@ Je gebautem Spiel:
 
 ### Medien und Informatik
 
-#### Form und Raum
+#### Informatik
 
-- [ ] Roboter-Pfad — Idee, Klassen 2–6
+- [x] **Roboter-Pfad** (`roboter-pfad`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
 ## 3. Klasse
 
@@ -195,8 +188,6 @@ Je gebautem Spiel:
 
 - [x] **Einmaleins-Blitz** (`einmaleins-blitz`) — für Kinder frei
 - [x] **Rest-Rätsel** (`rest-raetsel`) — für Kinder frei
-- [ ] Rechen-Maschine — Idee, Klassen 3–6
-- [ ] Zielzahl-Jagd — Idee, Klassen 3–6
 
 #### Grössen
 
@@ -205,8 +196,6 @@ Je gebautem Spiel:
 #### Form und Raum
 
 - [x] **Koordinaten-Schatzsuche** (`koordinaten-schatz`) — für Kinder frei
-- [ ] Pentomino-Puzzle — Idee, Klassen 3–6
-- [ ] Würfelbau-Blick — Idee, Klassen 3–6
 
 ### Deutsch
 
@@ -224,7 +213,6 @@ Je gebautem Spiel:
 
 #### neues Thema
 
-- [ ] Gedicht-Baukasten — Idee, Klassen 3–5
 - [ ] Tipp-Trainer — Idee, Klassen 3–6
 
 ### NMG
@@ -239,10 +227,6 @@ Je gebautem Spiel:
   - [ ] Inhalte geprüft: 0 von 3 Listen (offen: Tierklassen (Säugetier, Vogel, Fisch … Insekt, Spinnentier) inkl. knifflige Tiere; Gruppen der Säugetiere (Nagetier, Raubtier, Paarhufer …); Wildtier, Nutztier oder Heimtier)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session2.md`
 
-#### Zeit
-
-- [ ] Zeitstrahl-Sortierer — Idee, Klassen 3–6
-
 #### Orientierung
 
 - [ ] Schweiz-Karten-Suche — Idee, Klassen 3–6
@@ -253,20 +237,6 @@ Je gebautem Spiel:
 
 - [x] **Noten-Namen** (`noten-namen`) — für Kinder frei
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session2.md`
-
-### Englisch
-
-#### neues Thema (FS1E.5.E)
-
-- [ ] Spelling-Bee — Idee, Klassen 3–6
-
-#### neues Thema (FS1E.1.A)
-
-- [ ] Listen & Tap — Idee, Klassen 3–6
-
-#### neues Thema (FS1E.2.B)
-
-- [ ] Wort-Zwillinge — Idee, Klassen 3–6
 
 ## 4. Klasse
 
@@ -294,11 +264,17 @@ Je gebautem Spiel:
 - [x] **Malkreuz** (`malkreuz`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+- [x] **Rechen-Maschine** (`rechen-maschine`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Rechen-Rakete** (`rechen-rakete`) — für Kinder frei
 - [x] **Rechentrick-Detektiv** (`rechentrick-detektiv`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Schriftlich-Werkstatt** (`schriftlich-werkstatt`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+- [x] **Zielzahl-Jagd** (`zielzahl-jagd`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
@@ -319,9 +295,24 @@ Je gebautem Spiel:
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Umfragen und Zählungen (Titel, Fragen, Kategorien))
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
+#### Kombinieren
+
+- [x] **Glace-Kombinator** (`glace-kombinator`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 2 Listen (offen: Glacesorten (Name, Farbe, Buchstabe auf der Kugel); Kleidungsstücke in Gruppen (Oberteile, Hosen, Schuhe, Kopfbedeckungen))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+
 #### Form und Raum
 
-- [ ] Netz-Falter — Idee, Klassen 4–6
+- [x] **Netz-Falter** (`netz-falter`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+- [x] **Pentomino-Puzzle** (`pentomino-puzzle`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+- [x] **Würfelbau-Blick** (`wuerfelbau-blick`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
 ### Englisch
 
@@ -329,10 +320,28 @@ Je gebautem Spiel:
 
 - [x] **English Word-Match** (`word-match`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
   - [ ] Inhalte geprüft: 0 von 8 Listen (offen: Englisch: Farben (Colours); Englisch: Tiere (Animals); Englisch: Zahlen 1–10 (Numbers); Englisch: Essen (Food); Englisch: Familie und Körper (Family, Body); Englisch: Schule (School); Englisch: Wetter (Weather); Englisch: kurze Wendungen (Hello!, How are you?))
+- [x] **Wort-Zwillinge** (`wort-zwillinge`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 3 Listen (offen: Englisch: Parallelwörter, fast gleich geschrieben (hand – Hand, zebra – Zebra); Englisch: Parallelwörter, ähnlich geschrieben (house – Haus, water – Wasser); Englisch: falsche Freunde (gift = Geschenk, nicht Gift))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
-#### neues Thema (FS1E.5.D)
+#### Sätze
 
-- [ ] Sentence-Builder — Idee, Klassen 4–6
+- [x] **Sentence-Builder** (`sentence-builder`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 4 Listen (offen: Englisch: Ich-Sätze (I like …, I have got …, I can …, I am …); Englisch: Sätze in der 3. Person (She has got …, He likes …); Englisch: Fragesätze (Do you …? Have you got …? Can you …?); Englisch: Verneinung (I don't …, She doesn't …, It isn't …))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+
+#### Hören und Buchstabieren
+
+- [x] **Listen & Tap** (`listen-tap`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 8 Listen (offen: Englisch: Farben (Colours) (Liste von English Word-Match); Englisch: Tiere (Animals) (Liste von English Word-Match); Englisch: Zahlen 1–10 (Numbers) (Liste von English Word-Match); Englisch: Essen (Food) (Liste von English Word-Match); Englisch: Familie und Körper (Family, Body) (Liste von English Word-Match); Englisch: Schule (School) (Liste von English Word-Match); Englisch hören: Anweisungen mit Farbe und Form (Touch the red heart.); Englisch hören: Wo ist das Tier? (in, on, under, next to))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+- [x] **Spelling-Bee** (`spelling-bee`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 6 Listen (offen: Englisch: Farben (Colours) (Liste von English Word-Match); Englisch: Tiere (Animals) (Liste von English Word-Match); Englisch: Zahlen 1–10 (Numbers) (Liste von English Word-Match); Englisch: Essen (Food) (Liste von English Word-Match); Englisch: Familie und Körper (Family, Body) (Liste von English Word-Match); Englisch: Schule (School) (Liste von English Word-Match))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
 ### NMG
 
@@ -341,6 +350,31 @@ Je gebautem Spiel:
 - [x] **Kompass-Spiel** (`kompass`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Orte auf dem Dorfplan (Name mit Artikel))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+- [x] **Plan-Leser** (`plan-leser`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 2 Listen (offen: Plan Schulzimmer: Dinge und ihre Zeichen; Plan Quartier: Orte und ihre Zeichen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+
+#### Wetter
+
+- [x] **Wetter und Jahreszeiten** (`wetter-jahreszeiten`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 4 Listen (offen: Zu welcher Jahreszeit passt das? (Natur, Wetter, Tätigkeiten); Kleidung für das Wetter; Wettersymbole (auch im Wetterbericht); Wetterwissen: Nebel, Hagel, Donner, Messgeräte, Föhn)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+
+#### Zeit
+
+- [x] **Zeitstrahl-Sortierer** (`zeitstrahl-sortierer`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 4 Listen (offen: Lebensabschnitte und Ereignisse im Leben (Kindergarten mit 4, 1. Klasse mit 6); Generationen: Kind, Eltern, Grosseltern, Urgrosseltern; Ereignisse mit Jahrzahl (Bundesbrief 1291, erste Eisenbahn 1847, Mondlandung 1969); Zeitalter: Steinzeit, Römerzeit, Mittelalter, Neuzeit und ihre Merkmale)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+
+#### Forschen
+
+- [x] **Stromkreis-Bauer** (`stromkreis-bauer`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 5 Listen (offen: Schaltbilder: Batterie, Lampe, Drähte (geschlossen, Draht lose, gleicher Pol); Schaltbilder mit Schalter (offen, geschlossen); Leiter und Nichtleiter (Gegenstände in der Lücke); Schaltbilder mit Kurzschluss (Draht über Batterie, Lampe, Schalter); Schaltbilder mit zwei oder drei Lampen in Serie und parallel)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
 ### Deutsch
@@ -361,6 +395,13 @@ Je gebautem Spiel:
 - [x] **Fehler-Lupe** (`fehler-lupe`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 9 Listen (offen: Nomen gross, auch Gefühle (Hund, Angst); sp und st am Wortanfang, sch (Stein, Schule); ie oder i (Biene, Kind); e oder ä, eu oder äu (Hände, Bäume); Komma bei Aufzählungen; Doppelkonsonant, ck und tz (Sonne, Zucker, Katze); Dehnungs-h (fahren, Zahn); Verben als Nomen (beim Essen); Fehlerfreie Sätze (nur Königsstufe, zusätzlich zu einer Regel))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+
+#### Gedichte
+
+- [x] **Gedicht-Baukasten** (`gedicht-baukasten`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 5 Listen (offen: Zweizeiler zum Ergänzen des Reimworts; Vierzeiler im Paarreim (aabb); Vierzeiler im Kreuzreim (abab); Vierzeiler im umarmenden Reim (abba); Gedichte mit zwei oder drei Strophen)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
 ## 5. Klasse

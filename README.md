@@ -17,6 +17,11 @@ die Aufsicht ein. **Kinder sehen alles, was nichts mehr zu prüfen hat:** Neue S
 sobald sie angesehen sind, Spiele mit Wort- und Inhaltslisten, sobald eine Liste geprüft ist. Die
 Aufsicht kann im Tab Verwaltung anders freigeben oder sperren.
 
+**♾ Endlos:** Rechenspiele bieten zusätzlich einen Endlos-Modus: so viele Aufgaben wie möglich bis
+zum ersten Fehler, mit oder ohne Timer. Auf der Spielkarte „♾ Endlos spielen“ antippen; im Startbild
+des Spiels unter den Stufen die Endlos-Stufe wählen (Timer oben ein- oder ausschalten). Der Rekord je Kind und die Rangliste stehen am Ende der
+Runde und in der Statistik.
+
 - **Empfohlen: Chrome oder Edge.** Dort teilen Startseite, Spiele und Statistik auch beim Öffnen per
   Doppelklick (`file://`) denselben Speicher, also Spieler, Profil und Fortschritt.
 - **Firefox:** ungeprüft, ob der Speicher beim Doppelklick zwischen den Seiten geteilt wird. Wer

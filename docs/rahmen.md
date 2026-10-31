@@ -220,7 +220,28 @@ Adresse (`#statistik`). `#anmelden` meldet ab und führt zur Anmeldung; dorthin 
 „wechseln“ im Spiel. Je Spieler speichert das Profil Favoriten, die Ansicht (`kacheln` oder
 `kompakt`) und welche Gruppen zugeklappt sind (`zu`).
 
-## 7. Was das Testskript dazu prüft
+## 7. Endlos-Modus und Rekorde
+
+Vorgabe Patrik 2026-10-31.
+- **Ablauf:** Aufgaben, bis die erste falsch ist oder, mit Timer, die Zeit um ist. Gezählt werden die
+  richtig gelösten. Im Startbild des Spiels unter den Stufen „♾ Endlos“, mit dem eigenen Rekord;
+  direkt über `?stufe=s3&endlos=1`.
+- **Welche Spiele:** Der Katalog nennt je Spiel die Stufen mit `endlos: [...]`. Ausgewählt sind
+  Spiele ohne Inhaltslisten, die ihre Aufgaben berechnen, in Stufen mit mindestens 100 verschiedenen
+  Aufgaben (gemessen in LERN_Session3). Bei Wortlisten wäre Endlos nur ein Durchlauf durch die Liste.
+- **Wiederholungen:** keine der letzten 30 Aufgaben nochmal. Findet sich keine neue mehr, ist die
+  Stufe „alles geschafft“.
+- **Speicher:** `lernspiele:rekorde` = `[{ name, zeit, spiel, stufe, timer, punkte, dauer, alles?,
+  test?, hilfe? }]`, eine Zeile je Endlos-Runde, getrennt vom Protokoll. `timer` ist die Zeit je
+  Aufgabe in Sekunden oder `null`. Verglichen wird nur bei gleicher Stufe und gleichem Timer.
+  Sichern, Einlesen und Löschen behandeln die Rekorde wie das Protokoll.
+- **Rangliste:** bester Wert je Kind, ohne Testrunden und ohne Aufsicht; am Ende einer Endlos-Runde
+  und in der Statistik („Platz 2 von 3“).
+- **Später, noch Idee:** eine Online-Rangliste, bei der die Aufsicht das Gerät anmeldet und
+  Wettbewerbe nach Alter, Klasse und Region erscheinen. Das Speicherformat ist dafür geeignet. Heute
+  bleibt alles lokal.
+
+## 8. Was das Testskript dazu prüft
 
 `node tools/pruefe_spiele.js [ids] [--seed=N]` prüft:
 - jede Stufe lädt und lässt sich durchspielen;
@@ -231,7 +252,9 @@ Adresse (`#statistik`). `#anmelden` meldet ab und führt zur Anmeldung; dorthin 
 - die Testhilfen;
 - reservierte Klassen im eigenen Stil;
 - jedes Spiel mit Inhaltslisten als Kind, mit je einer freigegebenen Liste: Es gibt mindestens eine
-  Stufe, und keine Stufe läuft leer.
+  Stufe, und keine Stufe läuft leer;
+- Wiederholungen je Runde;
+- jedes Spiel mit Endlos-Stufen im Endlos-Modus (`--endlos=0` schaltet ab).
 
 **Nicht geprüft** wird das Aussehen. Das heisst: Desktop, Tablet (768 px) und Handy (375 px) im
 Browser ansehen.

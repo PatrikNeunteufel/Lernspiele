@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gedicht-Baukasten</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 25px); font-weight: 800; margin: 0 0 10px; }
+  .gedicht { background: #fffaf0; border: 3px solid var(--rand); border-radius: 16px; padding: 12px 18px; margin: 0 auto 14px;
+    max-width: 560px; font-size: clamp(18px, 4vw, 22px); line-height: 1.5; font-weight: 600; }
+  .gedicht .titel { font-weight: 900; margin-bottom: 6px; }
+  .gedicht .strophe + .strophe { margin-top: 14px; }
+  .gedicht .luecke { display: inline-block; min-width: 90px; border-bottom: 3px solid var(--deko-1); color: var(--deko-1); font-weight: 900; text-align: center; }
+  .gedicht .vorgabe { color: var(--text); }
+  .gedicht-vers { display: block; width: 100%; text-align: left; font: inherit; font-weight: 600; color: var(--text); background: #fff;
+    border: 3px solid var(--rand); border-radius: 12px; padding: 6px 10px; margin: 4px 0; cursor: pointer; }
+  .gedicht-vers.falsch { border-color: var(--hinweis); background: var(--hinweis-hell); }
+  .gedicht-vers.richtig { border-color: var(--gut); background: var(--gut-hell); }
+  .gedicht-ordnen .wahl-knopf, .gedicht-ordnen .ablage span { font-size: clamp(16px, 3.6vw, 19px); }
+  .gedicht-ordnen .ablage { flex-direction: column; align-items: stretch; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📜 Gedicht-Baukasten</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="gedichte.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.6.C.1 (literarische Texte gestalten): e Reim, Vers und Strophe erkennen und
+// verwenden (Orientierungspunkt 2. Zyklus, Ende 4. Klasse); Reimschema (Paarreim, Kreuzreim,
+// umarmender Reim) folgt danach. Basisklasse 4: s1 3. Klasse (Reimwort ergänzen), s3 Vers, Strophe,
+// Reim; s4 Verse ordnen; s5 5. Klasse Reimschema; s6 Königsstufe. Alle Verse selbst verfasst (gedichte.js).
+
+const { zufall, waehle, mische, el } = LS;
+const ID = "gedicht-baukasten";
+const ORDNUNG = ["ersten", "zweiten", "dritten", "vierten"];
+const SCHEMA = {
+  paarreim: "Paarreim (aabb)",
+  kreuzreim: "Kreuzreim (abab)",
+  umarmend: "umarmender Reim (abba)",
+};
+// Wer reimt sich mit wem? Partner je Vers (0–3) im Vierzeiler.
+const PARTNER = { paarreim: [1, 0, 3, 2], kreuzreim: [2, 3, 0, 1], umarmend: [3, 2, 1, 0] };
+const VIER = ["paarreim", "kreuzreim", "umarmend"];
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : GEDICHT_LISTEN);
+const PAARE = FREI.has("reimpaare") ? REIMPAARE.map((x, i) => i) : [];
+/** Freie Vierzeiler: [Liste, Nummer]. */
+const VIERER = VIER.filter(l => FREI.has(l)).flatMap(l => VIERZEILER[l].map((x, i) => [l, i]));
+const STROPHEN = FREI.has("strophen") ? STROPHEN_GEDICHTE.map((x, i) => i) : [];
+
+const endwort = v => v.replace(/[,.!?;:]+$/, "").split(" ").pop();
+
+/** Gedicht einer Aufgabe als Strophen: [{ schema, verse }]. */
+function strophenVon(a) {
+  if (a.liste === "strophen") return STROPHEN_GEDICHTE[a.nr][1].map(([schema, ...verse]) => ({ schema, verse }));
+  return [{ schema: a.liste, verse: VIERZEILER[a.liste][a.nr] }];
+}
+const alleVerse = a => strophenVon(a).flatMap(s => s.verse);
+
+/** Gedicht aus den freien Listen: Vierzeiler und (falls mitStrophen) Gedichte mit Strophen. */
+function gedichtWahl(mitStrophen) {
+  const liste = [...VIERER, ...(mitStrophen ? STROPHEN.map(i => ["strophen", i]) : [])];
+  return liste.length ? waehle(liste) : null;
+}
+
+/** Zahlen um die richtige herum, ohne 0 und ohne die richtige. */
+const zahlenUm = (k, n = 2) => mische([k - 2, k - 1, k + 1, k + 2].filter(x => x > 0)).slice(0, n);
+
+// ---------- Aufgabenarten (null, wenn die freien Listen nichts hergeben) ----------
+
+const ARTEN = {
+  /** Reimwort ergänzen; schwer: eine falsche Wahl reimt sich, passt aber nicht. */
+  reimwort(schwer) {
+    if (!PAARE.length) return null;
+    const i = waehle(PAARE);
+    const [, , richtig, f1, f2, unsinn] = REIMPAARE[i];
+    return { art: "reimwort", liste: "reimpaare", nr: i, richtig, optionen: mische([richtig, f1, schwer ? unsinn : f2]) };
+  },
+  /** Welches Wort reimt sich auf …? */
+  reim() {
+    const g = VIERER.length ? waehle(VIERER) : null;
+    if (!g) return null;
+    const [liste, nr] = g;
+    const verse = VIERZEILER[liste][nr];
+    const v = zufall(0, 3);
+    const richtig = endwort(verse[PARTNER[liste][v]]);
+    const andere = verse.map(endwort).filter((w, j) => j !== v && w !== richtig);
+    return { art: "reim", liste, nr, vers: v, richtig, optionen: mische([richtig, ...mische(andere).slice(0, 2)]) };
+  },
+  /** Wie viele Verse / Strophen? */
+  zaehlen(mitStrophen) {
+    const g = gedichtWahl(mitStrophen);
+    if (!g) return null;
+    const a = { liste: g[0], nr: g[1] };
+    const strophen = Math.random() < 0.5 && g[0] === "strophen";
+    const k = strophen ? strophenVon(a).length : alleVerse(a).length;
+    return { art: "zaehlen", ...a, was: strophen ? "Strophen" : "Verse", richtig: k, optionen: mische([k, ...zahlenUm(k)]) };
+  },
+  /** Tippe auf den n-ten Vers (der m-ten Strophe). */
+  vers(mitStrophen) {
+    const g = gedichtWahl(mitStrophen);
+    if (!g) return null;
+    const a = { liste: g[0], nr: g[1] };
+    const st = strophenVon(a);
+    const s = zufall(0, st.length - 1);
+    const v = zufall(0, st[s].verse.length - 1);
+    return { art: "vers", ...a, strophe: s, vers: v, richtig: st[s].verse[v], optionen: [] };
+  },
+  /** Verse ordnen: der erste Vers steht schon da. */
+  ordnen() {
+    const g = VIERER.length ? waehle(VIERER) : null;
+    if (!g) return null;
+    const verse = VIERZEILER[g[0]][g[1]];
+    return { art: "ordnen", liste: g[0], nr: g[1], richtig: verse.slice(1).join(" / "), optionen: [] };
+  },
+  /** Reimschema eines Vierzeilers oder einer vierzeiligen Strophe. */
+  schema(mitStrophen) {
+    const kandidaten = [...VIERER.map(([l, i]) => [l, i, 0])];
+    if (mitStrophen) for (const i of STROPHEN) STROPHEN_GEDICHTE[i][1].forEach((s, j) => { if (s.length === 5) kandidaten.push(["strophen", i, j]); });
+    if (!kandidaten.length) return null;
+    const [liste, nr, strophe] = waehle(kandidaten);
+    const richtig = liste === "strophen" ? STROPHEN_GEDICHTE[nr][1][strophe][0] : liste;
+    return { art: "schema", liste, nr, strophe, richtig, optionen: mische(VIER) };
+  },
+};
+
+const STUFE = {
+  s1: [() => ARTEN.reimwort(false)],
+  s2: [() => ARTEN.reimwort(true), () => ARTEN.reim()],
+  s3: [() => ARTEN.reim(), () => ARTEN.zaehlen(true), () => ARTEN.vers(true), () => ARTEN.vers(true)],
+  s4: [() => ARTEN.ordnen(), () => ARTEN.ordnen(), () => ARTEN.reim()],
+  s5: [() => ARTEN.schema(false), () => ARTEN.schema(false), () => ARTEN.ordnen()],
+  // Königsstufe: Reimschema auch in Strophen, ordnen, Strophen zählen
+  s6: [() => ARTEN.schema(true), () => ARTEN.schema(true), () => ARTEN.ordnen(), () => ARTEN.zaehlen(true), () => ARTEN.vers(true)],
+};
+
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Welches Wort reimt sich? Ergänze den Vers.",
+  s2: "Reimt sich und passt: Pass auf, es gibt Fallen!",
+  s3: "Vers, Strophe, Reim: zählen, zeigen, finden.",
+  s4: "Bring die Verse in die richtige Reihenfolge.",
+  s5: "Paarreim, Kreuzreim oder umarmender Reim?",
+  s6: "Reimschema in Strophen, ordnen, zählen.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+// ---------- Prüfung (tools/pruefe_spiele.js) ----------
+
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (!FREI.has(a.liste)) m.push(`Inhalt nicht aus einer freien Liste (${a.liste})`);
+  if (a.optionen.length && (new Set(a.optionen).size !== a.optionen.length || a.optionen.filter(o => o === a.richtig).length !== 1)) m.push("Antworten doppelt oder richtige fehlt");
+  const inhalt = a.liste === "reimpaare" ? REIMPAARE[a.nr] : a.liste === "strophen" ? STROPHEN_GEDICHTE[a.nr] : VIERZEILER[a.liste][a.nr];
+  if (JSON.stringify([a, inhalt]).includes("ß")) m.push("ß");
+  if (a.liste !== "reimpaare" && a.liste !== "strophen") {
+    const v = inhalt;
+    if (v.length !== 4) m.push("Vierzeiler ohne vier Verse");
+    if (v.slice(0, 3).some(x => /[.!?]$/.test(x)) || !/[.!]$/.test(v[3])) m.push("Satzzeichen: nur der letzte Vers endet mit Punkt");
+    if (a.liste === "umarmend" && !/^und /.test(v[2])) m.push("umarmend: dritter Vers beginnt nicht mit „und“");
+    if (new Set(v.map(endwort)).size !== 4) m.push("Endwort doppelt");
+  }
+  if (a.art === "reimwort") {
+    const [, v2, richtig, f1, f2, unsinn] = REIMPAARE[a.nr];
+    if (!v2.includes("{}") || a.richtig !== richtig) m.push("Reimwort falsch");
+    if (stufe === "s1" && a.optionen.includes(unsinn)) m.push("Stufe 1: keine reimende Falle");
+    if (!a.optionen.every(o => [richtig, f1, f2, unsinn].includes(o))) m.push("fremde Wahl");
+  }
+  if (a.art === "reim" && endwort(VIERZEILER[a.liste][a.nr][PARTNER[a.liste][a.vers]]) !== a.richtig) m.push("Reimpartner falsch");
+  if (a.art === "zaehlen") {
+    const k = a.was === "Strophen" ? strophenVon(a).length : alleVerse(a).length;
+    if (k !== a.richtig) m.push("Anzahl falsch");
+  }
+  if (a.art === "vers" && strophenVon(a)[a.strophe].verse[a.vers] !== a.richtig) m.push("Vers falsch");
+  if (a.art === "vers" && new Set(alleVerse(a)).size !== alleVerse(a).length) m.push("Vers doppelt");
+  if (a.art === "schema") {
+    const st = a.liste === "strophen" ? STROPHEN_GEDICHTE[a.nr][1][a.strophe] : null;
+    if (st && st.length !== 5) m.push("Reimschema nur bei vier Versen");
+    if ((st ? st[0] : a.liste) !== a.richtig) m.push("Reimschema falsch");
+  }
+  if (["s1", "s2"].includes(stufe) && !["reimwort", "reim"].includes(a.art)) m.push("Stufe 1/2 nur Reime");
+  return m;
+}
+
+// ---------- Spiel ----------
+
+const HINWEIS = {
+  reimwort: "Sprich den ersten Vers laut. Welches Wort klingt am Ende gleich und passt zum Sinn?",
+  reim: "Sprich die Wörter am Ende der Verse laut. Welches klingt am Schluss gleich?",
+  zaehlen: "Ein Vers ist eine Zeile. Eine Strophe ist eine Gruppe von Versen mit Abstand dazwischen.",
+  vers: "Ein Vers ist eine Zeile. Zähle von oben, in jeder Strophe neu.",
+  ordnen: "Achte auf die Reime und darauf, wie der Satz weitergeht. Der letzte Vers endet mit einem Punkt.",
+  schema: "Gib Versen, die sich reimen, den gleichen Buchstaben: der erste Vers ist a. Welcher Vers reimt sich mit ihm?",
+};
+
+/** Gedicht als Kasten; mit opt.vers(vers, strophe, nr) statt Text eigene Elemente je Vers. */
+function gedichtKasten(a, opt = {}) {
+  const box = el("div", { class: "gedicht" });
+  if (a.liste === "strophen") box.append(el("div", { class: "titel", text: STROPHEN_GEDICHTE[a.nr][0] }));
+  const st = strophenVon(a);
+  const nur = opt.strophe ?? null;
+  st.forEach((s, j) => {
+    if (nur !== null && nur !== j) return;
+    const strophe = el("div", { class: "strophe" });
+    s.verse.forEach((v, i) => strophe.append(opt.vers ? opt.vers(v, j, i) : el("div", { text: v })));
+    box.append(strophe);
+  });
+  return box;
+}
+
+LS.spiel({
+  id: ID,
+  einleitung: "Reime, Verse, Strophen: Bau mit mir Gedichte! Lies die Verse ruhig laut vor.",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const f = ctx.flaeche;
+    const frage = t => f.append(el("div", { class: "frage", text: t }));
+    if (ctx.nr === 0) ctx.sag("Lies die Verse halblaut vor, dann hörst du die Reime.");
+
+    if (a.art === "reimwort") {
+      const [v1, v2, richtig] = REIMPAARE[a.nr];
+      frage("Welches Wort reimt sich und passt?");
+      const [vor, nach] = v2.split("{}");
+      f.append(el("div", { class: "gedicht" }, el("div", { text: v1 }),
+        el("div", {}, document.createTextNode(vor), el("span", { class: "luecke", text: "?" }), document.createTextNode(nach))));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, hinweis: HINWEIS.reimwort, loesung: `${v1} ${v2.replace("{}", richtig)}`, breite: 150,
+        beiRichtig: () => { const l = f.querySelector(".luecke"); l.textContent = richtig; } });
+      return;
+    }
+    if (a.art === "reim") {
+      const wort = endwort(VIERZEILER[a.liste][a.nr][a.vers]);
+      frage(`Welches Wort reimt sich auf «${wort}»?`);
+      f.append(gedichtKasten(a));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, hinweis: HINWEIS.reim, loesung: `${wort} – ${a.richtig}`, breite: 150 });
+      return;
+    }
+    if (a.art === "zaehlen") {
+      frage(`Wie viele ${a.was} hat das Gedicht?`);
+      f.append(gedichtKasten(a));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: String, hinweis: HINWEIS.zaehlen, loesung: `Das Gedicht hat ${a.richtig} ${a.was}.`, breite: 90 });
+      return;
+    }
+    if (a.art === "vers") {
+      const mehrere = strophenVon(a).length > 1;
+      frage(`Tippe auf den ${ORDNUNG[a.vers]} Vers${mehrere ? ` der ${ORDNUNG[a.strophe]} Strophe` : ""}.`);
+      const loesung = `Der ${ORDNUNG[a.vers].replace(/n$/, "")} Vers${mehrere ? ` der ${ORDNUNG[a.strophe]} Strophe` : ""} heisst: ${a.richtig}`;
+      ctx.loesung(loesung);
+      f.append(gedichtKasten(a, {
+        vers: (v, j, i) => el("button", { type: "button", class: "gedicht-vers", text: v, onclick: e => {
+          if (ctx.vorbei()) return;
+          const k = e.currentTarget;
+          if (j === a.strophe && i === a.vers) { k.classList.add("richtig"); ctx.richtig(); return; }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+          ctx.falsch(HINWEIS.vers, loesung);
+        } }),
+      }));
+      return;
+    }
+    if (a.art === "ordnen") {
+      const verse = VIERZEILER[a.liste][a.nr];
+      frage("Ordne die Verse: Was kommt nach dem ersten Vers?");
+      f.append(el("div", { class: "gedicht" }, el("div", { class: "vorgabe", text: verse[0] })));
+      const { ablage, box } = LS.reihenfolge(ctx, { reihe: verse.slice(1), hinweis: HINWEIS.ordnen, loesung: verse.join(" / "), breite: 320 });
+      ablage.classList.add("gedicht-ordnen");
+      box.classList.add("gedicht-ordnen");
+      return;
+    }
+    // Reimschema
+    const ganzes = a.liste !== "strophen";
+    frage(ganzes ? "Welches Reimschema hat das Gedicht?" : `Welches Reimschema hat die ${ORDNUNG[a.strophe].replace(/n$/, "")} Strophe?`);
+    f.append(gedichtKasten(a));
+    LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: k => SCHEMA[k], hinweis: HINWEIS.schema, loesung: `${SCHEMA[a.richtig]}`, breite: 230 });
+  },
+});
+</script>
+</body>
+</html>

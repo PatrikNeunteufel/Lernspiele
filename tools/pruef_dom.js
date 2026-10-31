@@ -379,6 +379,11 @@ const alert = () => {};
 const innerWidth = 1024;
 const innerHeight = 768;
 const scrollTo = () => {};
+// Sprachausgabe: eine englische und eine deutsche Test-Stimme; gesprochen wird nichts, gemerkt wird der Text.
+const __gesprochen = [];
+class SpeechSynthesisUtterance { constructor(text) { this.text = text; } }
+const speechSynthesis = { getVoices: () => [{ lang: "en-GB", name: "Test" }, { lang: "de-CH", name: "Test" }],
+  speak: u => __gesprochen.push(u.text), cancel() {}, addEventListener() {} };
 const addEventListener = (t, fn) => document.addEventListener(t, fn);
 const Node = Knoten;
 const HTMLElement = Element;

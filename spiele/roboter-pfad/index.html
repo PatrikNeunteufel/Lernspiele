@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roboter-Pfad</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .rp-raster { display: grid; gap: 3px; width: 100%; max-width: 400px; margin: 0 auto 12px; }
+  .rp-raster .rp-rand { display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: var(--text-leise); }
+  .rp-zelle { position: relative; aspect-ratio: 1; border-radius: 10px; background: #f1f3fa; border: 2px solid var(--rand); display: flex;
+    align-items: center; justify-content: center; font-size: clamp(20px, 6vw, 34px); line-height: 1; padding: 0; font-family: inherit; color: var(--text); }
+  button.rp-zelle { cursor: pointer; background: #fff; }
+  .rp-zelle.rp-spur { background: var(--gut-hell); }
+  .rp-zelle.rp-ende { border-color: var(--gut); border-width: 4px; }
+  .rp-zelle.rp-falsch { background: var(--hinweis-hell); }
+  .rp-zelle.rp-crash { background: var(--hinweis-hell); }
+  .rp-robot { position: relative; display: inline-flex; width: 100%; height: 100%; align-items: center; justify-content: center; }
+  .rp-blick { position: absolute; inset: 0; pointer-events: none; }
+  .rp-blick::before { content: ""; position: absolute; top: -2px; left: 50%; transform: translateX(-50%); border-left: 8px solid transparent;
+    border-right: 8px solid transparent; border-bottom: 11px solid var(--deko-3); }
+  .rp-programm { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; min-height: 64px; margin: 0 auto 10px;
+    max-width: 640px; padding: 6px; border: 3px dashed var(--rand); border-radius: 16px; }
+  .rp-programm .leise { font-size: 16px; }
+  .rp-karte { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 54px; padding: 4px 6px;
+    border-radius: 12px; background: #fff; border: 3px solid var(--deko-6); font: inherit; font-size: 24px; line-height: 1.1; color: var(--text); }
+  .rp-karte small { font-size: 12px; font-weight: 800; color: var(--text-leise); }
+  .rp-karte b { font-size: 15px; color: var(--deko-3); }
+  button.rp-karte { cursor: pointer; box-shadow: 0 4px 0 var(--rand); }
+  .rp-karte.rp-falsch { background: var(--hinweis-hell); }
+  .rp-karte.rp-richtig { background: var(--gut-hell); border-color: var(--gut); }
+  .rp-block { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; border: 3px solid var(--deko-1); border-radius: 14px; }
+  .rp-block > b { font-size: 18px; color: var(--deko-1); }
+  .rp-wenn { max-width: 520px; margin: 0 auto 10px; padding: 8px 12px; border: 3px solid var(--deko-1); border-radius: 16px; font-size: clamp(17px, 4vw, 21px); font-weight: 800; line-height: 1.5; }
+  .rp-wenn .rp-karte { font-size: 18px; min-width: 0; flex-direction: row; gap: 4px; padding: 2px 6px; vertical-align: middle; }
+  .rp-befehle { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 auto 6px; }
+  .rp-befehl { min-width: 70px; min-height: 64px; border-radius: 16px; border: 3px solid var(--deko-6); background: #fff; font: inherit; font-size: 26px;
+    font-weight: 900; color: var(--text); cursor: pointer; box-shadow: 0 5px 0 var(--rand); display: inline-flex; flex-direction: column; align-items: center; justify-content: center; }
+  .rp-befehl small { font-size: 12px; font-weight: 800; color: var(--text-leise); }
+  .rp-befehl.rp-mal { border-color: var(--deko-1); color: var(--deko-1); }
+  .rp-befehl.rp-an { background: var(--deko-1); color: #fff; }
+  .rp-befehl:disabled { opacity: .4; cursor: default; }
+  .rp-zeile { text-align: center; font-size: 17px; font-weight: 800; color: var(--text-leise); margin: 0 0 6px; }
+  @media (max-width: 420px) { .rp-befehl { min-width: 56px; min-height: 56px; font-size: 22px; } .rp-karte { min-width: 44px; font-size: 20px; } }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🤖 Roboter-Pfad</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MI.2.2.a (Grundanspruch und Orientierungspunkt 1. Zyklus, 2. Klasse): formale
+// Anleitungen erkennen und ihnen folgen; Ausblick MI.2.2.b–f (Lösungswege durch Probieren,
+// Abläufe mit Wiederholungen und Bedingungen). Ein Roboter fährt im Raster: „vor“ = ein Feld in
+// Blickrichtung, „links“ und „rechts“ = am Ort eine Vierteldrehung. Befolgen (wo hält er?), selbst
+// ein Programm legen (jedes Programm, das auf dem Stern hält, gilt), den falschen Befehl finden,
+// Wiederholungen („3× vor“) und eine Bedingung („Wenn vorne frei …“).
+
+const { zufall, waehle, mische, el } = LS;
+
+// ---------- Raster und Befehle ----------
+const DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0]; // Blick 0 = oben, 1 = rechts, 2 = unten, 3 = links
+const BEFEHL = {
+  V: { bild: "⬆️", wort: "vor", satz: "vor" },
+  L: { bild: "↺", wort: "links", satz: "links drehen" },
+  R: { bild: "↻", wort: "rechts", satz: "rechts drehen" },
+};
+const SPALTEN = "ABCDEF";
+const feldName = (x, y) => `${SPALTEN[x]}${y + 1}`;
+const k = (x, y) => `${x},${y}`;
+
+/** Programm: Liste von { b: "V" | "L" | "R", n } oder { wdh, blk: [...] } → Liste einzelner Befehle. */
+function flach(prog) {
+  const aus = [];
+  for (const t of prog) {
+    if (t.blk) for (let i = 0; i < t.wdh; i++) aus.push(...flach(t.blk));
+    else for (let i = 0; i < (t.n || 1); i++) aus.push(t.b);
+  }
+  return aus;
+}
+const teilText = t => (t.blk ? `${t.wdh}× [${t.blk.map(teilText).join(", ")}]` : `${t.n > 1 ? `${t.n}× ` : ""}${BEFEHL[t.b].satz}`);
+const progText = prog => prog.map(teilText).join(", ");
+
+const frei = (feld, x, y) => x >= 0 && y >= 0 && x < feld.b && y < feld.h && !feld.hin.includes(k(x, y));
+
+/** Fährt die Befehle ab: { spur: [[x, y] …], x, y, d, crash: null | { x, y, art } }. */
+function fahre(feld, start, befehle) {
+  let { x, y, d } = start;
+  const spur = [[x, y]];
+  for (const b of befehle) {
+    if (b === "L") d = (d + 3) % 4;
+    else if (b === "R") d = (d + 1) % 4;
+    else {
+      const nx = x + DX[d], ny = y + DY[d];
+      if (!frei(feld, nx, ny)) return { spur, x, y, d, crash: { x: nx, y: ny, art: nx < 0 || ny < 0 || nx >= feld.b || ny >= feld.h ? "rand" : "hindernis" } };
+      x = nx; y = ny;
+      spur.push([x, y]);
+    }
+  }
+  return { spur, x, y, d, crash: null };
+}
+
+/** Bedingungs-Programm: wdh-mal „Wenn vorne frei: vor, sonst: sonst (L oder R)“. */
+function fahreWenn(feld, start, wenn) {
+  let { x, y, d } = start;
+  const spur = [[x, y]];
+  let drehungen = 0;
+  for (let i = 0; i < wenn.wdh; i++) {
+    if (frei(feld, x + DX[d], y + DY[d])) { x += DX[d]; y += DY[d]; spur.push([x, y]); }
+    else { d = wenn.sonst === "L" ? (d + 3) % 4 : (d + 1) % 4; drehungen++; }
+  }
+  return { spur, x, y, d, drehungen, crash: null };
+}
+
+/**
+ * Kürzestes Programm zum Ziel (Breitensuche über Ort und Blickrichtung). mitWdh: Karten mit
+ * Wiederholung zählen als eine Karte („3× vor“, „2× rechts“). Gibt eine Liste von Teilen oder null.
+ */
+function kuerzestes(feld, start, ziel, mitWdh = false) {
+  const aktionen = mitWdh
+    ? [1, 2, 3, 4].map(n => ({ b: "V", n })).concat([{ b: "L", n: 1 }, { b: "R", n: 1 }, { b: "R", n: 2 }])
+    : [{ b: "V", n: 1 }, { b: "L", n: 1 }, { b: "R", n: 1 }];
+  const schl = s => `${s.x},${s.y},${s.d}`;
+  const vorher = new Map([[schl(start), null]]);
+  const schlange = [start];
+  while (schlange.length) {
+    const s = schlange.shift();
+    if (s.x === ziel.x && s.y === ziel.y) {
+      const weg = [];
+      for (let z = schl(s); vorher.get(z); z = vorher.get(z).von) weg.unshift(vorher.get(z).teil);
+      return weg;
+    }
+    for (const t of aktionen) {
+      const r = fahre(feld, s, flach([t]));
+      if (r.crash) continue;
+      const n = { x: r.x, y: r.y, d: r.d };
+      if (vorher.has(schl(n))) continue;
+      vorher.set(schl(n), { von: schl(s), teil: { ...t } });
+      schlange.push(n);
+    }
+  }
+  return null;
+}
+
+/** Zufälliges Feld mit Hindernissen, Start und (optional) Ziel auf freien, verschiedenen Plätzen. */
+function neuesFeld(b, h, hindernisse) {
+  const plaetze = mische([...Array(b * h)].map((_, i) => [i % b, Math.floor(i / b)]));
+  const hin = plaetze.slice(0, hindernisse).map(([x, y]) => k(x, y));
+  const [sx, sy] = plaetze[hindernisse];
+  const [zx, zy] = plaetze[hindernisse + 1];
+  return { feld: { b, h, hin }, start: { x: sx, y: sy }, ziel: { x: zx, y: zy } };
+}
+
+// ---------- Stufen ----------
+// Raster b × h, Hindernisse, Blick am Start (null = zufällig), Arten mit Gewicht.
+const STUFE = {
+  s1: { b: 4, h: 4, hin: [0, 1], blick: 0, arten: { befolgen: 1 }, befehle: [2, 3], drehungen: [0, 1] },
+  s2: { b: 4, h: 4, hin: [0, 0], blick: 0, arten: { legen: 1 }, laenge: [2, 4], drehungen: [0, 1] },
+  s3: { b: 5, h: 5, hin: [2, 3], blick: null, arten: { legen: 3, befolgen: 2 }, laenge: [4, 7], befehle: [4, 6], drehungen: [1, 3] },
+  s4: { b: 5, h: 5, hin: [3, 5], blick: null, arten: { fehler: 3, legen: 2 }, laenge: [6, 9], drehungen: [1, 4] },
+  s5: { b: 6, h: 6, hin: [3, 5], blick: null, arten: { legenWdh: 3, befolgenWdh: 2 }, laenge: [7, 12], sparen: 2, extra: 1 },
+  s6: { b: 6, h: 6, hin: [5, 7], blick: null, arten: { wenn: 3, legenWdh: 2, fehler: 2 }, laenge: [8, 14], sparen: 3, extra: 0 },
+};
+const gewichtet = arten => waehle(Object.entries(arten).flatMap(([a, g]) => Array(g).fill(a)));
+const drehZahl = befehle => befehle.filter(b => b !== "V").length;
+
+function startMitBlick(p, f) {
+  return { ...f.start, d: p.blick ?? zufall(0, 3) };
+}
+
+/** Programm befolgen: zufällige Befehle ohne Zusammenstoss, der Roboter hält woanders als am Start. */
+function befolgen(p) {
+  for (let v = 0; v < 300; v++) {
+    const f = neuesFeld(p.b, p.h, zufall(p.hin[0], p.hin[1]));
+    const start = startMitBlick(p, f);
+    const n = zufall(p.befehle[0], p.befehle[1]);
+    const prog = [...Array(n)].map(() => ({ b: Math.random() < 0.6 ? "V" : waehle(["L", "R"]), n: 1 }));
+    const bef = flach(prog);
+    const dz = drehZahl(bef);
+    if (dz < p.drehungen[0] || dz > p.drehungen[1] || bef[bef.length - 1] !== "V") continue;
+    const r = fahre(f.feld, start, bef);
+    if (r.crash || (r.x === start.x && r.y === start.y)) continue;
+    return { art: "befolgen", feld: f.feld, start, prog, ende: { x: r.x, y: r.y } };
+  }
+  return null;
+}
+
+/** Befolgen mit Wiederholungen: Karten „3× vor“ und ein Block „2× [vor, rechts]“. */
+function befolgenWdh(p) {
+  for (let v = 0; v < 400; v++) {
+    const f = neuesFeld(p.b, p.h, zufall(p.hin[0], p.hin[1]));
+    const start = startMitBlick(p, f);
+    const prog = [];
+    const teile = zufall(2, 3);
+    for (let i = 0; i < teile; i++) {
+      const r = Math.random();
+      if (r < 0.3) prog.push({ wdh: zufall(2, 3), blk: [{ b: "V", n: zufall(1, 2) }, { b: waehle(["L", "R"]), n: 1 }] });
+      else if (r < 0.75) prog.push({ b: "V", n: zufall(2, 4) });
+      else prog.push({ b: waehle(["L", "R"]), n: 1 });
+    }
+    if (!prog.some(t => t.blk || t.n > 1)) continue;
+    const bef = flach(prog);
+    if (bef.length > 14 || prog[prog.length - 1].b === "L" || prog[prog.length - 1].b === "R") continue;
+    const r = fahre(f.feld, start, bef);
+    if (r.crash || (r.x === start.x && r.y === start.y) || r.spur.length < 4) continue;
+    return { art: "befolgenWdh", feld: f.feld, start, prog, ende: { x: r.x, y: r.y } };
+  }
+  return null;
+}
+
+/** Selbst legen: Ziel erreichbar, kürzestes Programm im Längenbereich der Stufe. */
+function legen(p, mitWdh = false) {
+  for (let v = 0; v < 400; v++) {
+    const f = neuesFeld(p.b, p.h, zufall(p.hin[0], p.hin[1]));
+    const start = startMitBlick(p, f);
+    const weg = kuerzestes(f.feld, start, f.ziel);
+    if (!weg || weg.length < p.laenge[0] || weg.length > p.laenge[1]) continue;
+    if (p.drehungen && (drehZahl(flach(weg)) < p.drehungen[0] || drehZahl(flach(weg)) > p.drehungen[1])) continue;
+    if (!mitWdh) return { art: "legen", feld: f.feld, start, ziel: f.ziel, loes: weg };
+    const kurz = kuerzestes(f.feld, start, f.ziel, true);
+    if (weg.length - kurz.length < p.sparen) continue;
+    return { art: "legenWdh", feld: f.feld, start, ziel: f.ziel, loes: kurz, limit: kurz.length + p.extra };
+  }
+  return null;
+}
+
+/** Ein Befehl falsch: genau eine Karte, deren Austausch das Programm zum Stern bringt. */
+function fixStellen(feld, start, ziel, prog) {
+  const stellen = [];
+  prog.forEach((t, i) => {
+    for (const b of ["V", "L", "R"]) {
+      if (b === t.b) continue;
+      const neu = prog.map((u, j) => (j === i ? { b, n: 1 } : u));
+      const r = fahre(feld, start, flach(neu));
+      if (!r.crash && r.x === ziel.x && r.y === ziel.y) { stellen.push({ i, b }); break; }
+    }
+  });
+  return stellen;
+}
+function fehler(p) {
+  for (let v = 0; v < 400; v++) {
+    const f = neuesFeld(p.b, p.h, zufall(p.hin[0], p.hin[1]));
+    const start = startMitBlick(p, f);
+    const weg = kuerzestes(f.feld, start, f.ziel);
+    if (!weg || weg.length < p.laenge[0] - 1 || weg.length > p.laenge[1]) continue;
+    const i = zufall(0, weg.length - 1);
+    const falsch = waehle(["V", "L", "R"].filter(b => b !== weg[i].b));
+    const prog = weg.map((t, j) => (j === i ? { b: falsch, n: 1 } : { ...t }));
+    const r = fahre(f.feld, start, flach(prog));
+    if (!r.crash && r.x === f.ziel.x && r.y === f.ziel.y) continue;
+    const stellen = fixStellen(f.feld, start, f.ziel, prog);
+    if (stellen.length !== 1 || stellen[0].i !== i) continue;
+    return { art: "fehler", feld: f.feld, start, ziel: f.ziel, prog, fehlerAn: i, richtigerBefehl: weg[i].b };
+  }
+  return null;
+}
+
+/** Bedingung: „Wiederhole n-mal: Wenn vorne frei: vor, sonst: drehen.“ Der Roboter fährt und dreht. */
+function wenn(p) {
+  for (let v = 0; v < 400; v++) {
+    const f = neuesFeld(p.b, p.h, zufall(p.hin[0], p.hin[1]));
+    const start = startMitBlick(p, f);
+    const w = { wdh: zufall(6, 10), sonst: waehle(["L", "R"]) };
+    const r = fahreWenn(f.feld, start, w);
+    if (r.drehungen < 1 || r.drehungen > 3 || r.spur.length < 4 || (r.x === start.x && r.y === start.y)) continue;
+    return { art: "wenn", feld: f.feld, start, wenn: w, ende: { x: r.x, y: r.y } };
+  }
+  return null;
+}
+
+const ERZEUGER = {
+  befolgen, befolgenWdh, fehler, wenn,
+  legen: p => legen(p, false),
+  legenWdh: p => legen(p, true),
+};
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let v = 0; v < 20; v++) {
+    const a = ERZEUGER[gewichtet(p.arten)](p);
+    if (a) return a;
+  }
+  return null;
+}
+
+function loesungText(a) {
+  if (a.art === "befolgen" || a.art === "befolgenWdh") return `Der Roboter macht: ${progText(a.prog)} — und hält auf ${feldName(a.ende.x, a.ende.y)}.`;
+  if (a.art === "wenn") return `Der Roboter hält auf ${feldName(a.ende.x, a.ende.y)}.`;
+  if (a.art === "fehler") return `Die ${a.fehlerAn + 1}. Karte „${BEFEHL[a.prog[a.fehlerAn].b].satz}“ ist falsch — richtig ist „${BEFEHL[a.richtigerBefehl].satz}“.`;
+  return `Zum Beispiel: ${progText(a.loes)}.`;
+}
+
+// ---------- Mängel für tools/pruefe_spiele.js ----------
+function pruefeAufgabe(a, stufe) {
+  const p = STUFE[stufe];
+  if (!a) return ["keine Aufgabe"];
+  const m = [];
+  if (!p.arten[a.art]) m.push(`Aufgabenart ${a.art} gehört nicht in diese Stufe`);
+  const { feld, start } = a;
+  if (feld.b !== p.b || feld.h !== p.h) m.push("Rastergrösse falsch");
+  if (feld.hin.length < p.hin[0] || feld.hin.length > p.hin[1]) m.push("Zahl der Hindernisse falsch");
+  if (!frei(feld, start.x, start.y)) m.push("Start nicht frei");
+  if (p.blick !== null && start.d !== p.blick) m.push("Blick am Start falsch");
+  if (a.ziel && (!frei(feld, a.ziel.x, a.ziel.y) || (a.ziel.x === start.x && a.ziel.y === start.y))) m.push("Ziel nicht frei oder am Start");
+  if (a.art === "befolgen" || a.art === "befolgenWdh") {
+    const r = fahre(feld, start, flach(a.prog));
+    if (r.crash) m.push("Programm fährt in ein Hindernis");
+    if (r.x !== a.ende.x || r.y !== a.ende.y) m.push("Ende falsch gespeichert");
+    if (r.x === start.x && r.y === start.y) m.push("Roboter hält am Start");
+    if (a.art === "befolgenWdh" && !a.prog.some(t => t.blk || t.n > 1)) m.push("keine Wiederholung");
+    if (a.art === "befolgen" && a.prog.some(t => t.n > 1 || t.blk)) m.push("Wiederholung in einer Stufe ohne Wiederholungen");
+  } else if (a.art === "wenn") {
+    const r = fahreWenn(feld, start, a.wenn);
+    if (r.x !== a.ende.x || r.y !== a.ende.y) m.push("Ende falsch gespeichert");
+    if (r.drehungen < 1) m.push("Bedingung greift nie");
+  } else if (a.art === "legen" || a.art === "legenWdh") {
+    const r = fahre(feld, start, flach(a.loes));
+    if (r.crash || r.x !== a.ziel.x || r.y !== a.ziel.y) m.push("Lösung erreicht den Stern nicht");
+    const kurz = kuerzestes(feld, start, a.ziel, a.art === "legenWdh");
+    if (!kurz || kurz.length !== a.loes.length) m.push("Lösung nicht die kürzeste");
+    if (a.art === "legen" && (a.loes.length < p.laenge[0] || a.loes.length > p.laenge[1])) m.push("Programmlänge ausserhalb der Stufe");
+    if (a.art === "legenWdh") {
+      if (a.limit < kurz.length) m.push("Kartenzahl reicht nicht");
+      if (kuerzestes(feld, start, a.ziel).length <= a.limit) m.push("geht auch ohne Wiederholung");
+    }
+  } else if (a.art === "fehler") {
+    const r = fahre(feld, start, flach(a.prog));
+    if (!r.crash && r.x === a.ziel.x && r.y === a.ziel.y) m.push("Programm mit Fehler erreicht den Stern trotzdem");
+    const stellen = fixStellen(feld, start, a.ziel, a.prog);
+    if (stellen.length !== 1 || stellen[0].i !== a.fehlerAn) m.push(`nicht genau eine falsche Karte (${stellen.map(s => s.i + 1).join(", ")})`);
+    const neu = a.prog.map((t, j) => (j === a.fehlerAn ? { b: a.richtigerBefehl, n: 1 } : t));
+    const r2 = fahre(feld, start, flach(neu));
+    if (r2.crash || r2.x !== a.ziel.x || r2.y !== a.ziel.y) m.push("Korrektur erreicht den Stern nicht");
+  }
+  if (/ß/.test(loesungText(a))) m.push("ß im Text");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+/**
+ * Raster mit Spalten A… und Reihen 1…. zustand: { robot: {x, y, d}, ziel, spur: Set, crash, markiert: Map Feld → Klasse }
+ * klick(x, y): Felder sind Knöpfe (Befolgen).
+ */
+function raster(feld, zustand, klick) {
+  const r = el("div", { class: "rp-raster", style: `grid-template-columns: 20px repeat(${feld.b}, minmax(0, 1fr))` });
+  r.append(el("span"));
+  for (let x = 0; x < feld.b; x++) r.append(el("span", { class: "rp-rand", text: SPALTEN[x] }));
+  for (let y = 0; y < feld.h; y++) {
+    r.append(el("span", { class: "rp-rand", text: String(y + 1) }));
+    for (let x = 0; x < feld.b; x++) {
+      const hin = feld.hin.includes(k(x, y));
+      const knopf = klick && !hin;
+      const z = el(knopf ? "button" : "div", { class: "rp-zelle", "aria-label": feldName(x, y) });
+      if (knopf) { z.type = "button"; z.addEventListener("click", () => klick(x, y, z)); }
+      if (zustand.spur?.has(k(x, y))) z.classList.add("rp-spur");
+      const extra = zustand.markiert?.get(k(x, y));
+      if (extra) z.classList.add(extra);
+      const { robot, ziel, crash } = zustand;
+      if (hin) z.append(crash && crash.x === x && crash.y === y ? "💥" : "🪨");
+      else if (robot && robot.x === x && robot.y === y) {
+        z.append(el("span", { class: "rp-robot", "aria-label": `Roboter, schaut nach ${["oben", "rechts", "unten", "links"][robot.d]}` },
+          "🤖", el("span", { class: "rp-blick", style: `transform: rotate(${robot.d * 90}deg)` })));
+      } else if (ziel && ziel.x === x && ziel.y === y) z.append("⭐");
+      r.append(z);
+    }
+  }
+  return r;
+}
+
+/** Karte eines Programmteils (nur zum Anschauen oder als Knopf). */
+function karte(t, alsKnopf = false) {
+  if (t.blk) {
+    const b = el("span", { class: "rp-block" }, el("b", { text: `${t.wdh}×` }));
+    for (const u of t.blk) b.append(karte(u));
+    return b;
+  }
+  return el(alsKnopf ? "button" : "span", { class: "rp-karte", ...(alsKnopf ? { type: "button" } : {}) },
+    t.n > 1 ? el("b", { text: `${t.n}×` }) : null, el("span", { "aria-hidden": "true", text: BEFEHL[t.b].bild }), el("small", { text: BEFEHL[t.b].wort }));
+}
+const spurSet = r => new Set(r.spur.map(([x, y]) => k(x, y)));
+
+// ---------- Aufgaben im Spiel ----------
+function zeigeBefolgen(ctx, a, loesung) {
+  ctx.loesung(loesung);
+  ctx.flaeche.append(el("div", { class: "auftrag", text: "Wo hält der Roboter? Tipp auf das Feld!" }));
+  if (a.art === "wenn") {
+    ctx.flaeche.append(el("div", { class: "rp-wenn vorgabe" },
+      el("div", { text: `Wiederhole ${a.wenn.wdh}-mal:` }),
+      el("div", {}, "• Wenn vorne frei: ", karte({ b: "V", n: 1 })),
+      el("div", {}, "• Sonst: ", karte({ b: a.wenn.sonst, n: 1 }), " drehen")));
+  } else {
+    ctx.flaeche.append(el("div", { class: "rp-programm vorgabe" }, ...a.prog.map(t => karte(t))));
+  }
+  const halter = el("div");
+  ctx.flaeche.append(halter);
+  const markiert = new Map();
+  const zeichne = (endZustand) => {
+    halter.innerHTML = "";
+    halter.append(raster(a.feld, endZustand || { robot: a.start, markiert }, endZustand ? null : klick));
+  };
+  function klick(x, y) {
+    if (ctx.vorbei()) return;
+    if (x === a.ende.x && y === a.ende.y) {
+      const r = a.art === "wenn" ? fahreWenn(a.feld, a.start, a.wenn) : fahre(a.feld, a.start, flach(a.prog));
+      zeichne({ robot: { x: r.x, y: r.y, d: r.d }, spur: spurSet(r), markiert: new Map([[k(x, y), "rp-ende"]]) });
+      ctx.richtig();
+      return;
+    }
+    markiert.set(k(x, y), "rp-falsch");
+    ctx.falsch(a.art === "wenn" ? "Noch nicht. Frag bei jedem Durchgang: Ist das Feld vor dem Roboter frei?"
+      : "Noch nicht. Fahr mit dem Finger Schritt für Schritt mit. Beim Drehen bleibt der Roboter stehen und schaut nur anders.", loesung);
+    if (ctx.vorbei()) {
+      const r = a.art === "wenn" ? fahreWenn(a.feld, a.start, a.wenn) : fahre(a.feld, a.start, flach(a.prog));
+      zeichne({ robot: { x: r.x, y: r.y, d: r.d }, spur: spurSet(r), markiert: new Map([[k(r.x, r.y), "rp-ende"]]) });
+    } else zeichne();
+  }
+  zeichne();
+  if (ctx.nr === 0) ctx.sag("Das Dreieck zeigt, wohin der Roboter schaut.");
+}
+
+function zeigeLegen(ctx, a, loesung) {
+  ctx.loesung(loesung);
+  const mitWdh = a.art === "legenWdh";
+  ctx.flaeche.append(el("div", { class: "auftrag", text: mitWdh ? `Bring den Roboter zum Stern — mit höchstens ${a.limit} Karten!` : "Bring den Roboter zum Stern!" }));
+  const halter = el("div");
+  const programm = el("div", { class: "rp-programm", "aria-live": "polite" });
+  const zeile = el("div", { class: "rp-zeile" });
+  const befehle = el("div", { class: "rp-befehle" });
+  ctx.flaeche.append(halter, programm, zeile, befehle);
+  let prog = [];
+  let mal = 1; // gewählte Wiederholung für die nächste Karte
+  let ergebnis = null; // letzte Fahrt (Spur zeigen, bis das Programm sich ändert)
+
+  const knoepfe = {};
+  const knopf = (inhalt, klein, klasse, fn) => el("button", { type: "button", class: "rp-befehl" + (klasse ? " " + klasse : ""), onclick: fn },
+    el("span", { "aria-hidden": "true", text: inhalt }), el("small", { text: klein }));
+  for (const b of ["V", "L", "R"]) befehle.append(knoepfe[b] = knopf(BEFEHL[b].bild, BEFEHL[b].wort, "", () => dazu(b)));
+  if (mitWdh) for (const n of [2, 3, 4]) befehle.append(knoepfe[n] = knopf(`${n}×`, "mal", "rp-mal", () => { if (ctx.vorbei()) return; mal = mal === n ? 1 : n; LS.ton("tipp"); zeichne(); }));
+  befehle.append(knoepfe.weg = knopf("⌫", "zurück", "", () => { if (ctx.vorbei()) return; prog.pop(); ergebnis = null; zeichne(); }));
+  befehle.append(knoepfe.los = knopf("▶", "fahren", "", fahren));
+
+  function dazu(b) {
+    if (ctx.vorbei()) return;
+    if (mitWdh && prog.length >= a.limit) return;
+    prog.push({ b, n: mal });
+    mal = 1;
+    ergebnis = null;
+    LS.ton("tipp");
+    zeichne();
+  }
+
+  function fahren() {
+    if (ctx.vorbei() || !prog.length) return;
+    const r = fahre(a.feld, a.start, flach(prog));
+    ergebnis = r;
+    const amZiel = !r.crash && r.x === a.ziel.x && r.y === a.ziel.y;
+    zeichne();
+    if (amZiel) { ctx.richtig(mitWdh && prog.some(t => t.n > 1) ? "Super! Mit Wiederholungen geht es kürzer." : "Geschafft! Dein Programm stimmt."); return; }
+    const ueberStern = r.spur.some(([x, y]) => x === a.ziel.x && y === a.ziel.y);
+    ctx.falsch(r.crash ? (r.crash.art === "rand" ? "Hoppla, der Roboter wollte aus dem Feld fahren. Wohin schaut er da?" : "Bumm! Ein Stein war im Weg. Schau, wo der Roboter hängen blieb.")
+      : ueberStern ? "Der Roboter ist über den Stern gefahren — er muss darauf stehen bleiben."
+      : "Der Roboter steht noch nicht auf dem Stern. Ändere dein Programm und probier nochmal.", loesung);
+  }
+
+  function zeichne() {
+    halter.innerHTML = "";
+    const z = ergebnis
+      ? { robot: { x: ergebnis.x, y: ergebnis.y, d: ergebnis.d }, ziel: a.ziel, spur: spurSet(ergebnis), crash: ergebnis.crash,
+        markiert: ergebnis.crash && ergebnis.crash.art === "hindernis" ? new Map([[k(ergebnis.crash.x, ergebnis.crash.y), "rp-crash"]]) : null }
+      : { robot: a.start, ziel: a.ziel };
+    halter.append(raster(a.feld, z));
+    programm.innerHTML = "";
+    if (!prog.length) programm.append(el("span", { class: "leise", text: "Dein Programm: tipp unten die Befehle an." }));
+    for (const t of prog) programm.append(karte(t));
+    zeile.textContent = mitWdh ? `${prog.length} von ${a.limit} Karten${mal > 1 ? ` · nächste Karte ${mal}×` : ""}` : "";
+    const voll = mitWdh && prog.length >= a.limit;
+    for (const b of ["V", "L", "R"]) knoepfe[b].disabled = voll;
+    if (mitWdh) for (const n of [2, 3, 4]) { knoepfe[n].disabled = voll; knoepfe[n].classList.toggle("rp-an", mal === n); }
+    knoepfe.weg.disabled = !prog.length;
+    knoepfe.los.disabled = !prog.length;
+  }
+  zeichne();
+  if (ctx.nr === 0) ctx.sag(mitWdh ? "Neu: „3×“ und dann „vor“ gibt eine Karte „3× vor“." : "Leg die Befehle der Reihe nach und lass den Roboter fahren!");
+}
+
+function zeigeFehler(ctx, a, loesung) {
+  ctx.loesung(loesung);
+  ctx.flaeche.append(el("div", { class: "auftrag", text: "Eine Karte ist falsch! Tipp sie an." }));
+  const r = fahre(a.feld, a.start, flach(a.prog));
+  ctx.flaeche.append(raster(a.feld, { robot: { x: r.x, y: r.y, d: r.d }, ziel: a.ziel, spur: spurSet(r), crash: r.crash,
+    markiert: r.crash && r.crash.art === "hindernis" ? new Map([[k(r.crash.x, r.crash.y), "rp-crash"]]) : null }));
+  ctx.flaeche.append(el("div", { class: "rp-zeile", text: r.crash ? "So fährt das Programm — und stösst an." : "So fährt das Programm — aber nicht zum Stern." }));
+  const box = el("div", { class: "rp-programm vorgabe" });
+  a.prog.forEach((t, i) => {
+    const kn = karte(t, true);
+    kn.addEventListener("click", () => {
+      if (ctx.vorbei() || kn.classList.contains("rp-falsch")) return;
+      if (i === a.fehlerAn) {
+        kn.classList.add("rp-richtig");
+        ctx.richtig(`Genau! Hier gehört „${BEFEHL[a.richtigerBefehl].satz}“ hin.`);
+        return;
+      }
+      kn.classList.add("rp-falsch");
+      ctx.falsch("Diese Karte stimmt. Fahr das Programm mit dem Finger nach: Wo geht es zum ersten Mal falsch?", loesung);
+      if (ctx.vorbei()) box.children[a.fehlerAn].classList.add("rp-richtig");
+    });
+    box.append(kn);
+  });
+  ctx.flaeche.append(box);
+  if (ctx.nr === 0) ctx.sag("Die grünen Felder zeigen, wo der Roboter gefahren ist.");
+}
+
+LS.spiel({
+  id: "roboter-pfad",
+  einleitung: "Piep! Ich bin ein Roboter und mache genau, was die Karten sagen: vor, links drehen, rechts drehen.",
+  anzahl: 6,
+  stufen: {
+    s1: "Wo hält der Roboter? Zwei, drei Befehle.",
+    s2: "Leg selbst ein Programm zum Stern.",
+    s3: "Mit Steinen im Weg: legen und befolgen.",
+    s4: "Lange Wege — und eine falsche Karte finden.",
+    s5: "Wiederholungen: „3× vor“ spart Karten.",
+    s6: "Endgegner: „Wenn vorne frei …“ — Bedingungen.",
+  },
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const loesung = loesungText(a);
+    ctx.kennung(JSON.stringify([a.art, a.feld.hin, a.start, a.ziel || null, a.prog || null, a.wenn || null]));
+    if (a.art === "legen" || a.art === "legenWdh") zeigeLegen(ctx, a, loesung);
+    else if (a.art === "fehler") zeigeFehler(ctx, a, loesung);
+    else zeigeBefolgen(ctx, a, loesung);
+  },
+});
+</script>
+</body>
+</html>

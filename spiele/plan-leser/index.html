@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan-Leser</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 25px); font-weight: 800; margin: 0 0 10px; }
+  .plan-zeile { display: flex; justify-content: center; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .plan-bild { display: block; width: min(360px, 100%); touch-action: manipulation; }
+  .plan-bild .grund { stroke: #fff; stroke-width: 2; }
+  .plan-bild.schulzimmer .grund { fill: #f6ead7; }
+  .plan-bild.quartier .grund { fill: #dcefcf; }
+  .plan-bild .rahmen { fill: none; stroke: var(--deko-7); stroke-width: 4; }
+  .plan-bild .plan-feld { fill: transparent; cursor: pointer; }
+  .plan-bild .plan-feld.daneben { fill: var(--hinweis-hell); }
+  .plan-bild .plan-feld.treffer { fill: var(--gut-hell); stroke: var(--gut); stroke-width: 4; }
+  .plan-bild .weg { fill: none; stroke: var(--text); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2 10; }
+  .plan-bild .weg-pfeil { fill: var(--text); }
+  .plan-bild .weg-start { fill: none; stroke: var(--text); stroke-width: 4; }
+  .plan-bild .zeichen-text, .zeichen-gross .zeichen-text, .legende .zeichen-text { font-family: var(--schrift); font-weight: 900; font-size: 26px; }
+  .f1 { color: var(--deko-1); } .f2 { color: var(--deko-2); } .f3 { color: var(--deko-3); } .f4 { color: var(--deko-4); }
+  .f5 { color: var(--deko-5); } .f6 { color: var(--deko-6); } .f7 { color: var(--deko-7); }
+  .legende { background: #fff; border: 3px solid var(--rand); border-radius: 14px; padding: 8px 12px; min-width: 170px; }
+  .legende b { display: block; margin-bottom: 4px; font-size: 16px; }
+  .legende-zeile { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; line-height: 1.2; margin: 3px 0; }
+  .legende-zeile svg { width: 28px; height: 28px; flex: none; }
+  .massstab { margin-top: 8px; font-weight: 800; font-size: 16px; }
+  .massstab span { display: inline-block; width: 40px; height: 8px; background: var(--text); border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+  .zeichen-gross { display: block; width: 90px; height: 90px; margin: 0 auto 8px; background: #fff; border: 3px solid var(--rand); border-radius: 14px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🗺️ Plan-Leser</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="plaene.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.8.5 (sich orientieren): c einfache Orientierungsmittel lesen (1. Zyklus);
+// d/e Skizzen und Pläne lesen und herstellen; f Karten und Pläne mit Massstab (Orientierungspunkt
+// 2. Zyklus, Ende 4. Klasse). Basisklasse 4: s1 3. Klasse, s5 5. Klasse, s6 Königsstufe.
+// Abgrenzung zum Kompass-Spiel (NMG.8.4, Himmelsrichtungen): hier Legende, Zeichen, Lage auf dem
+// Plan („rechts neben“, „zwischen“), Massstab (1 Feld = 10 m) und Wege aus der Sicht des Gehenden
+// (links oder rechts abbiegen). Dinge und Zeichen in plaene.js.
+
+const { zufall, waehle, mische, el } = LS;
+const ID = "plan-leser";
+const SVG = "http://www.w3.org/2000/svg";
+const N = 6;       // Plan mit N × N Feldern
+const F = 50;      // Feldgrösse im Bild
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : PLAN_LISTEN);
+const LISTEN = PLAN_LISTEN.filter(l => FREI.has(l));
+
+const ding = (liste, i) => PLAN_DINGE[liste][i];
+const einzelne = liste => PLAN_DINGE[liste].map((d, i) => i).filter(i => !PLAN_DINGE[liste][i][2]);
+const mehrfache = liste => PLAN_DINGE[liste].map((d, i) => i).filter(i => !!PLAN_DINGE[liste][i][2]);
+const zeile = z => Math.floor(z / N), spalte = z => z % N;
+const gross = s => s[0].toUpperCase() + s.slice(1);
+const feldText = n => `${n} ${n === 1 ? "Feld" : "Felder"}`;
+const meter = m => `${LS.zahlText(m)} m`;
+
+// Richtungen auf dem Plan (für Wege): dx nach rechts, dy nach unten
+const SCHRITTE = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+
+/** Plan: 36 Felder mit Nummer des Dings oder -1. fest: { Feld: Ding }, frei: Felder, die leer bleiben. */
+function planNeu(liste, anzahl, mehrfach = null, fest = {}, gesperrt = new Set()) {
+  const felder = Array(N * N).fill(-1);
+  for (const [z, d] of Object.entries(fest)) felder[z] = d;
+  const leer = mische([...Array(N * N).keys()].filter(z => felder[z] < 0 && !gesperrt.has(z)));
+  const schon = new Set(Object.values(fest));
+  const dazu = mische(einzelne(liste).filter(d => !schon.has(d))).slice(0, anzahl);
+  for (const d of dazu) felder[leer.pop()] = d;
+  if (mehrfach) for (let k = 0; k < mehrfach.anzahl; k++) felder[leer.pop()] = mehrfach.ding;
+  return { liste, felder };
+}
+const imPlan = p => [...new Set(p.felder.filter(d => d >= 0))];
+const feldVon = (p, d) => p.felder.indexOf(d);
+
+// ---------- Wege ----------
+
+/** Weg aus 'teile' geraden Stücken mit Länge 1–3, ohne Kreuzung; Felder vom Start bis zum Ziel. */
+function wegNeu(teile) {
+  for (let versuch = 0; versuch < 200; versuch++) {
+    let z = zufall(0, N * N - 1);
+    const felder = [z];
+    const stuecke = [];
+    let richtung = null;
+    let ok = true;
+    for (let t = 0; t < teile && ok; t++) {
+      const moeglich = [0, 1, 2, 3].filter(r => richtung === null || r % 2 !== richtung % 2);
+      richtung = waehle(moeglich);
+      const laenge = zufall(1, 3);
+      for (let i = 0; i < laenge; i++) {
+        const c = spalte(z) + SCHRITTE[richtung][0], r = zeile(z) + SCHRITTE[richtung][1];
+        if (c < 0 || r < 0 || c >= N || r >= N || felder.includes(r * N + c)) { ok = false; break; }
+        z = r * N + c;
+        felder.push(z);
+      }
+      stuecke.push([richtung, laenge]);
+    }
+    if (ok) return { felder, stuecke };
+  }
+  return null;
+}
+
+/** Abbiegen von Richtung a nach b, aus der Sicht des Gehenden. */
+function abbiegen(a, b) {
+  const [ax, ay] = SCHRITTE[a], [bx, by] = SCHRITTE[b];
+  return ax * by - ay * bx > 0 ? "rechts" : "links";
+}
+/** Text aus Längen und Abzweigungen: „2 Felder geradeaus, rechts abbiegen, 1 Feld geradeaus“. */
+function wegText(laengen, abzweigungen) {
+  const teile = [`${feldText(laengen[0])} geradeaus`];
+  for (let i = 1; i < laengen.length; i++) teile.push(`${abzweigungen[i - 1]} abbiegen`, `${feldText(laengen[i])} geradeaus`);
+  return teile.join(", ");
+}
+const laengenVon = stuecke => stuecke.map(s => s[1]);
+const abzweigungenVon = stuecke => stuecke.slice(1).map((s, i) => abbiegen(stuecke[i][0], s[0]));
+function beschreibung(stuecke) { return wegText(laengenVon(stuecke), abzweigungenVon(stuecke)); }
+/** Falsche Beschreibungen: eine Abzweigung oder alle verkehrt, ein Stück länger oder kürzer. */
+function falscheBeschreibungen(stuecke) {
+  const l = laengenVon(stuecke), a = abzweigungenVon(stuecke);
+  const kehr = r => (r === "links" ? "rechts" : "links");
+  const varianten = [wegText(l, a.map(kehr))];
+  a.forEach((_, i) => varianten.push(wegText(l, a.map((r, j) => (j === i ? kehr(r) : r)))));
+  l.forEach((_, i) => { for (const d of [-1, 1]) if (l[i] + d >= 1) varianten.push(wegText(l.map((x, j) => (j === i ? x + d : x)), a)); });
+  return [...new Set(varianten)].filter(v => v !== beschreibung(stuecke));
+}
+
+// ---------- Aufgabenarten ----------
+
+const ARTEN = {
+  /** Was bedeutet dieses Zeichen? */
+  zeichen(liste) {
+    const p = planNeu(liste, 7);
+    const da = imPlan(p);
+    const d = waehle(da);
+    return { art: "zeichen", plan: p, ding: d, richtig: d, optionen: mische([d, ...mische(da.filter(x => x !== d)).slice(0, 2)]) };
+  },
+  /** Tippe auf dem Plan auf … */
+  tippen(liste) {
+    const p = planNeu(liste, 7, { ding: waehle(mehrfache(liste)), anzahl: zufall(2, 4) });
+    const d = waehle(imPlan(p).filter(x => !ding(liste, x)[2]));
+    return { art: "tippen", plan: p, ding: d, richtig: feldVon(p, d), optionen: [] };
+  },
+  /** Wie viele … hat es auf dem Plan? */
+  zaehlen(liste) {
+    const m = waehle(mehrfache(liste));
+    const k = zufall(2, 6);
+    const p = planNeu(liste, 6, { ding: m, anzahl: k });
+    const andere = mische([...Array(8).keys()].map(x => x + 1).filter(x => x !== k && Math.abs(x - k) <= 2)).slice(0, 2);
+    return { art: "zaehlen", plan: p, ding: m, richtig: k, optionen: mische([k, ...andere]) };
+  },
+  /** Was ist rechts neben / links neben / über / unter …? (zwischen: Was ist zwischen … und …?) */
+  lage(liste, mitZwischen) {
+    for (let versuch = 0; versuch < 50; versuch++) {
+      const p = planNeu(liste, 9);
+      const fragen = [];
+      for (let z = 0; z < N * N; z++) {
+        const d = p.felder[z];
+        if (d < 0) continue;
+        const c = spalte(z), r = zeile(z);
+        const bei = (dc, dr) => (c + dc >= 0 && c + dc < N && r + dr >= 0 && r + dr < N ? p.felder[(r + dr) * N + c + dc] : -1);
+        for (const [wort, dc, dr] of [["rechts neben", 1, 0], ["links neben", -1, 0], ["auf dem Plan direkt über", 0, -1], ["auf dem Plan direkt unter", 0, 1]]) {
+          if (bei(dc, dr) >= 0) fragen.push({ wort, bezug: [d], richtig: bei(dc, dr) });
+        }
+        if (mitZwischen) for (const [dc, dr] of [[1, 0], [0, 1]]) {
+          if (bei(dc, dr) >= 0 && bei(2 * dc, 2 * dr) >= 0) fragen.push({ wort: "zwischen", bezug: [d, bei(2 * dc, 2 * dr)], richtig: bei(dc, dr) });
+        }
+      }
+      const wahl = mitZwischen ? fragen.filter(f => f.wort === "zwischen") : fragen;
+      if (!wahl.length) continue;
+      const f = waehle(wahl);
+      const andere = mische(imPlan(p).filter(x => x !== f.richtig && !f.bezug.includes(x))).slice(0, 2);
+      return { art: "lage", plan: p, wort: f.wort, bezug: f.bezug, richtig: f.richtig, optionen: mische([f.richtig, ...andere]) };
+    }
+    return null;
+  },
+  /** Wie weit ist es von … bis … (gerade Linie)? */
+  strecke(liste, stufe) {
+    const m = waehle(PLAN_MASSSTAB[liste][stufe]);
+    const waagrecht = Math.random() < 0.5;
+    const d = zufall(2, 5);
+    const a0 = zufall(0, N - 1 - d), q = zufall(0, N - 1);
+    const za = waagrecht ? q * N + a0 : a0 * N + q;
+    const zb = waagrecht ? za + d : za + d * N;
+    const [da, db] = mische(einzelne(liste)).slice(0, 2);
+    const p = planNeu(liste, 5, null, { [za]: da, [zb]: db });
+    const richtig = d * m;
+    const andere = mische([...new Set([(d + 1) * m, (d - 1) * m, d, (d + 2) * m])].filter(x => x > 0 && x !== richtig)).slice(0, 2);
+    return { art: "strecke", plan: p, von: da, bis: db, massstab: m, richtig, optionen: mische([richtig, ...andere]) };
+  },
+  /** Weg auf dem Plan: Länge, Abbiegen oder Beschreibung. */
+  weg(liste, art, teile, stufe) {
+    const w = wegNeu(teile);
+    if (!w) return null;
+    const [da, db] = mische(einzelne(liste)).slice(0, 2);
+    const p = planNeu(liste, 5, null, { [w.felder[0]]: da, [w.felder[w.felder.length - 1]]: db }, new Set(w.felder));
+    const a = { art, plan: p, von: da, bis: db, weg: w };
+    if (art === "weglaenge") {
+      const m = waehle(PLAN_MASSSTAB[liste][stufe]);
+      const f = w.felder.length - 1;
+      const richtig = f * m;
+      const andere = mische([...new Set([(f + 1) * m, (f - 1) * m, f, (f + 2) * m, (f - 2) * m])].filter(x => x > 0 && x !== richtig)).slice(0, 2);
+      return { ...a, massstab: m, richtig, optionen: mische([richtig, ...andere]) };
+    }
+    if (art === "abbiegen") {
+      const richtig = abbiegen(w.stuecke[0][0], w.stuecke[1][0]);
+      return { ...a, richtig, optionen: ["links", "rechts"] };
+    }
+    const richtig = beschreibung(w.stuecke);
+    return { ...a, richtig, optionen: mische([richtig, ...mische(falscheBeschreibungen(w.stuecke)).slice(0, 2)]) };
+  },
+};
+
+// Je Stufe die Arten; jede Art bekommt eine freie Liste.
+const STUFE = {
+  s1: [l => ARTEN.zeichen(l), l => ARTEN.tippen(l)],
+  s2: [l => ARTEN.zaehlen(l), l => ARTEN.lage(l, false), l => ARTEN.lage(l, false), l => ARTEN.tippen(l)],
+  s3: [l => ARTEN.strecke(l, "s3"), l => ARTEN.strecke(l, "s3"), l => ARTEN.lage(l, true)],
+  s4: [l => ARTEN.weg(l, "weglaenge", 2, "s4"), l => ARTEN.weg(l, "abbiegen", 2), l => ARTEN.strecke(l, "s4")],
+  s5: [l => ARTEN.weg(l, "beschreiben", 3), l => ARTEN.weg(l, "weglaenge", 3, "s5")],
+  // Königsstufe: lange Wege beschreiben und messen, Massstab 25 m oder 50 m
+  s6: [l => ARTEN.weg(l, "beschreiben", 4), l => ARTEN.weg(l, "weglaenge", 4, "s6"), l => ARTEN.lage(l, true)],
+};
+
+function aufgabeErzeugen(stufe) {
+  if (!LISTEN.length) return null;
+  for (let i = 0; i < 5; i++) {
+    const a = waehle(STUFE[stufe])(waehle(LISTEN));
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Legende lesen: Was bedeutet das Zeichen?",
+  s2: "Zählen und Lage: rechts neben, über, unter.",
+  s3: "Massstab: 1 Feld = 10 m. Wie weit ist es?",
+  s4: "Wege messen und abbiegen: links oder rechts?",
+  s5: "Wege beschreiben, Massstab 50 m und 100 m.",
+  s6: "Lange Wege beschreiben und messen.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+// ---------- Prüfung (tools/pruefe_spiele.js) ----------
+
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  const p = a.plan;
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (!FREI.has(p.liste)) m.push(`Plan nicht aus einer freien Liste (${p.liste})`);
+  if (p.felder.some(d => d >= PLAN_DINGE[p.liste].length)) m.push("unbekanntes Ding");
+  // Ein Ding, das nur einmal vorkommt, steht höchstens einmal im Plan
+  for (const d of einzelne(p.liste)) if (p.felder.filter(x => x === d).length > 1) m.push("Ding doppelt im Plan");
+  const zeichen = PLAN_DINGE[p.liste].map(d => d[3]);
+  if (new Set(zeichen).size !== zeichen.length) m.push("Zeichen doppelt in der Liste");
+  if (JSON.stringify(a).includes("ß") || JSON.stringify(PLAN_DINGE[p.liste]).includes("ß")) m.push("ß");
+  if (a.optionen.length && (new Set(a.optionen).size !== a.optionen.length || a.optionen.filter(o => o === a.richtig).length !== 1)) m.push("Antworten doppelt oder richtige fehlt");
+  const z = feldVon(p, a.ding);
+  if (a.art === "zeichen" && (z < 0 || !a.optionen.every(o => feldVon(p, o) >= 0))) m.push("Zeichen nicht im Plan");
+  if (a.art === "tippen" && (p.felder[a.richtig] !== a.ding || ding(p.liste, a.ding)[2])) m.push("Feld falsch");
+  if (a.art === "zaehlen" && p.felder.filter(x => x === a.ding).length !== a.richtig) m.push("Anzahl falsch");
+  if (a.art === "lage") {
+    const zr = feldVon(p, a.richtig), z1 = feldVon(p, a.bezug[0]);
+    const schritt = { "rechts neben": [1, 0], "links neben": [-1, 0], "auf dem Plan direkt über": [0, -1], "auf dem Plan direkt unter": [0, 1] }[a.wort];
+    if (schritt && (spalte(zr) - spalte(z1) !== schritt[0] || zeile(zr) - zeile(z1) !== schritt[1])) m.push("Lage falsch");
+    if (a.wort === "zwischen") {
+      const z2 = feldVon(p, a.bezug[1]);
+      if (spalte(z1) + spalte(z2) !== 2 * spalte(zr) || zeile(z1) + zeile(z2) !== 2 * zeile(zr) || Math.abs(z1 - z2) !== 2 && Math.abs(z1 - z2) !== 2 * N) m.push("zwischen falsch");
+    }
+    if (a.optionen.some(o => ding(p.liste, o)[2])) m.push("Antwort kommt mehrmals vor");
+    if (stufe === "s2" && a.wort === "zwischen") m.push("zwischen erst ab Stufe 3");
+  }
+  if (a.art === "strecke") {
+    const za = feldVon(p, a.von), zb = feldVon(p, a.bis);
+    const d = Math.abs(spalte(za) - spalte(zb)) + Math.abs(zeile(za) - zeile(zb));
+    if ((spalte(za) !== spalte(zb) && zeile(za) !== zeile(zb)) || d * a.massstab !== a.richtig) m.push("Strecke falsch");
+    if (!PLAN_MASSSTAB[p.liste][stufe].includes(a.massstab)) m.push("Massstab nicht aus der Stufe");
+  }
+  if (a.weg) {
+    const f = a.weg.felder;
+    if (p.felder[f[0]] !== a.von || p.felder[f[f.length - 1]] !== a.bis) m.push("Start oder Ziel falsch");
+    if (f.slice(1, -1).some(x => p.felder[x] >= 0)) m.push("Ding auf dem Weg");
+    for (let i = 1; i < f.length; i++) if (Math.abs(spalte(f[i]) - spalte(f[i - 1])) + Math.abs(zeile(f[i]) - zeile(f[i - 1])) !== 1) m.push("Weg springt");
+    if (a.art === "weglaenge" && (f.length - 1) * a.massstab !== a.richtig) m.push("Weglänge falsch");
+    if (a.art === "abbiegen" && abbiegen(a.weg.stuecke[0][0], a.weg.stuecke[1][0]) !== a.richtig) m.push("Abbiegen falsch");
+    if (a.art === "beschreiben" && beschreibung(a.weg.stuecke) !== a.richtig) m.push("Beschreibung falsch");
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+function sternPunkte(cx, cy, r1, r2) {
+  return [...Array(10).keys()].map(i => {
+    const w = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? r2 : r1;
+    return `${(cx + r * Math.cos(w)).toFixed(1)},${(cy + r * Math.sin(w)).toFixed(1)}`;
+  }).join(" ");
+}
+
+/** Zeichen eines Dings als SVG-Text (Farbe über die Klasse f1 … f7 und currentColor). */
+function zeichenSvg(code, farbe, cx, cy) {
+  const g = inhalt => `<g class="f${farbe}">${inhalt}</g>`;
+  const cc = 'fill="currentColor"';
+  switch (code) {
+    case "kreis": return g(`<circle cx="${cx}" cy="${cy}" r="11" ${cc}/>`);
+    case "ring": return g(`<circle cx="${cx}" cy="${cy}" r="10" fill="none" stroke="currentColor" stroke-width="5"/>`);
+    case "quadrat": return g(`<rect x="${cx - 11}" y="${cy - 11}" width="22" height="22" ${cc}/>`);
+    case "rechteck": return g(`<rect x="${cx - 7}" y="${cy - 12}" width="14" height="24" ${cc}/>`);
+    case "dreieck": return g(`<polygon points="${cx},${cy - 13} ${cx + 13},${cy + 10} ${cx - 13},${cy + 10}" ${cc}/>`);
+    case "raute": return g(`<polygon points="${cx},${cy - 14} ${cx + 12},${cy} ${cx},${cy + 14} ${cx - 12},${cy}" ${cc}/>`);
+    case "stern": return g(`<polygon points="${sternPunkte(cx, cy, 14, 6)}" ${cc}/>`);
+    case "kreuz": return g(`<path d="M${cx - 12} ${cy}H${cx + 12}M${cx} ${cy - 12}V${cy + 12}" stroke="currentColor" stroke-width="6"/>`);
+    case "x": return g(`<path d="M${cx - 10} ${cy - 10}L${cx + 10} ${cy + 10}M${cx - 10} ${cy + 10}L${cx + 10} ${cy - 10}" stroke="currentColor" stroke-width="5"/>`);
+    case "balken": return g(`<rect x="${cx - 14}" y="${cy - 5}" width="28" height="10" ${cc}/>`);
+    case "welle": return g(`<path d="M${cx - 13} ${cy - 3}q6.5 -8 13 0t13 0M${cx - 13} ${cy + 6}q6.5 -8 13 0t13 0" fill="none" stroke="currentColor" stroke-width="4"/>`);
+    case "sechseck": return g(`<polygon points="${[0, 1, 2, 3, 4, 5].map(i => `${(cx + 12 * Math.cos(i * Math.PI / 3)).toFixed(1)},${(cy + 12 * Math.sin(i * Math.PI / 3)).toFixed(1)}`).join(" ")}" ${cc}/>`);
+    case "halbkreis": return g(`<path d="M${cx - 13} ${cy + 6}A13 13 0 0 1 ${cx + 13} ${cy + 6}Z" ${cc}/>`);
+    case "haus": return g(`<polygon points="${cx},${cy - 13} ${cx + 12},${cy - 2} ${cx + 12},${cy + 11} ${cx - 12},${cy + 11} ${cx - 12},${cy - 2}" ${cc}/>`);
+    case "baum": return g(`<rect x="${cx - 2}" y="${cy + 2}" width="4" height="11" ${cc}/><circle cx="${cx}" cy="${cy - 4}" r="9" ${cc}/>`);
+    default: return g(`<text class="zeichen-text" x="${cx}" y="${cy + 9}" text-anchor="middle" ${cc}>${code}</text>`);
+  }
+}
+
+function svgEl(viewBox, klasse, innen) {
+  const s = document.createElementNS(SVG, "svg");
+  s.setAttribute("viewBox", viewBox);
+  s.setAttribute("class", klasse);
+  s.setAttribute("aria-hidden", "true");
+  s.innerHTML = innen;
+  return s;
+}
+
+const mitte = z => [spalte(z) * F + F / 2, zeile(z) * F + F / 2];
+
+/** Plan mit Feldern, Zeichen und (falls da) Weg. */
+function planBild(a) {
+  const p = a.plan;
+  let s = "";
+  for (let z = 0; z < N * N; z++) s += `<rect class="grund" x="${spalte(z) * F}" y="${zeile(z) * F}" width="${F}" height="${F}"/>`;
+  if (a.weg) {
+    const f = a.weg.felder;
+    const pt = f.map(mitte);
+    const [x0, y0] = pt[0];
+    const [xe, ye] = pt[pt.length - 1];
+    const [xv, yv] = pt[pt.length - 2];
+    const dx = Math.sign(xe - xv), dy = Math.sign(ye - yv);
+    // Weg vom Rand des Startfelds bis vor das Zielfeld, Pfeilspitze vor dem Ziel
+    const ende = [xe - dx * 18, ye - dy * 18];
+    s += `<polyline class="weg" points="${[...pt.slice(0, -1), ende].map(q => q.join(",")).join(" ")}"/>`;
+    const [ax, ay] = ende;
+    s += `<polygon class="weg-pfeil" points="${ax + dx * 8},${ay + dy * 8} ${ax - dx * 6 - dy * 9},${ay - dy * 6 + dx * 9} ${ax - dx * 6 + dy * 9},${ay - dy * 6 - dx * 9}"/>`;
+    s += `<circle class="weg-start" cx="${x0}" cy="${y0}" r="21"/>`;
+  }
+  for (let z = 0; z < N * N; z++) if (p.felder[z] >= 0) {
+    const d = ding(p.liste, p.felder[z]);
+    s += zeichenSvg(d[3], d[4], ...mitte(z));
+  }
+  s += `<rect class="rahmen" x="2" y="2" width="${N * F - 4}" height="${N * F - 4}" rx="6"/>`;
+  return svgEl(`0 0 ${N * F} ${N * F}`, `plan-bild ${p.liste}`, s);
+}
+
+function legende(a) {
+  const p = a.plan;
+  const box = el("div", { class: "legende" }, el("b", { text: "Legende" }));
+  for (const d of imPlan(p)) {
+    const x = ding(p.liste, d);
+    box.append(el("div", { class: "legende-zeile" }, svgEl("0 0 30 30", "", zeichenSvg(x[3], x[4], 15, 15)), el("span", { text: x[2] ? x[0].split(" ").slice(1).join(" ") : x[0] })));
+  }
+  if (a.massstab) box.append(el("div", { class: "massstab" }, el("span"), document.createTextNode(`1 Feld = ${meter(a.massstab)}`)));
+  return box;
+}
+
+// ---------- Spiel ----------
+
+const HINWEIS = {
+  zeichen: "Suche das Zeichen in der Legende. Was steht daneben?",
+  tippen: "Schau zuerst in der Legende, welches Zeichen dazugehört. Dann such es auf dem Plan.",
+  zaehlen: "Zähle jedes Zeichen einzeln und tippe dabei mit dem Finger darauf.",
+  lage: "Finde zuerst das Zeichen aus der Frage auf dem Plan. Dann schau ins Feld gleich daneben.",
+  strecke: "Zähle die Schritte von Feld zu Feld. Jeder Schritt ist so lang, wie der Massstab sagt.",
+  weglaenge: "Zähle die Schritte von Feld zu Feld auf dem gestrichelten Weg. Dann rechne mit dem Massstab.",
+  abbiegen: "Stell dir vor, du gehst selbst auf dem gestrichelten Weg. Dreh das Gerät mit, wenn es hilft.",
+  beschreiben: "Geh den gestrichelten Weg Stück für Stück. Zähle die Felder und schau, wohin du dich drehst.",
+};
+
+LS.spiel({
+  id: ID,
+  einleitung: "Ein Plan zeigt alles von oben. Die Legende verrät, was die Zeichen bedeuten. Kannst du den Plan lesen?",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = a.plan;
+    const name = d => ding(p.liste, d)[0];
+    const dativ = d => ding(p.liste, d)[1];
+    const bild = planBild(a);
+    let frage, loesung, inhalt = d => name(d);
+    if (a.art === "zeichen") {
+      frage = "Was bedeutet dieses Zeichen?";
+      loesung = `Das Zeichen bedeutet: ${name(a.ding)}.`;
+    } else if (a.art === "tippen") {
+      frage = `Tippe auf dem Plan auf ${name(a.ding)}.`;
+      loesung = `${gross(name(a.ding))} ist in der ${zeile(a.richtig) + 1}. Reihe von oben, im ${spalte(a.richtig) + 1}. Feld von links.`;
+    } else if (a.art === "zaehlen") {
+      frage = `Wie viele ${ding(p.liste, a.ding)[2]} hat es auf dem Plan?`;
+      loesung = `Es hat ${a.richtig} ${ding(p.liste, a.ding)[2]}.`;
+      inhalt = k => String(k);
+    } else if (a.art === "lage") {
+      frage = a.wort === "zwischen" ? `Was ist zwischen ${dativ(a.bezug[0])} und ${dativ(a.bezug[1])}?` : `Was ist ${a.wort} ${dativ(a.bezug[0])}?`;
+      loesung = `${gross(name(a.richtig))}.`;
+    } else if (a.art === "strecke") {
+      frage = `Wie weit ist es in gerader Linie von ${dativ(a.von)} bis zu ${dativ(a.bis)}?`;
+      loesung = `${feldText(a.richtig / a.massstab)} × ${meter(a.massstab)} = ${meter(a.richtig)}`;
+      inhalt = meter;
+    } else if (a.art === "weglaenge") {
+      frage = `Wie lang ist der gestrichelte Weg von ${dativ(a.von)} zu ${dativ(a.bis)}?`;
+      loesung = `${feldText(a.richtig / a.massstab)} × ${meter(a.massstab)} = ${meter(a.richtig)}`;
+      inhalt = meter;
+    } else if (a.art === "abbiegen") {
+      frage = `Du gehst auf dem gestrichelten Weg von ${dativ(a.von)} zu ${dativ(a.bis)}. Wie biegst du ab?`;
+      loesung = `Du biegst ${a.richtig} ab.`;
+      inhalt = r => ({ bild: r === "links" ? "↰" : "↱", text: `${r} abbiegen` });
+    } else {
+      frage = `Welche Beschreibung passt zum gestrichelten Weg von ${dativ(a.von)} zu ${dativ(a.bis)}?`;
+      loesung = `${a.richtig}.`;
+      inhalt = t => t;
+    }
+    // von dem → vom, zu dem → zum, zu der → zur
+    frage = frage.replace(/\bvon dem\b/g, "vom").replace(/\bzu dem\b/g, "zum").replace(/\bzu der\b/g, "zur");
+    ctx.flaeche.append(el("div", { class: "frage", text: frage }));
+    if (a.art === "zeichen") {
+      const x = ding(p.liste, a.ding);
+      ctx.flaeche.append(svgEl("0 0 40 40", "zeichen-gross", zeichenSvg(x[3], x[4], 20, 20)));
+    }
+    ctx.flaeche.append(el("div", { class: "plan-zeile" }, bild, legende(a)));
+    if (a.art === "tippen") {
+      ctx.loesung(loesung);
+      for (let z = 0; z < N * N; z++) {
+        const r = document.createElementNS(SVG, "rect");
+        for (const [k, v] of Object.entries({ class: "plan-feld", x: spalte(z) * F, y: zeile(z) * F, width: F, height: F })) r.setAttribute(k, v);
+        r.addEventListener("click", () => {
+          if (ctx.vorbei()) return;
+          if (z === a.richtig) { r.classList.add("treffer"); ctx.richtig(); return; }
+          r.classList.add("daneben");
+          ctx.falsch(HINWEIS.tippen, loesung);
+        });
+        bild.append(r);
+      }
+    } else {
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt, hinweis: HINWEIS[a.art], loesung, breite: a.art === "beschreiben" ? 300 : 150 });
+    }
+    if (ctx.nr === 0) ctx.sag("Schau zuerst in die Legende!");
+  },
+});
+</script>
+</body>
+</html>

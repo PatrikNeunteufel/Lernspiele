@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rechen-Maschine</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .maschine { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; margin: 6px 0 14px; }
+  .m-kasten { border: 4px solid var(--deko-6); border-radius: 16px; padding: 8px 14px; background: #fff; text-align: center;
+    font-size: clamp(24px, 6vw, 36px); font-weight: 900; min-width: 64px; font-variant-numeric: tabular-nums; }
+  .m-kasten small { display: block; font-size: 13px; font-weight: 800; color: var(--text-leise); text-transform: uppercase; letter-spacing: .4px; }
+  .m-kasten.m-rand { border-color: var(--deko-7); background: #f6f7fb; }
+  .m-kasten.m-fehlt { border-style: dashed; border-color: var(--deko-3); color: var(--deko-3); }
+  .m-pfeil { font-size: 28px; font-weight: 900; color: var(--text-leise); }
+  .m-paare { display: grid; grid-template-columns: auto auto auto; gap: 4px 14px; justify-content: center; align-items: center;
+    font-size: clamp(22px, 5vw, 30px); font-weight: 900; margin: 0 auto 14px; font-variant-numeric: tabular-nums; }
+  .m-paare .m-kopf { font-size: 14px; font-weight: 800; color: var(--text-leise); text-transform: uppercase; }
+  .m-paare span { text-align: center; }
+  .weiche { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 4px 0 14px; }
+  .weiche .w-frage { border: 4px solid var(--deko-1); border-radius: 16px; padding: 8px 16px; font-size: clamp(20px, 4.6vw, 26px); font-weight: 900; background: #fff; text-align: center; }
+  .weiche .w-wege { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .weiche .w-weg { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .weiche .w-weg b { font-size: 18px; color: var(--text-leise); }
+  .weiche .w-runden { font-size: 18px; font-weight: 800; color: var(--text-leise); text-align: center; }
+  .rm-anzeige { margin: 0 auto 10px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>⚙️ Rechen-Maschine</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.B.3.d (Orientierungspunkt 2. Zyklus, 4. Klasse): Anweisungen in Form von
+// Flussdiagrammen ausführen. Eine Zahl geht in die Maschine, jeder Kasten rechnet einen Schritt
+// („verdopple, dann − 3“). Vorwärts ausführen, rückwärts rechnen (Umkehrrechnung) und die fehlende
+// Regel aus Zahlenpaaren finden; in der Königsstufe eine Weiche („Ist die Zahl gerade?“).
+// Alle Zwischenergebnisse sind ganze Zahlen ab 0; Geteilt nur, wenn es aufgeht.
+
+const { zahlText, zufall, waehle, mische, el } = LS;
+
+// ---------- Rechenschritte ----------
+// Ein Schritt ist ein Text wie "+ 7", "− 3", "× 2", ": 4" (dieser Text ist zugleich der Wert der Antwortknöpfe).
+const ZEICHEN = ["+", "−", "×", ":"];
+const UMKEHR = { "+": "−", "−": "+", "×": ":", ":": "×" };
+const schritt = (o, n) => `${o} ${n}`;
+const zerlegeSchritt = s => { const [o, n] = s.split(" "); return { o, n: Number(n) }; };
+
+/** Ergebnis eines Schritts oder null, wenn es keine ganze Zahl ab 0 gibt. */
+function rechne(x, s) {
+  const { o, n } = zerlegeSchritt(s);
+  const y = o === "+" ? x + n : o === "−" ? x - n : o === "×" ? x * n : x % n === 0 ? x / n : NaN;
+  return Number.isInteger(y) && y >= 0 ? y : null;
+}
+/** Wort für Kinder: × 2 = verdoppeln, : 2 = halbieren. */
+const wortFuer = s => (s === "× 2" ? "verdoppeln" : s === ": 2" ? "halbieren" : "");
+const zeigeSchritt = s => { const { o, n } = zerlegeSchritt(s); return `${o} ${zahlText(n)}`; };
+/** Rechnung eines Schritts als Text: „12 × 2 = 24“. */
+const zeile = (x, s) => `${zahlText(x)} ${zeigeSchritt(s)} = ${zahlText(rechne(x, s))}`;
+/** Schritt ist gültig (keine Null, kein × 1). */
+const gueltig = s => { const { o, n } = zerlegeSchritt(s); return ZEICHEN.includes(o) && Number.isInteger(n) && (o === "+" || o === "−" ? n >= 1 : n >= 2); };
+
+// ---------- Stufen ----------
+// schritte: [min, max] Kästen; plus(): Zahl für + und −; mal: Zahlen für × und :; max: grösste Zahl
+// überall (Eingabe, Zwischenergebnisse, Ausgabe); ein: grösste Eingabe; arten: Gewichte der Aufgabenarten.
+const zehner = (a, b) => 10 * zufall(a / 10, b / 10);
+const STUFE = {
+  s1: { schritte: [1, 1], plus: () => zufall(1, 20), mal: [2], max: 100, ein: 50, arten: { vor: 7, rueck: 3 } },
+  s2: { schritte: [2, 2], plus: () => zufall(1, 20), mal: [2], max: 100, ein: 50, arten: { vor: 6, rueck: 4 } },
+  s3: { schritte: [2, 3], plus: () => zufall(1, 50), mal: [2, 3, 4, 5, 6, 7, 8, 9], max: 1000, ein: 200, arten: { vor: 4, rueck: 3, regel: 3 } },
+  s4: { schritte: [3, 3], plus: () => zufall(1, 100), mal: [2, 3, 4, 5, 6, 7, 8, 9], max: 1000, ein: 300, arten: { vor: 3, rueck: 3, regel: 4 } },
+  s5: { schritte: [3, 3], plus: () => (Math.random() < 0.6 ? zehner(10, 500) : zufall(1, 30)), mal: [2, 3, 4, 5, 6, 7, 8, 9, 10], max: 10000, ein: 2000, arten: { vor: 3, rueck: 3, regel2: 4 } },
+  s6: { schritte: [3, 4], plus: () => (Math.random() < 0.7 ? zehner(10, 900) : zufall(1, 50)), mal: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12], max: 10000, ein: 3000, arten: { rueck: 3, regel2: 3, weiche: 4 } },
+};
+// In Stufe 1 und 2 gibt es Mal und Geteilt nur als Verdoppeln und Halbieren.
+
+function gewichtet(arten) {
+  const liste = Object.entries(arten).flatMap(([a, g]) => Array(g).fill(a));
+  return waehle(liste);
+}
+
+/** Ein zufälliger gültiger Schritt für die Zahl x (oder null). */
+function naechsterSchritt(x, p, vorher) {
+  for (let v = 0; v < 40; v++) {
+    const o = waehle(ZEICHEN);
+    let n;
+    if (o === "+") n = p.plus();
+    else if (o === "−") n = p.plus();
+    else if (o === "×") n = waehle(p.mal);
+    else { const t = p.mal.filter(d => x % d === 0); if (!t.length) continue; n = waehle(t); }
+    const s = schritt(o, n);
+    if (!gueltig(s) || s === vorher) continue;
+    // keine Schritte, die den vorigen aufheben (× 2, dann : 2)
+    if (vorher && zerlegeSchritt(vorher).o === UMKEHR[o] && zerlegeSchritt(vorher).n === n) continue;
+    const y = rechne(x, s);
+    if (y === null || y < 1 || y > p.max || y === x) continue;
+    return s;
+  }
+  return null;
+}
+
+/** Kette von Schritten ab Eingabe ein: { ein, ops, zw (Werte nach jedem Schritt) } oder null. */
+function kette(p, anzahl) {
+  const ein = zufall(2, p.ein);
+  const ops = [];
+  const zw = [];
+  let x = ein;
+  for (let i = 0; i < anzahl; i++) {
+    const s = naechsterSchritt(x, p, ops[i - 1]);
+    if (!s) return null;
+    ops.push(s);
+    x = rechne(x, s);
+    zw.push(x);
+  }
+  // Ausgabe nicht gleich Eingabe oder einem Zwischenergebnis (sonst wäre ein Kasten überflüssig)
+  if (x === ein || zw.slice(0, -1).includes(x)) return null;
+  return { ein, ops, zw, aus: x };
+}
+
+/** Schritte, die aus a genau b machen (für Ablenker beim Regel-Finden). */
+function schritteVon(a, b) {
+  const s = [];
+  if (b > a) s.push(schritt("+", b - a));
+  if (a > b) s.push(schritt("−", a - b));
+  if (a > 0 && b % a === 0 && b / a >= 2) s.push(schritt("×", b / a));
+  if (b > 0 && a % b === 0 && a / b >= 2) s.push(schritt(":", a / b));
+  return s;
+}
+
+/** Wendet die Maschine (Liste von Schritten) an; null, sobald ein Schritt nicht geht. */
+function maschine(x, ops) {
+  for (const s of ops) { x = rechne(x, s); if (x === null) return null; }
+  return x;
+}
+
+/** Passt eine Regel an der Stelle 'fehlt' der Maschine zu allen Zahlenpaaren? */
+function regelPasst(ops, fehlt, regel, paare) {
+  const m = ops.slice();
+  m[fehlt] = regel;
+  return paare.every(([x, y]) => maschine(x, m) === y);
+}
+
+/** Drei Ablenker: Schritte, die nicht zu allen Paaren passen; bevorzugt solche, die beim ersten Paar passen. */
+function ablenker(ops, fehlt, paare) {
+  const richtig = ops[fehlt];
+  const { o, n } = zerlegeSchritt(richtig);
+  const [x1] = paare[0];
+  const vorne = maschine(x1, ops.slice(0, fehlt));
+  const hinten = (() => {
+    // Wert, der nach dem fehlenden Schritt beim ersten Paar herauskommen muss
+    let y = paare[0][1];
+    for (const s of ops.slice(fehlt + 1).reverse()) {
+      const { o: o2, n: n2 } = zerlegeSchritt(s);
+      y = rechne(y, schritt(UMKEHR[o2], n2));
+      if (y === null) return null;
+    }
+    return y;
+  })();
+  const erstePaar = vorne !== null && hinten !== null ? schritteVon(vorne, hinten) : [];
+  const nahe = [n - 1, n + 1, n - 2, n + 2, n * 2].map(k => schritt(o, k));
+  const andere = ZEICHEN.filter(z => z !== o).map(z => schritt(z, n));
+  const ok = s => gueltig(s) && s !== richtig && !regelPasst(ops, fehlt, s, paare);
+  const a = mische([...new Set(erstePaar)]).filter(ok).slice(0, 2);
+  for (const s of mische([...nahe, ...andere])) if (a.length < 3 && ok(s) && !a.includes(s)) a.push(s);
+  return a.length === 3 ? a : null;
+}
+
+/** Aufgabe zur Regel: Maschine mit einem fehlenden Kasten, drei Zahlenpaare, vier Antworten. */
+function regelAufgabe(p, anzahl) {
+  for (let v = 0; v < 60; v++) {
+    const k = kette(p, anzahl);
+    if (!k) continue;
+    const fehlt = anzahl === 1 ? 0 : zufall(0, anzahl - 1);
+    // drei verschiedene Eingaben, für die alle Schritte gehen
+    const eingaben = new Set([k.ein]);
+    for (let w = 0; w < 80 && eingaben.size < 3; w++) {
+      const x = zufall(2, Math.min(p.ein, anzahl === 1 ? 60 : p.ein));
+      const y = maschine(x, k.ops);
+      if (y !== null && y >= 1 && y <= p.max && y !== x) eingaben.add(x);
+    }
+    if (eingaben.size < 3) continue;
+    const paare = [...eingaben].sort((a, b) => a - b).map(x => [x, maschine(x, k.ops)]);
+    const ab = ablenker(k.ops, fehlt, paare);
+    if (!ab) continue;
+    return { art: anzahl === 1 ? "regel" : "regel2", ops: k.ops, fehlt, paare, optionen: mische([k.ops[fehlt], ...ab]) };
+  }
+  return null;
+}
+
+// Weiche (Königsstufe): Frage an die Zahl, je nach Antwort ein anderer Kasten; die Ausgabe geht
+// noch einmal (oder zweimal) hinein. Beide Wege müssen vorkommen.
+function weicheAufgabe(p) {
+  for (let v = 0; v < 200; v++) {
+    const gerade = Math.random() < 0.5;
+    const bed = gerade ? { art: "gerade" } : { art: "groesser", k: 10 * zufall(3, 30) };
+    const ja = gerade ? ": 2" : schritt("−", 10 * zufall(1, 9));
+    const nein = gerade ? waehle(["+ 1", "+ 3", "+ 5", "× 3", "× 2", "− 1"]) : waehle(["× 2", "× 3", "+ 50", "+ 25", "+ 99"]);
+    const runden = zufall(2, 3);
+    let x = zufall(gerade ? 10 : 20, gerade ? 200 : 400);
+    const ein = x;
+    const spur = [];
+    let geht = true;
+    for (let r = 0; r < runden; r++) {
+      const ok = gerade ? x % 2 === 0 : x > bed.k;
+      const s = ok ? ja : nein;
+      const y = rechne(x, s);
+      if (y === null || y < 1 || y > p.max) { geht = false; break; }
+      spur.push({ x, ok, s, y });
+      x = y;
+    }
+    if (!geht || !spur.some(t => t.ok) || !spur.some(t => !t.ok) || x === ein) continue;
+    return { art: "weiche", ein, bed, ja, nein, runden, spur, aus: x };
+  }
+  return null;
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let v = 0; v < 100; v++) {
+    const art = gewichtet(p.arten);
+    if (art === "regel") { const a = regelAufgabe(p, 1); if (a) return a; continue; }
+    if (art === "regel2") { const a = regelAufgabe(p, 2); if (a) return a; continue; }
+    if (art === "weiche") { const a = weicheAufgabe(p); if (a) return a; continue; }
+    const k = kette(p, zufall(p.schritte[0], p.schritte[1]));
+    if (k) return { art, ...k };
+  }
+  return null;
+}
+
+// ---------- Texte ----------
+const bedText = b => (b.art === "gerade" ? "Ist die Zahl gerade?" : `Ist die Zahl grösser als ${zahlText(b.k)}?`);
+const bedAntwort = (b, x, ok) => (b.art === "gerade" ? `${zahlText(x)} ist ${ok ? "" : "nicht "}gerade`
+  : `${zahlText(x)} ist ${ok ? "" : "nicht "}grösser als ${zahlText(b.k)}`);
+
+/** Lösungstext; bei Zahlenantworten steht das Ergebnis hinter dem letzten „=“. */
+function loesungText(a) {
+  if (a.art === "vor") return a.ops.map((s, i) => zeile(i ? a.zw[i - 1] : a.ein, s)).join(", ");
+  if (a.art === "rueck") {
+    const teile = [];
+    let y = a.aus;
+    for (const s of a.ops.slice().reverse()) {
+      const { o, n } = zerlegeSchritt(s);
+      const u = schritt(UMKEHR[o], n);
+      teile.push(zeile(y, u));
+      y = rechne(y, u);
+    }
+    return `Rückwärts: ${teile.join(", ")}`;
+  }
+  if (a.art === "weiche") return a.spur.map((t, i) => `Runde ${i + 1}: ${bedAntwort(a.bed, t.x, t.ok)} → ${zeile(t.x, t.s)}`).join(". ");
+  const r = a.ops[a.fehlt];
+  return `Der fehlende Kasten ist „${zeigeSchritt(r)}“ — ` + a.paare.map(([x, y]) => `${zahlText(x)} → ${zahlText(y)}`).join(", ");
+}
+
+// ---------- Mängel für tools/pruefe_spiele.js ----------
+const ARTEN_TEXT = { vor: 1, rueck: 1, regel: 1, regel2: 1, weiche: 1 };
+function pruefeAufgabe(a, stufe) {
+  const p = STUFE[stufe];
+  const m = [];
+  if (!a) return ["keine Aufgabe"];
+  if (!ARTEN_TEXT[a.art] || !p.arten[a.art]) m.push(`Aufgabenart ${a.art} gehört nicht in diese Stufe`);
+  const imRaum = x => Number.isInteger(x) && x >= 0 && x <= p.max;
+  const malOk = s => { const { o, n } = zerlegeSchritt(s); return o === "+" || o === "−" || p.mal.includes(n); };
+  if (a.art === "vor" || a.art === "rueck") {
+    if (a.ops.length < p.schritte[0] || a.ops.length > p.schritte[1]) m.push("falsche Zahl von Kästen");
+    if (!a.ops.every(gueltig) || !a.ops.every(malOk)) m.push("Kasten nicht aus der Stufe");
+    let x = a.ein;
+    if (!imRaum(x) || x > p.ein) m.push("Eingabe ausserhalb des Zahlenraums");
+    a.ops.forEach((s, i) => {
+      x = rechne(x, s);
+      if (x === null || !imRaum(x)) m.push("Zwischenergebnis keine ganze Zahl im Zahlenraum");
+      if (x !== a.zw[i]) m.push("Zwischenergebnis falsch gespeichert");
+    });
+    if (x !== a.aus) m.push("Ausgabe stimmt nicht");
+    const loes = loesungText(a).split("=").pop().trim();
+    if (loes !== zahlText(a.art === "vor" ? a.aus : a.ein)) m.push(`Lösungstext endet nicht mit der Antwort (${loes})`);
+  } else if (a.art === "regel" || a.art === "regel2") {
+    if (a.ops.length !== (a.art === "regel" ? 1 : 2)) m.push("falsche Zahl von Kästen");
+    if (new Set(a.optionen).size !== a.optionen.length || a.optionen.length !== 4) m.push("Antworten doppelt oder nicht vier");
+    if (!a.optionen.every(gueltig)) m.push("ungültige Antwort");
+    const richtige = a.optionen.filter(s => regelPasst(a.ops, a.fehlt, s, a.paare));
+    if (richtige.length !== 1 || richtige[0] !== a.ops[a.fehlt]) m.push(`nicht genau eine passende Regel (${richtige.join(", ")})`);
+    if (new Set(a.paare.map(q => q[0])).size !== 3) m.push("Eingaben doppelt");
+    for (const [x, y] of a.paare) if (!imRaum(x) || !imRaum(y) || maschine(x, a.ops) !== y) m.push("Zahlenpaar stimmt nicht oder ausserhalb des Zahlenraums");
+  } else if (a.art === "weiche") {
+    let x = a.ein;
+    for (let r = 0; r < a.runden; r++) {
+      const ok = a.bed.art === "gerade" ? x % 2 === 0 : x > a.bed.k;
+      const y = rechne(x, ok ? a.ja : a.nein);
+      if (y === null || !imRaum(y)) { m.push("Weiche: Schritt geht nicht"); break; }
+      x = y;
+    }
+    if (x !== a.aus) m.push("Weiche: Ausgabe stimmt nicht");
+    if (loesungText(a).split("=").pop().trim() !== zahlText(a.aus)) m.push("Weiche: Lösungstext endet nicht mit der Antwort");
+  }
+  if (/ß/.test(JSON.stringify(a) + loesungText(a))) m.push("ß im Text");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+function kasten(inhalt, klein, art = "") {
+  return el("div", { class: "m-kasten" + (art ? " " + art : "") }, klein ? el("small", { text: klein }) : null, inhalt);
+}
+const pfeil = () => el("span", { class: "m-pfeil", text: "→" });
+
+/**
+ * Maschine als Reihe: Eingabe → Kästen → Ausgabe. werte: { ein, aus } — Zahl, null (gesucht: „?“)
+ * oder false (Spalte der Zahlenpaare: „▢“); fehlt: Index des leeren Kastens.
+ */
+function reihe(ops, werte, fehlt = -1) {
+  const r = el("div", { class: "maschine vorgabe" });
+  const rand = (w, wort) => (w === false ? kasten("▢", wort, "m-rand")
+    : w === null ? kasten("?", wort, "m-rand m-fehlt") : kasten(zahlText(w), wort, "m-rand"));
+  r.append(rand(werte.ein, "rein"));
+  ops.forEach((s, i) => {
+    r.append(pfeil());
+    r.append(i === fehlt ? kasten("?", "Kasten", "m-fehlt") : kasten(zeigeSchritt(s), wortFuer(s) || "Kasten"));
+  });
+  r.append(pfeil(), rand(werte.aus, "raus"));
+  return r;
+}
+
+function zahlAntwort(ctx, soll, loesung, hinweis) {
+  const anzeige = el("div", { class: "anzeige leer rm-anzeige", "aria-label": "Deine Zahl" });
+  ctx.flaeche.append(anzeige);
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 5,
+    onOk(w) {
+      if (ctx.vorbei()) return;
+      if (w === soll) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(hinweis(w), loesung);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(tasten.element);
+}
+
+LS.spiel({
+  id: "rechen-maschine",
+  einleitung: "Die Rechen-Maschine rechnet Schritt für Schritt. Was kommt heraus — und was ging hinein?",
+  anzahl: 8,
+  stufen: {
+    s1: "Ein Kasten: 15 → + 7 → ?",
+    s2: "Zwei Kästen: verdopple, dann − 3. Auch rückwärts.",
+    s3: "Mit Mal und Geteilt, rückwärts — und die Regel finden.",
+    s4: "Drei Kästen und Regeln aus Zahlenpaaren.",
+    s5: "Bis 10 000: Welcher Kasten fehlt in der Maschine?",
+    s6: "Endgegner: Maschine mit Weiche — gerade oder nicht?",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const loesung = loesungText(a);
+
+    if (a.art === "vor" || a.art === "rueck") {
+      const vor = a.art === "vor";
+      ctx.loesung(loesung);
+      ctx.flaeche.append(el("div", { class: "auftrag", text: vor ? "Was kommt heraus?" : "Welche Zahl ging hinein?" }),
+        reihe(a.ops, vor ? { ein: a.ein, aus: null } : { ein: null, aus: a.aus }));
+      const soll = vor ? a.aus : a.ein;
+      zahlAntwort(ctx, soll, loesung, w => {
+        if (vor) {
+          const z1 = a.zw[0];
+          return a.ops.length > 1 && z1 !== soll && w !== z1
+            ? `Noch nicht. Nach dem ersten Kasten hast du ${zahlText(z1)} — rechne von dort weiter.`
+            : "Noch nicht. Rechne Kasten für Kasten und merk dir jedes Zwischenergebnis.";
+        }
+        const probe = maschine(w, a.ops);
+        return probe !== null && probe !== soll && probe !== a.aus
+          ? `Probe: Mit ${zahlText(w)} kommt ${zahlText(probe)} heraus, nicht ${zahlText(a.aus)}. Rechne vom Ende her: aus + wird −, aus × wird :.`
+          : "Rechne vom Ende her rückwärts: aus + wird −, aus × wird : — und umgekehrt.";
+      });
+      if (ctx.nr === 0) ctx.sag(vor ? "Steck die Zahl vorne hinein und rechne Kasten für Kasten." : "Rückwärts! Starte hinten und mach jeden Schritt rückgängig.");
+      return;
+    }
+
+    if (a.art === "weiche") {
+      ctx.loesung(loesung);
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Was kommt am Schluss heraus?" }));
+      const w = el("div", { class: "weiche vorgabe" },
+        kasten(zahlText(a.ein), "rein", "m-rand"),
+        el("span", { class: "m-pfeil", text: "↓" }),
+        el("div", { class: "w-frage", text: bedText(a.bed) }),
+        el("div", { class: "w-wege" },
+          el("div", { class: "w-weg" }, el("b", { text: "ja ↓" }), kasten(zeigeSchritt(a.ja), wortFuer(a.ja) || "Kasten")),
+          el("div", { class: "w-weg" }, el("b", { text: "nein ↓" }), kasten(zeigeSchritt(a.nein), wortFuer(a.nein) || "Kasten"))),
+        el("div", { class: "w-runden", text: `Die Maschine läuft ${a.runden}-mal: Was herauskommt, geht wieder oben hinein.` }));
+      ctx.flaeche.append(w);
+      zahlAntwort(ctx, a.aus, loesung, () => "Noch nicht. Beantworte in jeder Runde zuerst die Frage — ja oder nein? — und nimm dann den passenden Kasten.");
+      if (ctx.nr === 0) ctx.sag("Eine Weiche! Die Frage entscheidet, welchen Kasten die Zahl nimmt.");
+      return;
+    }
+
+    // Regel finden: ein Kasten fehlt, die Zahlenpaare verraten ihn.
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "Welcher Kasten fehlt?" }), reihe(a.ops, { ein: false, aus: false }, a.fehlt));
+    const tab = el("div", { class: "m-paare vorgabe" },
+      el("span", { class: "m-kopf", text: "rein" }), el("span"), el("span", { class: "m-kopf", text: "raus" }));
+    for (const [x, y] of a.paare) tab.append(el("span", { text: zahlText(x) }), el("span", { class: "m-pfeil", text: "→" }), el("span", { text: zahlText(y) }));
+    ctx.flaeche.append(tab);
+    LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.ops[a.fehlt], inhalt: zeigeSchritt, breite: 110, loesung,
+      hinweis: s => {
+        const falsch = a.paare.find(([x, y]) => { const m = a.ops.slice(); m[a.fehlt] = s; return maschine(x, m) !== y; });
+        return `Mit ${zeigeSchritt(s)} wird aus ${zahlText(falsch[0])} nicht ${zahlText(falsch[1])}. Prüf jede Regel an allen Zahlenpaaren.`;
+      },
+    });
+    if (ctx.nr === 0) ctx.sag("Probier jede Regel mit allen Zahlenpaaren aus!");
+  },
+});
+</script>
+</body>
+</html>
