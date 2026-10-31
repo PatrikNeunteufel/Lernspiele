@@ -51,8 +51,12 @@ Die Arbeit lief in zwei Commits (`118936f`, `a9d1798`) und dem hier beschriebene
 - **Endlos-Modus:**
   - 34 Spiele, die ihre Aufgaben berechnen, in Stufen mit mindestens 100 verschiedenen Aufgaben.
   - Die Runde läuft bis zum ersten Fehler oder bis die Zeit um ist.
-  - Einstieg über „♾ Endlos spielen“ auf der Spielkarte ins Startbild des Spiels; die Stufenknöpfe
-    der Startseite springen direkt in eine gewöhnliche Runde.
+  - Auf der Spielkarte schalten ♾ und ⏱ (SVG, an gold wie der Stern), was die Stufenknöpfe starten;
+    mit ♾ zeigen sie den Rekord statt der Sterne. Ein Tipp auf eine freie Stelle der Karte öffnet das
+    Startbild des Spiels, dort stehen die vollständigen Ranglisten ohne und mit Timer.
+  - Mit Timer starten alle mit der Vorgabezeit der Stufe; je richtige Aufgabe 4 % knapper, Untergrenze
+    40 % der Startzeit (`ENDLOS_TEMPO`). Gewöhnliche Runden bleiben gleich.
+  - Lernziel-Kürzel auf der Karte blenden beim Antippen ihren Klartext ein.
   - Rekorde in `lernspiele:rekorde`, Rangliste am Schluss und in der Statistik.
   - Die Online-Rangliste ist als Idee dokumentiert.
 - **Sprachausgabe:** `LS.sprich`, `LS.stimmeBereit`, `LS.spielMitStimme`; britische Stimme bevorzugt.

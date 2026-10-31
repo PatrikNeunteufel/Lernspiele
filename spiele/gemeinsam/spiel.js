@@ -83,12 +83,13 @@ const LS = (() => {
   //   rolle: "kind" | "aufsicht" (Entscheid L2 a) — die Aufsicht meldet sich mit PIN an, verwaltet
   //     Konten und Freigaben und spielt als Tester: Runden mit test: true, im Spiel Testhilfen
   //   pin: { salz, hash } nur bei der Aufsicht (SHA-256, nie die PIN selbst)
-  //   favoriten: [<spiel-id>], ansicht: "kacheln" | "kompakt", zu: [<Gruppen-Id>] (zugeklappt)
+  //   favoriten: [<spiel-id>], endlosAn: [<spiel-id>] (Karte startet Endlos-Runden), ansicht: "kacheln" | "kompakt",
+  //   zu: [<Gruppen-Id>] (zugeklappt)
   const LEERES_PROFIL = {
     alter: null, klasse: null, fokus: [], rolle: "kind",
     reihenfolge: { global: "stufe", spiele: {} },
     timer: { an: false, faktor: 1, spiele: {} },
-    favoriten: [], ansicht: "kacheln", zu: [],
+    favoriten: [], endlosAn: [], ansicht: "kacheln", zu: [],
   };
 
   /** Vorgabezeit je Aufgabe aus dem Katalog (Sekunden), falls die Seite ihn geladen hat. */
@@ -337,16 +338,25 @@ const LS = (() => {
   function protokolliere(eintrag) { schreibe("protokoll", [...protokoll(), eintrag]); }
 
   // ---------- Endlos-Rekorde (Vorgabe Patrik 2026-10-31) ----------
-  // lernspiele:rekorde = [{ name, zeit, spiel, stufe, timer (Sekunden oder null), punkte, dauer,
-  //   alles?, test?, hilfe? }] — eine Zeile je Endlos-Runde, getrennt vom Protokoll der Runden.
-  // Verglichen wird nur bei gleichem Timer (ohne, oder mit derselben Zeit je Aufgabe). Das Format ist
+  // lernspiele:rekorde = [{ name, zeit, spiel, stufe, timer (Startzeit in Sekunden oder null), punkte,
+  //   dauer, alles?, test?, hilfe? }] — eine Zeile je Endlos-Runde, getrennt vom Protokoll der Runden.
+  // Zwei Ranglisten je Stufe: ohne und mit Timer. Mit Timer starten alle mit der Vorgabezeit der Stufe
+  // (Katalog, ohne persönlichen Faktor), und die Zeit wird je gelöste Aufgabe etwas kürzer
+  // (ENDLOS_TEMPO) — so ist der Vergleich gerecht. Das Format ist
   // so gewählt, dass es später auch an einen Server gehen könnte (Rangliste nach Alter, Klasse, Region
   // — noch Idee); heute bleibt alles im Browser.
   const rekorde = () => lies("rekorde", []);
   function speichereRekord(eintrag) { schreibe("rekorde", [...rekorde(), eintrag]); }
   /** Stufen, die den Endlos-Modus anbieten (Katalog: endlos). */
   const endlosStufen = spielId => katalogEintrag(spielId)?.endlos || [];
-  const gleicherModus = (e, spiel, stufe, timer) => e.spiel === spiel && e.stufe === stufe && (e.timer ?? null) === (timer ?? null);
+  const gleicherModus = (e, spiel, stufe, mitTimer) => e.spiel === spiel && e.stufe === stufe && !!e.timer === !!mitTimer;
+  /**
+   * Endlos mit Timer (Wunsch Patrik 2026-10-31): je gelöste Aufgabe 4 % weniger Zeit, nie unter 40 % der
+   * Startzeit und nie unter 3 s — spürbar schneller, aber nicht zu rasch und nicht unbegrenzt.
+   */
+  const ENDLOS_TEMPO = { faktor: 0.96, untergrenze: 0.4, minimum: 3 };
+  const endlosSekunden = (start, geschafft) => Math.max(ENDLOS_TEMPO.minimum, Math.round(start * ENDLOS_TEMPO.untergrenze),
+    Math.round(start * ENDLOS_TEMPO.faktor ** geschafft));
   function besterRekord(name, spiel, stufe, timer) {
     return rekorde().filter(e => e.name === name && gleicherModus(e, spiel, stufe, timer)).reduce((m, e) => Math.max(m, e.punkte), 0);
   }
@@ -846,15 +856,20 @@ const LS = (() => {
       // Endlos: so viele wie möglich bis zum ersten Fehler — nur Stufen mit genug verschiedenen Aufgaben (Katalog).
       const endlosListe = stufenListe.filter(st => endlosStufen(def.id).includes(st.id));
       if (endlosListe.length) {
-        const mitTimer = st => (timerFuer(name, def.id, st.id).an ? timerFuer(name, def.id, st.id).sekunden : null);
+        const mitTimer = st => timerFuer(name, def.id, st.id).an;
         karte.append(el("div", { class: "endlos-wahl" },
           el("b", { text: "♾ Endlos — wie viele schaffst du ohne Fehler?" }),
+          el("span", { class: "leise", text: "Mit Timer wird die Zeit nach jeder richtigen Aufgabe etwas knapper." }),
           el("div", { class: "endlos-knoepfe" }, ...endlosListe.map(st => {
             const rekord = besterRekord(name, def.id, st.id, mitTimer(st));
             const k = el("button", { class: "knopf hell klein", type: "button", onclick: () => runde(st, true) },
               `${st.icon} ${st.nr}`, el("small", { text: rekord ? ` · Rekord ${rekord}` : "" }));
             return k;
-          }))));
+          })),
+          // Vollständige Ranglisten je Endlos-Stufe, ohne und mit Timer (Wunsch Patrik 2026-10-31).
+          ...endlosListe.filter(st => ranglisteFuer(def.id, st.id, false).length || ranglisteFuer(def.id, st.id, true).length)
+            .map(st => el("div", { class: "ranglisten" }, el("b", { text: `${st.icon} Stufe ${st.nr}` }),
+              rangliste(def.id, st.id, false, name, Infinity), rangliste(def.id, st.id, true, name, Infinity)))));
       }
       buehne.append(karte);
     }
@@ -878,6 +893,7 @@ const LS = (() => {
       const timer = timerFuer(name, def.id, stufe.id);
       let nr = 0;
       let geschafft = 0; // Endlos: richtig gelöste Aufgaben
+      const startSekunden = endlos ? vorgabeZeit(def.id, stufe.id) : timer.sekunden; // Endlos: für alle gleich
       let fehler = 0;
       const beginn = Date.now();
       const fehlerAufgaben = [];
@@ -967,6 +983,8 @@ const LS = (() => {
           },
         };
 
+        // Endlos mit Timer: gleiche Startzeit für alle, je gelöste Aufgabe etwas knapper (ENDLOS_TEMPO).
+        const sekunden = endlos ? endlosSekunden(startSekunden, geschafft) : timer.sekunden;
         if (timer.an) {
           // Balken läuft per CSS-Übergang von voll auf leer; der Fehler zählt einmal, die Aufgabe bleibt offen.
           const balken = zeitleiste.firstChild;
@@ -974,7 +992,7 @@ const LS = (() => {
           balken.style.transition = "none";
           balken.style.width = "100%";
           void balken.offsetWidth;
-          balken.style.transition = `width ${timer.sekunden}s linear`;
+          balken.style.transition = `width ${sekunden}s linear`;
           balken.style.width = "0%";
           uhr = setTimeout(() => {
             if (erledigt) return;
@@ -985,7 +1003,8 @@ const LS = (() => {
             ton("falsch");
             if (endlos) return endlosVorbei("⏰ Die Zeit ist um!");
             eule.sag("⏰ Die Zeit ist um! Mach die Aufgabe trotzdem fertig.", "hinweis");
-          }, timer.sekunden * 1000);
+          }, sekunden * 1000);
+          if (endlos) punkte.textContent = `♾ ${geschafft} · ⏱ ${sekunden} s`;
         }
 
         /** Endlos: erste falsche Antwort oder Zeit um — Lösung zeigen, dann zum Ergebnis. */
@@ -1144,7 +1163,7 @@ const LS = (() => {
       /** Endlos: Ergebnis speichern, Rekord und Rangliste zeigen. */
       function schlussEndlos() {
         clearTimeout(uhr);
-        const mitTimer = timer.an ? timer.sekunden : null;
+        const mitTimer = timer.an ? startSekunden : null;
         const vorher = besterRekord(name, def.id, stufe.id, mitTimer);
         speichereRekord({
           name, zeit: new Date().toISOString(), spiel: def.id, stufe: stufe.id, timer: mitTimer, punkte: geschafft,
@@ -1174,12 +1193,12 @@ const LS = (() => {
     }
 
     /** Rangliste als kleine Tabelle: bester Wert je Spieler (ohne Testrunden), der eigene hervorgehoben. */
-    function rangliste(spiel, stufeId, mitTimer, ich) {
+    function rangliste(spiel, stufeId, mitTimer, ich, hoechstens = 10) {
       const liste = ranglisteFuer(spiel, stufeId, mitTimer);
       if (!liste.length) return el("div");
       return el("div", { class: "rangliste" },
-        el("b", { text: `Rangliste ${mitTimer ? `(mit Timer ${mitTimer} s)` : "(ohne Timer)"}` }),
-        el("ol", {}, ...liste.slice(0, 10).map(r => el("li", { class: r.name === ich ? "ich" : "" },
+        el("b", { text: mitTimer ? "⏱ mit Timer" : "ohne Timer" }),
+        el("ol", {}, ...liste.slice(0, hoechstens).map(r => el("li", { class: r.name === ich ? "ich" : "" },
           el("span", { text: r.name }), el("b", { text: String(r.punkte) })))));
     }
 
@@ -1210,7 +1229,7 @@ const LS = (() => {
       "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
       "spieler-zeile",
       "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "zeitleiste", "zeitbalken", "testhilfe",
-      "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ich"],
+      "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };

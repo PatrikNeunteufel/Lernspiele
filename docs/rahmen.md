@@ -217,7 +217,10 @@ was nichts mehr zu prüfen hat (Präzisierung Patrik 2026-10-31).
 **Startseite** (`index.html`, Code in `start/`): Ohne Anmeldung zeigt sie die Anmeldung, danach
 die Tabs Spiele, Profil, Statistik und, nur für die Aufsicht, Verwaltung. Der Tab steht in der
 Adresse (`#statistik`). `#anmelden` meldet ab und führt zur Anmeldung; dorthin verweist auch
-„wechseln“ im Spiel. Je Spieler speichert das Profil Favoriten, die Ansicht (`kacheln` oder
+„wechseln“ im Spiel. Auf jeder Spielkarte schalten ⏱ (Timer dieses Spiels, dieselbe Einstellung wie
+im Spiel) und ♾ (Endlos, Profil-Feld `endlosAn`), was die Stufenknöpfe starten. Die Symbole sind als
+SVG gezeichnet: aus als grauer Umriss, an in Gold wie der Favoriten-Stern. Ein Tipp auf eine freie
+Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim Antippen ihren Klartext ein. Je Spieler speichert das Profil Favoriten, die Ansicht (`kacheln` oder
 `kompakt`) und welche Gruppen zugeklappt sind (`zu`).
 
 ## 7. Endlos-Modus und Rekorde
@@ -231,12 +234,18 @@ Vorgabe Patrik 2026-10-31.
   Aufgaben (gemessen in LERN_Session3). Bei Wortlisten wäre Endlos nur ein Durchlauf durch die Liste.
 - **Wiederholungen:** keine der letzten 30 Aufgaben nochmal. Findet sich keine neue mehr, ist die
   Stufe „alles geschafft“.
+- **Timer im Endlos-Modus** (Wunsch Patrik 2026-10-31): Alle starten mit der Vorgabezeit der Stufe aus
+  dem Katalog, ohne den persönlichen Faktor aus dem Profil. Nach jeder richtigen Aufgabe wird die Zeit
+  4 % knapper, nie unter 40 % der Startzeit und nie unter 3 s (`ENDLOS_TEMPO` in `spiel.js`). Bei
+  15 s Start sind es nach 10 Aufgaben 10 s, nach 20 noch 7 s. In gewöhnlichen Runden bleibt die Zeit
+  gleich, damit die Zeiten je Aufgabe in der Statistik vergleichbar bleiben (Entscheid Patrik Z1 a).
 - **Speicher:** `lernspiele:rekorde` = `[{ name, zeit, spiel, stufe, timer, punkte, dauer, alles?,
-  test?, hilfe? }]`, eine Zeile je Endlos-Runde, getrennt vom Protokoll. `timer` ist die Zeit je
-  Aufgabe in Sekunden oder `null`. Verglichen wird nur bei gleicher Stufe und gleichem Timer.
+  test?, hilfe? }]`, eine Zeile je Endlos-Runde, getrennt vom Protokoll. `timer` ist die Startzeit in
+  Sekunden oder `null`. Je Stufe gibt es zwei Ranglisten: ohne und mit Timer.
   Sichern, Einlesen und Löschen behandeln die Rekorde wie das Protokoll.
-- **Rangliste:** bester Wert je Kind, ohne Testrunden und ohne Aufsicht; am Ende einer Endlos-Runde
-  und in der Statistik („Platz 2 von 3“).
+- **Rangliste:** bester Wert je Kind, ohne Testrunden und ohne Aufsicht. Am Ende einer Endlos-Runde
+  die ersten zehn, im Startbild des Spiels unter den Stufen die vollständigen Ranglisten beider
+  Varianten je Endlos-Stufe, in der Statistik der Platz („2. von 3“).
 - **Später, noch Idee:** eine Online-Rangliste, bei der die Aufsicht das Gerät anmeldet und
   Wettbewerbe nach Alter, Klasse und Region erscheinen. Das Speicherformat ist dafür geeignet. Heute
   bleibt alles lokal.

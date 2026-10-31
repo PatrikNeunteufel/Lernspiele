@@ -66,6 +66,9 @@
   standardmässig frei, was nichts zu prüfen hat; Annahmen sperren nicht (F1 a).
 - Wiederholungsregel je Runde, `ctx.kennung()`; Checkliste `docs/checkliste.md` (`tools/checkliste.js`).
 - 19 weitere Spiele (G1 a), Sprachausgabe für Englisch (G2 a, `LS.spielMitStimme`).
-- Endlos-Modus mit Rekorden und Rangliste in 34 Spielen.
+- Endlos-Modus mit Rekorden und Rangliste in 34 Spielen; mit Timer gleiche Startzeit für alle und
+  je Aufgabe 4 % knapper (Untergrenze 40 %); vollständige Ranglisten ohne/mit Timer im Startbild.
+- Spielkarte: Schalter ⏱ ♾ ⭐ als SVG (aus grau, an gold), Tipp auf die Karte öffnet das Startbild;
+  Lernziel-Kürzel blenden beim Antippen ihren Klartext ein.
 - Prüfliste Teile 22–39; Lernziele in docs/lernziele/lehrplan_sg_session3.md.
 - Session-Abschluss: Report docs/report/LERN_Session3_2026-10-31.md, Handover nachgeführt.

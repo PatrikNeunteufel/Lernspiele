@@ -88,18 +88,37 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
   padding: 16px; border-top: 10px solid var(--f, var(--knopf));
   display: flex; flex-direction: column; gap: 6px;
 }
-.spielkarte .kopfzeile { display: flex; align-items: center; gap: 12px; padding-right: 40px; }
+.spielkarte { cursor: pointer; }
+.spielkarte .kopfzeile { display: flex; align-items: center; gap: 12px; }
+.spielkarte .kopfzeile .name { flex: 1; min-width: 0; }
 .spielkarte .spiel-bild { font-size: 44px; line-height: 1; }
 .spielkarte b.name { font-size: 22px; }
 .spielkarte .ziel { font-size: 15px; color: var(--text-leise); }
 .spielkarte.gesperrt { opacity: .7; border-top-style: dashed; }
-.stern-knopf { position: absolute; top: 8px; right: 8px; border: none; background: none; font-size: 28px; cursor: pointer; line-height: 1; padding: 6px; }
+/* Schalter oben rechts: ⏱ Timer, ♾ Endlos, ☆ Favorit — aus = blass, an = leuchtet */
+.karten-schalter-zeile { display: flex; justify-content: flex-end; gap: 0; margin: -12px -10px -10px 0; }
+.stufen-text { display: inline-flex; align-items: center; gap: 1px; }
+.stufen-text .symbol { width: 18px; height: 18px; }
+.karten-schalter { border: none; background: none; cursor: pointer; line-height: 0; padding: 5px; border-radius: 10px; }
+.karten-schalter:focus-visible { outline: 3px solid var(--knopf); }
+.symbol { width: 30px; height: 30px; fill: none; stroke: #a7acc2; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.symbol.an { fill: url(#gold-verlauf); stroke: #c98400; filter: drop-shadow(0 1px 1px rgba(150, 95, 0, .35)); }
+.symbol.endlos { stroke-width: 2.6; }
+.symbol.endlos.an { fill: none; stroke: url(#gold-verlauf); stroke-width: 3.4; }
+.symbol.uhr.an .zeiger { stroke: #7a4f00; }
+.spielkarte.endlos-an { box-shadow: var(--schatten), 0 0 0 3px var(--knopf); }
 .marken { display: flex; gap: 6px; flex-wrap: wrap; }
 .marke { font-size: 13px; font-weight: 800; border-radius: 999px; padding: 2px 10px; background: #eef0fb; }
 .marke.fokus { background: #fff1c2; }
+button.marke { border: none; font-family: inherit; color: var(--text); cursor: help; }
+.marke.tipp { position: relative; }
+.marke.tipp:hover::after, .marke.tipp:focus::after {
+  content: attr(data-tipp); position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 5;
+  width: max-content; max-width: min(260px, 80vw); white-space: normal; text-align: left;
+  background: var(--text); color: #fff; font-size: 13px; font-weight: 600; line-height: 1.35;
+  padding: 6px 10px; border-radius: 8px; box-shadow: var(--schatten);
+}
 .marke.warnung { background: var(--hinweis-hell); color: #9a4b00; }
-a.marke.endlos-link { color: var(--knopf); text-decoration: none; background: #e6e9ff; }
-a.marke.endlos-link:hover { text-decoration: underline; }
 
 .stufenknoepfe { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 6px; }
 .stufenknopf {
@@ -123,7 +142,8 @@ a.marke.endlos-link:hover { text-decoration: underline; }
 .spiele.kompakt .ziel, .spiele.kompakt .marken { display: none; }
 .spiele.kompakt .stufenknoepfe { flex: 2 1 320px; margin: 0; }
 .spiele.kompakt .stufenknopf { min-height: 44px; font-size: 16px; }
-.spiele.kompakt .stern-knopf { position: static; font-size: 24px; order: -1; }
+.spiele.kompakt .karten-schalter-zeile { margin: 0; }
+.spiele.kompakt .symbol { width: 24px; height: 24px; }
 
 .leer-hinweis { text-align: center; padding: 28px; font-size: 20px; }
 

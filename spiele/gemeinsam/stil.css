@@ -153,7 +153,13 @@ button { font-family: inherit; }
 .endlos-knoepfe small { font-size: 14px; color: var(--text-leise); }
 .rangliste { margin: 12px auto; max-width: 320px; text-align: left; }
 .rangliste ol { margin: 6px 0 0; padding-left: 1.6em; }
-.rangliste li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 8px; border-radius: 8px; }
+.rangliste li { padding: 4px 8px; border-radius: 8px; }
+.rangliste li b { float: right; margin-left: 12px; }
+/* Startbild: je Endlos-Stufe zwei Ranglisten nebeneinander (ohne / mit Timer) */
+.ranglisten { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; align-items: start; padding-top: 8px; border-top: 1px solid var(--rand); }
+.ranglisten > b { grid-column: 1 / -1; }
+.ranglisten .rangliste { margin: 0; max-width: none; }
+@media (max-width: 480px) { .ranglisten { grid-template-columns: 1fr; } }
 .rangliste li.ich { background: var(--gut-hell); font-weight: 800; }
 .rangliste li::marker { font-weight: 800; }
 .fortschritt span.fertig { background: var(--gut); }

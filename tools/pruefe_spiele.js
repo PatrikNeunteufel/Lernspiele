@@ -206,7 +206,8 @@ function pruefe(id, stufe, liste = null, endlos = false) {
       ? `localStorage.setItem("lernspiele:profile", JSON.stringify({ Kind: { rolle: "kind" } }));
          localStorage.setItem("lernspiele:spieler", JSON.stringify("Kind"));
          localStorage.setItem("lernspiele:freigabe", JSON.stringify({ spiele: { ${JSON.stringify(id)}: true }, listen: ${JSON.stringify(Object.fromEntries(liste.map(k => [k, true])))} }));`
-      : `localStorage.setItem("lernspiele:profile", JSON.stringify({ Testlauf: { rolle: "aufsicht" } }));
+      // Endlos mit Timer: prüft die knapper werdende Zeit und das Ende bei „Zeit um“ mit.
+      : `localStorage.setItem("lernspiele:profile", JSON.stringify({ Testlauf: { rolle: "aufsicht"${endlos ? ', timer: { an: true, faktor: 1, spiele: {} }' : ""} } }));
          localStorage.setItem("lernspiele:spieler", JSON.stringify("Testlauf"));
          sessionStorage.setItem("lernspiele:aufsicht", "Testlauf");`, "vorbereitung", 1000);
     for (const s of skripte(seitenPfad, html)) lauf(s.code, s.name, 5000);

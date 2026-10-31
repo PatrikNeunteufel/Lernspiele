@@ -4,6 +4,25 @@
 
 const FAECHER = [...new Set(THEMEN.map(t => t.fach))];
 
+// Symbole der Karten-Schalter: aus = grauer Umriss, an = gold mit Verlauf wie der Favoriten-Stern.
+// Der Verlauf steht einmal im Dokument (#gold-verlauf).
+const SCHALTER_SYMBOL = {
+  stern: '<path d="M12 2.6l2.85 6 6.55.82-4.85 4.55 1.27 6.5L12 17.3l-5.82 3.17 1.27-6.5L2.6 9.42l6.55-.82z"/>',
+  endlos: '<path class="linie" d="M7.6 8.2C5.3 8.2 3.5 9.9 3.5 12s1.8 3.8 4.1 3.8c3.6 0 5.2-7.6 8.8-7.6 2.3 0 4.1 1.7 4.1 3.8s-1.8 3.8-4.1 3.8c-3.6 0-5.2-7.6-8.8-7.6z"/>',
+  uhr: '<rect x="10.2" y="1.8" width="3.6" height="2.6" rx="1"/><circle cx="12" cy="13.6" r="7.6"/><path class="zeiger" d="M12 13.6V9.2M12 13.6l3 2"/>',
+};
+function schalterSymbol(art, an) {
+  if (!document.getElementById("gold-verlauf")) {
+    const defs = document.createElement("div");
+    defs.innerHTML = '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gold-verlauf" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0" stop-color="#ffe27a"/><stop offset=".55" stop-color="#ffc107"/><stop offset="1" stop-color="#f29a00"/></linearGradient></defs></svg>';
+    document.body.append(defs.firstChild);
+  }
+  const box = document.createElement("span");
+  box.innerHTML = `<svg class="symbol ${art}${an ? " an" : ""}" viewBox="0 0 24 24" aria-hidden="true">${SCHALTER_SYMBOL[art]}</svg>`;
+  return box.firstChild;
+}
+
 function zeichneSpiele(box, neu) {
   const { el } = LS;
   const name = LS.aktuellerSpieler();
@@ -69,29 +88,48 @@ function zeichneSpiele(box, neu) {
   function karte(s) {
     const favorit = p.favoriten.includes(s.id);
     const frei = LS.fuerKinderSichtbar(s.id);
-    const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") });
+    // Schalter je Spiel (Wunsch Patrik 2026-10-31): ⏱ Timer und ♾ Endlos leuchten wie der Favoriten-Stern;
+    // die Stufenknöpfe starten dann mit Timer bzw. im Endlos-Modus. Der Timer ist dieselbe Einstellung wie im Spiel.
+    const timerAn = s.stufen.some(st => LS.timerFuer(name, s.id, st).an);
+    const endlosAn = !!s.endlos?.length && p.endlosAn.includes(s.id);
+    const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") + (endlosAn ? " endlos-an" : ""), title: "Antippen: Startbild des Spiels" });
     k.style.setProperty("--f", s.farbe);
-    const marken = s.lernziele.map(l => el("span", { class: "marke" + (fokus.includes(l.lz) ? " fokus" : ""), text: (fokus.includes(l.lz) ? "⭐ " : "") + l.lz }));
-    // Endlos startet im Startbild des Spiels (dort Stufe und Timer wählen); die Stufenknöpfe springen direkt in eine Runde.
-    if (s.endlos?.length) marken.push(el("a", { class: "marke endlos-link", href: s.pfad, title: "Endlos-Modus: so viele wie möglich ohne Fehler — Stufe im Spiel wählen", text: "♾ Endlos spielen" }));
+    // Freie Stellen der Karte öffnen das Startbild des Spiels (dort Stufen, Endlos und Timer mit Erklärung).
+    k.addEventListener("click", e => { if (!e.target.closest("a, button")) location.href = s.pfad; });
+    const ziel = lz => LERNZIELE.find(x => x.lz === lz)?.text || "";
+    // Lernziel-Kürzel: Antippen oder Zeigen blendet den Klartext ein (auch auf dem Tablet, wo es kein title gibt).
+    const marken = s.lernziele.map(l => el("button", { type: "button", class: "marke tipp" + (fokus.includes(l.lz) ? " fokus" : ""),
+      "data-tipp": `${l.lz}: ${ziel(l.lz)}`, "aria-label": `Lernziel ${l.lz}: ${ziel(l.lz)}`, text: (fokus.includes(l.lz) ? "⭐ " : "") + l.lz }));
     if (aufsicht && !frei) marken.unshift(el("span", { class: "marke warnung", text: "🔒 für Kinder nicht sichtbar" }));
+    const schalter = (an, art, text, onclick) => el("button", { type: "button", class: "karten-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
+      "aria-label": text, title: text, onclick }, schalterSymbol(art, an));
+    // Schalter in einer eigenen schmalen Leiste oben rechts; darunter hat der Name die volle Breite.
+    const schalterZeile = el("div", { class: "karten-schalter-zeile" },
+        schalter(timerAn, "uhr", timerAn ? "Timer aus" : "Timer ein: jede Aufgabe hat eine Zeit", () => { LS.setzeTimerSpiel(name, s.id, !timerAn); neu(); }),
+        s.endlos?.length ? schalter(endlosAn, "endlos", endlosAn ? "Endlos aus" : "Endlos ein: so viele wie möglich ohne Fehler",
+          () => speichere({ endlosAn: endlosAn ? p.endlosAn.filter(x => x !== s.id) : [...p.endlosAn, s.id] })) : null,
+        schalter(favorit, "stern", favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten",
+          () => speichere({ favoriten: favorit ? p.favoriten.filter(x => x !== s.id) : [...p.favoriten, s.id] })));
     k.append(
-      el("button", { type: "button", class: "stern-knopf", "aria-pressed": String(favorit), "aria-label": favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten",
-        text: favorit ? "⭐" : "☆", onclick: () => speichere({ favoriten: favorit ? p.favoriten.filter(x => x !== s.id) : [...p.favoriten, s.id] }) }),
+      schalterZeile,
       el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: s.bild }), el("b", { class: "name", text: s.name })),
       el("div", { class: "ziel", text: s.beschreibung }),
       el("div", { class: "marken" }, ...marken));
     const knoepfe = el("div", { class: "stufenknoepfe" });
     const empf = LS.empfohleneStufe(name, s.id);
     const gross = filter.stufe !== "alle";
-    for (const st of LS.SKALA.filter(st => s.stufen.includes(st.id) && (!gross || filter.stufe === st.id))) {
-      const sterne = LS.besteSterne(name, s.id, st.id);
+    // Endlos an: nur die Endlos-Stufen, mit dem Rekord statt der Sterne.
+    const stufen = LS.SKALA.filter(st => s.stufen.includes(st.id) && (!gross || filter.stufe === st.id) && (!endlosAn || s.endlos.includes(st.id)));
+    for (const st of stufen) {
+      const timer = LS.timerFuer(name, s.id, st.id);
+      const rekord = endlosAn ? LS.besterRekord(name, s.id, st.id, timer.an) : 0;
+      const sterne = endlosAn ? "" : "★".repeat(LS.besteSterne(name, s.id, st.id));
       const a = el("a", {
         class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empf && !gross ? " empfohlen" : ""),
-        href: `${s.pfad}?stufe=${st.id}`,
-        title: `Stufe ${st.nr} · ${st.name} (${LS.stufeFuer(s.id, st.id)})`,
-      }, el("span", { text: gross ? `${st.icon} Stufe ${st.nr} spielen` : `${st.icon}${st.nr}` }),
-         el("span", { class: "s", text: sterne ? "★".repeat(sterne) : "" }));
+        href: `${s.pfad}?stufe=${st.id}${endlosAn ? "&endlos=1" : ""}`,
+        title: `${endlosAn ? "♾ Endlos · " : ""}Stufe ${st.nr} · ${st.name} (${LS.stufeFuer(s.id, st.id)})${timer.an ? " · ⏱ mit Timer" : ""}`,
+      }, el("span", { class: "stufen-text" }, endlosAn ? schalterSymbol("endlos", true) : st.icon, gross ? ` Stufe ${st.nr} spielen` : `${st.nr}`),
+         el("span", { class: "s", text: endlosAn ? (rekord ? `🏆${rekord}` : "") : sterne }));
       a.style.setProperty("--sf", st.farbe);
       knoepfe.append(a);
     }
