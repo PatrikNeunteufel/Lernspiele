@@ -44,18 +44,18 @@ const ARTEN = {
   alltag() {
     const x = waehle(L.filter(l => ["Frucht", "Gemüse", "Getränk", "Getreide", "Süsses"].includes(l.gruppe)));
     if (!x) return null;
-    return { art: "korb", x, koerbe: ["jeden", "selten"], richtig: x.gruppe === "Süsses" ? "selten" : "jeden" };
+    return { art: "korb", typ: "alltag", x, koerbe: ["jeden", "selten"], richtig: x.gruppe === "Süsses" ? "selten" : "jeden" };
   },
   fruchtGemuese() {
     const x = waehle(L.filter(l => l.gruppe === "Frucht" || l.gruppe === "Gemüse"));
     if (!x) return null;
-    return { art: "korb", x, koerbe: ["Frucht", "Gemüse"], richtig: x.gruppe };
+    return { art: "korb", typ: "fruchtGemuese", x, koerbe: ["Frucht", "Gemüse"], richtig: x.gruppe };
   },
   gruppe(n = 4) {
     const x = waehle(L);
     if (!x) return null;
     const andere = mische(Object.keys(GRUPPEN_ZNUENI).filter(g => g !== x.gruppe)).slice(0, n - 1);
-    return { art: "korb", x, koerbe: mische([x.gruppe, ...andere]), richtig: x.gruppe };
+    return { art: "korb", typ: "gruppe", x, koerbe: mische([x.gruppe, ...andere]), richtig: x.gruppe };
   },
   znueni() {
     if (!ZNUENIS_FREI.length) return null;
@@ -129,6 +129,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.typ || a.art);
+    if (a.art === "korb" && a.koerbe.length <= 3) ctx.serie("antwort", a.richtig);
     if (a.art === "korb") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wohin gehört das?" }));
       const erkl = GRUPPEN_ZNUENI[a.x.gruppe].erklaerung;

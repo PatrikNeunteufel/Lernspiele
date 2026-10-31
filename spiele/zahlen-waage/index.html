@@ -117,8 +117,10 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].rechts.length > 1) { ctx.serie("links", a.links.op); ctx.serie("rechts", a.rechts.op); } // Rechenarten
     const loesung = `${text(a.links)} = ${a.rechts.a === null ? zahlText(a.richtig) : `${zahlText(a.rechts.a)} ${a.rechts.op} ${zahlText(a.richtig)}`}`;
     ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(a.richtig));
     const luecke = el("span", { class: "luecke", text: "?" });
     const rechtsInhalt = a.rechts.a === null ? [luecke] : [`${zahlText(a.rechts.a)} ${a.rechts.op} `, luecke];
     const balken = el("div", { class: "balken" },

@@ -103,6 +103,11 @@ const STUFE = {
   s6: [() => ARTEN.frage(null, 6, true), () => ARTEN.frage(null, 6), () => ARTEN.signal(false), () => ARTEN.signal(true), () => ARTEN.korb()],
 };
 
+/** Wie viele verschiedene Arten eine Stufe mit den freien Listen hergibt — ctx.serie("art") nur bei mehreren.
+    Der Merksatz zählt nicht mit: Er ist eine einzige Aufgabe und kommt je Runde höchstens einmal. */
+const ARTEN_JE_STUFE = Object.fromEntries(Object.entries(STUFE).map(([s, neue]) =>
+  [s, new Set(neue.map(neu => neu()?.art).filter(art => art && art !== "merksatz")).size]));
+
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {
   for (const art of mische(STUFE[stufe])) {
@@ -207,6 +212,9 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const f = ctx.flaeche;
+    if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
+    if (a.art === "korb") ctx.serie("antwort", a.richtig);
+    if (a.art === "signal") ctx.serie("richtung", a.vor);
     if (a.art === "korb") {
       f.append(el("div", { class: "frage", text: "Ist das sicher oder gefährlich?" }));
       LS.koerbe(ctx, {

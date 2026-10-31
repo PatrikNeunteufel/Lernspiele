@@ -60,7 +60,9 @@ function verschoben(silben) {
 const ARTEN = {
   zaehlen(min, max, hoechstens) {
     const w = waehle(mitSilben(min, max));
-    return { art: "zaehlen", w, optionen: Array.from({ length: hoechstens }, (_, i) => i + 1), richtig: w.silben.length };
+    // Wie viele Silbenzahlen die freien Wörter hergeben: bei zwei oder drei ist die Antwort ein Merkmal (ctx.serie).
+    const antworten = new Set(mitSilben(min, max).map(x => x.silben.length)).size;
+    return { art: "zaehlen", w, optionen: Array.from({ length: hoechstens }, (_, i) => i + 1), richtig: w.silben.length, antworten };
   },
   welchesWort(anzahl) {
     // Welches Bild hat so viele Silben? Die anderen Wörter haben andere Silbenzahlen.
@@ -141,6 +143,8 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const { w } = a;
+    if (moeglich(ctx.stufe).length > 1) ctx.serie("art", a.art);
+    if (a.art === "zaehlen" && a.antworten >= 2 && a.antworten <= 3) ctx.serie("antwort", a.richtig);
     const loesung = `${w.wort}: ${silbenText(w.silben)} — ${w.silben.length} ${w.silben.length === 1 ? "Silbe" : "Silben"}`;
     // Der Hinweis darf die Silbenzahl nicht zeigen — er erklärt nur, wie man sie findet.
     const hinweis = "Sprich das Wort langsam und klatsche mit. Leg die Hand unters Kinn: Jedes Mal, wenn das Kinn nach unten geht, ist eine Silbe.";

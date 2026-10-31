@@ -150,6 +150,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("antwort", a.loesung === a.oben ? "auf" : "ab");
     ctx.flaeche.append(
       el("div", { class: "zahl-gross", text: zahlText(a.zahl) }),
       el("div", { class: "auf", html: `runde auf <b>${NAME[a.auf]}</b>` }));
@@ -159,6 +160,7 @@ LS.spiel({
     const loesungText = `${zahlText(a.zahl)} ≈ ${zahlText(a.loesung)}`;
     ctx.loesung(loesungText);
     const knapp = !!STUFE[ctx.stufe].knapp;
+    ctx.schritte(STUFE[ctx.stufe].tippen ? LS.tippSchritte(a.loesung) : 1);
     if (!STUFE[ctx.stufe].tippen) {
       const ziele = el("div", { class: "ziele" });
       let fertig = false;

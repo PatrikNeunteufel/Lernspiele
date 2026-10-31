@@ -170,6 +170,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const art = waehle(STUFE[ctx.stufe]);
+    if (STUFE[ctx.stufe].length > 1) ctx.serie("art", art);
     let fertig = false;
 
     const auswahl = (optionen, richtig, hinweis, loesungText) => {
@@ -239,6 +240,7 @@ LS.spiel({
       const dx = zufall(1, 4), dy = zufall(1, 4) * waehle([1, -1]);
       const neu = ecken.map(([a, b]) => [a + dx, b + dy]);
       if (neu.some(([a, b]) => a < 0 || a > N || b < 0 || b > N)) return this.aufgabe(ctx);
+      ctx.serie("richtung", dy > 0); // nach oben oder unten
       const welche = zufall(0, ecken.length - 1);
       const name = "ABCD"[welche];
       const loesung = `${name} ${pt(...ecken[welche])} → ${pt(...neu[welche])}`;

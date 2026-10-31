@@ -101,10 +101,13 @@
 const { STELLEN, zahlText, zufall, waehle, el } = LS;
 
 // Je Stufe: Länge der Zahlen und ob auch umgekehrt gefragt wird (Stelle → Ziffer antippen).
-// umgekehrt: "abwechselnd" (jede zweite Aufgabe) oder "zufall"; gleicheZiffern: Ziffern dürfen
-// sich wiederholen (Königsstufe) — beim Antippen zählt dann die Position, nicht die Ziffer.
+// Bis zum Klassenziel (Stufe 3) nur benennen, wie das Lernziel G1 es verlangt; umgekehrt ist die
+// Erweiterung ab Stufe 4 (Entscheid Patrik SD1 a, LERN_Session4).
+// umgekehrt: "abwechselnd" (jede zweite Aufgabe) oder "zufall" (höchstens LS.SERIE_MAX gleiche
+// Richtungen hintereinander, über ctx.serie); gleicheZiffern: Ziffern dürfen sich wiederholen (Königsstufe) — beim Antippen zählt
+// dann die Position, nicht die Ziffer.
 const STUFE = {
-  s1: { laenge: [3, 3], umgekehrt: "abwechselnd" },
+  s1: { laenge: [3, 3], umgekehrt: false },
   s2: { laenge: [4, 4], umgekehrt: false },
   s3: { laenge: [4, 5], umgekehrt: false },
   s4: { laenge: [6, 6], umgekehrt: "abwechselnd" },
@@ -129,6 +132,12 @@ function zahlErzeugen(stufe) {
     if (!s.includes(z)) s += z;
   }
   return Number(s);
+}
+
+/** Umgekehrt fragen (Stelle genannt → Ziffer antippen)? */
+function richtungFuer(stufe, nr) {
+  const art = STUFE[stufe].umgekehrt;
+  return art === "abwechselnd" ? nr % 2 === 1 : art === "zufall" && Math.random() < 0.5;
 }
 
 /** Für das Testskript: eine Zahl der Stufe. */
@@ -232,7 +241,7 @@ LS.spiel({
   einleitung: "Psst, Detektiv! Jede Ziffer hat ihren Platz in der Zahl. Findest du heraus, wie die Stellen heissen?",
   anzahl: 8,
   stufen: {
-    s1: "Zahlen bis 1000 mit Hundertern — manchmal umgekehrt.",
+    s1: "Zahlen bis 1000: Wie heisst die Stelle unter der Lupe?",
     s2: "Vierstellige Zahlen: Welche Stelle ist unter der Lupe?",
     s3: "Vier- und fünfstellige Zahlen: Wie heisst die Stelle unter der Lupe?",
     s4: "Sechsstellige Zahlen, und umgekehrt: Finde die Ziffer zur Stelle.",
@@ -241,8 +250,9 @@ LS.spiel({
   },
   aufgabe(ctx) {
     const zahl = zahlErzeugen(ctx.stufe);
-    const art = STUFE[ctx.stufe].umgekehrt;
-    const umgekehrt = art === "zufall" ? Math.random() < 0.5 : art === "abwechselnd" && ctx.nr % 2 === 1;
+    const umgekehrt = richtungFuer(ctx.stufe, ctx.nr);
+    if (STUFE[ctx.stufe].umgekehrt === "zufall") ctx.serie("richtung", umgekehrt);
+    ctx.schritte(1); // beide Arten: eine Antwort antippen
     if (umgekehrt) zifferFinden(ctx, zahl, ctx.stufe === "s6");
     else stelleBenennen(ctx, zahl, ctx.stufe === "s6");
     if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort.");

@@ -410,6 +410,8 @@ LS.spiel({
   },
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (new Set(STUFE[ctx.stufe].arten).size > 1) ctx.serie("art", a.art);
+    if (a.art === "seite") ctx.serie("antwort", a.gezeigt);
     ctx.flaeche.append(el("div", { class: "frage", html: FRAGEN[a.art] }));
     const zeigeBau = !["planZuBau", "dreiAnsichten"].includes(a.art);
     if (zeigeBau) ctx.flaeche.append(el("div", { class: "bau" }, bauSvg(a)));

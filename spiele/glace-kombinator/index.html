@@ -210,6 +210,8 @@ const STUFEN_TEXT = {
 };
 // Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
 const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+// Stufen, in denen die freien Listen mehr als eine Aufgabenart hergeben (nur dort ctx.serie("art")).
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()?.art).filter(Boolean)).size > 1));
 
 function pruefeAufgabe(a, stufe) {
   if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
@@ -412,6 +414,7 @@ LS.spiel({
   stufen: STUFEN,
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     if (a.art === "legen") legen(ctx, a); else zaehlen(ctx, a);
   },
 });

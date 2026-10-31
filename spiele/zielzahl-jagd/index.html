@@ -165,6 +165,8 @@ LS.spiel({
     const loesung = a.weg.join(", ");
     ctx.loesung(loesung);
     ctx.kennung(`${a.karten.slice().sort((x, y) => x - y).join(",")}→${a.ziel}`);
+    // Je Rechenschritt drei Tipps (Karte, Zeichen, Karte); a.weg ist der kürzeste Weg.
+    ctx.schritte(3 * a.weg.length);
 
     ctx.flaeche.append(
       el("div", { class: "auftrag", text: p.alle ? "Benutze alle Karten und triff die Zielzahl!" : "Rechne mit den Karten, bis du die Zielzahl hast!" }),

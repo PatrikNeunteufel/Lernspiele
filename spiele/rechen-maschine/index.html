@@ -327,6 +327,7 @@ function reihe(ops, werte, fehlt = -1) {
 }
 
 function zahlAntwort(ctx, soll, loesung, hinweis) {
+  ctx.schritte(LS.tippSchritte(soll));
   const anzeige = el("div", { class: "anzeige leer rm-anzeige", "aria-label": "Deine Zahl" });
   ctx.flaeche.append(anzeige);
   const tasten = LS.tastatur({
@@ -357,6 +358,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("art", a.art); // vorwärts, rückwärts, Regel finden, Weiche
     const loesung = loesungText(a);
 
     if (a.art === "vor" || a.art === "rueck") {

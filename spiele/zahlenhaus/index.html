@@ -122,6 +122,7 @@ LS.spiel({
     const rechnung = w => reihe.map((z, i) => zahlText(i === a.luecke.seite ? w : z)).join(" + ");
     const loesung = `${rechnung(a.richtig)} = ${zahlText(a.dach)}`;
     ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(a.richtig));
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl fehlt im Stockwerk?" }), haus);
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Fehlende Zahl" });
     ctx.flaeche.append(anzeige);

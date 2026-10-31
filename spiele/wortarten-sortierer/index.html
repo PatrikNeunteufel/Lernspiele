@@ -178,6 +178,7 @@ LS.spiel({
   aufgabe(ctx) {
     if (ctx.nr === 0) Object.keys(zaehler).forEach(k => { zaehler[k] = 0; });
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("antwort", a.art); // Korb (Königsstufe: der des ersten Worts)
 
     const karte = el("div", { class: "wortkarte", text: a.wort });
     const ist = art => (art === "A" ? "ein Adjektiv" : art === "V" ? "ein Verb" : "ein Nomen");

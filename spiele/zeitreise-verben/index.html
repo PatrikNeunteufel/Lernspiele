@@ -180,6 +180,8 @@ const STUFE = Object.fromEntries(Object.entries(VARIANTEN)
 const ERLAUBT = { s1: ["jetztFrueher"], s2: ["jetztFrueher"], s3: ["erkennen", "bilden"], s4: ["erkennen", "bilden"], s5: ["hilfsverb", "bilden", "erkennen"], s6: ["zweischritt"] };
 
 function aufgabeErzeugen(stufe) { return waehle(STUFE[stufe])(); }
+/** Je Stufe die Zahl verschiedener Aufgabenarten (jede Variante liefert immer dieselbe Art). */
+const ARTEN_ZAHL = Object.fromEntries(Object.entries(STUFE).map(([s, v]) => [s, new Set(v.map(f => f().art)).size]));
 
 // ---------- Prüfung ----------
 
@@ -284,6 +286,10 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (ARTEN_ZAHL[ctx.stufe] > 1) ctx.serie("art", a.art);
+    // Antwort bei höchstens drei festen Antworten; Zielzeit, wo es zwei gibt (Stufe 5 nur Perfekt)
+    if (a.art !== "bilden") ctx.serie("antwort", a.art === "zweischritt" ? a.erkennen.richtig : a.richtig);
+    if (a.ziel && ctx.stufe !== "s5") ctx.serie("ziel", a.ziel);
 
     if (a.art === "jetztFrueher") {
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Passiert das jetzt oder früher?" }), satzBild(a.teile));

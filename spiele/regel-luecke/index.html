@@ -159,6 +159,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (regelnIn(ctx.stufe).length > 1) ctx.serie("regel", a.regelId);
+    ctx.serie("antwort", a.richtig.toLowerCase());
     const p = STUFE[ctx.stufe];
     const loesung = p.knapp ? `Man schreibt ${a.ganz}. ${a.regel.regel}` : `Man schreibt ${a.ganz}.`;
     ctx.loesung(loesung);

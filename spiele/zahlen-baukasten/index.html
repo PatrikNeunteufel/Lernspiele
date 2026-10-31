@@ -140,6 +140,7 @@ LS.spiel({
     const loesung = teile.reduce((s, t) => s + t.ziffer * t.st.wert, 0);
     const loesungText = `${teile.map(t => `${t.ziffer} ${t.st.k}`).join(" + ")} = ${zahlText(loesung)}`;
     ctx.loesung(loesungText);
+    ctx.schritte(LS.tippSchritte(loesung));
 
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl bauen diese Bausteine?" }));
 

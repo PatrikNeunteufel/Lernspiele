@@ -188,7 +188,9 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].arten.length > 1) ctx.serie("art", a.art);
     if (a.art === "vergleich") {
+      ctx.serie("antwort", a.richtig); // linke oder rechte Figur
       ctx.flaeche.append(el("div", { class: "frage", text: "Welche Figur hat mehr Häuschen?" }));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 150,
@@ -212,6 +214,7 @@ LS.spiel({
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 80, hinweis, loesung });
     } else {
       ctx.loesung(loesung);
+      ctx.schritte(LS.tippSchritte(a.richtig));
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Antwort" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({

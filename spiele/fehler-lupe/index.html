@@ -183,7 +183,8 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const p = STUFE[ctx.stufe];
-    const loesung = `Richtig ist «${a.richtig}»: ${ganz(a.woerter)}`;
+    if (p.regeln.length > 1) ctx.serie("regel", a.regelId);
+    const loesung =`Richtig ist «${a.richtig}»: ${ganz(a.woerter)}`;
     ctx.loesung?.(loesung); // für die Testhilfe 🔑
 
     ctx.flaeche.append(el("div", { class: "auftrag", text: "🔍 Welches Wort ist falsch geschrieben? Tipp es an!" }));

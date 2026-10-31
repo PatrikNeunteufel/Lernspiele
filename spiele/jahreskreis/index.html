@@ -66,25 +66,25 @@ const ARTEN = {
   tagMorgen() {
     const h = zufall(0, 6);
     const [wort, d] = waehle([["morgen", 1], ["gestern", -1]]);
-    return { frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ist ${wort}?`, liste: "tage", loesung: mod(h + d, 7) };
+    return { frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ist ${wort}?`, liste: "tage", loesung: mod(h + d, 7), zurueck: d < 0 };
   },
   tagWeit() {
     const h = zufall(0, 6);
     const [wort, d] = waehle([["übermorgen", 2], ["vorgestern", -2], ["in einer Woche", 7]]);
-    return { frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ist ${wort}?`, liste: "tage", loesung: mod(h + d, 7) };
+    return { frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ist ${wort}?`, liste: "tage", loesung: mod(h + d, 7), zurueck: d < 0 };
   },
   tagRechnen() {
     const h = zufall(0, 6), d = zufall(3, 12) * waehle([1, -1]);
-    return { frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ist ${d > 0 ? `in ${d}` : `vor ${-d}`} Tagen?`, liste: "tage", loesung: mod(h + d, 7) };
+    return { frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ist ${d > 0 ? `in ${d}` : `vor ${-d}`} Tagen?`, liste: "tage", loesung: mod(h + d, 7), zurueck: d < 0 };
   },
   monatNach() {
     const m = zufall(0, 11);
     const vor = Math.random() < 0.5;
-    return { frage: `Welcher Monat kommt ${vor ? "vor" : "nach"} dem <b>${MONATE[m]}</b>?`, liste: "monate", loesung: mod(m + (vor ? -1 : 1), 12) };
+    return { frage: `Welcher Monat kommt ${vor ? "vor" : "nach"} dem <b>${MONATE[m]}</b>?`, liste: "monate", loesung: mod(m + (vor ? -1 : 1), 12), zurueck: vor };
   },
   monatRechnen() {
     const m = zufall(0, 11), d = zufall(2, 7) * waehle([1, -1]);
-    return { frage: `Welcher Monat ist ${Math.abs(d)} Monate ${d > 0 ? "nach" : "vor"} dem <b>${MONATE[m]}</b>?`, liste: "monate", loesung: mod(m + d, 12) };
+    return { frage: `Welcher Monat ist ${Math.abs(d)} Monate ${d > 0 ? "nach" : "vor"} dem <b>${MONATE[m]}</b>?`, liste: "monate", loesung: mod(m + d, 12), zurueck: d < 0 };
   },
   jahreszeit() {
     const m = Number(waehle(Object.keys(JAHRESZEIT)));
@@ -103,12 +103,12 @@ const ARTEN = {
     const h = zufall(0, 6), w = zufall(1, 4), r = zufall(1, 6), vor = Math.random() < 0.4;
     const d = (7 * w + r) * (vor ? -1 : 1);
     const text = Math.random() < 0.5 ? `${7 * w + r} Tagen` : `${w === 1 ? "einer Woche" : `${w} Wochen`} und ${r === 1 ? "einem Tag" : `${r} Tagen`}`;
-    return { typ: "tag", h, d, frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ${vor ? "war vor" : "ist in"} ${text}?`, liste: "tage", loesung: mod(h + d, 7),
+    return { typ: "tag", h, d, zurueck: vor, frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ${vor ? "war vor" : "ist in"} ${text}?`, liste: "tage", loesung: mod(h + d, 7),
       hinweis: "Nach einer ganzen Woche ist wieder derselbe Tag. Zähl zuerst die Wochen weg, dann die übrigen Tage." };
   },
   monatWeit() {
     const m = zufall(0, 11), d = zufall(13, 30) * waehle([1, -1]);
-    return { typ: "monat", m, d, frage: `Welcher Monat ist ${Math.abs(d)} Monate ${d > 0 ? "nach" : "vor"} dem <b>${MONATE[m]}</b>?`, liste: "monate", loesung: mod(m + d, 12),
+    return { typ: "monat", m, d, zurueck: d < 0, frage: `Welcher Monat ist ${Math.abs(d)} Monate ${d > 0 ? "nach" : "vor"} dem <b>${MONATE[m]}</b>?`, liste: "monate", loesung: mod(m + d, 12),
       hinweis: "Nach 12 Monaten ist wieder derselbe Monat. Zähl zuerst ein ganzes Jahr weg." };
   },
   datumTag() {
@@ -154,9 +154,8 @@ const STUFE = {
 
 function aufgabeErzeugen(stufe) {
   const art = waehle(STUFE[stufe]);
-  if (art === "ordnenTage") return ARTEN.ordnen("tage");
-  if (art === "ordnenMonate") return ARTEN.ordnen("monate");
-  return ARTEN[art]();
+  const a = art === "ordnenTage" ? ARTEN.ordnen("tage") : art === "ordnenMonate" ? ARTEN.ordnen("monate") : ARTEN[art]();
+  return { art, ...a };
 }
 
 /** Mängel der Königsstufe, unabhängig nachgerechnet (Datum über Date in einem Nicht-Schaltjahr). */
@@ -211,12 +210,15 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("art", a.art); // jede Stufe hat mehrere Arten
+    if (a.zurueck !== undefined) ctx.serie("richtung", a.zurueck); // vorwärts oder zurück im Kalender
     const namen = NAMEN[a.liste];
     ctx.flaeche.append(el("div", { class: "frage", html: a.frage }));
     let fertig = false;
 
     const loesung = a.reihe ? a.folge.map(j => namen[j]).join(" → ") : `Richtig ist: ${(a.namen || namen)[a.loesung]}.`;
     ctx.loesung(loesung);
+    ctx.schritte(a.reihe ? a.folge.length : 1); // die Reihe der Reihe nach antippen, sonst eine Antwort
 
     if (a.reihe) {
       const gelegt = el("div", { class: "reihe-gelegt" });

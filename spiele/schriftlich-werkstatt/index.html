@@ -221,6 +221,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const x = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].arten.length > 1) ctx.serie("rechenart", x.art);
     const n = x.r.length;
     const mal = x.art === "×";
     // Spalten: [Zeichen] + n Stellen (+ "×" und Faktor rechts bei der Multiplikation)
@@ -228,6 +229,7 @@ LS.spiel({
     const links = mal ? 0 : 1;
     const rechnung = x.zahlen.map(zahlText).join(` ${x.art} `);
     ctx.loesung(`${rechnung} = ${zahlText(x.ergebnis)}`);
+    ctx.schritte(2 * n); // je Spalte eine Ziffer und OK
     const raster = el("div", { class: "werkstatt", role: "group", "aria-label": "Stellenwerttabelle" });
     raster.style.setProperty("--spalten", spalten);
 

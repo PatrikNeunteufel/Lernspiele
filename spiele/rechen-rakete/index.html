@@ -174,8 +174,10 @@ LS.spiel({
 
   aufgabe(ctx) {
     const x = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("rechenart", x.art);
     const loesung = `${zahlText(x.a)} ${x.art} ${zahlText(x.b)} = ${zahlText(x.ergebnis)}`;
     ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(x.ergebnis));
     const bahn = el("div", { class: "bahn", "aria-hidden": "true" });
     const rakete = el("div", { class: "rakete", text: "🚀" });
     bahn.append(rakete);

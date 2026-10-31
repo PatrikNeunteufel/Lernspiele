@@ -96,6 +96,9 @@ const STUFE = {
 /** Aufgabenarten der Stufe, die mit den freien Listen gehen; leer = Stufe wird nicht angeboten. */
 const moeglich = stufe => STUFE[stufe].filter(([geht]) => geht()).map(([, neu]) => neu);
 const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => moeglich(s).length));
+/** Stufen, in denen die freien Listen mehr als eine Art hergeben (für ctx.serie). */
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(moeglich(s).map(neu => neu().art)).size > 1));
+const MEHRERE_ARTIKEL = new Set(FREIE.map(k => k.ganz[0])).size > 1;
 
 function aufgabeErzeugen(stufe) {
   const arten = moeglich(stufe);
@@ -136,6 +139,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    if (a.art === "artikel" && MEHRERE_ARTIKEL) ctx.serie("antwort", a.richtig);
     const { k } = a;
     const grund = k.teile[k.teile.length - 1];
     if (a.art === "zusammen") {

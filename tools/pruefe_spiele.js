@@ -84,7 +84,34 @@ const TREIBER = `
   // Wiederholungen je Runde: höchstens eine Aufgabe ein zweites Mal, nie direkt hintereinander.
   let gestellt = new Map();
   let letzte = null;
+  // Endlos: Jede Aufgabe nennt ihre Handgriffe (ctx.schritte). Sie sind eine Untergrenze — wer die
+  // Aufgabe mit weniger Klicks löst, zeigt, dass das Spiel zu viele angibt.
+  let schritte = 0;
+  let klicks = 0;
+  let klicksBeiStart = 0;
+  const handgriffe = []; // Endlos: Handgriffe je gestellte Aufgabe, für die Übersicht
+  // Serienbremse: je Merkmal aus ctx.serie höchstens LS.SERIE_MAX gleiche hintereinander in einer Runde.
+  let serien = {};
   LS.pruefung.haken = (art, a) => {
+    if (art === "gestellt") {
+      if (a.nr === 0) serien = {};
+      for (const [name, wert] of Object.entries(a.serien || {})) {
+        const s = serien[name] ||= { wert: null, lauf: 0 };
+        s.lauf = s.wert === wert ? s.lauf + 1 : 1;
+        s.wert = wert;
+        if (a.serieErzwungen) melde("Hinweis Serie", "Merkmal «" + name + "» kam trotz Serienbremse " + s.lauf + "-mal hintereinander («" + wert + "») — hat die Stufe nur diesen Wert? Dann ctx.serie hier weglassen.", "erzwungen " + name);
+        else if (s.lauf > LS.SERIE_MAX) melde("Serie", "Merkmal «" + name + "» " + s.lauf + "-mal hintereinander («" + wert + "»)", "serie " + name);
+      }
+    }
+    if (art === "gestellt" && endlos) {
+      schritte = a.schritte;
+      klicksBeiStart = klicks;
+      handgriffe.push(schritte);
+      if (!(schritte > 0)) melde("Handgriffe", "Endlos-Aufgabe ohne ctx.schritte: «" + (a.kennung || "").slice(0, 80) + "»", "ohne");
+    }
+    // Der Klick, der löst, ist noch nicht gezählt (er läuft gerade).
+    if (art === "richtig" && endlos && klicks - klicksBeiStart + 1 < schritte)
+      melde("Handgriffe", "mit " + (klicks - klicksBeiStart + 1) + " Klicks gelöst, das Spiel nennt " + schritte, "zu viele");
     // Neue Aufgabe: Hinweise einer übersprungenen Aufgabe mit derselben Nummer vergessen.
     if (art === "aufgabe") { hinweise.delete(a.nr); return; }
     if (art === "gestellt" && endlos) return; // Endlos: eigene Regel (keine der letzten 30)
@@ -118,7 +145,9 @@ const TREIBER = `
     }
     hinweise.delete(a.nr);
   };
-  let klicks = 0;
+  let letztesErgebnis = null;
+  let verlassenGeprueft = false;
+  let endeGesehen = 0;
   let ohneFortschritt = 0;
   let letzterText = "";
   __uhr.weiter(50);
@@ -142,6 +171,26 @@ const TREIBER = `
     klicks++;
     __uhr.weiter(2000);
     pruefeText("nach Klick auf «" + k.textContent.trim().slice(0, 20) + "»");
+    // Endlos: Ist die Runde vorbei („Zum Ergebnis“), muss der Rekord schon gespeichert sein — auch wenn
+    // das Kind den Knopf nie antippt.
+    const zumErgebnis = endlos && buehne.querySelectorAll("button").find(b => /Zum Ergebnis/.test(b.textContent));
+    if (zumErgebnis && zumErgebnis !== letztesErgebnis) {
+      letztesErgebnis = zumErgebnis;
+      endeGesehen++;
+      if (protokoll().length < endeGesehen) melde("Rekord", "Endlos-Runde vorbei, aber erst beim Antippen von «Zum Ergebnis» gespeichert", "zum Ergebnis");
+      if (protokoll().at(-1)?.abgebrochen) melde("Rekord", "Zwischenstand vom Verlassen bleibt stehen, obwohl die Runde zu Ende gespielt wurde", "zwischenstand");
+    }
+    // Endlos (Entscheid E1 a): Verlässt das Kind die Seite mitten in der Serie, zählt sie bis dahin.
+    // Einmal je Spiel und Stufe das Verlassen nachstellen; danach geht die Runde weiter.
+    const serie = endlos && !zumErgebnis && Number((buehne.querySelector(".fortschritt.endlos")?.textContent.match(/♾ (\\d+)/) || [])[1]);
+    if (serie > 0 && !verlassenGeprueft && Math.random() < 0.2) {
+      verlassenGeprueft = true;
+      const vorher = protokoll().length;
+      document.dispatchEvent(new Event("pagehide"));
+      const r = protokoll();
+      if (r.length !== vorher + 1 || !r.at(-1).abgebrochen || r.at(-1).punkte !== serie)
+        melde("Rekord", "Verlassen mitten in der Serie (" + serie + ") speichert keinen passenden Zwischenstand: " + JSON.stringify(r.at(-1) || null).slice(0, 120), "verlassen");
+    }
     const jetzt = buehne.textContent;
     ohneFortschritt = jetzt === letzterText ? ohneFortschritt + 1 : 0;
     letzterText = jetzt;
@@ -152,7 +201,7 @@ const TREIBER = `
     for (const f of e.fehlerAufgaben || []) if (${VERDAECHTIG}.test(f.text + " " + f.loesung)) melde("Protokoll", "Fehleraufgabe: " + (f.text + " → " + f.loesung).slice(0, 160));
   }
   const gekuerzt = protokoll().filter(e => e.gekuerzt).map(e => e.aufgaben + "/" + e.gekuerzt);
-  return { runden: protokoll().length, klicks, funde, ohneVorab, gekuerzt };
+  return { runden: protokoll().length, klicks, funde, ohneVorab, gekuerzt, handgriffe };
 })`;
 
 // Generatoren im Kontext: aufgabeErzeugen + pruefeAufgabe, falls vorhanden.
@@ -226,7 +275,8 @@ function pruefe(id, stufe, liste = null, endlos = false) {
     const t = lauf(TREIBER, "treiber", 60000)(opt.runden, opt.maxKlicks, endlos);
     ergebnis.runden = t.runden;
     ergebnis.klicks = t.klicks;
-    for (const f of t.funde) (f.art === "Hänger" ? ergebnis.hinweise : ergebnis.fehler).push(`${f.art}: ${f.text}`);
+    ergebnis.handgriffe = t.handgriffe;
+    for (const f of t.funde) (/^(Hänger|Hinweis)/.test(f.art) ? ergebnis.hinweise : ergebnis.fehler).push(`${f.art}: ${f.text}`);
     if (t.gekuerzt.length) ergebnis.hinweise.push(`zu wenig verschiedene Aufgaben: ${t.gekuerzt.length} von ${t.runden} Runden früher beendet (Aufgaben ${[...new Set(t.gekuerzt)].join(", ")})`);
     if (t.ohneVorab) ergebnis.fehler.push(`Testhilfe: ${t.ohneVorab} Antworten auf Aufgaben ohne ctx.loesung() — 🔑 kennt dort keine Lösung`);
     if (t.runden < opt.runden) ergebnis.hinweise.push(`nur ${t.runden} von ${opt.runden} Runden mit ${t.klicks} Zufallsklicks geschafft`);
@@ -268,7 +318,9 @@ if (opt.endlos !== 0) {
       for (const f of e.fehler) console.log(`    FEHLER  ${s.id} ${stufe} endlos: ${f}`);
       for (const h of e.hinweise) if (!/^nur \d+ von/.test(h)) console.log(`    hinweis ${s.id} ${stufe} endlos: ${h}`);
       fehlerZahl += e.fehler.length;
-      zeile.push(`${stufe}:${e.runden ?? "-"}`);
+      // Dahinter die Handgriffe der gestellten Aufgaben (kleinste–grösste), aus denen der Boden der Zeit folgt.
+      const h = e.handgriffe || [];
+      zeile.push(`${stufe}:${e.runden ?? "-"}` + (h.length ? ` [${Math.min(...h)}–${Math.max(...h)}]` : ""));
     }
     console.log(`♾ ${s.id.padEnd(24)} ${zeile.join(" ")}`);
   }

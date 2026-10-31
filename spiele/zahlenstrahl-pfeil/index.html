@@ -141,7 +141,11 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("art", a.ablesen ? "ablesen" : "zeigen");
     const loesungText = `Die Zahl ${zahlText(a.ziel)} liegt dort, wo der grüne Pfeil zeigt.`;
+    // Stelle antippen und OK, oder die Zahl eintippen — ungefähr genügt, also die kürzeste Zahl im
+    // Toleranzbereich (die kleinste hat die wenigsten Ziffern).
+    ctx.schritte(a.ablesen ? LS.tippSchritte(Math.max(0, Math.ceil(a.ziel - a.toleranz))) : 2);
 
     if (!a.ablesen) {
       // Für die Testhilfe: der grüne Pfeil des Lösungstexts erscheint erst nach dem Aufgeben.

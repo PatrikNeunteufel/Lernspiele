@@ -168,6 +168,8 @@ function einsortieren(ctx, zahl) {
   const ersteStelle = 7 - String(zahl).length; // Index der höchsten Stelle in STELLEN
   const loesung = `${zahlText(zahl)} → ` + spalten.filter(s => STELLEN.indexOf(s) >= ersteStelle).map(s => `${soll[s.k]} ${s.k}`).join(", ");
   ctx.loesung(loesung);
+  // Handgriffe: zum ersten Fach der Zahl springen (wenn sie die Tabelle nicht füllt), je Ziffer ein Tipp, OK.
+  ctx.schritte((STELLEN.indexOf(spalten[0]) < ersteStelle ? 1 : 0) + String(zahl).length + 1);
   ctx.flaeche.append(
     el("div", { class: "auftrag", text: "Sortiere die Zahl in die Tabelle ein!" }),
     el("div", { class: "zahl-gross", html: `<span class="brief">✉️</span>${zahlText(zahl)}` }));
@@ -242,6 +244,7 @@ function ablesen(ctx, zahl) {
   const ersteStelle = 7 - String(zahl).length;
   const loesung = `In der Tabelle steht ${zahlText(zahl)}.`;
   ctx.loesung(loesung);
+  ctx.schritte(LS.tippSchritte(zahl));
   ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl steht in der Tabelle?" }));
   const { tab, faecher } = tabelleZeichnen(spalten);
   tab.classList.add("nur-lesen");

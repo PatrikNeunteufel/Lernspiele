@@ -61,17 +61,17 @@ const ARTEN = {
 };
 
 // Basisklasse 2: s1 1. Klasse, s2–s4 2. Klasse, s5 3. Klasse, s6 Königsstufe.
-// Je Stufe die Aufgabenarten (mit Wiederholung = häufiger) und ob sie mit den freien Listen gehen.
+// Je Stufe die Aufgabenarten (mit Wiederholung = häufiger): Art, Erzeuger und ob sie mit den freien Listen gehen.
 // Stufe 2 braucht die Reihen (Vergleiche kommen dazu, wenn frei), die Schätzstufen Fragen ihrer Stufe.
 const VARIANTEN = {
-  s1: [[() => ARTEN.vergleich(), FREIE_VERGLEICHE.length]],
-  s2: [[() => ARTEN.ordnen(3), reihenMit(3).length], [() => ARTEN.ordnen(3), reihenMit(3).length],
-       [() => ARTEN.vergleich(), reihenMit(3).length && FREIE_VERGLEICHE.length]],
-  s3: [[() => ARTEN.schaetzen(3), fragenDerStufe(3).length]],
-  s4: [[() => ARTEN.schaetzen(4), fragenDerStufe(4).length], [() => ARTEN.schaetzen(4), fragenDerStufe(4).length],
-       [() => ARTEN.ordnen(4), reihenMit(4).length]],
-  s5: [[() => ARTEN.schaetzen(5), fragenDerStufe(5).length]],
-  s6: [[() => ARTEN.schaetzen(6), fragenDerStufe(6).length]],
+  s1: [["vergleich", () => ARTEN.vergleich(), FREIE_VERGLEICHE.length]],
+  s2: [["ordnen", () => ARTEN.ordnen(3), reihenMit(3).length], ["ordnen", () => ARTEN.ordnen(3), reihenMit(3).length],
+       ["vergleich", () => ARTEN.vergleich(), reihenMit(3).length && FREIE_VERGLEICHE.length]],
+  s3: [["schaetzen", () => ARTEN.schaetzen(3), fragenDerStufe(3).length]],
+  s4: [["schaetzen", () => ARTEN.schaetzen(4), fragenDerStufe(4).length], ["schaetzen", () => ARTEN.schaetzen(4), fragenDerStufe(4).length],
+       ["ordnen", () => ARTEN.ordnen(4), reihenMit(4).length]],
+  s5: [["schaetzen", () => ARTEN.schaetzen(5), fragenDerStufe(5).length]],
+  s6: [["schaetzen", () => ARTEN.schaetzen(6), fragenDerStufe(6).length]],
 };
 const STUFE = {
   s1: { arten: ["vergleich"] },
@@ -82,8 +82,10 @@ const STUFE = {
   s6: { arten: ["schaetzen"], knapp: true },
 };
 for (const [s, v] of Object.entries(VARIANTEN)) {
-  const moeglich = v.filter(([, geht]) => geht).map(([f]) => f);
-  if (moeglich.length) STUFE[s].neu = () => waehle(moeglich)(); else delete STUFE[s];
+  const moeglich = v.filter(([, , geht]) => geht);
+  if (!moeglich.length) { delete STUFE[s]; continue; }
+  STUFE[s].neu = () => waehle(moeglich)[1]();
+  STUFE[s].artWechselt = new Set(moeglich.map(([art]) => art)).size > 1; // für ctx.serie
 }
 
 function aufgabeErzeugen(stufe) { return STUFE[stufe].neu(); }
@@ -156,6 +158,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].artWechselt) ctx.serie("art", a.art);
     if (a.art === "vergleich") {
       ctx.flaeche.append(el("div", { class: "frage", text: `Was ist ${a.eigenschaft}?` }));
       LS.auswahl(ctx, {

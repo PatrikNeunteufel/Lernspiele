@@ -278,8 +278,11 @@ LS.spiel({
     const arten = P[ctx.stufe].arten;
     const art = ctx.nr < arten.length ? arten[ctx.nr] : waehle(arten);
     const r = art(P[ctx.stufe], ctx.geordnet);
+    ctx.serie("art", r.art);
+    if (r.art === "nachbar") ctx.serie("richtung", r.plus);
     const loesung = `${r.erklaerung} → Code ${zahlText(r.loesung)}`;
     ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(r.loesung));
 
     const tresor = el("div", { class: "tresor", "aria-hidden": "true",
       html: `<div class="innen">${waehle(["💎", "👑", "🏆", "💰", "🪙", "🎁"])}</div><div class="tuer"><div class="rad"></div></div>` });

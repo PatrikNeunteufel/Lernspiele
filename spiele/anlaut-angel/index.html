@@ -139,6 +139,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    // Jede Art einer Stufe fragt anders (Bild, Anfang, Ende, Mitte, Lücke).
+    if (moeglich(ctx.stufe).length > 1) ctx.serie("art", a.art === "laut" ? a.wo : a.art);
     if (a.art === "bildZumLaut") {
       ctx.flaeche.append(el("div", { class: "see" }, el("div", { text: "Angle das Bild, das so beginnt:" }), el("div", { class: "buchstabe-gross", text: `${a.buchstabe} ${a.buchstabe.toLowerCase()}` })));
       LS.auswahl(ctx, {

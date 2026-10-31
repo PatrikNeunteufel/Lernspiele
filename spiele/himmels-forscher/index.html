@@ -135,6 +135,9 @@ const ARTEN = {
   },
 };
 
+// Jede Aufgabe trägt den Namen ihrer Art (für ctx.serie).
+for (const [name, neu] of Object.entries(ARTEN)) ARTEN[name] = (...x) => ({ art: name, ...neu(...x) });
+
 const STUFE = {
   s1: () => waehle([ARTEN.vollNeu, ARTEN.zuOderAb])(),
   s2: () => waehle([ARTEN.zuOderAb, ARTEN.naechste, () => ARTEN.ordnen(4)])(),
@@ -191,6 +194,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = STUFE[ctx.stufe]();
+    ctx.serie("art", a.art); // jede Stufe hat mehrere Arten
+    if (a.art === "vollNeu" || a.art === "zuOderAb") ctx.serie("antwort", a.richtig); // Vollmond/Neumond, zunehmend/abnehmend
     let fertig = false;
     const nacht = el("div", { class: "nacht" }, el("div", { class: "frage", html: a.frage }));
     if (a.gross) nacht.append(el("div", { class: "mond-gross", text: a.gross }));

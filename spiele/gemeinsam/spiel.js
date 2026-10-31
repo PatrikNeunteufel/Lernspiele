@@ -346,17 +346,39 @@ const LS = (() => {
   // so gewählt, dass es später auch an einen Server gehen könnte (Rangliste nach Alter, Klasse, Region
   // — noch Idee); heute bleibt alles im Browser.
   const rekorde = () => lies("rekorde", []);
-  function speichereRekord(eintrag) { schreibe("rekorde", [...rekorde(), eintrag]); }
+  /** Rekord anhängen; ersetzt: ein früher gespeicherter Zwischenstand derselben Runde, der wegfällt. */
+  function speichereRekord(eintrag, ersetzt = null) {
+    schreibe("rekorde", [...rekorde().filter(e => e !== ersetzt && !(ersetzt && e.name === ersetzt.name && e.zeit === ersetzt.zeit
+      && e.spiel === ersetzt.spiel && e.stufe === ersetzt.stufe)), eintrag]);
+  }
   /** Stufen, die den Endlos-Modus anbieten (Katalog: endlos). */
   const endlosStufen = spielId => katalogEintrag(spielId)?.endlos || [];
   const gleicherModus = (e, spiel, stufe, mitTimer) => e.spiel === spiel && e.stufe === stufe && !!e.timer === !!mitTimer;
   /**
-   * Endlos mit Timer (Wunsch Patrik 2026-10-31): je gelöste Aufgabe 4 % weniger Zeit, nie unter 40 % der
-   * Startzeit und nie unter 3 s — spürbar schneller, aber nicht zu rasch und nicht unbegrenzt.
+   * Endlos mit Timer (Entscheide Patrik F1 a, F2 a, 2026-10-31): Die Zeit nähert sich einem Boden, der aus
+   * den Handgriffen der Aufgabe folgt (ctx.schritte): grundzeit + schritte × jeSchritt, dazu die Zeit, in der
+   * das Kind nur warten kann (ctx.wartezeit, z. B. eine vorgespielte Melodie). Je gelöste Aufgabe
+   * fällt 8 % der restlichen Spanne weg — anfangs grosse Schritte, dann immer kleinere, ohne abrupten Halt.
+   * Grundzeit und Schrittzeit sind Annahmen, bis gemessene Zeiten von Kindern vorliegen. Ohne Angabe der
+   * Handgriffe (darf nicht vorkommen, das Testskript prüft es) gilt als Boden ersatzweise 40 % der Startzeit.
    */
-  const ENDLOS_TEMPO = { faktor: 0.96, untergrenze: 0.4, minimum: 3 };
-  const endlosSekunden = (start, geschafft) => Math.max(ENDLOS_TEMPO.minimum, Math.round(start * ENDLOS_TEMPO.untergrenze),
-    Math.round(start * ENDLOS_TEMPO.faktor ** geschafft));
+  /**
+   * Serienbremse (Vorgabe Patrik 2026-11-01): Ein zufällig gewähltes Merkmal (ctx.serie) kommt höchstens
+   * SERIE_MAX-mal hintereinander; der Rahmen zieht dafür bis zu SERIE_VERSUCHE-mal neu.
+   */
+  const SERIE_MAX = 3;
+  const SERIE_VERSUCHE = 40;
+
+  const ENDLOS_TEMPO = { annaeherung: 0.92, grundzeit: 1.2, jeSchritt: 0.5, ersatzBoden: 0.4 };
+  const endlosBoden = (start, schritte, warten) => Math.min(start,
+    schritte > 0 ? ENDLOS_TEMPO.grundzeit + warten + schritte * ENDLOS_TEMPO.jeSchritt : start * ENDLOS_TEMPO.ersatzBoden);
+  /** Sekunden für die nächste Endlos-Aufgabe, auf eine Zehntelsekunde gerundet. */
+  function endlosSekunden(start, geschafft, schritte, warten = 0) {
+    const boden = endlosBoden(start, schritte, warten);
+    return Math.round((boden + (start - boden) * ENDLOS_TEMPO.annaeherung ** geschafft) * 10) / 10;
+  }
+  /** Anzeige der Zeit: unter 10 s mit einer Nachkommastelle (Komma), sonst ganze Sekunden. */
+  const sekundenText = s => (s < 10 ? s.toFixed(1).replace(".", ",") : String(Math.round(s))) + " s";
   function besterRekord(name, spiel, stufe, timer) {
     return rekorde().filter(e => e.name === name && gleicherModus(e, spiel, stufe, timer)).reduce((m, e) => Math.max(m, e.punkte), 0);
   }
@@ -581,6 +603,9 @@ const LS = (() => {
     return api;
   }
 
+  /** Handgriffe, um wert auf der Zifferntastatur einzutippen: je Ziffer ein Tipp, dazu OK (für ctx.schritte). */
+  const tippSchritte = wert => String(Math.abs(wert)).length + 1;
+
   // ---------- Flug in einen Korb ----------
 
   /**
@@ -634,6 +659,7 @@ const LS = (() => {
 
   function auswahl(ctx, opt) {
     ctx.loesung(loesungFuer(opt, opt.richtig));
+    ctx.schritte(1);
     const box = el("div", { class: "wahl" });
     if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
     let fertig = false;
@@ -669,6 +695,7 @@ const LS = (() => {
    */
   function reihenfolge(ctx, opt) {
     ctx.loesung(opt.loesung || opt.reihe.map(w => (opt.ablage ? opt.ablage(w) : String(w))).join(" → "));
+    ctx.schritte(opt.reihe.length);
     const ablage = el("div", { class: "ablage", "aria-live": "polite" });
     const box = el("div", { class: "wahl" });
     if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
@@ -710,6 +737,7 @@ const LS = (() => {
    */
   function koerbe(ctx, opt) {
     ctx.loesung(opt.loesung || opt.korbInhalt?.(opt.richtig)?.text || loesungFuer(opt, opt.richtig));
+    ctx.schritte(1);
     const karte = el("div", { class: "korb-karte" },
       opt.karte.bild ? el("span", { class: "bild", text: opt.karte.bild }) : null, el("b", { text: opt.karte.text }));
     const box = el("div", { class: "korb-reihe" });
@@ -909,6 +937,11 @@ const LS = (() => {
       let letzte = null;
       const zuletzt = []; // Endlos: die letzten Kennungen
       let allesGeschafft = false;
+      const serienVerlauf = {}; // je Merkmal (ctx.serie) die Werte der gestellten Aufgaben dieser Runde
+      const mitTimer = timer.an ? startSekunden : null; // Endlos: Startzeit des Rekords oder null
+      let rekordVorher = null; // Endlos: bisheriger Rekord, sobald diese Runde gespeichert ist
+      let zwischenstand = null; // Endlos: beim Verlassen gespeicherter Eintrag, den das Ende ersetzt
+      let rundeGespeichert = false;
       buehne.innerHTML = "";
 
       const punkte = el("div", { class: "fortschritt" + (endlos ? " endlos" : "") });
@@ -950,6 +983,9 @@ const LS = (() => {
         let eintrag = null; // Protokolleintrag, sobald die Aufgabe einen Fehler hatte
         let loesungVorab = null; // vom Spiel mit ctx.loesung() genannt, für die Testhilfe
         let eigeneKennung = null; // vom Spiel mit ctx.kennung() genannt, gegen Wiederholungen
+        let schritte = 0; // Handgriffe der Aufgabe (ctx.schritte), für den Boden der Endlos-Zeit
+        let warten = 0;   // Sekunden, in denen das Kind nur warten kann (ctx.wartezeit)
+        let serien = {};  // Merkmale dieser Aufgabe (ctx.serie): Name → Wert
         const start = performance.now();
         pruefung.haken?.("aufgabe", { nr });
 
@@ -983,9 +1019,11 @@ const LS = (() => {
           },
         };
 
-        // Endlos mit Timer: gleiche Startzeit für alle, je gelöste Aufgabe etwas knapper (ENDLOS_TEMPO).
-        const sekunden = endlos ? endlosSekunden(startSekunden, geschafft) : timer.sekunden;
-        if (timer.an) {
+        // Timer erst, wenn die Aufgabe gezeichnet ist: im Endlos-Modus hängt die Zeit an ihren Handgriffen.
+        // Gleiche Startzeit für alle, je gelöste Aufgabe knapper (ENDLOS_TEMPO).
+        function starteUhr() {
+          if (!timer.an) return;
+          const sekunden = endlos ? endlosSekunden(startSekunden, geschafft, schritte, warten) : timer.sekunden;
           // Balken läuft per CSS-Übergang von voll auf leer; der Fehler zählt einmal, die Aufgabe bleibt offen.
           const balken = zeitleiste.firstChild;
           zeitleiste.classList.remove("um");
@@ -1004,13 +1042,14 @@ const LS = (() => {
             if (endlos) return endlosVorbei("⏰ Die Zeit ist um!");
             eule.sag("⏰ Die Zeit ist um! Mach die Aufgabe trotzdem fertig.", "hinweis");
           }, sekunden * 1000);
-          if (endlos) punkte.textContent = `♾ ${geschafft} · ⏱ ${sekunden} s`;
+          if (endlos) punkte.textContent = `♾ ${geschafft} · ⏱ ${sekundenText(sekunden)}`;
         }
 
         /** Endlos: erste falsche Antwort oder Zeit um — Lösung zeigen, dann zum Ergebnis. */
         function endlosVorbei(text) {
           erledigt = true;
           abschliessen(false);
+          speichereEndlos(); // zählt sofort, auch wenn das Kind „Zum Ergebnis“ nicht mehr antippt
           const loesung = loesungVorab;
           eule.sag(`${text}${loesung ? ` Schau mal: ${loesung}` : ""}`, "hinweis");
           const weiter = el("button", { class: "knopf", type: "button", text: "Zum Ergebnis ➜", onclick: schlussEndlos });
@@ -1031,6 +1070,20 @@ const LS = (() => {
            * Ohne Angabe nimmt der Rahmen Text und Bilder der Fläche; dient der Regel gegen Wiederholungen.
            */
           kennung(wert) { eigeneKennung = wert == null ? null : String(wert); },
+          /**
+           * Ein zufällig gewähltes Merkmal der Aufgabe, das das Kind als Muster erkennen kann: Richtung,
+           * Aufgabenart, Antwort bei wenigen festen Antworten (ja/nein, <, =, >). Der Rahmen zieht neu,
+           * statt dasselbe Merkmal öfter als SERIE_MAX-mal hintereinander zu stellen. Nur angeben, wo die
+           * Stufe wirklich mehrere Werte hat.
+           */
+          serie(name, wert) { serien[name] = String(wert); },
+          /**
+           * Diese Aufgabe braucht n Handgriffe mehr (Tipps, Ziffern samt OK, Züge) — wie viele mindestens,
+           * wer sie fehlerfrei löst. Die Bausteine zählen ihre selbst; Pflicht in Endlos-Stufen.
+           */
+          schritte(n) { schritte += n; },
+          /** Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (vorgespielte Töne). */
+          wartezeit(s) { warten += s; },
           /** Ist die Aufgabe gelöst oder nach drei Fehlversuchen aufgelöst? Dann nimmt sie keine Antwort mehr an. */
           vorbei: () => erledigt,
           richtig(text) {
@@ -1071,16 +1124,26 @@ const LS = (() => {
         };
         // Aufgabe zeichnen; ist sie in dieser Runde nicht mehr erlaubt, neu ziehen (die Spiele ziehen
         // in aufgabe() zufällig). Findet sich nach vielen Versuchen keine erlaubte, ist die Stufe erschöpft.
+        // Serienbremse (Vorgabe Patrik 2026-11-01): Merkmale aus ctx.serie höchstens SERIE_MAX-mal
+        // hintereinander. Findet sich nach SERIE_VERSUCHE Zügen keine passende Aufgabe, gilt die Aufgabe
+        // trotzdem (die Stufe hat dann wohl nur diesen Wert) — das Testskript meldet es.
+        const serieZuLang = () => Object.entries(serien).some(([name, wert]) => {
+          const bisher = serienVerlauf[name] || [];
+          return bisher.length >= SERIE_MAX && bisher.slice(-SERIE_MAX).every(w => w === wert);
+        });
         for (let versuch = 0; ; versuch++) {
           def.aufgabe(ctx);
           const k = kennung(flaeche, loesungVorab, eigeneKennung);
           const n = k ? gestellt.get(k) || 0 : 0;
-          if (endlos ? !k || !zuletzt.includes(k) : n === 0 || (n === 1 && !wiederholt && k !== letzte)) {
+          const zuLang = serieZuLang();
+          if ((endlos ? !k || !zuletzt.includes(k) : n === 0 || (n === 1 && !wiederholt && k !== letzte))
+            && (!zuLang || versuch >= SERIE_VERSUCHE)) {
             if (endlos && k) { zuletzt.push(k); if (zuletzt.length > 30) zuletzt.shift(); }
             if (n) wiederholt = true;
             if (k) gestellt.set(k, n + 1);
             letzte = k;
-            pruefung.haken?.("gestellt", { nr, kennung: k });
+            for (const [name, wert] of Object.entries(serien)) (serienVerlauf[name] ||= []).push(wert);
+            pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, serieErzwungen: zuLang && versuch >= SERIE_VERSUCHE });
             break;
           }
           if (versuch >= 60) {
@@ -1092,7 +1155,11 @@ const LS = (() => {
           flaeche.innerHTML = "";
           loesungVorab = null;
           eigeneKennung = null;
+          schritte = 0;
+          warten = 0;
+          serien = {};
         }
+        starteUhr();
       }
 
       /**
@@ -1160,16 +1227,43 @@ const LS = (() => {
           : "Du hast durchgehalten! Spiel nochmal, dann wird es leichter.", "gut");
       }
 
-      /** Endlos: Ergebnis speichern, Rekord und Rangliste zeigen. */
-      function schlussEndlos() {
-        clearTimeout(uhr);
-        const mitTimer = timer.an ? startSekunden : null;
-        const vorher = besterRekord(name, def.id, stufe.id, mitTimer);
-        speichereRekord({
+      /**
+       * Endlos: Rekord speichern, sobald die Runde vorbei ist (Fehler, Zeit um, alles geschafft) — nicht erst
+       * beim Ergebnisbild. Endgültig nur einmal je Runde; gibt den bisherigen Rekord zurück.
+       * abgebrochen (Entscheid Patrik E1 a): Das Kind verlässt die Seite mitten in der Serie, sie zählt bis
+       * dahin. Kommt es zurück und spielt weiter, ersetzt der nächste Stand diesen Zwischenstand.
+       */
+      function speichereEndlos(abgebrochen = false) {
+        if (rundeGespeichert) return rekordVorher;
+        if (rekordVorher === null) rekordVorher = besterRekord(name, def.id, stufe.id, mitTimer);
+        const eintrag = {
           name, zeit: new Date().toISOString(), spiel: def.id, stufe: stufe.id, timer: mitTimer, punkte: geschafft,
           dauer: Math.round((Date.now() - beginn) / 1000),
           ...(allesGeschafft ? { alles: true } : {}), ...(test ? { test: true } : {}), ...(hilfen ? { hilfe: hilfen } : {}),
-        });
+          ...(abgebrochen ? { abgebrochen: true } : {}),
+        };
+        speichereRekord(eintrag, zwischenstand);
+        zwischenstand = eintrag;
+        if (!abgebrochen) {
+          rundeGespeichert = true;
+          removeEventListener("pagehide", beimVerlassen);
+          document.removeEventListener("visibilitychange", beimVerstecken);
+        }
+        return rekordVorher;
+      }
+      // Verlassen: Tab zu, Zurück-Pfeil (pagehide); Tablet aus oder App gewechselt (visibilitychange, auf
+      // Tablets zuverlässiger als pagehide). Eine Serie ohne richtige Aufgabe gibt keinen Eintrag.
+      function beimVerlassen() { if (geschafft > 0) speichereEndlos(true); }
+      function beimVerstecken() { if (document.visibilityState === "hidden") beimVerlassen(); }
+      if (endlos) {
+        addEventListener("pagehide", beimVerlassen);
+        document.addEventListener("visibilitychange", beimVerstecken);
+      }
+
+      /** Endlos: Ergebnis speichern (falls noch nicht geschehen), Rekord und Rangliste zeigen. */
+      function schlussEndlos() {
+        clearTimeout(uhr);
+        const vorher = speichereEndlos();
         const neuerRekord = geschafft > 0 && geschafft > vorher;
         ton("fertig");
         if (neuerRekord) konfetti();
@@ -1235,7 +1329,7 @@ const LS = (() => {
   };
 
   return {
-    STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, spiel, lies, schreibe, sterneText,
+    STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, SERIE_MAX, spiel, lies, schreibe, sterneText,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
     freigabe, spielFrei, spielZuPruefen, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, spielListen, listeFrei, setzeListeFrei, freieListen,

@@ -270,8 +270,10 @@ LS.spiel({
 
   aufgabe(ctx) {
     const { karten, stellen, vorgabe, richtig } = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("ziel", vorgabe.ziel); // grösste, kleinste, nächste oder jede passende Zahl
     const loesung = `Eine richtige Lösung ist ${zahlText(richtig[0])}.`;
     ctx.loesung(loesung);
+    ctx.schritte(karten.length + 1); // jede Karte einmal antippen, dann OK
     ctx.flaeche.append(el("div", { class: "vorgabe", text: vorgabe.text }));
 
     const faecher = el("div", { class: "faecher" });

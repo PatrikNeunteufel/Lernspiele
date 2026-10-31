@@ -279,6 +279,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.art);
     const f = ctx.flaeche;
     if (a.art === "zeit") {
       f.append(el("div", { class: "frage", text: "Zu welcher Jahreszeit passt das am besten?" }));

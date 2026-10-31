@@ -77,8 +77,8 @@ function aufgabeErzeugen(stufe) {
   if (art === "einfach" || art === "weit") {
     const v = zufall(1, p.max);
     return Math.random() < 0.5
-      ? { art, fam, f, links: `${zahlText(v)} ${gross}`, ziel: klein, loesung: v * f }
-      : { art, fam, f, links: `${zahlText(v * f)} ${klein}`, ziel: gross, loesung: v };
+      ? { art, fam, f, links: `${zahlText(v)} ${gross}`, ziel: klein, loesung: v * f, richtung: "gross→klein" }
+      : { art, fam, f, links: `${zahlText(v * f)} ${klein}`, ziel: gross, loesung: v, richtung: "klein→gross" };
   }
   const s = (a, b) => (a ? `${a} ${gross} ` : "") + `${zahlText(b)} ${klein}`;
   if (art === "gemischt") {
@@ -146,8 +146,11 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.stufe === "s6") ctx.serie("art", a.art);
+    if (a.richtung) ctx.serie("richtung", a.richtung);
     const loesung = `${a.links} = ${zahlText(a.loesung)} ${a.ziel}`;
     ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(a.loesung));
     ctx.flaeche.append(el("div", { class: "familie", text: FAMILIEN[a.fam].name }));
     // Königsstufe: Treppe erst nach dem ersten Fehler, über der Rechnung eingefügt.
     const koenig = ctx.stufe === "s6";

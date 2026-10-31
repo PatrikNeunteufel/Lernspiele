@@ -137,8 +137,10 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (new Set(STUFE[ctx.stufe].arten.map(x => x.einheit)).size > 1) ctx.serie("einheit", a.einheit); // bis zu welchem Vielfachen
     const loesung = `${zahlText(a.start)} + ${zahlText(a.fehlt)} = ${zahlText(a.ziel)}`;
     ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(a.fehlt));
     const luecke = el("span", { class: "luecke", text: "?" });
     ctx.flaeche.append(el("div", { class: "auftrag", text: `Ergänze ${BIS_ZUM[a.einheit]}.` }));
     if (ctx.stufe === "s1") ctx.flaeche.append(zehnerfelder(a));

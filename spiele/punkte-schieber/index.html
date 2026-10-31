@@ -275,6 +275,7 @@ function verschiebeZumZiel(ctx) {
   const abstand = st => Math.abs(SPALTEN.indexOf(st) - SPALTEN.indexOf(von));
   const nach = waehle(SPALTEN.filter(st => st !== von && abstand(st) <= (STUFE[ctx.stufe].weit || 2) && start[st.k] < MAX_PUNKTE));
   const diff = nach.wert - von.wert;
+  ctx.serie("richtung", diff > 0); // grösser oder kleiner
   const zielWert = wert(start) + diff;
   const loesung = `Ein Punkt von ${von.k} nach ${nach.k}: ${zahlText(zielWert)}.`;
   ctx.loesung(loesung);
@@ -314,6 +315,7 @@ function mitAnzahlPunkten(ctx) {
     groessteUngerade: { text: `Lege mit genau ${n} Punkten die grösste ungerade Zahl.`, loesung: (n - 1) * oben + 1, ungerade: true },
   });
   const art = waehle(Object.keys(vorgaben));
+  ctx.serie("vorgabe", art);
   const v = vorgaben[art];
   const loesung = `Die Lösung ist ${zahlText(v.loesung)} (${punkteText(zerlege(v.loesung))}).`;
   ctx.loesung(loesung);

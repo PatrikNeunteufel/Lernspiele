@@ -530,6 +530,7 @@ LS.spiel({
   },
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("art", a.art);
     if (a.art === "legen") legen(ctx, a); else auswahlAufgabe(ctx, a);
   },
 });

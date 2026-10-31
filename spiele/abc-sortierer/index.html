@@ -137,6 +137,8 @@ function aufgabeErzeugen(stufe) {
   if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
   return waehle(arten)();
 }
+// Stufen, in denen die freien Listen mehr als eine Aufgabenart ergeben (nur dort ctx.serie("art")).
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(moeglich(s).map(neu => neu().art)).size > 1));
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a) {
@@ -172,6 +174,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    if (a.art === "nachbar") ctx.serie("richtung", a.nach);
     if (a.art === "luecke") {
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Welcher Buchstabe fehlt?" }),
         el("div", { class: "leiste" }, ...a.zeige.map(b => el("span", { class: b === a.richtig ? "luecke" : "", text: b === a.richtig ? "?" : b }))));

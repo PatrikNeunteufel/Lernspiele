@@ -376,6 +376,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const x = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].trickFrage) ctx.serie("art", x.modus);
+    ctx.serie("trick", x.trick);
 
     if (x.modus === "trick") {
       ctx.flaeche.append(
@@ -393,6 +395,7 @@ LS.spiel({
     }
 
     const loesung = `${x.links} = ${x.rechts} = ${zahlText(x.wert)}`;
+    ctx.schritte(LS.tippSchritte(x.wert)); // nach der Wahl (zählt die Auswahl selbst) das Ergebnis eintippen
     ctx.flaeche.append(
       el("div", { class: "auftrag", text: "Welche Aufgabe gibt dasselbe — und ist leichter?" }),
       el("div", { class: "rechnung", text: x.links }));

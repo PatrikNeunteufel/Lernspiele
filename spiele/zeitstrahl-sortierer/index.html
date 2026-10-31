@@ -277,6 +277,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.art === "ordnen" ? a.typ : a.art);
     const f = ctx.flaeche;
     if (a.art === "ordnen") {
       const titel = {

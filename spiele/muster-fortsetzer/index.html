@@ -52,10 +52,10 @@ const ARTEN = {
       const a0 = start();
       const folge = Array.from({ length: 6 }, (_, i) => a0 + i * d);
       if (folge.some(x => x < 0 || x > max)) continue;
-      return { art: "zahl", folge: folge.slice(0, 5), richtig: folge[5], regel: `${d > 0 ? "+" : "−"} ${zahlText(Math.abs(d))}` };
+      return { art: "zahl", typ: "linear", folge: folge.slice(0, 5), richtig: folge[5], regel: `${d > 0 ? "+" : "−"} ${zahlText(Math.abs(d))}` };
     }
     const d = schritte.find(x => x > 0);
-    return { art: "zahl", folge: [0, d, 2 * d, 3 * d, 4 * d], richtig: 5 * d, regel: `+ ${zahlText(d)}` };
+    return { art: "zahl", typ: "linear", folge: [0, d, 2 * d, 3 * d, 4 * d], richtig: 5 * d, regel: `+ ${zahlText(d)}` };
   },
   nichtlinear() {
     const typ = waehle(["quadrat", "dreieck", "wachsend", "schrumpfend"]);
@@ -63,22 +63,22 @@ const ARTEN = {
     const ab = f => Array.from({ length: 6 }, (_, i) => f(k + i));
     if (typ === "quadrat") {
       const folge = ab(n => n * n);
-      return { art: "zahl", folge: folge.slice(0, 5), richtig: folge[5], regel: `${k} · ${k}, ${k + 1} · ${k + 1}, ${k + 2} · ${k + 2}, … (Quadratzahlen)` };
+      return { art: "zahl", typ, folge: folge.slice(0, 5), richtig: folge[5], regel: `${k} · ${k}, ${k + 1} · ${k + 1}, ${k + 2} · ${k + 2}, … (Quadratzahlen)` };
     }
     if (typ === "dreieck") {
       const folge = ab(n => (n * (n + 1)) / 2);
-      return { art: "zahl", folge: folge.slice(0, 5), richtig: folge[5], regel: `+ ${k + 1}, + ${k + 2}, + ${k + 3}, … (jedes Mal 1 mehr)` };
+      return { art: "zahl", typ, folge: folge.slice(0, 5), richtig: folge[5], regel: `+ ${k + 1}, + ${k + 2}, + ${k + 3}, … (jedes Mal 1 mehr)` };
     }
     if (typ === "wachsend") {
       const a0 = zufall(1, 20), d0 = zufall(1, 4);
       const folge = [a0];
       for (let i = 0; i < 5; i++) folge.push(folge[i] + d0 + i);
-      return { art: "zahl", folge: folge.slice(0, 5), richtig: folge[5], regel: `+ ${d0}, + ${d0 + 1}, + ${d0 + 2}, … (jedes Mal 1 mehr)` };
+      return { art: "zahl", typ, folge: folge.slice(0, 5), richtig: folge[5], regel: `+ ${d0}, + ${d0 + 1}, + ${d0 + 2}, … (jedes Mal 1 mehr)` };
     }
     const a0 = zufall(90, 150), d0 = zufall(7, 11);
     const folge = [a0];
     for (let i = 0; i < 5; i++) folge.push(folge[i] - (d0 + 2 * i));
-    return { art: "zahl", folge: folge.slice(0, 5), richtig: folge[5], regel: `− ${d0}, − ${d0 + 2}, − ${d0 + 4}, … (jedes Mal 2 mehr weg)` };
+    return { art: "zahl", typ, folge: folge.slice(0, 5), richtig: folge[5], regel: `− ${d0}, − ${d0 + 2}, − ${d0 + 4}, … (jedes Mal 2 mehr weg)` };
   },
 };
 
@@ -137,6 +137,10 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.stufe === "s3") ctx.serie("art", a.art);
+    if (ctx.stufe === "s6") ctx.serie("art", a.typ);
+    // aufwärts oder abwärts; in Stufe 3 geht es nur aufwärts
+    if (a.art === "zahl" && ctx.stufe !== "s3") ctx.serie("richtung", a.folge[1] > a.folge[0]);
     const luecke = el("span", { class: "luecke", text: "?" });
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Wie geht es weiter?" }),
       el("div", { class: "reihe" }, ...a.folge.map(x => el("span", { text: typeof x === "number" ? zahlText(x) : x })), luecke));
@@ -153,6 +157,7 @@ LS.spiel({
     }
     const loesung = `Die Regel: ${a.regel} — es kommt ${zahlText(a.richtig)}.`;
     ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(a.richtig));
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Nächste Zahl" });
     ctx.flaeche.append(anzeige);
     const tasten = LS.tastatur({

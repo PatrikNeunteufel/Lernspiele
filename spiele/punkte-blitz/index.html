@@ -149,6 +149,8 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const s = STUFE[ctx.stufe];
+    if (new Set(s.arten).size > 1) ctx.serie("art", a.art);
+    if (a.art === "vergleich" || a.art === "gerade") ctx.serie("antwort", a.richtig);
     const feld = el("div", { class: "bildfeld", "aria-label": "Bild" });
     let frage = "Wie viele Punkte sind es?";
     if (a.art === "wuerfel") feld.append(wuerfel(a.n));

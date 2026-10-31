@@ -142,6 +142,8 @@ const STUFEN_TEXT = {
   s6: "Endgegner: sechs Bilder, Sätze und Anweisungen gemischt.",
 };
 const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+/** Stufen, in denen die freien Listen mehr als eine Art hergeben (für ctx.serie). */
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()?.art).filter(Boolean)).size > 1));
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a, stufe) {
@@ -196,6 +198,7 @@ const SPIEL = {
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     ctx.kennung(a.sprich);
     ctx.flaeche.append(el("div", { class: "frage", text: a.art === "anweisung" ? "Hör zu und tu, was du hörst." : "Hör zu: Welches Bild passt?" }));
     ctx.flaeche.append(el("button", { type: "button", class: "lt-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => LS.sprich(a.sprich, "en") }));

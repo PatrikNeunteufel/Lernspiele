@@ -176,6 +176,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.art);
+    if (a.art === "entscheid") ctx.serie("antwort", a.richtig);
     ctx.flaeche.append(el("div", { class: "frage", text: FRAGE[a.art] }));
     ctx.flaeche.append(el("div", { class: "wortkarte" + (a.art === "freund" ? " freund" : ""), text: a.zeige }));
     const hinweis = a.art === "freund"

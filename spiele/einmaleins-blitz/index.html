@@ -175,8 +175,10 @@ LS.spiel({
   aufgabe(ctx) {
     if (ctx.nr === 0) serie = 0;
     const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].arten.length > 1) ctx.serie("art", a.art);
     const loesung = a.teile.map(t => t === null ? zahlText(a.loesung) : typeof t === "number" ? zahlText(t) : t).join(" ");
     ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(a.loesung));
     const serieZeile = el("div", { class: "serie", text: serie >= 2 ? `⚡ ${serie} in Folge!` : "" });
     const rechnung = el("div", { class: "rechnung", "aria-live": "polite" });
     const luecke = el("span", { class: "luecke", text: "?" });

@@ -106,8 +106,10 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].halb.length) ctx.serie("art", a.art);
     const loesung = a.art === "doppel" ? `${zahlText(a.n)} + ${zahlText(a.n)} = ${zahlText(a.richtig)}` : `${zahlText(a.richtig)} + ${zahlText(a.richtig)} = ${zahlText(a.n)}`;
     ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(a.richtig));
     const luecke = el("span", { class: "luecke", text: "?" });
     ctx.flaeche.append(el("div", { class: "auftrag", text: a.art === "doppel" ? `Verdopple ${zahlText(a.n)}.` : `Halbiere ${zahlText(a.n)}.` }));
     if (a.art === "doppel" && STUFE[ctx.stufe].spiegel) ctx.flaeche.append(spiegelBild(a.n));

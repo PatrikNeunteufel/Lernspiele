@@ -210,9 +210,12 @@ LS.spiel({
     const raetsel = STUFE[ctx.stufe].raetsel;
     const { a, b, oben, links, werte } = x;
     const mehr = links.length > 1;
+    if (ctx.stufe === "s3") ctx.serie("art", mehr ? "2×2" : "3×1"); // zwei Formen des Malkreuzes
     ctx.loesung(`${zahlText(a)} × ${zahlText(b)} = ${zahlText(a * b)}`);
 
     const offen = new Set(x.offen);
+    // Jedes offene Feld eintippen; das nächste Feld wählt das Malkreuz selbst.
+    for (const k of offen) ctx.schritte(LS.tippSchritte(werte[k]));
     const felder = {};
     const fehlerJe = {};
     let aktiv = null;

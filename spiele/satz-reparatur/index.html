@@ -77,6 +77,10 @@ const KOENIG_EINZEL = [...frei("s3"), ...frei("s4")];
 const ANGEBOTEN = new Set([...["s1", "s2", "s3", "s4", "s5"].filter(s => frei(s).length),
   ...(frei("s5").length && KOENIG_EINZEL.length ? ["s6"] : [])]);
 
+const satzende = satz => (satz.match(/[.!?]/g) || []).join("");
+/** Stufen mit Einzelsätzen und verschiedenen Satzzeichen: Dort ist das Zeichen ein Merkmal (ctx.serie). */
+const ZEICHEN_WECHSELT = new Set(["s1", "s2", "s3", "s4"].filter(s => new Set(frei(s).map(satzende)).size > 1));
+
 /** Satz der Stufe. Königsstufe: ein kleiner Text aus drei Sätzen — ein Satzpaar der Stufe 5 und
     ein Satz der Stufe 3 oder 4 (abstrakte Nomen, ? und !), in zufälliger Reihenfolge. */
 function aufgabeErzeugen(stufe) {
@@ -119,6 +123,7 @@ LS.spiel({
   aufgabe(ctx) {
     const satz = aufgabeErzeugen(ctx.stufe);
     ctx.loesung(satz);
+    if (ZEICHEN_WECHSELT.has(ctx.stufe)) ctx.serie("satzzeichen", satzende(satz));
     const woerter = zerlege(satz);
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Repariere den Satz!" }),
       el("div", { class: "tipp-zeile", text: "Wort antippen = gross/klein · Kästchen antippen = Satzzeichen wählen" }));

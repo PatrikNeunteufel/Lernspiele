@@ -263,6 +263,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const p = STUFE[ctx.stufe];
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
     const f = ctx.flaeche;
     // Ab Stufe 3 wird in Rappen getippt (1 3 6 0 → 13 Fr. 60 Rp.), sonst in ganzen Franken.
     const mitRappen = p.raster < 100 || a.art === "gewicht";

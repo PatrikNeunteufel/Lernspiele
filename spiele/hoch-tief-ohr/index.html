@@ -133,9 +133,12 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.stufe === "s4" || ctx.stufe === "s6") ctx.serie("art", a.art);
+    if (a.art === "vergleich" || a.art === "schritt") ctx.serie("antwort", a.richtig); // erster/zweiter/gleich, Halbton/Ganzton
     // Gehört, nicht gesehen: die Melodie selbst macht die Aufgabe aus (Regel gegen Wiederholungen).
     ctx.kennung(JSON.stringify(a.folge));
     const hoeren = () => alsToene(a.folge);
+    ctx.wartezeit(hoeren().reduce((s, t) => s + t.dauer, 0)); // die Töne laufen gleich zu Beginn
     ctx.flaeche.append(el("div", { class: "ohr", text: "👂" }),
       el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, hoeren, a.folge.length === 2 ? "🔊 Beide Töne anhören" : "🔊 Melodie anhören")));
 

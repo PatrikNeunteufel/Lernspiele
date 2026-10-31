@@ -182,7 +182,10 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const { art, h, m } = a;
+    if (new Set(STUFE[ctx.stufe].arten).size > 1) ctx.serie("art", art);
     let fertig = false;
+    /** Handgriffe, um eine Uhrzeit einzutippen: 7:45 als 7 4 5, dann OK. */
+    const zeitSchritte = (hh, mm) => LS.tippSchritte(hh * 100 + mm);
 
     /** Uhrzeit oder Minutenzahl eintippen; istRichtig(zahl) prüft die Eingabe. */
     const eingabe = (istRichtig, hinweis, loesungText, alsMinuten = false) => {
@@ -206,6 +209,7 @@ LS.spiel({
     // Auswahl-Knöpfe (Text oder kleine Uhren)
     const auswahl = (optionen, darstellen, istRichtig, loesungText, hinweis) => {
       ctx.loesung(loesungText);
+      ctx.schritte(1);
       const box = el("div", { class: "optionen" });
       for (const o of mische(optionen)) {
         const k = el("button", { type: "button", class: "option" });
@@ -240,6 +244,7 @@ LS.spiel({
       ctx.flaeche.append(uhr(h, m, "uhr-gross"));
       const loesung = `Es ist ${digital(h, m)}.`;
       ctx.loesung(loesung);
+      ctx.schritte(zeitSchritte(h, m));
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({
@@ -258,22 +263,26 @@ LS.spiel({
       const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
       ctx.flaeche.append(el("div", { class: "digital", text: `${digital(t0.h, t0.m)} → ${digital(t1.h, t1.m)}` }),
         el("div", { class: "frage", text: "Wie viele Minuten liegen dazwischen?" }));
+      ctx.schritte(LS.tippSchritte(a.dauer));
       eingabe(z => z === a.dauer, "Rechne zuerst bis zur nächsten vollen Stunde, dann die ganzen Stunden, dann den Rest. 1 h = 60 min.",
         `Von ${digital(t0.h, t0.m)} bis ${digital(t1.h, t1.m)} sind es ${a.dauer} min (${minText(a.dauer)}).`, true);
     } else if (art === "rueckwaerts") {
       const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
       ctx.flaeche.append(el("div", { class: "frage", html: `Der Film dauert <b>${minText(a.dauer)}</b> und endet um <b>${digital(t1.h, t1.m)}</b>. Wann hat er begonnen?` }));
+      ctx.schritte(zeitSchritte(t0.h, t0.m));
       eingabe(z => gleicheZeit(z, t0), "Rechne rückwärts: zuerst die Stunden weg, dann die Minuten.",
         `${digital(t1.h, t1.m)} − ${minText(a.dauer)} = ${digital(t0.h, t0.m)}`);
     } else if (art === "dauerGenau") {
       const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
       ctx.flaeche.append(el("div", { class: "digital", text: digital(t0.h, t0.m) }),
         el("div", { class: "frage", html: `Wie spät ist es in <b>${a.dauer} Minuten</b>?` }));
+      ctx.schritte(zeitSchritte(t1.h, t1.m));
       eingabe(z => gleicheZeit(z, t1), "60 Minuten sind 1 Stunde. Rechne zuerst bis zur vollen Stunde, dann den Rest.",
         `${digital(t0.h, t0.m)} + ${a.dauer} min = ${digital(t1.h, t1.m)}`);
     } else if (art === "lesen24") {
       ctx.flaeche.append(el("div", { class: "frage", text: `Es ist ${a.tageszeit}. Wie spät ist es? Tipp die Zeit ein, z. B. 1 5 4 0 für 15:40.` }));
       ctx.flaeche.append(uhr(h, m, "uhr-gross"));
+      ctx.schritte(zeitSchritte(a.h24, m));
       eingabe(z => gleicheZeit(z, { h: a.h24, m }), z => {
         const t = zeitAusZiffern(z);
         return t && t.m === m && t.h === h ? `Die Minuten stimmen. Aber es ist ${a.tageszeit} — wie zählt man da die Stunden?` : zeigerHinweis;
@@ -286,6 +295,7 @@ LS.spiel({
       const t0 = { h: Math.floor(start / 60), m: start % 60 }, t1 = { h: Math.floor(ende / 60), m: ende % 60 };
       const loesung = `${digital(t0.h, t0.m)} + ${dauer} min = ${digital(t1.h, t1.m)}`;
       ctx.loesung(loesung);
+      ctx.schritte(zeitSchritte(t1.h, t1.m));
       ctx.flaeche.append(el("div", { class: "digital", text: digital(t0.h, t0.m) }),
         el("div", { class: "frage", html: `Wie spät ist es in <b>${dauer >= 60 ? `${Math.floor(dauer / 60)} h ${dauer % 60} min` : `${dauer} Minuten`}</b>?` }));
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit" });

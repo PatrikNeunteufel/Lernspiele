@@ -124,13 +124,16 @@ LS.spiel({
 | `ctx.loesung(text)` | Lösung gleich beim Zeichnen nennen. Sie erscheint nur beim Testspieler hinter „🔑“. **Pflicht in jeder Aufgabe** ✔. Die Bausteine rufen sie selbst auf. Den Text in **eine** Konstante legen, die auch `ctx.falsch` bekommt. |
 | `ctx.vorbei()` | Ist die Aufgabe gelöst oder aufgelöst? Dann nimmt sie keine Antwort mehr an. |
 | `ctx.kennung(wert)` | Woran die Aufgabe zu erkennen ist, wenn man es nicht sieht (Hör-Aufgaben: die Melodie). Sonst nimmt der Rahmen Text, Bilder und Lösung. |
+| `ctx.schritte(n)` | Die Aufgabe braucht n Handgriffe mehr: Tipps, Ziffern samt OK, Züge, so viele wie mindestens nötig sind. Aufrufe zählen zusammen. Die Bausteine zählen ihre selbst (`auswahl` und `koerbe` 1, `reihenfolge` je Teil 1); für die Tastatur `LS.tippSchritte(wert)`. **Pflicht in Endlos-Stufen** ✔, daraus folgt der Boden der Endlos-Zeit (Abschnitt 7). |
+| `ctx.serie(name, wert)` | Ein zufällig gewähltes Merkmal, das das Kind als Muster erkennen kann: Richtung oder Aufgabenart, oder die richtige Antwort bei höchstens drei festen Antworten (ja/nein, <, =, >, auf/ab). **Serienbremse** (Vorgabe Patrik 2026-11-01): Der Rahmen zieht neu, statt dasselbe Merkmal öfter als `LS.SERIE_MAX` = 3-mal hintereinander zu stellen (bis zu 40 Versuche). Nicht für Zahlenwerte oder Knopfpositionen, und nur in Stufen, die wirklich mehrere Werte haben ✔. |
+| `ctx.wartezeit(s)` | Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne). Zählt zum Boden der Endlos-Zeit. |
+| `ctx.sag(text, art?)` | Die Eule spricht (`art`: `"gut"` oder `"hinweis"`). |
 
 **Wiederholungen** (Vorgabe Patrik 2026-10-31): In einer Runde kommt höchstens eine Aufgabe ein
 zweites Mal, nie direkt hintereinander. Der Rahmen zieht eine nicht erlaubte Aufgabe neu (das Spiel
 zieht in `aufgabe()` zufällig). Gibt eine Stufe nicht genug verschiedene Aufgaben her, endet die Runde
 früher; das Protokoll vermerkt dann `gekuerzt` mit der geplanten Anzahl, und das Testskript meldet es
 als Hinweis.
-| `ctx.sag(text, art?)` | Die Eule spricht (`art`: `"gut"` oder `"hinweis"`). |
 
 Ausserhalb von `ctx`, für Spiele mit Inhaltslisten: `LS.freieListen("<id>")` liefert die Listen,
 die der angemeldete Spieler üben darf. Die Aufsicht bekommt alle, ein Kind nur die freigegebenen
@@ -150,7 +153,8 @@ auf. Die Optionen sind in `spiel.js` beschrieben.
 | `NOTEN.zeile`, `NOTEN.hoerKnopf` | Notenbild und Hörknopf (`noten.js`) |
 
 Hilfsfunktionen: `LS.el` (Element bauen), `LS.zahlText` (Schulschreibweise, „30 400“),
-`LS.zerlege`, `LS.zufall`, `LS.waehle`, `LS.mische`.
+`LS.zerlege`, `LS.zufall`, `LS.waehle`, `LS.mische`, `LS.tippSchritte(wert)` (Handgriffe, um eine Zahl
+einzutippen: je Ziffer einer, dazu OK).
 
 ### 4.4 Pflichtfunktionen für die Prüfung
 
@@ -234,14 +238,28 @@ Vorgabe Patrik 2026-10-31.
   Aufgaben (gemessen in LERN_Session3). Bei Wortlisten wäre Endlos nur ein Durchlauf durch die Liste.
 - **Wiederholungen:** keine der letzten 30 Aufgaben nochmal. Findet sich keine neue mehr, ist die
   Stufe „alles geschafft“.
-- **Timer im Endlos-Modus** (Wunsch Patrik 2026-10-31): Alle starten mit der Vorgabezeit der Stufe aus
-  dem Katalog, ohne den persönlichen Faktor aus dem Profil. Nach jeder richtigen Aufgabe wird die Zeit
-  4 % knapper, nie unter 40 % der Startzeit und nie unter 3 s (`ENDLOS_TEMPO` in `spiel.js`). Bei
-  15 s Start sind es nach 10 Aufgaben 10 s, nach 20 noch 7 s. In gewöhnlichen Runden bleibt die Zeit
-  gleich, damit die Zeiten je Aufgabe in der Statistik vergleichbar bleiben (Entscheid Patrik Z1 a).
+- **Timer im Endlos-Modus** (Wunsch Patrik 2026-10-31; Boden und Verlauf: Entscheide F1 a und F2 a,
+  LERN_Session4): Alle starten mit der Vorgabezeit der Stufe aus dem Katalog, ohne den persönlichen
+  Faktor aus dem Profil. Die Zeit nähert sich einem **Boden je Aufgabe**: 1,2 s Grundzeit + 0,5 s je
+  Handgriff (`ctx.schritte`) + Wartezeit (`ctx.wartezeit`). Nach jeder richtigen Aufgabe fallen 8 % der
+  restlichen Spanne bis zum Boden weg: anfangs grosse Schritte, dann immer kleinere, ohne abrupten Halt
+  (`ENDLOS_TEMPO` in `spiel.js`). Die Zeit erscheint auf eine Zehntelsekunde, unter 10 s mit Komma.
+  Weil der Boden an der Aufgabe hängt, bekommt eine Aufgabe mit mehr Ziffern etwas mehr Zeit als ihre
+  Vorgängerin. Grundzeit und Schrittzeit sind Annahmen, bis gemessene Zeiten von Kindern vorliegen; der
+  Boden zählt Handgriffe, nicht Lese- und Denkzeit. Beispiele (Sekunden nach 10 / 20 / 50 Aufgaben):
+  Einmaleins s3, 10 s Start, 3 Handgriffe: 5,9 / 4,1 / 2,8 · Baukasten s3, 25 s, 5 Handgriffe:
+  13 / 7,7 / 4,0 · Zahlenmauer s6, 188 s, 33 Handgriffe: 92 / 50 / 20.
+  In gewöhnlichen Runden bleibt die Zeit gleich, damit die Zeiten je Aufgabe in der Statistik
+  vergleichbar bleiben (Entscheid Patrik Z1 a).
 - **Speicher:** `lernspiele:rekorde` = `[{ name, zeit, spiel, stufe, timer, punkte, dauer, alles?,
-  test?, hilfe? }]`, eine Zeile je Endlos-Runde, getrennt vom Protokoll. `timer` ist die Startzeit in
+  test?, hilfe?, abgebrochen? }]`, eine Zeile je Endlos-Runde, getrennt vom Protokoll. `timer` ist die Startzeit in
   Sekunden oder `null`. Je Stufe gibt es zwei Ranglisten: ohne und mit Timer.
+  Gespeichert wird, sobald die Runde vorbei ist (Fehler, Zeit um, alles geschafft), nicht erst beim
+  Antippen von „Zum Ergebnis“ (Meldung Patrik, LERN_Session4). Verlässt das Kind die Seite mitten in
+  der Serie (Zurück-Pfeil, Tab zu: `pagehide`; Tablet aus, App gewechselt: `visibilitychange`), zählt
+  die Serie bis dahin mit `abgebrochen: true` (Entscheid Patrik E1 a). Kommt es zurück und spielt
+  weiter, ersetzt der nächste Stand diesen Zwischenstand. Eine Serie ohne richtige Aufgabe gibt keinen
+  Eintrag.
   Sichern, Einlesen und Löschen behandeln die Rekorde wie das Protokoll.
 - **Rangliste:** bester Wert je Kind, ohne Testrunden und ohne Aufsicht. Am Ende einer Endlos-Runde
   die ersten zehn, im Startbild des Spiels unter den Stufen die vollständigen Ranglisten beider
@@ -263,7 +281,15 @@ Vorgabe Patrik 2026-10-31.
 - jedes Spiel mit Inhaltslisten als Kind, mit je einer freigegebenen Liste: Es gibt mindestens eine
   Stufe, und keine Stufe läuft leer;
 - Wiederholungen je Runde;
-- jedes Spiel mit Endlos-Stufen im Endlos-Modus (`--endlos=0` schaltet ab).
+- jedes Spiel mit Endlos-Stufen im Endlos-Modus (`--endlos=0` schaltet ab): jede Aufgabe nennt ihre
+  Handgriffe (`ctx.schritte`), und keine wird mit weniger Klicks gelöst, als sie nennt. Die Übersicht
+  zeigt je Stufe die kleinste und grösste Zahl Handgriffe der gestellten Aufgaben, z. B. `s3:3 [2–3]`.
+  Ist eine Endlos-Runde vorbei, muss ihr Rekord schon gespeichert sein, bevor „Zum Ergebnis“ angetippt wird.
+  Einmal je Stufe stellt der Test das Verlassen mitten in der Serie nach (`pagehide`): Es muss ein
+  Zwischenstand mit der Serie entstehen, und am Ende der Runde darf er nicht stehen bleiben.
+- die Serienbremse: Kein Merkmal aus `ctx.serie` kommt öfter als `LS.SERIE_MAX`-mal hintereinander
+  (Fehler). Musste der Rahmen nach 40 Versuchen aufgeben, meldet der Test einen Hinweis: Die Stufe hat
+  dann wohl nur diesen Wert, und `ctx.serie` gehört dort weg.
 
 **Nicht geprüft** wird das Aussehen. Das heisst: Desktop, Tablet (768 px) und Handy (375 px) im
 Browser ansehen.

@@ -391,6 +391,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const p = STUFE[ctx.stufe];
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art); // ohne freie Orte bleibt manchmal nur eine Art
     const f = ctx.flaeche;
     const R = RICHTUNGEN;
     const merkspruch = "Beim N beginnen und im Uhrzeigersinn weiter: Nie Ohne Seife Waschen.";

@@ -88,9 +88,12 @@ LS.spiel({
 
   aufgabe(ctx) {
     const x = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].rueckwaerts) ctx.serie("richtung", x.rueckwaerts);
     const umkehr = `${zahlText(x.q)} × ${x.d}${x.r ? ` + ${x.r}` : ""} = ${zahlText(x.a)}`;
     const umkehrZeile = el("div", { class: "umkehr" });
 
+    // Rückwärts die gesuchte Zahl eintippen, sonst Ergebnis und Rest.
+    ctx.schritte(x.rueckwaerts ? LS.tippSchritte(x.a) : LS.tippSchritte(x.q) + LS.tippSchritte(x.r));
     if (x.rueckwaerts) {
       ctx.loesung(umkehr);
       ctx.flaeche.append(

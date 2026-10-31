@@ -44,6 +44,11 @@ const FREI = new Set(LS.spielListen(SPIEL_ID).length ? LS.freieListen(SPIEL_ID) 
 const geschichteFrei = g => FREI.has(GESCHICHTEN_LISTEN[g.stufe]);
 /** Angeboten wird eine Stufe, wenn sie freie Geschichten hat. */
 const ANGEBOTEN = new Set(Object.keys(STUFE_NR).filter(s => GESCHICHTEN.some(g => g.stufe === STUFE_NR[s] && geschichteFrei(g))));
+/** Rechenart der passenden Rechnung: „a + _ = c“ → „+“. */
+const rechenart = g => (g.richtig || g.rechnung).replace(/[^+−·:]/g, "");
+/** Stufen, deren freie Geschichten mehr als eine Rechenart haben (für ctx.serie). */
+const MEHRERE_RECHENARTEN = new Set(Object.keys(STUFE_NR).filter(s =>
+  new Set(GESCHICHTEN.filter(g => g.stufe === STUFE_NR[s] && geschichteFrei(g)).map(rechenart)).size > 1));
 
 /** Ausdruck wie „a · b + c“ mit den Werten ausrechnen (· und : vor + und −). */
 function rechne(ausdruck, werte) {
@@ -140,6 +145,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const { g, werte } = a;
+    if (MEHRERE_RECHENARTEN.has(ctx.stufe)) ctx.serie("rechenart", rechenart(g));
     if (g.bild) {
       // Stufe 1: Bilder zeigen, was passiert
       const bilder = el("div", { class: "bilder", "aria-hidden": "true" });

@@ -107,6 +107,8 @@ const STUFEN_TEXT = {
 };
 // Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
 const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+// Stufen, in denen die freien Listen mehr als eine Aufgabenart hergeben (nur dort ctx.serie("art")).
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()?.art).filter(Boolean)).size > 1));
 
 /** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (koerper.js). */
 function herkunft(a) {
@@ -141,6 +143,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    // Königsstufe: nur zwei Wege durch den Körper — zu wenige, um Fragen-Serien zu brechen.
+    if (MEHRERE_ARTEN.has(ctx.stufe) && ctx.stufe !== "s6") ctx.serie("art", a.art);
     if (a.art === "teil") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst dieser Körperteil?" }), el("div", { class: "bild-gross", text: a.bild }));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 110, hinweis: "Zeig auf deinen eigenen Körper: Wo ist das?", loesung: `Das ist ${a.artikel} ${a.richtig}.` });

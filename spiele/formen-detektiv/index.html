@@ -205,6 +205,10 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    // Stufe 4 hat nur sieben verschiedene Aufgaben (Würfel oder Kugel) — für die Serienbremse zu wenige.
+    if (STUFE[ctx.stufe].arten.length > 1 && ctx.stufe !== "s4") ctx.serie("art", a.art);
+    // Ecken: nur 0, 3 oder 4. (Stufe 1 hat nur drei verschiedene Aufgaben; die Runde endet vorher.)
+    if (a.art === "ecken") ctx.serie("antwort", a.richtig);
     const knapp = STUFE[ctx.stufe].knapp;
     const frage = t => ctx.flaeche.append(el("div", { class: "frage", text: t }));
     // Königsstufe: knappe Hilfe ohne Zählanleitung.

@@ -98,19 +98,21 @@ const ARTEN = {
 
 // Basisklasse 1: Stufe 1 Kindergarten, 2–4 1. Klasse, 5 2. Klasse, 6 Endgegner.
 // Bis Stufe 5 (2. Klasse) tragen alle Antworten ein Bild; erst die Königsstufe nimmt auch Wörter ohne Bild.
-// Je Stufe die Aufgabenarten mit der Liste, aus der sie ihren Inhalt nehmen.
+// Je Stufe die Aufgabenarten: Liste, aus der sie ihren Inhalt nehmen, Art und Erzeuger.
 const BILD_NOETIG = ["s1", "s2", "s3", "s4", "s5"];
 const STUFE = {
-  s1: [["reimgruppen", () => ARTEN.welcheReimt(3)]],
-  s2: [["reimgruppen", () => ARTEN.welcheReimt(4)]],
-  s3: [["reimgruppen", () => ARTEN.paare(3)]],
-  s4: [["reimgruppen", () => ARTEN.paare(4)], ["reimgruppen", () => ARTEN.reimtNicht(true)]],
-  s5: [["reimgruppen", () => ARTEN.reimtNicht(true)], ["reimverse", () => ARTEN.vers(true)]],
-  s6: [["reimverse", () => ARTEN.vers(false)], ["reimgruppen", () => ARTEN.paare(5)], ["reimgruppen", () => ARTEN.paare(6)]],
+  s1: [["reimgruppen", "welcheReimt", () => ARTEN.welcheReimt(3)]],
+  s2: [["reimgruppen", "welcheReimt", () => ARTEN.welcheReimt(4)]],
+  s3: [["reimgruppen", "paare", () => ARTEN.paare(3)]],
+  s4: [["reimgruppen", "paare", () => ARTEN.paare(4)], ["reimgruppen", "reimtNicht", () => ARTEN.reimtNicht(true)]],
+  s5: [["reimgruppen", "reimtNicht", () => ARTEN.reimtNicht(true)], ["reimverse", "vers", () => ARTEN.vers(true)]],
+  s6: [["reimverse", "vers", () => ARTEN.vers(false)], ["reimgruppen", "paare", () => ARTEN.paare(5)], ["reimgruppen", "paare", () => ARTEN.paare(6)]],
 };
 
 /** Aufgabenarten der Stufe, deren Liste frei ist; leer = Stufe wird nicht angeboten. */
-const moeglich = stufe => STUFE[stufe].filter(([l]) => FREI.has(l)).map(([, neu]) => neu);
+const moeglich = stufe => STUFE[stufe].filter(([l]) => FREI.has(l)).map(([, , neu]) => neu);
+/** Wie viele verschiedene Aufgabenarten die Stufe mit den freien Listen hat (ctx.serie nur bei mehreren). */
+const artenIn = stufe => new Set(STUFE[stufe].filter(([l]) => FREI.has(l)).map(([, art]) => art)).size;
 const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => moeglich(s).length));
 
 function aufgabeErzeugen(stufe) {
@@ -202,6 +204,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (artenIn(ctx.stufe) > 1) ctx.serie("art", a.art);
     if (a.art === "paare") {
       paareSpielen(ctx, a);
       if (ctx.nr === 0) ctx.sag("Sprich die Wörter laut. Welche klingen am Ende gleich?");

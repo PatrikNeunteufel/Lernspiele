@@ -124,6 +124,9 @@ const STUFE = {
 // Stufen, in denen jedes Tier ein Bild tragen muss (2. Klasse und die Wirbeltier-Stufe mit Bild).
 const BILD_NOETIG = ["s1", "s2"];
 
+/** Wie viele verschiedene Arten eine Stufe mit den freien Listen hergibt — ctx.serie("art") nur bei mehreren. */
+const ARTEN_JE_STUFE = Object.fromEntries(Object.entries(STUFE).map(([s, neue]) => [s, new Set(neue.map(neu => neu()?.art).filter(Boolean)).size]));
+
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {
   for (const art of mische(STUFE[stufe])) {
@@ -185,6 +188,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
+    if (a.merkmal === "haltung") ctx.serie("antwort", a.richtig); // drei feste Körbe
     if (a.art === "merkmal") {
       ctx.flaeche.append(el("div", { class: "frage", text: `Welches Tier gehört zu den ${KLASSE_TEXT[a.klasse][1]}?` }),
         el("div", { class: "auftrag leise", text: KOERBE[a.klasse].erklaerung }));

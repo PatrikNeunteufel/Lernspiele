@@ -132,6 +132,9 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.stufe !== "s1" && ctx.stufe !== "s3") ctx.serie("art", a.art);
+    // Antwort als Merkmal, wo höchstens drei Noten oder Taktarten zur Wahl stehen.
+    if (a.optionen.length <= 3) ctx.serie("antwort", a.richtig.wert ?? a.richtig);
     if (a.art === "benennen") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst diese Note?" }),
         el("div", { class: "notenblatt" }, NOTEN.zeile({ noten: [{ wert: a.richtig.wert }], linien: 1, mindestBreite: 160 })));

@@ -115,6 +115,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (moeglich(ctx.stufe).length > 1) ctx.serie("art", a.art);
     const zeit = STUFE[ctx.stufe].zeit;
     const tafel = el("div", { class: "tafel", "aria-live": "polite" });
     const zeige = () => {

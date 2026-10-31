@@ -167,6 +167,7 @@ LS.spiel({
     const erlaubt = GELD.filter(g => p.geld.includes(g.rp));
     const auf = aufgabeErzeugen(ctx.stufe);
     const art = auf.art;
+    ctx.serie("art", art); // jede Stufe hat mehrere Arten
 
     // Tastatur für Beträge: Ab Stufe 3 in Rappen getippt (1 3 6 0 → 13 Fr. 60 Rp.), sonst ganze Franken.
     const mitRappen = p.raster < 100;

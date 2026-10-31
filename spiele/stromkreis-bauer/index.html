@@ -282,6 +282,9 @@ const STUFE = {
   s6: [() => ARTEN.welche(3, true), () => ARTEN.welche(3, true), () => ARTEN.kurz(), () => ARTEN.warum(), () => ARTEN.korb(() => true)],
 };
 
+/** Wie viele verschiedene Arten eine Stufe mit den freien Listen hergibt — ctx.serie("art") nur bei mehreren. */
+const ARTEN_JE_STUFE = Object.fromEntries(Object.entries(STUFE).map(([s, neue]) => [s, new Set(neue.map(neu => neu()?.art).filter(Boolean)).size]));
+
 function aufgabeErzeugen(stufe) {
   for (const art of mische(STUFE[stufe])) {
     const a = art();
@@ -459,6 +462,9 @@ LS.spiel({
     const e = s ? ergebnis(s, g) : null;
     const loesung = loesungText(a, s, g, e);
     ctx.kennung(`${a.art}|${a.sch}|${a.ding}`);
+    if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
+    // ja/nein, leitet/nicht; nicht in Stufe 1: Ihre drei geschlossenen Stromkreise reichen nicht für die Bremse.
+    if (a.optionen.length === 2 && ctx.stufe !== "s1") ctx.serie("antwort", a.richtig);
     if (a.art === "korb") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Leitet das den Strom?" }));
       LS.koerbe(ctx, {

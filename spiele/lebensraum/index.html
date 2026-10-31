@@ -107,6 +107,8 @@ const STUFEN_TEXT = {
 };
 // Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
 const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+/** Stufen, in denen die freien Listen mehr als eine Art hergeben (für ctx.serie). */
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()?.art).filter(Boolean)).size > 1));
 
 /** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (tiere.js, nahrung.js). */
 function herkunft(a) {
@@ -158,6 +160,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    if (a.art === "zuordnen" && a.raeume.length > 1 && a.raeume.length <= 3) ctx.serie("antwort", a.w.lebensraum);
     if (a.art === "kette") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wer wird von wem gefressen? Fang mit der Pflanze an." }));
       LS.reihenfolge(ctx, {

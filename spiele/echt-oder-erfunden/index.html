@@ -125,6 +125,8 @@ const STUFEN_TEXT = {
   s6: "Märchen, Sage, Fabel oder Sachtext?",
 };
 const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+// Stufen, in denen die freien Listen mehr als eine Aufgabenart hergeben (nur dort ctx.serie("art")).
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()?.art).filter(Boolean)).size > 1));
 
 // ---------- Prüfung (tools/pruefe_spiele.js) ----------
 
@@ -174,8 +176,10 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    if (a.optionen.length === 2) ctx.serie("antwort", a.richtig); // echt/erfunden, stimmt/erfunden
     const f = ctx.flaeche;
-    const text = (t, klasse = "sachtext") => f.append(el("div", { class: klasse, text: t }));
+    const text =(t, klasse = "sachtext") => f.append(el("div", { class: klasse, text: t }));
     if (ctx.nr === 0) ctx.sag("Lies genau. Könnte das wirklich so passieren?");
     if (a.art === "aussage") {
       const [bild, satz] = AUSSAGEN[a.nr];

@@ -161,6 +161,8 @@ const STUFEN_TEXT = {
   s6: "Reimschema in Strophen, ordnen, zählen.",
 };
 const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+// Stufen, in denen die freien Listen mehr als eine Aufgabenart hergeben (nur dort ctx.serie("art")).
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()?.art).filter(Boolean)).size > 1));
 
 // ---------- Prüfung (tools/pruefe_spiele.js) ----------
 
@@ -235,6 +237,12 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    // Strophen oder Verse zählen: nur Gedichte mit Strophen fragen beides.
+    if (a.art === "zaehlen" && STROPHEN.length) ctx.serie("was", a.was);
+    // Reimschema: drei feste Antworten; Strophen erst in der Königsstufe.
+    const schemata = new Set([...VIERER.map(([l]) => l), ...(ctx.stufe === "s6" && STROPHEN.length ? VIER : [])]);
+    if (a.art === "schema" && schemata.size > 1) ctx.serie("antwort", a.richtig);
     const f = ctx.flaeche;
     const frage = t => f.append(el("div", { class: "frage", text: t }));
     if (ctx.nr === 0) ctx.sag("Lies die Verse halblaut vor, dann hörst du die Reime.");

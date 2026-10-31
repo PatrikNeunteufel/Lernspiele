@@ -87,6 +87,8 @@ function aufgabeErzeugen(stufe) {
   if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
   return waehle(arten)();
 }
+// Stufen, in denen die freien Listen mehr als eine Aufgabenart ergeben (nur dort ctx.serie("art")).
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(moeglich(s).map(neu => neu().art)).size > 1));
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a) {
@@ -115,6 +117,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     if (a.art === "zwilling") {
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Welcher kleine Buchstabe ist der Zwilling?" }), el("div", { class: "vorlage" }, el("div", { class: "gross", text: a.gross })));
       const box = LS.auswahl(ctx, {

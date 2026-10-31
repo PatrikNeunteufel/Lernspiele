@@ -80,24 +80,24 @@ const ARTEN = {
     const x = waehle(I.filter(i => !mitBild || i.bild));
     if (!x) return null;
     const andere = mische(Object.keys(SPIELARTEN).filter(s => s !== x.spielart)).slice(0, 2);
-    return { art: "korb", x, richtig: x.spielart, koerbe: mische([x.spielart, ...andere]), info: SPIELARTEN };
+    return { art: "korb", nach: "spielart", x, richtig: x.spielart, koerbe: mische([x.spielart, ...andere]), info: SPIELARTEN };
   },
   gruppe() {
     const x = waehle(I);
     if (!x) return null;
-    return { art: "korb", x, richtig: x.gruppe, koerbe: ["Schlaginstrument", "Saiteninstrument", "Blasinstrument", "Tasteninstrument"], info: GRUPPEN };
+    return { art: "korb", nach: "gruppe", x, richtig: x.gruppe, koerbe: ["Schlaginstrument", "Saiteninstrument", "Blasinstrument", "Tasteninstrument"], info: GRUPPEN };
   },
   genauer() {
     const x = waehle(I.filter(i => i.genauer));
     if (!x) return null;
     const paar = x.genauer.includes("blas") ? ["Holzblasinstrument", "Blechblasinstrument"] : ["Streichinstrument", "Zupfinstrument"];
-    return { art: "korb", x, richtig: x.genauer, koerbe: paar, info: GRUPPEN };
+    return { art: "korb", nach: "genauer", x, richtig: x.genauer, koerbe: paar, info: GRUPPEN };
   },
   /** Königsstufe: alle vier genaueren Gruppen; nurFallen = Instrumente aus Metall, die zu den Holzblasinstrumenten zählen. */
   genauerAlle(nurFallen) {
     const x = waehle(I.filter(i => i.genauer && (!nurFallen || FALLEN.test(i.name))));
     if (!x) return null;
-    return { art: "korb", x, richtig: x.genauer, koerbe: mische(["Holzblasinstrument", "Blechblasinstrument", "Streichinstrument", "Zupfinstrument"]), info: GRUPPEN };
+    return { art: "korb", nach: "genauer", x, richtig: x.genauer, koerbe: mische(["Holzblasinstrument", "Blechblasinstrument", "Streichinstrument", "Zupfinstrument"]), info: GRUPPEN };
   },
   frage() {
     if (!FRAGEN.length) return null;
@@ -136,6 +136,10 @@ const STUFEN_TEXT = {
 };
 // Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
 const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+// Aufgabenart für ctx.serie: bei Körben, wonach sortiert wird.
+const artVon = a => a.nach || a.art;
+// Stufen, in denen die freien Listen mehr als eine Aufgabenart hergeben (nur dort ctx.serie("art")).
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()).filter(Boolean).map(artVon)).size > 1));
 
 /** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (instrumente.js). */
 function herkunft(a) {
@@ -167,6 +171,9 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", artVon(a));
+    // Zwei feste Körbe (Holz/Blech, Streichen/Zupfen); mit allen vier Körben (Königsstufe) nicht.
+    if (a.nach === "genauer" && a.koerbe.length === 2) ctx.serie("antwort", a.richtig);
     if (a.art === "name") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst dieses Instrument?" }), el("div", { class: "bild-gross" }, bildVon(a.x)));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 130, hinweis: "Schau genau: Hat es Saiten, Tasten, ein Mundstück — oder schlägt man darauf?", loesung: `Das ist: ${a.x.name}.` });

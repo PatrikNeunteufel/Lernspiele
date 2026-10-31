@@ -531,8 +531,12 @@ LS.spiel({
   },
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (Object.keys(STUFE[ctx.stufe].arten).length > 1) ctx.serie("art", a.art);
     const loesung = loesungText(a);
     ctx.kennung(JSON.stringify([a.art, a.feld.hin, a.start, a.ziel || null, a.prog || null, a.wenn || null]));
+    // Legen: je Karte des kürzesten Programms ein Tipp (mit Wiederholung einer mehr), dann ▶.
+    // Befolgen und Fehler finden: ein Feld oder eine Karte antippen.
+    ctx.schritte(a.loes ? a.loes.reduce((s, t) => s + (t.n > 1 ? 2 : 1), 0) + 1 : 1);
     if (a.art === "legen" || a.art === "legenWdh") zeigeLegen(ctx, a, loesung);
     else if (a.art === "fehler") zeigeFehler(ctx, a, loesung);
     else zeigeBefolgen(ctx, a, loesung);

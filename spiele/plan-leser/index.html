@@ -404,6 +404,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("art", a.art);
+    if (a.art === "abbiegen") ctx.serie("antwort", a.richtig);
     const p = a.plan;
     const name = d => ding(p.liste, d)[0];
     const dativ = d => ding(p.liste, d)[1];

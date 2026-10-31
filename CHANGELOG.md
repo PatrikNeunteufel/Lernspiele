@@ -72,3 +72,29 @@
   Lernziel-Kürzel blenden beim Antippen ihren Klartext ein.
 - Prüfliste Teile 22–39; Lernziele in docs/lernziele/lehrplan_sg_session3.md.
 - Session-Abschluss: Report docs/report/LERN_Session3_2026-10-31.md, Handover nachgeführt.
+
+## 2026-10-31 — LERN_Session4
+- Endlos-Timer (Entscheide F1 a, F2 a): Die Zeit nähert sich einem Boden je Aufgabe (1,2 s + 0,5 s je
+  Handgriff + Wartezeit), je richtige Aufgabe fallen 8 % der restlichen Spanne weg; ersetzt
+  „4 % knapper, Untergrenze 40 % und 3 s“. Anzeige auf Zehntelsekunden, unter 10 s mit Komma.
+- Rahmen: `ctx.schritte(n)`, `ctx.wartezeit(s)`, `LS.tippSchritte(wert)`; die Bausteine zählen ihre
+  Handgriffe selbst; der Timer startet erst, wenn die Aufgabe gezeichnet ist.
+- Alle 34 Endlos-Spiele nennen ihre Handgriffe je Aufgabe; Hoch-Tief-Ohr dazu die Abspielzeit.
+- Testskript: Endlos-Aufgaben ohne `ctx.schritte` und mit weniger Klicks gelöste Aufgaben sind Fehler;
+  die Übersicht zeigt die Handgriffe je Stufe. `docs/rahmen.md` Abschnitte 4.2, 4.3, 7, 8.
+- `.claude/launch.json`: dritte Vorschau `lernspiele-3` auf Port 8769.
+- Behoben: Endlos-Runden zählten erst beim Antippen von „Zum Ergebnis“; jetzt sofort beim Rundenende
+  gespeichert (einmal je Runde). Das Testskript prüft es.
+- Endlos (Entscheid E1 a): Verlassen mitten in der Serie (`pagehide`, `visibilitychange`) speichert sie
+  als Zwischenstand mit `abgebrochen: true`; Weiterspielen ersetzt ihn. Testskript stellt das Verlassen nach.
+- Stellen-Detektiv (Entscheid SD1 a): Stufen 1–3 fragen nur „Wie heisst die Stelle unter der Lupe?“
+  (Lernziel G1), umgekehrt erst ab Stufe 4 (bisher wegen der Umstellung auf sechs Stufen auch in Stufe 1).
+  Königsstufe zufällig, höchstens drei Aufgaben derselben Richtung hintereinander.
+- Serienbremse im Rahmen (Vorgabe Patrik 2026-11-01): `ctx.serie(name, wert)` meldet zufällige Merkmale
+  (Richtung, Aufgabenart, Antwort bei wenigen festen Antworten); der Rahmen zieht neu statt eines vierten
+  gleichen in Folge (`LS.SERIE_MAX` = 3). Testskript prüft Serien je Runde.
+- 75 Spiele melden ihre zufälligen Merkmale mit `ctx.serie` (Richtung, Aufgabenart, Antwort bei
+  höchstens drei festen Antworten); Inhaltslisten-Spiele melden nur in Stufen, deren freie Listen
+  mehrere Werte hergeben.
+- Session-Abschluss: Report docs/report/LERN_Session4_2026-10-31.md, Handover nachgeführt
+  (LERN-25 bis LERN-27). Gesamtlauf des Testskripts ohne Fehler.

@@ -184,6 +184,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].arten.length > 1) ctx.serie("art", a.art);
     const proZeile = {};
     for (const k of a.ziel) { const [r, c] = teile(k); (proZeile[r] ||= []).push(c + 1); }
     ctx.loesung("Färbe " + Object.keys(proZeile).map(r => `Zeile ${+r + 1}: Spalte ${proZeile[r].sort((x, y) => x - y).join(", ")}`).join(" · "));

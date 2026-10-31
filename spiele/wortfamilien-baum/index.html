@@ -176,6 +176,8 @@ const STUFE = Object.fromEntries(Object.entries(VARIANTEN)
 const ERLAUBT = { s1: ["zugehoerig"], s2: ["ausreisser"], s3: ["baum", "stamm"], s4: ["baum", "ausreisser"], s5: ["baum", "ausreisser"], s6: ["alle"] };
 
 function aufgabeErzeugen(stufe) { return waehle(STUFE[stufe])(); }
+/** Je Stufe die Zahl verschiedener Aufgabenarten (jede Variante liefert immer dieselbe Art). */
+const ARTEN_ZAHL = Object.fromEntries(Object.entries(STUFE).map(([s, v]) => [s, new Set(v.map(f => f().art)).size]));
 
 // ---------- Prüfung der Wortlisten (einmal) und je Aufgabe ----------
 
@@ -289,6 +291,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (ARTEN_ZAHL[ctx.stufe] > 1) ctx.serie("art", a.art);
     const { fam } = a;
     const mitStamm = MIT_STAMM[ctx.stufe];
 

@@ -110,7 +110,9 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
-    const folge = () => [{ midi: NOTEN.midi(a.p, a.vorzeichen || 0), dauer: 0.9 }];
+    if (STUFE[ctx.stufe].umgekehrt) ctx.serie("art", a.art);
+    if (STUFE[ctx.stufe].vorzeichen && a.art === "benennen") ctx.serie("vorzeichen", a.vorzeichen); // ohne, ♯ oder ♭
+    const folge =() => [{ midi: NOTEN.midi(a.p, a.vorzeichen || 0), dauer: 0.9 }];
     // Beim Treffer die Note vorspielen — so hängen Bild und Klang zusammen.
     const vorspielen = () => NOTEN.spiele(folge());
     if (a.art === "finden") {

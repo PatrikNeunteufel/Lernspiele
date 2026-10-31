@@ -1,15 +1,18 @@
 # Handover — Lernspiele
 
 ## Stand
-**2026-10-31, nach LERN_Session3** ([Report](report/LERN_Session3_2026-10-31.md)):
+**2026-11-01, nach LERN_Session4** ([Report](report/LERN_Session4_2026-10-31.md)):
 - **Spiele:** 84 Spiele in 28 Themen, je sechs Stufen bezogen auf eine Basisklasse. Neu in dieser
   Sitzung: 28 Spiele (9 zum Orientierungspunkt der 4. Klasse, 19 aus den übrigen Ideen), siehe
   [lehrplan_sg_session3.md](lernziele/lehrplan_sg_session3.md). Offen sind noch 3 Ideen.
 - **Tests:** `node tools/pruefe_spiele.js` prüft alle 504 Kombinationen Spiel × Stufe, dazu den
-  Endlos-Modus und jede Inhaltsliste als Kind. Neu prüft das Skript:
+  Endlos-Modus und jede Inhaltsliste als Kind; Stand 2026-11-01: „Keine Fehler.“ (11 Minuten), ein
+  Hinweis bei Flächen-Pixel s6. Das Skript prüft unter anderem:
   - Hinweise, die die Lösung verraten (LERN-19);
   - die Testhilfen;
-  - Rahmen-Klassen, die ein Spiel im eigenen Stil umdefiniert.
+  - Rahmen-Klassen, die ein Spiel im eigenen Stil umdefiniert;
+  - Handgriffe der Endlos-Aufgaben, Speichern der Rekorde, Verlassen mitten in der Serie;
+  - die Serienbremse (`ctx.serie`).
 - **Startseite neu** (Entscheide L1 a bis L4 a, [rahmen.md](rahmen.md) Abschnitt 6):
   - Anmeldung: Kinder ohne PIN, die Aufsicht mit PIN.
   - Tabs: Spiele, Profil, Statistik, Verwaltung.
@@ -21,22 +24,28 @@
 - **Wiederholungen:** In einer Runde höchstens eine Aufgabe ein zweites Mal, nie direkt
   hintereinander; kleine Stufen haben kürzere Runden.
 - **Endlos-Modus:** 34 Spiele, die ihre Aufgaben berechnen, bis zum ersten Fehler, mit oder ohne
-  Timer; Rekorde und Rangliste (rahmen.md Abschnitt 7).
+  Timer; Rekorde und Rangliste (rahmen.md Abschnitt 7). Mit Timer nähert sich die Zeit einem Boden
+  je Aufgabe aus ihren Handgriffen (F1 a, F2 a). Gespeichert wird beim Rundenende und beim Verlassen
+  mitten in der Serie (E1 a).
+- **Serienbremse:** Zufällige Merkmale (Richtung, Aufgabenart, Antwort bei höchstens drei festen
+  Antworten) höchstens dreimal hintereinander, in 75 Spielen (`ctx.serie`, `LS.SERIE_MAX`).
 - **Sprachausgabe:** `LS.sprich`, `LS.spielMitStimme` (Listen & Tap, Spelling-Bee); britische Stimme
   bevorzugt, ohne Stimme keine Runde.
 - **Offen:**
   - Inhalte und Spiele prüfen; Stand in [checkliste.md](checkliste.md).
   - Noch kein Kind hat gespielt.
   - Die neue Startseite und die neuen Spiele hat noch niemand im Browser angesehen.
-  - Der letzte Teil von Session 3 (zweites Paket, Endlos, Sprachausgabe) ist nicht committet.
+  - Grundzeit und Schrittzeit des Endlos-Bodens sind Annahmen bis zur Testrunde (LERN-4).
 
 **Nächste Session — Plan:**
 1. Startseite und die 28 neuen Spiele auf Desktop, Tablet und Handy ansehen, dazu die
-   Sprachausgabe auf dem Tablet der Kinder. Danach im Katalog
-   `geprueft` eintragen und die Checkliste neu erzeugen.
+   Sprachausgabe und das Speichern beim Ausschalten (Endlos) auf dem Tablet der Kinder. Danach im
+   Katalog `geprueft` eintragen und die Checkliste neu erzeugen.
 2. LERN-11: die Prüfliste einarbeiten; geprüfte Listen im Katalog `geprueft`.
-3. LERN-4: Testrunde mit den Kindern.
-4. Vor LERN-17 (GitHub Pages): Datenschutz-Scan des Repos.
+3. LERN-4: Testrunde mit den Kindern; danach den Endlos-Boden aus gemessenen Zeiten eichen (LERN-25).
+4. Offene Entscheide aus LERN_Session4: Flächen-Pixel s6, Speichern der gewöhnlichen Runde vor
+   „Weiter“ (LERN-27).
+5. Vor LERN-17 (GitHub Pages): Datenschutz-Scan des Repos.
 
 Technik: HTML/CSS/JS ohne Build (Entscheid LERN-1). Vertrag zwischen Rahmen und Spielen: [rahmen.md](rahmen.md).
 Übersicht aller Spiele und was zu prüfen ist: [checkliste.md](checkliste.md) (erzeugt mit `node tools/checkliste.js`). Gemeinsamer Rahmen `spiele/gemeinsam/`:
@@ -112,3 +121,6 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-22 | Startseite mit Anmeldung, Tabs, Gruppen, Favoriten; Rollen Kind/Aufsicht mit PIN (L1–L3 a) | erledigt 2026-10-31 (LERN_Session3), im Browser noch nicht angesehen | rahmen.md Abschnitt 6, start/ |
 | LERN-23 | Prüfstand und Freigabe je Spiel und Inhaltsliste (L4 a) | erledigt 2026-10-31 (LERN_Session3) | katalog.js (geprueft, listen), Tab Verwaltung |
 | LERN-24 | Checkliste Klasse → Fach → Thema → Spiel | erledigt 2026-10-31 (LERN_Session3) | checkliste.md, tools/checkliste.js |
+| LERN-25 | Endlos-Timer: Boden je Aufgabe aus Handgriffen (F1 a, F2 a); Konstanten eichen | in Arbeit seit 2026-10-31 (LERN_Session4); gebaut, Eichung nach LERN-4 | rahmen.md Abschnitt 7, `ENDLOS_TEMPO` in spiel.js |
+| LERN-26 | Serienbremse für zufällige Merkmale (`ctx.serie`, höchstens 3 gleiche) | erledigt 2026-11-01 (LERN_Session4) | rahmen.md Abschnitt 4.2; Grenzfälle im Report LERN_Session4 |
+| LERN-27 | Gewöhnliche Runde erst nach „Weiter“ gespeichert, wenn die Eule die letzte Aufgabe auflöst | offen (Entscheid Patrik) | Report LERN_Session4, Offene Punkte |

@@ -155,9 +155,11 @@ LS.spiel({
   aufgabe(ctx) {
     const [a, b] = STUFE[ctx.stufe].paar();
     const richtig = a.wert < b.wert ? "<" : a.wert > b.wert ? ">" : "=";
+    ctx.serie("antwort", richtig);
     const rechnen = STUFE[ctx.stufe].rechnen;
     const loesung = `${a.text} ${richtig} ${b.text}${rechnen ? ` (${zahlText(a.wert)} ${richtig} ${zahlText(b.wert)})` : ""}`;
     ctx.loesung(loesung);
+    ctx.schritte(1); // ein Zeichen antippen
     const seite = x => x.punkte ? el("div", { class: "seite" }, el("div", { class: "punkte", text: x.punkte })) : el("div", { class: "seite", text: x.text });
     const mitte = el("div", { class: "kroko-mitte", text: "?" });
     ctx.flaeche.append(el("div", { class: "vergleich" }, seite(a), mitte, seite(b)));

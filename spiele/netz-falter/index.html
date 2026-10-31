@@ -360,6 +360,7 @@ function tippAufgabe(ctx, { netz, svgOpt, tippbar, richtig, hinweis, loesung }) 
   const { svg, flaechen } = netzSvg(netz, svgOpt);
   ctx.flaeche.append(el("div", { class: "netz" }, svg));
   ctx.loesung(loesung);
+  ctx.schritte(1); // eine Fläche antippen
   let fertig = false;
   for (const i of tippbar) {
     const f = flaechen[i];
@@ -390,6 +391,8 @@ LS.spiel({
   },
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (new Set(STUFE[ctx.stufe].arten).size > 1) ctx.serie("art", a.art);
+    if (["janein", "quaderJanein", "koerperJanein"].includes(a.art)) ctx.serie("antwort", a.richtig);
     const frage = a.art === "koerperJanein"
       ? `Kann man aus diesem Netz ${a.k.typ === "prisma" ? "ein <b>Dreiecksprisma</b>" : "eine <b>Pyramide</b>"} falten?`
       : FRAGEN[a.art];

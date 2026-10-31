@@ -82,6 +82,9 @@ const STUFE = {
   s6: [() => ARTEN.wasser(), () => ARTEN.material(5), () => ARTEN.frageBis(6), () => ARTEN.frageBis(6)],
 };
 
+/** Wie viele verschiedene Arten eine Stufe mit den freien Listen hergibt — ctx.serie("art") nur bei mehreren. */
+const ARTEN_JE_STUFE = Object.fromEntries(Object.entries(STUFE).map(([s, neue]) => [s, new Set(neue.map(neu => neu()?.art).filter(Boolean)).size]));
+
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {
   for (const art of mische(STUFE[stufe])) {
@@ -132,6 +135,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
+    if (a.art === "wasser") ctx.serie("antwort", a.richtig);
     if (a.art === "wasser") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Was passiert im Wasser?" }));
       LS.koerbe(ctx, {

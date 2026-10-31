@@ -12,6 +12,13 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8767", "--bind", "127.0.0.1"],
       "port": 8767
+    },
+    {
+      "name": "lernspiele-3",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8769", "--bind", "127.0.0.1"],
+      "port": 8769,
+      "autoPort": false
     }
   ]
 }

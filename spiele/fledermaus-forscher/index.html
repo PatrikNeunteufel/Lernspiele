@@ -109,6 +109,8 @@ const STUFEN_TEXT = {
 };
 // Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
 const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+// Stufen, in denen die freien Listen mehr als eine Aufgabenart hergeben (nur dort ctx.serie("art")).
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()?.art).filter(Boolean)).size > 1));
 
 /** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (fakten.js). */
 function herkunft(a) {
@@ -143,7 +145,12 @@ LS.spiel({
   aufgabe(ctx) {
     if (ctx.nr === 0) gebraucht = new Set();
     const a = aufgabeErzeugen(ctx.stufe);
-    const kopf = el("div", { class: "nacht" }, el("div", { class: "bild", text: "🦇" }));
+    // Stufe 1 hat weniger verschiedene Aufgaben als eine Runde — dort liefe die Serienbremse ins Leere.
+    if (ctx.stufe !== "s1") {
+      if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+      if (a.art === "aussage") ctx.serie("antwort", a.a.stimmt);
+    }
+    const kopf =el("div", { class: "nacht" }, el("div", { class: "bild", text: "🦇" }));
     ctx.flaeche.append(kopf);
 
     if (a.art === "aussage") {

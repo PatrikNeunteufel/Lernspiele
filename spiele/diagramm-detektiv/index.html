@@ -417,6 +417,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    if (new Set(STUFE[ctx.stufe].arten).size > 1) ctx.serie("art", a.art);
     const k = i => kat(a, i);
     const einheit = UMFRAGEN[a.u].einheit;
     const f = ctx.flaeche;
