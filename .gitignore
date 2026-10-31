@@ -1,0 +1,11 @@
+# Visual Studio: Arbeitsbereich-Zustand und Cache, nicht Teil des Projekts.
+.vs/
+
+# Fotos von Lernzielblättern bleiben lokal (können Handschrift von Kindern zeigen);
+# ins Repo kommt nur die Abschrift in docs/lernziele/. Entscheid Patrik 2026-10-31.
+material/
+*.jpeg
+*.jpg
+
+# Gesicherte Spielerdaten aus der Statistik (Namen und Lernstand der Kinder) gehören nicht ins Repo.
+lernspiele-*.json

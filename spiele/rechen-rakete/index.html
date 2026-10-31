@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rechen-Rakete</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .start-zeile { display: flex; gap: 16px; align-items: stretch; }
+
+  /* Flugbahn: die Rakete steigt mit jeder gelösten Aufgabe */
+  .bahn {
+    position: relative;
+    flex: none;
+    width: 58px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #1e1b4b, #4338ca 60%, #93c5fd);
+    overflow: hidden;
+  }
+
+  .bahn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 12%, #fff 0 1.5px, transparent 2px),
+      radial-gradient(circle at 70% 25%, #fff 0 1px, transparent 1.5px),
+      radial-gradient(circle at 40% 40%, #fff 0 1px, transparent 1.5px),
+      radial-gradient(circle at 65% 6%, #fff 0 1.5px, transparent 2px);
+  }
+
+  .rakete {
+    position: absolute;
+    left: 50%;
+    font-size: 34px;
+    transform: translate(-50%, 50%) rotate(-45deg);
+    transition: bottom .8s cubic-bezier(.3, 1.4, .5, 1);
+  }
+
+  .inhalt { flex: 1; min-width: 0; }
+
+  .rechnung {
+    text-align: center;
+    font-size: clamp(30px, 7.5vw, 58px);
+    font-weight: 900;
+    margin: 4px 0 14px;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🚀 Rechen-Rakete</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.3: Stufe b „bis 100 ohne 10er-Übergänge addieren und subtrahieren“,
+// Stufe c „im Zahlenraum bis 100 … addieren und subtrahieren“, Stufe e „bis 4 Wertziffern im Kopf
+// addieren und subtrahieren (z.B. 320'000 + 38'000; 402 + 90)“ und multiplizieren/dividieren.
+// Wertziffern = Ziffern ungleich 0 (320 000 hat zwei: 3 und 2).
+
+const { zahlText, zufall, waehle, el, zerlege, STELLEN } = LS;
+
+/** Zahl mit genau w Wertziffern (aufeinanderfolgend, erste ≠ 0), verschoben um 10^stelle. */
+function mitWertziffern(w, stelle) {
+  let n = zufall(1, 9);
+  for (let i = 1; i < w; i++) n = n * 10 + zufall(1, 9);
+  return n * 10 ** stelle;
+}
+
+const wertziffern = n => String(n).replace(/0/g, "").length;
+
+// Je Stufe: Zahlenraum (grösste Zahl a mindestens 'min', Ergebnis unter 'max'), Rechenarten.
+const STUFE = {
+  s1: { min: 11, max: 100, arten: ["+", "−"] },
+  s2: { min: 15, max: 1000, arten: ["+", "−"] },
+  s3: { min: 300, max: 10000, arten: ["+", "−"] },
+  s4: { min: 10000, max: 1000000, arten: ["+", "−"] },
+  s5: { min: 100, max: 1000000, arten: ["+", "−", "×", ":"] },
+};
+
+function aufgabeErzeugen(stufe) {
+  const { min, max, arten } = STUFE[stufe];
+  const art = waehle(arten);
+  for (;;) {
+    let a, b;
+    if (stufe === "s1") {
+      // bis 100 ohne Zehnerübergang: Einer bzw. Zehner getrennt rechnen
+      a = zufall(11, 89);
+      const plusZehner = Math.random() < 0.5;
+      if (art === "+") b = plusZehner ? 10 * zufall(1, 9 - Math.floor(a / 10)) : zufall(1, 9 - (a % 10));
+      else b = plusZehner ? 10 * zufall(1, Math.floor(a / 10) - 1 || 1) : zufall(1, a % 10 || 1);
+      // wirklich ohne Übergang: Einer und Zehner je für sich rechenbar
+      const ueber = art === "+" ? (a % 10) + (b % 10) > 9 || a + b > 99 : (a % 10) < (b % 10) || a - b < 1;
+      if (!b || ueber) continue;
+    } else if (stufe === "s2") {
+      // bis 100 mit Übergang oder Hunderter/Zehner bis 1000 (340 + 50, 700 − 30)
+      if (Math.random() < 0.5) { a = zufall(15, 85); b = zufall(6, 39); }
+      else { a = zufall(11, 95) * 10; b = zufall(1, 9) * 10; }
+    } else if (art === "+" || art === "−") {
+      // insgesamt höchstens 4 Wertziffern; b liegt an derselben oder einer tieferen Stelle als a
+      const wa = zufall(1, 3), wb = zufall(1, 4 - wa);
+      const hoch = Math.max(wa, Math.floor(Math.log10(max)) - 1);
+      const sa = zufall(0, Math.max(0, hoch - wa));
+      const sb = zufall(Math.max(0, sa - 2), sa + wa - 1);
+      a = mitWertziffern(wa, sa);
+      b = mitWertziffern(wb, Math.max(0, sb - wb + 1));
+    } else if (art === "×") {
+      // z. B. 40 × 300, 25 × 40: Wertziffern zusammen höchstens 4
+      const wa = zufall(1, 2), wb = zufall(1, 2);
+      a = mitWertziffern(wa, zufall(0, 2));
+      b = mitWertziffern(wb, zufall(0, 2));
+    } else {
+      // z. B. 2400 : 6 — Teiler einstellig, Ergebnis mit 1–2 Wertziffern
+      b = zufall(2, 9);
+      const q = mitWertziffern(zufall(1, 2), zufall(0, 3));
+      a = q * b;
+    }
+    if (art === "−" && b > a) [a, b] = [b, a];
+    const ergebnis = art === "+" ? a + b : art === "−" ? a - b : art === "×" ? a * b : a / b;
+    if (ergebnis <= 0 || ergebnis >= max || a >= max || Math.max(a, ergebnis) < min) continue;
+    if (stufe !== "s1" && stufe !== "s2" && wertziffern(a) + wertziffern(b) > 4) continue;
+    if (art === "−" && a === b) continue;
+    // Ab Stufe 3 keine trivialen Aufgaben wie 330 + 1: b höchstens zwei Stellen kleiner als a.
+    if ((art === "+" || art === "−") && !["s1", "s2"].includes(stufe) && b * 100 < a) continue;
+    return { a, b, art, ergebnis };
+  }
+}
+
+/** Hinweis: den zweiten Summanden in seine Stellen zerlegen (320 000 + 30 000 + 8 000). */
+function hinweisFuer(x) {
+  if (x.art === "×") return `Rechne ohne Nullen (${String(x.a).replace(/0+$/, "")} × ${String(x.b).replace(/0+$/, "")}) und hänge dann alle Nullen an.`;
+  if (x.art === ":") return `Welche Zahl mal ${x.b} gibt ${zahlText(x.a)}? Rechne zuerst ohne die Nullen.`;
+  const teile = STELLEN.filter(st => zerlege(x.b)[st.k]).map(st => zerlege(x.b)[st.k] * st.wert);
+  if (teile.length < 2) return `Rechne Stelle für Stelle. Welche Stelle ändert sich bei ${x.art} ${zahlText(x.b)}?`;
+  return `Zerlege: ${zahlText(x.a)} ${x.art} ${teile.map(zahlText).join(` ${x.art} `)}`;
+}
+
+LS.spiel({
+  id: "rechen-rakete",
+  einleitung: "3, 2, 1 … Start! Jede richtige Antwort bringt die Rakete höher ins All. Rechne im Kopf!",
+  anzahl: 8,
+  stufen: {
+    s1: "Bis 100 ohne Zehnerübergang: 43 + 20, 57 − 4.",
+    s2: "Bis 100 mit Übergang und bis 1000 mit Zehnern: 47 + 28, 340 + 50.",
+    s3: "Mit Wertziffern bis 10 000: 402 + 90, 3400 − 600.",
+    s4: "Bis zur Million: 320 000 + 38 000.",
+    s5: "Auch mal und geteilt: 40 × 300, 2400 : 6.",
+  },
+
+  aufgabe(ctx) {
+    const x = aufgabeErzeugen(ctx.stufe);
+    const bahn = el("div", { class: "bahn", "aria-hidden": "true" });
+    const rakete = el("div", { class: "rakete", text: "🚀" });
+    bahn.append(rakete);
+    const hoehe = n => `${8 + (n / 8) * 84}%`;
+    rakete.style.bottom = hoehe(ctx.nr);
+
+    const inhalt = el("div", { class: "inhalt" },
+      el("div", { class: "rechnung", text: `${zahlText(x.a)} ${x.art} ${zahlText(x.b)} =` }));
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergebnis" });
+    inhalt.append(anzeige);
+    ctx.flaeche.append(el("div", { class: "start-zeile" }, bahn, inhalt));
+
+    const tasten = LS.tastatur({
+      anzeige,
+      maxStellen: 7,
+      onOk(w) {
+        if (w === x.ergebnis) {
+          tasten.gesperrt = true;
+          anzeige.classList.add("richtig");
+          rakete.style.bottom = hoehe(ctx.nr + 1);
+          ctx.richtig(ctx.nr === 7 ? "Die Rakete ist im All! 🌟" : undefined);
+          return;
+        }
+        anzeige.classList.add("falsch");
+        ctx.falsch(hinweisFuer(x), `${zahlText(x.a)} ${x.art} ${zahlText(x.b)} = ${zahlText(x.ergebnis)}`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag("Rechne im Kopf und tipp das Ergebnis ein.");
+  },
+});
+</script>
+</body>
+</html>

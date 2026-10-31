@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lernspiele</title>
+<link rel="stylesheet" href="spiele/gemeinsam/stil.css">
+<style>
+  .titel { text-align: center; padding: 20px 16px 4px; }
+  .titel h1 { font-size: clamp(34px, 7vw, 56px); margin: 0; letter-spacing: 1px; }
+  .titel h1 span:nth-child(7n+1) { color: var(--deko-1); }
+  .titel h1 span:nth-child(7n+2) { color: var(--deko-2); }
+  .titel h1 span:nth-child(7n+3) { color: var(--deko-3); }
+  .titel h1 span:nth-child(7n+4) { color: var(--deko-4); }
+  .titel h1 span:nth-child(7n+5) { color: var(--deko-5); }
+  .titel h1 span:nth-child(7n+6) { color: var(--deko-6); }
+  .titel h1 span:nth-child(7n+7) { color: var(--deko-1); }
+
+  .leiste { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .leiste .rechts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .knopf.klein { font-size: 18px; min-height: 48px; padding: 8px 16px; }
+  a.knopf { text-decoration: none; display: inline-flex; align-items: center; }
+
+  /* Profil */
+  .profil { margin-bottom: 16px; }
+  .profil h2 { margin: 0 0 12px; font-size: 22px; }
+  .profil-felder { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
+  .profil label { font-weight: 800; display: flex; flex-direction: column; gap: 4px; font-size: 16px; }
+  .profil input[type=number], .profil select {
+    font: inherit; font-size: 18px; border: 3px solid var(--rand); border-radius: 12px; padding: 6px 10px; min-width: 110px; max-width: 100%; background: #fff;
+  }
+  .timer-details { margin: 6px 0 14px; }
+  .timer-details summary { cursor: pointer; font-weight: 700; color: var(--knopf); }
+  .tabelle-rahmen { overflow-x: auto; }
+  .timer-tabelle { display: grid; grid-template-columns: minmax(150px, 1.6fr) 110px repeat(5, 74px); gap: 6px 8px; align-items: center; margin-top: 10px; min-width: 640px; }
+  .timer-tabelle b { font-size: 14px; color: var(--text-leise); }
+  .timer-tabelle select { min-width: 0; width: 100%; font-size: 15px; }
+  .timer-tabelle input.sek { width: 64px; font: inherit; font-size: 16px; border: 2px solid var(--rand); border-radius: 10px; padding: 4px 6px; }
+  .timer-tabelle .vorschlag { display: block; font-size: 12px; color: var(--text-leise); }
+  .fokus-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 8px; margin: 8px 0 14px; }
+  .fokus-liste label { flex-direction: row; align-items: flex-start; gap: 8px; font-weight: 600; background: #f6f7fd; border-radius: 12px; padding: 8px 10px; cursor: pointer; }
+  .fokus-liste input { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+  .fokus-liste b { font-weight: 900; }
+
+  /* Filter */
+  .filter { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .filter-zeile { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .filter-zeile > span { font-weight: 900; min-width: 64px; }
+  .chip {
+    border: none; border-radius: 999px; padding: 8px 16px; min-height: 44px;
+    font: inherit; font-size: 17px; font-weight: 800;
+    background: #fff; color: var(--text); box-shadow: 0 3px 0 var(--rand); cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--knopf); color: #fff; box-shadow: 0 3px 0 var(--knopf-dunkel); }
+  .chip .tipp { font-size: 12px; font-weight: 800; margin-left: 4px; opacity: .8; }
+
+  .thema h2 { font-size: clamp(20px, 4.5vw, 26px); margin: 8px 4px 10px; }
+  .spiele { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 16px; margin-bottom: 24px; }
+
+  .spielkarte {
+    background: #fff; border-radius: var(--rund); box-shadow: var(--schatten);
+    padding: 16px; border-top: 10px solid var(--f, var(--knopf));
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .spielkarte .kopfzeile { display: flex; align-items: center; gap: 12px; }
+  .spielkarte .bild { font-size: 44px; line-height: 1; }
+  .spielkarte b.name { font-size: 22px; }
+  .spielkarte .ziel { font-size: 15px; color: var(--text-leise); }
+  .marken { display: flex; gap: 6px; flex-wrap: wrap; }
+  .marke { font-size: 13px; font-weight: 800; border-radius: 999px; padding: 2px 10px; background: #eef0fb; }
+  .marke.fokus { background: #fff1c2; }
+
+  .stufenknoepfe { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 6px; }
+  .stufenknopf {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-decoration: none; color: var(--text); background: #f6f7fd;
+    border-radius: 12px; padding: 6px 2px; min-height: 58px; font-weight: 900; font-size: 18px;
+    border-bottom: 4px solid var(--sf);
+  }
+  .stufenknopf:hover { background: #eceffd; }
+  .stufenknopf .s { font-size: 11px; color: #f5b301; letter-spacing: 0; min-height: 13px; }
+  .stufenknopf.empfohlen { outline: 3px solid var(--knopf); outline-offset: 1px; }
+  .stufenknopf.gross { grid-column: 1 / -1; flex-direction: row; gap: 10px; min-height: 56px; background: var(--knopf); color: #fff; border-bottom-color: var(--knopf-dunkel); font-size: 20px; }
+  .stufenknopf.gross .s { font-size: 16px; }
+
+  .leer-hinweis { text-align: center; padding: 28px; font-size: 20px; }
+</style>
+</head>
+<body>
+<header class="titel">
+  <h1 aria-label="Lernspiele"></h1>
+  <p class="leise">Kleine Spiele zum Üben — such dir eins aus!</p>
+</header>
+<main class="buehne">
+  <div class="karte" style="margin-bottom:16px">
+    <div class="leiste">
+      <div id="wahl"></div>
+      <div class="rechts">
+        <button class="knopf hell klein" type="button" id="profil-knopf">✏️ Profil</button>
+        <a class="knopf hell klein" href="statistik.html">📊 Statistik</a>
+      </div>
+    </div>
+    <div id="profil"></div>
+  </div>
+  <div class="filter" id="filter"></div>
+  <div id="liste"></div>
+</main>
+
+<script src="spiele/gemeinsam/spiel.js"></script>
+<script src="spiele/gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+
+const { el } = LS;
+const h1 = document.querySelector(".titel h1");
+for (const b of "Lernspiele") h1.append(el("span", { text: b, "aria-hidden": "true" }));
+
+// Filter merkt sich der Browser (nur Bequemlichkeit).
+const filter = LS.lies("filter", { thema: "alle", stufe: "alle", fokus: false });
+const merkeFilter = () => LS.schreibe("filter", filter);
+
+// ---------- Spielerwahl und Profil ----------
+
+let profilOffen = false;
+
+function zeichneWahl() {
+  const box = document.getElementById("wahl");
+  box.innerHTML = "";
+  box.append(LS.spielerWahl(() => { profilOffen = !LS.profil(LS.aktuellerSpieler()).klasse; alles(); }));
+  document.getElementById("profil-knopf").disabled = !LS.aktuellerSpieler();
+}
+
+document.getElementById("profil-knopf").addEventListener("click", () => { profilOffen = !profilOffen; zeichneProfil(); });
+
+function zeichneProfil() {
+  const box = document.getElementById("profil");
+  box.innerHTML = "";
+  const name = LS.aktuellerSpieler();
+  if (!profilOffen || !name) return;
+  const p = LS.profil(name);
+  const alter = el("input", { type: "number", min: "5", max: "14", value: p.alter ?? "", "aria-label": "Alter" });
+  const klasse = el("select", { "aria-label": "Klasse" },
+    el("option", { value: "", text: "—" }),
+    ...[1, 2, 3, 4, 5, 6].map(k => el("option", { value: String(k), text: `${k}. Klasse` })));
+  klasse.value = p.klasse ?? "";
+  const fokus = el("div", { class: "fokus-liste" });
+  for (const lz of LERNZIELE) {
+    const cb = el("input", { type: "checkbox", value: lz.lz });
+    cb.checked = p.fokus.includes(lz.lz);
+    fokus.append(el("label", {}, cb, el("span", { html: `<b>${lz.lz}</b> ${lz.text}` })));
+  }
+  // Reihenfolge der Teile (Bausteine, Rätselteile): global und je Spiel, das sie beachtet.
+  const reihenfolgeWahl = (wert, ohneVorgabe) => {
+    const s = el("select", {},
+      ...(ohneVorgabe ? [el("option", { value: "", text: "wie oben" })] : []),
+      ...Object.entries(LS.REIHENFOLGEN).map(([k, t]) => el("option", { value: k, text: t })));
+    s.value = wert ?? "";
+    return s;
+  };
+  const reihenfolgeGlobal = reihenfolgeWahl(p.reihenfolge.global, false);
+  const reihenfolgeSpiele = SPIELE.filter(s => s.reihenfolge).map(s => ({ s, wahl: reihenfolgeWahl(p.reihenfolge.spiele?.[s.id], true) }));
+
+  // Timer: global ein/aus und Zeitfaktor; je Spiel ein/aus und Sekunden je Stufe (leer = Vorgabe × Faktor).
+  const t = p.timer;
+  const timerGlobal = el("select", {}, el("option", { value: "aus", text: "aus" }), el("option", { value: "an", text: "an" }));
+  timerGlobal.value = t.an ? "an" : "aus";
+  const faktor = el("select", {}, ...[[2, "viel Zeit (×2)"], [1.5, "mehr Zeit (×1.5)"], [1, "Vorgabe (×1)"], [0.75, "weniger Zeit (×0.75)"], [0.5, "knapp (×0.5)"]]
+    .map(([w, txt]) => el("option", { value: String(w), text: txt })));
+  faktor.value = String(t.faktor || 1);
+  const timerSpiele = SPIELE.map(s => {
+    const an = el("select", {}, el("option", { value: "", text: "wie oben" }), el("option", { value: "an", text: "an" }), el("option", { value: "aus", text: "aus" }));
+    const eigen = t.spiele?.[s.id] || {};
+    an.value = eigen.an == null ? "" : eigen.an ? "an" : "aus";
+    const sekunden = Object.fromEntries(LS.SKALA.map(st => {
+      const vorschlag = LS.zeitVorschlag(name, s.id, st.id);
+      const feld = el("input", {
+        type: "number", min: "5", max: "600", class: "sek",
+        placeholder: String(Math.round(LS.vorgabeZeit(s.id, st.id) * (t.faktor || 1))),
+        title: vorschlag ? `Aus ${vorschlag.n} gemessenen Aufgaben vorgeschlagen: ${vorschlag.sekunden} s` : "Vorgabe × Faktor",
+        "aria-label": `${s.name} Stufe ${st.nr} Sekunden`,
+      });
+      feld.value = eigen.sekunden?.[st.id] ?? "";
+      return [st.id, { feld, vorschlag }];
+    }));
+    return { s, an, sekunden };
+  });
+  const timerTabelle = el("div", { class: "timer-tabelle" },
+    el("span", {}), el("b", { text: "Timer" }), ...LS.SKALA.map(st => el("b", { text: `${st.icon}${st.nr}` })),
+    ...timerSpiele.flatMap(({ s, an, sekunden }) => [
+      el("span", { text: `${s.bild} ${s.name}` }), an,
+      ...LS.SKALA.map(st => el("span", {}, sekunden[st.id].feld,
+        sekunden[st.id].vorschlag ? el("small", { class: "vorschlag", text: `💡${sekunden[st.id].vorschlag.sekunden}` }) : null)),
+    ]));
+
+  const speichern = () => {
+    const spiele = {};
+    for (const { s, wahl } of reihenfolgeSpiele) if (wahl.value) spiele[s.id] = wahl.value;
+    const timerJeSpiel = {};
+    for (const { s, an, sekunden } of timerSpiele) {
+      const sek = Object.fromEntries(Object.entries(sekunden).filter(([, x]) => x.feld.value).map(([k, x]) => [k, Number(x.feld.value)]));
+      if (an.value || Object.keys(sek).length) timerJeSpiel[s.id] = { an: an.value ? an.value === "an" : null, sekunden: sek };
+    }
+    LS.speichereProfil(name, {
+      alter: alter.value ? Number(alter.value) : null,
+      klasse: klasse.value ? Number(klasse.value) : null,
+      fokus: [...fokus.querySelectorAll("input:checked")].map(c => c.value),
+      reihenfolge: { global: reihenfolgeGlobal.value, spiele },
+      timer: { an: timerGlobal.value === "an", faktor: Number(faktor.value), spiele: timerJeSpiel },
+    });
+    profilOffen = false;
+    alles();
+  };
+  box.append(el("div", { class: "profil" },
+    el("h2", { text: `Profil von ${name}` }),
+    el("div", { class: "profil-felder" }, el("label", {}, "Alter", alter), el("label", {}, "Klasse", klasse)),
+    el("div", { html: "<b>Fokus</b> — was soll vermehrt geübt werden?" }),
+    fokus,
+    el("div", { html: "<b>Reihenfolge der Teile</b> — stehen Bausteine wie 3 ZT + 4 H geordnet (grösste Stelle links) oder gemischt?" }),
+    el("div", { class: "profil-felder", style: "margin-top:8px" },
+      el("label", {}, "Für alle Spiele", reihenfolgeGlobal),
+      ...reihenfolgeSpiele.map(({ s, wahl }) => el("label", {}, `${s.bild} ${s.name}`, wahl))),
+    el("div", { html: "<b>Timer</b> — jede Aufgabe hat eine Zeit; ist sie um, zählt es als Fehler. Das Kind kann ihn im Spiel auch selbst ein- und ausschalten." }),
+    el("div", { class: "profil-felder", style: "margin-top:8px" },
+      el("label", {}, "Für alle Spiele", timerGlobal), el("label", {}, "Zeit", faktor)),
+    el("details", { class: "timer-details" },
+      el("summary", { text: "Sekunden je Spiel und Stufe anpassen (leer = Vorgabe; 💡 = Vorschlag aus den eigenen Zeiten)" }),
+      el("div", { class: "tabelle-rahmen" }, timerTabelle)),
+    el("div", { class: "knopfzeile", style: "justify-content:flex-start" },
+      el("button", { class: "knopf gruen klein", type: "button", text: "Speichern", onclick: speichern }),
+      el("button", { class: "knopf hell klein", type: "button", text: "Abbrechen", onclick: () => { profilOffen = false; zeichneProfil(); } }))));
+}
+
+// ---------- Filter ----------
+
+function chip(text, aktiv, onclick, tipp) {
+  return el("button", { type: "button", class: "chip", "aria-pressed": String(aktiv), onclick }, text, tipp ? el("span", { class: "tipp", text: tipp }) : null);
+}
+
+function zeichneFilter() {
+  const box = document.getElementById("filter");
+  box.innerHTML = "";
+  const name = LS.aktuellerSpieler();
+  const empfohlen = name ? LS.empfohleneStufe(name) : null;
+  const hatFokus = name && LS.profil(name).fokus.length > 0;
+  const setze = (k, v) => () => { filter[k] = v; merkeFilter(); zeichneFilter(); zeichneListe(); };
+
+  const themen = el("div", { class: "filter-zeile" }, el("span", { text: "Thema" }),
+    chip("Alle", filter.thema === "alle", setze("thema", "alle")),
+    ...THEMEN.map(t => chip(`${t.fach}: ${t.name}`, filter.thema === t.id, setze("thema", t.id))));
+  if (hatFokus) themen.append(chip("⭐ Mein Fokus", filter.fokus, setze("fokus", !filter.fokus)));
+
+  const stufen = el("div", { class: "filter-zeile" }, el("span", { text: "Stufe" }),
+    chip("Alle", filter.stufe === "alle", setze("stufe", "alle")),
+    ...LS.SKALA.map(s => chip(`${s.icon} ${s.nr} ${s.name}`, filter.stufe === s.id, setze("stufe", s.id), s.id === empfohlen ? "👍" : "")));
+  box.append(themen, stufen);
+}
+
+// ---------- Spielliste ----------
+
+function zeichneListe() {
+  const box = document.getElementById("liste");
+  box.innerHTML = "";
+  const name = LS.aktuellerSpieler();
+  const fokus = name ? LS.profil(name).fokus : [];
+  const empfohlen = name ? LS.empfohleneStufe(name) : null;
+  let gezeigt = 0;
+
+  for (const thema of THEMEN.filter(t => filter.thema === "alle" || filter.thema === t.id)) {
+    let spiele = SPIELE.filter(s => s.thema === thema.id && (filter.stufe === "alle" || s.stufen.includes(filter.stufe)));
+    if (filter.fokus && fokus.length) spiele = spiele.filter(s => s.lernziele.some(l => fokus.includes(l.lz)));
+    // Fokus-Spiele zuerst.
+    spiele = [...spiele].sort((a, b) => Number(b.lernziele.some(l => fokus.includes(l.lz))) - Number(a.lernziele.some(l => fokus.includes(l.lz))));
+    if (!spiele.length) continue;
+
+    const gitter = el("div", { class: "spiele" });
+    for (const s of spiele) {
+      const karte = el("div", { class: "spielkarte" });
+      karte.style.setProperty("--f", s.farbe);
+      karte.append(
+        el("div", { class: "kopfzeile" }, el("div", { class: "bild", text: s.bild }), el("b", { class: "name", text: s.name })),
+        el("div", { class: "ziel", text: s.beschreibung }),
+        el("div", { class: "marken" }, ...s.lernziele.map(l =>
+          el("span", { class: "marke" + (fokus.includes(l.lz) ? " fokus" : ""), text: (fokus.includes(l.lz) ? "⭐ " : "") + l.lz }))));
+
+      const knoepfe = el("div", { class: "stufenknoepfe" });
+      const stufen = LS.SKALA.filter(st => s.stufen.includes(st.id) && (filter.stufe === "alle" || filter.stufe === st.id));
+      for (const st of stufen) {
+        const sterne = name ? LS.besteSterne(name, s.id, st.id) : 0;
+        const gross = filter.stufe !== "alle";
+        const a = el("a", {
+          class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empfohlen && !gross ? " empfohlen" : ""),
+          href: `${s.pfad}?stufe=${st.id}`,
+          title: `Stufe ${st.nr} · ${st.name} (${st.fuer})`,
+        }, el("span", { text: gross ? `${st.icon} Stufe ${st.nr} spielen` : `${st.icon}${st.nr}` }),
+           el("span", { class: "s", text: sterne ? "★".repeat(sterne) : "" }));
+        a.style.setProperty("--sf", st.farbe);
+        knoepfe.append(a);
+      }
+      karte.append(knoepfe);
+      gitter.append(karte);
+      gezeigt++;
+    }
+    box.append(el("section", { class: "thema" }, el("h2", { text: `${thema.fach} · ${thema.titel}` }), gitter));
+  }
+  if (!gezeigt) box.append(el("div", { class: "karte leer-hinweis", text: "Für diese Auswahl gibt es noch kein Spiel. 🌱" }));
+}
+
+function alles() { zeichneWahl(); zeichneProfil(); zeichneFilter(); zeichneListe(); }
+alles();
+</script>
+</body>
+</html>

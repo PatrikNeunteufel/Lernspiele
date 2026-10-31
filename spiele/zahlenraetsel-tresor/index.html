@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zahlenrätsel-Tresor</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .tresor-zeile {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .tresor {
+    position: relative;
+    width: 128px;
+    height: 128px;
+    flex: none;
+    perspective: 400px;
+  }
+
+  .tresor .innen {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    background: radial-gradient(circle, #fff6c9, #f5c451);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+  }
+
+  .tresor .tuer {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #7b8496, #4b5263);
+    box-shadow: inset 0 0 0 6px #5c6475, 0 8px 16px rgba(0, 0, 0, .2);
+    transform-origin: left center;
+    transition: transform .8s cubic-bezier(.3, 1.4, .5, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tresor .rad {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 6px solid #d7dbe6;
+    background: repeating-conic-gradient(#aab1c2 0 10deg, #8d95a8 10deg 20deg);
+    transition: transform .8s;
+  }
+
+  .tresor.offen .tuer { transform: rotateY(-105deg); }
+  .tresor.offen .rad { transform: rotate(270deg); }
+  .tresor.ruckeln .tuer { animation: wackeln .4s; }
+
+  .raetsel {
+    flex: 1;
+    min-width: 260px;
+    max-width: 620px;
+    background: #fdf8ef;
+    border-radius: 18px;
+    border: 3px solid #e9dcc4;
+    padding: 14px 18px;
+    font-size: clamp(19px, 3.4vw, 24px);
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .raetsel .titel { font-weight: 900; color: #a0703d; font-size: .8em; text-transform: uppercase; letter-spacing: 1px; }
+  .raetsel ul { margin: 6px 0 0; padding-left: 1.1em; }
+  .raetsel .wk { display: inline-block; color: #fff; background: var(--f); border-radius: 8px; padding: 0 8px; font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔐 Zahlenrätsel-Tresor</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lernziel 4.2-E1: Mit den Wertziffern sicher sein und schwierige Zahlenrätsel lösen.
+// Rätselarten: Bündeln (13 T = 1 ZT 3 T), Nachbarzahl (3 ZT grösser als …),
+// Ziffernrätsel mit Hinweisen, „Wie viele H stecken in …?“.
+
+const { STELLEN, zahlText, zufall, waehle, mische, el } = LS;
+const ST = Object.fromEntries(STELLEN.map(s => [s.k, s]));
+const wk = (anzahl, k) => `<span class="wk st st-${k}">${anzahl} ${k}</span>`;
+const LAENGEN_WORT = { 2: "zwei", 3: "drei", 4: "vier", 5: "fünf", 6: "sechs" };
+/** Teile nach Stelle ordnen: grösste Stelle links (Einstellung „geordnet“ im Profil). */
+const groesseZuerst = (a, b) => ST[b.k].wert - ST[a.k].wert;
+
+/** Bündeln: Zahl aus Teilen; einige Teile haben mehr als 9 Einheiten (13 T = 1 ZT 3 T). */
+function buendeln(p, geordnet) {
+  for (;;) {
+    const teile = mische(p.stellen).slice(0, p.teile).map(k => ({ k, n: zufall(1, 9) }));
+    // Die höchste erlaubte Stelle bekommt kein Bündel, sonst wird der Zahlenraum gesprengt.
+    teile.filter(t => t.k !== p.stellen[0]).slice(0, zufall(...p.gross)).forEach(t => { t.n = zufall(...p.bereich); });
+    const loesung = teile.reduce((s, t) => s + t.n * ST[t.k].wert, 0);
+    if (loesung >= p.max) continue;
+    if (geordnet) teile.sort(groesseZuerst);
+    const gebuendelt = teile.some(t => t.n > 9);
+    return {
+      html: `<div class="titel">Wer bin ich?</div>Ich bestehe aus ${teile.map(t => wk(t.n, t.k)).join(" + ")}.`,
+      loesung,
+      hinweis: gebuendelt ? "Bündle! 10 Einer sind 1 Zehner, 10 Zehner sind 1 Hunderter, …" : "Jeder Baustein gehört an seine Stelle. Leere Stellen bekommen eine 0.",
+      erklaerung: teile.map(t => `${t.n} ${t.k} = ${zahlText(t.n * ST[t.k].wert)}`).join(", "),
+    };
+  }
+}
+
+/** Nachbarzahl: um einige Wertziffern grösser oder kleiner als eine gegebene Zahl. */
+function nachbar(p, geordnet) {
+  for (;;) {
+    const basis = zufall(...p.basis);
+    const teile = mische(p.nStellen).slice(0, p.nTeile).map(k => ({ k, n: zufall(1, p.nMax) }));
+    if (geordnet) teile.sort(groesseZuerst);
+    const plus = Math.random() < 0.5;
+    const diff = teile.reduce((s, t) => s + t.n * ST[t.k].wert, 0);
+    const loesung = plus ? basis + diff : basis - diff;
+    if (loesung <= 0 || loesung >= p.max) continue;
+    return {
+      html: `<div class="titel">Wer bin ich?</div>Ich bin ${teile.map(t => wk(t.n, t.k)).join(" und ")} ${plus ? "grösser" : "kleiner"} als <b>${zahlText(basis)}</b>.`,
+      loesung,
+      hinweis: plus ? "Zähle die Teile dazu. Achtung beim Übertrag in die nächste Stelle!" : "Nimm die Teile weg. Achtung, wenn eine Stelle nicht reicht!",
+      erklaerung: `${zahlText(basis)} ${plus ? "+" : "−"} ${zahlText(diff)}`,
+    };
+  }
+}
+
+/** Ziffernrätsel: Zahl aus Hinweisen über ihre Ziffern bestimmen. */
+function ziffernraetsel(p) {
+  const laenge = p.laenge;
+  const stellen = STELLEN.slice(7 - laenge);
+  for (;;) {
+    const z = {};
+    stellen.forEach((st, i) => { z[st.k] = i === 0 ? zufall(1, 9) : (Math.random() < 0.3 ? 0 : zufall(1, 9)); });
+    const [a, b, c] = mische(stellen.filter(st => z[st.k] > 0)).slice(0, 3);
+    if (!b || (laenge >= 3 && !c)) continue;
+    const hinweise = [`Ich bin ${LAENGEN_WORT[laenge]}stellig.`];
+    hinweise.push(`Meine ${a.k}-Ziffer ist ${z[a.k]}.`);
+    const diff = z[b.k] - z[a.k];
+    if (z[b.k] === 2 * z[a.k]) hinweise.push(`Meine ${b.k}-Ziffer ist doppelt so gross wie meine ${a.k}-Ziffer.`);
+    else if (diff !== 0) hinweise.push(`Meine ${b.k}-Ziffer ist um ${Math.abs(diff)} ${diff > 0 ? "grösser" : "kleiner"} als meine ${a.k}-Ziffer.`);
+    else hinweise.push(`Meine ${b.k}-Ziffer ist gleich wie meine ${a.k}-Ziffer.`);
+    if (c && p.summe) {
+      hinweise.push(`Wenn du meine ${a.k}-, ${b.k}- und ${c.k}-Ziffer zusammenzählst, erhältst du ${z[a.k] + z[b.k] + z[c.k]}.`);
+    } else if (c) {
+      hinweise.push(`Meine ${c.k}-Ziffer ist ${z[c.k]}.`);
+    }
+    const rest = stellen.filter(st => ![a, b, c].includes(st));
+    const nullen = rest.filter(st => z[st.k] === 0);
+    const andere = rest.filter(st => z[st.k] !== 0);
+    andere.forEach(st => hinweise.push(`Bei den ${LS.dativ(st)} steht eine ${z[st.k]}.`));
+    if (nullen.length) hinweise.push(nullen.length === 1 ? `Meine ${nullen[0].k}-Ziffer ist 0.` : `Bei ${nullen.map(s => s.k).join(", ")} steht jeweils eine 0.`);
+    const loesung = stellen.reduce((s, st) => s + z[st.k] * st.wert, 0);
+    return {
+      html: `<div class="titel">Wer bin ich?</div><ul>${mische(hinweise.slice(1)).reduce((h, x) => h + `<li>${x}</li>`, `<li>${hinweise[0]}</li>`)}</ul>`,
+      loesung,
+      hinweis: "Mach dir eine Stellenwerttabelle und trag jede Ziffer ein, die du schon weisst.",
+      erklaerung: stellen.map(st => `${z[st.k]} ${st.k}`).join(", "),
+    };
+  }
+}
+
+/** „Wie viele H stecken in …?“ — Anzahl ganzer Einheiten einer Stelle. */
+function wieViele(p) {
+  const k = waehle(p.wieViele);
+  const zahl = zufall(10000, 999999);
+  const loesung = Math.floor(zahl / ST[k].wert);
+  return {
+    html: `<div class="titel">Knacknuss</div>Wie viele <span class="wk st st-${k}">${k}</span> (${ST[k].name}) stecken insgesamt in <b>${zahlText(zahl)}</b>?`,
+    loesung,
+    hinweis: `Nicht nur die ${k}-Ziffer zählt! Alles links davon sind auch ${ST[k].name}.`,
+    erklaerung: `${zahlText(zahl)} hat ${zahlText(loesung)} ganze ${ST[k].name}`,
+  };
+}
+
+const OHNE_M = ["HT", "ZT", "T", "H", "Z", "E"];
+
+// Je Stufe: Bündeln (Stellen, Teile, Anzahl Bündel, Bündelgrösse), Nachbarzahl (Basis, Stellen,
+// Teile, grösste Ziffer), Ziffernrätsel (Länge, Summenhinweis), Knacknuss-Stellen, Rätselarten.
+const P = {
+  s1: { stellen: ["Z", "E"], teile: 2, gross: [0, 0], bereich: [1, 9], max: 100,
+        basis: [10, 89], nStellen: ["Z", "E"], nTeile: 1, nMax: 5,
+        laenge: 2, summe: false, arten: [buendeln, nachbar, ziffernraetsel] },
+  s2: { stellen: ["H", "Z", "E"], teile: 3, gross: [1, 1], bereich: [10, 19], max: 1000,
+        basis: [100, 899], nStellen: ["H", "Z", "E"], nTeile: 1, nMax: 9,
+        laenge: 3, summe: false, arten: [buendeln, nachbar, ziffernraetsel] },
+  s3: { stellen: OHNE_M, teile: 3, gross: [1, 1], bereich: [10, 19], max: 1000000,
+        basis: [10000, 899999], nStellen: ["HT", "ZT", "T", "H", "Z"], nTeile: 1, nMax: 5,
+        laenge: 5, summe: false, arten: [buendeln, nachbar, ziffernraetsel] },
+  s4: { stellen: OHNE_M, teile: 4, gross: [1, 2], bereich: [11, 45], max: 1000000,
+        basis: [10000, 899999], nStellen: ["HT", "ZT", "T", "H", "Z"], nTeile: 2, nMax: 9,
+        laenge: 6, summe: true, wieViele: ["Z", "H", "T"], arten: [buendeln, nachbar, ziffernraetsel, wieViele] },
+  s5: { stellen: OHNE_M, teile: 4, gross: [2, 3], bereich: [11, 99], max: 1000000,
+        basis: [10000, 899999], nStellen: ["HT", "ZT", "T", "H", "Z", "E"], nTeile: 3, nMax: 9,
+        laenge: 6, summe: true, wieViele: ["H", "T", "ZT"], arten: [buendeln, nachbar, ziffernraetsel, wieViele] },
+};
+
+LS.spiel({
+  id: "zahlenraetsel-tresor",
+  einleitung: "Im Tresor liegt ein Schatz! Jedes Rätsel verrät dir den Code. Rechne gut — die Zahl ist der Schlüssel.",
+  anzahl: 6,
+  stufen: {
+    s1: "Zahlen bis 100: 3 Z + 4 E, „2 Z grösser als 35“, kleine Ziffernrätsel.",
+    s2: "Bis 1000, mit einem Bündel wie 13 Z.",
+    s3: "Bündeln mit 10–19 Teilen, Nachbarzahlen, Rätsel mit klaren Hinweisen.",
+    s4: "Grosse Bündel, zwei Teile auf einmal, Summen-Hinweise und Knacknüsse.",
+    s5: "Mehrere grosse Bündel, drei Teile auf einmal — für echte Profis.",
+  },
+
+  aufgabe(ctx) {
+    // Jede Rätselart kommt in einer Runde vor, danach zufällig.
+    const arten = P[ctx.stufe].arten;
+    const art = ctx.nr < arten.length ? arten[ctx.nr] : waehle(arten);
+    const r = art(P[ctx.stufe], ctx.geordnet);
+
+    const tresor = el("div", { class: "tresor", "aria-hidden": "true",
+      html: `<div class="innen">${waehle(["💎", "👑", "🏆", "💰", "🪙", "🎁"])}</div><div class="tuer"><div class="rad"></div></div>` });
+    ctx.flaeche.append(el("div", { class: "tresor-zeile" }, tresor, el("div", { class: "raetsel", html: r.html })));
+
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Code" });
+    ctx.flaeche.append(anzeige);
+    const tasten = LS.tastatur({
+      anzeige,
+      maxStellen: 7,
+      onOk(w) {
+        if (w === r.loesung) {
+          tasten.gesperrt = true;
+          anzeige.classList.add("richtig");
+          tresor.classList.add("offen");
+          ctx.richtig("Klack — der Tresor ist offen! 🎉");
+          return;
+        }
+        anzeige.classList.add("falsch");
+        tresor.classList.remove("ruckeln");
+        void tresor.offsetWidth;
+        tresor.classList.add("ruckeln");
+        ctx.falsch(r.hinweis, `${r.erklaerung} → Code ${zahlText(r.loesung)}`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) { tasten.gesperrt = true; tresor.classList.add("offen"); }
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag("Lies das Rätsel genau und tipp den Code ein.");
+  },
+});
+</script>
+</body>
+</html>

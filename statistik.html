@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lernspiele Statistik</title>
+<link rel="stylesheet" href="spiele/gemeinsam/stil.css">
+<style>
+  :root {
+    /* Eine Farbe, hell → dunkel: Anteil der Aufgaben, die auf Anhieb richtig waren. */
+    --seq-1: #e8eeff; --seq-2: #c5d3ff; --seq-3: #9db2fb; --seq-4: #6f8bf3; --seq-5: #4a63d8;
+  }
+  section.karte { margin-bottom: 16px; }
+  section h2 { margin: 0 0 12px; font-size: 22px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip { border: none; border-radius: 999px; padding: 8px 16px; min-height: 44px; font: inherit; font-size: 17px; font-weight: 800; background: #fff; color: var(--text); box-shadow: 0 3px 0 var(--rand); cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--knopf); color: #fff; box-shadow: 0 3px 0 var(--knopf-dunkel); }
+
+  .kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 12px; }
+  .kachel { background: #f6f7fd; border-radius: 16px; padding: 12px 14px; }
+  .kachel .zahl { font-size: 32px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .kachel .was { font-size: 14px; color: var(--text-leise); font-weight: 700; }
+
+  .tabelle-rahmen { overflow-x: auto; }
+  table { border-collapse: separate; border-spacing: 0 4px; width: 100%; font-size: 15px; }
+  th { text-align: left; font-size: 13px; color: var(--text-leise); font-weight: 800; padding: 4px 8px; white-space: nowrap; }
+  td { padding: 8px; background: #f8f9fe; font-variant-numeric: tabular-nums; }
+  td:first-child { border-radius: 10px 0 0 10px; }
+  td:last-child { border-radius: 0 10px 10px 0; }
+  td.zahl, th.zahl { text-align: right; }
+  .sterne { color: #f5b301; letter-spacing: 1px; white-space: nowrap; }
+  .wackelt { color: #b45309; font-weight: 800; white-space: nowrap; }
+  .gut { color: #15803d; font-weight: 800; }
+
+  /* Vergleich: Zelle eingefärbt nach Anteil, Text bleibt in Textfarbe. */
+  td.zelle { text-align: center; font-weight: 800; min-width: 84px; }
+  td.zelle small { display: block; font-weight: 600; color: var(--text-leise); font-size: 12px; }
+  td.zelle.hell-text, td.zelle.hell-text small { color: #fff; }
+  .legende { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-leise); margin-top: 8px; flex-wrap: wrap; }
+  .legende i { display: inline-block; width: 28px; height: 14px; border-radius: 4px; }
+
+  details { background: #f8f9fe; border-radius: 12px; padding: 8px 12px; margin-bottom: 6px; }
+  summary { cursor: pointer; font-weight: 700; }
+  details ul { margin: 8px 0 4px; padding-left: 1.2em; }
+  details li { margin-bottom: 6px; }
+
+  .knopf.klein { font-size: 18px; min-height: 48px; padding: 8px 16px; }
+  a.knopf { text-decoration: none; display: inline-flex; align-items: center; }
+
+  /* Vorschläge */
+  .vorschlaege { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 12px; }
+  .vorschlag { background: #f6f7fd; border-radius: 16px; padding: 12px 14px; border-left: 6px solid var(--knopf); display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+  .vorschlag p { margin: 0; font-size: 15px; }
+  .vorschlag.wiederholen { border-left-color: var(--hinweis); }
+  .vorschlag.konzentration { border-left-color: #b45309; }
+  .vorschlag.weiter, .vorschlag.timer { border-left-color: var(--gut); }
+  .befund { background: var(--hinweis-hell); border-radius: 12px; padding: 4px 12px; margin-bottom: 8px; }
+
+  /* Säulen: eine Farbe, dünne Säulen mit runden Enden, Werte darüber, Achse zurückhaltend */
+  .diagramme { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 18px; }
+  .diagramme h3 { font-size: 15px; margin: 0 0 6px; color: var(--text-leise); }
+  .saeulen { position: relative; display: flex; align-items: flex-end; gap: 4px; height: calc(var(--h) + 44px); border-bottom: 1px solid var(--rand); padding-top: 4px; }
+  .spalte { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .saeule { width: min(70%, 26px); background: var(--knopf); border-radius: 4px 4px 0 0; }
+  .saeule.betont { background: var(--hinweis); }
+  .spalte .wert { font-size: 11px; color: var(--text-leise); white-space: nowrap; min-height: 14px; }
+  .spalte .name { font-size: 11px; color: var(--text-leise); white-space: nowrap; height: 22px; line-height: 22px; overflow: hidden; }
+  .referenz { position: absolute; left: 0; right: 0; border-top: 2px dashed #c5c9de; pointer-events: none; }
+  .leise-text { color: var(--text-leise); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📊 Statistik</h1>
+</header>
+<main class="buehne" id="seite"></main>
+
+<script src="spiele/gemeinsam/spiel.js"></script>
+<script src="spiele/gemeinsam/katalog.js"></script>
+<script src="spiele/gemeinsam/auswertung.js"></script>
+<script>
+"use strict";
+
+const { el, SKALA } = LS;
+const { anhieb, mittel, rundenZuLernziel } = AUSWERTUNG;
+const seite = document.getElementById("seite");
+let gewaehlt = LS.aktuellerSpieler() || LS.spielerListe()[0] || null;
+
+const prozent = x => x == null ? "—" : `${Math.round(x * 100)} %`;
+const datum = iso => new Date(iso).toLocaleDateString("de-CH", { day: "2-digit", month: "2-digit" }) + " " +
+  new Date(iso).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" });
+const spielName = id => SPIELE.find(s => s.id === id)?.name || id;
+const stufeName = id => { const s = SKALA.find(x => x.id === id); return s ? `${s.icon} ${s.nr}` : id; };
+
+/**
+ * Säulendiagramm (eine Farbe, eine Reihe): Werte als Säulen mit Beschriftung darunter und Wert darüber.
+ * daten: [{ name, wert, titel }]; format: Wert → Text; markiere: Index → Säule hervorheben.
+ */
+function saeulen(daten, format, { hoehe = 120, referenz = null, markiere = () => false } = {}) {
+  const max = Math.max(...daten.map(d => d.wert || 0), referenz || 0) || 1;
+  const box = el("div", { class: "saeulen", style: `--h:${hoehe}px` });
+  if (referenz != null) {
+    const linie = el("div", { class: "referenz", title: `Üblich: ${format(referenz)}` });
+    linie.style.bottom = `${(referenz / max) * hoehe + 22}px`;
+    box.append(linie);
+  }
+  for (const [i, d] of daten.entries()) {
+    const h = d.wert ? Math.max(3, (d.wert / max) * hoehe) : 0;
+    const saeule = el("div", { class: "saeule" + (markiere(i) ? " betont" : "") });
+    saeule.style.height = `${h}px`;
+    box.append(el("div", { class: "spalte", title: d.titel || `${d.name}: ${format(d.wert)}` },
+      el("div", { class: "wert", text: d.wert ? format(d.wert) : "" }),
+      saeule,
+      el("div", { class: "name", text: d.name })));
+  }
+  return box;
+}
+
+function stufeFarbe(anteil) {
+  const i = Math.min(4, Math.floor(anteil * 5));
+  return { bg: `var(--seq-${i + 1})`, hell: i >= 3 };
+}
+
+function zeichne() {
+  seite.innerHTML = "";
+  const namen = LS.spielerListe();
+  const alle = LS.protokoll();
+
+  if (!namen.length) {
+    seite.append(el("section", { class: "karte" }, el("p", { text: "Noch keine Spieler. Auf der Startseite einen Namen eintragen und losspielen!" })));
+    return;
+  }
+  if (!namen.includes(gewaehlt)) gewaehlt = namen[0];
+
+  // ----- Auswahl -----
+  const wahl = el("div", { class: "chips" });
+  for (const n of namen) wahl.append(el("button", { type: "button", class: "chip", "aria-pressed": String(n === gewaehlt), text: n, onclick: () => { gewaehlt = n; zeichne(); } }));
+
+  const runden = alle.filter(e => e.name === gewaehlt);
+  const p = LS.profil(gewaehlt);
+  const minuten = Math.round(runden.reduce((s, e) => s + (e.dauer || 0), 0) / 60);
+  const profilText = [p.alter ? `${p.alter} Jahre` : null, p.klasse ? `${p.klasse}. Klasse` : null].filter(Boolean).join(" · ") || "Profil noch ohne Alter und Klasse";
+
+  seite.append(el("section", { class: "karte" },
+    wahl,
+    el("p", { class: "leise-text", style: "margin:0 0 12px", text: profilText + (p.fokus.length ? ` · Fokus: ${p.fokus.join(", ")}` : "") }),
+    el("div", { class: "kacheln" },
+      kachel(String(runden.length), "Runden gespielt"),
+      kachel(`${minuten} min`, "Spielzeit"),
+      kachel(prozent(mittel(runden.map(anhieb))), "Aufgaben auf Anhieb richtig"),
+      kachel(String(runden.reduce((s, e) => s + e.fehlerAufgaben.filter(f => !f.geloest).length, 0)), "Aufgaben mit Lösung gezeigt"))));
+
+  // ----- Auswertung und Vorschläge -----
+  const vorschlaege = AUSWERTUNG.vorschlaege(gewaehlt, runden, p);
+  seite.append(el("section", { class: "karte" },
+    el("h2", { text: `Das empfehle ich für ${gewaehlt}` }),
+    vorschlaege.length
+      ? el("div", { class: "vorschlaege" }, ...vorschlaege.slice(0, 8).map(v => el("div", { class: `vorschlag ${v.art}` },
+          el("b", { text: v.titel }),
+          el("p", { text: v.text }),
+          v.link ? el("a", { class: "knopf gruen klein", href: v.link, text: "Jetzt üben ➜" }) : null)))
+      : el("p", { class: "leise-text", text: runden.length ? "Alles im grünen Bereich — weiter so!" : "Sobald ein paar Runden gespielt sind, erscheinen hier Vorschläge." })));
+
+  // ----- Wann wird gelernt -----
+  const lz = AUSWERTUNG.lernzeiten(runden);
+  const minFormat = m => m >= 1 ? `${Math.round(m)}′` : "<1′";
+  seite.append(el("section", { class: "karte" },
+    el("h2", { text: "Wann wird gelernt?" }),
+    el("p", { class: "leise-text", style: "margin-top:0", text: `Minuten Spielzeit. In den letzten 14 Tagen an ${lz.uebungstage14} Tag${lz.uebungstage14 === 1 ? "" : "en"} geübt.` }),
+    el("div", { class: "diagramme" },
+      el("div", {}, el("h3", { text: "Letzte 14 Tage" }), saeulen(lz.tage.map(t => ({ name: t.name, wert: t.minuten, titel: `${t.lang}: ${minFormat(t.minuten)} in ${t.runden} Runden` })), minFormat, { hoehe: 90 })),
+      el("div", {}, el("h3", { text: "Wochentage (gesamt)" }), saeulen(lz.wochentage.map(t => ({ name: t.name, wert: t.minuten, titel: `${t.name}: ${minFormat(t.minuten)} in ${t.runden} Runden` })), minFormat, { hoehe: 90 })),
+      el("div", {}, el("h3", { text: "Tageszeit (Uhr)" }), saeulen(lz.fenster.map(t => ({ name: t.name, wert: t.minuten, titel: `${t.name} Uhr: ${minFormat(t.minuten)} in ${t.runden} Runden` })), minFormat, { hoehe: 90 })))));
+
+  // ----- Konzentration -----
+  const k = AUSWERTUNG.konzentration(runden);
+  const zeitFormat = x => `${Math.round(x * 100)} %`;
+  seite.append(el("section", { class: "karte" },
+    el("h2", { text: "Konzentration" }),
+    !k.genug
+      ? el("p", { class: "leise-text", text: "Dafür braucht es mindestens 3 Runden mit Zeitmessung." })
+      : el("div", {},
+          el("p", { class: "leise-text", style: "margin-top:0", text: "Zeit je Aufgabe im Vergleich zur eigenen üblichen Zeit im selben Spiel und derselben Stufe (100 % = wie üblich, höher = langsamer), und Anteil Aufgaben mit Fehler. Orange = auffällig, gestrichelt = übliche Zeit." }),
+          k.befunde.length
+            ? el("div", { class: "befund" }, ...k.befunde.map(b => el("p", { text: "⚠ " + b.text })))
+            : el("p", { class: "gut", text: "✓ Keine Hinweise auf nachlassende Konzentration." }),
+          el("div", { class: "diagramme" },
+            el("div", {}, el("h3", { text: "Zeit nach Aufgabe in der Runde" }),
+              saeulen(k.nachPosition.map(x => ({ name: `${x.pos}.`, wert: x.zeit, titel: `${x.pos}. Aufgabe: ${zeitFormat(x.zeit)} der üblichen Zeit (${x.n} Messungen)` })), zeitFormat, { hoehe: 90, referenz: 1, markiere: i => k.nachPosition[i].zeit > 1.2 })),
+            el("div", {}, el("h3", { text: "Fehler nach Aufgabe in der Runde" }),
+              saeulen(k.nachPosition.map(x => ({ name: `${x.pos}.`, wert: x.fehler, titel: `${x.pos}. Aufgabe: ${prozent(x.fehler)} mit Fehler` })), prozent, { hoehe: 90, markiere: i => k.nachPosition[i].fehler >= 0.3 })),
+            el("div", {}, el("h3", { text: "Auf Anhieb richtig nach Runde der Sitzung" }),
+              saeulen(k.nachRunde.map(x => ({ name: x.runde, wert: x.anhieb, titel: `${x.runde} Runde: ${prozent(x.anhieb)} auf Anhieb richtig (${x.n} Runden)` })), prozent, { hoehe: 90 }))))));
+
+  // ----- Je Lernziel -----
+  const zeilen = LERNZIELE.map(lz => {
+    const r = rundenZuLernziel(runden, lz.lz);
+    const q = mittel(r.map(anhieb));
+    const beste = r.reduce((m, e) => Math.max(m, e.sterne), 0);
+    const zuletzt = r.length ? datum(r[r.length - 1].zeit) : "—";
+    const status = !r.length ? el("span", { class: "leise-text", text: "noch nicht geübt" })
+      : q < 0.7 ? el("span", { class: "wackelt", text: "⚠ üben" })
+      : el("span", { class: "gut", text: "✓ sitzt" });
+    return el("tr", {},
+      el("td", { html: `${p.fokus.includes(lz.lz) ? "⭐ " : ""}<b>${lz.lz}</b> ${lz.text}` }),
+      el("td", { class: "zahl", text: String(r.length) }),
+      el("td", { class: "zahl", text: prozent(q) }),
+      el("td", { class: "sterne", text: beste ? "★".repeat(beste) : "" }),
+      el("td", { text: zuletzt }),
+      el("td", {}, status));
+  });
+  seite.append(el("section", { class: "karte" },
+    el("h2", { text: `Lernziele — ${gewaehlt}` }),
+    el("p", { class: "leise-text", style: "margin-top:0", text: "Gezählt werden Runden in den Stufen, die zum Lernziel gehören (meist Stufe 3 und 4). „Üben“ heisst: weniger als 70 % auf Anhieb richtig." }),
+    el("div", { class: "tabelle-rahmen" }, el("table", {},
+      el("thead", {}, el("tr", {}, ...["Lernziel", "Runden", "Anhieb", "Beste", "Zuletzt", ""].map((t, i) => el("th", { class: i === 1 || i === 2 ? "zahl" : "", text: t })))),
+      el("tbody", {}, ...zeilen)))));
+
+  // ----- Je Spiel und Stufe -----
+  const spielZeilen = SPIELE.map(s => el("tr", {},
+    el("td", { text: `${s.bild} ${s.name}` }),
+    ...SKALA.map(st => {
+      const r = runden.filter(e => e.spiel === s.id && e.stufe === st.id);
+      const beste = r.reduce((m, e) => Math.max(m, e.sterne), 0);
+      return el("td", { class: "sterne", title: `${r.length} Runde${r.length === 1 ? "" : "n"}`, html: beste ? "★".repeat(beste) : '<span class="leise-text">·</span>' });
+    })));
+  seite.append(el("section", { class: "karte" },
+    el("h2", { text: "Beste Sterne je Spiel und Stufe" }),
+    el("div", { class: "tabelle-rahmen" }, el("table", {},
+      el("thead", {}, el("tr", {}, el("th", { text: "Spiel" }), ...SKALA.map(st => el("th", { text: `${st.icon} ${st.nr}` })))),
+      el("tbody", {}, ...spielZeilen)))));
+
+  // ----- Vergleich -----
+  if (namen.length > 1) {
+    const vergleich = LERNZIELE.map(lz => el("tr", {},
+      el("td", { html: `<b>${lz.lz}</b> ${lz.text}` }),
+      ...namen.map(n => {
+        const r = rundenZuLernziel(alle.filter(e => e.name === n), lz.lz);
+        if (!r.length) return el("td", { class: "zelle", html: '<span class="leise-text">—</span>' });
+        const q = mittel(r.map(anhieb));
+        const f = stufeFarbe(q);
+        const td = el("td", { class: "zelle" + (f.hell ? " hell-text" : ""), title: `${n}: ${prozent(q)} auf Anhieb richtig in ${r.length} Runde${r.length === 1 ? "" : "n"}` },
+          prozent(q), el("small", { text: `${r.length} Runde${r.length === 1 ? "" : "n"}` }));
+        td.style.background = f.bg;
+        return td;
+      })));
+    const legende = el("div", { class: "legende" }, "Anteil auf Anhieb richtig:", "0 %",
+      ...[1, 2, 3, 4, 5].map(i => { const x = el("i"); x.style.background = `var(--seq-${i})`; return x; }), "100 %");
+    seite.append(el("section", { class: "karte" },
+      el("h2", { text: "Vergleich" }),
+      el("div", { class: "tabelle-rahmen" }, el("table", {},
+        el("thead", {}, el("tr", {}, el("th", { text: "Lernziel" }), ...namen.map(n => el("th", { style: "text-align:center", text: n })))),
+        el("tbody", {}, ...vergleich))),
+      legende));
+  }
+
+  // ----- Letzte Runden -----
+  const letzte = runden.slice(-30).reverse();
+  const verlauf = el("div");
+  if (!letzte.length) verlauf.append(el("p", { class: "leise-text", text: "Noch keine Runde gespielt." }));
+  for (const e of letzte) {
+    const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.spiel)} · Stufe ${stufeName(e.stufe)} · ${"★".repeat(e.sterne)} · ${e.fehler} Fehler` }));
+    if (e.fehlerAufgaben.length) {
+      d.append(el("ul", {}, ...e.fehlerAufgaben.map(f => el("li", {},
+        el("div", { text: f.text || "(Aufgabe)" }),
+        el("div", { class: "leise-text", text: `${f.versuche} Fehlversuch${f.versuche === 1 ? "" : "e"} · ${f.geloest ? "dann gelöst" : "Lösung gezeigt"}${f.loesung ? " · " + f.loesung : ""}` })))));
+    } else {
+      d.append(el("p", { class: "gut", text: "Alles auf Anhieb richtig!" }));
+    }
+    verlauf.append(d);
+  }
+  seite.append(el("section", { class: "karte" }, el("h2", { text: "Letzte Runden" }), verlauf));
+
+  // ----- Daten -----
+  const datei = el("input", { type: "file", accept: "application/json", style: "display:none" });
+  datei.addEventListener("change", async () => {
+    const f = datei.files[0];
+    if (!f) return;
+    try {
+      const daten = JSON.parse(await f.text());
+      if (!daten.profile || !Array.isArray(daten.protokoll)) throw new Error("Format");
+      if (!confirm("Die Daten auf diesem Gerät werden durch die Datei ersetzt. Weiter?")) return;
+      LS.schreibe("profile", daten.profile);
+      LS.schreibe("protokoll", daten.protokoll);
+      zeichne();
+    } catch { alert("Diese Datei kann ich nicht lesen."); }
+  });
+  seite.append(el("section", { class: "karte" },
+    el("h2", { text: "Daten" }),
+    el("p", { class: "leise-text", style: "margin-top:0", text: "Alles bleibt in diesem Browser auf diesem Gerät. Zum Mitnehmen auf ein anderes Gerät: sichern und dort einlesen." }),
+    el("div", { class: "knopfzeile", style: "justify-content:flex-start" },
+      el("button", { class: "knopf hell klein", type: "button", text: "💾 Sichern", onclick: sichern }),
+      el("button", { class: "knopf hell klein", type: "button", text: "📂 Einlesen", onclick: () => datei.click() }),
+      el("button", { class: "knopf hell klein", type: "button", text: `🗑 ${gewaehlt} löschen`, onclick: () => {
+        if (confirm(`${gewaehlt} mit allen Runden löschen?`)) { LS.loescheSpieler(gewaehlt); gewaehlt = null; zeichne(); }
+      } })),
+    datei));
+}
+
+function kachel(zahl, was) {
+  return el("div", { class: "kachel" }, el("div", { class: "zahl", text: zahl }), el("div", { class: "was", text: was }));
+}
+
+function sichern() {
+  const daten = { version: 1, gesichert: new Date().toISOString(), profile: LS.lies("profile", {}), protokoll: LS.protokoll() };
+  const a = el("a", { href: URL.createObjectURL(new Blob([JSON.stringify(daten, null, 2)], { type: "application/json" })), download: `lernspiele-${new Date().toISOString().slice(0, 10)}.json` });
+  document.body.append(a);
+  a.click();
+  a.remove();
+}
+
+zeichne();
+</script>
+</body>
+</html>

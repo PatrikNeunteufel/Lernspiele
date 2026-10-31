@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zahlen-Hüpfer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .schritt-schild {
+    display: inline-block;
+    background: var(--hinweis);
+    color: #fff;
+    font-weight: 900;
+    font-size: clamp(24px, 5vw, 34px);
+    border-radius: 14px;
+    padding: 4px 18px;
+    box-shadow: 0 5px 0 #d97f00;
+  }
+
+  .teich {
+    position: relative;
+    margin: 18px 0 12px;
+    padding: 34px 8px 18px;
+    border-radius: 26px;
+    background:
+      radial-gradient(ellipse at 20% 30%, rgba(255, 255, 255, .35) 0 8%, transparent 9%),
+      radial-gradient(ellipse at 75% 70%, rgba(255, 255, 255, .25) 0 6%, transparent 7%),
+      linear-gradient(180deg, #7fd3f5, #4fb3e6);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .seerose {
+    position: relative;
+    flex: 1;
+    aspect-ratio: 1.25;
+    max-width: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #8fe08a, #45b04a 70%);
+    box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .12), 0 6px 10px rgba(0, 60, 100, .2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: clamp(12px, 2.6vw, 22px);
+    color: #1e4d22;
+    font-variant-numeric: tabular-nums;
+    transition: transform .3s;
+  }
+
+  /* Kerbe einer Seerose */
+  .seerose::after {
+    content: "";
+    position: absolute;
+    top: 50%; right: -2px;
+    width: 26%; height: 14%;
+    background: #5fbfea;
+    clip-path: polygon(0 50%, 100% 0, 100% 100%);
+  }
+
+  .seerose span {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, .85);
+    border-radius: 10px;
+    padding: 2px 6px;
+  }
+
+  .seerose.offen span { color: #b6bccf; }
+  .seerose.jetzt { transform: scale(1.08); box-shadow: 0 0 0 5px #fff, 0 6px 10px rgba(0, 60, 100, .2); }
+
+  .frosch {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(34px, 6vw, 48px);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .frosch.springt { animation: sprung .45s ease-out; }
+
+  @keyframes sprung {
+    0% { transform: translate(-150%, 10px) scale(.9); }
+    50% { transform: translate(-90%, -40px) scale(1.1); }
+    100% { transform: translate(-50%, 0) scale(1); }
+  }
+
+  .frosch.rueckwaerts.springt { animation-name: sprung-zurueck; }
+
+  @keyframes sprung-zurueck {
+    0% { transform: translate(50%, 10px) scale(.9); }
+    50% { transform: translate(-10%, -40px) scale(1.1); }
+    100% { transform: translate(-50%, 0) scale(1); }
+  }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🐸 Zahlen-Hüpfer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lernziel 4.2-G5: In vorgegebenen Schritten vorwärts und rückwärts zählen.
+
+const { zahlText, zufall, waehle, el } = LS;
+const SPRUENGE = 4;
+
+const SCHRITTE = {
+  s1: [1, 2, 5, 10],
+  s2: [10, 20, 50, 100, 5, 25],
+  s3: [10, 100, 1000, 10000, 100000, 5, 50, 500, 5000],
+  s4: [20, 200, 2000, 20000, 25, 250, 2500, 25000, 5000, 50000, 300, 3000],
+  s5: [99, 999, 9999, 101, 1010, 990, 12500, 125000, 75000, 11000],
+};
+
+// Je Stufe: Zahlenraum, Anteil Vorwärtsreihen, krumme Startzahlen.
+const STUFE = {
+  s1: { max: 100, vorwaerts: 0.7, krumm: false },
+  s2: { max: 1000, vorwaerts: 0.6, krumm: true },
+  s3: { max: 1000000, vorwaerts: 0.6, krumm: false },
+  s4: { max: 1000000, vorwaerts: 0.5, krumm: true },
+  s5: { max: 1000000, vorwaerts: 0.5, krumm: true },
+};
+
+/**
+ * Startzahl so wählen, dass alle Sprünge im Zahlenraum der Stufe bleiben und
+ * meist ein Sprung über eine höhere Stelle geht (z. B. 9 980 → 10 000).
+ */
+function aufgabeErzeugen(stufe) {
+  const { max, krumm } = STUFE[stufe];
+  const schritt = waehle(SCHRITTE[stufe]);
+  const vorwaerts = Math.random() < STUFE[stufe].vorwaerts;
+  const grenze = Math.min(schritt * 10 * waehle([1, 10]), max); // Übergang an dieser Grenze
+  const vielfaches = grenze * zufall(1, Math.max(1, Math.floor(0.9 * max / grenze)));
+  const vorher = zufall(1, SPRUENGE - 1); // so viele Sprünge vor dem Übergang
+  // Krummer Anfang (nicht durch den Schritt teilbar) macht das Zählen interessanter.
+  const versatz = krumm ? zufall(1, 9) * (schritt >= 1000 ? 10 : 1) : 0;
+  let start = vorwaerts ? vielfaches - vorher * schritt + versatz : vielfaches + vorher * schritt - versatz;
+  start = Math.max(0, Math.min(start, max - SPRUENGE * schritt));
+  if (!vorwaerts && start - SPRUENGE * schritt < 0) start = SPRUENGE * schritt;
+  return { schritt, vorwaerts, start };
+}
+
+LS.spiel({
+  id: "zahlen-huepfer",
+  einleitung: "Quak! Der Frosch hüpft von Seerose zu Seerose — immer gleich weit. Schreib auf, wo er landet. Pass auf, ob er vorwärts (+) oder rückwärts (−) hüpft!",
+  anzahl: 6,
+  stufen: {
+    s1: "Bis 100 in Schritten wie +2, +5 oder −10.",
+    s2: "Bis 1000 in Schritten wie +20, +50 oder −100.",
+    s3: "Schritte wie +10, +100, −1000 oder +500.",
+    s4: "Knifflige Schritte wie −250 oder +25 000 und krumme Startzahlen.",
+    s5: "Schritte wie +99, −999 oder +12 500 — gut aufpassen!",
+  },
+
+  aufgabe(ctx) {
+    const { schritt, vorwaerts, start } = aufgabeErzeugen(ctx.stufe);
+    const d = vorwaerts ? schritt : -schritt;
+    const zeichen = vorwaerts ? "+" : "−";
+    const zahlen = Array.from({ length: SPRUENGE + 1 }, (_, i) => start + i * d);
+
+    ctx.flaeche.append(el("div", { class: "auftrag", html: `Der Frosch hüpft immer <span class="schritt-schild">${zeichen} ${zahlText(schritt)}</span>` }));
+
+    const teich = el("div", { class: "teich" });
+    const rosen = zahlen.map((z, i) => {
+      const r = el("div", { class: "seerose" + (i === 0 ? "" : " offen") }, el("span", { text: i === 0 ? zahlText(z) : "?" }));
+      teich.append(r);
+      return r;
+    });
+    const frosch = el("div", { class: "frosch" + (vorwaerts ? "" : " rueckwaerts"), text: "🐸", "aria-hidden": "true" });
+    // Beim Rückwärtszählen läuft der Teich von rechts nach links, damit der Frosch sichtbar zurückhüpft.
+    if (!vorwaerts) teich.style.flexDirection = "row-reverse";
+    rosen[0].append(frosch);
+    ctx.flaeche.append(teich);
+
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Wo landet der Frosch?" });
+    ctx.flaeche.append(anzeige);
+
+    let sprung = 1;
+    let versucheHier = 0;
+    rosen[1].classList.add("jetzt");
+
+    function landen() {
+      rosen[sprung].classList.remove("offen", "jetzt");
+      rosen[sprung].firstChild.textContent = zahlText(zahlen[sprung]);
+      rosen[sprung].append(frosch);
+      frosch.classList.remove("springt");
+      void frosch.offsetWidth;
+      frosch.classList.add("springt");
+      LS.ton("huepf");
+      sprung++;
+      versucheHier = 0;
+      if (sprung <= SPRUENGE) rosen[sprung].classList.add("jetzt");
+    }
+
+    const tasten = LS.tastatur({
+      anzeige,
+      maxStellen: 7,
+      onOk(w) {
+        const soll = zahlen[sprung];
+        if (w === soll) {
+          landen();
+          if (sprung > SPRUENGE) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig("Alle Seerosen geschafft! 🎉"); return; }
+          tasten.leeren();
+          ctx.sag(waehle(["Hopp!", "Richtig, weiter!", "Platsch — genau getroffen!", "Super, der nächste Sprung!"]), "gut");
+          return;
+        }
+        anzeige.classList.add("falsch");
+        versucheHier++;
+        const vorher = zahlen[sprung - 1];
+        let hinweis;
+        if (vorwaerts && w < vorher) hinweis = "Der Frosch hüpft vorwärts — die Zahl muss grösser werden!";
+        else if (!vorwaerts && w > vorher) hinweis = "Der Frosch hüpft rückwärts — die Zahl muss kleiner werden!";
+        else hinweis = `Rechne ${zahlText(vorher)} ${zeichen} ${zahlText(schritt)}. Schau genau, welche Stelle sich ändert.`;
+        ctx.falsch(hinweis);
+        if (versucheHier >= 3) {
+          // Nach drei Versuchen hilft die Eule und der Frosch hüpft trotzdem weiter.
+          ctx.sag(`${zahlText(vorher)} ${zeichen} ${zahlText(schritt)} = ${zahlText(soll)}. Weiter geht's!`, "hinweis");
+          landen();
+          tasten.leeren();
+          if (sprung > SPRUENGE) { tasten.gesperrt = true; setTimeout(() => ctx.richtig("Geschafft — die nächste Reihe!"), 1600); }
+        }
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    ctx.sag(ctx.nr === 0 ? "Wo landet der Frosch beim ersten Sprung? Tipp die Zahl ein." : "Neue Reihe, neuer Schritt!");
+  },
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Punkte-Schieber</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .punkt-tabelle {
+    display: grid;
+    grid-template-columns: repeat(var(--spalten), minmax(0, 1fr));
+    gap: clamp(3px, 1vw, 6px);
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .punkt-tabelle .kopfzelle {
+    background: var(--f);
+    color: #fff;
+    border-radius: 12px 12px 4px 4px;
+    text-align: center;
+    font-weight: 900;
+    font-size: clamp(16px, 3.2vw, 22px);
+    padding: 6px 0;
+  }
+
+  .punkt-feld {
+    border: 4px solid var(--f);
+    border-radius: 4px 4px 16px 16px;
+    background: #fff;
+    min-height: clamp(110px, 22vw, 150px);
+    padding: 8px 2px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: center;
+    gap: clamp(3px, 1vw, 6px);
+    cursor: pointer;
+    transition: background .2s;
+  }
+
+  .punkt-feld.ziel-moeglich { background: #f1f3ff; }
+  .punkt-feld.richtig { background: var(--gut-hell); }
+  .punkt-tabelle.falsch { animation: wackeln .4s; }
+  .punkt-tabelle.fest .punkt-feld { cursor: default; }
+
+  .punkt {
+    width: clamp(13px, 3.6vw, 26px);
+    height: clamp(13px, 3.6vw, 26px);
+    flex: none;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background: radial-gradient(circle at 35% 30%, #fff8, transparent 40%), var(--f);
+    box-shadow: 0 3px 0 rgba(0, 0, 0, .18);
+    cursor: pointer;
+    animation: punkt-rein .25s;
+  }
+
+  .punkt.gehoben {
+    transform: translateY(-6px) scale(1.25);
+    box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--knopf), 0 8px 10px rgba(0, 0, 0, .2);
+    animation: none;
+  }
+
+  @keyframes punkt-rein { from { transform: scale(0); } }
+
+  .anzahl { text-align: center; font-weight: 900; font-size: 20px; color: var(--f); min-height: 26px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>⚪ Punkte-Schieber</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lernziel 4.2-E3: Zahlen in der Stellenwerttabelle mit Punkten darstellen und die Punkte
+// laut den Vorgaben verschieben.
+
+const { STELLEN, zahlText, zufall, waehle, zerlege, el } = LS;
+// Je Stufe: Spalten der Tabelle (ab dieser Stelle bis E), höchste Punktzahl je Feld beim Legen.
+const STUFE = {
+  s1: { ab: "Z", maxJe: 5 },
+  s2: { ab: "H", maxJe: 5 },
+  s3: { ab: "T", maxJe: 5 },
+  s4: { ab: "HT", maxJe: 6 },
+  s5: { ab: "HT", maxJe: 7 },
+};
+let SPALTEN = STELLEN.slice(1); // wird je Aufgabe auf die Stufe gesetzt
+
+/** Stellenzahl zwischen a und b, höchstens so viele wie Spalten. */
+const laenge = (a, b) => zufall(Math.min(a, SPALTEN.length), Math.min(b, SPALTEN.length));
+const MAX_PUNKTE = 9;
+
+const wert = punkte => SPALTEN.reduce((s, st) => s + punkte[st.k] * st.wert, 0);
+const kopie = punkte => ({ ...punkte });
+const summe = punkte => SPALTEN.reduce((s, st) => s + punkte[st.k], 0);
+
+function zufallsPunkte(stellenAnzahl, maxJe) {
+  const p = Object.fromEntries(SPALTEN.map(st => [st.k, 0]));
+  SPALTEN.slice(SPALTEN.length - stellenAnzahl).forEach((st, i) => { p[st.k] = i === 0 ? zufall(1, maxJe) : zufall(0, maxJe); });
+  return p;
+}
+
+/**
+ * Zeichnet die Punkte-Tabelle.
+ * modus 'legen': Feld antippen = Punkt dazu, Punkt antippen = Punkt weg.
+ * modus 'schieben': Punkt antippen = hochheben, anderes Feld antippen = dort ablegen.
+ * modus 'fest': nur anschauen.
+ */
+function punkteTabelle(ctx, start, modus, onAenderung) {
+  const punkte = kopie(start);
+  let gehoben = null;
+  let gesperrt = false;
+  const tab = el("div", { class: "punkt-tabelle" + (modus === "fest" ? " fest" : "") });
+  tab.style.setProperty("--spalten", SPALTEN.length);
+  const felder = {}, zaehler = {};
+  for (const st of SPALTEN) tab.append(el("div", { class: `kopfzelle st st-${st.k}`, text: st.k, title: st.name }));
+  for (const st of SPALTEN) {
+    felder[st.k] = el("div", { class: `punkt-feld st st-${st.k}`, "aria-label": st.name });
+    felder[st.k].addEventListener("click", () => feldGetippt(st.k));
+    tab.append(felder[st.k]);
+  }
+  if (modus === "legen") for (const st of SPALTEN) { zaehler[st.k] = el("div", { class: `anzahl st st-${st.k}` }); tab.append(zaehler[st.k]); }
+
+  function zeichne() {
+    for (const st of SPALTEN) {
+      const f = felder[st.k];
+      f.innerHTML = "";
+      f.classList.toggle("ziel-moeglich", gehoben !== null && gehoben !== st.k);
+      for (let i = 0; i < punkte[st.k]; i++) {
+        const p = el("button", { type: "button", class: "punkt" + (gehoben === st.k && i === punkte[st.k] - 1 ? " gehoben" : ""), "aria-label": `Punkt bei ${st.name}` });
+        p.addEventListener("click", (e) => { e.stopPropagation(); punktGetippt(st.k); });
+        f.append(p);
+      }
+      if (zaehler[st.k]) zaehler[st.k].textContent = punkte[st.k] || "";
+    }
+  }
+
+  function geaendert() { zeichne(); tab.classList.remove("falsch"); if (onAenderung) onAenderung(punkte); }
+
+  function feldGetippt(k) {
+    if (gesperrt) return;
+    if (modus === "legen") {
+      if (punkte[k] >= MAX_PUNKTE) { ctx.sag("Mehr als 9 Punkte passen nicht in ein Feld!", "hinweis"); return; }
+      punkte[k]++;
+      LS.ton("tipp");
+      geaendert();
+    } else if (modus === "schieben" && gehoben !== null) {
+      if (gehoben === k) { gehoben = null; zeichne(); return; }
+      if (punkte[k] >= MAX_PUNKTE) { ctx.sag("Dort sind schon 9 Punkte!", "hinweis"); return; }
+      punkte[gehoben]--;
+      punkte[k]++;
+      gehoben = null;
+      LS.ton("huepf");
+      geaendert();
+    }
+  }
+
+  function punktGetippt(k) {
+    if (gesperrt) return;
+    if (modus === "legen") { punkte[k]--; LS.ton("tipp"); geaendert(); }
+    else if (modus === "schieben") { gehoben = gehoben === k ? null : k; LS.ton("tipp"); zeichne(); }
+  }
+
+  zeichne();
+  ctx.flaeche.append(tab);
+  return {
+    punkte,
+    tab,
+    felder,
+    sperren() { gesperrt = true; gehoben = null; zeichne(); },
+    zuruecksetzen() { Object.assign(punkte, start); gehoben = null; geaendert(); },
+  };
+}
+
+function okZeile(ctx, beiOk, mitZurueck) {
+  const ok = el("button", { class: "knopf gruen", type: "button", text: "OK ✓", onclick: () => beiOk() });
+  const zeile = el("div", { class: "knopfzeile" }, ok);
+  if (mitZurueck) zeile.prepend(el("button", { class: "knopf hell", type: "button", text: "↺ Neu anfangen", onclick: mitZurueck }));
+  ctx.flaeche.append(zeile);
+  return ok;
+}
+
+const istAufgegeben = ctx => !!ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen):not(.hell)");
+
+function punkteText(p) { return SPALTEN.filter(st => p[st.k]).map(st => `${p[st.k]} ${st.k}`).join(", "); }
+
+// ---------- Aufgabenarten ----------
+
+/** Zahl mit Punkten legen. */
+function legen(ctx) {
+  const ziel = zufallsPunkte(laenge(4, 6), STUFE[ctx.stufe].maxJe);
+  const zahl = wert(ziel);
+  ctx.flaeche.append(el("div", { class: "auftrag", html: `Lege die Zahl <b>${zahlText(zahl)}</b> mit Punkten.` }));
+  const t = punkteTabelle(ctx, Object.fromEntries(SPALTEN.map(st => [st.k, 0])), "legen");
+  const ok = okZeile(ctx, () => {
+    if (SPALTEN.every(st => t.punkte[st.k] === ziel[st.k])) { t.sperren(); ok.disabled = true; ctx.richtig(); return; }
+    t.tab.classList.add("falsch");
+    const falsch = SPALTEN.find(st => t.punkte[st.k] !== ziel[st.k]);
+    ctx.falsch(`Bei den ${LS.dativ(falsch)} (${falsch.k}) stimmt die Anzahl Punkte noch nicht.`, `${zahlText(zahl)} = ${punkteText(ziel)}`);
+    if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
+  });
+  if (ctx.nr === 0) ctx.sag("Tipp in ein Feld, um einen Punkt zu legen. Tipp auf einen Punkt, um ihn wegzunehmen.");
+}
+
+/** Punkte ablesen. */
+function lesen(ctx) {
+  const start = zufallsPunkte(laenge(4, 6), 6);
+  const zahl = wert(start);
+  ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl zeigen die Punkte?" }));
+  punkteTabelle(ctx, start, "fest");
+  const anzeige = el("div", { class: "anzeige leer", style: "margin-top:14px", "aria-label": "Deine Zahl" });
+  ctx.flaeche.append(anzeige);
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 7,
+    onOk(w) {
+      if (w === zahl) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch("Zähl die Punkte in jedem Feld. Ein leeres Feld ist eine 0!", `${punkteText(start)} = ${zahlText(zahl)}`);
+      if (istAufgegeben(ctx)) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(tasten.element);
+}
+
+/** Einen bestimmten Punkt verschieben (von Stelle a nach Stelle b). */
+function verschiebeNachVorgabe(ctx) {
+  for (;;) {
+    const start = zufallsPunkte(laenge(4, 6), 5);
+    const von = waehle(SPALTEN.filter(st => start[st.k] > 0));
+    const nach = waehle(SPALTEN.filter(st => st !== von && start[st.k] < MAX_PUNKTE));
+    const ziel = kopie(start);
+    ziel[von.k]--;
+    ziel[nach.k]++;
+    if (summe(ziel) === 0) continue;
+    ctx.flaeche.append(el("div", { class: "auftrag", html: `Die Punkte zeigen <b>${zahlText(wert(start))}</b>.<br>Verschiebe einen Punkt von den <span style="color:var(--st-${von.k})">${von.k}</span> zu den <span style="color:var(--st-${nach.k})">${nach.k}</span>.` }));
+    const t = punkteTabelle(ctx, start, "schieben");
+    const ok = okZeile(ctx, () => {
+      if (SPALTEN.every(st => t.punkte[st.k] === ziel[st.k])) {
+        t.sperren(); ok.disabled = true;
+        ctx.richtig(`Richtig! Aus ${zahlText(wert(start))} wird ${zahlText(wert(ziel))}.`);
+        return;
+      }
+      t.tab.classList.add("falsch");
+      ctx.falsch(`Nimm genau einen Punkt bei ${von.k} und leg ihn bei ${nach.k} ab. Mit „Neu anfangen“ ist alles wieder wie am Anfang.`, `Ein Punkt wandert von ${von.k} nach ${nach.k}: ${zahlText(wert(ziel))}.`);
+      if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
+    }, () => t.zuruecksetzen());
+    if (ctx.nr <= 2) ctx.sag("Tipp auf einen Punkt, um ihn hochzuheben. Dann tipp auf das Feld, wo er hin soll.");
+    return;
+  }
+}
+
+/** Einen Punkt so verschieben, dass sich die Zahl um einen bestimmten Betrag ändert. */
+function verschiebeZumZiel(ctx) {
+  const start = zufallsPunkte(laenge(5, 6), 5);
+  const von = waehle(SPALTEN.filter(st => start[st.k] > 0));
+  // Höchstens zwei Stellen weit, damit der Unterschied durchschaubar bleibt (900, 9900, 90 …).
+  const abstand = st => Math.abs(SPALTEN.indexOf(st) - SPALTEN.indexOf(von));
+  const nach = waehle(SPALTEN.filter(st => st !== von && abstand(st) <= 2 && start[st.k] < MAX_PUNKTE));
+  const diff = nach.wert - von.wert;
+  const zielWert = wert(start) + diff;
+  ctx.flaeche.append(el("div", { class: "auftrag", html: `Die Punkte zeigen <b>${zahlText(wert(start))}</b>.<br>Verschiebe <u>genau einen</u> Punkt, sodass die Zahl um <b>${zahlText(Math.abs(diff))}</b> ${diff > 0 ? "grösser" : "kleiner"} wird.` }));
+  const t = punkteTabelle(ctx, start, "schieben");
+  const ok = okZeile(ctx, () => {
+    const bewegt = SPALTEN.reduce((s, st) => s + Math.abs(t.punkte[st.k] - start[st.k]), 0);
+    if (bewegt === 2 && wert(t.punkte) === zielWert) {
+      t.sperren(); ok.disabled = true;
+      ctx.richtig(`Genau! ${zahlText(wert(start))} ${diff > 0 ? "+" : "−"} ${zahlText(Math.abs(diff))} = ${zahlText(zielWert)}`);
+      return;
+    }
+    t.tab.classList.add("falsch");
+    const hinweis = bewegt === 0 ? "Du hast noch keinen Punkt verschoben."
+      : bewegt > 2 ? "Verschiebe nur einen einzigen Punkt! Tipp auf „Neu anfangen“."
+      : `Deine Zahl ist jetzt ${zahlText(wert(t.punkte))}. Sie soll ${zahlText(zielWert)} sein. Überlege: Was passiert, wenn ein Punkt eine Stelle nach links wandert?`;
+    ctx.falsch(hinweis, `Ein Punkt von ${von.k} nach ${nach.k}: ${zahlText(zielWert)}.`);
+    if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
+  }, () => t.zuruecksetzen());
+  if (ctx.nr <= 1) ctx.sag("Tipp: Ein Punkt von H nach T macht die Zahl um 900 grösser (1000 − 100).");
+}
+
+/** Mit einer festen Anzahl Punkte eine Zahl nach Vorgabe legen. */
+function mitAnzahlPunkten(ctx) {
+  const n = zufall(3, 8);
+  const art = waehle(["groesste", "kleinsteFuenf", "kleinsteSechs"]);
+  const vorgaben = {
+    groesste: { text: `Lege mit genau ${n} Punkten die grösste Zahl.`, loesung: n * 100000 },
+    kleinsteFuenf: { text: `Lege mit genau ${n} Punkten die kleinste fünfstellige Zahl.`, loesung: 10000 + (n - 1) },
+    kleinsteSechs: { text: `Lege mit genau ${n} Punkten die kleinste sechsstellige Zahl.`, loesung: 100000 + (n - 1) },
+  };
+  const v = vorgaben[art];
+  ctx.flaeche.append(el("div", { class: "auftrag", text: v.text }));
+  const t = punkteTabelle(ctx, Object.fromEntries(SPALTEN.map(st => [st.k, 0])), "legen");
+  const ok = okZeile(ctx, () => {
+    const anzahl = summe(t.punkte);
+    if (anzahl === n && wert(t.punkte) === v.loesung) { t.sperren(); ok.disabled = true; ctx.richtig(`Super! Das ist ${zahlText(v.loesung)}.`); return; }
+    t.tab.classList.add("falsch");
+    const hinweis = anzahl !== n ? `Du hast ${anzahl} Punkte gelegt — es müssen genau ${n} sein.`
+      : art === "groesste" ? "Das geht noch grösser! In welches Feld zählt ein Punkt am meisten?"
+      : "Fast! Die erste Stelle braucht einen Punkt — und die übrigen Punkte sollen möglichst wenig wert sein.";
+    ctx.falsch(hinweis, `Die Lösung ist ${zahlText(v.loesung)} (${punkteText(zerlege(v.loesung))}).`);
+    if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
+  });
+}
+
+const ABLAUF = {
+  s1: [legen, lesen, verschiebeNachVorgabe, legen, lesen, verschiebeNachVorgabe, legen, lesen],
+  s2: [legen, lesen, verschiebeNachVorgabe, legen, lesen, verschiebeNachVorgabe, verschiebeNachVorgabe, legen],
+  s3: [legen, lesen, verschiebeNachVorgabe, legen, verschiebeNachVorgabe, lesen, verschiebeNachVorgabe, legen],
+  s4: [legen, verschiebeNachVorgabe, verschiebeZumZiel, lesen, verschiebeZumZiel, legen, verschiebeNachVorgabe, verschiebeZumZiel],
+  s5: [verschiebeNachVorgabe, verschiebeZumZiel, mitAnzahlPunkten, legen, verschiebeZumZiel, mitAnzahlPunkten, verschiebeZumZiel, mitAnzahlPunkten],
+};
+
+LS.spiel({
+  id: "punkte-schieber",
+  einleitung: "In der Stellenwerttabelle kann man Zahlen auch mit Punkten zeigen: 3 Punkte bei den H sind 300. Und wenn du Punkte verschiebst, wird die Zahl eine ganz andere!",
+  anzahl: 8,
+  stufen: {
+    s1: "Tabelle mit Z und E: Punkte legen, ablesen, einen Punkt verschieben.",
+    s2: "Tabelle mit H, Z und E.",
+    s3: "Tabelle bis T: legen, ablesen und nach Vorgabe verschieben.",
+    s4: "Tabelle bis HT, und: Verschiebe einen Punkt, sodass die Zahl um 900 grösser wird.",
+    s5: "Profi-Rätsel mit fester Punktzahl und gezieltem Verschieben.",
+  },
+  aufgabe(ctx) {
+    SPALTEN = STELLEN.slice(STELLEN.findIndex(st => st.k === STUFE[ctx.stufe].ab));
+    ABLAUF[ctx.stufe][ctx.nr](ctx);
+  },
+});
+</script>
+</body>
+</html>

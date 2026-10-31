@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stellen-Detektiv</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .zahl-ziffern {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    margin: 8px 0 22px;
+    font-size: clamp(46px, 11vw, 84px);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .zahl-ziffern .luecke { width: .25em; }
+
+  .ziffer {
+    position: relative;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: var(--text);
+    padding: 0 .06em;
+    border-radius: 14px;
+    line-height: 1.15;
+  }
+
+  button.ziffer { cursor: pointer; }
+  button.ziffer:hover { background: #f1f3fb; }
+
+  /* Lupe über der gesuchten Ziffer */
+  .ziffer.gesucht {
+    color: var(--knopf);
+    background: #eef0ff;
+    box-shadow: 0 0 0 4px var(--knopf);
+    animation: puls 1.4s infinite;
+  }
+
+  .ziffer.gesucht::before {
+    content: "🔍";
+    position: absolute;
+    top: -.55em;
+    right: -.35em;
+    font-size: .45em;
+  }
+
+  .ziffer.richtig { background: var(--gut-hell); box-shadow: 0 0 0 4px var(--gut); color: var(--gut); }
+  .ziffer.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+
+  @keyframes puls {
+    50% { box-shadow: 0 0 0 9px rgba(91, 108, 255, .25); }
+  }
+
+  .antworten {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .antwort {
+    border: none;
+    border-radius: 16px;
+    background: var(--f);
+    color: #fff;
+    font-size: clamp(17px, 4.4vw, 22px);
+    font-weight: 900;
+    min-height: 64px;
+    padding: 6px 4px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, .2);
+    transition: transform .08s, opacity .2s;
+  }
+
+  .antwort:active { transform: translateY(3px); }
+  .antwort small { display: block; font-size: 14px; opacity: .9; }
+  .antwort.weg { opacity: .3; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔍 Stellen-Detektiv</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lernziel 4.2-G1: Die Stellen einer Zahl benennen (Einer, Zehner, Hunderter, Tausender, …).
+// Grund: Lupe zeigt auf eine Ziffer → Stelle wählen.
+// Erweitert: zusätzlich umgekehrt — Stelle ist genannt → Ziffer antippen; mehr Stellen.
+
+const { STELLEN, zahlText, zufall, waehle, el } = LS;
+
+// Je Stufe: Länge der Zahlen und ob auch umgekehrt gefragt wird (Stelle → Ziffer antippen).
+const STUFE = {
+  s1: { laenge: [2, 2], umgekehrt: false },
+  s2: { laenge: [3, 3], umgekehrt: true },
+  s3: { laenge: [4, 5], umgekehrt: false },
+  s4: { laenge: [6, 6], umgekehrt: true },
+  s5: { laenge: [7, 7], umgekehrt: true },
+};
+
+function zahlErzeugen(stufe) {
+  if (stufe === "s4" && Math.random() < 0.06) return 1000000;
+  const stellen = zufall(...STUFE[stufe].laenge);
+  let s = String(zufall(1, 9));
+  // Lauter verschiedene Ziffern, wenn möglich — sonst wäre „tipp die Ziffer an“ mehrdeutig.
+  while (s.length < stellen) {
+    const z = String(zufall(0, 9));
+    if (!s.includes(z)) s += z;
+  }
+  return Number(s);
+}
+
+/** Ziffern der Zahl mit ihrer Stelle, links nach rechts. */
+function ziffernMitStelle(zahl) {
+  const s = String(zahl);
+  return [...s].map((z, i) => ({ z, st: STELLEN[7 - s.length + i], gruppenEnde: s.length >= 5 && (s.length - i - 1) % 3 === 0 && i < s.length - 1 }));
+}
+
+function zahlZeichnen(ctx, liste, klickbar, onKlick) {
+  const zeile = el("div", { class: "zahl-ziffern", "aria-label": "Zahl" });
+  const knoepfe = liste.map((d) => {
+    const k = klickbar
+      ? el("button", { type: "button", class: "ziffer", text: d.z, onclick: () => onKlick(d, k) })
+      : el("span", { class: "ziffer", text: d.z });
+    zeile.append(k);
+    if (d.gruppenEnde) zeile.append(el("span", { class: "luecke" }));
+    return k;
+  });
+  ctx.flaeche.append(zeile);
+  return knoepfe;
+}
+
+/** Lupe auf eine Ziffer → richtige Stelle aus den Knöpfen wählen. */
+function stelleBenennen(ctx, zahl) {
+  const liste = ziffernMitStelle(zahl);
+  const ziel = waehle(liste);
+  ctx.flaeche.append(el("div", { class: "auftrag", text: "An welcher Stelle steht die Ziffer unter der Lupe?" }));
+  const knoepfe = zahlZeichnen(ctx, liste, false);
+  knoepfe[liste.indexOf(ziel)].classList.add("gesucht");
+
+  // Nur die Stellen anbieten, die in der Zahl vorkommen (plus eine darüber als Falle).
+  const angebot = STELLEN.slice(Math.max(0, 7 - String(zahl).length - 1));
+  const antworten = el("div", { class: "antworten" });
+  let fertig = false;
+  for (const st of angebot) {
+    // Weiches Trennzeichen, damit „Hunderttausender“ auf schmalen Bildschirmen umbrechen kann.
+    const b = el("button", { type: "button", class: `antwort st st-${st.k}`, html: `${st.name.replace(/(.)tausender/, "$1&shy;tausender")}<small>${st.k}</small>` });
+    b.addEventListener("click", () => {
+      if (fertig) return;
+      if (st === ziel.st) {
+        fertig = true;
+        knoepfe[liste.indexOf(ziel)].classList.replace("gesucht", "richtig");
+        ctx.richtig(`Genau! Die ${ziel.z} steht bei den ${LS.dativ(st)}.`);
+        return;
+      }
+      b.classList.add("weg");
+      ctx.falsch("Zähl von rechts: Einer, Zehner, Hunderter, Tausender, …",
+        `Die ${ziel.z} steht bei den ${LS.dativ(ziel.st)} (${ziel.st.k}).`);
+      if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+    });
+    antworten.append(b);
+  }
+  ctx.flaeche.append(antworten);
+}
+
+/** Stelle ist genannt → die passende Ziffer in der Zahl antippen. */
+function zifferFinden(ctx, zahl) {
+  const liste = ziffernMitStelle(zahl);
+  const ziel = waehle(liste);
+  ctx.flaeche.append(el("div", { class: "auftrag", html: `Tipp die Ziffer an, die bei den <span style="color:var(--st-${ziel.st.k})">${LS.dativ(ziel.st)} (${ziel.st.k})</span> steht!` }));
+  let fertig = false;
+  zahlZeichnen(ctx, liste, true, (d, knopf) => {
+    if (fertig) return;
+    if (d === ziel) {
+      fertig = true;
+      knopf.classList.add("richtig");
+      ctx.richtig();
+      return;
+    }
+    knopf.classList.remove("falsch");
+    void knopf.offsetWidth;
+    knopf.classList.add("falsch");
+    ctx.falsch(`Die ${d.z} steht bei den ${LS.dativ(d.st)}. Zähl nochmal von rechts!`,
+      `Bei den ${LS.dativ(ziel.st)} steht die ${ziel.z}.`);
+    if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+  });
+}
+
+LS.spiel({
+  id: "stellen-detektiv",
+  einleitung: "Psst, Detektiv! Jede Ziffer hat ihren Platz in der Zahl. Findest du heraus, wie die Stellen heissen?",
+  anzahl: 8,
+  stufen: {
+    s1: "Zahlen bis 100: Zehner oder Einer?",
+    s2: "Zahlen bis 1000 mit Hundertern — manchmal umgekehrt.",
+    s3: "Vier- und fünfstellige Zahlen: Wie heisst die Stelle unter der Lupe?",
+    s4: "Sechsstellige Zahlen, und umgekehrt: Finde die Ziffer zur Stelle.",
+    s5: "Siebenstellige Zahlen bis zu den Millionen.",
+  },
+  aufgabe(ctx) {
+    const zahl = zahlErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].umgekehrt && ctx.nr % 2 === 1) zifferFinden(ctx, zahl);
+    else stelleBenennen(ctx, zahl);
+    if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort.");
+  },
+});
+</script>
+</body>
+</html>

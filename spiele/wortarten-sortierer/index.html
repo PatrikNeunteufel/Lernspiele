@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wortarten-Sortierer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .wortkarte {
+    margin: 6px auto 20px;
+    width: fit-content;
+    max-width: 100%;
+    background: #fff;
+    border: 4px solid var(--rand);
+    border-radius: 20px;
+    padding: 14px 30px;
+    font-size: clamp(36px, 8vw, 58px);
+    font-weight: 900;
+    box-shadow: var(--schatten);
+    transition: transform .5s, opacity .5s;
+  }
+
+  .satz {
+    text-align: center;
+    font-size: clamp(22px, 4.6vw, 32px);
+    font-weight: 700;
+    line-height: 1.6;
+    margin: 6px 0 20px;
+  }
+
+  .satz mark {
+    background: #fff1c2;
+    border-bottom: 5px solid #f5b301;
+    border-radius: 6px;
+    padding: 0 6px;
+    font-weight: 900;
+  }
+
+  .koerbe {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .korb {
+    border: none;
+    border-radius: 20px 20px 28px 28px;
+    padding: 14px 6px 10px;
+    min-height: 120px;
+    cursor: pointer;
+    color: #fff;
+    background: var(--k);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, .2);
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: transform .1s;
+  }
+
+  .korb:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0, 0, 0, .2); }
+  .korb .bild { font-size: 36px; }
+  .korb b { font-size: clamp(18px, 3.6vw, 24px); }
+  .korb small { font-size: 14px; opacity: .9; }
+  .korb .zahl { font-size: 15px; font-weight: 900; background: rgba(255, 255, 255, .25); border-radius: 999px; padding: 0 10px; margin-top: 4px; }
+  .korb.falsch { animation: wackeln .4s; }
+
+  .k-N { --k: var(--deko-6); }
+  .k-V { --k: var(--deko-3); }
+  .k-A { --k: var(--deko-5); }
+
+  .wortkarte.weg { transform: translateY(160px) scale(.4); opacity: 0; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧺 Wortarten-Sortierer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.5.D.1: Nomen, Verb und Adjektiv — Stufe a erste Erfahrungen, b mit inhaltlichen
+// Proben, c mit formalen Proben. Die Wörter stehen in woerter.js.
+
+const { waehle, el } = LS;
+
+const ARTEN = {
+  N: { name: "Nomen", kind: "Namenwort", bild: "🏠", probe: "Nomen-Probe: Passt der, die oder das davor? (der Hund)" },
+  V: { name: "Verb", kind: "Tunwort", bild: "🏃", probe: "Verb-Probe: Passt ich, du, er davor? (ich spiele, er spielt)" },
+  A: { name: "Adjektiv", kind: "Wiewort", bild: "🎨", probe: "Adjektiv-Probe: Kann man es steigern? (gross, grösser, am grössten)" },
+};
+
+/** Satz „Der [Hund|N] bellt.“ in Teile zerlegen: Text oder { wort, art }. */
+function zerlegeSatz(satz) {
+  return satz.split(/(\[[^\]]+\])/).filter(Boolean).map(t => {
+    const m = t.match(/^\[([^|]+)\|([NVA])\]$/);
+    return m ? { wort: m[1], art: m[2] } : t;
+  });
+}
+
+/** Aufgabe je Stufe: Wort einzeln (1–2) oder markiert im Satz (3–5). */
+function aufgabeErzeugen(stufe) {
+  if (stufe === "s1" || stufe === "s2") {
+    const art = waehle(["N", "V", "A"]);
+    const wort = waehle(WOERTER[art]);
+    // Stufe 2: alles klein — die Grossschreibung verrät das Nomen nicht mehr, die Probe zählt.
+    return { art, wort: stufe === "s2" ? wort.toLowerCase() : wort, satz: null };
+  }
+  const teile = zerlegeSatz(waehle(SAETZE[stufe]));
+  const ziel = waehle(teile.filter(t => typeof t === "object"));
+  return { art: ziel.art, wort: ziel.wort, satz: teile, ziel };
+}
+
+const zaehler = { N: 0, V: 0, A: 0 };
+
+LS.spiel({
+  id: "wortarten-sortierer",
+  einleitung: "Jedes Wort gehört in einen Korb: Nomen, Verb oder Adjektiv. Weisst du, wohin?",
+  anzahl: 10,
+  stufen: {
+    s1: "Einzelne Wörter: Hund, spielen, rot.",
+    s2: "Alles klein geschrieben — jetzt hilft nur die Probe.",
+    s3: "Ein Wort im Satz: Der Hund bellt laut.",
+    s4: "Vergangenheit und Steigerung: sprang, höher, am schnellsten.",
+    s5: "Knifflig: das Lachen, beim Essen, das Blau.",
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) Object.keys(zaehler).forEach(k => { zaehler[k] = 0; });
+    const a = aufgabeErzeugen(ctx.stufe);
+
+    if (a.satz) {
+      const satz = el("div", { class: "satz" });
+      for (const t of a.satz) satz.append(t === a.ziel ? el("mark", { text: t.wort }) : typeof t === "object" ? t.wort : t);
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Wortart hat das markierte Wort?" }), satz);
+    } else {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "In welchen Korb gehört das Wort?" }));
+    }
+    const karte = el("div", { class: "wortkarte", text: a.wort });
+    if (!a.satz) ctx.flaeche.append(karte);
+
+    const koerbe = el("div", { class: "koerbe" });
+    let fertig = false;
+    for (const [k, info] of Object.entries(ARTEN)) {
+      const zahl = el("span", { class: "zahl", text: String(zaehler[k]) });
+      const korb = el("button", { type: "button", class: `korb k-${k}` },
+        el("span", { class: "bild", text: info.bild }), el("b", { text: info.name }), el("small", { text: info.kind }), zahl);
+      korb.addEventListener("click", () => {
+        if (fertig) return;
+        if (k === a.art) {
+          fertig = true;
+          zaehler[k]++;
+          zahl.textContent = String(zaehler[k]);
+          karte.classList.add("weg");
+          ctx.richtig(`Richtig: «${a.wort}» ist ${k === "A" ? "ein Adjektiv" : k === "V" ? "ein Verb" : "ein Nomen"}.`);
+          return;
+        }
+        korb.classList.remove("falsch");
+        void korb.offsetWidth;
+        korb.classList.add("falsch");
+        // Hinweis: die Probe der gewählten Wortart machen lassen — sie klappt hier nicht.
+        ctx.falsch(`Mach die ${ARTEN[k].probe} Klappt das mit «${a.wort}»?`,
+          `«${a.wort}» ist ${a.art === "A" ? "ein Adjektiv" : a.art === "V" ? "ein Verb" : "ein Nomen"}. ${ARTEN[a.art].probe}`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+      });
+      koerbe.append(korb);
+    }
+    ctx.flaeche.append(koerbe);
+    if (ctx.nr === 0) ctx.sag(a.satz ? "Lies den Satz und tipp auf den richtigen Korb." : "Tipp auf den richtigen Korb.");
+  },
+});
+</script>
+</body>
+</html>

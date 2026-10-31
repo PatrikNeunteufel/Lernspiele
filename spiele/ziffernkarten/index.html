@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ziffernkarten</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .vorgabe {
+    background: #fff8e1;
+    border: 3px dashed #f5c451;
+    border-radius: 18px;
+    padding: 12px 18px;
+    font-size: clamp(20px, 3.6vw, 26px);
+    font-weight: 800;
+    text-align: center;
+    margin: 0 auto 18px;
+    max-width: 720px;
+  }
+
+  .faecher {
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    max-width: calc(var(--n) * 106px);
+    margin: 0 auto;
+    gap: clamp(4px, 1.5vw, 10px);
+  }
+
+  .fach-kopf {
+    text-align: center;
+    font-weight: 900;
+    color: #fff;
+    background: var(--f);
+    border-radius: 10px;
+    padding: 4px 0;
+    font-size: 18px;
+  }
+
+  .platz {
+    border: 4px dashed var(--f);
+    border-radius: 16px;
+    aspect-ratio: .78;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fbfcff;
+    cursor: pointer;
+  }
+
+  .karten {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    min-height: 130px;
+    margin: 22px 0 6px;
+    padding: 12px;
+    border-radius: 20px;
+    background: rgba(91, 108, 255, .07);
+  }
+
+  .karte-ziffer {
+    width: clamp(64px, 14vw, 88px);
+    aspect-ratio: .72;
+    border: none;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 5px 0 #d8dbe8, 0 8px 16px rgba(45, 48, 71, .12);
+    font-family: inherit;
+    font-size: clamp(40px, 9vw, 56px);
+    font-weight: 900;
+    color: var(--text);
+    cursor: pointer;
+    position: relative;
+    animation: karte-rein .35s backwards;
+  }
+
+  .karte-ziffer::before, .karte-ziffer::after {
+    content: "";
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--knopf);
+    opacity: .5;
+  }
+  .karte-ziffer::before { top: 8px; left: 8px; }
+  .karte-ziffer::after { bottom: 8px; right: 8px; }
+
+  .platz .karte-ziffer { width: 100%; height: 100%; animation: none; }
+
+  @keyframes karte-rein {
+    from { transform: translateY(20px) rotate(-8deg); opacity: 0; }
+  }
+
+  .faecher.richtig .platz { border-style: solid; border-color: var(--gut); background: var(--gut-hell); }
+  .faecher.falsch { animation: wackeln .4s; }
+
+  .ergebnis { text-align: center; font-size: 22px; font-weight: 800; min-height: 32px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🃏 Ziffernkarten</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lernziel 4.2-G4 (Grund): aus mehreren Ziffern Zahlen bilden, die den schriftlichen Vorgaben entsprechen.
+// Lernziel 4.2-E2 (Erweitert): aus mehreren Ziffern Zahlen bilden, die den Vorgaben entsprechen —
+// hier mit mehreren Bedingungen gleichzeitig (gerade/ungerade, Nähe, Grenzen, feste Stelle + Extremwert).
+
+const { STELLEN, zahlText, zufall, waehle, mische, el } = LS;
+
+/** Alle Zahlen aus den Karten (jede Karte genau einmal), ohne führende Null. */
+function alleZahlen(karten) {
+  const ergebnis = new Set();
+  (function lege(rest, bisher) {
+    if (!rest.length) { if (bisher[0] !== 0) ergebnis.add(Number(bisher.join(""))); return; }
+    rest.forEach((z, i) => lege([...rest.slice(0, i), ...rest.slice(i + 1)], [...bisher, z]));
+  })(karten, []);
+  return [...ergebnis];
+}
+
+function kartenZiehen(anzahl, mitNull) {
+  const pool = mische([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, anzahl - (mitNull ? 1 : 0));
+  if (mitNull) pool.push(0);
+  return mische(pool);
+}
+
+const stelleVon = (n, st) => Math.floor(n / st.wert) % 10;
+const gerade = n => n % 2 === 0;
+// Je Stufe: Anzahl Karten und ob Vorgaben der erweiterten Anforderung dazukommen.
+const STUFE = {
+  s1: { karten: 2, erweitert: false },
+  s2: { karten: 3, erweitert: false },
+  s3: { karten: 4, erweitert: false },
+  s4: { karten: 5, erweitert: true },
+  s5: { karten: 6, erweitert: true },
+};
+
+const GERADE = "Die Zahl muss gerade sein: Bei den Einern steht 0, 2, 4, 6 oder 8.";
+const UNGERADE = "Die Zahl muss ungerade sein: Bei den Einern steht 1, 3, 5, 7 oder 9.";
+
+/**
+ * Vorgaben: Text, Bedingung (filter) und Ziel ('alle' = jede passende Zahl zählt,
+ * 'max'/'min' = die grösste/kleinste passende, 'nah' = am nächsten bei 'bei').
+ */
+function vorgabeErzeugen(stufe, karten, stellen) {
+  const n = karten.length;
+  const st = waehle(stellen);
+  const d = waehle(karten.filter(z => !(z === 0 && st === stellen[0])));
+  const zahlen = alleZahlen(karten);
+  const beispiel = waehle(zahlen);
+  const hoch = STELLEN[7 - n]; // höchste Stelle
+  const unten = Math.floor(beispiel / hoch.wert) * hoch.wert;
+  const anStelle = `Die ${d} muss bei den ${LS.dativ(st)} stehen.`;
+
+  const grund = [
+    { text: "Bilde die grösste Zahl.", filter: () => true, ziel: "max" },
+    { text: "Bilde die kleinste Zahl.", filter: () => true, ziel: "min" },
+    { text: `Bilde eine Zahl, bei der die ${d} bei den ${LS.dativ(st)} (${st.k}) steht.`, filter: z => stelleVon(z, st) === d, ziel: "alle", regel: anStelle },
+    { text: `Bilde eine Zahl zwischen ${zahlText(unten)} und ${zahlText(unten + hoch.wert)}.`, filter: z => z > unten && z < unten + hoch.wert, ziel: "alle", regel: `Die Zahl muss zwischen ${zahlText(unten)} und ${zahlText(unten + hoch.wert)} liegen.` },
+    { text: `Bilde die grösste Zahl, bei der die ${d} bei den ${LS.dativ(st)} (${st.k}) steht.`, filter: z => stelleVon(z, st) === d, ziel: "max", regel: anStelle },
+  ];
+  if (!STUFE[stufe].erweitert) return waehle(stufe === "s1" ? grund.slice(0, 4) : grund);
+
+  const mitte = waehle([3, 4, 5, 6, 7]) * hoch.wert;
+  const grenze = Math.round(beispiel / (hoch.wert / 10)) * (hoch.wert / 10);
+  const erweitert = [
+    { text: "Bilde die grösste gerade Zahl.", filter: gerade, ziel: "max", regel: GERADE },
+    { text: "Bilde die kleinste ungerade Zahl.", filter: z => !gerade(z), ziel: "min", regel: UNGERADE },
+    { text: `Bilde die Zahl, die am nächsten bei ${zahlText(mitte)} liegt.`, filter: () => true, ziel: "nah", bei: mitte },
+    { text: `Bilde die grösste Zahl, die kleiner als ${zahlText(grenze)} ist.`, filter: z => z < grenze, ziel: "max", regel: `Die Zahl muss kleiner als ${zahlText(grenze)} sein.` },
+    { text: `Bilde die kleinste Zahl, die grösser als ${zahlText(grenze)} ist.`, filter: z => z > grenze, ziel: "min", regel: `Die Zahl muss grösser als ${zahlText(grenze)} sein.` },
+    { text: `Die ${d} steht bei den ${LS.dativ(st)} (${st.k}), und die Zahl ist so klein wie möglich.`, filter: z => stelleVon(z, st) === d, ziel: "min", regel: anStelle },
+    { text: `Bilde die grösste ungerade Zahl, bei der die ${d} bei den ${LS.dativ(st)} (${st.k}) steht.`, filter: z => stelleVon(z, st) === d && !gerade(z), ziel: "max", regel: `${UNGERADE} ${anStelle}` },
+  ];
+  if (stufe === "s4") return waehle(Math.random() < 0.25 ? grund.slice(2) : erweitert);
+
+  // Profi: zwei Bedingungen gleichzeitig.
+  const profi = [
+    { text: `Bilde die gerade Zahl, die am nächsten bei ${zahlText(mitte)} liegt.`, filter: gerade, ziel: "nah", bei: mitte, regel: GERADE },
+    { text: `Bilde die grösste Zahl, die kleiner als ${zahlText(grenze)} ist und bei der die ${d} bei den ${LS.dativ(st)} (${st.k}) steht.`, filter: z => z < grenze && stelleVon(z, st) === d, ziel: "max", regel: `Die Zahl muss kleiner als ${zahlText(grenze)} sein. ${anStelle}` },
+    { text: `Bilde die kleinste ungerade Zahl, die grösser als ${zahlText(grenze)} ist.`, filter: z => z > grenze && !gerade(z), ziel: "min", regel: `Die Zahl muss grösser als ${zahlText(grenze)} sein. ${UNGERADE}` },
+  ];
+  return waehle(Math.random() < 0.5 ? profi : erweitert);
+}
+
+/** Menge der richtigen Antworten zur Vorgabe; leer, wenn die Karten nicht passen. */
+function loesungen(vorgabe, zahlen) {
+  const passend = zahlen.filter(vorgabe.filter);
+  if (!passend.length) return [];
+  if (vorgabe.ziel === "alle") return passend;
+  if (vorgabe.ziel === "max") return [Math.max(...passend)];
+  if (vorgabe.ziel === "min") return [Math.min(...passend)];
+  const abstand = Math.min(...passend.map(z => Math.abs(z - vorgabe.bei)));
+  return passend.filter(z => Math.abs(z - vorgabe.bei) === abstand);
+}
+
+function aufgabeErzeugen(stufe) {
+  const anzahl = STUFE[stufe].karten;
+  const stellen = STELLEN.slice(7 - anzahl);
+  for (;;) {
+    const karten = kartenZiehen(anzahl, Math.random() < 0.5);
+    const vorgabe = vorgabeErzeugen(stufe, karten, stellen);
+    const richtig = loesungen(vorgabe, alleZahlen(karten));
+    if (richtig.length) return { karten, stellen, vorgabe, richtig };
+  }
+}
+
+LS.spiel({
+  id: "ziffernkarten",
+  einleitung: "Ich habe Ziffernkarten gemischt! Leg sie in die Fächer, sodass eine Zahl entsteht, die zur Vorgabe passt. Jede Karte wird genau einmal gebraucht.",
+  anzahl: 8,
+  stufen: {
+    s1: "2 Karten: die grösste oder kleinste Zahl legen.",
+    s2: "3 Karten: grösste, kleinste Zahl, eine Ziffer an fester Stelle.",
+    s3: "4 Karten nach schriftlichen Vorgaben (Lernziel G4).",
+    s4: "5 Karten, Vorgaben wie die grösste gerade Zahl (Lernziel E2).",
+    s5: "6 Karten und zwei Bedingungen gleichzeitig.",
+  },
+
+  aufgabe(ctx) {
+    const { karten, stellen, vorgabe, richtig } = aufgabeErzeugen(ctx.stufe);
+    ctx.flaeche.append(el("div", { class: "vorgabe", text: vorgabe.text }));
+
+    const faecher = el("div", { class: "faecher" });
+    faecher.style.setProperty("--n", stellen.length);
+    for (const st of stellen) faecher.append(el("div", { class: `fach-kopf st st-${st.k}`, text: st.k }));
+    const plaetze = stellen.map(st => {
+      const p = el("div", { class: `platz st st-${st.k}`, "aria-label": st.name });
+      faecher.append(p);
+      return p;
+    });
+    const stapel = el("div", { class: "karten" });
+    const ergebnis = el("div", { class: "ergebnis" });
+    const ok = el("button", { class: "knopf gruen", type: "button", text: "OK ✓", disabled: "" });
+    ctx.flaeche.append(faecher, stapel, ergebnis, el("div", { class: "knopfzeile" }, ok));
+
+    let gesperrt = false;
+    function aktualisiere() {
+      const voll = plaetze.every(p => p.firstChild);
+      ok.disabled = !voll || gesperrt;
+      // Mit führender Null die Karten so zeigen, wie sie liegen — sonst verschwände die Null still.
+      const roh = plaetze.map(p => p.firstChild?.textContent).join("");
+      ergebnis.textContent = !voll ? "" : roh.startsWith("0") ? `Deine Karten: ${roh}` : `Deine Zahl: ${zahlText(gelegt())}`;
+      faecher.classList.remove("falsch");
+    }
+    const gelegt = () => Number(plaetze.map(p => p.firstChild.textContent).join(""));
+
+    // Karte antippen: vom Stapel ins erste freie Fach, aus einem Fach zurück auf den Stapel.
+    karten.forEach((z, i) => {
+      const k = el("button", { type: "button", class: "karte-ziffer", text: String(z), style: `animation-delay:${i * 0.07}s` });
+      k.addEventListener("click", () => {
+        if (gesperrt) return;
+        LS.ton("tipp");
+        if (k.parentElement === stapel) {
+          const frei = plaetze.find(p => !p.firstChild);
+          if (frei) frei.append(k);
+        } else {
+          stapel.append(k);
+        }
+        aktualisiere();
+      });
+      stapel.append(k);
+    });
+
+    ok.addEventListener("click", () => {
+      if (gesperrt) return;
+      const zahl = gelegt();
+      if (richtig.includes(zahl)) {
+        gesperrt = true;
+        ok.disabled = true;
+        faecher.classList.add("richtig");
+        ctx.richtig();
+        return;
+      }
+      faecher.classList.add("falsch");
+      let hinweis;
+      if (plaetze[0].firstChild.textContent === "0") hinweis = "Eine Zahl fängt nie mit 0 an!";
+      else if (!vorgabe.filter(zahl)) hinweis = vorgabe.regel || "Lies die Vorgabe nochmal genau.";
+      else if (vorgabe.ziel === "max") hinweis = "Das passt — aber es geht noch grösser! Die grossen Ziffern gehören nach vorne.";
+      else if (vorgabe.ziel === "min") hinweis = "Das passt — aber es geht noch kleiner! Die kleinen Ziffern gehören nach vorne.";
+      else if (vorgabe.ziel === "nah") hinweis = `Es gibt eine Zahl, die noch näher bei ${zahlText(vorgabe.bei)} liegt. Schau zuerst auf die vorderste Stelle.`;
+      else hinweis = "Lies die Vorgabe nochmal genau.";
+      ctx.falsch(hinweis, `Eine richtige Lösung ist ${zahlText(richtig[0])}.`);
+      if (ctx.flaeche.querySelector(".knopfzeile button.knopf:not(.gruen)")) { gesperrt = true; ok.disabled = true; }
+    });
+
+    ctx.sag(ctx.nr === 0 ? "Tipp eine Karte an, dann rutscht sie ins nächste freie Fach. Nochmal tippen holt sie zurück." : "Neue Karten, neue Vorgabe!");
+  },
+});
+</script>
+</body>
+</html>
