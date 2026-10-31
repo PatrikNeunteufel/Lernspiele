@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fehler-Lupe</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .regelkarte {
+    background: #fff8e1;
+    border: 3px dashed #f5c451;
+    border-radius: 16px;
+    padding: 10px 16px;
+    font-size: 17px;
+    margin: 0 auto 14px;
+    max-width: 700px;
+  }
+  .regelkarte b { display: block; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: #a0703d; }
+
+  .satz { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; margin: 8px 0 18px; }
+  .wort {
+    border: none; border-radius: 12px; padding: 8px 12px; min-height: 52px;
+    font-family: inherit; font-size: clamp(22px, 5vw, 32px); font-weight: 800;
+    background: #fff; color: var(--text); box-shadow: 0 4px 0 var(--rand); cursor: pointer;
+  }
+  .wort:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--rand); }
+  .wort.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .wort.gepeilt { opacity: .45; }
+  .wort.gefunden { background: #fff1c2; box-shadow: 0 0 0 4px #f5b301; }
+  .wort.repariert { background: var(--gut-hell); box-shadow: 0 0 0 4px var(--gut); }
+  .frage { text-align: center; font-weight: 800; font-size: clamp(18px, 4vw, 22px); margin: 4px 0 10px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔍 Fehler-Lupe</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.4.F.1 (Rechtschreibung überarbeiten): b sch, sp/st, Abstrakta gross; c (OP 4. Klasse)
+// ie, e/ä, Komma bei Aufzählungen. Stufe 5 nimmt Regeln der 5. Klasse dazu (Doppelkonsonant, ck/tz,
+// äu/eu, Dehnungs-h, Verben als Nomen). In jedem Satz steht genau ein Fehler: erst das Wort finden,
+// dann die richtige Schreibweise wählen. Die Sätze stehen in woerter.js.
+
+const { waehle, mische, el } = LS;
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Kinder üben nur Regeln aus freien Listen (LS.freieListen; die Aufsicht sieht alle). Kennt der
+// Katalog die Listen dieses Spiels noch nicht, gilt alles als frei — wie bei einem Spiel ohne Listen.
+const ID = "fehler-lupe";
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : [...Object.values(FEHLER_REGELN).map(r => r.liste), "fehlerfrei"]);
+// Die fehlerfreien Sätze der Königsstufe sind eine eigene Liste; ohne sie kommt kein Zusatzsatz dazu.
+const ZUSATZ_FREI = FREI.has("fehlerfrei");
+const regelFrei = id => FREI.has(FEHLER_REGELN[id].liste);
+
+const OP = ["gross", "abstrakt", "spst", "sch", "ie", "eae", "komma"].filter(regelFrei);
+const FUENFTE = ["doppel", "cktz", "aeu", "dehnung", "nominal"].filter(regelFrei);
+const STUFEN_VOLL = {
+  s1: { regeln: ["gross", "spst"].filter(regelFrei), laenge: "kurz", hilfe: "regel" },
+  s2: { regeln: ["gross", "spst", "sch", "abstrakt"].filter(regelFrei), laenge: "kurz", hilfe: "regel" },
+  s3: { regeln: OP, laenge: "kurz", hilfe: "liste" },
+  s4: { regeln: OP, laenge: "lang" },
+  // 5. Klasse: meistens eine neue Regel, manchmal eine der 4. Klasse.
+  s5: { regeln: [...FUENFTE, ...OP], neu: FUENFTE.length ? FUENFTE : null, laenge: "kurz" },
+  // Königsstufe: langer Satz mit Fehler und ein fehlerfreier Satz dazu, alle Regeln, knappe Hinweise.
+  s6: { regeln: [...OP, ...FUENFTE], laenge: "lang", zusatz: true, knapp: true },
+};
+// Angeboten wird eine Stufe nur, wenn ihr mindestens eine freie Regel bleibt.
+const STUFE = Object.fromEntries(Object.entries(STUFEN_VOLL).filter(([, p]) => p.regeln.length));
+// Regelkarte der Stufe 3: nur die Regeln, die vorkommen können.
+const KURZNAME = { gross: "Nomen gross", abstrakt: "Nomen gross", spst: "sp und st", sch: "sch", ie: "ie", eae: "e oder ä", komma: "Komma bei Aufzählungen" };
+const LISTE = `Achte auf: ${[...new Set(OP.map(r => KURZNAME[r]))].join(" · ")}.`;
+
+/** "Der {Stein|Schtein} ist schwer." → Wörter; das Fehlerwort trägt { richtig, falsch, weitere }.
+    Ein Satzzeichen direkt nach der Klammer (nach) steht im Satz, aber nicht auf den Wahlknöpfen. */
+function zerlegeSatz(satz) {
+  return satz.split(" ").map(t => {
+    const m = t.match(/^\{([^}]+)\}([.!?]?)$/);
+    if (!m) return { text: t };
+    const [richtig, falsch, ...weitere] = m[1].split("|");
+    return { text: falsch + m[2], fehler: { richtig, falsch, weitere, nach: m[2] } };
+  });
+}
+const ganz = woerter => woerter.map(w => (w.fehler ? w.fehler.richtig + w.fehler.nach : w.text)).join(" ");
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const regelId = p.neu && Math.random() < 0.7 ? waehle(p.neu) : waehle(p.regeln);
+  const regel = FEHLER_REGELN[regelId];
+  const satz = waehle(regel[p.laenge]);
+  let woerter = zerlegeSatz(satz);
+  const fehler = woerter.find(w => w.fehler).fehler;
+  let zusatz = null;
+  if (p.zusatz && ZUSATZ_FREI) {
+    // Der fehlerfreie Satz darf das Lösungswort nicht enthalten, sonst stünde es schon da.
+    const wortRe = new RegExp(`(^|[^\\p{L}])${fehler.richtig.replace(/[.,]$/, "")}([^\\p{L}]|$)`, "iu");
+    zusatz = waehle(FEHLERFREIE_SAETZE.filter(s => !wortRe.test(s)));
+    const extra = zerlegeSatz(zusatz);
+    woerter = Math.random() < 0.5 ? [...extra, ...woerter] : [...woerter, ...extra];
+  }
+  return { regelId, regel, satz, zusatz, woerter, fehler, richtig: fehler.richtig,
+    optionen: mische([fehler.richtig, fehler.falsch, ...fehler.weitere]) };
+}
+
+// ---------- Prüfung ----------
+
+const klein = r => r[0].toLowerCase() + r.slice(1);
+/** Welche falschen Schreibweisen passen zur Regel? (So prüft das Spiel die eigene Liste.) */
+const ERWARTET = {
+  gross: r => [klein(r)],
+  abstrakt: r => [klein(r)],
+  nominal: r => [klein(r)],
+  spst: r => [r.replace(/^([Ss])([pt])/, "$1ch$2")],
+  sch: r => [r.replace(/sch/i, m => m[0] + "h"), r.replace(/sch/i, m => m[0])],
+  ie: r => (r.includes("ie") ? [r.replace("ie", "i")] : [r.replace("i", "ie")]),
+  eae: r => (/[äÄ]/.test(r) ? [r.replace("ä", "e").replace("Ä", "E")] : [r.replace("e", "ä")]),
+  komma: r => [r.slice(0, -1), r.slice(0, -1) + "."],
+  doppel: r => [r.replace(/([bdfgklmnprst])\1/, "$1")],
+  cktz: r => [r.includes("ck") ? r.replace("ck", "k") : r.replace("tz", "z")],
+  aeu: r => (r.includes("äu") ? [r.replace("äu", "eu")] : [r.replace("eu", "äu")]),
+  dehnung: r => [r.replace(/([aeiouäöü])h/, "$1")],
+};
+
+/** Mängel der ganzen Satzliste — einmal berechnet. */
+const LISTEN_MAENGEL = (() => {
+  const m = [];
+  for (const [id, regel] of Object.entries(FEHLER_REGELN)) {
+    for (const satz of [...regel.kurz, ...regel.lang]) {
+      const marken = satz.match(/\{[^}]*\}/g) || [];
+      if (marken.length !== 1) { m.push(`«${satz}»: nicht genau ein Fehler markiert`); continue; }
+      const woerter = zerlegeSatz(satz);
+      const f = woerter.find(w => w.fehler).fehler;
+      const erwartet = ERWARTET[id](f.richtig);
+      for (const x of [f.falsch, ...f.weitere]) if (!erwartet.includes(x)) m.push(`«${satz}»: «${x}» passt nicht zur Regel ${regel.name}`);
+      if (f.falsch === f.richtig) m.push(`«${satz}»: richtig und falsch gleich`);
+      if (!/^[A-ZÄÖÜ]/.test(ganz(woerter)) || !/[.!?]$/.test(satz)) m.push(`«${satz}»: Satzanfang oder Satzende`);
+      if (id === "komma" && !/ und /.test(satz)) m.push(`«${satz}»: Aufzählung ohne «und»`);
+      if (woerter.some(w => !w.fehler && /^sch[pt]/i.test(w.text))) m.push(`«${satz}»: weiteres schp/scht`);
+      if (new RegExp(`(^|[^\\p{L}])${f.richtig.replace(/[.,]$/, "")}([^\\p{L}]|$)`, "u").test(regel.regel)) m.push(`Regel ${regel.name} nennt das Lösungswort «${f.richtig}»`);
+    }
+  }
+  for (const s of FEHLERFREIE_SAETZE) if (/[{}|]/.test(s) || !/^[A-ZÄÖÜ].*[.!?]$/.test(s)) m.push(`fehlerfreier Satz «${s}» falsch aufgebaut`);
+  if (/ß/.test(JSON.stringify([FEHLER_REGELN, FEHLERFREIE_SAETZE]))) m.push("ß in den Sätzen");
+  return m;
+})();
+
+function pruefeAufgabe(a, stufe) {
+  const m = [...LISTEN_MAENGEL];
+  const p = STUFE[stufe];
+  if (!p) return ["Stufe wird mit den freien Listen nicht angeboten"];
+  if (!p.regeln.includes(a.regelId)) m.push("Regel nicht in der Stufe");
+  if (!FREI.has(a.regel.liste)) m.push(`Regel aus der Liste ${a.regel.liste}, die nicht frei ist`);
+  if (!a.regel[p.laenge].includes(a.satz)) m.push("Satzlänge passt nicht zur Stufe");
+  if (a.woerter.filter(w => w.fehler).length !== 1) m.push("nicht genau ein Fehler");
+  if (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length || a.optionen.length < 2) m.push("Auswahl doppelt oder ohne Lösung");
+  if (p.zusatz && ZUSATZ_FREI && (!a.zusatz || a.woerter.some(w => !w.fehler && w.text.replace(/[.,!?]$/, "").toLowerCase() === a.richtig.replace(/[.,]$/, "").toLowerCase()))) m.push("Königsstufe: Zusatzsatz fehlt oder enthält das Lösungswort");
+  if (/ß/.test(JSON.stringify(a))) m.push("ß in der Aufgabe");
+  return m;
+}
+
+// ---------- Spiel ----------
+
+LS.spiel({
+  id: "fehler-lupe",
+  einleitung: "In jedem Satz hat sich genau ein Fehler versteckt. Nimm die Lupe: Tipp auf das falsche Wort und repariere es!",
+  anzahl: 8,
+  stufen: Object.fromEntries(Object.entries({
+    s1: "Nomen gross, sp und st — die Regel steht dabei.",
+    s2: "Dazu sch und Nomen wie Angst oder Freude.",
+    s3: "Dazu ie, e oder ä und das Komma bei Aufzählungen.",
+    s4: "Lange Sätze, alle Regeln gemischt — ohne Regelkarte.",
+    s5: "Neue Regeln: Sonne, Zucker, Bäume, fahren, beim Essen.",
+    s6: "Endgegner: zwei Sätze, ein einziger Fehler, alle Regeln.",
+  }).filter(([s]) => STUFE[s])),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const loesung = `Richtig ist «${a.richtig}»: ${ganz(a.woerter)}`;
+    ctx.loesung?.(loesung); // für die Testhilfe 🔑
+
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "🔍 Welches Wort ist falsch geschrieben? Tipp es an!" }));
+    if (p.hilfe === "regel") ctx.flaeche.append(el("div", { class: "regelkarte" }, el("b", { text: `Achte auf: ${a.regel.name}` }), a.regel.regel));
+    if (p.hilfe === "liste") ctx.flaeche.append(el("div", { class: "regelkarte" }, LISTE));
+
+    const zeile = el("div", { class: "satz" });
+    let gefunden = false;
+    const wortHinweis = w => `Bei «${w}» stimmt alles. ` + (p.hilfe === "regel" ? a.regel.regel
+      : p.hilfe === "liste" ? "Lies Wort für Wort und denk an die Regeln oben."
+      : "Lies den Satz langsam, Wort für Wort.");
+
+    for (const w of a.woerter) {
+      const knopf = el("button", { type: "button", class: "wort", text: w.text });
+      knopf.addEventListener("click", () => {
+        if (gefunden || ctx.vorbei() || knopf.classList.contains("gepeilt")) return;
+        if (w.fehler) {
+          gefunden = true;
+          knopf.classList.add("gefunden");
+          LS.ton("tipp");
+          ctx.sag("Gefunden! Wie schreibt man das Wort richtig?", "gut");
+          ctx.flaeche.append(el("div", { class: "frage", text: "Wie schreibt man es richtig?" }));
+          LS.auswahl(ctx, {
+            optionen: a.optionen, richtig: a.richtig, breite: 150,
+            hinweis: p.knapp ? "So stimmt es noch nicht. Welche Regel passt zu diesem Wort?" : `So stimmt es noch nicht. ${a.regel.regel}`,
+            loesung,
+            lob: `Repariert: ${ganz(a.woerter)}`,
+            beiRichtig: () => { knopf.textContent = a.richtig + a.fehler.nach;knopf.classList.remove("gefunden"); knopf.classList.add("repariert"); },
+          });
+          return;
+        }
+        knopf.classList.remove("falsch"); void knopf.offsetWidth; knopf.classList.add("falsch", "gepeilt");
+        ctx.falsch(wortHinweis(w.text), loesung);
+        if (ctx.vorbei()) gefunden = true;
+      });
+      zeile.append(knopf);
+    }
+    ctx.flaeche.append(zeile);
+    if (ctx.nr === 0) ctx.sag("Lies den Satz genau. Nur ein Wort ist falsch geschrieben.");
+  },
+});
+</script>
+</body>
+</html>

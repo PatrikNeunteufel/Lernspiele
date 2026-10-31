@@ -37,24 +37,36 @@ const RAEUME = {
   Weiher: { bild: "💧", name: "Weiher und Bach", farbe: "#2f8fe0" },
   Gebirge: { bild: "🏔️", name: "Gebirge", farbe: "#7a6f9b" },
 };
-const LEBEWESEN = TIERE.map(([name, bild, klasse, , , lebensraum]) => ({ name, bild, klasse, lebensraum })).filter(t => t.lebensraum);
+const ID = "lebensraum";
 
-const KETTEN = NAHRUNGSKETTEN.map(k => k.map(([name, bild, pflanze]) => ({ name, bild, pflanze: !!pflanze })));
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf — je Lebensraum
+// eine Liste, dazu die Nahrungsketten. Kennt der Katalog die Listen des Spiels noch nicht, gilt der
+// ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : LEBENSRAUM_LISTEN);
+const LEBEWESEN = TIERE.map(([name, bild, klasse, , , lebensraum]) => ({ name, bild, klasse, lebensraum }))
+  .filter(t => t.lebensraum && FREI.has(LEBENSRAUM_LISTE_JE_RAUM[t.lebensraum]));
+
+const KETTEN = (FREI.has("nahrungsketten") ? NAHRUNGSKETTEN : []).map(k => k.map(([name, bild, pflanze]) => ({ name, bild, pflanze: !!pflanze })));
 /** Alle Paare „frisst“: { esser, futter } aus allen Ketten. */
 const FRISST = KETTEN.flatMap(k => k.slice(1).map((esser, i) => ({ esser: esser.name, futter: k[i] })));
 const glied = name => KETTEN.flat().find(g => g.name === name);
 
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
-  zuordnen(raeume, mitBild) {
-    const auswahl = mische(raeume).slice(0, raeume.length);
-    const w = waehle(LEBEWESEN.filter(t => auswahl.includes(t.lebensraum) && (!mitBild || t.bild)));
+  /** Lebewesen aus einem der 'raeume', dazu weitere dieser Räume als Körbe, zusammen 'anzahl'. */
+  zuordnen(raeume, anzahl, mitBild) {
+    const w = waehle(LEBEWESEN.filter(t => raeume.includes(t.lebensraum) && (!mitBild || t.bild)));
+    if (!w) return null;
+    const auswahl = [w.lebensraum, ...mische(raeume.filter(r => r !== w.lebensraum)).slice(0, anzahl - 1)];
     return { art: "zuordnen", w, raeume: Object.keys(RAEUME).filter(r => auswahl.includes(r)) };
   },
   /** Nahrungskette mit 'laenge' Gliedern (null = jede); mitBild: nur Ketten, deren Glieder alle ein Bild haben. */
   kette(laenge, mitBild) {
-    return { art: "kette", kette: waehle(KETTEN.filter(k => (!laenge || k.length === laenge) && (!mitBild || k.every(g => g.bild)))) };
+    const kette = waehle(KETTEN.filter(k => (!laenge || k.length === laenge) && (!mitBild || k.every(g => g.bild))));
+    return kette ? { art: "kette", kette } : null;
   },
   wasFrisst() {
+    if (!FRISST.length) return null;
     const { esser, futter } = waehle(FRISST);
     const andere = futter.pflanze ? GROSSE_RAEUBER.filter(n => n !== esser) : NICHT_FUTTER;
     return { art: "wasFrisst", esser: glied(esser), richtig: futter, optionen: mische([futter, ...mische(andere).slice(0, 2).map(glied)]) };
@@ -63,22 +75,57 @@ const ARTEN = {
 
 // Basisklasse 2: Stufe 1 = 1. Klasse, 2–4 = 2. Klasse, 5 = 3. Klasse, 6 Endgegner.
 // Bis Stufe 4 (2. Klasse) trägt jedes Lebewesen ein Bild — ohne Lesetext lösbar.
+const DREI = ["Wald", "Wiese", "Weiher"];
 const VIER = ["Wald", "Wiese", "Weiher", "Gebirge"];
 const BILD_NOETIG = ["s1", "s2", "s3", "s4"];
+// Je Stufe die Arten (mehrfach genannt = häufiger).
 const STUFE = {
-  s1: () => ARTEN.zuordnen(mische(["Wald", "Wiese", "Weiher"]).slice(0, 2), true),
-  s2: () => ARTEN.zuordnen(["Wald", "Wiese", "Weiher"], true),
-  s3: () => ARTEN.zuordnen(VIER, true),
-  s4: () => waehle([() => ARTEN.kette(3, true), () => ARTEN.zuordnen(VIER, true)])(),
-  s5: () => waehle([() => ARTEN.kette(4, false), ARTEN.wasFrisst])(),
-  s6: () => waehle([() => ARTEN.zuordnen(VIER, false), () => ARTEN.kette(null, false), ARTEN.wasFrisst])(),
+  s1: [() => ARTEN.zuordnen(DREI, 2, true)],
+  s2: [() => ARTEN.zuordnen(DREI, 3, true)],
+  s3: [() => ARTEN.zuordnen(VIER, 4, true)],
+  s4: [() => ARTEN.kette(3, true), () => ARTEN.zuordnen(VIER, 4, true)],
+  s5: [() => ARTEN.kette(4, false), ARTEN.wasFrisst],
+  s6: [() => ARTEN.zuordnen(VIER, 4, false), () => ARTEN.kette(null, false), ARTEN.wasFrisst],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Zwei Lebensräume: Wald, Wiese oder Weiher.",
+  s2: "Drei Lebensräume: Wald, Wiese, Weiher und Bach.",
+  s3: "Vier Lebensräume: dazu das Gebirge.",
+  s4: "Vier Lebensräume und kurze Nahrungsketten: Gras → Feldmaus → Fuchs.",
+  s5: "Nahrungsketten mit vier Gliedern — und: Was frisst …?",
+  s6: "Endgegner: alles gemischt, auch Tiere ohne Bild.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (tiere.js, nahrung.js). */
+function herkunft(a) {
+  if (a.art === "zuordnen") {
+    const zeile = TIERE.find(z => z[0] === a.w.name && z[5] === a.w.lebensraum);
+    return [zeile ? LEBENSRAUM_LISTE_JE_RAUM[zeile[5]] : "?"];
+  }
+  const inKette = name => NAHRUNGSKETTEN.some(k => k.some(g => g[0] === name));
+  const namen = a.art === "kette" ? a.kette.map(g => g.name) : [a.esser.name, ...a.optionen.map(o => o.name)];
+  return [namen.every(inKette) ? "nahrungsketten" : "?"];
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
   const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (a.art === "wasFrisst" && a.optionen.some(o => !o)) return [...m, "Auswahl unbekannt"];
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
   if (a.art === "zuordnen") {
     if (!a.raeume.includes(a.w.lebensraum)) m.push("richtiger Lebensraum fehlt");
     if (BILD_NOETIG.includes(stufe) && !a.w.bild) m.push("Lebewesen ohne Bild bis Stufe 4");
@@ -107,14 +154,7 @@ LS.spiel({
   id: "lebensraum",
   einleitung: "Wo wohnen Tiere und Pflanzen? Im Wald, auf der Wiese, im Weiher oder im Gebirge? Und wer frisst wen?",
   anzahl: 8,
-  stufen: {
-    s1: "Zwei Lebensräume: Wald, Wiese oder Weiher.",
-    s2: "Drei Lebensräume: Wald, Wiese, Weiher und Bach.",
-    s3: "Vier Lebensräume: dazu das Gebirge.",
-    s4: "Vier Lebensräume und kurze Nahrungsketten: Gras → Feldmaus → Fuchs.",
-    s5: "Nahrungsketten mit vier Gliedern — und: Was frisst …?",
-    s6: "Endgegner: alles gemischt, auch Tiere ohne Bild.",
-  },
+  stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

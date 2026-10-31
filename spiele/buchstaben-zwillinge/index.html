@@ -38,44 +38,62 @@ const ABC = "abcdefghijklmnopqrstuvwxyz".split("");
 const VERWECHSELBAR = new Set(VERWECHSLER.flat());
 const SALAT = ANLAUT_WOERTER.map(([wort, bild]) => ({ wort, bild }));
 
+// Freigabe (Entscheid L4 a): Inhalte nur aus Listen, die der Spieler üben darf (Aufsicht: alle).
+// Kennt der Katalog die Listen nicht, gilt alles als frei — dann entscheidet die Freigabe des Spiels.
+const LISTEN = ["verwechsler", "wortpaare", "salat-woerter"];
+const FREI = new Set(LS.spielListen("buchstaben-zwillinge").length ? LS.freieListen("buchstaben-zwillinge") : LISTEN);
+
 const ARTEN = {
   kleinZuGross() {
-    // einfache Buchstaben, Ablenker nicht verwechselbar
+    // einfache Buchstaben, Ablenker nicht verwechselbar — das ABC selbst ist keine Inhaltsliste
     const richtig = waehle(ABC.filter(b => !VERWECHSELBAR.has(b)));
     const andere = mische(ABC.filter(b => b !== richtig && !VERWECHSELBAR.has(b))).slice(0, 2);
-    return { art: "zwilling", gross: richtig.toUpperCase(), richtig, optionen: mische([richtig, ...andere]) };
+    return { art: "zwilling", liste: null, gross: richtig.toUpperCase(), richtig, optionen: mische([richtig, ...andere]) };
   },
   verwechsler() {
     const gruppe = waehle(VERWECHSLER);
     const richtig = waehle(gruppe);
-    return { art: "zwilling", gross: richtig.toUpperCase(), richtig, optionen: mische(gruppe) };
+    return { art: "zwilling", liste: "verwechsler", gruppe, gross: richtig.toUpperCase(), richtig, optionen: mische(gruppe) };
   },
   wortpaar() {
-    const [[wort, bild], ...andere] = waehle(WORTPAARE);
-    return { art: "wortpaar", wort, bild, richtig: wort, optionen: mische([wort, ...andere]) };
+    const paar = waehle(WORTPAARE);
+    const [[wort, bild], ...andere] = paar;
+    return { art: "wortpaar", liste: "wortpaare", paar, wort, bild, richtig: wort, optionen: mische([wort, ...andere]) };
   },
   salat(min, max, gross) {
     const w = waehle(SALAT.filter(x => x.wort.length >= min && x.wort.length <= max));
     const reihe = (gross ? w.wort.toUpperCase() : w.wort).split("");
-    return { art: "salat", w, reihe };
+    return { art: "salat", liste: "salat-woerter", w, reihe };
   },
 };
 
+// Je Stufe die Aufgabenarten mit der Liste, aus der sie ihren Inhalt nehmen (null = keine Liste nötig).
 const STUFE = {
-  s1: () => ARTEN.kleinZuGross(),
-  s2: () => waehle([ARTEN.verwechsler, ARTEN.kleinZuGross])(),
-  s3: () => waehle([ARTEN.wortpaar, ARTEN.verwechsler])(),
-  s4: () => waehle([() => ARTEN.salat(3, 4, false), ARTEN.wortpaar])(),
-  s5: () => ARTEN.salat(5, 7, true),
+  s1: [[null, ARTEN.kleinZuGross]],
+  s2: [["verwechsler", ARTEN.verwechsler], [null, ARTEN.kleinZuGross]],
+  s3: [["wortpaare", ARTEN.wortpaar], ["verwechsler", ARTEN.verwechsler]],
+  s4: [["salat-woerter", () => ARTEN.salat(3, 4, false)], ["wortpaare", ARTEN.wortpaar]],
+  s5: [["salat-woerter", () => ARTEN.salat(5, 7, true)]],
   // Königsstufe: lange Wörter in Grossbuchstaben und ähnliche Wörter gemischt
-  s6: () => waehle([() => ARTEN.salat(7, 8, true), () => ARTEN.salat(6, 8, true), ARTEN.wortpaar])(),
+  s6: [["salat-woerter", () => ARTEN.salat(7, 8, true)], ["salat-woerter", () => ARTEN.salat(6, 8, true)], ["wortpaare", ARTEN.wortpaar]],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Aufgabenarten der Stufe, deren Liste frei ist; leer = Stufe wird nicht angeboten. */
+const moeglich = stufe => STUFE[stufe].filter(([l]) => !l || FREI.has(l)).map(([, neu]) => neu);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => moeglich(s).length));
+
+function aufgabeErzeugen(stufe) {
+  const arten = moeglich(stufe);
+  if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  return waehle(arten)();
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a) {
   const m = [];
+  const ausListe = !a.liste ? true : a.liste === "verwechsler" ? VERWECHSLER.includes(a.gruppe)
+    : a.liste === "wortpaare" ? WORTPAARE.includes(a.paar) : SALAT.includes(a.w);
+  if ((a.liste && !FREI.has(a.liste)) || !ausListe) m.push("Inhalt nicht aus einer freien Liste");
   if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
   if (a.art === "zwilling" && a.gross.toLowerCase() !== a.richtig) m.push("Zwilling passt nicht");
   if (a.art === "salat" && a.reihe.join("").toLowerCase() !== a.w.wort.toLowerCase()) m.push("Salat ergibt das Wort nicht");
@@ -86,14 +104,14 @@ LS.spiel({
   id: "buchstaben-zwillinge",
   einleitung: "Jeder grosse Buchstabe hat einen kleinen Zwilling: A und a, B und b. Findest du sie?",
   anzahl: 10,
-  stufen: {
+  stufen: nurMoegliche({
     s1: "Gross und klein: Welcher Zwilling gehört zu M?",
     s2: "Aufgepasst: b, d, p, q sehen sich ähnlich!",
     s3: "Welches Wort passt zum Bild: Hund, Hand oder Mund?",
     s4: "Buchstabensalat: kurze Wörter legen.",
     s5: "Buchstabensalat in Grossbuchstaben: lange Wörter.",
     s6: "Ganz lange Wörter legen und ähnliche Wörter unterscheiden — gemischt.",
-  },
+  }),
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

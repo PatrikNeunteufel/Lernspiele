@@ -36,45 +36,63 @@ const { zufall, waehle, mische, el } = LS;
 const WOERTER = ANLAUT_WOERTER.map(([wort, bild]) => ({ wort, bild }));
 const mitLaenge = (min, max) => WOERTER.filter(w => w.wort.length >= min && w.wort.length <= max);
 
+// Freigabe (Entscheid L4 a): Inhalte nur aus Listen, die der Spieler üben darf (Aufsicht: alle).
+// Kennt der Katalog die Listen nicht, gilt alles als frei — dann entscheidet die Freigabe des Spiels.
+const LISTEN = ["einzelwoerter", "aehnliche-woerter", "wortgruppen"];
+const FREI = new Set(LS.spielListen("blitzlesen").length ? LS.freieListen("blitzlesen") : LISTEN);
+
 const ARTEN = {
   bild(min, max, n) {
     const w = waehle(mitLaenge(min, max));
     // Ablenker mit anderem Bild und anderem Anfang, damit nur das Lesen entscheidet
     const andere = mische(WOERTER.filter(x => x.bild !== w.bild && x.wort[0] !== w.wort[0])).slice(0, n - 1);
-    return { art: "bild", text: w.wort, richtig: w, optionen: mische([w, ...andere]) };
+    return { art: "bild", liste: "einzelwoerter", text: w.wort, richtig: w, optionen: mische([w, ...andere]) };
   },
   aehnlich() {
-    const [[wort], ...andere] = waehle(WORTPAARE);
+    const paar = waehle(WORTPAARE);
+    const [[wort], ...andere] = paar;
     const gezeigt = waehle([wort, ...andere]);
-    return { art: "wort", text: gezeigt, richtig: gezeigt, optionen: mische([wort, ...andere]) };
+    return { art: "wort", liste: "aehnliche-woerter", paar, text: gezeigt, richtig: gezeigt, optionen: mische([wort, ...andere]) };
   },
   gruppe() {
-    const [einz, mehr, ein, bild] = waehle(ZAEHLDINGE);
+    const ding = waehle(ZAEHLDINGE);
+    const [einz, mehr, ein, bild] = ding;
     const n = zufall(1, 5);
     const text = n === 1 ? `${ein} ${einz}` : `${ZAHLWOERTER[n]} ${mehr}`;
-    const anders = waehle(ZAEHLDINGE.filter(d => d[0] !== einz))[3];
+    const anders = waehle(ZAEHLDINGE.filter(d => d[0] !== einz));
     const m = waehle([1, 2, 3, 4, 5].filter(x => x !== n));
     const richtig = bild.repeat(n);
-    return { art: "gruppe", text, richtig, optionen: mische([richtig, anders.repeat(n), bild.repeat(m)]) };
+    return { art: "gruppe", liste: "wortgruppen", dinge: [ding, anders], text, richtig, optionen: mische([richtig, anders[3].repeat(n), bild.repeat(m)]) };
   },
 };
 
-// Je Stufe: Aufgabe und wie lange das Wort sichtbar bleibt (ms)
+// Je Stufe: Aufgabenarten mit ihrer Liste und wie lange das Wort sichtbar bleibt (ms)
 const STUFE = {
-  s1: { neu: () => ARTEN.bild(2, 4, 3), zeit: 3000 },
-  s2: { neu: () => ARTEN.bild(3, 5, 4), zeit: 1800 },
-  s3: { neu: () => ARTEN.bild(4, 8, 4), zeit: 1200 },
-  s4: { neu: () => waehle([ARTEN.aehnlich, () => ARTEN.bild(5, 8, 4)])(), zeit: 1000 },
-  s5: { neu: () => waehle([ARTEN.gruppe, ARTEN.aehnlich])(), zeit: 1500 },
+  s1: { arten: [["einzelwoerter", () => ARTEN.bild(2, 4, 3)]], zeit: 3000 },
+  s2: { arten: [["einzelwoerter", () => ARTEN.bild(3, 5, 4)]], zeit: 1800 },
+  s3: { arten: [["einzelwoerter", () => ARTEN.bild(4, 8, 4)]], zeit: 1200 },
+  s4: { arten: [["aehnliche-woerter", ARTEN.aehnlich], ["einzelwoerter", () => ARTEN.bild(5, 8, 4)]], zeit: 1000 },
+  s5: { arten: [["wortgruppen", ARTEN.gruppe], ["aehnliche-woerter", ARTEN.aehnlich]], zeit: 1500 },
   // Königsstufe: sehr kurz sichtbar, lange und ähnliche Wörter und Wortgruppen gemischt
-  s6: { neu: () => waehle([() => ARTEN.bild(6, 8, 5), ARTEN.aehnlich, ARTEN.gruppe])(), zeit: 700 },
+  s6: { arten: [["einzelwoerter", () => ARTEN.bild(6, 8, 5)], ["aehnliche-woerter", ARTEN.aehnlich], ["wortgruppen", ARTEN.gruppe]], zeit: 700 },
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe].neu(); }
+/** Aufgabenarten der Stufe, deren Liste frei ist; leer = Stufe wird nicht angeboten. */
+const moeglich = stufe => STUFE[stufe].arten.filter(([l]) => FREI.has(l)).map(([, neu]) => neu);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => moeglich(s).length));
+
+function aufgabeErzeugen(stufe) {
+  const arten = moeglich(stufe);
+  if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  return waehle(arten)();
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a) {
   const m = [];
+  const ausListe = a.art === "bild" ? a.optionen.every(o => WOERTER.includes(o))
+    : a.art === "wort" ? WORTPAARE.includes(a.paar) : a.dinge.every(d => ZAEHLDINGE.includes(d));
+  if (!FREI.has(a.liste) || !ausListe) m.push("Inhalt nicht aus einer freien Liste");
   if (!a.optionen.includes(a.richtig)) m.push("richtige Antwort fehlt");
   const schluessel = a.optionen.map(o => (typeof o === "string" ? o : o.wort));
   if (new Set(schluessel).size !== schluessel.length) m.push("Auswahl doppelt");
@@ -86,14 +104,14 @@ LS.spiel({
   id: "blitzlesen",
   einleitung: "Ein Wort blitzt auf — und ist gleich wieder weg! Lies schnell und tipp auf das passende Bild.",
   anzahl: 10,
-  stufen: {
+  stufen: nurMoegliche({
     s1: "Kurze Wörter, drei Sekunden: Maus, Bus, Hut.",
     s2: "Etwas längere Wörter, kürzer sichtbar.",
     s3: "Lange Wörter, ganz kurz: Pinguin, Zitrone.",
     s4: "Genau lesen: Hund, Hand oder Mund?",
     s5: "Wortgruppen: drei Birnen, ein Stern.",
     s6: "Blitzschnell: lange Wörter, ähnliche Wörter und Wortgruppen.",
-  },
+  }),
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

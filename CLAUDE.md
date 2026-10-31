@@ -47,9 +47,9 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 <!-- Kopplungsblock für die globalen ~/.claude-Skills. Format: ~/.claude/docs/steckbrief.template.md -->
 - **Projekt:** Lernspiele — kleine Mathe-Lernspiele (später weitere Fächer) für die 2. und 4. Klasse
 - **Session-Prefix:** LERN
-- **Sprachen:** HTML/CSS/JavaScript ohne Build-Schritt und ohne externe Abhängigkeiten (Entscheid LERN-1, 2026-10-31). Jedes Spiel ist eine eigenständige Seite `spiele/<name>/index.html`; Gemeinsames in `spiele/gemeinsam/`; Startseite `index.html` (Filter Thema/Stufe, Spielerwahl, Profil), Statistik `statistik.html`. Läuft offline per Doppelklick.
+- **Sprachen:** HTML/CSS/JavaScript ohne Build-Schritt und ohne externe Abhängigkeiten (Entscheid LERN-1, 2026-10-31). Jedes Spiel ist eine eigenständige Seite `spiele/<name>/index.html`; Gemeinsames in `spiele/gemeinsam/`; Startseite `index.html` mit Anmeldung und Tabs Spiele, Profil, Statistik, Verwaltung (Code je Tab in `start/`). Läuft offline per Doppelklick.
 - **Konventionen:** CLAUDE.md (Abschnitt Gestaltungsregeln)
-- **Architektur-Doku:** —
+- **Architektur-Doku:** docs/rahmen.md (Vertrag Rahmen ↔ Spiele: reservierte CSS-Klassen, Farben, ctx-API, Bausteine, Pflichtfunktionen)
 - **Handover:** docs/HANDOVER.md
 - **Session-Reports:** docs/report/ · LERN_Session<N>_<YYYY-MM-DD>.md
 - **Changelog/Logbuch:** CHANGELOG.md

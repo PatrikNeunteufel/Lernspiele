@@ -4,7 +4,12 @@
    Schweizer Schreibweise (ss). Adjektive, die beim Verb stehen („Der Hund bellt laut“), gelten
    nach Schweizer Schulgrammatik als Adjektiv. Wörter ohne Markierung werden nicht abgefragt.
 
-   Sätze: Wörter in [Wort|Art] werden abgefragt, alles andere ist nur Text. */
+   Sätze: Wörter in [Wort|Art] werden abgefragt, alles andere ist nur Text.
+
+   Inhaltslisten (Entscheid L4 a): WOERTER (alle drei Wortarten) ist die Liste „einzelwoerter“;
+   in SAETZE ist der Schlüssel die Liste-Id — „saetze-einfach“, „saetze-zeiten“, „saetze-nominal“.
+   Der Prüfstand steht im Katalog (spiele/gemeinsam/katalog.js, Eintrag „wortarten-sortierer“,
+   Feld listen). */
 
 const WOERTER = {
   // Stufe 1–2: einzelne Wörter, eindeutige Wortart
@@ -18,7 +23,7 @@ const WOERTER = {
 
 const SAETZE = {
   // Stufe 3: einfache Sätze, Grundformen und Präsens
-  s3: [
+  "saetze-einfach": [
     "Der [Hund|N] [bellt|V] [laut|A].",
     "Die [Katze|N] [schläft|V] auf dem [Sofa|N].",
     "[Lina|N] [malt|V] ein [rotes|A] [Haus|N].",
@@ -36,7 +41,7 @@ const SAETZE = {
     "Der [Bus|N] [fährt|V] [schnell|A].",
   ],
   // Stufe 4: Vergangenheit, Steigerung, zusammengesetzte Zeiten
-  s4: [
+  "saetze-zeiten": [
     "Gestern [sprang|V] der [Hase|N] über den [Zaun|N].",
     "Der [Turm|N] [ist|V] [höher|A] als das [Haus|N].",
     "Meine [Schwester|N] [rannte|V] am [schnellsten|A].",
@@ -49,7 +54,7 @@ const SAETZE = {
     "Der [Zug|N] [fuhr|V] [langsamer|A] als das [Auto|N].",
   ],
   // Stufe 5: formale Proben — gleiche Wörter, andere Wortart (Nominalisierung)
-  s5: [
+  "saetze-nominal": [
     "Das [Lachen|N] der [Kinder|N] [ist|V] [laut|A].",
     "Beim [Essen|N] [spricht|V] niemand.",
     "Wir [essen|V] [frisches|A] [Brot|N].",

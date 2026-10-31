@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wortfamilien-Baum</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  /* Ein Baum je Wortfamilie: unten der Stamm mit dem Familienwort, oben die Krone mit den Wörtern. */
+  .baum { display: flex; flex-direction: column; align-items: center; margin: 4px auto 16px; max-width: 640px; }
+  .krone {
+    background: #e6f7f1;
+    border: 4px solid var(--deko-5);
+    border-radius: 48% 48% 40% 40% / 60% 60% 40% 40%;
+    padding: 20px 22px 24px;
+    min-width: min(300px, 100%);
+    min-height: 86px;
+    box-sizing: border-box;
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
+  }
+  .krone .leer { font-size: 40px; color: var(--deko-5); font-weight: 900; }
+  .blatt {
+    background: #fff;
+    border-radius: 16px 4px 16px 4px;
+    padding: 6px 12px;
+    font-size: clamp(18px, 4.4vw, 24px);
+    font-weight: 800;
+    box-shadow: 0 3px 0 var(--rand);
+  }
+  .holz {
+    background: #a8714d; color: #fff;
+    border-radius: 0 0 14px 14px;
+    padding: 8px 26px 10px; margin-top: -4px;
+    text-align: center;
+  }
+  .holz b { display: block; font-size: clamp(22px, 5vw, 30px); }
+  .holz small { font-size: 15px; font-weight: 700; opacity: .9; }
+  mark { background: #fff1c2; border-bottom: 3px solid #f5b301; border-radius: 4px; padding: 0 2px; color: inherit; }
+
+  .wortkarte { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 6px 0 18px; }
+  .wortchip {
+    background: #fff; border: 3px solid var(--rand); border-radius: 14px;
+    padding: 8px 16px; font-size: clamp(22px, 5vw, 30px); font-weight: 800;
+  }
+  .zaehler { text-align: center; color: var(--text-leise); font-weight: 800; margin: -6px 0 10px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🌳 Wortfamilien-Baum</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.5.D.1.b (Orientierungspunkt 4. Klasse): Wortstamm erkennen, Wörter derselben
+// Wortfamilie zuordnen, zusammengesetzte Nomen zerlegen. Die Familien stehen in woerter.js.
+// Stufe 1–3 nur Wörter, in denen der Stamm unverändert steckt; Stufe 4 Umlaut im Stamm
+// (fahren → Fähre) und Wörter, die nur ähnlich aussehen (Fahne); Stufe 5 zusammengesetzte Nomen.
+
+const { waehle, mische, el } = LS;
+
+/** Für den Stammvergleich: klein, Umlaute ohne Punkte (Fähre → fahre). Länge bleibt gleich. */
+const norm = w => w.toLowerCase().replace(/ä/g, "a").replace(/ö/g, "o").replace(/ü/g, "u");
+const hatStamm = (wort, fam) => norm(wort).includes(norm(fam.stamm));
+const ARTEN = ["einfach", "umlaut", "zusammen"];
+const mitglieder = (fam, arten = ARTEN) => arten.flatMap(a => fam[a]);
+const falscheWoerter = fam => fam.falsch.map(([w]) => w);
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Kinder üben nur Wörter aus freien Listen (LS.freieListen; die Aufsicht sieht alle). Kennt der
+// Katalog die Listen dieses Spiels noch nicht, gilt alles als frei — wie bei einem Spiel ohne Listen.
+const SPIEL_ID = "wortfamilien-baum";
+const FREI = new Set(LS.spielListen(SPIEL_ID).length ? LS.freieListen(SPIEL_ID) : Object.values(WORTFAMILIEN_LISTEN));
+const spalteFrei = spalte => FREI.has(WORTFAMILIEN_LISTEN[spalte]);
+/** Die Familien mit den Wörtern aus freien Listen; Familienwort und Stamm bleiben (Bäume). */
+const FAMILIEN = WORTFAMILIEN.map(f => ({ ...f,
+  ...Object.fromEntries(Object.keys(WORTFAMILIEN_LISTEN).map(spalte => [spalte, spalteFrei(spalte) ? f[spalte] : []])) }));
+const FREIE_WOERTER = new Set(FAMILIEN.flatMap(f => [...mitglieder(f), ...falscheWoerter(f)]));
+
+const familienMit = (arten, n) => FAMILIEN.filter(f => mitglieder(f, arten).length >= n);
+/** Gibt es Familien mit n Wörtern aus 'arten' und einem Wort, das nur ähnlich aussieht? */
+const mitAehnlichen = (arten, n = 3) => familienMit(arten, n).some(f => f.falsch.length);
+
+/** Wörter anderer Familien, in denen der Stamm von 'fam' nicht steckt. */
+function fremdeWoerter(fam, arten = ARTEN) {
+  return FAMILIEN.filter(f => f !== fam).flatMap(f => mitglieder(f, arten).map(w => ({ w, f })))
+    .filter(x => !hatStamm(x.w, fam));
+}
+
+/** n verschiedene Wörter aus verschiedenen fremden Familien. */
+function fremde(fam, n, arten) {
+  const gewaehlt = [];
+  for (const x of mische(fremdeWoerter(fam, arten))) {
+    if (gewaehlt.length === n) break;
+    if (!gewaehlt.some(g => g.f === x.f)) gewaehlt.push(x);
+  }
+  return gewaehlt;
+}
+
+// ---------- Aufgabenarten ----------
+
+/** Stufe 1: Familie mit zwei Blättern — welches dritte Wort gehört auch dazu? */
+function zugehoerig() {
+  const fam = waehle(familienMit(["einfach"], 3));
+  const [b1, b2, richtig] = mische(fam.einfach);
+  const andere = fremde(fam, 2, ["einfach"]).map(x => x.w);
+  return { art: "zugehoerig", fam, blaetter: [b1, b2], richtig, optionen: mische([richtig, ...andere]) };
+}
+
+/** Drei Wörter der Familie und ein Ausreisser: aus einer anderen Familie (Stufe 2) oder ein
+    Wort, das nur ähnlich aussieht (ab Stufe 4). */
+function ausreisser(arten, aehnlich) {
+  const kandidaten = familienMit(arten, 3).filter(f => !aehnlich || f.falsch.length);
+  const fam = waehle(kandidaten);
+  const drei = mische(mitglieder(fam, arten)).slice(0, 3);
+  let richtig, falschFreund = null, andereFam = null;
+  if (aehnlich) {
+    falschFreund = waehle(fam.falsch);
+    richtig = falschFreund[0];
+  } else {
+    const x = fremde(fam, 1, ["einfach"])[0];
+    richtig = x.w;
+    andereFam = x.f;
+  }
+  return { art: "ausreisser", fam, mitglieder: drei, richtig, falschFreund, andereFam, optionen: mische([...drei, richtig]) };
+}
+
+/** Ein Wort an den richtigen von n Bäumen hängen. */
+function baum(arten, n) {
+  const fam = waehle(familienMit(arten, 1));
+  const wort = waehle(mitglieder(fam, arten));
+  const andere = mische(FAMILIEN.filter(f => f !== fam && !hatStamm(wort, f))).slice(0, n - 1);
+  return { art: "baum", fam, wort, wortArt: arten[0], baeume: mische([fam, ...andere]) };
+}
+
+/** Drei Wörter einer Familie — welcher Stamm steckt in allen? */
+function stammFinden() {
+  const fam = waehle(familienMit(["einfach"], 3));
+  const woerter = mische(fam.einfach).slice(0, 3);
+  const andere = mische(FAMILIEN.filter(f => f !== fam && !woerter.some(w => hatStamm(w, f)))).slice(0, 2);
+  return { art: "stamm", fam, woerter, richtig: fam.stamm, optionen: mische([fam.stamm, ...andere.map(f => f.stamm)]) };
+}
+
+/** Königsstufe: sechs Wörter, alle der Familie antippen — mit Umlaut, zusammengesetzten Nomen und
+    höchstens einem Wort, das nur ähnlich aussieht. */
+function alleFinden() {
+  const fam = waehle(familienMit(ARTEN, 4));
+  const k = Math.random() < 0.5 ? 3 : 4;
+  const richtige = mische(mitglieder(fam)).slice(0, k);
+  const andere = fam.falsch.length ? [waehle(fam.falsch)[0]] : [];
+  for (const x of fremde(fam, 6 - k - andere.length, ARTEN)) andere.push(x.w);
+  return { art: "alle", fam, richtige, andere, karten: mische([...richtige, ...andere]) };
+}
+
+// Je Stufe die Aufgabenarten mit der Bedingung, unter der sie mit den freien Listen gehen. Stufe 1–3
+// brauchen die Liste abgeleitet, Stufe 4 umlaut-aehnlich, Stufe 5 zusammengesetzt; Stufe 6 nimmt,
+// was frei ist. Eine Stufe ohne mögliche Aufgabenart wird nicht angeboten.
+const einfach = spalteFrei("einfach"), umlaut = spalteFrei("umlaut"), zusammen = spalteFrei("zusammen");
+const VARIANTEN = {
+  s1: [[() => zugehoerig(), einfach]],
+  s2: [[() => ausreisser(["einfach"], false), einfach]],
+  s3: [[() => baum(["einfach"], 3), einfach], [stammFinden, einfach]],
+  s4: [[() => baum(["umlaut"], 3), umlaut], [() => ausreisser(["einfach", "umlaut"], true), umlaut && mitAehnlichen(["einfach", "umlaut"])]],
+  s5: [[() => baum(["zusammen"], 4), zusammen], [() => baum(["zusammen"], 4), zusammen], [() => ausreisser(ARTEN, true), zusammen && mitAehnlichen(ARTEN)]],
+  s6: [[() => alleFinden(), familienMit(ARTEN, 4).length > 0]],
+};
+const STUFE = Object.fromEntries(Object.entries(VARIANTEN)
+  .map(([s, v]) => [s, v.filter(([, geht]) => geht).map(([f]) => f)]).filter(([, v]) => v.length));
+
+const ERLAUBT = { s1: ["zugehoerig"], s2: ["ausreisser"], s3: ["baum", "stamm"], s4: ["baum", "ausreisser"], s5: ["baum", "ausreisser"], s6: ["alle"] };
+
+function aufgabeErzeugen(stufe) { return waehle(STUFE[stufe])(); }
+
+// ---------- Prüfung der Wortlisten (einmal) und je Aufgabe ----------
+
+/** Mängel der Wortlisten: jedes Wort enthält den Stamm seiner Familie und keinen anderen;
+    in „einfach“ und „zusammen“ unverändert, in „umlaut“ nur mit Umlaut; kein Wort doppelt. */
+const LISTEN_MAENGEL = (() => {
+  const m = [];
+  const gesehen = new Map();
+  for (const fam of WORTFAMILIEN) {
+    for (const art of ARTEN) {
+      for (const w of fam[art]) {
+        if (gesehen.has(w)) m.push(`«${w}» steht doppelt (${gesehen.get(w)} und ${fam.wort})`);
+        gesehen.set(w, fam.wort);
+        if (!hatStamm(w, fam)) m.push(`«${w}» enthält den Stamm «${fam.stamm}» nicht`);
+        const auch = WORTFAMILIEN.filter(f => f !== fam && hatStamm(w, f)).map(f => f.stamm);
+        if (auch.length) m.push(`«${w}» enthält auch den Stamm «${auch.join(", ")}»`);
+        const unveraendert = w.toLowerCase().includes(fam.stamm);
+        if (art === "umlaut" ? unveraendert : !unveraendert) m.push(`«${w}» passt nicht in die Liste ${art}`);
+      }
+    }
+    for (const w of falscheWoerter(fam)) if (WORTFAMILIEN.some(f => mitglieder(f).includes(w))) m.push(`«${w}» ist zugleich Familienwort`);
+  }
+  if (/ß/.test(JSON.stringify(WORTFAMILIEN))) m.push("ß in den Wortlisten");
+  if (new Set(WORTFAMILIEN.map(f => f.stamm)).size !== WORTFAMILIEN.length) m.push("ein Stamm kommt doppelt vor");
+  return m;
+})();
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [...LISTEN_MAENGEL];
+  const fam = a.fam;
+  const istMitglied = w => mitglieder(fam).includes(w);
+  if (!STUFE[stufe]) m.push("Stufe wird mit den freien Listen nicht angeboten");
+  if (!ERLAUBT[stufe].includes(a.art)) m.push(`Aufgabenart ${a.art} passt nicht zur Stufe`);
+  // Jedes gezeigte Wort stammt aus einer freien Liste (Stämme und Familienwörter stehen in jeder Liste).
+  const gezeigt = [...(a.blaetter || []), ...(a.mitglieder || []), ...(a.woerter || []), ...(a.karten || []),
+    ...(a.wort ? [a.wort] : []), ...(a.art === "stamm" ? [] : a.optionen || [])];
+  for (const w of gezeigt) if (!FREIE_WOERTER.has(w)) m.push(`«${w}» stammt nicht aus einer freien Liste`);
+  if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
+  if (a.art === "zugehoerig") {
+    if (a.optionen.length !== 3 || !fam.einfach.includes(a.richtig) || a.blaetter.includes(a.richtig)) m.push("Stufe 1: Lösung oder Blätter falsch");
+    if (a.optionen.filter(o => istMitglied(o) || hatStamm(o, fam)).length !== 1) m.push("mehr als eine Option gehört zur Familie");
+  }
+  if (a.art === "ausreisser") {
+    if (a.optionen.length !== 4 || a.optionen.filter(istMitglied).length !== 3 || istMitglied(a.richtig)) m.push("Ausreisser: nicht genau drei Familienwörter");
+    if (stufe === "s2" && (hatStamm(a.richtig, fam) || !a.andereFam)) m.push("Stufe 2: Ausreisser enthält den Stamm");
+    if (stufe !== "s2" && !falscheWoerter(fam).includes(a.richtig)) m.push("ab Stufe 4: Ausreisser ist kein ähnliches Wort");
+    if (stufe === "s2" && a.mitglieder.some(w => !fam.einfach.includes(w))) m.push("Stufe 2 mit Umlaut oder zusammengesetztem Wort");
+  }
+  if (a.art === "baum") {
+    const passend = a.baeume.filter(f => hatStamm(a.wort, f));
+    if (passend.length !== 1 || passend[0] !== fam) m.push(`«${a.wort}» passt nicht zu genau einem Baum`);
+    if (new Set(a.baeume).size !== a.baeume.length || a.baeume.length !== (stufe === "s5" ? 4 : 3)) m.push("Bäume doppelt oder falsche Anzahl");
+    const soll = { s3: "einfach", s4: "umlaut", s5: "zusammen" }[stufe];
+    if (!fam[soll].includes(a.wort)) m.push(`Wort nicht aus der Liste ${soll}`);
+  }
+  if (a.art === "stamm") {
+    if (!a.woerter.every(w => fam.einfach.includes(w))) m.push("Stamm-Aufgabe mit Wort ausserhalb von einfach");
+    const andere = a.optionen.filter(o => o !== fam.stamm);
+    if (andere.some(s => a.woerter.some(w => norm(w).includes(norm(s))))) m.push("ein anderer Stamm steckt auch in den Wörtern");
+  }
+  if (a.art === "alle") {
+    if (a.richtige.length < 3 || a.andere.length < 2 || a.karten.length !== 6) m.push("Königsstufe: zu wenige Wörter");
+    if (!a.richtige.every(istMitglied) || a.andere.some(istMitglied)) m.push("Königsstufe: Zuordnung falsch");
+    if (a.andere.some(w => hatStamm(w, fam) && !falscheWoerter(fam).includes(w))) m.push("fremdes Wort enthält den Stamm");
+    if (a.andere.filter(w => falscheWoerter(fam).includes(w)).length > 1) m.push("mehr als ein ähnliches Wort");
+    if (new Set(a.karten).size !== a.karten.length) m.push("Karte doppelt");
+  }
+  if (/ß/.test(JSON.stringify(a))) m.push("ß in der Aufgabe");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Wort mit markiertem Stamm (auch bei Umlaut: Fähre → «Fäh» markiert). */
+function markiert(wort, fam) {
+  const i = norm(wort).indexOf(norm(fam.stamm));
+  if (i < 0) return el("span", { text: wort });
+  const n = fam.stamm.length;
+  return el("span", {}, wort.slice(0, i), el("mark", { text: wort.slice(i, i + n) }), wort.slice(i + n));
+}
+
+/** Baum: Krone mit Blättern, Holz mit Familienwort (und Stamm). */
+function baumBild(fam, blaetter, mitStamm) {
+  const krone = el("div", { class: "krone" });
+  if (blaetter.length) for (const b of blaetter) krone.append(el("span", { class: "blatt" }, markiert(b, fam)));
+  else krone.append(el("span", { class: "leer", "aria-hidden": "true", text: "?" }));
+  const holz = el("div", { class: "holz" }, el("b", { text: fam.wort }), mitStamm ? el("small", { text: `Stamm: ${fam.stamm}` }) : null);
+  return { element: el("div", { class: "baum familie" }, krone, holz), krone };
+}
+
+function neuesBlatt(krone, wort, fam) {
+  krone.querySelector(".leer")?.remove();
+  krone.append(el("span", { class: "blatt" }, markiert(wort, fam)));
+}
+
+const MIT_STAMM = { s1: true, s2: true, s3: true, s4: true, s5: false, s6: false };
+
+LS.spiel({
+  id: "wortfamilien-baum",
+  einleitung: "Wörter mit demselben Stamm gehören zu einer Familie: fahren, Fahrer, Abfahrt. Hilf mir, die Wörter an den richtigen Baum zu hängen!",
+  anzahl: 8,
+  stufen: Object.fromEntries(Object.entries({
+    s1: "Welches Wort gehört auch zur Familie? Fahrer, Fahrt, …",
+    s2: "Ein Wort passt nicht dazu — finde den Ausreisser.",
+    s3: "An welchen Baum gehört das Wort? Und welcher Stamm steckt in allen?",
+    s4: "Mit Umlaut: fahren – Fähre. Und Wörter, die nur ähnlich aussehen: Fahne.",
+    s5: "Zusammengesetzte Nomen zerlegen: Fahrrad, Schlafsack, Wasserfall.",
+    s6: "Endgegner: alle Wörter der Familie finden — mit Umlaut, Fallen und langen Wörtern.",
+  }).filter(([s]) => STUFE[s])),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const { fam } = a;
+    const mitStamm = MIT_STAMM[ctx.stufe];
+
+    if (a.art === "zugehoerig") {
+      const b = baumBild(fam, a.blaetter, true);
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welches Wort gehört auch zur Familie?" }), b.element);
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 150,
+        hinweis: w => `In «${w}» steckt nicht «${fam.stamm}». Such das Wort, in dem «${fam.stamm}» steckt.`,
+        loesung: `«${a.richtig}» gehört zur Familie ${fam.wort} — darin steckt «${fam.stamm}».`,
+        lob: `Genau! «${a.richtig}» gehört zur Familie ${fam.wort}. 🌳`,
+        beiRichtig: () => neuesBlatt(b.krone, a.richtig, fam) });
+    } else if (a.art === "ausreisser") {
+      const b = baumBild(fam, [], mitStamm);
+      ctx.flaeche.append(el("div", { class: "auftrag", text: `Welches Wort gehört NICHT zur Familie ${fam.wort}?` }), b.element);
+      const loesung = a.falschFreund
+        ? `«${a.richtig}» passt nicht: ${a.falschFreund[1]} — das hat nichts mit «${fam.wort}» zu tun.`
+        : `«${a.richtig}» gehört zur Familie ${a.andereFam.wort}.`;
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 150,
+        hinweis: w => (a.falschFreund
+          ? `«${w}» gehört dazu${fam.umlaut.includes(w) ? " — aus a, o, u wird manchmal ä, ö, ü" : ""}. Ein Wort sieht nur ähnlich aus und bedeutet etwas ganz anderes. Welches?`
+          : `«${w}» gehört dazu — darin steckt «${fam.stamm}». Such das Wort ohne diesen Stamm.`),
+        loesung, lob: `Richtig! ${loesung}`,
+        beiRichtig: () => a.mitglieder.forEach(w => neuesBlatt(b.krone, w, fam)) });
+    } else if (a.art === "baum") {
+      const s5 = ctx.stufe === "s5";
+      ctx.flaeche.append(el("div", { class: "auftrag", text: s5 ? "Zerlege das Wort: An welchen Baum gehört es?" : "An welchen Baum gehört das Wort?" }));
+      LS.koerbe(ctx, {
+        karte: { text: a.wort },
+        koerbe: a.baeume,
+        korbInhalt: f => ({ bild: "🌳", text: f.wort, klein: mitStamm ? `Stamm: ${f.stamm}` : "" }),
+        richtig: fam,
+        hinweis: f => (s5 ? `«${a.wort}» ist zusammengesetzt. Zerlege es in seine Teile — passt ein Teil zu «${f.wort}»?`
+          : a.wortArt === "umlaut" ? `In «${a.wort}» steckt nicht «${f.stamm}». Tipp: Mach aus ä ein a, aus äu ein au — welcher Stamm passt dann?`
+          : `Steckt «${f.stamm}» in «${a.wort}»? Such den Stamm im Wort.`),
+        loesung: `«${a.wort}» gehört zu ${fam.wort}: Darin steckt «${fam.stamm}».`,
+        lob: `Richtig! «${a.wort}» gehört zu ${fam.wort}. 🌳`,
+      });
+    } else if (a.art === "stamm") {
+      const reihe = el("div", { class: "wortkarte" });
+      const zeige = mitMarke => { reihe.innerHTML = ""; for (const w of a.woerter) reihe.append(el("span", { class: "wortchip" }, mitMarke ? markiert(w, fam) : w)); };
+      zeige(false);
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welcher Wortstamm steckt in allen drei Wörtern?" }), reihe);
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 130,
+        hinweis: "Lies die drei Wörter langsam. Welcher Teil kommt in jedem Wort vor?",
+        loesung: `In ${a.woerter.join(", ")} steckt «${fam.stamm}» — Familie ${fam.wort}.`,
+        lob: `Genau! Alle gehören zur Familie ${fam.wort}.`,
+        beiRichtig: () => zeige(true) });
+    } else {
+      // Königsstufe: alle Wörter der Familie antippen.
+      const b = baumBild(fam, [], false);
+      const zaehler = el("div", { class: "zaehler" });
+      const offen = new Set(a.richtige);
+      const zeigeZahl = () => { zaehler.textContent = `Noch ${offen.size} ${offen.size === 1 ? "Wort" : "Wörter"} für den Baum`; };
+      zeigeZahl();
+      ctx.flaeche.append(el("div", { class: "auftrag", text: `Tipp alle Wörter an, die zur Familie ${fam.wort} gehören!` }), b.element, zaehler);
+      const box = el("div", { class: "wahl" });
+      box.style.setProperty("--wahl-breite", "140px");
+      let fertig = false;
+      const loesung = `Zur Familie ${fam.wort} gehören: ${a.richtige.join(", ")}.`;
+      ctx.loesung?.(loesung); // für die Testhilfe 🔑
+      for (const w of a.karten) {
+        const k = el("button", { type: "button", class: "wahl-knopf", text: w });
+        k.addEventListener("click", () => {
+          if (fertig || k.classList.contains("gewaehlt")) return;
+          if (offen.has(w)) {
+            offen.delete(w);
+            LS.fliegen(k, b.krone);
+            k.classList.add("gewaehlt");
+            neuesBlatt(b.krone, w, fam);
+            zeigeZahl();
+            if (!offen.size) { fertig = true; ctx.richtig(`Super! Die ganze Familie ${fam.wort} hängt am Baum. 🌳`); }
+            else LS.ton("tipp");
+            return;
+          }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+          ctx.falsch(falscheWoerter(fam).includes(w) ? `«${w}» sieht nur ähnlich aus — es bedeutet etwas ganz anderes.`
+            : `In «${w}» steckt ein anderer Stamm.`, loesung);
+          if (ctx.vorbei()) fertig = true;
+        });
+        box.append(k);
+      }
+      ctx.flaeche.append(box);
+    }
+    if (ctx.nr === 0) ctx.sag(a.art === "alle" ? "Achtung, Fallen! Manche Wörter sehen nur ähnlich aus." : "Such den Wortstamm — er steckt in allen Wörtern der Familie.");
+  },
+});
+</script>
+</body>
+</html>

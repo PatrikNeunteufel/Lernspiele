@@ -151,6 +151,8 @@ LS.spiel({
       if (ctx.nr === 0) ctx.sag("Schau, was sich wiederholt.");
       return;
     }
+    const loesung = `Die Regel: ${a.regel} — es kommt ${zahlText(a.richtig)}.`;
+    ctx.loesung(loesung);
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Nächste Zahl" });
     ctx.flaeche.append(anzeige);
     const tasten = LS.tastatur({
@@ -167,7 +169,7 @@ LS.spiel({
         anzeige.classList.add("falsch");
         const [x, y, z] = a.folge;
         ctx.falsch(`Wie kommt man von ${zahlText(x)} zu ${zahlText(y)}? Und von ${zahlText(y)} zu ${zahlText(z)}? Ist der Sprung immer gleich gross?`,
-          `Die Regel: ${a.regel} — es kommt ${zahlText(a.richtig)}.`);
+          loesung);
         if (ctx.vorbei()) tasten.gesperrt = true;
       },
     });

@@ -166,6 +166,8 @@ function einsortieren(ctx, zahl) {
   const spalten = spaltenFuer(ctx.stufe);
   const soll = zerlege(zahl);
   const ersteStelle = 7 - String(zahl).length; // Index der höchsten Stelle in STELLEN
+  const loesung = `${zahlText(zahl)} → ` + spalten.filter(s => STELLEN.indexOf(s) >= ersteStelle).map(s => `${soll[s.k]} ${s.k}`).join(", ");
+  ctx.loesung(loesung);
   ctx.flaeche.append(
     el("div", { class: "auftrag", text: "Sortiere die Zahl in die Tabelle ein!" }),
     el("div", { class: "zahl-gross", html: `<span class="brief">✉️</span>${zahlText(zahl)}` }));
@@ -225,7 +227,7 @@ function einsortieren(ctx, zahl) {
         : wert[st.k] === undefined
           ? `Bei den ${LS.dativ(st)} (${st.k}) fehlt noch etwas — auch eine Null zählt!`
           : `Schau nochmal bei den ${LS.dativ(st)} (${st.k}). Lies die Zahl von hinten: E, Z, H, …`;
-      ctx.falsch(hinweis, `${zahlText(zahl)} → ` + spalten.filter(s => STELLEN.indexOf(s) >= ersteStelle).map(s => `${soll[s.k]} ${s.k}`).join(", "));
+      ctx.falsch(hinweis, loesung);
       if (ctx.flaeche.querySelector(".knopfzeile")) gesperrt = true;
     },
   }));
@@ -238,6 +240,8 @@ function ablesen(ctx, zahl) {
   const soll = tabelleFuer(ctx.stufe, zahl);
   const gebuendelt = STELLEN.some(st => soll[st.k] > 9);
   const ersteStelle = 7 - String(zahl).length;
+  const loesung = `In der Tabelle steht ${zahlText(zahl)}.`;
+  ctx.loesung(loesung);
   ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl steht in der Tabelle?" }));
   const { tab, faecher } = tabelleZeichnen(spalten);
   tab.classList.add("nur-lesen");
@@ -257,7 +261,7 @@ function ablesen(ctx, zahl) {
         : String(w).length !== String(zahl).length
           ? "Zähl die Ziffern in der Tabelle — deine Zahl hat eine andere Länge. Nullen nicht vergessen!"
           : "Fast! Lies Fach für Fach von links nach rechts.";
-      ctx.falsch(hinweis, `In der Tabelle steht ${zahlText(zahl)}.`);
+      ctx.falsch(hinweis, loesung);
       if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
     },
   });

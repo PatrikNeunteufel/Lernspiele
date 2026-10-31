@@ -3,8 +3,14 @@
 // ganz: [Artikel, zusammengesetztes Wort]; falsch: falsch zusammengesetzte Formen (nur bei Fugenlauten)
 // Das Grundwort (der letzte Teil) bestimmt den Artikel.
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten (Entscheid L4 a): KOMPOSITA ist nach Listen gruppiert — „zwei-teile“, „fugenlaut“,
+// „drei-teile“. Der Prüfstand steht im Katalog (spiele/gemeinsam/katalog.js, Eintrag
+// „nomen-puzzle“, Feld listen).
 
-const KOMPOSITA = [
+const KOMPOSITA = {
+  // zwei Teile, einfach aneinandergehängt (Stufe 1–4)
+  "zwei-teile": [
   { teile: [["das", "Haus", "🏠"], ["die", "Tür", "🚪"]], ganz: ["die", "Haustür"] },
   { teile: [["der", "Fuss", "🦶"], ["der", "Ball", "⚽"]], ganz: ["der", "Fussball"] },
   { teile: [["der", "Schnee", "❄️"], ["der", "Mann", "🧑"]], ganz: ["der", "Schneemann"] },
@@ -19,13 +25,18 @@ const KOMPOSITA = [
   { teile: [["das", "Wasser", "💧"], ["die", "Flasche", "🍾"]], ganz: ["die", "Wasserflasche"] },
   { teile: [["der", "Sand", "🏖️"], ["die", "Burg", "🏰"]], ganz: ["die", "Sandburg"] },
   { teile: [["der", "Vogel", "🐦"], ["das", "Nest", "🪺"]], ganz: ["das", "Vogelnest"] },
+  ],
   // mit Fugenlaut oder verkürztem ersten Teil (Stufe 5)
+  "fugenlaut": [
   { teile: [["die", "Sonne", "☀️"], ["die", "Blume", "🌸"]], ganz: ["die", "Sonnenblume"], falsch: ["Sonneblume", "Sonnesblume"] },
   { teile: [["der", "Hund", "🐕"], ["die", "Hütte", "🛖"]], ganz: ["die", "Hundehütte"], falsch: ["Hundhütte", "Hundshütte"] },
   { teile: [["der", "Geburtstag", "🎉"], ["der", "Kuchen", "🎂"]], ganz: ["der", "Geburtstagskuchen"], falsch: ["Geburtstagkuchen", "Geburtstagekuchen"] },
   { teile: [["die", "Schule", "🏫"], ["die", "Tasche", "🎒"]], ganz: ["die", "Schultasche"], falsch: ["Schuletasche", "Schulestasche"] },
-  // drei Teile (Stufe 5)
+  ],
+  // drei Teile (Stufe 5); Sonnenblumenkern hat dazu einen Fugenlaut
+  "drei-teile": [
   { teile: [["der", "Fuss", "🦶"], ["der", "Ball", "⚽"], ["der", "Schuh", "👟"]], ganz: ["der", "Fussballschuh"] },
   { teile: [["das", "Haus", "🏠"], ["die", "Tür", "🚪"], ["der", "Schlüssel", "🔑"]], ganz: ["der", "Haustürschlüssel"] },
   { teile: [["die", "Sonne", "☀️"], ["die", "Blume", "🌸"], ["der", "Kern", "🌰"]], ganz: ["der", "Sonnenblumenkern"], falsch: ["Sonneblumekern", "Sonnenblumekern"] },
-];
+  ],
+};

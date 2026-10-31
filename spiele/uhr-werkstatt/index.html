@@ -186,6 +186,7 @@ LS.spiel({
 
     /** Uhrzeit oder Minutenzahl eintippen; istRichtig(zahl) prüft die Eingabe. */
     const eingabe = (istRichtig, hinweis, loesungText, alsMinuten = false) => {
+      ctx.loesung(loesungText);
       const anzeige = el("div", { class: "anzeige leer", "aria-label": alsMinuten ? "Minuten" : "Uhrzeit" });
       ctx.flaeche.append(alsMinuten ? el("div", { class: "ergebnis-zeile" }, anzeige, el("span", { class: "einheit", text: "min" })) : anzeige);
       const tasten = LS.tastatur({
@@ -204,6 +205,7 @@ LS.spiel({
 
     // Auswahl-Knöpfe (Text oder kleine Uhren)
     const auswahl = (optionen, darstellen, istRichtig, loesungText, hinweis) => {
+      ctx.loesung(loesungText);
       const box = el("div", { class: "optionen" });
       for (const o of mische(optionen)) {
         const k = el("button", { type: "button", class: "option" });
@@ -236,6 +238,8 @@ LS.spiel({
     } else if (art === "lesenTippen") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie spät ist es? Tipp die Zeit ein (z. B. 7 4 5 für 7:45)." }));
       ctx.flaeche.append(uhr(h, m, "uhr-gross"));
+      const loesung = `Es ist ${digital(h, m)}.`;
+      ctx.loesung(loesung);
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({
@@ -245,7 +249,7 @@ LS.spiel({
           const t = zeitAusZiffern(z);
           if (t && zwoelf(t.h) === h && t.m === m) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
           anzeige.classList.add("falsch");
-          ctx.falsch(t && t.m !== m ? "Die Minuten stimmen noch nicht. Zähl in 5er-Schritten bis zum langen Zeiger, dann die kleinen Striche dazu." : zeigerHinweis, `Es ist ${digital(h, m)}.`);
+          ctx.falsch(t && t.m !== m ? "Die Minuten stimmen noch nicht. Zähl in 5er-Schritten bis zum langen Zeiger, dann die kleinen Striche dazu." : zeigerHinweis, loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
         },
       });
@@ -280,6 +284,8 @@ LS.spiel({
       const dauer = waehle([15, 20, 25, 35, 40, 45, 50, 75, 90]);
       const ende = start + dauer;
       const t0 = { h: Math.floor(start / 60), m: start % 60 }, t1 = { h: Math.floor(ende / 60), m: ende % 60 };
+      const loesung = `${digital(t0.h, t0.m)} + ${dauer} min = ${digital(t1.h, t1.m)}`;
+      ctx.loesung(loesung);
       ctx.flaeche.append(el("div", { class: "digital", text: digital(t0.h, t0.m) }),
         el("div", { class: "frage", html: `Wie spät ist es in <b>${dauer >= 60 ? `${Math.floor(dauer / 60)} h ${dauer % 60} min` : `${dauer} Minuten`}</b>?` }));
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit" });
@@ -294,7 +300,7 @@ LS.spiel({
           const bisVoll = 60 - t0.m;
           ctx.falsch(dauer > bisVoll && t0.m > 0
             ? `Rechne zuerst bis zur vollen Stunde: ${digital(t0.h, t0.m)} + ${bisVoll} min = ${digital(t0.h + 1, 0)}. Dann den Rest dazu.`
-            : "Zähl die Minuten zur Startzeit dazu. 60 Minuten sind 1 Stunde.", `${digital(t0.h, t0.m)} + ${dauer} min = ${digital(t1.h, t1.m)}`);
+            : "Zähl die Minuten zur Startzeit dazu. 60 Minuten sind 1 Stunde.", loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
         },
       });

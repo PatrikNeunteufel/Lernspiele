@@ -1,0 +1,203 @@
+/* Startseite: Anmeldung, Tabs (Spiele, Profil, Statistik, Verwaltung). Spiele laden diese Datei nicht. */
+
+:root {
+  /* Statistik: eine Farbe, hell → dunkel — Anteil der Aufgaben, die auf Anhieb richtig waren. */
+  --seq-1: #e8eeff; --seq-2: #c5d3ff; --seq-3: #9db2fb; --seq-4: #6f8bf3; --seq-5: #4a63d8;
+}
+
+.titel { text-align: center; padding: 20px 16px 4px; }
+.titel h1 { font-size: clamp(34px, 7vw, 56px); margin: 0; letter-spacing: 1px; }
+.titel h1 span:nth-child(7n+1) { color: var(--deko-1); }
+.titel h1 span:nth-child(7n+2) { color: var(--deko-2); }
+.titel h1 span:nth-child(7n+3) { color: var(--deko-3); }
+.titel h1 span:nth-child(7n+4) { color: var(--deko-4); }
+.titel h1 span:nth-child(7n+5) { color: var(--deko-5); }
+.titel h1 span:nth-child(7n+6) { color: var(--deko-6); }
+.titel h1 span:nth-child(7n+7) { color: var(--deko-1); }
+
+.knopf.klein { font-size: 18px; min-height: 48px; padding: 8px 16px; }
+a.knopf { text-decoration: none; display: inline-flex; align-items: center; }
+.leise-text { color: var(--text-leise); }
+section.karte { margin-bottom: 16px; }
+section.karte h2 { margin: 0 0 12px; font-size: 22px; }
+
+/* ---------- Kopfleiste: Tabs und angemeldete Person ---------- */
+
+.leiste { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab {
+  border: none; border-radius: 14px 14px 6px 6px; padding: 10px 18px; min-height: 48px;
+  font: inherit; font-size: 18px; font-weight: 800; color: var(--text); background: #fff;
+  box-shadow: 0 3px 0 var(--rand); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+}
+.tab[aria-selected="true"] { background: var(--knopf); color: #fff; box-shadow: 0 3px 0 var(--knopf-dunkel); }
+.wer { display: flex; align-items: center; gap: 8px; font-weight: 800; }
+.wer select { font: inherit; font-size: 17px; font-weight: 800; border: 3px solid var(--rand); border-radius: 12px; padding: 6px 10px; background: #fff; max-width: 220px; }
+
+/* ---------- Anmeldung ---------- */
+
+.anmeldung { max-width: 720px; margin: 0 auto; }
+.anmeldung h2 { text-align: center; margin: 4px 0 16px; font-size: 26px; }
+.namen { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr)); gap: 12px; }
+.name-knopf {
+  border: none; border-radius: 18px; padding: 16px 10px; min-height: 72px;
+  font: inherit; font-size: 22px; font-weight: 900; background: #f6f7fd; color: var(--text);
+  box-shadow: 0 4px 0 var(--rand); cursor: pointer;
+}
+.name-knopf.aufsicht { background: #eef0fb; font-size: 18px; }
+.pin-zeile { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; margin-top: 16px; }
+.pin-zeile input, .feld {
+  font: inherit; font-size: 20px; border: 3px solid var(--rand); border-radius: 12px; padding: 8px 12px; width: 170px; background: #fff;
+}
+.pin-zeile input:focus, .feld:focus { outline: none; border-color: var(--knopf); }
+.meldung { text-align: center; color: #b45309; font-weight: 800; min-height: 24px; margin-top: 8px; }
+
+/* ---------- Spiele: Filter ---------- */
+
+.filter { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.filter-zeile { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filter-zeile > span { font-weight: 900; min-width: 64px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.chip {
+  border: none; border-radius: 999px; padding: 8px 16px; min-height: 44px;
+  font: inherit; font-size: 17px; font-weight: 800;
+  background: #fff; color: var(--text); box-shadow: 0 3px 0 var(--rand); cursor: pointer;
+}
+.chip[aria-pressed="true"] { background: var(--knopf); color: #fff; box-shadow: 0 3px 0 var(--knopf-dunkel); }
+.chip.klein { font-size: 15px; min-height: 38px; padding: 6px 12px; }
+.chip .tipp { font-size: 12px; font-weight: 800; margin-left: 4px; opacity: .8; }
+.werkzeuge { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
+
+/* ---------- Spiele: Gruppen (Favoriten, Fach, Thema) ---------- */
+
+.gruppe { margin-bottom: 14px; }
+.gruppe > summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px;
+  font-size: clamp(21px, 4.6vw, 27px); font-weight: 900; padding: 8px 4px;
+}
+.gruppe > summary::-webkit-details-marker { display: none; }
+.gruppe > summary::before { content: "▸"; color: var(--knopf); transition: transform .15s; }
+.gruppe[open] > summary::before { transform: rotate(90deg); }
+.gruppe > summary .anzahl { font-size: 15px; font-weight: 800; color: var(--text-leise); }
+.gruppe .gruppe > summary { font-size: clamp(18px, 4vw, 21px); padding-left: 18px; }
+.gruppe .gruppe { margin-bottom: 6px; }
+
+.spiele { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 16px; margin: 6px 0 18px; }
+.spielkarte {
+  position: relative; background: #fff; border-radius: var(--rund); box-shadow: var(--schatten);
+  padding: 16px; border-top: 10px solid var(--f, var(--knopf));
+  display: flex; flex-direction: column; gap: 6px;
+}
+.spielkarte .kopfzeile { display: flex; align-items: center; gap: 12px; padding-right: 40px; }
+.spielkarte .spiel-bild { font-size: 44px; line-height: 1; }
+.spielkarte b.name { font-size: 22px; }
+.spielkarte .ziel { font-size: 15px; color: var(--text-leise); }
+.spielkarte.gesperrt { opacity: .7; border-top-style: dashed; }
+.stern-knopf { position: absolute; top: 8px; right: 8px; border: none; background: none; font-size: 28px; cursor: pointer; line-height: 1; padding: 6px; }
+.marken { display: flex; gap: 6px; flex-wrap: wrap; }
+.marke { font-size: 13px; font-weight: 800; border-radius: 999px; padding: 2px 10px; background: #eef0fb; }
+.marke.fokus { background: #fff1c2; }
+.marke.warnung { background: var(--hinweis-hell); color: #9a4b00; }
+
+.stufenknoepfe { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 6px; }
+.stufenknopf {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-decoration: none; color: var(--text); background: #f6f7fd;
+  border-radius: 12px; padding: 6px 2px; min-height: 58px; font-weight: 900; font-size: 18px;
+  border-bottom: 4px solid var(--sf);
+}
+.stufenknopf:hover { background: #eceffd; }
+.stufenknopf .s { font-size: 11px; color: #f5b301; letter-spacing: 0; min-height: 13px; }
+.stufenknopf.empfohlen { outline: 3px solid var(--knopf); outline-offset: 1px; }
+.stufenknopf.gross { grid-column: 1 / -1; flex-direction: row; gap: 10px; min-height: 56px; background: var(--knopf); color: #fff; border-bottom-color: var(--knopf-dunkel); font-size: 20px; }
+.stufenknopf.gross .s { font-size: 16px; }
+
+/* Kompakt: eine Zeile je Spiel */
+.spiele.kompakt { grid-template-columns: 1fr; gap: 8px; }
+.spiele.kompakt .spielkarte { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 8px 14px; padding: 8px 12px; border-top: none; border-left: 8px solid var(--f, var(--knopf)); }
+.spiele.kompakt .kopfzeile { flex: 1 1 220px; padding-right: 0; }
+.spiele.kompakt .spiel-bild { font-size: 30px; }
+.spiele.kompakt b.name { font-size: 19px; }
+.spiele.kompakt .ziel, .spiele.kompakt .marken { display: none; }
+.spiele.kompakt .stufenknoepfe { flex: 2 1 320px; margin: 0; }
+.spiele.kompakt .stufenknopf { min-height: 44px; font-size: 16px; }
+.spiele.kompakt .stern-knopf { position: static; font-size: 24px; order: -1; }
+
+.leer-hinweis { text-align: center; padding: 28px; font-size: 20px; }
+
+/* ---------- Profil ---------- */
+
+.profil h2 { margin: 0 0 12px; font-size: 22px; }
+.profil-felder { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
+.profil label { font-weight: 800; display: flex; flex-direction: column; gap: 4px; font-size: 16px; }
+.profil input[type=number], .profil select, .verwaltung select {
+  font: inherit; font-size: 18px; border: 3px solid var(--rand); border-radius: 12px; padding: 6px 10px; min-width: 110px; max-width: 100%; background: #fff;
+}
+.timer-details { margin: 6px 0 14px; }
+.timer-details summary { cursor: pointer; font-weight: 700; color: var(--knopf); }
+.tabelle-rahmen { overflow-x: auto; }
+.timer-tabelle { display: grid; grid-template-columns: minmax(150px, 1.6fr) 110px repeat(6, 74px); gap: 6px 8px; align-items: center; margin-top: 10px; min-width: 720px; }
+.timer-tabelle b { font-size: 14px; color: var(--text-leise); }
+.timer-tabelle select { min-width: 0; width: 100%; font-size: 15px; }
+.timer-tabelle input.sek { width: 64px; font: inherit; font-size: 16px; border: 2px solid var(--rand); border-radius: 10px; padding: 4px 6px; }
+.timer-tabelle .vorschlag { display: block; font-size: 12px; color: var(--text-leise); }
+.fokus-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 8px; margin: 8px 0 14px; }
+.fokus-liste label { flex-direction: row; align-items: flex-start; gap: 8px; font-weight: 600; background: #f6f7fd; border-radius: 12px; padding: 8px 10px; cursor: pointer; }
+.fokus-liste input { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+.fokus-liste b { font-weight: 900; }
+
+/* ---------- Statistik ---------- */
+
+.statistik .kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 12px; }
+.statistik .kachel { background: #f6f7fd; border-radius: 16px; padding: 12px 14px; }
+.statistik .kachel .zahl { font-size: 32px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.statistik .kachel .was { font-size: 14px; color: var(--text-leise); font-weight: 700; }
+.statistik table, .verwaltung table { border-collapse: separate; border-spacing: 0 4px; width: 100%; font-size: 15px; }
+.statistik th, .verwaltung th { text-align: left; font-size: 13px; color: var(--text-leise); font-weight: 800; padding: 4px 8px; white-space: nowrap; }
+.statistik td, .verwaltung td { padding: 8px; background: #f8f9fe; font-variant-numeric: tabular-nums; }
+.statistik td:first-child, .verwaltung td:first-child { border-radius: 10px 0 0 10px; }
+.statistik td:last-child, .verwaltung td:last-child { border-radius: 0 10px 10px 0; }
+.statistik td.zahl, .statistik th.zahl { text-align: right; }
+.statistik .sterne { color: #f5b301; letter-spacing: 1px; white-space: nowrap; }
+.statistik .wackelt { color: #b45309; font-weight: 800; white-space: nowrap; }
+.statistik .gut { color: #15803d; font-weight: 800; }
+.statistik td.zelle { text-align: center; font-weight: 800; min-width: 84px; }
+.statistik td.zelle small { display: block; font-weight: 600; color: var(--text-leise); font-size: 12px; }
+.statistik td.zelle.hell-text, .statistik td.zelle.hell-text small { color: #fff; }
+.statistik .legende { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-leise); margin-top: 8px; flex-wrap: wrap; }
+.statistik .legende i { display: inline-block; width: 28px; height: 14px; border-radius: 4px; }
+.statistik details { background: #f8f9fe; border-radius: 12px; padding: 8px 12px; margin-bottom: 6px; }
+.statistik summary { cursor: pointer; font-weight: 700; }
+.statistik details ul { margin: 8px 0 4px; padding-left: 1.2em; }
+.statistik details li { margin-bottom: 6px; }
+.statistik .vorschlaege { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 12px; }
+.statistik .vorschlag { background: #f6f7fd; border-radius: 16px; padding: 12px 14px; border-left: 6px solid var(--knopf); display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.statistik .vorschlag p { margin: 0; font-size: 15px; }
+.statistik .vorschlag.wiederholen { border-left-color: var(--hinweis); }
+.statistik .vorschlag.konzentration { border-left-color: #b45309; }
+.statistik .vorschlag.weiter, .statistik .vorschlag.timer { border-left-color: var(--gut); }
+.statistik .befund { background: var(--hinweis-hell); border-radius: 12px; padding: 4px 12px; margin-bottom: 8px; }
+.statistik .diagramme { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 18px; }
+.statistik .diagramme h3 { font-size: 15px; margin: 0 0 6px; color: var(--text-leise); }
+.statistik .saeulen { position: relative; display: flex; align-items: flex-end; gap: 4px; height: calc(var(--h) + 44px); border-bottom: 1px solid var(--rand); padding-top: 4px; }
+.statistik .spalte { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.statistik .saeule { width: min(70%, 26px); background: var(--knopf); border-radius: 4px 4px 0 0; }
+.statistik .saeule.betont { background: var(--hinweis); }
+.statistik .spalte .wert { font-size: 11px; color: var(--text-leise); white-space: nowrap; min-height: 14px; }
+.statistik .spalte .name { font-size: 11px; color: var(--text-leise); white-space: nowrap; height: 22px; line-height: 22px; overflow: hidden; }
+.statistik .referenz { position: absolute; left: 0; right: 0; border-top: 2px dashed #c5c9de; pointer-events: none; }
+
+/* ---------- Verwaltung ---------- */
+
+.verwaltung .zeile-knoepfe { display: flex; flex-wrap: wrap; gap: 6px; }
+.schalter { border: none; border-radius: 999px; padding: 6px 14px; min-height: 40px; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; background: #fff; box-shadow: 0 3px 0 var(--rand); }
+.schalter.frei { background: var(--gut-hell); color: #15803d; }
+.schalter.gesperrt { background: var(--hinweis-hell); color: #9a4b00; }
+.pruefstand { font-size: 13px; font-weight: 800; white-space: nowrap; }
+.pruefstand.offen { color: #9a4b00; }
+.pruefstand.ok { color: #15803d; }
+
+@media (max-width: 600px) {
+  .tab { padding: 8px 12px; font-size: 16px; }
+  .stufenknoepfe { grid-template-columns: repeat(3, 1fr); }
+}

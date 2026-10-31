@@ -36,6 +36,15 @@ const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
 // Zahlenraum je Stufe (alle Zahlen der Geschichte und das Ergebnis)
 const RAUM = { s1: 10, s2: 20, s3: 100, s4: 100, s5: 100, s6: 1000 };
 
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Kinder rechnen nur Geschichten aus freien Listen (LS.freieListen; die Aufsicht sieht alle). Kennt
+// der Katalog die Listen dieses Spiels noch nicht, gilt alles als frei — wie bei einem Spiel ohne Listen.
+const SPIEL_ID = "rechengeschichten";
+const FREI = new Set(LS.spielListen(SPIEL_ID).length ? LS.freieListen(SPIEL_ID) : Object.values(GESCHICHTEN_LISTEN));
+const geschichteFrei = g => FREI.has(GESCHICHTEN_LISTEN[g.stufe]);
+/** Angeboten wird eine Stufe, wenn sie freie Geschichten hat. */
+const ANGEBOTEN = new Set(Object.keys(STUFE_NR).filter(s => GESCHICHTEN.some(g => g.stufe === STUFE_NR[s] && geschichteFrei(g))));
+
 /** Ausdruck wie „a · b + c“ mit den Werten ausrechnen (· und : vor + und −). */
 function rechne(ausdruck, werte) {
   const t = ausdruck.split(" ").map(x => (x in werte ? werte[x] : x));
@@ -61,7 +70,7 @@ const geschichteText = (text, werte) => text.replace(/\{(\w)\}/g, (_, k) => zahl
  */
 function aufgabeErzeugen(stufe) {
   const n = STUFE_NR[stufe];
-  const liste = GESCHICHTEN.filter(x => x.stufe === n);
+  const liste = GESCHICHTEN.filter(x => x.stufe === n && geschichteFrei(x));
   const start = zufall(0, liste.length - 1);
   let a = null;
   // Begrenzte Versuche, nach je 50 die nächste Geschichte: endet sicher.
@@ -82,6 +91,8 @@ const pruefeAufgabe = (a, stufe) => maengel(a, stufe);
 function maengel(a, stufe) {
   const m = [];
   if (a.g.stufe !== STUFE_NR[stufe]) m.push("Geschichte aus einer anderen Stufe");
+  if (!ANGEBOTEN.has(stufe)) m.push("Stufe wird mit den freien Listen nicht angeboten");
+  if (!geschichteFrei(a.g)) m.push(`Geschichte aus der Liste ${GESCHICHTEN_LISTEN[a.g.stufe]}, die nicht frei ist`);
   if (!Number.isInteger(a.ergebnis) || a.ergebnis <= 0) m.push(`Ergebnis ${a.ergebnis} keine natürliche Zahl`);
   if (Object.values(a.werte).some(w => !Number.isInteger(w) || w <= 0)) m.push("Zahl in der Geschichte unpassend");
   // Zahlenraum: gezeigte Zahlen und Ergebnis
@@ -117,14 +128,14 @@ LS.spiel({
   id: "rechengeschichten",
   einleitung: "In jeder Geschichte steckt eine Rechnung. Findest du sie?",
   anzahl: 8,
-  stufen: {
+  stufen: Object.fromEntries(Object.entries({
     s1: "Bildgeschichten bis 10: dazu oder weg?",
     s2: "Kurze Geschichten bis 20.",
     s3: "Geschichten bis 100, auch mit mal.",
     s4: "Was fehlt noch? 28 + ? = 50",
     s5: "Gerecht verteilen — und ? · 6 = 30.",
     s6: "Ausrechnen — und eine Zahl braucht man gar nicht.",
-  },
+  }).filter(([s]) => ANGEBOTEN.has(s))),
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
@@ -153,6 +164,8 @@ LS.spiel({
       if (ctx.nr === 0) ctx.sag("Lies die Geschichte genau. Kommt etwas dazu oder geht etwas weg?");
       return;
     }
+    const loesung = `${einsetzen(g.rechnung, werte)} = ${zahlText(a.ergebnis)}`;
+    ctx.loesung(loesung);
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Rechne aus." }));
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergebnis" });
     ctx.flaeche.append(anzeige);
@@ -167,7 +180,7 @@ LS.spiel({
         fehlversuche++;
         ctx.falsch(fehlversuche < 2 ? "Nicht ganz. Welche Zahlen brauchst du wirklich?"
           : `Die ${zahlText(werte[g.unwichtig])} brauchst du zum Rechnen nicht.`,
-          `${einsetzen(g.rechnung, werte)} = ${zahlText(a.ergebnis)}`);
+          loesung);
         if (ctx.vorbei()) tasten.gesperrt = true;
       },
     });

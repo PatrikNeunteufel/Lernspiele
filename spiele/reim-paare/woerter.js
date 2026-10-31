@@ -2,6 +2,11 @@
 // Selbstlaut). Bild = Emoji oder null (dann nur in der Königsstufe, Stufe 6, mit Lesetext).
 // Bewusst weggelassen: Paare, die nur in manchen Aussprachen reimen (Bär – Meer).
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten (Entscheid L4 a), Prüfstand im Katalog (spiele/gemeinsam/katalog.js, Eintrag
+// „reim-paare“, Feld listen): REIMGRUPPEN = Liste „reimgruppen“, REIMVERSE = „reimverse“.
+// Ist nur „reimverse“ frei, sind die Lösungswörter der anderen Verse die Auswahl; das Bild zum
+// Lösungswort kommt dann trotzdem aus REIMGRUPPEN.
 
 const REIMGRUPPEN = [
   [["Maus", "🐭"], ["Haus", "🏠"]],

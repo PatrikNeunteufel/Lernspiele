@@ -29,6 +29,13 @@
 
 const { waehle, mische, el } = LS;
 
+const ID = "tier-sortierer";
+
+// Freigabe (Entscheid L4 a): nur Eigenschaften aus Listen (Spalten in tiere.js), die der Spieler
+// üben darf. Kennt der Katalog die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : TIER_LISTEN);
+const merkmalFrei = merkmal => FREI.has(TIER_LISTE_JE_MERKMAL[merkmal]);
+
 const LEBEWESEN = TIERE.map(([name, bild, klasse, gruppe, haltung, lebensraum]) => ({ name, bild, klasse, gruppe, haltung, lebensraum }));
 const TIER = LEBEWESEN.filter(t => !["Pflanze", "Pilz"].includes(t.klasse));
 const tier = name => TIER.find(t => t.name === name);
@@ -71,10 +78,12 @@ const KNIFFLIG = [
   ["Spitzmaus", "gruppe", "Nagetier"], ["Fledermaus", "gruppe", "Nagetier"], ["Igel", "gruppe", "Nagetier"],
 ];
 
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 function sortieren(merkmal, auswahlKoerbe, anzahlKoerbe, mitBild) {
+  if (!merkmalFrei(merkmal)) return null;
   const t = waehle(TIER.filter(x => auswahlKoerbe.includes(x[merkmal]) && (!mitBild || x.bild)));
   const andere = mische(auswahlKoerbe.filter(k => k !== t[merkmal])).slice(0, anzahlKoerbe - 1);
-  return { art: "sortieren", tier: t, richtig: t[merkmal], koerbe: mische([t[merkmal], ...andere]) };
+  return { art: "sortieren", merkmal, tier: t, richtig: t[merkmal], koerbe: mische([t[merkmal], ...andere]) };
 }
 
 const ARTEN = {
@@ -85,37 +94,70 @@ const ARTEN = {
   merkmal(mitBild) {
     // Welches Tier gehört zu …? Die anderen Tiere sind aus anderen Klassen.
     // Ohne Bild (Königsstufe) zählt nur das Wissen über das Tier, nicht sein Aussehen.
+    if (!merkmalFrei("klasse")) return null;
     const klasse = waehle(KLASSEN);
     const richtig = waehle(TIER.filter(t => t.klasse === klasse));
     const andere = mische(KLASSEN.filter(k => k !== klasse)).slice(0, 3).map(k => waehle(TIER.filter(t => t.klasse === k)));
-    return { art: "merkmal", klasse, richtig, mitBild, optionen: mische([richtig, ...andere]) };
+    return { art: "merkmal", merkmal: "klasse", klasse, richtig, mitBild, optionen: mische([richtig, ...andere]) };
   },
   knifflig(anzahlKoerbe = 3) {
-    const [name, merkmal, falle] = waehle(KNIFFLIG);
+    const frei = KNIFFLIG.filter(([, merkmal]) => merkmalFrei(merkmal));
+    if (!frei.length) return null;
+    const [name, merkmal, falle] = waehle(frei);
     const t = tier(name);
     const liste = merkmal === "klasse" ? [...KLASSEN, "Spinnentier", "Weichtier", "Wurm"] : GRUPPEN;
     const weitere = mische(liste.filter(k => k !== t[merkmal] && k !== falle)).slice(0, anzahlKoerbe - 2);
-    return { art: "sortieren", tier: t, richtig: t[merkmal], falle, koerbe: mische([t[merkmal], falle, ...weitere]) };
+    return { art: "sortieren", merkmal, tier: t, richtig: t[merkmal], falle, koerbe: mische([t[merkmal], falle, ...weitere]) };
   },
 };
 
 // Basisklasse 3: Stufe 1 = 2. Klasse, 2–4 = 3. Klasse, 5 = 4. Klasse, 6 Endgegner.
+// Je Stufe die Arten (mehrfach genannt = häufiger).
 const STUFE = {
-  s1: () => ARTEN.haltung(),
-  s2: () => ARTEN.wirbeltier(true),
-  s3: () => waehle([ARTEN.klasse, ARTEN.klasse, () => ARTEN.merkmal(true)])(),
-  s4: () => ARTEN.gruppe(),
-  s5: () => waehle([() => ARTEN.knifflig(3), () => ARTEN.knifflig(3), ARTEN.gruppe])(),
-  s6: () => waehle([() => ARTEN.knifflig(5), () => ARTEN.knifflig(5), () => ARTEN.merkmal(false)])(),
+  s1: [ARTEN.haltung],
+  s2: [() => ARTEN.wirbeltier(true)],
+  s3: [ARTEN.klasse, ARTEN.klasse, () => ARTEN.merkmal(true)],
+  s4: [ARTEN.gruppe],
+  s5: [() => ARTEN.knifflig(3), () => ARTEN.knifflig(3), ARTEN.gruppe],
+  s6: [() => ARTEN.knifflig(5), () => ARTEN.knifflig(5), () => ARTEN.merkmal(false)],
 };
 // Stufen, in denen jedes Tier ein Bild tragen muss (2. Klasse und die Wirbeltier-Stufe mit Bild).
 const BILD_NOETIG = ["s1", "s2"];
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Wildtier, Nutztier oder Heimtier?",
+  s2: "Säugetier, Vogel, Fisch, Reptil oder Amphibie? Mit Bild.",
+  s3: "Dazu Insekten — und welches Tier passt zum Merkmal?",
+  s4: "Säugetiere genauer: Nagetier, Raubtier, Paarhufer und mehr.",
+  s5: "Knifflig: Fledermaus, Wal, Spinne, Hase …",
+  s6: "Endgegner: knifflige Tiere mit fünf Körben, Merkmale ohne Bilder.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Liste der abgefragten Eigenschaft, geprüft an den Rohdaten (tiere.js): Spalte je Merkmal. */
+function herkunft(a) {
+  const spalte = { klasse: 2, gruppe: 3, haltung: 4 }[a.merkmal];
+  const passt = t => TIERE.some(z => z[0] === t.name && z[spalte] === t[a.merkmal]);
+  const tiere = a.art === "merkmal" ? a.optionen : [a.tier];
+  return [tiere.every(passt) ? TIER_LISTE_JE_MERKMAL[a.merkmal] : "?"];
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
   const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
   if (a.art === "sortieren") {
     if (!a.koerbe.includes(a.richtig)) m.push("richtiger Korb fehlt");
     if (new Set(a.koerbe).size !== a.koerbe.length) m.push("Korb doppelt");
@@ -139,14 +181,7 @@ LS.spiel({
   id: "tier-sortierer",
   einleitung: "Jedes Tier gehört in eine Gruppe. Schau genau: Hat es Fell, Federn oder Schuppen? Wie viele Beine?",
   anzahl: 10,
-  stufen: {
-    s1: "Wildtier, Nutztier oder Heimtier?",
-    s2: "Säugetier, Vogel, Fisch, Reptil oder Amphibie? Mit Bild.",
-    s3: "Dazu Insekten — und welches Tier passt zum Merkmal?",
-    s4: "Säugetiere genauer: Nagetier, Raubtier, Paarhufer und mehr.",
-    s5: "Knifflig: Fledermaus, Wal, Spinne, Hase …",
-    s6: "Endgegner: knifflige Tiere mit fünf Körben, Merkmale ohne Bilder.",
-  },
+  stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

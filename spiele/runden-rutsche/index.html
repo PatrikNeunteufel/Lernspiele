@@ -157,6 +157,7 @@ LS.spiel({
     ctx.flaeche.append(svg);
 
     const loesungText = `${zahlText(a.zahl)} ≈ ${zahlText(a.loesung)}`;
+    ctx.loesung(loesungText);
     const knapp = !!STUFE[ctx.stufe].knapp;
     if (!STUFE[ctx.stufe].tippen) {
       const ziele = el("div", { class: "ziele" });

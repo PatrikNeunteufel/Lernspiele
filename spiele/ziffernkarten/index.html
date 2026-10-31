@@ -270,6 +270,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const { karten, stellen, vorgabe, richtig } = aufgabeErzeugen(ctx.stufe);
+    const loesung = `Eine richtige Lösung ist ${zahlText(richtig[0])}.`;
+    ctx.loesung(loesung);
     ctx.flaeche.append(el("div", { class: "vorgabe", text: vorgabe.text }));
 
     const faecher = el("div", { class: "faecher" });
@@ -331,7 +333,7 @@ LS.spiel({
       else if (vorgabe.ziel === "min") hinweis = "Das passt — aber es geht noch kleiner! Die kleinen Ziffern gehören nach vorne.";
       else if (vorgabe.ziel === "nah") hinweis = `Es gibt eine Zahl, die noch näher bei ${zahlText(vorgabe.bei)} liegt. Schau zuerst auf die vorderste Stelle.`;
       else hinweis = "Lies die Vorgabe nochmal genau.";
-      ctx.falsch(hinweis, `Eine richtige Lösung ist ${zahlText(richtig[0])}.`);
+      ctx.falsch(hinweis, loesung);
       if (ctx.flaeche.querySelector(".knopfzeile button.knopf:not(.gruen)")) { gesperrt = true; ok.disabled = true; }
     });
 

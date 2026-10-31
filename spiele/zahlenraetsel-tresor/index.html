@@ -278,6 +278,8 @@ LS.spiel({
     const arten = P[ctx.stufe].arten;
     const art = ctx.nr < arten.length ? arten[ctx.nr] : waehle(arten);
     const r = art(P[ctx.stufe], ctx.geordnet);
+    const loesung = `${r.erklaerung} → Code ${zahlText(r.loesung)}`;
+    ctx.loesung(loesung);
 
     const tresor = el("div", { class: "tresor", "aria-hidden": "true",
       html: `<div class="innen">${waehle(["💎", "👑", "🏆", "💰", "🪙", "🎁"])}</div><div class="tuer"><div class="rad"></div></div>` });
@@ -300,7 +302,7 @@ LS.spiel({
         tresor.classList.remove("ruckeln");
         void tresor.offsetWidth;
         tresor.classList.add("ruckeln");
-        ctx.falsch(r.hinweis, `${r.erklaerung} → Code ${zahlText(r.loesung)}`);
+        ctx.falsch(r.hinweis, loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) { tasten.gesperrt = true; tresor.classList.add("offen"); }
       },
     });

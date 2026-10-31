@@ -35,7 +35,13 @@
 
 const { waehle, mische, el } = LS;
 
-const WOERTER = SILBEN_WOERTER.map(([getrennt, bild]) => ({ silben: getrennt.split("-"), wort: getrennt.replace(/-/g, ""), bild }));
+// Freigabe (Entscheid L4 a): je Silbenzahl eine Liste; nur Wörter aus Listen, die der Spieler üben
+// darf (Aufsicht: alle). Kennt der Katalog die Listen nicht, gilt alles als frei — dann entscheidet
+// die Freigabe des Spiels.
+const SILBEN_JE_LISTE = { "eine-silbe": 1, "zwei-silben": 2, "drei-silben": 3, "vier-silben": 4, "fuenf-silben": 5 };
+const FREI = new Set(LS.spielListen("silben-klatscher").length ? LS.freieListen("silben-klatscher") : Object.keys(SILBEN_WOERTER));
+const WOERTER = Object.entries(SILBEN_WOERTER).filter(([l]) => FREI.has(l)).flatMap(([liste, woerter]) =>
+  woerter.map(([getrennt, bild]) => ({ silben: getrennt.split("-"), wort: getrennt.replace(/-/g, ""), bild, liste })));
 const mitSilben = (min, max) => WOERTER.filter(w => w.silben.length >= min && w.silben.length <= max);
 
 /** Falsche Trennung: eine Silbengrenze um einen Buchstaben verschieben. */
@@ -75,20 +81,35 @@ const ARTEN = {
 };
 
 // Basisklasse 1: Stufe 1 Kindergarten, 2–4 1. Klasse, 5 2. Klasse, 6 Endgegner.
+// Je Stufe die Aufgabenarten mit der Bedingung, dass die freien Listen Wörter dafür haben.
+const gibt = (min, max) => () => mitSilben(min, max).length > 0;
+// „Welches Wort hat n Silben?“ braucht ein Wort mit n Silben und drei mit anderer Silbenzahl.
+const ZIELE = () => [2, 3, 4].filter(n => mitSilben(n, n).length && WOERTER.filter(w => w.silben.length !== n).length >= 3);
 const STUFE = {
-  s1: () => ARTEN.zaehlen(1, 2, 3),
-  s2: () => ARTEN.zaehlen(1, 3, 4),
-  s3: () => waehle([() => ARTEN.zaehlen(1, 4, 5), () => ARTEN.welchesWort(waehle([2, 3, 4]))])(),
-  s4: () => waehle([() => ARTEN.zaehlen(2, 5, 5), () => ARTEN.trennung(2, 5)])(),
-  s5: () => waehle([() => ARTEN.trennung(2, 5), () => ARTEN.ordnen(3, 5)])(),
-  s6: () => waehle([() => ARTEN.trennung(4, 5), () => ARTEN.ordnen(4, 5)])(),
+  s1: [[gibt(1, 2), () => ARTEN.zaehlen(1, 2, 3)]],
+  s2: [[gibt(1, 3), () => ARTEN.zaehlen(1, 3, 4)]],
+  s3: [[gibt(1, 4), () => ARTEN.zaehlen(1, 4, 5)], [() => ZIELE().length > 0, () => ARTEN.welchesWort(waehle(ZIELE()))]],
+  s4: [[gibt(2, 5), () => ARTEN.zaehlen(2, 5, 5)], [gibt(2, 5), () => ARTEN.trennung(2, 5)]],
+  s5: [[gibt(2, 5), () => ARTEN.trennung(2, 5)], [gibt(3, 5), () => ARTEN.ordnen(3, 5)]],
+  s6: [[gibt(4, 5), () => ARTEN.trennung(4, 5)], [gibt(4, 5), () => ARTEN.ordnen(4, 5)]],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Aufgabenarten der Stufe, die mit den freien Listen gehen; leer = Stufe wird nicht angeboten. */
+const moeglich = stufe => STUFE[stufe].filter(([geht]) => geht()).map(([, neu]) => neu);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => moeglich(s).length));
+
+function aufgabeErzeugen(stufe) {
+  const arten = moeglich(stufe);
+  if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  return waehle(arten)();
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a) {
   const m = [];
+  const woerter = a.art === "welchesWort" ? a.optionen : [a.w];
+  if (!woerter.every(w => WOERTER.includes(w) && FREI.has(w.liste))) m.push("Wort nicht aus einer freien Liste");
+  if (woerter.some(w => SILBEN_JE_LISTE[w.liste] !== w.silben.length)) m.push("Wort steht in der Liste einer anderen Silbenzahl");
   if (a.w.silben.join("") !== a.w.wort || a.w.silben.some(s => !s)) m.push("Silben ergeben das Wort nicht");
   if (a.art === "zaehlen" && !a.optionen.includes(a.richtig)) m.push("richtige Zahl fehlt in der Auswahl");
   if (a.art === "welchesWort" && a.optionen.filter(w => w.silben.length === a.anzahl).length !== 1) m.push("nicht genau ein Wort mit dieser Silbenzahl");
@@ -108,14 +129,14 @@ LS.spiel({
   id: "silben-klatscher",
   einleitung: "Sprich das Wort laut und klatsche bei jeder Silbe: Ba-na-ne — drei Mal klatschen!",
   anzahl: 10,
-  stufen: {
+  stufen: nurMoegliche({
     s1: "Kurze Wörter: Wie oft klatschst du? Hund, Kat-ze.",
     s2: "Bis drei Silben klatschen: Ba-na-ne.",
     s3: "Bis vier Silben — und welches Bild hat so viele Silben?",
     s4: "Bis fünf Silben und die richtigen Silbenbögen finden.",
     s5: "Silbenbögen finden und Silben in die richtige Reihenfolge bringen.",
     s6: "Endgegner: lange Wörter ordnen und trennen — mit weniger Hilfe.",
-  },
+  }),
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

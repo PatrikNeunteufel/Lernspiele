@@ -54,16 +54,30 @@ const STUFE = {
 const ALLE_WOERTER = Object.values(THEMEN_EN).flatMap(t => t.woerter);
 const ABC = "abcdefghijklmnopqrstuvwxyz";
 
-/** Drei Wörter aus allen Themen, die dem englischen Wort ähneln: gleicher Anfangsbuchstabe, ähnliche Länge. */
+// Freigabe (Entscheid L4 a): je Thema eine Liste (Feld liste in woerter.js), die Wendungen eine
+// eigene. Nur Inhalte aus Listen, die der Spieler üben darf (Aufsicht: alle). Kennt der Katalog die
+// Listen nicht, gilt alles als frei — dann entscheidet die Freigabe des Spiels.
+const LISTEN = [...new Set(Object.values(THEMEN_EN).map(t => t.liste)), "wendungen"];
+const FREI = new Set(LS.spielListen("word-match").length ? LS.freieListen("word-match") : LISTEN);
+const FREIE_WOERTER = Object.values(THEMEN_EN).filter(t => FREI.has(t.liste)).flatMap(t => t.woerter);
+/** Englisch, Deutsch und Bild aller freien Wörter und Wendungen — für pruefeAufgabe. */
+const FREIE_TEXTE = new Set([...FREIE_WOERTER, ...(FREI.has("wendungen") ? WENDUNGEN_EN : [])].flat());
+/** Themen und Aufgabenarten der Stufe, die mit den freien Listen gehen; keine Art = Stufe wird nicht angeboten. */
+const themenIn = stufe => STUFE[stufe].themen.filter(t => FREI.has(THEMEN_EN[t].liste));
+const artenIn = stufe => STUFE[stufe].arten.filter(a => (a === "wendung" ? FREI.has("wendungen") : themenIn(stufe).length > 0));
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => artenIn(s).length));
+
+/** Drei freie Wörter aus allen Themen, die dem englischen Wort ähneln: gleicher Anfangsbuchstabe, ähnliche Länge. */
 function aehnliche(en) {
   const nah = w => (w[0][0] === en[0] ? 0 : 10) + Math.abs(w[0].length - en.length) + Math.random();
-  return ALLE_WOERTER.filter(w => w[0] !== en).sort((a, b) => nah(a) - nah(b)).slice(0, 3);
+  return FREIE_WOERTER.filter(w => w[0] !== en).sort((a, b) => nah(a) - nah(b)).slice(0, 3);
 }
 
 /** Eine Aufgabe: Art, Wort, Antwortmöglichkeiten (bei buchstabieren die Kacheln). */
 function aufgabeErzeugen(stufe) {
-  const p = STUFE[stufe];
-  const art = waehle(p.arten);
+  const arten = artenIn(stufe);
+  if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  const art = waehle(arten);
   if (art === "wendung") {
     const [en, de] = waehle(WENDUNGEN_EN);
     const deutschZuEnglisch = Math.random() < 0.5;
@@ -71,11 +85,12 @@ function aufgabeErzeugen(stufe) {
     return { art, en, de, thema: "Phrases", zeige: deutschZuEnglisch ? de : en,
       optionen: deutschZuEnglisch ? [en, ...andere.map(w => w[0])] : [de, ...andere.map(w => w[1])], richtig: deutschZuEnglisch ? en : de, loesung: `${en} = ${de}` };
   }
-  const thema = THEMEN_EN[waehle(p.themen)];
+  const themaId = waehle(themenIn(stufe));
+  const thema = THEMEN_EN[themaId];
   const kandidaten = art === "buchstabierenSchwer" ? thema.woerter.filter(w => w[0].length >= 4) : thema.woerter;
   const [en, de, bild] = waehle(kandidaten.length ? kandidaten : thema.woerter);
   const andere = mische(thema.woerter.filter(w => w[0] !== en)).slice(0, 3);
-  const basis = { art, en, de, bild, thema: thema.name, loesung: `${bild} ${en} = ${de}` };
+  const basis = { art, themaId, en, de, bild, thema: thema.name, loesung: `${bild} ${en} = ${de}` };
   if (art === "bildZuEn") return { ...basis, optionen: [en, ...andere.map(w => w[0])], richtig: en };
   if (art === "enZuBild") return { ...basis, optionen: [bild, ...andere.map(w => w[2])], richtig: bild, alsBild: true };
   if (art === "deZuEn") return { ...basis, optionen: [en, ...andere.map(w => w[0])], richtig: en };
@@ -90,6 +105,9 @@ function aufgabeErzeugen(stufe) {
 /** Mängel: richtige Antwort genau einmal, Möglichkeiten verschieden, Kacheln reichen genau für das Wort. */
 function pruefeAufgabe(a, stufe) {
   const m = [];
+  const liste = a.art === "wendung" ? "wendungen" : THEMEN_EN[a.themaId].liste;
+  if (!FREI.has(liste) || ![a.en, a.de, ...(a.optionen || [])].every(t => FREIE_TEXTE.has(t))) m.push("Inhalt nicht aus einer freien Liste");
+  if (a.art !== "wendung" && !STUFE[stufe].themen.includes(a.themaId)) m.push("Thema nicht in der Stufe");
   if (a.optionen) {
     if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
     if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Möglichkeit");
@@ -108,14 +126,14 @@ LS.spiel({
   id: "word-match",
   einleitung: "Hello! Let's play! Welches englische Wort passt zum Bild? Und was heisst das auf Deutsch?",
   anzahl: 8,
-  stufen: {
+  stufen: nurMoegliche({
     s1: "Bild → englisches Wort: Farben, Tiere, Zahlen.",
     s2: "Dazu Essen und Familie, auch Wort → Bild.",
     s3: "Deutsch → Englisch: Schule, Körper, Wetter.",
     s4: "Englisch → Deutsch und kleine Sätze wie „How are you?“",
     s5: "Buchstabieren: das englische Wort aus Buchstaben legen.",
     s6: "Endgegner: ähnliche Wörter aus allen Themen, buchstabieren ohne Bild mit falschen Buchstaben.",
-  },
+  }),
 
   aufgabe(ctx) {
     let fertig = false;
@@ -138,6 +156,7 @@ LS.spiel({
 
     const a = aufgabeErzeugen(ctx.stufe);
     const { art, en, de, bild, loesung } = a;
+    ctx.loesung(loesung);
     ctx.flaeche.append(el("div", { class: "thema-name", text: a.thema }));
 
     if (a.optionen) {

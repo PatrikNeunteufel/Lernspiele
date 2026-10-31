@@ -65,11 +65,23 @@ function zerlege(satz) {
   });
 }
 
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Kinder üben nur Sätze aus freien Listen (LS.freieListen; die Aufsicht sieht alle). Kennt der
+// Katalog die Listen dieses Spiels noch nicht, gilt alles als frei — wie bei einem Spiel ohne Listen.
+const SPIEL_ID = "satz-reparatur";
+const FREI = new Set(LS.spielListen(SPIEL_ID).length ? LS.freieListen(SPIEL_ID) : Object.values(SAETZE_LISTEN));
+/** Sätze einer Gruppe (s1 … s5), leer, wenn ihre Liste nicht frei ist. */
+const frei = gruppe => (FREI.has(SAETZE_LISTEN[gruppe]) ? SAETZE[gruppe] : []);
+const KOENIG_EINZEL = [...frei("s3"), ...frei("s4")];
+/** Angebotene Stufen: s1–s5 mit freier eigener Liste, s6 mit Satzpaaren und einem Einzelsatz. */
+const ANGEBOTEN = new Set([...["s1", "s2", "s3", "s4", "s5"].filter(s => frei(s).length),
+  ...(frei("s5").length && KOENIG_EINZEL.length ? ["s6"] : [])]);
+
 /** Satz der Stufe. Königsstufe: ein kleiner Text aus drei Sätzen — ein Satzpaar der Stufe 5 und
     ein Satz der Stufe 3 oder 4 (abstrakte Nomen, ? und !), in zufälliger Reihenfolge. */
 function aufgabeErzeugen(stufe) {
-  if (stufe !== "s6") return waehle(SAETZE[stufe]);
-  const teile = [waehle(SAETZE.s5), waehle([...SAETZE.s3, ...SAETZE.s4])];
+  if (stufe !== "s6") return waehle(frei(stufe));
+  const teile = [waehle(frei("s5")), waehle(KOENIG_EINZEL)];
   return (Math.random() < 0.5 ? teile : teile.reverse()).join(" ");
 }
 
@@ -82,6 +94,11 @@ function pruefeAufgabe(satz, stufe) {
   if (/[,;:ß]/.test(satz)) m.push("Komma, Doppelpunkt oder ß im Satz");
   if (/\s{2}/.test(satz) || satz !== satz.trim()) m.push("doppelte Leerzeichen");
   if (stufe === "s6" && saetze.length !== 3) m.push("Königsstufe nicht mit drei Sätzen");
+  if (!ANGEBOTEN.has(stufe)) m.push("Stufe wird mit den freien Listen nicht angeboten");
+  // Inhalt aus freien Listen: der Satz selbst, in der Königsstufe ein Satzpaar und ein Einzelsatz.
+  const ausFrei = stufe === "s6" ? frei("s5").some(p => satz.includes(p) && KOENIG_EINZEL.includes(satz.replace(p, "").trim()))
+    : frei(stufe).includes(satz);
+  if (!ausFrei) m.push("Satz stammt nicht aus einer freien Liste der Stufe");
   for (const s of AUCH_PUNKT) if (!Object.values(SAETZE).flat().some(x => x.includes(s))) m.push(`AUCH_PUNKT: «${s}» steht in keinem Satz`);
   return m;
 }
@@ -90,17 +107,18 @@ LS.spiel({
   id: "satz-reparatur",
   einleitung: "Oje, in diesen Sätzen ist alles klein geschrieben und die Satzzeichen fehlen! Repariere sie: Tipp ein Wort an, um den ersten Buchstaben gross zu machen.",
   anzahl: 8,
-  stufen: {
+  stufen: Object.fromEntries(Object.entries({
     s1: "Satzanfang gross und Punkt am Ende.",
     s2: "Dazu Namen und Nomen gross: Hund, Lina.",
     s3: "Auch Nomen wie Angst und Freude — und ? oder !",
     s4: "Längere Sätze mit mehreren Nomen.",
     s5: "Zwei Sätze hintereinander.",
     s6: "Endgegner: drei Sätze am Stück — mit Nomen wie Angst, ? und !",
-  },
+  }).filter(([s]) => ANGEBOTEN.has(s))),
 
   aufgabe(ctx) {
     const satz = aufgabeErzeugen(ctx.stufe);
+    ctx.loesung(satz);
     const woerter = zerlege(satz);
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Repariere den Satz!" }),
       el("div", { class: "tipp-zeile", text: "Wort antippen = gross/klein · Kästchen antippen = Satzzeichen wählen" }));

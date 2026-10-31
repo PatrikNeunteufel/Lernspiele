@@ -80,10 +80,15 @@ const LS = (() => {
   //   fehlerAufgaben: [{ text, loesung, versuche, geloest }] }
 
   //   timer: { an, faktor, spiele: { <spiel-id>: { an (null = wie global), sekunden: { s1: … } } } }
+  //   rolle: "kind" | "aufsicht" (Entscheid L2 a) — die Aufsicht meldet sich mit PIN an, verwaltet
+  //     Konten und Freigaben und spielt als Tester: Runden mit test: true, im Spiel Testhilfen
+  //   pin: { salz, hash } nur bei der Aufsicht (SHA-256, nie die PIN selbst)
+  //   favoriten: [<spiel-id>], ansicht: "kacheln" | "kompakt", zu: [<Gruppen-Id>] (zugeklappt)
   const LEERES_PROFIL = {
-    alter: null, klasse: null, fokus: [],
+    alter: null, klasse: null, fokus: [], rolle: "kind",
     reihenfolge: { global: "stufe", spiele: {} },
     timer: { an: false, faktor: 1, spiele: {} },
+    favoriten: [], ansicht: "kacheln", zu: [],
   };
 
   /** Vorgabezeit je Aufgabe aus dem Katalog (Sekunden), falls die Seite ihn geladen hat. */
@@ -143,12 +148,60 @@ const LS = (() => {
     return wert === "stufe" ? ["s1", "s2", "s3"].includes(stufe) : wert === "geordnet";
   }
 
-  const profile = () => lies("profile", {});
+  /** Profile; frühere Testspieler (test: true, LERN_Session3) werden zur Aufsicht. */
+  const profile = () => {
+    const alle = lies("profile", {});
+    for (const p of Object.values(alle)) if (p.test && !p.rolle) { p.rolle = "aufsicht"; delete p.test; }
+    return alle;
+  };
   const spielerListe = () => Object.keys(profile());
-  const aktuellerSpieler = () => { const n = lies("spieler", null); return spielerListe().includes(n) ? n : null; };
-  function setzeSpieler(name) { schreibe("spieler", name); }
-
   function profil(name) { return { ...LEERES_PROFIL, ...(profile()[name] || {}) }; }
+  const istAufsicht = name => !!name && profile()[name]?.rolle === "aufsicht";
+  const kinderListe = () => spielerListe().filter(n => !istAufsicht(n));
+  const aufsichtListe = () => spielerListe().filter(istAufsicht);
+  /** Name mit 🔑 davor, wenn es eine Aufsicht ist — nur zur Anzeige. */
+  const spielerName = name => (istAufsicht(name) ? `🔑 ${name}` : name);
+
+  // Anmeldung (Entscheid L1 a): Kinder ohne PIN. Die Aufsicht gilt nur in diesem Browser-Tab
+  // (sessionStorage) — schliesst man ihn, ist sie abgemeldet und kein Kind erbt ihre Rechte.
+  function sitzung() { try { return sessionStorage.getItem("lernspiele:aufsicht"); } catch { return null; } }
+  function setzeSitzung(name) { try { name ? sessionStorage.setItem("lernspiele:aufsicht", name) : sessionStorage.removeItem("lernspiele:aufsicht"); } catch { /* egal */ } }
+  const aktuellerSpieler = () => {
+    const n = lies("spieler", null);
+    if (!spielerListe().includes(n)) return null;
+    return istAufsicht(n) && sitzung() !== n ? null : n;
+  };
+  /** Ist gerade eine Aufsicht angemeldet? */
+  const aufsichtAngemeldet = () => istAufsicht(aktuellerSpieler());
+  /** Kind anmelden; eine Aufsicht nur über meldeAufsichtAn mit PIN. */
+  function setzeSpieler(name) {
+    if (istAufsicht(name)) return false;
+    schreibe("spieler", name);
+    setzeSitzung(null);
+    return true;
+  }
+  function abmelden() { schreibe("spieler", null); setzeSitzung(null); }
+
+  async function pinHash(pin, salz) {
+    const daten = new TextEncoder().encode(`${salz}:${pin}`);
+    return [...new Uint8Array(await crypto.subtle.digest("SHA-256", daten))].map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  const pinGueltig = pin => /^\d{4,6}$/.test(pin);
+  /** PIN einer Aufsicht setzen (4–6 Ziffern); gespeichert wird nur Salz und Hash. */
+  async function setzePin(name, pin) {
+    if (!pinGueltig(pin)) return false;
+    const salz = [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(16).padStart(2, "0")).join("");
+    speichereProfil(name, { rolle: "aufsicht", pin: { salz, hash: await pinHash(pin, salz) } });
+    return true;
+  }
+  /** Aufsicht mit PIN anmelden; true bei Erfolg. Ohne gesetzte PIN geht es nicht. */
+  async function meldeAufsichtAn(name, pin) {
+    const p = profil(name);
+    if (p.rolle !== "aufsicht" || !p.pin || (await pinHash(pin, p.pin.salz)) !== p.pin.hash) return false;
+    schreibe("spieler", name);
+    setzeSitzung(name);
+    return true;
+  }
 
   function speichereProfil(name, daten) {
     const alle = profile();
@@ -156,13 +209,65 @@ const LS = (() => {
     schreibe("profile", alle);
   }
 
-  function neuerSpieler(name) {
+  /** Neues Kind anlegen (ohne es anzumelden); gibt den Namen zurück oder null. */
+  function neuerSpieler(name, daten = {}) {
     name = name.trim().slice(0, 20);
-    if (!name) return null;
-    if (!spielerListe().includes(name)) speichereProfil(name, {});
-    setzeSpieler(name);
+    if (!name || spielerListe().includes(name)) return null;
+    speichereProfil(name, daten);
     return name;
   }
+
+  // ---------- Freigabe (Entscheid L4 a) ----------
+  // Prüfstand im Repo, Freigabe auf dem Gerät. Der Katalog trägt je Spiel `geprueft` (das Spiel als
+  // Ganzes ist angesehen) und je Inhaltsliste `listen: { <liste>: { name, geprueft } }`, mit
+  // geprueft = { am, von } oder null. Für Kinder sichtbar ist, was geprüft oder von der Aufsicht
+  // freigegeben ist und nicht gesperrt. Speicher lernspiele:freigabe = { spiele: { <id>: bool },
+  // listen: { "<id>/<liste>": bool } }; fehlt ein Eintrag, entscheidet der Prüfstand.
+  const freigabe = () => ({ spiele: {}, listen: {}, ...lies("freigabe", {}) });
+  function katalogEintrag(spielId) { return typeof SPIELE !== "undefined" ? SPIELE.find(s => s.id === spielId) : null; }
+  function setzeFreigabe(art, schluessel, wert) {
+    const f = freigabe();
+    if (wert === null) delete f[art][schluessel]; else f[art][schluessel] = wert;
+    schreibe("freigabe", f);
+  }
+  // Nutzt ein Spiel die Liste eines anderen (dieselben Wörter, dieselben Sätze), steht im Katalog
+  // nur ein Verweis { von: "<spiel>/<liste>" }: Prüfstand und Freigabe gelten dann einmal, an der Quelle.
+  /** Schlüssel "<spiel>/<liste>" der Quelle einer Liste (folgt dem Verweis von). */
+  function listenQuelle(spielId, listeId) {
+    const von = katalogEintrag(spielId)?.listen?.[listeId]?.von;
+    return von || `${spielId}/${listeId}`;
+  }
+  /** Katalog-Eintrag der Quelle: { name, geprueft }. */
+  function quellEintrag(schluessel) {
+    const [spiel, liste] = schluessel.split("/");
+    return katalogEintrag(spiel)?.listen?.[liste] || null;
+  }
+  /** Inhaltslisten eines Spiels aus dem Katalog: [{ id, name, geprueft, von }] — Name und Prüfstand von der Quelle. */
+  const spielListen = spielId => Object.entries(katalogEintrag(spielId)?.listen || {}).map(([id, l]) => {
+    const q = l.von ? quellEintrag(l.von) : l;
+    return { id, name: q?.name ?? l.name, geprueft: q?.geprueft ?? null, von: l.von || null, zusatz: !!q?.zusatz };
+  });
+  /** Liste für Kinder frei? null als wert in setzeListeFrei = zurück auf den Prüfstand. */
+  function listeFrei(spielId, listeId) {
+    const schluessel = listenQuelle(spielId, listeId);
+    return freigabe().listen[schluessel] ?? !!quellEintrag(schluessel)?.geprueft;
+  }
+  const setzeListeFrei = (spielId, listeId, wert) => setzeFreigabe("listen", listenQuelle(spielId, listeId), wert);
+  /** Listen, die der angemeldete Spieler üben darf (die Aufsicht alle) — Spiele filtern ihre Inhalte danach. */
+  const freieListen = spielId => spielListen(spielId).filter(l => aufsichtAngemeldet() || listeFrei(spielId, l.id)).map(l => l.id);
+  /** Spiel als Ganzes für Kinder frei (ohne Blick auf die Listen)? */
+  function spielFrei(spielId) {
+    const f = freigabe().spiele[spielId];
+    return f ?? !!katalogEintrag(spielId)?.geprueft;
+  }
+  const setzeSpielFrei = (spielId, wert) => setzeFreigabe("spiele", spielId, wert);
+  /**
+   * Darf der angemeldete Spieler das Spiel sehen? Kinder: frei und mindestens eine Liste frei — eine
+   * Zusatzliste (zusatz: true, z. B. fehlerfreie Sätze der Königsstufe) ergibt allein keine Aufgabe und zählt nicht.
+   */
+  const fuerKinderSichtbar = spielId => spielFrei(spielId) && (!spielListen(spielId).length
+    || spielListen(spielId).some(l => !l.zusatz && listeFrei(spielId, l.id)));
+  const spielSichtbar = spielId => aufsichtAngemeldet() || fuerKinderSichtbar(spielId);
 
   function loescheSpieler(name) {
     const alle = profile();
@@ -225,28 +330,6 @@ const LS = (() => {
     return protokoll()
       .filter(e => e.name === name && e.spiel === spiel && e.stufe === stufe)
       .reduce((m, e) => Math.max(m, e.sterne), 0);
-  }
-
-  /** Auswahl „Wer spielt?“: Namen als Knöpfe, dazu ein Feld für einen neuen Namen. */
-  function spielerWahl(onWahl) {
-    const box = el("div", { class: "spielerwahl" });
-    function zeichne() {
-      box.innerHTML = "";
-      const jetzt = aktuellerSpieler();
-      box.append(el("span", { class: "spielerwahl-titel", text: "Wer spielt?" }));
-      for (const n of spielerListe()) {
-        box.append(el("button", {
-          type: "button", class: "spieler" + (n === jetzt ? " aktiv" : ""), "aria-pressed": String(n === jetzt), text: n,
-          onclick: () => { setzeSpieler(n); zeichne(); onWahl(n); },
-        }));
-      }
-      const feld = el("input", { type: "text", maxlength: "20", placeholder: "Neuer Name", "aria-label": "Neuer Name", class: "spieler-neu" });
-      const dazu = () => { const n = neuerSpieler(feld.value); if (n) { zeichne(); onWahl(n); } };
-      feld.addEventListener("keydown", e => { if (e.key === "Enter") dazu(); e.stopPropagation(); });
-      box.append(el("span", { class: "spieler-neu-zeile" }, feld, el("button", { type: "button", class: "spieler plus", text: "＋", "aria-label": "Name hinzufügen", onclick: dazu })));
-    }
-    zeichne();
-    return box;
   }
 
   // ---------- Töne ----------
@@ -451,7 +534,11 @@ const LS = (() => {
    * opt.lob: Text bei richtiger Antwort; opt.breite: Mindestbreite der Knöpfe (px)
    * opt.beiRichtig(knopf): zusätzlich bei richtiger Antwort, z. B. einen Ton vorspielen
    */
+  /** Lösung für die Testhilfe: opt.loesung, sonst der richtige Wert, wenn er ein einfacher Wert ist. */
+  const loesungFuer = (opt, wert) => opt.loesung || (["string", "number"].includes(typeof wert) ? String(wert) : null);
+
   function auswahl(ctx, opt) {
+    ctx.loesung(loesungFuer(opt, opt.richtig));
     const box = el("div", { class: "wahl" });
     if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
     let fertig = false;
@@ -486,6 +573,7 @@ const LS = (() => {
    * opt.pfeile: zwischen den gelegten Teilen „→“ zeigen; opt.beiRichtig() wie bei auswahl
    */
   function reihenfolge(ctx, opt) {
+    ctx.loesung(opt.loesung || opt.reihe.map(w => (opt.ablage ? opt.ablage(w) : String(w))).join(" → "));
     const ablage = el("div", { class: "ablage", "aria-live": "polite" });
     const box = el("div", { class: "wahl" });
     if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
@@ -526,6 +614,7 @@ const LS = (() => {
    * opt.richtig, opt.hinweis(wert), opt.loesung, opt.lob wie bei auswahl
    */
   function koerbe(ctx, opt) {
+    ctx.loesung(opt.loesung || opt.korbInhalt?.(opt.richtig)?.text || loesungFuer(opt, opt.richtig));
     const karte = el("div", { class: "korb-karte" },
       opt.karte.bild ? el("span", { class: "bild", text: opt.karte.bild }) : null, el("b", { text: opt.karte.text }));
     const box = el("div", { class: "korb-reihe" });
@@ -610,22 +699,29 @@ const LS = (() => {
       setze();
     }
 
-    /** Ohne gewählten Namen zuerst „Wer spielt?“, danach geht es mit 'weiter' los. */
-    function namensWahl(weiter) {
+    // Angemeldet wird nur auf der Startseite (Entscheid L1 a); dorthin führt auch „wechseln“.
+    const START = "../../index.html";
+
+    /** Darf es losgehen? Sonst eine Karte: erst anmelden, oder das Spiel ist noch nicht freigegeben. */
+    function zugang() {
+      if (aktuellerSpieler() && spielSichtbar(def.id)) return true;
       buehne.innerHTML = "";
-      const karte = el("div", { class: "karte" });
+      const karte = el("div", { class: "karte mitte" });
       const eule = euleZeile();
-      karte.append(eule.element, spielerWahl(() => weiter()));
+      karte.append(eule.element, el("div", { class: "knopfzeile" },
+        el("a", { class: "knopf", href: aktuellerSpieler() ? START : `${START}#anmelden`, text: "Zur Startseite" })));
       buehne.append(karte);
-      eule.sag("Hallo! Wie heisst du? Tipp auf deinen Namen oder schreib ihn neu hin.");
+      eule.sag(aktuellerSpieler() ? "Dieses Spiel ist noch nicht freigegeben. Such dir auf der Startseite ein anderes aus!"
+        : "Hallo! Melde dich zuerst auf der Startseite an.");
+      return false;
     }
 
     function spielerZeile() {
       const name = aktuellerSpieler();
       return el("div", { class: "spieler-zeile" },
         el("span", { text: "Du spielst als " }),
-        el("b", { text: name }),
-        el("button", { type: "button", class: "link", text: "wechseln", onclick: () => namensWahl(stufenwahl) }));
+        el("b", { text: spielerName(name) }),
+        el("a", { class: "link", href: `${START}#anmelden`, text: "wechseln" }));
     }
 
     /** Schalter „Mit Timer“ für dieses Spiel; die Sekunden je Stufe stellt man im Profil ein. */
@@ -641,7 +737,7 @@ const LS = (() => {
     }
 
     function stufenwahl() {
-      if (!aktuellerSpieler()) return namensWahl(stufenwahl);
+      if (!zugang()) return;
       buehne.innerHTML = "";
       const name = aktuellerSpieler();
       const karte = el("div", { class: "karte" });
@@ -675,7 +771,7 @@ const LS = (() => {
     }
 
     function runde(stufe) {
-      if (!aktuellerSpieler()) return namensWahl(() => runde(stufe));
+      if (!zugang()) return;
       const name = aktuellerSpieler();
       const timer = timerFuer(name, def.id, stufe.id);
       let nr = 0;
@@ -692,8 +788,19 @@ const LS = (() => {
       const flaeche = el("div");
       const eule = euleZeile();
       const zeitleiste = el("div", { class: "zeitleiste", "aria-hidden": "true" }, el("div", { class: "zeitbalken" }));
+      // Testhilfen (Entscheid T2 a): nur beim Testspieler; wirken auf die gerade gezeigte Aufgabe.
+      const test = istAufsicht(name);
+      let hilfen = 0;
+      let jetzt = null; // { loesung(): Text oder null, ueberspringen() } der aktuellen Aufgabe
+      const loesungKnopf = el("button", { type: "button", class: "knopf hell klein", text: "🔑 Lösung zeigen", onclick: () => {
+        const text = jetzt?.loesung();
+        hilfen++;
+        eule.sag(text ? `🔑 ${text}` : "🔑 Dieses Spiel nennt seine Lösung erst nach drei Fehlversuchen.", "hinweis");
+      } });
+      const weiterKnopf = el("button", { type: "button", class: "knopf hell klein", text: "⏭ Aufgabe überspringen", onclick: () => { hilfen++; jetzt?.ueberspringen(); } });
       // Eule oben, damit ihre Rückmeldung auch auf kleinen Bildschirmen neben der Aufgabe sichtbar bleibt.
       karte.append(eule.element);
+      if (test) karte.append(el("div", { class: "testhilfe" }, el("span", { text: "🧪 Test" }), loesungKnopf, weiterKnopf));
       if (timer.an) karte.append(zeitleiste);
       karte.append(flaeche);
       buehne.append(punkte, karte);
@@ -710,7 +817,9 @@ const LS = (() => {
         let erledigt = false;
         let zeitUm = false;
         let eintrag = null; // Protokolleintrag, sobald die Aufgabe einen Fehler hatte
+        let loesungVorab = null; // vom Spiel mit ctx.loesung() genannt, für die Testhilfe
         const start = performance.now();
+        pruefung.haken?.("aufgabe", { nr });
 
         const fehlerEintrag = (loesungText) => {
           if (!eintrag) {
@@ -721,13 +830,25 @@ const LS = (() => {
           return eintrag;
         };
 
-        const abschliessen = (geloest) => {
+        const abschliessen = (geloest, uebersprungen = false) => {
           clearTimeout(uhr);
           // Balken dort anhalten, wo er gerade steht.
           const balken = zeitleiste.firstChild;
           balken.style.width = getComputedStyle(balken).width;
           balken.style.transition = "none";
-          aufgabenZeiten.push({ ms: Math.round(performance.now() - start), versuche, zeitUm, geloest });
+          aufgabenZeiten.push({ ms: Math.round(performance.now() - start), versuche, zeitUm, geloest, ...(uebersprungen ? { uebersprungen } : {}) });
+        };
+
+        jetzt = {
+          loesung: () => loesungVorab,
+          ueberspringen() {
+            // Gelöst oder aufgelöst: es geht ohnehin gleich bzw. mit „Weiter“ weiter.
+            if (erledigt) return;
+            erledigt = true;
+            abschliessen(false, true);
+            nr++;
+            naechste();
+          },
         };
 
         if (timer.an) {
@@ -756,12 +877,15 @@ const LS = (() => {
           nr,
           flaeche,
           sag: (t, art) => eule.sag(t, art),
+          /** Lösung der Aufgabe gleich beim Zeichnen nennen (Text wie loesungText); zeigt sie nur die Testhilfe. */
+          loesung(text) { loesungVorab = text || null; },
           /** Ist die Aufgabe gelöst oder nach drei Fehlversuchen aufgelöst? Dann nimmt sie keine Antwort mehr an. */
           vorbei: () => erledigt,
           richtig(text) {
             if (erledigt) return;
             erledigt = true;
             if (eintrag) eintrag.geloest = true;
+            pruefung.haken?.("richtig", { nr, vorab: loesungVorab });
             abschliessen(true);
             ton("richtig");
             eule.sag(text || waehle(LOB), "gut");
@@ -774,7 +898,9 @@ const LS = (() => {
             fehler++;
             fehlerEintrag(loesungText).versuche = versuche;
             ton("falsch");
-            if (versuche >= 3 && loesungText) {
+            const aufgeloest = versuche >= 3 && !!loesungText;
+            pruefung.haken?.("falsch", { nr, hinweis: hinweis || "", loesung: loesungText || "", aufgeloest, flaeche, vorab: loesungVorab });
+            if (aufgeloest) {
               erledigt = true;
               abschliessen(false);
               eule.sag(`Schau mal: ${loesungText}`, "hinweis");
@@ -804,6 +930,9 @@ const LS = (() => {
           timer: timer.an ? timer.sekunden : null,
           aufgabenZeiten,
           fehlerAufgaben,
+          // Testrunden zählen nicht in der Statistik (Entscheid T1 a); hilfe = Testhilfen benutzt.
+          ...(test ? { test: true } : {}),
+          ...(hilfen ? { hilfe: hilfen } : {}),
         });
         ton("fertig");
         konfetti();
@@ -836,11 +965,35 @@ const LS = (() => {
     else stufenwahl();
   }
 
+  /**
+   * Nur für tools/pruefe_spiele.js: pruefung.haken(art, angaben) erfährt jede neue Aufgabe
+   * (art "aufgabe", { nr }) und jede Antwort (art "richtig" oder "falsch";
+   * angaben { nr, hinweis, loesung, aufgeloest, flaeche, vorab }).
+   */
+  const pruefung = { haken: null };
+
+  /**
+   * CSS-Klassen des Rahmens (Vertrag in docs/rahmen.md; einzige Liste, das Testskript liest sie hier).
+   * reserviert: baut Startbild, Namenswahl, Runde und Schlusskarte — ein Spiel definiert sie im eigenen
+   *   <style> nie auf oberster Ebene neu (Vergleichs-Krokodil: eigene .mitte liess die Schlusskarte schrumpfen).
+   * bausteine: Teile der Bausteine (auswahl, reihenfolge, koerbe, tastatur, Noten), die ein Spiel anpassen darf.
+   */
+  const RAHMEN_KLASSEN = {
+    reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein",
+      "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
+      "spieler-zeile",
+      "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "zeitleiste", "zeitbalken", "testhilfe"],
+    bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
+      "tastatur", "anzeige", "ok", "loeschen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
+  };
+
   return {
     STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, spiel, lies, schreibe, sterneText,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
+    istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
+    freigabe, spielFrei, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, vorgabeZeit, timerFuer, setzeTimerSpiel, zeitVorschlag,
-    protokoll, besteSterne, spielerWahl, auswahl, reihenfolge, fliegen, koerbe,
+    protokoll, besteSterne, auswahl, reihenfolge, fliegen, koerbe, pruefung, RAHMEN_KLASSEN,
   };
 })();

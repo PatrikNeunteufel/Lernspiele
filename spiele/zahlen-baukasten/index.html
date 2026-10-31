@@ -33,7 +33,7 @@
   .baustein:hover { transform: translateY(-2px) rotate(-1deg); }
   .baustein small { display: block; font-size: 15px; font-weight: 700; opacity: .95; margin-top: 4px; min-height: 18px; }
   .baustein.lang { font-size: clamp(20px, 4vw, 26px); }
-  .plus { font-size: 34px; font-weight: 900; color: var(--text-leise); }
+  .baustein-plus { font-size: 34px; font-weight: 900; color: var(--text-leise); }
 
   /* Kleine Stellenwerttabelle, die beim Tippen mitläuft */
   .mini-tabelle {
@@ -138,12 +138,14 @@ LS.spiel({
   aufgabe(ctx) {
     const { teile, ausgeschrieben } = aufgabeErzeugen(ctx.stufe, ctx.geordnet);
     const loesung = teile.reduce((s, t) => s + t.ziffer * t.st.wert, 0);
+    const loesungText = `${teile.map(t => `${t.ziffer} ${t.st.k}`).join(" + ")} = ${zahlText(loesung)}`;
+    ctx.loesung(loesungText);
 
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl bauen diese Bausteine?" }));
 
     const reihe = el("div", { class: "bausteine" });
     teile.forEach((t, i) => {
-      if (i > 0) reihe.append(el("span", { class: "plus", text: "+" }));
+      if (i > 0) reihe.append(el("span", { class: "baustein-plus", text: "+" }));
       const info = el("small", { text: "" });
       const knopf = el("button", {
         type: "button",
@@ -193,7 +195,7 @@ LS.spiel({
         if (String(wert).length < String(loesung).length) hinweis = "Deine Zahl ist zu kurz. Denk an die Nullen bei den leeren Stellen!";
         else if (String(wert).length > String(loesung).length) hinweis = "Deine Zahl hat zu viele Stellen. Welches ist der grösste Baustein?";
         else hinweis = `Schau nochmal bei den ${LS.dativ(falscheStelle)} (${falscheStelle.k}).`;
-        ctx.falsch(hinweis, `${teile.map(t => `${t.ziffer} ${t.st.k}`).join(" + ")} = ${zahlText(loesung)}`);
+        ctx.falsch(hinweis, loesungText);
         if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
       },
     });

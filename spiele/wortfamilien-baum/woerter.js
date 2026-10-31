@@ -1,0 +1,162 @@
+/* Wortfamilien für den Wortfamilien-Baum — ZU PRÜFEN durch Eltern oder Lehrperson.
+   Lehrplan SG D.5.D.1.b (Orientierungspunkt 4. Klasse): „Wortstamm, Wortfamilien“ und
+   „zusammengesetzte Nomen zerlegen“.
+
+   Je Familie:
+     wort      — das Wort, nach dem die Familie heisst (steht am Baumstamm)
+     stamm     — der Wortstamm, wie er im Spiel gezeigt wird (klein geschrieben)
+     einfach   — abgeleitete Wörter, in denen der Stamm unverändert steckt (Fahrer, Abfahrt)
+     umlaut    — Wörter, in denen der Stamm einen Umlaut bekommt (fahren → Fähre); ab Stufe 4
+     zusammen  — zusammengesetzte Nomen mit dem Stamm (Fahrrad); ab Stufe 5
+     falsch    — Wörter, die nur ähnlich aussehen, aber NICHT zur Familie gehören,
+                 mit kurzer Erklärung der Bedeutung (Fahne — ein Tuch an einer Stange); ab Stufe 4
+
+   Bewusst weggelassen (nie als Familienmitglied UND nie als Ausreisser): Wörter, deren
+   Zugehörigkeit umstritten ist oder sich nur über die Herkunft erklärt, etwa Gefahr (gehört
+   nicht zu fahren), erfahren, Falle, Bauer, schlaff, erzählen, gewöhnen, aufhören, Kuchen;
+   ebenso Wörter mit Ablaut (Flug, Sprache, Hilfe, Getränk), damit der Stamm sichtbar bleibt.
+   Ein Wort darf nur den Stamm EINER Familie enthalten (also kein Hörspiel, kein Baumhaus).
+   Schweizer Schreibweise (ss statt ß).
+
+   Inhaltslisten (Entscheid L4 a): Die Aufsicht gibt die Spalten einzeln frei (Zuordnung in
+   WORTFAMILIEN_LISTEN unten). Der Prüfstand steht im Katalog (spiele/gemeinsam/katalog.js, Eintrag
+   wortfamilien-baum, Feld listen). Listen:
+     abgeleitet       die Spalte einfach (Fahrer, Abfahrt) — Stufe 1–3
+     umlaut-aehnlich  die Spalten umlaut und falsch (Fähre; Fahne) — beide kommen ab Stufe 4 dazu
+     zusammengesetzt  die Spalte zusammen (Fahrrad) — Stufe 5
+   Familienwort und Stamm (wort, stamm) stehen in jeder Liste mit. */
+
+const WORTFAMILIEN_LISTEN = { einfach: "abgeleitet", umlaut: "umlaut-aehnlich", falsch: "umlaut-aehnlich", zusammen: "zusammengesetzt" };
+
+const WORTFAMILIEN = [
+  { wort: "fahren", stamm: "fahr",
+    einfach: ["Fahrer", "Fahrerin", "Fahrt", "Abfahrt", "Ausfahrt", "Vorfahrt", "abfahren"],
+    umlaut: ["Fähre"],
+    zusammen: ["Fahrrad", "Fahrplan", "Fahrkarte", "Fahrzeug"],
+    falsch: [["Fahne", "ein Tuch an einer Stange"], ["Farbe", "rot, blau, gelb …"]] },
+  { wort: "spielen", stamm: "spiel",
+    einfach: ["Spiel", "Spieler", "Spielerin", "mitspielen", "verspielt"],
+    umlaut: [],
+    zusammen: ["Spielplatz", "Spielzeug", "Brettspiel"],
+    falsch: [["Spiegel", "darin sieht man sich selbst"]] },
+  { wort: "laufen", stamm: "lauf",
+    einfach: ["Lauf", "auslaufen", "weglaufen"],
+    umlaut: ["Läufer", "Läuferin"],
+    zusammen: ["Wettlauf", "Laufschuh"],
+    falsch: [["Laub", "die Blätter der Bäume"], ["Laus", "ein kleines Insekt"]] },
+  { wort: "schlafen", stamm: "schlaf",
+    einfach: ["Schlaf", "einschlafen", "ausschlafen", "verschlafen"],
+    umlaut: ["schläfrig"],
+    zusammen: ["Schlafzimmer", "Schlafsack", "Schlafanzug"],
+    falsch: [] },
+  { wort: "backen", stamm: "back",
+    einfach: ["gebacken", "aufbacken"],
+    umlaut: ["Bäcker", "Bäckerin", "Bäckerei", "Gebäck"],
+    zusammen: ["Backofen", "Backblech"],
+    falsch: [["Backe", "die Wange im Gesicht"]] },
+  { wort: "waschen", stamm: "wasch",
+    einfach: ["abwaschen", "auswaschen", "waschbar"],
+    umlaut: ["Wäsche"],
+    zusammen: ["Waschmaschine", "Waschbecken", "Waschlappen"],
+    falsch: [] },
+  { wort: "Haus", stamm: "haus",
+    einfach: [],
+    umlaut: ["Häuschen", "häuslich"],
+    zusammen: ["Haustür", "Hausaufgabe", "Hausschuh"],
+    falsch: [] },
+  { wort: "lesen", stamm: "les",
+    einfach: ["Leser", "Leserin", "vorlesen", "lesbar"],
+    umlaut: [],
+    zusammen: ["Lesebuch", "Lesezeichen"],
+    falsch: [] },
+  { wort: "schreiben", stamm: "schreib",
+    einfach: ["aufschreiben", "abschreiben", "beschreiben"],
+    umlaut: [],
+    zusammen: ["Schreibtisch", "Schreibheft"],
+    falsch: [["Scheibe", "eine dünne Platte, zum Beispiel aus Glas"]] },
+  { wort: "kalt", stamm: "kalt",
+    einfach: [],
+    umlaut: ["Kälte", "erkälten", "Erkältung"],
+    zusammen: [],
+    falsch: [["Kalk", "ein weisser Stoff, zum Beispiel im Wasserkocher"]] },
+  { wort: "warm", stamm: "warm",
+    einfach: [],
+    umlaut: ["Wärme", "wärmen", "aufwärmen", "Wärmflasche"],
+    zusammen: [],
+    falsch: [["warnen", "vor etwas Gefährlichem Bescheid geben"]] },
+  { wort: "lang", stamm: "lang",
+    einfach: ["langweilig"],
+    umlaut: ["Länge", "verlängern"],
+    zusammen: ["Langeweile"],
+    falsch: [["Schlange", "ein Tier ohne Beine"]] },
+  { wort: "Freund", stamm: "freund",
+    einfach: ["Freundin", "freundlich", "Freundschaft", "unfreundlich", "befreundet"],
+    umlaut: [],
+    zusammen: ["Brieffreund"],
+    falsch: [] },
+  { wort: "bauen", stamm: "bau",
+    einfach: ["Bau", "aufbauen", "umbauen"],
+    umlaut: ["Gebäude"],
+    zusammen: ["Baustelle", "Bauklotz"],
+    falsch: [["Bauch", "ein Teil des Körpers"], ["Baum", "eine grosse Pflanze mit Ästen"]] },
+  { wort: "kaufen", stamm: "kauf",
+    einfach: ["Kauf", "Einkauf", "einkaufen", "verkaufen"],
+    umlaut: ["Käufer", "Verkäufer", "Verkäuferin"],
+    zusammen: ["Kaufladen"],
+    falsch: [] },
+  { wort: "Zahl", stamm: "zahl",
+    einfach: ["zahlen", "bezahlen", "Anzahl"],
+    umlaut: ["zählen", "abzählen"],
+    zusammen: [],
+    falsch: [["Zahn", "damit beisst man"]] },
+  { wort: "fallen", stamm: "fall",
+    einfach: ["Fall", "Unfall", "umfallen", "hinfallen"],
+    umlaut: [],
+    zusammen: ["Wasserfall", "Fallschirm"],
+    falsch: [["Falke", "ein Greifvogel"], ["Falte", "ein Knick im Stoff oder im Papier"]] },
+  { wort: "wohnen", stamm: "wohn",
+    einfach: ["Wohnung", "Bewohner", "Einwohner", "bewohnt"],
+    umlaut: [],
+    zusammen: ["Wohnzimmer", "Wohnwagen"],
+    falsch: [] },
+  { wort: "hören", stamm: "hör",
+    einfach: ["zuhören", "Zuhörer", "Gehör", "hörbar"],
+    umlaut: [],
+    zusammen: ["Kopfhörer"],
+    falsch: [["Horn", "wächst zum Beispiel einer Kuh am Kopf"]] },
+  { wort: "Fisch", stamm: "fisch",
+    einfach: ["Fischer", "Fischerin", "fischen"],
+    umlaut: [],
+    zusammen: ["Goldfisch", "Tintenfisch"],
+    falsch: [["frisch", "nicht alt, gerade erst gemacht"]] },
+  { wort: "Schnee", stamm: "schnee",
+    einfach: [],
+    umlaut: [],
+    zusammen: ["Schneemann", "Schneeball", "Schneeflocke"],
+    falsch: [["Schnecke", "ein Tier, das sein Haus trägt"]] },
+  { wort: "sprechen", stamm: "sprech",
+    einfach: ["Sprecher", "aussprechen", "besprechen", "versprechen"],
+    umlaut: [],
+    zusammen: [],
+    falsch: [] },
+  { wort: "wandern", stamm: "wander",
+    einfach: ["Wanderer", "Wanderung", "auswandern"],
+    umlaut: [],
+    zusammen: ["Wanderweg", "Wanderschuh"],
+    falsch: [] },
+  { wort: "helfen", stamm: "helf",
+    einfach: ["Helfer", "Helferin", "mithelfen"],
+    umlaut: [],
+    zusammen: [],
+    falsch: [] },
+  { wort: "kochen", stamm: "koch",
+    einfach: ["Koch", "Kocher", "aufkochen"],
+    umlaut: ["Köchin"],
+    zusammen: ["Kochtopf", "Kochbuch"],
+    falsch: [] },
+  { wort: "Sonne", stamm: "sonn",
+    einfach: ["sonnig"],
+    umlaut: [],
+    zusammen: ["Sonnenschein", "Sonnenbrille", "Sonnenblume"],
+    falsch: [] },
+];

@@ -67,7 +67,7 @@ const ARTEN = {
   zuOderAb() {
     const p = waehle(PHASEN.filter(x => x.zu !== undefined));
     return { gross: p.bild, frage: "Nimmt der Mond zu oder ab?", optionen: ["zunehmend", "abnehmend"], richtig: p.zu ? "zunehmend" : "abnehmend",
-      hinweis: "Ist die rechte Seite hell, wird der Mond grösser (zunehmend). Ist die linke Seite hell, wird er kleiner.", loesung: `${p.bild}: ${p.zu ? "zunehmend" : "abnehmend"}` };
+      hinweis: "Ist die rechte Seite hell, wird der Mond grösser (zunehmend). Ist die linke Seite hell, wird er kleiner (abnehmend).", loesung: `${p.bild}: ${p.zu ? "zunehmend" : "abnehmend"}` };
   },
   naechste() {
     const i = Math.floor(Math.random() * 8);
@@ -196,6 +196,8 @@ LS.spiel({
     if (a.gross) nacht.append(el("div", { class: "mond-gross", text: a.gross }));
     ctx.flaeche.append(nacht);
 
+    const loesung = a.reihe ? a.reihe.join(" → ") : a.loesung;
+    ctx.loesung(loesung);
     if (a.reihe) {
       const gelegt = el("div", { class: "reihe" });
       const sonne = () => gelegt.append(el("span", { class: "sonne", text: "☀️" }));
@@ -215,7 +217,7 @@ LS.spiel({
             return;
           }
           k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
-          ctx.falsch(a.hinweis, a.reihe.join(" → "));
+          ctx.falsch(a.hinweis, loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
         });
         box.append(k);
@@ -230,7 +232,7 @@ LS.spiel({
           if (fertig) return;
           if (o === a.richtig) { fertig = true; k.classList.add("richtig"); ctx.richtig(); return; }
           k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
-          ctx.falsch(a.hinweis, a.loesung);
+          ctx.falsch(a.hinweis, loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
         });
         box.append(k);

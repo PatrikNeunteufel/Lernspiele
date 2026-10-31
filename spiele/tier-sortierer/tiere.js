@@ -8,6 +8,18 @@
 //               in mehreren gleich typisch ist oder nicht in der Schweiz lebt
 // Bild null = kein passendes Emoji; solche Einträge erscheinen erst in Stufen mit Lesetext.
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten (Entscheid L4 a): Freigegeben wird je Spalte — eine Liste prüft eine Eigenschaft
+// aller Tiere. Der Prüfstand steht im Katalog (spiele/gemeinsam/katalog.js, Feld listen der
+// Spiele); Kinder sehen nur Inhalte aus freien Listen.
+//   Tier-Sortierer („tier-sortierer“):
+//     tierklassen         Spalte Klasse (auch die knifflige Auswahl im Spiel: Fledermaus, Wal …)
+//     saeugetier-gruppen  Spalte Gruppe
+//     haltung             Spalte Haltung
+//   Lebensraum-Zuordnung („lebensraum“, Spalte Lebensraum, je Lebensraum eine Liste):
+//     wald, wiese, weiher, gebirge — siehe lebensraum/nahrung.js (dort auch die Nahrungsketten)
+const TIER_LISTEN = ["tierklassen", "saeugetier-gruppen", "haltung"];
+const TIER_LISTE_JE_MERKMAL = { klasse: "tierklassen", gruppe: "saeugetier-gruppen", haltung: "haltung" };
 
 const TIERE = [
   // Säugetiere

@@ -137,6 +137,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    const loesung = `${zahlText(a.start)} + ${zahlText(a.fehlt)} = ${zahlText(a.ziel)}`;
+    ctx.loesung(loesung);
     const luecke = el("span", { class: "luecke", text: "?" });
     ctx.flaeche.append(el("div", { class: "auftrag", text: `Ergänze ${BIS_ZUM[a.einheit]}.` }));
     if (ctx.stufe === "s1") ctx.flaeche.append(zehnerfelder(a));
@@ -166,7 +168,7 @@ LS.spiel({
         const hilfe = hinweisFuer(a, ctx.stufe);
         const hinweis = ueber > a.ziel ? `${zahlText(a.start)} + ${zahlText(w)} = ${zahlText(ueber)} — das ist zu viel. ${hilfe}`
           : `${zahlText(a.start)} + ${zahlText(w)} = ${zahlText(ueber)} — da fehlt noch etwas. ${hilfe}`;
-        ctx.falsch(hinweis, `${zahlText(a.start)} + ${zahlText(a.fehlt)} = ${zahlText(a.ziel)}`);
+        ctx.falsch(hinweis, loesung);
         if (ctx.vorbei()) tasten.gesperrt = true;
       },
     });

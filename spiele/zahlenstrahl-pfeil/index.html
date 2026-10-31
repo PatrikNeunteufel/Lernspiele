@@ -144,6 +144,10 @@ LS.spiel({
     const loesungText = `Die Zahl ${zahlText(a.ziel)} liegt dort, wo der grüne Pfeil zeigt.`;
 
     if (!a.ablesen) {
+      // Für die Testhilfe: der grüne Pfeil des Lösungstexts erscheint erst nach dem Aufgeben.
+      const unten = a.von + Math.floor((a.ziel - a.von) / a.schritt) * a.schritt;
+      ctx.loesung(unten === a.ziel ? `${zahlText(a.ziel)} liegt genau auf einem Strich.`
+        : `${zahlText(a.ziel)} liegt zwischen den Strichen ${zahlText(unten)} und ${zahlText(unten + a.schritt)}.`);
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Tipp auf die Stelle dieser Zahl:" }), el("div", { class: "ziel-zahl", text: zahlText(a.ziel) }));
       let gewaehlt = null, fertig = false;
       const svg = strahlZeichnen(a, (w, setze) => { if (fertig) return; gewaehlt = w; setze(w); ok.disabled = false; LS.ton("tipp"); });
@@ -162,6 +166,8 @@ LS.spiel({
       });
       ctx.flaeche.append(svg, el("div", { class: "hinweis-klein", text: `Ein Strich = ${zahlText(a.schritt)}` }), el("div", { class: "knopfzeile" }, ok));
     } else {
+      const loesung = `Der Pfeil zeigt etwa auf ${zahlText(a.ziel)}.`;
+      ctx.loesung(loesung);
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl zeigt der Pfeil ungefähr?" }));
       const svg = strahlZeichnen(a, null);
       svg.setzePfeil(a.ziel);
@@ -177,7 +183,7 @@ LS.spiel({
           }
           anzeige.classList.add("falsch");
           ctx.falsch(STUFE[ctx.stufe].knapp ? `${w < a.ziel ? "Zu klein" : "Zu gross"}.`
-            : `${w < a.ziel ? "Zu klein" : "Zu gross"}. Von welchem beschrifteten Strich aus zählst du? Jeder Strich ist ${zahlText(a.schritt)}.`, `Der Pfeil zeigt etwa auf ${zahlText(a.ziel)}.`);
+            : `${w < a.ziel ? "Zu klein" : "Zu gross"}. Von welchem beschrifteten Strich aus zählst du? Jeder Strich ist ${zahlText(a.schritt)}.`, loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
         },
       });

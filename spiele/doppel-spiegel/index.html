@@ -106,6 +106,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    const loesung = a.art === "doppel" ? `${zahlText(a.n)} + ${zahlText(a.n)} = ${zahlText(a.richtig)}` : `${zahlText(a.richtig)} + ${zahlText(a.richtig)} = ${zahlText(a.n)}`;
+    ctx.loesung(loesung);
     const luecke = el("span", { class: "luecke", text: "?" });
     ctx.flaeche.append(el("div", { class: "auftrag", text: a.art === "doppel" ? `Verdopple ${zahlText(a.n)}.` : `Halbiere ${zahlText(a.n)}.` }));
     if (a.art === "doppel" && STUFE[ctx.stufe].spiegel) ctx.flaeche.append(spiegelBild(a.n));
@@ -126,7 +128,7 @@ LS.spiel({
           return;
         }
         anzeige.classList.add("falsch");
-        ctx.falsch(hinweisFuer(a), a.art === "doppel" ? `${zahlText(a.n)} + ${zahlText(a.n)} = ${zahlText(a.richtig)}` : `${zahlText(a.richtig)} + ${zahlText(a.richtig)} = ${zahlText(a.n)}`);
+        ctx.falsch(hinweisFuer(a), loesung);
         if (ctx.vorbei()) tasten.gesperrt = true;
       },
     });

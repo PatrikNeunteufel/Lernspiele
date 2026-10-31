@@ -1,24 +1,34 @@
 // Inhalte für das Lebenszyklus-Puzzle (Lehrplan SG NMG.2.3).
-// Zyklen: [ab Stufe, Name, [[Bild oder null, Stadium], …] in der richtigen Reihenfolge]
+// Zyklen: [ab Stufe, Name, [[Bild oder null, Stadium], …] in der richtigen Reihenfolge, Liste]
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten (Entscheid L4 a), einzeln freizugeben. Der Prüfstand steht im Katalog
+// (spiele/gemeinsam/katalog.js, Spiel „lebenszyklus“, Feld listen); Kinder sehen nur Inhalte aus
+// freien Listen.
+//   zyklen-tiere     ZYKLEN, Liste im letzten Feld: Huhn, Schmetterling, Frosch, Käfer, Biene
+//   zyklen-pflanzen  ZYKLEN, Liste im letzten Feld: Sonnenblume, Apfelbaum
+//   zyklus-mensch    ZYKLEN, Liste im letzten Feld: Mensch
+//   geburt           GEBURT          Wie kommen die Jungen zur Welt?
+//   fragen           ZYKLUS_FRAGEN   Wissensfragen
+const ZYKLUS_LISTEN = ["zyklen-tiere", "zyklen-pflanzen", "zyklus-mensch", "geburt", "fragen"];
 
 const ZYKLEN = [
-  [1, "Huhn", [["🥚", "Ei"], ["🐣", "Küken schlüpft"], ["🐔", "Huhn"]]],
-  [1, "Mensch", [["👶", "Baby"], ["🧒", "Kind"], ["🧑", "Erwachsener"]]],
-  [2, "Mensch", [["👶", "Baby"], ["🧒", "Kind"], ["🧑", "Erwachsener"], ["🧓", "alter Mensch"]]],
-  [2, "Sonnenblume", [["🟤", "Samen"], ["🌱", "Keimling"], ["🌿", "junge Pflanze"], ["🌻", "Blüte"]]],
+  [1, "Huhn", [["🥚", "Ei"], ["🐣", "Küken schlüpft"], ["🐔", "Huhn"]], "zyklen-tiere"],
+  [1, "Mensch", [["👶", "Baby"], ["🧒", "Kind"], ["🧑", "Erwachsener"]], "zyklus-mensch"],
+  [2, "Mensch", [["👶", "Baby"], ["🧒", "Kind"], ["🧑", "Erwachsener"], ["🧓", "alter Mensch"]], "zyklus-mensch"],
+  [2, "Sonnenblume", [["🟤", "Samen"], ["🌱", "Keimling"], ["🌿", "junge Pflanze"], ["🌻", "Blüte"]], "zyklen-pflanzen"],
   // ab Stufe 3: für die Puppe gibt es kein Bild, sie steht nur als Wort da
-  [3, "Schmetterling", [["⚪", "Ei"], ["🐛", "Raupe"], [null, "Puppe"], ["🦋", "Schmetterling"]]],
-  [4, "Frosch", [["⚪", "Laich (Eier)"], [null, "Kaulquappe"], [null, "Kaulquappe mit Beinen"], [null, "junger Frosch mit Schwanz"], ["🐸", "Frosch"]]],
-  [4, "Marienkäfer", [["⚪", "Ei"], [null, "Larve"], [null, "Puppe"], ["🐞", "Marienkäfer"]]],
-  [4, "Honigbiene", [["⚪", "Ei"], [null, "Larve"], [null, "Puppe"], ["🐝", "Biene"]]],
-  [4, "Apfelbaum", [["🌸", "Blüte"], [null, "kleiner grüner Apfel"], ["🍎", "reifer Apfel"], ["🟤", "Kerne (Samen)"]]],
+  [3, "Schmetterling", [["⚪", "Ei"], ["🐛", "Raupe"], [null, "Puppe"], ["🦋", "Schmetterling"]], "zyklen-tiere"],
+  [4, "Frosch", [["⚪", "Laich (Eier)"], [null, "Kaulquappe"], [null, "Kaulquappe mit Beinen"], [null, "junger Frosch mit Schwanz"], ["🐸", "Frosch"]], "zyklen-tiere"],
+  [4, "Marienkäfer", [["⚪", "Ei"], [null, "Larve"], [null, "Puppe"], ["🐞", "Marienkäfer"]], "zyklen-tiere"],
+  [4, "Honigbiene", [["⚪", "Ei"], [null, "Larve"], [null, "Puppe"], ["🐝", "Biene"]], "zyklen-tiere"],
+  [4, "Apfelbaum", [["🌸", "Blüte"], [null, "kleiner grüner Apfel"], ["🍎", "reifer Apfel"], ["🟤", "Kerne (Samen)"]], "zyklen-pflanzen"],
   // ab Stufe 6 (Königsstufe): fünf Stadien — NEU in LERN_Session2, UNGEPRÜFT
-  [6, "Mensch", [["👶", "Baby"], ["🧒", "Kind"], [null, "Jugendlicher"], ["🧑", "Erwachsener"], ["🧓", "alter Mensch"]]],
-  [6, "Apfelbaum", [["🟤", "Kern (Samen)"], ["🌱", "Keimling"], [null, "junger Baum"], ["🌸", "Blüte"], ["🍎", "Apfel"]]],
+  [6, "Mensch", [["👶", "Baby"], ["🧒", "Kind"], [null, "Jugendlicher"], ["🧑", "Erwachsener"], ["🧓", "alter Mensch"]], "zyklus-mensch"],
+  [6, "Apfelbaum", [["🟤", "Kern (Samen)"], ["🌱", "Keimling"], [null, "junger Baum"], ["🌸", "Blüte"], ["🍎", "Apfel"]], "zyklen-pflanzen"],
 ];
 
-// Wie kommen die Jungen zur Welt? (NMG.2.3.c) [Bild, Tier, Art]
+// Wie kommen die Jungen zur Welt? (NMG.2.3.c) [Bild, Tier, Art] — Liste geburt
 const GEBURT = [
   ["🐔", "Huhn", "Ei"], ["🦆", "Ente", "Ei"], ["🐊", "Krokodil", "Ei"], ["🐢", "Schildkröte", "Ei"],
   ["🐧", "Pinguin", "Ei"], ["🐸", "Frosch", "Ei"], ["🐟", "Forelle", "Ei"], ["🐍", "Ringelnatter", "Ei"],
@@ -27,7 +37,7 @@ const GEBURT = [
   ["🐋", "Wal", "lebend"], ["🐬", "Delfin", "lebend"], ["🦇", "Fledermaus", "lebend"], ["🦔", "Igel", "lebend"],
 ];
 
-// Wissensfragen (Stufe 5 und 6): [Frage, richtig, falsch, falsch]
+// Wissensfragen (Stufe 5 und 6): [Frage, richtig, falsch, falsch] — Liste fragen
 const ZYKLUS_FRAGEN = [
   ["Womit atmet eine Kaulquappe im Wasser?", "mit Kiemen", "mit einer Nase", "mit Federn"],
   ["Womit atmet ein erwachsener Frosch an Land?", "mit Lungen", "mit Kiemen", "mit Blättern"],

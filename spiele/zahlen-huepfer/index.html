@@ -181,6 +181,7 @@ LS.spiel({
     const d = vorwaerts ? schritt : -schritt;
     const zeichen = vorwaerts ? "+" : "−";
     const zahlen = Array.from({ length: SPRUENGE + 1 }, (_, i) => start + i * d);
+    ctx.loesung(`Der Frosch landet auf ${zahlen.slice(1).map(zahlText).join(" → ")}.`);
 
     ctx.flaeche.append(el("div", { class: "auftrag", html: `Der Frosch hüpft immer <span class="schritt-schild">${zeichen} ${zahlText(schritt)}</span>` }));
 

@@ -175,6 +175,8 @@ LS.spiel({
   aufgabe(ctx) {
     if (ctx.nr === 0) serie = 0;
     const a = aufgabeErzeugen(ctx.stufe);
+    const loesung = a.teile.map(t => t === null ? zahlText(a.loesung) : typeof t === "number" ? zahlText(t) : t).join(" ");
+    ctx.loesung(loesung);
     const serieZeile = el("div", { class: "serie", text: serie >= 2 ? `⚡ ${serie} in Folge!` : "" });
     const rechnung = el("div", { class: "rechnung", "aria-live": "polite" });
     const luecke = el("span", { class: "luecke", text: "?" });
@@ -213,7 +215,7 @@ LS.spiel({
           for (let i = 0; i < a.k * a.r; i++) feld.append(el("i", { class: (i % a.r) >= 5 ? "fuenf" : "" }));
           hilfe.append(feld);
         }
-        ctx.falsch(hinweisFuer(a), `${a.teile.map(t => t === null ? zahlText(a.loesung) : typeof t === "number" ? zahlText(t) : t).join(" ")}`);
+        ctx.falsch(hinweisFuer(a), loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
       },
     });

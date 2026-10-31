@@ -35,7 +35,15 @@ const { waehle, mische, el } = LS;
 // Stufe der Texte (texte.js) = Nummer der Spielstufe; Stufe 6 (Königsstufe) nimmt die neuen
 // Folgerungstexte und dazu die längeren Sachtexte aus Stufe 5.
 const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
-const TEXTE = LESETEXTE.map(([stufe, titel, text, frage, richtig, f1, f2]) => ({ stufe, titel, text, frage, richtig, falsch: [f1, f2] }));
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Kinder lesen nur Texte aus freien Listen (LS.freieListen; die Aufsicht sieht alle). Kennt der
+// Katalog die Listen dieses Spiels noch nicht, gilt alles als frei — wie bei einem Spiel ohne Listen.
+const SPIEL_ID = "lese-detektiv";
+const FREI = new Set(LS.spielListen(SPIEL_ID).length ? LS.freieListen(SPIEL_ID) : Object.values(LESETEXTE_LISTEN));
+const TEXTE = LESETEXTE.map(([stufe, titel, text, frage, richtig, f1, f2]) => ({ stufe, titel, text, frage, richtig, falsch: [f1, f2] }))
+  .filter(t => FREI.has(LESETEXTE_LISTEN[t.stufe]));
+/** Angeboten wird eine Stufe, wenn die Liste ihrer eigenen Texte frei ist. */
+const ANGEBOTEN = new Set(Object.keys(STUFE_NR).filter(s => FREI.has(LESETEXTE_LISTEN[STUFE_NR[s]])));
 
 // In einer Runde jeden Text höchstens einmal (solange es genug gibt)
 let gebraucht = new Set();
@@ -50,9 +58,13 @@ function aufgabeErzeugen(stufe) {
 }
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
-function pruefeAufgabe(a) {
+function pruefeAufgabe(a, stufe) {
   const m = [];
   if (new Set(a.optionen).size !== 3) m.push("Antworten doppelt");
+  const n = STUFE_NR[stufe];
+  if (!ANGEBOTEN.has(stufe)) m.push("Stufe wird mit den freien Listen nicht angeboten");
+  if (a.t.stufe !== n && !(n >= 3 && a.t.stufe === n - 1)) m.push("Text aus einer anderen Stufe");
+  if (!FREI.has(LESETEXTE_LISTEN[a.t.stufe])) m.push(`Text aus der Liste ${LESETEXTE_LISTEN[a.t.stufe]}, die nicht frei ist`);
   return m;
 }
 
@@ -60,14 +72,14 @@ LS.spiel({
   id: "lese-detektiv",
   einleitung: "Lies genau wie ein Detektiv! Im Text steckt die Antwort — manchmal musst du ein bisschen nachdenken.",
   anzahl: 6,
-  stufen: {
+  stufen: Object.fromEntries(Object.entries({
     s1: "Ein Satz: Welches Bild passt?",
     s2: "Zwei, drei Sätze und eine Frage.",
     s3: "Kurze Sachtexte: Igel, Bienen, Schneeflocken.",
     s4: "Zwischen den Zeilen lesen: Welche Jahreszeit ist es?",
     s5: "Längere Sachtexte: Was stimmt?",
     s6: "Lange Sachtexte: Warum ist das so? Verbinde, was im Text steht.",
-  },
+  }).filter(([s]) => ANGEBOTEN.has(s))),
 
   aufgabe(ctx) {
     if (ctx.nr === 0) gebraucht = new Set();

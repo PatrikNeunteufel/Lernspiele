@@ -2,6 +2,15 @@
 // Einteilung der Ernährungslehre; bewusst ohne Grenzfälle (Tomate, Gurke, Mais, Kartoffel bei
 // „Früchte oder Gemüse“).
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten (Entscheid L4 a), einzeln freizugeben. Der Prüfstand steht im Katalog
+// (spiele/gemeinsam/katalog.js, Spiel „znueni-teller“, Feld listen); Kinder sehen nur Inhalte aus
+// freien Listen.
+//   lebensmittel   LEBENSMITTEL und GRUPPEN_ZNUENI   Lebensmittel, ihre Gruppe und die Erklärungen
+//   znuenis        ZNUENIS                           Welches Znüni ist ausgewogen?
+//   ernaehrung     ZNUENI_FRAGEN, Liste im letzten Feld: Wasser, Vitamine, Kraft, Wachsen
+//   region-saison  ZNUENI_FRAGEN, Liste im letzten Feld: was bei uns wächst, wann, woher
+const ZNUENI_LISTEN = ["lebensmittel", "znuenis", "ernaehrung", "region-saison"];
 
 // [Bild, Name, Gruppe]; Gruppe: Getränk, Frucht, Gemüse, Getreide, Eiweiss, Süsses
 const LEBENSMITTEL = [
@@ -32,14 +41,14 @@ const ZNUENIS = [
   [["🍐", "🥚", "💧"], ["🍫", "🍪"], ["🍟", "🍬"]],
 ];
 
-// Wissensfragen (Stufe 5): [Frage, richtig, falsch, falsch]
+// Wissensfragen (Stufe 5): [Frage, richtig, falsch, falsch, Liste]
 const ZNUENI_FRAGEN = [
-  ["Was trinkst du am besten, wenn du Durst hast?", "Wasser", "Süssgetränk", "Sirup mit viel Zucker"],
-  ["Was gibt dir viele Vitamine?", "Früchte und Gemüse", "Bonbons", "Pommes frites"],
-  ["Was gibt dir lange Kraft für die Schule?", "Brot und Teigwaren", "Bonbons", "Süssgetränk"],
-  ["Was hilft dem Körper beim Wachsen?", "Milch, Käse und Eier", "Schokolade", "Bonbons"],
-  ["Wovon solltest du am wenigsten essen?", "Süsses und Salziges", "Gemüse", "Früchte"],
-  ["Welche Frucht wächst auch in der Schweiz?", "Apfel", "Banane", "Ananas"],
-  ["Wann gibt es Erdbeeren aus der Schweiz?", "im Frühsommer", "im Winter", "an Weihnachten"],
-  ["Woher kommt ein Lebensmittel aus der Region?", "von einem Bauernhof in der Nähe", "aus einem fernen Land", "aus dem Meer weit weg"],
+  ["Was trinkst du am besten, wenn du Durst hast?", "Wasser", "Süssgetränk", "Sirup mit viel Zucker", "ernaehrung"],
+  ["Was gibt dir viele Vitamine?", "Früchte und Gemüse", "Bonbons", "Pommes frites", "ernaehrung"],
+  ["Was gibt dir lange Kraft für die Schule?", "Brot und Teigwaren", "Bonbons", "Süssgetränk", "ernaehrung"],
+  ["Was hilft dem Körper beim Wachsen?", "Milch, Käse und Eier", "Schokolade", "Bonbons", "ernaehrung"],
+  ["Wovon solltest du am wenigsten essen?", "Süsses und Salziges", "Gemüse", "Früchte", "ernaehrung"],
+  ["Welche Frucht wächst auch in der Schweiz?", "Apfel", "Banane", "Ananas", "region-saison"],
+  ["Wann gibt es Erdbeeren aus der Schweiz?", "im Frühsommer", "im Winter", "an Weihnachten", "region-saison"],
+  ["Woher kommt ein Lebensmittel aus der Region?", "von einem Bauernhof in der Nähe", "aus einem fernen Land", "aus dem Meer weit weg", "region-saison"],
 ];

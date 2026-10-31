@@ -29,33 +29,62 @@
 const { waehle, mische, el } = LS;
 const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
 
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Kinder üben nur Inhalte aus freien Listen (LS.freieListen; die Aufsicht sieht alle). Kennt der
+// Katalog die Listen dieses Spiels noch nicht, gilt alles als frei — wie bei einem Spiel ohne Listen.
+const SPIEL_ID = "schaetz-waage";
+const FREI = new Set(LS.spielListen(SPIEL_ID).length ? LS.freieListen(SPIEL_ID) : ["vergleiche", "reihen", ...Object.keys(SCHAETZ_LISTEN)]);
+/** Liste einer Schätzfrage nach der Einheit der richtigen Antwort („1.5 t“ → gewicht). */
+const frageListe = f => Object.keys(SCHAETZ_LISTEN).find(l => SCHAETZ_LISTEN[l].includes(f[2].split(" ")[1]));
+const FREIE_VERGLEICHE = FREI.has("vergleiche") ? VERGLEICHE : [];
+const FREIE_REIHEN = FREI.has("reihen") ? REIHEN : [];
+const FREIE_FRAGEN = SCHAETZFRAGEN.filter(f => FREI.has(frageListe(f)));
+const reihenMit = anzahl => FREIE_REIHEN.filter(r => r[1].length === anzahl);
+const fragenDerStufe = n => FREIE_FRAGEN.filter(f => f[0] === n);
+
 const ARTEN = {
   vergleich() {
-    const [eigenschaft, gross, klein] = waehle(VERGLEICHE);
+    const [eigenschaft, gross, klein] = waehle(FREIE_VERGLEICHE);
     return { art: "vergleich", eigenschaft, richtig: gross, optionen: mische([gross, klein]) };
   },
   /** Dinge ordnen; 'anzahl' Dinge je Reihe (3 in Stufe 2, 4 in Stufe 4). */
   ordnen(anzahl) {
-    const [richtung, dinge] = waehle(REIHEN.filter(r => r[1].length === anzahl));
+    const [richtung, dinge] = waehle(reihenMit(anzahl));
     return { art: "ordnen", richtung, reihe: dinge };
   },
   schaetzen(n) {
     // vor allem Fragen dieser Stufe, ab und zu eine aus der Stufe davor
-    const liste = SCHAETZFRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
-    const [, frage, richtig, f1, f2] = waehle(liste.length ? liste : SCHAETZFRAGEN.filter(f => f[0] === n));
+    const liste = FREIE_FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const [, frage, richtig, f1, f2] = waehle(liste.length ? liste : fragenDerStufe(n));
     return { art: "schaetzen", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
 };
 
 // Basisklasse 2: s1 1. Klasse, s2–s4 2. Klasse, s5 3. Klasse, s6 Königsstufe.
-const STUFE = {
-  s1: { arten: ["vergleich"], neu: () => ARTEN.vergleich() },
-  s2: { arten: ["ordnen", "vergleich"], ordnen: 3, neu: () => waehle([() => ARTEN.ordnen(3), () => ARTEN.ordnen(3), ARTEN.vergleich])() },
-  s3: { arten: ["schaetzen"], neu: () => ARTEN.schaetzen(3) },
-  s4: { arten: ["schaetzen", "ordnen"], ordnen: 4, neu: () => waehle([() => ARTEN.schaetzen(4), () => ARTEN.schaetzen(4), () => ARTEN.ordnen(4)])() },
-  s5: { arten: ["schaetzen"], neu: () => ARTEN.schaetzen(5) },
-  s6: { arten: ["schaetzen"], neu: () => ARTEN.schaetzen(6), knapp: true },
+// Je Stufe die Aufgabenarten (mit Wiederholung = häufiger) und ob sie mit den freien Listen gehen.
+// Stufe 2 braucht die Reihen (Vergleiche kommen dazu, wenn frei), die Schätzstufen Fragen ihrer Stufe.
+const VARIANTEN = {
+  s1: [[() => ARTEN.vergleich(), FREIE_VERGLEICHE.length]],
+  s2: [[() => ARTEN.ordnen(3), reihenMit(3).length], [() => ARTEN.ordnen(3), reihenMit(3).length],
+       [() => ARTEN.vergleich(), reihenMit(3).length && FREIE_VERGLEICHE.length]],
+  s3: [[() => ARTEN.schaetzen(3), fragenDerStufe(3).length]],
+  s4: [[() => ARTEN.schaetzen(4), fragenDerStufe(4).length], [() => ARTEN.schaetzen(4), fragenDerStufe(4).length],
+       [() => ARTEN.ordnen(4), reihenMit(4).length]],
+  s5: [[() => ARTEN.schaetzen(5), fragenDerStufe(5).length]],
+  s6: [[() => ARTEN.schaetzen(6), fragenDerStufe(6).length]],
 };
+const STUFE = {
+  s1: { arten: ["vergleich"] },
+  s2: { arten: ["ordnen", "vergleich"], ordnen: 3 },
+  s3: { arten: ["schaetzen"] },
+  s4: { arten: ["schaetzen", "ordnen"], ordnen: 4 },
+  s5: { arten: ["schaetzen"] },
+  s6: { arten: ["schaetzen"], knapp: true },
+};
+for (const [s, v] of Object.entries(VARIANTEN)) {
+  const moeglich = v.filter(([, geht]) => geht).map(([f]) => f);
+  if (moeglich.length) STUFE[s].neu = () => waehle(moeglich)(); else delete STUFE[s];
+}
 
 function aufgabeErzeugen(stufe) { return STUFE[stufe].neu(); }
 
@@ -63,7 +92,14 @@ function aufgabeErzeugen(stufe) { return STUFE[stufe].neu(); }
 function pruefeAufgabe(a, stufe) {
   const m = [];
   const s = STUFE[stufe];
+  if (!s) return ["Stufe wird mit den freien Listen nicht angeboten"];
   if (!s.arten.includes(a.art)) m.push("Aufgabentyp gehört nicht in diese Stufe");
+  // Inhalt aus einer freien Liste
+  const frei = a.art === "vergleich" ? FREIE_VERGLEICHE.some(v => v[1] === a.richtig)
+    : a.art === "ordnen" ? FREIE_REIHEN.some(r => r[1] === a.reihe)
+    : FREIE_FRAGEN.some(f => f[1] === a.frage);
+  if (!frei) m.push("Inhalt stammt nicht aus einer freien Liste");
+  for (const f of SCHAETZFRAGEN) if (!frageListe(f)) m.push(`Schätzfrage «${f[1]}»: Einheit gehört zu keiner Liste`);
   if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen.map(String)).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
   if (a.art === "schaetzen") {
     const f = SCHAETZFRAGEN.find(x => x[1] === a.frage);
@@ -84,30 +120,39 @@ const HINWEIS = {
   grösser: "Stell dir beide nebeneinander vor. Was ist höher?",
 };
 
-// Hinweis beim Schätzen nach der Einheit der Lösung: eine Referenzgrösse, ohne die Antwort zu nennen.
+// Hinweis beim Schätzen nach der Einheit der Lösung: zwei Referenzgrössen, ohne die Antwort zu
+// nennen. Je Referenz ein Stichwort: Kommt es in der Frage vor, wäre die Referenz die Antwort
+// selbst (Frage „Tafel Schokolade“, Referenz „100 g eine Tafel Schokolade“) und wird übersprungen,
+// ebenso eine Referenz mit genau dem gesuchten Wert („1 l Wasser wiegt 1 kg“ bei der Lösung 1 kg).
 const MASS_HINWEIS = [
-  [["cm", "m"], "Denk an etwas, das du kennst: 1 cm ist so breit wie ein Fingernagel, 1 m ist ein grosser Schritt."],
-  [["kg", "g"], "Denk an etwas, das du kennst: 1 kg wiegt eine Packung Mehl, 100 g eine Tafel Schokolade."],
-  [["l", "dl"], "Denk an etwas, das du kennst: 1 l passt in eine Milchpackung, 1 dl ist ein halbes Glas."],
+  [["cm", "m"], [["Fingernagel", "1 cm ist so breit wie ein Fingernagel"], ["Schritt", "1 m ist ein grosser Schritt"],
+    ["Lineal", "ein langes Lineal ist 30 cm lang"]]],
+  [["kg", "g"], [["Mehl", "1 kg wiegt eine Packung Mehl"], ["Schokolade", "100 g wiegt eine Tafel Schokolade"],
+    ["Wasser", "1 l Wasser wiegt 1 kg"], ["Zucker", "ein Würfelzucker wiegt etwa 3 g"]]],
+  [["l", "dl"], [["Milch", "1 l passt in eine Milchpackung"], ["Glas", "1 dl ist ein halbes Glas"],
+    ["Flasche", "in eine kleine Wasserflasche passen 5 dl"]]],
 ];
-function schaetzHinweis(richtig, knapp) {
+function schaetzHinweis(a, knapp) {
   if (knapp) return "Nicht ganz. Vergleiche mit etwas, das du kennst.";
-  const einheit = richtig.split(" ")[1];
-  return (MASS_HINWEIS.find(([e]) => e.includes(einheit)) || [, "Denk an etwas, das du kennst, und vergleiche."])[1];
+  const einheit = a.richtig.split(" ")[1];
+  const eintrag = MASS_HINWEIS.find(([e]) => e.includes(einheit));
+  if (!eintrag) return "Denk an etwas, das du kennst, und vergleiche.";
+  const saetze = eintrag[1].filter(([stichwort, satz]) => !a.frage.toLowerCase().includes(stichwort.toLowerCase()) && !new RegExp(`(^|\\D)${a.richtig}\\b`).test(satz)).slice(0, 2).map(([, satz]) => satz);
+  return `Denk an etwas, das du kennst: ${saetze.join(", ")}.`;
 }
 
 LS.spiel({
   id: "schaetz-waage",
   einleitung: "Was ist schwerer, was ist länger? Und wie lang ist eigentlich ein Bleistift? Schätz mal!",
   anzahl: 8,
-  stufen: {
+  stufen: Object.fromEntries(Object.entries({
     s1: "Vergleichen: Was ist schwerer, länger, grösser?",
     s2: "Drei Dinge ordnen: leicht → schwer.",
     s3: "Zentimeter und Meter schätzen.",
     s4: "Zentimeter und Meter, schwieriger — und vier Dinge ordnen.",
     s5: "Kilogramm, Gramm, Liter und Deziliter schätzen.",
     s6: "Kilometer, Millimeter, Tonnen, Milliliter, Stunden, Minuten, Sekunden.",
-  },
+  }).filter(([s]) => STUFE[s])),
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
@@ -136,7 +181,7 @@ LS.spiel({
       ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 110,
-        hinweis: schaetzHinweis(a.richtig, STUFE[ctx.stufe].knapp),
+        hinweis: schaetzHinweis(a, STUFE[ctx.stufe].knapp),
         loesung: `${a.frage} — ungefähr ${a.richtig}.`,
         lob: `Gut geschätzt: ungefähr ${a.richtig}! 📏`,
       });

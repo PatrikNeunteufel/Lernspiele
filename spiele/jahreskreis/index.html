@@ -215,6 +215,9 @@ LS.spiel({
     ctx.flaeche.append(el("div", { class: "frage", html: a.frage }));
     let fertig = false;
 
+    const loesung = a.reihe ? a.folge.map(j => namen[j]).join(" → ") : `Richtig ist: ${(a.namen || namen)[a.loesung]}.`;
+    ctx.loesung(loesung);
+
     if (a.reihe) {
       const gelegt = el("div", { class: "reihe-gelegt" });
       const wahl = el("div", { class: `wahl ${a.liste}` });
@@ -234,7 +237,7 @@ LS.spiel({
           k.classList.remove("falsch");
           void k.offsetWidth;
           k.classList.add("falsch");
-          ctx.falsch(pos === 0 ? `Beginne beim ${namen[a.folge[0]]}.` : `Was kommt nach dem ${namen[a.folge[pos - 1]]}? Sag die Reihe leise auf.`, a.folge.map(j => namen[j]).join(" → "));
+          ctx.falsch(pos === 0 ? `Beginne beim ${namen[a.folge[0]]}.` : `Was kommt nach dem ${namen[a.folge[pos - 1]]}? Sag die Reihe leise auf.`, loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
         });
         wahl.append(k);
@@ -253,7 +256,7 @@ LS.spiel({
         void k.offsetWidth;
         k.classList.add("falsch");
         ctx.falsch(a.hinweis || (a.liste === "zeiten" ? "Denk daran, wie das Wetter in diesem Monat meistens ist." : "Zähl Schritt für Schritt weiter — nach dem letzten kommt wieder der erste."),
-          `Richtig ist: ${(a.namen || namen)[a.loesung]}.`);
+          loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
       });
       wahl.append(k);

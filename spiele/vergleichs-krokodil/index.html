@@ -9,8 +9,9 @@
   .vergleich { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; max-width: 720px; margin: 8px auto 18px; }
   .seite { text-align: center; font-size: clamp(28px, 6.5vw, 48px); font-weight: 900; font-variant-numeric: tabular-nums; background: #fff; border-radius: 18px; padding: 12px 6px; box-shadow: var(--schatten); }
   .seite .punkte { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 180px; margin: 0 auto; font-size: 30px; line-height: 1; }
-  .mitte { width: clamp(70px, 16vw, 110px); height: clamp(70px, 16vw, 110px); border-radius: 50%; border: 4px dashed #c5c9de; display: flex; align-items: center; justify-content: center; font-size: clamp(44px, 10vw, 70px); font-weight: 900; color: var(--gut); }
-  .mitte.krokodil { border-style: solid; border-color: var(--gut); background: var(--gut-hell); }
+  /* nicht .mitte: so heisst im Rahmen die zentrierte Schlusskarte */
+  .kroko-mitte { width: clamp(70px, 16vw, 110px); height: clamp(70px, 16vw, 110px); border-radius: 50%; border: 4px dashed #c5c9de; display: flex; align-items: center; justify-content: center; font-size: clamp(44px, 10vw, 70px); font-weight: 900; color: var(--gut); }
+  .kroko-mitte.krokodil { border-style: solid; border-color: var(--gut); background: var(--gut-hell); }
   .zeichen-wahl { display: flex; justify-content: center; gap: 14px; }
   .zeichen-wahl button { width: 92px; height: 80px; border: none; border-radius: 18px; font-family: inherit; font-size: 46px; font-weight: 900; background: #fff; color: var(--text); box-shadow: 0 6px 0 var(--rand); cursor: pointer; }
   .zeichen-wahl button.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
@@ -154,8 +155,11 @@ LS.spiel({
   aufgabe(ctx) {
     const [a, b] = STUFE[ctx.stufe].paar();
     const richtig = a.wert < b.wert ? "<" : a.wert > b.wert ? ">" : "=";
+    const rechnen = STUFE[ctx.stufe].rechnen;
+    const loesung = `${a.text} ${richtig} ${b.text}${rechnen ? ` (${zahlText(a.wert)} ${richtig} ${zahlText(b.wert)})` : ""}`;
+    ctx.loesung(loesung);
     const seite = x => x.punkte ? el("div", { class: "seite" }, el("div", { class: "punkte", text: x.punkte })) : el("div", { class: "seite", text: x.text });
-    const mitte = el("div", { class: "mitte", text: "?" });
+    const mitte = el("div", { class: "kroko-mitte", text: "?" });
     ctx.flaeche.append(el("div", { class: "vergleich" }, seite(a), mitte, seite(b)));
 
     let fertig = false;
@@ -172,10 +176,9 @@ LS.spiel({
           return;
         }
         k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
-        const rechnen = STUFE[ctx.stufe].rechnen;
         const hinweis = rechnen ? "Rechne zuerst beide Seiten aus — ganz genau." :
           "Vergleiche Stelle für Stelle von links: Zuerst die Anzahl Ziffern, dann die erste Ziffer, die verschieden ist.";
-        ctx.falsch(hinweis, `${a.text} ${richtig} ${b.text}${rechnen ? ` (${zahlText(a.wert)} ${richtig} ${zahlText(b.wert)})` : ""}`);
+        ctx.falsch(hinweis, loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
       });
       wahl.append(k);

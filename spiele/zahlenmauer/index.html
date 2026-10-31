@@ -130,6 +130,7 @@ LS.spiel({
 
   aufgabe(ctx) {
     const { w, leer } = aufgabeErzeugen(ctx.stufe);
+    ctx.loesung("Von unten nach oben: " + w.map(reihe => reihe.map(zahlText).join(", ")).join(" | "));
     const mauer = el("div", { class: "mauer" + (w.length >= 5 ? " fuenf" : "") });
     const steine = {};
     let aktiv = null;

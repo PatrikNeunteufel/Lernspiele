@@ -117,6 +117,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    const loesung = `${text(a.links)} = ${a.rechts.a === null ? zahlText(a.richtig) : `${zahlText(a.rechts.a)} ${a.rechts.op} ${zahlText(a.richtig)}`}`;
+    ctx.loesung(loesung);
     const luecke = el("span", { class: "luecke", text: "?" });
     const rechtsInhalt = a.rechts.a === null ? [luecke] : [`${zahlText(a.rechts.a)} ${a.rechts.op} `, luecke];
     const balken = el("div", { class: "balken" },
@@ -149,8 +151,10 @@ LS.spiel({
         }
         anzeige.classList.add("falsch");
         const rechts = a.rechts.a === null ? w : RECHNE[a.rechts.op](a.rechts.a, w);
-        ctx.falsch(`Links sind es ${zahlText(a.w)}, rechts ${zahlText(rechts)}. ${rechts > a.w ? "Rechts ist zu schwer." : "Rechts ist zu leicht."}`,
-          `${text(a.links)} = ${a.rechts.a === null ? zahlText(a.richtig) : `${zahlText(a.rechts.a)} ${a.rechts.op} ${zahlText(a.richtig)}`}`);
+        const richtung = rechts > a.w ? "Rechts ist zu schwer." : "Rechts ist zu leicht.";
+        // Steht rechts nur die Lücke, wäre die Summe links schon die Lösung: dann nicht nennen.
+        ctx.falsch(a.rechts.a === null ? `${richtung} Rechne zuerst links aus.` : `Links sind es ${zahlText(a.w)}, rechts ${zahlText(rechts)}. ${richtung}`,
+          loesung);
         if (ctx.vorbei()) tasten.gesperrt = true;
       },
     });

@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Malkreuz</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .rechnung { text-align: center; font-size: clamp(30px, 7vw, 52px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 0 0 10px; }
+  /* Malkreuz: links die Teile des zweiten Faktors, oben die des ersten, rechts die Zeilensummen.
+     --teile (Anzahl Teile oben) setzt das Skript. */
+  .kreuz {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) repeat(var(--teile), minmax(0, 1fr)) minmax(0, 1.3fr);
+    gap: 6px;
+    max-width: 620px;
+    margin: 0 auto 10px;
+  }
+  .kreuz > * {
+    min-height: clamp(46px, 11vw, 64px);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    font-size: clamp(15px, 4.2vw, 26px);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    padding: 0 2px;
+  }
+  /* Drei Teile oben: fünf Spalten, auch bei 375 px Breite ohne Überlauf („63 000“) */
+  .kreuz.breit > * { font-size: clamp(13px, 3.6vw, 24px); }
+  .kreuz .ecke { font-size: clamp(24px, 6vw, 36px); color: var(--text-leise); }
+  .kreuz .gleich { color: var(--text-leise); }
+  /* Teile am Rand sind Stellenwerte (20 = 2 Zehner) und tragen die Farbe ihrer Stelle. */
+  .kreuz .rand { background: #fff; border: 4px solid var(--f); color: var(--f); }
+  .kreuz .gegeben { background: #f2f4fb; color: var(--text); }
+  .kreuz .feld { border: 3px dashed #c5c9de; background: #fff; color: var(--knopf); cursor: pointer; }
+  .kreuz .feld.aktiv { border: 4px solid var(--knopf); background: #eef0ff; transform: scale(1.04); }
+  .kreuz .feld.geloest { border: 3px solid var(--gut); background: var(--gut-hell); color: var(--text); cursor: default; }
+  .kreuz .feld.rand.geloest { border-color: var(--f); color: var(--f); background: #fff; }
+  .kreuz .feld.falsch { animation: wackeln .4s; }
+  .kreuz .summe { background: #fff7e6; }
+  .kreuz .zusammen { grid-column: 1 / -2; justify-content: flex-end; font-size: clamp(14px, 3.4vw, 20px); color: var(--text-leise); padding-right: 8px; }
+  .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>✖️ Malkreuz</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.C.2.f (OP): Multiplikationen im Malkreuz veranschaulichen. Beide Faktoren werden
+// in ihre Stellenwerte zerlegt (23 × 7 = 20 × 7 + 3 × 7); das Kind rechnet die Teilprodukte aus und
+// zählt sie zusammen. Bei zwei Zeilen erst die Zeilensummen, dann alles zusammen.
+
+const { zahlText, zufall, el, STELLEN } = LS;
+
+/** Zufallszahl ohne Ziffer 0 (eine Null gäbe ein leeres Teilprodukt). */
+function ohneNull(min, max) {
+  for (let versuch = 0; versuch < 1000; versuch++) {
+    const n = zufall(min, max);
+    if (!String(n).includes("0")) return n;
+  }
+  return min;
+}
+
+/** Zerlegung in Stellenwerte: 234 → [200, 30, 4]. */
+const zerlegen = n => String(n).split("").map((d, i, a) => Number(d) * 10 ** (a.length - 1 - i)).filter(Boolean);
+
+/** Stelle eines Teils (200 → H) — für die Farbe am Rand. */
+const stelleVon = v => STELLEN.find(st => v % st.wert === 0 && v / st.wert < 10).k;
+
+// Je Stufe: Faktoren (erster oben, zweiter links), Ziffernzahl je Faktor (für pruefeAufgabe),
+// Zahlenraum (grösstes Produkt), Rätsel = auch Randzahlen fehlen. Basisklasse 4.
+const STUFE = {
+  s1: { faktoren: () => [ohneNull(11, 29), zufall(2, 5)], stellen: [[2], [1]], max: 200 },
+  s2: { faktoren: () => [ohneNull(11, 99), zufall(2, 9)], stellen: [[2], [1]], max: 1000 },
+  s3: { faktoren: () => (Math.random() < 0.5 ? [ohneNull(111, 999), zufall(2, 9)] : [ohneNull(11, 19), ohneNull(11, 19)]), stellen: [[2, 3], [1, 2]], max: 10000 },
+  s4: { faktoren: () => [ohneNull(11, 99), ohneNull(11, 99)], stellen: [[2], [2]], max: 10000 },
+  s5: { faktoren: () => [ohneNull(111, 999), ohneNull(11, 99)], stellen: [[3], [2]], max: 100000 },
+  // Königsstufe: dreistellig × zwei- oder dreistellig, und am Rand fehlen zwei Zahlen.
+  s6: { faktoren: () => [ohneNull(111, 999), Math.random() < 0.5 ? ohneNull(11, 99) : ohneNull(111, 999)], stellen: [[3], [2, 3]], max: 1000000, raetsel: true },
+};
+
+/**
+ * Alle Felder des Malkreuzes mit Wert: o<j> oben, l<i> links, z<i>_<j> Teilprodukt,
+ * s<i> Zeilensumme (nur bei mehreren Zeilen), g Gesamtergebnis.
+ */
+function malkreuz(a, b) {
+  const oben = zerlegen(a);
+  const links = zerlegen(b);
+  const werte = {};
+  oben.forEach((o, j) => { werte["o" + j] = o; });
+  links.forEach((l, i) => {
+    werte["l" + i] = l;
+    oben.forEach((o, j) => { werte[`z${i}_${j}`] = l * o; });
+    if (links.length > 1) werte["s" + i] = l * a;
+  });
+  werte.g = a * b;
+  return { a, b, oben, links, werte };
+}
+
+/** Zusammenhänge zwischen den Feldern: Produkt (Rand links × Rand oben = Feld) und Summe (Teile → Ganzes). */
+function regeln(x) {
+  const r = [];
+  const mehr = x.links.length > 1;
+  x.links.forEach((_, i) => {
+    x.oben.forEach((_, j) => r.push({ art: "produkt", felder: [`l${i}`, `o${j}`, `z${i}_${j}`] }));
+    r.push({ art: "summe", felder: [...x.oben.map((_, j) => `z${i}_${j}`), mehr ? `s${i}` : "g"] });
+  });
+  if (mehr) r.push({ art: "summe", felder: [...x.links.map((_, i) => `s${i}`), "g"] });
+  return r;
+}
+
+/** Lassen sich alle offenen Felder Schritt für Schritt aus den bekannten folgern? (Jeder Schritt ist eindeutig.) */
+function loesbar(x, offen) {
+  const unbekannt = new Set(offen);
+  const liste = regeln(x);
+  let neu = true;
+  while (neu && unbekannt.size) {
+    neu = false;
+    for (const r of liste) {
+      const fehlt = r.felder.filter(k => unbekannt.has(k));
+      if (fehlt.length === 1) { unbekannt.delete(fehlt[0]); neu = true; }
+    }
+  }
+  return unbekannt.size === 0;
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let versuch = 0; versuch < 2000; versuch++) {
+    const [a, b] = p.faktoren();
+    if (a * b > p.max) continue;
+    const x = malkreuz(a, b);
+    const offen = Object.keys(x.werte).filter(k => /^[zsg]/.test(k));
+    if (p.raetsel) {
+      // Eine Zahl oben und eine links fehlt; je ein Teilprodukt in ihrer Spalte bzw. Zeile ist gegeben.
+      const j = zufall(0, x.oben.length - 1);
+      const i = zufall(0, x.links.length - 1);
+      const andereZeile = (i + zufall(1, x.links.length - 1)) % x.links.length;
+      const andereSpalte = (j + zufall(1, x.oben.length - 1)) % x.oben.length;
+      const gegeben = [`z${andereZeile}_${j}`, `z${i}_${andereSpalte}`];
+      const liste = [...offen.filter(k => !gegeben.includes(k)), "o" + j, "l" + i];
+      if (!loesbar(x, liste)) continue;
+      return { ...x, offen: liste };
+    }
+    return { ...x, offen };
+  }
+  throw new Error(`Malkreuz ${stufe}: keine passende Aufgabe gefunden`);
+}
+
+/** Mängel: Zerlegung, Teilprodukte, Summen, Lösbarkeit, Zahlenraum, offene Felder der Stufe. */
+function pruefeAufgabe(x, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  const { a, b, oben, links, werte } = x;
+  if (String(a).includes("0") || String(b).includes("0")) m.push("Faktor mit Ziffer 0");
+  if (!p.stellen[0].includes(String(a).length) || !p.stellen[1].includes(String(b).length)) m.push("Faktor mit falscher Stellenzahl");
+  if (a * b > p.max) m.push(`Produkt über ${p.max}`);
+  const istTeil = v => /^[1-9]0*$/.test(String(v));
+  if (oben.reduce((s, v) => s + v, 0) !== a || links.reduce((s, v) => s + v, 0) !== b || ![...oben, ...links].every(istTeil)) m.push("Zerlegung falsch");
+  links.forEach((l, i) => {
+    oben.forEach((o, j) => { if (werte[`z${i}_${j}`] !== l * o) m.push("Teilprodukt falsch"); });
+    if (links.length > 1 && werte["s" + i] !== oben.reduce((s, _, j) => s + werte[`z${i}_${j}`], 0)) m.push("Zeilensumme falsch");
+  });
+  const alleTeile = Object.keys(werte).filter(k => k.startsWith("z")).reduce((s, k) => s + werte[k], 0);
+  if (werte.g !== a * b || alleTeile !== a * b) m.push("Ergebnis falsch");
+  if (!loesbar(x, x.offen)) m.push("nicht lösbar");
+  const randOffen = x.offen.filter(k => /^[ol]/.test(k));
+  if (p.raetsel ? randOffen.length !== 2 || !randOffen.some(k => k[0] === "o") || !randOffen.some(k => k[0] === "l") : randOffen.length) m.push("falsche Randzahlen offen");
+  if (!x.offen.includes("g")) m.push("Ergebnis nicht gefragt");
+  if (Object.values(werte).some(v => !Number.isInteger(v) || v <= 0 || String(v).length > 6)) m.push("Wert passt nicht in die Tastatur");
+  return m;
+}
+
+const NULLEN = ["", "eine Null", "zwei Nullen", "drei Nullen", "vier Nullen", "fünf Nullen"];
+
+/** „20 × 30“ → Tipp „2 × 3, dann zwei Nullen anhängen“ (ohne das Ergebnis). */
+function nullTipp(l, o) {
+  const kern = v => { let k = v, n = 0; while (k % 10 === 0) { k /= 10; n++; } return [k, n]; };
+  const [kl, nl] = kern(l);
+  const [ko, no] = kern(o);
+  return nl + no ? ` Tipp: zuerst ${kl} × ${ko}, dann ${NULLEN[nl + no]} anhängen.` : "";
+}
+
+LS.spiel({
+  id: "malkreuz",
+  einleitung: "Grosse Malrechnungen werden klein: Zerlege die Zahlen im Malkreuz, rechne jedes Feld aus und zähl alles zusammen!",
+  anzahl: 5,
+  stufen: {
+    s1: "Zweistellig mal einstellig, klein: 23 × 4 = 20 × 4 + 3 × 4.",
+    s2: "Zweistellig mal einstellig: 67 × 8.",
+    s3: "Dreistellig mal einstellig oder 14 × 14 mit vier Feldern.",
+    s4: "Zweistellig mal zweistellig: 47 × 36.",
+    s5: "Dreistellig mal zweistellig: 254 × 37 mit sechs Feldern.",
+    s6: "Endgegner: Malkreuz-Rätsel — auch am Rand fehlen Zahlen.",
+  },
+
+  aufgabe(ctx) {
+    const x = aufgabeErzeugen(ctx.stufe);
+    const raetsel = STUFE[ctx.stufe].raetsel;
+    const { a, b, oben, links, werte } = x;
+    const mehr = links.length > 1;
+    ctx.loesung(`${zahlText(a)} × ${zahlText(b)} = ${zahlText(a * b)}`);
+
+    const offen = new Set(x.offen);
+    const felder = {};
+    const fehlerJe = {};
+    let aktiv = null;
+
+    const kreuz = el("div", { class: "kreuz" + (oben.length >= 3 ? " breit" : ""), role: "group", "aria-label": "Malkreuz" });
+    kreuz.style.setProperty("--teile", oben.length);
+
+    /** Ein Feld: offen = Knopf mit „?“, sonst die Zahl. 'rand' = Teil am Rand mit Stellenfarbe. */
+    const feld = (k, zusatz = "") => {
+      const randKlasse = /^[ol]/.test(k) ? ` rand st st-${stelleVon(werte[k])}` : "";
+      let e;
+      if (offen.has(k)) {
+        e = el("button", { type: "button", class: "feld" + randKlasse + zusatz, text: "?", "aria-label": "leeres Feld" });
+        e.addEventListener("click", () => { if (offen.has(k)) waehleFeld(k); });
+      } else {
+        e = el("div", { class: (randKlasse ? randKlasse.trim() : "gegeben") + zusatz, text: zahlText(werte[k]) });
+      }
+      felder[k] = e;
+      kreuz.append(e);
+    };
+
+    kreuz.append(el("div", { class: "ecke", text: "×" }));
+    oben.forEach((_, j) => feld("o" + j));
+    kreuz.append(el("div", { class: "gleich", text: mehr ? "Zeile" : "=" }));
+    links.forEach((_, i) => {
+      feld("l" + i);
+      oben.forEach((_, j) => feld(`z${i}_${j}`));
+      feld(mehr ? "s" + i : "g", " summe");
+    });
+    if (mehr) {
+      kreuz.append(el("div", { class: "zusammen", text: "alles zusammen =" }));
+      feld("g", " summe");
+    }
+
+    const rechnung = el("div", { class: "rechnung", text: raetsel ? "? × ? = ?" : `${zahlText(a)} × ${zahlText(b)} = ?` });
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Zahl für das gewählte Feld" });
+    ctx.flaeche.append(
+      el("div", { class: "auftrag", text: raetsel ? "Malkreuz-Rätsel: Finde alle fehlenden Zahlen!" : `Rechne im Malkreuz: ${zahlText(a)} × ${zahlText(b)}` }),
+      rechnung, kreuz,
+      el("div", { class: "hinweis-klein", text: "Tipp auf ein Feld mit ?, dann die Zahl eintippen." }),
+      anzeige);
+
+    const bekannt = k => !offen.has(k);
+    /** Kann das Feld jetzt schon ausgerechnet werden? */
+    const folgerbar = k => regeln(x).some(r => r.felder.includes(k) && r.felder.every(f => f === k || bekannt(f)));
+
+    function waehleFeld(k) {
+      if (aktiv) felder[aktiv].classList.remove("aktiv");
+      aktiv = k;
+      if (k) felder[k].classList.add("aktiv");
+      tasten.leeren();
+    }
+
+    /** Hinweis zum Feld k, ohne seinen Wert zu nennen. */
+    function hinweisFeld(k) {
+      if (k.startsWith("z")) {
+        const [i, j] = k.slice(1).split("_");
+        if (!bekannt("l" + i) || !bekannt("o" + j)) return "Dafür fehlt noch eine Zahl am Rand. Welches Feld kannst du schon ausrechnen?";
+        return `Rechne ${zahlText(werte["l" + i])} × ${zahlText(werte["o" + j])}.` + nullTipp(werte["l" + i], werte["o" + j]);
+      }
+      if (k.startsWith("o") || k.startsWith("l")) {
+        const oberer = k[0] === "o";
+        const nr = k.slice(1);
+        const paare = oberer ? links.map((_, i) => [`l${i}`, `z${i}_${nr}`]) : oben.map((_, j) => [`o${j}`, `z${nr}_${j}`]);
+        const paar = paare.find(([r, z]) => bekannt(r) && bekannt(z));
+        if (!paar) return "Fülle zuerst ein anderes Feld in dieser Reihe aus.";
+        return `Welche Zahl mal ${zahlText(werte[paar[0]])} gibt ${zahlText(werte[paar[1]])}?`;
+      }
+      if (k.startsWith("s") || !mehr) {
+        const i = k.startsWith("s") ? k.slice(1) : "0";
+        if (oben.some((_, j) => !bekannt(`z${i}_${j}`))) return "Rechne zuerst alle Felder in dieser Zeile aus.";
+        return "Zähl die Zahlen in dieser Zeile zusammen.";
+      }
+      if (links.some((_, i) => !bekannt("s" + i))) return "Rechne zuerst die Zeilensummen aus.";
+      return "Zähl die Zeilensummen zusammen.";
+    }
+
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: 6,
+      onOk(eingabe) {
+        if (!aktiv) { ctx.sag("Tipp zuerst auf ein Feld mit ?.", "hinweis"); return; }
+        const k = aktiv;
+        const setzen = (text) => {
+          const e = felder[k];
+          e.textContent = zahlText(werte[k]);
+          e.classList.remove("aktiv");
+          e.classList.add("geloest");
+          offen.delete(k);
+          if (!offen.size) {
+            tasten.gesperrt = true;
+            rechnung.textContent = `${zahlText(a)} × ${zahlText(b)} = ${zahlText(a * b)}`;
+            ctx.richtig("Das Malkreuz ist fertig! ✖️");
+            return;
+          }
+          // Als Nächstes ein Feld, das sich schon ausrechnen lässt.
+          waehleFeld([...offen].find(folgerbar) || [...offen][0]);
+          ctx.sag(text, "gut");
+        };
+        if (eingabe === werte[k]) { LS.ton("tipp"); setzen("Stimmt! Weiter mit dem nächsten Feld."); return; }
+        felder[k].classList.remove("falsch");
+        void felder[k].offsetWidth;
+        felder[k].classList.add("falsch");
+        fehlerJe[k] = (fehlerJe[k] || 0) + 1;
+        // Ohne Lösungstext: ein Malkreuz hat viele Felder, die Aufgabe soll nicht nach drei Fehlern enden.
+        ctx.falsch(hinweisFeld(k));
+        // Nach drei Fehlversuchen am selben Feld hilft die Eule und setzt es.
+        if (fehlerJe[k] >= 3) setzen(`Dieses Feld ist ${zahlText(werte[k])}. Weiter geht's!`);
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    waehleFeld([...offen].find(folgerbar) || [...offen][0]);
+    if (ctx.nr === 0) ctx.sag(raetsel ? "Welches Feld kannst du zuerst herausfinden? Schau, wo zwei Zahlen schon da sind." : "Rechne jedes Feld aus: die Zahl links mal die Zahl oben.");
+  },
+});
+</script>
+</body>
+</html>

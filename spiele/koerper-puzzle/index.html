@@ -31,50 +31,98 @@
 const { waehle, mische, el } = LS;
 // „ab Stufe“ in koerper.js = Nummer der Spielstufe (s1–s6).
 const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+const ID = "koerper-puzzle";
 
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : KOERPER_LISTEN);
+const nurFrei = (liste, daten) => (FREI.has(liste) ? daten : []);
+const TEILE = nurFrei("koerperteile", KOERPERTEILE);
+const SINNE_FREI = nurFrei("sinne", SINNE);
+const FRAGEN = KOERPER_FRAGEN.filter(f => FREI.has(f[5]));
+const WEGE_FREI = nurFrei("wege", WEGE);
+
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   teil(n = 3) {
-    const [bild, name, artikel] = waehle(KOERPERTEILE);
-    const andere = mische(KOERPERTEILE.filter(t => t[1] !== name)).slice(0, n - 1).map(t => t[1]);
+    if (!TEILE.length) return null;
+    const [bild, name, artikel] = waehle(TEILE);
+    const andere = mische(TEILE.filter(t => t[1] !== name)).slice(0, n - 1).map(t => t[1]);
     return { art: "teil", bild, artikel, richtig: name, optionen: mische([name, ...andere]) };
   },
   finde(n = 3) {
-    const [bild, name] = waehle(KOERPERTEILE);
-    const andere = mische(KOERPERTEILE.filter(t => t[1] !== name)).slice(0, n - 1);
+    if (!TEILE.length) return null;
+    const [bild, name] = waehle(TEILE);
+    const andere = mische(TEILE.filter(t => t[1] !== name)).slice(0, n - 1);
     return { art: "finde", name, richtig: bild, optionen: mische([bild, ...andere.map(t => t[0])]) };
   },
   sinn() {
-    const [frage, , organ] = waehle(SINNE);
-    return { art: "sinn", frage, richtig: organ, optionen: SINNE.map(s => s[2]) };
+    if (!SINNE_FREI.length) return null;
+    const [frage, , organ] = waehle(SINNE_FREI);
+    return { art: "sinn", frage, richtig: organ, optionen: SINNE_FREI.map(s => s[2]) };
   },
   frage(n) {
-    // Fragen dieser Stufe, ab und zu eine der Stufe davor
-    const liste = KOERPER_FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
-    const [, frage, richtig, f1, f2] = waehle(liste.length ? liste : KOERPER_FRAGEN.filter(f => f[0] === n));
+    // Fragen dieser Stufe, ab und zu eine der Stufe davor; ohne freie Frage dieser Stufe keine Aufgabe.
+    const eigene = FRAGEN.filter(f => f[0] === n);
+    if (!eigene.length) return null;
+    const liste = FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const [, frage, richtig, f1, f2] = waehle(liste);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
   weg() {
-    const [name, stationen] = waehle(WEGE);
+    if (!WEGE_FREI.length) return null;
+    const [name, stationen] = waehle(WEGE_FREI);
     return { art: "weg", name, reihe: stationen };
   },
 };
 
+// Je Stufe die Arten (mehrfach genannt = häufiger).
 const STUFE = {
-  s1: () => waehle([ARTEN.teil, ARTEN.finde])(),
-  s2: () => waehle([ARTEN.sinn, ARTEN.finde])(),
-  s3: () => waehle([() => ARTEN.frage(3), ARTEN.sinn])(),
+  s1: [ARTEN.teil, ARTEN.finde],
+  s2: [ARTEN.sinn, ARTEN.finde],
+  s3: [() => ARTEN.frage(3), ARTEN.sinn],
   // gemischt: Gelenke und Schutz, Sinne und Körperteile mit mehr Auswahl
-  s4: () => waehle([() => ARTEN.frage(3), () => ARTEN.frage(3), ARTEN.sinn, () => ARTEN.teil(4), () => ARTEN.finde(4)])(),
-  s5: () => ARTEN.frage(5),
+  s4: [() => ARTEN.frage(3), () => ARTEN.frage(3), ARTEN.sinn, () => ARTEN.teil(4), () => ARTEN.finde(4)],
+  s5: [() => ARTEN.frage(5)],
   // Königsstufe: Blutkreislauf, Haut, Wege durch den Körper
-  s6: () => waehle([() => ARTEN.frage(6), () => ARTEN.frage(6), ARTEN.weg])(),
+  s6: [() => ARTEN.frage(6), () => ARTEN.frage(6), ARTEN.weg],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Körperteile: Auge, Ohr, Nase, Hand …",
+  s2: "Die fünf Sinne: Womit hörst du?",
+  s3: "Gelenke, Schädel, Milchzähne.",
+  s4: "Alles gemischt: Körperteile, Sinne, Gelenke.",
+  s5: "Herz, Lunge, Magen, Gehirn: Was machen sie?",
+  s6: "Blutkreislauf, Haut und der Weg des Essens.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (koerper.js). */
+function herkunft(a) {
+  const teil = t => (KOERPERTEILE.some(x => x.includes(t)) ? "koerperteile" : "?");
+  if (a.art === "teil" || a.art === "finde") return [a.art === "teil" ? a.richtig : a.name, ...a.optionen].map(teil);
+  if (a.art === "sinn") return [a.frage, ...a.optionen].map(t => (SINNE.some(x => x.includes(t)) ? "sinne" : "?"));
+  if (a.art === "frage") return [KOERPER_FRAGEN.find(f => f[1] === a.frage)?.[5] || "?"];
+  return [WEGE.some(([name, st]) => name === a.name && st.join() === a.reihe.join()) ? "wege" : "?"];
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
   const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
   if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
   if (a.art === "frage") {
     const f = KOERPER_FRAGEN.find(x => x[1] === a.frage);
@@ -89,14 +137,7 @@ LS.spiel({
   id: "koerper-puzzle",
   einleitung: "Dein Körper kann so viel: sehen, hören, rennen, denken! Kennst du dich aus?",
   anzahl: 8,
-  stufen: {
-    s1: "Körperteile: Auge, Ohr, Nase, Hand …",
-    s2: "Die fünf Sinne: Womit hörst du?",
-    s3: "Gelenke, Schädel, Milchzähne.",
-    s4: "Alles gemischt: Körperteile, Sinne, Gelenke.",
-    s5: "Herz, Lunge, Magen, Gehirn: Was machen sie?",
-    s6: "Blutkreislauf, Haut und der Weg des Essens.",
-  },
+  stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
@@ -109,7 +150,7 @@ LS.spiel({
     } else if (a.art === "sinn") {
       ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 110, inhalt: o => ({ bild: sinnBild[o], text: o }),
-        hinweis: "Probier es aus: Halte dir die Augen, die Ohren oder die Nase zu. Was geht dann nicht mehr?", loesung: `${a.frage} Mit: ${a.richtig}.` });
+        hinweis: "Probier es aus: Mach es nach. Welchen Teil deines Körpers brauchst du dabei?", loesung: `${a.frage} Mit: ${a.richtig}.` });
     } else if (a.art === "frage") {
       ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 200, hinweis: "Denk an deinen eigenen Körper. Was passt?", loesung: `${a.frage} ${a.richtig}` });

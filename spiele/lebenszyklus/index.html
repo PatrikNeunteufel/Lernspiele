@@ -29,21 +29,33 @@
 
 const { waehle, mische, el } = LS;
 // „ab Stufe“ in zyklen.js = Nummer der Spielstufe; je Stufe die Zyklen der letzten drei Stufen.
-const zyklen = n => ZYKLEN.filter(z => z[0] <= n && z[0] >= n - 2).map(([, name, stadien]) => ({ name, stadien }));
+const ID = "lebenszyklus";
+
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ZYKLUS_LISTEN);
+const ZYKLEN_FREI = ZYKLEN.filter(z => FREI.has(z[3]));
+const GEBURT_FREI = FREI.has("geburt") ? GEBURT : [];
+const FRAGEN_FREI = FREI.has("fragen") ? ZYKLUS_FRAGEN : [];
+
+const zyklen = n => ZYKLEN_FREI.filter(z => z[0] <= n && z[0] >= n - 2).map(([, name, stadien]) => ({ name, stadien }));
 const GEBURT_TEXT = { Ei: { bild: "🥚", text: "aus dem Ei" }, Beutel: { bild: "👜", text: "im Beutel" }, lebend: { bild: "🍼", text: "lebend geboren" } };
 
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   ordnen(n, mindestens = 0) {
     const z = waehle(zyklen(n).filter(x => x.stadien.length >= mindestens));
-    return { art: "ordnen", z };
+    return z ? { art: "ordnen", z } : null;
   },
   geburt() {
-    const [bild, tier, richtig] = waehle(GEBURT);
+    if (!GEBURT_FREI.length) return null;
+    const [bild, tier, richtig] = waehle(GEBURT_FREI);
     return { art: "geburt", bild, tier, richtig };
   },
   naechstes(n) {
     // Was kommt nach …? (nicht das letzte Stadium)
     const z = waehle(zyklen(n).filter(x => x.stadien.length >= 4));
+    if (!z) return null;
     const i = Math.floor(Math.random() * (z.stadien.length - 1));
     const vor = z.stadien[i][1];
     const richtig = z.stadien[i + 1][1];
@@ -51,26 +63,59 @@ const ARTEN = {
     return { art: "naechstes", z, vor, richtig, optionen: mische([richtig, ...andere]) };
   },
   frage() {
-    const [frage, richtig, f1, f2] = waehle(ZYKLUS_FRAGEN);
+    if (!FRAGEN_FREI.length) return null;
+    const [frage, richtig, f1, f2] = waehle(FRAGEN_FREI);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
 };
 
+// Je Stufe die Arten (mehrfach genannt = häufiger).
 const STUFE = {
-  s1: () => ARTEN.ordnen(1),
-  s2: () => ARTEN.ordnen(2),
-  s3: () => waehle([ARTEN.geburt, () => ARTEN.ordnen(3)])(),
-  s4: () => waehle([() => ARTEN.ordnen(4), () => ARTEN.naechstes(4), ARTEN.geburt])(),
-  s5: () => waehle([ARTEN.frage, () => ARTEN.naechstes(5), () => ARTEN.ordnen(5)])(),
+  s1: [() => ARTEN.ordnen(1)],
+  s2: [() => ARTEN.ordnen(2)],
+  s3: [ARTEN.geburt, () => ARTEN.ordnen(3)],
+  s4: [() => ARTEN.ordnen(4), () => ARTEN.naechstes(4), ARTEN.geburt],
+  s5: [ARTEN.frage, () => ARTEN.naechstes(5), () => ARTEN.ordnen(5)],
   // Königsstufe: Wissensfragen und fünfstufige Zyklen
-  s6: () => waehle([ARTEN.frage, () => ARTEN.ordnen(6, 5), () => ARTEN.ordnen(6, 5), () => ARTEN.naechstes(6)])(),
+  s6: [ARTEN.frage, () => ARTEN.ordnen(6, 5), () => ARTEN.ordnen(6, 5), () => ARTEN.naechstes(6)],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Ei → Küken → Huhn: drei Bilder ordnen.",
+  s2: "Vier Stufen: Mensch, Sonnenblume, Schmetterling.",
+  s3: "Aus dem Ei, im Beutel oder lebend geboren?",
+  s4: "Frosch, Marienkäfer, Biene, Apfelbaum.",
+  s5: "Kiemen oder Lunge? Bestäubung und Keimung.",
+  s6: "Fünf Stufen ordnen und knifflige Wissensfragen.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (zyklen.js). */
+function herkunft(a) {
+  if (a.z) {
+    const zeile = ZYKLEN.find(z => z[1] === a.z.name && z[2].map(s => s[1]).join() === a.z.stadien.map(s => s[1]).join());
+    return [zeile ? zeile[3] : "?"];
+  }
+  if (a.art === "geburt") return [GEBURT.some(g => g[1] === a.tier && g[2] === a.richtig) ? "geburt" : "?"];
+  return [ZYKLUS_FRAGEN.some(f => f[0] === a.frage) ? "fragen" : "?"];
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
   const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
   if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
   if ((stufe === "s1" || stufe === "s2") && a.z && a.z.stadien.some(s => !s[0])) m.push("Stadium ohne Bild in Stufe 1–2");
   return m;
@@ -82,14 +127,7 @@ LS.spiel({
   id: "lebenszyklus",
   einleitung: "Aus dem Ei wird ein Küken, aus der Raupe ein Schmetterling. Bringst du alles in die richtige Reihenfolge?",
   anzahl: 6,
-  stufen: {
-    s1: "Ei → Küken → Huhn: drei Bilder ordnen.",
-    s2: "Vier Stufen: Mensch, Sonnenblume, Schmetterling.",
-    s3: "Aus dem Ei, im Beutel oder lebend geboren?",
-    s4: "Frosch, Marienkäfer, Biene, Apfelbaum.",
-    s5: "Kiemen oder Lunge? Bestäubung und Keimung.",
-    s6: "Fünf Stufen ordnen und knifflige Wissensfragen.",
-  },
+  stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
@@ -107,7 +145,7 @@ LS.spiel({
       LS.koerbe(ctx, {
         karte: { bild: a.bild, text: a.tier }, koerbe: ["Ei", "Beutel", "lebend"], richtig: a.richtig,
         korbInhalt: k => GEBURT_TEXT[k],
-        hinweis: "Denk nach: Säugetiere bekommen lebende Junge. Vögel, Reptilien, Fische und Frösche legen Eier. Kängurus tragen die Jungen im Beutel.",
+        hinweis: "Denk nach: Die meisten Säugetiere werden lebend geboren. Vögel, Reptilien, Fische und Frösche schlüpfen aus dem Ei. Junge Beuteltiere wachsen im Beutel auf.",
         loesung: `${a.tier}: ${GEBURT_TEXT[a.richtig].text}.`, lob: `Richtig: ${a.tier} — ${GEBURT_TEXT[a.richtig].text}.`,
       });
     } else if (a.art === "naechstes") {

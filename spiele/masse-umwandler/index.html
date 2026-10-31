@@ -146,6 +146,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    const loesung = `${a.links} = ${zahlText(a.loesung)} ${a.ziel}`;
+    ctx.loesung(loesung);
     ctx.flaeche.append(el("div", { class: "familie", text: FAMILIEN[a.fam].name }));
     // Königsstufe: Treppe erst nach dem ersten Fehler, über der Rechnung eingefügt.
     const koenig = ctx.stufe === "s6";
@@ -171,7 +173,7 @@ LS.spiel({
           : a.art === "weit" ? "Geh die Treppe Stufe für Stufe und rechne jeden Schritt."
           : a.art === "minus" ? `Rechne beide Grössen ganz in ${a.ziel} um und subtrahiere dann.`
           : `Rechne die grosse Einheit in ${a.ziel} um und zähle den Rest dazu.`;
-        ctx.falsch(hinweis, `${a.links} = ${zahlText(a.loesung)} ${a.ziel}`);
+        ctx.falsch(hinweis, loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
       },
     });

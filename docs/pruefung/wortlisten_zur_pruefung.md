@@ -1520,12 +1520,352 @@ Bild „svg:…“ = im Spiel gezeichnet; leer = kein Bild, nur ab Stufe 3.
 | Wie viele Musikerinnen und Musiker spielen in einem Duo? | zwei | drei; vier | ☐ |
 | Wie viele spielen in einem Trio? | drei | zwei; fünf | ☐ |
 | Wie viele spielen in einem Quartett? | vier | drei; acht | ☐ |
+| Wie viele spielen in einem Quintett? | fünf | vier; sechs | ☐ |
 | Wer leitet ein Orchester? | die Dirigentin oder der Dirigent | der Pianist; das Publikum | ☐ |
 | Welche Instrumente spielen in einem Streichquartett? | zwei Geigen, Bratsche und Cello | vier Trompeten; Klavier und drei Trommeln | ☐ |
 | Was schwingt bei der Gitarre, wenn ein Ton erklingt? | die Saite | der Gurt; das Plektrum allein | ☐ |
 | Eine Saite wird kürzer gegriffen. Wie klingt der Ton? | höher | tiefer; gleich | ☐ |
 | Was schwingt bei der Trommel? | das Fell | der Stuhl; die Luft im Zimmer allein | ☐ |
-| Wie viele spielen in einem Quintett? | fünf | vier; sechs | ☐ |
 | Wie entsteht der Ton bei der Trompete? | Die Lippen schwingen im Mundstück. | Ein Rohrblatt schwingt.; Eine Saite schwingt. | ☐ |
 | Wie entsteht der Ton bei der Klarinette? | Ein Rohrblatt schwingt am Mundstück. | Die Lippen schwingen wie bei der Trompete.; Man zupft eine Saite. | ☐ |
 | Wie entsteht der Ton beim Klavier? | Kleine Hämmer schlagen auf Saiten. | Luft strömt durch Pfeifen.; Man zupft die Saiten mit den Fingern. | ☐ |
+
+## 22. Wortfamilien-Baum (Lehrplan SG D.5.D.1)
+
+Ähnliche Wörter gehören NICHT zur Familie.
+
+| Familie | Stamm | abgeleitet | mit Umlaut | zusammengesetzt | nur ähnlich (Bedeutung) | ☐ |
+|---|---|---|---|---|---|---|
+| fahren | fahr | Fahrer, Fahrerin, Fahrt, Abfahrt, Ausfahrt, Vorfahrt, abfahren | Fähre | Fahrrad, Fahrplan, Fahrkarte, Fahrzeug | Fahne (ein Tuch an einer Stange); Farbe (rot, blau, gelb …) | ☐ |
+| spielen | spiel | Spiel, Spieler, Spielerin, mitspielen, verspielt |  | Spielplatz, Spielzeug, Brettspiel | Spiegel (darin sieht man sich selbst) | ☐ |
+| laufen | lauf | Lauf, auslaufen, weglaufen | Läufer, Läuferin | Wettlauf, Laufschuh | Laub (die Blätter der Bäume); Laus (ein kleines Insekt) | ☐ |
+| schlafen | schlaf | Schlaf, einschlafen, ausschlafen, verschlafen | schläfrig | Schlafzimmer, Schlafsack, Schlafanzug |  | ☐ |
+| backen | back | gebacken, aufbacken | Bäcker, Bäckerin, Bäckerei, Gebäck | Backofen, Backblech | Backe (die Wange im Gesicht) | ☐ |
+| waschen | wasch | abwaschen, auswaschen, waschbar | Wäsche | Waschmaschine, Waschbecken, Waschlappen |  | ☐ |
+| Haus | haus |  | Häuschen, häuslich | Haustür, Hausaufgabe, Hausschuh |  | ☐ |
+| lesen | les | Leser, Leserin, vorlesen, lesbar |  | Lesebuch, Lesezeichen |  | ☐ |
+| schreiben | schreib | aufschreiben, abschreiben, beschreiben |  | Schreibtisch, Schreibheft | Scheibe (eine dünne Platte, zum Beispiel aus Glas) | ☐ |
+| kalt | kalt |  | Kälte, erkälten, Erkältung |  | Kalk (ein weisser Stoff, zum Beispiel im Wasserkocher) | ☐ |
+| warm | warm |  | Wärme, wärmen, aufwärmen, Wärmflasche |  | warnen (vor etwas Gefährlichem Bescheid geben) | ☐ |
+| lang | lang | langweilig | Länge, verlängern | Langeweile | Schlange (ein Tier ohne Beine) | ☐ |
+| Freund | freund | Freundin, freundlich, Freundschaft, unfreundlich, befreundet |  | Brieffreund |  | ☐ |
+| bauen | bau | Bau, aufbauen, umbauen | Gebäude | Baustelle, Bauklotz | Bauch (ein Teil des Körpers); Baum (eine grosse Pflanze mit Ästen) | ☐ |
+| kaufen | kauf | Kauf, Einkauf, einkaufen, verkaufen | Käufer, Verkäufer, Verkäuferin | Kaufladen |  | ☐ |
+| Zahl | zahl | zahlen, bezahlen, Anzahl | zählen, abzählen |  | Zahn (damit beisst man) | ☐ |
+| fallen | fall | Fall, Unfall, umfallen, hinfallen |  | Wasserfall, Fallschirm | Falke (ein Greifvogel); Falte (ein Knick im Stoff oder im Papier) | ☐ |
+| wohnen | wohn | Wohnung, Bewohner, Einwohner, bewohnt |  | Wohnzimmer, Wohnwagen |  | ☐ |
+| hören | hör | zuhören, Zuhörer, Gehör, hörbar |  | Kopfhörer | Horn (wächst zum Beispiel einer Kuh am Kopf) | ☐ |
+| Fisch | fisch | Fischer, Fischerin, fischen |  | Goldfisch, Tintenfisch | frisch (nicht alt, gerade erst gemacht) | ☐ |
+| Schnee | schnee |  |  | Schneemann, Schneeball, Schneeflocke | Schnecke (ein Tier, das sein Haus trägt) | ☐ |
+| sprechen | sprech | Sprecher, aussprechen, besprechen, versprechen |  |  |  | ☐ |
+| wandern | wander | Wanderer, Wanderung, auswandern |  | Wanderweg, Wanderschuh |  | ☐ |
+| helfen | helf | Helfer, Helferin, mithelfen |  |  |  | ☐ |
+| kochen | koch | Koch, Kocher, aufkochen | Köchin | Kochtopf, Kochbuch |  | ☐ |
+| Sonne | sonn | sonnig |  | Sonnenschein, Sonnenbrille, Sonnenblume |  | ☐ |
+
+## 23. Zeitreise-Verben (Lehrplan SG D.5.D.1) — regelmässig
+
+| Verb | Präsens | Präteritum | Perfekt | ☐ |
+|---|---|---|---|---|
+| spielen | Lina spielt im Garten. | Lina spielte im Garten. | Lina hat im Garten gespielt. | ☐ |
+| malen | Tim malt ein Bild. | Tim malte ein Bild. | Tim hat ein Bild gemalt. | ☐ |
+| kochen | Papa kocht eine Suppe. | Papa kochte eine Suppe. | Papa hat eine Suppe gekocht. | ☐ |
+| lachen | Opa lacht laut. | Opa lachte laut. | Opa hat laut gelacht. | ☐ |
+| bauen | Noah baut eine Sandburg. | Noah baute eine Sandburg. | Noah hat eine Sandburg gebaut. | ☐ |
+| kaufen | Mama kauft Brot. | Mama kaufte Brot. | Mama hat Brot gekauft. | ☐ |
+| hören | Mia hört Musik. | Mia hörte Musik. | Mia hat Musik gehört. | ☐ |
+| lernen | Ben lernt das Einmaleins. | Ben lernte das Einmaleins. | Ben hat das Einmaleins gelernt. | ☐ |
+| tanzen | Sara tanzt auf der Bühne. | Sara tanzte auf der Bühne. | Sara hat auf der Bühne getanzt. | ☐ |
+| sagen | Lea sagt nichts. | Lea sagte nichts. | Lea hat nichts gesagt. | ☐ |
+| wohnen | Oma wohnt in Bern. | Oma wohnte in Bern. | Oma hat in Bern gewohnt. | ☐ |
+| zeichnen | Elias zeichnet einen Drachen. | Elias zeichnete einen Drachen. | Elias hat einen Drachen gezeichnet. | ☐ |
+| putzen | Nina putzt das Fenster. | Nina putzte das Fenster. | Nina hat das Fenster geputzt. | ☐ |
+| regnen | Es regnet den ganzen Tag. | Es regnete den ganzen Tag. | Es hat den ganzen Tag geregnet. | ☐ |
+| fragen | Luca fragt die Lehrerin. | Luca fragte die Lehrerin. | Luca hat die Lehrerin gefragt. | ☐ |
+| warten | Der Hund wartet vor der Tür. | Der Hund wartete vor der Tür. | Der Hund hat vor der Tür gewartet. | ☐ |
+| wandern | Die Klasse wandert auf den Berg. | Die Klasse wanderte auf den Berg. | Die Klasse ist auf den Berg gewandert. | ☐ |
+| reisen | Onkel Paul reist nach Italien. | Onkel Paul reiste nach Italien. | Onkel Paul ist nach Italien gereist. | ☐ |
+| landen | Das Flugzeug landet in Zürich. | Das Flugzeug landete in Zürich. | Das Flugzeug ist in Zürich gelandet. | ☐ |
+| klettern | Die Katze klettert auf den Baum. | Die Katze kletterte auf den Baum. | Die Katze ist auf den Baum geklettert. | ☐ |
+| hüpfen | Der Frosch hüpft ins Wasser. | Der Frosch hüpfte ins Wasser. | Der Frosch ist ins Wasser gehüpft. | ☐ |
+
+### Unregelmässig
+
+| Verb | Präsens | Präteritum | Perfekt | ☐ |
+|---|---|---|---|---|
+| singen | Der Chor singt ein Lied. | Der Chor sang ein Lied. | Der Chor hat ein Lied gesungen. | ☐ |
+| lesen | Lina liest ein Buch. | Lina las ein Buch. | Lina hat ein Buch gelesen. | ☐ |
+| schreiben | Tim schreibt einen Brief. | Tim schrieb einen Brief. | Tim hat einen Brief geschrieben. | ☐ |
+| trinken | Mia trinkt Tee. | Mia trank Tee. | Mia hat Tee getrunken. | ☐ |
+| essen | Ben isst einen Apfel. | Ben ass einen Apfel. | Ben hat einen Apfel gegessen. | ☐ |
+| finden | Noah findet einen Stein. | Noah fand einen Stein. | Noah hat einen Stein gefunden. | ☐ |
+| sehen | Sara sieht einen Regenbogen. | Sara sah einen Regenbogen. | Sara hat einen Regenbogen gesehen. | ☐ |
+| schlafen | Das Baby schläft lange. | Das Baby schlief lange. | Das Baby hat lange geschlafen. | ☐ |
+| nehmen | Luca nimmt den Bus. | Luca nahm den Bus. | Luca hat den Bus genommen. | ☐ |
+| helfen | Elias hilft seiner Oma. | Elias half seiner Oma. | Elias hat seiner Oma geholfen. | ☐ |
+| werfen | Nina wirft den Ball. | Nina warf den Ball. | Nina hat den Ball geworfen. | ☐ |
+| bringen | Der Pöstler bringt ein Paket. | Der Pöstler brachte ein Paket. | Der Pöstler hat ein Paket gebracht. | ☐ |
+| tragen | Papa trägt den Koffer. | Papa trug den Koffer. | Papa hat den Koffer getragen. | ☐ |
+| rufen | Mama ruft die Kinder. | Mama rief die Kinder. | Mama hat die Kinder gerufen. | ☐ |
+| geben | Lea gibt dem Hund Futter. | Lea gab dem Hund Futter. | Lea hat dem Hund Futter gegeben. | ☐ |
+| gehen | Tim geht nach Hause. | Tim ging nach Hause. | Tim ist nach Hause gegangen. | ☐ |
+| fahren | Oma fährt mit dem Zug. | Oma fuhr mit dem Zug. | Oma ist mit dem Zug gefahren. | ☐ |
+| fliegen | Der Vogel fliegt über das Feld. | Der Vogel flog über das Feld. | Der Vogel ist über das Feld geflogen. | ☐ |
+| laufen | Ben läuft zur Schule. | Ben lief zur Schule. | Ben ist zur Schule gelaufen. | ☐ |
+| kommen | Der Zug kommt zu spät. | Der Zug kam zu spät. | Der Zug ist zu spät gekommen. | ☐ |
+| springen | Der Hund springt über den Zaun. | Der Hund sprang über den Zaun. | Der Hund ist über den Zaun gesprungen. | ☐ |
+| fallen | Das Glas fällt auf den Boden. | Das Glas fiel auf den Boden. | Das Glas ist auf den Boden gefallen. | ☐ |
+| rennen | Mia rennt zum Bus. | Mia rannte zum Bus. | Mia ist zum Bus gerannt. | ☐ |
+| steigen | Noah steigt auf die Leiter. | Noah stieg auf die Leiter. | Noah ist auf die Leiter gestiegen. | ☐ |
+| bleiben | Luca bleibt zu Hause. | Luca blieb zu Hause. | Luca ist zu Hause geblieben. | ☐ |
+
+## 24. Fehler-Lupe (Lehrplan SG D.4.F.1) — gezeigt wird die falsche Schreibweise
+
+### Nomen gross
+
+Regel im Spiel: Nomen schreibt man gross. Probe: Passt der, die oder das davor?
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Der **Hund** bellt laut. | hund |  | ☐ |
+| Lina hat eine rote **Tasche**. | tasche |  | ☐ |
+| Im **Garten** blüht eine Rose. | garten |  | ☐ |
+| Tim isst einen **Apfel**. | apfel |  | ☐ |
+| Die **Katze** schläft auf dem Sofa. | katze |  | ☐ |
+| Wir fahren mit dem **Velo** zur Schule. | velo |  | ☐ |
+| Mein **Bruder** spielt Fussball. | bruder |  | ☐ |
+| Der **Vogel** singt im Baum. | vogel |  | ☐ |
+| Oma backt einen **Kuchen**. | kuchen |  | ☐ |
+| Auf dem Tisch steht eine **Vase**. | vase |  | ☐ |
+| Am Morgen packt Mia ihre **Schultasche** und läuft zur Bushaltestelle. | schultasche |  | ☐ |
+| Nach dem Regen sammeln die Kinder bunte **Blätter** im Wald. | blätter |  | ☐ |
+| Im Sommer baden wir gerne im kühlen **See** hinter dem Dorf. | see |  | ☐ |
+| Der Bauer füttert am Abend die **Kühe** im Stall. | kühe |  | ☐ |
+
+### Nomen gross (auch Gefühle)
+
+Regel im Spiel: Auch Nomen, die man nicht anfassen kann, schreibt man gross — zum Beispiel Gefühle.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Ich habe keine **Angst**. | angst |  | ☐ |
+| Das Geschenk macht mir grosse **Freude**. | freude |  | ☐ |
+| Lea hat heute viel **Glück**. | glück |  | ☐ |
+| Wir haben jetzt keine **Zeit**. | zeit |  | ☐ |
+| Tim braucht viel **Mut**. | mut |  | ☐ |
+| Nach dem Turnen habe ich grossen **Hunger**. | hunger |  | ☐ |
+| Nach dem langen Spiel hatten alle Kinder grossen **Durst** und tranken viel Wasser. | durst |  | ☐ |
+| Mit viel **Geduld** hat Noah das schwierige Puzzle gelöst. | geduld |  | ☐ |
+
+### sp und st
+
+Regel im Spiel: Am Wortanfang hört man «schp» und «scht» — man schreibt aber sp und st.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Der **Stein** ist schwer. | Schtein |  | ☐ |
+| Wir **spielen** im Hof. | schpielen |  | ☐ |
+| Am Himmel leuchtet ein **Stern**. | Schtern |  | ☐ |
+| Die **Spinne** baut ein Netz. | Schpinne |  | ☐ |
+| Lina **steht** am Fenster. | schteht |  | ☐ |
+| Der Hund **springt** über den Bach. | schpringt |  | ☐ |
+| Mein **Stift** ist rot. | Schtift |  | ☐ |
+| Die **Strasse** ist nass. | Schtrasse |  | ☐ |
+| Nach der Schule **spielen** wir mit unseren Freunden auf dem grossen Platz. | schpielen |  | ☐ |
+| Der Junge **stellt** seine Stiefel neben die Tür und zieht die Jacke aus. | schtellt |  | ☐ |
+
+### sch
+
+Regel im Spiel: Den Laut «sch» schreibt man mit drei Buchstaben: s, c und h.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Die **Schule** beginnt um acht Uhr. | Shule | Sule | ☐ |
+| Das **Schaf** frisst Gras. | Shaf | Saf | ☐ |
+| Mama stellt die **Flasche** auf den Tisch. | Flashe | Flase | ☐ |
+| Unter dem **Tisch** liegt ein Ball. | Tish | Tis | ☐ |
+| Wir **waschen** die Hände. | washen | wasen | ☐ |
+| Der **Schnee** ist weiss. | Shnee | Snee | ☐ |
+| Nach dem Mittagessen **schaut** Lea mit ihrer Grossmutter ein lustiges Bilderbuch an. | shaut | saut | ☐ |
+| Am Wochenende **schwimmen** wir mit der ganzen Familie im warmen Hallenbad. | shwimmen | swimmen | ☐ |
+
+### ie oder i
+
+Regel im Spiel: Ein lang gesprochenes i schreibt man meistens ie, ein kurz gesprochenes nur i.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Die **Biene** fliegt zur Blume. | Bine |  | ☐ |
+| Ich schreibe einen **Brief**. | Brif |  | ☐ |
+| Das **Tier** schläft im Stall. | Tir |  | ☐ |
+| Das **Kind** lacht. | Kiend |  | ☐ |
+| Die **Ziege** meckert laut. | Zige |  | ☐ |
+| Lina hat **vier** Katzen. | vir |  | ☐ |
+| Auf der **Wiese** wachsen Blumen. | Wise |  | ☐ |
+| Am Nachmittag **liegen** die Kinder im Schatten unter dem grossen Baum. | ligen |  | ☐ |
+| Mein kleiner Bruder **fliegt** morgen zum ersten Mal mit dem Flugzeug nach Spanien. | fligt |  | ☐ |
+
+### e oder ä
+
+Regel im Spiel: Gibt es ein verwandtes Wort mit a, schreibt man ä. Sonst schreibt man e.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Ich wasche meine **Hände**. | Hende |  | ☐ |
+| Im Herbst fallen die **Äpfel** vom Baum. | Epfel |  | ☐ |
+| Die **Gläser** stehen im Schrank. | Gleser |  | ☐ |
+| Heute ist es **kälter** als gestern. | kelter |  | ☐ |
+| Die **Männer** tragen schwere Kisten. | Menner |  | ☐ |
+| Im **Bett** liegt eine Puppe. | Bätt |  | ☐ |
+| Im Frühling blühen in allen **Gärten** unserer Strasse bunte Tulpen. | Gerten |  | ☐ |
+| Der Bauer bringt die **Kälber** am Abend zurück in den warmen Stall. | Kelber |  | ☐ |
+
+### Komma bei Aufzählungen
+
+Regel im Spiel: Bei einer Aufzählung trennt ein Komma die Teile — vor «und» steht kein Komma.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Wir kaufen **Äpfel,** Birnen und Bananen. | Äpfel | Äpfel. | ☐ |
+| Lina hat einen **Hund,** eine Katze und zwei Hasen. | Hund | Hund. | ☐ |
+| Im Rucksack sind **Brot,** Käse und Wasser. | Brot | Brot. | ☐ |
+| Tim mag Rot, **Blau,** Gelb und Grün. | Blau | Blau. | ☐ |
+| Wir **singen,** tanzen und lachen. | singen | singen. | ☐ |
+| Für den Ausflug packt Noah ein **Sandwich,** einen Apfel und eine Flasche Wasser ein. | Sandwich | Sandwich. | ☐ |
+| In unserem Zoo leben Löwen, **Affen,** Zebras und viele bunte Vögel. | Affen | Affen. | ☐ |
+
+### Doppelkonsonant
+
+Regel im Spiel: Nach einem kurz gesprochenen Vokal folgt oft ein doppelter Konsonant.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Die **Sonne** scheint hell. | Sone |  | ☐ |
+| Wir **kommen** morgen zu Besuch. | komen |  | ☐ |
+| Im **Sommer** gehen wir baden. | Somer |  | ☐ |
+| Mein **Teller** ist leer. | Teler |  | ☐ |
+| Der **Koffer** ist schwer. | Kofer |  | ☐ |
+| Am Abend **schwimmen** die Enten langsam über den stillen See. | schwimen |  | ☐ |
+
+### ck und tz
+
+Regel im Spiel: Nach einem kurz gesprochenen Vokal schreibt man ck und tz statt k und z.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Der **Zucker** ist süss. | Zuker |  | ☐ |
+| Die **Katze** miaut. | Kaze |  | ☐ |
+| Ich trage eine warme **Mütze**. | Müze |  | ☐ |
+| Der **Rucksack** ist voll. | Ruksack |  | ☐ |
+| Der **Blitz** leuchtet hell. | Bliz |  | ☐ |
+| Nach dem Gewitter **sitzen** wir auf der Terrasse und schauen den Regenbogen an. | sizen |  | ☐ |
+
+### äu oder eu
+
+Regel im Spiel: Gibt es ein verwandtes Wort mit au, schreibt man äu. Sonst schreibt man eu.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Die **Bäume** sind hoch. | Beume |  | ☐ |
+| Im Wald wohnen viele **Mäuse**. | Meuse |  | ☐ |
+| Lina **läuft** schnell. | leuft |  | ☐ |
+| Die **Häuser** sind alt. | Heuser |  | ☐ |
+| Meine **Freunde** kommen heute. | Fräunde |  | ☐ |
+| Am Morgen **räumt** mein Bruder sein Zimmer auf und macht dann seine Hausaufgaben. | reumt |  | ☐ |
+
+### Dehnungs-h
+
+Regel im Spiel: Manche lang gesprochenen Vokale bekommen ein h dahinter. Solche Wörter muss man sich merken.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Wir **fahren** ans Meer. | faren |  | ☐ |
+| Der **Zahn** wackelt. | Zan |  | ☐ |
+| Ich **wohne** in Bern. | wone |  | ☐ |
+| Das **Huhn** legt ein Ei. | Hun |  | ☐ |
+| Mein **Stuhl** wackelt. | Stul |  | ☐ |
+| Im Winter **fahren** wir mit der ganzen Familie zum Schlitteln in die Berge. | faren |  | ☐ |
+
+### Verben als Nomen
+
+Regel im Spiel: Steht beim Verb ein Artikel (das, beim, zum), wird es zum Nomen und man schreibt es gross.
+
+| Satz richtig | gezeigter Fehler | weitere Wahl | ☐ |
+|---|---|---|---|
+| Beim **Essen** sprechen wir leise. | essen |  | ☐ |
+| Das **Lesen** macht mir Spass. | lesen |  | ☐ |
+| Zum **Malen** brauche ich Farben. | malen |  | ☐ |
+| Beim **Schwimmen** trage ich eine Brille. | schwimmen |  | ☐ |
+| Nach dem langen **Wandern** waren alle müde und freuten sich auf das Abendessen. | wandern |  | ☐ |
+
+### Fehlerfreie Sätze (Königsstufe)
+
+| Satz | ☐ |
+|---|---|
+| Heute ist ein schöner Tag. | ☐ |
+| Die Kinder spielen im Park. | ☐ |
+| Am Abend lesen wir eine Geschichte. | ☐ |
+| Unser Hund heisst Bello. | ☐ |
+| Im Winter schneit es oft. | ☐ |
+| Der Zug fährt um neun Uhr ab. | ☐ |
+| Meine Schwester hat einen neuen Rucksack. | ☐ |
+| Wir essen gerne Suppe. | ☐ |
+| Nach der Schule mache ich meine Hausaufgaben. | ☐ |
+| Der Himmel ist blau. | ☐ |
+
+## 25. Diagramm-Detektiv (Lehrplan SG MA.3.C.1) — Umfragen
+
+Die Zahlen erzeugt das Spiel; zu prüfen sind Fragen und Kategorien.
+
+| Titel | Frage | Kategorien | ☐ |
+|---|---|---|---|
+| Haustiere | Wie viele Kinder haben {x}? | 🐕 Hund (einen Hund), 🐈 Katze (eine Katze), 🐇 Hase (einen Hasen), 🐟 Fisch (Fische), 🐦 Vogel (einen Vogel), 🐹 Hamster (einen Hamster) | ☐ |
+| Lieblingsfrucht | Wie viele Kinder essen am liebsten {x}? | 🍎 Apfel (Äpfel), 🍌 Banane (Bananen), 🍓 Erdbeere (Erdbeeren), 🍇 Traube (Trauben), 🍐 Birne (Birnen), 🍒 Kirsche (Kirschen) | ☐ |
+| Unser Schulweg | Wie viele Kinder kommen {x} zur Schule? | 🚶 zu Fuss (zu Fuss), 🚲 Velo (mit dem Velo), 🚌 Bus (mit dem Bus), 🛴 Trotti (mit dem Trottinett), 🚗 Auto (mit dem Auto) | ☐ |
+| Lieblingssport | Wie viele Kinder mögen {x} am liebsten? | ⚽ Fussball (Fussball), 🏊 Schwimmen (Schwimmen), ⛷️ Ski (Skifahren), 💃 Tanzen (Tanzen), 🤸 Turnen (Turnen) | ☐ |
+| Vögel am Futterhaus | Wie viele {x} wurden am Futterhaus gezählt? | 🐦 Meise (Meisen), 🐦‍⬛ Amsel (Amseln), 🐤 Spatz (Spatzen), 🕊️ Taube (Tauben), 🪶 Specht (Spechte) | ☐ |
+| Glace-Verkauf am Schulfest | Wie viele Kugeln {x} wurden verkauft? | 🍫 Schoggi (Schoggi), 🍦 Vanille (Vanille), 🍓 Erdbeer (Erdbeer), 🍋 Zitrone (Zitrone), 🍒 Kirsche (Kirsche) | ☐ |
+| Velos auf dem Schulhof | Wie viele Velos standen {x} auf dem Schulhof? | 🚲 Mo (am Montag), 🚲 Di (am Dienstag), 🚲 Mi (am Mittwoch), 🚲 Do (am Donnerstag), 🚲 Fr (am Freitag) | ☐ |
+| Ausgeliehene Bücher | Wie viele Bücher wurden {x} in der Bibliothek ausgeliehen? | 📚 Mo (am Montag), 📚 Di (am Dienstag), 📚 Mi (am Mittwoch), 📚 Do (am Donnerstag), 📚 Fr (am Freitag) | ☐ |
+
+## 26. Preis-Tabelle (Lehrplan SG MA.3.A.3) — Artikel
+
+Preis je Stück in Rappen: kleinster bis grösster Wert, den das Spiel wählt.
+
+| Bild | Einzahl | Mehrzahl | von Rp. | bis Rp. | ☐ |
+|---|---|---|---|---|---|
+| 🥐 | Gipfeli | Gipfeli | 80 | 250 | ☐ |
+| 🍎 | Apfel | Äpfel | 40 | 150 | ☐ |
+| ✏️ | Bleistift | Bleistifte | 50 | 250 | ☐ |
+| 📒 | Heft | Hefte | 100 | 450 | ☐ |
+| 🍦 | Glace | Glaces | 150 | 500 | ☐ |
+| 🧃 | Saft | Säfte | 100 | 300 | ☐ |
+| 🥨 | Brezel | Brezeln | 100 | 300 | ☐ |
+| 🖍️ | Farbstift | Farbstifte | 60 | 200 | ☐ |
+| 🎈 | Ballon | Ballone | 30 | 150 | ☐ |
+| 🍌 | Banane | Bananen | 30 | 100 | ☐ |
+| ⚽ | Ball | Bälle | 500 | 900 | ☐ |
+| 📕 | Buch | Bücher | 800 | 2000 | ☐ |
+| 🎟️ | Eintritt in die Badi | Eintritte in die Badi | 300 | 800 | ☐ |
+| 🧦 | Paar Socken | Paar Socken | 400 | 900 | ☐ |
+
+## 27. Kompass-Spiel (Lehrplan SG NMG.8.4) — Orte auf dem Plan
+
+| Bild | Name | Nominativ | Dativ | ☐ |
+|---|---|---|---|---|
+| 🏫 | Schule | die Schule | der Schule | ☐ |
+| ⛪ | Kirche | die Kirche | der Kirche | ☐ |
+| 🌲 | Wald | der Wald | dem Wald | ☐ |
+| 🏞️ | See | der See | dem See | ☐ |
+| 🏠 | Haus | das Haus | dem Haus | ☐ |
+| 🏰 | Burg | die Burg | der Burg | ☐ |
+| ⛲ | Brunnen | der Brunnen | dem Brunnen | ☐ |
+| 🛝 | Spielplatz | der Spielplatz | dem Spielplatz | ☐ |
+| 🏪 | Laden | der Laden | dem Laden | ☐ |
+| 🚉 | Bahnhof | der Bahnhof | dem Bahnhof | ☐ |
+| 🚜 | Bauernhof | der Bauernhof | dem Bauernhof | ☐ |
+| ⛰️ | Berg | der Berg | dem Berg | ☐ |
+| 🌉 | Brücke | die Brücke | der Brücke | ☐ |
+| 🏊 | Badi | die Badi | der Badi | ☐ |
+| 🌻 | Garten | der Garten | dem Garten | ☐ |
+| 🚒 | Feuerwehr | die Feuerwehr | der Feuerwehr | ☐ |

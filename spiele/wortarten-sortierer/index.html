@@ -109,30 +109,47 @@ function zerlegeSatz(satz) {
   });
 }
 
+// Freigabe (Entscheid L4 a): Einzelwörter und je Satzgruppe eine Liste (Schlüssel in SAETZE). Nur
+// Inhalte aus Listen, die der Spieler üben darf (Aufsicht: alle). Kennt der Katalog die Listen
+// nicht, gilt alles als frei — dann entscheidet die Freigabe des Spiels.
+const FREI = new Set(LS.spielListen("wortarten-sortierer").length ? LS.freieListen("wortarten-sortierer") : ["einzelwoerter", ...Object.keys(SAETZE)]);
+// Je Stufe die Listen, aus denen sie zieht; die Königsstufe mischt Vergangenheit und Nominalisierung.
+const STUFE_LISTEN = { s1: ["einzelwoerter"], s2: ["einzelwoerter"], s3: ["saetze-einfach"], s4: ["saetze-zeiten"],
+  s5: ["saetze-nominal"], s6: ["saetze-zeiten", "saetze-nominal"] };
+const freieListenIn = stufe => STUFE_LISTEN[stufe].filter(l => FREI.has(l));
+/** Freie Sätze der Stufe; leer (und keine Einzelwörter) = Stufe wird nicht angeboten. */
+const saetzeIn = stufe => freieListenIn(stufe).filter(l => l !== "einzelwoerter").flatMap(l => SAETZE[l]);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => freieListenIn(s).length));
+
 /** Aufgabe je Stufe: Wort einzeln (1–2) oder markiert im Satz (3–5). Die Königsstufe nimmt einen
     Satz der Stufen 4 und 5 und fragt bis zu drei Wörter darin nacheinander ab (ziele). */
 function aufgabeErzeugen(stufe) {
+  if (!freieListenIn(stufe).length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
   if (stufe === "s1" || stufe === "s2") {
     const art = waehle(["N", "V", "A"]);
     const wort = waehle(WOERTER[art]);
     // Stufe 2: alles klein — die Grossschreibung verrät das Nomen nicht mehr, die Probe zählt.
     return { art, wort: stufe === "s2" ? wort.toLowerCase() : wort, satz: null };
   }
+  const quelle = waehle(saetzeIn(stufe));
   if (stufe === "s6") {
-    const teile = zerlegeSatz(waehle([...SAETZE.s4, ...SAETZE.s5]));
+    const teile = zerlegeSatz(quelle);
     const woerter = teile.filter(t => typeof t === "object");
     const gewaehlt = new Set(LS.mische(woerter).slice(0, 3));
     const ziele = woerter.filter(t => gewaehlt.has(t)); // in Satzreihenfolge
-    return { art: ziele[0].art, wort: ziele[0].wort, satz: teile, ziel: ziele[0], ziele };
+    return { art: ziele[0].art, wort: ziele[0].wort, satz: teile, quelle, ziel: ziele[0], ziele };
   }
-  const teile = zerlegeSatz(waehle(SAETZE[stufe]));
+  const teile = zerlegeSatz(quelle);
   const ziel = waehle(teile.filter(t => typeof t === "object"));
-  return { art: ziel.art, wort: ziel.wort, satz: teile, ziel, ziele: [ziel] };
+  return { art: ziel.art, wort: ziel.wort, satz: teile, quelle, ziel, ziele: [ziel] };
 }
 
 /** Mängel: Wortart bekannt, Ziele stehen im Satz, Königsstufe mit mindestens zwei Wörtern. */
 function pruefeAufgabe(a, stufe) {
   const m = [];
+  const ausListe = a.satz ? saetzeIn(stufe).includes(a.quelle)
+    : FREI.has("einzelwoerter") && WOERTER[a.art].some(w => w.toLowerCase() === a.wort.toLowerCase());
+  if (!ausListe) m.push("Inhalt nicht aus einer freien Liste");
   const ziele = a.ziele || [a];
   if (!ziele.every(z => ARTEN[z.art] && z.wort && z.wort.trim() === z.wort)) m.push("Wort oder Wortart fehlt");
   if (a.satz && !ziele.every(z => a.satz.includes(z))) m.push("abgefragtes Wort steht nicht im Satz");
@@ -149,14 +166,14 @@ LS.spiel({
   id: "wortarten-sortierer",
   einleitung: "Jedes Wort gehört in einen Korb: Nomen, Verb oder Adjektiv. Weisst du, wohin?",
   anzahl: 10,
-  stufen: {
+  stufen: nurMoegliche({
     s1: "Einzelne Wörter: Hund, spielen, rot.",
     s2: "Alles klein geschrieben — jetzt hilft nur die Probe.",
     s3: "Ein Wort im Satz: Der Hund bellt laut.",
     s4: "Vergangenheit und Steigerung: sprang, höher, am schnellsten.",
     s5: "Knifflig: das Lachen, beim Essen, das Blau.",
     s6: "Endgegner: drei Wörter im selben Satz, Vergangenheit und Nominalisierung gemischt.",
-  },
+  }),
 
   aufgabe(ctx) {
     if (ctx.nr === 0) Object.keys(zaehler).forEach(k => { zaehler[k] = 0; });
@@ -166,6 +183,8 @@ LS.spiel({
     const ist = art => (art === "A" ? "ein Adjektiv" : art === "V" ? "ein Verb" : "ein Nomen");
     // Abgefragte Wörter der Reihe nach (Königsstufe: mehrere im selben Satz, sonst eines).
     const ziele = a.ziele || [{ wort: a.wort, art: a.art }];
+    const loesung = ziele.map(x => `«${x.wort}» ist ${ist(x.art)}.`).join(" ") + (ziele.length === 1 ? ` ${ARTEN[ziele[0].art].probe}` : "");
+    ctx.loesung(loesung);
     const marken = new Map(); // Satzteil → <mark>
     let pos = 0;
     if (a.satz) {
@@ -215,7 +234,7 @@ LS.spiel({
         // Königsstufe: knapper, ohne Beispiel.
         ctx.falsch(ctx.stufe === "s6" ? `Mach die Probe für ${ARTEN[k].name} genau. Klappt sie mit «${z.wort}» in diesem Satz?`
           : `Mach die ${ARTEN[k].probe} Klappt das mit «${z.wort}»?`,
-          ziele.map(x => `«${x.wort}» ist ${ist(x.art)}.`).join(" ") + (ziele.length === 1 ? ` ${ARTEN[z.art].probe}` : ""));
+          loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
       });
       koerbe.append(korb);

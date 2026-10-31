@@ -32,43 +32,89 @@ const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
 const WASSER = { schwimmt: { bild: "🛟", text: "schwimmt" }, sinkt: { bild: "⬇️", text: "sinkt" } };
 const MATERIALIEN = { Holz: "🪵", Metall: "🔩", Glas: "🫙", Kunststoff: "🧴", Papier: "📄" };
 
+const ID = "schwimmt-sinkt";
+
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : STOFF_LISTEN);
+const WASSER_FREI = FREI.has("wasser") ? WASSER_DINGE : [];
+const MATERIAL_FREI = FREI.has("material") ? MATERIAL_DINGE : [];
+const FRAGEN = STOFF_FRAGEN.filter(f => FREI.has(f[5]));
+
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   wasser(einfach = false) {
-    const [bild, name, schwimmt] = waehle(einfach ? WASSER_DINGE.filter(d => WASSER_EINFACH.includes(d[1])) : WASSER_DINGE);
+    const liste = einfach ? WASSER_FREI.filter(d => WASSER_EINFACH.includes(d[1])) : WASSER_FREI;
+    if (!liste.length) return null;
+    const [bild, name, schwimmt] = waehle(liste);
     return { art: "wasser", bild, name, richtig: schwimmt ? "schwimmt" : "sinkt" };
   },
   material(n = 3) {
-    const [bild, name, material] = waehle(MATERIAL_DINGE);
+    if (!MATERIAL_FREI.length) return null;
+    const [bild, name, material] = waehle(MATERIAL_FREI);
     const andere = mische(Object.keys(MATERIALIEN).filter(m => m !== material)).slice(0, n - 1);
     return { art: "material", bild, name, richtig: material, koerbe: mische([material, ...andere]) };
   },
   frage(n) {
-    const liste = STOFF_FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
-    const [, frage, richtig, f1, f2] = waehle(liste.length ? liste : STOFF_FRAGEN.filter(f => f[0] === n));
+    // Fragen dieser Stufe, ab und zu eine der Stufe davor; ohne freie Frage dieser Stufe keine Aufgabe.
+    if (!FRAGEN.some(f => f[0] === n)) return null;
+    const liste = FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const [, frage, richtig, f1, f2] = waehle(liste);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
   /** Irgendeine Frage bis zu dieser Stufe (Königsstufe). */
   frageBis(n) {
-    const [, frage, richtig, f1, f2] = waehle(STOFF_FRAGEN.filter(f => f[0] <= n));
+    const liste = FRAGEN.filter(f => f[0] <= n);
+    if (!liste.length) return null;
+    const [, frage, richtig, f1, f2] = waehle(liste);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
 };
 
+// Je Stufe die Arten (mehrfach genannt = häufiger).
 const STUFE = {
-  s1: () => ARTEN.wasser(true),
-  s2: () => ARTEN.wasser(),
-  s3: () => waehle([() => ARTEN.material(), () => ARTEN.wasser()])(),
-  s4: () => waehle([() => ARTEN.frage(4), () => ARTEN.material()])(),
-  s5: () => waehle([() => ARTEN.frage(5), () => ARTEN.wasser()])(),
+  s1: [() => ARTEN.wasser(true)],
+  s2: [() => ARTEN.wasser()],
+  s3: [() => ARTEN.material(), () => ARTEN.wasser()],
+  s4: [() => ARTEN.frage(4), () => ARTEN.material()],
+  s5: [() => ARTEN.frage(5), () => ARTEN.wasser()],
   // Königsstufe: alles gemischt — Wasser, Material mit allen Körben, alle Fragen
-  s6: () => waehle([() => ARTEN.wasser(), () => ARTEN.material(5), () => ARTEN.frageBis(6), () => ARTEN.frageBis(6)])(),
+  s6: [() => ARTEN.wasser(), () => ARTEN.material(5), () => ARTEN.frageBis(6), () => ARTEN.frageBis(6)],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Schwimmt oder sinkt? Holz, Stein, Apfel …",
+  s2: "Mehr Dinge: Kerze, Schlüssel, Kartoffel.",
+  s3: "Aus welchem Material ist das?",
+  s4: "Durchsichtig, biegsam, leitet Wärme.",
+  s5: "Warum schwimmt ein Schiff aus Stahl?",
+  s6: "Alles gemischt: Wasser, Material, Eigenschaften, Schiff.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (stoffe.js). */
+function herkunft(a) {
+  if (a.art === "wasser") return [WASSER_DINGE.some(d => d[1] === a.name && (d[2] ? "schwimmt" : "sinkt") === a.richtig) ? "wasser" : "?"];
+  if (a.art === "material") return [MATERIAL_DINGE.some(d => d[1] === a.name && d[2] === a.richtig) ? "material" : "?"];
+  return [STOFF_FRAGEN.find(f => f[1] === a.frage)?.[5] || "?"];
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
   const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
   if (stufe === "s1" && a.art === "wasser" && !WASSER_EINFACH.includes(a.name)) m.push("Ding in Stufe 1 nicht eindeutig");
   if (a.koerbe && (!a.koerbe.includes(a.richtig) || new Set(a.koerbe).size !== a.koerbe.length)) m.push("Korb fehlt oder doppelt");
   if (a.art === "frage") {
@@ -82,14 +128,7 @@ LS.spiel({
   id: "schwimmt-sinkt",
   einleitung: "Plumps! Was passiert, wenn du das ins Wasser legst? Schwimmt es oder sinkt es?",
   anzahl: 8,
-  stufen: {
-    s1: "Schwimmt oder sinkt? Holz, Stein, Apfel …",
-    s2: "Mehr Dinge: Kerze, Schlüssel, Kartoffel.",
-    s3: "Aus welchem Material ist das?",
-    s4: "Durchsichtig, biegsam, leitet Wärme.",
-    s5: "Warum schwimmt ein Schiff aus Stahl?",
-    s6: "Alles gemischt: Wasser, Material, Eigenschaften, Schiff.",
-  },
+  stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

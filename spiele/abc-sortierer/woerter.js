@@ -1,6 +1,10 @@
 // Wörter für den ABC-Sortierer (Nomen mit Bild). Viele Wörter teilen den Anfangsbuchstaben,
 // damit ab Stufe 3 der zweite und dritte Buchstabe entscheidet.
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltsliste (Entscheid L4 a): die ganze Datei ist eine Liste, „nomen-bild“. Der Prüfstand steht
+// im Katalog (spiele/gemeinsam/katalog.js, Eintrag „abc-sortierer“, Feld listen). Ohne diese Liste
+// bleiben nur die Stufen mit der ABC-Leiste (ohne Wörter).
 
 const ABC_WOERTER = [
   ["Affe", "🐒"], ["Ameise", "🐜"], ["Apfel", "🍎"], ["Auto", "🚗"],

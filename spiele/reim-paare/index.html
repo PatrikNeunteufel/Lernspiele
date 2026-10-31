@@ -61,48 +61,71 @@ function ausVerschiedenenGruppen(liste, anzahl) {
   return ergebnis;
 }
 
+// Freigabe (Entscheid L4 a): Inhalte nur aus Listen, die der Spieler üben darf (Aufsicht: alle).
+// Kennt der Katalog die Listen nicht, gilt alles als frei — dann entscheidet die Freigabe des Spiels.
+const FREI = new Set(LS.spielListen("reim-paare").length ? LS.freieListen("reim-paare") : ["reimgruppen", "reimverse"]);
+const GRUPPEN_FREI = FREI.has("reimgruppen");
+// Auswahl in den Versen: alle Reimwörter — oder, wenn die Reimgruppen nicht frei sind, nur die
+// Lösungswörter der Verse (sie stammen alle aus verschiedenen Reimgruppen).
+const VERS_WOERTER = REIMVERSE.map(([, wort]) => ALLE.find(w => w.wort === wort));
+const VERS_AUSWAHL = GRUPPEN_FREI ? ALLE : VERS_WOERTER;
+
 const ARTEN = {
   welcheReimt(anzahl) {
     const gruppe = waehle(GRUPPEN.filter(g => mitBild(g).length >= 2));
     const [vorlage, richtig] = mische(mitBild(gruppe));
-    return { art: "welcheReimt", vorlage, richtig, optionen: mische([richtig, ...ausVerschiedenenGruppen(andere(vorlage, true), anzahl - 1)]) };
+    return { art: "welcheReimt", liste: "reimgruppen", vorlage, richtig, optionen: mische([richtig, ...ausVerschiedenenGruppen(andere(vorlage, true), anzahl - 1)]) };
   },
   paare(anzahl) {
     const gruppen = mische(GRUPPEN.filter(g => mitBild(g).length >= 2)).slice(0, anzahl);
-    return { art: "paare", karten: mische(gruppen.flatMap(g => mische(mitBild(g)).slice(0, 2))) };
+    return { art: "paare", liste: "reimgruppen", karten: mische(gruppen.flatMap(g => mische(mitBild(g)).slice(0, 2))) };
   },
   reimtNicht(nurBild) {
     const auswahl = g => (nurBild ? mitBild(g) : g);
     const gruppe = waehle(GRUPPEN.filter(g => auswahl(g).length >= 3));
     const drei = mische(auswahl(gruppe)).slice(0, 3);
     const richtig = waehle(andere(drei[0], nurBild));
-    return { art: "reimtNicht", richtig, optionen: mische([...drei, richtig]) };
+    return { art: "reimtNicht", liste: "reimgruppen", richtig, optionen: mische([...drei, richtig]) };
   },
   vers(nurBild) {
     const verse = REIMVERSE.filter(([, wort]) => !nurBild || ALLE.find(w => w.wort === wort).bild);
     const [text, wort] = waehle(verse);
     const richtig = ALLE.find(w => w.wort === wort);
-    return { art: "vers", text, richtig, optionen: mische([richtig, ...ausVerschiedenenGruppen(andere(richtig, nurBild), 3)]) };
+    const fremd = (nurBild ? mitBild(VERS_AUSWAHL) : VERS_AUSWAHL).filter(x => !reimen(x, richtig));
+    return { art: "vers", liste: "reimverse", text, richtig, optionen: mische([richtig, ...ausVerschiedenenGruppen(fremd, 3)]) };
   },
 };
 
 // Basisklasse 1: Stufe 1 Kindergarten, 2–4 1. Klasse, 5 2. Klasse, 6 Endgegner.
 // Bis Stufe 5 (2. Klasse) tragen alle Antworten ein Bild; erst die Königsstufe nimmt auch Wörter ohne Bild.
+// Je Stufe die Aufgabenarten mit der Liste, aus der sie ihren Inhalt nehmen.
 const BILD_NOETIG = ["s1", "s2", "s3", "s4", "s5"];
 const STUFE = {
-  s1: () => ARTEN.welcheReimt(3),
-  s2: () => ARTEN.welcheReimt(4),
-  s3: () => ARTEN.paare(3),
-  s4: () => waehle([() => ARTEN.paare(4), () => ARTEN.reimtNicht(true)])(),
-  s5: () => waehle([() => ARTEN.reimtNicht(true), () => ARTEN.vers(true)])(),
-  s6: () => waehle([() => ARTEN.vers(false), () => ARTEN.paare(5), () => ARTEN.paare(6)])(),
+  s1: [["reimgruppen", () => ARTEN.welcheReimt(3)]],
+  s2: [["reimgruppen", () => ARTEN.welcheReimt(4)]],
+  s3: [["reimgruppen", () => ARTEN.paare(3)]],
+  s4: [["reimgruppen", () => ARTEN.paare(4)], ["reimgruppen", () => ARTEN.reimtNicht(true)]],
+  s5: [["reimgruppen", () => ARTEN.reimtNicht(true)], ["reimverse", () => ARTEN.vers(true)]],
+  s6: [["reimverse", () => ARTEN.vers(false)], ["reimgruppen", () => ARTEN.paare(5)], ["reimgruppen", () => ARTEN.paare(6)]],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Aufgabenarten der Stufe, deren Liste frei ist; leer = Stufe wird nicht angeboten. */
+const moeglich = stufe => STUFE[stufe].filter(([l]) => FREI.has(l)).map(([, neu]) => neu);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => moeglich(s).length));
+
+function aufgabeErzeugen(stufe) {
+  const arten = moeglich(stufe);
+  if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  return waehle(arten)();
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a, stufe) {
   const m = [];
+  const ausListe = a.art === "paare" ? a.karten.every(k => ALLE.includes(k))
+    : a.art === "vers" ? REIMVERSE.some(([t]) => t === a.text) && a.optionen.every(o => VERS_AUSWAHL.includes(o))
+    : a.optionen.every(o => ALLE.includes(o));
+  if (!FREI.has(a.liste) || !ausListe) m.push("Inhalt nicht aus einer freien Liste");
   if (a.art === "paare") {
     for (const k of a.karten) if (a.karten.filter(x => reimen(x, k)).length !== 2) m.push(`«${k.wort}» hat nicht genau einen Reimpartner`);
     if (a.karten.some(k => !k.bild)) m.push("Karte ohne Bild");
@@ -128,6 +151,8 @@ const reimeVon = w => ALLE.filter(x => reimen(x, w)).map(x => x.wort).join(" –
 
 /** Paare finden: zwei Karten antippen, die sich reimen. */
 function paareSpielen(ctx, a) {
+  const loesung = "Die Paare: " + [...new Set(a.karten.map(x => x.gruppe))].map(g => a.karten.filter(x => x.gruppe === g).map(x => x.wort).join(" – ")).join(", ");
+  ctx.loesung(loesung);
   ctx.flaeche.append(el("div", { class: "auftrag", text: "Finde die Reim-Paare: Tipp zwei Bilder an, die sich reimen." }));
   const box = el("div", { class: "paare" });
   let gewaehlt = null;
@@ -153,7 +178,7 @@ function paareSpielen(ctx, a) {
       }
       for (const kn of [erste.knopf, knopf]) { kn.classList.remove("falsch"); void kn.offsetWidth; kn.classList.add("falsch"); }
       ctx.falsch(`«${erste.k.wort}» und «${k.wort}» klingen am Ende nicht gleich. Sprich beide Wörter laut.`,
-        "Die Paare: " + [...new Set(a.karten.map(x => x.gruppe))].map(g => a.karten.filter(x => x.gruppe === g).map(x => x.wort).join(" – ")).join(", "));
+        loesung);
       if (ctx.vorbei()) fertig = true;
     });
     return knopf;
@@ -166,14 +191,14 @@ LS.spiel({
   id: "reim-paare",
   einleitung: "Maus und Haus — das reimt sich! Hör genau hin: Welche Wörter klingen am Ende gleich?",
   anzahl: 8,
-  stufen: {
+  stufen: nurMoegliche({
     s1: "Welches Bild reimt sich? Drei Bilder zur Auswahl.",
     s2: "Welches Bild reimt sich? Vier Bilder zur Auswahl.",
     s3: "Reim-Paare finden: drei Paare.",
     s4: "Vier Reim-Paare — und welches Bild reimt sich nicht?",
     s5: "Welches reimt sich nicht? Und Reime im Vers ergänzen: Die Ziege fängt eine …",
     s6: "Endgegner: Verse und grosse Runden mit fünf oder sechs Reim-Paaren.",
-  },
+  }),
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
@@ -206,7 +231,8 @@ LS.spiel({
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, inhalt, breite: 130,
         hinweis: "Lies den Vers laut. Das fehlende Wort klingt am Ende wie ein Wort im Vers.",
-        loesung: a.text.replace("___", a.richtig.wort) + ` (${reimeVon(a.richtig)})`,
+        // Die ganze Reimgruppe nur nennen, wenn die Reimgruppen frei sind.
+        loesung: a.text.replace("___", a.richtig.wort) + (GRUPPEN_FREI ? ` (${reimeVon(a.richtig)})` : ""),
         lob: a.text.replace("___", a.richtig.wort) + " 🎵",
       });
     }

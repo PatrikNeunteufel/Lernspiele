@@ -2,6 +2,15 @@
 // NMG.2.4.d Merkmale, die das Leben in einem Lebensraum erlauben). Gilt für die Fledermäuse der
 // Schweiz. Bewusst ohne genaue Zahlen (Artenzahl, Gewicht), die je nach Quelle abweichen.
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten (Entscheid L4 a): Jede Konstante unten ist eine Liste, die einzeln freigegeben
+// wird. Der Prüfstand steht im Katalog (spiele/gemeinsam/katalog.js, Spiel „fledermaus-forscher“,
+// Feld listen); Kinder sehen nur Inhalte aus freien Listen.
+//   aussagen     FLEDERMAUS_AUSSAGEN     Aussagen „Stimmt das?“
+//   fragen       FLEDERMAUS_FRAGEN       Fragen mit Auswahl
+//   jahr         FLEDERMAUS_JAHR         Das Jahr einer Fledermaus
+//   anpassungen  FLEDERMAUS_ANPASSUNGEN  Merkmal und Nutzen
+const FLEDERMAUS_LISTEN = ["aussagen", "fragen", "jahr", "anpassungen"];
 
 // Aussagen: [Stufe ab, Aussage, stimmt?, Erklärung]
 const FLEDERMAUS_AUSSAGEN = [

@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zeitreise-Verben</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .satz {
+    text-align: center;
+    font-size: clamp(24px, 5vw, 34px);
+    font-weight: 700;
+    line-height: 1.6;
+    margin: 6px 0 18px;
+  }
+  .satz mark {
+    background: #fff1c2;
+    border-bottom: 5px solid #f5b301;
+    border-radius: 6px;
+    padding: 0 6px;
+    font-weight: 900;
+    color: inherit;
+  }
+  .satz .luecke {
+    display: inline-block; min-width: 2.4em;
+    border-bottom: 5px solid var(--knopf); color: var(--knopf); font-weight: 900;
+  }
+  /* Zielzeit der Zeitreise: ein Band in Deko-Farbe */
+  .ziel {
+    width: fit-content; max-width: 100%;
+    margin: 0 auto 14px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--deko-1); color: #fff;
+    font-size: clamp(18px, 4vw, 24px); font-weight: 900;
+    text-align: center;
+  }
+  .satzwahl { font-weight: 700; line-height: 1.35; }
+  .schritt { text-align: center; color: var(--text-leise); font-weight: 800; margin: -4px 0 10px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>⏳ Zeitreise-Verben</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.5.D.1.b (Orientierungspunkt 4. Klasse): erste Erfahrung mit Präsens, Präteritum,
+// Perfekt; D.5.D.1.c (5. Klasse): Zeitformen benennen. Stufe 1–2 nur „jetzt oder früher?“,
+// Stufe 3 Zeitform erkennen und mit regelmässigen Verben bilden, Stufe 4 unregelmässige Verben,
+// Stufe 5 Perfekt mit hat oder ist, Königsstufe: erkennen und dann in eine andere Zeit reisen.
+// Verben und Sätze stehen in woerter.js.
+
+const { waehle, mische, el } = LS;
+
+const ZEITEN = {
+  praesens:    { name: "Präsens",    klein: "Gegenwart" },
+  praeteritum: { name: "Präteritum", klein: "Vergangenheit" },
+  perfekt:     { name: "Perfekt",    klein: "Vergangenheit" },
+};
+const ZEIT_IDS = Object.keys(ZEITEN);
+
+const verb = (zeile, regel) => {
+  const [inf, praes, praet, part, hilf, subj, rest] = zeile;
+  return { inf, praes, praet, part, hilf, subj, rest, regel };
+};
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Kinder üben nur Verben aus freien Listen (LS.freieListen; die Aufsicht sieht alle). Kennt der
+// Katalog die Listen dieses Spiels noch nicht, gilt alles als frei — wie bei einem Spiel ohne Listen.
+const SPIEL_ID = "zeitreise-verben";
+const FREI = new Set(LS.spielListen(SPIEL_ID).length ? LS.freieListen(SPIEL_ID) : ["regelmaessig", "unregelmaessig"]);
+
+/** Ganze Listen (für die Prüfung der Verbliste) und die freien Verben (für die Aufgaben). */
+const LISTE_REGEL = VERBEN_REGELMAESSIG.map(z => verb(z, true));
+const LISTE_UNREGEL = VERBEN_UNREGELMAESSIG.map(z => verb(z, false));
+const REGELMAESSIG = FREI.has("regelmaessig") ? LISTE_REGEL : [];
+const UNREGELMAESSIG = FREI.has("unregelmaessig") ? LISTE_UNREGEL : [];
+const ALLE = [...REGELMAESSIG, ...UNREGELMAESSIG];
+
+/** Verbstamm: spielen → spiel, wandern → wander. */
+const stammVon = inf => (/(er|el)n$/.test(inf) ? inf.slice(0, -1) : inf.slice(0, -2));
+/** Braucht der Stamm ein e vor -te / -t? (warten → wartete, regnen → regnete, aber wohnen → wohnte,
+    lernen → lernte; doppeltes m oder n ohne e: kommen → „kommte“) */
+const mitE = s => /(d|t|chn|[^aeiouäöülrhmn]n|[^aeiouäöülrhmn]m)$/.test(s);
+/** Nach der Regel gebildet: Präteritum -te, Partizip ge-…-t, Präsens -t. Für unregelmässige Verben
+    ist das die typische falsche Form (gehte, gegeht). */
+const regelForm = v => {
+  const s = stammVon(v.inf);
+  const e = mitE(s) ? "e" : "";
+  return { praes: s + e + "t", praet: s + e + "te", part: "ge" + s + e + "t" };
+};
+
+/** Satzteile einer Zeitform: Text oder { verb }. variante: falschPraet, falschPart, falschHilf. */
+function teile(v, zeit, variante = "") {
+  const r = regelForm(v);
+  const praet = variante === "falschPraet" ? r.praet : v.praet;
+  const part = variante === "falschPart" ? r.part : v.part;
+  const hilf = variante === "falschHilf" ? (v.hilf === "hat" ? "ist" : "hat") : v.hilf;
+  if (zeit === "praesens") return [v.subj, { verb: v.praes }, v.rest];
+  if (zeit === "praeteritum") return [v.subj, { verb: praet }, v.rest];
+  return [v.subj, { verb: hilf }, v.rest, { verb: part }];
+}
+const text = t => t.map(x => (typeof x === "string" ? x : x.verb)).join(" ") + ".";
+const verbText = t => t.filter(x => typeof x !== "string").map(x => x.verb).join(" … ");
+
+// ---------- Aufgaben ----------
+
+function jetztFrueher(stufe) {
+  const v = waehle(stufe === "s1" ? REGELMAESSIG : ALLE);
+  const zeit = waehle(stufe === "s1" ? ["praesens", "praeteritum"] : ZEIT_IDS);
+  return { art: "jetztFrueher", v, zeit, teile: teile(v, zeit), richtig: zeit === "praesens" ? "jetzt" : "frueher", optionen: ["jetzt", "frueher"] };
+}
+
+function erkennen(verben, merkhilfe) {
+  const v = waehle(verben);
+  const zeit = waehle(ZEIT_IDS);
+  return { art: "erkennen", v, zeit, teile: teile(v, zeit), richtig: zeit, optionen: ZEIT_IDS, merkhilfe };
+}
+
+/** Welche falschen Sätze stehen zur Wahl? Je Stufe andere Fallen. */
+function fallen(v, ziel, stufe) {
+  if (ziel === "praesens") return ["praeteritum", "perfekt"];
+  if (stufe === "s3") return ziel === "praeteritum" ? ["perfekt", "praesens"] : ["praeteritum", "praesens"];
+  if (stufe === "s4") return ziel === "praeteritum" ? ["falschPraet", "praesens"] : ["falschPart", "praeteritum"];
+  if (ziel === "praeteritum") return v.regel ? ["praesens", "perfekt"] : ["falschPraet", "praesens", "perfekt"];
+  return v.regel ? ["falschHilf", "praeteritum", "praesens"] : ["falschHilf", "falschPart", "praeteritum"];
+}
+
+function optionenFuer(v, ziel, stufe) {
+  const liste = [{ art: "richtig", text: text(teile(v, ziel)) }];
+  for (const f of fallen(v, ziel, stufe)) {
+    const t = f.startsWith("falsch") ? teile(v, ziel, f) : teile(v, f);
+    liste.push({ art: f, text: text(t) });
+  }
+  return liste;
+}
+
+function bilden(verben, ziele, stufe, quelle = "praesens") {
+  const v = waehle(verben);
+  const ziel = waehle(ziele.filter(z => z !== quelle));
+  const liste = optionenFuer(v, ziel, stufe);
+  return { art: "bilden", v, quelle, ziel, teile: teile(v, quelle), liste, richtig: liste[0].text, optionen: mische(liste.map(o => o.text)) };
+}
+
+function hilfsverb() {
+  // Ausgewogen: halb hat, halb ist (sofern die freien Verben beide haben).
+  const hilf = waehle([...new Set(ALLE.map(x => x.hilf))]);
+  const v = waehle(ALLE.filter(x => x.hilf === hilf));
+  return { art: "hilfsverb", v, richtig: v.hilf, optionen: ["hat", "ist"] };
+}
+
+/** Königsstufe: erst die Zeitform des Satzes benennen, dann in eine andere Zeit reisen. */
+function zweischritt() {
+  const quelle = waehle(ZEIT_IDS);
+  const b = bilden(ALLE, ZEIT_IDS, "s6", quelle);
+  return { ...b, art: "zweischritt", erkennen: { richtig: quelle, optionen: ZEIT_IDS } };
+}
+
+// Je Stufe die Aufgabenarten mit der Bedingung, unter der sie mit den freien Listen gehen: Stufe 1
+// und das Bilden in Stufe 3 brauchen regelmässige, Stufe 4 unregelmässige Verben; die übrigen
+// nehmen, was frei ist. Eine Stufe ohne mögliche Aufgabenart wird nicht angeboten.
+const R = REGELMAESSIG.length > 0, U = UNREGELMAESSIG.length > 0, A = ALLE.length > 0;
+const VARIANTEN = {
+  s1: [[() => jetztFrueher("s1"), R]],
+  s2: [[() => jetztFrueher("s2"), A]],
+  s3: [[() => erkennen(ALLE, true), A], [() => bilden(REGELMAESSIG, ["praeteritum", "perfekt"], "s3"), R]],
+  s4: [[() => erkennen(UNREGELMAESSIG, true), U], [() => bilden(UNREGELMAESSIG, ["praeteritum", "perfekt"], "s4"), U], [() => bilden(UNREGELMAESSIG, ["praeteritum", "perfekt"], "s4"), U]],
+  s5: [[hilfsverb, A], [() => bilden(ALLE, ["perfekt"], "s5", waehle(["praesens", "praeteritum"])), A], [() => erkennen(ALLE, false), A]],
+  s6: [[() => zweischritt(), A]],
+};
+const STUFE = Object.fromEntries(Object.entries(VARIANTEN)
+  .map(([s, v]) => [s, v.filter(([, geht]) => geht).map(([f]) => f)]).filter(([, v]) => v.length));
+const ERLAUBT = { s1: ["jetztFrueher"], s2: ["jetztFrueher"], s3: ["erkennen", "bilden"], s4: ["erkennen", "bilden"], s5: ["hilfsverb", "bilden", "erkennen"], s6: ["zweischritt"] };
+
+function aufgabeErzeugen(stufe) { return waehle(STUFE[stufe])(); }
+
+// ---------- Prüfung ----------
+
+/** Mängel der Verbliste: regelmässige Verben stimmen mit der Regel überein, unregelmässige nicht;
+    Hilfsverb hat oder ist; Partizip mit ge-; kein ß. */
+const LISTEN_MAENGEL = (() => {
+  const m = [];
+  for (const v of [...LISTE_REGEL, ...LISTE_UNREGEL]) {
+    const r = regelForm(v);
+    if (!["hat", "ist"].includes(v.hilf)) m.push(`${v.inf}: Hilfsverb «${v.hilf}»`);
+    if (!v.part.startsWith("ge")) m.push(`${v.inf}: Partizip ohne ge-`);
+    if (v.regel && (r.praes !== v.praes || r.praet !== v.praet || r.part !== v.part)) m.push(`${v.inf}: nicht regelmässig (${r.praes}, ${r.praet}, ${r.part})`);
+    if (!v.regel && r.praet === v.praet && r.part === v.part) m.push(`${v.inf}: ist doch regelmässig`);
+    if (!/^[A-ZÄÖÜ]/.test(v.subj)) m.push(`${v.inf}: Satz beginnt klein`);
+  }
+  if (new Set([...LISTE_REGEL, ...LISTE_UNREGEL].map(v => v.inf)).size !== LISTE_REGEL.length + LISTE_UNREGEL.length) m.push("Verb doppelt");
+  if (/ß/.test(JSON.stringify([VERBEN_REGELMAESSIG, VERBEN_UNREGELMAESSIG]))) m.push("ß in der Verbliste");
+  return m;
+})();
+
+function pruefeAufgabe(a, stufe) {
+  const m = [...LISTEN_MAENGEL];
+  if (!STUFE[stufe]) m.push("Stufe wird mit den freien Listen nicht angeboten");
+  if (!ERLAUBT[stufe].includes(a.art)) m.push(`Aufgabenart ${a.art} passt nicht zur Stufe`);
+  if (!ALLE.includes(a.v)) m.push(`Verb «${a.v.inf}» stammt nicht aus einer freien Liste`);
+  if (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length) m.push("Auswahl doppelt oder ohne Lösung");
+  if (stufe === "s1" && (!a.v.regel || a.zeit === "perfekt")) m.push("Stufe 1: nur regelmässige Verben in Präsens und Präteritum");
+  if (a.art === "bilden" || a.art === "zweischritt") {
+    if (a.ziel === a.quelle) m.push("Ziel- und Ausgangszeit gleich");
+    if (stufe === "s3" && !a.v.regel) m.push("Stufe 3: unregelmässiges Verb beim Bilden");
+    if (stufe === "s4" && a.v.regel) m.push("Stufe 4: regelmässiges Verb beim Bilden");
+    if (a.liste.length < 3) m.push("weniger als drei Sätze zur Wahl");
+    if (a.liste.filter(o => o.art === "richtig").length !== 1) m.push("nicht genau ein richtiger Satz");
+  }
+  if (a.art === "zweischritt" && a.erkennen.richtig !== a.quelle) m.push("Schritt 1 fragt nicht nach der Ausgangszeit");
+  if (a.art === "hilfsverb" && a.richtig !== a.v.hilf) m.push("Hilfsverb falsch");
+  if (/ß/.test(JSON.stringify(a))) m.push("ß in der Aufgabe");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Satz mit markiertem Verb; mitLuecke: das Hilfsverb als Lücke (Stufe 5). */
+function satzBild(t, mitLuecke) {
+  const box = el("div", { class: "satz" });
+  t.forEach((x, i) => {
+    if (i) box.append(" ");
+    if (typeof x === "string") box.append(x);
+    else if (mitLuecke && i === 1) box.append(el("span", { class: "luecke", text: "___" }));
+    else box.append(el("mark", { text: x.verb }));
+  });
+  box.append(".");
+  return box;
+}
+
+const zeitInhalt = (merkhilfe) => z => ({ text: ZEITEN[z].name, klein: merkhilfe ? ZEITEN[z].klein : "" });
+
+/** Hinweis nach falscher Zeitform (gewählt ≠ richtig) — ohne die richtige zu nennen. */
+function erkennenHinweis(gewaehlt, richtig) {
+  if (richtig === "praesens") return "Ist das schon vorbei? Lies das Verb genau.";
+  if (gewaehlt === "praesens") return "Passiert das gerade? Schau dir das ganze Verb an — auch am Satzende.";
+  return "Zähl die Teile des Verbs: Ist es ein einziges Wort, oder sind es zwei?";
+}
+
+const BILDEN_HINWEIS = {
+  praesens: "Dieser Satz passiert gerade. Reise in die Vergangenheit!",
+  praeteritum: "Das ist auch Vergangenheit, aber eine andere Zeitform. Im Perfekt hat das Verb zwei Teile.",
+  perfekt: "Das ist auch Vergangenheit, aber eine andere Zeitform. Im Präteritum ist das Verb ein einziges Wort.",
+  zurueck: "Das ist schon vorbei. Reise zurück in die Gegenwart!",
+  falschPraet: "Dieses Verb ist unregelmässig — im Präteritum ändert es sich stärker. Sprich die Form laut: Klingt sie richtig?",
+  falschPart: "Dieses Verb ist unregelmässig — seine ge-Form endet anders. Sprich sie laut: Klingt sie richtig?",
+  falschHilf: "Das Hilfsverb passt nicht. Sprich den Satz laut: Klingt er richtig?",
+};
+
+/** Auswahl der Sätze für die Zielzeit (Stufe 3–6). */
+function bildenAuswahl(ctx, a) {
+  const art = new Map(a.liste.map(o => [o.text, o.art]));
+  const richtigTeile = teile(a.v, a.ziel);
+  LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.richtig, breite: 300,
+    inhalt: t => el("span", { class: "satzwahl", text: t }),
+    hinweis: t => (a.ziel === "praesens" ? BILDEN_HINWEIS.zurueck : BILDEN_HINWEIS[art.get(t)]),
+    loesung: `${ZEITEN[a.ziel].name}: ${a.richtig}`,
+    lob: `Richtig! ${ZEITEN[a.ziel].name} von ${a.v.inf}: ${verbText(richtigTeile)}`,
+  });
+}
+
+const ZIEL_TEXT = { praesens: "⏩ Reise in die Gegenwart: ins Präsens!", praeteritum: "⏪ Reise ins Präteritum!", perfekt: "⏪ Reise ins Perfekt!" };
+
+LS.spiel({
+  id: "zeitreise-verben",
+  einleitung: "Steig ein in die Zeitmaschine! Verben verraten, wann etwas passiert: jetzt oder früher.",
+  anzahl: 8,
+  stufen: Object.fromEntries(Object.entries({
+    s1: "Jetzt oder früher? Lina spielt — Lina spielte.",
+    s2: "Jetzt oder früher? Auch mit hat oder ist: Tim ist nach Hause gegangen.",
+    s3: "Präsens, Präteritum oder Perfekt? Und Sätze in die Vergangenheit setzen.",
+    s4: "Unregelmässige Verben: gehen – ging – gegangen.",
+    s5: "Hat oder ist? Das Perfekt richtig bilden — ohne Merkhilfe.",
+    s6: "Endgegner: Zeitform erkennen und dann in eine andere Zeit reisen.",
+  }).filter(([s]) => STUFE[s])),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+
+    if (a.art === "jetztFrueher") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Passiert das jetzt oder früher?" }), satzBild(a.teile));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 150,
+        inhalt: o => (o === "jetzt" ? { bild: "🕐", text: "jetzt" } : { bild: "⏳", text: "früher" }),
+        hinweis: () => (a.richtig === "jetzt" ? "Passiert das gerade? Schau dir das Verb genau an." : "Ist das schon vorbei? Schau dir das ganze Verb an."),
+        loesung: `${text(a.teile)} — das ist ${a.richtig === "jetzt" ? "jetzt (Gegenwart)" : "früher (Vergangenheit)"}.`,
+        lob: a.richtig === "jetzt" ? "Richtig, das passiert jetzt!" : `Richtig, das war früher: ${verbText(a.teile)}.`,
+      });
+    } else if (a.art === "erkennen") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "In welcher Zeitform steht der Satz?" }), satzBild(a.teile));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 150,
+        inhalt: zeitInhalt(a.merkhilfe),
+        hinweis: g => erkennenHinweis(g, a.richtig),
+        loesung: `«${verbText(a.teile)}» ist ${ZEITEN[a.zeit].name}.`,
+        lob: `Richtig: ${ZEITEN[a.zeit].name}!`,
+      });
+    } else if (a.art === "bilden") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Wie heisst der Satz in der anderen Zeit?" }), satzBild(a.teile),
+        el("div", { class: "ziel", text: ZIEL_TEXT[a.ziel] }));
+      bildenAuswahl(ctx, a);
+    } else if (a.art === "hilfsverb") {
+      const t = teile(a.v, "perfekt");
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Hat oder ist? Was fehlt im Perfekt?" }), satzBild(t, true));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 130,
+        hinweis: () => (a.richtig === "hat" ? "Hier bewegt sich niemand von einem Ort zum anderen. Sprich den Satz laut: Klingt er richtig?"
+          : a.v.inf === "bleiben" ? "«bleiben» bildet das Perfekt wie die Verben der Bewegung. Sprich den Satz laut."
+          : "Bewegt sich hier jemand oder etwas von einem Ort weg oder an einen Ort hin? Dann passt das andere Hilfsverb."),
+        loesung: text(t),
+        lob: `Richtig: ${text(t)}`,
+      });
+    } else {
+      // Königsstufe: Schritt 1 Zeitform benennen, Schritt 2 in die Zielzeit reisen.
+      const schritt = el("div", { class: "schritt", text: "Schritt 1 von 2" });
+      const auftrag = el("div", { class: "auftrag", text: "In welcher Zeitform steht der Satz?" });
+      ctx.flaeche.append(schritt, auftrag, satzBild(a.teile));
+      ctx.loesung?.(`${ZEITEN[a.quelle].name}, dann ${ZEITEN[a.ziel].name}: ${a.richtig}`); // für die Testhilfe 🔑
+      const box = el("div", { class: "wahl" });
+      box.style.setProperty("--wahl-breite", "150px");
+      let weiter = false;
+      for (const z of a.erkennen.optionen) {
+        const k = el("button", { type: "button", class: "wahl-knopf", text: ZEITEN[z].name });
+        k.addEventListener("click", () => {
+          if (weiter || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+          if (z === a.quelle) {
+            weiter = true;
+            k.classList.add("richtig");
+            LS.ton("tipp");
+            ctx.sag(`Genau, ${ZEITEN[z].name}! Jetzt geht die Reise los.`, "gut");
+            box.remove();
+            schritt.textContent = "Schritt 2 von 2";
+            auftrag.textContent = "Wie heisst der Satz in der anderen Zeit?";
+            ctx.flaeche.append(el("div", { class: "ziel", text: ZIEL_TEXT[a.ziel] }));
+            bildenAuswahl(ctx, a);
+            return;
+          }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+          ctx.falsch(erkennenHinweis(z, a.quelle), `Der Satz steht im ${ZEITEN[a.quelle].name}. Im ${ZEITEN[a.ziel].name} heisst er: ${a.richtig}`);
+        });
+        box.append(k);
+      }
+      ctx.flaeche.append(box);
+    }
+    if (ctx.nr === 0) ctx.sag("Schau dir das Verb genau an — es ist gelb markiert.");
+  },
+});
+</script>
+</body>
+</html>

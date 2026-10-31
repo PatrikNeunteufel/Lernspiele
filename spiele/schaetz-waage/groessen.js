@@ -2,6 +2,14 @@
 // Referenzfragen: ungefähre Werte; die falschen Antworten liegen um mindestens das Zehnfache daneben,
 // damit beim Schätzen genau eine sinnvoll ist.
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten (Entscheid L4 a), einzeln von der Aufsicht freigegeben; der Prüfstand steht im
+// Katalog (spiele/gemeinsam/katalog.js, Eintrag schaetz-waage, Feld listen):
+//   vergleiche  VERGLEICHE (Stufe 1 und 2)
+//   reihen      REIHEN (Stufe 2 und 4)
+//   laenge, gewicht, hohlmass, zeit   SCHAETZFRAGEN je Grössenart — nach der Einheit der richtigen
+//               Antwort, Zuordnung in SCHAETZ_LISTEN
+const SCHAETZ_LISTEN = { laenge: ["mm", "cm", "m", "km"], gewicht: ["g", "kg", "t"], hohlmass: ["ml", "dl", "l"], zeit: ["s", "min", "h"] };
 
 // Vergleichen (Stufe 1, in Stufe 2 dazwischen): [Eigenschaft, grösseres Ding, kleineres Ding] — Ding = [Bild, Name mit Artikel]
 const VERGLEICHE = [

@@ -201,13 +201,15 @@ function punkteText(p) { return SPALTEN.filter(st => p[st.k]).map(st => `${p[st.
 function legen(ctx) {
   const ziel = zufallsPunkte(laenge(4, 6), STUFE[ctx.stufe].maxJe);
   const zahl = wert(ziel);
+  const loesung = `${zahlText(zahl)} = ${punkteText(ziel)}`;
+  ctx.loesung(loesung);
   ctx.flaeche.append(el("div", { class: "auftrag", html: `Lege die Zahl <b>${zahlText(zahl)}</b> mit Punkten.` }));
   const t = punkteTabelle(ctx, Object.fromEntries(SPALTEN.map(st => [st.k, 0])), "legen");
   const ok = okZeile(ctx, () => {
     if (SPALTEN.every(st => t.punkte[st.k] === ziel[st.k])) { t.sperren(); ok.disabled = true; ctx.richtig(); return; }
     t.tab.classList.add("falsch");
     const falsch = SPALTEN.find(st => t.punkte[st.k] !== ziel[st.k]);
-    ctx.falsch(`Bei den ${LS.dativ(falsch)} (${falsch.k}) stimmt die Anzahl Punkte noch nicht.`, `${zahlText(zahl)} = ${punkteText(ziel)}`);
+    ctx.falsch(`Bei den ${LS.dativ(falsch)} (${falsch.k}) stimmt die Anzahl Punkte noch nicht.`, loesung);
     if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
   });
   if (ctx.nr === 0) ctx.sag("Tipp in ein Feld, um einen Punkt zu legen. Tipp auf einen Punkt, um ihn wegzunehmen.");
@@ -217,6 +219,8 @@ function legen(ctx) {
 function lesen(ctx) {
   const start = zufallsPunkte(laenge(4, 6), 6);
   const zahl = wert(start);
+  const loesung = `${punkteText(start)} = ${zahlText(zahl)}`;
+  ctx.loesung(loesung);
   ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl zeigen die Punkte?" }));
   punkteTabelle(ctx, start, "fest");
   const anzeige = el("div", { class: "anzeige leer", style: "margin-top:14px", "aria-label": "Deine Zahl" });
@@ -226,7 +230,7 @@ function lesen(ctx) {
     onOk(w) {
       if (w === zahl) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
       anzeige.classList.add("falsch");
-      ctx.falsch("Zähl die Punkte in jedem Feld. Ein leeres Feld ist eine 0!", `${punkteText(start)} = ${zahlText(zahl)}`);
+      ctx.falsch("Zähl die Punkte in jedem Feld. Ein leeres Feld ist eine 0!", loesung);
       if (istAufgegeben(ctx)) tasten.gesperrt = true;
     },
   });
@@ -244,6 +248,8 @@ function verschiebeNachVorgabe(ctx) {
     const ziel = kopie(start);
     ziel[von.k]--;
     ziel[nach.k]++;
+    const loesung = `Ein Punkt wandert von ${von.k} nach ${nach.k}: ${zahlText(wert(ziel))}.`;
+    ctx.loesung(loesung);
     ctx.flaeche.append(el("div", { class: "auftrag", html: `Die Punkte zeigen <b>${zahlText(wert(start))}</b>.<br>Verschiebe einen Punkt von den <span style="color:var(--st-${von.k})">${von.k}</span> zu den <span style="color:var(--st-${nach.k})">${nach.k}</span>.` }));
     const t = punkteTabelle(ctx, start, "schieben");
     const ok = okZeile(ctx, () => {
@@ -253,7 +259,7 @@ function verschiebeNachVorgabe(ctx) {
         return;
       }
       t.tab.classList.add("falsch");
-      ctx.falsch(`Nimm genau einen Punkt bei ${von.k} und leg ihn bei ${nach.k} ab. Mit „Neu anfangen“ ist alles wieder wie am Anfang.`, `Ein Punkt wandert von ${von.k} nach ${nach.k}: ${zahlText(wert(ziel))}.`);
+      ctx.falsch(`Nimm genau einen Punkt bei ${von.k} und leg ihn bei ${nach.k} ab. Mit „Neu anfangen“ ist alles wieder wie am Anfang.`, loesung);
       if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
     }, () => t.zuruecksetzen());
     if (ctx.nr <= 2) ctx.sag("Tipp auf einen Punkt, um ihn hochzuheben. Dann tipp auf das Feld, wo er hin soll.");
@@ -270,6 +276,8 @@ function verschiebeZumZiel(ctx) {
   const nach = waehle(SPALTEN.filter(st => st !== von && abstand(st) <= (STUFE[ctx.stufe].weit || 2) && start[st.k] < MAX_PUNKTE));
   const diff = nach.wert - von.wert;
   const zielWert = wert(start) + diff;
+  const loesung = `Ein Punkt von ${von.k} nach ${nach.k}: ${zahlText(zielWert)}.`;
+  ctx.loesung(loesung);
   ctx.flaeche.append(el("div", { class: "auftrag", html: `Die Punkte zeigen <b>${zahlText(wert(start))}</b>.<br>Verschiebe <u>genau einen</u> Punkt, sodass die Zahl um <b>${zahlText(Math.abs(diff))}</b> ${diff > 0 ? "grösser" : "kleiner"} wird.` }));
   const t = punkteTabelle(ctx, start, "schieben");
   const ok = okZeile(ctx, () => {
@@ -284,7 +292,7 @@ function verschiebeZumZiel(ctx) {
       : bewegt > 2 ? "Verschiebe nur einen einzigen Punkt! Tipp auf „Neu anfangen“."
       : STUFE[ctx.stufe].knapp ? `Deine Zahl ist jetzt ${zahlText(wert(t.punkte))}. Das ist nicht der richtige Unterschied.`
       : `Deine Zahl ist jetzt ${zahlText(wert(t.punkte))}. Sie soll ${zahlText(zielWert)} sein. Überlege: Was passiert, wenn ein Punkt eine Stelle nach links wandert?`;
-    ctx.falsch(hinweis, `Ein Punkt von ${von.k} nach ${nach.k}: ${zahlText(zielWert)}.`);
+    ctx.falsch(hinweis, loesung);
     if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
   }, () => t.zuruecksetzen());
   if (ctx.nr <= 1) ctx.sag("Tipp: Ein Punkt von H nach T macht die Zahl um 900 grösser (1000 − 100).");
@@ -307,6 +315,8 @@ function mitAnzahlPunkten(ctx) {
   });
   const art = waehle(Object.keys(vorgaben));
   const v = vorgaben[art];
+  const loesung = `Die Lösung ist ${zahlText(v.loesung)} (${punkteText(zerlege(v.loesung))}).`;
+  ctx.loesung(loesung);
   ctx.flaeche.append(el("div", { class: "auftrag", text: v.text }));
   const t = punkteTabelle(ctx, Object.fromEntries(SPALTEN.map(st => [st.k, 0])), "legen");
   const ok = okZeile(ctx, () => {
@@ -317,7 +327,7 @@ function mitAnzahlPunkten(ctx) {
       : v.ungerade && wert(t.punkte) % 2 === 0 ? "Die Zahl muss ungerade sein. Schau auf die Einer!"
       : art.startsWith("groesste") ? "Das geht noch grösser! Welches erlaubte Feld zählt am meisten?"
       : "Fast! Die erste Stelle braucht einen Punkt — und die übrigen Punkte sollen möglichst wenig wert sein.";
-    ctx.falsch(hinweis, `Die Lösung ist ${zahlText(v.loesung)} (${punkteText(zerlege(v.loesung))}).`);
+    ctx.falsch(hinweis, loesung);
     if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
   });
 }

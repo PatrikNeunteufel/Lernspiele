@@ -36,6 +36,11 @@ const { waehle, mische, el } = LS;
 
 const liste = l => l.map(([wort, bild]) => ({ wort, bild }));
 const ANLAUT = liste(ANLAUT_WOERTER), ENDE = liste(ENDLAUT_WOERTER), MITTE = liste(MITTE_WOERTER), LUECKE = liste(LUECKEN_WOERTER);
+
+// Freigabe (Entscheid L4 a): Inhalte nur aus Listen, die der Spieler üben darf (Aufsicht: alle).
+// Kennt der Katalog die Listen nicht, gilt alles als frei — dann entscheidet die Freigabe des Spiels.
+const LISTEN = { anlaut: ANLAUT, endlaut: ENDE, mitte: MITTE, luecke: LUECKE };
+const FREI = new Set(LS.spielListen("anlaut-angel").length ? LS.freieListen("anlaut-angel") : Object.keys(LISTEN));
 const SELBSTLAUTE = ["a", "e", "i", "o", "u"];
 const anfang = w => w.wort[0].toUpperCase();
 const ende = w => w.wort.slice(-1);
@@ -49,21 +54,21 @@ const ARTEN = {
     const buchstabe = waehle([...new Set(ANLAUT.map(anfang))]);
     const richtig = waehle(ANLAUT.filter(w => anfang(w) === buchstabe));
     const andere = mische(ANLAUT.filter(w => anfang(w) !== buchstabe)).slice(0, n - 1);
-    return { art: "bildZumLaut", buchstabe, richtig, optionen: mische([richtig, ...andere]) };
+    return { art: "bildZumLaut", liste: "anlaut", buchstabe, richtig, optionen: mische([richtig, ...andere]) };
   },
   anlaut(n = 4) {
     const w = waehle(ANLAUT);
     const richtig = anfang(w);
-    return { art: "laut", wo: "anfang", w, richtig, optionen: mische([richtig, ...andereBuchstaben(richtig, ANLAUT, anfang, n - 1)]) };
+    return { art: "laut", liste: "anlaut", wo: "anfang", w, richtig, optionen: mische([richtig, ...andereBuchstaben(richtig, ANLAUT, anfang, n - 1)]) };
   },
   endlaut(n = 4) {
     const w = waehle(ENDE);
     const richtig = ende(w);
-    return { art: "laut", wo: "ende", w, richtig, optionen: mische([richtig, ...andereBuchstaben(richtig, ENDE, ende, n - 1)]) };
+    return { art: "laut", liste: "endlaut", wo: "ende", w, richtig, optionen: mische([richtig, ...andereBuchstaben(richtig, ENDE, ende, n - 1)]) };
   },
   mitte() {
     const w = waehle(MITTE);
-    return { art: "laut", wo: "mitte", w, richtig: selbstlaut(w), optionen: SELBSTLAUTE };
+    return { art: "laut", liste: "mitte", wo: "mitte", w, richtig: selbstlaut(w), optionen: SELBSTLAUTE };
   },
   luecke(n = 3) {
     const w = waehle(LUECKE);
@@ -71,25 +76,37 @@ const ARTEN = {
     const richtig = w.wort[i];
     const gross = i === 0;
     const pool = (SELBSTLAUTE.includes(richtig.toLowerCase()) ? SELBSTLAUTE : "bdfhklmnprstz".split("")).map(b => (gross ? b.toUpperCase() : b));
-    return { art: "luecke", w, i, richtig, optionen: mische([richtig, ...mische(pool.filter(b => b !== richtig)).slice(0, n - 1)]) };
+    return { art: "luecke", liste: "luecke", w, i, richtig, optionen: mische([richtig, ...mische(pool.filter(b => b !== richtig)).slice(0, n - 1)]) };
   },
 };
 
+// Je Stufe die Aufgabenarten mit der Liste, aus der sie ihre Wörter nehmen.
 const STUFE = {
-  s1: () => ARTEN.bildZumLaut(3),
-  s2: () => waehle([ARTEN.anlaut, () => ARTEN.bildZumLaut(4)])(),
-  s3: () => waehle([ARTEN.endlaut, ARTEN.anlaut])(),
-  s4: () => waehle([ARTEN.mitte, ARTEN.endlaut])(),
-  s5: () => waehle([() => ARTEN.luecke(), ARTEN.mitte])(),
+  s1: [["anlaut", () => ARTEN.bildZumLaut(3)]],
+  s2: [["anlaut", () => ARTEN.anlaut()], ["anlaut", () => ARTEN.bildZumLaut(4)]],
+  s3: [["endlaut", () => ARTEN.endlaut()], ["anlaut", () => ARTEN.anlaut()]],
+  s4: [["mitte", ARTEN.mitte], ["endlaut", () => ARTEN.endlaut()]],
+  s5: [["luecke", () => ARTEN.luecke()], ["mitte", ARTEN.mitte]],
   // Königsstufe: alle Arten gemischt, mehr Auswahl
-  s6: () => waehle([() => ARTEN.bildZumLaut(6), () => ARTEN.anlaut(6), () => ARTEN.endlaut(6), ARTEN.mitte, () => ARTEN.luecke(5)])(),
+  s6: [["anlaut", () => ARTEN.bildZumLaut(6)], ["anlaut", () => ARTEN.anlaut(6)], ["endlaut", () => ARTEN.endlaut(6)],
+    ["mitte", ARTEN.mitte], ["luecke", () => ARTEN.luecke(5)]],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Aufgabenarten der Stufe, deren Liste frei ist; leer = Stufe wird nicht angeboten. */
+const moeglich = stufe => STUFE[stufe].filter(([l]) => FREI.has(l)).map(([, neu]) => neu);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => moeglich(s).length));
+
+function aufgabeErzeugen(stufe) {
+  const arten = moeglich(stufe);
+  if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  return waehle(arten)();
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a) {
   const m = [];
+  const woerter = a.art === "bildZumLaut" ? a.optionen : [a.w];
+  if (!FREI.has(a.liste) || !woerter.every(w => LISTEN[a.liste].includes(w))) m.push("Wort nicht aus einer freien Liste");
   if (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length) m.push("Auswahl doppelt oder ohne Lösung");
   if (a.art === "bildZumLaut" && a.optionen.filter(w => anfang(w) === a.buchstabe).length !== 1) m.push("nicht genau ein Bild mit diesem Anlaut");
   if (a.art === "laut" && a.wo === "mitte" && a.w.wort.toLowerCase().split("").filter(b => SELBSTLAUTE.includes(b)).some(b => b !== a.richtig)) m.push("mehrere verschiedene Selbstlaute");
@@ -111,14 +128,14 @@ LS.spiel({
   id: "anlaut-angel",
   einleitung: "Sprich das Wort laut! Welchen Laut hörst du am Anfang? Und am Ende?",
   anzahl: 10,
-  stufen: {
+  stufen: nurMoegliche({
     s1: "Welches Bild beginnt mit M?",
     s2: "Mit welchem Buchstaben beginnt das Wort?",
     s3: "Was hörst du am Ende: Maus — s?",
     s4: "Welcher Selbstlaut ist in der Mitte: H_t?",
     s5: "Welcher Buchstabe fehlt: N_se?",
     s6: "Alles gemischt — Anfang, Mitte, Ende, Lücke — mit mehr Auswahl.",
-  },
+  }),
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

@@ -22,3 +22,10 @@ E2 = Stufe 4–6; Tresor und Punkte-Schieber E1/E3 = Stufe 3–6).
 
 Inhalt der Lehrmittel-Aufgaben (Themenbuch, Arbeitsheft) liegt nicht vor — die Spielideen
 stützen sich nur auf den Wortlaut der Lernziele.
+
+## Annahmen, mit dem Lehrmittel abzugleichen
+
+- **Schreibweise grosser Zahlen** (LERN-6; Stellen-Detektiv, Zahlen-Baukasten, Tabellen-Post,
+  Ziffernkarten, Zahlen-Hüpfer, Zahlenrätsel-Tresor, Punkte-Schieber): Ab fünf Stellen steht ein
+  schmales Leerzeichen („30 400“), vierstellige Zahlen bleiben ungegliedert („4500“). Das Lernzielblatt
+  schreibt „30 400“, der Lehrplan SG „320'000“ (MA.1.A.3.e).

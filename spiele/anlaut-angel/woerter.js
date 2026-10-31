@@ -2,6 +2,13 @@
 // keine Anlaute V (Vogel = F-Laut), Sch, St, Sp, Pf, Ch, Au/Ei/Eu; keine Endlaute b, d, g (Hund
 // klingt am Ende wie t), -er (Tiger klingt am Ende wie a), -h (Kuh) und -e (Hase).
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten (Entscheid L4 a) — je Konstante eine Liste, der Prüfstand steht im Katalog
+// (spiele/gemeinsam/katalog.js, Eintrag „anlaut-angel“, Feld listen):
+//   ANLAUT_WOERTER = Liste „anlaut“, ENDLAUT_WOERTER = „endlaut“, MITTE_WOERTER = „mitte“,
+//   LUECKEN_WOERTER = „luecke“.
+// ANLAUT_WOERTER brauchen auch Blitzlesen (Liste „einzelwoerter“) und Buchstaben-Zwillinge
+// (Liste „salat-woerter“); dort wird die Liste je Spiel freigegeben.
 
 // Anfangslaut = erster Buchstabe
 const ANLAUT_WOERTER = [

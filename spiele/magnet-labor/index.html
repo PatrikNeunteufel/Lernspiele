@@ -39,14 +39,26 @@ const { waehle, mische, el } = LS;
 const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
 const ANDERER_POL = { N: "S", S: "N" };
 const KOERBE = { ja: { bild: "🧲", text: "zieht an" }, nein: { bild: "🚫", text: "zieht nicht an" } };
+const ID = "magnet-labor";
 
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Die Pol-Aufgaben
+// erzeugt das Spiel selbst; sie hängen an der Liste kompass-pole (gleiche Pole stossen sich ab).
+// Kennt der Katalog die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : MAGNET_LISTEN);
+const DINGE = FREI.has("dinge") ? MAGNET_DINGE : [];
+const FRAGEN = MAGNET_FRAGEN.filter(f => FREI.has(f[5]));
+const POLE = FREI.has("kompass-pole");
+
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   ding() {
-    const [bild, name, zieht] = waehle(MAGNET_DINGE);
+    if (!DINGE.length) return null;
+    const [bild, name, zieht] = waehle(DINGE);
     return { art: "ding", bild, name, richtig: zieht ? "ja" : "nein" };
   },
   pole() {
     // zwei Stabmagnete, die einander zugewandten Pole entscheiden
+    if (!POLE) return null;
     const links = waehle([["N", "S"], ["S", "N"]]);
     const rechts = waehle([["N", "S"], ["S", "N"]]);
     const gleich = links[1] === rechts[0];
@@ -54,34 +66,66 @@ const ARTEN = {
   },
   poleWahl() {
     // Pole schwer: Welcher Pol muss rechts in der Mitte stehen, damit sie sich anziehen / abstossen?
+    if (!POLE) return null;
     const links = waehle([["N", "S"], ["S", "N"]]);
     const ziel = waehle(["anziehen", "abstossen"]);
     const richtig = ziel === "abstossen" ? links[1] : ANDERER_POL[links[1]];
     return { art: "poleWahl", links, ziel, richtig, optionen: ["N", "S"] };
   },
   frage(n) {
-    const liste = MAGNET_FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
-    const [, frage, richtig, f1, f2] = waehle(liste.length ? liste : MAGNET_FRAGEN.filter(f => f[0] === n));
+    // Fragen dieser Stufe, ab und zu eine der Stufe davor; ohne freie Frage dieser Stufe keine Aufgabe.
+    if (!FRAGEN.some(f => f[0] === n)) return null;
+    const liste = FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const [, frage, richtig, f1, f2] = waehle(liste);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
 };
 
+// Je Stufe die Arten (mehrfach genannt = häufiger).
 const STUFE = {
-  s1: () => ARTEN.ding(),
-  s2: () => waehle([ARTEN.pole, ARTEN.ding])(),
-  s3: () => waehle([() => ARTEN.frage(3), ARTEN.pole, ARTEN.ding])(),
-  s4: () => waehle([() => ARTEN.frage(4), ARTEN.pole])(),
+  s1: [ARTEN.ding],
+  s2: [ARTEN.pole, ARTEN.ding],
+  s3: [() => ARTEN.frage(3), ARTEN.pole, ARTEN.ding],
+  s4: [() => ARTEN.frage(4), ARTEN.pole],
   // Kompass und Pole, schwer
-  s5: () => waehle([() => ARTEN.frage(5), () => ARTEN.frage(5), ARTEN.poleWahl])(),
+  s5: [() => ARTEN.frage(5), () => ARTEN.frage(5), ARTEN.poleWahl],
   // Königsstufe: Strom — Stromkreis, Leiter, Elektromagnet, Sicherheit
-  s6: () => ARTEN.frage(6),
+  s6: [() => ARTEN.frage(6)],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Zieht der Magnet das an?",
+  s2: "Nordpol und Südpol: anziehen oder abstossen?",
+  s3: "Wirkt der Magnet durch Papier und Wasser?",
+  s4: "Kompass und die Erde als Magnet.",
+  s5: "Kompass und Pole für Profis: Welcher Pol muss hin?",
+  s6: "Strom: Batterie, Stromkreis, Elektromagnet.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (versuche.js). */
+function herkunft(a) {
+  if (a.art === "ding") return [MAGNET_DINGE.some(d => d[1] === a.name && (d[2] ? "ja" : "nein") === a.richtig) ? "dinge" : "?"];
+  if (a.art === "frage") return [MAGNET_FRAGEN.find(f => f[1] === a.frage)?.[5] || "?"];
+  return ["kompass-pole"]; // Pol-Aufgaben: vom Spiel erzeugt, an der Liste kompass-pole
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
   const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
   if (a.art === "pole" && a.richtig !== (a.links[1] === a.rechts[0] ? "abstossen" : "anziehen")) m.push("Pole falsch beurteilt");
   if (a.art === "poleWahl" && (a.richtig === a.links[1]) !== (a.ziel === "abstossen")) m.push("Pol falsch gewählt");
   if (a.art === "frage") {
@@ -97,14 +141,7 @@ LS.spiel({
   id: "magnet-labor",
   einleitung: "Willkommen im Labor! Was zieht der Magnet an? Und was passiert, wenn zwei Magnete sich treffen?",
   anzahl: 8,
-  stufen: {
-    s1: "Zieht der Magnet das an?",
-    s2: "Nordpol und Südpol: anziehen oder abstossen?",
-    s3: "Wirkt der Magnet durch Papier und Wasser?",
-    s4: "Kompass und die Erde als Magnet.",
-    s5: "Kompass und Pole für Profis: Welcher Pol muss hin?",
-    s6: "Strom: Batterie, Stromkreis, Elektromagnet.",
-  },
+  stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

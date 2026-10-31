@@ -211,6 +211,7 @@ LS.spiel({
     if (a.optionen) {
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 80, hinweis, loesung });
     } else {
+      ctx.loesung(loesung);
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Antwort" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({

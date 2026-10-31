@@ -18,14 +18,14 @@ wiedergegeben; der Wortlaut steht auf den Seiten.
 
 ## Annahmen, mit dem Lehrmittel abzugleichen
 
-- **Notennamen** klein und ohne Oktavstriche (c, d, e … h; fis, b, es). Deutsche Namen mit h
+- **Notennamen** (Noten-Namen, Hoch-Tief-Ohr) klein und ohne Oktavstriche (c, d, e … h; fis, b, es). Deutsche Namen mit h
   statt b; b ist das h mit ♭.
-- **Silben** sind Sprechsilben, wie man sie klatscht (E-le-fant), nicht die Trennung am Zeilenende.
-- **ABC-Ordnung:** Aufgaben kommen nur vor, wenn ä = a und ä = ae dieselbe Reihenfolge ergeben.
-- **Tiergruppen:** Hasen und Kaninchen als Hasenartige (keine Nagetiere); Igel, Maulwurf und
+- **Silben** (Silben-Klatscher, Wörter-Trenner) sind Sprechsilben, wie man sie klatscht (E-le-fant), nicht die Trennung am Zeilenende.
+- **ABC-Ordnung** (ABC-Sortierer): Aufgaben kommen nur vor, wenn ä = a und ä = ae dieselbe Reihenfolge ergeben.
+- **Tiergruppen** (Tier-Sortierer, Fledermaus-Forscher): Hasen und Kaninchen als Hasenartige (keine Nagetiere); Igel, Maulwurf und
   Spitzmaus als Insektenfresser — die übliche Schulsystematik; neuere Systematik fasst die
   Insektenfresser anders.
-- **Lebensräume:** nur Lebewesen mit einem eindeutig typischen Lebensraum; andere (Igel,
+- **Lebensräume** (Lebensraum-Zuordnung): nur Lebewesen mit einem eindeutig typischen Lebensraum; andere (Igel,
   Zauneidechse, Marienkäfer) kommen im Lebensraum-Spiel nicht vor.
 
 ## Zweite Gruppe: 20 Spiele ab der 1. Klasse
@@ -57,10 +57,10 @@ Lesetext); Stufe 5 reicht bis zum Orientierungspunkt Ende 4. Klasse. Gelesen am 
 
 ### Weitere Annahmen
 
-- **Schwimmt/sinkt, Magnet:** nur Dinge mit eindeutigem Verhalten; weggelassen sind Ei, Orange,
+- **Schwimmt/sinkt, Magnet** (Schwimmt oder sinkt?, Magnet-Labor): nur Dinge mit eindeutigem Verhalten; weggelassen sind Ei, Orange,
   Schwamm, Büroklammer im Wasser und Schlüssel, Löffel, Dosen, Münzen, ein zweiter Magnet beim Magneten.
-- **Früchte/Gemüse:** ohne Grenzfälle (Tomate, Gurke, Mais); Kartoffeln bei den Stärkebeilagen.
-- **Saxofon und Querflöte** als Holzblasinstrumente (Tonerzeugung, nicht Material).
+- **Früchte/Gemüse** (Znüni-Teller): ohne Grenzfälle (Tomate, Gurke, Mais); Kartoffeln bei den Stärkebeilagen.
+- **Saxofon und Querflöte** (Instrumenten-Kenner) als Holzblasinstrumente (Tonerzeugung, nicht Material).
 
 ## Stufenskala mit Basisklasse (Entscheid Patrik 2026-10-31)
 

@@ -171,6 +171,8 @@ LS.spiel({
     // Tastatur für Beträge: Ab Stufe 3 in Rappen getippt (1 3 6 0 → 13 Fr. 60 Rp.), sonst ganze Franken.
     const mitRappen = p.raster < 100;
     const betragEingabe = (soll, hinweis, loesungText) => {
+      const loesung = satz(loesungText);
+      ctx.loesung(loesung);
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Betrag" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({
@@ -180,7 +182,7 @@ LS.spiel({
           const rp = mitRappen ? z : z * 100;
           if (rp === soll) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
           anzeige.classList.add("falsch");
-          ctx.falsch(satz(hinweis(rp)), satz(loesungText));
+          ctx.falsch(satz(hinweis(rp)), loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
         },
       });
@@ -190,6 +192,8 @@ LS.spiel({
 
     if (art === "legen") {
       const soll = preis(p, p.max);
+      const loesung = `Zum Beispiel: ${zerlegen(soll, erlaubt).map(g => g.text).join(" + ")}`;
+      ctx.loesung(loesung);
       const ding = waehle(ARTIKEL);
       ctx.flaeche.append(el("div", { class: "theke" }, el("div", { class: "artikel" }, el("div", { class: "bild", text: ding }), el("div", { class: "preis", text: betrag(soll) }))),
         el("div", { class: "frage", html: `Lege genau <b>${betrag(soll)}</b> in die Kasse.` }));
@@ -215,7 +219,7 @@ LS.spiel({
         const summe = gelegt.reduce((s, x) => s + x, 0);
         if (summe === soll) { fertig = true; ctx.richtig(); return; }
         ctx.falsch(satz(`In der Kasse liegen ${betrag(summe)}. ${summe < soll ? `Es fehlen noch ${betrag(soll - summe)}.` : `Das sind ${betrag(summe - soll)} zu viel.`} Tipp auf ein Stück in der Kasse, um es zurückzunehmen.`),
-          `Zum Beispiel: ${zerlegen(soll, erlaubt).map(g => g.text).join(" + ")}`);
+          loesung);
         if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
       });
       ctx.flaeche.append(kasse, vorrat, el("div", { class: "knopfzeile" }, ok));
@@ -258,6 +262,8 @@ LS.spiel({
       // Rückgeld in die Kasse legen — richtig ist es erst mit möglichst wenigen Stücken.
       const soll = auf.loesung;
       const kuerzest = zerlegen(soll, erlaubt);
+      const loesung = `${betrag(auf.bezahlt)} − ${betrag(auf.preise[0])} = ${betrag(soll)}: ${kuerzest.map(g => g.text).join(" + ")}`;
+      ctx.loesung(loesung);
       ctx.flaeche.append(theke(auf.preise, [waehle(ARTIKEL)]),
         noteZeile(auf.bezahlt, " — lege das <b>Rückgeld</b> mit möglichst <b>wenigen Stücken</b>."));
       const kasse = el("div", { class: "kasse", "aria-label": "Rückgeld" });
@@ -284,7 +290,7 @@ LS.spiel({
         ctx.falsch(summe !== soll
           ? satz(`Das sind ${betrag(summe)}. ${summe < soll ? "Das ist zu wenig." : "Das ist zu viel."} Rechne: Wie viel fehlt vom Preis bis zur Note?`)
           : "Der Betrag stimmt! Aber es geht mit weniger Stücken: Tausche kleine Münzen gegen grössere.",
-          `${betrag(auf.bezahlt)} − ${betrag(auf.preise[0])} = ${betrag(soll)}: ${kuerzest.map(g => g.text).join(" + ")}`);
+          loesung);
         if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
       });
       ctx.flaeche.append(kasse, vorrat, el("div", { class: "knopfzeile" }, ok));
@@ -305,6 +311,8 @@ LS.spiel({
 
     if (art === "wieViele") {
       const ding = waehle(ARTIKEL);
+      const loesung = satz(`${auf.loesung} Stück: ${auf.loesung} × ${betrag(auf.stueck)} = ${betrag(auf.loesung * auf.stueck)}`);
+      ctx.loesung(loesung);
       ctx.flaeche.append(theke([auf.stueck], [ding]),
         el("div", { class: "frage", html: `Du hast <b>${betrag(auf.budget)}</b> Wie viele Stück kannst du <b>höchstens</b> kaufen?` }));
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Anzahl" });
@@ -316,7 +324,7 @@ LS.spiel({
           anzeige.classList.add("falsch");
           ctx.falsch(z * auf.stueck > auf.budget ? satz(`${z} Stück kosten ${betrag(z * auf.stueck)} — das reicht nicht.`)
             : satz(`${z} Stück kosten ${betrag(z * auf.stueck)}. Reicht das Geld noch für eines mehr?`),
-            satz(`${auf.loesung} Stück: ${auf.loesung} × ${betrag(auf.stueck)} = ${betrag(auf.loesung * auf.stueck)}`));
+            loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
         },
       });

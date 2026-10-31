@@ -3,7 +3,15 @@
    b gebräuchliche abstrakte Nomen gross, Satzschlusszeichen.
    Die Sätze stehen hier RICHTIG geschrieben. Das Spiel zeigt sie klein und ohne Schlusszeichen,
    das Kind stellt die Grossschreibung und das Satzzeichen wieder her.
-   Keine Kommas und keine Abkürzungen mit Punkt (z. B. „St.“), Schweizer Schreibweise (ss). */
+   Keine Kommas und keine Abkürzungen mit Punkt (z. B. „St.“), Schweizer Schreibweise (ss).
+
+   Inhaltslisten (Entscheid L4 a): Jede Gruppe in SAETZE ist eine Liste, die die Aufsicht einzeln
+   freigibt (Zuordnung in SAETZE_LISTEN unten). Der Prüfstand steht im Katalog
+   (spiele/gemeinsam/katalog.js, Eintrag satz-reparatur, Feld listen). Die Königsstufe nimmt ein
+   Satzpaar und einen Satz aus nomen-abstrakt oder lange-saetze. AUCH_PUNKT gehört zu den Sätzen,
+   die es nennt. Auch der Wörter-Trenner liest diese Datei; er kennt die Listen (noch) nicht. */
+
+const SAETZE_LISTEN = { s1: "satzanfang", s2: "nomen-konkret", s3: "nomen-abstrakt", s4: "lange-saetze", s5: "satzpaare" };
 
 const SAETZE = {
   // Stufe 1: nur Satzanfang und Punkt — Sätze ohne Nomen

@@ -2,6 +2,13 @@
 // Buchstaben. Das erste Wort ist das gesuchte (mit Bild); die anderen sind Ablenker.
 // Der Buchstabensalat nimmt die Wörter der Anlaut-Angel (anlaut-angel/woerter.js).
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten der Buchstaben-Zwillinge (Entscheid L4 a), Prüfstand im Katalog
+// (spiele/gemeinsam/katalog.js, Eintrag „buchstaben-zwillinge“, Feld listen):
+//   „wortpaare“     = WORTPAARE hier (Blitzlesen nimmt sie mit eigener Liste „aehnliche-woerter“)
+//   „verwechsler“   = VERWECHSLER hier
+//   „salat-woerter“ = ANLAUT_WOERTER in anlaut-angel/woerter.js
+// Gross- und Kleinbuchstaben des ABC (Stufe 1) brauchen keine Liste.
 
 const WORTPAARE = [
   [["Hund", "🐕"], "Hand", "Mund"],

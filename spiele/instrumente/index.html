@@ -33,7 +33,14 @@
 
 const { waehle, mische, el } = LS;
 const SVG = "http://www.w3.org/2000/svg";
-const I = INSTRUMENTE.map(([bild, name, gruppe, spielart, genauer]) => ({ bild, name, gruppe, spielart, genauer }));
+const ID = "instrumente";
+
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : INSTRUMENT_LISTEN);
+const I = INSTRUMENTE.map(([bild, name, gruppe, spielart, genauer]) => ({ bild, name, gruppe, spielart, genauer }))
+  .filter(i => FREI.has(INSTRUMENT_LISTE_JE_GRUPPE[i.gruppe]));
+const FRAGEN = INSTRUMENT_FRAGEN.filter(f => FREI.has(f[4]));
 
 // Schulinstrumente ohne Emoji, als kleine Zeichnungen
 const ZEICHNUNG = {
@@ -59,52 +66,92 @@ const GRUPPEN = {
 const FALLEN = /Saxofon|Querflöte/;
 const SPIELARTEN = { schlagen: "🥢", zupfen: "🤏", streichen: "🎻", blasen: "💨", schütteln: "🫨", "Tasten drücken": "🎹" };
 
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   name() {
-    const x = waehle(I.filter(i => i.bild));
-    const andere = mische(I.filter(i => i !== x && i.bild)).slice(0, 2).map(i => i.name);
+    // Die Namen zur Auswahl stammen nur aus freien Listen; sind es weniger als drei, genügen zwei.
+    const mitBild = I.filter(i => i.bild);
+    if (mitBild.length < 2) return null;
+    const x = waehle(mitBild);
+    const andere = mische(mitBild.filter(i => i !== x)).slice(0, 2).map(i => i.name);
     return { art: "name", x, richtig: x.name, optionen: mische([x.name, ...andere]) };
   },
   spielart(mitBild) {
     const x = waehle(I.filter(i => !mitBild || i.bild));
+    if (!x) return null;
     const andere = mische(Object.keys(SPIELARTEN).filter(s => s !== x.spielart)).slice(0, 2);
     return { art: "korb", x, richtig: x.spielart, koerbe: mische([x.spielart, ...andere]), info: SPIELARTEN };
   },
   gruppe() {
     const x = waehle(I);
+    if (!x) return null;
     return { art: "korb", x, richtig: x.gruppe, koerbe: ["Schlaginstrument", "Saiteninstrument", "Blasinstrument", "Tasteninstrument"], info: GRUPPEN };
   },
   genauer() {
     const x = waehle(I.filter(i => i.genauer));
+    if (!x) return null;
     const paar = x.genauer.includes("blas") ? ["Holzblasinstrument", "Blechblasinstrument"] : ["Streichinstrument", "Zupfinstrument"];
     return { art: "korb", x, richtig: x.genauer, koerbe: paar, info: GRUPPEN };
   },
   /** Königsstufe: alle vier genaueren Gruppen; nurFallen = Instrumente aus Metall, die zu den Holzblasinstrumenten zählen. */
   genauerAlle(nurFallen) {
     const x = waehle(I.filter(i => i.genauer && (!nurFallen || FALLEN.test(i.name))));
+    if (!x) return null;
     return { art: "korb", x, richtig: x.genauer, koerbe: mische(["Holzblasinstrument", "Blechblasinstrument", "Streichinstrument", "Zupfinstrument"]), info: GRUPPEN };
   },
   frage() {
-    const [frage, richtig, f1, f2] = waehle(INSTRUMENT_FRAGEN);
+    if (!FRAGEN.length) return null;
+    const [frage, richtig, f1, f2] = waehle(FRAGEN);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
 };
 
+// Je Stufe die Arten (mehrfach genannt = häufiger).
 const STUFE = {
-  s1: () => ARTEN.name(),
-  s2: () => waehle([() => ARTEN.spielart(true), ARTEN.name])(),
-  s3: () => waehle([ARTEN.gruppe, () => ARTEN.spielart(false)])(),
-  s4: () => waehle([ARTEN.genauer, ARTEN.gruppe])(),
-  s5: () => waehle([ARTEN.frage, ARTEN.genauer])(),
+  s1: [ARTEN.name],
+  s2: [() => ARTEN.spielart(true), ARTEN.name],
+  s3: [ARTEN.gruppe, () => ARTEN.spielart(false)],
+  s4: [ARTEN.genauer, ARTEN.gruppe],
+  s5: [ARTEN.frage, ARTEN.genauer],
   // Königsstufe: Ensembles, Klangerzeugung und Fallen gemischt, genauere Gruppen mit allen vier Körben
-  s6: () => waehle([ARTEN.frage, ARTEN.frage, () => ARTEN.genauerAlle(false), () => ARTEN.genauerAlle(true)])(),
+  s6: [ARTEN.frage, ARTEN.frage, () => ARTEN.genauerAlle(false), () => ARTEN.genauerAlle(true)],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Wie heisst das Instrument?",
+  s2: "Schlagen, zupfen, streichen oder blasen?",
+  s3: "Schlag-, Saiten-, Blas- oder Tasteninstrument?",
+  s4: "Holz oder Blech? Streichen oder zupfen?",
+  s5: "Duo, Trio, Quartett — und wie entsteht der Ton?",
+  s6: "Ensembles, Klang und Fallen: alle vier genauen Gruppen.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (instrumente.js). */
+function herkunft(a) {
+  const listeVon = name => INSTRUMENT_LISTE_JE_GRUPPE[INSTRUMENTE.find(i => i[1] === name)?.[2]] || "?";
+  if (a.art === "frage") return [INSTRUMENT_FRAGEN.find(f => f[0] === a.frage)?.[4] || "?"];
+  if (a.art === "name") return a.optionen.map(listeVon);
+  return [listeVon(a.x.name)];
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
   const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
+  if (a.optionen && a.optionen.length < 2) m.push("weniger als zwei Antworten");
   const wahl = a.optionen || a.koerbe;
   if (!wahl.includes(a.richtig) || new Set(wahl).size !== wahl.length) m.push("Auswahl doppelt oder ohne Lösung");
   if ((stufe === "s1" || stufe === "s2") && a.x && !a.x.bild) m.push("Instrument ohne Bild in Stufe 1–2");
@@ -116,14 +163,7 @@ LS.spiel({
   id: "instrumente",
   einleitung: "Trommel, Geige, Flöte — kennst du die Instrumente? Und wie macht man mit ihnen Musik?",
   anzahl: 8,
-  stufen: {
-    s1: "Wie heisst das Instrument?",
-    s2: "Schlagen, zupfen, streichen oder blasen?",
-    s3: "Schlag-, Saiten-, Blas- oder Tasteninstrument?",
-    s4: "Holz oder Blech? Streichen oder zupfen?",
-    s5: "Duo, Trio, Quartett — und wie entsteht der Ton?",
-    s6: "Ensembles, Klang und Fallen: alle vier genauen Gruppen.",
-  },
+  stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

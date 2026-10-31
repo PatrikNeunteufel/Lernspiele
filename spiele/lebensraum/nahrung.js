@@ -3,6 +3,15 @@
 // Für „Was frisst …?“ zählt nur, was hier steht — die falschen Antworten wählt das Spiel so,
 // dass sie sicher falsch sind (Pflanzen bei Fleischfressern, grosse Räuber bei Pflanzenfressern).
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten der Lebensraum-Zuordnung (Entscheid L4 a), einzeln freizugeben. Der Prüfstand
+// steht im Katalog (spiele/gemeinsam/katalog.js, Spiel „lebensraum“, Feld listen); Kinder sehen nur
+// Inhalte aus freien Listen.
+//   wald, wiese, weiher, gebirge  Tiere und Pflanzen mit diesem Lebensraum (Spalte Lebensraum in
+//                                 tier-sortierer/tiere.js, LEBENSRAUM_LISTE_JE_RAUM)
+//   nahrungsketten                NAHRUNGSKETTEN, ARTIKEL, GROSSE_RAEUBER, NICHT_FUTTER (diese Datei)
+const LEBENSRAUM_LISTEN = ["wald", "wiese", "weiher", "gebirge", "nahrungsketten"];
+const LEBENSRAUM_LISTE_JE_RAUM = { Wald: "wald", Wiese: "wiese", Weiher: "weiher", Gebirge: "gebirge" };
 
 const NAHRUNGSKETTEN = [
   [["Gras", "🌱", true], ["Heuschrecke", "🦗"], ["Grasfrosch", "🐸"], ["Graureiher", null]],

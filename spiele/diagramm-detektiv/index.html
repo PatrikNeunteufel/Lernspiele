@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagramm-Detektiv</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 12px; }
+  .titel { text-align: center; font-size: 17px; font-weight: 900; color: var(--text-leise); margin: 0 0 6px; }
+
+  .zwei { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 12px 20px; margin-bottom: 12px; }
+  .zwei > * { flex: 0 1 auto; }
+
+  /* Säulendiagramm (SVG, skaliert auf die Breite) */
+  .diagramm { display: block; width: min(440px, 100%); margin: 0 auto 12px; touch-action: manipulation; }
+  .zwei .diagramm { width: min(400px, 100%); margin: 0; }
+  .diagramm .gitter { stroke: #dfe3ef; stroke-width: 1; }
+  .diagramm .achse { stroke: var(--text); stroke-width: 2; }
+  .diagramm text { font-family: var(--schrift); font-weight: 800; fill: var(--text); }
+  .diagramm .zahl { font-size: 12px; fill: var(--text-leise); }
+  .diagramm .name { font-size: 12px; }
+  .diagramm .bild { font-size: 18px; }
+  .diagramm .saeule { fill: var(--deko-6); }
+  .diagramm .saeule.b { fill: var(--deko-3); }
+  .diagramm .leer { fill: rgba(99, 102, 241, .06); stroke: var(--deko-6); stroke-width: 1.5; stroke-dasharray: 5 4; }
+  .diagramm .band { fill: transparent; cursor: pointer; }
+  .diagramm .vorschau { fill: var(--deko-5); }
+  .diagramm .geloest { fill: var(--gut); }
+
+  /* Tabelle und Strichliste */
+  .daten { border-collapse: collapse; margin: 0 auto 12px; font-size: clamp(18px, 4vw, 22px); font-weight: 800; background: #fff; }
+  .zwei .daten { margin: 0; }
+  .daten th, .daten td { border: 2px solid var(--rand); padding: 4px 12px; text-align: left; }
+  .daten th { background: #f6f7fd; font-size: 16px; color: var(--text-leise); }
+  .daten td.zahl { text-align: right; font-variant-numeric: tabular-nums; min-width: 56px; }
+  .daten svg { display: block; height: 30px; }
+  .daten .strich { stroke: var(--text); stroke-width: 2.6; stroke-linecap: round; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔎 Diagramm-Detektiv</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="umfragen.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.C.1 Daten: b Strichlisten lesen und erstellen; c Daten in Säulendiagrammen
+// darstellen; d (Orientierungspunkt 4. Klasse) Tabellen und Säulendiagramme lesen, Daten vergleichen;
+// f (2. Zyklus, 5./6. Klasse) Mittelwert. Inhalte der Umfragen in umfragen.js.
+// Basisklasse 4: s1 3. Klasse, s2–s4 4. Klasse, s5 5. Klasse, s6 Königsstufe.
+
+const { zufall, waehle, mische, el, zahlText } = LS;
+const SVG = "http://www.w3.org/2000/svg";
+
+// Darstellungen: Achse (höchster Wert, Abstand der Gitterlinien, Abstand der Zahlen an der Achse)
+// und Raster der Werte. „Halbe“ Werte (Raster 5 bei Gitter 10) liegen zwischen zwei Linien.
+const ACHSEN = {
+  strich: { max: 12, raster: 1, label: 1, schritt: 1 },
+  s1:     { max: 10, raster: 1, label: 1, schritt: 1 },
+  s2:     { max: 20, raster: 2, label: 2, schritt: 2 },
+  s5:     { max: 50, raster: 5, label: 5, schritt: 5 },
+  s10h:   { max: 100, raster: 10, label: 10, schritt: 5 },
+  s1d:    { max: 12, raster: 1, label: 2, schritt: 1 },
+};
+
+// Je Stufe: Aufgabenarten (mit Wiederholung = häufiger), Darstellungen, Anzahl Kategorien, Antwort per Auswahl?
+const STUFE = {
+  s1: { arten: ["wieviel", "wieviel", "meist", "wenigst"], darst: ["strich"], n: [3, 4], wahl: true, max: 12 },
+  s2: { arten: ["wieviel", "meist", "wenigst", "mehr", "mehr"], darst: ["s1"], n: [4, 4], wahl: true, max: 10 },
+  s3: { arten: ["wieviel", "mehr", "mehr", "zusammen", "meist", "wenigst"], darst: ["s2", "s5", "tabelle"], n: [4, 5], max: 50 },
+  s4: { arten: ["ergaenzen", "uebertragen", "wieviel", "mehr"], darst: ["s10h"], n: [4, 5], max: 100 },
+  s5: { arten: ["vergleich", "vergleich", "durchschnitt", "total", "mehr"], darst: ["s10h", "tabelle100"], n: [4, 5], max: 100 },
+  s6: { arten: ["doppelGroesst", "doppelMehr", "fehlendTotal", "durchschnitt"], darst: [], n: [4, 5], max: 100 },
+};
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Kinder sehen nur Umfragen aus freien Listen (LS.freieListen; die Aufsicht sieht alle). Kennt der
+// Katalog die Listen dieses Spiels noch nicht, gilt alles als frei — wie bei einem Spiel ohne Listen.
+const SPIEL_ID = "diagramm-detektiv";
+const FREI = new Set(LS.spielListen(SPIEL_ID).length ? LS.freieListen(SPIEL_ID) : ["umfragen"]);
+/** Nummern der freien Umfragen in UMFRAGEN. */
+const FREIE_UMFRAGEN = FREI.has("umfragen") ? UMFRAGEN.map((u, i) => i) : [];
+const ZEIT_UMFRAGEN = FREIE_UMFRAGEN.filter(i => UMFRAGEN[i].durchschnitt);
+const KINDER_UMFRAGEN = FREIE_UMFRAGEN.filter(i => UMFRAGEN[i].gruppen);
+// Aufgabenarten, für die keine freie Umfrage passt, fallen weg; Stufen ohne Aufgabenart ebenso.
+const umfrageFuer = art => (art === "durchschnitt" ? ZEIT_UMFRAGEN : art.startsWith("doppel") ? KINDER_UMFRAGEN : FREIE_UMFRAGEN);
+for (const [s, p] of Object.entries(STUFE)) {
+  p.arten = p.arten.filter(art => umfrageFuer(art).length);
+  if (!p.arten.length) delete STUFE[s];
+}
+
+const summe = l => l.reduce((s, x) => s + x, 0);
+
+/** Verschiedene Werte im Raster der Achse (kein Wert 0, damit jede Säule sichtbar ist). */
+function werteZiehen(n, achse, max = achse.max) {
+  const moeglich = [];
+  for (let v = achse.schritt; v <= max; v += achse.schritt) moeglich.push(v);
+  return mische(moeglich).slice(0, n);
+}
+
+/** Kategorie i einer Aufgabe: { bild, name, x, wo, Wo } */
+function kat(a, i) {
+  const k = UMFRAGEN[a.u].kategorien[a.kat[i]];
+  const wo = k[3] || `bei ${k[0]} ${k[1]}`;
+  return { bild: k[0], name: k[1], x: k[2], wo, Wo: wo[0].toUpperCase() + wo.slice(1) };
+}
+
+/** Drei falsche Zahlen nahe der Lösung, dazu typische Fehler (Ablesen statt Rechnen, Summe statt Differenz). */
+function zahlOptionen(loesung, typisch) {
+  const kandidaten = [...typisch, loesung + 1, loesung - 1, loesung + 2, loesung - 2, loesung + 5];
+  const falsche = [...new Set(kandidaten.filter(z => z > 0 && z !== loesung))].slice(0, 3);
+  return mische([loesung, ...falsche]);
+}
+
+/** Neue Aufgabe für die Stufe — alle Zahlen und die Lösung; aufgabe(ctx) zeichnet sie nur. */
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  const n = zufall(p.n[0], p.n[1]);
+  const u = waehle(umfrageFuer(art));
+  const umfrage = UMFRAGEN[u];
+  // Wochentage bleiben in ihrer Reihenfolge, andere Kategorien werden gemischt.
+  const katIdx = umfrage.durchschnitt ? umfrage.kategorien.map((k, i) => i).slice(0, art === "durchschnitt" ? 5 : n)
+    : mische(umfrage.kategorien.map((k, i) => i)).slice(0, n);
+  const a = { art, u, kat: katIdx, darst: "", achse: null, werte: [], frage: "", loesung: 0 };
+
+  // Darstellung und Werte je Art
+  if (art === "uebertragen") {
+    a.darst = "strich+saeule"; a.achse = ACHSEN.strich;
+  } else if (art === "ergaenzen") {
+    a.darst = "tabelle+saeule"; a.achse = waehle([ACHSEN.s2, ACHSEN.s5]);
+  } else if (art === "vergleich") {
+    a.darst = "tabelle+saeule"; a.achse = waehle([ACHSEN.s2, ACHSEN.s5]);
+  } else if (art === "durchschnitt") {
+    a.darst = stufe === "s5" ? "tabelle" : "saeule"; a.achse = stufe === "s5" ? { max: 30, raster: 1, label: 1, schritt: 1 } : ACHSEN.s2;
+    a.achse = { ...a.achse, max: 30 };
+  } else if (art.startsWith("doppel")) {
+    a.darst = "doppel"; a.achse = ACHSEN.s1d;
+  } else if (art === "fehlendTotal") {
+    a.darst = "saeule"; a.achse = waehle([ACHSEN.s5, { ...ACHSEN.s10h, schritt: 10 }]);
+  } else {
+    const d = waehle(p.darst);
+    a.darst = d === "strich" ? "strich" : d.startsWith("tabelle") ? "tabelle" : "saeule";
+    a.achse = d === "tabelle" ? { max: 50, raster: 1, label: 1, schritt: 1 } : d === "tabelle100" ? { max: 100, raster: 1, label: 1, schritt: 1 } : ACHSEN[d];
+  }
+  const kk = i => kat(a, i);
+
+  if (art === "durchschnitt") {
+    // Mittelwert ganzzahlig: so lange ziehen, bis die Summe durch die Anzahl Tage teilbar ist.
+    do a.werte = Array.from({ length: katIdx.length }, () => zufall(1, a.achse.max / a.achse.schritt) * a.achse.schritt);
+    while (summe(a.werte) % katIdx.length);
+    a.loesung = summe(a.werte) / katIdx.length;
+    a.frage = umfrage.durchschnitt;
+    return a;
+  }
+  if (art.startsWith("doppel")) {
+    a.gruppen = umfrage.gruppen;
+    a.werte = Array.from({ length: n }, () => zufall(1, a.achse.max));
+    a.werte2 = Array.from({ length: n }, () => zufall(1, a.achse.max));
+    const diff = a.werte.map((w, i) => Math.abs(w - a.werte2[i]));
+    const groesst = Math.max(...diff);
+    if (art === "doppelGroesst") {
+      if (diff.filter(d => d === groesst).length !== 1 || groesst < 2) return aufgabeErzeugen(stufe);
+      const i = diff.indexOf(groesst);
+      a.loesung = kk(i).name;
+      a.optionen = a.kat.map((k, j) => kk(j).name);
+      a.frage = `Wo ist der Unterschied zwischen der ${a.gruppen[0]} und der ${a.gruppen[1]} am grössten?`;
+      return a;
+    }
+    const kandidaten = diff.map((d, i) => i).filter(i => diff[i] > 0);
+    if (!kandidaten.length) return aufgabeErzeugen(stufe);
+    const i = waehle(kandidaten);
+    // Die Klasse mit mehr Kindern steht in der Frage vorn.
+    const vorn = a.werte[i] > a.werte2[i] ? 0 : 1;
+    a.i = i; a.vorn = vorn;
+    a.loesung = diff[i];
+    a.frage = `${kk(i).Wo}: Wie viele mehr sind es in der ${a.gruppen[vorn]} als in der ${a.gruppen[1 - vorn]}?`;
+    return a;
+  }
+
+  a.werte = werteZiehen(n, a.achse, Math.min(a.achse.max, p.max));
+  const groesster = a.werte.indexOf(Math.max(...a.werte));
+  const kleinster = a.werte.indexOf(Math.min(...a.werte));
+
+  if (art === "wieviel") {
+    const i = zufall(0, n - 1);
+    a.i = i; a.loesung = a.werte[i];
+    a.frage = umfrage.frage.replace("{x}", kk(i).x);
+  } else if (art === "meist" || art === "wenigst") {
+    a.loesung = kk(art === "meist" ? groesster : kleinster).name;
+    a.optionen = a.kat.map((k, j) => kk(j).name);
+    a.frage = umfrage[art];
+  } else if (art === "mehr" || art === "zusammen") {
+    const [x, y] = mische(a.werte.map((w, i) => i)).slice(0, 2);
+    const [i, j] = art === "mehr" && a.werte[x] < a.werte[y] ? [y, x] : [x, y];
+    a.i = i; a.j = j;
+    a.loesung = art === "mehr" ? a.werte[i] - a.werte[j] : a.werte[i] + a.werte[j];
+    a.frage = art === "mehr" ? `Wie viele mehr ${kk(i).wo} als ${kk(j).wo}?` : `Wie viele ${kk(i).wo} und ${kk(j).wo} zusammen?`;
+  } else if (art === "total") {
+    a.loesung = summe(a.werte);
+    a.frage = `Wie viele ${umfrage.einheit} sind es insgesamt?`;
+  } else if (art === "ergaenzen" || art === "uebertragen") {
+    const i = zufall(0, n - 1);
+    a.i = i; a.loesung = a.werte[i];
+    a.frage = art === "ergaenzen" ? `Im Diagramm fehlt die Säule ${kk(i).wo}. Tipp in der leeren Spalte an, wie hoch sie sein muss.`
+      : `Zeichne die Säule ${kk(i).wo}: Zähle die Striche und tipp in der leeren Spalte die Höhe an.`;
+  } else if (art === "vergleich") {
+    // Eine Säule ist falsch gezeichnet: um ein bis drei Gitterlinien daneben, aber noch auf der Achse.
+    const i = zufall(0, n - 1);
+    const moeglich = [];
+    for (let v = a.achse.schritt; v <= a.achse.max; v += a.achse.schritt) if (v !== a.werte[i] && Math.abs(v - a.werte[i]) <= 3 * a.achse.raster) moeglich.push(v);
+    a.i = i;
+    a.gezeichnet = a.werte.map((w, j) => (j === i ? waehle(moeglich) : w));
+    a.loesung = kk(i).name;
+    a.optionen = a.kat.map((k, j) => kk(j).name);
+    a.frage = "Tabelle und Diagramm zeigen dieselbe Umfrage. Eine Säule ist falsch gezeichnet. Welche?";
+  } else if (art === "fehlendTotal") {
+    const i = zufall(0, n - 1);
+    a.i = i; a.loesung = a.werte[i];
+    a.total = summe(a.werte);
+    a.frage = `Insgesamt sind es ${zahlText(a.total)} ${umfrage.einheit}. Die Säule ${kk(i).wo} fehlt. Tipp an, wie hoch sie sein muss.`;
+  }
+
+  // Unten in der Skala: Zahl-Antworten zum Antippen statt Tastatur
+  if (p.wahl && typeof a.loesung === "number") {
+    const typisch = art === "mehr" ? [a.werte[a.i], a.werte[a.i] + a.werte[a.j]] : a.werte.filter((w, j) => j !== a.i);
+    a.optionen = zahlOptionen(a.loesung, typisch);
+  }
+  return a;
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. Rechnet die Lösung unabhängig nach. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p) return ["Stufe wird mit den freien Listen nicht angeboten"];
+  if (!p.arten.includes(a.art)) m.push("Aufgabentyp gehört nicht in diese Stufe");
+  const umfrage = UMFRAGEN[a.u];
+  if (!umfrage) return ["Umfrage fehlt"];
+  if (!FREIE_UMFRAGEN.includes(a.u)) m.push("Umfrage stammt nicht aus einer freien Liste");
+  if (new Set(a.kat).size !== a.kat.length || a.kat.some(k => !umfrage.kategorien[k])) m.push("Kategorien doppelt oder unbekannt");
+  if (a.werte.length !== a.kat.length) m.push("Zahl der Werte passt nicht zu den Kategorien");
+  const alleWerte = [...a.werte, ...(a.werte2 || []), ...(a.gezeichnet || [])];
+  if (alleWerte.some(w => !Number.isInteger(w) || w < 1 || w > a.achse.max || w % a.achse.schritt)) m.push("Wert ausserhalb der Achse oder des Rasters");
+  if (alleWerte.some(w => w > p.max)) m.push("Zahlenraum der Stufe überschritten");
+  if (/\{x\}|undefined/.test(a.frage)) m.push("Frage unvollständig");
+  if (/saeule|doppel/.test(a.darst) && a.achse.max / a.achse.raster > 20) m.push("zu viele Gitterlinien");
+  const name = i => umfrage.kategorien[a.kat[i]][1];
+  const idx = w => a.werte.indexOf(w);
+  let soll;
+  switch (a.art) {
+    case "wieviel": case "ergaenzen": case "uebertragen": case "fehlendTotal": soll = a.werte[a.i]; break;
+    case "meist": case "wenigst": {
+      const ext = a.art === "meist" ? Math.max(...a.werte) : Math.min(...a.werte);
+      if (a.werte.filter(w => w === ext).length !== 1) m.push("grösster oder kleinster Wert nicht eindeutig");
+      soll = name(idx(ext));
+      break;
+    }
+    case "mehr": soll = a.werte[a.i] - a.werte[a.j]; if (soll <= 0) m.push("Differenz nicht positiv"); break;
+    case "zusammen": soll = a.werte[a.i] + a.werte[a.j]; break;
+    case "total": soll = summe(a.werte); break;
+    case "durchschnitt": soll = summe(a.werte) / a.werte.length; if (!Number.isInteger(soll)) m.push("Durchschnitt nicht ganzzahlig"); break;
+    case "vergleich": {
+      const anders = a.werte.map((w, i) => i).filter(i => a.werte[i] !== a.gezeichnet[i]);
+      if (anders.length !== 1) m.push("nicht genau eine Säule falsch");
+      soll = name(anders[0]);
+      break;
+    }
+    case "doppelGroesst": {
+      const diff = a.werte.map((w, i) => Math.abs(w - a.werte2[i]));
+      const g = Math.max(...diff);
+      if (diff.filter(d => d === g).length !== 1) m.push("grösster Unterschied nicht eindeutig");
+      soll = name(diff.indexOf(g));
+      break;
+    }
+    case "doppelMehr": {
+      const [vorn, hinten] = a.vorn === 0 ? [a.werte, a.werte2] : [a.werte2, a.werte];
+      soll = vorn[a.i] - hinten[a.i];
+      if (soll <= 0) m.push("Differenz nicht positiv");
+      break;
+    }
+  }
+  if (soll !== a.loesung) m.push(`Lösung falsch (${a.loesung} statt ${soll})`);
+  if (["ergaenzen", "uebertragen", "fehlendTotal"].includes(a.art) && a.loesung % a.achse.raster) m.push("Säulenhöhe liegt nicht auf einer Gitterlinie");
+  if (a.art === "fehlendTotal" && a.total !== summe(a.werte)) m.push("Total stimmt nicht");
+  if (a.optionen) {
+    if (!a.optionen.includes(a.loesung)) m.push("Lösung fehlt in der Auswahl");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Optionen");
+    if (a.optionen.some(o => typeof o === "number" && o < 1)) m.push("Option nicht positiv");
+  }
+  if (p.wahl && typeof a.loesung === "number" && !a.optionen) m.push("Auswahl fehlt in dieser Stufe");
+  return m;
+}
+
+// ---------- Darstellungen ----------
+
+/** Strichliste: je fünf Striche ein Bündel (vier senkrecht, der fünfte quer darüber). */
+function striche(n) {
+  const buendel = Math.floor(n / 5), rest = n % 5;
+  let s = "", x = 4;
+  for (let b = 0; b < buendel; b++) {
+    for (let i = 0; i < 4; i++) s += `<line class="strich" x1="${x + i * 6}" x2="${x + i * 6}" y1="5" y2="25"/>`;
+    s += `<line class="strich" x1="${x - 3}" x2="${x + 21}" y1="21" y2="9"/>`;
+    x += 34;
+  }
+  for (let i = 0; i < rest; i++) s += `<line class="strich" x1="${x + i * 6}" x2="${x + i * 6}" y1="5" y2="25"/>`;
+  const breite = x + rest * 6 + 4;
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", `0 0 ${breite} 30`);
+  svg.setAttribute("width", breite);
+  svg.setAttribute("aria-label", "Strichliste");
+  svg.innerHTML = s;
+  return svg;
+}
+
+const katZelle = k => el("td", { text: `${k.bild} ${k.name}` });
+
+function strichliste(a) {
+  const t = el("table", { class: "daten" });
+  t.append(el("tr", {}, el("th", { text: UMFRAGEN[a.u].titel }), el("th", { text: "Striche" })));
+  a.kat.forEach((x, i) => t.append(el("tr", {}, katZelle(kat(a, i)), el("td", {}, striche(a.werte[i])))));
+  return t;
+}
+
+function tabelle(a) {
+  const t = el("table", { class: "daten" });
+  t.append(el("tr", {}, el("th", { text: UMFRAGEN[a.u].titel }), el("th", { text: "Anzahl" })));
+  a.kat.forEach((x, i) => t.append(el("tr", {}, katZelle(kat(a, i)), el("td", { class: "zahl", text: zahlText(a.werte[i]) }))));
+  return t;
+}
+
+/**
+ * Säulendiagramm als SVG. werte[i] === null lässt die Spalte leer; opt.leer = Index einer Spalte, in
+ * der man die Höhe antippt (opt.onTipp(wert)); opt.werte2 und opt.gruppen zeichnen Doppelsäulen.
+ */
+function diagramm(a, werte, opt = {}) {
+  const B = 360, H = 300, L = 38, R = 8, O = opt.gruppen ? 30 : 12, U = 52;
+  const { max, raster, label } = a.achse;
+  const ph = H - O - U, pw = B - L - R, spalte = pw / werte.length;
+  const Y = v => O + ph - (v / max) * ph;
+  let s = "";
+  for (let v = 0; v <= max; v += raster) {
+    s += `<line class="gitter" x1="${L}" x2="${B - R}" y1="${Y(v)}" y2="${Y(v)}"/>`;
+    if (v % label === 0) s += `<text class="zahl" x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
+  }
+  werte.forEach((w, i) => {
+    const x0 = L + i * spalte;
+    const k = kat(a, i);
+    if (opt.werte2) {
+      const b = spalte * 0.34;
+      s += `<rect class="saeule" x="${x0 + spalte * 0.14}" y="${Y(w)}" width="${b}" height="${Y(0) - Y(w)}" rx="3"/>`;
+      s += `<rect class="saeule b" x="${x0 + spalte * 0.52}" y="${Y(opt.werte2[i])}" width="${b}" height="${Y(0) - Y(opt.werte2[i])}" rx="3"/>`;
+    } else if (w !== null) {
+      s += `<rect class="saeule" x="${x0 + spalte * 0.2}" y="${Y(w)}" width="${spalte * 0.6}" height="${Y(0) - Y(w)}" rx="4"/>`;
+    } else if (i === opt.leer) {
+      s += `<rect class="leer" x="${x0 + spalte * 0.2}" y="${O}" width="${spalte * 0.6}" height="${ph}" rx="4"/>`;
+    }
+    s += `<text class="bild" x="${x0 + spalte / 2}" y="${H - U + 24}" text-anchor="middle">${k.bild}</text>`;
+    s += `<text class="name" x="${x0 + spalte / 2}" y="${H - U + 42}" text-anchor="middle">${k.name}</text>`;
+  });
+  s += `<line class="achse" x1="${L}" x2="${B - R}" y1="${Y(0)}" y2="${Y(0)}"/><line class="achse" x1="${L}" x2="${L}" y1="${Y(0)}" y2="${O - 4}"/>`;
+  if (opt.gruppen) {
+    s += `<rect class="saeule" x="${L + 10}" y="6" width="14" height="14" rx="3"/><text class="name" x="${L + 30}" y="18">Klasse ${opt.gruppen[0]}</text>`;
+    s += `<rect class="saeule b" x="${L + 130}" y="6" width="14" height="14" rx="3"/><text class="name" x="${L + 150}" y="18">Klasse ${opt.gruppen[1]}</text>`;
+  }
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", `0 0 ${B} ${H}`);
+  svg.setAttribute("class", "diagramm");
+  svg.setAttribute("aria-label", "Säulendiagramm");
+  svg.innerHTML = s;
+
+  if (opt.leer !== undefined) {
+    // Eine Säule in der leeren Spalte: Tippen auf eine Höhe setzt ihre Spitze auf die nächste Gitterlinie.
+    const x0 = L + opt.leer * spalte;
+    const saeule = document.createElementNS(SVG, "rect");
+    saeule.setAttribute("class", "vorschau");
+    saeule.setAttribute("x", x0 + spalte * 0.2); saeule.setAttribute("width", spalte * 0.6);
+    saeule.setAttribute("y", Y(0)); saeule.setAttribute("height", 0); saeule.setAttribute("rx", 4);
+    svg.append(saeule);
+    svg.setzeSaeule = (v, klasse = "vorschau") => {
+      saeule.setAttribute("class", klasse);
+      saeule.setAttribute("y", Y(v)); saeule.setAttribute("height", Y(0) - Y(v));
+    };
+    for (let v = raster; v <= max; v += raster) {
+      const band = document.createElementNS(SVG, "rect");
+      band.setAttribute("class", "band");
+      band.setAttribute("x", x0); band.setAttribute("width", spalte);
+      band.setAttribute("y", Y(v) - (Y(0) - Y(raster)) / 2); band.setAttribute("height", Y(0) - Y(raster));
+      band.addEventListener("click", () => opt.onTipp(v));
+      svg.append(band);
+    }
+  }
+  return svg;
+}
+
+const titel = a => el("div", { class: "titel", text: UMFRAGEN[a.u].titel });
+
+LS.spiel({
+  id: "diagramm-detektiv",
+  einleitung: "Detektivarbeit! Lies Strichlisten, Tabellen und Säulendiagramme genau — dann findest du jede Antwort.",
+  anzahl: 8,
+  stufen: Object.fromEntries(Object.entries({
+    s1: "Strichlisten lesen: Wie viele? Wo am meisten?",
+    s2: "Säulendiagramm bis 10: ablesen und vergleichen.",
+    s3: "Säulen in Zweier- und Fünferschritten, Tabellen: Wie viele mehr?",
+    s4: "Säulen ergänzen und Werte zwischen den Linien ablesen.",
+    s5: "Tabelle und Diagramm vergleichen, Durchschnitt pro Tag.",
+    s6: "Endgegner: zwei Klassen im Vergleich, fehlende Säule aus dem Total.",
+  }).filter(([s]) => STUFE[s])),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const k = i => kat(a, i);
+    const einheit = UMFRAGEN[a.u].einheit;
+    const f = ctx.flaeche;
+
+    // Darstellung der Daten
+    if (a.darst === "strich") f.append(strichliste(a));
+    else if (a.darst === "tabelle") f.append(tabelle(a));
+    else if (a.darst === "saeule") f.append(titel(a), diagramm(a, a.art === "fehlendTotal" ? a.werte.map((w, i) => (i === a.i ? null : w)) : a.werte, a.art === "fehlendTotal" ? { leer: a.i, onTipp: v => tipp(v) } : {}));
+    else if (a.darst === "doppel") f.append(titel(a), diagramm(a, a.werte, { werte2: a.werte2, gruppen: a.gruppen }));
+    else {
+      // zwei Darstellungen nebeneinander: Tabelle oder Strichliste links, Diagramm rechts
+      const links = a.darst === "strich+saeule" ? strichliste(a) : tabelle(a);
+      const werte = a.art === "vergleich" ? a.gezeichnet : a.werte.map((w, i) => (i === a.i ? null : w));
+      f.append(el("div", { class: "zwei" }, links, diagramm(a, werte, a.art === "vergleich" ? {} : { leer: a.i, onTipp: v => tipp(v) })));
+    }
+    f.append(el("div", { class: "frage", text: a.frage }));
+
+    // ---- Säule antippen (ergänzen, übertragen, fehlendes Total) ----
+    let gewaehlt = null;
+    function tipp(v) {
+      if (ctx.vorbei()) return;
+      gewaehlt = v;
+      f.querySelector(".diagramm").setzeSaeule(v);
+      LS.ton("tipp");
+    }
+    if (["ergaenzen", "uebertragen", "fehlendTotal"].includes(a.art)) {
+      const loesung = a.art === "fehlendTotal"
+        ? `${zahlText(a.total)} − (${a.werte.filter((w, i) => i !== a.i).join(" + ")}) = ${a.loesung}`
+        : `${k(a.i).Wo} sind es ${a.loesung} — die Säule reicht bis ${a.loesung}.`;
+      ctx.loesung?.(loesung);
+      const pruefen = el("button", { class: "knopf gruen", type: "button", text: "Prüfen ✓" });
+      pruefen.addEventListener("click", () => {
+        if (ctx.vorbei()) return;
+        if (gewaehlt === null) { ctx.sag("Tipp zuerst in der leeren Spalte an, wie hoch die Säule sein soll."); return; }
+        const svg = f.querySelector(".diagramm");
+        if (gewaehlt === a.loesung) { svg.setzeSaeule(a.loesung, "geloest"); ctx.richtig(); return; }
+        const richtung = gewaehlt > a.loesung ? "zu hoch" : "zu niedrig";
+        ctx.falsch(a.art === "fehlendTotal" ? `Die Säule ist ${richtung}. Zähle die anderen Säulen zusammen: Was fehlt noch bis zum Total?`
+          : a.art === "uebertragen" ? `Die Säule ist ${richtung}. Zähle die Striche nochmal: Ein Bündel sind fünf.`
+          : `Die Säule ist ${richtung}. Schau in der Tabelle nach und folge der Linie von der Zahl an der Achse.`, loesung);
+        if (ctx.vorbei()) svg.setzeSaeule(a.loesung, "geloest");
+      });
+      f.append(el("div", { class: "knopfzeile" }, pruefen));
+      if (ctx.nr === 0) ctx.sag("Tipp in die leere Spalte, dann auf «Prüfen». Du kannst die Höhe vorher noch ändern.");
+      return;
+    }
+
+    // ---- Hinweise je Art (nennen nie die Lösung) ----
+    const ablesen = a.darst === "strich" ? "Zähle zuerst die Fünferbündel, dann die einzelnen Striche."
+      : a.darst === "tabelle" || a.darst === "tabelle+saeule" ? "Such die Zeile in der Tabelle und lies die Zahl daneben."
+      : a.achse.schritt < a.achse.raster ? "Geh von der Spitze der Säule waagrecht zur Achse. Liegt sie zwischen zwei Linien, ist es die Zahl in der Mitte."
+      : "Geh von der Spitze der Säule waagrecht nach links zur Zahl an der Achse.";
+    const extrem = a.art === "meist"
+      ? (a.darst === "strich" ? "Wo sind die meisten Striche?" : a.darst === "tabelle" ? "Such die grösste Zahl in der Tabelle." : "Such die höchste Säule.")
+      : (a.darst === "strich" ? "Wo sind die wenigsten Striche?" : a.darst === "tabelle" ? "Such die kleinste Zahl in der Tabelle." : "Such die niedrigste Säule.");
+    const grundHinweis = {
+      wieviel: ablesen,
+      meist: extrem, wenigst: extrem,
+      mehr: `Lies beide Zahlen ab. Dann rechne: grössere minus kleinere Zahl. ${ablesen}`,
+      zusammen: `Lies beide Zahlen ab und zähle sie zusammen. ${ablesen}`,
+      total: "Zähle alle Zahlen zusammen — keine vergessen!",
+      vergleich: "Vergleiche jede Säule mit ihrer Zahl in der Tabelle, eine nach der anderen.",
+      durchschnitt: "Zähle alle Zahlen zusammen und teile durch die Anzahl Tage.",
+      doppelGroesst: "Rechne bei jedem Säulenpaar: höhere minus niedrigere Säule. Wo kommt am meisten heraus?",
+      doppelMehr: "Lies beide Säulen dieses Paars ab und rechne: höhere minus niedrigere.",
+    }[a.art];
+
+    const loesungText = {
+      wieviel: () => `${k(a.i).Wo} sind es ${a.loesung} ${einheit}.`,
+      meist: () => `Am meisten: ${k(a.werte.indexOf(Math.max(...a.werte))).name}.`,
+      wenigst: () => `Am wenigsten: ${k(a.werte.indexOf(Math.min(...a.werte))).name}.`,
+      mehr: () => `${k(a.i).Wo} ${a.werte[a.i]}, ${k(a.j).wo} ${a.werte[a.j]}: ${a.werte[a.i]} − ${a.werte[a.j]} = ${a.loesung}`,
+      zusammen: () => `${a.werte[a.i]} + ${a.werte[a.j]} = ${a.loesung}`,
+      total: () => `${a.werte.join(" + ")} = ${zahlText(a.loesung)}`,
+      vergleich: () => `${k(a.i).name}: In der Tabelle steht ${a.werte[a.i]}, die Säule zeigt ${a.gezeichnet[a.i]}.`,
+      durchschnitt: () => `(${a.werte.join(" + ")}) : ${a.werte.length} = ${summe(a.werte)} : ${a.werte.length} = ${a.loesung}`,
+      doppelGroesst: () => `Unterschiede: ${a.werte.map((w, i) => `${k(i).name} ${Math.abs(w - a.werte2[i])}`).join(", ")}. Am grössten bei ${a.loesung}.`,
+      doppelMehr: () => { const v = a.vorn === 0 ? [a.werte[a.i], a.werte2[a.i]] : [a.werte2[a.i], a.werte[a.i]]; return `${v[0]} − ${v[1]} = ${a.loesung}`; },
+    }[a.art]();
+
+    if (a.optionen) {
+      const zahlen = typeof a.loesung === "number";
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.loesung, breite: zahlen ? 90 : 120,
+        inhalt: zahlen ? undefined : name => { const i = a.kat.findIndex((x, j) => k(j).name === name); return { bild: k(i).bild, text: name }; },
+        hinweis: wert => zahlen ? `${wert > a.loesung ? "Das ist zu viel." : "Das ist zu wenig."} ${grundHinweis}` : grundHinweis,
+        loesung: loesungText,
+      });
+    } else {
+      ctx.loesung?.(loesungText);
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Antwort" });
+      f.append(anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: 3,
+        onOk(z) {
+          if (z === a.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+          anzeige.classList.add("falsch");
+          ctx.falsch(`${z > a.loesung ? "Das ist zu viel." : "Das ist zu wenig."} ${grundHinweis}`, loesungText);
+          if (ctx.vorbei()) tasten.gesperrt = true;
+        },
+      });
+      f.append(tasten.element);
+    }
+    if (ctx.nr === 0) ctx.sag(a.darst === "strich" ? "Ein Bündel sind fünf Striche." : "Lies genau: Titel, Achse und Beschriftung.");
+  },
+});
+</script>
+</body>
+</html>

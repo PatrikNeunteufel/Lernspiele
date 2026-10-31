@@ -31,9 +31,17 @@
 // beschreiben, die einem Tier das Leben in einem Lebensraum erlauben. Fakten in fakten.js.
 
 const { waehle, mische, el } = LS;
+const ID = "fledermaus-forscher";
 
-const AUSSAGEN = FLEDERMAUS_AUSSAGEN.map(([ab, text, stimmt, erklaerung]) => ({ ab, text, stimmt, erklaerung }));
-const FRAGEN = FLEDERMAUS_FRAGEN.map(([ab, frage, richtig, f1, f2, erklaerung]) => ({ ab, frage, richtig, falsch: [f1, f2], erklaerung }));
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : FLEDERMAUS_LISTEN);
+const nurFrei = (liste, daten) => (FREI.has(liste) ? daten : []);
+
+const AUSSAGEN = nurFrei("aussagen", FLEDERMAUS_AUSSAGEN).map(([ab, text, stimmt, erklaerung]) => ({ ab, text, stimmt, erklaerung }));
+const FRAGEN = nurFrei("fragen", FLEDERMAUS_FRAGEN).map(([ab, frage, richtig, f1, f2, erklaerung]) => ({ ab, frage, richtig, falsch: [f1, f2], erklaerung }));
+const JAHR = nurFrei("jahr", FLEDERMAUS_JAHR);
+const ANPASSUNGEN = nurFrei("anpassungen", FLEDERMAUS_ANPASSUNGEN);
 // Die Fakten tragen „ab Stufe“ 1–5 (fakten.js). Basisklasse 2: Stufe 1 = 1. Klasse, 2–4 = 2. Klasse,
 // 5 = 3. Klasse. Die Königsstufe (6) nimmt nur die schweren Inhalte (ab 4 und 5).
 const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
@@ -51,34 +59,71 @@ function frisch(liste) {
   return x;
 }
 
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
-  aussage: n => ({ art: "aussage", a: frisch(passend(AUSSAGEN, n)) }),
+  aussage: n => {
+    const liste = passend(AUSSAGEN, n);
+    return liste.length ? { art: "aussage", a: frisch(liste) } : null;
+  },
   frage: n => {
-    const f = frisch(passend(FRAGEN, n).length ? passend(FRAGEN, n) : FRAGEN.filter(x => x.ab <= n));
+    const liste = passend(FRAGEN, n).length ? passend(FRAGEN, n) : FRAGEN.filter(x => x.ab <= n);
+    if (!liste.length) return null;
+    const f = frisch(liste);
     return { art: "frage", f, optionen: mische([f.richtig, ...f.falsch]) };
   },
-  jahr: () => ({ art: "jahr", reihe: FLEDERMAUS_JAHR.map(([zeit, was]) => `${zeit}: ${was}`) }),
+  jahr: () => (JAHR.length ? { art: "jahr", reihe: JAHR.map(([zeit, was]) => `${zeit}: ${was}`) } : null),
   anpassung: () => {
-    const [merkmal, nutzen] = waehle(FLEDERMAUS_ANPASSUNGEN);
-    const andere = mische(FLEDERMAUS_ANPASSUNGEN.filter(x => x[0] !== merkmal)).slice(0, 2).map(x => x[1]);
+    if (ANPASSUNGEN.length < 3) return null;
+    const [merkmal, nutzen] = waehle(ANPASSUNGEN);
+    const andere = mische(ANPASSUNGEN.filter(x => x[0] !== merkmal)).slice(0, 2).map(x => x[1]);
     return { art: "anpassung", merkmal, richtig: nutzen, optionen: mische([nutzen, ...andere]) };
   },
 };
 
+// Je Stufe die Arten (mehrfach genannt = häufiger).
 const STUFE = {
-  s1: () => waehle([() => ARTEN.aussage(1), () => ARTEN.aussage(1), () => ARTEN.frage(1)])(),
-  s2: () => waehle([() => ARTEN.aussage(2), () => ARTEN.frage(2)])(),
-  s3: () => waehle([() => ARTEN.aussage(3), () => ARTEN.frage(3)])(),
-  s4: () => waehle([() => ARTEN.aussage(4), () => ARTEN.frage(4), ARTEN.jahr])(),
-  s5: () => waehle([() => ARTEN.aussage(5), () => ARTEN.frage(5), ARTEN.anpassung, ARTEN.jahr])(),
-  s6: () => waehle([() => ARTEN.aussage(6), () => ARTEN.frage(6), ARTEN.anpassung, ARTEN.jahr])(),
+  s1: [() => ARTEN.aussage(1), () => ARTEN.aussage(1), () => ARTEN.frage(1)],
+  s2: [() => ARTEN.aussage(2), () => ARTEN.frage(2)],
+  s3: [() => ARTEN.aussage(3), () => ARTEN.frage(3)],
+  s4: [() => ARTEN.aussage(4), () => ARTEN.frage(4), ARTEN.jahr],
+  s5: [() => ARTEN.aussage(5), () => ARTEN.frage(5), ARTEN.anpassung, ARTEN.jahr],
+  s6: [() => ARTEN.aussage(6), () => ARTEN.frage(6), ARTEN.anpassung, ARTEN.jahr],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Stimmt das? Schlafen, fliegen, kopfüber hängen.",
+  s2: "Der Körper: Fell, Flughaut, Milch für die Jungen.",
+  s3: "Echo, Insekten und Winterschlaf.",
+  s4: "Das Jahr einer Fledermaus und die Wochenstube.",
+  s5: "Wozu helfen die grossen Ohren? Fledermäuse schützen.",
+  s6: "Endgegner: das Jahr ohne Jahreszeiten, Merkmale und schwere Fragen gemischt.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (fakten.js). */
+function herkunft(a) {
+  if (a.art === "aussage") return FLEDERMAUS_AUSSAGEN.some(x => x[1] === a.a.text) ? ["aussagen"] : ["?"];
+  if (a.art === "frage") return FLEDERMAUS_FRAGEN.some(x => x[1] === a.f.frage) ? ["fragen"] : ["?"];
+  if (a.art === "jahr") return a.reihe.every(r => FLEDERMAUS_JAHR.some(([zeit, was]) => r === `${zeit}: ${was}`)) ? ["jahr"] : ["?"];
+  return [a.merkmal, ...a.optionen].every(t => FLEDERMAUS_ANPASSUNGEN.some(x => x.includes(t))) ? ["anpassungen"] : ["?"];
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
   const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
   const n = STUFE_NR[stufe];
   if (a.art === "aussage" && a.a.ab > n) m.push("Aussage aus einer höheren Stufe");
   if (a.art === "frage" && (a.f.ab > n || new Set(a.optionen).size !== 3)) m.push("Frage zu schwer oder Auswahl doppelt");
@@ -93,14 +138,7 @@ LS.spiel({
   id: "fledermaus-forscher",
   einleitung: "Fledermäuse fliegen in der Nacht, hängen kopfüber und hören, wo die Mücken sind. Was weisst du über sie?",
   anzahl: 8,
-  stufen: {
-    s1: "Stimmt das? Schlafen, fliegen, kopfüber hängen.",
-    s2: "Der Körper: Fell, Flughaut, Milch für die Jungen.",
-    s3: "Echo, Insekten und Winterschlaf.",
-    s4: "Das Jahr einer Fledermaus und die Wochenstube.",
-    s5: "Wozu helfen die grossen Ohren? Fledermäuse schützen.",
-    s6: "Endgegner: das Jahr ohne Jahreszeiten, Merkmale und schwere Fragen gemischt.",
-  },
+  stufen: STUFEN,
 
   aufgabe(ctx) {
     if (ctx.nr === 0) gebraucht = new Set();

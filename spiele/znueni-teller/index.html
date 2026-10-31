@@ -29,49 +29,91 @@
 // f lokale, saisonale Produkte. Inhalte in lebensmittel.js.
 
 const { waehle, mische, el } = LS;
-const L = LEBENSMITTEL.map(([bild, name, gruppe]) => ({ bild, name, gruppe }));
 const ALLTAG = { jeden: { bild: "🍎", text: "jeden Tag" }, selten: { bild: "🍬", text: "nur ab und zu" } };
+const ID = "znueni-teller";
 
+// Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
+// die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ZNUENI_LISTEN);
+const L = (FREI.has("lebensmittel") ? LEBENSMITTEL : []).map(([bild, name, gruppe]) => ({ bild, name, gruppe }));
+const ZNUENIS_FREI = FREI.has("znuenis") ? ZNUENIS : [];
+const FRAGEN = ZNUENI_FRAGEN.filter(f => FREI.has(f[4]));
+
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   alltag() {
     const x = waehle(L.filter(l => ["Frucht", "Gemüse", "Getränk", "Getreide", "Süsses"].includes(l.gruppe)));
+    if (!x) return null;
     return { art: "korb", x, koerbe: ["jeden", "selten"], richtig: x.gruppe === "Süsses" ? "selten" : "jeden" };
   },
   fruchtGemuese() {
     const x = waehle(L.filter(l => l.gruppe === "Frucht" || l.gruppe === "Gemüse"));
+    if (!x) return null;
     return { art: "korb", x, koerbe: ["Frucht", "Gemüse"], richtig: x.gruppe };
   },
   gruppe(n = 4) {
     const x = waehle(L);
+    if (!x) return null;
     const andere = mische(Object.keys(GRUPPEN_ZNUENI).filter(g => g !== x.gruppe)).slice(0, n - 1);
     return { art: "korb", x, koerbe: mische([x.gruppe, ...andere]), richtig: x.gruppe };
   },
   znueni() {
-    const [gut, ...schlecht] = waehle(ZNUENIS);
+    if (!ZNUENIS_FREI.length) return null;
+    const [gut, ...schlecht] = waehle(ZNUENIS_FREI);
     const optionen = mische([gut, ...schlecht].map(t => t.join("")));
     return { art: "znueni", richtig: gut.join(""), optionen };
   },
   frage() {
-    const [frage, richtig, f1, f2] = waehle(ZNUENI_FRAGEN);
+    if (!FRAGEN.length) return null;
+    const [frage, richtig, f1, f2] = waehle(FRAGEN);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
 };
 
+// Je Stufe die Arten (mehrfach genannt = häufiger).
 const STUFE = {
-  s1: () => ARTEN.alltag(),
-  s2: () => waehle([ARTEN.fruchtGemuese, ARTEN.alltag])(),
-  s3: () => ARTEN.gruppe(),
-  s4: () => waehle([ARTEN.znueni, () => ARTEN.gruppe()])(),
-  s5: () => waehle([ARTEN.frage, ARTEN.znueni])(),
+  s1: [ARTEN.alltag],
+  s2: [ARTEN.fruchtGemuese, ARTEN.alltag],
+  s3: [() => ARTEN.gruppe()],
+  s4: [ARTEN.znueni, () => ARTEN.gruppe()],
+  s5: [ARTEN.frage, ARTEN.znueni],
   // Königsstufe: alles gemischt, Gruppen mit allen sechs Körben
-  s6: () => waehle([() => ARTEN.gruppe(6), () => ARTEN.gruppe(6), ARTEN.znueni, ARTEN.frage, ARTEN.alltag])(),
+  s6: [() => ARTEN.gruppe(6), () => ARTEN.gruppe(6), ARTEN.znueni, ARTEN.frage, ARTEN.alltag],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Jeden Tag oder nur ab und zu?",
+  s2: "Frucht oder Gemüse?",
+  s3: "In welche Gruppe gehört das Lebensmittel?",
+  s4: "Welches Znüni ist ausgewogen?",
+  s5: "Vitamine, Kraft, Wasser — und was wächst bei uns?",
+  s6: "Alles gemischt — und alle sechs Gruppen auf einmal.",
+};
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (lebensmittel.js). */
+function herkunft(a) {
+  if (a.art === "korb") return [LEBENSMITTEL.some(l => l[1] === a.x.name && l[2] === a.x.gruppe) ? "lebensmittel" : "?"];
+  if (a.art === "znueni") return [ZNUENIS.some(z => z[0].join("") === a.richtig && z.every(t => a.optionen.includes(t.join("")))) ? "znuenis" : "?"];
+  return [ZNUENI_FRAGEN.find(f => f[0] === a.frage)?.[4] || "?"];
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
-function pruefeAufgabe(a) {
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
   const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (herkunft(a).some(l => !FREI.has(l))) m.push(`Inhalt nicht aus einer freien Liste (${herkunft(a).join(", ")})`);
   if (a.koerbe && (!a.koerbe.includes(a.richtig) || new Set(a.koerbe).size !== a.koerbe.length)) m.push("Korb fehlt oder doppelt");
   if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
   return m;
@@ -83,14 +125,7 @@ LS.spiel({
   id: "znueni-teller",
   einleitung: "Was gibt dir Kraft für die Schule? Stell dir ein feines und gesundes Znüni zusammen!",
   anzahl: 8,
-  stufen: {
-    s1: "Jeden Tag oder nur ab und zu?",
-    s2: "Frucht oder Gemüse?",
-    s3: "In welche Gruppe gehört das Lebensmittel?",
-    s4: "Welches Znüni ist ausgewogen?",
-    s5: "Vitamine, Kraft, Wasser — und was wächst bei uns?",
-    s6: "Alles gemischt — und alle sechs Gruppen auf einmal.",
-  },
+  stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
@@ -100,7 +135,7 @@ LS.spiel({
       LS.koerbe(ctx, {
         karte: { bild: a.x.bild, text: a.x.name }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: korbInfo,
         // Der Hinweis erklärt den falsch gewählten Korb — die Erklärung des richtigen nennte die Lösung.
-        hinweis: k => (ALLTAG[k] ? "Überleg: Hat es viel Zucker, Fett oder Salz? Dann nur ab und zu." : `${GRUPPEN_ZNUENI[k].erklaerung} Passt ${a.x.name} dazu?`),
+        hinweis: k => (ALLTAG[k] ? "Überleg: Viel Zucker, Fett oder Salz — nur ab und zu. Wasser, Früchte, Gemüse, Brot, Milch und Ei — jeden Tag." : `${GRUPPEN_ZNUENI[k].erklaerung} Passt ${a.x.name} dazu?`),
         loesung: `${a.x.name}: ${korbInfo(a.richtig).text}. ${erkl}`, lob: `Richtig! ${erkl}`,
       });
     } else if (a.art === "znueni") {

@@ -171,6 +171,8 @@ function zahlZeichnen(ctx, liste, klickbar, onKlick) {
 function stelleBenennen(ctx, zahl, knapp = false) {
   const liste = ziffernMitStelle(zahl);
   const ziel = waehle(liste);
+  const loesung = `Die ${ziel.z} steht bei den ${LS.dativ(ziel.st)} (${ziel.st.k}).`;
+  ctx.loesung(loesung);
   ctx.flaeche.append(el("div", { class: "auftrag", text: "An welcher Stelle steht die Ziffer unter der Lupe?" }));
   const knoepfe = zahlZeichnen(ctx, liste, false);
   knoepfe[liste.indexOf(ziel)].classList.add("gesucht");
@@ -192,7 +194,7 @@ function stelleBenennen(ctx, zahl, knapp = false) {
       }
       b.classList.add("weg");
       ctx.falsch(knapp ? "Nicht ganz. Zähl die Stellen genau ab!" : "Zähl von rechts: Einer, Zehner, Hunderter, Tausender, …",
-        `Die ${ziel.z} steht bei den ${LS.dativ(ziel.st)} (${ziel.st.k}).`);
+        loesung);
       if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
     });
     antworten.append(b);
@@ -204,6 +206,8 @@ function stelleBenennen(ctx, zahl, knapp = false) {
 function zifferFinden(ctx, zahl, knapp = false) {
   const liste = ziffernMitStelle(zahl);
   const ziel = waehle(liste);
+  const loesung = `Bei den ${LS.dativ(ziel.st)} steht die ${ziel.z}.`;
+  ctx.loesung(loesung);
   ctx.flaeche.append(el("div", { class: "auftrag", html: `Tipp die Ziffer an, die bei den <span style="color:var(--st-${ziel.st.k})">${LS.dativ(ziel.st)} (${ziel.st.k})</span> steht!` }));
   let fertig = false;
   zahlZeichnen(ctx, liste, true, (d, knopf) => {
@@ -218,7 +222,7 @@ function zifferFinden(ctx, zahl, knapp = false) {
     void knopf.offsetWidth;
     knopf.classList.add("falsch");
     ctx.falsch(knapp ? "Diese nicht. Zähl nochmal von rechts!" : `Die ${d.z} steht bei den ${LS.dativ(d.st)}. Zähl nochmal von rechts!`,
-      `Bei den ${LS.dativ(ziel.st)} steht die ${ziel.z}.`);
+      loesung);
     if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
   });
 }

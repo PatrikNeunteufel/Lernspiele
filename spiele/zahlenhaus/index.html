@@ -120,6 +120,8 @@ LS.spiel({
     const bekannt = reihe.reduce((x, y) => x + y, 0) - a.richtig;
     /** Rechnung des Stockwerks mit w an der Stelle der Lücke: „230 + 320 + 150“. */
     const rechnung = w => reihe.map((z, i) => zahlText(i === a.luecke.seite ? w : z)).join(" + ");
+    const loesung = `${rechnung(a.richtig)} = ${zahlText(a.dach)}`;
+    ctx.loesung(loesung);
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl fehlt im Stockwerk?" }), haus);
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Fehlende Zahl" });
     ctx.flaeche.append(anzeige);
@@ -137,7 +139,7 @@ LS.spiel({
         anzeige.classList.add("falsch");
         const summe = bekannt + w;
         ctx.falsch(`${rechnung(w)} = ${zahlText(summe)}. ${summe > a.dach ? "Das ist zu viel" : "Da fehlt noch etwas"} bis ${zahlText(a.dach)}.`,
-          `${rechnung(a.richtig)} = ${zahlText(a.dach)}`);
+          loesung);
         if (ctx.vorbei()) tasten.gesperrt = true;
       },
     });

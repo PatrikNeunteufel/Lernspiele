@@ -1,6 +1,13 @@
 // Texte für den Lese-Detektiv (Lehrplan SG D.2.B.1). [Stufe, Titel oder null, Text, Frage, richtig, falsch, falsch]
 // Stufe 1: ein Satz, Antworten sind Bilder. Die Namen sind erfunden.
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten (Entscheid L4 a): Die Texte einer Stufe (erstes Feld) bilden eine Liste, die die
+// Aufsicht einzeln freigibt (Zuordnung in LESETEXTE_LISTEN). Der Prüfstand steht im Katalog
+// (spiele/gemeinsam/katalog.js, Eintrag lese-detektiv, Feld listen). Eine Spielstufe braucht ihre
+// eigene Liste; ab Stufe 3 kommen die Texte der Stufe davor dazu, wenn deren Liste frei ist.
+
+const LESETEXTE_LISTEN = { 1: "bildsaetze", 2: "kurztexte", 3: "sachtexte-kurz", 4: "zwischen-zeilen", 5: "sachtexte-lang", 6: "sachtexte-folgern" };
 
 const LESETEXTE = [
   [1, null, "Der Apfel ist grün.", "Welches Bild passt?", "🍏", "🍎", "🍐"],

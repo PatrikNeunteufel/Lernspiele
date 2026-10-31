@@ -34,9 +34,14 @@
 
 const { waehle, mische, el } = LS;
 
-const EINFACH = KOMPOSITA.filter(k => k.teile.length === 2 && !k.falsch);
-const MIT_FUGE = KOMPOSITA.filter(k => k.falsch);
-const DREI = KOMPOSITA.filter(k => k.teile.length === 3);
+// Freigabe (Entscheid L4 a): nur Wörter aus Listen, die der Spieler üben darf (Aufsicht: alle).
+// Kennt der Katalog die Listen nicht, gilt alles als frei — dann entscheidet die Freigabe des Spiels.
+const FREI = new Set(LS.spielListen("nomen-puzzle").length ? LS.freieListen("nomen-puzzle") : Object.keys(KOMPOSITA));
+const FREIE = Object.entries(KOMPOSITA).filter(([l]) => FREI.has(l)).flatMap(([, liste]) => liste);
+
+const EINFACH = FREIE.filter(k => k.teile.length === 2 && !k.falsch);
+const MIT_FUGE = FREIE.filter(k => k.falsch);
+const DREI = FREIE.filter(k => k.teile.length === 3);
 const woerter = k => k.teile.map(t => t[1]);
 /** Zusammensetzen ohne Fugenlaut: Haus + Tür → Haustür */
 const zusammen = teile => teile.map((t, i) => (i === 0 ? t : t.toLowerCase())).join("");
@@ -76,21 +81,32 @@ const ARTEN = {
   },
 };
 
+// Je Stufe die Aufgabenarten mit der Bedingung, dass die freien Listen genug Wörter dafür haben.
+const ZWEI = () => EINFACH.length >= 2, FUGE = () => MIT_FUGE.length > 0, DREIER = () => DREI.length > 0, ALLE = () => FREIE.length > 0;
 const STUFE = {
-  s1: () => ARTEN.zusammen(),
-  s2: () => waehle([() => ARTEN.legen(false), ARTEN.zusammen])(),
-  s3: () => waehle([ARTEN.zerlegen, () => ARTEN.legen(false)])(),
-  s4: () => waehle([() => ARTEN.artikel(EINFACH), ARTEN.zerlegen])(),
-  s5: () => waehle([ARTEN.fuge, () => ARTEN.legen(true), () => ARTEN.artikel(KOMPOSITA)])(),
+  s1: [[ZWEI, ARTEN.zusammen]],
+  s2: [[ZWEI, () => ARTEN.legen(false)], [ZWEI, ARTEN.zusammen]],
+  s3: [[ZWEI, ARTEN.zerlegen], [ZWEI, () => ARTEN.legen(false)]],
+  s4: [[ZWEI, () => ARTEN.artikel(EINFACH)], [ZWEI, ARTEN.zerlegen]],
+  s5: [[FUGE, ARTEN.fuge], [DREIER, () => ARTEN.legen(true)], [ALLE, () => ARTEN.artikel(FREIE)]],
   // Königsstufe: drei Teile, Fugenlaute und Artikel gemischt
-  s6: () => waehle([() => ARTEN.legen(true), ARTEN.zerlegenDrei, () => ARTEN.artikel(DREI), () => ARTEN.artikel(MIT_FUGE), ARTEN.fuge])(),
+  s6: [[DREIER, () => ARTEN.legen(true)], [DREIER, ARTEN.zerlegenDrei], [DREIER, () => ARTEN.artikel(DREI)], [FUGE, () => ARTEN.artikel(MIT_FUGE)], [FUGE, ARTEN.fuge]],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Aufgabenarten der Stufe, die mit den freien Listen gehen; leer = Stufe wird nicht angeboten. */
+const moeglich = stufe => STUFE[stufe].filter(([geht]) => geht()).map(([, neu]) => neu);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => moeglich(s).length));
+
+function aufgabeErzeugen(stufe) {
+  const arten = moeglich(stufe);
+  if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  return waehle(arten)();
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a) {
   const m = [];
+  if (!FREIE.includes(a.k)) m.push("Wort nicht aus einer freien Liste");
   if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
   if (a.art === "artikel" && a.k.ganz[0] !== a.k.teile[a.k.teile.length - 1][0]) m.push("Artikel nicht vom Grundwort");
   if (!a.k.falsch && zusammen(woerter(a.k)) !== a.k.ganz[1]) m.push(`Teile ergeben nicht «${a.k.ganz[1]}»`);
@@ -109,14 +125,14 @@ LS.spiel({
   id: "nomen-puzzle",
   einleitung: "Aus zwei Nomen wird ein neues: Haus + Tür = Haustür. Das hintere Wort sagt, was es ist — eine Tür!",
   anzahl: 8,
-  stufen: {
+  stufen: nurMoegliche({
     s1: "Haus + Tür = ? Welches neue Wort entsteht?",
     s2: "Wortteile in die richtige Reihenfolge legen.",
     s3: "Zerlegen: Fussball = Fuss + Ball.",
     s4: "Der, die oder das? Das hintere Wort entscheidet.",
     s5: "Sonnenblume, Hundehütte und Wörter aus drei Teilen.",
     s6: "Drei Teile, Fugenlaute und Artikel — alles gemischt.",
-  },
+  }),
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

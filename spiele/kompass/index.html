@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kompass-Spiel</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 12px; }
+  .frage b { color: var(--deko-6); }
+  .achtung { text-align: center; font-weight: 900; color: var(--deko-3); margin: 0 0 8px; font-size: 17px; }
+
+  /* Kompassrose */
+  .rose { display: block; width: min(300px, 80vw); margin: 0 auto 12px; touch-action: manipulation; }
+  .rose.klein { width: 96px; margin: 0; }
+  .rose .ring { fill: #f6f7fd; stroke: var(--rand); stroke-width: 3; }
+  .rose .arm { fill: var(--deko-6); stroke: #fff; stroke-width: 2; cursor: pointer; }
+  .rose .arm.zwischen { fill: var(--deko-5); }
+  .rose .arm.daneben { fill: var(--hinweis); }
+  .rose .arm.treffer { fill: var(--gut); }
+  .rose .mitte { fill: #fff; stroke: var(--text); stroke-width: 2; }
+  .rose .pfeil { fill: var(--deko-3); stroke: #fff; stroke-width: 2; }
+  .rose text { font-family: var(--schrift); font-weight: 900; font-size: 20px; fill: var(--text); }
+
+  /* Plan: Raster mit Orten, Nordpfeil daneben */
+  .karten-zeile { display: flex; justify-content: center; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .plan { display: grid; gap: 3px; width: min(420px, 100%); background: #d9efc9; border: 4px solid #b6d9a0; border-radius: 16px; padding: 4px; }
+  .plan .feld { aspect-ratio: 1; border: none; border-radius: 8px; background: rgba(255, 255, 255, .55); font-family: inherit; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; color: var(--text); }
+  .plan .feld:disabled { cursor: default; }
+  .plan .feld .bild { font-size: clamp(20px, 5.4vw, 30px); line-height: 1.1; }
+  .plan .feld .name { font-size: clamp(8px, 2.1vw, 12px); font-weight: 800; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 1px; }
+  .plan .feld.start { box-shadow: inset 0 0 0 4px var(--deko-6); background: #fff; }
+  .plan .feld.daneben { background: var(--hinweis-hell); }
+  .plan .feld.spur { background: #fff6c9; }
+  .plan .feld.treffer { background: var(--gut-hell); box-shadow: inset 0 0 0 4px var(--gut); }
+  .nordpfeil { width: 64px; flex: none; }
+  .nordpfeil .pfeil { fill: var(--text); }
+  .nordpfeil text { font-family: var(--schrift); font-weight: 900; font-size: 22px; fill: var(--text); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧭 Kompass-Spiel</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="orte.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.8.4 Karten und Orientierung: c sich mit Himmelsrichtungen orientieren (Norden,
+// Osten, Süden, Westen) — Orientierungspunkt 4. Klasse; im 2. Zyklus weiter mit Zwischenrichtungen
+// und Karten, die nicht nach Norden ausgerichtet sind (Nordpfeil lesen). Abkürzungen deutsch: N, O,
+// S, W (O für Osten, nicht E). Auf dem Plan ist ohne Drehung Norden oben und Osten rechts.
+// Orte in orte.js. Basisklasse 4: s1 3. Klasse, s5 5. Klasse, s6 Königsstufe.
+
+const { zufall, waehle, mische, el } = LS;
+const SVG = "http://www.w3.org/2000/svg";
+const N = 6; // Plan mit N × N Feldern
+
+// Im Uhrzeigersinn ab Norden; dx nach Osten, dy nach Süden (Zeilen des Plans wachsen nach unten).
+const RICHTUNGEN = [
+  { k: "N",  name: "Norden",     adj: "nördlich",    lage: "oben",         dx: 0,  dy: -1 },
+  { k: "NO", name: "Nordosten",  adj: "nordöstlich", lage: "rechts oben",  dx: 1,  dy: -1 },
+  { k: "O",  name: "Osten",      adj: "östlich",     lage: "rechts",       dx: 1,  dy: 0 },
+  { k: "SO", name: "Südosten",   adj: "südöstlich",  lage: "rechts unten", dx: 1,  dy: 1 },
+  { k: "S",  name: "Süden",      adj: "südlich",     lage: "unten",        dx: 0,  dy: 1 },
+  { k: "SW", name: "Südwesten",  adj: "südwestlich", lage: "links unten",  dx: -1, dy: 1 },
+  { k: "W",  name: "Westen",     adj: "westlich",    lage: "links",        dx: -1, dy: 0 },
+  { k: "NW", name: "Nordwesten", adj: "nordwestlich", lage: "links oben",  dx: -1, dy: -1 },
+];
+const HAUPT = [0, 2, 4, 6];
+const ALLE8 = [0, 1, 2, 3, 4, 5, 6, 7];
+
+// Drehungen in Achtelschritten nach rechts (im Uhrzeigersinn)
+const DREHUNGEN = [
+  { text: "eine Vierteldrehung nach rechts", achtel: 2 },
+  { text: "eine Vierteldrehung nach links", achtel: 6 },
+  { text: "eine halbe Drehung", achtel: 4 },
+  { text: "eine Dreivierteldrehung nach rechts", achtel: 6 },
+];
+
+// Je Stufe: Aufgabenarten und ihre Einstellungen (Richtungen, Teilstücke eines Wegs, gedrehte Karte)
+const STUFE = {
+  s1: { arten: ["zeigen", "zeigen", "lesen", "buchstabe"], zeigen: HAUPT },
+  s2: { arten: ["richtung", "richtung", "nachbar", "zeigen"], zeigen: HAUPT, richtung: { dirs: HAUPT }, rose: true },
+  s3: { arten: ["weg", "weg", "richtung", "nachbar"], richtung: { dirs: HAUPT }, weg: { dirs: HAUPT, teile: 2 } },
+  s4: { arten: ["zeigen", "buchstabe", "richtung", "richtung", "weg", "beschreiben"], zeigen: ALLE8,
+        richtung: { dirs: ALLE8 }, weg: { dirs: HAUPT, teile: 3 }, beschreiben: {} },
+  s5: { arten: ["richtung", "richtung", "weg", "weg", "beschreiben"], richtung: { dirs: HAUPT, gedreht: true },
+        weg: { dirs: ALLE8, teile: 2 }, beschreiben: { gedreht: true } },
+  // Königsstufe: gedrehte Karte mit allen acht Richtungen, schräge Wege in drei Teilstücken, sich drehen.
+  s6: { arten: ["richtung", "weg", "weg", "drehen", "beschreiben"], richtung: { dirs: ALLE8, gedreht: true },
+        weg: { dirs: ALLE8, teile: 3, gedreht: true }, beschreiben: { gedreht: true } },
+};
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Kinder sehen nur Orte aus freien Listen (LS.freieListen; die Aufsicht sieht alle). Kennt der
+// Katalog die Listen dieses Spiels noch nicht, gilt alles als frei — wie bei einem Spiel ohne Listen.
+const SPIEL_ID = "kompass";
+const FREI = new Set(LS.spielListen(SPIEL_ID).length ? LS.freieListen(SPIEL_ID) : ["orte"]);
+/** Nummern der freien Orte in ORTE. */
+const FREIE_ORTE = FREI.has("orte") ? ORTE.map((o, i) => i) : [];
+// Aufgaben auf dem Plan brauchen freie Orte (mindestens so viele, wie ein Plan zeigt); die übrigen
+// (Kompassrose, Drehen) nicht. Stufen ohne Aufgabenart fallen weg.
+const MIT_PLAN = ["richtung", "nachbar", "weg", "beschreiben"];
+for (const [s, p] of Object.entries(STUFE)) {
+  p.arten = p.arten.filter(art => !MIT_PLAN.includes(art) || FREIE_ORTE.length >= 9);
+  if (!p.arten.length) delete STUFE[s];
+}
+
+const gross = s => s[0].toUpperCase() + s.slice(1);
+const feldText = n => `${n} ${n === 1 ? "Feld" : "Felder"}`;
+const schritteText = schritte => schritte.map(([ri, n]) => `${feldText(n)} nach ${RICHTUNGEN[ri].name}`).join(", dann ");
+
+/** Richtung von (0|0) nach (dx|dy) als Index, -1 wenn weder gerade noch genau schräg. */
+function richtungVon(dx, dy) {
+  if (!dx && !dy) return -1;
+  if (dx && dy && Math.abs(dx) !== Math.abs(dy)) return -1;
+  return RICHTUNGEN.findIndex(d => d.dx === Math.sign(dx) && d.dy === Math.sign(dy));
+}
+
+/** Weg Feld für Feld; null, sobald er den Plan verlässt. */
+function gehe(c, r, schritte) {
+  const spur = [[c, r]];
+  for (const [ri, n] of schritte) for (let i = 0; i < n; i++) {
+    c += RICHTUNGEN[ri].dx; r += RICHTUNGEN[ri].dy;
+    if (c < 0 || r < 0 || c >= N || r >= N) return null;
+    spur.push([c, r]);
+  }
+  return spur;
+}
+
+/** Sieben bis neun Orte auf verschiedenen Feldern. */
+function planErzeugen() {
+  const zellen = mische([...Array(N * N).keys()]);
+  const orte = mische(FREIE_ORTE).slice(0, zufall(7, 9));
+  return orte.map((o, i) => ({ o, c: zellen[i] % N, r: Math.floor(zellen[i] / N) }));
+}
+const ortBei = (plan, c, r) => plan.findIndex(p => p.c === c && p.r === r);
+
+/** Neue Aufgabe für die Stufe — Plan, Weg und Lösung; aufgabe(ctx) zeichnet sie nur. */
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  const opt = p[art] || {};
+  const k = opt.gedreht ? zufall(1, 3) : 0; // Vierteldrehungen der Karte im Uhrzeigersinn
+
+  if (art === "zeigen" || art === "lesen" || art === "buchstabe") {
+    const dirs = p.zeigen || HAUPT;
+    const ziel = waehle(dirs);
+    const a = { art, dirs, ziel, k, loesung: RICHTUNGEN[ziel].name };
+    if (art !== "zeigen") a.optionen = mische(dirs.map(i => RICHTUNGEN[i].name));
+    return a;
+  }
+  if (art === "drehen") {
+    const start = waehle(HAUPT);
+    const drehungen = Array.from({ length: zufall(1, 2) }, () => zufall(0, DREHUNGEN.length - 1));
+    const ende = drehungen.reduce((r, d) => (r + DREHUNGEN[d].achtel) % 8, start);
+    return { art, start, drehungen, k, loesung: RICHTUNGEN[ende].name, optionen: mische(HAUPT.map(i => RICHTUNGEN[i].name)) };
+  }
+
+  for (let versuch = 0; versuch < 200; versuch++) {
+    const plan = planErzeugen();
+    if (art === "richtung" || art === "nachbar") {
+      const paare = [];
+      for (let i = 0; i < plan.length; i++) for (let j = 0; j < plan.length; j++) {
+        if (i === j) continue;
+        const dx = plan[j].c - plan[i].c, dy = plan[j].r - plan[i].r;
+        const ri = richtungVon(dx, dy);
+        if (art === "richtung" && opt.dirs.includes(ri)) paare.push([i, j, ri]);
+        if (art === "nachbar" && HAUPT.includes(ri) && Math.abs(dx) + Math.abs(dy) === 1) paare.push([i, j, ri]);
+      }
+      if (!paare.length) continue;
+      const [start, ziel, ri] = waehle(paare);
+      const a = { art, plan, start, ziel, richtung: ri, k };
+      if (art === "richtung") {
+        a.dirs = opt.dirs;
+        a.loesung = RICHTUNGEN[ri].name;
+        a.optionen = mische(opt.dirs.map(i => RICHTUNGEN[i].name));
+      } else a.loesung = ziel;
+      return a;
+    }
+    if (art === "weg") {
+      // Teilstücke nacheinander, nie zweimal dieselbe oder gleich die Gegenrichtung
+      const start = zufall(0, plan.length - 1);
+      const schritte = [];
+      let vorher = -1;
+      for (let t = 0; t < opt.teile; t++) {
+        const ri = waehle(opt.dirs.filter(d => d !== vorher && d !== (vorher + 4) % 8));
+        schritte.push([ri, zufall(1, ri % 2 ? 2 : 4)]);
+        vorher = ri;
+      }
+      const spur = gehe(plan[start].c, plan[start].r, schritte);
+      if (!spur) continue;
+      const [zc, zr] = spur[spur.length - 1];
+      const ziel = ortBei(plan, zc, zr);
+      if (ziel < 0 || ziel === start) continue;
+      return { art, plan, start, ziel, schritte, k, loesung: ziel };
+    }
+    if (art === "beschreiben") {
+      // Ziel schräg versetzt, aber nicht genau schräg: zwei Teilstücke sind nötig
+      const paare = [];
+      for (let i = 0; i < plan.length; i++) for (let j = 0; j < plan.length; j++) {
+        const dx = plan[j].c - plan[i].c, dy = plan[j].r - plan[i].r;
+        if (dx && dy) paare.push([i, j, dx, dy]);
+      }
+      if (!paare.length) continue;
+      const [start, ziel, dx, dy] = waehle(paare);
+      const h = dx > 0 ? 2 : 6, v = dy > 0 ? 4 : 0;
+      const zuerstH = Math.random() < 0.5;
+      const weg = (hr, hn, vr, vn) => (zuerstH ? [[hr, hn], [vr, vn]] : [[vr, vn], [hr, hn]]);
+      const richtig = weg(h, Math.abs(dx), v, Math.abs(dy));
+      // typische Fehler: Osten und Westen verwechselt, Norden und Süden verwechselt, beides, Zahlen vertauscht
+      const falsche = [weg((h + 4) % 8, Math.abs(dx), v, Math.abs(dy)), weg(h, Math.abs(dx), (v + 4) % 8, Math.abs(dy)),
+        weg((h + 4) % 8, Math.abs(dx), (v + 4) % 8, Math.abs(dy)), weg(h, Math.abs(dy), v, Math.abs(dx))];
+      const texte = [...new Set(falsche.map(schritteText))].filter(t => t !== schritteText(richtig));
+      const varianten = [richtig, ...falsche.filter(s => texte.includes(schritteText(s)))]
+        .filter((s, i, l) => l.findIndex(x => schritteText(x) === schritteText(s)) === i).slice(0, 4);
+      return { art, plan, start, ziel, k, varianten, loesung: schritteText(richtig), optionen: mische(varianten.map(schritteText)) };
+    }
+  }
+  return aufgabeErzeugen(stufe);
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. Rechnet Richtungen und Wege unabhängig nach. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p) return ["Stufe wird mit den freien Listen nicht angeboten"];
+  if (!p.arten.includes(a.art)) m.push("Aufgabentyp gehört nicht in diese Stufe");
+  if (a.plan && a.plan.some(o => !FREIE_ORTE.includes(o.o))) m.push("Ort stammt nicht aus einer freien Liste");
+  const opt = p[a.art] || {};
+  if (!!opt.gedreht !== (a.k > 0) || a.k < 0 || a.k > 3) m.push("Drehung der Karte passt nicht zur Stufe");
+  if (a.optionen) {
+    if (!a.optionen.includes(a.loesung)) m.push("Lösung fehlt in der Auswahl");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Optionen");
+  }
+  if (["zeigen", "lesen", "buchstabe"].includes(a.art)) {
+    if (!(p.zeigen || HAUPT).includes(a.ziel)) m.push("Richtung gehört nicht in diese Stufe");
+    if (a.loesung !== RICHTUNGEN[a.ziel].name) m.push("Lösung falsch");
+    if (a.art !== "zeigen" && a.optionen.length !== (p.zeigen || HAUPT).length) m.push("Auswahl unvollständig");
+    return m;
+  }
+  if (a.art === "drehen") {
+    // Drehung in Grad nachrechnen: rechts = im Uhrzeigersinn
+    const grad = { "eine Vierteldrehung nach rechts": 90, "eine Vierteldrehung nach links": -90, "eine halbe Drehung": 180, "eine Dreivierteldrehung nach rechts": 270 };
+    const ende = ((a.start * 45 + a.drehungen.reduce((s, d) => s + grad[DREHUNGEN[d].text], 0)) % 360 + 360) % 360;
+    if (a.loesung !== RICHTUNGEN[ende / 45].name) m.push("Drehung falsch gerechnet");
+    return m;
+  }
+  const plan = a.plan;
+  if (new Set(plan.map(o => o.c + "," + o.r)).size !== plan.length || new Set(plan.map(o => o.o)).size !== plan.length) m.push("Orte doppelt");
+  if (plan.some(o => o.c < 0 || o.r < 0 || o.c >= N || o.r >= N || !ORTE[o.o])) m.push("Ort ausserhalb des Plans");
+  if (a.start === a.ziel) m.push("Start und Ziel gleich");
+  const A = plan[a.start], B = plan[a.ziel];
+  const dx = B.c - A.c, dy = B.r - A.r;
+  if (a.art === "richtung") {
+    const grad = (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360; // 0° = Norden, im Uhrzeigersinn
+    if (grad % 45 || !opt.dirs.includes(grad / 45)) m.push("Richtung nicht eindeutig oder nicht in dieser Stufe");
+    else if (a.loesung !== RICHTUNGEN[grad / 45].name) m.push("Lösung falsch");
+    if (dx && dy && Math.abs(dx) !== Math.abs(dy)) m.push("nicht genau schräg");
+  }
+  if (a.art === "nachbar" && (Math.abs(dx) + Math.abs(dy) !== 1 || RICHTUNGEN[a.richtung].dx !== dx || RICHTUNGEN[a.richtung].dy !== dy)) m.push("Nachbar liegt nicht direkt daneben");
+  if (a.art === "weg") {
+    if (a.schritte.length !== opt.teile) m.push("falsche Zahl von Teilstücken");
+    if (a.schritte.some(([ri, n]) => !opt.dirs.includes(ri) || n < 1 || n > 4)) m.push("Teilstück nicht erlaubt");
+    let c = A.c, r = A.r, raus = false;
+    for (const [ri, n] of a.schritte) for (let i = 0; i < n; i++) {
+      c += RICHTUNGEN[ri].dx; r += RICHTUNGEN[ri].dy;
+      if (c < 0 || r < 0 || c >= N || r >= N) raus = true;
+    }
+    if (raus) m.push("Weg verlässt den Plan");
+    if (c !== B.c || r !== B.r) m.push("Weg endet nicht am Ziel");
+    if (a.loesung !== a.ziel) m.push("Lösung falsch");
+  }
+  if (a.art === "beschreiben") {
+    const treffer = a.varianten.filter(v => {
+      let c = A.c, r = A.r;
+      for (const [ri, n] of v) { c += RICHTUNGEN[ri].dx * n; r += RICHTUNGEN[ri].dy * n; }
+      return c === B.c && r === B.r;
+    });
+    if (treffer.length !== 1 || schritteText(treffer[0]) !== a.loesung) m.push("nicht genau eine Wegbeschreibung führt ans Ziel");
+    if (a.optionen.length < 3) m.push("zu wenige Wegbeschreibungen");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Punkt im Abstand r vom Mittelpunkt in Richtung i (Achtel ab Norden, im Uhrzeigersinn). */
+function punkt(i, r, m = 120) {
+  const w = (i * 45 * Math.PI) / 180;
+  return [m + r * Math.sin(w), m - r * Math.cos(w)];
+}
+
+/**
+ * Kompassrose mit den Armen 'dirs'. opt.buchstaben: alle Buchstaben statt nur N; opt.pfeil: Index einer
+ * Richtung, in die ein Pfeil zeigt; opt.onTipp(i, arm): Arme antippbar; opt.klein: als Windrose neben dem Plan.
+ */
+function rose(dirs, opt = {}) {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", "0 0 240 240");
+  svg.setAttribute("class", "rose" + (opt.klein ? " klein" : ""));
+  svg.setAttribute("aria-label", "Kompassrose");
+  let s = `<circle class="ring" cx="120" cy="120" r="96"/>`;
+  for (const i of dirs) if (opt.buchstaben || i === 0) {
+    const [x, y] = punkt(i, 108);
+    s += `<text x="${x}" y="${y + 7}" text-anchor="middle">${RICHTUNGEN[i].k}</text>`;
+  }
+  svg.innerHTML = s;
+  svg.arme = {};
+  for (const i of [...dirs].sort((x, y) => (y % 2) - (x % 2))) { // Zwischenrichtungen zuerst, Hauptarme darüber
+    const lang = i % 2 === 0;
+    const spitze = punkt(i, lang ? 88 : 62), seite1 = punkt(i + 2, lang ? 16 : 11), seite2 = punkt(i + 6, lang ? 16 : 11);
+    const arm = document.createElementNS(SVG, "polygon");
+    arm.setAttribute("class", "arm" + (lang ? "" : " zwischen"));
+    arm.setAttribute("points", [seite1, spitze, seite2, [120, 120]].map(q => q.join(",")).join(" "));
+    if (opt.onTipp) arm.addEventListener("click", () => opt.onTipp(i, arm));
+    svg.append(arm);
+    svg.arme[i] = arm;
+  }
+  const extra = document.createElementNS(SVG, "g");
+  let e = `<circle class="mitte" cx="120" cy="120" r="9"/>`;
+  if (opt.pfeil !== undefined) {
+    const sp = punkt(opt.pfeil, 92), s1 = punkt(opt.pfeil + 2, 8), s2 = punkt(opt.pfeil + 6, 8), mitte = punkt(opt.pfeil, 60);
+    const f1 = punkt(opt.pfeil + 2, 20).map((v, j) => v + mitte[j] - 120), f2 = punkt(opt.pfeil + 6, 20).map((v, j) => v + mitte[j] - 120);
+    e += `<polygon class="pfeil" points="${[s1, mitte, f1, sp, f2, mitte, s2].map(q => q.join(",")).join(" ")}"/>`;
+  }
+  extra.innerHTML = e;
+  svg.append(extra);
+  return svg;
+}
+
+/** Nordpfeil, um k Vierteldrehungen im Uhrzeigersinn gedreht (wie die Karte). */
+function nordpfeil(k) {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", "0 0 64 64");
+  svg.setAttribute("class", "nordpfeil");
+  svg.setAttribute("aria-label", "Nordpfeil");
+  svg.innerHTML = `<g transform="rotate(${k * 90} 32 32)"><polygon class="pfeil" points="32,4 44,34 32,28 20,34"/><text x="32" y="56" text-anchor="middle">N</text></g>`;
+  return svg;
+}
+
+/** Feld (c|r) der Welt an seine Stelle auf dem Bildschirm, wenn die Karte k-mal gedreht ist. */
+function bildschirm(c, r, k) {
+  for (let i = 0; i < k; i++) [c, r] = [N - 1 - r, c];
+  return [c, r];
+}
+
+/** Plan als Raster von Knöpfen; onTipp(c, r, feld) macht die Felder antippbar. */
+function planZeichnen(a, onTipp) {
+  const box = el("div", { class: "plan", "aria-label": "Plan" });
+  box.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+  box.felder = {};
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const i = ortBei(a.plan, c, r);
+    const f = el("button", { type: "button", class: "feld" });
+    if (i >= 0) {
+      const [bild, name] = ORTE[a.plan[i].o];
+      f.append(el("span", { class: "bild", text: bild }), el("span", { class: "name", text: name }));
+      f.setAttribute("aria-label", name);
+    }
+    const [sx, sy] = bildschirm(c, r, a.k);
+    f.style.gridColumn = String(sx + 1);
+    f.style.gridRow = String(sy + 1);
+    if (onTipp) f.addEventListener("click", () => onTipp(c, r, f));
+    else f.disabled = true;
+    box.felder[c + "," + r] = f;
+    box.append(f);
+  }
+  return box;
+}
+
+LS.spiel({
+  id: "kompass",
+  einleitung: "Wo ist Norden? Mit dem Kompass findest du dich überall zurecht — auf der Kompassrose und auf dem Dorfplan.",
+  anzahl: 8,
+  stufen: Object.fromEntries(Object.entries({
+    s1: "Kompassrose: Norden, Osten, Süden, Westen zeigen und benennen.",
+    s2: "Auf dem Plan: In welcher Richtung liegt der See?",
+    s3: "Wege gehen: 2 Felder nach Osten, dann 1 Feld nach Süden.",
+    s4: "Zwischenrichtungen NO, SO, SW, NW und Wege beschreiben.",
+    s5: "Gedrehte Karte: Wohin zeigt der Nordpfeil? Schräge Schritte.",
+    s6: "Endgegner: gedrehte Karte mit acht Richtungen, Wege und Drehungen.",
+  }).filter(([s]) => STUFE[s])),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    const R = RICHTUNGEN;
+    const merkspruch = "Beim N beginnen und im Uhrzeigersinn weiter: Nie Ohne Seife Waschen.";
+    // Beispiel einer Zwischenrichtung, die nicht die gesuchte ist und sie nicht enthält
+    const beispiel = i => R[i % 2 ? (i + 4) % 8 : (i + 3) % 8];
+    const bestandteile = d => `${d.name} liegt zwischen ${R[d.dy < 0 ? 0 : 4].name} und ${R[d.dx > 0 ? 2 : 6].name}`;
+
+    // ---- Kompassrose ----
+    if (a.art === "zeigen") {
+      const d = R[a.ziel];
+      const loesung = `${d.name} ist ${d.lage}.`;
+      ctx.loesung?.(loesung);
+      let fertig = false;
+      f.append(el("div", { class: "frage", html: `Tipp auf <b>${d.name}</b>!` }));
+      const svg = rose(a.dirs, {
+        onTipp: (i, arm) => {
+          if (fertig) return;
+          if (i === a.ziel) { fertig = true; arm.setAttribute("class", "arm treffer"); ctx.richtig(`Genau: ${d.name} ist ${d.lage}!`); return; }
+          arm.setAttribute("class", "arm daneben");
+          ctx.falsch(a.ziel % 2 ? `${bestandteile(beispiel(a.ziel))}. Zuerst kommt Norden oder Süden, dann Osten oder Westen.` : merkspruch, loesung);
+          if (ctx.vorbei()) { fertig = true; svg.arme[a.ziel].setAttribute("class", "arm treffer"); }
+        },
+      });
+      f.append(svg);
+      if (ctx.nr === 0) ctx.sag("Der Buchstabe N zeigt dir, wo Norden ist.");
+      return;
+    }
+    if (a.art === "lesen" || a.art === "buchstabe") {
+      const d = R[a.ziel];
+      if (a.art === "lesen") {
+        f.append(el("div", { class: "frage", text: "In welche Himmelsrichtung zeigt der orange Pfeil?" }), rose(a.dirs, { pfeil: a.ziel }));
+      } else {
+        f.append(el("div", { class: "frage", html: `Wofür steht <b>${d.k}</b> auf dem Kompass?` }), rose(a.dirs, { buchstaben: true }));
+      }
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.loesung, breite: 130,
+        hinweis: a.art === "lesen" ? merkspruch
+          : a.ziel % 2 ? "Zwei Buchstaben: der erste steht für Norden oder Süden, der zweite für Osten oder Westen."
+          : "Jede Himmelsrichtung beginnt mit ihrem Buchstaben.",
+        loesung: a.art === "lesen" ? `Der Pfeil zeigt nach ${d.name}.` : `${d.k} steht für ${d.name}.`,
+      });
+      return;
+    }
+    if (a.art === "drehen") {
+      const start = R[a.start];
+      f.append(rose(HAUPT, { buchstaben: true, pfeil: a.start }));
+      f.append(el("div", { class: "frage", html: `Du schaust nach <b>${start.name}</b>. Du machst ${a.drehungen.map(d => `<b>${DREHUNGEN[d].text}</b>`).join(", dann ")}. Wohin schaust du jetzt?` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.loesung, breite: 130,
+        hinweis: "Nach rechts drehen heisst im Uhrzeigersinn: N, O, S, W. Eine Vierteldrehung geht eine Richtung weiter, eine halbe Drehung zwei.",
+        loesung: `Von ${start.name} aus: ${a.drehungen.map(d => DREHUNGEN[d].text).join(", dann ")} — jetzt schaust du nach ${a.loesung}.`,
+      });
+      return;
+    }
+
+    // ---- Plan ----
+    const A = a.plan[a.start], B = a.plan[a.ziel];
+    const [aBild, , aNom, aDat] = ORTE[A.o];
+    const [bBild, , bNom, bDat] = ORTE[B.o];
+    const gedreht = a.k > 0;
+    const kartenHinweis = gedreht
+      ? "Achtung, die Karte ist gedreht: Das N ist dort, wohin der Nordpfeil zeigt. Dreh die Karte in Gedanken, bis der Pfeil nach oben zeigt."
+      : "Auf der Karte ist Norden oben, Osten rechts, Süden unten und Westen links.";
+    const neben = p.rose ? rose(HAUPT, { buchstaben: true, klein: true }) : nordpfeil(a.k);
+    if (gedreht) f.append(el("div", { class: "achtung", text: "🔄 Die Karte ist gedreht — schau auf den Nordpfeil!" }));
+
+    if (a.art === "richtung" || a.art === "beschreiben") {
+      f.append(el("div", { class: "karten-zeile" }, planZeichnen(a, null), neben));
+      const startFeld = f.querySelector(".plan").felder[A.c + "," + A.r];
+      startFeld.classList.add("start");
+      if (a.art === "richtung") {
+        f.append(el("div", { class: "frage", html: `In welcher Richtung liegt ${bNom} ${bBild} von ${aDat} ${aBild} aus?` }));
+        LS.auswahl(ctx, {
+          optionen: a.optionen, richtig: a.loesung, breite: a.dirs.length > 4 ? 120 : 130,
+          hinweis: gedreht ? kartenHinweis
+            : `Stell dich in Gedanken auf ${aNom}: Liegt das Ziel oben, rechts, unten oder links?${a.dirs.length > 4 ? " Liegt es schräg, nimm zwei Richtungen zusammen." : ""} ${merkspruch}`,
+          loesung: `${gross(bNom)} liegt von ${aDat} aus im ${a.loesung}.`,
+        });
+      } else {
+        f.append(el("div", { class: "frage", html: `Wie kommst du von ${aDat} ${aBild} zu ${bDat} ${bBild}?` }));
+        LS.auswahl(ctx, {
+          optionen: a.optionen, richtig: a.loesung, breite: 260,
+          hinweis: gedreht ? kartenHinweis : "Zähle vom Start aus: Wie viele Felder nach rechts oder links? Wie viele nach oben oder unten? Osten ist rechts, Norden oben.",
+          loesung: `${a.loesung}.`,
+        });
+      }
+      return;
+    }
+
+    // Felder antippen: Nachbar oder Ziel eines Wegs
+    const spur = a.art === "weg" ? gehe(A.c, A.r, a.schritte) : [[A.c, A.r], [B.c, B.r]];
+    const loesung = a.art === "weg" ? `${schritteText(a.schritte)}: Du kommst bei ${bDat} ${bBild} an.`
+      : `Direkt ${R[a.richtung].adj} neben ${aDat} liegt ${bNom} ${bBild}.`;
+    ctx.loesung?.(loesung);
+    let fertig = false;
+    const zeigeLoesung = () => {
+      for (const [c, r] of spur.slice(1, -1)) plan.felder[c + "," + r].classList.add("spur");
+      plan.felder[B.c + "," + B.r].classList.add("treffer");
+    };
+    const plan = planZeichnen(a, (c, r, feld) => {
+      if (fertig) return;
+      if (c === B.c && r === B.r) { fertig = true; zeigeLoesung(); ctx.richtig(`Richtig: ${gross(bNom)} ${bBild}!`); return; }
+      feld.classList.add("daneben");
+      const schraeg = a.art === "weg" && a.schritte.some(([ri]) => ri % 2) ? " Ein schräger Schritt geht zugleich ein Feld nach oben oder unten und eines zur Seite." : "";
+      ctx.falsch(a.art === "weg" ? `Starte bei ${aDat} ${aBild} und zähle Feld für Feld. ${kartenHinweis}${schraeg}`
+        : `Such zuerst ${aNom} ${aBild} und geh ein Feld weiter. ${kartenHinweis}`, loesung);
+      if (ctx.vorbei()) { fertig = true; zeigeLoesung(); }
+    });
+    plan.felder[A.c + "," + A.r].classList.add("start");
+    f.append(el("div", { class: "karten-zeile" }, plan, neben));
+    f.append(el("div", { class: "frage", html: a.art === "weg"
+      ? `Starte bei ${aDat} ${aBild}. Geh <b>${schritteText(a.schritte)}</b>. Wo kommst du an?`
+      : `Was liegt direkt <b>${R[a.richtung].adj}</b> neben ${aDat} ${aBild}?` }));
+    if (ctx.nr === 0) ctx.sag("Tipp auf das Feld, wo du ankommst. Der blaue Rahmen zeigt den Start.");
+  },
+});
+</script>
+</body>
+</html>

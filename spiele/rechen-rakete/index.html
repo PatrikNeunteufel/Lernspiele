@@ -174,6 +174,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const x = aufgabeErzeugen(ctx.stufe);
+    const loesung = `${zahlText(x.a)} ${x.art} ${zahlText(x.b)} = ${zahlText(x.ergebnis)}`;
+    ctx.loesung(loesung);
     const bahn = el("div", { class: "bahn", "aria-hidden": "true" });
     const rakete = el("div", { class: "rakete", text: "🚀" });
     bahn.append(rakete);
@@ -198,7 +200,7 @@ LS.spiel({
           return;
         }
         anzeige.classList.add("falsch");
-        ctx.falsch(hinweisFuer(x, STUFE[ctx.stufe].knapp), `${zahlText(x.a)} ${x.art} ${zahlText(x.b)} = ${zahlText(x.ergebnis)}`);
+        ctx.falsch(hinweisFuer(x, STUFE[ctx.stufe].knapp), loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
       },
     });

@@ -35,6 +35,11 @@ const { zufall, waehle, mische, el } = LS;
 const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 const WOERTER = ABC_WOERTER.map(([wort, bild]) => ({ wort, bild }));
 
+// Freigabe (Entscheid L4 a): die Wörter sind eine Liste („nomen-bild“), die der Spieler üben dürfen
+// muss (Aufsicht: immer). Kennt der Katalog die Liste nicht, gilt sie als frei — dann entscheidet
+// die Freigabe des Spiels.
+const FREI = new Set(LS.spielListen("abc-sortierer").length ? LS.freieListen("abc-sortierer") : ["nomen-bild"]);
+
 // Wörterbuch-Ordnung: Umlaute wie Grundbuchstaben (ä = a) oder ausgeschrieben (ä = ae).
 // Eine Aufgabe gilt nur, wenn beide Regeln dieselbe Reihenfolge ergeben.
 const alsGrund = w => w.toLowerCase().replace(/ä/g, "a").replace(/ö/g, "o").replace(/ü/g, "u");
@@ -112,20 +117,32 @@ const ARTEN = {
 };
 
 // Basisklasse 2: Stufe 1 = 1. Klasse, 2–4 = 2. Klasse, 5 = 3. Klasse, 6 Endgegner.
+// Je Aufgabenart die Liste, aus der sie Wörter nimmt (null = nur die ABC-Leiste, keine Liste).
+const W = "nomen-bild";
 const STUFE = {
-  s1: () => waehle([() => ARTEN.luecke(2), () => ARTEN.luecke(3)])(),
-  s2: () => waehle([ARTEN.nachbar, () => ARTEN.ordnen(3, 1)])(),
-  s3: () => waehle([() => ARTEN.ordnen(4, 1), () => ARTEN.ordnen(4, 2)])(),
-  s4: () => waehle([() => ARTEN.ordnen(5, 1), () => ARTEN.ordnen(5, 2)])(),
-  s5: () => waehle([() => ARTEN.leitwoerter(2), () => ARTEN.ordnen(5, 3)])(),
-  s6: () => waehle([() => ARTEN.leitwoerter(3), () => ARTEN.ordnen(6, 2), () => ARTEN.ordnen(6, 3)])(),
+  s1: [[null, () => ARTEN.luecke(2)], [null, () => ARTEN.luecke(3)]],
+  s2: [[null, ARTEN.nachbar], [W, () => ARTEN.ordnen(3, 1)]],
+  s3: [[W, () => ARTEN.ordnen(4, 1)], [W, () => ARTEN.ordnen(4, 2)]],
+  s4: [[W, () => ARTEN.ordnen(5, 1)], [W, () => ARTEN.ordnen(5, 2)]],
+  s5: [[W, () => ARTEN.leitwoerter(2)], [W, () => ARTEN.ordnen(5, 3)]],
+  s6: [[W, () => ARTEN.leitwoerter(3)], [W, () => ARTEN.ordnen(6, 2)], [W, () => ARTEN.ordnen(6, 3)]],
 };
 
-function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+/** Aufgabenarten der Stufe, deren Liste frei ist; leer = Stufe wird nicht angeboten. */
+const moeglich = stufe => STUFE[stufe].filter(([l]) => !l || FREI.has(l)).map(([, neu]) => neu);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => moeglich(s).length));
+
+function aufgabeErzeugen(stufe) {
+  const arten = moeglich(stufe);
+  if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  return waehle(arten)();
+}
 
 /** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
 function pruefeAufgabe(a) {
   const m = [];
+  const woerter = [...(a.woerter || []), ...(a.art === "leitwoerter" ? [a.links, a.rechts, ...a.optionen] : [])];
+  if (woerter.length && (!FREI.has(W) || !woerter.every(w => WOERTER.includes(w)))) m.push("Wort nicht aus einer freien Liste");
   if (a.optionen && (new Set(a.optionen).size !== a.optionen.length || !a.optionen.includes(a.richtig))) m.push("Auswahl doppelt oder ohne Lösung");
   if (a.art === "luecke" && a.zeige[a.zeige.indexOf(a.richtig)] !== a.richtig) m.push("Lücke nicht in der Leiste");
   if (a.art === "nachbar" && ABC.indexOf(a.richtig) !== ABC.indexOf(a.buchstabe) + (a.nach ? 1 : -1)) m.push("falscher Nachbar");
@@ -144,14 +161,14 @@ LS.spiel({
   id: "abc-sortierer",
   einleitung: "A, B, C, D … Kennst du das ABC? Dann kannst du Wörter ordnen wie im Wörterbuch!",
   anzahl: 8,
-  stufen: {
+  stufen: nurMoegliche({
     s1: "Welcher Buchstabe fehlt in der ABC-Leiste?",
     s2: "Was kommt vor oder nach M? Drei Wörter ordnen.",
     s3: "Vier Wörter ordnen — manchmal zählt der zweite Buchstabe.",
     s4: "Fünf Wörter ordnen — bis zum zweiten Buchstaben.",
     s5: "Bis zum dritten Buchstaben — und wie im Wörterbuch: Welches Wort steht auf dieser Seite?",
     s6: "Endgegner: sechs Wörter bis zum dritten Buchstaben und Wörterbuch-Seiten, mit weniger Hilfe.",
-  },
+  }),
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);

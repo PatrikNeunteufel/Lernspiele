@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rechentrick-Detektiv</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .rechnung { text-align: center; font-size: clamp(28px, 7vw, 52px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 0 0 14px; }
+  .rechnung.klein { font-size: clamp(24px, 5.6vw, 40px); margin: 18px 0 10px; }
+  .wahl-knopf { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🕵️ Rechentrick-Detektiv</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.4 (Terme, Gesetze): .c Tauschaufgaben, .d/.e Beziehungen zwischen Produkten,
+// .f (OP) Verdoppeln/Halbieren und Assoziativgesetz — geschickt rechnen. Zwei Arten von Aufgaben:
+// 1. „Welche Aufgabe gibt dasselbe und ist leichter?“ — wählen, dann die leichte Aufgabe ausrechnen.
+// 2. „Welcher Trick steckt dahinter?“ — zu einer Gleichung den Trick nennen (ab Stufe 3).
+// Eindeutigkeit: Unter den Antworten hat genau eine denselben Wert; jeder Trick hat eine eigene Form.
+
+const { zahlText, zufall, waehle, mische, el } = LS;
+
+/** Vorlage mit Zahlen in Schulschreibweise: A`${30400} + ${5}` → „30 400 + 5“. */
+const A = (teile, ...werte) => teile.reduce((s, t, i) => s + t + (i < werte.length ? (typeof werte[i] === "number" ? zahlText(werte[i]) : werte[i]) : ""), "");
+
+// ---------- Rechenausdrücke lesen und ausrechnen ----------
+
+/** Liest „10 × 24 − 24“ oder „17 + (46 + 54)“ als Baum { zahl } | { op, l, r, klammer }. Wirft bei Unsinn. */
+function lesen(text) {
+  const t = text.replace(/\s+/g, "");
+  let i = 0;
+  const faktor = () => {
+    if (t[i] === "(") {
+      i++;
+      const n = summe();
+      if (t[i++] !== ")") throw new Error("Klammer fehlt: " + text);
+      return { ...n, klammer: true };
+    }
+    const m = /^\d+/.exec(t.slice(i));
+    if (!m) throw new Error("Zahl erwartet: " + text);
+    i += m[0].length;
+    return { zahl: Number(m[0]) };
+  };
+  const produkt = () => { let n = faktor(); while (t[i] === "×") { i++; n = { op: "×", l: n, r: faktor() }; } return n; };
+  const summe = () => { let n = produkt(); while (t[i] === "+" || t[i] === "−") { const op = t[i++]; n = { op, l: n, r: produkt() }; } return n; };
+  const baum = summe();
+  if (i !== t.length) throw new Error("Rest nicht gelesen: " + text);
+  return baum;
+}
+
+const istZahl = n => "zahl" in n;
+const wert = n => (istZahl(n) ? n.zahl : n.op === "+" ? wert(n.l) + wert(n.r) : n.op === "−" ? wert(n.l) - wert(n.r) : wert(n.l) * wert(n.r));
+const zahlenIn = n => (istZahl(n) ? [n.zahl] : [...zahlenIn(n.l), ...zahlenIn(n.r)]);
+/** Alle Zahlen und Zwischenergebnisse — für den Zahlenraum. */
+const teilwerte = n => (istZahl(n) ? [n.zahl] : [...teilwerte(n.l), ...teilwerte(n.r), wert(n)]);
+
+/** Lässt sich der Text lesen, und bleiben alle Zahlen und Zwischenergebnisse ganz und in 0 … max? */
+function imRaum(text, max) {
+  try { return teilwerte(lesen(text)).every(v => Number.isInteger(v) && v >= 0 && v <= max); } catch { return false; }
+}
+
+// ---------- Die vier Tricks ----------
+
+const TRICKS = {
+  tausch:     { bild: "🔄", text: "Tauschen" },
+  verdoppeln: { bild: "↕️", text: "Verdoppeln und halbieren" },
+  zusammen:   { bild: "🧩", text: "Anders zusammenfassen" },
+  nachbar:    { bild: "👣", text: "Nachbaraufgabe" },
+};
+
+/** Hinweis nach falscher Trick-Wahl: beschreibt nur den gewählten Trick, nie den richtigen. */
+const KENNZEICHEN = {
+  tausch: "Beim Tauschen bleiben es dieselben zwei Zahlen — sie wechseln nur den Platz. Ist das hier so?",
+  verdoppeln: "Beim Verdoppeln und Halbieren wird eine Zahl doppelt so gross und die andere halb so gross. Stimmt das hier?",
+  zusammen: "Beim anders Zusammenfassen bleiben alle Zahlen gleich, nur die Klammer wandert. Ist das hier so?",
+  nachbar: "Bei der Nachbaraufgabe kommt eine neue runde Zahl vor, und am Schluss wird ausgeglichen. Siehst du das hier?",
+};
+
+/** Form der Gleichung links = rechts: welche Tricks passen? (Für die Prüfung: genau einer.) */
+function trickVon(L, R) {
+  const zahlen2 = n => !istZahl(n) && istZahl(n.l) && istZahl(n.r);
+  const t = [];
+  if (zahlen2(L) && zahlen2(R) && L.op === R.op && (L.op === "+" || L.op === "×")
+      && R.l.zahl === L.r.zahl && R.r.zahl === L.l.zahl && L.l.zahl !== L.r.zahl) t.push("tausch");
+  if (zahlen2(L) && zahlen2(R) && L.op === "×" && R.op === "×") {
+    const [a, b, c, d] = [L.l.zahl, L.r.zahl, R.l.zahl, R.r.zahl];
+    for (let k = 1; k <= 6; k++) {
+      const f = 2 ** k;
+      if ((c === a * f && d * f === b) || (c * f === a && d === b * f)) { t.push("verdoppeln"); break; }
+    }
+  }
+  // (x op y) op z ↔ x op (y op z), gleiche Zahlen in gleicher Reihenfolge
+  const umklammert = (P, Q) => !istZahl(P) && !istZahl(Q) && P.op === Q.op && (P.op === "+" || P.op === "×")
+    && zahlen2(P.l) && P.l.op === P.op && istZahl(P.r) && istZahl(Q.l) && zahlen2(Q.r) && Q.r.op === P.op
+    && P.l.l.zahl === Q.l.zahl && P.l.r.zahl === Q.r.l.zahl && P.r.zahl === Q.r.r.zahl;
+  if (umklammert(L, R) || umklammert(R, L)) t.push("zusammen");
+  if (zahlen2(L) && !zahlen2(R) && !istZahl(R)
+      && zahlenIn(R).some(n => n > 0 && n % 10 === 0 && !zahlenIn(L).includes(n))) t.push("nachbar");
+  return t;
+}
+
+/** Zahl in lo … hi, die nicht auf 0 endet. */
+function ohneNullEnde(lo, hi) {
+  for (let versuch = 0; versuch < 100; versuch++) { const n = zufall(lo, hi); if (n % 10) return n; }
+  return lo % 10 ? lo : lo + 1;
+}
+
+// Aufgaben je Trick und Grösse g (= Nummer der Stufe 1–6). Jeder Erzeuger liefert
+// { links, rechts (die leichtere gleichwertige Aufgabe), falsch (Kandidaten), tipp (zum Ausrechnen) };
+// rein = Form für „Welcher Trick?“ (nur dieser eine Trick, ohne Tauschen nebenher).
+// Ob alles im Zahlenraum bleibt und die falschen Kandidaten wirklich etwas anderes geben,
+// prüft aufgabeErzeugen.
+
+const GROSS = { 1: [21, 89], 2: [120, 980], 3: [120, 980], 4: [1200, 9800], 5: [12000, 98000], 6: [120000, 980000] };
+
+function tausch(g, rein) {
+  // Ab Stufe 3 ist „klein + gross“ zu leicht; dort nur noch für „Welcher Trick?“.
+  if (rein || g <= 2) {
+    const gross = ohneNullEnde(...GROSS[g]);
+    const klein = zufall(2, 9);
+    return {
+      links: A`${klein} + ${gross}`, rechts: A`${gross} + ${klein}`,
+      falsch: [A`${gross} − ${klein}`, A`${gross} + ${klein + 1}`, A`${gross + 10} + ${klein}`, A`${klein} + ${gross - 10}`],
+      tipp: A`Fang bei ${gross} an und zähl ${klein} weiter.`,
+      wahlTipp: "Tipp: Mit welcher Zahl fängst du am leichtesten an?",
+    };
+  }
+  // Drei Zahlen: die erste und die dritte geben zusammen eine runde Zahl (296 + 538 + 4).
+  const R = { 3: 10, 4: 100, 5: 1000, 6: 1000 }[g];
+  const x = (g === 6 ? zufall(10, 99) * 1000 : zufall(1, 9) * R) + zufall(Math.ceil(R * 0.6), R - 1);
+  const z = R - (x % R);
+  const y = ohneNullEnde(...{ 3: [12, 89], 4: [120, 980], 5: [1200, 9800], 6: [12000, 98000] }[g]);
+  return {
+    links: A`${x} + ${y} + ${z}`, rechts: A`${x} + ${z} + ${y}`,
+    falsch: [A`${x} + ${z} + ${y + 10}`, A`${x} − ${z} + ${y}`, A`${x + z} + ${z} + ${y}`, A`${x} + ${y} − ${z}`],
+    tipp: A`Rechne zuerst ${x} + ${z} — das gibt eine runde Zahl. Dann kommt ${y} dazu.`,
+    wahlTipp: "Tipp: Welche zwei Zahlen geben zusammen eine runde Zahl?",
+  };
+}
+
+// Nachbaraufgabe beim Malrechnen: Faktor nahe einer runden Zahl, zweiter Faktor b.
+const MAL_NACHBAR = {
+  1: [{ f: [9, 11], b: [3, 9] }],
+  2: [{ f: [19, 21, 29, 31], b: [3, 9] }, { f: [9, 11], b: [12, 60] }],
+  3: [{ f: [19, 21, 29, 31, 39, 41, 49, 51], b: [6, 19] }, { f: [9, 11], b: [24, 90] }],
+  4: [{ f: [99, 101], b: [12, 98] }, { f: [49, 51], b: [12, 98] }],
+  5: [{ f: [99, 101, 999, 1001], b: [12, 98] }, { f: [99, 101], b: [120, 980] }],
+  6: [{ f: [98, 102, 998, 1002], b: [13, 99] }, { f: [999, 1001, 198, 202], b: [120, 980] }],
+};
+// Runde Nachbarn beim Plus- und Minusrechnen
+const RUND = { 1: [10], 2: [10, 100], 3: [100], 4: [100, 1000], 5: [1000, 10000], 6: [10000, 100000] };
+
+function nachbar(g, rein, max) {
+  const art = waehle(g === 1 ? ["×", "+"] : ["×", "+", "−"]);
+  if (art === "×") {
+    const t = waehle(MAL_NACHBAR[g]);
+    const f = waehle(t.f);
+    let b = zufall(...t.b);
+    if (b % 10 === 0) b++;
+    const R = f < 100 ? Math.round(f / 10) * 10 : Math.round(f / 100) * 100;
+    const d = Math.abs(f - R);
+    const weg = f < R;
+    const korr = d === 1 ? A`${b}` : A`${d} × ${b}`;
+    const rund = A`${R} × ${b}`;
+    const [z, gegen] = weg ? ["−", "+"] : ["+", "−"];
+    return {
+      links: A`${f} × ${b}`, rechts: `${rund} ${z} ${korr}`,
+      falsch: [`${rund} ${gegen} ${korr}`, A`${rund} ${z} ${d}`, rund, A`${rund} ${z} ${R}`],
+      tipp: `Rechne zuerst ${rund}, dann ${weg ? "minus" : "plus"} ${korr}.`,
+    };
+  }
+  const K = waehle(RUND[g]);
+  const R = zufall(K === 10 ? 2 : 1, 8) * K;
+  const d = zufall(1, K === 10 ? 2 : 3);
+  const s = R - d; // knapp unter der runden Zahl: 39, 298, 4997
+  if (art === "+") {
+    const lo = K === 10 ? 12 : Math.max(12, K / 10 + 2);
+    if (max - s < lo) return null;
+    const b = ohneNullEnde(lo, max - s);
+    return {
+      links: A`${s} + ${b}`, rechts: A`${R} + ${b} − ${d}`,
+      falsch: [A`${R} + ${b} + ${d}`, A`${R} + ${b}`, A`${R} + ${b} − ${2 * d}`, A`${s} + ${b} − ${d}`],
+      tipp: A`Rechne zuerst ${R} + ${b}, dann nimm ${d} weg.`,
+    };
+  }
+  if (max < s + 12) return null;
+  const a = ohneNullEnde(s + 12, max);
+  return {
+    links: A`${a} − ${s}`, rechts: A`${a} − ${R} + ${d}`,
+    falsch: [A`${a} − ${R} − ${d}`, A`${a} − ${R}`, A`${a} − ${R} + ${2 * d}`, A`${a} + ${R} − ${d}`],
+    tipp: A`Rechne zuerst ${a} − ${R}, dann zähl ${d} dazu.`,
+  };
+}
+
+// Verdoppeln und halbieren: a × b → (a · 2^k) × (b : 2^k) („hoch“) oder umgekehrt.
+const VERDOPPELN = {
+  1: [() => ({ a: 5, b: 2 * zufall(2, 9), k: 1, hoch: true }), () => ({ a: waehle([4, 6]), b: 15, k: 1, hoch: false })],
+  2: [() => ({ a: 5, b: 2 * zufall(6, 49), k: 1, hoch: true }), () => ({ a: 50, b: 2 * zufall(2, 9), k: 1, hoch: true }),
+      () => ({ a: 2 * zufall(2, 9), b: waehle([15, 25, 35, 45]), k: 1, hoch: false })],
+  3: [() => ({ a: 5, b: 2 * zufall(6, 49), k: 1, hoch: true }), () => ({ a: 50, b: 2 * zufall(2, 9), k: 1, hoch: true }),
+      () => ({ a: 25, b: 4 * zufall(2, 10), k: 2, hoch: true }), () => ({ a: 2 * zufall(2, 12), b: waehle([15, 25, 35, 45]), k: 1, hoch: false })],
+  4: [() => ({ a: 5, b: 2 * zufall(51, 499), k: 1, hoch: true }), () => ({ a: 25, b: 4 * zufall(3, 99), k: 2, hoch: true }),
+      () => ({ a: 50, b: 2 * zufall(6, 49), k: 1, hoch: true }), () => ({ a: 2 * zufall(6, 49), b: waehle([15, 25, 35, 45]), k: 1, hoch: false })],
+  5: [() => ({ a: 25, b: 4 * zufall(26, 999), k: 2, hoch: true }), () => ({ a: 125, b: 8 * zufall(2, 99), k: 3, hoch: true }),
+      () => ({ a: 50, b: 2 * zufall(51, 999), k: 1, hoch: true })],
+  6: [() => ({ a: 125, b: 8 * zufall(13, 999), k: 3, hoch: true }), () => ({ a: 250, b: 4 * zufall(26, 999), k: 2, hoch: true }),
+      () => ({ a: 8 * zufall(2, 12), b: 125, k: 3, hoch: false }), () => ({ a: 25, b: 4 * zufall(251, 9999), k: 2, hoch: true })],
+};
+
+function verdoppeln(g) {
+  const { a, b, k, hoch } = waehle(VERDOPPELN[g])();
+  const f = 2 ** k;
+  const c = hoch ? a * f : a / f;
+  const d = hoch ? b / f : b * f;
+  // Nicht schon rund (5 × 10) und kein blosses Tauschen (25 × 50 = 50 × 25).
+  if ((hoch ? b : a) % 10 === 0 || c === b || d === a) return null;
+  // Manchmal steht die besondere Zahl hinten: 14 × 5 → 7 × 10.
+  const vorn = Math.random() < 0.5;
+  const mal = (p, q) => (vorn ? A`${p} × ${q}` : A`${q} × ${p}`);
+  // Typische Fehler: nur eine Zahl verändert, beide in dieselbe Richtung, falsch halbiert/verdoppelt (±1).
+  const falsch = [mal(c, b), mal(a, d), mal(c, d + 1), mal(c, d - 1)];
+  const beide = hoch ? b * f : b / f;
+  if (Number.isInteger(beide)) falsch.push(mal(c, beide));
+  return {
+    links: mal(a, b), rechts: mal(c, d), falsch,
+    tipp: `Rechne ${mal(c, d)} — mit der runden Zahl geht es leicht.`,
+    wahlTipp: "Tipp: Verdopple die eine Zahl und halbiere die andere.",
+  };
+}
+
+// Anders zusammenfassen (Assoziativgesetz): zwei Zahlen geben zusammen eine runde Zahl.
+const PLUS_RUND = { 3: [100], 4: [100, 1000], 5: [1000, 10000], 6: [10000, 100000] };
+const PLUS_X = { 3: [12, 99], 4: [120, 980], 5: [1200, 9800], 6: [12000, 98000] };
+const MAL_PAARE = {
+  3: [{ p: 2, q: 5, x: [12, 99] }],
+  4: [{ p: 2, q: 5, x: [102, 999] }, { p: 4, q: 25, x: [12, 99] }, { p: 2, q: 50, x: [12, 99] }],
+  5: [{ p: 4, q: 25, x: [102, 999] }, { p: 8, q: 125, x: [12, 99] }],
+  6: [{ p: 8, q: 125, x: [102, 999] }, { p: 4, q: 250, x: [102, 999] }, { p: 4, q: 25, x: [1002, 9999] }],
+};
+
+function zusammen(g, rein) {
+  if (Math.random() < 0.5) {
+    const R = waehle(PLUS_RUND[g]);
+    const y = ohneNullEnde(R / 10 + 1, R - R / 10 - 1);
+    const z = R - y;
+    const x = ohneNullEnde(...PLUS_X[g]);
+    if (rein) return { links: A`(${x} + ${y}) + ${z}`, rechts: A`${x} + (${y} + ${z})` };
+    const vorn = g < 4 || Math.random() < 0.5; // sonst steht die einzelne Zahl in der Mitte: 46 + 37 + 54
+    return {
+      links: vorn ? A`${x} + ${y} + ${z}` : A`${y} + ${x} + ${z}`,
+      rechts: vorn ? A`${x} + ${R}` : A`${R} + ${x}`,
+      falsch: [A`${x + y} + ${R}`, A`${R} + ${z}`, A`${x} + ${R - R / 10}`, A`${x + 10} + ${R}`],
+      tipp: A`Rechne ${x} + ${R}. Welche Stelle wird grösser?`,
+      wahlTipp: "Tipp: Welche zwei Zahlen geben zusammen eine runde Zahl?",
+    };
+  }
+  const { p, q, x: bereich } = waehle(MAL_PAARE[g]);
+  const R = p * q;
+  const x = ohneNullEnde(...bereich);
+  if (rein) return { links: A`(${x} × ${p}) × ${q}`, rechts: A`${x} × (${p} × ${q})` };
+  const vorn = Math.random() < 0.5; // 4 × 37 × 25 oder 37 × 4 × 25
+  return {
+    links: vorn ? A`${p} × ${x} × ${q}` : A`${x} × ${p} × ${q}`,
+    rechts: vorn ? A`${R} × ${x}` : A`${x} × ${R}`,
+    falsch: [A`${p + q} × ${x}`, A`${R} × ${q}`, A`${R / 10} × ${x}`, A`${R} + ${x}`],
+    tipp: A`Hänge an ${x} so viele Nullen an, wie ${R} hat.`,
+    wahlTipp: "Tipp: Welche zwei Zahlen geben malgerechnet eine runde Zahl?",
+  };
+}
+
+const ERZEUGER = { tausch, nachbar, verdoppeln, zusammen };
+
+const WAHL_TIPP = { nachbar: "Tipp: Rechne mit der runden Nachbarzahl — und gleiche den Unterschied richtig aus." };
+
+// Je Stufe: Zahlenraum (alle Zahlen und Zwischenergebnisse), Tricks, Anteil „Welcher Trick?“.
+// Basisklasse 4: Stufe 1 = 3. Klasse (bis 100, Tauschen und Nachbaraufgaben im 1×1),
+// Stufe 3 = OP 4. Klasse (alle vier Tricks bis 1000), Stufe 5 = 5. Klasse (bis 100 000).
+const ALLE_TRICKS = ["tausch", "nachbar", "verdoppeln", "zusammen"];
+const STUFE = {
+  s1: { max: 100, tricks: ["tausch", "nachbar", "verdoppeln"], trickFrage: 0 },
+  s2: { max: 1000, tricks: ["tausch", "nachbar", "verdoppeln"], trickFrage: 0 },
+  s3: { max: 1000, tricks: ALLE_TRICKS, trickFrage: 0.3 },
+  s4: { max: 10000, tricks: ALLE_TRICKS, trickFrage: 0.3 },
+  s5: { max: 100000, tricks: ALLE_TRICKS, trickFrage: 0.35 },
+  s6: { max: 1000000, tricks: ALLE_TRICKS, trickFrage: 0.4 },
+};
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const g = Number(stufe.slice(1));
+  for (let versuch = 0; versuch < 2000; versuch++) {
+    const frage = Math.random() < p.trickFrage;
+    const trick = waehle(p.tricks);
+    const t = ERZEUGER[trick](g, frage, p.max);
+    if (!t || !imRaum(t.links, p.max) || !imRaum(t.rechts, p.max)) continue;
+    const w = wert(lesen(t.links));
+    if (wert(lesen(t.rechts)) !== w) continue;
+    if (frage) return { modus: "trick", trick, links: t.links, rechts: t.rechts, wert: w, optionen: mische(p.tricks) };
+    // Der Tipp zum Ausrechnen darf das Ergebnis nicht enthalten (199 − 99: „Rechne zuerst 199 − 100 …“).
+    if (enthaeltZahl(t.tipp, w)) continue;
+    // Falsche Antworten: lesbar, im Zahlenraum, mit anderem Wert; keine zwei mit gleichem Wert.
+    const werte = new Set([w]);
+    const falsch = mische([...new Set(t.falsch)]).filter(f => {
+      if (f === t.links || !imRaum(f, p.max)) return false;
+      const v = wert(lesen(f));
+      if (werte.has(v)) return false;
+      werte.add(v);
+      return true;
+    });
+    if (falsch.length < 2) continue;
+    return {
+      modus: "wahl", trick, links: t.links, rechts: t.rechts, wert: w, tipp: t.tipp,
+      wahlTipp: t.wahlTipp || WAHL_TIPP[trick], optionen: mische([t.rechts, ...falsch.slice(0, 3)]),
+    };
+  }
+  throw new Error(`Rechentrick-Detektiv ${stufe}: keine passende Aufgabe gefunden`);
+}
+
+/** Kommt die Zahl n als ganze Zahl im Text vor (nicht als Teil einer grösseren)? */
+const enthaeltZahl = (text, n) => new RegExp(`(?<!\\d)(?<!\\d\\s)${zahlText(n).replace(/\s/g, "\\s")}(?!\\d)(?!\\s\\d{3}(?!\\d))`).test(text);
+
+/** Mängel: Gleichwertigkeit, Zahlenraum, genau eine richtige Antwort, Trick eindeutig, Tipp ohne Ergebnis. */
+function pruefeAufgabe(x, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  let L, R;
+  try { L = lesen(x.links); R = lesen(x.rechts); } catch (e) { return ["nicht lesbar: " + e.message]; }
+  if (wert(L) !== x.wert || wert(R) !== x.wert) m.push("links und rechts nicht gleich viel");
+  if (!p.tricks.includes(x.trick)) m.push("Trick nicht in der Stufe");
+  if (!imRaum(x.links, p.max) || !imRaum(x.rechts, p.max)) m.push(`Zahlenraum über ${p.max}`);
+  if (new Set(x.optionen).size !== x.optionen.length) m.push("doppelte Optionen");
+  if (x.modus === "trick") {
+    const passt = trickVon(L, R);
+    if (passt.length !== 1 || passt[0] !== x.trick) m.push(`Trick nicht eindeutig (${passt.join(", ") || "keiner"})`);
+    if (!x.optionen.includes(x.trick) || x.optionen.length < 3) m.push("Trick fehlt in den Optionen");
+    return m;
+  }
+  if (x.optionen.length < 3) m.push("zu wenige Optionen");
+  if (x.optionen.includes(x.links)) m.push("Aufgabe selbst als Option");
+  const gleich = x.optionen.filter(o => imRaum(o, p.max) && wert(lesen(o)) === x.wert);
+  if (gleich.length !== 1 || gleich[0] !== x.rechts) m.push("nicht genau eine gleichwertige Option");
+  if (x.optionen.some(o => !imRaum(o, p.max))) m.push("Option ausserhalb des Zahlenraums");
+  else if (new Set(x.optionen.map(o => wert(lesen(o)))).size !== x.optionen.length) m.push("zwei Optionen mit gleichem Wert");
+  // Leichter: eine neue runde Zahl (oder beim Tauschen die grosse Zahl bzw. die runde Summe vorn).
+  const leichter = x.trick === "tausch"
+    ? (istZahl(R.l) ? R.l.zahl > R.r.zahl : wert(R.l) % 10 === 0)
+    : zahlenIn(R).some(n => n > 0 && n % 10 === 0 && !zahlenIn(L).includes(n));
+  if (!leichter) m.push("rechte Aufgabe nicht leichter");
+  if (enthaeltZahl(x.tipp, x.wert) || enthaeltZahl(x.wahlTipp, x.wert)) m.push("Tipp verrät das Ergebnis");
+  return m;
+}
+
+LS.spiel({
+  id: "rechentrick-detektiv",
+  einleitung: "Detektive rechnen schlau! Finde den Trick, der eine schwere Aufgabe leicht macht: tauschen, verdoppeln und halbieren, anders zusammenfassen oder die Nachbaraufgabe.",
+  anzahl: 8,
+  stufen: {
+    s1: "Bis 100: 3 + 58 = 58 + 3, 9 × 6 = 10 × 6 − 6, 5 × 14 = 10 × 7.",
+    s2: "Bis 1000: 298 + 145, 19 × 7, 5 × 86.",
+    s3: "Alle vier Tricks bis 1000 — und: Welcher Trick steckt dahinter?",
+    s4: "Bis 10 000: 4 × 37 × 25, 99 × 46, 1998 + 357.",
+    s5: "Bis 100 000: 125 × 48, 999 × 46, 9997 + 2468.",
+    s6: "Endgegner bis zur Million: 125 × 4072, 998 × 35, 250 × 3996.",
+  },
+
+  aufgabe(ctx) {
+    const x = aufgabeErzeugen(ctx.stufe);
+
+    if (x.modus === "trick") {
+      ctx.flaeche.append(
+        el("div", { class: "auftrag", text: "Welcher Trick steckt dahinter?" }),
+        el("div", { class: "rechnung", text: `${x.links} = ${x.rechts}` }));
+      LS.auswahl(ctx, {
+        optionen: x.optionen, richtig: x.trick, breite: 150,
+        inhalt: id => ({ bild: TRICKS[id].bild, text: TRICKS[id].text }),
+        hinweis: id => KENNZEICHEN[id],
+        loesung: `${x.links} = ${x.rechts}: ${TRICKS[x.trick].text}`,
+        lob: "Richtig erkannt, Detektiv! 🕵️",
+      });
+      if (ctx.nr === 0) ctx.sag("Schau genau: Was ist links und rechts anders?");
+      return;
+    }
+
+    const loesung = `${x.links} = ${x.rechts} = ${zahlText(x.wert)}`;
+    ctx.flaeche.append(
+      el("div", { class: "auftrag", text: "Welche Aufgabe gibt dasselbe — und ist leichter?" }),
+      el("div", { class: "rechnung", text: x.links }));
+    const schritt2 = el("div");
+
+    // Schritt 1 wählen; richtig heisst hier „weiter zu Schritt 2“, erst das Ausrechnen schliesst die Aufgabe.
+    const box = LS.auswahl({ ...ctx, richtig: () => rechnen() }, {
+      optionen: x.optionen, richtig: x.rechts, breite: 200, loesung,
+      hinweis: o => `${o} gibt ${wert(lesen(o)) > x.wert ? "mehr" : "weniger"} als ${x.links}. ${x.wahlTipp}`,
+    });
+    ctx.flaeche.append(schritt2);
+
+    function rechnen() {
+      LS.ton("richtig");
+      // Nur die gewählte Aufgabe stehen lassen, damit die Tastatur auch auf dem Handy sichtbar bleibt.
+      for (const k of box.children) if (!k.classList.contains("richtig")) k.style.display = "none";
+      ctx.sag("Genau, das gibt gleich viel! Jetzt rechne die leichte Aufgabe aus.", "gut");
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergebnis" });
+      schritt2.append(el("div", { class: "rechnung klein", text: `${x.rechts} =` }), anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: 7,
+        onOk(w) {
+          if (w === x.wert) {
+            tasten.gesperrt = true;
+            anzeige.classList.add("richtig");
+            ctx.richtig(`Geschickt gerechnet! ${x.links} = ${zahlText(x.wert)}`);
+            return;
+          }
+          anzeige.classList.add("falsch");
+          ctx.falsch(`${w > x.wert ? "Das ist zu viel." : "Das ist zu wenig."} ${x.tipp}`, loesung);
+          if (ctx.vorbei()) tasten.gesperrt = true;
+        },
+      });
+      schritt2.append(tasten.element);
+    }
+    if (ctx.nr === 0) ctx.sag("Nur eine Aufgabe gibt genau gleich viel. Welche ist es?");
+  },
+});
+</script>
+</body>
+</html>

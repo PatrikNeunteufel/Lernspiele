@@ -79,15 +79,35 @@
 const { waehle, mische, el } = LS;
 
 const STUFE = {
-  s1: { regeln: ["spst"], sichtbar: true, ausnahmen: false },
-  s2: { regeln: ["spst", "ie"], sichtbar: true, ausnahmen: false },
-  s3: { regeln: ["ie", "cktz"], sichtbar: true, ausnahmen: false },
-  s4: { regeln: ["ie", "cktz", "fv", "eae"], sichtbar: true, ausnahmen: false },
-  s5: { regeln: ["ie", "cktz", "fv", "eae", "doppel"], sichtbar: false, ausnahmen: true },
+  s1: { regeln: ["sp-st"], sichtbar: true, ausnahmen: false },
+  s2: { regeln: ["sp-st", "ie-i"], sichtbar: true, ausnahmen: false },
+  s3: { regeln: ["ie-i", "ck-tz"], sichtbar: true, ausnahmen: false },
+  s4: { regeln: ["ie-i", "ck-tz", "f-v", "e-ae"], sichtbar: true, ausnahmen: false },
+  s5: { regeln: ["ie-i", "ck-tz", "f-v", "e-ae", "doppel"], sichtbar: false, ausnahmen: true },
   // Königsstufe: alle sechs Regeln, Ausnahmen öfter, beim Fehler nur der Name der Regel statt ihres
   // Texts. Das Bild bleibt: ohne Bild wären Wörter wie Haken/Hacken, viel/fiel, Rose/Rosse mehrdeutig.
-  s6: { regeln: ["spst", "ie", "cktz", "fv", "eae", "doppel"], sichtbar: false, ausnahmen: true, knapp: true, ausnahmeAnteil: 0.4 },
+  s6: { regeln: ["sp-st", "ie-i", "ck-tz", "f-v", "e-ae", "doppel"], sichtbar: false, ausnahmen: true, knapp: true, ausnahmeAnteil: 0.4 },
 };
+
+// Freigabe (Entscheid L4 a): je Regel eine Liste (Schlüssel in REGELN), die Ausnahmen der ie-Regel
+// eine eigene. Nur Wörter aus Listen, die der Spieler üben darf (Aufsicht: alle). Kennt der Katalog
+// die Listen nicht, gilt alles als frei — dann entscheidet die Freigabe des Spiels.
+const AUSNAHMEN_LISTE = { "ie-i": "ie-ausnahmen" };
+const LISTEN = [...Object.keys(REGELN), ...Object.values(AUSNAHMEN_LISTE)];
+const FREI = new Set(LS.spielListen("regel-luecke").length ? LS.freieListen("regel-luecke") : LISTEN);
+
+/** Freie Wörter einer Regel in einer Stufe: Regelwörter und (falls die Stufe sie hat) Ausnahmen. */
+function woerterIn(regelId, p) {
+  const r = REGELN[regelId];
+  const ausnahmeListe = AUSNAHMEN_LISTE[regelId];
+  return {
+    woerter: FREI.has(regelId) ? r.woerter : [],
+    ausnahmen: p.ausnahmen && r.ausnahmen && ausnahmeListe && FREI.has(ausnahmeListe) ? r.ausnahmen : [],
+  };
+}
+/** Regeln der Stufe, zu denen es freie Wörter gibt; leer = Stufe wird nicht angeboten. */
+const regelnIn = stufe => STUFE[stufe].regeln.filter(id => { const w = woerterIn(id, STUFE[stufe]); return w.woerter.length + w.ausnahmen.length > 0; });
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => regelnIn(s).length));
 
 /** "B{ie|i}ne" → { vor: "B", richtig: "ie", falsch: "i", nach: "ne", ganz: "Biene" } */
 function zerlegeWort(text) {
@@ -97,11 +117,14 @@ function zerlegeWort(text) {
 
 function aufgabeErzeugen(stufe) {
   const p = STUFE[stufe];
-  const regelId = waehle(p.regeln);
+  const regeln = regelnIn(stufe);
+  if (!regeln.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  const regelId = waehle(regeln);
   const regel = REGELN[regelId];
-  let liste = p.ausnahmen && regel.ausnahmen ? [...regel.woerter, ...regel.ausnahmen] : regel.woerter;
+  const { woerter, ausnahmen } = woerterIn(regelId, p);
+  let liste = [...woerter, ...ausnahmen];
   // Königsstufe: Ausnahmen gezielt häufiger ziehen.
-  if (p.ausnahmeAnteil && regel.ausnahmen && Math.random() < p.ausnahmeAnteil) liste = regel.ausnahmen;
+  if (p.ausnahmeAnteil && ausnahmen.length && Math.random() < p.ausnahmeAnteil) liste = ausnahmen;
   const [text, bild] = waehle(liste);
   return { regel, regelId, text, bild, ...zerlegeWort(text) };
 }
@@ -111,6 +134,8 @@ function pruefeAufgabe(a, stufe) {
   const m = [];
   const p = STUFE[stufe];
   if (!p.regeln.includes(a.regelId)) m.push("Regel nicht in der Stufe");
+  const frei = woerterIn(a.regelId, p);
+  if (![...frei.woerter, ...frei.ausnahmen].some(([t]) => t === a.text)) m.push("Wort nicht aus einer freien Liste");
   if (!a.richtig || !a.falsch || a.richtig === a.falsch) m.push("Möglichkeiten fehlen oder sind gleich");
   if (/[{}|]/.test(a.ganz + a.richtig + a.falsch)) m.push("Lücke nicht aufgelöst");
   const ausnahme = (a.regel.ausnahmen || []).some(([t]) => t === a.text);
@@ -123,18 +148,20 @@ LS.spiel({
   id: "regel-luecke",
   einleitung: "In jedem Wort fehlt etwas. Welche Schreibweise ist richtig? Die Regel hilft dir!",
   anzahl: 10,
-  stufen: {
+  stufen: nurMoegliche({
     s1: "sp oder schp, st oder scht: Stern, Spiel.",
     s2: "Dazu ie oder i: Biene, Kind.",
     s3: "ie oder i, ck oder k, tz oder z — die Regel steht dabei.",
     s4: "Dazu f oder v und e oder ä: Vogel, Hände.",
     s5: "Alles gemischt, mit Ausnahmen (Igel, Tiger) und Doppelkonsonanten — ohne Regelkarte.",
     s6: "Endgegner: alle sechs Regeln, viele Ausnahmen — ohne Regelkarte.",
-  },
+  }),
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const p = STUFE[ctx.stufe];
+    const loesung = p.knapp ? `Man schreibt ${a.ganz}. ${a.regel.regel}` : `Man schreibt ${a.ganz}.`;
+    ctx.loesung(loesung);
     if (p.sichtbar) ctx.flaeche.append(el("div", { class: "regelkarte" }, el("b", { text: `Regel: ${a.regel.name}` }), a.regel.regel));
     if (a.bild) ctx.flaeche.append(el("div", { class: "bild-gross", "aria-hidden": "true", text: a.bild }));
 
@@ -159,9 +186,10 @@ LS.spiel({
         void knopf.offsetWidth;
         knopf.classList.add("falsch");
         ctx.falsch(p.sichtbar ? `Lies die Regel nochmal: ${a.regel.regel}`
-          : p.knapp ? `Sprich das Wort langsam und hör genau hin. Denk an die Regel «${a.regel.name}».`
+          // Königsstufe: der Regelname („sp / st“) nennt die Schreibweise schon, deshalb ohne ihn.
+          : p.knapp ? "Sprich das Wort langsam und hör genau hin. Welche Regel passt hier?"
           : `Regel ${a.regel.name}: ${a.regel.regel}`,
-          p.knapp ? `Man schreibt ${a.ganz}. ${a.regel.regel}` : `Man schreibt ${a.ganz}.`);
+          loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
       });
       optionen.append(knopf);

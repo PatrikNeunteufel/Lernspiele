@@ -5,10 +5,15 @@
 
    Schreibweise: Die Lücke steht in geschweiften Klammern, die RICHTIGE Möglichkeit zuerst:
    "B{ie|i}ne" → Lücke mit Auswahl „ie“ (richtig) oder „i“. Bild optional (Emoji).
-   Schweizer Schreibweise (ss statt ß). */
+   Schweizer Schreibweise (ss statt ß).
+
+   Inhaltslisten (Entscheid L4 a): je Regel eine Liste, der Schlüssel ist die Liste-Id —
+   „sp-st“, „ie-i“, „ck-tz“, „f-v“, „e-ae“, „doppel“. Die Ausnahmen der ie-Regel
+   (REGELN["ie-i"].ausnahmen) sind eine eigene Liste, „ie-ausnahmen“. Der Prüfstand steht im
+   Katalog (spiele/gemeinsam/katalog.js, Eintrag „regel-luecke“, Feld listen). */
 
 const REGELN = {
-  spst: {
+  "sp-st": {
     name: "sp / st",
     regel: "Am Wortanfang hört man «schp» und «scht» — man schreibt aber sp und st.",
     woerter: [
@@ -18,7 +23,7 @@ const REGELN = {
       ["{sp|schp}ringen", "🦘"], ["{st|scht}ehen", "🧍"], ["{sp|schp}ielen", "🧸"], ["{St|Scht}empel", "📮"],
     ],
   },
-  ie: {
+  "ie-i": {
     name: "ie oder i",
     regel: "Ein lang gesprochenes i schreibt man meistens ie (Biene). Ein kurzes i schreibt man nur i (Kind).",
     woerter: [
@@ -32,7 +37,7 @@ const REGELN = {
       // UNGEPRÜFT (LERN, Königsstufe 2026-10-31): weitere Ausnahmen mit langem i ohne e
       ["B{i|ie}ber", "🦫"], ["Kan{i|ie}nchen", "🐇"], ["Masch{i|ie}ne", "⚙️"], ["Benz{i|ie}n", "⛽"]],
   },
-  cktz: {
+  "ck-tz": {
     name: "ck / k und tz / z",
     regel: "Nach einem kurzen Vokal schreibt man ck und tz (Zucker, Katze). Nach einem langen Vokal, nach au, ei, eu und nach l, n, r nur k und z (Haken, Pauke, Balken, Kerze).",
     woerter: [
@@ -44,7 +49,7 @@ const REGELN = {
       ["Her{z|tz}", "❤️"], ["Kreu{z|tz}", "✝️"],
     ],
   },
-  fv: {
+  "f-v": {
     name: "f oder v",
     regel: "Die meisten Wörter mit dem f-Laut schreibt man mit f. Nur wenige mit v — die muss man sich merken: Vogel, Vater, viel, vier, voll, von, vor …",
     woerter: [
@@ -54,7 +59,7 @@ const REGELN = {
       ["{F|V}rosch", "🐸"], ["{F|V}uss", "🦶"],
     ],
   },
-  eae: {
+  "e-ae": {
     name: "e oder ä",
     regel: "Gibt es ein verwandtes Wort mit a, schreibt man ä (Hand → Hände). Sonst schreibt man e.",
     woerter: [

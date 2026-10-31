@@ -92,6 +92,7 @@ LS.spiel({
     const umkehrZeile = el("div", { class: "umkehr" });
 
     if (x.rueckwaerts) {
+      ctx.loesung(umkehr);
       ctx.flaeche.append(
         el("div", { class: "auftrag", text: "Welche Zahl ist gesucht?" }),
         el("div", { class: "rechnung", html: `? : ${x.d} = ${zahlText(x.q)} <span class="rest-wort">Rest</span> ${x.r}` }));
@@ -110,6 +111,8 @@ LS.spiel({
       return;
     }
 
+    const loesung = `${zahlText(x.a)} : ${x.d} = ${zahlText(x.q)} Rest ${x.r}, denn ${umkehr}`;
+    ctx.loesung(loesung);
     if (STUFE[ctx.stufe].bilder) {
       ctx.flaeche.append(
         el("div", { class: "sachtext", text: `${x.a} ${x.ding} werden an ${x.d} Kinder verteilt. Jedes Kind bekommt gleich viel.` }),
@@ -129,7 +132,7 @@ LS.spiel({
         onAenderung: w => { if (w === null) feld.textContent = "?"; },
         onOk(w) {
           if (w === soll) { tasten.gesperrt = true; feld.classList.remove("aktiv"); feld.classList.add("fertig"); weiter(); return; }
-          ctx.falsch(hinweis(w), `${zahlText(x.a)} : ${x.d} = ${zahlText(x.q)} Rest ${x.r}, denn ${umkehr}`);
+          ctx.falsch(hinweis(w), loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
         },
       });

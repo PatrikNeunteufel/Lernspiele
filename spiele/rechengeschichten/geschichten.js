@@ -5,6 +5,13 @@
 // 'stufe' 1–6 nach der Skala mit Basisklasse 2: 1 Bilder bis 10 (1. Klasse), 2 Text bis 20, 3 bis 100
 // auch mit mal, 4 Platzhalter, 5 geteilt und Platzhalter (3. Klasse), 6 Ausrechnen mit unwichtiger Angabe.
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
+//
+// Inhaltslisten (Entscheid L4 a): Die Geschichten einer Stufe bilden eine Liste, die die Aufsicht
+// einzeln freigibt (Zuordnung in GESCHICHTEN_LISTEN). Der Prüfstand steht im Katalog
+// (spiele/gemeinsam/katalog.js, Eintrag rechengeschichten, Feld listen). Jede Spielstufe braucht
+// die Liste ihrer Stufe.
+
+const GESCHICHTEN_LISTEN = { 1: "bilder-bis-10", 2: "text-bis-20", 3: "bis-100", 4: "platzhalter", 5: "verteilen", 6: "unwichtige-angabe" };
 
 const GESCHICHTEN = [
   // Stufe 1: mit Bildern, bis 10

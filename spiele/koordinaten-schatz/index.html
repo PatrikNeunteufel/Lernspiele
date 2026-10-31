@@ -173,6 +173,7 @@ LS.spiel({
     let fertig = false;
 
     const auswahl = (optionen, richtig, hinweis, loesungText) => {
+      ctx.loesung(loesungText);
       const box = el("div", { class: "optionen" });
       for (const o of mische(optionen)) {
         const k = el("button", { type: "button", class: "option", text: o });
@@ -190,12 +191,14 @@ LS.spiel({
 
     if (art === "tafelSetzen") {
       const ziel = zufall(0, 99);
+      const loesung = `${ez(ziel)} ist das Feld ${ziel}.`;
+      ctx.loesung(loesung);
       ctx.flaeche.append(el("div", { class: "frage", html: `Der Schatz liegt bei <b>${ez(ziel)}</b>. Tipp das Feld an!` }));
       const t = tafel((zahl, f) => {
         if (fertig) return;
         if (zahl === ziel) { fertig = true; f.classList.add("treffer"); f.textContent = "💎"; ctx.richtig(`Gefunden! ${ez(ziel)} ist das Feld ${ziel}.`); return; }
         f.classList.add("daneben");
-        ctx.falsch(`Das war ${ez(zahl)}. E sind die Spalten (oben), Z die Zeilen (links).`, `${ez(ziel)} ist das Feld ${ziel}.`);
+        ctx.falsch(`Das war ${ez(zahl)}. E sind die Spalten (oben), Z die Zeilen (links).`, loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; t.felder[ziel].classList.add("treffer"); }
       });
       ctx.flaeche.append(t);
@@ -211,12 +214,14 @@ LS.spiel({
       auswahl([ez(ziel), ...[...falsche].slice(0, 3)], ez(ziel), "Lies zuerst oben die Spalte (E), dann links die Zeile (Z).", `Der Schatz liegt bei ${ez(ziel)}.`);
     } else if (art === "punktSetzen") {
       const x = zufall(0, N), y = zufall(0, N);
+      const loesung = `Der Punkt ${pt(x, y)}.`;
+      ctx.loesung(loesung);
       ctx.flaeche.append(el("div", { class: "frage", html: `Vergrabe den Schatz bei <b>${pt(x, y)}</b>.` }));
       const svg = koordinaten((px, py) => {
         if (fertig) return;
         if (px === x && py === y) { fertig = true; punktMarke(svg, x, y); ctx.richtig(); return; }
         punktMarke(svg, px, py, "✖");
-        ctx.falsch(px === y && py === x ? "Vertauscht! Zuerst x (nach rechts), dann y (nach oben)." : "Zuerst x Schritte nach rechts, dann y Schritte nach oben.", `Der Punkt ${pt(x, y)}.`);
+        ctx.falsch(px === y && py === x ? "Vertauscht! Zuerst x (nach rechts), dann y (nach oben)." : "Zuerst x Schritte nach rechts, dann y Schritte nach oben.", loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; punktMarke(svg, x, y); }
       });
       ctx.flaeche.append(svg);
@@ -236,12 +241,14 @@ LS.spiel({
       if (neu.some(([a, b]) => a < 0 || a > N || b < 0 || b > N)) return this.aufgabe(ctx);
       const welche = zufall(0, ecken.length - 1);
       const name = "ABCD"[welche];
+      const loesung = `${name} ${pt(...ecken[welche])} → ${pt(...neu[welche])}`;
+      ctx.loesung(loesung);
       ctx.flaeche.append(el("div", { class: "frage", html: `Verschiebe die Figur um <b>${dx} nach rechts</b> und <b>${Math.abs(dy)} nach ${dy > 0 ? "oben" : "unten"}</b>. Wo landet die Ecke <b>${name}</b>?` }));
       const svg = koordinaten((px, py) => {
         if (fertig) return;
         if (px === neu[welche][0] && py === neu[welche][1]) { fertig = true; polygon(svg, neu, "figur-neu"); ctx.richtig(`Richtig: ${name} landet bei ${pt(...neu[welche])}.`); return; }
         punktMarke(svg, px, py, "✖");
-        ctx.falsch(`Starte bei ${name} ${pt(...ecken[welche])} und zähle die Schritte ab.`, `${name} ${pt(...ecken[welche])} → ${pt(...neu[welche])}`);
+        ctx.falsch(`Starte bei ${name} ${pt(...ecken[welche])} und zähle die Schritte ab.`, loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, neu, "figur-neu"); }
       });
       polygon(svg, ecken, "figur");
@@ -254,13 +261,15 @@ LS.spiel({
       const neu = ecken.map(([a, b]) => [a + dx, b + dy]);
       const welche = zufall(1, ecken.length - 1); // nie A selbst
       const name = "ABCD"[welche];
+      const loesung = `A ${pt(...ecken[0])} → A' ${pt(...neu[0])}, also ${name} ${pt(...ecken[welche])} → ${pt(...neu[welche])}`;
+      ctx.loesung(loesung);
       ctx.flaeche.append(el("div", { class: "frage", html: `Die Figur wird verschoben: <b>A</b> landet auf <b>A'</b>. Wo landet die Ecke <b>${name}</b>?` }));
       const svg = koordinaten((px, py) => {
         if (fertig) return;
         if (px === neu[welche][0] && py === neu[welche][1]) { fertig = true; polygon(svg, neu, "figur-neu"); ctx.richtig(`Richtig: ${name} landet bei ${pt(...neu[welche])}.`); return; }
         punktMarke(svg, px, py, "✖");
         ctx.falsch(`Zähle die Schritte von A nach A' — nach rechts oder links, nach oben oder unten. Genau so geht ${name}.`,
-          `A ${pt(...ecken[0])} → A' ${pt(...neu[0])}, also ${name} ${pt(...ecken[welche])} → ${pt(...neu[welche])}`);
+          loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, neu, "figur-neu"); }
       });
       polygon(svg, ecken, "figur");
@@ -271,13 +280,15 @@ LS.spiel({
       // Drei Ecken sind gezeichnet, die vierte (D) fehlt.
       const { art: form, ecken } = viereckErzeugen();
       const [zx, zy] = ecken[3]; // gesuchte Ecke D
+      const loesung = `D liegt bei ${pt(zx, zy)}.`;
+      ctx.loesung(loesung);
       ctx.flaeche.append(el("div", { class: "frage", html: `<b>A</b>, <b>B</b> und <b>C</b> sind Ecken eines ${form}s. Wo liegt die Ecke <b>D</b>?` }));
       const svg = koordinaten((px, py) => {
         if (fertig) return;
         if (px === zx && py === zy) { fertig = true; polygon(svg, ecken, "figur-neu"); ctx.richtig(`Richtig: D liegt bei ${pt(zx, zy)}.`); return; }
         punktMarke(svg, px, py, "✖");
         ctx.falsch(form === "Rechteck" ? "Gegenüberliegende Seiten sind gleich lang und laufen parallel."
-          : "Geh von C aus so viele Schritte, wie es von B nach A geht.", `D liegt bei ${pt(zx, zy)}.`);
+          : "Geh von C aus so viele Schritte, wie es von B nach A geht.", loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, ecken, "figur-neu"); }
       });
       const [a, b, c] = ecken;
@@ -287,6 +298,8 @@ LS.spiel({
     } else {
       // zeichnen: Ecken der Reihe nach setzen
       const ecken = figurErzeugen(N, N);
+      const loesung = ecken.map(([a, b], i) => `${"ABCD"[i]} ${pt(a, b)}`).join(", ");
+      ctx.loesung(loesung);
       ctx.flaeche.append(el("div", { class: "frage", html: `Zeichne die Figur: Tipp die Ecken der Reihe nach an — ${ecken.map(([a, b], i) => `<b>${"ABCD"[i]} ${pt(a, b)}</b>`).join(", ")}.` }));
       let pos = 0;
       const svg = koordinaten((px, py) => {
@@ -299,7 +312,7 @@ LS.spiel({
           return;
         }
         punktMarke(svg, px, py, "✖");
-        ctx.falsch(`Ecke ${"ABCD"[pos]} liegt bei ${pt(...ecken[pos])}: zuerst x nach rechts, dann y nach oben.`, ecken.map(([a, b], i) => `${"ABCD"[i]} ${pt(a, b)}`).join(", "));
+        ctx.falsch(`Ecke ${"ABCD"[pos]} liegt bei ${pt(...ecken[pos])}: zuerst x nach rechts, dann y nach oben.`, loesung);
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, ecken, "figur-neu"); }
       });
       ctx.flaeche.append(svg);
