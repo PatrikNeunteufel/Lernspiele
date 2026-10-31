@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flächen-Pixel</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .raster { display: block; width: 100%; max-width: 360px; height: auto; margin: 0 auto 12px; }
+  .wahl-knopf .raster { max-width: 220px; margin: 0; }
+  .raster .netz { stroke: #dfe3f3; stroke-width: 1; }
+  .raster .zelle { fill: var(--f, var(--deko-5)); stroke: #fff; stroke-width: 1.5; }
+  .raster .rand { fill: none; stroke: var(--text); stroke-width: 3; stroke-linejoin: round; }
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🟩 Flächen-Pixel</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.A.3: c Flächeninhalte vergleichen (z.B. Rechtecke mit Quadraten belegen),
+// d (Orientierungspunkt 2. Zyklus) „Flächen mit Einheitsquadraten auszählen“, e (Grundanspruch
+// 2. Zyklus) Umfang von Vielecken messen, Flächeninhalt von Rechtecken berechnen.
+// Umfang hier in Häuschen-Seiten: jede Seite eines Häuschens am Rand zählt 1.
+
+const { zufall, waehle, mische, el } = LS;
+const SVG = "http://www.w3.org/2000/svg";
+const FARBEN = ["var(--deko-1)", "var(--deko-2)", "var(--deko-3)", "var(--deko-5)", "var(--deko-6)"];
+const BREITE = 8, HOEHE = 6;
+
+/** Zusammenhängende Figur aus n Häuschen (wächst von einem Feld aus). */
+function figur(n) {
+  const zellen = new Set(["3,2"]);
+  while (zellen.size < n) {
+    const [x, y] = waehle([...zellen]).split(",").map(Number);
+    const [dx, dy] = waehle([[1, 0], [-1, 0], [0, 1], [0, -1]]);
+    const nx = x + dx, ny = y + dy;
+    if (nx >= 0 && nx < BREITE && ny >= 0 && ny < HOEHE) zellen.add(`${nx},${ny}`);
+  }
+  return [...zellen].map(z => z.split(",").map(Number));
+}
+const rechteck = (b, h) => { const z = []; for (let x = 0; x < b; x++) for (let y = 0; y < h; y++) z.push([x, y]); return z; };
+
+/** Zufälliges Rechteck mit min bis max Häuschen (aus allen passenden Massen gewählt, endet also sicher). */
+function rechteckMit(min, max) {
+  const masse = [];
+  for (let b = 2; b <= BREITE; b++) for (let h = 2; h <= HOEHE; h++) if (b * h >= min && b * h <= max) masse.push([b, h]);
+  return rechteck(...waehle(masse));
+}
+
+/** Hängen alle Häuschen über Seiten zusammen? */
+function zusammen(zellen) {
+  const da = new Set(zellen.map(z => z.join()));
+  const gesehen = new Set([zellen[0].join()]);
+  const offen = [zellen[0]];
+  while (offen.length) {
+    const [x, y] = offen.pop();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const k = `${x + dx},${y + dy}`;
+      if (da.has(k) && !gesehen.has(k)) { gesehen.add(k); offen.push([x + dx, y + dy]); }
+    }
+  }
+  return gesehen.size === zellen.length;
+}
+
+/** Umfang: Seiten von Häuschen, an die kein anderes Häuschen grenzt. */
+function umfang(zellen) {
+  const da = new Set(zellen.map(z => z.join()));
+  let u = 0;
+  for (const [x, y] of zellen) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (!da.has(`${x + dx},${y + dy}`)) u++;
+  return u;
+}
+
+function rasterBild(zellen) {
+  const Z = 20;
+  const s = document.createElementNS(SVG, "svg");
+  s.setAttribute("viewBox", `-2 -2 ${BREITE * Z + 4} ${HOEHE * Z + 4}`);
+  s.setAttribute("class", "raster");
+  s.setAttribute("aria-hidden", "true");
+  s.style.setProperty("--f", waehle(FARBEN));
+  let t = "";
+  for (let x = 0; x <= BREITE; x++) t += `<line class="netz" x1="${x * Z}" y1="0" x2="${x * Z}" y2="${HOEHE * Z}"/>`;
+  for (let y = 0; y <= HOEHE; y++) t += `<line class="netz" x1="0" y1="${y * Z}" x2="${BREITE * Z}" y2="${y * Z}"/>`;
+  const da = new Set(zellen.map(z => z.join()));
+  for (const [x, y] of zellen) {
+    t += `<rect class="zelle" x="${x * Z}" y="${y * Z}" width="${Z}" height="${Z}"/>`;
+    // Randlinien nur dort, wo kein Nachbar ist
+    if (!da.has(`${x},${y - 1}`)) t += `<line class="rand" x1="${x * Z}" y1="${y * Z}" x2="${x * Z + Z}" y2="${y * Z}"/>`;
+    if (!da.has(`${x},${y + 1}`)) t += `<line class="rand" x1="${x * Z}" y1="${y * Z + Z}" x2="${x * Z + Z}" y2="${y * Z + Z}"/>`;
+    if (!da.has(`${x - 1},${y}`)) t += `<line class="rand" x1="${x * Z}" y1="${y * Z}" x2="${x * Z}" y2="${y * Z + Z}"/>`;
+    if (!da.has(`${x + 1},${y}`)) t += `<line class="rand" x1="${x * Z + Z}" y1="${y * Z}" x2="${x * Z + Z}" y2="${y * Z + Z}"/>`;
+  }
+  s.innerHTML = t;
+  return s;
+}
+
+const ARTEN = {
+  /** Zwei Figuren vergleichen. nah: höchstens 2 Häuschen Unterschied (Stufe 4), sonst mindestens 2. */
+  vergleich(min, max, nah = false) {
+    const a = zufall(min, max);
+    const moeglich = [];
+    for (let b = min; b <= max; b++) {
+      const d = Math.abs(a - b);
+      if (nah ? d >= 1 && d <= 2 : d >= 2) moeglich.push(b);
+    }
+    const b = waehle(moeglich);
+    const figuren = [figur(a), figur(b)];
+    return { art: "vergleich", figuren, richtig: a > b ? 0 : 1, optionen: [0, 1] };
+  },
+  zaehlen(min, max, mitWahl) {
+    const zellen = Math.random() < 0.3 ? rechteckMit(min, max) : figur(zufall(min, max));
+    const richtig = zellen.length;
+    return { art: "flaeche", zellen, richtig, optionen: mitWahl ? mische([richtig, richtig - 1, richtig + 1, richtig + 2].filter(x => x > 0)) : null };
+  },
+  rechteck() {
+    const b = zufall(2, BREITE), h = zufall(2, HOEHE);
+    const was = waehle(["flaeche", "umfang"]);
+    const zellen = rechteck(b, h);
+    return { art: was, zellen, richtig: was === "flaeche" ? b * h : 2 * (b + h), b, h };
+  },
+  umfang() {
+    const zellen = figur(zufall(8, 16));
+    return { art: "umfang", zellen, richtig: umfang(zellen) };
+  },
+};
+
+// Basisklasse 2: s1 1. Klasse, s2–s4 2. Klasse, s5 3. Klasse, s6 Königsstufe.
+// Je Stufe: erlaubte Aufgabentypen, Grössenbereich (Häuschen) für Vergleich und Zählen.
+const STUFE = {
+  s1: { arten: ["vergleich"], vergleich: [3, 9], neu: () => ARTEN.vergleich(3, 9) },
+  s2: { arten: ["flaeche"], zaehlen: [3, 10], neu: () => ARTEN.zaehlen(3, 10, true) },
+  s3: { arten: ["flaeche"], zaehlen: [8, 24], neu: () => ARTEN.zaehlen(8, 24, false) },
+  s4: { arten: ["vergleich", "flaeche"], vergleich: [10, 20], nah: true, zaehlen: [12, 24],
+    neu: () => waehle([() => ARTEN.vergleich(10, 20, true), () => ARTEN.zaehlen(12, 24, false)])() },
+  s5: { arten: ["flaeche", "umfang"], rechteck: true, neu: () => ARTEN.rechteck() },
+  // Königsstufe: Umfang krummer Figuren und Rechtecke gemischt, knappe Hilfen ohne Masse.
+  s6: { arten: ["flaeche", "umfang"], krumm: true, knapp: true, neu: () => waehle([ARTEN.umfang, ARTEN.umfang, ARTEN.rechteck])() },
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe].neu(); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const s = STUFE[stufe];
+  if (!s.arten.includes(a.art)) m.push("Aufgabentyp gehört nicht in diese Stufe");
+  const imRaster = z => z.every(([x, y]) => x >= 0 && x < BREITE && y >= 0 && y < HOEHE);
+  if (a.art === "vergleich") {
+    const [x, y] = a.figuren.map(f => f.length);
+    if ((x > y ? 0 : 1) !== a.richtig || x === y) m.push("Vergleich falsch oder gleich gross");
+    if ([x, y].some(n => n < s.vergleich[0] || n > s.vergleich[1])) m.push("Figur ausserhalb des Grössenbereichs");
+    if (s.nah ? Math.abs(x - y) > 2 : Math.abs(x - y) < 2) m.push("Unterschied passt nicht zur Stufe");
+    if (a.figuren.some(f => !imRaster(f) || !zusammen(f) || new Set(f.map(z => z.join())).size !== f.length)) m.push("Figur zerfallen, doppelt oder ausserhalb");
+    return m;
+  }
+  if (!imRaster(a.zellen) || !zusammen(a.zellen)) m.push("Figur zerfallen oder ausserhalb des Rasters");
+  if (s.zaehlen && (a.zellen.length < s.zaehlen[0] || a.zellen.length > s.zaehlen[1])) m.push("Figur ausserhalb des Grössenbereichs");
+  if (s.rechteck && !a.b) m.push("Stufe 5: nur Rechtecke");
+  if (a.b && a.zellen.length !== a.b * a.h) m.push("Rechteck passt nicht zu den Massen");
+  if (a.art === "flaeche" && a.richtig !== a.zellen.length) m.push("Fläche falsch");
+  if (a.art === "umfang" && a.richtig !== umfang(a.zellen)) m.push("Umfang falsch");
+  if (a.b && a.art === "umfang" && a.richtig !== 2 * (a.b + a.h)) m.push("Umfang des Rechtecks falsch");
+  if (new Set(a.zellen.map(z => z.join())).size !== a.zellen.length) m.push("Häuschen doppelt");
+  if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
+  return m;
+}
+
+LS.spiel({
+  id: "flaechen-pixel",
+  einleitung: "Jede Figur besteht aus Häuschen. Wie viele sind es? Und wie lang ist der Rand?",
+  anzahl: 8,
+  stufen: {
+    s1: "Welche Figur ist grösser?",
+    s2: "Häuschen zählen bis 10.",
+    s3: "Grössere Figuren auszählen — clever in Reihen zählen.",
+    s4: "Fast gleich grosse Figuren vergleichen und auszählen.",
+    s5: "Rechtecke: Fläche und Umfang.",
+    s6: "Umfang von krummen Figuren und Rechtecken — gemischt.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "vergleich") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Welche Figur hat mehr Häuschen?" }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 150,
+        inhalt: i => rasterBild(a.figuren[i]),
+        hinweis: "Zähl die Häuschen von beiden Figuren und vergleiche.",
+        loesung: `Links ${a.figuren[0].length}, rechts ${a.figuren[1].length} Häuschen.`,
+      });
+      if (ctx.nr === 0) ctx.sag("Tipp auf die grössere Figur.");
+      return;
+    }
+    const frage = a.art === "flaeche" ? "Wie viele Häuschen hat die Figur?" : "Wie lang ist der Rand? Zähle die Häuschen-Seiten.";
+    ctx.flaeche.append(el("div", { class: "frage", text: frage }), rasterBild(a.zellen));
+    // Königsstufe: Hilfe ohne die Masse des Rechtecks.
+    const hinweis = STUFE[ctx.stufe].knapp
+      ? (a.art === "flaeche" ? "Nicht ganz. Wie viele Reihen, wie viele in jeder Reihe?" : "Nicht ganz. Jede kleine Seite am Rand zählt — auch in den Ecken und Buchten.")
+      : a.art === "flaeche"
+      ? (a.b ? `Zähle die Häuschen in einer Reihe (${a.b}) und wie viele Reihen es sind (${a.h}). Dann rechne.` : "Zähle Reihe für Reihe und zähle dann zusammen.")
+      : (a.b ? `Oben und unten sind je ${a.b} Seiten, links und rechts je ${a.h}.` : "Fahr mit dem Finger einmal rund um die Figur und zähle jede kleine Seite.");
+    const loesung = a.art === "flaeche" ? `Die Figur hat ${a.richtig} Häuschen${a.b ? ` (${a.b} · ${a.h})` : ""}.` : `Der Rand ist ${a.richtig} Seiten lang${a.b ? ` (${a.b} + ${a.h} + ${a.b} + ${a.h})` : ""}.`;
+    if (a.optionen) {
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 80, hinweis, loesung });
+    } else {
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Antwort" });
+      ctx.flaeche.append(anzeige);
+      const tasten = LS.tastatur({
+        anzeige,
+        maxStellen: 3,
+        onOk(w) {
+          if (w === a.richtig) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(loesung + " 🟩"); return; }
+          anzeige.classList.add("falsch");
+          ctx.falsch(`${w} stimmt nicht. ${hinweis}`, loesung);
+          if (ctx.vorbei()) tasten.gesperrt = true;
+        },
+      });
+      ctx.flaeche.append(tasten.element);
+    }
+    if (ctx.nr === 0) ctx.sag("Zähle genau — mit dem Finger geht es leichter.");
+  },
+});
+</script>
+</body>
+</html>

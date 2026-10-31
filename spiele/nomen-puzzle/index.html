@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nomen-Puzzle</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .puzzle { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin: 4px 0 14px; }
+  .teil { background: #fff; border: 3px solid var(--rand); border-radius: 16px; padding: 6px 14px; text-align: center; }
+  .teil .bild { font-size: clamp(40px, 9vw, 56px); display: block; line-height: 1.1; }
+  .teil b { font-size: clamp(18px, 4vw, 24px); }
+  .teil small { display: block; color: var(--text-leise); font-weight: 700; }
+  .zeichen { font-size: 32px; font-weight: 900; color: var(--text-leise); }
+  .ganz { font-size: clamp(30px, 7vw, 44px); font-weight: 900; text-align: center; margin: 4px 0 14px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧩 Nomen-Puzzle</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.5.D.1: a erste Erfahrungen mit Nomen (Grundanspruch 1. Zyklus); b (Orientierungspunkt
+// 2. Zyklus) „zusammengesetzte Nomen in ihre Bestandteile zerlegen“; c Wörter in Morpheme zerlegen.
+// Das Grundwort steht hinten und bestimmt den Artikel: das Haus + die Tür = die Haustür.
+
+const { waehle, mische, el } = LS;
+
+const EINFACH = KOMPOSITA.filter(k => k.teile.length === 2 && !k.falsch);
+const MIT_FUGE = KOMPOSITA.filter(k => k.falsch);
+const DREI = KOMPOSITA.filter(k => k.teile.length === 3);
+const woerter = k => k.teile.map(t => t[1]);
+/** Zusammensetzen ohne Fugenlaut: Haus + Tür → Haustür */
+const zusammen = teile => teile.map((t, i) => (i === 0 ? t : t.toLowerCase())).join("");
+
+const ARTEN = {
+  zusammen() {
+    // Haus + Tür = ? — Ablenker: umgedrehte Reihenfolge und ein anderes Grundwort
+    const k = waehle(EINFACH);
+    const [a, b] = woerter(k);
+    const fremd = waehle(EINFACH.filter(x => x !== k && x.teile[1][1] !== b)).teile[1][1];
+    return { art: "zusammen", k, richtig: k.ganz[1], optionen: mische([k.ganz[1], zusammen([b, a]), zusammen([a, fremd])]) };
+  },
+  legen(drei) {
+    const k = waehle(drei ? DREI : EINFACH);
+    return { art: "legen", k, reihe: woerter(k) };
+  },
+  zerlegen() {
+    const k = waehle(EINFACH);
+    const [a, b] = woerter(k);
+    const fremd = waehle(EINFACH.filter(x => x !== k && x.teile[0][1] !== a)).teile[0][1];
+    return { art: "zerlegen", k, richtig: `${a} + ${b}`, optionen: mische([`${a} + ${b}`, `${b} + ${a}`, `${fremd} + ${b}`]) };
+  },
+  zerlegenDrei() {
+    // Fussballschuh = Fuss + Ball + Schuh — Ablenker: vertauschte Reihenfolgen
+    const k = waehle(DREI);
+    const [a, b, c] = woerter(k);
+    const richtig = `${a} + ${b} + ${c}`;
+    return { art: "zerlegen", k, richtig, optionen: mische([richtig, `${b} + ${a} + ${c}`, `${a} + ${c} + ${b}`, `${c} + ${b} + ${a}`]) };
+  },
+  artikel(liste) {
+    const k = waehle(liste);
+    return { art: "artikel", k, richtig: k.ganz[0], optionen: ["der", "die", "das"] };
+  },
+  fuge() {
+    const k = waehle(MIT_FUGE);
+    return { art: "fuge", k, richtig: k.ganz[1], optionen: mische([k.ganz[1], ...k.falsch]) };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.zusammen(),
+  s2: () => waehle([() => ARTEN.legen(false), ARTEN.zusammen])(),
+  s3: () => waehle([ARTEN.zerlegen, () => ARTEN.legen(false)])(),
+  s4: () => waehle([() => ARTEN.artikel(EINFACH), ARTEN.zerlegen])(),
+  s5: () => waehle([ARTEN.fuge, () => ARTEN.legen(true), () => ARTEN.artikel(KOMPOSITA)])(),
+  // Königsstufe: drei Teile, Fugenlaute und Artikel gemischt
+  s6: () => waehle([() => ARTEN.legen(true), ARTEN.zerlegenDrei, () => ARTEN.artikel(DREI), () => ARTEN.artikel(MIT_FUGE), ARTEN.fuge])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a) {
+  const m = [];
+  if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
+  if (a.art === "artikel" && a.k.ganz[0] !== a.k.teile[a.k.teile.length - 1][0]) m.push("Artikel nicht vom Grundwort");
+  if (!a.k.falsch && zusammen(woerter(a.k)) !== a.k.ganz[1]) m.push(`Teile ergeben nicht «${a.k.ganz[1]}»`);
+  return m;
+}
+
+const teilKarte = ([artikel, wort, bild], mitArtikel) => el("div", { class: "teil" }, el("span", { class: "bild", text: bild }), el("b", { text: wort }), mitArtikel ? el("small", { text: artikel }) : null);
+function puzzle(k, mitArtikel, ergebnis) {
+  const box = el("div", { class: "puzzle" });
+  k.teile.forEach((t, i) => { if (i) box.append(el("span", { class: "zeichen", text: "+" })); box.append(teilKarte(t, mitArtikel)); });
+  if (ergebnis) box.append(el("span", { class: "zeichen", text: "=" }), el("div", { class: "teil" }, el("b", { text: ergebnis })));
+  return box;
+}
+
+LS.spiel({
+  id: "nomen-puzzle",
+  einleitung: "Aus zwei Nomen wird ein neues: Haus + Tür = Haustür. Das hintere Wort sagt, was es ist — eine Tür!",
+  anzahl: 8,
+  stufen: {
+    s1: "Haus + Tür = ? Welches neue Wort entsteht?",
+    s2: "Wortteile in die richtige Reihenfolge legen.",
+    s3: "Zerlegen: Fussball = Fuss + Ball.",
+    s4: "Der, die oder das? Das hintere Wort entscheidet.",
+    s5: "Sonnenblume, Hundehütte und Wörter aus drei Teilen.",
+    s6: "Drei Teile, Fugenlaute und Artikel — alles gemischt.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const { k } = a;
+    const grund = k.teile[k.teile.length - 1];
+    if (a.art === "zusammen") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welches neue Wort entsteht?" }), puzzle(k, false, "?"));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 150,
+        hinweis: `Das zweite Wort kommt hinten hin — denn es ist ${grund[0] === "die" ? "eine" : "ein"} ${grund[1]}.`,
+        loesung: `${woerter(k).join(" + ")} = ${k.ganz[1]}`, lob: `${woerter(k).join(" + ")} = ${k.ganz[1]} 🧩` });
+    } else if (a.art === "legen") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: `Lege das Wort «${k.ganz[1]}»: Tipp die Teile der Reihe nach an.` }));
+      LS.reihenfolge(ctx, { reihe: a.reihe, breite: 120, pfeile: false,
+        inhalt: w => ({ bild: k.teile.find(t => t[1] === w)[2], text: w }),
+        hinweis: `Lies «${k.ganz[1]}» langsam. Welcher Teil kommt zuerst?`,
+        loesung: `${k.ganz[1]} = ${woerter(k).join(" + ")}`, lob: `${k.ganz[1]}! 🧩` });
+    } else if (a.art === "zerlegen") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Aus welchen Wörtern besteht das Nomen?" }), el("div", { class: "ganz", text: k.ganz[1] }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 170,
+        hinweis: k.teile.length === 3 ? "Lies das Wort von vorne nach hinten und such die drei Nomen darin. Welches steht vorne?"
+          : "Lies das Wort und such die beiden Nomen darin. Welches steht vorne?",
+        loesung: `${k.ganz[1]} = ${a.richtig}` });
+    } else if (a.art === "artikel") {
+      // Königsstufe: ohne die Artikel der Teile — das Kind muss den Artikel des Grundworts selbst wissen.
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welcher Artikel passt zum neuen Wort?" }), puzzle(k, ctx.stufe !== "s6", `… ${k.ganz[1]}`));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 90,
+        // Der Hinweis nennt den Artikel nicht — sonst stünde die Lösung darin.
+        hinweis: `Das hintere Wort bestimmt den Artikel. Sag laut: … ${grund[1]}. Welcher Artikel passt?`,
+        loesung: `${k.ganz[0]} ${k.ganz[1]} — wie ${grund[0]} ${grund[1]}.`, lob: `Genau: ${k.ganz[0]} ${k.ganz[1]}!` });
+    } else {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Wie schreibt man das zusammengesetzte Wort richtig?" }), puzzle(k, false));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 190,
+        hinweis: "Sprich die Wörter laut. Hörst du zwischen den Teilen noch einen kleinen Laut, oder fällt einer weg?",
+        loesung: `Richtig ist: ${k.ganz[0]} ${k.ganz[1]}.` });
+    }
+    if (ctx.nr === 0) ctx.sag("Das hintere Wort sagt, was es ist.");
+  },
+});
+</script>
+</body>
+</html>

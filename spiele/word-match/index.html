@@ -46,7 +46,63 @@ const STUFE = {
   s3: { themen: ["essen", "familie", "schule", "koerper", "wetter", "tiere"], arten: ["deZuEn", "enZuBild"] },
   s4: { themen: Object.keys(THEMEN_EN), arten: ["enZuDe", "wendung", "deZuEn"] },
   s5: { themen: Object.keys(THEMEN_EN), arten: ["buchstabieren", "wendung"] },
+  // Königsstufe: Deutsch → Englisch mit ähnlichen Wörtern aus allen Themen (brother, bread, brown),
+  // buchstabieren ohne Bild mit zwei überzähligen Buchstaben, Wendungen in beide Richtungen.
+  s6: { themen: Object.keys(THEMEN_EN), arten: ["deZuEnAehnlich", "deZuEnAehnlich", "buchstabierenSchwer", "wendung"] },
 };
+
+const ALLE_WOERTER = Object.values(THEMEN_EN).flatMap(t => t.woerter);
+const ABC = "abcdefghijklmnopqrstuvwxyz";
+
+/** Drei Wörter aus allen Themen, die dem englischen Wort ähneln: gleicher Anfangsbuchstabe, ähnliche Länge. */
+function aehnliche(en) {
+  const nah = w => (w[0][0] === en[0] ? 0 : 10) + Math.abs(w[0].length - en.length) + Math.random();
+  return ALLE_WOERTER.filter(w => w[0] !== en).sort((a, b) => nah(a) - nah(b)).slice(0, 3);
+}
+
+/** Eine Aufgabe: Art, Wort, Antwortmöglichkeiten (bei buchstabieren die Kacheln). */
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  if (art === "wendung") {
+    const [en, de] = waehle(WENDUNGEN_EN);
+    const deutschZuEnglisch = Math.random() < 0.5;
+    const andere = mische(WENDUNGEN_EN.filter(w => w[0] !== en)).slice(0, 3);
+    return { art, en, de, thema: "Phrases", zeige: deutschZuEnglisch ? de : en,
+      optionen: deutschZuEnglisch ? [en, ...andere.map(w => w[0])] : [de, ...andere.map(w => w[1])], richtig: deutschZuEnglisch ? en : de, loesung: `${en} = ${de}` };
+  }
+  const thema = THEMEN_EN[waehle(p.themen)];
+  const kandidaten = art === "buchstabierenSchwer" ? thema.woerter.filter(w => w[0].length >= 4) : thema.woerter;
+  const [en, de, bild] = waehle(kandidaten.length ? kandidaten : thema.woerter);
+  const andere = mische(thema.woerter.filter(w => w[0] !== en)).slice(0, 3);
+  const basis = { art, en, de, bild, thema: thema.name, loesung: `${bild} ${en} = ${de}` };
+  if (art === "bildZuEn") return { ...basis, optionen: [en, ...andere.map(w => w[0])], richtig: en };
+  if (art === "enZuBild") return { ...basis, optionen: [bild, ...andere.map(w => w[2])], richtig: bild, alsBild: true };
+  if (art === "deZuEn") return { ...basis, optionen: [en, ...andere.map(w => w[0])], richtig: en };
+  if (art === "enZuDe") return { ...basis, optionen: [de, ...andere.map(w => w[1])], richtig: de };
+  if (art === "deZuEnAehnlich") return { ...basis, thema: "All topics", optionen: [en, ...aehnliche(en).map(w => w[0])], richtig: en };
+  // buchstabieren: Kacheln = Buchstaben des Worts (Königsstufe: plus zwei Buchstaben, die nicht vorkommen)
+  const ziel = en.toLowerCase();
+  const extra = art === "buchstabierenSchwer" ? mische(ABC.split("").filter(b => !ziel.includes(b))).slice(0, 2) : [];
+  return { ...basis, ziel, kacheln: mische([...ziel.split(""), ...extra]), extra };
+}
+
+/** Mängel: richtige Antwort genau einmal, Möglichkeiten verschieden, Kacheln reichen genau für das Wort. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (a.optionen) {
+    if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Möglichkeit");
+    if (a.optionen.length < 2) m.push("zu wenige Möglichkeiten");
+  } else {
+    const rest = a.kacheln.slice();
+    for (const b of a.ziel) { const i = rest.indexOf(b); if (i < 0) m.push("Buchstabe fehlt in den Kacheln"); else rest.splice(i, 1); }
+    if (rest.length !== a.extra.length || rest.some(b => a.ziel.includes(b))) m.push("überzählige Kachel kommt im Wort vor");
+    if (!/^[a-z]+$/.test(a.ziel)) m.push("Wort mit Zeichen, die keine Buchstaben sind");
+  }
+  if (new Set(ALLE_WOERTER.map(w => w[0])).size !== ALLE_WOERTER.length) m.push("englisches Wort doppelt in den Listen");
+  return m;
+}
 
 LS.spiel({
   id: "word-match",
@@ -58,11 +114,10 @@ LS.spiel({
     s3: "Deutsch → Englisch: Schule, Körper, Wetter.",
     s4: "Englisch → Deutsch und kleine Sätze wie „How are you?“",
     s5: "Buchstabieren: das englische Wort aus Buchstaben legen.",
+    s6: "Endgegner: ähnliche Wörter aus allen Themen, buchstabieren ohne Bild mit falschen Buchstaben.",
   },
 
   aufgabe(ctx) {
-    const p = STUFE[ctx.stufe];
-    const art = waehle(p.arten);
     let fertig = false;
 
     const auswahl = (optionen, richtig, alsBild, loesung) => {
@@ -81,45 +136,27 @@ LS.spiel({
       ctx.flaeche.append(box);
     };
 
-    if (art === "wendung") {
-      const [en, de] = waehle(WENDUNGEN_EN);
-      const deutschZuEnglisch = Math.random() < 0.5;
-      const andere = mische(WENDUNGEN_EN.filter(w => w[0] !== en)).slice(0, 3);
-      ctx.flaeche.append(el("div", { class: "thema-name", text: "Phrases" }),
-        el("div", { class: "wort-gross", text: deutschZuEnglisch ? de : en }));
-      auswahl(deutschZuEnglisch ? [en, ...andere.map(w => w[0])] : [de, ...andere.map(w => w[1])],
-        deutschZuEnglisch ? en : de, false, `${en} = ${de}`);
-      return;
-    }
+    const a = aufgabeErzeugen(ctx.stufe);
+    const { art, en, de, bild, loesung } = a;
+    ctx.flaeche.append(el("div", { class: "thema-name", text: a.thema }));
 
-    const themaId = waehle(p.themen);
-    const thema = THEMEN_EN[themaId];
-    const [en, de, bild] = waehle(thema.woerter);
-    const andere = mische(thema.woerter.filter(w => w[0] !== en)).slice(0, 3);
-    ctx.flaeche.append(el("div", { class: "thema-name", text: thema.name }));
-    const loesung = `${bild} ${en} = ${de}`;
-
-    if (art === "bildZuEn") {
-      ctx.flaeche.append(el("div", { class: "bild-gross", text: bild }));
-      auswahl([en, ...andere.map(w => w[0])], en, false, loesung);
-    } else if (art === "enZuBild") {
-      ctx.flaeche.append(el("div", { class: "wort-gross", text: en }));
-      auswahl([bild, ...andere.map(w => w[2])], bild, true, loesung);
-    } else if (art === "deZuEn") {
-      ctx.flaeche.append(el("div", { class: "wort-gross", text: de }));
-      auswahl([en, ...andere.map(w => w[0])], en, false, loesung);
-    } else if (art === "enZuDe") {
-      ctx.flaeche.append(el("div", { class: "wort-gross", text: en }));
-      auswahl([de, ...andere.map(w => w[1])], de, false, loesung);
+    if (a.optionen) {
+      // Gezeigt wird je nach Art das Bild, das englische oder das deutsche Wort.
+      const zeige = a.zeige ?? (art === "bildZuEn" ? bild : art === "enZuBild" || art === "enZuDe" ? en : de);
+      ctx.flaeche.append(el("div", { class: art === "bildZuEn" ? "bild-gross" : "wort-gross", text: zeige }));
+      auswahl(a.optionen, a.richtig, !!a.alsBild, loesung);
     } else {
-      // buchstabieren: Buchstaben-Kacheln in der richtigen Reihenfolge antippen
-      const ziel = en.toLowerCase();
-      ctx.flaeche.append(el("div", { class: "bild-gross", text: bild }), el("div", { class: "wort-gross", style: "font-size:24px;color:var(--text-leise)", text: de }));
+      // buchstabieren: Buchstaben-Kacheln in der richtigen Reihenfolge antippen.
+      // Königsstufe: ohne Bild, mit überzähligen Buchstaben, Hilfe ohne den bisherigen Wortanfang.
+      const ziel = a.ziel;
+      const schwer = art === "buchstabierenSchwer";
+      if (!schwer) ctx.flaeche.append(el("div", { class: "bild-gross", text: bild }));
+      ctx.flaeche.append(el("div", { class: "wort-gross", style: schwer ? "" : "font-size:24px;color:var(--text-leise)", text: de }));
       const ablage = el("div", { class: "ablage" });
       const felder = ziel.split("").map(() => { const s = el("span"); ablage.append(s); return s; });
       const kacheln = el("div", { class: "kacheln" });
       let pos = 0;
-      for (const b of mische(ziel.split(""))) {
+      for (const b of a.kacheln) {
         const k = el("button", { type: "button", class: "kachel", text: b });
         k.addEventListener("click", () => {
           if (fertig || k.disabled) return;
@@ -128,7 +165,8 @@ LS.spiel({
             if (pos === ziel.length) { fertig = true; ctx.richtig(`Great! ${en}`); }
             return;
           }
-          ctx.falsch(`Der nächste Buchstabe ist nicht „${b}“. Sprich das Wort leise: ${ziel.slice(0, pos)}…`, loesung);
+          ctx.falsch(schwer ? "Not this one. Sprich das englische Wort leise und hör auf den nächsten Laut."
+            : `Der nächste Buchstabe ist nicht „${b}“. Sprich das Wort leise: ${ziel.slice(0, pos)}…`, loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; felder.forEach((f, i) => { f.textContent = ziel[i]; }); }
         });
         kacheln.append(k);

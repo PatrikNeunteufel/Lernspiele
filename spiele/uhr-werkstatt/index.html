@@ -26,6 +26,9 @@
   .option svg { width: 100%; max-width: 130px; display: block; margin: 0 auto; }
   .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .option.richtig { background: var(--gut-hell); }
+  .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
+  .ergebnis-zeile .anzeige { flex: 1; }
+  .ergebnis-zeile .einheit { font-size: clamp(28px, 6vw, 40px); font-weight: 900; color: var(--knopf); min-width: 2.2em; }
   .digital { text-align: center; font-size: clamp(40px, 9vw, 60px); font-weight: 900; font-variant-numeric: tabular-nums; background: #1f2937; color: #7cf29a; border-radius: 16px; padding: 6px 22px; width: fit-content; margin: 0 auto 14px; letter-spacing: 2px; }
 </style>
 </head>
@@ -87,12 +90,58 @@ const STUFE = {
   s3: { raster: "5", arten: ["lesenDigital", "stellenWahl"] },
   s4: { raster: "1", arten: ["lesenTippen", "stellenWahl", "lesenDigital"] },
   s5: { raster: "5", arten: ["dauer", "dauer", "lesenTippen"] },
+  // Königsstufe: Zeitspannen zwischen zwei Uhrzeiten, Startzeit rückwärts, Dauer auf die Minute,
+  // analoge Uhr am Nachmittag in 24-Stunden-Zählung lesen.
+  s6: { raster: "1", arten: ["spanne", "rueckwaerts", "dauerGenau", "lesen24"] },
 };
 
 function zeitFuer(stufe) {
   const r = STUFE[stufe].raster;
   const m = Array.isArray(r) ? waehle(r) : r === "5" ? zufall(0, 11) * 5 : zufall(0, 59);
   return { h: zufall(1, 12), m };
+}
+
+const minText = n => (n >= 60 ? `${Math.floor(n / 60)} h${n % 60 ? ` ${n % 60} min` : ""}` : `${n} min`);
+const alsZeit = n => ({ h: Math.floor(n / 60), m: n % 60 });
+
+/** Eine Aufgabe: Art und Zeit; die Königsstufe rechnet Start, Dauer und Ende in Minuten seit Mitternacht. */
+function aufgabeErzeugen(stufe) {
+  const art = waehle(STUFE[stufe].arten);
+  const { h, m } = zeitFuer(stufe);
+  if (art === "spanne") {
+    const start = zufall(6 * 60, 15 * 60), dauer = zufall(25, 200);
+    return { art, start, dauer, ende: start + dauer, loesung: dauer };
+  }
+  if (art === "rueckwaerts") {
+    const dauer = zufall(1, 3) * 60 + zufall(1, 11) * 5, ende = zufall(10 * 60, 21 * 60);
+    return { art, start: ende - dauer, dauer, ende, loesung: ende - dauer };
+  }
+  if (art === "dauerGenau") {
+    const start = zufall(7 * 60, 18 * 60), dauer = zufall(31, 150);
+    return { art, start, dauer, ende: start + dauer, loesung: start + dauer };
+  }
+  if (art === "lesen24") {
+    const hh = zufall(1, 10);
+    return { art, h: hh, m, h24: hh + 12, tageszeit: hh <= 5 ? "am Nachmittag" : "am Abend" };
+  }
+  return { art, h, m };
+}
+
+/** Mängel: Uhrzeiten gültig, Rechnung Start + Dauer = Ende, Ergebnis passt in die Tastatur. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (a.start !== undefined) {
+    if (a.start + a.dauer !== a.ende) m.push("Start + Dauer ≠ Ende");
+    if (a.start < 0 || a.ende >= 24 * 60) m.push("Zeit ausserhalb des Tages");
+    if (!(a.dauer > 0)) m.push("Dauer nicht positiv");
+    if (String(a.art === "spanne" ? a.loesung : alsZeit(a.loesung).h * 100 + alsZeit(a.loesung).m).length > 4) m.push("Ergebnis passt nicht in die Tastatur");
+  } else {
+    if (!(a.h >= 1 && a.h <= 12 && a.m >= 0 && a.m < 60)) m.push("Uhrzeit ungültig");
+    const r = STUFE[stufe].raster;
+    if (Array.isArray(r) ? !r.includes(a.m) : r === "5" && a.m % 5) m.push("Minuten nicht im Raster der Stufe");
+    if (a.art === "lesen24" && !(a.h24 >= 13 && a.h24 <= 22)) m.push("Nachmittagszeit ungültig");
+  }
+  return m;
 }
 
 /** Typische Verwechslungen: Zeiger vertauscht, Stunde daneben, Viertelstunde daneben. */
@@ -127,12 +176,31 @@ LS.spiel({
     s3: "In 5-Minuten-Schritten, digital: 7:25.",
     s4: "Auf die Minute genau — und die richtige Uhr finden.",
     s5: "Zeitdauer: Wie spät ist es in 35 Minuten?",
+    s6: "Endgegner: Von 8:47 bis 11:20? Wann begann der Film? 15:40 am Nachmittag.",
   },
 
   aufgabe(ctx) {
-    const art = waehle(STUFE[ctx.stufe].arten);
-    const { h, m } = zeitFuer(ctx.stufe);
+    const a = aufgabeErzeugen(ctx.stufe);
+    const { art, h, m } = a;
     let fertig = false;
+
+    /** Uhrzeit oder Minutenzahl eintippen; istRichtig(zahl) prüft die Eingabe. */
+    const eingabe = (istRichtig, hinweis, loesungText, alsMinuten = false) => {
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": alsMinuten ? "Minuten" : "Uhrzeit" });
+      ctx.flaeche.append(alsMinuten ? el("div", { class: "ergebnis-zeile" }, anzeige, el("span", { class: "einheit", text: "min" })) : anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: alsMinuten ? 3 : 4,
+        onAenderung: z => { if (z !== null && !alsMinuten) { const t = zeitAusZiffern(z); anzeige.textContent = t ? digital(t.h, t.m) : String(z); } },
+        onOk(z) {
+          if (istRichtig(z)) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+          anzeige.classList.add("falsch");
+          ctx.falsch(typeof hinweis === "function" ? hinweis(z) : hinweis, loesungText);
+          if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+        },
+      });
+      ctx.flaeche.append(tasten.element);
+    };
+    const gleicheZeit = (z, soll) => { const t = zeitAusZiffern(z); return !!t && t.h === soll.h && t.m === soll.m; };
 
     // Auswahl-Knöpfe (Text oder kleine Uhren)
     const auswahl = (optionen, darstellen, istRichtig, loesungText, hinweis) => {
@@ -182,6 +250,30 @@ LS.spiel({
         },
       });
       ctx.flaeche.append(tasten.element);
+    } else if (art === "spanne") {
+      const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
+      ctx.flaeche.append(el("div", { class: "digital", text: `${digital(t0.h, t0.m)} → ${digital(t1.h, t1.m)}` }),
+        el("div", { class: "frage", text: "Wie viele Minuten liegen dazwischen?" }));
+      eingabe(z => z === a.dauer, "Rechne zuerst bis zur nächsten vollen Stunde, dann die ganzen Stunden, dann den Rest. 1 h = 60 min.",
+        `Von ${digital(t0.h, t0.m)} bis ${digital(t1.h, t1.m)} sind es ${a.dauer} min (${minText(a.dauer)}).`, true);
+    } else if (art === "rueckwaerts") {
+      const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
+      ctx.flaeche.append(el("div", { class: "frage", html: `Der Film dauert <b>${minText(a.dauer)}</b> und endet um <b>${digital(t1.h, t1.m)}</b>. Wann hat er begonnen?` }));
+      eingabe(z => gleicheZeit(z, t0), "Rechne rückwärts: zuerst die Stunden weg, dann die Minuten.",
+        `${digital(t1.h, t1.m)} − ${minText(a.dauer)} = ${digital(t0.h, t0.m)}`);
+    } else if (art === "dauerGenau") {
+      const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
+      ctx.flaeche.append(el("div", { class: "digital", text: digital(t0.h, t0.m) }),
+        el("div", { class: "frage", html: `Wie spät ist es in <b>${a.dauer} Minuten</b>?` }));
+      eingabe(z => gleicheZeit(z, t1), "60 Minuten sind 1 Stunde. Rechne zuerst bis zur vollen Stunde, dann den Rest.",
+        `${digital(t0.h, t0.m)} + ${a.dauer} min = ${digital(t1.h, t1.m)}`);
+    } else if (art === "lesen24") {
+      ctx.flaeche.append(el("div", { class: "frage", text: `Es ist ${a.tageszeit}. Wie spät ist es? Tipp die Zeit ein, z. B. 1 5 4 0 für 15:40.` }));
+      ctx.flaeche.append(uhr(h, m, "uhr-gross"));
+      eingabe(z => gleicheZeit(z, { h: a.h24, m }), z => {
+        const t = zeitAusZiffern(z);
+        return t && t.m === m && t.h === h ? `Die Minuten stimmen. Aber es ist ${a.tageszeit} — wie zählt man da die Stunden?` : zeigerHinweis;
+      }, `Es ist ${digital(a.h24, m)}.`);
     } else {
       // Zeitdauer: Startzeit digital, plus Minuten — Ergebnis eintippen (24-Stunden-Zählung, z. B. 15:20)
       const start = zufall(7, 17) * 60 + zufall(0, 11) * 5;

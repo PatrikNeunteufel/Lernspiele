@@ -59,32 +59,39 @@ function fuellen(summe, erlaubt) {
 }
 
 const ARTEN = {
-  benennen() {
-    const r = waehle(GRUND);
-    return { art: "benennen", richtig: r, optionen: GRUND };
+  benennen(werte) {
+    const r = waehle(werte);
+    return { art: "benennen", richtig: r, optionen: werte };
   },
   dauer(werte) {
     const r = waehle(werte);
     return { art: "dauer", richtig: r, optionen: werte };
   },
-  fuellen(takt, fehlt, rest) {
+  /** Takt mit Lücke: fehlt = mögliche fehlende Werte, rest = Werte für die übrigen Noten,
+      extra = weitere Antworten, die nie passen (für kurze Takte mit wenig Auswahl). */
+  fuellen(takt, fehlt, rest, extra = []) {
     const m = waehle(fehlt);
     const noten = fuellen(takt - m, rest);
-    const optionen = mische([...new Set([m, ...mische(fehlt.filter(x => x !== m)).slice(0, 3)])]).map(w);
+    const optionen = mische([...new Set([m, ...mische([...fehlt, ...extra].filter(x => x !== m)).slice(0, 3)])]).map(w);
     return { art: "fuellen", takt, noten, richtig: w(m), optionen };
   },
-  taktart() {
-    const takt = waehle([2, 3, 4]);
-    return { art: "taktart", takt, noten: fuellen(takt, [2, 1, 0.5]), richtig: `${takt}/4`, optionen: ["2/4", "3/4", "4/4"] };
+  taktart(takte, werte = [2, 1, 0.5]) {
+    const takt = waehle(takte);
+    return { art: "taktart", takt, noten: fuellen(takt, werte), richtig: `${takt}/4`, optionen: takte.map(t => `${t}/4`) };
   },
 };
 
+// Basisklasse 2: Stufe 1 = 1. Klasse, 2–4 = 2. Klasse, 5 = 3. Klasse, 6 Endgegner.
+const EINFACH = [2, 1, 0.5];
 const STUFE = {
-  s1: () => ARTEN.benennen(),
-  s2: () => waehle([ARTEN.benennen, () => ARTEN.dauer(GRUND)])(),
-  s3: () => waehle([() => ARTEN.fuellen(4, [2, 1, 0.5], [2, 1, 0.5]), () => ARTEN.dauer(GRUND)])(),
-  s4: () => waehle([ARTEN.taktart, () => ARTEN.fuellen(3, [2, 1, 0.5], [2, 1, 0.5]), () => ARTEN.fuellen(4, [2, 1, 0.5], [2, 1, 0.5])])(),
-  s5: () => waehle([() => ARTEN.fuellen(4, [3, 1.5, 0.5, 0.25], [2, 1, 0.5, 0.25]), () => ARTEN.fuellen(3, [1.5, 1, 0.5, 0.25], [1, 0.5, 0.25]), () => ARTEN.dauer(WERTE)])(),
+  s1: () => ARTEN.benennen([4, 2, 1].map(w)),
+  s2: () => waehle([() => ARTEN.benennen(GRUND), () => ARTEN.dauer(GRUND)])(),
+  s3: () => ARTEN.fuellen(4, EINFACH, EINFACH),
+  s4: () => waehle([() => ARTEN.fuellen(3, EINFACH, EINFACH), () => ARTEN.taktart([3, 4])])(),
+  s5: () => waehle([() => ARTEN.taktart([2, 3, 4]), () => ARTEN.fuellen(2, [1, 0.5], [1, 0.5], [2]),
+    () => ARTEN.fuellen(3, EINFACH, EINFACH), () => ARTEN.fuellen(4, EINFACH, EINFACH)])(),
+  s6: () => waehle([() => ARTEN.fuellen(4, [3, 1.5, 0.5, 0.25], [2, 1, 0.5, 0.25]), () => ARTEN.fuellen(3, [1.5, 1, 0.5, 0.25], [1, 0.5, 0.25]),
+    () => ARTEN.dauer(WERTE), () => ARTEN.taktart([2, 3, 4], [1.5, 1, 0.5, 0.25])])(),
 };
 
 function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
@@ -115,11 +122,12 @@ LS.spiel({
   einleitung: "Ganze, Halbe, Viertel, Achtel — jede Note dauert verschieden lang. Kannst du Rhythmen lesen?",
   anzahl: 8,
   stufen: {
-    s1: "Wie heisst die Note? Ganze, Halbe, Viertel, Achtel.",
-    s2: "Wie viele Viertel dauert die Note?",
+    s1: "Wie heisst die Note? Ganze, Halbe, Viertel.",
+    s2: "Dazu die Achtel — und wie viele Viertel dauert die Note?",
     s3: "Den 4/4-Takt füllen: Welche Note fehlt?",
-    s4: "2/4, 3/4 oder 4/4? Und den 3/4-Takt füllen.",
-    s5: "Mit punktierten Noten und Sechzehnteln.",
+    s4: "Den 3/4-Takt füllen — und: 3/4 oder 4/4?",
+    s5: "2/4, 3/4 oder 4/4? Takte in allen drei Taktarten füllen.",
+    s6: "Endgegner: mit punktierten Noten und Sechzehnteln.",
   },
 
   aufgabe(ctx) {
@@ -147,7 +155,8 @@ LS.spiel({
         el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => alsToene(a.noten, a.richtig.wert))));
       const box = LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 110, inhalt: symbol,
-        hinweis: v => `Zähl die Schläge: Es fehlen ${viertel(a.richtig.wert)}. Die ${v.name} dauert ${viertel(v.wert)}.`,
+        // Nennt nur, ob die gewählte Note zu lang oder zu kurz ist — nicht, wie viel fehlt.
+        hinweis: v => `Die ${v.name} dauert ${viertel(v.wert)} — das ist zu ${v.wert > a.richtig.wert ? "lang" : "kurz"}. Zähl die Schläge im Takt.`,
         loesung: `Es fehlt eine ${a.richtig.name} (${viertel(a.richtig.wert)}).`,
         beiRichtig: () => NOTEN.spiele(alsToene([...a.noten, a.richtig.wert])),
       });

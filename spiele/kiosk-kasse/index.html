@@ -89,9 +89,65 @@ const STUFE = {
   s3: { geld: [10, 20, 50, 100, 200, 500, 1000, 2000], raster: 10, max: 5000, arten: ["legen", "addieren", "zaehlen"] },
   s4: { geld: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000], raster: 5, max: 5000, arten: ["rueckgeld", "addieren", "legen"] },
   s5: { geld: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000], raster: 5, max: 10000, arten: ["einkauf", "rueckgeld"] },
+  // Königsstufe: Rückgeld mit möglichst wenigen Stücken legen, mehrere gleiche Sachen mit Rückgeld,
+  // „Wie viele kannst du kaufen?“ und grosse Einkäufe mit einer grossen Note.
+  s6: { geld: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000], raster: 5, max: 10000, arten: ["rueckgeldLegen", "mengeRueckgeld", "wieViele", "grossEinkauf"] },
 };
 
 const preis = (p, max) => zufall(1, Math.floor(max / p.raster) - 1) * p.raster;
+const naechsteNote = summe => [1000, 2000, 5000, 10000].find(n => n > summe);
+
+/** Königsstufe: Zahlen der Aufgabe (alles in Rappen). Die übrigen Stufen ziehen nur die Art. */
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  if (art === "rueckgeldLegen") {
+    const pr = preis(p, 4500), bezahlt = naechsteNote(pr);
+    return { art, preise: [pr], bezahlt, loesung: bezahlt - pr };
+  }
+  if (art === "mengeRueckgeld") {
+    const n = zufall(2, 5), stueck = zufall(21, 190) * 5, bezahlt = naechsteNote(n * stueck);
+    return { art, n, stueck, preise: [n * stueck], bezahlt, loesung: bezahlt - n * stueck };
+  }
+  if (art === "wieViele") {
+    const budget = waehle([1000, 2000, 5000]);
+    const stueck = zufall(Math.ceil(budget / 20 / 5), Math.floor(budget / 2 / 5)) * 5; // 2 bis 20 Stück
+    return { art, budget, stueck, loesung: Math.floor(budget / stueck) };
+  }
+  if (art === "grossEinkauf") {
+    const preise = Array.from({ length: zufall(3, 4) }, () => preis(p, 2500));
+    const summe = preise.reduce((s, x) => s + x, 0);
+    const bezahlt = summe < 5000 && Math.random() < 0.5 ? 5000 : 10000;
+    return { art, preise, bezahlt, loesung: bezahlt - summe };
+  }
+  return { art };
+}
+
+/** Kleinste Zahl von Stücken für einen Betrag, unabhängig vom Generator gerechnet. */
+function wenigsteStuecke(rp, werte) {
+  const best = new Array(rp / 5 + 1).fill(Infinity);
+  best[0] = 0;
+  for (let i = 1; i < best.length; i++) for (const w of werte) if (w / 5 <= i) best[i] = Math.min(best[i], best[i - w / 5] + 1);
+  return best[rp / 5];
+}
+
+/** Mängel: Rückgeld positiv und richtig, Preise im 5-Rappen-Raster, Stückzahl eindeutig. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!a.preise && a.art !== "wieViele") return m; // Stufen 1–5 erzeugen ihre Zahlen im Spiel
+  if (a.preise) {
+    const summe = a.preise.reduce((s, x) => s + x, 0);
+    if (a.preise.some(x => x <= 0 || x % 5)) m.push("Preis nicht im 5-Rappen-Raster");
+    if (a.loesung !== a.bezahlt - summe || a.loesung <= 0) m.push("Rückgeld stimmt nicht");
+    if (a.art === "mengeRueckgeld" && a.n * a.stueck !== summe) m.push("Menge × Preis stimmt nicht");
+    if (String(a.loesung).length > 6) m.push("Betrag passt nicht in die Tastatur");
+    if (a.art === "rueckgeldLegen" && wenigsteStuecke(a.loesung, STUFE[stufe].geld) !== zerlegen(a.loesung, GELD.filter(g => STUFE[stufe].geld.includes(g.rp))).length) m.push("Zerlegung nicht die kürzeste");
+  } else {
+    if (!(a.loesung * a.stueck <= a.budget && (a.loesung + 1) * a.stueck > a.budget)) m.push("Stückzahl stimmt nicht");
+    if (a.loesung < 2 || a.loesung > 20 || a.stueck % 5) m.push("Stückzahl oder Preis ausserhalb des Rahmens");
+  }
+  return m;
+}
 
 LS.spiel({
   id: "kiosk-kasse",
@@ -103,12 +159,14 @@ LS.spiel({
     s3: "Franken und Rappen: 7 Fr. 40 Rp.",
     s4: "Rückgeld: Bezahlt mit 20 Fr., kostet 13 Fr. 60 Rp.",
     s5: "Einkauf mit mehreren Sachen und Rückgeld.",
+    s6: "Endgegner: Rückgeld mit wenigen Stücken legen, 4 × 2 Fr. 35 Rp., wie viele für 20 Fr.?",
   },
 
   aufgabe(ctx) {
     const p = STUFE[ctx.stufe];
     const erlaubt = GELD.filter(g => p.geld.includes(g.rp));
-    const art = waehle(p.arten);
+    const auf = aufgabeErzeugen(ctx.stufe);
+    const art = auf.art;
 
     // Tastatur für Beträge: Ab Stufe 3 in Rappen getippt (1 3 6 0 → 13 Fr. 60 Rp.), sonst ganze Franken.
     const mitRappen = p.raster < 100;
@@ -185,6 +243,93 @@ LS.spiel({
         el("div", { class: "frage", text: "Wie viel kostet beides zusammen?" }));
       betragEingabe(a + b, () => mitRappen ? "Zähle zuerst die Franken zusammen, dann die Rappen. 100 Rp. sind 1 Fr." : "Zähl die beiden Preise zusammen.",
         `${betrag(a)} + ${betrag(b)} = ${betrag(a + b)}`);
+      return;
+    }
+
+    // ---- Königsstufe ----
+    const theke = (preise, dinge, text = betrag) => el("div", { class: "theke" },
+      ...preise.map((pr, i) => el("div", { class: "artikel" }, el("div", { class: "bild", text: dinge[i] }), el("div", { class: "preis", text: text(pr, i) }))));
+    const noteZeile = (rp, nachher) => {
+      const note = geldKnopf(GELD.find(g => g.rp === rp)); note.disabled = true;
+      return el("div", { class: "frage" }, "Bezahlt wird mit ", note, el("span", { html: nachher }));
+    };
+
+    if (art === "rueckgeldLegen") {
+      // Rückgeld in die Kasse legen — richtig ist es erst mit möglichst wenigen Stücken.
+      const soll = auf.loesung;
+      const kuerzest = zerlegen(soll, erlaubt);
+      ctx.flaeche.append(theke(auf.preise, [waehle(ARTIKEL)]),
+        noteZeile(auf.bezahlt, " — lege das <b>Rückgeld</b> mit möglichst <b>wenigen Stücken</b>."));
+      const kasse = el("div", { class: "kasse", "aria-label": "Rückgeld" });
+      const vorrat = el("div", { class: "vorrat" });
+      const gelegt = [];
+      let fertig = false;
+      for (const g of erlaubt.filter(x => x.rp < auf.bezahlt)) {
+        const k = geldKnopf(g);
+        k.addEventListener("click", () => {
+          if (fertig) return;
+          const stueck = geldKnopf(g);
+          gelegt.push(g.rp);
+          stueck.addEventListener("click", () => { if (fertig) return; gelegt.splice(gelegt.indexOf(g.rp), 1); stueck.remove(); });
+          kasse.append(stueck);
+          LS.ton("tipp");
+        });
+        vorrat.append(k);
+      }
+      const ok = el("button", { class: "knopf gruen", type: "button", text: "Herausgeben ✓" });
+      ok.addEventListener("click", () => {
+        if (fertig) return;
+        const summe = gelegt.reduce((s, x) => s + x, 0);
+        if (summe === soll && gelegt.length === kuerzest.length) { fertig = true; ctx.richtig(); return; }
+        ctx.falsch(summe !== soll
+          ? satz(`Das sind ${betrag(summe)}. ${summe < soll ? "Das ist zu wenig." : "Das ist zu viel."} Rechne: Wie viel fehlt vom Preis bis zur Note?`)
+          : "Der Betrag stimmt! Aber es geht mit weniger Stücken: Tausche kleine Münzen gegen grössere.",
+          `${betrag(auf.bezahlt)} − ${betrag(auf.preise[0])} = ${betrag(soll)}: ${kuerzest.map(g => g.text).join(" + ")}`);
+        if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
+      });
+      ctx.flaeche.append(kasse, vorrat, el("div", { class: "knopfzeile" }, ok));
+      if (ctx.nr === 0) ctx.sag("Nochmal tippen in der Kasse nimmt ein Stück zurück.");
+      return;
+    }
+
+    if (art === "mengeRueckgeld") {
+      const ding = waehle(ARTIKEL);
+      ctx.flaeche.append(theke([auf.stueck], [ding], pr => `${auf.n} × ${betrag(pr)}`),
+        // Beträge enden auf „Fr.“ oder „Rp.“ — dieser Punkt schliesst auch den Satz.
+        el("div", { class: "frage", html: `Du kaufst <b>${auf.n}</b> Stück, jedes kostet <b>${betrag(auf.stueck)}</b>` }),
+        noteZeile(auf.bezahlt, " — <b>wie viel Rückgeld</b> gibt es?"));
+      betragEingabe(auf.loesung, () => "Rechne zuerst aus, was alles zusammen kostet. Dann: Wie viel fehlt bis zur Note?",
+        `${auf.n} × ${betrag(auf.stueck)} = ${betrag(auf.preise[0])}; ${betrag(auf.bezahlt)} − ${betrag(auf.preise[0])} = ${betrag(auf.loesung)}`);
+      return;
+    }
+
+    if (art === "wieViele") {
+      const ding = waehle(ARTIKEL);
+      ctx.flaeche.append(theke([auf.stueck], [ding]),
+        el("div", { class: "frage", html: `Du hast <b>${betrag(auf.budget)}</b> Wie viele Stück kannst du <b>höchstens</b> kaufen?` }));
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Anzahl" });
+      ctx.flaeche.append(anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: 2,
+        onOk(z) {
+          if (z === auf.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+          anzeige.classList.add("falsch");
+          ctx.falsch(z * auf.stueck > auf.budget ? satz(`${z} Stück kosten ${betrag(z * auf.stueck)} — das reicht nicht.`)
+            : satz(`${z} Stück kosten ${betrag(z * auf.stueck)}. Reicht das Geld noch für eines mehr?`),
+            satz(`${auf.loesung} Stück: ${auf.loesung} × ${betrag(auf.stueck)} = ${betrag(auf.loesung * auf.stueck)}`));
+          if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+        },
+      });
+      ctx.flaeche.append(tasten.element);
+      return;
+    }
+
+    if (art === "grossEinkauf") {
+      const summe = auf.preise.reduce((s, x) => s + x, 0);
+      ctx.flaeche.append(theke(auf.preise, mische(ARTIKEL).slice(0, auf.preise.length)),
+        noteZeile(auf.bezahlt, " — <b>wie viel Rückgeld</b> gibt es?"));
+      betragEingabe(auf.loesung, () => "Rechne zuerst alles zusammen — Franken und Rappen getrennt. Dann ergänze bis zur Note.",
+        `${auf.preise.map(betrag).join(" + ")} = ${betrag(summe)}; ${betrag(auf.bezahlt)} − ${betrag(summe)} = ${betrag(auf.loesung)}`);
       return;
     }
 

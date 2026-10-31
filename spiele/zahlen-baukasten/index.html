@@ -74,22 +74,52 @@ const { STELLEN, zahlText, zufall, mische, zerlege, el } = LS;
 const nurStellen = (...k) => STELLEN.filter(s => k.includes(s.k));
 
 // Je Stufe: erlaubte Stellen, Anzahl Bausteine, Anteil ausgeschriebener Namen.
+// buendeln: Anteil Aufgaben mit einem Baustein über 9 (z. B. 14 H = 1400) — Königsstufe.
 // Ob die Bausteine geordnet (grösste Stelle links) stehen, bestimmt die Einstellung im Profil (ctx.geordnet).
 const STUFE = {
-  s1: { stellen: nurStellen("Z", "E"), teile: [1, 2], ausgeschrieben: 0 },
-  s2: { stellen: nurStellen("H", "Z", "E"), teile: [2, 3], ausgeschrieben: 0 },
+  s1: { stellen: nurStellen("H", "Z", "E"), teile: [2, 3], ausgeschrieben: 0 },
+  s2: { stellen: nurStellen("T", "H", "Z", "E"), teile: [2, 3], ausgeschrieben: 0 },
   s3: { stellen: STELLEN.slice(1), teile: [2, 3], ausgeschrieben: 0 },
   s4: { stellen: STELLEN.slice(1), teile: [3, 4], ausgeschrieben: 0.4 },
   s5: { stellen: STELLEN, teile: [4, 5], ausgeschrieben: 0.5 },
+  s6: { stellen: STELLEN, teile: [4, 6], ausgeschrieben: 0.5, buendeln: 0.6 },
 };
+
+const GRENZE = 9999999; // die Tastatur nimmt höchstens sieben Ziffern
+const wertVon = teile => teile.reduce((s, t) => s + t.ziffer * t.st.wert, 0);
 
 function aufgabeErzeugen(stufe, geordnet) {
   const p = STUFE[stufe];
   // Erweitert: selten genau eine Million (Zahlenraum der 4. Klasse endet dort).
   if (stufe === "s4" && Math.random() < 0.08) return { teile: [{ st: STELLEN[0], ziffer: 1 }], ausgeschrieben: false };
   const teile = mische(p.stellen).slice(0, zufall(...p.teile)).map(st => ({ st, ziffer: zufall(1, 9) }));
+  if (p.buendeln && Math.random() < p.buendeln) {
+    // Ein Baustein unterhalb der Millionen bekommt 11–19: Zehn davon sind eine Stelle weiter links.
+    const kandidaten = teile.filter(t => t.st.k !== "M");
+    const t = kandidaten[zufall(0, kandidaten.length - 1)];
+    t.ziffer = zufall(11, 19);
+    // Bleibt die Zahl siebenstellig? Sonst die Millionen verkleinern (sicher: 8 M + 19 HT < 10 Mio.).
+    const m = teile.find(x => x.st.k === "M");
+    if (m && wertVon(teile) > GRENZE) m.ziffer = Math.min(m.ziffer, 8);
+  }
   if (geordnet) teile.sort((a, b) => b.st.wert - a.st.wert);
   return { teile, ausgeschrieben: Math.random() < p.ausgeschrieben };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  const wert = wertVon(a.teile);
+  if (wert < 1 || wert > GRENZE) m.push(`Wert ${wert} ausserhalb 1–${GRENZE}`);
+  const millionFall = stufe === "s4" && a.teile.length === 1 && a.teile[0].st.k === "M";
+  if (!millionFall && (a.teile.length < p.teile[0] || a.teile.length > p.teile[1])) m.push(`${a.teile.length} Bausteine`);
+  if (!millionFall && a.teile.some(t => !p.stellen.includes(t.st))) m.push("Stelle nicht erlaubt");
+  if (new Set(a.teile.map(t => t.st.k)).size !== a.teile.length) m.push("Stelle doppelt");
+  const gross = a.teile.filter(t => t.ziffer > 9);
+  if (gross.length > (p.buendeln ? 1 : 0)) m.push("zu viele Bausteine über 9");
+  if (a.teile.some(t => t.ziffer < 1 || t.ziffer > 19 || (t.ziffer === 10))) m.push("Ziffer ungültig");
+  if (gross.some(t => t.st.k === "M")) m.push("Millionen über 9");
+  return m;
 }
 
 LS.spiel({
@@ -97,11 +127,12 @@ LS.spiel({
   einleitung: "Hallo! Ich bin Eule Zahlina. Setz die Bausteine zu einer Zahl zusammen. Tipp auf einen Baustein, dann verrate ich dir, wie viel er wert ist.",
   anzahl: 8,
   stufen: {
-    s1: "Zehner und Einer: 3 Z + 4 E",
-    s2: "Mit Hundertern — Achtung, leere Stellen: 4 H + 2 E",
+    s1: "Mit Hundertern — Achtung, leere Stellen: 4 H + 2 E",
+    s2: "Mit Tausendern, 2 bis 3 Bausteine: 3 T + 5 Z",
     s3: "2 bis 3 Bausteine bis zu den HT: 3 ZT + 4 H",
     s4: "3 bis 4 Bausteine, manchmal ausgeschrieben.",
     s5: "Bis zu den Millionen, 4 bis 5 Bausteine.",
+    s6: "Bis 6 Bausteine, und mal mehr als 9: 14 H + 3 T",
   },
 
   aufgabe(ctx) {

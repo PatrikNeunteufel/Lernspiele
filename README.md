@@ -1,8 +1,9 @@
 # Lernspiele
 
-Kleine Lernspiele für die 2. und 4. Klasse (Mathe, Deutsch, Englisch, NMG, Musik), ausgerichtet am
-Lehrplan Volksschule St. Gallen. Jedes Spiel übt ein Lernziel in fünf Stufen, vom Einsteiger
-(ab 2. Klasse) bis zum Profi.
+Kleine Lernspiele für die 1. bis 4. Klasse (Mathe, Deutsch, Englisch, NMG, Musik), ausgerichtet am
+Lehrplan Volksschule St. Gallen. Jedes Spiel ist für eine Basisklasse gebaut und hat sechs Stufen:
+1 eine Klasse tiefer · 2 leichter · 3 Klassenziel · 4 schwerer · 5 eine Klasse höher ·
+6 👑 Königsstufe (Endgegner). Mit der Klasse im Profil schlägt die Startseite je Spiel eine Stufe vor.
 
 ## Starten
 
@@ -27,7 +28,9 @@ ohne Installation.
 Name, Alter, Klasse und Lernstand bleiben **nur in diesem Browser auf diesem Gerät**
 (`localStorage`, Schlüssel `lernspiele:*`). Nichts wird verschickt. In der Statistik lassen sich
 die Daten als JSON-Datei sichern (`lernspiele-<Namen>-<Datum>.json`) und auf einem anderen Gerät
-einlesen. Solche Dateien gehören nicht ins Repo; `.gitignore` schliesst sie aus.
+einlesen. Einlesen führt zusammen: Runden, die schon da sind, zählen einmal, neue kommen dazu,
+vorhandene Profile bleiben — so lässt sich zwischen Handy und Computer hin und her abgleichen. Solche Dateien gehören nicht ins Repo; `.gitignore` schliesst sie aus. Ebenfalls in der
+Statistik: den Spielstand eines Kindes zurücksetzen (alle Spiele oder ein einzelnes; Profil bleibt).
 
 ## Ordner
 

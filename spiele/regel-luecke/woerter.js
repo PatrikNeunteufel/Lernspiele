@@ -28,7 +28,9 @@ const REGELN = {
       ["L{i|ie}cht", "💡"], ["M{i|ie}tte", "🎯"], ["Z{i|ie}mmer", "🛏️"],
     ],
     // Ausnahmen (nur Stufe 5): langes i ohne e
-    ausnahmen: [["{I|Ie}gel", "🦔"], ["T{i|ie}ger", "🐯"], ["K{i|ie}no", "🎬"], ["Krokod{i|ie}l", "🐊"]],
+    ausnahmen: [["{I|Ie}gel", "🦔"], ["T{i|ie}ger", "🐯"], ["K{i|ie}no", "🎬"], ["Krokod{i|ie}l", "🐊"],
+      // UNGEPRÜFT (LERN, Königsstufe 2026-10-31): weitere Ausnahmen mit langem i ohne e
+      ["B{i|ie}ber", "🦫"], ["Kan{i|ie}nchen", "🐇"], ["Masch{i|ie}ne", "⚙️"], ["Benz{i|ie}n", "⛽"]],
   },
   cktz: {
     name: "ck / k und tz / z",

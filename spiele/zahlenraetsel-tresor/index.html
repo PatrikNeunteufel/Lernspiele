@@ -97,55 +97,69 @@
 const { STELLEN, zahlText, zufall, waehle, mische, el } = LS;
 const ST = Object.fromEntries(STELLEN.map(s => [s.k, s]));
 const wk = (anzahl, k) => `<span class="wk st st-${k}">${anzahl} ${k}</span>`;
-const LAENGEN_WORT = { 2: "zwei", 3: "drei", 4: "vier", 5: "fünf", 6: "sechs" };
+const LAENGEN_WORT = { 2: "zwei", 3: "drei", 4: "vier", 5: "fünf", 6: "sechs", 7: "sieben" };
 /** Teile nach Stelle ordnen: grösste Stelle links (Einstellung „geordnet“ im Profil). */
 const groesseZuerst = (a, b) => ST[b.k].wert - ST[a.k].wert;
+const summeTeile = teile => teile.reduce((s, t) => s + t.n * ST[t.k].wert, 0);
+const VERSUCHE = 200; // Zufallssuche je Rätsel; danach ein sicher gültiger Notausgang
 
 /** Bündeln: Zahl aus Teilen; einige Teile haben mehr als 9 Einheiten (13 T = 1 ZT 3 T). */
 function buendeln(p, geordnet) {
-  for (;;) {
-    const teile = mische(p.stellen).slice(0, p.teile).map(k => ({ k, n: zufall(1, 9) }));
+  let teile = null;
+  for (let v = 0; v < VERSUCHE && !teile; v++) {
+    const versuch = mische(p.stellen).slice(0, p.teile).map(k => ({ k, n: zufall(1, 9) }));
     // Die höchste erlaubte Stelle bekommt kein Bündel, sonst wird der Zahlenraum gesprengt.
-    teile.filter(t => t.k !== p.stellen[0]).slice(0, zufall(...p.gross)).forEach(t => { t.n = zufall(...p.bereich); });
-    const loesung = teile.reduce((s, t) => s + t.n * ST[t.k].wert, 0);
-    if (loesung >= p.max) continue;
-    if (geordnet) teile.sort(groesseZuerst);
-    const gebuendelt = teile.some(t => t.n > 9);
-    return {
-      html: `<div class="titel">Wer bin ich?</div>Ich bestehe aus ${teile.map(t => wk(t.n, t.k)).join(" + ")}.`,
-      loesung,
-      hinweis: gebuendelt ? "Bündle! 10 Einer sind 1 Zehner, 10 Zehner sind 1 Hunderter, …" : "Jeder Baustein gehört an seine Stelle. Leere Stellen bekommen eine 0.",
-      erklaerung: teile.map(t => `${t.n} ${t.k} = ${zahlText(t.n * ST[t.k].wert)}`).join(", "),
-    };
+    versuch.filter(t => t.k !== p.stellen[0]).slice(0, zufall(...p.gross)).forEach(t => { t.n = zufall(...p.bereich); });
+    if (summeTeile(versuch) < p.max) teile = versuch;
   }
+  // Notausgang: ohne Bündel bleibt jede Zahl im Zahlenraum (lauter Ziffern 1–9 an verschiedenen Stellen).
+  if (!teile) teile = mische(p.stellen).slice(0, p.teile).map(k => ({ k, n: zufall(1, 9) }));
+  const loesung = summeTeile(teile);
+  if (geordnet) teile.sort(groesseZuerst);
+  const gebuendelt = teile.some(t => t.n > 9);
+  return {
+    art: "buendeln", teile,
+    html: `<div class="titel">Wer bin ich?</div>Ich bestehe aus ${teile.map(t => wk(t.n, t.k)).join(" + ")}.`,
+    loesung,
+    hinweis: p.knapp ? "Bündle, wo es nötig ist!" : gebuendelt ? "Bündle! 10 Einer sind 1 Zehner, 10 Zehner sind 1 Hunderter, …" : "Jeder Baustein gehört an seine Stelle. Leere Stellen bekommen eine 0.",
+    erklaerung: teile.map(t => `${t.n} ${t.k} = ${zahlText(t.n * ST[t.k].wert)}`).join(", "),
+  };
 }
 
 /** Nachbarzahl: um einige Wertziffern grösser oder kleiner als eine gegebene Zahl. */
 function nachbar(p, geordnet) {
-  for (;;) {
-    const basis = zufall(...p.basis);
-    const teile = mische(p.nStellen).slice(0, p.nTeile).map(k => ({ k, n: zufall(1, p.nMax) }));
-    if (geordnet) teile.sort(groesseZuerst);
-    const plus = Math.random() < 0.5;
-    const diff = teile.reduce((s, t) => s + t.n * ST[t.k].wert, 0);
-    const loesung = plus ? basis + diff : basis - diff;
-    if (loesung <= 0 || loesung >= p.max) continue;
-    return {
-      html: `<div class="titel">Wer bin ich?</div>Ich bin ${teile.map(t => wk(t.n, t.k)).join(" und ")} ${plus ? "grösser" : "kleiner"} als <b>${zahlText(basis)}</b>.`,
-      loesung,
-      hinweis: plus ? "Zähle die Teile dazu. Achtung beim Übertrag in die nächste Stelle!" : "Nimm die Teile weg. Achtung, wenn eine Stelle nicht reicht!",
-      erklaerung: `${zahlText(basis)} ${plus ? "+" : "−"} ${zahlText(diff)}`,
-    };
+  let basis, teile, plus, loesung;
+  for (let v = 0; v < VERSUCHE; v++) {
+    basis = zufall(...p.basis);
+    teile = mische(p.nStellen).slice(0, p.nTeile).map(k => ({ k, n: zufall(1, p.nMax) }));
+    plus = Math.random() < 0.5;
+    loesung = plus ? basis + summeTeile(teile) : basis - summeTeile(teile);
+    if (loesung > 0 && loesung < p.max) break;
   }
+  if (!(loesung > 0 && loesung < p.max)) {
+    // Notausgang: 1 E grösser als die kleinste Basis — liegt immer im Zahlenraum.
+    basis = p.basis[0]; teile = [{ k: "E", n: 1 }]; plus = true; loesung = basis + 1;
+  }
+  if (geordnet) teile.sort(groesseZuerst);
+  const diff = summeTeile(teile);
+  return {
+    art: "nachbar", basis, teile, plus,
+    html: `<div class="titel">Wer bin ich?</div>Ich bin ${teile.map(t => wk(t.n, t.k)).join(" und ")} ${plus ? "grösser" : "kleiner"} als <b>${zahlText(basis)}</b>.`,
+    loesung,
+    hinweis: p.knapp ? (plus ? "Dazuzählen — und an den Übertrag denken!" : "Wegnehmen — und ans Entbündeln denken!")
+      : plus ? "Zähle die Teile dazu. Achtung beim Übertrag in die nächste Stelle!" : "Nimm die Teile weg. Achtung, wenn eine Stelle nicht reicht!",
+    erklaerung: `${zahlText(basis)} ${plus ? "+" : "−"} ${zahlText(diff)}`,
+  };
 }
 
 /** Ziffernrätsel: Zahl aus Hinweisen über ihre Ziffern bestimmen. */
 function ziffernraetsel(p) {
   const laenge = p.laenge;
   const stellen = STELLEN.slice(7 - laenge);
-  for (;;) {
+  for (let v = 0; ; v++) {
     const z = {};
-    stellen.forEach((st, i) => { z[st.k] = i === 0 ? zufall(1, 9) : (Math.random() < 0.3 ? 0 : zufall(1, 9)); });
+    // Nach vielen Fehlversuchen ohne Nullen würfeln: dann gibt es sicher genug Ziffern über 0.
+    stellen.forEach((st, i) => { z[st.k] = i === 0 || v >= VERSUCHE ? zufall(1, 9) : (Math.random() < 0.3 ? 0 : zufall(1, 9)); });
     const [a, b, c] = mische(stellen.filter(st => z[st.k] > 0)).slice(0, 3);
     if (!b || (laenge >= 3 && !c)) continue;
     const hinweise = [`Ich bin ${LAENGEN_WORT[laenge]}stellig.`];
@@ -166,6 +180,8 @@ function ziffernraetsel(p) {
     if (nullen.length) hinweise.push(nullen.length === 1 ? `Meine ${nullen[0].k}-Ziffer ist 0.` : `Bei ${nullen.map(s => s.k).join(", ")} steht jeweils eine 0.`);
     const loesung = stellen.reduce((s, st) => s + z[st.k] * st.wert, 0);
     return {
+      // Für die Prüfung: welche Stellen ein Hinweis festlegt (a direkt, b über a, c direkt oder über die Summe, Rest direkt).
+      art: "ziffernraetsel", z, laenge, bestimmt: [a, b, c, ...rest].filter(Boolean).map(st => st.k), anzahlHinweise: hinweise.length,
       html: `<div class="titel">Wer bin ich?</div><ul>${mische(hinweise.slice(1)).reduce((h, x) => h + `<li>${x}</li>`, `<li>${hinweise[0]}</li>`)}</ul>`,
       loesung,
       hinweis: "Mach dir eine Stellenwerttabelle und trag jede Ziffer ein, die du schon weisst.",
@@ -177,12 +193,13 @@ function ziffernraetsel(p) {
 /** „Wie viele H stecken in …?“ — Anzahl ganzer Einheiten einer Stelle. */
 function wieViele(p) {
   const k = waehle(p.wieViele);
-  const zahl = zufall(10000, 999999);
+  const zahl = zufall(...(p.wZahl || [10000, 999999]));
   const loesung = Math.floor(zahl / ST[k].wert);
   return {
+    art: "wieViele", k, zahl,
     html: `<div class="titel">Knacknuss</div>Wie viele <span class="wk st st-${k}">${k}</span> (${ST[k].name}) stecken insgesamt in <b>${zahlText(zahl)}</b>?`,
     loesung,
-    hinweis: `Nicht nur die ${k}-Ziffer zählt! Alles links davon sind auch ${ST[k].name}.`,
+    hinweis: p.knapp ? "Nicht nur die eine Ziffer zählt!" : `Nicht nur die ${k}-Ziffer zählt! Alles links davon sind auch ${ST[k].name}.`,
     erklaerung: `${zahlText(zahl)} hat ${zahlText(loesung)} ganze ${ST[k].name}`,
   };
 }
@@ -192,12 +209,12 @@ const OHNE_M = ["HT", "ZT", "T", "H", "Z", "E"];
 // Je Stufe: Bündeln (Stellen, Teile, Anzahl Bündel, Bündelgrösse), Nachbarzahl (Basis, Stellen,
 // Teile, grösste Ziffer), Ziffernrätsel (Länge, Summenhinweis), Knacknuss-Stellen, Rätselarten.
 const P = {
-  s1: { stellen: ["Z", "E"], teile: 2, gross: [0, 0], bereich: [1, 9], max: 100,
-        basis: [10, 89], nStellen: ["Z", "E"], nTeile: 1, nMax: 5,
-        laenge: 2, summe: false, arten: [buendeln, nachbar, ziffernraetsel] },
-  s2: { stellen: ["H", "Z", "E"], teile: 3, gross: [1, 1], bereich: [10, 19], max: 1000,
+  s1: { stellen: ["H", "Z", "E"], teile: 3, gross: [1, 1], bereich: [10, 19], max: 1000,
         basis: [100, 899], nStellen: ["H", "Z", "E"], nTeile: 1, nMax: 9,
         laenge: 3, summe: false, arten: [buendeln, nachbar, ziffernraetsel] },
+  s2: { stellen: ["T", "H", "Z", "E"], teile: 3, gross: [1, 1], bereich: [10, 19], max: 10000,
+        basis: [1000, 8999], nStellen: ["T", "H", "Z"], nTeile: 1, nMax: 5,
+        laenge: 4, summe: false, arten: [buendeln, nachbar, ziffernraetsel] },
   s3: { stellen: OHNE_M, teile: 3, gross: [1, 1], bereich: [10, 19], max: 1000000,
         basis: [10000, 899999], nStellen: ["HT", "ZT", "T", "H", "Z"], nTeile: 1, nMax: 5,
         laenge: 5, summe: false, arten: [buendeln, nachbar, ziffernraetsel] },
@@ -207,18 +224,53 @@ const P = {
   s5: { stellen: OHNE_M, teile: 4, gross: [2, 3], bereich: [11, 99], max: 1000000,
         basis: [10000, 899999], nStellen: ["HT", "ZT", "T", "H", "Z", "E"], nTeile: 3, nMax: 9,
         laenge: 6, summe: true, wieViele: ["H", "T", "ZT"], arten: [buendeln, nachbar, ziffernraetsel, wieViele] },
+  // Königsstufe: bis knapp 10 Millionen (sieben Ziffern auf der Tastatur), knappe Hinweise.
+  s6: { stellen: ["M", ...OHNE_M], teile: 5, gross: [2, 3], bereich: [11, 99], max: 10000000,
+        basis: [1000000, 8999999], nStellen: ["M", ...OHNE_M], nTeile: 3, nMax: 9,
+        laenge: 7, summe: true, wieViele: ["Z", "H", "T", "ZT"], wZahl: [1000000, 9999999], knapp: true,
+        arten: [buendeln, nachbar, ziffernraetsel, wieViele] },
 };
+
+/** Für das Testskript: ein zufälliges Rätsel der Stufe. */
+function aufgabeErzeugen(stufe) {
+  return waehle(P[stufe].arten)(P[stufe], Math.random() < 0.5);
+}
+
+function pruefeAufgabe(r, stufe) {
+  const m = [];
+  const p = P[stufe];
+  if (!Number.isInteger(r.loesung) || r.loesung <= 0 || r.loesung >= p.max) m.push(`Lösung ${r.loesung} ausserhalb 1–${p.max - 1}`);
+  if (String(r.loesung).length > 7) m.push("passt nicht in die Tastatur");
+  if (r.art === "buendeln") {
+    if (summeTeile(r.teile) !== r.loesung) m.push("Summe stimmt nicht");
+    if (r.teile.some(t => !p.stellen.includes(t.k))) m.push("Stelle nicht erlaubt");
+    if (new Set(r.teile.map(t => t.k)).size !== r.teile.length) m.push("Stelle doppelt");
+    if (r.teile.some(t => t.n > 9 && t.k === p.stellen[0])) m.push("Bündel an der höchsten Stelle");
+  } else if (r.art === "nachbar") {
+    if (r.basis + (r.plus ? 1 : -1) * summeTeile(r.teile) !== r.loesung) m.push("Nachbarzahl stimmt nicht");
+  } else if (r.art === "ziffernraetsel") {
+    const stellen = STELLEN.slice(7 - r.laenge);
+    if (stellen.reduce((s, st) => s + r.z[st.k] * st.wert, 0) !== r.loesung) m.push("Ziffern ergeben die Lösung nicht");
+    if (String(r.loesung).length !== r.laenge) m.push("Länge stimmt nicht");
+    // Eindeutig: jede Stelle ist durch genau einen Hinweis festgelegt.
+    if (r.bestimmt.length !== r.laenge || new Set(r.bestimmt).size !== r.laenge) m.push("nicht jede Stelle bestimmt");
+  } else if (r.art === "wieViele") {
+    if (r.loesung !== Math.floor(r.zahl / ST[r.k].wert)) m.push("Anzahl stimmt nicht");
+  } else m.push("unbekannte Rätselart");
+  return m;
+}
 
 LS.spiel({
   id: "zahlenraetsel-tresor",
   einleitung: "Im Tresor liegt ein Schatz! Jedes Rätsel verrät dir den Code. Rechne gut — die Zahl ist der Schlüssel.",
   anzahl: 6,
   stufen: {
-    s1: "Zahlen bis 100: 3 Z + 4 E, „2 Z grösser als 35“, kleine Ziffernrätsel.",
-    s2: "Bis 1000, mit einem Bündel wie 13 Z.",
+    s1: "Bis 1000, mit einem Bündel wie 13 Z.",
+    s2: "Bis 10 000: ein Bündel wie 14 H, „3 H grösser als 4520“.",
     s3: "Bündeln mit 10–19 Teilen, Nachbarzahlen, Rätsel mit klaren Hinweisen.",
     s4: "Grosse Bündel, zwei Teile auf einmal, Summen-Hinweise und Knacknüsse.",
     s5: "Mehrere grosse Bündel, drei Teile auf einmal — für echte Profis.",
+    s6: "Millionen-Rätsel mit vielen Bündeln — und die Eule hilft kaum.",
   },
 
   aufgabe(ctx) {

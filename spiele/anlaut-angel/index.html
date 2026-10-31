@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anlaut-Angel</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .see { background: linear-gradient(180deg, #bfe3ff, #7cc4f5); border-radius: 20px; padding: 12px; margin-bottom: 14px; text-align: center; }
+  .see .bild { font-size: clamp(64px, 15vw, 96px); line-height: 1.1; }
+  .see .wort { font-size: clamp(30px, 7vw, 44px); font-weight: 900; letter-spacing: 3px; }
+  .see .wort b { color: var(--deko-1); }
+  .buchstabe-gross { font-size: clamp(56px, 13vw, 84px); font-weight: 900; color: var(--deko-6); }
+  .wahl-knopf.buchstabe { font-size: clamp(30px, 7vw, 42px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎣 Anlaut-Angel</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.1.A.1: b einzelne Laute (z.B. Anlaute) heraushören, d (Grundanspruch 1. Zyklus)
+// Laute im Wort verorten (Anlaut, Mittellaute, Endlaut); D.4.A.1.c Laute heraushören und den
+// passenden Buchstaben zuordnen, d lautgetreu verschriften. Wörter in woerter.js.
+// Sprich das Wort laut — das Spiel selbst spricht nicht.
+
+const { waehle, mische, el } = LS;
+
+const liste = l => l.map(([wort, bild]) => ({ wort, bild }));
+const ANLAUT = liste(ANLAUT_WOERTER), ENDE = liste(ENDLAUT_WOERTER), MITTE = liste(MITTE_WOERTER), LUECKE = liste(LUECKEN_WOERTER);
+const SELBSTLAUTE = ["a", "e", "i", "o", "u"];
+const anfang = w => w.wort[0].toUpperCase();
+const ende = w => w.wort.slice(-1);
+const selbstlaut = w => w.wort.toLowerCase().split("").find(b => SELBSTLAUTE.includes(b));
+
+/** Buchstaben als Ablenker: andere Anfangsbuchstaben aus der Liste. */
+const andereBuchstaben = (richtig, quelle, f, n) => mische([...new Set(quelle.map(f))].filter(b => b !== richtig)).slice(0, n);
+
+const ARTEN = {
+  bildZumLaut(n) {
+    const buchstabe = waehle([...new Set(ANLAUT.map(anfang))]);
+    const richtig = waehle(ANLAUT.filter(w => anfang(w) === buchstabe));
+    const andere = mische(ANLAUT.filter(w => anfang(w) !== buchstabe)).slice(0, n - 1);
+    return { art: "bildZumLaut", buchstabe, richtig, optionen: mische([richtig, ...andere]) };
+  },
+  anlaut(n = 4) {
+    const w = waehle(ANLAUT);
+    const richtig = anfang(w);
+    return { art: "laut", wo: "anfang", w, richtig, optionen: mische([richtig, ...andereBuchstaben(richtig, ANLAUT, anfang, n - 1)]) };
+  },
+  endlaut(n = 4) {
+    const w = waehle(ENDE);
+    const richtig = ende(w);
+    return { art: "laut", wo: "ende", w, richtig, optionen: mische([richtig, ...andereBuchstaben(richtig, ENDE, ende, n - 1)]) };
+  },
+  mitte() {
+    const w = waehle(MITTE);
+    return { art: "laut", wo: "mitte", w, richtig: selbstlaut(w), optionen: SELBSTLAUTE };
+  },
+  luecke(n = 3) {
+    const w = waehle(LUECKE);
+    const i = Math.floor(Math.random() * w.wort.length);
+    const richtig = w.wort[i];
+    const gross = i === 0;
+    const pool = (SELBSTLAUTE.includes(richtig.toLowerCase()) ? SELBSTLAUTE : "bdfhklmnprstz".split("")).map(b => (gross ? b.toUpperCase() : b));
+    return { art: "luecke", w, i, richtig, optionen: mische([richtig, ...mische(pool.filter(b => b !== richtig)).slice(0, n - 1)]) };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.bildZumLaut(3),
+  s2: () => waehle([ARTEN.anlaut, () => ARTEN.bildZumLaut(4)])(),
+  s3: () => waehle([ARTEN.endlaut, ARTEN.anlaut])(),
+  s4: () => waehle([ARTEN.mitte, ARTEN.endlaut])(),
+  s5: () => waehle([() => ARTEN.luecke(), ARTEN.mitte])(),
+  // Königsstufe: alle Arten gemischt, mehr Auswahl
+  s6: () => waehle([() => ARTEN.bildZumLaut(6), () => ARTEN.anlaut(6), () => ARTEN.endlaut(6), ARTEN.mitte, () => ARTEN.luecke(5)])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a) {
+  const m = [];
+  if (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length) m.push("Auswahl doppelt oder ohne Lösung");
+  if (a.art === "bildZumLaut" && a.optionen.filter(w => anfang(w) === a.buchstabe).length !== 1) m.push("nicht genau ein Bild mit diesem Anlaut");
+  if (a.art === "laut" && a.wo === "mitte" && a.w.wort.toLowerCase().split("").filter(b => SELBSTLAUTE.includes(b)).some(b => b !== a.richtig)) m.push("mehrere verschiedene Selbstlaute");
+  return m;
+}
+
+/** Wort mit verdecktem Teil: „_aus“, „Mau_“, „H_t“. */
+function verdeckt(w, wo, i) {
+  const s = w.wort;
+  if (wo === "anfang") return el("div", { class: "wort" }, el("b", { text: "_" }), s.slice(1));
+  if (wo === "ende") return el("div", { class: "wort" }, s.slice(0, -1), el("b", { text: "_" }));
+  if (wo === "mitte") return el("div", { class: "wort" }, ...s.split("").map(b => (SELBSTLAUTE.includes(b.toLowerCase()) ? el("b", { text: "_" }) : b)));
+  return el("div", { class: "wort" }, s.slice(0, i), el("b", { text: "_" }), s.slice(i + 1));
+}
+
+const WO_TEXT = { anfang: "am Anfang", ende: "am Ende", mitte: "in der Mitte" };
+
+LS.spiel({
+  id: "anlaut-angel",
+  einleitung: "Sprich das Wort laut! Welchen Laut hörst du am Anfang? Und am Ende?",
+  anzahl: 10,
+  stufen: {
+    s1: "Welches Bild beginnt mit M?",
+    s2: "Mit welchem Buchstaben beginnt das Wort?",
+    s3: "Was hörst du am Ende: Maus — s?",
+    s4: "Welcher Selbstlaut ist in der Mitte: H_t?",
+    s5: "Welcher Buchstabe fehlt: N_se?",
+    s6: "Alles gemischt — Anfang, Mitte, Ende, Lücke — mit mehr Auswahl.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "bildZumLaut") {
+      ctx.flaeche.append(el("div", { class: "see" }, el("div", { text: "Angle das Bild, das so beginnt:" }), el("div", { class: "buchstabe-gross", text: `${a.buchstabe} ${a.buchstabe.toLowerCase()}` })));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 120,
+        inhalt: w => ({ bild: w.bild, text: w.wort }),
+        hinweis: w => `Sprich «${w.wort}» laut. Hörst du am Anfang ein ${a.buchstabe}?`,
+        loesung: `«${a.richtig.wort}» beginnt mit ${a.buchstabe}.`,
+        lob: `${a.richtig.bild} ${a.richtig.wort} — mit ${a.buchstabe}! 🎣`,
+      });
+    } else {
+      ctx.flaeche.append(el("div", { class: "see" }, el("div", { class: "bild", text: a.w.bild }), verdeckt(a.w, a.wo, a.i)));
+      const frage = a.art === "luecke" ? "Welcher Buchstabe fehlt?" : `Was hörst du ${WO_TEXT[a.wo]}?`;
+      ctx.flaeche.append(el("div", { class: "auftrag", text: frage }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 70,
+        // Der Hinweis nennt das Wort nicht — sonst stünde die Lösung darin.
+        hinweis: a.art === "luecke" ? "Sprich das Wort zum Bild ganz langsam, Laut für Laut. Welcher Laut fehlt?"
+          : `Sprich das Wort zum Bild ganz langsam und zieh die Laute lang. Was hörst du ${WO_TEXT[a.wo]}?`,
+        loesung: `${a.w.wort}: ${a.art === "luecke" ? `es fehlt ${a.richtig}` : `${WO_TEXT[a.wo]} hört man ${a.richtig}`}.`,
+        lob: `Richtig: ${a.w.wort}! 🎣`,
+      });
+      for (const k of box.children) k.classList.add("buchstabe");
+    }
+    if (ctx.nr === 0) ctx.sag("Sprich das Wort laut — dann hörst du es besser.");
+  },
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Punkte-Blitz</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .bildfeld { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: flex-end; min-height: 140px; margin: 4px 0 14px; }
+  .bildfeld.verdeckt > * { visibility: hidden; }
+  .bildfeld.verdeckt { background: repeating-linear-gradient(45deg, #eef0fa 0 12px, #f7f8fd 12px 24px); border-radius: 16px; }
+  /* Würfelbild: 3 × 3 Plätze */
+  .wuerfel { display: grid; grid-template-columns: repeat(3, 26px); grid-template-rows: repeat(3, 26px); gap: 6px; padding: 12px; background: #fff; border: 4px solid var(--text); border-radius: 18px; }
+  .wuerfel i { border-radius: 50%; }
+  .wuerfel i.p { background: var(--text); }
+  /* Zehnerfeld: 2 Reihen à 5, die Kraft der Fünf */
+  .zehnerfeld { display: grid; grid-template-columns: repeat(5, 26px); gap: 5px; padding: 8px; background: #fff; border: 3px solid var(--rand); border-radius: 12px; }
+  .zehnerfeld i { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--rand); box-sizing: border-box; }
+  .zehnerfeld i.p { background: var(--deko-6); border-color: var(--deko-6); }
+  /* Stellenwert-Material in Stellenfarben: Hunderterplatte, Zehnerstange, Einerwürfel */
+  .platte { display: grid; grid-template-columns: repeat(10, 7px); gap: 1px; padding: 2px; background: var(--st-H); border-radius: 3px; }
+  .platte i { width: 7px; height: 7px; background: rgba(255, 255, 255, .45); }
+  .stange { display: grid; grid-template-rows: repeat(10, 9px); gap: 1px; padding: 2px; background: var(--st-Z); border-radius: 3px; }
+  .stange i { width: 9px; height: 9px; background: rgba(255, 255, 255, .45); }
+  .einer { width: 13px; height: 13px; background: var(--st-E); border-radius: 3px; }
+  .einer-gruppe { display: grid; grid-template-columns: repeat(2, 13px); gap: 3px; align-content: end; }
+  /* Umbrechen, damit bis zu neun Hunderterplatten auch auf dem Handy (375 px) Platz haben */
+  .gruppe { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; align-items: flex-end; max-width: 100%; }
+  .seite { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .seite b { font-size: 20px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>⚡ Punkte-Blitz</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.1: a „Anzahlen mit verschieden angeordneten Elementen vergleichen“ (mehr,
+// weniger, gleich viele), c (Grundanspruch 1. Zyklus) gerade, ungerade, Zehner, Einer, Zahlen bis
+// 100 lesen; e Hunderter, Zahlen bis 1000. Anzahlen auf einen Blick erfassen statt zählen:
+// Ab Stufe 2 wird das Bild nach kurzer Zeit zugedeckt (wieder zeigen geht immer).
+
+const { zufall, waehle, mische, el, zahlText } = LS;
+
+// Würfelbilder: Plätze 0–8 im 3 × 3-Raster
+const WUERFEL = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+
+// Je Stufe: Darstellung, Zahlenraum, Zeit sichtbar (ms; 0 = bleibt stehen).
+// Basisklasse 1: s1 Kindergarten, s2–s4 1. Klasse, s5 2. Klasse, s6 Königsstufe.
+const STUFE = {
+  s1: { arten: ["wuerfel", "vergleich"], bis: 6, zeit: 0 },
+  s2: { arten: ["zehner", "zehner", "vergleich"], bis: 10, zeit: 2500 },
+  s3: { arten: ["zehner", "gerade"], bis: 20, zeit: 2500 },
+  s4: { arten: ["zehner", "vergleich", "gerade"], bis: 20, zeit: 1500 },
+  s5: { arten: ["stellen"], bis: 100, zeit: 3500 },
+  s6: { arten: ["stellen"], bis: 1000, zeit: 2000 },
+};
+
+/** Ablenker nahe bei n: ±1, ±2, ±10, ±100 und vertauschte Ziffern (47 ↔ 74). */
+function ablenker(n, max) {
+  const kandidaten = [n - 1, n + 1, n - 2, n + 2, n - 10, n + 10, n - 100, n + 100];
+  const dreh = Number(String(n).split("").reverse().join(""));
+  if (n >= 10 && dreh !== n) kandidaten.unshift(dreh);
+  return [...new Set(kandidaten.filter(x => x >= 1 && x <= max && x !== n))];
+}
+
+function aufgabeErzeugen(stufe) {
+  const s = STUFE[stufe];
+  const art = waehle(s.arten);
+  if (art === "wuerfel") {
+    const n = zufall(1, 6);
+    return { art, n, richtig: n, optionen: mische([n, ...mische(ablenker(n, 6)).slice(0, 2)]) };
+  }
+  if (art === "vergleich") {
+    // Zwei Würfel- oder Zehnerfeld-Bilder: Wo sind mehr? Manchmal gleich viele.
+    // In Stufe 4 liegen die Anzahlen nah beieinander (höchstens 3 auseinander).
+    const max = s.bis;
+    const a = zufall(1, max);
+    const nah = stufe === "s4";
+    const b = Math.random() < 0.2 ? a
+      : waehle([...Array(max).keys()].map(i => i + 1).filter(x => x !== a && (!nah || Math.abs(x - a) <= 3)));
+    return { art, a, b, richtig: a > b ? "links" : a < b ? "rechts" : "gleich", optionen: ["links", "gleich", "rechts"] };
+  }
+  if (art === "zehner") {
+    const n = zufall({ s2: 3, s3: 8, s4: 11 }[stufe], s.bis);
+    return { art, n, richtig: n, optionen: mische([n, ...mische(ablenker(n, s.bis)).slice(0, 3)]) };
+  }
+  if (art === "gerade") {
+    const n = zufall(2, s.bis);
+    return { art, n, richtig: n % 2 === 0 ? "gerade" : "ungerade", optionen: ["gerade", "ungerade"] };
+  }
+  const n = stufe === "s5" ? zufall(11, 99) : zufall(101, 999);
+  return { art: "stellen", n, richtig: n, optionen: mische([n, ...mische(ablenker(n, s.bis)).slice(0, 3)]) };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!a.optionen.includes(a.richtig)) m.push("richtige Antwort fehlt");
+  if (new Set(a.optionen).size !== a.optionen.length) m.push("Auswahl doppelt");
+  if (a.art === "vergleich" && a.richtig !== (a.a > a.b ? "links" : a.a < a.b ? "rechts" : "gleich")) m.push("Vergleich falsch");
+  const bis = STUFE[stufe].bis;
+  const zahlen = a.art === "vergleich" ? [a.a, a.b] : [a.n];
+  if (zahlen.some(x => !Number.isInteger(x) || x < 1 || x > bis)) m.push("ausserhalb des Zahlenraums");
+  if (a.art === "wuerfel" && !WUERFEL[a.n]) m.push("kein Würfelbild");
+  if (typeof a.richtig === "number" && a.optionen.some(o => o < 1 || o > bis)) m.push("Auswahl ausserhalb des Zahlenraums");
+  if (a.art === "gerade" && a.richtig !== (a.n % 2 === 0 ? "gerade" : "ungerade")) m.push("gerade/ungerade falsch");
+  if (!STUFE[stufe].arten.includes(a.art)) m.push("Aufgabentyp gehört nicht in diese Stufe");
+  return m;
+}
+
+const wuerfel = n => el("div", { class: "wuerfel" }, ...Array.from({ length: 9 }, (_, i) => el("i", { class: WUERFEL[n].includes(i) ? "p" : "" })));
+function zehnerfelder(n) {
+  const felder = [];
+  for (let z = 0; z < Math.max(1, Math.ceil(n / 10)); z++) {
+    felder.push(el("div", { class: "zehnerfeld" }, ...Array.from({ length: 10 }, (_, i) => el("i", { class: z * 10 + i < n ? "p" : "" }))));
+  }
+  return el("div", { class: "seite" }, ...felder);
+}
+function stellenMaterial(n) {
+  const h = Math.floor(n / 100), z = Math.floor(n / 10) % 10, e = n % 10;
+  const zeile = el("div", { class: "gruppe" });
+  for (let i = 0; i < h; i++) zeile.append(el("div", { class: "platte" }, ...Array.from({ length: 100 }, () => el("i"))));
+  for (let i = 0; i < z; i++) zeile.append(el("div", { class: "stange" }, ...Array.from({ length: 10 }, () => el("i"))));
+  zeile.append(el("div", { class: "einer-gruppe" }, ...Array.from({ length: e }, () => el("div", { class: "einer" }))));
+  return zeile;
+}
+
+LS.spiel({
+  id: "punkte-blitz",
+  einleitung: "Wie viele sind es? Schau ganz schnell — nicht zählen, sondern auf einen Blick sehen!",
+  anzahl: 10,
+  stufen: {
+    s1: "Würfelbilder bis 6: Wie viele? Wo sind mehr?",
+    s2: "Zehnerfeld bis 10 — das Bild verschwindet nach kurzer Zeit.",
+    s3: "Zwei Zehnerfelder bis 20, gerade oder ungerade?",
+    s4: "Bis 20, noch kürzer zu sehen: Wie viele? Wo sind mehr?",
+    s5: "Zehnerstangen und Einerwürfel bis 100.",
+    s6: "Hunderterplatten, Stangen und Einer bis 1000 — nur ganz kurz zu sehen!",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const s = STUFE[ctx.stufe];
+    const feld = el("div", { class: "bildfeld", "aria-label": "Bild" });
+    let frage = "Wie viele Punkte sind es?";
+    if (a.art === "wuerfel") feld.append(wuerfel(a.n));
+    else if (a.art === "vergleich") {
+      const bild = n => (ctx.stufe === "s1" ? wuerfel(n) : zehnerfelder(n));
+      feld.append(el("div", { class: "seite" }, bild(a.a), el("b", { text: "links" })), el("div", { class: "seite" }, bild(a.b), el("b", { text: "rechts" })));
+      frage = "Wo sind mehr Punkte?";
+    } else if (a.art === "zehner") feld.append(zehnerfelder(a.n));
+    else if (a.art === "gerade") { feld.append(zehnerfelder(a.n)); frage = "Ist die Anzahl gerade oder ungerade?"; }
+    else { feld.append(stellenMaterial(a.n)); frage = "Welche Zahl ist das?"; }
+    ctx.flaeche.append(el("div", { class: "auftrag", text: frage }), feld);
+
+    if (s.zeit) {
+      // kurz zeigen, dann zudecken; „Nochmal zeigen“ deckt wieder auf
+      const zudecken = () => feld.classList.add("verdeckt");
+      let uhr = setTimeout(zudecken, s.zeit);
+      ctx.flaeche.append(el("div", { class: "hoer-zeile" },
+        el("button", { type: "button", class: "knopf hell", text: "👀 Nochmal zeigen", onclick: () => { feld.classList.remove("verdeckt"); clearTimeout(uhr); uhr = setTimeout(zudecken, s.zeit); } })));
+    }
+
+    const hinweis = {
+      wuerfel: "Denk an den Würfel: Die Fünf hat vier Ecken und einen Punkt in der Mitte.",
+      vergleich: "Schau, welches Bild mehr Punkte hat. Volle Reihen helfen beim Vergleichen.",
+      zehner: "Eine volle Reihe sind 5 Punkte, ein volles Feld 10. Wie viele fehlen bis zum vollen Feld?",
+      gerade: "Gerade heisst: Jeder Punkt hat einen Partner. Bleibt einer allein, ist die Zahl ungerade.",
+      stellen: "Eine Platte sind 100, eine Stange 10, ein Würfelchen 1. Zähle zuerst die grossen Teile.",
+    }[a.art];
+    const name = { links: "Links", rechts: "Rechts", gleich: "Gleich viele" };
+    LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.richtig, breite: a.art === "vergleich" || a.art === "gerade" ? 130 : 90,
+      inhalt: o => (typeof o === "number" ? zahlText(o) : name[o] || o),
+      hinweis,
+      loesung: a.art === "vergleich" ? `Links ${a.a}, rechts ${a.b}.` : a.art === "gerade" ? `${a.n} ist ${a.richtig}.` : `Es sind ${zahlText(a.n)}.`,
+    });
+    if (ctx.nr === 0) ctx.sag(s.zeit ? "Schau schnell hin — gleich wird das Bild zugedeckt!" : "Schau genau hin und tipp auf die Antwort.");
+  },
+});
+</script>
+</body>
+</html>

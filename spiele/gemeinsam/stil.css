@@ -481,6 +481,44 @@ button.link {
 
 .ablage .pfeil { background: none; padding: 0; color: var(--text-leise); }
 
+/* Karte und Körbe (LS.koerbe) */
+.korb-karte {
+  margin: 6px auto 18px;
+  width: fit-content;
+  max-width: 100%;
+  background: #fff;
+  border: 4px solid var(--rand);
+  border-radius: 20px;
+  padding: 10px 28px;
+  text-align: center;
+  box-shadow: var(--schatten);
+}
+.korb-karte .bild { font-size: clamp(60px, 14vw, 90px); line-height: 1.1; display: block; }
+.korb-karte b { font-size: clamp(24px, 5.6vw, 36px); font-weight: 900; }
+.korb-reihe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 12px; max-width: 720px; margin: 0 auto; }
+.korb-knopf {
+  border: none;
+  border-radius: 20px 20px 28px 28px;
+  padding: 12px 8px 10px;
+  min-height: 92px;
+  cursor: pointer;
+  color: #fff;
+  background: var(--k);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .2);
+  font-family: inherit;
+  font-size: clamp(18px, 3.8vw, 22px);
+  font-weight: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.korb-knopf:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0, 0, 0, .2); }
+.korb-knopf .bild { font-size: 36px; }
+.korb-knopf small { font-size: 14px; font-weight: 700; opacity: .9; }
+.korb-knopf.falsch { animation: wackeln .4s; }
+
 /* Kopie eines Teils, die vom Ausgangsort in den gewählten Korb fliegt (LS.fliegen). */
 .flug {
   position: fixed;

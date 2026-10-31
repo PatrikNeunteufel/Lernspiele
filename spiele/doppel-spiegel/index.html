@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doppel-Spiegel</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .spiegel { display: flex; justify-content: center; align-items: stretch; gap: 0; margin: 4px 0 14px; }
+  .spiegel .seite { display: grid; grid-template-columns: repeat(5, 24px); gap: 6px; align-content: center; padding: 10px; min-height: 66px; background: #fff; border: 3px solid var(--rand); border-radius: 14px; }
+  .spiegel .seite i { width: 24px; height: 24px; border-radius: 50%; background: var(--deko-3); }
+  .spiegel .seite.bild i { opacity: .45; }
+  .spiegel .glas { width: 10px; margin: 0 12px; border-radius: 6px; background: linear-gradient(180deg, #c7d2fe, #a5b4fc, #c7d2fe); }
+  .rechnung { text-align: center; font-size: clamp(30px, 7.5vw, 52px); font-weight: 900; margin: 4px 0 12px; font-variant-numeric: tabular-nums; }
+  .rechnung .luecke { display: inline-block; min-width: 1.6em; border-bottom: 5px solid var(--deko-4); color: var(--deko-4); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🪞 Doppel-Spiegel</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.3: a „im Zahlenraum bis 20 ohne Zählen verdoppeln, halbieren“, b (Grundanspruch
+// 1. Zyklus) „bis 100 verdoppeln (5er- und 10er-Zahlen) und halbieren (10er-Zahlen)“, c im
+// Zahlenraum bis 100 verdoppeln und halbieren; MA.1.A.1.c Begriffe verdoppeln, halbieren.
+// Der Spiegel zeigt: Verdoppeln heisst, dasselbe noch einmal dazu.
+
+const { zufall, waehle, el, zahlText } = LS;
+
+const vielfache = (von, bis, k) => { const l = []; for (let x = Math.ceil(von / k) * k; x <= bis; x += k) l.push(x); return l; };
+
+// Je Stufe: Zahlen zum Verdoppeln und zum Halbieren, Zahlenraum 'bis' (grösste Zahl, die in der
+// Aufgabe vorkommt), Spiegelbild ja/nein. Basisklasse 1: s1 Kindergarten, s2–s4 1. Klasse,
+// s5 2. Klasse (Lehrplan b: 5er- und 10er-Zahlen), s6 Königsstufe.
+const STUFE = {
+  s1: { doppel: vielfache(1, 3, 1), halb: [], bis: 6, spiegel: true },
+  s2: { doppel: vielfache(1, 5, 1), halb: [], bis: 10, spiegel: true },
+  s3: { doppel: vielfache(1, 5, 1), halb: vielfache(2, 10, 2), bis: 10 },
+  s4: { doppel: vielfache(4, 10, 1), halb: vielfache(8, 20, 2), bis: 20 },
+  s5: { doppel: vielfache(15, 50, 5), halb: vielfache(30, 100, 10), bis: 100, schritt: { doppel: 5, halb: 10 } },
+  s6: { doppel: vielfache(101, 499, 1).filter(x => x % 10 !== 0), halb: vielfache(102, 998, 2).filter(x => x % 10 !== 0), bis: 1000 },
+};
+
+function aufgabeErzeugen(stufe) {
+  const s = STUFE[stufe];
+  const halbieren = s.halb.length > 0 && Math.random() < 0.45;
+  const n = waehle(halbieren ? s.halb : s.doppel);
+  return { art: halbieren ? "halb" : "doppel", n, richtig: halbieren ? n / 2 : n * 2 };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const s = STUFE[stufe];
+  if (!Number.isInteger(a.richtig) || a.richtig < 1) m.push("Ergebnis nicht ganzzahlig");
+  if (a.art === "doppel" && a.richtig !== 2 * a.n) m.push("Verdoppeln falsch");
+  if (a.art === "halb" && a.richtig * 2 !== a.n) m.push("Halbieren falsch");
+  if (a.art === "halb" && !s.halb.length) m.push("Halbieren gehört nicht in diese Stufe");
+  if (Math.max(a.n, a.richtig) > s.bis) m.push("ausserhalb des Zahlenraums");
+  if (s.schritt && a.n % s.schritt[a.art] !== 0) m.push("keine 5er-/10er-Zahl");
+  return m;
+}
+
+/** Punkte links, Spiegel, Spiegelbild rechts (nur bis 10 Punkte je Seite). */
+function spiegelBild(n) {
+  const punkte = () => Array.from({ length: n }, () => el("i"));
+  return el("div", { class: "spiegel", "aria-hidden": "true" },
+    el("div", { class: "seite" }, ...punkte()), el("div", { class: "glas" }), el("div", { class: "seite bild" }, ...punkte()));
+}
+
+/** Hinweis: in Zehner und Einer zerlegen (2 · 37 = 2 · 30 + 2 · 7). */
+function hinweisFuer(a) {
+  if (a.art === "doppel") {
+    if (a.n <= 10) return `Verdoppeln heisst: ${a.n} + ${a.n}.`;
+    const gross = a.n >= 100 ? Math.floor(a.n / 100) * 100 : Math.floor(a.n / 10) * 10;
+    const rest = a.n - gross;
+    return rest ? `Zerlege: das Doppelte von ${zahlText(gross)} und das Doppelte von ${zahlText(rest)}, dann zusammenzählen.` : `Das Doppelte von ${zahlText(a.n)}: ${zahlText(a.n)} + ${zahlText(a.n)}.`;
+  }
+  // Grosse Zahl mit gerader Hunderterziffer: in Hunderter und Rest zerlegen (die Hälfte von 600 und von 74).
+  const gross = Math.floor(a.n / 100) * 100;
+  if (a.n > 100 && gross % 200 === 0 && (a.n - gross) % 2 === 0) {
+    return `Zerlege: die Hälfte von ${zahlText(gross)} und die Hälfte von ${zahlText(a.n - gross)}, dann zusammenzählen.`;
+  }
+  return `Halbieren heisst: in zwei gleiche Teile teilen. Welche Zahl plus sich selbst gibt ${zahlText(a.n)}?`;
+}
+
+LS.spiel({
+  id: "doppel-spiegel",
+  einleitung: "Der Spiegel zeigt alles doppelt! Verdoppeln heisst: noch einmal gleich viel dazu. Halbieren heisst: in zwei gleiche Teile teilen.",
+  anzahl: 10,
+  stufen: {
+    s1: "1, 2 oder 3 verdoppeln — mit dem Spiegel.",
+    s2: "Bis 5 verdoppeln — mit dem Spiegel.",
+    s3: "Verdoppeln und halbieren bis 10.",
+    s4: "Verdoppeln und halbieren bis 20.",
+    s5: "Bis 100: 35 verdoppeln, 80 halbieren.",
+    s6: "Bis 1000, alle Zahlen: 374 verdoppeln, 658 halbieren.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const luecke = el("span", { class: "luecke", text: "?" });
+    ctx.flaeche.append(el("div", { class: "auftrag", text: a.art === "doppel" ? `Verdopple ${zahlText(a.n)}.` : `Halbiere ${zahlText(a.n)}.` }));
+    if (a.art === "doppel" && STUFE[ctx.stufe].spiegel) ctx.flaeche.append(spiegelBild(a.n));
+    ctx.flaeche.append(el("div", { class: "rechnung" }, ...(a.art === "doppel"
+      ? [`${zahlText(a.n)} + ${zahlText(a.n)} = `, luecke]
+      : ["die Hälfte von ", `${zahlText(a.n)} = `, luecke])));
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergebnis" });
+    ctx.flaeche.append(anzeige);
+    const tasten = LS.tastatur({
+      anzeige,
+      maxStellen: 4,
+      onAenderung(w) { luecke.textContent = w === null ? "?" : zahlText(w); },
+      onOk(w) {
+        if (w === a.richtig) {
+          tasten.gesperrt = true;
+          anzeige.classList.add("richtig");
+          ctx.richtig(a.art === "doppel" ? `Das Doppelte von ${zahlText(a.n)} ist ${zahlText(a.richtig)}! 🪞` : `Die Hälfte von ${zahlText(a.n)} ist ${zahlText(a.richtig)}! 🪞`);
+          return;
+        }
+        anzeige.classList.add("falsch");
+        ctx.falsch(hinweisFuer(a), a.art === "doppel" ? `${zahlText(a.n)} + ${zahlText(a.n)} = ${zahlText(a.richtig)}` : `${zahlText(a.richtig)} + ${zahlText(a.richtig)} = ${zahlText(a.n)}`);
+        if (ctx.vorbei()) tasten.gesperrt = true;
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag("Tipp das Ergebnis ein.");
+  },
+});
+</script>
+</body>
+</html>

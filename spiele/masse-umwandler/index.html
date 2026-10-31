@@ -53,30 +53,71 @@ const STUFE = {
   s3: { paare: [["laenge", "m", "cm"], ["laenge", "cm", "mm"], ["hohl", "l", "dl"], ["gewicht", "kg", "g"], ["geld", "Fr.", "Rp."]], art: "gemischt", max: 9 },
   s4: { paare: [["laenge", "km", "m"], ["laenge", "m", "mm"], ["laenge", "dm", "cm"], ["hohl", "dl", "cl"], ["hohl", "l", "ml"], ["gewicht", "t", "kg"], ["gewicht", "g", "mg"], ["zeit", "h", "min"], ["zeit", "min", "s"]], art: "einfach", max: 12 },
   s5: { paare: [["laenge", "cm", "mm"], ["laenge", "m", "cm"], ["gewicht", "kg", "g"], ["hohl", "l", "dl"], ["zeit", "h", "min"]], art: "rechnen", max: 5 },
+  // Königsstufe: je ein Drittel weite Sprünge über mehrere Stufen der Treppe (3 km = ? cm),
+  // gemischte Grössen mit den Einheiten der Stufe 4 und Subtraktion gemischter Grössen;
+  // die Treppe erscheint erst nach dem ersten Fehler.
+  s6: {
+    art: "koenig", max: 9,
+    weit: [["laenge", "km", "cm"], ["laenge", "m", "mm"], ["laenge", "dm", "mm"], ["hohl", "l", "ml"], ["gewicht", "t", "g"], ["gewicht", "kg", "mg"], ["zeit", "h", "s"]],
+    gemischt: [["laenge", "km", "m"], ["laenge", "m", "mm"], ["hohl", "l", "ml"], ["gewicht", "t", "kg"], ["zeit", "h", "min"], ["zeit", "min", "s"]],
+    minus: [["laenge", "m", "cm"], ["laenge", "km", "m"], ["gewicht", "kg", "g"], ["hohl", "l", "dl"], ["zeit", "h", "min"], ["zeit", "min", "s"]],
+  },
 };
 
-const wert = (fam, e) => FAMILIEN[fam].einheiten.find(x => x[0] === e)[1];
+const wert = (fam, e) => FAMILIEN[fam].einheiten.find(x => x[0] === e)?.[1];
 
 function aufgabeErzeugen(stufe) {
   const p = STUFE[stufe];
-  const [fam, gross, klein] = waehle(p.paare);
+  let art = p.art, paare = p.paare;
+  if (art === "koenig") { art = waehle(["weit", "gemischt", "minus"]); paare = p[art]; }
+  const [fam, gross, klein] = waehle(paare);
   const f = wert(fam, gross) / wert(fam, klein);
   // Anteil in der kleinen Einheit, kleiner als eine grosse Einheit (bei 1000er-Schritten in Zehnern: 2 kg 350 g)
   const teil = () => f >= 1000 ? zufall(1, 99) * 10 : zufall(1, f - 1);
-  if (p.art === "einfach") {
+  if (art === "einfach" || art === "weit") {
     const v = zufall(1, p.max);
     return Math.random() < 0.5
-      ? { fam, f, links: `${zahlText(v)} ${gross}`, ziel: klein, loesung: v * f }
-      : { fam, f, links: `${zahlText(v * f)} ${klein}`, ziel: gross, loesung: v };
+      ? { art, fam, f, links: `${zahlText(v)} ${gross}`, ziel: klein, loesung: v * f }
+      : { art, fam, f, links: `${zahlText(v * f)} ${klein}`, ziel: gross, loesung: v };
   }
-  if (p.art === "gemischt") {
+  const s = (a, b) => (a ? `${a} ${gross} ` : "") + `${zahlText(b)} ${klein}`;
+  if (art === "gemischt") {
     const a = zufall(1, p.max), b = teil();
-    return { fam, f, links: `${a} ${gross} ${zahlText(b)} ${klein}`, ziel: klein, loesung: a * f + b };
+    return { art, fam, f, links: s(a, b), ziel: klein, loesung: a * f + b };
+  }
+  if (art === "minus") {
+    // Zwei gemischte Grössen, die erste grösser; meist muss man eine grosse Einheit „aufbrechen“.
+    const a1 = zufall(2, p.max), b1 = teil(), a2 = zufall(1, a1 - 1), b2 = teil();
+    return { art, fam, f, links: `${s(a1, b1)} − ${s(a2, b2)}`, ziel: klein, loesung: (a1 - a2) * f + b1 - b2 };
   }
   // rechnen: zwei gemischte Grössen addieren, Ergebnis in der kleinen Einheit
   const a1 = zufall(0, p.max), b1 = teil(), a2 = zufall(0, p.max), b2 = teil();
-  const s = (a, b) => (a ? `${a} ${gross} ` : "") + `${zahlText(b)} ${klein}`;
-  return { fam, f, links: `${s(a1, b1)} + ${s(a2, b2)}`, ziel: klein, loesung: (a1 + a2) * f + b1 + b2 };
+  return { art, fam, f, links: `${s(a1, b1)} + ${s(a2, b2)}`, ziel: klein, loesung: (a1 + a2) * f + b1 + b2 };
+}
+
+/**
+ * Mängel einer Aufgabe: Die linke Seite wird unabhängig vom Generator nachgerechnet
+ * („2 km 350 m − 1 km 20 m“ → Summe der Teile in der Zieleinheit) und mit der Lösung verglichen.
+ */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const inZiel = teil => {
+    const t = teil.replace(/[   ]/g, "").trim().split(/\s+/);
+    let summe = 0;
+    for (let i = 0; i < t.length; i += 2) {
+      const w = wert(a.fam, t[i + 1]);
+      if (!/^\d+$/.test(t[i]) || w === undefined) { m.push(`unlesbarer Teil «${teil}»`); return NaN; }
+      summe += Number(t[i]) * w;
+    }
+    return summe / wert(a.fam, a.ziel);
+  };
+  const [links, op, rechts] = a.links.split(/ ([+−]) /);
+  const soll = op === "+" ? inZiel(links) + inZiel(rechts) : op === "−" ? inZiel(links) - inZiel(rechts) : inZiel(links);
+  if (soll !== a.loesung) m.push(`Lösung stimmt nicht (nachgerechnet ${soll})`);
+  if (!(Number.isInteger(a.loesung) && a.loesung > 0)) m.push("Lösung keine positive ganze Zahl");
+  if (String(a.loesung).length > 9) m.push("Lösung passt nicht in die Tastatur");
+  if (op === "−" && stufe !== "s6") m.push("Subtraktion ausserhalb der Königsstufe");
+  return m;
 }
 
 /** Einheiten-Treppe der Familie als Hilfe: m —×100→ cm … */
@@ -100,12 +141,17 @@ LS.spiel({
     s3: "Gemischt: 3 m 25 cm = 325 cm.",
     s4: "km, t, ml, cl, h, min, s — Kilo, Dezi, Centi, Milli.",
     s5: "Rechnen: 3 cm 5 mm + 2 cm 7 mm = ? mm.",
+    s6: "Endgegner: 3 km = ? cm, 2 h = ? s, 5 m 20 cm − 2 m 75 cm — ohne Treppe.",
   },
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     ctx.flaeche.append(el("div", { class: "familie", text: FAMILIEN[a.fam].name }));
-    if (ctx.stufe !== "s5") ctx.flaeche.append(treppe(a.fam));
+    // Königsstufe: Treppe erst nach dem ersten Fehler, über der Rechnung eingefügt.
+    const koenig = ctx.stufe === "s6";
+    const hilfeOrt = el("div");
+    ctx.flaeche.append(hilfeOrt);
+    if (ctx.stufe !== "s5" && !koenig) hilfeOrt.append(treppe(a.fam));
     ctx.flaeche.append(el("div", { class: "rechnung", html: `${a.links} = <span class="einheit">? ${a.ziel}</span>` }));
     const anzeige = el("div", { class: "anzeige leer", "aria-label": `Ergebnis in ${a.ziel}` });
     ctx.flaeche.append(el("div", { class: "ergebnis-zeile" }, anzeige, el("span", { class: "einheit", text: a.ziel })));
@@ -114,11 +160,18 @@ LS.spiel({
       onOk(w) {
         if (w === a.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
         anzeige.classList.add("falsch");
-        const zuKlein = w * a.f === a.loesung, zuGross = w === a.loesung * a.f;
-        ctx.falsch(zuKlein || zuGross
-          ? `Fast — du hast in die falsche Richtung umgerechnet. Grosse Einheit → kleine Einheit: mal ${zahlText(a.f)}. Kleine → grosse: geteilt durch ${zahlText(a.f)}.`
-          : `Schau auf die Treppe: Zwischen den beiden Einheiten liegt der Faktor ${zahlText(a.f)}.`,
-          `${a.links} = ${zahlText(a.loesung)} ${a.ziel}`);
+        if (koenig && !hilfeOrt.firstChild) hilfeOrt.append(treppe(a.fam));
+        // Falsche Richtung erkennt man nur bei einer reinen Umwandlung.
+        const umwandlung = a.art === "einfach" || a.art === "weit";
+        const zuKlein = umwandlung && w * a.f === a.loesung, zuGross = umwandlung && w === a.loesung * a.f;
+        const hinweis = zuKlein || zuGross
+          ? (koenig ? "Fast — du hast in die falsche Richtung umgerechnet."
+            : `Fast — du hast in die falsche Richtung umgerechnet. Grosse Einheit → kleine Einheit: mal ${zahlText(a.f)}. Kleine → grosse: geteilt durch ${zahlText(a.f)}.`)
+          : !koenig ? `Schau auf die Treppe: Zwischen den beiden Einheiten liegt der Faktor ${zahlText(a.f)}.`
+          : a.art === "weit" ? "Geh die Treppe Stufe für Stufe und rechne jeden Schritt."
+          : a.art === "minus" ? `Rechne beide Grössen ganz in ${a.ziel} um und subtrahiere dann.`
+          : `Rechne die grosse Einheit in ${a.ziel} um und zähle den Rest dazu.`;
+        ctx.falsch(hinweis, `${a.links} = ${zahlText(a.loesung)} ${a.ziel}`);
         if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
       },
     });

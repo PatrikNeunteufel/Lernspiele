@@ -83,7 +83,43 @@ const ARTEN = {
   },
   planetenOrdnen() {
     return { reihe: PLANETEN.map(p => p.name), planeten: true, frage: "Ordne die Planeten: Welcher ist der Sonne am nächsten? Tipp sie der Reihe nach an.",
-      hinweis: "Merksatz: Mein Vater erklärt mir jeden Sonntag unseren Nachthimmel — Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus, Neptun." };
+      // Nur der Merksatz — die Namen dazu wären die Lösung.
+      hinweis: "Merksatz: Mein Vater erklärt mir jeden Sonntag unseren Nachthimmel. Jedes Wort beginnt wie ein Planet." };
+  },
+  // ---- Königsstufe ----
+  vorher() {
+    const i = Math.floor(Math.random() * 8);
+    const v = (i + 7) % 8;
+    return { gross: PHASEN[i].bild, frage: "Wie sah der Mond ein paar Tage <b>vorher</b> aus?", optionen: mische([v, (i + 1) % 8, (i + 4) % 8, (i + 6) % 8]).map(k => PHASEN[k].bild), richtig: PHASEN[v].bild, mond: true,
+      hinweis: "Denk rückwärts: Was kam vor diesem Bild?", loesung: `Vor ${PHASEN[i].bild} kam ${PHASEN[v].bild}.` };
+  },
+  planetenRueckwaerts() {
+    return { reihe: PLANETEN.map(p => p.name).reverse(), planeten: true, sonneAmEnde: true,
+      frage: "Von aussen nach innen: Beginne mit dem Planeten, der am weitesten von der Sonne weg ist.",
+      hinweis: "Sag den Merksatz und geh ihn von hinten nach vorn." };
+  },
+  planetenLage() {
+    const namen = PLANETEN.map(p => p.name);
+    const i = Math.floor(Math.random() * 7); // es gibt einen Nachfolger
+    const j = Math.min(i, 5);                // und für „zwischen“ zwei
+    const art = waehle(["nach", "nach", "zwischen", "zwischen", "aussen", "klein"]);
+    const f = art === "nach" ? { frage: `Welcher Planet kommt von der Sonne aus direkt nach ${namen[i]}?`, richtig: namen[i + 1] }
+      : art === "zwischen" ? { frage: `Welcher Planet liegt zwischen ${namen[j]} und ${namen[j + 2]}?`, richtig: namen[j + 1] }
+      : art === "aussen" ? { frage: "Welcher Planet ist am weitesten von der Sonne entfernt?", richtig: "Neptun" }
+      : { frage: "Welcher Planet ist der kleinste?", richtig: "Merkur" };
+    // Die genannten Planeten selbst sind keine Antwortmöglichkeit.
+    const genannt = namen.filter(n => f.frage.includes(n));
+    const andere = mische(namen.filter(n => n !== f.richtig && !genannt.includes(n))).slice(0, 3);
+    return { frage: f.frage, optionen: mische([f.richtig, ...andere]), richtig: f.richtig, hinweis: "Denk an den Merksatz und an das Bild vom Sonnensystem.", loesung: `${f.frage} ${f.richtig}.` };
+  },
+  zeitdauer() {
+    const f = waehle([
+      { frage: "Wie lange dauert es ungefähr von einem Vollmond bis zum nächsten?", richtig: "etwa 1 Monat" },
+      { frage: "Wie lange braucht die Erde für eine Runde um die Sonne?", richtig: "1 Jahr" },
+      { frage: "Wie lange braucht die Erde, um sich einmal um sich selbst zu drehen?", richtig: "1 Tag" },
+    ]);
+    const optionen = ["1 Tag", "etwa 1 Woche", "etwa 1 Monat", "1 Jahr"];
+    return { frage: f.frage, optionen, richtig: f.richtig, hinweis: "Tag und Nacht, die Mondbilder, die Jahreszeiten — was davon passt?", loesung: `${f.frage} ${f.richtig}.` };
   },
   planetenFrage() {
     const fragen = [
@@ -105,7 +141,32 @@ const STUFE = {
   s3: () => waehle([ARTEN.naechste, () => ARTEN.ordnen(4), () => ARTEN.ordnen(5)])(),
   s4: () => waehle([() => ARTEN.ordnen(8), ARTEN.naechste, ARTEN.planetenFrage])(),
   s5: () => waehle([ARTEN.planetenOrdnen, ARTEN.planetenFrage, () => ARTEN.ordnen(8)])(),
+  s6: () => waehle([ARTEN.vorher, ARTEN.planetenRueckwaerts, ARTEN.planetenLage, ARTEN.zeitdauer, () => ARTEN.ordnen(8)])(),
 };
+
+/** Für das Testskript: eine Aufgabe der Stufe. */
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel: genau eine richtige Antwort unter den Möglichkeiten, Reihen ohne Doppel, Fakten stimmen. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const namen = PLANETEN.map(p => p.name);
+  if (a.reihe) {
+    if (new Set(a.reihe).size !== a.reihe.length) m.push("Reihe mit doppeltem Teil");
+    if (a.planeten && a.reihe.join() !== (a.sonneAmEnde ? namen.slice().reverse() : namen).join()) m.push("Planetenreihe falsch");
+    if (a.mond) a.reihe.forEach((b, k) => { if (k && PHASEN.findIndex(p => p.bild === b) !== (PHASEN.findIndex(p => p.bild === a.reihe[k - 1]) + (a.reihe.length === 4 ? 2 : 1)) % 8) m.push("Mondreihe falsch"); });
+  } else {
+    if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal unter den Möglichkeiten");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Möglichkeit");
+    const nach = a.frage.match(/direkt nach (\w+)\?/);
+    if (nach && namen[namen.indexOf(nach[1]) + 1] !== a.richtig) m.push("Nachfolger falsch");
+    const zw = a.frage.match(/zwischen (\w+) und (\w+)\?/);
+    if (zw && (namen.indexOf(zw[2]) - namen.indexOf(zw[1]) !== 2 || namen[namen.indexOf(zw[1]) + 1] !== a.richtig)) m.push("Planet dazwischen falsch");
+  }
+  if (namen.includes(a.richtig) && a.hinweis.includes(a.richtig)) m.push("Hinweis verrät die Lösung");
+  if (a.planeten && namen.some(n => a.hinweis.includes(n))) m.push("Hinweis nennt Planetennamen");
+  return m;
+}
 
 function planetKnopfInhalt(name) {
   const p = PLANETEN.find(x => x.name === name);
@@ -125,6 +186,7 @@ LS.spiel({
     s3: "Mondbilder in die richtige Reihenfolge legen.",
     s4: "Den ganzen Mondzyklus ordnen und erste Planeten-Fragen.",
     s5: "Die acht Planeten der Reihe nach von der Sonne aus.",
+    s6: "Endgegner: Mond rückwärts, Planeten von aussen nach innen, Nachbarn und Zeitdauern.",
   },
 
   aufgabe(ctx) {
@@ -136,7 +198,8 @@ LS.spiel({
 
     if (a.reihe) {
       const gelegt = el("div", { class: "reihe" });
-      if (a.planeten) gelegt.append(el("span", { class: "sonne", text: "☀️" }));
+      const sonne = () => gelegt.append(el("span", { class: "sonne", text: "☀️" }));
+      if (a.planeten && !a.sonneAmEnde) sonne();
       nacht.append(gelegt);
       const box = el("div", { class: "optionen" });
       let pos = 0;
@@ -148,7 +211,7 @@ LS.spiel({
           if (item === a.reihe[pos]) {
             pos++; k.classList.add("gewaehlt"); LS.ton("tipp");
             gelegt.append(el("span", { class: a.planeten ? "planet" : "", text: item }));
-            if (pos === a.reihe.length) { fertig = true; ctx.richtig(); }
+            if (pos === a.reihe.length) { fertig = true; if (a.sonneAmEnde) sonne(); ctx.richtig(); }
             return;
           }
           k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");

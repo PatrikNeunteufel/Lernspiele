@@ -81,12 +81,15 @@
 const { STELLEN, zahlText, zufall, zerlege, el } = LS;
 
 // Je Stufe: Spalten der Tabelle (ab dieser Stelle bis E), Länge der Zahlen, Anteil Nullen mittendrin.
+// buendeln (Königsstufe): Anteil der Ableseaufgaben, in denen ein Fach mehr als 9 zeigt
+// (z. B. 3 HT und 14 ZT) — zehn davon sind eins weiter links.
 const STUFE = {
-  s1: { ab: "Z",  laenge: [2, 2], nullen: 0.1 },
-  s2: { ab: "H",  laenge: [2, 3], nullen: 0.25 },
+  s1: { ab: "H",  laenge: [2, 3], nullen: 0.25 },
+  s2: { ab: "T",  laenge: [3, 4], nullen: 0.2 },
   s3: { ab: "HT", laenge: [4, 6], nullen: 0.15 },
   s4: { ab: "M",  laenge: [5, 6], nullen: 0.4 },
   s5: { ab: "M",  laenge: [6, 7], nullen: 0.45 },
+  s6: { ab: "M",  laenge: [7, 7], nullen: 0.5, buendeln: 0.7 },
 };
 
 function zahlErzeugen(stufe) {
@@ -97,6 +100,50 @@ function zahlErzeugen(stufe) {
   let s = String(zufall(1, 9));
   for (let i = 1; i < stellen; i++) s += Math.random() < nullen ? "0" : String(zufall(1, 9));
   return Number(s);
+}
+
+/**
+ * Inhalt der Fächer beim Ablesen: die Ziffern der Zahl; in der Königsstufe manchmal gebündelt —
+ * ein Fach gibt eins an sein rechtes Nachbarfach ab, das dann 10 mehr zeigt. Der Wert bleibt gleich.
+ */
+function tabelleFuer(stufe, zahl) {
+  const f = zerlege(zahl);
+  const p = STUFE[stufe];
+  if (!p.buendeln || Math.random() >= p.buendeln) return f;
+  const erste = 7 - String(zahl).length;
+  // Links muss etwas abzugeben sein; die höchste Stelle darf dabei nicht auf 0 fallen.
+  const moeglich = [];
+  for (let i = erste; i < STELLEN.length - 1; i++) {
+    const links = f[STELLEN[i].k];
+    if (links >= (i === erste ? 2 : 1)) moeglich.push(i);
+  }
+  if (!moeglich.length) return f;
+  const i = moeglich[zufall(0, moeglich.length - 1)];
+  f[STELLEN[i].k] -= 1;
+  f[STELLEN[i + 1].k] += 10;
+  return f;
+}
+
+/** Für das Testskript: Zahl und Fachinhalt beim Ablesen. */
+function aufgabeErzeugen(stufe) {
+  const zahl = zahlErzeugen(stufe);
+  return { zahl, tabelle: tabelleFuer(stufe, zahl) };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  const len = String(a.zahl).length;
+  // 1 000 000 ist in Stufe 4 als Sonderfall erlaubt, sonst gilt die Länge.
+  if (!(a.zahl === 1000000 && stufe === "s4") && (len < p.laenge[0] || len > p.laenge[1])) m.push(`Länge ${len}`);
+  const spalten = spaltenFuer(stufe);
+  if (len > spalten.length) m.push("Zahl passt nicht in die Tabelle");
+  const summe = STELLEN.reduce((s, st) => s + a.tabelle[st.k] * st.wert, 0);
+  if (summe !== a.zahl) m.push(`Tabelle ergibt ${summe}`);
+  const gross = STELLEN.filter(st => a.tabelle[st.k] > 9);
+  if (gross.length > (p.buendeln ? 1 : 0) || STELLEN.some(st => a.tabelle[st.k] > 19 || a.tabelle[st.k] < 0)) m.push("Fach ungültig");
+  if (a.tabelle[STELLEN[7 - len].k] === 0) m.push("höchstes Fach 0");
+  return m;
 }
 
 function spaltenFuer(stufe) {
@@ -188,7 +235,8 @@ function einsortieren(ctx, zahl) {
 
 function ablesen(ctx, zahl) {
   const spalten = spaltenFuer(ctx.stufe);
-  const soll = zerlege(zahl);
+  const soll = tabelleFuer(ctx.stufe, zahl);
+  const gebuendelt = STELLEN.some(st => soll[st.k] > 9);
   const ersteStelle = 7 - String(zahl).length;
   ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl steht in der Tabelle?" }));
   const { tab, faecher } = tabelleZeichnen(spalten);
@@ -204,9 +252,11 @@ function ablesen(ctx, zahl) {
     onOk(w) {
       if (w === zahl) { anzeige.classList.add("richtig"); tasten.gesperrt = true; ctx.richtig(); return; }
       anzeige.classList.add("falsch");
-      const hinweis = String(w).length !== String(zahl).length
-        ? "Zähl die Ziffern in der Tabelle — deine Zahl hat eine andere Länge. Nullen nicht vergessen!"
-        : "Fast! Lies Fach für Fach von links nach rechts.";
+      const hinweis = gebuendelt
+        ? "Ein Fach hat mehr als 9! Zehn davon sind eins im Fach links daneben."
+        : String(w).length !== String(zahl).length
+          ? "Zähl die Ziffern in der Tabelle — deine Zahl hat eine andere Länge. Nullen nicht vergessen!"
+          : "Fast! Lies Fach für Fach von links nach rechts.";
       ctx.falsch(hinweis, `In der Tabelle steht ${zahlText(zahl)}.`);
       if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
     },
@@ -220,11 +270,12 @@ LS.spiel({
   einleitung: "Hallo, hier ist Eule Zahlina mit der Zahlen-Post! Jede Ziffer muss ins richtige Fach der Stellenwerttabelle. Manchmal musst du auch eine Zahl aus der Tabelle ablesen.",
   anzahl: 8,
   stufen: {
-    s1: "Kleine Tabelle mit Z und E — Zahlen bis 100.",
-    s2: "Tabelle mit H, Z und E — Zahlen bis 1000, manchmal mit Nullen.",
+    s1: "Tabelle mit H, Z und E — Zahlen bis 1000, manchmal mit Nullen.",
+    s2: "Tabelle mit T, H, Z und E — Zahlen bis 9999.",
     s3: "Zahlen bis 999 999, wenige Nullen.",
     s4: "Ganze Tabelle bis zur Million, viele Nullen.",
     s5: "Siebenstellige Zahlen mit vielen Nullen.",
+    s6: "Millionenzahlen — und manchmal steht mehr als 9 in einem Fach!",
   },
   aufgabe(ctx) {
     const zahl = zahlErzeugen(ctx.stufe);

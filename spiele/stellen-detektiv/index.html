@@ -101,24 +101,50 @@
 const { STELLEN, zahlText, zufall, waehle, el } = LS;
 
 // Je Stufe: Länge der Zahlen und ob auch umgekehrt gefragt wird (Stelle → Ziffer antippen).
+// umgekehrt: "abwechselnd" (jede zweite Aufgabe) oder "zufall"; gleicheZiffern: Ziffern dürfen
+// sich wiederholen (Königsstufe) — beim Antippen zählt dann die Position, nicht die Ziffer.
 const STUFE = {
-  s1: { laenge: [2, 2], umgekehrt: false },
-  s2: { laenge: [3, 3], umgekehrt: true },
+  s1: { laenge: [3, 3], umgekehrt: "abwechselnd" },
+  s2: { laenge: [4, 4], umgekehrt: false },
   s3: { laenge: [4, 5], umgekehrt: false },
-  s4: { laenge: [6, 6], umgekehrt: true },
-  s5: { laenge: [7, 7], umgekehrt: true },
+  s4: { laenge: [6, 6], umgekehrt: "abwechselnd" },
+  s5: { laenge: [7, 7], umgekehrt: "abwechselnd" },
+  s6: { laenge: [7, 7], umgekehrt: "zufall", gleicheZiffern: true },
 };
 
 function zahlErzeugen(stufe) {
   if (stufe === "s4" && Math.random() < 0.06) return 1000000;
-  const stellen = zufall(...STUFE[stufe].laenge);
+  const cfg = STUFE[stufe];
+  const stellen = zufall(...cfg.laenge);
   let s = String(zufall(1, 9));
-  // Lauter verschiedene Ziffern, wenn möglich — sonst wäre „tipp die Ziffer an“ mehrdeutig.
+  if (cfg.gleicheZiffern) {
+    // Viele Nullen und Wiederholungen: Hier hilft nur genaues Abzählen der Stellen.
+    const vorrat = [0, 0, 0, Number(s), zufall(1, 9), zufall(1, 9)];
+    while (s.length < stellen) s += String(waehle(vorrat));
+    return Number(s);
+  }
+  // Lauter verschiedene Ziffern — sonst wäre „tipp die Ziffer an“ mehrdeutig.
   while (s.length < stellen) {
     const z = String(zufall(0, 9));
     if (!s.includes(z)) s += z;
   }
   return Number(s);
+}
+
+/** Für das Testskript: eine Zahl der Stufe. */
+function aufgabeErzeugen(stufe) { return { zahl: zahlErzeugen(stufe) }; }
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const cfg = STUFE[stufe];
+  const s = String(a.zahl);
+  const [min, max] = cfg.laenge;
+  // 1 000 000 ist in Stufe 4 als Sonderfall erlaubt (dort sonst sechsstellig).
+  const sonderfall = stufe === "s4" && a.zahl === 1000000;
+  if (!sonderfall && (s.length < min || s.length > max)) m.push(`Länge ${s.length} ausserhalb ${min}–${max}`);
+  if (!cfg.gleicheZiffern && !sonderfall && new Set(s).size !== s.length) m.push("Ziffern nicht verschieden");
+  if (s[0] === "0") m.push("führende Null");
+  return m;
 }
 
 /** Ziffern der Zahl mit ihrer Stelle, links nach rechts. */
@@ -142,7 +168,7 @@ function zahlZeichnen(ctx, liste, klickbar, onKlick) {
 }
 
 /** Lupe auf eine Ziffer → richtige Stelle aus den Knöpfen wählen. */
-function stelleBenennen(ctx, zahl) {
+function stelleBenennen(ctx, zahl, knapp = false) {
   const liste = ziffernMitStelle(zahl);
   const ziel = waehle(liste);
   ctx.flaeche.append(el("div", { class: "auftrag", text: "An welcher Stelle steht die Ziffer unter der Lupe?" }));
@@ -165,7 +191,7 @@ function stelleBenennen(ctx, zahl) {
         return;
       }
       b.classList.add("weg");
-      ctx.falsch("Zähl von rechts: Einer, Zehner, Hunderter, Tausender, …",
+      ctx.falsch(knapp ? "Nicht ganz. Zähl die Stellen genau ab!" : "Zähl von rechts: Einer, Zehner, Hunderter, Tausender, …",
         `Die ${ziel.z} steht bei den ${LS.dativ(ziel.st)} (${ziel.st.k}).`);
       if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
     });
@@ -175,7 +201,7 @@ function stelleBenennen(ctx, zahl) {
 }
 
 /** Stelle ist genannt → die passende Ziffer in der Zahl antippen. */
-function zifferFinden(ctx, zahl) {
+function zifferFinden(ctx, zahl, knapp = false) {
   const liste = ziffernMitStelle(zahl);
   const ziel = waehle(liste);
   ctx.flaeche.append(el("div", { class: "auftrag", html: `Tipp die Ziffer an, die bei den <span style="color:var(--st-${ziel.st.k})">${LS.dativ(ziel.st)} (${ziel.st.k})</span> steht!` }));
@@ -191,7 +217,7 @@ function zifferFinden(ctx, zahl) {
     knopf.classList.remove("falsch");
     void knopf.offsetWidth;
     knopf.classList.add("falsch");
-    ctx.falsch(`Die ${d.z} steht bei den ${LS.dativ(d.st)}. Zähl nochmal von rechts!`,
+    ctx.falsch(knapp ? "Diese nicht. Zähl nochmal von rechts!" : `Die ${d.z} steht bei den ${LS.dativ(d.st)}. Zähl nochmal von rechts!`,
       `Bei den ${LS.dativ(ziel.st)} steht die ${ziel.z}.`);
     if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
   });
@@ -202,16 +228,19 @@ LS.spiel({
   einleitung: "Psst, Detektiv! Jede Ziffer hat ihren Platz in der Zahl. Findest du heraus, wie die Stellen heissen?",
   anzahl: 8,
   stufen: {
-    s1: "Zahlen bis 100: Zehner oder Einer?",
-    s2: "Zahlen bis 1000 mit Hundertern — manchmal umgekehrt.",
+    s1: "Zahlen bis 1000 mit Hundertern — manchmal umgekehrt.",
+    s2: "Vierstellige Zahlen: Welche Stelle ist unter der Lupe?",
     s3: "Vier- und fünfstellige Zahlen: Wie heisst die Stelle unter der Lupe?",
     s4: "Sechsstellige Zahlen, und umgekehrt: Finde die Ziffer zur Stelle.",
     s5: "Siebenstellige Zahlen bis zu den Millionen.",
+    s6: "Millionenzahlen mit vielen Nullen und gleichen Ziffern — bunt gemischt.",
   },
   aufgabe(ctx) {
     const zahl = zahlErzeugen(ctx.stufe);
-    if (STUFE[ctx.stufe].umgekehrt && ctx.nr % 2 === 1) zifferFinden(ctx, zahl);
-    else stelleBenennen(ctx, zahl);
+    const art = STUFE[ctx.stufe].umgekehrt;
+    const umgekehrt = art === "zufall" ? Math.random() < 0.5 : art === "abwechselnd" && ctx.nr % 2 === 1;
+    if (umgekehrt) zifferFinden(ctx, zahl, ctx.stufe === "s6");
+    else stelleBenennen(ctx, zahl, ctx.stufe === "s6");
     if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort.");
   },
 });

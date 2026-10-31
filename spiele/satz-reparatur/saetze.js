@@ -78,3 +78,12 @@ const SAETZE = {
     "Die Angst war gross. Doch dann kam die Freude.",
   ],
 };
+
+// Aussagen mit Nachdruck: Hier ist neben dem Ausrufezeichen auch ein Punkt richtig. Aufforderungen
+// („Pass auf!“) und Ausrufe wie „Was für eine Freude!“ verlangen das Ausrufezeichen.
+const AUCH_PUNKT = [
+  "Wir haben grossen Hunger!",
+  "Das macht mir grossen Spass!",
+  "Endlich ist der Winter da!",
+  "Wir haben Ferien!",
+];

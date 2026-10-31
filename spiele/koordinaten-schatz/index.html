@@ -64,7 +64,31 @@ const STUFE = {
   s3: ["punktSetzen", "punktLesen"],
   s4: ["punktLesen", "verschieben", "punktSetzen"],
   s5: ["zeichnen", "verschieben"],
+  // Königsstufe: Verschiebung aus einem Punkt und seinem Bild erschliessen, die fehlende Ecke eines
+  // Rechtecks oder schräg liegenden Quadrats finden, dazu Verschieben wie in Stufe 4.
+  s6: ["vektor", "ergaenzen", "verschieben"],
 };
+
+/** Verschiebung (dx|dy), die die Figur im Bereich 0–N lässt und mindestens zwei Schritte weit ist. */
+function verschiebungFuer(ecken) {
+  const xs = ecken.map(e => e[0]), ys = ecken.map(e => e[1]);
+  const moeglich = [];
+  for (let dx = -Math.min(...xs); dx <= N - Math.max(...xs); dx++)
+    for (let dy = -Math.min(...ys); dy <= N - Math.max(...ys); dy++)
+      if (Math.abs(dx) + Math.abs(dy) >= 2 && dx !== 0 && dy !== 0) moeglich.push([dx, dy]);
+  return waehle(moeglich);
+}
+
+/** Vier Ecken A–D eines Rechtecks oder eines schräg liegenden Quadrats, alle im Bereich 0–N. */
+function viereckErzeugen() {
+  if (Math.random() < 0.5) {
+    const w = zufall(2, 6), h = zufall(2, 5), x0 = zufall(0, N - w), y0 = zufall(0, N - h);
+    return { art: "Rechteck", ecken: [[x0, y0], [x0 + w, y0], [x0 + w, y0 + h], [x0, y0 + h]] };
+  }
+  // Quadrat: A → B um (p|q), B → C um (−q|p); alle Ecken bleiben im Bereich.
+  const p = zufall(1, 4), q = zufall(1, 3), x0 = zufall(q, N - p), y0 = zufall(0, N - p - q);
+  return { art: "Quadrat", ecken: [[x0, y0], [x0 + p, y0 + q], [x0 + p - q, y0 + q + p], [x0 - q, y0 + p]] };
+}
 
 const ez = z => `${z % 10} E ${Math.floor(z / 10)} Z`;
 const pt = (x, y) => `(${x}|${y})`;
@@ -141,6 +165,7 @@ LS.spiel({
     s3: "Schatzkarte mit x und y: Punkt (3|7) setzen und ablesen.",
     s4: "Figuren verschieben: 3 nach rechts, 2 nach oben.",
     s5: "Figuren aus Koordinaten zeichnen.",
+    s6: "Endgegner: Verschiebung selbst abzählen, die fehlende Ecke eines Quadrats finden.",
   },
 
   aufgabe(ctx) {
@@ -221,6 +246,43 @@ LS.spiel({
       });
       polygon(svg, ecken, "figur");
       ecken.forEach(([a, b], i) => svg.zeichne(`<text x="${svg.X(a) - 10}" y="${svg.Y(b) - 6}" style="font-size:13px;fill:var(--deko-6)">${"ABCD"[i]}</text>`));
+      ctx.flaeche.append(svg);
+    } else if (art === "vektor") {
+      // Nur das Bild A' einer Ecke ist gegeben; die Verschiebung muss man selbst abzählen.
+      const ecken = figurErzeugen(N, N);
+      const [dx, dy] = verschiebungFuer(ecken);
+      const neu = ecken.map(([a, b]) => [a + dx, b + dy]);
+      const welche = zufall(1, ecken.length - 1); // nie A selbst
+      const name = "ABCD"[welche];
+      ctx.flaeche.append(el("div", { class: "frage", html: `Die Figur wird verschoben: <b>A</b> landet auf <b>A'</b>. Wo landet die Ecke <b>${name}</b>?` }));
+      const svg = koordinaten((px, py) => {
+        if (fertig) return;
+        if (px === neu[welche][0] && py === neu[welche][1]) { fertig = true; polygon(svg, neu, "figur-neu"); ctx.richtig(`Richtig: ${name} landet bei ${pt(...neu[welche])}.`); return; }
+        punktMarke(svg, px, py, "✖");
+        ctx.falsch(`Zähle die Schritte von A nach A' — nach rechts oder links, nach oben oder unten. Genau so geht ${name}.`,
+          `A ${pt(...ecken[0])} → A' ${pt(...neu[0])}, also ${name} ${pt(...ecken[welche])} → ${pt(...neu[welche])}`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, neu, "figur-neu"); }
+      });
+      polygon(svg, ecken, "figur");
+      ecken.forEach(([a, b], i) => svg.zeichne(`<text x="${svg.X(a) - 10}" y="${svg.Y(b) - 6}" style="font-size:13px;fill:var(--deko-6)">${"ABCD"[i]}</text>`));
+      svg.zeichne(`<circle class="gesetzt" cx="${svg.X(neu[0][0])}" cy="${svg.Y(neu[0][1])}" r="5"/><text x="${svg.X(neu[0][0]) - 12}" y="${svg.Y(neu[0][1]) - 6}" style="font-size:13px;fill:var(--deko-3)">A'</text>`);
+      ctx.flaeche.append(svg);
+    } else if (art === "ergaenzen") {
+      // Drei Ecken sind gezeichnet, die vierte (D) fehlt.
+      const { art: form, ecken } = viereckErzeugen();
+      const [zx, zy] = ecken[3]; // gesuchte Ecke D
+      ctx.flaeche.append(el("div", { class: "frage", html: `<b>A</b>, <b>B</b> und <b>C</b> sind Ecken eines ${form}s. Wo liegt die Ecke <b>D</b>?` }));
+      const svg = koordinaten((px, py) => {
+        if (fertig) return;
+        if (px === zx && py === zy) { fertig = true; polygon(svg, ecken, "figur-neu"); ctx.richtig(`Richtig: D liegt bei ${pt(zx, zy)}.`); return; }
+        punktMarke(svg, px, py, "✖");
+        ctx.falsch(form === "Rechteck" ? "Gegenüberliegende Seiten sind gleich lang und laufen parallel."
+          : "Geh von C aus so viele Schritte, wie es von B nach A geht.", `D liegt bei ${pt(zx, zy)}.`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, ecken, "figur-neu"); }
+      });
+      const [a, b, c] = ecken;
+      svg.zeichne(`<polyline class="figur" style="fill:none" points="${[a, b, c].map(([x, y]) => `${svg.X(x)},${svg.Y(y)}`).join(" ")}"/>`);
+      [a, b, c].forEach(([x, y], i) => svg.zeichne(`<circle class="gesetzt" cx="${svg.X(x)}" cy="${svg.Y(y)}" r="5"/><text x="${svg.X(x) - 12}" y="${svg.Y(y) - 6}" style="font-size:13px;fill:var(--deko-6)">${"ABC"[i]}</text>`));
       ctx.flaeche.append(svg);
     } else {
       // zeichnen: Ecken der Reihe nach setzen

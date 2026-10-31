@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schwimmt oder sinkt?</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🛁 Schwimmt oder sinkt?</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="stoffe.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.3.3: a Eigenschaften von Objekten und Stoffen beschreiben (z.B. schwimmt, schwer,
+// weich); b (Grundanspruch 1. Zyklus) Beschaffenheit erforschen (Holz, Steine, Kunststoffe);
+// c nach Material ordnen; d (Orientierungspunkt 2. Zyklus) mit Stoffen laborieren: schwimmen,
+// sinken, Wärmeleitfähigkeit. Inhalte in stoffe.js. Am besten zu Hause mit einer Schüssel Wasser nachprüfen!
+
+const { waehle, mische, el } = LS;
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+const WASSER = { schwimmt: { bild: "🛟", text: "schwimmt" }, sinkt: { bild: "⬇️", text: "sinkt" } };
+const MATERIALIEN = { Holz: "🪵", Metall: "🔩", Glas: "🫙", Kunststoff: "🧴", Papier: "📄" };
+
+const ARTEN = {
+  wasser(einfach = false) {
+    const [bild, name, schwimmt] = waehle(einfach ? WASSER_DINGE.filter(d => WASSER_EINFACH.includes(d[1])) : WASSER_DINGE);
+    return { art: "wasser", bild, name, richtig: schwimmt ? "schwimmt" : "sinkt" };
+  },
+  material(n = 3) {
+    const [bild, name, material] = waehle(MATERIAL_DINGE);
+    const andere = mische(Object.keys(MATERIALIEN).filter(m => m !== material)).slice(0, n - 1);
+    return { art: "material", bild, name, richtig: material, koerbe: mische([material, ...andere]) };
+  },
+  frage(n) {
+    const liste = STOFF_FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const [, frage, richtig, f1, f2] = waehle(liste.length ? liste : STOFF_FRAGEN.filter(f => f[0] === n));
+    return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
+  },
+  /** Irgendeine Frage bis zu dieser Stufe (Königsstufe). */
+  frageBis(n) {
+    const [, frage, richtig, f1, f2] = waehle(STOFF_FRAGEN.filter(f => f[0] <= n));
+    return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.wasser(true),
+  s2: () => ARTEN.wasser(),
+  s3: () => waehle([() => ARTEN.material(), () => ARTEN.wasser()])(),
+  s4: () => waehle([() => ARTEN.frage(4), () => ARTEN.material()])(),
+  s5: () => waehle([() => ARTEN.frage(5), () => ARTEN.wasser()])(),
+  // Königsstufe: alles gemischt — Wasser, Material mit allen Körben, alle Fragen
+  s6: () => waehle([() => ARTEN.wasser(), () => ARTEN.material(5), () => ARTEN.frageBis(6), () => ARTEN.frageBis(6)])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (stufe === "s1" && a.art === "wasser" && !WASSER_EINFACH.includes(a.name)) m.push("Ding in Stufe 1 nicht eindeutig");
+  if (a.koerbe && (!a.koerbe.includes(a.richtig) || new Set(a.koerbe).size !== a.koerbe.length)) m.push("Korb fehlt oder doppelt");
+  if (a.art === "frage") {
+    if (new Set(a.optionen).size !== 3) m.push("Antworten doppelt");
+    if (STOFF_FRAGEN.find(f => f[1] === a.frage)[0] > STUFE_NR[stufe]) m.push("Frage aus einer höheren Stufe");
+  }
+  return m;
+}
+
+LS.spiel({
+  id: "schwimmt-sinkt",
+  einleitung: "Plumps! Was passiert, wenn du das ins Wasser legst? Schwimmt es oder sinkt es?",
+  anzahl: 8,
+  stufen: {
+    s1: "Schwimmt oder sinkt? Holz, Stein, Apfel …",
+    s2: "Mehr Dinge: Kerze, Schlüssel, Kartoffel.",
+    s3: "Aus welchem Material ist das?",
+    s4: "Durchsichtig, biegsam, leitet Wärme.",
+    s5: "Warum schwimmt ein Schiff aus Stahl?",
+    s6: "Alles gemischt: Wasser, Material, Eigenschaften, Schiff.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "wasser") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Was passiert im Wasser?" }));
+      LS.koerbe(ctx, {
+        karte: { bild: a.bild, text: a.name }, koerbe: ["schwimmt", "sinkt"], richtig: a.richtig, korbInhalt: k => WASSER[k],
+        farbe: k => (k === "schwimmt" ? "#2f8fe0" : "var(--deko-7)"),
+        hinweis: "Ist es für seine Grösse leicht wie Holz — oder schwer wie Metall und Stein?",
+        loesung: `${a.name} ${a.richtig}.`, lob: `Richtig: ${a.name} ${a.richtig}! Probier es zu Hause aus.`,
+      });
+    } else if (a.art === "material") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Aus welchem Material ist das?" }));
+      LS.koerbe(ctx, {
+        karte: { bild: a.bild, text: a.name }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: m => ({ bild: MATERIALIEN[m], text: m }),
+        hinweis: "Wie fühlt es sich an? Hart und kalt, durchsichtig, leicht und biegsam?",
+        loesung: `${a.name}: ${a.richtig}.`,
+      });
+    } else {
+      ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 200, hinweis: "Denk an deine Versuche mit Wasser und verschiedenen Dingen.", loesung: `${a.frage} ${a.richtig}` });
+    }
+    if (ctx.nr === 0) ctx.sag("Was glaubst du? Tipp auf deine Vermutung.");
+  },
+});
+</script>
+</body>
+</html>

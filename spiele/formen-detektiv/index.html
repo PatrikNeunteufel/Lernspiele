@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formen-Detektiv</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .form { width: 100%; max-width: 120px; height: auto; display: block; margin: 0 auto; }
+  .form-gross { max-width: 180px; margin: 4px auto 14px; }
+  .form .flaeche { fill: var(--f, var(--deko-5)); stroke: var(--text); stroke-width: 2.5; stroke-linejoin: round; }
+  .form .hell { fill: #fff; opacity: .35; stroke: none; }
+  .form .kante { fill: none; stroke: var(--text); stroke-width: 2.5; stroke-linejoin: round; }
+  .form .verdeckt { fill: none; stroke: var(--text); stroke-width: 1.5; stroke-dasharray: 4 4; }
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔺 Formen-Detektiv</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.A.1: a „Kreis, Dreieck, Rechteck, Quadrat, Würfel und Kugel benennen“, b ordnen
+// und beschreiben; e (Orientierungspunkt 2. Zyklus) „Punkt, Ecke, Kante, Seitenfläche, Würfel,
+// Quader“; f Körper (Würfel, Quader, Kugel, Zylinder, Pyramide) in der Umwelt erkennen;
+// g Symmetrie, Parallele, rechtwinklig.
+
+const { zufall, waehle, mische, el } = LS;
+const SVG = "http://www.w3.org/2000/svg";
+const FARBEN = ["var(--deko-1)", "var(--deko-2)", "var(--deko-3)", "var(--deko-4)", "var(--deko-5)", "var(--deko-6)"];
+
+// Figuren als Punktlisten im Feld 100 × 100 (Kreis gesondert). Eigenschaften für Stufe 4–5.
+const FIGUREN = {
+  Kreis: { ecken: 0 },
+  Dreieck: { ecken: 3, punkte: [[50, 12], [90, 84], [10, 84]] },
+  Rechteck: { ecken: 4, punkte: [[8, 28], [92, 28], [92, 72], [8, 72]] },
+  Quadrat: { ecken: 4, punkte: [[18, 18], [82, 18], [82, 82], [18, 82]] },
+};
+// Für Stufe 5: Symmetrieachsen, rechte Winkel, Paare paralleler Seiten
+const EIGENSCHAFTEN = {
+  Quadrat: { punkte: FIGUREN.Quadrat.punkte, achsen: 4, rechte: 4, parallel: 2 },
+  Rechteck: { punkte: FIGUREN.Rechteck.punkte, achsen: 2, rechte: 4, parallel: 2 },
+  "gleichseitiges Dreieck": { punkte: [[50, 13], [90, 82], [10, 82]], achsen: 3, rechte: 0, parallel: 0 },
+  // Katheten verschieden lang (56 und 72) — ein gleichschenklig-rechtwinkliges hätte eine Achse
+  "rechtwinkliges Dreieck": { punkte: [[20, 30], [20, 86], [92, 86]], achsen: 0, rechte: 1, parallel: 0 },
+  "gleichschenkliges Trapez": { punkte: [[30, 25], [70, 25], [92, 75], [8, 75]], achsen: 1, rechte: 0, parallel: 1 },
+  // Seiten 66 und rund 55 lang, also kein Rhombus: keine Symmetrieachse
+  Parallelogramm: { punkte: [[28, 25], [94, 25], [72, 75], [6, 75]], achsen: 0, rechte: 0, parallel: 2 },
+};
+
+// Artikel für die Fragen („Wo ist der Kreis?“, „Das ist eine Kugel.“)
+const ARTIKEL = {
+  Kreis: "der", Würfel: "der", Quader: "der", Zylinder: "der", Kugel: "die", Pyramide: "die",
+  Ball: "der", Basketball: "der", Spielwürfel: "der", Eiswürfel: "der", Ziegelstein: "der", Dose: "die", Orange: "die",
+};
+const der = n => ARTIKEL[n] || "das";
+const ein = n => ({ der: "ein", die: "eine", das: "ein" })[der(n)];
+
+const KOERPER = ["Würfel", "Quader", "Kugel", "Zylinder", "Pyramide"];
+// Ecken, Kanten, Flächen (Pyramide mit quadratischer Grundfläche)
+const ZAEHLEN = { Würfel: { Ecken: 8, Kanten: 12, Flächen: 6 }, Quader: { Ecken: 8, Kanten: 12, Flächen: 6 }, Pyramide: { Ecken: 5, Kanten: 8, Flächen: 5 } };
+// Dinge aus der Umwelt
+const DINGE = [["⚽", "Ball", "Kugel"], ["🏀", "Basketball", "Kugel"], ["🎲", "Spielwürfel", "Würfel"], ["🧊", "Eiswürfel", "Würfel"],
+  ["🥫", "Dose", "Zylinder"], ["🧱", "Ziegelstein", "Quader"], ["🍊", "Orange", "Kugel"]];
+
+function svg(attr, ...kinder) {
+  const s = document.createElementNS(SVG, "svg");
+  s.setAttribute("viewBox", "0 0 100 100");
+  s.setAttribute("class", "form " + (attr.klasse || ""));
+  s.setAttribute("aria-hidden", "true");
+  if (attr.farbe) s.style.setProperty("--f", attr.farbe);
+  s.innerHTML = kinder.join("");
+  return s;
+}
+const polygon = (p, drehung = 0) => `<polygon class="flaeche" points="${p.map(q => q.join(",")).join(" ")}" transform="rotate(${drehung} 50 50)"/>`;
+
+function figurBild(name, opt = {}) {
+  const dreh = opt.drehen ? waehle([0, 15, 30, 45, 60, 90]) : 0;
+  const farbe = opt.farbe || waehle(FARBEN);
+  if (name === "Kreis") return svg({ farbe, klasse: opt.klasse }, `<circle class="flaeche" cx="50" cy="50" r="${opt.drehen ? zufall(28, 40) : 38}"/>`);
+  const punkte = (FIGUREN[name] || EIGENSCHAFTEN[name]).punkte;
+  return svg({ farbe, klasse: opt.klasse }, polygon(punkte, dreh));
+}
+
+function koerperBild(name, klasse = "") {
+  const f = waehle(FARBEN);
+  const t = {
+    Würfel: `<polygon class="flaeche" points="20,35 60,35 60,85 20,85"/><polygon class="flaeche" points="20,35 40,18 80,18 60,35"/><polygon class="flaeche" points="60,35 80,18 80,68 60,85"/><polygon class="hell" points="20,35 40,18 80,18 60,35"/>`,
+    Quader: `<polygon class="flaeche" points="8,45 64,45 64,82 8,82"/><polygon class="flaeche" points="8,45 26,30 82,30 64,45"/><polygon class="flaeche" points="64,45 82,30 82,67 64,82"/><polygon class="hell" points="8,45 26,30 82,30 64,45"/>`,
+    Kugel: `<circle class="flaeche" cx="50" cy="52" r="38"/><ellipse class="verdeckt" cx="50" cy="52" rx="38" ry="12"/><ellipse class="hell" cx="36" cy="38" rx="10" ry="7"/>`,
+    Zylinder: `<path class="flaeche" d="M22,22 L22,80 A28,10 0 0 0 78,80 L78,22"/><ellipse class="flaeche" cx="50" cy="22" rx="28" ry="10"/><ellipse class="hell" cx="50" cy="22" rx="28" ry="10"/>`,
+    Pyramide: `<polygon class="flaeche" points="14,74 56,88 50,14"/><polygon class="flaeche" points="56,88 88,70 50,14"/><polygon class="hell" points="56,88 88,70 50,14"/><path class="verdeckt" d="M14,74 L46,60 L88,70 M46,60 L50,14"/>`,
+  }[name];
+  return svg({ farbe: f, klasse }, t);
+}
+
+// Flache Formen, die man mit Würfel und Kugel verwechseln kann (Stufe 4: flach oder Körper?)
+const FLACH = ["Quadrat", "Kreis"];
+const RUND_ECKIG = ["Würfel", "Kugel"];
+
+const ARTEN = {
+  /** Gesuchte Form unter 'namen' finden; 'anzahl' Auswahlknöpfe. */
+  findeFigur(drehen, namen = Object.keys(FIGUREN), anzahl = 3) {
+    const ziel = waehle(namen);
+    // Ein Quadrat ist auch ein Rechteck: Wird das Rechteck gesucht, kommt kein Quadrat dazu.
+    const andere = namen.filter(n => n !== ziel && !(ziel === "Rechteck" && n === "Quadrat"));
+    return { art: "findeFigur", ziel, drehen, optionen: mische([ziel, ...mische(andere).slice(0, anzahl - 1)]) };
+  },
+  /** Würfel oder Kugel unter Körpern und flachen Formen finden (Lehrplan MA.2.A.1.a). */
+  koerperFlach() {
+    const ziel = waehle(RUND_ECKIG);
+    return { art: "koerperFlach", ziel, optionen: mische([...RUND_ECKIG, ...FLACH]) };
+  },
+  benenne() {
+    const ziel = waehle(Object.keys(FIGUREN));
+    return { art: "benenne", ziel, optionen: Object.keys(FIGUREN) };
+  },
+  ecken() {
+    const ziel = waehle(Object.keys(FIGUREN));
+    return { art: "ecken", ziel, richtig: FIGUREN[ziel].ecken, optionen: [0, 3, 4, 5] };
+  },
+  koerper() {
+    const ziel = waehle(KOERPER);
+    return { art: "koerper", ziel, optionen: mische([ziel, ...mische(KOERPER.filter(k => k !== ziel)).slice(0, 3)]) };
+  },
+  /** Ding aus der Umwelt einem Körper zuordnen. nurWuerfelKugel: Stufe 4, Ablenker sind die flachen Formen. */
+  ding(nurWuerfelKugel = false) {
+    const [bild, name, koerper] = waehle(nurWuerfelKugel ? DINGE.filter(d => RUND_ECKIG.includes(d[2])) : DINGE);
+    const andere = nurWuerfelKugel ? [...RUND_ECKIG, ...FLACH].filter(k => k !== koerper) : mische(KOERPER.filter(k => k !== koerper)).slice(0, 2);
+    return { art: "ding", bild, name, ziel: koerper, optionen: mische([koerper, ...andere]) };
+  },
+  zaehlen() {
+    const ziel = waehle(Object.keys(ZAEHLEN));
+    const was = waehle(["Ecken", "Kanten", "Flächen"]);
+    const richtig = ZAEHLEN[ziel][was];
+    return { art: "zaehlen", ziel, was, richtig, optionen: mische([richtig, ...mische([4, 5, 6, 8, 10, 12].filter(x => x !== richtig)).slice(0, 3)]) };
+  },
+  eigenschaft() {
+    const ziel = waehle(Object.keys(EIGENSCHAFTEN));
+    const was = waehle(["achsen", "rechte", "parallel"]);
+    return { art: "eigenschaft", ziel, was, richtig: EIGENSCHAFTEN[ziel][was], optionen: [0, 1, 2, 3, 4] };
+  },
+};
+
+// Basisklasse 1: s1 Kindergarten, s2–s4 1. Klasse, s5 2. Klasse, s6 Königsstufe.
+const S1_FORMEN = ["Kreis", "Dreieck", "Quadrat"];
+const STUFE = {
+  s1: { arten: ["findeFigur"], neu: () => ARTEN.findeFigur(false, S1_FORMEN, 3) },
+  s2: { arten: ["findeFigur"], neu: () => ARTEN.findeFigur(false, Object.keys(FIGUREN), 4) },
+  s3: { arten: ["findeFigur", "benenne", "ecken"], neu: () => waehle([() => ARTEN.findeFigur(true), ARTEN.benenne, ARTEN.ecken])() },
+  s4: { arten: ["koerperFlach", "ding"], neu: () => waehle([ARTEN.koerperFlach, () => ARTEN.ding(true)])() },
+  s5: { arten: ["koerper", "ding"], neu: () => waehle([ARTEN.koerper, ARTEN.koerper, () => ARTEN.ding(false)])() },
+  // Königsstufe: Körper und Figuren genau untersuchen, ohne Zählhilfe.
+  s6: { arten: ["zaehlen", "eigenschaft"], neu: () => waehle([ARTEN.zaehlen, ARTEN.eigenschaft, ARTEN.eigenschaft])(), knapp: true },
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe].neu(); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const richtig = a.richtig ?? a.ziel;
+  if (!STUFE[stufe].arten.includes(a.art)) m.push("Aufgabentyp gehört nicht in diese Stufe");
+  if (!a.optionen.includes(richtig)) m.push("richtige Antwort fehlt");
+  if (new Set(a.optionen).size !== a.optionen.length) m.push("Auswahl doppelt");
+  if (a.art === "findeFigur" && a.ziel === "Rechteck" && a.optionen.includes("Quadrat")) m.push("Quadrat als Ablenker zum Rechteck");
+  if (stufe === "s1" && (a.drehen || a.optionen.length !== 3 || a.optionen.some(n => !S1_FORMEN.includes(n)))) m.push("Stufe 1: nur Kreis, Dreieck, Quadrat, ungedreht");
+  if (stufe === "s2" && (a.drehen || a.optionen.length < 3)) m.push("Stufe 2: ungedreht, mindestens drei Formen");
+  if (a.art === "ecken" && a.richtig !== FIGUREN[a.ziel].ecken) m.push("Eckenzahl falsch");
+  if (a.art === "zaehlen" && a.richtig !== ZAEHLEN[a.ziel][a.was]) m.push("Zählwert falsch");
+  if (a.art === "eigenschaft" && a.richtig !== EIGENSCHAFTEN[a.ziel][a.was]) m.push("Eigenschaft falsch");
+  if (a.art === "ding" && DINGE.find(d => d[1] === a.name)?.[2] !== a.ziel) m.push("Ding falsch zugeordnet");
+  if (stufe === "s4" && a.art === "ding" && !RUND_ECKIG.includes(a.ziel)) m.push("Stufe 4: nur Würfel und Kugel");
+  return m;
+}
+
+const WAS = { achsen: "Symmetrieachsen", rechte: "rechte Winkel", parallel: "Paare paralleler Seiten" };
+const ERKLAERUNG = {
+  Kreis: "Der Kreis ist rund und hat keine Ecken.", Dreieck: "Das Dreieck hat drei Ecken und drei Seiten.",
+  Rechteck: "Das Rechteck hat vier Ecken; gegenüberliegende Seiten sind gleich lang.", Quadrat: "Beim Quadrat sind alle vier Seiten gleich lang.",
+  Würfel: "Der Würfel hat sechs gleiche quadratische Flächen.", Quader: "Der Quader hat sechs rechteckige Flächen, wie eine Schachtel.",
+  Kugel: "Die Kugel ist überall rund, wie ein Ball.", Zylinder: "Der Zylinder hat oben und unten einen Kreis, wie eine Dose.",
+  Pyramide: "Die Pyramide hat unten ein Viereck und läuft oben in einer Spitze zusammen.",
+};
+
+LS.spiel({
+  id: "formen-detektiv",
+  einleitung: "Kreis, Dreieck, Rechteck, Quadrat — und Körper wie Würfel und Kugel. Erkennst du sie alle?",
+  anzahl: 8,
+  stufen: {
+    s1: "Kreis, Dreieck und Quadrat finden.",
+    s2: "Kreis, Dreieck, Rechteck und Quadrat finden.",
+    s3: "Gedrehte Formen benennen und Ecken zählen.",
+    s4: "Würfel und Kugel — und Dinge, die so aussehen.",
+    s5: "Alle Körper: Würfel, Quader, Kugel, Zylinder, Pyramide.",
+    s6: "Ecken, Kanten, Flächen, Symmetrieachsen, rechte Winkel, parallele Seiten.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const knapp = STUFE[ctx.stufe].knapp;
+    const frage = t => ctx.flaeche.append(el("div", { class: "frage", text: t }));
+    // Königsstufe: knappe Hilfe ohne Zählanleitung.
+    const zahlWahl = (richtig, loesung) => LS.auswahl(ctx, { optionen: a.optionen, richtig, breite: 70,
+      hinweis: knapp ? "Nicht ganz. Schau nochmal genau hin." : "Zähle langsam und zeig mit dem Finger auf jede Stelle.", loesung });
+    const gross = t => t.charAt(0).toUpperCase() + t.slice(1);
+    const flachHinweis = k => `${gross(ein(k))} ${k} ist flach, wie auf Papier gezeichnet. Gesucht ist ein Körper, den man in die Hand nehmen kann.`;
+
+    if (a.art === "koerperFlach") {
+      frage(`Wo ist ${der(a.ziel)} ${a.ziel}?`);
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.ziel, breite: 110,
+        inhalt: k => (FLACH.includes(k) ? figurBild(k) : koerperBild(k)),
+        hinweis: k => (FLACH.includes(k) ? flachHinweis(k) : `Das ist ${ein(k)} ${k}. ${ERKLAERUNG[a.ziel]}`), loesung: ERKLAERUNG[a.ziel] });
+    } else if (a.art === "findeFigur") {
+      frage(`Wo ist ${der(a.ziel)} ${a.ziel}?`);
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.ziel, breite: 110, inhalt: n => figurBild(n, { drehen: a.drehen }), hinweis: n => `Das ist ${ein(n)} ${n}. ${ERKLAERUNG[a.ziel]}`, loesung: ERKLAERUNG[a.ziel] });
+    } else if (a.art === "benenne") {
+      frage("Wie heisst diese Form?");
+      ctx.flaeche.append(figurBild(a.ziel, { drehen: true, klasse: "form-gross" }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.ziel, breite: 120, hinweis: n => `${ERKLAERUNG[n]} Passt das?`, loesung: ERKLAERUNG[a.ziel] });
+    } else if (a.art === "ecken") {
+      frage(`Wie viele Ecken hat ${der(a.ziel)} ${a.ziel}?`);
+      ctx.flaeche.append(figurBild(a.ziel, { drehen: true, klasse: "form-gross" }));
+      zahlWahl(a.richtig, ERKLAERUNG[a.ziel]);
+    } else if (a.art === "koerper") {
+      frage(`Wo ist ${der(a.ziel)} ${a.ziel}?`);
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.ziel, breite: 110, inhalt: k => koerperBild(k), hinweis: k => `Das ist ${ein(k)} ${k}. ${ERKLAERUNG[a.ziel]}`, loesung: ERKLAERUNG[a.ziel] });
+    } else if (a.art === "ding") {
+      frage(`Welche Form hat ${der(a.name)} ${a.name}?`);
+      ctx.flaeche.append(el("div", { class: "frage", style: "font-size:64px", text: a.bild }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.ziel, breite: 110, inhalt: k => ({ text: k }), hinweis: k => (FLACH.includes(k) ? flachHinweis(k) : `${ERKLAERUNG[k]} Sieht ${der(a.name)} ${a.name} so aus?`), loesung: `${a.name}: ${a.ziel}. ${ERKLAERUNG[a.ziel]}` });
+    } else if (a.art === "zaehlen") {
+      frage(`Wie viele ${a.was} hat ${der(a.ziel)} ${a.ziel}?`);
+      ctx.flaeche.append(koerperBild(a.ziel, "form-gross"));
+      zahlWahl(a.richtig, `${a.ziel}: ${ZAEHLEN[a.ziel].Ecken} Ecken, ${ZAEHLEN[a.ziel].Kanten} Kanten, ${ZAEHLEN[a.ziel].Flächen} Flächen.`);
+    } else {
+      frage(`Wie viele ${WAS[a.was]} hat ${der(a.ziel)} ${a.ziel}?`);
+      ctx.flaeche.append(figurBild(a.ziel, { klasse: "form-gross" }));
+      zahlWahl(a.richtig, `${a.ziel}: ${EIGENSCHAFTEN[a.ziel].achsen} Symmetrieachsen, ${EIGENSCHAFTEN[a.ziel].rechte} rechte Winkel, ${EIGENSCHAFTEN[a.ziel].parallel} Paare paralleler Seiten.`);
+    }
+    if (ctx.nr === 0) ctx.sag("Schau die Form genau an: Ecken, Seiten, rund?");
+  },
+});
+</script>
+</body>
+</html>

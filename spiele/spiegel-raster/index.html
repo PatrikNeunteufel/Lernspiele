@@ -47,7 +47,79 @@ const STUFE = {
   s3: { n: 8, felder: [6, 9], arten: ["senkrecht", "waagrecht"] },
   s4: { n: 8, felder: [5, 8], arten: ["senkrecht", "waagrecht", "verschieben"] },
   s5: { n: 8, felder: [6, 9], arten: ["diagonal", "verschieben", "waagrecht"] },
+  // Königsstufe: an zwei Achsen zugleich spiegeln, an der anderen Diagonale, an einer Achse
+  // ausserhalb der Mitte, und schräg nach links/oben verschieben.
+  s6: { n: 8, felder: [5, 7], arten: ["doppelt", "gegendiagonal", "versetzt", "verschiebenFrei"] },
 };
+
+const teile = s => s.split(",").map(Number);
+
+/** Königsstufe: jede Art mit begrenzten Versuchen, damit der Generator sicher endet. */
+function koenigsAufgabe(p, art) {
+  const n = p.n, h = n / 2, k = zufall(...p.felder);
+  if (art === "doppelt") {
+    // Vorlage oben links; Spiegelbilder an der senkrechten, der waagrechten und an beiden Achsen.
+    const vorlage = figur(Math.min(k, 6), { r0: 0, r1: h - 1, c0: 0, c1: h - 1 });
+    const ziel = new Set();
+    for (const s of vorlage) {
+      const [r, c] = teile(s);
+      ziel.add(key(r, n - 1 - c)); ziel.add(key(n - 1 - r, c)); ziel.add(key(n - 1 - r, n - 1 - c));
+    }
+    return { art, n, vorlage, ziel, bereich: (r, c) => r >= h || c >= h, achsen: ["senkrecht", "waagrecht"],
+      frage: "Spiegle die Figur an <b>beiden</b> roten Achsen — es braucht drei Spiegelbilder." };
+  }
+  if (art === "gegendiagonal") {
+    // Achse von unten links nach oben rechts: (r, c) → (n−1−c, n−1−r); Vorlage oberhalb.
+    let vorlage = new Set();
+    for (let v = 0; v < 50 && vorlage.size < 4; v++) {
+      vorlage = new Set([...figur(k, { r0: 0, r1: n - 2, c0: 0, c1: n - 2 })].filter(s => { const [r, c] = teile(s); return r + c < n - 1; }));
+    }
+    if (!vorlage.size) vorlage.add(key(0, 0));
+    const ziel = new Set([...vorlage].map(s => { const [r, c] = teile(s); return key(n - 1 - c, n - 1 - r); }));
+    return { art, n, vorlage, ziel, bereich: (r, c) => r + c > n - 1, achsen: ["gegendiagonal"],
+      frage: "Spiegle die Figur an der schrägen roten Achse." };
+  }
+  if (art === "versetzt") {
+    // Senkrechte Achse links oder rechts der Mitte, zwischen Spalte a−1 und a.
+    const a = waehle([3, 5]);
+    const vorlage = figur(k, { r0: 0, r1: n - 1, c0: Math.max(0, 2 * a - n), c1: a - 1 });
+    const ziel = new Set([...vorlage].map(s => { const [r, c] = teile(s); return key(r, 2 * a - 1 - c); }));
+    return { art, n, vorlage, ziel, bereich: (r, c) => c >= a, achsen: ["versetzt"], achseBei: a,
+      frage: "Die Achse steht nicht in der Mitte. Spiegle die Figur an der roten Achse." };
+  }
+  // verschiebenFrei: Figur in einem 3×3-Kasten; mindestens 4 Schritte in eine Richtung — so
+  // überlappen Vorlage und Bild nie. Auch nach links und nach oben.
+  const weit = zufall(4, 5) * waehle([1, -1]), quer = zufall(0, 3) * waehle([1, -1]);
+  const [dx, dy] = Math.random() < 0.5 ? [weit, quer] : [quer, weit];
+  const r0 = zufall(Math.max(0, -dy), n - 3 - Math.max(0, dy)), c0 = zufall(Math.max(0, -dx), n - 3 - Math.max(0, dx));
+  const vorlage = figur(Math.min(k, 6), { r0, r1: r0 + 2, c0, c1: c0 + 2 });
+  const ziel = new Set([...vorlage].map(s => { const [r, c] = teile(s); return key(r + dy, c + dx); }));
+  const richtung = (d, plus, minus) => (d ? `<b>${Math.abs(d)} nach ${d > 0 ? plus : minus}</b>` : "");
+  return { art, n, vorlage, ziel, bereich: () => true, verschiebung: { dx, dy },
+    frage: `Verschiebe die blaue Figur um ${[richtung(dx, "rechts", "links"), richtung(dy, "unten", "oben")].filter(Boolean).join(" und ")}.` };
+}
+
+/** Mängel: Bild liegt im Raster, nur auf antippbaren Feldern, nicht auf der Vorlage, und folgt der Abbildung. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const n = a.n, h = n / 2;
+  if (!a.vorlage.size || a.ziel.size === 0) m.push("leere Figur");
+  for (const s of a.ziel) {
+    const [r, c] = teile(s);
+    if (r < 0 || c < 0 || r >= n || c >= n) m.push("Bild ausserhalb des Rasters");
+    else if (a.vorlage.has(s) || !a.bereich(r, c)) m.push("Bildfeld nicht antippbar");
+  }
+  const bild = {
+    senkrecht: ([r, c]) => [[r, n - 1 - c]], waagrecht: ([r, c]) => [[n - 1 - r, c]], diagonal: ([r, c]) => [[c, r]],
+    doppelt: ([r, c]) => [[r, n - 1 - c], [n - 1 - r, c], [n - 1 - r, n - 1 - c]],
+    gegendiagonal: ([r, c]) => [[n - 1 - c, n - 1 - r]],
+    versetzt: ([r, c]) => [[r, 2 * a.achseBei - 1 - c]],
+  }[a.art] || (([r, c]) => [[r + a.verschiebung.dy, c + a.verschiebung.dx]]);
+  const soll = new Set([...a.vorlage].flatMap(s => bild(teile(s)).map(([r, c]) => key(r, c))));
+  if (soll.size !== a.ziel.size || [...soll].some(s => !a.ziel.has(s))) m.push("Bild folgt nicht der Abbildung");
+  if (a.art === "doppelt" && [...a.vorlage].some(s => { const [r, c] = teile(s); return r >= h || c >= h; })) m.push("Vorlage nicht im Viertel oben links");
+  return m;
+}
 
 const key = (r, c) => `${r},${c}`;
 
@@ -69,6 +141,7 @@ function figur(k, bereich) {
 function aufgabeErzeugen(stufe) {
   const p = STUFE[stufe], n = p.n, h = n / 2;
   const art = waehle(p.arten);
+  if (stufe === "s6") return koenigsAufgabe(p, art);
   const k = zufall(...p.felder);
   if (art === "senkrecht") {
     const vorlage = figur(k, { r0: 0, r1: n - 1, c0: 0, c1: h - 1 });
@@ -106,6 +179,7 @@ LS.spiel({
     s3: "Auch an der waagrechten Achse spiegeln.",
     s4: "Dazu: Figuren im Raster verschieben.",
     s5: "Profi: an der schrägen Achse spiegeln.",
+    s6: "Endgegner: an zwei Achsen zugleich, Achse nicht in der Mitte, schräg verschieben.",
   },
 
   aufgabe(ctx) {
@@ -139,6 +213,13 @@ LS.spiel({
     if (a.art === "senkrecht") rahmen.append(el("div", { class: "achse", style: "left:calc(50% - 3px);top:-6px;bottom:-6px;width:6px" }));
     if (a.art === "waagrecht") rahmen.append(el("div", { class: "achse", style: "top:calc(50% - 3px);left:-6px;right:-6px;height:6px" }));
     if (a.art === "diagonal") rahmen.append(el("div", { class: "achse diagonal", style: "left:0;top:0;width:141.4%;height:6px;transform:rotate(45deg) translateY(-3px)" }));
+    // Königsstufe: Achsen aus a.achsen
+    for (const achse of a.achsen || []) {
+      if (achse === "senkrecht") rahmen.append(el("div", { class: "achse", style: "left:calc(50% - 3px);top:-6px;bottom:-6px;width:6px" }));
+      if (achse === "waagrecht") rahmen.append(el("div", { class: "achse", style: "top:calc(50% - 3px);left:-6px;right:-6px;height:6px" }));
+      if (achse === "versetzt") rahmen.append(el("div", { class: "achse", style: `left:calc(${(a.achseBei / a.n) * 100}% - 3px);top:-6px;bottom:-6px;width:6px` }));
+      if (achse === "gegendiagonal") rahmen.append(el("div", { class: "achse diagonal", style: "left:0;top:100%;width:141.4%;height:6px;transform:rotate(-45deg) translateY(-3px)" }));
+    }
     ctx.flaeche.append(rahmen);
 
     const ok = el("button", { class: "knopf gruen", type: "button", text: "Fertig ✓" });

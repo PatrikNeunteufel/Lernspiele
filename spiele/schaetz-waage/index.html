@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schätz-Waage</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 14px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📏 Schätz-Waage</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="groessen.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.A.1: a lang/kurz, schwer/leicht, gross/klein beschreiben; b Steigerungsformen
+// („B ist schwerer als A“); c (Grundanspruch 1. Zyklus) Referenzgrössen 1 cm, 1 m; e 1 km, 1 mm,
+// 1 kg, 100 g, 1 l, 1 dl, 1 h, 1 min; f (Orientierungspunkt 2. Zyklus) t, ml, s. Inhalte in groessen.js.
+
+const { waehle, mische, el } = LS;
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+
+const ARTEN = {
+  vergleich() {
+    const [eigenschaft, gross, klein] = waehle(VERGLEICHE);
+    return { art: "vergleich", eigenschaft, richtig: gross, optionen: mische([gross, klein]) };
+  },
+  /** Dinge ordnen; 'anzahl' Dinge je Reihe (3 in Stufe 2, 4 in Stufe 4). */
+  ordnen(anzahl) {
+    const [richtung, dinge] = waehle(REIHEN.filter(r => r[1].length === anzahl));
+    return { art: "ordnen", richtung, reihe: dinge };
+  },
+  schaetzen(n) {
+    // vor allem Fragen dieser Stufe, ab und zu eine aus der Stufe davor
+    const liste = SCHAETZFRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const [, frage, richtig, f1, f2] = waehle(liste.length ? liste : SCHAETZFRAGEN.filter(f => f[0] === n));
+    return { art: "schaetzen", frage, richtig, optionen: mische([richtig, f1, f2]) };
+  },
+};
+
+// Basisklasse 2: s1 1. Klasse, s2–s4 2. Klasse, s5 3. Klasse, s6 Königsstufe.
+const STUFE = {
+  s1: { arten: ["vergleich"], neu: () => ARTEN.vergleich() },
+  s2: { arten: ["ordnen", "vergleich"], ordnen: 3, neu: () => waehle([() => ARTEN.ordnen(3), () => ARTEN.ordnen(3), ARTEN.vergleich])() },
+  s3: { arten: ["schaetzen"], neu: () => ARTEN.schaetzen(3) },
+  s4: { arten: ["schaetzen", "ordnen"], ordnen: 4, neu: () => waehle([() => ARTEN.schaetzen(4), () => ARTEN.schaetzen(4), () => ARTEN.ordnen(4)])() },
+  s5: { arten: ["schaetzen"], neu: () => ARTEN.schaetzen(5) },
+  s6: { arten: ["schaetzen"], neu: () => ARTEN.schaetzen(6), knapp: true },
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe].neu(); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const s = STUFE[stufe];
+  if (!s.arten.includes(a.art)) m.push("Aufgabentyp gehört nicht in diese Stufe");
+  if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen.map(String)).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
+  if (a.art === "schaetzen") {
+    const f = SCHAETZFRAGEN.find(x => x[1] === a.frage);
+    if (!f) m.push("Frage nicht in der Liste");
+    else if (f[0] > STUFE_NR[stufe] || f[0] < STUFE_NR[stufe] - 1) m.push("Frage aus einer anderen Stufe");
+    else if (f[2] !== a.richtig) m.push("Lösung passt nicht zur Liste");
+  }
+  if (a.art === "ordnen") {
+    if (a.reihe.length !== s.ordnen) m.push("falsche Zahl von Dingen zum Ordnen");
+    if (new Set(a.reihe.map(d => d[1])).size !== a.reihe.length) m.push("Ding doppelt in der Reihe");
+  }
+  return m;
+}
+
+const HINWEIS = {
+  schwerer: "Stell dir vor, du müsstest beide hochheben. Was wäre schwerer?",
+  länger: "Stell dir beide nebeneinander vor. Was reicht weiter?",
+  grösser: "Stell dir beide nebeneinander vor. Was ist höher?",
+};
+
+// Hinweis beim Schätzen nach der Einheit der Lösung: eine Referenzgrösse, ohne die Antwort zu nennen.
+const MASS_HINWEIS = [
+  [["cm", "m"], "Denk an etwas, das du kennst: 1 cm ist so breit wie ein Fingernagel, 1 m ist ein grosser Schritt."],
+  [["kg", "g"], "Denk an etwas, das du kennst: 1 kg wiegt eine Packung Mehl, 100 g eine Tafel Schokolade."],
+  [["l", "dl"], "Denk an etwas, das du kennst: 1 l passt in eine Milchpackung, 1 dl ist ein halbes Glas."],
+];
+function schaetzHinweis(richtig, knapp) {
+  if (knapp) return "Nicht ganz. Vergleiche mit etwas, das du kennst.";
+  const einheit = richtig.split(" ")[1];
+  return (MASS_HINWEIS.find(([e]) => e.includes(einheit)) || [, "Denk an etwas, das du kennst, und vergleiche."])[1];
+}
+
+LS.spiel({
+  id: "schaetz-waage",
+  einleitung: "Was ist schwerer, was ist länger? Und wie lang ist eigentlich ein Bleistift? Schätz mal!",
+  anzahl: 8,
+  stufen: {
+    s1: "Vergleichen: Was ist schwerer, länger, grösser?",
+    s2: "Drei Dinge ordnen: leicht → schwer.",
+    s3: "Zentimeter und Meter schätzen.",
+    s4: "Zentimeter und Meter, schwieriger — und vier Dinge ordnen.",
+    s5: "Kilogramm, Gramm, Liter und Deziliter schätzen.",
+    s6: "Kilometer, Millimeter, Tonnen, Milliliter, Stunden, Minuten, Sekunden.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "vergleich") {
+      ctx.flaeche.append(el("div", { class: "frage", text: `Was ist ${a.eigenschaft}?` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 140,
+        inhalt: ([bild, name]) => ({ bild, text: name.split(" ")[1] }),
+        hinweis: HINWEIS[a.eigenschaft],
+        loesung: `${a.richtig[1][0].toUpperCase()}${a.richtig[1].slice(1)} ist ${a.eigenschaft}.`,
+        lob: `Richtig: ${a.richtig[1][0].toUpperCase()}${a.richtig[1].slice(1)} ist ${a.eigenschaft}! 💪`,
+      });
+    } else if (a.art === "ordnen") {
+      ctx.flaeche.append(el("div", { class: "frage", text: `Ordne: ${a.richtung}` }));
+      LS.reihenfolge(ctx, {
+        reihe: a.reihe, breite: 120, pfeile: true,
+        inhalt: ([bild, name]) => ({ bild, text: name }), ablage: ([bild, name]) => `${bild} ${name}`,
+        // Verrät nicht, welches Ding an der Reihe ist.
+        hinweis: () => {
+          const wort = a.richtung.startsWith("leicht") ? "Leichteste" : a.richtung.startsWith("kurz") ? "Kürzeste" : "Kleinste";
+          return `Fang mit dem ${wort}n an. Welches ist von den übrigen Dingen das ${wort}?`;
+        },
+        loesung: a.reihe.map(d => d[1]).join(" → "),
+      });
+    } else {
+      ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 110,
+        hinweis: schaetzHinweis(a.richtig, STUFE[ctx.stufe].knapp),
+        loesung: `${a.frage} — ungefähr ${a.richtig}.`,
+        lob: `Gut geschätzt: ungefähr ${a.richtig}! 📏`,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Stell es dir gut vor und tipp auf deine Antwort.");
+  },
+});
+</script>
+</body>
+</html>

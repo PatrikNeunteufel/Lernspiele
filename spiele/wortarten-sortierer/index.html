@@ -35,6 +35,10 @@
     font-weight: 900;
   }
 
+  /* Königsstufe: mehrere Wörter eines Satzes nacheinander — nur das aktuelle ist hervorgehoben. */
+  .satz mark.ruhig { background: none; border-bottom-color: transparent; font-weight: 700; }
+  .satz mark.sortiert { background: none; border-bottom: 5px dotted var(--rand); font-weight: 700; }
+
   .koerbe {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -105,7 +109,8 @@ function zerlegeSatz(satz) {
   });
 }
 
-/** Aufgabe je Stufe: Wort einzeln (1–2) oder markiert im Satz (3–5). */
+/** Aufgabe je Stufe: Wort einzeln (1–2) oder markiert im Satz (3–5). Die Königsstufe nimmt einen
+    Satz der Stufen 4 und 5 und fragt bis zu drei Wörter darin nacheinander ab (ziele). */
 function aufgabeErzeugen(stufe) {
   if (stufe === "s1" || stufe === "s2") {
     const art = waehle(["N", "V", "A"]);
@@ -113,9 +118,29 @@ function aufgabeErzeugen(stufe) {
     // Stufe 2: alles klein — die Grossschreibung verrät das Nomen nicht mehr, die Probe zählt.
     return { art, wort: stufe === "s2" ? wort.toLowerCase() : wort, satz: null };
   }
+  if (stufe === "s6") {
+    const teile = zerlegeSatz(waehle([...SAETZE.s4, ...SAETZE.s5]));
+    const woerter = teile.filter(t => typeof t === "object");
+    const gewaehlt = new Set(LS.mische(woerter).slice(0, 3));
+    const ziele = woerter.filter(t => gewaehlt.has(t)); // in Satzreihenfolge
+    return { art: ziele[0].art, wort: ziele[0].wort, satz: teile, ziel: ziele[0], ziele };
+  }
   const teile = zerlegeSatz(waehle(SAETZE[stufe]));
   const ziel = waehle(teile.filter(t => typeof t === "object"));
-  return { art: ziel.art, wort: ziel.wort, satz: teile, ziel };
+  return { art: ziel.art, wort: ziel.wort, satz: teile, ziel, ziele: [ziel] };
+}
+
+/** Mängel: Wortart bekannt, Ziele stehen im Satz, Königsstufe mit mindestens zwei Wörtern. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const ziele = a.ziele || [a];
+  if (!ziele.every(z => ARTEN[z.art] && z.wort && z.wort.trim() === z.wort)) m.push("Wort oder Wortart fehlt");
+  if (a.satz && !ziele.every(z => a.satz.includes(z))) m.push("abgefragtes Wort steht nicht im Satz");
+  if (a.satz && a.satz.some(t => typeof t === "string" && /[[\]|]/.test(t))) m.push("Markierung im Satz nicht aufgelöst");
+  if (!a.satz && (stufe !== "s1" && stufe !== "s2")) m.push("Einzelwort ausserhalb der Stufen 1–2");
+  if (stufe === "s2" && a.wort !== a.wort.toLowerCase()) m.push("Stufe 2 nicht klein geschrieben");
+  if (stufe === "s6" && (ziele.length < 2 || new Set(ziele).size !== ziele.length)) m.push("Königsstufe mit weniger als zwei verschiedenen Wörtern");
+  return m;
 }
 
 const zaehler = { N: 0, V: 0, A: 0 };
@@ -130,6 +155,7 @@ LS.spiel({
     s3: "Ein Wort im Satz: Der Hund bellt laut.",
     s4: "Vergangenheit und Steigerung: sprang, höher, am schnellsten.",
     s5: "Knifflig: das Lachen, beim Essen, das Blau.",
+    s6: "Endgegner: drei Wörter im selben Satz, Vergangenheit und Nominalisierung gemischt.",
   },
 
   aufgabe(ctx) {
@@ -137,12 +163,19 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
 
     const karte = el("div", { class: "wortkarte", text: a.wort });
-    let quelle = karte;
+    const ist = art => (art === "A" ? "ein Adjektiv" : art === "V" ? "ein Verb" : "ein Nomen");
+    // Abgefragte Wörter der Reihe nach (Königsstufe: mehrere im selben Satz, sonst eines).
+    const ziele = a.ziele || [{ wort: a.wort, art: a.art }];
+    const marken = new Map(); // Satzteil → <mark>
+    let pos = 0;
     if (a.satz) {
       const satz = el("div", { class: "satz" });
-      quelle = el("mark", { text: a.ziel.wort });
-      for (const t of a.satz) satz.append(t === a.ziel ? quelle : typeof t === "object" ? t.wort : t);
-      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Wortart hat das markierte Wort?" }), satz);
+      for (const t of a.satz) {
+        if (ziele.includes(t)) { const mk = el("mark", { text: t.wort }); marken.set(t, mk); satz.append(mk); }
+        else satz.append(typeof t === "object" ? t.wort : t);
+      }
+      ziele.forEach((z, i) => marken.get(z).classList.toggle("ruhig", i > 0));
+      ctx.flaeche.append(el("div", { class: "auftrag", text: ziele.length > 1 ? `Sortiere die ${ziele.length} Wörter nacheinander — immer das markierte.` : "Welche Wortart hat das markierte Wort?" }), satz);
     } else {
       ctx.flaeche.append(el("div", { class: "auftrag", text: "In welchen Korb gehört das Wort?" }));
       ctx.flaeche.append(karte);
@@ -156,20 +189,33 @@ LS.spiel({
         el("span", { class: "bild", text: info.bild }), el("b", { text: info.name }), el("small", { text: info.kind }), zahl);
       korb.addEventListener("click", () => {
         if (fertig) return;
-        if (k === a.art) {
-          fertig = true;
+        const z = ziele[pos];
+        const quelle = a.satz ? marken.get(z) : karte;
+        if (k === z.art) {
           zaehler[k]++;
           zahl.textContent = String(zaehler[k]);
           LS.fliegen(quelle, korb, quelle === karte);
-          ctx.richtig(`Richtig: «${a.wort}» ist ${k === "A" ? "ein Adjektiv" : k === "V" ? "ein Verb" : "ein Nomen"}.`);
+          pos++;
+          if (pos < ziele.length) {
+            // Nächstes Wort im Satz hervorheben.
+            quelle.classList.add("ruhig", "sortiert");
+            marken.get(ziele[pos]).classList.remove("ruhig");
+            LS.ton("tipp");
+            ctx.sag(`Richtig: «${z.wort}» ist ${ist(k)}. Und das nächste?`, "gut");
+            return;
+          }
+          fertig = true;
+          ctx.richtig(`Richtig: «${z.wort}» ist ${ist(k)}.`);
           return;
         }
         korb.classList.remove("falsch");
         void korb.offsetWidth;
         korb.classList.add("falsch");
         // Hinweis: die Probe der gewählten Wortart machen lassen — sie klappt hier nicht.
-        ctx.falsch(`Mach die ${ARTEN[k].probe} Klappt das mit «${a.wort}»?`,
-          `«${a.wort}» ist ${a.art === "A" ? "ein Adjektiv" : a.art === "V" ? "ein Verb" : "ein Nomen"}. ${ARTEN[a.art].probe}`);
+        // Königsstufe: knapper, ohne Beispiel.
+        ctx.falsch(ctx.stufe === "s6" ? `Mach die Probe für ${ARTEN[k].name} genau. Klappt sie mit «${z.wort}» in diesem Satz?`
+          : `Mach die ${ARTEN[k].probe} Klappt das mit «${z.wort}»?`,
+          ziele.map(x => `«${x.wort}» ist ${ist(x.art)}.`).join(" ") + (ziele.length === 1 ? ` ${ARTEN[z.art].probe}` : ""));
         if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
       });
       koerbe.append(korb);

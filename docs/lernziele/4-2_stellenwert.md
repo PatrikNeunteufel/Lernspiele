@@ -14,9 +14,11 @@ Wortlaut abgeschrieben vom Foto; Lehrmittel-Verweise (Themenbuch / Arbeitsheft g
 | 4.2-E2 | erweitert | Du kannst aus mehreren Ziffern Zahlen bilden, die den Vorgaben entsprechen. | TB S.23 Nr.10 | Ausbaustufe von G4 mit mehreren Bedingungen gleichzeitig | erledigt 2026-10-31 (spiele/ziffernkarten/, Stufe Erweitert) |
 | 4.2-E3 | erweitert | Du kannst in der Stellenwerttabelle Zahlen mit Punkten darstellen. Die Punkte kannst du dann laut den Vorgaben der Aufgabe verschieben. | TB S.23 Nr.11–12 | „Punkte-Schieber": Punkte legen, ablesen und nach Vorgabe verschieben | erledigt 2026-10-31 (spiele/punkte-schieber/) |
 
-Jedes Spiel hat fünf Stufen; das Lernziel wird in den Stufen geübt, die `spiele/gemeinsam/katalog.js`
-zuordnet (Grundanforderung meist Stufe 3, erweitert Stufe 4; Ziffernkarten: G4 = Stufe 3, E2 = Stufe 4–5;
-Tresor und Punkte-Schieber: Stufe 3–5). Stufe 1–2 öffnen die Spiele für die 2. Klasse.
+Die Spiele haben die Basisklasse 4 und sechs Stufen (Stand LERN_Session2): Stufe 1 = Stoff der
+3. Klasse, Stufe 2 = Lernziel leichter, Stufe 3 = Grundanforderung, Stufe 4 = erweiterte Anforderung,
+Stufe 5 = darüber hinaus, Stufe 6 = Königsstufe. Welche Stufe welches Lernziel übt, steht in
+`spiele/gemeinsam/katalog.js` (Grundanforderungen G1–G5 auf Stufe 2–4; Ziffernkarten G4 = Stufe 2–3,
+E2 = Stufe 4–6; Tresor und Punkte-Schieber E1/E3 = Stufe 3–6).
 
 Inhalt der Lehrmittel-Aufgaben (Themenbuch, Arbeitsheft) liegt nicht vor — die Spielideen
 stützen sich nur auf den Wortlaut der Lernziele.

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zahlen-Waage</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .waage { position: relative; width: min(520px, 100%); height: 190px; margin: 0 auto 10px; }
+  .balken { position: absolute; left: 16%; right: 16%; top: 90px; height: 10px; background: var(--text); border-radius: 6px; transition: transform .4s cubic-bezier(.3, 1.4, .5, 1); transform-origin: 50% 50%; }
+  /* Die Schale sitzt mittig auf dem Balkenende; schmal genug, dass sie auf dem Handy nicht übersteht */
+  .schale { position: absolute; top: 10px; width: 38%; transform: translateX(-50%); text-align: center; }
+  .schale.links { left: 0; } .schale.rechts { left: 100%; }
+  .schale > span { display: inline-block; background: #fff; border: 4px solid var(--deko-6); border-radius: 14px; padding: 6px 12px; font-size: clamp(22px, 5vw, 32px); font-weight: 900; white-space: nowrap; transform: translateY(-58px); font-variant-numeric: tabular-nums; }
+  .schale .luecke { color: var(--deko-4); }
+  .fuss { position: absolute; left: 50%; top: 95px; width: 0; height: 0; transform: translateX(-50%); border-left: 34px solid transparent; border-right: 34px solid transparent; border-bottom: 90px solid var(--deko-7); }
+  .gleich { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>⚖️ Zahlen-Waage</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.1.b „die Begriffe plus, minus, gleich und die Symbole +, −, = verstehen“;
+// MA.1.B.1.b/c Summen und Differenzen systematisch variieren; MA.3.C.3.d Gleichungen mit einem
+// Platzhalter. Die Waage ist im Gleichgewicht, wenn beide Seiten gleich viel ergeben — sie neigt
+// sich schon beim Eintippen zur schwereren Seite.
+
+const { zufall, waehle, el, zahlText } = LS;
+
+const RECHNE = { "+": (a, b) => a + b, "−": (a, b) => a - b, "·": (a, b) => a * b };
+const wert = t => (t.op ? RECHNE[t.op](t.a, t.b) : t.a);
+
+/** Rechte Seite c op ? passend zum Wert w; gibt das fehlende ? zurück oder null. */
+function fehlendes(w, c, op) {
+  if (op === "+") return w - c;
+  if (op === "−") return c - w;
+  if (op === "·") return w % c === 0 ? w / c : null;
+  return null;
+}
+
+// Je Stufe: linke Seite erzeugen, Rechenart rechts (null = nur „?“), Zahlenraum.
+// Basisklasse 1: s1 Kindergarten, s2–s4 1. Klasse, s5 2. Klasse, s6 Königsstufe.
+const STUFE = {
+  s1: { raum: 5, links: () => ({ a: zufall(1, 4), op: "+", b: zufall(1, 4) }), rechts: [null] },
+  s2: { raum: 10, links: () => ({ a: zufall(1, 8), op: "+", b: zufall(1, 8) }), rechts: [null] },
+  s3: { raum: 10, links: () => ({ a: zufall(2, 8), op: "+", b: zufall(1, 7) }), rechts: ["+"] },
+  s4: { raum: 20, links: () => waehle([{ a: zufall(3, 14), op: "+", b: zufall(2, 9) }, { a: zufall(11, 20), op: "−", b: zufall(2, 9) }]), rechts: ["+", "−"] },
+  s5: { raum: 100, links: () => waehle([{ a: zufall(2, 7) * 10, op: "+", b: zufall(11, 29) }, { a: zufall(30, 90), op: "−", b: zufall(5, 25) }]), rechts: ["+", "−"] },
+  // Königsstufe: Mal, Plus und Minus bis 1000 gemischt, auf beiden Seiten.
+  s6: { raum: 1000, links: () => waehle([
+    { a: zufall(3, 9), op: "·", b: zufall(3, 9) },
+    { a: zufall(12, 25), op: "·", b: waehle([4, 5, 10, 20]) },
+    { a: zufall(120, 600), op: "+", b: zufall(110, 390) },
+    { a: zufall(300, 999), op: "−", b: zufall(101, 299) },
+  ]), rechts: ["+", "−", "·"] },
+};
+
+/** Ersatz, falls der Zufall wider Erwarten nichts Passendes findet: hält die Waage im Gleichgewicht. */
+const ERSATZ = { links: { a: 1, op: "+", b: 1 }, rechts: { a: null }, richtig: 2, w: 2 };
+
+function aufgabeErzeugen(stufe) {
+  const s = STUFE[stufe];
+  for (let versuch = 0; versuch < 10000; versuch++) {
+    const links = s.links();
+    const w = wert(links);
+    if (w < 1 || w > s.raum) continue;
+    const op = waehle(s.rechts);
+    if (op === null) return { links, rechts: { a: null }, richtig: w, w };
+    const c = op === "·" ? waehle([2, 3, 4, 5, 6, 8, 10].filter(x => w % x === 0 && x !== w)) : op === "−" ? zufall(w + 1, s.raum) : zufall(1, w - 1);
+    if (c === undefined || c < 1 || c > s.raum) continue;
+    const r = fehlendes(w, c, op);
+    if (r === null || r < 1 || r > s.raum) continue;
+    // nicht dieselbe Rechnung auf beiden Seiten (5 + 3 = 5 + ?)
+    if (op === links.op && (c === links.a || c === links.b)) continue;
+    return { links, rechts: { a: c, op, b: null }, richtig: r, w };
+  }
+  return structuredClone(ERSATZ);
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const rechts = a.rechts.a === null ? a.richtig : RECHNE[a.rechts.op](a.rechts.a, a.richtig);
+  if (rechts !== wert(a.links)) m.push("Waage nicht im Gleichgewicht");
+  if (!Number.isInteger(a.richtig) || a.richtig < 1 || a.richtig > STUFE[stufe].raum) m.push("Lösung ausserhalb des Zahlenraums");
+  if (a.rechts.a !== null && a.rechts.a > STUFE[stufe].raum) m.push("Zahl rechts ausserhalb des Zahlenraums");
+  const l = a.links;
+  if ([l.a, l.b, wert(l)].some(x => !Number.isInteger(x) || x < 1 || x > STUFE[stufe].raum)) m.push("linke Seite ausserhalb des Zahlenraums");
+  if (!STUFE[stufe].rechts.includes(a.rechts.a === null ? null : a.rechts.op)) m.push("Rechenart rechts gehört nicht in diese Stufe");
+  if (a.rechts.a !== null && a.rechts.op === l.op && (a.rechts.a === l.a || a.rechts.a === l.b)) m.push("beide Seiten dieselbe Rechnung");
+  return m;
+}
+
+const text = t => (t.op ? `${zahlText(t.a)} ${t.op} ${zahlText(t.b)}` : zahlText(t.a));
+
+LS.spiel({
+  id: "zahlen-waage",
+  einleitung: "Die Waage ist nur dann gerade, wenn beide Seiten gleich viel sind. Welche Zahl fehlt?",
+  anzahl: 8,
+  stufen: {
+    s1: "Bis 5: 2 + 3 = ?",
+    s2: "Bis 10: 4 + 5 = ?",
+    s3: "Bis 10: 6 + 3 = 5 + ?",
+    s4: "Bis 20, auch mit minus: 15 − 4 = 8 + ?",
+    s5: "Bis 100: 40 + 23 = 50 + ?",
+    s6: "Mit mal, bis 1000: 4 · 6 = 3 · ?, 480 + 270 = 900 − ?",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const luecke = el("span", { class: "luecke", text: "?" });
+    const rechtsInhalt = a.rechts.a === null ? [luecke] : [`${zahlText(a.rechts.a)} ${a.rechts.op} `, luecke];
+    const balken = el("div", { class: "balken" },
+      el("div", { class: "schale links" }, el("span", { text: text(a.links) })),
+      el("div", { class: "schale rechts" }, el("span", {}, ...rechtsInhalt)));
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "Mach die Waage gerade!" }),
+      el("div", { class: "waage", "aria-hidden": "true" }, el("div", { class: "fuss" }), balken),
+      el("div", { class: "gleich", text: `${text(a.links)} = ${a.rechts.a === null ? "?" : `${zahlText(a.rechts.a)} ${a.rechts.op} ?`}` }));
+
+    // Neigung: schwerere Seite nach unten, höchstens 12°. Positiver Winkel dreht im Uhrzeigersinn
+    // (rechts sinkt) — also links schwerer = negativer Winkel.
+    const neige = w => {
+      const rechts = w === null ? 0 : a.rechts.a === null ? w : RECHNE[a.rechts.op](a.rechts.a, w);
+      const d = rechts - a.w;
+      balken.style.transform = `rotate(${Math.max(-12, Math.min(12, (d / Math.max(a.w, 1)) * 24))}deg)`;
+    };
+    neige(null);
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Fehlende Zahl" });
+    ctx.flaeche.append(anzeige);
+    const tasten = LS.tastatur({
+      anzeige,
+      maxStellen: 4,
+      onAenderung(w) { luecke.textContent = w === null ? "?" : zahlText(w); neige(w); },
+      onOk(w) {
+        if (w === a.richtig) {
+          tasten.gesperrt = true;
+          anzeige.classList.add("richtig");
+          ctx.richtig(`Im Gleichgewicht: beide Seiten sind ${zahlText(a.w)}! ⚖️`);
+          return;
+        }
+        anzeige.classList.add("falsch");
+        const rechts = a.rechts.a === null ? w : RECHNE[a.rechts.op](a.rechts.a, w);
+        ctx.falsch(`Links sind es ${zahlText(a.w)}, rechts ${zahlText(rechts)}. ${rechts > a.w ? "Rechts ist zu schwer." : "Rechts ist zu leicht."}`,
+          `${text(a.links)} = ${a.rechts.a === null ? zahlText(a.richtig) : `${zahlText(a.rechts.a)} ${a.rechts.op} ${zahlText(a.richtig)}`}`);
+        if (ctx.vorbei()) tasten.gesperrt = true;
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag("Rechne zuerst die linke Seite aus. Was fehlt rechts?");
+  },
+});
+</script>
+</body>
+</html>

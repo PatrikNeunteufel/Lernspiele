@@ -126,7 +126,6 @@ const AUSWERTUNG = (() => {
   function vorschlaege(name, runden, profil, jetzt = Date.now()) {
     const v = [];
     const link = (spiel, stufe) => `${spielVon(spiel)?.pfad}?stufe=${stufe}`;
-    const empfohlen = LS.empfohleneStufe(name) || "s3";
 
     // 1. Wiederholen: Spiel+Stufe mit schwacher Quote in den letzten Runden
     const gruppen = {};
@@ -147,7 +146,7 @@ const AUSWERTUNG = (() => {
     for (const [k, rs] of Object.entries(gruppen)) {
       const [spiel, stufe] = k.split("|");
       const n = stufeNr(stufe);
-      if (n >= 5 || rs.length < 2 || !rs.slice(-2).every(e => e.sterne === 3)) continue;
+      if (n >= LS.SKALA.length || rs.length < 2 || !rs.slice(-2).every(e => e.sterne === 3)) continue;
       const naechste = `s${n + 1}`;
       if (LS.besteSterne(name, spiel, naechste) === 3) continue;
       v.push({ art: "weiter", prio: 3, titel: `⬆️ Bereit für Stufe ${n + 1}: ${spielVon(spiel)?.name}`,
@@ -174,8 +173,13 @@ const AUSWERTUNG = (() => {
       const rs = rundenZuLernziel(runden, lzId);
       const zuletzt = rs.length ? Date.parse(rs[rs.length - 1].zeit) : 0;
       if (jetzt - zuletzt < 3 * TAG_MS) continue;
-      const s = SPIELE.find(x => x.lernziele.some(l => l.lz === lzId));
-      const stufe = s.lernziele.find(l => l.lz === lzId).stufen.includes(empfohlen) ? empfohlen : s.lernziele.find(l => l.lz === lzId).stufen[0];
+      // Spiel mit der Basisklasse, die der Klasse des Kindes am nächsten liegt
+      const kandidaten = SPIELE.filter(x => x.lernziele.some(l => l.lz === lzId));
+      const klasse = Number(profil.klasse) || 0;
+      const s = kandidaten.reduce((m, x) => (Math.abs((x.klasse || 0) - klasse) < Math.abs((m.klasse || 0) - klasse) ? x : m));
+      const empfohlen = LS.empfohleneStufe(name, s.id) || "s3";
+      const geuebt = s.lernziele.find(l => l.lz === lzId).stufen;
+      const stufe = geuebt.includes(empfohlen) ? empfohlen : geuebt[0];
       v.push({ art: "fokus", prio: 2, titel: `⭐ Fokus: ${lz.lz} ${lz.text}`,
         text: rs.length ? `Seit ${Math.floor((jetzt - zuletzt) / TAG_MS)} Tagen nicht geübt.` : "Noch nie geübt — guter Startpunkt.", link: link(s.id, stufe) });
     }

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muster-Fortsetzer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .reihe { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 6px 0 16px; }
+  .reihe span { min-width: 54px; height: 60px; padding: 0 8px; display: grid; place-items: center; background: #fff; border: 3px solid var(--rand); border-radius: 14px; font-size: clamp(26px, 6vw, 34px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  .reihe span.luecke { border: 3px dashed var(--deko-4); color: var(--deko-4); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔁 Muster-Fortsetzer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.B.1.a „Muster mit Anzahlen bilden, … weiterführen (z.B. rot, gelb / rot, rot,
+// gelb, gelb)“, b Zahlenfolgen bilden und weiterführen; MA.3.A.3.b (Grundanspruch 1. Zyklus)
+// lineare Zahlenfolgen beschreiben und weiterführen (0, 9, 18, 27 …); c nichtlineare Folgen
+// (1, 4, 9, 16 …; 1, 3, 6, 10, 15 …; 90, 81, 70, 57 …).
+
+const { zufall, waehle, mische, el, zahlText } = LS;
+
+const ZEICHEN = [["🔴", "🔵", "🟡"], ["⭐", "🌙", "☀️"], ["🍎", "🍐", "🍌"], ["🐸", "🐟", "🐦"], ["🟥", "🔺", "🔵"]];
+// Bildmuster als Folge von Platzhaltern: 0, 1, 2 stehen für die drei Zeichen einer Gruppe
+// Basisklasse 1: s1 Kindergarten (AB), s2–s4 1. Klasse, s5 2. Klasse, s6 Königsstufe.
+const BILDMUSTER = { s1: ["01"], s2: ["001", "011"], s3: ["012", "0011"] };
+
+const ARTEN = {
+  bild(stufe) {
+    const kern = waehle(BILDMUSTER[stufe]).split("").map(Number);
+    const z = mische(waehle(ZEICHEN));
+    const laenge = kern.length * 2 + zufall(0, kern.length - 1);
+    const folge = Array.from({ length: laenge + 1 }, (_, i) => z[kern[i % kern.length]]);
+    const richtig = folge.pop();
+    // Zur Wahl stehen die Zeichen des Musters (jedes Muster hat mindestens zwei)
+    return { art: "bild", kern: kern.join(""), zeichen: z, folge, richtig, optionen: mische([...new Set(kern.map(k => z[k]))]) };
+  },
+  linear(start, schritte, max) {
+    // Begrenzte Versuche; jede Schrittweite der Stufen hat einen gültigen Start, also endet es praktisch immer früh.
+    for (let v = 0; v < 1000; v++) {
+      const d = waehle(schritte);
+      const a0 = start();
+      const folge = Array.from({ length: 6 }, (_, i) => a0 + i * d);
+      if (folge.some(x => x < 0 || x > max)) continue;
+      return { art: "zahl", folge: folge.slice(0, 5), richtig: folge[5], regel: `${d > 0 ? "+" : "−"} ${zahlText(Math.abs(d))}` };
+    }
+    const d = schritte.find(x => x > 0);
+    return { art: "zahl", folge: [0, d, 2 * d, 3 * d, 4 * d], richtig: 5 * d, regel: `+ ${zahlText(d)}` };
+  },
+  nichtlinear() {
+    const typ = waehle(["quadrat", "dreieck", "wachsend", "schrumpfend"]);
+    const k = zufall(1, 8);
+    const ab = f => Array.from({ length: 6 }, (_, i) => f(k + i));
+    if (typ === "quadrat") {
+      const folge = ab(n => n * n);
+      return { art: "zahl", folge: folge.slice(0, 5), richtig: folge[5], regel: `${k} · ${k}, ${k + 1} · ${k + 1}, ${k + 2} · ${k + 2}, … (Quadratzahlen)` };
+    }
+    if (typ === "dreieck") {
+      const folge = ab(n => (n * (n + 1)) / 2);
+      return { art: "zahl", folge: folge.slice(0, 5), richtig: folge[5], regel: `+ ${k + 1}, + ${k + 2}, + ${k + 3}, … (jedes Mal 1 mehr)` };
+    }
+    if (typ === "wachsend") {
+      const a0 = zufall(1, 20), d0 = zufall(1, 4);
+      const folge = [a0];
+      for (let i = 0; i < 5; i++) folge.push(folge[i] + d0 + i);
+      return { art: "zahl", folge: folge.slice(0, 5), richtig: folge[5], regel: `+ ${d0}, + ${d0 + 1}, + ${d0 + 2}, … (jedes Mal 1 mehr)` };
+    }
+    const a0 = zufall(90, 150), d0 = zufall(7, 11);
+    const folge = [a0];
+    for (let i = 0; i < 5; i++) folge.push(folge[i] - (d0 + 2 * i));
+    return { art: "zahl", folge: folge.slice(0, 5), richtig: folge[5], regel: `− ${d0}, − ${d0 + 2}, − ${d0 + 4}, … (jedes Mal 2 mehr weg)` };
+  },
+};
+
+// Je Stufe: Erzeuger, Zahlenraum (max) und ob nichtlineare Folgen vorkommen.
+const STUFE = {
+  s1: { max: 0, neu: () => ARTEN.bild("s1") },
+  s2: { max: 0, neu: () => ARTEN.bild("s2") },
+  s3: { max: 20, neu: () => (Math.random() < 0.5 ? ARTEN.bild("s3") : ARTEN.linear(() => zufall(0, 14), [1], 20)) },
+  s4: { max: 20, neu: () => ARTEN.linear(() => zufall(0, 20), [1, 2, 3, -1, -2, -3], 20) },
+  s5: { max: 100, neu: () => ARTEN.linear(() => zufall(0, 40), [2, 3, 5, 10, -2, -5, -10, 9], 100) },
+  // Königsstufe: nichtlineare Folgen und lineare Folgen bis 1000 mit krummen Sprüngen.
+  s6: { max: 1000, nichtlinear: true, neu: () => (Math.random() < 0.6 ? ARTEN.nichtlinear()
+    : ARTEN.linear(() => zufall(0, 600), [25, 75, 125, 15, 12, 99, -20, -50, -40], 1000)) },
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe].neu(); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const s = STUFE[stufe];
+  if (a.art === "bild") {
+    if (!BILDMUSTER[stufe]?.includes(a.kern)) m.push("Bildmuster gehört nicht in diese Stufe");
+    const k = a.kern.split("").map(Number);
+    if ([...a.folge, a.richtig].some((x, i) => x !== a.zeichen[k[i % k.length]])) m.push("Folge passt nicht zum Muster");
+    if (a.folge.length < 2 * k.length) m.push("Muster nicht zweimal ganz zu sehen");
+    if (!a.optionen.includes(a.richtig)) m.push("richtiges Zeichen fehlt");
+    if (new Set(a.optionen).size !== a.optionen.length || a.optionen.length < 2) m.push("Auswahl doppelt oder nur eine Wahl");
+    return m;
+  }
+  const f = [...a.folge, a.richtig];
+  if (!s.max) m.push("Zahlenfolge gehört nicht in diese Stufe");
+  if (f.some(x => !Number.isInteger(x) || x < 0 || x > s.max)) m.push("Zahl ausserhalb des Zahlenraums");
+  // Linear: gleiche Sprünge. Nichtlinear (Quadrat-, Dreieckszahlen, wachsende/schrumpfende Sprünge):
+  // die Sprünge ändern sich jedes Mal um gleich viel — so ist die Fortsetzung eindeutig.
+  const d1 = f.slice(1).map((x, i) => x - f[i]);
+  const d2 = d1.slice(1).map((x, i) => x - d1[i]);
+  const linear = d2.every(x => x === 0);
+  if (!linear && !(s.nichtlinear && d2.every(x => x === d2[0]))) m.push("Folge folgt keiner erlaubten Regel");
+  if (linear && d1[0] === 0) m.push("Folge ohne Sprung");
+  return m;
+}
+
+LS.spiel({
+  id: "muster-fortsetzer",
+  einleitung: "Muster wiederholen sich. Findest du heraus, wie es weitergeht?",
+  anzahl: 8,
+  stufen: {
+    s1: "Bildmuster: 🔴🔵🔴🔵 … was kommt als Nächstes?",
+    s2: "Bildmuster: 🔴🔴🔵🔴🔴🔵 … oder 🔴🔵🔵 …",
+    s3: "Muster mit drei Bildern und Zahlenfolgen: 4, 5, 6 …",
+    s4: "Zahlenfolgen bis 20: 2, 4, 6 … oder 18, 15, 12 …",
+    s5: "Zahlenfolgen bis 100: 0, 9, 18, 27 …",
+    s6: "Knifflig: 1, 4, 9, 16 … oder 125, 250, 375 …",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const luecke = el("span", { class: "luecke", text: "?" });
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "Wie geht es weiter?" }),
+      el("div", { class: "reihe" }, ...a.folge.map(x => el("span", { text: typeof x === "number" ? zahlText(x) : x })), luecke));
+    if (a.art === "bild") {
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90,
+        inhalt: o => ({ bild: o }),
+        hinweis: "Sprich das Muster laut: Welcher Teil wiederholt sich immer wieder?",
+        loesung: `Als Nächstes kommt ${a.richtig}.`,
+        beiRichtig: () => { luecke.textContent = a.richtig; },
+      });
+      if (ctx.nr === 0) ctx.sag("Schau, was sich wiederholt.");
+      return;
+    }
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Nächste Zahl" });
+    ctx.flaeche.append(anzeige);
+    const tasten = LS.tastatur({
+      anzeige,
+      maxStellen: 4,
+      onAenderung(w) { luecke.textContent = w === null ? "?" : zahlText(w); },
+      onOk(w) {
+        if (w === a.richtig) {
+          tasten.gesperrt = true;
+          anzeige.classList.add("richtig");
+          ctx.richtig(`Genau! Die Regel: ${a.regel}`);
+          return;
+        }
+        anzeige.classList.add("falsch");
+        const [x, y, z] = a.folge;
+        ctx.falsch(`Wie kommt man von ${zahlText(x)} zu ${zahlText(y)}? Und von ${zahlText(y)} zu ${zahlText(z)}? Ist der Sprung immer gleich gross?`,
+          `Die Regel: ${a.regel} — es kommt ${zahlText(a.richtig)}.`);
+        if (ctx.vorbei()) tasten.gesperrt = true;
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag("Schau, wie gross die Sprünge sind.");
+  },
+});
+</script>
+</body>
+</html>

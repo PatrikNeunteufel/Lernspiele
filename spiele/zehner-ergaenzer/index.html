@@ -56,19 +56,23 @@
 <script>
 "use strict";
 // Lehrplan SG MA.1.A.3.b (Grundanspruch 1. Zyklus): „auf den nächsten 10er ergänzen“ bis 100.
-// Die höheren Stufen übertragen das auf Hunderter, Tausender und die Million (MA.1.A.3.e:
-// Rechnen mit Wertziffern im Kopf). Ergänzt wird immer bis zum nächsten Vielfachen der Einheit.
+// Basisklasse 2: Stufe 3 ist genau dieses Lernziel. Stufe 4 ergänzt auf 100, Stufe 5 (3. Klasse)
+// auf Hunderter und 1000, die Königsstufe mischt alles bis zur Million (MA.1.A.3.e: Rechnen mit
+// Wertziffern im Kopf). Ergänzt wird immer bis zum nächsten Vielfachen der Einheit.
 
 const { zahlText, zufall, waehle, el } = LS;
 
-// Je Stufe: mögliche Einheiten mit Startbereich [von, bis] und dem Zahlenraum.
+// Je Stufe: mögliche Einheiten mit Startbereich [von, bis] (× mal) und dem Zahlenraum.
 const STUFE = {
   s1: { raum: 20, arten: [{ einheit: 10, von: 1, bis: 19 }] },
-  s2: { raum: 100, arten: [{ einheit: 10, von: 11, bis: 99 }, { einheit: 100, von: 1, bis: 9, mal: 10 }] },
-  s3: { raum: 1000, arten: [{ einheit: 100, von: 11, bis: 99 }, { einheit: 100, von: 101, bis: 999 }, { einheit: 100, von: 11, bis: 99, mal: 10 }] },
-  s4: { raum: 10000, arten: [{ einheit: 1000, von: 101, bis: 999 }, { einheit: 1000, von: 11, bis: 99, mal: 10 }, { einheit: 1000, von: 101, bis: 999, mal: 10 }] },
-  s5: { raum: 1000000, arten: [{ einheit: 10000, von: 101, bis: 999, mal: 100 }, { einheit: 100000, von: 11, bis: 99, mal: 1000 },
-    { einheit: 1000000, von: 101, bis: 999, mal: 1000 }, { einheit: 1000000, von: 11, bis: 99, mal: 10000 }] },
+  s2: { raum: 100, arten: [{ einheit: 100, von: 1, bis: 9, mal: 10 }, { einheit: 10, von: 11, bis: 49 }] },
+  s3: { raum: 100, arten: [{ einheit: 10, von: 11, bis: 99 }] },
+  s4: { raum: 100, arten: [{ einheit: 100, von: 11, bis: 99 }] },
+  s5: { raum: 1000, arten: [{ einheit: 100, von: 101, bis: 999 }, { einheit: 1000, von: 101, bis: 999 }, { einheit: 1000, von: 11, bis: 99, mal: 10 }] },
+  s6: { raum: 1000000, arten: [
+    { einheit: 1000, von: 1001, bis: 9999 }, { einheit: 10000, von: 1001, bis: 9999, mal: 10 },
+    { einheit: 10000, von: 101, bis: 999, mal: 100 }, { einheit: 100000, von: 1001, bis: 9999, mal: 100 },
+    { einheit: 1000000, von: 101, bis: 999, mal: 1000 }, { einheit: 1000000, von: 1001, bis: 9999, mal: 100 }] },
 };
 
 function aufgabeErzeugen(stufe) {
@@ -96,7 +100,9 @@ const BIS_ZUM = {
   10000: "bis zum nächsten Zehntausender", 100000: "bis zum nächsten Hunderttausender", 1000000: "bis zur Million",
 };
 
-function hinweisFuer(a) {
+function hinweisFuer(a, stufe) {
+  // Königsstufe: knappe Hilfe ohne Zwischenhalt
+  if (stufe === "s6") return `Zuerst ${BIS_ZUM[a.einheit / 10]}, dann weiter bis ${zahlText(a.ziel)}.`;
   // Zwischenhalt am nächsten kleineren Vielfachen, wenn es einen gibt: 37 → 40 → 100
   const zwischen = Math.ceil(a.start / (a.einheit / 10)) * (a.einheit / 10);
   if (zwischen !== a.start && zwischen !== a.ziel) {
@@ -122,10 +128,11 @@ LS.spiel({
   anzahl: 10,
   stufen: {
     s1: "Bis 20 mit Zehnerfeldern: 7 + ? = 10, 13 + ? = 20.",
-    s2: "Bis 100: 37 + ? = 40, 60 + ? = 100.",
-    s3: "Bis 1000: 37 + ? = 100, 365 + ? = 400.",
-    s4: "Bis 10 000: 365 + ? = 1000, 4750 + ? = 5000.",
-    s5: "Bis zur Million: 63 500 + ? = 70 000.",
+    s2: "Zehnerzahlen auf 100 und bis zum Zehner bis 50: 60 + ? = 100, 27 + ? = 30.",
+    s3: "Bis zum nächsten Zehner bis 100: 37 + ? = 40, 84 + ? = 90.",
+    s4: "Auf 100 ergänzen: 37 + ? = 100.",
+    s5: "Bis 1000: 365 + ? = 400, 365 + ? = 1000.",
+    s6: "Endgegner bis zur Million: 4750 + ? = 5000, 63 500 + ? = 70 000.",
   },
 
   aufgabe(ctx) {
@@ -156,10 +163,11 @@ LS.spiel({
         }
         anzeige.classList.add("falsch");
         const ueber = a.start + w;
-        const hinweis = ueber > a.ziel ? `${zahlText(a.start)} + ${zahlText(w)} = ${zahlText(ueber)} — das ist zu viel. ${hinweisFuer(a)}`
-          : `${zahlText(a.start)} + ${zahlText(w)} = ${zahlText(ueber)} — da fehlt noch etwas. ${hinweisFuer(a)}`;
+        const hilfe = hinweisFuer(a, ctx.stufe);
+        const hinweis = ueber > a.ziel ? `${zahlText(a.start)} + ${zahlText(w)} = ${zahlText(ueber)} — das ist zu viel. ${hilfe}`
+          : `${zahlText(a.start)} + ${zahlText(w)} = ${zahlText(ueber)} — da fehlt noch etwas. ${hilfe}`;
         ctx.falsch(hinweis, `${zahlText(a.start)} + ${zahlText(a.fehlt)} = ${zahlText(a.ziel)}`);
-        if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+        if (ctx.vorbei()) tasten.gesperrt = true;
       },
     });
     ctx.flaeche.append(tasten.element);

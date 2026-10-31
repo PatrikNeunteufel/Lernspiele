@@ -86,7 +86,8 @@
   .karte-ziffer::before { top: 8px; left: 8px; }
   .karte-ziffer::after { bottom: 8px; right: 8px; }
 
-  .platz .karte-ziffer { width: 100%; height: 100%; animation: none; }
+  /* In schmalen Fächern (sieben Stellen auf dem Handy) wird die Ziffer kleiner. */
+  .platz .karte-ziffer { width: 100%; height: 100%; animation: none; font-size: clamp(28px, 7vw, 56px); }
 
   @keyframes karte-rein {
     from { transform: translateY(20px) rotate(-8deg); opacity: 0; }
@@ -134,13 +135,16 @@ function kartenZiehen(anzahl, mitNull) {
 
 const stelleVon = (n, st) => Math.floor(n / st.wert) % 10;
 const gerade = n => n % 2 === 0;
-// Je Stufe: Anzahl Karten und ob Vorgaben der erweiterten Anforderung dazukommen.
+// Je Stufe: Anzahl Karten, Art der Vorgaben und ob eine Null dabei ist (0.5 = jede zweite Aufgabe).
+// art: "leicht" = grösste, kleinste, feste Stelle, zwischen; "grund" = dazu grösste mit fester Stelle;
+// "erweitert" = gerade/ungerade, Nähe, Grenzen; "profi" = zwei Bedingungen; "koenig" = bis drei.
 const STUFE = {
-  s1: { karten: 2, erweitert: false },
-  s2: { karten: 3, erweitert: false },
-  s3: { karten: 4, erweitert: false },
-  s4: { karten: 5, erweitert: true },
-  s5: { karten: 6, erweitert: true },
+  s1: { karten: 3, art: "grund", null: 0.5 },
+  s2: { karten: 4, art: "leicht", null: 0 },
+  s3: { karten: 4, art: "grund", null: 0.5 },
+  s4: { karten: 5, art: "erweitert", null: 0.5 },
+  s5: { karten: 6, art: "profi", null: 0.5 },
+  s6: { karten: 7, art: "koenig", null: 1 },
 };
 
 const GERADE = "Die Zahl muss gerade sein: Bei den Einern steht 0, 2, 4, 6 oder 8.";
@@ -150,11 +154,10 @@ const UNGERADE = "Die Zahl muss ungerade sein: Bei den Einern steht 1, 3, 5, 7 o
  * Vorgaben: Text, Bedingung (filter) und Ziel ('alle' = jede passende Zahl zählt,
  * 'max'/'min' = die grösste/kleinste passende, 'nah' = am nächsten bei 'bei').
  */
-function vorgabeErzeugen(stufe, karten, stellen) {
+function vorgabeErzeugen(stufe, karten, stellen, zahlen) {
   const n = karten.length;
   const st = waehle(stellen);
   const d = waehle(karten.filter(z => !(z === 0 && st === stellen[0])));
-  const zahlen = alleZahlen(karten);
   const beispiel = waehle(zahlen);
   const hoch = STELLEN[7 - n]; // höchste Stelle
   const unten = Math.floor(beispiel / hoch.wert) * hoch.wert;
@@ -167,7 +170,9 @@ function vorgabeErzeugen(stufe, karten, stellen) {
     { text: `Bilde eine Zahl zwischen ${zahlText(unten)} und ${zahlText(unten + hoch.wert)}.`, filter: z => z > unten && z < unten + hoch.wert, ziel: "alle", regel: `Die Zahl muss zwischen ${zahlText(unten)} und ${zahlText(unten + hoch.wert)} liegen.` },
     { text: `Bilde die grösste Zahl, bei der die ${d} bei den ${LS.dativ(st)} (${st.k}) steht.`, filter: z => stelleVon(z, st) === d, ziel: "max", regel: anStelle },
   ];
-  if (!STUFE[stufe].erweitert) return waehle(stufe === "s1" ? grund.slice(0, 4) : grund);
+  const art = STUFE[stufe].art;
+  if (art === "leicht") return waehle(grund.slice(0, 4));
+  if (art === "grund") return waehle(grund);
 
   const mitte = waehle([3, 4, 5, 6, 7]) * hoch.wert;
   const grenze = Math.round(beispiel / (hoch.wert / 10)) * (hoch.wert / 10);
@@ -180,7 +185,7 @@ function vorgabeErzeugen(stufe, karten, stellen) {
     { text: `Die ${d} steht bei den ${LS.dativ(st)} (${st.k}), und die Zahl ist so klein wie möglich.`, filter: z => stelleVon(z, st) === d, ziel: "min", regel: anStelle },
     { text: `Bilde die grösste ungerade Zahl, bei der die ${d} bei den ${LS.dativ(st)} (${st.k}) steht.`, filter: z => stelleVon(z, st) === d && !gerade(z), ziel: "max", regel: `${UNGERADE} ${anStelle}` },
   ];
-  if (stufe === "s4") return waehle(Math.random() < 0.25 ? grund.slice(2) : erweitert);
+  if (art === "erweitert") return waehle(Math.random() < 0.25 ? grund.slice(2) : erweitert);
 
   // Profi: zwei Bedingungen gleichzeitig.
   const profi = [
@@ -188,7 +193,16 @@ function vorgabeErzeugen(stufe, karten, stellen) {
     { text: `Bilde die grösste Zahl, die kleiner als ${zahlText(grenze)} ist und bei der die ${d} bei den ${LS.dativ(st)} (${st.k}) steht.`, filter: z => z < grenze && stelleVon(z, st) === d, ziel: "max", regel: `Die Zahl muss kleiner als ${zahlText(grenze)} sein. ${anStelle}` },
     { text: `Bilde die kleinste ungerade Zahl, die grösser als ${zahlText(grenze)} ist.`, filter: z => z > grenze && !gerade(z), ziel: "min", regel: `Die Zahl muss grösser als ${zahlText(grenze)} sein. ${UNGERADE}` },
   ];
-  return waehle(Math.random() < 0.5 ? profi : erweitert);
+  if (art === "profi") return waehle(Math.random() < 0.5 ? profi : erweitert);
+
+  // Königsstufe: sieben Karten mit Null, zwei oder drei Bedingungen gleichzeitig.
+  const koenig = [
+    { text: `Bilde die ungerade Zahl, die am nächsten bei ${zahlText(mitte)} liegt.`, filter: z => !gerade(z), ziel: "nah", bei: mitte, regel: UNGERADE },
+    { text: `Bilde die grösste gerade Zahl, die kleiner als ${zahlText(grenze)} ist und bei der die ${d} bei den ${LS.dativ(st)} (${st.k}) steht.`, filter: z => z < grenze && gerade(z) && stelleVon(z, st) === d, ziel: "max", regel: `Die Zahl muss kleiner als ${zahlText(grenze)} sein. ${GERADE} ${anStelle}` },
+    { text: `Bilde die kleinste Zahl, die grösser als ${zahlText(grenze)} ist und bei der die ${d} bei den ${LS.dativ(st)} (${st.k}) steht.`, filter: z => z > grenze && stelleVon(z, st) === d, ziel: "min", regel: `Die Zahl muss grösser als ${zahlText(grenze)} sein. ${anStelle}` },
+    { text: `Bilde die gerade Zahl, die am nächsten bei ${zahlText(mitte)} liegt und bei der die ${d} bei den ${LS.dativ(st)} (${st.k}) steht.`, filter: z => gerade(z) && stelleVon(z, st) === d, ziel: "nah", bei: mitte, regel: `${GERADE} ${anStelle}` },
+  ];
+  return waehle(Math.random() < 0.7 ? koenig : profi);
 }
 
 /** Menge der richtigen Antworten zur Vorgabe; leer, wenn die Karten nicht passen. */
@@ -203,14 +217,42 @@ function loesungen(vorgabe, zahlen) {
 }
 
 function aufgabeErzeugen(stufe) {
-  const anzahl = STUFE[stufe].karten;
+  const { karten: anzahl, null: mitNull } = STUFE[stufe];
   const stellen = STELLEN.slice(7 - anzahl);
-  for (;;) {
-    const karten = kartenZiehen(anzahl, Math.random() < 0.5);
-    const vorgabe = vorgabeErzeugen(stufe, karten, stellen);
-    const richtig = loesungen(vorgabe, alleZahlen(karten));
+  let karten, zahlen;
+  for (let versuch = 0; versuch < 100; versuch++) {
+    karten = kartenZiehen(anzahl, Math.random() < mitNull);
+    zahlen = alleZahlen(karten);
+    const vorgabe = vorgabeErzeugen(stufe, karten, stellen, zahlen);
+    const richtig = loesungen(vorgabe, zahlen);
     if (richtig.length) return { karten, stellen, vorgabe, richtig };
   }
+  // Notausgang (praktisch nie): die grösste Zahl gibt es immer.
+  const vorgabe = { text: "Bilde die grösste Zahl.", filter: () => true, ziel: "max" };
+  return { karten, stellen, vorgabe, richtig: loesungen(vorgabe, zahlen) };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (a.karten.length !== p.karten) m.push(`${a.karten.length} Karten`);
+  if (new Set(a.karten).size !== a.karten.length) m.push("Karte doppelt");
+  if (p.null === 0 && a.karten.includes(0)) m.push("Null in Stufe ohne Null");
+  if (p.null === 1 && !a.karten.includes(0)) m.push("Null fehlt");
+  if (!a.richtig.length) m.push("keine Lösung");
+  const sortiert = z => String(z).split("").sort().join("");
+  const soll = a.karten.slice().sort().join("");
+  for (const z of a.richtig) {
+    if (sortiert(z) !== soll) m.push(`Lösung ${z} nutzt nicht genau die Karten`);
+    if (!a.vorgabe.filter(z)) m.push(`Lösung ${z} erfüllt die Vorgabe nicht`);
+  }
+  const passend = alleZahlen(a.karten).filter(a.vorgabe.filter);
+  const r = a.richtig;
+  if (a.vorgabe.ziel === "max" && (r.length !== 1 || r[0] !== Math.max(...passend))) m.push("nicht die grösste");
+  if (a.vorgabe.ziel === "min" && (r.length !== 1 || r[0] !== Math.min(...passend))) m.push("nicht die kleinste");
+  if (a.vorgabe.ziel === "nah" && passend.some(z => Math.abs(z - a.vorgabe.bei) < Math.abs(r[0] - a.vorgabe.bei))) m.push("nicht die nächste");
+  if (a.vorgabe.ziel === "alle" && r.length !== passend.length) m.push("Lösungsmenge unvollständig");
+  return m;
 }
 
 LS.spiel({
@@ -218,11 +260,12 @@ LS.spiel({
   einleitung: "Ich habe Ziffernkarten gemischt! Leg sie in die Fächer, sodass eine Zahl entsteht, die zur Vorgabe passt. Jede Karte wird genau einmal gebraucht.",
   anzahl: 8,
   stufen: {
-    s1: "2 Karten: die grösste oder kleinste Zahl legen.",
-    s2: "3 Karten: grösste, kleinste Zahl, eine Ziffer an fester Stelle.",
+    s1: "3 Karten: grösste, kleinste Zahl, eine Ziffer an fester Stelle.",
+    s2: "4 Karten ohne Null: grösste, kleinste Zahl, eine Ziffer an fester Stelle.",
     s3: "4 Karten nach schriftlichen Vorgaben (Lernziel G4).",
     s4: "5 Karten, Vorgaben wie die grösste gerade Zahl (Lernziel E2).",
     s5: "6 Karten und zwei Bedingungen gleichzeitig.",
+    s6: "7 Karten mit Null und bis zu drei Bedingungen auf einmal.",
   },
 
   aufgabe(ctx) {

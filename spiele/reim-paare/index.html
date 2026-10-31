@@ -71,25 +71,31 @@ const ARTEN = {
     const gruppen = mische(GRUPPEN.filter(g => mitBild(g).length >= 2)).slice(0, anzahl);
     return { art: "paare", karten: mische(gruppen.flatMap(g => mische(mitBild(g)).slice(0, 2))) };
   },
-  reimtNicht() {
-    const gruppe = waehle(GRUPPEN.filter(g => g.length >= 3));
-    const drei = mische(gruppe).slice(0, 3);
-    const richtig = waehle(andere(drei[0], false));
+  reimtNicht(nurBild) {
+    const auswahl = g => (nurBild ? mitBild(g) : g);
+    const gruppe = waehle(GRUPPEN.filter(g => auswahl(g).length >= 3));
+    const drei = mische(auswahl(gruppe)).slice(0, 3);
+    const richtig = waehle(andere(drei[0], nurBild));
     return { art: "reimtNicht", richtig, optionen: mische([...drei, richtig]) };
   },
-  vers() {
-    const [text, wort] = waehle(REIMVERSE);
+  vers(nurBild) {
+    const verse = REIMVERSE.filter(([, wort]) => !nurBild || ALLE.find(w => w.wort === wort).bild);
+    const [text, wort] = waehle(verse);
     const richtig = ALLE.find(w => w.wort === wort);
-    return { art: "vers", text, richtig, optionen: mische([richtig, ...ausVerschiedenenGruppen(andere(richtig, false), 3)]) };
+    return { art: "vers", text, richtig, optionen: mische([richtig, ...ausVerschiedenenGruppen(andere(richtig, nurBild), 3)]) };
   },
 };
 
+// Basisklasse 1: Stufe 1 Kindergarten, 2–4 1. Klasse, 5 2. Klasse, 6 Endgegner.
+// Bis Stufe 5 (2. Klasse) tragen alle Antworten ein Bild; erst die Königsstufe nimmt auch Wörter ohne Bild.
+const BILD_NOETIG = ["s1", "s2", "s3", "s4", "s5"];
 const STUFE = {
   s1: () => ARTEN.welcheReimt(3),
-  s2: () => waehle([() => ARTEN.welcheReimt(4), () => ARTEN.paare(3)])(),
-  s3: () => waehle([() => ARTEN.paare(3), () => ARTEN.paare(4), () => ARTEN.welcheReimt(4)])(),
-  s4: () => waehle([ARTEN.reimtNicht, () => ARTEN.paare(4)])(),
-  s5: () => waehle([ARTEN.vers, ARTEN.reimtNicht])(),
+  s2: () => ARTEN.welcheReimt(4),
+  s3: () => ARTEN.paare(3),
+  s4: () => waehle([() => ARTEN.paare(4), () => ARTEN.reimtNicht(true)])(),
+  s5: () => waehle([() => ARTEN.reimtNicht(true), () => ARTEN.vers(true)])(),
+  s6: () => waehle([() => ARTEN.vers(false), () => ARTEN.paare(5), () => ARTEN.paare(6)])(),
 };
 
 function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
@@ -104,10 +110,10 @@ function pruefeAufgabe(a, stufe) {
   }
   if (new Set(a.optionen.map(o => o.wort)).size !== a.optionen.length) m.push("doppelte Auswahl");
   if (!a.optionen.includes(a.richtig)) m.push("richtige Antwort fehlt");
+  if (BILD_NOETIG.includes(stufe) && a.optionen.some(o => !o.bild)) m.push("Wort ohne Bild bis Stufe 5");
   if (a.art === "welcheReimt") {
     if (a.optionen.filter(o => reimen(o, a.vorlage)).length !== 1) m.push("nicht genau ein Reimwort in der Auswahl");
     if (a.optionen.includes(a.vorlage)) m.push("Vorlage steht in der Auswahl");
-    if ((stufe === "s1" || stufe === "s2") && a.optionen.some(o => !o.bild)) m.push("Wort ohne Bild in Stufe 1–2");
   }
   if (a.art === "reimtNicht" && a.optionen.filter(o => !reimen(o, a.richtig)).length !== 3) m.push("die drei anderen reimen sich nicht alle");
   if (a.art === "vers") {
@@ -148,7 +154,7 @@ function paareSpielen(ctx, a) {
       for (const kn of [erste.knopf, knopf]) { kn.classList.remove("falsch"); void kn.offsetWidth; kn.classList.add("falsch"); }
       ctx.falsch(`«${erste.k.wort}» und «${k.wort}» klingen am Ende nicht gleich. Sprich beide Wörter laut.`,
         "Die Paare: " + [...new Set(a.karten.map(x => x.gruppe))].map(g => a.karten.filter(x => x.gruppe === g).map(x => x.wort).join(" – ")).join(", "));
-      if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+      if (ctx.vorbei()) fertig = true;
     });
     return knopf;
   });
@@ -162,10 +168,11 @@ LS.spiel({
   anzahl: 8,
   stufen: {
     s1: "Welches Bild reimt sich? Drei Bilder zur Auswahl.",
-    s2: "Vier Bilder zur Auswahl und erste Reim-Paare.",
-    s3: "Reim-Paare finden: drei oder vier Paare.",
-    s4: "Welches Wort reimt sich nicht?",
-    s5: "Reime im Vers ergänzen: Die Ziege fängt eine …",
+    s2: "Welches Bild reimt sich? Vier Bilder zur Auswahl.",
+    s3: "Reim-Paare finden: drei Paare.",
+    s4: "Vier Reim-Paare — und welches Bild reimt sich nicht?",
+    s5: "Welches reimt sich nicht? Und Reime im Vers ergänzen: Die Ziege fängt eine …",
+    s6: "Endgegner: Verse und grosse Runden mit fünf oder sechs Reim-Paaren.",
   },
 
   aufgabe(ctx) {

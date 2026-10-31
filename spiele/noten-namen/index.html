@@ -38,8 +38,10 @@ const STUFE = {
   s2: { von: -2, bis: 5 },                                       // c' bis c''
   s3: { von: -2, bis: 9, umgekehrt: true },                      // c' bis g'' (bis über die oberste Linie)
   s4: { von: -5, bis: 12, umgekehrt: true },                     // g bis c''' mit Hilfslinien
-  s5: { von: -2, bis: 9, vorzeichen: true },
+  s5: { von: -2, bis: 9, vorzeichen: 0.7 },                     // Anteil der Noten mit Vorzeichen
+  s6: { von: -5, bis: 12, umgekehrt: true, vorzeichen: 0.5 },    // Endgegner: alles gemischt
 };
+// Basisklasse 3: Stufe 1 = 2. Klasse, 2–4 = 3. Klasse, 5 = 4. Klasse, 6 Endgegner.
 
 // Vorzeichen, die in der Schule zuerst vorkommen: fis, cis, gis, dis, ais und b, es, as, des, ges.
 const KREUZ = ["c", "d", "f", "g", "a"];
@@ -49,18 +51,19 @@ const GELAEUFIG = [...KREUZ.map(n => n + "is"), "b", "es", "as", "des", "ges"];
 function aufgabeErzeugen(stufe) {
   const s = STUFE[stufe];
   const p = zufall(s.von, s.bis);
-  let vorzeichen = 0;
-  if (s.vorzeichen && Math.random() < 0.7) {
-    const n = NOTEN.name(p);
-    vorzeichen = KREUZ.includes(n) && BE.includes(n) ? waehle([1, -1]) : KREUZ.includes(n) ? 1 : BE.includes(n) ? -1 : 0;
-  }
-  const richtig = NOTEN.name(p, vorzeichen);
   if (s.umgekehrt && Math.random() < 0.4) {
-    // Name gegeben, Note finden: drei Positionen mit verschiedenen Namen
+    // Name gegeben, Note finden: drei Positionen mit verschiedenen Namen (Stammtöne, ohne Vorzeichen)
+    const richtig = NOTEN.name(p);
     const andere = new Set();
     while (andere.size < 2) { const q = zufall(s.von, s.bis); if (NOTEN.name(q) !== richtig) andere.add(q); }
     return { art: "finden", p, richtig, optionen: mische([p, ...andere]) };
   }
+  let vorzeichen = 0;
+  if (s.vorzeichen && Math.random() < s.vorzeichen) {
+    const n = NOTEN.name(p);
+    vorzeichen = KREUZ.includes(n) && BE.includes(n) ? waehle([1, -1]) : KREUZ.includes(n) ? 1 : BE.includes(n) ? -1 : 0;
+  }
+  const richtig = NOTEN.name(p, vorzeichen);
   let optionen;
   if (s.namen) optionen = s.namen;
   else if (vorzeichen) {
@@ -102,6 +105,7 @@ LS.spiel({
     s3: "Bis über die oberste Linie — und Noten finden.",
     s4: "Mit Hilfslinien unten und oben.",
     s5: "Mit Vorzeichen: fis, cis, b, es …",
+    s6: "Endgegner: Hilfslinien, Vorzeichen und Noten finden gemischt.",
   },
 
   aufgabe(ctx) {

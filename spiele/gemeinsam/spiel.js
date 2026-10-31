@@ -128,7 +128,7 @@ const LS = (() => {
 
   /** Reihenfolge-Werte für die Einstellung „Teile einer Aufgabe“. */
   const REIHENFOLGEN = {
-    stufe: "nach Stufe (1–3 geordnet, 4–5 gemischt)",
+    stufe: "nach Stufe (1–3 geordnet, 4–6 gemischt)",
     geordnet: "immer geordnet (gross links → klein rechts)",
     gemischt: "immer gemischt",
   };
@@ -172,11 +172,50 @@ const LS = (() => {
     if (lies("spieler", null) === name) schreibe("spieler", null);
   }
 
-  /** Empfohlene Stufe aus der Klasse: 2. Kl. → 1, 3. Kl. → 2, 4. Kl. → 3, darüber → 4. */
-  function empfohleneStufe(name) {
+  /** Spielstand zurücksetzen: die Runden eines Kindes löschen — alle oder nur die eines Spiels.
+      Profil, Klasse, Fokus und Timer bleiben. */
+  function loescheRunden(name, spielId = null) {
+    schreibe("protokoll", protokoll().filter(e => e.name !== name || (spielId && e.spiel !== spielId)));
+  }
+
+  /**
+   * Gesicherte Daten eines anderen Geräts dazunehmen, ohne etwas zu verlieren: Runden, die schon da
+   * sind (gleiches Kind, Zeit, Spiel, Stufe), zählen nur einmal; neue kommen dazu. Unbekannte Kinder
+   * werden mit ihrem Profil angelegt, vorhandene Profile bleiben. Gibt die Anzahl neuer Runden und Kinder zurück.
+   */
+  function zusammenfuehren(daten) {
+    const schluessel = e => `${e.name}|${e.zeit}|${e.spiel}|${e.stufe}`;
+    const runden = protokoll();
+    const bekannt = new Set(runden.map(schluessel));
+    const neu = daten.protokoll.filter(e => e && e.name && e.zeit && !bekannt.has(schluessel(e)));
+    schreibe("protokoll", [...runden, ...neu].sort((a, b) => (a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0)));
+    const alle = profile();
+    const neueKinder = Object.keys(daten.profile).filter(n => !(n in alle));
+    for (const n of neueKinder) alle[n] = { ...LEERES_PROFIL, ...daten.profile[n] };
+    // Kinder, die nur in Runden vorkommen, bekommen ein leeres Profil
+    for (const e of neu) if (!(e.name in alle)) { alle[e.name] = { ...LEERES_PROFIL }; neueKinder.push(e.name); }
+    schreibe("profile", alle);
+    return { runden: neu.length, kinder: neueKinder.length };
+  }
+
+  /** Basisklasse eines Spiels aus dem Katalog (null, wenn die Seite den Katalog nicht geladen hat). */
+  function basisKlasse(spielId) {
+    const eintrag = typeof SPIELE !== "undefined" ? SPIELE.find(s => s.id === spielId) : null;
+    return eintrag?.klasse ?? null;
+  }
+
+  /**
+   * Empfohlene Stufe aus der Klasse des Kindes und der Basisklasse des Spiels: gleiche Klasse →
+   * Stufe 3, eine Klasse tiefer oder mehr → Stufe 1, eine höher → Stufe 5, zwei und mehr höher →
+   * Königsstufe. Ohne Spiel (Filter auf der Startseite) gilt Stufe 3 = die eigene Klasse.
+   */
+  function empfohleneStufe(name, spielId) {
     const k = Number(profil(name).klasse);
     if (!k) return null;
-    return k <= 2 ? "s1" : k === 3 ? "s2" : k === 4 ? "s3" : "s4";
+    const b = spielId ? basisKlasse(spielId) : k;
+    if (!b) return null;
+    const d = k - b;
+    return d < 0 ? "s1" : d === 0 ? "s3" : d === 1 ? "s5" : "s6";
   }
 
   const protokoll = () => lies("protokoll", []);
@@ -431,7 +470,7 @@ const LS = (() => {
         wackeln(k);
         k.classList.add("gewaehlt");
         ctx.falsch(typeof opt.hinweis === "function" ? opt.hinweis(wert) : opt.hinweis, opt.loesung);
-        if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+        if (ctx.vorbei()) fertig = true;
       });
       box.append(k);
     }
@@ -469,7 +508,7 @@ const LS = (() => {
         }
         wackeln(k);
         ctx.falsch(typeof opt.hinweis === "function" ? opt.hinweis(wert, opt.reihe[pos]) : opt.hinweis, opt.loesung);
-        if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+        if (ctx.vorbei()) fertig = true;
       });
       box.append(k);
     }
@@ -477,18 +516,68 @@ const LS = (() => {
     return { ablage, box };
   }
 
+  const KORB_FARBEN = ["var(--deko-6)", "var(--deko-3)", "var(--deko-5)", "var(--deko-2)", "var(--deko-1)", "var(--deko-4)"];
+
+  /**
+   * Karte und Körbe: Die Karte (Bild und Name) gehört in genau einen Korb; bei richtiger Wahl
+   * fliegt sie hinein. Hängt Karte und Körbe an ctx.flaeche an.
+   * opt.karte: { bild, text } der Karte
+   * opt.koerbe: Werte der Körbe; opt.korbInhalt(wert): { bild, text, klein }; opt.farbe(wert, i): CSS-Farbe
+   * opt.richtig, opt.hinweis(wert), opt.loesung, opt.lob wie bei auswahl
+   */
+  function koerbe(ctx, opt) {
+    const karte = el("div", { class: "korb-karte" },
+      opt.karte.bild ? el("span", { class: "bild", text: opt.karte.bild }) : null, el("b", { text: opt.karte.text }));
+    const box = el("div", { class: "korb-reihe" });
+    let fertig = false;
+    opt.koerbe.forEach((wert, i) => {
+      const k = el("button", { type: "button", class: "korb-knopf" });
+      wahlInhalt(k, opt.korbInhalt ? opt.korbInhalt(wert) : String(wert));
+      k.style.setProperty("--k", opt.farbe ? opt.farbe(wert, i) : KORB_FARBEN[i % KORB_FARBEN.length]);
+      k.addEventListener("click", () => {
+        if (fertig) return;
+        if (wert === opt.richtig) {
+          fertig = true;
+          fliegen(karte, k);
+          ctx.richtig(opt.lob);
+          return;
+        }
+        wackeln(k);
+        ctx.falsch(typeof opt.hinweis === "function" ? opt.hinweis(wert) : opt.hinweis, opt.loesung);
+        if (ctx.vorbei()) fertig = true;
+      });
+      box.append(k);
+    });
+    ctx.flaeche.append(karte, box);
+    return { karte, box };
+  }
+
   // ---------- Rahmen eines Spiels ----------
 
-  /** Einheitliche Schwierigkeitsskala aller Spiele. Stufe 3 und 4 entsprechen der Grund- und
-      der erweiterten Anforderung des Lernzielblatts 4. Klasse; 1–2 öffnen die Spiele für die
-      2. Klasse, 5 ist die Herausforderung darüber hinaus. */
+  /** Schwierigkeitsskala, bezogen auf die Basisklasse des Spiels (Katalog, Feld 'klasse'):
+      Stufe 3 ist das Lernziel der Basisklasse, 2 leichter und 4 schwerer in derselben Klasse,
+      1 eine Klasse tiefer, 5 eine Klasse höher. Die Königsstufe ist der Endgegner: besonders
+      herausfordernd, über alles hinweg. (Entscheid Patrik 2026-10-31) */
   const SKALA = [
-    { id: "s1", nr: 1, icon: "🌱", name: "Einsteiger",       fuer: "ab 2. Klasse",  farbe: "var(--deko-5)" },
-    { id: "s2", nr: 2, icon: "🌿", name: "Entdecker",        fuer: "2.–3. Klasse",  farbe: "var(--deko-6)" },
-    { id: "s3", nr: 3, icon: "🌳", name: "Grundanforderung", fuer: "4. Klasse",     farbe: "var(--deko-4)" },
-    { id: "s4", nr: 4, icon: "⭐", name: "Erweitert",        fuer: "4. Klasse",     farbe: "var(--deko-3)" },
-    { id: "s5", nr: 5, icon: "🚀", name: "Profi",            fuer: "Herausforderung", farbe: "var(--deko-1)" },
+    { id: "s1", nr: 1, icon: "🌱", name: "Einstieg",       rel: -1,  farbe: "var(--deko-5)" },
+    { id: "s2", nr: 2, icon: "🌿", name: "Üben",           rel: 0,   zusatz: "leichter", farbe: "var(--deko-6)" },
+    { id: "s3", nr: 3, icon: "🌳", name: "Klassenziel",    rel: 0,   farbe: "var(--deko-4)" },
+    { id: "s4", nr: 4, icon: "⭐", name: "Knifflig",       rel: 0,   zusatz: "schwerer", farbe: "var(--deko-3)" },
+    { id: "s5", nr: 5, icon: "🚀", name: "Nächste Klasse", rel: 1,   farbe: "var(--deko-1)" },
+    { id: "s6", nr: 6, icon: "👑", name: "Königsstufe",    rel: null, farbe: "var(--deko-2)" },
   ];
+
+  const klasseText = k => (k <= 0 ? "Kindergarten" : `${k}. Klasse`);
+
+  /** Für wen ist die Stufe? „2. Klasse, leichter“ — aus der Basisklasse des Spiels. */
+  function stufeFuer(spielId, stufeId) {
+    const st = SKALA.find(s => s.id === stufeId);
+    if (!st) return "";
+    if (st.rel === null) return "Endgegner";
+    const b = basisKlasse(spielId);
+    if (!b) return st.name;
+    return klasseText(b + st.rel) + (st.zusatz ? `, ${st.zusatz}` : "");
+  }
 
   const LOB = ["Super!", "Genau richtig!", "Toll gemacht!", "Prima!", "Stark!", "Richtig! 🎉", "Bravo!"];
 
@@ -505,7 +594,7 @@ const LS = (() => {
   /**
    * Startet ein Spiel.
    * def.id, def.titel, def.einleitung
-   * def.stufen: { s1: "Beschreibung", …, s5: "…" } — welche Stufen der SKALA das Spiel anbietet
+   * def.stufen: { s1: "Beschreibung", …, s6: "…" } — welche Stufen der SKALA das Spiel anbietet
    * def.anzahl: Aufgaben je Runde
    * def.aufgabe(ctx): zeichnet Aufgabe ctx.nr in ctx.flaeche. Ruft ctx.richtig() oder
    *   ctx.falsch(hinweis, loesungText) auf. ctx.sag(text) lässt die Eule sprechen.
@@ -565,7 +654,7 @@ const LS = (() => {
         const timer = timerFuer(name, def.id, st.id);
         const knopf = el("button", { class: "stufe", type: "button", onclick: () => runde(st) },
           el("b", { text: `${st.icon} Stufe ${st.nr} · ${st.name}` }),
-          el("div", { class: "fuer", text: st.fuer + (st.id === empfohleneStufe(name) ? " · 👍 für dich empfohlen" : "") }),
+          el("div", { class: "fuer", text: stufeFuer(def.id, st.id) + (st.id === empfohleneStufe(name, def.id) ? " · 👍 für dich empfohlen" : "") }),
           el("span", { text: st.text }),
           timer.an ? el("div", { class: "fuer", style: "margin-top:6px", text: `⏱ ${timer.sekunden} s je Aufgabe` }) : null,
           el("div", { class: "sterne-klein", html: beste ? `<span style="color:#f5b301">${"★".repeat(beste)}</span><span class="aus">${"★".repeat(3 - beste)}</span>` : '<span class="leise" style="font-size:16px">noch nicht gespielt</span>' }));
@@ -667,6 +756,8 @@ const LS = (() => {
           nr,
           flaeche,
           sag: (t, art) => eule.sag(t, art),
+          /** Ist die Aufgabe gelöst oder nach drei Fehlversuchen aufgelöst? Dann nimmt sie keine Antwort mehr an. */
+          vorbei: () => erledigt,
           richtig(text) {
             if (erledigt) return;
             erledigt = true;
@@ -748,7 +839,8 @@ const LS = (() => {
   return {
     STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, spiel, lies, schreibe, sterneText,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
+    basisKlasse, stufeFuer, klasseText, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, vorgabeZeit, timerFuer, setzeTimerSpiel, zeitVorschlag,
-    protokoll, besteSterne, spielerWahl, auswahl, reihenfolge, fliegen,
+    protokoll, besteSterne, spielerWahl, auswahl, reihenfolge, fliegen, koerbe,
   };
 })();

@@ -95,7 +95,7 @@ const ARTEN = {
     const woerter = woerterFuer(anzahl, stelle);
     return { art: "ordnen", woerter, reihe: sortiert(woerter), stelle };
   },
-  leitwoerter() {
+  leitwoerter(falsche = 2) {
     // Seite im Wörterbuch: erstes und letztes Wort; welches Wort steht dazwischen?
     for (;;) {
       const s = sortiert(mische(WOERTER).slice(0, 6));
@@ -103,19 +103,22 @@ const ARTEN = {
       const k = zufall(1, 3);
       const links = s[k - 1], rechts = s[k + 1];
       const richtig = s[k];
-      const draussen = s.filter((_, i) => i < k - 1 || i > k + 1).slice(0, 2);
+      const draussen = s.filter((_, i) => i < k - 1 || i > k + 1).slice(0, falsche);
+      if (draussen.length < falsche) continue;
       if (draussen.length < 2 || links.wort[0] === rechts.wort[0] && Math.random() < 0.5) continue;
       return { art: "leitwoerter", links, rechts, richtig, optionen: mische([richtig, ...draussen]) };
     }
   },
 };
 
+// Basisklasse 2: Stufe 1 = 1. Klasse, 2–4 = 2. Klasse, 5 = 3. Klasse, 6 Endgegner.
 const STUFE = {
   s1: () => waehle([() => ARTEN.luecke(2), () => ARTEN.luecke(3)])(),
   s2: () => waehle([ARTEN.nachbar, () => ARTEN.ordnen(3, 1)])(),
   s3: () => waehle([() => ARTEN.ordnen(4, 1), () => ARTEN.ordnen(4, 2)])(),
-  s4: () => waehle([() => ARTEN.ordnen(5, 2), () => ARTEN.ordnen(5, 3)])(),
-  s5: () => waehle([ARTEN.leitwoerter, () => ARTEN.ordnen(5, 3)])(),
+  s4: () => waehle([() => ARTEN.ordnen(5, 1), () => ARTEN.ordnen(5, 2)])(),
+  s5: () => waehle([() => ARTEN.leitwoerter(2), () => ARTEN.ordnen(5, 3)])(),
+  s6: () => waehle([() => ARTEN.leitwoerter(3), () => ARTEN.ordnen(6, 2), () => ARTEN.ordnen(6, 3)])(),
 };
 
 function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
@@ -145,8 +148,9 @@ LS.spiel({
     s1: "Welcher Buchstabe fehlt in der ABC-Leiste?",
     s2: "Was kommt vor oder nach M? Drei Wörter ordnen.",
     s3: "Vier Wörter ordnen — manchmal zählt der zweite Buchstabe.",
-    s4: "Fünf Wörter ordnen — bis zum dritten Buchstaben.",
-    s5: "Wie im Wörterbuch: Welches Wort steht auf dieser Seite?",
+    s4: "Fünf Wörter ordnen — bis zum zweiten Buchstaben.",
+    s5: "Bis zum dritten Buchstaben — und wie im Wörterbuch: Welches Wort steht auf dieser Seite?",
+    s6: "Endgegner: sechs Wörter bis zum dritten Buchstaben und Wörterbuch-Seiten, mit weniger Hilfe.",
   },
 
   aufgabe(ctx) {
@@ -173,6 +177,8 @@ LS.spiel({
         reihe: a.reihe, breite: 120, pfeile: true, ablage: w => w.wort,
         inhalt: w => ({ bild: w.bild, text: w.wort }),
         hinweis: (w, erwartet) => {
+          // Königsstufe: knappe Hilfe, ohne den entscheidenden Buchstaben zu nennen.
+          if (ctx.stufe === "s6") return `«${w.wort}» ist noch nicht an der Reihe. Vergleiche Buchstabe für Buchstabe.`;
           if (w.wort[0] !== erwartet.wort[0]) return `Schau den ersten Buchstaben an: ${erwartet.wort[0]} kommt im ABC vor ${w.wort[0]}.`;
           const st = entscheidendeStelle(w, erwartet);
           return `Beide beginnen gleich. Schau auf Buchstabe ${st}: ${erwartet.wort[st - 1] || "(Wort zu Ende)"} kommt vor ${w.wort[st - 1] || "(Wort zu Ende)"}.`;

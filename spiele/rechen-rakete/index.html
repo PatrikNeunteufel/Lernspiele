@@ -76,65 +76,82 @@ function mitWertziffern(w, stelle) {
 
 const wertziffern = n => String(n).replace(/0/g, "").length;
 
-// Je Stufe: Zahlenraum (grösste Zahl a mindestens 'min', Ergebnis unter 'max'), Rechenarten.
+// Je Stufe: Zahlenraum (grösste Zahl a mindestens 'min', Ergebnis unter 'max'), Rechenarten,
+// höchstens 'wz' Wertziffern in a und b zusammen ('wb': davon höchstens so viele in b),
+// 'drei': Stufe der 3. Klasse (bis 100 mit Übergang, bis 1000 mit Zehnern), 'knapp': kurze Hinweise.
 const STUFE = {
-  s1: { min: 11, max: 100, arten: ["+", "−"] },
-  s2: { min: 15, max: 1000, arten: ["+", "−"] },
-  s3: { min: 300, max: 10000, arten: ["+", "−"] },
-  s4: { min: 10000, max: 1000000, arten: ["+", "−"] },
-  s5: { min: 100, max: 1000000, arten: ["+", "−", "×", ":"] },
+  s1: { min: 15, max: 1000, arten: ["+", "−"], drei: true },
+  s2: { min: 100, max: 10000, arten: ["+", "−"], wz: 3, wb: 1 },
+  s3: { min: 300, max: 10000, arten: ["+", "−"], wz: 4 },
+  s4: { min: 10000, max: 1000000, arten: ["+", "−"], wz: 4 },
+  s5: { min: 100, max: 1000000, arten: ["+", "−", "×", ":"], wz: 4 },
+  // Königsstufe: bis knapp 10 Millionen, fünf Wertziffern, Teiler auch 25, 50 oder Zehner.
+  s6: { min: 10000, max: 10000000, arten: ["+", "−", "×", ":"], wz: 5, gross: true, knapp: true },
 };
 
+const rechne = (a, art, b) => art === "+" ? a + b : art === "−" ? a - b : art === "×" ? a * b : a / b;
+
 function aufgabeErzeugen(stufe) {
-  const { min, max, arten } = STUFE[stufe];
+  const p = STUFE[stufe];
+  const { min, max, arten } = p;
   const art = waehle(arten);
-  for (;;) {
+  for (let versuch = 0; versuch < 2000; versuch++) {
     let a, b;
-    if (stufe === "s1") {
-      // bis 100 ohne Zehnerübergang: Einer bzw. Zehner getrennt rechnen
-      a = zufall(11, 89);
-      const plusZehner = Math.random() < 0.5;
-      if (art === "+") b = plusZehner ? 10 * zufall(1, 9 - Math.floor(a / 10)) : zufall(1, 9 - (a % 10));
-      else b = plusZehner ? 10 * zufall(1, Math.floor(a / 10) - 1 || 1) : zufall(1, a % 10 || 1);
-      // wirklich ohne Übergang: Einer und Zehner je für sich rechenbar
-      const ueber = art === "+" ? (a % 10) + (b % 10) > 9 || a + b > 99 : (a % 10) < (b % 10) || a - b < 1;
-      if (!b || ueber) continue;
-    } else if (stufe === "s2") {
+    if (p.drei) {
       // bis 100 mit Übergang oder Hunderter/Zehner bis 1000 (340 + 50, 700 − 30)
       if (Math.random() < 0.5) { a = zufall(15, 85); b = zufall(6, 39); }
       else { a = zufall(11, 95) * 10; b = zufall(1, 9) * 10; }
     } else if (art === "+" || art === "−") {
-      // insgesamt höchstens 4 Wertziffern; b liegt an derselben oder einer tieferen Stelle als a
-      const wa = zufall(1, 3), wb = zufall(1, 4 - wa);
-      const hoch = Math.max(wa, Math.floor(Math.log10(max)) - 1);
-      const sa = zufall(0, Math.max(0, hoch - wa));
+      // höchstens wz Wertziffern; b liegt an derselben oder einer tieferen Stelle als a
+      const wa = zufall(1, Math.min(3, p.wz - 1)), wb = zufall(1, Math.min(p.wb || 9, p.wz - wa));
+      // hoch: Exponent der höchsten Stelle unter 'max' (bei 10 000 die Tausender); die erste
+      // Wertziffer von a steht bei 10^(sa + wa − 1) und darf bis dorthin reichen.
+      const hoch = Math.max(wa - 1, Math.floor(Math.log10(max)) - 1);
+      const sa = zufall(0, Math.max(0, hoch - wa + 1));
       const sb = zufall(Math.max(0, sa - 2), sa + wa - 1);
       a = mitWertziffern(wa, sa);
       b = mitWertziffern(wb, Math.max(0, sb - wb + 1));
     } else if (art === "×") {
-      // z. B. 40 × 300, 25 × 40: Wertziffern zusammen höchstens 4
+      // z. B. 40 × 300, 25 × 40; Königsstufe auch 300 × 4000 = 1 200 000
       const wa = zufall(1, 2), wb = zufall(1, 2);
-      a = mitWertziffern(wa, zufall(0, 2));
-      b = mitWertziffern(wb, zufall(0, 2));
+      a = mitWertziffern(wa, zufall(0, p.gross ? 3 : 2));
+      b = mitWertziffern(wb, zufall(0, p.gross ? 3 : 2));
     } else {
-      // z. B. 2400 : 6 — Teiler einstellig, Ergebnis mit 1–2 Wertziffern
-      b = zufall(2, 9);
-      const q = mitWertziffern(zufall(1, 2), zufall(0, 3));
+      // z. B. 2400 : 6 — Teiler einstellig, Ergebnis mit 1–2 Wertziffern; Königsstufe: 4 800 000 : 60
+      b = p.gross ? waehle([zufall(2, 9), zufall(2, 9) * 10, 25, 50]) : zufall(2, 9);
+      const q = mitWertziffern(zufall(1, 2), zufall(0, p.gross ? 4 : 3));
       a = q * b;
     }
     if (art === "−" && b > a) [a, b] = [b, a];
-    const ergebnis = art === "+" ? a + b : art === "−" ? a - b : art === "×" ? a * b : a / b;
+    const ergebnis = rechne(a, art, b);
     if (ergebnis <= 0 || ergebnis >= max || a >= max || Math.max(a, ergebnis) < min) continue;
-    if (stufe !== "s1" && stufe !== "s2" && wertziffern(a) + wertziffern(b) > 4) continue;
+    if (!p.drei && wertziffern(a) + wertziffern(b) > p.wz) continue;
     if (art === "−" && a === b) continue;
-    // Ab Stufe 3 keine trivialen Aufgaben wie 330 + 1: b höchstens zwei Stellen kleiner als a.
-    if ((art === "+" || art === "−") && !["s1", "s2"].includes(stufe) && b * 100 < a) continue;
+    // Ab Stufe 2 keine trivialen Aufgaben wie 330 + 1: b höchstens zwei Stellen kleiner als a.
+    if ((art === "+" || art === "−") && !p.drei && b * 100 < a) continue;
     return { a, b, art, ergebnis };
   }
+  // Notausgang (praktisch nie): 3·10^k + 10^k mit 10^k ≥ min liegt in jeder Stufe im Zahlenraum.
+  const z = 10 ** Math.ceil(Math.log10(min));
+  return { a: 3 * z, b: z, art: "+", ergebnis: 4 * z };
+}
+
+function pruefeAufgabe(x, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(x.art)) m.push("Rechenart nicht erlaubt");
+  if (rechne(x.a, x.art, x.b) !== x.ergebnis) m.push("Ergebnis stimmt nicht");
+  if (!Number.isInteger(x.ergebnis) || x.ergebnis <= 0 || x.ergebnis >= p.max) m.push(`Ergebnis ausserhalb 1–${p.max - 1}`);
+  if (x.a >= p.max || Math.max(x.a, x.ergebnis) < p.min) m.push("Zahlenraum");
+  if (String(x.ergebnis).length > 7) m.push("passt nicht in die Tastatur");
+  if (!p.drei && wertziffern(x.a) + wertziffern(x.b) > p.wz) m.push("zu viele Wertziffern");
+  if (p.wb && (x.art === "+" || x.art === "−") && wertziffern(x.b) > p.wb && wertziffern(x.a) > p.wb) m.push("b hat zu viele Wertziffern");
+  return m;
 }
 
 /** Hinweis: den zweiten Summanden in seine Stellen zerlegen (320 000 + 30 000 + 8 000). */
-function hinweisFuer(x) {
+function hinweisFuer(x, knapp) {
+  if (knapp) return x.art === "×" || x.art === ":" ? "Rechne zuerst ohne die Nullen — und zähl sie genau!" : "Rechne Stelle für Stelle — und denk an den Übertrag!";
   if (x.art === "×") return `Rechne ohne Nullen (${String(x.a).replace(/0+$/, "")} × ${String(x.b).replace(/0+$/, "")}) und hänge dann alle Nullen an.`;
   if (x.art === ":") return `Welche Zahl mal ${x.b} gibt ${zahlText(x.a)}? Rechne zuerst ohne die Nullen.`;
   const teile = STELLEN.filter(st => zerlege(x.b)[st.k]).map(st => zerlege(x.b)[st.k] * st.wert);
@@ -147,11 +164,12 @@ LS.spiel({
   einleitung: "3, 2, 1 … Start! Jede richtige Antwort bringt die Rakete höher ins All. Rechne im Kopf!",
   anzahl: 8,
   stufen: {
-    s1: "Bis 100 ohne Zehnerübergang: 43 + 20, 57 − 4.",
-    s2: "Bis 100 mit Übergang und bis 1000 mit Zehnern: 47 + 28, 340 + 50.",
-    s3: "Mit Wertziffern bis 10 000: 402 + 90, 3400 − 600.",
+    s1: "Bis 100 mit Übergang und bis 1000 mit Zehnern: 47 + 28, 340 + 50.",
+    s2: "Bis 10 000, die zweite Zahl hat eine Wertziffer: 402 + 90, 3400 − 600.",
+    s3: "Mit Wertziffern bis 10 000: 4020 + 390, 3450 − 600.",
     s4: "Bis zur Million: 320 000 + 38 000.",
     s5: "Auch mal und geteilt: 40 × 300, 2400 : 6.",
+    s6: "Bis 10 Millionen, alle vier Rechenarten: 300 × 4000, 4 800 000 : 60.",
   },
 
   aufgabe(ctx) {
@@ -180,7 +198,7 @@ LS.spiel({
           return;
         }
         anzeige.classList.add("falsch");
-        ctx.falsch(hinweisFuer(x), `${zahlText(x.a)} ${x.art} ${zahlText(x.b)} = ${zahlText(x.ergebnis)}`);
+        ctx.falsch(hinweisFuer(x, STUFE[ctx.stufe].knapp), `${zahlText(x.a)} ${x.art} ${zahlText(x.b)} = ${zahlText(x.ergebnis)}`);
         if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
       },
     });

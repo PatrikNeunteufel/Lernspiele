@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buchstaben-Zwillinge</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .vorlage { text-align: center; margin: 4px 0 14px; }
+  .vorlage .gross { font-size: clamp(64px, 15vw, 96px); font-weight: 900; color: var(--deko-6); line-height: 1.1; }
+  .vorlage .bild { font-size: clamp(56px, 13vw, 84px); line-height: 1.1; }
+  .vorlage .wort-gross { font-size: clamp(32px, 7.5vw, 48px); font-weight: 900; letter-spacing: 4px; }
+  .wahl-knopf.buchstabe { font-size: clamp(34px, 8vw, 46px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔡 Buchstaben-Zwillinge</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../anlaut-angel/woerter.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.2.A.1: a einzelne Buchstaben wiedererkennen, b Buchstaben und Laute verbinden,
+// Buchstaben zu Silben und kurzen Wörtern verbinden; D.4.A.1.d (Grundanspruch 1. Zyklus) das ganze
+// Alphabet kennen und Wörter lautgetreu schreiben. Grossbuchstabe ↔ Kleinbuchstabe, ähnliche
+// Buchstaben unterscheiden, Wörter aus Buchstaben legen.
+
+const { waehle, mische, el } = LS;
+
+const ABC = "abcdefghijklmnopqrstuvwxyz".split("");
+const VERWECHSELBAR = new Set(VERWECHSLER.flat());
+const SALAT = ANLAUT_WOERTER.map(([wort, bild]) => ({ wort, bild }));
+
+const ARTEN = {
+  kleinZuGross() {
+    // einfache Buchstaben, Ablenker nicht verwechselbar
+    const richtig = waehle(ABC.filter(b => !VERWECHSELBAR.has(b)));
+    const andere = mische(ABC.filter(b => b !== richtig && !VERWECHSELBAR.has(b))).slice(0, 2);
+    return { art: "zwilling", gross: richtig.toUpperCase(), richtig, optionen: mische([richtig, ...andere]) };
+  },
+  verwechsler() {
+    const gruppe = waehle(VERWECHSLER);
+    const richtig = waehle(gruppe);
+    return { art: "zwilling", gross: richtig.toUpperCase(), richtig, optionen: mische(gruppe) };
+  },
+  wortpaar() {
+    const [[wort, bild], ...andere] = waehle(WORTPAARE);
+    return { art: "wortpaar", wort, bild, richtig: wort, optionen: mische([wort, ...andere]) };
+  },
+  salat(min, max, gross) {
+    const w = waehle(SALAT.filter(x => x.wort.length >= min && x.wort.length <= max));
+    const reihe = (gross ? w.wort.toUpperCase() : w.wort).split("");
+    return { art: "salat", w, reihe };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.kleinZuGross(),
+  s2: () => waehle([ARTEN.verwechsler, ARTEN.kleinZuGross])(),
+  s3: () => waehle([ARTEN.wortpaar, ARTEN.verwechsler])(),
+  s4: () => waehle([() => ARTEN.salat(3, 4, false), ARTEN.wortpaar])(),
+  s5: () => ARTEN.salat(5, 7, true),
+  // Königsstufe: lange Wörter in Grossbuchstaben und ähnliche Wörter gemischt
+  s6: () => waehle([() => ARTEN.salat(7, 8, true), () => ARTEN.salat(6, 8, true), ARTEN.wortpaar])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a) {
+  const m = [];
+  if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
+  if (a.art === "zwilling" && a.gross.toLowerCase() !== a.richtig) m.push("Zwilling passt nicht");
+  if (a.art === "salat" && a.reihe.join("").toLowerCase() !== a.w.wort.toLowerCase()) m.push("Salat ergibt das Wort nicht");
+  return m;
+}
+
+LS.spiel({
+  id: "buchstaben-zwillinge",
+  einleitung: "Jeder grosse Buchstabe hat einen kleinen Zwilling: A und a, B und b. Findest du sie?",
+  anzahl: 10,
+  stufen: {
+    s1: "Gross und klein: Welcher Zwilling gehört zu M?",
+    s2: "Aufgepasst: b, d, p, q sehen sich ähnlich!",
+    s3: "Welches Wort passt zum Bild: Hund, Hand oder Mund?",
+    s4: "Buchstabensalat: kurze Wörter legen.",
+    s5: "Buchstabensalat in Grossbuchstaben: lange Wörter.",
+    s6: "Ganz lange Wörter legen und ähnliche Wörter unterscheiden — gemischt.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "zwilling") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welcher kleine Buchstabe ist der Zwilling?" }), el("div", { class: "vorlage" }, el("div", { class: "gross", text: a.gross })));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 70,
+        hinweis: VERWECHSELBAR.has(a.richtig) ? "Schau genau: Wo ist der Bauch, wo der Strich — oben, unten, links oder rechts?" : "Sprich den Buchstaben laut. Wie sieht er klein aus?",
+        loesung: `${a.gross} und ${a.richtig} sind Zwillinge.`,
+        lob: `${a.gross} und ${a.richtig} — Zwillinge! 👯`,
+      });
+      for (const k of box.children) k.classList.add("buchstabe");
+    } else if (a.art === "wortpaar") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welches Wort passt zum Bild?" }), el("div", { class: "vorlage" }, el("div", { class: "bild", text: a.bild })));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 120,
+        hinweis: w => `Lies «${w}» langsam, Buchstabe für Buchstabe. Passt das zum Bild?`,
+        loesung: `Das Bild zeigt: ${a.wort}.`,
+      });
+    } else {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Lege das Wort: Tipp die Buchstaben der Reihe nach an." }),
+        el("div", { class: "vorlage" }, el("div", { class: "bild", text: a.w.bild })));
+      const box = LS.reihenfolge(ctx, {
+        reihe: a.reihe, breite: 60,
+        hinweis: "Sprich das Wort zum Bild langsam, Laut für Laut. Welchen Laut hörst du als Nächstes?",
+        loesung: `Das Wort heisst ${a.w.wort}.`,
+        lob: `${a.w.bild} ${a.w.wort}! 👏`,
+      });
+      for (const k of box.box.children) k.classList.add("buchstabe");
+    }
+    if (ctx.nr === 0) ctx.sag("Schau genau hin!");
+  },
+});
+</script>
+</body>
+</html>

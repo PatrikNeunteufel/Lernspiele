@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Znüni-Teller</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  .teller { font-size: clamp(32px, 7vw, 42px); letter-spacing: 4px; background: radial-gradient(circle, #fff 60%, #eef0fa 61%); border-radius: 50%; padding: 18px 10px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🍎 Znüni-Teller</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="lebensmittel.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.1.3: a Lebensmittel nach Kriterien ordnen; c (Grundanspruch 1. Zyklus) eine
+// Mahlzeit zubereiten (Znüni, Zvieri); d (Orientierungspunkt 2. Zyklus) Bedeutung von Wasser und
+// Nährstoffen für eine ausgewogene Ernährung; e Modelle (Ernährungsscheibe, -pyramide);
+// f lokale, saisonale Produkte. Inhalte in lebensmittel.js.
+
+const { waehle, mische, el } = LS;
+const L = LEBENSMITTEL.map(([bild, name, gruppe]) => ({ bild, name, gruppe }));
+const ALLTAG = { jeden: { bild: "🍎", text: "jeden Tag" }, selten: { bild: "🍬", text: "nur ab und zu" } };
+
+const ARTEN = {
+  alltag() {
+    const x = waehle(L.filter(l => ["Frucht", "Gemüse", "Getränk", "Getreide", "Süsses"].includes(l.gruppe)));
+    return { art: "korb", x, koerbe: ["jeden", "selten"], richtig: x.gruppe === "Süsses" ? "selten" : "jeden" };
+  },
+  fruchtGemuese() {
+    const x = waehle(L.filter(l => l.gruppe === "Frucht" || l.gruppe === "Gemüse"));
+    return { art: "korb", x, koerbe: ["Frucht", "Gemüse"], richtig: x.gruppe };
+  },
+  gruppe(n = 4) {
+    const x = waehle(L);
+    const andere = mische(Object.keys(GRUPPEN_ZNUENI).filter(g => g !== x.gruppe)).slice(0, n - 1);
+    return { art: "korb", x, koerbe: mische([x.gruppe, ...andere]), richtig: x.gruppe };
+  },
+  znueni() {
+    const [gut, ...schlecht] = waehle(ZNUENIS);
+    const optionen = mische([gut, ...schlecht].map(t => t.join("")));
+    return { art: "znueni", richtig: gut.join(""), optionen };
+  },
+  frage() {
+    const [frage, richtig, f1, f2] = waehle(ZNUENI_FRAGEN);
+    return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.alltag(),
+  s2: () => waehle([ARTEN.fruchtGemuese, ARTEN.alltag])(),
+  s3: () => ARTEN.gruppe(),
+  s4: () => waehle([ARTEN.znueni, () => ARTEN.gruppe()])(),
+  s5: () => waehle([ARTEN.frage, ARTEN.znueni])(),
+  // Königsstufe: alles gemischt, Gruppen mit allen sechs Körben
+  s6: () => waehle([() => ARTEN.gruppe(6), () => ARTEN.gruppe(6), ARTEN.znueni, ARTEN.frage, ARTEN.alltag])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a) {
+  const m = [];
+  if (a.koerbe && (!a.koerbe.includes(a.richtig) || new Set(a.koerbe).size !== a.koerbe.length)) m.push("Korb fehlt oder doppelt");
+  if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
+  return m;
+}
+
+const korbInfo = k => (ALLTAG[k] ? ALLTAG[k] : { bild: GRUPPEN_ZNUENI[k].bild, text: GRUPPEN_ZNUENI[k].name });
+
+LS.spiel({
+  id: "znueni-teller",
+  einleitung: "Was gibt dir Kraft für die Schule? Stell dir ein feines und gesundes Znüni zusammen!",
+  anzahl: 8,
+  stufen: {
+    s1: "Jeden Tag oder nur ab und zu?",
+    s2: "Frucht oder Gemüse?",
+    s3: "In welche Gruppe gehört das Lebensmittel?",
+    s4: "Welches Znüni ist ausgewogen?",
+    s5: "Vitamine, Kraft, Wasser — und was wächst bei uns?",
+    s6: "Alles gemischt — und alle sechs Gruppen auf einmal.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "korb") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Wohin gehört das?" }));
+      const erkl = GRUPPEN_ZNUENI[a.x.gruppe].erklaerung;
+      LS.koerbe(ctx, {
+        karte: { bild: a.x.bild, text: a.x.name }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: korbInfo,
+        // Der Hinweis erklärt den falsch gewählten Korb — die Erklärung des richtigen nennte die Lösung.
+        hinweis: k => (ALLTAG[k] ? "Überleg: Hat es viel Zucker, Fett oder Salz? Dann nur ab und zu." : `${GRUPPEN_ZNUENI[k].erklaerung} Passt ${a.x.name} dazu?`),
+        loesung: `${a.x.name}: ${korbInfo(a.richtig).text}. ${erkl}`, lob: `Richtig! ${erkl}`,
+      });
+    } else if (a.art === "znueni") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Welches Znüni ist ausgewogen?" }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 160, inhalt: t => el("span", { class: "teller", text: t }),
+        hinweis: "Ein gutes Znüni hat Frucht oder Gemüse, etwas für lange Kraft und Wasser zum Trinken.", loesung: `Ausgewogen ist: ${a.richtig}`, lob: "Mmh, ein feines Znüni! 🍎" });
+    } else {
+      ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 180, hinweis: "Denk an die Ernährungspyramide: unten das, wovon wir viel brauchen, oben das, wovon wir wenig brauchen.", loesung: `${a.frage} ${a.richtig}.` });
+    }
+    if (ctx.nr === 0) ctx.sag("Was ist gut für jeden Tag?");
+  },
+});
+</script>
+</body>
+</html>

@@ -78,11 +78,36 @@ const STUFE = {
   s3: { reihen: ALLE, arten: ["mal", "geteilt"], zehner: false, punktefeld: false },
   s4: { reihen: ALLE, arten: ["mal", "geteilt"], zehner: true, punktefeld: false },
   s5: { reihen: ALLE, arten: ["mal", "geteilt", "luecke"], zehner: true, punktefeld: false },
+  // Königsstufe: beide Faktoren dürfen Zehner oder Hunderter sein (40 × 60, 4800 : 60, _ × 70 = 5600),
+  // Lücken auch in Geteiltaufgaben; nur Grundaufgaben ohne 1 und 10.
+  s6: { reihen: [2, 3, 4, 5, 6, 7, 8, 9], arten: ["mal", "geteilt", "luecke", "luecke-geteilt"], koenig: true, punktefeld: false },
 };
+
+// Grösste Zahl, die in einer Aufgabe der Stufe vorkommen darf (für pruefeAufgabe).
+const MAX_ZAHL = { s1: 100, s2: 100, s3: 100, s4: 10000, s5: 10000, s6: 81000 };
+
+/** Königsstufe: a = k·fa, b = r·fb mit fa, fb ∈ {1, 10, 100}, mindestens einer > 1, fa·fb ≤ 1000. */
+function koenigsAufgabe(p) {
+  const k = zufall(2, 9), r = waehle(p.reihen);
+  const [fa, fb] = waehle([[10, 1], [1, 10], [100, 1], [1, 100], [10, 10], [100, 10], [10, 100]]);
+  const a = k * fa, b = r * fb, produkt = a * b;
+  const art = waehle(p.arten);
+  const basis = { k, r, fa, fb, faktor: fa * fb, art };
+  if (art === "mal") return { ...basis, teile: [a, "×", b, "=", null], loesung: produkt };
+  if (art === "geteilt") return { ...basis, teile: [produkt, ":", b, "=", null], loesung: a };
+  if (art === "luecke") return Math.random() < 0.5
+    ? { ...basis, teile: [a, "×", null, "=", produkt], loesung: b }
+    : { ...basis, teile: [null, "×", b, "=", produkt], loesung: a };
+  // Geteilt mit Lücke: der Teiler oder die zu teilende Zahl fehlt.
+  return Math.random() < 0.5
+    ? { ...basis, teile: [produkt, ":", null, "=", a], loesung: b }
+    : { ...basis, teile: [null, ":", b, "=", a], loesung: produkt };
+}
 
 /** Eine Aufgabe: Anzeige (mit Lücke als null), Lösung, Grundaufgabe k × r für Hinweise. */
 function aufgabeErzeugen(stufe) {
   const p = STUFE[stufe];
+  if (p.koenig) return koenigsAufgabe(p);
   const r = waehle(p.reihen);
   const k = zufall(1, 10);
   const faktor = p.zehner && Math.random() < 0.6 ? waehle([10, 100]) : 1;
@@ -96,8 +121,36 @@ function aufgabeErzeugen(stufe) {
     : { teile: [null, "×", r, "=", produkt], loesung: a, k, r, faktor, art };
 }
 
+/** Mängel einer Aufgabe: genau eine Lücke, Rechnung stimmt mit der Lösung, Zahlenraum der Stufe. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (a.teile.filter(t => t === null).length !== 1) m.push("nicht genau eine Lücke");
+  const [x, op, y, , z] = a.teile.map(t => (t === null ? a.loesung : t));
+  if (op === "×" && x * y !== z) m.push("Malrechnung stimmt nicht");
+  if (op === ":" && (y === 0 || x !== y * z)) m.push("Geteiltrechnung geht nicht auf");
+  if (![x, y, z].every(n => Number.isInteger(n) && n > 0)) m.push("keine positive ganze Zahl");
+  if (Math.max(x, y, z) > MAX_ZAHL[stufe]) m.push("Zahlenraum überschritten");
+  if (String(a.loesung).length > 6) m.push("Lösung passt nicht in die Tastatur");
+  if (stufe === "s1" && ![2, 5, 10].includes(a.r)) m.push("Reihe nicht 2, 5 oder 10");
+  if (stufe === "s6" && a.faktor === 1) m.push("Königsstufe ohne Zehner oder Hunderter");
+  return m;
+}
+
+const NULLEN = n => (n === 10 ? "eine Null" : n === 100 ? "zwei Nullen" : "drei Nullen");
+
 function hinweisFuer(a) {
-  if (a.faktor > 1) return `Rechne zuerst ${a.k} × ${a.r} = ${a.k * a.r}. Dann ${a.faktor === 10 ? "eine Null" : "zwei Nullen"} dazu.`;
+  // Königsstufe: knappe Hilfe ohne Zahlen der Lösung.
+  if (a.fa !== undefined) {
+    return a.art === "mal" || a.art === "luecke"
+      ? "Rechne die Grundaufgabe ohne Nullen. Zähle danach die Nullen beider Faktoren."
+      : "Denk an die passende Malaufgabe. Wie viele Nullen hat jede Zahl?";
+  }
+  if (a.faktor > 1) {
+    // Strategie nennen, ohne die Lösung vorzurechnen.
+    if (a.art === "mal") return `Rechne zuerst ${a.k} × ${a.r}. Dann ${NULLEN(a.faktor)} dazu.`;
+    if (a.art === "geteilt") return `Lass ${NULLEN(a.faktor)} weg und teile durch ${a.r}. Danach kommt ${a.faktor === 10 ? "die Null" : "jede Null"} wieder dazu.`;
+    return `Denk an die Grundaufgabe ohne ${a.faktor === 10 ? "die Null" : "die Nullen"} aus der ${a.r}er-Reihe.`;
+  }
   if (a.art === "geteilt") return `Welche Zahl mal ${a.r} gibt ${zahlText(a.k * a.r)}? Denk an die ${a.r}er-Reihe.`;
   if (a.art === "luecke") return "Welche Malaufgabe aus der Reihe passt? Probier sie durch.";
   if (a.k === 1) return `1 × ${a.r} ist einfach ${a.r}.`;
@@ -116,6 +169,7 @@ LS.spiel({
     s3: "Mal und geteilt gemischt: 7 × 8 und 56 : 8.",
     s4: "Mit Zehnern und Hundertern: 30 × 7, 400 : 8.",
     s5: "Lücken füllen: 7 × _ = 56, _ × 6 = 420.",
+    s6: "Endgegner: 40 × 60, 4800 : _ = 80, _ : 70 = 300 — alles gemischt.",
   },
 
   aufgabe(ctx) {

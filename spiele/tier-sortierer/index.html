@@ -6,42 +6,6 @@
 <title>Tier-Sortierer</title>
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .tierkarte {
-    margin: 6px auto 18px;
-    width: fit-content;
-    max-width: 100%;
-    background: #fff;
-    border: 4px solid var(--rand);
-    border-radius: 20px;
-    padding: 10px 28px;
-    text-align: center;
-    box-shadow: var(--schatten);
-  }
-  .tierkarte .bild { font-size: clamp(60px, 14vw, 90px); line-height: 1.1; display: block; }
-  .tierkarte b { font-size: clamp(24px, 5.6vw, 36px); font-weight: 900; }
-
-  .koerbe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 12px; max-width: 720px; margin: 0 auto; }
-  .korb {
-    border: none;
-    border-radius: 20px 20px 28px 28px;
-    padding: 12px 8px 10px;
-    min-height: 92px;
-    cursor: pointer;
-    color: #fff;
-    background: var(--k);
-    box-shadow: 0 6px 0 rgba(0, 0, 0, .2);
-    font-family: inherit;
-    font-size: clamp(18px, 3.8vw, 22px);
-    font-weight: 900;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-  }
-  .korb:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0, 0, 0, .2); }
-  .korb small { font-size: 14px; font-weight: 700; opacity: .9; }
-  .korb.falsch { animation: wackeln .4s; }
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 14px; }
 </style>
 </head>
@@ -92,7 +56,6 @@ const KOERBE = {
   Unpaarhufer: { bild: "☝️", zusatz: "ein Huf", erklaerung: "Pferd, Esel und Zebra stehen an jedem Fuss auf einem einzigen Huf." },
   Wal: { bild: "🌊", zusatz: "im Meer", erklaerung: "Wale und Delfine leben im Meer, sind aber Säugetiere: Sie atmen Luft und säugen ihre Jungen." },
 };
-const FARBEN = ["var(--deko-6)", "var(--deko-3)", "var(--deko-5)", "var(--deko-2)", "var(--deko-1)", "var(--deko-4)"];
 
 const HALTUNGEN = ["Wildtier", "Nutztier", "Heimtier"];
 const WIRBELTIERE = ["Säugetier", "Vogel", "Fisch", "Reptil", "Amphibie"];
@@ -119,29 +82,34 @@ const ARTEN = {
   wirbeltier: mitBild => sortieren("klasse", WIRBELTIERE, 5, mitBild),
   klasse: () => sortieren("klasse", KLASSEN, 6, false),
   gruppe: () => sortieren("gruppe", GRUPPEN, 4, false),
-  merkmal() {
+  merkmal(mitBild) {
     // Welches Tier gehört zu …? Die anderen Tiere sind aus anderen Klassen.
+    // Ohne Bild (Königsstufe) zählt nur das Wissen über das Tier, nicht sein Aussehen.
     const klasse = waehle(KLASSEN);
     const richtig = waehle(TIER.filter(t => t.klasse === klasse));
     const andere = mische(KLASSEN.filter(k => k !== klasse)).slice(0, 3).map(k => waehle(TIER.filter(t => t.klasse === k)));
-    return { art: "merkmal", klasse, richtig, optionen: mische([richtig, ...andere]) };
+    return { art: "merkmal", klasse, richtig, mitBild, optionen: mische([richtig, ...andere]) };
   },
-  knifflig() {
+  knifflig(anzahlKoerbe = 3) {
     const [name, merkmal, falle] = waehle(KNIFFLIG);
     const t = tier(name);
     const liste = merkmal === "klasse" ? [...KLASSEN, "Spinnentier", "Weichtier", "Wurm"] : GRUPPEN;
-    const dritte = waehle(liste.filter(k => k !== t[merkmal] && k !== falle));
-    return { art: "sortieren", tier: t, richtig: t[merkmal], falle, koerbe: mische([t[merkmal], falle, dritte]) };
+    const weitere = mische(liste.filter(k => k !== t[merkmal] && k !== falle)).slice(0, anzahlKoerbe - 2);
+    return { art: "sortieren", tier: t, richtig: t[merkmal], falle, koerbe: mische([t[merkmal], falle, ...weitere]) };
   },
 };
 
+// Basisklasse 3: Stufe 1 = 2. Klasse, 2–4 = 3. Klasse, 5 = 4. Klasse, 6 Endgegner.
 const STUFE = {
   s1: () => ARTEN.haltung(),
-  s2: () => waehle([ARTEN.haltung, () => ARTEN.wirbeltier(true)])(),
-  s3: () => waehle([() => ARTEN.wirbeltier(false), ARTEN.klasse, ARTEN.merkmal])(),
-  s4: () => waehle([ARTEN.gruppe, ARTEN.gruppe, ARTEN.merkmal])(),
-  s5: () => waehle([ARTEN.knifflig, ARTEN.knifflig, ARTEN.gruppe])(),
+  s2: () => ARTEN.wirbeltier(true),
+  s3: () => waehle([ARTEN.klasse, ARTEN.klasse, () => ARTEN.merkmal(true)])(),
+  s4: () => ARTEN.gruppe(),
+  s5: () => waehle([() => ARTEN.knifflig(3), () => ARTEN.knifflig(3), ARTEN.gruppe])(),
+  s6: () => waehle([() => ARTEN.knifflig(5), () => ARTEN.knifflig(5), () => ARTEN.merkmal(false)])(),
 };
+// Stufen, in denen jedes Tier ein Bild tragen muss (2. Klasse und die Wirbeltier-Stufe mit Bild).
+const BILD_NOETIG = ["s1", "s2"];
 
 function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
 
@@ -152,7 +120,8 @@ function pruefeAufgabe(a, stufe) {
     if (!a.koerbe.includes(a.richtig)) m.push("richtiger Korb fehlt");
     if (new Set(a.koerbe).size !== a.koerbe.length) m.push("Korb doppelt");
     if (a.koerbe.some(k => !KOERBE[k])) m.push("Korb ohne Erklärung");
-    if ((stufe === "s1" || stufe === "s2") && !a.tier.bild) m.push("Tier ohne Bild in Stufe 1–2");
+    if (BILD_NOETIG.includes(stufe) && !a.tier.bild) m.push("Tier ohne Bild in Stufe 1–2");
+    if (stufe === "s6" && a.koerbe.length < 5) m.push("Königsstufe mit weniger als fünf Körben");
     if (a.falle && a.falle === a.richtig) m.push("Falle ist die Lösung");
   } else {
     if (a.optionen.filter(t => t.klasse === a.klasse).length !== 1) m.push("nicht genau ein Tier der gesuchten Klasse");
@@ -172,10 +141,11 @@ LS.spiel({
   anzahl: 10,
   stufen: {
     s1: "Wildtier, Nutztier oder Heimtier?",
-    s2: "Säugetier, Vogel, Fisch, Reptil oder Amphibie?",
-    s3: "Dazu Insekten — und welches Tier passt zu welcher Gruppe?",
+    s2: "Säugetier, Vogel, Fisch, Reptil oder Amphibie? Mit Bild.",
+    s3: "Dazu Insekten — und welches Tier passt zum Merkmal?",
     s4: "Säugetiere genauer: Nagetier, Raubtier, Paarhufer und mehr.",
     s5: "Knifflig: Fledermaus, Wal, Spinne, Hase …",
+    s6: "Endgegner: knifflige Tiere mit fünf Körben, Merkmale ohne Bilder.",
   },
 
   aufgabe(ctx) {
@@ -185,7 +155,7 @@ LS.spiel({
         el("div", { class: "auftrag leise", text: KOERBE[a.klasse].erklaerung }));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 140,
-        inhalt: t => ({ bild: t.bild || "", text: t.name }),
+        inhalt: t => ({ bild: a.mitBild ? t.bild || "" : "", text: t.name }),
         hinweis: t => `${t.name} ist ${KLASSE_TEXT[t.klasse][0]}. ${KOERBE[t.klasse].erklaerung}`,
         loesung: `${a.richtig.name} gehört dazu.`,
       });
@@ -193,30 +163,15 @@ LS.spiel({
       return;
     }
 
-    const karte = el("div", { class: "tierkarte" }, el("span", { class: "bild", text: a.tier.bild || "❔" }), el("b", { text: a.tier.name }));
-    ctx.flaeche.append(el("div", { class: "auftrag", text: "In welchen Korb gehört das Tier?" }), karte);
-    const koerbe = el("div", { class: "koerbe" });
-    let fertig = false;
-    a.koerbe.forEach((name, i) => {
-      const info = KOERBE[name];
-      const korb = el("button", { type: "button", class: "korb" }, el("span", { text: info.bild }), name, el("small", { text: info.zusatz }));
-      korb.style.setProperty("--k", FARBEN[i % FARBEN.length]);
-      korb.addEventListener("click", () => {
-        if (fertig) return;
-        if (name === a.richtig) {
-          fertig = true;
-          LS.fliegen(karte, korb);
-          ctx.richtig(`Richtig! ${KOERBE[name].erklaerung}`);
-          return;
-        }
-        korb.classList.remove("falsch"); void korb.offsetWidth; korb.classList.add("falsch");
-        const warum = a.falle === name ? `Das denken viele! Aber: ${KOERBE[a.richtig].erklaerung}` : `${KOERBE[name].erklaerung} Passt das zu ${a.tier.name}?`;
-        ctx.falsch(warum, `${a.tier.name}: ${a.richtig}. ${KOERBE[a.richtig].erklaerung}`);
-        if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
-      });
-      koerbe.append(korb);
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "In welchen Korb gehört das Tier?" }));
+    LS.koerbe(ctx, {
+      karte: { bild: a.tier.bild || "❔", text: a.tier.name },
+      koerbe: a.koerbe, richtig: a.richtig,
+      korbInhalt: name => ({ bild: KOERBE[name].bild, text: name, klein: KOERBE[name].zusatz }),
+      hinweis: name => (a.falle === name ? `Das denken viele! Aber: ${KOERBE[a.richtig].erklaerung}` : `${KOERBE[name].erklaerung} Passt das zu ${a.tier.name}?`),
+      loesung: `${a.tier.name}: ${a.richtig}. ${KOERBE[a.richtig].erklaerung}`,
+      lob: `Richtig! ${KOERBE[a.richtig].erklaerung}`,
     });
-    ctx.flaeche.append(koerbe);
     if (ctx.nr === 0) ctx.sag("Schau das Tier an und tipp auf den richtigen Korb.");
   },
 });

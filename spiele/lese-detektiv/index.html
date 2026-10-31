@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lese-Detektiv</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .sachtext { background: #fffdf5; border: 3px solid var(--rand); border-radius: 18px; padding: 14px 18px; margin: 4px auto 14px; max-width: 660px; font-size: clamp(18px, 4vw, 23px); line-height: 1.6; }
+  .sachtext h2 { margin: 0 0 6px; font-size: clamp(20px, 4.6vw, 26px); }
+  .sachtext.gross { text-align: center; font-size: clamp(26px, 6vw, 36px); font-weight: 800; }
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 25px); font-weight: 800; margin: 0 0 12px; }
+  .wahl-knopf.bilder { font-size: clamp(30px, 7vw, 42px); }
+  .wahl-knopf.satz { font-size: clamp(16px, 3.6vw, 20px); text-align: left; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🕵️ Lese-Detektiv</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="texte.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.2.B.1: b kurze Sätze mit Bild-Unterstützung verstehen; c (Grundanspruch 1. Zyklus)
+// Abbildungen und Text in Beziehung setzen, mit gezielten Fragen einen einfachen Sachtext verstehen;
+// e/f (2. Zyklus) Struktur erkennen, explizite und naheliegende implizite Informationen entnehmen.
+
+const { waehle, mische, el } = LS;
+// Stufe der Texte (texte.js) = Nummer der Spielstufe; Stufe 6 (Königsstufe) nimmt die neuen
+// Folgerungstexte und dazu die längeren Sachtexte aus Stufe 5.
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+const TEXTE = LESETEXTE.map(([stufe, titel, text, frage, richtig, f1, f2]) => ({ stufe, titel, text, frage, richtig, falsch: [f1, f2] }));
+
+// In einer Runde jeden Text höchstens einmal (solange es genug gibt)
+let gebraucht = new Set();
+
+function aufgabeErzeugen(stufe) {
+  const n = STUFE_NR[stufe];
+  const passend = TEXTE.filter(t => t.stufe === n || (t.stufe === n - 1 && n >= 3));
+  const frisch = passend.filter(t => !gebraucht.has(t));
+  const t = waehle(frisch.length ? frisch : passend);
+  gebraucht.add(t);
+  return { t, optionen: mische([t.richtig, ...t.falsch]) };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a) {
+  const m = [];
+  if (new Set(a.optionen).size !== 3) m.push("Antworten doppelt");
+  return m;
+}
+
+LS.spiel({
+  id: "lese-detektiv",
+  einleitung: "Lies genau wie ein Detektiv! Im Text steckt die Antwort — manchmal musst du ein bisschen nachdenken.",
+  anzahl: 6,
+  stufen: {
+    s1: "Ein Satz: Welches Bild passt?",
+    s2: "Zwei, drei Sätze und eine Frage.",
+    s3: "Kurze Sachtexte: Igel, Bienen, Schneeflocken.",
+    s4: "Zwischen den Zeilen lesen: Welche Jahreszeit ist es?",
+    s5: "Längere Sachtexte: Was stimmt?",
+    s6: "Lange Sachtexte: Warum ist das so? Verbinde, was im Text steht.",
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) gebraucht = new Set();
+    const { t, optionen } = aufgabeErzeugen(ctx.stufe);
+    const box = el("div", { class: "sachtext" + (t.stufe === 1 ? " gross" : "") });
+    if (t.titel) box.append(el("h2", { text: t.titel }));
+    box.append(t.text);
+    ctx.flaeche.append(box, el("div", { class: "frage", text: t.frage }));
+    const knoepfe = LS.auswahl(ctx, {
+      optionen, richtig: t.richtig, breite: t.stufe === 1 ? 110 : t.richtig.length > 20 ? 260 : 150,
+      hinweis: t.stufe === 1 ? "Lies den Satz nochmal Wort für Wort. Was siehst du im Bild?" : t.stufe >= 4 ? "Lies nochmal genau. Die Antwort steht vielleicht nicht wörtlich da — welche Hinweise gibt der Text?" : "Lies nochmal genau. Such die Stelle im Text, die zur Frage passt.",
+      loesung: `Richtig ist: ${t.richtig}`,
+      lob: `Gut gelesen, Detektiv! 🕵️`,
+    });
+    const art = t.stufe === 1 ? "bilder" : t.richtig.length > 20 ? "satz" : null;
+    if (art) for (const k of knoepfe.children) k.classList.add(art);
+    if (ctx.nr === 0) ctx.sag("Lies zuerst den Text, dann die Frage.");
+  },
+});
+</script>
+</body>
+</html>

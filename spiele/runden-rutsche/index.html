@@ -48,19 +48,24 @@ const { zahlText, zufall, waehle, el } = LS;
 
 // Je Stufe: Zahlenraum, Rundungsstellen, Anteil kniffliger Fälle (Endziffer 5, Übertrag 3 995),
 // Eingabe per Tastatur statt Auswahl.
+// knapp (Königsstufe): Hinweis ohne die entscheidende Ziffer.
 const STUFE = {
-  s1: { max: 100, auf: [10], knifflig: 0.2, tippen: false },
-  s2: { max: 1000, auf: [10, 100], knifflig: 0.25, tippen: false },
+  s1: { max: 1000, auf: [10, 100], knifflig: 0.25, tippen: false },
+  s2: { max: 10000, auf: [10, 100], knifflig: 0.15, tippen: false },
   s3: { max: 10000, auf: [10, 100, 1000], knifflig: 0.3, tippen: false },
   s4: { max: 1000000, auf: [100, 1000, 10000, 100000], knifflig: 0.35, tippen: false },
   s5: { max: 1000000, auf: [10, 100, 1000, 10000, 100000], knifflig: 0.4, tippen: true },
+  s6: { max: 10000000, auf: [10, 100, 1000, 10000, 100000, 1000000], knifflig: 0.6, tippen: true, knapp: true },
 };
 
-const NAME = { 10: "Zehner", 100: "Hunderter", 1000: "Tausender", 10000: "Zehntausender", 100000: "Hunderttausender" };
+const NAME = { 10: "Zehner", 100: "Hunderter", 1000: "Tausender", 10000: "Zehntausender", 100000: "Hunderttausender", 1000000: "Millionen" };
+/** „bei den Zehnern“, „bei den Millionen“ */
+const dativ = auf => NAME[auf].endsWith("n") ? NAME[auf] : NAME[auf] + "n";
+const GROESSTE = 9999999; // die Tastatur nimmt höchstens sieben Ziffern
 
 function aufgabeErzeugen(stufe) {
   const p = STUFE[stufe];
-  for (;;) {
+  for (let versuch = 0; versuch < 1000; versuch++) {
     const auf = waehle(p.auf);
     let zahl;
     if (Math.random() < p.knifflig) {
@@ -73,9 +78,24 @@ function aufgabeErzeugen(stufe) {
     if (zahl % auf === 0 || zahl <= auf || zahl >= p.max) continue;
     const unten = Math.floor(zahl / auf) * auf;
     const oben = unten + auf;
+    if (oben > GROESSTE) continue;
     const loesung = zahl - unten >= auf / 2 ? oben : unten;
     return { zahl, auf, unten, oben, loesung };
   }
+  // Notausgang (praktisch nie): 3 ½ der kleinsten Rundungsstelle, z. B. 35 → 40.
+  const auf = p.auf[0];
+  return { zahl: 3.5 * auf, auf, unten: 3 * auf, oben: 4 * auf, loesung: 4 * auf };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.auf.includes(a.auf)) m.push("Rundungsstelle nicht erlaubt");
+  if (a.zahl <= a.auf || a.zahl >= p.max) m.push(`Zahl ausserhalb ${a.auf + 1}–${p.max - 1}`);
+  if (!(a.unten < a.zahl && a.zahl < a.oben) || a.unten % a.auf || a.oben - a.unten !== a.auf) m.push("Nachbarn falsch");
+  if (a.loesung !== Math.round(a.zahl / a.auf) * a.auf) m.push("Rundung falsch");
+  if (a.oben > GROESSTE) m.push("passt nicht in die Tastatur");
+  return m;
 }
 
 /** Rutsche als SVG: Bogen von „unten“ nach „oben“, Kugel an der Position der Zahl. */
@@ -108,10 +128,11 @@ function rutscheZeichnen(a) {
   return svg;
 }
 
-function hinweisFuer(a) {
+function hinweisFuer(a, knapp) {
+  if (knapp) return `Welche Ziffer steht rechts von den ${dativ(a.auf)}?`;
   const stelle = a.auf / 10;
   const ziffer = Math.floor(a.zahl / stelle) % 10;
-  return `Schau auf die Ziffer rechts von den ${NAME[a.auf]}n: Es ist eine ${ziffer}. Bei 0–4 rundet man ab, bei 5–9 auf.`;
+  return `Schau auf die Ziffer rechts von den ${dativ(a.auf)}: Es ist eine ${ziffer}. Bei 0–4 rundet man ab, bei 5–9 auf.`;
 }
 
 LS.spiel({
@@ -119,11 +140,12 @@ LS.spiel({
   einleitung: "Auf welche Seite rutscht die Kugel? Liegt die Zahl näher bei der kleineren oder der grösseren runden Zahl? Genau in der Mitte rutscht sie nach oben!",
   anzahl: 8,
   stufen: {
-    s1: "Bis 100 auf Zehner runden: 47 → 50.",
-    s2: "Bis 1000 auf Zehner und Hunderter.",
+    s1: "Bis 1000 auf Zehner und Hunderter.",
+    s2: "Bis 10 000 auf Zehner und Hunderter: 4362 → 4400.",
     s3: "Bis 10 000 auf Zehner, Hunderter und Tausender (Lehrplan 4. Klasse).",
     s4: "Bis zur Million, auch knifflig: 3 995 auf Zehner.",
     s5: "Ohne Auswahl: das gerundete Ergebnis selbst eintippen.",
+    s6: "Bis 10 Millionen, auf jede Stelle bis zu den Millionen — selbst eintippen.",
   },
 
   aufgabe(ctx) {
@@ -135,6 +157,7 @@ LS.spiel({
     ctx.flaeche.append(svg);
 
     const loesungText = `${zahlText(a.zahl)} ≈ ${zahlText(a.loesung)}`;
+    const knapp = !!STUFE[ctx.stufe].knapp;
     if (!STUFE[ctx.stufe].tippen) {
       const ziele = el("div", { class: "ziele" });
       let fertig = false;
@@ -153,7 +176,7 @@ LS.spiel({
           knopf.classList.remove("falsch");
           void knopf.offsetWidth;
           knopf.classList.add("falsch");
-          ctx.falsch(hinweisFuer(a), loesungText);
+          ctx.falsch(hinweisFuer(a, knapp), loesungText);
           if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
         });
         ziele.append(knopf);
@@ -167,7 +190,7 @@ LS.spiel({
         onOk(w) {
           if (w === a.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); svg.rutschen(w); ctx.richtig(`Richtig: ${loesungText}`); return; }
           anzeige.classList.add("falsch");
-          ctx.falsch(w % a.auf !== 0 ? `Gerundet auf ${NAME[a.auf]} endet die Zahl auf ${String(a.auf).slice(1)}. ${hinweisFuer(a)}` : hinweisFuer(a), loesungText);
+          ctx.falsch(w % a.auf !== 0 ? `Gerundet auf ${NAME[a.auf]} endet die Zahl auf ${String(a.auf).slice(1)}. ${hinweisFuer(a, knapp)}` : hinweisFuer(a, knapp), loesungText);
           if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
         },
       });

@@ -97,7 +97,49 @@ const ARTEN = {
     const folge = Array.from({ length: n }, (_, i) => mod(start + i, liste.length));
     return { reihe: true, frage: `Tipp die ${art === "tage" ? "Tage" : "Monate"} in der richtigen Reihenfolge an — beginne beim <b>${liste[folge[0]]}</b>.`, liste: art, folge };
   },
+
+  // ---- Königsstufe ----
+  tagWochen() {
+    const h = zufall(0, 6), w = zufall(1, 4), r = zufall(1, 6), vor = Math.random() < 0.4;
+    const d = (7 * w + r) * (vor ? -1 : 1);
+    const text = Math.random() < 0.5 ? `${7 * w + r} Tagen` : `${w === 1 ? "einer Woche" : `${w} Wochen`} und ${r === 1 ? "einem Tag" : `${r} Tagen`}`;
+    return { typ: "tag", h, d, frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ${vor ? "war vor" : "ist in"} ${text}?`, liste: "tage", loesung: mod(h + d, 7),
+      hinweis: "Nach einer ganzen Woche ist wieder derselbe Tag. Zähl zuerst die Wochen weg, dann die übrigen Tage." };
+  },
+  monatWeit() {
+    const m = zufall(0, 11), d = zufall(13, 30) * waehle([1, -1]);
+    return { typ: "monat", m, d, frage: `Welcher Monat ist ${Math.abs(d)} Monate ${d > 0 ? "nach" : "vor"} dem <b>${MONATE[m]}</b>?`, liste: "monate", loesung: mod(m + d, 12),
+      hinweis: "Nach 12 Monaten ist wieder derselbe Monat. Zähl zuerst ein ganzes Jahr weg." };
+  },
+  datumTag() {
+    // Im Februar nur ohne Monatswechsel — die Länge hängt dort vom Schaltjahr ab.
+    const m = zufall(0, 11), h = zufall(0, 6), d = zufall(5, 20);
+    const t1 = m === 1 ? zufall(1, 28 - d) : zufall(1, TAGE_IM_MONAT[m]);
+    let t2 = t1 + d, m2 = m;
+    if (t2 > TAGE_IM_MONAT[m]) { t2 -= TAGE_IM_MONAT[m]; m2 = (m + 1) % 12; }
+    return { typ: "datum", m, t1, m2, t2, h, frage: `Der <b>${t1}. ${MONATE[m]}</b> ist ein ${TAGE[h]}. Welcher Wochentag ist der <b>${t2}. ${MONATE[m2]}</b>?`,
+      liste: "tage", loesung: mod(h + d, 7),
+      hinweis: m2 !== m ? `Wie viele Tage hat der ${MONATE[m]}? Zähl die Tage bis zum Datum und dann die Wochen weg.` : "Zähl die Tage bis zum Datum und dann die Wochen weg." };
+  },
+  monatsLaenge() {
+    // Genau ein Monat mit 30 Tagen unter drei Monaten mit 31 Tagen (Februar nicht dabei).
+    const kurz = waehle([3, 5, 8, 10]);
+    const lang = mische([0, 2, 4, 6, 7, 9, 11]).slice(0, 3);
+    const optionen = mische([kurz, ...lang]);
+    return { typ: "laenge", frage: "Welcher dieser Monate hat nur <b>30</b> Tage?", liste: "auswahl", namen: optionen.map(i => MONATE[i]), monate: optionen,
+      loesung: optionen.indexOf(kurz), hinweis: "Knöchelregel: Zähl die Monate auf den Knöcheln und in den Lücken deiner Faust ab. Lücke = kürzerer Monat." };
+  },
+  jahreszeitRechnen() {
+    const ziele = Object.keys(JAHRESZEIT).map(Number);
+    const ziel = waehle(ziele), d = zufall(2, 8);
+    const m = mod(ziel - d, 12);
+    return { typ: "zeit", m, d, frage: `Welche Jahreszeit ist <b>${d} Monate</b> nach dem <b>${MONATE[m]}</b>?`, liste: "zeiten", loesung: ZEITEN.indexOf(JAHRESZEIT[ziel]),
+      hinweis: "Rechne zuerst den Monat aus. Dann denk an das Wetter in diesem Monat." };
+  },
 };
+
+// Tage je Monat in einem gewöhnlichen Jahr (Februar nur ohne Monatswechsel gebraucht).
+const TAGE_IM_MONAT = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 // Je Stufe: Aufgabenarten
 const STUFE = {
@@ -106,6 +148,8 @@ const STUFE = {
   s3: ["monatNach", "jahreszeit", "ordnenMonate", "tagWeit"],
   s4: ["monatRechnen", "tagRechnen", "ordnenMonate", "jahreszeit"],
   s5: ["monatRechnen", "tagRechnen", "tagRechnen", "monatRechnen"],
+  // Königsstufe: Wochen und Tage, mehr als ein Jahr, Datum über den Monatswechsel, Monatslängen.
+  s6: ["tagWochen", "monatWeit", "datumTag", "datumTag", "monatsLaenge", "jahreszeitRechnen"],
 };
 
 function aufgabeErzeugen(stufe) {
@@ -113,6 +157,33 @@ function aufgabeErzeugen(stufe) {
   if (art === "ordnenTage") return ARTEN.ordnen("tage");
   if (art === "ordnenMonate") return ARTEN.ordnen("monate");
   return ARTEN[art]();
+}
+
+/** Mängel der Königsstufe, unabhängig nachgerechnet (Datum über Date in einem Nicht-Schaltjahr). */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (a.reihe) {
+    if (new Set(a.folge).size !== a.folge.length) m.push("Reihe mit doppeltem Teil");
+    return m;
+  }
+  const namen = a.namen || NAMEN[a.liste];
+  if (!(a.loesung >= 0 && a.loesung < namen.length)) m.push("Lösung nicht unter den Möglichkeiten");
+  if (a.typ === "datum") {
+    const tage = Math.round((new Date(2025 + (a.m2 < a.m ? 1 : 0), a.m2, a.t2) - new Date(2025, a.m, a.t1)) / 86400000);
+    if (TAGE[mod(a.h + tage, 7)] !== namen[a.loesung]) m.push("Wochentag stimmt nicht");
+    if (a.t2 > new Date(2025, a.m2 + 1, 0).getDate() || a.t2 < 1) m.push("Datum gibt es nicht");
+    if ((a.m === 1 && a.m2 !== 1) || a.m2 - a.m > 1) m.push("Monatswechsel nach Februar oder zu weit");
+  }
+  if (a.typ === "laenge") {
+    const dreissig = a.monate.filter(i => new Date(2025, i + 1, 0).getDate() === 30);
+    if (dreissig.length !== 1 || MONATE[dreissig[0]] !== namen[a.loesung] || a.monate.includes(1)) m.push("nicht genau ein Monat mit 30 Tagen");
+  }
+  if (a.typ === "zeit" && JAHRESZEIT[mod(a.m + a.d, 12)] !== namen[a.loesung]) m.push("Jahreszeit stimmt nicht oder Monat nicht eindeutig");
+  if (a.typ === "tag" && TAGE[mod(a.h + a.d, 7)] !== namen[a.loesung]) m.push("Wochentag stimmt nicht");
+  if (a.typ === "monat" && MONATE[mod(a.m + a.d, 12)] !== namen[a.loesung]) m.push("Monat stimmt nicht");
+  if (stufe === "s6" && !a.typ) m.push("Königsstufe mit leichter Aufgabe");
+  if (a.hinweis && a.hinweis.includes(namen[a.loesung])) m.push("Hinweis verrät die Lösung");
+  return m;
 }
 
 const NAMEN = { tage: TAGE, monate: MONATE, zeiten: ZEITEN };
@@ -135,6 +206,7 @@ LS.spiel({
     s3: "Monate ordnen und Jahreszeiten zuordnen.",
     s4: "Rechnen im Kalender: 3 Monate nach Oktober?",
     s5: "Profi: Heute ist Freitag — welcher Tag ist in 10 Tagen?",
+    s6: "Endgegner: in 3 Wochen und 2 Tagen, 15 Monate später, vom 28. April zum 6. Mai.",
   },
 
   aufgabe(ctx) {
@@ -172,7 +244,7 @@ LS.spiel({
     }
 
     const wahl = el("div", { class: `wahl ${a.liste}` });
-    namen.forEach((text, i) => {
+    (a.namen || namen).forEach((text, i) => {
       const k = knopfFuer(a.liste, i, text);
       k.addEventListener("click", () => {
         if (fertig) return;
@@ -180,8 +252,8 @@ LS.spiel({
         k.classList.remove("falsch");
         void k.offsetWidth;
         k.classList.add("falsch");
-        ctx.falsch(a.liste === "zeiten" ? "Denk daran, wie das Wetter in diesem Monat meistens ist." : "Zähl Schritt für Schritt weiter — nach dem letzten kommt wieder der erste.",
-          `Richtig ist: ${namen[a.loesung]}.`);
+        ctx.falsch(a.hinweis || (a.liste === "zeiten" ? "Denk daran, wie das Wetter in diesem Monat meistens ist." : "Zähl Schritt für Schritt weiter — nach dem letzten kommt wieder der erste."),
+          `Richtig ist: ${(a.namen || namen)[a.loesung]}.`);
         if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
       });
       wahl.append(k);

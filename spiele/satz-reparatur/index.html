@@ -45,12 +45,45 @@
 const { waehle, el } = LS;
 const ZEICHEN = ["", ".", "!", "?"];
 
-/** "Wo ist mein Buch? Ich finde es nicht." → Wörter mit Soll-Schreibung und Satzende-Zeichen */
+/**
+ * "Wo ist mein Buch? Ich finde es nicht." → Wörter mit Soll-Schreibung und Satzende-Zeichen.
+ * 'erlaubt': richtige Satzzeichen am Satzende — bei Aussagen mit Nachdruck (AUCH_PUNKT) auch der Punkt.
+ */
 function zerlege(satz) {
-  return satz.split(" ").map(t => {
+  let satzAnfang = 0;
+  const woerter = satz.split(" ");
+  return woerter.map((t, i) => {
     const m = t.match(/^(.+?)([.!?]?)$/);
-    return { soll: m[1], ende: m[2] || null };
+    const ende = m[2] || null;
+    let erlaubt = null;
+    if (ende) {
+      const teilsatz = woerter.slice(satzAnfang, i + 1).join(" ");
+      erlaubt = ende === "!" && AUCH_PUNKT.includes(teilsatz) ? ["!", "."] : [ende];
+      satzAnfang = i + 1;
+    }
+    return { soll: m[1], ende, erlaubt };
   });
+}
+
+/** Satz der Stufe. Königsstufe: ein kleiner Text aus drei Sätzen — ein Satzpaar der Stufe 5 und
+    ein Satz der Stufe 3 oder 4 (abstrakte Nomen, ? und !), in zufälliger Reihenfolge. */
+function aufgabeErzeugen(stufe) {
+  if (stufe !== "s6") return waehle(SAETZE[stufe]);
+  const teile = [waehle(SAETZE.s5), waehle([...SAETZE.s3, ...SAETZE.s4])];
+  return (Math.random() < 0.5 ? teile : teile.reverse()).join(" ");
+}
+
+/** Mängel: jeder Satz beginnt gross und endet mit . ! oder ?, keine Kommas, kein ß; Königsstufe mit drei Sätzen. */
+function pruefeAufgabe(satz, stufe) {
+  const m = [];
+  const saetze = satz.match(/[^.!?]+[.!?]/g) || [];
+  if (saetze.join("").replace(/\s/g, "") !== satz.replace(/\s/g, "")) m.push("Text endet nicht mit einem Satzzeichen");
+  if (saetze.some(s => !/^[A-ZÄÖÜ]/.test(s.trim()))) m.push("Satzanfang klein");
+  if (/[,;:ß]/.test(satz)) m.push("Komma, Doppelpunkt oder ß im Satz");
+  if (/\s{2}/.test(satz) || satz !== satz.trim()) m.push("doppelte Leerzeichen");
+  if (stufe === "s6" && saetze.length !== 3) m.push("Königsstufe nicht mit drei Sätzen");
+  for (const s of AUCH_PUNKT) if (!Object.values(SAETZE).flat().some(x => x.includes(s))) m.push(`AUCH_PUNKT: «${s}» steht in keinem Satz`);
+  return m;
 }
 
 LS.spiel({
@@ -63,10 +96,11 @@ LS.spiel({
     s3: "Auch Nomen wie Angst und Freude — und ? oder !",
     s4: "Längere Sätze mit mehreren Nomen.",
     s5: "Zwei Sätze hintereinander.",
+    s6: "Endgegner: drei Sätze am Stück — mit Nomen wie Angst, ? und !",
   },
 
   aufgabe(ctx) {
-    const satz = waehle(SAETZE[ctx.stufe]);
+    const satz = aufgabeErzeugen(ctx.stufe);
     const woerter = zerlege(satz);
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Repariere den Satz!" }),
       el("div", { class: "tipp-zeile", text: "Wort antippen = gross/klein · Kästchen antippen = Satzzeichen wählen" }));
@@ -108,10 +142,13 @@ LS.spiel({
     ok.addEventListener("click", () => {
       if (fertig) return;
       const grossFalsch = zustand.filter(w => w.gross !== (w.soll[0] !== w.soll[0].toLowerCase()));
-      const zeichenFalsch = zustand.filter(w => w.ende && w.zeichen !== w.ende);
+      const zeichenFalsch = zustand.filter(w => w.ende && !w.erlaubt.includes(w.zeichen));
       if (!grossFalsch.length && !zeichenFalsch.length) { fertig = true; ctx.richtig(`Richtig repariert: ${satz}`); return; }
       const anfangFalsch = grossFalsch.some((w, i) => i === 0 || zustand[zustand.indexOf(w) - 1]?.ende);
-      const hinweis = anfangFalsch ? "Wie beginnt ein Satz? Mit einem grossen Buchstaben!"
+      // Königsstufe: knapper — nur wie viele Stellen noch nicht stimmen, nicht welche Art.
+      const offen = grossFalsch.length + zeichenFalsch.length;
+      const hinweis = ctx.stufe === "s6" ? `Noch ${offen === 1 ? "eine Stelle stimmt" : `${offen} Stellen stimmen`} nicht. Prüfe jeden Satzanfang, jedes Nomen und jedes Satzende.`
+        : anfangFalsch ? "Wie beginnt ein Satz? Mit einem grossen Buchstaben!"
         : grossFalsch.some(w => !w.gross) ? "Ein Nomen fehlt noch. Probe: Passt der, die oder das davor? Namen schreibt man auch gross."
         : grossFalsch.length ? "Ein Wort ist zu viel gross. Nur Satzanfang, Namen und Nomen schreibt man gross."
         : zeichenFalsch.some(w => !w.zeichen) ? "Am Satzende fehlt ein Zeichen." : "Ist es eine Frage (?), ein Ausruf (!) oder ein normaler Satz (.)?";

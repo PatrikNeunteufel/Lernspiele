@@ -25,6 +25,8 @@
   .stein.leer.aktiv { border: 4px solid var(--knopf); background: #eef0ff; transform: scale(1.06); }
   .stein.geloest { background: linear-gradient(180deg, #5fd391, #2fb36b); }
   .stein.falsch { animation: wackeln .4s; }
+  /* Königsstufe: fünf Steine in der untersten Reihe, auch auf dem Handy ohne Querrollen */
+  .mauer.fuenf .stein { width: clamp(52px, 15vw, 96px); font-size: clamp(16px, 3.8vw, 26px); }
   .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
 </style>
 </head>
@@ -48,13 +50,32 @@ const { zahlText, zufall, mische, el } = LS;
 // Je Stufe: Anzahl Grundsteine, Grundzahlen (Erzeuger), Anzahl leerer Steine, mindestens so viele
 // leere Grundsteine. Eine Mauer mit n Grundsteinen braucht n bekannte Steine, um eindeutig zu sein:
 // leer ≤ Steine − n (3 Grundsteine: 6 − 3 = 3; 4 Grundsteine: 10 − 4 = 6).
+// Basisklasse 2 (Lehrplan SG MA.1.B.1.b Additionen bis 20 in der 1. Klasse, c Zahlenmauern bis 100
+// als Grundanspruch Ende 2. Klasse). 'max' = Zahlenraum: kein Stein grösser, auch der oberste nicht.
 const STUFE = {
-  s1: { n: 3, grund: () => zufall(1, 10), leer: 3, untenMin: 0, unten: false },
-  s2: { n: 3, grund: () => zufall(2, 30), leer: 3, untenMin: 1, unten: true },
-  s3: { n: 4, grund: () => zufall(2, 30), leer: 5, untenMin: 1, unten: true },
-  s4: { n: 4, grund: () => zufall(1, 25) * 100 * (Math.random() < 0.5 ? 1 : 10), leer: 6, untenMin: 1, unten: true },
-  s5: { n: 4, grund: () => zufall(3, 60), leer: 6, untenMin: 2, unten: true },
+  s1: { n: 3, grund: () => zufall(1, 5), max: 20, leer: 3, untenMin: 0, unten: false },
+  s2: { n: 3, grund: () => zufall(2, 25), max: 100, leer: 3, untenMin: 0, unten: false },
+  s3: { n: 3, grund: () => zufall(2, 25), max: 100, leer: 3, untenMin: 1, unten: true },
+  s4: { n: 4, grund: () => zufall(2, 12), max: 100, leer: 6, untenMin: 2, unten: true },
+  s5: { n: 4, grund: () => zufall(10, 120), max: 1000, leer: 6, untenMin: 2, unten: true },
+  // Königsstufe: fünf Reihen (15 Steine), Grundzahlen bis 120, 9 Lücken, davon mindestens 2 unten.
+  s6: { n: 5, grund: () => zufall(5, 120), max: 10000, leer: 9, untenMin: 2, unten: true },
 };
+
+/** Mängel: Summenregel, Lücken lösbar und eindeutig (leer ≤ Steine − Grundsteine), Zahlenraum. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  const { w, leer } = a;
+  if (w.length !== p.n || w.some((reihe, r) => reihe.length !== p.n - r)) m.push("Mauer hat die falsche Form");
+  for (let r = 1; r < w.length; r++) w[r].forEach((x, i) => { if (x !== w[r - 1][i] + w[r - 1][i + 1]) m.push("Summenregel verletzt"); });
+  if (!w.flat().every(x => Number.isInteger(x) && x > 0)) m.push("Stein ohne positive ganze Zahl");
+  if (leer.size !== p.leer || leer.size > p.n * (p.n + 1) / 2 - p.n) m.push("falsche Zahl leerer Steine");
+  if (!loesbar(w, leer)) m.push("nicht lösbar");
+  if ([...leer].filter(k => k.startsWith("0,")).length < p.untenMin) m.push("zu wenige leere Grundsteine");
+  if (w[w.length - 1][0] > p.max) m.push(`oberster Stein über ${p.max}`);
+  return m;
+}
 
 /** Mauer als Reihen von unten nach oben: w[0] = Grundsteine, w[r][i] = w[r-1][i] + w[r-1][i+1]. */
 function mauerBauen(n, grund) {
@@ -85,6 +106,7 @@ function aufgabeErzeugen(stufe) {
   // Begrenzte Versuche als Sicherung: findet sich keine lösbare Auswahl, gibt es einen Fehler statt einer Endlosschleife.
   for (let versuch = 0; versuch < 2000; versuch++) {
     const w = mauerBauen(p.n, p.grund);
+    if (w[w.length - 1][0] > p.max) continue;
     const alle = w.flatMap((reihe, r) => reihe.map((_, i) => `${r},${i}`)).filter(k => p.unten || !k.startsWith("0,"));
     const leer = new Set(mische(alle).slice(0, p.leer));
     const untenLeer = [...leer].filter(k => k.startsWith("0,")).length;
@@ -98,16 +120,17 @@ LS.spiel({
   einleitung: "Baue die Zahlenmauer fertig! Jeder Stein ist so gross wie die beiden Steine darunter zusammen.",
   anzahl: 5,
   stufen: {
-    s1: "Kleine Mauer mit Zahlen bis 10 — nur zusammenzählen.",
-    s2: "Bis 100, manchmal fehlt ein Stein unten: rückwärts rechnen.",
-    s3: "Vier Reihen, mehr Lücken.",
-    s4: "Grosse Zahlen mit Hundertern und Tausendern.",
-    s5: "Viele Lücken — welchen Stein kannst du zuerst ausrechnen?",
+    s1: "Kleine Mauer bis 20 — nur zusammenzählen.",
+    s2: "Kleine Mauer bis 100 — zusammenzählen.",
+    s3: "Bis 100, und manchmal fehlt ein Stein unten: rückwärts rechnen.",
+    s4: "Vier Reihen bis 100, viele Lücken.",
+    s5: "Vier Reihen bis 1000 — welchen Stein kannst du zuerst ausrechnen?",
+    s6: "Endgegner: fünf Reihen, Zahlen bis fast 2000, neun Lücken.",
   },
 
   aufgabe(ctx) {
     const { w, leer } = aufgabeErzeugen(ctx.stufe);
-    const mauer = el("div", { class: "mauer" });
+    const mauer = el("div", { class: "mauer" + (w.length >= 5 ? " fuenf" : "") });
     const steine = {};
     let aktiv = null;
     const offen = new Set(leer);

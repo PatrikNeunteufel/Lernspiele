@@ -34,15 +34,16 @@
 // Das Krokodil öffnet sein Maul immer zur grösseren Zahl.
 
 const { zahlText, zufall, waehle, el } = LS;
-const DINGE = ["🍎", "⭐", "🐟", "🌸", "⚽"];
 
-// Je Stufe: Erzeuger für die beiden Seiten { text | punkte, wert }
+// Je Stufe: Erzeuger für die beiden Seiten { text, wert }, grösster vorkommender Wert, Rechnungen?
+// Stufe 3 ist das Lernziel der 4. Klasse (MA.1.A.2.f: bis 1 Million ordnen), Stufe 1 die 3. Klasse (bis 1000).
 const STUFE = {
-  s1: () => { const a = zufall(1, 10), b = Math.random() < 0.2 ? a : zufall(1, 10); const d = waehle(DINGE); return [{ punkte: d.repeat(a), wert: a }, { punkte: d.repeat(b), wert: b }]; },
-  s2: () => zahlenPaar(10, 100),
-  s3: () => zahlenPaar(100, 1000),
-  s4: () => zahlenPaar(10000, 1000000),
-  s5: () => termPaar(),
+  s1: { paar: () => zahlenPaar(100, 1000), max: 999 },
+  s2: { paar: () => zahlenPaar(1000, 10000), max: 9999 },
+  s3: { paar: () => zahlenPaar(10000, 1000000), max: 999999 },
+  s4: { paar: () => kniffligesPaar(), max: 1000000 },
+  s5: { paar: () => termPaar(false), max: 9999, rechnen: true },
+  s6: { paar: () => termPaar(true), max: 10000000, rechnen: true },
 };
 
 /** Zwei Zahlen, oft mit gleichen Anfangsziffern, damit man Stelle für Stelle vergleichen muss. */
@@ -61,18 +62,80 @@ function zahlenPaar(min, max) {
   return [{ text: zahlText(a), wert: a }, { text: zahlText(b), wert: b }];
 }
 
-/** Rechnungen vergleichen: 300 · 4 ? 1000 + 250 */
-function termPaar() {
-  const term = () => waehle([
+const zahlSeite = n => ({ text: zahlText(n), wert: n });
+
+/**
+ * Knifflig bis zur Million: nur eine hintere Stelle verschieden, zwei Ziffern vertauscht
+ * (47 382 / 47 832) oder die Längenfalle (99 870 / 100 020).
+ */
+function kniffligesPaar() {
+  const r = Math.random();
+  if (r < 0.15) { const a = zufall(100000, 999999); return [zahlSeite(a), zahlSeite(a)]; }
+  if (r < 0.75) {
+    const s = String(zufall(100000, 999999)).split("");
+    const t = s.slice();
+    const i = zufall(2, s.length - 2);
+    if (r < 0.45 || s[i] === s[i + 1]) t[i] = String((Number(t[i]) + zufall(1, 9)) % 10);
+    else [t[i], t[i + 1]] = [t[i + 1], t[i]];
+    return [zahlSeite(Number(s.join(""))), zahlSeite(Number(t.join("")))];
+  }
+  if (r < 0.9) {
+    // Viele Neuner gegen eine Stelle mehr: Wer mehr Stellen hat, ist grösser.
+    const z = 10 ** zufall(4, 5);
+    const a = z - zufall(1, z / 100), b = z + zufall(0, z / 100);
+    return Math.random() < 0.5 ? [zahlSeite(a), zahlSeite(b)] : [zahlSeite(b), zahlSeite(a)];
+  }
+  return [zahlSeite(zufall(100000, 999999)), zahlSeite(zufall(100000, 999999))];
+}
+
+/**
+ * Rechnungen vergleichen: 300 · 4 ? 1000 + 250. Königsstufe (gross): bis 10 Millionen, und oft
+ * steht gegenüber eine Zahl, die nur knapp neben dem Ergebnis liegt.
+ */
+function termPaar(gross) {
+  const klein = [
     () => { const x = zufall(2, 9) * 100, y = zufall(2, 9); return { text: `${zahlText(x)} · ${y}`, wert: x * y }; },
     () => { const x = zufall(1, 9) * 1000, y = zufall(1, 9) * 50; return { text: `${zahlText(x)} + ${y}`, wert: x + y }; },
     () => { const x = zufall(2, 9) * 1000, y = zufall(1, 9) * 100; return { text: `${zahlText(x)} − ${y}`, wert: x - y }; },
     () => { const y = zufall(2, 9), q = zufall(2, 9) * 100; return { text: `${zahlText(q * y)} : ${y}`, wert: q }; },
-  ])();
+  ];
+  const koenig = [
+    () => { const x = zufall(2, 9) * 10 ** zufall(3, 5), y = zufall(2, 9); return { text: `${zahlText(x)} · ${y}`, wert: x * y }; },
+    () => { const x = waehle([25, 50, 125]) * 10 ** zufall(2, 3), y = waehle([4, 8, 40, 80]); return { text: `${zahlText(x)} · ${y}`, wert: x * y }; },
+    () => { const x = zufall(1, 8) * 1000000, y = zufall(1, 99) * 10000; return { text: `${zahlText(x)} + ${zahlText(y)}`, wert: x + y }; },
+    () => { const x = zufall(2, 9) * 1000000, y = zufall(1, 9) * 100000 + zufall(1, 9) * 1000; return { text: `${zahlText(x)} − ${zahlText(y)}`, wert: x - y }; },
+    () => { const y = zufall(2, 9), q = zufall(11, 99) * 10000; return { text: `${zahlText(q * y)} : ${y}`, wert: q }; },
+  ];
+  const term = () => waehle(gross ? koenig : klein)();
   const a = term();
-  let b = term();
-  if (Math.random() < 0.15) b = { text: zahlText(a.wert), wert: a.wert };
-  return [a, b];
+  const r = Math.random();
+  if (r < 0.15) return [a, zahlSeite(a.wert)];
+  // Königsstufe: knapp daneben (± 1, 10 oder 1000) — nur genaues Rechnen hilft.
+  if (gross && r < 0.45) {
+    const d = waehle([1, 10, 1000]);
+    // Nach oben nur, solange die Zahl unter 10 Millionen bleibt.
+    const n = a.wert + d < 10000000 && Math.random() < 0.5 ? a.wert + d : a.wert - d;
+    return Math.random() < 0.5 ? [a, zahlSeite(n)] : [zahlSeite(n), a];
+  }
+  return [a, term()];
+}
+
+/** Für das Testskript: ein Paar der Stufe. */
+function aufgabeErzeugen(stufe) { return STUFE[stufe].paar(); }
+
+function pruefeAufgabe(paar, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  for (const s of paar) {
+    // Text nachrechnen: schmale Leerzeichen weg, Rechenzeichen in JavaScript-Schreibweise.
+    const ausdruck = s.text.replace(/[\s ]/g, "").replace(/·/g, "*").replace(/−/g, "-").replace(/:/g, "/");
+    if (!/^[\d*+\-/]+$/.test(ausdruck)) { m.push(`Text «${s.text}» nicht lesbar`); continue; }
+    const wert = Function(`return ${ausdruck}`)();
+    if (wert !== s.wert) m.push(`«${s.text}» ergibt ${wert}, nicht ${s.wert}`);
+    if (!Number.isInteger(s.wert) || s.wert < 1 || s.wert > p.max) m.push(`Wert ${s.wert} ausserhalb 1–${p.max}`);
+    if (!p.rechnen && /[·+−:]/.test(s.text)) m.push("Rechnung in einer Stufe ohne Rechnungen");
+  }
+  return m;
 }
 
 LS.spiel({
@@ -80,15 +143,16 @@ LS.spiel({
   einleitung: "Das hungrige Krokodil frisst immer die grössere Zahl! Wähle das richtige Zeichen: < (kleiner als), > (grösser als) oder = (gleich).",
   anzahl: 10,
   stufen: {
-    s1: "Bilder zählen: Wo sind mehr?",
-    s2: "Zahlen bis 100.",
-    s3: "Zahlen bis 1000.",
-    s4: "Grosse Zahlen bis zur Million: 47 382 oder 47 832?",
+    s1: "Zahlen bis 1000.",
+    s2: "Vierstellige Zahlen: 4527 oder 4572?",
+    s3: "Grosse Zahlen bis zur Million: 47 382 oder 47 832?",
+    s4: "Knifflig bis zur Million: 99 870 oder 100 020?",
     s5: "Rechnungen vergleichen: 300 · 4 oder 1000 + 250?",
+    s6: "Rechnungen mit Millionen: 125 000 · 8 oder 999 999?",
   },
 
   aufgabe(ctx) {
-    const [a, b] = STUFE[ctx.stufe]();
+    const [a, b] = STUFE[ctx.stufe].paar();
     const richtig = a.wert < b.wert ? "<" : a.wert > b.wert ? ">" : "=";
     const seite = x => x.punkte ? el("div", { class: "seite" }, el("div", { class: "punkte", text: x.punkte })) : el("div", { class: "seite", text: x.text });
     const mitte = el("div", { class: "mitte", text: "?" });
@@ -108,9 +172,10 @@ LS.spiel({
           return;
         }
         k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
-        const hinweis = ctx.stufe === "s1" ? "Zähl die Bilder auf beiden Seiten genau." : ctx.stufe === "s5" ? "Rechne zuerst beide Seiten aus." :
+        const rechnen = STUFE[ctx.stufe].rechnen;
+        const hinweis = rechnen ? "Rechne zuerst beide Seiten aus — ganz genau." :
           "Vergleiche Stelle für Stelle von links: Zuerst die Anzahl Ziffern, dann die erste Ziffer, die verschieden ist.";
-        ctx.falsch(hinweis, `${a.text ?? a.wert} ${richtig} ${b.text ?? b.wert}${ctx.stufe === "s5" ? ` (${zahlText(a.wert)} ${richtig} ${zahlText(b.wert)})` : ""}`);
+        ctx.falsch(hinweis, `${a.text} ${richtig} ${b.text}${rechnen ? ` (${zahlText(a.wert)} ${richtig} ${zahlText(b.wert)})` : ""}`);
         if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
       });
       wahl.append(k);

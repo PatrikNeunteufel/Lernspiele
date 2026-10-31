@@ -52,6 +52,7 @@ const TIERE = [
   ["Graureiher", null, "Vogel", null, "Wildtier", "Weiher"],
   ["Höckerschwan", "🦢", "Vogel", null, "Wildtier", "Weiher"],
   ["Steinadler", "🦅", "Vogel", null, "Wildtier", "Gebirge"],
+  ["Alpendohle", "🐦‍⬛", "Vogel", null, "Wildtier", "Gebirge"], // UNGEPRÜFT, neu LERN_Session2 (Gebirge mit Bild)
   ["Feldlerche", null, "Vogel", null, "Wildtier", "Wiese"],
   ["Huhn", "🐔", "Vogel", null, "Nutztier", null],
   ["Wellensittich", "🦜", "Vogel", null, "Heimtier", null],

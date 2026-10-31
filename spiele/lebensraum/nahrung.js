@@ -15,6 +15,9 @@ const NAHRUNGSKETTEN = [
   [["Blütennektar", "🌸", true], ["Nachtfalter", null], ["Fledermaus", "🦇"]],
   [["Gras", "🌱", true], ["Reh", "🦌"], ["Luchs", null]],
   [["Gräser", "🌱", true], ["Murmeltier", null], ["Steinadler", "🦅"]],
+  // UNGEPRÜFT, neu LERN_Session2 (mehr kurze Ketten mit Bildern für Stufe 4):
+  [["Löwenzahn", "🌼", true], ["Feldhase", "🐇"], ["Fuchs", "🦊"]],
+  [["Körner", "🌾", true], ["Feldmaus", "🐁"], ["Waldkauz", "🦉"]],
 ];
 
 // Artikel der Tiere, für die Frage „Was frisst der/die/das …?“
@@ -23,6 +26,7 @@ const ARTIKEL = {
   Kohlmeise: "die", Sperber: "der", Schnecke: "die", Igel: "der", Mückenlarve: "die", Forelle: "die",
   Eichhörnchen: "das", Baummarder: "der", Regenwurm: "der", Amsel: "die", Nachtfalter: "der",
   Fledermaus: "die", Reh: "das", Luchs: "der", Murmeltier: "das", Steinadler: "der",
+  Feldhase: "der", Waldkauz: "der", // UNGEPRÜFT, neu LERN_Session2
 };
 
 // Grosse Räuber: Sie werden in keiner Kette von einem Pflanzenfresser gefressen.

@@ -84,6 +84,9 @@ const STUFE = {
   s3: { regeln: ["ie", "cktz"], sichtbar: true, ausnahmen: false },
   s4: { regeln: ["ie", "cktz", "fv", "eae"], sichtbar: true, ausnahmen: false },
   s5: { regeln: ["ie", "cktz", "fv", "eae", "doppel"], sichtbar: false, ausnahmen: true },
+  // Königsstufe: alle sechs Regeln, Ausnahmen öfter, beim Fehler nur der Name der Regel statt ihres
+  // Texts. Das Bild bleibt: ohne Bild wären Wörter wie Haken/Hacken, viel/fiel, Rose/Rosse mehrdeutig.
+  s6: { regeln: ["spst", "ie", "cktz", "fv", "eae", "doppel"], sichtbar: false, ausnahmen: true, knapp: true, ausnahmeAnteil: 0.4 },
 };
 
 /** "B{ie|i}ne" → { vor: "B", richtig: "ie", falsch: "i", nach: "ne", ganz: "Biene" } */
@@ -96,9 +99,24 @@ function aufgabeErzeugen(stufe) {
   const p = STUFE[stufe];
   const regelId = waehle(p.regeln);
   const regel = REGELN[regelId];
-  const liste = p.ausnahmen && regel.ausnahmen ? [...regel.woerter, ...regel.ausnahmen] : regel.woerter;
+  let liste = p.ausnahmen && regel.ausnahmen ? [...regel.woerter, ...regel.ausnahmen] : regel.woerter;
+  // Königsstufe: Ausnahmen gezielt häufiger ziehen.
+  if (p.ausnahmeAnteil && regel.ausnahmen && Math.random() < p.ausnahmeAnteil) liste = regel.ausnahmen;
   const [text, bild] = waehle(liste);
-  return { regel, bild, ...zerlegeWort(text) };
+  return { regel, regelId, text, bild, ...zerlegeWort(text) };
+}
+
+/** Mängel: Lücke lesbar, zwei verschiedene Möglichkeiten, Regel und Ausnahmen passend zur Stufe. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.regeln.includes(a.regelId)) m.push("Regel nicht in der Stufe");
+  if (!a.richtig || !a.falsch || a.richtig === a.falsch) m.push("Möglichkeiten fehlen oder sind gleich");
+  if (/[{}|]/.test(a.ganz + a.richtig + a.falsch)) m.push("Lücke nicht aufgelöst");
+  const ausnahme = (a.regel.ausnahmen || []).some(([t]) => t === a.text);
+  if (ausnahme && !p.ausnahmen) m.push("Ausnahme in einer Stufe ohne Ausnahmen");
+  if (!a.bild) m.push("Bild fehlt (ohne Bild ist das Wort nicht immer eindeutig)");
+  return m;
 }
 
 LS.spiel({
@@ -111,6 +129,7 @@ LS.spiel({
     s3: "ie oder i, ck oder k, tz oder z — die Regel steht dabei.",
     s4: "Dazu f oder v und e oder ä: Vogel, Hände.",
     s5: "Alles gemischt, mit Ausnahmen (Igel, Tiger) und Doppelkonsonanten — ohne Regelkarte.",
+    s6: "Endgegner: alle sechs Regeln, viele Ausnahmen — ohne Regelkarte.",
   },
 
   aufgabe(ctx) {
@@ -139,7 +158,10 @@ LS.spiel({
         knopf.classList.remove("falsch");
         void knopf.offsetWidth;
         knopf.classList.add("falsch");
-        ctx.falsch(p.sichtbar ? `Lies die Regel nochmal: ${a.regel.regel}` : `Regel ${a.regel.name}: ${a.regel.regel}`, `Man schreibt ${a.ganz}.`);
+        ctx.falsch(p.sichtbar ? `Lies die Regel nochmal: ${a.regel.regel}`
+          : p.knapp ? `Sprich das Wort langsam und hör genau hin. Denk an die Regel «${a.regel.name}».`
+          : `Regel ${a.regel.name}: ${a.regel.regel}`,
+          p.knapp ? `Man schreibt ${a.ganz}. ${a.regel.regel}` : `Man schreibt ${a.ganz}.`);
         if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
       });
       optionen.append(knopf);

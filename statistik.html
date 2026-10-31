@@ -277,23 +277,43 @@ function zeichne() {
   datei.addEventListener("change", async () => {
     const f = datei.files[0];
     if (!f) return;
+    let daten;
     try {
-      const daten = JSON.parse(await f.text());
+      daten = JSON.parse(await f.text());
       if (!daten.profile || !Array.isArray(daten.protokoll)) throw new Error("Format");
-      if (!confirm("Die Daten auf diesem Gerät werden durch die Datei ersetzt. Weiter?")) return;
-      LS.schreibe("profile", daten.profile);
-      LS.schreibe("protokoll", daten.protokoll);
-      zeichne();
-    } catch { alert("Diese Datei kann ich nicht lesen."); }
+    } catch { alert("Diese Datei kann ich nicht lesen."); return; } finally { datei.value = ""; }
+    // Zusammenführen: Was auf diesem Gerät gespielt wurde, bleibt; dazu kommt, was nur in der Datei steht.
+    const { runden, kinder } = LS.zusammenfuehren(daten);
+    alert(runden || kinder
+      ? `Eingelesen: ${runden} neue Runde${runden === 1 ? "" : "n"}${kinder ? `, ${kinder} neue${kinder === 1 ? "s Kind" : " Kinder"}` : ""}. Alles andere auf diesem Gerät bleibt.`
+      : "Alles aus der Datei war auf diesem Gerät schon vorhanden.");
+    zeichne();
   });
+  // Spielstand zurücksetzen: alle Runden oder nur die eines Spiels; das Profil bleibt.
+  const gespielt = [...new Set(LS.protokoll().filter(e => e.name === gewaehlt).map(e => e.spiel))]
+    .map(id => SPIELE.find(s => s.id === id)).filter(Boolean);
+  const welche = el("select", { "aria-label": "Welcher Spielstand" },
+    el("option", { value: "", text: "alle Spiele" }),
+    ...gespielt.map(s => el("option", { value: s.id, text: `${s.bild} ${s.name}` })));
   seite.append(el("section", { class: "karte" },
     el("h2", { text: "Daten" }),
-    el("p", { class: "leise-text", style: "margin-top:0", text: "Alles bleibt in diesem Browser auf diesem Gerät. Zum Mitnehmen auf ein anderes Gerät: sichern und dort einlesen." }),
+    el("p", { class: "leise-text", style: "margin-top:0", text: "Alles bleibt in diesem Browser auf diesem Gerät. Spielt ein Kind auf mehreren Geräten: auf dem einen sichern, die Datei hinüberschicken und auf dem anderen einlesen — die Runden werden zusammengeführt, nichts geht verloren." }),
     el("div", { class: "knopfzeile", style: "justify-content:flex-start" },
       el("button", { class: "knopf hell klein", type: "button", text: "💾 Sichern", onclick: sichern }),
-      el("button", { class: "knopf hell klein", type: "button", text: "📂 Einlesen", onclick: () => datei.click() }),
-      el("button", { class: "knopf hell klein", type: "button", text: `🗑 ${gewaehlt} löschen`, onclick: () => {
-        if (confirm(`${gewaehlt} mit allen Runden löschen?`)) { LS.loescheSpieler(gewaehlt); gewaehlt = null; zeichne(); }
+      el("button", { class: "knopf hell klein", type: "button", text: "📂 Einlesen", onclick: () => datei.click() })),
+    el("h3", { text: `Spielstand von ${gewaehlt} zurücksetzen` }),
+    el("p", { class: "leise-text", style: "margin-top:0", text: "Löscht die gespielten Runden und Sterne. Name, Klasse und Einstellungen bleiben. Tipp: vorher sichern." }),
+    el("div", { class: "knopfzeile", style: "justify-content:flex-start" },
+      welche,
+      el("button", { class: "knopf hell klein", type: "button", text: "↺ Zurücksetzen", onclick: () => {
+        const spiel = SPIELE.find(s => s.id === welche.value);
+        if (confirm(spiel ? `Alle Runden von ${gewaehlt} in «${spiel.name}» löschen?` : `Alle Runden von ${gewaehlt} löschen? Name und Einstellungen bleiben.`)) {
+          LS.loescheRunden(gewaehlt, welche.value || null);
+          zeichne();
+        }
+      } }),
+      el("button", { class: "knopf hell klein", type: "button", text: `🗑 ${gewaehlt} ganz löschen`, onclick: () => {
+        if (confirm(`${gewaehlt} mit Profil und allen Runden löschen?`)) { LS.loescheSpieler(gewaehlt); gewaehlt = null; zeichne(); }
       } })),
     datei));
 }

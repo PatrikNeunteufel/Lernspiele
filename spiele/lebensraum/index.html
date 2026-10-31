@@ -6,47 +6,6 @@
 <title>Lebensraum-Zuordnung</title>
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .lebewesen {
-    margin: 6px auto 18px;
-    width: fit-content;
-    max-width: 100%;
-    background: #fff;
-    border: 4px solid var(--rand);
-    border-radius: 20px;
-    padding: 10px 28px;
-    text-align: center;
-    box-shadow: var(--schatten);
-  }
-  .lebewesen .bild { font-size: clamp(60px, 14vw, 90px); line-height: 1.1; display: block; }
-  .lebewesen b { font-size: clamp(24px, 5.6vw, 36px); font-weight: 900; }
-
-  .raeume { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 12px; max-width: 720px; margin: 0 auto; }
-  .raum {
-    border: none;
-    border-radius: 20px;
-    min-height: 110px;
-    padding: 10px;
-    cursor: pointer;
-    color: #fff;
-    font-family: inherit;
-    font-size: clamp(18px, 3.8vw, 22px);
-    font-weight: 900;
-    background: var(--r);
-    box-shadow: 0 6px 0 rgba(0, 0, 0, .2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-  }
-  .raum span { font-size: 40px; }
-  .raum:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0, 0, 0, .2); }
-  .raum.falsch { animation: wackeln .4s; }
-  /* Landschaftsfarben (Deko, keine Stellenfarben) */
-  .r-Wald { --r: #2f7d4f; }
-  .r-Wiese { --r: #7cb342; }
-  .r-Weiher { --r: #2f8fe0; }
-  .r-Gebirge { --r: #7a6f9b; }
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 14px; }
 </style>
 </head>
@@ -71,11 +30,12 @@
 
 const { waehle, mische, el } = LS;
 
+// Landschaftsfarben (Deko, keine Stellenfarben)
 const RAEUME = {
-  Wald: { bild: "🌲", name: "Wald" },
-  Wiese: { bild: "🌼", name: "Wiese" },
-  Weiher: { bild: "💧", name: "Weiher und Bach" },
-  Gebirge: { bild: "🏔️", name: "Gebirge" },
+  Wald: { bild: "🌲", name: "Wald", farbe: "#2f7d4f" },
+  Wiese: { bild: "🌼", name: "Wiese", farbe: "#7cb342" },
+  Weiher: { bild: "💧", name: "Weiher und Bach", farbe: "#2f8fe0" },
+  Gebirge: { bild: "🏔️", name: "Gebirge", farbe: "#7a6f9b" },
 };
 const LEBEWESEN = TIERE.map(([name, bild, klasse, , , lebensraum]) => ({ name, bild, klasse, lebensraum })).filter(t => t.lebensraum);
 
@@ -90,8 +50,9 @@ const ARTEN = {
     const w = waehle(LEBEWESEN.filter(t => auswahl.includes(t.lebensraum) && (!mitBild || t.bild)));
     return { art: "zuordnen", w, raeume: Object.keys(RAEUME).filter(r => auswahl.includes(r)) };
   },
-  kette() {
-    return { art: "kette", kette: waehle(KETTEN) };
+  /** Nahrungskette mit 'laenge' Gliedern (null = jede); mitBild: nur Ketten, deren Glieder alle ein Bild haben. */
+  kette(laenge, mitBild) {
+    return { art: "kette", kette: waehle(KETTEN.filter(k => (!laenge || k.length === laenge) && (!mitBild || k.every(g => g.bild)))) };
   },
   wasFrisst() {
     const { esser, futter } = waehle(FRISST);
@@ -100,12 +61,17 @@ const ARTEN = {
   },
 };
 
+// Basisklasse 2: Stufe 1 = 1. Klasse, 2–4 = 2. Klasse, 5 = 3. Klasse, 6 Endgegner.
+// Bis Stufe 4 (2. Klasse) trägt jedes Lebewesen ein Bild — ohne Lesetext lösbar.
+const VIER = ["Wald", "Wiese", "Weiher", "Gebirge"];
+const BILD_NOETIG = ["s1", "s2", "s3", "s4"];
 const STUFE = {
   s1: () => ARTEN.zuordnen(mische(["Wald", "Wiese", "Weiher"]).slice(0, 2), true),
   s2: () => ARTEN.zuordnen(["Wald", "Wiese", "Weiher"], true),
-  s3: () => ARTEN.zuordnen(["Wald", "Wiese", "Weiher", "Gebirge"], false),
-  s4: () => waehle([ARTEN.kette, () => ARTEN.zuordnen(["Wald", "Wiese", "Weiher", "Gebirge"], false)])(),
-  s5: () => waehle([ARTEN.kette, ARTEN.wasFrisst])(),
+  s3: () => ARTEN.zuordnen(VIER, true),
+  s4: () => waehle([() => ARTEN.kette(3, true), () => ARTEN.zuordnen(VIER, true)])(),
+  s5: () => waehle([() => ARTEN.kette(4, false), ARTEN.wasFrisst])(),
+  s6: () => waehle([() => ARTEN.zuordnen(VIER, false), () => ARTEN.kette(null, false), ARTEN.wasFrisst])(),
 };
 
 function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
@@ -115,9 +81,14 @@ function pruefeAufgabe(a, stufe) {
   const m = [];
   if (a.art === "zuordnen") {
     if (!a.raeume.includes(a.w.lebensraum)) m.push("richtiger Lebensraum fehlt");
-    if ((stufe === "s1" || stufe === "s2") && !a.w.bild) m.push("Lebewesen ohne Bild in Stufe 1–2");
+    if (BILD_NOETIG.includes(stufe) && !a.w.bild) m.push("Lebewesen ohne Bild bis Stufe 4");
   }
-  if (a.art === "kette" && !a.kette[0].pflanze) m.push("Kette beginnt nicht mit einer Pflanze");
+  if (a.art === "kette") {
+    if (!a.kette[0].pflanze) m.push("Kette beginnt nicht mit einer Pflanze");
+    if (BILD_NOETIG.includes(stufe) && a.kette.some(g => !g.bild)) m.push("Kettenglied ohne Bild bis Stufe 4");
+    if (stufe === "s4" && a.kette.length !== 3) m.push("Stufe 4 verlangt eine Kette mit drei Gliedern");
+    if (stufe === "s5" && a.kette.length !== 4) m.push("Stufe 5 verlangt eine Kette mit vier Gliedern");
+  }
   if (a.art === "wasFrisst") {
     if (a.optionen.some(o => !o)) m.push("Auswahl unbekannt");
     else {
@@ -139,9 +110,10 @@ LS.spiel({
   stufen: {
     s1: "Zwei Lebensräume: Wald, Wiese oder Weiher.",
     s2: "Drei Lebensräume: Wald, Wiese, Weiher und Bach.",
-    s3: "Dazu das Gebirge — und Tiere ohne Bild.",
-    s4: "Nahrungsketten ordnen: Gras → Feldmaus → Fuchs.",
-    s5: "Wer frisst was?",
+    s3: "Vier Lebensräume: dazu das Gebirge.",
+    s4: "Vier Lebensräume und kurze Nahrungsketten: Gras → Feldmaus → Fuchs.",
+    s5: "Nahrungsketten mit vier Gliedern — und: Was frisst …?",
+    s6: "Endgegner: alles gemischt, auch Tiere ohne Bild.",
   },
 
   aufgabe(ctx) {
@@ -169,30 +141,18 @@ LS.spiel({
       });
       return;
     }
-    const karte = el("div", { class: "lebewesen" }, el("span", { class: "bild", text: a.w.bild || "❔" }), el("b", { text: a.w.name }));
-    ctx.flaeche.append(el("div", { class: "auftrag", text: "Wo lebt das?" }), karte);
-    const box = el("div", { class: "raeume" });
-    let fertig = false;
-    for (const r of a.raeume) {
-      const k = el("button", { type: "button", class: `raum r-${r}` }, el("span", { text: RAEUME[r].bild }), RAEUME[r].name);
-      k.addEventListener("click", () => {
-        if (fertig) return;
-        if (r === a.w.lebensraum) {
-          fertig = true;
-          LS.fliegen(karte, k);
-          ctx.richtig(`Richtig: ${a.w.name} — ${RAEUME[r].name}.`);
-          return;
-        }
-        k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
-        ctx.falsch(a.w.klasse === "Pflanze" || a.w.klasse === "Pilz"
-          ? `Hm, ${a.w.name} wächst meistens woanders. Wo ist der Boden passend — schattig, sonnig oder nass?`
-          : `Hm, ${a.w.name} trifft man meistens woanders. Wo findet das Tier Futter und Schutz?`,
-          `${a.w.name} lebt typisch im Lebensraum ${RAEUME[a.w.lebensraum].name}.`);
-        if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
-      });
-      box.append(k);
-    }
-    ctx.flaeche.append(box);
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "Wo lebt das?" }));
+    LS.koerbe(ctx, {
+      karte: { bild: a.w.bild || "❔", text: a.w.name },
+      koerbe: a.raeume, richtig: a.w.lebensraum,
+      korbInhalt: r => ({ bild: RAEUME[r].bild, text: RAEUME[r].name }),
+      farbe: r => RAEUME[r].farbe,
+      hinweis: a.w.klasse === "Pflanze" || a.w.klasse === "Pilz"
+        ? `Hm, ${a.w.name} wächst meistens woanders. Wo ist der Boden passend — schattig, sonnig oder nass?`
+        : `Hm, ${a.w.name} trifft man meistens woanders. Wo findet das Tier Futter und Schutz?`,
+      loesung: `${a.w.name} lebt typisch im Lebensraum ${RAEUME[a.w.lebensraum].name}.`,
+      lob: `Richtig: ${a.w.name} — ${RAEUME[a.w.lebensraum].name}.`,
+    });
     if (ctx.nr === 0) ctx.sag("Tipp auf den Lebensraum, wo man es am meisten findet.");
   },
 });

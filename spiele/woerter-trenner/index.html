@@ -38,8 +38,33 @@
 const { waehle, el } = LS;
 
 // Je Stufe: Anzahl Wörter im Satz (alle Sätze der Satz-Reparatur, ohne Satzzeichen)
-const STUFE = { s1: [2, 3], s2: [4, 4], s3: [5, 5], s4: [6, 7], s5: [8, 20] };
-const ALLE = Object.values(SAETZE).flat().map(s => s.replace(/[.!?]/g, "").split(" "));
+// Königsstufe: zwei Sätze aneinander, zusammen 14 bis 24 Wörter, knappere Hilfe.
+const STUFE = { s1: [2, 3], s2: [4, 4], s3: [5, 5], s4: [6, 7], s5: [8, 20], s6: [14, 24] };
+const woerterVon = s => s.replace(/[.!?]/g, "").split(" ");
+const ALLE = Object.values(SAETZE).flat().map(woerterVon);
+const LANGE = [...SAETZE.s4, ...SAETZE.s5];
+
+/** Wörter der Aufgabe. Königsstufe: zwei lange Sätze aus Stufe 4 und 5 hintereinander (begrenzte Versuche). */
+function aufgabeErzeugen(stufe) {
+  const [min, max] = STUFE[stufe];
+  if (stufe === "s6") {
+    for (let v = 0; v < 100; v++) {
+      const w = woerterVon(LS.mische(LANGE).slice(0, 2).join(" "));
+      if (w.length >= min && w.length <= max) return w;
+    }
+    return woerterVon(`${SAETZE.s5[0]} ${SAETZE.s4[0]}`);
+  }
+  return waehle(ALLE.filter(w => w.length >= min && w.length <= max));
+}
+
+/** Mängel: Wortzahl im Rahmen der Stufe, nur Buchstaben, keine leeren Wörter. */
+function pruefeAufgabe(woerter, stufe) {
+  const m = [];
+  const [min, max] = STUFE[stufe];
+  if (woerter.length < min || woerter.length > max) m.push(`Wortzahl ${woerter.length} ausserhalb ${min}–${max}`);
+  if (woerter.some(w => !/^[A-Za-zÄÖÜäöü]+$/.test(w))) m.push("Wort mit Zeichen, die keine Buchstaben sind");
+  return m;
+}
 
 LS.spiel({
   id: "woerter-trenner",
@@ -51,11 +76,11 @@ LS.spiel({
     s3: "Sätze mit 5 Wörtern.",
     s4: "Lange Sätze mit 6 bis 7 Wörtern.",
     s5: "Ganz lange Sätze — auch zwei hintereinander.",
+    s6: "Endgegner: zwei lange Sätze ohne Lücke, bis 24 Wörter.",
   },
 
   aufgabe(ctx) {
-    const [min, max] = STUFE[ctx.stufe];
-    const woerter = waehle(ALLE.filter(w => w.length >= min && w.length <= max));
+    const woerter = aufgabeErzeugen(ctx.stufe);
     const buchstaben = woerter.join("").toUpperCase().split("");
     // Soll: Trennstellen nach dem i-ten Buchstaben (Index im zusammengeklebten Text)
     const soll = new Set();
@@ -95,7 +120,9 @@ LS.spiel({
       const fehlt = [...soll].filter(s => !gesetzt.has(s));
       const zuviel = [...gesetzt].filter(s => !soll.has(s));
       if (!fehlt.length && !zuviel.length) { fertig = true; loesung.textContent = woerter.join(" "); ctx.richtig(); return; }
-      ctx.falsch(`${fehlt.length ? `Es fehlen noch ${fehlt.length} Trennstrich${fehlt.length === 1 ? "" : "e"}.` : ""} ${zuviel.length ? `${zuviel.length} Strich${zuviel.length === 1 ? " ist" : "e sind"} zu viel — dort geht ein Wort weiter.` : ""} Lies leise und klatsche bei jedem Wort.`.trim(),
+      // Königsstufe: knapper — ohne Zahl der fehlenden oder überzähligen Striche.
+      if (ctx.stufe === "s6") ctx.falsch("Noch nicht ganz. Lies leise Wort für Wort und klatsche bei jedem Wort.", `Der Text heisst: ${woerter.join(" ")}`);
+      else ctx.falsch(`${fehlt.length ? `Es fehlen noch ${fehlt.length} Trennstrich${fehlt.length === 1 ? "" : "e"}.` : ""} ${zuviel.length ? `${zuviel.length} Strich${zuviel.length === 1 ? " ist" : "e sind"} zu viel — dort geht ein Wort weiter.` : ""} Lies leise und klatsche bei jedem Wort.`.trim(),
         `Der Satz heisst: ${woerter.join(" ")}`);
       if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) {
         fertig = true;

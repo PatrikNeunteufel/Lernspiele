@@ -23,7 +23,11 @@ const SILBEN_WOERTER = [
   // vier Silben
   ["Re-gen-bo-gen", "🌈"], ["Ba-de-wan-ne", "🛁"], ["He-li-kop-ter", "🚁"], ["Ta-schen-lam-pe", "🔦"],
   ["Son-nen-blu-me", "🌻"], ["Kran-ken-wa-gen", "🚑"],
+  // UNGEPRÜFT, neu LERN_Session2 (mehr lange Wörter für die Königsstufe):
+  ["Scho-ko-la-de", "🍫"], ["Kaf-fee-tas-se", "☕"], ["Ba-de-an-zug", "🩱"], ["Ba-by-fla-sche", "🍼"],
   // fünf Silben
   ["Ma-ri-en-kä-fer", "🐞"], ["Lo-ko-mo-ti-ve", "🚂"], ["Was-ser-me-lo-ne", "🍉"], ["Feu-er-wehr-au-to", "🚒"],
   ["Po-li-zei-au-to", "🚓"],
+  // UNGEPRÜFT, neu LERN_Session2:
+  ["Kar-tof-fel-sa-lat", "🥗"],
 ];

@@ -37,35 +37,54 @@
 
 const { zahlText, zufall, waehle, el } = LS;
 
-// Je Stufe: mögliche Ausschnitte [von, bis, Schritt der Striche], Toleranz in Strichabständen,
-// und ob auch abgelesen wird.
+// Je Stufe: mögliche Ausschnitte [von, bis, Schritt der Striche] oder ein verschobener Ausschnitt
+// (verschoben: { schritte, bis } — beginnt nicht bei 0, endet spätestens bei 'bis'),
+// Toleranz in Strichabständen, Anteil Ableseaufgaben.
+// Stufe 3 ist das Lernziel der 4. Klasse (MA.1.A.2.f: Position bis 1 Million), Stufe 1 die 3. Klasse
+// (MA.1.A.2.e: bis 1000).
 const STUFE = {
-  s1: { ausschnitte: [[0, 20, 1]], toleranz: 0.5, ablesen: false },
-  s2: { ausschnitte: [[0, 100, 10]], toleranz: 0.3, ablesen: true },
-  s3: { ausschnitte: [[0, 1000, 100], [0, 100, 10]], toleranz: 0.3, ablesen: true },
-  s4: { ausschnitte: [[0, 1000000, 100000], [0, 10000, 1000], [0, 100000, 10000]], toleranz: 0.3, ablesen: true },
-  s5: { ausschnitte: "verschoben", toleranz: 0.2, ablesen: true },
+  s1: { ausschnitte: [[0, 1000, 100], [0, 100, 10]], toleranz: 0.3, ablesen: 0.4 },
+  s2: { ausschnitte: [[0, 10000, 1000], [0, 1000, 100]], toleranz: 0.3, ablesen: 0.4 },
+  s3: { ausschnitte: [[0, 1000000, 100000], [0, 10000, 1000], [0, 100000, 10000]], toleranz: 0.3, ablesen: 0.4 },
+  s4: { verschoben: { schritte: [1000, 10000], bis: 1000000 }, toleranz: 0.25, ablesen: 0.4 },
+  s5: { verschoben: { schritte: [1, 10, 100, 1000, 10000], bis: 1000000 }, toleranz: 0.2, ablesen: 0.4 },
+  s6: { verschoben: { schritte: [10, 100, 1000, 10000, 100000], bis: 10000000 }, toleranz: 0.15, ablesen: 0.5, knapp: true },
 };
 
 function ausschnittFuer(stufe) {
   const p = STUFE[stufe];
-  if (p.ausschnitte !== "verschoben") return waehle(p.ausschnitte);
+  if (!p.verschoben) return waehle(p.ausschnitte);
   // Ausschnitt, der nicht bei 0 beginnt: z. B. 4600 bis 4700 in Zehnern oder 300 000 bis 400 000
-  const schritt = waehle([1, 10, 100, 1000, 10000]);
-  const von = schritt * 10 * zufall(1, Math.min(89, Math.floor(990000 / (schritt * 10)))); // bis zur Million
-  return [von, von + schritt * 10, schritt];
+  const schritt = waehle(p.verschoben.schritte);
+  const breite = schritt * 10;
+  // Stufen 4 und 5 bleiben bei höchstens 899 Ausschnittbreiten (z. B. 4600–4700 in Zehnern),
+  // die Königsstufe nutzt den ganzen Zahlenraum.
+  const obergrenze = p.verschoben.bis / breite - 1;
+  const von = breite * zufall(1, Math.max(1, p.knapp ? obergrenze : Math.min(899, obergrenze)));
+  return [von, von + breite, schritt];
 }
 
 function aufgabeErzeugen(stufe) {
   const [von, bis, schritt] = ausschnittFuer(stufe);
-  const ablesen = STUFE[stufe].ablesen && Math.random() < 0.4;
-  // Zielzahl: nicht genau auf einem Strich (ausser in Stufe 1), damit geschätzt werden muss
-  const raster = Math.max(1, schritt / 10); // Zielzahlen sind ganze Zahlen auf einem Zehntel-Strich-Raster
-  let ziel;
-  do {
-    ziel = stufe === "s1" ? zufall(von + 1, bis - 1) : von + Math.round(zufall(1, 99) / 100 * (bis - von) / raster) * raster;
-  } while (ziel <= von || ziel >= bis);
+  const ablesen = Math.random() < STUFE[stufe].ablesen;
+  // Zielzahl: nicht genau auf einem Strich, damit geschätzt werden muss; ganze Zahlen auf einem
+  // Zehntel-Strich-Raster. 1–99 Hundertstel des Ausschnitts liegen immer echt zwischen von und bis.
+  const raster = Math.max(1, schritt / 10);
+  const ziel = von + Math.max(1, Math.min(Math.round((bis - von) / raster) - 1, Math.round(zufall(1, 99) / 100 * (bis - von) / raster))) * raster;
   return { von, bis, schritt, ziel, ablesen, toleranz: STUFE[stufe].toleranz * schritt };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!(a.von < a.ziel && a.ziel < a.bis)) m.push("Ziel nicht zwischen den Enden");
+  if (!Number.isInteger(a.ziel)) m.push("Ziel keine ganze Zahl");
+  const grenze = p.verschoben ? p.verschoben.bis : Math.max(...p.ausschnitte.map(x => x[1]));
+  if (a.bis > grenze || a.von < 0) m.push(`Ausschnitt ${a.von}–${a.bis} ausserhalb 0–${grenze}`);
+  if (Math.round((a.bis - a.von) / a.schritt) !== 10) m.push("nicht zehn Strichabstände");
+  if (p.verschoben && a.von === 0) m.push("verschobener Ausschnitt beginnt bei 0");
+  if (String(a.ziel).length > 7) m.push("passt nicht in die Tastatur");
+  return m;
 }
 
 function strahlZeichnen(a, onTipp) {
@@ -112,11 +131,12 @@ LS.spiel({
   einleitung: "Wo steht die Zahl auf dem Zahlenstrahl? Tipp auf die richtige Stelle — oder lies ab, wohin der Pfeil zeigt.",
   anzahl: 8,
   stufen: {
-    s1: "Zahlen bis 20 — jeder Strich ist eine Zahl.",
-    s2: "Bis 100 in Zehnerschritten, auch ablesen.",
-    s3: "Bis 1000 in Hunderterschritten.",
-    s4: "Bis zur Million: Wo liegt 72 000? (Lehrplan 4. Klasse)",
+    s1: "Bis 1000 in Hunderterschritten, auch ablesen.",
+    s2: "Bis 10 000 in Tausenderschritten.",
+    s3: "Bis zur Million: Wo liegt 72 000? (Lehrplan 4. Klasse)",
+    s4: "Ausschnitte der Million wie 300 000 bis 400 000.",
     s5: "Ausschnitte wie 4600 bis 4700 — genau schätzen!",
+    s6: "Ausschnitte bis 10 Millionen, ganz genau schätzen.",
   },
 
   aufgabe(ctx) {
@@ -137,7 +157,7 @@ LS.spiel({
           return;
         }
         const richtung = gewaehlt < a.ziel ? "weiter rechts" : "weiter links";
-        ctx.falsch(`Die Zahl liegt ${richtung}. Zähl die Striche: jeder Strich ist ${zahlText(a.schritt)}.`, loesungText);
+        ctx.falsch(STUFE[ctx.stufe].knapp ? `Die Zahl liegt ${richtung}.` : `Die Zahl liegt ${richtung}. Zähl die Striche: jeder Strich ist ${zahlText(a.schritt)}.`, loesungText);
         if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) { fertig = true; ok.disabled = true; svg.zeigeLoesung(a.ziel); }
       });
       ctx.flaeche.append(svg, el("div", { class: "hinweis-klein", text: `Ein Strich = ${zahlText(a.schritt)}` }), el("div", { class: "knopfzeile" }, ok));
@@ -156,7 +176,8 @@ LS.spiel({
             return;
           }
           anzeige.classList.add("falsch");
-          ctx.falsch(`${w < a.ziel ? "Zu klein" : "Zu gross"}. Von welchem beschrifteten Strich aus zählst du? Jeder Strich ist ${zahlText(a.schritt)}.`, `Der Pfeil zeigt etwa auf ${zahlText(a.ziel)}.`);
+          ctx.falsch(STUFE[ctx.stufe].knapp ? `${w < a.ziel ? "Zu klein" : "Zu gross"}.`
+            : `${w < a.ziel ? "Zu klein" : "Zu gross"}. Von welchem beschrifteten Strich aus zählst du? Jeder Strich ist ${zahlText(a.schritt)}.`, `Der Pfeil zeigt etwa auf ${zahlText(a.ziel)}.`);
           if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
         },
       });

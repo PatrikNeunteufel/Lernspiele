@@ -62,24 +62,26 @@ const ARTEN = {
     const andere = mische(WOERTER.filter(w => w.silben.length !== anzahl)).slice(0, 3);
     return { art: "welchesWort", anzahl, w: ziel, optionen: mische([ziel, ...andere]), richtig: ziel };
   },
-  trennung() {
-    const w = waehle(mitSilben(2, 5));
+  trennung(min = 2, max = 5) {
+    const w = waehle(mitSilben(min, max));
     const richtig = w.silben.join("-");
     const falsche = new Set();
     for (let i = 0; i < 30 && falsche.size < 2; i++) { const f = verschoben(w.silben); if (f && f.join("-") !== richtig) falsche.add(f.join("-")); }
     return { art: "trennung", w, optionen: mische([richtig, ...falsche]), richtig };
   },
-  ordnen() {
-    return { art: "ordnen", w: waehle(mitSilben(3, 5)) };
+  ordnen(min = 3, max = 5) {
+    return { art: "ordnen", w: waehle(mitSilben(min, max)) };
   },
 };
 
+// Basisklasse 1: Stufe 1 Kindergarten, 2–4 1. Klasse, 5 2. Klasse, 6 Endgegner.
 const STUFE = {
   s1: () => ARTEN.zaehlen(1, 2, 3),
-  s2: () => waehle([() => ARTEN.zaehlen(1, 3, 4), () => ARTEN.welchesWort(waehle([1, 2, 3]))])(),
-  s3: () => waehle([() => ARTEN.zaehlen(1, 5, 5), () => ARTEN.welchesWort(waehle([2, 3, 4])), ARTEN.trennung])(),
-  s4: () => waehle([ARTEN.trennung, () => ARTEN.welchesWort(waehle([3, 4, 5]))])(),
-  s5: () => waehle([ARTEN.ordnen, ARTEN.trennung])(),
+  s2: () => ARTEN.zaehlen(1, 3, 4),
+  s3: () => waehle([() => ARTEN.zaehlen(1, 4, 5), () => ARTEN.welchesWort(waehle([2, 3, 4]))])(),
+  s4: () => waehle([() => ARTEN.zaehlen(2, 5, 5), () => ARTEN.trennung(2, 5)])(),
+  s5: () => waehle([() => ARTEN.trennung(2, 5), () => ARTEN.ordnen(3, 5)])(),
+  s6: () => waehle([() => ARTEN.trennung(4, 5), () => ARTEN.ordnen(4, 5)])(),
 };
 
 function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
@@ -108,10 +110,11 @@ LS.spiel({
   anzahl: 10,
   stufen: {
     s1: "Kurze Wörter: Wie oft klatschst du? Hund, Kat-ze.",
-    s2: "Bis drei Silben — und welches Bild hat so viele Silben?",
-    s3: "Bis fünf Silben und die richtigen Silbenbögen finden.",
-    s4: "Wo sind die Silbenbögen richtig? Lange Wörter.",
-    s5: "Silben in die richtige Reihenfolge bringen.",
+    s2: "Bis drei Silben klatschen: Ba-na-ne.",
+    s3: "Bis vier Silben — und welches Bild hat so viele Silben?",
+    s4: "Bis fünf Silben und die richtigen Silbenbögen finden.",
+    s5: "Silbenbögen finden und Silben in die richtige Reihenfolge bringen.",
+    s6: "Endgegner: lange Wörter ordnen und trennen — mit weniger Hilfe.",
   },
 
   aufgabe(ctx) {
@@ -155,7 +158,9 @@ LS.spiel({
       // Gleiche Silben (Pa-pa-gei) dürfen in beliebiger Reihenfolge getippt werden.
       LS.reihenfolge(ctx, {
         reihe: w.silben, breite: 110, ablage: s => s,
-        hinweis: (s, erwartet) => `Sprich das Wort: ${w.wort}. Welche Silbe hörst du jetzt? Sie beginnt mit «${erwartet[0]}».`,
+        // Königsstufe: knappere Hilfe ohne Anfangsbuchstaben der nächsten Silbe.
+        hinweis: (s, erwartet) => ctx.stufe === "s6" ? `Sprich das Wort langsam: ${w.wort}. Welche Silbe hörst du jetzt?`
+          : `Sprich das Wort: ${w.wort}. Welche Silbe hörst du jetzt? Sie beginnt mit «${erwartet[0]}».`,
         loesung, lob: `${silbenText(w.silben)} — ${w.wort}! 👏`,
       });
     }

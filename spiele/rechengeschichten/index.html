@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rechengeschichten</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .geschichte { background: #fff; border: 3px solid var(--rand); border-radius: 18px; padding: 14px 18px; margin: 4px auto 14px; max-width: 640px; font-size: clamp(19px, 4.2vw, 25px); font-weight: 700; line-height: 1.5; text-align: center; }
+  .bilder { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px; font-size: clamp(34px, 8vw, 46px); margin: 6px 0 12px; }
+  .bilder .weg { opacity: .35; text-decoration: line-through; }
+  .bilder .plus { font-size: 30px; font-weight: 900; margin: 0 8px; color: var(--text-leise); }
+  .wahl-knopf { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📖 Rechengeschichten</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="geschichten.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.C.2: b (Grundanspruch 1. Zyklus) zu Sachsituationen, Rechengeschichten und Bildern
+// Grundoperationen notieren und lösen, wesentliche und unwesentliche Angaben erkennen; c mit
+// Platzhaltern bzw. Umkehroperationen. MA.3.C.3.b/c/d: Rechnungen eine Bedeutung geben.
+// Die Geschichten stehen in geschichten.js.
+
+const { zufall, waehle, mische, el, zahlText } = LS;
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+// Zahlenraum je Stufe (alle Zahlen der Geschichte und das Ergebnis)
+const RAUM = { s1: 10, s2: 20, s3: 100, s4: 100, s5: 100, s6: 1000 };
+
+/** Ausdruck wie „a · b + c“ mit den Werten ausrechnen (· und : vor + und −). */
+function rechne(ausdruck, werte) {
+  const t = ausdruck.split(" ").map(x => (x in werte ? werte[x] : x));
+  for (let i = 1; i < t.length; i += 2) {
+    if (t[i] === "·" || t[i] === ":") {
+      const r = t[i] === "·" ? t[i - 1] * t[i + 1] : t[i - 1] / t[i + 1];
+      t.splice(i - 1, 3, r);
+      i -= 2;
+    }
+  }
+  let r = Number(t[0]);
+  for (let i = 1; i < t.length; i += 2) r = t[i] === "+" ? r + Number(t[i + 1]) : r - Number(t[i + 1]);
+  return r;
+}
+
+/** Rechnung mit eingesetzten Zahlen: „7 + ? = 12“. */
+const einsetzen = (rechnung, werte) => rechnung.split(" ").map(x => (x === "_" ? "?" : x in werte ? zahlText(werte[x]) : x)).join(" ");
+const geschichteText = (text, werte) => text.replace(/\{(\w)\}/g, (_, k) => zahlText(werte[k]));
+
+/**
+ * Zahlen ziehen, bis die Aufgabe eindeutig ist: Bei gleichen Zahlen ergibt ein Ablenker wie „a + a“
+ * dasselbe wie „a + b“, und 4 − 2 = 4 : 2.
+ */
+function aufgabeErzeugen(stufe) {
+  const n = STUFE_NR[stufe];
+  const liste = GESCHICHTEN.filter(x => x.stufe === n);
+  const start = zufall(0, liste.length - 1);
+  let a = null;
+  // Begrenzte Versuche, nach je 50 die nächste Geschichte: endet sicher.
+  for (let v = 0; v < 5000; v++) {
+    const g = liste[(start + Math.floor(v / 50)) % liste.length];
+    const werte = {};
+    for (const [k, [min, max]] of Object.entries(g.zahlen)) werte[k] = zufall(min, max);
+    for (const [k, ausdruck] of Object.entries(g.abgeleitet || {})) werte[k] = rechne(ausdruck, werte);
+    const ergebnis = rechne(g.ergebnis, werte);
+    a = g.richtig ? { art: "waehlen", g, werte, ergebnis, optionen: mische([g.richtig, ...g.falsch]) } : { art: "rechnen", g, werte, ergebnis };
+    if (!maengel(a, stufe).length) return a;
+  }
+  return a;
+}
+
+/** Mängel einer Aufgabe — auch für tools/pruefe_spiele.js. */
+const pruefeAufgabe = (a, stufe) => maengel(a, stufe);
+function maengel(a, stufe) {
+  const m = [];
+  if (a.g.stufe !== STUFE_NR[stufe]) m.push("Geschichte aus einer anderen Stufe");
+  if (!Number.isInteger(a.ergebnis) || a.ergebnis <= 0) m.push(`Ergebnis ${a.ergebnis} keine natürliche Zahl`);
+  if (Object.values(a.werte).some(w => !Number.isInteger(w) || w <= 0)) m.push("Zahl in der Geschichte unpassend");
+  // Zahlenraum: gezeigte Zahlen und Ergebnis
+  const gezeigt = [...a.g.text.matchAll(/\{(\w)\}/g)].map(x => a.werte[x[1]]);
+  if ([...gezeigt, a.ergebnis].some(w => w > RAUM[stufe])) m.push("ausserhalb des Zahlenraums");
+  // Die unwichtige Zahl darf keiner anderen gezeigten Zahl gleichen, sonst ist nicht klar, welche wegfällt.
+  if (a.g.unwichtig) {
+    const u = a.werte[a.g.unwichtig];
+    const andere = [...a.g.text.matchAll(/\{(\w)\}/g)].filter(x => x[1] !== a.g.unwichtig).map(x => a.werte[x[1]]);
+    if (andere.includes(u)) m.push("unwichtige Zahl gleicht einer gebrauchten");
+  }
+  if (a.art === "waehlen") {
+    const texte = a.optionen.map(o => einsetzen(o, a.werte));
+    if (new Set(texte).size !== texte.length) m.push("zwei Rechnungen sehen gleich aus");
+    // Ohne Platzhalter: nur die richtige Rechnung ergibt das Ergebnis
+    for (const o of a.optionen) {
+      if (o.includes("_")) continue;
+      const passt = rechne(o, a.werte) === a.ergebnis;
+      if (passt !== (o === a.g.richtig)) m.push(`«${einsetzen(o, a.werte)}» ${passt ? "ergibt auch das Ergebnis" : "ergibt nicht das Ergebnis"}`);
+    }
+    // Mit Platzhalter: nur in der richtigen Gleichung macht das Ergebnis beide Seiten gleich
+    for (const o of a.optionen.filter(x => x.includes("="))) {
+      const [links, rechts] = o.split(" = ");
+      const mit = { ...a.werte, _: a.ergebnis };
+      const stimmt = rechne(links, mit) === rechne(rechts, mit);
+      if (stimmt !== (o === a.g.richtig)) m.push(`Gleichung «${o}» ${stimmt ? "stimmt auch" : "stimmt nicht"}`);
+    }
+  }
+  return m;
+}
+
+LS.spiel({
+  id: "rechengeschichten",
+  einleitung: "In jeder Geschichte steckt eine Rechnung. Findest du sie?",
+  anzahl: 8,
+  stufen: {
+    s1: "Bildgeschichten bis 10: dazu oder weg?",
+    s2: "Kurze Geschichten bis 20.",
+    s3: "Geschichten bis 100, auch mit mal.",
+    s4: "Was fehlt noch? 28 + ? = 50",
+    s5: "Gerecht verteilen — und ? · 6 = 30.",
+    s6: "Ausrechnen — und eine Zahl braucht man gar nicht.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const { g, werte } = a;
+    if (g.bild) {
+      // Stufe 1: Bilder zeigen, was passiert
+      const bilder = el("div", { class: "bilder", "aria-hidden": "true" });
+      if (g.art === "dazu") {
+        bilder.append(...Array.from({ length: werte.a }, () => el("span", { text: g.bild })), el("span", { class: "plus", text: "+" }), ...Array.from({ length: werte.b }, () => el("span", { text: g.bild })));
+      } else {
+        bilder.append(...Array.from({ length: werte.a }, (_, i) => el("span", { class: i >= werte.a - werte.b ? "weg" : "", text: g.bild })));
+      }
+      ctx.flaeche.append(bilder);
+    }
+    ctx.flaeche.append(el("div", { class: "geschichte", text: geschichteText(g.text, werte) }));
+
+    if (a.art === "waehlen") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Rechnung passt?" }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: g.richtig, breite: 150,
+        inhalt: o => einsetzen(o, werte),
+        hinweis: o => (o.includes("·") ? "Mal passt, wenn etwas mehrmals gleich oft vorkommt (je …)." : o.includes("−") ? "Minus passt, wenn etwas weggeht oder fehlt." : o.includes(":") ? "Geteilt passt, wenn man gerecht verteilt." : "Plus passt, wenn etwas dazukommt."),
+        loesung: `${einsetzen(g.richtig, werte)} — die Lösung ist ${zahlText(a.ergebnis)}.`,
+        lob: `Genau: ${einsetzen(g.richtig, werte)}. Die Lösung ist ${zahlText(a.ergebnis)}.`,
+      });
+      if (ctx.nr === 0) ctx.sag("Lies die Geschichte genau. Kommt etwas dazu oder geht etwas weg?");
+      return;
+    }
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "Rechne aus." }));
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergebnis" });
+    ctx.flaeche.append(anzeige);
+    let fehlversuche = 0;
+    const tasten = LS.tastatur({
+      anzeige,
+      maxStellen: 4,
+      onOk(w) {
+        if (w === a.ergebnis) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`${einsetzen(g.rechnung, werte)} = ${zahlText(a.ergebnis)} 🎉`); return; }
+        anzeige.classList.add("falsch");
+        // Erst eine knappe Frage, ab dem zweiten Fehlversuch der Hinweis auf die unwichtige Zahl.
+        fehlversuche++;
+        ctx.falsch(fehlversuche < 2 ? "Nicht ganz. Welche Zahlen brauchst du wirklich?"
+          : `Die ${zahlText(werte[g.unwichtig])} brauchst du zum Rechnen nicht.`,
+          `${einsetzen(g.rechnung, werte)} = ${zahlText(a.ergebnis)}`);
+        if (ctx.vorbei()) tasten.gesperrt = true;
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag("Achtung: Nicht jede Zahl braucht man zum Rechnen!");
+  },
+});
+</script>
+</body>
+</html>

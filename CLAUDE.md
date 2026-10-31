@@ -13,17 +13,21 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
   Schreibweise (ss statt ß) in allem, was Kinder sehen.
 - **Ein Lernziel je Spiel** (Ausnahme: Ziffernkarten üben G4 und E2 in verschiedenen Stufen),
   Zuordnung Lernziel → Spiel und Stufen in `spiele/gemeinsam/katalog.js` und `docs/lernziele/`.
-- **Fünf Stufen je Spiel** auf einer gemeinsamen Skala (`LS.SKALA` in `spiele/gemeinsam/spiel.js`):
-  1 Einsteiger (ab 2. Klasse, bis 100) · 2 Entdecker (bis 1000) · 3 Grundanforderung und
-  4 Erweitert (wie das Lernzielblatt der 4. Klasse) · 5 Profi (Herausforderung). Die Stufe wird
-  per `?stufe=s1 … s5` direkt angesprungen; die Klasse im Profil schlägt eine Stufe vor.
+- **Sechs Stufen je Spiel, bezogen auf seine Basisklasse** (Entscheid Patrik 2026-10-31): Jedes
+  Spiel ist für eine Basisklasse ausgelegt (Katalog, Feld `klasse`). Skala `LS.SKALA` in
+  `spiele/gemeinsam/spiel.js`: 1 Einstieg (eine Klasse tiefer) · 2 Üben (Basisklasse, leichter) ·
+  3 Klassenziel (Lernziel der Basisklasse) · 4 Knifflig (Basisklasse, schwerer) · 5 Nächste Klasse
+  (eine Klasse höher) · 6 Königsstufe (Endgegner, besonders herausfordernd). Die Beschriftung
+  „2. Klasse, leichter“ rechnet `LS.stufeFuer` aus der Basisklasse. Direkt anspringen mit
+  `?stufe=s1 … s6`; die Klasse im Profil schlägt je Spiel eine Stufe vor (gleiche Klasse → 3,
+  tiefer → 1, eine höher → 5, zwei höher → 6).
 - **Farben je Stelle wie Calcularis** (Vorgabe Patrik 2026-10-31): Einer rot, Zehner blau,
   Hunderter grün, ab den Tausendern wiederholt (T rot, ZT blau, HT grün, M rot). Sie stehen nur in
   `spiele/gemeinsam/stil.css` (`--st-M` … `--st-E`) und werden **nur für Stellen** benutzt;
   Spielkarten, Stufen und Titel nehmen die `--deko-*`-Farben, damit nichts mit einer Stelle
   verwechselt wird.
 - **Reihenfolge der Teile** (Bausteine, Rätselteile): geordnet = grösste Stelle links. Einstellbar
-  im Profil global und je Spiel („nach Stufe“ = Stufe 1–3 geordnet, 4–5 gemischt); Spiele lesen
+  im Profil global und je Spiel („nach Stufe“ = Stufe 1–3 geordnet, 4–6 gemischt); Spiele lesen
   `ctx.geordnet` und sind im Katalog mit `reihenfolge: true` markiert.
 - **Fehler sind nicht schlimm:** falsche Antwort → Hinweis und neuer Versuch, kein Punktabzug,
   kein Zeitdruck als Standard. Der Timer ist eine **zuschaltbare** Zusatzschwierigkeit (Zeit um =

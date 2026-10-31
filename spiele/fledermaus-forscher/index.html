@@ -34,10 +34,13 @@ const { waehle, mische, el } = LS;
 
 const AUSSAGEN = FLEDERMAUS_AUSSAGEN.map(([ab, text, stimmt, erklaerung]) => ({ ab, text, stimmt, erklaerung }));
 const FRAGEN = FLEDERMAUS_FRAGEN.map(([ab, frage, richtig, f1, f2, erklaerung]) => ({ ab, frage, richtig, falsch: [f1, f2], erklaerung }));
-const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5 };
+// Die Fakten tragen „ab Stufe“ 1–5 (fakten.js). Basisklasse 2: Stufe 1 = 1. Klasse, 2–4 = 2. Klasse,
+// 5 = 3. Klasse. Die Königsstufe (6) nimmt nur die schweren Inhalte (ab 4 und 5).
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+const SCHWER_AB = 4;
 
-/** Vor allem neue Inhalte dieser Stufe, dazu etwas aus der Stufe davor. */
-const passend = (liste, n) => liste.filter(x => x.ab === n || x.ab === n - 1);
+/** Vor allem neue Inhalte dieser Stufe, dazu etwas aus der Stufe davor; Königsstufe: alles Schwere. */
+const passend = (liste, n) => liste.filter(x => (n === 6 ? x.ab >= SCHWER_AB : x.ab === n || x.ab === n - 1));
 
 // In einer Runde jede Aussage und Frage höchstens einmal.
 let gebraucht = new Set();
@@ -68,6 +71,7 @@ const STUFE = {
   s3: () => waehle([() => ARTEN.aussage(3), () => ARTEN.frage(3)])(),
   s4: () => waehle([() => ARTEN.aussage(4), () => ARTEN.frage(4), ARTEN.jahr])(),
   s5: () => waehle([() => ARTEN.aussage(5), () => ARTEN.frage(5), ARTEN.anpassung, ARTEN.jahr])(),
+  s6: () => waehle([() => ARTEN.aussage(6), () => ARTEN.frage(6), ARTEN.anpassung, ARTEN.jahr])(),
 };
 
 function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
@@ -78,6 +82,9 @@ function pruefeAufgabe(a, stufe) {
   const n = STUFE_NR[stufe];
   if (a.art === "aussage" && a.a.ab > n) m.push("Aussage aus einer höheren Stufe");
   if (a.art === "frage" && (a.f.ab > n || new Set(a.optionen).size !== 3)) m.push("Frage zu schwer oder Auswahl doppelt");
+  if (n === 6 && (a.art === "aussage" ? a.a.ab : a.art === "frage" ? a.f.ab : SCHWER_AB) < SCHWER_AB) m.push("leichter Inhalt in der Königsstufe");
+  if (a.art === "jahr" && n < 4) m.push("Jahr der Fledermaus vor Stufe 4");
+  if (a.art === "anpassung" && n < 5) m.push("Merkmal/Nutzen vor Stufe 5");
   if (a.art === "anpassung" && FLEDERMAUS_ANPASSUNGEN.filter(x => a.optionen.includes(x[1]) && x[0] === a.merkmal).length !== 1) m.push("Merkmal passt zu keiner oder mehreren Antworten");
   return m;
 }
@@ -92,6 +99,7 @@ LS.spiel({
     s3: "Echo, Insekten und Winterschlaf.",
     s4: "Das Jahr einer Fledermaus und die Wochenstube.",
     s5: "Wozu helfen die grossen Ohren? Fledermäuse schützen.",
+    s6: "Endgegner: das Jahr ohne Jahreszeiten, Merkmale und schwere Fragen gemischt.",
   },
 
   aufgabe(ctx) {
@@ -122,9 +130,17 @@ LS.spiel({
       });
     } else if (a.art === "jahr") {
       kopf.append(el("div", { class: "aussage", text: "Das Jahr einer Fledermaus — fang beim Winter an." }));
+      // Königsstufe: Karten ohne Jahreszeit — man ordnet nach dem, was passiert.
+      const ohneZeit = ctx.stufe === "s6";
       LS.reihenfolge(ctx, {
-        reihe: a.reihe, breite: 220, ablage: s => s.split(":")[0],
-        hinweis: (_, erwartet) => `Was kommt nach dem Letzten? Denk an die Jahreszeiten: ${erwartet.split(":")[0]}.`,
+        reihe: a.reihe, breite: 220, ablage: s => s.split(": ")[0],
+        inhalt: s => (ohneZeit ? s.split(": ")[1] : s),
+        // Der Hinweis nennt nur, was schon liegt — nicht die nächste Karte.
+        hinweis: (_, erwartet) => {
+          const i = a.reihe.indexOf(erwartet);
+          return i === 0 ? "Fang beim Winter an: Was macht die Fledermaus, wenn es kalt ist?"
+            : `Was passiert nach «${a.reihe[i - 1].split(": ")[1]}»? Denk an die Jahreszeiten.`;
+        },
         loesung: a.reihe.join(" → "),
         lob: "Super! Danach beginnt wieder der Winterschlaf. ❄️",
       });

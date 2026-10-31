@@ -137,10 +137,14 @@ Regel im Spiel: Ein lang gesprochenes i schreibt man meistens ie (Biene). Ein ku
 | Licht | i | Liecht | 💡 | ☐ |
 | Mitte | i | Miette | 🎯 | ☐ |
 | Zimmer | i | Ziemmer | 🛏️ | ☐ |
-| Igel (Ausnahme, nur Stufe 5) | I | Iegel | 🦔 | ☐ |
-| Tiger (Ausnahme, nur Stufe 5) | i | Tieger | 🐯 | ☐ |
-| Kino (Ausnahme, nur Stufe 5) | i | Kieno | 🎬 | ☐ |
-| Krokodil (Ausnahme, nur Stufe 5) | i | Krokodiel | 🐊 | ☐ |
+| Igel (Ausnahme, Stufe 5–6) | I | Iegel | 🦔 | ☐ |
+| Tiger (Ausnahme, Stufe 5–6) | i | Tieger | 🐯 | ☐ |
+| Kino (Ausnahme, Stufe 5–6) | i | Kieno | 🎬 | ☐ |
+| Krokodil (Ausnahme, Stufe 5–6) | i | Krokodiel | 🐊 | ☐ |
+| Biber (Ausnahme, Stufe 5–6) | i | Bieber | 🦫 | ☐ |
+| Kaninchen (Ausnahme, Stufe 5–6) | i | Kanienchen | 🐇 | ☐ |
+| Maschine (Ausnahme, Stufe 5–6) | i | Maschiene | ⚙️ | ☐ |
+| Benzin (Ausnahme, Stufe 5–6) | i | Benzien | ⛽ | ☐ |
 
 ### ck / k und tz / z
 
@@ -240,6 +244,8 @@ Regel im Spiel: Nach einem kurzen Vokal folgt oft ein doppelter Konsonant (Ball,
 
 Die Sätze stehen hier richtig geschrieben. Das Spiel zeigt sie klein und ohne Schlusszeichen;
 der Wörter-Trenner zeigt sie in Grossbuchstaben ohne Lücken.
+
+Auch ein Punkt gilt als richtig (Aussage mit Nachdruck) bei: „Wir haben grossen Hunger!“, „Das macht mir grossen Spass!“, „Endlich ist der Winter da!“, „Wir haben Ferien!“ ☐
 
 ### Stufe 1 — nur Satzanfang und Punkt (keine Nomen)
 
@@ -526,11 +532,16 @@ Sprechsilben, wie man sie klatscht — nicht die Trennung am Zeilenende (E-le-fa
 | Taschenlampe | Ta-schen-lam-pe | 4 | 🔦 | ☐ |
 | Sonnenblume | Son-nen-blu-me | 4 | 🌻 | ☐ |
 | Krankenwagen | Kran-ken-wa-gen | 4 | 🚑 | ☐ |
+| Schokolade | Scho-ko-la-de | 4 | 🍫 | ☐ |
+| Kaffeetasse | Kaf-fee-tas-se | 4 | ☕ | ☐ |
+| Badeanzug | Ba-de-an-zug | 4 | 🩱 | ☐ |
+| Babyflasche | Ba-by-fla-sche | 4 | 🍼 | ☐ |
 | Marienkäfer | Ma-ri-en-kä-fer | 5 | 🐞 | ☐ |
 | Lokomotive | Lo-ko-mo-ti-ve | 5 | 🚂 | ☐ |
 | Wassermelone | Was-ser-me-lo-ne | 5 | 🍉 | ☐ |
 | Feuerwehrauto | Feu-er-wehr-au-to | 5 | 🚒 | ☐ |
 | Polizeiauto | Po-li-zei-au-to | 5 | 🚓 | ☐ |
+| Kartoffelsalat | Kar-tof-fel-sa-lat | 5 | 🥗 | ☐ |
 
 ## 6. Reim-Paare (Lehrplan SG D.5.C.1)
 
@@ -706,6 +717,7 @@ Ohne Bild = kein passendes Emoji; das Tier kommt erst ab Stufe 3 vor.
 | Graureiher |  | Vogel |  | Wildtier | Weiher | ☐ |
 | Höckerschwan | 🦢 | Vogel |  | Wildtier | Weiher | ☐ |
 | Steinadler | 🦅 | Vogel |  | Wildtier | Gebirge | ☐ |
+| Alpendohle | 🐦‍⬛ | Vogel |  | Wildtier | Gebirge | ☐ |
 | Feldlerche |  | Vogel |  | Wildtier | Wiese | ☐ |
 | Huhn | 🐔 | Vogel |  | Nutztier |  | ☐ |
 | Wellensittich | 🦜 | Vogel |  | Heimtier |  | ☐ |
@@ -760,8 +772,10 @@ Ohne Bild = kein passendes Emoji; das Tier kommt erst ab Stufe 3 vor.
 | Blütennektar → Nachtfalter → Fledermaus | ☐ |
 | Gras → Reh → Luchs | ☐ |
 | Gräser → Murmeltier → Steinadler | ☐ |
+| Löwenzahn → Feldhase → Fuchs | ☐ |
+| Körner → Feldmaus → Waldkauz | ☐ |
 
-Artikel für „Was frisst …?“: die Heuschrecke, der Grasfrosch, der Graureiher, die Feldmaus, der Fuchs, die Raupe, die Kohlmeise, der Sperber, die Schnecke, der Igel, die Mückenlarve, die Forelle, das Eichhörnchen, der Baummarder, der Regenwurm, die Amsel, der Nachtfalter, die Fledermaus, das Reh, der Luchs, das Murmeltier, der Steinadler ☐
+Artikel für „Was frisst …?“: die Heuschrecke, der Grasfrosch, der Graureiher, die Feldmaus, der Fuchs, die Raupe, die Kohlmeise, der Sperber, die Schnecke, der Igel, die Mückenlarve, die Forelle, das Eichhörnchen, der Baummarder, der Regenwurm, die Amsel, der Nachtfalter, die Fledermaus, das Reh, der Luchs, das Murmeltier, der Steinadler, der Feldhase, der Waldkauz ☐
 
 ## 9. Fledermaus-Forscher (Lehrplan SG NMG.2.3, NMG.2.4)
 
@@ -822,3 +836,696 @@ Artikel für „Was frisst …?“: die Heuschrecke, der Grasfrosch, der Graurei
 | Winterschlaf | den Winter ohne Insekten überstehen | ☐ |
 | spitze Zähne | Käfer mit hartem Panzer knacken | ☐ |
 | Fell | warm bleiben | ☐ |
+
+## 10. Anlaut-Angel (Lehrplan SG D.1.A.1, D.4.A.1)
+
+Nur Wörter, bei denen man den Buchstaben auch hört (kein V wie in Vogel, keine Endlaute b/d/g, kein -er).
+
+### Anlaut = erster Buchstabe
+
+| Wort | Bild | ☐ |
+|---|---|---|
+| Affe | 🐒 | ☐ |
+| Apfel | 🍎 | ☐ |
+| Ameise | 🐜 | ☐ |
+| Ananas | 🍍 | ☐ |
+| Ball | ⚽ | ☐ |
+| Banane | 🍌 | ☐ |
+| Biene | 🐝 | ☐ |
+| Baum | 🌳 | ☐ |
+| Bus | 🚌 | ☐ |
+| Brot | 🍞 | ☐ |
+| Dose | 🥫 | ☐ |
+| Delfin | 🐬 | ☐ |
+| Drache | 🐉 | ☐ |
+| Ente | 🦆 | ☐ |
+| Esel | 🫏 | ☐ |
+| Elefant | 🐘 | ☐ |
+| Fisch | 🐟 | ☐ |
+| Fuchs | 🦊 | ☐ |
+| Feder | 🪶 | ☐ |
+| Frosch | 🐸 | ☐ |
+| Gabel | 🍴 | ☐ |
+| Giraffe | 🦒 | ☐ |
+| Gurke | 🥒 | ☐ |
+| Geschenk | 🎁 | ☐ |
+| Hund | 🐕 | ☐ |
+| Haus | 🏠 | ☐ |
+| Hut | 🎩 | ☐ |
+| Hase | 🐇 | ☐ |
+| Herz | ❤️ | ☐ |
+| Igel | 🦔 | ☐ |
+| Insel | 🏝️ | ☐ |
+| Katze | 🐈 | ☐ |
+| Kuh | 🐄 | ☐ |
+| Kerze | 🕯️ | ☐ |
+| Krone | 👑 | ☐ |
+| Kamel | 🐫 | ☐ |
+| Löwe | 🦁 | ☐ |
+| Leiter | 🪜 | ☐ |
+| Lama | 🦙 | ☐ |
+| Löffel | 🥄 | ☐ |
+| Maus | 🐭 | ☐ |
+| Mond | 🌙 | ☐ |
+| Melone | 🍈 | ☐ |
+| Nase | 👃 | ☐ |
+| Nuss | 🥜 | ☐ |
+| Nest | 🪺 | ☐ |
+| Ohr | 👂 | ☐ |
+| Orange | 🍊 | ☐ |
+| Oktopus | 🐙 | ☐ |
+| Pilz | 🍄 | ☐ |
+| Pinguin | 🐧 | ☐ |
+| Pizza | 🍕 | ☐ |
+| Palme | 🌴 | ☐ |
+| Rose | 🌹 | ☐ |
+| Ring | 💍 | ☐ |
+| Rakete | 🚀 | ☐ |
+| Sonne | ☀️ | ☐ |
+| Sofa | 🛋️ | ☐ |
+| Socke | 🧦 | ☐ |
+| Salat | 🥗 | ☐ |
+| Tomate | 🍅 | ☐ |
+| Tiger | 🐅 | ☐ |
+| Tasse | ☕ | ☐ |
+| Torte | 🎂 | ☐ |
+| Uhr | ⌚ | ☐ |
+| Ufo | 🛸 | ☐ |
+| Wal | 🐋 | ☐ |
+| Wolke | ☁️ | ☐ |
+| Wurm | 🪱 | ☐ |
+| Zebra | 🦓 | ☐ |
+| Zahn | 🦷 | ☐ |
+| Zug | 🚆 | ☐ |
+| Zitrone | 🍋 | ☐ |
+
+### Endlaut = letzter Buchstabe
+
+| Wort | Bild | Endlaut | ☐ |
+|---|---|---|---|
+| Ball | ⚽ | l | ☐ |
+| Igel | 🦔 | l | ☐ |
+| Esel | 🫏 | l | ☐ |
+| Apfel | 🍎 | l | ☐ |
+| Kamel | 🐫 | l | ☐ |
+| Wal | 🐋 | l | ☐ |
+| Baum | 🌳 | m | ☐ |
+| Wurm | 🪱 | m | ☐ |
+| Zahn | 🦷 | n | ☐ |
+| Kran | 🏗️ | n | ☐ |
+| Maus | 🐭 | s | ☐ |
+| Bus | 🚌 | s | ☐ |
+| Eis | 🍦 | s | ☐ |
+| Haus | 🏠 | s | ☐ |
+| Nuss | 🥜 | s | ☐ |
+| Brot | 🍞 | t | ☐ |
+| Hut | 🎩 | t | ☐ |
+| Nest | 🪺 | t | ☐ |
+| Salat | 🥗 | t | ☐ |
+| Boot | ⛵ | t | ☐ |
+| Schaf | 🐑 | f | ☐ |
+| Auto | 🚗 | o | ☐ |
+| Ufo | 🛸 | o | ☐ |
+| Sofa | 🛋️ | a | ☐ |
+| Zebra | 🦓 | a | ☐ |
+| Lama | 🦙 | a | ☐ |
+| Pizza | 🍕 | a | ☐ |
+| Kiwi | 🥝 | i | ☐ |
+| Taxi | 🚕 | i | ☐ |
+| Känguru | 🦘 | u | ☐ |
+| Herz | ❤️ | z | ☐ |
+| Pilz | 🍄 | z | ☐ |
+
+### Selbstlaut in der Mitte
+
+| Wort | Bild | ☐ |
+|---|---|---|
+| Hut | 🎩 | ☐ |
+| Bus | 🚌 | ☐ |
+| Nuss | 🥜 | ☐ |
+| Wurm | 🪱 | ☐ |
+| Zug | 🚆 | ☐ |
+| Mond | 🌙 | ☐ |
+| Topf | 🍲 | ☐ |
+| Boot | ⛵ | ☐ |
+| Ball | ⚽ | ☐ |
+| Wal | 🐋 | ☐ |
+| Zahn | 🦷 | ☐ |
+| Schaf | 🐑 | ☐ |
+| Hand | ✋ | ☐ |
+| Fisch | 🐟 | ☐ |
+| Pilz | 🍄 | ☐ |
+| Ring | 💍 | ☐ |
+| Bett | 🛏️ | ☐ |
+| Nest | 🪺 | ☐ |
+| Herz | ❤️ | ☐ |
+| Stern | ⭐ | ☐ |
+
+### Lautgetreue Wörter (fehlender Buchstabe)
+
+| Wort | Bild | ☐ |
+|---|---|---|
+| Nase | 👃 | ☐ |
+| Hose | 👖 | ☐ |
+| Rose | 🌹 | ☐ |
+| Dose | 🥫 | ☐ |
+| Sofa | 🛋️ | ☐ |
+| Lama | 🦙 | ☐ |
+| Hut | 🎩 | ☐ |
+| Wal | 🐋 | ☐ |
+| Igel | 🦔 | ☐ |
+| Banane | 🍌 | ☐ |
+| Tomate | 🍅 | ☐ |
+| Kamel | 🐫 | ☐ |
+| Rakete | 🚀 | ☐ |
+| Esel | 🫏 | ☐ |
+| Salat | 🥗 | ☐ |
+| Melone | 🍈 | ☐ |
+| Zebra | 🦓 | ☐ |
+| Pilz | 🍄 | ☐ |
+
+## 11. Buchstaben-Zwillinge und Blitzlesen (Lehrplan SG D.2.A.1)
+
+### Ähnliche Wörter (das erste passt zum Bild)
+
+| Wort mit Bild | Ablenker | ☐ |
+|---|---|---|
+| 🐕 Hund | Hand, Mund | ☐ |
+| 🐭 Maus | Haus, Mais | ☐ |
+| 🐟 Fisch | Tisch, Frisch | ☐ |
+| 👖 Hose | Hase, Rose | ☐ |
+| 👃 Nase | Vase, Hase | ☐ |
+| 🦵 Bein | Wein, Stein | ☐ |
+| ⚽ Ball | Wall, Fall | ☐ |
+| 🌙 Mond | Mund, Hund | ☐ |
+| 🐄 Kuh | Schuh, Kur | ☐ |
+| 🎩 Hut | Mut, Gut | ☐ |
+| 🚌 Bus | Bis, Mus | ☐ |
+| 🦷 Zahn | Hahn, Kahn | ☐ |
+
+### Leicht verwechselbare Buchstaben
+
+| Gruppe | ☐ |
+|---|---|
+| b d p q | ☐ |
+| m n u | ☐ |
+| i j l | ☐ |
+| f t | ☐ |
+| h n | ☐ |
+| a o e | ☐ |
+
+### Wortgruppen in Blitzlesen Stufe 5
+
+| Einzahl | Mehrzahl | ein/eine | Bild | ☐ |
+|---|---|---|---|---|
+| Apfel | Äpfel | ein | 🍎 | ☐ |
+| Birne | Birnen | eine | 🍐 | ☐ |
+| Stern | Sterne | ein | ⭐ | ☐ |
+| Ball | Bälle | ein | ⚽ | ☐ |
+| Fisch | Fische | ein | 🐟 | ☐ |
+| Herz | Herzen | ein | ❤️ | ☐ |
+| Blume | Blumen | eine | 🌸 | ☐ |
+
+## 12. Nomen-Puzzle (Lehrplan SG D.5.D.1)
+
+Das Grundwort (letzter Teil) bestimmt den Artikel.
+
+| Teile | zusammengesetzt | falsche Formen | ☐ |
+|---|---|---|---|
+| das Haus + die Tür | die Haustür |  | ☐ |
+| der Fuss + der Ball | der Fussball |  | ☐ |
+| der Schnee + der Mann | der Schneemann |  | ☐ |
+| der Regen + der Schirm | der Regenschirm |  | ☐ |
+| der Apfel + der Baum | der Apfelbaum |  | ☐ |
+| der Zahn + die Bürste | die Zahnbürste |  | ☐ |
+| das Feuer + das Holz | das Feuerholz |  | ☐ |
+| der Mond + das Licht | das Mondlicht |  | ☐ |
+| die Hand + der Schuh | der Handschuh |  | ☐ |
+| das Eis + der Bär | der Eisbär |  | ☐ |
+| die Nacht + das Hemd | das Nachthemd |  | ☐ |
+| das Wasser + die Flasche | die Wasserflasche |  | ☐ |
+| der Sand + die Burg | die Sandburg |  | ☐ |
+| der Vogel + das Nest | das Vogelnest |  | ☐ |
+| die Sonne + die Blume | die Sonnenblume | Sonneblume, Sonnesblume | ☐ |
+| der Hund + die Hütte | die Hundehütte | Hundhütte, Hundshütte | ☐ |
+| der Geburtstag + der Kuchen | der Geburtstagskuchen | Geburtstagkuchen, Geburtstagekuchen | ☐ |
+| die Schule + die Tasche | die Schultasche | Schuletasche, Schulestasche | ☐ |
+| der Fuss + der Ball + der Schuh | der Fussballschuh |  | ☐ |
+| das Haus + die Tür + der Schlüssel | der Haustürschlüssel |  | ☐ |
+| die Sonne + die Blume + der Kern | der Sonnenblumenkern | Sonneblumekern, Sonnenblumekern | ☐ |
+
+## 13. Lese-Detektiv (Lehrplan SG D.2.B.1)
+
+Die Namen in den Texten sind erfunden.
+
+| Stufe | Titel | Text | Frage | richtig | falsch | ☐ |
+|---|---|---|---|---|---|---|
+| 1 |  | Der Apfel ist grün. | Welches Bild passt? | 🍏 | 🍎; 🍐 | ☐ |
+| 1 |  | Im Glas ist Milch. | Welches Bild passt? | 🥛 | 🧃; ☕ | ☐ |
+| 1 |  | Die Sonne scheint. | Welches Bild passt? | ☀️ | 🌧️; ❄️ | ☐ |
+| 1 |  | Es schneit. | Welches Bild passt? | ❄️ | ☀️; 🌧️ | ☐ |
+| 1 |  | Drei Fische schwimmen. | Welches Bild passt? | 🐟🐟🐟 | 🐟🐟; 🐦🐦🐦 | ☐ |
+| 1 |  | Der Hund hat einen Knochen. | Welches Bild passt? | 🐕 🦴 | 🐈 🦴; 🐕 ⚽ | ☐ |
+| 1 |  | Das Taxi ist gelb. | Welches Bild passt? | 🚕 | 🚗; 🚙 | ☐ |
+| 1 |  | Zwei Katzen spielen. | Welches Bild passt? | 🐈🐈 | 🐈🐈🐈; 🐕🐕 | ☐ |
+| 2 |  | Mia hat einen Hund. Er heisst Bello. Bello spielt gern mit dem Ball. | Wie heisst der Hund? | Bello | Mia; Ball | ☐ |
+| 2 |  | Tom isst einen Apfel. Der Apfel ist grün und süss. | Welche Farbe hat der Apfel? | grün | rot; gelb | ☐ |
+| 2 |  | Heute regnet es. Lena nimmt den Regenschirm mit. | Was nimmt Lena mit? | den Regenschirm | die Sonnenbrille; den Ball | ☐ |
+| 2 |  | Im Garten steht ein Baum. Auf dem Baum sitzt eine Katze. | Wo sitzt die Katze? | auf dem Baum | im Haus; unter dem Tisch | ☐ |
+| 2 |  | Ben hat Geburtstag. Er wird heute acht Jahre alt. | Wie alt wird Ben? | acht Jahre | sieben Jahre; neun Jahre | ☐ |
+| 3 | Der Igel | Der Igel hat viele Stacheln. Wenn er Angst hat, rollt er sich zu einer Kugel zusammen. In der Nacht sucht er Käfer, Würmer und Schnecken. Im Winter hält er Winterschlaf. | Was macht der Igel, wenn er Angst hat? | Er rollt sich zu einer Kugel zusammen. | Er klettert auf einen Baum.; Er springt ins Wasser. | ☐ |
+| 3 | Die Biene | Bienen fliegen von Blüte zu Blüte. Dort sammeln sie Nektar. Aus dem Nektar machen sie Honig. Bienen leben in einem Bienenstock. | Was machen Bienen aus dem Nektar? | Honig | Milch; Käse | ☐ |
+| 3 | Das Eichhörnchen | Das Eichhörnchen lebt im Wald. Im Herbst sammelt es Nüsse und versteckt sie im Boden. Im Winter sucht es seine Vorräte. Manche Nüsse findet es nicht mehr. Aus ihnen wachsen neue Bäume. | Was wächst aus den vergessenen Nüssen? | neue Bäume | Pilze; Blumen | ☐ |
+| 3 | Schneeflocken | Wenn es sehr kalt ist, fällt Schnee. Schneeflocken sind aus Eis. Jede Flocke hat sechs Spitzen. | Wie viele Spitzen hat eine Schneeflocke? | sechs | vier; acht | ☐ |
+| 4 |  | Lukas zieht seine Stiefel und die dicke Jacke an. Er nimmt die Schaufel und geht hinaus. Bald steht vor dem Haus ein grosser Schneemann. | Welche Jahreszeit ist es? | Winter | Sommer; Frühling | ☐ |
+| 4 |  | Anna packt Badetuch, Sonnencreme und Badekleid ein. Dann fährt sie mit dem Velo zum See. | Was will Anna am See machen? | baden | Schlittschuh laufen; Pilze sammeln | ☐ |
+| 4 |  | Der Bäcker steht jeden Morgen um drei Uhr auf. Wenn die anderen Leute aufwachen, sind Brot und Gipfeli schon fertig. | Warum steht der Bäcker so früh auf? | Damit Brot und Gipfeli am Morgen fertig sind. | Weil er nicht schlafen kann.; Weil er in die Schule muss. | ☐ |
+| 4 |  | Im Herbst werden die Blätter gelb, rot und braun. Dann fallen sie zu Boden. Im Frühling wachsen an den Ästen neue Blätter. | Was passiert im Herbst mit den Blättern? | Sie werden bunt und fallen herunter. | Sie werden grün.; Sie wachsen neu. | ☐ |
+| 5 | Der Rhein | Der Rhein ist einer der grössten Flüsse Europas. Er entspringt in den Alpen im Kanton Graubünden. Bei Schaffhausen stürzt er über den Rheinfall. In Basel verlässt er die Schweiz und fliesst bis in die Nordsee. | Was stimmt? | Der Rhein fliesst bis in die Nordsee. | Der Rhein entspringt in Basel.; Der Rheinfall ist in Genf. | ☐ |
+| 5 | Der Steinbock | Der Steinbock lebt in den Bergen und kann sehr gut klettern. Die Männchen haben lange, gebogene Hörner. Vor gut hundert Jahren gab es in der Schweiz keine Steinböcke mehr. Heute leben wieder viele in den Alpen. | Was stimmt? | Heute leben wieder viele Steinböcke in den Alpen. | Steinböcke leben am Meer.; Steinböcke können nicht klettern. | ☐ |
+| 5 | Der Mond | Der Mond kreist um die Erde. Er leuchtet nicht selbst, sondern wird von der Sonne beschienen. Für eine Runde um die Erde braucht er ungefähr einen Monat. | Was stimmt? | Der Mond wird von der Sonne beschienen. | Der Mond leuchtet selbst wie eine Lampe.; Der Mond braucht einen Tag für eine Runde um die Erde. | ☐ |
+| 5 | Die Kartoffel | Die Kartoffel wächst unter der Erde. Im Frühling legt man Kartoffeln in den Boden. Aus jeder wächst eine Pflanze mit vielen neuen Knollen. Im Spätsommer und Herbst werden sie geerntet. | Was stimmt? | Kartoffeln wachsen unter der Erde. | Kartoffeln wachsen an Bäumen.; Man erntet Kartoffeln im Winter. | ☐ |
+| 6 | Der Biber | Der Biber lebt an Bächen und Flüssen. Mit seinen scharfen Zähnen kann er sogar Bäume fällen. Er wohnt in einer Biberburg aus Ästen und Schlamm. Der Eingang zur Burg muss immer unter Wasser liegen. Ist ein Bach zu wenig tief, baut der Biber einen Damm aus Ästen, Steinen und Schlamm. Hinter dem Damm staut sich das Wasser. | Warum baut der Biber einen Damm? | Damit das Wasser tief genug für den Eingang seiner Burg ist. | Damit er trockenen Fusses über den Bach gehen kann.; Damit die Fische nicht wegschwimmen können. | ☐ |
+| 6 | Schwalbe und Meise | Die Schwalbe frisst nur Insekten. Sie fängt sie im Flug. Im Herbst wird es bei uns kalt, und es fliegen kaum noch Insekten herum. Dann fliegt die Schwalbe weit nach Süden, bis nach Afrika. Die Meise frisst im Sommer auch Insekten. Im Winter frisst sie Samen und Körner. Sie bleibt das ganze Jahr bei uns. | Warum kann die Meise im Winter bei uns bleiben? | Sie findet auch im Winter Futter: Samen und Körner. | Sie friert nie, weil sie so klein ist.; Sie kann nicht so weit fliegen wie die Schwalbe. | ☐ |
+| 6 | Das Murmeltier | Murmeltiere leben hoch oben in den Alpen. Im Sommer fressen sie viel Gras und Kräuter. Sie werden dabei rund und dick. Im Herbst kriechen sie in ihren Bau unter der Erde. Den Eingang verschliessen sie mit Erde und Gras. Dann schlafen sie den ganzen Winter lang und fressen nichts. Im Frühling kommen sie dünn wieder heraus. | Wozu brauchen die Murmeltiere das Fett, das sie im Sommer anfressen? | Davon leben sie während des Winterschlafs. | Damit sie im Sommer schneller rennen können.; Damit sie im Bau weich liegen. | ☐ |
+| 6 | Der Löwenzahn | Im Frühling blüht der Löwenzahn auf vielen Wiesen gelb. Nach einigen Tagen wird aus der Blüte eine weisse Kugel: die Pusteblume. Sie besteht aus vielen kleinen Schirmchen. An jedem Schirmchen hängt ein Samen. Schon ein leichter Wind trägt die Schirmchen weit fort. Wo ein Samen landet, kann eine neue Pflanze wachsen. | Warum wächst Löwenzahn an so vielen Orten? | Der Wind trägt seine Samen weit herum. | Die Menschen pflanzen ihn überall an.; Die Bienen tragen die gelben Blüten fort. | ☐ |
+
+## 14. Rechengeschichten (Lehrplan SG MA.3.C.2, MA.3.C.3)
+
+Platzhalter {a}, {b} … werden im Spiel durch Zahlen aus den Bereichen ersetzt.
+
+| Stufe | Geschichte | Zahlen | richtige Rechnung | Ablenker | ☐ |
+|---|---|---|---|---|---|
+| 1 | Im Korb liegen {a} Äpfel. Es kommen {b} dazu. | a: 1–6, b: 1–4 | a + b | a − b; a + a | ☐ |
+| 1 | Im Teich schwimmen {a} Fische. {b} Fische kommen dazu. | a: 2–6, b: 1–4 | a + b | a − b; b + b | ☐ |
+| 1 | Es sind {a} Ballone. {b} fliegen weg. | b: 1–4, d: 1–5, a = b + d | a − b | a + b; b − b | ☐ |
+| 1 | Auf dem Teller liegen {a} Guetsli. {b} werden gegessen. | b: 1–4, d: 1–5, a = b + d | a − b | a + b; a + a | ☐ |
+| 2 | {a} Kinder spielen Fangen, {b} Kinder spielen Ball. Wie viele Kinder spielen? | a: 4–12, b: 3–8 | a + b | a − b; a + a | ☐ |
+| 2 | Im Bus sitzen {a} Leute. An der Haltestelle steigen {b} aus. Wie viele sind noch im Bus? | b: 2–8, d: 3–10, a = b + d | a − b | a + b; b − a | ☐ |
+| 2 | Im Bus sitzen {a} Leute. An der Haltestelle steigen {b} ein. Wie viele sind jetzt im Bus? | a: 5–12, b: 2–8 | a + b | a − b; b + b | ☐ |
+| 2 | Ein Eichhörnchen versteckt {a} Nüsse. {b} findet es nicht mehr. Wie viele findet es wieder? | b: 2–7, d: 3–10, a = b + d | a − b | a + b; a + a | ☐ |
+| 3 | Ein Kind baut {a} Türme mit je {b} Klötzen. Wie viele Klötze braucht es? | a: 2–9, b: 3–10 | a · b | a + b; b − a | ☐ |
+| 3 | Die Bäckerei kauft {a} Schachteln mit je {b} Eiern. Wie viele Eier sind es? | a: 2–10, b: 6–10 | a · b | a + b; b − a | ☐ |
+| 3 | Ein Buch hat {a} Seiten. Du hast schon {b} gelesen. Wie viele Seiten fehlen noch? | b: 12–45, d: 10–50, a = b + d | a − b | a + b; b − b | ☐ |
+| 3 | Im Kässeli sind {a} Fr. Zum Geburtstag kommen {b} Fr. dazu. Wie viel Geld ist jetzt drin? | a: 12–50, b: 10–40 | a + b | a − b; a · b | ☐ |
+| 4 | Ein Bus hat {c} Sitzplätze. {a} sind besetzt. Wie viele sind noch frei? | a: 12–40, b: 5–30, c = a + b | a + _ = c | c + a = _; a · _ = c | ☐ |
+| 4 | Ein Geschenk kostet {c} Fr. {a} Fr. sind schon gespart. Wie viel fehlt noch? | a: 10–40, b: 5–35, c = a + b | a + _ = c | c + a = _; a − c = _ | ☐ |
+| 4 | Ein Kind hat {a} Sticker. Zum Geburtstag bekommt es noch welche. Jetzt hat es {c} Sticker. Wie viele hat es bekommen? | a: 12–45, b: 5–30, c = a + b | a + _ = c | c + a = _; a − c = _ | ☐ |
+| 4 | Auf dem Spielplatz sind {c} Kinder. {a} spielen im Sand, die anderen schaukeln. Wie viele schaukeln? | a: 10–40, b: 6–35, c = a + b | a + _ = c | c + a = _; a · _ = c | ☐ |
+| 5 | {c} Kinder werden in Gruppen zu {b} eingeteilt. Wie viele Gruppen gibt es? | a: 2–9, b: 2–6, c = a · b | c : b | c · b; c − b | ☐ |
+| 5 | {c} Guetsli werden gerecht auf {b} Teller verteilt. Wie viele kommen auf jeden Teller? | a: 2–9, b: 2–5, c = a · b | c : b | c + b; c · b | ☐ |
+| 5 | {c} Kinder fahren mit Autos an den Ausflug. In jedes Auto passen {b} Kinder. Wie viele Autos braucht es? | a: 2–8, b: 3–5, c = a · b | c : b | c · b; c − b | ☐ |
+| 5 | In jede Schachtel kommen {b} Eier. Es sind {c} Eier. Wie viele Schachteln werden voll? | a: 3–10, b: 6–10, c = a · b | _ · b = c | c · b = _; b + _ = c | ☐ |
+| 5 | Im Schulzimmer waren {a} Farbstifte. Einige sind verloren gegangen. Jetzt sind es noch {c}. Wie viele sind verloren gegangen? | c: 20–60, b: 5–25, a = c + b | a − _ = c | a + c = _; c − a = _ | ☐ |
+| 6 | Ein Zug hat {a} Wagen. In jedem Wagen sitzen {b} Leute. Der Zug fährt um {d} Uhr ab. Wie viele Leute sitzen im Zug? | a: 3–9, b: 12–40, d: 7–11 | a · b | (nicht gebraucht: d) | ☐ |
+| 6 | Im Garten stehen {a} Apfelbäume und {d} Birnbäume. An jedem Apfelbaum hängen {b} Äpfel. Wie viele Äpfel sind es? | a: 3–8, b: 15–30, d: 2–6 | a · b | (nicht gebraucht: d) | ☐ |
+| 6 | Ein Velo kostet {a} Fr., ein Helm {b} Fr. Das Kind ist {d} Jahre alt. Wie viel kosten Velo und Helm zusammen? | a: 180–450, b: 35–90, d: 7–10 | a + b | (nicht gebraucht: d) | ☐ |
+| 6 | Eine Klasse sammelt {a} Fr. für einen Ausflug. Die Reise kostet {b} Fr. Es fahren {d} Kinder mit. Wie viel Geld bleibt übrig? | b: 120–300, e: 20–150, d: 18–24, a = b + e | a − b | (nicht gebraucht: d) | ☐ |
+
+## 15. Schätz-Waage (Lehrplan SG MA.3.A.1)
+
+### Vergleichen
+
+| Eigenschaft | grösser | kleiner | ☐ |
+|---|---|---|---|
+| schwerer | 🐘 der Elefant | 🐭 die Maus | ☐ |
+| schwerer | 🚗 das Auto | 🚲 das Velo | ☐ |
+| schwerer | 🍉 die Wassermelone | 🍓 die Erdbeere | ☐ |
+| schwerer | 🐄 die Kuh | 🐔 das Huhn | ☐ |
+| schwerer | 🎃 der Kürbis | 🍎 der Apfel | ☐ |
+| schwerer | 🐎 das Pferd | 🐕 der Hund | ☐ |
+| länger | 🚌 der Bus | 🚗 das Auto | ☐ |
+| länger | 🚆 der Zug | 🚲 das Velo | ☐ |
+| länger | 🐊 das Krokodil | 🦎 die Eidechse | ☐ |
+| grösser | 🦒 die Giraffe | 🐈 die Katze | ☐ |
+| grösser | 🌳 der Baum | 🌷 die Blume | ☐ |
+| grösser | 🏠 das Haus | ⛺ das Zelt | ☐ |
+
+### Ordnen
+
+| Richtung | Reihe | ☐ |
+|---|---|---|
+| leicht → schwer | 🪶 Feder → 🍎 Apfel → 🐈 Katze → 🐘 Elefant | ☐ |
+| leicht → schwer | 🍓 Erdbeere → 🍎 Apfel → 🍉 Wassermelone → 🚗 Auto | ☐ |
+| kurz → lang | 🐜 Ameise → ✏️ Bleistift → 🚲 Velo → 🚌 Bus | ☐ |
+| klein → gross | 🐁 Maus → 🐈 Katze → 🐎 Pferd → 🦒 Giraffe | ☐ |
+| leicht → schwer | 🪶 Feder → 🍎 Apfel → 🍉 Wassermelone | ☐ |
+| leicht → schwer | 🐭 Maus → 🐈 Katze → 🐎 Pferd | ☐ |
+| leicht → schwer | 🐜 Ameise → 🐕 Hund → 🐘 Elefant | ☐ |
+| leicht → schwer | 🍓 Erdbeere → 🍌 Banane → 🎃 Kürbis | ☐ |
+| kurz → lang | 🐜 Ameise → 🐈 Katze → 🐊 Krokodil | ☐ |
+| kurz → lang | ✏️ Bleistift → 🧹 Besen → 🚌 Bus | ☐ |
+| klein → gross | 🐁 Maus → 🐕 Hund → 🦒 Giraffe | ☐ |
+| klein → gross | 🌷 Blume → 🧑 Mensch → 🌳 Baum | ☐ |
+
+### Referenzgrössen
+
+| Stufe | Frage | richtig | falsch | ☐ |
+|---|---|---|---|---|
+| 4 | Wie lang ist ein Auto? | 4 m | 40 cm; 40 m | ☐ |
+| 4 | Wie hoch hängt ein Basketballkorb? | 3 m | 30 cm; 30 m | ☐ |
+| 4 | Wie lang ist ein Schullineal? | 30 cm | 3 m; 3 cm | ☐ |
+| 4 | Wie breit ist ein Schulheft? | 21 cm | 2 m; 2 cm | ☐ |
+| 4 | Wie lang ist ein Bus? | 12 m | 12 cm; 120 m | ☐ |
+| 4 | Wie lang ist dein Fuss? | 20 cm | 2 m; 2 cm | ☐ |
+| 4 | Wie hoch ist ein Stockwerk in einem Haus? | 3 m | 30 cm; 30 m | ☐ |
+| 4 | Wie lang ist eine Turnhalle? | 30 m | 3 m; 300 m | ☐ |
+| 4 | Wie lang ist ein Regenwurm? | 10 cm | 1 m; 1 cm | ☐ |
+| 3 | Wie lang ist ein neuer Bleistift? | 18 cm | 18 m; 2 cm | ☐ |
+| 3 | Wie hoch ist eine Zimmertür? | 2 m | 20 cm; 20 m | ☐ |
+| 3 | Wie breit ist ein Fingernagel? | 1 cm | 1 m; 10 cm | ☐ |
+| 3 | Wie gross ist ein Kind in der 2. Klasse? | 125 cm | 125 m; 12 cm | ☐ |
+| 3 | Wie lang ist ein Schulzimmer? | 9 m | 9 cm; 90 m | ☐ |
+| 3 | Wie lang ist eine Banane? | 20 cm | 2 m; 2 cm | ☐ |
+| 3 | Wie hoch ist ein Tisch? | 75 cm | 75 m; 7 cm | ☐ |
+| 5 | Wie schwer ist eine Packung Mehl? | 1 kg | 1 g; 100 kg | ☐ |
+| 5 | Wie schwer ist eine Tafel Schokolade? | 100 g | 100 kg; 1 g | ☐ |
+| 5 | Wie schwer ist ein Apfel? | 150 g | 150 kg; 15 g | ☐ |
+| 5 | Wie viel passt in ein Wasserglas? | 2 dl | 2 l; 20 l | ☐ |
+| 5 | Wie viel Milch ist in einer Milchpackung? | 1 l | 1 dl; 10 l | ☐ |
+| 5 | Wie schwer ist ein Kind in der 2. Klasse? | 25 kg | 25 g; 250 kg | ☐ |
+| 5 | Wie viel Wasser passt in einen Eimer? | 10 l | 10 dl; 100 l | ☐ |
+| 5 | Wie schwer ist ein Velo? | 15 kg | 150 kg; 1 kg | ☐ |
+| 6 | Wie lang ist ein Schulweg zu Fuss? | 1 km | 1 mm; 100 km | ☐ |
+| 6 | Wie lang ist eine Ameise? | 5 mm | 5 m; 50 cm | ☐ |
+| 6 | Wie schwer ist ein Auto? | 1.5 t | 1.5 kg; 15 g | ☐ |
+| 6 | Wie viel passt in einen Teelöffel? | 5 ml | 5 l; 5 dl | ☐ |
+| 6 | Wie lange dauert eine Schullektion? | 45 min | 45 s; 45 h | ☐ |
+| 6 | Wie lange schläft ein Kind in der Nacht? | 10 h | 10 min; 10 s | ☐ |
+| 6 | Wie lange dauert das Zähneputzen? | 3 min | 3 h; 3 s | ☐ |
+| 6 | Wie lange dauert ein Herzschlag ungefähr? | 1 s | 1 min; 1 h | ☐ |
+| 6 | Wie schwer ist ein Elefant? | 5 t | 5 kg; 50 g | ☐ |
+| 6 | Wie dick ist eine Münze? | 2 mm | 2 cm; 2 m | ☐ |
+
+## 16. Lebenszyklus-Puzzle (Lehrplan SG NMG.2.3)
+
+### Zyklen
+
+| ab Stufe | Lebewesen | Stadien | ☐ |
+|---|---|---|---|
+| 1 | Huhn | Ei → Küken schlüpft → Huhn | ☐ |
+| 1 | Mensch | Baby → Kind → Erwachsener | ☐ |
+| 2 | Mensch | Baby → Kind → Erwachsener → alter Mensch | ☐ |
+| 2 | Sonnenblume | Samen → Keimling → junge Pflanze → Blüte | ☐ |
+| 3 | Schmetterling | Ei → Raupe → Puppe → Schmetterling | ☐ |
+| 4 | Frosch | Laich (Eier) → Kaulquappe → Kaulquappe mit Beinen → junger Frosch mit Schwanz → Frosch | ☐ |
+| 4 | Marienkäfer | Ei → Larve → Puppe → Marienkäfer | ☐ |
+| 4 | Honigbiene | Ei → Larve → Puppe → Biene | ☐ |
+| 4 | Apfelbaum | Blüte → kleiner grüner Apfel → reifer Apfel → Kerne (Samen) | ☐ |
+| 6 | Mensch | Baby → Kind → Jugendlicher → Erwachsener → alter Mensch | ☐ |
+| 6 | Apfelbaum | Kern (Samen) → Keimling → junger Baum → Blüte → Apfel | ☐ |
+
+### Wie kommen die Jungen zur Welt?
+
+| Tier | Bild | Art | ☐ |
+|---|---|---|---|
+| Huhn | 🐔 | Ei | ☐ |
+| Ente | 🦆 | Ei | ☐ |
+| Krokodil | 🐊 | Ei | ☐ |
+| Schildkröte | 🐢 | Ei | ☐ |
+| Pinguin | 🐧 | Ei | ☐ |
+| Frosch | 🐸 | Ei | ☐ |
+| Forelle | 🐟 | Ei | ☐ |
+| Ringelnatter | 🐍 | Ei | ☐ |
+| Känguru | 🦘 | Beutel | ☐ |
+| Koala | 🐨 | Beutel | ☐ |
+| Kuh | 🐄 | lebend | ☐ |
+| Hund | 🐕 | lebend | ☐ |
+| Katze | 🐈 | lebend | ☐ |
+| Pferd | 🐎 | lebend | ☐ |
+| Wal | 🐋 | lebend | ☐ |
+| Delfin | 🐬 | lebend | ☐ |
+| Fledermaus | 🦇 | lebend | ☐ |
+| Igel | 🦔 | lebend | ☐ |
+
+### Fragen
+
+| Frage | richtig | falsch | ☐ |
+|---|---|---|---|
+| Womit atmet eine Kaulquappe im Wasser? | mit Kiemen | mit einer Nase; mit Federn | ☐ |
+| Womit atmet ein erwachsener Frosch an Land? | mit Lungen | mit Kiemen; mit Blättern | ☐ |
+| Was frisst eine Raupe? | Blätter | Fleisch; Steine | ☐ |
+| Was schlüpft aus der Puppe? | der Schmetterling | die Raupe; das Ei | ☐ |
+| Was braucht ein Samen, damit er keimt? | Wasser und Wärme | Salz; Trockenheit und Kälte | ☐ |
+| Was tragen Bienen von Blüte zu Blüte? | Blütenstaub (Pollen) | Wasser; Sand | ☐ |
+| Was wächst aus einer bestäubten Blüte? | eine Frucht mit Samen | eine Raupe; ein Ei | ☐ |
+| Was verliert die Kaulquappe, wenn sie zum Frosch wird? | den Schwanz | die Beine; die Augen | ☐ |
+| Wie nennt man es, wenn aus der Raupe ein Schmetterling wird? | Verwandlung (Metamorphose) | Winterschlaf; Keimung | ☐ |
+| Warum fliegen Bienen von Blüte zu Blüte? | Sie sammeln Nektar und Pollen als Futter. | Sie schlafen in den Blüten.; Sie legen ihre Eier in die Blüten. | ☐ |
+
+## 17. Körper-Puzzle (Lehrplan SG NMG.1.4)
+
+### Körperteile
+
+| Bild | Name | Artikel | ☐ |
+|---|---|---|---|
+| 👁️ | Auge | das | ☐ |
+| 👂 | Ohr | das | ☐ |
+| 👃 | Nase | die | ☐ |
+| 👄 | Mund | der | ☐ |
+| ✋ | Hand | die | ☐ |
+| 🦶 | Fuss | der | ☐ |
+| 🦵 | Bein | das | ☐ |
+| 💪 | Arm | der | ☐ |
+| 🦷 | Zahn | der | ☐ |
+| 👅 | Zunge | die | ☐ |
+
+### Sinne
+
+| Frage | Bild | Sinnesorgan | ☐ |
+|---|---|---|---|
+| Womit siehst du? | 👁️ | Auge | ☐ |
+| Womit hörst du? | 👂 | Ohr | ☐ |
+| Womit riechst du? | 👃 | Nase | ☐ |
+| Womit schmeckst du? | 👅 | Zunge | ☐ |
+| Womit fühlst du, ob etwas warm oder kalt ist? | ✋ | Haut | ☐ |
+
+### Fragen
+
+| Stufe | Frage | richtig | falsch | ☐ |
+|---|---|---|---|---|
+| 3 | Wo kannst du dein Bein beugen? | am Knie | am Schienbein; an der Zehe | ☐ |
+| 3 | Wo kannst du deinen Arm beugen? | am Ellbogen | am Oberarm; am Fingernagel | ☐ |
+| 3 | Was schützt das Gehirn? | der Schädel | die Haare; die Ohren | ☐ |
+| 3 | Was schützt die Augen vor Staub? | die Augenlider und Wimpern | die Nase; die Zähne | ☐ |
+| 3 | Wie heissen die ersten Zähne eines Kindes? | Milchzähne | Weisheitszähne; Goldzähne | ☐ |
+| 5 | Was macht das Herz? | Es pumpt das Blut durch den Körper. | Es verdaut das Essen.; Es denkt nach. | ☐ |
+| 5 | Was macht die Lunge? | Sie nimmt beim Atmen Luft auf. | Sie pumpt das Blut.; Sie bewegt die Beine. | ☐ |
+| 5 | Was macht der Magen? | Er verdaut das Essen. | Er sieht.; Er pumpt das Blut. | ☐ |
+| 5 | Was macht das Gehirn? | Es denkt und steuert den Körper. | Es verdaut das Essen.; Es atmet. | ☐ |
+| 5 | Was brauchst du, um dich zu bewegen? | Muskeln und Knochen | nur Haare; nur die Haut | ☐ |
+| 5 | Was gibt dem Körper Halt? | das Skelett aus Knochen | das Blut; die Haare | ☐ |
+| 6 | Wohin führen die Arterien das Blut? | vom Herz weg in den Körper | nur in die Haare; aus dem Körper hinaus | ☐ |
+| 6 | Wohin führen die Venen das Blut? | zurück zum Herz | in den Magen; in die Haare | ☐ |
+| 6 | Warum schwitzt du, wenn dir heiss ist? | Damit der Körper abkühlt. | Damit die Haut wächst.; Damit du besser siehst. | ☐ |
+| 6 | Warum schützt du dich mit Sonnencreme? | Damit die Haut keinen Sonnenbrand bekommt. | Damit die Haare wachsen.; Damit du schneller rennst. | ☐ |
+| 6 | Was bringt das Blut zu allen Teilen des Körpers? | Sauerstoff und Nährstoffe | Haare und Nägel; Steine und Sand | ☐ |
+| 6 | Was spürst du am Handgelenk, wenn du zwei Finger darauflegst? | den Puls: so schlägt das Herz | wie die Lunge atmet; wie der Magen verdaut | ☐ |
+| 6 | Wie schützt die Haut den Körper? | Sie hält Schmutz und Keime draussen. | Sie pumpt das Blut.; Sie verdaut das Essen. | ☐ |
+
+### Wege durch den Körper
+
+| Weg | Stationen | ☐ |
+|---|---|---|
+| Der Weg des Essens | Mund → Speiseröhre → Magen → Dünndarm → Dickdarm | ☐ |
+| Der Weg der Luft | Nase → Luftröhre → Lunge | ☐ |
+
+## 18. Znüni-Teller (Lehrplan SG NMG.1.3)
+
+### Lebensmittel und Gruppen
+
+Gruppe „Getreide“ heisst im Spiel „Brot, Teigwaren, Kartoffeln“; „Süsses“ heisst „Süsses und Salziges“.
+
+| Bild | Name | Gruppe | ☐ |
+|---|---|---|---|
+| 💧 | Wasser | Getränk | ☐ |
+| 🍵 | Tee ohne Zucker | Getränk | ☐ |
+| 🍎 | Apfel | Frucht | ☐ |
+| 🍐 | Birne | Frucht | ☐ |
+| 🍌 | Banane | Frucht | ☐ |
+| 🍒 | Kirschen | Frucht | ☐ |
+| 🍓 | Erdbeere | Frucht | ☐ |
+| 🍇 | Trauben | Frucht | ☐ |
+| 🍊 | Orange | Frucht | ☐ |
+| 🥕 | Karotte | Gemüse | ☐ |
+| 🥦 | Brokkoli | Gemüse | ☐ |
+| 🥬 | Salat | Gemüse | ☐ |
+| 🧅 | Zwiebel | Gemüse | ☐ |
+| 🧄 | Knoblauch | Gemüse | ☐ |
+| 🍞 | Brot | Getreide | ☐ |
+| 🍝 | Teigwaren | Getreide | ☐ |
+| 🍚 | Reis | Getreide | ☐ |
+| 🥔 | Kartoffel | Getreide | ☐ |
+| 🥛 | Milch | Eiweiss | ☐ |
+| 🧀 | Käse | Eiweiss | ☐ |
+| 🥚 | Ei | Eiweiss | ☐ |
+| 🐟 | Fisch | Eiweiss | ☐ |
+| 🍗 | Poulet | Eiweiss | ☐ |
+| 🍫 | Schokolade | Süsses | ☐ |
+| 🍬 | Bonbon | Süsses | ☐ |
+| 🍩 | Donut | Süsses | ☐ |
+| 🥤 | Süssgetränk | Süsses | ☐ |
+| 🍪 | Guetsli | Süsses | ☐ |
+| 🍟 | Pommes frites | Süsses | ☐ |
+
+### Znüni zur Wahl
+
+| ausgewogen | nicht ausgewogen | ☐ |
+|---|---|---|
+| 🍎🍞💧 | 🍫🥤; 🍬🍩🥤 | ☐ |
+| 🥕🧀🍞 | 🍟🥤; 🍪🍫 | ☐ |
+| 🍌🥛 | 🍩🥤; 🍬🍪🍫 | ☐ |
+| 🍐🥚💧 | 🍫🍪; 🍟🍬 | ☐ |
+
+### Fragen
+
+| Frage | richtig | falsch | ☐ |
+|---|---|---|---|
+| Was trinkst du am besten, wenn du Durst hast? | Wasser | Süssgetränk; Sirup mit viel Zucker | ☐ |
+| Was gibt dir viele Vitamine? | Früchte und Gemüse | Bonbons; Pommes frites | ☐ |
+| Was gibt dir lange Kraft für die Schule? | Brot und Teigwaren | Bonbons; Süssgetränk | ☐ |
+| Was hilft dem Körper beim Wachsen? | Milch, Käse und Eier | Schokolade; Bonbons | ☐ |
+| Wovon solltest du am wenigsten essen? | Süsses und Salziges | Gemüse; Früchte | ☐ |
+| Welche Frucht wächst auch in der Schweiz? | Apfel | Banane; Ananas | ☐ |
+| Wann gibt es Erdbeeren aus der Schweiz? | im Frühsommer | im Winter; an Weihnachten | ☐ |
+| Woher kommt ein Lebensmittel aus der Region? | von einem Bauernhof in der Nähe | aus einem fernen Land; aus dem Meer weit weg | ☐ |
+
+## 19. Magnet-Labor (Lehrplan SG NMG.5.2)
+
+### Zieht der Magnet es an?
+
+| Bild | Ding | zieht an? | ☐ |
+|---|---|---|---|
+| 📎 | Büroklammer | ja | ☐ |
+| 🔩 | Schraube aus Eisen | ja | ☐ |
+| ✂️ | Schere | ja | ☐ |
+| 🧷 | Sicherheitsnadel | ja | ☐ |
+| 🪵 | Holzklotz | nein | ☐ |
+| 📄 | Papier | nein | ☐ |
+| ✏️ | Bleistift | nein | ☐ |
+| 🏀 | Ball | nein | ☐ |
+| 🪶 | Feder | nein | ☐ |
+| 🍎 | Apfel | nein | ☐ |
+| 🧶 | Wolle | nein | ☐ |
+| 🥛 | Glas | nein | ☐ |
+
+### Fragen
+
+| Stufe | Frage | richtig | falsch | ☐ |
+|---|---|---|---|---|
+| 3 | Zieht der Magnet die Büroklammer auch durch ein Blatt Papier an? | Ja, der Magnet wirkt durch Papier. | Nein, nie.; Nur wenn das Papier nass ist. | ☐ |
+| 3 | Zieht der Magnet eine Büroklammer unter Wasser an? | Ja, der Magnet wirkt auch im Wasser. | Nein, Wasser stoppt den Magneten.; Nur warmes Wasser. | ☐ |
+| 3 | Wann zieht der Magnet die Büroklammer stärker an? | wenn sie näher beim Magneten ist | wenn sie weiter weg ist; wenn es dunkel ist | ☐ |
+| 4 | Wohin zeigt eine Kompassnadel? | nach Norden | immer zur Sonne; nach unten | ☐ |
+| 4 | Warum zeigt die Kompassnadel nach Norden? | Die Erde ist wie ein riesiger Magnet. | Der Wind dreht die Nadel.; Die Nadel ist schwer. | ☐ |
+| 4 | Wie viele Pole hat ein Magnet? | zwei: Nordpol und Südpol | einen; keinen | ☐ |
+| 5 | Ein Stabmagnet zerbricht in der Mitte. Wie viele Pole hat jedes Stück? | zwei: wieder einen Nordpol und einen Südpol | nur einen; keinen mehr | ☐ |
+| 5 | Wo zieht ein Stabmagnet am stärksten an? | an seinen beiden Enden, den Polen | genau in der Mitte; überall gleich stark | ☐ |
+| 5 | Du hältst einen Magneten nahe an einen Kompass. Was passiert? | Die Kompassnadel dreht sich. | Nichts, der Kompass merkt es nicht.; Der Kompass wird warm. | ☐ |
+| 5 | Du drehst dich mit dem Kompass in der Hand um. Wohin zeigt die Nadel jetzt? | immer noch nach Norden | mit dir mit nach hinten; nach unten | ☐ |
+| 6 | Welches Material leitet elektrischen Strom? | Metall, zum Beispiel ein Kupferdraht | Holz; Kunststoff | ☐ |
+| 6 | Wann leuchtet die Lampe im Stromkreis? | wenn der Stromkreis geschlossen ist | wenn der Stromkreis offen ist; wenn die Batterie fehlt | ☐ |
+| 6 | Wie heissen die beiden Pole einer Batterie? | Plus und Minus | Nord und Süd; oben und unten | ☐ |
+| 6 | Was passiert, wenn Strom durch einen Draht um eine Schraube fliesst? | Die Schraube wird zum Magneten. | Die Schraube schmilzt sofort.; Nichts, nie. | ☐ |
+| 6 | Darf man mit dem Strom aus der Steckdose experimentieren? | Nein, das ist lebensgefährlich. | Ja, das ist ungefährlich.; Ja, mit nassen Händen. | ☐ |
+| 6 | Was macht ein Schalter im Stromkreis? | Er öffnet und schliesst den Stromkreis. | Er macht die Batterie voll.; Er macht den Strom stärker. | ☐ |
+| 6 | Was braucht ein Elektromagnet, damit er gut anzieht? | Strom, der durch den Draht fliesst | Wasser im Draht; Sonnenlicht | ☐ |
+
+## 20. Schwimmt oder sinkt? (Lehrplan SG NMG.3.3)
+
+### Im Wasser
+
+„Stufe 1“ = ganz eindeutige Dinge, die schon in der Einstiegsstufe vorkommen.
+
+| Bild | Ding | schwimmt? | Stufe 1 | ☐ |
+|---|---|---|---|---|
+| 🪵 | Holzklotz | schwimmt | ja | ☐ |
+| 🍎 | Apfel | schwimmt | ja | ☐ |
+| 🍃 | Blatt | schwimmt | ja | ☐ |
+| 🕯️ | Kerze | schwimmt |  | ☐ |
+| 🏓 | Tischtennisball | schwimmt | ja | ☐ |
+| 🪶 | Feder | schwimmt | ja | ☐ |
+| 🧊 | Eiswürfel | schwimmt |  | ☐ |
+| 🍌 | Banane | schwimmt |  | ☐ |
+| 🪨 | Stein | sinkt | ja | ☐ |
+| 🔩 | Schraube | sinkt | ja | ☐ |
+| 🔑 | Schlüssel | sinkt |  | ☐ |
+| 🪙 | Münze | sinkt | ja | ☐ |
+| 🥄 | Löffel aus Metall | sinkt |  | ☐ |
+| 🥔 | Kartoffel | sinkt |  | ☐ |
+| 💍 | Ring | sinkt |  | ☐ |
+| 🔨 | Hammer | sinkt | ja | ☐ |
+
+### Material
+
+| Bild | Ding | Material | ☐ |
+|---|---|---|---|
+| 🪵 | Holzklotz | Holz | ☐ |
+| 🛶 | Holzkanu | Holz | ☐ |
+| 🔩 | Schraube | Metall | ☐ |
+| 🔑 | Schlüssel | Metall | ☐ |
+| 🪙 | Münze | Metall | ☐ |
+| 🫙 | Konfiglas | Glas | ☐ |
+| 🥛 | Trinkglas | Glas | ☐ |
+| 🪟 | Fensterscheibe | Glas | ☐ |
+| 🧴 | Shampooflasche | Kunststoff | ☐ |
+| 🪣 | Kessel aus Plastik | Kunststoff | ☐ |
+| 📄 | Blatt | Papier | ☐ |
+| 📦 | Karton | Papier | ☐ |
+| 📰 | Zeitung | Papier | ☐ |
+
+### Fragen
+
+| Stufe | Frage | richtig | falsch | ☐ |
+|---|---|---|---|---|
+| 4 | Welches Material ist durchsichtig? | Glas | Holz; Metall | ☐ |
+| 4 | Welcher Löffel wird im heissen Tee schnell warm? | ein Löffel aus Metall | ein Löffel aus Holz; ein Löffel aus Kunststoff | ☐ |
+| 4 | Woraus macht man Papier? | aus Holz | aus Glas; aus Metall | ☐ |
+| 4 | Was kann man gut biegen und wieder loslassen? | ein Gummiband | eine Glasscheibe; einen Stein | ☐ |
+| 5 | Ein grosser Holzklotz und ein kleiner Nagel: Was sinkt? | der kleine Nagel | der grosse Holzklotz; beide schwimmen | ☐ |
+| 5 | Warum schwimmt ein grosses Schiff aus Stahl? | Es hat innen viel Luft. | Stahl ist leichter als Wasser.; Weil es so gross ist, sinkt es nie. | ☐ |
+| 5 | Ein Klumpen Knete sinkt. Wie kann er schwimmen? | Wenn man ein Boot daraus formt. | Wenn man ihn kleiner macht.; Wenn man ihn rot anmalt. | ☐ |
+| 5 | Was passiert mit Eis im Wasser? | Es schwimmt oben. | Es sinkt auf den Boden.; Es fliegt davon. | ☐ |
+
+## 21. Instrumenten-Kenner (Lehrplan SG MU.4.C.1)
+
+### Instrumente
+
+Bild „svg:…“ = im Spiel gezeichnet; leer = kein Bild, nur ab Stufe 3.
+
+| Bild | Name | Gruppe | Spielweise | genauer | ☐ |
+|---|---|---|---|---|---|
+| 🥁 | Trommel | Schlaginstrument | schlagen |  | ☐ |
+| 🪇 | Rasseln | Schlaginstrument | schütteln |  | ☐ |
+| 🔔 | Glocke | Schlaginstrument | schlagen |  | ☐ |
+| svg:triangel | Triangel | Schlaginstrument | schlagen |  | ☐ |
+| svg:klangstab | Klangstab | Schlaginstrument | schlagen |  | ☐ |
+| svg:schlagholz | Schlaghölzer | Schlaginstrument | schlagen |  | ☐ |
+| 🎸 | Gitarre | Saiteninstrument | zupfen | Zupfinstrument | ☐ |
+| 🎻 | Geige | Saiteninstrument | streichen | Streichinstrument | ☐ |
+|  | Cello | Saiteninstrument | streichen | Streichinstrument | ☐ |
+|  | Harfe | Saiteninstrument | zupfen | Zupfinstrument | ☐ |
+| 🎹 | Klavier | Tasteninstrument | Tasten drücken |  | ☐ |
+| 🎺 | Trompete | Blasinstrument | blasen | Blechblasinstrument | ☐ |
+|  | Posaune | Blasinstrument | blasen | Blechblasinstrument | ☐ |
+| 🎷 | Saxofon | Blasinstrument | blasen | Holzblasinstrument | ☐ |
+| 🪈 | Blockflöte | Blasinstrument | blasen | Holzblasinstrument | ☐ |
+|  | Querflöte | Blasinstrument | blasen | Holzblasinstrument | ☐ |
+|  | Klarinette | Blasinstrument | blasen | Holzblasinstrument | ☐ |
+
+### Fragen
+
+| Frage | richtig | falsch | ☐ |
+|---|---|---|---|
+| Wie viele Musikerinnen und Musiker spielen in einem Duo? | zwei | drei; vier | ☐ |
+| Wie viele spielen in einem Trio? | drei | zwei; fünf | ☐ |
+| Wie viele spielen in einem Quartett? | vier | drei; acht | ☐ |
+| Wer leitet ein Orchester? | die Dirigentin oder der Dirigent | der Pianist; das Publikum | ☐ |
+| Welche Instrumente spielen in einem Streichquartett? | zwei Geigen, Bratsche und Cello | vier Trompeten; Klavier und drei Trommeln | ☐ |
+| Was schwingt bei der Gitarre, wenn ein Ton erklingt? | die Saite | der Gurt; das Plektrum allein | ☐ |
+| Eine Saite wird kürzer gegriffen. Wie klingt der Ton? | höher | tiefer; gleich | ☐ |
+| Was schwingt bei der Trommel? | das Fell | der Stuhl; die Luft im Zimmer allein | ☐ |
+| Wie viele spielen in einem Quintett? | fünf | vier; sechs | ☐ |
+| Wie entsteht der Ton bei der Trompete? | Die Lippen schwingen im Mundstück. | Ein Rohrblatt schwingt.; Eine Saite schwingt. | ☐ |
+| Wie entsteht der Ton bei der Klarinette? | Ein Rohrblatt schwingt am Mundstück. | Die Lippen schwingen wie bei der Trompete.; Man zupft eine Saite. | ☐ |
+| Wie entsteht der Ton beim Klavier? | Kleine Hämmer schlagen auf Saiten. | Luft strömt durch Pfeifen.; Man zupft die Saiten mit den Fingern. | ☐ |

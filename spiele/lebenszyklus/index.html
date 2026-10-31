@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lebenszyklus-Puzzle</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🐛 Lebenszyklus-Puzzle</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="zyklen.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.2.3: b (Grundanspruch 1. Zyklus) Wachstum und Entwicklung beobachten (Raupe über
+// Puppe zum Schmetterling; Blüten und Früchte); c Fortbestand bei Tieren: Entwicklung im Ei, im
+// Beutel, im Tierleib; d Bestäubung, Keimung; f (Grundanspruch 2. Zyklus) Entwicklung der
+// Amphibien von der Kaulquappe zum Frosch, von der Kiemen- zur Lungenatmung.
+
+const { waehle, mische, el } = LS;
+// „ab Stufe“ in zyklen.js = Nummer der Spielstufe; je Stufe die Zyklen der letzten drei Stufen.
+const zyklen = n => ZYKLEN.filter(z => z[0] <= n && z[0] >= n - 2).map(([, name, stadien]) => ({ name, stadien }));
+const GEBURT_TEXT = { Ei: { bild: "🥚", text: "aus dem Ei" }, Beutel: { bild: "👜", text: "im Beutel" }, lebend: { bild: "🍼", text: "lebend geboren" } };
+
+const ARTEN = {
+  ordnen(n, mindestens = 0) {
+    const z = waehle(zyklen(n).filter(x => x.stadien.length >= mindestens));
+    return { art: "ordnen", z };
+  },
+  geburt() {
+    const [bild, tier, richtig] = waehle(GEBURT);
+    return { art: "geburt", bild, tier, richtig };
+  },
+  naechstes(n) {
+    // Was kommt nach …? (nicht das letzte Stadium)
+    const z = waehle(zyklen(n).filter(x => x.stadien.length >= 4));
+    const i = Math.floor(Math.random() * (z.stadien.length - 1));
+    const vor = z.stadien[i][1];
+    const richtig = z.stadien[i + 1][1];
+    const andere = mische(z.stadien.map(s => s[1]).filter(s => s !== vor && s !== richtig)).slice(0, 2);
+    return { art: "naechstes", z, vor, richtig, optionen: mische([richtig, ...andere]) };
+  },
+  frage() {
+    const [frage, richtig, f1, f2] = waehle(ZYKLUS_FRAGEN);
+    return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.ordnen(1),
+  s2: () => ARTEN.ordnen(2),
+  s3: () => waehle([ARTEN.geburt, () => ARTEN.ordnen(3)])(),
+  s4: () => waehle([() => ARTEN.ordnen(4), () => ARTEN.naechstes(4), ARTEN.geburt])(),
+  s5: () => waehle([ARTEN.frage, () => ARTEN.naechstes(5), () => ARTEN.ordnen(5)])(),
+  // Königsstufe: Wissensfragen und fünfstufige Zyklen
+  s6: () => waehle([ARTEN.frage, () => ARTEN.ordnen(6, 5), () => ARTEN.ordnen(6, 5), () => ARTEN.naechstes(6)])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
+  if ((stufe === "s1" || stufe === "s2") && a.z && a.z.stadien.some(s => !s[0])) m.push("Stadium ohne Bild in Stufe 1–2");
+  return m;
+}
+
+const stadiumInhalt = ([bild, text]) => ({ bild: bild || "", text });
+
+LS.spiel({
+  id: "lebenszyklus",
+  einleitung: "Aus dem Ei wird ein Küken, aus der Raupe ein Schmetterling. Bringst du alles in die richtige Reihenfolge?",
+  anzahl: 6,
+  stufen: {
+    s1: "Ei → Küken → Huhn: drei Bilder ordnen.",
+    s2: "Vier Stufen: Mensch, Sonnenblume, Schmetterling.",
+    s3: "Aus dem Ei, im Beutel oder lebend geboren?",
+    s4: "Frosch, Marienkäfer, Biene, Apfelbaum.",
+    s5: "Kiemen oder Lunge? Bestäubung und Keimung.",
+    s6: "Fünf Stufen ordnen und knifflige Wissensfragen.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "ordnen") {
+      ctx.flaeche.append(el("div", { class: "frage", text: `${a.z.name}: Was kommt zuerst? Tipp der Reihe nach.` }));
+      LS.reihenfolge(ctx, {
+        reihe: a.z.stadien, breite: 130, pfeile: true,
+        inhalt: stadiumInhalt, ablage: ([bild, text]) => (bild ? `${bild} ${text}` : text),
+        hinweis: "Was ist zuerst da — und was wird daraus? Denk daran, wie es wächst.",
+        loesung: a.z.stadien.map(s => s[1]).join(" → "),
+        lob: `Richtig! ${a.z.stadien.map(s => s[1]).join(" → ")}`,
+      });
+    } else if (a.art === "geburt") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Wie kommen die Jungen zur Welt?" }));
+      LS.koerbe(ctx, {
+        karte: { bild: a.bild, text: a.tier }, koerbe: ["Ei", "Beutel", "lebend"], richtig: a.richtig,
+        korbInhalt: k => GEBURT_TEXT[k],
+        hinweis: "Denk nach: Säugetiere bekommen lebende Junge. Vögel, Reptilien, Fische und Frösche legen Eier. Kängurus tragen die Jungen im Beutel.",
+        loesung: `${a.tier}: ${GEBURT_TEXT[a.richtig].text}.`, lob: `Richtig: ${a.tier} — ${GEBURT_TEXT[a.richtig].text}.`,
+      });
+    } else if (a.art === "naechstes") {
+      ctx.flaeche.append(el("div", { class: "frage", text: `${a.z.name}: Was kommt nach «${a.vor}»?` }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 160,
+        hinweis: "Denk an die ganze Reihe vom Anfang bis zum Ende.", loesung: a.z.stadien.map(s => s[1]).join(" → ") });
+    } else {
+      ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 180, hinweis: "Denk an das, was du über Pflanzen und Tiere weisst.", loesung: `${a.frage} ${a.richtig.replace(/\.$/, "")}.` });
+    }
+    if (ctx.nr === 0) ctx.sag("Was ist zuerst da?");
+  },
+});
+</script>
+</body>
+</html>

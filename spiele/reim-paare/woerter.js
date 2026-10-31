@@ -1,5 +1,5 @@
 // Reimgruppen für Reim-Paare: Wörter einer Gruppe reimen sich (gleich klingend ab dem betonten
-// Selbstlaut). Bild = Emoji oder null (dann nur in Stufen mit Lesetext, ab Stufe 4).
+// Selbstlaut). Bild = Emoji oder null (dann nur in der Königsstufe, Stufe 6, mit Lesetext).
 // Bewusst weggelassen: Paare, die nur in manchen Aussprachen reimen (Bär – Meer).
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
 
@@ -31,7 +31,8 @@ const REIMGRUPPEN = [
   [["Mücke", "🦟"], ["Brücke", "🌉"], ["Lücke", null]],
 ];
 
-// Verse für Stufe 5: Das fehlende Wort reimt sich auf ein Wort im Vers.
+// Verse für Stufe 5 und 6: Das fehlende Wort reimt sich auf ein Wort im Vers
+// (Stufe 5 nur Verse, deren Lösung ein Bild hat).
 const REIMVERSE = [
   ["Die kleine Maus wohnt in einem ___.", "Haus"],
   ["Die Kuh sucht ihren ___.", "Schuh"],

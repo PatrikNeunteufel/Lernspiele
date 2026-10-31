@@ -73,9 +73,9 @@ const ARTEN = {
     const k = waehle(Object.keys(KONTUREN));
     return { art: "kontur", folge: folgeMit(k), richtig: k };
   },
-  notenbild() {
+  notenbild(anzahl = 3) {
     const k = waehle(Object.keys(KONTUREN));
-    const andere = mische(Object.keys(KONTUREN).filter(x => x !== k)).slice(0, 2);
+    const andere = mische(Object.keys(KONTUREN).filter(x => x !== k)).slice(0, anzahl - 1);
     const richtig = folgeMit(k);
     return { art: "notenbild", folge: richtig, richtig, optionen: mische([richtig, ...andere.map(folgeMit)]) };
   },
@@ -88,12 +88,14 @@ const ARTEN = {
   },
 };
 
+// Basisklasse 2: Stufe 1 = 1. Klasse, 2–4 = 2. Klasse, 5 = 3. Klasse, 6 Endgegner.
 const STUFE = {
   s1: () => ARTEN.vergleich(7, 12, false),
-  s2: () => waehle([() => ARTEN.vergleich(3, 7, true), ARTEN.kontur])(),
-  s3: () => waehle([ARTEN.kontur, () => ARTEN.vergleich(2, 4, true)])(),
-  s4: () => waehle([ARTEN.notenbild, ARTEN.kontur])(),
-  s5: () => waehle([ARTEN.schritt, ARTEN.schritt, ARTEN.notenbild])(),
+  s2: () => ARTEN.vergleich(2, 6, true),
+  s3: () => ARTEN.kontur(),
+  s4: () => waehle([ARTEN.kontur, () => ARTEN.notenbild(3)])(),
+  s5: () => ARTEN.notenbild(3),
+  s6: () => waehle([ARTEN.schritt, ARTEN.schritt, () => ARTEN.notenbild(4)])(),
 };
 
 function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
@@ -122,10 +124,11 @@ LS.spiel({
   anzahl: 8,
   stufen: {
     s1: "Zwei Töne: Welcher ist höher? Grosse Sprünge.",
-    s2: "Kleinere Sprünge — oder gleich hoch? Wohin geht die Melodie?",
+    s2: "Kleinere Sprünge — oder gleich hoch?",
     s3: "Drei Töne: hinauf, hinunter oder beides?",
-    s4: "Welches Notenbild passt zur Melodie?",
-    s5: "Halbton oder Ganzton?",
+    s4: "Wohin geht die Melodie? Und welches Notenbild passt dazu?",
+    s5: "Welches Notenbild passt zur Melodie?",
+    s6: "Endgegner: Halbton oder Ganzton? Und Notenbilder mit vier Möglichkeiten.",
   },
 
   aufgabe(ctx) {
@@ -165,7 +168,9 @@ LS.spiel({
       ctx.flaeche.append(el("div", { class: "notenblatt" }, NOTEN.zeile({ noten: a.folge.map(p => ({ p })), schluessel: true, mindestBreite: 220 })));
       LS.auswahl(ctx, {
         optionen: ["Halbton", "Ganzton"], richtig: a.richtig, breite: 150,
-        hinweis: "Ohne Vorzeichen liegen die Halbtöne zwischen e und f und zwischen h und c. Alle anderen Nachbarn sind Ganztöne.",
+        // Königsstufe: knappe Hilfe ohne die Regel; die Regel steht in der Auflösung.
+        hinweis: ctx.stufe === "s6" ? "Hör nochmal genau hin: Ist der Schritt ganz klein oder etwas grösser?"
+          : "Ohne Vorzeichen liegen die Halbtöne zwischen e und f und zwischen h und c. Alle anderen Nachbarn sind Ganztöne.",
         loesung: `${NOTEN.name(a.folge[0])} – ${NOTEN.name(a.folge[1])} ist ein ${a.richtig}.`,
       });
     }

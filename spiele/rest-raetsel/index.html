@@ -42,14 +42,35 @@ const STUFE = {
   s3: { teiler: [2, 3, 4, 5, 6, 7, 8, 9], qMax: 10, bilder: false, rueckwaerts: 0 },
   s4: { teiler: [3, 4, 6, 7, 8, 9], qMax: 99, bilder: false, rueckwaerts: 0 },
   s5: { teiler: [4, 6, 7, 8, 9], qMax: 99, bilder: false, rueckwaerts: 0.4 },
+  // Königsstufe: einstellige Teiler mit dreistelligem Ergebnis (5000 : 7) oder zweistellige
+  // Teiler (950 : 12), auch rückwärts.
+  s6: { teiler: [6, 7, 8, 9, 11, 12, 15, 25], qMax: 999, bilder: false, rueckwaerts: 0.3 },
 };
+
+// Grösste zu teilende Zahl je Stufe (für pruefeAufgabe).
+const MAX_ZAHL = { s1: 29, s2: 99, s3: 99, s4: 1000, s5: 1000, s6: 9999 };
 
 function aufgabeErzeugen(stufe) {
   const p = STUFE[stufe];
   const d = waehle(p.teiler);
-  const q = zufall(stufe === "s4" || stufe === "s5" ? 11 : 1, p.qMax);
+  let q;
+  if (stufe === "s6") q = d > 10 ? zufall(11, 99) : zufall(101, p.qMax);
+  else q = zufall(stufe === "s4" || stufe === "s5" ? 11 : 1, p.qMax);
   const r = Math.random() < 0.15 ? 0 : zufall(1, d - 1); // manchmal geht es auf
   return { d, q, r, a: q * d + r, rueckwaerts: Math.random() < p.rueckwaerts, ding: waehle(DINGE) };
+}
+
+/** Mängel: a = q · d + r mit 0 ≤ r < d, Zahlenraum der Stufe, Felder gross genug. */
+function pruefeAufgabe(x, stufe) {
+  const m = [];
+  if (x.a !== x.q * x.d + x.r) m.push("Umkehraufgabe stimmt nicht");
+  if (!(x.r >= 0 && x.r < x.d)) m.push("Rest nicht kleiner als der Teiler");
+  if (!(x.q >= 1)) m.push("Ergebnis kleiner als 1");
+  if (!STUFE[stufe].teiler.includes(x.d)) m.push("Teiler nicht aus der Stufe");
+  if (x.a > MAX_ZAHL[stufe]) m.push("Zahlenraum überschritten");
+  if (String(x.q).length > 3 || String(x.a).length > 5) m.push("Zahl passt nicht in die Tastatur");
+  if (x.rueckwaerts && !STUFE[stufe].rueckwaerts) m.push("Rückwärts-Rätsel in falscher Stufe");
+  return m;
 }
 
 LS.spiel({
@@ -62,6 +83,7 @@ LS.spiel({
     s3: "Alle Einmaleins-Reihen: 32 : 6 = 5 Rest 2.",
     s4: "Grössere Zahlen: 250 : 7.",
     s5: "Auch rückwärts: Welche Zahl gibt durch 7 genau 8 Rest 3?",
+    s6: "Endgegner: 5000 : 7 und 950 : 12 — auch rückwärts.",
   },
 
   aufgabe(ctx) {

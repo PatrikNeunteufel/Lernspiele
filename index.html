@@ -262,7 +262,6 @@ function zeichneListe() {
   box.innerHTML = "";
   const name = LS.aktuellerSpieler();
   const fokus = name ? LS.profil(name).fokus : [];
-  const empfohlen = name ? LS.empfohleneStufe(name) : null;
   let gezeigt = 0;
 
   for (const thema of THEMEN.filter(t => filter.thema === "alle" || filter.thema === t.id)) {
@@ -283,6 +282,8 @@ function zeichneListe() {
           el("span", { class: "marke" + (fokus.includes(l.lz) ? " fokus" : ""), text: (fokus.includes(l.lz) ? "⭐ " : "") + l.lz }))));
 
       const knoepfe = el("div", { class: "stufenknoepfe" });
+      // Empfehlung je Spiel: Klasse des Kindes gegen die Basisklasse des Spiels
+      const empfohlen = name ? LS.empfohleneStufe(name, s.id) : null;
       const stufen = LS.SKALA.filter(st => s.stufen.includes(st.id) && (filter.stufe === "alle" || filter.stufe === st.id));
       for (const st of stufen) {
         const sterne = name ? LS.besteSterne(name, s.id, st.id) : 0;
@@ -290,7 +291,7 @@ function zeichneListe() {
         const a = el("a", {
           class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empfohlen && !gross ? " empfohlen" : ""),
           href: `${s.pfad}?stufe=${st.id}`,
-          title: `Stufe ${st.nr} · ${st.name} (${st.fuer})`,
+          title: `Stufe ${st.nr} · ${st.name} (${LS.stufeFuer(s.id, st.id)})`,
         }, el("span", { text: gross ? `${st.icon} Stufe ${st.nr} spielen` : `${st.icon}${st.nr}` }),
            el("span", { class: "s", text: sterne ? "★".repeat(sterne) : "" }));
         a.style.setProperty("--sf", st.farbe);

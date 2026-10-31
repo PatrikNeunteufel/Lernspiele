@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Körper-Puzzle</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  .bild-gross { text-align: center; font-size: clamp(64px, 15vw, 96px); line-height: 1.1; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🫀 Körper-Puzzle</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="koerper.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.1.4: a Körperteile, deren Lage und Funktion beschreiben; b (Grundanspruch
+// 1. Zyklus) Eigenschaften zuordnen (Gelenke beweglich, Schädel schützt); c Organsysteme
+// (Bewegung: Muskeln und Skelett; Verdauung); d Haut, schwitzen, Sonnenbrand; e (Grundanspruch
+// 2. Zyklus) Blutkreislauf: Herz, Venen, Arterien. Inhalte in koerper.js.
+
+const { waehle, mische, el } = LS;
+// „ab Stufe“ in koerper.js = Nummer der Spielstufe (s1–s6).
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+
+const ARTEN = {
+  teil(n = 3) {
+    const [bild, name, artikel] = waehle(KOERPERTEILE);
+    const andere = mische(KOERPERTEILE.filter(t => t[1] !== name)).slice(0, n - 1).map(t => t[1]);
+    return { art: "teil", bild, artikel, richtig: name, optionen: mische([name, ...andere]) };
+  },
+  finde(n = 3) {
+    const [bild, name] = waehle(KOERPERTEILE);
+    const andere = mische(KOERPERTEILE.filter(t => t[1] !== name)).slice(0, n - 1);
+    return { art: "finde", name, richtig: bild, optionen: mische([bild, ...andere.map(t => t[0])]) };
+  },
+  sinn() {
+    const [frage, , organ] = waehle(SINNE);
+    return { art: "sinn", frage, richtig: organ, optionen: SINNE.map(s => s[2]) };
+  },
+  frage(n) {
+    // Fragen dieser Stufe, ab und zu eine der Stufe davor
+    const liste = KOERPER_FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const [, frage, richtig, f1, f2] = waehle(liste.length ? liste : KOERPER_FRAGEN.filter(f => f[0] === n));
+    return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
+  },
+  weg() {
+    const [name, stationen] = waehle(WEGE);
+    return { art: "weg", name, reihe: stationen };
+  },
+};
+
+const STUFE = {
+  s1: () => waehle([ARTEN.teil, ARTEN.finde])(),
+  s2: () => waehle([ARTEN.sinn, ARTEN.finde])(),
+  s3: () => waehle([() => ARTEN.frage(3), ARTEN.sinn])(),
+  // gemischt: Gelenke und Schutz, Sinne und Körperteile mit mehr Auswahl
+  s4: () => waehle([() => ARTEN.frage(3), () => ARTEN.frage(3), ARTEN.sinn, () => ARTEN.teil(4), () => ARTEN.finde(4)])(),
+  s5: () => ARTEN.frage(5),
+  // Königsstufe: Blutkreislauf, Haut, Wege durch den Körper
+  s6: () => waehle([() => ARTEN.frage(6), () => ARTEN.frage(6), ARTEN.weg])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (a.optionen && (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length)) m.push("Auswahl doppelt oder ohne Lösung");
+  if (a.art === "frage") {
+    const f = KOERPER_FRAGEN.find(x => x[1] === a.frage);
+    if (f[0] > STUFE_NR[stufe]) m.push("Frage aus einer höheren Stufe");
+  }
+  return m;
+}
+
+const sinnBild = Object.fromEntries(SINNE.map(([, bild, organ]) => [organ, bild]));
+
+LS.spiel({
+  id: "koerper-puzzle",
+  einleitung: "Dein Körper kann so viel: sehen, hören, rennen, denken! Kennst du dich aus?",
+  anzahl: 8,
+  stufen: {
+    s1: "Körperteile: Auge, Ohr, Nase, Hand …",
+    s2: "Die fünf Sinne: Womit hörst du?",
+    s3: "Gelenke, Schädel, Milchzähne.",
+    s4: "Alles gemischt: Körperteile, Sinne, Gelenke.",
+    s5: "Herz, Lunge, Magen, Gehirn: Was machen sie?",
+    s6: "Blutkreislauf, Haut und der Weg des Essens.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "teil") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst dieser Körperteil?" }), el("div", { class: "bild-gross", text: a.bild }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 110, hinweis: "Zeig auf deinen eigenen Körper: Wo ist das?", loesung: `Das ist ${a.artikel} ${a.richtig}.` });
+    } else if (a.art === "finde") {
+      ctx.flaeche.append(el("div", { class: "frage", text: `Tipp auf: ${a.name}` }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 100, inhalt: b => ({ bild: b }), hinweis: "Zeig zuerst auf deinem Körper, wo das ist.", loesung: `${a.richtig} ${a.name}` });
+    } else if (a.art === "sinn") {
+      ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 110, inhalt: o => ({ bild: sinnBild[o], text: o }),
+        hinweis: "Probier es aus: Halte dir die Augen, die Ohren oder die Nase zu. Was geht dann nicht mehr?", loesung: `${a.frage} Mit: ${a.richtig}.` });
+    } else if (a.art === "frage") {
+      ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 200, hinweis: "Denk an deinen eigenen Körper. Was passt?", loesung: `${a.frage} ${a.richtig}` });
+    } else {
+      ctx.flaeche.append(el("div", { class: "frage", text: `${a.name}: Tipp die Stationen der Reihe nach an.` }));
+      LS.reihenfolge(ctx, { reihe: a.reihe, breite: 130, pfeile: true,
+        hinweis: "Wo beginnt der Weg? Denk an deinen Körper von oben nach unten.", loesung: a.reihe.join(" → ") });
+    }
+    if (ctx.nr === 0) ctx.sag("Schau genau und tipp auf deine Antwort.");
+  },
+});
+</script>
+</body>
+</html>

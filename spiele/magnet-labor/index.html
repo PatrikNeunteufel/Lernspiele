@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magnet-Labor</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  .magnete { display: flex; justify-content: center; gap: 28px; margin: 6px 0 16px; }
+  .stab { display: flex; border-radius: 8px; overflow: hidden; border: 3px solid var(--text); font-weight: 900; color: #fff; font-size: 24px; }
+  .stab span { width: 58px; height: 42px; display: grid; place-items: center; }
+  /* Nordpol rot, Südpol grün — wie oft im Schulmaterial (Deko-Farben, keine Stellenfarben) */
+  .stab .N { background: #e5484d; }
+  .stab .S { background: #2fbf71; }
+  .stab .frei { background: #c9ccd6; color: var(--text); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧲 Magnet-Labor</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="versuche.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.5.2: 2a Magnete untersuchen (ziehen sich an, stossen sich ab, nichts passiert);
+// 2b (Grundanspruch 1. Zyklus) Magnete haben zwei Pole, gleiche stossen sich ab, ungleiche ziehen
+// sich an; 2c Wirkung auf Materialien, Abstand; 2d Elektromagnet; 1a/1b Batterie und Stromkreis.
+// NMG.3.3.d Verhalten gegenüber Magnet. Inhalte in versuche.js.
+
+const { waehle, mische, el } = LS;
+// „ab Stufe“ in versuche.js = Nummer der Spielstufe (s1–s6).
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+const ANDERER_POL = { N: "S", S: "N" };
+const KOERBE = { ja: { bild: "🧲", text: "zieht an" }, nein: { bild: "🚫", text: "zieht nicht an" } };
+
+const ARTEN = {
+  ding() {
+    const [bild, name, zieht] = waehle(MAGNET_DINGE);
+    return { art: "ding", bild, name, richtig: zieht ? "ja" : "nein" };
+  },
+  pole() {
+    // zwei Stabmagnete, die einander zugewandten Pole entscheiden
+    const links = waehle([["N", "S"], ["S", "N"]]);
+    const rechts = waehle([["N", "S"], ["S", "N"]]);
+    const gleich = links[1] === rechts[0];
+    return { art: "pole", links, rechts, richtig: gleich ? "abstossen" : "anziehen", optionen: ["anziehen", "abstossen"] };
+  },
+  poleWahl() {
+    // Pole schwer: Welcher Pol muss rechts in der Mitte stehen, damit sie sich anziehen / abstossen?
+    const links = waehle([["N", "S"], ["S", "N"]]);
+    const ziel = waehle(["anziehen", "abstossen"]);
+    const richtig = ziel === "abstossen" ? links[1] : ANDERER_POL[links[1]];
+    return { art: "poleWahl", links, ziel, richtig, optionen: ["N", "S"] };
+  },
+  frage(n) {
+    const liste = MAGNET_FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const [, frage, richtig, f1, f2] = waehle(liste.length ? liste : MAGNET_FRAGEN.filter(f => f[0] === n));
+    return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.ding(),
+  s2: () => waehle([ARTEN.pole, ARTEN.ding])(),
+  s3: () => waehle([() => ARTEN.frage(3), ARTEN.pole, ARTEN.ding])(),
+  s4: () => waehle([() => ARTEN.frage(4), ARTEN.pole])(),
+  // Kompass und Pole, schwer
+  s5: () => waehle([() => ARTEN.frage(5), () => ARTEN.frage(5), ARTEN.poleWahl])(),
+  // Königsstufe: Strom — Stromkreis, Leiter, Elektromagnet, Sicherheit
+  s6: () => ARTEN.frage(6),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (a.art === "pole" && a.richtig !== (a.links[1] === a.rechts[0] ? "abstossen" : "anziehen")) m.push("Pole falsch beurteilt");
+  if (a.art === "poleWahl" && (a.richtig === a.links[1]) !== (a.ziel === "abstossen")) m.push("Pol falsch gewählt");
+  if (a.art === "frage") {
+    if (new Set(a.optionen).size !== 3) m.push("Antworten doppelt");
+    if (MAGNET_FRAGEN.find(f => f[1] === a.frage)[0] > STUFE_NR[stufe]) m.push("Frage aus einer höheren Stufe");
+  }
+  return m;
+}
+
+const stab = pole => el("div", { class: "stab" }, ...pole.map(p => el("span", { class: p, text: p })));
+
+LS.spiel({
+  id: "magnet-labor",
+  einleitung: "Willkommen im Labor! Was zieht der Magnet an? Und was passiert, wenn zwei Magnete sich treffen?",
+  anzahl: 8,
+  stufen: {
+    s1: "Zieht der Magnet das an?",
+    s2: "Nordpol und Südpol: anziehen oder abstossen?",
+    s3: "Wirkt der Magnet durch Papier und Wasser?",
+    s4: "Kompass und die Erde als Magnet.",
+    s5: "Kompass und Pole für Profis: Welcher Pol muss hin?",
+    s6: "Strom: Batterie, Stromkreis, Elektromagnet.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "ding") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Zieht der Magnet das an?" }));
+      LS.koerbe(ctx, {
+        karte: { bild: a.bild, text: a.name }, koerbe: ["ja", "nein"], richtig: a.richtig, korbInhalt: k => KOERBE[k],
+        farbe: k => (k === "ja" ? "var(--deko-6)" : "var(--deko-7)"),
+        hinweis: "Ein Magnet zieht Dinge aus Eisen an — nicht Holz, Papier, Glas oder Stoff.",
+        loesung: `${a.name}: ${KOERBE[a.richtig].text}.`, lob: `Richtig: ${a.name} — ${KOERBE[a.richtig].text}.`,
+      });
+    } else if (a.art === "pole") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Ziehen sich die Magnete an oder stossen sie sich ab?" }),
+        el("div", { class: "magnete" }, stab(a.links), stab(a.rechts)));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 140,
+        inhalt: o => ({ bild: o === "anziehen" ? "🤝" : "↔️", text: o === "anziehen" ? "ziehen sich an" : "stossen sich ab" }),
+        hinweis: "Schau auf die beiden Pole in der Mitte: Gleiche Pole stossen sich ab, verschiedene ziehen sich an.",
+        loesung: `In der Mitte treffen ${a.links[1]} und ${a.rechts[0]} aufeinander: ${a.richtig === "anziehen" ? "verschieden — sie ziehen sich an" : "gleich — sie stossen sich ab"}.`,
+      });
+    } else if (a.art === "poleWahl") {
+      const ziehen = a.ziel === "anziehen";
+      ctx.flaeche.append(el("div", { class: "frage", text: `Welcher Pol muss rechts in der Mitte sein, damit sich die Magnete ${ziehen ? "anziehen" : "abstossen"}?` }),
+        el("div", { class: "magnete" }, stab(a.links), el("div", { class: "stab" }, el("span", { class: "frei", text: "?" }), el("span", { class: "frei", text: "" }))));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 140,
+        inhalt: o => ({ text: o, klein: o === "N" ? "Nordpol" : "Südpol" }),
+        hinweis: "Schau, welcher Pol links in der Mitte ist. Gleiche Pole stossen sich ab, verschiedene ziehen sich an.",
+        loesung: `Links in der Mitte ist ${a.links[1]}. ${ziehen ? `Verschiedene Pole ziehen sich an: rechts muss ${a.richtig} sein.` : `Gleiche Pole stossen sich ab: rechts muss auch ${a.richtig} sein.`}`,
+      });
+    } else {
+      ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 200, hinweis: "Denk an deine Versuche mit Magneten und Batterien.", loesung: `${a.frage} ${a.richtig}` });
+    }
+    if (ctx.nr === 0) ctx.sag("Überleg zuerst, dann tipp auf deine Antwort.");
+  },
+});
+</script>
+</body>
+</html>

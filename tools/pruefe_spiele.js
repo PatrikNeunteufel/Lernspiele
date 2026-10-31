@@ -16,7 +16,7 @@ const vm = require("vm");
 const WURZEL = path.join(__dirname, "..");
 const SPIELE_DIR = path.join(WURZEL, "spiele");
 const DOM = fs.readFileSync(path.join(__dirname, "pruef_dom.js"), "utf8");
-const STUFEN = ["s1", "s2", "s3", "s4", "s5"];
+const STUFEN = ["s1", "s2", "s3", "s4", "s5", "s6"];
 const VERDAECHTIG = /NaN|undefined|\bnull\b|Infinity|\[object /;
 
 const opt = { runden: 3, aufgaben: 3000, seed: 1, maxKlicks: 8000 };
@@ -64,6 +64,8 @@ const TREIBER = `
   let ohneFortschritt = 0;
   let letzterText = "";
   __uhr.weiter(50);
+  // ?stufe=… startet direkt eine Runde; sonst bietet das Spiel diese Stufe nicht an.
+  if (!buehne.querySelector(".fortschritt")) return { runden: 0, klicks: 0, funde: [{ art: "Stufe", text: "Stufe wird nicht angeboten (fehlt in def.stufen)" }] };
   pruefeText("Start");
   while (protokoll().length < runden && klicks < maxKlicks) {
     // Knöpfe und alles andere, das auf Tippen hört (SVG-Felder, Zahlenstrahl).
