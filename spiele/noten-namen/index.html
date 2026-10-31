@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Noten-Namen</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .notenwahl .wahl-knopf { padding: 4px; }
+  .notenwahl .noten-zeile { max-width: 200px; }
+  .name-gross { text-align: center; font-size: clamp(48px, 12vw, 72px); font-weight: 900; margin: 0 0 10px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎼 Noten-Namen</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/noten.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MU.6.B.1 (Notation): b rhythmische Motive und melodische Bewegungen im Notenbild
+// erkennen; e (2. Zyklus) „die Stammtöne benennen und notieren (absolute Notennamen) und kennen
+// die Bedeutung von Vorzeichen“; MU.6.A.1.2a einfache Tonfolgen im Fünftonraum.
+// Violinschlüssel, deutsche Notennamen (h statt b). Kleinbuchstaben ohne Oktavstriche —
+// Annahme, mit dem Musik-Lehrmittel abzugleichen.
+
+const { zufall, waehle, mische, el } = LS;
+
+// Je Stufe: Bereich der Positionen (p, siehe noten.js) und ob Vorzeichen vorkommen.
+const STUFE = {
+  s1: { von: -2, bis: 2, namen: ["c", "d", "e", "f", "g"] },   // c' bis g' (Fünftonraum)
+  s2: { von: -2, bis: 5 },                                       // c' bis c''
+  s3: { von: -2, bis: 9, umgekehrt: true },                      // c' bis g'' (bis über die oberste Linie)
+  s4: { von: -5, bis: 12, umgekehrt: true },                     // g bis c''' mit Hilfslinien
+  s5: { von: -2, bis: 9, vorzeichen: true },
+};
+
+// Vorzeichen, die in der Schule zuerst vorkommen: fis, cis, gis, dis, ais und b, es, as, des, ges.
+const KREUZ = ["c", "d", "f", "g", "a"];
+const BE = ["h", "e", "a", "d", "g"];
+const GELAEUFIG = [...KREUZ.map(n => n + "is"), "b", "es", "as", "des", "ges"];
+
+function aufgabeErzeugen(stufe) {
+  const s = STUFE[stufe];
+  const p = zufall(s.von, s.bis);
+  let vorzeichen = 0;
+  if (s.vorzeichen && Math.random() < 0.7) {
+    const n = NOTEN.name(p);
+    vorzeichen = KREUZ.includes(n) && BE.includes(n) ? waehle([1, -1]) : KREUZ.includes(n) ? 1 : BE.includes(n) ? -1 : 0;
+  }
+  const richtig = NOTEN.name(p, vorzeichen);
+  if (s.umgekehrt && Math.random() < 0.4) {
+    // Name gegeben, Note finden: drei Positionen mit verschiedenen Namen
+    const andere = new Set();
+    while (andere.size < 2) { const q = zufall(s.von, s.bis); if (NOTEN.name(q) !== richtig) andere.add(q); }
+    return { art: "finden", p, richtig, optionen: mische([p, ...andere]) };
+  }
+  let optionen;
+  if (s.namen) optionen = s.namen;
+  else if (vorzeichen) {
+    // die richtige, der Stammton ohne Vorzeichen und zwei andere gebräuchliche Namen
+    const stamm = NOTEN.name(p);
+    optionen = mische([richtig, stamm, ...mische(GELAEUFIG.filter(n => n !== richtig)).slice(0, 2)]);
+  } else optionen = NOTEN.NAMEN;
+  return { art: "benennen", p, vorzeichen, richtig, optionen };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const s = STUFE[stufe];
+  if (a.p < s.von || a.p > s.bis) m.push("Note ausserhalb des Bereichs");
+  if (a.art === "benennen") {
+    if (!a.optionen.includes(a.richtig)) m.push("richtiger Name fehlt");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("Name doppelt");
+    if (a.vorzeichen && !/is$|es$|^b$|^as$/.test(a.richtig)) m.push("Vorzeichen ohne passenden Namen");
+  } else if (a.optionen.filter(q => NOTEN.name(q) === a.richtig).length !== 1) m.push("nicht genau eine passende Note");
+  return m;
+}
+
+/** Hinweis: von einer bekannten Note aus zählen. */
+function hinweisFuer(p) {
+  if (p <= -2) return "Die Note mit der kleinen Hilfslinie unten ist das c. Zähle von dort: c, d, e …";
+  if (p <= 3) return "Die unterste Linie ist das e, der Zwischenraum darüber das f, die zweite Linie das g.";
+  if (p <= 8) return "Die mittlere Linie ist das h. Zähle von dort hinauf: h, c, d, e, f.";
+  return "Die oberste Linie ist das f. Darüber geht es weiter: g, a, h, c.";
+}
+
+LS.spiel({
+  id: "noten-namen",
+  einleitung: "Jede Note hat einen Namen: c, d, e, f, g, a, h. Wo sitzt sie im Notensystem?",
+  anzahl: 10,
+  stufen: {
+    s1: "Fünf Töne: c, d, e, f, g.",
+    s2: "Von c bis zum hohen c.",
+    s3: "Bis über die oberste Linie — und Noten finden.",
+    s4: "Mit Hilfslinien unten und oben.",
+    s5: "Mit Vorzeichen: fis, cis, b, es …",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const folge = () => [{ midi: NOTEN.midi(a.p, a.vorzeichen || 0), dauer: 0.9 }];
+    // Beim Treffer die Note vorspielen — so hängen Bild und Klang zusammen.
+    const vorspielen = () => NOTEN.spiele(folge());
+    if (a.art === "finden") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Note ist das?" }), el("div", { class: "name-gross", text: a.richtig }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.p, breite: 150,
+        inhalt: q => NOTEN.zeile({ noten: [{ p: q }], schluessel: true, mindestBreite: 150 }),
+        hinweis: q => `Das ist das ${NOTEN.name(q)}. ${hinweisFuer(a.p)}`,
+        loesung: `So sieht das ${a.richtig} aus.`,
+        lob: `Genau, das ist das ${a.richtig}! 🎵`, beiRichtig: vorspielen,
+      });
+      box.classList.add("notenwahl");
+    } else {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Wie heisst diese Note?" }),
+        el("div", { class: "notenblatt" }, NOTEN.zeile({ noten: [{ p: a.p, vorzeichen: a.vorzeichen }], schluessel: true, mindestBreite: 220 })),
+        el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, folge)));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 70,
+        hinweis: a.vorzeichen ? (a.vorzeichen > 0 ? "♯ heisst: einen halben Ton höher. Man hängt «-is» an: f wird fis." : "♭ heisst: einen halben Ton tiefer. Man hängt «-es» an, aus h wird b, aus e wird es.") : hinweisFuer(a.p),
+        loesung: `Das ist das ${a.richtig}.`,
+        lob: `Richtig, das ${a.richtig}! 🎵`, beiRichtig: vorspielen,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Schau, auf welcher Linie oder in welchem Zwischenraum die Note sitzt.");
+  },
+});
+</script>
+</body>
+</html>

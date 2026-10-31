@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reim-Paare</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .vorlage { text-align: center; margin: 4px 0 14px; }
+  .vorlage .bild { font-size: clamp(64px, 15vw, 100px); line-height: 1.1; }
+  .vorlage .wort { font-size: clamp(28px, 6.5vw, 42px); font-weight: 900; }
+  .vers { text-align: center; font-size: clamp(22px, 4.8vw, 32px); font-weight: 800; line-height: 1.5; margin: 6px 0 16px; }
+  .vers .luecke { display: inline-block; min-width: 3em; border-bottom: 5px solid var(--deko-4); color: var(--deko-4); }
+
+  /* Paare finden: Karten mit Bild und Wort */
+  .paare { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 560px; margin: 0 auto; }
+  .paar-karte { border: none; border-radius: 16px; min-height: 104px; background: #fff; box-shadow: 0 5px 0 var(--rand); font-family: inherit; color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px; }
+  .paar-karte .bild { font-size: clamp(36px, 9vw, 48px); line-height: 1.1; }
+  .paar-karte b { font-size: clamp(16px, 3.6vw, 22px); }
+  .paar-karte.gewaehlt { outline: 5px solid var(--deko-6); }
+  .paar-karte.gefunden { background: var(--gut-hell); box-shadow: 0 5px 0 var(--gut); cursor: default; }
+  .paar-karte.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎵 Reim-Paare</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.5.C.1 (1. Zyklus): a „Erfahrungen sammeln mit Reimen, Silben und Lauten“,
+// c (Grundanspruch) Wissen über Anlaut, Reim, Silbe nutzen. Reimwörter stehen in woerter.js.
+
+const { waehle, mische, el } = LS;
+
+const GRUPPEN = REIMGRUPPEN.map((g, nr) => g.map(([wort, bild]) => ({ wort, bild, gruppe: nr })));
+const ALLE = GRUPPEN.flat();
+const mitBild = liste => liste.filter(w => w.bild);
+const reimen = (a, b) => a.gruppe === b.gruppe;
+
+/** Wörter, die sich nicht auf w reimen. */
+const andere = (w, nurBild) => (nurBild ? mitBild(ALLE) : ALLE).filter(x => !reimen(x, w));
+
+/** Wörter verschiedener Gruppen — keine zwei davon reimen sich. */
+function ausVerschiedenenGruppen(liste, anzahl) {
+  const gesehen = new Set();
+  const ergebnis = [];
+  for (const w of mische(liste)) {
+    if (gesehen.has(w.gruppe)) continue;
+    gesehen.add(w.gruppe);
+    ergebnis.push(w);
+    if (ergebnis.length === anzahl) break;
+  }
+  return ergebnis;
+}
+
+const ARTEN = {
+  welcheReimt(anzahl) {
+    const gruppe = waehle(GRUPPEN.filter(g => mitBild(g).length >= 2));
+    const [vorlage, richtig] = mische(mitBild(gruppe));
+    return { art: "welcheReimt", vorlage, richtig, optionen: mische([richtig, ...ausVerschiedenenGruppen(andere(vorlage, true), anzahl - 1)]) };
+  },
+  paare(anzahl) {
+    const gruppen = mische(GRUPPEN.filter(g => mitBild(g).length >= 2)).slice(0, anzahl);
+    return { art: "paare", karten: mische(gruppen.flatMap(g => mische(mitBild(g)).slice(0, 2))) };
+  },
+  reimtNicht() {
+    const gruppe = waehle(GRUPPEN.filter(g => g.length >= 3));
+    const drei = mische(gruppe).slice(0, 3);
+    const richtig = waehle(andere(drei[0], false));
+    return { art: "reimtNicht", richtig, optionen: mische([...drei, richtig]) };
+  },
+  vers() {
+    const [text, wort] = waehle(REIMVERSE);
+    const richtig = ALLE.find(w => w.wort === wort);
+    return { art: "vers", text, richtig, optionen: mische([richtig, ...ausVerschiedenenGruppen(andere(richtig, false), 3)]) };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.welcheReimt(3),
+  s2: () => waehle([() => ARTEN.welcheReimt(4), () => ARTEN.paare(3)])(),
+  s3: () => waehle([() => ARTEN.paare(3), () => ARTEN.paare(4), () => ARTEN.welcheReimt(4)])(),
+  s4: () => waehle([ARTEN.reimtNicht, () => ARTEN.paare(4)])(),
+  s5: () => waehle([ARTEN.vers, ARTEN.reimtNicht])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (a.art === "paare") {
+    for (const k of a.karten) if (a.karten.filter(x => reimen(x, k)).length !== 2) m.push(`«${k.wort}» hat nicht genau einen Reimpartner`);
+    if (a.karten.some(k => !k.bild)) m.push("Karte ohne Bild");
+    return m;
+  }
+  if (new Set(a.optionen.map(o => o.wort)).size !== a.optionen.length) m.push("doppelte Auswahl");
+  if (!a.optionen.includes(a.richtig)) m.push("richtige Antwort fehlt");
+  if (a.art === "welcheReimt") {
+    if (a.optionen.filter(o => reimen(o, a.vorlage)).length !== 1) m.push("nicht genau ein Reimwort in der Auswahl");
+    if (a.optionen.includes(a.vorlage)) m.push("Vorlage steht in der Auswahl");
+    if ((stufe === "s1" || stufe === "s2") && a.optionen.some(o => !o.bild)) m.push("Wort ohne Bild in Stufe 1–2");
+  }
+  if (a.art === "reimtNicht" && a.optionen.filter(o => !reimen(o, a.richtig)).length !== 3) m.push("die drei anderen reimen sich nicht alle");
+  if (a.art === "vers") {
+    if (a.optionen.filter(o => reimen(o, a.richtig)).length !== 1) m.push("mehr als ein Reimwort in der Auswahl");
+    const partner = ALLE.filter(w => reimen(w, a.richtig) && w !== a.richtig);
+    if (!partner.some(w => a.text.includes(w.wort))) m.push("Vers enthält kein Reimwort zur Lösung");
+  }
+  return m;
+}
+
+const reimeVon = w => ALLE.filter(x => reimen(x, w)).map(x => x.wort).join(" – ");
+
+/** Paare finden: zwei Karten antippen, die sich reimen. */
+function paareSpielen(ctx, a) {
+  ctx.flaeche.append(el("div", { class: "auftrag", text: "Finde die Reim-Paare: Tipp zwei Bilder an, die sich reimen." }));
+  const box = el("div", { class: "paare" });
+  let gewaehlt = null;
+  let gefunden = 0;
+  let fertig = false;
+  const knoepfe = a.karten.map(k => {
+    const knopf = el("button", { type: "button", class: "paar-karte" }, el("span", { class: "bild", text: k.bild }), el("b", { text: k.wort }));
+    knopf.addEventListener("click", () => {
+      if (fertig || knopf.classList.contains("gefunden")) return;
+      if (!gewaehlt) { gewaehlt = { k, knopf }; knopf.classList.add("gewaehlt"); LS.ton("tipp"); return; }
+      if (gewaehlt.knopf === knopf) { knopf.classList.remove("gewaehlt"); gewaehlt = null; return; }
+      const erste = gewaehlt;
+      gewaehlt = null;
+      erste.knopf.classList.remove("gewaehlt");
+      if (reimen(erste.k, k)) {
+        erste.knopf.classList.add("gefunden");
+        knopf.classList.add("gefunden");
+        gefunden++;
+        LS.ton("huepf");
+        if (gefunden === a.karten.length / 2) { fertig = true; ctx.richtig("Alle Reim-Paare gefunden! 🎉"); }
+        else ctx.sag(`${erste.k.wort} – ${k.wort}: das reimt sich!`, "gut");
+        return;
+      }
+      for (const kn of [erste.knopf, knopf]) { kn.classList.remove("falsch"); void kn.offsetWidth; kn.classList.add("falsch"); }
+      ctx.falsch(`«${erste.k.wort}» und «${k.wort}» klingen am Ende nicht gleich. Sprich beide Wörter laut.`,
+        "Die Paare: " + [...new Set(a.karten.map(x => x.gruppe))].map(g => a.karten.filter(x => x.gruppe === g).map(x => x.wort).join(" – ")).join(", "));
+      if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+    });
+    return knopf;
+  });
+  box.append(...knoepfe);
+  ctx.flaeche.append(box);
+}
+
+LS.spiel({
+  id: "reim-paare",
+  einleitung: "Maus und Haus — das reimt sich! Hör genau hin: Welche Wörter klingen am Ende gleich?",
+  anzahl: 8,
+  stufen: {
+    s1: "Welches Bild reimt sich? Drei Bilder zur Auswahl.",
+    s2: "Vier Bilder zur Auswahl und erste Reim-Paare.",
+    s3: "Reim-Paare finden: drei oder vier Paare.",
+    s4: "Welches Wort reimt sich nicht?",
+    s5: "Reime im Vers ergänzen: Die Ziege fängt eine …",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "paare") {
+      paareSpielen(ctx, a);
+      if (ctx.nr === 0) ctx.sag("Sprich die Wörter laut. Welche klingen am Ende gleich?");
+      return;
+    }
+    const inhalt = o => (o.bild ? { bild: o.bild, text: o.wort } : { text: o.wort });
+    if (a.art === "welcheReimt") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Was reimt sich darauf?" }),
+        el("div", { class: "vorlage" }, el("div", { class: "bild", text: a.vorlage.bild }), el("div", { class: "wort", text: a.vorlage.wort })));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, inhalt, breite: 130,
+        hinweis: o => `«${a.vorlage.wort}» und «${o.wort}» klingen am Ende nicht gleich. Sprich sie laut.`,
+        loesung: `${a.vorlage.wort} – ${a.richtig.wort}`, lob: `${a.vorlage.wort} – ${a.richtig.wort}: das reimt sich! 🎵`,
+      });
+    } else if (a.art === "reimtNicht") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Drei Wörter reimen sich. Welches passt nicht dazu?" }));
+      const reimend = a.optionen.filter(o => o !== a.richtig);
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, inhalt, breite: 130,
+        hinweis: o => `«${o.wort}» reimt sich auf ${reimend.filter(x => x !== o).map(x => `«${x.wort}»`).join(" und ")}. Such das Wort, das am Ende anders klingt.`,
+        loesung: `${reimend.map(x => x.wort).join(" – ")} reimen sich, «${a.richtig.wort}» nicht.`,
+      });
+    } else {
+      const [vor, nach] = a.text.split("___");
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welches Wort reimt sich und passt in den Vers?" }),
+        el("div", { class: "vers" }, vor, el("span", { class: "luecke", text: "?" }), nach));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, inhalt, breite: 130,
+        hinweis: "Lies den Vers laut. Das fehlende Wort klingt am Ende wie ein Wort im Vers.",
+        loesung: a.text.replace("___", a.richtig.wort) + ` (${reimeVon(a.richtig)})`,
+        lob: a.text.replace("___", a.richtig.wort) + " 🎵",
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Sprich die Wörter laut und hör aufs Ende.");
+  },
+});
+</script>
+</body>
+</html>

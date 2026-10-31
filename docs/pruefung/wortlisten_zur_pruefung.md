@@ -446,3 +446,379 @@ der Wörter-Trenner zeigt sie in Grossbuchstaben ohne Lücken.
 | My name is Tim. | Ich heisse Tim. | ☐ |
 | How old are you? | Wie alt bist du? | ☐ |
 | I'm nine. | Ich bin neun. | ☐ |
+
+## 5. Silben-Klatscher (Lehrplan SG D.5.C.1)
+
+Sprechsilben, wie man sie klatscht — nicht die Trennung am Zeilenende (E-le-fant, nicht Ele-fant).
+
+| Wort | Silben | Anzahl | Bild | ☐ |
+|---|---|---|---|---|
+| Hund | Hund | 1 | 🐕 | ☐ |
+| Maus | Maus | 1 | 🐭 | ☐ |
+| Ball | Ball | 1 | ⚽ | ☐ |
+| Baum | Baum | 1 | 🌳 | ☐ |
+| Haus | Haus | 1 | 🏠 | ☐ |
+| Fisch | Fisch | 1 | 🐟 | ☐ |
+| Kuh | Kuh | 1 | 🐄 | ☐ |
+| Schuh | Schuh | 1 | 👟 | ☐ |
+| Mond | Mond | 1 | 🌙 | ☐ |
+| Stern | Stern | 1 | ⭐ | ☐ |
+| Brot | Brot | 1 | 🍞 | ☐ |
+| Hut | Hut | 1 | 🎩 | ☐ |
+| Bus | Bus | 1 | 🚌 | ☐ |
+| Zug | Zug | 1 | 🚆 | ☐ |
+| Eis | Eis | 1 | 🍦 | ☐ |
+| Herz | Herz | 1 | ❤️ | ☐ |
+| Katze | Kat-ze | 2 | 🐈 | ☐ |
+| Apfel | Ap-fel | 2 | 🍎 | ☐ |
+| Auto | Au-to | 2 | 🚗 | ☐ |
+| Blume | Blu-me | 2 | 🌸 | ☐ |
+| Sofa | So-fa | 2 | 🛋️ | ☐ |
+| Hase | Ha-se | 2 | 🐇 | ☐ |
+| Birne | Bir-ne | 2 | 🍐 | ☐ |
+| Rose | Ro-se | 2 | 🌹 | ☐ |
+| Sonne | Son-ne | 2 | ☀️ | ☐ |
+| Ziege | Zie-ge | 2 | 🐐 | ☐ |
+| Käse | Kä-se | 2 | 🧀 | ☐ |
+| Ente | En-te | 2 | 🦆 | ☐ |
+| Löwe | Lö-we | 2 | 🦁 | ☐ |
+| Tiger | Ti-ger | 2 | 🐅 | ☐ |
+| Hose | Ho-se | 2 | 👖 | ☐ |
+| Kuchen | Ku-chen | 2 | 🍰 | ☐ |
+| Gurke | Gur-ke | 2 | 🥒 | ☐ |
+| Brille | Bril-le | 2 | 👓 | ☐ |
+| Kirsche | Kir-sche | 2 | 🍒 | ☐ |
+| Wolke | Wol-ke | 2 | ☁️ | ☐ |
+| Zebra | Ze-bra | 2 | 🦓 | ☐ |
+| Küken | Kü-ken | 2 | 🐥 | ☐ |
+| Schnecke | Schne-cke | 2 | 🐌 | ☐ |
+| Drache | Dra-che | 2 | 🐉 | ☐ |
+| Kamel | Ka-mel | 2 | 🐫 | ☐ |
+| Geschenk | Ge-schenk | 2 | 🎁 | ☐ |
+| Banane | Ba-na-ne | 3 | 🍌 | ☐ |
+| Tomate | To-ma-te | 3 | 🍅 | ☐ |
+| Elefant | E-le-fant | 3 | 🐘 | ☐ |
+| Papagei | Pa-pa-gei | 3 | 🦜 | ☐ |
+| Schmetterling | Schmet-ter-ling | 3 | 🦋 | ☐ |
+| Karotte | Ka-rot-te | 3 | 🥕 | ☐ |
+| Telefon | Te-le-fon | 3 | ☎️ | ☐ |
+| Kaninchen | Ka-nin-chen | 3 | 🐰 | ☐ |
+| Pinguin | Pin-gu-in | 3 | 🐧 | ☐ |
+| Rakete | Ra-ke-te | 3 | 🚀 | ☐ |
+| Gitarre | Gi-tar-re | 3 | 🎸 | ☐ |
+| Zitrone | Zi-tro-ne | 3 | 🍋 | ☐ |
+| Krokodil | Kro-ko-dil | 3 | 🐊 | ☐ |
+| Fledermaus | Fle-der-maus | 3 | 🦇 | ☐ |
+| Schildkröte | Schild-krö-te | 3 | 🐢 | ☐ |
+| Känguru | Kän-gu-ru | 3 | 🦘 | ☐ |
+| Giraffe | Gi-raf-fe | 3 | 🦒 | ☐ |
+| Oktopus | Ok-to-pus | 3 | 🐙 | ☐ |
+| Eidechse | Ei-dech-se | 3 | 🦎 | ☐ |
+| Roboter | Ro-bo-ter | 3 | 🤖 | ☐ |
+| Kalender | Ka-len-der | 3 | 📅 | ☐ |
+| Regenschirm | Re-gen-schirm | 3 | ☂️ | ☐ |
+| Motorrad | Mo-tor-rad | 3 | 🏍️ | ☐ |
+| Spaghetti | Spa-ghet-ti | 3 | 🍝 | ☐ |
+| Schneeflocke | Schnee-flo-cke | 3 | ❄️ | ☐ |
+| Regenbogen | Re-gen-bo-gen | 4 | 🌈 | ☐ |
+| Badewanne | Ba-de-wan-ne | 4 | 🛁 | ☐ |
+| Helikopter | He-li-kop-ter | 4 | 🚁 | ☐ |
+| Taschenlampe | Ta-schen-lam-pe | 4 | 🔦 | ☐ |
+| Sonnenblume | Son-nen-blu-me | 4 | 🌻 | ☐ |
+| Krankenwagen | Kran-ken-wa-gen | 4 | 🚑 | ☐ |
+| Marienkäfer | Ma-ri-en-kä-fer | 5 | 🐞 | ☐ |
+| Lokomotive | Lo-ko-mo-ti-ve | 5 | 🚂 | ☐ |
+| Wassermelone | Was-ser-me-lo-ne | 5 | 🍉 | ☐ |
+| Feuerwehrauto | Feu-er-wehr-au-to | 5 | 🚒 | ☐ |
+| Polizeiauto | Po-li-zei-au-to | 5 | 🚓 | ☐ |
+
+## 6. Reim-Paare (Lehrplan SG D.5.C.1)
+
+Alle Wörter einer Zeile müssen sich reimen; Wörter aus verschiedenen Zeilen dürfen sich **nicht** reimen.
+Wörter ohne Bild kommen erst ab Stufe 4 vor.
+
+| Reimgruppe | ☐ |
+|---|---|
+| 🐭 Maus – 🏠 Haus | ☐ |
+| 🐕 Hund – 👄 Mund | ☐ |
+| 🐄 Kuh – 👟 Schuh | ☐ |
+| 👖 Hose – 🌹 Rose – 🥫 Dose | ☐ |
+| 👃 Nase – 🐇 Hase – 🏺 Vase | ☐ |
+| 🦵 Bein – 🐖 Schwein – 🪨 Stein | ☐ |
+| ☀️ Sonne – 🛢️ Tonne | ☐ |
+| 👓 Brille – 🦗 Grille | ☐ |
+| 🐋 Wal – 🧣 Schal | ☐ |
+| 🪰 Fliege – 🐐 Ziege – Wiege | ☐ |
+| 🌲 Tanne – 🍳 Pfanne – Kanne | ☐ |
+| 🦔 Igel – 🪞 Spiegel – 🧱 Ziegel | ☐ |
+| 🐝 Biene – 🛤️ Schiene | ☐ |
+| 🥜 Nuss – 🚌 Bus – 💋 Kuss | ☐ |
+| 🦷 Zahn – 🐓 Hahn – 🏗️ Kran | ☐ |
+| ✋ Hand – 🏖️ Sand | ☐ |
+| 🍾 Flasche – 👜 Tasche | ☐ |
+| 🧚 Fee – 🍵 Tee – ❄️ Schnee – 🍀 Klee | ☐ |
+| 🥚 Ei – 🦈 Hai | ☐ |
+| 💡 Licht – 🙂 Gesicht | ☐ |
+| Kamm – 🧽 Schwamm – 🐑 Lamm | ☐ |
+| 🪱 Wurm – 🗼 Turm – 🌪️ Sturm | ☐ |
+| 🪜 Leiter – 🏇 Reiter | ☐ |
+| 🍲 Topf – Kopf – Zopf | ☐ |
+| 🦟 Mücke – 🌉 Brücke – Lücke | ☐ |
+
+### Verse (Stufe 5)
+
+| Vers | ☐ |
+|---|---|
+| Die kleine Maus wohnt in einem **Haus**. | ☐ |
+| Die Kuh sucht ihren **Schuh**. | ☐ |
+| Der Hase hat eine lange **Nase**. | ☐ |
+| Die Ziege fängt eine **Fliege**. | ☐ |
+| Der Hahn sitzt auf dem **Kran**. | ☐ |
+| Der Wal trägt einen warmen **Schal**. | ☐ |
+| Die Biene fliegt über die **Schiene**. | ☐ |
+| Der Igel schaut in den **Spiegel**. | ☐ |
+| Im Winter fällt der Schnee, die Fee trinkt heissen **Tee**. | ☐ |
+| Der Wurm kriecht auf den **Turm**. | ☐ |
+| In der Tasche ist eine **Flasche**. | ☐ |
+| Das Lamm sucht den **Kamm**. | ☐ |
+| Der Hund hat einen grossen **Mund**. | ☐ |
+| Ich sehe die Grille durch meine **Brille**. | ☐ |
+
+## 7. ABC-Sortierer (Lehrplan SG D.5.E.1)
+
+| Wort | Bild | ☐ |
+|---|---|---|
+| Affe | 🐒 | ☐ |
+| Ameise | 🐜 | ☐ |
+| Apfel | 🍎 | ☐ |
+| Auto | 🚗 | ☐ |
+| Ball | ⚽ | ☐ |
+| Banane | 🍌 | ☐ |
+| Baum | 🌳 | ☐ |
+| Biene | 🐝 | ☐ |
+| Birne | 🍐 | ☐ |
+| Blume | 🌸 | ☐ |
+| Boot | ⛵ | ☐ |
+| Brot | 🍞 | ☐ |
+| Bus | 🚌 | ☐ |
+| Dach | 🏠 | ☐ |
+| Delfin | 🐬 | ☐ |
+| Drache | 🐉 | ☐ |
+| Ei | 🥚 | ☐ |
+| Eis | 🍦 | ☐ |
+| Elefant | 🐘 | ☐ |
+| Ente | 🦆 | ☐ |
+| Esel | 🫏 | ☐ |
+| Fisch | 🐟 | ☐ |
+| Flasche | 🍾 | ☐ |
+| Fuchs | 🦊 | ☐ |
+| Gabel | 🍴 | ☐ |
+| Giraffe | 🦒 | ☐ |
+| Gurke | 🥒 | ☐ |
+| Hase | 🐇 | ☐ |
+| Haus | 🏡 | ☐ |
+| Herz | ❤️ | ☐ |
+| Hund | 🐕 | ☐ |
+| Hut | 🎩 | ☐ |
+| Igel | 🦔 | ☐ |
+| Insel | 🏝️ | ☐ |
+| Jacke | 🧥 | ☐ |
+| Kamel | 🐫 | ☐ |
+| Katze | 🐈 | ☐ |
+| Kerze | 🕯️ | ☐ |
+| Kirsche | 🍒 | ☐ |
+| Koala | 🐨 | ☐ |
+| Krone | 👑 | ☐ |
+| Kuh | 🐄 | ☐ |
+| Maus | 🐭 | ☐ |
+| Mond | 🌙 | ☐ |
+| Nase | 👃 | ☐ |
+| Nest | 🪺 | ☐ |
+| Ohr | 👂 | ☐ |
+| Palme | 🌴 | ☐ |
+| Pilz | 🍄 | ☐ |
+| Pinsel | 🖌️ | ☐ |
+| Rakete | 🚀 | ☐ |
+| Ring | 💍 | ☐ |
+| Rose | 🌹 | ☐ |
+| Schaf | 🐑 | ☐ |
+| Schiff | 🚢 | ☐ |
+| Schuh | 👟 | ☐ |
+| Sonne | ☀️ | ☐ |
+| Stern | ⭐ | ☐ |
+| Tasse | ☕ | ☐ |
+| Tiger | 🐅 | ☐ |
+| Tomate | 🍅 | ☐ |
+| Uhr | ⌚ | ☐ |
+| Vogel | 🐦 | ☐ |
+| Wal | 🐋 | ☐ |
+| Wolke | ☁️ | ☐ |
+| Wurm | 🪱 | ☐ |
+| Zahn | 🦷 | ☐ |
+| Zebra | 🦓 | ☐ |
+| Ziege | 🐐 | ☐ |
+| Zug | 🚆 | ☐ |
+
+## 8. Tier-Sortierer und Lebensraum-Zuordnung (Lehrplan SG NMG.2.1, NMG.2.4)
+
+Leer = bewusst nicht zugeordnet, weil nicht eindeutig (Haltung) oder in mehreren Lebensräumen typisch.
+Ohne Bild = kein passendes Emoji; das Tier kommt erst ab Stufe 3 vor.
+
+| Name | Bild | Klasse | Gruppe (Säugetiere) | Haltung | Lebensraum | ☐ |
+|---|---|---|---|---|---|---|
+| Reh | 🦌 | Säugetier | Paarhufer | Wildtier | Wald | ☐ |
+| Rothirsch | 🦌 | Säugetier | Paarhufer | Wildtier | Wald | ☐ |
+| Wildschwein | 🐗 | Säugetier | Paarhufer | Wildtier | Wald | ☐ |
+| Fuchs | 🦊 | Säugetier | Raubtier | Wildtier | Wald | ☐ |
+| Dachs | 🦡 | Säugetier | Raubtier | Wildtier | Wald | ☐ |
+| Luchs |  | Säugetier | Raubtier | Wildtier | Wald | ☐ |
+| Wolf | 🐺 | Säugetier | Raubtier | Wildtier |  | ☐ |
+| Braunbär | 🐻 | Säugetier | Raubtier | Wildtier |  | ☐ |
+| Eichhörnchen | 🐿️ | Säugetier | Nagetier | Wildtier | Wald | ☐ |
+| Feldmaus | 🐁 | Säugetier | Nagetier | Wildtier | Wiese | ☐ |
+| Feldhase | 🐇 | Säugetier | Hasenartige | Wildtier | Wiese | ☐ |
+| Maulwurf |  | Säugetier | Insektenfresser | Wildtier | Wiese | ☐ |
+| Igel | 🦔 | Säugetier | Insektenfresser | Wildtier |  | ☐ |
+| Spitzmaus |  | Säugetier | Insektenfresser | Wildtier |  | ☐ |
+| Fledermaus | 🦇 | Säugetier | Fledertier | Wildtier |  | ☐ |
+| Biber | 🦫 | Säugetier | Nagetier | Wildtier | Weiher | ☐ |
+| Murmeltier |  | Säugetier | Nagetier | Wildtier | Gebirge | ☐ |
+| Steinbock |  | Säugetier | Paarhufer | Wildtier | Gebirge | ☐ |
+| Gämse |  | Säugetier | Paarhufer | Wildtier | Gebirge | ☐ |
+| Kuh | 🐄 | Säugetier | Paarhufer | Nutztier |  | ☐ |
+| Schaf | 🐑 | Säugetier | Paarhufer | Nutztier |  | ☐ |
+| Ziege | 🐐 | Säugetier | Paarhufer | Nutztier |  | ☐ |
+| Schwein | 🐖 | Säugetier | Paarhufer | Nutztier |  | ☐ |
+| Pferd | 🐎 | Säugetier | Unpaarhufer |  |  | ☐ |
+| Esel | 🫏 | Säugetier | Unpaarhufer |  |  | ☐ |
+| Zebra | 🦓 | Säugetier | Unpaarhufer | Wildtier |  | ☐ |
+| Hund | 🐕 | Säugetier | Raubtier | Heimtier |  | ☐ |
+| Katze | 🐈 | Säugetier | Raubtier | Heimtier |  | ☐ |
+| Kaninchen | 🐰 | Säugetier | Hasenartige |  |  | ☐ |
+| Hamster | 🐹 | Säugetier | Nagetier | Heimtier |  | ☐ |
+| Meerschweinchen |  | Säugetier | Nagetier | Heimtier |  | ☐ |
+| Ratte | 🐀 | Säugetier | Nagetier |  |  | ☐ |
+| Wal | 🐋 | Säugetier | Wal | Wildtier |  | ☐ |
+| Delfin | 🐬 | Säugetier | Wal | Wildtier |  | ☐ |
+| Specht |  | Vogel |  | Wildtier | Wald | ☐ |
+| Waldkauz | 🦉 | Vogel |  | Wildtier | Wald | ☐ |
+| Stockente | 🦆 | Vogel |  | Wildtier | Weiher | ☐ |
+| Graureiher |  | Vogel |  | Wildtier | Weiher | ☐ |
+| Höckerschwan | 🦢 | Vogel |  | Wildtier | Weiher | ☐ |
+| Steinadler | 🦅 | Vogel |  | Wildtier | Gebirge | ☐ |
+| Feldlerche |  | Vogel |  | Wildtier | Wiese | ☐ |
+| Huhn | 🐔 | Vogel |  | Nutztier |  | ☐ |
+| Wellensittich | 🦜 | Vogel |  | Heimtier |  | ☐ |
+| Pinguin | 🐧 | Vogel |  | Wildtier |  | ☐ |
+| Forelle | 🐟 | Fisch |  | Wildtier |  | ☐ |
+| Hecht |  | Fisch |  | Wildtier | Weiher | ☐ |
+| Goldfisch | 🐠 | Fisch |  | Heimtier |  | ☐ |
+| Hai | 🦈 | Fisch |  | Wildtier |  | ☐ |
+| Zauneidechse | 🦎 | Reptil |  | Wildtier |  | ☐ |
+| Ringelnatter | 🐍 | Reptil |  | Wildtier | Weiher | ☐ |
+| Blindschleiche |  | Reptil |  | Wildtier |  | ☐ |
+| Schildkröte | 🐢 | Reptil |  |  |  | ☐ |
+| Krokodil | 🐊 | Reptil |  | Wildtier |  | ☐ |
+| Grasfrosch | 🐸 | Amphibie |  | Wildtier | Weiher | ☐ |
+| Erdkröte |  | Amphibie |  | Wildtier |  | ☐ |
+| Bergmolch |  | Amphibie |  | Wildtier | Weiher | ☐ |
+| Feuersalamander |  | Amphibie |  | Wildtier | Wald | ☐ |
+| Alpensalamander |  | Amphibie |  | Wildtier | Gebirge | ☐ |
+| Waldameise | 🐜 | Insekt |  | Wildtier | Wald | ☐ |
+| Hirschkäfer | 🪲 | Insekt |  | Wildtier | Wald | ☐ |
+| Heuschrecke | 🦗 | Insekt |  | Wildtier | Wiese | ☐ |
+| Schmetterling | 🦋 | Insekt |  | Wildtier | Wiese | ☐ |
+| Marienkäfer | 🐞 | Insekt |  | Wildtier |  | ☐ |
+| Honigbiene | 🐝 | Insekt |  |  | Wiese | ☐ |
+| Libelle |  | Insekt |  | Wildtier | Weiher | ☐ |
+| Stubenfliege | 🪰 | Insekt |  | Wildtier |  | ☐ |
+| Mücke | 🦟 | Insekt |  | Wildtier |  | ☐ |
+| Kreuzspinne | 🕷️ | Spinnentier |  | Wildtier |  | ☐ |
+| Weinbergschnecke | 🐌 | Weichtier |  | Wildtier |  | ☐ |
+| Regenwurm | 🪱 | Wurm |  | Wildtier | Wiese | ☐ |
+| Fichte | 🌲 | Pflanze |  |  | Wald | ☐ |
+| Fliegenpilz | 🍄 | Pilz |  |  | Wald | ☐ |
+| Farn | 🌿 | Pflanze |  |  | Wald | ☐ |
+| Löwenzahn | 🌼 | Pflanze |  |  | Wiese | ☐ |
+| Klee | 🍀 | Pflanze |  |  | Wiese | ☐ |
+| Seerose | 🪷 | Pflanze |  |  | Weiher | ☐ |
+| Schilf |  | Pflanze |  |  | Weiher | ☐ |
+| Edelweiss |  | Pflanze |  |  | Gebirge | ☐ |
+| Enzian |  | Pflanze |  |  | Gebirge | ☐ |
+
+### Nahrungsketten (Stufe 4–5) — lies: … wird gefressen von …
+
+| Kette | ☐ |
+|---|---|
+| Gras → Heuschrecke → Grasfrosch → Graureiher | ☐ |
+| Gras → Feldmaus → Fuchs | ☐ |
+| Blätter → Raupe → Kohlmeise → Sperber | ☐ |
+| Salat → Schnecke → Igel | ☐ |
+| Algen → Mückenlarve → Forelle → Graureiher | ☐ |
+| Eicheln → Eichhörnchen → Baummarder | ☐ |
+| Laub → Regenwurm → Amsel | ☐ |
+| Blütennektar → Nachtfalter → Fledermaus | ☐ |
+| Gras → Reh → Luchs | ☐ |
+| Gräser → Murmeltier → Steinadler | ☐ |
+
+Artikel für „Was frisst …?“: die Heuschrecke, der Grasfrosch, der Graureiher, die Feldmaus, der Fuchs, die Raupe, die Kohlmeise, der Sperber, die Schnecke, der Igel, die Mückenlarve, die Forelle, das Eichhörnchen, der Baummarder, der Regenwurm, die Amsel, der Nachtfalter, die Fledermaus, das Reh, der Luchs, das Murmeltier, der Steinadler ☐
+
+## 9. Fledermaus-Forscher (Lehrplan SG NMG.2.3, NMG.2.4)
+
+### Aussagen „Stimmt das?“
+
+| ab Stufe | Aussage | stimmt? | Erklärung im Spiel | ☐ |
+|---|---|---|---|---|
+| 1 | Fledermäuse schlafen am Tag. | ja | Fledermäuse schlafen am Tag und jagen in der Nacht. | ☐ |
+| 1 | Fledermäuse hängen beim Schlafen kopfüber. | ja | Sie halten sich mit den Krallen der Füsse fest und hängen kopfüber. | ☐ |
+| 1 | Fledermäuse fliegen in der Nacht. | ja | In der Dämmerung und in der Nacht gehen sie auf die Jagd. | ☐ |
+| 1 | Fledermäuse sind Vögel. | nein | Fledermäuse haben keine Federn. Sie sind Säugetiere. | ☐ |
+| 1 | Fledermäuse haben ein Fell. | ja | Ihr Körper ist mit einem weichen Fell bedeckt, wie bei allen Säugetieren. | ☐ |
+| 2 | Fledermaus-Junge trinken Milch bei der Mutter. | ja | Fledermäuse sind Säugetiere: Die Jungen werden geboren und trinken Milch. | ☐ |
+| 2 | Fledermäuse legen Eier. | nein | Fledermäuse bekommen lebende Junge. Eier legen zum Beispiel Vögel. | ☐ |
+| 2 | Fledermäuse sind Mäuse. | nein | Sie heissen nur so. Fledermäuse sind eine eigene Gruppe, die Fledertiere. | ☐ |
+| 2 | Die Flügel der Fledermaus sind aus Haut. | ja | Die Flughaut ist zwischen den langen Fingern, den Armen und den Beinen gespannt. | ☐ |
+| 2 | Fledermäuse sind die einzigen Säugetiere, die richtig fliegen können. | ja | Kein anderes Säugetier kann mit Flügeln fliegen. | ☐ |
+| 3 | Fledermäuse sind blind. | nein | Fledermäuse können sehen. Im Dunkeln finden sie den Weg aber vor allem mit ihren Ohren. | ☐ |
+| 3 | Fledermäuse finden ihre Beute mit dem Echo ihrer Rufe. | ja | Sie rufen sehr hoch, das Echo verrät ihnen, wo eine Mücke fliegt. | ☐ |
+| 3 | Wir Menschen hören die Rufe der Fledermäuse meistens nicht. | ja | Die Rufe sind so hoch (Ultraschall), dass unsere Ohren sie meistens nicht hören. | ☐ |
+| 3 | Die Fledermäuse in der Schweiz fressen Insekten. | ja | Mücken, Nachtfalter und Käfer — alle Fledermäuse der Schweiz fressen Insekten. | ☐ |
+| 3 | Fledermäuse in der Schweiz saugen Blut. | nein | Nein. Nur drei Arten in Amerika trinken Blut. Unsere Fledermäuse fressen Insekten. | ☐ |
+| 3 | Im Winter halten Fledermäuse Winterschlaf. | ja | Im Winter gibt es keine Insekten. Darum schlafen sie in Höhlen, Kellern oder Baumhöhlen. | ☐ |
+| 4 | Im Winterschlaf schlägt das Herz der Fledermaus viel langsamer. | ja | Der Körper wird kühl und das Herz schlägt langsam — so reicht das Fett bis zum Frühling. | ☐ |
+| 4 | Eine Fledermaus-Mutter bekommt meistens ein Junges im Jahr. | ja | Meistens ist es ein einziges Junges im Frühsommer. | ☐ |
+| 4 | Im Sommer leben die Mütter mit ihren Jungen zusammen in einer Wochenstube. | ja | In der Wochenstube ist es warm. Dort ziehen viele Mütter zusammen ihre Jungen auf. | ☐ |
+| 4 | Fledermäuse bauen Nester wie Vögel. | nein | Sie bauen keine Nester. Sie suchen Verstecke: Baumhöhlen, Spalten, Dachböden. | ☐ |
+| 5 | In der Schweiz sind alle Fledermäuse geschützt. | ja | Man darf sie nicht stören, fangen oder ihre Verstecke zerstören. | ☐ |
+| 5 | Auch Delfine finden ihre Beute mit dem Echo. | ja | Delfine orientieren sich im Wasser ebenfalls mit Echo-Lauten. | ☐ |
+| 5 | Eine Fledermaus am Boden nimmt man sofort mit blossen Händen auf. | nein | Nicht mit blossen Händen anfassen! Eine erwachsene Person holen, die beim Fledermausschutz anruft. | ☐ |
+| 5 | Viel helles Licht in der Nacht hilft den Fledermäusen. | nein | Viele Fledermäuse meiden helles Licht. Dunkle Nächte helfen ihnen. | ☐ |
+
+### Fragen mit Auswahl
+
+| ab Stufe | Frage | richtig | falsch | Erklärung | ☐ |
+|---|---|---|---|---|---|
+| 1 | Wann jagt die Fledermaus? | in der Nacht | am Mittag; am Morgen früh | Fledermäuse jagen in der Dämmerung und in der Nacht. | ☐ |
+| 2 | Woraus sind die Flügel der Fledermaus? | aus Haut | aus Federn; aus Schuppen | Die Flughaut ist zwischen den Fingern gespannt. | ☐ |
+| 2 | Was trinkt ein Fledermaus-Junges? | Milch der Mutter | Nektar; Wasser aus dem Weiher | Fledermäuse sind Säugetiere. | ☐ |
+| 2 | Zu welcher Tiergruppe gehört die Fledermaus? | Säugetiere | Vögel; Insekten | Fell, lebende Junge, Milch: ein Säugetier. | ☐ |
+| 3 | Was frisst eine Fledermaus in der Schweiz? | Insekten | Früchte; Blut | Mücken, Nachtfalter und Käfer. | ☐ |
+| 3 | Wie findet die Fledermaus im Dunkeln eine Mücke? | mit dem Echo ihrer Rufe | mit der Nase; mit einer Taschenlampe | Sie ruft und hört, wie das Echo zurückkommt. | ☐ |
+| 3 | Was macht die Fledermaus im Winter? | Winterschlaf | Sie fliegt in den Süden.; Sie jagt im Schnee. | Im Winter gibt es keine Insekten — sie schläft. | ☐ |
+| 4 | Wo verbringen Fledermäuse den Winter? | in Höhlen, Kellern oder Baumhöhlen | in einem Nest im Gras; im Weiher | Dort ist es ruhig und frostfrei. | ☐ |
+| 4 | Wie heisst das Sommer-Quartier, in dem die Mütter ihre Jungen aufziehen? | Wochenstube | Winterquartier; Bienenstock | In der Wochenstube leben viele Mütter mit ihren Jungen. | ☐ |
+| 5 | Was hilft den Fledermäusen im Garten? | Blumen, die Insekten anlocken | viel helles Licht in der Nacht; Gift gegen Insekten | Wo es Insekten gibt, finden Fledermäuse Futter. | ☐ |
+| 5 | Was hilft einer Fledermaus, die eine Wohnung sucht? | ein Fledermauskasten | ein Vogelhäuschen mit Futter; ein Gartenteich | Fledermauskästen sind schmale Verstecke mit einem Schlitz unten. | ☐ |
+
+### Jahr der Fledermaus: ❄️ Winter Winterschlaf in einer Höhle → 🌱 Frühling Aufwachen und Insekten jagen → ☀️ Frühsommer Ein Junges kommt in der Wochenstube zur Welt → ☀️ Sommer Das Junge lernt fliegen und jagen → 🍂 Herbst Fett anfressen und ein Winterquartier suchen ☐
+
+### Merkmal und Nutzen (jeder Nutzen darf nur zu einem Merkmal passen)
+
+| Merkmal | Nutzen | ☐ |
+|---|---|---|
+| grosse Ohren | das Echo der Rufe hören | ☐ |
+| Flughaut zwischen den Fingern | fliegen | ☐ |
+| Krallen an den Füssen | kopfüber hängen | ☐ |
+| Winterschlaf | den Winter ohne Insekten überstehen | ☐ |
+| spitze Zähne | Käfer mit hartem Panzer knacken | ☐ |
+| Fell | warm bleiben | ☐ |

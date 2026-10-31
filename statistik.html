@@ -304,7 +304,11 @@ function kachel(zahl, was) {
 
 function sichern() {
   const daten = { version: 1, gesichert: new Date().toISOString(), profile: LS.lies("profile", {}), protokoll: LS.protokoll() };
-  const a = el("a", { href: URL.createObjectURL(new Blob([JSON.stringify(daten, null, 2)], { type: "application/json" })), download: `lernspiele-${new Date().toISOString().slice(0, 10)}.json` });
+  // Die Datei enthält alle Kinder dieses Geräts — darum stehen alle Namen im Dateinamen.
+  // Das Muster lernspiele-*.json hält .gitignore aus dem Repo heraus.
+  const namen = Object.keys(daten.profile).map(n => n.replace(/[^\p{L}\p{N}_-]+/gu, "_")).filter(Boolean).join("-");
+  const dateiname = `lernspiele-${namen ? namen + "-" : ""}${new Date().toISOString().slice(0, 10)}.json`;
+  const a = el("a", { href: URL.createObjectURL(new Blob([JSON.stringify(daten, null, 2)], { type: "application/json" })), download: dateiname });
   document.body.append(a);
   a.click();
   a.remove();

@@ -421,6 +421,96 @@ button.link {
 
 .knopfzeile { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
 
+/* ---------- Auswahlknöpfe und Reihenfolge (LS.auswahl, LS.reihenfolge) ---------- */
+
+.wahl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--wahl-breite, 140px), 100%), 1fr));
+  gap: 10px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.wahl-knopf {
+  border: none;
+  border-radius: 16px;
+  min-height: 64px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: clamp(18px, 3.8vw, 24px);
+  font-weight: 900;
+  background: #fff;
+  color: var(--text);
+  box-shadow: 0 5px 0 var(--rand);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.wahl-knopf:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--rand); }
+.wahl-knopf .bild { font-size: clamp(34px, 8vw, 46px); line-height: 1.1; }
+.wahl-knopf small { font-size: 14px; font-weight: 700; color: var(--text-leise); }
+.wahl-knopf.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+.wahl-knopf.richtig { background: var(--gut-hell); box-shadow: 0 5px 0 var(--gut); }
+.wahl-knopf.gewaehlt { opacity: .3; }
+
+.ablage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  min-height: 64px;
+  margin: 0 auto 14px;
+  padding: 8px;
+  border: 4px dashed var(--rand);
+  border-radius: 18px;
+  max-width: 720px;
+}
+
+.ablage > span {
+  background: var(--gut-hell);
+  border-radius: 12px;
+  padding: 6px 12px;
+  font-size: clamp(18px, 3.8vw, 24px);
+  font-weight: 900;
+}
+
+.ablage .pfeil { background: none; padding: 0; color: var(--text-leise); }
+
+/* Kopie eines Teils, die vom Ausgangsort in den gewählten Korb fliegt (LS.fliegen). */
+.flug {
+  position: fixed;
+  z-index: 50;
+  box-sizing: border-box;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: transform .6s ease-in, opacity .6s ease-in;
+}
+
+/* ---------- Noten (NOTEN.zeile in noten.js) ---------- */
+
+.noten-zeile { display: block; width: 100%; max-width: 560px; height: auto; margin: 0 auto; }
+.noten-zeile .linie { stroke: var(--text); stroke-width: 1.4; }
+.noten-zeile .strich { stroke: var(--text); stroke-width: 3; }
+.noten-zeile .kopf { fill: var(--text); stroke: var(--text); stroke-width: 1.6; }
+.noten-zeile .kopf.hohl { fill: #fff; stroke-width: 2.4; }
+.noten-zeile .hals { stroke: var(--text); stroke-width: 1.8; }
+.noten-zeile .faehnchen, .noten-zeile .punkt { fill: var(--text); }
+.noten-zeile .schluessel { fill: var(--text); font-family: "Noto Music", "Segoe UI Symbol", "Apple Symbols", "Bravura", serif; }
+.noten-zeile .takt { fill: var(--text); font-size: 24px; font-weight: 900; font-family: Georgia, serif; }
+.noten-zeile .vorzeichen { fill: var(--text); font-size: 22px; font-weight: 700; }
+.noten-zeile .luecke { fill: var(--hinweis-hell); stroke: var(--deko-4); stroke-width: 2.5; stroke-dasharray: 6 4; }
+.noten-zeile .luecke-text { fill: var(--deko-4); font-size: 26px; font-weight: 900; }
+.notenblatt { background: #fff; border: 3px solid var(--rand); border-radius: 18px; padding: 6px 10px; margin: 4px auto 14px; max-width: 580px; }
+.hoer-zeile { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
+
 /* ---------- Konfetti ---------- */
 
 .konfetti {

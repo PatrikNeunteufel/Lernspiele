@@ -364,6 +364,119 @@ const LS = (() => {
     return api;
   }
 
+  // ---------- Flug in einen Korb ----------
+
+  /**
+   * Eine Kopie von 'quelle' fliegt auf geradem, also meist schrägem Weg in die Mitte von 'ziel'
+   * (den gewählten Korb). verstecken: die Quelle selbst dabei ausblenden (eine Karte, nicht ein
+   * markiertes Wort im Satz).
+   */
+  function fliegen(quelle, ziel, verstecken = true) {
+    const von = quelle.getBoundingClientRect();
+    const nach = ziel.getBoundingClientRect();
+    const stil = getComputedStyle(quelle);
+    const flug = quelle.cloneNode(true);
+    flug.classList.add("flug");
+    Object.assign(flug.style, {
+      left: `${von.left}px`, top: `${von.top}px`, width: `${von.width}px`, height: `${von.height}px`,
+      fontSize: stil.fontSize, fontWeight: stil.fontWeight,
+    });
+    document.body.append(flug);
+    if (verstecken) quelle.style.visibility = "hidden";
+    const dx = nach.left + nach.width / 2 - (von.left + von.width / 2);
+    const dy = nach.top + nach.height / 2 - (von.top + von.height / 2);
+    void flug.offsetWidth; // Startpunkt festhalten, damit der Übergang greift
+    flug.style.transform = `translate(${dx}px, ${dy}px) scale(.3)`;
+    flug.style.opacity = "0";
+    setTimeout(() => flug.remove(), 800);
+  }
+
+  // ---------- Auswahlknöpfe und Reihenfolge (für Spiele mit Antwort per Antippen) ----------
+
+  /** Knopfinhalt: Text, Element oder { bild, text, klein }. */
+  function wahlInhalt(knopf, inhalt) {
+    if (inhalt instanceof Node || typeof inhalt !== "object") { knopf.append(inhalt); return; }
+    if (inhalt.bild) knopf.append(el("span", { class: "bild", text: inhalt.bild }));
+    if (inhalt.text) knopf.append(el("span", { text: inhalt.text }));
+    if (inhalt.klein) knopf.append(el("small", { text: inhalt.klein }));
+  }
+
+  const wackeln = k => { k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch"); };
+
+  /**
+   * Auswahlknöpfe mit genau einer richtigen Antwort; hängt sie an ctx.flaeche an.
+   * opt.optionen: Werte; opt.richtig: richtiger Wert (Vergleich mit ===)
+   * opt.inhalt(wert): Knopfinhalt (Text, Element oder { bild, text, klein }), Vorgabe der Wert selbst
+   * opt.hinweis(wert): Hinweis nach falscher Wahl (Text oder Funktion des gewählten Werts)
+   * opt.loesung: Lösungstext nach dem dritten Fehlversuch
+   * opt.lob: Text bei richtiger Antwort; opt.breite: Mindestbreite der Knöpfe (px)
+   * opt.beiRichtig(knopf): zusätzlich bei richtiger Antwort, z. B. einen Ton vorspielen
+   */
+  function auswahl(ctx, opt) {
+    const box = el("div", { class: "wahl" });
+    if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
+    let fertig = false;
+    for (const wert of opt.optionen) {
+      const k = el("button", { type: "button", class: "wahl-knopf" });
+      wahlInhalt(k, opt.inhalt ? opt.inhalt(wert) : String(wert));
+      k.addEventListener("click", () => {
+        if (fertig || k.classList.contains("gewaehlt")) return;
+        if (wert === opt.richtig) {
+          fertig = true;
+          k.classList.add("richtig");
+          if (opt.beiRichtig) opt.beiRichtig(k);
+          ctx.richtig(opt.lob);
+          return;
+        }
+        wackeln(k);
+        k.classList.add("gewaehlt");
+        ctx.falsch(typeof opt.hinweis === "function" ? opt.hinweis(wert) : opt.hinweis, opt.loesung);
+        if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+      });
+      box.append(k);
+    }
+    ctx.flaeche.append(box);
+    return box;
+  }
+
+  /**
+   * Teile der Reihe nach antippen; jedes richtig getippte Teil wandert in die Ablage.
+   * opt.reihe: Werte in richtiger Reihenfolge (gezeigt werden sie gemischt)
+   * opt.inhalt(wert), opt.hinweis(wert, erwartet), opt.loesung, opt.lob wie bei auswahl
+   * opt.ablage(wert): Text des Teils in der Ablage, Vorgabe der Wert selbst
+   * opt.pfeile: zwischen den gelegten Teilen „→“ zeigen; opt.beiRichtig() wie bei auswahl
+   */
+  function reihenfolge(ctx, opt) {
+    const ablage = el("div", { class: "ablage", "aria-live": "polite" });
+    const box = el("div", { class: "wahl" });
+    if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
+    let pos = 0;
+    let fertig = false;
+    for (const wert of mische(opt.reihe)) {
+      const k = el("button", { type: "button", class: "wahl-knopf" });
+      wahlInhalt(k, opt.inhalt ? opt.inhalt(wert) : String(wert));
+      k.addEventListener("click", () => {
+        if (fertig || k.classList.contains("gewaehlt")) return;
+        // Gleiche Werte dürfen mehrfach vorkommen: zählt, ob der Wert an der Reihe ist.
+        if (wert === opt.reihe[pos]) {
+          pos++;
+          k.classList.add("gewaehlt");
+          ton("tipp");
+          if (opt.pfeile && pos > 1) ablage.append(el("span", { class: "pfeil", text: "→" }));
+          ablage.append(el("span", { text: opt.ablage ? opt.ablage(wert) : String(wert) }));
+          if (pos === opt.reihe.length) { fertig = true; if (opt.beiRichtig) opt.beiRichtig(); ctx.richtig(opt.lob); }
+          return;
+        }
+        wackeln(k);
+        ctx.falsch(typeof opt.hinweis === "function" ? opt.hinweis(wert, opt.reihe[pos]) : opt.hinweis, opt.loesung);
+        if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+      });
+      box.append(k);
+    }
+    ctx.flaeche.append(ablage, box);
+    return { ablage, box };
+  }
+
   // ---------- Rahmen eines Spiels ----------
 
   /** Einheitliche Schwierigkeitsskala aller Spiele. Stufe 3 und 4 entsprechen der Grund- und
@@ -636,6 +749,6 @@ const LS = (() => {
     STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, spiel, lies, schreibe, sterneText,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     REIHENFOLGEN, geordnet, vorgabeZeit, timerFuer, setzeTimerSpiel, zeitVorschlag,
-    protokoll, besteSterne, spielerWahl,
+    protokoll, besteSterne, spielerWahl, auswahl, reihenfolge, fliegen,
   };
 })();

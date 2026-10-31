@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silben-Klatscher</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .wortbild { text-align: center; margin: 4px 0 14px; }
+  .wortbild .bild { font-size: clamp(70px, 16vw, 110px); line-height: 1.1; }
+  .wortbild .wort { font-size: clamp(30px, 7vw, 46px); font-weight: 900; letter-spacing: 1px; }
+  .silben { font-size: clamp(22px, 5vw, 32px); font-weight: 900; letter-spacing: 1px; }
+  /* Silbenbögen unter den Silben, abwechselnd zwei Deko-Farben */
+  .silben span { display: inline-block; padding: 0 2px 8px; border-bottom: 5px solid var(--deko-6); border-radius: 0 0 40px 40px; margin: 0 1px; }
+  .silben span:nth-child(even) { border-color: var(--deko-2); }
+  .klatsch { font-size: clamp(20px, 5vw, 28px); letter-spacing: -4px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>👏 Silben-Klatscher</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.5.C.1 (1. Zyklus): a „Erfahrungen sammeln mit Reimen, Silben und Lauten
+// (phonologische Bewusstheit)“, c (Grundanspruch) Wissen über Anlaut, Reim, Silbe nutzen.
+// Geübt werden Sprechsilben — so, wie man ein Wort klatscht. Die Wörter stehen in woerter.js.
+
+const { waehle, mische, el } = LS;
+
+const WOERTER = SILBEN_WOERTER.map(([getrennt, bild]) => ({ silben: getrennt.split("-"), wort: getrennt.replace(/-/g, ""), bild }));
+const mitSilben = (min, max) => WOERTER.filter(w => w.silben.length >= min && w.silben.length <= max);
+
+/** Falsche Trennung: eine Silbengrenze um einen Buchstaben verschieben. */
+function verschoben(silben) {
+  for (let versuch = 0; versuch < 20; versuch++) {
+    const s = silben.slice();
+    const i = Math.floor(Math.random() * (s.length - 1));
+    if (Math.random() < 0.5 && s[i].length > 1) { s[i + 1] = s[i].slice(-1) + s[i + 1]; s[i] = s[i].slice(0, -1); }
+    else if (s[i + 1].length > 1) { s[i] += s[i + 1][0]; s[i + 1] = s[i + 1].slice(1); }
+    else continue;
+    return s;
+  }
+  return null;
+}
+
+const ARTEN = {
+  zaehlen(min, max, hoechstens) {
+    const w = waehle(mitSilben(min, max));
+    return { art: "zaehlen", w, optionen: Array.from({ length: hoechstens }, (_, i) => i + 1), richtig: w.silben.length };
+  },
+  welchesWort(anzahl) {
+    // Welches Bild hat so viele Silben? Die anderen Wörter haben andere Silbenzahlen.
+    const ziel = waehle(mitSilben(anzahl, anzahl));
+    const andere = mische(WOERTER.filter(w => w.silben.length !== anzahl)).slice(0, 3);
+    return { art: "welchesWort", anzahl, w: ziel, optionen: mische([ziel, ...andere]), richtig: ziel };
+  },
+  trennung() {
+    const w = waehle(mitSilben(2, 5));
+    const richtig = w.silben.join("-");
+    const falsche = new Set();
+    for (let i = 0; i < 30 && falsche.size < 2; i++) { const f = verschoben(w.silben); if (f && f.join("-") !== richtig) falsche.add(f.join("-")); }
+    return { art: "trennung", w, optionen: mische([richtig, ...falsche]), richtig };
+  },
+  ordnen() {
+    return { art: "ordnen", w: waehle(mitSilben(3, 5)) };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.zaehlen(1, 2, 3),
+  s2: () => waehle([() => ARTEN.zaehlen(1, 3, 4), () => ARTEN.welchesWort(waehle([1, 2, 3]))])(),
+  s3: () => waehle([() => ARTEN.zaehlen(1, 5, 5), () => ARTEN.welchesWort(waehle([2, 3, 4])), ARTEN.trennung])(),
+  s4: () => waehle([ARTEN.trennung, () => ARTEN.welchesWort(waehle([3, 4, 5]))])(),
+  s5: () => waehle([ARTEN.ordnen, ARTEN.trennung])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a) {
+  const m = [];
+  if (a.w.silben.join("") !== a.w.wort || a.w.silben.some(s => !s)) m.push("Silben ergeben das Wort nicht");
+  if (a.art === "zaehlen" && !a.optionen.includes(a.richtig)) m.push("richtige Zahl fehlt in der Auswahl");
+  if (a.art === "welchesWort" && a.optionen.filter(w => w.silben.length === a.anzahl).length !== 1) m.push("nicht genau ein Wort mit dieser Silbenzahl");
+  if (a.art === "trennung") {
+    if (a.optionen.length < 2) m.push("keine falsche Trennung gefunden");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Auswahl");
+    if (a.optionen.some(o => o.replace(/-/g, "") !== a.w.wort)) m.push("Auswahl verändert das Wort");
+  }
+  return m;
+}
+
+const klatschen = n => "👏".repeat(n);
+const silbenBoegen = silben => el("div", { class: "silben" }, ...silben.map(s => el("span", { text: s })));
+const silbenText = silben => silben.join(" - ");
+
+LS.spiel({
+  id: "silben-klatscher",
+  einleitung: "Sprich das Wort laut und klatsche bei jeder Silbe: Ba-na-ne — drei Mal klatschen!",
+  anzahl: 10,
+  stufen: {
+    s1: "Kurze Wörter: Wie oft klatschst du? Hund, Kat-ze.",
+    s2: "Bis drei Silben — und welches Bild hat so viele Silben?",
+    s3: "Bis fünf Silben und die richtigen Silbenbögen finden.",
+    s4: "Wo sind die Silbenbögen richtig? Lange Wörter.",
+    s5: "Silben in die richtige Reihenfolge bringen.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const { w } = a;
+    const loesung = `${w.wort}: ${silbenText(w.silben)} — ${w.silben.length} ${w.silben.length === 1 ? "Silbe" : "Silben"}`;
+    // Der Hinweis darf die Silbenzahl nicht zeigen — er erklärt nur, wie man sie findet.
+    const hinweis = "Sprich das Wort langsam und klatsche mit. Leg die Hand unters Kinn: Jedes Mal, wenn das Kinn nach unten geht, ist eine Silbe.";
+
+    if (a.art === "welchesWort") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: `Welches Wort hat ${a.anzahl} ${a.anzahl === 1 ? "Silbe" : "Silben"}?` }),
+        el("div", { class: "wortbild" }, el("div", { class: "klatsch", text: klatschen(a.anzahl) })));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 130,
+        inhalt: o => ({ bild: o.bild, text: o.wort }),
+        hinweis: o => `«${o.wort}» hat ${o.silben.length} ${o.silben.length === 1 ? "Silbe" : "Silben"}: ${silbenText(o.silben)}.`,
+        loesung, lob: `Genau: ${silbenText(w.silben)} 👏`,
+      });
+      if (ctx.nr === 0) ctx.sag("Sprich jedes Wort und klatsche mit.");
+      return;
+    }
+
+    ctx.flaeche.append(el("div", { class: "wortbild" }, el("div", { class: "bild", text: w.bild }), el("div", { class: "wort", text: w.wort })));
+    if (a.art === "zaehlen") {
+      ctx.flaeche.prepend(el("div", { class: "auftrag", text: "Wie oft klatschst du?" }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90,
+        inhalt: n => ({ text: String(n), klein: klatschen(n) }),
+        hinweis, loesung, lob: `Richtig: ${silbenText(w.silben)} 👏`,
+      });
+    } else if (a.art === "trennung") {
+      ctx.flaeche.prepend(el("div", { class: "auftrag", text: "Wo sind die Silbenbögen richtig?" }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 200,
+        inhalt: o => silbenBoegen(o.split("-")),
+        hinweis: "Sprich das Wort langsam. Jede Silbe ist ein Klatscher — sie klingt wie ein kleines Stück vom Wort.",
+        loesung, lob: `Super: ${silbenText(w.silben)} 👏`,
+      });
+    } else {
+      ctx.flaeche.prepend(el("div", { class: "auftrag", text: "Tipp die Silben der Reihe nach an." }));
+      // Gleiche Silben (Pa-pa-gei) dürfen in beliebiger Reihenfolge getippt werden.
+      LS.reihenfolge(ctx, {
+        reihe: w.silben, breite: 110, ablage: s => s,
+        hinweis: (s, erwartet) => `Sprich das Wort: ${w.wort}. Welche Silbe hörst du jetzt? Sie beginnt mit «${erwartet[0]}».`,
+        loesung, lob: `${silbenText(w.silben)} — ${w.wort}! 👏`,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Sprich das Wort laut und klatsche bei jeder Silbe.");
+  },
+});
+</script>
+</body>
+</html>

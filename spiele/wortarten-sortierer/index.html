@@ -17,7 +17,6 @@
     font-size: clamp(36px, 8vw, 58px);
     font-weight: 900;
     box-shadow: var(--schatten);
-    transition: transform .5s, opacity .5s;
   }
 
   .satz {
@@ -72,7 +71,6 @@
   .k-V { --k: var(--deko-3); }
   .k-A { --k: var(--deko-5); }
 
-  .wortkarte.weg { transform: translateY(160px) scale(.4); opacity: 0; }
 </style>
 </head>
 <body>
@@ -138,15 +136,17 @@ LS.spiel({
     if (ctx.nr === 0) Object.keys(zaehler).forEach(k => { zaehler[k] = 0; });
     const a = aufgabeErzeugen(ctx.stufe);
 
+    const karte = el("div", { class: "wortkarte", text: a.wort });
+    let quelle = karte;
     if (a.satz) {
       const satz = el("div", { class: "satz" });
-      for (const t of a.satz) satz.append(t === a.ziel ? el("mark", { text: t.wort }) : typeof t === "object" ? t.wort : t);
+      quelle = el("mark", { text: a.ziel.wort });
+      for (const t of a.satz) satz.append(t === a.ziel ? quelle : typeof t === "object" ? t.wort : t);
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Wortart hat das markierte Wort?" }), satz);
     } else {
       ctx.flaeche.append(el("div", { class: "auftrag", text: "In welchen Korb gehört das Wort?" }));
+      ctx.flaeche.append(karte);
     }
-    const karte = el("div", { class: "wortkarte", text: a.wort });
-    if (!a.satz) ctx.flaeche.append(karte);
 
     const koerbe = el("div", { class: "koerbe" });
     let fertig = false;
@@ -160,7 +160,7 @@ LS.spiel({
           fertig = true;
           zaehler[k]++;
           zahl.textContent = String(zaehler[k]);
-          karte.classList.add("weg");
+          LS.fliegen(quelle, korb, quelle === karte);
           ctx.richtig(`Richtig: «${a.wort}» ist ${k === "A" ? "ein Adjektiv" : k === "V" ? "ein Verb" : "ein Nomen"}.`);
           return;
         }

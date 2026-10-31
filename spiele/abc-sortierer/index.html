@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ABC-Sortierer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .leiste { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 6px 0 16px; }
+  .leiste span { width: clamp(40px, 10vw, 56px); height: clamp(48px, 12vw, 64px); display: grid; place-items: center; border-radius: 12px; background: #fff; border: 3px solid var(--rand); font-size: clamp(24px, 6vw, 34px); font-weight: 900; }
+  .leiste span.luecke { border: 3px dashed var(--deko-4); color: var(--deko-4); }
+  .leitwoerter { display: flex; justify-content: space-between; gap: 10px; max-width: 520px; margin: 6px auto 16px; padding: 10px 16px; background: #fff; border: 3px solid var(--rand); border-radius: 14px; font-size: clamp(20px, 4.6vw, 28px); font-weight: 900; }
+  .leitwoerter span { color: var(--text-leise); font-size: 14px; font-weight: 700; display: block; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔤 ABC-Sortierer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.5.E.1 (1. Zyklus): a „das ABC mit Unterstützung buchstabieren“, b (Grundanspruch)
+// „das ABC auswendig buchstabieren, um es für das Nachschlagen von Wörtern im Schul-Wörterbuch
+// zu nutzen“; c (2. Zyklus) Vorgehensweisen für das Nachschlagen. Wörter in woerter.js.
+
+const { zufall, waehle, mische, el } = LS;
+
+const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const WOERTER = ABC_WOERTER.map(([wort, bild]) => ({ wort, bild }));
+
+// Wörterbuch-Ordnung: Umlaute wie Grundbuchstaben (ä = a) oder ausgeschrieben (ä = ae).
+// Eine Aufgabe gilt nur, wenn beide Regeln dieselbe Reihenfolge ergeben.
+const alsGrund = w => w.toLowerCase().replace(/ä/g, "a").replace(/ö/g, "o").replace(/ü/g, "u");
+const alsAe = w => w.toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue");
+const vergleich = f => (a, b) => (f(a.wort) < f(b.wort) ? -1 : f(a.wort) > f(b.wort) ? 1 : 0);
+const sortiert = (liste, f = alsGrund) => liste.slice().sort(vergleich(f));
+const eindeutig = liste => sortiert(liste).map(w => w.wort).join() === sortiert(liste, alsAe).map(w => w.wort).join()
+  && new Set(liste.map(w => alsGrund(w.wort))).size === liste.length;
+
+/** Bis zu welchem Buchstaben muss man schauen, um a und b zu ordnen? (1 = erster) */
+function entscheidendeStelle(a, b) {
+  const x = alsGrund(a.wort), y = alsGrund(b.wort);
+  let i = 0;
+  while (i < x.length && i < y.length && x[i] === y[i]) i++;
+  return i + 1;
+}
+
+/** Grösste nötige Stelle beim Ordnen einer Liste (je zwei Nachbarn in der Lösung). */
+function tiefe(liste) {
+  const s = sortiert(liste);
+  return Math.max(1, ...s.slice(1).map((w, i) => entscheidendeStelle(s[i], w)));
+}
+
+/** Wörter für eine Ordnen-Aufgabe: anzahl Wörter, die nötige Tiefe genau 'stelle'. */
+function woerterFuer(anzahl, stelle) {
+  for (;;) {
+    let auswahl;
+    if (stelle === 1) {
+      // lauter verschiedene Anfangsbuchstaben
+      const gesehen = new Set();
+      auswahl = mische(WOERTER).filter(w => !gesehen.has(w.wort[0]) && gesehen.add(w.wort[0])).slice(0, anzahl);
+    } else {
+      // ein Anfangsbuchstabe mit mehreren Wörtern, dazu andere
+      const buchstabe = waehle([...new Set(WOERTER.map(w => w.wort[0]))].filter(b => WOERTER.filter(w => w.wort[0] === b).length >= 2));
+      const gleiche = mische(WOERTER.filter(w => w.wort[0] === buchstabe)).slice(0, zufall(2, Math.min(3, anzahl)));
+      auswahl = [...gleiche, ...mische(WOERTER.filter(w => w.wort[0] !== buchstabe)).slice(0, anzahl - gleiche.length)];
+    }
+    if (auswahl.length === anzahl && eindeutig(auswahl) && tiefe(auswahl) === stelle) return auswahl;
+  }
+}
+
+const ARTEN = {
+  luecke(breite) {
+    const i = zufall(1, ABC.length - 2);
+    const von = Math.max(0, Math.min(i - breite, ABC.length - 2 * breite - 1));
+    const zeige = ABC.slice(von, von + 2 * breite + 1);
+    const falsch = mische(ABC.filter(b => b !== ABC[i] && Math.abs(ABC.indexOf(b) - i) <= 4)).slice(0, 2);
+    return { art: "luecke", zeige, richtig: ABC[i], optionen: mische([ABC[i], ...falsch]) };
+  },
+  nachbar() {
+    const nach = Math.random() < 0.5;
+    const i = nach ? zufall(0, ABC.length - 2) : zufall(1, ABC.length - 1);
+    const richtig = ABC[nach ? i + 1 : i - 1];
+    const falsch = mische([ABC[nach ? i - 1 : i + 1], ABC[i + (nach ? 2 : -2)], ABC[i]].filter(b => b && b !== richtig)).slice(0, 2);
+    return { art: "nachbar", nach, buchstabe: ABC[i], richtig, optionen: mische([richtig, ...falsch]) };
+  },
+  ordnen(anzahl, stelle) {
+    const woerter = woerterFuer(anzahl, stelle);
+    return { art: "ordnen", woerter, reihe: sortiert(woerter), stelle };
+  },
+  leitwoerter() {
+    // Seite im Wörterbuch: erstes und letztes Wort; welches Wort steht dazwischen?
+    for (;;) {
+      const s = sortiert(mische(WOERTER).slice(0, 6));
+      if (!eindeutig(s)) continue;
+      const k = zufall(1, 3);
+      const links = s[k - 1], rechts = s[k + 1];
+      const richtig = s[k];
+      const draussen = s.filter((_, i) => i < k - 1 || i > k + 1).slice(0, 2);
+      if (draussen.length < 2 || links.wort[0] === rechts.wort[0] && Math.random() < 0.5) continue;
+      return { art: "leitwoerter", links, rechts, richtig, optionen: mische([richtig, ...draussen]) };
+    }
+  },
+};
+
+const STUFE = {
+  s1: () => waehle([() => ARTEN.luecke(2), () => ARTEN.luecke(3)])(),
+  s2: () => waehle([ARTEN.nachbar, () => ARTEN.ordnen(3, 1)])(),
+  s3: () => waehle([() => ARTEN.ordnen(4, 1), () => ARTEN.ordnen(4, 2)])(),
+  s4: () => waehle([() => ARTEN.ordnen(5, 2), () => ARTEN.ordnen(5, 3)])(),
+  s5: () => waehle([ARTEN.leitwoerter, () => ARTEN.ordnen(5, 3)])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a) {
+  const m = [];
+  if (a.optionen && (new Set(a.optionen).size !== a.optionen.length || !a.optionen.includes(a.richtig))) m.push("Auswahl doppelt oder ohne Lösung");
+  if (a.art === "luecke" && a.zeige[a.zeige.indexOf(a.richtig)] !== a.richtig) m.push("Lücke nicht in der Leiste");
+  if (a.art === "nachbar" && ABC.indexOf(a.richtig) !== ABC.indexOf(a.buchstabe) + (a.nach ? 1 : -1)) m.push("falscher Nachbar");
+  if (a.art === "ordnen") {
+    if (!eindeutig(a.woerter)) m.push("Reihenfolge hängt von der Umlaut-Regel ab oder Wort doppelt");
+    if (tiefe(a.woerter) !== a.stelle) m.push(`entscheidet erst Buchstabe ${tiefe(a.woerter)}, verlangt ${a.stelle}`);
+  }
+  if (a.art === "leitwoerter") {
+    const zwischen = a.optionen.filter(o => alsGrund(o.wort) > alsGrund(a.links.wort) && alsGrund(o.wort) < alsGrund(a.rechts.wort));
+    if (zwischen.length !== 1 || zwischen[0] !== a.richtig) m.push("nicht genau ein Wort zwischen den Leitwörtern");
+  }
+  return m;
+}
+
+LS.spiel({
+  id: "abc-sortierer",
+  einleitung: "A, B, C, D … Kennst du das ABC? Dann kannst du Wörter ordnen wie im Wörterbuch!",
+  anzahl: 8,
+  stufen: {
+    s1: "Welcher Buchstabe fehlt in der ABC-Leiste?",
+    s2: "Was kommt vor oder nach M? Drei Wörter ordnen.",
+    s3: "Vier Wörter ordnen — manchmal zählt der zweite Buchstabe.",
+    s4: "Fünf Wörter ordnen — bis zum dritten Buchstaben.",
+    s5: "Wie im Wörterbuch: Welches Wort steht auf dieser Seite?",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "luecke") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welcher Buchstabe fehlt?" }),
+        el("div", { class: "leiste" }, ...a.zeige.map(b => el("span", { class: b === a.richtig ? "luecke" : "", text: b === a.richtig ? "?" : b }))));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 80,
+        hinweis: "Sag das ABC laut bis zur Lücke. Welcher Buchstabe kommt dann?",
+        loesung: a.zeige.join(" "),
+      });
+    } else if (a.art === "nachbar") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: `Welcher Buchstabe kommt ${a.nach ? "nach" : "vor"} ${a.buchstabe}?` }),
+        el("div", { class: "leiste" }, ...(a.nach ? [a.buchstabe, "?"] : ["?", a.buchstabe]).map(b => el("span", { class: b === "?" ? "luecke" : "", text: b }))));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 80,
+        hinweis: `Sag das ABC laut bis ${a.buchstabe}. Welcher Buchstabe kommt ${a.nach ? "danach" : "davor"}?`,
+        loesung: a.nach ? `${a.buchstabe} → ${a.richtig}` : `${a.richtig} → ${a.buchstabe}`,
+      });
+    } else if (a.art === "ordnen") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Tipp die Wörter nach dem ABC an — das erste zuerst." }));
+      LS.reihenfolge(ctx, {
+        reihe: a.reihe, breite: 120, pfeile: true, ablage: w => w.wort,
+        inhalt: w => ({ bild: w.bild, text: w.wort }),
+        hinweis: (w, erwartet) => {
+          if (w.wort[0] !== erwartet.wort[0]) return `Schau den ersten Buchstaben an: ${erwartet.wort[0]} kommt im ABC vor ${w.wort[0]}.`;
+          const st = entscheidendeStelle(w, erwartet);
+          return `Beide beginnen gleich. Schau auf Buchstabe ${st}: ${erwartet.wort[st - 1] || "(Wort zu Ende)"} kommt vor ${w.wort[st - 1] || "(Wort zu Ende)"}.`;
+        },
+        loesung: a.reihe.map(w => w.wort).join(" → "),
+        lob: "Richtig geordnet! 🔤",
+      });
+    } else {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Diese Seite im Wörterbuch beginnt und endet mit diesen Wörtern. Welches Wort steht auf der Seite?" }),
+        el("div", { class: "leitwoerter" },
+          el("div", {}, el("span", { text: "erstes Wort" }), a.links.wort),
+          el("div", { style: "text-align:right" }, el("span", { text: "letztes Wort" }), a.rechts.wort)));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 130,
+        inhalt: w => ({ bild: w.bild, text: w.wort }),
+        hinweis: w => (alsGrund(w.wort) < alsGrund(a.links.wort) ? `«${w.wort}» kommt im ABC vor «${a.links.wort}» — es steht weiter vorne.` : `«${w.wort}» kommt im ABC nach «${a.rechts.wort}» — es steht weiter hinten.`),
+        loesung: `${a.links.wort} → ${a.richtig.wort} → ${a.rechts.wort}`,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Sag das ABC leise vor dich hin — das hilft!");
+  },
+});
+</script>
+</body>
+</html>

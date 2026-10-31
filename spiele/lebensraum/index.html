@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lebensraum-Zuordnung</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .lebewesen {
+    margin: 6px auto 18px;
+    width: fit-content;
+    max-width: 100%;
+    background: #fff;
+    border: 4px solid var(--rand);
+    border-radius: 20px;
+    padding: 10px 28px;
+    text-align: center;
+    box-shadow: var(--schatten);
+  }
+  .lebewesen .bild { font-size: clamp(60px, 14vw, 90px); line-height: 1.1; display: block; }
+  .lebewesen b { font-size: clamp(24px, 5.6vw, 36px); font-weight: 900; }
+
+  .raeume { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 12px; max-width: 720px; margin: 0 auto; }
+  .raum {
+    border: none;
+    border-radius: 20px;
+    min-height: 110px;
+    padding: 10px;
+    cursor: pointer;
+    color: #fff;
+    font-family: inherit;
+    font-size: clamp(18px, 3.8vw, 22px);
+    font-weight: 900;
+    background: var(--r);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, .2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+  .raum span { font-size: 40px; }
+  .raum:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0, 0, 0, .2); }
+  .raum.falsch { animation: wackeln .4s; }
+  /* Landschaftsfarben (Deko, keine Stellenfarben) */
+  .r-Wald { --r: #2f7d4f; }
+  .r-Wiese { --r: #7cb342; }
+  .r-Weiher { --r: #2f8fe0; }
+  .r-Gebirge { --r: #7a6f9b; }
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 14px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🌳 Lebensraum-Zuordnung</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../tier-sortierer/tiere.js"></script>
+<script src="nahrung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.2.1: b „Lebewesen ihren typischen Lebensräumen zuordnen (z.B. Wiese:
+// Wildkräuter, Gräser, Insekten, Regenwurm, Käfer)“ (Grundanspruch 1. Zyklus); d erklären, welche
+// Tiere voneinander abhängig sind (Nahrungsketten, Grundanspruch 2. Zyklus). Die Lebewesen stehen
+// in tier-sortierer/tiere.js, die Nahrungsketten in nahrung.js.
+
+const { waehle, mische, el } = LS;
+
+const RAEUME = {
+  Wald: { bild: "🌲", name: "Wald" },
+  Wiese: { bild: "🌼", name: "Wiese" },
+  Weiher: { bild: "💧", name: "Weiher und Bach" },
+  Gebirge: { bild: "🏔️", name: "Gebirge" },
+};
+const LEBEWESEN = TIERE.map(([name, bild, klasse, , , lebensraum]) => ({ name, bild, klasse, lebensraum })).filter(t => t.lebensraum);
+
+const KETTEN = NAHRUNGSKETTEN.map(k => k.map(([name, bild, pflanze]) => ({ name, bild, pflanze: !!pflanze })));
+/** Alle Paare „frisst“: { esser, futter } aus allen Ketten. */
+const FRISST = KETTEN.flatMap(k => k.slice(1).map((esser, i) => ({ esser: esser.name, futter: k[i] })));
+const glied = name => KETTEN.flat().find(g => g.name === name);
+
+const ARTEN = {
+  zuordnen(raeume, mitBild) {
+    const auswahl = mische(raeume).slice(0, raeume.length);
+    const w = waehle(LEBEWESEN.filter(t => auswahl.includes(t.lebensraum) && (!mitBild || t.bild)));
+    return { art: "zuordnen", w, raeume: Object.keys(RAEUME).filter(r => auswahl.includes(r)) };
+  },
+  kette() {
+    return { art: "kette", kette: waehle(KETTEN) };
+  },
+  wasFrisst() {
+    const { esser, futter } = waehle(FRISST);
+    const andere = futter.pflanze ? GROSSE_RAEUBER.filter(n => n !== esser) : NICHT_FUTTER;
+    return { art: "wasFrisst", esser: glied(esser), richtig: futter, optionen: mische([futter, ...mische(andere).slice(0, 2).map(glied)]) };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.zuordnen(mische(["Wald", "Wiese", "Weiher"]).slice(0, 2), true),
+  s2: () => ARTEN.zuordnen(["Wald", "Wiese", "Weiher"], true),
+  s3: () => ARTEN.zuordnen(["Wald", "Wiese", "Weiher", "Gebirge"], false),
+  s4: () => waehle([ARTEN.kette, () => ARTEN.zuordnen(["Wald", "Wiese", "Weiher", "Gebirge"], false)])(),
+  s5: () => waehle([ARTEN.kette, ARTEN.wasFrisst])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (a.art === "zuordnen") {
+    if (!a.raeume.includes(a.w.lebensraum)) m.push("richtiger Lebensraum fehlt");
+    if ((stufe === "s1" || stufe === "s2") && !a.w.bild) m.push("Lebewesen ohne Bild in Stufe 1–2");
+  }
+  if (a.art === "kette" && !a.kette[0].pflanze) m.push("Kette beginnt nicht mit einer Pflanze");
+  if (a.art === "wasFrisst") {
+    if (a.optionen.some(o => !o)) m.push("Auswahl unbekannt");
+    else {
+      const falscheFrisst = a.optionen.filter(o => o !== a.richtig && FRISST.some(f => f.esser === a.esser.name && f.futter.name === o.name));
+      if (falscheFrisst.length) m.push("eine falsche Antwort steht in einer Kette als Futter");
+      if (new Set(a.optionen.map(o => o.name)).size !== 3) m.push("doppelte Auswahl");
+    }
+    if (!ARTIKEL[a.esser.name]) m.push("Artikel fehlt");
+  }
+  return m;
+}
+
+const mitBild = g => (g.bild ? `${g.bild} ${g.name}` : g.name);
+
+LS.spiel({
+  id: "lebensraum",
+  einleitung: "Wo wohnen Tiere und Pflanzen? Im Wald, auf der Wiese, im Weiher oder im Gebirge? Und wer frisst wen?",
+  anzahl: 8,
+  stufen: {
+    s1: "Zwei Lebensräume: Wald, Wiese oder Weiher.",
+    s2: "Drei Lebensräume: Wald, Wiese, Weiher und Bach.",
+    s3: "Dazu das Gebirge — und Tiere ohne Bild.",
+    s4: "Nahrungsketten ordnen: Gras → Feldmaus → Fuchs.",
+    s5: "Wer frisst was?",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "kette") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Wer wird von wem gefressen? Fang mit der Pflanze an." }));
+      LS.reihenfolge(ctx, {
+        reihe: a.kette, breite: 130, pfeile: true, ablage: mitBild,
+        inhalt: g => ({ bild: g.bild || "", text: g.name }),
+        hinweis: (g, erwartet) => (erwartet.pflanze ? "Am Anfang steht immer eine Pflanze." : `${erwartet.name} kommt zuerst — wer frisst wen?`),
+        loesung: a.kette.map(g => g.name).join(" → "),
+        lob: "Richtig! Jedes Tier frisst das, was links davon steht. 🌱",
+      });
+      if (ctx.nr === 0) ctx.sag("Der Pfeil heisst: wird gefressen von.");
+      return;
+    }
+    if (a.art === "wasFrisst") {
+      ctx.flaeche.append(el("div", { class: "frage", text: `Was frisst ${ARTIKEL[a.esser.name]} ${a.esser.name}?` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 130,
+        inhalt: g => ({ bild: g.bild || "", text: g.name }),
+        hinweis: g => (g.pflanze ? `${g.name} ist kein Futter für ${a.esser.name}: Hier geht es um ein Tier, das gefressen wird.`
+          : `${g.name} ist viel grösser — das ist kein Futter für ${a.esser.name}.`),
+        loesung: `${a.richtig.name} → ${a.esser.name}`,
+      });
+      return;
+    }
+    const karte = el("div", { class: "lebewesen" }, el("span", { class: "bild", text: a.w.bild || "❔" }), el("b", { text: a.w.name }));
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "Wo lebt das?" }), karte);
+    const box = el("div", { class: "raeume" });
+    let fertig = false;
+    for (const r of a.raeume) {
+      const k = el("button", { type: "button", class: `raum r-${r}` }, el("span", { text: RAEUME[r].bild }), RAEUME[r].name);
+      k.addEventListener("click", () => {
+        if (fertig) return;
+        if (r === a.w.lebensraum) {
+          fertig = true;
+          LS.fliegen(karte, k);
+          ctx.richtig(`Richtig: ${a.w.name} — ${RAEUME[r].name}.`);
+          return;
+        }
+        k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+        ctx.falsch(a.w.klasse === "Pflanze" || a.w.klasse === "Pilz"
+          ? `Hm, ${a.w.name} wächst meistens woanders. Wo ist der Boden passend — schattig, sonnig oder nass?`
+          : `Hm, ${a.w.name} trifft man meistens woanders. Wo findet das Tier Futter und Schutz?`,
+          `${a.w.name} lebt typisch im Lebensraum ${RAEUME[a.w.lebensraum].name}.`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+      });
+      box.append(k);
+    }
+    ctx.flaeche.append(box);
+    if (ctx.nr === 0) ctx.sag("Tipp auf den Lebensraum, wo man es am meisten findet.");
+  },
+});
+</script>
+</body>
+</html>

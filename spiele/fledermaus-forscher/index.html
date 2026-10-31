@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fledermaus-Forscher</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .nacht { background: linear-gradient(180deg, #1e1b4b, #3b3486); border-radius: 20px; padding: 14px; color: #fff; margin-bottom: 14px; text-align: center; }
+  .nacht .bild { font-size: clamp(54px, 12vw, 80px); line-height: 1.1; }
+  .nacht .aussage { font-size: clamp(20px, 4.6vw, 30px); font-weight: 800; margin-top: 6px; }
+  .wahl-knopf.ja { background: #dff7ea; }
+  .wahl-knopf.nein { background: #fde2e2; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🦇 Fledermaus-Forscher</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="fakten.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.2.3.e: Informationen zu Wachstum, Entwicklung und Fortpflanzung von Säugetieren
+// erschliessen und festhalten (z.B. in Steckbriefen); NMG.2.4.d (Orientierungspunkt): Merkmale
+// beschreiben, die einem Tier das Leben in einem Lebensraum erlauben. Fakten in fakten.js.
+
+const { waehle, mische, el } = LS;
+
+const AUSSAGEN = FLEDERMAUS_AUSSAGEN.map(([ab, text, stimmt, erklaerung]) => ({ ab, text, stimmt, erklaerung }));
+const FRAGEN = FLEDERMAUS_FRAGEN.map(([ab, frage, richtig, f1, f2, erklaerung]) => ({ ab, frage, richtig, falsch: [f1, f2], erklaerung }));
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5 };
+
+/** Vor allem neue Inhalte dieser Stufe, dazu etwas aus der Stufe davor. */
+const passend = (liste, n) => liste.filter(x => x.ab === n || x.ab === n - 1);
+
+// In einer Runde jede Aussage und Frage höchstens einmal.
+let gebraucht = new Set();
+function frisch(liste) {
+  const neu = liste.filter(x => !gebraucht.has(x));
+  const x = waehle(neu.length ? neu : liste);
+  gebraucht.add(x);
+  return x;
+}
+
+const ARTEN = {
+  aussage: n => ({ art: "aussage", a: frisch(passend(AUSSAGEN, n)) }),
+  frage: n => {
+    const f = frisch(passend(FRAGEN, n).length ? passend(FRAGEN, n) : FRAGEN.filter(x => x.ab <= n));
+    return { art: "frage", f, optionen: mische([f.richtig, ...f.falsch]) };
+  },
+  jahr: () => ({ art: "jahr", reihe: FLEDERMAUS_JAHR.map(([zeit, was]) => `${zeit}: ${was}`) }),
+  anpassung: () => {
+    const [merkmal, nutzen] = waehle(FLEDERMAUS_ANPASSUNGEN);
+    const andere = mische(FLEDERMAUS_ANPASSUNGEN.filter(x => x[0] !== merkmal)).slice(0, 2).map(x => x[1]);
+    return { art: "anpassung", merkmal, richtig: nutzen, optionen: mische([nutzen, ...andere]) };
+  },
+};
+
+const STUFE = {
+  s1: () => waehle([() => ARTEN.aussage(1), () => ARTEN.aussage(1), () => ARTEN.frage(1)])(),
+  s2: () => waehle([() => ARTEN.aussage(2), () => ARTEN.frage(2)])(),
+  s3: () => waehle([() => ARTEN.aussage(3), () => ARTEN.frage(3)])(),
+  s4: () => waehle([() => ARTEN.aussage(4), () => ARTEN.frage(4), ARTEN.jahr])(),
+  s5: () => waehle([() => ARTEN.aussage(5), () => ARTEN.frage(5), ARTEN.anpassung, ARTEN.jahr])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const n = STUFE_NR[stufe];
+  if (a.art === "aussage" && a.a.ab > n) m.push("Aussage aus einer höheren Stufe");
+  if (a.art === "frage" && (a.f.ab > n || new Set(a.optionen).size !== 3)) m.push("Frage zu schwer oder Auswahl doppelt");
+  if (a.art === "anpassung" && FLEDERMAUS_ANPASSUNGEN.filter(x => a.optionen.includes(x[1]) && x[0] === a.merkmal).length !== 1) m.push("Merkmal passt zu keiner oder mehreren Antworten");
+  return m;
+}
+
+LS.spiel({
+  id: "fledermaus-forscher",
+  einleitung: "Fledermäuse fliegen in der Nacht, hängen kopfüber und hören, wo die Mücken sind. Was weisst du über sie?",
+  anzahl: 8,
+  stufen: {
+    s1: "Stimmt das? Schlafen, fliegen, kopfüber hängen.",
+    s2: "Der Körper: Fell, Flughaut, Milch für die Jungen.",
+    s3: "Echo, Insekten und Winterschlaf.",
+    s4: "Das Jahr einer Fledermaus und die Wochenstube.",
+    s5: "Wozu helfen die grossen Ohren? Fledermäuse schützen.",
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) gebraucht = new Set();
+    const a = aufgabeErzeugen(ctx.stufe);
+    const kopf = el("div", { class: "nacht" }, el("div", { class: "bild", text: "🦇" }));
+    ctx.flaeche.append(kopf);
+
+    if (a.art === "aussage") {
+      kopf.append(el("div", { class: "aussage", text: a.a.text }));
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Stimmt das?" }));
+      const box = LS.auswahl(ctx, {
+        optionen: [true, false], richtig: a.a.stimmt, breite: 150,
+        inhalt: w => ({ bild: w ? "👍" : "👎", text: w ? "Stimmt" : "Stimmt nicht" }),
+        hinweis: "Denk noch einmal nach — was weisst du über Fledermäuse?",
+        loesung: `${a.a.stimmt ? "Das stimmt." : "Das stimmt nicht."} ${a.a.erklaerung}`,
+        lob: `${a.a.stimmt ? "Stimmt!" : "Genau, das stimmt nicht!"} ${a.a.erklaerung}`,
+      });
+      box.children[0].classList.add("ja");
+      box.children[1].classList.add("nein");
+    } else if (a.art === "frage") {
+      kopf.append(el("div", { class: "aussage", text: a.f.frage }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.f.richtig, breite: 200,
+        hinweis: "Hm, das passt nicht zur Fledermaus. Versuch es nochmal.",
+        loesung: `${a.f.richtig}. ${a.f.erklaerung}`,
+        lob: `Richtig: ${a.f.richtig}. ${a.f.erklaerung}`,
+      });
+    } else if (a.art === "jahr") {
+      kopf.append(el("div", { class: "aussage", text: "Das Jahr einer Fledermaus — fang beim Winter an." }));
+      LS.reihenfolge(ctx, {
+        reihe: a.reihe, breite: 220, ablage: s => s.split(":")[0],
+        hinweis: (_, erwartet) => `Was kommt nach dem Letzten? Denk an die Jahreszeiten: ${erwartet.split(":")[0]}.`,
+        loesung: a.reihe.join(" → "),
+        lob: "Super! Danach beginnt wieder der Winterschlaf. ❄️",
+      });
+    } else {
+      kopf.append(el("div", { class: "aussage", text: `Wozu helfen der Fledermaus: ${a.merkmal}?` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 200,
+        hinweis: w => `«${w}» — dafür hat die Fledermaus ein anderes Merkmal. Wozu braucht sie ${a.merkmal}?`,
+        loesung: `${a.merkmal}: ${a.richtig}`,
+        lob: `Genau: ${a.merkmal} — ${a.richtig}.`,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Lies genau und tipp auf deine Antwort.");
+  },
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zehner-Ergänzer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .rechnung {
+    text-align: center;
+    font-size: clamp(30px, 7.5vw, 54px);
+    font-weight: 900;
+    margin: 4px 0 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rechnung .luecke {
+    display: inline-block;
+    min-width: 1.6em;
+    border-bottom: 5px solid var(--deko-4);
+    color: var(--deko-4);
+  }
+
+  /* Zehnerfeld: zwei Reihen à fünf Punkte, gefüllt = schon da, leer = fehlt noch */
+  .zehnerfelder { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-bottom: 14px; }
+  .zehnerfeld {
+    display: grid;
+    grid-template-columns: repeat(5, 30px);
+    gap: 6px;
+    padding: 8px;
+    border: 3px solid var(--rand);
+    border-radius: 12px;
+    background: #fff;
+  }
+  .zehnerfeld i { width: 30px; height: 30px; border-radius: 50%; border: 3px dashed var(--rand); }
+  .zehnerfeld i.da { background: var(--deko-6); border: 3px solid var(--deko-6); }
+
+  /* Sprung von der Startzahl zur Zielzahl */
+  .sprung { display: flex; align-items: flex-end; justify-content: center; gap: 0; margin: 4px 0 14px; }
+  .sprung .zahl { font-size: clamp(20px, 4.4vw, 28px); font-weight: 900; background: #fff; border: 3px solid var(--rand); border-radius: 12px; padding: 4px 10px; }
+  .sprung .zahl.ziel { border-color: var(--deko-4); }
+  .sprung .bogen { width: clamp(90px, 30vw, 200px); height: 46px; border: 4px solid var(--deko-4); border-bottom: none; border-radius: 100px 100px 0 0; margin: 0 -4px 18px; position: relative; }
+  .sprung .bogen b { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); font-size: 22px; color: var(--deko-4); white-space: nowrap; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔟 Zehner-Ergänzer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.3.b (Grundanspruch 1. Zyklus): „auf den nächsten 10er ergänzen“ bis 100.
+// Die höheren Stufen übertragen das auf Hunderter, Tausender und die Million (MA.1.A.3.e:
+// Rechnen mit Wertziffern im Kopf). Ergänzt wird immer bis zum nächsten Vielfachen der Einheit.
+
+const { zahlText, zufall, waehle, el } = LS;
+
+// Je Stufe: mögliche Einheiten mit Startbereich [von, bis] und dem Zahlenraum.
+const STUFE = {
+  s1: { raum: 20, arten: [{ einheit: 10, von: 1, bis: 19 }] },
+  s2: { raum: 100, arten: [{ einheit: 10, von: 11, bis: 99 }, { einheit: 100, von: 1, bis: 9, mal: 10 }] },
+  s3: { raum: 1000, arten: [{ einheit: 100, von: 11, bis: 99 }, { einheit: 100, von: 101, bis: 999 }, { einheit: 100, von: 11, bis: 99, mal: 10 }] },
+  s4: { raum: 10000, arten: [{ einheit: 1000, von: 101, bis: 999 }, { einheit: 1000, von: 11, bis: 99, mal: 10 }, { einheit: 1000, von: 101, bis: 999, mal: 10 }] },
+  s5: { raum: 1000000, arten: [{ einheit: 10000, von: 101, bis: 999, mal: 100 }, { einheit: 100000, von: 11, bis: 99, mal: 1000 },
+    { einheit: 1000000, von: 101, bis: 999, mal: 1000 }, { einheit: 1000000, von: 11, bis: 99, mal: 10000 }] },
+};
+
+function aufgabeErzeugen(stufe) {
+  for (;;) {
+    const art = waehle(STUFE[stufe].arten);
+    const start = zufall(art.von, art.bis) * (art.mal || 1);
+    if (start % art.einheit === 0) continue;
+    const ziel = Math.ceil(start / art.einheit) * art.einheit;
+    return { start, ziel, fehlt: ziel - start, einheit: art.einheit };
+  }
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (a.start + a.fehlt !== a.ziel) m.push("Rechnung geht nicht auf");
+  if (a.fehlt < 1 || a.fehlt >= a.einheit) m.push("Ergänzung nicht bis zum nächsten Vielfachen");
+  if (a.ziel % a.einheit !== 0) m.push("Ziel ist kein Vielfaches der Einheit");
+  if (a.ziel > STUFE[stufe].raum) m.push("Zahlenraum überschritten");
+  return m;
+}
+
+const BIS_ZUM = {
+  10: "bis zum nächsten Zehner", 100: "bis zum nächsten Hunderter", 1000: "bis zum nächsten Tausender",
+  10000: "bis zum nächsten Zehntausender", 100000: "bis zum nächsten Hunderttausender", 1000000: "bis zur Million",
+};
+
+function hinweisFuer(a) {
+  // Zwischenhalt am nächsten kleineren Vielfachen, wenn es einen gibt: 37 → 40 → 100
+  const zwischen = Math.ceil(a.start / (a.einheit / 10)) * (a.einheit / 10);
+  if (zwischen !== a.start && zwischen !== a.ziel) {
+    return `Mach einen Zwischenhalt: ${zahlText(a.start)} → ${zahlText(zwischen)} → ${zahlText(a.ziel)}. Zähle beide Sprünge zusammen.`;
+  }
+  return `Wie viel fehlt von ${zahlText(a.start)} bis ${zahlText(a.ziel)}? Zähle von ${zahlText(a.start)} weiter.`;
+}
+
+function zehnerfelder(a) {
+  // Für Stufe 1: je Zehner ein Feld, gefüllt bis zur Startzahl
+  const box = el("div", { class: "zehnerfelder", "aria-hidden": "true" });
+  for (let z = 0; z < a.ziel / 10; z++) {
+    const feld = el("div", { class: "zehnerfeld" });
+    for (let i = 1; i <= 10; i++) feld.append(el("i", { class: z * 10 + i <= a.start ? "da" : "" }));
+    box.append(feld);
+  }
+  return box;
+}
+
+LS.spiel({
+  id: "zehner-ergaenzer",
+  einleitung: "Wie viel fehlt bis zur runden Zahl? Ergänze bis zum nächsten Zehner — und später bis zum Hunderter, Tausender und zur Million.",
+  anzahl: 10,
+  stufen: {
+    s1: "Bis 20 mit Zehnerfeldern: 7 + ? = 10, 13 + ? = 20.",
+    s2: "Bis 100: 37 + ? = 40, 60 + ? = 100.",
+    s3: "Bis 1000: 37 + ? = 100, 365 + ? = 400.",
+    s4: "Bis 10 000: 365 + ? = 1000, 4750 + ? = 5000.",
+    s5: "Bis zur Million: 63 500 + ? = 70 000.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const luecke = el("span", { class: "luecke", text: "?" });
+    ctx.flaeche.append(el("div", { class: "auftrag", text: `Ergänze ${BIS_ZUM[a.einheit]}.` }));
+    if (ctx.stufe === "s1") ctx.flaeche.append(zehnerfelder(a));
+    else {
+      ctx.flaeche.append(el("div", { class: "sprung", "aria-hidden": "true" },
+        el("span", { class: "zahl", text: zahlText(a.start) }),
+        el("span", { class: "bogen" }, el("b", { text: "+ ?" })),
+        el("span", { class: "zahl ziel", text: zahlText(a.ziel) })));
+    }
+    ctx.flaeche.append(el("div", { class: "rechnung" }, `${zahlText(a.start)} + `, luecke, ` = ${zahlText(a.ziel)}`));
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergänzung" });
+    ctx.flaeche.append(anzeige);
+
+    const tasten = LS.tastatur({
+      anzeige,
+      maxStellen: 7,
+      onAenderung(w) { luecke.textContent = w === null ? "?" : zahlText(w); },
+      onOk(w) {
+        if (w === a.fehlt) {
+          tasten.gesperrt = true;
+          anzeige.classList.add("richtig");
+          ctx.richtig(`${zahlText(a.start)} + ${zahlText(a.fehlt)} = ${zahlText(a.ziel)} 🎯`);
+          return;
+        }
+        anzeige.classList.add("falsch");
+        const ueber = a.start + w;
+        const hinweis = ueber > a.ziel ? `${zahlText(a.start)} + ${zahlText(w)} = ${zahlText(ueber)} — das ist zu viel. ${hinweisFuer(a)}`
+          : `${zahlText(a.start)} + ${zahlText(w)} = ${zahlText(ueber)} — da fehlt noch etwas. ${hinweisFuer(a)}`;
+        ctx.falsch(hinweis, `${zahlText(a.start)} + ${zahlText(a.fehlt)} = ${zahlText(a.ziel)}`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag("Tipp ein, wie viel fehlt.");
+  },
+});
+</script>
+</body>
+</html>

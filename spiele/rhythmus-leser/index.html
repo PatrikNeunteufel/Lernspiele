@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rhythmus-Leser</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .notenwahl .wahl-knopf { padding: 2px 4px; }
+  .notenwahl .noten-zeile { max-width: 120px; }
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🥁 Rhythmus-Leser</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/noten.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MU.6.B.1: c (Grundanspruch 1. Zyklus) „Notenwerten eine Bedeutung zuordnen und
+// rhythmische Motive aus Halben, Vierteln und Achteln lesen“; g (Grundanspruch 2. Zyklus)
+// Motive mit Sechzehnteln und punktierten Noten; MU.6.A.1.1e (2. Zyklus) Taktarten 2/4, 3/4, 4/4.
+
+const { waehle, mische, el } = LS;
+
+// Notenwerte in Vierteln
+const WERTE = [
+  { wert: 4, name: "ganze Note", schlaege: "4" },
+  { wert: 2, name: "halbe Note", schlaege: "2" },
+  { wert: 1, name: "Viertelnote", schlaege: "1" },
+  { wert: 0.5, name: "Achtelnote", schlaege: "½" },
+  { wert: 3, name: "punktierte halbe Note", schlaege: "3", punkt: true },
+  { wert: 1.5, name: "punktierte Viertelnote", schlaege: "1½", punkt: true },
+  { wert: 0.25, name: "Sechzehntelnote", schlaege: "¼" },
+];
+const w = x => WERTE.find(v => v.wert === x);
+const GRUND = [4, 2, 1, 0.5].map(w);
+
+/** Teile, die zusammen 'summe' Viertel ergeben, aus den erlaubten Werten. */
+function fuellen(summe, erlaubt) {
+  const teile = [];
+  let rest = summe;
+  while (rest > 1e-9) {
+    const passt = erlaubt.filter(x => x <= rest + 1e-9);
+    const x = waehle(passt);
+    // Achtel und Sechzehntel kommen paarweise oder in Vierergruppen, wie in Liedern
+    const anzahl = x === 0.5 && rest >= 1 ? 2 : x === 0.25 && rest >= 1 ? 4 : 1;
+    for (let i = 0; i < anzahl; i++) teile.push(x);
+    rest -= x * anzahl;
+  }
+  return teile;
+}
+
+const ARTEN = {
+  benennen() {
+    const r = waehle(GRUND);
+    return { art: "benennen", richtig: r, optionen: GRUND };
+  },
+  dauer(werte) {
+    const r = waehle(werte);
+    return { art: "dauer", richtig: r, optionen: werte };
+  },
+  fuellen(takt, fehlt, rest) {
+    const m = waehle(fehlt);
+    const noten = fuellen(takt - m, rest);
+    const optionen = mische([...new Set([m, ...mische(fehlt.filter(x => x !== m)).slice(0, 3)])]).map(w);
+    return { art: "fuellen", takt, noten, richtig: w(m), optionen };
+  },
+  taktart() {
+    const takt = waehle([2, 3, 4]);
+    return { art: "taktart", takt, noten: fuellen(takt, [2, 1, 0.5]), richtig: `${takt}/4`, optionen: ["2/4", "3/4", "4/4"] };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.benennen(),
+  s2: () => waehle([ARTEN.benennen, () => ARTEN.dauer(GRUND)])(),
+  s3: () => waehle([() => ARTEN.fuellen(4, [2, 1, 0.5], [2, 1, 0.5]), () => ARTEN.dauer(GRUND)])(),
+  s4: () => waehle([ARTEN.taktart, () => ARTEN.fuellen(3, [2, 1, 0.5], [2, 1, 0.5]), () => ARTEN.fuellen(4, [2, 1, 0.5], [2, 1, 0.5])])(),
+  s5: () => waehle([() => ARTEN.fuellen(4, [3, 1.5, 0.5, 0.25], [2, 1, 0.5, 0.25]), () => ARTEN.fuellen(3, [1.5, 1, 0.5, 0.25], [1, 0.5, 0.25]), () => ARTEN.dauer(WERTE)])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a) {
+  const m = [];
+  const summe = l => l.reduce((s, x) => s + x, 0);
+  if (!a.optionen.includes(a.richtig)) m.push("richtige Antwort fehlt");
+  if (new Set(a.optionen).size !== a.optionen.length) m.push("Auswahl doppelt");
+  if (a.art === "fuellen") {
+    if (Math.abs(summe(a.noten) + a.richtig.wert - a.takt) > 1e-9) m.push("Takt geht nicht auf");
+    if (a.optionen.filter(o => Math.abs(summe(a.noten) + o.wert - a.takt) < 1e-9).length !== 1) m.push("mehr als eine Note passt");
+  }
+  if (a.art === "taktart" && Math.abs(summe(a.noten) - a.takt) > 1e-9) m.push("Taktart passt nicht zu den Noten");
+  return m;
+}
+
+const TEMPO = 0.6; // Sekunden je Viertel
+/** Rhythmus als Töne: jede Note ein kurzer Ton, die Lücke still. */
+const alsToene = (werte, lueckeWert) => [...werte.map(x => ({ midi: 72, dauer: x * TEMPO })), ...(lueckeWert ? [{ midi: null, dauer: lueckeWert * TEMPO }] : [])];
+const symbol = v => NOTEN.zeile({ noten: [{ wert: v.wert, punkt: v.punkt }], linien: 1, mindestBreite: 80 });
+const notenAus = werte => werte.map(x => ({ wert: x, punkt: w(x).punkt }));
+const viertel = x => (x === 1 ? "1 Viertel" : `${w(x).schlaege} Viertel`);
+
+LS.spiel({
+  id: "rhythmus-leser",
+  einleitung: "Ganze, Halbe, Viertel, Achtel — jede Note dauert verschieden lang. Kannst du Rhythmen lesen?",
+  anzahl: 8,
+  stufen: {
+    s1: "Wie heisst die Note? Ganze, Halbe, Viertel, Achtel.",
+    s2: "Wie viele Viertel dauert die Note?",
+    s3: "Den 4/4-Takt füllen: Welche Note fehlt?",
+    s4: "2/4, 3/4 oder 4/4? Und den 3/4-Takt füllen.",
+    s5: "Mit punktierten Noten und Sechzehnteln.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "benennen") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst diese Note?" }),
+        el("div", { class: "notenblatt" }, NOTEN.zeile({ noten: [{ wert: a.richtig.wert }], linien: 1, mindestBreite: 160 })));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 150, inhalt: v => v.name,
+        hinweis: "Schau: Ist der Kopf leer oder ausgemalt? Hat die Note einen Hals? Ein Fähnchen?",
+        loesung: `Das ist eine ${a.richtig.name}.`,
+      });
+    } else if (a.art === "dauer") {
+      ctx.flaeche.append(el("div", { class: "frage", text: `Wie lange dauert die ${a.richtig.name}?` }),
+        el("div", { class: "notenblatt" }, NOTEN.zeile({ noten: [{ wert: a.richtig.wert, punkt: a.richtig.punkt }], linien: 1, mindestBreite: 160 })),
+        el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => [{ midi: 72, dauer: a.richtig.wert * TEMPO }])));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90, inhalt: v => ({ text: v.schlaege, klein: "Viertel" }),
+        hinweis: "Eine Viertelnote ist ein Schlag. Eine halbe dauert zwei, eine ganze vier. Der Punkt verlängert um die Hälfte.",
+        loesung: `Eine ${a.richtig.name} dauert ${viertel(a.richtig.wert)}.`,
+      });
+    } else if (a.art === "fuellen") {
+      ctx.flaeche.append(el("div", { class: "frage", text: `Im ${a.takt}/4-Takt fehlt eine Note. Welche passt?` }),
+        el("div", { class: "notenblatt" }, NOTEN.zeile({ noten: notenAus(a.noten), linien: 1, takt: `${a.takt}/4`, luecke: a.richtig.wert, taktstrich: true })),
+        el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => alsToene(a.noten, a.richtig.wert))));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 110, inhalt: symbol,
+        hinweis: v => `Zähl die Schläge: Es fehlen ${viertel(a.richtig.wert)}. Die ${v.name} dauert ${viertel(v.wert)}.`,
+        loesung: `Es fehlt eine ${a.richtig.name} (${viertel(a.richtig.wert)}).`,
+        beiRichtig: () => NOTEN.spiele(alsToene([...a.noten, a.richtig.wert])),
+      });
+      box.classList.add("notenwahl");
+    } else {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Welche Taktart passt zu diesem Takt?" }),
+        el("div", { class: "notenblatt" }, NOTEN.zeile({ noten: notenAus(a.noten), linien: 1, taktstrich: true })),
+        el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => alsToene(a.noten))));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90,
+        hinweis: "Zähle alle Notenwerte zusammen. Wie viele Viertel sind es?",
+        loesung: `Zusammen sind es ${a.takt} Viertel: ${a.richtig}-Takt.`,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Tipp auf «Anhören», wenn du den Rhythmus hören willst.");
+  },
+});
+</script>
+</body>
+</html>

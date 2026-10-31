@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoch-Tief-Ohr</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  .ohr { text-align: center; font-size: clamp(56px, 13vw, 84px); line-height: 1.1; }
+  .hoer-zeile .knopf { font-size: clamp(18px, 4vw, 22px); }
+  .notenwahl .wahl-knopf { padding: 2px 4px; }
+  .notenwahl .noten-zeile { max-width: 220px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>👂 Hoch-Tief-Ohr</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/noten.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MU.6.A.1 (Melodie): 2a „hoch/tief unterscheiden sowie einfache Tonfolgen im
+// Fünftonraum erkennen und wiedergeben“; 2c ein- bis zweitaktige Tonfolgen wiedergeben (Grundanspruch
+// 1. Zyklus); 2e (Orientierungspunkt 2. Zyklus) Halb- und Ganztonschritte erkennen (lesen, hören).
+// MU.6.B.1.b melodische Bewegungen im Notenbild erkennen. Die Töne erzeugt der Browser selbst.
+
+const { zufall, waehle, mische, el } = LS;
+
+// Fünftonraum c' bis g' (Positionen −2 bis 2), für Stufe 2 bis g'' erweitert
+const KONTUREN = {
+  auf: { bild: "↗️↗️", text: "immer höher" },
+  ab: { bild: "↘️↘️", text: "immer tiefer" },
+  aufAb: { bild: "↗️↘️", text: "zuerst höher, dann tiefer" },
+  abAuf: { bild: "↘️↗️", text: "zuerst tiefer, dann höher" },
+};
+
+/** Kontur einer Folge von drei Positionen. */
+function kontur(f) {
+  const r1 = Math.sign(f[1] - f[0]), r2 = Math.sign(f[2] - f[1]);
+  if (r1 > 0 && r2 > 0) return "auf";
+  if (r1 < 0 && r2 < 0) return "ab";
+  if (r1 > 0 && r2 < 0) return "aufAb";
+  if (r1 < 0 && r2 > 0) return "abAuf";
+  return null;
+}
+
+/** Drei Töne im Fünftonraum mit der Kontur k (keine Tonwiederholung). */
+function folgeMit(k) {
+  for (;;) {
+    const f = [zufall(-2, 2), zufall(-2, 2), zufall(-2, 2)];
+    if (kontur(f) === k) return f;
+  }
+}
+
+const ARTEN = {
+  vergleich(min, max, gleichMoeglich) {
+    // zwei Töne im Abstand min–max Halbtöne (diatonisch gewählt), manchmal gleich hoch
+    if (gleichMoeglich && Math.random() < 0.2) { const p = zufall(-2, 6); return { art: "vergleich", folge: [p, p], richtig: "gleich" }; }
+    for (;;) {
+      const a = zufall(-2, 9), b = zufall(-2, 9);
+      const abstand = Math.abs(NOTEN.midi(a) - NOTEN.midi(b));
+      if (abstand >= min && abstand <= max) return { art: "vergleich", folge: [a, b], richtig: b > a ? "zweiter" : "erster" };
+    }
+  },
+  kontur() {
+    const k = waehle(Object.keys(KONTUREN));
+    return { art: "kontur", folge: folgeMit(k), richtig: k };
+  },
+  notenbild() {
+    const k = waehle(Object.keys(KONTUREN));
+    const andere = mische(Object.keys(KONTUREN).filter(x => x !== k)).slice(0, 2);
+    const richtig = folgeMit(k);
+    return { art: "notenbild", folge: richtig, richtig, optionen: mische([richtig, ...andere.map(folgeMit)]) };
+  },
+  schritt() {
+    // benachbarte Stammtöne der C-Dur-Tonleiter: e–f und h–c sind Halbtöne
+    const p = zufall(-2, 8);
+    const folge = Math.random() < 0.5 ? [p, p + 1] : [p + 1, p];
+    const halb = NOTEN.midi(p + 1) - NOTEN.midi(p) === 1;
+    return { art: "schritt", folge, richtig: halb ? "Halbton" : "Ganzton" };
+  },
+};
+
+const STUFE = {
+  s1: () => ARTEN.vergleich(7, 12, false),
+  s2: () => waehle([() => ARTEN.vergleich(3, 7, true), ARTEN.kontur])(),
+  s3: () => waehle([ARTEN.kontur, () => ARTEN.vergleich(2, 4, true)])(),
+  s4: () => waehle([ARTEN.notenbild, ARTEN.kontur])(),
+  s5: () => waehle([ARTEN.schritt, ARTEN.schritt, ARTEN.notenbild])(),
+};
+
+function aufgabeErzeugen(stufe) { return STUFE[stufe](); }
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const midi = a.folge.map(p => NOTEN.midi(p));
+  if (a.art === "vergleich") {
+    const soll = midi[1] > midi[0] ? "zweiter" : midi[1] < midi[0] ? "erster" : "gleich";
+    if (soll !== a.richtig) m.push("Antwort passt nicht zu den Tönen");
+    if (stufe === "s1" && Math.abs(midi[1] - midi[0]) < 7) m.push("Abstand zu klein für Stufe 1");
+  }
+  if (a.art === "kontur" && kontur(a.folge) !== a.richtig) m.push("Kontur falsch");
+  if ((a.art === "kontur" || a.art === "notenbild") && a.folge.some(p => p < -2 || p > 2)) m.push("ausserhalb des Fünftonraums");
+  if (a.art === "notenbild" && new Set(a.optionen.map(kontur)).size !== a.optionen.length) m.push("zwei Notenbilder mit gleicher Kontur");
+  if (a.art === "schritt" && (Math.abs(midi[1] - midi[0]) === 1) !== (a.richtig === "Halbton")) m.push("Halbton/Ganzton falsch");
+  return m;
+}
+
+const alsToene = folge => folge.map(p => ({ midi: NOTEN.midi(p), dauer: 0.75 }));
+
+LS.spiel({
+  id: "hoch-tief-ohr",
+  einleitung: "Spitz die Ohren! Ist der Ton hoch wie ein Vogel oder tief wie ein Bär? Mach den Ton an: 🔊",
+  anzahl: 8,
+  stufen: {
+    s1: "Zwei Töne: Welcher ist höher? Grosse Sprünge.",
+    s2: "Kleinere Sprünge — oder gleich hoch? Wohin geht die Melodie?",
+    s3: "Drei Töne: hinauf, hinunter oder beides?",
+    s4: "Welches Notenbild passt zur Melodie?",
+    s5: "Halbton oder Ganzton?",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const hoeren = () => alsToene(a.folge);
+    ctx.flaeche.append(el("div", { class: "ohr", text: "👂" }),
+      el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, hoeren, a.folge.length === 2 ? "🔊 Beide Töne anhören" : "🔊 Melodie anhören")));
+
+    if (a.art === "vergleich") {
+      ctx.flaeche.prepend(el("div", { class: "frage", text: "Welcher Ton ist höher?" }));
+      const optionen = ctx.stufe === "s1" ? ["erster", "zweiter"] : ["erster", "zweiter", "gleich"];
+      LS.auswahl(ctx, {
+        optionen, richtig: a.richtig, breite: 130,
+        inhalt: o => ({ bild: o === "erster" ? "1️⃣" : o === "zweiter" ? "2️⃣" : "🟰", text: o === "gleich" ? "gleich hoch" : `${o} Ton` }),
+        hinweis: "Hör nochmal hin und sing die beiden Töne leise mit. Geht deine Stimme hinauf oder hinunter?",
+        loesung: a.richtig === "gleich" ? "Beide Töne waren gleich hoch." : `Der ${a.richtig} Ton war höher.`,
+      });
+    } else if (a.art === "kontur") {
+      ctx.flaeche.prepend(el("div", { class: "frage", text: "Wohin geht die Melodie?" }));
+      LS.auswahl(ctx, {
+        optionen: Object.keys(KONTUREN), richtig: a.richtig, breite: 150,
+        inhalt: k => ({ bild: KONTUREN[k].bild, text: KONTUREN[k].text }),
+        hinweis: "Zeig mit der Hand mit: Geht sie beim zweiten Ton hinauf oder hinunter? Und beim dritten?",
+        loesung: `Die Melodie ging ${KONTUREN[a.richtig].text}.`,
+      });
+    } else if (a.art === "notenbild") {
+      ctx.flaeche.prepend(el("div", { class: "frage", text: "Welches Notenbild passt zur Melodie?" }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 200,
+        inhalt: f => NOTEN.zeile({ noten: f.map(p => ({ p })), schluessel: true, mindestBreite: 200 }),
+        hinweis: f => `Diese Noten gehen ${KONTUREN[kontur(f)].text}. Hör nochmal: Wie geht die Melodie?`,
+        loesung: `Die Melodie ging ${KONTUREN[kontur(a.richtig)].text}.`,
+      });
+      box.classList.add("notenwahl");
+    } else {
+      ctx.flaeche.prepend(el("div", { class: "frage", text: "Halbton oder Ganzton?" }));
+      ctx.flaeche.append(el("div", { class: "notenblatt" }, NOTEN.zeile({ noten: a.folge.map(p => ({ p })), schluessel: true, mindestBreite: 220 })));
+      LS.auswahl(ctx, {
+        optionen: ["Halbton", "Ganzton"], richtig: a.richtig, breite: 150,
+        hinweis: "Ohne Vorzeichen liegen die Halbtöne zwischen e und f und zwischen h und c. Alle anderen Nachbarn sind Ganztöne.",
+        loesung: `${NOTEN.name(a.folge[0])} – ${NOTEN.name(a.folge[1])} ist ein ${a.richtig}.`,
+      });
+    }
+    // Die Töne gleich vorspielen; der Knopf spielt sie nochmal.
+    NOTEN.spiele(hoeren());
+    if (ctx.nr === 0) ctx.sag("Hör gut zu. Mit dem Knopf kannst du nochmal hören.");
+  },
+});
+</script>
+</body>
+</html>
