@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spiegel-Raster</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.2vw, 28px); font-weight: 800; margin: 0 0 12px; }
+  .frage b { color: var(--knopf); }
+  .raster-rahmen { position: relative; width: min(440px, 88vw); margin: 0 auto 14px; }
+  .raster { display: grid; gap: 2px; background: #c9cde0; border: 2px solid #c9cde0; border-radius: 8px; overflow: hidden; }
+  .zelle { aspect-ratio: 1; border: none; padding: 0; background: #fff; cursor: pointer; }
+  .zelle.fest { cursor: default; background: #f3f4f8; }
+  .zelle.vorlage { background: var(--deko-6); }
+  .zelle.gesetzt { background: var(--deko-3); }
+  .zelle.fehlt { box-shadow: inset 0 0 0 4px var(--gut); }
+  .zelle.zuviel { box-shadow: inset 0 0 0 4px var(--hinweis); }
+  .achse { position: absolute; background: #e5484d; pointer-events: none; border-radius: 3px; }
+  .achse.diagonal { transform-origin: 0 0; }
+  .legende { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-size: 15px; color: var(--text-leise); margin-bottom: 8px; }
+  .legende i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🪞 Spiegel-Raster</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.A.2: c „Figuren in Rastern nachzeichnen, symmetrisch ergänzen bzw. spiegeln“,
+// d „Figuren in Rastern … verschieben“, e „Figuren an Achsen spiegeln“.
+// Das Kind tippt Felder an, bis das Spiegelbild (bzw. die verschobene Figur) vollständig ist.
+
+const { zufall, waehle, mische, el } = LS;
+
+// Je Stufe: Rastergrösse, Anzahl Vorlagefelder, Aufgabenarten.
+const STUFE = {
+  s1: { n: 6, felder: [3, 4], arten: ["senkrecht"] },
+  s2: { n: 8, felder: [5, 7], arten: ["senkrecht"] },
+  s3: { n: 8, felder: [6, 9], arten: ["senkrecht", "waagrecht"] },
+  s4: { n: 8, felder: [5, 8], arten: ["senkrecht", "waagrecht", "verschieben"] },
+  s5: { n: 8, felder: [6, 9], arten: ["diagonal", "verschieben", "waagrecht"] },
+};
+
+const key = (r, c) => `${r},${c}`;
+
+/** Zusammenhängende Figur aus k Feldern in einem Bereich (Zufallswachstum). */
+function figur(k, bereich) {
+  const { r0, r1, c0, c1 } = bereich;
+  const start = [zufall(r0, r1), zufall(c0, c1)];
+  const felder = new Set([key(...start)]);
+  let versuche = 0;
+  while (felder.size < k && versuche++ < 500) {
+    const [r, c] = [...felder][zufall(0, felder.size - 1)].split(",").map(Number);
+    const [dr, dc] = waehle([[1, 0], [-1, 0], [0, 1], [0, -1]]);
+    const nr = r + dr, nc = c + dc;
+    if (nr >= r0 && nr <= r1 && nc >= c0 && nc <= c1) felder.add(key(nr, nc));
+  }
+  return felder;
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe], n = p.n, h = n / 2;
+  const art = waehle(p.arten);
+  const k = zufall(...p.felder);
+  if (art === "senkrecht") {
+    const vorlage = figur(k, { r0: 0, r1: n - 1, c0: 0, c1: h - 1 });
+    const ziel = new Set([...vorlage].map(s => { const [r, c] = s.split(",").map(Number); return key(r, n - 1 - c); }));
+    return { art, n, vorlage, ziel, bereich: (r, c) => c >= h, frage: "Spiegle die Figur an der roten Achse." };
+  }
+  if (art === "waagrecht") {
+    const vorlage = figur(k, { r0: 0, r1: h - 1, c0: 0, c1: n - 1 });
+    const ziel = new Set([...vorlage].map(s => { const [r, c] = s.split(",").map(Number); return key(n - 1 - r, c); }));
+    return { art, n, vorlage, ziel, bereich: (r) => r >= h, frage: "Spiegle die Figur an der roten Achse." };
+  }
+  if (art === "diagonal") {
+    // Achse von oben links nach unten rechts: (r, c) → (c, r); Vorlage unterhalb der Diagonale
+    let vorlage;
+    do { vorlage = new Set([...figur(k, { r0: 1, r1: n - 1, c0: 0, c1: n - 2 })].filter(s => { const [r, c] = s.split(",").map(Number); return r > c; })); } while (vorlage.size < 4);
+    const ziel = new Set([...vorlage].map(s => { const [r, c] = s.split(",").map(Number); return key(c, r); }));
+    return { art, n, vorlage, ziel, bereich: (r, c) => c > r, frage: "Spiegle die Figur an der schrägen roten Achse." };
+  }
+  // verschieben: Figur oben links, um dx nach rechts und dy nach unten verschieben
+  const dx = zufall(2, 4), dy = zufall(0, 3);
+  const vorlage = figur(Math.min(k, 6), { r0: 0, r1: n - 1 - dy - 1, c0: 0, c1: n - 1 - dx - 1 });
+  const ziel = new Set([...vorlage].map(s => { const [r, c] = s.split(",").map(Number); return key(r + dy, c + dx); }));
+  if ([...ziel].some(s => vorlage.has(s))) return aufgabeErzeugen(stufe); // keine Überlappung, damit es eindeutig bleibt
+  return { art, n, vorlage, ziel, bereich: () => true, verschiebung: { dx, dy },
+    frage: `Verschiebe die blaue Figur um <b>${dx} nach rechts</b>${dy ? ` und <b>${dy} nach unten</b>` : ""}.` };
+}
+
+LS.spiel({
+  id: "spiegel-raster",
+  einleitung: "Spieglein, Spieglein! Tipp die Felder an, damit auf der anderen Seite das Spiegelbild entsteht.",
+  anzahl: 6,
+  stufen: {
+    s1: "Kleines Raster, senkrechte Achse in der Mitte.",
+    s2: "Grösseres Raster, mehr Felder.",
+    s3: "Auch an der waagrechten Achse spiegeln.",
+    s4: "Dazu: Figuren im Raster verschieben.",
+    s5: "Profi: an der schrägen Achse spiegeln.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.flaeche.append(el("div", { class: "frage", html: a.frage }),
+      el("div", { class: "legende", html: `<span><i style="background:var(--deko-6)"></i>Vorlage</span><span><i style="background:var(--deko-3)"></i>deine Felder</span>` }));
+    const rahmen = el("div", { class: "raster-rahmen" });
+    const raster = el("div", { class: "raster" });
+    raster.style.gridTemplateColumns = `repeat(${a.n}, 1fr)`;
+    const zellen = {};
+    const gesetzt = new Set();
+    let fertig = false;
+    for (let r = 0; r < a.n; r++) for (let c = 0; c < a.n; c++) {
+      const k = key(r, c);
+      const vorlage = a.vorlage.has(k);
+      const tippbar = !vorlage && a.bereich(r, c);
+      const z = el("button", { type: "button", class: "zelle" + (vorlage ? " vorlage" : tippbar ? "" : " fest"), "aria-label": `Zeile ${r + 1}, Spalte ${c + 1}` });
+      if (!tippbar) z.disabled = true;
+      else z.addEventListener("click", () => {
+        if (fertig) return;
+        gesetzt.has(k) ? gesetzt.delete(k) : gesetzt.add(k);
+        z.classList.toggle("gesetzt", gesetzt.has(k));
+        z.classList.remove("fehlt", "zuviel");
+        LS.ton("tipp");
+      });
+      zellen[k] = z;
+      raster.append(z);
+    }
+    rahmen.append(raster);
+    // Achse einzeichnen (in Prozent des Rasters)
+    if (a.art === "senkrecht") rahmen.append(el("div", { class: "achse", style: "left:calc(50% - 3px);top:-6px;bottom:-6px;width:6px" }));
+    if (a.art === "waagrecht") rahmen.append(el("div", { class: "achse", style: "top:calc(50% - 3px);left:-6px;right:-6px;height:6px" }));
+    if (a.art === "diagonal") rahmen.append(el("div", { class: "achse diagonal", style: "left:0;top:0;width:141.4%;height:6px;transform:rotate(45deg) translateY(-3px)" }));
+    ctx.flaeche.append(rahmen);
+
+    const ok = el("button", { class: "knopf gruen", type: "button", text: "Fertig ✓" });
+    ok.addEventListener("click", () => {
+      if (fertig) return;
+      const fehlt = [...a.ziel].filter(k => !gesetzt.has(k));
+      const zuviel = [...gesetzt].filter(k => !a.ziel.has(k));
+      if (!fehlt.length && !zuviel.length) { fertig = true; ctx.richtig(); return; }
+      const teile = [fehlt.length ? `${fehlt.length} Feld${fehlt.length === 1 ? " fehlt" : "er fehlen"}` : "", zuviel.length ? `${zuviel.length} Feld${zuviel.length === 1 ? " ist" : "er sind"} zu viel` : ""].filter(Boolean).join(", ");
+      ctx.falsch(`${teile}. ${a.verschiebung ? "Nimm dir eine Ecke der Figur vor und zähl die Schritte ab." : "Jedes Feld hat sein Spiegelbild gleich weit weg von der Achse."}`,
+        "Die grün umrandeten Felder gehören dazu, die orange umrandeten nicht.");
+      // Nach dem 2. Fehlversuch zeigen, wo es nicht stimmt; beim Aufgeben ebenso.
+      if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)") || fehlt.length + zuviel.length <= 2) {
+        fehlt.forEach(k => zellen[k].classList.add("fehlt"));
+        zuviel.forEach(k => zellen[k].classList.add("zuviel"));
+      }
+      if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
+    });
+    ctx.flaeche.append(el("div", { class: "knopfzeile" }, ok));
+    if (ctx.nr === 0) ctx.sag("Tipp ein Feld an, um es zu färben. Nochmal tippen macht es wieder weiss.");
+  },
+});
+</script>
+</body>
+</html>

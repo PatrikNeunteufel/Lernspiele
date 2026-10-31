@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Himmels-Forscher</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .nacht { background: linear-gradient(180deg, #1e1b4b, #312e81); border-radius: 20px; padding: 14px; color: #fff; margin-bottom: 14px; }
+  .frage { text-align: center; font-size: clamp(20px, 4.2vw, 28px); font-weight: 800; margin: 0 0 12px; }
+  .mond-gross { text-align: center; font-size: clamp(80px, 18vw, 120px); line-height: 1.1; }
+  .optionen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); gap: 10px; max-width: 700px; margin: 0 auto; }
+  .option { border: none; border-radius: 16px; min-height: 64px; padding: 8px; font-family: inherit; font-size: clamp(18px, 3.8vw, 24px); font-weight: 900; background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; }
+  .option.mond { font-size: clamp(40px, 9vw, 56px); background: #312e81; }
+  .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .option.richtig { background: var(--gut-hell); }
+  .option.gewaehlt { opacity: .3; }
+  .reihe { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 64px; margin-bottom: 12px; }
+  .reihe span { font-size: 40px; }
+  .reihe .planet { font-size: 16px; font-weight: 900; background: #fff; color: var(--text); border-radius: 999px; padding: 8px 12px; }
+  .sonne { font-size: 40px; }
+  .planet-knopf { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .planet-knopf i { display: block; border-radius: 50%; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔭 Himmels-Forscher</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.4.5: b Erscheinungen am Tag- und Nachthimmel beobachten (Sonnenlauf, Mond, Sterne);
+// d Beobachtungen ordnen (z.B. Mondphasen); e Phänomene zu Erde, Mond, Planeten, Sonne und Sternen
+// auf einfache Modelle übertragen. Mondbilder gelten für die Nordhalbkugel (also auch für die Schweiz):
+// Ist die rechte Seite hell, nimmt der Mond zu.
+
+const { waehle, mische, el } = LS;
+
+// Mondzyklus in Reihenfolge, beginnend beim Neumond
+const PHASEN = [
+  { bild: "🌑", name: "Neumond" }, { bild: "🌒", name: "zunehmende Sichel", zu: true },
+  { bild: "🌓", name: "zunehmender Halbmond", zu: true }, { bild: "🌔", name: "fast Vollmond (zunehmend)", zu: true },
+  { bild: "🌕", name: "Vollmond" }, { bild: "🌖", name: "abnehmend nach Vollmond", zu: false },
+  { bild: "🌗", name: "abnehmender Halbmond", zu: false }, { bild: "🌘", name: "abnehmende Sichel", zu: false },
+];
+
+// Planeten von der Sonne aus, mit Farbe fürs Bild
+const PLANETEN = [
+  { name: "Merkur", farbe: "#a8a29e" }, { name: "Venus", farbe: "#e7c27d" },
+  { name: "Erde", farbe: "#3b82f6" }, { name: "Mars", farbe: "#dc6b47" },
+  { name: "Jupiter", farbe: "#d6a77a" }, { name: "Saturn", farbe: "#e9d29a" },
+  { name: "Uranus", farbe: "#7dd3fc" }, { name: "Neptun", farbe: "#3b5bdb" },
+];
+
+const ARTEN = {
+  vollNeu() {
+    const ziel = waehle([0, 4]);
+    return { frage: `Welches Bild zeigt den <b>${PHASEN[ziel].name}</b>?`, optionen: mische([0, 2, 4, 6]).map(i => PHASEN[i].bild), richtig: PHASEN[ziel].bild, mond: true,
+      hinweis: "Beim Vollmond ist der ganze Mond hell, beim Neumond sieht man ihn fast gar nicht.", loesung: `${PHASEN[ziel].bild} ist der ${PHASEN[ziel].name}.` };
+  },
+  zuOderAb() {
+    const p = waehle(PHASEN.filter(x => x.zu !== undefined));
+    return { gross: p.bild, frage: "Nimmt der Mond zu oder ab?", optionen: ["zunehmend", "abnehmend"], richtig: p.zu ? "zunehmend" : "abnehmend",
+      hinweis: "Ist die rechte Seite hell, wird der Mond grösser (zunehmend). Ist die linke Seite hell, wird er kleiner.", loesung: `${p.bild}: ${p.zu ? "zunehmend" : "abnehmend"}` };
+  },
+  naechste() {
+    const i = Math.floor(Math.random() * 8);
+    const n = (i + 1) % 8;
+    return { gross: PHASEN[i].bild, frage: "Wie sieht der Mond ein paar Tage später aus?", optionen: mische([n, (i + 7) % 8, (i + 4) % 8, (i + 2) % 8]).map(k => PHASEN[k].bild), richtig: PHASEN[n].bild, mond: true,
+      hinweis: "Der Mond wird von rechts her hell bis zum Vollmond, danach wird er von rechts her wieder dunkel.", loesung: `Nach ${PHASEN[i].bild} kommt ${PHASEN[n].bild}.` };
+  },
+  ordnen(anzahl) {
+    const start = Math.floor(Math.random() * 8);
+    const schritt = anzahl === 4 ? 2 : 1;
+    return { reihe: Array.from({ length: anzahl }, (_, k) => PHASEN[(start + k * schritt) % 8].bild), frage: `Lege die Mondbilder in die richtige Reihenfolge — beginne mit ${PHASEN[start].bild}.`,
+      hinweis: "Rechte Seite hell = zunehmend bis zum Vollmond, danach nimmt er ab.", mond: true };
+  },
+  planetenOrdnen() {
+    return { reihe: PLANETEN.map(p => p.name), planeten: true, frage: "Ordne die Planeten: Welcher ist der Sonne am nächsten? Tipp sie der Reihe nach an.",
+      hinweis: "Merksatz: Mein Vater erklärt mir jeden Sonntag unseren Nachthimmel — Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus, Neptun." };
+  },
+  planetenFrage() {
+    const fragen = [
+      { frage: "Welcher Planet ist der grösste?", richtig: "Jupiter" },
+      { frage: "Auf welchem Planeten leben wir?", richtig: "Erde" },
+      { frage: "Welcher Planet ist der Sonne am nächsten?", richtig: "Merkur" },
+      { frage: "Welcher Planet hat die auffälligen Ringe?", richtig: "Saturn" },
+      { frage: "Welcher Planet heisst auch der „rote Planet“?", richtig: "Mars" },
+    ];
+    const f = waehle(fragen);
+    const andere = mische(PLANETEN.map(p => p.name).filter(n => n !== f.richtig)).slice(0, 3);
+    return { frage: f.frage, optionen: mische([f.richtig, ...andere]), richtig: f.richtig, hinweis: "Denk an das Bild vom Sonnensystem.", loesung: `${f.frage} ${f.richtig}.` };
+  },
+};
+
+const STUFE = {
+  s1: () => waehle([ARTEN.vollNeu, ARTEN.zuOderAb])(),
+  s2: () => waehle([ARTEN.zuOderAb, ARTEN.naechste, () => ARTEN.ordnen(4)])(),
+  s3: () => waehle([ARTEN.naechste, () => ARTEN.ordnen(4), () => ARTEN.ordnen(5)])(),
+  s4: () => waehle([() => ARTEN.ordnen(8), ARTEN.naechste, ARTEN.planetenFrage])(),
+  s5: () => waehle([ARTEN.planetenOrdnen, ARTEN.planetenFrage, () => ARTEN.ordnen(8)])(),
+};
+
+function planetKnopfInhalt(name) {
+  const p = PLANETEN.find(x => x.name === name);
+  // Alle Kugeln gleich gross — sonst verrät die Grösse die Antwort auf „Welcher ist der grösste?“
+  const kugel = el("i");
+  kugel.style.cssText = `width:24px;height:24px;background:${p.farbe}`;
+  return el("span", { class: "planet-knopf" }, kugel, name);
+}
+
+LS.spiel({
+  id: "himmels-forscher",
+  einleitung: "Schau in den Nachthimmel! Der Mond sieht jede Nacht ein bisschen anders aus. Und um die Sonne kreisen acht Planeten.",
+  anzahl: 6,
+  stufen: {
+    s1: "Vollmond, Neumond — nimmt der Mond zu oder ab?",
+    s2: "Wie sieht der Mond ein paar Tage später aus?",
+    s3: "Mondbilder in die richtige Reihenfolge legen.",
+    s4: "Den ganzen Mondzyklus ordnen und erste Planeten-Fragen.",
+    s5: "Die acht Planeten der Reihe nach von der Sonne aus.",
+  },
+
+  aufgabe(ctx) {
+    const a = STUFE[ctx.stufe]();
+    let fertig = false;
+    const nacht = el("div", { class: "nacht" }, el("div", { class: "frage", html: a.frage }));
+    if (a.gross) nacht.append(el("div", { class: "mond-gross", text: a.gross }));
+    ctx.flaeche.append(nacht);
+
+    if (a.reihe) {
+      const gelegt = el("div", { class: "reihe" });
+      if (a.planeten) gelegt.append(el("span", { class: "sonne", text: "☀️" }));
+      nacht.append(gelegt);
+      const box = el("div", { class: "optionen" });
+      let pos = 0;
+      for (const item of mische(a.reihe)) {
+        const k = el("button", { type: "button", class: "option" + (a.mond ? " mond" : "") });
+        a.planeten ? k.append(planetKnopfInhalt(item)) : k.append(item);
+        k.addEventListener("click", () => {
+          if (fertig || k.classList.contains("gewaehlt")) return;
+          if (item === a.reihe[pos]) {
+            pos++; k.classList.add("gewaehlt"); LS.ton("tipp");
+            gelegt.append(el("span", { class: a.planeten ? "planet" : "", text: item }));
+            if (pos === a.reihe.length) { fertig = true; ctx.richtig(); }
+            return;
+          }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+          ctx.falsch(a.hinweis, a.reihe.join(" → "));
+          if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+        });
+        box.append(k);
+      }
+      ctx.flaeche.append(box);
+    } else {
+      const box = el("div", { class: "optionen" });
+      for (const o of a.optionen) {
+        const k = el("button", { type: "button", class: "option" + (a.mond ? " mond" : "") });
+        PLANETEN.some(p => p.name === o) ? k.append(planetKnopfInhalt(o)) : k.append(o);
+        k.addEventListener("click", () => {
+          if (fertig) return;
+          if (o === a.richtig) { fertig = true; k.classList.add("richtig"); ctx.richtig(); return; }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+          ctx.falsch(a.hinweis, a.loesung);
+          if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+        });
+        box.append(k);
+      }
+      ctx.flaeche.append(box);
+    }
+    if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort.");
+  },
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jahreskreis-Ordner</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(22px, 4.6vw, 30px); font-weight: 800; margin: 4px 0 16px; line-height: 1.35; }
+  .frage b { color: var(--knopf); }
+
+  .wahl { display: grid; gap: 10px; max-width: 760px; margin: 0 auto; }
+  .wahl.tage { grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); }
+  .wahl.monate { grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); }
+  .wahl.zeiten { grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); }
+
+  .antwort {
+    border: none; border-radius: 16px; min-height: 58px; padding: 8px;
+    font-family: inherit; font-size: clamp(18px, 3.6vw, 22px); font-weight: 900;
+    color: var(--text); background: #fff; box-shadow: 0 5px 0 var(--rand); cursor: pointer;
+    border-left: 8px solid var(--j, var(--knopf));
+  }
+  .antwort.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .antwort.richtig { background: var(--gut-hell); }
+  .antwort.gewaehlt { opacity: .35; }
+  .antwort .nr { display: block; font-size: 13px; color: var(--text-leise); }
+
+  /* Jahreszeit-Farben: Frühling, Sommer, Herbst, Winter (Deko, keine Stellenfarben) */
+  .jz-fruehling { --j: #7ccf6b; }
+  .jz-sommer { --j: #f5b301; }
+  .jz-herbst { --j: #e07a3f; }
+  .jz-winter { --j: #74a7e0; }
+
+  .reihe-gelegt { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 52px; margin: 0 0 14px; }
+  .reihe-gelegt span { background: var(--gut-hell); border-radius: 12px; padding: 8px 14px; font-weight: 900; font-size: 20px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📅 Jahreskreis-Ordner</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.9.1: a Zeitbegriffe (morgen, heute, gestern), zeitliche Reihen: Wochentage, Monate;
+// b Jahreskreis, Frühling, Sommer, Herbst, Winter.
+// Jahreszeiten werden nur zu eindeutigen Monaten gefragt (nicht März, Juni, September, Dezember,
+// in denen die Jahreszeit mitten im Monat wechselt).
+
+const { zufall, waehle, mische, el } = LS;
+
+const TAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+const MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+const JAHRESZEIT = { 0: "Winter", 1: "Winter", 3: "Frühling", 4: "Frühling", 6: "Sommer", 7: "Sommer", 9: "Herbst", 10: "Herbst" };
+const ZEITEN = ["Frühling", "Sommer", "Herbst", "Winter"];
+const ZEIT_KLASSE = { Frühling: "jz-fruehling", Sommer: "jz-sommer", Herbst: "jz-herbst", Winter: "jz-winter" };
+const mod = (n, m) => ((n % m) + m) % m;
+
+/* Aufgabenarten: jede liefert { frage (HTML), liste, loesung (Index in liste) } oder eine Reihen-Aufgabe. */
+const ARTEN = {
+  tagMorgen() {
+    const h = zufall(0, 6);
+    const [wort, d] = waehle([["morgen", 1], ["gestern", -1]]);
+    return { frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ist ${wort}?`, liste: "tage", loesung: mod(h + d, 7) };
+  },
+  tagWeit() {
+    const h = zufall(0, 6);
+    const [wort, d] = waehle([["übermorgen", 2], ["vorgestern", -2], ["in einer Woche", 7]]);
+    return { frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ist ${wort}?`, liste: "tage", loesung: mod(h + d, 7) };
+  },
+  tagRechnen() {
+    const h = zufall(0, 6), d = zufall(3, 12) * waehle([1, -1]);
+    return { frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ist ${d > 0 ? `in ${d}` : `vor ${-d}`} Tagen?`, liste: "tage", loesung: mod(h + d, 7) };
+  },
+  monatNach() {
+    const m = zufall(0, 11);
+    const vor = Math.random() < 0.5;
+    return { frage: `Welcher Monat kommt ${vor ? "vor" : "nach"} dem <b>${MONATE[m]}</b>?`, liste: "monate", loesung: mod(m + (vor ? -1 : 1), 12) };
+  },
+  monatRechnen() {
+    const m = zufall(0, 11), d = zufall(2, 7) * waehle([1, -1]);
+    return { frage: `Welcher Monat ist ${Math.abs(d)} Monate ${d > 0 ? "nach" : "vor"} dem <b>${MONATE[m]}</b>?`, liste: "monate", loesung: mod(m + d, 12) };
+  },
+  jahreszeit() {
+    const m = Number(waehle(Object.keys(JAHRESZEIT)));
+    return { frage: `In welcher Jahreszeit liegt der <b>${MONATE[m]}</b>?`, liste: "zeiten", loesung: ZEITEN.indexOf(JAHRESZEIT[m]) };
+  },
+  ordnen(art) {
+    const liste = art === "tage" ? TAGE : MONATE;
+    const n = art === "tage" ? 4 : 5;
+    const start = zufall(0, liste.length - 1);
+    const folge = Array.from({ length: n }, (_, i) => mod(start + i, liste.length));
+    return { reihe: true, frage: `Tipp die ${art === "tage" ? "Tage" : "Monate"} in der richtigen Reihenfolge an — beginne beim <b>${liste[folge[0]]}</b>.`, liste: art, folge };
+  },
+};
+
+// Je Stufe: Aufgabenarten
+const STUFE = {
+  s1: ["tagMorgen", "tagMorgen", "ordnenTage"],
+  s2: ["tagWeit", "monatNach", "ordnenTage", "jahreszeit"],
+  s3: ["monatNach", "jahreszeit", "ordnenMonate", "tagWeit"],
+  s4: ["monatRechnen", "tagRechnen", "ordnenMonate", "jahreszeit"],
+  s5: ["monatRechnen", "tagRechnen", "tagRechnen", "monatRechnen"],
+};
+
+function aufgabeErzeugen(stufe) {
+  const art = waehle(STUFE[stufe]);
+  if (art === "ordnenTage") return ARTEN.ordnen("tage");
+  if (art === "ordnenMonate") return ARTEN.ordnen("monate");
+  return ARTEN[art]();
+}
+
+const NAMEN = { tage: TAGE, monate: MONATE, zeiten: ZEITEN };
+
+function knopfFuer(art, i, text) {
+  // Nur die Jahreszeiten-Knöpfe sind gefärbt; Monate nicht, sonst verrät die Farbe die Jahreszeit.
+  const k = el("button", { type: "button", class: "antwort" + (art === "zeiten" ? ` ${ZEIT_KLASSE[text]}` : "") });
+  if (art === "monate") k.append(el("span", { class: "nr", text: `${i + 1}. Monat` }));
+  k.append(text);
+  return k;
+}
+
+LS.spiel({
+  id: "jahreskreis",
+  einleitung: "Gestern, heute, morgen — Wochentage, Monate und Jahreszeiten. Kennst du dich im Jahreskreis aus?",
+  anzahl: 8,
+  stufen: {
+    s1: "Gestern und morgen, Wochentage ordnen.",
+    s2: "Übermorgen und vorgestern, Monate, Jahreszeiten.",
+    s3: "Monate ordnen und Jahreszeiten zuordnen.",
+    s4: "Rechnen im Kalender: 3 Monate nach Oktober?",
+    s5: "Profi: Heute ist Freitag — welcher Tag ist in 10 Tagen?",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const namen = NAMEN[a.liste];
+    ctx.flaeche.append(el("div", { class: "frage", html: a.frage }));
+    let fertig = false;
+
+    if (a.reihe) {
+      const gelegt = el("div", { class: "reihe-gelegt" });
+      const wahl = el("div", { class: `wahl ${a.liste}` });
+      let pos = 0;
+      for (const i of mische(a.folge)) {
+        const k = knopfFuer(a.liste, i, namen[i]);
+        k.addEventListener("click", () => {
+          if (fertig || k.classList.contains("gewaehlt")) return;
+          if (i === a.folge[pos]) {
+            pos++;
+            k.classList.add("gewaehlt");
+            gelegt.append(el("span", { text: namen[i] }));
+            LS.ton("tipp");
+            if (pos === a.folge.length) { fertig = true; ctx.richtig(); }
+            return;
+          }
+          k.classList.remove("falsch");
+          void k.offsetWidth;
+          k.classList.add("falsch");
+          ctx.falsch(pos === 0 ? `Beginne beim ${namen[a.folge[0]]}.` : `Was kommt nach dem ${namen[a.folge[pos - 1]]}? Sag die Reihe leise auf.`, a.folge.map(j => namen[j]).join(" → "));
+          if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+        });
+        wahl.append(k);
+      }
+      ctx.flaeche.append(gelegt, wahl);
+      return;
+    }
+
+    const wahl = el("div", { class: `wahl ${a.liste}` });
+    namen.forEach((text, i) => {
+      const k = knopfFuer(a.liste, i, text);
+      k.addEventListener("click", () => {
+        if (fertig) return;
+        if (i === a.loesung) { fertig = true; k.classList.add("richtig"); ctx.richtig(); return; }
+        k.classList.remove("falsch");
+        void k.offsetWidth;
+        k.classList.add("falsch");
+        ctx.falsch(a.liste === "zeiten" ? "Denk daran, wie das Wetter in diesem Monat meistens ist." : "Zähl Schritt für Schritt weiter — nach dem letzten kommt wieder der erste.",
+          `Richtig ist: ${namen[a.loesung]}.`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+      });
+      wahl.append(k);
+    });
+    ctx.flaeche.append(wahl);
+    if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort.");
+  },
+});
+</script>
+</body>
+</html>

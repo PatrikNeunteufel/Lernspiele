@@ -235,3 +235,214 @@ Regel im Spiel: Nach einem kurzen Vokal folgt oft ein doppelter Konsonant (Ball,
 | Nase | s | Nasse | 👃 | ☐ |
 | Rose | s | Rosse | 🌹 | ☐ |
 | Hase | s | Hasse | 🐇 | ☐ |
+
+## 3. Satz-Reparatur und Wörter-Trenner (Lehrplan SG D.4.F.1)
+
+Die Sätze stehen hier richtig geschrieben. Das Spiel zeigt sie klein und ohne Schlusszeichen;
+der Wörter-Trenner zeigt sie in Grossbuchstaben ohne Lücken.
+
+### Stufe 1 — nur Satzanfang und Punkt (keine Nomen)
+
+| Satz | ☐ |
+|---|---|
+| Ich bin heute müde. | ☐ |
+| Wir spielen draussen. | ☐ |
+| Er lacht laut. | ☐ |
+| Sie rennt schnell. | ☐ |
+| Du malst schön. | ☐ |
+| Wir singen zusammen. | ☐ |
+| Es regnet stark. | ☐ |
+| Ich lese gern. | ☐ |
+| Heute ist es warm. | ☐ |
+| Morgen gehen wir weg. | ☐ |
+| Er springt hoch. | ☐ |
+| Wir lachen viel. | ☐ |
+
+### Stufe 2 — dazu Namen und konkrete Nomen
+
+| Satz | ☐ |
+|---|---|
+| Der Hund bellt laut. | ☐ |
+| Lina malt ein Haus. | ☐ |
+| Die Katze schläft auf dem Sofa. | ☐ |
+| Tim isst einen Apfel. | ☐ |
+| Mein Bruder spielt Fussball. | ☐ |
+| Die Sonne scheint hell. | ☐ |
+| Im Garten wächst eine Blume. | ☐ |
+| Mia fährt mit dem Velo zur Schule. | ☐ |
+| Der Vogel sitzt auf dem Baum. | ☐ |
+| Papa kocht heute Spaghetti. | ☐ |
+| Wir wohnen in Wil. | ☐ |
+| Oma backt einen Kuchen. | ☐ |
+
+### Stufe 3 — dazu abstrakte Nomen, ? und !
+
+| Satz | ☐ |
+|---|---|
+| Hast du Angst vor Hunden? | ☐ |
+| Was für eine Freude! | ☐ |
+| Kommst du morgen zu meinem Fest? | ☐ |
+| Die Kinder haben viel Mut. | ☐ |
+| Wie heisst dein Lehrer? | ☐ |
+| Wir haben grossen Hunger! | ☐ |
+| Lisa hat Glück gehabt. | ☐ |
+| Warum lachst du so? | ☐ |
+| Das macht mir grossen Spass! | ☐ |
+| Hast du heute Zeit? | ☐ |
+| Die Freundschaft ist wichtig. | ☐ |
+| Der Ärger ist schnell vorbei. | ☐ |
+
+### Stufe 4 — längere Sätze
+
+| Satz | ☐ |
+|---|---|
+| Am Montag gehen wir mit der Klasse in den Wald. | ☐ |
+| Hat der Hund von Oma einen Namen? | ☐ |
+| Im Sommer baden die Kinder im See. | ☐ |
+| Mein Freund Luca wohnt neben der Schule. | ☐ |
+| Wann beginnt die Pause am Nachmittag? | ☐ |
+| Endlich ist der Winter da! | ☐ |
+| Die Lehrerin erzählt eine spannende Geschichte. | ☐ |
+| Im Herbst fallen die Blätter von den Bäumen. | ☐ |
+| Wer hat meine Jacke gesehen? | ☐ |
+| Der Zug fährt um acht Uhr nach Zürich. | ☐ |
+
+### Stufe 5 — zwei Sätze
+
+| Satz | ☐ |
+|---|---|
+| Heute regnet es. Wir bleiben im Haus. | ☐ |
+| Wo ist mein Buch? Ich finde es nicht. | ☐ |
+| Wir haben Ferien! Alle Kinder jubeln. | ☐ |
+| Der Bus kommt. Steig schnell ein! | ☐ |
+| Kennst du Anna? Sie wohnt in Bern. | ☐ |
+| Das Essen ist fertig. Kommt ihr? | ☐ |
+| Im Zoo gibt es Elefanten. Hast du schon einen gesehen? | ☐ |
+| Lukas hat Geburtstag. Er wird neun Jahre alt. | ☐ |
+| Pass auf! Die Strasse ist nass. | ☐ |
+| Die Angst war gross. Doch dann kam die Freude. | ☐ |
+
+## 4. English Word-Match (Lehrplan SG FS1E.5.B.1)
+
+### Colours
+
+| Englisch | Deutsch | Bild | ☐ |
+|---|---|---|---|
+| red | rot | 🟥 | ☐ |
+| blue | blau | 🟦 | ☐ |
+| green | grün | 🟩 | ☐ |
+| yellow | gelb | 🟨 | ☐ |
+| black | schwarz | ⬛ | ☐ |
+| white | weiss | ⬜ | ☐ |
+| orange | orange | 🟧 | ☐ |
+| purple | violett | 🟪 | ☐ |
+| brown | braun | 🟫 | ☐ |
+
+### Animals
+
+| Englisch | Deutsch | Bild | ☐ |
+|---|---|---|---|
+| dog | Hund | 🐶 | ☐ |
+| cat | Katze | 🐱 | ☐ |
+| bird | Vogel | 🐦 | ☐ |
+| fish | Fisch | 🐟 | ☐ |
+| horse | Pferd | 🐴 | ☐ |
+| cow | Kuh | 🐄 | ☐ |
+| pig | Schwein | 🐷 | ☐ |
+| mouse | Maus | 🐭 | ☐ |
+| sheep | Schaf | 🐑 | ☐ |
+| duck | Ente | 🦆 | ☐ |
+| frog | Frosch | 🐸 | ☐ |
+| lion | Löwe | 🦁 | ☐ |
+
+### Numbers
+
+| Englisch | Deutsch | Bild | ☐ |
+|---|---|---|---|
+| one | eins | 1️⃣ | ☐ |
+| two | zwei | 2️⃣ | ☐ |
+| three | drei | 3️⃣ | ☐ |
+| four | vier | 4️⃣ | ☐ |
+| five | fünf | 5️⃣ | ☐ |
+| six | sechs | 6️⃣ | ☐ |
+| seven | sieben | 7️⃣ | ☐ |
+| eight | acht | 8️⃣ | ☐ |
+| nine | neun | 9️⃣ | ☐ |
+| ten | zehn | 🔟 | ☐ |
+
+### Food
+
+| Englisch | Deutsch | Bild | ☐ |
+|---|---|---|---|
+| apple | Apfel | 🍎 | ☐ |
+| banana | Banane | 🍌 | ☐ |
+| bread | Brot | 🍞 | ☐ |
+| milk | Milch | 🥛 | ☐ |
+| cheese | Käse | 🧀 | ☐ |
+| egg | Ei | 🥚 | ☐ |
+| cake | Kuchen | 🍰 | ☐ |
+| carrot | Karotte | 🥕 | ☐ |
+| strawberry | Erdbeere | 🍓 | ☐ |
+| water | Wasser | 💧 | ☐ |
+
+### Family
+
+| Englisch | Deutsch | Bild | ☐ |
+|---|---|---|---|
+| mother | Mutter | 👩 | ☐ |
+| father | Vater | 👨 | ☐ |
+| sister | Schwester | 👧 | ☐ |
+| brother | Bruder | 👦 | ☐ |
+| baby | Baby | 👶 | ☐ |
+| grandmother | Grossmutter | 👵 | ☐ |
+| grandfather | Grossvater | 👴 | ☐ |
+
+### School
+
+| Englisch | Deutsch | Bild | ☐ |
+|---|---|---|---|
+| book | Buch | 📖 | ☐ |
+| pencil | Bleistift | ✏️ | ☐ |
+| ruler | Lineal | 📏 | ☐ |
+| scissors | Schere | ✂️ | ☐ |
+| chair | Stuhl | 🪑 | ☐ |
+| clock | Uhr | 🕒 | ☐ |
+| teacher | Lehrerin / Lehrer | 🧑‍🏫 | ☐ |
+
+### Body
+
+| Englisch | Deutsch | Bild | ☐ |
+|---|---|---|---|
+| hand | Hand | ✋ | ☐ |
+| foot | Fuss | 🦶 | ☐ |
+| eye | Auge | 👁️ | ☐ |
+| ear | Ohr | 👂 | ☐ |
+| nose | Nase | 👃 | ☐ |
+| mouth | Mund | 👄 | ☐ |
+
+### Weather
+
+| Englisch | Deutsch | Bild | ☐ |
+|---|---|---|---|
+| sun | Sonne | ☀️ | ☐ |
+| rain | Regen | 🌧️ | ☐ |
+| snow | Schnee | ❄️ | ☐ |
+| wind | Wind | 🌬️ | ☐ |
+| cloud | Wolke | ☁️ | ☐ |
+
+### Phrases
+
+| Englisch | Deutsch | ☐ |
+|---|---|---|
+| Hello! | Hallo! | ☐ |
+| Goodbye! | Auf Wiedersehen! | ☐ |
+| Good morning! | Guten Morgen! | ☐ |
+| Good night! | Gute Nacht! | ☐ |
+| Thank you! | Danke! | ☐ |
+| Please. | Bitte. | ☐ |
+| How are you? | Wie geht es dir? | ☐ |
+| I'm fine. | Mir geht es gut. | ☐ |
+| What's your name? | Wie heisst du? | ☐ |
+| My name is Tim. | Ich heisse Tim. | ☐ |
+| How old are you? | Wie alt bist du? | ☐ |
+| I'm nine. | Ich bin neun. | ☐ |

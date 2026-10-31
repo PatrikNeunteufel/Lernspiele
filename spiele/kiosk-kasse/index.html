@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kiosk-Kasse</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .theke { display: flex; justify-content: center; align-items: flex-end; gap: 18px; flex-wrap: wrap; margin: 0 0 12px; }
+  .artikel { text-align: center; }
+  .artikel .bild { font-size: clamp(44px, 10vw, 64px); line-height: 1; }
+  .preis { display: inline-block; background: #fff8e1; border: 3px solid #f5c451; border-radius: 10px; padding: 2px 10px; font-weight: 900; font-size: 18px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .frage { text-align: center; font-size: clamp(20px, 4.2vw, 28px); font-weight: 800; margin: 0 0 12px; }
+  .frage b { color: var(--knopf); }
+
+  .geld { border: none; cursor: pointer; font-family: inherit; font-weight: 900; color: #3b3b3b; display: inline-flex; align-items: center; justify-content: center; flex: none; padding: 0; }
+  .geld.muenze { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fbfbfb, #b9bec6 70%); box-shadow: inset 0 0 0 3px #9aa1ab, 0 3px 0 rgba(0, 0, 0, .15); }
+  .geld.muenze.gelb { background: radial-gradient(circle at 35% 30%, #fff3b0, #d7b23c 70%); box-shadow: inset 0 0 0 3px #b8962a, 0 3px 0 rgba(0, 0, 0, .15); }
+  .geld.note { border-radius: 8px; width: 92px; height: 50px; font-size: 17px; box-shadow: 0 3px 0 rgba(0, 0, 0, .18); border: 2px solid rgba(0, 0, 0, .15); }
+  .note-10 { background: #f7d64a; } .note-20 { background: #ef6f6f; color: #fff; } .note-50 { background: #6cc77c; }
+  .note-100 { background: #6aa4e6; color: #fff; }
+
+  .kasse { min-height: 96px; border-radius: 18px; background: #f6f7fd; border: 3px dashed var(--rand); padding: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .kasse:empty::before { content: "Tipp auf Geld, um es hierher zu legen"; color: #b6bccf; font-weight: 700; }
+  .kasse .geld { transform: scale(.9); }
+  .vorrat { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .geld:active { transform: translateY(2px); }
+  .haufen { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 12px; }
+  .haufen .geld { cursor: default; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🏪 Kiosk-Kasse</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.A.2: b ganze Frankenbeträge bis 20 Fr. legen, addieren, subtrahieren;
+// c bis 100 Fr. mit Münzen und Noten legen; d Beträge mit Fr. und Rp. bilden, addieren und
+// subtrahieren (z.B. 25 Fr. 60 Rp. + 14 Fr. 30 Rp.). MA.3.A.1.d Abkürzungen Fr., Rp.
+// Alle Beträge intern in Rappen.
+
+const { zufall, waehle, mische, el } = LS;
+
+const GELD = [
+  // Grössen-Reihenfolge wie die echten Münzen, aber mindestens 40 px als Tippziel
+  { rp: 5, text: "5 Rp.", art: "muenze", gr: 42, gelb: true }, { rp: 10, text: "10 Rp.", art: "muenze", gr: 46 },
+  { rp: 20, text: "20 Rp.", art: "muenze", gr: 50 }, { rp: 50, text: "50 Rp.", art: "muenze", gr: 44 },
+  { rp: 100, text: "1 Fr.", art: "muenze", gr: 54 }, { rp: 200, text: "2 Fr.", art: "muenze", gr: 60 },
+  { rp: 500, text: "5 Fr.", art: "muenze", gr: 66 },
+  { rp: 1000, text: "10 Fr.", art: "note" }, { rp: 2000, text: "20 Fr.", art: "note" },
+  { rp: 5000, text: "50 Fr.", art: "note" }, { rp: 10000, text: "100 Fr.", art: "note" },
+];
+const ARTIKEL = ["🍦", "🥨", "🍫", "🧃", "🍎", "📒", "✏️", "🎈", "🧸", "🍌", "🥤", "🍪", "⚽", "🖍️"];
+
+/** Satzende nach „Fr.“ oder „Rp.“: kein doppelter Punkt. */
+const satz = s => s.replace(/\.\./g, ".");
+
+/** Betrag in Schweizer Schreibweise mit Fr. und Rp.: 25 Fr. 60 Rp., 13 Fr., 60 Rp. */
+function betrag(rp) {
+  const fr = Math.floor(rp / 100), r = rp % 100;
+  if (!fr) return `${r} Rp.`;
+  return r ? `${fr} Fr. ${r} Rp.` : `${fr} Fr.`;
+}
+
+function geldKnopf(g) {
+  const k = el("button", { type: "button", class: `geld ${g.art}${g.gelb ? " gelb" : ""}${g.art === "note" ? ` note-${g.rp / 100}` : ""}`, text: g.text, "aria-label": g.text });
+  if (g.art === "muenze") { k.style.width = k.style.height = `${g.gr}px`; k.style.fontSize = `${Math.max(10, g.gr / 4)}px`; }
+  return k;
+}
+
+/** Betrag mit möglichst wenigen Stücken (für „zählen“-Aufgaben und Lösungstexte). */
+function zerlegen(rp, erlaubt) {
+  const stuecke = [];
+  for (const g of [...erlaubt].sort((a, b) => b.rp - a.rp)) while (rp >= g.rp) { stuecke.push(g); rp -= g.rp; }
+  return stuecke;
+}
+
+// Je Stufe: erlaubtes Geld (bis Rappenwert), Preisraster, Höchstbetrag, Aufgabenarten.
+const STUFE = {
+  s1: { geld: [100, 200, 500, 1000, 2000], raster: 100, max: 2000, arten: ["legen", "legen", "addieren"] },
+  s2: { geld: [100, 200, 500, 1000, 2000, 5000, 10000], raster: 100, max: 10000, arten: ["legen", "zaehlen", "addieren"] },
+  s3: { geld: [10, 20, 50, 100, 200, 500, 1000, 2000], raster: 10, max: 5000, arten: ["legen", "addieren", "zaehlen"] },
+  s4: { geld: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000], raster: 5, max: 5000, arten: ["rueckgeld", "addieren", "legen"] },
+  s5: { geld: [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000], raster: 5, max: 10000, arten: ["einkauf", "rueckgeld"] },
+};
+
+const preis = (p, max) => zufall(1, Math.floor(max / p.raster) - 1) * p.raster;
+
+LS.spiel({
+  id: "kiosk-kasse",
+  einleitung: "Willkommen im Kiosk! Lege Geld in die Kasse, zähl zusammen und gib das Rückgeld richtig heraus.",
+  anzahl: 8,
+  stufen: {
+    s1: "Ganze Franken bis 20 Fr. legen.",
+    s2: "Bis 100 Fr. mit Münzen und Noten, Geld zählen.",
+    s3: "Franken und Rappen: 7 Fr. 40 Rp.",
+    s4: "Rückgeld: Bezahlt mit 20 Fr., kostet 13 Fr. 60 Rp.",
+    s5: "Einkauf mit mehreren Sachen und Rückgeld.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const erlaubt = GELD.filter(g => p.geld.includes(g.rp));
+    const art = waehle(p.arten);
+
+    // Tastatur für Beträge: Ab Stufe 3 in Rappen getippt (1 3 6 0 → 13 Fr. 60 Rp.), sonst ganze Franken.
+    const mitRappen = p.raster < 100;
+    const betragEingabe = (soll, hinweis, loesungText) => {
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Betrag" });
+      ctx.flaeche.append(anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: mitRappen ? 6 : 4,
+        onAenderung: z => { if (z !== null) anzeige.textContent = betrag(mitRappen ? z : z * 100); },
+        onOk(z) {
+          const rp = mitRappen ? z : z * 100;
+          if (rp === soll) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+          anzeige.classList.add("falsch");
+          ctx.falsch(satz(hinweis(rp)), satz(loesungText));
+          if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+        },
+      });
+      ctx.flaeche.append(tasten.element);
+      if (mitRappen && ctx.nr === 0) ctx.sag("Tipp Franken und Rappen zusammen: 1 3 6 0 heisst 13 Fr. 60 Rp.");
+    };
+
+    if (art === "legen") {
+      const soll = preis(p, p.max);
+      const ding = waehle(ARTIKEL);
+      ctx.flaeche.append(el("div", { class: "theke" }, el("div", { class: "artikel" }, el("div", { class: "bild", text: ding }), el("div", { class: "preis", text: betrag(soll) }))),
+        el("div", { class: "frage", html: `Lege genau <b>${betrag(soll)}</b> in die Kasse.` }));
+      const kasse = el("div", { class: "kasse", "aria-label": "Kasse" });
+      const vorrat = el("div", { class: "vorrat" });
+      const gelegt = [];
+      let fertig = false;
+      for (const g of erlaubt) {
+        const k = geldKnopf(g);
+        k.addEventListener("click", () => {
+          if (fertig) return;
+          const stueck = geldKnopf(g);
+          gelegt.push(g.rp);
+          stueck.addEventListener("click", () => { if (fertig) return; gelegt.splice(gelegt.indexOf(g.rp), 1); stueck.remove(); });
+          kasse.append(stueck);
+          LS.ton("tipp");
+        });
+        vorrat.append(k);
+      }
+      const ok = el("button", { class: "knopf gruen", type: "button", text: "Bezahlen ✓" });
+      ok.addEventListener("click", () => {
+        if (fertig) return;
+        const summe = gelegt.reduce((s, x) => s + x, 0);
+        if (summe === soll) { fertig = true; ctx.richtig(); return; }
+        ctx.falsch(satz(`In der Kasse liegen ${betrag(summe)}. ${summe < soll ? `Es fehlen noch ${betrag(soll - summe)}.` : `Das sind ${betrag(summe - soll)} zu viel.`} Tipp auf ein Stück in der Kasse, um es zurückzunehmen.`),
+          `Zum Beispiel: ${zerlegen(soll, erlaubt).map(g => g.text).join(" + ")}`);
+        if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
+      });
+      ctx.flaeche.append(kasse, vorrat, el("div", { class: "knopfzeile" }, ok));
+      if (ctx.nr === 0) ctx.sag("Tipp auf Münzen und Noten. Nochmal tippen in der Kasse nimmt sie zurück.");
+      return;
+    }
+
+    if (art === "zaehlen") {
+      const soll = preis(p, p.max);
+      const stuecke = mische(zerlegen(soll, erlaubt));
+      const haufen = el("div", { class: "haufen", "aria-label": "Geld" });
+      for (const g of stuecke) { const k = geldKnopf(g); k.disabled = true; haufen.append(k); }
+      ctx.flaeche.append(el("div", { class: "frage", text: "Wie viel Geld ist das?" }), haufen);
+      betragEingabe(soll, rp => rp < soll ? "Zu wenig. Beginne mit den Noten und den grössten Münzen." : "Zu viel. Zähl jedes Stück nur einmal.",
+        `Das sind ${betrag(soll)}.`);
+      return;
+    }
+
+    if (art === "addieren") {
+      const a = preis(p, p.max / 2), b = preis(p, p.max / 2);
+      const [d1, d2] = mische(ARTIKEL).slice(0, 2);
+      ctx.flaeche.append(el("div", { class: "theke" },
+        el("div", { class: "artikel" }, el("div", { class: "bild", text: d1 }), el("div", { class: "preis", text: betrag(a) })),
+        el("div", { class: "artikel" }, el("div", { class: "bild", text: d2 }), el("div", { class: "preis", text: betrag(b) }))),
+        el("div", { class: "frage", text: "Wie viel kostet beides zusammen?" }));
+      betragEingabe(a + b, () => mitRappen ? "Zähle zuerst die Franken zusammen, dann die Rappen. 100 Rp. sind 1 Fr." : "Zähl die beiden Preise zusammen.",
+        `${betrag(a)} + ${betrag(b)} = ${betrag(a + b)}`);
+      return;
+    }
+
+    // Rückgeld: ein Artikel (s4) oder mehrere (s5), bezahlt mit der nächstgrösseren Note
+    const anzahl = art === "einkauf" ? zufall(2, 3) : 1;
+    const preise = Array.from({ length: anzahl }, () => preis(p, art === "einkauf" ? 2500 : 4500));
+    const summe = preise.reduce((s, x) => s + x, 0);
+    const bezahlt = [1000, 2000, 5000, 10000].find(n => n > summe);
+    const dinge = mische(ARTIKEL).slice(0, anzahl);
+    ctx.flaeche.append(el("div", { class: "theke" }, ...preise.map((pr, i) => el("div", { class: "artikel" }, el("div", { class: "bild", text: dinge[i] }), el("div", { class: "preis", text: betrag(pr) })))));
+    const note = geldKnopf(GELD.find(g => g.rp === bezahlt)); note.disabled = true;
+    ctx.flaeche.append(el("div", { class: "frage" }, `Bezahlt wird mit `, note, el("span", { html: ` — <b>wie viel Rückgeld</b> gibt es?` })));
+    betragEingabe(bezahlt - summe,
+      () => anzahl > 1 ? `Rechne zuerst zusammen: Alles kostet ${betrag(summe)}. Dann: Wie viel fehlt bis ${betrag(bezahlt)}?` : `Zähl vom Preis aus hoch bis ${betrag(bezahlt)}: zuerst bis zum nächsten ganzen Franken.`,
+      `${betrag(bezahlt)} − ${betrag(summe)} = ${betrag(bezahlt - summe)}`);
+  },
+});
+</script>
+</body>
+</html>

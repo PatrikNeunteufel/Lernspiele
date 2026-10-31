@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vergleichs-Krokodil</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .vergleich { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; max-width: 720px; margin: 8px auto 18px; }
+  .seite { text-align: center; font-size: clamp(28px, 6.5vw, 48px); font-weight: 900; font-variant-numeric: tabular-nums; background: #fff; border-radius: 18px; padding: 12px 6px; box-shadow: var(--schatten); }
+  .seite .punkte { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 180px; margin: 0 auto; font-size: 30px; line-height: 1; }
+  .mitte { width: clamp(70px, 16vw, 110px); height: clamp(70px, 16vw, 110px); border-radius: 50%; border: 4px dashed #c5c9de; display: flex; align-items: center; justify-content: center; font-size: clamp(44px, 10vw, 70px); font-weight: 900; color: var(--gut); }
+  .mitte.krokodil { border-style: solid; border-color: var(--gut); background: var(--gut-hell); }
+  .zeichen-wahl { display: flex; justify-content: center; gap: 14px; }
+  .zeichen-wahl button { width: 92px; height: 80px; border: none; border-radius: 18px; font-family: inherit; font-size: 46px; font-weight: 900; background: #fff; color: var(--text); box-shadow: 0 6px 0 var(--rand); cursor: pointer; }
+  .zeichen-wahl button.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .zeichen-wahl small { display: block; font-size: 12px; font-weight: 700; color: var(--text-leise); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🐊 Vergleichs-Krokodil</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.1: a Anzahlen vergleichen (grösser, kleiner, gleich viele), c die Begriffe
+// „grösser als“, „kleiner als“ und die Symbole <, >; MA.1.A.2.e/f Zahlen bis 1000 bzw. 1 Million ordnen.
+// Das Krokodil öffnet sein Maul immer zur grösseren Zahl.
+
+const { zahlText, zufall, waehle, el } = LS;
+const DINGE = ["🍎", "⭐", "🐟", "🌸", "⚽"];
+
+// Je Stufe: Erzeuger für die beiden Seiten { text | punkte, wert }
+const STUFE = {
+  s1: () => { const a = zufall(1, 10), b = Math.random() < 0.2 ? a : zufall(1, 10); const d = waehle(DINGE); return [{ punkte: d.repeat(a), wert: a }, { punkte: d.repeat(b), wert: b }]; },
+  s2: () => zahlenPaar(10, 100),
+  s3: () => zahlenPaar(100, 1000),
+  s4: () => zahlenPaar(10000, 1000000),
+  s5: () => termPaar(),
+};
+
+/** Zwei Zahlen, oft mit gleichen Anfangsziffern, damit man Stelle für Stelle vergleichen muss. */
+function zahlenPaar(min, max) {
+  const a = zufall(min, max - 1);
+  let b;
+  const r = Math.random();
+  if (r < 0.15) b = a;
+  else if (r < 0.6 && a >= 10) {
+    // gleiche Länge, nur eine Stelle verschieden (z. B. 47 382 / 47 832)
+    const s = String(a).split("");
+    const i = zufall(1, s.length - 1);
+    s[i] = String((Number(s[i]) + zufall(1, 9)) % 10);
+    b = Number(s.join(""));
+  } else b = zufall(min, max - 1);
+  return [{ text: zahlText(a), wert: a }, { text: zahlText(b), wert: b }];
+}
+
+/** Rechnungen vergleichen: 300 · 4 ? 1000 + 250 */
+function termPaar() {
+  const term = () => waehle([
+    () => { const x = zufall(2, 9) * 100, y = zufall(2, 9); return { text: `${zahlText(x)} · ${y}`, wert: x * y }; },
+    () => { const x = zufall(1, 9) * 1000, y = zufall(1, 9) * 50; return { text: `${zahlText(x)} + ${y}`, wert: x + y }; },
+    () => { const x = zufall(2, 9) * 1000, y = zufall(1, 9) * 100; return { text: `${zahlText(x)} − ${y}`, wert: x - y }; },
+    () => { const y = zufall(2, 9), q = zufall(2, 9) * 100; return { text: `${zahlText(q * y)} : ${y}`, wert: q }; },
+  ])();
+  const a = term();
+  let b = term();
+  if (Math.random() < 0.15) b = { text: zahlText(a.wert), wert: a.wert };
+  return [a, b];
+}
+
+LS.spiel({
+  id: "vergleichs-krokodil",
+  einleitung: "Das hungrige Krokodil frisst immer die grössere Zahl! Wähle das richtige Zeichen: < (kleiner als), > (grösser als) oder = (gleich).",
+  anzahl: 10,
+  stufen: {
+    s1: "Bilder zählen: Wo sind mehr?",
+    s2: "Zahlen bis 100.",
+    s3: "Zahlen bis 1000.",
+    s4: "Grosse Zahlen bis zur Million: 47 382 oder 47 832?",
+    s5: "Rechnungen vergleichen: 300 · 4 oder 1000 + 250?",
+  },
+
+  aufgabe(ctx) {
+    const [a, b] = STUFE[ctx.stufe]();
+    const richtig = a.wert < b.wert ? "<" : a.wert > b.wert ? ">" : "=";
+    const seite = x => x.punkte ? el("div", { class: "seite" }, el("div", { class: "punkte", text: x.punkte })) : el("div", { class: "seite", text: x.text });
+    const mitte = el("div", { class: "mitte", text: "?" });
+    ctx.flaeche.append(el("div", { class: "vergleich" }, seite(a), mitte, seite(b)));
+
+    let fertig = false;
+    const wahl = el("div", { class: "zeichen-wahl" });
+    for (const [z, wort] of [["<", "kleiner"], ["=", "gleich"], [">", "grösser"]]) {
+      const k = el("button", { type: "button" }, z, el("small", { text: wort }));
+      k.addEventListener("click", () => {
+        if (fertig) return;
+        if (z === richtig) {
+          fertig = true;
+          mitte.textContent = z;
+          mitte.classList.add("krokodil");
+          ctx.richtig(z === "=" ? "Gleich gross — das Krokodil kann sich nicht entscheiden!" : "Happs! 🐊");
+          return;
+        }
+        k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+        const hinweis = ctx.stufe === "s1" ? "Zähl die Bilder auf beiden Seiten genau." : ctx.stufe === "s5" ? "Rechne zuerst beide Seiten aus." :
+          "Vergleiche Stelle für Stelle von links: Zuerst die Anzahl Ziffern, dann die erste Ziffer, die verschieden ist.";
+        ctx.falsch(hinweis, `${a.text ?? a.wert} ${richtig} ${b.text ?? b.wert}${ctx.stufe === "s5" ? ` (${zahlText(a.wert)} ${richtig} ${zahlText(b.wert)})` : ""}`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+      });
+      wahl.append(k);
+    }
+    ctx.flaeche.append(wahl);
+    if (ctx.nr === 0) ctx.sag("Das Maul (die offene Seite) zeigt immer zur grösseren Zahl: 3 < 5.");
+  },
+});
+</script>
+</body>
+</html>

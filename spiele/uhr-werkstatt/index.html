@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uhr-Werkstatt</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(22px, 4.6vw, 30px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .uhr-gross { display: block; width: min(260px, 62vw); margin: 0 auto 14px; }
+  .uhr .rand { fill: #fff; stroke: var(--text); stroke-width: 4; }
+  .uhr .strich { stroke: var(--text); stroke-width: 1.5; }
+  .uhr .strich.gross { stroke-width: 3.5; }
+  .uhr text { font-family: var(--schrift); font-weight: 900; font-size: 11px; fill: var(--text); }
+  .uhr .stunde { stroke: var(--text); stroke-width: 5; stroke-linecap: round; }
+  .uhr .minute { stroke: var(--knopf); stroke-width: 3.5; stroke-linecap: round; }
+  .uhr .mitte { fill: var(--text); }
+
+  .optionen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; max-width: 700px; margin: 0 auto; }
+  .option {
+    border: none; border-radius: 16px; min-height: 64px; padding: 8px;
+    font-family: inherit; font-size: clamp(20px, 4vw, 26px); font-weight: 900;
+    background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; font-variant-numeric: tabular-nums;
+  }
+  .option svg { width: 100%; max-width: 130px; display: block; margin: 0 auto; }
+  .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .option.richtig { background: var(--gut-hell); }
+  .digital { text-align: center; font-size: clamp(40px, 9vw, 60px); font-weight: 900; font-variant-numeric: tabular-nums; background: #1f2937; color: #7cf29a; border-radius: 16px; padding: 6px 22px; width: fit-content; margin: 0 auto 14px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🕰️ Uhr-Werkstatt</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.A.2: b „die Uhrzeit auf halbe Stunden bestimmen“, d „analoge und digitale
+// Uhrzeiten bestimmen“; NMG.9.1.b die Uhr lesen. Stufe 5: Zeitdauer (MA.3.A.2.g rechnen mit Zeitangaben).
+
+const { zufall, waehle, mische, el } = LS;
+const SVG = "http://www.w3.org/2000/svg";
+
+/** Analoge Uhr als SVG (h 0–23, m 0–59). Stundenzeiger rückt mit den Minuten weiter. */
+function uhr(h, m, klasse = "uhr") {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", "-60 -60 120 120");
+  svg.setAttribute("class", `uhr ${klasse}`);
+  svg.setAttribute("aria-label", "Analoge Uhr");
+  let inhalt = `<circle class="rand" r="56"/>`;
+  for (let i = 0; i < 60; i++) {
+    const w = i * 6 * Math.PI / 180, gross = i % 5 === 0;
+    inhalt += `<line class="strich${gross ? " gross" : ""}" x1="${Math.sin(w) * (gross ? 46 : 50)}" y1="${-Math.cos(w) * (gross ? 46 : 50)}" x2="${Math.sin(w) * 54}" y2="${-Math.cos(w) * 54}"/>`;
+  }
+  for (let z = 1; z <= 12; z++) {
+    const w = z * 30 * Math.PI / 180;
+    inhalt += `<text x="${Math.sin(w) * 37}" y="${-Math.cos(w) * 37 + 4}" text-anchor="middle">${z}</text>`;
+  }
+  const ws = ((h % 12) + m / 60) * 30 * Math.PI / 180, wm = m * 6 * Math.PI / 180;
+  inhalt += `<line class="stunde" x1="0" y1="0" x2="${Math.sin(ws) * 26}" y2="${-Math.cos(ws) * 26}"/>`;
+  inhalt += `<line class="minute" x1="0" y1="0" x2="${Math.sin(wm) * 44}" y2="${-Math.cos(wm) * 44}"/>`;
+  inhalt += `<circle class="mitte" r="4"/>`;
+  svg.innerHTML = inhalt;
+  return svg;
+}
+
+const zwei = n => String(n).padStart(2, "0");
+const digital = (h, m) => `${h}:${zwei(m)}`;
+const zwoelf = h => ((h + 11) % 12) + 1;
+
+/** Uhrzeit in Worten, wie Kinder sie sagen (Schriftdeutsch): 3 Uhr, Viertel nach 3, halb 4, Viertel vor 4. */
+function inWorten(h, m) {
+  const jetzt = zwoelf(h), naechste = zwoelf(h + 1);
+  return { 0: `${jetzt} Uhr`, 15: `Viertel nach ${jetzt}`, 30: `halb ${naechste}`, 45: `Viertel vor ${naechste}` }[m];
+}
+
+// Je Stufe: Minutenraster, Aufgabenarten.
+const STUFE = {
+  s1: { raster: [0, 30], arten: ["lesenWorte"] },
+  s2: { raster: [0, 15, 30, 45], arten: ["lesenWorte", "stellenWahl"] },
+  s3: { raster: "5", arten: ["lesenDigital", "stellenWahl"] },
+  s4: { raster: "1", arten: ["lesenTippen", "stellenWahl", "lesenDigital"] },
+  s5: { raster: "5", arten: ["dauer", "dauer", "lesenTippen"] },
+};
+
+function zeitFuer(stufe) {
+  const r = STUFE[stufe].raster;
+  const m = Array.isArray(r) ? waehle(r) : r === "5" ? zufall(0, 11) * 5 : zufall(0, 59);
+  return { h: zufall(1, 12), m };
+}
+
+/** Typische Verwechslungen: Zeiger vertauscht, Stunde daneben, Viertelstunde daneben. */
+function ablenker(h, m, stufe) {
+  const kand = new Map();
+  const add = (hh, mm) => { hh = zwoelf(hh); mm = ((mm % 60) + 60) % 60; const k = `${hh}:${mm}`; if (!(hh === h && mm === m) && !kand.has(k)) kand.set(k, { h: hh, m: mm }); };
+  const raster = STUFE[stufe].raster;
+  if (Array.isArray(raster) && raster.length === 2) { add(h + 1, m); add(h - 1, m); add(h, m === 0 ? 30 : 0); add(h + 1, m === 0 ? 30 : 0); }
+  else {
+    add(Math.round(m / 5) || 12, h * 5); // Zeiger verwechselt
+    add(h + 1, m); add(h - 1, m); add(h, m + 15); add(h, m - 15); add(h, 60 - m);
+  }
+  // Bei Viertel- und Halbstunden nur Zeiten anbieten, die sich in Worten sagen lassen.
+  const passend = [...kand.values()].filter(t => !Array.isArray(raster) || raster.includes(t.m));
+  return mische(passend).slice(0, 3);
+}
+
+/** Digitale Eingabe: Ziffern → „h:mm“ (die letzten zwei Ziffern sind die Minuten). */
+function zeitAusZiffern(z) {
+  const s = String(z);
+  if (s.length < 3) return null;
+  return { h: Number(s.slice(0, -2)), m: Number(s.slice(-2)) };
+}
+
+LS.spiel({
+  id: "uhr-werkstatt",
+  einleitung: "Tick, tack! Wie spät ist es? Der kurze Zeiger zeigt die Stunden, der lange blaue die Minuten.",
+  anzahl: 8,
+  stufen: {
+    s1: "Volle und halbe Stunden: 3 Uhr, halb 4.",
+    s2: "Viertel nach und Viertel vor.",
+    s3: "In 5-Minuten-Schritten, digital: 7:25.",
+    s4: "Auf die Minute genau — und die richtige Uhr finden.",
+    s5: "Zeitdauer: Wie spät ist es in 35 Minuten?",
+  },
+
+  aufgabe(ctx) {
+    const art = waehle(STUFE[ctx.stufe].arten);
+    const { h, m } = zeitFuer(ctx.stufe);
+    let fertig = false;
+
+    // Auswahl-Knöpfe (Text oder kleine Uhren)
+    const auswahl = (optionen, darstellen, istRichtig, loesungText, hinweis) => {
+      const box = el("div", { class: "optionen" });
+      for (const o of mische(optionen)) {
+        const k = el("button", { type: "button", class: "option" });
+        darstellen(k, o);
+        k.addEventListener("click", () => {
+          if (fertig) return;
+          if (istRichtig(o)) { fertig = true; k.classList.add("richtig"); ctx.richtig(); return; }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+          ctx.falsch(hinweis, loesungText);
+          if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+        });
+        box.append(k);
+      }
+      ctx.flaeche.append(box);
+    };
+
+    const zeigerHinweis = "Schau zuerst auf den kurzen Zeiger (Stunden), dann auf den langen blauen (Minuten). Jede Zahl auf dem Rand sind 5 Minuten.";
+
+    if (art === "lesenWorte" || art === "lesenDigital") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Wie spät ist es?" }));
+      const gross = uhr(h, m, "uhr-gross"); ctx.flaeche.append(gross);
+      const text = (hh, mm) => art === "lesenWorte" ? inWorten(hh, mm) : digital(hh, mm);
+      auswahl([{ h, m }, ...ablenker(h, m, ctx.stufe)], (k, o) => k.append(text(o.h, o.m)), o => o.h === h && o.m === m,
+        `Es ist ${text(h, m)}.`, zeigerHinweis);
+    } else if (art === "stellenWahl") {
+      const text = ctx.stufe === "s2" ? inWorten(h, m) : digital(h, m);
+      ctx.flaeche.append(el("div", { class: "frage", html: `Welche Uhr zeigt <b>${text}</b>?` }));
+      auswahl([{ h, m }, ...ablenker(h, m, ctx.stufe)], (k, o) => k.append(uhr(o.h, o.m)), o => o.h === h && o.m === m,
+        `Gesucht war ${text}.`, "Der lange Zeiger zeigt die Minuten: bei der 3 sind es 15, bei der 6 sind es 30 Minuten.");
+    } else if (art === "lesenTippen") {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Wie spät ist es? Tipp die Zeit ein (z. B. 7 4 5 für 7:45)." }));
+      ctx.flaeche.append(uhr(h, m, "uhr-gross"));
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit" });
+      ctx.flaeche.append(anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: 4,
+        onAenderung: z => { if (z !== null) { const t = zeitAusZiffern(z); anzeige.textContent = t ? digital(t.h, t.m) : String(z); } },
+        onOk(z) {
+          const t = zeitAusZiffern(z);
+          if (t && zwoelf(t.h) === h && t.m === m) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+          anzeige.classList.add("falsch");
+          ctx.falsch(t && t.m !== m ? "Die Minuten stimmen noch nicht. Zähl in 5er-Schritten bis zum langen Zeiger, dann die kleinen Striche dazu." : zeigerHinweis, `Es ist ${digital(h, m)}.`);
+          if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+        },
+      });
+      ctx.flaeche.append(tasten.element);
+    } else {
+      // Zeitdauer: Startzeit digital, plus Minuten — Ergebnis eintippen (24-Stunden-Zählung, z. B. 15:20)
+      const start = zufall(7, 17) * 60 + zufall(0, 11) * 5;
+      const dauer = waehle([15, 20, 25, 35, 40, 45, 50, 75, 90]);
+      const ende = start + dauer;
+      const t0 = { h: Math.floor(start / 60), m: start % 60 }, t1 = { h: Math.floor(ende / 60), m: ende % 60 };
+      ctx.flaeche.append(el("div", { class: "digital", text: digital(t0.h, t0.m) }),
+        el("div", { class: "frage", html: `Wie spät ist es in <b>${dauer >= 60 ? `${Math.floor(dauer / 60)} h ${dauer % 60} min` : `${dauer} Minuten`}</b>?` }));
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit" });
+      ctx.flaeche.append(anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: 4,
+        onAenderung: z => { if (z !== null) { const t = zeitAusZiffern(z); anzeige.textContent = t ? digital(t.h, t.m) : String(z); } },
+        onOk(z) {
+          const t = zeitAusZiffern(z);
+          if (t && t.h === t1.h && t.m === t1.m) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+          anzeige.classList.add("falsch");
+          const bisVoll = 60 - t0.m;
+          ctx.falsch(dauer > bisVoll && t0.m > 0
+            ? `Rechne zuerst bis zur vollen Stunde: ${digital(t0.h, t0.m)} + ${bisVoll} min = ${digital(t0.h + 1, 0)}. Dann den Rest dazu.`
+            : "Zähl die Minuten zur Startzeit dazu. 60 Minuten sind 1 Stunde.", `${digital(t0.h, t0.m)} + ${dauer} min = ${digital(t1.h, t1.m)}`);
+          if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+        },
+      });
+      ctx.flaeche.append(tasten.element);
+    }
+    if (ctx.nr === 0) ctx.sag("Kurzer Zeiger = Stunden, langer blauer Zeiger = Minuten.");
+  },
+});
+</script>
+</body>
+</html>

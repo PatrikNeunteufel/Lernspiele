@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Masse-Umwandler</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .rechnung { text-align: center; font-size: clamp(30px, 7vw, 52px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 6px 0 12px; }
+  .rechnung .einheit { color: var(--knopf); }
+  .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
+  .ergebnis-zeile .anzeige { flex: 1; }
+  .ergebnis-zeile .einheit { font-size: clamp(28px, 6vw, 40px); font-weight: 900; color: var(--knopf); min-width: 2.2em; }
+
+  .treppe { display: flex; justify-content: center; align-items: flex-end; gap: 4px; margin: 0 auto 14px; flex-wrap: wrap; }
+  .stufe-t { display: flex; flex-direction: column; align-items: center; }
+  .stufe-t b { background: var(--f, var(--deko-6)); color: #fff; border-radius: 10px; padding: 6px 12px; font-size: 18px; }
+  .pfeil-t { font-size: 13px; font-weight: 800; color: var(--text-leise); text-align: center; padding: 0 4px 10px; }
+  .familie { text-align: center; color: var(--text-leise); font-weight: 700; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📏 Masse-Umwandler</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.A.2.e: Grössen in benachbarte Masseinheiten umwandeln (l, dl; m, cm, mm; kg, g;
+// z.B. 2'000 g = 2 kg) und mit ihnen rechnen (z.B. 3 cm 5 mm + 2 cm 7 mm);
+// MA.3.A.1.e/f: km, dm, mm, cl, ml, t, mg, h, min, s; Vorsätze Kilo, Dezi, Centi, Milli.
+
+const { zahlText, zufall, waehle, el } = LS;
+
+// Familien: Einheiten von klein nach gross mit Wert in der kleinsten Einheit.
+const FAMILIEN = {
+  laenge: { name: "Längen", einheiten: [["mm", 1], ["cm", 10], ["dm", 100], ["m", 1000], ["km", 1000000]] },
+  hohl: { name: "Hohlmasse", einheiten: [["ml", 1], ["cl", 10], ["dl", 100], ["l", 1000]] },
+  gewicht: { name: "Gewichte", einheiten: [["mg", 1], ["g", 1000], ["kg", 1000000], ["t", 1000000000]] },
+  zeit: { name: "Zeit", einheiten: [["s", 1], ["min", 60], ["h", 3600]] },
+  geld: { name: "Geld", einheiten: [["Rp.", 1], ["Fr.", 100]] },
+};
+
+// Je Stufe: erlaubte Paare [Familie, gross, klein], Aufgabenart.
+const STUFE = {
+  s1: { paare: [["laenge", "m", "cm"], ["geld", "Fr.", "Rp."]], art: "einfach", max: 9 },
+  s2: { paare: [["laenge", "m", "cm"], ["laenge", "cm", "mm"], ["hohl", "l", "dl"], ["gewicht", "kg", "g"]], art: "einfach", max: 20 },
+  s3: { paare: [["laenge", "m", "cm"], ["laenge", "cm", "mm"], ["hohl", "l", "dl"], ["gewicht", "kg", "g"], ["geld", "Fr.", "Rp."]], art: "gemischt", max: 9 },
+  s4: { paare: [["laenge", "km", "m"], ["laenge", "m", "mm"], ["laenge", "dm", "cm"], ["hohl", "dl", "cl"], ["hohl", "l", "ml"], ["gewicht", "t", "kg"], ["gewicht", "g", "mg"], ["zeit", "h", "min"], ["zeit", "min", "s"]], art: "einfach", max: 12 },
+  s5: { paare: [["laenge", "cm", "mm"], ["laenge", "m", "cm"], ["gewicht", "kg", "g"], ["hohl", "l", "dl"], ["zeit", "h", "min"]], art: "rechnen", max: 5 },
+};
+
+const wert = (fam, e) => FAMILIEN[fam].einheiten.find(x => x[0] === e)[1];
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const [fam, gross, klein] = waehle(p.paare);
+  const f = wert(fam, gross) / wert(fam, klein);
+  // Anteil in der kleinen Einheit, kleiner als eine grosse Einheit (bei 1000er-Schritten in Zehnern: 2 kg 350 g)
+  const teil = () => f >= 1000 ? zufall(1, 99) * 10 : zufall(1, f - 1);
+  if (p.art === "einfach") {
+    const v = zufall(1, p.max);
+    return Math.random() < 0.5
+      ? { fam, f, links: `${zahlText(v)} ${gross}`, ziel: klein, loesung: v * f }
+      : { fam, f, links: `${zahlText(v * f)} ${klein}`, ziel: gross, loesung: v };
+  }
+  if (p.art === "gemischt") {
+    const a = zufall(1, p.max), b = teil();
+    return { fam, f, links: `${a} ${gross} ${zahlText(b)} ${klein}`, ziel: klein, loesung: a * f + b };
+  }
+  // rechnen: zwei gemischte Grössen addieren, Ergebnis in der kleinen Einheit
+  const a1 = zufall(0, p.max), b1 = teil(), a2 = zufall(0, p.max), b2 = teil();
+  const s = (a, b) => (a ? `${a} ${gross} ` : "") + `${zahlText(b)} ${klein}`;
+  return { fam, f, links: `${s(a1, b1)} + ${s(a2, b2)}`, ziel: klein, loesung: (a1 + a2) * f + b1 + b2 };
+}
+
+/** Einheiten-Treppe der Familie als Hilfe: m —×100→ cm … */
+function treppe(fam) {
+  const e = FAMILIEN[fam].einheiten.slice().reverse();
+  const box = el("div", { class: "treppe", "aria-label": "Einheiten-Treppe" });
+  e.forEach(([name, w], i) => {
+    if (i) box.append(el("div", { class: "pfeil-t", html: `×${zahlText(e[i - 1][1] / w)}<br>→` }));
+    box.append(el("div", { class: "stufe-t" }, el("b", { text: name })));
+  });
+  return box;
+}
+
+LS.spiel({
+  id: "masse-umwandler",
+  einleitung: "Meter, Liter, Kilo und Co.: Wandle die Grössen in die andere Einheit um. Die Einheiten-Treppe hilft dir!",
+  anzahl: 8,
+  stufen: {
+    s1: "Meter und Zentimeter, Franken und Rappen: 2 m = 200 cm.",
+    s2: "Dazu mm, l und dl, kg und g: 2000 g = 2 kg.",
+    s3: "Gemischt: 3 m 25 cm = 325 cm.",
+    s4: "km, t, ml, cl, h, min, s — Kilo, Dezi, Centi, Milli.",
+    s5: "Rechnen: 3 cm 5 mm + 2 cm 7 mm = ? mm.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.flaeche.append(el("div", { class: "familie", text: FAMILIEN[a.fam].name }));
+    if (ctx.stufe !== "s5") ctx.flaeche.append(treppe(a.fam));
+    ctx.flaeche.append(el("div", { class: "rechnung", html: `${a.links} = <span class="einheit">? ${a.ziel}</span>` }));
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": `Ergebnis in ${a.ziel}` });
+    ctx.flaeche.append(el("div", { class: "ergebnis-zeile" }, anzeige, el("span", { class: "einheit", text: a.ziel })));
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: 9,
+      onOk(w) {
+        if (w === a.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+        anzeige.classList.add("falsch");
+        const zuKlein = w * a.f === a.loesung, zuGross = w === a.loesung * a.f;
+        ctx.falsch(zuKlein || zuGross
+          ? `Fast — du hast in die falsche Richtung umgerechnet. Grosse Einheit → kleine Einheit: mal ${zahlText(a.f)}. Kleine → grosse: geteilt durch ${zahlText(a.f)}.`
+          : `Schau auf die Treppe: Zwischen den beiden Einheiten liegt der Faktor ${zahlText(a.f)}.`,
+          `${a.links} = ${zahlText(a.loesung)} ${a.ziel}`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag("Von gross nach klein wird die Zahl grösser — von klein nach gross kleiner.");
+  },
+});
+</script>
+</body>
+</html>

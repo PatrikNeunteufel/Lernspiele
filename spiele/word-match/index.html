@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Word-Match</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .thema-name { text-align: center; font-weight: 800; color: var(--text-leise); margin-bottom: 4px; }
+  .bild-gross { text-align: center; font-size: clamp(64px, 15vw, 100px); line-height: 1.1; margin-bottom: 8px; }
+  .wort-gross { text-align: center; font-size: clamp(32px, 7vw, 48px); font-weight: 900; margin-bottom: 14px; color: var(--knopf); }
+  .optionen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; max-width: 680px; margin: 0 auto; }
+  .option { border: none; border-radius: 16px; min-height: 64px; padding: 8px; font-family: inherit; font-size: clamp(20px, 4vw, 26px); font-weight: 900; background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; }
+  .option.bild { font-size: clamp(40px, 9vw, 56px); }
+  .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .option.richtig { background: var(--gut-hell); }
+  .ablage { display: flex; justify-content: center; gap: 6px; min-height: 60px; margin-bottom: 14px; flex-wrap: wrap; }
+  .ablage span { width: 44px; height: 54px; border-radius: 10px; border-bottom: 4px solid var(--knopf); display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; }
+  .kacheln { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .kachel { width: 52px; height: 58px; border: none; border-radius: 12px; font-family: inherit; font-size: 28px; font-weight: 900; background: #fff; box-shadow: 0 4px 0 var(--rand); cursor: pointer; }
+  .kachel:disabled { opacity: .25; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🇬🇧 English Word-Match</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS1E.5.B.1: Wortschatz zu vertrauten Themen (a begrenztes, b elementares Repertoire).
+// Englisch beginnt in St. Gallen in der 3. Klasse; Stufe 1 mit Bildern taugt auch früher.
+
+const { zufall, waehle, mische, el } = LS;
+
+// Je Stufe: Themen und Aufgabenarten
+const STUFE = {
+  s1: { themen: ["farben", "tiere", "zahlen"], arten: ["bildZuEn"] },
+  s2: { themen: ["farben", "tiere", "zahlen", "essen", "familie"], arten: ["bildZuEn", "enZuBild"] },
+  s3: { themen: ["essen", "familie", "schule", "koerper", "wetter", "tiere"], arten: ["deZuEn", "enZuBild"] },
+  s4: { themen: Object.keys(THEMEN_EN), arten: ["enZuDe", "wendung", "deZuEn"] },
+  s5: { themen: Object.keys(THEMEN_EN), arten: ["buchstabieren", "wendung"] },
+};
+
+LS.spiel({
+  id: "word-match",
+  einleitung: "Hello! Let's play! Welches englische Wort passt zum Bild? Und was heisst das auf Deutsch?",
+  anzahl: 8,
+  stufen: {
+    s1: "Bild → englisches Wort: Farben, Tiere, Zahlen.",
+    s2: "Dazu Essen und Familie, auch Wort → Bild.",
+    s3: "Deutsch → Englisch: Schule, Körper, Wetter.",
+    s4: "Englisch → Deutsch und kleine Sätze wie „How are you?“",
+    s5: "Buchstabieren: das englische Wort aus Buchstaben legen.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const art = waehle(p.arten);
+    let fertig = false;
+
+    const auswahl = (optionen, richtig, alsBild, loesung) => {
+      const box = el("div", { class: "optionen" });
+      for (const o of mische(optionen)) {
+        const k = el("button", { type: "button", class: "option" + (alsBild ? " bild" : ""), text: o });
+        k.addEventListener("click", () => {
+          if (fertig) return;
+          if (o === richtig) { fertig = true; k.classList.add("richtig"); ctx.richtig(waehle(["Great!", "Well done!", "Super!", "Yes!"])); return; }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+          ctx.falsch("Try again! Schau genau hin.", loesung);
+          if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+        });
+        box.append(k);
+      }
+      ctx.flaeche.append(box);
+    };
+
+    if (art === "wendung") {
+      const [en, de] = waehle(WENDUNGEN_EN);
+      const deutschZuEnglisch = Math.random() < 0.5;
+      const andere = mische(WENDUNGEN_EN.filter(w => w[0] !== en)).slice(0, 3);
+      ctx.flaeche.append(el("div", { class: "thema-name", text: "Phrases" }),
+        el("div", { class: "wort-gross", text: deutschZuEnglisch ? de : en }));
+      auswahl(deutschZuEnglisch ? [en, ...andere.map(w => w[0])] : [de, ...andere.map(w => w[1])],
+        deutschZuEnglisch ? en : de, false, `${en} = ${de}`);
+      return;
+    }
+
+    const themaId = waehle(p.themen);
+    const thema = THEMEN_EN[themaId];
+    const [en, de, bild] = waehle(thema.woerter);
+    const andere = mische(thema.woerter.filter(w => w[0] !== en)).slice(0, 3);
+    ctx.flaeche.append(el("div", { class: "thema-name", text: thema.name }));
+    const loesung = `${bild} ${en} = ${de}`;
+
+    if (art === "bildZuEn") {
+      ctx.flaeche.append(el("div", { class: "bild-gross", text: bild }));
+      auswahl([en, ...andere.map(w => w[0])], en, false, loesung);
+    } else if (art === "enZuBild") {
+      ctx.flaeche.append(el("div", { class: "wort-gross", text: en }));
+      auswahl([bild, ...andere.map(w => w[2])], bild, true, loesung);
+    } else if (art === "deZuEn") {
+      ctx.flaeche.append(el("div", { class: "wort-gross", text: de }));
+      auswahl([en, ...andere.map(w => w[0])], en, false, loesung);
+    } else if (art === "enZuDe") {
+      ctx.flaeche.append(el("div", { class: "wort-gross", text: en }));
+      auswahl([de, ...andere.map(w => w[1])], de, false, loesung);
+    } else {
+      // buchstabieren: Buchstaben-Kacheln in der richtigen Reihenfolge antippen
+      const ziel = en.toLowerCase();
+      ctx.flaeche.append(el("div", { class: "bild-gross", text: bild }), el("div", { class: "wort-gross", style: "font-size:24px;color:var(--text-leise)", text: de }));
+      const ablage = el("div", { class: "ablage" });
+      const felder = ziel.split("").map(() => { const s = el("span"); ablage.append(s); return s; });
+      const kacheln = el("div", { class: "kacheln" });
+      let pos = 0;
+      for (const b of mische(ziel.split(""))) {
+        const k = el("button", { type: "button", class: "kachel", text: b });
+        k.addEventListener("click", () => {
+          if (fertig || k.disabled) return;
+          if (b === ziel[pos]) {
+            felder[pos].textContent = b; pos++; k.disabled = true; LS.ton("tipp");
+            if (pos === ziel.length) { fertig = true; ctx.richtig(`Great! ${en}`); }
+            return;
+          }
+          ctx.falsch(`Der nächste Buchstabe ist nicht „${b}“. Sprich das Wort leise: ${ziel.slice(0, pos)}…`, loesung);
+          if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; felder.forEach((f, i) => { f.textContent = ziel[i]; }); }
+        });
+        kacheln.append(k);
+      }
+      ctx.flaeche.append(ablage, kacheln);
+    }
+    if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort. Good luck!");
+  },
+});
+</script>
+</body>
+</html>

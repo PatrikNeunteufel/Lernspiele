@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wörter-Trenner</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  /* Eine Zeile, nie umbrechen: ein Zeilenumbruch sähe aus wie eine Wortgrenze. Lange Sätze: seitlich schieben. */
+  .schlange-rahmen { overflow-x: auto; margin: 10px 0 18px; padding-bottom: 6px; }
+  .schlange { display: flex; flex-wrap: nowrap; align-items: stretch; width: max-content; margin: 0 auto; font-size: var(--gr, 40px); }
+  .buchstabe { font-weight: 900; padding: .15em 0; color: var(--text); line-height: 1.1; }
+  .luecke { width: .5em; min-width: 12px; border: none; background: transparent; cursor: pointer; position: relative; padding: 0; }
+  .luecke::after { content: ""; position: absolute; left: calc(50% - 2px); top: .2em; bottom: .2em; width: 4px; border-radius: 2px; background: transparent; }
+  .luecke:hover::after { background: #dfe3ef; }
+  .luecke.strich::after { background: var(--hinweis); top: 0; bottom: 0; }
+  .luecke.fehlt::after { background: var(--gut); top: 0; bottom: 0; }
+  .luecke.zuviel::after { background: #e5484d; }
+  .loesung { text-align: center; font-size: clamp(22px, 4.6vw, 30px); font-weight: 800; color: var(--gut); min-height: 36px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>✂️ Wörter-Trenner</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../satz-reparatur/saetze.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.4.F.1.a: Wortgrenzen beachten. Ein Satz steht ohne Lücken in Grossbuchstaben da;
+// das Kind setzt Trennstriche zwischen die Wörter. Die Sätze stammen aus der Satz-Reparatur.
+
+const { waehle, el } = LS;
+
+// Je Stufe: Anzahl Wörter im Satz (alle Sätze der Satz-Reparatur, ohne Satzzeichen)
+const STUFE = { s1: [2, 3], s2: [4, 4], s3: [5, 5], s4: [6, 7], s5: [8, 20] };
+const ALLE = Object.values(SAETZE).flat().map(s => s.replace(/[.!?]/g, "").split(" "));
+
+LS.spiel({
+  id: "woerter-trenner",
+  einleitung: "Hilfe, die Wörter kleben aneinander! Tipp zwischen die Buchstaben, um die Wörter zu trennen.",
+  anzahl: 8,
+  stufen: {
+    s1: "Kurze Sätze mit 2 bis 3 Wörtern: ERLACHTLAUT.",
+    s2: "Sätze mit 4 Wörtern.",
+    s3: "Sätze mit 5 Wörtern.",
+    s4: "Lange Sätze mit 6 bis 7 Wörtern.",
+    s5: "Ganz lange Sätze — auch zwei hintereinander.",
+  },
+
+  aufgabe(ctx) {
+    const [min, max] = STUFE[ctx.stufe];
+    const woerter = waehle(ALLE.filter(w => w.length >= min && w.length <= max));
+    const buchstaben = woerter.join("").toUpperCase().split("");
+    // Soll: Trennstellen nach dem i-ten Buchstaben (Index im zusammengeklebten Text)
+    const soll = new Set();
+    let pos = 0;
+    woerter.slice(0, -1).forEach(w => { pos += w.length; soll.add(pos); });
+
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "Wo hört ein Wort auf?" }));
+    const schlange = el("div", { class: "schlange", "aria-label": "Buchstaben ohne Lücken" });
+    const gesetzt = new Set();
+    const luecken = {};
+    let fertig = false;
+    buchstaben.forEach((b, i) => {
+      schlange.append(el("span", { class: "buchstabe", text: b }));
+      if (i < buchstaben.length - 1) {
+        const stelle = i + 1;
+        const l = el("button", { type: "button", class: "luecke", "aria-label": `Trennen nach ${b}` });
+        l.addEventListener("click", () => {
+          if (fertig) return;
+          gesetzt.has(stelle) ? gesetzt.delete(stelle) : gesetzt.add(stelle);
+          l.classList.toggle("strich", gesetzt.has(stelle));
+          l.classList.remove("fehlt", "zuviel");
+          LS.ton("tipp");
+        });
+        luecken[stelle] = l;
+        schlange.append(l);
+      }
+    });
+    const loesung = el("div", { class: "loesung" });
+    ctx.flaeche.append(el("div", { class: "schlange-rahmen" }, schlange), loesung);
+    // Schriftgrösse so wählen, dass der Satz möglichst in eine Zeile passt (mindestens 22 px)
+    const breite = ctx.flaeche.clientWidth || 600;
+    schlange.style.setProperty("--gr", `${Math.max(22, Math.min(44, Math.floor(breite / (buchstaben.length * 1.25))))}px`);
+
+    const ok = el("button", { class: "knopf gruen", type: "button", text: "Fertig ✓" });
+    ok.addEventListener("click", () => {
+      if (fertig) return;
+      const fehlt = [...soll].filter(s => !gesetzt.has(s));
+      const zuviel = [...gesetzt].filter(s => !soll.has(s));
+      if (!fehlt.length && !zuviel.length) { fertig = true; loesung.textContent = woerter.join(" "); ctx.richtig(); return; }
+      ctx.falsch(`${fehlt.length ? `Es fehlen noch ${fehlt.length} Trennstrich${fehlt.length === 1 ? "" : "e"}.` : ""} ${zuviel.length ? `${zuviel.length} Strich${zuviel.length === 1 ? " ist" : "e sind"} zu viel — dort geht ein Wort weiter.` : ""} Lies leise und klatsche bei jedem Wort.`.trim(),
+        `Der Satz heisst: ${woerter.join(" ")}`);
+      if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) {
+        fertig = true;
+        fehlt.forEach(s => luecken[s].classList.add("fehlt"));
+        zuviel.forEach(s => luecken[s].classList.add("zuviel"));
+        loesung.textContent = woerter.join(" ");
+      }
+    });
+    ctx.flaeche.append(el("div", { class: "knopfzeile" }, ok));
+    if (ctx.nr === 0) ctx.sag("Tipp genau zwischen zwei Buchstaben — dort erscheint ein Trennstrich.");
+  },
+});
+</script>
+</body>
+</html>

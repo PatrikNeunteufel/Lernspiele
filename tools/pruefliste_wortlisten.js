@@ -14,6 +14,8 @@ const lade = (datei, namen) => {
 
 const { WOERTER, SAETZE } = lade("spiele/wortarten-sortierer/woerter.js", ["WOERTER", "SAETZE"]);
 const { REGELN } = lade("spiele/regel-luecke/woerter.js", ["REGELN"]);
+const SATZ = lade("spiele/satz-reparatur/saetze.js", ["SAETZE"]).SAETZE;
+const { THEMEN_EN, WENDUNGEN_EN } = lade("spiele/word-match/woerter.js", ["THEMEN_EN", "WENDUNGEN_EN"]);
 
 const ART = { N: "Nomen", V: "Verb", A: "Adjektiv" };
 const STUFE = { s3: "Stufe 3 — einfache Sätze", s4: "Stufe 4 — Vergangenheit, Steigerung", s5: "Stufe 5 — gleiche Wörter, andere Wortart" };
@@ -69,5 +71,36 @@ for (const [, r] of Object.entries(REGELN)) {
     z(`| ${m[1]}${m[2]}${m[4]}${zusatz} | ${m[2]} | ${m[1]}${m[3]}${m[4]} | ${bild || ""} | ☐ |`);
   }
 }
+z("");
+z("## 3. Satz-Reparatur und Wörter-Trenner (Lehrplan SG D.4.F.1)");
+z("");
+z("Die Sätze stehen hier richtig geschrieben. Das Spiel zeigt sie klein und ohne Schlusszeichen;");
+z("der Wörter-Trenner zeigt sie in Grossbuchstaben ohne Lücken.");
+const SATZ_STUFE = { s1: "Stufe 1 — nur Satzanfang und Punkt (keine Nomen)", s2: "Stufe 2 — dazu Namen und konkrete Nomen",
+  s3: "Stufe 3 — dazu abstrakte Nomen, ? und !", s4: "Stufe 4 — längere Sätze", s5: "Stufe 5 — zwei Sätze" };
+for (const [stufe, liste] of Object.entries(SATZ)) {
+  z("");
+  z(`### ${SATZ_STUFE[stufe]}`);
+  z("");
+  z("| Satz | ☐ |");
+  z("|---|---|");
+  for (const s of liste) z(`| ${s} | ☐ |`);
+}
+z("");
+z("## 4. English Word-Match (Lehrplan SG FS1E.5.B.1)");
+for (const [, t] of Object.entries(THEMEN_EN)) {
+  z("");
+  z(`### ${t.name}`);
+  z("");
+  z("| Englisch | Deutsch | Bild | ☐ |");
+  z("|---|---|---|---|");
+  for (const [en, de, bild] of t.woerter) z(`| ${en} | ${de} | ${bild} | ☐ |`);
+}
+z("");
+z("### Phrases");
+z("");
+z("| Englisch | Deutsch | ☐ |");
+z("|---|---|---|");
+for (const [en, de] of WENDUNGEN_EN) z(`| ${en} | ${de} | ☐ |`);
 z("");
 process.stdout.write(zeilen.join("\n"));

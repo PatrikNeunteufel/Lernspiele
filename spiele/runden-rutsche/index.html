@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Runden-Rutsche</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .zahl-gross { text-align: center; font-size: clamp(40px, 9vw, 64px); font-weight: 900; margin: 0 0 4px; font-variant-numeric: tabular-nums; }
+  .auf { text-align: center; font-size: clamp(20px, 4vw, 26px); font-weight: 800; color: var(--text-leise); margin-bottom: 8px; }
+  .auf b { color: var(--knopf); }
+
+  .rutsche { width: 100%; max-width: 720px; display: block; margin: 0 auto; overflow: visible; }
+  .rutsche .bahn { stroke: #f5b301; stroke-width: 14; stroke-linecap: round; fill: none; }
+  .rutsche .strich { stroke: #c9cde0; stroke-width: 2; }
+  .rutsche .mitte { stroke: var(--hinweis); stroke-width: 3; stroke-dasharray: 5 4; }
+  .rutsche text { font-family: var(--schrift); font-weight: 800; fill: var(--text-leise); font-size: 15px; }
+  .rutsche .kugel { transition: transform .9s cubic-bezier(.5, 0, .5, 1.2); }
+
+  .ziele { display: flex; justify-content: space-between; gap: 12px; max-width: 760px; margin: 6px auto 0; }
+  .ziel {
+    border: none; border-radius: 18px; padding: 12px 18px; min-height: 72px; min-width: 130px;
+    font-family: inherit; font-size: clamp(24px, 5vw, 34px); font-weight: 900;
+    background: #fff; color: var(--text); box-shadow: 0 6px 0 var(--rand), 0 8px 16px rgba(45, 48, 71, .1); cursor: pointer;
+    font-variant-numeric: tabular-nums;
+  }
+  .ziel small { display: block; font-size: 14px; color: var(--text-leise); font-weight: 700; }
+  .ziel.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .ziel.richtig { background: var(--gut-hell); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🛝 Runden-Rutsche</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.4.f: natürliche Zahlen auf 10er, 100er und 1000er runden.
+// Die Zahl liegt als Kugel auf einer Rutsche zwischen zwei runden Zahlen; Regel: 0–4 ab, 5–9 auf.
+
+const { zahlText, zufall, waehle, el } = LS;
+
+// Je Stufe: Zahlenraum, Rundungsstellen, Anteil kniffliger Fälle (Endziffer 5, Übertrag 3 995),
+// Eingabe per Tastatur statt Auswahl.
+const STUFE = {
+  s1: { max: 100, auf: [10], knifflig: 0.2, tippen: false },
+  s2: { max: 1000, auf: [10, 100], knifflig: 0.25, tippen: false },
+  s3: { max: 10000, auf: [10, 100, 1000], knifflig: 0.3, tippen: false },
+  s4: { max: 1000000, auf: [100, 1000, 10000, 100000], knifflig: 0.35, tippen: false },
+  s5: { max: 1000000, auf: [10, 100, 1000, 10000, 100000], knifflig: 0.4, tippen: true },
+};
+
+const NAME = { 10: "Zehner", 100: "Hunderter", 1000: "Tausender", 10000: "Zehntausender", 100000: "Hunderttausender" };
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (;;) {
+    const auf = waehle(p.auf);
+    let zahl;
+    if (Math.random() < p.knifflig) {
+      // genau in der Mitte (…5…) oder knapp unter einem Übertrag (3 995 → 4 000)
+      const unten = auf * zufall(1, Math.floor(p.max / auf) - 1);
+      zahl = Math.random() < 0.5 ? unten + auf / 2 : unten - zufall(1, Math.max(1, auf / 10));
+    } else {
+      zahl = zufall(auf + 1, p.max - 1);
+    }
+    if (zahl % auf === 0 || zahl <= auf || zahl >= p.max) continue;
+    const unten = Math.floor(zahl / auf) * auf;
+    const oben = unten + auf;
+    const loesung = zahl - unten >= auf / 2 ? oben : unten;
+    return { zahl, auf, unten, oben, loesung };
+  }
+}
+
+/** Rutsche als SVG: Bogen von „unten“ nach „oben“, Kugel an der Position der Zahl. */
+function rutscheZeichnen(a) {
+  const B = 700, H = 150, x0 = 40, x1 = B - 40;
+  const anteil = (a.zahl - a.unten) / a.auf;
+  const xPos = x0 + anteil * (x1 - x0);
+  const yBahn = x => 110 - 70 * Math.sin(Math.PI * (x - x0) / (x1 - x0)); // Hügel: Mitte oben
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${B} ${H}`);
+  svg.setAttribute("class", "rutsche");
+  svg.setAttribute("aria-hidden", "true");
+  let pfad = "";
+  for (let x = x0; x <= x1; x += 10) pfad += `${x === x0 ? "M" : "L"}${x},${yBahn(x).toFixed(1)} `;
+  let striche = "";
+  for (let i = 0; i <= 10; i++) {
+    const x = x0 + i * (x1 - x0) / 10;
+    striche += `<line class="${i === 5 ? "mitte" : "strich"}" x1="${x}" x2="${x}" y1="${yBahn(x) + 10}" y2="${yBahn(x) + (i === 5 ? 34 : 18)}"/>`;
+  }
+  svg.innerHTML = `<path class="bahn" d="${pfad}"/>${striche}
+    <text x="${x0}" y="${H - 4}" text-anchor="middle">${zahlText(a.unten)}</text>
+    <text x="${(x0 + x1) / 2}" y="${H - 4}" text-anchor="middle" style="fill:var(--hinweis)">${zahlText(a.unten + a.auf / 2)}</text>
+    <text x="${x1}" y="${H - 4}" text-anchor="middle">${zahlText(a.oben)}</text>
+    <g class="kugel"><circle cx="${xPos}" cy="${yBahn(xPos) - 16}" r="15" fill="var(--knopf)"/><circle cx="${xPos - 5}" cy="${yBahn(xPos) - 21}" r="4" fill="#fff" opacity=".7"/></g>`;
+  // Kugel rutscht zur gewählten Seite: Verschiebung relativ zur Startposition
+  svg.rutschen = (ziel) => {
+    const xz = ziel === a.oben ? x1 : x0;
+    svg.querySelector(".kugel").style.transform = `translate(${xz - xPos}px, ${yBahn(xz) - yBahn(xPos)}px)`;
+  };
+  return svg;
+}
+
+function hinweisFuer(a) {
+  const stelle = a.auf / 10;
+  const ziffer = Math.floor(a.zahl / stelle) % 10;
+  return `Schau auf die Ziffer rechts von den ${NAME[a.auf]}n: Es ist eine ${ziffer}. Bei 0–4 rundet man ab, bei 5–9 auf.`;
+}
+
+LS.spiel({
+  id: "runden-rutsche",
+  einleitung: "Auf welche Seite rutscht die Kugel? Liegt die Zahl näher bei der kleineren oder der grösseren runden Zahl? Genau in der Mitte rutscht sie nach oben!",
+  anzahl: 8,
+  stufen: {
+    s1: "Bis 100 auf Zehner runden: 47 → 50.",
+    s2: "Bis 1000 auf Zehner und Hunderter.",
+    s3: "Bis 10 000 auf Zehner, Hunderter und Tausender (Lehrplan 4. Klasse).",
+    s4: "Bis zur Million, auch knifflig: 3 995 auf Zehner.",
+    s5: "Ohne Auswahl: das gerundete Ergebnis selbst eintippen.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.flaeche.append(
+      el("div", { class: "zahl-gross", text: zahlText(a.zahl) }),
+      el("div", { class: "auf", html: `runde auf <b>${NAME[a.auf]}</b>` }));
+    const svg = rutscheZeichnen(a);
+    ctx.flaeche.append(svg);
+
+    const loesungText = `${zahlText(a.zahl)} ≈ ${zahlText(a.loesung)}`;
+    if (!STUFE[ctx.stufe].tippen) {
+      const ziele = el("div", { class: "ziele" });
+      let fertig = false;
+      for (const wert of [a.unten, a.oben]) {
+        const knopf = el("button", { type: "button", class: "ziel" }, el("small", { text: wert === a.unten ? "⬅ abrunden" : "aufrunden ➡" }), zahlText(wert));
+        knopf.addEventListener("click", () => {
+          if (fertig) return;
+          if (wert === a.loesung) {
+            fertig = true;
+            knopf.classList.add("richtig");
+            svg.rutschen(wert);
+            LS.ton("huepf");
+            ctx.richtig(`Richtig: ${loesungText}`);
+            return;
+          }
+          knopf.classList.remove("falsch");
+          void knopf.offsetWidth;
+          knopf.classList.add("falsch");
+          ctx.falsch(hinweisFuer(a), loesungText);
+          if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+        });
+        ziele.append(knopf);
+      }
+      ctx.flaeche.append(ziele);
+    } else {
+      const anzeige = el("div", { class: "anzeige leer", style: "margin-top:10px", "aria-label": "Gerundete Zahl" });
+      ctx.flaeche.append(anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: 7,
+        onOk(w) {
+          if (w === a.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); svg.rutschen(w); ctx.richtig(`Richtig: ${loesungText}`); return; }
+          anzeige.classList.add("falsch");
+          ctx.falsch(w % a.auf !== 0 ? `Gerundet auf ${NAME[a.auf]} endet die Zahl auf ${String(a.auf).slice(1)}. ${hinweisFuer(a)}` : hinweisFuer(a), loesungText);
+          if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+        },
+      });
+      ctx.flaeche.append(tasten.element);
+    }
+    if (ctx.nr === 0) ctx.sag("Die gestrichelte Linie ist die Mitte. Liegt die Kugel davor oder dahinter?");
+  },
+});
+</script>
+</body>
+</html>

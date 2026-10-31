@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zahlenstrahl-Pfeil</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .ziel-zahl { text-align: center; font-size: clamp(40px, 9vw, 62px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 0 0 6px; }
+  .strahl { width: 100%; max-width: 760px; display: block; margin: 0 auto; touch-action: manipulation; cursor: crosshair; }
+  .strahl .linie { stroke: var(--text); stroke-width: 4; stroke-linecap: round; }
+  .strahl .strich { stroke: var(--text); stroke-width: 2; }
+  .strahl .strich.gross { stroke-width: 3; }
+  .strahl text { font-family: var(--schrift); font-weight: 800; font-size: 15px; fill: var(--text-leise); }
+  .strahl .treffer { fill: transparent; }
+  .strahl .pfeil { fill: var(--knopf); transition: transform .25s; }
+  .strahl .loesung { fill: var(--gut); }
+  .strahl .loesung-text { fill: var(--gut); font-size: 17px; }
+  .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎯 Zahlenstrahl-Pfeil</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.2: Zahlen ordnen — c bis 100 (Zahlenstrahl), e bis 1000, f bis 1 Million
+// („die ungefähre Position von 72'000 auf einem Zahlenstrahl bestimmen“).
+// Zwei Aufgabenarten: Zahl auf dem Strahl zeigen (tippen) und Zahl am Pfeil ablesen (eintippen).
+
+const { zahlText, zufall, waehle, el } = LS;
+
+// Je Stufe: mögliche Ausschnitte [von, bis, Schritt der Striche], Toleranz in Strichabständen,
+// und ob auch abgelesen wird.
+const STUFE = {
+  s1: { ausschnitte: [[0, 20, 1]], toleranz: 0.5, ablesen: false },
+  s2: { ausschnitte: [[0, 100, 10]], toleranz: 0.3, ablesen: true },
+  s3: { ausschnitte: [[0, 1000, 100], [0, 100, 10]], toleranz: 0.3, ablesen: true },
+  s4: { ausschnitte: [[0, 1000000, 100000], [0, 10000, 1000], [0, 100000, 10000]], toleranz: 0.3, ablesen: true },
+  s5: { ausschnitte: "verschoben", toleranz: 0.2, ablesen: true },
+};
+
+function ausschnittFuer(stufe) {
+  const p = STUFE[stufe];
+  if (p.ausschnitte !== "verschoben") return waehle(p.ausschnitte);
+  // Ausschnitt, der nicht bei 0 beginnt: z. B. 4600 bis 4700 in Zehnern oder 300 000 bis 400 000
+  const schritt = waehle([1, 10, 100, 1000, 10000]);
+  const von = schritt * 10 * zufall(1, Math.min(89, Math.floor(990000 / (schritt * 10)))); // bis zur Million
+  return [von, von + schritt * 10, schritt];
+}
+
+function aufgabeErzeugen(stufe) {
+  const [von, bis, schritt] = ausschnittFuer(stufe);
+  const ablesen = STUFE[stufe].ablesen && Math.random() < 0.4;
+  // Zielzahl: nicht genau auf einem Strich (ausser in Stufe 1), damit geschätzt werden muss
+  const raster = Math.max(1, schritt / 10); // Zielzahlen sind ganze Zahlen auf einem Zehntel-Strich-Raster
+  let ziel;
+  do {
+    ziel = stufe === "s1" ? zufall(von + 1, bis - 1) : von + Math.round(zufall(1, 99) / 100 * (bis - von) / raster) * raster;
+  } while (ziel <= von || ziel >= bis);
+  return { von, bis, schritt, ziel, ablesen, toleranz: STUFE[stufe].toleranz * schritt };
+}
+
+function strahlZeichnen(a, onTipp) {
+  const B = 760, x0 = 30, x1 = B - 30, y = 70;
+  const xVon = w => x0 + (w - a.von) / (a.bis - a.von) * (x1 - x0);
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${B} 130`);
+  svg.setAttribute("class", "strahl");
+  let inhalt = `<line class="linie" x1="${x0 - 14}" x2="${x1 + 14}" y1="${y}" y2="${y}"/>`;
+  const n = Math.round((a.bis - a.von) / a.schritt);
+  for (let i = 0; i <= n; i++) {
+    const w = a.von + i * a.schritt;
+    const gross = i === 0 || i === n || (n > 10 && i % 5 === 0) || (n === 10 && i === 5);
+    inhalt += `<line class="strich${gross ? " gross" : ""}" x1="${xVon(w)}" x2="${xVon(w)}" y1="${y - (gross ? 14 : 9)}" y2="${y + (gross ? 14 : 9)}"/>`;
+    // Beschriftet sind nur Anfang und Ende (in Stufe 1 auch jeder 5. Strich)
+    if (i === 0 || i === n || (n === 20 && i % 5 === 0)) inhalt += `<text x="${xVon(w)}" y="${y + 38}" text-anchor="middle">${zahlText(w)}</text>`;
+  }
+  inhalt += `<rect class="treffer" x="0" y="0" width="${B}" height="130"/>`;
+  inhalt += `<g class="pfeil-g" style="display:none"><path class="pfeil" d="M0,-6 L-11,-28 L11,-28 Z"/></g>`;
+  svg.innerHTML = inhalt;
+  const pfeil = svg.querySelector(".pfeil-g");
+  const setzePfeil = (w) => { pfeil.style.display = ""; pfeil.setAttribute("transform", `translate(${xVon(w)},${y})`); };
+  svg.zeigeLoesung = (w) => {
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.innerHTML = `<path class="loesung" d="M0,6 L-9,24 L9,24 Z"/><text class="loesung-text" x="0" y="44" text-anchor="middle">${zahlText(w)}</text>`;
+    g.setAttribute("transform", `translate(${xVon(w)},${y})`);
+    svg.append(g);
+  };
+  svg.setzePfeil = setzePfeil;
+  if (onTipp) {
+    svg.addEventListener("pointerdown", (e) => {
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX; pt.y = e.clientY;
+      const lokal = pt.matrixTransform(svg.getScreenCTM().inverse());
+      const w = a.von + (Math.min(x1, Math.max(x0, lokal.x)) - x0) / (x1 - x0) * (a.bis - a.von);
+      onTipp(w, setzePfeil);
+    });
+  }
+  return svg;
+}
+
+LS.spiel({
+  id: "zahlenstrahl-pfeil",
+  einleitung: "Wo steht die Zahl auf dem Zahlenstrahl? Tipp auf die richtige Stelle — oder lies ab, wohin der Pfeil zeigt.",
+  anzahl: 8,
+  stufen: {
+    s1: "Zahlen bis 20 — jeder Strich ist eine Zahl.",
+    s2: "Bis 100 in Zehnerschritten, auch ablesen.",
+    s3: "Bis 1000 in Hunderterschritten.",
+    s4: "Bis zur Million: Wo liegt 72 000? (Lehrplan 4. Klasse)",
+    s5: "Ausschnitte wie 4600 bis 4700 — genau schätzen!",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const loesungText = `Die Zahl ${zahlText(a.ziel)} liegt dort, wo der grüne Pfeil zeigt.`;
+
+    if (!a.ablesen) {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Tipp auf die Stelle dieser Zahl:" }), el("div", { class: "ziel-zahl", text: zahlText(a.ziel) }));
+      let gewaehlt = null, fertig = false;
+      const svg = strahlZeichnen(a, (w, setze) => { if (fertig) return; gewaehlt = w; setze(w); ok.disabled = false; LS.ton("tipp"); });
+      const ok = el("button", { class: "knopf gruen", type: "button", text: "OK ✓", disabled: "" });
+      ok.addEventListener("click", () => {
+        if (fertig || gewaehlt === null) return;
+        if (Math.abs(gewaehlt - a.ziel) <= a.toleranz) {
+          fertig = true; ok.disabled = true;
+          svg.zeigeLoesung(a.ziel);
+          ctx.richtig();
+          return;
+        }
+        const richtung = gewaehlt < a.ziel ? "weiter rechts" : "weiter links";
+        ctx.falsch(`Die Zahl liegt ${richtung}. Zähl die Striche: jeder Strich ist ${zahlText(a.schritt)}.`, loesungText);
+        if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) { fertig = true; ok.disabled = true; svg.zeigeLoesung(a.ziel); }
+      });
+      ctx.flaeche.append(svg, el("div", { class: "hinweis-klein", text: `Ein Strich = ${zahlText(a.schritt)}` }), el("div", { class: "knopfzeile" }, ok));
+    } else {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl zeigt der Pfeil ungefähr?" }));
+      const svg = strahlZeichnen(a, null);
+      svg.setzePfeil(a.ziel);
+      const anzeige = el("div", { class: "anzeige leer", style: "margin-top:10px", "aria-label": "Deine Zahl" });
+      ctx.flaeche.append(svg, el("div", { class: "hinweis-klein", text: `Ein Strich = ${zahlText(a.schritt)} · ungefähr genügt` }), anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: 7,
+        onOk(w) {
+          if (Math.abs(w - a.ziel) <= a.toleranz) {
+            tasten.gesperrt = true; anzeige.classList.add("richtig");
+            ctx.richtig(w === a.ziel ? "Genau richtig!" : `Gut geschätzt! Genau wäre ${zahlText(a.ziel)}.`);
+            return;
+          }
+          anzeige.classList.add("falsch");
+          ctx.falsch(`${w < a.ziel ? "Zu klein" : "Zu gross"}. Von welchem beschrifteten Strich aus zählst du? Jeder Strich ist ${zahlText(a.schritt)}.`, `Der Pfeil zeigt etwa auf ${zahlText(a.ziel)}.`);
+          if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+        },
+      });
+      ctx.flaeche.append(tasten.element);
+    }
+    if (ctx.nr === 0) ctx.sag("Schau zuerst, wie viel ein Strich ist.");
+  },
+});
+</script>
+</body>
+</html>

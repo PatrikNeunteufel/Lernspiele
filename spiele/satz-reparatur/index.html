@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satz-Reparatur</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .satz { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; margin: 8px 0 18px; }
+  .wort {
+    border: none; border-radius: 12px; padding: 8px 12px; min-height: 52px;
+    font-family: inherit; font-size: clamp(22px, 5vw, 32px); font-weight: 800;
+    background: #fff; color: var(--text); box-shadow: 0 4px 0 var(--rand); cursor: pointer;
+  }
+  .wort.gross { background: #eef0ff; color: var(--knopf); }
+  .wort .erster { display: inline-block; min-width: .6em; text-align: center; }
+  .wort.gross .erster { text-decoration: underline 3px; text-underline-offset: 4px; }
+  .wort.fehler { box-shadow: 0 0 0 3px var(--hinweis); }
+  .zeichen {
+    border: 3px dashed #c5c9de; border-radius: 10px; width: 46px; height: 52px;
+    font-family: inherit; font-size: 34px; font-weight: 900; background: #fbfcff; color: var(--knopf); cursor: pointer;
+  }
+  .zeichen.gesetzt { border-style: solid; border-color: var(--knopf); }
+  .zeichen.fehler { border-color: var(--hinweis); }
+  .tipp-zeile { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔧 Satz-Reparatur</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="saetze.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.4.F.1: a Satzanfang gross, Eigennamen und konkrete Nomen gross, Punkt am Satzende;
+// b abstrakte Nomen gross, Satzschlusszeichen. Die Sätze stehen richtig in saetze.js;
+// gezeigt werden sie klein und ohne Schlusszeichen.
+
+const { waehle, el } = LS;
+const ZEICHEN = ["", ".", "!", "?"];
+
+/** "Wo ist mein Buch? Ich finde es nicht." → Wörter mit Soll-Schreibung und Satzende-Zeichen */
+function zerlege(satz) {
+  return satz.split(" ").map(t => {
+    const m = t.match(/^(.+?)([.!?]?)$/);
+    return { soll: m[1], ende: m[2] || null };
+  });
+}
+
+LS.spiel({
+  id: "satz-reparatur",
+  einleitung: "Oje, in diesen Sätzen ist alles klein geschrieben und die Satzzeichen fehlen! Repariere sie: Tipp ein Wort an, um den ersten Buchstaben gross zu machen.",
+  anzahl: 8,
+  stufen: {
+    s1: "Satzanfang gross und Punkt am Ende.",
+    s2: "Dazu Namen und Nomen gross: Hund, Lina.",
+    s3: "Auch Nomen wie Angst und Freude — und ? oder !",
+    s4: "Längere Sätze mit mehreren Nomen.",
+    s5: "Zwei Sätze hintereinander.",
+  },
+
+  aufgabe(ctx) {
+    const satz = waehle(SAETZE[ctx.stufe]);
+    const woerter = zerlege(satz);
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "Repariere den Satz!" }),
+      el("div", { class: "tipp-zeile", text: "Wort antippen = gross/klein · Kästchen antippen = Satzzeichen wählen" }));
+    const zeile = el("div", { class: "satz" });
+    const zustand = woerter.map(w => ({ ...w, gross: false, zeichen: "" }));
+    let fertig = false;
+
+    zustand.forEach(w => {
+      const rest = w.soll.slice(1).toLowerCase();
+      const erster = el("span", { class: "erster", text: w.soll[0].toLowerCase() });
+      const knopf = el("button", { type: "button", class: "wort", "aria-label": w.soll.toLowerCase() }, erster, rest);
+      knopf.addEventListener("click", () => {
+        if (fertig) return;
+        w.gross = !w.gross;
+        erster.textContent = w.gross ? w.soll[0].toUpperCase() : w.soll[0].toLowerCase();
+        knopf.classList.toggle("gross", w.gross);
+        knopf.classList.remove("fehler");
+        LS.ton("tipp");
+      });
+      w.knopf = knopf;
+      zeile.append(knopf);
+      if (w.ende) {
+        const z = el("button", { type: "button", class: "zeichen", "aria-label": "Satzzeichen" });
+        z.addEventListener("click", () => {
+          if (fertig) return;
+          w.zeichen = ZEICHEN[(ZEICHEN.indexOf(w.zeichen) + 1) % ZEICHEN.length];
+          z.textContent = w.zeichen;
+          z.classList.toggle("gesetzt", !!w.zeichen);
+          z.classList.remove("fehler");
+          LS.ton("tipp");
+        });
+        w.zeichenKnopf = z;
+        zeile.append(z);
+      }
+    });
+    ctx.flaeche.append(zeile);
+
+    const ok = el("button", { class: "knopf gruen", type: "button", text: "Fertig ✓" });
+    ok.addEventListener("click", () => {
+      if (fertig) return;
+      const grossFalsch = zustand.filter(w => w.gross !== (w.soll[0] !== w.soll[0].toLowerCase()));
+      const zeichenFalsch = zustand.filter(w => w.ende && w.zeichen !== w.ende);
+      if (!grossFalsch.length && !zeichenFalsch.length) { fertig = true; ctx.richtig(`Richtig repariert: ${satz}`); return; }
+      const anfangFalsch = grossFalsch.some((w, i) => i === 0 || zustand[zustand.indexOf(w) - 1]?.ende);
+      const hinweis = anfangFalsch ? "Wie beginnt ein Satz? Mit einem grossen Buchstaben!"
+        : grossFalsch.some(w => !w.gross) ? "Ein Nomen fehlt noch. Probe: Passt der, die oder das davor? Namen schreibt man auch gross."
+        : grossFalsch.length ? "Ein Wort ist zu viel gross. Nur Satzanfang, Namen und Nomen schreibt man gross."
+        : zeichenFalsch.some(w => !w.zeichen) ? "Am Satzende fehlt ein Zeichen." : "Ist es eine Frage (?), ein Ausruf (!) oder ein normaler Satz (.)?";
+      ctx.falsch(hinweis, satz);
+      // Nach dem Aufgeben zeigen, wo die Fehler waren
+      if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) {
+        fertig = true;
+        grossFalsch.forEach(w => w.knopf.classList.add("fehler"));
+        zeichenFalsch.forEach(w => w.zeichenKnopf.classList.add("fehler"));
+      }
+    });
+    ctx.flaeche.append(el("div", { class: "knopfzeile" }, ok));
+    if (ctx.nr === 0) ctx.sag("Tipp auf die Wörter, die gross geschrieben werden. Dann das Kästchen am Ende für das Satzzeichen.");
+  },
+});
+</script>
+</body>
+</html>

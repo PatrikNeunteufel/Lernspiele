@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Koordinaten-Schatzsuche</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.2vw, 28px); font-weight: 800; margin: 0 0 12px; }
+  .frage b { color: var(--knopf); white-space: nowrap; }
+
+  /* Hundertertafel 0–99 mit Achsen E (Einer, Spalten) und Z (Zehner, Zeilen) */
+  .tafel { display: grid; grid-template-columns: 28px repeat(10, 1fr); gap: 2px; width: min(520px, 94vw); margin: 0 auto 12px; }
+  .tafel .kopf-e, .tafel .kopf-z { font-weight: 900; font-size: 13px; color: var(--text-leise); display: flex; align-items: center; justify-content: center; }
+  .tafel .feld { aspect-ratio: 1; border: none; border-radius: 6px; background: #eaf4ff; font-family: inherit; font-weight: 800; font-size: clamp(11px, 2.6vw, 16px); color: #8aa0bd; cursor: pointer; padding: 0; }
+  .tafel .feld.schatz { background: #fff1c2; color: var(--text); font-size: clamp(16px, 4vw, 24px); }
+  .tafel .feld.daneben { background: var(--hinweis-hell); }
+  .tafel .feld.treffer { background: var(--gut-hell); color: var(--text); }
+
+  .ksys { width: min(440px, 90vw); display: block; margin: 0 auto 12px; touch-action: manipulation; }
+  .ksys .gitter { stroke: #dfe3ef; stroke-width: 1; }
+  .ksys .achse { stroke: var(--text); stroke-width: 2; }
+  .ksys text { font-family: var(--schrift); font-size: 10px; font-weight: 800; fill: var(--text-leise); }
+  .ksys .punkt-ziel { fill: transparent; cursor: pointer; }
+  .ksys .punkt-ziel:hover { fill: rgba(91, 108, 255, .15); }
+  .ksys .gesetzt { fill: var(--deko-3); }
+  .ksys .figur { fill: rgba(99, 102, 241, .25); stroke: var(--deko-6); stroke-width: 2; }
+  .ksys .figur-neu { fill: rgba(240, 124, 42, .25); stroke: var(--deko-3); stroke-width: 2; }
+  .ksys .marke { font-size: 16px; }
+  .ksys .loesung { fill: var(--gut); }
+
+  .optionen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); gap: 10px; max-width: 620px; margin: 0 auto; }
+  .option { border: none; border-radius: 16px; min-height: 58px; font-family: inherit; font-size: 22px; font-weight: 900; background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; }
+  .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .option.richtig { background: var(--gut-hell); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🏴‍☠️ Koordinaten-Schatzsuche</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.C.4: b „Positionen in einem Koordinatensystem bestimmen (z.B. Schiffe versenken
+// auf der 100er-Tafel mit den Koordinaten 2 E 5 Z …)“; d „Figuren in einem Koordinatensystem zeichnen,
+// horizontal und vertikal verschieben sowie die Koordinaten der Eckpunkte angeben“; f zu Koordinaten
+// Figuren zeichnen. Hundertertafel 0–99: Zeile = Zehner, Spalte = Einer (2 E 5 Z ist das Feld 52).
+// Koordinatensystem: Punkt (x|y), x nach rechts, y nach oben.
+
+const { zufall, waehle, mische, el } = LS;
+const SVG = "http://www.w3.org/2000/svg";
+const N = 10; // Koordinatensystem 0–10
+
+// Je Stufe: Aufgabenarten
+const STUFE = {
+  s1: ["tafelSetzen"],
+  s2: ["tafelSetzen", "tafelLesen"],
+  s3: ["punktSetzen", "punktLesen"],
+  s4: ["punktLesen", "verschieben", "punktSetzen"],
+  s5: ["zeichnen", "verschieben"],
+};
+
+const ez = z => `${z % 10} E ${Math.floor(z / 10)} Z`;
+const pt = (x, y) => `(${x}|${y})`;
+
+function tafel(onTipp) {
+  const box = el("div", { class: "tafel", "aria-label": "Hundertertafel" });
+  const felder = {};
+  box.append(el("div"));
+  for (let e = 0; e < 10; e++) box.append(el("div", { class: "kopf-e", text: `${e} E` }));
+  for (let z = 0; z < 10; z++) {
+    box.append(el("div", { class: "kopf-z", text: `${z} Z` }));
+    for (let e = 0; e < 10; e++) {
+      const zahl = z * 10 + e;
+      const f = el("button", { type: "button", class: "feld", text: String(zahl), "aria-label": `Feld ${zahl}` });
+      if (onTipp) f.addEventListener("click", () => onTipp(zahl, f));
+      else f.disabled = true;
+      felder[zahl] = f;
+      box.append(f);
+    }
+  }
+  box.felder = felder;
+  return box;
+}
+
+/** Koordinatensystem als SVG; onTipp(x, y) beim Tippen auf einen Gitterpunkt. */
+function koordinaten(onTipp) {
+  const s = 30, o = 24, groesse = o + N * s + 26; // Rand für die Beschriftung der x-Achse
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", `0 0 ${groesse} ${groesse}`);
+  svg.setAttribute("class", "ksys");
+  const X = x => o + x * s, Y = y => o + (N - y) * s; // y nach oben
+  let inhalt = "";
+  for (let i = 0; i <= N; i++) {
+    inhalt += `<line class="gitter" x1="${X(i)}" x2="${X(i)}" y1="${Y(0)}" y2="${Y(N)}"/><line class="gitter" x1="${X(0)}" x2="${X(N)}" y1="${Y(i)}" y2="${Y(i)}"/>`;
+    inhalt += `<text x="${X(i)}" y="${Y(0) + 14}" text-anchor="middle">${i}</text><text x="${X(0) - 8}" y="${Y(i) + 3}" text-anchor="end">${i}</text>`;
+  }
+  inhalt += `<line class="achse" x1="${X(0)}" x2="${X(N) + 6}" y1="${Y(0)}" y2="${Y(0)}"/><line class="achse" x1="${X(0)}" x2="${X(0)}" y1="${Y(0)}" y2="${Y(N) - 6}"/>`;
+  inhalt += `<text x="${X(N) + 8}" y="${Y(0) + 4}">x</text><text x="${X(0) - 3}" y="${Y(N) - 9}">y</text>`;
+  svg.innerHTML = inhalt;
+  const ebene = document.createElementNS(SVG, "g");
+  svg.append(ebene);
+  if (onTipp) {
+    for (let x = 0; x <= N; x++) for (let y = 0; y <= N; y++) {
+      const c = document.createElementNS(SVG, "circle");
+      c.setAttribute("class", "punkt-ziel"); c.setAttribute("cx", X(x)); c.setAttribute("cy", Y(y)); c.setAttribute("r", s / 2.2);
+      c.addEventListener("click", () => onTipp(x, y));
+      svg.append(c);
+    }
+  }
+  svg.zeichne = (html) => { const g = document.createElementNS(SVG, "g"); g.innerHTML = html; ebene.append(g); return g; };
+  svg.X = X; svg.Y = Y;
+  return svg;
+}
+
+const polygon = (svg, punkte, klasse) => svg.zeichne(`<polygon class="${klasse}" points="${punkte.map(([x, y]) => `${svg.X(x)},${svg.Y(y)}`).join(" ")}"/>`);
+const punktMarke = (svg, x, y, text = "💎") => svg.zeichne(`<text class="marke" x="${svg.X(x)}" y="${svg.Y(y) + 6}" text-anchor="middle">${text}</text>`);
+
+/** Dreieck oder Viereck mit ganzzahligen Ecken im Bereich. */
+function figurErzeugen(maxX, maxY) {
+  const x0 = zufall(0, maxX - 3), y0 = zufall(0, maxY - 3);
+  return waehle([
+    [[x0, y0], [x0 + zufall(2, 3), y0], [x0 + zufall(0, 2), y0 + zufall(2, 3)]],
+    [[x0, y0], [x0 + zufall(2, 3), y0], [x0 + zufall(2, 3), y0 + zufall(2, 3)], [x0, y0 + zufall(2, 3)]],
+  ]);
+}
+
+LS.spiel({
+  id: "koordinaten-schatz",
+  einleitung: "Ahoi! Schätze sind versteckt. Mit Koordinaten findest du sie — erst auf der Hundertertafel, dann auf der Schatzkarte.",
+  anzahl: 6,
+  stufen: {
+    s1: "Hundertertafel: Wo ist 2 E 5 Z?",
+    s2: "Auch umgekehrt: Welche Koordinaten hat der Schatz?",
+    s3: "Schatzkarte mit x und y: Punkt (3|7) setzen und ablesen.",
+    s4: "Figuren verschieben: 3 nach rechts, 2 nach oben.",
+    s5: "Figuren aus Koordinaten zeichnen.",
+  },
+
+  aufgabe(ctx) {
+    const art = waehle(STUFE[ctx.stufe]);
+    let fertig = false;
+
+    const auswahl = (optionen, richtig, hinweis, loesungText) => {
+      const box = el("div", { class: "optionen" });
+      for (const o of mische(optionen)) {
+        const k = el("button", { type: "button", class: "option", text: o });
+        k.addEventListener("click", () => {
+          if (fertig) return;
+          if (o === richtig) { fertig = true; k.classList.add("richtig"); ctx.richtig(); return; }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+          ctx.falsch(hinweis, loesungText);
+          if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+        });
+        box.append(k);
+      }
+      ctx.flaeche.append(box);
+    };
+
+    if (art === "tafelSetzen") {
+      const ziel = zufall(0, 99);
+      ctx.flaeche.append(el("div", { class: "frage", html: `Der Schatz liegt bei <b>${ez(ziel)}</b>. Tipp das Feld an!` }));
+      const t = tafel((zahl, f) => {
+        if (fertig) return;
+        if (zahl === ziel) { fertig = true; f.classList.add("treffer"); f.textContent = "💎"; ctx.richtig(`Gefunden! ${ez(ziel)} ist das Feld ${ziel}.`); return; }
+        f.classList.add("daneben");
+        ctx.falsch(`Das war ${ez(zahl)}. E sind die Spalten (oben), Z die Zeilen (links).`, `${ez(ziel)} ist das Feld ${ziel}.`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; t.felder[ziel].classList.add("treffer"); }
+      });
+      ctx.flaeche.append(t);
+    } else if (art === "tafelLesen") {
+      const ziel = zufall(0, 99);
+      ctx.flaeche.append(el("div", { class: "frage", text: "Welche Koordinaten hat der Schatz?" }));
+      const t = tafel(null);
+      t.felder[ziel].classList.add("schatz"); t.felder[ziel].textContent = "💎";
+      ctx.flaeche.append(t);
+      const e = ziel % 10, z = Math.floor(ziel / 10);
+      const falsche = new Set([ez(z + e * 10), ez(((z + 1) % 10) * 10 + e), ez(z * 10 + (e + 1) % 10), ez(((z + 9) % 10) * 10 + e)]);
+      falsche.delete(ez(ziel));
+      auswahl([ez(ziel), ...[...falsche].slice(0, 3)], ez(ziel), "Lies zuerst oben die Spalte (E), dann links die Zeile (Z).", `Der Schatz liegt bei ${ez(ziel)}.`);
+    } else if (art === "punktSetzen") {
+      const x = zufall(0, N), y = zufall(0, N);
+      ctx.flaeche.append(el("div", { class: "frage", html: `Vergrabe den Schatz bei <b>${pt(x, y)}</b>.` }));
+      const svg = koordinaten((px, py) => {
+        if (fertig) return;
+        if (px === x && py === y) { fertig = true; punktMarke(svg, x, y); ctx.richtig(); return; }
+        punktMarke(svg, px, py, "✖");
+        ctx.falsch(px === y && py === x ? "Vertauscht! Zuerst x (nach rechts), dann y (nach oben)." : "Zuerst x Schritte nach rechts, dann y Schritte nach oben.", `Der Punkt ${pt(x, y)}.`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; punktMarke(svg, x, y); }
+      });
+      ctx.flaeche.append(svg);
+    } else if (art === "punktLesen") {
+      const x = zufall(1, N), y = zufall(1, N);
+      ctx.flaeche.append(el("div", { class: "frage", text: "Wo liegt der Schatz?" }));
+      const svg = koordinaten(null);
+      punktMarke(svg, x, y);
+      ctx.flaeche.append(svg);
+      const falsche = new Set([pt(y, x), pt(x + 1, y), pt(x, y - 1), pt(x - 1, y + 1)]);
+      falsche.delete(pt(x, y));
+      auswahl([pt(x, y), ...[...falsche].slice(0, 3)], pt(x, y), "Zuerst x: wie weit nach rechts? Dann y: wie weit nach oben?", `Der Schatz liegt bei ${pt(x, y)}.`);
+    } else if (art === "verschieben") {
+      const ecken = figurErzeugen(5, 5);
+      const dx = zufall(1, 4), dy = zufall(1, 4) * waehle([1, -1]);
+      const neu = ecken.map(([a, b]) => [a + dx, b + dy]);
+      if (neu.some(([a, b]) => a < 0 || a > N || b < 0 || b > N)) return this.aufgabe(ctx);
+      const welche = zufall(0, ecken.length - 1);
+      const name = "ABCD"[welche];
+      ctx.flaeche.append(el("div", { class: "frage", html: `Verschiebe die Figur um <b>${dx} nach rechts</b> und <b>${Math.abs(dy)} nach ${dy > 0 ? "oben" : "unten"}</b>. Wo landet die Ecke <b>${name}</b>?` }));
+      const svg = koordinaten((px, py) => {
+        if (fertig) return;
+        if (px === neu[welche][0] && py === neu[welche][1]) { fertig = true; polygon(svg, neu, "figur-neu"); ctx.richtig(`Richtig: ${name} landet bei ${pt(...neu[welche])}.`); return; }
+        punktMarke(svg, px, py, "✖");
+        ctx.falsch(`Starte bei ${name} ${pt(...ecken[welche])} und zähle die Schritte ab.`, `${name} ${pt(...ecken[welche])} → ${pt(...neu[welche])}`);
+        if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, neu, "figur-neu"); }
+      });
+      polygon(svg, ecken, "figur");
+      ecken.forEach(([a, b], i) => svg.zeichne(`<text x="${svg.X(a) - 10}" y="${svg.Y(b) - 6}" style="font-size:13px;fill:var(--deko-6)">${"ABCD"[i]}</text>`));
+      ctx.flaeche.append(svg);
+    } else {
+      // zeichnen: Ecken der Reihe nach setzen
+      const ecken = figurErzeugen(N, N);
+      ctx.flaeche.append(el("div", { class: "frage", html: `Zeichne die Figur: Tipp die Ecken der Reihe nach an — ${ecken.map(([a, b], i) => `<b>${"ABCD"[i]} ${pt(a, b)}</b>`).join(", ")}.` }));
+      let pos = 0;
+      const svg = koordinaten((px, py) => {
+        if (fertig) return;
+        if (px === ecken[pos][0] && py === ecken[pos][1]) {
+          svg.zeichne(`<circle class="gesetzt" cx="${svg.X(px)}" cy="${svg.Y(py)}" r="6"/>`);
+          LS.ton("tipp");
+          pos++;
+          if (pos === ecken.length) { fertig = true; polygon(svg, ecken, "figur-neu"); ctx.richtig(); }
+          return;
+        }
+        punktMarke(svg, px, py, "✖");
+        ctx.falsch(`Ecke ${"ABCD"[pos]} liegt bei ${pt(...ecken[pos])}: zuerst x nach rechts, dann y nach oben.`, ecken.map(([a, b], i) => `${"ABCD"[i]} ${pt(a, b)}`).join(", "));
+        if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, ecken, "figur-neu"); }
+      });
+      ctx.flaeche.append(svg);
+    }
+    if (ctx.nr === 0) ctx.sag(ctx.stufe <= "s2" ? "E = Einer (Spalten oben), Z = Zehner (Zeilen links)." : "Zuerst x nach rechts, dann y nach oben.");
+  },
+});
+</script>
+</body>
+</html>

@@ -465,7 +465,7 @@ const LS = (() => {
 
     /** Text der Aufgabe, wie das Kind sie sieht — fürs Protokoll. */
     function aufgabenText(flaeche) {
-      return [...flaeche.querySelectorAll(".auftrag, .vorgabe, .raetsel, .bausteine, .zahl-gross, .zahl-ziffern, .rechnung, .satz, .wortkarte, .lueckenwort")]
+      return [...flaeche.querySelectorAll(".auftrag, .vorgabe, .raetsel, .bausteine, .zahl-gross, .zahl-ziffern, .rechnung, .satz, .wortkarte, .lueckenwort, .frage, .ziel-zahl, .auf, .sachtext, .theke, .familie, .digital")]
         .map(e => e.innerText.replace(/\s+/g, " ").trim())
         .filter(Boolean)
         .join(" · ")

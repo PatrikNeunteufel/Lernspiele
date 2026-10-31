@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zahlenmauer-Baumeister</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .mauer { display: flex; flex-direction: column-reverse; align-items: center; gap: 6px; margin: 4px 0 14px; }
+  .reihe { display: flex; gap: 6px; }
+  .stein {
+    width: clamp(64px, 17vw, 108px);
+    height: clamp(48px, 11vw, 64px);
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: clamp(18px, 4.4vw, 28px);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    background: linear-gradient(180deg, #e2725b, #c4553e);
+    box-shadow: inset 0 -5px 0 rgba(0, 0, 0, .18);
+  }
+  .stein.leer { background: #fff; color: var(--knopf); border: 3px dashed #e2a08f; cursor: pointer; box-shadow: none; }
+  .stein.leer.aktiv { border: 4px solid var(--knopf); background: #eef0ff; transform: scale(1.06); }
+  .stein.geloest { background: linear-gradient(180deg, #5fd391, #2fb36b); }
+  .stein.falsch { animation: wackeln .4s; }
+  .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧱 Zahlenmauer-Baumeister</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.B.1.c: Summen und Differenzen systematisch variieren, Beispiel Zahlenmauer.
+// Regel: Jeder Stein ist die Summe der beiden Steine direkt darunter.
+
+const { zahlText, zufall, mische, el } = LS;
+
+// Je Stufe: Anzahl Grundsteine, Grundzahlen (Erzeuger), Anzahl leerer Steine, mindestens so viele
+// leere Grundsteine. Eine Mauer mit n Grundsteinen braucht n bekannte Steine, um eindeutig zu sein:
+// leer ≤ Steine − n (3 Grundsteine: 6 − 3 = 3; 4 Grundsteine: 10 − 4 = 6).
+const STUFE = {
+  s1: { n: 3, grund: () => zufall(1, 10), leer: 3, untenMin: 0, unten: false },
+  s2: { n: 3, grund: () => zufall(2, 30), leer: 3, untenMin: 1, unten: true },
+  s3: { n: 4, grund: () => zufall(2, 30), leer: 5, untenMin: 1, unten: true },
+  s4: { n: 4, grund: () => zufall(1, 25) * 100 * (Math.random() < 0.5 ? 1 : 10), leer: 6, untenMin: 1, unten: true },
+  s5: { n: 4, grund: () => zufall(3, 60), leer: 6, untenMin: 2, unten: true },
+};
+
+/** Mauer als Reihen von unten nach oben: w[0] = Grundsteine, w[r][i] = w[r-1][i] + w[r-1][i+1]. */
+function mauerBauen(n, grund) {
+  const w = [Array.from({ length: n }, grund)];
+  for (let r = 1; r < n; r++) w.push(w[r - 1].slice(0, -1).map((x, i) => x + w[r - 1][i + 1]));
+  return w;
+}
+
+/** Lösbar? Wiederholt aus je zwei bekannten Steinen eines Dreiecks (unten links, unten rechts, oben) den dritten folgern. */
+function loesbar(w, leer) {
+  const bekannt = w.map((reihe, r) => reihe.map((_, i) => !leer.has(`${r},${i}`)));
+  let neu = true;
+  while (neu) {
+    neu = false;
+    for (let r = 0; r < w.length - 1; r++) {
+      for (let i = 0; i < w[r].length - 1; i++) {
+        const drei = [[r, i], [r, i + 1], [r + 1, i]];
+        const fehlt = drei.filter(([a, b]) => !bekannt[a][b]);
+        if (fehlt.length === 1) { bekannt[fehlt[0][0]][fehlt[0][1]] = true; neu = true; }
+      }
+    }
+  }
+  return bekannt.every(reihe => reihe.every(Boolean));
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  // Begrenzte Versuche als Sicherung: findet sich keine lösbare Auswahl, gibt es einen Fehler statt einer Endlosschleife.
+  for (let versuch = 0; versuch < 2000; versuch++) {
+    const w = mauerBauen(p.n, p.grund);
+    const alle = w.flatMap((reihe, r) => reihe.map((_, i) => `${r},${i}`)).filter(k => p.unten || !k.startsWith("0,"));
+    const leer = new Set(mische(alle).slice(0, p.leer));
+    const untenLeer = [...leer].filter(k => k.startsWith("0,")).length;
+    if (untenLeer >= p.untenMin && loesbar(w, leer)) return { w, leer };
+  }
+  throw new Error(`Zahlenmauer ${stufe}: keine lösbare Mauer gefunden`);
+}
+
+LS.spiel({
+  id: "zahlenmauer",
+  einleitung: "Baue die Zahlenmauer fertig! Jeder Stein ist so gross wie die beiden Steine darunter zusammen.",
+  anzahl: 5,
+  stufen: {
+    s1: "Kleine Mauer mit Zahlen bis 10 — nur zusammenzählen.",
+    s2: "Bis 100, manchmal fehlt ein Stein unten: rückwärts rechnen.",
+    s3: "Vier Reihen, mehr Lücken.",
+    s4: "Grosse Zahlen mit Hundertern und Tausendern.",
+    s5: "Viele Lücken — welchen Stein kannst du zuerst ausrechnen?",
+  },
+
+  aufgabe(ctx) {
+    const { w, leer } = aufgabeErzeugen(ctx.stufe);
+    const mauer = el("div", { class: "mauer" });
+    const steine = {};
+    let aktiv = null;
+    const offen = new Set(leer);
+    const fehlerJeStein = {};
+
+    const waehleStein = (k) => {
+      if (aktiv) steine[aktiv].classList.remove("aktiv");
+      aktiv = k;
+      if (k) steine[k].classList.add("aktiv");
+      tasten.leeren();
+    };
+
+    w.forEach((reihe, r) => {
+      const zeile = el("div", { class: "reihe" });
+      reihe.forEach((wert, i) => {
+        const k = `${r},${i}`;
+        const stein = el("button", { type: "button", class: "stein" + (leer.has(k) ? " leer" : ""), text: leer.has(k) ? "?" : zahlText(wert), "aria-label": leer.has(k) ? "leerer Stein" : zahlText(wert) });
+        if (leer.has(k)) stein.addEventListener("click", () => { if (offen.has(k)) waehleStein(k); });
+        else stein.disabled = true;
+        steine[k] = stein;
+        zeile.append(stein);
+      });
+      mauer.append(zeile);
+    });
+
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Zahl für den gewählten Stein" });
+    ctx.flaeche.append(mauer, el("div", { class: "hinweis-klein", text: "Tipp auf einen leeren Stein, dann die Zahl eintippen." }), anzeige);
+
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: 7,
+      onOk(eingabe) {
+        if (!aktiv) { ctx.sag("Tipp zuerst auf einen leeren Stein.", "hinweis"); return; }
+        const [r, i] = aktiv.split(",").map(Number);
+        const setzen = (text) => {
+          const stein = steine[aktiv];
+          stein.textContent = zahlText(w[r][i]);
+          stein.classList.remove("leer", "aktiv");
+          stein.classList.add("geloest");
+          offen.delete(aktiv);
+          if (!offen.size) { tasten.gesperrt = true; ctx.richtig("Die Mauer steht! 🧱"); return; }
+          waehleStein([...offen][0]);
+          ctx.sag(text, "gut");
+        };
+        if (eingabe === w[r][i]) { LS.ton("tipp"); setzen("Stimmt! Weiter mit dem nächsten Stein."); return; }
+
+        steine[aktiv].classList.remove("falsch");
+        void steine[aktiv].offsetWidth;
+        steine[aktiv].classList.add("falsch");
+        fehlerJeStein[aktiv] = (fehlerJeStein[aktiv] || 0) + 1;
+        // Ohne Lösungstext: eine Mauer hat viele Steine, die Runde soll nicht nach drei Fehlern enden.
+        ctx.falsch(r > 0
+          ? "Zähl die beiden Steine direkt darunter zusammen. Fehlt dort noch einer? Dann rechne zuerst den."
+          : "Unten fehlt ein Stein: Nimm den Stein darüber und zieh den Nachbarn ab.");
+        // Nach drei Fehlversuchen am selben Stein hilft die Eule und setzt ihn.
+        if (fehlerJeStein[aktiv] >= 3) setzen(`Dieser Stein ist ${zahlText(w[r][i])}. Weiter geht's!`);
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    waehleStein([...offen][0]);
+    if (ctx.nr === 0) ctx.sag("Welchen Stein kannst du schon ausrechnen? Tipp ihn an.");
+  },
+});
+</script>
+</body>
+</html>
