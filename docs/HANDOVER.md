@@ -15,9 +15,11 @@
   - Tabs: Spiele, Profil, Statistik, Verwaltung.
   - Spiele nach Fach und Thema auf- und zuklappbar, Favoriten, Kompaktansicht.
   - Die Aufsicht spielt als Tester, mit Testhilfen und mit Runden, die nicht zählen.
-- **Freigabe:** Kinder sehen nur, was geprüft (Katalog) oder in der Verwaltung freigegeben ist.
-  Das gilt je Spiel und je Inhaltsliste: 120 Listen in 29 Spielen, gemeinsam genutzte Listen als
-  Verweis. Heute ist **nichts geprüft**, Kinder sehen also erst nach „Alles freigeben“ etwas.
+- **Freigabe:** Standardmässig frei ist, was nichts mehr zu prüfen hat. Gesperrt sind die neun neuen
+  Spiele (`neu`, bis angesehen) und Spiele, deren Inhaltslisten alle ungeprüft sind (120 Listen in
+  29 Spielen, gemeinsam genutzte als Verweis). Heute für Kinder frei: 32 von 65 Spielen.
+- **Wiederholungen:** In einer Runde höchstens eine Aufgabe ein zweites Mal, nie direkt
+  hintereinander; kleine Stufen haben kürzere Runden.
 - **Testskript, neue Prüfung:** jede Liste als Kind einzeln freigegeben, 128 Fälle fehlerfrei.
 - **Offen:**
   - Inhalte und Spiele prüfen; Stand in [checkliste.md](checkliste.md).

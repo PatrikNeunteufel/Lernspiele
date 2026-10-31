@@ -13,8 +13,9 @@ Browser. Alles läuft offline und ohne Installation.
 **Anmelden:** Kinder tippen ihren Namen an. Die **Aufsicht** (Eltern, Lehrperson) meldet sich mit
 ihrer PIN an. Sie legt die Kinder an, gibt Spiele und Inhaltslisten frei, sieht alle Statistiken
 und spielt als Tester (mit „Lösung zeigen“, Runden zählen nicht). Beim ersten Start richtet man
-die Aufsicht ein. **Kinder sehen nur freigegebene Spiele** — was im Repo geprüft ist oder was die
-Aufsicht im Tab Verwaltung freigibt.
+die Aufsicht ein. **Kinder sehen alles, was nichts mehr zu prüfen hat:** Neue Spiele erscheinen,
+sobald sie angesehen sind, Spiele mit Wort- und Inhaltslisten, sobald eine Liste geprüft ist. Die
+Aufsicht kann im Tab Verwaltung anders freigeben oder sperren.
 
 - **Empfohlen: Chrome oder Edge.** Dort teilen Startseite, Spiele und Statistik auch beim Öffnen per
   Doppelklick (`file://`) denselben Speicher, also Spieler, Profil und Fortschritt.

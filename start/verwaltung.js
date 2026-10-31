@@ -39,7 +39,7 @@ function zeichneVerwaltung(box, neu) {
     for (const s of spiele) {
       zeilen.push(el("tr", {},
         el("td", { text: `${s.bild} ${s.name}` }),
-        el("td", {}, stand(s.geprueft)),
+        el("td", {}, s.geprueft || s.neu ? stand(s.geprueft) : el("span", { class: "pruefstand ok", text: "nichts zu prüfen" })),
         el("td", {}, schalter(LS.spielFrei(s.id), s.id in f.spiele, w => LS.setzeSpielFrei(s.id, w)))));
       for (const l of LS.spielListen(s.id)) {
         // Verweis auf die Liste eines anderen Spiels: dort freigeben, hier nur zeigen.
@@ -55,7 +55,7 @@ function zeichneVerwaltung(box, neu) {
   }
   seite.append(karte(
     el("h2", { text: "Spiele und Inhalte freigeben" }),
-    el("p", { class: "leise-text", style: "margin-top:0", text: `Kinder sehen ${sichtbar} von ${SPIELE.length} Spielen. Sichtbar ist, was geprüft ist (Eintrag im Katalog) oder hier freigegeben — und nicht gesperrt. Ein Spiel mit Wortlisten braucht mindestens eine freie Liste; die Kinder üben nur die freien Listen.` }),
+    el("p", { class: "leise-text", style: "margin-top:0", text: `Kinder sehen ${sichtbar} von ${SPIELE.length} Spielen. Frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Inhaltslisten, bis sie geprüft sind (Eintrag im Katalog). Hier lässt sich das je Gerät anders setzen. Ein Spiel mit Inhaltslisten braucht mindestens eine freie Liste; die Kinder üben nur die freien Listen.` }),
     zeile(knopf("✓ Alles freigeben", () => alleSetzen(true)), knopf("🔒 Alles sperren", () => alleSetzen(false)), knopf("↺ Alles wie Prüfstand", () => alleSetzen(null))),
     el("div", { class: "tabelle-rahmen" }, el("table", {},
       el("thead", {}, el("tr", {}, ...["Spiel / Liste", "Prüfstand", "für Kinder"].map(t => el("th", { text: t })))),

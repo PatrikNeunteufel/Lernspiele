@@ -104,7 +104,7 @@ for (const s of SPIELE) {
   });
   eintraege.push({
     klasse: s.klasse, fach: t.fach, thema: t.name, name: s.name, gebaut: true, id: s.id,
-    geprueft: s.geprueft, listen, annahmen: annahmenZu(s),
+    neu: s.neu, geprueft: s.geprueft, listen, annahmen: annahmenZu(s),
   });
 }
 for (const i of ideen) {
@@ -119,18 +119,22 @@ for (const i of ideen) {
 const z = [];
 const gebaut = eintraege.filter(e => e.gebaut);
 const ideenOffen = eintraege.filter(e => !e.gebaut && !e.ersetzt);
-const angesehen = gebaut.filter(e => e.geprueft).length;
+const neue = gebaut.filter(e => e.neu);
+const angesehen = neue.filter(e => e.geprueft).length;
+const frei = gebaut.filter(e => !(e.neu && !e.geprueft) && (!e.listen.length || e.listen.some(l => !l.zusatz && l.geprueft))).length;
 const listenAlle = gebaut.flatMap(e => e.listen).filter(l => !l.verweis); // jede Liste einmal, an ihrer Quelle
 z.push("# Checkliste der Spiele", "",
   "Erzeugt mit `node tools/checkliste.js > docs/checkliste.md` — **nicht von Hand ändern**. Abgehakt",
   "wird in den Quellen: ein Spiel als angesehen bzw. eine Inhaltsliste als geprüft mit `geprueft: { am, von }`",
   "im Katalog (`spiele/gemeinsam/katalog.js`), Annahmen in `docs/lernziele/`, Ideen in",
   "`docs/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.", "",
-  `**Stand:** ${gebaut.length} Spiele gebaut, ${ideenOffen.length} Ideen offen · ${angesehen} von ${gebaut.length} Spielen angesehen · ` +
-  `${listenAlle.filter(l => l.geprueft).length} von ${listenAlle.length} Inhaltslisten geprüft.`, "",
+  `**Stand:** ${gebaut.length} Spiele gebaut, ${ideenOffen.length} Ideen offen · für Kinder frei: ${frei} von ${gebaut.length} · ` +
+  `${angesehen} von ${neue.length} neuen Spielen angesehen · ${listenAlle.filter(l => l.geprueft).length} von ${listenAlle.length} Inhaltslisten geprüft.`, "",
+  "Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit",
+  "Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.", "",
   "Gliederung: **Klasse** (Basisklasse des Spiels, bei Ideen die unterste Klasse des Bereichs) → **Fach** → **Thema** → Spiel.",
   "Je gebautem Spiel:", "",
-  "- *angesehen* — auf Desktop, Tablet (768 px) und Handy (375 px) durchgespielt;",
+  "- *angesehen* (nur neue Spiele) — auf Desktop, Tablet (768 px) und Handy (375 px) durchgespielt;",
   "- *Inhalte* — Wort- und Inhaltslisten geprüft (Prüfliste `docs/pruefung/wortlisten_zur_pruefung.md`);",
   "- *Lehrmittel* — Annahmen, die mit dem Lehrmittel abzugleichen sind (Datei in `docs/lernziele/`).", "");
 
@@ -148,8 +152,14 @@ for (const klasse of [...new Set(eintraege.map(e => e.klasse))].sort((a, b) => a
           z.push(`- ${e.ersetzt ? "[x] ~~" + e.name + "~~ — " + e.ersetzt : `[ ] ${e.name} — Idee${e.bereich ? ", " + e.bereich : ""}`}`);
           continue;
         }
-        z.push(`- [x] **${e.name}** (\`${e.id}\`)`);
-        z.push(`  - ${haken(e.geprueft)} angesehen${e.geprueft ? ` ${e.geprueft.am}${e.geprueft.von ? " · " + e.geprueft.von : ""}` : ""}`);
+        // Für Kinder frei, wenn nichts mehr zu prüfen ist: ein neues Spiel erst angesehen, Listen erst geprüft
+        // (eine geprüfte gewöhnliche Liste genügt, damit das Spiel erscheint).
+        const sperre = [];
+        if (e.neu && !e.geprueft) sperre.push("angesehen");
+        const listenOk = !e.listen.length || e.listen.some(l => !l.zusatz && l.geprueft);
+        if (!listenOk) sperre.push("eine Liste geprüft");
+        z.push(`- [x] **${e.name}** (\`${e.id}\`) — für Kinder ${sperre.length ? "🔒 gesperrt, bis " + sperre.join(" und ") + " ist" : "frei"}`);
+        if (e.neu) z.push(`  - ${haken(e.geprueft)} angesehen${e.geprueft ? ` ${e.geprueft.am}${e.geprueft.von ? " · " + e.geprueft.von : ""}` : ""}`);
         if (e.listen.length) {
           const ok = e.listen.filter(l => l.geprueft).length;
           z.push(`  - ${haken(ok === e.listen.length)} Inhalte geprüft: ${ok} von ${e.listen.length} Listen` +

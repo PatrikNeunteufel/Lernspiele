@@ -218,11 +218,12 @@ const LS = (() => {
   }
 
   // ---------- Freigabe (Entscheid L4 a) ----------
-  // Prüfstand im Repo, Freigabe auf dem Gerät. Der Katalog trägt je Spiel `geprueft` (das Spiel als
-  // Ganzes ist angesehen) und je Inhaltsliste `listen: { <liste>: { name, geprueft } }`, mit
-  // geprueft = { am, von } oder null. Für Kinder sichtbar ist, was geprüft oder von der Aufsicht
-  // freigegeben ist und nicht gesperrt. Speicher lernspiele:freigabe = { spiele: { <id>: bool },
-  // listen: { "<id>/<liste>": bool } }; fehlt ein Eintrag, entscheidet der Prüfstand.
+  // Prüfstand im Repo, Freigabe auf dem Gerät. Standardmässig frei ist alles, was nichts mehr zu
+  // prüfen hat (Präzisierung Patrik 2026-10-31): Ein Spiel mit `neu` im Katalog ist gesperrt, bis es
+  // angesehen ist (`geprueft`); eine Inhaltsliste (`listen: { <liste>: { name, geprueft } }`) ist
+  // gesperrt, bis sie geprüft ist; geprueft = { am, von } oder null. Die Aufsicht kann auf dem Gerät
+  // anders entscheiden: lernspiele:freigabe = { spiele: { <id>: bool }, listen: { "<id>/<liste>": bool } };
+  // fehlt ein Eintrag, entscheidet der Prüfstand.
   const freigabe = () => ({ spiele: {}, listen: {}, ...lies("freigabe", {}) });
   function katalogEintrag(spielId) { return typeof SPIELE !== "undefined" ? SPIELE.find(s => s.id === spielId) : null; }
   function setzeFreigabe(art, schluessel, wert) {
@@ -255,10 +256,12 @@ const LS = (() => {
   const setzeListeFrei = (spielId, listeId, wert) => setzeFreigabe("listen", listenQuelle(spielId, listeId), wert);
   /** Listen, die der angemeldete Spieler üben darf (die Aufsicht alle) — Spiele filtern ihre Inhalte danach. */
   const freieListen = spielId => spielListen(spielId).filter(l => aufsichtAngemeldet() || listeFrei(spielId, l.id)).map(l => l.id);
+  /** Muss das Spiel als Ganzes noch angesehen werden (neu und nicht geprüft)? */
+  const spielZuPruefen = spielId => { const e = katalogEintrag(spielId); return !!e?.neu && !e.geprueft; };
   /** Spiel als Ganzes für Kinder frei (ohne Blick auf die Listen)? */
   function spielFrei(spielId) {
     const f = freigabe().spiele[spielId];
-    return f ?? !!katalogEintrag(spielId)?.geprueft;
+    return f ?? !spielZuPruefen(spielId);
   }
   const setzeSpielFrei = (spielId, wert) => setzeFreigabe("spiele", spielId, wert);
   /**
@@ -780,6 +783,13 @@ const LS = (() => {
       const fehlerAufgaben = [];
       const aufgabenZeiten = []; // je Aufgabe: { ms, versuche, zeitUm, geloest }
       let uhr = null;            // laufender Timer der aktuellen Aufgabe
+      // Wiederholungen (Vorgabe Patrik 2026-10-31): In einer Runde kommt höchstens eine Aufgabe ein
+      // zweites Mal, nie direkt hintereinander. Gibt die Stufe nicht genug verschiedene Aufgaben her,
+      // endet die Runde früher (anzahl wird kleiner).
+      let anzahl = def.anzahl;
+      const gestellt = new Map(); // Kennung → wie oft gestellt
+      let wiederholt = false;
+      let letzte = null;
       buehne.innerHTML = "";
 
       const punkte = el("div", { class: "fortschritt" });
@@ -807,7 +817,7 @@ const LS = (() => {
 
       function naechste() {
         clearTimeout(uhr);
-        if (nr >= def.anzahl) return schluss();
+        if (nr >= anzahl) return schluss();
         [...punkte.children].forEach((p, i) => {
           p.classList.toggle("fertig", i < nr);
           p.classList.toggle("aktiv", i === nr);
@@ -818,6 +828,7 @@ const LS = (() => {
         let zeitUm = false;
         let eintrag = null; // Protokolleintrag, sobald die Aufgabe einen Fehler hatte
         let loesungVorab = null; // vom Spiel mit ctx.loesung() genannt, für die Testhilfe
+        let eigeneKennung = null; // vom Spiel mit ctx.kennung() genannt, gegen Wiederholungen
         const start = performance.now();
         pruefung.haken?.("aufgabe", { nr });
 
@@ -879,6 +890,11 @@ const LS = (() => {
           sag: (t, art) => eule.sag(t, art),
           /** Lösung der Aufgabe gleich beim Zeichnen nennen (Text wie loesungText); zeigt sie nur die Testhilfe. */
           loesung(text) { loesungVorab = text || null; },
+          /**
+           * Woran diese Aufgabe zu erkennen ist, wenn man es nicht sieht (Hör-Aufgaben: die Melodie).
+           * Ohne Angabe nimmt der Rahmen Text und Bilder der Fläche; dient der Regel gegen Wiederholungen.
+           */
+          kennung(wert) { eigeneKennung = wert == null ? null : String(wert); },
           /** Ist die Aufgabe gelöst oder nach drei Fehlversuchen aufgelöst? Dann nimmt sie keine Antwort mehr an. */
           vorbei: () => erledigt,
           richtig(text) {
@@ -912,7 +928,47 @@ const LS = (() => {
             }
           },
         };
-        def.aufgabe(ctx);
+        // Aufgabe zeichnen; ist sie in dieser Runde nicht mehr erlaubt, neu ziehen (die Spiele ziehen
+        // in aufgabe() zufällig). Findet sich nach vielen Versuchen keine erlaubte, ist die Stufe erschöpft.
+        for (let versuch = 0; ; versuch++) {
+          def.aufgabe(ctx);
+          const k = kennung(flaeche, loesungVorab, eigeneKennung);
+          const n = k ? gestellt.get(k) || 0 : 0;
+          if (n === 0 || (n === 1 && !wiederholt && k !== letzte)) {
+            if (n) wiederholt = true;
+            if (k) gestellt.set(k, n + 1);
+            letzte = k;
+            pruefung.haken?.("gestellt", { nr, kennung: k });
+            break;
+          }
+          if (versuch >= 60) { clearTimeout(uhr); anzahl = nr; return schluss(); }
+          flaeche.innerHTML = "";
+          loesungVorab = null;
+          eigeneKennung = null;
+        }
+      }
+
+      /**
+       * Woran man eine Aufgabe wiedererkennt: der Text, den das Kind sieht, ohne die Antwortknöpfe
+       * (deren Reihenfolge ist gemischt), dazu die Lösung. Leer, wenn es nichts zu vergleichen gibt.
+       */
+      function kennung(wurzel, loesung, eigeneKennung) {
+        if (eigeneKennung != null) return `eigen|${eigeneKennung}|${loesung || ""}`;
+        const teile = [];
+        // Gezeichnete Bilder (Noten, Formen, Uhr) zählen mit ihren Formen und Lagen, ohne Stil-Angaben.
+        const ZEICHNUNG = /^(circle|ellipse|line|path|polygon|polyline|rect|text|use)$/;
+        const sammle = (k, imBild) => {
+          if (k.nodeType === 3) { teile.push(k.data); return; }
+          if (k.nodeType !== 1 || k.localName === "button" || k.localName === "input" || k.localName === "a") return;
+          const bild = imBild || k.localName === "svg";
+          if (bild && ZEICHNUNG.test(k.localName)) {
+            teile.push(k.localName + ["cx", "cy", "r", "x", "y", "x1", "y1", "x2", "y2", "d", "points", "width", "height", "href"].map(a => k.getAttribute?.(a) ?? "").join(","));
+          }
+          for (const c of k.childNodes) sammle(c, bild);
+        };
+        sammle(wurzel, false);
+        const text = teile.join(" ").replace(/\s+/g, " ").trim();
+        return text || loesung ? `${text}|${loesung || ""}` : null;
       }
 
       function schluss() {
@@ -924,7 +980,8 @@ const LS = (() => {
           stufe: stufe.id,
           sterne,
           fehler,
-          aufgaben: def.anzahl,
+          aufgaben: anzahl,
+          ...(anzahl < def.anzahl ? { gekuerzt: def.anzahl } : {}), // geplant waren mehr, die Stufe gab nicht genug her
           dauer: Math.round((Date.now() - beginn) / 1000),
           geordnet: geordnet(name, def.id, stufe.id),
           timer: timer.an ? timer.sekunden : null,
@@ -967,7 +1024,8 @@ const LS = (() => {
 
   /**
    * Nur für tools/pruefe_spiele.js: pruefung.haken(art, angaben) erfährt jede neue Aufgabe
-   * (art "aufgabe", { nr }) und jede Antwort (art "richtig" oder "falsch";
+   * (art "aufgabe", { nr }; nach der Wiederholungsprüfung art "gestellt", { nr, kennung })
+   * und jede Antwort (art "richtig" oder "falsch";
    * angaben { nr, hinweis, loesung, aufgeloest, flaeche, vorab }).
    */
   const pruefung = { haken: null };
@@ -991,7 +1049,7 @@ const LS = (() => {
     STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, spiel, lies, schreibe, sterneText,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
-    freigabe, spielFrei, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, spielListen, listeFrei, setzeListeFrei, freieListen,
+    freigabe, spielFrei, spielZuPruefen, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, vorgabeZeit, timerFuer, setzeTimerSpiel, zeitVorschlag,
     protokoll, besteSterne, auswahl, reihenfolge, fliegen, koerbe, pruefung, RAHMEN_KLASSEN,

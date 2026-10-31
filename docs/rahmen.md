@@ -123,6 +123,13 @@ LS.spiel({
 | `ctx.falsch(hinweis, loesungText?)` | Fehlversuch. Der Hinweis darf die Lösung **nicht verraten** ✔. Mit `loesungText` zeigt der Rahmen nach dem dritten Fehlversuch die Lösung und einen Weiter-Knopf. Ohne ihn bleibt die Aufgabe offen; das Spiel hilft dann selbst (Zahlenmauer, Malkreuz). |
 | `ctx.loesung(text)` | Lösung gleich beim Zeichnen nennen. Sie erscheint nur beim Testspieler hinter „🔑“. **Pflicht in jeder Aufgabe** ✔. Die Bausteine rufen sie selbst auf. Den Text in **eine** Konstante legen, die auch `ctx.falsch` bekommt. |
 | `ctx.vorbei()` | Ist die Aufgabe gelöst oder aufgelöst? Dann nimmt sie keine Antwort mehr an. |
+| `ctx.kennung(wert)` | Woran die Aufgabe zu erkennen ist, wenn man es nicht sieht (Hör-Aufgaben: die Melodie). Sonst nimmt der Rahmen Text, Bilder und Lösung. |
+
+**Wiederholungen** (Vorgabe Patrik 2026-10-31): In einer Runde kommt höchstens eine Aufgabe ein
+zweites Mal, nie direkt hintereinander. Der Rahmen zieht eine nicht erlaubte Aufgabe neu (das Spiel
+zieht in `aufgabe()` zufällig). Gibt eine Stufe nicht genug verschiedene Aufgaben her, endet die Runde
+früher; das Protokoll vermerkt dann `gekuerzt` mit der geplanten Anzahl, und das Testskript meldet es
+als Hinweis.
 | `ctx.sag(text, art?)` | Die Eule spricht (`art`: `"gut"` oder `"hinweis"`). |
 
 Ausserhalb von `ctx`, für Spiele mit Inhaltslisten: `LS.freieListen("<id>")` liefert die Listen,
@@ -185,9 +192,13 @@ Entscheide Patrik L1 a bis L4 a, 2026-10-31.
 
   Frühere Testspieler (`test: true`) werden beim Lesen zur Aufsicht.
 
-**Freigabe.** Der Prüfstand steht im Repo, die Freigabe gilt je Gerät.
-- Im Katalog trägt ein Spiel `geprueft: { am, von }` oder lässt das Feld weg; dann ist es ungeprüft.
-  Das heisst: Das Spiel als Ganzes ist angesehen, auf Desktop, Tablet und Handy.
+**Freigabe.** Der Prüfstand steht im Repo, die Freigabe gilt je Gerät. Standardmässig frei ist,
+was nichts mehr zu prüfen hat (Präzisierung Patrik 2026-10-31).
+- Ein neues Spiel trägt im Katalog `neu: "<Sitzung>"` und ist gesperrt, bis es angesehen ist:
+  `geprueft: { am, von }`, das heisst auf Desktop, Tablet und Handy durchgespielt. Spiele ohne `neu`
+  sind frei.
+- Offene Annahmen zum Lehrmittel (`docs/lernziele/`) sperren nicht: Sie betreffen die Darstellung,
+  nicht die fachliche Richtigkeit (Entscheid Patrik F1 a, 2026-10-31). Sie stehen in der Checkliste.
 - Spiele mit Inhaltslisten tragen zusätzlich `listen: { <liste-id>: { name, geprueft } }`.
   - **Verweis:** Nutzt ein Spiel die Liste eines anderen (dieselben Wörter oder Sätze), steht dort nur
     `{ von: "<spiel>/<liste>" }`. Prüfstand und Freigabe gelten einmal, an der Quelle; die Verwaltung

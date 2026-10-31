@@ -68,7 +68,7 @@ function zeichneSpiele(box, neu) {
 
   function karte(s) {
     const favorit = p.favoriten.includes(s.id);
-    const frei = LS.spielFrei(s.id);
+    const frei = LS.fuerKinderSichtbar(s.id);
     const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") });
     k.style.setProperty("--f", s.farbe);
     const marken = s.lernziele.map(l => el("span", { class: "marke" + (fokus.includes(l.lz) ? " fokus" : ""), text: (fokus.includes(l.lz) ? "⭐ " : "") + l.lz }));

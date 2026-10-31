@@ -133,6 +133,8 @@ LS.spiel({
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    // Gehört, nicht gesehen: die Melodie selbst macht die Aufgabe aus (Regel gegen Wiederholungen).
+    ctx.kennung(JSON.stringify(a.folge));
     const hoeren = () => alsToene(a.folge);
     ctx.flaeche.append(el("div", { class: "ohr", text: "👂" }),
       el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, hoeren, a.folge.length === 2 ? "🔊 Beide Töne anhören" : "🔊 Melodie anhören")));

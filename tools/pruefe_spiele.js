@@ -80,9 +80,22 @@ const TREIBER = `
   const aufgabenText = (e) => e.nodeType === 3 ? e.data : klickbar(e) ? " " : e.childNodes.map(aufgabenText).join(" ");
   const optionen = (flaeche) => flaeche.querySelectorAll("*").filter(klickbar).map(text).filter(t => t && t.length <= 40 && !KEIN_WERT.test(t));
   let ohneVorab = 0; // Aufgaben, deren Lösung das Spiel nicht mit ctx.loesung() nennt
+  // Wiederholungen je Runde: höchstens eine Aufgabe ein zweites Mal, nie direkt hintereinander.
+  let gestellt = new Map();
+  let letzte = null;
   LS.pruefung.haken = (art, a) => {
     // Neue Aufgabe: Hinweise einer übersprungenen Aufgabe mit derselben Nummer vergessen.
     if (art === "aufgabe") { hinweise.delete(a.nr); return; }
+    if (art === "gestellt") {
+      if (a.nr === 0) { gestellt = new Map(); letzte = null; }
+      if (!a.kennung) return;
+      const n = (gestellt.get(a.kennung) || 0) + 1;
+      gestellt.set(a.kennung, n);
+      const doppelt = [...gestellt.values()].filter(x => x > 1).length;
+      if (n > 2 || doppelt > 1 || a.kennung === letzte) melde("Wiederholung", "«" + a.kennung.slice(0, 80) + "» " + (a.kennung === letzte ? "direkt hintereinander" : n > 2 ? n + "-mal in einer Runde" : "zweite Wiederholung in einer Runde"), a.kennung);
+      letzte = a.kennung;
+      return;
+    }
     if (!a.vorab) ohneVorab++;
     if (art === "falsch") {
       if (a.aufgeloest) { hinweise.delete(a.nr); return; }
@@ -135,7 +148,8 @@ const TREIBER = `
     if (!(e.sterne >= 1 && e.sterne <= 3) || !Number.isFinite(e.fehler) || !Number.isFinite(e.dauer)) melde("Protokoll", JSON.stringify(e).slice(0, 160));
     for (const f of e.fehlerAufgaben || []) if (${VERDAECHTIG}.test(f.text + " " + f.loesung)) melde("Protokoll", "Fehleraufgabe: " + (f.text + " → " + f.loesung).slice(0, 160));
   }
-  return { runden: protokoll().length, klicks, funde, ohneVorab };
+  const gekuerzt = protokoll().filter(e => e.gekuerzt).map(e => e.aufgaben + "/" + e.gekuerzt);
+  return { runden: protokoll().length, klicks, funde, ohneVorab, gekuerzt };
 })`;
 
 // Generatoren im Kontext: aufgabeErzeugen + pruefeAufgabe, falls vorhanden.
@@ -209,6 +223,7 @@ function pruefe(id, stufe, liste = null) {
     ergebnis.runden = t.runden;
     ergebnis.klicks = t.klicks;
     for (const f of t.funde) (f.art === "Hänger" ? ergebnis.hinweise : ergebnis.fehler).push(`${f.art}: ${f.text}`);
+    if (t.gekuerzt.length) ergebnis.hinweise.push(`zu wenig verschiedene Aufgaben: ${t.gekuerzt.length} von ${t.runden} Runden früher beendet (Aufgaben ${[...new Set(t.gekuerzt)].join(", ")})`);
     if (t.ohneVorab) ergebnis.fehler.push(`Testhilfe: ${t.ohneVorab} Antworten auf Aufgaben ohne ctx.loesung() — 🔑 kennt dort keine Lösung`);
     if (t.runden < opt.runden) ergebnis.hinweise.push(`nur ${t.runden} von ${opt.runden} Runden mit ${t.klicks} Zufallsklicks geschafft`);
   } catch (e) {
