@@ -27,8 +27,8 @@
   - Grundzeit und Schrittzeit des Endlos-Bodens sind Annahmen bis zur Testrunde (LERN-4).
 
 **Nächste Session — Plan:**
-1. P56 a: Lehrplan SG für die 5./6. Klasse auswerten → `docs/eulenpfad/spielideen/lehrplan_sg_5-6.md`
-   mit Ideen und Prioritäten; danach auswählen lassen.
+1. Aus `docs/eulenpfad/spielideen/lehrplan_sg_5-6.md` (LERN_Session7) auswählen lassen und bauen; vorher
+   Basisklasse 5/6 und Dezimalschreibweise klären (Abschnitt 9 dort).
 2. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
 3. LERN-21 / LERN-11 im Entwickler-Modus: neue Spiele ansehen, Inhaltslisten prüfen.
 4. Schweiz-Karten-Suche: Seen, Flüsse, Gebirge (Download anfragen); Namen in `orte.js` prüfen.
@@ -116,5 +116,5 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-29 | Name „Eulenpfad“: Markenrecherche EU (TMview) und Domain vor der Veröffentlichung | offen | Report LERN_Session5; Swissreg ohne Treffer |
 | LERN-30 | Zufallsmix in Safari/iPad und Firefox prüfen; Leiste auf dem Handy (drei Zeilen) | offen | rahmen.md Abschnitt 9 |
 | LERN-31 | Abgleich-Ordner auf den echten Geräten prüfen (`file://`, Netzwerk- und Cloud-Ordner, iPad/Android nur Datei) | in Arbeit seit 2026-11-01 (LERN_Session6); gebaut, nur auf localhost geprüft | rahmen.md Abschnitt 10 |
-| LERN-32 | Lehrplan SG 5./6. Klasse auswerten, Spielideen mit Basisklasse 5/6 (Entscheid P56 a) | offen, nächste Session | Report LERN_Session6 |
+| LERN-32 | Lehrplan SG 5./6. Klasse auswerten, Spielideen mit Basisklasse 5/6 (Entscheid P56 a) | erledigt 2026-11-01 (LERN_Session7, 52 Ideen, Top 15) | docs/eulenpfad/spielideen/lehrplan_sg_5-6.md; Auswahl offen |
 | LERN-33 | Schweiz-Karten-Suche: Seen, Flüsse, Gebirge (swisstopo-Datensatz, Download anfragen) | offen | `tools/karte_schweiz.py`; Report LERN_Session6 |
