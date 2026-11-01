@@ -1,0 +1,26 @@
+/* Zufallsmix (mix.html): oben die Spiele der Runde, Fortschritt und Beenden, darunter das laufende
+   Spiel in seinem iframe. Die übrigen Klassen kommen aus spiele/gemeinsam/stil.css und start/start.css. */
+
+.mix-filter .filter-zeile > span { min-width: 84px; }
+
+.mix-leiste { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 8px; }
+.mix-leiste .fortschritt { flex: 1; margin: 0; flex-wrap: wrap; }
+.mix-spiele { display: flex; gap: 2px; }
+.mix-bild { font-size: 28px; line-height: 1; padding: 4px; border-radius: 12px; opacity: .45; }
+.mix-bild.aktiv { opacity: 1; background: var(--karte); box-shadow: var(--schatten); }
+.mix-bild.weg { filter: grayscale(1); opacity: .2; }
+
+.mix-rahmen { margin: 0 -16px; }
+.mix-spiel { display: block; width: 100%; height: calc(100vh - 150px); min-height: 460px; border: 0; background: transparent; }
+.mix-spiel[hidden] { display: none; }
+
+.mix-ergebnis { list-style: none; padding: 0; margin: 12px auto; max-width: 420px; text-align: left; }
+.mix-ergebnis li { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 12px; background: #f6f7fd; margin-bottom: 6px; }
+.mix-ergebnis li span:nth-child(2) { flex: 1; font-weight: 700; }
+.mix-ergebnis .mix-bild { box-shadow: none; background: none; padding: 0; }
+
+@media (max-width: 560px) {
+  .mix-bild { font-size: 22px; padding: 2px; }
+  .mix-rahmen { margin: 0 -10px; }
+  .mix-spiel { height: calc(100vh - 170px); }
+}

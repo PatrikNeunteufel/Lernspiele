@@ -36,6 +36,9 @@ const THEMEN = [
   { id: "geschichten", fach: "NMG", name: "Geschichten", titel: "Echt oder erfunden: Geschichten und Textsorten", quelle: "Lehrplan SG NMG.9.4" },
 ];
 
+/** Fächer in der Reihenfolge der Themen (Startseite, Zufallsmix). */
+const FAECHER = [...new Set(THEMEN.map(t => t.fach))];
+
 const ALLE_STUFEN = ["s1", "s2", "s3", "s4", "s5", "s6"];
 
 const SPIELE = [

@@ -98,3 +98,18 @@
   mehrere Werte hergeben.
 - Session-Abschluss: Report docs/report/LERN_Session4_2026-10-31.md, Handover nachgeführt
   (LERN-25 bis LERN-27). Gesamtlauf des Testskripts ohne Fehler.
+
+## 2026-11-01 — LERN_Session5
+- Name der Sammlung „Eulenpfad“ (Entscheid N1 a): Startseite, Statistik-Titel, README, CLAUDE.md.
+  Swissreg ohne Treffer; technische Namen (`lernspiele:*`, `lernspiele-*.json`) bleiben.
+- Zufallsmix (Entscheid M1 a): `mix.html`, `mix/mix.js`, `mix/mix.css`, Einstieg oben im Tab Spiele.
+  Bis zu sechs Spiele in einer Runde (10 oder 20 Aufgaben) oder endlos; Fach, Fokus, Stufe („passend“
+  oder fest), Timer, Wechsel nach 1 oder 3 Aufgaben. Die Spiele laufen unverändert im iframe
+  (`?mix=1`), der Mix führt Serie, Protokoll (je Spiel mit `mix`) und Rekord (`mix:<Auswahl>`).
+- Rahmen: Mix-Betrieb in `runde`, `body.im-mix`, `LS.tonSchalter`, `LS.rangliste`, weitere Exporte;
+  `FAECHER` im Katalog. Statistik zeigt Mix-Rekorde und Mix-Runden.
+- Punkte-Schieber: Ablauf beginnt nach 8 Aufgaben von vorn (stürzte im Mix bei der 9. ab).
+- Testskript: jedes Spiel im Mix (`--mix=0` schaltet ab), Ausnahmen auch im Mix-Zweig;
+  `docs/rahmen.md` Abschnitte 8 und 9.
+- Session-Abschluss: Report docs/report/LERN_Session5_2026-11-01.md, Handover nachgeführt
+  (LERN-9 erledigt, LERN-28 bis LERN-30 neu). Zwei Gesamtläufe des Testskripts ohne Fehler.

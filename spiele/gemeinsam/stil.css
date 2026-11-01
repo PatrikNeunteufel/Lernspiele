@@ -558,6 +558,10 @@ button.link, a.link {
   .kopf a.zurueck, .kopf .ton { width: 44px; height: 44px; font-size: 22px; }
 }
 
+/* Im Zufallsmix (iframe von mix.html, Entscheid M1 a): Kopfzeile und Fortschritt zeigt der Mix selbst. */
+body.im-mix .kopf, body.im-mix .fortschritt { display: none; }
+body.im-mix .buehne { padding-top: 8px; }
+
 @media (prefers-reduced-motion: reduce) {
   *:not(.zeitbalken) { animation: none !important; transition: none !important; }
 }

@@ -290,6 +290,55 @@ Vorgabe Patrik 2026-10-31.
 - die Serienbremse: Kein Merkmal aus `ctx.serie` kommt öfter als `LS.SERIE_MAX`-mal hintereinander
   (Fehler). Musste der Rahmen nach 40 Versuchen aufgeben, meldet der Test einen Hinweis: Die Stufe hat
   dann wohl nur diesen Wert, und `ctx.serie` gehört dort weg.
+- jedes Spiel im Zufallsmix (Abschnitt 9; `--mix=0` schaltet ab), Stufe 3 mit Timer und, falls es
+  Endlos-Stufen hat, die erste davon im Endlos-Mix: Das Spiel meldet „bereit“, zeichnet erst auf
+  „aufgabe“ hin, meldet je Aufgabe genau ein vollständiges Ergebnis, bleibt danach still und schreibt
+  weder Protokoll noch Rekord selbst. Die Übersicht zeigt `s3:10 s1♾:1` (gemeldete Ergebnisse).
 
 **Nicht geprüft** wird das Aussehen. Das heisst: Desktop, Tablet (768 px) und Handy (375 px) im
 Browser ansehen.
+
+## 9. Zufallsmix
+
+Entscheid M1 a (LERN_Session5, 2026-11-01). `mix.html` mit `mix/mix.js` mischt Aufgaben aus bis zu
+sechs Spielen in einer Runde (10 oder 20 Aufgaben) oder einer Endlos-Serie. Einstellbar sind:
+- Fächer, dazu Fokus;
+- Stufe: „passend für mich“ = empfohlene Stufe je Spiel, sonst 3; oder eine feste Stufe;
+- Timer an oder aus;
+- Länge;
+- Wechsel nach jeder oder nach drei Aufgaben.
+
+Die Einstellungen stehen im Profil (`mix`). Teil des Mix ist jedes Spiel, das das Kind sehen darf und
+das die Stufe anbietet; im Endlos-Mix nur Stufen mit `endlos` im Katalog.
+
+- **Bauweise:** Jedes Spiel läuft unverändert in einem eigenen iframe (`?stufe=…&mix=1&timer=0|1`,
+  dazu `&endlos=1`). Mit `mix=1` blendet der Rahmen Kopfzeile und Fortschritt aus (`body.im-mix`) und
+  stellt eine Aufgabe nur, wenn der Mix sie verlangt. Serie, Wechsel, Ende, Protokoll und Rekord führt
+  allein `mix.js`. Wiederholungen und Serienbremse gelten je Spiel weiter, weil jedes iframe seine
+  Runde behält.
+- **Nachrichten** (`postMessage`, `{ lern: "mix", typ, … }`; angenommen nur vom eigenen iframe bzw.
+  von `parent`):
+
+  | Richtung | typ | Inhalt |
+  |---|---|---|
+  | Spiel → Mix | `bereit` | geladen, wartet auf die erste Aufgabe |
+  | Spiel → Mix | `ergebnis` | `zeit` (Eintrag wie `aufgabenZeiten`), `fehler`, `hilfen`, `fehlerAufgabe` oder null |
+  | Spiel → Mix | `erschoepft` | keine neue Aufgabe mehr (Wiederholungsregel) |
+  | Spiel → Mix | `geht-nicht` | Stufe nicht angeboten, nicht frei oder keine Stimme |
+  | Mix → Spiel | `aufgabe` | `geschafft`: Serie über alle Spiele, für die knapper werdende Endlos-Zeit |
+  | Mix → Spiel | `ton` | `an`: Ton-Schalter der Mix-Seite |
+
+- **Endlos-Mix:** Endet beim ersten Fehler oder bei „Zeit um“; das Spiel zeigt die Lösung und
+  „Weiter ➜“. Die Zeit startet bei der Vorgabezeit des jeweiligen Spiels und nähert sich wie in
+  Abschnitt 7 dem Boden der Aufgabe. Gezählt wird dabei die Serie des Mix.
+- **Speicher:**
+  - Runde: je gespieltes Spiel ein Protokolleintrag mit `mix: "<Auswahl>"` und `sterne: null`, weil
+    Sterne für ganze Runden eines Spiels gelten. Die Aufgaben zählen damit für die Lernziele.
+  - Endlos: ein Rekord unter `spiel: "mix:<Auswahl>"`, mit `stufe` (`s1`–`s6` oder `passend`),
+    `timer: true` oder null und `spiele: [ids]`.
+  - `<Auswahl>` ist `alle`, sonst `fokus` und/oder Fächer mit `+`. Ranglisten vergleichen so nur
+    gleiche Mischungen.
+  - Verlassen mitten in der Runde zählt bis dahin (`abgebrochen`, wie E1 a).
+- **Unter `file://`** geprüft am 2026-11-01 in Chrome und Edge (headless): `postMessage`, gemeinsamer
+  `localStorage` und `sessionStorage` (Aufsicht) und die Adresse im iframe funktionieren. Ungeprüft:
+  Safari/iPad und Firefox.

@@ -82,6 +82,16 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
 .gruppe .gruppe > summary { font-size: clamp(18px, 4vw, 21px); padding-left: 18px; }
 .gruppe .gruppe { margin-bottom: 6px; }
 
+/* Einstieg in den Zufallsmix über den Filtern */
+.mix-einstieg {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 14px; padding: 14px 18px;
+  background: #fff; border-radius: var(--rund); box-shadow: var(--schatten); border-left: 10px solid var(--deko-2);
+  color: var(--text); text-decoration: none;
+}
+.mix-einstieg .spiel-bild { font-size: 44px; line-height: 1; }
+.mix-einstieg b { display: block; font-size: 22px; }
+.mix-einstieg .ziel { font-size: 15px; color: var(--text-leise); }
+
 .spiele { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 16px; margin: 6px 0 18px; }
 .spielkarte {
   position: relative; background: #fff; border-radius: var(--rund); box-shadow: var(--schatten);

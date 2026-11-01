@@ -85,11 +85,12 @@ const LS = (() => {
   //   pin: { salz, hash } nur bei der Aufsicht (SHA-256, nie die PIN selbst)
   //   favoriten: [<spiel-id>], endlosAn: [<spiel-id>] (Karte startet Endlos-Runden), ansicht: "kacheln" | "kompakt",
   //   zu: [<Gruppen-Id>] (zugeklappt)
+  //   mix: zuletzt gewählte Einstellungen des Zufallsmix (mix/mix.js) oder null
   const LEERES_PROFIL = {
     alter: null, klasse: null, fokus: [], rolle: "kind",
     reihenfolge: { global: "stufe", spiele: {} },
     timer: { an: false, faktor: 1, spiele: {} },
-    favoriten: [], endlosAn: [], ansicht: "kacheln", zu: [],
+    favoriten: [], endlosAn: [], ansicht: "kacheln", zu: [], mix: null,
   };
 
   /** Vorgabezeit je Aufgabe aus dem Katalog (Sekunden), falls die Seite ihn geladen hat. */
@@ -392,6 +393,16 @@ const LS = (() => {
     return [...beste.values()].sort((a, b) => b.punkte - a.punkte || (a.zeit < b.zeit ? -1 : 1));
   }
 
+  /** Rangliste als kleine Tabelle: bester Wert je Spieler (ohne Testrunden), der eigene hervorgehoben. */
+  function rangliste(spiel, stufeId, mitTimer, ich, hoechstens = 10) {
+    const liste = ranglisteFuer(spiel, stufeId, mitTimer);
+    if (!liste.length) return el("div");
+    return el("div", { class: "rangliste" },
+      el("b", { text: mitTimer ? "⏱ mit Timer" : "ohne Timer" }),
+      el("ol", {}, ...liste.slice(0, hoechstens).map(r => el("li", { class: r.name === ich ? "ich" : "" },
+        el("span", { text: r.name }), el("b", { text: String(r.punkte) })))));
+  }
+
   function besteSterne(name, spiel, stufe) {
     return protokoll()
       .filter(e => e.name === name && e.spiel === spiel && e.stufe === stufe)
@@ -480,6 +491,16 @@ const LS = (() => {
       }
     } catch { /* ohne Ton weiter */ }
   }
+
+  /** Knopf „Ton an/aus“ in der Kopfzeile; beimWechsel(an) erfährt jede Änderung (der Mix gibt sie an seine Spiele weiter). */
+  function tonSchalter(knopf, beimWechsel = null) {
+    if (!knopf) return;
+    const setze = () => { knopf.textContent = tonAn ? "🔊" : "🔇"; };
+    knopf.addEventListener("click", () => { tonAn = !tonAn; schreibe("ton", tonAn); setze(); ton("tipp"); beimWechsel?.(tonAn); });
+    setze();
+  }
+  /** Ton an oder aus, ohne zu speichern (im Mix: Meldung der Mix-Seite). */
+  const setzeTon = an => { tonAn = !!an; };
 
   // ---------- Eule ----------
 
@@ -814,13 +835,7 @@ const LS = (() => {
   function spiel(def) {
     const buehne = document.querySelector(".buehne");
     const stufenListe = SKALA.filter(s => def.stufen[s.id]).map(s => ({ ...s, text: def.stufen[s.id] }));
-    const tonKnopf = document.querySelector(".kopf .ton");
-
-    if (tonKnopf) {
-      const setze = () => { tonKnopf.textContent = tonAn ? "🔊" : "🔇"; };
-      tonKnopf.addEventListener("click", () => { tonAn = !tonAn; schreibe("ton", tonAn); setze(); ton("tipp"); });
-      setze();
-    }
+    tonSchalter(document.querySelector(".kopf .ton"));
 
     // Angemeldet wird nur auf der Startseite (Entscheid L1 a); dorthin führt auch „wechseln“.
     const START = "../../index.html";
@@ -914,14 +929,25 @@ const LS = (() => {
     /**
      * Eine Runde. endlos (Vorgabe Patrik 2026-10-31): Aufgaben, bis die erste falsch ist oder die Zeit
      * um ist; gezählt werden die richtigen. Rekord je Spieler, Spiel, Stufe und mit/ohne Timer.
+     * mix (Entscheid M1 a, LERN_Session5): Das Spiel läuft im iframe des Zufallsmix (mix.html) und stellt
+     * eine Aufgabe nur, wenn der Mix sie verlangt; das Ergebnis meldet es zurück. Serie, Ende, Protokoll
+     * und Rekord führt der Mix. mix = { timer: true/false }.
      */
-    function runde(stufe, endlos = false) {
+    function runde(stufe, endlos = false, mix = null) {
       if (!zugang()) return;
       const name = aktuellerSpieler();
-      const timer = timerFuer(name, def.id, stufe.id);
+      const timer = mix ? { ...timerFuer(name, def.id, stufe.id), an: mix.timer } : timerFuer(name, def.id, stufe.id);
       let nr = 0;
       let geschafft = 0; // Endlos: richtig gelöste Aufgaben
       const startSekunden = endlos ? vorgabeZeit(def.id, stufe.id) : timer.sekunden; // Endlos: für alle gleich
+      // Mix: Die Aufgabe darf erst gezeichnet werden, wenn der Mix sie verlangt (freigabe). Im Endlos-Mix
+      // zählt für die knapper werdende Zeit die Serie über alle Spiele (mixGeschafft).
+      let mixFreigabe = false;
+      let mixGeschafft = 0;
+      let mixGemeldet = 0;      // Aufgaben, deren Ergebnis schon an den Mix ging
+      let mixBereit = false;
+      let mixVorher = null;     // Stand von fehler, hilfen und fehlerAufgaben vor der Aufgabe
+      const anMix = daten => parent.postMessage({ lern: "mix", spiel: def.id, ...daten }, "*");
       let fehler = 0;
       const beginn = Date.now();
       const fehlerAufgaben = [];
@@ -931,7 +957,7 @@ const LS = (() => {
       // zweites Mal, nie direkt hintereinander. Gibt die Stufe nicht genug verschiedene Aufgaben her,
       // endet die Runde früher (anzahl wird kleiner). Endlos: keine der letzten 30 Aufgaben nochmal;
       // findet sich keine neue mehr, ist alles geschafft.
-      let anzahl = endlos ? Infinity : def.anzahl;
+      let anzahl = endlos || mix ? Infinity : def.anzahl;
       const gestellt = new Map(); // Kennung → wie oft gestellt
       let wiederholt = false;
       let letzte = null;
@@ -968,8 +994,23 @@ const LS = (() => {
       karte.append(flaeche);
       buehne.append(punkte, karte);
 
+      /** Mix: Ergebnis der letzten Aufgabe melden — oder, vor der ersten, dass das Spiel bereit ist. */
+      function meldeMix() {
+        const zeit = aufgabenZeiten[mixGemeldet];
+        if (!zeit) {
+          if (!mixBereit) { mixBereit = true; anMix({ typ: "bereit" }); }
+          return;
+        }
+        mixGemeldet++;
+        anMix({ typ: "ergebnis", zeit, fehler: fehler - mixVorher.fehler, hilfen: hilfen - mixVorher.hilfen,
+          fehlerAufgabe: fehlerAufgaben[mixVorher.fehlerAufgaben] || null });
+      }
+
       function naechste() {
         clearTimeout(uhr);
+        if (mix && !mixFreigabe) return meldeMix();
+        mixFreigabe = false;
+        mixVorher = { fehler, hilfen, fehlerAufgaben: fehlerAufgaben.length };
         if (nr >= anzahl) return endlos ? schlussEndlos() : schluss();
         if (endlos) punkte.textContent = `♾ ${geschafft}`;
         else [...punkte.children].forEach((p, i) => {
@@ -1023,7 +1064,7 @@ const LS = (() => {
         // Gleiche Startzeit für alle, je gelöste Aufgabe knapper (ENDLOS_TEMPO).
         function starteUhr() {
           if (!timer.an) return;
-          const sekunden = endlos ? endlosSekunden(startSekunden, geschafft, schritte, warten) : timer.sekunden;
+          const sekunden = endlos ? endlosSekunden(startSekunden, mix ? mixGeschafft : geschafft, schritte, warten) : timer.sekunden;
           // Balken läuft per CSS-Übergang von voll auf leer; der Fehler zählt einmal, die Aufgabe bleibt offen.
           const balken = zeitleiste.firstChild;
           zeitleiste.classList.remove("um");
@@ -1049,10 +1090,11 @@ const LS = (() => {
         function endlosVorbei(text) {
           erledigt = true;
           abschliessen(false);
-          speichereEndlos(); // zählt sofort, auch wenn das Kind „Zum Ergebnis“ nicht mehr antippt
+          if (!mix) speichereEndlos(); // zählt sofort, auch wenn das Kind „Zum Ergebnis“ nicht mehr antippt
           const loesung = loesungVorab;
           eule.sag(`${text}${loesung ? ` Schau mal: ${loesung}` : ""}`, "hinweis");
-          const weiter = el("button", { class: "knopf", type: "button", text: "Zum Ergebnis ➜", onclick: schlussEndlos });
+          // Im Mix führt „Weiter“ zurück zum Mix; er zeigt das Ergebnis der ganzen Serie.
+          const weiter = el("button", { class: "knopf", type: "button", text: mix ? "Weiter ➜" : "Zum Ergebnis ➜", onclick: mix ? naechste : schlussEndlos });
           flaeche.append(el("div", { class: "knopfzeile" }, weiter));
           weiter.focus();
         }
@@ -1148,6 +1190,8 @@ const LS = (() => {
           }
           if (versuch >= 60) {
             clearTimeout(uhr);
+            // Mix: Das Spiel hat keine neue Aufgabe mehr; der Mix nimmt dann die anderen.
+            if (mix) { flaeche.innerHTML = ""; return anMix({ typ: "erschoepft" }); }
             anzahl = nr;
             if (endlos) { allesGeschafft = true; return schlussEndlos(); }
             return schluss();
@@ -1255,10 +1299,19 @@ const LS = (() => {
       // Tablets zuverlässiger als pagehide). Eine Serie ohne richtige Aufgabe gibt keinen Eintrag.
       function beimVerlassen() { if (geschafft > 0) speichereEndlos(true); }
       function beimVerstecken() { if (document.visibilityState === "hidden") beimVerlassen(); }
-      if (endlos) {
+      if (endlos && !mix) {
         addEventListener("pagehide", beimVerlassen);
         document.addEventListener("visibilitychange", beimVerstecken);
       }
+      // Mix: Aufgaben nur auf Verlangen des Mix (mix.html), Nachrichten nur von ihm.
+      if (mix) addEventListener("message", e => {
+        if (e.source !== parent || e.data?.lern !== "mix") return;
+        if (e.data.typ === "ton") return setzeTon(e.data.an);
+        if (e.data.typ !== "aufgabe") return;
+        mixGeschafft = e.data.geschafft || 0;
+        mixFreigabe = true;
+        naechste();
+      });
 
       /** Endlos: Ergebnis speichern (falls noch nicht geschehen), Rekord und Rangliste zeigen. */
       function schlussEndlos() {
@@ -1286,22 +1339,32 @@ const LS = (() => {
       naechste();
     }
 
-    /** Rangliste als kleine Tabelle: bester Wert je Spieler (ohne Testrunden), der eigene hervorgehoben. */
-    function rangliste(spiel, stufeId, mitTimer, ich, hoechstens = 10) {
-      const liste = ranglisteFuer(spiel, stufeId, mitTimer);
-      if (!liste.length) return el("div");
-      return el("div", { class: "rangliste" },
-        el("b", { text: mitTimer ? "⏱ mit Timer" : "ohne Timer" }),
-        el("ol", {}, ...liste.slice(0, hoechstens).map(r => el("li", { class: r.name === ich ? "ich" : "" },
-          el("span", { text: r.name }), el("b", { text: String(r.punkte) })))));
-    }
-
     // ?stufe=<id> startet direkt in dieser Stufe (Startseite verlinkt so ein erweitertes Lernziel),
     // mit &endlos=1 im Endlos-Modus, wenn die Stufe ihn anbietet.
     const adresse = new URLSearchParams(location.search);
     const direkt = stufenListe.find(st => st.id === adresse.get("stufe"));
+    // &mix=1 im iframe des Zufallsmix (Entscheid M1 a): ohne Kopfzeile, mit &timer=1 und &endlos=1 vom Mix.
+    // Kann das Spiel die verlangte Stufe nicht stellen (nicht frei, keine Stimme), sagt es das dem Mix.
+    if (adresse.get("mix") === "1" && parent !== window) {
+      document.body.classList.add("im-mix");
+      const endlos = adresse.get("endlos") === "1";
+      if (!direkt || !aktuellerSpieler() || !spielSichtbar(def.id) || (endlos && !endlosStufen(def.id).includes(direkt.id)))
+        return parent.postMessage({ lern: "mix", spiel: def.id, typ: "geht-nicht" }, "*");
+      return runde(direkt, endlos, { timer: adresse.get("timer") === "1" });
+    }
     if (direkt) runde(direkt, adresse.get("endlos") === "1" && endlosStufen(def.id).includes(direkt.id));
     else stufenwahl();
+  }
+
+  // ---------- Zufallsmix (Entscheid M1 a, LERN_Session5) ----------
+  // Rekorde des Endlos-Mix stehen unter spiel "mix:<Auswahl>" (alle, fokus oder Fächer mit +), damit
+  // Ranglisten nur gleiche Mischungen vergleichen; stufe ist eine Stufe der Skala oder "passend".
+  const MIX_PRAEFIX = "mix:";
+  const istMix = spielId => String(spielId).startsWith(MIX_PRAEFIX);
+  /** Anzeigename einer Mix-Kennung: „🎲 Zufallsmix · ⭐ Fokus + Mathe“. */
+  function mixName(spielId) {
+    const auswahl = String(spielId).slice(MIX_PRAEFIX.length);
+    return "🎲 Zufallsmix" + (auswahl === "alle" ? "" : " · " + auswahl.split("+").map(t => (t === "fokus" ? "⭐ Fokus" : t)).join(" + "));
   }
 
   /**
@@ -1329,7 +1392,8 @@ const LS = (() => {
   };
 
   return {
-    STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, SERIE_MAX, spiel, lies, schreibe, sterneText,
+    STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
+    MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
     freigabe, spielFrei, spielZuPruefen, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, spielListen, listeFrei, setzeListeFrei, freieListen,

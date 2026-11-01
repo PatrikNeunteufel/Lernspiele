@@ -17,8 +17,9 @@ function zeichneStatistik(box, neu) {
   const prozent = x => x == null ? "—" : `${Math.round(x * 100)} %`;
   const datum = iso => new Date(iso).toLocaleDateString("de-CH", { day: "2-digit", month: "2-digit" }) + " " +
     new Date(iso).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit" });
-  const spielName = id => SPIELE.find(s => s.id === id)?.name || id;
-  const stufeName = id => { const s = SKALA.find(x => x.id === id); return s ? `${s.icon} ${s.nr}` : id; };
+  const spielName = id => (LS.istMix(id) ? LS.mixName(id) : SPIELE.find(s => s.id === id)?.name || id);
+  // "passend": Zufallsmix mit der empfohlenen Stufe je Spiel
+  const stufeName = id => { const s = SKALA.find(x => x.id === id); return s ? `${s.icon} ${s.nr}` : id === "passend" ? "👍 passend" : id; };
   const kachel = (zahl, was) => el("div", { class: "kachel" }, el("div", { class: "zahl", text: zahl }), el("div", { class: "was", text: was }));
   const karte = (...inhalt) => el("section", { class: "karte" }, ...inhalt);
 
@@ -154,7 +155,8 @@ function zeichneStatistik(box, neu) {
       return el("tr", {},
         el("td", { text: spielName(e.spiel) }),
         el("td", { text: stufeName(e.stufe) }),
-        el("td", { text: e.timer ? `⏱ ${e.timer} s` : "ohne" }),
+        // Zufallsmix: timer true (Startzeiten je Spiel verschieden), sonst die Startzeit in Sekunden
+        el("td", { text: typeof e.timer === "number" ? `⏱ ${e.timer} s` : e.timer ? "⏱ an" : "ohne" }),
         el("td", { class: "zahl", text: String(e.punkte) }),
         el("td", { text: platz ? `${platz}. von ${rang.length}` : "—" }),
         el("td", { class: "leise-text", text: rang.slice(0, 3).map((r, i) => `${i + 1}. ${r.name} ${r.punkte}`).join(" · ") }));
@@ -198,7 +200,7 @@ function zeichneStatistik(box, neu) {
   const verlauf = el("div");
   if (!letzte.length) verlauf.append(el("p", { class: "leise-text", text: "Noch keine Runde gespielt." }));
   for (const e of letzte) {
-    const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.spiel)} · Stufe ${stufeName(e.stufe)} · ${"★".repeat(e.sterne)} · ${e.fehler} Fehler${e.test ? " · 🧪 Test" : ""}${e.hilfe ? " · 🔑 mit Hilfe" : ""}` }));
+    const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.spiel)} · Stufe ${stufeName(e.stufe)} · ${e.mix ? "🎲 im Zufallsmix" : "★".repeat(e.sterne)} · ${e.fehler} Fehler${e.test ? " · 🧪 Test" : ""}${e.hilfe ? " · 🔑 mit Hilfe" : ""}` }));
     if (e.fehlerAufgaben.length) {
       d.append(el("ul", {}, ...e.fehlerAufgaben.map(f => el("li", {},
         el("div", { text: f.text || "(Aufgabe)" }),

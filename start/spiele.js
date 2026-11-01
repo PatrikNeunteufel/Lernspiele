@@ -2,8 +2,6 @@
    Kinder sehen nur freigegebene Spiele (Entscheid L4 a); die Aufsicht sieht alle mit Prüfstand. */
 "use strict";
 
-const FAECHER = [...new Set(THEMEN.map(t => t.fach))];
-
 // Symbole der Karten-Schalter: aus = grauer Umriss, an = gold mit Verlauf wie der Favoriten-Stern.
 // Der Verlauf steht einmal im Dokument (#gold-verlauf).
 const SCHALTER_SYMBOL = {
@@ -52,6 +50,10 @@ function zeichneSpiele(box, neu) {
   zeilen.push(el("div", { class: "filter-zeile" }, el("span", { text: "Stufe" }),
     chip("Alle", filter.stufe === "alle", setze("stufe", "alle")),
     ...LS.SKALA.map(s => chip(`${s.icon} ${s.nr} ${s.name}`, filter.stufe === s.id, setze("stufe", s.id), s.id === empfohlen ? "👍" : ""))));
+  // Zufallsmix (Entscheid M1 a): Aufgaben aus mehreren Spielen, Einstellungen auf der Mix-Seite.
+  if (SPIELE.some(s => LS.spielSichtbar(s.id))) box.append(el("a", { class: "mix-einstieg", href: "mix.html" },
+    el("span", { class: "spiel-bild", text: "🎲" }),
+    el("span", {}, el("b", { text: "Zufallsmix" }), el("span", { class: "ziel", text: "Aufgaben aus vielen Spielen gemischt — du stellst ein, wie schwer, wie lang und ob mit Timer." }))));
   box.append(el("div", { class: "filter" }, ...zeilen));
 
   // ----- Spiele auswählen -----

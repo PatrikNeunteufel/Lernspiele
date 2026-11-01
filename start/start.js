@@ -10,7 +10,8 @@ const START_TABS = [
 
 {
   const h1 = document.querySelector(".titel h1");
-  for (const b of "Lernspiele") h1.append(LS.el("span", { text: b, "aria-hidden": "true" }));
+  // Name der Sammlung (Entscheid N1 a, LERN_Session5; Swissreg ohne Treffer am 2026-11-01)
+  for (const b of "Eulenpfad") h1.append(LS.el("span", { text: b, "aria-hidden": "true" }));
 }
 
 /** Gewählter Tab aus der Adresse; Verwaltung nur für die Aufsicht. */

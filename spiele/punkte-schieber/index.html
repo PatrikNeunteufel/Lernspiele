@@ -358,7 +358,9 @@ LS.spiel({
   aufgabe(ctx) {
     SPALTEN = STELLEN.slice(STELLEN.findIndex(st => st.k === STUFE[ctx.stufe].ab));
     PLUS = ctx.stufe === "s6" ? 1 : 0;
-    ABLAUF[ctx.stufe][ctx.nr](ctx);
+    // Im Zufallsmix gibt es mehr als 8 Aufgaben: der Ablauf beginnt dann von vorn.
+    const ablauf = ABLAUF[ctx.stufe];
+    ablauf[ctx.nr % ablauf.length](ctx);
   },
 });
 </script>

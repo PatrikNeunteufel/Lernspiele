@@ -1,13 +1,25 @@
-# Handover — Lernspiele
+# Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
-**2026-11-01, nach LERN_Session4** ([Report](report/LERN_Session4_2026-10-31.md)):
-- **Spiele:** 84 Spiele in 28 Themen, je sechs Stufen bezogen auf eine Basisklasse. Neu in dieser
-  Sitzung: 28 Spiele (9 zum Orientierungspunkt der 4. Klasse, 19 aus den übrigen Ideen), siehe
-  [lehrplan_sg_session3.md](lernziele/lehrplan_sg_session3.md). Offen sind noch 3 Ideen.
-- **Tests:** `node tools/pruefe_spiele.js` prüft alle 504 Kombinationen Spiel × Stufe, dazu den
-  Endlos-Modus und jede Inhaltsliste als Kind; Stand 2026-11-01: „Keine Fehler.“ (11 Minuten), ein
-  Hinweis bei Flächen-Pixel s6. Das Skript prüft unter anderem:
+**2026-11-01, nach LERN_Session5** ([Report](report/LERN_Session5_2026-11-01.md)):
+- **Name:** „Eulenpfad“ (Entscheid N1 a). Swissreg ohne Treffer; EU-Recherche offen (LERN-29).
+  Technische Namen (`lernspiele:*`, `lernspiele-*.json`) bleiben.
+- **Spiele:** 84 Spiele in 28 Themen, je sechs Stufen bezogen auf eine Basisklasse. Offen sind noch 3
+  Ideen aus [lehrplan_sg_session3.md](lernziele/lehrplan_sg_session3.md).
+- **Zufallsmix** (Entscheid M1 a, [rahmen.md](rahmen.md) Abschnitt 9):
+  - `mix.html` mischt bis zu sechs Spiele in einer Runde (10 oder 20 Aufgaben) oder endlos.
+  - Einstellbar: Fach, Fokus, Stufe „passend“ oder fest, Timer, Wechsel nach 1 oder 3 Aufgaben.
+  - Die Spiele laufen unverändert im iframe (`?mix=1`). Unter `file://` in Chrome und Edge geprüft;
+    Safari und Firefox ungeprüft (LERN-30).
+- **Tests:** `node tools/pruefe_spiele.js` prüft:
+  - alle 504 Kombinationen Spiel × Stufe;
+  - den Endlos-Modus;
+  - jede Inhaltsliste als Kind;
+  - jedes Spiel im Zufallsmix.
+
+  Stand 2026-11-01: „Keine Fehler.“ (rund 13 Minuten). Dazu 11 Hinweise „zu wenig verschiedene
+  Aufgaben“ (wie vor der Sitzung) und der Hinweis bei Flächen-Pixel s6. Das Skript prüft unter
+  anderem:
   - Hinweise, die die Lösung verraten (LERN-19);
   - die Testhilfen;
   - Rahmen-Klassen, die ein Spiel im eigenen Stil umdefiniert;
@@ -38,14 +50,19 @@
   - Grundzeit und Schrittzeit des Endlos-Bodens sind Annahmen bis zur Testrunde (LERN-4).
 
 **Nächste Session — Plan:**
-1. Startseite und die 28 neuen Spiele auf Desktop, Tablet und Handy ansehen, dazu die
-   Sprachausgabe und das Speichern beim Ausschalten (Endlos) auf dem Tablet der Kinder. Danach im
-   Katalog `geprueft` eintragen und die Checkliste neu erzeugen.
+1. Startseite, Zufallsmix und die 28 neuen Spiele auf Desktop, Tablet und Handy ansehen (LERN-21).
+   Auf dem Tablet der Kinder zusätzlich:
+   - den Mix (LERN-30);
+   - die Sprachausgabe;
+   - das Speichern beim Ausschalten (Endlos).
+
+   Danach im Katalog `geprueft` eintragen und die Checkliste neu erzeugen.
 2. LERN-11: die Prüfliste einarbeiten; geprüfte Listen im Katalog `geprueft`.
-3. LERN-4: Testrunde mit den Kindern; danach den Endlos-Boden aus gemessenen Zeiten eichen (LERN-25).
-4. Offene Entscheide aus LERN_Session4: Flächen-Pixel s6, Speichern der gewöhnlichen Runde vor
-   „Weiter“ (LERN-27).
-5. Vor LERN-17 (GitHub Pages): Datenschutz-Scan des Repos.
+3. LERN-4: Testrunde mit den Kindern (Prüfung 4.2 am Do 05.11.); danach den Endlos-Boden aus
+   gemessenen Zeiten eichen (LERN-25).
+4. LERN-28: Statistik-Ausbau entscheiden, zuerst der Können-Wert je Lernziel.
+5. Offene Entscheide aus LERN_Session4: Flächen-Pixel s6, LERN-27.
+6. Vor LERN-17 (GitHub Pages): Datenschutz-Scan des Repos und LERN-29.
 
 Technik: HTML/CSS/JS ohne Build (Entscheid LERN-1). Vertrag zwischen Rahmen und Spielen: [rahmen.md](rahmen.md).
 Übersicht aller Spiele und was zu prüfen ist: [checkliste.md](checkliste.md) (erzeugt mit `node tools/checkliste.js`). Gemeinsamer Rahmen `spiele/gemeinsam/`:
@@ -86,6 +103,7 @@ Vorschau: `.claude/launch.json` (`lernspiele` Port 8765, `lernspiele-2` Port 876
 hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Firefox mit `file://`.
 
 ## Ordner
+- `index.html`, `start/` — Startseite; `mix.html`, `mix/` — Zufallsmix
 - `spiele/` — die Spiele (je Spiel ein Unterordner mit Inhaltsdatei), `spiele/gemeinsam/` Rahmen
 - `tools/` — Testskript, Ersatz-DOM, Prüfliste
 - `docs/lernziele/` — Lernziele und Basisklassen mit Zuordnung Lernziel → Spiel
@@ -105,7 +123,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-6 | Schreibweise vierstelliger Zahlen („4500“ / „4 500“) mit Lehrmittel abgleichen | offen | Lehrplan SG schreibt „320'000“ (MA.1.A.3.e), das Lernzielblatt „30 400“ |
 | LERN-7 | Farben je Stelle nach Calcularis | erledigt 2026-10-31 (LERN_Session1) | CLAUDE.md Gestaltungsregeln |
 | LERN-8 | Einstellung Reihenfolge der Teile je Spiel oder je Spieler | erledigt 2026-10-31 (LERN_Session1) | Profil auf der Startseite |
-| LERN-9 | Mischspiel über mehrere Themen, gewichtet nach Fokus | später | Profil-Fokus ist dafür angelegt |
+| LERN-9 | Mischspiel über mehrere Themen, gewichtet nach Fokus | erledigt 2026-11-01 (LERN_Session5, Zufallsmix; Fokus als Filter, nicht als Gewicht) | rahmen.md Abschnitt 9, mix/ |
 | LERN-10 | Spielideen aus dem Lehrplan Volksschule SG, alle Fächer 1.–6. Kl. | erledigt 2026-10-31 (LERN_Session1) | docs/spielideen/lehrplan_sg_spielideen.md |
 | LERN-11 | Inhaltslisten prüfen lassen | offen (Prüfung durch Patrik oder Lehrperson, Entscheid a) | docs/pruefung/wortlisten_zur_pruefung.md (Teile 1–39); geprüfte Listen im Katalog `geprueft` |
 | LERN-12 | Timer, Zeitmessung und didaktische Statistik | erledigt 2026-10-31 (LERN_Session1) | spiel.js, auswertung.js, statistik.html |
@@ -124,3 +142,6 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-25 | Endlos-Timer: Boden je Aufgabe aus Handgriffen (F1 a, F2 a); Konstanten eichen | in Arbeit seit 2026-10-31 (LERN_Session4); gebaut, Eichung nach LERN-4 | rahmen.md Abschnitt 7, `ENDLOS_TEMPO` in spiel.js |
 | LERN-26 | Serienbremse für zufällige Merkmale (`ctx.serie`, höchstens 3 gleiche) | erledigt 2026-11-01 (LERN_Session4) | rahmen.md Abschnitt 4.2; Grenzfälle im Report LERN_Session4 |
 | LERN-27 | Gewöhnliche Runde erst nach „Weiter“ gespeichert, wenn die Eule die letzte Aufgabe auflöst | offen (Entscheid Patrik) | Report LERN_Session4, Offene Punkte |
+| LERN-28 | Statistik und Empfehlungen ausbauen (Können-Wert, Fehlermuster, Wiedervorlage, Prüfungsplan, Bericht) | offen (Entscheid Patrik) | Report LERN_Session5, Recherche |
+| LERN-29 | Name „Eulenpfad“: Markenrecherche EU (TMview) und Domain vor der Veröffentlichung | offen | Report LERN_Session5; Swissreg ohne Treffer |
+| LERN-30 | Zufallsmix in Safari/iPad und Firefox prüfen; Leiste auf dem Handy (drei Zeilen) | offen | rahmen.md Abschnitt 9 |

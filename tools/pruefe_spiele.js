@@ -204,6 +204,58 @@ const TREIBER = `
   return { runden: protokoll().length, klicks, funde, ohneVorab, gekuerzt, handgriffe };
 })`;
 
+// Zufallsmix (Entscheid M1 a): Der Treiber spielt die Mix-Seite. Das Spiel meldet „bereit“, zeichnet erst
+// auf „aufgabe“ hin und meldet jedes Ergebnis; Protokoll und Rekord schreibt es selbst nicht.
+const MIX_TREIBER = `
+(function mixTreiber(aufgaben, maxKlicks, endlos) {
+  const buehne = document.querySelector(".buehne");
+  const funde = [];
+  const melde = (art, text) => { if (funde.length < 10 && !funde.some(f => f.text === text)) funde.push({ art, text }); };
+  const neue = () => __nachrichten.splice(0);
+  const sende = d => document.dispatchEvent(Object.assign(new Event("message"), { data: { lern: "mix", ...d }, source: parent }));
+  const knoepfe = () => buehne.querySelectorAll("*").filter(b => (b.localName === "button" || b.__hoerer.click || b.__hoerer.pointerdown)
+    && !b.disabled && !b.classList.contains("link") && !b.closest(".testhilfe"));
+  __uhr.weiter(50);
+  let n = neue();
+  if (n.some(m => m.typ === "geht-nicht")) return { geht: false, funde, ergebnisse: 0, klicks: 0 };
+  if (n.length !== 1 || n[0].typ !== "bereit") melde("Mix", "statt «bereit» kam: " + JSON.stringify(n).slice(0, 120));
+  if (knoepfe().length) melde("Mix", "zeichnet eine Aufgabe, bevor der Mix sie verlangt");
+  let klicks = 0, ergebnisse = 0;
+  for (let i = 0; i < aufgaben && klicks < maxKlicks; i++) {
+    sende({ typ: "aufgabe", geschafft: i });
+    n = [];
+    while (!n.length && klicks < maxKlicks) {
+      const liste = knoepfe();
+      if (!liste.length) { __uhr.weiter(2000); n = neue(); if (!n.length && ++klicks % 50 === 0) melde("Hänger", "keine Knöpfe und keine Meldung"); continue; }
+      const vor = liste.filter(b => /Weiter|Prüfen|OK/.test(b.textContent));
+      const k = vor.length && Math.random() < 0.4 ? vor[Math.floor(Math.random() * vor.length)] : liste[Math.floor(Math.random() * liste.length)];
+      if (k.__hoerer.pointerdown) k.dispatchEvent(Object.assign(new Event("pointerdown", { bubbles: true }), { clientX: Math.random() * 600 }));
+      k.click();
+      klicks++;
+      __uhr.weiter(2000);
+      n = neue();
+    }
+    if (!n.length) break;
+    if (n.length > 1) melde("Mix", "mehrere Meldungen auf eine Aufgabe: " + n.map(m => m.typ).join(", "));
+    const m = n[0];
+    if (m.typ === "erschoepft") break;
+    if (m.typ !== "ergebnis") { melde("Mix", "unerwartete Meldung «" + m.typ + "»"); break; }
+    ergebnisse++;
+    const z = m.zeit || {};
+    if (!Number.isFinite(z.ms) || typeof z.geloest !== "boolean" || !(m.fehler >= 0) || !(m.hilfen >= 0))
+      melde("Mix", "Ergebnis unvollständig: " + JSON.stringify(m).slice(0, 160));
+    if ((m.fehler > 0) !== !!m.fehlerAufgabe && !(z.zeitUm && m.fehlerAufgabe)) melde("Mix", "Fehler und Fehleraufgabe passen nicht: " + JSON.stringify(m).slice(0, 160));
+    // Bis zur nächsten Verlangung bleibt das Spiel still.
+    __uhr.weiter(3000);
+    if (neue().length) melde("Mix", "meldet ohne neue Aufgabe weiter");
+    if (endlos && !z.geloest) break;
+  }
+  const protokoll = JSON.parse(localStorage.getItem("lernspiele:protokoll") || "[]");
+  const rekorde = JSON.parse(localStorage.getItem("lernspiele:rekorde") || "[]");
+  if (protokoll.length || rekorde.length) melde("Mix", "Spiel schreibt selbst ins Protokoll oder die Rekorde");
+  return { geht: true, funde, ergebnisse, klicks };
+})`;
+
 // Generatoren im Kontext: aufgabeErzeugen + pruefeAufgabe, falls vorhanden.
 const GENERATOR = `
 (function generator(stufe, anzahl) {
@@ -242,13 +294,20 @@ function rahmenKlassenImStil(html, reserviert) {
  * Kind, für das nur dieses Spiel und nur diese Listen freigegeben sind (Entscheid L4 a); bietet das
  * Spiel die Stufe dann nicht an, ist das kein Fehler (ergebnis.angeboten = false).
  */
-function pruefe(id, stufe, liste = null, endlos = false) {
+function pruefe(id, stufe, liste = null, endlos = false, mix = false) {
   const seitenPfad = path.join(SPIELE_DIR, id, "index.html");
   const html = fs.readFileSync(seitenPfad, "utf8");
   const body = (html.match(/<body[^>]*>([\s\S]*)<\/body>/) || [, html])[1].replace(/<script[\s\S]*?<\/script>/g, "");
-  const kontext = vm.createContext({ __seite: { html: body, search: "?stufe=" + stufe + (endlos ? "&endlos=1" : ""), seed: opt.seed }, console, URL, URLSearchParams, structuredClone });
+  const search = "?stufe=" + stufe + (endlos ? "&endlos=1" : "") + (mix ? "&mix=1&timer=1" : "");
+  const kontext = vm.createContext({ __seite: { html: body, search, seed: opt.seed }, console, URL, URLSearchParams, structuredClone });
   const ergebnis = { id, stufe, fehler: [], hinweise: [], angeboten: true };
   const lauf = (code, name, ms) => vm.runInContext(code, kontext, { filename: name, timeout: ms });
+  /** Ausnahmen, die im Spiel aufgefangen wurden (pruef_dom sammelt sie in __fehler), als Fehler dazunehmen. */
+  const mitAusnahmen = () => {
+    const laufFehler = vm.runInContext("typeof __fehler === 'undefined' ? [] : __fehler", kontext);
+    for (const f of new Set(laufFehler)) ergebnis.fehler.push("Ausnahme: " + f);
+    return ergebnis;
+  };
   try {
     lauf(DOM, "pruef_dom.js", 5000);
     lauf(liste
@@ -260,6 +319,13 @@ function pruefe(id, stufe, liste = null, endlos = false) {
          localStorage.setItem("lernspiele:spieler", JSON.stringify("Testlauf"));
          sessionStorage.setItem("lernspiele:aufsicht", "Testlauf");`, "vorbereitung", 1000);
     for (const s of skripte(seitenPfad, html)) lauf(s.code, s.name, 5000);
+    if (mix) {
+      // Mehr Aufgaben als eine gewöhnliche Runde: Spiele, die über ctx.nr eine feste Folge lesen, fallen so auf.
+      const t = lauf(MIX_TREIBER, "mix-treiber", 60000)(12, opt.maxKlicks, endlos);
+      Object.assign(ergebnis, { angeboten: t.geht, runden: t.ergebnisse, klicks: t.klicks });
+      for (const f of t.funde) (/^Hänger/.test(f.art) ? ergebnis.hinweise : ergebnis.fehler).push(`${f.art}: ${f.text}`);
+      return mitAusnahmen();
+    }
     if (!liste && stufe === STUFEN[0]) for (const k of rahmenKlassenImStil(html, lauf("LS.RAHMEN_KLASSEN.reserviert", "klassen", 1000)))
       ergebnis.fehler.push(`Stil: definiert die Rahmen-Klasse .${k} neu (docs/rahmen.md)`);
     // Bietet das Spiel die Stufe an? (Als Kind fehlen Stufen ohne freie Inhalte; dann keinen Generator aufrufen.)
@@ -283,9 +349,7 @@ function pruefe(id, stufe, liste = null, endlos = false) {
   } catch (e) {
     ergebnis.fehler.push(/timed out/.test(e.message) ? "Zeitlimit überschritten — Endlosschleife?" : `Abbruch: ${String(e.stack || e).split("\n").slice(0, 3).join(" | ")}`);
   }
-  const laufFehler = vm.runInContext("typeof __fehler === 'undefined' ? [] : __fehler", kontext);
-  for (const f of new Set(laufFehler)) ergebnis.fehler.push("Ausnahme: " + f);
-  return ergebnis;
+  return mitAusnahmen();
 }
 
 const ids = fs.readdirSync(SPIELE_DIR)
@@ -323,6 +387,27 @@ if (opt.endlos !== 0) {
       zeile.push(`${stufe}:${e.runden ?? "-"}` + (h.length ? ` [${Math.min(...h)}–${Math.max(...h)}]` : ""));
     }
     console.log(`♾ ${s.id.padEnd(24)} ${zeile.join(" ")}`);
+  }
+}
+
+// Zufallsmix: jedes Spiel einmal in Stufe 3 im Mix (mit Timer), Endlos-Spiele zusätzlich im Endlos-Mix
+// in ihrer ersten Endlos-Stufe (--mix=0 schaltet ab).
+if (opt.mix !== 0) {
+  const kat = vm.createContext({ LS: { SKALA: [] } });
+  vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", "katalog.js"), "utf8") + ";this.SPIELE = SPIELE;", kat);
+  console.log(`\nZufallsmix (${ids.length} Spiele):\n`);
+  for (const id of ids) {
+    const s = kat.SPIELE.find(x => x.id === id);
+    const faelle = [["s3", false], ...(s?.endlos?.length ? [[s.endlos[0], true]] : [])];
+    const zeile = [];
+    for (const [stufe, endlos] of faelle) {
+      const e = pruefe(id, stufe, null, endlos, true);
+      for (const f of e.fehler) console.log(`    FEHLER  ${id} ${stufe}${endlos ? " endlos" : ""} mix: ${f}`);
+      for (const h of e.hinweise) console.log(`    hinweis ${id} ${stufe}${endlos ? " endlos" : ""} mix: ${h}`);
+      fehlerZahl += e.fehler.length;
+      zeile.push(`${stufe}${endlos ? "♾" : ""}:${e.angeboten ? e.runden : "geht nicht"}`);
+    }
+    console.log(`🎲 ${id.padEnd(24)} ${zeile.join(" ")}`);
   }
 }
 

@@ -1,4 +1,4 @@
-# Lernspiele
+# Eulenpfad
 
 Kleine Lernspiele für die 1. bis 4. Klasse (Mathe, Deutsch, Englisch, NMG, Musik), ausgerichtet am
 Lehrplan Volksschule St. Gallen. Jedes Spiel ist für eine Basisklasse gebaut und hat sechs Stufen:
@@ -24,6 +24,11 @@ eine freie Stelle der Karte öffnet das Startbild des Spiels mit allen Stufen, R
 Ranglisten. Mit Timer wird die Zeit im Endlos-Modus nach jeder richtigen Aufgabe etwas knapper.
 Die Lernziel-Kürzel (z. B. MA.1.A.3) zeigen beim Antippen, was geübt wird. Der Rekord je Kind und die Rangliste stehen am Ende der
 Runde und in der Statistik.
+
+**🎲 Zufallsmix:** Oben im Tab Spiele. Mischt Aufgaben aus bis zu sechs Spielen. Einstellen lassen
+sich Fächer, Stufe („passend für mich“ oder fest), Timer, Länge (10, 20 oder ♾ Endlos) und wie oft das
+Spiel wechselt. Die Aufgaben zählen in der Statistik bei ihrem Spiel, Endlos-Serien haben eigene
+Ranglisten je Mischung.
 
 - **Empfohlen: Chrome oder Edge.** Dort teilen Startseite, Spiele und Statistik auch beim Öffnen per
   Doppelklick (`file://`) denselben Speicher, also Spieler, Profil und Fortschritt.
@@ -52,6 +57,7 @@ Statistik: den Spielstand eines Kindes zurücksetzen (alle Spiele oder ein einze
 | Ordner | Inhalt |
 |---|---|
 | `index.html`, `start/` | Startseite: Anmeldung und Tabs Spiele, Profil, Statistik, Verwaltung (je Tab eine Datei) |
+| `mix.html`, `mix/` | Zufallsmix: Einstellungen, Spiele im iframe, Protokoll und Rekord (Vertrag: `docs/rahmen.md` Abschnitt 9) |
 | `spiele/<name>/` | je Spiel eine Seite `index.html`, Inhaltslisten in eigenen Dateien (`woerter.js` …) |
 | `spiele/gemeinsam/` | Rahmen (`spiel.js`), Katalog aller Spiele mit Prüfstand (`katalog.js`), Auswertung, Stil |
 | `docs/rahmen.md` | Vertrag zwischen Rahmen und Spielen: Klassen, Farben, Schnittstelle, Freigabe |

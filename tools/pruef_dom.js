@@ -384,6 +384,9 @@ const __gesprochen = [];
 class SpeechSynthesisUtterance { constructor(text) { this.text = text; } }
 const speechSynthesis = { getVoices: () => [{ lang: "en-GB", name: "Test" }, { lang: "de-CH", name: "Test" }],
   speak: u => __gesprochen.push(u.text), cancel() {}, addEventListener() {} };
+// Zufallsmix: Das Spiel läuft „im iframe“; parent sammelt seine Nachrichten (das Testskript spielt den Mix).
+const __nachrichten = [];
+const parent = { postMessage: d => __nachrichten.push(structuredClone(d)) };
 const addEventListener = (t, fn) => document.addEventListener(t, fn);
 const removeEventListener = (t, fn) => document.removeEventListener(t, fn);
 const Node = Knoten;
