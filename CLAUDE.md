@@ -5,7 +5,8 @@ Name der Sammlung „Eulenpfad“ (Entscheid N1 a, 2026-11-01). Technische Namen
 
 **Ordner** (Entscheide P1 a, P2 a, 2026-11-01): Das Repo trägt die Reihe Eulenpfad → Lernsteig →
 Gratwanderung ([Konzept](docs/konzept_reihe_eulenpfad.md)). Je App ein Ordner, der **nur enthält,
-was online geht**: `eulenpfad/` (heute), später `lernsteig/` und `gratwanderung/`. Doku je App unter
+was online geht**: `eulenpfad/`, dazu `lernsteig/` und `gratwanderung/` (Grundgerüst seit
+LERN_Session6, Stand in `docs/lernsteig/` und `docs/gratwanderung/`). Doku je App unter
 `docs/<app>/`, Werkzeuge in `tools/`, Einstiegsseite der Reihe in `portal/`. Pfade in Code-Angaben
 (`spiele/…`, `start/…`) gelten relativ zum App-Ordner.
 
@@ -65,7 +66,7 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 - **Handover:** docs/eulenpfad/HANDOVER.md
 - **Session-Reports:** docs/eulenpfad/report/ · LERN_Session<N>_<YYYY-MM-DD>.md
 - **Changelog/Logbuch:** CHANGELOG.md
-- **Build:** — (kein Build; `eulenpfad/index.html` im Browser öffnen). Veröffentlichen: `.github/workflows/pages.yml`, nur von Hand gestartet (LERN-17)
+- **Build:** — (kein Build; `eulenpfad/index.html` im Browser öffnen). Veröffentlichen: `.github/workflows/pages.yml` auf `https://patrikneunteufel.github.io/Lernspiele/`, von selbst bei jedem Push auf master, der `portal/` oder einen App-Ordner ändert (W1 a), sonst von Hand
 - **Tests:** — (manuell im Browser: Desktop, Tablet 768 px, Handy 375 px; jede Kombination Spiel × Stufe lädt ohne Konsolenfehler; Aufgabengeneratoren je Stufe mit einigen tausend Zufallsaufgaben auf Zahlenraum und gültige Lösung prüfen)
 - **Sensible Daten:** Namen, Alter und Lernstand der Kinder nur im Browser (localStorage, Schlüssel `lernspiele:*`) und in selbst gesicherten JSON-Dateien — solche Dateien nie ins Repo; keine Namen, Fotos oder Handschrift von Kindern in Spielen/Commits; Lernzielblätter liegen nur als Material in material/
 - **Bewusste Vereinfachungen:** —

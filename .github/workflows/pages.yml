@@ -1,12 +1,21 @@
 # Veröffentlichen auf GitHub Pages (Entscheide P1 a, P2 a; LERN-17).
 # Online geht nur die Einstiegsseite (portal/) und die App-Ordner, in derselben Ordnerstruktur wie im
 # Repo, damit die relativen Verweise lokal und online gleich gelten; die Wurzel leitet nur auf portal/
-# weiter. Doku, Werkzeuge und
-# Material bleiben draussen. Nur von Hand starten (Actions → Pages → Run workflow), und erst nach dem
-# Datenschutz-Scan des Repos; in den Repo-Einstellungen unter Pages die Quelle „GitHub Actions“ wählen.
+# weiter. Doku, Werkzeuge und Material bleiben draussen. In den Repo-Einstellungen unter Pages ist
+# die Quelle „GitHub Actions“ gewählt.
+# Start (Entscheid W1 a, nach dem Datenschutz-Scan LERN_Session6): von selbst bei jedem Push auf master,
+# der Veröffentlichtes ändert — reine Doku-Commits lösen nichts aus —, und weiter von Hand.
 name: Pages
 
 on:
+  push:
+    branches: [master]
+    paths:
+      - "portal/**"
+      - "eulenpfad/**"
+      - "lernsteig/**"
+      - "gratwanderung/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:

@@ -65,6 +65,7 @@ Statistik: den Spielstand eines Kindes zurücksetzen (alle Spiele oder ein einze
 | `eulenpfad/mix.html`, `mix/` | Zufallsmix: Einstellungen, Spiele im iframe, Protokoll und Rekord (Vertrag: `docs/eulenpfad/rahmen.md` Abschnitt 9) |
 | `eulenpfad/spiele/<name>/` | je Spiel eine Seite `index.html`, Inhaltslisten in eigenen Dateien (`woerter.js` …) |
 | `eulenpfad/spiele/gemeinsam/` | Rahmen (`spiel.js`), Abgleich (`abgleich.js`), Katalog aller Spiele mit Prüfstand (`katalog.js`), Auswertung, Stil |
+| `lernsteig/`, `gratwanderung/` | Grundgerüst der zweiten und dritten App (Startseite, noch ohne Übungen); Stand in `docs/lernsteig/`, `docs/gratwanderung/` |
 | `portal/` | Einstiegsseite der Reihe, verlinkt die Apps (lokal `portal/index.html` öffnen; online leitet die Wurzel dorthin) |
 | `docs/konzept_reihe_eulenpfad.md` | Konzept der Reihe Eulenpfad → Lernsteig → Gratwanderung |
 | `docs/eulenpfad/rahmen.md` | Vertrag zwischen Rahmen und Spielen: Klassen, Farben, Schnittstelle, Freigabe, Abgleich |
@@ -74,7 +75,7 @@ Statistik: den Spielstand eines Kindes zurücksetzen (alle Spiele oder ein einze
 | `docs/eulenpfad/pruefung/` | Prüfliste der Wort- und Inhaltslisten für Eltern oder Lehrperson |
 | `docs/eulenpfad/HANDOVER.md`, `report/` | Stand und Sitzungsberichte |
 | `tools/` | Prüfskripte (Node.js) |
-| `.github/workflows/pages.yml` | Veröffentlichen auf GitHub Pages: nur `portal/` und die App-Ordner, nur von Hand gestartet |
+| `.github/workflows/pages.yml` | Veröffentlichen auf GitHub Pages (<https://patrikneunteufel.github.io/Lernspiele/>): nur `portal/` und die App-Ordner, von selbst bei jedem Push, der sie ändert |
 
 ## Prüfen
 
