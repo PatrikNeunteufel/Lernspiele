@@ -2,23 +2,24 @@
 // Zahlen ersetzt: 'zahlen' gibt Bereiche [min, max], 'abgeleitet' berechnet weitere Zahlen.
 // 'richtig' ist die passende Rechnung, 'falsch' sind Ablenker; „_“ steht für die gesuchte Zahl.
 // 'ergebnis' ist die Lösung. 'unwichtig' nennt eine Zahl, die zum Rechnen nicht gebraucht wird.
+// Kann eine gezeigte Zahl 1 sein, braucht der Satz die Einzahl: {b:wird|werden} wählt nach b.
 // 'stufe' 1–6 nach der Skala mit Basisklasse 2: 1 Bilder bis 10 (1. Klasse), 2 Text bis 20, 3 bis 100
 // auch mit mal, 4 Platzhalter, 5 geteilt und Platzhalter (3. Klasse), 6 Ausrechnen mit unwichtiger Angabe.
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
 //
 // Inhaltslisten (Entscheid L4 a): Die Geschichten einer Stufe bilden eine Liste, die die Aufsicht
-// einzeln freigibt (Zuordnung in GESCHICHTEN_LISTEN). Der Prüfstand steht im Katalog
-// (spiele/gemeinsam/katalog.js, Eintrag rechengeschichten, Feld listen). Jede Spielstufe braucht
+// einzeln freigibt (Zuordnung in GESCHICHTEN_LISTEN). Der Prüfstand steht in
+// spiele/gemeinsam/pruefstand.js (Schlüssel rechengeschichten/<liste>). Jede Spielstufe braucht
 // die Liste ihrer Stufe.
 
 const GESCHICHTEN_LISTEN = { 1: "bilder-bis-10", 2: "text-bis-20", 3: "bis-100", 4: "platzhalter", 5: "verteilen", 6: "unwichtige-angabe" };
 
 const GESCHICHTEN = [
   // Stufe 1: mit Bildern, bis 10
-  { stufe: 1, bild: "🍎", art: "dazu", text: "Im Korb liegen {a} Äpfel. Es kommen {b} dazu.", zahlen: { a: [1, 6], b: [1, 4] }, richtig: "a + b", falsch: ["a − b", "a + a"], ergebnis: "a + b" },
-  { stufe: 1, bild: "🐟", art: "dazu", text: "Im Teich schwimmen {a} Fische. {b} Fische kommen dazu.", zahlen: { a: [2, 6], b: [1, 4] }, richtig: "a + b", falsch: ["a − b", "b + b"], ergebnis: "a + b" },
-  { stufe: 1, bild: "🎈", art: "weg", text: "Es sind {a} Ballone. {b} fliegen weg.", zahlen: { b: [1, 4], d: [1, 5] }, abgeleitet: { a: "b + d" }, richtig: "a − b", falsch: ["a + b", "b − b"], ergebnis: "a − b" },
-  { stufe: 1, bild: "🍪", art: "weg", text: "Auf dem Teller liegen {a} Guetsli. {b} werden gegessen.", zahlen: { b: [1, 4], d: [1, 5] }, abgeleitet: { a: "b + d" }, richtig: "a − b", falsch: ["a + b", "a + a"], ergebnis: "a − b" },
+  { stufe: 1, bild: "🍎", art: "dazu", text: "Im Korb {a:liegt|liegen} {a} {a:Apfel|Äpfel}. Es {b:kommt|kommen} {b} dazu.", zahlen: { a: [1, 6], b: [1, 4] }, richtig: "a + b", falsch: ["a − b", "a + a"], ergebnis: "a + b" },
+  { stufe: 1, bild: "🐟", art: "dazu", text: "Im Teich schwimmen {a} Fische. {b} {b:Fisch kommt|Fische kommen} dazu.", zahlen: { a: [2, 6], b: [1, 4] }, richtig: "a + b", falsch: ["a − b", "b + b"], ergebnis: "a + b" },
+  { stufe: 1, bild: "🎈", art: "weg", text: "Es sind {a} Ballone. {b} {b:fliegt|fliegen} weg.", zahlen: { b: [1, 4], d: [1, 5] }, abgeleitet: { a: "b + d" }, richtig: "a − b", falsch: ["a + b", "b − b"], ergebnis: "a − b" },
+  { stufe: 1, bild: "🍪", art: "weg", text: "Auf dem Teller liegen {a} Guetsli. {b} {b:wird|werden} gegessen.", zahlen: { b: [1, 4], d: [1, 5] }, abgeleitet: { a: "b + d" }, richtig: "a − b", falsch: ["a + b", "a + a"], ergebnis: "a − b" },
   // Stufe 2: Text, bis 20
   { stufe: 2, text: "{a} Kinder spielen Fangen, {b} Kinder spielen Ball. Wie viele Kinder spielen?", zahlen: { a: [4, 12], b: [3, 8] }, richtig: "a + b", falsch: ["a − b", "a + a"], ergebnis: "a + b" },
   { stufe: 2, text: "Im Bus sitzen {a} Leute. An der Haltestelle steigen {b} aus. Wie viele sind noch im Bus?", zahlen: { b: [2, 8], d: [3, 10] }, abgeleitet: { a: "b + d" }, richtig: "a − b", falsch: ["a + b", "b − a"], ergebnis: "a − b" },

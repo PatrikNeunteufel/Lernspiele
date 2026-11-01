@@ -21,6 +21,21 @@ function schalterSymbol(art, an) {
   return box.firstChild;
 }
 
+// Suche im Tab Spiele (Wunsch Patrik, LERN_Session6): bleibt beim Neuzeichnen erhalten, nicht gespeichert.
+let spielSuche = "";
+let spielSucheTippt = false; // nach dem Neuzeichnen das Suchfeld wieder fokussieren
+
+/** Suchfeld, das bei jeder Eingabe neu zeichnet und danach den Fokus zurückholt. */
+function suchFeld(wert, setze, neu, platzhalter) {
+  const feld = LS.el("input", { class: "feld suche", type: "search", placeholder: platzhalter, "aria-label": platzhalter, value: wert });
+  feld.addEventListener("input", () => { setze(feld.value); spielSucheTippt = true; neu(); });
+  if (spielSucheTippt) {
+    spielSucheTippt = false;
+    requestAnimationFrame(() => { feld.focus(); feld.setSelectionRange(feld.value.length, feld.value.length); });
+  }
+  return feld;
+}
+
 function zeichneSpiele(box, neu) {
   const { el } = LS;
   const name = LS.aktuellerSpieler();
@@ -47,6 +62,10 @@ function zeichneSpiele(box, neu) {
   const klasse = Number(p.klasse) || null;
   const nurKlasse = !aufsicht && klasse && p.meineKlasse !== false;
   if (!aufsicht && klasse) faecher.append(chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), `${klasse}. Klasse`));
+  // Für die Aufsicht: nur, was noch zu prüfen ist — Spiel nicht angesehen oder eine eigene Inhaltsliste ungeprüft.
+  const zuPruefen = s => LS.spielZuPruefen(s.id) || LS.spielListen(s.id).some(l => !l.von && !l.geprueft);
+  const nurZuPruefen = aufsicht && filter.zuPruefen;
+  if (aufsicht) faecher.append(chip("🔍 Zu prüfen", nurZuPruefen, setze("zuPruefen", !filter.zuPruefen), `${SPIELE.filter(zuPruefen).length}`));
   const zeilen = [faecher];
   if (filter.fach !== "alle") {
     zeilen.push(el("div", { class: "filter-zeile" }, el("span", { text: "Thema" }),
@@ -68,14 +87,20 @@ function zeichneSpiele(box, neu) {
     && (filter.thema === "alle" || s.thema === filter.thema)
     && (filter.stufe === "alle" || s.stufen.includes(filter.stufe))
     && (!filter.fokus || s.lernziele.some(l => fokus.includes(l.lz)))
-    && (!nurKlasse || Math.abs(s.klasse - klasse) <= 1);
+    && (!nurKlasse || Math.abs(s.klasse - klasse) <= 1)
+    && (!nurZuPruefen || zuPruefen(s))
+    && (!treffer || treffer.has(s.id));
+  // Suche (Entscheid SU1 a): Treffer nach Relevanz, sonst Fokus-Spiele zuerst und Katalog-Reihenfolge.
+  const treffer = spielSuche.trim() ? new Map((LS.suche(spielSuche) || []).map((t, i) => [t.id, { ...t, i }])) : null;
   const imFokus = s => s.lernziele.some(l => fokus.includes(l.lz));
-  // Fokus-Spiele zuerst, sonst Katalog-Reihenfolge.
-  const auswahl = SPIELE.filter(passt).sort((a, b) => Number(imFokus(b)) - Number(imFokus(a)));
+  const auswahl = SPIELE.filter(passt).sort(treffer
+    ? (a, b) => treffer.get(a.id).i - treffer.get(b.id).i
+    : (a, b) => Number(imFokus(b)) - Number(imFokus(a)));
 
   // ----- Werkzeuge: Ansicht und alle auf/zu -----
   const gruppenIds = ["favoriten", ...FAECHER.map(f => "fach:" + f), ...THEMEN.map(t => "thema:" + t.id)];
   box.append(el("div", { class: "werkzeuge" },
+    suchFeld(spielSuche, v => { spielSuche = v; }, neu, "🔍 Spiel suchen"),
     chip("▦ Kacheln", p.ansicht !== "kompakt", () => speichere({ ansicht: "kacheln" }), null, "klein"),
     chip("☰ Kompakt", p.ansicht === "kompakt", () => speichere({ ansicht: "kompakt" }), null, "klein"),
     chip("Alle auf", false, () => speichere({ zu: [] }), null, "klein"),
@@ -84,8 +109,10 @@ function zeichneSpiele(box, neu) {
   /** Auf- und zuklappbare Gruppe; der Zustand landet im Profil. */
   function gruppe(id, titel, anzahl, ...inhalt) {
     const d = el("details", { class: "gruppe" }, el("summary", {}, el("span", { text: titel }), el("span", { class: "anzahl", text: `${anzahl}` })), ...inhalt);
-    d.open = !zu.has(id);
+    // Während einer Suche sind alle Gruppen mit Treffern offen; das ändert das gespeicherte Zuklappen nicht.
+    d.open = spielSuche ? true : !zu.has(id);
     d.addEventListener("toggle", () => {
+      if (spielSuche) return;
       d.open ? zu.delete(id) : zu.add(id);
       LS.speichereProfil(name, { zu: [...zu] });
     });
@@ -109,7 +136,10 @@ function zeichneSpiele(box, neu) {
     // Lernziel-Kürzel: Antippen oder Zeigen blendet den Klartext ein (auch auf dem Tablet, wo es kein title gibt).
     const marken = s.lernziele.map(l => el("button", { type: "button", class: "marke tipp" + (fokus.includes(l.lz) ? " fokus" : ""),
       "data-tipp": `${l.lz}: ${ziel(l.lz)}`, "aria-label": `Lernziel ${l.lz}: ${ziel(l.lz)}`, text: (fokus.includes(l.lz) ? "⭐ " : "") + l.lz }));
-    if (aufsicht && !frei) marken.unshift(el("span", { class: "marke warnung", text: "🔒 für Kinder nicht sichtbar" }));
+    if (aufsicht && !frei) marken.unshift(el("span", { class: "marke warnung", text: `🔒 für Kinder nicht sichtbar: ${LS.sperrGrund(s.id)}` }));
+    // Treffer über ein Feld, das nicht auf der Karte steht: sagen, wo (Entscheid SU1 a).
+    const grund = treffer?.get(s.id)?.grund;
+    if (grund) marken.push(el("span", { class: "marke such-grund", text: `🔍 gefunden ${grund}` }));
     const schalter = (an, art, text, onclick) => el("button", { type: "button", class: "karten-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
       "aria-label": text, title: text, onclick }, schalterSymbol(art, an));
     // Schalter in einer eigenen schmalen Leiste oben rechts; darunter hat der Name die volle Breite.
@@ -146,10 +176,11 @@ function zeichneSpiele(box, neu) {
     return k;
   }
 
-  // ----- Favoriten, dann Fach → Thema -----
-  const favoriten = auswahl.filter(s => p.favoriten.includes(s.id));
+  // ----- Bei einer Suche: eine Liste, beste Treffer zuerst; sonst Favoriten, dann Fach → Thema -----
+  if (treffer && auswahl.length) box.append(el("h2", { class: "treffer-titel", text: `🔍 ${auswahl.length} Treffer, beste zuerst` }), gitter(auswahl));
+  const favoriten = treffer ? [] : auswahl.filter(s => p.favoriten.includes(s.id));
   if (favoriten.length) box.append(gruppe("favoriten", "⭐ Favoriten", favoriten.length, gitter(favoriten)));
-  for (const fach of FAECHER) {
+  for (const fach of treffer ? [] : FAECHER) {
     const themen = THEMEN.filter(t => t.fach === fach)
       .map(t => ({ t, spiele: auswahl.filter(s => s.thema === t.id) }))
       .filter(x => x.spiele.length);

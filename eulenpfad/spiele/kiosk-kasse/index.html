@@ -40,6 +40,8 @@
 <script src="../gemeinsam/spiel.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
 <script>
 "use strict";
 // Lehrplan SG MA.3.A.2: b ganze Frankenbeträge bis 20 Fr. legen, addieren, subtrahieren;
@@ -69,6 +71,8 @@ function betrag(rp) {
   if (!fr) return `${r} Rp.`;
   return r ? `${fr} Fr. ${r} Rp.` : `${fr} Fr.`;
 }
+/** Verb passend zum Betrag: Einzahl bei genau 1 Fr. oder 1 Rp. („Das ist 1 Fr.“), sonst Mehrzahl. */
+const verb = (rp, eins, mehr) => (rp === 100 || rp === 1 ? eins : mehr);
 
 function geldKnopf(g) {
   const k = el("button", { type: "button", class: `geld ${g.art}${g.gelb ? " gelb" : ""}${g.art === "note" ? ` note-${g.rp / 100}` : ""}`, text: g.text, "aria-label": g.text });
@@ -220,7 +224,9 @@ LS.spiel({
         if (fertig) return;
         const summe = gelegt.reduce((s, x) => s + x, 0);
         if (summe === soll) { fertig = true; ctx.richtig(); return; }
-        ctx.falsch(satz(`In der Kasse liegen ${betrag(summe)}. ${summe < soll ? `Es fehlen noch ${betrag(soll - summe)}.` : `Das sind ${betrag(summe - soll)} zu viel.`} Tipp auf ein Stück in der Kasse, um es zurückzunehmen.`),
+        ctx.falsch(satz(`In der Kasse ${verb(summe, "liegt", "liegen")} ${betrag(summe)}. ${summe < soll
+          ? `Es ${verb(soll - summe, "fehlt", "fehlen")} noch ${betrag(soll - summe)}.`
+          : `Das ${verb(summe - soll, "ist", "sind")} ${betrag(summe - soll)} zu viel.`} Tipp auf ein Stück in der Kasse, um es zurückzunehmen.`),
           loesung);
         if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
       });
@@ -236,7 +242,7 @@ LS.spiel({
       for (const g of stuecke) { const k = geldKnopf(g); k.disabled = true; haufen.append(k); }
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie viel Geld ist das?" }), haufen);
       betragEingabe(soll, rp => rp < soll ? "Zu wenig. Beginne mit den Noten und den grössten Münzen." : "Zu viel. Zähl jedes Stück nur einmal.",
-        `Das sind ${betrag(soll)}.`);
+        `Das ${verb(soll, "ist", "sind")} ${betrag(soll)}.`);
       return;
     }
 
@@ -290,7 +296,7 @@ LS.spiel({
         const summe = gelegt.reduce((s, x) => s + x, 0);
         if (summe === soll && gelegt.length === kuerzest.length) { fertig = true; ctx.richtig(); return; }
         ctx.falsch(summe !== soll
-          ? satz(`Das sind ${betrag(summe)}. ${summe < soll ? "Das ist zu wenig." : "Das ist zu viel."} Rechne: Wie viel fehlt vom Preis bis zur Note?`)
+          ? satz(`Das ${verb(summe, "ist", "sind")} ${betrag(summe)}. ${summe < soll ? "Das ist zu wenig." : "Das ist zu viel."} Rechne: Wie viel fehlt vom Preis bis zur Note?`)
           : "Der Betrag stimmt! Aber es geht mit weniger Stücken: Tausche kleine Münzen gegen grössere.",
           loesung);
         if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
@@ -324,8 +330,9 @@ LS.spiel({
         onOk(z) {
           if (z === auf.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
           anzeige.classList.add("falsch");
-          ctx.falsch(z * auf.stueck > auf.budget ? satz(`${z} Stück kosten ${betrag(z * auf.stueck)} — das reicht nicht.`)
-            : satz(`${z} Stück kosten ${betrag(z * auf.stueck)}. Reicht das Geld noch für eines mehr?`),
+          const kosten = z === 1 ? "kostet" : "kosten";
+          ctx.falsch(z * auf.stueck > auf.budget ? satz(`${z} Stück ${kosten} ${betrag(z * auf.stueck)} — das reicht nicht.`)
+            : satz(`${z} Stück ${kosten} ${betrag(z * auf.stueck)}. Reicht das Geld noch für eines mehr?`),
             loesung);
           if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
         },

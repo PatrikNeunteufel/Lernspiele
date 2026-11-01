@@ -50,7 +50,8 @@ untereinander.
 | Runde | `fortschritt`, `zeitleiste`, `zeitbalken`, `testhilfe` | Punkte je Aufgabe, Timer, Testhilfen |
 | Sterne | `sterne`, `sterne-klein`, `aus`, `konfetti`, `flug` | Belohnung und Animation |
 | Angemeldet | `spieler-zeile` | „Du spielst als …“ im Startbild; angemeldet wird auf der Startseite |
-| Stufenwahl | `stufen`, `stufe`, `fuer`, `timer-zeile`, `timer-schalter`, `reihenfolge-zeile`, `reihenfolge-schalter`, `leise` | Startbild des Spiels |
+| Stufenwahl | `stufen`, `stufe`, `fuer`, `timer-zeile`, `timer-schalter`, `option-zeile`, `option-schalter`, `leise` |
+| Entwickler-Modus | `entwickler-leiste`, `entwickler-feld` | Leiste unten im Spiel (Abschnitt 11) | Startbild des Spiels |
 
 **Erlaubt:** reservierte Klassen eingeschachtelt in einer eigenen Klasse. `.uhr .mitte` trifft nur
 die Uhr. `.knopf` darf ein Spiel als Klasse an eigene Knöpfe hängen, aber nicht umgestalten.
@@ -122,6 +123,7 @@ LS.spiel({
 |---|---|
 | `ctx.stufe`, `ctx.nr`, `ctx.flaeche` | Stufe (`s1`–`s6`), Nummer der Aufgabe, Fläche zum Zeichnen |
 | `ctx.geordnet` | Bausteine geordnet zeigen? Nur Spiele mit `reihenfolge: true` im Katalog. Eingestellt auf der Stufenwahl (Schalter „🔀 Teile“, Entscheid R1 a) oder im Profil; die Wahl je Spiel schlägt die globale, „nach Stufe“ heisst Stufe 1–3 geordnet. Im Zufallsmix gilt dieselbe Einstellung. |
+| `ctx.option(id)` | Wert einer **Spieloption** (Entscheid UE1 a). Ein Spiel beschreibt sie in `def.optionen = { <id>: { titel, werte: { stufe: "nach Stufe", …: Text }, erklaerung: { <wert>: Text }, nachStufe(stufe) → Wert } }`; der Rahmen zeigt je Option einen Schalter auf der Stufenwahl (`option-zeile`), speichert die Wahl je Spieler und Spiel (Profil `optionen`) und schreibt sie ins Protokoll. „nach Stufe“ ist schon aufgelöst. Beispiel: Schriftlich-Werkstatt, `uebertrag`: `zeigen` oder `selbst`. |
 | `ctx.richtig(lob?)` | Aufgabe gelöst |
 | `ctx.falsch(hinweis, loesungText?)` | Fehlversuch. Der Hinweis darf die Lösung **nicht verraten** ✔. Mit `loesungText` zeigt der Rahmen nach dem dritten Fehlversuch die Lösung und einen Weiter-Knopf. Ohne ihn bleibt die Aufgabe offen; das Spiel hilft dann selbst (Zahlenmauer, Malkreuz). |
 | `ctx.loesung(text)` | Lösung gleich beim Zeichnen nennen. Sie erscheint nur beim Testspieler hinter „🔑“. **Pflicht in jeder Aufgabe** ✔. Die Bausteine rufen sie selbst auf. Den Text in **eine** Konstante legen, die auch `ctx.falsch` bekommt. |
@@ -199,14 +201,16 @@ Entscheide Patrik L1 a bis L4 a, 2026-10-31.
 
   Frühere Testspieler (`test: true`) werden beim Lesen zur Aufsicht.
 
-**Freigabe.** Der Prüfstand steht im Repo, die Freigabe gilt je Gerät. Standardmässig frei ist,
-was nichts mehr zu prüfen hat (Präzisierung Patrik 2026-10-31).
+**Freigabe.** Der Prüfstand steht im Repo (`spiele/gemeinsam/pruefstand.js`, gesetzt im
+Entwickler-Modus, Abschnitt 11), die Freigabe gilt je Gerät. Standardmässig frei ist, was nichts mehr
+zu prüfen hat (Präzisierung Patrik 2026-10-31).
 - Ein neues Spiel trägt im Katalog `neu: "<Sitzung>"` und ist gesperrt, bis es angesehen ist:
-  `geprueft: { am, von }`, das heisst auf Desktop, Tablet und Handy durchgespielt. Spiele ohne `neu`
-  sind frei.
+  `PRUEFSTAND.spiele[<id>] = { am, von }`, das heisst auf Desktop, Tablet und Handy durchgespielt.
+  Spiele ohne `neu` sind frei.
 - Offene Annahmen zum Lehrmittel (`docs/lernziele/`) sperren nicht: Sie betreffen die Darstellung,
   nicht die fachliche Richtigkeit (Entscheid Patrik F1 a, 2026-10-31). Sie stehen in der Checkliste.
-- Spiele mit Inhaltslisten tragen zusätzlich `listen: { <liste-id>: { name, geprueft } }`.
+- Spiele mit Inhaltslisten tragen zusätzlich `listen: { <liste-id>: { name } }`; geprüft ist eine Liste
+  mit `PRUEFSTAND.listen["<spiel>/<liste>"] = { am, von }`.
   - **Verweis:** Nutzt ein Spiel die Liste eines anderen (dieselben Wörter oder Sätze), steht dort nur
     `{ von: "<spiel>/<liste>" }`. Prüfstand und Freigabe gelten einmal, an der Quelle; die Verwaltung
     zeigt den Verweis ohne eigenen Schalter. Beispiele: Blitzlesen und Buchstaben-Zwillinge nutzen
@@ -225,7 +229,11 @@ was nichts mehr zu prüfen hat (Präzisierung Patrik 2026-10-31).
 die Tabs Spiele, Profil, Statistik und, nur für die Aufsicht, Verwaltung mit den Untertabs Konten,
 Freigabe und Abgleich. Der Tab steht in der Adresse (`#statistik`, Untertab `#verwaltung/abgleich`;
 ohne Untertab Konten). `#anmelden` meldet ab und führt zur Anmeldung; dorthin verweist auch
-„wechseln“ im Spiel. Der Filter „🎒 Meine Klasse“ (Entscheide K1 a, K2 a) zeigt einem Kind mit
+„wechseln“ im Spiel. Die **Suche** im Tab Spiele und in der Freigabe (Entscheid SU1 a, `LS.suche`) ordnet
+nach Relevanz: Feldgewichte Name 6, Lernziel-Kürzel 4, Beschreibung 3, Inhaltslisten 2, Thema 1;
+Wortanfang vor Wortteil, genaue Umlaute vor ä = a; ein Tippfehler nur im Namen ab 5 Buchstaben und nie bei
+Kürzeln mit Ziffern; jedes Suchwort muss passen. Während einer Suche steht statt der Gruppen eine Liste,
+beste Treffer zuerst; wer nur über Thema oder Inhaltsliste passt, trägt „🔍 gefunden …“. Der Filter „🎒 Meine Klasse“ (Entscheide K1 a, K2 a) zeigt einem Kind mit
 Klasse im Profil nur Spiele, deren Basisklasse höchstens eine Klasse daneben liegt, die also eine
 Stufe genau für seine Klasse haben. Er ist vorgegeben an, das Kind darf ihn ausschalten (Profil-Feld
 `meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Auf jeder Spielkarte schalten ⏱ (Timer dieses Spiels, dieselbe Einstellung wie
@@ -278,6 +286,9 @@ Vorgabe Patrik 2026-10-31.
 ## 8. Was das Testskript dazu prüft
 
 `node tools/pruefe_spiele.js [ids] [--seed=N]` prüft:
+- zehn feste Beispielsuchen mit erwarteten Treffern, Reihenfolge und Grund (`suche` als id: nur diese);
+- Hinweis „Einzahl?“, wenn im sichtbaren Text die Zahl 1 bei einem Verb in der Mehrzahl steht („1 werden
+  gegessen“, „Es kommen 1 dazu“, „1 Stück kosten“) — zum Nachsehen, kein Fehler;
 - jede Stufe lädt und lässt sich durchspielen;
 - kein NaN, undefined oder null im sichtbaren Text;
 - die Generatoren mit `pruefeAufgabe`;
@@ -383,3 +394,34 @@ Seite lädt es direkt nach `spiel.js`.
   zwei bzw. drei Geräte, Zwischen- und Endstand, Löschen und neu Anlegen, Freigabe, Neuzeichnen der
   Rangliste. Ungeprüft: `file://`, echte Netzwerk- und Cloud-Ordner, Uhren, die zwischen Geräten
   abweichen (LERN-31).
+
+## 11. Entwickler-Modus
+
+Entscheide Patrik E1 a, E2 a, E3 a, 2026-11-01 (LERN_Session6). Code in `spiele/gemeinsam/entwicklung.js`
+(`LS.entwicklung`) und `tools/entwickler_server.py`.
+
+- **Nur lokal:** Er funktioniert nur im lokalen Repo mit laufendem Entwickler-Server
+  (`python tools/entwickler_server.py`, dann `http://localhost:8765/eulenpfad/`). Der Server liefert das
+  Repo aus wie `http.server` (ohne Zwischenspeicher, ohne `entwickler.key` und `.git`) und schreibt nur
+  zwei Dateien: `spiele/gemeinsam/pruefstand.js` und `docs/eulenpfad/bemerkungen.json`.
+- **Schlüssel:** Im Klartext nur in `entwickler.key` in der Repo-Wurzel (von Git ausgeschlossen); in
+  `entwicklung.js` steht nur `SCHLUESSEL_HASH` (SHA-256 mit Salz). Die Aufsicht schaltet unter Verwaltung →
+  Entwicklung je Gerät frei (`lernspiele:entwickler`, nicht abgeglichen); der Server prüft den Schlüssel
+  bei jedem Schreiben noch einmal. Neuer Schlüssel: `python tools/entwickler_server.py --neuer-schluessel`.
+- **Zusätze**, eingeschaltet über einen eigenen Schalter, nur für die angemeldete Aufsicht:
+  - in jedem Spiel eine Leiste unten (`entwickler-leiste`): „✓ Spiel angesehen“ und „📝 Bemerkung“ mit
+    Spiel, Stufe und laufender Aufgabe (`LS.spielStand()`), ob Kinder das Spiel sehen (`LS.sperrGrund`), und
+    aufklappbar die Inhaltslisten des Spiels, je mit „ansehen“ und „✓ geprüft“ (`entwickler-listen`);
+  - in der Freigabe je Spiel „✓ angesehen“, je Liste „✓ geprüft“ und „ansehen“: die Einträge der Liste
+    aus `docs/eulenpfad/pruefung/listen.json` (vom Prüflisten-Generator), je Eintrag eine Bemerkung;
+  - unter Verwaltung → Entwicklung alle Bemerkungen, offene zuerst.
+- **Ohne Server** bleiben die Knöpfe sichtbar und melden „Entwickler-Server nicht gefunden“ samt Startbefehl.
+  Antwortet auf der Adresse ein anderer Server (etwa ein altes `python -m http.server`), melden sie das.
+- **Port allein:** Unter Windows teilen sich Python-Server sonst still denselben Port, und Anfragen landen
+  zufällig beim falschen. Der Entwickler-Server belegt den Port deshalb exklusiv und bricht ab, wenn er
+  schon belegt ist (`python tools/entwickler_server.py 8770` für einen anderen Port).
+- **Bemerkungen** (`docs/eulenpfad/bemerkungen.json`): `{ nr, zeit, status: "offen" | "erledigt …", text,
+  von, spiel?, stufe?, liste?, eintrag?, aufgabe?, seite }`. Claude liest sie zu Beginn einer Sitzung, behebt
+  sie und setzt den Status. Keine Namen von Kindern hineinschreiben: die Datei liegt im öffentlichen Repo.
+- **Vorrang:** Was hier geprüft wird, gilt nach Commit und Push für alle; eine lokale Sperre der Aufsicht
+  (`lernspiele:freigabe`) schlägt den Prüfstand weiterhin.

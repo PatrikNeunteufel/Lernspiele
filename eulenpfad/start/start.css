@@ -71,6 +71,10 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
 .chip.klein { font-size: 15px; min-height: 38px; padding: 6px 12px; }
 .chip .tipp { font-size: 12px; font-weight: 800; margin-left: 4px; opacity: .8; }
 .werkzeuge { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
+/* Suchfeld (Tab Spiele, Freigabe) */
+input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit; font-size: 16px; padding: 6px 12px;
+  border: 3px solid var(--rand); border-radius: 12px; background: #fff; }
+.werkzeuge input.suche { margin-right: auto; }
 
 /* ---------- Spiele: Gruppen (Favoriten, Fach, Thema) ---------- */
 
@@ -133,6 +137,13 @@ button.marke { border: none; font-family: inherit; color: var(--text); cursor: h
   padding: 6px 10px; border-radius: 8px; box-shadow: var(--schatten);
 }
 .marke.warnung { background: var(--hinweis-hell); color: #9a4b00; }
+/* Suche (Entscheid SU1 a): Grund eines Treffers, Titel der Trefferliste */
+.marke.such-grund { background: #e8f4ff; color: #22577a; font-weight: 700; }
+td .marke.such-grund { display: inline-block; margin-top: 4px; }
+/* Entwickler: Listenname öffnet die Liste; geprüfte grün */
+.liste-link { background: none; border: none; padding: 0; font: inherit; color: var(--knopf); text-decoration: underline; cursor: pointer; text-align: left; }
+.liste-link.geprueft { color: #1f8a4c; }
+.treffer-titel { font-size: 20px; margin: 4px 0 12px; }
 
 .stufenknoepfe { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 6px; }
 .stufenknopf {
@@ -225,8 +236,7 @@ button.marke { border: none; font-family: inherit; color: var(--text); cursor: h
 
 /* ---------- Verwaltung ---------- */
 
-.verwaltung .zeile-knoepfe { display: flex; flex-wrap: wrap; gap: 6px; }
-.schalter { border: none; border-radius: 999px; padding: 6px 14px; min-height: 40px; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; background: #fff; box-shadow: 0 3px 0 var(--rand); }
+.verwaltung .zeile-knoepfe { display: flex; flex-wrap: wrap; gap: 6px; }.schalter { border: none; border-radius: 999px; padding: 6px 14px; min-height: 40px; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; background: #fff; box-shadow: 0 3px 0 var(--rand); }
 .schalter.frei { background: var(--gut-hell); color: #15803d; }
 .schalter.gesperrt { background: var(--hinweis-hell); color: #9a4b00; }
 .pruefstand { font-size: 13px; font-weight: 800; white-space: nowrap; }

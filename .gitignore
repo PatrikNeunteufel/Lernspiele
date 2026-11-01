@@ -9,3 +9,7 @@ material/
 
 # Gesicherte Spielerdaten aus der Statistik (Namen und Lernstand der Kinder) gehören nicht ins Repo.
 lernspiele-*.json
+
+# Entwickler-Schlüssel im Klartext (Entscheid E2 a): nur lokal; im Repo steht nur sein Hash
+# (eulenpfad/spiele/gemeinsam/entwicklung.js). Neu erzeugen: python tools/entwickler_server.py --neuer-schluessel
+entwickler.key

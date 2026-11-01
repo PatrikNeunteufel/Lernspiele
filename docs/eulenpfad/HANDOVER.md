@@ -1,68 +1,38 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
-**2026-11-01, nach LERN_Session5** ([Report](report/LERN_Session5_2026-11-01.md)):
-- **Name:** „Eulenpfad“ (Entscheid N1 a). Swissreg ohne Treffer; EU-Recherche offen (LERN-29).
-  Technische Namen (`lernspiele:*`, `lernspiele-*.json`) bleiben.
-- **Spiele:** 84 Spiele in 28 Themen, je sechs Stufen bezogen auf eine Basisklasse. Offen sind noch 3
-  Ideen aus [lehrplan_sg_session3.md](lernziele/lehrplan_sg_session3.md).
-- **Zufallsmix** (Entscheid M1 a, [rahmen.md](rahmen.md) Abschnitt 9):
-  - `mix.html` mischt bis zu sechs Spiele in einer Runde (10 oder 20 Aufgaben) oder endlos.
-  - Einstellbar: Fach, Fokus, Stufe „passend“ oder fest, Timer, Wechsel nach 1 oder 3 Aufgaben.
-  - Die Spiele laufen unverändert im iframe (`?mix=1`). Unter `file://` in Chrome und Edge geprüft;
-    Safari und Firefox ungeprüft (LERN-30).
-- **Tests:** `node tools/pruefe_spiele.js` prüft:
-  - alle 504 Kombinationen Spiel × Stufe;
-  - den Endlos-Modus;
-  - jede Inhaltsliste als Kind;
-  - jedes Spiel im Zufallsmix.
-
-  Stand 2026-11-01: „Keine Fehler.“ (rund 13 Minuten). Dazu 11 Hinweise „zu wenig verschiedene
-  Aufgaben“ (wie vor der Sitzung) und der Hinweis bei Flächen-Pixel s6. Das Skript prüft unter
-  anderem:
-  - Hinweise, die die Lösung verraten (LERN-19);
-  - die Testhilfen;
-  - Rahmen-Klassen, die ein Spiel im eigenen Stil umdefiniert;
-  - Handgriffe der Endlos-Aufgaben, Speichern der Rekorde, Verlassen mitten in der Serie;
-  - die Serienbremse (`ctx.serie`).
-- **Startseite neu** (Entscheide L1 a bis L4 a, [rahmen.md](rahmen.md) Abschnitt 6):
-  - Anmeldung: Kinder ohne PIN, die Aufsicht mit PIN.
-  - Tabs: Spiele, Profil, Statistik, Verwaltung.
-  - Spiele nach Fach und Thema auf- und zuklappbar, Favoriten, Kompaktansicht.
-  - Die Aufsicht spielt als Tester, mit Testhilfen und mit Runden, die nicht zählen.
-- **Freigabe:** Standardmässig frei ist, was nichts mehr zu prüfen hat. Gesperrt sind die 28 neuen
-  Spiele (`neu`, bis angesehen) und Spiele, deren Inhaltslisten alle ungeprüft sind (162 Listen,
-  gemeinsam genutzte als Verweis). Heute für Kinder frei: 32 von 84 Spielen.
-- **Wiederholungen:** In einer Runde höchstens eine Aufgabe ein zweites Mal, nie direkt
-  hintereinander; kleine Stufen haben kürzere Runden.
-- **Endlos-Modus:** 34 Spiele, die ihre Aufgaben berechnen, bis zum ersten Fehler, mit oder ohne
-  Timer; Rekorde und Rangliste (rahmen.md Abschnitt 7). Mit Timer nähert sich die Zeit einem Boden
-  je Aufgabe aus ihren Handgriffen (F1 a, F2 a). Gespeichert wird beim Rundenende und beim Verlassen
-  mitten in der Serie (E1 a).
-- **Serienbremse:** Zufällige Merkmale (Richtung, Aufgabenart, Antwort bei höchstens drei festen
-  Antworten) höchstens dreimal hintereinander, in 75 Spielen (`ctx.serie`, `LS.SERIE_MAX`).
-- **Sprachausgabe:** `LS.sprich`, `LS.spielMitStimme` (Listen & Tap, Spelling-Bee); britische Stimme
-  bevorzugt, ohne Stimme keine Runde.
+**2026-11-01, nach LERN_Session6** ([Report](report/LERN_Session6_2026-11-01.md)):
+- **Reihe und Ordner** (P1 a, P2 a): App in `eulenpfad/`, Doku in `docs/eulenpfad/`; Grundgerüste
+  `lernsteig/`, `gratwanderung/` (Handover in `docs/lernsteig/`, `docs/gratwanderung/`); Einstiegsseite
+  `portal/`. **Online** unter patrikneunteufel.github.io/Lernspiele/ (Pages bei jedem Push, der eine App
+  ändert; W1 a).
+- **Spiele:** 86 Spiele in 29 Themen, je sechs Stufen zur Basisklasse. Plan 1.–4. Klasse vollständig
+  (1.: 10, 2.: 28, 3.: 11, 4.: 37); offen nur Mots-Match (5. Klasse). Für die 5./6. Klasse gibt es noch
+  keinen eigenen Plan (P56 a).
+- **Prüfstand** in `eulenpfad/spiele/gemeinsam/pruefstand.js`, gesetzt im **Entwickler-Modus**
+  (`python tools/entwickler_server.py`, Schlüssel in `entwickler.key`, rahmen.md Abschnitt 11):
+  2 von 30 neuen Spielen angesehen, 3 von 166 Inhaltslisten geprüft; für Kinder frei 34 von 86.
+  Bemerkungen in `docs/eulenpfad/bemerkungen.json` (heute leer).
+- **Abgleich zwischen Geräten** (S1 a, rahmen.md Abschnitt 10): Ordner je Gerät oder Abgleich-Datei;
+  auf echten Geräten ungeprüft (LERN-31).
+- **Bedienung:** Suche mit Rangfolge (SU1 a), Filter „Meine Klasse“ (K1 a, K2 a) und „Zu prüfen“,
+  Verwaltung mit Untertabs, Spieloptionen auf der Stufenwahl (Reihenfolge R1 a, Übertrag UE1 a).
+- **Tests:** `node tools/pruefe_spiele.js` — alle Spiele × Stufen, Endlos, Inhaltslisten als Kind, Mix,
+  zehn Beispielsuchen, Hinweis „Einzahl?“. Stand 2026-11-01: „Keine Fehler.“, 11 bekannte Hinweise
+  „zu wenig verschiedene Aufgaben“.
+- **Datenschutz:** Scan von Arbeitsbaum, Pages-Auslieferung und Git-Historie ohne Funde (D2 a, D3 a).
 - **Offen:**
-  - Inhalte und Spiele prüfen; Stand in [checkliste.md](checkliste.md).
-  - Noch kein Kind hat gespielt.
-  - Die neue Startseite und die neuen Spiele hat noch niemand im Browser angesehen.
+  - Noch kein Kind hat gespielt; Spiele ansehen und Listen prüfen (LERN-21, LERN-11).
+  - Schweiz-Karten-Suche ohne Seen, Flüsse, Gebirge (eigener swisstopo-Datensatz).
   - Grundzeit und Schrittzeit des Endlos-Bodens sind Annahmen bis zur Testrunde (LERN-4).
 
 **Nächste Session — Plan:**
-1. Startseite, Zufallsmix und die 28 neuen Spiele auf Desktop, Tablet und Handy ansehen (LERN-21).
-   Auf dem Tablet der Kinder zusätzlich:
-   - den Mix (LERN-30);
-   - die Sprachausgabe;
-   - das Speichern beim Ausschalten (Endlos).
-
-   Danach im Katalog `geprueft` eintragen und die Checkliste neu erzeugen.
-2. LERN-11: die Prüfliste einarbeiten; geprüfte Listen im Katalog `geprueft`.
-3. LERN-4: Testrunde mit den Kindern vor der Prüfung 4.2; danach den Endlos-Boden aus
-   gemessenen Zeiten eichen (LERN-25).
-4. LERN-28: Statistik-Ausbau entscheiden, zuerst der Können-Wert je Lernziel.
-5. Offene Entscheide aus LERN_Session4: Flächen-Pixel s6, LERN-27.
-6. Vor LERN-17 (GitHub Pages): Datenschutz-Scan des Repos und LERN-29.
+1. P56 a: Lehrplan SG für die 5./6. Klasse auswerten → `docs/eulenpfad/spielideen/lehrplan_sg_5-6.md`
+   mit Ideen und Prioritäten; danach auswählen lassen.
+2. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
+3. LERN-21 / LERN-11 im Entwickler-Modus: neue Spiele ansehen, Inhaltslisten prüfen.
+4. Schweiz-Karten-Suche: Seen, Flüsse, Gebirge (Download anfragen); Namen in `orte.js` prüfen.
+5. LERN-31 (Abgleich auf den echten Geräten), LERN-4 (Testrunde mit den Kindern), LERN-28 (Statistik).
 
 Technik: HTML/CSS/JS ohne Build (Entscheid LERN-1). Vertrag zwischen Rahmen und Spielen: [rahmen.md](rahmen.md).
 Übersicht aller Spiele und was zu prüfen ist: [checkliste.md](checkliste.md) (erzeugt mit `node tools/checkliste.js`). Gemeinsamer Rahmen `spiele/gemeinsam/`:
@@ -146,3 +116,5 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-29 | Name „Eulenpfad“: Markenrecherche EU (TMview) und Domain vor der Veröffentlichung | offen | Report LERN_Session5; Swissreg ohne Treffer |
 | LERN-30 | Zufallsmix in Safari/iPad und Firefox prüfen; Leiste auf dem Handy (drei Zeilen) | offen | rahmen.md Abschnitt 9 |
 | LERN-31 | Abgleich-Ordner auf den echten Geräten prüfen (`file://`, Netzwerk- und Cloud-Ordner, iPad/Android nur Datei) | in Arbeit seit 2026-11-01 (LERN_Session6); gebaut, nur auf localhost geprüft | rahmen.md Abschnitt 10 |
+| LERN-32 | Lehrplan SG 5./6. Klasse auswerten, Spielideen mit Basisklasse 5/6 (Entscheid P56 a) | offen, nächste Session | Report LERN_Session6 |
+| LERN-33 | Schweiz-Karten-Suche: Seen, Flüsse, Gebirge (swisstopo-Datensatz, Download anfragen) | offen | `tools/karte_schweiz.py`; Report LERN_Session6 |

@@ -24,6 +24,8 @@
 <script src="../gemeinsam/spiel.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
 <script src="geschichten.js"></script>
 <script>
 "use strict";
@@ -68,7 +70,10 @@ function rechne(ausdruck, werte) {
 
 /** Rechnung mit eingesetzten Zahlen: „7 + ? = 12“. */
 const einsetzen = (rechnung, werte) => rechnung.split(" ").map(x => (x === "_" ? "?" : x in werte ? zahlText(werte[x]) : x)).join(" ");
-const geschichteText = (text, werte) => text.replace(/\{(\w)\}/g, (_, k) => zahlText(werte[k]));
+/** Text mit eingesetzten Zahlen; {b:wird|werden} wählt die Einzahl, wenn b = 1 ist, sonst die Mehrzahl. */
+const geschichteText = (text, werte) => text
+  .replace(/\{(\w):([^|}]*)\|([^}]*)\}/g, (_, k, eins, mehr) => (werte[k] === 1 ? eins : mehr))
+  .replace(/\{(\w)\}/g, (_, k) => zahlText(werte[k]));
 
 /**
  * Zahlen ziehen, bis die Aufgabe eindeutig ist: Bei gleichen Zahlen ergibt ein Ablenker wie „a + a“
@@ -101,6 +106,10 @@ function maengel(a, stufe) {
   if (!geschichteFrei(a.g)) m.push(`Geschichte aus der Liste ${GESCHICHTEN_LISTEN[a.g.stufe]}, die nicht frei ist`);
   if (!Number.isInteger(a.ergebnis) || a.ergebnis <= 0) m.push(`Ergebnis ${a.ergebnis} keine natürliche Zahl`);
   if (Object.values(a.werte).some(w => !Number.isInteger(w) || w <= 0)) m.push("Zahl in der Geschichte unpassend");
+  // Ist eine gezeigte Zahl 1, braucht der Satz eine Einzahlform ({b:wird|werden}), sonst „1 werden gegessen“.
+  for (const [, k] of a.g.text.matchAll(/\{(\w)\}/g)) {
+    if (a.werte[k] === 1 && !a.g.text.includes(`{${k}:`)) m.push(`Zahl ${k} ist 1, der Satz hat aber keine Einzahlform`);
+  }
   // Zahlenraum: gezeigte Zahlen und Ergebnis
   const gezeigt = [...a.g.text.matchAll(/\{(\w)\}/g)].map(x => a.werte[x[1]]);
   if ([...gezeigt, a.ergebnis].some(w => w > RAUM[stufe])) m.push("ausserhalb des Zahlenraums");

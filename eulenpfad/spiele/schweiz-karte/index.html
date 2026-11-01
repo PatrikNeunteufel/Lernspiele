@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schweiz-Karten-Suche</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .karte-svg { display: block; width: 100%; max-width: 900px; margin: 6px auto 4px; background: #eaf5fb; border-radius: 16px; touch-action: manipulation; }
+  .karte-svg .land { fill: none; stroke: var(--text); stroke-width: .9; }
+  .karte-svg .gebiet { fill: #fbf7ec; stroke: #8a8fa8; stroke-width: .45; stroke-linejoin: round; fill-rule: evenodd; }
+  .karte-svg .gebiet.wahl { cursor: pointer; }
+  .karte-svg .gebiet.wahl:hover { fill: #fff1c9; }
+  .karte-svg .gebiet.blass { fill: #f3f1ea; stroke: #c5c9d6; }
+  .karte-svg .gebiet.falsch { fill: var(--hinweis-hell); }
+  .karte-svg .gebiet.richtig { fill: #bfe8cf; stroke: var(--gut); stroke-width: 1; }
+  .karte-svg .gebiet.markiert { fill: #f7b9c4; stroke: #b4233c; stroke-width: 1; }
+  .karte-svg .punkt { fill: var(--text); stroke: #fff; stroke-width: .8; }
+  .karte-svg .punkt.richtig { fill: var(--gut); }
+  .karte-svg .punkt.falsch { fill: var(--hinweis); }
+  .karte-svg .punkt.markiert { fill: #b4233c; }
+  .karte-svg .treffer { fill: transparent; cursor: pointer; }
+  .quelle { text-align: center; font-size: 12px; color: var(--text-leise); margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🗺️ Schweiz-Karten-Suche</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="karte.js"></script>
+<script src="orte.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.8.4.d (Orientierungspunkt 4. Klasse): Orte, Kantone und Städte auf einer stummen Karte
+// finden. Die Karte ist amtlich (swisstopo, swissBOUNDARIES3D, vereinfacht mit tools/karte_schweiz.py);
+// die Namen stehen in orte.js. Seen, Flüsse und Gebirge fehlen noch (eigener Datensatz nötig).
+
+const { waehle, mische, el } = LS;
+const SPIEL_ID = "schweiz-karte";
+const SVG = "http://www.w3.org/2000/svg";
+
+const FREI = new Set(LS.freieListen(SPIEL_ID));
+const ortName = o => ORT_NAMEN[o.name] || o.name.replace(/ \([A-Z]{2}\)$/, "");
+const KANTONE = FREI.has("kantone") ? KARTE.kantone.map(k => ({ ...k, kurz: KANTONE_NAMEN[k.nr][0], anzeige: KANTONE_NAMEN[k.nr][1] })) : [];
+const WAHLKREISE = FREI.has("wahlkreise-sg") ? KARTE.wahlkreise.map(w => ({ ...w, anzeige: w.name })) : [];
+const HAUPTORTE = FREI.has("hauptorte") ? KARTE.orte.filter(o => o.hauptort).map(o => ({ ...o, anzeige: ortName(o) })) : [];
+const STAEDTE = FREI.has("staedte") ? KARTE.orte.filter(o => !o.hauptort && o.einwohner >= STADT_MIN).map(o => ({ ...o, anzeige: ortName(o) })) : [];
+
+// Je Stufe: was gesucht wird. Basisklasse 4 (OP NMG.8.4.d): Stufe 1 = 3. Klasse, Stufe 5 = 5. Klasse.
+const STUFE = {
+  s1: { art: "gebiet", ziele: () => WAHLKREISE, ansicht: "sg" },
+  s2: { art: "gebiet", ziele: () => KANTONE.filter(k => OSTSCHWEIZ.includes(k.nr)) },
+  s3: { art: "gebiet", ziele: () => KANTONE },
+  s4: { art: "punkt", ziele: () => HAUPTORTE },
+  s5: { art: "punkt", ziele: () => STAEDTE, mit: () => [...HAUPTORTE, ...STAEDTE] },
+  s6: { art: "erkennen", ziele: () => [...KANTONE, ...HAUPTORTE] },  // Königsstufe: markiert — wie heisst es?
+};
+
+function aufgabeErzeugen(stufe) {
+  const ziele = STUFE[stufe].ziele();
+  return ziele.length ? { ziel: waehle(ziele) } : null;
+}
+
+/** Mängel einer Aufgabe — auch für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return ["keine Aufgabe, obwohl die Stufe angeboten wird"];
+  const m = [];
+  const z = a.ziel;
+  if (!z.anzeige) m.push("Ziel ohne Namen");
+  if (STUFE[stufe].art === "gebiet" && !z.d) m.push("Gebiet ohne Umriss");
+  if (STUFE[stufe].art === "punkt" && !(z.x >= 0 && z.x <= KARTE.breite && z.y >= 0 && z.y <= KARTE.hoehe)) m.push("Ort ausserhalb der Karte");
+  if (!STUFE[stufe].ziele().includes(z)) m.push("Ziel nicht aus einer freien Liste");
+  return m;
+}
+
+/** Mittelpunkt eines Ziels in Kartenkoordinaten (km). */
+const lage = z => (z.mitte ? { x: z.mitte[0], y: z.mitte[1] } : { x: z.x, y: z.y });
+
+/** Richtung von a nach b in Worten: „im Osten“, „im Nordwesten“ … */
+function richtung(a, b) {
+  const dx = b.x - a.x, dy = a.y - b.y; // y wächst nach unten
+  const ns = Math.abs(dy) > Math.abs(dx) / 2 ? (dy > 0 ? "Nord" : "Süd") : "";
+  const ow = Math.abs(dx) > Math.abs(dy) / 2 ? (dx > 0 ? "ost" : "west") : "";
+  return ns && ow ? `im ${ns}${ow}en` : ns ? `im ${ns}en` : `im ${ow === "ost" ? "Osten" : "Westen"}`;
+}
+
+/** Ausschnitt [x, y, b, h] um die Umrisse (aus den Zahlen der SVG-Pfade). */
+function ausschnitt(gebiete, rand = 4) {
+  const zahlen = gebiete.flatMap(g => (g.d.match(/-?\d+(\.\d+)?/g) || []).map(Number));
+  const xs = zahlen.filter((_, i) => i % 2 === 0), ys = zahlen.filter((_, i) => i % 2 === 1);
+  const x = Math.min(...xs) - rand, y = Math.min(...ys) - rand;
+  return [x, y, Math.max(...xs) - x + rand, Math.max(...ys) - y + rand];
+}
+
+const svgEl = (tag, attr = {}) => {
+  const e = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  return e;
+};
+
+const STUFEN_TEXT = {
+  s1: "Kanton St. Gallen: die Wahlkreise Toggenburg, Rheintal, See-Gaster …",
+  s2: "St. Gallen und seine Nachbarkantone in der Ostschweiz.",
+  s3: "Alle 26 Kantone der Schweiz.",
+  s4: "Die Hauptorte der Kantone: Chur, Bellinzona, Genf …",
+  s5: "Grosse Städte: Winterthur, Lugano, Biel …",
+  s6: "Endgegner: Ein Kanton oder Hauptort ist markiert — wie heisst er?",
+};
+
+LS.spiel({
+  id: SPIEL_ID,
+  einleitung: "Auf dieser Karte steht kein einziger Name! Ich sage dir, was du suchst — tipp es auf der Karte an.",
+  anzahl: 8,
+  stufen: Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => STUFE[s].ziele().length)),
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const { ziel } = aufgabeErzeugen(ctx.stufe);
+    const istKanton = ziel.kurz !== undefined;
+    const wort = ctx.stufe === "s4" ? "den Hauptort" : ctx.stufe === "s5" ? "die Stadt" : ctx.stufe === "s1" ? "den Wahlkreis" : "den Kanton";
+    const loesungText = `Gesucht war ${istKanton ? `der Kanton ${ziel.anzeige} (${ziel.kurz})` : ctx.stufe === "s1" ? `der Wahlkreis ${ziel.anzeige}` : ziel.anzeige}.`;
+    ctx.loesung(p.art === "erkennen" ? ziel.anzeige : loesungText);
+
+    // Karte: Ausschnitt St. Gallen (Stufe 1) oder die ganze Schweiz
+    const gebiete = p.ansicht === "sg" ? KARTE.wahlkreise : KARTE.kantone;
+    const [vx, vy, vb, vh] = p.ansicht === "sg" ? ausschnitt(gebiete) : [0, 0, KARTE.breite, KARTE.hoehe];
+    const svg = svgEl("svg", { class: "karte-svg", viewBox: `${vx} ${vy} ${vb} ${vh}`, role: "img", "aria-label": "Stumme Karte" });
+    const flaechen = new Map();
+    let fertig = false;
+
+    const falschGetippt = (getippt, element) => {
+      if (fertig || ctx.vorbei()) return;
+      element.classList.add("falsch");
+      setTimeout(() => element.classList.remove("falsch"), 700);
+      const name = getippt.kurz !== undefined ? `der Kanton ${getippt.anzeige}` : getippt.anzeige;
+      ctx.falsch(`Das ist ${name}. Was du suchst, liegt weiter ${richtung(lage(getippt), lage(ziel))}.`, loesungText);
+      if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) { fertig = true; zeigeZiel(); }
+    };
+    const richtigGetippt = element => {
+      if (fertig || ctx.vorbei()) return;
+      fertig = true;
+      element.classList.add("richtig");
+      ctx.richtig(`Genau, das ist ${istKanton ? `${ziel.anzeige} (${ziel.kurz})` : ziel.anzeige}!`);
+    };
+    const zeigeZiel = () => (flaechen.get(ziel) || svg.querySelector(".ziel"))?.classList.add("richtig");
+
+    // Flächen: Kantone bzw. Wahlkreise; klickbar, wenn ein Gebiet gesucht ist
+    const auswahlGebiete = p.art === "gebiet" ? (p.ansicht === "sg" ? WAHLKREISE : KANTONE) : [];
+    for (const g of gebiete) {
+      const daten = auswahlGebiete.find(x => x.d === g.d) || KANTONE.find(x => x.d === g.d) || g;
+      const pfad = svgEl("path", { d: g.d, class: "gebiet" + (auswahlGebiete.length ? " wahl" : p.art === "punkt" ? " blass" : "") });
+      if (auswahlGebiete.length) pfad.addEventListener("click", () => (daten === ziel ? richtigGetippt(pfad) : falschGetippt(daten, pfad)));
+      if (p.art === "erkennen" && daten === ziel) pfad.classList.add("markiert");
+      flaechen.set(daten, pfad);
+      svg.append(pfad);
+    }
+    if (p.ansicht !== "sg") svg.append(svgEl("path", { d: KARTE.land, class: "land" }));
+
+    // Punkte: Hauptorte bzw. Städte; der grosse, unsichtbare Kreis ist die Tippfläche
+    const punkte = p.art === "punkt" ? (p.mit ? p.mit() : p.ziele()) : p.art === "erkennen" && !istKanton ? [ziel] : [];
+    for (const o of punkte) {
+      const g = svgEl("g", {});
+      const sichtbar = svgEl("circle", { cx: o.x, cy: o.y, r: 2.6, class: "punkt" + (p.art === "erkennen" ? " markiert" : "") + (o === ziel ? " ziel" : "") });
+      g.append(sichtbar);
+      if (p.art === "punkt") {
+        const treffer = svgEl("circle", { cx: o.x, cy: o.y, r: 6, class: "treffer" });
+        treffer.addEventListener("click", () => (o === ziel ? richtigGetippt(sichtbar) : falschGetippt(o, sichtbar)));
+        g.append(treffer);
+      }
+      svg.append(g);
+    }
+
+    const frage = p.art === "erkennen"
+      ? (istKanton ? "Welcher Kanton ist rot markiert?" : "Welcher Hauptort ist rot markiert?")
+      : `Tipp auf ${wort}: ${ziel.anzeige}${istKanton ? ` (${ziel.kurz})` : ""}`;
+    ctx.flaeche.append(el("div", { class: "auftrag", text: frage }), svg,
+      el("div", { class: "quelle", text: "Karte: swisstopo, swissBOUNDARIES3D (vereinfacht)" }));
+
+    if (p.art === "erkennen") {
+      // Königsstufe: vier Namen derselben Art zur Wahl
+      const gleiche = (istKanton ? KANTONE : HAUPTORTE).filter(x => x !== ziel);
+      LS.auswahl(ctx, {
+        optionen: mische([ziel, ...mische(gleiche).slice(0, 3)]),
+        richtig: ziel,
+        inhalt: x => x.anzeige,
+        hinweis: x => `${x.anzeige} liegt woanders — weiter ${richtung(lage(ziel), lage(x))} als das markierte.`,
+        loesung: ziel.anzeige,
+        lob: `Genau, das ist ${ziel.anzeige}!`,
+      });
+      return;
+    }
+    ctx.schritte(1);
+    if (ctx.nr === 0) ctx.sag(p.ansicht === "sg" ? "Das ist der Kanton St. Gallen. Wo liegt der Wahlkreis?" : "Das ist die Schweiz. Such genau — es stehen keine Namen dran.");
+  },
+});
+</script>
+</body>
+</html>

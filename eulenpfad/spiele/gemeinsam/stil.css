@@ -327,13 +327,13 @@ button { font-family: inherit; }
 
 /* ---------- Timer ---------- */
 
-.timer-zeile, .reihenfolge-zeile { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 8px; }
+.timer-zeile, .option-zeile { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 8px; }
 
 /* Testhilfen, nur beim Testspieler (Entscheid T2 a) */
 .testhilfe { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; padding: 6px 10px;
   border: 2px dashed var(--text-leise); border-radius: 12px; font-size: 15px; color: var(--text-leise); }
 
-.timer-schalter, .reihenfolge-schalter {
+.timer-schalter, .option-schalter {
   border: none;
   border-radius: 999px;
   padding: 8px 18px;
@@ -349,10 +349,42 @@ button { font-family: inherit; }
 
 .timer-schalter.an { background: var(--hinweis); color: #fff; box-shadow: 0 4px 0 #d97f00; }
 
-/* Reihenfolge der Teile (Entscheid R1 a): drei Knöpfe, der gewählte gefüllt — Deko-Farbe, keine Stellenfarbe */
-.reihenfolge-zeile { gap: 8px; }
-.reihenfolge-schalter { padding: 8px 14px; font-size: 17px; }
-.reihenfolge-schalter.an { background: var(--deko-1); color: #fff; box-shadow: 0 4px 0 #6b3fb0; }
+/* Entwickler-Leiste (Entscheid E2 a): nur bei freigeschaltetem Entwickler-Modus, unten fest */
+.entwickler-leiste {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 14px;
+  background: #1f2933; color: #fff; font-size: 15px; box-shadow: 0 -2px 8px rgba(0, 0, 0, .2);
+}
+.entwickler-leiste .leise { color: #c5ccd6; }
+.entwickler-leiste a.link { color: #9fd8ff; }
+.entwickler-leiste .knopf.klein { min-height: 36px; padding: 4px 12px; font-size: 15px; }
+.entwickler-feld { flex-basis: 100%; display: flex; flex-direction: column; gap: 6px; }
+.entwickler-feld textarea { font: inherit; font-size: 16px; border-radius: 10px; border: 2px solid var(--rand); padding: 8px; width: 100%; }
+.entwickler-feld .knopfzeile { justify-content: flex-start; flex-wrap: wrap; margin: 0; }
+body:has(.entwickler-leiste) { padding-bottom: 90px; }
+.entwickler-listen { flex-basis: 100%; }
+.entwickler-listen summary { cursor: pointer; }
+.entwickler-listen ul { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.entwickler-listen .liste-link { background: none; border: none; padding: 2px 0; font: inherit; font-size: 15px;
+  color: #9fd8ff; text-decoration: underline; cursor: pointer; text-align: left; }
+.entwickler-listen .liste-link.geprueft { color: #7ee0a1; }
+
+/* Inhaltsliste ansehen (Entwickler-Modus, Entscheid E3 a), auf Spielseiten und in der Verwaltung */
+.listen-dialog { width: calc(100% - 32px); max-width: 960px; max-height: 88vh; border: none; border-radius: 16px; padding: 18px 20px; color: var(--text); }
+.listen-dialog::backdrop { background: rgba(31, 41, 51, .45); }
+.listen-dialog h2 { margin: 0 0 10px; font-size: 21px; }
+.listen-dialog h3 { margin: 14px 0 4px; font-size: 17px; }
+.listen-dialog .knopfzeile { justify-content: flex-start; flex-wrap: wrap; margin: 0 0 8px; }
+.listen-dialog table { border-collapse: separate; border-spacing: 0 4px; width: 100%; font-size: 15px; }
+.listen-dialog th { text-align: left; font-size: 13px; color: var(--text-leise); padding: 4px 8px; }
+.listen-dialog td { padding: 6px 8px; background: #f8f9fe; }
+.listen-dialog .knopf.klein { min-height: 34px; padding: 2px 10px; font-size: 15px; }
+.listen-dialog textarea { font: inherit; width: 100%; border-radius: 10px; border: 2px solid var(--rand); padding: 8px; }
+
+/* Spieloptionen auf der Stufenwahl (Reihenfolge der Teile R1 a, Übertrag UE1 a): je Wert ein Knopf, der gewählte gefüllt — Deko-Farbe, keine Stellenfarbe */
+.option-zeile { gap: 8px; }
+.option-schalter { padding: 8px 14px; font-size: 17px; }
+.option-schalter.an { background: var(--deko-1); color: #fff; box-shadow: 0 4px 0 #6b3fb0; }
 
 .zeitleiste {
   height: 14px;

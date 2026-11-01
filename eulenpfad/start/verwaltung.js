@@ -2,6 +2,9 @@
    Konten anlegen, Rollen und PIN (Entscheid L1 a, L2 a). Alles gilt für dieses Gerät. */
 "use strict";
 
+// Suche in der Freigabe (wie im Tab Spiele, suchFeld aus start/spiele.js); bleibt beim Neuzeichnen erhalten.
+let freigabeSuche = "";
+
 function zeichneVerwaltung(box, neu) {
   const { el } = LS;
   if (!LS.aufsichtAngemeldet()) return;
@@ -25,7 +28,12 @@ function zeichneVerwaltung(box, neu) {
     { id: "konten", text: "👥 Konten", zeichne: konten },
     { id: "freigabe", text: "✓ Freigabe", zeichne: freigabeTeil },
     { id: "abgleich", text: "🔄 Abgleich", zeichne: abgleich },
+    { id: "entwicklung", text: "🛠 Entwicklung", zeichne: entwicklung },
   ];
+  const dev = LS.entwicklung.aktiv();
+  /** Entwickler: Prüfstand setzen oder aufheben, danach neu zeichnen (meldet selbst, wenn der Server fehlt). */
+  const pruefKnopf = (art, id, g, text) => el("button", { type: "button", class: "schalter", text: g ? "aufheben" : text,
+    onclick: async () => { if (await LS.entwicklung.setzeGeprueft(art, id, !g)) neu(); } });
   const unter = UNTER.find(u => u.id === location.hash.split("/")[1]) || UNTER[0];
   seite.append(el("nav", { class: "tabs untertabs", role: "tablist" }, ...UNTER.map(u =>
     el("a", { class: "tab", role: "tab", href: `#verwaltung/${u.id}`, "aria-selected": String(u === unter), text: u.text }))));
@@ -43,51 +51,66 @@ function zeichneVerwaltung(box, neu) {
       }
       neu();
     };
-    // Je Fach eine zuklappbare Gruppe, zu Beginn zu; welche offen sind, merkt sich das Gerät (nicht abgeglichen).
-    const offen = new Set(LS.lies("verwaltungOffen", []));
-    const gruppen = [];
-    for (const fach of [...new Set(THEMEN.map(t => t.fach))]) {
-      const spiele = SPIELE.filter(s => THEMEN.find(t => t.id === s.thema)?.fach === fach);
-      if (!spiele.length) continue;
-      const zeilen = [];
-      const tbody = el("tbody");
-      const frei = spiele.filter(s => LS.fuerKinderSichtbar(s.id)).length;
-      const zuPruefen = spiele.filter(s => LS.spielZuPruefen(s.id) || LS.spielListen(s.id).some(l => !l.von && !l.geprueft)).length;
-      const gruppe = el("details", { class: "gruppe" },
-        el("summary", {}, el("span", { text: fach }),
-          el("span", { class: "anzahl", text: `${frei} von ${spiele.length} frei${zuPruefen ? ` · ${zuPruefen} zu prüfen` : ""}` })),
-        el("div", { class: "tabelle-rahmen" }, el("table", {},
-          el("thead", {}, el("tr", {}, ...["Spiel / Liste", "Prüfstand", "für Kinder"].map(t => el("th", { text: t })))),
-          tbody)));
-      gruppe.open = offen.has(fach);
-      gruppe.addEventListener("toggle", () => {
-        gruppe.open ? offen.add(fach) : offen.delete(fach);
-        LS.schreibe("verwaltungOffen", [...offen]);
-      });
-      gruppen.push(gruppe);
-      for (const s of spiele) {
+    /** Zeilen eines Spiels: das Spiel, darunter seine Inhaltslisten; grund: warum es zur Suche passt. */
+    function spielZeilen(s, grund) {
+      const g = LS.spielGeprueft(s.id);
+      const zeilen = [el("tr", {},
+        el("td", {}, `${s.bild} ${s.name}`, grund ? el("div", { class: "marke such-grund", text: `🔍 gefunden ${grund}` }) : null),
+        el("td", {}, el("div", { class: "zeile-knoepfe" },
+          g || s.neu ? stand(g) : el("span", { class: "pruefstand ok", text: "nichts zu prüfen" }),
+          dev ? pruefKnopf("spiele", s.id, g, "✓ angesehen") : null)),
+        el("td", {}, schalter(LS.spielFrei(s.id), s.id in f.spiele, w => LS.setzeSpielFrei(s.id, w))))];
+      for (const l of LS.spielListen(s.id)) {
+        // Verweis auf die Liste eines anderen Spiels: dort freigeben, hier nur zeigen.
+        const quelle = l.von ? SPIELE.find(x => x.id === l.von.split("/")[0]) : null;
+        // Entwickler: Der Listenname öffnet die Liste; geprüft wird erst dort, nach dem Ansehen.
         zeilen.push(el("tr", {},
-          el("td", { text: `${s.bild} ${s.name}` }),
-          el("td", {}, s.geprueft || s.neu ? stand(s.geprueft) : el("span", { class: "pruefstand ok", text: "nichts zu prüfen" })),
-          el("td", {}, schalter(LS.spielFrei(s.id), s.id in f.spiele, w => LS.setzeSpielFrei(s.id, w)))));
-        for (const l of LS.spielListen(s.id)) {
-          // Verweis auf die Liste eines anderen Spiels: dort freigeben, hier nur zeigen.
-          const quelle = l.von ? SPIELE.find(x => x.id === l.von.split("/")[0]) : null;
-          zeilen.push(el("tr", {},
-            el("td", { style: "padding-left:36px", text: `↳ ${l.name}` }),
-            el("td", {}, stand(l.geprueft)),
-            el("td", {}, quelle
-              ? el("span", { class: "leise-text", text: `${LS.listeFrei(s.id, l.id) ? "✓ frei" : "🔒 gesperrt"} — wie bei ${quelle.name}` })
-              : schalter(LS.listeFrei(s.id, l.id), `${s.id}/${l.id}` in f.listen, w => LS.setzeListeFrei(s.id, l.id, w)))));
-        }
+          el("td", { style: "padding-left:36px" }, "↳ ", dev && !quelle
+            ? el("button", { type: "button", class: "liste-link" + (l.geprueft ? " geprueft" : ""), text: l.name, title: "Liste ansehen", onclick: () => zeigeListe(s, l) })
+            : l.name),
+          el("td", {}, stand(l.geprueft)),
+          el("td", {}, quelle
+            ? el("span", { class: "leise-text", text: `${LS.listeFrei(s.id, l.id) ? "✓ frei" : "🔒 gesperrt"} — wie bei ${quelle.name}` })
+            : schalter(LS.listeFrei(s.id, l.id), `${s.id}/${l.id}` in f.listen, w => LS.setzeListeFrei(s.id, l.id, w)))));
       }
-      tbody.append(...zeilen);
+      return zeilen;
+    }
+    const tabelle = zeilen => el("div", { class: "tabelle-rahmen" }, el("table", {},
+      el("thead", {}, el("tr", {}, ...["Spiel / Liste", "Prüfstand", "für Kinder"].map(t => el("th", { text: t })))),
+      el("tbody", {}, ...zeilen)));
+    const gruppen = [];
+    const treffer = freigabeSuche.trim() ? LS.suche(freigabeSuche) || [] : null;
+    if (treffer) {
+      // Suche (Entscheid SU1 a): eine Liste, beste Treffer zuerst, je mit Grund, wenn er nicht sichtbar ist.
+      if (treffer.length) gruppen.push(el("div", {}, el("h3", { text: `🔍 ${treffer.length} Treffer, beste zuerst` }),
+        tabelle(treffer.flatMap(t => spielZeilen(SPIELE.find(s => s.id === t.id), t.grund)))));
+    } else {
+      // Je Fach eine zuklappbare Gruppe, zu Beginn zu; welche offen sind, merkt sich das Gerät (nicht abgeglichen).
+      const offen = new Set(LS.lies("verwaltungOffen", []));
+      for (const fach of [...new Set(THEMEN.map(t => t.fach))]) {
+        const spiele = SPIELE.filter(s => THEMEN.find(t => t.id === s.thema)?.fach === fach);
+        if (!spiele.length) continue;
+        const frei = spiele.filter(s => LS.fuerKinderSichtbar(s.id)).length;
+        const zuPruefen = spiele.filter(s => LS.spielZuPruefen(s.id) || LS.spielListen(s.id).some(l => !l.von && !l.geprueft)).length;
+        const gruppe = el("details", { class: "gruppe" },
+          el("summary", {}, el("span", { text: fach }),
+            el("span", { class: "anzahl", text: `${frei} von ${spiele.length} frei${zuPruefen ? ` · ${zuPruefen} zu prüfen` : ""}` })),
+          tabelle(spiele.flatMap(s => spielZeilen(s, null))));
+        gruppe.open = offen.has(fach);
+        gruppe.addEventListener("toggle", () => {
+          gruppe.open ? offen.add(fach) : offen.delete(fach);
+          LS.schreibe("verwaltungOffen", [...offen]);
+        });
+        gruppen.push(gruppe);
+      }
     }
     seite.append(karte(
       el("h2", { text: "Spiele und Inhalte freigeben" }),
-      el("p", { class: "leise-text", style: "margin-top:0", text: `Kinder sehen ${sichtbar} von ${SPIELE.length} Spielen. Frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Inhaltslisten, bis sie geprüft sind (Eintrag im Katalog). Hier lässt sich das anders setzen; mit Abgleich gilt es für alle Geräte. Ein Spiel mit Inhaltslisten braucht mindestens eine freie Liste; die Kinder üben nur die freien Listen.` }),
+      el("p", { class: "leise-text", style: "margin-top:0", text: `Kinder sehen ${sichtbar} von ${SPIELE.length} Spielen. Frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Inhaltslisten, bis sie geprüft sind (Prüfstand im Repo, gesetzt im Entwickler-Modus). Hier lässt sich das anders setzen; mit Abgleich gilt es für alle Geräte. Ein Spiel mit Inhaltslisten braucht mindestens eine freie Liste; die Kinder üben nur die freien Listen.` }),
       zeile(knopf("✓ Alles freigeben", () => alleSetzen(true)), knopf("🔒 Alles sperren", () => alleSetzen(false)), knopf("↺ Alles wie Prüfstand", () => alleSetzen(null))),
-      ...gruppen));
+      zeile(suchFeld(freigabeSuche, v => { freigabeSuche = v; }, neu, "🔍 Spiel oder Inhaltsliste suchen")),
+      ...gruppen,
+      gruppen.length ? null : el("p", { class: "leise-text", text: "Kein Spiel passt zur Suche." })));
   }
 
   // ----- Konten -----
@@ -177,4 +200,62 @@ function zeichneVerwaltung(box, neu) {
       zeile(knopf("💾 Abgleich-Datei sichern", () => ab.dateiSichern()), knopf("📂 Abgleich-Datei einlesen", () => abDatei.click())),
       abDatei, abMeldung));
   }
+
+  // ----- Entwicklung (Entscheide E1 a, E2 a) -----
+  function entwicklung() {
+    const en = LS.entwicklung;
+    const meldung = el("div", { class: "meldung", style: "text-align:left", "aria-live": "polite" });
+    const status = el("p", { style: "margin:0 0 8px", text: "Entwickler-Server: wird gesucht …" });
+    en.server().then(s => {
+      status.textContent = s ? `Entwickler-Server: verbunden${s.schluessel ? "" : " — aber entwickler.key fehlt (python tools/entwickler_server.py --neuer-schluessel)"}.`
+        : `${en.serverMeldung().replace(/\n+/g, " ")} Freischalten geht trotzdem; prüfen und Bemerkungen speichern erst mit laufendem Entwickler-Server.`;
+    });
+    const teile = [];
+    if (!en.freigeschaltet()) {
+      const feld = el("input", { class: "feld", type: "password", autocomplete: "off", placeholder: "Entwickler-Schlüssel", "aria-label": "Entwickler-Schlüssel" });
+      const los = async () => {
+        if (await en.freischalten(feld.value)) return neu();
+        meldung.textContent = "Dieser Schlüssel passt nicht.";
+        feld.value = "";
+      };
+      feld.addEventListener("keydown", e => { if (e.key === "Enter") los(); });
+      teile.push(el("div", { class: "pin-zeile", style: "justify-content:flex-start" }, feld, knopf("Freischalten", los, "gruen")));
+    } else {
+      const an = en.zustand().an;
+      const name = el("input", { class: "feld", type: "text", maxlength: "40", placeholder: "Name für „geprüft von“", "aria-label": "Name für geprüft von", value: en.zustand().name });
+      teile.push(
+        zeile(knopf(an ? "🛠 Entwickler-Zusätze an" : "Entwickler-Zusätze aus", () => { en.setzeAn(!an); neu(); }, an ? "gruen" : "hell"),
+          knopf("Schlüssel auf diesem Gerät vergessen", () => { en.sperren(); neu(); })),
+        el("div", { class: "pin-zeile", style: "justify-content:flex-start" }, name,
+          knopf("Name speichern", () => { en.benenne(name.value); meldung.textContent = "✓ Name gespeichert."; })));
+      // Bemerkungen: offene zuerst; ich arbeite sie ab und setze sie in bemerkungen.json auf „erledigt“.
+      const liste = el("div", { text: "Bemerkungen werden geladen …", class: "leise-text" });
+      const neueBemerkung = el("div");
+      teile.push(el("h3", { text: "Bemerkungen" }),
+        zeile(knopf("📝 Allgemeine Bemerkung", () => {
+          neueBemerkung.innerHTML = "";
+          neueBemerkung.append(en.bemerkungsFeld(() => ({}), () => neu()));
+        })), neueBemerkung, liste);
+      en.bemerkungen().then(b => {
+        liste.innerHTML = "";
+        if (!b) return (liste.textContent = "Nur mit laufendem Entwickler-Server sichtbar.");
+        if (!b.length) return (liste.textContent = "Noch keine Bemerkungen.");
+        const sortiert = [...b].sort((x, y) => (x.status === y.status ? y.nr - x.nr : x.status === "offen" ? -1 : 1));
+        liste.append(el("div", { class: "tabelle-rahmen" }, el("table", {},
+          el("thead", {}, el("tr", {}, ...["Nr.", "Stand", "Wo", "Bemerkung"].map(t => el("th", { text: t })))),
+          el("tbody", {}, ...sortiert.map(x => el("tr", {},
+            el("td", { text: String(x.nr) }),
+            el("td", { text: x.status === "offen" ? "offen" : `✓ ${x.status}` }),
+            el("td", { text: [x.spiel, x.stufe, x.liste, x.eintrag].filter(Boolean).join(" · ") || "allgemein" }),
+            el("td", { text: x.text + (x.aufgabe ? ` (${x.aufgabe})` : "") })))))));
+      });
+    }
+    seite.append(karte(
+      el("h2", { text: "Entwicklung" }),
+      el("p", { class: "leise-text", style: "margin-top:0", text: "Der Entwickler-Modus funktioniert nur im lokalen Repo mit laufendem Entwickler-Server: python tools/entwickler_server.py, dann http://localhost:8765/eulenpfad/ öffnen. Freigeschaltet wird er mit dem Schlüssel aus entwickler.key. Dann gibt es in den Spielen eine Leiste mit „Spiel angesehen“ und „Bemerkung“, und in der Freigabe „geprüft“ und „ansehen“ je Spiel und Inhaltsliste. Was hier geprüft wird, gilt nach Commit und Push für alle; eine lokale Sperre der Aufsicht gilt weiter." }),
+      status, ...teile, meldung));
+  }
+
+  /** Inhaltsliste ansehen (Entscheid E3 a); danach die Seite neu zeichnen. */
+  function zeigeListe(s, l) { LS.entwicklung.zeigeListe(s, l, neu); }
 }

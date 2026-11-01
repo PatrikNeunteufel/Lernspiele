@@ -229,7 +229,7 @@ tabelle("## 12. Nomen-Puzzle (Lehrplan SG D.5.D.1)", "Das Grundwort (letzter Tei
   Object.values(KOMPOSITA).flat().map(k => [k.teile.map(t => `${t[0]} ${t[1]}`).join(" + "), `${k.ganz[0]} ${k.ganz[1]}`, (k.falsch || []).join(", ")]));
 tabelle("## 13. Lese-Detektiv (Lehrplan SG D.2.B.1)", "Die Namen in den Texten sind erfunden.", ["Stufe", "Titel", "Text", "Frage", "richtig", "falsch"],
   LESETEXTE.map(([s, t, text, f, r, a, b]) => [s, t, text, f, r, `${a}; ${b}`]));
-tabelle("## 14. Rechengeschichten (Lehrplan SG MA.3.C.2, MA.3.C.3)", "Platzhalter {a}, {b} … werden im Spiel durch Zahlen aus den Bereichen ersetzt.", ["Stufe", "Geschichte", "Zahlen", "richtige Rechnung", "Ablenker"],
+tabelle("## 14. Rechengeschichten (Lehrplan SG MA.3.C.2, MA.3.C.3)", "Platzhalter {a}, {b} … werden im Spiel durch Zahlen aus den Bereichen ersetzt; {b:wird|werden} heisst: „wird“, wenn b = 1 ist, sonst „werden“.", ["Stufe", "Geschichte", "Zahlen", "richtige Rechnung", "Ablenker"],
   GESCHICHTEN.map(g => [g.stufe, g.text, Object.entries(g.zahlen).map(([k, [a, b]]) => `${k}: ${a}–${b}`).concat(Object.entries(g.abgeleitet || {}).map(([k, v]) => `${k} = ${v}`)).join(", "), g.richtig || g.rechnung, (g.falsch || []).join("; ") || `(nicht gebraucht: ${g.unwichtig})`]));
 z("## 15. Schätz-Waage (Lehrplan SG MA.3.A.1)");
 z("");
@@ -352,4 +352,255 @@ const GB = lade("spiele/gedicht-baukasten/gedichte.js", ["REIMPAARE", "VIERZEILE
 teil("## 39. Gedicht-Baukasten (Lehrplan SG D.6.C.1) — Zweizeiler", "Alle Verse selbst verfasst.", ["Vers 1", "Vers 2", "Reimwort", "Wahl", "Wahl", "Wahl"], GB.REIMPAARE);
 teil("### Vierzeiler", null, ["Verse"], Object.fromEntries(Object.entries(GB.VIERZEILER).map(([k, v]) => [k, v.map(g => [g])])));
 teil("### Gedichte mit Strophen", null, ["Titel", "Strophen (Reimschema / Verse)"], GB.STROPHEN_GEDICHTE);
+// LERN_Session6: Schweiz-Karten-Suche — Lage aus swisstopo (karte.js), geprüft werden die Namen (orte.js)
+const { KARTE } = lade("spiele/schweiz-karte/karte.js", ["KARTE"]);
+const KO = lade("spiele/schweiz-karte/orte.js", ["KANTONE_NAMEN", "ORT_NAMEN", "STADT_MIN"]);
+const ortName = o => KO.ORT_NAMEN[o.name] || o.name.replace(/ \([A-Z]{2}\)$/, "");
+const KARTE_TEILE = {
+  "wahlkreise-sg": ["Wahlkreise des Kantons St. Gallen", null, ["Wahlkreis"], KARTE.wahlkreise.map(w => [w.name])],
+  "kantone": ["Kantone", null, ["Nr.", "Kürzel", "Name im Spiel", "Name in den swisstopo-Daten"],
+    KARTE.kantone.map(k => [k.nr, KO.KANTONE_NAMEN[k.nr][0], KO.KANTONE_NAMEN[k.nr][1], k.name])],
+  "hauptorte": ["Kantonshauptorte", "Punkt = Mitte der Gemeindefläche.", ["Kanton", "Name im Spiel", "Gemeinde in den Daten"],
+    KARTE.orte.filter(o => o.hauptort).map(o => [KO.KANTONE_NAMEN[o.kanton][0], ortName(o), o.name])],
+  "staedte": ["Grosse Städte", `Ab ${KO.STADT_MIN} Einwohnern, ohne Hauptorte.`, ["Kanton", "Name im Spiel", "Einwohner"],
+    KARTE.orte.filter(o => !o.hauptort && o.einwohner >= KO.STADT_MIN).map(o => [KO.KANTONE_NAMEN[o.kanton][0], ortName(o), o.einwohner])],
+};
+z("## 40. Schweiz-Karten-Suche (Lehrplan SG NMG.8.4) — Namen auf der stummen Karte");
+z("");
+z("Die Lage stammt aus swissBOUNDARIES3D (swisstopo); zu prüfen sind die Namen, wie die Kinder sie lernen.");
+z("");
+for (const [titel, hinweis, kopf, daten] of Object.values(KARTE_TEILE)) tabelle(`### ${titel}`, hinweis, kopf, daten);
+
 process.stdout.write(zeilen.join("\n"));
+
+// ---------- Inhalte je Liste: docs/eulenpfad/pruefung/listen.json ----------
+// Je Quell-Liste des Katalogs („<spiel>/<liste>“) die Einträge, die das Spiel zeigt, wenn nur diese
+// Liste frei ist (Zusatzlisten: ihre eigenen Einträge). Zuordnung wie im Code der Spiele.
+
+const katalog = vm.createContext({ LS: { SKALA: [] } });
+vm.runInContext(`${fs.readFileSync(path.join(wurzel, "spiele/gemeinsam/katalog.js"), "utf8")};this.SPIELE = SPIELE;`, katalog);
+const QUELL_LISTEN = Object.fromEntries(katalog.SPIELE.flatMap(s => Object.entries(s.listen || {})
+  .filter(([, l]) => !l.von).map(([id, l]) => [`${s.id}/${id}`, l.name])));
+
+const listen = {};
+const text = x => (x === null || x === undefined ? "" : String(x));
+/** Eine Tabelle zur Liste „<spiel>/<liste>“; Zellen als Strings. */
+function inListe(schluessel, titel, hinweis, kopf, zeilenListe) {
+  if (!QUELL_LISTEN[schluessel]) throw new Error(`Liste ${schluessel} steht nicht im Katalog`);
+  listen[schluessel] ??= { name: QUELL_LISTEN[schluessel], tabellen: [] };
+  listen[schluessel].tabellen.push({ titel, hinweis: hinweis || null, kopf, zeilen: zeilenListe.map(z => z.map(text)) });
+}
+/** Wie teil(): ein Objekt { gruppe: [...] } wird je Gruppe zu einer Tabelle. */
+const inListeTeil = (schluessel, titel, hinweis, kopf, daten) => {
+  if (!Array.isArray(daten) && Object.values(daten).every(Array.isArray) && Object.values(daten).every(v => v.every(Array.isArray))) {
+    for (const [gruppe, liste] of Object.entries(daten)) inListe(schluessel, `${titel} — ${gruppe}`, hinweis, kopf, zeilenVon(liste));
+  } else inListe(schluessel, titel, hinweis, kopf, zeilenVon(daten));
+};
+
+// Wortarten-Sortierer: einzelwoerter = WOERTER, sonst SAETZE[liste]
+inListe("wortarten-sortierer/einzelwoerter", "Einzelwörter", "In Stufe 2 alles klein geschrieben.", ["Nomen", "Verb", "Adjektiv"],
+  Array.from({ length: n }, (_, i) => [WOERTER.N[i], WOERTER.V[i], WOERTER.A[i]]));
+for (const [liste, saetze] of Object.entries(SAETZE)) inListe(`wortarten-sortierer/${liste}`, STUFE[liste], "Abgefragt werden nur die Wörter in „…“.", ["Satz", "Wortarten"],
+  saetze.map(satz => [satz.replace(/\[([^|]+)\|[NVA]\]/g, "„$1“"), [...satz.matchAll(/\[([^|]+)\|([NVA])\]/g)].map(m => `${m[1]} = ${ART[m[2]]}`).join("; ")]));
+
+// Regel-Lücke: je Regel eine Liste (Schlüssel in REGELN), die Ausnahmen der ie-Regel eigens (AUSNAHMEN_LISTE im Spiel)
+const regelZeilen = woerter => woerter.map(([t, bild]) => { const m = t.match(/^(.*)\{([^|]+)\|([^}]+)\}(.*)$/); return [m[1] + m[2] + m[4], m[2], m[1] + m[3] + m[4], bild]; });
+for (const [id, r] of Object.entries(REGELN)) inListe(`regel-luecke/${id}`, r.name, `Regel im Spiel: ${r.regel}`, ["Wort", "richtig", "falsche Auswahl", "Bild"], regelZeilen(r.woerter));
+inListe("regel-luecke/ie-ausnahmen", `${REGELN["ie-i"].name} — Ausnahmen`, "Nur in Stufe 5–6.", ["Wort", "richtig", "falsche Auswahl", "Bild"], regelZeilen(REGELN["ie-i"].ausnahmen));
+
+// Satz-Reparatur: SAETZE[gruppe] je SAETZE_LISTEN (die Liste des Wörter-Trenners verweist hierher)
+const { SAETZE_LISTEN } = lade("spiele/satz-reparatur/saetze.js", ["SAETZE_LISTEN"]);
+for (const [gruppe, liste] of Object.entries(SAETZE_LISTEN)) {
+  const punkt = AUCH_PUNKT.filter(s => SATZ[gruppe].some(x => x.includes(s)));
+  inListe(`satz-reparatur/${liste}`, SATZ_STUFE[gruppe], punkt.length ? `Auch ein Punkt gilt als richtig bei: ${punkt.map(s => `„${s}“`).join(", ")}` : null, ["Satz"], SATZ[gruppe].map(s => [s]));
+}
+
+// Word-Match: Themen mit dem Feld „liste“ (Familie und Körper teilen eine Liste), dazu die Wendungen
+for (const t of Object.values(THEMEN_EN)) inListe(`word-match/${t.liste}`, t.name, null, ["Englisch", "Deutsch", "Bild"], t.woerter);
+inListe("word-match/wendungen", "Phrases", null, ["Englisch", "Deutsch"], WENDUNGEN_EN);
+
+// Silben-Klatscher, Reim-Paare, ABC-Sortierer
+for (const [liste, woerter] of Object.entries(SILBEN_WOERTER)) inListe(`silben-klatscher/${liste}`, "Wörter", "Sprechsilben, wie man sie klatscht.", ["Wort", "Silben", "Anzahl", "Bild"],
+  woerter.map(([g, bild]) => [g.replace(/-/g, ""), g, g.split("-").length, bild]));
+inListe("reim-paare/reimgruppen", "Reimgruppen", "Wörter ohne Bild kommen erst ab Stufe 4 vor.", ["Reimgruppe"], REIMGRUPPEN.map(g => [g.map(([w, b]) => (b ? `${b} ${w}` : w)).join(" – ")]));
+inListe("reim-paare/reimverse", "Verse", "Ist nur diese Liste frei, sind die Lösungswörter der anderen Verse die Auswahl.", ["Vers"], REIMVERSE.map(([vers, wort]) => [vers.replace("___", `„${wort}“`)]));
+inListe("abc-sortierer/nomen-bild", "Nomen mit Bild", null, ["Wort", "Bild"], ABC_WOERTER);
+
+// Tier-Sortierer: je Spalte von tiere.js eine Liste (TIER_LISTE_JE_MERKMAL), nur Tiere (keine Pflanzen, Pilze)
+const NUR_TIERE = TIERE.filter(t => !["Pflanze", "Pilz"].includes(t[2]));
+const KNIFFLIG_HINWEIS = "Die knifflige Auswahl (richtige und naheliegende falsche Gruppe) steht im Spielcode (KNIFFLIG).";
+inListe("tier-sortierer/tierklassen", "Tierklassen", KNIFFLIG_HINWEIS, ["Name", "Bild", "Klasse"], NUR_TIERE.map(([name, bild, klasse]) => [name, bild, klasse]));
+inListe("tier-sortierer/saeugetier-gruppen", "Gruppen der Säugetiere", KNIFFLIG_HINWEIS, ["Name", "Bild", "Gruppe (Säugetiere)"], NUR_TIERE.filter(t => t[3]).map(([name, bild, , gruppe]) => [name, bild, gruppe]));
+inListe("tier-sortierer/haltung", "Haltung", "Tiere ohne eindeutige Haltung kommen nicht vor.", ["Name", "Bild", "Haltung"], NUR_TIERE.filter(t => t[4]).map(([name, bild, , , haltung]) => [name, bild, haltung]));
+
+// Lebensraum: je Lebensraum eine Liste (LEBENSRAUM_LISTE_JE_RAUM), Tiere und Pflanzen; dazu die Nahrungsketten
+const { LEBENSRAUM_LISTE_JE_RAUM } = lade("spiele/lebensraum/nahrung.js", ["LEBENSRAUM_LISTE_JE_RAUM"]);
+for (const [raum, liste] of Object.entries(LEBENSRAUM_LISTE_JE_RAUM)) inListe(`lebensraum/${liste}`, `Lebensraum ${raum}`, null, ["Name", "Bild", "Klasse", "Lebensraum"],
+  TIERE.filter(t => t[5] === raum).map(([name, bild, klasse, , , r]) => [name, bild, klasse, r]));
+inListe("lebensraum/nahrungsketten", "Nahrungsketten — lies: … wird gefressen von …", null, ["Kette"], NAHRUNGSKETTEN.map(k => [k.map(([name]) => name).join(" → ")]));
+inListe("lebensraum/nahrungsketten", "Artikel für „Was frisst …?“", null, ["Name", "Artikel"], Object.entries(ARTIKEL));
+
+// Fledermaus-Forscher: je Konstante eine Liste
+inListe("fledermaus-forscher/aussagen", "Aussagen „Stimmt das?“", null, ["ab Stufe", "Aussage", "stimmt?", "Erklärung im Spiel"], FLEDER.FLEDERMAUS_AUSSAGEN.map(([ab, t, s, e]) => [ab, t, s ? "ja" : "nein", e]));
+inListe("fledermaus-forscher/fragen", "Fragen mit Auswahl", null, ["ab Stufe", "Frage", "richtig", "falsch", "Erklärung"], FLEDER.FLEDERMAUS_FRAGEN.map(([ab, f, r, f1, f2, e]) => [ab, f, r, `${f1}; ${f2}`, e]));
+inListe("fledermaus-forscher/jahr", "Jahr der Fledermaus (Reihenfolge)", null, ["Zeit", "was"], FLEDER.FLEDERMAUS_JAHR);
+inListe("fledermaus-forscher/anpassungen", "Merkmal und Nutzen", "Jeder Nutzen darf nur zu einem Merkmal passen.", ["Merkmal", "Nutzen"], FLEDER.FLEDERMAUS_ANPASSUNGEN);
+
+// Schätz-Waage: Vergleiche, Reihen; Schätzfragen je Einheit der richtigen Antwort (SCHAETZ_LISTEN)
+const { SCHAETZ_LISTEN } = lade("spiele/schaetz-waage/groessen.js", ["SCHAETZ_LISTEN"]);
+inListe("schaetz-waage/vergleiche", "Vergleichen", null, ["Eigenschaft", "grösser", "kleiner"], SCHAETZ.VERGLEICHE.map(([e, a, b]) => [e, `${a[0]} ${a[1]}`, `${b[0]} ${b[1]}`]));
+inListe("schaetz-waage/reihen", "Ordnen", null, ["Richtung", "Reihe"], SCHAETZ.REIHEN.map(([r, d]) => [r, d.map(x => `${x[0]} ${x[1]}`).join(" → ")]));
+for (const [liste, einheiten] of Object.entries(SCHAETZ_LISTEN)) inListe(`schaetz-waage/${liste}`, "Referenzgrössen", null, ["Stufe", "Frage", "richtig", "falsch"],
+  frage3(SCHAETZ.SCHAETZFRAGEN.filter(f => einheiten.includes(f[2].split(" ")[1]))));
+
+// Rechengeschichten und Lese-Detektiv: je Stufe der Daten eine Liste
+const { GESCHICHTEN_LISTEN } = lade("spiele/rechengeschichten/geschichten.js", ["GESCHICHTEN_LISTEN"]);
+for (const [stufe, liste] of Object.entries(GESCHICHTEN_LISTEN)) inListe(`rechengeschichten/${liste}`, "Geschichten", "Platzhalter {a}, {b} … werden im Spiel durch Zahlen aus den Bereichen ersetzt; {b:wird|werden} heisst: „wird“, wenn b = 1 ist, sonst „werden“.",
+  ["Stufe", "Geschichte", "Zahlen", "richtige Rechnung", "Ablenker"],
+  GESCHICHTEN.filter(g => g.stufe === Number(stufe)).map(g => [g.stufe, g.text, Object.entries(g.zahlen).map(([k, [a, b]]) => `${k}: ${a}–${b}`).concat(Object.entries(g.abgeleitet || {}).map(([k, v]) => `${k} = ${v}`)).join(", "),
+    g.richtig || g.rechnung, (g.falsch || []).join("; ") || `(nicht gebraucht: ${g.unwichtig})`]));
+const { LESETEXTE_LISTEN } = lade("spiele/lese-detektiv/texte.js", ["LESETEXTE_LISTEN"]);
+for (const [stufe, liste] of Object.entries(LESETEXTE_LISTEN)) inListe(`lese-detektiv/${liste}`, "Texte", "Die Namen in den Texten sind erfunden.", ["Stufe", "Titel", "Text", "Frage", "richtig", "falsch"],
+  LESETEXTE.filter(t => t[0] === Number(stufe)).map(([s, t, txt, f, r, a, b]) => [s, t, txt, f, r, `${a}; ${b}`]));
+
+// Anlaut-Angel, Buchstaben-Zwillinge, Blitzlesen, Nomen-Puzzle
+inListe("anlaut-angel/anlaut", "Anlaut = erster Buchstabe", null, ["Wort", "Bild"], ANLAUT.ANLAUT_WOERTER);
+inListe("anlaut-angel/endlaut", "Endlaut = letzter Buchstabe", null, ["Wort", "Bild", "Endlaut"], ANLAUT.ENDLAUT_WOERTER.map(([w, b]) => [w, b, w.slice(-1)]));
+inListe("anlaut-angel/mitte", "Selbstlaut in der Mitte", null, ["Wort", "Bild"], ANLAUT.MITTE_WOERTER);
+inListe("anlaut-angel/luecke", "Lautgetreue Wörter (fehlender Buchstabe)", null, ["Wort", "Bild"], ANLAUT.LUECKEN_WOERTER);
+inListe("buchstaben-zwillinge/verwechsler", "Leicht verwechselbare Buchstaben", null, ["Gruppe"], ZWILLINGE.VERWECHSLER.map(g => [g.join(" ")]));
+inListe("buchstaben-zwillinge/wortpaare", "Ähnliche Wörter (das erste passt zum Bild)", null, ["Wort mit Bild", "Ablenker"], ZWILLINGE.WORTPAARE.map(([[w, b], ...a]) => [`${b} ${w}`, a.join(", ")]));
+inListe("blitzlesen/wortgruppen", "Wortgruppen", null, ["Einzahl", "Mehrzahl", "ein/eine", "Bild"], BLITZ.ZAEHLDINGE);
+for (const [liste, komposita] of Object.entries(KOMPOSITA)) inListe(`nomen-puzzle/${liste}`, "Zusammengesetzte Nomen", "Das Grundwort (letzter Teil) bestimmt den Artikel.", ["Teile", "zusammengesetzt", "falsche Formen"],
+  komposita.map(k => [k.teile.map(t => `${t[0]} ${t[1]}`).join(" + "), `${k.ganz[0]} ${k.ganz[1]}`, (k.falsch || []).join(", ")]));
+
+// Lebenszyklus: Zyklen mit Liste im letzten Feld, dazu Geburt und Fragen
+for (const liste of ["zyklen-tiere", "zyklen-pflanzen", "zyklus-mensch"]) inListe(`lebenszyklus/${liste}`, "Zyklen", null, ["ab Stufe", "Lebewesen", "Stadien"],
+  ZYKLUS.ZYKLEN.filter(z => z[3] === liste).map(([s, name, st]) => [s, name, st.map(x => x[1]).join(" → ")]));
+inListe("lebenszyklus/geburt", "Wie kommen die Jungen zur Welt?", null, ["Tier", "Bild", "Art"], ZYKLUS.GEBURT.map(([b, t, a]) => [t, b, a]));
+inListe("lebenszyklus/fragen", "Fragen", null, ["Frage", "richtig", "falsch"], ZYKLUS.ZYKLUS_FRAGEN.map(([f, r, a, b]) => [f, r, `${a}; ${b}`]));
+
+// Körper-Puzzle, Znüni-Teller, Magnet-Labor, Schwimmt oder sinkt: Fragen mit Liste im letzten Feld
+const fragenMit = (fragen, liste) => fragen.filter(f => f[f.length - 1] === liste);
+inListe("koerper-puzzle/koerperteile", "Körperteile", null, ["Bild", "Name", "Artikel"], KOERPER.KOERPERTEILE);
+inListe("koerper-puzzle/sinne", "Sinne", null, ["Frage", "Bild", "Sinnesorgan"], KOERPER.SINNE);
+for (const liste of ["gelenke-schutz", "organe", "kreislauf-haut"]) inListe(`koerper-puzzle/${liste}`, "Fragen", null, ["Stufe", "Frage", "richtig", "falsch"], frage3(fragenMit(KOERPER.KOERPER_FRAGEN, liste)));
+inListe("koerper-puzzle/wege", "Wege durch den Körper", null, ["Weg", "Stationen"], KOERPER.WEGE.map(([name, s]) => [name, s.join(" → ")]));
+const { GRUPPEN_ZNUENI } = lade("spiele/znueni-teller/lebensmittel.js", ["GRUPPEN_ZNUENI"]);
+inListe("znueni-teller/lebensmittel", "Lebensmittel und Gruppen", null, ["Bild", "Name", "Gruppe"], ZNUENI.LEBENSMITTEL);
+inListe("znueni-teller/lebensmittel", "Gruppen und Erklärungen", null, ["Gruppe", "Bild", "Name im Spiel", "Erklärung"], Object.entries(GRUPPEN_ZNUENI).map(([g, x]) => [g, x.bild, x.name, x.erklaerung]));
+inListe("znueni-teller/znuenis", "Znüni zur Wahl", null, ["ausgewogen", "nicht ausgewogen"], ZNUENI.ZNUENIS.map(([g, ...s]) => [g.join(""), s.map(x => x.join("")).join("; ")]));
+for (const liste of ["ernaehrung", "region-saison"]) inListe(`znueni-teller/${liste}`, "Fragen", null, ["Frage", "richtig", "falsch"], fragenMit(ZNUENI.ZNUENI_FRAGEN, liste).map(([f, r, a, b]) => [f, r, `${a}; ${b}`]));
+inListe("magnet-labor/dinge", "Zieht der Magnet es an?", null, ["Bild", "Ding", "zieht an?"], MAGNET.MAGNET_DINGE.map(([b, d, j]) => [b, d, j ? "ja" : "nein"]));
+for (const liste of ["wirkung", "kompass-pole", "strom"]) inListe(`magnet-labor/${liste}`, "Fragen", liste === "kompass-pole" ? "Dazu Aufgaben zu Nord- und Südpol, die das Spiel selbst erzeugt (gleiche Pole stossen sich ab, verschiedene ziehen sich an)." : null,
+  ["Stufe", "Frage", "richtig", "falsch"], frage3(fragenMit(MAGNET.MAGNET_FRAGEN, liste)));
+inListe("schwimmt-sinkt/wasser", "Im Wasser", "„Stufe 1“ = ganz eindeutige Dinge, die schon in der Einstiegsstufe vorkommen.", ["Bild", "Ding", "schwimmt?", "Stufe 1"],
+  STOFFE.WASSER_DINGE.map(([b, d, j]) => [b, d, j ? "schwimmt" : "sinkt", STOFFE.WASSER_EINFACH.includes(d) ? "ja" : ""]));
+inListe("schwimmt-sinkt/material", "Material", null, ["Bild", "Ding", "Material"], STOFFE.MATERIAL_DINGE);
+for (const liste of ["eigenschaften", "schwimmen-sinken"]) inListe(`schwimmt-sinkt/${liste}`, "Fragen", null, ["Stufe", "Frage", "richtig", "falsch"], frage3(fragenMit(STOFFE.STOFF_FRAGEN, liste)));
+
+// Instrumente: Liste je Gruppe (INSTRUMENT_LISTE_JE_GRUPPE), Fragen mit Liste im letzten Feld
+const { INSTRUMENT_LISTE_JE_GRUPPE } = lade("spiele/instrumente/instrumente.js", ["INSTRUMENT_LISTE_JE_GRUPPE"]);
+for (const [gruppe, liste] of Object.entries(INSTRUMENT_LISTE_JE_GRUPPE)) inListe(`instrumente/${liste}`, "Instrumente", "Bild „svg:…“ = im Spiel gezeichnet; leer = kein Bild, nur ab Stufe 3.",
+  ["Bild", "Name", "Gruppe", "Spielweise", "genauer"], INSTR.INSTRUMENTE.filter(i => i[2] === gruppe));
+for (const liste of ["ensembles", "klang"]) inListe(`instrumente/${liste}`, "Fragen", null, ["Frage", "richtig", "falsch"], fragenMit(INSTR.INSTRUMENT_FRAGEN, liste).map(([f, r, a, b]) => [f, r, `${a}; ${b}`]));
+
+// Diagramm-Detektiv, Preis-Tabelle, Kompass
+inListe("diagramm-detektiv/umfragen", "Umfragen", "Die Zahlen erzeugt das Spiel; zu prüfen sind Fragen und Kategorien.", ["Titel", "Frage", "Kategorien"],
+  UMFRAGEN.map(u => [u.titel, u.frage, u.kategorien.map(([b, name, f]) => `${b} ${name} (${f})`).join(", ")]));
+const PREIS = lade("spiele/preis-tabelle/artikel.js", ["WARE_GEWICHT", "FOLGEN"]);
+inListe("preis-tabelle/stueckware", "Artikel", "Preis je Stück in Rappen: kleinster bis grösster Wert, den das Spiel wählt.", ["Bild", "Einzahl", "Mehrzahl", "von Rp.", "bis Rp."], PREIS_ARTIKEL);
+inListe("preis-tabelle/gewichtsware", "Ware nach Gewicht", "Preis für 100 g in Rappen: kleinster bis grösster Wert, den das Spiel wählt.", ["Bild", "Name", "von Rp.", "bis Rp."], PREIS.WARE_GEWICHT);
+inListe("preis-tabelle/folgen", "Folgen in Tabellen", "Die Zahlen erzeugt das Spiel; bei Geld steht rechts ein Frankenbetrag.", ["Bild", "Spalte links", "Spalte rechts", "Geld", "Satz zur Frage"],
+  PREIS.FOLGEN.map(([b, l, r, geld, s]) => [b, l, r, geld ? "ja" : "nein", s]));
+inListe("kompass/orte", "Orte auf dem Plan", null, ["Bild", "Name", "Nominativ", "Dativ"], ORTE);
+
+// Wortfamilien-Baum: Spalten je Liste (WORTFAMILIEN_LISTEN); Familienwort und Stamm stehen in jeder Liste mit
+const { WORTFAMILIEN_LISTEN } = lade("spiele/wortfamilien-baum/woerter.js", ["WORTFAMILIEN_LISTEN"]);
+const SPALTE_KOPF = { einfach: "abgeleitet", umlaut: "mit Umlaut", zusammen: "zusammengesetzt", falsch: "nur ähnlich (Bedeutung)" };
+const SPALTE_TEXT = { falsch: w => w.map(([x, b]) => `${x} (${b})`).join("; ") };
+for (const liste of [...new Set(Object.values(WORTFAMILIEN_LISTEN))]) {
+  const spalten = Object.keys(WORTFAMILIEN_LISTEN).filter(s => WORTFAMILIEN_LISTEN[s] === liste);
+  inListe(`wortfamilien-baum/${liste}`, "Wortfamilien", liste === "umlaut-aehnlich" ? "Ähnliche Wörter gehören NICHT zur Familie." : null, ["Familie", "Stamm", ...spalten.map(s => SPALTE_KOPF[s])],
+    WORTFAMILIEN.filter(f => spalten.some(s => f[s].length)).map(f => [f.wort, f.stamm, ...spalten.map(s => (SPALTE_TEXT[s] || (w => w.join(", ")))(f[s]))]));
+}
+
+// Zeitreise-Verben, Fehler-Lupe (Regeln über das Feld „liste“, Zusatzliste fehlerfrei)
+inListe("zeitreise-verben/regelmaessig", "Regelmässige Verben", null, ["Verb", "Präsens", "Präteritum", "Perfekt"], ZR.VERBEN_REGELMAESSIG.map(satz3));
+inListe("zeitreise-verben/unregelmaessig", "Unregelmässige Verben", null, ["Verb", "Präsens", "Präteritum", "Perfekt"], ZR.VERBEN_UNREGELMAESSIG.map(satz3));
+for (const r of Object.values(FL.FEHLER_REGELN)) inListe(`fehler-lupe/${r.liste}`, r.name, `Regel im Spiel: ${r.regel} — das Wort in „…“ zeigt das Spiel falsch.`, ["Satz richtig", "gezeigter Fehler", "weitere Wahl"],
+  [...r.kurz, ...r.lang].map(s => { const m = s.match(/\{([^}]+)\}/)[1].split("|"); return [s.replace(/\{([^|}]+)[^}]*\}/, "„$1“"), m[1], m.slice(2).join(", ")]; }));
+inListe("fehler-lupe/fehlerfrei", "Fehlerfreie Sätze (Königsstufe)", "Nur neben einem Satz aus einer freien Regel-Liste.", ["Satz"], FL.FEHLERFREIE_SAETZE.map(s => [s]));
+
+// Englisch: Wort-Zwillinge (Liste im 4. Feld), Sentence-Builder (Liste im 3. Feld), Listen & Tap
+for (const liste of ["gleich", "aehnlich"]) inListe(`wort-zwillinge/${liste}`, "Parallelwörter", null, ["Englisch", "Deutsch", "Bild"], WZ.ZWILLINGE.filter(z => z[3] === liste).map(([en, de, b]) => [en, de, b]));
+inListeTeil("wort-zwillinge/falsche-freunde", "Falsche Freunde", null, ["Englisch", "Bedeutung", "sieht aus wie", "Bild"], WZ.FALSCHE_FREUNDE);
+const nackt = w => w.replace(/[.?!]$/, "");
+for (const liste of ["ich-saetze", "er-sie-saetze", "fragen", "verneinung"]) {
+  const saetze = SB.SAETZE.filter(s => s[2] === liste);
+  inListe(`sentence-builder/${liste}`, "Sätze", "Britisches Englisch (have got).", ["Englisch", "Deutsch"], saetze.map(([en, de]) => [en, de]));
+  // Verwechsler wie im Spiel: das erste Wort des Satzes mit einem Eintrag
+  const paare = [...new Set(saetze.map(([en]) => en.split(" ").map(nackt).find(w => SB.VERWECHSLER[w])).filter(Boolean))];
+  if (paare.length) inListe(`sentence-builder/${liste}`, "Verwechsler (falsche Form als zusätzliche Karte, nur in Stufen mit Verwechsler)", null, ["richtig", "falsch"], paare.map(w => [w, SB.VERWECHSLER[w]]));
+}
+inListeTeil("listen-tap/anweisungen", "Formen", null, ["Form"], LT.ANWEISUNG_FORMEN);
+inListeTeil("listen-tap/anweisungen", "Farben", null, ["Farbe", "Bilder"], LT.ANWEISUNG_FARBEN);
+inListeTeil("listen-tap/anweisungen", "Anweisungen", null, ["Anweisung"], LT.ANWEISUNG_VERBEN);
+inListeTeil("listen-tap/wo-ist", "Tiere", null, ["Englisch", "Bild"], LT.WO_TIERE);
+inListeTeil("listen-tap/wo-ist", "Orte", null, ["Ding", "Präposition"], LT.WO_ORTE);
+
+// Glace-Kombinator, Früher und heute, Wetter: je Konstante eine Liste
+inListeTeil("glace-kombinator/sorten", "Sorten", null, ["Sorte", "Farbe", "Buchstabe"], GK.GLACE_SORTEN);
+inListeTeil("glace-kombinator/kleider", "Kleider", null, ["Gruppe", "Bild", "Name"], GK.KLEIDER);
+inListeTeil("frueher-heute/paare", "Paare", "„svg:…“ = im Spiel gezeichnet.", ["Gruppe", "Bild früher", "früher", "Bild heute", "heute", "früher eindeutig"], FH.FH_PAARE);
+inListeTeil("frueher-heute/reihen", "Reihen vom ältesten zum neusten", null, ["Gruppe", "Thema", "Reihe (Bild / Ding)"], FH.FH_REIHEN);
+inListeTeil("frueher-heute/grosseltern", "Gab es das schon?", null, ["Bild", "Ding", "vor 60 Jahren", "vor 100 Jahren"], FH.FH_GROSSELTERN);
+inListeTeil("wetter-jahreszeiten/jahreszeiten", "Jahreszeiten", null, ["ab Stufe", "Bild", "Beobachtung", "Jahreszeit"], WJ.WJ_JAHRESZEITEN);
+inListeTeil("wetter-jahreszeiten/kleidung", "Kleidung", null, ["Bild", "Wetter", "richtig", "falsch", "falsch"], WJ.WJ_KLEIDUNG);
+inListeTeil("wetter-jahreszeiten/symbole", "Wettersymbole", null, ["Bild", "Name"], WJ.WJ_SYMBOLE);
+inListeTeil("wetter-jahreszeiten/fragen", "Fragen", null, ["ab Stufe", "Bild", "Frage", "richtig", "falsch", "falsch", "Erklärung"], WJ.WJ_FRAGEN);
+
+// Schulweg-Profi: Konstanten je Liste, Fragen mit Liste im 2. Feld
+const VERKEHR = "Verkehrsregeln aus dem Gedächtnis belegt (SVG, VTS) — bitte besonders prüfen.";
+inListeTeil("schulweg-profi/sicher-gefaehrlich", "Sicher oder gefährlich", VERKEHR, ["Bild", "Situation", "sicher"], SW.SW_SICHER);
+inListeTeil("schulweg-profi/queren", "Merksatz", null, ["Bild", "Mundart", "Hochdeutsch"], SW.SW_MERKSATZ);
+inListeTeil("schulweg-profi/signale", "Signale", VERKEHR, ["Signal", "Bedeutung", "auch richtig"], SW.SW_SIGNALE);
+for (const liste of ["sicher-gefaehrlich", "queren", "signale", "velo"]) {
+  const fragen = SW.SW_FRAGEN.filter(f => f[1] === liste);
+  if (fragen.length) inListeTeil(`schulweg-profi/${liste}`, "Fragen", VERKEHR, ["ab Stufe", "Liste", "Bild", "Frage", "richtig", "falsch", "falsch", "Erklärung"], fragen);
+}
+
+// Zeitstrahl-Sortierer: Konstanten je Liste (Kopf von zeitstrahl.js)
+inListeTeil("zeitstrahl-sortierer/lebensabschnitte", "Lebensabschnitte", null, ["Bild", "Abschnitt"], ZS.ZS_ABSCHNITTE);
+inListeTeil("zeitstrahl-sortierer/lebensabschnitte", "Ereignisse im Leben", "Eintrittsalter für den Kanton St. Gallen.", ["Alter", "Bild", "Ereignis"], ZS.ZS_LEBEN);
+inListeTeil("zeitstrahl-sortierer/generationen", "Generationen", null, ["Generation", "Bild", "Person"], ZS.ZS_GENERATIONEN);
+inListeTeil("zeitstrahl-sortierer/ereignisse", "Ereignisse mit Jahrzahl", "Jahrzahlen bitte nachprüfen.", ["Jahr", "Jahrzahl", "Bild", "Ereignis", "Zeitalter"], ZS.ZS_EREIGNISSE);
+inListeTeil("zeitstrahl-sortierer/epochen", "Zeitalter", null, ["Bild", "Zeitalter"], ZS.ZS_EPOCHEN);
+inListeTeil("zeitstrahl-sortierer/epochen", "Merkmale der Zeitalter", null, ["Zeitalter", "Bild", "Merkmal"], ZS.ZS_MERKMALE);
+
+// Stromkreis-Bauer: Schaltungen mit Liste im 1. Feld, Gegenstände zur Liste leiter
+inListeTeil("stromkreis-bauer/leiter", "Leiter und Nichtleiter", null, ["Bild", "Gegenstand", "leitet", "knifflig"], ST.GEGENSTAENDE);
+for (const liste of ["einfach", "schalter", "leiter", "kurzschluss", "serie-parallel"]) {
+  const schaltungen = ST.SCHALTUNGEN.filter(s => s[0] === liste);
+  if (schaltungen.length) inListeTeil(`stromkreis-bauer/${liste}`, "Schaltungen", "Kurzschrift im Kopf von bauteile.js; ob die Lampe brennt, rechnet das Spiel aus.", ["Liste", "Aufbau", "Zusatz"], schaltungen);
+}
+
+// Plan-Leser (PLAN_DINGE[liste]), Echt oder erfunden?, Gedicht-Baukasten
+for (const [liste, dinge] of Object.entries(PL.PLAN_DINGE)) inListeTeil(`plan-leser/${liste}`, "Dinge auf dem Plan", "Zeichen frei erfunden.", ["Name", "Dativ", "Mehrzahl", "Zeichen", "Farbe"], dinge);
+inListeTeil("echt-oder-erfunden/aussagen", "Sätze", null, ["Bild", "Satz", "kann es geben", "Stufe 1"], EE.AUSSAGEN);
+inListeTeil("echt-oder-erfunden/geschichten", "Geschichten", "Nummer des erfundenen Satzes, −1 = alles echt.", ["Sätze", "erfundener Satz", "Merkmal"], EE.GESCHICHTEN);
+inListeTeil("echt-oder-erfunden/geschichten", "Merkmale", null, ["Schlüssel", "Merkmal"], EE.MERKMALE);
+inListeTeil("echt-oder-erfunden/staunen", "Erstaunlich, aber wahr?", "Fakten bitte nachprüfen.", ["Satz", "stimmt"], EE.STAUNEN);
+inListeTeil("echt-oder-erfunden/textsorten", "Textsorten", null, ["Sorte", "Angaben"], EE.TEXTSORTEN);
+inListeTeil("echt-oder-erfunden/textsorten", "Texte zu den Textsorten", "Selbst geschrieben; die Sagen spielen an echten Orten.", ["Sorte", "Text"], EE.TEXTSORTEN_TEXTE);
+inListeTeil("gedicht-baukasten/reimpaare", "Zweizeiler", "Alle Verse selbst verfasst.", ["Vers 1", "Vers 2", "Reimwort", "Wahl", "Wahl", "Wahl"], GB.REIMPAARE);
+for (const [liste, gedichte] of Object.entries(GB.VIERZEILER)) inListe(`gedicht-baukasten/${liste}`, "Vierzeiler", null, ["Verse"], gedichte.map(g => [zelle(g)]));
+inListeTeil("gedicht-baukasten/strophen", "Gedichte mit Strophen", null, ["Titel", "Strophen (Reimschema / Verse)"], GB.STROPHEN_GEDICHTE);
+
+for (const [liste, [titel, hinweis, kopf, daten]] of Object.entries(KARTE_TEILE)) inListe(`schweiz-karte/${liste}`, titel, hinweis, kopf, daten);
+
+// Jede Quell-Liste braucht einen Eintrag — sonst bricht der Lauf ab, statt still eine Lücke zu schreiben.
+const fehlend = Object.keys(QUELL_LISTEN).filter(k => !listen[k] || listen[k].tabellen.every(t => !t.zeilen.length));
+if (fehlend.length) throw new Error(`Listen ohne Einträge: ${fehlend.join(", ")}`);
+const geordnet = Object.fromEntries(Object.keys(QUELL_LISTEN).map(k => [k, listen[k]]));
+fs.writeFileSync(path.join(__dirname, "..", "docs", "eulenpfad", "pruefung", "listen.json"), `${JSON.stringify(geordnet, null, 2)}\n`, "utf8");

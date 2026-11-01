@@ -44,8 +44,10 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
   kein Zeitdruck als Standard. Der Timer ist eine **zuschaltbare** Zusatzschwierigkeit (Zeit um =
   ein Fehler, die Aufgabe bleibt lösbar); gemessen wird die Zeit je Aufgabe aber immer.
 - **Inhaltslisten (Wörter, Sätze) stehen in eigenen Dateien** (`woerter.js` im Spielordner), damit
-  Eltern oder Lehrperson sie ohne Code prüfen können; jede neue Liste gilt als ungeprüft, bis das
-  im Handover vermerkt ist.
+  Eltern oder Lehrperson sie ohne Code prüfen können; jede neue Liste gilt als ungeprüft, bis sie im
+  Entwickler-Modus geprüft ist (`spiele/gemeinsam/pruefstand.js`, Entscheid E1 a).
+- **Entwickler-Bemerkungen** (`docs/eulenpfad/bemerkungen.json`): zu Beginn jeder Sitzung die offenen
+  lesen, beheben und ihren Status auf „erledigt <Datum> (<Sitzung>)“ setzen.
 - **Alter:** 2. Klasse (≈ 7–8 J.) fast ohne Lesetext, Symbole/Bilder; 4. Klasse (≈ 9–10 J.)
   kurze Sätze erlaubt.
 - **Offline lauffähig**, keine Anmeldung. **Daten über das Kind nur lokal im Browser**
@@ -67,6 +69,7 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 - **Session-Reports:** docs/eulenpfad/report/ · LERN_Session<N>_<YYYY-MM-DD>.md
 - **Changelog/Logbuch:** CHANGELOG.md
 - **Build:** — (kein Build; `eulenpfad/index.html` im Browser öffnen). Veröffentlichen: `.github/workflows/pages.yml` auf `https://patrikneunteufel.github.io/Lernspiele/`, von selbst bei jedem Push auf master, der `portal/` oder einen App-Ordner ändert (W1 a), sonst von Hand
+- **Entwickler-Modus:** `python tools/entwickler_server.py` (Repo ausliefern, Prüfstand und Bemerkungen schreiben), Schlüssel in `entwickler.key` (gitignored); docs/eulenpfad/rahmen.md Abschnitt 11
 - **Tests:** — (manuell im Browser: Desktop, Tablet 768 px, Handy 375 px; jede Kombination Spiel × Stufe lädt ohne Konsolenfehler; Aufgabengeneratoren je Stufe mit einigen tausend Zufallsaufgaben auf Zahlenraum und gültige Lösung prüfen)
 - **Sensible Daten:** Namen, Alter und Lernstand der Kinder nur im Browser (localStorage, Schlüssel `lernspiele:*`) und in selbst gesicherten JSON-Dateien — solche Dateien nie ins Repo; keine Namen, Fotos oder Handschrift von Kindern in Spielen/Commits; Lernzielblätter liegen nur als Material in material/
 - **Bewusste Vereinfachungen:** —

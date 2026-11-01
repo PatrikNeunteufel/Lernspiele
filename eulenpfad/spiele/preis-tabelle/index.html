@@ -33,6 +33,8 @@
 <script src="../gemeinsam/spiel.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
 <script src="artikel.js"></script>
 <script>
 "use strict";
@@ -317,7 +319,8 @@ LS.spiel({
         return i === a.luecke ? (zelle = luecke()) : betrag(a.preise[i]);
       }));
       const g = a.menge[a.luecke];
-      frage = `Was kosten ${grammText(g)} ${name}?`;
+      // „1 kg“ ist eine Menge in der Einzahl: „Was kostet 1 kg Schoggi?“, aber „Was kosten 300 g …?“
+      frage = `Was ${grammText(g).startsWith("1 ") ? "kostet" : "kosten"} ${grammText(g)} ${name}?`;
       hinweis = ctx.stufe === "s5" ? "Wie viel kosten 100 g? Wie oft stecken 100 g in der gesuchten Menge?"
         : "Rechne zuerst aus, was 100 g kosten — oder 50 g. Dann mal so oft, wie es braucht.";
       // Lösungsweg über 100 g und, wenn nötig, über 50 g

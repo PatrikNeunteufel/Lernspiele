@@ -91,13 +91,27 @@ Prüffunktion (`pruefeAufgabe`) werden zusätzlich mit 3000 Zufallsaufgaben je S
 geprüft. Danach spielt es jedes Spiel mit Inhaltslisten als Kind, mit je einer freigegebenen Liste.
 Einzelne Spiele: `node tools/pruefe_spiele.js reim-paare abc-sortierer`.
 
+**Entwickler-Modus** (nur lokal): Spiele durchspielen, Inhaltslisten ansehen, beides als geprüft
+markieren und Bemerkungen für die Entwicklung eintragen. Server starten:
+
+```bash
+python tools/entwickler_server.py
+```
+
+Der Server schreibt die Links in die Konsole (Strg+Klick öffnet sie); mit `--oeffnen` öffnet er
+Eulenpfad gleich im Browser. Dann <http://localhost:8765/eulenpfad/> öffnen, als Aufsicht anmelden und unter Verwaltung → Entwicklung
+den Schlüssel aus `entwickler.key` eingeben (die Datei ist von Git ausgeschlossen). Der Server schreibt
+den Prüfstand nach `eulenpfad/spiele/gemeinsam/pruefstand.js` und Bemerkungen nach
+`docs/eulenpfad/bemerkungen.json`; nach Commit und Push gilt der Prüfstand für alle.
+
 Die Checkliste neu erzeugen, nachdem sich Katalog, Prüfstand, Spielideen oder Annahmen geändert haben:
 
 ```bash
 node tools/checkliste.js > docs/eulenpfad/checkliste.md
 ```
 
-Die Prüfliste der Inhaltslisten neu erzeugen, nachdem eine Liste geändert wurde:
+Die Prüfliste der Inhaltslisten neu erzeugen, nachdem eine Liste geändert wurde (schreibt zusätzlich
+`docs/eulenpfad/pruefung/listen.json` für „ansehen“ im Entwickler-Modus):
 
 ```bash
 node tools/pruefliste_wortlisten.js > docs/eulenpfad/pruefung/wortlisten_zur_pruefung.md

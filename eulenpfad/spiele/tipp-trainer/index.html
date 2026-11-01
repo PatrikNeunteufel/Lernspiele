@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipp-Trainer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .tt-bild { text-align: center; font-size: 64px; line-height: 1.1; margin: 4px 0; }
+  .tt-text { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; margin: 8px auto 14px; max-width: 900px;
+    font-size: clamp(26px, 6vw, 44px); font-weight: 900; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+  .tt-wort { display: inline-flex; gap: 2px; white-space: nowrap; }
+  .tt-zeichen { min-width: .62em; padding: 0 .04em; text-align: center; border-bottom: 4px solid transparent; color: #9aa0c0; }
+  .tt-zeichen.leer { color: #c5c9de; }
+  .tt-zeichen.fertig { color: var(--gut); }
+  .tt-zeichen.jetzt { color: var(--text); border-bottom-color: var(--knopf); background: #eef0ff; border-radius: 6px 6px 0 0; }
+  .tt-zeichen.falsch { animation: wackeln .4s; background: var(--hinweis-hell); }
+  /* Bildschirmtastatur (Schweizer Anordnung QWERTZ, vereinfacht) */
+  .tt-tasten { display: flex; flex-direction: column; gap: 6px; align-items: center; user-select: none; }
+  /* Tasten teilen sich die Breite: auch auf dem Handy passt jede Reihe ohne Überlauf */
+  .tt-reihe { display: flex; gap: 4px; justify-content: center; width: 100%; max-width: 760px; }
+  .tt-taste { flex: 1 1 0; min-width: 0; max-width: 60px; height: clamp(44px, 9vw, 58px); padding: 0 2px; border: none; border-radius: 10px;
+    background: #fff; box-shadow: 0 3px 0 var(--rand); font: inherit; font-size: clamp(17px, 3.6vw, 24px); font-weight: 800; color: var(--text); cursor: pointer; }
+  .tt-taste:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--rand); }
+  .tt-taste.breit { flex-grow: 1.6; max-width: 92px; }
+  .tt-taste.leertaste { flex: 0 1 60%; max-width: 360px; }
+  .tt-taste.an { background: var(--deko-6); color: #fff; box-shadow: 0 3px 0 #3f43b8; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>⌨️ Tipp-Trainer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="../abc-sortierer/woerter.js"></script>
+<script src="../satz-reparatur/saetze.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.4.A.1.e: auf der Tastatur schreiben (Tastaturschreib-Programme im 2. und 3. Zyklus;
+// Blindschreiben ist nicht das Ziel). Das Kind tippt Buchstaben, Wörter und Sätze auf der
+// Bildschirmtastatur oder einer echten Tastatur. Grossbuchstaben verlangen zuerst ⇧.
+// Inhalte (Katalog: listen mit von): Nomen mit Bild aus dem ABC-Sortierer, Sätze aus der Satz-Reparatur.
+
+const { zufall, waehle, mische, el } = LS;
+const SPIEL_ID = "tipp-trainer";
+
+const FREI = new Set(LS.freieListen(SPIEL_ID));
+const NOMEN = FREI.has("nomen-bild") ? ABC_WOERTER : [];
+const saetzeAus = gruppen => gruppen.filter(g => FREI.has(SAETZE_LISTEN[g])).flatMap(g => SAETZE[g]);
+
+// Je Stufe: woher die Aufgaben kommen. Stufe 1 braucht keine Liste (Buchstaben).
+const STUFE = {
+  s1: { art: "buchstabe" },                                                      // 2. Klasse: Buchstaben finden
+  s2: { art: "wort", woerter: () => NOMEN.filter(([w]) => w.length <= 4) },      // kurze Nomen, Grossbuchstabe
+  s3: { art: "wort", woerter: () => NOMEN.filter(([w]) => w.length >= 5) },      // Klassenziel: längere Nomen
+  s4: { art: "satz", saetze: () => saetzeAus(["s1", "s2"]).filter(s => s.split(" ").length <= 4) },
+  s5: { art: "satz", saetze: () => saetzeAus(["s2", "s3", "s4"]).filter(s => s.split(" ").length >= 5) },
+  s6: { art: "satz", saetze: () => saetzeAus(["s5"]) },                          // Königsstufe: zwei Sätze
+};
+const BUCHSTABEN = "abcdefghijklmnopqrstuvwxyzäöü";
+const vorrat = stufe => (STUFE[stufe].art === "wort" ? STUFE[stufe].woerter() : STUFE[stufe].art === "satz" ? STUFE[stufe].saetze() : [...BUCHSTABEN]);
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  if (p.art === "buchstabe") return { text: waehle([...BUCHSTABEN]) };
+  if (p.art === "wort") { const [wort, bild] = waehle(p.woerter()); return { text: wort, bild }; }
+  return { text: waehle(p.saetze()) };
+}
+
+// Bildschirmtastatur: Schweizer Anordnung (QWERTZ), vereinfacht auf das, was die Inhalte brauchen.
+const REIHEN = [
+  ["q", "w", "e", "r", "t", "z", "u", "i", "o", "p", "ü"],
+  ["a", "s", "d", "f", "g", "h", "j", "k", "l", "ö", "ä"],
+  ["⇧", "y", "x", "c", "v", "b", "n", "m", ",", ".", "?", "!"],
+  [" "],
+];
+const ZEICHEN = new Set(REIHEN.flat().filter(z => z !== "⇧"));
+/** Lässt sich der Text mit der Bildschirmtastatur tippen? */
+const tippbar = text => [...text].every(z => ZEICHEN.has(z.toLowerCase()));
+
+/** Mängel einer Aufgabe — auch für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!a || !a.text) return ["keine Aufgabe"];
+  if (!tippbar(a.text)) m.push(`Zeichen, die es auf der Tastatur nicht gibt: ${a.text}`);
+  if (/\s\s|^\s|\s$/.test(a.text)) m.push("doppelter oder Rand-Leerschlag");
+  const p = STUFE[stufe];
+  if (p.art === "buchstabe" && a.text.length !== 1) m.push("kein einzelner Buchstabe");
+  if (p.art === "wort" && !vorrat(stufe).some(([w]) => w === a.text)) m.push("Wort nicht aus einer freien Liste");
+  if (p.art === "satz" && !vorrat(stufe).includes(a.text)) m.push("Satz nicht aus einer freien Liste");
+  return m;
+}
+
+const STUFEN_TEXT = {
+  s1: "Buchstaben auf der Tastatur finden: k, m, ä …",
+  s2: "Kurze Nomen mit Grossbuchstaben: Hund, Ball.",
+  s3: "Längere Nomen: Elefant, Giraffe, Kirsche.",
+  s4: "Kurze Sätze mit Leerschlag und Punkt.",
+  s5: "Längere Sätze, auch mit Fragezeichen und Komma.",
+  s6: "Endgegner: zwei Sätze hintereinander.",
+};
+
+LS.spiel({
+  id: SPIEL_ID,
+  einleitung: "Willkommen im Tipp-Trainer! Tipp ab, was oben steht — auf den Tasten unten oder auf einer echten Tastatur. Für einen Grossbuchstaben drückst du zuerst ⇧.",
+  anzahl: 6,
+  // Nur Stufen, für die die freien Listen etwas hergeben.
+  stufen: Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => vorrat(s).length)),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const text = a.text;
+    ctx.loesung(text);
+    // Handgriffe: jedes Zeichen eine Taste, Grossbuchstaben zusätzlich ⇧
+    ctx.schritte([...text].length + [...text].filter(z => z !== z.toLowerCase()).length);
+
+    const zeichen = [...text].map(z => el("span", { class: "tt-zeichen" + (z === " " ? " leer" : ""), text: z === " " ? "·" : z }));
+    // Zeichen je Wort zusammenhalten: umgebrochen wird nur zwischen Wörtern.
+    const zeile = el("div", { class: "tt-text", "aria-label": text });
+    let wort = null;
+    zeichen.forEach((z, j) => {
+      if (text[j] === " ") { zeile.append(z); wort = null; return; }
+      if (!wort) { wort = el("span", { class: "tt-wort" }); zeile.append(wort); }
+      wort.append(z);
+    });
+    ctx.flaeche.append(
+      el("div", { class: "auftrag", text: STUFE[ctx.stufe].art === "buchstabe" ? "Finde diesen Buchstaben:" : "Tipp ab:" }),
+      a.bild ? el("div", { class: "tt-bild", text: a.bild, "aria-hidden": "true" }) : "",
+      zeile);
+
+    let i = 0;
+    let gross = false;   // ⇧ auf der Bildschirmtastatur gedrückt (gilt für ein Zeichen)
+    let fertig = false;
+    const fehlerJe = [];
+    const markiere = () => zeichen.forEach((z, j) => z.classList.toggle("jetzt", j === i));
+
+    const weiter = selbst => {
+      zeichen[i].classList.remove("jetzt", "falsch");
+      zeichen[i].classList.add("fertig");
+      i++;
+      if (i === zeichen.length) {
+        fertig = true;
+        document.removeEventListener("keydown", physisch);
+        ctx.richtig(selbst ? undefined : "Geschafft! 🎉");
+        return;
+      }
+      markiere();
+    };
+
+    /** Ein Zeichen kommt an (Bildschirm oder echte Tastatur). */
+    const eingabe = z => {
+      if (fertig || ctx.vorbei()) return;
+      const soll = text[i];
+      if (z === soll) { LS.ton("tipp"); weiter(true); return; }
+      zeichen[i].classList.remove("falsch");
+      void zeichen[i].offsetWidth;
+      zeichen[i].classList.add("falsch");
+      fehlerJe[i] = (fehlerJe[i] || 0) + 1;
+      ctx.falsch(soll === " " ? "Hier hört ein Wort auf. Was kommt zwischen zwei Wörter?"
+        : z.toLowerCase() === soll.toLowerCase() ? (soll === soll.toUpperCase() ? "Das ist ein Grossbuchstabe: Drück zuerst ⇧." : "Hier gehört ein kleiner Buchstabe hin.")
+        : "Schau genau auf das blau markierte Zeichen und such es auf der Tastatur.");
+      // Nach drei Fehlversuchen beim selben Zeichen tippt die Eule es, damit es weitergeht.
+      if (fehlerJe[i] >= 3) { ctx.sag("Ich helfe dir bei diesem Zeichen. Weiter geht's!", "hinweis"); weiter(false); }
+    };
+
+    // Bildschirmtastatur
+    const tasten = el("div", { class: "tt-tasten", role: "group", "aria-label": "Tastatur" });
+    const shift = [];
+    const zeichne = () => {
+      for (const k of tasten.querySelectorAll(".tt-taste[data-z]")) {
+        const z = k.dataset.z;
+        k.textContent = z === " " ? "Leerschlag" : gross ? z.toUpperCase() : z;
+      }
+      shift.forEach(k => k.classList.toggle("an", gross));
+    };
+    for (const reihe of REIHEN) {
+      tasten.append(el("div", { class: "tt-reihe" }, ...reihe.map(z => {
+        if (z === "⇧") {
+          const k = el("button", { type: "button", class: "tt-taste breit", text: "⇧", "aria-label": "Grossbuchstabe",
+            onclick: () => { gross = !gross; LS.ton("tipp"); zeichne(); } });
+          shift.push(k);
+          return k;
+        }
+        return el("button", { type: "button", class: "tt-taste" + (z === " " ? " leertaste" : ""), "data-z": z,
+          onclick: () => { const g = gross; gross = false; zeichne(); eingabe(g ? z.toUpperCase() : z); } });
+      })));
+    }
+    zeichne();
+    ctx.flaeche.append(tasten);
+
+    // Echte Tastatur: das Zeichen so, wie die Tastatur es liefert (⇧ macht dort selbst gross).
+    function physisch(e) {
+      if (!document.body.contains(tasten)) { document.removeEventListener("keydown", physisch); return; }
+      if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
+      e.preventDefault();
+      eingabe(e.key);
+    }
+    document.addEventListener("keydown", physisch);
+
+    markiere();
+    if (ctx.nr === 0) ctx.sag(STUFE[ctx.stufe].art === "buchstabe" ? "Such den Buchstaben auf der Tastatur und tipp ihn an." : "Tipp Zeichen für Zeichen. Das blau markierte ist dran.");
+  },
+});
+</script>
+</body>
+</html>

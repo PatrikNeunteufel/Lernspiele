@@ -92,6 +92,7 @@ const LS = (() => {
   //   zu: [<Gruppen-Id>] (zugeklappt)
   //   mix: zuletzt gewählte Einstellungen des Zufallsmix (mix/mix.js) oder null
   //   meineKlasse: Filter „🎒 Meine Klasse“ im Tab Spiele (K2 a); fehlt = an
+  //   optionen: { <spiel-id>: { <option>: Wert } } — Spieloptionen aus def.optionen (UE1 a); fehlt = "stufe"
   //   geaendert: { <feld>: ISO, angelegt: ISO } — setzt speichereProfil; beim Abgleich gewinnt je Feld der jüngere Stand
   const LEERES_PROFIL = {
     alter: null, klasse: null, fokus: [], rolle: "kind",
@@ -160,6 +161,21 @@ const LS = (() => {
   function reihenfolgeFuer(name, spiel) {
     const r = profil(name).reihenfolge || LEERES_PROFIL.reihenfolge;
     return r.spiele?.[spiel] || r.global || "stufe";
+  }
+
+  // Spieloptionen (Entscheid UE1 a, LERN_Session6): Ein Spiel beschreibt sie in def.optionen =
+  // { <id>: { titel, werte: { stufe: "nach Stufe", …: Text }, erklaerung: { <wert>: Text }, nachStufe(stufe) → Wert } };
+  // gespeichert wird je Spieler und Spiel im Profil (optionen: { <spiel>: { <id>: Wert } }), fehlt = "stufe".
+  const optionFuer = (name, spiel, id) => profil(name).optionen?.[spiel]?.[id] || "stufe";
+  function setzeOption(name, spiel, id, wert) {
+    const o = { ...(profil(name).optionen || {}) };
+    o[spiel] = { ...(o[spiel] || {}), [id]: wert };
+    speichereProfil(name, { optionen: o });
+  }
+  /** Gültiger Wert einer Spieloption für eine Stufe: „stufe“ wird über nachStufe aufgelöst. */
+  function optionWert(name, def, id, stufe) {
+    const w = optionFuer(name, def.id, id);
+    return w === "stufe" ? def.optionen[id].nachStufe(stufe) : w;
   }
 
   /** Reihenfolge eines Spiels für einen Spieler setzen (wie die Wahl je Spiel im Profil). */
@@ -248,8 +264,9 @@ const LS = (() => {
   // ---------- Freigabe (Entscheid L4 a) ----------
   // Prüfstand im Repo, Freigabe auf dem Gerät. Standardmässig frei ist alles, was nichts mehr zu
   // prüfen hat (Präzisierung Patrik 2026-10-31): Ein Spiel mit `neu` im Katalog ist gesperrt, bis es
-  // angesehen ist (`geprueft`); eine Inhaltsliste (`listen: { <liste>: { name, geprueft } }`) ist
-  // gesperrt, bis sie geprüft ist; geprueft = { am, von } oder null. Die Aufsicht kann auf dem Gerät
+  // angesehen ist; eine Inhaltsliste (`listen: { <liste>: { name } }`) ist gesperrt, bis sie geprüft
+  // ist. Der Prüfstand steht in pruefstand.js (PRUEFSTAND, je { am, von }; Entscheid E1 a), getrennt
+  // vom Katalog, damit der Entwickler-Server ihn schreiben kann. Die Aufsicht kann auf dem Gerät
   // anders entscheiden: lernspiele:freigabe = { spiele: { <id>: bool }, listen: { "<id>/<liste>": bool } };
   // fehlt ein Eintrag, entscheidet der Prüfstand.
   const freigabe = () => ({ spiele: {}, listen: {}, ...lies("freigabe", {}) });
@@ -268,26 +285,31 @@ const LS = (() => {
     const von = katalogEintrag(spielId)?.listen?.[listeId]?.von;
     return von || `${spielId}/${listeId}`;
   }
-  /** Katalog-Eintrag der Quelle: { name, geprueft }. */
+  /** Katalog-Eintrag der Quelle: { name, zusatz }. */
   function quellEintrag(schluessel) {
     const [spiel, liste] = schluessel.split("/");
     return katalogEintrag(spiel)?.listen?.[liste] || null;
   }
-  /** Inhaltslisten eines Spiels aus dem Katalog: [{ id, name, geprueft, von }] — Name und Prüfstand von der Quelle. */
+  /** Prüfstand aus pruefstand.js: { am, von } oder null; art "spiele" oder "listen". */
+  const pruefstand = (art, schluessel) => (typeof PRUEFSTAND !== "undefined" ? PRUEFSTAND[art]?.[schluessel] : null) || null;
+  /** Inhaltslisten eines Spiels aus dem Katalog: [{ id, quelle, name, geprueft, von }] — Name und Prüfstand von der Quelle. */
   const spielListen = spielId => Object.entries(katalogEintrag(spielId)?.listen || {}).map(([id, l]) => {
+    const quelle = l.von || `${spielId}/${id}`;
     const q = l.von ? quellEintrag(l.von) : l;
-    return { id, name: q?.name ?? l.name, geprueft: q?.geprueft ?? null, von: l.von || null, zusatz: !!q?.zusatz };
+    return { id, quelle, name: q?.name ?? l.name, geprueft: pruefstand("listen", quelle), von: l.von || null, zusatz: !!q?.zusatz };
   });
   /** Liste für Kinder frei? null als wert in setzeListeFrei = zurück auf den Prüfstand. */
   function listeFrei(spielId, listeId) {
     const schluessel = listenQuelle(spielId, listeId);
-    return freigabe().listen[schluessel] ?? !!quellEintrag(schluessel)?.geprueft;
+    return freigabe().listen[schluessel] ?? !!pruefstand("listen", schluessel);
   }
   const setzeListeFrei = (spielId, listeId, wert) => setzeFreigabe("listen", listenQuelle(spielId, listeId), wert);
   /** Listen, die der angemeldete Spieler üben darf (die Aufsicht alle) — Spiele filtern ihre Inhalte danach. */
   const freieListen = spielId => spielListen(spielId).filter(l => aufsichtAngemeldet() || listeFrei(spielId, l.id)).map(l => l.id);
   /** Muss das Spiel als Ganzes noch angesehen werden (neu und nicht geprüft)? */
-  const spielZuPruefen = spielId => { const e = katalogEintrag(spielId); return !!e?.neu && !e.geprueft; };
+  const spielZuPruefen = spielId => !!katalogEintrag(spielId)?.neu && !pruefstand("spiele", spielId);
+  /** Wann und von wem das Spiel angesehen wurde ({ am, von }) oder null. */
+  const spielGeprueft = spielId => pruefstand("spiele", spielId);
   /** Spiel als Ganzes für Kinder frei (ohne Blick auf die Listen)? */
   function spielFrei(spielId) {
     const f = freigabe().spiele[spielId];
@@ -301,6 +323,80 @@ const LS = (() => {
   const fuerKinderSichtbar = spielId => spielFrei(spielId) && (!spielListen(spielId).length
     || spielListen(spielId).some(l => !l.zusatz && listeFrei(spielId, l.id)));
   const spielSichtbar = spielId => aufsichtAngemeldet() || fuerKinderSichtbar(spielId);
+  // ---------- Suche (Entscheid SU1 a, LERN_Session6) ----------
+  // Kleine Volltextsuche mit Rangfolge: je Suchwort der beste Treffer über alle Felder, gewichtet nach Feld
+  // und Art des Treffers; jedes Suchwort muss passen. Passt ein Spiel nur über ein Feld, das auf der Karte
+  // nicht steht (Thema, Inhaltsliste), nennt `grund` es.
+  const SUCH_GEWICHT = { name: 6, lernziele: 4, beschreibung: 3, listen: 2, thema: 1 };
+  const SUCH_SICHTBAR = new Set(["name", "lernziele", "beschreibung"]);
+  const falte = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const suchWoerter = t => String(t || "").toLowerCase().split(/[^\p{L}\p{N}.]+/u)
+    .map(w => w.replace(/^\.+|\.+$/g, "")).filter(Boolean);
+  /** Höchstens ein Zeichen Unterschied (einfügen, löschen, ersetzen)? */
+  function einTippfehler(a, b) {
+    if (Math.abs(a.length - b.length) > 1) return false;
+    let i = 0, j = 0, fehler = 0;
+    while (i < a.length && j < b.length) {
+      if (a[i] === b[j]) { i++; j++; continue; }
+      if (++fehler > 1) return false;
+      if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; }
+    }
+    return fehler + (a.length - i) + (b.length - j) <= 1;
+  }
+  /** Wie gut passt das Suchwort q zum Wort w (0 bis 1)? Tippfehler nur im Namen, nie bei Kürzeln mit Ziffern. */
+  function wortWert(q, w, feld) {
+    if (w === q) return 1;
+    if (w.startsWith(q)) return 0.8;
+    const fq = falte(q), fw = falte(w);
+    if (fw === fq) return 0.7;
+    if (fw.startsWith(fq)) return 0.6;
+    if (q.length >= 4 && w.includes(q)) return 0.4;     // Teil eines zusammengesetzten Worts (Wortschatz)
+    if (q.length >= 4 && fw.includes(fq)) return 0.3;
+    if (feld === "name" && q.length >= 5 && !/\d/.test(q)
+      && (einTippfehler(fq, fw.slice(0, fq.length)) || einTippfehler(fq, fw.slice(0, fq.length + 1)))) return 0.25;
+    return 0;
+  }
+  /** Durchsuchbare Felder eines Spiels: je Feld eine Liste von Texten (Listen und Lernziele einzeln). */
+  function suchFelder(e) {
+    const thema = typeof THEMEN !== "undefined" ? THEMEN.find(t => t.id === e.thema) : null;
+    return { name: [e.name], lernziele: e.lernziele.map(l => l.lz), beschreibung: [e.beschreibung],
+      listen: spielListen(e.id).map(l => l.name), thema: thema ? [`${thema.name}: ${thema.titel}`] : [] };
+  }
+  /**
+   * Spiele zur Suche, beste zuerst: [{ id, wert, grund }]; grund z. B. „im Thema Wortschatz: …“ oder null,
+   * wenn alle Suchwörter auf der Karte stehen. Leere Suche: null.
+   */
+  function suche(text) {
+    const qs = suchWoerter(text);
+    if (!qs.length || typeof SPIELE === "undefined") return null;
+    const treffer = [];
+    SPIELE.forEach((e, rang) => {
+      const felder = suchFelder(e);
+      let wert = 0;
+      const gruende = [];
+      for (const q of qs) {
+        let best = 0, wo = null;
+        for (const [feld, texte] of Object.entries(felder)) for (const t of texte) for (const w of suchWoerter(t)) {
+          const x = wortWert(q, w, feld) * SUCH_GEWICHT[feld];
+          if (x > best) { best = x; wo = { feld, t }; }
+        }
+        if (!best) return;
+        wert += best;
+        if (!SUCH_SICHTBAR.has(wo.feld)) gruende.push(wo.feld === "thema" ? `im Thema ${wo.t}` : `in der Liste „${wo.t}“`);
+      }
+      treffer.push({ id: e.id, wert, rang, grund: gruende.length ? [...new Set(gruende)].join("; ") : null });
+    });
+    return treffer.sort((a, b) => b.wert - a.wert || a.rang - b.rang).map(({ rang, ...t }) => t);
+  }
+  /** Warum sehen Kinder das Spiel nicht? Kurzer Text oder null, wenn sie es sehen. */
+  function sperrGrund(spielId) {
+    if (fuerKinderSichtbar(spielId)) return null;
+    if (freigabe().spiele[spielId] === false) return "auf diesem Gerät gesperrt";
+    if (!spielFrei(spielId)) return "noch nicht angesehen";
+    const listen = spielListen(spielId).filter(l => !l.zusatz);
+    if (listen.some(l => freigabe().listen[l.quelle] === false)) return "Inhaltslisten gesperrt";
+    return listen.length === 1 ? "Inhaltsliste noch nicht geprüft" : `keine der ${listen.length} Inhaltslisten geprüft`;
+  }
 
   // Löschvermerke, damit der Abgleich Gelöschtes nicht von einem anderen Gerät zurückholt:
   // lernspiele:geloescht = { spieler: { <name>: ISO }, runden: [{ name, spiel (null = alle), bis: ISO }] }.
@@ -895,6 +991,9 @@ const LS = (() => {
 
   const klasseText = k => (k <= 0 ? "Kindergarten" : `${k}. Klasse`);
 
+  // Was gerade gespielt wird ({ spiel, stufe?, nr?, aufgabe?() }), für die Bemerkungen im Entwickler-Modus.
+  let spielStand = null;
+
   /** Für wen ist die Stufe? „2. Klasse, leichter“ — aus der Basisklasse des Spiels. */
   function stufeFuer(spielId, stufeId) {
     const st = SKALA.find(s => s.id === stufeId);
@@ -928,6 +1027,7 @@ const LS = (() => {
   function spiel(def) {
     const buehne = document.querySelector(".buehne");
     const stufenListe = SKALA.filter(s => def.stufen[s.id]).map(s => ({ ...s, text: def.stufen[s.id] }));
+    spielStand = { spiel: def.id };
     tonSchalter(document.querySelector(".kopf .ton"));
     // Kam beim Abgleich etwas von einem anderen Gerät dazu: die Stufenwahl mit Sternen und Ranglisten neu zeichnen.
     addEventListener("lernspiele:abgeglichen", () => { if (buehne.querySelector(".stufen")) stufenwahl(); });
@@ -976,20 +1076,33 @@ const LS = (() => {
     function reihenfolgeZeile(neuZeichnen) {
       if (typeof SPIELE === "undefined" || !SPIELE.find(s => s.id === def.id)?.reihenfolge) return null;
       const name = aktuellerSpieler();
-      const wert = reihenfolgeFuer(name, def.id);
-      const KURZ = { stufe: "nach Stufe", geordnet: "geordnet", gemischt: "gemischt" };
-      const ERKLAERT = {
-        stufe: "Stufe 1–3 geordnet, ab Stufe 4 gemischt.",
-        geordnet: "Grösste Stelle links, kleinste rechts.",
-        gemischt: "Die Teile stehen durcheinander. Das ist kniffliger.",
-      };
-      return el("div", { class: "reihenfolge-zeile" },
-        el("b", { text: "🔀 Teile:" }),
-        ...Object.keys(REIHENFOLGEN).map(k => el("button", {
-          type: "button", class: "reihenfolge-schalter" + (k === wert ? " an" : ""), "aria-pressed": String(k === wert),
-          onclick: () => { setzeReihenfolgeSpiel(name, def.id, k); ton("tipp"); neuZeichnen(); },
-        }, KURZ[k])),
-        el("span", { class: "leise", text: ERKLAERT[wert] }));
+      return optionsZeile({
+        titel: "🔀 Teile:", wert: reihenfolgeFuer(name, def.id),
+        werte: { stufe: "nach Stufe", geordnet: "geordnet", gemischt: "gemischt" },
+        erklaerung: {
+          stufe: "Stufe 1–3 geordnet, ab Stufe 4 gemischt.",
+          geordnet: "Grösste Stelle links, kleinste rechts.",
+          gemischt: "Die Teile stehen durcheinander. Das ist kniffliger.",
+        },
+      }, k => setzeReihenfolgeSpiel(name, def.id, k), neuZeichnen);
+    }
+
+    /** Eine Zeile mit Knöpfen je Wert, der gewählte gefüllt, darunter leise, was er heisst. */
+    function optionsZeile(o, setze, neuZeichnen) {
+      return el("div", { class: "option-zeile" },
+        el("b", { text: o.titel }),
+        ...Object.entries(o.werte).map(([k, text]) => el("button", {
+          type: "button", class: "option-schalter" + (k === o.wert ? " an" : ""), "aria-pressed": String(k === o.wert),
+          onclick: () => { setze(k); ton("tipp"); neuZeichnen(); },
+        }, text)),
+        el("span", { class: "leise", text: o.erklaerung[o.wert] }));
+    }
+
+    /** Spieloptionen aus def.optionen (z. B. Übertrag selbst schreiben), je eine Zeile auf der Stufenwahl. */
+    function spielOptionsZeilen(neuZeichnen) {
+      const name = aktuellerSpieler();
+      return Object.entries(def.optionen || {}).map(([id, o]) => optionsZeile({ ...o, wert: optionFuer(name, def.id, id) },
+        k => setzeOption(name, def.id, id, k), neuZeichnen));
     }
 
     function stufenwahl() {
@@ -998,7 +1111,7 @@ const LS = (() => {
       const name = aktuellerSpieler();
       const karte = el("div", { class: "karte" });
       const eule = euleZeile();
-      karte.append(spielerZeile(), eule.element, timerZeile(stufenwahl), reihenfolgeZeile(stufenwahl) || "");
+      karte.append(spielerZeile(), eule.element, timerZeile(stufenwahl), reihenfolgeZeile(stufenwahl) || "", ...spielOptionsZeilen(stufenwahl));
       eule.sag(def.einleitung);
       const stufen = el("div", { class: "stufen" });
       for (const st of stufenListe) {
@@ -1217,9 +1330,12 @@ const LS = (() => {
           weiter.focus();
         }
 
+        spielStand = { spiel: def.id, stufe: stufe.id, nr, aufgabe: () => aufgabenText(flaeche) };
         const ctx = {
           stufe: stufe.id,
           geordnet: geordnet(name, def.id, stufe.id),
+          /** Wert einer Spieloption aus def.optionen für diese Stufe („nach Stufe“ schon aufgelöst). */
+          option: id => optionWert(name, def, id, stufe.id),
           nr,
           flaeche,
           sag: (t, art) => eule.sag(t, art),
@@ -1360,6 +1476,7 @@ const LS = (() => {
           ...(anzahl < def.anzahl ? { gekuerzt: def.anzahl } : {}), // geplant waren mehr, die Stufe gab nicht genug her
           dauer: Math.round((Date.now() - beginn) / 1000),
           geordnet: geordnet(name, def.id, stufe.id),
+          ...(def.optionen ? { optionen: Object.fromEntries(Object.keys(def.optionen).map(id => [id, optionWert(name, def, id, stufe.id)])) } : {}),
           timer: timer.an ? timer.sekunden : null,
           aufgabenZeiten,
           fehlerAufgaben,
@@ -1503,7 +1620,7 @@ const LS = (() => {
     reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein",
       "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
       "spieler-zeile",
-      "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "reihenfolge-zeile", "reihenfolge-schalter", "zeitleiste", "zeitbalken", "testhilfe",
+      "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
@@ -1513,9 +1630,9 @@ const LS = (() => {
     STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
-    beiAenderung, abgleichDaten,
+    beiAenderung, abgleichDaten, spielStand: () => spielStand,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
-    freigabe, spielFrei, spielZuPruefen, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, spielListen, listeFrei, setzeListeFrei, freieListen,
+    freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, vorgabeZeit, timerFuer, setzeTimerSpiel, zeitVorschlag,
     stimmeBereit, sprich, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen,

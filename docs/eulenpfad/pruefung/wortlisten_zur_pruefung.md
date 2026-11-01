@@ -1112,14 +1112,14 @@ Die Namen in den Texten sind erfunden.
 
 ## 14. Rechengeschichten (Lehrplan SG MA.3.C.2, MA.3.C.3)
 
-Platzhalter {a}, {b} … werden im Spiel durch Zahlen aus den Bereichen ersetzt.
+Platzhalter {a}, {b} … werden im Spiel durch Zahlen aus den Bereichen ersetzt; {b:wird|werden} heisst: „wird“, wenn b = 1 ist, sonst „werden“.
 
 | Stufe | Geschichte | Zahlen | richtige Rechnung | Ablenker | ☐ |
 |---|---|---|---|---|---|
-| 1 | Im Korb liegen {a} Äpfel. Es kommen {b} dazu. | a: 1–6, b: 1–4 | a + b | a − b; a + a | ☐ |
-| 1 | Im Teich schwimmen {a} Fische. {b} Fische kommen dazu. | a: 2–6, b: 1–4 | a + b | a − b; b + b | ☐ |
-| 1 | Es sind {a} Ballone. {b} fliegen weg. | b: 1–4, d: 1–5, a = b + d | a − b | a + b; b − b | ☐ |
-| 1 | Auf dem Teller liegen {a} Guetsli. {b} werden gegessen. | b: 1–4, d: 1–5, a = b + d | a − b | a + b; a + a | ☐ |
+| 1 | Im Korb {a:liegt/liegen} {a} {a:Apfel/Äpfel}. Es {b:kommt/kommen} {b} dazu. | a: 1–6, b: 1–4 | a + b | a − b; a + a | ☐ |
+| 1 | Im Teich schwimmen {a} Fische. {b} {b:Fisch kommt/Fische kommen} dazu. | a: 2–6, b: 1–4 | a + b | a − b; b + b | ☐ |
+| 1 | Es sind {a} Ballone. {b} {b:fliegt/fliegen} weg. | b: 1–4, d: 1–5, a = b + d | a − b | a + b; b − b | ☐ |
+| 1 | Auf dem Teller liegen {a} Guetsli. {b} {b:wird/werden} gegessen. | b: 1–4, d: 1–5, a = b + d | a − b | a + b; a + a | ☐ |
 | 2 | {a} Kinder spielen Fangen, {b} Kinder spielen Ball. Wie viele Kinder spielen? | a: 4–12, b: 3–8 | a + b | a − b; a + a | ☐ |
 | 2 | Im Bus sitzen {a} Leute. An der Haltestelle steigen {b} aus. Wie viele sind noch im Bus? | b: 2–8, d: 3–10, a = b + d | a − b | a + b; b − a | ☐ |
 | 2 | Im Bus sitzen {a} Leute. An der Haltestelle steigen {b} ein. Wie viele sind jetzt im Bus? | a: 5–12, b: 2–8 | a + b | a − b; b + b | ☐ |
@@ -2783,3 +2783,113 @@ Alle Verse selbst verfasst.
 | Winter | kreuzreim / Der Winter kommt mit Eis und Schnee, / die Bäume stehen kahl, / es friert der kleine Gartensee, / die Sonne scheint nur schmal. · kreuzreim / Wir fahren Schlitten auf dem Hang, / die Wangen werden rot, / und abends trinken wir noch lang / den Tee mit Honigbrot. | ☐ |
 | Der Käfer | paarreim / Ein Käfer krabbelt übers Blatt, / er ist vom vielen Laufen matt. · paarreim / Er ruht sich aus im Sonnenlicht / und rührt sich eine Weile nicht. · paarreim / Dann fliegt er summend in die Höh / und landet sanft im grünen Klee. | ☐ |
 | Gute Nacht | umarmend / Am Abend wird es still im Haus, / die Lampe leuchtet warm, / die Katze schläft in meinem Arm, / dann geht auch bald das Licht aus. · umarmend / Ich mache meine Augen zu, / der Mond schaut still herein, / ich träume von dem Sonnenschein, / und alles kommt zur Ruh. | ☐ |
+
+## 40. Schweiz-Karten-Suche (Lehrplan SG NMG.8.4) — Namen auf der stummen Karte
+
+Die Lage stammt aus swissBOUNDARIES3D (swisstopo); zu prüfen sind die Namen, wie die Kinder sie lernen.
+
+### Wahlkreise des Kantons St. Gallen
+
+| Wahlkreis | ☐ |
+|---|---|
+| Rheintal | ☐ |
+| Rorschach | ☐ |
+| Sarganserland | ☐ |
+| See-Gaster | ☐ |
+| St. Gallen | ☐ |
+| Toggenburg | ☐ |
+| Werdenberg | ☐ |
+| Wil | ☐ |
+
+### Kantone
+
+| Nr. | Kürzel | Name im Spiel | Name in den swisstopo-Daten | ☐ |
+|---|---|---|---|---|
+| 1 | ZH | Zürich | Zürich | ☐ |
+| 2 | BE | Bern | Bern | ☐ |
+| 3 | LU | Luzern | Luzern | ☐ |
+| 4 | UR | Uri | Uri | ☐ |
+| 5 | SZ | Schwyz | Schwyz | ☐ |
+| 6 | OW | Obwalden | Obwalden | ☐ |
+| 7 | NW | Nidwalden | Nidwalden | ☐ |
+| 8 | GL | Glarus | Glarus | ☐ |
+| 9 | ZG | Zug | Zug | ☐ |
+| 10 | FR | Freiburg | Fribourg | ☐ |
+| 11 | SO | Solothurn | Solothurn | ☐ |
+| 12 | BS | Basel-Stadt | Basel-Stadt | ☐ |
+| 13 | BL | Basel-Landschaft | Basel-Landschaft | ☐ |
+| 14 | SH | Schaffhausen | Schaffhausen | ☐ |
+| 15 | AR | Appenzell Ausserrhoden | Appenzell Ausserrhoden | ☐ |
+| 16 | AI | Appenzell Innerrhoden | Appenzell Innerrhoden | ☐ |
+| 17 | SG | St. Gallen | St. Gallen | ☐ |
+| 18 | GR | Graubünden | Graubünden | ☐ |
+| 19 | AG | Aargau | Aargau | ☐ |
+| 20 | TG | Thurgau | Thurgau | ☐ |
+| 21 | TI | Tessin | Ticino | ☐ |
+| 22 | VD | Waadt | Vaud | ☐ |
+| 23 | VS | Wallis | Valais | ☐ |
+| 24 | NE | Neuenburg | Neuchâtel | ☐ |
+| 25 | GE | Genf | Genève | ☐ |
+| 26 | JU | Jura | Jura | ☐ |
+
+### Kantonshauptorte
+
+Punkt = Mitte der Gemeindefläche.
+
+| Kanton | Name im Spiel | Gemeinde in den Daten | ☐ |
+|---|---|---|---|
+| ZH | Zürich | Zürich | ☐ |
+| GE | Genf | Genève | ☐ |
+| BS | Basel | Basel | ☐ |
+| VD | Lausanne | Lausanne | ☐ |
+| BE | Bern | Bern | ☐ |
+| LU | Luzern | Luzern | ☐ |
+| SG | St. Gallen | St. Gallen | ☐ |
+| NE | Neuenburg | Neuchâtel | ☐ |
+| TI | Bellinzona | Bellinzona | ☐ |
+| GR | Chur | Chur | ☐ |
+| FR | Freiburg | Fribourg | ☐ |
+| SH | Schaffhausen | Schaffhausen | ☐ |
+| VS | Sitten | Sion | ☐ |
+| ZG | Zug | Zug | ☐ |
+| TG | Frauenfeld | Frauenfeld | ☐ |
+| AG | Aarau | Aarau | ☐ |
+| SO | Solothurn | Solothurn | ☐ |
+| SZ | Schwyz | Schwyz | ☐ |
+| BL | Liestal | Liestal | ☐ |
+| AR | Herisau | Herisau | ☐ |
+| GL | Glarus | Glarus | ☐ |
+| JU | Delsberg | Delémont | ☐ |
+| OW | Sarnen | Sarnen | ☐ |
+| UR | Altdorf | Altdorf (UR) | ☐ |
+| NW | Stans | Stans | ☐ |
+| AI | Appenzell | Appenzell | ☐ |
+
+### Grosse Städte
+
+Ab 25000 Einwohnern, ohne Hauptorte.
+
+| Kanton | Name im Spiel | Einwohner | ☐ |
+|---|---|---|---|
+| ZH | Winterthur | 120376 | ☐ |
+| TI | Lugano | 63629 | ☐ |
+| BE | Biel | 56896 | ☐ |
+| BE | Thun | 44125 | ☐ |
+| BE | Köniz | 43508 | ☐ |
+| GE | Vernier | 37837 | ☐ |
+| NE | La Chaux-de-Fonds | 37600 | ☐ |
+| GE | Lancy | 37259 | ☐ |
+| ZH | Uster | 36563 | ☐ |
+| LU | Emmen | 32619 | ☐ |
+| ZH | Dübendorf | 32571 | ☐ |
+| VD | Yverdon-les-Bains | 30292 | ☐ |
+| LU | Kriens | 30008 | ☐ |
+| SG | Rapperswil-Jona | 28779 | ☐ |
+| ZH | Dietikon | 28295 | ☐ |
+| FR | Bulle | 27101 | ☐ |
+| GE | Meyrin | 27059 | ☐ |
+| ZH | Wetzikon | 26977 | ☐ |
+| VD | Montreux | 26955 | ☐ |
+| ZH | Wädenswil | 25704 | ☐ |
+| SG | Wil | 25176 | ☐ |
+| ZG | Baar | 25004 | ☐ |

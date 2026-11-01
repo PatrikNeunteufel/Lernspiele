@@ -1,11 +1,11 @@
 # Checkliste der Spiele
 
 Erzeugt mit `node tools/checkliste.js > docs/eulenpfad/checkliste.md` — **nicht von Hand ändern**. Abgehakt
-wird in den Quellen: ein Spiel als angesehen bzw. eine Inhaltsliste als geprüft mit `geprueft: { am, von }`
-im Katalog (`eulenpfad/spiele/gemeinsam/katalog.js`), Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
+wird im Entwickler-Modus (Spiel angesehen, Inhaltsliste geprüft; schreibt `eulenpfad/spiele/gemeinsam/pruefstand.js`),
+Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
 `docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
-**Stand:** 84 Spiele gebaut, 3 Ideen offen · für Kinder frei: 32 von 84 · 0 von 28 neuen Spielen angesehen · 0 von 162 Inhaltslisten geprüft.
+**Stand:** 86 Spiele gebaut, 1 Idee offen · für Kinder frei: 34 von 86 · 2 von 30 neuen Spielen angesehen · 3 von 166 Inhaltslisten geprüft.
 
 Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit
 Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.
@@ -211,9 +211,11 @@ Je gebautem Spiel:
 - [x] **Regel-Lücke** (`regel-luecke`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
   - [ ] Inhalte geprüft: 0 von 7 Listen (offen: Regel sp/st am Wortanfang; Regel ie oder i (ohne Ausnahmen); Ausnahmen zur ie-Regel: langes i ohne e (Igel, Tiger); Regel ck/k und tz/z; Wörter mit f oder v; Regel e oder ä (Ableitung von a); Doppelkonsonant nach kurzem Vokal)
 
-#### neues Thema
+#### Schreiben
 
-- [ ] Tipp-Trainer — Idee, Klassen 3–6
+- [x] **Tipp-Trainer** (`tipp-trainer`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 6 Listen (offen: Nomen mit Bild zum Ordnen nach dem ABC (Liste von ABC-Sortierer); Sätze ohne Nomen: Satzanfang und Punkt (Liste von Satz-Reparatur); Sätze mit Namen und konkreten Nomen (Liste von Satz-Reparatur); Sätze mit abstrakten Nomen, Frage- und Ausrufesätze (Liste von Satz-Reparatur); Längere Sätze mit mehreren Nomen (Liste von Satz-Reparatur); Zwei Sätze hintereinander (Liste von Satz-Reparatur))
 
 ### NMG
 
@@ -226,10 +228,6 @@ Je gebautem Spiel:
 - [x] **Tier-Sortierer** (`tier-sortierer`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
   - [ ] Inhalte geprüft: 0 von 3 Listen (offen: Tierklassen (Säugetier, Vogel, Fisch … Insekt, Spinnentier) inkl. knifflige Tiere; Gruppen der Säugetiere (Nagetier, Raubtier, Paarhufer …); Wildtier, Nutztier oder Heimtier)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session2.md`
-
-#### Orientierung
-
-- [ ] Schweiz-Karten-Suche — Idee, Klassen 3–6
 
 ### Musik
 
@@ -271,8 +269,8 @@ Je gebautem Spiel:
 - [x] **Rechentrick-Detektiv** (`rechentrick-detektiv`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
-- [x] **Schriftlich-Werkstatt** (`schriftlich-werkstatt`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Schriftlich-Werkstatt** (`schriftlich-werkstatt`) — für Kinder frei
+  - [x] angesehen 2026-11-01 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Zielzahl-Jagd** (`zielzahl-jagd`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
@@ -280,9 +278,9 @@ Je gebautem Spiel:
 
 #### Zahlen ordnen
 
-- [x] **Preis-Tabelle** (`preis-tabelle`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
-  - [ ] angesehen
-  - [ ] Inhalte geprüft: 0 von 3 Listen (offen: Waren mit Stückpreis (Gipfeli, Heft, Ball); Waren mit Preis je 100 g (Käse, Kirschen); Folgen in Tabellen (Sparschwein, Seiten pro Tag))
+- [x] **Preis-Tabelle** (`preis-tabelle`) — für Kinder frei
+  - [x] angesehen 2026-11-01 · Patrik
+  - [x] Inhalte geprüft: 3 von 3 Listen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Runden-Rutsche** (`runden-rutsche`) — für Kinder frei
 - [x] **Vergleichs-Krokodil** (`vergleichs-krokodil`) — für Kinder frei
@@ -355,6 +353,9 @@ Je gebautem Spiel:
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 2 Listen (offen: Plan Schulzimmer: Dinge und ihre Zeichen; Plan Quartier: Orte und ihre Zeichen)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+- [x] **Schweiz-Karten-Suche** (`schweiz-karte`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 4 Listen (offen: Wahlkreise des Kantons St. Gallen; Die 26 Kantone mit Kürzel; Kantonshauptorte (deutsche Namen); Grosse Städte ab 25 000 Einwohnern)
 
 #### Wetter
 

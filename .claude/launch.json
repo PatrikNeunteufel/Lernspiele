@@ -19,6 +19,13 @@
       "runtimeArgs": ["-m", "http.server", "8769", "--bind", "127.0.0.1"],
       "port": 8769,
       "autoPort": false
+    },
+    {
+      "name": "entwicklung",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["tools/entwickler_server.py", "8766"],
+      "port": 8766,
+      "autoPort": false
     }
   ]
 }

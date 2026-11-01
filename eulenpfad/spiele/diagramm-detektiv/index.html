@@ -49,6 +49,8 @@
 <script src="../gemeinsam/spiel.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
 <script src="umfragen.js"></script>
 <script>
 "use strict";
@@ -447,7 +449,7 @@ LS.spiel({
     if (["ergaenzen", "uebertragen", "fehlendTotal"].includes(a.art)) {
       const loesung = a.art === "fehlendTotal"
         ? `${zahlText(a.total)} − (${a.werte.filter((w, i) => i !== a.i).join(" + ")}) = ${a.loesung}`
-        : `${k(a.i).Wo} sind es ${a.loesung} — die Säule reicht bis ${a.loesung}.`;
+        : `${k(a.i).Wo} ${a.loesung === 1 ? "ist" : "sind"} es ${a.loesung} — die Säule reicht bis ${a.loesung}.`;
       ctx.loesung?.(loesung);
       const pruefen = el("button", { class: "knopf gruen", type: "button", text: "Prüfen ✓" });
       pruefen.addEventListener("click", () => {
@@ -487,7 +489,7 @@ LS.spiel({
     }[a.art];
 
     const loesungText = {
-      wieviel: () => `${k(a.i).Wo} sind es ${a.loesung} ${einheit}.`,
+      wieviel: () => (a.loesung === 1 ? `${k(a.i).Wo} ist es 1 ${UMFRAGEN[a.u].einzahl}.` : `${k(a.i).Wo} sind es ${a.loesung} ${einheit}.`),
       meist: () => `Am meisten: ${k(a.werte.indexOf(Math.max(...a.werte))).name}.`,
       wenigst: () => `Am wenigsten: ${k(a.werte.indexOf(Math.min(...a.werte))).name}.`,
       mehr: () => `${k(a.i).Wo} ${a.werte[a.i]}, ${k(a.j).wo} ${a.werte[a.j]}: ${a.werte[a.i]} − ${a.werte[a.j]} = ${a.loesung}`,

@@ -1,9 +1,10 @@
 // Erzeugt die Checkliste aller Spiele: Klasse → Fach → Thema → Spiel, gebaut oder nur Idee, und was
 // je Spiel noch zu prüfen ist. Nichts davon wird von Hand gepflegt — die Quellen sind:
-//   spiele/gemeinsam/katalog.js            gebaute Spiele, Basisklasse, Thema, Prüfstand (geprueft, listen)
+//   eulenpfad/spiele/gemeinsam/katalog.js     gebaute Spiele, Basisklasse, Thema, Inhaltslisten
+//   eulenpfad/spiele/gemeinsam/pruefstand.js  Prüfstand: Spiele angesehen, Listen geprüft
 //   docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md   Spielideen mit Klassenbereich und Lehrplan-Codes
 //   docs/eulenpfad/lernziele/*.md          Annahmen, die mit dem Lehrmittel abzugleichen sind
-// Abgehakt wird in den Quellen (z. B. geprueft im Katalog), danach die Liste neu erzeugen:
+// Abgehakt wird im Entwickler-Modus (schreibt pruefstand.js), danach die Liste neu erzeugen:
 //   node tools/checkliste.js > docs/eulenpfad/checkliste.md
 "use strict";
 const fs = require("fs");
@@ -15,7 +16,8 @@ const lies = p => fs.readFileSync(path.join(WURZEL, p), "utf8");
 
 const katalog = vm.createContext({ LS: { SKALA: [] } });
 vm.runInContext(lies("eulenpfad/spiele/gemeinsam/katalog.js") + ";this.SPIELE = SPIELE; this.THEMEN = THEMEN;", katalog);
-const { SPIELE, THEMEN } = katalog;
+vm.runInContext(lies("eulenpfad/spiele/gemeinsam/pruefstand.js") + ";this.PRUEFSTAND = PRUEFSTAND;", katalog);
+const { SPIELE, THEMEN, PRUEFSTAND } = katalog;
 
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[^a-z]/g, "");
 
@@ -97,15 +99,16 @@ for (const s of SPIELE) {
   const idee = ideen.find(i => GEBAUT_ALS[i.name] === s.id || norm(i.name) === norm(s.name));
   if (idee) gebauteIdeen.add(idee.name);
   // Verweis auf die Liste eines anderen Spiels: Name und Prüfstand von dort, geprüft wird sie dort.
-  const listen = Object.values(s.listen || {}).map(l => {
-    if (!l.von) return l;
+  const listen = Object.entries(s.listen || {}).map(([id, l]) => {
+    if (!l.von) return { ...l, geprueft: PRUEFSTAND.listen[`${s.id}/${id}`] || null };
     const [spiel, liste] = l.von.split("/");
     const quelle = SPIELE.find(x => x.id === spiel);
-    return { ...quelle.listen[liste], name: `${quelle.listen[liste].name} (Liste von ${quelle.name})`, verweis: true };
+    return { ...quelle.listen[liste], geprueft: PRUEFSTAND.listen[l.von] || null,
+      name: `${quelle.listen[liste].name} (Liste von ${quelle.name})`, verweis: true };
   });
   eintraege.push({
     klasse: s.klasse, fach: t.fach, thema: t.name, name: s.name, gebaut: true, id: s.id,
-    neu: s.neu, geprueft: s.geprueft, listen, annahmen: annahmenZu(s),
+    neu: s.neu, geprueft: PRUEFSTAND.spiele[s.id] || null, listen, annahmen: annahmenZu(s),
   });
 }
 for (const i of ideen) {
@@ -126,10 +129,10 @@ const frei = gebaut.filter(e => !(e.neu && !e.geprueft) && (!e.listen.length || 
 const listenAlle = gebaut.flatMap(e => e.listen).filter(l => !l.verweis); // jede Liste einmal, an ihrer Quelle
 z.push("# Checkliste der Spiele", "",
   "Erzeugt mit `node tools/checkliste.js > docs/eulenpfad/checkliste.md` — **nicht von Hand ändern**. Abgehakt",
-  "wird in den Quellen: ein Spiel als angesehen bzw. eine Inhaltsliste als geprüft mit `geprueft: { am, von }`",
-  "im Katalog (`eulenpfad/spiele/gemeinsam/katalog.js`), Annahmen in `docs/eulenpfad/lernziele/`, Ideen in",
+  "wird im Entwickler-Modus (Spiel angesehen, Inhaltsliste geprüft; schreibt `eulenpfad/spiele/gemeinsam/pruefstand.js`),",
+  "Annahmen in `docs/eulenpfad/lernziele/`, Ideen in",
   "`docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.", "",
-  `**Stand:** ${gebaut.length} Spiele gebaut, ${ideenOffen.length} Ideen offen · für Kinder frei: ${frei} von ${gebaut.length} · ` +
+  `**Stand:** ${gebaut.length} Spiele gebaut, ${ideenOffen.length} ${ideenOffen.length === 1 ? "Idee" : "Ideen"} offen · für Kinder frei: ${frei} von ${gebaut.length} · ` +
   `${angesehen} von ${neue.length} neuen Spielen angesehen · ${listenAlle.filter(l => l.geprueft).length} von ${listenAlle.length} Inhaltslisten geprüft.`, "",
   "Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit",
   "Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.", "",

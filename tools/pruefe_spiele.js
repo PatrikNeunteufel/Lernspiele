@@ -22,6 +22,12 @@ const DOM = fs.readFileSync(path.join(__dirname, "pruef_dom.js"), "utf8");
 const STUFEN = ["s1", "s2", "s3", "s4", "s5", "s6"];
 // Nur ganze Wörter: „Na“ + „se“ im Buchstabensalat ergibt im Text „NaNse“ und ist kein Fehler.
 const VERDAECHTIG = /\bNaN\b|\bundefined\b|\bnull\b|\bInfinity\b|\[object /;
+// Einzahl verpasst (LERN_Session6, „1 werden gegessen“): die Zahl 1 vor einem Verb in der Mehrzahl oder
+// danach („es kommen 1 dazu“). Nur ein Hinweis zum Nachsehen, kein Fehler: der Text ist zusammengesetzt.
+// Auch mit einem Nomen dazwischen („1 Stück kosten“). „100 Rp. sind 1 Fr.“ ist richtig (Subjekt in der
+// Mehrzahl), darum steht „sind“ hinter der 1 nicht in der Liste.
+// Nicht gemeldet: „für 1 Stück herausfinden“ (Infinitiv) und „liegen 1 Fr. 50 Rp.“ (mehr als 1 Fr.).
+const EINZAHL = /(?<![\d.,'’])(?<!für )\b1 (?:[A-ZÄÖÜ][\wäöüß]* )?(?:sind|haben|[a-zäöü]+en)\b|\b(?:haben|liegen|kommen|stehen|sitzen|fliegen|schwimmen|werden|gehen|laufen|wohnen|spielen|fahren|bleiben|fehlen|hängen|wachsen|passen|kosten)\s1\b(?![\d.,'’])(?! Fr\. \d)/;
 
 const opt = { runden: 3, aufgaben: 3000, seed: 1, maxKlicks: 8000 };
 const nurSpiele = [];
@@ -58,6 +64,11 @@ const TREIBER = `
   };
   const pruefeText = (wo) => {
     const t = buehne.textContent;
+    const e = t.match(${EINZAHL});
+    if (e) {
+      const stelle = t.slice(Math.max(0, e.index - 50), e.index + 30).replace(/\\s+/g, " ");
+      melde("Hinweis Einzahl?", "«" + stelle + "»", "einzahl:" + e[0]);
+    }
     const m = t.match(${VERDAECHTIG});
     if (!m) return;
     const stelle = t.slice(Math.max(0, m.index - 60), m.index + 40).replace(/\\s+/g, " ");
@@ -157,7 +168,7 @@ const TREIBER = `
   while (protokoll().length < runden && klicks < maxKlicks) {
     // Knöpfe und alles andere, das auf Tippen hört (SVG-Felder, Zahlenstrahl).
     const knoepfe = buehne.querySelectorAll("*").filter(b => (b.localName === "button" || b.__hoerer.click || b.__hoerer.pointerdown)
-      && !b.disabled && !b.classList.contains("link") && !b.classList.contains("timer-schalter") && !b.classList.contains("reihenfolge-schalter") && !/Andere Stufe/.test(b.textContent)
+      && !b.disabled && !b.classList.contains("link") && !b.classList.contains("timer-schalter") && !b.classList.contains("option-schalter") && !/Andere Stufe/.test(b.textContent)
       && !b.closest(".testhilfe"));
     if (!knoepfe.length) { __uhr.weiter(2000); if (++ohneFortschritt > 50) { melde("Hänger", "keine Knöpfe mehr"); break; } continue; }
     // Weiter- und Nochmal-Knöpfe bevorzugen, damit die Runde vorankommt; selten eine Testhilfe.
@@ -437,5 +448,40 @@ if (opt.kind !== 0) {
     }
   }
 }
+// Suche (Entscheid SU1 a): feste Beispielsuchen mit erwarteten Treffern (--suche=0 schaltet ab;
+// nur die Suche: node tools/pruefe_spiele.js suche).
+// zuerst: diese Spiele in dieser Reihenfolge ganz oben; ohne: darf nicht vorkommen; grund: Spiel, das einen Grund nennen muss.
+const SUCHFAELLE = [
+  { q: "schatz", zuerst: ["koordinaten-schatz", "schaetz-waage"], grund: "wort-zwillinge" },
+  { q: "schätzen", enthaelt: ["schaetz-waage", "uhr-werkstatt"] },
+  { q: "uhr", zuerst: ["uhr-werkstatt"] },
+  { q: "stellen", zuerst: ["stellen-detektiv"], enthaelt: ["zahlen-baukasten", "ziffernkarten"] },
+  { q: "zahlenstral", zuerst: ["zahlenstrahl-pfeil"], anzahl: 1 },
+  { q: "wortschatz", enthaelt: ["word-match", "wort-zwillinge"], grund: "word-match" },
+  { q: "MA.3.A.2", zuerst: ["uhr-werkstatt", "kiosk-kasse", "masse-umwandler"], anzahl: 3 },
+  { q: "englisch wörter", enthaelt: ["word-match", "wort-zwillinge", "listen-tap"], anzahl: 3 },
+  { q: "gipfeli", zuerst: ["preis-tabelle"], anzahl: 1, grund: "preis-tabelle" },
+  { q: "xyzqw", anzahl: 0 },
+];
+if (opt.suche !== 0 && (!nurSpiele.length || nurSpiele.includes("suche"))) {
+  const k = vm.createContext({ __seite: { html: "", search: "", seed: opt.seed }, console, URL, URLSearchParams, structuredClone });
+  vm.runInContext(DOM, k, { filename: "pruef_dom.js" });
+  for (const d of ["spiel.js", "katalog.js", "pruefstand.js"]) vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", d), "utf8"), k, { filename: d });
+  const suche = q => vm.runInContext(`LS.suche(${JSON.stringify(q)})`, k) || [];
+  console.log("\nSuche (feste Beispiele):\n");
+  for (const f of SUCHFAELLE) {
+    const r = suche(f.q);
+    const ids = r.map(t => t.id);
+    const maengel = [];
+    if (f.zuerst && f.zuerst.some((id, i) => ids[i] !== id)) maengel.push(`zuerst erwartet ${f.zuerst.join(", ")}`);
+    for (const id of f.enthaelt || []) if (!ids.includes(id)) maengel.push(`${id} fehlt`);
+    if (f.anzahl !== undefined && ids.length !== f.anzahl) maengel.push(`${ids.length} statt ${f.anzahl} Treffer`);
+    if (f.grund && !r.find(t => t.id === f.grund)?.grund) maengel.push(`${f.grund} ohne Grund`);
+    for (const m of maengel) console.log(`    FEHLER  Suche „${f.q}“: ${m}`);
+    fehlerZahl += maengel.length;
+    console.log(`${maengel.length ? "✗" : "✓"} „${f.q}“`.padEnd(22) + ` ${ids.slice(0, 5).join(", ")}${ids.length > 5 ? ` … (${ids.length})` : ""}`);
+  }
+}
+
 console.log(`\n${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`);
 process.exitCode = fehlerZahl ? 1 : 0;
