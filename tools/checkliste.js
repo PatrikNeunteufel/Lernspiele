@@ -1,10 +1,10 @@
 // Erzeugt die Checkliste aller Spiele: Klasse → Fach → Thema → Spiel, gebaut oder nur Idee, und was
 // je Spiel noch zu prüfen ist. Nichts davon wird von Hand gepflegt — die Quellen sind:
 //   spiele/gemeinsam/katalog.js            gebaute Spiele, Basisklasse, Thema, Prüfstand (geprueft, listen)
-//   docs/spielideen/lehrplan_sg_spielideen.md   Spielideen mit Klassenbereich und Lehrplan-Codes
-//   docs/lernziele/*.md                    Annahmen, die mit dem Lehrmittel abzugleichen sind
+//   docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md   Spielideen mit Klassenbereich und Lehrplan-Codes
+//   docs/eulenpfad/lernziele/*.md          Annahmen, die mit dem Lehrmittel abzugleichen sind
 // Abgehakt wird in den Quellen (z. B. geprueft im Katalog), danach die Liste neu erzeugen:
-//   node tools/checkliste.js > docs/checkliste.md
+//   node tools/checkliste.js > docs/eulenpfad/checkliste.md
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -14,7 +14,7 @@ const WURZEL = path.join(__dirname, "..");
 const lies = p => fs.readFileSync(path.join(WURZEL, p), "utf8");
 
 const katalog = vm.createContext({ LS: { SKALA: [] } });
-vm.runInContext(lies("spiele/gemeinsam/katalog.js") + ";this.SPIELE = SPIELE; this.THEMEN = THEMEN;", katalog);
+vm.runInContext(lies("eulenpfad/spiele/gemeinsam/katalog.js") + ";this.SPIELE = SPIELE; this.THEMEN = THEMEN;", katalog);
 const { SPIELE, THEMEN } = katalog;
 
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[^a-z]/g, "");
@@ -40,7 +40,7 @@ const ideen = [];
 {
   let fach = null;
   let aktuell = null;
-  for (const zeile of lies("docs/spielideen/lehrplan_sg_spielideen.md").split(/\r?\n/)) {
+  for (const zeile of lies("docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md").split(/\r?\n/)) {
     const kopf = zeile.match(/^#{2,3} (?:Spielideen |\d+\. )?(.+)/);
     if (kopf) {
       aktuell = null;
@@ -63,10 +63,10 @@ const ideen = [];
 }
 
 // ----- Annahmen je Lernziel-Dokument (Abschnitte „Annahmen“, „Weitere Annahmen“, „Bekannte Grenzen“) -----
-const annahmen = fs.readdirSync(path.join(WURZEL, "docs/lernziele")).filter(f => f.endsWith(".md")).map(datei => {
+const annahmen = fs.readdirSync(path.join(WURZEL, "docs/eulenpfad/lernziele")).filter(f => f.endsWith(".md")).map(datei => {
   const text = [];
   let drin = false;
-  for (const zeile of lies("docs/lernziele/" + datei).split(/\r?\n/)) {
+  for (const zeile of lies("docs/eulenpfad/lernziele/" + datei).split(/\r?\n/)) {
     if (/^#{2,3} /.test(zeile)) drin = /Annahmen|Bekannte Grenzen/.test(zeile);
     else if (drin) text.push(zeile);
   }
@@ -125,10 +125,10 @@ const angesehen = neue.filter(e => e.geprueft).length;
 const frei = gebaut.filter(e => !(e.neu && !e.geprueft) && (!e.listen.length || e.listen.some(l => !l.zusatz && l.geprueft))).length;
 const listenAlle = gebaut.flatMap(e => e.listen).filter(l => !l.verweis); // jede Liste einmal, an ihrer Quelle
 z.push("# Checkliste der Spiele", "",
-  "Erzeugt mit `node tools/checkliste.js > docs/checkliste.md` — **nicht von Hand ändern**. Abgehakt",
+  "Erzeugt mit `node tools/checkliste.js > docs/eulenpfad/checkliste.md` — **nicht von Hand ändern**. Abgehakt",
   "wird in den Quellen: ein Spiel als angesehen bzw. eine Inhaltsliste als geprüft mit `geprueft: { am, von }`",
-  "im Katalog (`spiele/gemeinsam/katalog.js`), Annahmen in `docs/lernziele/`, Ideen in",
-  "`docs/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.", "",
+  "im Katalog (`eulenpfad/spiele/gemeinsam/katalog.js`), Annahmen in `docs/eulenpfad/lernziele/`, Ideen in",
+  "`docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.", "",
   `**Stand:** ${gebaut.length} Spiele gebaut, ${ideenOffen.length} Ideen offen · für Kinder frei: ${frei} von ${gebaut.length} · ` +
   `${angesehen} von ${neue.length} neuen Spielen angesehen · ${listenAlle.filter(l => l.geprueft).length} von ${listenAlle.length} Inhaltslisten geprüft.`, "",
   "Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit",
@@ -136,8 +136,8 @@ z.push("# Checkliste der Spiele", "",
   "Gliederung: **Klasse** (Basisklasse des Spiels, bei Ideen die unterste Klasse des Bereichs) → **Fach** → **Thema** → Spiel.",
   "Je gebautem Spiel:", "",
   "- *angesehen* (nur neue Spiele) — auf Desktop, Tablet (768 px) und Handy (375 px) durchgespielt;",
-  "- *Inhalte* — Wort- und Inhaltslisten geprüft (Prüfliste `docs/pruefung/wortlisten_zur_pruefung.md`);",
-  "- *Lehrmittel* — Annahmen, die mit dem Lehrmittel abzugleichen sind (Datei in `docs/lernziele/`).", "");
+  "- *Inhalte* — Wort- und Inhaltslisten geprüft (Prüfliste `docs/eulenpfad/pruefung/wortlisten_zur_pruefung.md`);",
+  "- *Lehrmittel* — Annahmen, die mit dem Lehrmittel abzugleichen sind (Datei in `docs/eulenpfad/lernziele/`).", "");
 
 const haken = b => (b ? "[x]" : "[ ]");
 for (const klasse of [...new Set(eintraege.map(e => e.klasse))].sort((a, b) => a - b)) {

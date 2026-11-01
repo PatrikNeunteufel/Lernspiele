@@ -17,7 +17,7 @@ const path = require("path");
 const vm = require("vm");
 
 const WURZEL = path.join(__dirname, "..");
-const SPIELE_DIR = path.join(WURZEL, "spiele");
+const SPIELE_DIR = path.join(WURZEL, "eulenpfad", "spiele"); // App-Ordner (Entscheid P1 a)
 const DOM = fs.readFileSync(path.join(__dirname, "pruef_dom.js"), "utf8");
 const STUFEN = ["s1", "s2", "s3", "s4", "s5", "s6"];
 // Nur ganze Wörter: „Na“ + „se“ im Buchstabensalat ergibt im Text „NaNse“ und ist kein Fehler.
@@ -278,7 +278,7 @@ const GENERATOR = `
 })`;
 
 /**
- * Reservierte Rahmen-Klassen (LS.RAHMEN_KLASSEN.reserviert, docs/rahmen.md), mit denen ein Selektor im
+ * Reservierte Rahmen-Klassen (LS.RAHMEN_KLASSEN.reserviert, docs/eulenpfad/rahmen.md), mit denen ein Selektor im
  * eigenen <style> beginnt. Eingeschachtelt wie „.uhr .mitte“ ist harmlos.
  */
 function rahmenKlassenImStil(html, reserviert) {
@@ -327,7 +327,7 @@ function pruefe(id, stufe, liste = null, endlos = false, mix = false) {
       return mitAusnahmen();
     }
     if (!liste && stufe === STUFEN[0]) for (const k of rahmenKlassenImStil(html, lauf("LS.RAHMEN_KLASSEN.reserviert", "klassen", 1000)))
-      ergebnis.fehler.push(`Stil: definiert die Rahmen-Klasse .${k} neu (docs/rahmen.md)`);
+      ergebnis.fehler.push(`Stil: definiert die Rahmen-Klasse .${k} neu (docs/eulenpfad/rahmen.md)`);
     // Bietet das Spiel die Stufe an? (Als Kind fehlen Stufen ohne freie Inhalte; dann keinen Generator aufrufen.)
     if (liste && !lauf(`!!document.querySelector(".buehne .fortschritt")`, "angeboten", 1000)) {
       ergebnis.angeboten = false;

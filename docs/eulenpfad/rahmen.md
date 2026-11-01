@@ -12,6 +12,9 @@ stehen in `CLAUDE.md`. Hier steht, **wie** ein Spiel sie technisch umsetzt.
 - Farben: `:root` in `spiele/gemeinsam/stil.css`
 - Spiele, Themen, Lernziele: `spiele/gemeinsam/katalog.js`
 
+Pfade gelten relativ zum App-Ordner `eulenpfad/` (Entscheid P1 a); die Werkzeuge liegen in `tools/`
+der Repo-Wurzel.
+
 `node tools/pruefe_spiele.js` prüft die Punkte, die mit ✔ markiert sind.
 
 ## 1. Aufbau einer Spielseite

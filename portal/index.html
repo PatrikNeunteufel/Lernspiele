@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eulenpfad · Lernsteig · Gratwanderung</title>
+<!-- Einstiegsseite der Reihe (Entscheid P2 a). Online gilt dieselbe Ordnerstruktur wie im Repo
+     (.github/workflows/pages.yml): portal/ neben den App-Ordnern, die Wurzel leitet hierher weiter.
+     So stimmen die Verweise ../<app>/ lokal und online. -->
+<style>
+  :root { --text: #2b2d42; --leise: #6b7089; --karte: #fff; --rand: #e3e6f3; --akzent: #6366f1; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 32px 16px; font: 18px/1.5 system-ui, "Segoe UI", sans-serif;
+    color: var(--text); background: linear-gradient(180deg, #e0f2fe, #fef9e7);
+  }
+  main { max-width: 900px; margin: 0 auto; }
+  h1 { text-align: center; font-size: clamp(30px, 6vw, 44px); margin: 0 0 6px; }
+  .unter { text-align: center; color: var(--leise); margin: 0 0 28px; }
+  .apps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .app {
+    display: block; padding: 22px; border-radius: 20px; background: var(--karte); color: inherit;
+    text-decoration: none; box-shadow: 0 4px 0 var(--rand);
+  }
+  a.app:hover, a.app:focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; }
+  .app .bild { font-size: 44px; }
+  .app h2 { margin: 6px 0 2px; font-size: 26px; }
+  .app .stufe { font-weight: 800; color: var(--akzent); font-size: 15px; }
+  .app p { margin: 8px 0 0; color: var(--leise); font-size: 16px; }
+  .app.bald { opacity: .6; box-shadow: none; border: 2px dashed var(--rand); }
+  footer { margin-top: 28px; text-align: center; color: var(--leise); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Eulenpfad</h1>
+  <p class="unter">Lernspiele, die mit jeder Schulstufe steiler werden.</p>
+  <div class="apps">
+    <a class="app" href="../eulenpfad/index.html">
+      <div class="bild">🦉</div>
+      <h2>Eulenpfad</h2>
+      <div class="stufe">Primarschule</div>
+      <p>Kleine Lernspiele für die 1. bis 4. Klasse — die Eule begleitet.</p>
+    </a>
+    <div class="app bald">
+      <div class="bild">⛰️</div>
+      <h2>Lernsteig</h2>
+      <div class="stufe">Sekundarstufe I · in Planung</div>
+      <p>Üben und Prüfungen vorbereiten, in Niveaus.</p>
+    </div>
+    <div class="app bald">
+      <div class="bild">🏔️</div>
+      <h2>Gratwanderung</h2>
+      <div class="stufe">Gymnasium · in Planung</div>
+      <p>Repetieren bis zur Matura.</p>
+    </div>
+  </div>
+  <footer>Alles bleibt im Browser auf deinem Gerät. Keine Anmeldung, keine Werbung.</footer>
+</main>
+</body>
+</html>

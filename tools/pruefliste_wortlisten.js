@@ -1,11 +1,11 @@
 // Erzeugt aus den Inhaltslisten der Spiele (Wörter, Sätze, Tiere, Fakten) eine lesbare Prüfliste (Markdown) für Eltern
-// oder Lehrperson. Aufruf: node tools/pruefliste_wortlisten.js > docs/pruefung/wortlisten_zur_pruefung.md
+// oder Lehrperson. Aufruf: node tools/pruefliste_wortlisten.js > docs/eulenpfad/pruefung/wortlisten_zur_pruefung.md
 "use strict";
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 
-const wurzel = path.join(__dirname, "..");
+const wurzel = path.join(__dirname, "..", "eulenpfad"); // App-Ordner (Entscheid P1 a)
 const lade = (datei, namen) => {
   const kontext = {};
   vm.runInNewContext(`${fs.readFileSync(path.join(wurzel, datei), "utf8")}\n;this.ergebnis = { ${namen.join(", ")} };`, kontext);

@@ -1,9 +1,9 @@
 # Checkliste der Spiele
 
-Erzeugt mit `node tools/checkliste.js > docs/checkliste.md` — **nicht von Hand ändern**. Abgehakt
+Erzeugt mit `node tools/checkliste.js > docs/eulenpfad/checkliste.md` — **nicht von Hand ändern**. Abgehakt
 wird in den Quellen: ein Spiel als angesehen bzw. eine Inhaltsliste als geprüft mit `geprueft: { am, von }`
-im Katalog (`spiele/gemeinsam/katalog.js`), Annahmen in `docs/lernziele/`, Ideen in
-`docs/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
+im Katalog (`eulenpfad/spiele/gemeinsam/katalog.js`), Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
+`docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
 **Stand:** 84 Spiele gebaut, 3 Ideen offen · für Kinder frei: 32 von 84 · 0 von 28 neuen Spielen angesehen · 0 von 162 Inhaltslisten geprüft.
 
@@ -14,8 +14,8 @@ Gliederung: **Klasse** (Basisklasse des Spiels, bei Ideen die unterste Klasse de
 Je gebautem Spiel:
 
 - *angesehen* (nur neue Spiele) — auf Desktop, Tablet (768 px) und Handy (375 px) durchgespielt;
-- *Inhalte* — Wort- und Inhaltslisten geprüft (Prüfliste `docs/pruefung/wortlisten_zur_pruefung.md`);
-- *Lehrmittel* — Annahmen, die mit dem Lehrmittel abzugleichen sind (Datei in `docs/lernziele/`).
+- *Inhalte* — Wort- und Inhaltslisten geprüft (Prüfliste `docs/eulenpfad/pruefung/wortlisten_zur_pruefung.md`);
+- *Lehrmittel* — Annahmen, die mit dem Lehrmittel abzugleichen sind (Datei in `docs/eulenpfad/lernziele/`).
 
 ## 1. Klasse
 

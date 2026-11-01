@@ -3,6 +3,12 @@
 Name der Sammlung „Eulenpfad“ (Entscheid N1 a, 2026-11-01). Technische Namen bleiben: Ordner
 `Lernspiele/`, Speicherschlüssel `lernspiele:*`, gesicherte Dateien `lernspiele-*.json`.
 
+**Ordner** (Entscheide P1 a, P2 a, 2026-11-01): Das Repo trägt die Reihe Eulenpfad → Lernsteig →
+Gratwanderung ([Konzept](docs/konzept_reihe_eulenpfad.md)). Je App ein Ordner, der **nur enthält,
+was online geht**: `eulenpfad/` (heute), später `lernsteig/` und `gratwanderung/`. Doku je App unter
+`docs/<app>/`, Werkzeuge in `tools/`, Einstiegsseite der Reihe in `portal/`. Pfade in Code-Angaben
+(`spiele/…`, `start/…`) gelten relativ zum App-Ordner.
+
 Sammlung kleiner, in sich geschlossener Lernspiele für Primarschüler (2. und 4. Klasse).
 Jedes Spiel übt **genau ein Lernziel** aus dem jeweiligen Lernzielblatt der Klasse und ist
 kindgerecht gestaltet: grosse Bedienelemente (Tablet/Finger), wenig Text, sofortige freundliche
@@ -15,7 +21,7 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
   vierstellige Zahlen ungegliedert „4500" — Annahme, mit dem Lehrmittel abzugleichen). Schweizer
   Schreibweise (ss statt ß) in allem, was Kinder sehen.
 - **Ein Lernziel je Spiel** (Ausnahme: Ziffernkarten üben G4 und E2 in verschiedenen Stufen),
-  Zuordnung Lernziel → Spiel und Stufen in `spiele/gemeinsam/katalog.js` und `docs/lernziele/`.
+  Zuordnung Lernziel → Spiel und Stufen in `spiele/gemeinsam/katalog.js` und `docs/eulenpfad/lernziele/`.
 - **Sechs Stufen je Spiel, bezogen auf seine Basisklasse** (Entscheid Patrik 2026-10-31): Jedes
   Spiel ist für eine Basisklasse ausgelegt (Katalog, Feld `klasse`). Skala `LS.SKALA` in
   `spiele/gemeinsam/spiel.js`: 1 Einstieg (eine Klasse tiefer) · 2 Üben (Basisklasse, leichter) ·
@@ -53,16 +59,16 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 <!-- Kopplungsblock für die globalen ~/.claude-Skills. Format: ~/.claude/docs/steckbrief.template.md -->
 - **Projekt:** Eulenpfad (Ordner Lernspiele) — kleine Mathe-Lernspiele (später weitere Fächer) für die 2. und 4. Klasse
 - **Session-Prefix:** LERN
-- **Sprachen:** HTML/CSS/JavaScript ohne Build-Schritt und ohne externe Abhängigkeiten (Entscheid LERN-1, 2026-10-31). Jedes Spiel ist eine eigenständige Seite `spiele/<name>/index.html`; Gemeinsames in `spiele/gemeinsam/`; Startseite `index.html` mit Anmeldung und Tabs Spiele, Profil, Statistik, Verwaltung (Code je Tab in `start/`). Läuft offline per Doppelklick.
+- **Sprachen:** HTML/CSS/JavaScript ohne Build-Schritt und ohne externe Abhängigkeiten (Entscheid LERN-1, 2026-10-31). App-Ordner `eulenpfad/`: Jedes Spiel ist eine eigenständige Seite `eulenpfad/spiele/<name>/index.html`; Gemeinsames in `eulenpfad/spiele/gemeinsam/`; Startseite `eulenpfad/index.html` mit Anmeldung und Tabs Spiele, Profil, Statistik, Verwaltung (Code je Tab in `eulenpfad/start/`). Läuft offline per Doppelklick.
 - **Konventionen:** CLAUDE.md (Abschnitt Gestaltungsregeln)
-- **Architektur-Doku:** docs/rahmen.md (Vertrag Rahmen ↔ Spiele: reservierte CSS-Klassen, Farben, ctx-API, Bausteine, Pflichtfunktionen)
-- **Handover:** docs/HANDOVER.md
-- **Session-Reports:** docs/report/ · LERN_Session<N>_<YYYY-MM-DD>.md
+- **Architektur-Doku:** docs/eulenpfad/rahmen.md (Vertrag Rahmen ↔ Spiele: reservierte CSS-Klassen, Farben, ctx-API, Bausteine, Pflichtfunktionen)
+- **Handover:** docs/eulenpfad/HANDOVER.md
+- **Session-Reports:** docs/eulenpfad/report/ · LERN_Session<N>_<YYYY-MM-DD>.md
 - **Changelog/Logbuch:** CHANGELOG.md
-- **Build:** — (kein Build; `index.html` im Browser öffnen)
+- **Build:** — (kein Build; `eulenpfad/index.html` im Browser öffnen). Veröffentlichen: `.github/workflows/pages.yml`, nur von Hand gestartet (LERN-17)
 - **Tests:** — (manuell im Browser: Desktop, Tablet 768 px, Handy 375 px; jede Kombination Spiel × Stufe lädt ohne Konsolenfehler; Aufgabengeneratoren je Stufe mit einigen tausend Zufallsaufgaben auf Zahlenraum und gültige Lösung prüfen)
 - **Sensible Daten:** Namen, Alter und Lernstand der Kinder nur im Browser (localStorage, Schlüssel `lernspiele:*`) und in selbst gesicherten JSON-Dateien — solche Dateien nie ins Repo; keine Namen, Fotos oder Handschrift von Kindern in Spielen/Commits; Lernzielblätter liegen nur als Material in material/
 - **Bewusste Vereinfachungen:** —
-- **Deliverables:** je Spiel eine lauffähige Seite; Lernziel-Abdeckung in docs/lernziele/
+- **Deliverables:** je Spiel eine lauffähige Seite; Lernziel-Abdeckung in docs/eulenpfad/lernziele/
 - **Domänen-Skills (lokal):** —
 - **Beim Start laden:** —

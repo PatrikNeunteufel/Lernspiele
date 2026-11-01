@@ -7,8 +7,12 @@ Lehrplan Volksschule St. Gallen. Jedes Spiel ist für eine Basisklasse gebaut un
 
 ## Starten
 
-**Kein Server nötig.** `index.html` im Hauptordner doppelklicken, dann öffnet sich die Startseite im
+**Kein Server nötig.** `eulenpfad/index.html` doppelklicken, dann öffnet sich die Startseite im
 Browser. Alles läuft offline und ohne Installation.
+
+Eulenpfad ist die erste App einer Reihe: Eulenpfad (Primar) → Lernsteig (Sekundarstufe I) →
+Gratwanderung (Gymnasium), siehe [Konzept](docs/konzept_reihe_eulenpfad.md). Jede App hat einen
+eigenen Ordner mit genau dem, was online geht.
 
 **Anmelden:** Kinder tippen ihren Namen an. Die **Aufsicht** (Eltern, Lehrperson) meldet sich mit
 ihrer PIN an. Sie legt die Kinder an, gibt Spiele und Inhaltslisten frei, sieht alle Statistiken
@@ -34,7 +38,7 @@ Ranglisten je Mischung.
   Doppelklick (`file://`) denselben Speicher, also Spieler, Profil und Fortschritt.
 - **Firefox:** ungeprüft, ob der Speicher beim Doppelklick zwischen den Seiten geteilt wird. Wer
   sichergehen will, startet einen kleinen lokalen Server im Hauptordner und öffnet
-  <http://localhost:8765>:
+  <http://localhost:8765/eulenpfad/>:
 
   ```bash
   python -m http.server 8765 --bind 127.0.0.1
@@ -56,16 +60,21 @@ Statistik: den Spielstand eines Kindes zurücksetzen (alle Spiele oder ein einze
 
 | Ordner | Inhalt |
 |---|---|
-| `index.html`, `start/` | Startseite: Anmeldung und Tabs Spiele, Profil, Statistik, Verwaltung (je Tab eine Datei) |
-| `mix.html`, `mix/` | Zufallsmix: Einstellungen, Spiele im iframe, Protokoll und Rekord (Vertrag: `docs/rahmen.md` Abschnitt 9) |
-| `spiele/<name>/` | je Spiel eine Seite `index.html`, Inhaltslisten in eigenen Dateien (`woerter.js` …) |
-| `spiele/gemeinsam/` | Rahmen (`spiel.js`), Katalog aller Spiele mit Prüfstand (`katalog.js`), Auswertung, Stil |
-| `docs/rahmen.md` | Vertrag zwischen Rahmen und Spielen: Klassen, Farben, Schnittstelle, Freigabe |
-| `docs/checkliste.md` | Checkliste: Klasse → Fach → Thema → Spiel, gebaut oder Idee, was noch zu prüfen ist (erzeugt) |
-| `docs/lernziele/` | Lernziele mit Zuordnung Lernziel → Spiel |
-| `docs/spielideen/` | Spielideen aus dem Lehrplan Volksschule SG |
-| `docs/pruefung/` | Prüfliste der Wort- und Inhaltslisten für Eltern oder Lehrperson |
+| `eulenpfad/` | **die App** — nur was online geht |
+| `eulenpfad/index.html`, `start/` | Startseite: Anmeldung und Tabs Spiele, Profil, Statistik, Verwaltung (je Tab eine Datei) |
+| `eulenpfad/mix.html`, `mix/` | Zufallsmix: Einstellungen, Spiele im iframe, Protokoll und Rekord (Vertrag: `docs/eulenpfad/rahmen.md` Abschnitt 9) |
+| `eulenpfad/spiele/<name>/` | je Spiel eine Seite `index.html`, Inhaltslisten in eigenen Dateien (`woerter.js` …) |
+| `eulenpfad/spiele/gemeinsam/` | Rahmen (`spiel.js`), Abgleich (`abgleich.js`), Katalog aller Spiele mit Prüfstand (`katalog.js`), Auswertung, Stil |
+| `portal/` | Einstiegsseite der Reihe, verlinkt die Apps (lokal `portal/index.html` öffnen; online leitet die Wurzel dorthin) |
+| `docs/konzept_reihe_eulenpfad.md` | Konzept der Reihe Eulenpfad → Lernsteig → Gratwanderung |
+| `docs/eulenpfad/rahmen.md` | Vertrag zwischen Rahmen und Spielen: Klassen, Farben, Schnittstelle, Freigabe, Abgleich |
+| `docs/eulenpfad/checkliste.md` | Checkliste: Klasse → Fach → Thema → Spiel, gebaut oder Idee, was noch zu prüfen ist (erzeugt) |
+| `docs/eulenpfad/lernziele/` | Lernziele mit Zuordnung Lernziel → Spiel |
+| `docs/eulenpfad/spielideen/` | Spielideen aus dem Lehrplan Volksschule SG |
+| `docs/eulenpfad/pruefung/` | Prüfliste der Wort- und Inhaltslisten für Eltern oder Lehrperson |
+| `docs/eulenpfad/HANDOVER.md`, `report/` | Stand und Sitzungsberichte |
 | `tools/` | Prüfskripte (Node.js) |
+| `.github/workflows/pages.yml` | Veröffentlichen auf GitHub Pages: nur `portal/` und die App-Ordner, nur von Hand gestartet |
 
 ## Prüfen
 
@@ -84,11 +93,11 @@ Einzelne Spiele: `node tools/pruefe_spiele.js reim-paare abc-sortierer`.
 Die Checkliste neu erzeugen, nachdem sich Katalog, Prüfstand, Spielideen oder Annahmen geändert haben:
 
 ```bash
-node tools/checkliste.js > docs/checkliste.md
+node tools/checkliste.js > docs/eulenpfad/checkliste.md
 ```
 
 Die Prüfliste der Inhaltslisten neu erzeugen, nachdem eine Liste geändert wurde:
 
 ```bash
-node tools/pruefliste_wortlisten.js > docs/pruefung/wortlisten_zur_pruefung.md
+node tools/pruefliste_wortlisten.js > docs/eulenpfad/pruefung/wortlisten_zur_pruefung.md
 ```
