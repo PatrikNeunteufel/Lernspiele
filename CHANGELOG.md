@@ -113,3 +113,13 @@
   `docs/rahmen.md` Abschnitte 8 und 9.
 - Session-Abschluss: Report docs/report/LERN_Session5_2026-11-01.md, Handover nachgeführt
   (LERN-9 erledigt, LERN-28 bis LERN-30 neu). Zwei Gesamtläufe des Testskripts ohne Fehler.
+
+## 2026-11-01 — LERN_Session6
+- Reihenfolge der Teile direkt im Spiel (Entscheid R1 a): Schalter „🔀 Teile: nach Stufe / geordnet /
+  gemischt“ auf der Stufenwahl von Zahlen-Baukasten und Zahlenrätsel-Tresor; schreibt die Wahl je
+  Spiel wie das Profil (`setzeReihenfolgeSpiel` in `spiel.js`, Klassen `reihenfolge-zeile`,
+  `reihenfolge-schalter`).
+- Fix: Die Wahl je Spiel „nach Stufe“ schlug eine globale Wahl „immer geordnet/gemischt“ nicht; jetzt
+  gilt je Spiel vor global für alle drei Werte (`reihenfolgeFuer`).
+- Durchgesehen: Die übrigen Stellenwert-Spiele zeigen keine Teile, die man mischen sollte (Tabellen und
+  Ziffernkarten haben eine feste Ordnung); kein weiteres Spiel mit `reihenfolge: true`.

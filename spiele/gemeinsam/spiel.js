@@ -142,12 +142,24 @@ const LS = (() => {
 
   /**
    * Stehen die Teile einer Aufgabe (Bausteine, Rätselteile) geordnet von der grössten Stelle links
-   * zur kleinsten rechts? Einstellung je Spiel schlägt die globale; „stufe“ heisst: 1–3 geordnet.
+   * zur kleinsten rechts? „stufe“ heisst: 1–3 geordnet.
    */
   function geordnet(name, spiel, stufe) {
-    const r = profil(name).reihenfolge || LEERES_PROFIL.reihenfolge;
-    const wert = [r.spiele?.[spiel], r.global].find(w => w && w !== "stufe") || "stufe";
+    const wert = reihenfolgeFuer(name, spiel);
     return wert === "stufe" ? ["s1", "s2", "s3"].includes(stufe) : wert === "geordnet";
+  }
+
+  /** Gültige Reihenfolge eines Spiels: Einstellung je Spiel schlägt die globale (auch „stufe“). */
+  function reihenfolgeFuer(name, spiel) {
+    const r = profil(name).reihenfolge || LEERES_PROFIL.reihenfolge;
+    return r.spiele?.[spiel] || r.global || "stufe";
+  }
+
+  /** Reihenfolge eines Spiels für einen Spieler setzen (wie die Wahl je Spiel im Profil). */
+  function setzeReihenfolgeSpiel(name, spiel, wert) {
+    const r = { ...LEERES_PROFIL.reihenfolge, ...(profil(name).reihenfolge || {}) };
+    r.spiele = { ...r.spiele, [spiel]: wert };
+    speichereProfil(name, { reihenfolge: r });
   }
 
   /** Profile; frühere Testspieler (test: true, LERN_Session3) werden zur Aufsicht. */
@@ -874,13 +886,36 @@ const LS = (() => {
         el("span", { class: "leise", text: an ? "Jede Aufgabe hat eine Zeit. Ist sie um, zählt es als Fehler." : "Für mehr Spannung: Timer einschalten." }));
     }
 
+    /**
+     * Schalter „Teile: nach Stufe / geordnet / gemischt“ für Spiele mit `reihenfolge: true` im Katalog
+     * (Entscheid R1 a, LERN_Session6); schreibt dieselbe Wahl je Spiel wie das Profil.
+     */
+    function reihenfolgeZeile(neuZeichnen) {
+      if (typeof SPIELE === "undefined" || !SPIELE.find(s => s.id === def.id)?.reihenfolge) return null;
+      const name = aktuellerSpieler();
+      const wert = reihenfolgeFuer(name, def.id);
+      const KURZ = { stufe: "nach Stufe", geordnet: "geordnet", gemischt: "gemischt" };
+      const ERKLAERT = {
+        stufe: "Stufe 1–3 geordnet, ab Stufe 4 gemischt.",
+        geordnet: "Grösste Stelle links, kleinste rechts.",
+        gemischt: "Die Teile stehen durcheinander. Das ist kniffliger.",
+      };
+      return el("div", { class: "reihenfolge-zeile" },
+        el("b", { text: "🔀 Teile:" }),
+        ...Object.keys(REIHENFOLGEN).map(k => el("button", {
+          type: "button", class: "reihenfolge-schalter" + (k === wert ? " an" : ""), "aria-pressed": String(k === wert),
+          onclick: () => { setzeReihenfolgeSpiel(name, def.id, k); ton("tipp"); neuZeichnen(); },
+        }, KURZ[k])),
+        el("span", { class: "leise", text: ERKLAERT[wert] }));
+    }
+
     function stufenwahl() {
       if (!zugang()) return;
       buehne.innerHTML = "";
       const name = aktuellerSpieler();
       const karte = el("div", { class: "karte" });
       const eule = euleZeile();
-      karte.append(spielerZeile(), eule.element, timerZeile(stufenwahl));
+      karte.append(spielerZeile(), eule.element, timerZeile(stufenwahl), reihenfolgeZeile(stufenwahl) || "");
       eule.sag(def.einleitung);
       const stufen = el("div", { class: "stufen" });
       for (const st of stufenListe) {
@@ -1385,7 +1420,7 @@ const LS = (() => {
     reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein",
       "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
       "spieler-zeile",
-      "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "zeitleiste", "zeitbalken", "testhilfe",
+      "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "reihenfolge-zeile", "reihenfolge-schalter", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],

@@ -47,7 +47,7 @@ untereinander.
 | Runde | `fortschritt`, `zeitleiste`, `zeitbalken`, `testhilfe` | Punkte je Aufgabe, Timer, Testhilfen |
 | Sterne | `sterne`, `sterne-klein`, `aus`, `konfetti`, `flug` | Belohnung und Animation |
 | Angemeldet | `spieler-zeile` | „Du spielst als …“ im Startbild; angemeldet wird auf der Startseite |
-| Stufenwahl | `stufen`, `stufe`, `fuer`, `timer-zeile`, `timer-schalter`, `leise` | Startbild des Spiels |
+| Stufenwahl | `stufen`, `stufe`, `fuer`, `timer-zeile`, `timer-schalter`, `reihenfolge-zeile`, `reihenfolge-schalter`, `leise` | Startbild des Spiels |
 
 **Erlaubt:** reservierte Klassen eingeschachtelt in einer eigenen Klasse. `.uhr .mitte` trifft nur
 die Uhr. `.knopf` darf ein Spiel als Klasse an eigene Knöpfe hängen, aber nicht umgestalten.
@@ -118,7 +118,7 @@ LS.spiel({
 | | |
 |---|---|
 | `ctx.stufe`, `ctx.nr`, `ctx.flaeche` | Stufe (`s1`–`s6`), Nummer der Aufgabe, Fläche zum Zeichnen |
-| `ctx.geordnet` | Bausteine geordnet zeigen? (Profil-Einstellung; nur Spiele mit `reihenfolge: true` im Katalog) |
+| `ctx.geordnet` | Bausteine geordnet zeigen? Nur Spiele mit `reihenfolge: true` im Katalog. Eingestellt auf der Stufenwahl (Schalter „🔀 Teile“, Entscheid R1 a) oder im Profil; die Wahl je Spiel schlägt die globale, „nach Stufe“ heisst Stufe 1–3 geordnet. Im Zufallsmix gilt dieselbe Einstellung. |
 | `ctx.richtig(lob?)` | Aufgabe gelöst |
 | `ctx.falsch(hinweis, loesungText?)` | Fehlversuch. Der Hinweis darf die Lösung **nicht verraten** ✔. Mit `loesungText` zeigt der Rahmen nach dem dritten Fehlversuch die Lösung und einen Weiter-Knopf. Ohne ihn bleibt die Aufgabe offen; das Spiel hilft dann selbst (Zahlenmauer, Malkreuz). |
 | `ctx.loesung(text)` | Lösung gleich beim Zeichnen nennen. Sie erscheint nur beim Testspieler hinter „🔑“. **Pflicht in jeder Aufgabe** ✔. Die Bausteine rufen sie selbst auf. Den Text in **eine** Konstante legen, die auch `ctx.falsch` bekommt. |

@@ -157,7 +157,7 @@ const TREIBER = `
   while (protokoll().length < runden && klicks < maxKlicks) {
     // Knöpfe und alles andere, das auf Tippen hört (SVG-Felder, Zahlenstrahl).
     const knoepfe = buehne.querySelectorAll("*").filter(b => (b.localName === "button" || b.__hoerer.click || b.__hoerer.pointerdown)
-      && !b.disabled && !b.classList.contains("link") && !b.classList.contains("timer-schalter") && !/Andere Stufe/.test(b.textContent)
+      && !b.disabled && !b.classList.contains("link") && !b.classList.contains("timer-schalter") && !b.classList.contains("reihenfolge-schalter") && !/Andere Stufe/.test(b.textContent)
       && !b.closest(".testhilfe"));
     if (!knoepfe.length) { __uhr.weiter(2000); if (++ohneFortschritt > 50) { melde("Hänger", "keine Knöpfe mehr"); break; } continue; }
     // Weiter- und Nochmal-Knöpfe bevorzugen, damit die Runde vorankommt; selten eine Testhilfe.

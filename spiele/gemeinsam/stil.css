@@ -327,13 +327,13 @@ button { font-family: inherit; }
 
 /* ---------- Timer ---------- */
 
-.timer-zeile { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 8px; }
+.timer-zeile, .reihenfolge-zeile { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 8px; }
 
 /* Testhilfen, nur beim Testspieler (Entscheid T2 a) */
 .testhilfe { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; padding: 6px 10px;
   border: 2px dashed var(--text-leise); border-radius: 12px; font-size: 15px; color: var(--text-leise); }
 
-.timer-schalter {
+.timer-schalter, .reihenfolge-schalter {
   border: none;
   border-radius: 999px;
   padding: 8px 18px;
@@ -348,6 +348,11 @@ button { font-family: inherit; }
 }
 
 .timer-schalter.an { background: var(--hinweis); color: #fff; box-shadow: 0 4px 0 #d97f00; }
+
+/* Reihenfolge der Teile (Entscheid R1 a): drei Knöpfe, der gewählte gefüllt — Deko-Farbe, keine Stellenfarbe */
+.reihenfolge-zeile { gap: 8px; }
+.reihenfolge-schalter { padding: 8px 14px; font-size: 17px; }
+.reihenfolge-schalter.an { background: var(--deko-1); color: #fff; box-shadow: 0 4px 0 #6b3fb0; }
 
 .zeitleiste {
   height: 14px;
