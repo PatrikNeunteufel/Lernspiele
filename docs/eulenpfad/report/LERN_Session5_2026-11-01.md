@@ -107,7 +107,7 @@ Name „Eulenpfad“ (N1 a) und der Zufallsmix mit den Spielen im iframe (M1 a).
 ## Offene Punkte / Plan für die nächste Session
 1. **LERN-21:** Startseite, Mix und die 28 neuen Spiele ansehen. Den Mix auf dem Tablet der Kinder
    (Safari?) prüfen (LERN-30), dabei die Leiste auf dem Handy (drei Zeilen).
-2. **LERN-11, LERN-4** wie bisher; Prüfung 4.2 am Do 05.11.
+2. **LERN-11, LERN-4** wie bisher; vor der Prüfung 4.2.
 3. **LERN-28:** Statistik-Ausbau entscheiden; zuerst der Können-Wert je Lernziel, er trägt auch
    „passend“ im Mix.
 4. **LERN-29:** vor LERN-17 Markenrecherche EU (TMview) und Domain für „Eulenpfad“.

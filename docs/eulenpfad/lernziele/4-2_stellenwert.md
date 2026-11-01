@@ -1,6 +1,6 @@
 # Lernziele 4.2 — Stellenwert / Ziffern und Zahlen (4. Klasse)
 
-Quelle: Lernzielblatt (Foto `material/4-klasse/lernziele_4-2_stellenwert.jpeg`), Prüfung **Do 05.11.26**.
+Quelle: Lernzielblatt der 4. Klasse (Foto in `material/`, nicht im Repo).
 Wortlaut abgeschrieben vom Foto; Lehrmittel-Verweise (Themenbuch / Arbeitsheft gelb) unverändert.
 
 | Nr. | Stufe | Lernziel (Wortlaut) | Lehrmittel | Spielidee (Vorschlag) | Status |

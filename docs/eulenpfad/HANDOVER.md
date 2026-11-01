@@ -58,7 +58,7 @@
 
    Danach im Katalog `geprueft` eintragen und die Checkliste neu erzeugen.
 2. LERN-11: die Prüfliste einarbeiten; geprüfte Listen im Katalog `geprueft`.
-3. LERN-4: Testrunde mit den Kindern (Prüfung 4.2 am Do 05.11.); danach den Endlos-Boden aus
+3. LERN-4: Testrunde mit den Kindern vor der Prüfung 4.2; danach den Endlos-Boden aus
    gemessenen Zeiten eichen (LERN-25).
 4. LERN-28: Statistik-Ausbau entscheiden, zuerst der Können-Wert je Lernziel.
 5. Offene Entscheide aus LERN_Session4: Flächen-Pixel s6, LERN-27.
@@ -116,7 +116,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | Nr. | Punkt | Status | Einzelheiten |
 |---|---|---|---|
 | LERN-1 | Technik der Spiele festlegen | erledigt 2026-10-31 (HTML/JS, CLAUDE.md) | Steckbrief *Sprachen* |
-| LERN-2 | Spiele 4.2 Stellenwert bauen (Prüfung Do 05.11.26) | erledigt 2026-10-31 (LERN_Session1, 8 von 8) | docs/lernziele/4-2_stellenwert.md |
+| LERN-2 | Spiele 4.2 Stellenwert bauen | erledigt 2026-10-31 (LERN_Session1, 8 von 8) | docs/eulenpfad/lernziele/4-2_stellenwert.md |
 | LERN-3 | Thema/Lernzielblatt 2. Klasse | offen | noch kein Material |
 | LERN-4 | Test mit den Kindern; Schwierigkeit und Hinweise nachschärfen | in Arbeit seit 2026-10-31 (LERN_Session1, erste Rückmeldung umgesetzt) | Report LERN_Session2, Plan |
 | LERN-5 | Fortschritt protokollieren mit Namen | erledigt 2026-10-31 (LERN_Session1, Entscheid b) | CLAUDE.md Gestaltungsregeln |

@@ -2,7 +2,7 @@
 
 ## Schwerpunkt
 Projekt eingerichtet und von null auf 26 Lernspiele gebracht: zuerst das Stellenwert-Paket für die
-Prüfung 4.2 (Do 05.11.26), dann gemeinsamer Rahmen mit Spielerprofil, fünf Stufen, Timer,
+Prüfung 4.2, dann gemeinsamer Rahmen mit Spielerprofil, fünf Stufen, Timer,
 Zeitmessung und didaktischer Statistik, danach Spiele aus dem Lehrplan Volksschule St. Gallen für
 Mathe, Deutsch, NMG und Englisch.
 

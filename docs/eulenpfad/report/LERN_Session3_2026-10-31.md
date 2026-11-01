@@ -121,7 +121,7 @@ Die Arbeit lief in zwei Commits (`118936f`, `a9d1798`) und dem hier beschriebene
    Sprachausgabe und PIN unter `file://`. Danach im Katalog `geprueft` eintragen und
    `node tools/checkliste.js > docs/checkliste.md` ausführen (LERN-21).
 2. **LERN-11:** Prüfliste einarbeiten (Teile 1–39); geprüfte Listen im Katalog `geprueft`.
-3. **LERN-4:** Testrunde mit den Kindern (Stellenwert-Prüfung Do 05.11).
+3. **LERN-4:** Testrunde mit den Kindern (vor der Stellenwert-Prüfung).
 4. **Lehrmittel-Abgleich:** 50 Spiele mit offenen Annahmen, siehe Checkliste.
 5. **Vor LERN-17 (GitHub Pages):** Datenschutz-Scan.
 6. **Offene Ideen:** Tipp-Trainer, Schweiz-Karten-Suche, Mots-Match.
