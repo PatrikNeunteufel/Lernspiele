@@ -5,7 +5,7 @@ wird im Entwickler-Modus (Spiel angesehen, Inhaltsliste geprüft; schreibt `eule
 Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
 `docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
-**Stand:** 86 Spiele gebaut, 1 Idee offen · für Kinder frei: 34 von 86 · 2 von 30 neuen Spielen angesehen · 3 von 166 Inhaltslisten geprüft.
+**Stand:** 91 Spiele gebaut, 2 Ideen offen · für Kinder frei: 34 von 91 · 2 von 35 neuen Spielen angesehen · 3 von 166 Inhaltslisten geprüft.
 
 Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit
 Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.
@@ -84,6 +84,10 @@ Je gebautem Spiel:
 #### Zahlen ordnen
 
 - [x] ~~Folgen-Fortsetzer~~ — ersetzt: Zahlenfolgen übt der Muster-Fortsetzer (Stufen 5–6), den OP 4. Klasse (MA.3.A.3.d) die Preis-Tabelle
+
+#### Kombinieren
+
+- [ ] Glace-Kombinator — Idee, Klassen 2–6
 
 ### NMG
 
@@ -295,7 +299,7 @@ Je gebautem Spiel:
 
 #### Kombinieren
 
-- [x] **Glace-Kombinator** (`glace-kombinator`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+- [x] **Möglichkeiten-Finder** (`glace-kombinator`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 2 Listen (offen: Glacesorten (Name, Farbe, Buchstabe auf der Kugel); Kleidungsstücke in Gruppen (Oberteile, Hosen, Schuhe, Kopfbedeckungen))
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
@@ -407,8 +411,41 @@ Je gebautem Spiel:
 
 ## 5. Klasse
 
+### Mathe
+
+#### Brüche
+
+- [x] **Bruch-Pizzeria** (`bruch-werkstatt`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`
+
+#### Daten
+
+- [x] **Mittelwert-Türme** (`mittelwert-waage`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`
+
 ### Französisch
 
 #### neues Thema (FS2F.5.B)
 
 - [ ] Mots-Match / Épeler — Idee, Klassen 5–6
+
+## 6. Klasse
+
+### Mathe
+
+#### Teiler und Überschlag
+
+- [x] **Teiler-Spürnase** (`teiler-detektiv`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`
+- [x] **Überschlags-Radar** (`ueberschlags-blitz`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`
+
+#### Zahlen ordnen
+
+- [x] **Velo-Tabelle** (`velo-tabelle`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`

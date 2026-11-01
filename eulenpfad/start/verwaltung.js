@@ -28,6 +28,7 @@ function zeichneVerwaltung(box, neu) {
     { id: "konten", text: "👥 Konten", zeichne: konten },
     { id: "freigabe", text: "✓ Freigabe", zeichne: freigabeTeil },
     { id: "abgleich", text: "🔄 Abgleich", zeichne: abgleich },
+    { id: "einstellungen", text: "⚙️ Einstellungen", zeichne: einstellungen },
     { id: "entwicklung", text: "🛠 Entwicklung", zeichne: entwicklung },
   ];
   const dev = LS.entwicklung.aktiv();
@@ -199,6 +200,34 @@ function zeichneVerwaltung(box, neu) {
       ...ordnerTeil,
       zeile(knopf("💾 Abgleich-Datei sichern", () => ab.dateiSichern()), knopf("📂 Abgleich-Datei einlesen", () => abDatei.click())),
       abDatei, abMeldung));
+  }
+
+  // ----- Einstellungen für alle auf diesem Gerät (LERN_Session7; später je Klasse durch die Lehrperson) -----
+  function einstellungen() {
+    /** Ein Knopf je Wahl; gewählt ist, was 'aktuell' gleicht (null = „wie global“). */
+    const wahlKnoepfe = (wahlen, aktuell, setze) => el("div", { class: "zeile-knoepfe" }, ...wahlen.map(([wert, text]) =>
+      el("button", { type: "button", class: "schalter" + (wert === aktuell ? " frei" : ""), "aria-pressed": String(wert === aktuell),
+        text: (wert === aktuell ? "✓ " : "") + text, onclick: () => { setze(wert); neu(); } })));
+    const zeilen = Object.entries(LS.EINSTELLUNGEN).map(([name, e]) => {
+      const global = LS.einstellung(name, null);
+      // Spiele, die die Einstellung nutzen (Katalog, Feld einstellungen): je Spiel „wie global“ oder ein eigener Wert
+      const spiele = SPIELE.filter(s => s.einstellungen?.includes(name));
+      return el("div", { class: "einstellung" },
+        el("h3", { text: e.titel }),
+        el("p", { class: "leise-text", style: "margin:0 0 6px", text: e.erklaerung }),
+        wahlKnoepfe(Object.entries(e.werte).map(([w, t]) => [w, t + (w === e.standard ? " (Standard)" : "")]), global, w => LS.setzeEinstellung(name, w)),
+        spiele.length ? el("details", { class: "einstellung-spiele" },
+          el("summary", { text: `Je Spiel (${spiele.length})` }),
+          ...spiele.map(s => el("div", { class: "einstellung-spiel" },
+            el("span", { text: `${s.bild} ${s.name}` }),
+            wahlKnoepfe([[null, `wie global (${e.werte[global].split(":")[0]})`], ...Object.entries(e.werte).map(([w, t]) => [w, t.split(":")[0]])],
+              LS.einstellungSpiel(name, s.id), w => LS.setzeEinstellung(name, w, s.id))))) : null);
+    });
+    seite.append(karte(
+      el("h2", { text: "Einstellungen" }),
+      el("p", { class: "leise-text", style: "margin-top:0", text: "Gelten für alle Kinder auf diesem Gerät, je Spiel auch abweichend. „Alles auf Standard“ setzt auch die Spiele zurück." }),
+      ...zeilen,
+      zeile(knopf("↺ Alles auf Standard", () => { LS.einstellungenZuruecksetzen(); neu(); }))));
   }
 
   // ----- Entwicklung (Entscheide E1 a, E2 a) -----

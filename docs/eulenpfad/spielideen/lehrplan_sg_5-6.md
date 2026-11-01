@@ -26,6 +26,19 @@ weiter gelten.
   5. Klasse (z. B. Zeitreise-Verben Stufe 5: Perfekt mit „hat“ oder „ist“, D.5.D.1.c). Abschnitt 8
   nennt, wo eine Fortsetzung genügt und kein neues Spiel nötig ist.
 
+### Entscheide und Stand (LERN_Session7)
+
+- **A1 a:** erstes Paket M1, M6, M7, M9, M10. **Gebaut:** Bruch-Pizzeria (M1, Basisklasse 5),
+  Teiler-Spürnase (M6, Basisklasse 6), Überschlags-Radar (M7, Basisklasse 6); Lernziele in
+  [lehrplan_sg_session7.md](../lernziele/lehrplan_sg_session7.md).
+- **B1 a:** M10 als Mittelwert-Türme (Basisklasse 5) gebaut; statt M9 die Velo-Tabelle (Basisklasse 6,
+  Weg und Zeit), weil die Preis-Tabelle den Dreisatz mit Geld schon übt (Abschnitt 8).
+- **A2 a / Dezimalzeichen:** Die Quellen sind uneinheitlich (Abschnitt 9, Punkt 5). Bis zu den
+  Klasseneinstellungen ([Konzept](../konzept_klasseneinstellungen.md)) stellt die Aufsicht das Zeichen je
+  Gerät ein, Standard Punkt (Wunsch Patrik, LERN_Session7). M3–M5 können damit gebaut werden.
+- **A3 a:** Basisklasse je Spiel aus dem Lehrmittel belegen, für Basisklasse 6 den 3. Zyklus
+  nachlesen. Belegt bisher nur über das Schweizer Zahlenbuch (Abschnitt 9, Punkt 1).
+
 ### Stufenskala für Spiele mit Basisklasse 5 oder 6
 
 Die Skala `LS.SKALA` gilt unverändert. Für Basisklasse 5: 1 = 4. Klasse (Stufe bis und mit OP) ·
@@ -41,14 +54,14 @@ kuratierte Liste oder eigene Grafik · *gross* = Kartendaten, Ton, 3D.
 
 | # | Spiel | Fach | Lehrplan-Code | Aufwand | Begründung |
 |---|---|---|---|---|---|
-| 1 | Bruch-Werkstatt | MA | MA.1.C.2.g, MA.1.A.2.g | mittel | Brüche am Kreis- und Rechteckmodell darstellen, vergleichen, ordnen (Nenner 2–10). Grundlage für alles Weitere zu Brüchen; im Bestand fehlt das Thema ganz. |
+| 1 | Bruch-Pizzeria | MA | MA.1.C.2.g, MA.1.A.2.g | mittel | Brüche am Kreis- und Rechteckmodell darstellen, vergleichen, ordnen (Nenner 2–10). Grundlage für alles Weitere zu Brüchen; im Bestand fehlt das Thema ganz. |
 | 2 | Komma-Strahl | MA | MA.1.A.2.g | klein | Dezimalzahlen ordnen und in Schritten zählen (Beispiel im Lehrplan: von 0.725 in 0.005er-Schritten). Baut auf Zahlenstrahl-Pfeil auf, eigener Generator. |
 | 3 | Dezimal-Rakete | MA | MA.1.A.3.f, MA.1.C.1.f | klein | Dezimalzahlen bis 5 Wertziffern im Kopf addieren und subtrahieren. Fortsetzung der Rechen-Rakete mit Komma. |
 | 4 | Bruch-Rechteck | MA | MA.1.A.3.f | mittel | Kürzen, erweitern, addieren, subtrahieren am Rechteckmodell, Nenner 2–100 wie im Lehrplan. Setzt Nr. 1 voraus. |
-| 5 | Teiler-Detektiv | MA | MA.1.A.4.g, MA.1.A.1.g, MA.1.C.2.g | klein | Teilbarkeit durch 2, 5, 10, 100, 1000; Teiler und Vielfache; Königsstufe: Quadratzahlen haben eine ungerade Anzahl Teiler (Beispiel im Lehrplan). |
+| 5 | Teiler-Spürnase | MA | MA.1.A.4.g, MA.1.A.1.g, MA.1.C.2.g | klein | Teilbarkeit durch 2, 5, 10, 100, 1000; Teiler und Vielfache; Königsstufe: Quadratzahlen haben eine ungerade Anzahl Teiler (Beispiel im Lehrplan). |
 | 6 | Dreisatz-Markt | MA | MA.3.A.3.e, MA.3.C.3.f, MA.3.C.2.e | klein | Proportionale Wertetabellen am Marktstand (Lehrplan-Beispiel: 300 g Käse zu 20 Fr./kg). Alltagsnah, Fortsetzung von Preis-Tabelle. |
-| 7 | Überschlags-Blitz | MA | MA.1.A.2.g, MA.1.B.2.f | klein | Ergebnisse überschlagen (≈) und Stellenzahl von Produkten abschätzen; Antwort aus drei Grössenordnungen. Schnell, gut als Endlos-Spiel. |
-| 8 | Mittelwert-Waage | MA | MA.3.C.1.f | klein | Mittelwert, Maximum, Minimum aus kleinen Datensätzen; Säulen ausgleichen, bis alle gleich hoch sind. |
+| 7 | Überschlags-Radar | MA | MA.1.A.2.g, MA.1.B.2.f | klein | Ergebnisse überschlagen (≈) und Stellenzahl von Produkten abschätzen; Antwort aus drei Grössenordnungen. Schnell, gut als Endlos-Spiel. |
+| 8 | Mittelwert-Türme | MA | MA.3.C.1.f | klein | Mittelwert, Maximum, Minimum aus kleinen Datensätzen; Säulen ausgleichen, bis alle gleich hoch sind. |
 | 9 | Komma-Jagd | D | D.5.E.1.d, D.4.F.1.d | mittel | Komma bei Aufzählungen und zwischen übersichtlichen Verbgruppen setzen. Braucht eine geprüfte Satzliste. |
 | 10 | Morphem-Schere | D | D.5.D.1.c, D.5.E.1.d | mittel | Wörter in Vor-, Stamm- und Nachmorphem schneiden; danach Stammregel (e/ä). Ergänzt Wortfamilien-Baum. |
 | 11 | Code-Garten | MI | MI.2.2.c–f | mittel–gross | Abläufe mit Schleife, Wenn-dann und Parameter lesen, ausführen, dann selbst legen. MI ist ab der 5. Klasse eigenes Fach; Roboter-Pfad endet ohne Schleifen. |
@@ -140,18 +153,18 @@ Zuordnung zur 5./6. Klasse heisst das: belegt nur als Obergrenze (Ende 6. Klasse
 
 | # | Spiel | Code | Klasse | Aufwand | Idee |
 |---|---|---|---|---|---|
-| M1 | Bruch-Werkstatt | MA.1.C.2.g, MA.1.A.2.g, MA.1.A.1.g | 5 | mittel | Pizza und Schokoladentafel teilen; Bruch ablesen, legen, zwei Brüche vergleichen, mehrere ordnen. Stufe 1: Halbe, Viertel (4. Kl. als Einstieg); Königsstufe: Nenner 20, 50, 100. |
+| M1 | Bruch-Pizzeria (gebaut) | MA.1.C.2.g, MA.1.A.2.g, MA.1.A.1.g | 5 (Zahlenbuch 5) | mittel | Pizza und Schokoladentafel teilen; Bruch ablesen, legen, zwei Brüche vergleichen, mehrere ordnen. Stufe 1: Halbe, Viertel (4. Kl. als Einstieg); Königsstufe: Nenner 20, 50, 100. |
 | M2 | Bruch-Rechteck | MA.1.A.3.f | 5 (6?) | mittel | Rechteckmodell mit Linien: erweitern (feiner teilen), kürzen (gröber), gleichnamig machen, addieren. |
 | M3 | Komma-Strahl | MA.1.A.2.g | 5 | klein | Dezimalzahl auf dem Strahl setzen, Lupe zoomt eine Stelle tiefer; Zählen in 0.1-, 0.01-, 0.005-Schritten. |
 | M4 | Dezimal-Rakete | MA.1.A.3.f, MA.1.C.1.f | 5 | klein | Kopfrechnen mit Dezimalzahlen; Stellenfarben bleiben (Zehntel, Hundertstel brauchen eigene Farben — Rahmenfrage). |
 | M5 | Komma-Runden | MA.1.A.4.g | 5 | klein | Runden auf Zehntel und Hundertstel; als neue Stufen der Runden-Rutsche oder eigenes Spiel (Abschnitt 8). |
-| M6 | Teiler-Detektiv | MA.1.A.4.g, MA.1.A.1.g, MA.1.C.2.g | 5 | klein | Zahlen in Körbe „durch 2 / 5 / 10 teilbar“; alle Teiler finden; Vielfache fangen. |
-| M7 | Überschlags-Blitz | MA.1.A.2.g, MA.1.B.2.f | 5 | klein | Rechnung blinkt, Kind wählt das passende Überschlagsergebnis (≈ 40 000 / 4000 / 400 000). |
+| M6 | Teiler-Spürnase (gebaut) | MA.1.A.4.g, MA.1.A.1.g, MA.1.C.2.g | 6 (Zahlenbuch 6) | klein | Zahlen in Körbe „durch 2 / 5 / 10 teilbar“; alle Teiler finden; Vielfache fangen. |
+| M7 | Überschlags-Radar (gebaut) | MA.1.A.2.g, MA.1.B.2.f | 6 (Zahlenbuch 6) | klein | Rechnung blinkt, Kind wählt das passende Überschlagsergebnis (≈ 40 000 / 4000 / 400 000). |
 | M8 | Rechenprobe | MA.1.B.2.g | 5 (6?) | klein | Ergebnis mit Umkehroperation oder Vereinfachen prüfen; falsche Ergebnisse entlarven. Nah am Rechentrick-Detektiv. |
 | M9 | Dreisatz-Markt | MA.3.A.3.e, MA.3.C.3.f, MA.3.C.2.e | 5 (6?) | klein | Wertetabelle am Marktstand oder beim Velofahren (Lehrplan-Beispiel 4.5 km/h) ergänzen. |
-| M10 | Mittelwert-Waage | MA.3.C.1.f | 5 | klein | Säulen ausgleichen; Mittelwert, Max, Min ablesen. |
+| M10 | Mittelwert-Türme | MA.3.C.1.f | 5 | klein | Säulen ausgleichen; Mittelwert, Max, Min ablesen. |
 | M11 | Zufalls-Skala | MA.3.A.1.g | 5 | klein–mittel | Ereignisse auf der Skala unmöglich – unwahrscheinlich – möglich – wahrscheinlich – sicher einordnen; mit Würfel und Glücksrad. |
-| M12 | Veloschloss-Knacker | MA.3.B.2.c | 5 (6?) | klein | Alle Codes oder Anordnungen systematisch finden (Lehrplan-Beispiele Veloschloss, ADEN). Ergänzt Glace-Kombinator. |
+| M12 | Veloschloss-Knacker | MA.3.B.2.c | 5 (6?) | klein | Alle Codes oder Anordnungen systematisch finden (Lehrplan-Beispiele Veloschloss, ADEN). Ergänzt Möglichkeiten-Finder. |
 | M13 | Umfang-Fläche-Labor | MA.2.A.3.e, MA.2.B.1.f/g | 5 | klein | Rechteck im Raster ziehen; Umfang und Fläche getrennt; Ziel vorgegeben. |
 | M14 | Würfel-Kipper | MA.2.A.2.f, MA.2.C.3.e | 5 | mittel | Würfel mit Augen kippen (Pfeile), Vorhersage: welche Zahl oben? Ohne 3D-Bibliothek als Netz-Ansicht lösbar. |
 | M15 | Flächenmass-Treppe | MA.3.A.1.h, MA.3.A.2.g/h | 5 (6?) | klein | Flächenmasse (Faktor 100) und zweifach benannte Einheiten (3 m 25 cm). Fortsetzung des Masse-Umwandlers mit eigener Treppe. |
@@ -296,10 +309,12 @@ liegt, genügt es zu prüfen, ob Stufe 5 und 6 ihn tragen — ein neues Spiel w�
 
 | Spiel (Basisklasse) | Stoff nach dem OP | Code |
 |---|---|---|
+| Preis-Tabelle (4) | Stufe 5 schon „Dreisatz und Gewichte“, Stufe 6 Dreisatz rückwärts — deckt M9 Dreisatz-Markt zum grossen Teil | MA.3.A.3.e |
+| Diagramm-Detektiv (4) | Stufe 5 hat schon die Aufgabenart „Durchschnitt“ — überschneidet sich mit M10 Mittelwert-Türme | MA.3.C.1.f |
 | Runden-Rutsche (4) | Dezimalzahlen runden (17 456 auf 100er, 1.745 auf Zehntel) | MA.1.A.4.g |
 | Rechentrick-Detektiv (4) | Ergebnisse durch Vereinfachen und Zerlegen prüfen | MA.1.B.2.g |
 | Netz-Falter (4) | Netz von Würfel und Quader abwickeln | MA.2.C.1.g |
-| Glace-Kombinator (4) | Permutationen | MA.3.B.2.c |
+| Möglichkeiten-Finder (4) | Permutationen | MA.3.B.2.c |
 | Diagramm-Detektiv (4) | Kreis- und Liniendiagramm, Informationen aus Medien | MA.3.A.1.h, MA.3.C.2.e |
 | Zeitreise-Verben (4) | Zeitformen benennen (Stufe 5 hat schon Perfekt mit hat/ist) | D.5.D.1.c |
 | Wortfamilien-Baum (4) | Wortstamm, Wortfamilie | D.5.D.1.c |
@@ -315,10 +330,14 @@ M16, U1 und die Randidee Instrumentengruppen.
 
 ## 9. Offene Fragen
 
-1. **5. oder 6. Klasse:** Der Lehrplan trennt nicht. Belegen liesse sich die Trennung über das
-   Inhaltsverzeichnis des Lehrmittels (Mathematik 5 und 6; welches St. Gallen vorgibt, ist nicht
-   nachgeschaut). Bis dahin vorläufig Basisklasse 5.
-2. **Basisklasse 6** bräuchte für Stufe 5 den 3. Zyklus; nicht ausgewertet.
+1. **5. oder 6. Klasse:** Der Lehrplan trennt nicht. St. Gallen lässt Schweizer Zahlenbuch 5/6,
+   Mathematik 5/6 oder mathwelt 2 zu (sg.ch, Liste für das Schuljahr 2023/24; eine neuere Liste
+   nicht gefunden). Für das Zahlenbuch belegen die „Konzeption der Inhaltsbereiche“ (2011) und das
+   Inhaltsverzeichnis Band 6 (2017) die Bände je Thema; Einzelheiten in
+   [lehrplan_sg_session7.md](../lernziele/lehrplan_sg_session7.md). Die Neuausgabe 2023 und die beiden
+   anderen Lehrmittel sind nicht eingesehen.
+2. **Basisklasse 6** braucht für Stufe 5 den 3. Zyklus; für die gebauten Spiele sind MA.1.A.1.h,
+   MA.1.A.2.h und MA.1.A.4.h nachgelesen (`tools/lehrplan_sg_lesen.py`, Feld `zyklus` = 3).
 3. **Stellenfarben für Zehntel, Hundertstel, Tausendstel:** Calcularis-Vorgabe reicht bis M; für M3/M4
    braucht `stil.css` Farben rechts vom Komma — Rahmenfrage, vor dem Bau zu entscheiden.
 4. **Lehrmittel Französisch** und damit der Wortschatz für F1–F4: offen.
@@ -326,3 +345,11 @@ M16, U1 und die Randidee Instrumentengruppen.
    „17'456“; das Projekt das schmale Leerzeichen. Für Dezimalzahlen zeigt der Lehrplan den Punkt
    („0.725“, „30.8“), nicht das Komma — mit dem Lehrmittel abzugleichen, bevor M3/M4 gebaut werden.
    Die Namen „Komma-Strahl“ und „Komma-Runden“ sind bis dahin Arbeitstitel.
+   Gefunden (LERN_Session7): Das Zahlenbuch nennt in der Konzeption 2011 Geld in Band 2
+   „Kommaschreibweise“, in Band 4 „Punktschreibweise“, in Band 5 aber „Rechnen mit Komma“; das
+   Inhaltsverzeichnis Band 6 (2017) „Rechnen mit Kommazahlen“; das Elternmerkblatt zu Band 5 (2009)
+   schreibt „0,25“. Wie die Neuausgabe 2023 Dezimalzahlen schreibt, ist nicht belegt — offen, bis
+   jemand ins Buch des Kindes schaut. Eine KI-Zusammenfassung der Google-Suche (von Patrik
+   weitergegeben, 01.11.2026) sagt: Komma in der Unterstufe, Punkt ab der Mittelstufe, Geld mit Punkt,
+   Masseinheiten mit Komma. Sie verweist nur auf Wikipedia und eine Nachhilfeseite und ist hier nicht
+   als Beleg verwendet. Folge (Wunsch Patrik): Das Zeichen ist eine Einstellung, nicht fest.

@@ -19,7 +19,9 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 
 - **Fachliche Treue zuerst:** Begriffe und Schreibweisen exakt wie im Lernzielblatt/Lehrmittel
   (E, Z, H, T, ZT, HT, M; Tausendertrennung mit schmalem Leerzeichen „30 400", ab fünf Stellen;
-  vierstellige Zahlen ungegliedert „4500" — Annahme, mit dem Lehrmittel abzugleichen). Schweizer
+  vierstellige Zahlen ungegliedert „4500" — Annahme, mit dem Lehrmittel abzugleichen; Dezimalzahlen
+  nur über `LS.dezimalText`, das Zeichen stellt die Aufsicht ein, global oder je Spiel, Standard
+  Punkt; Geld nur über `LS.geldText`: bis 3. Klasse „25 Fr. 60 Rp.“, ab 4. Klasse „25.60 Fr.“). Schweizer
   Schreibweise (ss statt ß) in allem, was Kinder sehen.
 - **Ein Lernziel je Spiel** (Ausnahme: Ziffernkarten üben G4 und E2 in verschiedenen Stufen),
   Zuordnung Lernziel → Spiel und Stufen in `spiele/gemeinsam/katalog.js` und `docs/eulenpfad/lernziele/`.

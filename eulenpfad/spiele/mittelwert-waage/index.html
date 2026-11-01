@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mittelwert-Türme</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+
+  /* Säulen aus Klötzen; eine Säule wird zum Ausgleichen angetippt. */
+  .saeulen { display: flex; justify-content: center; align-items: flex-end; gap: clamp(8px, 3vw, 22px); margin: 8px auto 4px; min-height: 120px; }
+  .saeule { display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; border: none; background: none; padding: 4px; border-radius: 12px; font-family: inherit; }
+  .saeule.waehlbar { cursor: pointer; }
+  .saeule.gewaehlt-saeule { background: var(--hinweis-hell); }
+  .klotz { width: clamp(34px, 9vw, 52px); height: clamp(14px, 3.4vw, 20px); border-radius: 5px; background: var(--deko-3); }
+  .saeule-name { font-weight: 800; color: var(--text-leise); margin-top: 4px; }
+  .saeule-wert { font-weight: 900; font-size: 20px; font-variant-numeric: tabular-nums; }
+
+  .daten { margin: 4px auto 10px; border-collapse: collapse; font-size: clamp(18px, 4vw, 24px); font-variant-numeric: tabular-nums; }
+  .daten th, .daten td { border: 2px solid var(--rand); padding: 6px 10px; text-align: center; }
+  .daten th { color: var(--text-leise); font-weight: 800; }
+  .daten td { font-weight: 900; background: #fff; }
+  .daten td.luecke { color: var(--knopf); }
+  .tabelle-rahmen { overflow-x: auto; max-width: 100%; }
+  .wahl-knopf { font-size: clamp(22px, 5vw, 30px); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🏰 Mittelwert-Türme</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.C.1.f (Grundanspruch 2. Zyklus): Datensätze nach Kriterien auswerten, Mittelwert,
+// Maximum und Minimum bestimmen; MA.3.A.1.h Begriff Mittelwert. Stufe 1: MA.3.C.1.d (OP 4. Klasse)
+// Daten in Diagrammen interpretieren. Schweizer Zahlenbuch 5: „Statistik (Durchschnitte)“.
+// Ausgleichen zeigt, was der Mittelwert ist: alle Säulen gleich hoch, ohne dass etwas dazukommt.
+// Basisklasse 5: s1 4. Klasse, s5 6. Klasse, s6 Königsstufe. Alle Werte und Mittelwerte ganzzahlig.
+
+const { zahlText, zufall, waehle, mische, el } = LS;
+
+const TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+// Worüber die Daten sind: Einheit in Einzahl und Mehrzahl, grösster sinnvoller Wert
+const DATEN = [
+  { was: "Velokilometer pro Tag", einheit: ["km", "km"], max: 40 },
+  { was: "gelesene Seiten pro Tag", einheit: ["Seite", "Seiten"], max: 60 },
+  { was: "Tore pro Spiel", einheit: ["Tor", "Tore"], max: 9, namen: ["1. Spiel", "2. Spiel", "3. Spiel", "4. Spiel", "5. Spiel", "6. Spiel"] },
+  { was: "Minuten Üben pro Tag", einheit: ["min", "min"], max: 90 },
+  { was: "Punkte pro Runde", einheit: ["Punkt", "Punkte"], max: 1000, namen: ["1. Runde", "2. Runde", "3. Runde", "4. Runde", "5. Runde", "6. Runde"] },
+  { was: "Besucher im Hallenbad pro Tag", einheit: ["Person", "Personen"], max: 1000 },
+];
+const AUSGLEICHEN_MAX = 12; // höher wird der Klotzturm unhandlich
+
+// Je Stufe: Aufgabenarten, Anzahl Werte, grösster Wert, Säulen zeigen
+const STUFE = {
+  s1: { arten: ["meist", "wenigst", "unterschied"], n: [4, 5], max: 10, saeulen: true },
+  s2: { arten: ["ausgleichen"], n: [3, 3, 4], max: 8, saeulen: true },
+  s3: { arten: ["mittelwert", "mittelwert", "ausgleichen"], n: [3, 4, 5], max: 20, saeulen: true },
+  s4: { arten: ["mittelwert", "mittelwert", "ausgleichen"], n: [4, 5, 6], max: 100, saeulen: false },
+  s5: { arten: ["fehlt", "fehlt", "mittelwert"], n: [3, 4, 5], max: 100, saeulen: false },
+  s6: { arten: ["fehlt", "dazu", "mittelwert"], n: [4, 5, 6], max: 1000, saeulen: false },
+};
+
+const summe = w => w.reduce((s, x) => s + x, 0);
+
+// ---------- Aufgaben als Daten ----------
+
+/** Werte mit ganzzahligem Mittelwert, nicht alle gleich. */
+function werteMitMittel(n, max, min = 1) {
+  for (let i = 0; i < 200; i++) {
+    const w = Array.from({ length: n }, () => zufall(min, max));
+    if (summe(w) % n === 0 && new Set(w).size > 1) return w;
+  }
+  return null;
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(art, p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "mittelwert", thema: 0, werte: [2, 4, 6], loesung: 4 };
+}
+
+function erzeuge(art, p) {
+  const n = waehle(p.n);
+  // ein Thema, dessen Werte den Zahlenraum der Stufe einigermassen füllen
+  const passend = DATEN.map((t, i) => i).filter(i => DATEN[i].max >= Math.min(p.max, 40));
+  const ti = waehle(passend);
+  const max = Math.min(p.max, DATEN[ti].max, art === "ausgleichen" ? AUSGLEICHEN_MAX : Infinity);
+  if (art === "meist" || art === "wenigst" || art === "unterschied") {
+    const werte = Array.from({ length: n }, () => zufall(1, max));
+    const ziel = art === "wenigst" ? Math.min(...werte) : Math.max(...werte);
+    if (werte.filter(x => x === ziel).length !== 1 && art !== "unterschied") return null;
+    const loesung = art === "unterschied" ? Math.max(...werte) - Math.min(...werte) : werte.indexOf(ziel);
+    return { art, thema: ti, werte, loesung };
+  }
+  if (art === "ausgleichen") {
+    const werte = werteMitMittel(n, max);
+    if (!werte) return null;
+    const m = summe(werte) / n;
+    const zuege = summe(werte.map(x => Math.max(0, x - m)));
+    if (zuege > 8) return null; // höchstens acht Klötze verschieben
+    return { art, thema: ti, werte, loesung: m, zuege };
+  }
+  if (art === "mittelwert") {
+    const werte = werteMitMittel(n, max);
+    return werte && { art, thema: ti, werte, loesung: summe(werte) / n };
+  }
+  if (art === "fehlt") {
+    // ein Wert fehlt, der Mittelwert ist bekannt
+    const werte = werteMitMittel(n, max);
+    if (!werte) return null;
+    return { art, thema: ti, werte, luecke: zufall(0, n - 1), mittel: summe(werte) / n, loesung: null };
+  }
+  if (art === "dazu") {
+    // n Werte und ihr Mittelwert; ein weiterer Wert kommt dazu — wie gross muss er sein für den neuen Mittelwert?
+    const alle = werteMitMittel(n + 1, max);
+    if (!alle) return null;
+    const werte = alle.slice(0, n);
+    if (summe(werte) % n !== 0) return null;
+    return { art, thema: ti, werte, mittelAlt: summe(werte) / n, mittelNeu: summe(alle) / (n + 1), loesung: alle[n] };
+  }
+  return null;
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (!p.n.includes(a.werte.length)) m.push("Anzahl Werte nicht in der Stufe");
+  if (a.werte.some(x => !Number.isInteger(x) || x < 1 || x > p.max)) m.push("Wert ausserhalb des Zahlenraums");
+  const n = a.werte.length;
+  switch (a.art) {
+    case "meist": if (a.werte[a.loesung] !== Math.max(...a.werte) || a.werte.filter(x => x === a.werte[a.loesung]).length !== 1) m.push("Maximum nicht eindeutig"); break;
+    case "wenigst": if (a.werte[a.loesung] !== Math.min(...a.werte) || a.werte.filter(x => x === a.werte[a.loesung]).length !== 1) m.push("Minimum nicht eindeutig"); break;
+    case "unterschied": if (a.loesung !== Math.max(...a.werte) - Math.min(...a.werte)) m.push("Unterschied falsch"); break;
+    case "ausgleichen":
+      if (Math.max(...a.werte) > AUSGLEICHEN_MAX) m.push("Turm zu hoch zum Ausgleichen");
+      // falls through
+    case "mittelwert":
+      if (a.loesung * n !== summe(a.werte)) m.push("Mittelwert falsch oder nicht ganzzahlig");
+      if (new Set(a.werte).size === 1) m.push("alle Werte gleich");
+      break;
+    case "fehlt": {
+      if (a.mittel * n !== summe(a.werte)) m.push("Mittelwert falsch");
+      if (!(a.luecke >= 0 && a.luecke < n)) m.push("Lücke ausserhalb");
+      break;
+    }
+    case "dazu":
+      if (a.mittelAlt * n !== summe(a.werte)) m.push("alter Mittelwert falsch");
+      if (a.mittelNeu * (n + 1) !== summe(a.werte) + a.loesung) m.push("neuer Wert passt nicht");
+      if (a.loesung < 1 || a.loesung > p.max) m.push("neuer Wert ausserhalb");
+      break;
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const namenFuer = a => (DATEN[a.thema].namen || TAGE).slice(0, a.werte.length);
+const wertText = (a, x) => `${zahlText(x)} ${DATEN[a.thema].einheit[x === 1 ? 0 : 1]}`;
+
+/** Säulen aus Klötzen (ein Klotz je Einheit, bei grossen Werten ohne Klötze, nur Zahl). */
+function saeulenEl(a, werte, waehlbar) {
+  const box = el("div", { class: "saeulen" });
+  const namen = namenFuer(a);
+  werte.forEach((x, i) => {
+    const s = el(waehlbar ? "button" : "div", { class: "saeule" + (waehlbar ? " waehlbar" : ""), "aria-label": `${namen[i]}: ${x}` });
+    if (waehlbar) s.type = "button";
+    s.append(el("span", { class: "saeule-name", text: namen[i] }));
+    for (let k = 0; k < x; k++) s.append(el("span", { class: "klotz" }));
+    s.append(el("span", { class: "saeule-wert", text: zahlText(x) }));
+    s.dataset.i = i;
+    box.append(s);
+  });
+  return box;
+}
+
+function tabelleEl(a, werte, luecke = -1) {
+  const namen = namenFuer(a);
+  return el("div", { class: "tabelle-rahmen" }, el("table", { class: "daten" },
+    el("tr", {}, ...namen.map(t => el("th", { text: t }))),
+    el("tr", {}, ...werte.map((x, i) => el("td", { class: i === luecke ? "luecke" : "", text: i === luecke ? "?" : zahlText(x) })))));
+}
+
+/** Zahl eintippen; prüft gegen 'richtig', Hinweis aus 'hinweis(w)'. */
+function eintippen(ctx, richtig, hinweis, loesungText) {
+  ctx.loesung(loesungText);
+  ctx.schritte(LS.tippSchritte(richtig));
+  const anzeige = el("div", { class: "anzeige leer", style: "margin-top:10px", "aria-label": "Deine Antwort" });
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 5,
+    onOk(w) {
+      if (w === richtig) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${loesungText}`); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(hinweis(w), loesungText);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(anzeige, tasten.element);
+}
+
+const HINWEIS_MITTEL = "Zähle alle Werte zusammen und teile durch die Anzahl Werte.";
+
+LS.spiel({
+  id: "mittelwert-waage",
+  einleitung: "Bei den Mittelwert-Türmen wird ausgeglichen: Wie hoch wären alle Säulen, wenn jede gleich viel hätte? Das ist der Mittelwert.",
+  anzahl: 8,
+  stufen: {
+    s1: "Am meisten, am wenigsten und der Unterschied.",
+    s2: "Türme ausgleichen: Klötze verschieben, bis alle gleich hoch sind.",
+    s3: "Mittelwert bis 20 ausrechnen (Lehrplan 5. Klasse).",
+    s4: "Mittelwert aus Tabellen bis 100.",
+    s5: "Ein Wert fehlt — der Mittelwert verrät ihn.",
+    s6: "Endgegner: bis 1000, fehlende und neue Werte.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    const t = DATEN[a.thema];
+    const namen = namenFuer(a);
+    const titel = el("div", { class: "auftrag", text: t.was });
+    if (a.art === "meist" || a.art === "wenigst") {
+      ctx.serie("art", a.art);
+      f.append(el("div", { class: "frage", html: a.art === "meist" ? "Wo ist es <b>am meisten</b>?" : "Wo ist es <b>am wenigsten</b>?" }), titel, saeulenEl(a, a.werte, false));
+      LS.auswahl(ctx, {
+        optionen: namen.map((_, i) => i), richtig: a.loesung, inhalt: i => namen[i],
+        hinweis: a.art === "meist" ? "Suche die höchste Säule." : "Suche die niedrigste Säule.",
+        loesung: `${namen[a.loesung]}: ${wertText(a, a.werte[a.loesung])}`,
+      });
+    } else if (a.art === "unterschied") {
+      f.append(el("div", { class: "frage", html: "Wie gross ist der <b>Unterschied</b> zwischen dem meisten und dem wenigsten?" }), titel, saeulenEl(a, a.werte, false));
+      eintippen(ctx, a.loesung, () => "Suche die höchste und die niedrigste Säule und rechne: höchste minus niedrigste.",
+        `${zahlText(Math.max(...a.werte))} − ${zahlText(Math.min(...a.werte))} = ${zahlText(a.loesung)}`);
+    } else if (a.art === "ausgleichen") {
+      ausgleichen(ctx, a, titel);
+    } else if (a.art === "mittelwert") {
+      f.append(el("div", { class: "frage", html: "Wie gross ist der <b>Mittelwert</b>?" }), titel, p.saeulen ? saeulenEl(a, a.werte, false) : tabelleEl(a, a.werte));
+      eintippen(ctx, a.loesung, () => HINWEIS_MITTEL,
+        `(${a.werte.map(zahlText).join(" + ")}) : ${a.werte.length} = ${zahlText(summe(a.werte))} : ${a.werte.length} = ${zahlText(a.loesung)}`);
+    } else if (a.art === "fehlt") {
+      const n = a.werte.length, wert = a.werte[a.luecke];
+      f.append(el("div", { class: "frage", html: `Der Mittelwert ist <b>${zahlText(a.mittel)}</b>. Welcher Wert fehlt?` }), titel, tabelleEl(a, a.werte, a.luecke));
+      eintippen(ctx, wert, () => `Alle ${n} Werte zusammen ergeben ${n} · ${zahlText(a.mittel)}. Zieh davon die bekannten Werte ab.`,
+        `${n} · ${zahlText(a.mittel)} = ${zahlText(n * a.mittel)}; ${zahlText(n * a.mittel)} − ${zahlText(summe(a.werte) - wert)} = ${zahlText(wert)}`);
+    } else if (a.art === "dazu") {
+      const n = a.werte.length;
+      f.append(el("div", { class: "frage", html: `Der Mittelwert ist ${zahlText(a.mittelAlt)}. Ein Wert kommt dazu, danach ist er <b>${zahlText(a.mittelNeu)}</b>. Wie gross ist der neue Wert?` }), titel, tabelleEl(a, a.werte));
+      eintippen(ctx, a.loesung, () => `Nachher sind es ${n + 1} Werte. Zusammen ergeben sie ${n + 1} · ${zahlText(a.mittelNeu)}.`,
+        `${n + 1} · ${zahlText(a.mittelNeu)} − ${n} · ${zahlText(a.mittelAlt)} = ${zahlText((n + 1) * a.mittelNeu)} − ${zahlText(n * a.mittelAlt)} = ${zahlText(a.loesung)}`);
+    }
+    if (ctx.nr === 0 && a.art === "ausgleichen") ctx.sag("Tippe zuerst eine hohe Säule an, dann eine niedrige: Ein Klotz wandert hinüber.");
+  },
+});
+
+/** Klötze von Säule zu Säule verschieben, bis alle gleich hoch sind. */
+function ausgleichen(ctx, a, titel) {
+  const f = ctx.flaeche;
+  const werte = [...a.werte];
+  const loesungText = `Alle ${werte.length} Säulen gleich hoch: je ${zahlText(a.loesung)}`;
+  ctx.loesung(loesungText);
+  ctx.schritte(2 * a.zuege);
+  f.append(el("div", { class: "frage", html: "Mach alle Säulen <b>gleich hoch</b>. Dann siehst du den Mittelwert." }), titel);
+  let box = null, von = -1;
+  let zuege = 0; // verschobene Klötze, auch vor „von vorn“ — für das Vorgehen
+  const zeichne = () => {
+    const neu = saeulenEl(a, werte, true);
+    if (box) box.replaceWith(neu); else f.append(neu);
+    box = neu;
+    box.querySelectorAll(".saeule").forEach(s => {
+      const i = Number(s.dataset.i);
+      if (i === von) s.classList.add("gewaehlt-saeule");
+      s.addEventListener("click", () => tippe(i));
+    });
+  };
+  const tippe = i => {
+    if (ctx.vorbei()) return;
+    if (von === -1) { if (werte[i] > 0) { von = i; LS.ton("tipp"); } zeichne(); return; }
+    if (i !== von) { werte[von]--; werte[i]++; zuege++; LS.ton("tipp"); }
+    von = -1;
+    zeichne();
+    if (!werte.every(x => x === werte[0])) return;
+    const ohneUmweg = zuege === a.zuege;
+    ctx.vorgehen("ausgleichen", ohneUmweg ? "kuerzest" : "umwege");
+    ctx.richtig(`Genau! Jede Säule hat ${zahlText(werte[0])} — das ist der Mittelwert.` +
+      (ohneUmweg ? ` Und mit nur ${a.zuege} ${a.zuege === 1 ? "Zug" : "Zügen"} — kein Klotz zu viel!` : ` Es ginge auch mit ${a.zuege} ${a.zuege === 1 ? "Zug" : "Zügen"}: nur von hohen zu niedrigen Säulen.`));
+  };
+  zeichne();
+  const nochmal = el("button", { type: "button", class: "knopf hell klein", text: "↺ von vorn" });
+  nochmal.addEventListener("click", () => { if (ctx.vorbei()) return; werte.splice(0, werte.length, ...a.werte); von = -1; zeichne(); });
+  f.append(el("div", { class: "knopfzeile" }, nochmal));
+}
+</script>
+</body>
+</html>

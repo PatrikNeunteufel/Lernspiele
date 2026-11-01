@@ -15,12 +15,16 @@ import datetime
 import hashlib
 import hmac
 import http.server
+import mimetypes
 import json
 import re
 import secrets
 import socket
 import sys
 import webbrowser
+
+# Bilder der Anleitungen (WebP): Windows kennt den Typ nicht immer, sonst kommt application/octet-stream
+mimetypes.add_type("image/webp", ".webp")
 from pathlib import Path
 
 WURZEL = Path(__file__).resolve().parent.parent

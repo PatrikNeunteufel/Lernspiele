@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Überschlags-Radar</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .rechnung { text-align: center; font-size: clamp(30px, 7vw, 50px); font-weight: 900; margin: 0 0 14px; font-variant-numeric: tabular-nums; }
+  .wahl-knopf { font-size: clamp(22px, 5vw, 30px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  /* Rechnungen untereinander, jede auf einer Zeile */
+  .wahl.pruef-liste { display: grid; grid-template-columns: 1fr; max-width: 560px; margin: 0 auto; }
+  .pruef-liste .wahl-knopf { font-size: clamp(17px, 4vw, 24px); white-space: nowrap; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📡 Überschlags-Radar</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.2.g (Grundanspruch 2. Zyklus): Grundoperationen mit natürlichen Zahlen
+// überschlagen (Beispiele dort: 13 567 + 28 902 ≈ 40 000; 592 000 : 195 ≈ 600 000 : 200);
+// MA.1.B.2.f: Ergebnisse mit Überschlag prüfen, Anzahl Stellen von Produkten und Quotienten.
+// 3. Zyklus MA.1.A.2.h: in Prozentrechnungen Ergebnisse überschlagen (263 von 830 sind etwa 30 %).
+// Schweizer Zahlenbuch: Überschlagsrechnung in Band 6. Basisklasse 6: s1 5. Klasse, s5 7. Klasse.
+// Die Antworten liegen eine Zehnerpotenz auseinander: Wer vernünftig überschlägt, landet eindeutig.
+// Dezimalzahlen kommen nicht vor (Schreibweise Punkt/Komma noch offen, Entscheid A2).
+
+const { zahlText, zufall, waehle, mische, el } = LS;
+
+// Je Stufe: Aufgabenarten, Rechenarten, Zahlenraum der Rechnung, Anzahl Antworten.
+const STUFE = {
+  s1: { arten: ["ueberschlag"], ops: ["+", "-"], max: 100000, optionen: 3 },
+  s2: { arten: ["ueberschlag"], ops: ["+", "-", "·"], max: 1000000, optionen: 3 },
+  s3: { arten: ["ueberschlag"], ops: ["+", "-", "·", ":"], max: 1000000, optionen: 4 },
+  s4: { arten: ["ueberschlag", "stellen", "pruefen"], ops: ["·", ":", "+", "-"], max: 1000000, optionen: 4 },
+  s5: { arten: ["anteil", "prozentVon"], max: 100000, optionen: 4 },
+  s6: { arten: ["pruefen", "stellen", "ueberschlag"], ops: ["·", ":", "+", "-"], max: 10000000, optionen: 4 },
+};
+
+const ZEICHEN = { "+": "+", "-": "−", "·": "·", ":": ":" };
+const stellenVon = n => String(Math.round(n)).length;
+/** Auf die erste Stelle runden: 13 567 → 10 000, 28 902 → 30 000. */
+const rund1 = x => { const p = 10 ** Math.floor(Math.log10(x)); return Math.round(x / p) * p; };
+const rechne = (a, op, b) => (op === "+" ? a + b : op === "-" ? a - b : op === "·" ? a * b : a / b);
+
+// ---------- Aufgaben als Daten ----------
+
+/** Rechnung mit Überschlag; null, wenn der Überschlag zu weit vom Ergebnis liegt. */
+function rechnung(op, max) {
+  let a, b;
+  if (op === "+" || op === "-") { a = zufall(1000, max - 1); b = zufall(1000, max - 1); if (op === "-" && a < b) [a, b] = [b, a]; }
+  if (op === "·") { b = zufall(3, 99); a = zufall(100, Math.floor(max / b)); }
+  if (op === ":") { b = zufall(11, 999); const q = zufall(12, Math.floor(max / b)); a = q * b + zufall(0, b - 1); }
+  let ue, weg;
+  if (op === ":") {
+    // kompatible Zahlen: Divisor auf die erste Stelle, Dividend auf ein passendes Vielfaches
+    const rb = rund1(b), q = rund1(a / rb);
+    ue = q; weg = `${zahlText(q * rb)} : ${zahlText(rb)} = ${zahlText(q)}`;
+  } else {
+    const ra = rund1(a), rb = rund1(b);
+    ue = rechne(ra, op, rb); weg = `${zahlText(ra)} ${ZEICHEN[op]} ${zahlText(rb)} = ${zahlText(ue)}`;
+  }
+  const genau = rechne(a, op, b);
+  if (!(ue >= 1) || !(genau >= 1) || genau / ue < 0.6 || genau / ue > 1.6) return null;
+  return { a, op, b, ue, weg, genau };
+}
+
+/** Antworten eine Zehnerpotenz auseinander, alle ganzzahlig. */
+function zehnerOptionen(ue, anzahl) {
+  const kand = [ue, ue * 10, ue / 10, ue * 100, ue / 100].filter(x => Number.isInteger(x) && x >= 1);
+  const opt = kand.slice(0, anzahl);
+  return opt.length === anzahl ? mische(opt) : null;
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = ERZEUGER[art](p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "ueberschlag", a: 13567, op: "+", b: 28902, ue: 40000, weg: "10 000 + 30 000 = 40 000", genau: 42469, optionen: [4000, 40000, 400000].slice(0, p.optionen || 3) };
+}
+
+const ERZEUGER = {
+  ueberschlag(p) {
+    const r = rechnung(waehle(p.ops), p.max);
+    if (!r) return null;
+    const optionen = zehnerOptionen(r.ue, p.optionen);
+    return optionen && { art: "ueberschlag", ...r, optionen };
+  },
+  stellen(p) {
+    const r = rechnung(waehle(["·", ":"]), p.max);
+    if (!r) return null;
+    const n = stellenVon(Math.floor(r.genau));
+    // nur, wenn der Überschlag dieselbe Stellenzahl hat — sonst wäre es Glück
+    if (stellenVon(r.ue) !== n || n < 2) return null;
+    return { art: "stellen", ...r, stellen: n, optionen: [n - 1, n, n + 1] };
+  },
+  pruefen(p) {
+    // vier Rechnungen, genau eine mit einem Ergebnis, das eine Zehnerpotenz daneben liegt
+    const liste = [];
+    for (let i = 0; i < 30 && liste.length < 4; i++) {
+      const r = rechnung(waehle(p.ops), p.max);
+      if (!r || (r.op === ":" && !Number.isInteger(r.genau))) continue;
+      liste.push(r);
+    }
+    if (liste.length < 4) return null;
+    const falsch = zufall(0, 3);
+    const zeilen = liste.map((r, i) => ({ a: r.a, op: r.op, b: r.b, ergebnis: i === falsch ? (Math.random() < 0.5 ? r.genau * 10 : Math.round(r.genau / 10)) : r.genau, ue: r.ue, weg: r.weg }));
+    if (zeilen[falsch].ergebnis < 1) return null;
+    return { art: "pruefen", zeilen, falsch };
+  },
+  anteil() {
+    // 263 von 830 sind etwa 30 %
+    const prozent = waehle([10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90]);
+    const ganz = zufall(120, 9999);
+    const teil = Math.round(ganz * (prozent + zufall(-2, 2)) / 100);
+    const andere = mische([10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90].filter(x => Math.abs(x - prozent) >= 15)).slice(0, 3);
+    return { art: "anteil", teil, ganz, prozent, optionen: mische([prozent, ...andere]) };
+  },
+  prozentVon(p) {
+    // 45 % von 13 000 sind etwa 6000 — Antworten eine Zehnerpotenz auseinander
+    const prozent = waehle([5, 10, 15, 20, 25, 30, 40, 45, 50, 60, 75, 80, 90]);
+    const ganz = zufall(1000, p.max);
+    const genau = ganz * prozent / 100;
+    const ue = rund1(genau);
+    const optionen = zehnerOptionen(ue, p.optionen);
+    return optionen && { art: "prozentVon", prozent, ganz, genau, ue, optionen };
+  },
+};
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const naechste = (wert, optionen) => [...optionen].sort((x, y) => Math.abs(Math.log10(x / wert)) - Math.abs(Math.log10(y / wert)));
+  if (a.art === "ueberschlag" || a.art === "prozentVon") {
+    if (a.art === "ueberschlag" && (!p.ops.includes(a.op) || a.a >= p.max || a.b >= p.max)) m.push("Rechnung nicht in der Stufe");
+    if (a.optionen.length !== p.optionen || new Set(a.optionen).size !== a.optionen.length) m.push("Antworten doppelt oder falsche Anzahl");
+    if (!a.optionen.includes(a.ue)) m.push("Überschlag fehlt unter den Antworten");
+    const [erste, zweite] = naechste(a.genau, a.optionen);
+    if (erste !== a.ue) m.push("eine andere Antwort liegt näher am Ergebnis");
+    if (Math.abs(Math.log10(zweite / a.genau)) < 0.5) m.push("zweite Antwort zu nah am Ergebnis");
+  }
+  if (a.art === "ueberschlag" && Math.abs(rechne(a.a, a.op, a.b) - a.genau) > 1e-6) m.push("Ergebnis falsch");
+  if (a.art === "stellen") {
+    if (stellenVon(Math.floor(a.genau)) !== a.stellen || stellenVon(a.ue) !== a.stellen) m.push("Stellenzahl falsch oder nicht eindeutig");
+    if (a.optionen.filter(o => o === a.stellen).length !== 1) m.push("Lösung nicht genau einmal");
+  }
+  if (a.art === "pruefen") {
+    const falsche = a.zeilen.filter(z => z.ergebnis !== rechne(z.a, z.op, z.b));
+    if (falsche.length !== 1 || a.zeilen[a.falsch] !== falsche[0]) m.push("nicht genau eine falsche Rechnung");
+    const f = a.zeilen[a.falsch];
+    if (Math.abs(Math.log10(f.ergebnis / rechne(f.a, f.op, f.b))) < 0.8) m.push("falsches Ergebnis zu nah am richtigen");
+    if (a.zeilen.some(z => z.a >= p.max || z.b >= p.max || z.ergebnis >= p.max * 100)) m.push("Zahlen zu gross");
+  }
+  if (a.art === "anteil") {
+    const echt = 100 * a.teil / a.ganz;
+    const [erste, zweite] = [...a.optionen].sort((x, y) => Math.abs(x - echt) - Math.abs(y - echt));
+    if (erste !== a.prozent) m.push("eine andere Prozentangabe liegt näher");
+    if (Math.abs(zweite - echt) < 10) m.push("zweite Prozentangabe zu nah");
+    if (new Set(a.optionen).size !== a.optionen.length || a.optionen.length !== p.optionen) m.push("Antworten doppelt oder falsche Anzahl");
+  }
+  return m;
+}
+
+// ---------- Spiel ----------
+
+const rechnungText = r => `${zahlText(r.a)} ${ZEICHEN[r.op]} ${zahlText(r.b)}`;
+const HINWEIS = "Runde jede Zahl auf ihre erste Stelle und rechne mit den runden Zahlen. Wie viele Nullen hat das Ergebnis?";
+
+LS.spiel({
+  id: "ueberschlags-blitz",
+  einleitung: "Das Radar peilt nur ungefähr — du auch! Du musst nicht genau rechnen: Runde die Zahlen und finde heraus, ungefähr wie gross das Ergebnis ist.",
+  anzahl: 8,
+  stufen: {
+    s1: "Plus und minus bis 100 000 überschlagen.",
+    s2: "Bis zur Million, auch mal.",
+    s3: "Alle vier Rechenarten überschlagen (Lehrplan 6. Klasse).",
+    s4: "Wie viele Stellen hat das Ergebnis? Welche Rechnung kann nicht stimmen?",
+    s5: "Prozente überschlagen: 263 von 830 sind etwa wie viel Prozent?",
+    s6: "Endgegner: bis 10 Millionen prüfen, überschlagen, Stellen zählen.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const f = ctx.flaeche;
+    if (a.art === "ueberschlag") {
+      ctx.serie("rechenart", a.op);
+      f.append(el("div", { class: "frage", text: "Ungefähr wie gross ist das Ergebnis?" }), el("div", { class: "rechnung", text: `${rechnungText(a)} ≈ ?` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.ue, inhalt: x => `≈ ${zahlText(x)}`, breite: 150,
+        hinweis: HINWEIS, loesung: `${rechnungText(a)} ≈ ${a.weg}`, lob: `Genau: ${a.weg}`,
+      });
+    } else if (a.art === "stellen") {
+      f.append(el("div", { class: "frage", text: "Wie viele Stellen hat das Ergebnis?" }), el("div", { class: "rechnung", text: rechnungText(a) }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.stellen, inhalt: n => `${n} Stellen`, breite: 130,
+        hinweis: "Überschlage zuerst: Runde beide Zahlen und rechne. Wie viele Ziffern hat das runde Ergebnis?",
+        loesung: `${a.weg}: ${a.stellen} Stellen`,
+      });
+    } else if (a.art === "pruefen") {
+      f.append(el("div", { class: "frage", html: "Eine Rechnung <b>kann nicht stimmen</b>. Welche?" }));
+      const box = LS.auswahl(ctx, {
+        optionen: [0, 1, 2, 3], richtig: a.falsch,
+        inhalt: i => `${rechnungText(a.zeilen[i])} = ${zahlText(a.zeilen[i].ergebnis)}`,
+        hinweis: i => `Überschlag: ${a.zeilen[i].weg}. Das passt — diese Rechnung kann stimmen.`,
+        loesung: `${rechnungText(a.zeilen[a.falsch])} ≈ ${a.zeilen[a.falsch].weg}, nicht ${zahlText(a.zeilen[a.falsch].ergebnis)}`,
+      });
+      box.classList.add("pruef-liste");
+    } else if (a.art === "anteil") {
+      f.append(el("div", { class: "frage", text: "Ungefähr wie viel Prozent sind das?" }), el("div", { class: "rechnung", text: `${zahlText(a.teil)} von ${zahlText(a.ganz)}` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.prozent, inhalt: x => `≈ ${x} %`, breite: 120,
+        hinweis: "Runde beide Zahlen und vergleiche: Ist der Teil etwa die Hälfte, ein Viertel, ein Zehntel des Ganzen?",
+        loesung: `${zahlText(a.teil)} von ${zahlText(a.ganz)} ≈ ${a.prozent} %`,
+      });
+    } else if (a.art === "prozentVon") {
+      f.append(el("div", { class: "frage", text: "Ungefähr wie viel ist das?" }), el("div", { class: "rechnung", text: `${a.prozent} % von ${zahlText(a.ganz)}` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.ue, inhalt: x => `≈ ${zahlText(x)}`, breite: 150,
+        hinweis: "10 % sind ein Zehntel, 50 % die Hälfte. Runde das Ganze und rechne damit.",
+        loesung: `${a.prozent} % von ${zahlText(a.ganz)} ≈ ${zahlText(a.ue)}`,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag(a.art === "anteil" || a.art === "prozentVon" ? "Tipp: 50 % ist die Hälfte, 25 % ein Viertel, 10 % ein Zehntel." : `Tipp: Runde jede Zahl auf ihre erste Stelle — ${zahlText(28902)} wird zu ${zahlText(30000)}.`);
+  },
+});
+</script>
+</body>
+</html>

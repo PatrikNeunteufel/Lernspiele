@@ -31,6 +31,15 @@
   .app .stufe { font-weight: 800; color: var(--akzent); font-size: 15px; }
   .app p { margin: 8px 0 0; color: var(--leise); font-size: 16px; }
   .app.bald { opacity: .6; box-shadow: none; border: 2px dashed var(--rand); }
+  .anleitungen { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 18px; }
+  .anleitung {
+    display: flex; gap: 14px; align-items: center; padding: 14px 18px; border-radius: 16px; background: var(--karte);
+    color: inherit; text-decoration: none; box-shadow: 0 3px 0 var(--rand); font-size: 16px; line-height: 1.35;
+  }
+  .anleitung .bild { font-size: 34px; }
+  .anleitung span:last-child { color: var(--leise); }
+  .anleitung b { color: var(--text); }
+  a.anleitung:hover, a.anleitung:focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; }
   footer { margin-top: 28px; text-align: center; color: var(--leise); font-size: 14px; }
 </style>
 </head>
@@ -44,7 +53,7 @@
       <div class="bild">🦉</div>
       <h2>Eulenpfad</h2>
       <div class="stufe">Primarschule</div>
-      <p>Kleine Lernspiele für die 1. bis 4. Klasse — die Eule begleitet.</p>
+      <p>Kleine Lernspiele für die 1. bis 6. Klasse — die Eule begleitet.</p>
     </a>
     <a class="app bald" href="../lernsteig/index.html">
       <div class="bild">⛰️</div>
@@ -58,6 +67,11 @@
       <div class="stufe">Gymnasium · im Aufbau</div>
       <p>Repetieren bis zur Matura.</p>
     </a>
+  </div>
+  <!-- Anleitungen zum Eulenpfad (Wunsch Patrik, LERN_Session7) -->
+  <div class="anleitungen">
+    <a class="anleitung" href="../eulenpfad/anleitung/kinder.html"><span class="bild">🧒</span><span><b>So spielst du</b><br>Anleitung für Kinder</span></a>
+    <a class="anleitung" href="../eulenpfad/anleitung/aufsicht.html"><span class="bild">🧑‍🏫</span><span><b>Anleitung für Erwachsene</b><br>Konten, Freigabe, Statistik, Sichern, Abgleich</span></a>
   </div>
   <footer>Alles bleibt im Browser auf deinem Gerät. Keine Anmeldung, keine Werbung.</footer>
 </main>

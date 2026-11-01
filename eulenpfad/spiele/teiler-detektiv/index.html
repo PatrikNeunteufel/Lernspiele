@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teiler-Spürnase</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .zahl-gross { text-align: center; font-size: clamp(44px, 10vw, 68px); font-weight: 900; margin: 0 0 8px; font-variant-numeric: tabular-nums; }
+
+  .teiler-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 640px; margin: 6px auto 0; }
+  .teiler-chip {
+    border: none; border-radius: 16px; min-width: 64px; min-height: 64px; padding: 6px 12px;
+    font-family: inherit; font-size: 28px; font-weight: 900; font-variant-numeric: tabular-nums;
+    background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer;
+  }
+  .teiler-chip.an { background: var(--deko-5); color: #fff; box-shadow: 0 5px 0 rgba(0, 0, 0, .25); }
+  .teiler-chip.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .fertig-zeile { display: flex; justify-content: center; margin-top: 14px; }
+  .korb-karte .bild { font-variant-numeric: tabular-nums; }
+  .wahl-knopf { font-size: clamp(24px, 5.5vw, 32px); font-weight: 900; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🐶 Teiler-Spürnase</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.4.g: Zahlen erkennen, die durch 2, 5, 10, 100, 1000 teilbar sind; MA.1.A.1.g:
+// Begriffe Teiler, Vielfache (beides Grundanspruch 2. Zyklus). 3. Zyklus: MA.1.A.4.h (Erweiterung)
+// Teilbarkeitsregeln durch 3, 4, 6, 8, 9, 25, 50, Teiler bestimmen; MA.1.A.1.h Primzahl.
+// MA.1.C.2.g: Quadratzahlen haben eine ungerade Anzahl Teiler (Königsstufe).
+// Schweizer Zahlenbuch: Primzahlen, Teiler und Vielfache in Band 6. Basisklasse 6: s1 5. Klasse,
+// s5 7. Klasse, s6 Königsstufe.
+
+const { zahlText, zufall, waehle, mische, el } = LS;
+
+// Je Stufe: Aufgabenarten, Teiler für „teilbar?“, Zahlenraum, grösste Zahl für „alle Teiler“,
+// grösster Teiler für „Vielfaches“.
+const STUFE = {
+  s1: { arten: ["teilbar"], durch: [2, 5, 10], max: 1000 },
+  s2: { arten: ["teilbar", "teilbar", "vielfaches"], durch: [2, 5, 10, 100, 1000], max: 100000, vielfachBis: 10 },
+  s3: { arten: ["alleTeiler", "vielfaches", "teilbar"], durch: [2, 5, 10, 100, 1000], max: 100000, teilerBis: 40, vielfachBis: 12 },
+  s4: { arten: ["alleTeiler", "alleTeiler", "vielfaches", "keinTeiler"], teilerBis: 100, vielfachBis: 25 },
+  s5: { arten: ["teilbar", "teilbar", "primzahl"], durch: [3, 4, 6, 9, 25, 50], max: 10000, primBis: 100 },
+  s6: { arten: ["ungeradeTeiler", "primzahl", "teilbar"], durch: [3, 4, 6, 8, 9, 25, 50], max: 100000, primBis: 200 },
+};
+
+const teilerVon = n => { const t = []; for (let d = 1; d <= n; d++) if (n % d === 0) t.push(d); return t; };
+const istPrim = n => n > 1 && teilerVon(n).length === 2;
+const istQuadrat = n => Number.isInteger(Math.sqrt(n));
+
+// Regeln je Teiler — als Hinweis, ohne die Antwort zu sagen
+const REGEL = {
+  2: "Durch 2 teilbar sind Zahlen mit gerader Endziffer: 0, 2, 4, 6, 8.",
+  5: "Durch 5 teilbar sind Zahlen, die auf 0 oder 5 enden.",
+  10: "Durch 10 teilbar sind Zahlen, die auf 0 enden.",
+  100: "Durch 100 teilbar sind Zahlen, die auf 00 enden.",
+  1000: "Durch 1000 teilbar sind Zahlen, die auf 000 enden.",
+  3: "Durch 3 teilbar ist eine Zahl, wenn ihre Quersumme durch 3 teilbar ist.",
+  9: "Durch 9 teilbar ist eine Zahl, wenn ihre Quersumme durch 9 teilbar ist.",
+  4: "Durch 4 teilbar ist eine Zahl, wenn die Zahl aus ihren letzten zwei Ziffern durch 4 teilbar ist.",
+  8: "Durch 8 teilbar ist eine Zahl, wenn die Zahl aus ihren letzten drei Ziffern durch 8 teilbar ist.",
+  6: "Durch 6 teilbar ist eine Zahl, wenn sie durch 2 und durch 3 teilbar ist.",
+  25: "Durch 25 teilbar sind Zahlen, die auf 00, 25, 50 oder 75 enden.",
+  50: "Durch 50 teilbar sind Zahlen, die auf 00 oder 50 enden.",
+};
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = ERZEUGER[art](p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "teilbar", zahl: 40, durch: p.durch ? p.durch[0] : 2, loesung: true };
+}
+
+/** Teilbare oder nicht teilbare Zahl; nicht teilbare passen oft fast (endet auf 5 bei 10, auf 50 bei 100). */
+function zahlZumTeiler(d, max, teilbar) {
+  for (let i = 0; i < 200; i++) {
+    const vielfaches = d * zufall(2, Math.floor((max - 1) / d));
+    const n = teilbar ? vielfaches
+      : Math.random() < 0.5 ? vielfaches + (d >= 10 ? d / 2 : zufall(1, d - 1)) : zufall(11, max - 1);
+    if (n >= 11 && n < max && (n % d === 0) === teilbar) return n;
+  }
+  return null;
+}
+
+const ERZEUGER = {
+  teilbar(p) {
+    const d = waehle(p.durch);
+    const ja = Math.random() < 0.5;
+    const zahl = zahlZumTeiler(d, p.max, ja);
+    return zahl && { art: "teilbar", zahl, durch: d, loesung: zahl % d === 0 };
+  },
+  vielfaches(p) {
+    const d = zufall(3, p.vielfachBis);
+    const richtig = d * zufall(4, 12); // ab 4 · d: der Hinweis zeigt die Reihe bis 3 · d
+    const ablenker = mische([richtig + 1, richtig - 1, richtig + d - 1, richtig + Math.ceil(d / 2), richtig - Math.ceil(d / 2), richtig + 2]
+      .filter(n => n > d && n % d !== 0)).filter((n, i, alle) => alle.indexOf(n) === i).slice(0, 3);
+    if (ablenker.length < 3) return null;
+    return { art: "vielfaches", durch: d, richtig, optionen: mische([richtig, ...ablenker]) };
+  },
+  alleTeiler(p) {
+    const zahl = zufall(12, p.teilerBis);
+    const teiler = teilerVon(zahl);
+    if (teiler.length < 4 || teiler.length > 9) return null;
+    // Kandidaten: alle Teiler und einige Nicht-Teiler unter der Zahl, höchstens 12 Chips
+    const nicht = mische(Array.from({ length: zahl - 1 }, (_, i) => i + 1).filter(k => zahl % k !== 0)).slice(0, Math.max(3, 12 - teiler.length));
+    return { art: "alleTeiler", zahl, teiler, chips: [...teiler, ...nicht].sort((x, y) => x - y) };
+  },
+  keinTeiler(p) {
+    const zahl = zufall(20, p.teilerBis);
+    const teiler = teilerVon(zahl).filter(t => t > 1 && t < zahl);
+    if (teiler.length < 3) return null;
+    // Nicht-Teiler, der wie einer aussieht: Nachbar eines Teilers
+    const richtig = waehle(teiler.map(t => t + 1).concat(teiler.map(t => t - 1)).filter(k => k > 1 && k < zahl && zahl % k !== 0));
+    if (!richtig) return null;
+    return { art: "keinTeiler", zahl, richtig, optionen: mische([richtig, ...mische(teiler).slice(0, 3)]) };
+  },
+  primzahl(p) {
+    const richtig = waehle(Array.from({ length: p.primBis - 10 }, (_, i) => i + 11).filter(istPrim));
+    // Ablenker: ungerade Zahlen, die keine Primzahlen sind (51, 91), auch Quadrate
+    const kandidaten = Array.from({ length: p.primBis - 10 }, (_, i) => i + 11).filter(n => n % 2 === 1 && !istPrim(n) && Math.abs(n - richtig) < 40);
+    if (kandidaten.length < 3) return null;
+    return { art: "primzahl", richtig, optionen: mische([richtig, ...mische(kandidaten).slice(0, 3)]) };
+  },
+  ungeradeTeiler(p) {
+    // Quadratzahlen haben eine ungerade Anzahl Teiler (Lehrplan MA.1.C.2.g)
+    const richtig = waehle([16, 25, 36, 49, 64, 81, 100, 121, 144]);
+    const kandidaten = Array.from({ length: 140 }, (_, i) => i + 12).filter(n => !istQuadrat(n) && teilerVon(n).length >= 4 && Math.abs(n - richtig) < 30);
+    if (kandidaten.length < 3) return null;
+    return { art: "ungeradeTeiler", richtig, optionen: mische([richtig, ...mische(kandidaten).slice(0, 3)]) };
+  },
+};
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const einRichtiger = (pruef) => {
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Optionen");
+    const treffer = a.optionen.filter(pruef);
+    if (treffer.length !== 1 || treffer[0] !== a.richtig) m.push(`${treffer.length} passende Optionen statt genau der Lösung`);
+  };
+  switch (a.art) {
+    case "teilbar":
+      if (!p.durch.includes(a.durch)) m.push("Teiler nicht in der Stufe");
+      if (a.zahl < 11 || a.zahl >= p.max) m.push("Zahl ausserhalb des Zahlenraums");
+      if (a.loesung !== (a.zahl % a.durch === 0)) m.push("Teilbarkeit falsch");
+      break;
+    case "vielfaches":
+      if (a.durch > p.vielfachBis) m.push("Teiler zu gross");
+      einRichtiger(n => n % a.durch === 0);
+      break;
+    case "alleTeiler":
+      if (a.zahl > p.teilerBis) m.push("Zahl zu gross");
+      if (a.teiler.join() !== teilerVon(a.zahl).join()) m.push("Teiler falsch");
+      if (!a.teiler.every(t => a.chips.includes(t))) m.push("Teiler fehlt unter den Kärtchen");
+      if (new Set(a.chips).size !== a.chips.length || a.chips.length > 12) m.push("Kärtchen doppelt oder zu viele");
+      break;
+    case "keinTeiler":
+      einRichtiger(n => a.zahl % n !== 0);
+      break;
+    case "primzahl":
+      if (Math.max(...a.optionen) > p.primBis) m.push("Zahl zu gross");
+      einRichtiger(istPrim);
+      break;
+    case "ungeradeTeiler":
+      einRichtiger(n => teilerVon(n).length % 2 === 1);
+      break;
+  }
+  return m;
+}
+
+// ---------- Spiel ----------
+
+LS.spiel({
+  id: "teiler-detektiv",
+  einleitung: "Mit deiner Spürnase findest du heraus, durch welche Zahlen sich eine Zahl ohne Rest teilen lässt. Die Endziffern verraten oft schon viel!",
+  anzahl: 8,
+  stufen: {
+    s1: "Teilbar durch 2, 5 oder 10?",
+    s2: "Auch durch 100 und 1000 — und Vielfache aus dem Einmaleins.",
+    s3: "Alle Teiler einer Zahl finden, Vielfache erkennen (Lehrplan 6. Klasse).",
+    s4: "Alle Teiler bis 100 und den falschen Teiler entlarven.",
+    s5: "Teilbar durch 3, 4, 6, 9, 25 oder 50? Primzahlen erkennen.",
+    s6: "Endgegner: Welche Zahl hat eine ungerade Anzahl Teiler? Primzahlen bis 200.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const f = ctx.flaeche;
+    if (a.art === "teilbar") {
+      ctx.serie("antwort", a.loesung);
+      const loesungText = a.loesung ? `${zahlText(a.zahl)} : ${a.durch} = ${zahlText(a.zahl / a.durch)} — teilbar` : `${zahlText(a.zahl)} : ${a.durch} geht nicht auf — nicht teilbar`;
+      f.append(el("div", { class: "frage", html: `Ist die Zahl durch <b>${a.durch}</b> teilbar?` }));
+      LS.koerbe(ctx, {
+        karte: { bild: zahlText(a.zahl), text: "" },
+        koerbe: [true, false],
+        korbInhalt: w => (w ? { bild: "✔", text: `teilbar durch ${a.durch}` } : { bild: "✘", text: "nicht teilbar" }),
+        richtig: a.loesung, hinweis: REGEL[a.durch], loesung: loesungText, lob: `Richtig: ${loesungText}`,
+      });
+    } else if (a.art === "vielfaches") {
+      f.append(el("div", { class: "frage", html: `Welche Zahl ist ein <b>Vielfaches von ${a.durch}</b>?` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, inhalt: n => zahlText(n), breite: 110,
+        hinweis: `Ein Vielfaches von ${a.durch} findest du in der ${a.durch}er-Reihe: ${a.durch}, ${2 * a.durch}, ${3 * a.durch}, …`,
+        loesung: `${a.richtig} = ${a.richtig / a.durch} · ${a.durch}`,
+      });
+    } else if (a.art === "alleTeiler") {
+      alleTeiler(ctx, a);
+    } else if (a.art === "keinTeiler") {
+      f.append(el("div", { class: "frage", html: `Welche Zahl ist <b>kein</b> Teiler von ${a.zahl}?` }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90,
+        hinweis: n => `${a.zahl} : ${n} geht ohne Rest auf — ${n} ist ein Teiler. Probiere die anderen.`,
+        loesung: `${a.zahl} : ${a.richtig} geht nicht auf`,
+      });
+    } else if (a.art === "primzahl") {
+      f.append(el("div", { class: "frage", html: "Welche Zahl ist eine <b>Primzahl</b>?" }), el("div", { class: "auftrag", text: "Eine Primzahl hat genau zwei Teiler: 1 und sich selbst." }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90,
+        hinweis: n => `${n} hat mehr als zwei Teiler, zum Beispiel ${teilerVon(n)[1]}. Probiere 2, 3, 5 und 7 als Teiler aus.`,
+        loesung: `${a.richtig} hat nur die Teiler 1 und ${a.richtig}`,
+      });
+    } else if (a.art === "ungeradeTeiler") {
+      f.append(el("div", { class: "frage", html: "Welche Zahl hat eine <b>ungerade Anzahl</b> Teiler?" }), el("div", { class: "auftrag", text: "Teiler kommen meist in Paaren: 12 = 3 · 4. Wann hat ein Teiler keinen Partner?" }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90,
+        hinweis: n => `${n} hat ${teilerVon(n).length} Teiler, das ist gerade. Bei welcher Zahl ist ein Teiler sein eigener Partner?`,
+        loesung: `${a.richtig} = ${Math.sqrt(a.richtig)} · ${Math.sqrt(a.richtig)}: ${teilerVon(a.richtig).length} Teiler`,
+      });
+    }
+    if (ctx.nr === 0 && a.art === "teilbar") ctx.sag([3, 9, 6].includes(a.durch) ? "Bei 3, 6 und 9 hilft die Quersumme." : "Schau dir die letzten Ziffern der Zahl genau an.");
+  },
+});
+
+/**
+ * Wie hat das Kind die Teiler gesucht? „paare“: immer zwei, die zusammen die Zahl ergeben (2 und 15 zu 30),
+ * die Wurzel einer Quadratzahl darf allein stehen; „aufsteigend“: der Grösse nach; sonst „durcheinander“.
+ */
+function teilerVorgehen(zahl, reihe) {
+  const rest = [...reihe];
+  let paare = true;
+  while (rest.length && paare) {
+    const d = rest.shift();
+    if (d * d === zahl) continue;
+    paare = rest[0] * d === zahl;
+    rest.shift();
+  }
+  if (paare) return "paare";
+  return reihe.every((d, i) => i === 0 || reihe[i - 1] < d) ? "aufsteigend" : "durcheinander";
+}
+
+/** Alle Teiler antippen, dann „Fertig“. */
+function alleTeiler(ctx, a) {
+  const f = ctx.flaeche;
+  const loesungText = `Teiler von ${a.zahl}: ${a.teiler.join(", ")}`;
+  ctx.loesung(loesungText);
+  ctx.schritte(a.teiler.length + 1);
+  f.append(el("div", { class: "frage", html: `Tippe <b>alle Teiler</b> von ${a.zahl} an.` }));
+  const box = el("div", { class: "teiler-chips" });
+  const reihe = []; // Reihenfolge, in der das Kind die Kärtchen angetippt hat (für das Vorgehen)
+  for (const k of a.chips) {
+    const chip = el("button", { type: "button", class: "teiler-chip", text: String(k) });
+    chip.dataset.wert = k;
+    chip.addEventListener("click", () => {
+      if (ctx.vorbei()) return;
+      chip.classList.toggle("an");
+      chip.classList.remove("falsch");
+      if (chip.classList.contains("an")) reihe.push(k); else reihe.splice(reihe.indexOf(k), 1);
+      LS.ton("tipp");
+    });
+    box.append(chip);
+  }
+  const fertig = el("button", { type: "button", class: "knopf gruen", text: "Fertig ✓" });
+  fertig.addEventListener("click", () => {
+    if (ctx.vorbei()) return;
+    const gewaehlt = [...box.querySelectorAll(".teiler-chip.an")].map(c => Number(c.dataset.wert));
+    const zuviel = gewaehlt.filter(k => a.zahl % k !== 0);
+    const fehlen = a.teiler.filter(t => !gewaehlt.includes(t));
+    if (!zuviel.length && !fehlen.length) {
+      const v = teilerVorgehen(a.zahl, reihe);
+      ctx.vorgehen("teilerpaare", v);
+      ctx.richtig(v === "paare" ? `Richtig, und clever in Paaren gesucht: ${loesungText}`
+        : v === "aufsteigend" ? `Richtig, schön der Reihe nach: ${loesungText}`
+        : `Richtig: ${loesungText}. Tipp fürs nächste Mal: Such in Paaren, zum Beispiel ${a.teiler[1]} · ${a.zahl / a.teiler[1]} = ${a.zahl}.`);
+      return;
+    }
+    for (const c of box.querySelectorAll(".teiler-chip.an")) if (zuviel.includes(Number(c.dataset.wert))) c.classList.add("falsch");
+    const hinweis = zuviel.length
+      ? `${zuviel[0]} ist kein Teiler: ${a.zahl} : ${zuviel[0]} geht nicht ohne Rest auf.`
+      : `Es fehlen noch ${fehlen.length === 1 ? "ein Teiler" : `${fehlen.length} Teiler`}. Tipp: Teiler kommen in Paaren, ${a.zahl} = 1 · ${a.zahl}.`;
+    ctx.falsch(hinweis, loesungText);
+  });
+  f.append(box, el("div", { class: "fertig-zeile" }, fertig));
+}
+</script>
+</body>
+</html>

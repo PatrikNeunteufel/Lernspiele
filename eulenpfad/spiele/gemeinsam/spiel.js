@@ -77,6 +77,74 @@ const LS = (() => {
     for (const f of aenderungsHoerer) try { f(schluessel); } catch { /* ein Hörer darf das Speichern nicht stören */ }
   }
 
+  // ---------- Einstellungen der Aufsicht, gelten für alle auf diesem Gerät (Wunsch Patrik, LERN_Session7) ----------
+  // Später setzt sie eine Lehrperson je Klasse: docs/eulenpfad/konzept_klasseneinstellungen.md.
+  // Gespeichert wird nur, was vom Standard abweicht: lernspiele:einstellungen =
+  //   { <name>: wert, spiele: { <spiel-id>: { <name>: wert } } }. Je Spiel gilt: eigener Wert, sonst global,
+  //   sonst Standard. Welche Spiele eine Einstellung nutzen, steht im Katalog (Feld einstellungen).
+  const EINSTELLUNGEN = {
+    dezimal: {
+      titel: "Dezimalzeichen", standard: "punkt",
+      werte: { punkt: "Punkt: 4.5", komma: "Komma: 4,5" },
+      erklaerung: "So stehen Dezimalzahlen in den Spielen (Längen, Wege, Gewichte) und Geldbeträge ab der 4. Klasse (25.60 Fr.). Bis zur 3. Klasse stehen sie als Franken und Rappen: 25 Fr. 60 Rp. Standard ist der Punkt wie im Lehrplan.",
+    },
+  };
+
+  /** Id des Spiels dieser Seite (spiele/<id>/index.html), auch bevor eine Runde läuft; sonst null. */
+  const seitenSpiel = () => (typeof location !== "undefined" ? location.pathname.match(/\/spiele\/([^/]+)\//)?.[1] ?? null : null);
+
+  /** Wert für das laufende Spiel (oder spielId); ohne Spiel der globale. */
+  function einstellung(name, spielId = spielStand?.spiel ?? seitenSpiel()) {
+    const e = EINSTELLUNGEN[name];
+    const alle = lies("einstellungen", {});
+    const eigen = spielId ? alle.spiele?.[spielId]?.[name] : undefined;
+    if (eigen in e.werte) return eigen;
+    return alle[name] in e.werte ? alle[name] : e.standard;
+  }
+
+  /** Eigener Wert eines Spiels oder null („wie global“). */
+  const einstellungSpiel = (name, spielId) => lies("einstellungen", {}).spiele?.[spielId]?.[name] ?? null;
+
+  /** wert null: global zurück auf den Standard, je Spiel zurück auf „wie global“. */
+  function setzeEinstellung(name, wert, spielId = null) {
+    const alle = { ...lies("einstellungen", {}) };
+    if (spielId) {
+      const spiele = { ...alle.spiele };
+      const eigen = { ...spiele[spielId] };
+      if (wert === null) delete eigen[name]; else eigen[name] = wert;
+      if (Object.keys(eigen).length) spiele[spielId] = eigen; else delete spiele[spielId];
+      if (Object.keys(spiele).length) alle.spiele = spiele; else delete alle.spiele;
+    } else if (wert === null || wert === EINSTELLUNGEN[name].standard) delete alle[name];
+    else alle[name] = wert;
+    schreibe("einstellungen", alle);
+  }
+
+  const einstellungenZuruecksetzen = () => schreibe("einstellungen", {});
+
+  /**
+   * Dezimalzahl mit dem eingestellten Zeichen, vor dem Komma in Schulschreibweise: 30 400.5 oder 30 400,5.
+   * stellen: feste Anzahl Nachkommastellen; ohne Angabe so viele wie nötig.
+   */
+  function dezimalText(x, stellen) {
+    const roh = stellen === undefined ? String(Math.abs(x)) : Math.abs(x).toFixed(stellen);
+    const [ganz, rest] = roh.split(".");
+    const t = zahlText(Number(ganz)) + (rest ? (einstellung("dezimal") === "komma" ? "," : ".") + rest : "");
+    return x < 0 ? "−" + t : t;
+  }
+
+  /**
+   * Geldbetrag (in Rappen) so, wie die Klasse ihn schreibt (Entscheid C1 a, LERN_Session7): bis zur
+   * 3. Klasse „25 Fr. 60 Rp.“ (Lehrplan MA.3.A.2.d), ab der 4. Klasse „25.60 Fr.“ mit dem eingestellten
+   * Dezimalzeichen (MA.3.A.3.d „5.40 Fr.“; Zahlenbuch 4 „Punktschreibweise“). Ganze Franken immer „13 Fr.“.
+   * klasse: ohne Angabe die Klasse der laufenden Stufe (klasseDerStufe).
+   */
+  function geldText(rp, klasse = klasseDerStufe(spielStand?.spiel, spielStand?.stufe)) {
+    const fr = Math.floor(rp / 100), r = rp % 100;
+    if (!r) return `${zahlText(fr)} Fr.`;
+    if (klasse >= 4) return `${dezimalText(rp / 100, 2)} Fr.`;
+    return fr ? `${zahlText(fr)} Fr. ${r} Rp.` : `${r} Rp.`;
+  }
+
   // ---------- Spieler, Profil und Protokoll (nur auf diesem Gerät) ----------
   // Profil je Name: { alter, klasse, fokus: [Lernziel-Ids, z. B. "4.2-G3"],
   //   reihenfolge: { global, spiele: { <spiel-id>: … } } mit "stufe" | "geordnet" | "gemischt" }
@@ -508,6 +576,14 @@ const LS = (() => {
   function basisKlasse(spielId) {
     const eintrag = typeof SPIELE !== "undefined" ? SPIELE.find(s => s.id === spielId) : null;
     return eintrag?.klasse ?? null;
+  }
+
+  /** Schulklasse, für die eine Stufe gedacht ist (Basisklasse + Abstand); die Königsstufe zählt wie Stufe 5. */
+  function klasseDerStufe(spielId, stufeId) {
+    const b = basisKlasse(spielId);
+    const st = SKALA.find(s => s.id === stufeId);
+    if (!b || !st) return null;
+    return b + (st.rel ?? 1);
   }
 
   /**
@@ -1258,6 +1334,7 @@ const LS = (() => {
         let schritte = 0; // Handgriffe der Aufgabe (ctx.schritte), für den Boden der Endlos-Zeit
         let warten = 0;   // Sekunden, in denen das Kind nur warten kann (ctx.wartezeit)
         let serien = {};  // Merkmale dieser Aufgabe (ctx.serie): Name → Wert
+        let vorgehen = null; // wie das Kind vorging (ctx.vorgehen): Art → Wert, für die Statistik
         const start = performance.now();
         pruefung.haken?.("aufgabe", { nr });
 
@@ -1276,7 +1353,7 @@ const LS = (() => {
           const balken = zeitleiste.firstChild;
           balken.style.width = getComputedStyle(balken).width;
           balken.style.transition = "none";
-          aufgabenZeiten.push({ ms: Math.round(performance.now() - start), versuche, zeitUm, geloest, ...(uebersprungen ? { uebersprungen } : {}) });
+          aufgabenZeiten.push({ ms: Math.round(performance.now() - start), versuche, zeitUm, geloest, ...(uebersprungen ? { uebersprungen } : {}), ...(vorgehen ? { vorgehen } : {}) });
         };
 
         jetzt = {
@@ -1353,6 +1430,12 @@ const LS = (() => {
            * Stufe wirklich mehrere Werte hat.
            */
           serie(name, wert) { serien[name] = String(wert); },
+          /**
+           * Wie das Kind die Aufgabe angegangen ist (systematisch, in Paaren, mit Umwegen …). Vor
+           * ctx.richtig() melden; landet in aufgabenZeiten und in der Statistik („Vorgehen“). Die Arten
+           * und ihre Werte stehen in AUSWERTUNG.VORGEHEN (auswertung.js).
+           */
+          vorgehen(art, wert) { vorgehen = { ...vorgehen, [art]: String(wert) }; },
           /**
            * Diese Aufgabe braucht n Handgriffe mehr (Tipps, Ziffern samt OK, Züge) — wie viele mindestens,
            * wer sie fehlerfrei löst. Die Bausteine zählen ihre selbst; Pflicht in Endlos-Stufen.
@@ -1627,7 +1710,7 @@ const LS = (() => {
   };
 
   return {
-    STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
+    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     beiAenderung, abgleichDaten, spielStand: () => spielStand,

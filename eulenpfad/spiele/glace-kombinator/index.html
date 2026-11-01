@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Glace-Kombinator</title>
+<title>Möglichkeiten-Finder</title>
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   .frage { text-align: center; font-size: clamp(18px, 4.2vw, 24px); font-weight: 700; color: var(--text-leise); margin: -4px 0 10px; }
@@ -43,7 +43,7 @@
 <body>
 <header class="kopf">
   <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
-  <h1>🍨 Glace-Kombinator</h1>
+  <h1>🧩 Möglichkeiten-Finder</h1>
   <button class="ton" type="button" aria-label="Ton an oder aus"></button>
 </header>
 <main class="buehne"></main>
@@ -154,6 +154,83 @@ function alleKombis(a) {
     for (const s of a.sorten) if (gleich || !bisher.includes(s)) weiter([...bisher, s]);
   })([]);
   return liste;
+}
+
+// ---------- Wie systematisch hat das Kind gesucht? (Hinweis Patrik, LERN_Session7) ----------
+
+/** Alle Reihenfolgen der Stellen 0 … n−1 (höchstens vier Stellen: 24). */
+const anordnungen = n => (n <= 1 ? [Array.from({ length: n }, (_, i) => i)]
+  : anordnungen(n - 1).flatMap(p => Array.from({ length: n }, (_, i) => [...p.slice(0, i), n - 1, ...p.slice(i)])));
+
+/**
+ * Systematisch heisst wie beim Zählwerk: Eine Stelle wechselt am langsamsten, alle Funde mit demselben
+ * Stück dort stehen beieinander, und innerhalb davon gilt dasselbe für die nächste Stelle.
+ * „streng“: zusätzlich innen jedes Mal dieselbe Reihenfolge; „geordnet“: nur beieinander.
+ * Liefert ausserdem die Stücke der langsamsten Stelle in der Reihenfolge des Kindes.
+ */
+function systematik(folge) {
+  let best = null;
+  for (const pos of anordnungen(folge[0].length)) {
+    const stufe = bloecke(folge, pos);
+    if (stufe && (!best || (stufe === "streng" && best.stufe !== "streng"))) best = { stufe, pos };
+    if (best?.stufe === "streng") break;
+  }
+  if (!best) return { stufe: "durcheinander" };
+  return { stufe: best.stufe, werte: [...new Set(folge.map(k => k[best.pos[0]]))] };
+}
+
+/** "streng", "geordnet" oder null, wenn die Stellen in der Reihenfolge 'pos' keine Blöcke bilden. */
+function bloecke(folge, pos) {
+  let streng = true;
+  const vorher = pos.map(() => new Set()); // je Ebene: „a kam vor b“
+  function ebene(teil, i) {
+    if (i >= pos.length || teil.length <= 1) return true;
+    const laeufe = [];
+    for (const k of teil) {
+      const l = laeufe[laeufe.length - 1];
+      if (l && l.wert === k[pos[i]]) l.teil.push(k); else laeufe.push({ wert: k[pos[i]], teil: [k] });
+    }
+    if (new Set(laeufe.map(l => l.wert)).size !== laeufe.length) return false; // ein Stück zweimal getrennt
+    laeufe.forEach((l, j) => laeufe.slice(j + 1).forEach(m => {
+      if (vorher[i].has(`${m.wert}→${l.wert}`)) streng = false;
+      vorher[i].add(`${l.wert}→${m.wert}`);
+    }));
+    return laeufe.every(l => ebene(l.teil, i + 1));
+  }
+  return ebene(folge, 0) ? (streng ? "streng" : "geordnet") : null;
+}
+
+/** Lob am Ende des Legens, je nachdem, wie das Kind vorgegangen ist; meldet das Vorgehen für die Statistik. */
+function lobFuer(ctx, a, gefundenFolge, doppelte, alle) {
+  const N = gefundenFolge.length;
+  if (N <= 2) return `Alle ${N} gefunden!`;
+  let folge = gefundenFolge;
+  if (a.typ === "glace" && !a.reihenfolge) {
+    // Im Becher ist die Reihenfolge der Kugeln egal: jede Glace nach der Reihenfolge ordnen, in der das Kind die Sorten zuerst nahm
+    const rang = new Map();
+    for (const k of folge) for (const s of k) if (!rang.has(s)) rang.set(s, rang.size);
+    folge = folge.map(k => [...k].sort((x, y) => rang.get(x) - rang.get(y)));
+  }
+  const s = systematik(folge);
+  ctx.vorgehen("systematik", doppelte >= 2 ? "hilfe" : s.stufe);
+  // Namen ungebeugt („lange Hose mit allem kombiniert“), weil die Listen sie im Nominativ führen
+  const beispiel = `zuerst ${alle[0][0]} mit allem kombinieren, dann ${a.typ === "kleider" ? "das nächste Stück" : "die nächste Sorte"}`;
+  if (doppelte >= 2) return `Alle ${N} gefunden — mit der geordneten Reihe hat es geklappt. Nächstes Mal gleich so: ${beispiel}.`;
+  if (s.stufe === "streng") {
+    const [w1, w2] = s.werte;
+    return waehle([
+      `Alle ${N} gefunden — und richtig systematisch: zuerst ${w1} mit allem kombiniert, dann ${w2}${s.werte.length > 2 ? " und so weiter" : ""}. So geht nichts verloren.`,
+      `Stark! Erst ${w1} mit allem kombiniert, dann ${w2} — wie ein Zählwerk. Alle ${N} gefunden.`,
+      `Alle ${N} gefunden, Schritt für Schritt der Reihe nach. Genau so findet man sicher alle.`,
+    ]);
+  }
+  if (s.stufe === "geordnet") {
+    return `Alle ${N} gefunden! Gut geordnet: ${s.werte[0]} hast du mit allem kombiniert, bevor du weitergegangen bist. Noch sicherer wird es, wenn du innen jedes Mal gleich vorgehst.`;
+  }
+  return waehle([
+    `Alle ${N} gefunden — diesmal kreuz und quer. Der Reihe nach geht es leichter: ${beispiel}.`,
+    `Geschafft, alle ${N}! Probier nächstes Mal ein System: ${beispiel}.`,
+  ]);
 }
 
 const fak = n => (n <= 1 ? 1 : n * fak(n - 1));
@@ -323,7 +400,7 @@ function legen(ctx, a) {
     LS.ton("huepf");
     zeichneBau();
     zeichneGefunden();
-    if (gefunden.size === N) ctx.richtig(`Alle ${N} gefunden — super systematisch!`);
+    if (gefunden.size === N) ctx.richtig(lobFuer(ctx, a, [...gefunden.values()], doppelte, alle));
   }
 
   if (glaceArt) {

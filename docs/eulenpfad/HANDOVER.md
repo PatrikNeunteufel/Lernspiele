@@ -6,9 +6,15 @@
   `lernsteig/`, `gratwanderung/` (Handover in `docs/lernsteig/`, `docs/gratwanderung/`); Einstiegsseite
   `portal/`. **Online** unter patrikneunteufel.github.io/Lernspiele/ (Pages bei jedem Push, der eine App
   ändert; W1 a).
-- **Spiele:** 86 Spiele in 29 Themen, je sechs Stufen zur Basisklasse. Plan 1.–4. Klasse vollständig
-  (1.: 10, 2.: 28, 3.: 11, 4.: 37); offen nur Mots-Match (5. Klasse). Für die 5./6. Klasse gibt es noch
-  keinen eigenen Plan (P56 a).
+- **Spiele:** 91 Spiele in 31 Themen, je sechs Stufen zur Basisklasse. Plan 1.–4. Klasse vollständig
+  (1.: 10, 2.: 28, 3.: 11, 4.: 37); 5./6. Klasse: Plan in `spielideen/lehrplan_sg_5-6.md` (52 Ideen),
+  gebaut Bruch-Pizzeria (5), Mittelwert-Türme (5), Teiler-Spürnase (6), Überschlags-Radar (6),
+  Velo-Tabelle (6) in LERN_Session7.
+- **Anleitungen** für Erwachsene und Kinder in `eulenpfad/anleitung/`, vom Portal verlinkt; Bilder neu mit
+  `node tools/anleitung_bilder.js` (Server auf Port 8765 nötig), nach Änderungen an der Oberfläche.
+- **Einstellungen der Aufsicht** je Gerät (Verwaltung → Einstellungen): Dezimalzeichen Punkt/Komma,
+  Standard Punkt, `LS.dezimalText`. Klasseneinstellungen durch Lehrpersonen nur als Konzept:
+  `konzept_klasseneinstellungen.md` (offene Fragen F1–F8).
 - **Prüfstand** in `eulenpfad/spiele/gemeinsam/pruefstand.js`, gesetzt im **Entwickler-Modus**
   (`python tools/entwickler_server.py`, Schlüssel in `entwickler.key`, rahmen.md Abschnitt 11):
   2 von 30 neuen Spielen angesehen, 3 von 166 Inhaltslisten geprüft; für Kinder frei 34 von 86.
@@ -27,8 +33,8 @@
   - Grundzeit und Schrittzeit des Endlos-Bodens sind Annahmen bis zur Testrunde (LERN-4).
 
 **Nächste Session — Plan:**
-1. Aus `docs/eulenpfad/spielideen/lehrplan_sg_5-6.md` (LERN_Session7) auswählen lassen und bauen; vorher
-   Basisklasse 5/6 und Dezimalschreibweise klären (Abschnitt 9 dort).
+1. 5./6. Klasse weiter nach `docs/eulenpfad/spielideen/lehrplan_sg_5-6.md`: M3–M5 (Dezimalzahlen,
+   jetzt mit `LS.dezimalText`), dann die übrigen Top 15; die fünf neuen Spiele im Entwickler-Modus ansehen.
 2. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
 3. LERN-21 / LERN-11 im Entwickler-Modus: neue Spiele ansehen, Inhaltslisten prüfen.
 4. Schweiz-Karten-Suche: Seen, Flüsse, Gebirge (Download anfragen); Namen in `orte.js` prüfen.

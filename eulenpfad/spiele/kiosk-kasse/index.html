@@ -65,12 +65,8 @@ const ARTIKEL = ["🍦", "🥨", "🍫", "🧃", "🍎", "📒", "✏️", "🎈
 /** Satzende nach „Fr.“ oder „Rp.“: kein doppelter Punkt. */
 const satz = s => s.replace(/\.\./g, ".");
 
-/** Betrag in Schweizer Schreibweise mit Fr. und Rp.: 25 Fr. 60 Rp., 13 Fr., 60 Rp. */
-function betrag(rp) {
-  const fr = Math.floor(rp / 100), r = rp % 100;
-  if (!fr) return `${r} Rp.`;
-  return r ? `${fr} Fr. ${r} Rp.` : `${fr} Fr.`;
-}
+/** Betrag wie die Klasse der Stufe ihn schreibt (LS.geldText, Entscheid C1 a): bis 3. Klasse 25 Fr. 60 Rp., ab 4. Klasse 25.60 Fr. */
+const betrag = rp => LS.geldText(rp);
 /** Verb passend zum Betrag: Einzahl bei genau 1 Fr. oder 1 Rp. („Das ist 1 Fr.“), sonst Mehrzahl. */
 const verb = (rp, eins, mehr) => (rp === 100 || rp === 1 ? eins : mehr);
 
@@ -193,7 +189,7 @@ LS.spiel({
         },
       });
       ctx.flaeche.append(tasten.element);
-      if (mitRappen && ctx.nr === 0) ctx.sag("Tipp Franken und Rappen zusammen: 1 3 6 0 heisst 13 Fr. 60 Rp.");
+      if (mitRappen && ctx.nr === 0) ctx.sag(`Tipp Franken und Rappen zusammen: 1 3 6 0 heisst ${LS.geldText(1360)}`);
     };
 
     if (art === "legen") {

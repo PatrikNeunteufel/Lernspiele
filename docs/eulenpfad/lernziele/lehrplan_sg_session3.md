@@ -79,7 +79,7 @@ an sg.lehrplan.ch sind sie in dieser Sitzung nicht neu nachgelesen.
 | MA.2.C.3 Netze (`.d`) | Netz-Falter | 4 | Würfelnetz wählen → ja/nein → Gegenüber → Spielwürfel → Quadernetze → Prisma, Pyramide |
 | MA.1.B.3 Hilfsmittel (`.d` OP Flussdiagramm) | Rechen-Maschine | 4 | ein Kasten → zwei → mit ×/: und Regel finden → drei Kästen → bis 10 000 → Weiche |
 | MA.1.B.1 Erforschen (`.e/.f` offene Aufgaben) | Zielzahl-Jagd | 4 | 3 Karten, + − → mit × → 4 Karten, alle Zeichen → Zielzahl bis 200 → bis 999 → alle Karten verbrauchen |
-| MA.3.B.2 Kombinatorik (`.b` OP) | Glace-Kombinator | 4 | Kleider 2×2 → Becher → Becher und Cornet, zählen → doppelte Sorten → Türme → 3 Kugeln, 4 Gruppen |
+| MA.3.B.2 Kombinatorik (`.b` OP) | Möglichkeiten-Finder | 4 | Kleider 2×2 → Becher → Becher und Cornet, zählen → doppelte Sorten → Türme → 3 Kugeln, 4 Gruppen |
 | MI.2.2 Informatik (`.a`) | Roboter-Pfad | 2 | befolgen → legen → mit Steinen → falsche Karte → Wiederholungen → Bedingungen |
 | NMG.9.2 Früher – heute (`.b/.c`, `.e`) | Früher und heute | 2 | früher oder heute → Ersatz von heute → Paare, Reihen → umgekehrt → vor 60 Jahren → vor 100 Jahren |
 | NMG.1.2 Gefahren (`.b`) | Schulweg-Profi | 2 | sicher/gefährlich → Lichtsignal, Merksatz → queren → Signale → Velo → ohne Trottoir, gemischt |
@@ -106,9 +106,9 @@ Mots-Match (Französisch ab 5. Klasse).
 - Netz-Falter: Begriffe „Dreiecksprisma“ und „Pyramide“ (quadratische Grundfläche); kommen Prismen und Pyramiden in der 5./6. Klasse vor?
 - Zielzahl-Jagd: Gerechnet wird in Schritten (zwei Karten → neue Karte) statt mit Punkt vor Strich und Klammern.
 - Rechen-Maschine: Heissen die Kästen „Rechenmaschine“, „Zahlenautomat“ oder „Flussdiagramm“? Weiche „gerade?“ in Stufe 6.
-- Glace-Kombinator: Becher = „Reihenfolge egal“, Cornet = „Reihenfolge zählt“; Namen der Kleider (Trägershirt, Zylinder, Halbschuhe).
+- Möglichkeiten-Finder: Becher = „Reihenfolge egal“, Cornet = „Reihenfolge zählt“; Namen der Kleider (Trägershirt, Zylinder, Halbschuhe).
 - Roboter-Pfad: Befehle „vor / links / rechts“ mit ↺ ↻, Raster A1–F6, „Wiederhole n-mal“, „Wenn vorne frei“.
-- Rechen-Maschine, Zielzahl-Jagd, Glace-Kombinator: Malzeichen × wie in den übrigen Spielen.
+- Rechen-Maschine, Zielzahl-Jagd, Möglichkeiten-Finder: Malzeichen × wie in den übrigen Spielen.
 
 **NMG**
 - Schulweg-Profi: Signale vereinfacht nachgebaut (mit der Signalisationsverordnung abgleichen); Merksatz „Warte, luege, lose, laufe“ in Mundart; Glocken- und Bremsenpflicht und „ohne Trottoir links gehen“ aus dem Gedächtnis belegt.

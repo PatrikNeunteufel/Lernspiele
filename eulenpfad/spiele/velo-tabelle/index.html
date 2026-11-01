@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velo-Tabelle</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .fahrer { text-align: center; font-size: clamp(40px, 9vw, 56px); margin: 0 0 4px; }
+  .tabelle-rahmen { overflow-x: auto; max-width: 100%; }
+  .wertetabelle { margin: 4px auto 12px; border-collapse: collapse; font-size: clamp(15px, 3.8vw, 24px); font-variant-numeric: tabular-nums; }
+  .wertetabelle th, .wertetabelle td { border: 2px solid var(--rand); padding: 8px clamp(4px, 1.6vw, 12px); text-align: center; white-space: nowrap; }
+  .wertetabelle th { color: var(--text-leise); font-weight: 800; background: var(--karte); }
+  .wertetabelle td { font-weight: 900; background: #fff; }
+  .wertetabelle td.luecke { color: var(--knopf); }
+  .wahl-knopf { font-size: clamp(20px, 4.6vw, 28px); font-weight: 900; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🚲 Velo-Tabelle</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.A.3.e (Grundanspruch 2. Zyklus): funktionale Zusammenhänge in Wertetabellen
+// (Beispiel dort: Distanzen bei 4.5 km/h nach 10, 20, 30 min), mit proportionalen Beziehungen
+// rechnen; MA.3.C.2.e Proportionalitäten in Sachsituationen; NMG.3.1.g Geschwindigkeiten bestimmen
+// und vergleichen (Schnecke, Bach, Velo). 3. Zyklus MA.3.A.3.f: Anteile bestimmen und vergleichen.
+// Setzt die Preis-Tabelle (Basisklasse 4, Geld) mit Weg und Zeit fort (Entscheid B1 a).
+// Schweizer Zahlenbuch 6: „Zeit und Geschwindigkeit“, „Proportionalitätstabellen“.
+// Basisklasse 6: s1 5. Klasse, s5 7. Klasse. Dezimalzahlen mit dem eingestellten Zeichen (LS.dezimalText).
+
+const { zahlText, dezimalText, zufall, waehle, mische, el } = LS;
+
+const FAHRER = [
+  { bild: "🚲", name: "Das Velo", vmin: 8, vmax: 24 }, { bild: "🛴", name: "Das Trottinett", vmin: 6, vmax: 18 },
+  { bild: "🚶", name: "Die Wanderin", vmin: 3, vmax: 6 }, { bild: "🛶", name: "Das Kanu", vmin: 3, vmax: 10 },
+];
+/** Eine Figur, für die diese Geschwindigkeit (km/h) glaubhaft ist; ohne Ausnahme: nicht die Figur. */
+const fahrerFuer = (v, ausser = -1) => {
+  const passend = FAHRER.map((_, i) => i).filter(i => i !== ausser && FAHRER[i].vmin <= v && v <= FAHRER[i].vmax);
+  return passend.length ? waehle(passend) : -1;
+};
+
+// Je Stufe: Aufgabenart, Geschwindigkeiten (km/h), Zeiten (min), Anzahl Spalten
+const STUFE = {
+  s1: { arten: ["weg"], v: [4, 5, 6, 8, 10, 12, 15, 20], zeiten: [60, 120, 180, 240, 300], spalten: 3, stunden: true },
+  s2: { arten: ["weg"], v: [4, 8, 12, 16, 20, 24], zeiten: [15, 30, 45, 60, 90, 120], spalten: 3 },
+  s3: { arten: ["weg", "weg", "zeit"], v: [3, 4.5, 6, 9, 12, 15, 18], zeiten: [10, 20, 30, 40, 50, 60], spalten: 4, dezimal: true },
+  s4: { arten: ["zeit", "weg"], v: [6, 9, 12, 15, 18, 24], zeiten: [10, 20, 30, 40, 50, 60, 80, 90], spalten: 4, dezimal: true },
+  s5: { arten: ["vergleich"], v: [3, 4.5, 6, 8, 9, 12, 15, 18, 20, 24], zeiten: [10, 15, 20, 30, 40, 45, 60, 90] },
+  s6: { arten: ["fehler", "vergleich"], v: [4.5, 6, 9, 12, 15, 18], zeiten: [10, 20, 30, 40, 50, 60, 90], spalten: 5, dezimal: true },
+};
+
+const wegVon = (v, t) => Math.round(v * t / 60 * 1000) / 1000;
+const hatEineStelle = x => Math.abs(x * 10 - Math.round(x * 10)) < 1e-9;
+const zeitText = (t, stunden) => (stunden ? `${t / 60} h` : `${t} min`);
+const kmText = x => `${dezimalText(x)} km`;
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(art, p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "weg", fahrer: 0, v: 12, zeiten: [60, 120, 180], luecke: 2, optionen: null };
+}
+
+function erzeuge(art, p) {
+  if (art === "weg" || art === "zeit") {
+    const v = waehle(p.v);
+    const fahrer = fahrerFuer(v);
+    if (fahrer < 0) return null;
+    const zeiten = mische(p.zeiten).slice(0, p.spalten).sort((x, y) => x - y);
+    const wege = zeiten.map(t => wegVon(v, t));
+    if (!wege.every(w => (p.dezimal ? hatEineStelle(w) : Number.isInteger(w)) && w > 0)) return null;
+    const luecke = zufall(1, zeiten.length - 1); // die erste Spalte ist immer gegeben
+    const a = { art, fahrer, v, zeiten, luecke };
+    if (art === "weg" && p.dezimal) {
+      // Auswahl, weil Dezimalzahlen nicht über die Zifferntastatur gehen
+      const w = wege[luecke], d = zeiten[luecke] - zeiten[0];
+      const kand = [w, wege[0] + d / 10, w * 2, w / 2, w + 0.5, w - 0.5, w + 1].filter(x => x > 0 && hatEineStelle(x));
+      a.optionen = mische(kand.filter((x, i) => kand.findIndex(y => Math.abs(y - x) < 1e-9) === i).slice(0, 4));
+      if (a.optionen.length < 4 || !a.optionen.includes(w)) return null;
+    }
+    return a;
+  }
+  if (art === "vergleich") {
+    // Wer ist schneller? Zwei Angaben mit verschiedenen Zeiten
+    const v1 = waehle(p.v), v2 = Math.random() < 0.2 ? v1 : waehle(p.v);
+    const f1 = fahrerFuer(v1), f2 = fahrerFuer(v2, f1);
+    if (f1 < 0 || f2 < 0) return null;
+    const t1 = waehle(p.zeiten), t2 = waehle(p.zeiten.filter(t => t !== t1));
+    const w1 = wegVon(v1, t1), w2 = wegVon(v2, t2);
+    if (!hatEineStelle(w1) || !hatEineStelle(w2) || w1 <= 0 || w2 <= 0) return null;
+    if (v1 !== v2 && Math.max(v1, v2) / Math.min(v1, v2) < 1.15) return null;
+    const loesung = v1 === v2 ? "gleich" : v1 > v2 ? "erster" : "zweiter";
+    return { art, f1, f2, v1, v2, t1, t2, w1, w2, loesung };
+  }
+  if (art === "fehler") {
+    const v = waehle(p.v);
+    const fahrer = fahrerFuer(v);
+    if (fahrer < 0) return null;
+    const zeiten = mische(p.zeiten).slice(0, p.spalten).sort((x, y) => x - y);
+    const wege = zeiten.map(t => wegVon(v, t));
+    if (!wege.every(w => hatEineStelle(w) && w > 0)) return null;
+    const falsch = zufall(1, zeiten.length - 1);
+    // typischer Fehler: gleich viel dazugezählt statt im gleichen Verhältnis
+    const angezeigt = [...wege];
+    angezeigt[falsch] = Math.round((wege[0] + (zeiten[falsch] - zeiten[0]) / 10) * 10) / 10;
+    if (Math.abs(angezeigt[falsch] - wege[falsch]) < 0.25) angezeigt[falsch] = Math.round((wege[falsch] + 1) * 10) / 10;
+    return { art, fahrer, v, zeiten, wege: angezeigt, falsch };
+  }
+  return null;
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (a.art === "weg" || a.art === "zeit" || a.art === "fehler") {
+    if (!p.v.includes(a.v)) m.push("Geschwindigkeit nicht in der Stufe");
+    if (a.zeiten.length !== p.spalten || !a.zeiten.every(t => p.zeiten.includes(t))) m.push("Zeiten nicht in der Stufe");
+    if (new Set(a.zeiten).size !== a.zeiten.length) m.push("doppelte Zeit");
+  }
+  if (a.art === "weg" || a.art === "zeit") {
+    const wege = a.zeiten.map(t => wegVon(a.v, t));
+    if (!wege.every(w => (p.dezimal ? hatEineStelle(w) : Number.isInteger(w)))) m.push("Weg mit zu vielen Nachkommastellen");
+    if (a.luecke < 1 || a.luecke >= a.zeiten.length) m.push("Lücke an falscher Stelle");
+    if (a.optionen) {
+      const w = wege[a.luecke];
+      if (a.optionen.filter(x => Math.abs(x - w) < 1e-9).length !== 1) m.push("Lösung nicht genau einmal unter den Antworten");
+      if (new Set(a.optionen.map(x => x.toFixed(3))).size !== a.optionen.length) m.push("doppelte Antworten");
+    }
+  }
+  if (a.art === "vergleich") {
+    if (Math.abs(a.w1 - wegVon(a.v1, a.t1)) > 1e-9 || Math.abs(a.w2 - wegVon(a.v2, a.t2)) > 1e-9) m.push("Weg passt nicht zur Zeit");
+    const s1 = a.w1 / a.t1, s2 = a.w2 / a.t2;
+    const l = Math.abs(s1 - s2) < 1e-9 ? "gleich" : s1 > s2 ? "erster" : "zweiter";
+    if (l !== a.loesung) m.push("Vergleich falsch");
+    if (a.t1 === a.t2) m.push("gleiche Zeiten — zu einfach");
+  }
+  if (a.art === "fehler") {
+    const falsche = a.wege.map((w, i) => Math.abs(w - wegVon(a.v, a.zeiten[i])) > 1e-9 ? i : -1).filter(i => i >= 0);
+    if (falsche.length !== 1 || falsche[0] !== a.falsch) m.push("nicht genau ein falscher Wert");
+    if (!a.wege.every(hatEineStelle)) m.push("Wert mit zu vielen Nachkommastellen");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Wertetabelle Zeit → Weg; gesucht: "weg" oder "zeit" in der Spalte luecke. */
+function tabelleEl(zeiten, wege, luecke, gesucht, stunden) {
+  const zelle = (frage, text) => el("td", { class: frage ? "luecke" : "", text: frage ? "?" : text });
+  return el("div", { class: "tabelle-rahmen" }, el("table", { class: "wertetabelle" },
+    el("tr", {}, el("th", { text: "Zeit" }), ...zeiten.map((t, i) => zelle(i === luecke && gesucht === "zeit", zeitText(t, stunden)))),
+    el("tr", {}, el("th", { text: "Weg" }), ...wege.map((w, i) => zelle(i === luecke && gesucht === "weg", kmText(w))))));
+}
+
+const HINWEIS_WEG = "Doppelt so lange heisst doppelt so weit. Rechne zuerst, wie weit es in einer kleinen Zeit kommt, zum Beispiel in 10 min.";
+
+function eintippen(ctx, richtig, hinweis, loesungText) {
+  ctx.loesung(loesungText);
+  ctx.schritte(LS.tippSchritte(richtig));
+  const anzeige = el("div", { class: "anzeige leer", style: "margin-top:6px", "aria-label": "Deine Antwort" });
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 4,
+    onOk(w) {
+      if (w === richtig) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${loesungText}`); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(hinweis, loesungText);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(anzeige, tasten.element);
+}
+
+LS.spiel({
+  id: "velo-tabelle",
+  einleitung: "Wer gleichmässig fährt, kommt in doppelt so viel Zeit doppelt so weit. Fülle die Tabellen aus und finde heraus, wer schneller ist!",
+  anzahl: 8,
+  stufen: {
+    s1: "Ganze Stunden: Wie weit in 3 h?",
+    s2: "Minuten: 15, 30, 45 und 90 min.",
+    s3: "Auch Kommazahlen: 4.5 km in einer Stunde (Lehrplan 6. Klasse).",
+    s4: "Rückwärts: Wie lange für diesen Weg?",
+    s5: "Wer ist schneller? Verschiedene Zeiten vergleichen.",
+    s6: "Endgegner: den falschen Wert in der Tabelle finden.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    if (a.art === "weg" || a.art === "zeit") {
+      const fa = FAHRER[a.fahrer];
+      const wege = a.zeiten.map(t => wegVon(a.v, t));
+      const loesungText = `${zeitText(a.zeiten[a.luecke], p.stunden)} → ${kmText(wege[a.luecke])}`;
+      if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+      f.append(el("div", { class: "fahrer", text: fa.bild }),
+        el("div", { class: "frage", html: `${fa.name} ist gleichmässig unterwegs. ${a.art === "weg" ? "<b>Wie weit</b> nach dieser Zeit?" : "<b>Wie lange</b> für diesen Weg?"}` }),
+        tabelleEl(a.zeiten, wege, a.luecke, a.art, p.stunden));
+      if (a.art === "weg" && a.optionen) {
+        LS.auswahl(ctx, { optionen: a.optionen, richtig: wege[a.luecke], inhalt: kmText, hinweis: HINWEIS_WEG, loesung: loesungText, breite: 120 });
+      } else if (a.art === "weg") {
+        eintippen(ctx, wege[a.luecke], HINWEIS_WEG + " Antwort in km.", loesungText);
+      } else {
+        eintippen(ctx, a.zeiten[a.luecke], "Wie weit kommt es in 10 min? Wie oft passt das in den gesuchten Weg? Antwort in Minuten.", loesungText);
+      }
+    } else if (a.art === "vergleich") {
+      const g1 = FAHRER[a.f1], g2 = FAHRER[a.f2];
+      ctx.serie("antwort", a.loesung);
+      f.append(el("div", { class: "frage", html: "<b>Wer ist schneller?</b>" }),
+        el("div", { class: "auftrag", text: `${g1.bild} ${g1.name}: ${kmText(a.w1)} in ${a.t1} min` }),
+        el("div", { class: "auftrag", text: `${g2.bild} ${g2.name}: ${kmText(a.w2)} in ${a.t2} min` }));
+      const loesungText = `In 60 min: ${g1.name} ${kmText(a.v1)}, ${g2.name} ${kmText(a.v2)}`;
+      LS.auswahl(ctx, {
+        optionen: ["erster", "zweiter", "gleich"], richtig: a.loesung, breite: 150,
+        inhalt: o => (o === "erster" ? { bild: g1.bild, text: g1.name } : o === "zweiter" ? { bild: g2.bild, text: g2.name } : { bild: "🤝", text: "gleich schnell" }),
+        hinweis: "Rechne beide auf dieselbe Zeit um, zum Beispiel auf eine Stunde (60 min).",
+        loesung: loesungText,
+      });
+    } else if (a.art === "fehler") {
+      const fa = FAHRER[a.fahrer];
+      f.append(el("div", { class: "fahrer", text: fa.bild }),
+        el("div", { class: "frage", html: `${fa.name} ist gleichmässig unterwegs. <b>Ein Weg</b> stimmt nicht. Welcher?` }));
+      const richtigerWeg = wegVon(a.v, a.zeiten[a.falsch]);
+      LS.auswahl(ctx, {
+        optionen: a.zeiten.map((_, i) => i), richtig: a.falsch, breite: 150,
+        inhalt: i => `${zeitText(a.zeiten[i])} → ${kmText(a.wege[i])}`,
+        hinweis: i => `${zeitText(a.zeiten[i])} → ${kmText(a.wege[i])} passt zu den anderen. Vergleiche: Doppelte Zeit, doppelter Weg?`,
+        loesung: `${zeitText(a.zeiten[a.falsch])} → ${kmText(richtigerWeg)}, nicht ${kmText(a.wege[a.falsch])}`,
+      });
+    }
+    if (ctx.nr === 0) ctx.sag("Tipp: Rechne zuerst, wie weit es in 10 min oder in einer Stunde kommt.");
+  },
+});
+</script>
+</body>
+</html>

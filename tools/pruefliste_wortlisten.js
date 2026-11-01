@@ -313,7 +313,7 @@ teil("### Anweisungen", null, ["Anweisung"], LT.ANWEISUNG_VERBEN);
 teil("### Wo ist das Tier? — Tiere", null, ["Englisch", "Bild"], LT.WO_TIERE);
 teil("### Wo ist das Tier? — Orte", null, ["Ding", "Präposition"], LT.WO_ORTE);
 const GK = lade("spiele/glace-kombinator/inhalte.js", ["GLACE_SORTEN", "KLEIDER"]);
-teil("## 31. Glace-Kombinator (Lehrplan SG MA.3.B.2) — Sorten", null, ["Sorte", "Farbe", "Buchstabe"], GK.GLACE_SORTEN);
+teil("## 31. Möglichkeiten-Finder (Lehrplan SG MA.3.B.2) — Sorten", null, ["Sorte", "Farbe", "Buchstabe"], GK.GLACE_SORTEN);
 teil("### Kleider", null, ["Gruppe", "Bild", "Name"], GK.KLEIDER);
 const FH = lade("spiele/frueher-heute/dinge.js", ["FH_PAARE", "FH_REIHEN", "FH_GROSSELTERN"]);
 teil("## 32. Früher und heute (Lehrplan SG NMG.9.2) — Paare", "„svg:…“ = im Spiel gezeichnet.", ["Gruppe", "Bild früher", "früher", "Bild heute", "heute", "früher eindeutig"], FH.FH_PAARE);
@@ -549,7 +549,7 @@ inListeTeil("listen-tap/anweisungen", "Anweisungen", null, ["Anweisung"], LT.ANW
 inListeTeil("listen-tap/wo-ist", "Tiere", null, ["Englisch", "Bild"], LT.WO_TIERE);
 inListeTeil("listen-tap/wo-ist", "Orte", null, ["Ding", "Präposition"], LT.WO_ORTE);
 
-// Glace-Kombinator, Früher und heute, Wetter: je Konstante eine Liste
+// Möglichkeiten-Finder, Früher und heute, Wetter: je Konstante eine Liste
 inListeTeil("glace-kombinator/sorten", "Sorten", null, ["Sorte", "Farbe", "Buchstabe"], GK.GLACE_SORTEN);
 inListeTeil("glace-kombinator/kleider", "Kleider", null, ["Gruppe", "Bild", "Name"], GK.KLEIDER);
 inListeTeil("frueher-heute/paare", "Paare", "„svg:…“ = im Spiel gezeichnet.", ["Gruppe", "Bild früher", "früher", "Bild heute", "heute", "früher eindeutig"], FH.FH_PAARE);

@@ -209,6 +209,17 @@ td .marke.such-grund { display: inline-block; margin-top: 4px; }
 .statistik .wackelt { color: #b45309; font-weight: 800; white-space: nowrap; }
 .statistik .gut { color: #15803d; font-weight: 800; }
 .statistik td.zelle { text-align: center; font-weight: 800; min-width: 84px; }
+/* Einstellungen je Spiel in der Verwaltung */
+.verwaltung .einstellung-spiele { margin-top: 10px; }
+.verwaltung .einstellung-spiele summary { cursor: pointer; font-weight: 800; }
+.verwaltung .einstellung-spiel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; padding: 6px 0; border-bottom: 1px solid var(--rand); }
+
+/* Vorgehen: ein Punkt je Aufgabe, gut / mittel / schwach */
+.statistik .vorgehen + .vorgehen { margin-top: 14px; }
+.statistik .vorgehen-punkte { display: flex; gap: 6px; flex-wrap: wrap; }
+.statistik .vorgehen-punkt { width: 18px; height: 18px; border-radius: 50%; background: var(--rand); }
+.statistik .vorgehen-punkt.vp-gut { background: var(--gut); }
+.statistik .vorgehen-punkt.vp-mittel { background: var(--deko-4); }
 .statistik td.zelle small { display: block; font-weight: 600; color: var(--text-leise); font-size: 12px; }
 .statistik td.zelle.hell-text, .statistik td.zelle.hell-text small { color: #fff; }
 .statistik .legende { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-leise); margin-top: 8px; flex-wrap: wrap; }

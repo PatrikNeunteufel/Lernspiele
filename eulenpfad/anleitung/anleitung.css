@@ -1,0 +1,36 @@
+/* Gemeinsamer Stil der Anleitungen (LERN_Session7). Eigenständig, damit die Seiten auch ohne den
+   Spielrahmen lesbar sind; Farben wie im Portal. */
+:root { --text: #2b2d42; --leise: #6b7089; --karte: #fff; --rand: #e3e6f3; --akzent: #6366f1; --markierung: #e11d48; }
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 28px 16px 48px; font: 18px/1.6 system-ui, "Segoe UI", sans-serif;
+  color: var(--text); background: linear-gradient(180deg, #e0f2fe, #fef9e7) fixed;
+}
+main { max-width: 860px; margin: 0 auto; }
+.zurueck { display: inline-block; margin-bottom: 12px; color: var(--akzent); font-weight: 700; text-decoration: none; }
+h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 6px; line-height: 1.2; }
+.unter { color: var(--leise); margin: 0 0 22px; }
+section { background: var(--karte); border-radius: 20px; padding: 20px 22px; margin: 0 0 18px; box-shadow: 0 4px 0 var(--rand); }
+h2 { margin: 0 0 8px; font-size: 24px; line-height: 1.3; }
+h3 { margin: 16px 0 6px; font-size: 19px; }
+p, ul, ol { margin: 0 0 10px; }
+li { margin: 2px 0; }
+figure { margin: 12px 0 14px; }
+figure img { display: block; max-width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--rand); }
+figure.handy img { max-width: 340px; margin: 0 auto; }
+figcaption { color: var(--leise); font-size: 15px; margin-top: 6px; }
+/* Nummern wie in den roten Rahmen der Bilder */
+.nr { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--markierung); color: #fff; font-weight: 800; font-size: 14px; margin-right: 4px; vertical-align: 2px; }
+.tipp { background: #eef2ff; border-left: 5px solid var(--akzent); border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
+.achtung { background: #fff7ed; border-left: 5px solid #f59e0b; border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
+nav.inhalt ol { columns: 2; column-gap: 28px; padding-left: 22px; }
+@media (max-width: 600px) { nav.inhalt ol { columns: 1; } }
+nav.inhalt a { color: var(--akzent); text-decoration: none; }
+kbd { font: inherit; font-weight: 700; background: #f3f4fb; border: 1px solid var(--rand); border-radius: 6px; padding: 0 6px; }
+
+/* Kinderanleitung: grosse Schrift, wenig Text */
+body.kinder { font-size: 22px; }
+body.kinder h2 { font-size: 28px; }
+body.kinder section { text-align: center; }
+body.kinder .gross { font-size: 44px; line-height: 1; }

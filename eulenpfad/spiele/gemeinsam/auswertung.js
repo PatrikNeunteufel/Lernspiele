@@ -212,5 +212,46 @@ const AUSWERTUNG = (() => {
     return v.sort((a, b) => a.prio - b.prio);
   }
 
-  return { anhieb, mittel, median, sitzungen, lernzeiten, konzentration, vorschlaege, rundenZuLernziel, QUOTE_UEBEN };
+  // ---------- Vorgehen (ctx.vorgehen): wie ein Kind Aufgaben angeht (Wunsch Patrik, LERN_Session7) ----------
+  // Je Art die Werte vom besten zum schwächsten; ton: gut | mittel | schwach (Farbe in der Statistik).
+  const VORGEHEN = {
+    systematik: {
+      titel: "Systematisch kombinieren", spiele: ["glace-kombinator"],
+      erklaerung: "Beim Legen aller Möglichkeiten: der Reihe nach wie ein Zählwerk (erst ein Stück mit allem, dann das nächste)?",
+      werte: [
+        { id: "streng", text: "der Reihe nach", ton: "gut" },
+        { id: "geordnet", text: "geordnet, innen wechselnd", ton: "mittel" },
+        { id: "durcheinander", text: "kreuz und quer", ton: "schwach" },
+        { id: "hilfe", text: "mit Hilfe der geordneten Reihe", ton: "schwach" },
+      ],
+    },
+    teilerpaare: {
+      titel: "Teiler finden", spiele: ["teiler-detektiv"],
+      erklaerung: "Beim Antippen aller Teiler: in Paaren (2 und 15 zu 30) oder der Reihe nach — dann geht keiner vergessen.",
+      werte: [
+        { id: "paare", text: "in Paaren", ton: "gut" },
+        { id: "aufsteigend", text: "der Grösse nach", ton: "gut" },
+        { id: "durcheinander", text: "durcheinander", ton: "schwach" },
+      ],
+    },
+    ausgleichen: {
+      titel: "Ausgleichen", spiele: ["mittelwert-waage"],
+      erklaerung: "Beim Ausgleichen der Säulen: mit so wenigen Zügen wie nötig — wer das schafft, hat den Mittelwert vorher im Kopf.",
+      werte: [
+        { id: "kuerzest", text: "ohne Umweg", ton: "gut" },
+        { id: "umwege", text: "mit Umwegen", ton: "mittel" },
+      ],
+    },
+  };
+
+  /** Je Art mit Daten: Anzahl je Wert und die Folge der letzten Aufgaben (älteste zuerst). */
+  function vorgehen(runden) {
+    const sortiert = [...runden].sort((a, b) => a.zeit.localeCompare(b.zeit));
+    return Object.entries(VORGEHEN).map(([art, d]) => {
+      const folge = sortiert.flatMap(e => (e.aufgabenZeiten || []).filter(a => a.vorgehen?.[art]).map(a => a.vorgehen[art]));
+      return { art, ...d, folge, anzahl: Object.fromEntries(d.werte.map(w => [w.id, folge.filter(x => x === w.id).length])) };
+    }).filter(v => v.folge.length);
+  }
+
+  return { anhieb, mittel, median, sitzungen, lernzeiten, konzentration, vorschlaege, rundenZuLernziel, QUOTE_UEBEN, VORGEHEN, vorgehen };
 })();

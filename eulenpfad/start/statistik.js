@@ -100,6 +100,27 @@ function zeichneStatistik(box, neu) {
             el("div", {}, el("h3", { text: "Auf Anhieb richtig nach Runde der Sitzung" }),
               saeulen(k.nachRunde.map(x => ({ name: x.runde, wert: x.anhieb, titel: `${x.runde} Runde: ${prozent(x.anhieb)} auf Anhieb richtig (${x.n} Runden)` })), prozent, { hoehe: 90 }))))));
 
+  // ----- Vorgehen (ctx.vorgehen; LERN_Session7) -----
+  const vg = AUSWERTUNG.vorgehen(runden);
+  if (vg.length) {
+    const LETZTE = 12;
+    seite.append(karte(
+      el("h2", { text: "Vorgehen" }),
+      el("p", { class: "leise-text", style: "margin-top:0", text: "Wie Aufgaben angegangen werden — nicht nur ob richtig, sondern wie. Punkte: die letzten Aufgaben, die neueste rechts." }),
+      ...vg.map(v => {
+        const wert = id => v.werte.find(w => w.id === id);
+        const letzte = v.folge.slice(-LETZTE);
+        const gutZuletzt = letzte.filter(x => wert(x)?.ton === "gut").length;
+        return el("div", { class: "vorgehen" },
+          el("h3", { text: `${v.titel} (${v.spiele.map(spielName).join(", ")})` }),
+          el("p", { class: "leise-text", style: "margin:0 0 6px", text: v.erklaerung }),
+          el("div", { class: "vorgehen-punkte", "aria-label": `Letzte ${letzte.length}: ${letzte.map(x => wert(x)?.text || x).join(", ")}` },
+            ...letzte.map(x => el("span", { class: `vorgehen-punkt vp-${wert(x)?.ton || "schwach"}`, title: wert(x)?.text || x }))),
+          el("p", { style: "margin:6px 0 0", text: `Zuletzt ${gutZuletzt} von ${letzte.length} ${v.werte.filter(w => w.ton === "gut").map(w => w.text).join(" oder ")}. Insgesamt: ` +
+            v.werte.filter(w => v.anzahl[w.id]).map(w => `${w.text} ${v.anzahl[w.id]}`).join(" · ") }));
+      })));
+  }
+
   // ----- Je Lernziel -----
   const zeilen = LERNZIELE.map(lz => {
     const r = rundenZuLernziel(runden, lz.lz);

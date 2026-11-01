@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bruch-Pizzeria</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 0 0 10px; }
+
+  /* Bruch übereinander; der Schrägstrich ist nur für Protokoll und Vorleser da. */
+  .bruch { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.05; margin: 0 .12em; font-variant-numeric: tabular-nums; font-weight: 900; }
+  .bruch .z { border-bottom: .09em solid currentColor; padding: 0 .15em; }
+  .bruch .n { padding: 0 .15em; }
+  .bruch .schraeg { font-size: 0; }
+  .bruch-gross { font-size: clamp(40px, 9vw, 60px); color: var(--knopf); }
+
+  .modell { display: block; margin: 0 auto; max-width: 100%; }
+  .modell .teil { fill: #fff; stroke: var(--text); stroke-width: 2; }
+  .modell .teil.voll { fill: var(--deko-2); }
+  .modell.klickbar .teil { cursor: pointer; }
+  .modell-kreis { width: min(240px, 60vw); }
+  .modell-streifen { width: min(560px, 92vw); }
+  .modell-paar { display: flex; flex-direction: column; gap: 14px; align-items: center; }
+  .modell-paar .modell-streifen { width: min(460px, 76vw); }
+
+  .vergleich { display: flex; align-items: center; justify-content: center; gap: 18px; font-size: clamp(36px, 8vw, 54px); margin: 6px 0 12px; }
+  .vergleich .luecke { min-width: 1.4em; text-align: center; color: var(--text-leise); border-bottom: 4px dashed var(--rand); }
+  .fertig-zeile { display: flex; justify-content: center; margin-top: 14px; }
+  .zaehler-anzeige { text-align: center; font-weight: 800; color: var(--text-leise); margin-top: 6px; }
+  .wahl-knopf { font-size: clamp(28px, 6vw, 36px); font-weight: 900; }
+  .wahl-knopf .bruch { font-size: 30px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🍕 Bruch-Pizzeria</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.C.2.g: Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10 darstellen und vergleichen,
+// Darstellungen deuten (Kreis-, Rechteckmodell); MA.1.A.2.g: Brüche mit den Nennern 2, 3, 4, 5, 6,
+// 8, 10, 20, 50, 100 ordnen; MA.1.A.1.g: Bruch, Zähler, Nenner. Beides Grundanspruch 2. Zyklus.
+// Schweizer Zahlenbuch: Brüche als Anteile und Modelle in Band 5, erweitern und kürzen in Band 6.
+// Basisklasse 5: s1 4. Klasse (Halbe, Drittel, Viertel), s5 6. Klasse, s6 Königsstufe.
+// Ein Bruch ist im Spiel ein Text "z/n" (vergleichbar mit ===), angezeigt übereinander.
+
+const { zufall, waehle, mische, el } = LS;
+
+const NENNER_KLEIN = [2, 3, 4, 5, 6, 8, 10];
+const NENNER_ALLE = [2, 3, 4, 5, 6, 8, 10, 20, 50, 100];
+
+// Je Stufe: Aufgabenarten und Nenner. ordnenAnzahl: wie viele Brüche zu ordnen sind.
+const STUFE = {
+  s1: { arten: ["ablesen", "legen"], nenner: [2, 3, 4] },
+  s2: { arten: ["ablesen", "legen"], nenner: NENNER_KLEIN },
+  s3: { arten: ["ablesen", "legen", "vergleichBild", "vergleichBild"], nenner: NENNER_KLEIN },
+  s4: { arten: ["vergleich", "vergleich", "ordnen", "ablesen"], nenner: NENNER_KLEIN, ordnenAnzahl: 3 },
+  s5: { arten: ["gleichwertig", "gleichwertig", "erweitertLegen", "vergleich", "ordnen"], nenner: NENNER_ALLE, ordnenAnzahl: 3, gleich: true },
+  s6: { arten: ["ordnen", "vergleich", "gleichwertig"], nenner: NENNER_ALLE, ordnenAnzahl: 4, gleich: true, knapp: true },
+};
+
+const ggT = (a, b) => (b ? ggT(b, a % b) : a);
+const teile = b => b.split("/").map(Number);
+const wert = b => { const [z, n] = teile(b); return z / n; };
+const bruch = (z, n) => `${z}/${n}`;
+const gekuerzt = b => { const [z, n] = teile(b); const g = ggT(z, n); return bruch(z / g, n / g); };
+const gleichGross = (a, b) => gekuerzt(a) === gekuerzt(b);
+const vergleichZeichen = (a, b) => (gleichGross(a, b) ? "=" : wert(a) < wert(b) ? "<" : ">");
+
+/** Echter Bruch mit einem Nenner aus der Liste. */
+function zufallsBruch(nenner) {
+  const n = waehle(nenner);
+  return bruch(zufall(1, n - 1), n);
+}
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = ERZEUGER[art](p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "ablesen", bruch: "1/2", modell: "kreis", optionen: mische(["1/2", "1/3", "1/4", "2/3"]) };
+}
+
+const ERZEUGER = {
+  ablesen(p) {
+    const b = zufallsBruch(p.nenner.filter(n => n <= 12));
+    const [z, n] = teile(b);
+    // Ablenker: ungefärbte Teile, ein Teil mehr oder weniger, Zähler und Nenner vertauscht im Teil
+    const kandidaten = [bruch(n - z, n), bruch(z + 1, n), bruch(z - 1, n), bruch(z, n + 1), bruch(z, n - 1), bruch(z, n + z)];
+    const ablenker = mische(kandidaten.filter(k => {
+      const [kz, kn] = teile(k);
+      return kz >= 1 && kz < kn && !gleichGross(k, b);
+    })).filter((k, i, alle) => alle.findIndex(x => gleichGross(x, k)) === i).slice(0, 3);
+    if (ablenker.length < 3) return null;
+    return { art: "ablesen", bruch: b, modell: n <= 8 && Math.random() < 0.5 ? "kreis" : "streifen", optionen: mische([b, ...ablenker]) };
+  },
+  legen(p) {
+    const b = zufallsBruch(p.nenner.filter(n => n <= 12));
+    const [, n] = teile(b);
+    return { art: "legen", bruch: b, teile: n, ziel: teile(b)[0], modell: n <= 8 && Math.random() < 0.5 ? "kreis" : "streifen" };
+  },
+  erweitertLegen(p) {
+    // 1/2 auf einem Streifen mit 8 Teilen färben: 4 Teile
+    const n = waehle([2, 3, 4, 5]);
+    const z = zufall(1, n - 1);
+    const faktoren = [2, 3, 4, 5].filter(f => NENNER_ALLE.includes(n * f) || n * f === 12);
+    if (!faktoren.length) return null;
+    const m = n * waehle(faktoren);
+    return { art: "erweitertLegen", bruch: bruch(z, n), teile: m, ziel: z * m / n, modell: "streifen" };
+  },
+  vergleichBild(p) {
+    // gleicher Nenner oder gleicher Zähler; zwei Streifen untereinander helfen
+    let a, b;
+    if (Math.random() < 0.5) {
+      const n = waehle(p.nenner); a = bruch(zufall(1, n - 1), n); b = bruch(zufall(1, n - 1), n);
+    } else {
+      const n1 = waehle(p.nenner), n2 = waehle(p.nenner);
+      const z = zufall(1, Math.min(n1, n2) - 1); a = bruch(z, n1); b = bruch(z, n2);
+    }
+    return { art: "vergleichBild", a, b, loesung: vergleichZeichen(a, b) };
+  },
+  vergleich(p) {
+    let a = zufallsBruch(p.nenner), b = zufallsBruch(p.nenner);
+    if (p.gleich && Math.random() < 0.25) {
+      // gleich grosse Brüche in anderer Form: 3/4 und 75/100
+      const [z, n] = teile(gekuerzt(a));
+      const f = p.nenner.filter(m => m > n && m % n === 0);
+      if (f.length) { const m = waehle(f); b = bruch(z * m / n, m); }
+    }
+    if (p.knapp && !gleichGross(a, b) && Math.abs(wert(a) - wert(b)) > 0.1) return null;
+    return { art: "vergleich", a, b, loesung: vergleichZeichen(a, b) };
+  },
+  ordnen(p) {
+    const reihe = [];
+    for (let i = 0; i < 40 && reihe.length < p.ordnenAnzahl; i++) {
+      const b = zufallsBruch(p.nenner);
+      if (reihe.every(r => Math.abs(wert(r) - wert(b)) >= (p.knapp ? 0.01 : 0.05))) reihe.push(b);
+    }
+    if (reihe.length < p.ordnenAnzahl) return null;
+    reihe.sort((x, y) => wert(x) - wert(y));
+    return { art: "ordnen", reihe };
+  },
+  gleichwertig(p) {
+    // Zu einem Bruch den gleich grossen finden — erweitert oder gekürzt
+    const n = waehle([2, 3, 4, 5, 10]);
+    const z = zufall(1, n - 1);
+    if (ggT(z, n) !== 1) return null;
+    const vielfache = p.nenner.filter(m => m > n && m % n === 0);
+    if (!vielfache.length) return null;
+    const m = waehle(vielfache);
+    const klein = bruch(z, n), gross = bruch(z * m / n, m);
+    const kuerzen = Math.random() < 0.5;
+    const vorgabe = kuerzen ? gross : klein, richtig = kuerzen ? klein : gross;
+    const [rz, rn] = teile(richtig);
+    // Ablenker: plus statt mal (1/2 → 3/4), nur Nenner verändert, Zähler daneben
+    const d = Math.abs(rn - teile(vorgabe)[1]);
+    const kandidaten = [bruch(teile(vorgabe)[0] + d, teile(vorgabe)[1] + d), bruch(teile(vorgabe)[0], rn), bruch(rz + 1, rn), bruch(rz - 1, rn), bruch(rz, rn + 1)];
+    const ablenker = mische(kandidaten.filter(k => {
+      const [kz, kn] = teile(k);
+      return kz >= 1 && kz < kn && !gleichGross(k, vorgabe) && k !== vorgabe;
+    })).filter((k, i, alle) => alle.indexOf(k) === i).slice(0, 3);
+    if (ablenker.length < 3) return null;
+    return { art: "gleichwertig", vorgabe, richtig, optionen: mische([richtig, ...ablenker]) };
+  },
+};
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  const echt = b => { const [z, n] = teile(b); return Number.isInteger(z) && Number.isInteger(n) && z >= 1 && z < n; };
+  const nennerOk = b => p.nenner.includes(teile(b)[1]) || (a.art === "gleichwertig" && NENNER_ALLE.includes(teile(b)[1]));
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (a.art === "ablesen" || a.art === "gleichwertig") {
+    const richtig = a.art === "ablesen" ? a.bruch : a.richtig;
+    if (!a.optionen.includes(richtig)) m.push("richtige Antwort fehlt");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Optionen");
+    const passend = a.optionen.filter(o => gleichGross(o, a.art === "ablesen" ? a.bruch : a.vorgabe) && o !== a.vorgabe);
+    if (passend.length !== 1) m.push(`${passend.length} gleich grosse Optionen statt einer`);
+    if (!a.optionen.every(echt)) m.push("Option ist kein echter Bruch");
+    if (a.art === "ablesen" && !nennerOk(a.bruch)) m.push("Nenner nicht in der Stufe");
+    if (a.art === "gleichwertig" && (!gleichGross(a.vorgabe, a.richtig) || a.vorgabe === a.richtig)) m.push("Lösung nicht gleich gross");
+  }
+  if (a.art === "legen" || a.art === "erweitertLegen") {
+    if (!echt(a.bruch)) m.push("kein echter Bruch");
+    if (a.ziel * teile(a.bruch)[1] !== teile(a.bruch)[0] * a.teile) m.push("Anzahl Teile passt nicht zum Bruch");
+    if (a.teile > 20) m.push("zu viele Teile zum Antippen");
+  }
+  if (a.art === "vergleich" || a.art === "vergleichBild") {
+    if (!echt(a.a) || !echt(a.b) || !nennerOk(a.a) || !nennerOk(a.b)) m.push("Bruch nicht in der Stufe");
+    if (a.loesung !== vergleichZeichen(a.a, a.b)) m.push("Vergleich falsch");
+    if (a.loesung === "=" && !p.gleich) m.push("gleich grosse Brüche erst ab Stufe 5");
+    if (a.a === a.b) m.push("zweimal derselbe Bruch");
+  }
+  if (a.art === "ordnen") {
+    if (a.reihe.length !== p.ordnenAnzahl) m.push("falsche Anzahl");
+    for (let i = 1; i < a.reihe.length; i++) if (!(wert(a.reihe[i - 1]) < wert(a.reihe[i]))) m.push("nicht streng aufsteigend");
+    if (!a.reihe.every(b => echt(b) && nennerOk(b))) m.push("Bruch nicht in der Stufe");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Bruch übereinander; textContent "3/4". */
+function bruchEl(b, klasse = "") {
+  const [z, n] = teile(b);
+  return el("span", { class: `bruch ${klasse}`, "aria-label": `${z} ${n === 2 ? "Halbe" : "von " + n}` },
+    el("span", { class: "z", text: String(z) }), el("span", { class: "schraeg", text: "/" }), el("span", { class: "n", text: String(n) }));
+}
+
+const SVG = "http://www.w3.org/2000/svg";
+
+/** Höchstens fünf Teile je Zeile, damit jedes Teil gross genug für einen Finger ist: 12 → 4 × 3. */
+const fingerSpalten = n => (n <= 5 ? n : [5, 4, 3].find(s => n % s === 0) || n);
+
+/**
+ * Kreis- oder Streifenmodell mit n Teilen; voll: Anzahl gefärbter Teile (von links bzw. oben).
+ * klickbar: Teile zum Antippen, der Streifen bricht dann in Zeilen um.
+ */
+function modellEl(art, n, voll, klickbar = false) {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("class", `modell modell-${art}`);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `${n} Teile, ${voll} gefärbt`);
+  const teil = (form, i) => { form.setAttribute("class", `teil${i < voll ? " voll" : ""}`); form.dataset.i = i; svg.append(form); };
+  if (art === "kreis") {
+    svg.setAttribute("viewBox", "0 0 220 220");
+    const r = 100, c = 110;
+    for (let i = 0; i < n; i++) {
+      const w0 = 2 * Math.PI * i / n - Math.PI / 2, w1 = 2 * Math.PI * (i + 1) / n - Math.PI / 2;
+      const p = document.createElementNS(SVG, "path");
+      p.setAttribute("d", `M${c},${c} L${c + r * Math.cos(w0)},${c + r * Math.sin(w0)} A${r},${r} 0 ${w1 - w0 > Math.PI ? 1 : 0} 1 ${c + r * Math.cos(w1)},${c + r * Math.sin(w1)} Z`);
+      teil(p, i);
+    }
+  } else {
+    // bis 12 Teile ein Streifen, sonst ein Rechteck mit 10 Spalten (20, 50, 100)
+    const spalten = klickbar ? fingerSpalten(n) : n <= 12 ? n : 10, zeilen = n / spalten;
+    const B = 520, H = klickbar ? zeilen * 90 : n <= 12 ? 90 : Math.min(260, zeilen * 40);
+    svg.setAttribute("viewBox", `-4 -4 ${B + 8} ${H + 8}`);
+    for (let i = 0; i < n; i++) {
+      const r = document.createElementNS(SVG, "rect");
+      r.setAttribute("x", (i % spalten) * B / spalten); r.setAttribute("y", Math.floor(i / spalten) * H / zeilen);
+      r.setAttribute("width", B / spalten); r.setAttribute("height", H / zeilen);
+      teil(r, i);
+    }
+  }
+  return svg;
+}
+
+// ---------- Hinweise (verraten die Lösung nicht) ----------
+
+const HINWEIS_ABLESEN = "Zähle zuerst alle Teile — das ist der Nenner unten. Dann die gefärbten — das ist der Zähler oben.";
+function hinweisVergleich(a, b) {
+  const [za, na] = teile(a), [zb, nb] = teile(b);
+  if (na === nb) return "Gleicher Nenner: Die Teile sind gleich gross. Wo sind es mehr Teile?";
+  if (za === zb) return "Gleicher Zähler: Je mehr Teile das Ganze hat, desto kleiner ist jedes Teil.";
+  return "Bring beide auf den gleichen Nenner: Zähler und Nenner mit derselben Zahl malnehmen.";
+}
+const HINWEIS_GLEICH = "Gleich gross bleibt ein Bruch nur, wenn du Zähler und Nenner mit derselben Zahl malnimmst oder durch dieselbe Zahl teilst.";
+
+// ---------- Spiel ----------
+
+LS.spiel({
+  id: "bruch-werkstatt",
+  einleitung: "Willkommen in der Bruch-Pizzeria! Hier wird geteilt: Pizzas, Schokolade und Streifen. Unten steht, in wie viele Teile das Ganze geteilt ist, oben, wie viele Teile gemeint sind.",
+  anzahl: 8,
+  stufen: {
+    s1: "Halbe, Drittel und Viertel ablesen und färben.",
+    s2: "Brüche mit Nenner bis 10 ablesen und färben.",
+    s3: "Ablesen, färben und vergleichen mit Bild (Lehrplan 5. Klasse).",
+    s4: "Vergleichen ohne Bild und drei Brüche ordnen.",
+    s5: "Gleich grosse Brüche: erweitern und kürzen, auch Nenner 20, 50, 100.",
+    s6: "Endgegner: vier Brüche ordnen, knapp vergleichen, gleich grosse finden.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const f = ctx.flaeche;
+    if (a.art === "ablesen") {
+      ctx.serie("modell", a.modell);
+      f.append(el("div", { class: "frage", text: "Welcher Bruch ist gefärbt?" }), modellEl(a.modell, teile(a.bruch)[1], teile(a.bruch)[0]));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.bruch, inhalt: b => bruchEl(b), hinweis: HINWEIS_ABLESEN, loesung: a.bruch, lob: `Genau: ${a.bruch}` });
+    } else if (a.art === "legen" || a.art === "erweitertLegen") {
+      legen(ctx, a);
+    } else if (a.art === "vergleich" || a.art === "vergleichBild") {
+      ctx.serie("antwort", a.loesung);
+      const luecke = el("span", { class: "luecke", text: "?" });
+      f.append(el("div", { class: "frage", text: "Was gehört in die Lücke: <, = oder >?" }),
+        el("div", { class: "vergleich" }, bruchEl(a.a), luecke, bruchEl(a.b)));
+      if (a.art === "vergleichBild") {
+        f.append(el("div", { class: "modell-paar" }, modellEl("streifen", teile(a.a)[1], teile(a.a)[0]), modellEl("streifen", teile(a.b)[1], teile(a.b)[0])));
+      }
+      const zeichen = STUFE[ctx.stufe].gleich ? ["<", "=", ">"] : ["<", ">"];
+      LS.auswahl(ctx, {
+        optionen: zeichen, richtig: a.loesung, loesung: `${a.a} ${a.loesung} ${a.b}`,
+        hinweis: hinweisVergleich(a.a, a.b), beiRichtig: () => { luecke.textContent = a.loesung; },
+      });
+    } else if (a.art === "ordnen") {
+      f.append(el("div", { class: "frage", text: "Tippe die Brüche der Grösse nach an — den kleinsten zuerst." }));
+      LS.reihenfolge(ctx, {
+        reihe: a.reihe, inhalt: b => bruchEl(b), pfeile: true,
+        hinweis: (gewaehlt, erwartet) => `${gewaehlt} ist noch nicht dran. ${hinweisVergleich(gewaehlt, erwartet)}`,
+      });
+    } else if (a.art === "gleichwertig") {
+      f.append(el("div", { class: "frage", html: "Welcher Bruch ist <b>gleich gross</b>?" }), el("div", { class: "vergleich" }, bruchEl(a.vorgabe, "bruch-gross")));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: b => bruchEl(b), hinweis: HINWEIS_GLEICH, loesung: `${a.vorgabe} = ${a.richtig}`, lob: `Genau: ${a.vorgabe} = ${a.richtig}` });
+    }
+    if (ctx.nr === 0 && a.art === "legen") ctx.sag("Tippe Teile an, um sie zu färben. Nochmals tippen nimmt die Farbe weg.");
+  },
+});
+
+/** Teile antippen, bis der Bruch gefärbt ist; „Fertig“ prüft die Anzahl. */
+function legen(ctx, a) {
+  const f = ctx.flaeche;
+  const svg = modellEl(a.modell, a.teile, 0, true);
+  svg.classList.add("klickbar");
+  const anzeige = el("div", { class: "zaehler-anzeige", text: "0 Teile gefärbt" });
+  const loesungText = a.art === "erweitertLegen" ? `${a.bruch} = ${a.ziel}/${a.teile}: ${a.ziel} Teile färben` : `${a.ziel} von ${a.teile} Teilen färben`;
+  ctx.loesung(loesungText);
+  ctx.schritte(a.ziel + 1);
+  f.append(el("div", { class: "frage" }, "Färbe ", bruchEl(a.bruch), a.art === "erweitertLegen" ? " — der Streifen hat mehr Teile!" : ""), svg, anzeige);
+  const gefaerbt = () => svg.querySelectorAll(".teil.voll").length;
+  svg.addEventListener("click", e => {
+    const t = e.target.closest(".teil");
+    if (!t || ctx.vorbei()) return;
+    t.classList.toggle("voll");
+    LS.ton("tipp");
+    const k = gefaerbt();
+    anzeige.textContent = `${k} ${k === 1 ? "Teil" : "Teile"} gefärbt`;
+  });
+  const fertig = el("button", { type: "button", class: "knopf gruen", text: "Fertig ✓" });
+  fertig.addEventListener("click", () => {
+    if (ctx.vorbei()) return;
+    const k = gefaerbt();
+    if (k === a.ziel) { ctx.richtig(`Richtig: ${loesungText}`); return; }
+    const n = teile(a.bruch)[1];
+    const hinweis = a.art === "erweitertLegen"
+      ? `Du hast ${k} von ${a.teile} Teilen. Der Streifen hat ${a.teile / n}-mal so viele Teile wie der Nenner sagt — also brauchst du auch ${a.teile / n}-mal so viele gefärbte.`
+      : `Du hast ${k} ${k === 1 ? "Teil" : "Teile"} gefärbt. Der Zähler oben sagt, wie viele es sein sollen.`;
+    ctx.falsch(hinweis, loesungText);
+  });
+  f.append(el("div", { class: "fertig-zeile" }, fertig));
+}
+</script>
+</body>
+</html>

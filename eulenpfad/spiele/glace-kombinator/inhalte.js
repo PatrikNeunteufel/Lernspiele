@@ -1,4 +1,4 @@
-/* Inhalte des Glace-Kombinators (Lehrplan SG MA.3.B.2) — UNGEPRÜFT, bitte von Eltern oder
+/* Inhalte des Möglichkeiten-Finders (Lehrplan SG MA.3.B.2) — UNGEPRÜFT, bitte von Eltern oder
    Lehrperson prüfen lassen. Schweizer Schreibweise (ss statt ß).
 
    Inhaltslisten (Entscheid L4 a), der Prüfstand steht im Katalog (spiele/gemeinsam/katalog.js,

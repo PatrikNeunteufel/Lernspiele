@@ -3,7 +3,9 @@
    'klasse' ist die Basisklasse: Stufe 3 = ihr Lernziel, 1 eine Klasse tiefer, 5 eine höher, 6 Königsstufe;
    'lernziele' ordnet die Lernziele des Lernzielblatts den Stufen zu, in denen sie geübt werden.
    'zeiten': Vorgabezeit je Aufgabe in Sekunden für den zuschaltbaren Timer (im Profil anpassbar).
-   'reihenfolge': das Spiel beachtet die Profil-Einstellung „Teile geordnet / gemischt“. */
+   'reihenfolge': das Spiel beachtet die Profil-Einstellung „Teile geordnet / gemischt“.
+   'einstellungen': Einstellungen der Aufsicht, die das Spiel nutzt (LS.EINSTELLUNGEN); die Verwaltung
+   bietet sie je Spiel an (global / eigener Wert). */
 
 const THEMEN = [
   { id: "stellenwert", fach: "Mathe", name: "Stellenwert", titel: "Stellenwert / Ziffern und Zahlen", quelle: "Lernziele 4.2" },
@@ -30,6 +32,8 @@ const THEMEN = [
   { id: "englisch-saetze", fach: "Englisch", name: "Sätze", titel: "Englische Sätze bauen, fragen und verneinen", quelle: "Lehrplan SG FS1E.5.D.1" },
   { id: "englisch-hoeren", fach: "Englisch", name: "Hören und Buchstabieren", titel: "Englisch hören, verstehen und buchstabieren", quelle: "Lehrplan SG FS1E.1.A.1, FS1E.5.E.1" },
   { id: "kombinatorik", fach: "Mathe", name: "Kombinieren", titel: "Kombinationen und Anordnungen systematisch finden und zählen", quelle: "Lehrplan SG MA.3.B.2" },
+  { id: "brueche", fach: "Mathe", name: "Brüche", titel: "Brüche darstellen, vergleichen, ordnen, erweitern und kürzen", quelle: "Lehrplan SG MA.1.C.2, MA.1.A.2, MA.1.A.3" },
+  { id: "teiler", fach: "Mathe", name: "Teiler und Überschlag", titel: "Teilbarkeit, Teiler, Vielfache, Primzahlen und Überschlagen", quelle: "Lehrplan SG MA.1.A.1, MA.1.A.2, MA.1.A.4, MA.1.B.2" },
   { id: "informatik", fach: "Medien und Informatik", name: "Informatik", titel: "Anleitungen befolgen, Abläufe planen, Wiederholungen und Bedingungen", quelle: "Lehrplan SG MI.2.2" },
   { id: "wetter", fach: "NMG", name: "Wetter", titel: "Wetter, Jahreszeiten und Temperatur", quelle: "Lehrplan SG NMG.4.4" },
   { id: "verkehr", fach: "NMG", name: "Sicher unterwegs", titel: "Schulweg, Verkehrsregeln und Signale", quelle: "Lehrplan SG NMG.1.2" },
@@ -118,6 +122,26 @@ const SPIELE = [
     pfad: "spiele/rest-raetsel/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 30, s2: 25, s3: 25, s4: 40, s5: 45, s6: 56 },
     beschreibung: "Teilen mit Rest — und mit der Umkehraufgabe zeigen, dass es stimmt",
     lernziele: [{ lz: "MA.1.B.2", stufen: ALLE_STUFEN }] },
+  { id: "bruch-werkstatt", klasse: 5, neu: "LERN_Session7", bild: "🍕", name: "Bruch-Pizzeria", thema: "brueche", farbe: "var(--deko-2)",
+    pfad: "spiele/bruch-werkstatt/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 20, s4: 25, s5: 25, s6: 35 },
+    beschreibung: "Brüche an Pizza und Streifen ablesen, färben, vergleichen und ordnen — bis zum Erweitern und Kürzen",
+    lernziele: [{ lz: "MA.1.C.2", stufen: ["s1", "s2", "s3", "s4"] }, { lz: "MA.1.A.2", stufen: ["s4", "s5", "s6"] }, { lz: "MA.1.A.3", stufen: ["s5", "s6"] }] },
+  { id: "teiler-detektiv", klasse: 6, neu: "LERN_Session7", bild: "🐶", name: "Teiler-Spürnase", thema: "teiler", farbe: "var(--deko-5)",
+    pfad: "spiele/teiler-detektiv/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 15, s3: 40, s4: 45, s5: 20, s6: 30 },
+    beschreibung: "Teilbar oder nicht? Teiler, Vielfache und Primzahlen aufspüren",
+    lernziele: [{ lz: "MA.1.A.4", stufen: ["s1", "s2", "s5", "s6"] }, { lz: "MA.1.A.1", stufen: ["s2", "s3", "s4", "s5", "s6"] }, { lz: "MA.1.C.2", stufen: ["s6"] }] },
+  { id: "ueberschlags-blitz", klasse: 6, neu: "LERN_Session7", bild: "📡", name: "Überschlags-Radar", thema: "teiler", farbe: "var(--deko-1)",
+    pfad: "spiele/ueberschlags-blitz/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 30, s5: 20, s6: 35 },
+    beschreibung: "Ungefähr wie gross? Ergebnisse überschlagen, Stellenzahl bestimmen, falsche Rechnungen entlarven",
+    lernziele: [{ lz: "MA.1.A.2", stufen: ALLE_STUFEN }, { lz: "MA.1.B.2", stufen: ["s4", "s6"] }] },
+  { id: "mittelwert-waage", klasse: 5, neu: "LERN_Session7", bild: "🏰", name: "Mittelwert-Türme", thema: "daten", farbe: "var(--deko-3)",
+    pfad: "spiele/mittelwert-waage/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 45, s3: 40, s4: 50, s5: 50, s6: 60 },
+    beschreibung: "Säulen ausgleichen, Mittelwert, Maximum und Minimum bestimmen, fehlende Werte finden",
+    lernziele: [{ lz: "MA.3.C.1", stufen: ALLE_STUFEN }] },
+  { id: "velo-tabelle", klasse: 6, neu: "LERN_Session7", bild: "🚲", name: "Velo-Tabelle", thema: "zahlen", farbe: "var(--deko-6)",
+    pfad: "spiele/velo-tabelle/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 20, s2: 25, s3: 30, s4: 35, s5: 40, s6: 45 },
+    beschreibung: "Weg und Zeit in Wertetabellen: wie weit, wie lange, wer ist schneller?",
+    lernziele: [{ lz: "MA.3.A.3", stufen: ALLE_STUFEN }, { lz: "NMG.3.1", stufen: ["s5"] }] },
   { id: "jahreskreis", klasse: 2, bild: "📅", name: "Jahreskreis-Ordner", thema: "zeit", farbe: "var(--deko-5)",
     pfad: "spiele/jahreskreis/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 20, s5: 25, s6: 31 },
     beschreibung: "Gestern, morgen, Wochentage, Monate und Jahreszeiten",
@@ -127,7 +151,7 @@ const SPIELE = [
     beschreibung: "Die Uhr lesen — von halb 4 bis auf die Minute, und Zeitdauern rechnen",
     lernziele: [{ lz: "MA.3.A.2", stufen: ALLE_STUFEN }, { lz: "NMG.9.1", stufen: ["s1", "s2"] }] },
   { id: "kiosk-kasse", klasse: 2, bild: "🏪", name: "Kiosk-Kasse", thema: "groessen", farbe: "var(--deko-3)",
-    pfad: "spiele/kiosk-kasse/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 30, s2: 35, s3: 40, s4: 40, s5: 60, s6: 75 },
+    pfad: "spiele/kiosk-kasse/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], zeiten: { s1: 30, s2: 35, s3: 40, s4: 40, s5: 60, s6: 75 },
     beschreibung: "Mit Franken und Rappen bezahlen, zählen und Rückgeld geben",
     lernziele: [{ lz: "MA.3.A.2", stufen: ALLE_STUFEN }] },
   { id: "masse-umwandler", klasse: 3, bild: "📏", name: "Masse-Umwandler", thema: "groessen", farbe: "var(--deko-5)",
@@ -448,7 +472,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "MA.3.C.1", stufen: ALLE_STUFEN }] },
   { id: "preis-tabelle", klasse: 4, neu: "LERN_Session3", bild: "🧾", name: "Preis-Tabelle", thema: "zahlen", farbe: "var(--deko-3)",
-    pfad: "spiele/preis-tabelle/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 20, s2: 20, s3: 30, s4: 40, s5: 50, s6: 63 },
+    pfad: "spiele/preis-tabelle/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], zeiten: { s1: 20, s2: 20, s3: 30, s4: 40, s5: 50, s6: 63 },
     beschreibung: "Preistabellen füllen: 1 Stück kostet 2 Fr. 40 Rp. — was kosten 5? Auch rückwärts",
     listen: {
       "stueckware": { name: "Waren mit Stückpreis (Gipfeli, Heft, Ball)" },
@@ -571,9 +595,9 @@ const SPIELE = [
     pfad: "spiele/zielzahl-jagd/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 40, s2: 50, s3: 60, s4: 75, s5: 90, s6: 120 },
     beschreibung: "Aus Zahlenkarten mit +, −, ×, : die Zielzahl bilden — jeder richtige Weg gilt",
     lernziele: [{ lz: "MA.1.B.1", stufen: ALLE_STUFEN }] },
-  { id: "glace-kombinator", klasse: 4, neu: "LERN_Session3", bild: "🍨", name: "Glace-Kombinator", thema: "kombinatorik", farbe: "var(--deko-2)",
+  { id: "glace-kombinator", klasse: 4, neu: "LERN_Session3", bild: "🧩", name: "Möglichkeiten-Finder", thema: "kombinatorik", farbe: "var(--deko-2)",
     pfad: "spiele/glace-kombinator/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 40, s2: 50, s3: 50, s4: 60, s5: 50, s6: 60 },
-    beschreibung: "Alle Glace mit zwei Kugeln finden, Kleider kombinieren — und zählen, wie viele es gibt",
+    beschreibung: "Glace, Kleider und Türme: alle Möglichkeiten systematisch finden — und zählen, wie viele es gibt",
     listen: {
       "sorten": { name: "Glacesorten (Name, Farbe, Buchstabe auf der Kugel)" },
       "kleider": { name: "Kleidungsstücke in Gruppen (Oberteile, Hosen, Schuhe, Kopfbedeckungen)" },
@@ -690,9 +714,9 @@ const LERNZIELE = [
   // Kompetenzen aus dem Lehrplan Volksschule SG (geprüft an sg.lehrplan.ch, 2026-10-31)
   { lz: "MA.1.A.3", niveau: "Lehrplan SG", text: "Einmaleins und Kopfrechnen: ergänzen, addieren, subtrahieren, multiplizieren, dividieren" },
   { lz: "MA.1.A.1", niveau: "Lehrplan SG", text: "Anzahlen und Zahlen vergleichen: grösser, kleiner, <, >" },
-  { lz: "MA.1.A.2", niveau: "Lehrplan SG", text: "Zahlen ordnen, auf dem Zahlenstrahl zeigen und ablesen" },
+  { lz: "MA.1.A.2", niveau: "Lehrplan SG", text: "Zahlen und Brüche ordnen, auf dem Zahlenstrahl zeigen und ablesen, Ergebnisse überschlagen" },
   { lz: "MA.1.A.4", niveau: "Lehrplan SG", text: "Rechengesetze und Rechentricks nutzen; auf Zehner, Hunderter und Tausender runden" },
-  { lz: "MA.1.C.2", niveau: "Lehrplan SG", text: "Rechnungen veranschaulichen: Stellenwert legen, Malkreuz" },
+  { lz: "MA.1.C.2", niveau: "Lehrplan SG", text: "Rechnungen und Brüche veranschaulichen: Stellenwert legen, Malkreuz, Kreis- und Rechteckmodell" },
   { lz: "MA.1.B.1", niveau: "Lehrplan SG", text: "Zahlenmauern und offene Aufgaben: Summen, Produkte und Operationen erforschen" },
   { lz: "MA.1.B.2", niveau: "Lehrplan SG", text: "Division mit Rest mit der Umkehraufgabe begründen" },
   { lz: "MA.2.A.2", niveau: "Lehrplan SG", text: "Figuren im Raster spiegeln, symmetrisch ergänzen und verschieben" },
@@ -712,7 +736,8 @@ const LERNZIELE = [
   { lz: "NMG.2.4", niveau: "Lehrplan SG", text: "Tiere ordnen: Wild-, Nutz-, Heimtiere; Tiergruppen und ihre Merkmale" },
   { lz: "MU.6.A.1", niveau: "Lehrplan SG", text: "Hoch und tief, Tonfolgen, Halb- und Ganztöne; Taktarten" },
   { lz: "MU.6.B.1", niveau: "Lehrplan SG", text: "Notenwerte und Rhythmen lesen; Stammtöne benennen" },
-  { lz: "MA.3.A.3", niveau: "Lehrplan SG", text: "Zahlenfolgen und Wertetabellen beschreiben und weiterführen" },
+  { lz: "MA.3.A.3", niveau: "Lehrplan SG", text: "Zahlenfolgen und Wertetabellen beschreiben und weiterführen, proportional rechnen" },
+  { lz: "NMG.3.1", niveau: "Lehrplan SG", text: "Bewegungen beschreiben, Zeiten und Strecken messen, Geschwindigkeiten vergleichen" },
   { lz: "MA.2.A.1", niveau: "Lehrplan SG", text: "Figuren und Körper benennen; Ecke, Kante, Fläche; Symmetrie" },
   { lz: "MA.2.A.3", niveau: "Lehrplan SG", text: "Flächen vergleichen und auszählen; Umfang" },
   { lz: "MA.3.C.2", niveau: "Lehrplan SG", text: "Rechengeschichten: Rechnungen notieren und lösen" },
@@ -726,7 +751,7 @@ const LERNZIELE = [
   { lz: "NMG.5.2", niveau: "Lehrplan SG", text: "Magnete und einfache Stromkreise" },
   { lz: "MU.4.C.1", niveau: "Lehrplan SG", text: "Instrumente benennen, unterscheiden, Instrumentengruppen" },
   // LERN_Session3 — Codes aus docs/spielideen/lehrplan_sg_spielideen.md (gelesen an sg.lehrplan.ch, LERN_Session1)
-  { lz: "MA.3.C.1", niveau: "Lehrplan SG", text: "Daten in Strichlisten, Tabellen und Säulendiagrammen lesen und darstellen" },
+  { lz: "MA.3.C.1", niveau: "Lehrplan SG", text: "Daten in Strichlisten, Tabellen und Säulendiagrammen lesen und darstellen, Mittelwert bestimmen" },
   { lz: "NMG.8.4", niveau: "Lehrplan SG", text: "Himmelsrichtungen kennen, sich auf Plänen und Karten orientieren" },
   // LERN_Session3, Englisch — Codes aus docs/spielideen/lehrplan_sg_spielideen.md
   { lz: "FS1E.2.B.1", niveau: "Lehrplan SG", text: "Englisch lesen: Parallelwörter, Namen und Zahlen erkennen" },

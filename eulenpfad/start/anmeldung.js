@@ -53,7 +53,8 @@ function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
     zweit.addEventListener("keydown", e => { if (e.key === "Enter") los(); });
     karte.append(
       el("h2", { text: `${LS.spielerName(name)}: ${ohnePin ? "PIN festlegen" : "PIN eingeben"}` }),
-      ohnePin ? el("p", { class: "leise-text", style: "text-align:center", text: "Diese Aufsicht hat noch keine PIN. Lege jetzt eine fest (4 bis 6 Ziffern)." }) : null,
+      // DOM-append schreibt null als Text hin (anders als LS.el) — deshalb leer statt null
+      ...(ohnePin ? [el("p", { class: "leise-text", style: "text-align:center", text: "Diese Aufsicht hat noch keine PIN. Lege jetzt eine fest (4 bis 6 Ziffern)." })] : []),
       el("div", { class: "pin-zeile" }, feld, ohnePin ? zweit : null,
         el("button", { type: "button", class: "knopf gruen klein", text: "Anmelden", onclick: los }),
         el("button", { type: "button", class: "knopf hell klein", text: "Zurück", onclick: uebersicht })),

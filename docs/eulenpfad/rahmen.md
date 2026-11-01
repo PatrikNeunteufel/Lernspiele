@@ -131,6 +131,7 @@ LS.spiel({
 | `ctx.kennung(wert)` | Woran die Aufgabe zu erkennen ist, wenn man es nicht sieht (Hör-Aufgaben: die Melodie). Sonst nimmt der Rahmen Text, Bilder und Lösung. |
 | `ctx.schritte(n)` | Die Aufgabe braucht n Handgriffe mehr: Tipps, Ziffern samt OK, Züge, so viele wie mindestens nötig sind. Aufrufe zählen zusammen. Die Bausteine zählen ihre selbst (`auswahl` und `koerbe` 1, `reihenfolge` je Teil 1); für die Tastatur `LS.tippSchritte(wert)`. **Pflicht in Endlos-Stufen** ✔, daraus folgt der Boden der Endlos-Zeit (Abschnitt 7). |
 | `ctx.serie(name, wert)` | Ein zufällig gewähltes Merkmal, das das Kind als Muster erkennen kann: Richtung oder Aufgabenart, oder die richtige Antwort bei höchstens drei festen Antworten (ja/nein, <, =, >, auf/ab). **Serienbremse** (Vorgabe Patrik 2026-11-01): Der Rahmen zieht neu, statt dasselbe Merkmal öfter als `LS.SERIE_MAX` = 3-mal hintereinander zu stellen (bis zu 40 Versuche). Nicht für Zahlenwerte oder Knopfpositionen, und nur in Stufen, die wirklich mehrere Werte haben ✔. |
+| `ctx.vorgehen(art, wert)` | Wie das Kind die Aufgabe angegangen ist, vor `ctx.richtig()` gemeldet (LERN_Session7). Landet in `aufgabenZeiten[i].vorgehen` und in der Statistik, Karte „Vorgehen“ (Punkte der letzten 12 Aufgaben). Arten und Werte (vom besten zum schwächsten, Ton gut/mittel/schwach) stehen in `AUSWERTUNG.VORGEHEN`: `systematik` (Möglichkeiten-Finder: Zählwerk, geordnet, kreuz und quer, mit Hilfe), `teilerpaare` (Teiler-Spürnase: in Paaren, der Grösse nach, durcheinander), `ausgleichen` (Mittelwert-Türme: ohne Umweg, mit Umwegen). |
 | `ctx.wartezeit(s)` | Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne). Zählt zum Boden der Endlos-Zeit. |
 | `ctx.sag(text, art?)` | Die Eule spricht (`art`: `"gut"` oder `"hinweis"`). |
 
@@ -160,6 +161,16 @@ auf. Die Optionen sind in `spiel.js` beschrieben.
 Hilfsfunktionen: `LS.el` (Element bauen), `LS.zahlText` (Schulschreibweise, „30 400“),
 `LS.zerlege`, `LS.zufall`, `LS.waehle`, `LS.mische`, `LS.tippSchritte(wert)` (Handgriffe, um eine Zahl
 einzutippen: je Ziffer einer, dazu OK).
+
+**Dezimalzahlen** schreibt ein Spiel nur mit `LS.dezimalText(x, stellen?)` („30 400.5“ oder
+„30 400,5“), **Geldbeträge** nur mit `LS.geldText(rappen)` (Entscheid C1 a): bis zur 3. Klasse
+„25 Fr. 60 Rp.“, ab der 4. Klasse „25.60 Fr.“; massgebend ist die Klasse der laufenden Stufe
+(`LS.klasseDerStufe`, Königsstufe wie Stufe 5), ganze Franken immer „13 Fr.“. Das Dezimalzeichen
+stellt die Aufsicht in der Verwaltung ein (Untertab Einstellungen, Standard Punkt wie im Lehrplan):
+global und je Spiel („wie global“, Punkt, Komma). Ein Spiel, das die Einstellung nutzt, trägt im
+Katalog `einstellungen: ["dezimal"]`; nur diese Spiele erscheinen unter „Je Spiel“.
+`LS.einstellung(name)` liest im Spiel den Wert des Spiels, sonst den globalen, sonst den Standard.
+Später setzt eine Lehrperson sie je Klasse ([konzept_klasseneinstellungen.md](konzept_klasseneinstellungen.md)).
 
 ### 4.4 Pflichtfunktionen für die Prüfung
 
@@ -227,7 +238,7 @@ zu prüfen hat (Präzisierung Patrik 2026-10-31).
 
 **Startseite** (`index.html`, Code in `start/`): Ohne Anmeldung zeigt sie die Anmeldung, danach
 die Tabs Spiele, Profil, Statistik und, nur für die Aufsicht, Verwaltung mit den Untertabs Konten,
-Freigabe und Abgleich. Der Tab steht in der Adresse (`#statistik`, Untertab `#verwaltung/abgleich`;
+Freigabe, Abgleich, Einstellungen (für alle auf diesem Gerät, „↺ Alles auf Standard“) und Entwicklung. Der Tab steht in der Adresse (`#statistik`, Untertab `#verwaltung/abgleich`;
 ohne Untertab Konten). `#anmelden` meldet ab und führt zur Anmeldung; dorthin verweist auch
 „wechseln“ im Spiel. Die **Suche** im Tab Spiele und in der Freigabe (Entscheid SU1 a, `LS.suche`) ordnet
 nach Relevanz: Feldgewichte Name 6, Lernziel-Kürzel 4, Beschreibung 3, Inhaltslisten 2, Thema 1;

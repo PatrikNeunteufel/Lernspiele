@@ -483,5 +483,26 @@ if (opt.suche !== 0 && (!nurSpiele.length || nurSpiele.includes("suche"))) {
   }
 }
 
+// Namen der Spiele (Hinweis Patrik, LERN_Session7): kein Name doppelt (Fehler); dasselbe Grundwort
+// am Ende („…-Werkstatt“, „…-Detektiv“) in mehr als NAMEN_GRUNDWORT_MAX Spielen ist ein Hinweis.
+const NAMEN_GRUNDWORT_MAX = 2;
+if (opt.namen !== 0 && !nurSpiele.length) {
+  const kat = vm.createContext({ LS: { SKALA: [] } });
+  vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", "katalog.js"), "utf8") + ";this.SPIELE = SPIELE;", kat);
+  console.log("\nNamen der Spiele:\n");
+  const namen = new Map();
+  const grundwoerter = new Map();
+  for (const s of kat.SPIELE) {
+    const n = s.name.trim().toLowerCase();
+    namen.set(n, [...(namen.get(n) || []), s.id]);
+    const teile = s.name.split(/[-\s]+/);
+    if (teile.length > 1) { const g = teile[teile.length - 1]; grundwoerter.set(g, [...(grundwoerter.get(g) || []), s.name]); }
+  }
+  let gemeldet = 0;
+  for (const [n, ids] of namen) if (ids.length > 1) { console.log(`    FEHLER  Name „${n}“ doppelt: ${ids.join(", ")}`); fehlerZahl++; gemeldet++; }
+  for (const [g, liste] of grundwoerter) if (liste.length > NAMEN_GRUNDWORT_MAX) { console.log(`    hinweis Grundwort „${g}“ in ${liste.length} Namen: ${liste.join(", ")}`); gemeldet++; }
+  if (!gemeldet) console.log(`✓ ${kat.SPIELE.length} Namen, keiner doppelt, kein Grundwort öfter als ${NAMEN_GRUNDWORT_MAX}-mal`);
+}
+
 console.log(`\n${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`);
 process.exitCode = fehlerZahl ? 1 : 0;

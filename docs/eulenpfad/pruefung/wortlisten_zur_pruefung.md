@@ -2106,7 +2106,7 @@ Die Einzelwörter kommen aus Word-Match (Teil 9).
 | box | on | ☐ |
 | box | next to | ☐ |
 
-## 31. Glace-Kombinator (Lehrplan SG MA.3.B.2) — Sorten
+## 31. Möglichkeiten-Finder (Lehrplan SG MA.3.B.2) — Sorten
 
 | Sorte | Farbe | Buchstabe | ☐ |
 |---|---|---|---|
