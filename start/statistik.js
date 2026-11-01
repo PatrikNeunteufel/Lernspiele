@@ -225,16 +225,10 @@ function zeichneStatistik(box, neu) {
   datei.addEventListener("change", async () => {
     const f = datei.files[0];
     if (!f) return;
-    let daten;
-    try {
-      daten = JSON.parse(await f.text());
-      if (!daten.profile || !Array.isArray(daten.protokoll)) throw new Error("Format");
-    } catch { alert("Diese Datei kann ich nicht lesen."); return; } finally { datei.value = ""; }
     // Zusammenführen: Was auf diesem Gerät gespielt wurde, bleibt; dazu kommt, was nur in der Datei steht.
-    const { runden: r, kinder: k } = LS.zusammenfuehren(daten);
-    alert(r || k
-      ? `Eingelesen: ${r} neue Runde${r === 1 ? "" : "n"}${k ? `, ${k} neue${k === 1 ? "s Kind" : " Kinder"}` : ""}. Alles andere auf diesem Gerät bleibt.`
-      : "Alles aus der Datei war auf diesem Gerät schon vorhanden.");
+    let r;
+    try { r = await LS.abgleich.dateiEinlesen(f); } catch { alert("Diese Datei kann ich nicht lesen."); return; } finally { datei.value = ""; }
+    alert(LS.abgleich.ergebnisText(r));
     neu();
   });
   const gespielt = [...new Set(LS.protokoll().filter(e => e.name === gewaehlt).map(e => e.spiel))]
@@ -244,7 +238,7 @@ function zeichneStatistik(box, neu) {
     ...gespielt.map(s => el("option", { value: s.id, text: `${s.bild} ${s.name}` })));
   seite.append(karte(
     el("h2", { text: "Daten" }),
-    el("p", { class: "leise-text", style: "margin-top:0", text: "Alles bleibt in diesem Browser auf diesem Gerät. Spielt ein Kind auf mehreren Geräten: auf dem einen sichern, die Datei hinüberschicken und auf dem anderen einlesen — die Runden werden zusammengeführt, nichts geht verloren." + (zeigeTest ? "" : " Aufsicht-Konten und Testrunden werden nur mitgesichert, wenn die Testrunden eingeblendet sind.") }),
+    el("p", { class: "leise-text", style: "margin-top:0", text: "Alles bleibt in diesem Browser auf diesem Gerät. Spielt ein Kind auf mehreren Geräten: auf dem einen sichern, die Datei hinüberschicken und auf dem anderen einlesen — die Runden werden zusammengeführt, nichts geht verloren. Von selbst geht es mit einem Abgleich-Ordner (Verwaltung)." + (zeigeTest ? "" : " Aufsicht-Konten und Testrunden werden nur mitgesichert, wenn die Testrunden eingeblendet sind.") }),
     zeile(
       knopf("💾 Alle sichern", () => sichern(LS.spielerListe().filter(sichtbarerSpieler))),
       knopf(`💾 Nur ${gewaehlt} sichern`, () => sichern([gewaehlt])),

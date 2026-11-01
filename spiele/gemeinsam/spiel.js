@@ -61,6 +61,10 @@ const LS = (() => {
 
   // ---------- Speicher (nur im Browser, darf fehlen) ----------
 
+  // Wer wissen will, dass etwas gespeichert wurde (der Abgleich zwischen Geräten, abgleich.js).
+  const aenderungsHoerer = [];
+  const beiAenderung = f => aenderungsHoerer.push(f);
+
   function lies(schluessel, ersatz) {
     try {
       const v = localStorage.getItem("lernspiele:" + schluessel);
@@ -70,6 +74,7 @@ const LS = (() => {
 
   function schreibe(schluessel, wert) {
     try { localStorage.setItem("lernspiele:" + schluessel, JSON.stringify(wert)); } catch { /* egal */ }
+    for (const f of aenderungsHoerer) try { f(schluessel); } catch { /* ein Hörer darf das Speichern nicht stören */ }
   }
 
   // ---------- Spieler, Profil und Protokoll (nur auf diesem Gerät) ----------
@@ -86,6 +91,8 @@ const LS = (() => {
   //   favoriten: [<spiel-id>], endlosAn: [<spiel-id>] (Karte startet Endlos-Runden), ansicht: "kacheln" | "kompakt",
   //   zu: [<Gruppen-Id>] (zugeklappt)
   //   mix: zuletzt gewählte Einstellungen des Zufallsmix (mix/mix.js) oder null
+  //   meineKlasse: Filter „🎒 Meine Klasse“ im Tab Spiele (K2 a); fehlt = an
+  //   geaendert: { <feld>: ISO, angelegt: ISO } — setzt speichereProfil; beim Abgleich gewinnt je Feld der jüngere Stand
   const LEERES_PROFIL = {
     alter: null, klasse: null, fokus: [], rolle: "kind",
     reihenfolge: { global: "stufe", spiele: {} },
@@ -217,9 +224,16 @@ const LS = (() => {
     return true;
   }
 
+  /**
+   * Profilfelder ändern. Jedes geänderte Feld bekommt einen Zeitstempel (geaendert: { feld: ISO }), ein
+   * neues Profil dazu „angelegt“: Beim Abgleich zwischen Geräten gewinnt je Feld der jüngere Stand.
+   */
   function speichereProfil(name, daten) {
     const alle = profile();
-    alle[name] = { ...profil(name), ...daten };
+    const jetzt = new Date().toISOString();
+    const geaendert = { ...(alle[name]?.geaendert || {}), ...(alle[name] ? {} : { angelegt: jetzt }) };
+    for (const k of Object.keys(daten)) geaendert[k] = jetzt;
+    alle[name] = { ...profil(name), ...daten, geaendert };
     schreibe("profile", alle);
   }
 
@@ -243,6 +257,8 @@ const LS = (() => {
   function setzeFreigabe(art, schluessel, wert) {
     const f = freigabe();
     if (wert === null) delete f[art][schluessel]; else f[art][schluessel] = wert;
+    // Stand vor der Freigabe schreiben: Der Abgleich nimmt die Freigabe des Geräts mit dem jüngsten Stand.
+    schreibe("freigabeStand", new Date().toISOString());
     schreibe("freigabe", f);
   }
   // Nutzt ein Spiel die Liste eines anderen (dieselben Wörter, dieselben Sätze), steht im Katalog
@@ -286,7 +302,19 @@ const LS = (() => {
     || spielListen(spielId).some(l => !l.zusatz && listeFrei(spielId, l.id)));
   const spielSichtbar = spielId => aufsichtAngemeldet() || fuerKinderSichtbar(spielId);
 
+  // Löschvermerke, damit der Abgleich Gelöschtes nicht von einem anderen Gerät zurückholt:
+  // lernspiele:geloescht = { spieler: { <name>: ISO }, runden: [{ name, spiel (null = alle), bis: ISO }] }.
+  // Ein Vermerk entfernt alles, was bis zu seinem Zeitpunkt entstand; Späteres (neu angelegt, neu gespielt) bleibt.
+  const geloescht = () => ({ spieler: {}, runden: [], ...lies("geloescht", {}) });
+  const rundeGeloescht = (e, g) => (g.spieler[e.name] && e.zeit <= g.spieler[e.name])
+    || g.runden.some(r => r.name === e.name && (!r.spiel || r.spiel === e.spiel) && e.zeit <= r.bis);
+  /** Jüngster Zeitstempel eines Profils (leer bei Profilen von vor LERN_Session6). */
+  const profilStand = p => Object.values(p?.geaendert || {}).reduce((a, b) => (b > a ? b : a), "");
+
   function loescheSpieler(name) {
+    const g = geloescht();
+    g.spieler[name] = new Date().toISOString();
+    schreibe("geloescht", g);
     const alle = profile();
     delete alle[name];
     schreibe("profile", alle);
@@ -298,33 +326,86 @@ const LS = (() => {
   /** Spielstand zurücksetzen: die Runden eines Kindes löschen — alle oder nur die eines Spiels.
       Profil, Klasse, Fokus und Timer bleiben. */
   function loescheRunden(name, spielId = null) {
+    const g = geloescht();
+    g.runden.push({ name, spiel: spielId, bis: new Date().toISOString() });
+    schreibe("geloescht", g);
     const bleibt = e => e.name !== name || (spielId && e.spiel !== spielId);
     schreibe("protokoll", protokoll().filter(bleibt));
     schreibe("rekorde", rekorde().filter(bleibt));
   }
 
   /**
-   * Gesicherte Daten eines anderen Geräts dazunehmen, ohne etwas zu verlieren: Runden, die schon da
-   * sind (gleiches Kind, Zeit, Spiel, Stufe), zählen nur einmal; neue kommen dazu. Unbekannte Kinder
-   * werden mit ihrem Profil angelegt, vorhandene Profile bleiben. Gibt die Anzahl neuer Runden und Kinder zurück.
+   * Daten eines anderen Geräts dazunehmen (Sichern/Einlesen und Abgleich-Ordner, Entscheid S1 a):
+   * - Runden und Rekorde: gleiche Runde (Kind, Zeit, Spiel, Stufe) zählt einmal. Bei Rekorden gilt der
+   *   höhere Stand — ein Zwischenstand mitten in der Serie wird so vom Endstand ersetzt.
+   * - Profile: unbekannte kommen dazu; bei bekannten gewinnt je Feld der jüngere Zeitstempel. Ohne
+   *   Zeitstempel (ältere Dateien) bleibt das Profil auf diesem Gerät, wie es ist. Die PIN reist nie mit.
+   * - Löschvermerke beider Seiten gelten zusammen; die Freigabe kommt vom Gerät mit dem jüngsten Stand.
+   * Gibt zurück, wie viel neu kam: { runden, kinder, rekorde, profile, freigabe }.
    */
   function zusammenfuehren(daten) {
     const schluessel = e => `${e.name}|${e.zeit}|${e.spiel}|${e.stufe}`;
+    const fremd = daten.geloescht || {};
+    const g = geloescht();
+    for (const [n, t] of Object.entries(fremd.spieler || {})) if (!(g.spieler[n] >= t)) g.spieler[n] = t;
+    const vermerk = r => `${r.name}|${r.spiel}|${r.bis}`;
+    const bekannteVermerke = new Set(g.runden.map(vermerk));
+    g.runden.push(...(fremd.runden || []).filter(r => r && r.name && r.bis && !bekannteVermerke.has(vermerk(r))));
+    schreibe("geloescht", g);
+    const lebt = e => e && e.name && e.zeit && !rundeGeloescht(e, g);
+
     const runden = protokoll();
     const bekannt = new Set(runden.map(schluessel));
-    const neu = daten.protokoll.filter(e => e && e.name && e.zeit && !bekannt.has(schluessel(e)));
-    schreibe("protokoll", [...runden, ...neu].sort((a, b) => (a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0)));
-    // Endlos-Rekorde ebenso: gleiche Runde (Kind, Zeit, Spiel, Stufe) zählt einmal.
-    const alteRekorde = rekorde();
-    const bekannteRekorde = new Set(alteRekorde.map(schluessel));
-    schreibe("rekorde", [...alteRekorde, ...(daten.rekorde || []).filter(e => e && e.name && e.zeit && !bekannteRekorde.has(schluessel(e)))]);
+    const neu = (daten.protokoll || []).filter(e => lebt(e) && !bekannt.has(schluessel(e)));
+    schreibe("protokoll", [...runden, ...neu].filter(lebt).sort((a, b) => (a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0)));
+
+    const rek = new Map(rekorde().filter(lebt).map(e => [schluessel(e), e]));
+    let neueRekorde = 0;
+    for (const e of (daten.rekorde || []).filter(lebt)) {
+      const da = rek.get(schluessel(e));
+      if (!da || (e.punkte || 0) > (da.punkte || 0)) { rek.set(schluessel(e), e); neueRekorde++; }
+    }
+    schreibe("rekorde", [...rek.values()]);
+
     const alle = profile();
-    const neueKinder = Object.keys(daten.profile).filter(n => !(n in alle));
-    for (const n of neueKinder) alle[n] = { ...LEERES_PROFIL, ...daten.profile[n] };
+    const neueKinder = [];
+    let geaenderteProfile = 0;
+    for (const [n, fp] of Object.entries(daten.profile || {})) {
+      if (!fp) continue;
+      const { pin, ...rein } = fp;
+      if (g.spieler[n] && profilStand(rein) <= g.spieler[n]) continue;
+      if (!(n in alle)) { alle[n] = { ...LEERES_PROFIL, ...rein }; neueKinder.push(n); continue; }
+      const da = alle[n];
+      const zeit = { ...(da.geaendert || {}) };
+      let anders = false;
+      for (const [k, t] of Object.entries(rein.geaendert || {})) {
+        if (!(t > (zeit[k] || ""))) continue;
+        if (k in rein) da[k] = rein[k];
+        zeit[k] = t;
+        anders = true;
+      }
+      if (anders) { da.geaendert = zeit; geaenderteProfile++; }
+    }
+    // Gelöschte Kinder auch hier entfernen, ausser sie wurden danach neu angelegt oder geändert.
+    for (const [n, t] of Object.entries(g.spieler)) if (n in alle && profilStand(alle[n]) <= t) delete alle[n];
     // Kinder, die nur in Runden vorkommen, bekommen ein leeres Profil
     for (const e of neu) if (!(e.name in alle)) { alle[e.name] = { ...LEERES_PROFIL }; neueKinder.push(e.name); }
     schreibe("profile", alle);
-    return { runden: neu.length, kinder: neueKinder.length };
+
+    let neueFreigabe = false;
+    if (daten.freigabe && daten.freigabeStand && daten.freigabeStand > lies("freigabeStand", "")) {
+      schreibe("freigabeStand", daten.freigabeStand);
+      schreibe("freigabe", daten.freigabe);
+      neueFreigabe = true;
+    }
+    return { runden: neu.length, kinder: neueKinder.length, rekorde: neueRekorde, profile: geaenderteProfile, freigabe: neueFreigabe };
+  }
+
+  /** Alles, was ein Gerät für den Abgleich weitergibt: wie Sichern, aber vollständig und ohne PIN. */
+  function abgleichDaten() {
+    const ohnePin = Object.fromEntries(Object.entries(profile()).map(([n, { pin, ...rest }]) => [n, rest]));
+    return { version: 2, gesichert: new Date().toISOString(), profile: ohnePin, protokoll: protokoll(), rekorde: rekorde(),
+      geloescht: geloescht(), freigabe: lies("freigabe", null), freigabeStand: lies("freigabeStand", null) };
   }
 
   /** Basisklasse eines Spiels aus dem Katalog (null, wenn die Seite den Katalog nicht geladen hat). */
@@ -848,6 +929,8 @@ const LS = (() => {
     const buehne = document.querySelector(".buehne");
     const stufenListe = SKALA.filter(s => def.stufen[s.id]).map(s => ({ ...s, text: def.stufen[s.id] }));
     tonSchalter(document.querySelector(".kopf .ton"));
+    // Kam beim Abgleich etwas von einem anderen Gerät dazu: die Stufenwahl mit Sternen und Ranglisten neu zeichnen.
+    addEventListener("lernspiele:abgeglichen", () => { if (buehne.querySelector(".stufen")) stufenwahl(); });
 
     // Angemeldet wird nur auf der Startseite (Entscheid L1 a); dorthin führt auch „wechseln“.
     const START = "../../index.html";
@@ -1430,6 +1513,7 @@ const LS = (() => {
     STELLEN, SKALA, zahlText, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
+    beiAenderung, abgleichDaten,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
     freigabe, spielFrei, spielZuPruefen, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, loescheRunden, zusammenfuehren,

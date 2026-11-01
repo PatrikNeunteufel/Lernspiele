@@ -45,7 +45,9 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
   (Entscheid LERN-5 b, 2026-10-31): Profil (Name, Alter, Klasse, Fokus-Lernziele) und je Runde
   ein Protokolleintrag (Spiel, Stufe, Sterne, Fehler, Dauer, falsch gelöste Aufgaben). Nichts
   wird an einen Server geschickt; Sichern/Einlesen als JSON-Datei nur auf Knopfdruck in der
-  Statistik. Keine weiteren Angaben (Nachname, Schule, Foto) erfassen.
+  Statistik. Ausnahme Abgleich (Entscheid S1 a, 2026-11-01): Daten verlassen den Browser nur in
+  einen Ordner, den die Aufsicht wählt (Netzwerkordner oder Ordner eines Cloud-Dienstes), ohne PIN.
+  Keine weiteren Angaben (Nachname, Schule, Foto) erfassen.
 
 ## Projekt-Steckbrief
 <!-- Kopplungsblock für die globalen ~/.claude-Skills. Format: ~/.claude/docs/steckbrief.template.md -->

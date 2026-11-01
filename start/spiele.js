@@ -41,6 +41,12 @@ function zeichneSpiele(box, neu) {
     chip("Alle", filter.fach === "alle", setze("fach", "alle")),
     ...FAECHER.map(f => chip(f, filter.fach === f, setze("fach", f))));
   if (fokus.length) faecher.append(chip("⭐ Mein Fokus", filter.fokus, setze("fokus", !filter.fokus)));
+  // Meine Klasse (Entscheide K1 a, K2 a, LERN_Session6): nur Spiele mit einer Stufe genau für die Klasse
+  // des Kindes, also Basisklasse ±1. Für Kinder mit Klasse im Profil, vorgegeben an; das Kind darf ihn
+  // ausschalten (Profil-Feld meineKlasse, je Kind statt je Browser).
+  const klasse = Number(p.klasse) || null;
+  const nurKlasse = !aufsicht && klasse && p.meineKlasse !== false;
+  if (!aufsicht && klasse) faecher.append(chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), `${klasse}. Klasse`));
   const zeilen = [faecher];
   if (filter.fach !== "alle") {
     zeilen.push(el("div", { class: "filter-zeile" }, el("span", { text: "Thema" }),
@@ -61,7 +67,8 @@ function zeichneSpiele(box, neu) {
     && (filter.fach === "alle" || THEMEN.find(t => t.id === s.thema)?.fach === filter.fach)
     && (filter.thema === "alle" || s.thema === filter.thema)
     && (filter.stufe === "alle" || s.stufen.includes(filter.stufe))
-    && (!filter.fokus || s.lernziele.some(l => fokus.includes(l.lz)));
+    && (!filter.fokus || s.lernziele.some(l => fokus.includes(l.lz)))
+    && (!nurKlasse || Math.abs(s.klasse - klasse) <= 1);
   const imFokus = s => s.lernziele.some(l => fokus.includes(l.lz));
   // Fokus-Spiele zuerst, sonst Katalog-Reihenfolge.
   const auswahl = SPIELE.filter(passt).sort((a, b) => Number(imFokus(b)) - Number(imFokus(a)));

@@ -221,7 +221,10 @@ was nichts mehr zu prüfen hat (Präzisierung Patrik 2026-10-31).
 **Startseite** (`index.html`, Code in `start/`): Ohne Anmeldung zeigt sie die Anmeldung, danach
 die Tabs Spiele, Profil, Statistik und, nur für die Aufsicht, Verwaltung. Der Tab steht in der
 Adresse (`#statistik`). `#anmelden` meldet ab und führt zur Anmeldung; dorthin verweist auch
-„wechseln“ im Spiel. Auf jeder Spielkarte schalten ⏱ (Timer dieses Spiels, dieselbe Einstellung wie
+„wechseln“ im Spiel. Der Filter „🎒 Meine Klasse“ (Entscheide K1 a, K2 a) zeigt einem Kind mit
+Klasse im Profil nur Spiele, deren Basisklasse höchstens eine Klasse daneben liegt, die also eine
+Stufe genau für seine Klasse haben. Er ist vorgegeben an, das Kind darf ihn ausschalten (Profil-Feld
+`meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Auf jeder Spielkarte schalten ⏱ (Timer dieses Spiels, dieselbe Einstellung wie
 im Spiel) und ♾ (Endlos, Profil-Feld `endlosAn`), was die Stufenknöpfe starten. Die Symbole sind als
 SVG gezeichnet: aus als grauer Umriss, an in Gold wie der Favoriten-Stern. Ein Tipp auf eine freie
 Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim Antippen ihren Klartext ein. Je Spieler speichert das Profil Favoriten, die Ansicht (`kacheln` oder
@@ -342,3 +345,37 @@ das die Stufe anbietet; im Endlos-Mix nur Stufen mit `endlos` im Katalog.
 - **Unter `file://`** geprüft am 2026-11-01 in Chrome und Edge (headless): `postMessage`, gemeinsamer
   `localStorage` und `sessionStorage` (Aufsicht) und die Adresse im iframe funktionieren. Ungeprüft:
   Safari/iPad und Firefox.
+
+## 10. Abgleich zwischen Geräten
+
+Entscheid Patrik S1 a, 2026-11-01 (LERN_Session6). Ziel: Endlos-Ranglisten und Statistik sind auf
+jedem Gerät im Haushalt vollständig. Code in `spiele/gemeinsam/abgleich.js` (`LS.abgleich`), jede
+Seite lädt es direkt nach `spiel.js`.
+
+- **Ordner:** Die Aufsicht wählt in der Verwaltung auf jedem Gerät denselben Ordner (Netzwerkordner
+  oder Ordner eines Cloud-Dienstes). Der Browser merkt sich den Zugriff in IndexedDB (`lernspiele`,
+  Speicher `abgleich`). Das geht nur mit File System Access, heute Chrome und Edge auf dem Computer.
+- **Je Gerät eine Datei** `lernspiele-sync-<id>.json` (Kennung und Name in `lernspiele:geraet`).
+  Jedes Gerät schreibt nur seine eigene; zwei Geräte überschreiben sich also nie.
+- **Wann:** Beim Öffnen jeder Seite und wenn sie wieder in den Vordergrund kommt, liest das Gerät die
+  Dateien der anderen und schreibt dann die eigene. Nach jeder Änderung an geteilten Daten (Profile,
+  Runden, Rekorde, Freigabe, Löschvermerke) schreibt es die eigene Datei nach 1,5 s nach. Im iframe
+  des Zufallsmix gleicht nur die Mix-Seite ab. Kam etwas dazu, meldet `lernspiele:abgeglichen` es der
+  Seite; Startseite und Stufenwahl zeichnen sich neu.
+- **Erlaubnis:** Will der Browser vor dem Zugriff fragen, steht oben auf der Startseite „🔄 Abgleichen“
+  — fragen darf er nur nach einem Tippen.
+- **Ohne Ordner** (iPad, Android, Firefox): dieselben Daten als Datei sichern und auf dem anderen Gerät
+  einlesen (Verwaltung oder Statistik).
+- **Zusammenführen** (`LS.zusammenfuehren`, auch beim Einlesen):
+  - Runden: gleiche Runde (Kind, Zeit, Spiel, Stufe) zählt einmal.
+  - Rekorde: ebenso, bei gleicher Runde gilt der höhere Stand (Zwischenstand → Endstand).
+  - Profile: je Feld der jüngere Zeitstempel (`geaendert`); ältere Profile ohne Zeitstempel bleiben,
+    wie sie sind. Die PIN reist nie mit.
+  - Löschen: `lernspiele:geloescht` hält Vermerke für gelöschte Kinder und zurückgesetzte Runden.
+    Ein Vermerk entfernt auf allen Geräten, was bis zu seinem Zeitpunkt entstand; danach neu Angelegtes
+    bleibt.
+  - Freigabe: die des Geräts mit dem jüngsten `lernspiele:freigabeStand`.
+- **Geprüft** am 2026-11-01 auf localhost mit dem Browser-eigenen Dateispeicher (OPFS) als Ordner:
+  zwei bzw. drei Geräte, Zwischen- und Endstand, Löschen und neu Anlegen, Freigabe, Neuzeichnen der
+  Rangliste. Ungeprüft: `file://`, echte Netzwerk- und Cloud-Ordner, Uhren, die zwischen Geräten
+  abweichen (LERN-31).

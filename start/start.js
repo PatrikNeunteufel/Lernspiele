@@ -58,8 +58,26 @@ function zeichneStart(mitAufsicht = null) {
     tabs.append(el("a", { class: "tab", role: "tab", href: "#" + t.id, "aria-selected": String(t === tab), text: t.text }));
   }
   leiste.append(tabs, werWahl());
+  abgleichKnopf(leiste);
   tab.zeichne(inhalt, zeichneStart);
 }
 
+/**
+ * Abgleich (Entscheid S1 a): Ist ein Ordner gewählt, aber der Browser will vor dem Zugriff gefragt werden,
+ * steht oben ein Knopf — die Erlaubnis gibt es nur nach einem Tippen.
+ */
+async function abgleichKnopf(leiste) {
+  const h = await LS.abgleich.ordner();
+  if (!h || (await h.queryPermission({ mode: "readwrite" }).catch(() => "denied")) === "granted") return;
+  const k = LS.el("button", { type: "button", class: "knopf hell klein", text: "🔄 Abgleichen",
+    title: "Daten der anderen Geräte holen und die eigenen dorthin schreiben",
+    onclick: async () => { const r = await LS.abgleich.jetzt(true); if (r.status === "ok") k.remove(); } });
+  leiste.append(k);
+}
+
 addEventListener("hashchange", () => zeichneStart());
+// Kam beim Abgleich etwas dazu (Runden, Rekorde, Kinder): neu zeichnen, ausser jemand tippt gerade etwas ein.
+addEventListener("lernspiele:abgeglichen", () => {
+  if (!document.activeElement?.matches("input, select, textarea")) zeichneStart();
+});
 zeichneStart();
