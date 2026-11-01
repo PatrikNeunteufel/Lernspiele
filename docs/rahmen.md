@@ -219,8 +219,9 @@ was nichts mehr zu prüfen hat (Präzisierung Patrik 2026-10-31).
 - Öffnet ein Kind ein gesperrtes Spiel über die Adresse, zeigt der Rahmen „noch nicht freigegeben“.
 
 **Startseite** (`index.html`, Code in `start/`): Ohne Anmeldung zeigt sie die Anmeldung, danach
-die Tabs Spiele, Profil, Statistik und, nur für die Aufsicht, Verwaltung. Der Tab steht in der
-Adresse (`#statistik`). `#anmelden` meldet ab und führt zur Anmeldung; dorthin verweist auch
+die Tabs Spiele, Profil, Statistik und, nur für die Aufsicht, Verwaltung mit den Untertabs Konten,
+Freigabe und Abgleich. Der Tab steht in der Adresse (`#statistik`, Untertab `#verwaltung/abgleich`;
+ohne Untertab Konten). `#anmelden` meldet ab und führt zur Anmeldung; dorthin verweist auch
 „wechseln“ im Spiel. Der Filter „🎒 Meine Klasse“ (Entscheide K1 a, K2 a) zeigt einem Kind mit
 Klasse im Profil nur Spiele, deren Basisklasse höchstens eine Klasse daneben liegt, die also eine
 Stufe genau für seine Klasse haben. Er ist vorgegeben an, das Kind darf ihn ausschalten (Profil-Feld

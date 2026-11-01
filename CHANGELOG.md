@@ -133,3 +133,6 @@
   nach Zeitstempel (`geaendert`), Löschvermerke (`lernspiele:geloescht`), Freigabe nach
   `lernspiele:freigabeStand`. Das Einlesen in der Statistik nutzt dasselbe.
 - Datenregel LERN-5 b in CLAUDE.md um den Abgleich-Ordner ergänzt; LERN-31 (echte Geräte) im Handover.
+- Verwaltung in Untertabs Konten, Freigabe und Abgleich (`#verwaltung/<untertab>`, Klasse `untertabs`
+  in start.css). Freigabe je Fach zuklappbar mit „x von y frei · z zu prüfen“; offene Fächer merkt
+  sich das Gerät (`lernspiele:verwaltungOffen`, nicht abgeglichen).

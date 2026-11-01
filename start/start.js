@@ -16,7 +16,7 @@ const START_TABS = [
 
 /** Gewählter Tab aus der Adresse; Verwaltung nur für die Aufsicht. */
 function aktuellerTab() {
-  const id = location.hash.slice(1);
+  const id = location.hash.slice(1).split("/")[0]; // #verwaltung/konten: Untertab nach dem Schrägstrich
   const tab = START_TABS.find(t => t.id === id && (!t.nurAufsicht || LS.aufsichtAngemeldet()));
   return tab || START_TABS[0];
 }
