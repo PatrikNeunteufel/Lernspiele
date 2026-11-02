@@ -88,7 +88,7 @@ function preisWort(rp, region = false) {
   return `${z(fr)} ${fr === 1 ? "franc" : "francs"}${r ? " " + z(r) : ""}`;
 }
 const paarText = paare => paare.map(p => String(p).padStart(2, "0")).join(" ");
-const sprich = text => LS.sprich(text, "fr");
+const sprich = (text, fertig) => LS.sprich(text, "fr", "", fertig);
 
 // Je Stufe: Zahlenraum, Aufgabenarten
 const STUFE = {
@@ -239,7 +239,7 @@ LS.spielMitStimme({
         if (a.region) f.append(el("div", { class: "nr-region", text: "🇨🇭 so sagt man in der Westschweiz" }));
       } else {
         f.append(el("div", { class: "frage", text: a.region ? "Hör zu (so sagt man in der Westschweiz). Welche Zahl hörst du?" : "Hör zu: Welche Zahl hörst du?" }), hoerKnopf(text));
-        sprich(text);
+        sprich(text, ctx.uhrWarten());
       }
       const loesung = `${text} = ${zahlText(a.n)}`;
       if (a.art === "hoerenWahl") {
@@ -275,7 +275,7 @@ LS.spielMitStimme({
       const loesung = `${text} = ${geldText(a.rp)}`;
       const hinweis = "Hör zuerst auf die Franken (… francs), dann auf die Rappen dahinter.";
       f.append(el("div", { class: "frage", text: a.region ? "Was kostet es? (so sagt man in der Westschweiz)" : "Was kostet es? Hör zu." }), hoerKnopf(text));
-      sprich(text);
+      sprich(text, ctx.uhrWarten());
       if (a.art === "preisWahl") {
         const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: a.rp, inhalt: o => geldText(o), breite: 130, loesung, hinweis, lob: `Richtig: ${loesung}` });
         box.classList.add("nr-ziffern");
@@ -292,7 +292,7 @@ LS.spielMitStimme({
     ctx.kennung(`telefon:${ziffern}:${a.region ? "ch" : ""}`);
     const loesung = `${text} = ${paarText(a.paare)}`;
     f.append(el("div", { class: "frage", text: `Hör die Telefonnummer: ${a.paare.length} Paare. Tipp alle Ziffern ein.` }), hoerKnopf(text));
-    sprich(text);
+    sprich(text, ctx.uhrWarten());
     ctx.schritte(LS.tippSchritte(Number(ziffern)));
     eintippen(Number(ziffern), loesung, z => {
       const s = String(z);

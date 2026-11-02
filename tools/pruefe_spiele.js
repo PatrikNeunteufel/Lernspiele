@@ -125,6 +125,8 @@ const TREIBER = `
       melde("Handgriffe", "mit " + (klicks - klicksBeiStart + 1) + " Klicks gelöst, das Spiel nennt " + schritte, "zu viele");
     // Neue Aufgabe: Hinweise einer übersprungenen Aufgabe mit derselben Nummer vergessen.
     if (art === "aufgabe") { hinweise.delete(a.nr); return; }
+    // Ab hier nur Aufgaben und Antworten; andere Haken (etwa „uhr“, ctx.uhrWarten) sind keine Antwort.
+    if (art !== "gestellt" && art !== "falsch" && art !== "richtig") return;
     if (art === "gestellt" && endlos) return; // Endlos: eigene Regel (keine der letzten 30)
     if (art === "gestellt") {
       if (a.nr === 0) { gestellt = new Map(); letzte = null; }

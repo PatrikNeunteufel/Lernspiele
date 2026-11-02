@@ -66,7 +66,7 @@ const eintrag = anzeige => WOERTER.find(w => w.anzeige === anzeige);
 const mitLaut = laute => WOERTER.filter(w => laute.includes(w.laut));
 /** Ohne Artikel: „le bateau“ → „bateau“. */
 const nackt = anzeige => anzeige.replace(/^(le |la |l’)/, "");
-const sprich = text => LS.sprich(text.replace(/’/g, "'"), "fr");
+const sprich = (text, fertig) => LS.sprich(text.replace(/’/g, "'"), "fr", "", fertig);
 const ALLE = Object.keys(SON_LAUTE);
 /** Zu welchem Laut gehört eine Schreibweise (eau → au)? Für Ablenker ausserhalb der Liste (c, s, j, e): null. */
 const lautDerSchrift = gr => ALLE.find(l => SON_LAUTE[l].schrift.includes(gr)) || null;
@@ -303,7 +303,7 @@ const SPIEL = {
         beiRichtig: () => f.append(el("div", { class: "sl-geschrieben" }, geschrieben(w1), " – ", geschrieben(w2))),
       });
       box.classList.add("sl-gleich");
-      sprich(`${w1.anzeige}, ${w2.anzeige}`);
+      sprich(`${w1.anzeige}, ${w2.anzeige}`, ctx.uhrWarten());
       return;
     }
 
@@ -318,7 +318,7 @@ const SPIEL = {
         hinweis: "Hör nochmal genau hin (🔊) und sprich das Wort leise nach.",
         loesung: `${w.anzeige}: ${SON_LAUTE[w.laut].name}`, lob: `Richtig: ${w.anzeige}`,
       });
-      sprich(w.anzeige);
+      sprich(w.anzeige, ctx.uhrWarten());
       return;
     }
 
@@ -344,7 +344,7 @@ const SPIEL = {
         beiRichtig: () => wortEl.replaceWith(lueckenwort(w, true)),
       });
       box.classList.add("sl-wahl");
-      sprich(w.anzeige);
+      sprich(w.anzeige, ctx.uhrWarten());
       return;
     }
 
@@ -370,7 +370,7 @@ const SPIEL = {
       if (ctx.vorbei()) tasten.gesperrt = true;
     });
     f.append(tasten.element);
-    sprich(w.anzeige);
+    sprich(w.anzeige, ctx.uhrWarten());
   },
 };
 

@@ -263,7 +263,6 @@ LS.spiel({
     const loesung = loesungText(a);
     ctx.loesung(loesung);
     ctx.schritte(a.art === "fehlt" ? 1 : a.ziele.length);
-    ctx.wartezeit(s.zeit + ZUDECKEN);
     const f = ctx.flaeche;
     const auftrag = el("div", { class: "auftrag", text: "Schau gut hin und merk dir alles!" });
     const raster = el("div", { class: `mb-raster g${a.n}`, "aria-label": "Bild" });
@@ -278,13 +277,15 @@ LS.spiel({
     f.append(auftrag, raster);
     const da = () => f.contains(raster); // Die Aufgabe kann neu gezogen worden sein (Wiederholungsregel).
     // Erst wenn das Kind bereit ist: ▶ Los, 3-2-1 — dann zeigen, zudecken, verändert aufdecken (Wunsch Patrik).
-    LS.losGehts(ctx, raster, () => {
+    // Die Uhr startet erst mit dem veränderten Bild: vorher kann das Kind nichts tun (F1 a, LERN_Session9).
+    LS.losGehts(ctx, raster, uhrLos => {
     setTimeout(() => { if (da()) raster.classList.add("verdeckt"); }, s.zeit * 1000);
     setTimeout(() => {
       if (!da()) return;
       raster.classList.remove("verdeckt");
       auftrag.textContent = FRAGE[a.art];
       ctx.sag(FRAGE[a.art]);
+      uhrLos();
       if (a.art === "fehlt") {
         fuelle(a.nachher, false);
         const box = el("div", { class: "wahl mb-wahl" });
@@ -327,7 +328,7 @@ LS.spiel({
         if (ctx.vorbei()) for (const j of a.ziele) raster.children[j].classList.add("richtig");
       });
     }, (s.zeit + ZUDECKEN) * 1000);
-    });
+    }, { uhr: false });
   },
 });
 </script>

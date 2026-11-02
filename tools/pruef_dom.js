@@ -388,10 +388,11 @@ const innerWidth = 1024;
 const innerHeight = 768;
 const scrollTo = () => {};
 // Sprachausgabe: je eine englische, deutsche und französische Test-Stimme; gesprochen wird nichts, gemerkt wird der Text.
+// Das Ende meldet sie nach einer halben Sekunde (die Uhr wartet darauf, ctx.uhrWarten).
 const __gesprochen = [];
 class SpeechSynthesisUtterance { constructor(text) { this.text = text; } }
 const speechSynthesis = { getVoices: () => [{ lang: "en-GB", name: "Test" }, { lang: "de-CH", name: "Test" }, { lang: "fr-FR", name: "Test" }],
-  speak: u => __gesprochen.push(u.text), cancel() {}, addEventListener() {} };
+  speak: u => { __gesprochen.push(u.text); setTimeout(() => u.onend?.(), 500); }, cancel() {}, addEventListener() {} };
 // Zufallsmix: Das Spiel läuft „im iframe“; parent sammelt seine Nachrichten (das Testskript spielt den Mix).
 const __nachrichten = [];
 const parent = { postMessage: d => __nachrichten.push(structuredClone(d)) };

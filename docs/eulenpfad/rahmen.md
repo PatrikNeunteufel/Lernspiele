@@ -132,7 +132,9 @@ LS.spiel({
 | `ctx.schritte(n)` | Die Aufgabe braucht n Handgriffe mehr: Tipps, Ziffern samt OK, Züge, so viele wie mindestens nötig sind. Aufrufe zählen zusammen. Die Bausteine zählen ihre selbst (`auswahl` und `koerbe` 1, `reihenfolge` je Teil 1); für die Tastatur `LS.tippSchritte(wert)`. **Pflicht in Endlos-Stufen** ✔, daraus folgt der Boden der Endlos-Zeit (Abschnitt 7). |
 | `ctx.serie(name, wert)` | Ein zufällig gewähltes Merkmal, das das Kind als Muster erkennen kann: Richtung oder Aufgabenart, oder die richtige Antwort bei höchstens drei festen Antworten (ja/nein, <, =, >, auf/ab). **Serienbremse** (Vorgabe Patrik 2026-11-01): Der Rahmen zieht neu, statt dasselbe Merkmal öfter als `LS.SERIE_MAX` = 3-mal hintereinander zu stellen (bis zu 40 Versuche). Nicht für Zahlenwerte oder Knopfpositionen, und nur in Stufen, die wirklich mehrere Werte haben ✔. |
 | `ctx.vorgehen(art, wert)` | Wie das Kind die Aufgabe angegangen ist, vor `ctx.richtig()` gemeldet (LERN_Session7). Landet in `aufgabenZeiten[i].vorgehen` und in der Statistik, Karte „Vorgehen“ (Punkte der letzten 12 Aufgaben). Arten und Werte (vom besten zum schwächsten, Ton gut/mittel/schwach) stehen in `AUSWERTUNG.VORGEHEN`: `systematik` (Möglichkeiten-Finder: Zählwerk, geordnet, kreuz und quer, mit Hilfe), `teilerpaare` (Teiler-Spürnase: in Paaren, der Grösse nach, durcheinander), `ausgleichen` (Mittelwert-Türme: ohne Umweg, mit Umwegen). |
-| `ctx.wartezeit(s)` | Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne). Zählt zum Boden der Endlos-Zeit. |
+| `ctx.wartezeit(s)` | Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne). Uhr und Zeitmessung beginnen so viel später (Entscheide F1 a, F2 a, LERN_Session9). |
+| `ctx.uhrWarten()` | Uhr und Zeitmessung beginnen erst, wenn die zurückgegebene Funktion gerufen wird: Jetzt kann das Kind antworten. Beim Zeichnen rufen. Für eine Stimme, die gleich vorspricht: `LS.sprich(text, sprache, "", ctx.uhrWarten())` (die Uhr startet, wenn die Stimme fertig ist, ohne Stimme sofort). `LS.losGehts` nutzt es selbst. **Regel** (F1 a, F2 a): Die Uhr läuft nie, solange das Kind nur warten kann — „▶ Los!“, 3-2-1, Zeigen, Vorspielen. |
+| `ctx.losKnopf` | Für `LS.losGehts`: „▶ Los!“ mit 3-2-1 (erste Aufgabe, nach einer Aufgabe mit Fehler oder Zeit um, im Mix) oder nur kurz 👀 (LERN-38). |
 | `ctx.sag(text, art?)` | Die Eule spricht (`art`: `"gut"` oder `"hinweis"`). |
 
 **Wiederholungen** (Vorgabe Patrik 2026-10-31): In einer Runde kommt höchstens eine Aufgabe ein
@@ -155,7 +157,7 @@ auf. Die Optionen sind in `spiel.js` beschrieben.
 | `LS.auswahl(ctx, opt)` | genau eine richtige Antwort unter mehreren Knöpfen |
 | `LS.reihenfolge(ctx, opt)` | Teile in der richtigen Reihenfolge antippen |
 | `LS.koerbe(ctx, opt)` | Karte in den richtigen Korb (sie fliegt hinein) |
-| `LS.losGehts(ctx, element, weiter)` | Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): element bleibt verdeckt, darüber „▶ Los!“, nach dem Tippen 3-2-1, dann sichtbar und `weiter()` startet die Zeigezeit. Mit Timer (`ctx.mitTimer`) ohne Knopf, nur 3-2-1. Benutzt von Merk-Blick, Punkte-Blitz, Blitzlesen, Finger-Zähler (Wunsch Patrik, LERN_Session8) |
+| `LS.losGehts(ctx, element, weiter, { uhr })` | Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): element bleibt verdeckt. Bei der ersten Aufgabe einer Runde, nach einer Aufgabe mit Fehler und im Mix darüber „▶ Los!“, nach dem Tippen 3-2-1; sonst nur 1 s 👀 (`ctx.losKnopf`, LERN-38). Dann sichtbar, und `weiter(uhrLos)` startet die Zeigezeit. Mit und ohne Timer gleich: Die Uhr startet nach `weiter()`, mit `{ uhr: false }` erst, wenn das Spiel `uhrLos()` ruft (Merk-Blick: mit dem veränderten Bild). Benutzt von Merk-Blick, Punkte-Blitz, Blitzlesen, Finger-Zähler (Wunsch Patrik, LERN_Session8) |
 | `LS.tastatur(opt)` | Zifferntastatur mit Anzeigefeld; das Spiel prüft selbst in `onOk`. Mit `dezimal: true` eine Taste für das eingestellte Dezimalzeichen (auch `.` und `,` auf der Tastatur), `nachkomma` begrenzt die Ziffern danach (Standard 3); `onOk(wert, text)` bekommt die Zahl und den getippten Text mit „.“, wenn die Stellenzahl zählt („3.0“ beim Runden) (LERN_Session8, LERN-36) |
 | `NOTEN.zeile`, `NOTEN.hoerKnopf` | Notenbild und Hörknopf (`noten.js`) |
 
@@ -268,7 +270,8 @@ Vorgabe Patrik 2026-10-31.
 - **Timer im Endlos-Modus** (Wunsch Patrik 2026-10-31; Boden und Verlauf: Entscheide F1 a und F2 a,
   LERN_Session4): Alle starten mit der Vorgabezeit der Stufe aus dem Katalog, ohne den persönlichen
   Faktor aus dem Profil. Die Zeit nähert sich einem **Boden je Aufgabe**: 1,2 s Grundzeit + 0,5 s je
-  Handgriff (`ctx.schritte`) + Wartezeit (`ctx.wartezeit`). Nach jeder richtigen Aufgabe fallen 8 % der
+  Handgriff (`ctx.schritte`); Wartezeit zählt nicht dazu, weil die Uhr erst danach startet (`ctx.wartezeit`,
+  `ctx.uhrWarten`, LERN_Session9). Nach jeder richtigen Aufgabe fallen 8 % der
   restlichen Spanne bis zum Boden weg: anfangs grosse Schritte, dann immer kleinere, ohne abrupten Halt
   (`ENDLOS_TEMPO` in `spiel.js`). Die Zeit erscheint auf eine Zehntelsekunde, unter 10 s mit Komma.
   Weil der Boden an der Aufgabe hängt, bekommt eine Aufgabe mit mehr Ziffern etwas mehr Zeit als ihre

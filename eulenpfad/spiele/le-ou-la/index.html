@@ -262,7 +262,7 @@ LS.spiel({
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     if (a.koerbe && a.koerbe.length <= 3) ctx.serie("antwort", a.richtig);
     const w = a.w;
-    const sag = () => LS.sprich(sprechText(a.sprich), "fr");
+    const sag = (fertig = null) => LS.sprich(sprechText(a.sprich), "fr", "", fertig);
     const loesung = a.art === "hoerZahl" ? `„${a.sprich}“ → ${a.richtig}`
       : a.optionen ? `${a.zeige} → ${a.richtig}` : `${mit(a.richtig, a.form)} = ${w.de}`;
     ctx.flaeche.append(el("div", { class: "frage", text: FRAGE[a.art] }));
@@ -272,9 +272,9 @@ LS.spiel({
       let karte;
       if (a.art === "hoerZahl") {
         ctx.kennung(a.sprich);
-        const gehoert = sag();
+        const gehoert = sag(ctx.uhrWarten());
         karte = { bild: "👂", text: gehoert ? "Hör zu!" : a.sprich }; // ohne Stimme: lesen statt hören
-        ctx.flaeche.append(el("button", { type: "button", class: "lol-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: sag }));
+        ctx.flaeche.append(el("button", { type: "button", class: "lol-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sag() }));
       } else karte = { bild: a.mitBild ? (a.mehrzahl ? drei(w.bild) : w.bild) : null, text: a.form };
       const korbInhalt = a.art === "hoerZahl"
         ? v => (v === "eins" ? { bild: w.bild, text: "eins" } : { bild: drei(w.bild), text: "mehrere" })
@@ -290,7 +290,7 @@ LS.spiel({
       if (a.mitBild) karte.append(el("span", { class: "lol-bild", text: w.bild }));
       karte.append(el("span", { text: a.zeige }));
       ctx.flaeche.append(karte);
-      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 160, hinweis, loesung, lob: waehle(LOB), beiRichtig: sag })
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 160, hinweis, loesung, lob: waehle(LOB), beiRichtig: () => sag() })
         .classList.add("lol-wahl");
     }
   },

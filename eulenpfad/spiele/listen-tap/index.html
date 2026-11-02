@@ -217,7 +217,7 @@ const SPIEL = {
     box.addEventListener("click", () => {
       if (ctx.vorbei()) box.children[a.optionen.indexOf(a.richtig)]?.classList.add("richtig");
     });
-    LS.sprich(a.sprich, "en");
+    LS.sprich(a.sprich, "en", "", ctx.uhrWarten());
     if (ctx.nr === 0) ctx.sag("Hör zu und tipp auf das Bild. Mit 🔊 hörst du es nochmal.");
   },
 };

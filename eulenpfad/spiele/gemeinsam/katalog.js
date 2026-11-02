@@ -2,7 +2,8 @@
    Braucht spiel.js (LS.SKALA) davor. Jedes Spiel bietet die Stufen s1–s6 der Skala an;
    'klasse' ist die Basisklasse: Stufe 3 = ihr Lernziel, 1 eine Klasse tiefer, 5 eine höher, 6 Königsstufe;
    'lernziele' ordnet die Lernziele des Lernzielblatts den Stufen zu, in denen sie geübt werden.
-   'zeiten': Vorgabezeit je Aufgabe in Sekunden für den zuschaltbaren Timer (im Profil anpassbar).
+   'zeiten': Vorgabezeit je Aufgabe in Sekunden für den zuschaltbaren Timer (im Profil anpassbar). Sie zählt
+   ab dem Moment, in dem das Kind antworten kann — ohne „▶ Los!“, Zeigen und Vorspielen (F1 a, F3 a, LERN_Session9).
    'reihenfolge': das Spiel beachtet die Profil-Einstellung „Teile geordnet / gemischt“.
    'einstellungen': Einstellungen der Aufsicht, die das Spiel nutzt (LS.EINSTELLUNGEN); die Verwaltung
    bietet sie je Spiel an (global / eigener Wert).
@@ -300,12 +301,12 @@ const SPIELE = [
     beschreibung: "Ganze, Halbe, Viertel, Achtel — und den Takt füllen",
     lernziele: [{ lz: "MU.6.B.1", stufen: ALLE_STUFEN }, { lz: "MU.6.A.1", stufen: ["s4", "s5", "s6"] }] },
   { id: "hoch-tief-ohr", klasse: 2, bild: "👂", name: "Hoch-Tief-Ohr", thema: "musik", farbe: "var(--deko-4)",
-    pfad: "spiele/hoch-tief-ohr/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 15, s4: 20, s5: 15, s6: 19 },
+    pfad: "spiele/hoch-tief-ohr/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s5", "s6"], zeiten: { s1: 11, s2: 14, s3: 13, s4: 18, s5: 13, s6: 17 },
     beschreibung: "Welcher Ton ist höher? Wohin geht die Melodie? Halbton oder Ganzton?",
     lernziele: [{ lz: "MU.6.A.1", stufen: ALLE_STUFEN }, { lz: "MU.6.B.1", stufen: ["s4", "s5", "s6"] }] },
   // LERN_Session2, zweite Gruppe: Stufe 1 auf Niveau 1. Klasse
   { id: "punkte-blitz", klasse: 1, bild: "⚡", name: "Punkte-Blitz", thema: "zahlen", farbe: "var(--deko-4)",
-    pfad: "spiele/punkte-blitz/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 8, s2: 10, s3: 10, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/punkte-blitz/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 8, s2: 8, s3: 8, s4: 13, s5: 18, s6: 23 },
     beschreibung: "Wie viele sind es? Würfelbild, Zehnerfeld, Zehnerstangen — auf einen Blick",
     lernziele: [{ lz: "MA.1.A.1", stufen: ALLE_STUFEN }] },
   { id: "zahlenhaus", klasse: 1, bild: "🏠", name: "Zahlenhaus", thema: "rechnen", farbe: "var(--deko-2)",
@@ -376,7 +377,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.2.A.1", stufen: ALLE_STUFEN }, { lz: "D.4.A.1", stufen: ["s4", "s5"] }] },
   { id: "blitzlesen", klasse: 2, bild: "⚡", name: "Blitzlesen", thema: "lesen", farbe: "var(--deko-3)",
-    pfad: "spiele/blitzlesen/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 10, s3: 10, s4: 10, s5: 12, s6: 15 },
+    pfad: "spiele/blitzlesen/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 8, s3: 8, s4: 8, s5: 10, s6: 13 },
     beschreibung: "Ein Wort blitzt auf — welches Bild passt?",
     listen: {
       "einzelwoerter": { von: "anlaut-angel/anlaut" },
@@ -570,7 +571,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "FS1E.5.D.1", stufen: ALLE_STUFEN }] },
   { id: "listen-tap", klasse: 4, bild: "👂", name: "Listen & Tap", thema: "englisch-hoeren", farbe: "var(--deko-5)", neu: "LERN_Session3",
-    pfad: "spiele/listen-tap/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 10, s3: 12, s4: 15, s5: 15, s6: 18 },
+    pfad: "spiele/listen-tap/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 9, s2: 9, s3: 10, s4: 12, s5: 12, s6: 16 },
     beschreibung: "Englisch hören und das passende Bild antippen: Wörter, Anweisungen, „The cat is under the table“",
     listen: {
       "farben": { von: "word-match/farben" },
@@ -584,7 +585,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "FS1E.1.A.1", stufen: ALLE_STUFEN }] },
   { id: "spelling-bee", klasse: 4, bild: "🐝", name: "Spelling-Bee", thema: "englisch-hoeren", farbe: "var(--deko-4)", neu: "LERN_Session3",
-    pfad: "spiele/spelling-bee/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 25, s2: 25, s3: 30, s4: 35, s5: 40, s6: 45 },
+    pfad: "spiele/spelling-bee/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 24, s2: 24, s3: 28, s4: 33, s5: 38, s6: 43 },
     beschreibung: "Ein englisches Wort hören und aus Buchstaben legen",
     listen: {
       "farben": { von: "word-match/farben" },
@@ -809,7 +810,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.2.B.1", stufen: ALLE_STUFEN }] },
   { id: "sound-sorter", klasse: 5, neu: "LERN_Session8", bild: "🔊", name: "Sound-Sorter", thema: "englisch-hoeren", farbe: "var(--deko-1)",
-    pfad: "spiele/sound-sorter/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 12, s2: 15, s3: 15, s4: 20, s5: 20, s6: 25 },
+    pfad: "spiele/sound-sorter/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 11, s2: 14, s3: 14, s4: 20, s5: 19, s6: 25 },
     beschreibung: "Englische Wörter nach ihrem Laut sortieren: i wie in live oder wie in life?",
     listen: {
       "woerter": { name: "Englische Wörter nach Laut (Schreibung und Aussprache)" },
@@ -873,7 +874,7 @@ const SPIELE = [
     lernziele: [{ lz: "NMG.6.3", stufen: ALLE_STUFEN }, { lz: "NMG.6.4", stufen: ["s5", "s6"] }] },
   // LERN_Session8, Runde 3: Französisch (Lehrmittel „dis donc!“), Englisch, Informatik, Sinne
   { id: "mots-match", klasse: 5, neu: "LERN_Session8", bild: "🥐", name: "Mots-Match", thema: "franzoesisch", farbe: "var(--deko-2)",
-    pfad: "spiele/mots-match/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 10, s3: 12, s4: 15, s5: 15, s6: 19 },
+    pfad: "spiele/mots-match/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 6, s2: 10, s3: 12, s4: 13, s5: 15, s6: 19 },
     beschreibung: "Französische Wörter und Bilder zuordnen: Farben, Tiere, Essen, Schule, Körper und Familie",
     listen: {
       "farben": { name: "Französisch: Farben (les couleurs)" },
@@ -884,28 +885,28 @@ const SPIELE = [
     },
     lernziele: [{ lz: "FS2F.5.B.1", stufen: ALLE_STUFEN }, { lz: "FS2F.2.A.1", stufen: ["s1", "s2"] }] },
   { id: "parallelwort-bruecke", klasse: 5, neu: "LERN_Session8", bild: "🌉", name: "Wörter-Brücke", thema: "franzoesisch", farbe: "var(--deko-5)",
-    pfad: "spiele/parallelwort-bruecke/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 15, s4: 20, s5: 20, s6: 25 },
+    pfad: "spiele/parallelwort-bruecke/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 11, s3: 15, s4: 20, s5: 20, s6: 25 },
     beschreibung: "Französische Wörter, die man schon versteht: la banane, le train, la musique",
     listen: {
       "parallel": { name: "Französische Parallelwörter (bekannt aus anderen Sprachen)" },
     },
     lernziele: [{ lz: "FS2F.2.B.1", stufen: ALLE_STUFEN }, { lz: "FS2F.1.B.1", stufen: ["s2"] }] },
   { id: "le-ou-la", klasse: 5, neu: "LERN_Session8", bild: "🏷️", name: "Le ou la?", thema: "franzoesisch", farbe: "var(--deko-6)",
-    pfad: "spiele/le-ou-la/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 10, s3: 12, s4: 15, s5: 15, s6: 19 },
+    pfad: "spiele/le-ou-la/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 10, s3: 12, s4: 14, s5: 15, s6: 19 },
     beschreibung: "Der richtige Artikel: le, la, l’, les, un, une, des — und die Mehrzahl",
     listen: {
       "nomen": { name: "Französische Nomen mit Geschlecht und Mehrzahl" },
     },
     lernziele: [{ lz: "FS2F.5.D.2", stufen: ALLE_STUFEN }, { lz: "FS2F.5.D.1", stufen: ["s4"] }] },
   { id: "son-lauscher", klasse: 5, neu: "LERN_Session8", bild: "👂", name: "Son-Lauscher", thema: "franzoesisch", farbe: "var(--deko-3)",
-    pfad: "spiele/son-lauscher/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/son-lauscher/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 10, s3: 13, s4: 14, s5: 18, s6: 23 },
     beschreibung: "Französisch hören und schreiben: ou, au, on, ch, é und die Nasallaute",
     listen: {
       "woerter": { name: "Französische Wörter nach Laut (ou, au, on, ch, é, Nasallaute)" },
     },
     lernziele: [{ lz: "FS2F.5.C.2", stufen: ALLE_STUFEN }, { lz: "FS2F.5.E.2", stufen: ["s4", "s5", "s6"] }] },
   { id: "nombres-rallye", klasse: 5, neu: "LERN_Session8", bild: "🔢", name: "Nombres-Rallye", thema: "franz-alltag", farbe: "var(--deko-4)",
-    pfad: "spiele/nombres-rallye/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 8, s2: 10, s3: 12, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/nombres-rallye/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 7, s2: 9, s3: 11, s4: 14, s5: 17, s6: 22 },
     beschreibung: "Französische Zahlen hören, lesen und schreiben: un, deux, trois … bis cent",
     lernziele: [{ lz: "FS2F.3.A.1", stufen: ALLE_STUFEN }] },
   { id: "quelle-heure", klasse: 5, neu: "LERN_Session8", bild: "🕰️", name: "Quelle heure?", thema: "franz-alltag", farbe: "var(--deko-1)",
@@ -913,18 +914,18 @@ const SPIELE = [
     beschreibung: "Die Uhrzeit auf Französisch: Il est trois heures et demie",
     lernziele: [{ lz: "FS2F.3.A.1", stufen: ALLE_STUFEN }] },
   { id: "calendrier", klasse: 5, neu: "LERN_Session8", bild: "📆", name: "Calendrier", thema: "franz-alltag", farbe: "var(--deko-7)",
-    pfad: "spiele/calendrier/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s5", "s6"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/calendrier/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s5", "s6"], zeiten: { s1: 9, s2: 10, s3: 13, s4: 14, s5: 17, s6: 21 },
     beschreibung: "Wochentage, Monate und das Datum auf Französisch: lundi, janvier, le 3 mai",
     lernziele: [{ lz: "FS2F.3.A.1", stufen: ALLE_STUFEN }] },
   { id: "au-cafe", klasse: 5, neu: "LERN_Session8", bild: "☕", name: "Au café", thema: "franz-alltag", farbe: "var(--deko-2)",
-    pfad: "spiele/au-cafe/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
+    pfad: "spiele/au-cafe/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 14, s2: 18, s3: 23, s4: 23, s5: 29, s6: 40 },
     beschreibung: "Kurze Gespräche: begrüssen, sich vorstellen, nach dem Befinden fragen, bestellen",
     listen: {
       "dialoge": { name: "Kurze Dialoge: begrüssen, Befinden, bestellen" },
     },
     lernziele: [{ lz: "FS2F.3.A.1", stufen: ALLE_STUFEN }] },
   { id: "weather-report", klasse: 5, neu: "LERN_Session8", bild: "🌦️", name: "Weather-Report", thema: "englisch-hoeren", farbe: "var(--deko-6)",
-    pfad: "spiele/weather-report/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 60 },
+    pfad: "spiele/weather-report/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 13, s2: 13, s3: 17, s4: 25, s5: 29, s6: 47 },
     beschreibung: "Kurze englische Durchsagen hören: Wetter, Sportresultat, Weg — und das Wichtige herauspicken",
     listen: {
       "durchsagen": { name: "Englische Durchsagen: Wetter, Sport, Weg" },
@@ -968,11 +969,11 @@ const SPIELE = [
     },
     lernziele: [{ lz: "MA.3.A.2", stufen: ["s1", "s2", "s3", "s4", "s6"] }, { lz: "NMG.9.1", stufen: ["s4", "s5", "s6"] }] },
   { id: "merk-blick", klasse: 1, neu: "LERN_Session8", bild: "👀", name: "Merk-Blick", thema: "geometrie", farbe: "var(--deko-6)",
-    pfad: "spiele/merk-blick/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 15, s3: 18, s4: 20, s5: 22, s6: 28 },
+    pfad: "spiele/merk-blick/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 6, s2: 6, s3: 8, s4: 9, s5: 10, s6: 14 },
     beschreibung: "Ein Bild gut anschauen und merken — was hat sich verändert, was fehlt?",
     lernziele: [{ lz: "MA.2.C.3", stufen: ALLE_STUFEN }] },
   { id: "finger-zaehler", klasse: 1, neu: "LERN_Session8", bild: "🖐️", name: "Finger-Zähler", thema: "zahlen", farbe: "var(--deko-1)",
-    pfad: "spiele/finger-zaehler/index.html", stufen: ALLE_STUFEN, endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 6, s2: 8, s3: 10, s4: 12, s5: 12, s6: 15 },
+    pfad: "spiele/finger-zaehler/index.html", stufen: ALLE_STUFEN, endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 6, s2: 8, s3: 10, s4: 12, s5: 12, s6: 13 },
     beschreibung: "Wie viele Finger? Fingerbilder bis 10 und kleine Mengen auf einen Blick",
     lernziele: [{ lz: "MA.1.A.2", stufen: ALLE_STUFEN }, { lz: "MA.1.C.2", stufen: ["s3", "s4", "s5", "s6"] }] },
   { id: "gerecht-teiler", klasse: 1, neu: "LERN_Session8", bild: "🍪", name: "Gerecht-Teiler", thema: "rechnen", farbe: "var(--deko-2)",
@@ -980,15 +981,15 @@ const SPIELE = [
     beschreibung: "Zwei Teller, ungleich viele Guetzli: Verschiebe, bis beide gleich viele haben",
     lernziele: [{ lz: "MA.1.A.4", stufen: ALLE_STUFEN }, { lz: "MA.3.A.2", stufen: ["s1", "s2"] }] },
   { id: "klang-wichtel", klasse: 1, neu: "LERN_Session8", bild: "🔔", name: "Klang-Wichtel", thema: "musik", farbe: "var(--deko-7)",
-    pfad: "spiele/klang-wichtel/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/klang-wichtel/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 9, s3: 12, s4: 12, s5: 17, s6: 22 },
     beschreibung: "Hör genau: kurz oder lang, schnell oder langsam, laut oder leise?",
     lernziele: [{ lz: "MU.6.A.1", stufen: ALLE_STUFEN }, { lz: "MU.6.B.1", stufen: ["s5", "s6"] }] },
   { id: "rhythmus-diktat", klasse: 5, neu: "LERN_Session8", bild: "🥁", name: "Rhythmus-Diktat", thema: "musik", farbe: "var(--deko-5)",
-    pfad: "spiele/rhythmus-diktat/index.html", stufen: ALLE_STUFEN, endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 25, s2: 30, s3: 35, s4: 40, s5: 45, s6: 70 },
+    pfad: "spiele/rhythmus-diktat/index.html", stufen: ALLE_STUFEN, endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 19, s2: 24, s3: 29, s4: 34, s5: 39, s6: 62 },
     beschreibung: "Rhythmen hören und aus Notenkarten nachlegen: Achtel, Sechzehntel, punktierte Noten",
     lernziele: [{ lz: "MU.6.B.1", stufen: ALLE_STUFEN }] },
   { id: "tonleiter-treppe", klasse: 5, neu: "LERN_Session8", bild: "🎼", name: "Tonleiter-Treppe", thema: "musik", farbe: "var(--deko-2)",
-    pfad: "spiele/tonleiter-treppe/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s3"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
+    pfad: "spiele/tonleiter-treppe/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s3"], zeiten: { s1: 14, s2: 20, s3: 25, s4: 30, s5: 33, s6: 43 },
     beschreibung: "Halb- und Ganztonschritte auf der Treppe — Dur oder Moll?",
     lernziele: [{ lz: "MU.6.A.1", stufen: ALLE_STUFEN }] },
 ];

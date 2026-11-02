@@ -235,8 +235,8 @@ const SPIEL = {
     if (a.zeige === "bild") ctx.flaeche.append(el("div", { class: "wortkarte mm-bild", text: ziel.bild }));
     if (a.zeige === "fr") ctx.flaeche.append(el("div", { class: "wortkarte", text: ziel.fr }));
     if (a.zeige === "de") ctx.flaeche.append(el("div", { class: "wortkarte mm-de", text: ziel.de }));
-    const sag = () => LS.sprich(sprechText(ziel.fr), "fr");
-    if (a.ton) ctx.flaeche.append(el("button", { type: "button", class: "mm-hoer", text: a.hoeren ? "🔊 nochmal" : "🔊 anhören", "aria-label": "Anhören", onclick: sag }));
+    const sag = (fertig = null) => LS.sprich(sprechText(ziel.fr), "fr", "", fertig);
+    if (a.ton) ctx.flaeche.append(el("button", { type: "button", class: "mm-hoer", text: a.hoeren ? "🔊 nochmal" : "🔊 anhören", "aria-label": "Anhören", onclick: () => sag() }));
 
     const bilder = ["frZuBild", "hoerZuBild"].includes(a.art);
     const hinweis = a.hoeren ? "Hör nochmal genau hin! Tipp auf 🔊."
@@ -248,7 +248,7 @@ const SPIEL = {
       optionen: a.optionen, richtig: a.richtig,
       inhalt: bilder ? w => ({ bild: w }) : undefined,
       breite: bilder ? 110 : 150, hinweis, loesung, lob: waehle(LOB),
-      beiRichtig: sag,
+      beiRichtig: () => sag(),
     });
     box.classList.add("mm-wahl");
     if (bilder) box.classList.add("mm-bilder");
@@ -256,7 +256,7 @@ const SPIEL = {
     box.addEventListener("click", () => {
       if (ctx.vorbei() && !box.querySelector(".richtig")) { box.children[a.optionen.indexOf(a.richtig)]?.classList.add("richtig"); sag(); }
     });
-    if (a.ton === "auto") sag();
+    if (a.ton === "auto") sag(ctx.uhrWarten());
   },
 };
 

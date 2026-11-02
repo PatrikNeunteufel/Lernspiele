@@ -239,7 +239,7 @@ LS.spiel({
     if (a.art === "entscheid") ctx.serie("antwort", a.richtig);
     const z = a.ziel;
     const franz = a.art === "satz" ? a.satz : z.fr;
-    const sag = () => LS.sprich(sprechText(franz), "fr");
+    const sag = (fertig = null) => LS.sprich(sprechText(franz), "fr", "", fertig);
     const loesung = a.art === "satz" ? `${z.bild} ${a.satz} = ${a.satzDe}`
       : z.kennz === "falle" ? `${z.fr} heisst „${z.de}“, nicht „${z.falsch}“.`
       : `${z.bild ? z.bild + " " : ""}${z.fr} = ${z.de}`;
@@ -248,13 +248,13 @@ LS.spiel({
     let zeigeText = true;
     if (a.art === "hoerBild") {
       ctx.kennung(z.fr);
-      zeigeText = !sag(); // ohne Stimme: lesen statt hören
+      zeigeText = !sag(ctx.uhrWarten()); // ohne Stimme: lesen statt hören
     }
     if (a.art === "satz") ctx.flaeche.append(el("div", { class: "satz", text: a.satz }));
     else if (a.art === "entscheid") ctx.flaeche.append(el("div", { class: "wortkarte", text: a.paar }));
     else if (a.art === "franz") ctx.flaeche.append(el("div", { class: "wortkarte wb-de", text: z.de }));
     else if (zeigeText) ctx.flaeche.append(el("div", { class: "wortkarte" + (a.art === "freund" ? " wb-falle" : ""), text: z.fr }));
-    if (a.art !== "franz") ctx.flaeche.append(el("button", { type: "button", class: "wb-hoer", text: a.art === "hoerBild" ? "🔊 nochmal" : "🔊 anhören", "aria-label": "Anhören", onclick: sag }));
+    if (a.art !== "franz") ctx.flaeche.append(el("button", { type: "button", class: "wb-hoer", text: a.art === "hoerBild" ? "🔊 nochmal" : "🔊 anhören", "aria-label": "Anhören", onclick: () => sag() }));
 
     const bilder = ["bild", "hoerBild", "satz"].includes(a.art);
     const lob = z.kennz === "falle" && a.art === "freund" ? `Genau! ${z.fr} heisst „${z.de}“.`
@@ -263,7 +263,7 @@ LS.spiel({
       optionen: a.optionen, richtig: a.richtig,
       inhalt: bilder ? w => ({ bild: w }) : a.art === "entscheid" ? w => ENTSCHEID[w] : undefined,
       breite: bilder ? 110 : 150, hinweis: hinweisFuer(a), loesung, lob,
-      beiRichtig: sag,
+      beiRichtig: () => sag(),
     });
     box.classList.add("wb-wahl");
     if (bilder) box.classList.add("wb-bilder");

@@ -233,7 +233,7 @@ const SPIEL = {
         hinweis: "Hör nochmal genau hin! Tipp auf 🔊.", loesung: `${a.bilder[a.wort]} ${a.wort}`, lob: waehle(["Great!", "Well done!", "Yes!"]),
       });
       box.classList.add("ss-wahl");
-      LS.sprich(a.wort, "en");
+      LS.sprich(a.wort, "en", "", ctx.uhrWarten());
       return;
     }
 
@@ -246,7 +246,7 @@ const SPIEL = {
         hinweis: "Hör nochmal genau hin und sprich das Wort leise nach. Tipp auf 🔊.",
         loesung: `${a.wort}: ${korbInhalt(a, a.richtig).text}`, lob: `Richtig: ${a.wort}`,
       });
-      LS.sprich(a.wort, "en");
+      LS.sprich(a.wort, "en", "", ctx.uhrWarten());
       return;
     }
 
@@ -272,7 +272,7 @@ const SPIEL = {
         hinweis: "Hör nochmal genau hin und sprich die Wörter auf den Körben leise nach.",
         loesung: `${a.wort} klingt wie ${S5_LAUTE[a.richtig].beispiel}`, lob: `Richtig: ${a.wort} klingt wie ${S5_LAUTE[a.richtig].beispiel}`,
       });
-      LS.sprich(a.wort, "en");
+      LS.sprich(a.wort, "en", "", ctx.uhrWarten());
       return;
     }
 

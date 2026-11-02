@@ -165,7 +165,7 @@ const SPIEL = {
       kacheln.append(k);
     }
     ctx.flaeche.append(felder, kacheln);
-    LS.sprich(ziel, "en");
+    LS.sprich(ziel, "en", "", ctx.uhrWarten());
     if (ctx.nr === 0) ctx.sag("Tipp die Buchstaben der Reihe nach an. Mit 🔊 hörst du das Wort nochmal.");
   },
 };

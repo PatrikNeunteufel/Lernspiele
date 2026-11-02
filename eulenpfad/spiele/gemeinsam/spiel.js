@@ -633,8 +633,8 @@ const LS = (() => {
   const gleicherModus = (e, spiel, stufe, mitTimer) => e.spiel === spiel && e.stufe === stufe && !!e.timer === !!mitTimer;
   /**
    * Endlos mit Timer (Entscheide Patrik F1 a, F2 a, 2026-10-31): Die Zeit nähert sich einem Boden, der aus
-   * den Handgriffen der Aufgabe folgt (ctx.schritte): grundzeit + schritte × jeSchritt, dazu die Zeit, in der
-   * das Kind nur warten kann (ctx.wartezeit, z. B. eine vorgespielte Melodie). Je gelöste Aufgabe
+   * den Handgriffen der Aufgabe folgt (ctx.schritte): grundzeit + schritte × jeSchritt. Wartezeit zählt nicht
+   * dazu: Die Uhr startet erst, wenn das Kind antworten kann (F1 a, LERN_Session9). Je gelöste Aufgabe
    * fällt 8 % der restlichen Spanne weg — anfangs grosse Schritte, dann immer kleinere, ohne abrupten Halt.
    * Grundzeit und Schrittzeit sind Annahmen, bis gemessene Zeiten von Kindern vorliegen. Ohne Angabe der
    * Handgriffe (darf nicht vorkommen, das Testskript prüft es) gilt als Boden ersatzweise 40 % der Startzeit.
@@ -647,11 +647,11 @@ const LS = (() => {
   const SERIE_VERSUCHE = 40;
 
   const ENDLOS_TEMPO = { annaeherung: 0.92, grundzeit: 1.2, jeSchritt: 0.5, ersatzBoden: 0.4 };
-  const endlosBoden = (start, schritte, warten) => Math.min(start,
-    schritte > 0 ? ENDLOS_TEMPO.grundzeit + warten + schritte * ENDLOS_TEMPO.jeSchritt : start * ENDLOS_TEMPO.ersatzBoden);
+  const endlosBoden = (start, schritte) => Math.min(start,
+    schritte > 0 ? ENDLOS_TEMPO.grundzeit + schritte * ENDLOS_TEMPO.jeSchritt : start * ENDLOS_TEMPO.ersatzBoden);
   /** Sekunden für die nächste Endlos-Aufgabe, auf eine Zehntelsekunde gerundet. */
-  function endlosSekunden(start, geschafft, schritte, warten = 0) {
-    const boden = endlosBoden(start, schritte, warten);
+  function endlosSekunden(start, geschafft, schritte) {
+    const boden = endlosBoden(start, schritte);
     return Math.round((boden + (start - boden) * ENDLOS_TEMPO.annaeherung ** geschafft) * 10) / 10;
   }
   /** Anzeige der Zeit: unter 10 s mit einer Nachkommastelle (Komma), sonst ganze Sekunden. */
@@ -717,10 +717,14 @@ const LS = (() => {
   // Sprachausgabe der Browser nicht.
   const STIMMLAGE = { "": { pitch: 1, rate: 0.85 }, gut: { pitch: 1.35, rate: 1 }, hinweis: { pitch: 0.85, rate: 0.78 } };
   /** Text vorlesen; art: "" (Aufgabe), "gut" (Lob), "hinweis" (Tipp). false ohne Stimme oder bei Ton aus. */
-  function sprich(text, sprache = "en", art = "") {
-    if (!tonAn) return false; // Ton aus (🔇 in der Kopfzeile) gilt auch für die Stimme
+  function sprich(text, sprache = "en", art = "", fertig = null) {
+    // fertig: einmal gerufen, wenn die Stimme fertig ist (ctx.uhrWarten) — gleich danach, wenn nichts gesprochen wird.
+    let gerufen = false;
+    const ende = () => { if (!gerufen && fertig) { gerufen = true; fertig(); } };
+    const nichts = () => { setTimeout(ende, 0); return false; };
+    if (!tonAn) return nichts(); // Ton aus (🔇 in der Kopfzeile) gilt auch für die Stimme
     const v = stimme(sprache);
-    if (!v) return false;
+    if (!v) return nichts();
     try {
       const u = new SpeechSynthesisUtterance(text);
       u.voice = v;
@@ -728,10 +732,13 @@ const LS = (() => {
       const lage = STIMMLAGE[art] || STIMMLAGE[""];
       u.rate = lage.rate;
       u.pitch = lage.pitch;
+      u.onend = u.onerror = ende;
+      // Manche Browser melden das Ende nicht: spätestens nach einer groben Sprechdauer.
+      if (fertig) setTimeout(ende, (1 + text.length * 0.1) / lage.rate * 1000);
       speechSynthesis.cancel();
       speechSynthesis.speak(u);
       return true;
-    } catch { return false; }
+    } catch { return nichts(); }
   }
   /**
    * Spiel starten, das eine Stimme braucht: sofort, wenn sie schon da ist (so auch im Testskript),
@@ -1021,31 +1028,45 @@ const LS = (() => {
   // ---------- Bereit machen: ▶ Los, 3-2-1 (Wunsch Patrik, LERN_Session8) ----------
 
   /**
-   * Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): Erst ist element verdeckt und darüber steht
-   * „▶ Los!“; nach dem Tippen zählt es 3, 2, 1 herunter, dann wird element sichtbar und weiter() läuft (dort startet
-   * das Spiel seine Zeigezeit). Mit Timer (ctx.mitTimer) fehlt der Knopf, weil die Zeit schon läuft: nur 3-2-1.
-   * element muss schon in der Fläche hängen. Wird die Aufgabe inzwischen ersetzt, passiert nichts mehr.
+   * Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): Erst ist element verdeckt. Bei der ersten
+   * Aufgabe einer Runde, nach einer Aufgabe mit Fehler und im Mix (ctx.losKnopf) steht darüber „▶ Los!“; nach dem
+   * Tippen zählt es 3, 2, 1 herunter. Sonst erscheint nur kurz 👀 (LERN-38). Dann wird element sichtbar und
+   * weiter(uhrLos) läuft (dort startet das Spiel seine Zeigezeit). Die Uhr wartet so lange (F1 a, LERN_Session9):
+   * Sie startet nach weiter() — oder mit { uhr: false } erst, wenn das Spiel uhrLos() ruft (Merk-Blick: wenn
+   * das veränderte Bild erscheint). element muss schon in der Fläche hängen. Wird die Aufgabe inzwischen
+   * ersetzt, passiert nichts mehr.
    */
-  function losGehts(ctx, element, weiter, { zaehlen = 3 } = {}) {
+  const AUFPASSEN_MS = 1000;
+  function losGehts(ctx, element, weiter, { zaehlen = 3, uhr = true } = {}) {
+    const uhrLos = ctx.uhrWarten();
     const huelle = el("div", { class: "los-huelle wartet" });
     element.replaceWith(huelle);
     const zahl = el("div", { class: "los-zahl" });
     const ueber = el("div", { class: "los-ueber" }, zahl);
     huelle.append(element, ueber);
-    ctx.wartezeit(zaehlen);
     const noch = () => ctx.flaeche.contains(huelle) && !ctx.vorbei();
+    const zeigen = () => {
+      if (!noch()) return;
+      huelle.classList.remove("wartet");
+      ueber.remove();
+      weiter(uhrLos);
+      if (uhr) uhrLos();
+    };
     const zaehle = n => {
       if (!noch()) return;
-      if (n === 0) { huelle.classList.remove("wartet"); ueber.remove(); weiter(); return; }
+      if (n === 0) return zeigen();
       zahl.textContent = String(n);
       ton("tipp");
       setTimeout(() => zaehle(n - 1), 800);
     };
-    if (ctx.mitTimer) return zaehle(zaehlen);
+    if (!ctx.losKnopf) {
+      zahl.textContent = "👀";
+      setTimeout(zeigen, AUFPASSEN_MS);
+      return;
+    }
     const los = el("button", { type: "button", class: "knopf gruen los-knopf", text: "▶ Los!", "aria-label": "Los, ich bin bereit",
       onclick: () => { los.remove(); zaehle(zaehlen); } });
     ueber.prepend(los);
-    ctx.schritte(1);
   }
 
   // ---------- Flug in einen Korb ----------
@@ -1444,6 +1465,7 @@ const LS = (() => {
       const fehlerAufgaben = [];
       const aufgabenZeiten = []; // je Aufgabe: { ms, versuche, zeitUm, geloest }
       let uhr = null;            // laufender Timer der aktuellen Aufgabe
+      let aufgabeLauf = 0;       // zählt die gestellten Aufgaben; ein später Uhrstart der vorigen (ctx.uhrWarten) bleibt wirkungslos
       // Wiederholungen (Vorgabe Patrik 2026-10-31): In einer Runde kommt höchstens eine Aufgabe ein
       // zweites Mal, nie direkt hintereinander. Gibt die Stufe nicht genug verschiedene Aufgaben her,
       // endet die Runde früher (anzahl wird kleiner). Endlos: keine der letzten 30 Aufgaben nochmal;
@@ -1543,10 +1565,18 @@ const LS = (() => {
         let loesungVorab = null; // vom Spiel mit ctx.loesung() genannt, für die Testhilfe
         let eigeneKennung = null; // vom Spiel mit ctx.kennung() genannt, gegen Wiederholungen
         let schritte = 0; // Handgriffe der Aufgabe (ctx.schritte), für den Boden der Endlos-Zeit
-        let warten = 0;   // Sekunden, in denen das Kind nur warten kann (ctx.wartezeit)
+        let warten = 0;   // Sekunden, in denen das Kind nur warten kann (ctx.wartezeit): so viel später startet die Uhr
+        let uhrWartet = false; // startet die Uhr erst auf ctx.uhrWarten() hin?
+        let zug = 0; // zählt die Züge beim Zeichnen; eine verworfene Fassung startet die Uhr nicht
         let serien = {};  // Merkmale dieser Aufgabe (ctx.serie): Name → Wert
         let vorgehen = null; // wie das Kind vorging (ctx.vorgehen): Art → Wert, für die Statistik
         const start = performance.now();
+        let bereit = null; // ab wann das Kind antworten kann (performance.now()); ab da laufen Uhr und Zeitmessung
+        const lauf = ++aufgabeLauf;
+        // „▶ Los!“ (LS.losGehts) bei der ersten Aufgabe, nach einer Aufgabe mit Fehler und im Mix (dort kommt
+        // dazwischen meist ein anderes Spiel); sonst nur kurz 👀 (LERN-38).
+        const vorige = aufgabenZeiten.at(-1);
+        const losKnopf = mix || !vorige || !vorige.geloest || vorige.versuche > 0 || vorige.zeitUm;
         pruefung.haken?.("aufgabe", { nr });
 
         const fehlerEintrag = (loesungText) => {
@@ -1564,7 +1594,11 @@ const LS = (() => {
           const balken = zeitleiste.firstChild;
           balken.style.width = getComputedStyle(balken).width;
           balken.style.transition = "none";
-          aufgabenZeiten.push({ ms: Math.round(performance.now() - start), versuche, zeitUm, geloest, ...(uebersprungen ? { uebersprungen } : {}), ...(vorgehen ? { vorgehen } : {}) });
+          // Gemessen ab dem Moment, in dem das Kind antworten kann; wer schon vorher antwortet (während Töne
+          // laufen), ab dem Zeichnen.
+          const jetztMs = performance.now();
+          const ab = bereit !== null && bereit <= jetztMs ? bereit : start;
+          aufgabenZeiten.push({ ms: Math.round(jetztMs - ab), versuche, zeitUm, geloest, ...(uebersprungen ? { uebersprungen } : {}), ...(vorgehen ? { vorgehen } : {}) });
         };
 
         jetzt = {
@@ -1579,16 +1613,36 @@ const LS = (() => {
           },
         };
 
-        // Timer erst, wenn die Aufgabe gezeichnet ist: im Endlos-Modus hängt die Zeit an ihren Handgriffen.
-        // Gleiche Startzeit für alle, je gelöste Aufgabe knapper (ENDLOS_TEMPO).
-        function starteUhr() {
-          if (!timer.an) return;
-          const sekunden = endlos ? endlosSekunden(startSekunden, mix ? mixGeschafft : geschafft, schritte, warten) : timer.sekunden;
-          // Balken läuft per CSS-Übergang von voll auf leer; der Fehler zählt einmal, die Aufgabe bleibt offen.
+        /** Balken voll und still, solange die Uhr noch nicht läuft. */
+        function balkenVoll() {
           const balken = zeitleiste.firstChild;
           zeitleiste.classList.remove("um");
           balken.style.transition = "none";
           balken.style.width = "100%";
+          return balken;
+        }
+
+        // Uhr und Zeitmessung beginnen, wenn das Kind antworten kann (Entscheide F1 a, F2 a, LERN_Session9):
+        // gleich nach dem Zeichnen, nach der Wartezeit (ctx.wartezeit: vorgespielte Töne) oder erst auf
+        // ctx.uhrWarten() hin (LS.losGehts: nach „▶ Los!“, 3-2-1 und Zeigen; Stimme fertig). Wer wartet,
+        // verliert keine Zeit.
+        function bereitMachen() {
+          if (timer.an) balkenVoll();
+          if (uhrWartet) return;
+          if (warten > 0) uhr = setTimeout(starteUhr, warten * 1000);
+          else starteUhr();
+        }
+
+        // Im Endlos-Modus hängt die Zeit an den Handgriffen der Aufgabe.
+        // Gleiche Startzeit für alle, je gelöste Aufgabe knapper (ENDLOS_TEMPO).
+        function starteUhr() {
+          if (erledigt || bereit !== null || lauf !== aufgabeLauf) return;
+          bereit = performance.now();
+          pruefung.haken?.("uhr", { nr });
+          if (!timer.an) return;
+          const sekunden = endlos ? endlosSekunden(startSekunden, mix ? mixGeschafft : geschafft, schritte) : timer.sekunden;
+          // Balken läuft per CSS-Übergang von voll auf leer; der Fehler zählt einmal, die Aufgabe bleibt offen.
+          const balken = balkenVoll();
           void balken.offsetWidth;
           balken.style.transition = `width ${sekunden}s linear`;
           balken.style.width = "0%";
@@ -1626,7 +1680,17 @@ const LS = (() => {
           option: id => optionWert(name, def, id, stufe.id),
           nr,
           flaeche,
-          mitTimer: !!timer.an, // läuft die Zeit schon? (LS.losGehts verzichtet dann auf den Knopf)
+          losKnopf, // LS.losGehts: „▶ Los!“ und 3-2-1 (true) oder nur kurz 👀
+          /**
+           * Uhr und Zeitmessung starten nicht gleich nach dem Zeichnen, sondern erst, wenn die zurückgegebene
+           * Funktion gerufen wird: das Kind kann jetzt antworten (LS.losGehts; Stimme fertig, LS.sprich mit
+           * fertig). Beim Zeichnen rufen; wirkt einmal, auch wenn mehrere warten.
+           */
+          uhrWarten() {
+            uhrWartet = true;
+            const meinZug = zug;
+            return () => { if (meinZug === zug) starteUhr(); };
+          },
           sag: (t, art) => eule.sag(t, art),
           /** Lösung der Aufgabe gleich beim Zeichnen nennen (Text wie loesungText); zeigt sie nur die Testhilfe. */
           loesung(text) { loesungVorab = text || null; },
@@ -1653,7 +1717,10 @@ const LS = (() => {
            * wer sie fehlerfrei löst. Die Bausteine zählen ihre selbst; Pflicht in Endlos-Stufen.
            */
           schritte(n) { schritte += n; },
-          /** Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (vorgespielte Töne). */
+          /**
+           * Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne):
+           * Uhr und Zeitmessung beginnen so viel später.
+           */
           wartezeit(s) { warten += s; },
           /** Ist die Aufgabe gelöst oder nach drei Fehlversuchen aufgelöst? Dann nimmt sie keine Antwort mehr an. */
           vorbei: () => erledigt,
@@ -1735,9 +1802,11 @@ const LS = (() => {
           eigeneKennung = null;
           schritte = 0;
           warten = 0;
+          uhrWartet = false;
+          zug++;
           serien = {};
         }
-        starteUhr();
+        bereitMachen();
       }
 
       /**

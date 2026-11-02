@@ -350,7 +350,7 @@ function pruefeAufgabe(a, stufe) {
 // ---------- Darstellung ----------
 
 /** Text vorlesen (fr); der typografische Apostroph wird für die Stimme gerade. */
-const sprich = text => LS.sprich(text.replace(/’/g, "'"), "fr");
+const sprich = (text, fertig) => LS.sprich(text.replace(/’/g, "'"), "fr", "", fertig);
 
 function blattEl(t, m, gross = false) {
   return el("span", { class: "blatt" + (gross ? " gross" : ""), "aria-label": `${t}. ${MOIS_DE[m]}` },
@@ -409,7 +409,7 @@ const SPIEL = {
     if (a.monat) f.append(monatEl(a.m, a.jahr, null).element);
     if (a.sprich) {
       f.append(el("button", { type: "button", class: "cal-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(a.sprich) }));
-      sprich(a.sprich);
+      sprich(a.sprich, ctx.uhrWarten());
     }
 
     if (a.typ === "reihe") {

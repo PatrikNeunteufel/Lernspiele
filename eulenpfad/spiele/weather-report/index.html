@@ -69,7 +69,7 @@ const DURCHSAGEN = FREI.has("durchsagen") ? WR_DURCHSAGEN : [];
 const WOERTER = FREI.has("durchsagen") ? WR_WOERTER : [];
 
 /** Vorlesen (en); der typografische Apostroph wird für die Stimme gerade. */
-const sprich = t => LS.sprich(t.replace(/’/g, "'"), "en");
+const sprich = (t, fertig) => LS.sprich(t.replace(/’/g, "'"), "en", "", fertig);
 const HAUPT_WETTER = ["sunny", "cloudy", "rainy", "windy", "snowy", "foggy", "stormy"];
 // Woran man ein Wetter im Text erkennt (für die Prüfung: keine weiteren Wetter im Text).
 const STAMM = { sunny: /\bsun(ny|shine)?\b/i, cloudy: /\bcloud/i, rainy: /\brain/i, windy: /\bwind/i, snowy: /\bsnow/i, foggy: /\bfog/i, stormy: /\bstorm|\bthunder/i };
@@ -441,7 +441,7 @@ const SPIEL = {
     const f = ctx.flaeche;
     f.append(el("div", { class: "wr-radio", "aria-hidden": "true", text: a.art === "weg" ? "🗺️📻" : "📻" }));
     f.append(el("button", { type: "button", class: "wr-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(a.sprich) }));
-    sprich(a.sprich);
+    sprich(a.sprich, ctx.uhrWarten());
 
     if (a.art === "zwei") { zweiFragen(ctx, a); return; }
     f.append(el("div", { class: "frage", text: a.en }), el("div", { class: "wr-de", text: a.de }));

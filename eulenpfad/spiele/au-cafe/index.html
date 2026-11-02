@@ -64,7 +64,7 @@ const DIALOGE = FREI.has("dialoge") ? CAFE_DIALOGE : [];
 /** Französisch anzeigen: Leerzeichen vor ? ! : ; geschützt. */
 const fr = t => t.replace(/ ([?!:;])/g, " $1");
 /** Vorlesen (fr); der typografische Apostroph wird für die Stimme gerade. */
-const sprich = t => LS.sprich(t.replace(/’/g, "'"), "fr");
+const sprich = (t, fertig) => LS.sprich(t.replace(/’/g, "'"), "fr", "", fertig);
 const ZAHLEN = [null, "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix",
   "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf", "vingt"];
 const preisText = p => LS.geldText(p * 100);
@@ -380,7 +380,7 @@ const SPIEL = {
     f.append(el("div", { class: "frage", html: a.frage }));
     if (a.sprich) {
       f.append(el("button", { type: "button", class: "cafe-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(a.sprich) }));
-      sprich(a.sprich);
+      sprich(a.sprich, ctx.uhrWarten());
     }
 
     if (a.art === "ordnen") {

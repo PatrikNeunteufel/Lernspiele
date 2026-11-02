@@ -309,7 +309,8 @@ LS.spiel({
     if (ctx.stufe === "s6") ctx.serie("art", a.art === "eins" ? a.merkmal : "zwei");
     if (a.art === "eins" || a.art === "vergleich") ctx.serie("antwort", a.richtig);
     if (a.art === "legen") ctx.serie("zeichen", a.merkmal);
-    ctx.wartezeit(ende(a.toene) + 0.1);
+    // Die Uhr startet, wenn die Töne das erste Mal verklungen sind — das Vorspielen wartet auf die Eule (F2 a).
+    const uhrLos = ctx.uhrWarten();
 
     const f = ctx.flaeche;
     let markiere = () => {}; // Stufe 4: Karte des gerade klingenden Klangs hervorheben
@@ -317,6 +318,7 @@ LS.spiel({
     const abspielen = () => {
       gehoert = true;
       const d = spieleToene(a.toene, a.freq);
+      setTimeout(uhrLos, d * 1000);
       if (!d) { ctx.sag("Der Ton ist aus. Schalte ihn oben rechts ein: 🔊", "hinweis"); return; }
       markiere();
     };
