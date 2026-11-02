@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le ou la?</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(17px, 3.8vw, 22px); font-weight: 800; margin: 2px 0 8px; color: var(--text-leise); }
+  .wortkarte { text-align: center; font-size: clamp(30px, 7vw, 46px); font-weight: 900; margin: 4px auto 14px; color: var(--deko-6);
+    background: #fff; border-radius: 18px; box-shadow: 0 5px 0 var(--rand); padding: 10px 18px; max-width: 520px; overflow-wrap: anywhere; }
+  .wortkarte .lol-bild { display: block; font-size: clamp(48px, 12vw, 72px); line-height: 1.15; }
+  .korb-karte.lol-mehr .bild { font-size: clamp(38px, 10vw, 60px); }
+  .lol-koerbe .korb-knopf { font-size: clamp(24px, 5.4vw, 32px); }
+  .lol-koerbe .korb-knopf .bild { font-size: clamp(24px, 6vw, 34px); }
+  .lol-hoer { display: block; margin: 0 auto 12px; border: none; border-radius: 999px; padding: 10px 24px; font-family: inherit;
+    font-size: clamp(18px, 4vw, 24px); font-weight: 900; background: var(--deko-6); color: #fff; box-shadow: 0 5px 0 var(--deko-7); cursor: pointer; }
+  .lol-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-7); }
+  .lol-wahl .wahl-knopf { font-size: clamp(19px, 4.2vw, 24px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🏷️ Le ou la?</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS2F.5.D.2.a (bestimmter und unbestimmter Artikel, Einzahl und Mehrzahl) und
+// FS2F.5.D.1.a. Basisklasse 5: Französisch ab der 5. Klasse, Stufe 1 ist ein Einstieg ohne Vorkenntnisse.
+// Stufen: s1 le oder la mit Bild · s2 dazu l’ vor Vokal und stummem h · s3 un oder une, gemischt mit
+// le/la/l’ (5.D.2.a) · s4 Mehrzahl erkennen: les und des, auch hören (le chat / les chats) · s5 Mehrzahl
+// bilden mit den Ausnahmen -eau, -al, -eu · s6 alles gemischt ohne Bild, auch von der Mehrzahl zurück.
+// Kein anderes Spiel übt französische Artikel; Mots-Match zeigt die Artikel nur mit dem Wort.
+// Inhalte in woerter.js. Ohne französische Stimme stehen die Hör-Aufgaben als Text da.
+
+const { waehle, mische, el } = LS;
+const ID = "le-ou-la";
+
+// Freigabe (Entscheid L4 a): eine Liste „nomen“. Kennt der Katalog die Listen nicht, gilt alles als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["nomen"]);
+const VOKAL = /^[aeiouyhàâéèêîïôœ]/i;
+const ALLE = NOMEN.map(([wort, genus, plural, bild, de, ausnahme = ""]) => ({ wort, genus, plural, bild, de, ausnahme, vokal: VOKAL.test(wort) }));
+const POOL = FREI.has("nomen") ? ALLE : [];
+const AUSNAHMEN = POOL.filter(w => w.ausnahme && w.ausnahme !== "gleich");
+const OHNE_GLEICH = POOL.filter(w => w.ausnahme !== "gleich");
+
+/** Bestimmter und unbestimmter Artikel der Einzahl. */
+const bestimmt = w => (w.vokal ? "l’" : w.genus === "m" ? "le" : "la");
+const unbestimmt = w => (w.genus === "m" ? "un" : "une");
+/** „le chat“, „l’arbre“, „les chats“. */
+const mit = (artikel, form) => (artikel === "l’" ? "l’" + form : `${artikel} ${form}`);
+const sprechText = t => t.replace(/’/g, "'");
+const LOB = ["Bravo !", "Super !", "Très bien !", "Génial !"];
+const drei = b => b + b + b;
+
+// Jede Art liefert null, wenn die freien Listen nicht genug hergeben.
+const ARTEN = {
+  /** Einzahl: le / la (s1) oder le / la / l’. */
+  bestimmt(koerbe) {
+    const pool = POOL.filter(w => koerbe.includes("l’") || !w.vokal);
+    if (!pool.length) return null;
+    const w = waehle(pool);
+    return { art: "bestimmt", w, form: w.wort, mehrzahl: false, mitBild: true, koerbe, richtig: bestimmt(w), sprich: mit(bestimmt(w), w.wort) };
+  },
+  /** Einzahl: un / une. */
+  unbestimmt() {
+    if (!POOL.length) return null;
+    const w = waehle(POOL);
+    return { art: "unbestimmt", w, form: w.wort, mehrzahl: false, mitBild: true, koerbe: ["un", "une"], richtig: unbestimmt(w), sprich: mit(unbestimmt(w), w.wort) };
+  },
+  /** Hören: eins oder mehrere? le chat / les chats, un chat / des chats. */
+  hoerZahl() {
+    if (!POOL.length) return null;
+    const w = waehle(POOL);
+    const mehrzahl = Math.random() < 0.5;
+    const def = Math.random() < 0.5;
+    const sprich = mehrzahl ? mit(def ? "les" : "des", w.plural) : mit(def ? bestimmt(w) : unbestimmt(w), w.wort);
+    return { art: "hoerZahl", w, mehrzahl, koerbe: ["eins", "mehrere"], richtig: mehrzahl ? "mehrere" : "eins", sprich };
+  },
+  /** Einzahl oder Mehrzahl: le / la / l’ / les. Ohne Bild nur Wörter, deren Mehrzahl man sieht. */
+  mitLes(mitBild) {
+    const pool = mitBild ? POOL : OHNE_GLEICH;
+    if (!pool.length) return null;
+    const w = waehle(pool);
+    const mehrzahl = Math.random() < 0.5;
+    const richtig = mehrzahl ? "les" : bestimmt(w);
+    return { art: "mitLes", w, form: mehrzahl ? w.plural : w.wort, mehrzahl, mitBild, koerbe: ["le", "la", "l’", "les"], richtig, sprich: mit(richtig, mehrzahl ? w.plural : w.wort) };
+  },
+  /** Einzahl oder Mehrzahl: un / une / des. */
+  mitDes(mitBild) {
+    const pool = mitBild ? POOL : OHNE_GLEICH;
+    if (!pool.length) return null;
+    const w = waehle(pool);
+    const mehrzahl = Math.random() < 0.5;
+    const richtig = mehrzahl ? "des" : unbestimmt(w);
+    return { art: "mitDes", w, form: mehrzahl ? w.plural : w.wort, mehrzahl, mitBild, koerbe: ["un", "une", "des"], richtig, sprich: mit(richtig, mehrzahl ? w.plural : w.wort) };
+  },
+  /** Mehrzahl bilden: le gâteau → les gâteaux. Jede zweite Aufgabe ist eine Ausnahme. */
+  mehrzahl(mitBild) {
+    const pool = AUSNAHMEN.length && Math.random() < 0.5 ? AUSNAHMEN : OHNE_GLEICH;
+    if (!pool.length) return null;
+    const w = waehle(pool);
+    const def = Math.random() < 0.5;
+    const pa = def ? "les" : "des";
+    const sa = def ? bestimmt(w) : unbestimmt(w);
+    const richtig = mit(pa, w.plural);
+    const falsch = { regel: mit(pa, w.wort + "s"), ohne: mit(pa, w.wort), artikel: mit(sa, w.plural) };
+    const optionen = [richtig, ...new Set(Object.values(falsch).filter(o => o !== richtig))];
+    return { art: "mehrzahl", w, def, mitBild, zeige: mit(sa, w.wort), richtig, falsch, optionen: mische(optionen), sprich: richtig };
+  },
+  /** Zurück zur Einzahl: les chevaux → le cheval. */
+  einzahl() {
+    if (!OHNE_GLEICH.length) return null;
+    const w = waehle(OHNE_GLEICH);
+    const def = Math.random() < 0.5;
+    const sa = def ? bestimmt(w) : unbestimmt(w);
+    const richtig = mit(sa, w.wort);
+    // anderer Artikel: anderes Geschlecht, bei l’ der Artikel ohne Apostroph (le arbre)
+    const anderer = def ? (w.vokal ? `${w.genus === "m" ? "le" : "la"} ${w.wort}` : mit(w.genus === "m" ? "la" : "le", w.wort))
+      : mit(w.genus === "m" ? "une" : "un", w.wort);
+    const falsch = { endung: mit(sa, w.plural), artikel: anderer };
+    if (w.ausnahme === "al") falsch.au = mit(sa, w.wort.slice(0, -2) + "au");
+    const optionen = [richtig, ...new Set(Object.values(falsch).filter(o => o !== richtig))];
+    return { art: "einzahl", w, def, mitBild: false, zeige: mit(def ? "les" : "des", w.plural), richtig, falsch, optionen: mische(optionen), sprich: richtig };
+  },
+};
+
+// Je Stufe die Arten (mehrfach genannt = häufiger). Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 = 6. Klasse.
+const STUFE = {
+  s1: [() => ARTEN.bestimmt(["le", "la"])],
+  s2: [() => ARTEN.bestimmt(["le", "la", "l’"])],
+  s3: [() => ARTEN.unbestimmt(), () => ARTEN.unbestimmt(), () => ARTEN.bestimmt(["le", "la", "l’"])],
+  s4: [() => ARTEN.hoerZahl(), () => ARTEN.mitLes(true), () => ARTEN.mitDes(true)],
+  s5: [() => ARTEN.mehrzahl(true)],
+  // Königsstufe: ohne Bild, bestimmt und unbestimmt, Mehrzahl bilden und zurück zur Einzahl
+  s6: [() => ARTEN.mitLes(false), () => ARTEN.mitDes(false), () => ARTEN.mehrzahl(false), () => ARTEN.einzahl()],
+};
+
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "le oder la? 🐱 chat → le chat, 🍎 pomme → la pomme",
+  s2: "Dazu l’ vor a, e, i, o, u und stummem h: l’arbre, l’hôtel.",
+  s3: "un oder une? un chat, une pomme — gemischt mit le, la, l’.",
+  s4: "Mehrzahl: les und des. Hör genau: le chat oder les chats?",
+  s5: "Mehrzahl bilden: les chats, les gâteaux, les chevaux.",
+  s6: "Endgegner: alles gemischt, ohne Bild, auch zurück zur Einzahl.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()?.art).filter(Boolean)).size > 1));
+
+/** Mehrzahl nach der Kennzeichnung in woerter.js (für die Prüfung der Liste). */
+function erwarteteMehrzahl(w) {
+  switch (w.ausnahme) {
+    case "": return w.wort + "s";
+    case "eau": case "eu": return w.wort + "x";
+    case "al": return w.wort.slice(0, -2) + "aux";
+    case "gleich": return /[sxz]$/.test(w.wort) ? w.wort : null;
+    case "oeil": return w.wort === "œil" ? "yeux" : null;
+    default: return null;
+  }
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  const erlaubt = { s1: ["bestimmt"], s2: ["bestimmt"], s3: ["unbestimmt", "bestimmt"], s4: ["hoerZahl", "mitLes", "mitDes"], s5: ["mehrzahl"],
+    s6: ["mitLes", "mitDes", "mehrzahl", "einzahl"] }[stufe];
+  if (!erlaubt.includes(a.art)) m.push(`Art ${a.art} gehört nicht in die Stufe`);
+  const w = a.w;
+  if (!POOL.includes(w)) m.push("Wort nicht aus einer freien Liste");
+  const moeglich = a.koerbe || a.optionen;
+  if (moeglich.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+  if (new Set(moeglich).size !== moeglich.length) m.push("doppelte Möglichkeit");
+  if (moeglich.length < 2) m.push("zu wenige Möglichkeiten");
+  // Die richtige Antwort aus den Daten nachrechnen.
+  const soll = {
+    bestimmt: () => bestimmt(w),
+    unbestimmt: () => unbestimmt(w),
+    hoerZahl: () => (a.sprich.startsWith("les ") || a.sprich.startsWith("des ") ? "mehrere" : "eins"),
+    mitLes: () => (a.mehrzahl ? "les" : bestimmt(w)),
+    mitDes: () => (a.mehrzahl ? "des" : unbestimmt(w)),
+    mehrzahl: () => mit(a.def ? "les" : "des", w.plural),
+    einzahl: () => mit(a.def ? bestimmt(w) : unbestimmt(w), w.wort),
+  }[a.art]();
+  if (a.richtig !== soll) m.push(`Lösung ${a.richtig} statt ${soll}`);
+  if (stufe === "s1" && w.vokal) m.push("Stufe 1 mit Wort, das mit Vokal beginnt");
+  if (a.form !== undefined && a.form !== (a.mehrzahl ? w.plural : w.wort)) m.push("gezeigte Form passt nicht");
+  // Ohne Bild darf die Form nicht zugleich Einzahl und Mehrzahl sein (la souris / les souris).
+  if (a.mitBild === false && w.plural === w.wort) m.push("ohne Bild: Einzahl und Mehrzahl gleich");
+  if (a.art === "hoerZahl" && ![mit(bestimmt(w), w.wort), mit(unbestimmt(w), w.wort), "les " + w.plural, "des " + w.plural].includes(a.sprich)) m.push("gesprochener Text passt nicht");
+  if (a.art === "mehrzahl" && w.ausnahme === "gleich") m.push("Mehrzahl bilden mit gleicher Mehrzahl");
+  // Keine falsche Möglichkeit darf selbst eine richtige Form sein (mit dem verlangten Artikel).
+  const gueltig = a.art === "mehrzahl" ? ALLE.map(x => mit(a.def ? "les" : "des", x.plural))
+    : a.art === "einzahl" ? ALLE.map(x => mit(a.def ? bestimmt(x) : unbestimmt(x), x.wort)) : [];
+  if (a.optionen && a.optionen.some(o => o !== a.richtig && gueltig.includes(o))) m.push("eine falsche Möglichkeit ist auch richtig");
+  const sollAnzahl = a.art === "mehrzahl" ? (w.ausnahme ? 4 : 3) : a.art === "einzahl" ? (w.ausnahme === "al" ? 4 : 3) : null;
+  if (sollAnzahl && a.optionen.length !== sollAnzahl) m.push(`${a.optionen.length} statt ${sollAnzahl} Möglichkeiten`);
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  // Liste: Mehrzahl passt zur Kennzeichnung, jedes Wort nur einmal.
+  const falsch = ALLE.filter(x => erwarteteMehrzahl(x) !== x.plural || !["m", "f"].includes(x.genus));
+  if (falsch.length) m.push("Mehrzahl oder Geschlecht passt nicht zur Kennzeichnung: " + falsch.map(x => x.wort).join(", "));
+  if (new Set(ALLE.map(x => x.wort)).size !== ALLE.length) m.push("Wort doppelt in der Liste");
+  return m;
+}
+
+const FRAGE = {
+  bestimmt: "Welcher Artikel passt?",
+  unbestimmt: "un oder une?",
+  hoerZahl: "Hör zu: eins oder mehrere?",
+  mitLes: "Welcher Artikel passt? Zähl genau!",
+  mitDes: "Welcher Artikel passt? Zähl genau!",
+  mehrzahl: "Wie heisst die Mehrzahl?",
+  einzahl: "Wie heisst die Einzahl?",
+};
+
+/** Hinweis nach falscher Wahl; verrät die Lösung nicht. */
+function hinweisFuer(a) {
+  const w = a.w;
+  if (a.art === "hoerZahl") return "Hör genau auf den Anfang: le oder les? un oder des? Tipp auf 🔊.";
+  if (a.art === "mehrzahl") return o => (o === a.falsch.regel ? "Fast! Dieses Wort hat eine besondere Mehrzahl."
+    : o === a.falsch.ohne ? "In der Mehrzahl ändert sich das Wortende." : "Schau auf den Artikel: In der Mehrzahl heisst er anders.");
+  if (a.art === "einzahl") return o => (o === a.falsch.artikel ? "Schau auf den Artikel und den ersten Buchstaben."
+    : "Das Ende stimmt noch nicht: In der Einzahl heisst das Wort anders.");
+  return o => {
+    const mehr = ["les", "des"].includes(o);
+    if (mehr !== a.mehrzahl) return a.mitBild ? "Zähl die Bilder: eins oder mehrere?" : "Schau auf das Wortende: eins oder mehrere?";
+    if (o === "l’") return "l’ steht nur vor a, e, i, o, u oder stummem h.";
+    if (w.vokal && a.koerbe.includes("l’") && !a.mehrzahl) return `Schau auf den ersten Buchstaben von „${a.form}“.`;
+    return "Ist das Wort männlich oder weiblich? Merk es dir mit dem Artikel.";
+  };
+}
+
+LS.spiel({
+  id: ID,
+  einleitung: "Im Französischen hat jedes Nomen einen Artikel: le chat, la pomme. Lern das Wort immer mit dem Artikel! Hilfst du mir, die Artikel zu finden?",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Tipp auf den richtigen Korb. Hör dir das Wort danach mit 🔊 an.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    if (a.koerbe && a.koerbe.length <= 3) ctx.serie("antwort", a.richtig);
+    const w = a.w;
+    const sag = () => LS.sprich(sprechText(a.sprich), "fr");
+    const loesung = a.art === "hoerZahl" ? `„${a.sprich}“ → ${a.richtig}`
+      : a.optionen ? `${a.zeige} → ${a.richtig}` : `${mit(a.richtig, a.form)} = ${w.de}`;
+    ctx.flaeche.append(el("div", { class: "frage", text: FRAGE[a.art] }));
+    const hinweis = hinweisFuer(a);
+
+    if (a.koerbe) {
+      let karte;
+      if (a.art === "hoerZahl") {
+        ctx.kennung(a.sprich);
+        const gehoert = sag();
+        karte = { bild: "👂", text: gehoert ? "Hör zu!" : a.sprich }; // ohne Stimme: lesen statt hören
+        ctx.flaeche.append(el("button", { type: "button", class: "lol-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: sag }));
+      } else karte = { bild: a.mitBild ? (a.mehrzahl ? drei(w.bild) : w.bild) : null, text: a.form };
+      const korbInhalt = a.art === "hoerZahl"
+        ? v => (v === "eins" ? { bild: w.bild, text: "eins" } : { bild: drei(w.bild), text: "mehrere" })
+        : v => ({ text: v });
+      const { karte: k, box } = LS.koerbe(ctx, { karte, koerbe: a.koerbe, korbInhalt, richtig: a.richtig, hinweis, loesung, lob: waehle(LOB) });
+      if (a.mehrzahl && a.mitBild) k.classList.add("lol-mehr");
+      box.classList.add("lol-koerbe");
+      // Gelöst oder aufgelöst: das ganze Wort mit Artikel vorlesen.
+      let gesagt = false;
+      box.addEventListener("click", () => { if (ctx.vorbei() && !gesagt) { gesagt = true; sag(); } });
+    } else {
+      const karte = el("div", { class: "wortkarte" });
+      if (a.mitBild) karte.append(el("span", { class: "lol-bild", text: w.bild }));
+      karte.append(el("span", { text: a.zeige }));
+      ctx.flaeche.append(karte);
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 160, hinweis, loesung, lob: waehle(LOB), beiRichtig: sag })
+        .classList.add("lol-wahl");
+    }
+  },
+});
+</script>
+</body>
+</html>

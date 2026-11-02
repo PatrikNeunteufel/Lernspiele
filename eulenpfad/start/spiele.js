@@ -59,9 +59,9 @@ function zeichneSpiele(box, neu) {
   // Meine Klasse (Entscheide K1 a, K2 a, LERN_Session6): nur Spiele mit einer Stufe genau für die Klasse
   // des Kindes, also Basisklasse ±1. Für Kinder mit Klasse im Profil, vorgegeben an; das Kind darf ihn
   // ausschalten (Profil-Feld meineKlasse, je Kind statt je Browser).
-  const klasse = Number(p.klasse) || null;
-  const nurKlasse = !aufsicht && klasse && p.meineKlasse !== false;
-  if (!aufsicht && klasse) faecher.append(chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), `${klasse}. Klasse`));
+  const klasse = LS.klasseVon(p); // 0 = Kindergarten
+  const nurKlasse = !aufsicht && klasse !== null && p.meineKlasse !== false;
+  if (!aufsicht && klasse !== null) faecher.append(chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), LS.klasseText(klasse)));
   // Für die Aufsicht: nur, was noch zu prüfen ist — Spiel nicht angesehen oder eine eigene Inhaltsliste ungeprüft.
   const zuPruefen = s => LS.spielZuPruefen(s.id) || LS.spielListen(s.id).some(l => !l.von && !l.geprueft);
   const nurZuPruefen = aufsicht && filter.zuPruefen;
@@ -128,7 +128,9 @@ function zeichneSpiele(box, neu) {
     // die Stufenknöpfe starten dann mit Timer bzw. im Endlos-Modus. Der Timer ist dieselbe Einstellung wie im Spiel.
     const timerAn = s.stufen.some(st => LS.timerFuer(name, s.id, st).an);
     const endlosAn = !!s.endlos?.length && p.endlosAn.includes(s.id);
-    const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") + (endlosAn ? " endlos-an" : ""), title: "Antippen: Startbild des Spiels" });
+    // data-vorlesen: langes Drücken liest Name und Beschreibung vor (Kindergarten, 1. Klasse; LERN_Session8)
+    const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") + (endlosAn ? " endlos-an" : ""), title: "Antippen: Startbild des Spiels",
+      "data-vorlesen": `${s.name}. ${s.beschreibung}` });
     k.style.setProperty("--f", s.farbe);
     // Freie Stellen der Karte öffnen das Startbild des Spiels (dort Stufen, Endlos und Timer mit Erklärung).
     k.addEventListener("click", e => { if (!e.target.closest("a, button")) location.href = s.pfad; });
@@ -166,6 +168,7 @@ function zeichneSpiele(box, neu) {
       const a = el("a", {
         class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empf && !gross ? " empfohlen" : ""),
         href: `${s.pfad}?stufe=${st.id}${endlosAn ? "&endlos=1" : ""}`,
+        "data-vorlesen": `${s.name}, Stufe ${st.nr}, ${st.name}. ${LS.stufeFuer(s.id, st.id)}${st.id === empf ? ", für dich empfohlen" : ""}.`,
         title: `${endlosAn ? "♾ Endlos · " : ""}Stufe ${st.nr} · ${st.name} (${LS.stufeFuer(s.id, st.id)})${timer.an ? " · ⏱ mit Timer" : ""}`,
       }, el("span", { class: "stufen-text" }, endlosAn ? schalterSymbol("endlos", true) : st.icon, gross ? ` Stufe ${st.nr} spielen` : `${st.nr}`),
          el("span", { class: "s", text: endlosAn ? (rekord ? `🏆${rekord}` : "") : sterne }));
@@ -189,6 +192,8 @@ function zeichneSpiele(box, neu) {
     box.append(gruppe("fach:" + fach, fach, anzahl,
       ...themen.map(({ t, spiele }) => gruppe("thema:" + t.id, t.titel, spiele.length, gitter(spiele)))));
   }
+  // Langes Drücken auf eine Karte oder einen Stufenknopf liest vor (Kindergarten, 1. Klasse; LERN_Session8).
+  LS.langDruecken(box);
   if (!auswahl.length) {
     box.append(el("div", { class: "karte leer-hinweis",
       text: SPIELE.some(s => LS.spielSichtbar(s.id)) ? "Für diese Auswahl gibt es noch kein Spiel. 🌱"

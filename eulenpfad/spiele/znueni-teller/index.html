@@ -32,7 +32,10 @@
 // f lokale, saisonale Produkte. Inhalte in lebensmittel.js.
 
 const { waehle, mische, el } = LS;
-const ALLTAG = { jeden: { bild: "🍎", text: "jeden Tag" }, selten: { bild: "🍬", text: "nur ab und zu" } };
+// Bilder für „wie oft“, nicht für ein Lebensmittel: sonst passte die Karte „🍎 Apfel“ schon dem Bild nach in den Korb.
+const ALLTAG = { jeden: { bild: "☀️", text: "jeden Tag" }, selten: { bild: "🎉", text: "nur ab und zu" } };
+// Frage je Art; die Eule liest sie vor (rahmen.md Abschnitt 12) und nennt dabei die Körbe.
+const KORB_FRAGE = { alltag: "Jeden Tag oder nur ab und zu?", fruchtGemuese: "Frucht oder Gemüse?", gruppe: "Wohin gehört das?" };
 const ID = "znueni-teller";
 
 // Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
@@ -135,14 +138,15 @@ LS.spiel({
     if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.typ || a.art);
     if (a.art === "korb" && a.koerbe.length <= 3) ctx.serie("antwort", a.richtig);
     if (a.art === "korb") {
-      ctx.flaeche.append(el("div", { class: "frage", text: "Wohin gehört das?" }));
+      ctx.flaeche.append(el("div", { class: "frage", text: KORB_FRAGE[a.typ] }));
       const erkl = GRUPPEN_ZNUENI[a.x.gruppe].erklaerung;
-      LS.koerbe(ctx, {
+      const { karte } = LS.koerbe(ctx, {
         karte: { bild: a.x.bild, text: a.x.name }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: korbInfo,
         // Der Hinweis erklärt den falsch gewählten Korb — die Erklärung des richtigen nennte die Lösung.
         hinweis: k => (ALLTAG[k] ? "Überleg: Viel Zucker, Fett oder Salz — nur ab und zu. Wasser, Früchte, Gemüse, Brot, Milch und Ei — jeden Tag." : `${GRUPPEN_ZNUENI[k].erklaerung} Passt ${a.x.name} dazu?`),
         loesung: `${a.x.name}: ${korbInfo(a.richtig).text}. ${erkl}`, lob: `Richtig! ${erkl}`,
       });
+      karte.querySelector("b").classList.add("frage"); // Name des Lebensmittels vorlesen (rahmen.md Abschnitt 12)
     } else if (a.art === "znueni") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Welches Znüni ist ausgewogen?" }));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 160, inhalt: t => el("span", { class: "teller", text: t }),

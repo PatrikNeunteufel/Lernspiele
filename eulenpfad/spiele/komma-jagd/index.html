@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Komma-Jagd</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 12px; }
+  .regelkarte { background: #fff8e1; border: 3px dashed #f5c451; border-radius: 16px; padding: 8px 14px; font-size: 16px; margin: 0 auto 14px; max-width: 700px; }
+  .regelkarte b { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: #a0703d; }
+  .satz { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; row-gap: 10px; max-width: 760px; margin: 0 auto 18px;
+    font-size: clamp(21px, 5vw, 32px); font-weight: 800; line-height: 1.2; }
+  .satz .kj-wort { padding: 0 1px; }
+  .satz .kj-luecke { border: none; background: transparent; font: inherit; color: var(--knopf); cursor: pointer;
+    width: 26px; height: 1.9em; margin: 0 -2px; padding: 0; position: relative; display: inline-flex; align-items: flex-end; justify-content: flex-start; }
+  .satz .kj-luecke::after { content: ""; position: absolute; left: 50%; bottom: .15em; width: 3px; height: .9em; margin-left: -1.5px; border-radius: 2px; background: var(--rand); }
+  .satz .kj-luecke.gesetzt::after { display: none; }
+  .satz .kj-luecke.gesetzt { color: var(--knopf); font-size: 1.2em; line-height: 1; padding-bottom: .05em; }
+  .satz .kj-luecke.richtig { color: var(--gut); }
+  .satz .kj-luecke:focus-visible { outline: 3px solid var(--knopf); border-radius: 6px; }
+  .kj-pruefen { display: flex; justify-content: center; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>✒️ Komma-Jagd</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.5.E.1.d (Grundanspruch 2. Zyklus): Komma bei Aufzählungen und zwischen übersichtlichen
+// Verbgruppen; D.4.F.1.d: eigene Texte mit dem Komma überarbeiten. s1 Aufzählung mit einem Komma (wie
+// D.4.F.1.c, 4. Klasse), s2–s3 Aufzählungen, dazu Sätze ohne Komma, s4 Verbgruppen, s5 alles gemischt
+// (6. Klasse), s6 Königsstufe: lange Sätze mit Kommas verschiedener Art. Basisklasse 5.
+// Bezug: Die Fehler-Lupe (Liste „komma“) lässt ein einzelnes falsch geschriebenes Wort korrigieren; hier
+// setzt das Kind ALLE Kommas eines Satzes selbst und muss auch erkennen, wo keines hingehört. Die
+// Satz-Reparatur übt Satzanfang und Satzzeichen am Ende, nicht das Komma.
+// Inhalte nur aus woerter.js und nur aus freien Listen (LS.freieListen).
+
+const { waehle, el } = LS;
+const ID = "komma-jagd";
+
+// Freigabe: Kinder bekommen nur Sätze aus freien Listen. Kennt der Katalog die Listen nicht, gilt alles als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : Object.keys(KOMMA_SAETZE));
+
+/** "Ich bleibe zu Hause, weil …" → { woerter: ["Ich", …], kommas: [3] } — Komma nach dem Wort mit diesem Index. */
+function zerlege(satz) {
+  const roh = satz.split(" ");
+  return { woerter: roh.map(w => w.replace(/,$/, "")), kommas: roh.map((w, i) => (w.endsWith(",") ? i : -1)).filter(i => i >= 0) };
+}
+const anzahlKommas = satz => (satz.match(/,/g) || []).length;
+
+// Je Stufe: Quellen mit Filter (Anzahl Kommas), Anteil der Sätze ohne Komma, Regelkarte, knappe Hinweise.
+const STUFE = {
+  s1: { quellen: { aufzaehlung: n => n === 1 }, regel: "aufzaehlung" },
+  s2: { quellen: { aufzaehlung: n => n >= 2 }, regel: "aufzaehlung" },
+  s3: { quellen: { aufzaehlung: () => true }, ohne: 0.3, regel: "aufzaehlung", ohneKarte: true },
+  s4: { quellen: { verbgruppen: n => n === 1 }, ohne: 0.25, regel: "verbgruppen" },
+  s5: { quellen: { verbgruppen: () => true, aufzaehlung: () => true }, ohne: 0.25, braucht: "verbgruppen", ohneKarte: true },
+  s6: { quellen: { verbgruppen: n => n >= 2, aufzaehlung: n => n >= 3 }, ohne: 0.25, braucht: "verbgruppen", ohneKarte: true, knapp: true },
+};
+
+const REGELN = {
+  aufzaehlung: { name: "Aufzählung", text: "Zwischen die Teile einer Aufzählung kommt ein Komma. Vor „und“ und „oder“ steht keines." },
+  verbgruppen: { name: "Verbgruppen", text: "Jede Verbgruppe hat ihr eigenes Verb. Zwischen zwei Verbgruppen steht ein Komma — oft vor weil, wenn, dass, als." },
+};
+const BEIDE_REGELN = "Aufzählung: Komma zwischen den Teilen, nicht vor „und“ oder „oder“. Zwei Verbgruppen mit je einem Verb: Komma dazwischen.";
+
+/** Freie Sätze einer Stufe je Liste: { liste: [sätze] }; Listen ohne Sätze fehlen. */
+function quellenIn(stufe) {
+  const p = STUFE[stufe];
+  const r = {};
+  for (const [liste, filter] of Object.entries(p.quellen)) {
+    if (!FREI.has(liste)) continue;
+    const s = KOMMA_SAETZE[liste].filter(x => filter(anzahlKommas(x)));
+    if (s.length) r[liste] = s;
+  }
+  return r;
+}
+const ohneFrei = stufe => STUFE[stufe].ohne && FREI.has("ohne");
+const angeboten = stufe => Object.keys(quellenIn(stufe)).length > 0 && (!STUFE[stufe].braucht || FREI.has(STUFE[stufe].braucht));
+/** Wie viele verschiedene Listen kann die Stufe ziehen (für die Serienbremse)? */
+const listenZahl = stufe => Object.keys(quellenIn(stufe)).length + (ohneFrei(stufe) ? 1 : 0);
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  if (!angeboten(stufe)) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  const p = STUFE[stufe];
+  const quellen = quellenIn(stufe);
+  const liste = ohneFrei(stufe) && Math.random() < p.ohne ? "ohne" : waehle(Object.keys(quellen));
+  const satz = waehle(liste === "ohne" ? KOMMA_SAETZE.ohne : quellen[liste]);
+  return { liste, satz, ...zerlege(satz) };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!angeboten(stufe)) m.push("Stufe mit den freien Listen nicht angeboten");
+  if (!FREI.has(a.liste)) m.push(`Satz aus der Liste ${a.liste}, die nicht frei ist`);
+  if (a.liste === "ohne" ? !p.ohne : !p.quellen[a.liste]) m.push("Liste nicht in der Stufe");
+  if (!(KOMMA_SAETZE[a.liste] || []).includes(a.satz)) m.push("Satz nicht in der Liste");
+  const n = anzahlKommas(a.satz);
+  if (a.liste === "ohne" && n) m.push("Satz ohne Komma hat ein Komma");
+  if (a.liste !== "ohne" && (!n || !p.quellen[a.liste]?.(n))) m.push("Anzahl Kommas passt nicht zur Stufe");
+  if (a.kommas.length !== n) m.push("Kommas nicht zwischen zwei Wörtern");
+  if (a.kommas.some(i => i >= a.woerter.length - 1)) m.push("Komma am Satzende");
+  if (/ß/.test(a.satz)) m.push("ß im Satz");
+  if (!/^[A-ZÄÖÜ][^,]*.*[.?!]$/.test(a.satz) || /\s{2}|\s,|,\S/.test(a.satz)) m.push("Satz falsch aufgebaut");
+  // Die Regel des Spiels: vor „und“ und „oder“ steht kein Komma (die Listen enthalten keine Kann-Kommas).
+  a.kommas.forEach(i => { if (/^(und|oder)$/.test(a.woerter[i + 1])) m.push("Komma vor und/oder"); });
+  if (a.woerter.some(w => !w)) m.push("leeres Wort");
+  return m;
+}
+
+// ---------- Spiel ----------
+
+const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => angeboten(s)));
+
+LS.spiel({
+  id: ID,
+  einleitung: "Auf der Jagd nach Kommas! Tippe zwischen die Wörter, wo ein Komma hingehört. Nochmals tippen nimmt es weg. Dann „Prüfen“.",
+  anzahl: 8,
+  stufen: nurAngebotene({
+    s1: "Aufzählung mit drei Teilen: ein Komma, vor „und“ keines.",
+    s2: "Lange Aufzählungen: mehrere Kommas.",
+    s3: "Aufzählungen — und Sätze, die gar kein Komma brauchen (Lehrplan 5. Klasse).",
+    s4: "Zwei Verbgruppen: Ich bleibe drinnen, weil es regnet.",
+    s5: "Alles gemischt — ohne Regelkarte.",
+    s6: "Endgegner: lange Sätze mit mehreren Kommas verschiedener Art.",
+  }),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    if (listenZahl(ctx.stufe) > 1) ctx.serie("liste", a.liste);
+    const loesung = a.satz;
+    ctx.loesung(loesung);
+    ctx.schritte(a.kommas.length + 1);
+    const f = ctx.flaeche;
+    if (!p.ohneKarte) {
+      const r = REGELN[p.regel];
+      f.append(el("div", { class: "regelkarte" }, el("b", { text: `Regel: ${r.name}` }), r.text));
+    }
+    f.append(el("div", { class: "frage", text: "Wo fehlen Kommas? Tippe zwischen die Wörter." }));
+
+    const satz = el("div", { class: "satz", "aria-label": "Satz ohne Kommas" });
+    const luecken = [];
+    a.woerter.forEach((w, i) => {
+      satz.append(el("span", { class: "kj-wort", text: w }));
+      if (i === a.woerter.length - 1) return;
+      const l = el("button", { type: "button", class: "kj-luecke", "aria-label": `Komma nach „${w}“`, "aria-pressed": "false" });
+      l.addEventListener("click", () => {
+        if (ctx.vorbei()) return;
+        const an = !l.classList.contains("gesetzt");
+        l.classList.toggle("gesetzt", an);
+        l.textContent = an ? "," : "";
+        l.setAttribute("aria-pressed", String(an));
+        LS.ton("tipp");
+      });
+      satz.append(l);
+      luecken.push(l);
+    });
+    f.append(satz);
+
+    const regelText = p.knapp ? "Lies den Satz halblaut: Wo machst du eine kleine Pause zwischen zwei Teilen?"
+      : p.ohneKarte ? BEIDE_REGELN : REGELN[p.regel].text;
+    const pruefen = el("button", { type: "button", class: "knopf gruen", text: "Prüfen ✓" });
+    pruefen.addEventListener("click", () => {
+      if (ctx.vorbei()) return;
+      const gesetzt = luecken.map((l, i) => (l.classList.contains("gesetzt") ? i : -1)).filter(i => i >= 0);
+      const fehlen = a.kommas.filter(i => !gesetzt.includes(i)).length;
+      const zuviel = gesetzt.filter(i => !a.kommas.includes(i)).length;
+      if (!fehlen && !zuviel) {
+        luecken.forEach(l => l.classList.toggle("richtig", l.classList.contains("gesetzt")));
+        ctx.richtig(a.kommas.length ? `Richtig: ${loesung}` : "Richtig: Dieser Satz braucht kein Komma.");
+        return;
+      }
+      const teile = [];
+      if (p.knapp) teile.push("Noch nicht ganz.");
+      else {
+        if (zuviel) teile.push(zuviel === 1 ? "Ein Komma steht an einer Stelle, wo keines hingehört." : `${zuviel} Kommas stehen an Stellen, wo keines hingehört.`);
+        if (fehlen) teile.push(fehlen === 1 ? "Es fehlt noch ein Komma." : `Es fehlen noch ${fehlen} Kommas.`);
+      }
+      teile.push(regelText);
+      ctx.falsch(teile.join(" "), loesung);
+    });
+    f.append(el("div", { class: "kj-pruefen" }, pruefen));
+    if (ctx.nr === 0) ctx.sag(`Tippe auf die kleinen Striche zwischen den Wörtern.${ohneFrei(ctx.stufe) ? " Ein Satz kann auch ganz ohne Komma richtig sein!" : ""}`);
+  },
+});
+</script>
+</body>
+</html>

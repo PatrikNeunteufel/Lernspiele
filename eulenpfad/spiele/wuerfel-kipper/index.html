@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Würfel-Kipper</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 8px; }
+  .frage b { color: var(--knopf); }
+  .kipp-buehne { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: center; }
+  .wuerfel { width: min(170px, 42vw); display: block; }
+  .wuerfel .flaeche-o { fill: #fff; }
+  .wuerfel .flaeche-v { fill: color-mix(in srgb, var(--deko-7) 14%, #fff); }
+  .wuerfel .flaeche-r { fill: color-mix(in srgb, var(--deko-7) 28%, #fff); }
+  .wuerfel polygon { stroke: var(--text); stroke-width: 3; stroke-linejoin: round; }
+  .wuerfel .auge { fill: var(--text); }
+  .wuerfel .auge.eins { fill: var(--deko-2); }
+  .kipp-folge { display: flex; flex-direction: column; gap: 6px; }
+  .kipp-chip { border: 2px solid var(--rand); border-radius: 14px; padding: 6px 12px; font-weight: 800; font-size: clamp(16px, 3.8vw, 20px); background: #fff; white-space: nowrap; }
+  .kipp-chip .pfeil-gross { font-size: 1.3em; margin-right: 6px; color: var(--deko-1); }
+  .weg-karte { width: min(300px, 80vw); display: block; }
+  .weg-karte .feld { fill: #fff; stroke: var(--rand); stroke-width: 2; }
+  .weg-karte .feld.ziel { fill: var(--gut-hell); stroke: var(--gut); }
+  .weg-karte .spur { fill: none; stroke: var(--deko-1); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+  .weg-karte .spitze { fill: var(--deko-1); }
+  .weg-karte .stein { fill: #fff; stroke: var(--text); stroke-width: 3; }
+  .weg-karte .stein-zahl { font-size: 24px; font-weight: 900; fill: var(--text); }
+  .weg-karte .marke { font-size: 26px; }
+  .kipp-knoepfe { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+  .kipp-knoepfe .knopf { min-width: 120px; }
+  .wahl-knopf { font-size: clamp(26px, 6vw, 34px); font-weight: 900; min-width: 64px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎲 Würfel-Kipper</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.A.2.f (Grundanspruch 2. Zyklus): Körper kippen und drehen; MA.2.C.3.e: die Lage
+// von Körpern im Kopf ändern, Würfel kippen (Beispiel dort sinngemäss: einen Würfel viermal kippen,
+// bis dieselbe Zahl oben liegt).
+// Basisklasse 5: s1 4. Klasse (Gegenseiten ergeben 7), s2–s4 5. Klasse, s5 6. Klasse, s6 Königsstufe.
+// Bezug: Netz-Falter (Basisklasse 4) fragt nach gegenüberliegenden Flächen im Netz, Würfelbau-Blick
+// nach Ansichten von Würfelgebäuden. Hier wird ein einzelner Spielwürfel bewegt: Die 7er-Regel ist
+// nur Stufe 1, danach geht es um die Lage nach dem Kippen.
+//
+// Der Spielwürfel: Gegenseiten ergeben 7. Händigkeit: Die Seiten 1, 2 und 3 laufen um ihre
+// gemeinsame Ecke, von aussen gesehen, GEGEN den Uhrzeigersinn („rechtshändig“). So sind die
+// westlichen Spielwürfel gebaut (Wikipedia „Dice“, abgerufen 2026-11-02: „If those faces run
+// counterclockwise, the die is called right-handed … Western dice are normally right-handed“).
+// Beispiel: 1 oben, 2 vorne, dann 3 rechts. Die Augenbilder 2, 3 und 6 liegen im Bild immer gleich
+// schräg; ihre Drehlage auf echten Würfeln ist nicht nachgebildet.
+//
+// Lage: welche Zahl wo liegt — o(ben), u(nten), v(orne, zum Kind), h(inten), r(echts), l(inks).
+// Kippen nach rechts heisst: Der Würfel rollt über seine rechte untere Kante, die obere Seite
+// landet rechts.
+
+const { zufall, waehle, mische, el } = LS;
+const SVGNS = "http://www.w3.org/2000/svg";
+
+const HAENDIGKEIT = +1; // +1: 1-2-3 gegen den Uhrzeigersinn (westlich), −1: im Uhrzeigersinn
+const SEITEN = ["o", "u", "v", "h", "r", "l"];
+const GEGEN = { o: "u", u: "o", v: "h", h: "v", r: "l", l: "r" };
+// Rechtshändiges Koordinatensystem: x nach rechts, y nach oben, z nach vorne (zum Kind).
+const NORMALE = { r: [1, 0, 0], l: [-1, 0, 0], o: [0, 1, 0], u: [0, -1, 0], v: [0, 0, 1], h: [0, 0, -1] };
+
+const RICHTUNGEN = ["rechts", "links", "vorne", "hinten"];
+const UMKEHR = { rechts: "links", links: "rechts", vorne: "hinten", hinten: "vorne" };
+// Kippen als Tausch der Seiten: neu[seite] = alt[KIPP[d][seite]]
+const KIPP = {
+  rechts: { r: "o", u: "r", l: "u", o: "l", v: "v", h: "h" },
+  links:  { l: "o", u: "l", r: "u", o: "r", v: "v", h: "h" },
+  vorne:  { v: "o", u: "v", h: "u", o: "h", r: "r", l: "l" },
+  hinten: { h: "o", u: "h", v: "u", o: "v", r: "r", l: "l" },
+};
+// Dieselben Kipps als Drehung der Normalen (zur unabhängigen Prüfung in pruefeAufgabe)
+const DREHUNG = {
+  rechts: ([x, y, z]) => [y, -x, z],
+  links:  ([x, y, z]) => [-y, x, z],
+  vorne:  ([x, y, z]) => [x, -z, y],
+  hinten: ([x, y, z]) => [x, z, -y],
+};
+// Auf der Wegkarte (von oben gesehen): hinten ist oben im Bild, vorne unten.
+const SCHRITT = { rechts: [1, 0], links: [-1, 0], hinten: [0, -1], vorne: [0, 1] };
+const PFEIL = { rechts: "➡", links: "⬅", hinten: "⬆", vorne: "⬇" };
+const WORT = { rechts: "nach rechts", links: "nach links", hinten: "nach hinten", vorne: "nach vorne" };
+const ORT = { o: "oben", u: "unten", v: "vorne", h: "hinten", r: "rechts", l: "links" };
+
+const kippe = (lage, d) => Object.fromEntries(SEITEN.map(s => [s, lage[KIPP[d][s]]]));
+const rolle = (lage, weg) => weg.reduce(kippe, lage);
+const gleicheLage = (a, b) => SEITEN.every(s => a[s] === b[s]);
+
+/** Alle 24 Lagen des Spielwürfels: von 1 oben, 2 vorne, 3 rechts aus durch Kippen erreicht. */
+const START = HAENDIGKEIT > 0 ? { o: 1, u: 6, v: 2, h: 5, r: 3, l: 4 } : { o: 1, u: 6, v: 2, h: 5, r: 4, l: 3 };
+const LAGEN = (() => {
+  const gesehen = new Map([[JSON.stringify(START), START]]);
+  const offen = [START];
+  while (offen.length) {
+    const l = offen.pop();
+    for (const d of RICHTUNGEN) {
+      const n = kippe(l, d), k = JSON.stringify(n);
+      if (!gesehen.has(k)) { gesehen.set(k, n); offen.push(n); }
+    }
+  }
+  return [...gesehen.values()];
+})();
+
+/** Prüft einen Spielwürfel: Zahlen 1–6 je einmal, Gegenseiten 7, Händigkeit. Liefert Mängel. */
+function pruefeWuerfel(lage) {
+  const m = [];
+  const zahlen = SEITEN.map(s => lage[s]);
+  if ([...zahlen].sort().join("") !== "123456") m.push("nicht die Zahlen 1 bis 6");
+  for (const s of ["o", "v", "r"]) if (lage[s] + lage[GEGEN[s]] !== 7) m.push(`Gegenseiten ${ORT[s]}/${ORT[GEGEN[s]]} ergeben nicht 7`);
+  const wo = z => NORMALE[SEITEN.find(s => lage[s] === z)];
+  const [a, b, c] = [wo(1), wo(2), wo(3)];
+  if (a && b && c) {
+    const det = a[0] * (b[1] * c[2] - b[2] * c[1]) - a[1] * (b[0] * c[2] - b[2] * c[0]) + a[2] * (b[0] * c[1] - b[1] * c[0]);
+    if (det !== HAENDIGKEIT) m.push("Händigkeit falsch (1-2-3 um die Ecke)");
+  }
+  return m;
+}
+
+/** Unabhängig nachgerechnet: Normalen drehen, dann ablesen, welche Zahl an der Seite liegt. */
+function zahlNachDrehung(lage, weg, seite) {
+  let normalen = SEITEN.map(s => ({ zahl: lage[s], n: NORMALE[s] }));
+  for (const d of weg) normalen = normalen.map(x => ({ zahl: x.zahl, n: DREHUNG[d](x.n) }));
+  const ziel = NORMALE[seite];
+  return normalen.find(x => x.n.every((w, i) => w === ziel[i])).zahl;
+}
+
+// Je Stufe: Aufgabenarten und Länge des Wegs
+const STUFE = {
+  s1: { arten: ["gegenseite"] },
+  s2: { arten: ["kipps"], laenge: 1 },
+  s3: { arten: ["kipps"], laenge: 2 },
+  s4: { arten: ["weg"], laenge: [3, 4], karte: { b: 5, h: 4 } },
+  s5: { arten: ["weg", "weg", "weg", "viermal"], laenge: [4], karte: { b: 5, h: 4 }, fragen: ["o", "v"] },
+  s6: { arten: ["ziel"], karte: { b: 4, h: 4 }, zielZahl: 6 },
+};
+
+// ---------- Aufgaben als Daten ----------
+
+function zufallsWeg(laenge) {
+  const w = [];
+  while (w.length < laenge) {
+    const d = waehle(RICHTUNGEN);
+    if (w.length && UMKEHR[d] === w[w.length - 1]) continue; // nicht gleich zurückkippen
+    w.push(d);
+  }
+  return w;
+}
+
+/** Weg auf der Karte ohne Umkehr und ohne ein Feld zweimal; null, wenn es nicht passt. */
+function kartenWeg(karte, laenge) {
+  const start = [zufall(0, karte.b - 1), zufall(0, karte.h - 1)];
+  const felder = [start], weg = [];
+  for (let i = 0; i < laenge; i++) {
+    const [x, y] = felder[felder.length - 1];
+    const moegliche = RICHTUNGEN.filter(d => {
+      const nx = x + SCHRITT[d][0], ny = y + SCHRITT[d][1];
+      return nx >= 0 && ny >= 0 && nx < karte.b && ny < karte.h && !felder.some(([fx, fy]) => fx === nx && fy === ny);
+    });
+    if (!moegliche.length) return null;
+    const d = waehle(moegliche);
+    weg.push(d);
+    felder.push([x + SCHRITT[d][0], y + SCHRITT[d][1]]);
+  }
+  return { start, weg };
+}
+
+/** Alle kürzesten Wege mit nh Schritten waagrecht (hr) und nv senkrecht (vr). */
+function kuerzesteWege(nh, hr, nv, vr) {
+  if (!nh && !nv) return [[]];
+  const w = [];
+  if (nh) for (const rest of kuerzesteWege(nh - 1, hr, nv, vr)) w.push([hr, ...rest]);
+  if (nv) for (const rest of kuerzesteWege(nh, hr, nv - 1, vr)) w.push([vr, ...rest]);
+  return w;
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const lage = waehle(LAGEN);
+    let a = null;
+    if (art === "gegenseite") {
+      const frage = waehle(["u", "h", "l"]);
+      a = { art, lage, weg: [], frage, antwort: lage[frage] };
+    } else if (art === "kipps") {
+      const weg = zufallsWeg(p.laenge);
+      a = { art, lage, weg, frage: "o", antwort: rolle(lage, weg).o };
+    } else if (art === "weg") {
+      const k = kartenWeg(p.karte, waehle(p.laenge));
+      if (!k) continue;
+      const frage = p.fragen ? waehle(p.fragen) : "o";
+      a = { art, lage, weg: k.weg, start: k.start, frage, antwort: rolle(lage, k.weg)[frage] };
+    } else if (art === "viermal") {
+      const d = waehle(RICHTUNGEN);
+      a = { art, lage, weg: [d, d, d, d], frage: "o", antwort: lage.o };
+    } else if (art === "ziel") {
+      const hr = waehle(["rechts", "links"]), vr = waehle(["hinten", "vorne"]);
+      const nh = zufall(1, 3), nv = zufall(1, 3);
+      if (nh + nv < 3 || nh + nv > 4) continue;
+      const sx = hr === "rechts" ? zufall(0, p.karte.b - 1 - nh) : zufall(nh, p.karte.b - 1);
+      const sy = vr === "vorne" ? zufall(0, p.karte.h - 1 - nv) : zufall(nv, p.karte.h - 1);
+      const gute = kuerzesteWege(nh, hr, nv, vr).filter(w => rolle(lage, w).o === p.zielZahl);
+      a = { art, lage, start: [sx, sy], hr, nh, vr, nv, zielZahl: p.zielZahl, gut: gute[0] || null };
+    }
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "gegenseite", lage: START, weg: [], frage: "u", antwort: 6 };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  m.push(...pruefeWuerfel(a.lage));
+  // Kipp-Logik: jede Richtung viermal = gleiche Lage, hin und zurück = gleiche Lage,
+  // nach jedem Kipp wieder ein gültiger Spielwürfel, Tausch und Drehung stimmen überein.
+  for (const d of RICHTUNGEN) {
+    if (!gleicheLage(rolle(a.lage, [d, d, d, d]), a.lage)) m.push(`viermal ${WORT[d]} kippen ergibt nicht dieselbe Lage`);
+    if (!gleicheLage(rolle(a.lage, [d, UMKEHR[d]]), a.lage)) m.push(`${WORT[d]} und zurück ergibt nicht dieselbe Lage`);
+    const n = kippe(a.lage, d);
+    if (pruefeWuerfel(n).length) m.push(`nach dem Kippen ${WORT[d]} kein gültiger Spielwürfel`);
+    for (const s of SEITEN) if (n[s] !== zahlNachDrehung(a.lage, [d], s)) { m.push(`Kippen ${WORT[d]}: Tausch und Drehung widersprechen sich`); break; }
+  }
+  if (a.art === "ziel") {
+    const wege = kuerzesteWege(a.nh, a.hr, a.nv, a.vr);
+    const gut = wege.filter(w => zahlNachDrehung(a.lage, w, "o") === a.zielZahl);
+    if (!gut.length) m.push("kein kürzester Weg bringt die Zahl nach oben");
+    if (gut.length === wege.length) m.push("jeder Weg ist richtig — keine Wahl");
+    if (a.lage.o === a.zielZahl) m.push("Zielzahl liegt schon oben");
+    if (!a.gut || zahlNachDrehung(a.lage, a.gut, "o") !== a.zielZahl) m.push("genannter Lösungsweg falsch");
+    if (a.nh + a.nv < 3 || a.nh + a.nv > 4) m.push("Weg nicht 3 oder 4 Kipps lang");
+    const [sx, sy] = a.start, zx = sx + a.nh * SCHRITT[a.hr][0], zy = sy + a.nv * SCHRITT[a.vr][1];
+    for (const [x, y] of [[sx, sy], [zx, zy]]) if (x < 0 || y < 0 || x >= p.karte.b || y >= p.karte.h) m.push("Start oder Ziel ausserhalb der Karte");
+    return m;
+  }
+  if (a.antwort !== zahlNachDrehung(a.lage, a.weg, a.frage)) m.push("Antwort falsch (nachgerechnet mit Drehungen)");
+  if (a.antwort !== rolle(a.lage, a.weg)[a.frage]) m.push("Antwort falsch (Tausch)");
+  if (a.art === "gegenseite" && a.antwort !== 7 - a.lage[GEGEN[a.frage]]) m.push("7er-Regel verletzt");
+  if (a.art === "kipps" && a.weg.length !== p.laenge) m.push("falsche Anzahl Kipps");
+  if (a.art === "weg") {
+    if (!p.laenge.includes(a.weg.length)) m.push("falsche Anzahl Kipps");
+    let [x, y] = a.start;
+    const felder = [[x, y]];
+    for (const d of a.weg) {
+      x += SCHRITT[d][0]; y += SCHRITT[d][1];
+      if (x < 0 || y < 0 || x >= p.karte.b || y >= p.karte.h) m.push("Weg verlässt die Karte");
+      if (felder.some(([fx, fy]) => fx === x && fy === y)) m.push("Weg kreuzt sich");
+      felder.push([x, y]);
+    }
+  }
+  if (a.art === "viermal" && (a.weg.length !== 4 || new Set(a.weg).size !== 1 || a.antwort !== a.lage.o)) m.push("viermal gleich kippen: Lösung nicht die Startzahl");
+  if (a.weg.some((d, i) => i && UMKEHR[d] === a.weg[i - 1])) m.push("Weg kippt gleich wieder zurück");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+const svgEl = (tag, attr = {}) => { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); return e; };
+
+// Augen im Feld 0–100 je Seite
+const AUGEN = {
+  1: [[50, 50]], 2: [[25, 25], [75, 75]], 3: [[25, 25], [50, 50], [75, 75]],
+  4: [[25, 25], [75, 25], [25, 75], [75, 75]], 5: [[25, 25], [75, 25], [50, 50], [25, 75], [75, 75]],
+  6: [[25, 22], [25, 50], [25, 78], [75, 22], [75, 50], [75, 78]],
+};
+// Schrägbild: Vorderseite als Quadrat, Oberseite und rechte Seite nach hinten oben verschoben.
+// Je Seite: Ursprung, Richtung u (0→100), Richtung v (0→100) in SVG-Einheiten.
+const S = 100, T = 50, X0 = 10, Y0 = 60;
+const SEITE_BILD = {
+  o: { ursprung: [X0 + T, Y0 - T], u: [S, 0], v: [-T, T] },
+  v: { ursprung: [X0, Y0], u: [S, 0], v: [0, S] },
+  r: { ursprung: [X0 + S, Y0], u: [T, -T], v: [0, S] },
+};
+
+/** Schräg gezeichneter Würfel mit den Seiten oben, vorne, rechts. */
+function wuerfelEl(lage) {
+  const svg = svgEl("svg", { class: "wuerfel", viewBox: "0 0 170 170", role: "img",
+    "aria-label": `Würfel: oben ${lage.o}, vorne ${lage.v}, rechts ${lage.r}` });
+  for (const s of ["v", "r", "o"]) {
+    const { ursprung: [ox, oy], u: [ux, uy], v: [vx, vy] } = SEITE_BILD[s];
+    const ecken = [[0, 0], [1, 0], [1, 1], [0, 1]].map(([a, b]) => `${ox + a * ux + b * vx},${oy + a * uy + b * vy}`).join(" ");
+    svg.append(svgEl("polygon", { class: `flaeche-${s}`, points: ecken }));
+    const g = svgEl("g", { transform: `matrix(${ux / 100} ${uy / 100} ${vx / 100} ${vy / 100} ${ox} ${oy})` });
+    const z = lage[s];
+    for (const [x, y] of AUGEN[z]) g.append(svgEl("circle", { class: z === 1 ? "auge eins" : "auge", cx: x, cy: y, r: z === 1 ? 13 : 9 }));
+    svg.append(g);
+  }
+  return svg;
+}
+
+const FELD = 50;
+/** Wegkarte von oben: Felder, Spur mit Pfeilspitze, Start mit Würfel, Ziel mit Fahne. */
+function karteEl(karte, start, weg, ziel = null) {
+  const svg = svgEl("svg", { class: "weg-karte", viewBox: `-4 -4 ${karte.b * FELD + 8} ${karte.h * FELD + 8}`, role: "img",
+    "aria-label": `Karte von oben, ${weg ? weg.length + " Kipps" : "Start und Ziel"}` });
+  const mitte = ([x, y]) => [x * FELD + FELD / 2, y * FELD + FELD / 2];
+  for (let y = 0; y < karte.h; y++) for (let x = 0; x < karte.b; x++) {
+    const istZiel = ziel && ziel[0] === x && ziel[1] === y;
+    svg.append(svgEl("rect", { class: istZiel ? "feld ziel" : "feld", x: x * FELD, y: y * FELD, width: FELD, height: FELD }));
+  }
+  if (weg) {
+    const punkte = [start];
+    for (const d of weg) { const [x, y] = punkte[punkte.length - 1]; punkte.push([x + SCHRITT[d][0], y + SCHRITT[d][1]]); }
+    svg.append(svgEl("polyline", { class: "spur", points: punkte.map(mitte).map(q => q.join(",")).join(" ") }));
+    const [ex, ey] = mitte(punkte[punkte.length - 1]);
+    const [dx, dy] = SCHRITT[weg[weg.length - 1]];
+    // Pfeilspitze in Fahrtrichtung
+    const spitze = [[ex + dx * 14, ey + dy * 14], [ex - dx * 4 - dy * 11, ey - dy * 4 + dx * 11], [ex - dx * 4 + dy * 11, ey - dy * 4 - dx * 11]];
+    svg.append(svgEl("polygon", { class: "spitze", points: spitze.map(q => q.join(",")).join(" ") }));
+    const fahne = svgEl("text", { class: "marke", x: ex + 4, y: ey - 6, "text-anchor": "start" });
+    fahne.textContent = "🏁";
+    svg.append(fahne);
+  }
+  if (ziel && !weg) {
+    const [zx, zy] = mitte(ziel);
+    const fahne = svgEl("text", { class: "marke", x: zx, y: zy + 9, "text-anchor": "middle" });
+    fahne.textContent = "🏁";
+    svg.append(fahne);
+  }
+  const [sx, sy] = mitte(start);
+  const stein = svgEl("rect", { class: "stein", x: sx - 17, y: sy - 17, width: 34, height: 34, rx: 6 });
+  svg.append(stein);
+  return { svg, stein, mitte };
+}
+
+const chip = (d, i) => el("div", { class: "kipp-chip" }, el("span", { class: "pfeil-gross", text: PFEIL[d] }), `${i != null ? `${i + 1}. ` : ""}${WORT[d]}`);
+
+// ---------- Hinweise (verraten die Lösung nicht) ----------
+
+const H_SIEBEN = "Gegenüberliegende Seiten ergeben zusammen immer 7.";
+const H_KIPP = {
+  rechts: "Kippt der Würfel nach rechts, kommt die linke Seite nach oben.",
+  links: "Kippt der Würfel nach links, kommt die rechte Seite nach oben.",
+  vorne: "Kippt der Würfel nach vorne, kommt die hintere Seite nach oben.",
+  hinten: "Kippt der Würfel nach hinten, kommt die vordere Seite nach oben.",
+};
+const H_SCHRITTE = "Kippe Schritt für Schritt im Kopf und merke dir nach jedem Kipp, was oben, vorne und rechts liegt.";
+
+// ---------- Spiel ----------
+
+LS.spiel({
+  id: "wuerfel-kipper",
+  einleitung: "Ein Spielwürfel: Gegenüberliegende Seiten ergeben zusammen 7. Kippe ihn im Kopf — rollt er nach rechts, landet die obere Seite rechts. Welche Zahl liegt danach oben?",
+  anzahl: 8,
+  stufen: {
+    s1: "Gegenseiten: Welche Zahl liegt unten? (Zusammen 7.)",
+    s2: "Einmal kippen: Was liegt dann oben?",
+    s3: "Zweimal kippen, zum Beispiel nach rechts, dann nach hinten (Lehrplan 5. Klasse).",
+    s4: "Ein Weg mit 3 oder 4 Kipps auf der Karte.",
+    s5: "Viermal kippen (6. Klasse): Was liegt oben, was vorne?",
+    s6: "Endgegner: Wähle den Weg — am Ziel soll die 6 oben liegen.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    if (a.art === "ziel") { zielAufgabe(ctx, a, p); return; }
+
+    const loesungText = a.art === "gegenseite"
+      ? `${ORT[a.frage]} liegt ${a.antwort} (gegenüber von ${7 - a.antwort})`
+      : `${ORT[a.frage]} liegt ${a.antwort}`;
+    const buehne = el("div", { class: "kipp-buehne" }, wuerfelEl(a.lage));
+    let frage, hinweis;
+    if (a.art === "gegenseite") {
+      ctx.serie("frage", a.frage);
+      frage = `Welche Zahl liegt <b>${ORT[a.frage]}</b>?`;
+      hinweis = `${H_SIEBEN} ${{ u: "Unten liegt gegenüber von oben.", h: "Hinten liegt gegenüber von vorne.", l: "Links liegt gegenüber von rechts." }[a.frage]}`;
+    } else if (a.art === "kipps") {
+      if (a.weg.length === 1) ctx.serie("richtung", a.weg[0]);
+      buehne.append(el("div", { class: "kipp-folge" }, ...a.weg.map((d, i) => chip(d, a.weg.length > 1 ? i : null))));
+      frage = a.weg.length === 1 ? `Der Würfel kippt <b>${WORT[a.weg[0]]}</b>. Welche Zahl liegt dann oben?` : `Der Würfel kippt ${a.weg.length}-mal. Welche Zahl liegt dann <b>oben</b>?`;
+      hinweis = a.weg.length === 1 ? `${H_KIPP[a.weg[0]]} ${H_SIEBEN}` : `${H_SCHRITTE} ${H_SIEBEN}`;
+    } else if (a.art === "weg") {
+      if (p.fragen) ctx.serie("frage", a.frage);
+      buehne.append(karteEl(p.karte, a.start, a.weg).svg);
+      frage = `Der Würfel rollt auf dem Weg bis zur 🏁 — ${a.weg.length} Kipps. Welche Zahl liegt am Ende <b>${ORT[a.frage]}</b>?`;
+      hinweis = `${H_SCHRITTE} Auf der Karte ist hinten oben im Bild. ${H_SIEBEN}`;
+    } else {
+      buehne.append(el("div", { class: "kipp-folge" }, ...a.weg.map((d, i) => chip(d, i))));
+      frage = `Der Würfel kippt viermal <b>${WORT[a.weg[0]]}</b>. Welche Zahl liegt dann oben?`;
+      hinweis = "Nach jedem Kipp liegt eine andere Seite oben. Wo ist die obere Seite nach dem vierten Kipp? Kippe in Gedanken mit.";
+    }
+    f.append(el("div", { class: "frage", html: frage }), buehne);
+    LS.auswahl(ctx, { optionen: [1, 2, 3, 4, 5, 6], richtig: a.antwort, hinweis, loesung: loesungText, lob: `Richtig: ${loesungText}.` });
+    if (ctx.nr === 0 && a.art !== "gegenseite") ctx.sag("Kippen nach rechts heisst: Der Würfel rollt über seine rechte Kante. Die obere Seite landet rechts.");
+  },
+});
+
+/** Königsstufe: Das Kind wählt die Reihenfolge der Kipps; am Ziel soll die Zielzahl oben liegen. */
+function zielAufgabe(ctx, a, p) {
+  const f = ctx.flaeche;
+  const ziel = [a.start[0] + a.nh * SCHRITT[a.hr][0], a.start[1] + a.nv * SCHRITT[a.vr][1]];
+  const loesungText = `Zum Beispiel: ${a.gut.map(d => WORT[d]).join(", ")}`;
+  ctx.loesung(loesungText);
+  ctx.schritte(a.nh + a.nv);
+  let lage = a.lage, pos = [...a.start], gefahren = [];
+  const wuerfelPlatz = el("div", {});
+  const karte = karteEl(p.karte, a.start, null, ziel);
+  const zahl = svgEl("text", { class: "stein-zahl", "text-anchor": "middle" });
+  karte.svg.append(zahl);
+  const knoepfe = {};
+  const zeichne = () => {
+    wuerfelPlatz.replaceChildren(wuerfelEl(lage));
+    const [mx, my] = karte.mitte(pos);
+    karte.stein.setAttribute("x", mx - 17); karte.stein.setAttribute("y", my - 17);
+    zahl.setAttribute("x", mx); zahl.setAttribute("y", my + 8); zahl.textContent = String(lage.o);
+    const rest = { [a.hr]: ziel[0] - pos[0] !== 0, [a.vr]: ziel[1] - pos[1] !== 0 };
+    for (const d of [a.hr, a.vr]) knoepfe[d].disabled = !rest[d] || ctx.vorbei();
+  };
+  const zurueck = () => { lage = a.lage; pos = [...a.start]; gefahren = []; zeichne(); };
+  f.append(el("div", { class: "frage", html: `Kippe den Würfel auf dem kürzesten Weg zur 🏁. Dort soll die <b>${a.zielZahl}</b> oben liegen.` }),
+    el("div", { class: "kipp-buehne" }, wuerfelPlatz, karte.svg));
+  const zeile = el("div", { class: "kipp-knoepfe" });
+  for (const d of [a.hr, a.vr]) {
+    const k = el("button", { type: "button", class: "knopf", text: `${PFEIL[d]} ${WORT[d]}` });
+    k.addEventListener("click", () => {
+      if (ctx.vorbei() || k.disabled) return;
+      lage = kippe(lage, d);
+      pos = [pos[0] + SCHRITT[d][0], pos[1] + SCHRITT[d][1]];
+      gefahren.push(d);
+      LS.ton("tipp");
+      zeichne();
+      if (pos[0] !== ziel[0] || pos[1] !== ziel[1]) return;
+      if (lage.o === a.zielZahl) { ctx.richtig(`Geschafft: ${gefahren.map(d2 => WORT[d2]).join(", ")}`); zeichne(); return; }
+      ctx.falsch("Am Ziel liegt eine andere Zahl oben. Überlege: Auf welcher Seite liegt die gesuchte Zahl jetzt — und mit welchem Kipp kommt sie nach oben? Versuche eine andere Reihenfolge.", loesungText);
+      if (ctx.vorbei()) { lage = rolle(a.lage, a.gut); zeichne(); return; }
+      setTimeout(zurueck, 900);
+    });
+    knoepfe[d] = k;
+    zeile.append(k);
+  }
+  const neu = el("button", { type: "button", class: "knopf hell", text: "↺ zum Start" });
+  neu.addEventListener("click", () => { if (!ctx.vorbei()) zurueck(); });
+  zeile.append(neu);
+  f.append(zeile);
+  zeichne();
+  if (ctx.nr === 0) ctx.sag("Es gibt mehrere kürzeste Wege. Nur auf manchen liegt am Ziel die richtige Zahl oben. Plane zuerst im Kopf!");
+}
+</script>
+</body>
+</html>

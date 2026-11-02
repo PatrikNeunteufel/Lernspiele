@@ -46,7 +46,7 @@ untereinander.
 | Seite | `buehne`, `kopf`, `zurueck`, `ton` | Fläche der Seite, Kopfzeile mit Zurück und Ton |
 | Karten | `karte`, `mitte`, `schluss`, `auftrag` | weisse Karte, zentriert, Schlusskarte, Auftragszeile |
 | Knöpfe | `knopf` mit `hell`, `gruen`, `klein`; `knopfzeile`, `link` | alle Knöpfe des Rahmens |
-| Eule | `eule`, `eule-zeile`, `blase` | Eule mit Sprechblase |
+| Eule | `eule`, `eule-zeile`, `blase`, `vorlesen` | Eule mit Sprechblase und Vorlese-Knopf 🔊 (Abschnitt 12) |
 | Runde | `fortschritt`, `zeitleiste`, `zeitbalken`, `testhilfe` | Punkte je Aufgabe, Timer, Testhilfen |
 | Sterne | `sterne`, `sterne-klein`, `aus`, `konfetti`, `flug` | Belohnung und Animation |
 | Angemeldet | `spieler-zeile` | „Du spielst als …“ im Startbild; angemeldet wird auf der Startseite |
@@ -65,7 +65,7 @@ zum Beispiel grössere Wahlknöpfe. Die Liste steht in `LS.RAHMEN_KLASSEN.bauste
 |---|---|
 | `LS.auswahl`, `LS.reihenfolge` | `wahl`, `wahl-knopf`, `bild`, `ablage`, `pfeil` |
 | `LS.koerbe` | `korb-karte`, `korb-reihe`, `korb-knopf` |
-| `LS.tastatur` | `tastatur`, `anzeige`, `ok`, `loeschen` |
+| `LS.tastatur` | `tastatur`, `anzeige`, `ok`, `loeschen`, `zeichen` (Dezimalzeichen) |
 | Noten (`noten.js`) | `hoer-zeile`, `hoer-knopf`, `notenblatt`, `noten-zeile` |
 
 Den Zustand zeigen die Klassen `richtig`, `falsch` und `gewaehlt`. Sie setzt der Baustein selbst;
@@ -155,12 +155,13 @@ auf. Die Optionen sind in `spiel.js` beschrieben.
 | `LS.auswahl(ctx, opt)` | genau eine richtige Antwort unter mehreren Knöpfen |
 | `LS.reihenfolge(ctx, opt)` | Teile in der richtigen Reihenfolge antippen |
 | `LS.koerbe(ctx, opt)` | Karte in den richtigen Korb (sie fliegt hinein) |
-| `LS.tastatur(opt)` | Zifferntastatur mit Anzeigefeld; das Spiel prüft selbst in `onOk` |
+| `LS.losGehts(ctx, element, weiter)` | Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): element bleibt verdeckt, darüber „▶ Los!“, nach dem Tippen 3-2-1, dann sichtbar und `weiter()` startet die Zeigezeit. Mit Timer (`ctx.mitTimer`) ohne Knopf, nur 3-2-1. Benutzt von Merk-Blick, Punkte-Blitz, Blitzlesen, Finger-Zähler (Wunsch Patrik, LERN_Session8) |
+| `LS.tastatur(opt)` | Zifferntastatur mit Anzeigefeld; das Spiel prüft selbst in `onOk`. Mit `dezimal: true` eine Taste für das eingestellte Dezimalzeichen (auch `.` und `,` auf der Tastatur), `nachkomma` begrenzt die Ziffern danach (Standard 3); `onOk(wert, text)` bekommt die Zahl und den getippten Text mit „.“, wenn die Stellenzahl zählt („3.0“ beim Runden) (LERN_Session8, LERN-36) |
 | `NOTEN.zeile`, `NOTEN.hoerKnopf` | Notenbild und Hörknopf (`noten.js`) |
 
 Hilfsfunktionen: `LS.el` (Element bauen), `LS.zahlText` (Schulschreibweise, „30 400“),
 `LS.zerlege`, `LS.zufall`, `LS.waehle`, `LS.mische`, `LS.tippSchritte(wert)` (Handgriffe, um eine Zahl
-einzutippen: je Ziffer einer, dazu OK).
+einzutippen: je Ziffer und Dezimalzeichen einer, dazu OK; die Null in „0.5“ setzt die Tastatur selbst; `tippSchritte(wert, stellen)` für eine feste Stellenzahl wie „3.0“).
 
 **Dezimalzahlen** schreibt ein Spiel nur mit `LS.dezimalText(x, stellen?)` („30 400.5“ oder
 „30 400,5“), **Geldbeträge** nur mit `LS.geldText(rappen)` (Entscheid C1 a): bis zur 3. Klasse
@@ -436,3 +437,44 @@ Entscheide Patrik E1 a, E2 a, E3 a, 2026-11-01 (LERN_Session6). Code in `spiele/
   sie und setzt den Status. Keine Namen von Kindern hineinschreiben: die Datei liegt im öffentlichen Repo.
 - **Vorrang:** Was hier geprüft wird, gilt nach Commit und Push für alle; eine lokale Sperre der Aufsicht
   (`lernspiele:freigabe`) schlägt den Prüfstand weiterhin.
+
+## 12. Kindergarten und Vorlesen
+
+Wunsch Patrik, LERN_Session8: Kinder, die noch nicht lesen, sollen ohne Lesen spielen können, ausser in den
+Spielen, die das Lesen selbst üben; ein Kind im Kindergarten soll sich eintragen lassen.
+
+- **Klasse 0 = Kindergarten** (`LS.KLASSEN`, `LS.klasseVon(profil)`, `LS.klasseText(0)` = „Kindergarten“). Im
+  Profil und beim Anlegen wählbar. Es gibt keine Spiele mit Basisklasse 0: Stufe 1 der Spiele mit Basisklasse 1
+  ist der Kindergarten (Skala „eine Klasse tiefer“). „🎒 Meine Klasse“ zeigt einem Kindergartenkind die Spiele mit
+  Basisklasse 1; die empfohlene Stufe ist 1, auch im Stufenfilter der Startseite. Nie `Number(p.klasse) || …`
+  schreiben — 0 ist eine Klasse.
+- **Vorlesen:** Neben der Eule steht 🗣️ (nicht 🔊: das ist der Ton-Schalter der Kopfzeile); die Eule liest ihre
+  Sprechblase und den Auftrag der Aufgabe vor, also
+  **nur die Elemente `.frage` und `.auftrag`** (die obersten, ohne verschachtelte). Satz, Wortkarte, Sachtext und
+  Antwortknöpfe liest sie nie. Daraus folgt für jedes Spiel: In `.frage` und `.auftrag` steht nur die Anweisung,
+  nie der Stoff, den ein Lesespiel üben will (das Wort, der Buchstabe, der Text).
+  - Profil-Feld `vorlesen`: `auto` (jede neue Aufgabe und jeden Tipp), `knopf` (nur auf 🗣️), fehlt = nach Klasse:
+    Kindergarten und 1. Klasse automatisch, sonst auf 🗣️ (`LS.vorlesenArt`). Auch auf der Stufenwahl jedes Spiels
+    umschaltbar („🗣️ Vorlesen: gleich / auf Knopfdruck“, schreibt dasselbe Profil-Feld).
+  - **Startseite:** Langes Drücken auf eine Spielkarte liest Name und Beschreibung (`data-vorlesen`), auf einen
+    Stufenknopf Spiel, Stufe und für wen (`LS.langDruecken(box)` in `start/spiele.js`); kurzes Tippen öffnet wie
+    bisher.
+  - **Startblatt** eines Spiels: 🗣️ liest die Einleitung, langes Drücken einen Stufenknopf (sein `aria-label`:
+    Stufe, Name, für wen, Beschreibung). Hier und auf der Startseite nur auf Knopfdruck — automatisch liest die
+    Eule nur im Spiel selbst (Vorgabe Patrik, LERN_Session8).
+  - **Blase nur einmal:** Automatisch liest die Eule mit der neuen Aufgabe die Blase nur, wenn sie in dieser
+    Aufgabe etwas gesagt hat — sonst stünde dort noch das Lob der vorigen und käme zweimal.
+  - **Ton aus** (🔇 in der Kopfzeile) geht vor: Dann spricht keine Stimme, auch nicht in den Hörspielen (`sprich`
+    prüft `tonAn`); Ausschalten bricht eine laufende Ansage ab.
+  - **Stimmlage:** Aufgaben normal, Lob (`ctx.richtig`, Blase „gut“) höher und lebhafter, Tipps (Blase „hinweis“)
+    tiefer und ruhiger (`STIMMLAGE`, nur Tonhöhe und Tempo — mehr bietet die Sprachausgabe nicht).
+  - Ausgeschlossen: Spiele mit `vorlesen: false` im Katalog (Lese-Detektiv: die Fragen gehören zum
+    Leseverstehen) und alle Spiele in Englisch und Französisch (fremde Wörter in Fragen, eigene Stimmen).
+  - Stimme: Deutsch, bevorzugt de-CH (`BEVORZUGT`); ohne deutsche Stimme kein Knopf. Bildzeichen (Emoji) werden
+    vor dem Sprechen entfernt, × und : zwischen Zahlen als „mal“ und „durch“ gelesen.
+  - Antwortknöpfe mit Wörtern brauchen für Kinder bis zur 1. Klasse ein Bild oder Zeichen dazu (Beispiel
+    Punkte-Blitz: ⬅️ Links, 🟰 Gleich viele, ➡️ Rechts).
+  - **Langes Drücken** (0,5 s) auf einen Knopf in der Aufgabe liest seinen Text vor (`aria-label`, sonst Text);
+    der Knopf wird dabei nicht ausgelöst (`langDruecken` in `spiel.js`). Nicht in Deutsch (Buchstaben und
+    Wörter auf Knöpfen sind dort Stoff) und überall, wo nicht vorgelesen wird; Katalog-Feld `knoepfeVorlesen`
+    schaltet es je Spiel an oder aus.

@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pflanzen-Bestimmer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.4vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .pb-bild { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto 10px; background: #f4fbef; border-radius: 18px; touch-action: manipulation; }
+  .wahl-knopf .pb-bild { max-width: 150px; margin: 0; background: none; }
+  .wahl-knopf { font-size: clamp(17px, 4vw, 22px); font-weight: 800; }
+  .pb-kandidaten { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 auto 10px; max-width: 680px; }
+  .pb-kandidat { padding: 6px 12px; border-radius: 999px; background: #fff; border: 2px solid var(--deko-3); font-weight: 800; font-size: clamp(14px, 3.4vw, 17px); }
+  .pb-kandidat.weg { opacity: .3; text-decoration: line-through; }
+  .pb-kandidat.gefunden { background: var(--gut-hell); border-color: var(--gut); }
+  .pb-schritt { text-align: center; color: var(--text-leise); font-weight: 800; font-size: 15px; margin: 0 0 4px; }
+  .pb-janein { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin: 0 0 10px; }
+  .pb-janein .wahl-knopf { min-width: 130px; min-height: 64px; }
+  .pb-merkmale { max-width: 620px; margin: 0 auto 12px; padding: 10px 16px; border-radius: 16px; background: #f1f8e9; border: 3px dashed #9ccc65;
+    text-align: center; font-size: clamp(16px, 3.8vw, 20px); font-weight: 800; }
+  .pb-bluete .pb-teil { cursor: pointer; }
+  .pb-bluete .pb-teil.hervor { stroke: var(--deko-2); stroke-width: 4; }
+  .pb-bluete .pb-teil.richtig { stroke: var(--gut); stroke-width: 4; }
+  .pb-bluete .pb-teil.falsch { stroke: var(--hinweis); stroke-width: 4; }
+  .pb-bluete .pb-zeiger { stroke: var(--deko-2); stroke-width: 3; fill: none; pointer-events: none; }
+  .pb-bluete .pb-zeiger-kopf { fill: var(--deko-2); pointer-events: none; }
+  .pb-bluete .pb-schild { font: 900 16px var(--schrift); fill: var(--deko-2); pointer-events: none; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🌿 Pflanzen-Bestimmer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.2.4.e (Grundanspruch 2. Zyklus): Pflanzen Ordnungssystemen zuordnen und die
+// Kriterien begründen — mit Blattformen und Blütenaufbau. Basisklasse 5: s1 4. Klasse (Laub- oder
+// Nadelbaum, NMG.2.4.b), s2–s4 5. Klasse (Blattform; Blattrand und Blattstellung; einfacher
+// Bestimmungsschlüssel mit Ja/Nein-Fragen), s5 6. Klasse (Blütenteile: Kelch-, Blüten-, Staubblatt,
+// Stempel), s6 Königsstufe (längerer Schlüssel, mehrere Merkmale zugleich, Teile von Stempel und
+// Staubblatt). Pflanzen in woerter.js (Liste „pflanzen“); Blätter, Zweige und Blüten zeichnet das
+// Spiel nach diesen Merkmalen. Die Blütenteile gehören zum Spiel (unten).
+// Bezug: Tier-Sortierer (NMG.2.4, nur Tiere), Lebensraum (NMG.2.1), Lebenszyklus (NMG.2.3: Bestäubung,
+// Keimung). Hier wird bestimmt und benannt, nicht der Ablauf von Bestäubung und Keimung geübt.
+
+const { waehle, mische, el } = LS;
+const SVGNS = "http://www.w3.org/2000/svg";
+function S(tag, attr = {}, ...kinder) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attr)) { if (k === "text") e.textContent = v; else e.setAttribute(k, v); }
+  for (const k of kinder) if (k != null) e.append(k);
+  return e;
+}
+const r1 = x => Math.round(x * 10) / 10;
+
+// ---------- Freigabe ----------
+
+const FREI = new Set(LS.spielListen("pflanzen-bestimmer").length ? LS.freieListen("pflanzen-bestimmer") : ["pflanzen"]);
+const PFL = FREI.has("pflanzen") ? PFLANZEN_LISTE : [];
+const pflanze = name => PFLANZEN_LISTE.find(p => p.name === name);
+
+const FORMEN = ["nadelförmig", "eiförmig", "herzförmig", "lanzettlich", "dreieckig", "gelappt", "gefingert", "gefiedert", "dreizählig"];
+const ZUSAMMENGESETZT = ["gefiedert", "gefingert", "dreizählig"];
+const FARBE = { weiss: "#ffffff", gelb: "#ffd21f", rot: "#e5383b", rosa: "#f5a3c7", blau: "#4f7fe0", violett: "#8e5bd6", hellviolett: "#c3a6ee" };
+
+// ---------- Zeichnen: Blätter ----------
+
+/** Umriss eines einfachen Blatts als Punkte; Blattgrund bei (0,0), Spitze bei (0,-L). */
+function umriss(form, L, opt = {}) {
+  const N = 40, b = opt.breite || 1;
+  const sin = t => Math.sin(Math.PI * t);
+  if (form === "herzförmig") {
+    const k = L / 22, rechts = [];
+    for (let i = 0; i <= N; i++) {
+      const s = Math.PI * i / N;
+      rechts.push([16 * Math.sin(s) ** 3 * k * 0.68 * b, (13 * Math.cos(s) - 5 * Math.cos(2 * s) - 2 * Math.cos(3 * s) - Math.cos(4 * s) - 5) * k]);
+    }
+    return [...rechts, ...rechts.slice(1, -1).reverse().map(([x, y]) => [-x, y])];
+  }
+  if (form === "hand") {
+    // Handförmig gelappt (Ahorn): fünf Lappen um einen Mittelpunkt
+    const cy = -0.42 * L, R = 0.55 * L, pkt = [[0, cy + 0.3 * R]];
+    for (let g = 150; g >= -150; g -= 3) {
+      const f = g * Math.PI / 180;
+      const r = R * (0.35 + 0.65 * Math.abs(Math.cos(f * Math.PI / (55 * Math.PI / 180))) ** 2.2) * (1 - 0.35 * Math.abs(g) / 150);
+      pkt.push([r * Math.sin(f), cy - r * Math.cos(f)]);
+    }
+    return pkt;
+  }
+  const w = {
+    "eiförmig": t => 0.34 * L * sin(t) ** 0.75 * (opt.umgekehrt ? 0.7 + 0.45 * t : 1.15 - 0.45 * t) * b,
+    "lanzettlich": t => 0.11 * L * sin(t) ** 0.7 * b,
+    "dreieckig": t => 0.42 * L * (1 - t) * Math.min(1, t / 0.18) ** 0.8,
+    "fieder": t => 0.3 * L * sin(t) ** 0.6 * (0.7 + 0.5 * t) * (0.55 + 0.45 * Math.abs(Math.sin(4.5 * Math.PI * t))),
+  }[form];
+  const rechts = [];
+  for (let i = 0; i <= N; i++) rechts.push([w(i / N), -L * i / N]);
+  return [...rechts, ...rechts.slice(1, -1).reverse().map(([x, y]) => [-x, y])];
+}
+
+/** Punkte im Abstand 'schritt' entlang des geschlossenen Umrisses. */
+function gleichmaessig(pkt, schritt) {
+  const aus = [pkt[0]];
+  let rest = schritt;
+  for (let i = 0; i < pkt.length; i++) {
+    let [ax, ay] = pkt[i];
+    const [bx, by] = pkt[(i + 1) % pkt.length];
+    let len = Math.hypot(bx - ax, by - ay);
+    while (len >= rest) {
+      const f = rest / len;
+      ax += (bx - ax) * f; ay += (by - ay) * f;
+      aus.push([ax, ay]);
+      len = Math.hypot(bx - ax, by - ay);
+      rest = schritt;
+    }
+    rest -= len;
+  }
+  return aus;
+}
+
+/** Pfad des Umrisses mit Blattrand: glatt, gesägt (spitze Zähne) oder gekerbt (rundliche Zähne). */
+function randPfad(pkt, rand, L) {
+  if (rand !== "gesägt" && rand !== "gekerbt") return "M" + pkt.map(p => p.map(r1).join(",")).join(" L") + " Z";
+  const schritt = Math.max(3, L * 0.06), h = schritt * (rand === "gesägt" ? 0.45 : 0.35);
+  const q = gleichmaessig(pkt, schritt);
+  let flaeche = 0;
+  for (let i = 0; i < q.length; i++) { const [ax, ay] = q[i], [bx, by] = q[(i + 1) % q.length]; flaeche += ax * by - bx * ay; }
+  const s = flaeche > 0 ? 1 : -1;
+  let d = `M${q[0].map(r1).join(",")}`;
+  for (let i = 0; i < q.length; i++) {
+    const [ax, ay] = q[i], [bx, by] = q[(i + 1) % q.length];
+    const len = Math.hypot(bx - ax, by - ay) || 1;
+    const nx = s * (by - ay) / len, ny = s * -(bx - ax) / len;
+    if (rand === "gesägt") d += ` L${r1(ax + 0.75 * (bx - ax) + nx * h)},${r1(ay + 0.75 * (by - ay) + ny * h)} L${r1(bx)},${r1(by)}`;
+    else d += ` Q${r1((ax + bx) / 2 + nx * h * 1.6)},${r1((ay + by) / 2 + ny * h * 1.6)} ${r1(bx)},${r1(by)}`;
+  }
+  return d + " Z";
+}
+
+const BLATT_STIL = { fill: "#6cbf4f", stroke: "#2f6b2a", "stroke-width": 1.5, "stroke-linejoin": "round" };
+const STIEL_STIL = { stroke: "#2f6b2a", "stroke-width": 3, "stroke-linecap": "round" };
+
+/** Ein Blatt (einfach oder zusammengesetzt) als Gruppe; Grund bei (0,0), nach oben. */
+function blattGruppe(p, L) {
+  const g = S("g");
+  const teil = (form, l, x, y, winkel, opt) =>
+    S("path", { d: randPfad(umriss(form, l, opt), p.rand, l), transform: `translate(${r1(x)},${r1(y)}) rotate(${winkel})`, ...BLATT_STIL });
+  if (p.blatt === "gefiedert") {
+    const n = p.teile || 7, k = (n - 1) / 2, l = L * (n >= 11 ? 0.24 : n >= 7 ? 0.3 : 0.38);
+    const oben = -0.8 * L;
+    g.append(S("line", { x1: 0, y1: 0.12 * L, x2: 0, y2: oben, ...STIEL_STIL }));
+    for (let i = 0; i < k; i++) {
+      const y = -L * (0.08 + (0.8 - 0.08 - (n >= 11 ? 0.1 : 0.16)) * i / Math.max(1, k - 1));
+      g.append(teil("eiförmig", l, 0, y, 68, { breite: 0.6 }), teil("eiförmig", l, 0, y, -68, { breite: 0.6 }));
+    }
+    g.append(teil("eiförmig", l * 1.05, 0, oben, 0, { breite: 0.6 }));
+  } else if (p.blatt === "gefingert" || p.blatt === "dreizählig") {
+    const drei = p.blatt === "dreizählig", n = drei ? 3 : p.teile || 5, oben = drei ? -0.38 * L : -0.32 * L;
+    g.append(S("line", { x1: 0, y1: 0.1 * L, x2: 0, y2: oben, ...STIEL_STIL }));
+    for (let i = 0; i < n; i++) {
+      const a = drei ? [-58, 0, 58][i] : -80 + 160 * i / (n - 1);
+      const l = drei ? 0.42 * L : 0.6 * L * (1 - 0.35 * Math.abs(a) / 80);
+      g.append(teil("eiförmig", l, 0, oben, a, drei ? { breite: 1.2 } : { breite: 0.5, umgekehrt: true }));
+    }
+  } else {
+    const form = p.blatt === "gelappt" ? (p.lappen === "hand" ? "hand" : "fieder") : p.blatt;
+    g.append(S("line", { x1: 0, y1: 0.2 * L, x2: 0, y2: 0, ...STIEL_STIL }), teil(form, L, 0, 0, 0, {}));
+    // Mittelrippe
+    if (form !== "hand") g.append(S("line", { x1: 0, y1: 0, x2: 0, y2: -0.85 * L, stroke: "#2f6b2a", "stroke-width": 1, opacity: .6 }));
+  }
+  return g;
+}
+
+/** Nadelzweig: einzeln (Fichte rundum, Tanne und Eibe flach), zu zweit, zu fünft, Büschel. */
+function nadelZweig(p) {
+  const g = S("g");
+  const [x1, y1, x2, y2] = [25, 175, 275, 45];
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
+  const linie = (x, y, winkel, l, stil) => {
+    const a = Math.atan2(uy, ux) + winkel * Math.PI / 180;
+    return S("line", { x1: r1(x), y1: r1(y), x2: r1(x + l * Math.cos(a)), y2: r1(y + l * Math.sin(a)), "stroke-linecap": "round", ...stil });
+  };
+  const gruen = { stroke: "#2e6b34", "stroke-width": 3 };
+  const art = p.nadeln;
+  const flach = /Weisstanne|Eibe/.test(p.name);
+  const schritt = art === "einzeln" ? 0.04 : art === "zu zweit" ? 0.075 : 0.1;
+  for (let u = 0.06, i = 0; u < 0.97; u += schritt, i++) {
+    const x = x1 + dx * u, y = y1 + dy * u, seite = i % 2 ? 1 : -1;
+    if (art === "einzeln" && flach) {
+      // flach in zwei Reihen wie ein Kamm
+      for (const s of [1, -1]) {
+        g.append(linie(x, y, s * 80, 24, { stroke: /Eibe/.test(p.name) ? "#1f4d2a" : "#2e6b34", "stroke-width": 5 }));
+        if (/Weisstanne/.test(p.name)) g.append(linie(x, y, s * 80, 22, { stroke: "#e8f5e9", "stroke-width": 1.2 }));
+      }
+    } else if (art === "einzeln") {
+      for (const w of [55, -55, 125, -125]) g.append(linie(x, y, w, 15, gruen));
+    } else if (art === "zu zweit") {
+      g.append(linie(x, y, seite * 35, 44, { stroke: "#3f7d5a", "stroke-width": 2.5 }), linie(x, y, seite * 50, 44, { stroke: "#3f7d5a", "stroke-width": 2.5 }));
+    } else if (art === "zu fünft") {
+      for (const w of [20, 32, 44, 56, 68]) g.append(linie(x, y, seite * w, 46, { stroke: "#2e6b34", "stroke-width": 2 }));
+    } else if (art === "Büschel") {
+      for (let w = -160; w <= 160; w += 22) g.append(linie(x, y, seite * 90 + w * 0.5, 15, { stroke: "#7cb342", "stroke-width": 2 }));
+      g.append(S("circle", { cx: r1(x), cy: r1(y), r: 3, fill: "#795548" }));
+    }
+  }
+  g.prepend(S("line", { x1, y1, x2, y2, stroke: "#795548", "stroke-width": 6, "stroke-linecap": "round" }));
+  return g;
+}
+
+/** Zweig mit Blättern: gegenständig (paarweise) oder wechselständig (abwechselnd). */
+function zweig(p, x0, unten, oben, L) {
+  const g = S("g");
+  g.append(S("line", { x1: x0, y1: unten, x2: x0, y2: oben, stroke: "#795548", "stroke-width": 5, "stroke-linecap": "round" }));
+  const blatt = (y, winkel) => { const b = blattGruppe(p, L); b.setAttribute("transform", `translate(${x0},${r1(y)}) rotate(${winkel})`); return b; };
+  const h = unten - oben;
+  if (p.stellung === "gegenständig") {
+    for (const f of [0.75, 0.38]) g.append(blatt(unten - h * f, -60), blatt(unten - h * f, 60));
+  } else {
+    [0.85, 0.62, 0.39, 0.16].forEach((f, i) => g.append(blatt(unten - h * f, i % 2 ? 58 : -58)));
+  }
+  return g;
+}
+
+/** Blüte von oben: 4, 5 oder 6 Blütenblätter, ein Körbchen oder Köpfchen aus vielen, sonst ein Farbfleck. */
+function bluete(b, cx, cy, R) {
+  const g = S("g");
+  const f = FARBE[b.farbe] || "#ffffff";
+  const rand = b.farbe === "weiss" ? "#b8b8b8" : "rgba(0,0,0,.25)";
+  const mitte = b.farbe === "rot" ? "#2d2d2d" : b.farbe === "gelb" ? "#e08a00" : "#f2c200";
+  if (typeof b.zahl === "number") {
+    const n = b.zahl, ry = n === 4 ? 0.36 * R : n === 6 ? 0.22 * R : 0.3 * R;
+    for (let i = 0; i < n; i++) {
+      const a = -90 + 360 * i / n, ar = a * Math.PI / 180;
+      g.append(S("ellipse", { cx: r1(cx + 0.52 * R * Math.cos(ar)), cy: r1(cy + 0.52 * R * Math.sin(ar)), rx: r1(0.5 * R), ry: r1(ry), fill: f, stroke: rand, "stroke-width": 1.5,
+        transform: `rotate(${a} ${r1(cx + 0.52 * R * Math.cos(ar))} ${r1(cy + 0.52 * R * Math.sin(ar))})` }));
+    }
+    g.append(S("circle", { cx, cy, r: r1(0.2 * R), fill: mitte }));
+  } else if (b.zahl === "viele" && ["rosa", "rot", "violett"].includes(b.farbe)) {
+    // Köpfchen aus vielen kleinen Blüten (Klee)
+    for (let i = 0; i < 30; i++) {
+      const a = i * 2.4, r = 0.6 * R * Math.sqrt(i / 30);
+      g.append(S("circle", { cx: r1(cx + r * Math.cos(a)), cy: r1(cy + r * Math.sin(a)), r: r1(0.14 * R), fill: f, stroke: rand, "stroke-width": 1 }));
+    }
+  } else if (b.zahl === "viele") {
+    // Körbchen: viele schmale Blütenblätter um eine Mitte
+    for (let i = 0; i < 24; i++) {
+      const a = 15 * i, ar = a * Math.PI / 180;
+      g.append(S("ellipse", { cx: r1(cx + 0.6 * R * Math.cos(ar)), cy: r1(cy + 0.6 * R * Math.sin(ar)), rx: r1(0.4 * R), ry: r1(0.08 * R), fill: f, stroke: rand, "stroke-width": 1,
+        transform: `rotate(${a} ${r1(cx + 0.6 * R * Math.cos(ar))} ${r1(cy + 0.6 * R * Math.sin(ar))})` }));
+    }
+    g.append(S("circle", { cx, cy, r: r1(0.3 * R), fill: b.farbe === "gelb" ? "#f2a900" : "#f2c200" }));
+  } else {
+    for (const [ox, oy] of [[-0.25, 0], [0.25, 0], [0, -0.25], [0, 0.22]]) g.append(S("circle", { cx: r1(cx + ox * R), cy: r1(cy + oy * R), r: r1(0.38 * R), fill: f, stroke: rand }));
+  }
+  return g;
+}
+
+/**
+ * Bild einer Pflanze. modus: "blatt" (ein grosses Blatt oder Nadelzweig), "zweig" (Blattstellung),
+ * "voll" (Blatt oder Zweig und Blüte). mitZweig: im Modus "voll" den Zweig statt eines Blatts zeigen.
+ */
+function pflanzeSvg(p, modus, mitZweig = false) {
+  const svg = S("svg", { class: "pb-bild", viewBox: "0 0 300 210", role: "img", "aria-label": "Zeichnung einer Pflanze" });
+  if (p.blatt === "nadelförmig") { svg.append(nadelZweig(p)); return svg; }
+  const blattL = { "herzförmig": 120, "gefingert": 150, "dreizählig": 150 }[p.blatt] || 165;
+  const blattY = p.blatt === "herzförmig" ? 160 : p.blatt === "gelappt" && p.lappen === "hand" ? 185 : 190;
+  if (modus === "blatt") {
+    const b = blattGruppe(p, blattL);
+    b.setAttribute("transform", `translate(150,${blattY})`);
+    svg.append(b);
+  } else if (modus === "zweig") {
+    svg.append(zweig(p, 150, 205, 10, ZUSAMMENGESETZT.includes(p.blatt) ? 85 : 62));
+  } else {
+    const mitBluete = !!p.bluete;
+    const x = mitBluete ? 95 : 150;
+    if (p.blatt && mitZweig && p.stellung) svg.append(zweig(p, x, 205, 10, ZUSAMMENGESETZT.includes(p.blatt) ? 70 : 55));
+    else if (p.blatt) {
+      const s = mitBluete ? 0.8 : 1;
+      const b = blattGruppe(p, blattL * s);
+      b.setAttribute("transform", `translate(${x},${blattY})`);
+      svg.append(b);
+    }
+    if (mitBluete && p.blatt) svg.append(bluete(p.bluete, 238, 80, 48));
+    else if (mitBluete) {
+      svg.append(S("path", { d: "M150,205 Q146,160 150,110", fill: "none", ...STIEL_STIL }), bluete(p.bluete, 150, 85, 68));
+    }
+  }
+  return svg;
+}
+
+// ---------- Merkmale für den Bestimmungsschlüssel ----------
+
+const mitBlatt = p => !!p.blatt;
+const nichtNadel = p => !!p.blatt && p.blatt !== "nadelförmig";
+const MERKMALE = [
+  { id: "nadel", frage: "Hat die Pflanze Nadeln?", wert: p => p.blatt === "nadelförmig", bekannt: mitBlatt, bild: "blatt",
+    tipp: "Schau genau: Sind es breite Blätter oder dünne, spitze Nadeln?" },
+  { id: "zus", frage: "Sitzen an einem Blattstiel mehrere kleine Blättchen?", wert: p => ZUSAMMENGESETZT.includes(p.blatt), bekannt: nichtNadel, bild: "blatt",
+    tipp: "Folge einem Blattstiel: Trägt er eine einzige Blattfläche oder mehrere kleine?" },
+  { id: "fieder", frage: "Sitzen die Blättchen links und rechts an einer langen Mittelrippe, wie bei einer Feder?", wert: p => p.blatt === "gefiedert", bekannt: nichtNadel, bild: "blatt",
+    tipp: "Schau, wo die Blättchen am Stiel sitzen: verteilt an einer langen Rippe, oder anders?" },
+  { id: "drei", frage: "Hat ein Blatt genau drei Blättchen?", wert: p => p.blatt === "dreizählig", bekannt: nichtNadel, bild: "blatt",
+    tipp: "Zähle die Blättchen eines Blattes." },
+  { id: "finger", frage: "Gehen mehr als drei Blättchen alle von einem Punkt aus, wie die Finger einer Hand?", wert: p => p.blatt === "gefingert", bekannt: nichtNadel, bild: "blatt",
+    tipp: "Schau, wo die Blättchen am Stiel sitzen, und zähle sie." },
+  { id: "lappen", frage: "Hat das Blatt grosse Lappen mit tiefen Buchten dazwischen?", wert: p => p.blatt === "gelappt", bekannt: nichtNadel, bild: "blatt",
+    tipp: "Fahre mit den Augen dem Umriss entlang: Geht er tief ins Blatt hinein?" },
+  { id: "herz", frage: "Ist das Blatt herzförmig?", wert: p => p.blatt === "herzförmig", bekannt: nichtNadel, bild: "blatt",
+    tipp: "Schau auf den Blattgrund beim Stiel: Hat er zwei runde Bögen?" },
+  { id: "schmal", frage: "Ist das Blatt lang und schmal?", wert: p => p.blatt === "lanzettlich", bekannt: nichtNadel, bild: "blatt",
+    tipp: "Vergleiche Länge und Breite des Blattes." },
+  { id: "dreieck", frage: "Ist das Blatt dreieckig?", wert: p => p.blatt === "dreieckig", bekannt: nichtNadel, bild: "blatt",
+    tipp: "Zähle die Ecken des Umrisses." },
+  { id: "rand", frage: "Hat der Blattrand kleine spitze Zähne wie eine Säge?", wert: p => p.rand === "gesägt", bekannt: p => !!p.rand, bild: "blatt",
+    tipp: "Fahre mit den Augen ganz genau dem Rand entlang." },
+  { id: "gegen", frage: "Stehen am Zweig immer zwei Blätter auf gleicher Höhe gegenüber?", wert: p => p.stellung === "gegenständig", bekannt: p => !!p.stellung, bild: "zweig",
+    tipp: "Schau, wo die Blätter am Zweig ansetzen: auf gleicher Höhe oder abwechselnd links und rechts?" },
+  { id: "zweiNadeln", frage: "Wachsen die Nadeln zu zweit aus dem Zweig?", wert: p => p.nadeln === "zu zweit", bekannt: p => !!p.nadeln, bild: "blatt",
+    tipp: "Zähle, wie viele Nadeln an derselben Stelle aus dem Zweig wachsen." },
+  { id: "fuenfNadeln", frage: "Wachsen die Nadeln zu fünft aus dem Zweig?", wert: p => p.nadeln === "zu fünft", bekannt: p => !!p.nadeln, bild: "blatt",
+    tipp: "Zähle, wie viele Nadeln an derselben Stelle aus dem Zweig wachsen." },
+  { id: "bueschel", frage: "Wachsen viele kurze Nadeln wie ein Pinsel aus einem Punkt?", wert: p => p.nadeln === "Büschel", bekannt: p => !!p.nadeln, bild: "blatt",
+    tipp: "Schau, wie viele Nadeln an derselben Stelle aus dem Zweig wachsen." },
+  { id: "gelb", frage: "Ist die Blüte gelb?", wert: p => p.bluete.farbe === "gelb", bekannt: p => !!p.bluete, bild: "bluete", tipp: "Schau genau auf die Farbe der Blüte." },
+  { id: "weiss", frage: "Ist die Blüte weiss?", wert: p => p.bluete.farbe === "weiss", bekannt: p => !!p.bluete, bild: "bluete", tipp: "Schau genau auf die Farbe der Blüte." },
+  { id: "blau", frage: "Ist die Blüte blau oder violett?", wert: p => ["blau", "violett", "hellviolett"].includes(p.bluete.farbe), bekannt: p => !!p.bluete, bild: "bluete", tipp: "Schau genau auf die Farbe der Blüte." },
+  { id: "rotrosa", frage: "Ist die Blüte rot oder rosa?", wert: p => ["rot", "rosa"].includes(p.bluete.farbe), bekannt: p => !!p.bluete, bild: "bluete", tipp: "Schau genau auf die Farbe der Blüte." },
+  { id: "vier", frage: "Hat die Blüte genau 4 Blütenblätter?", wert: p => p.bluete.zahl === 4, bekannt: p => !!p.bluete?.zahl, bild: "bluete", tipp: "Zähle die Blütenblätter langsam." },
+  { id: "fuenf", frage: "Hat die Blüte genau 5 Blütenblätter?", wert: p => p.bluete.zahl === 5, bekannt: p => !!p.bluete?.zahl, bild: "bluete", tipp: "Zähle die Blütenblätter langsam." },
+  { id: "viele", frage: "Besteht die Blüte aus sehr vielen kleinen Teilen?", wert: p => p.bluete.zahl === "viele", bekannt: p => !!p.bluete?.zahl, bild: "bluete",
+    tipp: "Schau genau: Sind es wenige grosse Blütenblätter oder sehr viele kleine?" },
+];
+const MERKMAL = Object.fromEntries(MERKMALE.map(m => [m.id, m]));
+
+/** Schlüssel: Kandidaten und die Fragen, die das Ziel als einziges übrig lassen. */
+function schluessel(n) {
+  const pool = PFL.filter(p => p.blatt || p.bluete);
+  if (pool.length < n) return null;
+  for (let versuch = 0; versuch < 300; versuch++) {
+    const ziel = waehle(pool);
+    const kand = [ziel, ...mische(pool.filter(p => p !== ziel)).slice(0, n - 1)];
+    let rest = kand;
+    const fragen = [];
+    while (rest.length > 1) {
+      const moeglich = MERKMALE.filter(m => rest.every(m.bekannt) && new Set(rest.map(m.wert)).size === 2);
+      if (!moeglich.length) break;
+      const m = waehle(moeglich);
+      const antwort = m.wert(ziel);
+      fragen.push({ id: m.id, antwort });
+      rest = rest.filter(p => m.wert(p) === antwort);
+    }
+    if (rest.length === 1 && fragen.length >= 2) return { art: "schluessel", ziel: ziel.name, kandidaten: mische(kand.map(p => p.name)), fragen };
+  }
+  return null;
+}
+
+// ---------- Blütenteile (Stufe 5 und Königsstufe) ----------
+
+const TEILE = [
+  { id: "kelchblatt", name: "Kelchblatt", gruppe: "kelchblatt", zeiger: [112, 180], tipp: "Diese grünen Blätter sitzen ganz unten an der Blüte. Sie haben die Knospe geschützt." },
+  { id: "bluetenblatt", name: "Blütenblatt", gruppe: "bluetenblatt", zeiger: [82, 112], tipp: "Diese Blätter sind gross und farbig. Sie locken Insekten an." },
+  { id: "staubbeutel", name: "Staubbeutel", gruppe: "staubblatt", zeiger: [115, 82], tipp: "Hier oben entsteht der gelbe Blütenstaub." },
+  { id: "staubfaden", name: "Staubfaden", gruppe: "staubblatt", zeiger: [126, 120], tipp: "Dieser dünne Stiel trägt etwas, das Blütenstaub macht." },
+  { id: "narbe", name: "Narbe", gruppe: "stempel", zeiger: [150, 60], tipp: "Dieser klebrige Teil sitzt ganz oben in der Mitte. Dort bleibt der Blütenstaub hängen." },
+  { id: "griffel", name: "Griffel", gruppe: "stempel", zeiger: [150, 104], tipp: "Dieser Teil ist wie ein Hals in der Mitte der Blüte." },
+  { id: "fruchtknoten", name: "Fruchtknoten", gruppe: "stempel", zeiger: [150, 160], tipp: "Dieser dicke Teil unten in der Mitte wird später zur Frucht." },
+];
+const GRUPPEN = [
+  { id: "kelchblatt", name: "Kelchblatt", tipp: "Diese grünen Blätter sitzen ganz unten an der Blüte. Sie haben die Knospe geschützt.", zeiger: [112, 180] },
+  { id: "bluetenblatt", name: "Blütenblatt", tipp: "Diese Blätter sind gross und farbig. Sie locken Insekten an.", zeiger: [82, 112] },
+  { id: "staubblatt", name: "Staubblatt", tipp: "Dieser Teil besteht aus einem dünnen Faden und einem Beutel mit Blütenstaub.", zeiger: [118, 84] },
+  { id: "stempel", name: "Stempel", tipp: "Dieser Teil steht genau in der Mitte der Blüte.", zeiger: [150, 104] },
+];
+const FUNKTIONEN = [
+  { frage: "Wo entsteht der Blütenstaub (Pollen)?", richtig: "im Staubbeutel", falsch: ["in der Narbe", "im Kelchblatt"], tipp: "Der Blütenstaub sitzt oben auf den dünnen Fäden." },
+  { frage: "Wo bleibt der Blütenstaub bei der Bestäubung kleben?", richtig: "auf der Narbe", falsch: ["auf dem Kelchblatt", "auf dem Staubfaden"], tipp: "Dieser Teil ist klebrig und sitzt ganz oben auf dem Stempel." },
+  { frage: "Was wird nach der Befruchtung zur Frucht?", richtig: "der Fruchtknoten", falsch: ["das Blütenblatt", "der Staubbeutel"], tipp: "Dieser Teil liegt unten in der Mitte der Blüte." },
+  { frage: "Welche Teile schützen die Knospe, bevor die Blüte aufgeht?", richtig: "die Kelchblätter", falsch: ["die Staubblätter", "die Narben"], tipp: "Sie sind meistens grün und sitzen ganz aussen." },
+  { frage: "Welche Teile locken mit ihrer Farbe Insekten an?", richtig: "die Blütenblätter", falsch: ["die Kelchblätter", "die Griffel"], tipp: "Sie sind gross und leuchten." },
+  { frage: "Wie heissen Narbe, Griffel und Fruchtknoten zusammen?", richtig: "Stempel", falsch: ["Staubblatt", "Kelch"], tipp: "Dieser Teil steht in der Mitte der Blüte." },
+  { frage: "Wie heissen Staubbeutel und Staubfaden zusammen?", richtig: "Staubblatt", falsch: ["Stempel", "Kelchblatt"], tipp: "Dieser Teil trägt den Blütenstaub." },
+  { frage: "Wo liegen die Samenanlagen, aus denen Samen werden?", richtig: "im Fruchtknoten", falsch: ["in der Narbe", "im Staubbeutel"], tipp: "Sie liegen gut geschützt unten im Stempel." },
+];
+
+/** Längsschnitt einer Blüte; jedes Teil trägt data-teil und data-gruppe. */
+function bluetenSchnitt() {
+  const svg = S("svg", { class: "pb-bild pb-bluete", viewBox: "0 0 300 250", role: "img", "aria-label": "Blüte im Längsschnitt" });
+  const teil = (id, form) => { const t = TEILE.find(x => x.id === id); form.setAttribute("class", "pb-teil"); form.setAttribute("data-teil", id); form.setAttribute("data-gruppe", t.gruppe); return form; };
+  svg.append(
+    S("path", { d: "M150,250 L150,186", stroke: "#4c8c2b", "stroke-width": 7, fill: "none" }),
+    S("ellipse", { cx: 150, cy: 183, rx: 26, ry: 8, fill: "#7cb342" }),
+    teil("kelchblatt", S("path", { d: "M138,182 Q108,192 92,168 Q118,166 140,177 Z", fill: "#5f9e3a", stroke: "#2f6b2a", "stroke-width": 1.5 })),
+    teil("kelchblatt", S("path", { d: "M162,182 Q192,192 208,168 Q182,166 160,177 Z", fill: "#5f9e3a", stroke: "#2f6b2a", "stroke-width": 1.5 })),
+    teil("bluetenblatt", S("path", { d: "M142,177 C100,172 48,122 66,78 C98,88 134,138 146,172 Z", fill: "#f48fb1", stroke: "#c2185b", "stroke-width": 1.5 })),
+    teil("bluetenblatt", S("path", { d: "M158,177 C200,172 252,122 234,78 C202,88 166,138 154,172 Z", fill: "#f48fb1", stroke: "#c2185b", "stroke-width": 1.5 })),
+  );
+  for (const [x2, y2] of [[115, 82], [132, 70], [168, 70], [185, 82]]) {
+    const x1 = x2 < 150 ? 146 : 154;
+    svg.append(teil("staubfaden", S("line", { x1, y1: 174, x2, y2, stroke: "#d9c27a", "stroke-width": 3 })));
+    svg.append(teil("staubbeutel", S("ellipse", { cx: x2, cy: y2 - 4, rx: 8, ry: 5, fill: "#f6c445", stroke: "#b8860b", "stroke-width": 1.5 })));
+  }
+  svg.append(
+    teil("fruchtknoten", S("ellipse", { cx: 150, cy: 158, rx: 14, ry: 18, fill: "#9ccc65", stroke: "#558b2f", "stroke-width": 1.5 })),
+    teil("griffel", S("rect", { x: 147, y: 66, width: 6, height: 76, fill: "#aed581", stroke: "#558b2f", "stroke-width": 1 })),
+    teil("narbe", S("ellipse", { cx: 150, cy: 61, rx: 10, ry: 6, fill: "#c0ca33", stroke: "#827717", "stroke-width": 1.5 })),
+  );
+  return svg;
+}
+
+/** Zeiger mit „?“ von rechts oben auf einen Punkt. */
+function zeiger(svg, [x, y]) {
+  const sx = x < 150 ? 30 : 270, sy = 22;
+  const a = Math.atan2(y - sy, x - sx), kx = x - 6 * Math.cos(a), ky = y - 6 * Math.sin(a);
+  svg.append(S("line", { class: "pb-zeiger", x1: sx, y1: sy + 8, x2: r1(kx), y2: r1(ky) }),
+    S("polygon", { class: "pb-zeiger-kopf", points: `${r1(x)},${r1(y)} ${r1(kx - 8 * Math.cos(a - 0.5))},${r1(ky - 8 * Math.sin(a - 0.5))} ${r1(kx - 8 * Math.cos(a + 0.5))},${r1(ky - 8 * Math.sin(a + 0.5))}` }),
+    S("text", { class: "pb-schild", x: sx, y: sy, "text-anchor": "middle", text: "?" }));
+}
+
+// ---------- Aufgaben als Daten ----------
+
+const ARTEN = {
+  laubNadel: () => {
+    const p = PFL.filter(x => x.gruppe === "Laubbaum" || x.gruppe === "Nadelbaum");
+    if (!p.length) return null;
+    const z = waehle(p);
+    return { art: "laubNadel", name: z.name, richtig: z.gruppe };
+  },
+  form: () => {
+    const p = PFL.filter(x => x.blatt);
+    if (!p.length) return null;
+    const z = waehle(p);
+    return { art: "form", name: z.name, richtig: z.blatt, optionen: mische([z.blatt, ...mische(FORMEN.filter(f => f !== z.blatt)).slice(0, 3)]) };
+  },
+  formBild: () => {
+    const p = PFL.filter(x => x.blatt);
+    const formen = mische([...new Set(p.map(x => x.blatt))]).slice(0, 3);
+    if (formen.length < 3) return null;
+    const namen = formen.map(f => waehle(p.filter(x => x.blatt === f)).name);
+    return { art: "formBild", form: formen[0], richtig: namen[0], optionen: mische(namen) };
+  },
+  rand: drei => {
+    const p = PFL.filter(x => x.rand && x.blatt !== "nadelförmig" && (drei || x.rand !== "gekerbt"));
+    if (!p.length) return null;
+    const z = waehle(p);
+    return { art: "rand", name: z.name, richtig: z.rand, optionen: drei ? ["glatt", "gesägt", "gekerbt"] : ["glatt", "gesägt"] };
+  },
+  stellung: () => {
+    const p = PFL.filter(x => x.stellung);
+    if (!p.length) return null;
+    const z = waehle(p);
+    return { art: "stellung", name: z.name, richtig: z.stellung };
+  },
+  schluessel: n => schluessel(n),
+  merkmale: () => {
+    // Zwei oder drei Merkmale nennen; genau eine von vier Zeichnungen passt zu allen.
+    const MERK = [["blatt", "Blatt"], ["rand", "Blattrand"], ["stellung", "Blätter"], ["farbe", "Blüte"]];
+    const wert = (p, k) => (k === "farbe" ? p.bluete?.farbe : p[k]);
+    const pool = PFL.filter(p => p.blatt && p.blatt !== "nadelförmig");
+    for (let versuch = 0; versuch < 200; versuch++) {
+      const z = waehle(pool);
+      if (!z) return null;
+      const bekannt = MERK.filter(([k]) => wert(z, k));
+      if (bekannt.length < 2) continue;
+      const genannt = mische(bekannt).slice(0, LS.zufall(2, Math.min(3, bekannt.length)));
+      const passt = p => genannt.every(([k]) => wert(p, k) === wert(z, k));
+      const andere = mische(pool.filter(p => p !== z && genannt.every(([k]) => wert(p, k)) && !passt(p))).slice(0, 3);
+      if (andere.length < 3) continue;
+      return { art: "merkmale", merkmale: genannt.map(([k, n]) => [k, n, wert(z, k)]), richtig: z.name, optionen: mische([z.name, ...andere.map(p => p.name)]) };
+    }
+    return null;
+  },
+  teilName: unterteile => {
+    const liste = unterteile ? TEILE : GRUPPEN;
+    const t = waehle(liste);
+    const andere = mische(liste.filter(x => x !== t)).slice(0, 3).map(x => x.name);
+    return { art: "teilName", teil: t.id, unterteile, richtig: t.name, optionen: mische([t.name, ...andere]) };
+  },
+  teilTippen: () => ({ art: "teilTippen", richtig: waehle(GRUPPEN).id }),
+  funktion: () => {
+    const f = waehle(FUNKTIONEN);
+    return { art: "funktion", frage: f.frage, richtig: f.richtig, optionen: mische([f.richtig, ...f.falsch]) };
+  },
+};
+
+const STUFE = {
+  s1: [() => ARTEN.laubNadel()],
+  s2: [() => ARTEN.form(), () => ARTEN.form(), () => ARTEN.formBild()],
+  s3: [() => ARTEN.rand(false), () => ARTEN.stellung()],
+  s4: [() => ARTEN.schluessel(4)],
+  s5: [() => ARTEN.teilName(false), () => ARTEN.teilTippen(), () => ARTEN.funktion()],
+  // Königsstufe: längerer Schlüssel, mehrere Merkmale zugleich, gekerbter Rand, Teile von Stempel und Staubblatt.
+  s6: [() => ARTEN.schluessel(6), () => ARTEN.schluessel(6), () => ARTEN.merkmale(), () => ARTEN.rand(true), () => ARTEN.teilName(true)],
+};
+
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!a) return ["keine Aufgabe"];
+  const einmal = (optionen, richtig) => {
+    if (optionen.filter(o => o === richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+    if (new Set(optionen).size !== optionen.length) m.push("doppelte Optionen");
+  };
+  const p = a.name && pflanze(a.name);
+  if (a.art === "laubNadel" && !["Laubbaum", "Nadelbaum"].includes(p.gruppe)) m.push("kein Baum");
+  if (a.art === "laubNadel" && p.gruppe !== a.richtig) m.push("Gruppe falsch");
+  if (a.art === "form") { einmal(a.optionen, a.richtig); if (p.blatt !== a.richtig) m.push("Blattform falsch"); }
+  if (a.art === "formBild") {
+    einmal(a.optionen, a.richtig);
+    if (a.optionen.filter(n => pflanze(n).blatt === a.form).length !== 1) m.push("Form nicht genau einmal unter den Bildern");
+  }
+  if (a.art === "rand") { if (p.rand !== a.richtig || !a.optionen.includes(a.richtig)) m.push("Rand falsch"); if (stufe !== "s6" && a.richtig === "gekerbt") m.push("gekerbt nur in der Königsstufe"); }
+  if (a.art === "stellung" && p.stellung !== a.richtig) m.push("Stellung falsch");
+  if (a.art === "schluessel") {
+    let rest = a.kandidaten.map(pflanze);
+    const ziel = pflanze(a.ziel);
+    for (const f of a.fragen) {
+      const mk = MERKMAL[f.id];
+      if (!rest.every(mk.bekannt)) m.push(`Merkmal ${f.id} nicht für alle bekannt`);
+      if (mk.wert(ziel) !== f.antwort) m.push(`Antwort zu ${f.id} falsch`);
+      if (new Set(rest.map(mk.wert)).size !== 2) m.push(`Frage ${f.id} trennt nicht`);
+      rest = rest.filter(x => mk.wert(x) === f.antwort);
+    }
+    if (rest.length !== 1 || rest[0] !== ziel) m.push("Schlüssel führt nicht genau zum Ziel");
+    if (new Set(a.kandidaten).size !== a.kandidaten.length) m.push("Kandidat doppelt");
+  }
+  if (a.art === "merkmale") {
+    einmal(a.optionen, a.richtig);
+    const passend = a.optionen.filter(n => a.merkmale.every(([k, , w]) => (k === "farbe" ? pflanze(n).bluete?.farbe : pflanze(n)[k]) === w));
+    if (passend.length !== 1 || passend[0] !== a.richtig) m.push("nicht genau eine Pflanze passt zu allen Merkmalen");
+  }
+  if (a.art === "teilName" || a.art === "funktion") einmal(a.optionen, a.richtig);
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const TIPP_FORM = "Schau den Umriss an: Besteht das Blatt aus mehreren Blättchen? Ist es breit oder schmal? Hat es Ecken, Lappen oder einen Bogen beim Stiel?";
+
+function zeigeLaubNadel(ctx, a) {
+  const p = pflanze(a.name);
+  ctx.kennung(`laubNadel|${a.name}`);
+  ctx.serie("antwort", a.richtig);
+  ctx.flaeche.append(el("div", { class: "frage", html: "Laubbaum oder Nadelbaum?" }), pflanzeSvg(p, "blatt"));
+  LS.koerbe(ctx, {
+    karte: { text: p.name }, koerbe: ["Laubbaum", "Nadelbaum"], richtig: a.richtig,
+    korbInhalt: g => ({ bild: g === "Laubbaum" ? "🌳" : "🌲", text: g }),
+    hinweis: "Schau genau auf das Bild: Hat der Baum breite Blätter oder dünne, spitze Nadeln?",
+    loesung: `${p.name}: ${a.richtig}. ${p.merke}`, lob: p.merke,
+  });
+}
+
+function zeigeForm(ctx, a) {
+  const p = pflanze(a.name);
+  ctx.kennung(`form|${a.name}`);
+  ctx.flaeche.append(el("div", { class: "frage", html: `Welche <b>Blattform</b> hat das Blatt? <small>(${p.name})</small>` }), pflanzeSvg(p, "blatt"));
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 150, hinweis: TIPP_FORM, loesung: `${p.name}: ${a.richtig}` });
+}
+
+function zeigeFormBild(ctx, a) {
+  ctx.kennung(`formBild|${[...a.optionen].sort().join("|")}|${a.form}`);
+  ctx.flaeche.append(el("div", { class: "frage", html: `Welches Blatt ist <b>${a.form}</b>?` }));
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 150, inhalt: n => pflanzeSvg(pflanze(n), "blatt"),
+    hinweis: TIPP_FORM, loesung: `${a.richtig}: ${a.form}`, lob: `Richtig: ${a.richtig}.` });
+}
+
+function zeigeRand(ctx, a) {
+  const p = pflanze(a.name);
+  ctx.kennung(`rand|${a.name}|${a.optionen.length}`);
+  if (a.optionen.length === 2) ctx.serie("antwort", a.richtig);
+  ctx.flaeche.append(el("div", { class: "frage", html: `Wie ist der <b>Blattrand</b>? <small>(${p.name})</small>` }), pflanzeSvg(p, "blatt"));
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 140,
+    inhalt: r => ({ text: r, klein: { glatt: "ohne Zähne", "gesägt": "spitze Zähne", gekerbt: "runde Zähne" }[r] }),
+    hinweis: "Fahre mit den Augen ganz genau dem Rand entlang: Hat er Zähne? Sind sie spitz oder rund?",
+    loesung: `${p.name}: Blattrand ${a.richtig}` });
+}
+
+function zeigeStellung(ctx, a) {
+  const p = pflanze(a.name);
+  ctx.kennung(`stellung|${a.name}`);
+  ctx.serie("antwort", a.richtig);
+  ctx.flaeche.append(el("div", { class: "frage", html: `Wie stehen die Blätter am Zweig? <small>(${p.name})</small>` }), pflanzeSvg(p, "zweig"));
+  LS.auswahl(ctx, { optionen: ["gegenständig", "wechselständig"], richtig: a.richtig, breite: 160,
+    inhalt: s => ({ text: s, klein: s === "gegenständig" ? "zwei auf gleicher Höhe" : "abwechselnd links und rechts" }),
+    hinweis: "Schau, wo die Blätter am Zweig ansetzen: Wie viele sitzen auf derselben Höhe?",
+    loesung: `${p.name}: ${a.richtig}` });
+}
+
+/** Bestimmungsschlüssel: Ja/Nein-Fragen zum Bild, bis nur noch eine Pflanze übrig ist. */
+function zeigeSchluessel(ctx, a) {
+  const ziel = pflanze(a.ziel);
+  const loesung = `${a.ziel}: ${a.fragen.map(f => `${MERKMAL[f.id].frage} ${f.antwort ? "Ja" : "Nein"}`).join(" ")}`;
+  ctx.kennung(`schluessel|${a.ziel}|${[...a.kandidaten].sort().join(",")}`);
+  ctx.loesung(loesung);
+  ctx.schritte(a.fragen.length);
+  const mitZweig = a.fragen.some(f => f.id === "gegen");
+  const chips = Object.fromEntries(a.kandidaten.map(n => [n, el("span", { class: "pb-kandidat", text: n })]));
+  const schritt = el("div", { class: "pb-schritt" });
+  const frage = el("div", { class: "frage" });
+  const knoepfe = el("div", { class: "pb-janein" });
+  ctx.flaeche.append(el("div", { class: "frage", html: "Welche Pflanze ist es? <b>Beantworte die Fragen</b> zum Bild." }),
+    pflanzeSvg(ziel, "voll", mitZweig), el("div", { class: "pb-kandidaten" }, ...Object.values(chips)), schritt, frage, knoepfe);
+  let nr = 0, fertig = false;
+  let rest = a.kandidaten.map(pflanze);
+  const zeige = () => {
+    schritt.textContent = `Frage ${nr + 1} von ${a.fragen.length}`;
+    frage.textContent = MERKMAL[a.fragen[nr].id].frage;
+  };
+  for (const antwort of [true, false]) {
+    const k = el("button", { type: "button", class: "wahl-knopf", text: antwort ? "Ja" : "Nein" });
+    k.addEventListener("click", () => {
+      if (fertig) return;
+      const f = a.fragen[nr], mk = MERKMAL[f.id];
+      if (antwort !== f.antwort) {
+        k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+        ctx.falsch(mk.tipp, loesung);
+        if (ctx.vorbei()) fertig = true;
+        return;
+      }
+      k.classList.remove("falsch");
+      rest = rest.filter(p => mk.wert(p) === f.antwort);
+      for (const n of a.kandidaten) if (!rest.some(p => p.name === n)) chips[n].classList.add("weg");
+      nr++;
+      if (nr === a.fragen.length) {
+        fertig = true;
+        chips[a.ziel].classList.add("gefunden");
+        frage.textContent = `Es ist: ${a.ziel}!`;
+        ctx.richtig(`Richtig bestimmt: ${a.ziel}. ${ziel.merke}`);
+        return;
+      }
+      zeige();
+    });
+    knoepfe.append(k);
+  }
+  zeige();
+}
+
+function zeigeMerkmale(ctx, a) {
+  const mitZweig = a.merkmale.some(([k]) => k === "stellung");
+  const text = a.merkmale.map(([, n, w]) => `${n}: ${w}`).join(" · ");
+  ctx.kennung(`merkmale|${a.richtig}|${text}|${[...a.optionen].sort().join(",")}`);
+  ctx.flaeche.append(el("div", { class: "frage", html: "Welche Pflanze passt zu <b>allen</b> Merkmalen?" }), el("div", { class: "pb-merkmale auftrag", text }));
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 150, inhalt: n => pflanzeSvg(pflanze(n), "voll", mitZweig),
+    hinweis: "Prüfe jedes Bild Merkmal für Merkmal. Ein einziges falsches Merkmal genügt, und die Pflanze fällt weg.",
+    loesung: `${a.richtig} (${text})`, lob: `Richtig: ${a.richtig}. ${pflanze(a.richtig).merke}` });
+}
+
+function zeigeTeilName(ctx, a) {
+  const liste = a.unterteile ? TEILE : GRUPPEN;
+  const t = liste.find(x => x.id === a.teil);
+  const svg = bluetenSchnitt();
+  for (const e of svg.querySelectorAll(".pb-teil")) if ((a.unterteile ? e.getAttribute("data-teil") : e.getAttribute("data-gruppe")) === t.id) e.classList.add("hervor");
+  zeiger(svg, t.zeiger);
+  ctx.kennung(`teilName|${a.teil}|${a.unterteile}`);
+  ctx.flaeche.append(el("div", { class: "frage", html: "Wie heisst der Teil beim <b>Zeiger</b>?" }), svg);
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 150, hinweis: t.tipp, loesung: t.name });
+}
+
+function zeigeTeilTippen(ctx, a) {
+  const t = GRUPPEN.find(x => x.id === a.richtig);
+  const svg = bluetenSchnitt();
+  const loesung = `${t.name}: ${t.tipp}`;
+  ctx.kennung(`teilTippen|${a.richtig}`);
+  ctx.loesung(loesung);
+  ctx.schritte(1);
+  ctx.flaeche.append(el("div", { class: "frage", html: `Tippe auf: <b>${t.name}</b>` }), svg);
+  let fertig = false;
+  for (const e of svg.querySelectorAll(".pb-teil")) {
+    e.addEventListener("click", () => {
+      if (fertig) return;
+      const g = e.getAttribute("data-gruppe");
+      if (g === a.richtig) {
+        fertig = true;
+        for (const x of svg.querySelectorAll(".pb-teil")) if (x.getAttribute("data-gruppe") === g) x.classList.add("richtig");
+        ctx.richtig(`Richtig: ${t.name}.`);
+        return;
+      }
+      for (const x of svg.querySelectorAll(".pb-teil")) x.classList.remove("falsch");
+      for (const x of svg.querySelectorAll(".pb-teil")) if (x.getAttribute("data-gruppe") === g) x.classList.add("falsch");
+      ctx.falsch(`Das ist ${["staubblatt", "kelchblatt", "bluetenblatt"].includes(g) ? "ein" : "der"} ${GRUPPEN.find(x => x.id === g).name}. Gesucht: ${t.tipp}`, loesung);
+      if (ctx.vorbei()) fertig = true;
+    });
+  }
+}
+
+function zeigeFunktion(ctx, a) {
+  const f = FUNKTIONEN.find(x => x.frage === a.frage);
+  ctx.kennung(`funktion|${a.frage}`);
+  ctx.flaeche.append(el("div", { class: "frage", text: a.frage }), bluetenSchnitt());
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 170, hinweis: f.tipp, loesung: a.richtig });
+}
+
+const ZEIGE = { laubNadel: zeigeLaubNadel, form: zeigeForm, formBild: zeigeFormBild, rand: zeigeRand, stellung: zeigeStellung, schluessel: zeigeSchluessel,
+  merkmale: zeigeMerkmale, teilName: zeigeTeilName, teilTippen: zeigeTeilTippen, funktion: zeigeFunktion };
+const ARTEN_JE_STUFE = Object.fromEntries(Object.keys(STUFE).map(s => [s, new Set(STUFE[s].map(f => f()?.art).filter(Boolean)).size]));
+
+const STUFEN_TEXT = {
+  s1: "Laubbaum oder Nadelbaum? Buche, Fichte, Lärche … (4. Klasse)",
+  s2: "Blattformen: eiförmig, herzförmig, gelappt, gefiedert …",
+  s3: "Blattrand glatt oder gesägt? Blätter gegenständig oder wechselständig?",
+  s4: "Bestimmungsschlüssel: Ja-Nein-Fragen, bis nur eine Pflanze übrig ist.",
+  s5: "Blütenteile: Kelchblatt, Blütenblatt, Staubblatt, Stempel (6. Klasse).",
+  s6: "Endgegner: langer Schlüssel, mehrere Merkmale, Narbe, Griffel, Fruchtknoten.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+LS.spiel({
+  id: "pflanzen-bestimmer",
+  einleitung: "Wie heisst diese Pflanze? Schau genau auf Blätter und Blüten — so bestimmen auch Fachleute Pflanzen!",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Tipp: Schau ganz genau hin — auf den Umriss, den Rand und die Blüte.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
+    ZEIGE[a.art](ctx, a);
+  },
+});
+</script>
+</body>
+</html>

@@ -480,7 +480,8 @@ function zeigeLegen(ctx, a, loesung) {
       : { robot: a.start, ziel: a.ziel };
     halter.append(raster(a.feld, z));
     programm.innerHTML = "";
-    if (!prog.length) programm.append(el("span", { class: "leise", text: "Dein Programm: tipp unten die Befehle an." }));
+    // Anleitung, kein Stoff: Klasse „frage“, damit die Eule sie mit dem Auftrag vorliest (rahmen.md 12).
+    if (!prog.length) programm.append(el("span", { class: "leise frage", text: "Dein Programm: tipp unten die Befehle an." }));
     for (const t of prog) programm.append(karte(t));
     zeile.textContent = mitWdh ? `${prog.length} von ${a.limit} Karten${mal > 1 ? ` · nächste Karte ${mal}×` : ""}` : "";
     const voll = mitWdh && prog.length >= a.limit;

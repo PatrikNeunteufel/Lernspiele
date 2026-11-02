@@ -183,14 +183,16 @@ LS.spiel({
     if (a.optionen.length === 2) ctx.serie("antwort", a.richtig); // echt/erfunden, stimmt/erfunden
     const f = ctx.flaeche;
     const text =(t, klasse = "sachtext") => f.append(el("div", { class: klasse, text: t }));
-    if (ctx.nr === 0) ctx.sag("Lies genau. Könnte das wirklich so passieren?");
+    if (ctx.nr === 0) ctx.sag(`${a.art === "aussage" ? "Hör oder lies genau." : "Lies genau."} Könnte das wirklich so passieren?`);
     if (a.art === "aussage") {
       const [bild, satz] = AUSSAGEN[a.nr];
       text("Kann es das geben?", "frage");
-      LS.koerbe(ctx, {
+      const { karte } = LS.koerbe(ctx, {
         karte: { bild, text: satz }, koerbe: a.optionen, richtig: a.richtig, korbInhalt: k => KORB[k],
         hinweis: HINWEIS.aussage, loesung: `${satz} ${a.richtig === "echt" ? "Das kann es wirklich geben." : "Das ist erfunden."}`,
       });
+      // NMG, kein Lesespiel: Die Eule liest den Satz mit vor (rahmen.md Abschnitt 12).
+      karte.querySelector("b").classList.add("frage");
       return;
     }
     if (a.art === "geschichte" || a.art === "staunen") {

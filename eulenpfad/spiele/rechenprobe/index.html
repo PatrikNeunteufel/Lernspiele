@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Probe-Stempel</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .roboter { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 0 10px; flex-wrap: wrap; }
+  .roboter .figur { font-size: clamp(40px, 9vw, 56px); }
+  .roboter .rechnung { font-size: clamp(18px, 5vw, 34px); font-weight: 900; font-variant-numeric: tabular-nums; background: #fff; border: 3px solid var(--rand); border-radius: 14px; padding: 8px 12px; text-align: center; max-width: 100%; }
+  .roboter .rechnung b { color: var(--deko-6); }
+  .frage { text-align: center; font-size: clamp(18px, 4.2vw, 24px); font-weight: 800; margin: 0 0 10px; }
+  .probe-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; font-size: clamp(22px, 5.4vw, 32px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 4px 0 8px; }
+  .probe-zeile .anzeige { min-width: 4.5em; }
+  .probe-erledigt { text-align: center; font-weight: 800; color: var(--text-leise); margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+  .wahl-knopf { font-size: clamp(20px, 4.8vw, 28px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  .stempel .wahl-knopf { min-width: 140px; font-size: clamp(24px, 5.6vw, 32px); }
+  .stempel .wahl-knopf.stimmt { color: var(--gut); }
+  .stempel .wahl-knopf.nein { color: var(--hinweis); }
+  .stempel-abdruck { display: inline-block; margin-left: 8px; padding: 2px 10px; border: 4px solid currentColor; border-radius: 10px; transform: rotate(-8deg); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>✅ Probe-Stempel</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.B.2.g (Grundanspruch 2. Zyklus): Ergebnisse durch Vereinfachen, Zerlegen und mit
+// der Umkehroperation prüfen; MA.1.B.2.f: Ergebnisse mit dem Überschlag prüfen.
+// Ein Rechenroboter hat gerechnet; das Kind wählt die passende Probe (Umkehraufgabe, Endziffer,
+// Überschlag), rechnet sie und stempelt „stimmt“ oder „falsch“.
+// Basisklasse 5: s1 4. Klasse (plus, minus bis 1000), s3 alle vier Rechenarten bis 100 000,
+// s4 welche schnelle Probe reicht, s5 6. Klasse (bis zur Million, durch zweistellige Zahlen),
+// s6 Königsstufe. Nur ganze Zahlen.
+// Bezug: Rest-Rätsel (Umkehraufgabe bei Division mit Rest) und Überschlags-Radar (s4: die falsche
+// Rechnung unter mehreren finden) üben je eine Probe; Rechentrick-Detektiv übt Vereinfachen. Hier
+// liegt der Schwerpunkt darauf, welche Probe passt, und die Probe selbst zu rechnen.
+
+const { zahlText, zufall, waehle, mische, el } = LS;
+
+// Je Stufe: Aufgabenarten, Rechenarten je Art, Zahlenraum, Faktor bzw. Teiler bei · und :, kleinster Quotient
+const STUFE = {
+  s1: { arten: ["probe"], ops: { probe: ["+", "−"] }, max: 1000 },
+  s2: { arten: ["probe", "wahl", "wahl"], ops: { probe: ["+", "−"], wahl: ["+", "−", "·", ":"] }, max: 10000, faktor: [3, 9], malMax: 1000, minQ: 12 },
+  s3: { arten: ["wahl", "wahl", "endziffer"], ops: { wahl: ["+", "−", "·", ":"], endziffer: ["+", "−", "·"] }, max: 100000, faktor: [3, 9], minQ: 100 },
+  s4: { arten: ["schnell", "schnell", "wahl", "endziffer"], ops: { schnell: ["+", "−", "·"], wahl: ["+", "−", "·", ":"], endziffer: ["+", "−", "·"] }, max: 100000, faktor: [3, 9], minQ: 1000 },
+  s5: { arten: ["wahl", "wahl", "schnell"], ops: { wahl: ["+", "−", ":"], schnell: ["+", "−", "·"] }, max: 1000000, faktor: [12, 99], minQ: 100 },
+  s6: { arten: ["schnell", "wahl", "endziffer"], ops: { schnell: ["+", "−", "·"], wahl: ["+", "−", ":"], endziffer: ["+", "−", "·"] }, max: 1000000, faktor: [12, 99], minQ: 100 },
+};
+
+const SCHNELL = ["ueberschlag", "endziffer", "umkehr"];
+const SCHNELL_TEXT = { ueberschlag: { bild: "📏", text: "Überschlag" }, endziffer: { bild: "🔚", text: "Endziffer" }, umkehr: { bild: "🔁", text: "nur die Umkehraufgabe" } };
+
+const rechneOp = (x, op, y) => (op === "+" ? x + y : op === "−" ? x - y : op === "·" ? x * y : x / y);
+const zt = zahlText;
+const rechnungText = (x, op, y) => `${zt(x)} ${op} ${zt(y)}`;
+
+/** Eine richtige Rechnung a op b = c im Zahlenraum der Stufe. */
+function rechnung(op, p) {
+  if (op === "+") {
+    const c = zufall(Math.ceil(p.max / 10), p.max - 1), a = zufall(Math.ceil(c * 0.2), Math.floor(c * 0.8));
+    return { a, b: c - a, c };
+  }
+  if (op === "−") {
+    const a = zufall(Math.ceil(p.max / 10), p.max - 1), b = zufall(Math.ceil(a * 0.2), Math.floor(a * 0.8));
+    return { a, b, c: a - b };
+  }
+  const b = zufall(...p.faktor);
+  if (op === "·") {
+    const oben = Math.floor(((p.malMax || p.max) - 1) / b);
+    const a = zufall(Math.max(12, Math.ceil(oben / 20)), oben);
+    return { a, b, c: a * b };
+  }
+  const c = zufall(Math.min(p.minQ, Math.floor((p.max - 1) / b / 2)), Math.floor((p.max - 1) / b));
+  return { a: b * c, b, c };
+}
+
+/** Ein typischer Rechenfehler des Roboters, den die Umkehraufgabe aufdeckt. */
+function falschesErgebnis(op, { a, b, c }) {
+  if (op === "·") { const k = waehle([1, 2, 10]) * waehle([1, -1]); return a + k > 0 ? (a + k) * b : null; }
+  if (op === ":") { const k = waehle([1, 2, 10]) * waehle([1, -1]); return c + k > 0 ? c + k : null; }
+  const d = waehle([1, 2, 10, 20, 100, 1000].filter(x => x < c / 3)) * waehle([1, -1]);
+  return Number.isFinite(d) ? c + d : null;
+}
+
+/** Umkehraufgabe zum Ergebnis r des Roboters: Text, Wert und die Zahl, die herauskommen muss. */
+function umkehr(op, a, b, r, bekannt = b) {
+  if (op === "+") return { text: rechnungText(r, "−", bekannt), wert: r - bekannt, ziel: bekannt === b ? a : b };
+  if (op === "−") return { text: rechnungText(r, "+", b), wert: r + b, ziel: a };
+  if (op === "·") return { text: rechnungText(r, ":", b), wert: r / b, ziel: a };
+  return { text: rechnungText(r, "·", b), wert: r * b, ziel: a };
+}
+
+/** Alle Umkehraufgaben, die als Probe taugen (für die Prüfung der Auswahl). */
+function gueltigeProben(op, a, b, r) {
+  if (op === "+") return [rechnungText(r, "−", a), rechnungText(r, "−", b)];
+  if (op === "−") return [rechnungText(r, "+", b), rechnungText(a, "−", r)];
+  if (op === "·") return [rechnungText(r, ":", a), rechnungText(r, ":", b)];
+  return [rechnungText(r, "·", b), rechnungText(a, ":", r)];
+}
+
+const endziffer = (op, a, b) => (op === "+" ? (a + b) % 10 : op === "−" ? ((a - b) % 10 + 10) % 10 : (a * b) % 10);
+
+/** Überschlag mit zwei gültigen Ziffern je Zahl. */
+const rund = x => { if (x < 100) return x; const m = 10 ** (String(x).length - 2); return Math.round(x / m) * m; };
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = ERZEUGER[art](p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "probe", op: "+", a: 300, b: 200, c: 500, r: 500, stimmt: true, probe: umkehr("+", 300, 200, 500) };
+}
+
+const ERZEUGER = {
+  probe(p) {
+    const op = waehle(p.ops.probe);
+    const g = rechnung(op, p);
+    const stimmt = Math.random() < 0.45;
+    const r = stimmt ? g.c : falschesErgebnis(op, g);
+    if (r == null || r <= 0 || (!stimmt && r === g.c)) return null;
+    return { art: "probe", op, ...g, r, stimmt, probe: umkehr(op, g.a, g.b, r, op === "+" ? waehle([g.a, g.b]) : g.b) };
+  },
+  wahl(p) {
+    const op = waehle(p.ops.wahl);
+    const g = rechnung(op, p);
+    const stimmt = Math.random() < 0.45;
+    const r = stimmt ? g.c : falschesErgebnis(op, g);
+    if (r == null || r <= 0 || (!stimmt && r === g.c)) return null;
+    const { a, b } = g;
+    const bekannt = op === "+" ? waehle([a, b]) : b;
+    const probe = umkehr(op, a, b, r, bekannt);
+    const anderer = bekannt === a ? b : a;
+    const ablenker = op === "+" ? [rechnungText(r, "+", bekannt), rechnungText(Math.max(a, b), "−", Math.min(a, b)), rechnungText(r, "+", anderer)]
+      : op === "−" ? [r > b ? rechnungText(r, "−", b) : rechnungText(b, "−", r), rechnungText(a, "+", b), rechnungText(a, "+", r)]
+      : op === "·" ? [rechnungText(r, "·", b), rechnungText(r, "−", b), rechnungText(r, "+", b)]
+      : [rechnungText(r, ":", b), rechnungText(a, "·", b), rechnungText(r, "+", b)];
+    return { art: "wahl", op, ...g, r, stimmt, probe, optionen: mische([probe.text, ...ablenker]) };
+  },
+  endziffer(p) {
+    const op = waehle(p.ops.endziffer);
+    const g = rechnung(op, p);
+    const e = endziffer(op, g.a, g.b);
+    if (g.a % 10 === 0 || g.b % 10 === 0 || e === g.a % 10 || e === g.b % 10) return null;
+    const stimmt = Math.random() < 0.45;
+    const r = stimmt ? g.c : g.c + zufall(1, 4) * waehle([1, -1]);
+    const andere = mische([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter(z => z !== e && z !== r % 10));
+    const optionen = [e, ...(r % 10 !== e ? [r % 10] : []), ...andere].slice(0, 4).sort((x, y) => x - y);
+    return { art: "endziffer", op, ...g, r, stimmt, e, optionen };
+  },
+  schnell(p) {
+    const op = waehle(p.ops.schnell);
+    const g = rechnung(op, p);
+    const { c } = g;
+    if (c < 1000) return null;
+    const typ = waehle(SCHNELL);
+    let r;
+    if (typ === "ueberschlag") {
+      // eine Ziffer zu wenig oder doppelt geschrieben — die Endziffer bleibt
+      const s = String(c), i = zufall(1, s.length - 2);
+      r = Number(Math.random() < 0.5 ? s.slice(0, i) + s.slice(i + 1) : s.slice(0, i + 1) + s[i] + s.slice(i + 1));
+    } else if (typ === "endziffer") {
+      r = c + zufall(1, 4) * waehle([1, -1]);
+    } else {
+      const m = Math.max(1, String(c).length - 3);
+      r = c + zufall(1, 3) * 10 ** m * waehle([1, -1]);
+    }
+    return { art: "schnell", op, ...g, r, stimmt: false, typ };
+  },
+};
+
+function pruefeAufgabe(x, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(x.art)) m.push(`Aufgabenart ${x.art} nicht in der Stufe`);
+  if (!(p.ops[x.art] || []).includes(x.op)) m.push(`Rechenart ${x.op} nicht in der Stufe`);
+  const { a, b, c, r, op } = x;
+  if (![a, b, c, r].every(n => Number.isInteger(n) && n > 0)) m.push("keine positive ganze Zahl");
+  if (rechneOp(a, op, b) !== c) m.push("Rechnung falsch");
+  if (Math.max(a, b, c) >= p.max) m.push("Zahlenraum überschritten");
+  if (op === "·" && p.malMax && c >= p.malMax) m.push("Produkt zu gross");
+  if ((op === "·" || op === ":") && (b < p.faktor[0] || b > p.faktor[1])) m.push("Faktor oder Teiler nicht in der Stufe");
+  if (x.stimmt !== (r === c)) m.push("„stimmt“ passt nicht");
+  if (x.art === "probe" || x.art === "wahl") {
+    const pr = x.probe;
+    if (!Number.isInteger(pr.wert) || pr.wert <= 0) m.push("Probe geht nicht auf");
+    if ((pr.wert === pr.ziel) !== x.stimmt) m.push("Probe passt nicht zum Stempel");
+    if (!gueltigeProben(op, a, b, r).includes(pr.text)) m.push("Probe ist keine Umkehraufgabe");
+  }
+  if (x.art === "wahl") {
+    const gueltig = gueltigeProben(op, a, b, r);
+    if (x.optionen.filter(o => gueltig.includes(o)).length !== 1) m.push("nicht genau eine Umkehraufgabe unter den Antworten");
+    if (new Set(x.optionen).size !== x.optionen.length) m.push("doppelte Antworten");
+  }
+  if (x.art === "endziffer") {
+    if (x.e !== c % 10) m.push("Endziffer falsch");
+    if (!x.stimmt && r % 10 === c % 10) m.push("Fehler ohne andere Endziffer");
+    if (!x.stimmt && Math.abs(r - c) > 4) m.push("Fehler zu gross für die Endziffer-Probe");
+    if (x.optionen.filter(z => z === x.e).length !== 1 || new Set(x.optionen).size !== x.optionen.length || x.optionen.length !== 4) m.push("Antworten falsch");
+  }
+  if (x.art === "schnell") {
+    const q = r / c;
+    if (x.stimmt) m.push("Roboter muss sich verrechnet haben");
+    if (x.typ === "ueberschlag" && (r % 10 !== c % 10 || (q > 0.2 && q < 5))) m.push("Überschlag-Fehler nicht eindeutig");
+    if (x.typ === "endziffer" && (r % 10 === c % 10 || Math.abs(r - c) > 4)) m.push("Endziffer-Fehler nicht eindeutig");
+    if (x.typ === "umkehr" && (r % 10 !== c % 10 || Math.abs(q - 1) > 0.05 || r === c)) m.push("Umkehr-Fehler nicht eindeutig");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const HINWEIS_WAHL = {
+  "+": "Die Umkehraufgabe von Plus ist Minus: Vom Ergebnis nimmst du eine der beiden Zahlen weg.",
+  "−": "Die Umkehraufgabe von Minus ist Plus: Zum Ergebnis zählst du die abgezogene Zahl dazu.",
+  "·": "Die Umkehraufgabe von Mal ist Durch: Das Ergebnis teilst du durch einen der Faktoren.",
+  ":": "Die Umkehraufgabe von Durch ist Mal: Das Ergebnis nimmst du mal den Teiler.",
+};
+const HINWEIS_STEMPEL = "Vergleiche das Ergebnis deiner Probe genau mit der Zahl in der Aufgabe.";
+const HINWEIS_STEMPEL_ENDZIFFER = "Vergleiche deine Endziffer mit der letzten Ziffer des Roboter-Ergebnisses.";
+
+/** Knöpfe wie LS.auswahl, aber für einen Zwischenschritt: richtig führt weiter, ohne ctx.richtig. */
+function knoepfe(ctx, ort, { optionen, richtig, inhalt = String, hinweis, loesungText, weiter, klasse = "" }) {
+  const box = el("div", { class: `wahl ${klasse}` });
+  let fertig = false;
+  for (const wert of optionen) {
+    const k = el("button", { type: "button", class: "wahl-knopf" });
+    const i = inhalt(wert);
+    if (typeof i === "object") { if (i.klasse) k.classList.add(i.klasse); if (i.bild) k.append(el("span", { class: "bild", text: i.bild })); k.append(el("span", { text: i.text })); } else k.append(i);
+    k.addEventListener("click", () => {
+      if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+      if (wert === richtig) { fertig = true; k.classList.add("richtig"); weiter(k); return; }
+      k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+      ctx.falsch(typeof hinweis === "function" ? hinweis(wert) : hinweis, loesungText);
+      if (ctx.vorbei()) fertig = true;
+    });
+    box.append(k);
+  }
+  ort.append(box);
+  return box;
+}
+
+LS.spiel({
+  id: "rechenprobe",
+  einleitung: "Robo hat gerechnet, aber Robo macht manchmal Fehler! Prüfe mit einer Probe und drücke den Stempel: stimmt oder falsch?",
+  anzahl: 8,
+  stufen: {
+    s1: "Plus und minus bis 1000: die Umkehraufgabe rechnen.",
+    s2: "Bis 10 000, auch mal und durch: Welche Umkehraufgabe passt?",
+    s3: "Alle vier Rechenarten bis 100 000, auch mit der Endziffer (Lehrplan 5. Klasse).",
+    s4: "Welche schnelle Probe zeigt den Fehler: Überschlag oder Endziffer?",
+    s5: "Bis zur Million, auch durch zweistellige Zahlen: 8832 : 24.",
+    s6: "Endgegner: alle Proben gemischt bis zur Million.",
+  },
+
+  aufgabe(ctx) {
+    const x = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    if (new Set(p.arten).size > 1) ctx.serie("art", x.art);
+    const roboter = el("div", { class: "roboter" }, el("span", { class: "figur", text: "🤖" }),
+      el("span", { class: "rechnung", html: `${rechnungText(x.a, x.op, x.b)} = <b>${zt(x.r)}</b>` }));
+    f.append(roboter);
+    const ort = el("div");
+
+    if (x.art === "schnell") {
+      const ue = `${zt(rund(x.a))} ${x.op} ${zt(rund(x.b))} ≈ ${zt(rechneOp(rund(x.a), x.op, rund(x.b)))}`;
+      const loesungText = x.typ === "ueberschlag" ? `Überschlag: ${ue}, nicht ${zt(x.r)}`
+        : x.typ === "endziffer" ? `Endziffer: Die Einer ergeben ${endziffer(x.op, x.a, x.b)}, nicht ${x.r % 10}`
+        : `Nur die Umkehraufgabe hilft: ${umkehr(x.op, x.a, x.b, x.r).text} ergibt nicht ${zt(umkehr(x.op, x.a, x.b, x.r).ziel)}, richtig ist ${zt(x.c)}`;
+      ctx.serie("antwort", x.typ);
+      f.append(el("div", { class: "frage", text: "Robo hat sich verrechnet. Welche schnelle Probe zeigt den Fehler?" }));
+      LS.auswahl(ctx, {
+        optionen: SCHNELL, richtig: x.typ, breite: 150, inhalt: t => SCHNELL_TEXT[t], loesung: loesungText, lob: `Genau! ${loesungText}`,
+        hinweis: t => (t === "ueberschlag" ? "Überschlage: Robos Ergebnis liegt nahe beim Überschlag. So fällt der Fehler nicht auf."
+          : t === "endziffer" ? "Rechne nur die Einer: Die Endziffer von Robo passt. So fällt der Fehler nicht auf."
+          : "Es geht schneller: Eine kurze Probe zeigt den Fehler schon."),
+      });
+      if (ctx.nr === 0) ctx.sag("Überschlag und Endziffer gehen schnell. Hilft keine von beiden, braucht es die Umkehraufgabe.");
+      return;
+    }
+
+    const stempelWort = x.stimmt ? "stimmt" : "falsch";
+    ctx.serie("stempel", stempelWort);
+    f.append(el("div", { class: "frage", text: "Stimmt das Ergebnis, oder ist es falsch? Mach die Probe!" }), ort);
+
+    const stempeln = (hinweis) => {
+      ort.append(el("div", { class: "frage", text: "Jetzt stempeln:" }));
+      knoepfe(ctx, ort, {
+        optionen: ["stimmt", "falsch"], richtig: stempelWort, klasse: "stempel", hinweis, loesungText,
+        inhalt: w => (w === "stimmt" ? { bild: "✔", text: "stimmt", klasse: "stimmt" } : { bild: "✘", text: "falsch", klasse: "nein" }),
+        weiter: () => {
+          roboter.querySelector(".rechnung").append(el("span", { class: "stempel-abdruck", text: stempelWort, style: `color: var(${x.stimmt ? "--gut" : "--hinweis"})` }));
+          ctx.richtig(x.stimmt ? "Stimmt! Robo hat richtig gerechnet." : `Gut aufgepasst! Richtig wäre ${zt(x.c)}.`);
+        },
+      });
+    };
+
+    let loesungText;
+    if (x.art === "endziffer") {
+      loesungText = `Endziffer: Die Einer ergeben ${x.e}, Robo hat ${x.r % 10} → ${stempelWort}`;
+      ctx.loesung(loesungText);
+      ctx.schritte(2);
+      ort.append(el("div", { class: "frage", text: "Welche Endziffer muss das Ergebnis haben?" }));
+      const einer = { "+": `${x.a % 10} + ${x.b % 10}`, "−": `${x.a % 10} − ${x.b % 10}`, "·": `${x.a % 10} · ${x.b % 10}` }[x.op];
+      knoepfe(ctx, ort, {
+        optionen: x.optionen, richtig: x.e, loesungText,
+        hinweis: `Schau nur die Einer an: ${einer}${x.op === "−" && x.a % 10 < x.b % 10 ? " (mit einem Zehner mehr)" : ""}. Die letzte Ziffer davon ist die Endziffer.`,
+        weiter: () => { ort.replaceChildren(el("div", { class: "probe-erledigt", text: `Endziffer: ${x.e}` })); stempeln(HINWEIS_STEMPEL_ENDZIFFER); },
+      });
+      if (ctx.nr === 0) ctx.sag("Für die Endziffer reichen die Einer der beiden Zahlen.");
+      return;
+    }
+
+    const pr = x.probe;
+    loesungText = `Probe: ${pr.text} = ${zt(pr.wert)}${x.stimmt ? "" : `, nicht ${zt(pr.ziel)}`} → ${stempelWort}`;
+    ctx.loesung(loesungText);
+    ctx.schritte((x.art === "wahl" ? 1 : 0) + LS.tippSchritte(pr.wert) + 1);
+
+    const rechnen = () => {
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergebnis der Probe" });
+      ort.append(el("div", { class: "frage", text: "Rechne die Probe:" }),
+        el("div", { class: "probe-zeile auftrag" }, el("span", { text: `${pr.text} =` }), anzeige));
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: 7,
+        onOk(w) {
+          if (ctx.vorbei()) return;
+          if (w === pr.wert) {
+            tasten.gesperrt = true;
+            ort.replaceChildren(el("div", { class: "probe-erledigt", text: `Probe: ${pr.text} = ${zt(pr.wert)}` }));
+            stempeln(HINWEIS_STEMPEL);
+            return;
+          }
+          anzeige.classList.add("falsch");
+          ctx.falsch(`Rechne die Probe nochmals genau: ${pr.text}.`, loesungText);
+          if (ctx.vorbei()) tasten.gesperrt = true;
+        },
+      });
+      ort.append(tasten.element);
+    };
+
+    if (x.art === "wahl") {
+      ort.append(el("div", { class: "frage", text: "Welche Umkehraufgabe passt als Probe?" }));
+      knoepfe(ctx, ort, {
+        optionen: x.optionen, richtig: pr.text, loesungText, hinweis: HINWEIS_WAHL[x.op],
+        weiter: () => { ort.replaceChildren(); rechnen(); },
+      });
+      if (ctx.nr === 0) ctx.sag("Die Umkehraufgabe rechnet rückwärts. Kommt die Zahl aus der Aufgabe heraus, stimmt es.");
+    } else {
+      rechnen();
+      if (ctx.nr === 0) ctx.sag("Rechne rückwärts: Kommt die Zahl aus der Aufgabe heraus, hat Robo richtig gerechnet.");
+    }
+  },
+});
+</script>
+</body>
+</html>

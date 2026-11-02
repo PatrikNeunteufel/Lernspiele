@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dezimal-Rakete</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .start-zeile { display: flex; gap: 16px; align-items: stretch; }
+
+  /* Flugbahn wie bei der Rechen-Rakete: die Rakete steigt mit jeder gelösten Aufgabe */
+  .bahn {
+    position: relative;
+    flex: none;
+    width: 58px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #1e1b4b, #4338ca 60%, #93c5fd);
+    overflow: hidden;
+  }
+
+  .bahn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 12%, #fff 0 1.5px, transparent 2px),
+      radial-gradient(circle at 70% 25%, #fff 0 1px, transparent 1.5px),
+      radial-gradient(circle at 40% 40%, #fff 0 1px, transparent 1.5px),
+      radial-gradient(circle at 65% 6%, #fff 0 1.5px, transparent 2px);
+  }
+
+  .rakete {
+    position: absolute;
+    left: 50%;
+    font-size: 34px;
+    transform: translate(-50%, 50%) rotate(-45deg);
+    transition: bottom .8s cubic-bezier(.3, 1.4, .5, 1);
+  }
+
+  .inhalt { flex: 1; min-width: 0; }
+
+  .rechnung {
+    text-align: center;
+    font-size: clamp(26px, 6.6vw, 52px);
+    font-weight: 900;
+    margin: 4px 0 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .rechnung .luecke { color: var(--knopf); }
+  .frage { text-align: center; font-size: clamp(16px, 3.6vw, 20px); font-weight: 800; color: var(--text-leise); margin: 0 0 2px; }
+
+  @media (max-width: 420px) {
+    .start-zeile { gap: 8px; }
+    .bahn { width: 34px; }
+    .rakete { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🚀 Dezimal-Rakete</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.3.f (Grundanspruch 2. Zyklus): Dezimalzahlen bis 5 Wertziffern im Kopf
+// addieren und subtrahieren; MA.1.C.1.f Rechenwege mit Dezimalzahlen darstellen (die Hinweise
+// zerlegen die zweite Zahl in ihre Stellen oder ergänzen über das Ganze).
+// Basisklasse 5: s1 4. Klasse — Dezimalzahlen nur als Geldbeträge (MA.3.A.3.d „5.40 Fr.“),
+// s2–s4 5. Klasse (Zehntel ohne und mit Übergang, Hundertstel, verschiedene Stellenzahl mit der
+// Falle 3.5 + 0.25 = 3.30), s5 6. Klasse = Grundanspruch (bis 5 Wertziffern, Ergänzen auf das
+// Ganze), s6 Königsstufe (Tausendstel, bis 6 Wertziffern, Ergänzen auf 10).
+// Fortsetzung der Rechen-Rakete (ganze Zahlen, Basisklasse 4) mit derselben Gestaltung.
+// Wertziffern wie dort: Ziffern ungleich 0 in beiden Zahlen zusammen (12.5 − 4.75 hat fünf).
+// Dezimalzahlen mit dem eingestellten Zeichen (LS.dezimalText), Geld mit LS.geldText.
+// Gerechnet wird in Tausendsteln als ganze Zahlen: 3.75 = 3750.
+
+const { dezimalText, geldText, zufall, waehle, el } = LS;
+
+// Je Stufe:
+//   geld: Geldbeträge in Rappen-Schritten (rp: kleinster Schritt in Tausendsteln, 50 = 5 Rp.)
+//   stellen: Nachkommastellen, aus denen a und b gewählt werden; gleich: a und b gleich viele
+//   uebergang: "nie", "immer" oder "egal" (Übergang über ein Zehntel, Hundertstel oder Ganzes)
+//   ganz: grösster ganzer Teil von a; wz: höchstens so viele Wertziffern in a und b zusammen
+//   ergaenzen: Anteil Ergänzungsaufgaben (3.65 + ? = 4), auf: Ziele dafür (1 = nächstes Ganzes)
+//   knapp: kurze Hinweise
+const STUFE = {
+  s1: { arten: ["+", "−"], geld: true, ganz: 15 },
+  s2: { arten: ["+", "−"], stellen: [1], gleich: true, uebergang: "nie", ganz: 20, wz: 4 },
+  s3: { arten: ["+", "−"], stellen: [1, 1, 2], gleich: true, uebergang: "immer", ganz: 20, wz: 4 },
+  s4: { arten: ["+", "−"], stellen: [1, 2], gleich: false, uebergang: "egal", ganz: 20, wz: 4 },
+  s5: { arten: ["+", "−"], stellen: [1, 2], uebergang: "egal", ganz: 99, wz: 5, ergaenzen: 0.3, auf: [1] },
+  s6: { arten: ["+", "−"], stellen: [1, 2, 3], uebergang: "egal", ganz: 99, wz: 6, ergaenzen: 0.3, auf: [1, 10], knapp: true },
+};
+
+const nachkommaVon = t => (t % 1000 === 0 ? 0 : t % 100 === 0 ? 1 : t % 10 === 0 ? 2 : 3);
+const wertziffern = t => String(t / 1000).replace(/[^1-9]/g, "").length;
+/** Zahl in Tausendsteln als Text; Geld in Franken mit Rappen. */
+const zahl = (t, geld, st) => (geld ? geldText(t / 10) : dezimalText(t / 1000, st));
+const zeichenName = () => (LS.einstellung("dezimal") === "komma" ? "Komma" : "Punkt");
+
+/** Gibt es beim Rechnen einen Übergang (über ein Zehntel, Hundertstel oder Ganzes)? */
+function mitUebergang(a, art, b) {
+  for (const s of [10, 100, 1000]) {
+    const ra = a % s, rb = b % s;
+    if (art === "+" ? ra + rb >= s : ra < rb) return true;
+  }
+  return false;
+}
+
+/** Zufallszahl in Tausendsteln mit genau 'st' Nachkommastellen und ganzem Teil bis 'ganz'. */
+function zufallsZahl(st, ganz) {
+  let rest = 0;
+  for (let i = 1; i <= st; i++) rest = rest * 10 + (i === st ? zufall(1, 9) : zufall(0, 9));
+  return zufall(0, ganz) * 1000 + rest * 10 ** (3 - st);
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const ergaenzen = p.ergaenzen && Math.random() < p.ergaenzen;
+  const art = ergaenzen ? "?" : waehle(p.arten);
+  for (let versuch = 0; versuch < 2000; versuch++) {
+    const x = ergaenzen ? erzeugeErgaenzen(p) : p.geld ? erzeugeGeld(p, art) : erzeuge(p, art);
+    if (x && pruefeAufgabe(x, stufe).length === 0) return x;
+  }
+  // Notausgang (praktisch nie): 3.2 + 0.5 (ohne Übergang) oder 3.6 + 0.5 (mit)
+  return p.geld ? { a: 3400, b: 500, art: "+", ergebnis: 3900, geld: true }
+    : { a: 3200 + (p.uebergang === "immer" ? 400 : 0), b: 500, art: "+", ergebnis: 3700 + (p.uebergang === "immer" ? 400 : 0) };
+}
+
+/** 4. Klasse: Franken und Rappen, z. B. 3.40 Fr. + 0.80 Fr., 5 Fr. − 1.50 Fr. */
+function erzeugeGeld(p, art) {
+  const rp = () => (Math.random() < 0.2 ? waehle([50, 150, 250, 350, 450, 550, 650, 750, 850, 950]) : zufall(0, 9) * 100);
+  let a = zufall(1, p.ganz) * 1000 + rp();
+  let b = zufall(0, 4) * 1000 + rp();
+  if (art === "−" && b > a) [a, b] = [b, a];
+  if (b === 0 || a === b) return null;
+  if (a % 1000 === 0 && b % 1000 === 0) return null; // nur ganze Franken: das übt die Rechen-Rakete
+  return { a, b, art, ergebnis: art === "+" ? a + b : a - b, geld: true };
+}
+
+function erzeuge(p, art) {
+  const sa = waehle(p.stellen);
+  const sb = p.gleich ? sa : p.gleich === false ? waehle(p.stellen.filter(s => s !== sa)) : waehle(p.stellen);
+  let a = zufallsZahl(sa, p.ganz);
+  // b meist kleiner: ganzer Teil bis 9 (bis 20 in den grossen Stufen)
+  let b = zufallsZahl(sb, p.ganz > 20 ? waehle([9, 20, p.ganz]) : waehle([0, 0, 1, 5, 9]));
+  if (art === "−" && b > a) [a, b] = [b, a];
+  if (a === 0 || b === 0 || a === b) return null;
+  const ergebnis = art === "+" ? a + b : a - b;
+  return { a, b, art, ergebnis };
+}
+
+/** Ergänzen: 3.65 + ? = 4, 7.385 + ? = 10. */
+function erzeugeErgaenzen(p) {
+  const auf = waehle(p.auf);
+  const st = waehle(p.stellen.filter(s => s > 1)) || 2;
+  const a = zufallsZahl(st, auf === 1 ? p.ganz : 9);
+  const ziel = auf === 1 ? Math.ceil(a / 1000) * 1000 : (Math.floor(a / 10000) + 1) * 10000;
+  return { a, b: ziel - a, art: "?", ergebnis: ziel };
+}
+
+function pruefeAufgabe(x, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (x.art === "?") {
+    if (!p.ergaenzen) m.push("Ergänzen nicht in der Stufe");
+    if (x.a + x.b !== x.ergebnis) m.push("Ergänzung stimmt nicht");
+    if (x.ergebnis % 1000 || !(x.b > 0)) m.push("Ziel kein Ganzes über a");
+    const ziele = p.auf || [];
+    const naechstes = Math.ceil(x.a / 1000) * 1000, zehner = (Math.floor(x.a / 10000) + 1) * 10000;
+    if (!((ziele.includes(1) && x.ergebnis === naechstes) || (ziele.includes(10) && x.ergebnis === zehner))) m.push("Ziel nicht erlaubt");
+    if (nachkommaVon(x.a) > Math.max(...p.stellen)) m.push("zu viele Nachkommastellen");
+    if (wertziffern(x.a) + wertziffern(x.ergebnis) > p.wz) m.push("zu viele Wertziffern");
+    return m;
+  }
+  if (!p.arten.includes(x.art)) m.push("Rechenart nicht erlaubt");
+  if ((x.art === "+" ? x.a + x.b : x.a - x.b) !== x.ergebnis) m.push("Ergebnis stimmt nicht");
+  if (!(x.ergebnis > 0) || !(x.a > 0) || !(x.b > 0)) m.push("Zahl nicht positiv");
+  if (x.ergebnis >= 1000000 || x.a >= 1000000) m.push("passt nicht in die Tastatur");
+  if (p.geld) {
+    if (!x.geld || x.a % 50 || x.b % 50) m.push("Geldbetrag nicht in 5-Rappen-Schritten");
+    if (x.a > (p.ganz + 1) * 1000 || x.ergebnis > 20000) m.push("Betrag zu gross");
+    return m;
+  }
+  const sa = nachkommaVon(x.a), sb = nachkommaVon(x.b);
+  if (!p.stellen.includes(sa) || !p.stellen.includes(sb)) m.push("Nachkommastellen nicht in der Stufe");
+  if (p.gleich === true && sa !== sb) m.push("verschieden viele Nachkommastellen");
+  if (p.gleich === false && sa === sb) m.push("gleich viele Nachkommastellen");
+  if (Math.floor(x.a / 1000) > p.ganz) m.push("Zahlenraum");
+  const ue = mitUebergang(x.a, x.art, x.b);
+  if (p.uebergang === "nie" && ue) m.push("mit Übergang");
+  if (p.uebergang === "immer" && !ue) m.push("ohne Übergang");
+  if (wertziffern(x.a) + wertziffern(x.b) > p.wz) m.push("zu viele Wertziffern");
+  return m;
+}
+
+/**
+ * Typischer Fehler bei verschieden vielen Nachkommastellen: die Ziffern rechtsbündig untereinander,
+ * 3.5 + 0.25 = 3.30. Liefert das falsche Ergebnis oder null.
+ */
+function rechtsbuendigFalsch(x) {
+  const sa = nachkommaVon(x.a), sb = nachkommaVon(x.b);
+  if (x.art === "?" || x.geld || sa === sb || !sa || !sb) return null; // Geld steht immer mit zwei Stellen
+  const s = Math.max(sa, sb);
+  // die kürzere Zahl so lesen, als hätte sie s Stellen: 3.5 → 3.05
+  const verschoben = t => Math.floor(t / 1000) * 1000 + ((t % 1000) / 10 ** (3 - nachkommaVon(t))) * 10 ** (3 - s);
+  const a = sa < sb ? verschoben(x.a) : x.a, b = sb < sa ? verschoben(x.b) : x.b;
+  const f = x.art === "+" ? a + b : a - b;
+  return f > 0 && f !== x.ergebnis ? f : null;
+}
+
+const ALLGEMEIN = "Rechne Stelle für Stelle: Ganze zu Ganzen, Zehntel zu Zehnteln, Hundertstel zu Hundertsteln.";
+
+/** Steht die Antwort als ganzes Wort im Hinweis? Dann verrät er sie. */
+const regexText = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const verraet = (hinweis, antwort) =>
+  new RegExp("(?<![\\p{L}\\p{N}.,])" + regexText(antwort) + "(?![\\p{N}]|[.,]\\p{N})", "u").test(hinweis);
+
+/**
+ * Hinweis mit Rechenweg (MA.1.C.1.f): bei einem Übergang über das Ganze, Zehntel oder Hundertstel
+ * rechnen (3.6 + 0.4 + 0.1), sonst die zweite Zahl in ihre Stellen zerlegen (12.75 − 4 − 0.7 − 0.05).
+ */
+function hinweisFuer(x, p) {
+  if (x.art === "?") {
+    const weit = x.ergebnis - x.a > 1000 ? ", dann weiter bis zum Ziel" : "";
+    return p.knapp ? "Ergänze zuerst auf das nächste Zehntel, dann auf das Ganze." : `Ergänze Schritt für Schritt: zuerst auf das nächste Zehntel, dann auf das nächste Ganze${weit}.`;
+  }
+  if (p.knapp) return "Stelle für Stelle — und denk an den Übertrag!";
+  const z = t => zahl(t, x.geld);
+  const teile = [Math.floor(x.b / 1000) * 1000, Math.floor(x.b % 1000 / 100) * 100, Math.floor(x.b % 100 / 10) * 10, x.b % 10].filter(Boolean);
+  let h;
+  if (teile.length === 1) {
+    // eine Wertziffer: über die nächste Stelle rechnen, wenn es einen Übergang gibt
+    const s = teile[0] >= 1000 ? 1000 : teile[0] >= 100 ? 100 : teile[0] >= 10 ? 10 : 1;
+    const U = Math.min(1000, s * 10), r = x.a % U;
+    const f = x.art === "+" ? U - r : r;
+    const name = U === 1000 ? "das Ganze" : U === 100 ? "das Zehntel" : "das Hundertstel";
+    h = s < 1000 && f > 0 && f < x.b ? `Rechne über ${name}: ${z(x.a)} ${x.art} ${z(f)} ${x.art} ${z(x.b - f)}` : ALLGEMEIN;
+  } else {
+    h = `Zerlege: ${z(x.a)} ${x.art} ${teile.map(z).join(` ${x.art} `)}`;
+  }
+  if (rechtsbuendigFalsch(x)) h += ` Schreib beide Zahlen mit gleich vielen Stellen nach dem ${zeichenName()}.`;
+  return verraet(h, z(x.ergebnis)) ? ALLGEMEIN : h;
+}
+
+LS.spiel({
+  id: "dezimal-rakete",
+  einleitung: "3, 2, 1 … Start! Diesmal rechnet die Rakete mit Dezimalzahlen. Zehntel zu Zehnteln, Hundertstel zu Hundertsteln — rechne im Kopf!",
+  anzahl: 8,
+  stufen: {
+    s1: "Mit Geld: 3.40 Fr. + 0.80 Fr., 5 Fr. − 1.50 Fr.",
+    s2: "Zehntel ohne Übergang: 4.3 + 0.5, 6.8 − 2.4.",
+    s3: "Mit Übergang: 3.6 + 0.5, 4.2 − 0.7, auch Hundertstel.",
+    s4: "Verschieden viele Stellen: 3.5 + 0.25 — Achtung, nicht 3.30!",
+    s5: "Bis 5 Wertziffern: 12.5 − 4.75, und ergänzen: 3.65 + ? = 4 (Lehrplan 6. Klasse).",
+    s6: "Endgegner mit Tausendsteln: 4.375 + 2.85, 7.385 + ? = 10.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const x = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("rechenart", x.art); // +, − und in Stufe 5 und 6 auch ? (ergänzen)
+    const z = t => zahl(t, x.geld);
+    const gesucht = x.art === "?" ? x.b : x.ergebnis;
+    const loesung = x.art === "?" ? `${z(x.ergebnis)} − ${z(x.a)} = ${z(x.b)}` : `${z(x.a)} ${x.art} ${z(x.b)} = ${z(x.ergebnis)}`;
+    ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(gesucht / 1000));
+
+    const bahn = el("div", { class: "bahn", "aria-hidden": "true" });
+    const rakete = el("div", { class: "rakete", text: "🚀" });
+    bahn.append(rakete);
+    const hoehe = n => `${8 + (n / 8) * 84}%`;
+    rakete.style.bottom = hoehe(ctx.nr);
+
+    const inhalt = el("div", { class: "inhalt" });
+    if (x.art === "?") {
+      inhalt.append(el("div", { class: "frage", text: "Wie viel fehlt?" }),
+        el("div", { class: "rechnung", html: `${z(x.a)} + <span class="luecke">?</span> = ${z(x.ergebnis)}` }));
+    } else {
+      inhalt.append(el("div", { class: "rechnung", text: `${z(x.a)} ${x.art} ${z(x.b)} =` }));
+    }
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergebnis" });
+    inhalt.append(anzeige);
+    ctx.flaeche.append(el("div", { class: "start-zeile" }, bahn, inhalt));
+
+    const falle = rechtsbuendigFalsch(x);
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: 3, dezimal: true, nachkomma: x.geld ? 2 : 3,
+      onOk(w) {
+        const t = Math.round(w * 1000);
+        if (t === gesucht) {
+          tasten.gesperrt = true;
+          anzeige.classList.add("richtig");
+          rakete.style.bottom = hoehe(ctx.nr + 1);
+          ctx.richtig(ctx.nr === 7 ? "Die Rakete ist im All! 🌟" : undefined);
+          return;
+        }
+        anzeige.classList.add("falsch");
+        // Falle 3.5 + 0.25 = 3.30: gezielt auf die Stellen hinweisen
+        const hinweis = falle !== null && t === falle && !p.knapp
+          ? `Achtung: Zehntel zu Zehnteln, Hundertstel zu Hundertsteln! Schreib beide Zahlen mit gleich vielen Stellen nach dem ${zeichenName()}.`
+          : hinweisFuer(x, p);
+        ctx.falsch(hinweis, loesung);
+        if (ctx.vorbei()) tasten.gesperrt = true;
+      },
+    });
+    ctx.flaeche.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag(x.geld ? "Rechne im Kopf und tipp den Betrag in Franken ein, zum Beispiel 4.20." : "Rechne im Kopf und tipp das Ergebnis ein. Das Zeichen für die Stelle nach den Ganzen hat eine eigene Taste.");
+  },
+});
+</script>
+</body>
+</html>

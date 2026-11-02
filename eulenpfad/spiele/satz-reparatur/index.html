@@ -129,7 +129,7 @@ LS.spiel({
     if (ZEICHEN_WECHSELT.has(ctx.stufe)) ctx.serie("satzzeichen", satzende(satz));
     const woerter = zerlege(satz);
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Repariere den Satz!" }),
-      el("div", { class: "tipp-zeile", text: "Wort antippen = gross/klein · Kästchen antippen = Satzzeichen wählen" }));
+      el("div", { class: "tipp-zeile frage", text: "Tipp ein Wort an: gross oder klein. Tipp das Kästchen an: Satzzeichen wählen." }));
     const zeile = el("div", { class: "satz" });
     const zustand = woerter.map(w => ({ ...w, gross: false, zeichen: "" }));
     let fertig = false;

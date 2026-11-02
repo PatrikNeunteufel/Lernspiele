@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Braille-Finger</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+
+  .bf-zelle { display: block; height: auto; }
+  .bf-zelle .rahmen { fill: #fff; stroke: var(--rand); stroke-width: 3; }
+  .bf-zelle circle { fill: #fff; stroke: var(--rand); stroke-width: 3; }
+  .bf-zelle circle.voll { fill: var(--text); stroke: var(--text); }
+  .bf-zelle text { font-size: 18px; font-weight: 800; fill: var(--text-leise); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .bf-zelle text.auf-voll { fill: #fff; }
+  .bf-gross { width: clamp(96px, 26vw, 130px); margin: 0 auto 12px; }
+  .bf-setzen { width: clamp(150px, 46vw, 210px); margin: 0 auto 10px; touch-action: manipulation; }
+  .bf-setzen circle { cursor: pointer; }
+  .bf-setzen circle.voll { fill: var(--deko-5); stroke: var(--deko-5); }
+  .bf-klein { width: clamp(40px, 11vw, 54px); }
+  .wahl-knopf .bf-klein { width: clamp(48px, 13vw, 64px); }
+
+  .bf-wort { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 0 auto 12px; max-width: 560px; }
+  .bf-wort .bf-zelle { width: clamp(48px, 13vw, 66px); }
+  .bf-buchstabe { text-align: center; font-size: clamp(56px, 13vw, 84px); font-weight: 900; line-height: 1.05; color: var(--deko-5); margin: 0 0 6px; }
+  .wahl-knopf.bf-wahl { font-size: clamp(30px, 7vw, 42px); }
+
+  .bf-schreibwort { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 0 0 8px; }
+  .bf-schreibwort span { min-width: clamp(34px, 9vw, 46px); text-align: center; font-size: clamp(26px, 6.5vw, 38px); font-weight: 900;
+    border-bottom: 5px solid var(--rand); border-radius: 8px 8px 0 0; background: #fff; }
+  .bf-schreibwort span.dran { border-color: var(--deko-5); color: var(--deko-5); }
+  .bf-schreibwort span.richtig { background: var(--gut-hell); border-color: var(--gut); }
+  .bf-geschrieben { display: flex; justify-content: center; gap: 6px; min-height: 10px; margin: 0 0 8px; flex-wrap: wrap; }
+  .bf-knoepfe { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .bf-knoepfe button { font: inherit; font-size: clamp(18px, 4.4vw, 22px); font-weight: 900; min-height: 56px; min-width: 130px; border: none;
+    border-radius: 16px; background: #fff; box-shadow: 0 5px 0 var(--rand); cursor: pointer; padding: 6px 16px; }
+  .bf-knoepfe button.bf-pruefen { background: var(--gut); color: #fff; box-shadow: 0 5px 0 #22975a; }
+  .bf-knoepfe button:disabled { opacity: .45; }
+
+  .bf-tafel { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; max-width: 640px; margin: 0 auto 12px;
+    background: var(--karte); border: 2px solid var(--rand); border-radius: 14px; padding: 8px; }
+  .bf-tafel figure { margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .bf-tafel .bf-zelle { width: clamp(24px, 6.4vw, 32px); }
+  .bf-tafel .bf-zelle circle { stroke-width: 4; }
+  .bf-tafel figcaption { font-weight: 900; font-size: 15px; }
+  .bf-regel { width: 100%; text-align: center; font-size: 14px; font-weight: 700; color: var(--text-leise); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>⠃ Braille-Finger</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="../geheimschrift-knacker/woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.4.1.e (Natur, Mensch, Gesellschaft, 2. Zyklus): Sinne — wie Menschen ohne Sehsinn
+// lesen: die Brailleschrift (Punktschrift), eine Zelle mit sechs Punkten je Buchstabe.
+// Basisklasse 5: s1 4. Klasse (Punkte zählen, gleiche Zellen finden), s2 Buchstaben a–j lesen,
+// s3 k–t (a–j plus Punkt 3), s4 ganzes Alphabet und kurze Wörter lesen, s5 6. Klasse: Buchstaben
+// selbst setzen (Punkte antippen), s6 Königsstufe: ein Wort Buchstabe für Buchstabe schreiben, ohne Tafel.
+// Wörter aus der Liste des Geheimschrift-Knackers (Verweis im Katalog, nur A–Z, ohne Umlaute).
+// Ohne freie Wörter laufen die Stufen ohne Wörter (s1, s2, s3, s5) weiter.
+// Kein anderes Spiel übt Braille; der Geheimschrift-Knacker (MI.2.1.c) übt eine andere Schrift.
+
+const { waehle, mische, el } = LS;
+
+// Standard-Braille-Alphabet (6-Punkte-Zelle): Punkte 1, 2, 3 links von oben nach unten, 4, 5, 6 rechts.
+// a–j: nur die oberen vier Punkte; k–t: a–j plus Punkt 3; u, v, x, y, z: a–e plus Punkte 3 und 6;
+// w ist die Ausnahme (j plus Punkt 6). Die deutschen Zusatzzeichen (ä, ö, ü, ei, ch …) fehlen hier bewusst.
+const BRAILLE = {
+  A: "1", B: "12", C: "14", D: "145", E: "15", F: "124", G: "1245", H: "125", I: "24", J: "245",
+  K: "13", L: "123", M: "134", N: "1345", O: "135", P: "1234", Q: "12345", R: "1235", S: "234", T: "2345",
+  U: "136", V: "1236", W: "2456", X: "1346", Y: "13456", Z: "1356",
+};
+const ABC = Object.keys(BRAILLE);
+const AJ = ABC.slice(0, 10), KT = ABC.slice(10, 20);
+const PUNKTE = [1, 2, 3, 4, 5, 6];
+const LAGE = { 1: [30, 30], 2: [30, 75], 3: [30, 120], 4: [70, 30], 5: [70, 75], 6: [70, 120] };
+/** Muster als sortierter Text der Punkte: [4, 1, 5] → "145". */
+const muster = punkte => [...new Set(punkte)].sort().join("");
+/** Gespiegelt (links ↔ rechts). */
+const gespiegelt = m => muster([...m].map(p => ({ 1: 4, 2: 5, 3: 6, 4: 1, 5: 2, 6: 3 })[p]));
+const buchstabeVon = m => ABC.find(b => BRAILLE[b] === m) || null;
+const punkteText = m => [...m].join(", ");
+
+// Freigabe (Entscheid L4 a): Wörter über den Verweis auf die Liste des Geheimschrift-Knackers.
+// Kennt der Katalog die Liste nicht, gilt sie als frei.
+const WOERTER_FREI = LS.spielListen("braille-finger").length ? LS.freieListen("braille-finger").includes("woerter") : true;
+const WOERTER = (WOERTER_FREI ? GEHEIM_WOERTER : []).filter(w => /^[A-Z]{3,5}$/.test(w));
+
+// tafel: "aj" (Reihe a–j, immer), "alle" (ganzes Alphabet erst nach dem ersten Fehler), null (keine)
+const STUFE = {
+  s1: { arten: ["zaehlen", "gleich"], buchstaben: ABC, tafel: null },
+  s2: { arten: ["lesen", "finden"], buchstaben: AJ, ablenker: AJ, tafel: "aj" },
+  s3: { arten: ["lesen", "finden"], buchstaben: KT, ablenker: [...AJ, ...KT], tafel: "aj" },
+  s4: { arten: ["lesen", "wort", "wort"], buchstaben: ABC, ablenker: ABC, tafel: "alle" },
+  s5: { arten: ["setzen"], buchstaben: ABC, tafel: "alle" },
+  s6: { arten: ["schreiben"], tafel: null },
+};
+const brauchtWoerter = stufe => STUFE[stufe].arten.some(a => a === "wort" || a === "schreiben");
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => !brauchtWoerter(s) || WOERTER.length >= 6));
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(waehle(p.arten), p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  throw new Error(`Stufe ${stufe}: keine Aufgabe gefunden`);
+}
+
+/** Ein anderes Muster, das sich in genau einem Punkt unterscheidet (nicht leer). */
+function nachbar(m) {
+  const p = waehle(PUNKTE);
+  const neu = m.includes(String(p)) ? [...m].filter(x => x !== String(p)) : [...m, String(p)];
+  return neu.length ? muster(neu) : null;
+}
+
+/** Ablenker-Buchstaben: zuerst die verwechselbaren (gespiegelt, ein Punkt anders, a–j-Partner). */
+function ablenker(b, p, anzahl) {
+  const m = BRAILLE[b];
+  const nah = p.ablenker.filter(x => x !== b && (BRAILLE[x] === gespiegelt(m)
+    || [...new Set([...BRAILLE[x], ...m])].length - Math.min(BRAILLE[x].length, m.length) === 1 && Math.abs(BRAILLE[x].length - m.length) <= 1));
+  const rest = p.ablenker.filter(x => x !== b && !nah.includes(x));
+  return [...mische(nah).slice(0, 2), ...mische(rest)].slice(0, anzahl);
+}
+
+function erzeuge(art, p) {
+  if (art === "zaehlen") {
+    const b = waehle(p.buchstaben);
+    return { art, b, richtig: BRAILLE[b].length };
+  }
+  if (art === "gleich") {
+    const m = BRAILLE[waehle(p.buchstaben)];
+    const andere = new Set([gespiegelt(m), nachbar(m), nachbar(m), nachbar(m), BRAILLE[waehle(ABC)]].filter(x => x && x !== m));
+    if (andere.size < 3) return null;
+    return { art, m, optionen: mische([m, ...mische([...andere]).slice(0, 3)]), richtig: m };
+  }
+  if (art === "lesen") {
+    const b = waehle(p.buchstaben);
+    return { art, b, optionen: mische([b, ...ablenker(b, p, 3)]), richtig: b };
+  }
+  if (art === "finden") {
+    const b = waehle(p.buchstaben);
+    return { art, b, optionen: mische([b, ...ablenker(b, p, 3)]), richtig: b };
+  }
+  if (art === "wort") {
+    const w = waehle(WOERTER);
+    const gleichLang = WOERTER.filter(x => x !== w && x.length === w.length);
+    if (gleichLang.length < 3) return null;
+    return { art, w, optionen: mische([w, ...mische(gleichLang).slice(0, 3)]), richtig: w };
+  }
+  if (art === "setzen") {
+    const b = waehle(p.buchstaben);
+    return { art, b, richtig: BRAILLE[b] };
+  }
+  if (art === "schreiben") {
+    const w = waehle(WOERTER);
+    return { art, w, richtig: [...w].map(c => BRAILLE[c]) };
+  }
+  return null;
+}
+
+/** Mängel: Muster nachgeschlagen, genau eine richtige Antwort, keine doppelten Optionen, Wort aus der Liste. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (a.b && p.buchstaben && !p.buchstaben.includes(a.b)) m.push("Buchstabe nicht in der Stufe");
+  const doppelt = o => new Set(o).size !== o.length;
+  switch (a.art) {
+    case "zaehlen": if (a.richtig !== BRAILLE[a.b].length) m.push("Anzahl falsch"); break;
+    case "gleich":
+      if (a.optionen.filter(o => o === a.m).length !== 1 || doppelt(a.optionen) || a.optionen.length !== 4) m.push("nicht genau eine gleiche Zelle");
+      if (a.optionen.some(o => !/^1?2?3?4?5?6?$/.test(o) || !o)) m.push("ungültiges Muster");
+      break;
+    case "lesen": case "finden":
+      if (a.richtig !== a.b || a.optionen.filter(o => o === a.b).length !== 1 || doppelt(a.optionen) || a.optionen.length !== 4) m.push("Lösung nicht eindeutig");
+      if (a.optionen.some(o => !p.ablenker.includes(o))) m.push("Ablenker nicht aus der Stufe");
+      if (new Set(a.optionen.map(o => BRAILLE[o])).size !== 4) m.push("zwei gleiche Zellen");
+      break;
+    case "wort":
+      if (!WOERTER.includes(a.w) || a.optionen.some(o => !WOERTER.includes(o))) m.push("Wort nicht aus der freien Liste");
+      if (a.optionen.filter(o => o === a.w).length !== 1 || doppelt(a.optionen)) m.push("Lösung nicht eindeutig");
+      break;
+    case "setzen": if (a.richtig !== BRAILLE[a.b] || buchstabeVon(a.richtig) !== a.b) m.push("Muster falsch"); break;
+    case "schreiben":
+      if (!WOERTER.includes(a.w)) m.push("Wort nicht aus der freien Liste");
+      if (a.richtig.map(buchstabeVon).join("") !== a.w) m.push("Muster ergeben nicht das Wort");
+      break;
+    default: m.push("unbekannte Art");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const SVG = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attr = {}) => { const e = document.createElementNS(SVG, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); return e; };
+
+/**
+ * Braille-Zelle als SVG: schwarze Punkte sind erhaben, helle Kreise zeigen die freien Stellen.
+ * groesse: Klasse (bf-gross, bf-klein …); nummern: Punktnummern zeigen; onTipp(punkt): Punkte antippbar.
+ */
+function zelleEl(m, { groesse = "bf-gross", nummern = false, onTipp = null, label = "Braille-Zelle" } = {}) {
+  const svg = svgEl("svg", { viewBox: "0 0 100 150", class: `bf-zelle ${groesse}`, role: onTipp ? "group" : "img", "aria-label": label });
+  svg.append(svgEl("rect", { class: "rahmen", x: 4, y: 4, width: 92, height: 142, rx: 14 }));
+  const kreise = {};
+  for (const p of PUNKTE) {
+    const [x, y] = LAGE[p];
+    const k = svgEl("circle", { cx: x, cy: y, r: onTipp ? 19 : 16, class: m.includes(String(p)) ? "voll" : "" });
+    if (onTipp) { k.setAttribute("aria-label", `Punkt ${p}`); k.addEventListener("click", () => onTipp(p)); }
+    kreise[p] = k;
+    svg.append(k);
+    if (nummern) {
+      const t = svgEl("text", { x, y, class: m.includes(String(p)) ? "auf-voll" : "" });
+      t.textContent = String(p);
+      svg.append(t);
+    }
+  }
+  svg.kreise = kreise;
+  return svg;
+}
+
+/** Tafel zum Nachschauen: Buchstaben mit ihrer Zelle; regel: Zeile darunter. */
+function tafelEl(buchstaben, regel) {
+  const box = el("div", { class: "bf-tafel", "aria-label": "Tafel der Brailleschrift" });
+  for (const b of buchstaben) box.append(el("figure", {}, zelleEl(BRAILLE[b], { groesse: "", label: b }), el("figcaption", { text: b })));
+  if (regel) box.append(el("div", { class: "bf-regel", text: regel }));
+  return box;
+}
+
+const REGEL_KT = "Die zweite Zehnerreihe ist wie die erste, nur kommt der Punkt unten links dazu.";
+const REGEL_ALLE = "Erste Zehnerreihe: nur die oberen vier Punkte. Zweite: dazu der Punkt unten links. Dritte: dazu beide Punkte unten. Ein Buchstabe ist die Ausnahme.";
+
+/** Antippbare Zelle mit Prüfen-Knopf; pruefe(muster) gibt true zurück, wenn es weitergeht. */
+function setzFeld(ctx, pruefe) {
+  let gesetzt = new Set();
+  let zelle;
+  const ort = el("div");
+  const zeichne = () => {
+    const neu = zelleEl(muster([...gesetzt].map(String)), { groesse: "bf-setzen", nummern: true, label: "Zelle zum Setzen", onTipp: p => {
+      if (ctx.vorbei()) return;
+      if (gesetzt.has(p)) gesetzt.delete(p); else gesetzt.add(p);
+      LS.ton("tipp");
+      zeichne();
+    } });
+    if (zelle) zelle.replaceWith(neu); else ort.append(neu);
+    zelle = neu;
+  };
+  zeichne();
+  const pruefen = el("button", { type: "button", class: "bf-pruefen", text: "Prüfen ✓" });
+  const leeren = el("button", { type: "button", text: "Alle weg ↺" });
+  leeren.addEventListener("click", () => { if (ctx.vorbei()) return; gesetzt = new Set(); zeichne(); });
+  pruefen.addEventListener("click", () => {
+    if (ctx.vorbei()) return;
+    if (pruefe(muster([...gesetzt].map(String)))) { gesetzt = new Set(); zeichne(); }
+    if (ctx.vorbei()) { pruefen.disabled = true; leeren.disabled = true; }
+  });
+  ctx.flaeche.append(ort, el("div", { class: "bf-knoepfe" }, leeren, pruefen));
+}
+
+LS.spiel({
+  id: "braille-finger",
+  einleitung: "Louis Braille aus Frankreich wurde als kleines Kind blind. Als Jugendlicher erfand er vor rund 200 Jahren eine Schrift aus erhabenen Punkten, die man mit den Fingern liest. Jeder Buchstabe ist eine Zelle mit sechs Punkten!",
+  anzahl: 8,
+  stufen: nurMoegliche({
+    s1: "Punkte zählen und gleiche Zellen finden (4. Klasse).",
+    s2: "Buchstaben a bis j lesen — die Tafel hilft.",
+    s3: "k bis t: wie a bis j, nur mit Punkt 3 dazu.",
+    s4: "Das ganze Alphabet und kurze Wörter lesen: HUND, MAUS.",
+    s5: "Selbst setzen: Tippe die Punkte für den Buchstaben (6. Klasse).",
+    s6: "Endgegner: ein ganzes Wort in Braille schreiben — ohne Tafel.",
+  }),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s1" ? "Die schwarzen Punkte sind erhaben. Blinde Menschen ertasten sie mit dem Finger."
+      : ctx.stufe === "s6" ? "Die Regel hilft: erste Zehnerreihe oben, zweite mit dem Punkt unten links, dritte mit beiden unteren Punkten."
+      : "Punkt 1, 2, 3 stehen links von oben nach unten, Punkt 4, 5, 6 rechts.");
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    // Zellen sind SVG ohne Text: Die Aufgabe erkennt man an Art und Buchstabe, Muster oder Wort.
+    ctx.kennung(`${a.art}|${a.b || a.m || a.w}`);
+    const tafelOrt = el("div");
+    f.append(tafelOrt);
+    if (p.tafel === "aj") tafelOrt.append(tafelEl(AJ, ctx.stufe === "s3" ? REGEL_KT : null));
+    const tafelNachFehler = () => { if (p.tafel === "alle" && !tafelOrt.firstChild) tafelOrt.append(tafelEl(ABC, REGEL_ALLE)); };
+
+    if (a.art === "zaehlen") {
+      const loesung = `${a.richtig} Punkte`;
+      f.append(el("div", { class: "frage", html: "Wie viele Punkte sind <b>erhaben</b> (schwarz)?" }), zelleEl(BRAILLE[a.b]));
+      LS.auswahl(ctx, {
+        optionen: [1, 2, 3, 4, 5, 6], richtig: a.richtig, breite: 70, loesung,
+        hinweis: "Zähle die schwarzen Punkte: zuerst links von oben nach unten, dann rechts.",
+      });
+      return;
+    }
+    if (a.art === "gleich") {
+      f.append(el("div", { class: "frage", html: "Welche Zelle ist <b>genau gleich</b>?" }), zelleEl(a.m));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90,
+        inhalt: o => zelleEl(o, { groesse: "bf-klein" }),
+        hinweis: "Vergleiche Punkt für Punkt: oben, in der Mitte, unten — links und rechts. Gespiegelt ist nicht gleich!",
+        loesung: `die Zelle mit den Punkten ${punkteText(a.m)}`,
+      });
+      return;
+    }
+    if (a.art === "lesen") {
+      const loesung = `${a.b} (Punkte ${punkteText(BRAILLE[a.b])})`;
+      f.append(el("div", { class: "frage", html: "Welcher <b>Buchstabe</b> ist das?" }), zelleEl(BRAILLE[a.b]));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 80, loesung,
+        hinweis: () => {
+          tafelNachFehler();
+          return ctx.stufe === "s3" ? "Such in der Tafel die Zelle ohne den Punkt unten links. Dein Buchstabe kommt zehn Buchstaben später im Alphabet."
+            : "Schau genau, welche Punkte schwarz sind, und vergleiche mit der Tafel.";
+        },
+      });
+      box.querySelectorAll(".wahl-knopf").forEach(k => k.classList.add("bf-wahl"));
+      return;
+    }
+    if (a.art === "finden") {
+      f.append(el("div", { class: "frage", html: "Welche Zelle ist der Buchstabe?" }), el("div", { class: "bf-buchstabe", text: a.b }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90,
+        inhalt: o => zelleEl(BRAILLE[o], { groesse: "bf-klein" }),
+        hinweis: ctx.stufe === "s3" ? "Such deinen Buchstaben minus zehn in der Tafel. Dann kommt der Punkt unten links dazu."
+          : "Such den Buchstaben in der Tafel und vergleiche die Punkte genau.",
+        loesung: `${a.b}: Punkte ${punkteText(BRAILLE[a.b])}`,
+      });
+      return;
+    }
+    if (a.art === "wort") {
+      f.append(el("div", { class: "frage", html: "Welches <b>Wort</b> steht da?" }),
+        el("div", { class: "bf-wort", "aria-label": "Wort in Brailleschrift" }, ...[...a.w].map(c => zelleEl(BRAILLE[c], { groesse: "" }))));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 120,
+        hinweis: () => { tafelNachFehler(); return "Lies Zelle für Zelle und vergleiche mit der Tafel."; },
+        loesung: `${a.w}: ${[...a.w].map(c => `${c} ${BRAILLE[c]}`).join(" · ")}`,
+      });
+      return;
+    }
+    if (a.art === "setzen") {
+      const loesung = `${a.b}: Punkte ${punkteText(a.richtig)}`;
+      ctx.loesung(loesung);
+      ctx.schritte(a.richtig.length + 1);
+      f.append(el("div", { class: "frage", html: "Tippe die Punkte für diesen <b>Buchstaben</b>:" }), el("div", { class: "bf-buchstabe", text: a.b }));
+      setzFeld(ctx, m => {
+        if (m === a.richtig) { ctx.richtig(`Richtig: ${loesung}`); return false; }
+        tafelNachFehler();
+        ctx.falsch(m === gespiegelt(a.richtig) ? "Fast — die Zelle ist gespiegelt. Punkt 1, 2, 3 sind links." : "Noch nicht. Schau in der Tafel nach und vergleiche Punkt für Punkt.", loesung);
+        return false;
+      });
+      return;
+    }
+    // schreiben: Buchstabe für Buchstabe
+    const loesung = `${a.w}: ${[...a.w].map((c, i) => `${c} ${a.richtig[i]}`).join(" · ")}`;
+    ctx.loesung(loesung);
+    ctx.schritte(a.richtig.reduce((s, m) => s + m.length + 1, 0));
+    const wortZeile = el("div", { class: "bf-schreibwort", "aria-label": "Wort zum Schreiben" }, ...[...a.w].map(c => el("span", { text: c })));
+    const geschrieben = el("div", { class: "bf-geschrieben", "aria-label": "schon geschrieben" });
+    f.append(el("div", { class: "frage", html: "Schreib das Wort in <b>Braille</b>, Buchstabe für Buchstabe:" }), wortZeile, geschrieben);
+    let pos = 0;
+    const markiere = () => [...wortZeile.children].forEach((s, i) => { s.classList.toggle("dran", i === pos); s.classList.toggle("richtig", i < pos); });
+    markiere();
+    setzFeld(ctx, m => {
+      if (m === a.richtig[pos]) {
+        geschrieben.append(zelleEl(m, { groesse: "bf-klein", label: a.w[pos] }));
+        pos++;
+        markiere();
+        if (pos === a.w.length) ctx.richtig(`Richtig: ${a.w}`);
+        return true;
+      }
+      ctx.falsch(m === gespiegelt(a.richtig[pos]) ? "Fast — die Zelle ist gespiegelt. Punkt 1, 2, 3 sind links." : REGEL_ALLE, loesung);
+      return false;
+    });
+  },
+});
+</script>
+</body>
+</html>

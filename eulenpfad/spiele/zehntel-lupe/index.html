@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zehntel-Lupe</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4.2vw, 26px); font-weight: 800; margin: 0 0 6px; }
+  .ziel-zahl { text-align: center; font-size: clamp(36px, 8vw, 56px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 0 0 6px; }
+  .rechnung { text-align: center; font-size: clamp(30px, 7vw, 52px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 4px 0 12px; }
+
+  .lupe { max-width: 760px; margin: 0 auto 8px; }
+  .lupe-strahl { width: 100%; max-width: 760px; display: block; margin: 0 auto; touch-action: manipulation; overflow: visible; }
+  .lupe-strahl .linie { stroke: var(--text); stroke-width: 4; stroke-linecap: round; }
+  .lupe-strahl .strich { stroke: var(--text); stroke-width: 2; }
+  .lupe-strahl .strich.gross { stroke-width: 3.5; }
+  .lupe-strahl text { font-family: var(--schrift); font-weight: 800; font-size: 26px; fill: var(--text-leise); }
+  .lupe-strahl .trichter { fill: var(--deko-6); opacity: .13; }
+  .lupe-strahl .markiert { fill: var(--deko-6); opacity: .28; }
+  .lupe-strahl .feld { fill: transparent; cursor: pointer; }
+  .lupe-strahl .feld:hover { fill: rgba(99, 102, 241, .12); }
+  .lupe-strahl .zeiger { fill: var(--knopf); }
+  .lupe-strahl .treffer-punkt { fill: var(--gut); }
+  .lupe-strahl .glas { font-size: 26px; }
+
+  .folge { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 6px; margin: 4px 0 12px; }
+  .folge .glied {
+    background: #fff; border: 3px solid var(--rand); border-radius: 14px; padding: 6px 10px;
+    font-size: clamp(20px, 5vw, 30px); font-weight: 900; font-variant-numeric: tabular-nums;
+  }
+  .folge .glied.offen { color: var(--knopf); border-color: var(--knopf); border-style: dashed; }
+  .folge .schritt { font-size: clamp(13px, 3vw, 16px); color: var(--text-leise); font-weight: 800; }
+  .wahl-knopf { font-size: clamp(20px, 4.6vw, 28px); font-weight: 900; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔎 Zehntel-Lupe</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.2.g (Grundanspruch 2. Zyklus): in Dezimalschritten zählen (Beispiel dort: von
+// 0.725 in 0.005er-Schritten), Dezimalzahlen ordnen. Basisklasse 5: s1 4. Klasse — Dezimalzahlen nur
+// aus Grössen (3.40 Fr., 1.5 m; MA.3.A.2/3 der 4. Klasse), s2–s4 5. Klasse (Zehntel, Hundertstel),
+// s5 6. Klasse = Grundanspruch (Tausendstel, 0.005er-Schritte), s6 Königsstufe.
+// Aufgabenarten: Zahl auf dem Strahl setzen (die Lupe zeigt das gewählte Stück eine Stelle feiner),
+// am Pfeil ablesen, zwei Zahlen vergleichen (Falle 0.5 gegen 0.45), ordnen, in Schritten zählen,
+// die Mitte zwischen zwei Zahlen finden.
+// Abgrenzung: Der Zahlenstrahl-Pfeil übt ganze Zahlen und Schätzen, der Zahlen-Hüpfer Schritte mit
+// ganzen Zahlen; hier liegen alle Zahlen genau auf Strichen, und gezählt wird nur in Dezimalschritten.
+// Dezimalzahlen mit dem eingestellten Zeichen (LS.dezimalText), Geld mit LS.geldText.
+// Gerechnet wird in Tausendsteln als ganze Zahlen: 2.37 = 2370.
+
+const { dezimalText, geldText, zufall, waehle, mische, el } = LS;
+const NS = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attr = {}, text) => {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  if (text !== undefined) e.textContent = text;
+  return e;
+};
+
+/** Nachkommastellen, die die Zahl (in Tausendsteln) wirklich hat. */
+const nachkommaVon = t => (t % 1000 === 0 ? 0 : t % 100 === 0 ? 1 : t % 10 === 0 ? 2 : 3);
+/** Zahl (Tausendstel) als Text: Franken, Meter oder ohne Einheit; st: feste Nachkommastellen. */
+const zahl = (t, einheit = null, st) => (einheit === "fr" ? geldText(t / 10)
+  : dezimalText(t / 1000, st) + (einheit === "m" ? " m" : ""));
+/** Strichabstand der Ebene k der Lupe: Zehntel, Hundertstel, Tausendstel. */
+const strichVon = k => 100 / 10 ** k;
+const STELLE = ["Zehntel", "Hundertstel", "Tausendstel"];
+/** „Jeder Strich ist …“ in Worten, damit der Hinweis keine Zahl nennt, die die Lösung sein könnte. */
+const strichName = (k, einheit) => (einheit === "fr" ? "10 Rappen" : einheit === "m" ? "10 Zentimeter" : `ein ${STELLE[k]}`);
+
+// Je Stufe: Aufgabenarten, ganze Zahlen von–bis, Ebenen der Lupe (0: nur Zehntel), Einheiten (nur s1),
+// Zählschritte in Tausendsteln, Anteil Rückwärtszählen, Ablesen mit Tastatur statt Auswahl,
+// höchstens so viele Nachkommastellen beim Vergleichen und Ordnen, Anzahl zu ordnender Zahlen.
+const STUFE = {
+  s1: { arten: ["setzen", "ablesen", "zaehlen"], ganz: [0, 9], ebenen: 0, einheiten: ["fr", "m"], schritte: [100, 200, 500], mitteBeschriften: true },
+  s2: { arten: ["setzen", "ablesen", "zaehlen"], ganz: [0, 20], ebenen: 0, schritte: [100, 200, 500] },
+  s3: { arten: ["setzen", "ablesen", "vergleich", "zaehlen"], ganz: [0, 10], ebenen: 1, stellen: 2, schritte: [10, 20, 50] },
+  s4: { arten: ["setzen", "ablesen", "ordnen", "zaehlen"], ganz: [0, 20], ebenen: 1, stellen: 2, schritte: [10, 50, 250], rueck: 0.5, tippen: true, ordnen: 3 },
+  s5: { arten: ["setzen", "ablesen", "vergleich", "ordnen", "zaehlen"], ganz: [0, 9], ebenen: 2, stellen: 3, schritte: [5, 5, 25], rueck: 0.3, tippen: true, ordnen: 4 },
+  // Königsstufe: bis 100, zwei Lupen, rückwärts über Stellen hinweg, ordnen in beide Richtungen, Mitte finden
+  s6: { arten: ["ablesen", "ordnen", "zaehlen", "mitte"], ganz: [0, 99], ebenen: 2, stellen: 3, schritte: [5, 25, 125], rueck: 0.7, tippen: true, ordnen: 4, beideRichtungen: true, knapp: true },
+};
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(art, p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  // Notausgang (praktisch nie): ab 1 in den ersten Schritten der Stufe weiterzählen
+  const s = p.schritte[0];
+  return { art: "zaehlen", einheit: p.einheiten ? p.einheiten[0] : null, schritt: s, richtung: 1, werte: [0, 1, 2, 3].map(i => 1000 + i * s) };
+}
+
+/**
+ * Ziel auf der feinsten Ebene: die letzte Ziffer ist nie 0, sonst bräuchte es die Lupe nicht.
+ * ohneMitte: nicht auf dem beschrifteten mittleren Strich (Stufe 1).
+ */
+function zielAuf(von, L, ohneMitte) {
+  let ziel = von;
+  for (let k = 0; k <= L; k++) {
+    let z = k === L ? zufall(1, 9) : zufall(0, 9);
+    if (ohneMitte && k === L && z === 5) z = waehle([4, 6]);
+    ziel += z * strichVon(k);
+  }
+  return ziel;
+}
+
+/** Falsche Antworten beim Ablesen: Strich daneben, Stück daneben, Ziffern vertauscht, 2.07 statt 2.7. */
+function ablesOptionen(ziel, von, L, geld) {
+  const rest = ziel - von;
+  const kand = L === 0
+    ? [von + rest / 10, ziel + 100, ziel - 100, (rest / 100) * 1000 + (von / 1000) * 100]
+    : [ziel + 10, ziel - 10, ziel + 100, ziel - 100, von + Math.floor(rest / 100) * 100 + (rest % 100) / 10, von + (rest % 100 / 10) * 100 + Math.floor(rest / 100) * 10];
+  const falsche = [...new Set(kand)].filter(x => x > 0 && x !== ziel && (!geld || x % 10 === 0));
+  return mische([ziel, ...mische(falsche).slice(0, 3)]);
+}
+
+function erzeuge(art, p) {
+  const einheit = p.einheiten ? waehle(p.einheiten) : null;
+  const g = zufall(...p.ganz);
+  const max = (p.ganz[1] + 1) * 1000;
+  if (art === "setzen" || art === "ablesen") {
+    const von = g * 1000;
+    const a = { art, einheit, von, ebenen: p.ebenen, ziel: zielAuf(von, p.ebenen, p.mitteBeschriften) };
+    if (art === "ablesen" && !p.tippen) a.optionen = ablesOptionen(a.ziel, von, p.ebenen, einheit === "fr");
+    return a;
+  }
+  if (art === "zaehlen") {
+    const s = waehle(p.schritte);
+    const r = Math.random() < (p.rueck || 0) ? -1 : 1;
+    let werte;
+    if (Math.random() < 0.5) {
+      // Über eine Stelle hinweg: 2.98, 2.99, 3.00, 3.01 oder 0.795, 0.8, 0.805
+      const grenze = s < 20 ? 100 : 1000;
+      const B = grenze * zufall(1, Math.floor(max / grenze) - 1);
+      const j = zufall(1, 3);
+      werte = [0, 1, 2, 3].map(i => B + (i - j) * s * r);
+    } else {
+      const start = s * zufall(1, Math.floor(max / s) - 1);
+      werte = [0, 1, 2, 3].map(i => start + i * s * r);
+    }
+    if (werte.some(w => w <= 0 || w > max)) return null;
+    return { art, einheit, schritt: s, richtung: r, werte };
+  }
+  if (art === "vergleich") {
+    const basis = g * 1000, d = zufall(1, 9);
+    // Anhang nach dem Zehntel: eine oder (bis Tausendstel) zwei weitere Ziffern, die letzte nie 0
+    const anhang = () => (p.stellen === 3 && Math.random() < 0.5 ? zufall(0, 9) * 10 + zufall(1, 9) : zufall(1, 9) * 10);
+    const typ = waehle(["falle", "falle", "laenger", "gleich", "frei"]);
+    let x, y, sx, sy;
+    if (typ === "falle") { x = basis + d * 100; y = basis + (d - 1) * 100 + anhang(); }      // 0.5 > 0.45
+    else if (typ === "laenger") { x = basis + d * 100; y = x + anhang(); }                     // 0.5 < 0.54
+    else if (typ === "gleich") { x = basis + d * 100; y = x; sy = zufall(2, p.stellen); }       // 0.5 = 0.50
+    else {
+      x = basis + zufall(1, 10 ** p.stellen - 1) * 10 ** (3 - p.stellen);
+      y = basis + zufall(1, 10 ** p.stellen - 1) * 10 ** (3 - p.stellen);
+      if (x === y) return null;
+    }
+    sx = nachkommaVon(x) || 1;
+    if (sy === undefined) sy = nachkommaVon(y) || 1;
+    if (Math.random() < 0.5) [x, y, sx, sy] = [y, x, sy, sx];
+    return { art, x, y, sx, sy, rel: x < y ? "<" : x > y ? ">" : "=" };
+  }
+  if (art === "ordnen") {
+    const z1 = zufall(1, 9);
+    let z2 = zufall(1, 8);
+    if (z2 >= z1) z2++;
+    const muster = [[z1], [z2], [z1, z2], [z2, z1], [0, z1], [0, z2], [z1, 0, z2], [z2, 0, z1], [0, z1, z2], [0, z2, z1]]
+      .filter(m => m.length <= p.stellen);
+    const werte = mische(muster).slice(0, p.ordnen).map(m => g * 1000 + Number((m.join("") + "00").slice(0, 3)));
+    const absteigend = !!p.beideRichtungen && Math.random() < 0.5;
+    return { art, werte, absteigend };
+  }
+  if (art === "mitte") {
+    const s = waehle([100, 10]);
+    const a = s * zufall(1, Math.floor(max / s) - 2);
+    return { art, a, b: a + s, antwort: a + s / 2 };
+  }
+  return null;
+}
+
+/** Gibt es eine Falle: eine kürzere Zahl, die grösser ist als eine längere (0.5 und 0.45)? */
+const hatFalle = werte => werte.some(x => werte.some(y => nachkommaVon(x) < nachkommaVon(y) && x > y));
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  const max = (p.ganz[1] + 1) * 1000;
+  const imRaum = t => Number.isInteger(t) && t > 0 && t <= max;
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (p.einheiten ? !p.einheiten.includes(a.einheit) && a.einheit !== undefined : a.einheit) m.push("Einheit nicht in der Stufe");
+  if (a.art === "setzen" || a.art === "ablesen") {
+    if (a.von % 1000 || a.von / 1000 < p.ganz[0] || a.von / 1000 > p.ganz[1]) m.push("Ausschnitt nicht in der Stufe");
+    if (!(a.von < a.ziel && a.ziel < a.von + 1000)) m.push("Ziel nicht im Ausschnitt");
+    if (nachkommaVon(a.ziel) !== a.ebenen + 1 || a.ebenen !== p.ebenen) m.push("Ziel nicht auf einem Strich der feinsten Ebene");
+    if (a.optionen) {
+      if (a.optionen.length !== 4) m.push("nicht vier Antworten");
+      if (a.optionen.filter(x => x === a.ziel).length !== 1) m.push("Lösung nicht genau einmal unter den Antworten");
+      if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+      if (a.optionen.some(x => !imRaum(x) || (a.einheit === "fr" && x % 10))) m.push("Antwort ausserhalb des Zahlenraums");
+    }
+    if (a.einheit === "fr" && a.ziel % 10) m.push("Geldbetrag nicht in Rappen");
+  }
+  if (a.art === "zaehlen") {
+    if (!p.schritte.includes(a.schritt)) m.push("Schritt nicht in der Stufe");
+    if (a.werte.length !== 4 || !a.werte.every(imRaum)) m.push("Zahlen ausserhalb des Zahlenraums");
+    if (a.werte.some((w, i) => i > 0 && w - a.werte[i - 1] !== a.schritt * a.richtung)) m.push("Schritte ungleich");
+    if (a.richtung < 0 && !p.rueck) m.push("rückwärts nicht in der Stufe");
+    if (a.einheit === "fr" && a.werte.some(w => w % 10)) m.push("Geldbetrag nicht in Rappen");
+  }
+  if (a.art === "vergleich") {
+    if (!imRaum(a.x) || !imRaum(a.y)) m.push("Zahlen ausserhalb des Zahlenraums");
+    if (Math.max(a.sx, a.sy) > p.stellen || a.sx < nachkommaVon(a.x) || a.sy < nachkommaVon(a.y)) m.push("Nachkommastellen falsch");
+    if (a.rel !== (a.x < a.y ? "<" : a.x > a.y ? ">" : "=")) m.push("Vergleich falsch");
+    if (a.rel === "=" && a.sx === a.sy) m.push("gleiche Zahl gleich geschrieben");
+  }
+  if (a.art === "ordnen") {
+    if (a.werte.length !== p.ordnen || new Set(a.werte).size !== a.werte.length) m.push("Anzahl oder doppelte Zahlen");
+    if (!a.werte.every(imRaum) || a.werte.some(w => nachkommaVon(w) > p.stellen)) m.push("Zahlen ausserhalb der Stufe");
+    if (!hatFalle(a.werte)) m.push("keine Falle (kürzere, aber grössere Zahl)");
+    if (a.absteigend && !p.beideRichtungen) m.push("absteigend nicht in der Stufe");
+  }
+  if (a.art === "mitte") {
+    if (a.antwort * 2 !== a.a + a.b || ![100, 10].includes(a.b - a.a)) m.push("Mitte falsch");
+    if (!imRaum(a.a) || !imRaum(a.b)) m.push("Zahlen ausserhalb des Zahlenraums");
+  }
+  return m;
+}
+
+// ---------- Zahlenstrahl mit Lupe ----------
+
+const B = 700, X0 = 64, X1 = 636, DX = (X1 - X0) / 10;
+const xVon = i => X0 + i * DX;
+
+/**
+ * Eine Ebene der Lupe: Strahl von 'von' in zehn Strichen zu 'schritt'.
+ * opt.trichter: Stück der Ebene darüber (Index), das hier vergrössert erscheint
+ * opt.markiert: eigenes Stück (Index), das in der nächsten Ebene vergrössert wird
+ * opt.zeiger: Strich (Index), auf den ein Pfeil zeigt; opt.treffer: Strich mit grünem Punkt
+ * opt.onStueck(i) / opt.onStrich(i): antippen
+ */
+function ebeneZeichnen(von, schritt, einheit, opt = {}) {
+  const oben = opt.trichter !== undefined ? 34 : 0;
+  const y = oben + 46, H = y + 54;
+  const svg = svgEl("svg", { viewBox: `0 0 ${B} ${H}`, class: "lupe-strahl" });
+  if (opt.trichter !== undefined) {
+    const xa = xVon(opt.trichter), xb = xVon(opt.trichter + 1);
+    svg.append(svgEl("polygon", { class: "trichter", points: `${xa},0 ${xb},0 ${X1 + 12},${y - 20} ${X0 - 12},${y - 20}` }),
+      svgEl("text", { class: "glas", x: X1 + 4, y: 28, "text-anchor": "middle" }, "🔎"));
+  }
+  if (opt.markiert !== undefined) svg.append(svgEl("rect", { class: "markiert", x: xVon(opt.markiert), y: y - 18, width: DX, height: 36, rx: 6 }));
+  svg.append(svgEl("line", { class: "linie", x1: X0 - 14, x2: X1 + 14, y1: y, y2: y }));
+  for (let i = 0; i <= 10; i++) {
+    const gross = i === 0 || i === 5 || i === 10;
+    svg.append(svgEl("line", { class: gross ? "strich gross" : "strich", x1: xVon(i), x2: xVon(i), y1: y - (gross ? 16 : 10), y2: y + (gross ? 16 : 10) }));
+  }
+  const beschriftet = opt.mitteBeschriften ? [0, 5, 10] : [0, 10];
+  for (const i of beschriftet) svg.append(svgEl("text", { x: xVon(i), y: y + 44, "text-anchor": "middle" }, zahl(von + i * schritt, einheit)));
+  if (opt.zeiger !== undefined) svg.append(svgEl("path", { class: "zeiger", d: `M${xVon(opt.zeiger)},${y - 6} l-12,-24 l24,0 Z` }));
+  if (opt.treffer !== undefined) svg.append(svgEl("circle", { class: "treffer-punkt", cx: xVon(opt.treffer), cy: y, r: 11 }));
+  if (opt.onStueck) for (let i = 0; i < 10; i++) {
+    const r = svgEl("rect", { class: "feld", x: xVon(i), y: y - 34, width: DX, height: 68 });
+    r.addEventListener("click", () => opt.onStueck(i));
+    svg.append(r);
+  }
+  if (opt.onStrich) for (let i = 0; i <= 10; i++) {
+    const r = svgEl("rect", { class: "feld", x: xVon(i) - DX / 2, y: y - 34, width: DX, height: 68 });
+    r.addEventListener("click", () => opt.onStrich(i));
+    svg.append(r);
+  }
+  return svg;
+}
+
+/** Weg durch die Lupe: je Ebene Anfang, Strichabstand und das Stück (zuletzt: der Strich) des Ziels. */
+function lupenWeg(a) {
+  const weg = [];
+  let von = a.von;
+  for (let k = 0; k <= a.ebenen; k++) {
+    const s = strichVon(k);
+    const i = k < a.ebenen ? Math.floor((a.ziel - von) / s) : (a.ziel - von) / s;
+    weg.push({ von, schritt: s, i });
+    von += i * s;
+  }
+  return weg;
+}
+
+// ---------- Darstellung je Aufgabenart ----------
+
+function eintippen(ctx, richtig, hinweis, loesungText) {
+  ctx.loesung(loesungText);
+  ctx.schritte(LS.tippSchritte(richtig / 1000));
+  const anzeige = el("div", { class: "anzeige leer", style: "margin-top:6px", "aria-label": "Deine Zahl" });
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 3, dezimal: true, nachkomma: 3,
+    onOk(w) {
+      if (Math.round(w * 1000) === richtig) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(hinweis, loesungText);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(anzeige, tasten.element);
+}
+
+function setzen(ctx, a, p) {
+  const Z = zahl(a.ziel, a.einheit);
+  const weg = lupenWeg(a);
+  const letzte = weg[weg.length - 1];
+  const loesungText = a.ebenen === 0
+    ? `${Z} ist der ${letzte.i}. Strich nach ${zahl(letzte.von, a.einheit)}.`
+    : `${Z} liegt zwischen ${zahl(letzte.von)} und ${zahl(letzte.von + 10 * letzte.schritt)}, beim ${letzte.i}. Strich.`;
+  ctx.loesung(loesungText);
+  ctx.schritte(a.ebenen + 1);
+  ctx.flaeche.append(
+    el("div", { class: "frage", text: a.ebenen ? "Tipp auf das Stück, in dem die Zahl liegt. Die Lupe zeigt es feiner." : "Tipp auf den Strich dieser Zahl:" }),
+    el("div", { class: "ziel-zahl", text: Z }));
+  const lupe = el("div", { class: "lupe" });
+  ctx.flaeche.append(lupe);
+  let ebene = 0;
+
+  function zeichne(geloest) {
+    const teile = [];
+    for (let k = 0; k <= ebene; k++) {
+      const w = weg[k];
+      const offen = !geloest && k === ebene;
+      const opt = { mitteBeschriften: p.mitteBeschriften };
+      if (k > 0) opt.trichter = weg[k - 1].i;
+      if (k < ebene) opt.markiert = w.i;
+      if (geloest && k === a.ebenen) opt.treffer = w.i;
+      if (offen && k < a.ebenen) opt.onStueck = i => tippe(k, i);
+      if (offen && k === a.ebenen) opt.onStrich = i => tippe(k, i);
+      teile.push(ebeneZeichnen(w.von, w.schritt, a.einheit, opt));
+    }
+    lupe.replaceChildren(...teile);
+  }
+
+  function tippe(k, i) {
+    if (ctx.vorbei() || k !== ebene) return;
+    const w = weg[k];
+    if (i === w.i) {
+      LS.ton("tipp");
+      if (k === a.ebenen) { zeichne(true); ctx.richtig(`Richtig: ${Z}`); return; }
+      ebene++;
+      zeichne(false);
+      return;
+    }
+    const richtung = i < w.i ? "weiter rechts" : "weiter links";
+    const hinweis = p.knapp ? `Die Zahl liegt ${richtung}.`
+      : k < a.ebenen ? `Die Zahl liegt ${richtung}. Schau auf die ${STELLE[k]} von ${Z}.`
+      : `Die Zahl liegt ${richtung}. Jeder Strich ist ${strichName(k, a.einheit)}.`;
+    ctx.falsch(hinweis, loesungText);
+    if (ctx.vorbei()) { ebene = a.ebenen; zeichne(true); }
+  }
+  zeichne(false);
+}
+
+function ablesen(ctx, a, p) {
+  const Z = zahl(a.ziel, a.einheit);
+  const weg = lupenWeg(a);
+  const loesungText = `Der Pfeil zeigt auf ${Z}.`;
+  ctx.flaeche.append(el("div", { class: "frage", text: a.ebenen ? "Welche Zahl zeigt der Pfeil? Die Lupe zeigt das markierte Stück grösser." : "Welche Zahl zeigt der Pfeil?" }));
+  const lupe = el("div", { class: "lupe" });
+  weg.forEach((w, k) => {
+    const opt = { mitteBeschriften: p.mitteBeschriften };
+    if (k > 0) opt.trichter = weg[k - 1].i;
+    if (k < a.ebenen) opt.markiert = w.i; else opt.zeiger = w.i;
+    lupe.append(ebeneZeichnen(w.von, w.schritt, a.einheit, opt));
+  });
+  ctx.flaeche.append(lupe);
+  const strich = strichName(a.ebenen, a.einheit);
+  const hinweis = p.knapp ? "Lies den Anfang des untersten Strahls ab und zähl die Striche."
+    : `Lies den Anfang des untersten Strahls ab und zähl die Striche bis zum Pfeil. Jeder Strich ist ${strich}.`;
+  if (a.optionen) {
+    LS.auswahl(ctx, { optionen: a.optionen, richtig: a.ziel, inhalt: v => zahl(v, a.einheit), breite: 120, loesung: loesungText,
+      hinweis: v => `${zahl(v, a.einheit)} passt nicht. ${hinweis}` });
+  } else {
+    eintippen(ctx, a.ziel, hinweis, loesungText);
+  }
+}
+
+function vergleich(ctx, a, p) {
+  const X = dezimalText(a.x / 1000, a.sx), Y = dezimalText(a.y / 1000, a.sy);
+  const st = Math.max(a.sx, a.sy);
+  ctx.serie("antwort", a.rel);
+  const loesungText = `${X} ${a.rel} ${Y}, denn ${dezimalText(a.x / 1000, st)} ${a.rel} ${dezimalText(a.y / 1000, st)}`;
+  ctx.flaeche.append(el("div", { class: "frage", text: "Welches Zeichen gehört in die Lücke?" }),
+    el("div", { class: "rechnung", text: `${X}  ?  ${Y}` }));
+  LS.auswahl(ctx, {
+    optionen: ["<", "=", ">"], richtig: a.rel, breite: 100, loesung: loesungText,
+    inhalt: o => ({ text: o, klein: o === "<" ? "kleiner als" : o === ">" ? "grösser als" : "gleich wie" }),
+    hinweis: p.knapp ? "Stelle für Stelle vergleichen, von links her."
+      : "Vergleiche Stelle für Stelle: zuerst die Ganzen, dann die Zehntel, dann die Hundertstel. Mehr Ziffern heisst nicht mehr wert!",
+  });
+}
+
+function ordnen(ctx, a, p) {
+  const reihe = [...a.werte].sort((x, y) => (a.absteigend ? y - x : x - y));
+  const T = v => dezimalText(v / 1000);
+  if (p.beideRichtungen) ctx.serie("richtung", a.absteigend ? "ab" : "auf");
+  ctx.flaeche.append(el("div", { class: "frage", text: a.absteigend ? "Tipp die Zahlen der Reihe nach an: von der grössten zur kleinsten." : "Tipp die Zahlen der Reihe nach an: von der kleinsten zur grössten." }));
+  LS.reihenfolge(ctx, {
+    reihe, inhalt: T, ablage: T, pfeile: true, breite: 110,
+    loesung: reihe.map(T).join(a.absteigend ? " > " : " < "),
+    hinweis: v => (p.knapp ? `${T(v)} ist noch nicht an der Reihe.`
+      : `${T(v)} ist noch nicht an der Reihe. Vergleiche zuerst die Zehntel, dann die Hundertstel.`),
+  });
+}
+
+function zaehlen(ctx, a, p) {
+  const st = a.schritt % 100 === 0 ? 1 : a.schritt % 10 === 0 ? 2 : 3;
+  const T = t => zahl(t, a.einheit, st);
+  const zeichen = a.richtung > 0 ? "+" : "−";
+  const S = zahl(a.schritt, a.einheit);
+  const [w0, w1, w2, w3] = a.werte;
+  const loesungText = `${T(w2)} ${zeichen} ${S} = ${T(w3)}`;
+  ctx.flaeche.append(el("div", { class: "frage", text: a.richtung > 0 ? "Zähl weiter: Welche Zahl kommt als Nächstes?" : "Zähl rückwärts: Welche Zahl kommt als Nächstes?" }));
+  const folge = el("div", { class: "folge rechnung" });
+  [w0, w1, w2].forEach((w, i) => {
+    if (i > 0) folge.append(el("span", { class: "schritt", text: `${zeichen}${S}` }));
+    folge.append(el("span", { class: "glied", text: T(w) }));
+  });
+  folge.append(el("span", { class: "schritt", text: `${zeichen}${S}` }), el("span", { class: "glied offen", text: "?" }));
+  ctx.flaeche.append(folge);
+  const hinweis = p.knapp ? "Stelle für Stelle — und denk an den Übertrag."
+    : a.richtung > 0 ? "Zähl den Schritt Stelle für Stelle dazu. Sind bei einer Stelle 10 voll, gibt es eine mehr bei der Stelle links davon."
+    : "Zähl den Schritt Stelle für Stelle weg. Reicht eine Stelle nicht, nimm eine von der Stelle links davon.";
+  eintippen(ctx, w3, hinweis, loesungText);
+}
+
+function mitte(ctx, a, p) {
+  const st = nachkommaVon(a.b - a.a);
+  const A = dezimalText(a.a / 1000), Bt = dezimalText(a.b / 1000);
+  const loesungText = `${dezimalText(a.a / 1000, st + 1)} + ${dezimalText((a.b - a.a) / 2000, st + 1)} = ${dezimalText(a.antwort / 1000)}`;
+  ctx.flaeche.append(el("div", { class: "frage", text: "Welche Zahl liegt genau in der Mitte?" }),
+    el("div", { class: "rechnung", text: `${A}  ·  ?  ·  ${Bt}` }));
+  eintippen(ctx, a.antwort, p.knapp ? "Schreib beide Zahlen mit einer Stelle mehr."
+    : `Schreib beide Zahlen mit einer Stelle mehr: ${dezimalText(a.a / 1000, st + 1)} und ${dezimalText(a.b / 1000, st + 1)}.`, loesungText);
+}
+
+const ARTEN = { setzen, ablesen, vergleich, ordnen, zaehlen, mitte };
+
+LS.spiel({
+  id: "zehntel-lupe",
+  einleitung: "Zwischen zwei Strichen hat es noch viel Platz! Die Lupe zeigt ein Stück des Zahlenstrahls zehnmal grösser. Setze, lies ab, ordne und zähle mit Dezimalzahlen.",
+  anzahl: 8,
+  stufen: {
+    s1: "Franken und Meter: Wo liegt 3.40 Fr., wo 1.5 m? In 10-Rappen-Schritten zählen.",
+    s2: "Zehntel: 2.7 zeigen und ablesen, in Schritten wie 0.2 zählen.",
+    s3: "Mit der Lupe zu den Hundertsteln: 2.37. Was ist grösser: 0.5 oder 0.45?",
+    s4: "Hundertstel eintippen, drei Zahlen ordnen, rückwärts in 0.25er-Schritten.",
+    s5: "Zwei Lupen bis zu den Tausendsteln: von 0.725 in 0.005er-Schritten (Lehrplan 6. Klasse).",
+    s6: "Endgegner: bis 100, rückwärts über Stellen hinweg, die Mitte zwischen 2.4 und 2.5.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("art", a.art);
+    ARTEN[a.art](ctx, a, p);
+    if (ctx.nr === 0) ctx.sag(p.ebenen ? "Tipp: Schau zuerst auf die Zehntel, dann zeigt dir die Lupe die Hundertstel." : "Tipp: Zähl die Striche ab dem Anfang.");
+  },
+});
+</script>
+</body>
+</html>

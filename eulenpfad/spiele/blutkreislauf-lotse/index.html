@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blutkreislauf-Lotse</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  /* Rot = sauerstoffreich, Blau = sauerstoffarm: fachliche Konvention der Schulbücher, keine Stellenfarben. */
+  :root {
+    --blut-reich: #d62839; --blut-reich-hell: #fde2e5;
+    --blut-arm: #2b59c3; --blut-arm-hell: #e0e8fb;
+    --blut-neutral: #b4b8cc;
+  }
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 8px; }
+  .frage b { color: var(--knopf); }
+  .frage-bild { text-align: center; font-size: clamp(40px, 9vw, 56px); line-height: 1.1; }
+
+  .kreislauf { display: block; width: 100%; max-width: 420px; margin: 0 auto 6px; touch-action: manipulation; user-select: none; }
+  .kreislauf.koerperbild { max-width: 300px; }
+  .kreislauf.antippen .station { cursor: pointer; }
+  .kreislauf text { font-family: var(--schrift); font-weight: 800; fill: var(--text); text-anchor: middle; dominant-baseline: middle; }
+  .kreislauf .klein { font-size: 11px; }
+  .kreislauf .mittel { font-size: 13px; }
+  .kreislauf .gross { font-size: 16px; }
+  .kreislauf .frage-zeichen { font-size: 26px; fill: var(--knopf); }
+  .kreislauf .kasten { fill: #fff; stroke: var(--text-leise); stroke-width: 2.5; }
+  .kreislauf .gefaess { fill: none; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+  .kreislauf .halo { fill: none; stroke: #fff; stroke-width: 22; stroke-linejoin: round; }
+  .kreislauf .treffer { fill: none; stroke: transparent; stroke-width: 26; pointer-events: stroke; stroke-linejoin: round; }
+  .kreislauf .leuchten { fill: none; stroke: var(--deko-4); stroke-width: 28; stroke-opacity: .55; stroke-linejoin: round; stroke-linecap: round; }
+  .kreislauf .s-reich { stroke: var(--blut-reich); }
+  .kreislauf .s-arm { stroke: var(--blut-arm); }
+  .kreislauf .s-neutral { stroke: var(--blut-neutral); }
+  .kreislauf .f-reich { fill: var(--blut-reich-hell); stroke: var(--blut-reich); }
+  .kreislauf .f-arm { fill: var(--blut-arm-hell); stroke: var(--blut-arm); }
+  .kreislauf .markiert .kasten, .kreislauf .kasten.markiert { stroke: var(--deko-4); stroke-width: 6; }
+  .kreislauf .daneben .kasten, .kreislauf .daneben .gefaess { stroke: var(--hinweis); }
+  .kreislauf .pfeil { fill: var(--text); }
+  .kreislauf .zelle { stroke: #fff; stroke-width: 3; transition: transform .35s ease; }
+  .kreislauf .zelle.z-reich { fill: var(--blut-reich); }
+  .kreislauf .zelle.z-arm { fill: var(--blut-arm); }
+  .kreislauf .organ { stroke: var(--text-leise); stroke-width: 2; }
+  .kreislauf .koerper-umriss { fill: #fff; stroke: var(--text-leise); stroke-width: 2.5; }
+
+  .legende { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: clamp(14px, 3.4vw, 16px); color: var(--text-leise); font-weight: 700; margin: 0 0 8px; }
+  .legende span { display: inline-flex; align-items: center; gap: 6px; }
+  .legende i { display: inline-block; width: 22px; height: 8px; border-radius: 4px; }
+  .legende .l-reich { background: var(--blut-reich); }
+  .legende .l-arm { background: var(--blut-arm); }
+  .wahl-knopf { font-size: clamp(17px, 3.8vw, 21px); font-weight: 800; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>❤️ Blutkreislauf-Lotse</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.1.4.e (2. Zyklus, 5./6. Klasse): Skelett, Muskeln, Herz und Blutkreislauf — Bau und
+// Funktion; Stufe 1 sinngemäss NMG.1.4.d (4. Klasse: Organe, Körperreaktionen).
+// Basisklasse 5: s1 4. Klasse (Wo liegt das Herz?), s2–s4 5. Klasse (Körperkreislauf → beide Kreisläufe →
+// Arterie/Vene, sauerstoffreich/-arm), s5 6. Klasse (Puls und Bewegung, Gasaustausch; Liste „fragen“),
+// s6 Königsstufe (ganzer Weg mit Vorhöfen und Kammern).
+// Fachfalle: „Arterie“ heisst „vom Herzen weg“, nicht „sauerstoffreich“ — die Lungenarterie führt
+// sauerstoffarmes Blut, die Lungenvene sauerstoffreiches. Rot/Blau ist Schulbuch-Konvention
+// (eigene Variablen --blut-*, keine Stellenfarben). Das Herz ist von vorne gezeichnet: Seine rechte Hälfte
+// liegt im Bild links.
+// Bezug: Körper-Puzzle (Basisklasse 2) fragt Organe und „Wohin führen Arterien/Venen?“ als Text; hier
+// wird der Weg im Bild gelotst, die Fragen der Liste überschneiden sich nicht.
+
+const { waehle, mische, el } = LS;
+const SVGNS = "http://www.w3.org/2000/svg";
+
+const LISTE = "fragen";
+const FREI = new Set(LS.spielListen("blutkreislauf-lotse").length ? LS.freieListen("blutkreislauf-lotse") : [LISTE]);
+const fragenDerStufe = n => (FREI.has(LISTE) ? KREISLAUF_FRAGEN.filter(f => f[0] === n) : []);
+
+// ---------- Stationen ----------
+
+// Grosses Bild (Stufen 3, 4, 6). blut: Zustand des Bluts, wenn es die Station verlässt.
+// zelle: Ort des Blutkörperchens; Kreislauf: zu welchem Kreislauf die Station gehört.
+const GROSS = {
+  koerper: { name: "Körper", blut: "arm", zelle: [172, 416], kreis: "koerper" },
+  hohlvene: { name: "Körpervene (Hohlvene)", gefaess: "Vene", blut: "arm", zelle: [70, 372], kreis: "koerper",
+    d: "M150 416 H70 V192 H140", pfeil: [70, 292, "auf"], schrift: [53, 300] },
+  rHaelfte: { name: "rechte Herzhälfte", blut: "arm", zelle: [174, 262] },
+  lHaelfte: { name: "linke Herzhälfte", blut: "reich", zelle: [246, 262] },
+  rVorhof: { name: "rechter Vorhof", kurz: "Vorhof", blut: "arm", zelle: [174, 203] },
+  rKammer: { name: "rechte Kammer", kurz: "Kammer", blut: "arm", zelle: [174, 266] },
+  lVorhof: { name: "linker Vorhof", kurz: "Vorhof", blut: "reich", zelle: [246, 203] },
+  lKammer: { name: "linke Kammer", kurz: "Kammer", blut: "reich", zelle: [246, 266] },
+  lungenarterie: { name: "Lungenarterie", gefaess: "Arterie", blut: "arm", zelle: [110, 66], kreis: "lunge",
+    d: "M140 262 H110 V44 H150", pfeil: [110, 122, "auf"], schrift: [127, 128] },
+  lunge: { name: "Lunge", blut: "reich", zelle: [172, 44], kreis: "lunge" },
+  lungenvene: { name: "Lungenvene", gefaess: "Vene", blut: "reich", zelle: [310, 166], kreis: "lunge",
+    d: "M270 44 H310 V192 H280", pfeil: [310, 112, "ab"], schrift: [293, 118] },
+  aorta: { name: "Körperarterie (Aorta)", gefaess: "Arterie", blut: "reich", zelle: [350, 282], kreis: "koerper",
+    d: "M280 262 H350 V416 H270", pfeil: [350, 340, "ab"], schrift: [367, 334] },
+};
+const KREIS_HAELFTEN = ["koerper", "hohlvene", "rHaelfte", "lungenarterie", "lunge", "lungenvene", "lHaelfte", "aorta"];
+const KREIS_KAMMERN = ["koerper", "hohlvene", "rVorhof", "rKammer", "lungenarterie", "lunge", "lungenvene", "lVorhof", "lKammer", "aorta"];
+const GEFAESSE = ["hohlvene", "lungenarterie", "lungenvene", "aorta"];
+
+// Kleines Bild (Stufe 2): Herz und vier Körperteile, je eine Arterie hin und eine Vene zurück.
+const TEILE = {
+  kopf: { name: "Kopf", zu: "zum Kopf", von: "vom Kopf", im: "im Kopf" },
+  arme: { name: "Arme", zu: "zu den Armen", von: "von den Armen", im: "in den Armen" },
+  bauch: { name: "Bauch", zu: "zum Bauch", von: "vom Bauch", im: "im Bauch" },
+  beine: { name: "Beine", zu: "zu den Beinen", von: "von den Beinen", im: "in den Beinen" },
+};
+const KLEIN_LAGE = {
+  kopf: { kasten: [160, 16, 100, 48], schrift: [210, 41], zelle: [176, 40], a: "M198 184 V64", v: "M222 64 V184", pa: [198, 122, "auf"], pv: [222, 122, "ab"], za: [198, 150], zv: [222, 96] },
+  beine: { kasten: [160, 376, 100, 48], schrift: [210, 401], zelle: [176, 400], a: "M198 256 V376", v: "M222 376 V256", pa: [198, 318, "ab"], pv: [222, 318, "auf"], za: [198, 290], zv: [222, 346] },
+  arme: { kasten: [8, 196, 92, 48], schrift: [62, 221], zelle: [24, 220], a: "M170 208 H100", v: "M100 232 H170", pa: [134, 208, "links"], pv: [134, 232, "rechts"], za: [156, 208], zv: [114, 232] },
+  bauch: { kasten: [320, 196, 92, 48], schrift: [374, 221], zelle: [336, 220], a: "M250 208 H320", v: "M320 232 H250", pa: [286, 208, "rechts"], pv: [286, 232, "links"], za: [264, 208], zv: [306, 232] },
+};
+const kleinName = id => (id === "herz" ? "Herz" : id.startsWith("a_") ? `Arterie ${TEILE[id.slice(2)].zu}`
+  : id.startsWith("v_") ? `Vene ${TEILE[id.slice(2)].von}` : TEILE[id].name);
+const kleinNaechste = id => (id.startsWith("a_") ? id.slice(2) : id.startsWith("v_") ? "herz" : `v_${id}`);
+const kleinOrt = id => (id === "herz" ? "im Herzen" : id.startsWith("a_") ? `in der Arterie ${TEILE[id.slice(2)].zu}`
+  : id.startsWith("v_") ? `in der Vene ${TEILE[id.slice(2)].von}` : TEILE[id].im);
+
+// Körperbild (Stufe 1): Organe von vorne gesehen.
+const ORGANE = {
+  gehirn: { nom: "das Gehirn", akk: "das Gehirn", funktion: "Womit denkst du? Tipp darauf.",
+    loesung: "Das Gehirn liegt im Kopf, gut geschützt vom Schädel." },
+  lunge: { nom: "die Lunge", akk: "die Lunge", funktion: "Wohin strömt die Luft, wenn du einatmest? Tipp darauf.",
+    loesung: "Die Lunge mit ihren zwei Flügeln füllt fast die ganze Brust." },
+  herz: { nom: "das Herz", akk: "das Herz", funktion: "Welches Organ pumpt Tag und Nacht das Blut durch den Körper? Tipp es an.",
+    loesung: "Das Herz liegt in der Brust zwischen den Lungenflügeln, etwas nach links." },
+  magen: { nom: "der Magen", akk: "den Magen", funktion: "Wohin kommt das Essen, wenn du es hinuntergeschluckt hast? Tipp darauf.",
+    loesung: "Der Magen liegt oben im Bauch, etwas nach links." },
+  darm: { nom: "der Darm", akk: "den Darm", funktion: "Wo kommen die Nährstoffe aus dem Essen ins Blut? Tipp darauf.",
+    loesung: "Der Darm liegt im Bauch. Im Dünndarm kommen die Nährstoffe ins Blut." },
+};
+
+// Stufe 4: Tippen, wo etwas geschieht.
+const WO = [
+  { frage: "Wo nimmt das Blut Sauerstoff auf? Tipp an.", ziel: "lunge", loesung: "In der Lunge nimmt das Blut Sauerstoff auf." },
+  { frage: "Wo gibt das Blut Sauerstoff ab? Tipp an.", ziel: "koerper", loesung: "Im Körper gibt das Blut den Sauerstoff an Muskeln und Organe ab." },
+  { frage: "Tipp die Arterie an, in der sauerstoffarmes Blut fliesst.", ziel: "lungenarterie", loesung: "Die Lungenarterie führt vom Herzen weg zur Lunge, mit sauerstoffarmem Blut." },
+  { frage: "Tipp die Vene an, in der sauerstoffreiches Blut fliesst.", ziel: "lungenvene", loesung: "Die Lungenvene führt aus der Lunge zum Herzen hin, mit sauerstoffreichem Blut." },
+  { frage: "Tipp die Arterie an, die das Blut in den Körper bringt.", ziel: "aorta", loesung: "Die Körperarterie (Aorta) führt vom Herzen weg in den Körper." },
+  { frage: "Tipp die Vene an, die das Blut aus dem Körper zum Herzen bringt.", ziel: "hohlvene", loesung: "Die Körpervene (Hohlvene) bringt das Blut aus dem Körper zum Herzen." },
+  { frage: "Welche Herzhälfte pumpt das Blut in den Körper? Tipp sie an.", ziel: "lHaelfte", loesung: "Die linke Herzhälfte pumpt das sauerstoffreiche Blut in den Körper." },
+  { frage: "Welche Herzhälfte pumpt das Blut zur Lunge? Tipp sie an.", ziel: "rHaelfte", loesung: "Die rechte Herzhälfte pumpt das sauerstoffarme Blut zur Lunge." },
+];
+
+// Je Stufe: Aufgabenarten
+const STUFE = {
+  s1: { arten: ["ort", "frage"], fragen: 1 },
+  s2: { arten: ["rund", "naechste"] },
+  s3: { arten: ["naechste", "weg", "weg", "kreislauf"], kreis: KREIS_HAELFTEN, laengen: [3, 4, 5] },
+  s4: { arten: ["gefaess", "sauerstoff", "wo"] },
+  s5: { arten: ["frage"], fragen: 5 },
+  s6: { arten: ["weg"], kreis: KREIS_KAMMERN, laengen: [6, 7, 8, 9, 10] },
+};
+const artenIn = stufe => STUFE[stufe].arten.filter(a => a !== "frage" || fragenDerStufe(STUFE[stufe].fragen).length);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => artenIn(s).length));
+
+// ---------- Aufgaben als Daten ----------
+
+/** Weg ab Station start, laenge Schritte weit im Kreis. */
+const wegAb = (kreis, start, laenge) => Array.from({ length: laenge }, (_, i) => kreis[(kreis.indexOf(start) + 1 + i) % kreis.length]);
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(artenIn(stufe));
+  switch (art) {
+    case "ort": return { art, organ: waehle(Object.keys(ORGANE)), funktion: Math.random() < 0.5 };
+    case "frage": return { art, frage: KREISLAUF_FRAGEN.indexOf(waehle(fragenDerStufe(p.fragen))) };
+    case "rund": return { art, teil: waehle(Object.keys(TEILE)) };
+    case "naechste":
+      if (stufe === "s2") { const t = waehle(Object.keys(TEILE)); return { art, start: waehle([`a_${t}`, t, `v_${t}`]) }; }
+      return { art, start: waehle(p.kreis) };
+    case "weg": return { art, start: waehle(p.kreis), laenge: waehle(p.laengen) };
+    case "kreislauf": return { art, station: waehle(["koerper", "hohlvene", "aorta", "lunge", "lungenarterie", "lungenvene"]) };
+    case "gefaess": return { art, station: waehle(GEFAESSE) };
+    case "sauerstoff": return { art, station: waehle([...GEFAESSE, "rHaelfte", "lHaelfte"]) };
+    case "wo": return { art, wo: WO.indexOf(waehle(WO)) };
+  }
+  throw new Error(`unbekannte Aufgabenart ${art}`);
+}
+
+/** Was richtig ist: Liste der anzutippenden Stationen oder die richtige Antwort. */
+function loesungVon(a, stufe) {
+  switch (a.art) {
+    case "ort": return [a.organ];
+    case "rund": return [`a_${a.teil}`, a.teil, `v_${a.teil}`, "herz"];
+    case "naechste": return stufe === "s2" ? [kleinNaechste(a.start)] : wegAb(STUFE[stufe].kreis, a.start, 1);
+    case "weg": return wegAb(STUFE[stufe].kreis, a.start, a.laenge);
+    case "wo": return [WO[a.wo].ziel];
+    case "kreislauf": return GROSS[a.station].kreis;
+    case "gefaess": return GROSS[a.station].gefaess;
+    case "sauerstoff": return GROSS[a.station].blut;
+    case "frage": return KREISLAUF_FRAGEN[a.frage][3];
+  }
+  return null;
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const l = loesungVon(a, stufe);
+  if (l == null || (Array.isArray(l) && (!l.length || l.some(x => x == null)))) m.push("keine Lösung");
+  if (a.art === "frage") {
+    const f = KREISLAUF_FRAGEN[a.frage];
+    if (!f || f[0] !== p.fragen) m.push("Frage nicht aus der Stufe");
+    else {
+      if (new Set([f[3], f[4], f[5]]).size !== 3) m.push("doppelte Antworten");
+      if (!KREISLAUF_TIPPS[f[1]]) m.push(`kein Tipp zum Thema ${f[1]}`);
+      if (!f[6]) m.push("Erklärung fehlt");
+    }
+    if (!FREI.has(LISTE)) m.push("Liste nicht frei");
+  }
+  if (a.art === "weg" || (a.art === "naechste" && stufe !== "s2")) {
+    if (!p.kreis.includes(a.start)) m.push("Start nicht im Kreislauf der Stufe");
+    if (a.art === "weg" && !p.laengen.includes(a.laenge)) m.push("Weglänge nicht in der Stufe");
+    // Der Weg folgt dem Blut: Körper → rechtes Herz → Lunge → linkes Herz → Körper.
+    const weg = [a.start, ...l];
+    for (let i = 1; i < weg.length; i++) {
+      const vor = p.kreis.indexOf(weg[i - 1]), nach = p.kreis.indexOf(weg[i]);
+      if ((vor + 1) % p.kreis.length !== nach) m.push(`Schritt ${weg[i - 1]} → ${weg[i]} folgt nicht dem Blut`);
+    }
+  }
+  if (a.art === "naechste" && stufe === "s2") {
+    const ok = Object.keys(TEILE).flatMap(t => [`a_${t}`, t, `v_${t}`]);
+    if (!ok.includes(a.start)) m.push("Start im kleinen Bild unbekannt");
+  }
+  // Fachliche Kontrolle der Tabelle: Arterien vom Herzen weg, Venen zum Herzen hin; Lungenarterie arm, Lungenvene reich.
+  if (a.art === "gefaess" || a.art === "sauerstoff" || a.art === "kreislauf") {
+    const st = GROSS[a.station];
+    if (!st) m.push("Station unbekannt");
+    else if (st.gefaess) {
+      const nachher = KREIS_HAELFTEN[(KREIS_HAELFTEN.indexOf(a.station) + 1) % KREIS_HAELFTEN.length];
+      const zumHerz = nachher === "rHaelfte" || nachher === "lHaelfte";
+      if ((st.gefaess === "Vene") !== zumHerz) m.push(`${st.name}: Arterie/Vene passt nicht zur Richtung`);
+    }
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+function svgEl(tag, attr = {}, ...kinder) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attr)) if (v != null) e.setAttribute(k, v);
+  for (const k of kinder) if (k != null) e.append(k);
+  return e;
+}
+const schrift = (x, y, text, klasse = "mittel", extra = {}) => svgEl("text", { x, y, class: klasse, ...extra }, text);
+function pfeilEl([x, y, richtung]) {
+  const pkt = { auf: [[-8, 6], [8, 6], [0, -8]], ab: [[-8, -6], [8, -6], [0, 8]], links: [[6, -8], [6, 8], [-8, 0]], rechts: [[-6, -8], [-6, 8], [8, 0]] }[richtung];
+  return svgEl("polygon", { class: "pfeil", points: pkt.map(([dx, dy]) => `${x + dx},${y + dy}`).join(" ") });
+}
+
+/**
+ * Bild mit Stationen. Liefert { svg, stationen: Map id → { g, punkt }, zelle(id, zustand), faerbe(id), markiere(id) }.
+ * opt.art: "gross" | "kammern" | "klein" | "koerper"; opt.farben: Gefässe gefärbt zeigen;
+ * opt.namen: Namen der Gefässe zeigen; opt.antippen: Stationen sind Tippziele.
+ */
+function bild(opt) {
+  const svg = svgEl("svg", { class: `kreislauf${opt.art === "koerper" ? " koerperbild" : ""}${opt.antippen ? " antippen" : ""}`,
+    viewBox: opt.art === "koerper" ? "0 0 300 420" : "0 0 420 460", role: "img", "aria-label": "Schema des Blutkreislaufs" });
+  const stationen = new Map();
+  const unten = svgEl("g"), mitte = svgEl("g"), oben = svgEl("g");
+  svg.append(unten, mitte, oben);
+  const neu = (id, punkt, ebene = mitte) => { const g = svgEl("g", { class: "station", "data-station": id }); ebene.append(g); stationen.set(id, { g, punkt }); return g; };
+  const farbe = zustand => (opt.farben ? zustand : "neutral");
+
+  if (opt.art === "gross" || opt.art === "kammern") {
+    // Organe
+    for (const [id, y, zeichen] of [["lunge", 14, "🫁"], ["koerper", 386, "🧍"]]) {
+      const g = neu(id, GROSS[id].zelle);
+      g.append(svgEl("rect", { class: "kasten", x: 150, y, width: 120, height: 60, rx: id === "lunge" ? 28 : 14 }),
+        schrift(224, y + 31, `${zeichen} ${GROSS[id].name}`, "gross"));
+    }
+    // Gefässe; die Lungenarterie läuft mit weissem Rand über die Körpervene.
+    for (const id of ["hohlvene", "lungenvene", "aorta", "lungenarterie"]) {
+      const st = GROSS[id];
+      const g = neu(id, st.zelle, unten);
+      if (id === "lungenarterie") g.append(svgEl("path", { class: "halo", d: st.d }));
+      g.append(svgEl("path", { class: `gefaess s-${farbe(st.blut)}`, d: st.d }), svgEl("path", { class: "treffer", d: st.d }), pfeilEl(st.pfeil));
+      if (opt.namen) g.append(schrift(st.schrift[0], st.schrift[1], st.name, "mittel", { transform: `rotate(-90 ${st.schrift[0]} ${st.schrift[1]})` }));
+    }
+    // Herz von vorne: die rechte Hälfte liegt im Bild links.
+    if (opt.art === "gross") {
+      for (const [id, x] of [["rHaelfte", 140], ["lHaelfte", 212]]) {
+        const g = neu(id, GROSS[id].zelle);
+        g.append(svgEl("rect", { class: `kasten${opt.farben ? ` f-${GROSS[id].blut}` : ""}`, x, y: 170, width: 68, height: 118, rx: 12 }),
+          schrift(x + 34, 212, id === "rHaelfte" ? "rechte" : "linke"), schrift(x + 34, 229, "Hälfte"));
+      }
+    } else {
+      for (const [id, x, y, h] of [["rVorhof", 140, 170, 44], ["rKammer", 140, 218, 70], ["lVorhof", 212, 170, 44], ["lKammer", 212, 218, 70]]) {
+        const g = neu(id, GROSS[id].zelle);
+        g.append(svgEl("rect", { class: `kasten${opt.farben ? ` f-${GROSS[id].blut}` : ""}`, x, y, width: 68, height: h, rx: 10 }),
+          schrift(x + 34, y + (h > 50 ? 22 : 16), GROSS[id].kurz));
+      }
+      oben.append(schrift(174, 160, "rechte Hälfte", "klein"), schrift(246, 160, "linke Hälfte", "klein"));
+    }
+    oben.append(schrift(210, 306, "❤️ Herz, von vorne gesehen", "klein"));
+  } else if (opt.art === "klein") {
+    const herz = neu("herz", [210, 240]);
+    herz.append(svgEl("path", { class: "kasten f-reich", d: "M210 264 C 158 232, 160 184, 188 184 C 200 184, 210 194, 210 202 C 210 194, 220 184, 232 184 C 260 184, 262 232, 210 264 Z" }),
+      schrift(210, 216, "Herz"));
+    for (const [t, lage] of Object.entries(KLEIN_LAGE)) {
+      const [x, y, w, h] = lage.kasten;
+      neu(t, lage.zelle).append(svgEl("rect", { class: "kasten", x, y, width: w, height: h, rx: 14 }), schrift(lage.schrift[0] + 8, lage.schrift[1], TEILE[t].name, "gross"));
+      neu(`a_${t}`, lage.za, unten).append(svgEl("path", { class: "gefaess s-reich", d: lage.a }), svgEl("path", { class: "treffer", d: lage.a, "stroke-width": 22 }), pfeilEl(lage.pa));
+      neu(`v_${t}`, lage.zv, unten).append(svgEl("path", { class: "gefaess s-arm", d: lage.v }), svgEl("path", { class: "treffer", d: lage.v, "stroke-width": 22 }), pfeilEl(lage.pv));
+    }
+  } else {
+    // Körper von vorne, die Organe ohne Namen.
+    unten.append(
+      svgEl("rect", { class: "koerper-umriss", x: 58, y: 118, width: 30, height: 160, rx: 15 }),
+      svgEl("rect", { class: "koerper-umriss", x: 212, y: 118, width: 30, height: 160, rx: 15 }),
+      svgEl("rect", { class: "koerper-umriss", x: 100, y: 292, width: 44, height: 122, rx: 18 }),
+      svgEl("rect", { class: "koerper-umriss", x: 156, y: 292, width: 44, height: 122, rx: 18 }),
+      svgEl("rect", { class: "koerper-umriss", x: 92, y: 106, width: 116, height: 196, rx: 30 }),
+      svgEl("rect", { class: "koerper-umriss", x: 136, y: 90, width: 28, height: 22 }),
+      svgEl("circle", { class: "koerper-umriss", cx: 150, cy: 54, r: 40 }));
+    neu("gehirn", null).append(svgEl("ellipse", { class: "organ", cx: 150, cy: 44, rx: 29, ry: 21, fill: "var(--deko-2)" }));
+    neu("lunge", null).append(svgEl("ellipse", { class: "organ", cx: 123, cy: 166, rx: 23, ry: 40, fill: "var(--deko-5)" }),
+      svgEl("ellipse", { class: "organ", cx: 177, cy: 166, rx: 21, ry: 38, fill: "var(--deko-5)" }));
+    neu("herz", null).append(svgEl("path", { class: "organ", fill: "var(--blut-reich)", d: "M160 200 C 140 186, 140 166, 152 166 C 157 166, 160 170, 160 173 C 160 170, 163 166, 168 166 C 180 166, 180 186, 160 200 Z" }));
+    neu("magen", null).append(svgEl("ellipse", { class: "organ", cx: 172, cy: 228, rx: 22, ry: 13, fill: "var(--deko-3)", transform: "rotate(-20 172 228)" }));
+    neu("darm", null).append(svgEl("rect", { class: "organ", x: 116, y: 248, width: 68, height: 44, rx: 16, fill: "var(--deko-4)" }),
+      svgEl("path", { d: "M126 262 H174 M126 276 H174", stroke: "var(--text-leise)", "stroke-width": 2, fill: "none" }));
+  }
+
+  // Das Blutkörperchen kommt erst ins Bild, wenn es einen Platz hat (zelle()).
+  const kreis = svgEl("circle", { class: "zelle z-reich", cx: 0, cy: 0, r: 10 });
+  return {
+    svg, stationen,
+    zelle(id, zustand) {
+      if (!svg.contains(kreis)) oben.append(kreis);
+      const [x, y] = stationen.get(id).punkt;
+      // Der erste Platz ohne Übergang, sonst fliegt das Blutkörperchen aus der Ecke herein. Das Bild hängt
+      // dann oft noch nicht in der Seite; deshalb den Übergang erst nach zwei Bildaufbauten freigeben.
+      const erstes = !kreis.style.transform;
+      if (erstes) kreis.style.transition = "none";
+      kreis.style.transform = `translate(${x}px, ${y}px)`;
+      if (erstes) requestAnimationFrame(() => requestAnimationFrame(() => { kreis.style.transition = ""; }));
+      kreis.setAttribute("class", `zelle z-${zustand}`);
+    },
+    faerbe(id) {
+      const st = GROSS[id];
+      if (!st) return;
+      for (const e of stationen.get(id).g.querySelectorAll(".gefaess, .kasten")) {
+        e.classList.remove("s-neutral");
+        e.classList.add(e.classList.contains("gefaess") ? `s-${st.blut}` : `f-${st.blut}`);
+      }
+    },
+    markiere(id) {
+      const st = GROSS[id], g = stationen.get(id).g;
+      if (st && st.d) g.prepend(svgEl("path", { class: "leuchten", d: st.d }));
+      else g.querySelector(".kasten")?.classList.add("markiert");
+    },
+    namen(id) {
+      const st = GROSS[id];
+      if (st && st.d && !stationen.get(id).g.querySelector("text")) stationen.get(id).g.append(schrift(st.schrift[0], st.schrift[1], st.name, "mittel", { transform: `rotate(-90 ${st.schrift[0]} ${st.schrift[1]})` }));
+    },
+    fragezeichen(id) {
+      const st = GROSS[id];
+      if (st && st.schrift) stationen.get(id).g.append(schrift(st.schrift[0] + (st.schrift[0] < 210 ? -6 : 6), st.schrift[1], "?", "frage-zeichen"));
+    },
+  };
+}
+
+function legende(mitGefaessen) {
+  return el("div", { class: "legende" },
+    el("span", {}, el("i", { class: "l-reich" }), mitGefaessen ? "rot: Arterie, vom Herzen weg" : "rot: sauerstoffreiches Blut"),
+    el("span", {}, el("i", { class: "l-arm" }), mitGefaessen ? "blau: Vene, zum Herzen hin" : "blau: sauerstoffarmes Blut"));
+}
+
+/** Kurz aufleuchten lassen, wo falsch getippt wurde. */
+function daneben(g) {
+  g.classList.remove("daneben");
+  void g.getBoundingClientRect();
+  g.classList.add("daneben");
+  setTimeout(() => g.classList.remove("daneben"), 700);
+}
+
+/**
+ * Stationen der Reihe nach antippen. weg: Ids in Reihenfolge; das Blutkörperchen wandert mit.
+ * blut(id): Zustand des Bluts nach der Station; faerben: Gefässe beim Durchfliessen färben.
+ */
+function lotsen(ctx, b, start, weg, { hinweis, loesung, lob, blut, faerben }) {
+  ctx.loesung(loesung);
+  ctx.schritte(weg.length);
+  let pos = 0;
+  let fertig = false;
+  for (const [id, st] of b.stationen) {
+    st.g.addEventListener("click", () => {
+      if (fertig || ctx.vorbei()) return;
+      // Ein Tipp auf die Station, wo das Blutkörperchen gerade ist, zählt nicht als Fehler.
+      if (id !== weg[pos] && id === (pos ? weg[pos - 1] : start)) return;
+      if (id === weg[pos]) {
+        pos++;
+        if (st.punkt) b.zelle(id, blut(id));
+        if (faerben) b.faerbe(id);
+        LS.ton("tipp");
+        if (pos === weg.length) { fertig = true; ctx.richtig(lob); }
+        return;
+      }
+      daneben(st.g);
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) fertig = true;
+    });
+  }
+}
+
+const HINWEIS_PFEILE = "Folge den Pfeilen. Wohin fliesst das Blut von hier aus?";
+const HINWEIS_HERZ = "Im Herzen fliesst das Blut immer zuerst in einen Vorhof und dann in die Kammer darunter. Folge den Pfeilen.";
+const kreisName = k => (k === "lunge" ? "Lungenkreislauf" : "Körperkreislauf");
+
+// Zuletzt gezeichnete Aufgabe (für Prüfskripte und die Entwickler-Leiste).
+let gezeigt = null;
+
+LS.spiel({
+  id: "blutkreislauf-lotse",
+  einleitung: "Dein Herz pumpt das Blut ohne Pause durch den Körper und durch die Lunge. Lotse ein Blutkörperchen auf seinem Weg!",
+  anzahl: 8,
+  stufen: nurMoegliche({
+    s1: "Wo liegen Herz, Lunge und Magen? Tipp sie im Körper an (4. Klasse).",
+    s2: "Vom Herzen in die Beine und zurück: Arterie hin, Vene zurück.",
+    s3: "Mit der Lunge: zwei Kreisläufe, das Herz hat zwei Hälften.",
+    s4: "Arterie oder Vene? Sauerstoffreich oder sauerstoffarm? Achtung, Falle bei der Lunge!",
+    s5: "Puls und Bewegung, Blut und Lunge: Fragen für die 6. Klasse.",
+    s6: "Endgegner: der ganze Weg mit Vorhöfen und Kammern, ohne Farben.",
+  }),
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    if (ctx.nr === 0) ctx.sag({
+      s1: "Du schaust die Person von vorne an: Ihre linke Seite ist in deinem Bild rechts.",
+      s2: "Arterien führen vom Herzen weg, Venen zum Herzen hin. Unterwegs fliesst das Blut auch noch durch die Lunge – das kommt in Stufe 3.",
+      s3: "Das Herz ist von vorne gezeichnet: Seine rechte Hälfte ist im Bild links. Folge den Pfeilen!",
+      s4: "Achtung, Falle: Arterie heisst „vom Herzen weg“, nicht „sauerstoffreich“. Schau auf die Pfeile.",
+      s5: "Lies die Frage genau. Nach der Antwort erfährst du, warum es so ist.",
+      s6: "Vom Körper ins rechte Herz, zur Lunge, ins linke Herz und wieder in den Körper. Die Farben fehlen – sie kommen, wenn das Blut durchfliesst.",
+    }[ctx.stufe]);
+    const a = aufgabeErzeugen(ctx.stufe);
+    gezeigt = a;
+    if (artenIn(ctx.stufe).length > 1) ctx.serie("art", a.art);
+    const f = ctx.flaeche;
+
+    if (a.art === "frage") {
+      const [, thema, frage, richtig, f1, f2, erklaerung] = KREISLAUF_FRAGEN[a.frage];
+      const bildZeichen = { herz: "❤️", blut: "🩸", lunge: "🫁", puls: "💓", bewegung: "🏃", kreislauf: "🔄" }[thema];
+      f.append(el("div", { class: "frage-bild", "aria-hidden": "true", text: bildZeichen }), el("div", { class: "frage", text: frage }));
+      LS.auswahl(ctx, { optionen: mische([richtig, f1, f2]), richtig, breite: 220,
+        hinweis: KREISLAUF_TIPPS[thema], loesung: `${richtig}. ${erklaerung}`, lob: `Richtig! ${erklaerung}` });
+      return;
+    }
+
+    if (a.art === "ort") {
+      const o = ORGANE[a.organ];
+      const b = bild({ art: "koerper", antippen: true });
+      f.append(el("div", { class: "frage", text: a.funktion ? o.funktion : `Tipp auf ${o.akk}.` }), b.svg);
+      ctx.loesung(o.loesung);
+      ctx.schritte(1);
+      let fertig = false;
+      for (const [id, st] of b.stationen) st.g.addEventListener("click", () => {
+        if (fertig || ctx.vorbei()) return;
+        if (id === a.organ) { fertig = true; ctx.richtig(`Richtig! ${o.loesung}`); return; }
+        daneben(st.g);
+        ctx.falsch(`Das ist ${ORGANE[id].nom}. Such weiter!`, o.loesung);
+        if (ctx.vorbei()) fertig = true;
+      });
+      return;
+    }
+
+    if (ctx.stufe === "s2") {
+      const b = bild({ art: "klein", antippen: true });
+      const weg = loesungVon(a, ctx.stufe);
+      const start = a.art === "rund" ? "herz" : a.start;
+      const loesung = a.art === "rund" ? [start, ...weg].map(kleinName).join(" → ") : `Als Nächstes: ${kleinName(weg[0])}.`;
+      f.append(el("div", { class: "frage", text: a.art === "rund"
+        ? `Bring das Blutkörperchen vom Herzen ${TEILE[a.teil].zu} und wieder zurück zum Herzen. Tipp den Weg an.`
+        : `Das Blutkörperchen ist ${kleinOrt(a.start)}. Wohin fliesst es als Nächstes? Tipp an.` }), b.svg, legende(true));
+      const blut = id => (id.startsWith("a_") || id === "herz" ? "reich" : "arm");
+      b.zelle(start, blut(start));
+      lotsen(ctx, b, start, weg, { hinweis: "Folge den Pfeilen. Rot führt vom Herzen weg, blau zum Herzen zurück.", loesung, blut, lob: a.art === "rund" ? "Einmal hin und zurück – gut gelotst! 🎉" : undefined });
+      return;
+    }
+
+    if (a.art === "naechste" || a.art === "weg") {
+      const kammern = ctx.stufe === "s6";
+      const b = bild({ art: kammern ? "kammern" : "gross", farben: !kammern, namen: true, antippen: true });
+      const weg = loesungVon(a, ctx.stufe);
+      const ziel = weg[weg.length - 1];
+      const loesung = [a.start, ...weg].map(id => GROSS[id].name).join(" → ");
+      const text = a.art === "naechste"
+        ? `Das Blutkörperchen ist hier: ${GROSS[a.start].name}. Wohin fliesst es als Nächstes? Tipp an.`
+        : ziel === a.start
+          ? `Lotse das Blutkörperchen einmal ganz herum, bis es wieder hier ist: ${GROSS[ziel].name}. Tipp jede Station an.`
+          : `Lotse das Blutkörperchen bis zum Ziel 🏁 ${GROSS[ziel].name}. Tipp jede Station auf dem Weg an.`;
+      f.append(el("div", { class: "frage", text }), b.svg);
+      if (!kammern) f.append(legende(false));
+      if (a.art === "weg") b.markiere(ziel);
+      if (kammern) b.faerbe(a.start);
+      b.zelle(a.start, GROSS[a.start].blut);
+      lotsen(ctx, b, a.start, weg, { hinweis: kammern ? HINWEIS_HERZ : HINWEIS_PFEILE, loesung, blut: id => GROSS[id].blut, faerben: kammern,
+        lob: a.art === "weg" ? "Gut gelotst! 🎉" : undefined });
+      return;
+    }
+
+    if (a.art === "kreislauf") {
+      const b = bild({ art: "gross", farben: true, namen: true });
+      b.markiere(a.station);
+      const richtig = GROSS[a.station].kreis;
+      const loesung = `${GROSS[a.station].name}: ${kreisName(richtig)}.`;
+      ctx.serie("antwort", richtig);
+      f.append(el("div", { class: "frage", text: `Gelb markiert: ${GROSS[a.station].name}. Gehört das zum Lungenkreislauf oder zum Körperkreislauf?` }), b.svg);
+      LS.auswahl(ctx, { optionen: ["lunge", "koerper"], richtig, breite: 180,
+        inhalt: k => ({ bild: k === "lunge" ? "🫁" : "🧍", text: kreisName(k) }),
+        hinweis: "Der Lungenkreislauf führt vom Herzen zur Lunge und zurück, der Körperkreislauf vom Herzen in den Körper und zurück.", loesung });
+      return;
+    }
+
+    if (a.art === "gefaess" || a.art === "sauerstoff") {
+      const b = bild({ art: "gross", farben: false, namen: false });
+      b.markiere(a.station);
+      b.fragezeichen(a.station);
+      const st = GROSS[a.station];
+      const richtig = loesungVon(a, ctx.stufe);
+      ctx.serie("antwort", richtig);
+      const aufdecken = () => { b.faerbe(a.station); b.namen(a.station); b.stationen.get(a.station).g.querySelector(".frage-zeichen")?.remove(); };
+      if (a.art === "gefaess") {
+        const loesung = `${st.gefaess}: ${st.name}. Hier fliesst das Blut ${st.gefaess === "Arterie" ? "vom Herzen weg" : "zum Herzen hin"}.`;
+        f.append(el("div", { class: "frage", html: "Ist das gelb markierte Blutgefäss eine <b>Arterie</b> oder eine <b>Vene</b>?" }), b.svg);
+        LS.auswahl(ctx, { optionen: ["Arterie", "Vene"], richtig, breite: 160, loesung, lob: `Richtig! ${loesung}`, beiRichtig: aufdecken,
+          hinweis: "Schau auf den Pfeil: Fliesst das Blut zum Herzen hin oder vom Herzen weg?" });
+      } else {
+        const loesung = `${st.name}: ${richtig === "reich" ? "sauerstoffreich, das Blut kommt aus der Lunge" : "sauerstoffarm, das Blut kommt aus dem Körper"}.`;
+        f.append(el("div", { class: "frage", html: `Fliesst im gelb Markierten <b>sauerstoffreiches</b> oder <b>sauerstoffarmes</b> Blut?` }), b.svg);
+        LS.auswahl(ctx, { optionen: ["reich", "arm"], richtig, breite: 180, loesung, lob: `Richtig! ${loesung}`, beiRichtig: aufdecken,
+          inhalt: z => ({ bild: z === "reich" ? "🔴" : "🔵", text: z === "reich" ? "sauerstoffreich" : "sauerstoffarm" }),
+          hinweis: "Folge den Pfeilen zurück: Kommt das Blut gerade aus der Lunge oder aus dem Körper?" });
+      }
+      return;
+    }
+
+    if (a.art === "wo") {
+      const w = WO[a.wo];
+      const b = bild({ art: "gross", farben: false, namen: false, antippen: true });
+      f.append(el("div", { class: "frage", text: w.frage }), b.svg);
+      ctx.loesung(w.loesung);
+      ctx.schritte(1);
+      let fertig = false;
+      for (const [id, st] of b.stationen) st.g.addEventListener("click", () => {
+        if (fertig || ctx.vorbei()) return;
+        if (id === w.ziel) { fertig = true; b.faerbe(id); b.namen(id); ctx.richtig(`Richtig! ${w.loesung}`); return; }
+        daneben(st.g);
+        ctx.falsch("Schau auf die Pfeile: Wo kommt das Blut gerade her, und wohin fliesst es?", w.loesung);
+        if (ctx.vorbei()) fertig = true;
+      });
+    }
+  },
+});
+</script>
+</body>
+</html>

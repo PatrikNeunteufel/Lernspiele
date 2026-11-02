@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wassertropfen-Reise</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.4vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .frage-bild { text-align: center; font-size: clamp(44px, 10vw, 64px); line-height: 1.1; margin: 0 0 4px; }
+  .wt-grafik { display: block; width: 100%; max-width: 560px; height: auto; margin: 0 auto 10px; border-radius: 16px; touch-action: manipulation; }
+  .wt-grafik .wt-pfeil { cursor: pointer; }
+  .wt-grafik .wt-linie { fill: none; stroke: #64748b; stroke-width: 4; stroke-linecap: round; }
+  .wt-grafik .wt-kopf { fill: #64748b; }
+  .wt-grafik .wt-marke { fill: #fff; stroke: #64748b; stroke-width: 2.5; }
+  .wt-grafik .wt-marke-text { font: 900 15px var(--schrift); fill: var(--text); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .wt-grafik .wt-pfeil.hervor .wt-linie { stroke: var(--deko-2); stroke-width: 6; }
+  .wt-grafik .wt-pfeil.hervor .wt-kopf { fill: var(--deko-2); }
+  .wt-grafik .wt-pfeil.hervor .wt-marke { stroke: var(--deko-2); stroke-width: 4; }
+  .wt-grafik .wt-pfeil.richtig .wt-linie { stroke: var(--gut); }
+  .wt-grafik .wt-pfeil.richtig .wt-kopf { fill: var(--gut); }
+  .wt-grafik .wt-pfeil.richtig .wt-marke { stroke: var(--gut); fill: var(--gut-hell); }
+  .wt-grafik .wt-pfeil.falsch .wt-marke { fill: var(--hinweis-hell); stroke: var(--hinweis); }
+  .wt-grafik .wt-schicht { cursor: pointer; stroke: rgba(0, 0, 0, .25); stroke-width: 1.5; }
+  .wt-grafik .wt-schicht.richtig { stroke: var(--gut); stroke-width: 5; }
+  .wt-grafik .wt-schicht.falsch { stroke: var(--hinweis); stroke-width: 5; }
+  .wt-grafik .wt-schild { font: 800 13px var(--schrift); fill: #fff; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: 3px; pointer-events: none; }
+  .wt-beschreibung { max-width: 640px; margin: 0 auto 12px; padding: 10px 16px; border-radius: 16px; background: #eef6ff; border: 3px dashed #9cc7f0; font-size: clamp(16px, 3.8vw, 20px); font-weight: 700; text-align: center; }
+  .wahl-knopf { font-size: clamp(17px, 4vw, 22px); font-weight: 800; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>💧 Wassertropfen-Reise</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.2.2.f (Grundanspruch 2. Zyklus): Wasserkreislauf, Verdunstung, Bodenschichten
+// erklären; Begriffe verdunsten, kondensieren. Basisklasse 5: s1 4. Klasse (Aggregatzustände fest,
+// flüssig, gasförmig; schmelzen, gefrieren), s2–s4 5. Klasse (Stationen des Kreislaufs ordnen,
+// Begriffe an die Pfeile der Grafik, knifflige Fragen), s5 6. Klasse (Bodenschichten, Grundwasser,
+// Kläranlage), s6 Königsstufe. Fragen in woerter.js (Liste „fragen“); Grafik, Stationen,
+// Bodenschichten und Kläranlage gehören zum Spiel (unten).
+// Bezug: Wetter-Jahreszeiten (Wetter beobachten, NMG.4.4) und Schwimmt-Sinkt (Stoffe, NMG.3.3) üben
+// keinen Kreislauf; die Eis-Frage („Warum schwimmt Eis?“) erklärt hier die Ausdehnung beim Gefrieren.
+
+const { waehle, mische, el } = LS;
+const SVGNS = "http://www.w3.org/2000/svg";
+/** SVG-Element bauen: S("rect", { x: 1 }, kind …) */
+function S(tag, attr = {}, ...kinder) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attr)) {
+    if (k === "text") e.textContent = v;
+    else e.setAttribute(k, v);
+  }
+  for (const k of kinder) if (k != null) e.append(k);
+  return e;
+}
+
+// ---------- Inhalte des Spiels (ohne Liste) ----------
+
+/** Die fünf Vorgänge, je mit Pfeil in der Grafik. Beschreibung und Tipp verraten den Namen nicht. */
+const VORGAENGE = [
+  { id: "verdunsten", text: "verdunsten", beschr: "Die Sonne wärmt das Meer. Wasser wird zu unsichtbarem Wasserdampf und steigt auf.",
+    tipp: "Hier steigt Wasser aus dem Meer auf. Es wird dabei unsichtbar.", suche: "Gesucht: Wo steigt Wasser aus dem Meer auf?",
+    linie: "M85,158 Q70,110 105,68", kopf: [105, 68, -50], marke: [60, 112] },
+  { id: "kondensieren", text: "kondensieren", beschr: "Oben ist die Luft kalt. Der Wasserdampf kühlt ab und wird zu winzigen Tröpfchen: Eine Wolke entsteht.",
+    tipp: "Hier wird aus dem unsichtbaren Dampf etwas, das man am Himmel sieht.", suche: "Gesucht: Wo wird aus unsichtbarem Dampf etwas, das man am Himmel sieht?",
+    linie: "M118,62 Q180,20 247,48", kopf: [247, 48, 21], marke: [178, 28] },
+  { id: "niederschlag", text: "Niederschlag", beschr: "Die Tröpfchen werden gross und schwer. Sie fallen als Regen, Schnee oder Hagel.",
+    tipp: "Hier kommt das Wasser vom Himmel herunter.", suche: "Gesucht: Wo kommt das Wasser vom Himmel herunter?",
+    linie: "M285,76 L285,122", kopf: [285, 122, 90], marke: [314, 100] },
+  { id: "versickern", text: "versickern", beschr: "Das Wasser dringt in den Boden ein und sinkt nach unten.",
+    tipp: "Hier verschwindet das Wasser in der Erde.", suche: "Gesucht: Wo verschwindet das Wasser in der Erde?",
+    linie: "M215,176 L215,226", kopf: [215, 226, 90], marke: [242, 204] },
+  { id: "abfliessen", text: "abfliessen", beschr: "Das Wasser fliesst in Bächen und Flüssen talwärts, bis ins Meer.",
+    tipp: "Hier fliesst das Wasser über den Boden zum Meer.", suche: "Gesucht: Wo fliesst das Wasser über den Boden zum Meer?",
+    linie: "M292,158 Q240,146 186,160", kopf: [186, 160, 165], marke: [240, 134] },
+];
+const VORGANG = Object.fromEntries(VORGAENGE.map(v => [v.id, v]));
+
+/** Zwei Wege eines Tropfens; die Reise ist ein Kreis, nach der letzten Station kommt wieder die erste. */
+const WEGE = [
+  { id: "boden", satz: "Unterwegs versickert der Tropfen im Boden.", stationen: [
+    { text: "Meer", bild: "🌊" }, { text: "Wasserdampf", bild: "♨️" }, { text: "Wolke", bild: "☁️" }, { text: "Regen", bild: "🌧️" },
+    { text: "Grundwasser", bild: "🟫" }, { text: "Quelle", bild: "⛲" }, { text: "Fluss", bild: "🏞️" }] },
+  { id: "berg", satz: "Unterwegs fällt der Tropfen als Schnee auf einen Berg.", stationen: [
+    { text: "Meer", bild: "🌊" }, { text: "Wasserdampf", bild: "♨️" }, { text: "Wolke", bild: "☁️" }, { text: "Schnee", bild: "🌨️" },
+    { text: "Schmelzwasser", bild: "💧" }, { text: "Bach", bild: "🏔️" }, { text: "Fluss", bild: "🏞️" }] },
+];
+
+/** Bodenschichten von oben nach unten (Grafik zu Stufe 5). */
+const SCHICHTEN = [
+  { id: "humus", name: "Humus (Oberboden)", y: 34, h: 44, farbe: "#4a3020" },
+  { id: "unterboden", name: "Unterboden", y: 78, h: 46, farbe: "#9a6b43" },
+  { id: "kies", name: "Kies und Sand mit Grundwasser", y: 124, h: 56, farbe: "#c9ad7a" },
+  { id: "lehm", name: "Lehm oder Fels", y: 180, h: 46, farbe: "#8a8f99" },
+];
+const SCHICHT_FRAGEN = [
+  { frage: "Tippe auf den Humus.", richtig: "humus", tipp: "Humus ist dunkle, lockere Erde aus verrotteten Blättern." },
+  { frage: "Wo leben die meisten Regenwürmer und Bodentiere?", richtig: "humus", tipp: "Die Bodentiere fressen verrottete Blätter. Wo gibt es am meisten davon?" },
+  { frage: "Tippe auf den Unterboden.", richtig: "unterboden", tipp: "Diese Schicht ist heller als der Humus und hat weniger Leben." },
+  { frage: "Wo sammelt sich das Grundwasser?", richtig: "kies", tipp: "Das Wasser braucht Lücken zwischen Körnern, in denen es stehen kann." },
+  { frage: "Welche Schicht lässt kein Wasser durch?", richtig: "lehm", tipp: "Das versickernde Wasser sinkt, bis es nicht mehr weiter kann." },
+];
+
+/** Stufen einer Kläranlage (vereinfacht), danach das Gewässer. */
+const KLAERANLAGE = [
+  { text: "Rechen", bild: "🗑️", was: "Ein Gitter hält grobe Abfälle zurück." },
+  { text: "Sandfang", bild: "⏳", was: "Sand und Steinchen sinken auf den Boden." },
+  { text: "Vorklärbecken", bild: "🟤", was: "Schlamm setzt sich langsam ab." },
+  { text: "Belebungsbecken", bild: "🦠", was: "Bakterien fressen den gelösten Schmutz." },
+  { text: "Nachklärbecken", bild: "🫧", was: "Die Bakterien setzen sich als Schlamm ab." },
+  { text: "Fluss oder See", bild: "🏞️", was: "Das gereinigte Wasser fliesst zurück in die Natur." },
+];
+
+// ---------- Freigabe der Liste ----------
+
+// Kennt der Katalog die Liste nicht, gilt sie mit dem Spiel als frei (wie regel-luecke).
+const FREI = new Set(LS.spielListen("wassertropfen-reise").length ? LS.freieListen("wassertropfen-reise") : ["fragen"]);
+const fragenDer = stufen => (FREI.has("fragen") ? WASSER_FRAGEN.filter(f => stufen.includes(f.stufe)) : []);
+
+// ---------- Aufgaben als Daten ----------
+
+/** Fenster von n Stationen ab Start s eines Wegs (im Kreis). */
+const fenster = (weg, s, n) => Array.from({ length: n }, (_, i) => weg.stationen[(s + i) % weg.stationen.length].text);
+
+const ARTEN = {
+  frage: stufen => {
+    const liste = fragenDer(stufen);
+    if (!liste.length) return null;
+    const f = waehle(liste);
+    return { art: "frage", f, optionen: mische([f.richtig, ...f.falsch]) };
+  },
+  // Reise ordnen: Start ist genannt, danach n Stationen in der richtigen Reihenfolge.
+  reise: n => {
+    const weg = waehle(WEGE);
+    const s = LS.zufall(0, weg.stationen.length - 1);
+    const folge = fenster(weg, s, n + 1);
+    return { art: "reise", weg: weg.id, start: folge[0], reihe: folge.slice(1) };
+  },
+  danach: () => {
+    const weg = waehle(WEGE);
+    const i = LS.zufall(0, weg.stationen.length - 1);
+    const jetzt = weg.stationen[i].text, richtig = weg.stationen[(i + 1) % weg.stationen.length].text;
+    const andere = mische(weg.stationen.map(s => s.text).filter(t => t !== jetzt && t !== richtig)).slice(0, 2);
+    return { art: "danach", weg: weg.id, jetzt, richtig, optionen: mische([richtig, ...andere]) };
+  },
+  pfeilBegriff: () => {
+    const v = waehle(VORGAENGE);
+    const andere = mische(VORGAENGE.filter(x => x !== v)).slice(0, 3).map(x => x.id);
+    return { art: "pfeilBegriff", richtig: v.id, optionen: mische([v.id, ...andere]) };
+  },
+  begriffPfeil: () => ({ art: "begriffPfeil", richtig: waehle(VORGAENGE).id }),
+  beschreibung: () => {
+    const v = waehle(VORGAENGE);
+    const andere = mische(VORGAENGE.filter(x => x !== v)).slice(0, 2).map(x => x.id);
+    return { art: "beschreibung", richtig: v.id, optionen: mische([v.id, ...andere]) };
+  },
+  // Die Pfeile tragen die Nummern 1–5 in zufälliger Verteilung; die Begriffe in Nummernfolge antippen.
+  nummern: () => ({ art: "nummern", reihe: mische(VORGAENGE.map(v => v.id)) }),
+  schicht: () => ({ art: "schicht", nr: LS.zufall(0, SCHICHT_FRAGEN.length - 1) }),
+  klaer: n => {
+    const s = LS.zufall(0, KLAERANLAGE.length - n);
+    return { art: "klaer", reihe: KLAERANLAGE.slice(s, s + n).map(k => k.text) };
+  },
+  klaerWas: () => {
+    const k = waehle(KLAERANLAGE.slice(0, 5));
+    const andere = mische(KLAERANLAGE.filter(x => x !== k)).slice(0, 2).map(x => x.was);
+    return { art: "klaerWas", teil: k.text, richtig: k.was, optionen: mische([k.was, ...andere]) };
+  },
+};
+
+// Je Stufe die Arten (mehrfach genannt = häufiger).
+const STUFE = {
+  s1: [() => ARTEN.frage([1])],
+  s2: [() => ARTEN.reise(3), () => ARTEN.reise(4), () => ARTEN.danach()],
+  s3: [() => ARTEN.pfeilBegriff(), () => ARTEN.begriffPfeil(), () => ARTEN.beschreibung(), () => ARTEN.frage([3]), () => ARTEN.frage([3])],
+  s4: [() => ARTEN.nummern(), () => ARTEN.reise(5), () => ARTEN.frage([4]), () => ARTEN.frage([4]), () => ARTEN.frage([3])],
+  s5: [() => ARTEN.schicht(), () => ARTEN.klaer(3), () => ARTEN.klaer(4), () => ARTEN.klaerWas(), () => ARTEN.frage([5]), () => ARTEN.frage([5])],
+  // Königsstufe: ganze Reise, alle Pfeile nummeriert, ganze Kläranlage, knifflige Fragen.
+  s6: [() => ARTEN.nummern(), () => ARTEN.reise(6), () => ARTEN.klaer(6), () => ARTEN.schicht(), () => ARTEN.frage([4, 5]), () => ARTEN.frage([4, 5])],
+};
+
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+/** Mängel einer Aufgabe: genau eine richtige Antwort, keine doppelten Optionen, Reihen passend. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!a) return ["keine Aufgabe"];
+  const einmal = (optionen, richtig) => {
+    if (optionen.filter(o => o === richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+    if (new Set(optionen).size !== optionen.length) m.push("doppelte Optionen");
+  };
+  if (a.art === "frage") {
+    const erlaubt = { s1: [1], s3: [3], s4: [3, 4], s5: [5], s6: [4, 5] }[stufe] || [];
+    if (!erlaubt.includes(a.f.stufe)) m.push(`Frage der Stufe ${a.f.stufe} in ${stufe}`);
+    if (a.f.falsch.length !== 2 || !a.f.tipp || !a.f.erklaerung) m.push("Frage unvollständig");
+    einmal(a.optionen, a.f.richtig);
+    if (a.optionen.length !== 3) m.push("nicht drei Antworten");
+  }
+  if (a.art === "reise") {
+    const weg = WEGE.find(w => w.id === a.weg).stationen.map(s => s.text);
+    const i = weg.indexOf(a.start);
+    a.reihe.forEach((t, k) => { if (weg[(i + 1 + k) % weg.length] !== t) m.push("Reihe passt nicht zum Weg"); });
+    if (new Set(a.reihe).size !== a.reihe.length || a.reihe.includes(a.start)) m.push("Station doppelt");
+  }
+  if (a.art === "danach") {
+    const weg = WEGE.find(w => w.id === a.weg).stationen.map(s => s.text);
+    if (weg[(weg.indexOf(a.jetzt) + 1) % weg.length] !== a.richtig) m.push("falsche Folge-Station");
+    einmal(a.optionen, a.richtig);
+    if (a.optionen.includes(a.jetzt)) m.push("Station selbst unter den Antworten");
+  }
+  if (["pfeilBegriff", "beschreibung"].includes(a.art)) einmal(a.optionen, a.richtig);
+  if (a.art === "nummern" && (a.reihe.length !== 5 || new Set(a.reihe).size !== 5)) m.push("nicht alle fünf Pfeile");
+  if (a.art === "klaer") {
+    const i = KLAERANLAGE.findIndex(k => k.text === a.reihe[0]);
+    if (a.reihe.some((t, k) => KLAERANLAGE[i + k]?.text !== t)) m.push("Kläranlage in falscher Reihenfolge");
+  }
+  if (a.art === "klaerWas") {
+    einmal(a.optionen, a.richtig);
+    if (KLAERANLAGE.find(k => k.text === a.teil).was !== a.richtig) m.push("Beschreibung passt nicht");
+  }
+  if (a.art === "schicht" && !SCHICHT_FRAGEN[a.nr]) m.push("Schichtfrage fehlt");
+  return m;
+}
+
+// ---------- Grafiken ----------
+
+/** Wasserkreislauf: Meer, Sonne, Wolke, Berg, Regen, Boden, Grundwasser, Fluss und die fünf Pfeile. */
+function kreislaufGrafik() {
+  const svg = S("svg", { class: "wt-grafik", viewBox: "0 0 400 270", role: "img", "aria-label": "Wasserkreislauf mit Meer, Sonne, Wolke, Berg, Boden und Fluss" });
+  svg.append(
+    S("rect", { x: 0, y: 0, width: 400, height: 175, fill: "#cfe9ff" }),
+    // Sonne
+    S("g", { stroke: "#f5b700", "stroke-width": 3, "stroke-linecap": "round" },
+      ...[0, 45, 90, 135, 180, 225, 270, 315].map(w => {
+        const r = w * Math.PI / 180;
+        return S("line", { x1: 45 + 25 * Math.cos(r), y1: 40 + 25 * Math.sin(r), x2: 45 + 33 * Math.cos(r), y2: 40 + 33 * Math.sin(r) });
+      })),
+    S("circle", { cx: 45, cy: 40, r: 19, fill: "#ffd34d" }),
+    // Berg mit Schnee
+    S("polygon", { points: "240,175 330,82 400,140 400,175", fill: "#8d9aa8" }),
+    S("polygon", { points: "312,101 330,82 349,99 340,96 331,103 321,97", fill: "#fff" }),
+    // Regen unter der Wolke
+    S("g", { stroke: "#3b82c4", "stroke-width": 2.5, "stroke-linecap": "round" },
+      ...[[266, 80], [276, 92], [298, 82], [306, 96], [268, 106], [300, 112]].map(([x, y]) => S("line", { x1: x, y1: y, x2: x - 3, y2: y + 9 }))),
+    // Wolke
+    S("g", { fill: "#fff", stroke: "#b8c4d6", "stroke-width": 2 },
+      S("circle", { cx: 266, cy: 54, r: 17 }), S("circle", { cx: 287, cy: 43, r: 22 }), S("circle", { cx: 309, cy: 54, r: 17 })),
+    S("rect", { x: 264, y: 50, width: 48, height: 20, fill: "#fff" }),
+    // Meer
+    S("rect", { x: 0, y: 160, width: 175, height: 110, fill: "#3b82c4" }),
+    S("path", { d: "M0,162 q12,-7 24,0 t24,0 t24,0 t24,0 t24,0 t24,0 t24,0 t24,0", fill: "none", stroke: "#bfe0ff", "stroke-width": 3 }),
+    // Boden mit Schichten: Humus, Boden, Grundwasser, Fels
+    S("rect", { x: 165, y: 170, width: 235, height: 18, fill: "#5a3a22" }),
+    S("rect", { x: 165, y: 188, width: 235, height: 26, fill: "#a0784f" }),
+    S("rect", { x: 165, y: 214, width: 235, height: 30, fill: "#7fb0d6" }),
+    S("g", { fill: "#d8c08f" }, ...[180, 205, 232, 258, 284, 310, 336, 362, 388].map((x, i) => S("circle", { cx: x, cy: 222 + (i % 2) * 12, r: 4 }))),
+    S("rect", { x: 165, y: 244, width: 235, height: 26, fill: "#8a8f99" }),
+    S("rect", { x: 165, y: 165, width: 235, height: 6, fill: "#5cb85c" }),
+    // Grundwasser fliesst langsam zum Meer (ohne Namen, nur Richtung)
+    S("path", { d: "M330,229 L190,229", stroke: "#2f6fa8", "stroke-width": 2, "stroke-dasharray": "6 5", fill: "none" }),
+    S("polygon", { points: "184,229 194,224 194,234", fill: "#2f6fa8" }),
+    // Quelle und Fluss zum Meer
+    S("path", { d: "M300,166 Q240,160 200,167 T160,166", fill: "none", stroke: "#3b82c4", "stroke-width": 7, "stroke-linecap": "round" }),
+    S("circle", { cx: 302, cy: 165, r: 5, fill: "#3b82c4" }),
+    S("text", { x: 395, y: 262, "text-anchor": "end", class: "wt-schild", text: "Fels" }),
+    S("text", { x: 395, y: 236, "text-anchor": "end", class: "wt-schild", text: "Grundwasser" }),
+  );
+  const pfeile = {};
+  for (const v of VORGAENGE) {
+    const [kx, ky, w] = v.kopf;
+    const r = w * Math.PI / 180;
+    const spitze = (l, d) => `${kx + l * Math.cos(r) - d * Math.sin(r)},${ky + l * Math.sin(r) + d * Math.cos(r)}`;
+    const marke = S("text", { x: v.marke[0], y: v.marke[1], class: "wt-marke-text", text: "?" });
+    const g = S("g", { class: "wt-pfeil", "data-vorgang": v.id },
+      S("path", { d: v.linie, fill: "none", stroke: "transparent", "stroke-width": 28 }),
+      S("path", { d: v.linie, class: "wt-linie" }),
+      S("polygon", { class: "wt-kopf", points: `${spitze(4, 0)} ${spitze(-10, -7)} ${spitze(-10, 7)}` }),
+      S("circle", { cx: v.marke[0], cy: v.marke[1], r: 16, class: "wt-marke" }),
+      marke);
+    pfeile[v.id] = { g, marke };
+    svg.append(g);
+  }
+  return { svg, pfeile };
+}
+
+/** Bodenprofil mit vier Schichten (ohne Namen, die erscheinen nach der richtigen Antwort). */
+function bodenGrafik() {
+  const svg = S("svg", { class: "wt-grafik", viewBox: "0 0 300 230", role: "img", "aria-label": "Bodenprofil mit vier Schichten", style: "max-width:420px" });
+  svg.append(S("rect", { x: 0, y: 0, width: 300, height: 34, fill: "#cfe9ff" }));
+  const schichten = {};
+  for (const s of SCHICHTEN) {
+    const r = S("rect", { x: 0, y: s.y, width: 300, height: s.h, fill: s.farbe, class: "wt-schicht", "data-schicht": s.id });
+    schichten[s.id] = r;
+    svg.append(r);
+  }
+  // Gras, Wurzeln, Regenwurm, Steine, Wasser, Fels-Risse: Dekor ohne Klick
+  svg.append(
+    S("g", { "pointer-events": "none" },
+      S("path", { d: "M0,34 " + Array.from({ length: 30 }, (_, i) => `l5,-8 l5,8`).join(" "), fill: "#5cb85c" }),
+      S("g", { stroke: "#d9b98c", "stroke-width": 2, fill: "none" },
+        S("path", { d: "M60,36 q-6,14 2,26 q6,10 -2,22" }), S("path", { d: "M200,36 q8,12 0,24 q-6,8 4,20" })),
+      S("path", { d: "M120,58 q8,-8 16,0 t16,0 t12,0", stroke: "#e08a9a", "stroke-width": 5, fill: "none", "stroke-linecap": "round" }),
+      S("g", { fill: "#7a5a3a" }, ...[[30, 95], [90, 110], [150, 92], [220, 108], [270, 96]].map(([x, y]) => S("ellipse", { cx: x, cy: y, rx: 8, ry: 5 }))),
+      S("g", { fill: "#e6d3a8" }, ...Array.from({ length: 24 }, (_, i) => S("circle", { cx: 8 + (i % 12) * 25, cy: 140 + Math.floor(i / 12) * 22 + (i % 2) * 6, r: 5 }))),
+      S("rect", { x: 0, y: 150, width: 300, height: 30, fill: "#5aa0e0", opacity: .45 }),
+      S("path", { d: "M0,150 q10,-4 20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0", stroke: "#2f6fa8", "stroke-width": 2, fill: "none" }),
+      S("g", { stroke: "#5f646d", "stroke-width": 2 }, S("line", { x1: 40, y1: 196, x2: 90, y2: 210 }), S("line", { x1: 170, y1: 190, x2: 230, y2: 214 }))),
+  );
+  return { svg, schichten };
+}
+
+// ---------- Darstellung ----------
+
+const wegVon = id => WEGE.find(w => w.id === id);
+const stationInhalt = weg => t => { const s = weg.stationen.find(x => x.text === t); return { bild: s.bild, text: s.text }; };
+const TIPP_REISE = "Denk an den Weg des Tropfens: Was muss als Nächstes passieren, damit er weiterkommt?";
+
+function zeigeFrage(ctx, a) {
+  const f = a.f;
+  const loesung = `${f.richtig}. ${f.erklaerung}`;
+  ctx.kennung(`frage|${f.frage}`);
+  ctx.flaeche.append(el("div", { class: "frage-bild", "aria-hidden": "true", text: f.bild }), el("div", { class: "frage", text: f.frage }));
+  if (new Set(f.falsch).size === 2 && ["fest", "flüssig", "gasförmig"].includes(f.richtig)) ctx.serie("antwort", f.richtig);
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: f.richtig, hinweis: f.tipp, loesung, lob: f.erklaerung, breite: 150 });
+}
+
+function zeigeReise(ctx, a) {
+  const weg = wegVon(a.weg);
+  const s = weg.stationen.find(x => x.text === a.start);
+  const loesung = [a.start, ...a.reihe].join(" → ");
+  ctx.kennung(`reise|${a.weg}|${a.start}|${a.reihe.length}`);
+  ctx.flaeche.append(kreislaufGrafik().svg,
+    el("div", { class: "frage", html: `Der Tropfen startet: <b>${s.bild} ${s.text}</b>. ${weg.satz} Tippe die nächsten ${a.reihe.length} Stationen der Reihe nach.` }));
+  LS.reihenfolge(ctx, { reihe: a.reihe, inhalt: stationInhalt(weg), hinweis: TIPP_REISE, loesung, pfeile: true, breite: 120 });
+}
+
+function zeigeDanach(ctx, a) {
+  const weg = wegVon(a.weg);
+  const s = weg.stationen.find(x => x.text === a.jetzt);
+  ctx.kennung(`danach|${a.weg}|${a.jetzt}`);
+  ctx.flaeche.append(kreislaufGrafik().svg,
+    el("div", { class: "frage", html: `${weg.satz}<br>Der Tropfen ist hier: <b>${s.bild} ${s.text}</b>. Wohin kommt er als Nächstes?` }));
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: stationInhalt(weg), hinweis: TIPP_REISE,
+    loesung: `${a.jetzt} → ${a.richtig}`, breite: 130 });
+}
+
+function zeigePfeilBegriff(ctx, a) {
+  const g = kreislaufGrafik();
+  const v = VORGANG[a.richtig];
+  g.pfeile[v.id].g.classList.add("hervor");
+  ctx.kennung(`pfeil|${v.id}`);
+  ctx.flaeche.append(el("div", { class: "frage", html: "Was passiert beim <b>leuchtenden Pfeil</b>?" }), g.svg);
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: v.id, inhalt: id => VORGANG[id].text, hinweis: v.tipp, loesung: `${v.text}: ${v.beschr}`,
+    breite: 140, beiRichtig: () => { g.pfeile[v.id].marke.textContent = "✓"; g.pfeile[v.id].g.classList.add("richtig"); } });
+}
+
+function zeigeBeschreibung(ctx, a) {
+  const v = VORGANG[a.richtig];
+  ctx.kennung(`beschr|${v.id}`);
+  ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst das?" }), el("div", { class: "wt-beschreibung auftrag", text: v.beschr }));
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: v.id, inhalt: id => VORGANG[id].text,
+    hinweis: "Lies genau: Wo ist das Wasser vorher, und wo ist es nachher?", loesung: v.text, breite: 140 });
+}
+
+/** Begriff steht da, das Kind tippt auf den passenden Pfeil in der Grafik. */
+function zeigeBegriffPfeil(ctx, a) {
+  const g = kreislaufGrafik();
+  const v = VORGANG[a.richtig];
+  const loesung = `${v.text}: ${v.beschr}`;
+  ctx.kennung(`begriff|${v.id}`);
+  ctx.loesung(loesung);
+  ctx.schritte(1);
+  ctx.flaeche.append(el("div", { class: "frage", html: `Tippe auf den Pfeil: <b>${v.text}</b>` }), g.svg);
+  let fertig = false;
+  for (const w of VORGAENGE) {
+    const p = g.pfeile[w.id];
+    p.g.addEventListener("click", () => {
+      if (fertig || p.g.classList.contains("falsch")) return;
+      if (w.id === v.id) {
+        fertig = true;
+        p.marke.textContent = "✓";
+        p.g.classList.add("richtig");
+        ctx.richtig(`Richtig: ${v.beschr}`);
+        return;
+      }
+      p.g.classList.add("falsch");
+      ctx.falsch(`Dieser Pfeil heisst „${w.text}“. ${v.suche}`, loesung);
+      if (ctx.vorbei()) fertig = true;
+    });
+  }
+}
+
+/** Nummern an den Pfeilen; die Begriffe in der Reihenfolge der Nummern antippen. */
+function zeigeNummern(ctx, a) {
+  const g = kreislaufGrafik();
+  a.reihe.forEach((id, i) => { g.pfeile[id].marke.textContent = String(i + 1); });
+  ctx.kennung(`nummern|${a.reihe.join(",")}`);
+  ctx.flaeche.append(el("div", { class: "frage", html: "Die Pfeile tragen Nummern. Tippe die Begriffe in der Reihenfolge <b>1, 2, 3, 4, 5</b>." }), g.svg);
+  LS.reihenfolge(ctx, {
+    reihe: a.reihe, inhalt: id => VORGANG[id].text, ablage: id => `${a.reihe.indexOf(id) + 1}: ${VORGANG[id].text}`, breite: 140,
+    hinweis: (_, erwartet) => `Schau Pfeil Nummer ${a.reihe.indexOf(erwartet) + 1} an: Wo beginnt er, und wohin führt er?`,
+    loesung: a.reihe.map((id, i) => `${i + 1}: ${VORGANG[id].text}`).join(", "),
+    beiRichtig: () => a.reihe.forEach(id => g.pfeile[id].g.classList.add("richtig")),
+  });
+}
+
+function zeigeSchicht(ctx, a) {
+  const q = SCHICHT_FRAGEN[a.nr];
+  const g = bodenGrafik();
+  const richtig = SCHICHTEN.find(s => s.id === q.richtig);
+  const loesung = `Die richtige Schicht: ${richtig.name}`;
+  ctx.kennung(`schicht|${a.nr}`);
+  ctx.loesung(loesung);
+  ctx.schritte(1);
+  ctx.flaeche.append(el("div", { class: "frage", text: q.frage }), g.svg);
+  let fertig = false;
+  const beschrifte = s => g.svg.append(S("text", { x: 8, y: s.y + s.h / 2 + 5, class: "wt-schild", text: s.name }));
+  for (const s of SCHICHTEN) {
+    const r = g.schichten[s.id];
+    r.addEventListener("click", () => {
+      if (fertig || r.classList.contains("falsch")) return;
+      if (s.id === q.richtig) {
+        fertig = true;
+        r.classList.add("richtig");
+        SCHICHTEN.forEach(beschrifte);
+        ctx.richtig(`Richtig: ${s.name}.`);
+        return;
+      }
+      r.classList.add("falsch");
+      beschrifte(s);
+      ctx.falsch(q.tipp, loesung);
+      if (ctx.vorbei()) { fertig = true; SCHICHTEN.forEach(beschrifte); }
+    });
+  }
+}
+
+function zeigeKlaer(ctx, a) {
+  const alle = a.reihe.length === KLAERANLAGE.length;
+  ctx.kennung(`klaer|${a.reihe.join(",")}`);
+  ctx.flaeche.append(el("div", { class: "frage-bild", "aria-hidden": "true", text: "🏭" }),
+    el("div", { class: "frage", html: alle ? "Abwasser kommt in die Kläranlage. Tippe <b>alle Stationen</b> der Reihe nach, bis das Wasser wieder in die Natur fliesst."
+      : `Abwasser fliesst durch die Kläranlage. Tippe diese ${a.reihe.length} Stationen <b>der Reihe nach</b>.` }));
+  LS.reihenfolge(ctx, {
+    reihe: a.reihe, pfeile: true, breite: 150,
+    inhalt: t => { const k = KLAERANLAGE.find(x => x.text === t); return alle ? { bild: k.bild, text: k.text } : { bild: k.bild, text: k.text, klein: k.was }; },
+    hinweis: "Zuerst kommt das Grobe aus dem Wasser, dann das Feine, ganz am Schluss der gelöste Schmutz.",
+    loesung: a.reihe.join(" → "),
+  });
+}
+
+function zeigeKlaerWas(ctx, a) {
+  const k = KLAERANLAGE.find(x => x.text === a.teil);
+  ctx.kennung(`klaerWas|${a.teil}`);
+  ctx.flaeche.append(el("div", { class: "frage-bild", "aria-hidden": "true", text: k.bild }),
+    el("div", { class: "frage", html: `Was passiert in der Kläranlage beim <b>${k.text}</b>?` }));
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, hinweis: "Denk an den Namen der Station: Was steckt darin?", loesung: `${k.text}: ${k.was}`, breite: 200 });
+}
+
+const ZEIGE = { frage: zeigeFrage, reise: zeigeReise, danach: zeigeDanach, pfeilBegriff: zeigePfeilBegriff, beschreibung: zeigeBeschreibung,
+  begriffPfeil: zeigeBegriffPfeil, nummern: zeigeNummern, schicht: zeigeSchicht, klaer: zeigeKlaer, klaerWas: zeigeKlaerWas };
+
+const STUFEN_TEXT = {
+  s1: "Fest, flüssig, gasförmig: Eis, Wasser und Dampf (4. Klasse).",
+  s2: "Die Reise des Tropfens: Meer, Wolke, Regen … der Reihe nach.",
+  s3: "verdunsten, kondensieren, Niederschlag, versickern, abfliessen: an die Pfeile!",
+  s4: "Knifflig: Warum ist Meerwasser salzig? Alle Pfeile nummeriert.",
+  s5: "Bodenschichten, Grundwasser und Kläranlage (6. Klasse).",
+  s6: "Endgegner: die ganze Reise, die ganze Kläranlage, knifflige Fragen.",
+};
+// Wie viele Aufgabenarten hat eine Stufe mit den freien Listen? Nur dann gilt die Serienbremse für die Art.
+const ARTEN_JE_STUFE = Object.fromEntries(Object.keys(STUFE).map(s => [s, new Set(STUFE[s].map(f => f()?.art).filter(Boolean)).size]));
+// Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+LS.spiel({
+  id: "wassertropfen-reise",
+  einleitung: "Ein Wassertropfen ist immer unterwegs: vom Meer in die Wolke, als Regen auf die Erde und wieder zurück. Begleite ihn!",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Tipp: Die Sonne wärmt das Wasser — dort beginnt die Reise des Tropfens.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
+    ZEIGE[a.art](ctx, a);
+  },
+});
+</script>
+</body>
+</html>

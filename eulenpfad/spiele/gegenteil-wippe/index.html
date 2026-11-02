@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gegenteil-Wippe</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  /* Bildknöpfe: Emoji oder Zeichnung, gross genug für Finger */
+  .gw-knopf { border: 3px solid var(--rand); border-radius: 18px; background: #fff; box-shadow: 0 5px 0 var(--rand); cursor: pointer; position: relative;
+    min-width: 96px; min-height: 96px; padding: 6px; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+  .gw-knopf:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--rand); }
+  .gw-knopf.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .gw-knopf.richtig { background: var(--gut-hell); box-shadow: 0 5px 0 var(--gut); }
+  .gw-knopf.gesetzt { background: var(--gut-hell); box-shadow: 0 5px 0 var(--gut); }
+  .gw-bild { font-size: clamp(48px, 12vw, 64px); line-height: 1.1; }
+  .gw-zeichnung svg { width: clamp(76px, 20vw, 96px); height: auto; display: block; }
+  .gw-nr { position: absolute; top: -10px; right: -8px; width: 32px; height: 32px; border-radius: 50%; background: var(--gut); color: #fff;
+    font-weight: 900; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  .gw-reihe { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 8px auto 4px; max-width: 560px; }
+  /* Wippe: Balken mit zwei Sitzen auf einem Bock; neigt sich auf die Seite mit „mehr“ */
+  .wippe { max-width: 420px; margin: 4px auto 10px; }
+  .balken { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 6px; border-bottom: 12px solid #c58b4e;
+    border-radius: 0 0 8px 8px; transform-origin: 50% 100%; transition: transform .7s cubic-bezier(.3, 1.6, .5, 1); }
+  .bock { width: 0; height: 0; margin: 0 auto; border-left: 28px solid transparent; border-right: 28px solid transparent; border-bottom: 42px solid #94612f; }
+  .sitz { min-width: 96px; min-height: 96px; display: flex; align-items: center; justify-content: center; border-radius: 18px; background: #fff; box-shadow: 0 4px 0 var(--rand); }
+  .sitz.leer { border: 4px dashed var(--rand); background: transparent; box-shadow: none; font-size: 40px; color: var(--text-leise); }
+  /* Königsstufe: kleine Wippen mit Paketen */
+  .wippen { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin: 0 auto 6px; }
+  .wippen svg { width: clamp(130px, 40vw, 170px); height: auto; display: block; }
+  .paket svg { width: 64px; height: 64px; display: block; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>⚖️ Gegenteil-Wippe</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.A.1: a (Kindergarten) lang/kurz, schnell/langsam, vorher/nachher, breit/schmal,
+// dick/dünn, gross/klein, schwer/leicht beschreiben und vergleichen — Stufen 1–3; b Steigerungsformen
+// („am grössten“, ordnen) — Stufen 4–6.
+// Basisklasse 1: s1 Kindergarten (gross/klein, schwer/leicht, zwei Bilder), s2–s4 1. Klasse (weitere
+// Gegensätze; das Gegenteil finden; drei Dinge: am grössten), s5 2. Klasse (der Grösse nach ordnen),
+// s6 Königsstufe (Pakete auf Wippen: aus zwei, drei Vergleichen das schwerste finden).
+// Andere Paare als die Schätz-Waage (Basisklasse 2, Stufe 1 „Was ist schwerer?“). Ohne Lesen spielbar:
+// Die Eule liest die Frage vor; Antworten sind Bilder. Inhalte in woerter.js (Liste „gegenteile“).
+
+const { waehle, mische, el, ton } = LS;
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Kinder üben nur Inhalte aus freien Listen; ohne freie Liste bleibt nur die Königsstufe (Pakete).
+const SPIEL_ID = "gegenteil-wippe";
+const FREI = new Set(LS.spielListen(SPIEL_ID).length ? LS.freieListen(SPIEL_ID) : Object.keys(GEGENTEIL_LISTEN));
+const INHALT = FREI.has("gegenteile") ? GEGENTEIL_LISTEN.gegenteile : { paare: [], gezeichnet: [], reihen: [] };
+
+// Wörter je Merkmal: a = mehr (gross), b = weniger (klein); k = „grösser“, s = „am grössten“.
+const MERKMAL = {
+  gross:   { a: "gross", b: "klein", ak: "grösser", bk: "kleiner", as: "grössten", bs: "kleinsten" },
+  schwer:  { a: "schwer", b: "leicht", ak: "schwerer", bk: "leichter", as: "schwersten", bs: "leichtesten" },
+  lang:    { a: "lang", b: "kurz", ak: "länger", bk: "kürzer", as: "längsten", bs: "kürzesten" },
+  schnell: { a: "schnell", b: "langsam", ak: "schneller", bk: "langsamer", as: "schnellsten", bs: "langsamsten" },
+  dick:    { a: "dick", b: "dünn", ak: "dicker", bk: "dünner", as: "dicksten", bs: "dünnsten" },
+  breit:   { a: "breit", b: "schmal", ak: "breiter", bk: "schmaler", as: "breitesten", bs: "schmalsten" },
+  vorher:  {},
+};
+const HINWEIS = {
+  gross: "Stell dir beide nebeneinander vor: Welches braucht viel Platz, welches wenig?",
+  schwer: "Stell dir vor, du trägst beide: Was ist mühsam zu tragen, was ganz leicht?",
+  lang: "Leg beide in Gedanken nebeneinander: Was reicht weiter, was weniger weit?",
+  schnell: "Stell dir ein Wettrennen vor: Wer ist zuerst im Ziel, wer zuletzt?",
+  dick: "Schau genau hin: Halte in Gedanken deinen Finger daneben.",
+  breit: "Schau genau hin: Wo hätte mehr Platz zum Durchgehen?",
+  vorher: "Was muss zuerst da sein, damit das andere entstehen kann?",
+  steigerung: "Vergleiche zuerst zwei Bilder. Das Gewinnerbild vergleichst du dann mit dem nächsten.",
+  ordnen: "Schau alle Bilder an, die noch übrig sind. Welches kommt jetzt dran?",
+};
+const gross1 = t => t[0].toUpperCase() + t.slice(1);
+const ohneN = t => t.replace(/n$/, ""); // „kleinsten“ → „kleinste“
+
+// ---------- Zeichnungen (gleiches Ding in vier Stufen) ----------
+const HOLZ = "#c58b4e", HOLZ_D = "#94612f";
+const ZEICHNUNG = {
+  stift(merkmal, s) {
+    const L = merkmal === "lang" ? [28, 46, 64, 84][s - 1] : 80;
+    const t = merkmal === "dick" ? [5, 10, 16, 24][s - 1] : 14;
+    const x0 = 50 - L / 2, spitze = Math.max(8, t * .9);
+    return `<rect x="${x0}" y="${50 - t / 2}" width="6" height="${t}" rx="2" style="fill:var(--deko-2)"/>`
+      + `<rect x="${x0 + 6}" y="${50 - t / 2}" width="${L - 6 - spitze}" height="${t}" style="fill:var(--deko-4)"/>`
+      + `<polygon points="${x0 + L - spitze},${50 - t / 2} ${x0 + L},50 ${x0 + L - spitze},${50 + t / 2}" style="fill:#e8c39e"/>`
+      + `<polygon points="${x0 + L - spitze / 3},${50 - t / 6} ${x0 + L},50 ${x0 + L - spitze / 3},${50 + t / 6}" style="fill:#333"/>`;
+  },
+  leiter(merkmal, s) {
+    const H = [30, 48, 66, 86][s - 1], y0 = 94 - H;
+    let r = `<rect x="36" y="${y0}" width="5" height="${H}" style="fill:${HOLZ_D}"/><rect x="59" y="${y0}" width="5" height="${H}" style="fill:${HOLZ_D}"/>`;
+    for (let y = y0 + 8; y < 92; y += 12) r += `<rect x="40" y="${y}" width="20" height="4" style="fill:${HOLZ}"/>`;
+    return r;
+  },
+  baum(merkmal, s) {
+    const w = [6, 12, 20, 30][s - 1];
+    return `<rect x="${50 - w / 2}" y="44" width="${w}" height="52" rx="2" style="fill:#8b5a2b"/><circle cx="50" cy="32" r="26" style="fill:#5cb85c"/>`;
+  },
+  buch(merkmal, s) {
+    const t = [6, 12, 20, 30][s - 1];
+    return `<rect x="15" y="${82 - t}" width="70" height="${t}" rx="3" style="fill:var(--deko-6)"/>`
+      + `<rect x="19" y="${84 - t}" width="64" height="${Math.max(2, t - 6)}" style="fill:#fff"/>`;
+  },
+  tuer(merkmal, s) {
+    const w = [22, 36, 50, 64][s - 1];
+    return `<rect x="${50 - w / 2}" y="10" width="${w}" height="84" rx="3" style="fill:${HOLZ};stroke:${HOLZ_D};stroke-width:3"/>`
+      + `<circle cx="${50 + w / 2 - 6}" cy="56" r="3" style="fill:${HOLZ_D}"/>`;
+  },
+  weg(merkmal, s) {
+    const w = [10, 22, 34, 48][s - 1];
+    return `<rect x="6" y="6" width="88" height="88" rx="8" style="fill:#9ed49e"/><rect x="${50 - w / 2}" y="6" width="${w}" height="88" style="fill:#c9bfae"/>`;
+  },
+  band(merkmal, s) {
+    const t = [6, 12, 20, 28][s - 1];
+    return `<polygon points="8,${50 - t / 2} 92,${50 - t / 2} 86,50 92,${50 + t / 2} 8,${50 + t / 2} 14,50" style="fill:var(--deko-1)"/>`;
+  },
+};
+const zeichnungSvg = z => `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${ZEICHNUNG[z.art](z.merkmal, z.s)}</svg>`;
+
+// ---------- Inhalte aufbereiten ----------
+// Ein Ding: { bild } (Emoji) oder { zeichnung: { art, merkmal, s } }, dazu name (mit Artikel).
+const dingAus = ([bild, name]) => ({ bild, name });
+const gezeichnet = ([merkmal, art, name], s) => ({ zeichnung: { art, merkmal, s }, name });
+const schluessel = d => d.bild || `${d.zeichnung.art}${d.zeichnung.s}`;
+
+/** Alle Paare: { merkmal, a (mehr / vorher), b (weniger / nachher) }; gezeichnete mit zufälligen Stufen 3–4 gegen 1–2. */
+function allePaare() {
+  const p = INHALT.paare.map(([merkmal, a, b]) => ({ merkmal, a: dingAus(a), b: dingAus(b) }));
+  for (const g of INHALT.gezeichnet) {
+    const sa = waehle([3, 4]), sb = waehle([1, 2].filter(x => sa - x >= 2));
+    p.push({ merkmal: g[0], a: gezeichnet(g, sa), b: gezeichnet(g, sb), zeichnung: true });
+  }
+  return p;
+}
+/** Reihen vom wenigsten zum meisten: Emoji-Reihen und gezeichnete Dinge in vier Stufen. */
+function alleReihen() {
+  return [
+    ...INHALT.reihen.map(([merkmal, dinge]) => ({ merkmal, dinge: dinge.map(dingAus) })),
+    ...INHALT.gezeichnet.map(g => ({ merkmal: g[0], dinge: [1, 2, 3, 4].map(s => gezeichnet(g, s)), zeichnung: true })),
+  ];
+}
+const zahlPaare = m => INHALT.paare.filter(p => p[0] === m).length + INHALT.gezeichnet.filter(g => g[0] === m).length;
+const GEGENTEIL_MERKMALE = Object.keys(MERKMAL).filter(m => zahlPaare(m) >= 3);
+
+// ---------- Stufen ----------
+// Basisklasse 1: s1 Kindergarten, s2–s4 1. Klasse, s5 2. Klasse, s6 Königsstufe.
+const STUFE = {
+  s1: { art: "vergleich", merkmale: ["gross", "schwer"] },
+  s2: { art: "vergleich", merkmale: Object.keys(MERKMAL), neu: ["lang", "schnell", "dick", "breit", "vorher"] },
+  s3: { art: "gegenteil" },
+  s4: { art: "steigerung", anzahl: [3] },
+  s5: { art: "ordnen", anzahl: [3, 4] },
+  s6: { art: "pakete", anzahl: [3, 3, 4] },
+};
+// Stufen ohne freie Inhalte nicht anbieten (Muster regel-luecke).
+if (!INHALT.paare.some(p => STUFE.s1.merkmale.includes(p[0]))) delete STUFE.s1;
+if (!INHALT.paare.length && !INHALT.gezeichnet.length) delete STUFE.s2;
+if (!GEGENTEIL_MERKMALE.length) delete STUFE.s3;
+if (!INHALT.reihen.length && !INHALT.gezeichnet.length) { delete STUFE.s4; delete STUFE.s5; }
+
+function aufgabeErzeugen(stufe) {
+  const st = STUFE[stufe];
+  if (st.art === "vergleich") {
+    const alle = allePaare().filter(p => st.merkmale.includes(p.merkmal));
+    const neue = alle.filter(p => (st.neu || []).includes(p.merkmal));
+    const p = waehle(neue.length && Math.random() < .7 ? neue : alle);
+    const frage = waehle(["a", "b"]);
+    return { art: "vergleich", merkmal: p.merkmal, a: p.a, b: p.b, frage, links: waehle(["a", "b"]) };
+  }
+  if (st.art === "gegenteil") {
+    const merkmal = waehle(GEGENTEIL_MERKMALE);
+    const paare = mische(allePaare().filter(p => p.merkmal === merkmal));
+    const [p, ...rest] = paare;
+    const seite = waehle(["a", "b"]), andere = seite === "a" ? "b" : "a";
+    const gezeigt = p[seite], richtig = p[andere];
+    // Ablenker von derselben Seite wie das gezeigte Ding: nur das Gegenstück passt.
+    const ablenker = rest.map(q => q[seite]).filter(d => schluessel(d) !== schluessel(richtig) && schluessel(d) !== schluessel(gezeigt)).slice(0, 2);
+    return { art: "gegenteil", merkmal, seite, gezeigt, richtig, optionen: mische([richtig, ...ablenker]) };
+  }
+  if (st.art === "steigerung" || st.art === "ordnen") {
+    const n = waehle(st.anzahl);
+    const reihen = alleReihen().filter(r => r.dinge.length >= n);
+    const r = waehle(reihen);
+    // n Dinge der Reihe, Reihenfolge der Reihe bleibt (vom wenigsten zum meisten).
+    const wahl = mische([...r.dinge.keys()]).slice(0, n).sort((x, y) => x - y).map(i => r.dinge[i]);
+    const frage = waehle(["a", "b"]);
+    if (st.art === "steigerung") {
+      const richtig = frage === "a" ? wahl[n - 1] : wahl[0];
+      return { art: "steigerung", merkmal: r.merkmal, frage, reihe: wahl, richtig, optionen: mische(wahl) };
+    }
+    // ordnen: frage "b" = vom wenigsten zum meisten, "a" = vom meisten zum wenigsten
+    const folge = frage === "b" ? wahl : [...wahl].reverse();
+    return { art: "ordnen", merkmal: r.merkmal, frage, folge, optionen: mische(folge) };
+  }
+  // Königsstufe: Pakete, schwerstes zuerst; Wippen vergleichen je zwei Nachbarn der Reihe.
+  const n = waehle(st.anzahl);
+  const farben = mische(["var(--deko-1)", "var(--deko-2)", "var(--deko-3)", "var(--deko-4)", "var(--deko-5)", "var(--deko-6)"]);
+  const pakete = mische(PAKET_ZEICHEN).slice(0, n).map((z, i) => ({ ...z, farbe: farben[i] }));
+  const wippen = mische(pakete.slice(0, -1).map((p, i) => (Math.random() < .5 ? { links: p, rechts: pakete[i + 1], schwer: "links" } : { links: pakete[i + 1], rechts: p, schwer: "rechts" })));
+  const frage = waehle(["a", "b"]);
+  return { art: "pakete", pakete, wippen, frage, richtig: frage === "a" ? pakete[0] : pakete[n - 1], optionen: mische(pakete) };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const st = STUFE[stufe];
+  if (!st) return ["Stufe wird mit den freien Listen nicht angeboten"];
+  if (a.art !== st.art) m.push("Aufgabenart gehört nicht in diese Stufe");
+  const ausListe = d => (d.bild ? INHALT.paare.some(p => [p[1][0], p[2][0]].includes(d.bild)) || INHALT.reihen.some(r => r[1].some(x => x[0] === d.bild))
+    : INHALT.gezeichnet.some(g => g[1] === d.zeichnung.art && g[0] === d.zeichnung.merkmal));
+  if (a.art === "vergleich") {
+    if (!st.merkmale.includes(a.merkmal)) m.push("Merkmal gehört nicht in diese Stufe");
+    if (!ausListe(a.a) || !ausListe(a.b)) m.push("Ding nicht aus einer freien Liste");
+    if (schluessel(a.a) === schluessel(a.b)) m.push("zwei gleiche Bilder");
+    if (a.a.zeichnung && a.a.zeichnung.s - a.b.zeichnung.s < 2) m.push("Zeichnungen zu ähnlich");
+  }
+  if (a.art === "gegenteil") {
+    const keys = a.optionen.map(schluessel);
+    if (a.optionen.length !== 3) m.push(`${a.optionen.length} statt 3 Antworten`);
+    if (new Set(keys).size !== keys.length || keys.includes(schluessel(a.gezeigt))) m.push("Bild doppelt");
+    // Genau eine Antwort steht auf der anderen Seite des Merkmals (gezeichnet: Stufe 3–4 = mehr, 1–2 = weniger).
+    const andere = a.seite === "a" ? "b" : "a";
+    const seiten = d => (d.zeichnung ? [d.zeichnung.s >= 3 ? "a" : "b"]
+      : INHALT.paare.filter(p => p[0] === a.merkmal).flatMap(p => [p[1][0] === d.bild ? "a" : null, p[2][0] === d.bild ? "b" : null]).filter(Boolean));
+    if (a.optionen.some(d => new Set(seiten(d)).size !== 1)) m.push("Bild ohne eindeutige Seite");
+    const passend = a.optionen.filter(d => seiten(d).includes(andere));
+    if (passend.length !== 1 || passend[0] !== a.richtig) m.push("nicht genau ein Gegenteil");
+    if (!seiten(a.gezeigt).includes(a.seite)) m.push("gezeigtes Bild auf der falschen Seite");
+    if (!a.optionen.every(ausListe)) m.push("Ding nicht aus einer freien Liste");
+  }
+  if (a.art === "steigerung" || a.art === "ordnen") {
+    const reihe = a.art === "ordnen" ? (a.frage === "b" ? a.folge : [...a.folge].reverse()) : a.reihe;
+    const r = alleReihen().find(x => x.merkmal === a.merkmal && reihe.every(d => x.dinge.some(y => schluessel(y) === schluessel(d))));
+    if (!r) m.push("Dinge nicht aus einer Reihe");
+    else {
+      const pos = reihe.map(d => r.dinge.findIndex(y => schluessel(y) === schluessel(d)));
+      if (pos.some((p, i) => i && p <= pos[i - 1])) m.push("Reihenfolge falsch");
+    }
+    if (!st.anzahl.includes(reihe.length)) m.push("falsche Zahl von Dingen");
+    if (a.art === "steigerung" && a.richtig !== (a.frage === "a" ? reihe[reihe.length - 1] : reihe[0])) m.push("Lösung falsch");
+    if (new Set(reihe.map(schluessel)).size !== reihe.length) m.push("Bild doppelt");
+  }
+  if (a.art === "pakete") {
+    // Das gesuchte Paket muss aus den Wippen eindeutig folgen: nie oben (schwerstes) bzw. nie unten (leichtestes).
+    const oben = new Set(a.wippen.map(w => (w.schwer === "links" ? w.rechts : w.links).zeichen));
+    const unten = new Set(a.wippen.map(w => (w.schwer === "links" ? w.links : w.rechts).zeichen));
+    const kandidaten = a.pakete.filter(p => (a.frage === "a" ? !oben.has(p.zeichen) : !unten.has(p.zeichen)));
+    if (kandidaten.length !== 1 || kandidaten[0] !== a.richtig) m.push("Lösung folgt nicht eindeutig aus den Wippen");
+    if (a.wippen.length !== a.pakete.length - 1) m.push("falsche Zahl von Wippen");
+  }
+  return m;
+}
+
+// ---------- Königsstufe: Pakete ----------
+const PAKET_ZEICHEN = [
+  { zeichen: "stern", name: "dem Stern", svg: `<polygon points="30,14 34,25 46,25 36.5,32 40,44 30,37 20,44 23.5,32 14,25 26,25" style="fill:#fff"/>` },
+  { zeichen: "kreis", name: "dem Kreis", svg: `<circle cx="30" cy="30" r="12" style="fill:#fff"/>` },
+  { zeichen: "dreieck", name: "dem Dreieck", svg: `<polygon points="30,16 44,42 16,42" style="fill:#fff"/>` },
+  { zeichen: "viereck", name: "dem Viereck", svg: `<rect x="19" y="19" width="22" height="22" style="fill:#fff"/>` },
+];
+const paketInhalt = p => `<rect x="4" y="4" width="52" height="52" rx="6" style="fill:${p.farbe};stroke:rgba(0,0,0,.25);stroke-width:2"/>${p.svg}`;
+const paketSvg = p => `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${paketInhalt(p)}</svg>`;
+function wippeSvg(w) {
+  const d = w.schwer === "links" ? 1 : -1; // links schwer: links unten
+  const yl = 62 + 12 * d, yr = 62 - 12 * d;
+  const auf = x => yl + ((yr - yl) * (x - 14)) / 132 - 4; // Oberkante des Balkens bei x
+  const paket = (p, x, y) => `<g transform="translate(${x - 18} ${y - 34}) scale(.6)">${paketInhalt(p)}</g>`;
+  return `<svg viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">`
+    + `<polygon points="80,62 64,96 96,96" style="fill:${HOLZ_D}"/>`
+    + `<line x1="14" y1="${yl}" x2="146" y2="${yr}" style="stroke:${HOLZ};stroke-width:8;stroke-linecap:round"/>`
+    + paket(w.links, 34, auf(34)) + paket(w.rechts, 126, auf(126)) + `</svg>`;
+}
+
+// ---------- Bausteine dieses Spiels ----------
+function dingKnopf(d) {
+  const k = el("button", { type: "button", class: "gw-knopf", "aria-label": d.name || "Bild" });
+  k.append(dingInhalt(d));
+  return k;
+}
+const dingInhalt = d => (d.bild ? el("span", { class: "gw-bild", text: d.bild }) : el("span", { class: "gw-zeichnung", html: zeichnungSvg(d.zeichnung) }));
+const wackeln = k => { k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch"); };
+
+/**
+ * Eine richtige Antwort unter Bildknöpfen. Nach dem dritten Fehlversuch zeigt der Rahmen die Lösung;
+ * hier wird dann zusätzlich der richtige Knopf grün, weil gezeichnete Dinge keinen eigenen Namen haben.
+ */
+function bildWahl(ctx, knoepfe, richtig, hinweis, loesung, lob, beiRichtig) {
+  ctx.loesung(loesung);
+  ctx.schritte(1);
+  let fertig = false;
+  knoepfe.forEach((k, i) => k.addEventListener("click", () => {
+    if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+    if (i === richtig) {
+      fertig = true;
+      k.classList.add("richtig");
+      if (beiRichtig) beiRichtig();
+      ctx.richtig(lob);
+      return;
+    }
+    wackeln(k);
+    k.classList.add("gewaehlt");
+    ctx.falsch(hinweis, loesung);
+    if (ctx.vorbei()) { fertig = true; knoepfe[richtig].classList.add("richtig"); }
+  }));
+}
+
+const LOB = ["Richtig! ⚖️", "Genau! ⚖️", "Super gemacht!", "Stimmt! ⚖️"];
+const nenne = d => d.name || "";
+/** „der lange Stift“: Name mit Eigenschaft (nur gezeichnete Dinge haben dieselben Namen). */
+function mitEigenschaft(d, merkmal) {
+  if (!d.zeichnung) return d.name;
+  const W = MERKMAL[merkmal];
+  const adj = d.zeichnung.s >= 3 ? W.a : W.b;
+  const [art, ...rest] = d.name.split(" ");
+  return `${art} ${adj}e ${rest.join(" ")}`;
+}
+
+LS.spiel({
+  id: SPIEL_ID,
+  einleitung: "Gross oder klein, schwer oder leicht? Hör die Frage und tipp auf das passende Bild. Die Wippe zeigt es dir!",
+  anzahl: 8,
+  stufen: Object.fromEntries(Object.entries({
+    s1: "Was ist grösser, was ist schwerer? Zwei Bilder.",
+    s2: "Mehr Gegensätze: lang – kurz, schnell – langsam, dick – dünn, breit – schmal, vorher – nachher.",
+    s3: "Das Gegenteil finden: Der Hase ist schnell — wer ist langsam?",
+    s4: "Drei Dinge: Was ist am grössten, was am kleinsten?",
+    s5: "Der Reihe nach ordnen, drei oder vier Dinge: vom Kleinsten zum Grössten.",
+    s6: "Pakete auf der Wippe: Welches ist am schwersten?",
+  }).filter(([s]) => STUFE[s])),
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s6" ? "Auf der Wippe ist das schwerere Paket unten." : "Hör gut zu und schau die Bilder genau an.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    const lob = waehle(LOB);
+    const W = MERKMAL[a.merkmal] || {};
+    ctx.serie("frage", a.frage || a.seite);
+
+    if (a.art === "vergleich") {
+      ctx.kennung(`v|${schluessel(a.a)}|${schluessel(a.b)}|${a.frage}`);
+      const vorher = a.merkmal === "vorher";
+      const frage = vorher ? (a.frage === "a" ? "Was war zuerst?" : "Was kommt danach?")
+        : `Was ist ${a.frage === "a" ? W.ak : W.bk}?`;
+      const loesung = vorher ? `Zuerst kommt ${a.a.name}, danach ${a.b.name}.`
+        : `${gross1(mitEigenschaft(a.a, a.merkmal))} ist ${W.ak} als ${mitEigenschaft(a.b, a.merkmal)}.`;
+      const reihe = a.links === "a" ? [a.a, a.b] : [a.b, a.a];
+      const knoepfe = reihe.map(dingKnopf);
+      const balken = el("div", { class: "balken" }, ...knoepfe);
+      ctx.flaeche.append(el("div", { class: "auftrag", text: frage }), el("div", { class: "wippe" }, balken, el("div", { class: "bock" })));
+      const richtig = reihe.indexOf(a.frage === "a" ? a.a : a.b);
+      // Die Wippe neigt sich auf die Seite mit „mehr“ (schwerer, grösser …); bei vorher/nachher bleibt sie gerade.
+      bildWahl(ctx, knoepfe, richtig, HINWEIS[a.merkmal], loesung, lob,
+        () => { if (!vorher) balken.style.transform = `rotate(${a.links === "a" ? -9 : 9}deg)`; });
+      return;
+    }
+
+    if (a.art === "gegenteil") {
+      ctx.kennung(`g|${schluessel(a.gezeigt)}|${a.optionen.map(schluessel).sort().join(",")}`);
+      const vorher = a.merkmal === "vorher";
+      const gezeigt = a.gezeigt.name; // ohne Eigenschaft, sonst „Der dünne Baum ist dünn.“
+      const frage = vorher ? (a.seite === "a" ? `Zuerst: ${a.gezeigt.name}. Was kommt danach?` : `Danach: ${a.gezeigt.name}. Was war vorher?`)
+        : `${gross1(gezeigt)} ist ${a.seite === "a" ? W.a : W.b}. Was ist das Gegenteil?`;
+      const loesung = vorher
+        ? (a.seite === "a" ? `Zuerst kommt ${a.gezeigt.name}, danach ${a.richtig.name}.` : `Zuerst kommt ${a.richtig.name}, danach ${a.gezeigt.name}.`)
+        : `Das Gegenteil von ${a.seite === "a" ? W.a : W.b} ist ${a.seite === "a" ? W.b : W.a}: ${mitEigenschaft(a.richtig, a.merkmal)}.`;
+      const leer = el("div", { class: "sitz leer", text: "?" });
+      const balken = el("div", { class: "balken" }, el("div", { class: "sitz" }, dingInhalt(a.gezeigt)), leer);
+      const knoepfe = a.optionen.map(dingKnopf);
+      ctx.flaeche.append(el("div", { class: "auftrag", text: frage }), el("div", { class: "wippe" }, balken, el("div", { class: "bock" })),
+        el("div", { class: "gw-reihe" }, ...knoepfe));
+      bildWahl(ctx, knoepfe, a.optionen.indexOf(a.richtig), HINWEIS[a.merkmal], loesung, lob, () => {
+        leer.className = "sitz";
+        leer.textContent = "";
+        leer.append(dingInhalt(a.richtig));
+        if (!vorher) balken.style.transform = `rotate(${a.seite === "a" ? -9 : 9}deg)`;
+      });
+      return;
+    }
+
+    if (a.art === "steigerung") {
+      ctx.kennung(`s|${a.reihe.map(schluessel).join(",")}|${a.frage}`);
+      const frage = `Was ist am ${a.frage === "a" ? W.as : W.bs}?`;
+      const loesung = `Am ${a.frage === "a" ? W.as : W.bs} ist ${a.richtig.zeichnung ? `${a.richtig.name.split(" ")[0]} ${ohneN(a.frage === "a" ? W.as : W.bs)} ${a.richtig.name.split(" ").slice(1).join(" ")}` : a.richtig.name}.`;
+      const knoepfe = a.optionen.map(dingKnopf);
+      ctx.flaeche.append(el("div", { class: "auftrag", text: frage }), el("div", { class: "gw-reihe" }, ...knoepfe));
+      bildWahl(ctx, knoepfe, a.optionen.indexOf(a.richtig), HINWEIS.steigerung, loesung, lob);
+      return;
+    }
+
+    if (a.art === "ordnen") {
+      ctx.kennung(`o|${a.folge.map(schluessel).join(",")}`);
+      const [erst, zuletzt] = a.frage === "b" ? [W.bs, W.as] : [W.as, W.bs];
+      const frage = `Tipp der Reihe nach: zuerst auf das ${gross1(ohneN(erst))}, am Schluss auf das ${gross1(ohneN(zuletzt))}.`;
+      // Gezeichnete Dinge heissen alle gleich: „Zuerst der kürzeste Stift, am Schluss der längste Stift.“
+      const [artikel, ...nomen] = a.folge[0].name.split(" ");
+      const loesung = a.folge[0].zeichnung ? `Zuerst ${artikel} ${ohneN(erst)} ${nomen.join(" ")}, am Schluss ${artikel} ${ohneN(zuletzt)} ${nomen.join(" ")}.`
+        : `${gross1(a.folge.map(nenne).join(", "))}.`;
+      ctx.loesung(loesung);
+      ctx.schritte(a.folge.length);
+      const knoepfe = a.optionen.map(dingKnopf);
+      ctx.flaeche.append(el("div", { class: "auftrag", text: frage }), el("div", { class: "gw-reihe" }, ...knoepfe));
+      let pos = 0;
+      const nummer = (k, n) => { k.classList.add("gesetzt"); k.append(el("span", { class: "gw-nr", text: String(n) })); };
+      knoepfe.forEach((k, i) => k.addEventListener("click", () => {
+        if (ctx.vorbei() || k.classList.contains("gesetzt")) return;
+        if (a.optionen[i] === a.folge[pos]) {
+          nummer(k, ++pos);
+          if (pos === a.folge.length) ctx.richtig(lob); else ton("tipp");
+          return;
+        }
+        wackeln(k);
+        ctx.falsch(HINWEIS.ordnen, loesung);
+        if (ctx.vorbei()) for (; pos < a.folge.length; pos++) nummer(knoepfe[a.optionen.indexOf(a.folge[pos])], pos + 1);
+      }));
+      return;
+    }
+
+    // Königsstufe: Pakete
+    ctx.kennung(`p|${a.pakete.map(p => p.zeichen + p.farbe).join(",")}|${a.wippen.map(w => w.links.zeichen + w.rechts.zeichen).join(",")}|${a.frage}`);
+    const am = a.frage === "a" ? "am schwersten" : "am leichtesten";
+    const frage = `Welches Paket ist ${am}? Schau auf die Wippen.`;
+    const loesung = `${gross1(am)} ist das Paket mit ${a.richtig.name}.`;
+    const knoepfe = a.optionen.map(p => {
+      const k = el("button", { type: "button", class: "gw-knopf", "aria-label": `Paket mit ${p.name.replace(/^dem /, "")}` });
+      k.append(el("span", { class: "paket", html: paketSvg(p) }));
+      return k;
+    });
+    ctx.flaeche.append(el("div", { class: "auftrag", text: frage }),
+      el("div", { class: "wippen" }, ...a.wippen.map(w => el("span", { html: wippeSvg(w) }))),
+      el("div", { class: "gw-reihe" }, ...knoepfe));
+    const hinweis = a.frage === "a" ? "Auf jeder Wippe ist das schwerere Paket unten. Such das Paket, das nie oben ist."
+      : "Auf jeder Wippe ist das leichtere Paket oben. Such das Paket, das nie unten ist.";
+    bildWahl(ctx, knoepfe, a.optionen.indexOf(a.richtig), hinweis, loesung, lob);
+  },
+});
+</script>
+</body>
+</html>

@@ -175,7 +175,7 @@ const AUSWERTUNG = (() => {
       if (jetzt - zuletzt < 3 * TAG_MS) continue;
       // Spiel mit der Basisklasse, die der Klasse des Kindes am nächsten liegt
       const kandidaten = SPIELE.filter(x => x.lernziele.some(l => l.lz === lzId));
-      const klasse = Number(profil.klasse) || 0;
+      const klasse = LS.klasseVon(profil) ?? 0; // ohne Angabe wie Kindergarten: das leichteste Spiel
       const s = kandidaten.reduce((m, x) => (Math.abs((x.klasse || 0) - klasse) < Math.abs((m.klasse || 0) - klasse) ? x : m));
       const empfohlen = LS.empfohleneStufe(name, s.id) || "s3";
       const geuebt = s.lernziele.find(l => l.lz === lzId).stufen;
@@ -235,8 +235,8 @@ const AUSWERTUNG = (() => {
       ],
     },
     ausgleichen: {
-      titel: "Ausgleichen", spiele: ["mittelwert-waage"],
-      erklaerung: "Beim Ausgleichen der Säulen: mit so wenigen Zügen wie nötig — wer das schafft, hat den Mittelwert vorher im Kopf.",
+      titel: "Ausgleichen", spiele: ["mittelwert-waage", "gerecht-teiler"],
+      erklaerung: "Beim Ausgleichen der Säulen oder Teller: mit so wenigen Zügen wie nötig — wer das schafft, hat das Ziel vorher im Kopf.",
       werte: [
         { id: "kuerzest", text: "ohne Umweg", ton: "gut" },
         { id: "umwege", text: "mit Umwegen", ton: "mittel" },

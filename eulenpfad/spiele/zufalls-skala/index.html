@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zufalls-Skala</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.4vw, 26px); font-weight: 800; margin: 0 0 10px; line-height: 1.5; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 0 8px; border-radius: 999px; background: #fff; border: 2px solid var(--rand); white-space: nowrap; }
+  .chip i { display: inline-block; width: .8em; height: .8em; border-radius: 50%; border: 2px solid var(--text); }
+  .situationen { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 10px 22px; margin: 0 0 8px; }
+  .situation { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .situation .marke { font-size: clamp(22px, 5vw, 30px); font-weight: 900; color: var(--deko-7); }
+  .situation .beschrieb { font-size: 15px; font-weight: 700; color: var(--text-leise); text-align: center; }
+  .zufall-bild { display: block; width: min(200px, 60vw); max-width: 100%; }
+  .zwei .zufall-bild { width: min(170px, 40vw); }
+  .zufall-bild.breit { width: min(360px, 88vw); }
+  .zufall-bild .linie { fill: #fff; stroke: var(--text); stroke-width: 3; }
+  .zufall-bild .auge { fill: var(--text); }
+  .zufall-bild .sektor, .zufall-bild .kugel { stroke: var(--text); stroke-width: 2; }
+  .zufall-bild .karte-rand { fill: #fff; stroke: var(--deko-7); stroke-width: 3; }
+  .zufall-bild .karte-zahl { font-size: 26px; font-weight: 900; fill: var(--text); text-anchor: middle; }
+  .zufall-bild .frage-zeichen { font-size: 44px; font-weight: 900; fill: var(--deko-7); text-anchor: middle; }
+  .skala .wahl-knopf { min-width: 0; padding-left: 8px; padding-right: 8px; }
+  .skala .wahl-knopf small { display: block; }
+  .wahl-knopf { font-size: clamp(18px, 4.4vw, 24px); font-weight: 900; }
+  .zahl-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: clamp(22px, 5vw, 30px); font-weight: 900; margin: 4px 0 8px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎲 Zufalls-Skala</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.A.1.g: Begriffe wahrscheinlich, möglich, sicher (und unmöglich) verstehen und
+// verwenden. Nur erzeugte Situationen mit Würfel, Glücksrad, Säckchen und Karten, keine Alltagssätze
+// (das Spiel hat keine Inhaltslisten).
+// Basisklasse 5: s1 4. Klasse (unmöglich, möglich, sicher), s3 Skala mit fünf Stufen, s4 zwei Räder
+// oder Säckchen vergleichen, s5 6. Klasse Chance als „3 von 10“ (Annahme), s6 Königsstufe Augensumme
+// zweier Würfel. Bezug: Möglichkeiten-Finder (alle Möglichkeiten zählen), Bruch-Pizzeria (Anteile).
+
+const { zufall, waehle, mische, el } = LS;
+
+const FARBEN = [
+  { name: "violett", v: "--deko-1" }, { name: "pink", v: "--deko-2" }, { name: "orange", v: "--deko-3" },
+  { name: "gelb", v: "--deko-4" }, { name: "türkis", v: "--deko-5" }, { name: "blau", v: "--deko-6" },
+];
+
+const DREI = ["unmoeglich", "moeglich", "sicher"];
+const FUENF = ["unmoeglich", "unwahrscheinlich", "moeglich", "wahrscheinlich", "sicher"];
+const STUFEN_TEXT = {
+  unmoeglich: { bild: "🚫", text: "unmöglich", klein: "nie" },
+  unwahrscheinlich: { bild: "🐢", text: "unwahrscheinlich", klein: "selten" },
+  moeglich: { bild: "🤷", text: "möglich", klein: "vielleicht" },
+  wahrscheinlich: { bild: "👍", text: "wahrscheinlich", klein: "meistens" },
+  sicher: { bild: "✅", text: "sicher", klein: "immer" },
+};
+const STUFEN_TEXT_FUENF = { ...STUFEN_TEXT, moeglich: { bild: "🤷", text: "möglich", klein: "etwa halb-halb" } };
+
+// Je Stufe: Aufgabenarten und Dinge
+const STUFE = {
+  s1: { arten: ["drei"], dinge: ["wuerfel", "sack"], sackMax: 8, farbenMax: 2 },
+  s2: { arten: ["drei"], dinge: ["wuerfel", "sack", "rad", "karten"], sackMax: 10, radMax: 8, farbenMax: 3 },
+  s3: { arten: ["fuenf"], dinge: ["wuerfel", "sack", "rad", "karten"], sackMax: 12, radMax: 12, farbenMax: 3 },
+  s4: { arten: ["vergleich", "vergleich", "fuenf"], dinge: ["wuerfel", "sack", "rad", "karten"], sackMax: 12, radMax: 12, farbenMax: 3 },
+  s5: { arten: ["anteil", "eintippen"], dinge: ["wuerfel", "sack", "rad", "karten"], sackMax: 12, radMax: 12, farbenMax: 3 },
+  s6: { arten: ["summeAnteil", "summeVergleich", "summeSkala"], dinge: ["summe"] },
+};
+
+// ---------- Situationen und Ereignisse ----------
+
+/** Alle gleich wahrscheinlichen Ausgänge einer Situation. */
+function ausgaenge(s) {
+  if (s.ding === "wuerfel") return [1, 2, 3, 4, 5, 6];
+  if (s.ding === "karten") return Array.from({ length: s.n }, (_, i) => i + 1);
+  if (s.ding === "summe") return [1, 2, 3, 4, 5, 6].flatMap(x => [1, 2, 3, 4, 5, 6].map(y => x + y));
+  return s.teile; // Rad und Säckchen: Farbnummern
+}
+
+function trifft(e, x) {
+  switch (e.art) {
+    case "gleich": return x === e.k;
+    case "nicht": return x !== e.k;
+    case "groesser": return x > e.k;
+    case "kleiner": return x < e.k;
+    case "mindestens": return x >= e.k;
+    case "hoechstens": return x <= e.k;
+    case "gerade": return x % 2 === 0;
+    case "ungerade": return x % 2 === 1;
+    case "farbe": return x === e.f;
+    case "nichtFarbe": return x !== e.f;
+    case "oder": return x === e.f || x === e.g;
+  }
+  return false;
+}
+
+/** Wie viele der Ausgänge passen, von wie vielen. */
+function chance(s, e) {
+  const alle = ausgaenge(s);
+  return { k: alle.filter(x => trifft(e, x)).length, n: alle.length };
+}
+
+function stufeDrei({ k, n }) { return k === 0 ? "unmoeglich" : k === n ? "sicher" : "moeglich"; }
+/** Fünf Stufen mit Abstand dazwischen; Grenzfälle (etwa 2 von 6) gibt es nicht (null). */
+function stufeFuenf({ k, n }) {
+  if (k === 0) return "unmoeglich";
+  if (k === n) return "sicher";
+  if (5 * k <= n) return "unwahrscheinlich";
+  if (5 * k >= 4 * n) return "wahrscheinlich";
+  if (5 * k > 2 * n && 5 * k < 3 * n) return "moeglich";
+  return null;
+}
+
+/** Zufällige Situation mit einem Ding aus der Stufe. */
+function situation(p, ding = waehle(p.dinge)) {
+  if (ding === "wuerfel" || ding === "summe") return { ding };
+  if (ding === "karten") return { ding, n: zufall(4, 10) };
+  const n = ding === "rad" ? zufall(4, p.radMax) : zufall(3, p.sackMax);
+  const farben = mische(FARBEN.map((_, i) => i)).slice(0, zufall(1, p.farbenMax));
+  // jede gewählte Farbe mindestens einmal
+  const teile = [...farben, ...Array.from({ length: n - farben.length }, () => waehle(farben))];
+  if (teile.length !== n) return null;
+  return { ding, n, teile: ding === "rad" ? mische(teile) : teile.sort((x, y) => x - y) };
+}
+
+/** Zufälliges Ereignis zur Situation. */
+function ereignis(s) {
+  if (s.ding === "rad" || s.ding === "sack") {
+    const da = [...new Set(s.teile)];
+    const art = waehle(["farbe", "farbe", "nichtFarbe", "oder"]);
+    const f = Math.random() < 0.8 ? waehle(da) : zufall(0, FARBEN.length - 1);
+    if (art === "oder") {
+      const g = waehle(FARBEN.map((_, i) => i).filter(i => i !== f));
+      return { art, f: Math.min(f, g), g: Math.max(f, g) };
+    }
+    return { art, f };
+  }
+  const max = s.ding === "wuerfel" ? 6 : s.ding === "karten" ? s.n : 12;
+  const min = s.ding === "summe" ? 2 : 1;
+  const art = waehle(["gleich", "gleich", "nicht", "groesser", "kleiner", "mindestens", "hoechstens", "gerade", "ungerade"]);
+  const k = { gleich: zufall(min - 1 || 1, max + 2), nicht: zufall(min, max), groesser: zufall(min - 1, max), kleiner: zufall(min, max + 1),
+    mindestens: zufall(min, max + 1), hoechstens: zufall(min, max), gerade: 0, ungerade: 0 }[art];
+  return art === "gerade" || art === "ungerade" ? { art } : { art, k };
+}
+
+/** Passende Situation und Ereignis zu einer gewünschten Stufe (bewertet mit stufeVon). */
+function fallFuer(p, ziel, stufeVon, ding) {
+  for (let i = 0; i < 300; i++) {
+    const s = situation(p, ding);
+    if (!s) continue;
+    const e = ereignis(s);
+    if (stufeVon(chance(s, e)) === ziel) return { s, e };
+  }
+  return null;
+}
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = ERZEUGER[art](p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "drei", s: { ding: "wuerfel" }, e: { art: "gleich", k: 7 }, loesung: "unmoeglich" };
+}
+
+const ERZEUGER = {
+  drei(p) {
+    const ziel = waehle(DREI);
+    const f = fallFuer(p, ziel, stufeDrei);
+    return f && { art: "drei", ...f, loesung: ziel };
+  },
+  fuenf(p) {
+    const ziel = waehle(FUENF);
+    const f = fallFuer(p, ziel, stufeFuenf);
+    return f && { art: "fuenf", ...f, loesung: ziel };
+  },
+  vergleich(p) {
+    // zwei Räder oder zwei Säckchen, dieselbe Zielfarbe
+    const ding = waehle(["rad", "sack"]);
+    const f = zufall(0, FARBEN.length - 1);
+    const andere = FARBEN.map((_, i) => i).filter(i => i !== f);
+    const max = ding === "rad" ? p.radMax : p.sackMax;
+    let k1, n1, k2, n2;
+    if (Math.random() < 0.25) {
+      // gleich gross, aber verschieden viele: 2 von 4 und 3 von 6
+      const n = zufall(2, 6), k = zufall(1, n - 1);
+      const m = mische([1, 2, 3, 4].filter(x => x * n <= max && x * n >= 3)).slice(0, 2);
+      if (m.length < 2) return null;
+      [k1, n1, k2, n2] = [k * m[0], n * m[0], k * m[1], n * m[1]];
+    } else {
+      n1 = zufall(3, max); n2 = zufall(3, max); k1 = zufall(1, n1 - 1); k2 = zufall(1, n2 - 1);
+      if (Math.abs(k1 / n1 - k2 / n2) < 1 / 12) return null;
+    }
+    const bau = (k, n) => {
+      const rest = mische(andere).slice(0, zufall(1, 2));
+      const teile = [...Array(k).fill(f), ...Array.from({ length: n - k }, () => waehle(rest))];
+      return { ding, n, teile: ding === "rad" ? mische(teile) : teile.sort((x, y) => x - y) };
+    };
+    const e = { art: "farbe", f };
+    const A = bau(k1, n1), B = bau(k2, n2);
+    const loesung = k1 * n2 === k2 * n1 ? "gleich" : k1 * n2 > k2 * n1 ? "A" : "B";
+    return { art: "vergleich", A, B, e, loesung };
+  },
+  anteil(p) {
+    const s = situation(p);
+    if (!s) return null;
+    const e = ereignis(s);
+    const { k, n } = chance(s, e);
+    if (k === 0 || k === n) return null;
+    const richtig = `${k} von ${n}`;
+    const kand = [[n - k, n], [k, n - k], [k + 1, n], [k - 1, n], [k, n + 1]].filter(([a, b]) => a >= 1 && a < b && a * n !== k * b);
+    const ablenker = mische(kand).filter((x, i, alle) => alle.findIndex(y => y[0] * x[1] === y[1] * x[0]) === i).slice(0, 3).map(([a, b]) => `${a} von ${b}`);
+    if (ablenker.length < 3) return null;
+    return { art: "anteil", s, e, k, n, richtig, optionen: mische([richtig, ...ablenker]) };
+  },
+  eintippen(p) {
+    const s = situation(p);
+    if (!s) return null;
+    const e = ereignis(s);
+    const { k, n } = chance(s, e);
+    if (k === 0 || k === n) return null;
+    return { art: "eintippen", s, e, k, n };
+  },
+  summeAnteil() {
+    const s = { ding: "summe" };
+    const e = ereignis(s);
+    const { k, n } = chance(s, e);
+    if (k === 0 || k === n || k > 30) return null;
+    return { art: "summeAnteil", s, e, k, n };
+  },
+  summeVergleich() {
+    const s = { ding: "summe" };
+    const eA = ereignis(s), eB = ereignis(s);
+    const cA = chance(s, eA), cB = chance(s, eB);
+    if (cA.k === 0 || cB.k === 0 || cA.k === 36 || cB.k === 36) return null;
+    if (JSON.stringify(eA) === JSON.stringify(eB)) return null;
+    // gleich oft nur, wenn es nicht offensichtlich ist (4 und 10, gerade und ungerade)
+    if (cA.k !== cB.k && Math.abs(cA.k - cB.k) < 2) return null;
+    const loesung = cA.k === cB.k ? "gleich" : cA.k > cB.k ? "A" : "B";
+    return { art: "summeVergleich", s, eA, eB, kA: cA.k, kB: cB.k, loesung };
+  },
+  summeSkala() {
+    const ziel = waehle(FUENF);
+    const f = fallFuer({}, ziel, stufeFuenf, "summe");
+    return f && { art: "summeSkala", ...f, loesung: ziel };
+  },
+};
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const situationOk = s => {
+    if (!p.dinge.includes(s.ding)) m.push(`${s.ding} nicht in der Stufe`);
+    if (s.ding === "rad" || s.ding === "sack") {
+      if (s.teile.length !== s.n || s.n < 2 || s.n > (s.ding === "rad" ? p.radMax : p.sackMax)) m.push("Anzahl Teile nicht in der Stufe");
+      if (!s.teile.every(f => f >= 0 && f < FARBEN.length)) m.push("unbekannte Farbe");
+    }
+    if (s.ding === "karten" && (s.n < 4 || s.n > 10)) m.push("Kartenzahl nicht in der Stufe");
+  };
+  if (a.s) situationOk(a.s);
+  if (a.art === "drei" && stufeDrei(chance(a.s, a.e)) !== a.loesung) m.push("Stufe falsch");
+  if ((a.art === "fuenf" || a.art === "summeSkala") && stufeFuenf(chance(a.s, a.e)) !== a.loesung) m.push("Stufe falsch oder Grenzfall");
+  if (a.art === "vergleich") {
+    situationOk(a.A); situationOk(a.B);
+    const cA = chance(a.A, a.e), cB = chance(a.B, a.e);
+    const l = cA.k * cB.n === cB.k * cA.n ? "gleich" : cA.k * cB.n > cB.k * cA.n ? "A" : "B";
+    if (l !== a.loesung) m.push("Vergleich falsch");
+    if (l !== "gleich" && Math.abs(cA.k / cA.n - cB.k / cB.n) < 1 / 12 - 1e-9) m.push("zu knapp");
+    if (cA.k === 0 || cB.k === 0) m.push("Farbe fehlt");
+  }
+  if (a.art === "anteil" || a.art === "eintippen" || a.art === "summeAnteil") {
+    const c = chance(a.s, a.e);
+    if (c.k !== a.k || c.n !== a.n) m.push("Anteil falsch");
+    if (a.k === 0 || a.k === a.n) m.push("unmöglich oder sicher");
+  }
+  if (a.art === "anteil") {
+    const wert = o => o.split(" von ").map(Number);
+    const passt = a.optionen.filter(o => { const [x, y] = wert(o); return x * a.n === a.k * y; });
+    if (passt.length !== 1 || passt[0] !== a.richtig) m.push("nicht genau eine richtige Antwort");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+  }
+  if (a.art === "summeVergleich") {
+    const l = a.kA === a.kB ? "gleich" : a.kA > a.kB ? "A" : "B";
+    if (chance(a.s, a.eA).k !== a.kA || chance(a.s, a.eB).k !== a.kB || l !== a.loesung) m.push("Vergleich falsch");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const SVG = "http://www.w3.org/2000/svg";
+function svgEl(tag, attr = {}, text) {
+  const e = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  if (text != null) e.textContent = text;
+  return e;
+}
+const farbStil = f => `fill: var(${FARBEN[f].v})`;
+
+function bildSvg(viewBox, label, breit = false) {
+  return svgEl("svg", { class: `zufall-bild${breit ? " breit" : ""}`, viewBox, role: "img", "aria-label": label });
+}
+
+/** Würfel mit Fragezeichen: Welche Seite kommt? */
+function wuerfelSvg(augen = 5) {
+  const svg = bildSvg("0 0 120 120", "Würfel mit 1 bis 6 Augen");
+  svg.style.width = "min(110px, 30vw)";
+  svg.append(svgEl("rect", { class: "linie", x: 6, y: 6, width: 108, height: 108, rx: 18 }));
+  const pos = { 1: [[60, 60]], 2: [[34, 34], [86, 86]], 3: [[30, 30], [60, 60], [90, 90]], 4: [[34, 34], [86, 34], [34, 86], [86, 86]],
+    5: [[32, 32], [88, 32], [60, 60], [32, 88], [88, 88]], 6: [[34, 30], [86, 30], [34, 60], [86, 60], [34, 90], [86, 90]] }[augen];
+  for (const [x, y] of pos) svg.append(svgEl("circle", { class: "auge", cx: x, cy: y, r: 10 }));
+  return svg;
+}
+
+/** Glücksrad mit Zeiger oben; Sektoren in den Farben der Teile. */
+function radSvg(teile) {
+  const svg = bildSvg("0 0 220 236", `Glücksrad mit ${teile.length} gleich grossen Feldern`);
+  const c = 110, cy = 126, r = 100, n = teile.length;
+  teile.forEach((f, i) => {
+    const w0 = 2 * Math.PI * i / n - Math.PI / 2, w1 = 2 * Math.PI * (i + 1) / n - Math.PI / 2;
+    svg.append(svgEl("path", { class: "sektor", style: farbStil(f),
+      d: `M${c},${cy} L${(c + r * Math.cos(w0)).toFixed(1)},${(cy + r * Math.sin(w0)).toFixed(1)} A${r},${r} 0 0 1 ${(c + r * Math.cos(w1)).toFixed(1)},${(cy + r * Math.sin(w1)).toFixed(1)} Z` }));
+  });
+  svg.append(svgEl("circle", { class: "linie", cx: c, cy, r: 9 }));
+  svg.append(svgEl("path", { class: "linie", d: `M${c - 12},4 L${c + 12},4 L${c},30 Z` }));
+  return svg;
+}
+
+/** Säckchen mit Kugeln (durchsichtig gezeichnet, damit man zählen kann). */
+function sackSvg(teile) {
+  const n = teile.length, spalten = Math.min(4, Math.ceil(Math.sqrt(n))), zeilen = Math.ceil(n / spalten);
+  const svg = bildSvg("0 0 200 220", `Säckchen mit ${n} Kugeln`);
+  svg.append(svgEl("path", { class: "linie", d: "M70,30 L130,30 L122,50 C190,70 196,200 150,212 L50,212 C4,200 10,70 78,50 Z" }));
+  svg.append(svgEl("path", { class: "linie", d: "M64,26 L136,26", style: "stroke-width: 6" }));
+  const r = Math.min(18, 130 / spalten / 2 - 2);
+  teile.forEach((f, i) => {
+    const sp = i % spalten, ze = Math.floor(i / spalten);
+    svg.append(svgEl("circle", { class: "kugel", style: farbStil(f), r, cx: 100 + (sp - (spalten - 1) / 2) * (2 * r + 6), cy: 140 + (ze - (zeilen - 1) / 2) * (2 * r + 6) }));
+  });
+  return svg;
+}
+
+/** Karten 1 bis n, gemischt und verdeckt gezogen. */
+function kartenSvg(n) {
+  const spalten = Math.min(n, 5), zeilen = Math.ceil(n / spalten);
+  const svg = bildSvg(`0 0 ${spalten * 64 + 4} ${zeilen * 84 + 4}`, `Karten mit den Zahlen 1 bis ${n}`, true);
+  for (let i = 0; i < n; i++) {
+    const x = 4 + (i % spalten) * 64, y = 4 + Math.floor(i / spalten) * 84;
+    svg.append(svgEl("rect", { class: "karte-rand", x, y, width: 56, height: 76, rx: 8 }));
+    svg.append(svgEl("text", { class: "karte-zahl", x: x + 28, y: y + 48 }, String(i + 1)));
+  }
+  return svg;
+}
+
+function zweiWuerfelSvg() {
+  const box = el("div", { class: "situationen" }, wuerfelSvg(3), wuerfelSvg(4));
+  return box;
+}
+
+const BESCHRIEB = {
+  wuerfel: () => "Ein Würfel mit 1 bis 6 Augen",
+  rad: s => `Glücksrad mit ${s.n} gleich grossen Feldern`,
+  sack: s => `${s.n} Kugeln im Säckchen`,
+  karten: s => `${s.n} Karten, verdeckt gemischt`,
+};
+
+function situationEl(s, marke) {
+  const bild = s.ding === "wuerfel" ? wuerfelSvg() : s.ding === "rad" ? radSvg(s.teile) : s.ding === "sack" ? sackSvg(s.teile) : kartenSvg(s.n);
+  return el("div", { class: "situation" }, marke ? el("div", { class: "marke", text: marke }) : null, bild, el("div", { class: "beschrieb", text: BESCHRIEB[s.ding](s) }));
+}
+
+const chip = f => el("span", { class: "chip" }, el("i", { style: `background: var(${FARBEN[f].v})` }), FARBEN[f].name);
+
+/** Das Ereignis als Satzteile (Text und Farbchips). */
+function ereignisTeile(s, e) {
+  if (s.ding === "rad" || s.ding === "sack") {
+    const vor = s.ding === "rad" ? "Das Rad bleibt auf " : "Du ziehst blind eine Kugel. Sie ist ";
+    const nach = s.ding === "rad" ? " stehen." : ".";
+    if (e.art === "farbe") return [vor, chip(e.f), nach];
+    if (e.art === "nichtFarbe") return [vor, "nicht ", chip(e.f), nach];
+    return [vor, chip(e.f), " oder ", chip(e.g), nach];
+  }
+  if (s.ding === "summe") {
+    const t = { gleich: `${e.k}`, nicht: `nicht ${e.k}`, groesser: `grösser als ${e.k}`, kleiner: `kleiner als ${e.k}`, mindestens: `${e.k} oder mehr`,
+      hoechstens: `${e.k} oder weniger`, gerade: "gerade", ungerade: "ungerade" }[e.art];
+    return [`Die Augensumme ist ${t}.`];
+  }
+  const vor = s.ding === "wuerfel" ? "Du würfelst " : "Du ziehst ";
+  const zahl = s.ding === "wuerfel" ? "eine Zahl" : "eine Karte mit einer Zahl";
+  const t = {
+    gleich: s.ding === "wuerfel" ? `eine ${e.k}` : `die Karte ${e.k}`,
+    nicht: s.ding === "wuerfel" ? `keine ${e.k}` : `nicht die Karte ${e.k}`,
+    groesser: `${zahl} grösser als ${e.k}`, kleiner: `${zahl} kleiner als ${e.k}`,
+    mindestens: s.ding === "wuerfel" ? `${e.k} oder mehr` : `eine Karte mit ${e.k} oder mehr`,
+    hoechstens: s.ding === "wuerfel" ? `${e.k} oder weniger` : `eine Karte mit ${e.k} oder weniger`,
+    gerade: s.ding === "wuerfel" ? "eine gerade Zahl" : "eine Karte mit einer geraden Zahl", ungerade: s.ding === "wuerfel" ? "eine ungerade Zahl" : "eine Karte mit einer ungeraden Zahl",
+  }[e.art];
+  return [vor + t + "."];
+}
+
+const kurzText = (s, e) => ereignisTeile(s, e).map(t => (typeof t === "string" ? t : t.textContent)).join("");
+
+const HINWEIS_DREI = "Zähle: Bei wie vielen Möglichkeiten passiert es? Bei keiner, bei einigen oder bei allen?";
+const HINWEIS_FUENF = "Zähle die passenden Möglichkeiten und vergleiche mit allen: keine, wenige, etwa die Hälfte, fast alle oder alle?";
+const HINWEIS_ANTEIL = "Zähle zuerst alle Möglichkeiten: Das ist die zweite Zahl. Dann die passenden: Das ist die erste.";
+const HINWEIS_SUMME = "Denk an beide Würfel: erster und zweiter Würfel geben 36 Paare. Zähle die Paare, die passen.";
+
+/** Begründung „4 von 6 passen“. */
+const begruendung = ({ k, n }) => `${k} von ${n} ${k === 1 ? "passt" : "passen"}`;
+
+LS.spiel({
+  id: "zufalls-skala",
+  einleitung: "Würfel, Glücksrad, Säckchen und Karten: Was kommt heraus? Das weiss niemand genau — aber du kannst sagen, wie wahrscheinlich es ist!",
+  anzahl: 8,
+  stufen: {
+    s1: "Unmöglich, möglich oder sicher? Mit Würfel und Säckchen.",
+    s2: "Dazu Glücksrad und Karten.",
+    s3: "Die Skala mit fünf Stufen: von unmöglich bis sicher (Lehrplan 5. Klasse).",
+    s4: "Zwei Räder oder Säckchen: Wo ist die Chance grösser?",
+    s5: "Die Chance als Zahl: 3 von 10.",
+    s6: "Endgegner: Augensumme von zwei Würfeln.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+
+    if (a.art === "drei" || a.art === "fuenf" || a.art === "summeSkala") {
+      const fuenf = a.art !== "drei";
+      const c = chance(a.s, a.e);
+      const loesungText = `${STUFEN_TEXT[a.loesung].text}: ${begruendung(c)}`;
+      if (!fuenf) ctx.serie("antwort", a.loesung);
+      if (a.art !== "summeSkala") ctx.serie("ding", a.s.ding);
+      f.append(a.s.ding === "summe" ? zweiWuerfelSvg() : el("div", { class: "situationen" }, situationEl(a.s)),
+        el("div", { class: "frage" }, ...(a.s.ding === "summe" ? ["Du würfelst mit zwei Würfeln. ", ...ereignisTeile(a.s, a.e)] : ereignisTeile(a.s, a.e))));
+      const box = LS.auswahl(ctx, {
+        optionen: fuenf ? FUENF : DREI, richtig: a.loesung, loesung: loesungText, lob: `Genau: ${loesungText}`, breite: fuenf ? 110 : 140,
+        inhalt: w => (fuenf ? STUFEN_TEXT_FUENF : STUFEN_TEXT)[w],
+        hinweis: a.art === "summeSkala" ? HINWEIS_SUMME : fuenf ? HINWEIS_FUENF : HINWEIS_DREI,
+      });
+      if (fuenf) box.classList.add("skala");
+      if (ctx.nr === 0) ctx.sag(fuenf ? "Die Knöpfe sind wie eine Skala: links nie, rechts immer." : "Unmöglich heisst nie, sicher heisst immer, möglich heisst vielleicht.");
+
+    } else if (a.art === "vergleich") {
+      const cA = chance(a.A, a.e), cB = chance(a.B, a.e);
+      const loesungText = `A: ${cA.k} von ${cA.n}, B: ${cB.k} von ${cB.n} → ${a.loesung === "gleich" ? "gleich gross" : a.loesung}`;
+      ctx.serie("antwort", a.loesung);
+      f.append(el("div", { class: "situationen zwei" }, situationEl(a.A, "A"), situationEl(a.B, "B")),
+        el("div", { class: "frage" }, "Wo ist die Chance grösser auf ", chip(a.e.f), "?"));
+      LS.auswahl(ctx, {
+        optionen: ["A", "B", "gleich"], richtig: a.loesung, breite: 120, loesung: loesungText, lob: `Richtig! ${loesungText}`,
+        inhalt: w => (w === "gleich" ? { bild: "⚖️", text: "gleich gross" } : { text: w }),
+        hinweis: "Nicht nur die Anzahl zählt: Wie viele sind es jeweils von allen?",
+      });
+      if (ctx.nr === 0) ctx.sag("Achtung: Mehr Felder in einer Farbe heisst nicht immer mehr Chance!");
+
+    } else if (a.art === "anteil") {
+      const loesungText = `${a.richtig}`;
+      ctx.serie("ding", a.s.ding);
+      f.append(el("div", { class: "situationen" }, situationEl(a.s)),
+        el("div", { class: "frage" }, ...ereignisTeile(a.s, a.e), el("br"), "Wie gross ist die Chance?"));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 120, loesung: loesungText, lob: `Genau: ${a.richtig}`, hinweis: HINWEIS_ANTEIL });
+
+    } else if (a.art === "eintippen" || a.art === "summeAnteil") {
+      const loesungText = `${a.k} von ${a.n}`;
+      ctx.loesung(loesungText);
+      ctx.schritte(LS.tippSchritte(a.k));
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort" });
+      if (a.art === "summeAnteil") f.append(zweiWuerfelSvg(), el("div", { class: "frage" }, "Du würfelst mit zwei Würfeln. ", ...ereignisTeile(a.s, a.e)));
+      else { ctx.serie("ding", a.s.ding); f.append(el("div", { class: "situationen" }, situationEl(a.s)), el("div", { class: "frage" }, ...ereignisTeile(a.s, a.e))); }
+      f.append(el("div", { class: "zahl-zeile auftrag" }, el("span", { text: "Chance:" }), anzeige, el("span", { text: `von ${a.n}` })));
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: 2,
+        onOk(w) {
+          if (ctx.vorbei()) return;
+          if (w === a.k) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${loesungText}`); return; }
+          anzeige.classList.add("falsch");
+          ctx.falsch(a.art === "summeAnteil" ? HINWEIS_SUMME : "Zähle die Möglichkeiten, die passen — jede gleich wahrscheinliche zählt einmal.", loesungText);
+          if (ctx.vorbei()) tasten.gesperrt = true;
+        },
+      });
+      f.append(tasten.element);
+
+    } else if (a.art === "summeVergleich") {
+      const loesungText = `A: ${a.kA} von 36, B: ${a.kB} von 36 → ${a.loesung === "gleich" ? "gleich gross" : a.loesung}`;
+      ctx.serie("antwort", a.loesung);
+      f.append(zweiWuerfelSvg(), el("div", { class: "frage", text: "Du würfelst mit zwei Würfeln. Was ist wahrscheinlicher?" }),
+        el("div", { class: "auftrag", text: `A: ${kurzText(a.s, a.eA)}` }), el("div", { class: "auftrag", text: `B: ${kurzText(a.s, a.eB)}` }));
+      LS.auswahl(ctx, {
+        optionen: ["A", "B", "gleich"], richtig: a.loesung, breite: 120, loesung: loesungText, lob: `Richtig! ${loesungText}`,
+        inhalt: w => (w === "gleich" ? { bild: "⚖️", text: "gleich wahrscheinlich" } : { text: w }), hinweis: HINWEIS_SUMME,
+      });
+      if (ctx.nr === 0) ctx.sag("Mit zwei Würfeln gibt es 36 Paare. Manche Summen kommen öfter vor als andere!");
+    }
+  },
+});
+</script>
+</body>
+</html>

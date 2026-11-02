@@ -168,10 +168,12 @@ LS.spiel({
 
     if (s.zeit) {
       // kurz zeigen, dann zudecken; „Nochmal zeigen“ deckt wieder auf
+      // Erst wenn das Kind bereit ist: ▶ Los, 3-2-1 (LS.losGehts, Wunsch Patrik LERN_Session8)
       const zudecken = () => feld.classList.add("verdeckt");
-      let uhr = setTimeout(zudecken, s.zeit);
+      let uhr = null;
       ctx.flaeche.append(el("div", { class: "hoer-zeile" },
         el("button", { type: "button", class: "knopf hell", text: "👀 Nochmal zeigen", onclick: () => { feld.classList.remove("verdeckt"); clearTimeout(uhr); uhr = setTimeout(zudecken, s.zeit); } })));
+      LS.losGehts(ctx, feld, () => { uhr = setTimeout(zudecken, s.zeit); });
     }
 
     const hinweis = {
@@ -181,7 +183,8 @@ LS.spiel({
       gerade: "Gerade heisst: Jeder Punkt hat einen Partner. Bleibt einer allein, ist die Zahl ungerade.",
       stellen: "Eine Platte sind 100, eine Stange 10, ein Würfelchen 1. Zähle zuerst die grossen Teile.",
     }[a.art];
-    const name = { links: "Links", rechts: "Rechts", gleich: "Gleich viele" };
+    // Mit Pfeil, damit auch Kinder antworten können, die noch nicht lesen (LERN_Session8)
+    const name = { links: { bild: "⬅️", text: "Links" }, rechts: { bild: "➡️", text: "Rechts" }, gleich: { bild: "🟰", text: "Gleich viele" } };
     LS.auswahl(ctx, {
       optionen: a.optionen, richtig: a.richtig, breite: a.art === "vergleich" || a.art === "gerade" ? 130 : 90,
       inhalt: o => (typeof o === "number" ? zahlText(o) : name[o] || o),

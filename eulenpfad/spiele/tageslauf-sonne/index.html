@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tageslauf-Sonne</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .tl-ding { text-align: center; font-size: clamp(64px, 16vw, 92px); line-height: 1.1; margin: 0 0 8px; }
+  /* Sonnenbogen: SVG als Hintergrund, die Plätze sind Knöpfe darüber (Lage in Prozent der Fläche) */
+  .tl-himmel { position: relative; width: 100%; max-width: 460px; margin: 0 auto; aspect-ratio: 400 / 270; }
+  .tl-himmel svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .tl-platz { position: absolute; transform: translate(-50%, -50%); width: clamp(64px, 18vw, 84px); height: clamp(64px, 18vw, 84px);
+    border-radius: 50%; border: 4px solid #fff; background: rgba(255, 255, 255, .55); box-shadow: 0 4px 0 var(--rand);
+    font-size: clamp(34px, 9vw, 46px); line-height: 1; padding: 0; cursor: pointer; display: grid; place-items: center; }
+  .tl-platz.nacht { background: rgba(255, 255, 255, .2); }
+  .tl-platz.richtig { background: var(--gut-hell); border-color: var(--gut); }
+  .tl-platz.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .tl-platz.gewaehlt { opacity: .4; }
+  .tl-platz .tl-mit { position: absolute; right: -14px; top: -14px; font-size: 30px; }
+  /* Wochenplan: Kalenderblätter in einer Reihe */
+  .tl-woche { display: flex; justify-content: center; gap: 6px; margin: 30px auto 8px; max-width: 520px; }
+  .tl-tag { position: relative; flex: 1 1 0; min-width: 0; max-width: 92px; min-height: 96px; padding: 0 0 8px; border: 3px solid var(--rand);
+    border-radius: 12px; background: #fff; box-shadow: 0 4px 0 var(--rand); cursor: pointer; font: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px; overflow: visible; }
+  .tl-tag .tl-band { align-self: stretch; height: 14px; background: var(--deko-2); border-radius: 8px 8px 0 0; }
+  .tl-tag .tl-punkte { display: flex; gap: 2px; min-height: 8px; }
+  .tl-tag .tl-punkte i { width: 6px; height: 6px; border-radius: 50%; background: var(--text-leise); }
+  .tl-tag .tl-was { font-size: clamp(30px, 8vw, 42px); line-height: 1.1; }
+  .tl-tag.heute { border-color: var(--deko-4); border-width: 5px; }
+  .tl-tag .tl-sonne { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); font-size: 28px; }
+  .tl-tag.richtig { background: var(--gut-hell); border-color: var(--gut); }
+  .tl-tag.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .tl-tag.gewaehlt { opacity: .4; }
+  .tl-wahl .wahl-knopf { min-height: 80px; }
+  .tl-wahl .wahl-knopf .bild { font-size: clamp(40px, 10vw, 54px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🌞 Tageslauf-Sonne</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.A.2.a „Tagesverlauf in Morgen, Mittag, Nachmittag, Abend und Nacht einteilen,
+// Aktivitäten zuordnen“ (Stufen 1–4 und 6); NMG.9.1.a „morgen, heute, gestern; zeitliche Reihen
+// bilden“ (Stufen 3–6: Reihenfolge des Tages, gestern/heute/morgen). Basisklasse 1: s1 Kindergarten
+// (Tag oder Nacht), s2–s4 1. Klasse, s5 2. Klasse, s6 Königsstufe.
+// Der Tageslauf ist ein Bogen der Sonne: links geht sie auf (Morgen), oben ist Mittag, rechts geht
+// sie unter (Abend), unter dem Horizont ist Nacht.
+// Bezug: Der Jahreskreis-Ordner (Basisklasse 2) übt Wochentage, Monate und Jahreszeiten mit Wörtern;
+// hier gibt es keine Wochentagswörter — gestern, heute, morgen nur als Bildgeschichte.
+
+const { zufall, waehle, mische, el } = LS;
+const SVG = "http://www.w3.org/2000/svg";
+
+const REIHE = ["morgen", "mittag", "nachmittag", "abend", "nacht"];
+// Plätze auf dem Bogen in Prozent der Fläche (viewBox 400 × 270, Horizont bei y = 180, Radius 140)
+const ZEIT = {
+  morgen: { text: "am Morgen", name: "Morgen", x: 15.5, y: 57.8, bild: "☀️" },
+  mittag: { text: "am Mittag", name: "Mittag", x: 50, y: 14.8, bild: "☀️" },
+  nachmittag: { text: "am Nachmittag", name: "Nachmittag", x: 72.5, y: 27, bild: "☀️" },
+  abend: { text: "am Abend", name: "Abend", x: 84.5, y: 57.8, bild: "☀️" },
+  nacht: { text: "in der Nacht", name: "Nacht", x: 50, y: 84.4, bild: "🌙" },
+  tag: { text: "am Tag", name: "Tag", x: 50, y: 14.8, bild: "☀️" },
+};
+const TAG = ["morgen", "mittag", "nachmittag"]; // in Stufe 1: hell; der Abend ist dort weggelassen
+
+// Freigabe (Entscheid L4 a): nur Tätigkeiten aus freien Listen; die Aufsicht bekommt alle.
+const FREI = LS.spielListen("tageslauf-sonne").length ? LS.freieListen("tageslauf-sonne") : ["taetigkeiten"];
+const LISTE = FREI.includes("taetigkeiten") ? TAETIGKEITEN.map(([bild, satz, zeit]) => ({ bild, satz, zeit })) : [];
+const SATZ = Object.fromEntries(LISTE.map(t => [t.bild, t.satz]));
+const WAS = Object.fromEntries(WOCHENPLAN);
+
+// Je Stufe: Aufgabenarten und Antworten
+const STUFE = {
+  s1: { arten: ["zuordnen"], zeiten: ["tag", "nacht"] },
+  s2: { arten: ["zuordnen"], zeiten: ["morgen", "mittag", "abend", "nacht"] },
+  s3: { arten: ["zuordnen"], zeiten: REIHE },
+  s4: { arten: ["ordnen"], teile: 3 },
+  s5: { arten: ["tage"] },
+  s6: { arten: ["ordnen", "passtNicht"], teile: 4 },
+};
+const angeboten = stufe => stufe === "s5" || LISTE.length > 0;
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => angeboten(s)));
+
+const zeitIn = (t, stufe) => (stufe === "s1" ? (t.zeit === "nacht" ? "nacht" : TAG.includes(t.zeit) ? "tag" : null) : t.zeit);
+const TAGE = { "-2": "vorgestern", "-1": "gestern", "1": "morgen", "2": "übermorgen" };
+
+function aufgabeErzeugen(stufe) {
+  const s = STUFE[stufe];
+  const art = waehle(s.arten);
+  if (art === "zuordnen") {
+    // Stufe 1: zuerst Tag oder Nacht wählen, sonst kämen fast nur Tag-Bilder
+    const ziel = stufe === "s1" ? waehle(s.zeiten) : null;
+    const t = waehle(LISTE.filter(x => s.zeiten.includes(zeitIn(x, stufe)) && (!ziel || zeitIn(x, stufe) === ziel)));
+    return { art, bild: t.bild, satz: t.satz, richtig: zeitIn(t, stufe), optionen: s.zeiten };
+  }
+  if (art === "ordnen") {
+    const zeiten = mische(REIHE).slice(0, s.teile).sort((x, y) => REIHE.indexOf(x) - REIHE.indexOf(y));
+    const reihe = zeiten.map(z => waehle(LISTE.filter(t => t.zeit === z)).bild);
+    return { art, reihe, zeiten };
+  }
+  if (art === "passtNicht") {
+    const z = waehle(REIHE.filter(x => LISTE.filter(t => t.zeit === x).length >= 3));
+    const drei = mische(LISTE.filter(t => t.zeit === z)).slice(0, 3);
+    const andere = waehle(LISTE.filter(t => t.zeit !== z));
+    return { art, zeit: z, andereZeit: andere.zeit, richtig: andere.bild, optionen: mische([...drei.map(t => t.bild), andere.bild]) };
+  }
+  // tage: fünf Kalenderblätter, eines ist heute
+  const d = waehle([-1, 1, -1, 1, -2, 2]);
+  const heute = zufall(Math.max(0, -d), Math.min(4, 4 - d));
+  return { art, d, heute, richtig: heute + d, plan: mische(WOCHENPLAN.map(w => w[0])).slice(0, 5), wochentag: zufall(1, 3) };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const s = STUFE[stufe];
+  if (!s.arten.includes(a.art)) m.push("Aufgabenart gehört nicht in diese Stufe");
+  const t = b => LISTE.find(x => x.bild === b);
+  if (a.art === "zuordnen") {
+    if (!t(a.bild)) m.push("Bild nicht aus einer freien Liste");
+    else if (zeitIn(t(a.bild), stufe) !== a.richtig) m.push("Tageszeit stimmt nicht");
+    if (!a.optionen.includes(a.richtig)) m.push("Antwort nicht zur Wahl");
+    if (stufe === "s1" && t(a.bild)?.zeit === "abend") m.push("Abend in Stufe 1 (weder klar Tag noch Nacht)");
+  }
+  if (a.art === "ordnen") {
+    const z = a.reihe.map(b => t(b)?.zeit);
+    if (a.reihe.length !== s.teile || new Set(a.reihe).size !== a.reihe.length) m.push("falsche Zahl Bilder");
+    if (z.some((x, i) => i && REIHE.indexOf(x) <= REIHE.indexOf(z[i - 1]))) m.push("Reihenfolge nicht eindeutig");
+  }
+  if (a.art === "passtNicht") {
+    const z = a.optionen.map(b => t(b)?.zeit);
+    const anders = a.optionen.filter((b, i) => z.filter(x => x === z[i]).length === 1);
+    if (a.optionen.length !== 4 || new Set(a.optionen).size !== 4) m.push("nicht vier verschiedene Bilder");
+    if (anders.length !== 1 || anders[0] !== a.richtig || z.filter(x => x === a.zeit).length !== 3) m.push("nicht genau eines passt nicht");
+  }
+  if (a.art === "tage") {
+    if (!(a.heute >= 0 && a.heute <= 4 && a.richtig >= 0 && a.richtig <= 4 && a.richtig === a.heute + a.d)) m.push("Tag ausserhalb der Reihe");
+    if (new Set(a.plan).size !== 5 || a.plan.some(b => !WAS[b])) m.push("Wochenplan doppelt oder unbekannt");
+    if (a.wochentag + 4 > 7) m.push("Wochentage laufen über die Woche hinaus");
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+const svgEl = (tag, attr) => { const e = document.createElementNS(SVG, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); return e; };
+
+/** Himmel mit Sonnenbogen (Bild ohne Schrift). */
+function himmelSvg() {
+  const svg = svgEl("svg", { viewBox: "0 0 400 270", "aria-hidden": "true" });
+  svg.append(
+    svgEl("rect", { x: 0, y: 0, width: 400, height: 186, rx: 18, fill: "#dff1ff" }),
+    svgEl("ellipse", { cx: 30, cy: 175, rx: 110, ry: 70, fill: "#ffe3c4", opacity: ".8" }),   // Morgenrot
+    svgEl("ellipse", { cx: 370, cy: 175, rx: 110, ry: 70, fill: "#ffcfa3", opacity: ".8" }),  // Abendrot
+    svgEl("path", { d: "M60,180 A140,140 0 0 1 340,180", fill: "none", stroke: "#f5b301", "stroke-width": 5, "stroke-dasharray": "10 10" }),
+    svgEl("rect", { x: 0, y: 186, width: 400, height: 84, rx: 18, fill: "#26315f" }),         // Nacht unter dem Horizont
+    svgEl("path", { d: "M0,190 Q100,166 200,186 T400,184 L400,196 L0,196 Z", fill: "#7ccf6b" }),
+  );
+  for (const [x, y] of [[40, 222], [92, 246], [140, 214], [268, 216], [318, 248], [362, 224]]) svg.append(svgEl("circle", { cx: x, cy: y, r: 3, fill: "#fff" }));
+  return svg;
+}
+
+LS.spiel({
+  id: "tageslauf-sonne",
+  einleitung: "Die Sonne wandert über den Himmel: Am Morgen geht sie auf, am Abend geht sie unter. Was machst du wann?",
+  anzahl: 8,
+  stufen: nurMoegliche({
+    s1: "Tag oder Nacht? 🦉 ist in der Nacht wach.",
+    s2: "Morgen, Mittag, Abend oder Nacht: Wann isst du das Zmorge?",
+    s3: "Alle fünf Tageszeiten, auch der Nachmittag mit dem Zvieri.",
+    s4: "Drei Bilder in der Reihenfolge des Tages antippen: 🥣 → 🍝 → 🛌.",
+    s5: "Gestern, heute, morgen: Was machst du morgen? Die 🌞 zeigt heute.",
+    s6: "Endgegner: vier Bilder ordnen — oder welches Bild passt nicht?",
+  }),
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag({ s4: "Denk an deinen Tag: vom Aufstehen bis zum Schlafen.", s5: "Die Sonne zeigt dir, welcher Tag heute ist.",
+      s6: "Drück lange auf ein Bild, dann sage ich dir, was es ist." }[ctx.stufe] || "Schau, wo die Sonne steht: Am Morgen geht sie auf, am Abend geht sie unter.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    const f = ctx.flaeche;
+    if (ctx.stufe === "s1") ctx.serie("antwort", a.richtig);
+    if (ctx.stufe === "s6") ctx.serie("art", a.art);
+
+    if (a.art === "zuordnen") {
+      ctx.kennung(`${a.art}|${a.bild}`);
+      const loesung = `Das ist ${ZEIT[a.richtig].text}.`;
+      ctx.loesung(loesung);
+      ctx.schritte(1);
+      f.append(el("div", { class: "auftrag", text: `${a.satz} ${ctx.stufe === "s1" ? "Ist das am Tag oder in der Nacht?" : "Wann ist das?"}` }),
+        el("div", { class: "tl-ding", "aria-hidden": "true", text: a.bild }));
+      const himmel = el("div", { class: "tl-himmel" }, himmelSvg());
+      let fertig = false;
+      for (const z of a.optionen) {
+        const k = el("button", { type: "button", class: "tl-platz" + (z === "nacht" ? " nacht" : ""), "aria-label": ZEIT[z].text, text: ZEIT[z].bild });
+        k.style.left = `${ZEIT[z].x}%`;
+        k.style.top = `${ZEIT[z].y}%`;
+        k.addEventListener("click", () => {
+          if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+          if (z === a.richtig) {
+            fertig = true;
+            k.classList.add("richtig");
+            k.append(el("span", { class: "tl-mit", "aria-hidden": "true", text: a.bild }));
+            ctx.richtig();
+            return;
+          }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+          const hinweis = ctx.stufe === "s1" ? "Hör nochmal gut zu: Ist es dabei hell oder dunkel?"
+            : REIHE.indexOf(z) < REIHE.indexOf(a.richtig) ? "Das kommt später am Tag. Folge der Sonne weiter." : "Das kommt früher am Tag. Geh mit der Sonne zurück.";
+          ctx.falsch(hinweis, loesung);
+        });
+        himmel.append(k);
+      }
+      f.append(himmel);
+      return;
+    }
+
+    if (a.art === "ordnen") {
+      ctx.kennung(`${a.art}|${a.reihe.join("")}`);
+      f.append(el("div", { class: "auftrag", text: "Was machst du zuerst am Tag? Tipp die Bilder der Reihe nach an." }));
+      const { box } = LS.reihenfolge(ctx, {
+        reihe: a.reihe, inhalt: b => ({ bild: b }), ablage: b => b, pfeile: true, breite: 90,
+        hinweis: "Das kommt später am Tag. Welches Bild kommt vorher?",
+        loesung: a.reihe.map((b, i) => `${b} ${ZEIT[a.zeiten[i]].name}`).join(" → "),
+      });
+      box.classList.add("tl-wahl");
+      Array.from(box.querySelectorAll(".wahl-knopf")).forEach(k => k.setAttribute("aria-label", SATZ[k.textContent.trim()] || ""));
+      return;
+    }
+
+    if (a.art === "passtNicht") {
+      ctx.kennung(`${a.art}|${a.optionen.slice().sort().join("")}`);
+      f.append(el("div", { class: "auftrag", text: "Drei Bilder gehören zur gleichen Tageszeit. Welches passt nicht dazu?" }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90, inhalt: b => ({ bild: b }),
+        hinweis: "Drück lange auf jedes Bild und hör gut zu: Wann macht man das?",
+        loesung: `${a.richtig} passt nicht: Das ist ${ZEIT[a.andereZeit].text}, die anderen sind ${ZEIT[a.zeit].text}.`,
+      });
+      box.classList.add("tl-wahl");
+      Array.from(box.querySelectorAll(".wahl-knopf")).forEach((k, i) => k.setAttribute("aria-label", SATZ[a.optionen[i]]));
+      return;
+    }
+
+    // gestern, heute, morgen
+    ctx.serie("richtung", a.d > 0 ? "vor" : "zurueck");
+    ctx.kennung(`${a.art}|${a.d}|${a.heute}|${a.plan.join("")}`);
+    const wort = TAGE[a.d];
+    const ziel = a.plan[a.richtig];
+    const loesung = `${wort[0].toUpperCase()}${wort.slice(1)}: ${WAS[ziel]} ${ziel}.`;
+    ctx.loesung(loesung);
+    ctx.schritte(1);
+    const frage = a.d < 0 ? `Was hast du ${wort} gemacht?` : `Was machst du ${wort}?`;
+    f.append(el("div", { class: "auftrag", text: `Heute ist der Tag mit der Sonne. ${frage}` }));
+    const woche = el("div", { class: "tl-woche" });
+    let fertig = false;
+    a.plan.forEach((b, i) => {
+      const k = el("button", { type: "button", class: "tl-tag" + (i === a.heute ? " heute" : ""), "aria-label": `${i === a.heute ? "heute: " : ""}${WAS[b]}` },
+        el("span", { class: "tl-band" }),
+        el("span", { class: "tl-punkte" }, ...Array.from({ length: a.wochentag + i }, () => el("i"))),
+        el("span", { class: "tl-was", text: b }));
+      if (i === a.heute) k.append(el("span", { class: "tl-sonne", "aria-hidden": "true", text: "🌞" }));
+      k.addEventListener("click", () => {
+        if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+        if (i === a.richtig) { fertig = true; k.classList.add("richtig"); ctx.richtig(); return; }
+        k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+        ctx.falsch(a.d < 0 ? `${wort[0].toUpperCase()}${wort.slice(1)} ist schon vorbei. Die Tage gehen von links nach rechts — wo ist heute?`
+          : `${wort[0].toUpperCase()}${wort.slice(1)} kommt erst noch. Die Tage gehen von links nach rechts — wo ist heute?`, loesung);
+      });
+      woche.append(k);
+    });
+    f.append(woche);
+  },
+});
+</script>
+</body>
+</html>

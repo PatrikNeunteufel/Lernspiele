@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speicher-Leiter</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .rechnung { text-align: center; font-size: clamp(26px, 6.4vw, 46px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 6px 0 12px; }
+  .rechnung .einheit { color: var(--knopf); }
+  .sachtext { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 700; max-width: 640px; margin: 0 auto 10px; line-height: 1.35; }
+  .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
+  .ergebnis-zeile .anzeige { flex: 1; min-width: 0; }
+  .ergebnis-zeile .einheit { font-size: clamp(22px, 5vw, 34px); font-weight: 900; color: var(--knopf); min-width: 2.4em; }
+
+  .sl-leiter { display: flex; justify-content: center; align-items: flex-end; gap: 2px; margin: 0 auto 12px; flex-wrap: wrap; }
+  .sl-sprosse { display: flex; flex-direction: column; align-items: center; }
+  .sl-sprosse b { background: var(--f, var(--deko-2)); color: #fff; border-radius: 10px; padding: 6px 10px; font-size: 18px; }
+  .sl-pfeil { font-size: 13px; font-weight: 800; color: var(--text-leise); text-align: center; padding: 0 3px 8px; }
+
+  .zahl-ziffern { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 12px; margin: 4px auto 12px; max-width: 560px;
+    font-family: ui-monospace, Consolas, monospace; font-size: clamp(22px, 5.4vw, 32px); font-weight: 900; letter-spacing: 2px; }
+  .zahl-ziffern span { background: var(--karte); border: 2px solid var(--rand); border-radius: 8px; padding: 2px 6px; }
+  .sl-bild { text-align: center; font-size: clamp(40px, 9vw, 56px); margin: 0 0 4px; }
+  .wahl-knopf.sl-zeichen { font-size: clamp(30px, 7vw, 44px); font-weight: 900; }
+  .wahl-knopf { font-weight: 800; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>💾 Speicher-Leiter</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MI.2.3.f (Medien und Informatik, 2. Zyklus): Speicherarten und Grösseneinheiten;
+// MA.3.A.1.h (Grundanspruch 2. Zyklus): Referenzgrössen 1 bit, 1 Byte, 1 kB.
+// Basisklasse 5: s1 4. Klasse (Dinge nach Speicherplatz ordnen), s2 bit und Byte (8 bit = 1 Byte),
+// s3 Leiter kB, MB, GB ordnen und vergleichen, s4 umrechnen, s5 6. Klasse (passt es auf den Speicher?),
+// s6 Königsstufe (bit gegen Byte beim Herunterladen, Restplatz).
+// Annahme: Faktor 1000 zwischen kB, MB und GB (Dezimalvorsätze wie bei Metern), nicht 1024.
+// Kein anderes Spiel übt Speichergrössen; Umrechnen mit einer Leiter wie im Masse-Umwandler.
+
+const { zahlText, zufall, waehle, mische, el } = LS;
+
+// SACHANGABEN — ungefähre Grössen typischer Dinge, zu prüfen (Lehrmittel, Lehrperson). Sie werden
+// immer mit „ungefähr“ gezeigt. Byte als Zahl; Text so, wie das Kind ihn sieht.
+const DINGE = [
+  { bild: "🔤", name: "ein Buchstabe", byte: 1, text: "1 Byte" },
+  { bild: "💬", name: "eine SMS", byte: 140, text: "ungefähr 140 Byte" },
+  { bild: "📄", name: "eine Seite Text", byte: 2e3, text: "ungefähr 2 kB" },
+  { bild: "📕", name: "ein ganzes Buch, nur Text", byte: 5e5, text: "ungefähr 500 kB" },
+  { bild: "📷", name: "ein Handyfoto", byte: 3e6, text: "ungefähr 3 MB" },
+  { bild: "🎵", name: "ein Lied", byte: 4e6, text: "ungefähr 4 MB" },
+  { bild: "🎥", name: "ein Video von 1 Minute", byte: 1e8, text: "ungefähr 100 MB" },
+  { bild: "🍿", name: "ein ganzer Film", byte: 2e9, text: "ungefähr 2 GB" },
+];
+
+const BYTE = { Byte: 1, kB: 1e3, MB: 1e6, GB: 1e9 };
+const GROSS_NACH_KLEIN = ["GB", "MB", "kB", "Byte", "bit"];
+const ZAHLEN_LEITER = [1, 2, 3, 5, 8, 10, 20, 50, 100, 200, 250, 300, 500, 800, 1500, 2000, 2500, 3000, 4000, 5000];
+
+const STUFE = {
+  s1: { arten: ["ordnen", "groesser"], leiter: null },
+  s2: { arten: ["byteZuBit", "bitZuByte", "muster", "wort"], leiter: ["Byte", "bit"] },
+  s3: { arten: ["leiter", "vergleich"], leiter: ["GB", "MB", "kB"] },
+  s4: { arten: ["einfach", "einfach", "gemischt"], leiter: ["GB", "MB", "kB", "Byte"],
+    paare: [["MB", "kB"], ["GB", "MB"], ["kB", "Byte"], ["GB", "kB"], ["MB", "Byte"]], gemischt: [["GB", "MB"], ["MB", "kB"]] },
+  s5: { arten: ["anzahl", "passt"], leiter: ["GB", "MB"] },
+  // Königsstufe: Leiter erst nach dem ersten Fehler
+  s6: { arten: ["bit", "laden", "rest"], leiter: ["GB", "MB", "kB", "Byte", "bit"], spaet: true },
+};
+
+const KARTEN_GB = [1, 2, 4, 8, 16, 32, 64];
+const GROESSEN_MB = [2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 200, 250, 500];
+const dingeZu = s => (s < 10 ? waehle(["Fotos", "Lieder"]) : "Videos");
+const grText = (n, e) => `${zahlText(n)} ${e}`;
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(waehle(p.arten), p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "byteZuBit", v: 1, L: 8 };
+}
+
+/** Indizes in DINGE, je zwei mindestens Faktor 10 auseinander (sonst ist die Reihenfolge strittig). */
+function weitAuseinander(anzahl) {
+  const wahl = mische(DINGE.map((_, i) => i)).slice(0, anzahl).sort((x, y) => DINGE[x].byte - DINGE[y].byte);
+  for (let i = 1; i < wahl.length; i++) if (DINGE[wahl[i]].byte / DINGE[wahl[i - 1]].byte < 10) return null;
+  return wahl;
+}
+
+/** Zufällige Grösse für die Leiter: { n, e, kb } mit Wert in kB. */
+function leiterGroesse() {
+  const e = waehle(["kB", "MB", "GB"]);
+  const n = waehle(ZAHLEN_LEITER.filter(x => e === "GB" ? x <= 50 : true));
+  return { n, e, kb: n * BYTE[e] / 1000 };
+}
+
+function erzeuge(art, p) {
+  if (art === "ordnen") {
+    const reihe = weitAuseinander(3);
+    return reihe && { art, reihe };
+  }
+  if (art === "groesser") {
+    const paar = weitAuseinander(2);
+    return paar && { art, paar, frage: waehle(["mehr", "weniger"]) };
+  }
+  if (art === "byteZuBit") { const v = zufall(1, 20); return { art, v, L: v * 8 }; }
+  if (art === "bitZuByte") { const v = zufall(1, 20); return { art, v, L: v }; }
+  if (art === "muster") {
+    const n = zufall(1, 3);
+    const bits = Array.from({ length: n * 8 }, () => (Math.random() < 0.5 ? "0" : "1")).join("");
+    const frage = waehle(["bit", "Byte"]);
+    return { art, bits, frage, L: frage === "bit" ? n * 8 : n };
+  }
+  if (art === "wort") { const n = zufall(3, 12); return { art, n, L: n * 8 }; }
+  if (art === "leiter") {
+    const teile = [leiterGroesse(), leiterGroesse(), leiterGroesse(), leiterGroesse()];
+    if (new Set(teile.map(t => t.kb)).size < 4) return null;
+    // mindestens eine Falle: die grössere Zahl ist die kleinere Grösse
+    if (!teile.some(x => teile.some(y => x.n > y.n && x.kb < y.kb))) return null;
+    return { art, reihe: teile.sort((x, y) => x.kb - y.kb).map(t => grText(t.n, t.e)), kb: teile.map(t => t.kb) };
+  }
+  if (art === "vergleich") {
+    const antwort = waehle(["<", "=", ">"]);
+    let l, r;
+    if (antwort === "=") {
+      const klein = waehle(["kB", "MB"]), gross = klein === "kB" ? "MB" : "GB";
+      const v = zufall(1, 9);
+      [l, r] = mische([{ n: v, e: gross }, { n: v * 1000, e: klein }]);
+    } else {
+      l = leiterGroesse(); r = leiterGroesse();
+      if (l.e === r.e) return null;
+    }
+    const lk = l.n * BYTE[l.e], rk = r.n * BYTE[r.e];
+    if ((lk < rk ? "<" : lk > rk ? ">" : "=") !== antwort) return null;
+    return { art, l: [l.n, l.e], r: [r.n, r.e], antwort };
+  }
+  if (art === "einfach") {
+    const [gross, klein] = waehle(p.paare);
+    const f = BYTE[gross] / BYTE[klein];
+    const v = zufall(1, f > 1000 ? 9 : 50);
+    return Math.random() < 0.5
+      ? { art, links: [[v, gross]], ziel: klein, L: v * f, richtung: "gross→klein" }
+      : { art, links: [[v * f, klein]], ziel: gross, L: v, richtung: "klein→gross" };
+  }
+  if (art === "gemischt") {
+    const [gross, klein] = waehle(p.gemischt);
+    const g = zufall(1, 9), b = waehle([zufall(1, 99), zufall(100, 999)]);
+    return { art, links: [[g, gross], [b, klein]], ziel: klein, L: g * 1000 + b };
+  }
+  if (art === "anzahl") {
+    const c = waehle(KARTEN_GB), s = waehle(GROESSEN_MB);
+    if ((c * 1000) % s !== 0) return null;
+    return { art, c, s, dinge: dingeZu(s), L: c * 1000 / s };
+  }
+  if (art === "passt") {
+    const c = waehle(KARTEN_GB), s = waehle(GROESSEN_MB);
+    const genau = c * 1000 / s;
+    const n = Math.round(genau * waehle([0.5, 0.7, 0.8, 0.9, 1.1, 1.2, 1.5, 2]));
+    if (n < 2 || n * s === c * 1000) return null;
+    return { art, c, s, n, dinge: dingeZu(s), antwort: n * s <= c * 1000 ? "ja" : "nein" };
+  }
+  if (art === "bit") {
+    const e = waehle(["kB", "MB"]), v = zufall(1, 9);
+    const proBit = BYTE[e] * 8;
+    return Math.random() < 0.5
+      ? { art, links: [[v, e]], ziel: "bit", L: v * proBit, richtung: "gross→klein" }
+      : { art, links: [[v * proBit, "bit"]], ziel: e, L: v, richtung: "klein→gross" };
+  }
+  if (art === "laden") {
+    // Leitung in Megabit pro Sekunde, Datei in Megabyte: zuerst ×8
+    const r = waehle([2, 4, 5, 8, 10, 16, 20, 40, 50, 80, 100]), m = zufall(1, 60);
+    if ((m * 8) % r !== 0) return null;
+    const t = m * 8 / r;
+    if (t < 2 || t > 600) return null;
+    return { art, r, m, ding: waehle(["ein Lied", "ein Hörspiel", "ein Spiel", "eine App"]), L: t };
+  }
+  if (art === "rest") {
+    const c = waehle([4, 8, 16, 32, 64]);
+    const g = zufall(1, c - 1), h = zufall(1, 9) * 100;
+    const frei = c * 1000 - g * 1000 - h;
+    const s = waehle([100, 200, 250, 300, 400, 500, 700, 750, 800, 1500, 2000]);
+    const L = Math.floor(frei / s);
+    if (L < 1 || L > 300) return null;
+    return { art, c, g, h, s, L };
+  }
+  return null;
+}
+
+/** Mängel: Lösung nachgerechnet, genau eine richtige Reihenfolge, keine doppelten Teile. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const inByte = ([n, e]) => (e === "bit" ? n / 8 : n * BYTE[e]);
+  switch (a.art) {
+    case "ordnen":
+      for (let i = 1; i < a.reihe.length; i++) if (DINGE[a.reihe[i]].byte < DINGE[a.reihe[i - 1]].byte * 10) m.push("zwei Dinge zu nah beieinander");
+      if (new Set(a.reihe).size !== a.reihe.length) m.push("doppeltes Ding");
+      break;
+    case "groesser":
+      if (DINGE[a.paar[1]].byte < DINGE[a.paar[0]].byte * 10) m.push("Paar nicht klar verschieden");
+      break;
+    case "byteZuBit": case "wort": if (a.L !== (a.v ?? a.n) * 8) m.push("bit falsch"); break;
+    case "bitZuByte": if (a.L !== a.v) m.push("Byte falsch"); break;
+    case "muster": {
+      if (!/^[01]+$/.test(a.bits) || a.bits.length % 8) m.push("Muster kein ganzes Byte");
+      if (a.L !== (a.frage === "bit" ? a.bits.length : a.bits.length / 8)) m.push("Anzahl falsch");
+      break;
+    }
+    case "leiter": {
+      const werte = a.reihe.map(t => { const [n, e] = t.split(" "); return Number(n.replace(/\D/g, "")) * BYTE[e]; });
+      if (new Set(werte).size !== werte.length) m.push("gleich grosse Werte");
+      if (werte.some((w, i) => i && w <= werte[i - 1])) m.push("Reihe nicht aufsteigend");
+      if (new Set(a.reihe).size !== a.reihe.length) m.push("doppelter Text");
+      break;
+    }
+    case "vergleich": {
+      const l = inByte(a.l), r = inByte(a.r);
+      if ((l < r ? "<" : l > r ? ">" : "=") !== a.antwort) m.push("Vergleich falsch");
+      if (a.l[1] === a.r[1]) m.push("gleiche Einheit — zu einfach");
+      break;
+    }
+    case "einfach": case "gemischt": case "bit": {
+      const soll = a.links.reduce((s, t) => s + inByte(t), 0) / (a.ziel === "bit" ? 1 / 8 : BYTE[a.ziel]);
+      if (Math.abs(soll - a.L) > 1e-9) m.push(`Lösung stimmt nicht (nachgerechnet ${soll})`);
+      if (a.art === "gemischt" && a.links[1][0] >= 1000) m.push("zweiter Teil schon eine ganze grosse Einheit");
+      break;
+    }
+    case "anzahl": if (a.L * a.s !== a.c * 1000) m.push("Anzahl falsch"); break;
+    case "passt": if ((a.n * a.s <= a.c * 1000 ? "ja" : "nein") !== a.antwort) m.push("ja/nein falsch"); break;
+    case "laden": if (a.L * a.r !== a.m * 8) m.push("Ladezeit falsch"); break;
+    case "rest": {
+      const frei = a.c * 1000 - a.g * 1000 - a.h;
+      if (!(frei > 0) || a.L !== Math.floor(frei / a.s)) m.push("Restplatz falsch");
+      break;
+    }
+    default: m.push("unbekannte Art");
+  }
+  if (a.L !== undefined && !(Number.isInteger(a.L) && a.L > 0 && String(a.L).length <= 9)) m.push("Lösung keine passende ganze Zahl");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Leiter der Einheiten (gross nach klein) mit „×1000 →“ bzw. „×8 →“ dazwischen. */
+function leiter(einheiten) {
+  const box = el("div", { class: "sl-leiter", "aria-label": "Leiter der Speichergrössen" });
+  einheiten.forEach((e, i) => {
+    if (i) box.append(el("div", { class: "sl-pfeil", html: `${e === "bit" ? "×8" : "×1000"}<br>→` }));
+    box.append(el("div", { class: "sl-sprosse", style: `--f: var(--deko-${GROSS_NACH_KLEIN.indexOf(e) + 1})` }, el("b", { text: e })));
+  });
+  return box;
+}
+
+const dingText = i => `${DINGE[i].bild} ${DINGE[i].name}: ${DINGE[i].text}`;
+
+LS.spiel({
+  id: "speicher-leiter",
+  einleitung: "Ein Buchstabe, ein Foto, ein Film — alles braucht Speicherplatz. Klettere die Speicher-Leiter hinauf: bit, Byte, kB, MB, GB!",
+  anzahl: 8,
+  stufen: {
+    s1: "Was braucht mehr Platz? Buchstabe, SMS, Foto, Film ordnen.",
+    s2: "bit und Byte: 8 bit = 1 Byte.",
+    s3: "Die Leiter kB, MB, GB: 1 MB = 1000 kB — ordnen und vergleichen.",
+    s4: "Umrechnen: 3 MB = 3000 kB, 2 GB 50 MB = 2050 MB.",
+    s5: "Passt es auf den Speicher? 32 GB, Fotos zu 4 MB (6. Klasse).",
+    s6: "Endgegner: Herunterladen in bit pro Sekunde, Restplatz — Leiter erst beim Fehler.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s1" ? "Ein Film braucht viel mehr Platz als ein Foto." : ctx.stufe === "s2" ? "Ein bit ist eine einzige 0 oder 1." : "Eine Sprosse auf der Leiter ist ×1000.");
+    if (a.richtung) ctx.serie("richtung", a.richtung);
+    const hilfeOrt = el("div");
+    f.append(hilfeOrt);
+    if (p.leiter && !p.spaet) hilfeOrt.append(leiter(p.leiter));
+    const leiterNachFehler = () => { if (p.leiter && !hilfeOrt.firstChild) hilfeOrt.append(leiter(p.leiter)); };
+
+    if (a.art === "ordnen") {
+      f.append(el("div", { class: "frage", html: "Tippe von <b>wenig</b> zu <b>viel</b> Speicherplatz." }));
+      LS.reihenfolge(ctx, {
+        reihe: a.reihe, pfeile: true, breite: 150,
+        inhalt: i => ({ bild: DINGE[i].bild, text: DINGE[i].name }),
+        ablage: i => DINGE[i].bild,
+        hinweis: "Nimm immer das, was von den übrigen am wenigsten Platz braucht. Text braucht wenig, Bilder mehr, bewegte Bilder am meisten.",
+        loesung: a.reihe.map(i => DINGE[i].name).join(" → "),
+        lob: a.reihe.map(dingText).join(" · "),
+      });
+      return;
+    }
+    if (a.art === "groesser") {
+      ctx.serie("frage", a.frage);
+      const richtig = a.frage === "mehr" ? a.paar[1] : a.paar[0];
+      f.append(el("div", { class: "frage", html: `Was braucht <b>${a.frage}</b> Speicherplatz?` }));
+      LS.auswahl(ctx, {
+        optionen: mische(a.paar), richtig, breite: 150,
+        inhalt: i => ({ bild: DINGE[i].bild, text: DINGE[i].name }),
+        hinweis: "Text braucht wenig Platz, Bilder mehr, Ton und bewegte Bilder am meisten.",
+        loesung: `${DINGE[richtig].name} (${DINGE[richtig].text})`,
+        lob: a.paar.map(dingText).join(" · "),
+      });
+      return;
+    }
+    if (a.art === "leiter") {
+      f.append(el("div", { class: "frage", html: "Tippe von <b>klein</b> nach <b>gross</b>." }));
+      LS.reihenfolge(ctx, {
+        reihe: a.reihe, pfeile: true, breite: 120,
+        hinweis: "Schau zuerst auf die Einheit: kB ist kleiner als MB, MB kleiner als GB. Eine Sprosse auf der Leiter ist ×1000.",
+        loesung: a.reihe.join(" < "),
+      });
+      return;
+    }
+    if (a.art === "vergleich") {
+      ctx.serie("antwort", a.antwort);
+      const l = grText(...a.l), r = grText(...a.r);
+      f.append(el("div", { class: "frage", html: "<b>&lt;, = oder &gt;?</b>" }),
+        el("div", { class: "rechnung", html: `${l} <span class="einheit">?</span> ${r}` }));
+      LS.auswahl(ctx, {
+        optionen: ["<", "=", ">"], richtig: a.antwort, breite: 90,
+        hinweis: "Rechne beide in dieselbe Einheit um. Eine Sprosse auf der Leiter ist ×1000.",
+        loesung: `${l} ${a.antwort} ${r}`,
+      });
+      f.querySelectorAll(".wahl-knopf").forEach(k => k.classList.add("sl-zeichen"));
+      return;
+    }
+    if (a.art === "passt") {
+      ctx.serie("antwort", a.antwort);
+      const loesung = `${zahlText(a.c)} GB = ${zahlText(a.c * 1000)} MB; ${zahlText(a.n)} · ${a.s} MB = ${zahlText(a.n * a.s)} MB — ${a.antwort === "ja" ? "es passt" : "zu viel"}`;
+      f.append(el("div", { class: "sl-bild", text: "💾" }),
+        el("div", { class: "sachtext", text: `Eine Speicherkarte hat ${zahlText(a.c)} GB. Passen ${zahlText(a.n)} ${a.dinge} zu je ${a.s} MB darauf?` }));
+      LS.auswahl(ctx, {
+        optionen: ["ja", "nein"], richtig: a.antwort, breite: 140,
+        inhalt: o => (o === "ja" ? { bild: "✅", text: "passt" } : { bild: "❌", text: "zu viel" }),
+        hinweis: "Rechne die Karte zuerst in MB um: 1 GB = 1000 MB. Wie viel brauchen alle zusammen?",
+        loesung,
+      });
+      return;
+    }
+
+    // Eingabe über die Zifferntastatur
+    let loesung, frageEl, ziel, hinweis;
+    if (a.art === "byteZuBit" || a.art === "bitZuByte") {
+      const links = a.art === "byteZuBit" ? grText(a.v, "Byte") : grText(a.v * 8, "bit");
+      ziel = a.art === "byteZuBit" ? "bit" : "Byte";
+      loesung = `${links} = ${zahlText(a.L)} ${ziel}`;
+      frageEl = el("div", { class: "rechnung", html: `${links} = <span class="einheit">? ${ziel}</span>` });
+      hinweis = "8 bit sind 1 Byte.";
+    } else if (a.art === "muster") {
+      ziel = a.frage;
+      const gruppen = a.bits.match(/.{4}/g);
+      loesung = `${a.bits.length} Stellen = ${a.L} ${ziel}`;
+      frageEl = el("div", {},
+        el("div", { class: "frage", html: `Jede Stelle (0 oder 1) ist 1 bit. Wie viele <b>${ziel}</b> sind das?` }),
+        el("div", { class: "zahl-ziffern", "aria-label": "Nullen und Einsen" }, ...gruppen.map(g => el("span", { text: g }))));
+      hinweis = ziel === "bit" ? "Zähle alle Nullen und Einsen. Ein Kästchen hat 4." : "Zähle die Stellen. Immer 8 bit sind 1 Byte.";
+    } else if (a.art === "wort") {
+      ziel = "bit";
+      loesung = `${a.n} Byte = ${zahlText(a.L)} bit`;
+      frageEl = el("div", { class: "sachtext", text: `Ein Wort hat ${a.n} Buchstaben. Jeder Buchstabe braucht 1 Byte. Wie viele bit braucht das Wort?` });
+      hinweis = "Wie viele Byte sind es? Und jedes Byte hat 8 bit.";
+    } else if (a.art === "einfach" || a.art === "gemischt" || a.art === "bit") {
+      ziel = a.ziel;
+      const links = a.links.map(t => grText(...t)).join(" ");
+      loesung = `${links} = ${zahlText(a.L)} ${ziel}`;
+      frageEl = el("div", { class: "rechnung", html: `${links} = <span class="einheit">? ${ziel}</span>` });
+      hinweis = a.art === "gemischt" ? `Rechne zuerst ${grText(...a.links[0])} in ${ziel} um und zähle ${grText(...a.links[1])} dazu.`
+        : a.art === "bit" ? "Geh die Leiter Sprosse für Sprosse: ×1000 bis zum Byte, dann ×8 bis zum bit."
+        : "Eine Sprosse auf der Leiter ist ×1000. Von gross nach klein wird die Zahl grösser.";
+    } else if (a.art === "anzahl") {
+      ziel = a.dinge;
+      loesung = `${zahlText(a.c)} GB = ${zahlText(a.c * 1000)} MB; ${zahlText(a.c * 1000)} : ${a.s} = ${zahlText(a.L)}`;
+      frageEl = el("div", {}, el("div", { class: "sl-bild", text: "💾" }),
+        el("div", { class: "sachtext", text: `Eine Speicherkarte hat ${zahlText(a.c)} GB. Wie viele ${a.dinge} zu je ${a.s} MB passen darauf?` }));
+      hinweis = "Rechne die Karte zuerst in MB um: 1 GB = 1000 MB. Dann teilen.";
+    } else if (a.art === "laden") {
+      ziel = "s";
+      loesung = `${a.m} MB = ${a.m * 8} Mbit; ${a.m * 8} : ${a.r} = ${zahlText(a.L)} s`;
+      frageEl = el("div", {}, el("div", { class: "sl-bild", text: "📶" }),
+        el("div", { class: "sachtext", text: `Die Internetleitung schafft ${a.r} Mbit (Megabit) pro Sekunde. Wie viele Sekunden dauert es, ${a.ding} mit ${a.m} MB (Megabyte) zu laden?` }));
+      hinweis = "Achtung: Die Leitung rechnet in bit, die Datei in Byte. 1 Byte = 8 bit.";
+    } else {
+      ziel = "Videos";
+      const frei = a.c * 1000 - a.g * 1000 - a.h;
+      loesung = `frei: ${zahlText(a.c * 1000)} MB − ${zahlText(a.g * 1000 + a.h)} MB = ${zahlText(frei)} MB; ${zahlText(frei)} : ${a.s} = ${zahlText(a.L)}`;
+      frageEl = el("div", {}, el("div", { class: "sl-bild", text: "📱" }),
+        el("div", { class: "sachtext", text: `Das Tablet hat ${a.c} GB Speicher. ${a.g} GB ${a.h} MB sind schon belegt. Wie viele Videos zu je ${zahlText(a.s)} MB passen noch darauf?` }));
+      hinweis = "Wie viel ist noch frei? Rechne alles in MB. Nur ganze Videos zählen.";
+    }
+    f.append(frageEl);
+    ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(a.L));
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": `Antwort in ${ziel}` });
+    f.append(el("div", { class: "ergebnis-zeile" }, anzeige, el("span", { class: "einheit", text: ziel })));
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: 9,
+      onOk(w) {
+        if (w === a.L) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+        anzeige.classList.add("falsch");
+        leiterNachFehler();
+        let h = hinweis;
+        if (a.art === "laden" && w * a.r === a.m) h = "Fast — aber die Datei ist in Byte, die Leitung in bit. 1 Byte = 8 bit.";
+        ctx.falsch(h, loesung);
+        if (ctx.vorbei()) tasten.gesperrt = true;
+      },
+    });
+    f.append(tasten.element);
+  },
+});
+</script>
+</body>
+</html>

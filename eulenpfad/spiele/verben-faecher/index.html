@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verben-Fächer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .regelkarte { background: #fff8e1; border: 3px dashed #f5c451; border-radius: 16px; padding: 8px 14px; font-size: 16px; margin: 0 auto 14px; max-width: 700px; }
+  .regelkarte b { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: #a0703d; }
+
+  /* Der Fächer: Fragen als Blätter über dem Griff mit dem Verb. */
+  /* Innenabstand: die äusseren Blätter sind gedreht und ragen sonst auf dem Handy über den Rand */
+  .vf-faecher { display: flex; justify-content: center; align-items: flex-end; gap: 6px; margin: 18px auto 0; max-width: 560px; padding: 0 14px; box-sizing: border-box; }
+  .vf-blatt { font: inherit; font-size: clamp(14px, 3.6vw, 19px); font-weight: 800; line-height: 1.15; min-width: 0; max-width: 104px; flex: 1 1 0;
+    min-height: 92px; padding: 10px 4px; border: 3px solid var(--rand); border-radius: 50% 50% 12px 12px / 30% 30% 12px 12px; background: #fff;
+    color: var(--text); cursor: pointer; transform-origin: 50% 160%; box-shadow: 0 4px 0 var(--rand); }
+  .vf-blatt.gewaehlt { background: #ffe9c7; border-color: var(--deko-6); box-shadow: 0 4px 0 var(--deko-6); }
+  .vf-blatt.richtig { background: var(--gut-hell); border-color: var(--gut); }
+  .vf-griff { display: block; width: max-content; max-width: 100%; margin: -4px auto 16px; padding: 8px 26px; border-radius: 0 0 30px 30px;
+    background: var(--deko-6); color: #fff; font-size: clamp(24px, 6vw, 34px); font-weight: 900; position: relative; z-index: 1; }
+  .vf-zeile { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+
+  /* Satz mit Lücken; unter jeder Lücke steht ihre Frage. */
+  .satz { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 8px 10px; max-width: 760px; margin: 0 auto 14px;
+    font-size: clamp(19px, 4.6vw, 28px); font-weight: 800; line-height: 1.2; }
+  .satz .vf-verb { padding: 6px 4px; color: var(--deko-6); }
+  .satz .vf-luecke { display: inline-flex; flex-direction: column; align-items: center; min-width: 90px; padding: 4px 8px; border-bottom: 4px solid var(--rand); }
+  .satz .vf-luecke small { font-size: 13px; color: var(--text-leise); font-weight: 800; }
+  .satz .vf-luecke span { min-height: 1.2em; }
+  .satz .vf-luecke.dran { border-color: var(--knopf); background: #eef4ff; border-radius: 8px 8px 0 0; }
+  .satz .vf-luecke.dran small { color: var(--knopf); }
+  .satz .vf-luecke.voll { border-color: var(--gut); }
+  .vf-zeit { text-align: center; font-size: 16px; font-weight: 800; color: var(--deko-6); margin: -4px 0 8px; }
+  .vf-karten { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 0 auto 8px; max-width: 640px; }
+  .vf-karte { font: inherit; font-size: clamp(17px, 4.2vw, 22px); font-weight: 800; min-height: 56px; padding: 6px 14px; border: none; border-radius: 14px;
+    background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand), 0 7px 14px rgba(45, 48, 71, .1); cursor: pointer; }
+  .vf-karte.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+
+  /* Stufe 1 und 5: Wörter im Satz antippen */
+  .satz .vf-wort { font: inherit; color: var(--text); cursor: pointer; padding: 2px 8px; border: 2px solid var(--rand); border-radius: 10px; background: #fff;
+    box-shadow: 0 3px 0 var(--rand); }
+  .satz .vf-wort.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .satz .vf-wort.richtig { background: var(--gut-hell); border-color: var(--gut); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🪭 Verben-Fächer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.5.D.1.c (Grundanspruch 2. Zyklus): Verbenfächer; Infinitiv, Personalform; Präsens,
+// Präteritum, Perfekt. Basisklasse 5. s1 4. Klasse (D.5.D.1.b sinngemäss: das Verb im Satz finden),
+// s2 Fächer mit Wer oder was? und Wen oder was?, s3 dazu Wem?, s4 dazu Wo? und Wohin?, mit einer
+// falschen Wortkarte, s5 6. Klasse: Personalform und Infinitiv im Präsens, Präteritum und Perfekt,
+// s6 Königsstufe: alle fünf Fragen, Satz in einer Zeitform, zwei falsche Wortkarten, knappe Hinweise.
+// Auf jeden Fächer folgt ein Satz aus Wortkarten: Das Kind ordnet jeder Frage ihre Antwort zu —
+// Vorbereitung auf die Satzglieder (Subjekt, Objekte, Ortsangabe).
+// Bezug: Der Wortarten-Sortierer bestimmt die Wortart eines Worts (auch im Satz); hier ist das Verb
+// gegeben, und es geht um seine Ergänzungen. Die Zeitreise-Verben bilden Zeitformen; hier werden in
+// einer Zeitform nur Personalform und Infinitiv bestimmt, keine Formen gebildet.
+// Inhalte nur aus woerter.js und nur aus freien Listen (LS.freieListen).
+
+const { waehle, mische, el } = LS;
+const ID = "verben-faecher";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : Object.keys(VERBEN_LISTEN));
+
+const FRAGEN = { wer: "Wer oder was?", wen: "Wen oder was?", wem: "Wem?", wo: "Wo?", wohin: "Wohin?" };
+const REIHE = ["wer", "wen", "wem", "wo", "wohin"];
+const ZEITEN = { praesens: "Präsens", praeteritum: "Präteritum", perfekt: "Perfekt" };
+
+/** Eintrag → { inf, formen, teile: [{ frage, text }], verb, fragen: ["wer", …] }; teile ohne das Verb. */
+function zerlegeVerb([inf, formen, satz]) {
+  const [praesens, praeteritum, perfekt] = formen.split("|");
+  const stuecke = satz.replace(/\.$/, "").split(/(\[[^\]]+\])/).map(s => s.trim()).filter(Boolean);
+  const teile = [];
+  let verb = null;
+  for (const s of stuecke) {
+    const m = s.match(/^\[(\w+):([^\]]+)\]$/);
+    if (m) teile.push({ frage: m[1], text: m[2] });
+    else verb = s;
+  }
+  const fragen = REIHE.filter(q => teile.some(t => t.frage === q));
+  return { inf, satz, praesens, praeteritum, perfekt: perfekt || "", teile, verb, fragen, schluessel: fragen.join("+") };
+}
+
+const VERBEN = FREI.has("verben") ? VERBEN_LISTEN.verben.map(zerlegeVerb) : [];
+const nurMit = erlaubt => VERBEN.filter(v => v.fragen.every(q => erlaubt.includes(q)));
+const mitOrt = v => v.fragen.includes("wo") || v.fragen.includes("wohin");
+
+/** Satz in einer Zeitform als Folge: { text, frage } für Ergänzungen, { text, verb: "fin" | "inf" } für das Verb. */
+function satzIn(v, zeit) {
+  const [wer, ...rest] = v.teile;
+  if (zeit === "perfekt") {
+    const [hilfs, partizip] = v.perfekt.split(" ");
+    return [wer, { text: hilfs, verb: "fin" }, ...rest, { text: partizip, verb: "inf" }];
+  }
+  return [wer, { text: zeit === "praeteritum" ? v.praeteritum : v.praesens, verb: "fin" }, ...rest];
+}
+const satzText = folge => `${folge.map(t => t.text).join(" ")}.`;
+const zeitenVon = v => Object.keys(ZEITEN).filter(z => z !== "perfekt" || v.perfekt);
+
+// Falsche Wortkarten: Antworten auf Wem?, Wo? oder Wohin? aus anderen Sätzen — Fragen, die dieses Verb
+// nicht braucht. (Wen oder was? nicht: das Velo kann auch Wer oder was? beantworten.)
+function ablenker(v, n) {
+  if (!n) return [];
+  const eigene = new Set(v.teile.map(t => t.text.toLowerCase()));
+  const pool = [...new Set(VERBEN.flatMap(w => w.teile).filter(t => ["wem", "wo", "wohin"].includes(t.frage) && !v.fragen.includes(t.frage)).map(t => t.text))]
+    .filter(t => !eigene.has(t.toLowerCase()));
+  return mische(pool).slice(0, n);
+}
+
+// Je Stufe: Aufgabenart, angebotene Fragen, Verben, Gewicht der Ortsverben, falsche Karten, Zeitform, Regel, knapp.
+const STUFE = {
+  s1: { art: "finden", verben: () => VERBEN },
+  s2: { art: "faecher", angebot: ["wer", "wen"], verben: () => nurMit(["wer", "wen"]), karte: "fragen" },
+  s3: { art: "faecher", angebot: ["wer", "wen", "wem"], verben: () => nurMit(["wer", "wen", "wem"]), mitWem: 0.6, karte: "fragen" },
+  s4: { art: "faecher", angebot: REIHE, verben: () => VERBEN, ort: 0.6, falsche: 1, karte: "ort" },
+  s5: { art: "zeitform", verben: () => VERBEN },
+  s6: { art: "faecher", angebot: REIHE, verben: () => VERBEN, falsche: 2, zeit: true, knapp: true },
+};
+const angeboten = stufe => STUFE[stufe].verben().length > 0;
+
+const REGELN = {
+  fragen: "Stell jede Frage mit dem Verb. Braucht der Satz eine Antwort darauf, sonst ist er nicht fertig, dann gehört die Frage in den Fächer.",
+  ort: "Wo? fragt nach dem Ort: im Haus. Wohin? fragt nach dem Ziel: ins Haus. Stell jede Frage mit dem Verb.",
+};
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  if (!angeboten(stufe)) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  const p = STUFE[stufe];
+  let pool = p.verben();
+  const teilPool = (bed, anteil) => { const t = pool.filter(bed); if (t.length && t.length < pool.length) pool = Math.random() < anteil ? t : pool.filter(v => !bed(v)); };
+  if (p.mitWem) teilPool(v => v.fragen.includes("wem"), p.mitWem);
+  if (p.ort) teilPool(mitOrt, p.ort);
+  const v = waehle(pool);
+  if (p.art === "finden") {
+    const folge = satzIn(v, "praesens");
+    return { art: p.art, inf: v.inf, v, woerter: satzText(folge).replace(/\.$/, "").split(" "), richtig: v.teile[0].text.split(" ").length };
+  }
+  if (p.art === "zeitform") {
+    const zeit = waehle(zeitenVon(v));
+    const folge = satzIn(v, zeit);
+    const optionen = [...new Set([v.inf, v.praesens, v.praeteritum, v.perfekt.split(" ")[1]].filter(Boolean))];
+    const frage = optionen.length >= 3 && Math.random() < 0.5 ? "infinitiv" : "personalform";
+    const woerter = satzText(folge).replace(/\.$/, "").split(" ");
+    const fin = folge.find(t => t.verb === "fin").text;
+    return { art: p.art, inf: v.inf, v, zeit, frage, woerter, richtig: woerter.indexOf(fin), optionen: mische(optionen), personalform: fin };
+  }
+  const zeit = p.zeit ? waehle(zeitenVon(v)) : "praesens";
+  const folge = satzIn(v, zeit);
+  return { art: p.art, inf: v.inf, v, zeit, folge, falsche: ablenker(v, p.falsche || 0) };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  const v = a.v;
+  if (!angeboten(stufe)) m.push("Stufe mit den freien Listen nicht angeboten");
+  if (!FREI.has("verben")) m.push("Liste verben nicht frei");
+  if (!VERBEN_LISTEN.verben.some(e => e[0] === v.inf && e[2] === v.satz)) m.push("Verb nicht in der Liste");
+  if (VERBEN_LISTEN.verben.filter(e => e[0] === v.inf).length !== 1) m.push(`Infinitiv ${v.inf} mehrmals in der Liste`);
+  if (!p.verben().includes(v)) m.push("Verb passt nicht zur Stufe");
+  if (a.art !== p.art) m.push("Aufgabenart passt nicht zur Stufe");
+  // Daten des Eintrags
+  if (/ß/.test(v.satz + v.praesens + v.praeteritum + v.perfekt)) m.push("ß im Eintrag");
+  if (!/^\[wer:[A-ZÄÖÜ][^\]]*\] \S+( \[[a-z]+:[^\]]+\])*\.$/.test(v.satz)) m.push(`Satz falsch aufgebaut: ${v.satz}`);
+  if (v.verb !== v.praesens) m.push(`Verb im Satz (${v.verb}) ist nicht die Präsensform (${v.praesens})`);
+  if (v.teile.some(t => !FRAGEN[t.frage])) m.push("unbekannte Frage");
+  if (new Set(v.teile.map(t => t.frage)).size !== v.teile.length) m.push("eine Frage doppelt");
+  if (!v.praeteritum || /\s/.test(v.praeteritum)) m.push("Präteritum fehlt oder hat mehrere Wörter");
+  if (v.perfekt && !/^(hat|haben|ist|sind) [a-zäöü]+$/.test(v.perfekt)) m.push("Perfekt falsch aufgebaut");
+  if (!/^[a-zäöü]+n$/.test(v.inf)) m.push("Infinitiv endet nicht auf -n");
+  if (a.art === "finden") {
+    if (a.woerter[a.richtig] !== v.praesens) m.push("richtiges Wort ist nicht das Verb");
+    if (a.woerter.filter(w => w === v.praesens).length !== 1) m.push("Verb kommt mehrmals vor");
+  } else if (a.art === "zeitform") {
+    if (!zeitenVon(v).includes(a.zeit)) m.push("Zeitform nicht vorhanden");
+    if (a.woerter[a.richtig] !== a.personalform || a.woerter.filter(w => w === a.personalform).length !== 1) m.push("Personalform nicht genau einmal im Satz");
+    if (a.frage === "infinitiv") {
+      if (a.optionen.filter(o => o === v.inf).length !== 1) m.push("Infinitiv nicht genau einmal unter den Antworten");
+      if (new Set(a.optionen).size !== a.optionen.length || a.optionen.length < 3) m.push("doppelte oder zu wenige Antworten");
+    }
+  } else {
+    if (!v.fragen.every(q => p.angebot.includes(q))) m.push("Verb braucht eine Frage, die nicht angeboten ist");
+    if (v.fragen[0] !== "wer") m.push("Wer oder was? fehlt");
+    const texte = a.folge.filter(t => t.frage).map(t => t.text);
+    if (new Set([...texte, ...a.falsche].map(t => t.toLowerCase())).size !== texte.length + a.falsche.length) m.push("Wortkarte doppelt");
+    if (a.falsche.length !== (p.falsche || 0)) m.push("Zahl der falschen Karten stimmt nicht");
+    if (!p.zeit && a.zeit !== "praesens") m.push("Zeitform in einer Stufe ohne Zeitformen");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Satz aus Wortknöpfen; genau ein Wort ist richtig. */
+function wortWahl(ctx, a, frageHtml, hinweis, loesung) {
+  const f = ctx.flaeche;
+  f.append(el("div", { class: "frage", html: frageHtml }));
+  const satz = el("div", { class: "satz", "aria-label": "Satz" });
+  let fertig = false;
+  a.woerter.forEach((w, i) => {
+    const k = el("button", { type: "button", class: "vf-wort", text: w });
+    k.addEventListener("click", () => {
+      if (fertig || ctx.vorbei() || k.classList.contains("falsch")) return;
+      if (i === a.richtig) { fertig = true; k.classList.add("richtig"); ctx.richtig(`Richtig: ${loesung}`); return; }
+      k.classList.add("falsch");
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) fertig = true;
+    });
+    satz.append(k);
+  });
+  f.append(satz);
+}
+
+/** Stufe 1: das Verb im Satz finden. */
+function finden(ctx, a) {
+  const loesung = `Das Verb ist „${a.woerter[a.richtig]}“ (${a.inf}).`;
+  ctx.loesung(loesung);
+  ctx.schritte(1);
+  wortWahl(ctx, a, "Tippe das <b>Verb</b> an.",
+    "Das Verb sagt, was jemand tut oder was geschieht. Im Aussagesatz kommt es an die zweite Stelle.", loesung);
+}
+
+/** Stufe 5: Personalform antippen oder den Infinitiv wählen — im Präsens, Präteritum oder Perfekt. */
+function zeitform(ctx, a) {
+  const f = ctx.flaeche;
+  ctx.serie("art", a.frage);
+  ctx.serie("zeit", a.zeit);
+  f.append(el("div", { class: "vf-zeit", text: `Der Satz steht im ${ZEITEN[a.zeit]}.` }));
+  if (a.frage === "personalform") {
+    const loesung = `Personalform: „${a.personalform}“ — Infinitiv: ${a.inf}`;
+    ctx.loesung(loesung);
+    ctx.schritte(1);
+    wortWahl(ctx, a, "Tippe die <b>Personalform</b> an.",
+      "Die Personalform verändert sich, wenn du die Person änderst (ich …, du …, sie …). Im Perfekt besteht das Verb aus zwei Teilen — nur einer davon verändert sich mit der Person.", loesung);
+    return;
+  }
+  const loesung = `Infinitiv: ${a.inf}`;
+  f.append(el("div", { class: "satz", text: a.woerter.join(" ") + "." }));
+  f.append(el("div", { class: "frage", html: "Wie heisst der <b>Infinitiv</b> des Verbs?" }));
+  LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.inf, breite: 130, loesung, lob: `Richtig: ${loesung}`,
+    hinweis: "So steht das Verb im Wörterbuch. Der Infinitiv verrät nicht, wer etwas tut, und hat keine Zeitform.",
+  });
+}
+
+/** Stufen 2–4 und 6: Fächer auffächern (welche Fragen braucht das Verb?), dann den Satz aus Wortkarten bauen. */
+function faecher(ctx, a, p) {
+  const f = ctx.flaeche;
+  const v = a.v;
+  const luecken = a.folge.filter(t => t.frage);
+  const loesung = `${v.inf}: ${v.fragen.map(q => FRAGEN[q]).join(" ")} — ${satzText(a.folge)}`;
+  ctx.loesung(loesung);
+  ctx.schritte(v.fragen.length + 1 + luecken.length);
+  ctx.serie("fragen", v.schluessel);
+  if (p.karte) f.append(el("div", { class: "regelkarte" }, el("b", { text: "So geht der Fächer" }), REGELN[p.karte]));
+  const frage = el("div", { class: "frage", html: `Welche Fragen braucht das Verb <b>${v.inf}</b>?` });
+  const faecherEl = el("div", { class: "vf-faecher" });
+  const n = p.angebot.length;
+  const blaetter = p.angebot.map((q, i) => {
+    const b = el("button", { type: "button", class: "vf-blatt", text: FRAGEN[q], "aria-pressed": "false" });
+    b.style.transform = `rotate(${((i - (n - 1) / 2) * 7).toFixed(1)}deg)`;
+    b.addEventListener("click", () => {
+      if (ctx.vorbei() || fertig1) return;
+      const an = !b.classList.contains("gewaehlt");
+      b.classList.toggle("gewaehlt", an);
+      b.setAttribute("aria-pressed", String(an));
+      LS.ton("tipp");
+    });
+    faecherEl.append(b);
+    return b;
+  });
+  const griff = el("div", { class: "vf-griff", text: v.inf });
+  let fertig1 = false;
+  const pruefen = el("button", { type: "button", class: "knopf gruen", text: "Prüfen ✓" });
+  const zeile = el("div", { class: "vf-zeile" }, pruefen);
+  f.append(frage, faecherEl, griff, zeile);
+  pruefen.addEventListener("click", () => {
+    if (ctx.vorbei() || fertig1) return;
+    const gewaehlt = p.angebot.filter((q, i) => blaetter[i].classList.contains("gewaehlt"));
+    const fehlen = v.fragen.filter(q => !gewaehlt.includes(q)).length;
+    const zuviel = gewaehlt.filter(q => !v.fragen.includes(q)).length;
+    if (!fehlen && !zuviel) {
+      fertig1 = true;
+      blaetter.forEach(b => b.classList.toggle("richtig", b.classList.contains("gewaehlt")));
+      zeile.remove();
+      LS.ton("tipp");
+      satzBauen(ctx, a, p, luecken, loesung);
+      return;
+    }
+    const teile = [];
+    if (p.knapp) teile.push("Noch nicht ganz. Stell jede Frage mit dem Verb.");
+    else {
+      if (zuviel) teile.push(zuviel === 1 ? "Eine Frage braucht das Verb nicht." : `${zuviel} Fragen braucht das Verb nicht.`);
+      if (fehlen) teile.push(fehlen === 1 ? "Eine Frage fehlt noch." : `Es fehlen noch ${fehlen} Fragen.`);
+      teile.push(REGELN[p.karte === "ort" ? "ort" : "fragen"]);
+    }
+    ctx.falsch(teile.join(" "), loesung);
+  });
+}
+
+function satzBauen(ctx, a, p, luecken, loesung) {
+  const f = ctx.flaeche;
+  f.append(el("div", { class: "frage", html: "Jetzt den Satz: <b>Welche Karte beantwortet die Frage?</b>" }));
+  if (p.zeit) f.append(el("div", { class: "vf-zeit", text: `Der Satz steht im ${ZEITEN[a.zeit]}.` }));
+  const satz = el("div", { class: "satz", "aria-label": "Satz mit Lücken" });
+  const lueckenEl = [];
+  for (const t of a.folge) {
+    if (t.verb) { satz.append(el("span", { class: "vf-verb", text: t.text })); continue; }
+    const inhalt = el("span", { text: "" });
+    const l = el("span", { class: "vf-luecke" }, inhalt, el("small", { text: FRAGEN[t.frage] }));
+    lueckenEl.push({ l, inhalt, t });
+    satz.append(l);
+  }
+  satz.append(el("span", { class: "vf-verb", text: "." }));
+  f.append(satz);
+  let pos = 0;
+  const zeige = () => lueckenEl.forEach((x, i) => x.l.classList.toggle("dran", i === pos && !ctx.vorbei()));
+  const karten = el("div", { class: "vf-karten" });
+  for (const text of mische([...luecken.map(t => t.text), ...a.falsche])) {
+    const k = el("button", { type: "button", class: "vf-karte", text });
+    k.addEventListener("click", () => {
+      if (ctx.vorbei() || pos >= lueckenEl.length) return;
+      const dran = lueckenEl[pos];
+      if (text === dran.t.text) {
+        dran.inhalt.textContent = text;
+        dran.l.classList.add("voll");
+        k.remove();
+        pos++;
+        LS.ton("tipp");
+        zeige();
+        if (pos === lueckenEl.length) ctx.richtig(`Richtig: ${satzText(a.folge)}`);
+        return;
+      }
+      k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+      const q = FRAGEN[dran.t.frage];
+      ctx.falsch(p.knapp ? `Frag: ${q}`
+        : `Frag mit dem Verb: ${q} Achte auf den Begleiter — der, den, dem zeigen, welche Frage passt.${["wo", "wohin"].includes(dran.t.frage) ? " Wo? antwortet mit dem Ort, Wohin? mit dem Ziel." : ""}`, loesung);
+      if (ctx.vorbei()) zeige();
+    });
+    karten.append(k);
+  }
+  f.append(karten);
+  zeige();
+}
+
+// ---------- Spiel ----------
+
+const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => angeboten(s)));
+
+LS.spiel({
+  id: ID,
+  einleitung: "Jedes Verb braucht seine Fragen: geben braucht Wer? Wem? Was? — wie ein Fächer, der aufgeht. Finde die Fragen und baue dann den Satz.",
+  anzahl: 8,
+  stufen: nurAngebotene({
+    s1: "Das Verb im Satz finden: Das Baby lacht.",
+    s2: "Fächer mit Wer oder was? und Wen oder was?",
+    s3: "Dazu Wem? — geben: Wer? Wem? Was? (Lehrplan 5. Klasse)",
+    s4: "Dazu Wo? und Wohin? — und eine falsche Wortkarte.",
+    s5: "Personalform und Infinitiv — im Präsens, Präteritum und Perfekt.",
+    s6: "Endgegner: alle fünf Fragen, Sätze in allen Zeitformen, zwei falsche Karten.",
+  }),
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    if (ctx.nr === 0) ctx.sag(p.knapp ? "Alle fünf Fragen sind im Fächer. Und der Satz steht nicht immer im Präsens!" : {
+      finden: "Das Verb sagt, was jemand tut oder was geschieht.",
+      zeitform: "Die Personalform passt zur Person. Der Infinitiv ist die Grundform, wie im Wörterbuch.",
+      faecher: "Tippe die Fragen an, die das Verb braucht. Dann „Prüfen“ — und der Satz kommt.",
+    }[p.art]);
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "finden") finden(ctx, a);
+    else if (a.art === "zeitform") zeitform(ctx, a);
+    else faecher(ctx, a, p);
+  },
+});
+</script>
+</body>
+</html>

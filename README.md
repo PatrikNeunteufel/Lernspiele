@@ -44,6 +44,10 @@ Ranglisten je Mischung.
   python -m http.server 8765 --bind 127.0.0.1
   ```
 
+  Unter Windows genügt ein Doppelklick auf `server_starten.bat` im Hauptordner: Sie startet
+  `tools/server.py` (wie oben, aber ohne Zwischenspeicher im Browser — nach Änderungen genügt ein
+  gewöhnliches Neuladen) und öffnet Eulenpfad im Browser.
+
 - Nach einer Änderung an den Dateien die Seite hart neu laden (Strg+F5).
 
 ## Daten der Kinder
@@ -97,6 +101,9 @@ markieren und Bemerkungen für die Entwicklung eintragen. Server starten:
 ```bash
 python tools/entwickler_server.py
 ```
+
+Unter Windows: Doppelklick auf `entwickler_server_starten.bat` (startet ihn mit `--oeffnen`). Er belegt
+denselben Port 8765 wie `server_starten.bat`; es läuft also immer nur einer von beiden.
 
 Der Server schreibt die Links in die Konsole (Strg+Klick öffnet sie); mit `--oeffnen` öffnet er
 Eulenpfad gleich im Browser. Dann <http://localhost:8765/eulenpfad/> öffnen, als Aufsicht anmelden und unter Verwaltung → Entwicklung

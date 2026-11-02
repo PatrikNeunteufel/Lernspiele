@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schoggi-Brüche</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 0 0 10px; }
+  .rechnung { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px; font-size: clamp(30px, 7vw, 46px); font-weight: 900; margin: 4px 0 12px; }
+  .rechnung .op { color: var(--text-leise); }
+
+  /* Bruch übereinander wie in der Bruch-Pizzeria; der Schrägstrich ist nur für Protokoll und Vorleser da. */
+  .bruch { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.05; margin: 0 .12em; font-variant-numeric: tabular-nums; font-weight: 900; }
+  .bruch .z { border-bottom: .09em solid currentColor; padding: 0 .15em; }
+  .bruch .n { padding: 0 .15em; }
+  .bruch .schraeg { font-size: 0; }
+  .gemischt { display: inline-flex; align-items: center; font-weight: 900; }
+  .gemischt .ganz { margin-right: .08em; }
+
+  /* Eingabe von Zähler und Nenner */
+  .bruch.eingabe .feld { display: inline-block; min-width: 1.5em; text-align: center; border: 3px dashed var(--rand); border-radius: 10px; color: var(--knopf); cursor: pointer; margin: 3px 0; }
+  .bruch.eingabe .feld.aktiv { border: 3px solid var(--knopf); }
+  .bruch.eingabe .feld.fest { border-color: transparent; color: var(--text); cursor: default; }
+  .bruch.eingabe .feld.richtig { background: var(--gut-hell); border-color: var(--gut); }
+  .bruch.eingabe .feld.falsch { background: var(--hinweis-hell); border-color: var(--hinweis); }
+
+  /* Schokoladentafel als Rechteckmodell */
+  .tafeln { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 14px; margin: 0 0 10px; }
+  .tafel-box { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: clamp(24px, 5vw, 32px); }
+  .tafel-box .op { font-size: clamp(30px, 7vw, 44px); font-weight: 900; color: var(--text-leise); }
+  .tafel { display: block; width: min(240px, 42vw); max-width: 100%; }
+  .tafel.einzeln { width: min(360px, 88vw); }
+  .tafel .stueck { fill: #fff; stroke: var(--text-leise); stroke-width: 1; }
+  .tafel .stueck.a { fill: var(--deko-1); }
+  .tafel .stueck.b { fill: var(--deko-3); }
+  .tafel .stueck.weg { fill: var(--deko-1); fill-opacity: .22; stroke-dasharray: 4 3; }
+  .tafel .linie { stroke: var(--text); stroke-width: 3; }
+  .tafel .rand { fill: none; stroke: var(--text); stroke-width: 4; }
+
+  .wahl-knopf { font-size: clamp(26px, 6vw, 34px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  .wahl-knopf .bruch { font-size: 30px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🍫 Schoggi-Brüche</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.3.f (Grundanspruch 2. Zyklus): Brüche am Rechteckmodell kürzen, erweitern,
+// addieren und subtrahieren (Nenner 2–100); MA.1.C.2.g Brüche darstellen. Schweizer Zahlenbuch 6
+// (Neuausgabe 2023), Lernumgebung 21 „¼ + ⅕ und ¼ − ⅕“: Ein Bruch teilt die Tafel in Spalten, der
+// andere in Zeilen — so entsteht der gemeinsame Nenner.
+// Basisklasse 6: s1 5. Klasse (gleichnamig addieren, erweitern sehen), s2 erweitern, kürzen,
+// gemeinsamer Nenner, s3 Klassenziel ungleichnamig mit Tafel, s4 ohne Tafel und gekürzt, s5 7. Klasse
+// (Annahme: über ein Ganzes, gemischte Zahlen, drei Brüche), s6 Königsstufe Nenner bis 100.
+// Bezug: Die Bruch-Pizzeria (Basisklasse 5) übt ablesen, vergleichen, ordnen und „gleich gross“;
+// hier liegt der Schwerpunkt auf gleichnamig machen, addieren, subtrahieren. Schreibweise wie dort.
+
+const { zufall, waehle, mische, el } = LS;
+
+const ggT = (a, b) => (b ? ggT(b, a % b) : a);
+const kgV = (a, b) => a / ggT(a, b) * b;
+const kurz = (z, n) => { const g = ggT(z, n); return [z / g, n / g]; };
+const bText = (z, n) => `${z}/${n}`;
+const gleichWert = (z1, n1, z2, n2) => z1 * n2 === z2 * n1;
+const bis = (von, nach) => Array.from({ length: nach - von + 1 }, (_, i) => von + i);
+
+/** Alle Nennerpaare (b ≠ d) aus einer Liste, die eine Bedingung erfüllen. */
+const paare = (liste, ok) => liste.flatMap(b => liste.filter(d => d !== b && ok(b, d)).map(d => [b, d]));
+
+const NENNER_KLEIN = bis(2, 10);
+const HUNDERT_PAARE = [[2, 10], [4, 10], [5, 20], [4, 20], [10, 20], [2, 100], [4, 100], [5, 100], [10, 100], [20, 100], [25, 100], [50, 100], [20, 50], [25, 50], [4, 25]];
+const GROSS = [6, 8, 9, 10, 12, 15, 16, 18, 20, 24, 25, 30, 40, 50, 60, 75, 100];
+
+// Je Stufe: Aufgabenarten, Nenner bzw. Nennerpaare, gekuerzt: Ergebnis muss ganz gekürzt sein.
+const STUFE = {
+  s1: { arten: ["gleichnamig", "gleichnamig", "erweitern"], nenner: NENNER_KLEIN },
+  s2: { arten: ["erweitern", "kuerzenBild", "nennerWahl"], nenner: NENNER_KLEIN },
+  s3: { arten: ["rechnen"], paare: paare(NENNER_KLEIN, (b, d) => b * d <= 60), bild: true },
+  s4: { arten: ["rechnen", "rechnen", "kuerzen"], paare: [...paare(bis(2, 12), (b, d) => kgV(b, d) <= 60), ...HUNDERT_PAARE], gekuerzt: true },
+  s5: { arten: ["ueberEins", "drei"], paare: paare(NENNER_KLEIN, (b, d) => kgV(b, d) <= 40), drei: [2, 3, 4, 5, 6, 8, 10, 12], dreiKgv: 24 },
+  s6: { arten: ["rechnen", "luecke", "drei"], paare: paare(GROSS, (b, d) => kgV(b, d) <= 100 && kgV(b, d) > Math.max(b, d) && Math.max(b, d) >= 12),
+        drei: [2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 20], dreiKgv: 60, dreiMinus: true, gekuerzt: true },
+};
+
+/** Wert einer Rechnung aus Termen [[z, n], …] und Zeichen ["+", "−", …]: gemeinsamer Nenner N, Zähler Z. */
+function rechne(terme, ops, N = terme.reduce((m, [, n]) => kgV(m, n), 1)) {
+  let Z = terme[0][0] * N / terme[0][1];
+  ops.forEach((op, i) => { const [z, n] = terme[i + 1]; Z += (op === "+" ? 1 : -1) * z * N / n; });
+  return { Z, N };
+}
+
+/** Rechenweg „1/4 + 1/5 = 5/20 + 4/20 = 9/20“, gekürzt dazu „= …“. */
+function weg(terme, ops, N) {
+  const { Z } = rechne(terme, ops, N);
+  const zeile = ts => ts.map((t, i) => (i ? ` ${ops[i - 1]} ` : "") + t).join("");
+  const teile = [zeile(terme.map(([z, n]) => bText(z, n)))];
+  if (terme.some(([, n]) => n !== N)) teile.push(zeile(terme.map(([z, n]) => bText(z * N / n, N))));
+  teile.push(bText(Z, N));
+  const [rz, rn] = kurz(Z, N);
+  if (rn !== N) teile.push(bText(rz, rn));
+  return teile.join(" = ");
+}
+
+/** Echter, gekürzter Bruch mit Nenner n. */
+const zaehlerFuer = n => bis(1, n - 1).filter(z => ggT(z, n) === 1);
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = ERZEUGER[art](p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "gleichnamig", terme: [[1, 4], [2, 4]], ops: ["+"], nenner: 4, ergebnis: [3, 4] };
+}
+
+const ERZEUGER = {
+  gleichnamig(p) {
+    const n = waehle(p.nenner), op = waehle(["+", "−"]);
+    const z1 = zufall(1, n - 1), z2 = zufall(1, n - 1);
+    if (op === "+" ? z1 + z2 > n : z1 <= z2) return null;
+    return { art: "gleichnamig", terme: [[z1, n], [z2, n]], ops: [op], nenner: n, ergebnis: [op === "+" ? z1 + z2 : z1 - z2, n] };
+  },
+  erweitern(p) {
+    // s1 mit Zeilen in der Tafel, s2 nur mit dem Ziel-Nenner
+    const n = waehle(p.nenner.filter(x => x <= (p.arten.includes("gleichnamig") ? 6 : 10)));
+    const k = zufall(2, p.arten.includes("gleichnamig") ? 4 : 5);
+    if (n * k > 60) return null;
+    const z = waehle(zaehlerFuer(n));
+    return { art: "erweitern", bruch: [z, n], k, linien: p.arten.includes("gleichnamig"), nenner: n * k, ergebnis: [z * k, n * k] };
+  },
+  kuerzenBild(p) {
+    const n = waehle(p.nenner.filter(x => x <= 6));
+    const k = zufall(2, 5);
+    const z = waehle(zaehlerFuer(n));
+    return { art: "kuerzenBild", bruch: [z * k, n * k], k, nenner: n, ergebnis: [z, n] };
+  },
+  nennerWahl(p) {
+    // teilerfremde Nenner: der kleinste gemeinsame Nenner ist b · d, die Tafel zeigt ihn
+    const b = waehle(p.nenner), d = waehle(p.nenner);
+    if (b === d || ggT(b, d) !== 1 || b * d > 60) return null;
+    const N = b * d;
+    const vielfach = x => x % b === 0 && x % d === 0;
+    const kand = [b + d, Math.max(b, d), N + b, N + d, N - 1, 2 * Math.max(b, d)].filter(x => x > 1 && !vielfach(x));
+    const ablenker = mische([...new Set(kand)]).slice(0, 3);
+    if (ablenker.length < 3) return null;
+    return { art: "nennerWahl", b, d, richtig: N, optionen: mische([N, ...ablenker]) };
+  },
+  rechnen(p) {
+    const [b, d] = waehle(p.paare);
+    const op = waehle(["+", "−"]);
+    const a = waehle(zaehlerFuer(b)), c = waehle(zaehlerFuer(d));
+    const terme = [[a, b], [c, d]];
+    const N = p.bild ? b * d : kgV(b, d);
+    const { Z } = rechne(terme, [op], N);
+    if (Z <= 0 || Z > N) return null;
+    return { art: "rechnen", terme, ops: [op], N, ergebnis: kurz(Z, N) };
+  },
+  kuerzen() {
+    const n = waehle([2, 3, 4, 5, 6, 8, 10, 12]);
+    const z = waehle(zaehlerFuer(n));
+    const k = waehle([2, 3, 4, 5, 6, 8, 12]);
+    if (n * k > 100) return null;
+    return { art: "kuerzen", bruch: [z * k, n * k], ergebnis: [z, n] };
+  },
+  ueberEins(p) {
+    const [b, d] = waehle(p.paare);
+    const a = waehle(zaehlerFuer(b)), c = waehle(zaehlerFuer(d));
+    const N = kgV(b, d);
+    const { Z } = rechne([[a, b], [c, d]], ["+"], N);
+    if (Z <= N) return null;
+    const [rz, rn] = kurz(Z, N);
+    const g = Math.floor(rz / rn), rest = rz % rn;
+    if (rest === 0) return null;
+    const richtig = `${g} ${rest}/${rn}`;
+    // Ablenker: Zähler und Nenner zusammengezählt, Rest daneben, Ganze daneben
+    const kand = [bText(a + c, b + d), `${g} ${rest + 1}/${rn}`, `${g} ${rest - 1}/${rn}`, `${g + 1} ${rest}/${rn}`, `${g} ${rest}/${N === rn ? rn + b : N}`];
+    const ablenker = mische(kand.filter(k => {
+      const w = wertText(k);
+      return w && !gleichWert(w[0], w[1], rz, rn) && echterTeil(k);
+    })).filter((k, i, alle) => alle.findIndex(x => gleichWert(...wertText(x), ...wertText(k))) === i).slice(0, 3);
+    if (ablenker.length < 3) return null;
+    return { art: "ueberEins", terme: [[a, b], [c, d]], ops: ["+"], N, ergebnis: [rz, rn], richtig, optionen: mische([richtig, ...ablenker]) };
+  },
+  drei(p) {
+    const ns = [waehle(p.drei), waehle(p.drei), waehle(p.drei)];
+    if (new Set(ns).size < 2) return null;
+    const N = ns.reduce(kgV, 1);
+    if (N > p.dreiKgv) return null;
+    const terme = ns.map(n => [waehle(zaehlerFuer(n)), n]);
+    const ops = p.dreiMinus ? [waehle(["+", "−"]), waehle(["+", "−"])] : Math.random() < 0.7 ? ["+", "+"] : [waehle(["+", "−"]), "+"];
+    const { Z } = rechne(terme, ops, N);
+    if (Z <= 0 || Z > 2 * N) return null;
+    // Zwischenergebnisse bleiben positiv
+    if (ops[0] === "−" && rechne(terme.slice(0, 2), [ops[0]], N).Z <= 0) return null;
+    return { art: "drei", terme, ops, N, ergebnis: kurz(Z, N) };
+  },
+  luecke(p) {
+    const [b, d] = waehle(p.paare);
+    const op = waehle(["+", "−"]);
+    const a = waehle(zaehlerFuer(b)), x = waehle(zaehlerFuer(d));
+    const N = kgV(b, d);
+    const { Z } = rechne([[a, b], [x, d]], [op], N);
+    if (Z <= 0 || Z > N) return null;
+    return { art: "luecke", terme: [[a, b], [x, d]], ops: [op], N, summe: kurz(Z, N), nenner: d, ergebnis: [x, d] };
+  },
+};
+
+/** „1 5/12“ oder „5/7“ → [Zähler, Nenner] des Werts. */
+function wertText(t) {
+  const m = String(t).match(/^(?:(\d+) )?(\d+)\/(\d+)$/);
+  if (!m) return null;
+  const g = Number(m[1] || 0), z = Number(m[2]), n = Number(m[3]);
+  return n > 0 ? [g * n + z, n] : null;
+}
+const echterTeil = t => { const m = String(t).match(/(\d+)\/(\d+)$/); return m && Number(m[1]) >= 1 && Number(m[1]) < Number(m[2]); };
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const echt = ([z, n]) => Number.isInteger(z) && Number.isInteger(n) && z >= 1 && z < n;
+  if (a.terme) {
+    if (!a.terme.every(echt)) m.push("Term ist kein echter Bruch");
+    if (!a.terme.every(([z, n]) => ggT(z, n) === 1) && a.art !== "gleichnamig") m.push("Term nicht gekürzt");
+  }
+  if (a.art === "gleichnamig") {
+    const n = a.nenner;
+    if (!p.nenner.includes(n) || !a.terme.every(t => t[1] === n)) m.push("Nenner nicht in der Stufe");
+    const { Z } = rechne(a.terme, a.ops, n);
+    if (Z !== a.ergebnis[0] || a.ergebnis[1] !== n || Z <= 0 || Z > n) m.push("Ergebnis falsch");
+  }
+  if (a.art === "erweitern" || a.art === "kuerzenBild" || a.art === "kuerzen") {
+    if (!gleichWert(...a.bruch, ...a.ergebnis)) m.push("nicht gleich gross");
+    if (a.art !== "kuerzen" && a.ergebnis[1] !== a.nenner) m.push("Ziel-Nenner passt nicht");
+    if (a.art === "kuerzen" && kurz(...a.bruch)[1] !== a.ergebnis[1]) m.push("nicht ganz gekürzt");
+    if (a.art === "kuerzen" && ggT(...a.bruch) === 1) m.push("lässt sich nicht kürzen");
+    if (a.bruch[1] > 100 || a.ergebnis[1] > 100) m.push("Nenner über 100");
+  }
+  if (a.art === "nennerWahl") {
+    const passt = a.optionen.filter(x => x % a.b === 0 && x % a.d === 0);
+    if (passt.length !== 1 || passt[0] !== a.richtig) m.push("nicht genau ein gemeinsamer Nenner unter den Antworten");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+  }
+  if (["rechnen", "ueberEins", "drei"].includes(a.art)) {
+    const { Z, N } = rechne(a.terme, a.ops, a.N);
+    const [rz, rn] = kurz(Z, N);
+    if (rz !== a.ergebnis[0] || rn !== a.ergebnis[1]) m.push("Ergebnis falsch");
+    if (Z <= 0) m.push("Ergebnis nicht positiv");
+    if (a.art === "rechnen" && Z > N) m.push("Ergebnis über einem Ganzen");
+    if (a.art === "ueberEins" && Z <= N) m.push("Ergebnis nicht über einem Ganzen");
+    if (a.N % a.terme.reduce((x, [, n]) => kgV(x, n), 1) !== 0) m.push("Nenner ist kein gemeinsamer Nenner");
+    if (a.N > 100) m.push("Nenner über 100");
+    if (a.art !== "drei") {
+      const [b, d] = [a.terme[0][1], a.terme[1][1]];
+      if (!p.paare.some(([x, y]) => x === b && y === d)) m.push("Nennerpaar nicht in der Stufe");
+    }
+  }
+  if (a.art === "ueberEins") {
+    const passt = a.optionen.filter(o => { const w = wertText(o); return w && gleichWert(...w, ...a.ergebnis); });
+    if (passt.length !== 1 || passt[0] !== a.richtig) m.push("nicht genau eine richtige Antwort");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+  }
+  if (a.art === "luecke") {
+    const { Z, N } = rechne(a.terme, a.ops, a.N);
+    const [sz, sn] = kurz(Z, N);
+    if (sz !== a.summe[0] || sn !== a.summe[1] || Z <= 0 || Z > N) m.push("Summe falsch");
+    if (a.ergebnis[0] !== a.terme[1][0] || a.ergebnis[1] !== a.nenner) m.push("Lücke falsch");
+    // eindeutig: bei festem Nenner gibt es nur einen Zähler
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Bruch übereinander; textContent „3/4“. */
+function bruchEl(z, n, klasse = "") {
+  return el("span", { class: `bruch ${klasse}`, "aria-label": `${z} von ${n}` },
+    el("span", { class: "z", text: String(z) }), el("span", { class: "schraeg", text: "/" }), el("span", { class: "n", text: String(n) }));
+}
+
+/** „1 5/12“ als gemischte Zahl, „5/7“ als Bruch. */
+function wertEl(t) {
+  const m = String(t).match(/^(?:(\d+) )?(\d+)\/(\d+)$/);
+  if (!m[1]) return bruchEl(m[2], m[3]);
+  return el("span", { class: "gemischt" }, el("span", { class: "ganz", text: m[1] + " " }), bruchEl(m[2], m[3]));
+}
+
+const SVG = "http://www.w3.org/2000/svg";
+function svgEl(tag, attr = {}) {
+  const e = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  return e;
+}
+
+/**
+ * Schokoladentafel mit spalten × zeilen Stückchen. klasse(i, j): Klasse des Stückchens in Spalte i, Zeile j.
+ * dick: "spalten" oder "zeilen" — diese Teilung als dicke Linien (der Bruch), die andere dünn.
+ */
+function tafelEl(spalten, zeilen, klasse, dick, einzeln = false) {
+  const B = 300, H = zeilen === 1 ? 110 : 200;
+  const svg = svgEl("svg", { class: `tafel${einzeln ? " einzeln" : ""}`, viewBox: `-4 -4 ${B + 8} ${H + 8}`, role: "img", "aria-label": `Tafel mit ${spalten * zeilen} Stückchen` });
+  const w = B / spalten, h = H / zeilen;
+  for (let j = 0; j < zeilen; j++) {
+    for (let i = 0; i < spalten; i++) {
+      const k = klasse(i, j);
+      svg.append(svgEl("rect", { class: `stueck${k ? " " + k : ""}`, x: i * w, y: j * h, width: w, height: h }));
+    }
+  }
+  if (dick === "spalten") for (let i = 1; i < spalten; i++) svg.append(svgEl("line", { class: "linie", x1: i * w, y1: 0, x2: i * w, y2: H }));
+  if (dick === "zeilen") for (let j = 1; j < zeilen; j++) svg.append(svgEl("line", { class: "linie", x1: 0, y1: j * h, x2: B, y2: j * h }));
+  svg.append(svgEl("rect", { class: "rand", x: 0, y: 0, width: B, height: H }));
+  return svg;
+}
+
+/** Zwei Tafeln b × d: links a/b in Spalten, rechts c/d in Zeilen. */
+function zweiTafeln(terme, op) {
+  const [[a, b], [c, d]] = terme;
+  return el("div", { class: "tafeln" },
+    el("div", { class: "tafel-box" }, tafelEl(b, d, i => (i < a ? "a" : null), "spalten"), bruchEl(a, b)),
+    el("div", { class: "tafel-box" }, el("span", { class: "op", text: op })),
+    el("div", { class: "tafel-box" }, tafelEl(b, d, (i, j) => (j < c ? "b" : null), "zeilen"), bruchEl(c, d)));
+}
+
+/** Rechnung als Zeile: Terme, Zeichen, „=“ und danach die Elemente in rest. */
+function rechnungEl(terme, ops, ...rest) {
+  const teile = [];
+  terme.forEach(([z, n], i) => { if (i) teile.push(el("span", { class: "op", text: ops[i - 1] })); teile.push(bruchEl(z, n)); });
+  return el("div", { class: "rechnung frage" }, ...teile, el("span", { class: "op", text: "=" }), ...rest);
+}
+
+/**
+ * Bruch eintippen: erst den Zähler, dann den Nenner (fester Nenner: nur der Zähler). Ein Tipp auf ein
+ * Feld setzt es zurück. pruefe(z, n) liefert "richtig", "kuerzen" (richtig, aber noch nicht gekürzt)
+ * oder einen Hinweis-Text.
+ */
+function bruchEingabe(ctx, { nenner = null, pruefe, loesungText, kuerzenText = "Richtig gerechnet! Kürze noch so weit wie möglich." }) {
+  const fz = el("span", { class: "feld aktiv", text: "?" });
+  const fn = el("span", { class: nenner ? "feld fest" : "feld", text: nenner ? String(nenner) : "?" });
+  const bild = el("span", { class: "bruch eingabe", "aria-label": "Deine Antwort" },
+    el("span", { class: "z" }, fz), el("span", { class: "schraeg", text: "/" }), el("span", { class: "n" }, fn));
+  let aktiv = fz, zaehler = null, nachFehler = false;
+  const setzeAktiv = f => { aktiv = f; fz.classList.toggle("aktiv", f === fz); fn.classList.toggle("aktiv", f === fn); };
+  const markiere = k => { for (const f of [fz, fn]) { f.classList.remove("richtig", "falsch"); if (k && !f.classList.contains("fest")) f.classList.add(k); } };
+  const anzeige = el("div", { class: "anzeige" }); // nicht angezeigt; die Felder zeigen die Ziffern
+  let tasten = null;
+  tasten = LS.tastatur({
+    anzeige, maxStellen: 3,
+    onAenderung(w) {
+      if (!tasten) return;
+      if (nachFehler && w != null) { nachFehler = false; markiere(null); if (!nenner) fn.textContent = "?"; }
+      if (!nachFehler) aktiv.textContent = w == null ? "?" : String(w);
+    },
+    onOk(w) {
+      if (ctx.vorbei()) return;
+      if (aktiv === fz) {
+        zaehler = w;
+        if (!nenner) { setzeAktiv(fn); tasten.leeren(); fn.textContent = "?"; return; }
+      }
+      const n = nenner ?? w;
+      const urteil = pruefe(zaehler, n);
+      if (urteil === "richtig") { markiere("richtig"); tasten.gesperrt = true; return; }
+      if (urteil === "kuerzen") {
+        ctx.sag(kuerzenText, "hinweis");
+      } else {
+        ctx.falsch(urteil, loesungText);
+        if (ctx.vorbei()) { tasten.gesperrt = true; return; }
+      }
+      // Die Antwort bleibt stehen, bis das Kind neu tippt.
+      setzeAktiv(fz);
+      nachFehler = true;
+      tasten.leeren();
+      fz.textContent = String(zaehler); fn.textContent = String(n);
+      markiere(urteil === "kuerzen" ? null : "falsch");
+    },
+  });
+  fz.addEventListener("click", () => { if (tasten.gesperrt || ctx.vorbei()) return; nachFehler = false; markiere(null); setzeAktiv(fz); tasten.leeren(); if (!nenner) fn.textContent = "?"; });
+  return { bild, tastatur: tasten.element };
+}
+
+// ---------- Hinweise (verraten die Lösung nicht) ----------
+
+const HINWEIS_NENNER_BILD = "Der Nenner muss zu beiden Brüchen passen. Zähle die Stückchen einer ganzen Tafel.";
+const HINWEIS_NENNER = "Der Nenner muss zu beiden Brüchen passen: Suche eine Zahl, in der beide Nenner aufgehen.";
+const hinweisZaehler = op => `Der Nenner passt. Erweitere jeden Bruch auf diesen Nenner und ${op === "−" ? "ziehe die Zähler voneinander ab" : "zähle die Zähler zusammen"}.`;
+
+/** Prüft eine eingegebene Summe/Differenz: gleicher Wert; gekuerzt verlangt den ganz gekürzten Bruch. */
+function pruefeErgebnis(ctx, a, z, n, { gekuerzt, bild, lob }) {
+  if (n === 0) return "Der Nenner ist nie 0: Er sagt, in wie viele Stückchen die Tafel geteilt ist.";
+  if (gleichWert(z, n, ...a.ergebnis)) {
+    if (gekuerzt && ggT(z, n) !== 1) return "kuerzen";
+    ctx.richtig(lob);
+    return "richtig";
+  }
+  const nennerOk = a.terme.every(([, nt]) => n % nt === 0);
+  if (!nennerOk) return bild ? HINWEIS_NENNER_BILD : HINWEIS_NENNER;
+  return a.ops.length > 1 ? "Der Nenner passt. Erweitere alle Brüche darauf und rechne dann mit den Zählern, Schritt für Schritt." : hinweisZaehler(a.ops[0]);
+}
+
+/** Lob mit gekürzter Form und, über einem Ganzen, der gemischten Zahl. */
+function lobFuer(loesungText, [rz, rn]) {
+  const g = Math.floor(rz / rn), rest = rz % rn;
+  return `Richtig: ${loesungText}${g >= 1 && rest ? ` = ${g} ${rest}/${rn}` : ""}`;
+}
+
+// ---------- Spiel ----------
+
+LS.spiel({
+  id: "bruch-rechteck",
+  einleitung: "Willkommen in der Schoggi-Fabrik! Teilst du eine Tafel in Spalten und Zeilen, werden die Stückchen gleich gross — dann kannst du Brüche zusammenzählen und abziehen.",
+  anzahl: 8,
+  stufen: {
+    s1: "Gleiche Nenner: 2/8 + 3/8. Und: Was passiert beim feiner Teilen?",
+    s2: "Erweitern, kürzen und den gemeinsamen Nenner finden.",
+    s3: "Mit zwei Tafeln: 1/4 + 1/5 (Lehrplan 6. Klasse).",
+    s4: "Ohne Tafel und ganz gekürzt, Nenner bis 100.",
+    s5: "Über ein Ganzes: gemischte Zahlen und drei Brüche.",
+    s6: "Endgegner: 7/20 − 3/25, Lücken und drei Brüche.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+
+    if (a.art === "gleichnamig") {
+      const [[z1, n], [z2]] = a.terme, op = a.ops[0];
+      const loesungText = weg(a.terme, a.ops, n);
+      ctx.serie("zeichen", op);
+      const klasse = i => (op === "+" ? (i < z1 ? "a" : i < z1 + z2 ? "b" : null) : (i < z1 - z2 ? "a" : i < z1 ? "weg" : null));
+      const eingabe = bruchEingabe(ctx, {
+        nenner: n, loesungText,
+        pruefe: z => (z === a.ergebnis[0] ? (ctx.richtig(`Richtig: ${loesungText}`), "richtig")
+          : op === "+" ? "Die Stückchen sind gleich gross. Zähle die gefärbten Stückchen beider Farben zusammen." : "Die Stückchen sind gleich gross. Zähle, wie viele gefärbte übrig bleiben."),
+      });
+      ctx.loesung(loesungText);
+      ctx.schritte(LS.tippSchritte(a.ergebnis[0]));
+      f.append(el("div", { class: "tafeln" }, tafelEl(n, 1, klasse, "spalten", true)), rechnungEl(a.terme, a.ops, eingabe.bild), eingabe.tastatur);
+      if (ctx.nr === 0) ctx.sag(op === "+" ? "Gleiche Nenner heisst: gleich grosse Stückchen. Zähle sie zusammen!" : "Die blassen Stückchen sind weggegessen.");
+
+    } else if (a.art === "erweitern" || a.art === "kuerzenBild") {
+      const [z, n] = a.bruch;
+      const loesungText = `${bText(z, n)} = ${bText(...a.ergebnis)}`;
+      let tafel, hinweis;
+      if (a.art === "erweitern") {
+        tafel = a.linien ? tafelEl(n, a.k, i => (i < z ? "a" : null), "spalten", true) : tafelEl(n, 1, i => (i < z ? "a" : null), "spalten", true);
+        hinweis = a.linien ? "Zähle die gefärbten Stückchen, nicht die Spalten." : `Teile jede Spalte in gleich viele Stückchen, bis die Tafel ${a.nenner} Stückchen hat. Wie viele sind dann gefärbt?`;
+      } else {
+        // fein geteilte Tafel mit dicken Linien für die groben Teile
+        tafel = tafelEl(a.ergebnis[1], a.k, i => (i < a.ergebnis[0] ? "a" : null), "spalten", true);
+        hinweis = "Zähle nur die dicken Spalten: Wie viele davon sind gefärbt?";
+      }
+      const eingabe = bruchEingabe(ctx, {
+        nenner: a.nenner, loesungText,
+        pruefe: x => (x === a.ergebnis[0] ? (ctx.richtig(`Richtig: ${loesungText}`), "richtig") : hinweis),
+      });
+      ctx.loesung(loesungText);
+      ctx.schritte(LS.tippSchritte(a.ergebnis[0]));
+      f.append(el("div", { class: "auftrag", text: a.art === "erweitern" ? "Gleich viel Schoggi, feiner geteilt:" : "Gleich viel Schoggi, gröber geteilt:" }),
+        el("div", { class: "tafeln" }, tafel),
+        el("div", { class: "rechnung frage" }, bruchEl(z, n), el("span", { class: "op", text: "=" }), eingabe.bild), eingabe.tastatur);
+
+    } else if (a.art === "nennerWahl") {
+      const loesungText = `${a.b} · ${a.d} = ${a.richtig} Stückchen`;
+      f.append(el("div", { class: "frage", text: "In wie viele Stückchen teilst du die Tafel, damit beide Brüche passen?" }),
+        el("div", { class: "tafeln" }, tafelEl(a.b, a.d, () => null, null, true)),
+        el("div", { class: "rechnung" }, bruchEl(1, a.b), el("span", { class: "op", text: "und" }), bruchEl(1, a.d)));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 110, loesung: loesungText, lob: `Richtig: ${loesungText}`,
+        hinweis: x => `${x} geht nicht für beide: ${x % a.b === 0 ? `durch ${a.d}` : `durch ${a.b}`} lässt sich ${x} nicht teilen.`,
+      });
+
+    } else if (a.art === "rechnen" || a.art === "drei") {
+      const loesungText = weg(a.terme, a.ops, a.N);
+      ctx.serie("zeichen", a.ops.join(""));
+      const eingabe = bruchEingabe(ctx, {
+        loesungText,
+        pruefe: (z, n) => pruefeErgebnis(ctx, a, z, n, { gekuerzt: p.gekuerzt, bild: p.bild, lob: lobFuer(loesungText, a.ergebnis) }),
+      });
+      ctx.loesung(loesungText);
+      ctx.schritte(LS.tippSchritte(a.ergebnis[0]) + LS.tippSchritte(a.ergebnis[1]));
+      if (p.bild) f.append(zweiTafeln(a.terme, a.ops[0]));
+      f.append(rechnungEl(a.terme, a.ops, eingabe.bild), eingabe.tastatur);
+      if (ctx.nr === 0) ctx.sag(p.bild ? "Beide Tafeln haben gleich viele Stückchen. Zähle die gefärbten!" : "Tippe zuerst den Zähler, dann OK, dann den Nenner.");
+
+    } else if (a.art === "kuerzen") {
+      const loesungText = `${bText(...a.bruch)} = ${bText(...a.ergebnis)}`;
+      const eingabe = bruchEingabe(ctx, {
+        loesungText, kuerzenText: "Gut gekürzt! Es geht aber noch weiter.",
+        pruefe: (z, n) => {
+          if (n === 0) return "Der Nenner ist nie 0.";
+          if (!gleichWert(z, n, ...a.bruch)) return "Teile Zähler und Nenner durch dieselbe Zahl, dann bleibt der Bruch gleich gross.";
+          if (ggT(z, n) !== 1) return "kuerzen";
+          ctx.richtig(`Richtig: ${loesungText}`);
+          return "richtig";
+        },
+      });
+      ctx.loesung(loesungText);
+      ctx.schritte(LS.tippSchritte(a.ergebnis[0]) + LS.tippSchritte(a.ergebnis[1]));
+      f.append(el("div", { class: "auftrag", text: "Kürze so weit wie möglich:" }),
+        el("div", { class: "rechnung frage" }, bruchEl(...a.bruch), el("span", { class: "op", text: "=" }), eingabe.bild), eingabe.tastatur);
+
+    } else if (a.art === "ueberEins") {
+      const loesungText = `${weg(a.terme, a.ops, a.N)} = ${a.richtig}`;
+      f.append(el("div", { class: "auftrag", text: "Mehr als eine ganze Tafel! Welche gemischte Zahl stimmt?" }),
+        rechnungEl(a.terme, a.ops, el("span", { text: "?" })));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 130, inhalt: wertEl, loesung: loesungText, lob: `Richtig: ${loesungText}`,
+        hinweis: x => (/ /.test(x) ? "Mache die Nenner gleich, zähle zusammen und nimm dann ganze Tafeln heraus." : "Nenner zählt man nie zusammen. Mache zuerst die Nenner gleich."),
+      });
+
+    } else if (a.art === "luecke") {
+      const [[za, na], [, d]] = a.terme, op = a.ops[0];
+      const loesungText = `${weg(a.terme, a.ops, a.N)} — die Lücke ist ${bText(...a.ergebnis)}`;
+      ctx.serie("zeichen", op);
+      const eingabe = bruchEingabe(ctx, {
+        nenner: d, loesungText,
+        pruefe: x => (x === a.ergebnis[0] ? (ctx.richtig(`Richtig: ${loesungText}`), "richtig")
+          : `Mache ${bText(za, na)} und ${bText(...a.summe)} gleichnamig. Was fehlt ${op === "+" ? "bis zum Ergebnis" : "dazwischen"}? Dann erweitere oder kürze auf ${d}.`),
+      });
+      ctx.loesung(loesungText);
+      ctx.schritte(LS.tippSchritte(a.ergebnis[0]));
+      f.append(el("div", { class: "auftrag", text: "Welcher Bruch fehlt?" }),
+        el("div", { class: "rechnung frage" }, bruchEl(za, na), el("span", { class: "op", text: op }), eingabe.bild,
+          el("span", { class: "op", text: "=" }), bruchEl(...a.summe)), eingabe.tastatur);
+    }
+  },
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klang-Wichtel</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 8px; }
+  .wichtel-zeile { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 4px 0 14px; }
+  .wichtel { font-size: clamp(52px, 13vw, 76px); line-height: 1; }
+  /* grosser Hörknopf */
+  .wichtel-hoeren { min-width: 96px; min-height: 96px; border-radius: 50%; font-size: 44px; padding: 0; }
+
+  /* Bilder für kurz und lang (Strich), laut und leise (Punkt) */
+  .strich { display: inline-block; height: 14px; border-radius: 7px; background: var(--text); vertical-align: middle; }
+  .strich.kurz { width: 18px; }
+  .strich.lang { width: 66px; }
+  .punkt { display: inline-block; border-radius: 50%; background: var(--text); vertical-align: middle; }
+  .punkt.gross { width: 36px; height: 36px; }
+  .punkt.klein { width: 14px; height: 14px; }
+  .bildpaar { display: inline-flex; align-items: center; gap: 10px; font-size: clamp(30px, 7vw, 40px); line-height: 1; }
+  .wahl-knopf .strich, .wahl-knopf .punkt { margin: 14px 0; }
+  .wahl-knopf.spielt { outline: 5px solid var(--deko-4); outline-offset: 2px; }
+
+  /* Stufe 5: Klangschrift legen */
+  .klangschrift { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; min-height: 70px;
+    margin: 4px auto 12px; padding: 10px 14px; max-width: 520px; border: 3px dashed var(--rand); border-radius: 16px; background: #fff; }
+  .legen-knoepfe .knopf { min-width: 92px; min-height: 64px; display: inline-flex; align-items: center; justify-content: center; }
+  .legen-knoepfe .knopf .strich, .legen-knoepfe .knopf .punkt { background: currentColor; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔔 Klang-Wichtel</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MU.6.A.1.1a (1. Zyklus, erste Stufe): Klangeigenschaften wie kurz/lang, schnell/langsam,
+// laut/leise in Abstufungen unterscheiden; MU.6.B.1.a Symbole klanglich umsetzen und Gehörtes grafisch
+// festhalten (langsam/schnell, laut/leise). Basisklasse 1: s1 Kindergarten, s2–s4 1. Klasse,
+// s5 2. Klasse, s6 Königsstufe. Antworten sind Bilder (🐭/🦁, 🐢/🐇, kurzer/langer Strich).
+// Bezug: Hoch-Tief-Ohr (Basisklasse 2) übt hoch/tief und Tonfolgen, Rhythmus-Leser Notenwerte — hier
+// deshalb keine Tonhöhen und keine Noten: Innerhalb einer Aufgabe klingt immer derselbe Ton.
+// Die Töne erzeugt der Browser selbst (WebAudio, wie noten.js, aber mit Lautstärke je Ton).
+// Vorlesen: Liest die Eule gerade vor (Kindergarten und 1. Klasse automatisch), wartet das Abspielen,
+// bis sie fertig ist; der Hörknopf unterbricht das Vorlesen und spielt sofort.
+
+const { zufall, waehle, mische, el } = LS;
+
+const TONHOEHEN = [392, 440, 494, 523]; // g', a', h', c'' — nur Abwechslung, nie Gegenstand einer Frage
+
+// Bilder und Wörter (Wörter nur für Vorlesen, aria-label und Lösung)
+const WERTE = {
+  laut: { bild: "🦁", text: "laut" }, leise: { bild: "🐭", text: "leise" },
+  schnell: { bild: "🐇", text: "schnell" }, langsam: { bild: "🐢", text: "langsam" },
+  kurz: { strich: "kurz", text: "kurz" }, lang: { strich: "lang", text: "lang" },
+};
+const MERKMALE = { laut: ["laut", "leise"], tempo: ["schnell", "langsam"], laenge: ["kurz", "lang"] };
+
+// Grenzen, an denen pruefeAufgabe die Töne nachmisst
+const LAUT_GRENZE = 0.2;   // Lautstärke (0–1) darüber: laut
+const TEMPO_GRENZE = 0.5;  // Sekunden von Schlag zu Schlag darunter: schnell
+
+// ---------- Klänge ----------
+
+/** n gleiche Töne: Abstand von Beginn zu Beginn, Dauer, Lautstärke. */
+const reihe = (n, abstand, dauer, laut, start = 0) => Array.from({ length: n }, (_, i) => ({ start: start + i * abstand, dauer, laut }));
+const ende = toene => Math.max(...toene.map(t => t.start + t.dauer));
+const r2 = x => Math.round(x * 100) / 100;
+
+const ARTEN = {
+  /** Ein Klang, ein Merkmal; in Stufe 6 ändern sich die anderen Merkmale mit (Ablenkung). */
+  eins(merkmal, gemischt) {
+    const wert = waehle(MERKMALE[merkmal]);
+    let toene;
+    if (!gemischt) {
+      // deutliche Gegensätze, je zwei Spielarten, damit nicht immer genau derselbe Klang kommt
+      if (merkmal === "laut") toene = reihe(zufall(2, 4), 0.55, 0.4, wert === "laut" ? waehle([0.4, 0.5]) : waehle([0.03, 0.045]));
+      if (merkmal === "laenge") { const d = wert === "lang" ? waehle([1.0, 1.3]) : waehle([0.12, 0.2]); toene = reihe(zufall(1, 3), r2(d + 0.45), d, 0.3); }
+      if (merkmal === "tempo") toene = reihe(zufall(4, 6), wert === "schnell" ? waehle([0.2, 0.25]) : waehle([0.7, 0.8]), 0.12, 0.3);
+      return { art: "eins", merkmal, richtig: wert, toene, werte: { [merkmal]: wert } };
+    }
+    const w = gemischteWerte();
+    w[merkmal] = wert;
+    return { art: "eins", merkmal, richtig: wert, toene: gemischterKlang(w), werte: w };
+  },
+  /** Zwei Klänge nacheinander: Welcher ist länger/kürzer/lauter/leiser? Abstufungen statt Gegensätze. */
+  vergleich() {
+    const merkmal = waehle(["laut", "laenge"]);
+    const stufen = merkmal === "laut" ? [0.05, 0.14, 0.4] : [0.25, 0.6, 1.2];
+    const [i, j] = mische([0, 1, 2]).slice(0, 2);
+    const frage = merkmal === "laut" ? waehle(["lauter", "leiser"]) : waehle(["länger", "kürzer"]);
+    const klang = x => (merkmal === "laut" ? { n: 2, d: 0.4, laut: x } : { n: 1, d: x, laut: 0.3 });
+    const a = klang(stufen[i]), b = klang(stufen[j]);
+    const ersterTeil = reihe(a.n, a.d + 0.2, a.d, a.laut);
+    const zweiterTeil = reihe(b.n, b.d + 0.2, b.d, b.laut, r2(ende(ersterTeil) + 0.9));
+    const mehr = (frage === "lauter" || frage === "länger") ? (i > j ? 1 : 2) : (i < j ? 1 : 2);
+    return { art: "vergleich", merkmal, frage, toene: [...ersterTeil, ...zweiterTeil], teil: ersterTeil.length, richtig: mehr };
+  },
+  /** Klangfolge hören und aufschreiben: Striche (kurz/lang) oder Punkte (laut/leise). */
+  legen() {
+    const merkmal = waehle(["laenge", "laut"]);
+    const n = zufall(3, 4);
+    let folge;
+    do folge = Array.from({ length: n }, () => waehle(MERKMALE[merkmal])); while (new Set(folge).size < 2);
+    const toene = [];
+    let t = 0;
+    for (const w of folge) {
+      const dauer = merkmal === "laenge" ? (w === "lang" ? 0.85 : 0.2) : 0.35;
+      toene.push({ start: r2(t), dauer, laut: merkmal === "laut" ? (w === "laut" ? 0.45 : 0.04) : 0.3 });
+      t += dauer + 0.3;
+    }
+    return { art: "legen", merkmal, folge, toene, richtig: folge.join("-") };
+  },
+  /** Königsstufe: ein Klang, zwei Merkmale zugleich erkennen (vier Bildkarten), das dritte lenkt ab. */
+  zwei() {
+    const paar = waehle([["tempo", "laut"], ["laenge", "laut"], ["tempo", "laenge"]]);
+    const w = gemischteWerte();
+    const optionen = MERKMALE[paar[0]].flatMap(x => MERKMALE[paar[1]].map(y => `${x}+${y}`));
+    return { art: "zwei", paar, richtig: `${w[paar[0]]}+${w[paar[1]]}`, optionen, toene: gemischterKlang(w), werte: w };
+  },
+};
+
+const gemischteWerte = () => ({ laut: waehle(MERKMALE.laut), tempo: waehle(MERKMALE.tempo), laenge: waehle(MERKMALE.laenge) });
+/** Vier Schläge; kurz = getupft, lang = gehalten bis fast zum nächsten Schlag. */
+function gemischterKlang(w) {
+  const abstand = w.tempo === "schnell" ? 0.3 : 0.8;
+  return reihe(4, abstand, w.laenge === "lang" ? r2(abstand * 0.85) : 0.08, w.laut === "laut" ? 0.45 : 0.05);
+}
+
+// Basisklasse 1: s1 Kindergarten, s2–s4 1. Klasse, s5 2. Klasse, s6 Königsstufe.
+const STUFE = {
+  s1: () => ARTEN.eins("laut", false),
+  s2: () => ARTEN.eins("laenge", false),
+  s3: () => ARTEN.eins("tempo", false),
+  s4: () => ARTEN.vergleich(),
+  s5: () => ARTEN.legen(),
+  s6: () => (Math.random() < 0.6 ? ARTEN.eins(waehle(["laut", "tempo", "laenge"]), true) : ARTEN.zwei()),
+};
+
+function aufgabeErzeugen(stufe) {
+  const a = STUFE[stufe]();
+  a.freq = waehle(TONHOEHEN);
+  return a;
+}
+
+// ---------- Nachmessen (für tools/pruefe_spiele.js) ----------
+
+/** Merkmale eines Klangs aus seinen Tönen: laut, tempo (bei mehreren Tönen), laenge (absolut oder im Verhältnis zum Abstand). */
+function miss(toene, relativ) {
+  const laut = toene.every(t => t.laut > LAUT_GRENZE) ? "laut" : toene.every(t => t.laut < LAUT_GRENZE) ? "leise" : null;
+  const abstand = toene.length > 1 ? toene[1].start - toene[0].start : null;
+  const tempo = abstand === null ? null : abstand < TEMPO_GRENZE ? "schnell" : "langsam";
+  const laenge = relativ ? (toene[0].dauer > abstand / 2 ? "lang" : "kurz") : toene[0].dauer >= 0.6 ? "lang" : toene[0].dauer <= 0.25 ? "kurz" : null;
+  return { laut, tempo, laenge };
+}
+
+const summeDauer = toene => toene.reduce((s, t) => s + t.dauer, 0);
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!TONHOEHEN.includes(a.freq)) m.push("Tonhöhe nicht in der Liste");
+  if (!a.toene.length || a.toene.some(t => !(t.dauer > 0) || !(t.laut > 0 && t.laut <= 0.5) || !(t.start >= 0))) m.push("ungültiger Ton");
+  for (let i = 1; i < a.toene.length; i++) if (a.toene[i].start < a.toene[i - 1].start + a.toene[i - 1].dauer) m.push("Töne überlappen");
+  const soll = { s1: ["eins"], s2: ["eins"], s3: ["eins"], s4: ["vergleich"], s5: ["legen"], s6: ["eins", "zwei"] }[stufe];
+  if (!soll.includes(a.art)) m.push(`Art ${a.art} nicht in der Stufe`);
+  const gemischt = stufe === "s6";
+  if (a.art === "eins") {
+    const nach = miss(a.toene, gemischt);
+    if (nach[a.merkmal] !== a.richtig) m.push(`gemessen ${nach[a.merkmal]}, Lösung ${a.richtig}`);
+    if (!gemischt && a.merkmal !== { s1: "laut", s2: "laenge", s3: "tempo" }[stufe]) m.push("falsches Merkmal für die Stufe");
+    // ohne Ablenkung: die anderen Merkmale bleiben gleich (keine zweite Spur zur Lösung)
+    if (!gemischt && a.merkmal !== "laut" && a.toene.some(t => t.laut !== 0.3)) m.push("Lautstärke ändert sich mit");
+  }
+  if (a.art === "zwei") {
+    const nach = miss(a.toene, true);
+    if (`${nach[a.paar[0]]}+${nach[a.paar[1]]}` !== a.richtig) m.push("Bildkarte passt nicht zum Klang");
+    if (a.optionen.length !== 4 || new Set(a.optionen).size !== 4 || !a.optionen.includes(a.richtig)) m.push("Bildkarten falsch");
+  }
+  if (a.art === "vergleich") {
+    const x = a.toene[0], y = a.toene[a.teil];
+    const wert = t => (a.merkmal === "laut" ? t.laut : t.dauer);
+    if (wert(x) === wert(y)) m.push("beide Klänge gleich");
+    const mehr = wert(x) > wert(y) ? 1 : 2;
+    const soll = a.frage === "lauter" || a.frage === "länger" ? mehr : 3 - mehr;
+    if (soll !== a.richtig) m.push("Antwort passt nicht zu den Klängen");
+    if (Math.max(wert(x), wert(y)) / Math.min(wert(x), wert(y)) < 2) m.push("Unterschied zu klein");
+    // das andere Merkmal ist bei beiden gleich
+    if (a.merkmal === "laut" ? x.dauer !== y.dauer : x.laut !== y.laut) m.push("zweites Merkmal verschieden");
+  }
+  if (a.art === "legen") {
+    if (a.folge.length !== a.toene.length || a.folge.length < 3 || a.folge.length > 4) m.push("Länge der Folge");
+    if (new Set(a.folge).size < 2) m.push("alle Zeichen gleich");
+    a.folge.forEach((w, i) => {
+      const t = a.toene[i];
+      const ist = a.merkmal === "laut" ? (t.laut > LAUT_GRENZE ? "laut" : "leise") : (t.dauer >= 0.6 ? "lang" : "kurz");
+      if (ist !== w) m.push(`Zeichen ${i + 1} passt nicht zum Ton`);
+    });
+  }
+  return m;
+}
+
+// ---------- Hören ----------
+
+let audio = null;
+/** Töne spielen (WebAudio); gibt die Dauer in Sekunden zurück, ohne Ton oder WebAudio 0. */
+function spieleToene(toene, freq) {
+  if (!LS.lies("ton", true)) return 0;
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    if (audio.state === "suspended") audio.resume();
+    const t0 = audio.currentTime + 0.08;
+    for (const t of toene) {
+      const osc = audio.createOscillator();
+      const g = audio.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+      const an = t0 + t.start, aus = an + t.dauer;
+      // sanft an, gleich laut halten, sanft aus: so ist die Dauer gut hörbar
+      g.gain.setValueAtTime(0.0001, an);
+      g.gain.exponentialRampToValueAtTime(t.laut, an + 0.012);
+      g.gain.setValueAtTime(t.laut, Math.max(an + 0.012, aus - 0.04));
+      g.gain.exponentialRampToValueAtTime(0.0001, aus);
+      osc.connect(g).connect(audio.destination);
+      osc.start(an);
+      osc.stop(aus + 0.02);
+    }
+    return ende(toene) + 0.08;
+  } catch { return 0; }
+}
+
+/** Liest die Eule gerade vor? (Profil „automatisch“ oder 🔊) */
+function eulSpricht() {
+  try { return speechSynthesis.speaking || speechSynthesis.pending; } catch { return false; }
+}
+function stillSein() { try { speechSynthesis.cancel(); } catch { /* ohne Stimme */ } }
+
+/**
+ * Gleich zu Beginn vorspielen — aber erst, wenn die Eule fertig vorgelesen hat (sie beginnt 0,3 s nach dem
+ * Zeichnen). Nichts tun, wenn die Aufgabe inzwischen ersetzt oder gelöst ist.
+ */
+function spaeterAbspielen(ctx, knopf, abspielen, schonGehoert) {
+  const warte = versuch => {
+    if (!ctx.flaeche.contains(knopf) || ctx.vorbei() || schonGehoert()) return;
+    if (eulSpricht() && versuch < 100) { setTimeout(() => warte(versuch + 1), 200); return; }
+    abspielen();
+  };
+  setTimeout(() => warte(0), 700);
+}
+
+// ---------- Darstellung ----------
+
+/** Bild eines Werts: Tier oder Strich. */
+function bildVon(wert) {
+  const w = WERTE[wert];
+  return w.strich ? el("span", { class: `strich ${w.strich}` }) : el("span", { class: "bild", text: w.bild });
+}
+const PUNKT = { laut: "gross", leise: "klein" };
+/** Zeichen der Klangschrift: Strich (kurz/lang) oder Punkt (laut/leise). */
+const zeichenVon = (merkmal, wert) => (merkmal === "laenge" ? el("span", { class: `strich ${wert}` }) : el("span", { class: `punkt ${PUNKT[wert]}` }));
+
+const FRAGEN = {
+  laut: "Hör gut zu: Ist der Klang laut wie ein Löwe oder leise wie eine Maus?",
+  laenge: "Hör gut zu: Ist der Ton kurz oder lang?",
+  tempo: "Hör gut zu: Klopft der Wichtel schnell wie ein Hase oder langsam wie eine Schildkröte?",
+};
+const FRAGEN_GEMISCHT = {
+  laut: "Hör gut zu: Ist es laut oder leise? Achte nur darauf!",
+  laenge: "Hör gut zu: Sind die Töne kurz oder lang? Achte nur darauf!",
+  tempo: "Hör gut zu: Ist es schnell oder langsam? Achte nur darauf!",
+};
+const HINWEISE = {
+  laut: "Hör nochmal mit dem grossen Knopf: Brüllt da ein Löwe, oder piepst eine Maus?",
+  laenge: "Hör nochmal mit dem grossen Knopf: Hört der Ton gleich auf, oder klingt er lange?",
+  tempo: "Hör nochmal und klopf mit: Kommen die Schläge dicht nacheinander oder mit Pausen?",
+};
+const WORT = { laut: "Lautstärke", laenge: "Länge", tempo: "Geschwindigkeit" };
+const PAAR_TEXT = { laut: "laut oder leise", tempo: "schnell oder langsam", laenge: "kurz oder lang" };
+
+LS.spiel({
+  id: "klang-wichtel",
+  einleitung: "Der Klang-Wichtel spielt dir Töne vor. Hör genau hin! Mach den Ton an: 🔊",
+  anzahl: 6,
+  stufen: {
+    s1: "Laut 🦁 oder leise 🐭?",
+    s2: "Kurz oder lang?",
+    s3: "Schnell 🐇 oder langsam 🐢?",
+    s4: "Zwei Klänge: Welcher ist länger, welcher lauter?",
+    s5: "Klänge aufschreiben: Striche kurz und lang, Punkte laut und leise.",
+    s6: "Endgegner: alles gemischt — auf was musst du achten?",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s5" ? "Hör zu und tippe für jeden Klang ein Zeichen. Mit dem grossen Knopf hörst du nochmal."
+      : "Hör gut zu. Mit dem grossen Knopf hörst du nochmal.");
+    // Gehört, nicht gesehen: die Töne und die Frage dazu machen die Aufgabe aus.
+    ctx.kennung(JSON.stringify([a.freq, a.art, a.merkmal || a.paar, a.frage || "", a.toene.map(t => [t.start, t.dauer, t.laut])]));
+    if (ctx.stufe === "s6") ctx.serie("art", a.art === "eins" ? a.merkmal : "zwei");
+    if (a.art === "eins" || a.art === "vergleich") ctx.serie("antwort", a.richtig);
+    if (a.art === "legen") ctx.serie("zeichen", a.merkmal);
+    ctx.wartezeit(ende(a.toene) + 0.1);
+
+    const f = ctx.flaeche;
+    let markiere = () => {}; // Stufe 4: Karte des gerade klingenden Klangs hervorheben
+    let gehoert = false;     // schon abgespielt? Dann nicht noch einmal von selbst
+    const abspielen = () => {
+      gehoert = true;
+      const d = spieleToene(a.toene, a.freq);
+      if (!d) { ctx.sag("Der Ton ist aus. Schalte ihn oben rechts ein: 🔊", "hinweis"); return; }
+      markiere();
+    };
+    const hoeren = el("button", { type: "button", class: "knopf hoer-knopf wichtel-hoeren", text: "🔊", "aria-label": "Anhören" });
+    hoeren.addEventListener("click", () => { stillSein(); abspielen(); });
+    f.append(el("div", { class: "frage", text: frageText(a) }),
+      el("div", { class: "wichtel-zeile" }, el("span", { class: "wichtel", text: "🧝", "aria-hidden": "true" }), hoeren));
+
+    if (a.art === "eins") {
+      const loesung = `Es war ${WERTE[a.richtig].text}${WERTE[a.richtig].bild ? " " + WERTE[a.richtig].bild : ""}.`;
+      const box = LS.auswahl(ctx, {
+        optionen: MERKMALE[a.merkmal], richtig: a.richtig, breite: 120,
+        inhalt: bildVon, hinweis: HINWEISE[a.merkmal], loesung,
+      });
+      beschrifte(box, MERKMALE[a.merkmal].map(w => WERTE[w].text));
+    } else if (a.art === "zwei") {
+      const text = o => o.split("+").map(w => WERTE[w].text).join(" und ");
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 130,
+        inhalt: o => el("span", { class: "bildpaar" }, ...o.split("+").map(bildVon)),
+        hinweis: `Hör nochmal. Achte zuerst nur auf die ${WORT[a.paar[0]]}, dann nur auf die ${WORT[a.paar[1]]}.`,
+        loesung: `Es war ${text(a.richtig)}.`,
+      });
+      beschrifte(box, a.optionen.map(text));
+    } else if (a.art === "vergleich") {
+      const box = LS.auswahl(ctx, {
+        optionen: [1, 2], richtig: a.richtig, breite: 120,
+        inhalt: n => el("span", { class: "bild", text: n === 1 ? "1️⃣" : "2️⃣" }),
+        hinweis: `Hör nochmal beide Klänge. Achte nur auf die ${WORT[a.merkmal]}.`,
+        loesung: `Der ${a.richtig === 1 ? "erste" : "zweite"} Klang war ${a.frage}.`,
+      });
+      beschrifte(box, ["der erste Klang", "der zweite Klang"]);
+      // Während des Abspielens leuchtet die Karte des Klangs, der gerade klingt.
+      const karten = [...box.querySelectorAll(".wahl-knopf")];
+      const zweiterAb = a.toene[a.teil].start;
+      markiere = () => {
+        karten.forEach(k => k.classList.remove("spielt"));
+        karten[0].classList.add("spielt");
+        setTimeout(() => { karten[0].classList.remove("spielt"); karten[1].classList.add("spielt"); }, (zweiterAb + 0.08) * 1000);
+        setTimeout(() => karten[1].classList.remove("spielt"), (ende(a.toene) + 0.15) * 1000);
+      };
+    } else {
+      legen(ctx, a);
+    }
+    spaeterAbspielen(ctx, hoeren, abspielen, () => gehoert);
+  },
+});
+
+function frageText(a) {
+  if (a.art === "eins") return (a.werte && Object.keys(a.werte).length > 1 ? FRAGEN_GEMISCHT : FRAGEN)[a.merkmal];
+  if (a.art === "zwei") return `Welches Bild passt? Achte auf zwei Dinge: ${PAAR_TEXT[a.paar[0]]} — und ${PAAR_TEXT[a.paar[1]]}.`;
+  if (a.art === "vergleich") return `Du hörst zwei Klänge. Welcher ist ${a.frage}?`;
+  return a.merkmal === "laenge"
+    ? "Hör zu und schreib die Töne auf: kurzer Ton, kurzer Strich — langer Ton, langer Strich."
+    : "Hör zu und schreib die Klänge auf: lauter Klang, grosser Punkt — leiser Klang, kleiner Punkt.";
+}
+
+/** Bildknöpfe: Vorlesetext für langes Drücken. */
+function beschrifte(box, texte) {
+  box.querySelectorAll(".wahl-knopf").forEach((k, i) => k.setAttribute("aria-label", texte[i]));
+}
+
+/** Stufe 5: Zeichen der Reihe nach legen, „✓“ prüft. */
+function legen(ctx, a) {
+  const f = ctx.flaeche;
+  const [w1, w2] = MERKMALE[a.merkmal];
+  const name = w => (a.merkmal === "laenge" ? `${w === "kurz" ? "kurzer" : "langer"} Strich` : `${w === "laut" ? "grosser" : "kleiner"} Punkt`);
+  const loesungText = `So klang es: ${a.folge.map(w => WERTE[w].text).join(" – ")}.`;
+  ctx.loesung(loesungText);
+  ctx.schritte(a.folge.length + 1);
+  const gelegt = [];
+  const schrift = el("div", { class: "klangschrift", "aria-label": "Deine Klangschrift" });
+  const zeichne = () => { schrift.innerHTML = ""; for (const w of gelegt) schrift.append(zeichenVon(a.merkmal, w)); };
+  const knopf = (w) => {
+    const k = el("button", { type: "button", class: "knopf hell", "aria-label": name(w) }, zeichenVon(a.merkmal, w));
+    k.addEventListener("click", () => { if (ctx.vorbei() || gelegt.length >= 6) return; gelegt.push(w); LS.ton("tipp"); zeichne(); });
+    return k;
+  };
+  const weg = el("button", { type: "button", class: "knopf hell", text: "⌫", "aria-label": "Letztes Zeichen wegnehmen" });
+  weg.addEventListener("click", () => { if (ctx.vorbei()) return; gelegt.pop(); zeichne(); });
+  const fertig = el("button", { type: "button", class: "knopf gruen", text: "✓", "aria-label": "Fertig" });
+  fertig.addEventListener("click", () => {
+    if (ctx.vorbei()) return;
+    if (gelegt.join("-") === a.richtig) { ctx.richtig("Super aufgeschrieben! Genau so hat es geklungen."); return; }
+    ctx.falsch(gelegt.length !== a.folge.length ? "Hör nochmal: Wie viele Klänge sind es? Zähle mit den Fingern."
+      : "Fast! Ein Zeichen passt noch nicht. Hör nochmal genau hin.", loesungText);
+  });
+  f.append(schrift,
+    el("div", { class: "knopfzeile legen-knoepfe" }, knopf(w1), knopf(w2)),
+    el("div", { class: "knopfzeile legen-knoepfe" }, weg, fertig));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sortier-Kiste</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .sortier .korb-karte { padding: 8px 18px; margin-bottom: 12px; }
+  .sk-gross svg { width: clamp(90px, 26vw, 120px); height: auto; display: block; }
+  .haufen { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-items: flex-end; min-height: 30px; margin: 0 auto 6px; max-width: 520px; }
+  .haufen svg { width: 28px; height: 28px; display: block; opacity: .75; }
+  .sortier .korb-reihe { grid-template-columns: repeat(auto-fit, minmax(min(96px, 100%), 1fr)); gap: 10px; }
+  .sortier .korb-knopf { min-height: 110px; gap: 6px; padding: 8px 6px; }
+  .sortier .korb-reihe.vier { grid-template-columns: repeat(2, 1fr); }
+  .sk-symbol svg { width: 40px; height: 40px; display: block; }
+  .sk-inhalt { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; align-content: flex-start; width: 100%; min-height: 36px;
+    padding: 4px; border-radius: 12px; background: rgba(255, 255, 255, .9); box-sizing: border-box; }
+  .sk-inhalt svg { width: 26px; height: 26px; display: block; }
+  .sortier .korb-knopf.ziel { outline: 5px solid var(--text); outline-offset: 2px; }
+  .sortier .korb-knopf.blass { opacity: .3; }
+  .sortier div.korb-knopf { cursor: default; }
+  /* Zahl- und Strichknöpfe */
+  .sortier .wahl { margin-top: 14px; }
+  .sortier .wahl-knopf b { font-size: clamp(26px, 6vw, 34px); line-height: 1; }
+  .sortier .wahl-knopf small { letter-spacing: 1px; }
+  .strich svg { width: 92px; height: 50px; display: block; }
+  .regel-bild svg { width: 84px; height: 44px; display: block; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧺 Sortier-Kiste</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.C.1: a (Kindergarten) sammeln und ordnen, z. B. Steine nach Farbe ordnen und zählen;
+// b Daten in Strichlisten festhalten (Stufe 5). MA.2.A.1.b: Figuren nach Eigenschaften ordnen, grösser
+// und kleiner (Stufen 2–4). NMG.3.3.a: Eigenschaften von Dingen wahrnehmen und vergleichen.
+// Basisklasse 1: s1 Kindergarten (nach Farbe, zwei Kisten), s2–s4 1. Klasse (Farbe oder Form, Grösse,
+// sortieren und zählen), s5 2. Klasse (zwei Merkmale, Strichliste), s6 Königsstufe (Regel finden).
+// Ohne Lesen spielbar: Die Eule liest den Auftrag vor; Dinge und Kisten sind Bilder. Die Farben sind
+// --deko-Farben (keine Stellenfarben): gelb, blau, orange, pink. Ohne Inhaltsliste.
+
+const { waehle, mische, el, ton } = LS;
+
+const FARBEN = { gelb: "var(--deko-4)", blau: "var(--deko-6)", orange: "var(--deko-3)", pink: "var(--deko-2)" };
+const FORMEN = ["kreis", "viereck", "dreieck", "stern"];
+const MEHRZAHL = { kreis: "Kreise", viereck: "Vierecke", dreieck: "Dreiecke", stern: "Sterne" };
+const GRAU = "var(--deko-7)";
+
+// ---------- Zeichnen ----------
+function sternPunkte(cx, cy, r1, r2) {
+  const p = [];
+  for (let i = 0; i < 10; i++) {
+    const w = -Math.PI / 2 + (i * Math.PI) / 5;
+    const r = i % 2 ? r2 : r1;
+    p.push(`${(cx + r * Math.cos(w)).toFixed(1)},${(cy + r * Math.sin(w)).toFixed(1)}`);
+  }
+  return p.join(" ");
+}
+/** Form im Feld 60 × 60, Mitte (30, 30). */
+function formSvg(form, stil) {
+  const s = `style="${stil}"`;
+  if (form === "kreis") return `<circle cx="30" cy="30" r="24" ${s}/>`;
+  if (form === "viereck") return `<rect x="9" y="9" width="42" height="42" rx="3" ${s}/>`;
+  if (form === "dreieck") return `<polygon points="30,5 56,51 4,51" ${s}/>`;
+  return `<polygon points="${sternPunkte(30, 31, 27, 11)}" ${s}/>`;
+}
+/** Ein Ding: farbige Form; kleine Dinge im selben Feld kleiner gezeichnet. */
+function dingSvg(d) {
+  const f = formSvg(d.form, `fill:${FARBEN[d.farbe]};stroke:rgba(0,0,0,.25);stroke-width:2`);
+  const inhalt = d.gross ? f : `<g transform="translate(30 30) scale(.55) translate(-30 -30)">${f}</g>`;
+  return `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inhalt}</svg>`;
+}
+/** Bild auf einer Kiste: weisse Form (nach Form), weisser Kreis gross/klein (nach Grösse). */
+function symbolSvg(regel, wert) {
+  const weiss = "fill:#fff;stroke:rgba(0,0,0,.2);stroke-width:2";
+  let inhalt = "";
+  if (regel === "form") inhalt = formSvg(wert, weiss);
+  else if (regel === "zwei") inhalt = formSvg(wert.split("|")[1], weiss);
+  else if (regel === "groesse") inhalt = wert === "gross" ? `<circle cx="30" cy="30" r="27" style="${weiss}"/>` : `<circle cx="30" cy="30" r="11" style="${weiss}"/>`;
+  return inhalt ? `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inhalt}</svg>` : "";
+}
+/** Strichliste: je fünf vier Striche und ein Querstrich. */
+function strichSvg(n) {
+  let s = "";
+  let x = 6;
+  for (let g = 0; g < Math.ceil(n / 5); g++) {
+    const k = Math.min(5, n - g * 5);
+    const start = x;
+    for (let i = 0; i < Math.min(k, 4); i++) { s += `<line x1="${x}" y1="8" x2="${x}" y2="42"/>`; x += 9; }
+    if (k === 5) s += `<line x1="${start - 4}" y1="36" x2="${x - 5}" y2="14"/>`;
+    x += 10;
+  }
+  return `<svg viewBox="0 0 92 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g style="stroke:var(--text);stroke-width:4;stroke-linecap:round">${s}</g></svg>`;
+}
+
+// ---------- Regeln ----------
+const wertVon = (d, regel) => (regel === "farbe" ? d.farbe : regel === "form" ? d.form : regel === "groesse" ? (d.gross ? "gross" : "klein") : `${d.farbe}|${d.form}`);
+const kistenFarbe = (regel, w) => (regel === "farbe" ? FARBEN[w] : regel === "zwei" ? FARBEN[w.split("|")[0]] : GRAU);
+// Ohne Endung an der Farbe („Kiste: gelb“), damit orange und pink richtig bleiben.
+const kistenName = (regel, w) => (regel === "farbe" ? `Kiste: ${w}`
+  : regel === "form" ? `Kiste für ${MEHRZAHL[w]}`
+  : regel === "groesse" ? `Kiste für ${w === "gross" ? "grosse" : "kleine"} Formen`
+  : regel === "zwei" ? `Kiste für ${MEHRZAHL[w.split("|")[1]]}, ${w.split("|")[0]}` : "Kiste");
+
+const AUFTRAG = {
+  farbe: "Wohin gehört diese Form? Tipp auf die Kiste mit der gleichen Farbe.",
+  form: "Wohin gehört diese Form? Tipp auf die Kiste mit der gleichen Form.",
+  groesse: "Ist diese Form gross oder klein? Tipp auf die passende Kiste.",
+  zwei: "Farbe und Form müssen passen. Tipp auf die richtige Kiste.",
+};
+const SORT_LOESUNG = {
+  farbe: "Jede Form kommt in die Kiste mit ihrer Farbe.",
+  form: "Jede Form kommt in die Kiste mit der gleichen Form.",
+  groesse: "Die grossen Formen kommen in die Kiste mit dem grossen Kreis, die kleinen in die Kiste mit dem kleinen.",
+  zwei: "Jede Form kommt in die Kiste mit ihrer Farbe und ihrer Form.",
+};
+const HINWEIS = {
+  farbe: "Schau die Farbe genau an. Welche Kiste hat dieselbe Farbe?",
+  form: "Schau die Form genau an: Ist sie rund? Wie viele Ecken hat sie?",
+  groesse: "Vergleiche mit den anderen Formen: Ist diese gross oder klein?",
+  zwei: "Farbe und Form der Kiste müssen beide passen.",
+  zahl: "Zeig mit dem Finger auf jede Form in der Kiste und zähl laut mit.",
+  strich: "Für jede Form ein Strich. Vier Striche und ein Querstrich sind zusammen fünf.",
+  regel: "Schau in jede Kiste: Was ist bei allen Formen darin gleich?",
+};
+/** Frage zum Zählen; als Aussage ohne Endung („sind gelb“), damit alle Farben passen. */
+function zaehlFrage(regel, w) {
+  if (regel === "farbe") return `Wie viele Formen sind ${w}?`;
+  if (regel === "form") return `Wie viele ${MEHRZAHL[w]} sind es?`;
+  if (regel === "groesse") return `Wie viele Formen sind ${w}?`;
+  const [farbe, form] = w.split("|");
+  return `Wie viele ${MEHRZAHL[form]} sind ${farbe}?`;
+}
+const esSind = n => (n === 1 ? "Es ist eine." : `Es sind ${n}.`);
+
+// ---------- Stufen ----------
+// Basisklasse 1: s1 Kindergarten, s2–s4 1. Klasse, s5 2. Klasse, s6 Königsstufe.
+const STUFE = {
+  s1: { regeln: ["farbe"], kisten: () => 2, dinge: 4, groessen: false },
+  s2: { regeln: ["farbe", "form"], kisten: () => 3, dinge: 5, groessen: false },
+  s3: { regeln: ["groesse", "groesse", "farbe", "form"], kisten: r => (r === "groesse" ? 2 : 3), dinge: 6, groessen: true },
+  s4: { regeln: ["farbe", "form", "groesse"], kisten: r => (r === "groesse" ? 2 : waehle([2, 3])), dinge: 6, groessen: true, zaehlen: "zahl" },
+  s5: { regeln: ["zwei"], kisten: () => 4, dinge: 7, groessen: true, zaehlen: "strich" },
+  s6: { arten: ["regel", "weiter"] },
+};
+const ZAHL_MAX = { zahl: 6, strich: 8 };
+
+function neuesDing(regel, w, groessen) {
+  const d = { farbe: waehle(Object.keys(FARBEN)), form: waehle(FORMEN), gross: groessen ? Math.random() < .5 : true };
+  if (regel === "farbe") d.farbe = w;
+  else if (regel === "form") d.form = w;
+  else if (regel === "groesse") d.gross = w === "gross";
+  else [d.farbe, d.form] = w.split("|");
+  return d;
+}
+function kistenWerte(regel, k) {
+  const farben = mische(Object.keys(FARBEN)), formen = mische(FORMEN);
+  if (regel === "farbe") return farben.slice(0, k);
+  if (regel === "form") return formen.slice(0, k);
+  if (regel === "groesse") return ["gross", "klein"];
+  return mische([`${farben[0]}|${formen[0]}`, `${farben[0]}|${formen[1]}`, `${farben[1]}|${formen[0]}`, `${farben[1]}|${formen[1]}`]);
+}
+
+/** Erklärt das Merkmal g die Kisten? In jeder Kiste ist g gleich, und die Kisten unterscheiden sich darin. */
+function erklaert(kisten, g) {
+  const je = kisten.map(inhalt => new Set(inhalt.map(d => wertVon(d, g))));
+  if (je.some(s => s.size !== 1)) return false;
+  const alle = je.map(s => [...s][0]);
+  return new Set(alle).size === alle.length;
+}
+const MERKMALE = ["farbe", "form", "groesse"];
+
+function aufgabeErzeugen(stufe) {
+  const st = STUFE[stufe];
+  if (st.arten) {
+    // Königsstufe: Die Kisten sind grau und schon gefüllt. Wonach wurde sortiert, und wohin gehört das neue Ding?
+    const art = waehle(st.arten);
+    for (;;) {
+      const regel = waehle(MERKMALE);
+      const werte = kistenWerte(regel, regel === "groesse" ? 2 : waehle([2, 3]));
+      const kisten = werte.map(w => Array.from({ length: 3 }, () => neuesDing(regel, w, true)));
+      if (MERKMALE.some(g => g !== regel && erklaert(kisten, g)) || !erklaert(kisten, regel)) continue;
+      if (kisten.some(k => new Set(k.map(d => JSON.stringify(d))).size < 3)) continue;
+      const a = { art, regel, werte, kisten };
+      if (art === "weiter") {
+        a.ziel = Math.floor(Math.random() * werte.length);
+        a.ding = neuesDing(regel, werte[a.ziel], true);
+      }
+      return a;
+    }
+  }
+  const regel = waehle(st.regeln);
+  const werte = kistenWerte(regel, st.kisten(regel));
+  const zuteilung = mische([...werte, ...Array.from({ length: st.dinge - werte.length }, () => waehle(werte))]);
+  const dinge = zuteilung.map(w => neuesDing(regel, w, st.groessen));
+  const a = { art: "sortieren", regel, werte, dinge };
+  if (st.zaehlen) {
+    const anzahl = w => dinge.filter(d => wertVon(d, regel) === w).length;
+    a.zaehlWert = waehle(werte);
+    a.anzahl = anzahl(a.zaehlWert);
+    a.zaehlen = st.zaehlen;
+    a.zahlen = st.zaehlen === "zahl" ? [1, 2, 3, 4, 5, 6]
+      : mische([a.anzahl - 1, a.anzahl, a.anzahl + 1].map(n => (a.anzahl === 1 ? n + 1 : n)));
+  }
+  return a;
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const st = STUFE[stufe];
+  if (st.arten) {
+    if (!st.arten.includes(a.art)) m.push("Aufgabenart gehört nicht in diese Stufe");
+    if (!erklaert(a.kisten, a.regel)) m.push("Die Regel erklärt die Kisten nicht");
+    for (const g of MERKMALE) if (g !== a.regel && erklaert(a.kisten, g)) m.push(`Auch ${g} erklärt die Kisten`);
+    if (a.art === "weiter" && wertVon(a.ding, a.regel) !== a.werte[a.ziel]) m.push("neues Ding passt nicht in die Zielkiste");
+    return m;
+  }
+  if (!st.regeln.includes(a.regel)) m.push("Regel gehört nicht in diese Stufe");
+  if (a.dinge.length !== st.dinge) m.push("falsche Zahl von Dingen");
+  for (const d of a.dinge) {
+    const passend = a.werte.filter(w => wertVon(d, a.regel) === w);
+    if (passend.length !== 1) m.push(`Ding passt in ${passend.length} Kisten`);
+    if (!st.groessen && !d.gross) m.push("kleines Ding in einer Stufe ohne Grössen");
+  }
+  if (new Set(a.werte).size !== a.werte.length) m.push("zwei gleiche Kisten");
+  if (a.werte.some(w => !a.dinge.some(d => wertVon(d, a.regel) === w))) m.push("leere Kiste");
+  if (stufe === "s1" && a.werte.length !== 2) m.push("Kindergarten: nicht zwei Kisten");
+  if (a.zaehlen) {
+    const n = a.dinge.filter(d => wertVon(d, a.regel) === a.zaehlWert).length;
+    if (n !== a.anzahl) m.push("Anzahl falsch");
+    if (n < 1 || n > ZAHL_MAX[a.zaehlen]) m.push("Anzahl ausserhalb");
+    if (!a.zahlen.includes(n) || new Set(a.zahlen).size !== a.zahlen.length || a.zahlen.some(z => z < 1)) m.push("Zahlknöpfe falsch");
+  }
+  return m;
+}
+
+// ---------- Kisten zeichnen ----------
+function kiste(regel, w, knopf = true) {
+  const k = el(knopf ? "button" : "div", { class: "korb-knopf", "aria-label": kistenName(regel, w) });
+  if (knopf) k.type = "button";
+  k.style.setProperty("--k", kistenFarbe(regel, w));
+  const sym = symbolSvg(regel, w);
+  if (sym) k.append(el("div", { class: "sk-symbol", html: sym }));
+  const inhalt = el("div", { class: "sk-inhalt" });
+  k.append(inhalt);
+  return { k, inhalt };
+}
+const wackeln = k => { k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch"); };
+const legeHinein = (inhalt, d) => inhalt.append(el("span", { html: dingSvg(d) }));
+
+const LOB = ["Gut sortiert! 🧺", "Alles am richtigen Platz! 🧺", "Super! 🧺", "Prima sortiert! 🧺"];
+
+/** Zählen nach dem Sortieren: Ziffer mit Punkten (Stufe 4) oder Strichliste (Stufe 5). */
+function zaehlKnoepfe(ctx, a, frage, loesung, lob) {
+  const box = el("div", { class: "wahl" });
+  box.style.setProperty("--wahl-breite", a.zaehlen === "zahl" ? "70px" : "110px");
+  let fertig = false;
+  for (const n of a.zahlen) {
+    const k = el("button", { type: "button", class: "wahl-knopf", "aria-label": String(n) });
+    if (a.zaehlen === "zahl") k.append(el("b", { text: String(n) }), el("small", { text: "●".repeat(n) }));
+    else k.append(el("span", { class: "strich", html: strichSvg(n) }));
+    k.addEventListener("click", () => {
+      if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+      if (n === a.anzahl) { fertig = true; k.classList.add("richtig"); ctx.richtig(lob); return; }
+      wackeln(k);
+      k.classList.add("gewaehlt");
+      ctx.falsch(HINWEIS[a.zaehlen], loesung);
+    });
+    box.append(k);
+  }
+  ctx.flaeche.append(box);
+}
+
+LS.spiel({
+  id: "sortier-kiste",
+  einleitung: "Hilf beim Aufräumen! Jede Form kommt in die passende Kiste. Schau genau: Farbe, Form oder Grösse?",
+  anzahl: 6,
+  stufen: {
+    s1: "Nach Farbe sortieren: zwei Kisten.",
+    s2: "Drei Kisten: nach Farbe oder nach Form.",
+    s3: "Nach Grösse: gross oder klein?",
+    s4: "Sortieren und dann zählen: Wie viele sind es?",
+    s5: "Farbe und Form zusammen: gelbe Dreiecke. Dann die Strichliste.",
+    s6: "Regel finden: Wonach wurde sortiert?",
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s6" ? "Schau in die Kisten: Was ist darin gleich?" : "Schau dir jede Form genau an und tipp auf die passende Kiste.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    const st = STUFE[ctx.stufe];
+    const lob = waehle(LOB);
+    ctx.flaeche.classList.add("sortier");
+
+    if (a.art === "regel" || a.art === "weiter") {
+      ctx.serie("art", a.art);
+      ctx.kennung(`${a.art}|${a.kisten.map(k => k.map(dingSchluessel).join("+")).join("/")}|${a.ding ? dingSchluessel(a.ding) : ""}`);
+      const reihe = el("div", { class: "korb-reihe" });
+      const kn = a.kisten.map((inhalt, j) => {
+        const { k, inhalt: feld } = kiste("regel", "", a.art === "weiter");
+        k.setAttribute("aria-label", `Kiste ${j + 1}`);
+        k.style.setProperty("--k", GRAU);
+        for (const d of inhalt) legeHinein(feld, d);
+        reihe.append(k);
+        return { k, feld };
+      });
+      if (a.art === "regel") {
+        ctx.serie("antwort", a.regel);
+        const loesung = { farbe: "Es wurde nach Farbe sortiert.", form: "Es wurde nach Form sortiert.", groesse: "Es wurde nach Grösse sortiert." }[a.regel];
+        ctx.flaeche.append(el("div", { class: "auftrag", text: "Wonach wurde sortiert? Tipp auf das passende Bild." }), reihe);
+        const bild = {
+          farbe: `<circle cx="16" cy="22" r="13" style="fill:${FARBEN.gelb}"/><circle cx="42" cy="22" r="13" style="fill:${FARBEN.blau}"/><circle cx="68" cy="22" r="13" style="fill:${FARBEN.pink}"/>`,
+          form: `<circle cx="16" cy="22" r="13" style="fill:${GRAU}"/><rect x="30" y="9" width="25" height="25" style="fill:${GRAU}"/><polygon points="70,8 84,36 56,36" style="fill:${GRAU}"/>`,
+          groesse: `<circle cx="26" cy="22" r="20" style="fill:${GRAU}"/><circle cx="66" cy="30" r="9" style="fill:${GRAU}"/>`,
+        };
+        const optionen = mische(MERKMALE);
+        const box = LS.auswahl(ctx, {
+          optionen, richtig: a.regel, breite: 110, hinweis: HINWEIS.regel, loesung, lob,
+          inhalt: r => el("span", { class: "regel-bild", html: `<svg viewBox="0 0 86 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${bild[r]}</svg>` }),
+        });
+        const namen = { farbe: "nach Farbe", form: "nach Form", groesse: "nach Grösse" };
+        [...box.children].forEach((k, i) => k.setAttribute("aria-label", namen[optionen[i]]));
+        return;
+      }
+      // weiter: neues Ding in die passende graue Kiste
+      ctx.schritte(1);
+      const loesung = `${SORT_LOESUNG[a.regel]} Diese Form kommt in die Kiste ${a.ziel + 1}.`;
+      ctx.loesung(loesung);
+      const karte = el("div", { class: "korb-karte sk-gross", html: dingSvg(a.ding) });
+      ctx.flaeche.append(el("div", { class: "auftrag", text: "In welche Kiste gehört diese Form? Schau zuerst, was in jeder Kiste gleich ist." }), karte, reihe);
+      kn.forEach(({ k, feld }, j) => k.addEventListener("click", () => {
+        if (ctx.vorbei()) return;
+        if (j === a.ziel) { LS.fliegen(karte, k); legeHinein(feld, a.ding); ctx.richtig(lob); return; }
+        wackeln(k);
+        ctx.falsch(HINWEIS.regel, loesung);
+      }));
+      return;
+    }
+
+    // Sortieren: ein Ding nach dem anderen in die Kisten, danach (Stufen 4, 5) zählen.
+    if (st.regeln.length > 1 && new Set(st.regeln).size > 1) ctx.serie("regel", a.regel);
+    ctx.kennung(`${a.regel}|${a.werte.join(",")}|${a.dinge.map(dingSchluessel).join(" ")}|${a.zaehlWert || ""}`);
+    ctx.schritte(a.dinge.length + (a.zaehlen ? 1 : 0));
+    const frage = a.zaehlen ? zaehlFrage(a.regel, a.zaehlWert) : "";
+    const loesung = a.zaehlen ? `${SORT_LOESUNG[a.regel]} ${frage} ${esSind(a.anzahl)}` : SORT_LOESUNG[a.regel];
+    ctx.loesung(loesung);
+    const auftrag = el("div", { class: "auftrag", text: AUFTRAG[a.regel] });
+    const haufen = el("div", { class: "haufen", "aria-hidden": "true" });
+    const karte = el("div", { class: "korb-karte sk-gross" });
+    const reihe = el("div", { class: "korb-reihe" + (a.werte.length === 4 ? " vier" : "") });
+    const kisten = a.werte.map(w => { const x = kiste(a.regel, w); reihe.append(x.k); return { ...x, w }; });
+    ctx.flaeche.append(auftrag, haufen, karte, reihe);
+
+    let pos = 0;
+    let zaehlt = false;
+    const zeigeKarte = () => {
+      karte.innerHTML = dingSvg(a.dinge[pos]);
+      haufen.innerHTML = a.dinge.slice(pos + 1).map(dingSvg).join("");
+    };
+    const zaehlen = () => {
+      zaehlt = true;
+      karte.remove();
+      haufen.remove();
+      for (const x of kisten) x.k.classList.add(x.w === a.zaehlWert ? "ziel" : "blass");
+      const text = a.zaehlen === "strich" ? `${frage} Tipp auf die passende Strichliste.` : frage;
+      auftrag.textContent = text;
+      ctx.sag(`Jetzt zählen! ${text}`);
+      zaehlKnoepfe(ctx, a, frage, loesung, lob);
+    };
+    const allesHinein = () => {
+      for (; pos < a.dinge.length; pos++) legeHinein(kisten.find(x => x.w === wertVon(a.dinge[pos], a.regel)).inhalt, a.dinge[pos]);
+      karte.innerHTML = "";
+      haufen.innerHTML = "";
+    };
+    for (const x of kisten) x.k.addEventListener("click", () => {
+      if (zaehlt || ctx.vorbei() || pos >= a.dinge.length) return;
+      const d = a.dinge[pos];
+      if (wertVon(d, a.regel) !== x.w) {
+        wackeln(x.k);
+        ctx.falsch(HINWEIS[a.regel], loesung);
+        if (ctx.vorbei()) allesHinein();
+        return;
+      }
+      LS.fliegen(karte, x.k, false);
+      legeHinein(x.inhalt, d);
+      pos++;
+      if (pos < a.dinge.length) { ton("tipp"); zeigeKarte(); return; }
+      if (a.zaehlen) { ton("tipp"); zaehlen(); return; }
+      karte.innerHTML = "";
+      ctx.richtig(lob);
+    });
+    zeigeKarte();
+  },
+});
+
+function dingSchluessel(d) { return `${d.farbe[0]}${d.form[0]}${d.form === "stern" ? "t" : ""}${d.gross ? "G" : "k"}`; }
+</script>
+</body>
+</html>

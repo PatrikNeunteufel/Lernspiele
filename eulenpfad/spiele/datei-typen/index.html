@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datei-Typen</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .korb-karte b { font-family: ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+  .dt-endung { color: var(--deko-3); }
+  .wahl-knopf.dt-datei { font-family: ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+  .wahl-knopf.dt-datei small { font-family: inherit; }
+  .dt-merk { max-width: 560px; margin: 0 auto 12px; text-align: center; font-size: 15px; font-weight: 700; color: var(--text-leise); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🗂️ Datei-Typen</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MI.2.1.d/e (Medien und Informatik, 2. Zyklus): Dateitypen (Text, Bild, Ton, Video) und
+// ihre Endungen kennen; MI.2.3.f: Grösseneinheiten (ungefähre Grösse einer Datei).
+// Basisklasse 5: s1 4. Klasse (Ding → Art der Datei: Text, Bild, Ton), s2 häufige Endungen in die Körbe,
+// s3 mehr Endungen, auch rückwärts (welche Datei ist ein Lied?), s4 welches Programm öffnet die Datei?,
+// s5 6. Klasse: welche Datei ist am grössten, wie gross ungefähr? (MI.2.3.f), s6 Königsstufe gemischt,
+// mit Fallen: Der Name täuscht („lied.jpg“ ist ein Bild).
+// Grössen wie in der Speicher-Leiter (DINGE dort): Seite Text 2 kB, Handyfoto 3 MB, Lied 4 MB,
+// Video 1 Minute 100 MB, Film 2 GB. Foto und Lied liegen zu nah beieinander und kommen nie zusammen.
+// Die Speicher-Leiter übt die Einheiten selbst (ordnen, umrechnen); hier geht es um die Datei.
+// Inhalte nur aus woerter.js (Liste „endungen“), freigegeben über LS.freieListen.
+
+const { waehle, mische, el } = LS;
+
+// Freigabe (Entscheid L4 a): Kennt der Katalog die Liste nicht, gilt sie als frei.
+const LISTE_FREI = LS.spielListen("datei-typen").length ? LS.freieListen("datei-typen").includes("endungen") : true;
+
+const ARTEN = {
+  text:  { name: "Text", bild: "📄" },
+  bild:  { name: "Bild", bild: "🖼️" },
+  ton:   { name: "Ton", bild: "🎵" },
+  video: { name: "Video", bild: "🎬" },
+};
+const KORB_ARTEN = ["text", "bild", "ton", "video"];
+const korbFarbe = art => `var(--deko-${KORB_ARTEN.indexOf(art) + 1})`;
+
+// Programme, die für eine Art sicher NICHT passen (Ablenker in Stufe 4). Bewusst weggelassen, weil sie
+// die Datei doch öffnen können: Webbrowser (öffnet Bilder, PDF, Ton, Video), Textverarbeitung für .txt
+// und .pdf, Entpackprogramm für .docx, .pptx, .xlsx (innen ZIP), Tabellenkalkulation für .html,
+// Videoplayer für Ton.
+const FALSCHE_PROGRAMME = {
+  text: ["bildbetrachter", "musik", "video"],
+  bild: ["musik", "tabelle", "entpacken", "texteditor"],
+  ton: ["bildbetrachter", "tabelle", "entpacken", "texteditor"],
+  video: ["bildbetrachter", "tabelle", "entpacken", "texteditor"],
+  praesentation: ["musik", "bildbetrachter", "video", "texteditor"],
+  tabelle: ["musik", "bildbetrachter", "video", "texteditor"],
+  archiv: ["musik", "bildbetrachter", "video", "texteditor"],
+  webseite: ["musik", "bildbetrachter", "video", "entpacken"],
+};
+
+// SACHANGABEN — ungefähre Grössen, dieselben wie in der Speicher-Leiter (zu prüfen). Byte als Zahl.
+const GROESSEN = [
+  { id: "seite", endung: "txt", namen: ["notizen", "einkaufsliste"], was: "eine Seite Text", n: 2, e: "kB", byte: 2e3 },
+  { id: "foto", endung: "jpg", namen: ["ferienfoto", "klassenfoto", "selfie"], was: "ein Handyfoto", n: 3, e: "MB", byte: 3e6 },
+  { id: "lied", endung: "mp3", namen: ["lied", "lieblingssong"], was: "ein Lied", n: 4, e: "MB", byte: 4e6 },
+  { id: "video", endung: "mp4", namen: ["clip", "kurzvideo"], was: "ein Video von 1 Minute", n: 100, e: "MB", byte: 1e8 },
+  { id: "film", endung: "mp4", namen: ["spielfilm", "kinofilm"], was: "ein ganzer Film", n: 2, e: "GB", byte: 2e9 },
+];
+const groesseText = g => `ungefähr ${g.n} ${g.e}`;
+
+const STUFE = {
+  s1: { arten: ["ding"] },
+  s2: { arten: ["korb"], nurHaeufig: true },
+  s3: { arten: ["korb", "korb", "welche"] },
+  s4: { arten: ["programm"] },
+  s5: { arten: ["groesste", "wieGross"] },
+  // Königsstufe: alles gemischt, Körbe oft mit täuschendem Namen
+  s6: { arten: ["falle", "falle", "programm", "groesste", "wieGross", "welche"] },
+};
+const nurMoegliche = texte => (LISTE_FREI ? texte : {});
+
+const endungVon = e => DATEI_ENDUNGEN.find(x => x.endung === e);
+const korbEndungen = p => DATEI_ENDUNGEN.filter(x => KORB_ARTEN.includes(x.art) && (!p.nurHaeufig || x.haeufig));
+const datei = (name, endung) => `${name}.${endung}`;
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(waehle(p.arten), p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  throw new Error(`Stufe ${stufe}: keine Aufgabe gefunden`);
+}
+
+function erzeuge(art, p) {
+  if (art === "ding") {
+    const d = waehle(DATEI_DINGE);
+    return { art, ding: DATEI_DINGE.indexOf(d), koerbe: ["text", "bild", "ton"], richtig: d.art };
+  }
+  if (art === "korb") {
+    const e = waehle(korbEndungen(p));
+    return { art, endung: e.endung, name: waehle(e.namen), koerbe: KORB_ARTEN, richtig: e.art };
+  }
+  if (art === "falle") {
+    // Der Name gehört zu einer anderen Art als die Endung: Es zählt nur die Endung.
+    const e = waehle(korbEndungen(p));
+    const andere = DATEI_ENDUNGEN.filter(x => KORB_ARTEN.includes(x.art) && x.art !== e.art);
+    return { art, endung: e.endung, name: waehle(waehle(andere).namen), koerbe: KORB_ARTEN, richtig: e.art };
+  }
+  if (art === "welche") {
+    // Gleicher Name, vier Endungen aus vier Arten: Welche Datei ist ein Bild?
+    const name = waehle(DATEI_NEUTRAL);
+    const endungen = KORB_ARTEN.map(k => waehle(DATEI_ENDUNGEN.filter(x => x.art === k)).endung);
+    const gesucht = waehle(KORB_ARTEN);
+    return { art, name, optionen: mische(endungen), gesucht, richtig: endungen[KORB_ARTEN.indexOf(gesucht)] };
+  }
+  if (art === "programm") {
+    const e = waehle(DATEI_ENDUNGEN);
+    const falsch = mische(FALSCHE_PROGRAMME[e.art]).slice(0, 3);
+    return { art, endung: e.endung, name: waehle(e.namen), optionen: mische([e.programm, ...falsch]), richtig: e.programm };
+  }
+  if (art === "groesste") {
+    // drei Dateien, je zwei mindestens Faktor 10 auseinander
+    const wahl = mische(GROESSEN.map((_, i) => i)).slice(0, 3).sort((x, y) => GROESSEN[x].byte - GROESSEN[y].byte);
+    for (let i = 1; i < 3; i++) if (GROESSEN[wahl[i]].byte < GROESSEN[wahl[i - 1]].byte * 10) return null;
+    const frage = waehle(["gross", "klein"]);
+    const dateien = mische(wahl).map(i => ({ g: i, name: waehle(GROESSEN[i].namen) }));
+    return { art, frage, dateien, richtig: frage === "gross" ? wahl[2] : wahl[0] };
+  }
+  if (art === "wieGross") {
+    const i = waehle(GROESSEN.map((_, k) => k));
+    const g = GROESSEN[i];
+    return { art, g: i, name: waehle(g.namen), optionen: mische(["kB", "MB", "GB"]), richtig: g.e };
+  }
+  return null;
+}
+
+/** Mängel: Art aus der Liste nachgeschlagen, genau eine richtige Antwort, keine doppelten Optionen. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (!LISTE_FREI) m.push("Liste „endungen“ nicht frei");
+  const e = a.endung && endungVon(a.endung);
+  switch (a.art) {
+    case "ding": {
+      const d = DATEI_DINGE[a.ding];
+      if (!d || d.art !== a.richtig || !a.koerbe.includes(a.richtig)) m.push("Ding passt nicht zum Korb");
+      break;
+    }
+    case "korb": case "falle": {
+      if (!e || e.art !== a.richtig) m.push("Endung passt nicht zum Korb");
+      if (e && p.nurHaeufig && !e.haeufig) m.push("seltene Endung in Stufe 2");
+      if (e && !KORB_ARTEN.includes(e.art)) m.push("Endung ohne Korb");
+      const nameArt = DATEI_ENDUNGEN.filter(x => x.namen.includes(a.name)).map(x => x.art);
+      if (a.art === "korb" && !nameArt.includes(a.richtig)) m.push("Name passt nicht zur Art");
+      if (a.art === "falle" && (!nameArt.length || nameArt.includes(a.richtig))) m.push("Falle täuscht nicht");
+      break;
+    }
+    case "welche": {
+      const arten = a.optionen.map(o => endungVon(o)?.art);
+      if (new Set(arten).size !== 4 || arten.some(x => !KORB_ARTEN.includes(x))) m.push("nicht vier verschiedene Arten");
+      if (arten.filter(x => x === a.gesucht).length !== 1 || endungVon(a.richtig)?.art !== a.gesucht) m.push("Lösung nicht eindeutig");
+      break;
+    }
+    case "programm": {
+      if (!e || e.programm !== a.richtig) m.push("Programm passt nicht");
+      if (new Set(a.optionen).size !== a.optionen.length || a.optionen.length !== 4) m.push("doppelte Programme");
+      if (e && a.optionen.some(o => o !== a.richtig && !FALSCHE_PROGRAMME[e.art].includes(o))) m.push("Ablenker könnte die Datei öffnen");
+      if (a.optionen.some(o => !DATEI_PROGRAMME[o])) m.push("unbekanntes Programm");
+      if (e && !e.namen.includes(a.name)) m.push("Name nicht aus der Liste");
+      break;
+    }
+    case "groesste": {
+      const b = a.dateien.map(d => GROESSEN[d.g].byte);
+      const soll = a.frage === "gross" ? Math.max(...b) : Math.min(...b);
+      if (GROESSEN[a.richtig].byte !== soll || b.filter(x => x === soll).length !== 1) m.push("Lösung nicht eindeutig");
+      const s = [...b].sort((x, y) => x - y);
+      if (s[1] < s[0] * 10 || s[2] < s[1] * 10) m.push("zwei Dateien zu nah beieinander");
+      if (new Set(a.dateien.map(d => d.g)).size !== 3) m.push("doppelte Datei");
+      break;
+    }
+    case "wieGross":
+      if (GROESSEN[a.g].e !== a.richtig || new Set(a.optionen).size !== 3) m.push("Einheit falsch");
+      break;
+    default: m.push("unbekannte Art");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const korbInhalt = k => ({ bild: ARTEN[k].bild, text: ARTEN[k].name });
+const dateiEl = (name, endung) => el("span", {}, `${name}.`, el("span", { class: "dt-endung", text: endung }));
+const programmText = id => `${DATEI_PROGRAMME[id].bild} ${DATEI_PROGRAMME[id].name}`;
+const HINWEIS_ENDUNG = "Schau auf die Endung nach dem Punkt. Sie verrät die Art der Datei.";
+
+LS.spiel({
+  id: "datei-typen",
+  einleitung: "Jede Datei hat einen Namen und eine Endung nach dem Punkt: ferien.jpg, lied.mp3. Die Endung verrät, ob Text, ein Bild, Ton oder ein Video darin steckt!",
+  anzahl: 8,
+  stufen: nurMoegliche({
+    s1: "Brief, Foto oder Lied: Ist es Text, ein Bild oder Ton?",
+    s2: "Die Endung verrät es: aufsatz.docx, ferienfoto.jpg, lied.mp3.",
+    s3: "Mehr Endungen: .pdf, .gif, .wav, .mov — welche Datei ist ein Lied?",
+    s4: "Welches Programm öffnet die Datei? Auch .pptx, .xlsx, .zip, .html.",
+    s5: "Welche Datei ist am grössten? kB, MB oder GB? (6. Klasse)",
+    s6: "Endgegner: alles gemischt — und der Name täuscht: lied.jpg ist ein Bild!",
+  }),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s1" ? "Lesen, anschauen oder anhören? Das zeigt dir die Art." : ctx.stufe === "s5" ? "Text braucht wenig Platz, Fotos und Lieder mehr, Videos am meisten." : "Schau immer zuerst auf die Endung nach dem Punkt.");
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art === "falle" ? "korb" : a.art);
+
+    if (a.art === "ding") {
+      const d = DATEI_DINGE[a.ding];
+      ctx.serie("korb", a.richtig);
+      f.append(el("div", { class: "frage", html: "Welche <b>Art Datei</b> wird das auf dem Computer?" }));
+      LS.koerbe(ctx, {
+        karte: { bild: d.bild, text: d.name }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt, farbe: korbFarbe,
+        hinweis: "Liest man es, schaut man es an oder hört man es?",
+        loesung: `${d.name}: ${ARTEN[a.richtig].name}`,
+      });
+      return;
+    }
+    if (a.art === "korb" || a.art === "falle") {
+      const e = endungVon(a.endung);
+      ctx.serie("korb", a.richtig);
+      f.append(el("div", { class: "frage", html: "In welchen <b>Korb</b> gehört die Datei?" }));
+      const { karte } = LS.koerbe(ctx, {
+        karte: { text: datei(a.name, a.endung) }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt, farbe: korbFarbe,
+        hinweis: a.art === "falle" ? "Lass dich nicht vom Namen täuschen! Es zählt nur die Endung nach dem Punkt." : HINWEIS_ENDUNG,
+        loesung: `${datei(a.name, a.endung)}: ${ARTEN[a.richtig].name} (.${a.endung}: ${e.wozu})`,
+        lob: `Richtig! .${a.endung}: ${e.wozu}.`,
+      });
+      const b = karte.querySelector("b");
+      b.textContent = "";
+      b.append(dateiEl(a.name, a.endung));
+      return;
+    }
+    if (a.art === "welche") {
+      ctx.serie("gesucht", a.gesucht);
+      const was = { text: "ein Text", bild: "ein Bild", ton: "Ton (zum Anhören)", video: "ein Video" }[a.gesucht];
+      f.append(el("div", { class: "frage", html: `Welche Datei ist <b>${was}</b>?` }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 150,
+        inhalt: o => dateiEl(a.name, o),
+        hinweis: "Alle heissen gleich. Nur die Endung nach dem Punkt ist verschieden.",
+        loesung: `${datei(a.name, a.richtig)} (.${a.richtig}: ${endungVon(a.richtig).wozu})`,
+      });
+      box.querySelectorAll(".wahl-knopf").forEach(k => k.classList.add("dt-datei"));
+      return;
+    }
+    if (a.art === "programm") {
+      const e = endungVon(a.endung);
+      f.append(el("div", { class: "frage", html: "Mit welchem <b>Programm</b> öffnest du die Datei?" }),
+        el("div", { class: "korb-karte" }, el("b", {}, dateiEl(a.name, a.endung))));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 150,
+        inhalt: o => ({ bild: DATEI_PROGRAMME[o].bild, text: DATEI_PROGRAMME[o].name, klein: DATEI_PROGRAMME[o].beispiel }),
+        hinweis: "Überlege zuerst: Was steckt in der Datei? Text, ein Bild, Ton, ein Video — oder etwas anderes?",
+        loesung: `${datei(a.name, a.endung)}: ${programmText(a.richtig)} (.${a.endung}: ${e.wozu})`,
+      });
+      return;
+    }
+    if (a.art === "groesste") {
+      ctx.serie("frage", a.frage);
+      const g = GROESSEN[a.richtig];
+      const name = a.dateien.find(d => d.g === a.richtig).name;
+      f.append(el("div", { class: "frage", html: `Welche Datei braucht am <b>${a.frage === "gross" ? "meisten" : "wenigsten"}</b> Speicherplatz?` }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.dateien.map(d => d.g), richtig: a.richtig, breite: 170,
+        inhalt: i => { const d = a.dateien.find(x => x.g === i); return el("span", {}, dateiEl(d.name, GROESSEN[i].endung), el("small", { text: GROESSEN[i].was })); },
+        hinweis: "Text braucht wenig Platz, Bilder und Ton mehr, bewegte Bilder am meisten.",
+        loesung: `${datei(name, g.endung)} (${g.was}, ${groesseText(g)})`,
+        lob: a.dateien.map(d => `${GROESSEN[d.g].was}: ${groesseText(GROESSEN[d.g])}`).join(" · "),
+      });
+      box.querySelectorAll(".wahl-knopf").forEach(k => { k.classList.add("dt-datei"); k.querySelector("small").style.display = "block"; });
+      return;
+    }
+    // wieGross
+    const g = GROESSEN[a.g];
+    ctx.serie("antwort", a.richtig);
+    f.append(el("div", { class: "frage", html: `Wie <b>gross</b> ist diese Datei ungefähr?` }),
+      el("div", { class: "korb-karte" }, el("b", {}, dateiEl(a.name, g.endung)), el("div", { class: "dt-merk", text: g.was })));
+    LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.richtig, breite: 110,
+      inhalt: o => `${g.n} ${o}`,
+      hinweis: "Denk an die Leiter: 1000 kB = 1 MB, 1000 MB = 1 GB. Braucht diese Datei wenig, mittel oder sehr viel Platz?",
+      loesung: `${datei(a.name, g.endung)}: ${groesseText(g)}`,
+    });
+  },
+});
+</script>
+</body>
+</html>

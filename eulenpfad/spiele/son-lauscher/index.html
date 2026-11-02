@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Son-Lauscher</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(17px, 3.8vw, 22px); font-weight: 800; margin: 2px 0 10px; color: var(--text-leise); }
+  .sl-hoer { display: block; margin: 0 auto 12px; border: none; border-radius: 999px; padding: 12px 26px; font-family: inherit;
+    font-size: clamp(20px, 4.4vw, 26px); font-weight: 900; background: var(--deko-3); color: #fff; box-shadow: 0 5px 0 var(--deko-7); cursor: pointer; }
+  .sl-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-7); }
+  .sl-paar { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin: 0 auto 12px; }
+  .sl-paar .sl-hoer { margin: 0; min-width: 120px; }
+  .sl-geschrieben { text-align: center; font-size: clamp(20px, 4.6vw, 28px); font-weight: 800; margin: 10px 0 0; }
+  .sl-geschrieben b, .lueckenwort b { color: var(--deko-3); }
+  .lueckenwort { text-align: center; font-size: clamp(30px, 7vw, 46px); font-weight: 900; margin: 4px 0 12px; overflow-wrap: anywhere; }
+  .sl-luecke { display: inline-block; min-width: 2.2em; border-bottom: 5px solid var(--deko-3); margin: 0 3px; color: var(--deko-3); text-align: center; }
+  .sl-wahl .wahl-knopf { font-size: clamp(26px, 6vw, 36px); min-height: 72px; }
+  .sl-gleich .wahl-knopf { min-height: 88px; font-size: clamp(20px, 4.6vw, 26px); }
+  .korb-knopf small { font-size: 15px; font-weight: 700; opacity: .9; }
+  .sl-tasten { grid-template-columns: repeat(5, 1fr); }
+  .sl-tasten button { font-size: clamp(24px, 6vw, 30px); }
+  .sl-anzeige { max-width: 260px; margin: 0 auto; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>👂 Son-Lauscher</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS2F.5.C.2.c (2. Zyklus): Laute und Schrift — ou, au, on, ch hören und der Schreibweise
+// zuordnen; FS2F.5.E.2.a: é und Nasallaute schreiben. Basisklasse 5 (Französisch beginnt in der
+// 5. Klasse): s1 Einstieg ohne Vorkenntnisse (zwei Wörter hören: klingen sie am Schluss gleich?),
+// s2 ou gegen au hören, s3 dazu on und ch (drei Körbe), s4 Nasallaute an/en, in/ain, on — hören und
+// ohne Ton nach der Schrift, s5 6. Klasse: é gegen è/ê hören und die Lücke mit der richtigen
+// Schreibweise füllen, s6 Königsstufe: alle Laute gemischt, Wort hören und die Lautgruppe selbst tippen
+// (au oder eau, in oder ain …).
+// Gehört wird über die Stimme des Geräts (Französisch aus der Schweiz zuerst, sonst aus Frankreich);
+// ohne französische Stimme erklärt die Eule es. Vorbild der Mechanik: Sound-Sorter (Englisch).
+// Abgrenzung: Nombres-Rallye und Quelle heure? üben Zahlen und Uhrzeit, hier zählt nur der Laut.
+
+const { waehle, mische, el } = LS;
+const ID = "son-lauscher";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["woerter"]);
+const WOERTER = FREI.has("woerter") ? SON_WOERTER.map(zerlegeEintrag) : [];
+
+/** "le bat[eau]" → { anzeige: "le bateau", vor: "le bat", gr: "eau", nach: "", laut, bild } */
+function zerlegeEintrag([roh, laut, bild = ""]) {
+  const m = roh.match(/^(.*)\[(.+?)\](.*)$/);
+  return { anzeige: m[1] + m[2] + m[3], vor: m[1], gr: m[2], nach: m[3], laut, bild };
+}
+const eintrag = anzeige => WOERTER.find(w => w.anzeige === anzeige);
+const mitLaut = laute => WOERTER.filter(w => laute.includes(w.laut));
+/** Ohne Artikel: „le bateau“ → „bateau“. */
+const nackt = anzeige => anzeige.replace(/^(le |la |l’)/, "");
+const sprich = text => LS.sprich(text.replace(/’/g, "'"), "fr");
+const ALLE = Object.keys(SON_LAUTE);
+/** Zu welchem Laut gehört eine Schreibweise (eau → au)? Für Ablenker ausserhalb der Liste (c, s, j, e): null. */
+const lautDerSchrift = gr => ALLE.find(l => SON_LAUTE[l].schrift.includes(gr)) || null;
+
+// Endet das Wort hörbar mit seinem Laut? Danach nur noch stumme Buchstaben (le loup, le pont, la roue, la vache).
+const STUMM_DANACH = /^(|s|t|d|c|x|p|ps|g|gt|e)$/;
+const endetMitLaut = w => STUMM_DANACH.test(w.nach);
+
+// Lücke (Stufe 5): Ablenker mit hörbar anderem Laut — so ist die Aufgabe beim Hören lösbar.
+const ABLENKER = {
+  ou: ["au", "on", "oi"], au: ["ou", "on", "an"], on: ["an", "ou", "in"], an: ["on", "in", "ou"],
+  in: ["an", "on", "ou"], ch: ["c", "s", "j"], oi: ["ou", "au", "on"],
+};
+function ablenkerFuer(w) {
+  if (w.laut === "é") return [waehle(["è", "ê"]), "e"];
+  if (w.laut === "è") return ["é", "e"];
+  return mische(ABLENKER[w.laut]).slice(0, 2);
+}
+
+/** Beispielwort für einen Korb, nicht das Wort der Karte. */
+const beispielFuer = (laut, w) => SON_LAUTE[laut].beispiele.find(b => b !== nackt(w.anzeige));
+
+const S1_LAUTE = ["ou", "au", "on", "oi", "é", "ch"];
+const NASAL = ["an", "in", "on"];
+
+const ARTEN = {
+  /** Stufe 1: zwei Wörter hören — klingen sie am Schluss gleich? */
+  paar() {
+    const pool = mitLaut(S1_LAUTE).filter(endetMitLaut);
+    const laute = S1_LAUTE.filter(l => pool.some(w => w.laut === l));
+    if (laute.length < 2) return null;
+    const gleich = Math.random() < 0.5 && laute.some(l => pool.filter(w => w.laut === l).length >= 2);
+    let w1, w2;
+    if (gleich) {
+      const l = waehle(laute.filter(x => pool.filter(w => w.laut === x).length >= 2));
+      [w1, w2] = mische(pool.filter(w => w.laut === l));
+    } else {
+      const [l1, l2] = mische(laute);
+      w1 = waehle(pool.filter(w => w.laut === l1));
+      w2 = waehle(pool.filter(w => w.laut === l2));
+    }
+    return { art: "paar", woerter: [w1.anzeige, w2.anzeige], richtig: gleich ? "gleich" : "verschieden" };
+  },
+  /** Stufe 2–5: Wort hören (nicht sehen) und in den Korb mit seinem Laut legen. */
+  hoeren(laute, n) {
+    const pool = mitLaut(laute);
+    if (!pool.length) return null;
+    const w = waehle(pool);
+    const koerbe = mische([w.laut, ...mische(laute.filter(l => l !== w.laut)).slice(0, n - 1)]);
+    return { art: "hoeren", wort: w.anzeige, richtig: w.laut, koerbe };
+  },
+  /** Stufe 4: Wort lesen (ohne Ton): Welcher Nasallaut? Die Körbe nennen nur ein Beispielwort. */
+  lesen() {
+    const pool = mitLaut(NASAL);
+    if (!pool.length) return null;
+    // Lieber Wörter, deren Schreibweise anders ist als die erste ihres Lauts (enfant, pain, nom).
+    const knifflig = pool.filter(w => w.gr !== SON_LAUTE[w.laut].schrift[0]);
+    const w = waehle(knifflig.length && Math.random() < 0.6 ? knifflig : pool);
+    return { art: "lesen", wort: w.anzeige, richtig: w.laut, koerbe: mische(NASAL) };
+  },
+  /** Stufe 5: Wort hören, Lücke mit der richtigen Schreibweise füllen (drei Knöpfe). */
+  luecke() {
+    if (!WOERTER.length) return null;
+    const w = waehle(WOERTER);
+    return { art: "luecke", wort: w.anzeige, richtig: w.gr, optionen: mische([w.gr, ...ablenkerFuer(w)]) };
+  },
+  /** Königsstufe: Wort hören, Lautgruppe selbst tippen. */
+  tippen() {
+    if (!WOERTER.length) return null;
+    const w = waehle(WOERTER);
+    return { art: "tippen", wort: w.anzeige, richtig: w.gr };
+  },
+};
+
+const STUFE = {
+  s1: [() => ARTEN.paar()],
+  s2: [() => ARTEN.hoeren(["ou", "au"], 2)],
+  s3: [() => ARTEN.hoeren(["ou", "au", "on", "ch"], 3)],
+  s4: [() => ARTEN.hoeren(NASAL, 3), () => ARTEN.lesen()],
+  s5: [() => ARTEN.hoeren(["é", "è"], 2), () => ARTEN.luecke()],
+  s6: [() => ARTEN.tippen()],
+};
+
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Ohne Vorkenntnisse: Zwei Wörter hören — klingen sie am Schluss gleich? le bateau, le gâteau",
+  s2: "Hör genau: ou wie in rouge oder au wie in jaune?",
+  s3: "Dazu on (le ballon) und ch (le chat). Drei Körbe.",
+  s4: "Nasallaute: an / en, in / ain, on — auch ohne Ton, nur lesen.",
+  s5: "é oder è? Und die Lücke füllen: le caf_ → é",
+  s6: "Endgegner: Wort hören und den Laut selbst schreiben: le bat_ → eau",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  const erlaubt = { s1: ["paar"], s2: ["hoeren"], s3: ["hoeren"], s4: ["hoeren", "lesen"], s5: ["hoeren", "luecke"], s6: ["tippen"] }[stufe];
+  if (!erlaubt.includes(a.art)) m.push(`Art ${a.art} in ${stufe}`);
+  const woerter = a.woerter || [a.wort];
+  for (const x of woerter) {
+    const w = eintrag(x);
+    if (!w) { m.push(`Wort nicht aus einer freien Liste: ${x}`); continue; }
+    if (!SON_LAUTE[w.laut]?.schrift.includes(w.gr)) m.push(`Schreibweise ${w.gr} passt nicht zum Laut ${w.laut}`);
+    if (!/^(le |la |l’)?[a-zàâçéèêëîïôûùüœ]+$/.test(w.anzeige)) m.push(`Wort mit unerwarteten Zeichen: ${w.anzeige}`);
+  }
+  if (m.length) return m;
+  if (a.art === "paar") {
+    const [w1, w2] = woerter.map(eintrag);
+    if (w1.anzeige === w2.anzeige) m.push("zweimal dasselbe Wort");
+    if (!endetMitLaut(w1) || !endetMitLaut(w2)) m.push("Wort endet nicht hörbar mit seinem Laut");
+    if (!S1_LAUTE.includes(w1.laut) || !S1_LAUTE.includes(w2.laut)) m.push("Laut nicht in Stufe 1");
+    if ((w1.laut === w2.laut) !== (a.richtig === "gleich")) m.push("gleich/verschieden falsch");
+  }
+  if (a.art === "hoeren" || a.art === "lesen") {
+    const w = eintrag(a.wort);
+    const laute = { s2: ["ou", "au"], s3: ["ou", "au", "on", "ch"], s4: NASAL, s5: ["é", "è"] }[stufe] || [];
+    const n = { s2: 2, s3: 3, s4: 3, s5: 2 }[stufe];
+    if (a.richtig !== w.laut) m.push("Korb passt nicht zum Laut");
+    if (a.koerbe.length !== n || new Set(a.koerbe).size !== n || !a.koerbe.includes(a.richtig)) m.push("Körbe nicht verschieden oder ohne den richtigen");
+    if (!a.koerbe.every(k => laute.includes(k))) m.push("Korb mit einem Laut ausserhalb der Stufe");
+    if (a.koerbe.some(k => !beispielFuer(k, w))) m.push("Korb ohne Beispielwort");
+  }
+  if (a.art === "luecke") {
+    const w = eintrag(a.wort);
+    if (a.optionen.length !== 3 || new Set(a.optionen).size !== 3) m.push("nicht drei verschiedene Schreibweisen");
+    if (a.optionen.filter(o => o === w.gr).length !== 1 || a.richtig !== w.gr) m.push("richtige Schreibweise nicht genau einmal");
+    // Beim Hören lösbar: kein Ablenker mit demselben Laut (au/eau, in/ain, è/ê).
+    if (a.optionen.some(o => o !== w.gr && lautDerSchrift(o) === w.laut)) m.push("Ablenker klingt gleich wie die Lösung");
+  }
+  if (a.art === "tippen") {
+    const w = eintrag(a.wort);
+    if (a.richtig !== w.gr) m.push("Lösung ist nicht die markierte Schreibweise");
+    if (![...w.gr].every(z => TASTEN.includes(z))) m.push(`Schreibweise ${w.gr} nicht eintippbar`);
+  }
+  return m;
+}
+
+// Buchstaben der Tastatur in der Königsstufe (alle Schreibweisen aus SON_LAUTE lassen sich damit tippen).
+const TASTEN = ["a", "e", "i", "o", "u", "n", "m", "c", "h", "é", "è", "ê"];
+
+/** Wort mit Lücke (oder gefüllt, Lautgruppe fett). */
+function lueckenwort(w, gefuellt = false) {
+  return el("div", { class: "lueckenwort" }, w.vor,
+    gefuellt ? el("b", { text: w.gr }) : el("span", { class: "sl-luecke", text: " " }), w.nach);
+}
+/** Geschrieben mit fetter Lautgruppe, für die Auflösung nach der Antwort. */
+const geschrieben = w => el("span", {}, w.vor, el("b", { text: w.gr }), w.nach);
+
+const hoerKnopf = (text, beschriftung = "🔊 nochmal") =>
+  el("button", { type: "button", class: "sl-hoer", text: beschriftung, "aria-label": "Anhören", onclick: () => sprich(text) });
+
+/** Korb: Laut mit Beispielwort; beim Lesen nur das Beispielwort (sonst verrät die Schrift den Korb). */
+function korbInhalt(a, k) {
+  const w = eintrag(a.wort);
+  return a.art === "lesen" ? { text: `wie in ${beispielFuer(k, w)}` } : { text: SON_LAUTE[k].name, klein: `wie in ${beispielFuer(k, w)}` };
+}
+
+// Tastatur der Königsstufe: auch auf einer echten Tastatur tippbar.
+let aktiveTasten = null;
+document.addEventListener("keydown", e => {
+  if (!aktiveTasten || !document.body.contains(aktiveTasten.element)) return;
+  if (TASTEN.includes(e.key)) aktiveTasten.tippe(e.key);
+  else if (e.key === "Backspace") aktiveTasten.loesche();
+  else if (e.key === "Enter") aktiveTasten.ok();
+  else return;
+  e.preventDefault();
+});
+
+/** Buchstabentastatur mit Anzeige; onOk(text). */
+function buchstabenTastatur(anzeige, onOk) {
+  let text = "";
+  const t = el("div", { class: "tastatur sl-tasten" });
+  const zeige = () => {
+    anzeige.classList.remove("richtig", "falsch");
+    anzeige.classList.toggle("leer", text === "");
+    anzeige.textContent = text;
+    okKnopf.disabled = text === "";
+  };
+  const api = {
+    element: t, gesperrt: false,
+    tippe(z) { if (api.gesperrt || text.length >= 3) return; text += z; LS.ton("tipp"); zeige(); },
+    loesche() { if (api.gesperrt) return; text = text.slice(0, -1); zeige(); },
+    ok() { if (!api.gesperrt && text) onOk(text); },
+  };
+  for (const z of TASTEN) t.append(el("button", { type: "button", text: z, onclick: () => api.tippe(z) }));
+  t.append(el("button", { type: "button", class: "loeschen", text: "⌫", "aria-label": "Löschen", onclick: () => api.loesche() }));
+  const okKnopf = el("button", { type: "button", class: "ok", text: "OK ✓", onclick: () => api.ok() });
+  t.append(okKnopf);
+  zeige();
+  aktiveTasten = api;
+  return api;
+}
+
+const TIPP = {
+  paar: "Hör beide Wörter. Achte nur auf den Schluss: le bateau, le gâteau — gleich!",
+  hoeren: "Hör zu und sortiere. Mit 🔊 hörst du das Wort nochmal.",
+  lesen: "Hier hörst du erst nach der Antwort etwas. Lies genau!",
+  luecke: "Hör zu: Welche Buchstaben fehlen?",
+  tippen: "Hör genau hin — und denk an die Schreibweise: au oder eau? in oder ain?",
+};
+
+const SPIEL = {
+  id: ID,
+  einleitung: "Son-Lauscher! Französisch klingt anders, als es aussieht: ou klingt wie u, eau wie o. Hör genau hin!",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.nr === 0) ctx.sag(TIPP[a.art]);
+    if (new Set(STUFE[ctx.stufe]).size > 1) ctx.serie("art", a.art);
+    const f = ctx.flaeche;
+
+    if (a.art === "paar") {
+      const [w1, w2] = a.woerter.map(eintrag);
+      ctx.kennung(`paar:${[...a.woerter].sort().join("|")}`);
+      ctx.serie("antwort", a.richtig);
+      f.append(el("div", { class: "frage", text: "Hör beide Wörter. Klingen sie am Schluss gleich?" }),
+        el("div", { class: "sl-paar" }, hoerKnopf(w1.anzeige, `🔊 ${w1.bild || "1"}`), hoerKnopf(w2.anzeige, `🔊 ${w2.bild || "2"}`)));
+      const loesung = `${w1.anzeige} – ${w2.anzeige}: ${a.richtig}`;
+      const box = LS.auswahl(ctx, {
+        optionen: ["gleich", "verschieden"], richtig: a.richtig, breite: 150,
+        inhalt: o => (o === "gleich" ? { bild: "=", text: "gleich" } : { bild: "≠", text: "verschieden" }),
+        hinweis: "Hör nochmal beide Wörter (🔊) und sprich den Schluss leise nach.", loesung, lob: "Bravo !",
+        beiRichtig: () => f.append(el("div", { class: "sl-geschrieben" }, geschrieben(w1), " – ", geschrieben(w2))),
+      });
+      box.classList.add("sl-gleich");
+      sprich(`${w1.anzeige}, ${w2.anzeige}`);
+      return;
+    }
+
+    const w = eintrag(a.wort);
+    ctx.kennung(`${a.art}:${a.wort}`);
+
+    if (a.art === "hoeren") {
+      ctx.serie("antwort", a.richtig);
+      f.append(el("div", { class: "frage", text: "Hör zu: Welchen Laut hörst du?" }), hoerKnopf(w.anzeige));
+      LS.koerbe(ctx, {
+        karte: { bild: w.bild || "👂", text: "?" }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: k => korbInhalt(a, k),
+        hinweis: "Hör nochmal genau hin (🔊) und sprich das Wort leise nach.",
+        loesung: `${w.anzeige}: ${SON_LAUTE[w.laut].name}`, lob: `Richtig: ${w.anzeige}`,
+      });
+      sprich(w.anzeige);
+      return;
+    }
+
+    if (a.art === "lesen") {
+      ctx.serie("antwort", a.richtig);
+      f.append(el("div", { class: "frage", text: "Lies das Wort. In welchem Korb klingt der Laut gleich?" }));
+      LS.koerbe(ctx, {
+        karte: { text: w.anzeige }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: k => korbInhalt(a, k),
+        hinweis: "Sprich das Wort leise. Welches Beispielwort klingt gleich?",
+        loesung: `${w.anzeige} klingt wie ${beispielFuer(w.laut, w)}`, lob: `Richtig: ${w.anzeige} klingt wie ${beispielFuer(w.laut, w)}`,
+      });
+      // Erst nach der Antwort vorsprechen.
+      f.addEventListener("click", () => { if (ctx.vorbei() && !f.dataset.gesprochen) { f.dataset.gesprochen = "1"; sprich(w.anzeige); } });
+      return;
+    }
+
+    if (a.art === "luecke") {
+      const wortEl = lueckenwort(w);
+      f.append(el("div", { class: "frage", text: "Hör zu und füll die Lücke." }), hoerKnopf(w.anzeige), wortEl);
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 90, loesung: `${w.anzeige}: ${w.gr}`,
+        hinweis: "Hör nochmal genau hin (🔊): Welcher Laut fehlt?", lob: `Richtig: ${w.anzeige}`,
+        beiRichtig: () => wortEl.replaceWith(lueckenwort(w, true)),
+      });
+      box.classList.add("sl-wahl");
+      sprich(w.anzeige);
+      return;
+    }
+
+    // Königsstufe: Lautgruppe tippen.
+    const wortEl = lueckenwort(w);
+    const loesung = `${w.anzeige}: ${w.gr}`;
+    ctx.loesung(loesung);
+    ctx.schritte(w.gr.length + 1);
+    const anzeige = el("div", { class: "anzeige leer sl-anzeige", "aria-label": "Deine Buchstaben" });
+    f.append(el("div", { class: "frage", text: "Hör zu und schreib die fehlenden Buchstaben." }), hoerKnopf(w.anzeige), wortEl, anzeige);
+    const tasten = buchstabenTastatur(anzeige, text => {
+      if (text === w.gr) {
+        tasten.gesperrt = true;
+        anzeige.classList.add("richtig");
+        wortEl.replaceWith(lueckenwort(w, true));
+        ctx.richtig(`Richtig: ${w.anzeige}`);
+        return;
+      }
+      anzeige.classList.add("falsch");
+      ctx.falsch(lautDerSchrift(text) === w.laut
+        ? "Gut gehört! Aber in diesem Wort schreibt man den Laut anders."
+        : "Hör nochmal genau hin (🔊) und sprich das Wort leise nach.", loesung);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    });
+    f.append(tasten.element);
+    sprich(w.anzeige);
+  },
+};
+
+// Startet sofort, wenn eine französische Stimme da ist; sonst wartet es kurz oder erklärt, dass sie fehlt.
+LS.spielMitStimme(SPIEL, "fr");
+</script>
+</body>
+</html>

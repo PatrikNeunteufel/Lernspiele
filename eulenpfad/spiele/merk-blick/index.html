@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merk-Blick</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .mb-raster { display: grid; gap: 8px; width: 100%; margin: 0 auto 14px; padding: 10px; box-sizing: border-box;
+    background: #fff; border: 3px solid var(--rand); border-radius: 18px; position: relative; }
+  .mb-raster.g2 { grid-template-columns: repeat(2, 1fr); max-width: 260px; }
+  .mb-raster.g3 { grid-template-columns: repeat(3, 1fr); max-width: 330px; }
+  .mb-raster.g4 { grid-template-columns: repeat(4, 1fr); max-width: 380px; }
+  .mb-platz { aspect-ratio: 1; display: grid; place-items: center; border-radius: 14px; background: #f6f7fc;
+    border: 3px solid transparent; font: inherit; padding: 0; min-width: 0; min-height: 64px; }
+  .mb-raster.g4 .mb-platz { min-height: 0; }
+  .mb-platz .mb-ding { font-size: clamp(34px, 9vw, 52px); line-height: 1; }
+  .mb-raster.g4 .mb-ding { font-size: clamp(26px, 7vw, 40px); }
+  .mb-platz svg { width: 82%; height: 82%; }
+  button.mb-platz { cursor: pointer; box-shadow: 0 4px 0 var(--rand); background: #fff; border-color: var(--rand); }
+  button.mb-platz.gewaehlt { background: var(--gut-hell); border-color: var(--gut); }
+  button.mb-platz.richtig { background: var(--gut-hell); border-color: var(--gut); }
+  button.mb-platz.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .mb-raster.verdeckt .mb-platz > * { visibility: hidden; }
+  .mb-raster.verdeckt { background: repeating-linear-gradient(45deg, #eef0fa 0 12px, #f7f8fd 12px 24px); }
+  .mb-raster.verdeckt::after { content: "🙈"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 64px; }
+  .mb-wahl .wahl-knopf { min-height: 80px; }
+  .mb-wahl .wahl-knopf .bild { font-size: clamp(40px, 10vw, 54px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>👀 Merk-Blick</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.C.3.b „Unterschiede zwischen sichtbaren Formen oder Raumlagen und Erinnerungsbildern
+// ermitteln“ (alle Stufen; a — Formen und Lagen wiedererkennen — steckt in Stufe 1). Basisklasse 1:
+// s1 Kindergarten (3 Dinge, eins fehlt), s2–s4 1. Klasse (fehlt, neu, Platz getauscht), s5 2. Klasse
+// (Drehung und Farbe), s6 Königsstufe (zwei Änderungen auf einmal).
+// Ablauf je Aufgabe: Bild zeigen (Zeit nach Stufe) → zudecken → verändert wieder zeigen → antworten.
+// Bezug: Punkte-Blitz deckt ebenfalls zu, fragt aber nach der Anzahl; Muster-Fortsetzer setzt Folgen
+// fort. Hier geht es um das Erinnerungsbild: Was ist anders als vorher?
+
+const { zufall, waehle, mische, el } = LS;
+const SVG = "http://www.w3.org/2000/svg";
+
+// Dinge aus dem Alltag von Kindergartenkindern (Bild und Name für das Vorlesen)
+const DINGE = [["🧸", "Teddy"], ["🍎", "Apfel"], ["⚽", "Ball"], ["🐶", "Hund"], ["🐱", "Katze"], ["🚗", "Auto"],
+  ["🌼", "Blume"], ["🍌", "Banane"], ["🎈", "Ballon"], ["🐟", "Fisch"], ["🦆", "Ente"], ["🍓", "Erdbeere"],
+  ["🥕", "Rüebli"], ["🚲", "Velo"], ["⭐", "Stern"], ["🐞", "Marienkäfer"], ["🍐", "Birne"], ["👟", "Schuh"],
+  ["🎁", "Geschenk"], ["🐸", "Frosch"], ["☂️", "Schirm"], ["🍪", "Guetzli"], ["🐰", "Hase"], ["🚂", "Zug"]];
+const NAME = Object.fromEntries(DINGE);
+
+// Formen für Stufe 5 und 6: keine sieht nach einer Vierteldrehung gleich aus.
+const FORMEN = {
+  dreieck: { name: "Dreieck", d: "M0,-36 L34,30 L-34,30 Z" },
+  pfeil: { name: "Pfeil", d: "M-32,-11 L4,-11 L4,-30 L34,0 L4,30 L4,11 L-32,11 Z" },
+  herz: { name: "Herz", d: "M0,32 C-42,6 -38,-32 -16,-32 C-6,-32 0,-24 0,-16 C0,-24 6,-32 16,-32 C38,-32 42,6 0,32 Z" },
+  halbkreis: { name: "Halbkreis", d: "M-36,14 A36,36 0 0 1 36,14 Z" },
+  tropfen: { name: "Tropfen", d: "M0,-38 C14,-14 28,2 28,14 A28,28 0 0 1 -28,14 C-28,2 -14,-14 0,-38 Z" },
+  haus: { name: "Haus", d: "M-28,32 L-28,-4 L0,-34 L28,-4 L28,32 Z" },
+  stueck: { name: "Kuchenstück", d: "M-30,30 L-30,-30 A60,60 0 0 1 30,30 Z" },
+};
+// Deutlich verschiedene Farben (deko-1 und deko-6 sind sich zu ähnlich, deko-7 ist grau)
+const FARBEN = { "deko-2": "rosa", "deko-3": "orange", "deko-4": "gelb", "deko-5": "türkis", "deko-6": "blau" };
+
+// Je Stufe: Rastergrösse, Zahl der Dinge, Aufgabenarten, Zeit zum Anschauen (s), Antworten bei „fehlt“.
+const STUFE = {
+  s1: { n: 2, dinge: 3, arten: ["fehlt"], zeit: 5, wahl: { fremd: 2, sichtbar: 0 } },
+  s2: { n: 2, dinge: 4, arten: ["fehlt"], zeit: 5, wahl: { fremd: 1, sichtbar: 1 } },
+  s3: { n: 3, dinge: 6, arten: ["neu", "neu", "fehlt"], zeit: 6, wahl: { fremd: 1, sichtbar: 2 } },
+  s4: { n: 3, dinge: 7, arten: ["tausch", "tausch", "neu"], zeit: 7 },
+  s5: { n: 3, dinge: 9, arten: ["dreh", "farbe", "tausch"], zeit: 8, formen: true },
+  s6: { n: 4, dinge: 12, arten: ["zwei"], zeit: 10, formen: true },
+};
+const ZUDECKEN = 1.2; // s, so lange liegt das Tuch darüber
+
+const gleich = (x, y) => JSON.stringify(x) === JSON.stringify(y);
+const formText = x => (typeof x === "string" ? NAME[x] : `${FARBEN[x.farbe]} ${FORMEN[x.form].name}`);
+const neueForm = () => ({ form: waehle(Object.keys(FORMEN)), farbe: waehle(Object.keys(FARBEN)), dreh: waehle([0, 90, 180, 270]) });
+
+/** Ort eines Platzes in Worten (für die Lösung): „oben links“, „in der Mitte“ … */
+function ort(i, n) {
+  const r = Math.floor(i / n), s = i % n;
+  if (n === 4) return `in der ${r + 1}. Reihe, ${s + 1}. von links`;
+  const zeile = n === 2 ? ["oben", "unten"][r] : ["oben", "in der Mitte", "unten"][r];
+  const spalte = n === 2 ? ["links", "rechts"][s] : ["links", "in der Mitte", "rechts"][s];
+  return zeile === spalte ? "in der Mitte" : zeile === "in der Mitte" ? `${spalte} in der Mitte` : `${zeile} ${spalte}`;
+}
+
+function aufgabeErzeugen(stufe) {
+  const s = STUFE[stufe];
+  const plaetze = s.n * s.n;
+  const art = waehle(s.arten);
+  const vorher = Array(plaetze).fill(null);
+  const belegt = mische([...Array(plaetze).keys()]).slice(0, s.dinge);
+  let fremde;
+  if (s.formen) {
+    // Formen: jede Kombination aus Form und Farbe höchstens einmal, jede Form höchstens dreimal
+    // (so bleibt beim Umfärben immer eine freie Farbe)
+    const gesehen = new Set();
+    for (const i of belegt) {
+      let f;
+      do f = neueForm(); while (gesehen.has(f.form + f.farbe) || vorher.filter(y => y && y.form === f.form).length >= 3);
+      gesehen.add(f.form + f.farbe);
+      vorher[i] = f;
+    }
+  } else {
+    const bilder = mische(DINGE.map(d => d[0]));
+    belegt.forEach((p, k) => { vorher[p] = bilder[k]; });
+    fremde = bilder.slice(s.dinge);
+  }
+  const nachher = vorher.map(x => (x && typeof x === "object" ? { ...x } : x));
+  const a = { art, n: s.n, vorher, nachher, ziele: [] };
+  const leer = vorher.map((x, i) => (x ? -1 : i)).filter(i => i >= 0);
+
+  if (art === "fehlt") {
+    const p = waehle(belegt);
+    nachher[p] = null;
+    a.weg = vorher[p];
+    a.ort = p;
+    const sichtbar = mische(belegt.filter(i => i !== p).map(i => vorher[i])).slice(0, s.wahl.sichtbar);
+    a.optionen = mische([a.weg, ...sichtbar, ...fremde.slice(0, s.wahl.fremd)]);
+    a.richtig = a.weg;
+    return a;
+  }
+  if (art === "neu") {
+    const p = waehle(leer);
+    nachher[p] = fremde[0];
+    a.ziele = [p];
+    return a;
+  }
+  if (art === "tausch") {
+    // zwei verschiedene Dinge tauschen den Platz
+    const [p, q] = mische(belegt).slice(0, 2);
+    [nachher[p], nachher[q]] = [vorher[q], vorher[p]];
+    a.ziele = [p, q].sort((x, y) => x - y);
+    return a;
+  }
+  // Formen ändern: Drehung, Farbe oder (Königsstufe) eine ganz andere Form
+  const aendern = (p, wie) => {
+    const x = nachher[p];
+    if (wie === "dreh") x.dreh = (x.dreh + waehle([90, 180, 270])) % 360;
+    else if (wie === "farbe") x.farbe = waehle(Object.keys(FARBEN).filter(f => f !== x.farbe && !nachher.some(y => y && y !== x && y.form === x.form && y.farbe === f)));
+    else {
+      let f;
+      do f = neueForm(); while (nachher.some(y => y && y.form === f.form && y.farbe === f.farbe));
+      nachher[p] = f;
+    }
+  };
+  if (art === "zwei") {
+    const ziele = mische(belegt).slice(0, 2);
+    a.wie = ziele.map(() => waehle(["dreh", "farbe", "ersetzt"]));
+    ziele.forEach((p, k) => aendern(p, a.wie[k]));
+    a.ziele = ziele.sort((x, y) => x - y);
+    return a;
+  }
+  const p = waehle(belegt);
+  aendern(p, art);
+  a.ziele = [p];
+  return a;
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. Die Unterschiede werden aus vorher/nachher neu bestimmt. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const s = STUFE[stufe];
+  if (!s.arten.includes(a.art)) m.push("Aufgabenart gehört nicht in diese Stufe");
+  if (a.vorher.length !== s.n * s.n || a.nachher.length !== s.n * s.n) m.push("Raster falsch");
+  if (a.vorher.filter(Boolean).length !== s.dinge) m.push("falsche Zahl Dinge");
+  const anders = a.vorher.map((x, i) => (gleich(x, a.nachher[i]) ? -1 : i)).filter(i => i >= 0);
+  const voll = a.vorher.filter(Boolean).map(x => JSON.stringify(x));
+  if (new Set(voll).size !== voll.length) m.push("ein Ding doppelt im Bild");
+  if (s.formen && a.vorher.filter(Boolean).some(x => !FORMEN[x.form] || !FARBEN[x.farbe] || x.dreh % 90)) m.push("unbekannte Form oder Farbe");
+  if (a.art === "fehlt") {
+    if (anders.length !== 1 || a.vorher[anders[0]] !== a.richtig || a.nachher[anders[0]] !== null) m.push("es fehlt nicht genau das gesuchte Ding");
+    if (!a.optionen.includes(a.richtig) || new Set(a.optionen).size !== a.optionen.length) m.push("Auswahl falsch");
+    if (a.optionen.filter(o => !a.nachher.includes(o) && a.vorher.includes(o)).length !== 1) m.push("nicht genau eine Antwort fehlt");
+    if (stufe === "s1" && a.optionen.length > 3) m.push("Stufe 1: höchstens drei Antworten");
+    return m;
+  }
+  if (!gleich([...anders].sort((x, y) => x - y), a.ziele)) m.push("Ziele passen nicht zu den Unterschieden");
+  const soll = { neu: 1, tausch: 2, dreh: 1, farbe: 1, zwei: 2 }[a.art];
+  if (anders.length !== soll) m.push(`${anders.length} statt ${soll} Unterschiede`);
+  if (a.art === "neu" && (a.vorher[a.ziele[0]] !== null || a.vorher.includes(a.nachher[a.ziele[0]]))) m.push("neues Ding nicht neu");
+  if (a.art === "tausch" && !(gleich(a.vorher[anders[0]], a.nachher[anders[1]]) && gleich(a.vorher[anders[1]], a.nachher[anders[0]]))) m.push("kein Tausch");
+  if (a.art === "dreh" && anders.some(i => a.vorher[i].form !== a.nachher[i].form || a.vorher[i].farbe !== a.nachher[i].farbe)) m.push("mehr als die Drehung geändert");
+  if (a.art === "farbe" && anders.some(i => a.vorher[i].form !== a.nachher[i].form || a.vorher[i].dreh !== a.nachher[i].dreh)) m.push("mehr als die Farbe geändert");
+  const nach = a.nachher.filter(Boolean).map(x => JSON.stringify(x));
+  if (s.formen && new Set(a.nachher.filter(Boolean).map(x => x.form + x.farbe)).size !== nach.length) m.push("nachher zwei gleiche Formen");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+function dingEl(x) {
+  if (!x) return null;
+  if (typeof x === "string") return el("span", { class: "mb-ding", text: x });
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", "-50 -50 100 100");
+  svg.setAttribute("aria-hidden", "true");
+  const p = document.createElementNS(SVG, "path");
+  p.setAttribute("d", FORMEN[x.form].d);
+  p.setAttribute("transform", `rotate(${x.dreh})`);
+  p.setAttribute("style", `fill: var(--${x.farbe}); stroke: var(--text); stroke-width: 3`);
+  svg.append(p);
+  return svg;
+}
+
+const FRAGE = {
+  fehlt: "Was fehlt jetzt? Tipp auf das Bild.",
+  neu: "Was ist neu dazugekommen? Tipp auf den Platz.",
+  tausch: "Zwei Dinge haben den Platz getauscht. Tipp auf beide.",
+  dreh: "Eine Form hat sich gedreht. Tipp auf sie.",
+  farbe: "Eine Form hat die Farbe gewechselt. Tipp auf sie.",
+  zwei: "Zwei Formen haben sich verändert. Tipp auf beide.",
+};
+const HINWEIS = {
+  fehlt: "Schau die Dinge an, die noch da sind. Welches war vorher auch noch da?",
+  neu: "Eines war vorher noch nicht da. Welcher Platz war vorher leer?",
+  tausch: "Zwei Dinge stehen jetzt am anderen Platz. Welche haben die Plätze gewechselt?",
+  dreh: "Alle Formen sind noch da. Eine zeigt jetzt in eine andere Richtung.",
+  farbe: "Alle Formen sind noch da. Eine hat jetzt eine andere Farbe.",
+  zwei: "Zwei Formen sind anders: gedreht, umgefärbt oder ausgetauscht.",
+};
+
+function loesungText(a) {
+  if (a.art === "fehlt") return `Es fehlt: ${NAME[a.weg]} ${a.weg} (${ort(a.ort, a.n)}).`;
+  if (a.art === "neu") return `Neu ist ${NAME[a.nachher[a.ziele[0]]]} ${a.nachher[a.ziele[0]]} (${ort(a.ziele[0], a.n)}).`;
+  if (a.art === "tausch") return `Getauscht: ${a.ziele.map(i => `${formText(a.vorher[i])} (${ort(i, a.n)})`).join(" und ")}.`;
+  return `Verändert: ${a.ziele.map(i => `${formText(a.vorher[i])} (${ort(i, a.n)})`).join(" und ")}.`;
+}
+
+LS.spiel({
+  id: "merk-blick",
+  einleitung: "Schau dir das Bild gut an und merk es dir. Dann deckt die Eule es zu — und verändert etwas!",
+  anzahl: 8,
+  stufen: {
+    s1: "3 Dinge — dann fehlt eines: Was fehlt? 🧸🍎⚽",
+    s2: "4 Dinge — was fehlt?",
+    s3: "6 Dinge: Was ist neu? Was fehlt?",
+    s4: "7 Dinge: Welche zwei haben den Platz getauscht?",
+    s5: "9 Formen: gedreht, umgefärbt oder getauscht?",
+    s6: "Endgegner: 12 Formen, zwei verändern sich!",
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Schau ganz genau hin und merk dir, wo alles ist!");
+    const a = aufgabeErzeugen(ctx.stufe);
+    const s = STUFE[ctx.stufe];
+    if (new Set(s.arten).size > 1) ctx.serie("art", a.art);
+    ctx.kennung(JSON.stringify([a.vorher, a.nachher]));
+    const loesung = loesungText(a);
+    ctx.loesung(loesung);
+    ctx.schritte(a.art === "fehlt" ? 1 : a.ziele.length);
+    ctx.wartezeit(s.zeit + ZUDECKEN);
+    const f = ctx.flaeche;
+    const auftrag = el("div", { class: "auftrag", text: "Schau gut hin und merk dir alles!" });
+    const raster = el("div", { class: `mb-raster g${a.n}`, "aria-label": "Bild" });
+    const fuelle = (liste, klickbar) => raster.replaceChildren(...liste.map((x, i) => {
+      const p = el(klickbar ? "button" : "div", { class: "mb-platz", ...(klickbar ? { type: "button", "aria-label": x ? formText(x) : "leerer Platz" } : {}) });
+      const d = dingEl(x);
+      if (d) p.append(d);
+      p.dataset.i = i;
+      return p;
+    }));
+    fuelle(a.vorher, false);
+    f.append(auftrag, raster);
+    const da = () => f.contains(raster); // Die Aufgabe kann neu gezogen worden sein (Wiederholungsregel).
+    // Erst wenn das Kind bereit ist: ▶ Los, 3-2-1 — dann zeigen, zudecken, verändert aufdecken (Wunsch Patrik).
+    LS.losGehts(ctx, raster, () => {
+    setTimeout(() => { if (da()) raster.classList.add("verdeckt"); }, s.zeit * 1000);
+    setTimeout(() => {
+      if (!da()) return;
+      raster.classList.remove("verdeckt");
+      auftrag.textContent = FRAGE[a.art];
+      ctx.sag(FRAGE[a.art]);
+      if (a.art === "fehlt") {
+        fuelle(a.nachher, false);
+        const box = el("div", { class: "wahl mb-wahl" });
+        box.style.setProperty("--wahl-breite", "90px");
+        let fertig = false;
+        for (const o of a.optionen) {
+          const k = el("button", { type: "button", class: "wahl-knopf", "aria-label": NAME[o] }, el("span", { class: "bild", text: o }));
+          k.addEventListener("click", () => {
+            if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+            if (o === a.richtig) {
+              fertig = true;
+              k.classList.add("richtig");
+              raster.children[a.ort].append(dingEl(a.weg));
+              ctx.richtig();
+              return;
+            }
+            k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+            ctx.falsch(HINWEIS.fehlt, loesung);
+          });
+          box.append(k);
+        }
+        f.append(box);
+        return;
+      }
+      // Antwort durch Antippen der Plätze
+      fuelle(a.nachher, true);
+      const getroffen = new Set();
+      for (const p of raster.children) p.addEventListener("click", () => {
+        const i = Number(p.dataset.i);
+        if (ctx.vorbei() || getroffen.has(i)) return;
+        if (a.ziele.includes(i)) {
+          getroffen.add(i);
+          p.classList.add("gewaehlt");
+          LS.ton("tipp");
+          if (getroffen.size === a.ziele.length) ctx.richtig();
+          return;
+        }
+        p.classList.remove("falsch"); void p.offsetWidth; p.classList.add("falsch");
+        ctx.falsch(HINWEIS[a.art], loesung);
+        if (ctx.vorbei()) for (const j of a.ziele) raster.children[j].classList.add("richtig");
+      });
+    }, (s.zeit + ZUDECKEN) * 1000);
+    });
+  },
+});
+</script>
+</body>
+</html>

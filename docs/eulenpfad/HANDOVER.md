@@ -1,7 +1,16 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
-**2026-11-02, nach LERN_Session7** ([Report](report/LERN_Session7_2026-11-01.md)):
+**2026-11-02, nach LERN_Session8** ([Report](report/LERN_Session8_2026-11-02.md)):
+- **Spiele:** 140 (49 neu in LERN_Session8: drei Runden 5./6. Klasse und ein Kindergarten-Paket; Lernziele in
+  `lernziele/lehrplan_sg_session8.md`). Fach Französisch neu, Thema Wirtschaft, Dezimalzahlen.
+- **Kindergarten und Vorlesen** (rahmen.md Abschnitt 12): Klasse 0 = Kindergarten; die Eule liest Aufträge und
+  Tipps vor (🗣️, im Spiel automatisch für Kindergarten und 1. Klasse oder nach Einstellung), langes Drücken
+  liest Knöpfe, Stufen und Spielkarten vor; 🔇 schaltet alles stumm. 29 Spiele der 1./2. Klasse lesearm.
+- **Server:** `server_starten.bat` (tools/server.py, ohne Zwischenspeicher), `entwickler_server_starten.bat`.
+- **Tests:** 2026-11-02 „Keine Fehler.“, 15 bekannte Hinweise. Echte Sprachausgabe noch nicht angehört.
+
+Älterer Stand (LERN_Session7):
 - **Reihe und Ordner** (P1 a, P2 a): App in `eulenpfad/`, Doku in `docs/eulenpfad/`; Grundgerüste
   `lernsteig/`, `gratwanderung/` (Handover in `docs/lernsteig/`, `docs/gratwanderung/`); Einstiegsseite
   `portal/`. **Online** unter patrikneunteufel.github.io/Lernspiele/ (Pages bei jedem Push, der eine App
@@ -37,11 +46,12 @@
 
 **Nächste Session — Plan:**
 1. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
-2. Die fünf neuen Spiele der 5./6. Klasse im Entwickler-Modus ansehen und freigeben (LERN-21).
-3. 5./6. Klasse weiter nach `docs/eulenpfad/spielideen/lehrplan_sg_5-6.md`: M3–M5 mit Dezimalzahlen
-   (LERN-36), dann die übrigen Top 15.
-4. Umbenennen der Grundwörter Detektiv, Sortierer, Puzzle vorschlagen (LERN-35).
-5. LERN-34 (Entscheide F1–F8 Klasseneinstellungen), LERN-31, LERN-4, LERN-33, LERN-11.
+2. „▶ Los! 3-2-1“ (`LS.losGehts`) nur bei der ersten Aufgabe einer Runde und nach Fehlern wieder (LERN-38).
+3. Entscheide: Umbenennen Detektiv / Sortierer / Puzzle (LERN-35), Farben rechts vom Komma, Malzeichen
+   „·“/„×“, Braille-Finger ohne freie Liste sichtbar (LERN-39).
+4. Patrik: neue Spiele ansehen und freigeben (LERN-21), Listen prüfen (LERN-11), Vorlesen auf dem Tablet
+   anhören (LERN-37).
+5. Rahmen-Wünsche aus LERN_Session8 (Report, Punkt 4); LERN-34, LERN-31, LERN-4, LERN-33.
 
 Technik: HTML/CSS/JS ohne Build (Entscheid LERN-1). Vertrag zwischen Rahmen und Spielen: [rahmen.md](rahmen.md).
 Übersicht aller Spiele und was zu prüfen ist: [checkliste.md](checkliste.md) (erzeugt mit `node tools/checkliste.js`). Gemeinsamer Rahmen `spiele/gemeinsam/`:
@@ -106,7 +116,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-10 | Spielideen aus dem Lehrplan Volksschule SG, alle Fächer 1.–6. Kl. | erledigt 2026-10-31 (LERN_Session1) | docs/spielideen/lehrplan_sg_spielideen.md |
 | LERN-11 | Inhaltslisten prüfen lassen | offen (Prüfung durch Patrik oder Lehrperson, Entscheid a) | docs/pruefung/wortlisten_zur_pruefung.md (Teile 1–39); geprüfte Listen im Katalog `geprueft` |
 | LERN-12 | Timer, Zeitmessung und didaktische Statistik | erledigt 2026-10-31 (LERN_Session1) | spiel.js, auswertung.js, statistik.html |
-| LERN-13 | Weitere Spiele aus den Spielideen | in Arbeit seit 2026-10-31 (LERN_Session2); 84 Spiele gebaut, 3 Ideen offen | checkliste.md; offen Tipp-Trainer, Schweiz-Karten-Suche (Kartendaten/Lizenz), Mots-Match |
+| LERN-13 | Weitere Spiele aus den Spielideen | in Arbeit seit 2026-10-31 (LERN_Session2); 140 Spiele gebaut | checkliste.md; lehrplan_sg_5-6.md Stand LERN_Session8 |
 | LERN-14 | Testskript für die Aufgabengeneratoren aller Spiele (Node) | erledigt 2026-10-31 (LERN_Session2) | tools/pruefe_spiele.js |
 | LERN-15 | Stufenskala mit Basisklasse und Königsstufe | erledigt 2026-10-31 (LERN_Session2, Entscheid Patrik) | CLAUDE.md; docs/lernziele/lehrplan_sg_session2.md |
 | LERN-16 | Spielstand zurücksetzen und zwischen Geräten abgleichen | erledigt 2026-10-31 (LERN_Session2, Entscheid a: Zusammenführen) | statistik.html, LS.zusammenfuehren |
@@ -114,7 +124,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-18 | Kiosk-Kasse Stufe 3–4 (Franken/Rappen) auf Basisklasse 2 prüfen | offen | docs/lernziele/lehrplan_sg_session2.md, Bekannte Grenzen |
 | LERN-19 | Prüfer: Hinweis verrät die Lösung automatisch erkennen | erledigt 2026-10-31 (LERN_Session3) | tools/pruefe_spiele.js, LS.pruefung.haken |
 | LERN-20 | Testspieler und Testhilfen (Entscheid T1 a, T2 a) | erledigt 2026-10-31 (LERN_Session3; heute Rolle Aufsicht, L2 a) | spiel.js (ctx.loesung), rahmen.md Abschnitt 6 |
-| LERN-21 | 28 neue Spiele und die Startseite auf Desktop, Tablet und Handy ansehen | offen | checkliste.md |
+| LERN-21 | Neue Spiele (2 von 84 angesehen) und die Startseite auf Desktop, Tablet und Handy ansehen | offen | checkliste.md |
 | LERN-22 | Startseite mit Anmeldung, Tabs, Gruppen, Favoriten; Rollen Kind/Aufsicht mit PIN (L1–L3 a) | erledigt 2026-10-31 (LERN_Session3), im Browser noch nicht angesehen | rahmen.md Abschnitt 6, start/ |
 | LERN-23 | Prüfstand und Freigabe je Spiel und Inhaltsliste (L4 a) | erledigt 2026-10-31 (LERN_Session3) | katalog.js (geprueft, listen), Tab Verwaltung |
 | LERN-24 | Checkliste Klasse → Fach → Thema → Spiel | erledigt 2026-10-31 (LERN_Session3) | checkliste.md, tools/checkliste.js |
@@ -129,4 +139,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-33 | Schweiz-Karten-Suche: Seen, Flüsse, Gebirge (swisstopo-Datensatz, Download anfragen) | offen | `tools/karte_schweiz.py`; Report LERN_Session6 |
 | LERN-34 | Klasseneinstellungen durch Lehrpersonen | offen (Konzept, Entscheide F1–F8) | docs/eulenpfad/konzept_klasseneinstellungen.md |
 | LERN-35 | Grundwörter in Spielnamen über der Grenze (Detektiv 5, Sortierer 4, Puzzle 4) umbenennen | offen (D2 a, später) | Testskript, Namensprüfung; Report LERN_Session7 |
-| LERN-36 | Dezimalzahlen-Spiele M3–M5 und Eingabe von Dezimalzahlen; Dezimalzeichen der Zahlenbuch-Neuausgabe | offen | lehrplan_sg_5-6.md Abschnitt 9; Konzept F5 |
+| LERN-36 | Dezimalzahlen-Spiele M3–M5 und Eingabe von Dezimalzahlen; Dezimalzeichen der Zahlenbuch-Neuausgabe | erledigt 2026-11-02 (LERN_Session8; Dezimalzeichen der Neuausgabe weiter offen) | lehrplan_sg_session8.md; rahmen.md 4.3 |
+| LERN-37 | Vorlesen und Kindergarten auf echten Geräten anhören und prüfen | offen | rahmen.md Abschnitt 12 |
+| LERN-38 | „▶ Los! 3-2-1“ nur bei der ersten Aufgabe und nach Fehlern, dazwischen kurz ein Aufpassen-Zeichen 👀 (Hinweis Patrik) | offen | Report LERN_Session8, Plan 0 |
+| LERN-39 | Entscheide aus LERN_Session8: Farben rechts vom Komma, Malzeichen, Braille-Finger ohne freie Liste | offen | Report LERN_Session8, Plan 1 |

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geheimschrift-Knacker</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 8px; }
+  .frage b { color: var(--knopf); }
+  .wortkarte { text-align: center; font-family: ui-monospace, Consolas, monospace; font-size: clamp(30px, 7.5vw, 48px);
+    font-weight: 900; letter-spacing: .18em; margin: 2px 0 10px; color: var(--deko-1); }
+  .wortkarte .gk-pfeil { color: var(--text-leise); letter-spacing: 0; margin: 0 .3em; }
+
+  .gk-scheibe-box { margin: 0 auto 8px; max-width: 300px; }
+  .gk-scheibe { display: block; width: 100%; max-width: 300px; height: auto; margin: 0 auto; }
+  .gk-scheibe .ring-aussen { fill: var(--karte); stroke: var(--rand); stroke-width: 2; }
+  .gk-scheibe .ring-innen { fill: #fff; stroke: var(--deko-1); stroke-width: 2; }
+  .gk-scheibe text { font-family: ui-monospace, Consolas, monospace; font-weight: 800; text-anchor: middle; dominant-baseline: central; }
+  .gk-scheibe .klar { font-size: 17px; fill: var(--text); }
+  .gk-scheibe .geheim { font-size: 16px; fill: var(--deko-1); }
+  .gk-scheibe .mitte-text { font-size: 18px; fill: var(--text-leise); font-family: inherit; }
+  .gk-legende { text-align: center; color: var(--text-leise); font-weight: 700; font-size: 14px; margin: 2px 0 4px; }
+  .gk-dreh { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 2px 0 6px; }
+  .gk-dreh button { font: inherit; font-size: 22px; font-weight: 900; min-width: 56px; min-height: 48px; border: none; border-radius: 14px;
+    background: #fff; box-shadow: 0 4px 0 var(--rand); cursor: pointer; }
+  .gk-dreh span { font-weight: 800; min-width: 7em; text-align: center; }
+
+  .gk-slots { display: flex; justify-content: center; gap: 6px; margin: 6px 0 10px; flex-wrap: wrap; }
+  .gk-slots span { width: clamp(34px, 9vw, 48px); height: clamp(44px, 11vw, 58px); border-bottom: 5px solid var(--knopf);
+    font-family: ui-monospace, Consolas, monospace; font-size: clamp(26px, 6.5vw, 38px); font-weight: 900;
+    display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 8px 8px 0 0; }
+  .gk-slots span.richtig { background: var(--gut-hell); border-color: var(--gut); }
+  .gk-slots span.falsch { background: var(--hinweis-hell); border-color: var(--hinweis); }
+  .gk-tasten { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; max-width: 460px; margin: 0 auto; }
+  .gk-tasten button { font: inherit; font-size: clamp(18px, 4.6vw, 24px); font-weight: 900; min-height: 46px; border: none; border-radius: 12px;
+    background: #fff; box-shadow: 0 4px 0 var(--rand); cursor: pointer; padding: 0; }
+  .gk-tasten button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--rand); }
+  .gk-tasten button.gk-weg { background: #ffe3e3; box-shadow: 0 4px 0 #f5b5b5; }
+  .gk-tasten button.gk-ok { grid-column: span 2; background: var(--gut); color: #fff; box-shadow: 0 4px 0 #22975a; }
+  .gk-tasten button:disabled { opacity: .45; }
+  .wahl-knopf.gk-buchstabe { font-family: ui-monospace, Consolas, monospace; font-size: clamp(30px, 7vw, 44px); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📜 Geheimschrift-Knacker</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MI.2.1.c (Medien und Informatik, 2. Zyklus): Geheimschriften ver- und entschlüsseln —
+// hier die Verschiebe-Schrift nach Caesar mit einer Schlüsselscheibe.
+// Basisklasse 5: s1 4. Klasse (ein Buchstabe 1 oder 2 Schritte), s2 entschlüsseln mit eingestellter
+// Scheibe, s3 verschlüsseln (Scheibe selbst drehen), s4 grosse Schlüssel über das Alphabet-Ende hinaus,
+// s5 6. Klasse: den Schlüssel knacken (welcher macht ein echtes Wort?), s6 Königsstufe: knacken und das
+// Wort aufschreiben, ohne Scheibe bis zum ersten Fehler.
+// Kein anderes Spiel übt Geheimschriften; der Roboter-Pfad (Abläufe) ist ein anderes Informatik-Thema.
+// Wörter nur aus woerter.js (Liste „woerter“), freigegeben über LS.freieListen.
+
+const { zufall, waehle, mische, el } = LS;
+
+const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+/** Jeden Buchstaben um k Schritte im Alphabet weiter (k negativ: zurück), nach dem Ende wieder vorne. */
+const verschiebe = (text, k) => [...text].map(c => ABC[(((ABC.indexOf(c) + k) % 26) + 26) % 26]).join("");
+/** Läuft eine Verschiebung um k (≥ 0) über das Alphabet-Ende hinaus? */
+const ueberlauf = (wort, k) => [...wort].some(c => ABC.indexOf(c) + k > 25);
+
+// Freigabe (Entscheid L4 a): Kennt der Katalog die Liste nicht, gilt sie als frei.
+const LISTE_FREI = LS.spielListen("geheimschrift-knacker").length ? LS.freieListen("geheimschrift-knacker").includes("woerter") : true;
+const WOERTER = LISTE_FREI ? GEHEIM_WOERTER : [];
+const ALLE = new Set(GEHEIM_WOERTER);
+
+// hilfe: "kreis" (nur das Alphabet im Kreis), "fest" (Scheibe auf den Schlüssel gestellt),
+// "drehen" (Scheibe zum Selbst-Drehen), "spaet" (drehbare Scheibe erst nach dem ersten Fehler)
+const STUFE = {
+  s1: { arten: ["buchstabe"], richtungen: ["ver", "ent"], schluessel: [1, 2], hilfe: "kreis" },
+  s2: { arten: ["wort"], richtungen: ["ent"], schluessel: [1, 2, 3], hilfe: "fest", ueberlauf: false },
+  s3: { arten: ["wort"], richtungen: ["ver"], schluessel: [1, 2, 3, 4, 5], hilfe: "drehen", ueberlauf: false },
+  s4: { arten: ["wort"], richtungen: ["ver", "ent"], schluessel: [4, 5, 6, 7, 8, 9, 10, 11, 12], hilfe: "kreis", ueberlauf: true },
+  s5: { arten: ["knacken"], schluessel: Array.from({ length: 25 }, (_, i) => i + 1), hilfe: "drehen", minLaenge: 4 },
+  s6: { arten: ["knackenWort"], schluessel: Array.from({ length: 25 }, (_, i) => i + 1), hilfe: "spaet", minLaenge: 5 },
+};
+const brauchtWoerter = stufe => STUFE[stufe].arten[0] !== "buchstabe";
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => !brauchtWoerter(s) || WOERTER.length));
+
+/** Schlüssel (1–25), die aus dem Geheimwort ein Wort der Liste machen. */
+const passendeSchluessel = geheim => STUFE.s5.schluessel.filter(j => ALLE.has(verschiebe(geheim, -j)));
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  throw new Error(`Stufe ${stufe}: keine Aufgabe gefunden`);
+}
+
+function erzeuge(p) {
+  const art = waehle(p.arten), k = waehle(p.schluessel);
+  if (art === "buchstabe") {
+    // ohne Überlauf; die Nachbarn für die Auswahl liegen auch noch im Alphabet
+    const i = zufall(k + 1, 24 - k);
+    const richtung = waehle(p.richtungen);
+    const von = ABC[i], loesung = verschiebe(von, richtung === "ver" ? k : -k);
+    const falsch = verschiebe(von, richtung === "ver" ? -k : k);
+    const optionen = mische([...new Set([loesung, falsch, verschiebe(loesung, richtung === "ver" ? 1 : -1), von])]);
+    return { art, k, richtung, von, loesung, falsch, optionen };
+  }
+  const wort = waehle(WOERTER);
+  if (!wort || wort.length < (p.minLaenge || 0)) return null;
+  if (art === "wort") {
+    const richtung = waehle(p.richtungen);
+    if (ueberlauf(wort, k) !== p.ueberlauf) return null;
+    const geheim = verschiebe(wort, k);
+    return richtung === "ver"
+      ? { art, k, richtung, gegeben: wort, loesung: geheim }
+      : { art, k, richtung, gegeben: geheim, loesung: wort };
+  }
+  const geheim = verschiebe(wort, k);
+  if (art === "knacken") {
+    const andere = mische(p.schluessel.filter(j => j !== k)).slice(0, 3);
+    return { art, k, gegeben: geheim, wort, optionen: mische([k, ...andere]) };
+  }
+  return { art, k, gegeben: geheim, wort, loesung: wort };
+}
+
+/** Mängel: Verschiebung nachgerechnet, Überlauf wie in der Stufe, Schlüssel eindeutig, Wort aus der Liste. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (!p.schluessel.includes(a.k)) m.push("Schlüssel nicht in der Stufe");
+  if (a.art === "buchstabe") {
+    if (verschiebe(a.von, a.richtung === "ver" ? a.k : -a.k) !== a.loesung) m.push("Buchstabe falsch verschoben");
+    if (Math.abs(ABC.indexOf(a.loesung) - ABC.indexOf(a.von)) !== a.k) m.push("Überlauf in Stufe 1");
+    if (a.optionen.filter(o => o === a.loesung).length !== 1) m.push("Lösung nicht genau einmal unter den Antworten");
+    if (new Set(a.optionen).size !== a.optionen.length || a.optionen.length < 3) m.push("doppelte oder zu wenige Antworten");
+    return m;
+  }
+  const klar = a.art === "wort" ? (a.richtung === "ver" ? a.gegeben : a.loesung) : a.wort;
+  if (!WOERTER.includes(klar)) m.push("Wort nicht aus der freien Liste");
+  if (!/^[A-Z]{3,7}$/.test(klar)) m.push("Wort nicht nur A–Z oder falsche Länge");
+  if (a.art === "wort") {
+    const geheim = a.richtung === "ver" ? a.loesung : a.gegeben;
+    if (verschiebe(klar, a.k) !== geheim) m.push("Verschiebung falsch");
+    if (ueberlauf(klar, a.k) !== p.ueberlauf) m.push(p.ueberlauf ? "kein Überlauf, obwohl die Stufe ihn übt" : "Überlauf in einer Stufe ohne");
+    return m;
+  }
+  if (verschiebe(a.wort, a.k) !== a.gegeben) m.push("Geheimwort falsch");
+  const passend = passendeSchluessel(a.gegeben);
+  if (passend.length !== 1 || passend[0] !== a.k) m.push(`Schlüssel nicht eindeutig (${passend.join(", ")})`);
+  if (a.art === "knacken") {
+    if (a.optionen.filter(o => o === a.k).length !== 1) m.push("Schlüssel nicht genau einmal unter den Antworten");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+  }
+  if (a.wort.length < (p.minLaenge || 0)) m.push("Wort zu kurz für die Stufe");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const SVG = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attr = {}) => { const e = document.createElementNS(SVG, tag); for (const [n, v] of Object.entries(attr)) e.setAttribute(n, v); return e; };
+
+/**
+ * Schlüsselscheibe: aussen das Alphabet (Klartext), innen die Geheimbuchstaben bei Schlüssel k.
+ * innen: false = nur das Alphabet im Kreis. drehbar: Knöpfe ◀ ▶ stellen den Schlüssel.
+ */
+function scheibe(k, { innen = true, drehbar = false } = {}) {
+  const box = el("div", { class: "gk-scheibe-box" });
+  const svg = svgEl("svg", { viewBox: "0 0 300 300", class: "gk-scheibe", role: "img",
+    "aria-label": innen ? "Schlüsselscheibe: aussen Klartext, innen Geheimschrift" : "Alphabet im Kreis" });
+  svg.append(svgEl("circle", { cx: 150, cy: 150, r: 146, class: "ring-aussen" }));
+  if (innen) svg.append(svgEl("circle", { cx: 150, cy: 150, r: 112, class: "ring-innen" }));
+  const geheim = [];
+  for (let i = 0; i < 26; i++) {
+    const w = (i * 2 * Math.PI) / 26 - Math.PI / 2;
+    const pos = r => ({ x: (150 + r * Math.cos(w)).toFixed(1), y: (150 + r * Math.sin(w)).toFixed(1) });
+    const t = svgEl("text", { ...pos(129), class: "klar" });
+    t.textContent = ABC[i];
+    svg.append(t);
+    if (innen) {
+      const g = svgEl("text", { ...pos(96), class: "geheim" });
+      svg.append(g);
+      geheim.push(g);
+    }
+  }
+  const mitte = svgEl("text", { x: 150, y: 150, class: "mitte-text" });
+  svg.append(mitte);
+  let schluessel = k;
+  const stelle = () => {
+    geheim.forEach((g, i) => { g.textContent = ABC[(i + schluessel) % 26]; });
+    mitte.textContent = innen ? `🔑 ${schluessel}` : "🔄";
+    if (anzeige) anzeige.textContent = `Schlüssel ${schluessel}`;
+  };
+  let anzeige = null;
+  box.append(svg);
+  if (innen) box.append(el("div", { class: "gk-legende", text: "aussen: Klartext · innen: Geheimschrift" }));
+  if (drehbar) {
+    anzeige = el("span");
+    const dreh = d => () => { schluessel = (schluessel + d + 26) % 26; stelle(); };
+    box.append(el("div", { class: "gk-dreh" },
+      el("button", { type: "button", text: "◀", "aria-label": "Scheibe zurückdrehen", onclick: dreh(-1) }), anzeige,
+      el("button", { type: "button", text: "▶", "aria-label": "Scheibe weiterdrehen", onclick: dreh(1) })));
+  }
+  stelle();
+  return box;
+}
+
+// Eingabe über Buchstabentasten; die echte Tastatur geht auch (A–Z, Rücktaste, Enter).
+let aktiveEingabe = null;
+document.addEventListener("keydown", e => {
+  if (!aktiveEingabe || !document.body.contains(aktiveEingabe.element)) return;
+  if (/^[a-zA-Z]$/.test(e.key)) aktiveEingabe.tippe(e.key.toUpperCase());
+  else if (e.key === "Backspace") aktiveEingabe.loesche();
+  else if (e.key === "Enter") aktiveEingabe.ok();
+  else return;
+  e.preventDefault();
+});
+
+/** Felder für laenge Buchstaben und Tasten A–Z; onOk(text) prüft das Spiel. */
+function buchstabenEingabe(laenge, onOk) {
+  let text = "";
+  const slots = el("div", { class: "gk-slots", "aria-label": "Deine Antwort", "aria-live": "polite" },
+    ...Array.from({ length: laenge }, () => el("span")));
+  const tasten = el("div", { class: "gk-tasten" });
+  let okKnopf;
+  const api = {
+    element: tasten, slots, gesperrt: false,
+    zeige() {
+      [...slots.children].forEach((s, i) => { s.textContent = text[i] || ""; s.classList.remove("richtig", "falsch"); });
+      okKnopf.disabled = text.length !== laenge;
+    },
+    tippe(c) { if (api.gesperrt || text.length >= laenge) return; text += c; LS.ton("tipp"); api.zeige(); },
+    loesche() { if (api.gesperrt) return; text = text.slice(0, -1); api.zeige(); },
+    ok() { if (api.gesperrt || text.length !== laenge) return; onOk(text); },
+    /** Nach einem Fehlversuch: richtige Stellen grün, falsche orange. */
+    markiere(loesung) { [...slots.children].forEach((s, i) => s.classList.add(text[i] === loesung[i] ? "richtig" : "falsch")); },
+  };
+  for (const c of ABC) tasten.append(el("button", { type: "button", text: c, onclick: () => api.tippe(c) }));
+  tasten.append(el("button", { type: "button", class: "gk-weg", text: "⌫", "aria-label": "Löschen", onclick: () => api.loesche() }));
+  okKnopf = el("button", { type: "button", class: "gk-ok", text: "OK ✓", onclick: () => api.ok() });
+  tasten.append(okKnopf);
+  aktiveEingabe = api;
+  api.zeige();
+  return api;
+}
+
+LS.spiel({
+  id: "geheimschrift-knacker",
+  einleitung: "Schon Julius Caesar schrieb geheime Briefe: Jeder Buchstabe wird im Alphabet ein paar Schritte verschoben. Der Schlüssel sagt, wie viele. Kannst du die Geheimschrift knacken?",
+  anzahl: 8,
+  stufen: nurMoegliche({
+    s1: "Ein Buchstabe: 1 oder 2 Schritte weiter oder zurück — C → E.",
+    s2: "Entschlüsseln mit Schlüssel 1–3, die Scheibe ist eingestellt.",
+    s3: "Verschlüsseln mit Schlüssel 1–5: Dreh die Scheibe selbst.",
+    s4: "Grosse Schlüssel bis 12: Nach Z geht es mit A weiter.",
+    s5: "Schlüssel knacken (6. Klasse): Welcher macht ein echtes Wort?",
+    s6: "Endgegner: Schlüssel unbekannt — knack das Wort, ohne Scheibe bis zum ersten Fehler.",
+  }),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    if (p.richtungen && p.richtungen.length > 1) ctx.serie("richtung", a.richtung);
+
+    if (a.art === "buchstabe") {
+      const weiter = a.richtung === "ver";
+      const loesung = `${a.von} ${weiter ? "+" : "−"} ${a.k} Schritt${a.k > 1 ? "e" : ""} → ${a.loesung}`;
+      f.append(el("div", { class: "frage", html: `Geh <b>${a.k} Schritt${a.k > 1 ? "e" : ""} ${weiter ? "weiter" : "zurück"}</b> im Alphabet.` }),
+        el("div", { class: "wortkarte" }, a.von, el("span", { class: "gk-pfeil", text: "→" }), "?"),
+        scheibe(0, { innen: false }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.loesung, breite: 80,
+        hinweis: w => (w === a.falsch ? "Du bist in die andere Richtung gegangen."
+          : `Zähle die Schritte auf dem Kreis genau: ${a.k} ${a.k > 1 ? "Schritte" : "Schritt"} ${weiter ? "weiter" : "zurück"}.`),
+        loesung,
+      });
+      f.querySelectorAll(".wahl-knopf").forEach(k => k.classList.add("gk-buchstabe"));
+      if (ctx.nr === 0) ctx.sag("Weiter heisst: im Alphabet nach hinten, zurück heisst: nach vorne.");
+      return;
+    }
+
+    if (a.art === "knacken") {
+      f.append(el("div", { class: "frage", html: "Welcher <b>Schlüssel</b> macht aus dem Geheimwort ein echtes Wort?" }),
+        el("div", { class: "wortkarte", text: a.gegeben }),
+        scheibe(0, { drehbar: true }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.k, breite: 110,
+        inhalt: j => ({ bild: "🔑", text: String(j) }),
+        hinweis: j => `Mit Schlüssel ${j} heisst es ${verschiebe(a.gegeben, -j)} — das ist kein Wort. Dreh die Scheibe und probier weiter.`,
+        loesung: `Schlüssel ${a.k}: ${a.gegeben} → ${a.wort}`,
+        lob: `Geknackt: ${a.gegeben} heisst ${a.wort}!`,
+      });
+      if (ctx.nr === 0) ctx.sag("Dreh die Scheibe und lies das Geheimwort innen → aussen.");
+      return;
+    }
+
+    // Wort eintippen: ent-/verschlüsseln oder knacken
+    const knacken = a.art === "knackenWort";
+    const loesung = knacken ? `Schlüssel ${a.k}: ${a.gegeben} → ${a.wort}`
+      : `Schlüssel ${a.k}: ${a.gegeben} → ${a.loesung}`;
+    const auftrag = knacken ? "Der Schlüssel ist geheim. <b>Was heisst das Wort?</b>"
+      : a.richtung === "ver" ? `<b>Verschlüssle</b> das Wort mit Schlüssel ${a.k}.`
+      : `<b>Entschlüssle</b> das Geheimwort. Schlüssel ${a.k}.`;
+    f.append(el("div", { class: "frage", html: auftrag }), el("div", { class: "wortkarte", text: a.gegeben }));
+    const hilfeOrt = el("div");
+    f.append(hilfeOrt);
+    if (p.hilfe === "fest") hilfeOrt.append(scheibe(a.k));
+    else if (p.hilfe === "drehen") hilfeOrt.append(scheibe(0, { drehbar: true }));
+    else if (p.hilfe === "kreis") hilfeOrt.append(scheibe(0, { innen: false }));
+    ctx.loesung(loesung);
+    ctx.schritte(a.loesung.length + 1);
+    const zurueck = a.richtung === "ent" || knacken;
+    const verkehrt = knacken ? null : verschiebe(a.gegeben, a.richtung === "ver" ? -a.k : a.k);
+    const eingabe = buchstabenEingabe(a.loesung.length, text => {
+      if (text === a.loesung) { eingabe.gesperrt = true; [...eingabe.slots.children].forEach(s => s.classList.add("richtig")); ctx.richtig(knacken ? `Geknackt! Schlüssel ${a.k}.` : undefined); return; }
+      eingabe.markiere(a.loesung);
+      if (p.hilfe === "spaet" && !hilfeOrt.firstChild) hilfeOrt.append(scheibe(0, { drehbar: true }));
+      const hinweis = text === verkehrt ? "Du bist in die andere Richtung gegangen."
+        : knacken ? "Probier die Schlüssel durch: Dreh die Scheibe, bis der Anfang nach einem Wort aussieht. Die grünen Buchstaben stimmen schon."
+        : `Geh bei jedem Buchstaben ${a.k} Schritte ${zurueck ? "zurück" : "weiter"}.${p.ueberlauf ? " Nach dem Ende des Alphabets geht es vorne weiter." : ""} Die grünen stimmen schon.`;
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) eingabe.gesperrt = true;
+    });
+    f.append(eingabe.slots, eingabe.element);
+    if (ctx.nr === 0) ctx.sag(knacken ? "Tipp: Probier zuerst den ersten Buchstaben mit verschiedenen Schlüsseln."
+      : zurueck ? "Entschlüsseln heisst: zurück im Alphabet." : "Verschlüsseln heisst: weiter im Alphabet.");
+  },
+});
+</script>
+</body>
+</html>

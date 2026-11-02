@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quelle heure?</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(17px, 3.8vw, 22px); font-weight: 800; margin: 2px 0 10px; color: var(--text-leise); }
+  .satz { text-align: center; font-size: clamp(24px, 5.6vw, 34px); font-weight: 900; margin: 4px auto 12px; color: var(--deko-1); overflow-wrap: anywhere; }
+  .qh-hoer { display: block; margin: 0 auto 12px; border: none; border-radius: 999px; padding: 12px 26px; font-family: inherit;
+    font-size: clamp(20px, 4.4vw, 26px); font-weight: 900; background: var(--deko-1); color: #fff; box-shadow: 0 5px 0 var(--deko-7); cursor: pointer; }
+  .qh-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-7); }
+  .uhr .rand { fill: #fff; stroke: var(--text); stroke-width: 4; }
+  .uhr .strich { stroke: var(--text); stroke-width: 1.5; }
+  .uhr .strich.gross { stroke-width: 3.5; }
+  .uhr text { font-family: var(--schrift); font-weight: 900; font-size: 11px; fill: var(--text); }
+  .uhr .stunde { stroke: var(--text); stroke-width: 5; stroke-linecap: round; }
+  .uhr .minute { stroke: var(--knopf); stroke-width: 3.5; stroke-linecap: round; }
+  .uhr .achse { fill: var(--text); }
+  .uhr .ziel circle { fill: transparent; }
+  .uhr .ziel { cursor: pointer; }
+  .uhr-gross { display: block; width: min(300px, 76vw); margin: 0 auto 10px; }
+  .qh-uhren .wahl-knopf svg { width: 100%; max-width: 130px; display: block; margin: 0 auto; }
+  .qh-uhren .wahl-knopf { min-height: 0; padding: 8px; }
+  .qh-saetze .wahl-knopf { font-size: clamp(16px, 4vw, 21px); font-weight: 800; min-height: 64px; }
+  .qh-tag { display: block; text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .qh-modus { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 auto 10px; }
+  .qh-modus button { border: 3px solid var(--rand); border-radius: 14px; background: #fff; padding: 10px 14px; font-family: inherit;
+    font-size: clamp(15px, 3.8vw, 19px); font-weight: 800; color: var(--text); cursor: pointer; min-height: 52px; }
+  .qh-modus button[aria-pressed="true"] { border-color: var(--deko-1); background: var(--deko-1); color: #fff; }
+  .qh-ok { display: flex; justify-content: center; margin-top: 6px; }
+  .digital { text-align: center; font-size: clamp(40px, 9vw, 60px); font-weight: 900; font-variant-numeric: tabular-nums; background: #1f2937; color: #7cf29a; border-radius: 16px; padding: 6px 22px; width: fit-content; margin: 0 auto 14px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🕰️ Quelle heure?</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS2F.3.A.1 (2. Zyklus): sich im Alltag verständigen, hier die Uhrzeit: „Il est trois
+// heures et demie.“ Basisklasse 5 (Französisch beginnt in der 5. Klasse): s1 Einstieg ohne Vorkenntnisse,
+// volle Stunden hören und die Uhr wählen oder den kurzen Zeiger stellen; s2 volle Stunden lesen; s3 et
+// quart, et demie, moins le quart; s4 Minuten in Fünferschritten (dix, vingt, moins dix); s5 6. Klasse:
+// midi, minuit und die 24-Stunden-Form (quinze heures trente); s6 Königsstufe: alles gemischt, nur hören.
+// Die Uhr selbst lesen lernen die Kinder in der Uhr-Werkstatt (Mathematik, 2.–4. Klasse); hier geht es
+// nur um die französischen Ausdrücke. Uhr als SVG nach dem Vorbild der Uhr-Werkstatt.
+
+const { zufall, waehle, mische, el } = LS;
+const sprich = text => LS.sprich(text, "fr");
+
+// Stunden als Wort (die Stunde ist weiblich: une heure, vingt et une heures).
+const STUNDE_WORT = ["zéro", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze",
+  "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf", "vingt", "vingt et une", "vingt-deux", "vingt-trois"];
+const MINUTE_WORT = { 5: "cinq", 10: "dix", 15: "quinze", 20: "vingt", 25: "vingt-cinq", 30: "trente", 35: "trente-cinq",
+  40: "quarante", 45: "quarante-cinq", 50: "cinquante", 55: "cinquante-cinq" };
+
+/** Genannte Stunde der Alltagsform: bis :30 die laufende, ab :35 die nächste („quatre heures moins dix“). */
+const genannteStunde = (h, m) => (m <= 30 ? h : (h + 1) % 24);
+/** „trois heures“, „une heure“, „midi“, „minuit“ (h 0–23). */
+function stundeText(h) {
+  if (h === 12) return "midi";
+  if (h === 0) return "minuit";
+  const h12 = h % 12;
+  return `${STUNDE_WORT[h12]} heure${h12 === 1 ? "" : "s"}`;
+}
+/**
+ * Alltagsform (h 0–23, m in Fünferschritten): Il est trois heures et quart / et demie / moins le quart,
+ * cinq heures dix, quatre heures moins vingt. Nach midi und minuit „et demi“ (männlich), sonst „et demie“.
+ */
+function alltag(h, m) {
+  const gh = genannteStunde(h, m), basis = stundeText(gh);
+  let rest = "";
+  if (m === 15) rest = " et quart";
+  else if (m === 30) rest = gh % 12 === 0 ? " et demi" : " et demie";
+  else if (m === 45) rest = " moins le quart";
+  else if (m > 30) rest = ` moins ${MINUTE_WORT[60 - m]}`;
+  else if (m > 0) rest = ` ${MINUTE_WORT[m]}`;
+  return `Il est ${basis}${rest}.`;
+}
+/** 24-Stunden-Form: Il est quinze heures trente. (h 13–23) */
+const offiziell = (h, m) => `Il est ${STUNDE_WORT[h]} heures${m ? " " + MINUTE_WORT[m] : ""}.`;
+
+// ---------- Uhr ----------
+
+const SVG = "http://www.w3.org/2000/svg";
+const zeigerEnde = (winkel, laenge) => `x2="${(Math.sin(winkel) * laenge).toFixed(2)}" y2="${(-Math.cos(winkel) * laenge).toFixed(2)}"`;
+const winkelStunde = (h, m) => ((h % 12) + m / 60) * 30 * Math.PI / 180;
+const winkelMinute = m => m * 6 * Math.PI / 180;
+
+/** Analoge Uhr (h 0–23, m 0–59). Mit stellbar: Zahlen als Tippziele (data-zahl). */
+function uhr(h, m, klasse = "", stellbar = false) {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", "-60 -60 120 120");
+  svg.setAttribute("class", `uhr ${klasse}`);
+  svg.setAttribute("aria-label", "Analoge Uhr");
+  let inhalt = `<circle class="rand" r="56"/>`;
+  for (let i = 0; i < 60; i++) {
+    const w = i * 6 * Math.PI / 180, gross = i % 5 === 0;
+    inhalt += `<line class="strich${gross ? " gross" : ""}" x1="${(Math.sin(w) * (gross ? 46 : 50)).toFixed(2)}" y1="${(-Math.cos(w) * (gross ? 46 : 50)).toFixed(2)}" ${zeigerEnde(w, 54)}/>`;
+  }
+  for (let z = 1; z <= 12; z++) {
+    const w = z * 30 * Math.PI / 180, x = (Math.sin(w) * 37).toFixed(2), y = (-Math.cos(w) * 37).toFixed(2);
+    const zahl = `<text x="${x}" y="${(Number(y) + 4).toFixed(2)}" text-anchor="middle">${z}</text>`;
+    inhalt += stellbar ? `<g class="ziel" data-zahl="${z}"><circle cx="${x}" cy="${y}" r="9.5"/>${zahl}</g>` : zahl;
+  }
+  inhalt += `<line class="stunde" x1="0" y1="0" ${zeigerEnde(winkelStunde(h, m), 26)}/>`;
+  inhalt += `<line class="minute" x1="0" y1="0" ${zeigerEnde(winkelMinute(m), 44)}/>`;
+  inhalt += `<circle class="achse" r="4"/>`;
+  svg.innerHTML = inhalt;
+  return svg;
+}
+/** Zeiger einer gezeichneten Uhr neu stellen. */
+function stelleZeiger(svg, h, m) {
+  const setze = (sel, w, l) => { const z = svg.querySelector(sel); z.setAttribute("x2", (Math.sin(w) * l).toFixed(2)); z.setAttribute("y2", (-Math.cos(w) * l).toFixed(2)); };
+  setze(".stunde", winkelStunde(h, m), 26);
+  setze(".minute", winkelMinute(m), 44);
+}
+const tagZeichen = h => (h >= 6 && h < 18 ? "☀️ am Tag" : "🌙 in der Nacht");
+
+// ---------- Stufen ----------
+
+// raster: Minuten; arten: [Art, Modus]; mittag: Zeiten um midi und minuit; s24: 24-Stunden-Form.
+const STUFE = {
+  s1: { raster: [0], arten: [["wahlUhr", "hoeren"], ["stellen", "hoeren"]] },
+  s2: { raster: [0], arten: [["wahlUhr", "lesen"], ["stellen", "lesen"], ["wahlSatz", "lesen"]] },
+  s3: { raster: [0, 15, 30, 45], arten: [["wahlUhr", "hoeren"], ["wahlUhr", "lesen"], ["wahlSatz", "lesen"], ["stellen", "hoeren"], ["stellen", "lesen"]] },
+  s4: { raster: "5", arten: [["wahlUhr", "hoeren"], ["wahlUhr", "lesen"], ["wahlSatz", "lesen"], ["stellen", "hoeren"], ["stellen", "lesen"]] },
+  s5: { raster: "5", arten: [["tippen24", "hoeren"], ["tippen24", "lesen"], ["mittagUhr", "lesen"], ["mittagSatz", "lesen"]] },
+  // Königsstufe: nur hören, alles gemischt (Fünferschritte, midi, minuit, 24 Stunden).
+  s6: { raster: "5", arten: [["wahlUhr", "hoeren"], ["stellen", "hoeren"], ["tippen24", "hoeren"], ["mittagUhr", "hoeren"]] },
+};
+const minutenDer = p => (Array.isArray(p.raster) ? p.raster : Array.from({ length: 12 }, (_, i) => i * 5));
+
+/** Alltagszeit auf der Uhr (h 1–12): Die genannte Stunde ist 1–11, damit midi und minuit erst in Stufe 5 kommen. */
+function alltagsZeit(p) {
+  for (;;) {
+    const h = zufall(1, 12), m = waehle(minutenDer(p));
+    const gh = genannteStunde(h, m) % 12;
+    if (gh >= 1 && gh <= 11) return { h, m };
+  }
+}
+/** Zeit um midi oder minuit: genannte Stunde 12 bzw. 0 (11:35 bis 12:30, 23:35 bis 0:30). */
+function mittagsZeit(p) {
+  const nacht = Math.random() < 0.5;
+  const m = waehle(minutenDer(p));
+  const h = m <= 30 ? (nacht ? 0 : 12) : (nacht ? 23 : 11);
+  return { h, m };
+}
+const gleicheZeit = (a, b) => a.h === b.h && a.m === b.m;
+const schluessel = t => `${t.h}:${t.m}`;
+
+/**
+ * Ablenker: typische Verwechslungen — „moins dix“ statt „dix“ (Stunde davor/danach), Stunde daneben,
+ * Zeiger vertauscht; bei midi/minuit dieselbe Uhr in der anderen Tageshälfte.
+ */
+function ablenker(t, p, mittag) {
+  const { h, m } = t;
+  const kand = [];
+  const add = (hh, mm) => kand.push({ h: ((hh % 24) + 24) % 24, m: ((mm % 60) + 60) % 60 });
+  if (mittag) {
+    add((h + 12) % 24, m);
+    add(m <= 30 ? h - 1 : h + 1, 60 - m);                          // midi dix ↔ midi moins dix
+    add(h + 1, m); add(h - 1, m); add(h, m + 15); add(h, m - 15);
+  } else {
+    if (m > 0 && m !== 30) add(m < 30 ? h - 1 : h + 1, 60 - m); // dix ↔ moins dix
+    add(h + 1, m); add(h - 1, m);
+    if (m % 5 === 0 && m > 0) add(m / 5, (h % 12) * 5);           // Zeiger vertauscht
+    add(h, m + 15); add(h, m - 15); add(h + 6, m); add(h + 2, m); add(h - 2, m);
+  }
+  // Reserve für den Rand (11 Uhr, 12:45): beliebige Zeiten der Stufe.
+  for (let i = 0; i < 24; i++) add(mittag ? h + zufall(-3, 3) : zufall(1, 12), waehle(minutenDer(p)));
+  const erlaubt = new Set(minutenDer(p));
+  const passt = x => {
+    if (gleicheZeit(x, t) || !erlaubt.has(x.m)) return false;
+    if (mittag) return true; // mit Tag/Nacht-Zeichen: jede Uhrzeit des Tages
+    if (x.h === 0 || x.h > 12) return false;
+    const gh = genannteStunde(x.h, x.m) % 12;
+    return gh >= 1 && gh <= 11;
+  };
+  const gesehen = new Set([schluessel(t)]);
+  const liste = [];
+  for (const x of mische(kand.slice(0, 2)).concat(mische(kand.slice(2)))) {
+    if (!passt(x)) continue;
+    // Ohne Tag/Nacht-Zeichen sehen 3:00 und 15:00 gleich aus: nur mit Zeichen zulassen.
+    const k = mittag ? schluessel(x) : `${x.h % 12}:${x.m}`;
+    if (gesehen.has(k)) continue;
+    gesehen.add(k);
+    liste.push(x);
+  }
+  return liste.slice(0, 3);
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const [art, modus] = waehle(p.arten);
+  if (art === "tippen24") {
+    const h = zufall(13, 23), m = waehle(minutenDer(p));
+    return { art, modus, h, m };
+  }
+  if (art === "mittagUhr" || art === "mittagSatz") {
+    const t = mittagsZeit(p);
+    return { art, modus, ...t, optionen: mische([t, ...ablenker(t, p, true)]) };
+  }
+  const t = alltagsZeit(p);
+  return { art, modus, ...t, ...(art === "stellen" ? {} : { optionen: mische([t, ...ablenker(t, p, false)]) }) };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.some(([x, mo]) => x === a.art && mo === a.modus)) m.push(`Art ${a.art}/${a.modus} nicht in ${stufe}`);
+  if (!minutenDer(p).includes(a.m)) m.push("Minuten nicht im Raster der Stufe");
+  if (a.art === "tippen24") {
+    if (!(a.h >= 13 && a.h <= 23)) m.push("24-Stunden-Zeit nicht am Nachmittag oder Abend");
+    if (/undefined/.test(offiziell(a.h, a.m))) m.push("Satz unvollständig");
+  } else if (a.art.startsWith("mittag")) {
+    if (genannteStunde(a.h, a.m) % 12 !== 0) m.push("keine Zeit um midi oder minuit");
+  } else {
+    if (!(a.h >= 1 && a.h <= 12)) m.push("Stunde nicht 1–12");
+    const gh = genannteStunde(a.h, a.m) % 12;
+    if (gh < 1 || gh > 11) m.push("midi oder minuit vor Stufe 5");
+  }
+  if (a.art !== "tippen24" && /undefined/.test(alltag(a.h, a.m))) m.push("Satz unvollständig");
+  if (a.optionen) {
+    const mittag = a.art.startsWith("mittag");
+    if (a.optionen.length !== 4) m.push(`${a.optionen.length} statt 4 Antworten`);
+    if (a.optionen.filter(o => gleicheZeit(o, a)).length !== 1) m.push("Lösung nicht genau einmal");
+    // Uhren müssen sich unterscheiden (ohne Tag/Nacht-Zeichen zählt nur die Zeigerstellung) …
+    const uhren = a.optionen.map(o => (mittag ? `${o.h}:${o.m}` : `${o.h % 12}:${o.m}`));
+    if (new Set(uhren).size !== uhren.length) m.push("zwei gleiche Uhren");
+    // … und die Sätze auch.
+    const saetze = a.optionen.map(o => alltag(o.h, o.m));
+    if (new Set(saetze).size !== saetze.length) m.push("zwei gleiche Sätze");
+    if (!a.optionen.every(o => minutenDer(p).includes(o.m))) m.push("Antwort ausserhalb des Rasters");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const hoerKnopf = text => el("button", { type: "button", class: "qh-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(text) });
+const zwei = n => String(n).padStart(2, "0");
+const digital = (h, m) => `${h}:${zwei(m)}`;
+
+const HINWEIS_UHR = "Kurzer Zeiger = Stunde, langer Zeiger = Minuten. Bei «moins» ist die genannte Stunde noch nicht ganz da.";
+const HINWEIS_MINUTEN = "Langer Zeiger: et quart bei der 3, et demie bei der 6, moins le quart bei der 9.";
+const TIPP = {
+  s1: "Hör zu: Il est … heures. Der kurze Zeiger zeigt die Stunde.",
+  s2: "Lies genau: Il est … heures. Der kurze Zeiger zeigt die Stunde.",
+  s3: "et quart = Viertel nach, et demie = halb, moins le quart = Viertel vor.",
+  s4: "Bis zur halben Stunde: plus (cinq heures dix). Danach: moins (six heures moins dix).",
+  s5: "midi = 12 Uhr am Mittag, minuit = 12 Uhr in der Nacht. Am Nachmittag: treize heures, quatorze heures …",
+  s6: "Nur hören! Mit 🔊 hörst du die Zeit nochmal.",
+};
+
+LS.spielMitStimme({
+  id: "quelle-heure",
+  einleitung: "Quelle heure est-il? Wie spät ist es? Hör zu, lies und stell die Uhr — auf Französisch!",
+  anzahl: 8,
+  stufen: {
+    s1: "Ohne Vorkenntnisse: volle Stunden hören. Il est trois heures.",
+    s2: "Volle Stunden lesen: Il est une heure, Il est huit heures.",
+    s3: "et quart, et demie, moins le quart.",
+    s4: "In Fünferschritten: cinq heures dix, six heures moins vingt.",
+    s5: "midi, minuit und die 24-Stunden-Form: quinze heures trente.",
+    s6: "Endgegner: alles gemischt — nur hören.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.nr === 0) ctx.sag(TIPP[ctx.stufe]);
+    ctx.serie("art", a.art);
+    ctx.kennung(`${a.art}:${a.modus}:${a.h}:${a.m}`);
+    const f = ctx.flaeche;
+    const mittag = a.art.startsWith("mittag");
+    const satz = a.art === "tippen24" ? offiziell(a.h, a.m) : alltag(a.h, a.m);
+
+    /** Satz zeigen (lesen) oder vorsprechen (hören). */
+    const vorgabe = (frageHoeren, frageLesen) => {
+      if (a.modus === "hoeren") { f.append(el("div", { class: "frage", text: frageHoeren }), hoerKnopf(satz)); sprich(satz); }
+      else f.append(el("div", { class: "frage", text: frageLesen }), el("div", { class: "satz", text: satz }));
+    };
+    const nachher = () => { if (a.modus === "lesen") sprich(satz); };
+
+    if (a.art === "wahlUhr" || a.art === "mittagUhr") {
+      vorgabe("Hör zu: Welche Uhr passt?", "Welche Uhr passt?");
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen.map(schluessel), richtig: schluessel(a), breite: 130,
+        inhalt: k => {
+          const [h, m] = k.split(":").map(Number);
+          const knopf = el("span", {}, uhr(h, m));
+          if (mittag) knopf.append(el("span", { class: "qh-tag", text: tagZeichen(h) }));
+          return knopf;
+        },
+        hinweis: mittag ? "midi ist am Tag, minuit in der Nacht. " + HINWEIS_UHR : HINWEIS_UHR,
+        loesung: `${satz} (${digital(a.h, a.m)}${mittag ? ", " + tagZeichen(a.h) : ""})`, lob: `Richtig: ${satz}`,
+        beiRichtig: nachher,
+      });
+      box.classList.add("qh-uhren");
+      return;
+    }
+
+    if (a.art === "wahlSatz" || a.art === "mittagSatz") {
+      f.append(el("div", { class: "frage", text: "Wie sagt man auf Französisch?" }), uhr(a.h, a.m, "uhr-gross"));
+      if (mittag) f.append(el("div", { class: "qh-tag", text: tagZeichen(a.h) }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen.map(schluessel), richtig: schluessel(a), breite: 260,
+        inhalt: k => { const [h, m] = k.split(":").map(Number); return alltag(h, m); },
+        hinweis: mittag ? "midi ist am Tag, minuit in der Nacht. " + HINWEIS_UHR : HINWEIS_UHR,
+        loesung: satz, lob: `Richtig: ${satz}`, beiRichtig: () => sprich(satz),
+      });
+      box.classList.add("qh-saetze");
+      return;
+    }
+
+    if (a.art === "tippen24") {
+      vorgabe("Hör zu und tipp die Uhrzeit ein, z. B. 1 5 3 0 für 15:30.", "Lies und tipp die Uhrzeit ein, z. B. 1 5 3 0 für 15:30.");
+      const loesung = `${satz} = ${digital(a.h, a.m)}`;
+      ctx.loesung(loesung);
+      ctx.schritte(LS.tippSchritte(a.h * 100 + a.m));
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit", style: "max-width:320px;margin:0 auto" });
+      f.append(anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: 4,
+        onAenderung: z => { if (z !== null) { const s = String(z); anzeige.textContent = s.length >= 3 ? `${s.slice(0, -2)}:${s.slice(-2)}` : s; } },
+        onOk(z) {
+          const s = String(z), h = Number(s.slice(0, -2)), m = Number(s.slice(-2));
+          if (s.length >= 3 && h === a.h && m === a.m) { tasten.gesperrt = true; anzeige.classList.add("richtig"); nachher(); ctx.richtig(`Richtig: ${loesung}`); return; }
+          anzeige.classList.add("falsch");
+          ctx.falsch(s.length >= 3 && m === a.m && h !== a.h
+            ? "Die Minuten stimmen. Hör nochmal auf die Stunde: Nach 12 zählt man weiter, treize heures, quatorze heures …"
+            : "Zuerst kommt die Stunde (… heures), dann die Minuten. Tipp beides ein.", loesung);
+          if (ctx.vorbei()) tasten.gesperrt = true;
+        },
+      });
+      f.append(tasten.element);
+      return;
+    }
+
+    // Zeiger stellen: Zahl antippen stellt den gewählten Zeiger; in Stufe 1 und 2 nur den kurzen.
+    vorgabe("Hör zu und stell die Uhr.", "Stell die Uhr.");
+    const nurStunde = minutenDer(STUFE[ctx.stufe]).length === 1;
+    const loesung = `${satz} (${digital(a.h, a.m)})`;
+    ctx.loesung(loesung);
+    // Handgriffe: kurzen Zeiger stellen (ausser er steht schon auf 12), langen Zeiger wählen und stellen, OK.
+    ctx.schritte((a.h % 12 ? 1 : 0) + (a.m ? 2 : 0) + 1);
+    let gh = 12, gm = 0, modus = "stunde", fertig = false;
+    const zifferblatt = uhr(gh, gm, "uhr-gross", true);
+    const modusKnoepfe = {
+      stunde: el("button", { type: "button", text: "kurzer Zeiger (Stunde)", "aria-pressed": "true" }),
+      minute: el("button", { type: "button", text: "langer Zeiger (Minuten)", "aria-pressed": "false" }),
+    };
+    for (const [art, k] of Object.entries(modusKnoepfe)) {
+      k.addEventListener("click", () => { modus = art; for (const [x, kk] of Object.entries(modusKnoepfe)) kk.setAttribute("aria-pressed", String(x === art)); LS.ton("tipp"); });
+    }
+    if (!nurStunde) f.append(el("div", { class: "qh-modus" }, modusKnoepfe.stunde, modusKnoepfe.minute));
+    f.append(zifferblatt);
+    for (const ziel of zifferblatt.querySelectorAll(".ziel")) {
+      ziel.addEventListener("click", () => {
+        if (fertig) return;
+        const z = Number(ziel.getAttribute("data-zahl"));
+        if (modus === "stunde") gh = z; else gm = (z % 12) * 5;
+        LS.ton("tipp");
+        stelleZeiger(zifferblatt, gh, gm);
+      });
+    }
+    const ok = el("button", { type: "button", class: "knopf gruen", text: "OK ✓" });
+    ok.addEventListener("click", () => {
+      if (fertig) return;
+      if (gh % 12 === a.h % 12 && gm === a.m) { fertig = true; nachher(); ctx.richtig(`Richtig: ${satz}`); return; }
+      const hinweis = gm !== a.m ? HINWEIS_MINUTEN + " Jede Zahl sind 5 Minuten." : a.m > 30
+        ? "Die Minuten stimmen. Bei «moins» ist die genannte Stunde noch nicht da: Der kurze Zeiger zeigt die Stunde davor."
+        : "Die Minuten stimmen. Schau, welche Stunde genannt wird, und stell den kurzen Zeiger darauf.";
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) fertig = true;
+    });
+    f.append(el("div", { class: "qh-ok" }, ok));
+  },
+}, "fr");
+</script>
+</body>
+</html>

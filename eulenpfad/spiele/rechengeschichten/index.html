@@ -166,7 +166,8 @@ LS.spiel({
       }
       ctx.flaeche.append(bilder);
     }
-    ctx.flaeche.append(el("div", { class: "geschichte", text: geschichteText(g.text, werte) }));
+    // Die Geschichte ist Mathe, nicht Lesestoff: als .frage liest die Eule sie vor (rahmen.md Abschnitt 12).
+    ctx.flaeche.append(el("div", { class: "geschichte frage", text: geschichteText(g.text, werte) }));
 
     if (a.art === "waehlen") {
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Rechnung passt?" }));
@@ -177,7 +178,7 @@ LS.spiel({
         loesung: `${einsetzen(g.richtig, werte)} — die Lösung ist ${zahlText(a.ergebnis)}.`,
         lob: `Genau: ${einsetzen(g.richtig, werte)}. Die Lösung ist ${zahlText(a.ergebnis)}.`,
       });
-      if (ctx.nr === 0) ctx.sag("Lies die Geschichte genau. Kommt etwas dazu oder geht etwas weg?");
+      if (ctx.nr === 0) ctx.sag("Lies oder hör die Geschichte genau. Kommt etwas dazu oder geht etwas weg?");
       return;
     }
     const loesung = `${einsetzen(g.rechnung, werte)} = ${zahlText(a.ergebnis)}`;

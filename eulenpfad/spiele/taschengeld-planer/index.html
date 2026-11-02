@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taschengeld-Planer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 10px; }
+  .tg-karte {
+    background: #fff; border: 3px solid var(--rand); border-radius: 18px; padding: 10px 14px; margin: 0 auto 12px;
+    max-width: 560px; font-size: clamp(17px, 3.8vw, 22px); font-variant-numeric: tabular-nums;
+  }
+  .tg-budget { font-weight: 900; color: var(--deko-5); text-align: center; margin-bottom: 6px; font-size: clamp(19px, 4.4vw, 26px); }
+  .tg-titel { font-weight: 800; color: var(--text-leise); font-size: .85em; margin: 6px 0 2px; }
+  .tg-zeile { display: flex; align-items: center; gap: 10px; padding: 4px 0; border-bottom: 1px dashed var(--rand); }
+  .tg-zeile:last-child { border-bottom: none; }
+  .tg-zeile .tg-bild { font-size: 1.5em; width: 1.6em; text-align: center; flex: none; }
+  .tg-zeile .tg-name { flex: 1; font-weight: 700; min-width: 0; }
+  .tg-zeile .tg-preis { font-weight: 900; }
+  .tg-preis { white-space: nowrap; }
+  .tg-angebote { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 10px; max-width: 560px; margin: 0 auto 12px; }
+  .tg-angebot { background: #fff; border: 3px solid var(--deko-5); border-radius: 16px; padding: 10px; text-align: center; font-size: clamp(17px, 3.8vw, 21px); }
+  .tg-angebot b { display: block; color: var(--deko-5); }
+  .tg-regal { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; max-width: 640px; margin: 0 auto 12px; }
+  .tg-ware {
+    border: 3px solid transparent; border-radius: 16px; min-height: 96px; padding: 8px; font-family: inherit; background: #fff;
+    box-shadow: 0 5px 0 var(--rand); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    color: var(--text); font-size: clamp(16px, 3.6vw, 19px); font-weight: 700;
+  }
+  .tg-ware .tg-bild { font-size: 34px; line-height: 1.1; }
+  .tg-ware .tg-preis { font-weight: 900; }
+  .tg-ware.gewaehlt { border-color: var(--deko-5); background: #e6fbf8; }
+  .tg-ware.gewaehlt::after { content: "✓ im Korb"; font-size: 14px; color: var(--deko-5); font-weight: 900; }
+  .tg-status { text-align: center; font-weight: 800; color: var(--text-leise); margin: 0 0 6px; }
+  .tg-pruefen { display: block; margin: 0 auto; }
+  .tg-pruefen:disabled { opacity: .45; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>👛 Taschengeld-Planer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.6.5.g (2. Zyklus): Konsumentscheide treffen und begründen — mit einem Budget planen,
+// Bedürfnis (Bedarf) und Wunsch unterscheiden; MA.3.A.2.h mit Geldbeträgen rechnen. Basisklasse 5:
+// s1 4. Klasse (Reicht das Geld?), s2 was bleibt übrig, s3 Wochenbudget (zwei, drei Dinge wählen, nicht
+// überziehen), s4 Sparziel (wie viele Wochen?), s5 6. Klasse Monatsbudget: Bedarf vor Wunsch, feste
+// Ausgaben, s6 Königsstufe Angebote vergleichen (Preis je Stück) und: lohnt sich der Pack, wenn ich nur
+// wenige brauche? Abgrenzung: Die Kiosk-Kasse übt Bezahlen und Rückgeld, die Preis-Tabelle den Dreisatz —
+// hier wird geplant und entschieden. Geld nur über LS.geldText (ab 4. Klasse „25.60 Fr.“ mit dem
+// eingestellten Dezimalzeichen), intern alles in Rappen. Waren und Preise in woerter.js (Annahmen).
+
+const { zufall, waehle, mische, el } = LS;
+const ID = "taschengeld-planer";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["waren"]);
+const WAREN = (FREI.has("waren") ? TASCHEN_WAREN : []).map(([bild, name, rp, art, stueck]) => ({ bild, name, rp, art, stueck: !!stueck }));
+const geld = rp => LS.geldText(rp);
+const summe = liste => liste.reduce((s, w) => s + w.rp * (w.anzahl || 1), 0);
+const ware = name => WAREN.find(w => w.name === name);
+
+/** k Waren ohne doppelte Namen aus einer Auswahl. */
+const ziehe = (liste, k) => mische(liste).slice(0, k);
+
+// ---------- Aufgaben als Daten ----------
+
+const ARTEN = {
+  /** Reicht das Geld für eine oder zwei Sachen? */
+  reicht() {
+    const billig = WAREN.filter(w => w.rp <= 1500);
+    if (billig.length < 2) return null;
+    const waren = ziehe(billig, zufall(1, 2));
+    const t = summe(waren);
+    if (t > 2000) return null;
+    const ja = Math.random() < 0.5;
+    const d = ja ? zufall(0, 6) * 50 : zufall(1, 6) * 50;
+    const budget = ja ? t + d : t - d;
+    if (budget < 100) return null;
+    return { art: "reicht", budget, waren: waren.map(w => w.name), antwort: ja ? "ja" : "nein" };
+  },
+  /** Was bleibt übrig? */
+  rest() {
+    const kand = WAREN.filter(w => w.rp <= 1200);
+    if (kand.length < 2) return null;
+    const waren = ziehe(kand, zufall(2, 3));
+    const t = summe(waren);
+    const budget = Math.ceil((t + zufall(1, 8) * 50) / 100) * 100 + waehle([0, 0, 50]);
+    if (budget - t <= 0 || budget > 3000) return null;
+    return { art: "rest", budget, waren: waren.map(w => w.name), antwort: budget - t };
+  },
+  /** Wochenbudget: genau k von fünf Sachen wählen, ohne zu überziehen. */
+  woche() {
+    const kand = WAREN.filter(w => w.rp <= 1000);
+    if (kand.length < 5) return null;
+    const regal = ziehe(kand, 5);
+    const k = waehle([2, 3]);
+    const kombis = kombinationen(regal.map((_, i) => i), k).map(c => summe(c.map(i => regal[i])));
+    const budget = waehle([500, 600, 700, 800, 1000, 1200, 1500]);
+    const gut = kombis.filter(s => s <= budget).length;
+    // mindestens eine passende Wahl, aber höchstens die Hälfte — sonst gibt es nichts zu rechnen
+    if (!gut || gut > kombis.length / 2) return null;
+    return { art: "woche", budget, regal: regal.map(w => w.name), k };
+  },
+  /** Sparziel: Wie viele Wochen? */
+  sparen() {
+    const ziele = WAREN.filter(w => w.rp >= 1500);
+    if (!ziele.length) return null;
+    const ziel = waehle(ziele);
+    const rate = waehle([200, 250, 300, 400, 500, 600, 800, 1000]);
+    const schon = waehle([0, 0, 100, 200, 300, 500, 700, 1000]);
+    if (schon >= ziel.rp) return null;
+    const wochen = Math.ceil((ziel.rp - schon) / rate);
+    if (wochen < 2 || wochen > 12) return null;
+    return { art: "sparen", ziel: ziel.name, rate, schon, antwort: wochen };
+  },
+  /** Monatsbudget mit festen Ausgaben: Was bleibt für Wünsche? */
+  fest() {
+    const bedarf = WAREN.filter(w => w.art === "bedarf" && w.rp <= 1500);
+    if (bedarf.length < 2) return null;
+    const fest = ziehe(bedarf, zufall(2, 3)).map(w => ({ name: w.name, anzahl: w.rp <= 300 ? zufall(1, 4) : 1, rp: w.rp }));
+    const f = summe(fest);
+    const budget = waehle([2000, 2500, 3000, 4000, 5000]);
+    if (f >= budget - 200) return null;
+    return { art: "fest", budget, fest: fest.map(w => [w.name, w.anzahl]), antwort: budget - f };
+  },
+  /** Bedarf vor Wunsch: Welcher Wunsch passt danach noch ins Budget? */
+  wunsch() {
+    const bedarf = WAREN.filter(w => w.art === "bedarf" && w.rp <= 1500);
+    const wuensche = WAREN.filter(w => w.art === "wunsch");
+    if (bedarf.length < 2 || wuensche.length < 3) return null;
+    const fest = ziehe(bedarf, 2);
+    const f = summe(fest);
+    const budget = waehle([1500, 2000, 2500, 3000, 4000]);
+    const rest = budget - f;
+    if (rest < 100) return null;
+    const passen = wuensche.filter(w => w.rp <= rest), zuTeuer = wuensche.filter(w => w.rp > rest);
+    if (!passen.length || zuTeuer.length < 2) return null;
+    // Der richtige Wunsch: der teuerste, der noch passt — die zu teuren nicht weit darüber
+    const richtig = waehle(passen.filter(w => w.rp > rest / 3).length ? passen.filter(w => w.rp > rest / 3) : passen);
+    const falsche = ziehe(zuTeuer.filter(w => w.rp <= rest * 3).length >= 2 ? zuTeuer.filter(w => w.rp <= rest * 3) : zuTeuer, 2);
+    return { art: "wunsch", budget, fest: fest.map(w => w.name), richtig: richtig.name, optionen: mische([richtig, ...falsche].map(w => w.name)) };
+  },
+  /** Bedarf oder Wunsch? (nur Waren mit eindeutiger Art) */
+  sortieren() {
+    const kand = WAREN.filter(w => w.art);
+    if (!kand.some(w => w.art === "bedarf") || !kand.some(w => w.art === "wunsch")) return null;
+    const art = waehle(["bedarf", "wunsch"]);
+    const w = waehle(kand.filter(x => x.art === art));
+    return { art: "sortieren", ware: w.name, antwort: w.art };
+  },
+  /** Welches Angebot ist pro Stück günstiger? */
+  vergleich() {
+    const kand = WAREN.filter(w => w.stueck);
+    if (!kand.length) return null;
+    const w = waehle(kand);
+    const [n1, n2] = ziehe([1, 2, 3, 4, 5, 6, 10], 2);
+    const gleich = Math.random() < 0.25;
+    const p1 = Math.max(50, w.rp + zufall(-3, 2) * 10);
+    const p2 = gleich ? p1 : Math.max(50, p1 + waehle([-1, 1]) * zufall(1, 4) * 10);
+    if (p2 === p1 && !gleich) return null;
+    return { art: "vergleich", ware: w.name, a: [n1, n1 * p1], b: [n2, n2 * p2], antwort: p1 === p2 ? "gleich" : p1 < p2 ? "A" : "B" };
+  },
+  /** Ich brauche nur wenige: einzeln oder im Pack? */
+  brauche() {
+    const kand = WAREN.filter(w => w.stueck && w.rp >= 80);
+    if (!kand.length) return null;
+    const w = waehle(kand);
+    const n = waehle([5, 6, 10]);
+    const k = zufall(1, n - 1);
+    // Pack immer günstiger pro Stück, 10 bis 30 Prozent
+    const packPreis = Math.round(n * w.rp * (1 - zufall(1, 3) / 10) / 10) * 10;
+    const einzeln = k * w.rp;
+    if (packPreis >= n * w.rp) return null;
+    return { art: "brauche", ware: w.name, k, n, pack: packPreis, antwort: einzeln < packPreis ? "einzeln" : einzeln > packPreis ? "pack" : "gleich" };
+  },
+};
+
+function kombinationen(liste, k) {
+  if (k === 0) return [[]];
+  return liste.flatMap((x, i) => kombinationen(liste.slice(i + 1), k - 1).map(c => [x, ...c]));
+}
+
+// Je Stufe: Aufgabenarten (mehrfach = häufiger).
+const STUFE = {
+  s1: ["reicht"],
+  s2: ["rest"],
+  s3: ["woche"],
+  s4: ["sparen"],
+  s5: ["wunsch", "fest", "sortieren"],
+  s6: ["vergleich", "brauche", "brauche"],
+};
+
+function aufgabeErzeugen(stufe) {
+  for (let versuch = 0; versuch < 400; versuch++) {
+    const a = ARTEN[waehle(STUFE[stufe])]();
+    if (a && !pruefeAufgabe(a, stufe).length) return a;
+  }
+  return null;
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFE[stufe].includes(a.art)) m.push(`Art ${a.art} nicht in ${stufe}`);
+  const namen = [...(a.waren || []), ...(a.regal || []), ...(a.fest || []).map(f => (Array.isArray(f) ? f[0] : f)), ...(a.optionen || []),
+    ...[a.ziel, a.ware].filter(Boolean)];
+  if (namen.some(n => !ware(n))) m.push("Ware nicht aus einer freien Liste");
+  const preis = n => ware(n)?.rp || 0;
+  const s = l => l.reduce((x, n) => x + preis(n), 0);
+  if (a.art === "reicht") {
+    if ((a.budget >= s(a.waren) ? "ja" : "nein") !== a.antwort) m.push("Antwort falsch");
+    if (Math.abs(a.budget - s(a.waren)) > 300) m.push("zu leicht: Unterschied über 3 Fr.");
+  }
+  if (a.art === "rest" && a.budget - s(a.waren) !== a.antwort) m.push("Rest falsch");
+  if (a.art === "rest" && a.antwort <= 0) m.push("Rest nicht positiv");
+  if (a.art === "woche") {
+    if (new Set(a.regal).size !== 5) m.push("Regal nicht mit fünf verschiedenen Waren");
+    const sum = kombinationen(a.regal, a.k).map(s);
+    if (!sum.some(x => x <= a.budget)) m.push("keine Wahl passt ins Budget");
+    if (sum.filter(x => x <= a.budget).length > sum.length / 2) m.push("zu leicht: mehr als die Hälfte passt");
+  }
+  if (a.art === "sparen") {
+    const n = Math.ceil((preis(a.ziel) - a.schon) / a.rate);
+    if (n !== a.antwort || a.schon + n * a.rate < preis(a.ziel) || a.schon + (n - 1) * a.rate >= preis(a.ziel)) m.push("Wochen falsch");
+  }
+  if (a.art === "fest") {
+    const f = a.fest.reduce((x, [n, k]) => x + preis(n) * k, 0);
+    if (a.budget - f !== a.antwort || a.antwort <= 0) m.push("Rest falsch");
+    if (a.fest.some(([n]) => ware(n)?.art !== "bedarf")) m.push("feste Ausgabe ist kein Bedarf");
+  }
+  if (a.art === "wunsch") {
+    const rest = a.budget - s(a.fest);
+    if (a.optionen.length !== 3 || new Set(a.optionen).size !== 3) m.push("nicht drei verschiedene Wünsche");
+    if (a.optionen.filter(n => preis(n) <= rest).length !== 1 || preis(a.richtig) > rest) m.push("nicht genau ein Wunsch passt");
+    if (a.optionen.some(n => ware(n)?.art !== "wunsch") || a.fest.some(n => ware(n)?.art !== "bedarf")) m.push("Bedarf und Wunsch vertauscht");
+  }
+  if (a.art === "sortieren" && ware(a.ware)?.art !== a.antwort) m.push("Korb falsch");
+  if (a.art === "vergleich") {
+    const [n1, p1] = a.a, [n2, p2] = a.b;
+    if (n1 === n2) m.push("gleiche Anzahl — kein Vergleich");
+    if (p1 % n1 || p2 % n2 || (p1 / n1) % 10 || (p2 / n2) % 10) m.push("Stückpreis nicht in ganzen 10 Rappen");
+    const l = p1 / n1 === p2 / n2 ? "gleich" : p1 / n1 < p2 / n2 ? "A" : "B";
+    if (l !== a.antwort) m.push("Vergleich falsch");
+  }
+  if (a.art === "brauche") {
+    const e = a.k * preis(a.ware);
+    const l = e < a.pack ? "einzeln" : e > a.pack ? "pack" : "gleich";
+    if (l !== a.antwort) m.push("Entscheid falsch");
+    if (a.pack >= a.n * preis(a.ware)) m.push("Pack nicht günstiger pro Stück");
+    if (a.k >= a.n) m.push("braucht mehr, als im Pack ist");
+  }
+  return m;
+}
+
+const STUFEN_TEXT = {
+  s1: `Reicht dein Geld? Du hast ${LS.geldText(850, 4)}, die Glace kostet ${LS.geldText(400, 4)}`,
+  s2: "Was bleibt dir übrig, wenn du zwei, drei Sachen kaufst?",
+  s3: "Wochenbudget: Wähle zwei oder drei Sachen, ohne zu überziehen.",
+  s4: "Sparziel: Wie viele Wochen musst du sparen?",
+  s5: "Monatsbudget: zuerst, was du brauchst — dann ein Wunsch.",
+  s6: "Endgegner: Welches Angebot ist günstiger? Lohnt sich der Pack?",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => WAREN.length && aufgabeErzeugen(s)));
+
+// ---------- Darstellung ----------
+
+/** Liste von Waren als Karte: [Name] oder [Name, Anzahl]. */
+function listeEl(titel, eintraege) {
+  const box = el("div", {});
+  if (titel) box.append(el("div", { class: "tg-titel", text: titel }));
+  for (const e of eintraege) {
+    const [name, k] = Array.isArray(e) ? e : [e, 1];
+    const w = ware(name);
+    box.append(el("div", { class: "tg-zeile" }, el("span", { class: "tg-bild", text: w.bild }),
+      el("span", { class: "tg-name", text: k > 1 ? `${k} × ${w.name}` : w.name }),
+      el("span", { class: "tg-preis", text: k > 1 ? `${k} × ${geld(w.rp)}` : geld(w.rp) })));
+  }
+  return box;
+}
+
+function eintippen(ctx, richtig, hinweis, loesung, einheit) {
+  ctx.loesung(loesung);
+  const dezimal = einheit === "Fr.";
+  ctx.schritte(LS.tippSchritte(dezimal ? richtig / 100 : richtig));
+  const anzeige = el("div", { class: "anzeige leer", "aria-label": `Deine Antwort in ${einheit}` });
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 3, dezimal, nachkomma: 2,
+    onOk(w) {
+      const ok = dezimal ? Math.round(w * 100) === richtig : w === richtig;
+      if (ok) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${loesung}`); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(el("div", { class: "tg-status", text: `Antwort in ${einheit}` }), anzeige, tasten.element);
+}
+
+const TIPP = {
+  reicht: "Zähl die Preise zusammen und vergleiche mit deinem Geld.",
+  rest: "Rechne zuerst, was alles zusammen kostet. Dann: Geld minus Ausgaben.",
+  woche: "Tipp Sachen an, bis genug im Korb sind. Rechne nach, bevor du prüfst!",
+  sparen: "Rechne Woche für Woche weiter. Erst wenn das Geld reicht, kannst du kaufen.",
+  fest: "Zuerst kommen die festen Ausgaben weg — das, was du sicher brauchst.",
+  wunsch: "Zuerst kaufst du, was du brauchst. Rechne aus, was dann noch übrig ist.",
+  sortieren: "Brauchst du es wirklich — für die Schule, die Gesundheit, die Sicherheit? Oder hättest du es einfach gern?",
+  vergleich: "Rechne für beide Angebote aus, was ein Stück kostet.",
+  brauche: "Überlege: Wie viele brauchst du wirklich? Was kostet das einzeln?",
+};
+
+LS.spiel({
+  id: ID,
+  einleitung: "Dein Taschengeld, dein Plan! Rechne nach, was du dir leisten kannst — und überlege, was du wirklich brauchst.",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.nr === 0) ctx.sag(TIPP[a.art]);
+    if (new Set(STUFE[ctx.stufe]).size > 1) ctx.serie("art", a.art);
+    const f = ctx.flaeche;
+    const karte = el("div", { class: "tg-karte sachtext" });
+
+    if (a.art === "reicht") {
+      ctx.serie("antwort", a.antwort);
+      const t = a.waren.reduce((x, n) => x + ware(n).rp, 0);
+      karte.append(el("div", { class: "tg-budget", text: `👛 Du hast ${geld(a.budget)}` }), listeEl("Du möchtest kaufen:", a.waren));
+      f.append(el("div", { class: "frage", text: a.waren.length > 1 ? "Reicht dein Geld für beides?" : "Reicht dein Geld dafür?" }), karte);
+      const loesung = `Zusammen ${geld(t)}, du hast ${geld(a.budget)}: ${a.antwort === "ja" ? "es reicht" : "es reicht nicht"}`;
+      LS.auswahl(ctx, {
+        optionen: ["ja", "nein"], richtig: a.antwort, breite: 150, loesung,
+        inhalt: o => (o === "ja" ? { bild: "👍", text: "Ja, es reicht" } : { bild: "✋", text: "Nein, zu wenig" }),
+        hinweis: TIPP.reicht,
+      });
+      return;
+    }
+
+    if (a.art === "rest") {
+      karte.append(el("div", { class: "tg-budget", text: `👛 Du hast ${geld(a.budget)}` }), listeEl("Du kaufst:", a.waren));
+      f.append(el("div", { class: "frage", text: "Wie viel Geld bleibt dir übrig?" }), karte);
+      eintippen(ctx, a.antwort, TIPP.rest, `${geld(a.budget)} − ${geld(a.budget - a.antwort)} = ${geld(a.antwort)}`, "Fr.");
+      return;
+    }
+
+    if (a.art === "woche") {
+      ctx.schritte(a.k + 1);
+      f.append(el("div", { class: "frage", text: `Wochenbudget ${geld(a.budget)} — wähle genau ${a.k} Sachen, ohne zu überziehen.` }));
+      const passende = kombinationen(a.regal, a.k).filter(c => c.reduce((x, n) => x + ware(n).rp, 0) <= a.budget);
+      const beispiel = passende.reduce((b, c) => (c.reduce((x, n) => x + ware(n).rp, 0) > b.reduce((x, n) => x + ware(n).rp, 0) ? c : b), passende[0]);
+      const loesung = `zum Beispiel ${beispiel.join(" + ")} = ${geld(beispiel.reduce((x, n) => x + ware(n).rp, 0))}`;
+      ctx.loesung(loesung);
+      const regal = el("div", { class: "tg-regal" });
+      const status = el("div", { class: "tg-status", text: `0 von ${a.k} im Korb` });
+      const pruefen = el("button", { type: "button", class: "knopf tg-pruefen", text: "Prüfen ✓" });
+      pruefen.disabled = true;
+      const gewaehlt = new Set();
+      for (const name of a.regal) {
+        const w = ware(name);
+        const k = el("button", { type: "button", class: "tg-ware", "aria-pressed": "false" },
+          el("span", { class: "tg-bild", text: w.bild }), el("span", { text: w.name }), el("span", { class: "tg-preis", text: geld(w.rp) }));
+        k.addEventListener("click", () => {
+          if (ctx.vorbei()) return;
+          if (gewaehlt.has(name)) gewaehlt.delete(name);
+          else if (gewaehlt.size < a.k) gewaehlt.add(name);
+          else return ctx.sag(`Dein Korb ist voll: genau ${a.k} Sachen. Tipp eine an, um sie herauszunehmen.`, "hinweis");
+          k.classList.toggle("gewaehlt", gewaehlt.has(name));
+          k.setAttribute("aria-pressed", String(gewaehlt.has(name)));
+          LS.ton("tipp");
+          status.textContent = `${gewaehlt.size} von ${a.k} im Korb`;
+          pruefen.disabled = gewaehlt.size !== a.k;
+        });
+        regal.append(k);
+      }
+      pruefen.addEventListener("click", () => {
+        if (ctx.vorbei() || gewaehlt.size !== a.k) return;
+        const t = [...gewaehlt].reduce((x, n) => x + ware(n).rp, 0);
+        if (t <= a.budget) {
+          pruefen.disabled = true;
+          ctx.richtig(`Gut geplant! Zusammen ${geld(t)}, es bleiben ${geld(a.budget - t)} übrig.`);
+          return;
+        }
+        ctx.falsch("Zusammen kostet das mehr als dein Budget. Rechne nach und tausche etwas aus.", loesung);
+        if (ctx.vorbei()) { pruefen.disabled = true; regal.querySelectorAll("button").forEach(b => { b.disabled = true; }); }
+      });
+      f.append(regal, status, pruefen);
+      return;
+    }
+
+    if (a.art === "sparen") {
+      const z = ware(a.ziel);
+      karte.append(el("div", { class: "tg-budget" }, `🎯 Sparziel: ${z.bild} ${z.name} für `, el("span", { class: "tg-preis", text: geld(z.rp) })),
+        el("div", { class: "tg-zeile" }, el("span", { class: "tg-bild", text: "🐷" }),
+          el("span", { class: "tg-name", text: a.schon ? `Im Kässeli sind schon ${geld(a.schon)}` : "Dein Kässeli ist leer." })),
+        el("div", { class: "tg-zeile" }, el("span", { class: "tg-bild", text: "📅" }),
+          el("span", { class: "tg-name", text: `Jede Woche legst du ${geld(a.rate)} dazu.` })));
+      f.append(el("div", { class: "frage", text: "Nach wie vielen Wochen kannst du es kaufen?" }), karte);
+      const gespart = a.schon + a.antwort * a.rate;
+      const loesung = `${a.schon ? geld(a.schon) + " + " : ""}${a.antwort} × ${geld(a.rate)} = ${geld(gespart)} → nach ${a.antwort} Wochen`;
+      eintippen(ctx, a.antwort, TIPP.sparen, loesung, "Wochen");
+      return;
+    }
+
+    if (a.art === "fest") {
+      const f2 = a.fest.reduce((x, [n, k]) => x + ware(n).rp * k, 0);
+      karte.append(el("div", { class: "tg-budget", text: `📅 Monatsbudget: ${geld(a.budget)}` }), listeEl("Das brauchst du sicher (feste Ausgaben):", a.fest));
+      f.append(el("div", { class: "frage", text: "Wie viel bleibt dir für Wünsche?" }), karte);
+      eintippen(ctx, a.antwort, TIPP.fest, `${geld(a.budget)} − ${geld(f2)} = ${geld(a.antwort)}`, "Fr.");
+      return;
+    }
+
+    if (a.art === "wunsch") {
+      const rest = a.budget - a.fest.reduce((x, n) => x + ware(n).rp, 0);
+      karte.append(el("div", { class: "tg-budget", text: `📅 Monatsbudget: ${geld(a.budget)}` }), listeEl("Das brauchst du zuerst:", a.fest));
+      f.append(el("div", { class: "frage", text: "Welchen Wunsch kannst du dir danach noch leisten?" }), karte);
+      const r = ware(a.richtig);
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 150,
+        inhalt: n => ({ bild: ware(n).bild, text: ware(n).name, klein: geld(ware(n).rp) }),
+        hinweis: TIPP.wunsch, loesung: `Es bleiben ${geld(rest)}: ${r.name} (${geld(r.rp)}) passt`,
+      });
+      return;
+    }
+
+    if (a.art === "sortieren") {
+      ctx.serie("antwort", a.antwort);
+      const w = ware(a.ware);
+      f.append(el("div", { class: "frage", text: "Brauchst du das, oder wünschst du es dir?" }));
+      LS.koerbe(ctx, {
+        karte: { bild: w.bild, text: w.name }, koerbe: ["bedarf", "wunsch"], richtig: a.antwort,
+        korbInhalt: k => (k === "bedarf" ? { bild: "🧰", text: "Bedarf", klein: "brauche ich" } : { bild: "💭", text: "Wunsch", klein: "hätte ich gern" }),
+        farbe: k => (k === "bedarf" ? "var(--deko-5)" : "var(--deko-2)"),
+        hinweis: TIPP.sortieren, loesung: `${w.name}: ${a.antwort === "bedarf" ? "Bedarf" : "Wunsch"}`,
+      });
+      return;
+    }
+
+    if (a.art === "vergleich") {
+      ctx.serie("antwort", a.antwort);
+      const w = ware(a.ware);
+      const angebot = (b, [n, p]) => el("div", { class: "tg-angebot" }, el("b", { text: `Angebot ${b}` }),
+        `${n} × ${w.bild} ${w.name}`, el("br"), `für ${geld(p)}`);
+      f.append(el("div", { class: "frage", text: "Welches Angebot ist pro Stück günstiger?" }),
+        el("div", { class: "tg-angebote sachtext" }, angebot("A", a.a), angebot("B", a.b)));
+      const st = ([n, p]) => geld(p / n);
+      LS.auswahl(ctx, {
+        optionen: ["A", "B", "gleich"], richtig: a.antwort, breite: 120,
+        inhalt: o => (o === "gleich" ? { bild: "🤝", text: "gleich teuer" } : { bild: "🏷️", text: `Angebot ${o}` }),
+        hinweis: TIPP.vergleich, loesung: `1 Stück: A ${st(a.a)}, B ${st(a.b)}`,
+      });
+      return;
+    }
+
+    // brauche: einzeln oder Pack?
+    ctx.serie("antwort", a.antwort);
+    const w = ware(a.ware);
+    f.append(el("div", { class: "frage", text: `Du brauchst ${a.k} × ${w.name}. Wie kaufst du günstiger ein?` }),
+      el("div", { class: "tg-angebote sachtext" },
+        el("div", { class: "tg-angebot" }, el("b", { text: "einzeln" }), `1 × ${w.bild} für ${geld(w.rp)}`),
+        el("div", { class: "tg-angebot" }, el("b", { text: "Pack" }), `${a.n} × ${w.bild} für ${geld(a.pack)}`)));
+    LS.auswahl(ctx, {
+      optionen: ["einzeln", "pack", "gleich"], richtig: a.antwort, breite: 120,
+      inhalt: o => (o === "einzeln" ? { bild: "1️⃣", text: "einzeln kaufen" } : o === "pack" ? { bild: "📦", text: "den Pack kaufen" } : { bild: "🤝", text: "kostet gleich viel" }),
+      hinweis: TIPP.brauche, loesung: `${a.k} einzeln: ${geld(a.k * w.rp)}, Pack: ${geld(a.pack)}`,
+    });
+  },
+});
+</script>
+</body>
+</html>

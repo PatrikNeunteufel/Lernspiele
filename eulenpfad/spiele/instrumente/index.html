@@ -194,6 +194,8 @@ LS.spiel({
         loesung: `${a.x.name}: ${a.richtig}.`,
       });
       if (bild && typeof bild !== "string") karte.prepend(el("span", { class: "bild" }, bild));
+      // Hier ist die Spielweise oder Gruppe gefragt, nicht der Name: Die Eule liest ihn mit vor (rahmen.md Abschnitt 12).
+      karte.querySelector("b").classList.add("frage");
     } else {
       ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 200, hinweis: "Denk an Musik, die du kennst: Wie viele spielen mit? Was schwingt?", loesung: `${a.frage} ${a.richtig.replace(/\.$/, "")}.` });

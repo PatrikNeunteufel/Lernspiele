@@ -163,7 +163,7 @@ LS.spiel({
     });
 
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Zahl für den gewählten Stein" });
-    ctx.flaeche.append(mauer, el("div", { class: "hinweis-klein", text: "Tipp auf einen leeren Stein, dann die Zahl eintippen." }), anzeige);
+    ctx.flaeche.append(mauer, el("div", { class: "hinweis-klein frage", text: "Tipp auf einen leeren Stein, dann die Zahl eintippen." }), anzeige);
 
     const tasten = LS.tastatur({
       anzeige, maxStellen: 7,

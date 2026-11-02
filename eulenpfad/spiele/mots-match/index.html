@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mots-Match</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .thema-name { text-align: center; font-weight: 800; color: var(--text-leise); margin-bottom: 2px; }
+  .frage { text-align: center; font-size: clamp(17px, 3.8vw, 22px); font-weight: 800; margin: 2px 0 8px; color: var(--text-leise); }
+  .wortkarte { text-align: center; font-size: clamp(30px, 7vw, 46px); font-weight: 900; margin: 4px auto 14px; color: var(--deko-2);
+    background: #fff; border-radius: 18px; box-shadow: 0 5px 0 var(--rand); padding: 10px 18px; max-width: 520px; overflow-wrap: anywhere; }
+  .wortkarte.mm-bild { font-size: clamp(64px, 15vw, 96px); line-height: 1.15; padding: 6px 18px; }
+  .wortkarte.mm-de { color: var(--deko-6); font-size: clamp(26px, 6vw, 38px); }
+  .mm-hoer { display: block; margin: 0 auto 14px; border: none; border-radius: 999px; padding: 12px 26px; font-family: inherit;
+    font-size: clamp(20px, 4.4vw, 26px); font-weight: 900; background: var(--deko-2); color: #fff; box-shadow: 0 5px 0 var(--deko-7); cursor: pointer; }
+  .mm-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-7); }
+  .mm-wahl .wahl-knopf { font-size: clamp(19px, 4.2vw, 24px); }
+  .mm-wahl.mm-bilder .wahl-knopf { min-height: 92px; }
+  .mm-wahl.mm-bilder .wahl-knopf .bild { font-size: clamp(42px, 10vw, 58px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🥐 Mots-Match</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS2F.5.B.1 (Wortschatz zu vertrauten Themen: a begrenztes, b elementares Repertoire)
+// und FS2F.2.A.1.a (einzelne Wörter mit Bild verstehen). Basisklasse 5: Französisch beginnt in
+// St. Gallen in der 5. Klasse; Stufe 1 ist ein Einstieg ohne Vorkenntnisse (Bild, Wort und Hören).
+// Stufen: s1 Bild → Wort mit Ton (FS2F.2.A.1.a) · s2 alle Themen, auch Wort → Bild (5.B.1.a) · s3 ohne
+// Ton, Deutsch → Französisch (5.B.1.a) · s4 nur hören (5.B.1.a, FS2F.1.A.1) · s5 ähnliche Wörter,
+// Artikel mitwählen (5.B.1.b) · s6 alles gemischt, schnell.
+// Aufbau wie English Word-Match (word-match); dort Englisch, hier Französisch mit Artikel und Stimme.
+// Inhalte in woerter.js; gehört wird über die Stimme des Geräts (fr-CH, sonst fr-FR).
+
+const { waehle, mische, el } = LS;
+const ID = "mots-match";
+const ALLE_THEMEN = Object.keys(THEMEN_FR);
+
+// Freigabe (Entscheid L4 a): je Thema eine Liste mit derselben Id. Kennt der Katalog die Listen
+// nicht, gilt alles als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ALLE_THEMEN);
+
+/** „le chat“, „l’oiseau“, „les frites“. */
+const frText = (artikel, wort) => (artikel === "l’" ? "l’" + wort : `${artikel} ${wort}`);
+const ALLE = ALLE_THEMEN.flatMap(thema => THEMEN_FR[thema].woerter.map(([artikel, wort, de, bild]) =>
+  ({ thema, artikel, wort, de, bild, fr: frText(artikel, wort) })));
+const FREIE = ALLE.filter(w => FREI.has(w.thema));
+const sprechText = fr => fr.replace(/’/g, "'");
+const LOB = ["Bravo !", "Super !", "Très bien !", "Génial !"];
+
+/** Artikel vertauschen (le ↔ la), wo das ein falsches Wort ergibt; sonst null. */
+function andererArtikel(w) {
+  if (w.thema === "farben" || !["le", "la"].includes(w.artikel) || ARTIKEL_DOPPELT_FR.includes(w.wort)) return null;
+  return frText(w.artikel === "le" ? "la" : "le", w.wort);
+}
+
+/** Ziel und n-1 andere Wörter aus einem freien Thema der Stufe; null, wenn keines genug hat. */
+function ausThema(themen, n) {
+  const frei = themen.filter(t => FREI.has(t) && THEMEN_FR[t].woerter.length >= n);
+  if (!frei.length) return null;
+  const thema = waehle(frei);
+  const pool = FREIE.filter(w => w.thema === thema);
+  const ziel = waehle(pool);
+  return { ziel, andere: mische(pool.filter(w => w !== ziel)).slice(0, n - 1) };
+}
+
+/** n-1 freie Wörter aus allen Themen, die dem Ziel ähneln: gleicher Anfang, ähnliche Länge. */
+function aehnliche(ziel, n) {
+  const nah = w => (w.wort.slice(0, 2) === ziel.wort.slice(0, 2) ? 0 : w.wort[0] === ziel.wort[0] ? 3 : 9)
+    + Math.abs(w.wort.length - ziel.wort.length) + Math.random() * 3;
+  return FREIE.filter(w => w !== ziel).sort((a, b) => nah(a) - nah(b)).slice(0, n - 1);
+}
+
+// Jede Art liefert null, wenn die freien Listen nicht genug hergeben.
+// ton: "auto" = beim Zeigen vorlesen und 🔊-Knopf, "knopf" = nur 🔊-Knopf, null = ohne Ton.
+const ARTEN = {
+  /** Bild → französisches Wort. */
+  bildZuFr(themen, n, ton) {
+    const t = ausThema(themen, n);
+    if (!t) return null;
+    return { art: "bildZuFr", ziel: t.ziel, ton, zeige: "bild", richtig: t.ziel.fr, optionen: mische([t.ziel, ...t.andere].map(w => w.fr)) };
+  },
+  /** Französisches Wort → Bild. */
+  frZuBild(themen, n, ton) {
+    const t = ausThema(themen, n);
+    if (!t) return null;
+    return { art: "frZuBild", ziel: t.ziel, ton, zeige: "fr", richtig: t.ziel.bild, optionen: mische([t.ziel, ...t.andere].map(w => w.bild)) };
+  },
+  /** Deutsches Wort → französisches Wort mit Artikel. */
+  deZuFr(themen, n) {
+    const t = ausThema(themen, n);
+    if (!t) return null;
+    return { art: "deZuFr", ziel: t.ziel, ton: null, zeige: "de", richtig: t.ziel.fr, optionen: mische([t.ziel, ...t.andere].map(w => w.fr)) };
+  },
+  /** Nur hören → Bild. alleThemen: Bilder aus allen freien Themen, sonst aus einem. */
+  hoerZuBild(themen, n, alleThemen) {
+    let t;
+    if (alleThemen) {
+      const pool = FREIE.filter(w => themen.includes(w.thema));
+      if (pool.length < n) return null;
+      const ziel = waehle(pool);
+      t = { ziel, andere: mische(pool.filter(w => w !== ziel)).slice(0, n - 1) };
+    } else t = ausThema(themen, n);
+    if (!t) return null;
+    return { art: "hoerZuBild", ziel: t.ziel, ton: "auto", zeige: null, hoeren: true, alleThemen,
+      richtig: t.ziel.bild, optionen: mische([t.ziel, ...t.andere].map(w => w.bild)) };
+  },
+  /** Bild → Wort unter ähnlichen Wörtern aus allen Themen; dazu dasselbe Wort mit falschem Artikel. */
+  aehnlich(n) {
+    if (FREIE.length < n) return null;
+    const ziel = waehle(FREIE);
+    const falscherArtikel = andererArtikel(ziel);
+    const andere = aehnliche(ziel, falscherArtikel ? n - 1 : n).map(w => w.fr);
+    return { art: "aehnlich", ziel, ton: null, zeige: "bild", richtig: ziel.fr, falscherArtikel,
+      optionen: mische([ziel.fr, ...(falscherArtikel ? [falscherArtikel] : []), ...andere]) };
+  },
+  /** Deutsch → Französisch unter ähnlichen Wörtern aus allen Themen. */
+  deZuFrAehnlich(n) {
+    if (FREIE.length < n) return null;
+    const ziel = waehle(FREIE);
+    return { art: "deZuFrAehnlich", ziel, ton: null, zeige: "de", richtig: ziel.fr, optionen: mische([ziel, ...aehnliche(ziel, n)].map(w => w.fr)) };
+  },
+};
+
+// Je Stufe die Arten. Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 = 6. Klasse.
+const STUFE = {
+  s1: [() => ARTEN.bildZuFr(["farben", "tiere", "essen"], 3, "auto")],
+  s2: [() => ARTEN.bildZuFr(ALLE_THEMEN, 4, "knopf"), () => ARTEN.frZuBild(ALLE_THEMEN, 4, "knopf")],
+  s3: [() => ARTEN.frZuBild(ALLE_THEMEN, 4, null), () => ARTEN.deZuFr(ALLE_THEMEN, 4)],
+  s4: [() => ARTEN.hoerZuBild(ALLE_THEMEN, 5, false)],
+  s5: [() => ARTEN.aehnlich(4)],
+  // Königsstufe: ähnliche Wörter mit falschem Artikel, hören unter sechs Bildern aus allen Themen, Deutsch → Französisch
+  s6: [() => ARTEN.aehnlich(5), () => ARTEN.hoerZuBild(ALLE_THEMEN, 6, true), () => ARTEN.deZuFrAehnlich(5)],
+};
+const ANZAHL = { s1: 3, s2: 4, s3: 4, s4: 5, s5: 4, s6: { aehnlich: 5, hoerZuBild: 6, deZuFrAehnlich: 5 } };
+const THEMEN_DER_STUFE = { s1: ["farben", "tiere", "essen"] };
+
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Erste Wörter: Bild → Wort, mit Ton. 🐱 = le chat",
+  s2: "Alle Themen: Schule, Körper, Familie — auch Wort → Bild.",
+  s3: "Ohne Ton: la pomme → 🍎, „Hund“ → le chien.",
+  s4: "Nur hören: Welches Bild passt?",
+  s5: "Ähnliche Wörter und der richtige Artikel: le chat, nicht la chat.",
+  s6: "Endgegner: alles gemischt, mehr Bilder, schnell.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+/** Stufen, in denen die freien Listen mehr als eine Art hergeben (für ctx.serie). */
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()?.art).filter(Boolean)).size > 1));
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  const erlaubt = { s1: ["bildZuFr"], s2: ["bildZuFr", "frZuBild"], s3: ["frZuBild", "deZuFr"], s4: ["hoerZuBild"], s5: ["aehnlich"],
+    s6: ["aehnlich", "hoerZuBild", "deZuFrAehnlich"] }[stufe];
+  if (!erlaubt.includes(a.art)) m.push(`Art ${a.art} gehört nicht in die Stufe`);
+  if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+  if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Möglichkeit");
+  const n = typeof ANZAHL[stufe] === "object" ? ANZAHL[stufe][a.art] : ANZAHL[stufe];
+  if (a.optionen.length !== n) m.push(`${a.optionen.length} statt ${n} Möglichkeiten`);
+  const w = ALLE.find(x => x.fr === a.ziel.fr);
+  if (!w || !FREI.has(w.thema)) m.push("Wort nicht aus einer freien Liste");
+  if (THEMEN_DER_STUFE[stufe] && !THEMEN_DER_STUFE[stufe].includes(a.ziel.thema)) m.push("Thema nicht in der Stufe");
+  const bildArt = ["frZuBild", "hoerZuBild"].includes(a.art);
+  if (a.richtig !== (bildArt ? w?.bild : w?.fr)) m.push("Lösung passt nicht zum Wort");
+  // Jede andere Möglichkeit ist ein freies Wort oder Bild; beim gleichen Thema aus diesem Thema.
+  const gleichesThema = !["aehnlich", "deZuFrAehnlich"].includes(a.art) && !a.alleThemen;
+  for (const o of a.optionen) {
+    if (o === a.richtig || o === a.falscherArtikel) continue;
+    const x = FREIE.find(y => (bildArt ? y.bild : y.fr) === o);
+    if (!x) m.push(`Möglichkeit «${o}» nicht aus einer freien Liste`);
+    else if (gleichesThema && x.thema !== a.ziel.thema) m.push("Möglichkeit aus einem anderen Thema");
+  }
+  if (a.falscherArtikel) {
+    if (a.art !== "aehnlich") m.push("falscher Artikel in einer Art ohne Artikelwahl");
+    if (ALLE.some(x => x.fr === a.falscherArtikel)) m.push("falscher Artikel ergibt ein Wort der Liste");
+    if (a.falscherArtikel.split(" ").slice(1).join(" ") !== a.ziel.wort) m.push("falscher Artikel mit anderem Wort");
+  }
+  if (["s1", "s2"].includes(stufe) !== !!a.ton && !a.hoeren) m.push("Ton passt nicht zur Stufe");
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  if (new Set(ALLE.map(x => x.fr)).size !== ALLE.length) m.push("französisches Wort doppelt in den Listen");
+  if (new Set(ALLE.map(x => x.bild)).size !== ALLE.length) m.push("Bild doppelt in den Listen");
+  if (ALLE.some(x => !["le", "la", "l’", "les"].includes(x.artikel))) m.push("unbekannter Artikel in der Liste");
+  if (ALLE.some(x => (x.artikel === "l’") !== /^[aeiouyhàâéèêîôœ]/i.test(x.wort))) m.push("l’ passt nicht zum Wortanfang");
+  return m;
+}
+
+const FRAGE = {
+  bildZuFr: "Wie heisst das auf Französisch?",
+  frZuBild: "Was heisst das? Tipp auf das Bild.",
+  deZuFr: "Wie heisst das auf Französisch?",
+  hoerZuBild: "Hör zu: Welches Bild passt?",
+  aehnlich: "Wie heisst das auf Französisch? Achte auf den Artikel!",
+  deZuFrAehnlich: "Wie heisst das auf Französisch? Schau genau hin!",
+};
+
+const SPIEL = {
+  id: ID,
+  einleitung: "Bonjour ! Welches französische Wort passt zum Bild? Mit 🔊 hörst du, wie man es sagt.",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort. Bonne chance !");
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    const { ziel } = a;
+    const loesung = `${ziel.bild} ${ziel.fr} = ${ziel.de}`;
+    if (a.hoeren) ctx.kennung(ziel.fr);
+    ctx.flaeche.append(el("div", { class: "thema-name", text: a.alleThemen || a.art === "aehnlich" || a.art === "deZuFrAehnlich" ? "Tous les thèmes" : THEMEN_FR[ziel.thema].name }));
+    ctx.flaeche.append(el("div", { class: "frage", text: FRAGE[a.art] }));
+    if (a.zeige === "bild") ctx.flaeche.append(el("div", { class: "wortkarte mm-bild", text: ziel.bild }));
+    if (a.zeige === "fr") ctx.flaeche.append(el("div", { class: "wortkarte", text: ziel.fr }));
+    if (a.zeige === "de") ctx.flaeche.append(el("div", { class: "wortkarte mm-de", text: ziel.de }));
+    const sag = () => LS.sprich(sprechText(ziel.fr), "fr");
+    if (a.ton) ctx.flaeche.append(el("button", { type: "button", class: "mm-hoer", text: a.hoeren ? "🔊 nochmal" : "🔊 anhören", "aria-label": "Anhören", onclick: sag }));
+
+    const bilder = ["frZuBild", "hoerZuBild"].includes(a.art);
+    const hinweis = a.hoeren ? "Hör nochmal genau hin! Tipp auf 🔊."
+      : a.art === "aehnlich" ? (o => (o === a.falscherArtikel ? "Das Wort stimmt, aber der Artikel nicht." : "Schau genau: Welches Wort passt zum Bild?"))
+      : a.art === "deZuFrAehnlich" ? "Die Wörter sehen ähnlich aus. Lies jedes genau."
+      : a.zeige === "de" ? "Lies die Wörter halblaut. Welches kennst du?"
+      : bilder ? "Lies das Wort nochmal halblaut." : "Schau genau auf das Bild.";
+    const box = LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.richtig,
+      inhalt: bilder ? w => ({ bild: w }) : undefined,
+      breite: bilder ? 110 : 150, hinweis, loesung, lob: waehle(LOB),
+      beiRichtig: sag,
+    });
+    box.classList.add("mm-wahl");
+    if (bilder) box.classList.add("mm-bilder");
+    // Nach dem dritten Fehlversuch die richtige Antwort zeigen und vorlesen.
+    box.addEventListener("click", () => {
+      if (ctx.vorbei() && !box.querySelector(".richtig")) { box.children[a.optionen.indexOf(a.richtig)]?.classList.add("richtig"); sag(); }
+    });
+    if (a.ton === "auto") sag();
+  },
+};
+
+// Startet sofort, wenn eine französische Stimme da ist; sonst wartet es kurz oder erklärt, dass sie fehlt.
+LS.spielMitStimme(SPIEL, "fr");
+</script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kakao-Weg</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 0 0 10px; }
+  .produkt { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 8px; color: var(--text-leise); }
+  .produkt .gross { font-size: clamp(40px, 9vw, 56px); display: block; line-height: 1.1; }
+  .schritt-wahl { --wahl-breite: 260px; }
+  .schritt-wahl .wahl-knopf { font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; line-height: 1.25; text-align: left; flex-direction: row; justify-content: flex-start; gap: 10px; }
+  .schritt-wahl .wahl-knopf .bild { font-size: 30px; flex: none; }
+  .schritt-ablage { flex-direction: column; align-items: stretch; }
+  .schritt-ablage > span { font-size: clamp(14px, 3.3vw, 17px); font-weight: 700; }
+  .schritt-ablage .pfeil { text-align: center; }
+  .weg-liste { list-style: none; padding: 0; margin: 0 auto 12px; max-width: 620px; display: grid; gap: 6px; }
+  .weg-liste li { background: #fff; border: 2px solid var(--rand); border-radius: 12px; padding: 6px 10px; font-size: clamp(14px, 3.3vw, 17px); font-weight: 700; display: flex; gap: 8px; align-items: center; }
+  .weg-liste li .nr { color: var(--text-leise); min-width: 1.4em; }
+  .weg-liste li.weg-luecke { border: 3px dashed var(--deko-4); background: var(--hinweis-hell); justify-content: center; font-size: 24px; }
+  .hinweiszeile { text-align: center; color: var(--text-leise); font-weight: 700; margin: 0 0 10px; font-size: clamp(14px, 3.3vw, 17px); }
+  .kreislauf { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto 10px; }
+  .kreislauf .kasten { fill: #fff; stroke: var(--rand); stroke-width: 3; }
+  .kreislauf .kasten-bild { font-size: 34px; }
+  .kreislauf .kasten-text { font-size: 14px; font-weight: 900; fill: var(--text); }
+  .kreislauf .kl-geld { stroke: var(--deko-4); fill: var(--deko-4); }
+  .kreislauf .kl-gut { stroke: var(--deko-5); fill: var(--deko-5); }
+  .kreislauf line { stroke-width: 5; }
+  .kreislauf .beschriftung { font-size: 15px; font-weight: 800; fill: var(--text); stroke: none; }
+  .kreislauf .frage-kasten { fill: var(--hinweis-hell); stroke: var(--deko-4); stroke-width: 2.5; stroke-dasharray: 5 3; }
+  .kreislauf .nummer { fill: #fff; stroke: var(--text); stroke-width: 2; }
+  .kreislauf .nummer-text { font-size: 16px; font-weight: 900; fill: var(--text); stroke: none; }
+  .legende { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; font-weight: 800; margin: 0 0 10px; font-size: 15px; }
+  .legende span::before { content: ""; display: inline-block; width: 22px; height: 6px; border-radius: 3px; margin-right: 6px; vertical-align: middle; background: var(--f); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🍫 Kakao-Weg</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.6.3.d/e (2. Zyklus): den Weg von Gütern von der Herstellung über Transport und Handel
+// bis zum Kauf beschreiben, Beteiligte nennen, Herkunft (Schweiz oder Ausland) und Transportwege —
+// Stufen 1–4 und 6, Inhalte aus der Liste „wege“ (woerter.js). NMG.6.4.f: einfacher Wirtschaftskreislauf
+// zwischen Haushalten und Unternehmen (Arbeit und Lohn, Waren und Geld) — Stufen 5 und 6, fest im Spiel.
+// Basisklasse 5: Stufe 1 = 4. Klasse, 2–4 = 5. Klasse, 5 = 6. Klasse, 6 Endgegner.
+// Kein vorhandenes Spiel übt Wirtschaft; die Reihenfolge kommt aus dem Baustein LS.reihenfolge.
+
+const { waehle, mische, zufall, el } = LS;
+const ID = "kakao-weg";
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+// Freigabe der Liste (Entscheid L4 a): ohne freie Liste nur die Stufen zum Wirtschaftskreislauf.
+const WEGE_FREI = LS.spielListen(ID).length ? LS.freieListen(ID).includes("wege") : true;
+const PRODUKTE = WEGE_FREI ? WEGE : [];
+const produkt = id => WEGE.find(p => p.id === id);
+
+/** Wer einen Schritt macht (Feld „wer“ in woerter.js). */
+const WER = {
+  hof: { bild: "🧑‍🌾", text: "Landwirtschaft", klein: "Bauernhof, Plantage, Wald" },
+  fabrik: { bild: "🏭", text: "Fabrik, Werkstatt", klein: "Mühle, Käserei, Bäckerei …" },
+  transport: { bild: "🚚", text: "Transport", klein: "Lastwagen, Zug, Schiff" },
+  gross: { bild: "🏬", text: "Grossverteiler", klein: "Lager, Verteilzentrum" },
+  laden: { bild: "🏪", text: "Laden", klein: "Verkauf" },
+  haushalt: { bild: "🏠", text: "Haushalt", klein: "wir kaufen ein" },
+};
+
+const HERKUNFT = {
+  schweiz: { bild: "🇨🇭", text: "aus der Schweiz" },
+  ausland: { bild: "🌍", text: "aus einem fernen Land" },
+};
+const TRANSPORT = {
+  schiff: { bild: "🚢", text: "weit gereist", klein: "mit dem Schiff über das Meer, dann mit Zug oder Lastwagen" },
+  kurz: { bild: "🚜", text: "kurzer Weg", klein: "mit Traktor, Zug oder Lastwagen in der Schweiz" },
+  flugzeug: { bild: "✈️", text: "mit dem Flugzeug", klein: "durch die Luft" },
+};
+
+// ---------- Wirtschaftskreislauf (fest im Spiel) ----------
+// Haushalte geben Arbeit und bekommen Lohn; sie geben Geld und bekommen Waren. Geld fliesst immer
+// gegen Arbeit oder Waren — darum zwei Farben: Geld (gold) und Arbeit/Waren (türkis).
+const FLUSS = {
+  arbeit: { bild: "🛠️", text: "Arbeit", von: "haushalt", art: "gut" },
+  lohn: { bild: "💵", text: "Lohn", von: "unternehmen", art: "geld" },
+  waren: { bild: "📦", text: "Waren", von: "unternehmen", art: "gut" },
+  geld: { bild: "🪙", text: "Geld für Waren", von: "haushalt", art: "geld" },
+};
+const FLUESSE = Object.keys(FLUSS); // Reihenfolge der Pfeile von oben nach unten
+const SEITE = {
+  haushalt: { bild: "🏠", text: "Haushalte" },
+  unternehmen: { bild: "🏭", text: "Unternehmen" },
+};
+const PERSONEN = [["Frau Keller", "sie"], ["Herr Brunner", "er"], ["Frau Gashi", "sie"], ["Herr Rossi", "er"], ["Frau Meier", "sie"], ["Herr Bühler", "er"]];
+const FAMILIEN = ["Keller", "Brunner", "Gashi", "Rossi", "Meier", "Bühler"];
+// [wo man arbeitet, wo man kauft, was man kauft]
+const BETRIEBE = [
+  ["in der Bäckerei", "in der Bäckerei", "Brot"], ["in der Käserei", "im Käseladen", "Käse"],
+  ["in der Mosterei", "im Laden", "Apfelsaft"], ["in der Schoggifabrik", "im Laden", "Schoggi"],
+  ["in der Papierfabrik", "in der Papeterie", "Zeichenpapier"], ["im Kleiderladen", "im Kleiderladen", "ein T-Shirt"],
+];
+const SZENEN = {
+  "arbeit-gibt": { fluss: "arbeit", hinweis: "Was tut die Person jeden Tag im Betrieb? Genau das gibt sie dem Unternehmen." },
+  "arbeit-bekommt": { fluss: "lohn", hinweis: "Niemand schafft umsonst. Was bekommt man am Ende des Monats?" },
+  "kauf-gibt": { fluss: "geld", hinweis: "Im Laden bekommt man nichts geschenkt. Womit bezahlt die Familie?" },
+  "kauf-bekommt": { fluss: "waren", hinweis: "Die Familie geht nicht mit leeren Händen nach Hause. Was trägt sie heim?" },
+};
+const SEKTOR = [
+  ["Familie Keller", "haushalt"], ["eine Wohngemeinschaft von Studentinnen", "haushalt"], ["ein Grossvater, der allein wohnt", "haushalt"],
+  ["Familie Gashi mit drei Kindern", "haushalt"], ["die Dorfbäckerei", "unternehmen"], ["eine Schoggifabrik", "unternehmen"],
+  ["die Velowerkstatt", "unternehmen"], ["ein Grossverteiler", "unternehmen"], ["die Mosterei", "unternehmen"], ["eine Papierfabrik", "unternehmen"],
+];
+
+// Je Stufe die Aufgabenarten; Arten mit Liste nur, wenn die Liste frei ist.
+const MIT_LISTE = new Set(["ordnen", "fehlt", "wer", "herkunft", "transport", "verschoben"]);
+const STUFE = {
+  s1: { arten: ["ordnen"], schritte: 3 },
+  s2: { arten: ["ordnen"], schritte: 5 },
+  s3: { arten: ["fehlt", "wer"] },
+  s4: { arten: ["herkunft", "transport"] },
+  s5: { arten: ["pfeil", "richtung", "szene", "sektor"] },
+  s6: { arten: ["ordnen", "verschoben", "kreislauf"], schritte: "alle" },
+};
+const artenIn = stufe => STUFE[stufe].arten.filter(a => !MIT_LISTE.has(a) || PRODUKTE.length);
+const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => artenIn(s).length));
+
+// ---------- Aufgaben als Daten ----------
+
+/** n Schritte eines Wegs in Reihenfolge (Indizes); bei 5 immer mit Anfang und Ende. */
+function schrittAuswahl(p, n) {
+  const alle = p.schritte.map((_, i) => i);
+  if (n === "alle" || n >= alle.length) return alle;
+  if (n >= 5) {
+    const mitte = mische(alle.slice(1, -1)).slice(0, n - 2);
+    return [0, ...mitte, alle.length - 1].sort((a, b) => a - b);
+  }
+  return mische(alle).slice(0, n).sort((a, b) => a - b);
+}
+
+/** Schritte anderer Wege, die an dieser Stelle sicher nicht passen (nicht derselbe, nicht verwandt). */
+function fremdeSchritte(p) {
+  return WEGE.filter(q => q.id !== p.id && !(p.verwandt || []).includes(q.id) && !(q.verwandt || []).includes(p.id))
+    .flatMap(q => q.schritte.map((s, i) => ({ produkt: q.id, i, laenge: q.schritte.length })));
+}
+
+function aufgabeErzeugen(stufe) {
+  const s = STUFE[stufe];
+  const art = waehle(artenIn(stufe));
+  if (MIT_LISTE.has(art)) {
+    const p = waehle(PRODUKTE);
+    if (art === "ordnen") return { art, produkt: p.id, schritte: schrittAuswahl(p, s.schritte) };
+    if (art === "fehlt") {
+      const luecke = zufall(0, p.schritte.length - 1);
+      // Falsche Antworten von einer ähnlichen Stelle anderer Wege, damit sie nicht zu leicht sind.
+      const rel = luecke / (p.schritte.length - 1);
+      const fremd = mische(fremdeSchritte(p)).sort((a, b) => Math.abs(a.i / (a.laenge - 1) - rel) - Math.abs(b.i / (b.laenge - 1) - rel));
+      const andere = [];
+      for (const f of fremd) if (andere.length < 2 && !andere.some(x => x.produkt === f.produkt)) andere.push({ produkt: f.produkt, i: f.i });
+      return { art, produkt: p.id, luecke, optionen: mische([{ produkt: p.id, i: luecke }, ...andere]) };
+    }
+    if (art === "wer") {
+      const moeglich = p.schritte.map((x, i) => i).filter(i => p.schritte[i][1]);
+      return { art, produkt: p.id, i: waehle(moeglich) };
+    }
+    if (art === "herkunft" || art === "transport") return { art, produkt: p.id };
+    if (art === "verschoben") {
+      // Ein Schritt wandert um mindestens zwei Plätze: nur er steht dann falsch.
+      const n = p.schritte.length;
+      for (;;) {
+        const von = zufall(0, n - 1), nach = zufall(0, n - 1);
+        if (Math.abs(von - nach) < 2) continue;
+        const reihe = p.schritte.map((_, i) => i).filter(i => i !== von);
+        reihe.splice(nach, 0, von);
+        return { art, produkt: p.id, reihe, falsch: von };
+      }
+    }
+  }
+  if (art === "pfeil") return { art, links: waehle(["haushalt", "unternehmen"]), fluss: waehle(FLUESSE) };
+  if (art === "richtung") return { art, links: waehle(["haushalt", "unternehmen"]), fluss: waehle(FLUESSE) };
+  if (art === "szene") {
+    const art2 = waehle(Object.keys(SZENEN));
+    return { art, szene: art2, person: zufall(0, PERSONEN.length - 1), familie: zufall(0, FAMILIEN.length - 1), betrieb: zufall(0, BETRIEBE.length - 1) };
+  }
+  if (art === "sektor") return { art, nr: zufall(0, SEKTOR.length - 1) };
+  // kreislauf: Pfeile von oben nach unten tragen die Nummern 1–4 in zufälliger Reihenfolge
+  return { art: "kreislauf", links: waehle(["haushalt", "unternehmen"]), nummern: mische([1, 2, 3, 4]) };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!artenIn(stufe).includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const p = a.produkt && produkt(a.produkt);
+  if (MIT_LISTE.has(a.art) && !p) m.push("Produkt fehlt");
+  if (a.art === "ordnen") {
+    const soll = STUFE[stufe].schritte;
+    if (soll !== "alle" && a.schritte.length !== soll) m.push("falsche Zahl Schritte");
+    if (soll === "alle" && a.schritte.length !== p.schritte.length) m.push("nicht der ganze Weg");
+    if (a.schritte.some((x, i) => i && x <= a.schritte[i - 1])) m.push("Schritte nicht in Reihenfolge");
+    if (new Set(a.schritte.map(i => p.schritte[i][0])).size !== a.schritte.length) m.push("zwei gleiche Schritte");
+  }
+  if (a.art === "fehlt") {
+    const richtige = a.optionen.filter(o => o.produkt === a.produkt && o.i === a.luecke);
+    if (richtige.length !== 1) m.push("richtige Antwort nicht genau einmal");
+    if (a.optionen.length !== 3) m.push("nicht drei Antworten");
+    for (const o of a.optionen) {
+      if (o.produkt === a.produkt && o.i !== a.luecke) m.push("anderer Schritt desselben Wegs als Antwort");
+      if (o.produkt !== a.produkt && (p.verwandt || []).includes(o.produkt)) m.push("Antwort aus einem verwandten Weg");
+      const text = produkt(o.produkt).schritte[o.i][0];
+      if (o.produkt !== a.produkt && p.schritte.some(s => s[0] === text)) m.push("falsche Antwort steht auch im Weg");
+    }
+    if (new Set(a.optionen.map(o => produkt(o.produkt).schritte[o.i][0])).size !== a.optionen.length) m.push("doppelte Antworten");
+  }
+  if (a.art === "wer" && !WER[p.schritte[a.i][1]]) m.push("Schritt ohne eindeutiges „wer“");
+  if ((a.art === "herkunft" && !HERKUNFT[p.herkunft]) || (a.art === "transport" && !TRANSPORT[p.transport])) m.push("Herkunft/Transport fehlt in der Liste");
+  if (a.art === "transport" && (p.herkunft === "ausland") !== (p.transport === "schiff")) m.push("Herkunft und Transport passen nicht zusammen");
+  if (a.art === "verschoben") {
+    const ohne = a.reihe.filter(i => i !== a.falsch);
+    if (ohne.some((x, i) => i && x < ohne[i - 1])) m.push("Rest ohne den verschobenen Schritt nicht geordnet");
+    // Nur genau ein Schritt, dessen Entfernen den Weg ordnet
+    const loesungen = a.reihe.filter(k => a.reihe.filter(i => i !== k).every((x, i, r) => !i || x > r[i - 1]));
+    if (loesungen.length !== 1 || loesungen[0] !== a.falsch) m.push("nicht genau ein falscher Schritt");
+  }
+  if (a.art === "kreislauf" && [...a.nummern].sort().join() !== "1,2,3,4") m.push("Nummern nicht 1–4");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+function svgEl(tag, attr = {}, text) {
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+/**
+ * Kreislauf: Haushalte und Unternehmen als Kästen, dazwischen vier Pfeile (Reihenfolge FLUESSE).
+ * opt.links: welche Seite links steht; opt.frage: Fluss mit „?“; opt.beschriftet: Flüsse mit Text;
+ * opt.nummern: Nummer je Pfeil (gleiche Reihenfolge wie FLUESSE).
+ */
+function kreislaufSvg(opt) {
+  const svg = svgEl("svg", { viewBox: "0 0 360 230", class: "kreislauf", role: "img", "aria-label": "Wirtschaftskreislauf" });
+  const rechts = opt.links === "haushalt" ? "unternehmen" : "haushalt";
+  const kasten = (seite, x) => {
+    svg.append(svgEl("rect", { x, y: 14, width: 100, height: 202, rx: 16, class: "kasten" }),
+      svgEl("text", { x: x + 50, y: 112, "text-anchor": "middle", class: "kasten-bild" }, SEITE[seite].bild),
+      svgEl("text", { x: x + 50, y: 140, "text-anchor": "middle", class: "kasten-text" }, SEITE[seite].text));
+  };
+  kasten(opt.links, 4);
+  kasten(rechts, 256);
+  FLUESSE.forEach((f, i) => {
+    const y = 50 + i * 46;
+    const nachRechts = FLUSS[f].von === opt.links;
+    const [x1, x2] = nachRechts ? [110, 250] : [250, 110];
+    const klasse = FLUSS[f].art === "geld" ? "kl-geld" : "kl-gut";
+    svg.append(svgEl("line", { x1, y1: y, x2: x2 + (nachRechts ? -10 : 10), y2: y, class: klasse }));
+    const spitze = nachRechts ? `${x2},${y} ${x2 - 14},${y - 9} ${x2 - 14},${y + 9}` : `${x2},${y} ${x2 + 14},${y - 9} ${x2 + 14},${y + 9}`;
+    svg.append(svgEl("polygon", { points: spitze, class: klasse }));
+    if (opt.frage === f) {
+      svg.append(svgEl("rect", { x: 160, y: y - 27, width: 40, height: 22, rx: 6, class: "frage-kasten" }),
+        svgEl("text", { x: 180, y: y - 10, "text-anchor": "middle", class: "beschriftung" }, "?"));
+    } else if (opt.beschriftet) {
+      svg.append(svgEl("text", { x: 180, y: y - 9, "text-anchor": "middle", class: "beschriftung" }, FLUSS[f].text));
+    }
+    if (opt.nummern) {
+      svg.append(svgEl("circle", { cx: 180, cy: y - 17, r: 12, class: "nummer" }),
+        svgEl("text", { x: 180, y: y - 11, "text-anchor": "middle", class: "nummer-text" }, String(opt.nummern[i])));
+    }
+  });
+  return svg;
+}
+
+const legende = () => el("div", { class: "legende" },
+  el("span", { style: "--f: var(--deko-4)", text: "Geld" }), el("span", { style: "--f: var(--deko-5)", text: "Arbeit oder Waren" }));
+const richtungText = (von) => (von === "haushalt" ? "von den Haushalten zu den Unternehmen" : "von den Unternehmen zu den Haushalten");
+const produktKopf = p => el("div", { class: "produkt" }, el("span", { class: "gross", text: p.bild }), `Weg: ${p.name}`);
+const schrittInhalt = s => ({ bild: s[2], text: s[0] });
+const wegText = (p, idx) => idx.map(i => p.schritte[i][0]).join(" → ");
+
+// Für das Prüfskript im Scratchpad: die laufende Aufgabe.
+let AKTUELL = null;
+
+LS.spiel({
+  id: ID,
+  einleitung: "Woher kommt eigentlich die Schoggi? Verfolge den Weg der Waren vom Feld bis in den Laden — und finde heraus, wie Geld und Arbeit im Kreis laufen.",
+  anzahl: 8,
+  stufen: nurAngebotene({
+    s1: "Drei Schritte ordnen: Was kommt zuerst? (4. Klasse)",
+    s2: "Fünf Schritte vom Feld bis zum Kauf ordnen.",
+    s3: "Welcher Schritt fehlt? Und: Wer macht das — Bauernhof, Fabrik, Transport, Laden?",
+    s4: "Woher kommt der Rohstoff? Schweiz oder fernes Land, Schiff oder kurzer Weg.",
+    s5: "Wirtschaftskreislauf: Arbeit, Lohn, Waren und Geld zwischen Haushalten und Unternehmen (6. Klasse).",
+    s6: "Endgegner: ganze Wege ordnen, den Schritt am falschen Platz finden, alle Pfeile des Kreislaufs.",
+  }),
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s5" ? "Tipp: Geld fliesst immer in die andere Richtung als Arbeit oder Waren."
+      : "Tipp: Überlege bei jedem Schritt, was vorher passiert sein muss.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    AKTUELL = a;
+    if (artenIn(ctx.stufe).length > 1) ctx.serie("art", a.art);
+    const f = ctx.flaeche;
+    const p = a.produkt && produkt(a.produkt);
+
+    if (a.art === "ordnen") {
+      const loesung = wegText(p, a.schritte);
+      f.append(produktKopf(p), el("div", { class: "frage", text: "Tippe die Schritte in der richtigen Reihenfolge an." }));
+      const { ablage, box } = LS.reihenfolge(ctx, {
+        reihe: a.schritte, pfeile: true, loesung,
+        inhalt: i => schrittInhalt(p.schritte[i]),
+        ablage: i => `${p.schritte[i][2]} ${p.schritte[i][0]}`,
+        hinweis: () => "Das kommt erst später. Was muss vorher passieren?",
+      });
+      ablage.classList.add("schritt-ablage");
+      box.classList.add("schritt-wahl");
+    } else if (a.art === "fehlt") {
+      const loesung = `Es fehlt: ${p.schritte[a.luecke][0]}`;
+      const liste = el("ol", { class: "weg-liste" });
+      p.schritte.forEach((s, i) => liste.append(i === a.luecke
+        ? el("li", { class: "weg-luecke", text: "❓" })
+        : el("li", {}, el("span", { class: "nr", text: `${i + 1}.` }), el("span", { text: s[2] }), el("span", { text: s[0] }))));
+      f.append(produktKopf(p), el("div", { class: "frage", text: "Welcher Schritt fehlt?" }), liste);
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.optionen.find(o => o.produkt === a.produkt && o.i === a.luecke), loesung,
+        inhalt: o => schrittInhalt(produkt(o.produkt).schritte[o.i]),
+        hinweis: "Lies den Schritt vor und nach der Lücke. Was muss dazwischen passieren — und gehört es zu diesem Produkt?",
+      });
+      box.classList.add("schritt-wahl");
+    } else if (a.art === "wer") {
+      const s = p.schritte[a.i];
+      f.append(produktKopf(p), el("div", { class: "frage", text: "Wer macht das?" }));
+      LS.koerbe(ctx, {
+        karte: { bild: s[2], text: s[0] }, koerbe: Object.keys(WER), richtig: s[1],
+        korbInhalt: w => WER[w], loesung: `${WER[s[1]].text}: ${s[0]}`,
+        hinweis: "Lies genau: Wo passiert das — auf dem Feld, in einem Betrieb, unterwegs, im Lager, im Laden oder zu Hause?",
+      });
+    } else if (a.art === "herkunft") {
+      ctx.serie("antwort", p.herkunft);
+      const loesung = `${HERKUNFT[p.herkunft].text}: ${p.grund}`;
+      f.append(el("div", { class: "produkt" }, el("span", { class: "gross", text: p.bild }), `${p.name} — Rohstoff: ${p.rohstoff}`),
+        el("div", { class: "frage", text: "Woher kommt der Rohstoff?" }));
+      LS.auswahl(ctx, {
+        optionen: ["schweiz", "ausland"], richtig: p.herkunft, breite: 200, inhalt: h => HERKUNFT[h], loesung,
+        lob: `Richtig! ${p.grund}`,
+        hinweis: "Denk an das Wetter bei uns: Kann das auf Schweizer Feldern, im Wald oder auf dem Bauernhof wachsen?",
+      });
+    } else if (a.art === "transport") {
+      ctx.serie("antwort", p.transport);
+      const loesung = `${TRANSPORT[p.transport].text} (${TRANSPORT[p.transport].klein})`;
+      f.append(el("div", { class: "produkt" }, el("span", { class: "gross", text: p.bild }), `${p.name} — Rohstoff: ${p.rohstoff}`),
+        el("div", { class: "frage", text: "Wie kommt es zu uns?" }),
+        el("div", { class: "hinweiszeile", text: `So beginnt der Weg: ${p.schritte[0][0]}` }));
+      LS.auswahl(ctx, {
+        optionen: ["schiff", "kurz", "flugzeug"], richtig: p.transport, breite: 200, inhalt: t => TRANSPORT[t], loesung,
+        hinweis: t => (t === "flugzeug" ? "Das Flugzeug ist teuer und nimmt nur wenig Ladung mit. Schwere Waren reisen anders."
+          : "Wo beginnt der Weg — in der Schweiz oder weit weg, hinter dem Meer?"),
+      });
+    } else if (a.art === "verschoben") {
+      const s = p.schritte[a.falsch];
+      const loesung = `Am falschen Platz: ${s[0]}`;
+      f.append(produktKopf(p), el("div", { class: "frage", text: "Ein Schritt steht am falschen Platz. Welcher?" }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.reihe, richtig: a.falsch, loesung,
+        inhalt: i => schrittInhalt(p.schritte[i]),
+        hinweis: "Dieser Schritt passt zu seinen Nachbarn. Lies den Weg der Reihe nach: Wo kommt etwas zu früh oder zu spät?",
+      });
+      box.classList.add("schritt-wahl");
+      box.style.gridTemplateColumns = "1fr";
+    } else if (a.art === "pfeil") {
+      const loesung = `Der Pfeil heisst «${FLUSS[a.fluss].text}».`;
+      f.append(el("div", { class: "frage", text: "Was fliesst beim Pfeil mit dem Fragezeichen?" }),
+        kreislaufSvg({ links: a.links, frage: a.fluss }), legende());
+      LS.auswahl(ctx, {
+        optionen: FLUESSE, richtig: a.fluss, breite: 140, inhalt: x => ({ bild: FLUSS[x].bild, text: FLUSS[x].text }), loesung,
+        hinweis: "Schau die Farbe an: Fliesst Geld? Und in welche Richtung zeigt der Pfeil?",
+      });
+    } else if (a.art === "richtung") {
+      const fl = FLUSS[a.fluss];
+      const loesung = `${fl.text} fliesst ${richtungText(fl.von)}.`;
+      ctx.serie("antwort", fl.von);
+      f.append(el("div", { class: "frage", text: `In welche Richtung fliesst: ${fl.bild} ${fl.text}?` }),
+        kreislaufSvg({ links: a.links, beschriftet: false }), legende());
+      LS.auswahl(ctx, {
+        optionen: ["haushalt", "unternehmen"], richtig: fl.von, breite: 220, loesung,
+        inhalt: v => ({ bild: v === "haushalt" ? "🏠 ➜ 🏭" : "🏭 ➜ 🏠", text: richtungText(v) }),
+        hinweis: "Denk an eine Familie: Was gibt sie weg, und was bekommt sie?",
+      });
+    } else if (a.art === "szene") {
+      const sz = SZENEN[a.szene];
+      const [person, pron] = PERSONEN[a.person];
+      const [arbeitOrt, kaufOrt, ware] = BETRIEBE[a.betrieb];
+      const text = a.szene.startsWith("arbeit")
+        ? `${person} arbeitet ${arbeitOrt}. ${a.szene === "arbeit-gibt" ? `Was gibt ${pron} dem Unternehmen?` : `Was bekommt ${pron} dafür vom Unternehmen?`}`
+        : `Familie ${FAMILIEN[a.familie]} kauft ${kaufOrt} ${ware}. ${a.szene === "kauf-gibt" ? "Was gibt die Familie dem Unternehmen?" : "Was bekommt die Familie vom Unternehmen?"}`;
+      const loesung = `${FLUSS[sz.fluss].text}`;
+      f.append(el("div", { class: "frage", text }));
+      LS.auswahl(ctx, {
+        optionen: FLUESSE, richtig: sz.fluss, breite: 140, inhalt: x => ({ bild: FLUSS[x].bild, text: FLUSS[x].text }), loesung,
+        hinweis: sz.hinweis,
+      });
+    } else if (a.art === "sektor") {
+      const [ding, richtig] = SEKTOR[a.nr];
+      ctx.serie("antwort", richtig);
+      const loesung = `${ding}: ${richtig === "haushalt" ? "ein Haushalt — hier wohnen Menschen zusammen und kaufen ein" : "ein Unternehmen — hier wird gearbeitet und etwas hergestellt oder verkauft"}`;
+      f.append(el("div", { class: "frage", text: "Haushalt oder Unternehmen?" }), el("div", { class: "produkt", text: ding }));
+      LS.auswahl(ctx, {
+        optionen: ["haushalt", "unternehmen"], richtig, breite: 200, inhalt: v => SEITE[v], loesung,
+        hinweis: "Wohnen hier Menschen zusammen? Oder wird hier für Lohn gearbeitet und etwas verkauft?",
+      });
+    } else {
+      // Königsstufe: alle vier Pfeile nach ihren Nummern beschriften
+      const reihe = FLUESSE.map((x, i) => [a.nummern[i], x]).sort((u, v) => u[0] - v[0]).map(([, x]) => x);
+      const loesung = reihe.map((x, i) => `${i + 1} ${FLUSS[x].text}`).join(" · ");
+      f.append(el("div", { class: "frage", text: "Was fliesst bei Pfeil 1, 2, 3 und 4? Tippe der Reihe nach." }),
+        kreislaufSvg({ links: a.links, nummern: a.nummern }), legende());
+      const { box } = LS.reihenfolge(ctx, {
+        reihe, loesung, breite: 140,
+        inhalt: x => ({ bild: FLUSS[x].bild, text: FLUSS[x].text }),
+        ablage: x => FLUSS[x].text,
+        hinweis: (x, erwartet) => `Schau Pfeil ${reihe.indexOf(erwartet) + 1} an: Welche Farbe hat er, und wohin zeigt er?`,
+      });
+      box.style.setProperty("--wahl-breite", "140px");
+    }
+  },
+});
+</script>
+</body>
+</html>

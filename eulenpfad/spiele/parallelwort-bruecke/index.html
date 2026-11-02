@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wörter-Brücke</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(17px, 3.8vw, 22px); font-weight: 800; margin: 4px 0 8px; color: var(--text-leise); }
+  .wortkarte { text-align: center; font-size: clamp(30px, 7vw, 48px); font-weight: 900; margin: 4px auto 12px; color: var(--deko-5);
+    background: #fff; border-radius: 18px; box-shadow: 0 5px 0 var(--rand); padding: 10px 18px; max-width: 560px; overflow-wrap: anywhere; }
+  .wortkarte.wb-de { color: var(--deko-6); }
+  .wortkarte.wb-falle { color: var(--deko-3); }
+  .satz { text-align: center; font-size: clamp(22px, 5vw, 32px); font-weight: 800; margin: 4px auto 12px; color: var(--text);
+    background: #fff; border-radius: 18px; box-shadow: 0 5px 0 var(--rand); padding: 12px 18px; max-width: 600px; overflow-wrap: anywhere; }
+  .wb-hoer { display: block; margin: 0 auto 14px; border: none; border-radius: 999px; padding: 10px 24px; font-family: inherit;
+    font-size: clamp(18px, 4vw, 24px); font-weight: 900; background: var(--deko-5); color: #fff; box-shadow: 0 5px 0 var(--deko-7); cursor: pointer; }
+  .wb-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-7); }
+  .wb-wahl.wb-bilder .wahl-knopf { min-height: 92px; }
+  .wb-wahl.wb-bilder .wahl-knopf .bild { font-size: clamp(42px, 10vw, 58px); }
+  .wb-wahl .wahl-knopf { font-size: clamp(18px, 4vw, 23px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🌉 Wörter-Brücke</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS2F.2.B.1.b und FS2F.1.B.1.b: Parallelwörter (aus Deutsch oder Englisch bekannt)
+// beim Lesen und Hören erkennen und so den Sinn erschliessen — Mut zum Erschliessen.
+// Basisklasse 5 (Französisch ab der 5. Klasse); Stufe 1 ist ein Einstieg ohne Vorkenntnisse.
+// Stufen: s1 fast gleiche Wörter mit Bild · s2 mehr Wörter, auch nur hören · s3 ähnliche Wörter ohne
+// Bild (Französisch ↔ Deutsch) · s4 kurze Sätze mit einem Parallelwort (FS2F.2.B.1.b) · s5 falsche
+// Freunde · s6 alles gemischt.
+// Gegenstück zu Wort-Zwillinge (wort-zwillinge, Englisch–Deutsch); Aufbau ähnlich, hier Französisch
+// mit Englisch als zweiter Brücke, Hören und Sätzen. Inhalte in woerter.js.
+
+const { waehle, mische, el } = LS;
+const ID = "parallelwort-bruecke";
+
+// Freigabe (Entscheid L4 a): eine Liste „parallel“ für Wörter, Fallen und Sätze. Kennt der Katalog die
+// Listen nicht, gilt alles als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["parallel"]);
+const nomen = fr => fr.replace(/^(le |la |les |l’)/, "");
+const ALLE = PARALLEL.map(([fr, de, en, bild, kennz, falsch]) => ({ fr, de, en, bild, kennz, falsch: falsch ?? null, nomen: nomen(fr) }));
+const WOERTER = FREI.has("parallel") ? ALLE : [];
+const BRUECKEN = WOERTER.filter(w => w.kennz !== "falle");
+const FALLEN = WOERTER.filter(w => w.kennz === "falle");
+const SAETZE = FREI.has("parallel") ? PARALLEL_SAETZE.map(([satz, wort, de]) => ({ satz, ziel: ALLE.find(w => w.fr === wort), de })) : [];
+const sprechText = t => t.replace(/’/g, "'");
+const ganzesWort = w => new RegExp(`(?<![\\p{L}])${w}(?![\\p{L}])`, "iu");
+const LOB = ["Bravo !", "Super !", "Très bien !", "Génial !"];
+
+/** n-1 andere Einträge, deren Feld dem Ziel ähnelt: gleicher Anfangsbuchstabe, ähnliche Länge. */
+function aehnliche(ziel, pool, feld, n) {
+  const nah = w => (w[feld][0].toLowerCase() === ziel[feld][0].toLowerCase() ? 0 : 6) + Math.abs(w[feld].length - ziel[feld].length) + Math.random() * 3;
+  return pool.filter(w => w !== ziel).sort((a, b) => nah(a) - nah(b)).slice(0, n - 1);
+}
+
+// Jede Art liefert null, wenn die freien Listen nicht genug hergeben.
+const ARTEN = {
+  /** Französisches Wort lesen → Bild. */
+  bild(kennz, n) {
+    const pool = BRUECKEN.filter(w => w.bild && kennz.includes(w.kennz));
+    if (pool.length < n) return null;
+    const ziel = waehle(pool);
+    return { art: "bild", ziel, richtig: ziel.bild, optionen: mische([ziel, ...mische(pool.filter(w => w !== ziel)).slice(0, n - 1)].map(w => w.bild)) };
+  },
+  /** Nur hören → Bild. */
+  hoerBild(kennz, n) {
+    const pool = BRUECKEN.filter(w => w.bild && kennz.includes(w.kennz));
+    if (pool.length < n) return null;
+    const ziel = waehle(pool);
+    return { art: "hoerBild", ziel, richtig: ziel.bild, optionen: mische([ziel, ...mische(pool.filter(w => w !== ziel)).slice(0, n - 1)].map(w => w.bild)) };
+  },
+  /** Französisch → Deutsch, die anderen deutschen Wörter sehen ähnlich aus. */
+  deutsch(n) {
+    if (BRUECKEN.length < n) return null;
+    const ziel = waehle(BRUECKEN);
+    return { art: "deutsch", ziel, richtig: ziel.de, optionen: mische([ziel, ...aehnliche(ziel, BRUECKEN, "de", n)].map(w => w.de)) };
+  },
+  /** Deutsch → Französisch unter ähnlich aussehenden französischen Wörtern. */
+  franz(n) {
+    if (BRUECKEN.length < n) return null;
+    const ziel = waehle(BRUECKEN);
+    return { art: "franz", ziel, richtig: ziel.fr, optionen: mische([ziel, ...aehnliche(ziel, BRUECKEN, "nomen", n)].map(w => w.fr)) };
+  },
+  /** Kurzer Satz mit einem Parallelwort → Bild. */
+  satz(n) {
+    if (!SAETZE.length) return null;
+    const s = waehle(SAETZE);
+    const andere = BRUECKEN.filter(w => w.bild && w !== s.ziel && !ganzesWort(w.nomen).test(s.satz));
+    if (andere.length < n - 1) return null;
+    return { art: "satz", ziel: s.ziel, satz: s.satz, satzDe: s.de, richtig: s.ziel.bild,
+      optionen: mische([s.ziel.bild, ...mische(andere).slice(0, n - 1).map(w => w.bild)]) };
+  },
+  /** Falscher Freund: Was heisst das wirklich? Unter den Antworten steht das Wort, nach dem es aussieht. */
+  freund(n) {
+    if (FALLEN.length < n - 1) return null;
+    const ziel = waehle(FALLEN);
+    const andere = mische(FALLEN.filter(w => w !== ziel && w.de !== ziel.falsch).map(w => w.de)).slice(0, n - 2);
+    return { art: "freund", ziel, richtig: ziel.de, optionen: mische([ziel.de, ziel.falsch, ...andere]) };
+  },
+  /** Ein Wortpaar: bedeuten die beiden Wörter dasselbe, oder ist es eine Falle? */
+  entscheid() {
+    if (!BRUECKEN.length || !FALLEN.length) return null;
+    if (Math.random() < 0.5) {
+      const ziel = waehle(BRUECKEN);
+      return { art: "entscheid", ziel, paar: `${ziel.fr} – ${ziel.de}`, richtig: "bruecke", optionen: ["bruecke", "falle"] };
+    }
+    const ziel = waehle(FALLEN);
+    return { art: "entscheid", ziel, paar: `${ziel.fr} – ${ziel.falsch}`, richtig: "falle", optionen: ["bruecke", "falle"] };
+  },
+};
+
+// Je Stufe die Arten. Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 = 6. Klasse.
+const STUFE = {
+  s1: [() => ARTEN.bild(["gleich"], 3)],
+  s2: [() => ARTEN.bild(["gleich", "aehnlich"], 4), () => ARTEN.hoerBild(["gleich", "aehnlich"], 4)],
+  s3: [() => ARTEN.deutsch(4), () => ARTEN.franz(4)],
+  s4: [() => ARTEN.satz(4)],
+  s5: [() => ARTEN.freund(4), () => ARTEN.entscheid()],
+  // Königsstufe: falsche Freunde unter fünf Antworten, Brücke oder Falle, ähnliche französische Wörter, Sätze
+  s6: [() => ARTEN.freund(5), () => ARTEN.entscheid(), () => ARTEN.franz(5), () => ARTEN.satz(5)],
+};
+const ANZAHL = { s1: 3, s2: 4, s3: 4, s4: 4, s5: { freund: 4, entscheid: 2 }, s6: { freund: 5, entscheid: 2, franz: 5, satz: 5 } };
+
+/** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe])) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Fast gleich: la banane → 🍌. Welches Bild passt?",
+  s2: "Mehr Wörter, auch nur hören: la musique → 🎵",
+  s3: "Ohne Bild: le café = Kaffee. Und zurück: Tee = le thé.",
+  s4: "Kurze Sätze: „Le tigre dort sous un arbre.“ Wovon ist die Rede?",
+  s5: "Falsche Freunde: le magasin ist kein Magazin, sondern ein Laden.",
+  s6: "Endgegner: Brücke oder Falle? Alles gemischt.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => new Set(STUFE[s].map(art => art()?.art).filter(Boolean)).size > 1));
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  const erlaubt = { s1: ["bild"], s2: ["bild", "hoerBild"], s3: ["deutsch", "franz"], s4: ["satz"], s5: ["freund", "entscheid"],
+    s6: ["freund", "entscheid", "franz", "satz"] }[stufe];
+  if (!erlaubt.includes(a.art)) m.push(`Art ${a.art} gehört nicht in die Stufe`);
+  if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+  if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Möglichkeit");
+  const n = typeof ANZAHL[stufe] === "object" ? ANZAHL[stufe][a.art] : ANZAHL[stufe];
+  if (a.optionen.length !== n) m.push(`${a.optionen.length} statt ${n} Möglichkeiten`);
+  const z = a.ziel;
+  if (!WOERTER.includes(z)) m.push("Wort nicht aus einer freien Liste");
+  const falle = z.kennz === "falle";
+  if (["freund"].includes(a.art) !== falle && a.art !== "entscheid") m.push("Falle in der falschen Art");
+  if (stufe === "s1" && z.kennz !== "gleich") m.push("Stufe 1 nur mit fast gleichen Wörtern");
+  const spalte = { bild: "bild", hoerBild: "bild", satz: "bild", deutsch: "de", franz: "fr" }[a.art];
+  if (spalte) {
+    if (a.richtig !== z[spalte]) m.push("Lösung passt nicht zum Wort");
+    if (a.optionen.some(o => !BRUECKEN.some(w => w[spalte] === o))) m.push("Möglichkeit nicht aus der Liste");
+  }
+  if (a.art === "satz") {
+    if (!ganzesWort(z.nomen).test(a.satz)) m.push("Parallelwort fehlt im Satz");
+    const imSatz = ALLE.filter(w => ganzesWort(w.nomen).test(a.satz));
+    if (imSatz.length !== 1) m.push(`Satz mit ${imSatz.length} Wörtern aus der Liste`);
+    if (a.optionen.some(o => o !== a.richtig && imSatz.some(w => w.bild === o))) m.push("anderes Bild kommt im Satz vor");
+  }
+  if (a.art === "freund") {
+    if (a.richtig !== z.de || !a.optionen.includes(z.falsch)) m.push("Falle ohne das gleich aussehende Wort");
+    if (a.optionen.some(o => o !== z.falsch && !FALLEN.some(w => w.de === o))) m.push("Antwort nicht aus der Liste");
+  }
+  if (a.art === "entscheid" && a.richtig !== (falle ? "falle" : "bruecke")) m.push("Entscheid passt nicht zum Paar");
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  // Liste: jedes Wort, jedes deutsche Wort und jedes Bild nur einmal; Kennzeichen bekannt.
+  if (new Set(ALLE.map(w => w.fr)).size !== ALLE.length) m.push("französisches Wort doppelt in der Liste");
+  if (new Set([...ALLE.map(w => w.de), ...FALLEN.map(w => w.falsch)]).size !== ALLE.length + FALLEN.length) m.push("deutsches Wort doppelt in der Liste");
+  const bilder = ALLE.filter(w => w.bild).map(w => w.bild);
+  if (new Set(bilder).size !== bilder.length) m.push("Bild doppelt in der Liste");
+  if (ALLE.some(w => !["gleich", "aehnlich", "falle"].includes(w.kennz) || (w.kennz === "falle") !== !!w.falsch)) m.push("Kennzeichen falsch");
+  if (PARALLEL_SAETZE.some(([, wort]) => !ALLE.some(w => w.fr === wort))) m.push("Satz mit unbekanntem Parallelwort");
+  return m;
+}
+
+const FRAGE = {
+  bild: "Was heisst das? Tipp auf das Bild.",
+  hoerBild: "Hör zu: Welches Bild passt?",
+  deutsch: "Was heisst das auf Deutsch?",
+  franz: "Wie heisst das auf Französisch?",
+  satz: "Lies den Satz. Wovon ist die Rede?",
+  freund: "⚠️ Achtung, Falle! Was heisst das wirklich?",
+  entscheid: "Bedeuten die beiden Wörter dasselbe?",
+};
+const ENTSCHEID = { bruecke: { bild: "🌉", text: "ja, dasselbe" }, falle: { bild: "⚠️", text: "nein, Falle" } };
+
+/** Hinweis nach falscher Wahl; verrät die Lösung nicht. */
+function hinweisFuer(a) {
+  const z = a.ziel;
+  const englisch = z.en && z.en.toLowerCase() !== z.de.toLowerCase() && !ganzesWort(z.en).test(z.de) ? `Tipp: Auf Englisch heisst es „${z.en}“.` : null;
+  switch (a.art) {
+    case "bild": return englisch || "Lies das Wort halblaut. An welches deutsche Wort erinnert es?";
+    case "hoerBild": return "Hör nochmal genau hin! Tipp auf 🔊.";
+    case "deutsch": return englisch || "Lies das Wort laut. Welches deutsche Wort klingt ähnlich?";
+    case "franz": return "Sprich die französischen Wörter halblaut. Welches klingt wie das deutsche?";
+    case "satz": return "Such im Satz ein Wort, das du schon kennst.";
+    case "freund": return o => (o === z.falsch ? "Das ist die Falle! Es sieht nur so aus." : "Vorsicht: Es sieht bekannt aus, bedeutet aber etwas anderes!");
+    default: return "Bedeuten die beiden Wörter wirklich dasselbe?";
+  }
+}
+
+LS.spiel({
+  id: ID,
+  einleitung: "Viele französische Wörter verstehst du schon: la banane, le train, la musique! Bau eine Brücke vom Deutschen oder Englischen. Aber Vorsicht vor Fallen.",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Lies das Wort laut. Klingt es wie ein Wort, das du kennst? Mit 🔊 hörst du es.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    if (a.art === "entscheid") ctx.serie("antwort", a.richtig);
+    const z = a.ziel;
+    const franz = a.art === "satz" ? a.satz : z.fr;
+    const sag = () => LS.sprich(sprechText(franz), "fr");
+    const loesung = a.art === "satz" ? `${z.bild} ${a.satz} = ${a.satzDe}`
+      : z.kennz === "falle" ? `${z.fr} heisst „${z.de}“, nicht „${z.falsch}“.`
+      : `${z.bild ? z.bild + " " : ""}${z.fr} = ${z.de}`;
+    ctx.flaeche.append(el("div", { class: "frage", text: FRAGE[a.art] }));
+
+    let zeigeText = true;
+    if (a.art === "hoerBild") {
+      ctx.kennung(z.fr);
+      zeigeText = !sag(); // ohne Stimme: lesen statt hören
+    }
+    if (a.art === "satz") ctx.flaeche.append(el("div", { class: "satz", text: a.satz }));
+    else if (a.art === "entscheid") ctx.flaeche.append(el("div", { class: "wortkarte", text: a.paar }));
+    else if (a.art === "franz") ctx.flaeche.append(el("div", { class: "wortkarte wb-de", text: z.de }));
+    else if (zeigeText) ctx.flaeche.append(el("div", { class: "wortkarte" + (a.art === "freund" ? " wb-falle" : ""), text: z.fr }));
+    if (a.art !== "franz") ctx.flaeche.append(el("button", { type: "button", class: "wb-hoer", text: a.art === "hoerBild" ? "🔊 nochmal" : "🔊 anhören", "aria-label": "Anhören", onclick: sag }));
+
+    const bilder = ["bild", "hoerBild", "satz"].includes(a.art);
+    const lob = z.kennz === "falle" && a.art === "freund" ? `Genau! ${z.fr} heisst „${z.de}“.`
+      : a.art === "entscheid" ? `Richtig! ${loesung}` : `${waehle(LOB)} ${z.fr} = ${z.de}`;
+    const box = LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.richtig,
+      inhalt: bilder ? w => ({ bild: w }) : a.art === "entscheid" ? w => ENTSCHEID[w] : undefined,
+      breite: bilder ? 110 : 150, hinweis: hinweisFuer(a), loesung, lob,
+      beiRichtig: sag,
+    });
+    box.classList.add("wb-wahl");
+    if (bilder) box.classList.add("wb-bilder");
+  },
+});
+</script>
+</body>
+</html>

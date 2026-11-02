@@ -24,6 +24,7 @@
   .antwort.richtig { background: var(--gut-hell); }
   .antwort.gewaehlt { opacity: .35; }
   .antwort .nr { display: block; font-size: 13px; color: var(--text-leise); }
+  .antwort .zeichen { margin-right: 6px; }
 
   /* Jahreszeit-Farben: Frühling, Sommer, Herbst, Winter (Deko, keine Stellenfarben) */
   .jz-fruehling { --j: #7ccf6b; }
@@ -62,6 +63,8 @@ const MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "A
 const JAHRESZEIT = { 0: "Winter", 1: "Winter", 3: "Frühling", 4: "Frühling", 6: "Sommer", 7: "Sommer", 9: "Herbst", 10: "Herbst" };
 const ZEITEN = ["Frühling", "Sommer", "Herbst", "Winter"];
 const ZEIT_KLASSE = { Frühling: "jz-fruehling", Sommer: "jz-sommer", Herbst: "jz-herbst", Winter: "jz-winter" };
+// Bild zur Jahreszeit: Kinder bis zur 1. Klasse erkennen die Knöpfe ohne Lesen (rahmen.md Abschnitt 12).
+const ZEIT_BILD = { Frühling: "🌷", Sommer: "☀️", Herbst: "🍂", Winter: "❄️" };
 const mod = (n, m) => ((n % m) + m) % m;
 
 /* Aufgabenarten: jede liefert { frage (HTML), liste, loesung (Index in liste) } oder eine Reihen-Aufgabe. */
@@ -194,6 +197,7 @@ function knopfFuer(art, i, text) {
   // Nur die Jahreszeiten-Knöpfe sind gefärbt; Monate nicht, sonst verrät die Farbe die Jahreszeit.
   const k = el("button", { type: "button", class: "antwort" + (art === "zeiten" ? ` ${ZEIT_KLASSE[text]}` : "") });
   if (art === "monate") k.append(el("span", { class: "nr", text: `${i + 1}. Monat` }));
+  if (art === "zeiten") k.append(el("span", { class: "zeichen", "aria-hidden": "true", text: ZEIT_BILD[text] }));
   k.append(text);
   return k;
 }

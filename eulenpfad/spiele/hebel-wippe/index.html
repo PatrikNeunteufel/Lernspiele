@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hebel-Wippe</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4.2vw, 26px); font-weight: 800; margin: 0 0 8px; }
+  .frage b { color: var(--knopf); }
+  .wippe { display: block; width: 100%; max-width: 620px; margin: 0 auto 6px; }
+  .wippe .balken-g { transition: transform .9s cubic-bezier(.3, 1.35, .5, 1); transform-box: view-box; }
+  .wippe .balken { fill: var(--deko-3); stroke: var(--text); stroke-width: 2; }
+  .wippe .drehpunkt { fill: var(--deko-7); stroke: var(--text); stroke-width: 2; }
+  .wippe .boden { stroke: var(--rand); stroke-width: 4; }
+  .wippe .platz-nr { font-size: 13px; font-weight: 800; fill: var(--text-leise); text-anchor: middle; }
+  .wippe .klotz rect { fill: var(--deko-6); stroke: var(--text); stroke-width: 2; }
+  .wippe .klotz.neu rect { fill: var(--deko-5); }
+  .wippe .klotz.stein rect { fill: var(--deko-7); }
+  .wippe .klotz text { font-size: 15px; font-weight: 900; fill: #fff; text-anchor: middle; }
+  .wippe .kraft path { fill: var(--deko-2); stroke: var(--text); stroke-width: 2; }
+  .wippe .kraft text { font-size: 15px; font-weight: 900; fill: var(--text); text-anchor: middle; }
+  .wippe .wippe-platz { cursor: pointer; }
+  .wippe .wippe-platz rect { fill: rgba(91, 108, 255, .07); stroke: var(--knopf); stroke-width: 2; stroke-dasharray: 5 4; }
+  .wippe .wippe-platz.gewaehlt rect { fill: rgba(91, 108, 255, .2); }
+  .wippe .wippe-platz text { font-size: 16px; font-weight: 900; fill: var(--knopf); text-anchor: middle; }
+  .wippe .gleich-zeichen { font-size: 15px; font-weight: 900; fill: var(--gut); text-anchor: middle; }
+  .wippe-legende { text-align: center; color: var(--text-leise); font-weight: 700; margin: 0 0 8px; font-size: 15px; }
+  .wahl-knopf { font-size: clamp(18px, 4vw, 24px); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🪵 Hebel-Wippe</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.5.1.f (Grundanspruch 2. Zyklus): Hebel, Rolle und schiefe Ebene erkunden; die
+// Wirkung des Hebels (Gewicht × Abstand vom Drehpunkt). Basisklasse 5: s1 4. Klasse (wer sinkt bei
+// gleich schweren Klötzen?), s2–s4 5. Klasse (Platz und Gewicht für das Gleichgewicht, mehrere
+// Klötze auf einer Seite), s5 6. Klasse (langer Hebel spart Kraft: Stange mit Stein), s6 Königsstufe
+// (mehrere Klötze auf beiden Seiten). Bezug: Zahlen-Waage (Gleichgewicht ohne Abstand) und
+// Mittelwert-Türme; hier zählt zusätzlich der Abstand. Nur erzeugte Situationen, keine Inhaltsliste.
+// Rechnung nur mit ganzen Zahlen; Plätze 1–5 je Seite (Stange: 1–3 und 1–10).
+
+const { zufall, waehle, mische, el } = LS;
+const SVG = "http://www.w3.org/2000/svg";
+
+// Je Stufe: Aufgabenarten, Gewichte (kg), Anzahl Klötze auf der anderen Seite (andere) und auf der
+// Seite des Kindes (eigene), grösstes gesuchtes Gewicht (maxKg).
+const STUFE = {
+  s1: { arten: ["seite"], kg: [1, 6], einfach: true },
+  s2: { arten: ["platz", "platz", "seite"], kg: [1, 8], doppelt: true },
+  s3: { arten: ["platz", "gewicht", "seite"], kg: [1, 12], maxKg: 20 },
+  s4: { arten: ["platz", "gewicht", "seite"], kg: [1, 9], andere: [2, 3], maxKg: 30 },
+  s5: { arten: ["kraft", "kraftPlatz"], stange: true },
+  s6: { arten: ["platz", "gewicht", "seite"], kg: [1, 9], andere: [2, 3], eigene: 1, maxKg: 30, knapp: true },
+};
+const PLAETZE = 5;
+const STANGE = { kurz: 3, lang: 10, steine: [12, 18, 20, 24, 30, 36, 40, 48, 50, 60, 72, 80, 90, 100, 120] };
+
+const moment = liste => liste.reduce((s, k) => s + k.kg * k.p, 0);
+const term = liste => liste.map(k => `${k.kg} × ${k.p}`).join(" + ");
+const kgZufall = p => zufall(p.kg[0], p.kg[1]);
+const andereSeite = s => (s === "links" ? "rechts" : "links");
+/** n Klötze auf verschiedenen Plätzen (ohne die belegten). */
+function kloetze(n, p, belegt = []) {
+  const frei = mische([1, 2, 3, 4, 5].filter(x => !belegt.includes(x)));
+  return frei.slice(0, n).map(pl => ({ p: pl, kg: kgZufall(p) })).sort((x, y) => x.p - y.p);
+}
+const sinkt = (ml, mr) => (ml > mr ? "links" : ml < mr ? "rechts" : "gleich");
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = ERZEUGER[art](p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "seite", nL: 5, nR: 5, links: [{ p: 2, kg: 3 }], rechts: [{ p: 4, kg: 3 }], loesung: "rechts" };
+}
+
+const ERZEUGER = {
+  seite(p) {
+    let links, rechts;
+    if (p.einfach) {
+      // gleich schwer und verschieden weit weg, gleich weit weg und verschieden schwer, oder gespiegelt
+      const v = Math.random();
+      const kg = kgZufall(p), pl = zufall(1, PLAETZE);
+      if (v < 0.45) { links = [{ p: pl, kg }]; rechts = [{ p: zufall(1, PLAETZE), kg }]; if (rechts[0].p === pl) return null; }
+      else if (v < 0.9) { links = [{ p: pl, kg }]; rechts = [{ p: pl, kg: kgZufall(p) }]; if (rechts[0].kg === kg) return null; }
+      else { links = [{ p: pl, kg }]; rechts = [{ p: pl, kg }]; }
+    } else if (p.doppelt) {
+      const kg = kgZufall(p);
+      links = [{ p: zufall(1, PLAETZE), kg }];
+      rechts = [{ p: zufall(1, PLAETZE), kg: waehle([kg, 2 * kg]) }];
+      if (Math.random() < 0.5) [links, rechts] = [rechts, links];
+    } else if (p.andere) {
+      links = kloetze(zufall(p.andere[0], p.andere[1]), p);
+      rechts = kloetze(p.eigene ? zufall(2, 3) : 1, p);
+      if (Math.random() < 0.5) [links, rechts] = [rechts, links];
+      // knapp: der Unterschied ist klein, oder es ist im Gleichgewicht
+      if (Math.abs(moment(links) - moment(rechts)) > (p.knapp ? 2 : 5)) return null;
+    } else {
+      links = [{ p: zufall(1, PLAETZE), kg: kgZufall(p) }];
+      rechts = [{ p: zufall(1, PLAETZE), kg: kgZufall(p) }];
+      if (Math.random() < 0.3 && moment(links) !== moment(rechts)) return null; // Gleichgewicht öfter
+      if (links[0].p === rechts[0].p || links[0].kg === rechts[0].kg) return null; // beides verschieden
+    }
+    return { art: "seite", nL: PLAETZE, nR: PLAETZE, links, rechts, loesung: sinkt(moment(links), moment(rechts)) };
+  },
+  platz(p) {
+    const kind = waehle(["links", "rechts"]);
+    const { andere, eigene } = gegeben(p);
+    const rest = moment(andere) - moment(eigene);
+    if (rest <= 0) return null;
+    let kg, loesung;
+    if (p.doppelt) {
+      // gleich schwer oder doppelt so schwer beziehungsweise halb so schwer
+      const o = andere[0].kg;
+      kg = waehle([o, o, 2 * o, o / 2]);
+      if (!Number.isInteger(kg) || rest % kg) return null;
+      loesung = rest / kg;
+    } else {
+      // Platz wählen, das Gewicht des Klotzes ergibt sich; gleich schwer wie drüben nur selten
+      loesung = waehle([1, 2, 3, 4, 5].filter(x => !eigene.some(k => k.p === x)));
+      kg = rest / loesung;
+      if (!Number.isInteger(kg) || kg > p.maxKg) return null;
+      if (andere.length === 1 && kg === andere[0].kg && Math.random() < 0.7) return null;
+    }
+    if (loesung > PLAETZE || eigene.some(k => k.p === loesung)) return null;
+    return { art: "platz", nL: PLAETZE, nR: PLAETZE, kind, kg, ...seiten(kind, andere, eigene), loesung };
+  },
+  gewicht(p) {
+    const kind = waehle(["links", "rechts"]);
+    const { andere, eigene } = gegeben(p);
+    const rest = moment(andere) - moment(eigene);
+    const frei = [1, 2, 3, 4, 5].filter(x => !eigene.some(k => k.p === x));
+    const platz = waehle(frei);
+    if (rest <= 0 || rest % platz) return null;
+    const loesung = rest / platz;
+    if (loesung > p.maxKg) return null;
+    return { art: "gewicht", nL: PLAETZE, nR: PLAETZE, kind, platz, ...seiten(kind, andere, eigene), loesung };
+  },
+  kraft() {
+    const stein = waehle(STANGE.steine), a = zufall(1, STANGE.kurz), b = zufall(a + 2, STANGE.lang);
+    if ((stein * a) % b) return null;
+    return { art: "kraft", nL: STANGE.kurz, nR: STANGE.lang, links: [{ p: a, kg: stein, stein: true }], rechts: [], platz: b, loesung: stein * a / b };
+  },
+  kraftPlatz() {
+    const stein = waehle(STANGE.steine), a = zufall(1, STANGE.kurz), b = zufall(a + 2, STANGE.lang);
+    if ((stein * a) % b) return null;
+    return { art: "kraftPlatz", nL: STANGE.kurz, nR: STANGE.lang, links: [{ p: a, kg: stein, stein: true }], rechts: [], kraft: stein * a / b, loesung: b };
+  },
+};
+
+/** Klötze der anderen Seite und schon liegende Klötze auf der Seite des Kindes. */
+function gegeben(p) {
+  const andere = kloetze(p.andere ? zufall(p.andere[0], p.andere[1]) : 1, p);
+  const eigene = p.eigene ? kloetze(p.eigene, p) : [];
+  return { andere, eigene };
+}
+const seiten = (kind, andere, eigene) => (kind === "links" ? { links: eigene, rechts: andere } : { links: andere, rechts: eigene });
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const alle = [...a.links, ...a.rechts];
+  const platzOk = (liste, n) => liste.every(k => Number.isInteger(k.p) && k.p >= 1 && k.p <= n) && new Set(liste.map(k => k.p)).size === liste.length;
+  if (!platzOk(a.links, a.nL) || !platzOk(a.rechts, a.nR)) m.push("Platz ausserhalb oder doppelt belegt");
+  if (!alle.every(k => Number.isInteger(k.kg) && k.kg >= 1)) m.push("Gewicht nicht ganzzahlig");
+  if (p.kg && !alle.every(k => k.kg >= p.kg[0] && k.kg <= p.kg[1])) m.push("Gewicht nicht im Bereich der Stufe");
+  const ml = moment(a.links), mr = moment(a.rechts);
+  if (a.art === "seite") {
+    if (a.loesung !== sinkt(ml, mr)) m.push("Lösung falsch");
+    if (!a.links.length || !a.rechts.length) m.push("eine Seite leer");
+  }
+  if (a.art === "platz" || a.art === "gewicht") {
+    const eigene = a.kind === "links" ? a.links : a.rechts, andere = a.kind === "links" ? a.rechts : a.links;
+    const rest = moment(andere) - moment(eigene);
+    if (a.art === "platz") {
+      // genau ein freier Platz bringt das Gleichgewicht
+      const passend = [1, 2, 3, 4, 5].filter(x => !eigene.some(k => k.p === x) && a.kg * x === rest);
+      if (passend.length !== 1 || passend[0] !== a.loesung) m.push("nicht genau ein passender Platz");
+      if (!(a.kg >= 1 && Number.isInteger(a.kg))) m.push("Gewicht des Kindes ungültig");
+    } else {
+      if (eigene.some(k => k.p === a.platz)) m.push("gesuchter Platz schon belegt");
+      if (a.loesung * a.platz !== rest || !Number.isInteger(a.loesung) || a.loesung < 1 || a.loesung > p.maxKg) m.push("gesuchtes Gewicht falsch oder zu gross");
+    }
+    if (p.eigene && eigene.length !== p.eigene) m.push("Klötze auf der Seite des Kindes fehlen");
+    if (p.andere && (andere.length < p.andere[0] || andere.length > p.andere[1])) m.push("Anzahl Klötze passt nicht");
+  }
+  if (a.art === "kraft" || a.art === "kraftPlatz") {
+    const stein = a.links[0];
+    const b = a.art === "kraft" ? a.platz : a.loesung, kraft = a.art === "kraft" ? a.loesung : a.kraft;
+    if (kraft * b !== stein.kg * stein.p || !Number.isInteger(kraft)) m.push("Kraft passt nicht zum Hebel");
+    if (!(b > stein.p && b <= a.nR)) m.push("Kraft nicht am langen Arm");
+    if (!(kraft < stein.kg)) m.push("Hebel spart keine Kraft");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const svgEl = (tag, attr = {}, text) => {
+  const e = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  if (text != null) e.textContent = text;
+  return e;
+};
+
+/**
+ * Wippe (oder Stange) mit nL Plätzen links und nR rechts. Gibt zurück: svg, x(seite, platz),
+ * klotz(seite, platz, kg, klasse) zum Hinlegen, kraft(platz, text), neige(ml, mr) und platzKnoepfe(seite, frei, beiWahl).
+ */
+function wippe(nL, nR) {
+  const u = Math.min(33, 360 / (nL + nR + 1));
+  const px = 200 + (nL - nR) * u / 2, py = 160;
+  const svg = svgEl("svg", { class: "wippe", viewBox: "0 0 400 236", role: "img" });
+  svg.append(svgEl("line", { class: "boden", x1: 10, y1: 226, x2: 390, y2: 226 }));
+  svg.append(svgEl("path", { class: "drehpunkt", d: `M${px},${py + 4} L${px - 26},226 L${px + 26},226 Z` }));
+  const g = svgEl("g", { class: "balken-g" });
+  g.style.transformOrigin = `${px}px ${py}px`;
+  svg.append(g);
+  const x = (seite, platz) => (seite === "links" ? px - platz * u : px + platz * u);
+  g.append(svgEl("rect", { class: "balken", x: px - (nL + 0.5) * u, y: py - 6, width: (nL + nR + 1) * u, height: 12, rx: 4 }));
+  for (let i = 1; i <= nL; i++) g.append(svgEl("text", { class: "platz-nr", x: x("links", i), y: py + 24 }, String(i)));
+  for (let i = 1; i <= nR; i++) g.append(svgEl("text", { class: "platz-nr", x: x("rechts", i), y: py + 24 }, String(i)));
+  const api = {
+    svg,
+    klotz(seite, platz, kg, klasse = "") {
+      const h = Math.min(66, 22 + kg * (klasse.includes("stein") ? 0.4 : 2.4)), b = klasse.includes("stein") ? u * 1.5 : u * 0.86;
+      const k = svgEl("g", { class: `klotz ${klasse}` });
+      k.append(svgEl("rect", { x: x(seite, platz) - b / 2, y: py - 6 - h, width: b, height: h, rx: klasse.includes("stein") ? 14 : 4 }),
+        svgEl("text", { x: x(seite, platz), y: py - 6 - h / 2 + 5 }, String(kg)));
+      g.append(k);
+      return k;
+    },
+    /** Pfeil nach unten: hier drückt das Kind (Kraft in kg oder „?“). */
+    kraft(platz, text) {
+      const cx = x("rechts", platz), k = svgEl("g", { class: "kraft" });
+      k.append(svgEl("path", { d: `M${cx - 9},${py - 64} h18 v26 h9 l-18,26 l-18,-26 h9 Z` }), svgEl("text", { x: cx, y: py - 72 }, text));
+      g.append(k);
+      return k;
+    },
+    /** Neigung: die schwerere Seite sinkt; im Gleichgewicht waagrecht mit „=“. */
+    neige(ml, mr) {
+      const w = ml === mr ? 0 : (mr > ml ? 1 : -1) * 9;
+      g.style.transform = `rotate(${w}deg)`;
+      svg.querySelector(".gleich-zeichen")?.remove();
+      if (w === 0 && ml > 0) svg.append(svgEl("text", { class: "gleich-zeichen", x: px, y: py + 44 }, "⚖ im Gleichgewicht"));
+    },
+    platzKnoepfe(seite, frei, beiWahl) {
+      const knoepfe = frei.map(pl => {
+        const k = svgEl("g", { class: "wippe-platz", role: "button", "aria-label": `Platz ${pl}` });
+        k.append(svgEl("rect", { x: x(seite, pl) - u * 0.45, y: py - 92, width: u * 0.9, height: 84, rx: 6 }),
+          svgEl("text", { x: x(seite, pl), y: py - 44 }, String(pl)));
+        k.addEventListener("click", () => beiWahl(pl, k));
+        g.append(k);
+        return k;
+      });
+      return { weg() { knoepfe.forEach(k => k.remove()); } };
+    },
+  };
+  return api;
+}
+
+const seitenText = s => (s === "links" ? "links" : "rechts");
+const REGEL = "Rechne auf jeder Seite Gewicht mal Platz. Sind beide Zahlen gleich, bleibt die Wippe gerade.";
+const beschreibe = (liste, seite) => (liste.length ? `${seitenText(seite)[0].toUpperCase() + seitenText(seite).slice(1)}: ${liste.map(k => `${k.kg} kg auf Platz ${k.p}`).join(", ")}.` : "");
+const rechnung = (liste) => (liste.length ? `${term(liste)} = ${moment(liste)}` : "0");
+
+LS.spiel({
+  id: "hebel-wippe",
+  einleitung: "Auf der Wippe zählt nicht nur das Gewicht, sondern auch, wie weit weg vom Drehpunkt es liegt. Die Zahl auf dem Klotz sind kg, die Zahlen unter dem Balken die Plätze.",
+  anzahl: 8,
+  stufen: {
+    s1: "Gleich schwer — wer weiter weg sitzt, sinkt. Welche Seite geht hinunter?",
+    s2: "Wohin muss der Klotz? Gleich schwer oder doppelt so schwer.",
+    s3: "Gewicht mal Platz: 2 × 3 = 3 × 2 (Lehrplan 5. Klasse).",
+    s4: "Mehrere Klötze auf einer Seite.",
+    s5: "Langer Hebel spart Kraft: Stein mit der Stange heben.",
+    s6: "Endgegner: Klötze auf beiden Seiten, knapp daneben.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    const w = wippe(a.nL, a.nR);
+    const f = ctx.flaeche;
+    for (const k of a.links) w.klotz("links", k.p, k.kg, k.stein ? "stein" : "");
+    for (const k of a.rechts) w.klotz("rechts", k.p, k.kg);
+    const ml = moment(a.links), mr = moment(a.rechts);
+    const kurzRegel = p.knapp ? "Gewicht mal Platz, auf beiden Seiten." : REGEL;
+
+    if (a.art === "seite") {
+      const loesungText = `Links ${rechnung(a.links)}, rechts ${rechnung(a.rechts)}: ${a.loesung === "gleich" ? "Die Wippe bleibt gerade" : `${seitenText(a.loesung)} sinkt`}.`;
+      ctx.serie("antwort", a.loesung);
+      f.append(el("div", { class: "frage", html: `Man hält die Wippe gerade. <b>Was passiert beim Loslassen?</b>` }),
+        el("div", { class: "auftrag", text: `${beschreibe(a.links, "links")} ${beschreibe(a.rechts, "rechts")}` }), w.svg);
+      const hinweis = p.einfach
+        ? (a.links[0].kg === a.rechts[0].kg ? "Gleich schwer: Wer weiter weg vom Drehpunkt sitzt, drückt stärker." : "Gleich weit weg: Das schwerere Gewicht drückt stärker.")
+        : kurzRegel + " Die grössere Zahl sinkt.";
+      LS.auswahl(ctx, {
+        optionen: ["links", "gleich", "rechts"], richtig: a.loesung, breite: 130,
+        inhalt: o => (o === "links" ? { bild: "↙️", text: "links sinkt" } : o === "rechts" ? { bild: "↘️", text: "rechts sinkt" } : { bild: "⚖️", text: "bleibt gerade" }),
+        hinweis, loesung: loesungText, lob: loesungText, beiRichtig: () => w.neige(ml, mr),
+      });
+      if (ctx.nr === 0) ctx.sag(p.einfach ? "Stell dir vor, du sitzt auf der Wippe. Weiter aussen drückt es stärker." : "Rechne auf jeder Seite: Gewicht mal Platz.");
+    } else if (a.art === "platz") {
+      platzAufgabe(ctx, a, w, kurzRegel);
+    } else if (a.art === "gewicht") {
+      gewichtAufgabe(ctx, a, w, kurzRegel);
+    } else {
+      stangeAufgabe(ctx, a, w);
+    }
+  },
+});
+
+/** Das Kind tippt den Platz an, auf den sein Klotz soll. */
+function platzAufgabe(ctx, a, w, regel) {
+  const eigene = a.kind === "links" ? a.links : a.rechts, andere = a.kind === "links" ? a.rechts : a.links;
+  const loesungText = `Platz ${a.loesung}: ${rechnung(andere)} und ${rechnung([...eigene, { p: a.loesung, kg: a.kg }].sort((x, y) => x.p - y.p))}`;
+  ctx.loesung(loesungText);
+  ctx.schritte(1);
+  w.neige(moment(a.links), moment(a.rechts));
+  ctx.flaeche.append(el("div", { class: "frage", html: `Wohin muss der <b>${a.kg}-kg-Klotz</b> ${seitenText(a.kind)}, damit die Wippe gerade ist?` }),
+    el("div", { class: "auftrag", text: `${beschreibe(a.links, "links")} ${beschreibe(a.rechts, "rechts")}`.trim() }), w.svg);
+  let neu = null;
+  const frei = [1, 2, 3, 4, 5].filter(x => !eigene.some(k => k.p === x));
+  const knoepfe = w.platzKnoepfe(a.kind, frei, (pl, knopf) => {
+    if (ctx.vorbei()) return;
+    neu?.remove();
+    neu = w.klotz(a.kind, pl, a.kg, "neu");
+    const mit = [...eigene, { p: pl, kg: a.kg }];
+    const ml = moment(a.kind === "links" ? mit : a.links), mr = moment(a.kind === "rechts" ? mit : a.rechts);
+    w.neige(ml, mr);
+    LS.ton("tipp");
+    if (pl === a.loesung) { knoepfe.weg(); ctx.richtig(`Richtig: ${loesungText}`); return; }
+    knopf.classList.add("gewaehlt");
+    const s = sinkt(ml, mr);
+    ctx.falsch(`Auf Platz ${pl} sinkt jetzt ${seitenText(s)}. ${regel}`, loesungText);
+    if (ctx.vorbei()) knoepfe.weg();
+  });
+  if (ctx.nr === 0) ctx.sag("Tippe auf einen Platz. Die Wippe zeigt dir, was passiert.");
+}
+
+/** Das Kind tippt ein, wie schwer der Klotz auf dem markierten Platz sein muss. */
+function gewichtAufgabe(ctx, a, w, regel) {
+  const eigene = a.kind === "links" ? a.links : a.rechts, andere = a.kind === "links" ? a.rechts : a.links;
+  const rest = moment(andere) - moment(eigene);
+  const loesungText = eigene.length
+    ? `${rechnung(andere)}, ${rechnung(eigene)}; es fehlen ${rest}, also ${rest} : ${a.platz} = ${a.loesung}`
+    : `${rechnung(andere)}, also ${rest} : ${a.platz} = ${a.loesung}`;
+  ctx.loesung(loesungText);
+  ctx.schritte(LS.tippSchritte(a.loesung));
+  w.neige(moment(a.links), moment(a.rechts));
+  let neu = w.klotz(a.kind, a.platz, 0, "neu");
+  neu.querySelector("text").textContent = "?";
+  ctx.flaeche.append(el("div", { class: "frage", html: `Wie viele kg braucht der Klotz ${seitenText(a.kind)} auf <b>Platz ${a.platz}</b>?` }),
+    el("div", { class: "auftrag", text: `${beschreibe(a.links, "links")} ${beschreibe(a.rechts, "rechts")}`.trim() }), w.svg);
+  const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort in kg" });
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 2,
+    onOk(v) {
+      neu.remove();
+      neu = w.klotz(a.kind, a.platz, v, "neu");
+      const mit = [...eigene, { p: a.platz, kg: v }];
+      const ml = moment(a.kind === "links" ? mit : a.links), mr = moment(a.kind === "rechts" ? mit : a.rechts);
+      w.neige(ml, mr);
+      if (v === a.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${loesungText}`); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(`Mit ${v} kg ist es ${seitenText(a.kind) === seitenText(sinkt(ml, mr)) ? "zu schwer" : "zu leicht"}. ${regel}`, loesungText);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(anzeige, tasten.element);
+}
+
+/** Stange als Hebel: Stein am kurzen Arm, das Kind drückt am langen. */
+function stangeAufgabe(ctx, a, w) {
+  const stein = a.links[0];
+  const M = stein.kg * stein.p;
+  const f = ctx.flaeche;
+  const REGEL_STANGE = "Stein: Gewicht mal Platz. Deine Seite: Kraft mal Platz. Beide gleich, dann hebt sich der Stein.";
+  f.append(el("div", { class: "wippe-legende", text: "Die Stange liegt auf einem Klotz. Links der Stein, rechts drückst du." }));
+  if (a.art === "kraft") {
+    const loesungText = `${stein.kg} × ${stein.p} = ${M}, also ${M} : ${a.platz} = ${a.loesung}`;
+    ctx.loesung(loesungText);
+    ctx.schritte(LS.tippSchritte(a.loesung));
+    w.neige(1, 0);
+    let pfeil = w.kraft(a.platz, "?");
+    f.append(el("div", { class: "frage", html: `Der Stein wiegt ${stein.kg} kg und liegt auf Platz ${stein.p}. <b>Wie viel Kraft (in kg)</b> brauchst du auf Platz ${a.platz}?` }), w.svg);
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort in kg" });
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: 3,
+      onOk(v) {
+        pfeil.remove();
+        pfeil = w.kraft(a.platz, String(v));
+        w.neige(M, v * a.platz);
+        if (v === a.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${loesungText}. Du sparst ${stein.kg - a.loesung} kg Kraft!`); return; }
+        anzeige.classList.add("falsch");
+        ctx.falsch(`Mit ${v} kg ${v * a.platz < M ? "bleibt der Stein liegen" : "drückst du stärker als nötig"}. ${REGEL_STANGE}`, loesungText);
+        if (ctx.vorbei()) tasten.gesperrt = true;
+      },
+    });
+    f.append(anzeige, tasten.element);
+  } else {
+    const loesungText = `Platz ${a.loesung}: ${stein.kg} × ${stein.p} = ${M} und ${a.kraft} × ${a.loesung} = ${M}`;
+    ctx.loesung(loesungText);
+    ctx.schritte(1);
+    w.neige(1, 0);
+    f.append(el("div", { class: "frage", html: `Der Stein wiegt ${stein.kg} kg und liegt auf Platz ${stein.p}. Du drückst mit <b>${a.kraft} kg</b>. <b>Wo</b> musst du drücken?` }), w.svg);
+    let pfeil = null;
+    const frei = []; for (let i = stein.p + 1; i <= a.nR; i++) frei.push(i);
+    const knoepfe = w.platzKnoepfe("rechts", frei, (pl, knopf) => {
+      if (ctx.vorbei()) return;
+      pfeil?.remove();
+      pfeil = w.kraft(pl, String(a.kraft));
+      w.neige(M, a.kraft * pl);
+      LS.ton("tipp");
+      if (pl === a.loesung) { knoepfe.weg(); ctx.richtig(`Richtig: ${loesungText}`); return; }
+      knopf.classList.add("gewaehlt");
+      ctx.falsch(`Auf Platz ${pl} ${a.kraft * pl < M ? "reicht deine Kraft nicht" : "hebst du den Stein zu stark"}. ${REGEL_STANGE}`, loesungText);
+      if (ctx.vorbei()) knoepfe.weg();
+    });
+  }
+  if (ctx.nr === 0) ctx.sag("Je weiter weg vom Drehpunkt du drückst, desto weniger Kraft brauchst du.");
+}
+</script>
+</body>
+</html>

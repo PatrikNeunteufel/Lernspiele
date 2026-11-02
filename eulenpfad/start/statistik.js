@@ -47,7 +47,7 @@ function zeichneStatistik(box, neu) {
   const runden = alle.filter(e => e.name === gewaehlt);
   const p = LS.profil(gewaehlt);
   const minuten = Math.round(runden.reduce((s, e) => s + (e.dauer || 0), 0) / 60);
-  const profilText = [p.alter ? `${p.alter} Jahre` : null, p.klasse ? `${p.klasse}. Klasse` : null].filter(Boolean).join(" · ") || "Profil noch ohne Alter und Klasse";
+  const profilText = [p.alter ? `${p.alter} Jahre` : null, LS.klasseVon(p) !== null ? LS.klasseText(LS.klasseVon(p)) : null].filter(Boolean).join(" · ") || "Profil noch ohne Alter und Klasse";
 
   seite.append(karte(
     kopf,

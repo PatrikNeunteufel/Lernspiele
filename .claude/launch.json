@@ -4,19 +4,19 @@
     {
       "name": "lernspiele",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8765", "--bind", "127.0.0.1"],
+      "runtimeArgs": ["tools/server.py", "8765"],
       "port": 8765
     },
     {
       "name": "lernspiele-2",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8767", "--bind", "127.0.0.1"],
+      "runtimeArgs": ["tools/server.py", "8767"],
       "port": 8767
     },
     {
       "name": "lernspiele-3",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8769", "--bind", "127.0.0.1"],
+      "runtimeArgs": ["tools/server.py", "8769"],
       "port": 8769,
       "autoPort": false
     },

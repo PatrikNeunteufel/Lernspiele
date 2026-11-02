@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energie-Wandler</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .anfang { text-align: center; font-weight: 800; color: var(--text-leise); margin: 0 0 6px; font-size: clamp(15px, 3.6vw, 18px); }
+
+  /* Energie → Wandler → Energie */
+  .kette { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 4px; margin: 4px auto 14px; max-width: 760px; }
+  .kette .glied { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 84px; max-width: 150px;
+    padding: 8px 10px; border-radius: 16px; background: #fff; box-shadow: 0 4px 0 var(--rand); text-align: center; font-weight: 800; font-size: clamp(13px, 3.2vw, 16px); line-height: 1.15; }
+  .kette .glied .bild { font-size: clamp(28px, 6.4vw, 38px); line-height: 1.1; }
+  .kette .form { background: var(--karte); border: 3px solid var(--deko-4); box-shadow: none; }
+  .kette .wandler { border: 3px solid var(--deko-6); }
+  .kette .offen { border: 3px dashed var(--knopf); color: var(--knopf); background: #fff; }
+  .kette .offen .bild { font-weight: 900; }
+  .kette .pfeil-k { font-size: clamp(20px, 4.6vw, 28px); font-weight: 900; color: var(--text-leise); }
+
+  .wahl-knopf { font-size: clamp(16px, 3.6vw, 20px); font-weight: 800; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>⚡ Energie-Wandler</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.3.2.d/e (2. Zyklus): Energieformen unterscheiden, Energieumwandlungen bei Geräten und
+// Vorgängen beschreiben, Energiewandler (Lehrplan-Beispiel: Generator, Bewegung → elektrische Energie);
+// erneuerbare und nicht erneuerbare Energieträger, Kraftwerke.
+// Basisklasse 5: s1 4. Klasse (Braucht es Strom?), s2–s4 5. Klasse (vorher → nachher → Ketten aus zwei
+// Wandlern), s5 6. Klasse (erneuerbar, Kraftwerke, Energie in der Schweiz), s6 Königsstufe (Ketten ordnen,
+// falschen Wandler finden).
+// Bezug: Stromkreis-Bauer (Basisklasse 4) und Magnet-Labor (Basisklasse 2) üben den Stromkreis selbst; hier
+// geht es nur darum, welche Energie vorher da ist und welche herauskommt.
+// Alle Inhalte aus der Liste „geraete“ (woerter.js): Ohne freie Liste bietet das Spiel keine Stufe an.
+
+const { waehle, mische, el } = LS;
+
+const LISTE = "geraete";
+const FREI = new Set(LS.spielListen("energie-wandler").length ? LS.freieListen("energie-wandler") : [LISTE]);
+const G = Object.fromEntries(ENERGIE_GERAETE.map(g => [g.name, g]));
+const ALLTAG = ["el", "bew", "waerme", "licht", "chem", "lage"]; // ohne Kernenergie: die kommt erst in Stufe 5
+const auchVon = g => g.auch || [];
+
+const formText = k => k.split("+").map(f => ENERGIEFORMEN[f].name).join(" und ");
+const formBild = k => k.split("+").map(f => ENERGIEFORMEN[f].bild).join("");
+const formInhalt = k => ({ bild: formBild(k), text: formText(k) });
+const geraetInhalt = name => ({ bild: G[name].bild, text: name });
+const paarText = k => { const [v, z] = k.split(">"); return `${formText(v)} → ${formText(z)}`; };
+/** Passt das Gerät zu: Energie vorher v, nachher alle Formen in z (lose: auch Nebenformen zählen)? */
+const passt = (g, v, z) => (g.von === v || auchVon(g).includes(v)) && z.every(f => g.zu.includes(f) || auchVon(g).includes(f));
+
+/** Formen entlang einer Kette: vorher[i] für Gerät i; am Ende die Formen nach dem letzten Gerät. */
+function formenDerKette(k) {
+  const geraete = k.geraete.map(n => G[n]);
+  return { vor: geraete.map(g => g.von), ende: geraete[geraete.length - 1].zu.join("+") };
+}
+const kettenIn = stufe => ENERGIE_KETTEN.filter(k => !k.ab || ({ s5: 5, s6: 6 }[stufe] || 0) >= k.ab);
+
+const STUFE = {
+  s1: { arten: ["strom"] },
+  s2: { arten: ["woher"] },
+  s3: { arten: ["wohin", "wohin", "paar"] },
+  s4: { arten: ["fehlt", "mitte"] },
+  s5: { arten: ["erneuerbar", "kraftwerk", "frage"] },
+  s6: { arten: ["ordnen", "falsch"] },
+};
+const artenIn = stufe => (FREI.has(LISTE) ? STUFE[stufe].arten : []);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => artenIn(s).length));
+const ohneKern = ENERGIE_GERAETE.filter(g => g.von !== "kern");
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const art = waehle(artenIn(stufe));
+  for (let versuch = 0; versuch < 200; versuch++) {
+    const a = erzeuge(art, stufe);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  throw new Error(`keine gültige Aufgabe für ${art} in ${stufe}`);
+}
+
+function erzeuge(art, stufe) {
+  switch (art) {
+    case "strom": {
+      const g = waehle(ENERGIE_GERAETE.filter(x => x.strom !== null && x.strom !== undefined));
+      return { art, geraet: g.name, richtig: g.strom ? "ja" : "nein", optionen: ["ja", "nein"] };
+    }
+    case "woher": {
+      const g = waehle(ohneKern);
+      const pool = ALLTAG.filter(f => f !== g.von && !auchVon(g).includes(f));
+      return { art, geraet: g.name, richtig: g.von, optionen: mische([g.von, ...mische(pool).slice(0, 2)]) };
+    }
+    case "wohin": {
+      const g = waehle(ohneKern);
+      const richtig = g.zu.join("+");
+      const pool = ALLTAG.filter(f => !g.zu.includes(f) && !auchVon(g).includes(f) && f !== g.von);
+      let falsche;
+      if (g.zu.length === 1) falsche = mische(pool).slice(0, 2);
+      else {
+        const paare = [];
+        for (let i = 0; i < pool.length; i++) for (let j = i + 1; j < pool.length; j++) paare.push(`${pool[i]}+${pool[j]}`);
+        falsche = mische(paare).slice(0, 2);
+      }
+      return { art, geraet: g.name, richtig, optionen: mische([richtig, ...falsche]) };
+    }
+    case "paar": {
+      const g = waehle(ohneKern);
+      const richtig = `${g.von}>${g.zu.join("+")}`;
+      const umgekehrt = `${g.zu.join("+")}>${g.von}`;
+      const andere = mische(ohneKern.filter(x => x !== g)).map(x => `${x.von}>${x.zu.join("+")}`)
+        .find(k => k !== richtig && k !== umgekehrt && !passtPaar(g, k));
+      return { art, geraet: g.name, richtig, optionen: mische([richtig, umgekehrt, andere]) };
+    }
+    case "fehlt": {
+      const k = waehle(kettenIn(stufe));
+      const j = Math.floor(Math.random() * k.geraete.length);
+      const { vor, ende } = formenDerKette(k);
+      const nachher = j < k.geraete.length - 1 ? [vor[j + 1]] : ende.split("+");
+      const falsche = mische(ohneKern.filter(g => !k.geraete.includes(g.name) && !passt(g, vor[j], nachher))).slice(0, 2).map(g => g.name);
+      return { art, kette: ENERGIE_KETTEN.indexOf(k), stelle: j, richtig: k.geraete[j], optionen: mische([k.geraete[j], ...falsche]) };
+    }
+    case "mitte": {
+      const k = waehle(kettenIn(stufe));
+      const j = Math.floor(Math.random() * (k.geraete.length - 1));
+      const { vor } = formenDerKette(k);
+      const a = G[k.geraete[j]], b = G[k.geraete[j + 1]];
+      const richtig = vor[j + 1];
+      const pool = ALLTAG.filter(f => f !== richtig && !(a.zu.includes(f) || auchVon(a).includes(f)) && !auchVon(b).includes(f));
+      return { art, kette: ENERGIE_KETTEN.indexOf(k), stelle: j, richtig, optionen: mische([richtig, ...mische(pool).slice(0, 2)]) };
+    }
+    case "erneuerbar": {
+      const g = waehle(ENERGIE_GERAETE.filter(x => x.erneuerbar === true || x.erneuerbar === false));
+      return { art, geraet: g.name, richtig: g.erneuerbar ? "ja" : "nein", optionen: ["ja", "nein"] };
+    }
+    case "kraftwerk": {
+      const g = waehle(ENERGIE_GERAETE.filter(x => x.kraftwerk));
+      const pool = [...ALLTAG, "kern"].filter(f => f !== g.von && !auchVon(g).includes(f) && !g.zu.includes(f));
+      return { art, geraet: g.name, richtig: g.von, optionen: mische([g.von, ...mische(pool).slice(0, 2)]) };
+    }
+    case "frage": {
+      const i = Math.floor(Math.random() * ENERGIE_FRAGEN.length);
+      const [, r, f1, f2] = ENERGIE_FRAGEN[i];
+      return { art, frage: i, richtig: r, optionen: mische([r, f1, f2]) };
+    }
+    case "ordnen": {
+      const k = waehle(kettenIn(stufe));
+      const { vor, ende } = formenDerKette(k);
+      const reihe = [];
+      k.geraete.forEach((n, i) => reihe.push(`f:${vor[i]}`, `g:${n}`));
+      reihe.push(`f:${ende}`);
+      return { art, kette: ENERGIE_KETTEN.indexOf(k), reihe };
+    }
+    case "falsch": {
+      const k = waehle(kettenIn(stufe));
+      const j = Math.floor(Math.random() * k.geraete.length);
+      const { vor, ende } = formenDerKette(k);
+      const nachher = j < k.geraete.length - 1 ? [vor[j + 1]] : ende.split("+");
+      const r = waehle(ohneKern.filter(g => !k.geraete.includes(g.name) && !passt(g, vor[j], nachher)));
+      const geraete = [...k.geraete];
+      geraete[j] = r.name;
+      return { art, kette: ENERGIE_KETTEN.indexOf(k), stelle: j, geraete, richtig: r.name, optionen: geraete };
+    }
+  }
+  return null;
+}
+/** Passt ein Paar „v>z“ (lose) zum Gerät? Dann darf es keine falsche Antwort sein. */
+const passtPaar = (g, k) => { const [v, z] = k.split(">"); return passt(g, v, z.split("+")); };
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!STUFE[stufe].arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (!FREI.has(LISTE)) m.push("Liste nicht frei");
+  if (a.optionen) {
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+    if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("Lösung nicht genau einmal unter den Antworten");
+    if (a.optionen.some(o => o == null)) m.push("Antwort fehlt");
+  }
+  const g = a.geraet && G[a.geraet];
+  if (a.geraet && !g) m.push("Gerät unbekannt");
+  if (["woher", "wohin", "paar", "fehlt", "mitte"].includes(a.art) && JSON.stringify(a).includes("kern")) m.push("Kernenergie vor Stufe 5");
+  const anders = (a.optionen || []).filter(o => o !== a.richtig);
+  switch (a.art) {
+    case "woher": case "kraftwerk":
+      if (a.richtig !== g.von) m.push("Lösung ist nicht die Energie vorher");
+      for (const o of anders) if (passt(g, o, g.zu)) m.push(`falsche Antwort ${o} passt auch`);
+      if (a.art === "kraftwerk" && !g.kraftwerk) m.push("kein Kraftwerk");
+      break;
+    case "wohin":
+      if (a.richtig !== g.zu.join("+")) m.push("Lösung ist nicht die Energie nachher");
+      for (const o of anders) if (o.split("+").some(f => g.zu.includes(f) || auchVon(g).includes(f))) m.push(`falsche Antwort ${o} enthält eine Energie, die herauskommt`);
+      break;
+    case "paar":
+      for (const o of anders) if (passtPaar(g, o)) m.push(`falsches Paar ${o} passt auch`);
+      if (!passtPaar(g, a.richtig)) m.push("richtiges Paar passt nicht");
+      break;
+    case "strom": case "erneuerbar": {
+      const wert = a.art === "strom" ? g.strom : g.erneuerbar;
+      if (typeof wert !== "boolean" || (wert ? "ja" : "nein") !== a.richtig) m.push("ja/nein passt nicht zum Gerät");
+      break;
+    }
+    case "fehlt": case "falsch": case "mitte": case "ordnen": {
+      const k = ENERGIE_KETTEN[a.kette];
+      if (!k || !kettenIn(stufe).includes(k)) { m.push("Kette nicht in der Stufe"); break; }
+      // Die Kette selbst: Jedes Gerät nimmt genau die Energie auf, die das vorherige abgibt.
+      for (let i = 1; i < k.geraete.length; i++) if (!G[k.geraete[i - 1]].zu.includes(G[k.geraete[i]].von)) m.push(`Kette: ${k.geraete[i - 1]} → ${k.geraete[i]} passt nicht`);
+      const { vor, ende } = formenDerKette(k);
+      if (a.art === "fehlt") {
+        if (a.richtig !== k.geraete[a.stelle]) m.push("Lösung ist nicht das fehlende Gerät");
+        const nachher = a.stelle < k.geraete.length - 1 ? [vor[a.stelle + 1]] : ende.split("+");
+        for (const o of anders) if (passt(G[o], vor[a.stelle], nachher)) m.push(`falsches Gerät ${o} passt auch`);
+      }
+      if (a.art === "mitte") {
+        if (a.richtig !== vor[a.stelle + 1]) m.push("Lösung ist nicht die Energie dazwischen");
+        const b = G[k.geraete[a.stelle + 1]];
+        for (const o of anders) if (passt(G[k.geraete[a.stelle]], G[k.geraete[a.stelle]].von, [o]) && passt(b, o, b.zu)) m.push(`falsche Energie ${o} passt auch`);
+      }
+      if (a.art === "falsch") {
+        // genau ein Gerät passt nicht zu seinen Energien davor und danach
+        const nicht = a.geraete.filter((n, i) => !passt(G[n], vor[i], i < a.geraete.length - 1 ? [vor[i + 1]] : ende.split("+")));
+        if (nicht.length !== 1 || nicht[0] !== a.richtig) m.push("nicht genau ein Gerät passt nicht");
+      }
+      if (a.art === "ordnen" && a.reihe.length !== 2 * k.geraete.length + 1) m.push("Reihe unvollständig");
+      break;
+    }
+    case "frage":
+      if (!ENERGIE_FRAGEN[a.frage] || ENERGIE_FRAGEN[a.frage][1] !== a.richtig) m.push("Frage oder Lösung falsch");
+      break;
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+function glied(inhalt, klasse) {
+  return el("div", { class: `glied ${klasse}` }, el("span", { class: "bild", text: inhalt.bild }), el("span", { text: inhalt.text }));
+}
+const offen = () => glied({ bild: "?", text: "" }, "form offen");
+const pfeilK = () => el("span", { class: "pfeil-k", "aria-hidden": "true", text: "→" });
+
+/** Kette als Zeile; zeige(i, art) entscheidet je Glied, ob es offen bleibt. */
+function ketteEl(k, { offenesGeraet = -1, offeneForm = -1, geraete = k.geraete, ohneFormen = false } = {}) {
+  const { vor, ende } = formenDerKette(k);
+  const zeile = el("div", { class: "kette auftrag" });
+  geraete.forEach((n, i) => {
+    if (!ohneFormen) zeile.append(i === offeneForm ? offen() : glied(formInhalt(vor[i]), "form"), pfeilK());
+    else if (i > 0) zeile.append(pfeilK());
+    zeile.append(i === offenesGeraet ? glied({ bild: "?", text: "Wandler" }, "wandler offen") : glied(geraetInhalt(n), "wandler"));
+  });
+  if (!ohneFormen) zeile.append(pfeilK(), offeneForm === geraete.length ? offen() : glied(formInhalt(ende), "form"));
+  return zeile;
+}
+
+/** Texte der Knöpfe, die der Reihe nach richtig sind (für Prüfskripte). */
+function loesungsTexte(a) {
+  const t = inh => `${inh.bild}${inh.text}`;
+  switch (a.art) {
+    case "strom": case "erneuerbar": return [t(jaNein(a.art)(a.richtig))];
+    case "woher": case "wohin": case "kraftwerk": case "mitte": return [t(formInhalt(a.richtig))];
+    case "paar": return [t({ bild: "", text: paarText(a.richtig) })];
+    case "fehlt": case "falsch": return [t(geraetInhalt(a.richtig))];
+    case "frage": return [t({ bild: "", text: a.richtig })];
+    case "ordnen": return a.reihe.map(w => t(teilInhalt(w)));
+  }
+  return [];
+}
+const jaNein = art => w => (art === "strom"
+  ? (w === "ja" ? { bild: "🔌", text: "Ja, es braucht Strom" } : { bild: "🚫", text: "Nein, kein Strom nötig" })
+  : (w === "ja" ? { bild: "♻️", text: "erneuerbar" } : { bild: "⛔", text: "nicht erneuerbar" }));
+const teilInhalt = w => (w.startsWith("g:") ? geraetInhalt(w.slice(2)) : formInhalt(w.slice(2)));
+
+let gezeigt = null; // zuletzt gezeichnete Aufgabe (Prüfskripte, Entwickler-Leiste)
+
+LS.spiel({
+  id: "energie-wandler",
+  einleitung: "Energie geht nie verloren – sie wird nur umgewandelt. Finde heraus, welche Energie hineingeht und welche herauskommt!",
+  anzahl: 8,
+  stufen: nurMoegliche({
+    s1: "Braucht das Gerät Strom? Föhn, Kerze, Velodynamo … (4. Klasse)",
+    s2: "Woher kommt die Energie? Föhn: elektrische Energie.",
+    s3: "Wohin geht sie? Föhn: elektrische Energie → Wärme und Bewegung.",
+    s4: "Ketten aus zwei Wandlern: Stausee → Kraftwerk → Strom → Lampe → Licht.",
+    s5: "Erneuerbar oder nicht? Kraftwerke und Strom in der Schweiz.",
+    s6: "Endgegner: ganze Ketten ordnen und den falschen Wandler finden.",
+  }),
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag({
+      s1: "Braucht es Strom aus der Steckdose oder aus einer Batterie? Oder geht es ohne?",
+      s2: "Frag dich: Was braucht das Gerät, damit es arbeitet?",
+      s3: "Frag dich: Was spürst, siehst oder nutzt du, wenn es arbeitet?",
+      s4: "Was ein Wandler abgibt, nimmt der nächste auf.",
+      s5: "Erneuerbar heisst: Die Energiequelle wächst nach oder geht nicht aus.",
+      s6: "Tipp die Kette von Anfang an: Energie, Wandler, Energie, Wandler …",
+    }[ctx.stufe]);
+    const a = aufgabeErzeugen(ctx.stufe);
+    gezeigt = a;
+    if (new Set(artenIn(ctx.stufe)).size > 1) ctx.serie("art", a.art);
+    const f = ctx.flaeche;
+    const g = a.geraet && G[a.geraet];
+    const k = a.kette != null ? ENERGIE_KETTEN[a.kette] : null;
+
+    if (a.art === "strom" || a.art === "erneuerbar") {
+      ctx.serie("antwort", a.richtig);
+      const loesung = a.art === "strom"
+        ? `${g.name}: ${g.strom ? "braucht Strom" : "braucht keinen Strom"}. ${g.text}`
+        : `${g.name}: ${g.erneuerbar ? "erneuerbar" : "nicht erneuerbar"}. ${g.text}`;
+      f.append(ketteEl({ geraete: [g.name] }, { ohneFormen: true }),
+        el("div", { class: "frage", text: a.art === "strom" ? `${g.name}: Braucht es Strom aus der Steckdose oder aus einer Batterie?` : `${g.name}: Ist die Energiequelle erneuerbar?` }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: jaNein(a.art), breite: 200, loesung, lob: `Richtig! ${g.text}`,
+        hinweis: a.art === "strom" ? "Überleg: Muss man es einstecken, oder hat es eine Batterie oder einen Akku?" : "Überleg: Wächst die Energiequelle nach, oder ist sie irgendwann aufgebraucht?" });
+      return;
+    }
+
+    if (a.art === "woher" || a.art === "wohin" || a.art === "kraftwerk") {
+      const woher = a.art !== "wohin";
+      const zeile = el("div", { class: "kette auftrag" },
+        woher ? offen() : glied(formInhalt(g.von), "form"), pfeilK(), glied(geraetInhalt(g.name), "wandler"), pfeilK(),
+        woher ? glied(formInhalt(g.zu.join("+")), "form") : offen());
+      const loesung = `${g.name}: ${formText(g.von)} → ${formText(g.zu.join("+"))}. ${g.text}`;
+      f.append(zeile, el("div", { class: "frage", text: woher ? `${g.name}: Welche Energie ist vorher da?` : `${g.name}: Welche Energie kommt heraus?` }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: formInhalt, breite: 190, loesung, lob: `Richtig! ${g.text}`,
+        hinweis: woher ? "Überleg: Was muss da sein, damit es arbeitet? Was wird dabei verbraucht?" : "Überleg: Was spürst, siehst oder nutzt du, wenn es arbeitet?" });
+      return;
+    }
+
+    if (a.art === "paar") {
+      const loesung = `${g.name}: ${paarText(a.richtig)}. ${g.text}`;
+      f.append(ketteEl({ geraete: [g.name] }, { ohneFormen: true }), el("div", { class: "frage", text: `${g.name}: Welche Umwandlung stimmt?` }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: o => ({ text: paarText(o) }), breite: 280, loesung, lob: `Richtig! ${g.text}`,
+        hinweis: "Achte auf die Richtung: Was ist vorher da, was kommt heraus?" });
+      return;
+    }
+
+    if (a.art === "fehlt" || a.art === "mitte") {
+      const { vor, ende } = formenDerKette(k);
+      const ganz = k.geraete.map((n, i) => `${formText(vor[i])} → ${n}`).join(" → ") + ` → ${formText(ende)}`;
+      const loesung = a.art === "fehlt" ? `Es fehlt: ${a.richtig}. Die Kette: ${ganz}.` : `Dazwischen: ${formText(a.richtig)}. Die Kette: ${ganz}.`;
+      f.append(el("div", { class: "anfang", text: `Am Anfang: ${k.anfang}` }),
+        ketteEl(k, a.art === "fehlt" ? { offenesGeraet: a.stelle } : { offeneForm: a.stelle + 1 }),
+        el("div", { class: "frage", text: a.art === "fehlt" ? "Welcher Wandler fehlt?" : "Welche Energie geht vom einen Wandler zum nächsten?" }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: a.art === "fehlt" ? geraetInhalt : formInhalt, breite: 190, loesung,
+        hinweis: a.art === "fehlt" ? "Der Wandler muss genau die Energie aufnehmen, die davor steht, und die Energie danach abgeben."
+          : "Was gibt der erste Wandler ab? Und was braucht der zweite, damit er arbeitet?" });
+      return;
+    }
+
+    if (a.art === "frage") {
+      const [frage, richtig, , , erklaerung] = ENERGIE_FRAGEN[a.frage];
+      f.append(el("div", { class: "frage", text: frage }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig, breite: 260, loesung: `${richtig}. ${erklaerung}`, lob: `Richtig! ${erklaerung}`,
+        hinweis: "Lies alle Antworten genau. Denk an die Berge, das Wasser, den Wind und die Sonne." });
+      return;
+    }
+
+    if (a.art === "ordnen") {
+      const loesung = a.reihe.map(w => teilInhalt(w).text).join(" → ");
+      f.append(el("div", { class: "frage", text: `Am Anfang: ${k.anfang}. Bau die Kette: Tipp der Reihe nach Energie, Wandler, Energie …` }));
+      LS.reihenfolge(ctx, { reihe: a.reihe, inhalt: teilInhalt, ablage: w => `${teilInhalt(w).bild} ${teilInhalt(w).text}`, pfeile: true, breite: 160, loesung,
+        hinweis: "Das kommt noch nicht. Was kommt aus dem letzten Teil heraus, und welcher Wandler nimmt genau das auf?", lob: "Die ganze Kette stimmt! 🎉" });
+      return;
+    }
+
+    if (a.art === "falsch") {
+      const { vor, ende } = formenDerKette(k);
+      const loesung = `${a.richtig} passt nicht. Richtig wäre: ${k.geraete[a.stelle]}.`;
+      f.append(el("div", { class: "anfang", text: `Am Anfang: ${k.anfang}` }), ketteEl(k, { geraete: a.geraete }),
+        el("div", { class: "frage", text: "Ein Wandler passt nicht zu den Energien davor und danach. Welcher?" }));
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: geraetInhalt, breite: 190, loesung,
+        hinweis: n => `${n} passt: ${formText(vor[a.geraete.indexOf(n)])} hinein, ${formText(a.geraete.indexOf(n) < a.geraete.length - 1 ? vor[a.geraete.indexOf(n) + 1] : ende)} heraus. Prüf die anderen.` });
+    }
+  },
+});
+</script>
+</body>
+</html>

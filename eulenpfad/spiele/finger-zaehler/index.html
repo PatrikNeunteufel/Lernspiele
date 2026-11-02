@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finger-Zähler</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .fz-haende { display: block; width: 100%; max-width: 340px; margin: 0 auto 12px; }
+  .fz-haende.zwei { max-width: 560px; }
+  .fz-feld { position: relative; }
+  .fz-feld.verdeckt .fz-haende { visibility: hidden; }
+  .fz-feld.verdeckt { background: repeating-linear-gradient(45deg, #eef0fa 0 12px, #f7f8fd 12px 24px); border-radius: 16px; }
+  .fz-feld.verdeckt::after { content: "🙈"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 56px; }
+  .fz-haut { fill: #f9d3b0; stroke: #a8714a; stroke-width: 3; }
+  .fz-haut.zu { fill: #efbf96; }
+  .fz-tipp { fill: transparent; cursor: pointer; }
+  /* Umriss eines eingeklappten Fingers: hier tippen, dann kommt der Finger */
+  .fz-geist { fill: none; stroke: var(--knopf); stroke-width: 2.5; stroke-dasharray: 5 4; opacity: .55; pointer-events: none; }
+  .fz-ziel { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 0 0 12px; }
+  .fz-ziffer { font-size: clamp(48px, 12vw, 72px); font-weight: 900; line-height: 1; }
+  /* Würfelbild 3 × 3 und Zehnerfeld 2 × 5 (Kraft der Fünf) */
+  .fz-wuerfel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 66px; height: 66px; padding: 7px; background: #fff; border: 3px solid var(--text); border-radius: 14px; box-sizing: border-box; }
+  .fz-wuerfel.gross { width: 104px; height: 104px; gap: 6px; padding: 10px; }
+  .fz-wuerfel i { border-radius: 50%; }
+  .fz-wuerfel i.p { background: var(--text); }
+  .fz-zehner { display: grid; grid-template-columns: repeat(5, 16px); gap: 4px; padding: 6px; background: #fff; border: 3px solid var(--rand); border-radius: 10px; }
+  .fz-zehner.gross { grid-template-columns: repeat(5, 24px); gap: 5px; }
+  .fz-zehner i { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--rand); box-sizing: border-box; }
+  .fz-zehner i.p { background: var(--deko-6); border-color: var(--deko-6); }
+  .fz-wahl .wahl-knopf { min-height: 84px; }
+  .fz-beides { display: flex; align-items: center; gap: 10px; }
+  .fz-wahl .wahl-knopf .fz-ziffer { font-size: 40px; }
+  .fz-wahl .wahl-knopf .fz-haende { max-width: 180px; margin: 0; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🖐️ Finger-Zähler</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.2.b „Fingerbilder von 1 bis 10 spontan zeigen sowie Anzahlen bis 5 ohne Zählen
+// erfassen“ (alle Stufen); MA.1.C.2.a Anzahlen verschieden darstellen (Hand, Würfelbild, Zehnerfeld,
+// Ziffer; Stufen 3–6). Basisklasse 1: s1 Kindergarten (1–3 Finger, Antwort als Punktbild, ohne Lesen),
+// s2–s4 1. Klasse, s5 2. Klasse (bis 10 ergänzen, Kraft der Fünf), s6 Königsstufe (Blitz).
+// Bezug: Punkte-Blitz übt Würfelbilder und Zehnerfelder auf einen Blick; hier sind es Finger. Würfel
+// und Zehnerfeld kommen nur als Gegenstück zur Hand vor (Stufe 4).
+// Annahme (mit dem Lehrmittel abzugleichen): Gezählt wird ab dem Daumen (Daumen, Zeigefinger,
+// Mittelfinger …), wie in der Schweiz üblich; die zweite Hand beginnt wieder beim Daumen.
+
+const { zufall, waehle, mische, el } = LS;
+const SVG = "http://www.w3.org/2000/svg";
+
+// Finger einer Hand in Zählreihenfolge: 0 Daumen, 1 Zeigefinger, 2 Mittelfinger, 3 Ringfinger, 4 kleiner Finger.
+const FINGER = ["Daumen", "Zeigefinger", "Mittelfinger", "Ringfinger", "kleiner Finger"];
+// Fingerbilder, die Kinder wirklich zeigen (je Anzahl; als Fingernummern). Das erste ist das Schweizer
+// Fingerbild ab dem Daumen; dazu ab dem Zeigefinger und mit dem kleinen Finger.
+const BILDER = {
+  0: [[]],
+  1: [[0], [1], [4]],
+  2: [[0, 1], [1, 2], [0, 4]],
+  3: [[0, 1, 2], [1, 2, 3], [0, 1, 4]],
+  4: [[0, 1, 2, 3], [1, 2, 3, 4]],
+  5: [[0, 1, 2, 3, 4]],
+};
+const WUERFEL = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+const ZAHLWORT = ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun", "zehn"];
+
+// Je Stufe: Aufgabenarten, Hände (1 oder 2), Zahlenraum, Antworten als Punkte oder Ziffern, Blitzzeit (ms).
+const STUFE = {
+  s1: { arten: ["wieviele", "wieviele", "zeigen"], haende: 1, von: 1, bis: 3, antwort: "punkte" },
+  s2: { arten: ["wieviele", "wieviele", "zeigen"], haende: 1, von: 1, bis: 5, antwort: "beides" },
+  s3: { arten: ["wieviele", "zeigen"], haende: 2, von: 1, bis: 10, antwort: "ziffer" },
+  s4: { arten: ["handZuBild", "bildZuHand"], haende: 2, von: 1, bis: 10, antwort: "ziffer" },
+  s5: { arten: ["fehlen", "fehlen", "zeigenRest"], haende: 2, von: 1, bis: 9, antwort: "ziffer" },
+  s6: { arten: ["blitz", "blitzFehlen"], haende: 2, von: 2, bis: 10, antwort: "ziffer", blitz: 1500 },
+};
+
+/** Ein Fingerbild für n Finger mit h Händen: [[Finger links], [Finger rechts]]. Halb geordnet (erste Hand voll, ab dem Daumen), halb verschieden. */
+function fingerbild(n, h) {
+  if (h === 1) return [Math.random() < 0.6 ? BILDER[n][0] : waehle(BILDER[n])];
+  if (Math.random() < 0.5) {
+    const a = Math.min(5, n);
+    return [BILDER[a][0], BILDER[n - a][0]];
+  }
+  const a = zufall(Math.max(0, n - 5), Math.min(5, n));
+  return [waehle(BILDER[a]), waehle(BILDER[n - a])];
+}
+const anzahl = bild => bild.reduce((s, f) => s + f.length, 0);
+const bildText = bild => bild.map(f => f.join("")).join("|");
+
+/**
+ * Wenigste Tipps, um mit h Händen genau n Finger zu zeigen: jeder Finger einzeln (die Handfläche klappt
+ * nichts mehr um — Rückmeldung Patrik, LERN_Session8: Kinder wussten nicht, wohin tippen).
+ */
+const wenigsteTipps = (n, h) => (n <= 5 * h ? n : NaN);
+
+/** Antwortmöglichkeiten: n und Nachbarn im Zahlenraum. */
+function optionenUm(n, von, bis, k) {
+  const nah = mische([n - 1, n + 1, n - 2, n + 2, n - 3, n + 3].filter(x => x >= von && x <= bis));
+  return mische([n, ...nah.slice(0, k - 1)]);
+}
+
+function aufgabeErzeugen(stufe) {
+  const s = STUFE[stufe];
+  const art = waehle(s.arten);
+  const h = s.haende;
+  // Stufe 1: immer alle drei Punktbilder zur Wahl
+  const wahl = (n, von = s.von, bis = s.bis) => (stufe === "s1" ? [1, 2, 3] : optionenUm(n, von, bis, stufe === "s4" ? 3 : 4));
+  if (art === "zeigen") {
+    const n = zufall(s.von, s.bis);
+    return { art, n, haende: h, hand: h === 1 ? waehle([0, 1]) : null, tipps: wenigsteTipps(n, h) };
+  }
+  if (art === "zeigenRest") {
+    // Kraft der Fünf: Die Hände zeigen n; zeig mit deinen Fingern, wie viele bis 10 fehlen.
+    const n = zufall(s.von, s.bis);
+    return { art, n, bild: fingerbild(n, 2), ziel: 10 - n, haende: 2, tipps: wenigsteTipps(10 - n, 2) };
+  }
+  if (art === "wieviele") {
+    const n = zufall(s.von, s.bis);
+    const hand = h === 1 ? waehle([0, 1]) : null;
+    return { art, n, bild: fingerbild(n, h), hand, richtig: n, optionen: wahl(n) };
+  }
+  if (art === "handZuBild") {
+    // Hand zeigt n — gleich viele als Würfelbild, Zehnerfeld oder Ziffer?
+    const n = zufall(s.von, s.bis);
+    const darstellung = n <= 6 ? waehle(["wuerfel", "zehner", "ziffer"]) : waehle(["zehner", "ziffer"]);
+    const optionen = darstellung === "wuerfel" ? optionenUm(n, 1, 6, 3) : wahl(n);
+    return { art, n, bild: fingerbild(n, 2), darstellung, richtig: n, optionen };
+  }
+  if (art === "bildZuHand") {
+    // Würfelbild, Zehnerfeld oder Ziffer zeigt n — welche Hände zeigen gleich viele?
+    const n = zufall(s.von, s.bis);
+    const darstellung = n <= 6 ? waehle(["wuerfel", "zehner", "ziffer"]) : waehle(["zehner", "ziffer"]);
+    const zahlen = optionenUm(n, s.von, s.bis, 3);
+    const bilder = zahlen.map(z => fingerbild(z, 2));
+    return { art, n, darstellung, optionen: bilder.map(bildText), bilder, richtig: bildText(bilder[zahlen.indexOf(n)]), zahlen };
+  }
+  if (art === "fehlen" || art === "blitzFehlen") {
+    const n = zufall(s.von, Math.min(9, s.bis));
+    return { art, n, bild: fingerbild(n, 2), richtig: 10 - n, optionen: optionenUm(10 - n, 1, 9, 4) };
+  }
+  // blitz: kurz zeigen, dann zudecken
+  const n = zufall(s.von, s.bis);
+  return { art, n, bild: fingerbild(n, 2), richtig: n, optionen: optionenUm(n, 1, 10, 4) };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const s = STUFE[stufe];
+  if (!s.arten.includes(a.art)) m.push("Aufgabenart gehört nicht in diese Stufe");
+  if (!(a.n >= s.von && a.n <= s.bis)) m.push("Anzahl ausserhalb des Zahlenraums");
+  if (a.bild) {
+    if (anzahl(a.bild) !== a.n) m.push("Fingerbild zeigt nicht n Finger");
+    if (a.bild.some(f => f.length > 5 || new Set(f).size !== f.length || f.some(i => i < 0 || i > 4))) m.push("unmögliche Hand");
+    if (a.bild.some(f => !BILDER[f.length].some(b => b.join() === f.join()))) m.push("Fingerbild, das Kinder nicht zeigen");
+    if (a.bild.length !== (a.art === "wieviele" ? s.haende : 2)) m.push("falsche Zahl Hände");
+  }
+  if (a.optionen) {
+    if (!a.optionen.includes(a.richtig)) m.push("richtige Antwort fehlt");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("Auswahl doppelt");
+    if (stufe === "s1" && a.optionen.some(o => !(o >= 1 && o <= 3))) m.push("Stufe 1: nur 1 bis 3");
+  }
+  if (["wieviele", "handZuBild", "blitz"].includes(a.art) && a.richtig !== a.n) m.push("Antwort ist nicht die Anzahl");
+  if (["fehlen", "blitzFehlen"].includes(a.art) && a.richtig !== 10 - anzahl(a.bild)) m.push("fehlende Finger falsch");
+  if (a.art === "handZuBild" && a.darstellung === "wuerfel" && a.optionen.some(o => !WUERFEL[o])) m.push("kein Würfelbild");
+  if (a.art === "bildZuHand") {
+    const passend = a.bilder.filter(b => anzahl(b) === a.n);
+    if (passend.length !== 1 || bildText(passend[0]) !== a.richtig) m.push("nicht genau ein passendes Händepaar");
+    if (a.darstellung === "wuerfel" && !WUERFEL[a.n]) m.push("kein Würfelbild");
+  }
+  if (a.art === "zeigen" || a.art === "zeigenRest") {
+    const ziel = a.art === "zeigen" ? a.n : a.ziel;
+    if (a.tipps !== wenigsteTipps(ziel, a.haende) || a.tipps < 1) m.push("Handgriffe falsch");
+    if (a.art === "zeigenRest" && a.ziel !== 10 - anzahl(a.bild)) m.push("Rest bis 10 falsch");
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+const svgEl = (tag, attr) => { const e = document.createElementNS(SVG, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); return e; };
+
+// Linke Hand von hinten gesehen (Daumen rechts); die rechte ist gespiegelt — die Daumen zeigen zueinander.
+// Finger: x, Länge; Fingerbreite 22, Wurzel bei y = 100.
+const LAGE = { 4: [14, 44], 3: [37, 58], 2: [60, 64], 1: [83, 58] };
+
+/**
+ * Eine Hand als <g>: auf = Liste der gestreckten Finger. spiegeln: rechte Hand.
+ * tippen(f): Finger f umklappen; tippen("flaeche"): Tipp auf die Handfläche (nur ein Hinweis).
+ * Mit tippen zeigt ein gestrichelter Umriss, wo ein eingeklappter Finger hinkommt. Ohne tippen nur ein Bild.
+ */
+function hand(auf, spiegeln, tippen) {
+  const g = svgEl("g", spiegeln ? { transform: "translate(320,0) scale(-1,1)" } : {});
+  const flaeche = svgEl("rect", { x: 12, y: 86, width: 96, height: 74, rx: 28, class: "fz-haut" });
+  g.append(flaeche);
+  for (const f of [4, 3, 2, 1]) {
+    const [x, laenge] = LAGE[f];
+    const offen = auf.includes(f);
+    if (!offen && tippen) g.append(svgEl("rect", { x, y: 92 - laenge, width: 22, height: laenge + 10, rx: 11, class: "fz-geist" }));
+    g.append(svgEl("rect", { x, y: offen ? 92 - laenge : 76, width: 22, height: offen ? laenge + 10 : 26, rx: 11, class: "fz-haut" + (offen ? "" : " zu"), "data-f": f }));
+  }
+  if (!auf.includes(0) && tippen) g.append(svgEl("rect", { x: 104, y: 86, width: 22, height: 56, rx: 11, transform: "rotate(25 112 140)", class: "fz-geist" }));
+  const daumen = auf.includes(0)
+    ? svgEl("rect", { x: 104, y: 86, width: 22, height: 56, rx: 11, transform: "rotate(25 112 140)", class: "fz-haut", "data-f": 0 })
+    : svgEl("rect", { x: 46, y: 112, width: 64, height: 24, rx: 12, class: "fz-haut zu", "data-f": 0 });
+  g.append(daumen);
+  if (tippen) {
+    flaeche.addEventListener("click", () => tippen("flaeche"));
+    // Grosse, unsichtbare Tippflächen je Finger: die ganze Spalte über der Handfläche
+    for (const f of [4, 3, 2, 1]) {
+      const r = svgEl("rect", { x: LAGE[f][0] - 0.5, y: 4, width: 23, height: 82, class: "fz-tipp" });
+      r.addEventListener("click", () => tippen(f));
+      g.append(r);
+    }
+    const r = svgEl("rect", { x: 108, y: 60, width: 46, height: 104, class: "fz-tipp" });
+    r.addEventListener("click", () => tippen(0));
+    g.append(r);
+    if (!auf.includes(0)) daumen.addEventListener("click", e => { e.stopPropagation(); tippen(0); });
+  }
+  return g;
+}
+
+/** Hände als SVG: bild = [[Finger], …]; seite (nur eine Hand): 0 links, 1 rechts. */
+function haendeSvg(bild, seite, tippen) {
+  const zwei = bild.length === 2;
+  const svg = svgEl("svg", { viewBox: zwei ? "0 0 320 170" : "0 0 160 170", class: "fz-haende" + (zwei ? " zwei" : ""), role: "img",
+    "aria-label": `${anzahl(bild)} Finger` });
+  if (zwei) bild.forEach((f, i) => svg.append(hand(f, i === 1, tippen && (x => tippen(i, x)))));
+  else {
+    const g = hand(bild[0], seite === 1, tippen && (x => tippen(0, x)));
+    if (seite === 1) g.setAttribute("transform", "translate(160,0) scale(-1,1)");
+    svg.append(g);
+  }
+  return svg;
+}
+
+const wuerfel = (n, gross) => el("div", { class: "fz-wuerfel" + (gross ? " gross" : "") }, ...Array.from({ length: 9 }, (_, i) => el("i", { class: WUERFEL[n].includes(i) ? "p" : "" })));
+const zehner = (n, gross) => el("div", { class: "fz-zehner" + (gross ? " gross" : "") }, ...Array.from({ length: 10 }, (_, i) => el("i", { class: i < n ? "p" : "" })));
+const ziffer = n => el("span", { class: "fz-ziffer", text: String(n) });
+const darstellen = (art, n, gross) => (art === "wuerfel" ? wuerfel(n, gross) : art === "zehner" ? zehner(n, gross) : ziffer(n));
+
+/** Antwortknöpfe mit aria-label (sie zeigen nur Bilder oder Ziffern); hängt sie an ctx.flaeche. */
+function antworten(ctx, a, inhalt, label, hinweis, loesung, breite = 90) {
+  const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite, inhalt, hinweis, loesung });
+  box.classList.add("fz-wahl");
+  Array.from(box.querySelectorAll(".wahl-knopf")).forEach((k, i) => k.setAttribute("aria-label", label(a.optionen[i])));
+}
+
+const HINWEIS = {
+  wieviele: "Eine ganze Hand hat fünf Finger. Schau, welche Finger offen sind.",
+  fehlen: "Zähl die eingeklappten Finger. Eine ganze Hand sind fünf.",
+  blitz: "Denk an das Bild: Waren es mehr oder weniger als eine ganze Hand?",
+  gleich: "Vergleiche: Eine ganze Hand sind fünf, ein volles Zehnerfeld sind zehn.",
+};
+
+LS.spiel({
+  id: "finger-zaehler",
+  einleitung: "Wie viele Finger sind es? Schau auf die Hände — und zeig es auch mit deinen eigenen!",
+  anzahl: 8,
+  stufen: {
+    s1: "Eine Hand, 1 bis 3 Finger: Wie viele? Zeig mit dem Finger! Antwort als Punkte.",
+    s2: "Eine Hand, 1 bis 5 Finger.",
+    s3: "Zwei Hände bis 10: Wie viele Finger? Zeig 7!",
+    s4: "Hand, Würfel, Zehnerfeld oder Zahl — was zeigt gleich viele?",
+    s5: "Kraft der Fünf: Wie viele Finger fehlen bis 10?",
+    s6: "Endgegner: Die Hände blitzen nur kurz auf!",
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s6" ? "Schau ganz schnell — die Hände sind gleich weg!" : "Eine ganze Hand hat fünf Finger. Mach mit deinen Händen mit!");
+    const a = aufgabeErzeugen(ctx.stufe);
+    const s = STUFE[ctx.stufe];
+    if (new Set(s.arten).size > 1) ctx.serie("art", a.art);
+    if (ctx.stufe === "s1" && a.art === "wieviele") ctx.serie("antwort", a.richtig);
+    const f = ctx.flaeche;
+
+    if (a.art === "zeigen" || a.art === "zeigenRest") {
+      const ziel = a.art === "zeigen" ? a.n : a.ziel;
+      ctx.kennung(`${a.art}|${a.n}|${a.hand}|${a.bild ? bildText(a.bild) : ""}`);
+      const loesung = a.art === "zeigen"
+        ? `Zeig ${ziel} Finger${ziel <= 5 ? `: ${FINGER.slice(0, ziel).join(", ")}` : `: eine ganze Hand und ${ziel - 5} Finger`}.`
+        : ziel === 1 ? "Bis 10 fehlt 1 Finger." : `Bis 10 fehlen ${ziel} Finger.`;
+      ctx.loesung(loesung);
+      ctx.schritte(a.tipps);
+      f.append(el("div", { class: "auftrag", text: a.art === "zeigen" ? `Zeig ${ziel} Finger! Tipp die Finger an.` : "Wie viele Finger fehlen bis zehn? Zeig sie unten mit den Fingern!" }));
+      if (a.art === "zeigen") {
+        // Ziel: in Stufe 1 als Punktbild, in Stufe 2 Ziffer und Punkte, danach Ziffer
+        const zielBild = el("div", { class: "fz-ziel", "aria-label": `${ziel}` });
+        if (s.antwort !== "ziffer") zielBild.append(wuerfel(ziel, true));
+        if (s.antwort !== "punkte") zielBild.append(ziffer(ziel));
+        f.append(zielBild);
+      } else f.append(haendeSvg(a.bild));
+      // Alle Finger zu; Tippen klappt einzelne Finger auf oder zu (gestrichelter Umriss = hier tippen).
+      const finger = Array.from({ length: a.haende }, () => []);
+      const feld = el("div", { class: "fz-feld" });
+      f.append(feld);
+      const zeichne = () => {
+        feld.replaceChildren(haendeSvg(finger, a.hand, (h, x) => {
+          if (ctx.vorbei()) return;
+          if (x === "flaeche") { ctx.sag("Tipp auf einen Finger — dort, wo der gestrichelte Finger ist.", "hinweis"); return; }
+          finger[h] = finger[h].includes(x) ? finger[h].filter(i => i !== x) : [...finger[h], x].sort();
+          LS.ton("tipp");
+          zeichne();
+          const n = anzahl(finger);
+          if (n === ziel) ctx.richtig(ziel <= 5 ? `Ja, das sind ${ZAHLWORT[ziel]}!` : `Super, ${ZAHLWORT[ziel]} Finger!`);
+          else if (n > ziel) ctx.sag("Das sind zu viele. Klapp einen Finger wieder ein.", "hinweis");
+        }));
+      };
+      zeichne();
+      return;
+    }
+
+    if (a.art === "bildZuHand") {
+      ctx.kennung(`${a.art}|${a.darstellung}|${a.n}|${a.optionen.join("/")}`);
+      const loesung = `Gleich viele: ${a.n} Finger.`;
+      f.append(el("div", { class: "auftrag", text: "Welche Hände zeigen gleich viele?" }),
+        el("div", { class: "fz-ziel", "aria-label": `${a.n}` }, darstellen(a.darstellung, a.n, true)));
+      antworten(ctx, a, o => haendeSvg(a.bilder[a.optionen.indexOf(o)]), o => `${anzahl(a.bilder[a.optionen.indexOf(o)])} Finger`, HINWEIS.gleich, loesung, 180);
+      if (ctx.stufe === "s4") ctx.serie("darstellung", a.darstellung);
+      return;
+    }
+
+    // Hände zeigen, Anzahl wählen
+    ctx.kennung(`${a.art}|${bildText(a.bild)}|${a.hand}|${a.darstellung || ""}`);
+    const frage = {
+      wieviele: "Wie viele Finger sind das?",
+      handZuBild: "Was zeigt gleich viele wie die Hände?",
+      fehlen: "Wie viele Finger fehlen bis zehn?",
+      blitz: "Wie viele Finger waren es?",
+      blitzFehlen: "Wie viele Finger fehlten bis zehn?",
+    }[a.art];
+    const loesung = a.art === "fehlen" || a.art === "blitzFehlen" ? `${a.n === 1 ? "1 Finger ist" : `${a.n} Finger sind`} offen, bis 10 ${a.richtig === 1 ? "fehlt 1" : `fehlen ${a.richtig}`}.`
+      : a.n === 1 ? "Es ist 1 Finger." : `Es sind ${a.n} Finger.`;
+    const feld = el("div", { class: "fz-feld" }, haendeSvg(a.bild, a.hand));
+    f.append(el("div", { class: "auftrag", text: frage }), feld);
+    if (s.blitz) {
+      // Erst wenn das Kind bereit ist: ▶ Los, 3-2-1, dann blitzen die Hände (LS.losGehts, Wunsch Patrik LERN_Session8)
+      const zu = () => { if (f.contains(feld)) feld.classList.add("verdeckt"); };
+      LS.losGehts(ctx, feld, () => setTimeout(zu, s.blitz));
+    }
+    const art = a.art === "handZuBild" ? a.darstellung : s.antwort;
+    const inhalt = o => (art === "punkte" ? wuerfel(o) : art === "beides" ? el("span", { class: "fz-beides" }, ziffer(o), wuerfel(o)) : darstellen(art, o));
+    const hinweis = a.art === "handZuBild" ? HINWEIS.gleich : a.art.startsWith("blitz") ? HINWEIS.blitz : a.art === "fehlen" ? HINWEIS.fehlen : HINWEIS.wieviele;
+    antworten(ctx, a, inhalt, o => String(o), hinweis, loesung);
+  },
+});
+</script>
+</body>
+</html>

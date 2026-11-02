@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teddy-Versteck</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .teddy-spiel .auftrag { margin-bottom: 12px; }
+  /* Grosse Szene: Bild und darüber die Plätze zum Antippen (in Prozent der Szene) */
+  .szene { position: relative; width: 100%; max-width: 520px; margin: 0 auto 6px; border-radius: 18px; overflow: hidden; background: #fbf8f2; box-shadow: 0 4px 0 var(--rand); }
+  .szene-bild, .szene-bild svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .platz { position: absolute; width: 20%; aspect-ratio: 1; border-radius: 50%; padding: 0; cursor: pointer;
+    border: 4px dashed var(--deko-6); background: rgba(255, 255, 255, .3); box-shadow: 0 0 0 3px rgba(255, 255, 255, .6); }
+  .platz:active { transform: scale(.94); }
+  .platz.falsch { border-color: var(--hinweis); background: var(--hinweis-hell); animation: wackeln .4s; }
+  .szene.fertig .platz { opacity: 0; pointer-events: none; transition: opacity .3s; }
+  /* Kleine Szenen als Bildknöpfe */
+  .teddy-spiel .wahl-knopf { padding: 6px; min-height: 64px; }
+  .mini { width: 100%; border-radius: 12px; overflow: hidden; background: #fbf8f2; }
+  .mini svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧸 Teddy-Versteck</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.8.4.a: Lage und Richtung beschreiben (links/rechts, oben/unten, vorne/hinten) —
+// Stufen 1–4. MA.2.A.1.c (Grundanspruch 1. Zyklus): Raumlagen „zwischen, neben, auf, über, unter,
+// innerhalb, ausserhalb, in der Mitte, vor, hinter, links, rechts“ — Stufen 3–6.
+// Basisklasse 1: s1 Kindergarten (auf, unter, in, neben), s2–s4 1. Klasse (vor, hinter, über, oben,
+// unten; zwischen, in der Mitte; links und rechts von dir aus), s5 2. Klasse (zwei Angaben, innerhalb,
+// ausserhalb), s6 Königsstufe (Regal mit neun Fächern, Lage zu anderen Spielsachen).
+// Ohne Lesen spielbar: Die Eule liest den Auftrag vor; Antworten sind Bilder oder Plätze in der Szene.
+// Anderes Niveau als Kompass und Plan-Leser (Basisklasse 3/4: Himmelsrichtungen, Pläne).
+
+const { waehle, mische, el } = LS;
+
+const B = 320;     // Breite jeder Szene (viewBox)
+const BODEN = 180; // Boden der gewöhnlichen Szene (Höhe 200)
+const PUNKT = 64;  // Durchmesser eines Platzes zum Antippen, in Einheiten der Szene (20 % der Breite)
+
+// Dinge: Fall im Satz und halbe Breite (w) bei Grösse 1.
+const DINGE = {
+  tisch: { dat: "dem Tisch", akk: "den Tisch", w: 65 },
+  kiste: { dat: "der Kiste", akk: "die Kiste", w: 55 },
+  bett:  { dat: "dem Bett", akk: "das Bett", w: 84 },
+  stuhl: { dat: "dem Stuhl", akk: "den Stuhl", w: 35 },
+  baum:  { dat: "dem Baum", akk: "den Baum", w: 60 },
+  regal: { dat: "dem Regal", akk: "das Regal", w: 60 },
+  reif:  { w: 70 },
+};
+// Mehrzahl (zwischen) und Formen mit „links/rechts“ als Eigenschaft (zwei gleiche Dinge).
+const ZWEI = {
+  kiste: { dat: "den zwei Kisten", akk: "die zwei Kisten" },
+  stuhl: { dat: "den zwei Stühlen", akk: "die zwei Stühle" },
+  baum:  { dat: "den zwei Bäumen", akk: "die zwei Bäume" },
+};
+const SEITE = {
+  kiste: { links: { dat: "der linken Kiste", akk: "die linke Kiste" }, rechts: { dat: "der rechten Kiste", akk: "die rechte Kiste" } },
+  stuhl: { links: { dat: "dem linken Stuhl", akk: "den linken Stuhl" }, rechts: { dat: "dem rechten Stuhl", akk: "den rechten Stuhl" } },
+};
+
+// Wo der Teddy steht: [dx, Höhe der Füsse über dem Boden, Grösse, Extras] bei Grösse 1 des Dings.
+// hinten: hinter dem Ding gezeichnet; nurBild: als Platz nicht unterscheidbar (vor/hinter), nur im Bild;
+// platz: Höhe der Platzmitte über dem Boden, wenn sie nicht die Mitte des Teddys ist.
+const POSEN = {
+  tisch: { auf: [0, 70, .9], unter: [0, 0, .9], "neben-l": [-95, 0, .9], "neben-r": [95, 0, .9], ueber: [0, 100, .9, { ballon: true }] },
+  kiste: { auf: [0, 84, .9], in: [0, 64, .9, { hinten: true, platz: 35 }], "neben-l": [-85, 0, .9], "neben-r": [85, 0, .9],
+    vor: [0, -14, 1, { nurBild: true }], hinter: [60, 20, .85, { hinten: true, nurBild: true }], ueber: [0, 112, .9, { ballon: true }] },
+  bett:  { auf: [15, 66, .9], unter: [0, 0, .8], "neben-l": [-115, 0, .9], "neben-r": [115, 0, .9], ueber: [10, 98, .9, { ballon: true }] },
+  stuhl: { auf: [-5, 75, .9], unter: [-2, 0, .8], "neben-l": [-68, 0, .9], "neben-r": [72, 0, .9], ueber: [-8, 108, .9, { ballon: true }] },
+  baum:  { auf: [18, 100, .9], unter: [42, 0, .9], "neben-l": [-108, 0, .9], "neben-r": [108, 0, .9],
+    vor: [0, -14, 1, { nurBild: true }], hinter: [20, 8, .85, { hinten: true, nurBild: true }] },
+  regal: { oben: [0, 74, .9], unten: [0, 3, .9], "neben-l": [-92, 0, .9], "neben-r": [92, 0, .9] },
+  reif:  { innen: [0, 8, .9], "aussen-l": [-115, 10, .9], "aussen-r": [115, 10, .9] },
+};
+
+/** Lage des Teddys (Füsse x, y; Grösse s) und Mitte des Platzes (zx, zy) für Ding d. */
+function pose(d, wo, boden = BODEN) {
+  const [dx, hoehe, gr, extra = {}] = POSEN[d.art][wo];
+  const s = gr * d.s;
+  const y = boden - hoehe * d.s;
+  return { x: d.x + dx * d.s, y, s, hinten: !!extra.hinten, ballon: !!extra.ballon, nurBild: !!extra.nurBild,
+    zx: d.x + dx * d.s, zy: extra.platz !== undefined ? boden - extra.platz * d.s : y - 25 * s };
+}
+
+// ---------- Sätze (vorgelesen) ----------
+// [wo: „Der Teddy …“ für die Bildwahl, wohin: „Setz den Teddy …“ für den Platz, oder null]
+const SATZ = {
+  auf: T => [`Der Teddy sitzt auf ${T.dat}.`, `Setz den Teddy auf ${T.akk}.`],
+  unter: T => [`Der Teddy versteckt sich unter ${T.dat}.`, `Setz den Teddy unter ${T.akk}.`],
+  in: T => [`Der Teddy sitzt in ${T.dat}.`, `Setz den Teddy in ${T.akk}.`],
+  neben: T => [`Der Teddy steht neben ${T.dat}.`, `Stell den Teddy neben ${T.akk}.`],
+  links: T => [`Der Teddy steht links neben ${T.dat}.`, `Stell den Teddy links neben ${T.akk}.`],
+  rechts: T => [`Der Teddy steht rechts neben ${T.dat}.`, `Stell den Teddy rechts neben ${T.akk}.`],
+  vor: T => [`Der Teddy steht vor ${T.dat}.`, null],
+  hinter: T => [`Der Teddy versteckt sich hinter ${T.dat}.`, null],
+  ueber: T => [`Der Teddy schwebt über ${T.dat}.`, `Lass den Teddy über ${T.dat} schweben.`],
+  oben: () => ["Der Teddy sitzt im oberen Fach.", "Setz den Teddy ins obere Fach."],
+  unten: () => ["Der Teddy sitzt im unteren Fach.", "Setz den Teddy ins untere Fach."],
+};
+const b = (rel, key, [wo, wohin]) => ({ rel, key, wo, wohin });
+
+// Hinweise nach einer falschen Wahl: erklären das Wort, ohne auf einen Platz zu zeigen.
+const HINWEIS = {
+  auf: "Auf heisst: oben drauf. Der Teddy berührt es.",
+  unter: "Unter heisst: darunter. Über dem Kopf vom Teddy ist etwas.",
+  in: "In heisst: drinnen. Vom Teddy sieht man nur noch den Kopf.",
+  neben: "Neben heisst: gleich daneben, auf dem Boden.",
+  vor: "Vor heisst: näher bei dir. Der Teddy verdeckt ein Stück davon.",
+  hinter: "Hinter heisst: weiter weg. Vom Teddy sieht man nur noch ein Stück.",
+  ueber: "Über heisst: weiter oben in der Luft. Der Teddy berührt es nicht.",
+  oben: "Oben ist nah bei der Decke, unten nah beim Boden.",
+  unten: "Unten ist nah beim Boden, oben nah bei der Decke.",
+  zwischen: "Zwischen heisst: Auf beiden Seiten vom Teddy steht etwas.",
+  mitte: "In der Mitte heisst: Links und rechts davon ist gleich viel.",
+  links: "Halte beide Hände hoch und streck Daumen und Zeigefinger aus. Die Hand, die ein L zeigt, ist links.",
+  rechts: "Halte beide Hände hoch und streck Daumen und Zeigefinger aus. Die Hand, die ein L zeigt, ist links — die andere rechts.",
+  innen: "Innerhalb heisst: drinnen im Reif.",
+  aussen: "Ausserhalb heisst: draussen, nicht im Reif.",
+  welches: "Hör noch einmal genau zu: Welches Ding ist gemeint, das linke oder das rechte? Und wo dort?",
+  fach: "Such zuerst das Spielzeug. Dann schau, welches Fach daneben, darüber oder darunter ist.",
+  ecke: "Oben ist die oberste Reihe, unten die unterste. Links und rechts: Denk an das L deiner linken Hand.",
+};
+
+// ---------- Szenen: Dinge und mögliche Plätze mit ihren Beschreibungen ----------
+
+/** Ein Ding in der Mitte; „neben“ zählt links und rechts, ab Stufe 4 auch „links/rechts neben“. */
+function einzeln(art) {
+  const d = { art, x: 160, s: 1 };
+  const T = DINGE[art];
+  const spots = Object.keys(POSEN[art]).map(wo => {
+    const p = pose(d, wo);
+    if (wo === "neben-l") return { pose: p, beschr: [b("neben", "neben", SATZ.neben(T)), b("links", "links", SATZ.links(T))] };
+    if (wo === "neben-r") return { pose: p, beschr: [b("neben", "neben", SATZ.neben(T)), b("rechts", "rechts", SATZ.rechts(T))] };
+    return { pose: p, beschr: [b(wo, wo, SATZ[wo](T))] };
+  });
+  return { szene: { h: 200, dinge: [d] }, spots };
+}
+
+/** Zwei gleiche Dinge mit Platz dazwischen; die übrigen Plätze sind nur zum Ablenken da. */
+function zwischen(art) {
+  const s = { kiste: .7, stuhl: .85, baum: .55 }[art];
+  const d0 = { art, x: 95, s }, d1 = { art, x: 225, s };
+  const mitte = { x: 160, y: BODEN, s: .9 * s, zx: 160, zy: BODEN - 25 * .9 * s };
+  const spots = [
+    { pose: mitte, beschr: [b("zwischen", "zwischen", [`Der Teddy steht zwischen ${ZWEI[art].dat}.`, `Stell den Teddy zwischen ${ZWEI[art].akk}.`])] },
+    { pose: pose(d0, "neben-l"), beschr: [] },
+    { pose: pose(d1, "neben-r"), beschr: [] },
+    { pose: pose(waehle([d0, d1]), "auf"), beschr: [] },
+  ];
+  return { szene: { h: 200, dinge: [d0, d1] }, spots };
+}
+
+/** Drei gleiche Dinge in einer Reihe: in (Kisten) oder auf (Stühlen) dem mittleren. */
+function mitteReihe(art) {
+  const dinge = [60, 160, 260].map(x => ({ art, x, s: .6 }));
+  const wo = art === "kiste" ? "in" : "auf";
+  const satz = art === "kiste"
+    ? ["Der Teddy sitzt in der Kiste in der Mitte.", "Setz den Teddy in die Kiste in der Mitte."]
+    : ["Der Teddy sitzt auf dem Stuhl in der Mitte.", "Setz den Teddy auf den Stuhl in der Mitte."];
+  const spots = dinge.map((d, i) => ({ pose: pose(d, wo), beschr: i === 1 ? [b("mitte", "mitte", satz)] : [] }));
+  return { szene: { h: 200, dinge }, spots };
+}
+
+/** Zwei gleiche Dinge: auf/in der linken oder rechten Kiste, auf/unter dem linken oder rechten Stuhl. */
+function linkesRechtes(art) {
+  const xs = art === "kiste" ? [85, 235] : [90, 230];
+  const dinge = xs.map(x => ({ art, x, s: 1 }));
+  const rels = art === "kiste" ? ["in", "auf"] : ["auf", "unter"];
+  const spots = [];
+  dinge.forEach((d, i) => {
+    const seite = i === 0 ? "links" : "rechts";
+    for (const rel of rels) spots.push({ pose: pose(d, rel), beschr: [b("welches", `${rel}@${seite}`, SATZ[rel](SEITE[art][seite]))] });
+  });
+  return { szene: { h: 200, dinge }, spots };
+}
+
+/** Kiste und Stuhl nebeneinander: links neben, rechts neben, zwischen (zwei Angaben). */
+function zweiDinge() {
+  const [li, re] = mische([{ art: "kiste", s: .8 }, { art: "stuhl", s: .85 }]);
+  // So weit vom Rand, dass die Plätze links und rechts aussen noch ganz in der Szene liegen.
+  li.x = PUNKT / 2 - POSEN[li.art]["neben-l"][0] * li.s;
+  re.x = B - PUNKT / 2 - POSEN[re.art]["neben-r"][0] * re.s;
+  const L = DINGE[li.art], R = DINGE[re.art];
+  const innen = ((li.x + DINGE[li.art].w * li.s) + (re.x - DINGE[re.art].w * re.s)) / 2;
+  const sm = .9 * Math.min(li.s, re.s);
+  const mitte = { x: innen, y: BODEN, s: sm, zx: innen, zy: BODEN - 25 * sm };
+  const spots = [
+    { pose: pose(li, "neben-l"), beschr: [b("links", "links@L", SATZ.links(L))] },
+    { pose: mitte, beschr: [b("rechts", "rechts@L", SATZ.rechts(L)), b("links", "links@R", SATZ.links(R)),
+      b("zwischen", "zwischen", [`Der Teddy steht zwischen ${L.dat} und ${R.dat}.`, `Stell den Teddy zwischen ${L.akk} und ${R.akk}.`])] },
+    { pose: pose(re, "neben-r"), beschr: [b("rechts", "rechts@R", SATZ.rechts(R))] },
+    { pose: pose(li, "auf"), beschr: [b("auf", "auf@L", SATZ.auf(L))] },
+    { pose: pose(re, "auf"), beschr: [b("auf", "auf@R", SATZ.auf(R))] },
+  ];
+  return { szene: { h: 200, dinge: [li, re] }, spots };
+}
+
+/** Reif am Boden: innerhalb, ausserhalb (links oder rechts). */
+function reif() {
+  const d = { art: "reif", x: 160, s: 1 };
+  const aussen = seite => [
+    b("aussen", "aussen", ["Der Teddy steht ausserhalb des Reifs.", "Stell den Teddy ausserhalb des Reifs hin."]),
+    b("aussen", `aussen-${seite}`, seite === "l"
+      ? ["Der Teddy steht ausserhalb des Reifs, auf der linken Seite.", "Stell den Teddy ausserhalb des Reifs hin, auf die linke Seite."]
+      : ["Der Teddy steht ausserhalb des Reifs, auf der rechten Seite.", "Stell den Teddy ausserhalb des Reifs hin, auf die rechte Seite."]),
+  ];
+  const spots = [
+    { pose: pose(d, "innen"), beschr: [b("innen", "innen", ["Der Teddy steht innerhalb des Reifs.", "Stell den Teddy innerhalb des Reifs hin."])] },
+    { pose: pose(d, "aussen-l"), beschr: aussen("l") },
+    { pose: pose(d, "aussen-r"), beschr: aussen("r") },
+  ];
+  return { szene: { h: 200, dinge: [d] }, spots };
+}
+
+// Königsstufe: Regal mit 3 × 3 Fächern, drei Spielsachen darin; der Teddy kommt in ein leeres Fach.
+const SPIELSACHEN = [
+  { bild: "⚽", dat: "dem Ball" }, { bild: "🚗", dat: "dem Auto" },
+  { bild: "🥁", dat: "der Trommel" }, { bild: "🦆", dat: "der Ente" },
+];
+const FACH = 70, RX = 55, RY = 12, REGAL_BODEN = 232;
+const fachMitte = i => ({ zx: RX + FACH / 2 + FACH * (i % 3), zy: RY + FACH / 2 + FACH * Math.floor(i / 3) });
+const ECKEN = { 0: "oben links", 2: "oben rechts", 6: "unten links", 8: "unten rechts" };
+
+function regal3() {
+  const faecher = mische([...Array(9).keys()]);
+  const sachen = mische(SPIELSACHEN).slice(0, 3).map((s, k) => ({ ...s, fach: faecher[k] }));
+  const bei = (r, c) => (r < 0 || r > 2 || c < 0 || c > 2 ? null : sachen.find(s => s.fach === r * 3 + c) || null);
+  const spots = [];
+  for (let i = 0; i < 9; i++) {
+    if (sachen.some(s => s.fach === i)) continue;
+    const r = Math.floor(i / 3), c = i % 3;
+    const m = fachMitte(i);
+    const p = { x: m.zx, y: RY + FACH * (r + 1) - 4, s: .8, ...m };
+    const beschr = [];
+    const fach = (key, rel, was) => beschr.push(b(rel, key, [`Der Teddy sitzt im Fach ${was}.`, `Setz den Teddy ins Fach ${was}.`]));
+    const o = bei(r - 1, c), u = bei(r + 1, c), l = bei(r, c - 1), re = bei(r, c + 1);
+    if (o) fach(`unter@${o.bild}`, "fach", `unter ${o.dat}`);
+    if (u) fach(`ueber@${u.bild}`, "fach", `über ${u.dat}`);
+    if (re) fach(`links@${re.bild}`, "fach", `links neben ${re.dat}`);
+    if (l) fach(`rechts@${l.bild}`, "fach", `rechts neben ${l.dat}`);
+    if (l && re) fach(`zwischen@${l.bild}${re.bild}`, "fach", `zwischen ${l.dat} und ${re.dat}`);
+    if (o && u) fach(`zwischen@${o.bild}${u.bild}`, "fach", `zwischen ${o.dat} und ${u.dat}`);
+    if (ECKEN[i]) fach(`ecke@${i}`, "ecke", ECKEN[i]);
+    if (i === 4) fach("mitte@regal", "mitte", "in der Mitte");
+    spots.push({ pose: p, beschr });
+  }
+  return { szene: { h: 240, boden: REGAL_BODEN, regal3: true, dinge: [], sachen }, spots };
+}
+
+// ---------- Stufen ----------
+// typen: Bildwahl und/oder Platz; szenen: [Erzeuger, Gewicht]; rels: erlaubte Beschreibungen;
+// neu: was diese Stufe dazubringt (kommt öfter als Ziel); n: Zahl der Antworten.
+const S1 = ["auf", "unter", "in", "neben"];
+const S2 = [...S1, "vor", "hinter", "ueber", "oben", "unten"];
+const S3 = [...S2, "zwischen", "mitte"];
+const EINZELN_1 = ["tisch", "kiste", "bett", "stuhl"];
+const EINZELN_2 = [...EINZELN_1, "baum", "regal"];
+const STUFE = {
+  s1: { typen: ["bild", "legen"], n: 2, rels: S1, szenen: [[() => einzeln(waehle(EINZELN_1)), 1]] },
+  s2: { typen: ["bild", "legen"], n: 3, rels: S2, neu: ["vor", "hinter", "ueber", "oben", "unten"],
+    szenen: [[() => einzeln(waehle(EINZELN_2)), 1]] },
+  s3: { typen: ["bild", "legen"], n: 3, rels: S3, neu: ["zwischen", "mitte"],
+    szenen: [[() => einzeln(waehle(EINZELN_2)), 4], [() => zwischen(waehle(["kiste", "stuhl", "baum"])), 3], [() => mitteReihe(waehle(["kiste", "stuhl"])), 3]] },
+  s4: { typen: ["bild", "legen"], n: 3, rels: [...S3, "links", "rechts"], neu: ["links", "rechts"], neuAnteil: .75,
+    szenen: [[() => einzeln(waehle(EINZELN_2)), 8], [() => zwischen(waehle(["kiste", "stuhl", "baum"])), 1], [() => mitteReihe(waehle(["kiste", "stuhl"])), 1]] },
+  s5: { typen: ["bild", "legen"], n: 4, rels: ["welches", "links", "rechts", "zwischen", "auf", "innen", "aussen"],
+    neu: ["welches", "links", "rechts", "innen", "aussen"], neuAnteil: .85,
+    szenen: [[() => linkesRechtes(waehle(["kiste", "stuhl"])), 4], [zweiDinge, 3], [reif, 3]] },
+  s6: { typen: ["legen"], n: 9, rels: ["fach", "ecke", "mitte"], neu: ["fach"], neuAnteil: .8, szenen: [[regal3, 1]] },
+};
+
+function gewichtet(liste) {
+  let r = Math.random() * liste.reduce((a, [, g]) => a + g, 0);
+  for (const [x, g] of liste) if ((r -= g) < 0) return x;
+  return liste[0][0];
+}
+const abstand = (p, q) => Math.hypot(p.zx - q.zx, p.zy - q.zy);
+const imBild = (p, h) => p.zx >= PUNKT / 2 && p.zx <= B - PUNKT / 2 && p.zy >= PUNKT / 2 - 8 && p.zy <= h - PUNKT / 2 + 8;
+
+function aufgabeErzeugen(stufe) {
+  const st = STUFE[stufe];
+  for (let versuch = 0; versuch < 200; versuch++) {
+    const typ = waehle(st.typen);
+    const { szene, spots } = gewichtet(st.szenen)();
+    const erlaubt = x => st.rels.includes(x.rel);
+    const nutzbar = spots.filter(sp => typ === "bild" || (!sp.pose.nurBild && imBild(sp.pose, szene.h)));
+    const kandidaten = nutzbar.flatMap(sp => sp.beschr.filter(x => erlaubt(x) && (typ === "bild" || x.wohin)).map(x => ({ sp, x })));
+    if (!kandidaten.length) continue;
+    const neue = kandidaten.filter(k => (st.neu || []).includes(k.x.rel));
+    const { sp: ziel, x } = waehle(neue.length && Math.random() < (st.neuAnteil ?? .6) ? neue : kandidaten);
+    // Ablenker: kein anderer Platz darf zur Beschreibung passen; nur Lagen, die die Stufe kennt.
+    const andere = mische(nutzbar.filter(sp => sp !== ziel && !sp.beschr.some(y => y.key === x.key)
+      && (!sp.beschr.length || sp.beschr.some(erlaubt))));
+    const gewaehlt = [ziel];
+    for (const sp of andere) {
+      if (gewaehlt.length >= st.n) break;
+      if (typ === "legen" && gewaehlt.some(g => abstand(g.pose, sp.pose) < PUNKT)) continue;
+      gewaehlt.push(sp);
+    }
+    if (gewaehlt.length < 2) continue;
+    const optionen = mische(gewaehlt);
+    return {
+      typ, szene, rel: x.rel, key: x.key, satz: typ === "bild" ? x.wo : x.wohin, loesung: x.wo,
+      optionen: optionen.map(sp => ({ pose: sp.pose, keys: sp.beschr.map(y => y.key) })),
+      ziel: optionen.indexOf(ziel),
+    };
+  }
+  throw new Error("Keine Aufgabe gefunden für " + stufe);
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const st = STUFE[stufe];
+  if (!st.typen.includes(a.typ)) m.push("Aufgabenart gehört nicht in diese Stufe");
+  if (!st.rels.includes(a.rel)) m.push("Lage gehört nicht in diese Stufe");
+  if (a.optionen.length < 2 || a.optionen.length > st.n) m.push(`${a.optionen.length} Antworten`);
+  if (stufe === "s1" && a.optionen.length > 2) m.push("Kindergarten: mehr als 2 Antworten");
+  const passend = a.optionen.map((o, i) => (o.keys.includes(a.key) ? i : -1)).filter(i => i >= 0);
+  if (passend.length !== 1 || passend[0] !== a.ziel) m.push("nicht genau eine passende Antwort");
+  if (!a.satz || !a.loesung) m.push("Satz fehlt");
+  const lagen = a.optionen.map(o => `${o.pose.x}|${o.pose.y}|${o.pose.s}|${o.pose.hinten}`);
+  if (new Set(lagen).size !== lagen.length) m.push("zwei gleiche Bilder");
+  if (a.typ === "legen") {
+    a.optionen.forEach((o, i) => {
+      if (o.pose.nurBild) m.push("Platz für vor/hinter (nicht unterscheidbar)");
+      if (!imBild(o.pose, a.szene.h)) m.push("Platz ragt aus der Szene");
+      for (const q of a.optionen.slice(i + 1)) if (abstand(o.pose, q.pose) < PUNKT) m.push("Plätze überdecken sich");
+    });
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+const HOLZ = "#c58b4e", HOLZ_D = "#94612f", FELL = "#b5793f", FELL_H = "#e6c193", AUGE = "#3b2614";
+
+function teddySvg(p) {
+  const ballon = p.ballon
+    ? `<path d="M7,-24 L27,-56" style="stroke:#666;stroke-width:1.5;fill:none"/><ellipse cx="28" cy="-67" rx="10" ry="12" style="fill:var(--deko-2)"/>`
+    : "";
+  return `<g transform="translate(${p.x} ${p.y}) scale(${p.s})">${ballon}`
+    + `<ellipse cx="-7" cy="-3" rx="7" ry="4" style="fill:${HOLZ_D}"/><ellipse cx="7" cy="-3" rx="7" ry="4" style="fill:${HOLZ_D}"/>`
+    + `<ellipse cx="0" cy="-16" rx="13" ry="15" style="fill:${FELL}"/><ellipse cx="0" cy="-14" rx="7" ry="8" style="fill:${FELL_H}"/>`
+    + `<circle cx="-13" cy="-22" r="5" style="fill:${FELL}"/><circle cx="13" cy="-22" r="5" style="fill:${FELL}"/>`
+    + `<circle cx="-9" cy="-45" r="5" style="fill:${FELL}"/><circle cx="9" cy="-45" r="5" style="fill:${FELL}"/>`
+    + `<circle cx="0" cy="-36" r="11" style="fill:${FELL}"/><ellipse cx="0" cy="-32" rx="5" ry="4" style="fill:${FELL_H}"/>`
+    + `<circle cx="0" cy="-34" r="1.8" style="fill:${AUGE}"/><circle cx="-4" cy="-39" r="1.6" style="fill:${AUGE}"/><circle cx="4" cy="-39" r="1.6" style="fill:${AUGE}"/></g>`;
+}
+
+function dingSvg(d, boden) {
+  const t = `transform="translate(${d.x} ${boden}) scale(${d.s})"`;
+  const r = (x, y, w, h, f, extra = "") => `<rect x="${x}" y="${y}" width="${w}" height="${h}" ${extra} style="fill:${f}"/>`;
+  switch (d.art) {
+    case "tisch":
+      return `<g ${t}>${r(-58, -62, 8, 62, HOLZ_D)}${r(50, -62, 8, 62, HOLZ_D)}${r(-65, -70, 130, 10, HOLZ, 'rx="3"')}</g>`;
+    case "kiste":
+      return `<g ${t}><rect x="-55" y="-80" width="110" height="80" rx="4" style="fill:#d9a35f;stroke:${HOLZ_D};stroke-width:3"/>`
+        + `<path d="M-55,-53 H55 M-55,-27 H55" style="stroke:${HOLZ_D};stroke-width:2"/>${r(-58, -84, 116, 9, HOLZ_D, 'rx="3"')}</g>`;
+    case "bett":
+      return `<g ${t}>${r(-84, -100, 10, 100, HOLZ, 'rx="3"')}${r(-80, -44, 8, 44, HOLZ_D)}${r(72, -44, 8, 44, HOLZ_D)}`
+        + `${r(-80, -56, 160, 12, HOLZ_D, 'rx="3"')}${r(-74, -66, 152, 11, "#dbe5ff", 'rx="4"')}`
+        + `<ellipse cx="-56" cy="-69" rx="14" ry="6" style="fill:#fff;stroke:#cfd6e6"/>${r(-30, -68, 106, 14, "var(--deko-6)", 'rx="4"')}</g>`;
+    case "stuhl":
+      return `<g ${t}>${r(-32, -69, 6, 69, HOLZ_D)}${r(26, -69, 6, 69, HOLZ_D)}${r(-35, -75, 70, 7, HOLZ, 'rx="2"')}`
+        + `${r(28, -140, 7, 67, HOLZ_D, 'rx="2"')}${r(22, -137, 13, 26, HOLZ, 'rx="3"')}</g>`;
+    case "baum":
+      return `<g ${t}>${r(-15, -112, 30, 112, "#8b5a2b", 'rx="4"')}<circle cx="0" cy="-110" r="55" style="fill:#5cb85c"/>`
+        + `<circle cx="-32" cy="-92" r="28" style="fill:#4fa94f"/><circle cx="32" cy="-92" r="28" style="fill:#4fa94f"/></g>`;
+    case "regal":
+      return `<g ${t}><rect x="-60" y="-140" width="120" height="140" style="fill:#f0dfc0;stroke:${HOLZ_D};stroke-width:5"/>${r(-60, -74, 120, 6, HOLZ_D)}</g>`;
+    case "reif":
+      return `<g ${t}><ellipse cx="0" cy="-14" rx="70" ry="16" style="fill:none;stroke:var(--deko-5);stroke-width:6"/></g>`;
+  }
+  return "";
+}
+
+function regal3Svg(sz) {
+  let s = `<rect x="${RX}" y="${RY}" width="${FACH * 3}" height="${FACH * 3}" style="fill:#f0dfc0;stroke:${HOLZ_D};stroke-width:5"/>`;
+  for (let k = 1; k < 3; k++) {
+    s += `<rect x="${RX + FACH * k - 2.5}" y="${RY}" width="5" height="${FACH * 3}" style="fill:${HOLZ_D}"/>`;
+    s += `<rect x="${RX}" y="${RY + FACH * k - 2.5}" width="${FACH * 3}" height="5" style="fill:${HOLZ_D}"/>`;
+  }
+  s += `<rect x="${RX + 6}" y="${RY + FACH * 3}" width="8" height="${REGAL_BODEN - RY - FACH * 3}" style="fill:${HOLZ_D}"/>`;
+  s += `<rect x="${RX + FACH * 3 - 14}" y="${RY + FACH * 3}" width="8" height="${REGAL_BODEN - RY - FACH * 3}" style="fill:${HOLZ_D}"/>`;
+  for (const x of sz.sachen) {
+    const m = fachMitte(x.fach);
+    s += `<text x="${m.zx}" y="${m.zy + 4}" text-anchor="middle" dominant-baseline="middle" style="font-size:40px">${x.bild}</text>`;
+  }
+  return s;
+}
+
+/** Die ganze Szene als SVG; teddy: Lage oder null (noch nicht hingelegt). */
+function szeneSvg(sz, teddy) {
+  const h = sz.h, boden = sz.boden || BODEN;
+  let s = `<svg viewBox="0 0 ${B} ${h}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">`;
+  s += `<rect x="0" y="${boden}" width="${B}" height="${h - boden}" style="fill:#eadfcb"/>`;
+  if (teddy?.hinten) s += teddySvg(teddy);
+  for (const d of sz.dinge) s += dingSvg(d, boden);
+  if (sz.regal3) s += regal3Svg(sz);
+  if (teddy && !teddy.hinten) s += teddySvg(teddy);
+  return s + "</svg>";
+}
+
+const LOB = ["Gefunden! 🧸", "Genau dort! 🧸", "Super, der Teddy freut sich! 🧸", "Richtig! 🧸"];
+
+LS.spiel({
+  id: "teddy-versteck",
+  einleitung: "Der Teddy spielt Verstecken! Hör gut zu, wo er ist. Dann tipp auf das richtige Bild oder auf den richtigen Platz.",
+  anzahl: 8,
+  stufen: {
+    s1: "Auf, unter, in, neben: zwei Bilder oder zwei Plätze.",
+    s2: "Dazu vor, hinter, über, oben, unten: drei zur Wahl.",
+    s3: "Dazu zwischen und in der Mitte.",
+    s4: "Links und rechts — so, wie du es siehst.",
+    s5: "Zwei Angaben: „auf der linken Kiste“, „rechts neben dem Stuhl“; innerhalb und ausserhalb.",
+    s6: "Regal mit neun Fächern: „ins Fach unter dem Ball“.",
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Hör gut zu, wo der Teddy ist!");
+    const a = aufgabeErzeugen(ctx.stufe);
+    const st = STUFE[ctx.stufe];
+    if (st.typen.length > 1) ctx.serie("art", a.typ);
+    ctx.serie("lage", a.rel);
+    ctx.kennung(`${a.typ}|${a.szene.dinge.map(d => d.art + d.x).join(",")}|${(a.szene.sachen || []).map(x => x.bild + x.fach).join(",")}|${a.key}|${a.optionen.map(o => o.keys[0] || `${o.pose.x},${o.pose.y}`).sort().join(",")}`);
+    const hinweis = HINWEIS[a.rel === "fach" && /^ecke/.test(a.key) ? "ecke" : a.rel] || HINWEIS.welches;
+    const loesung = a.loesung;
+    const lob = waehle(LOB);
+    ctx.flaeche.classList.add("teddy-spiel");
+
+    if (a.typ === "bild") {
+      ctx.flaeche.append(el("div", { class: "auftrag", text: `Tipp auf das Bild: ${a.satz}` }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen.map((_, i) => i), richtig: a.ziel, breite: 130,
+        inhalt: i => el("div", { class: "mini", html: szeneSvg(a.szene, a.optionen[i].pose) }),
+        hinweis, loesung, lob,
+      });
+      // Nur Bilder: neutral benennen, sonst läse langes Drücken die Lösung vor.
+      for (const k of box.children) k.setAttribute("aria-label", "Bild mit Teddy");
+      return;
+    }
+
+    // Platz in der Szene antippen; der Teddy erscheint dort.
+    ctx.schritte(1);
+    ctx.loesung(loesung);
+    ctx.flaeche.append(el("div", { class: "auftrag", text: a.satz }));
+    const szene = el("div", { class: "szene" });
+    szene.style.aspectRatio = `${B} / ${a.szene.h}`;
+    const bild = el("div", { class: "szene-bild", html: szeneSvg(a.szene, null) });
+    szene.append(bild);
+    const zeige = p => { bild.innerHTML = szeneSvg(a.szene, p); szene.classList.add("fertig"); };
+    a.optionen.forEach((o, i) => {
+      const k = el("button", { type: "button", class: "platz", "aria-label": "hier" });
+      k.style.left = `${((o.pose.zx - PUNKT / 2) / B) * 100}%`;
+      k.style.top = `${((o.pose.zy - PUNKT / 2) / a.szene.h) * 100}%`;
+      k.addEventListener("click", () => {
+        if (ctx.vorbei() || k.classList.contains("falsch")) return;
+        if (i === a.ziel) { zeige(o.pose); ctx.richtig(lob); return; }
+        k.classList.add("falsch");
+        ctx.falsch(hinweis, loesung);
+        if (ctx.vorbei()) zeige(a.optionen[a.ziel].pose);
+      });
+      szene.append(k);
+    });
+    ctx.flaeche.append(szene);
+  },
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wort-Spürnase</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 10px; color: var(--text-leise); }
+  .frage b { color: var(--deko-3); }
+  .satz {
+    background: #fff; border: 3px solid var(--rand); border-radius: 18px; padding: 14px 18px; margin: 0 auto 14px;
+    max-width: 680px; font-size: clamp(19px, 4.2vw, 25px); line-height: 1.6; font-weight: 600;
+  }
+  .wsn-gesucht { color: var(--deko-3); font-weight: 900; border-bottom: 4px solid var(--deko-3); }
+  .wsn-hinweis.gezeigt { background: var(--gut-hell); box-shadow: 0 0 0 3px var(--gut); border-radius: 6px; }
+  .wsn-tipp {
+    border: none; border-radius: 10px; padding: 2px 6px; margin: 2px 1px; font: inherit; font-weight: 700;
+    background: var(--karte); color: var(--text); box-shadow: 0 3px 0 var(--rand); cursor: pointer;
+  }
+  .wsn-tipp.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .wsn-tipp.richtig { background: var(--gut-hell); box-shadow: 0 3px 0 var(--gut); }
+  .wsn-schritt { text-align: center; font-weight: 800; color: var(--deko-6); margin: 0 0 10px; font-size: clamp(16px, 3.6vw, 20px); }
+  .wsn-wahl .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>👃 Wort-Spürnase</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.2.B.1.f (Grundanspruch 2. Zyklus): „unbekannte Wörter aus dem Zusammenhang
+// erschliessen“; dasselbe beim Hören D.1.B.1.f (hier nur gelesen). Basisklasse 5: s1 4. Klasse
+// (Hinweis im selben Satz, bekanntere Wörter), s2–s4 5. Klasse (seltenere Wörter, Hinweis im nächsten
+// Satz), s5 6. Klasse (Fremdwörter, Gegensätze), s6 Königsstufe (Bedeutung wählen und den Hinweis im
+// Text selbst antippen). Nach jeder Antwort zeigt das Spiel, welches Wort im Text der Hinweis war.
+// Abgrenzung: Der Lese-Detektiv übt Textverständnis allgemein (Fragen zum Inhalt), Echt oder
+// erfunden? Textsorten — hier geht es nur um ein einzelnes Wort und seinen Zusammenhang.
+// Sätze in woerter.js (Liste „saetze“), selbst geschrieben.
+
+const { waehle, mische, el } = LS;
+const ID = "wort-spuernase";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["saetze"]);
+const SAETZE = FREI.has("saetze") ? SPUER_SAETZE : [];
+
+// Je Stufe: Stufen der Sätze (erstes Feld in woerter.js); tippen = Hinweis selbst antippen.
+const STUFE = {
+  s1: { saetze: [1] },
+  s2: { saetze: [2] },
+  s3: { saetze: [3] },
+  s4: { saetze: [4] },
+  s5: { saetze: [5] },
+  s6: { saetze: [4, 5], tippen: true },
+};
+
+/** "Text mit {Wort} und [Hinweis]." → Teile [{ art: "text" | "wort" | "hinweis", text }]. */
+function zerlege(text) {
+  const teile = [];
+  const re = /\{([^}]+)\}|\[([^\]]+)\]/g;
+  let pos = 0, m;
+  while ((m = re.exec(text))) {
+    if (m.index > pos) teile.push({ art: "text", text: text.slice(pos, m.index) });
+    teile.push(m[1] !== undefined ? { art: "wort", text: m[1] } : { art: "hinweis", text: m[2] });
+    pos = re.lastIndex;
+  }
+  if (pos < text.length) teile.push({ art: "text", text: text.slice(pos) });
+  return teile;
+}
+
+const vorrat = stufe => SAETZE.filter(s => STUFE[stufe].saetze.includes(s[0]));
+
+function aufgabeErzeugen(stufe) {
+  const liste = vorrat(stufe);
+  if (!liste.length) return null;
+  const [nr, text, richtig, f1, f2] = waehle(liste);
+  const teile = zerlege(text);
+  return {
+    nr, text, teile, richtig, optionen: mische([richtig, f1, f2]),
+    wort: teile.find(t => t.art === "wort")?.text, hinweis: teile.find(t => t.art === "hinweis")?.text,
+  };
+}
+
+const SATZENDE = /[.!?]\s/;
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!STUFE[stufe].saetze.includes(a.nr)) m.push(`Satz der Stufe ${a.nr} in ${stufe}`);
+  if (!SAETZE.some(s => s[1] === a.text)) m.push("Satz nicht aus einer freien Liste");
+  if ((a.text.match(/\{/g) || []).length !== 1 || (a.text.match(/\[/g) || []).length !== 1) m.push("nicht genau ein {Wort} und ein [Hinweis]");
+  if (!a.wort || !a.hinweis) m.push("Wort oder Hinweis fehlt");
+  if (a.optionen.length !== 3 || new Set(a.optionen).size !== 3) m.push("nicht drei verschiedene Bedeutungen");
+  if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Bedeutung nicht genau einmal");
+  if (a.optionen.some(o => !o.trim())) m.push("leere Bedeutung");
+  // Abstand zwischen Wort und Hinweis: Stufe 1–2 im selben Satz, Stufe 3–4 im nächsten.
+  const iw = a.text.indexOf("{"), ih = a.text.indexOf("[");
+  const dazwischen = a.text.slice(Math.min(iw, ih), Math.max(iw, ih));
+  if (a.nr <= 2 && SATZENDE.test(dazwischen)) m.push("Stufe 1–2: Hinweis nicht im selben Satz");
+  if ((a.nr === 3 || a.nr === 4) && !SATZENDE.test(dazwischen)) m.push("Stufe 3–4: Hinweis nicht in einem anderen Satz");
+  if (a.hinweis && a.wort && a.hinweis.toLowerCase().includes(a.wort.toLowerCase())) m.push("Hinweis enthält das Wort selbst");
+  if (a.hinweis && a.hinweis.split(" ").length > 6) m.push("Hinweis zu lang");
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  return m;
+}
+
+/** Text als Elemente; mitTipp: jedes Wort ausser dem gesuchten als Knopf (Königsstufe, zweiter Schritt). */
+function textEl(a, mitTipp, beimTipp) {
+  const box = el("div", { class: "satz" });
+  for (const t of a.teile) {
+    if (t.art === "wort") { box.append(el("span", { class: "wsn-gesucht", text: t.text })); continue; }
+    if (!mitTipp) {
+      box.append(t.art === "hinweis" ? el("span", { class: "wsn-hinweis", text: t.text }) : t.text);
+      continue;
+    }
+    // Wörter einzeln antippbar; Satzzeichen bleiben Text daneben.
+    for (const stueck of t.text.split(/(\s+)/)) {
+      const m = stueck.match(/^([^\p{L}\p{N}]*)([\p{L}\p{N}-]+)([^\p{L}\p{N}]*)$/u);
+      if (!m) { box.append(stueck); continue; }
+      const k = el("button", { type: "button", class: "wsn-tipp" + (t.art === "hinweis" ? " wsn-hinweis" : ""), text: m[2] });
+      k.addEventListener("click", () => beimTipp(k, t.art === "hinweis"));
+      box.append(m[1], k, m[3]);
+    }
+  }
+  return box;
+}
+
+const zeigeHinweis = flaeche => flaeche.querySelectorAll(".wsn-hinweis").forEach(e => e.classList.add("gezeigt"));
+
+const STUFEN_TEXT = {
+  s1: "Der Hinweis steht im selben Satz: „so erschöpft, dass sie sich hinlegen musste“.",
+  s2: "Seltenere Wörter, der Hinweis steht im selben Satz.",
+  s3: "Der Hinweis steht im nächsten Satz.",
+  s4: "Schwierigere Wörter, Hinweis im nächsten Satz.",
+  s5: "Fremdwörter und Gegensätze: „nicht simpel, sondern kompliziert“.",
+  s6: "Endgegner: Bedeutung wählen und den Hinweis im Text selbst antippen.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => vorrat(s).length));
+
+/** Hinweis nach falscher Bedeutung, ohne die richtige zu nennen. */
+function hinweisFuer(a, gewaehlt) {
+  const wo = a.nr <= 2 ? "Lies den ganzen Satz. Welche Wörter helfen dir?"
+    : a.nr <= 4 ? "Lies auch den nächsten Satz: Dort steht, was das Wort bedeutet."
+    : "Setz die Bedeutung anstelle des Wortes ein. Passt dann alles zusammen?";
+  return `„${gewaehlt}“ passt nicht zum Text. ${wo}`;
+}
+
+LS.spiel({
+  id: ID,
+  einleitung: "Ein Wort ist schwierig — aber der Text verrät, was es bedeutet. Schnüffle wie eine Spürnase nach dem Hinweis!",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(STUFE[ctx.stufe].tippen
+      ? "Wähle zuerst die Bedeutung. Dann tippst du das Wort im Text an, das dir geholfen hat."
+      : "Lies den Text genau. Welche Bedeutung passt zum farbigen Wort?");
+    const a = aufgabeErzeugen(ctx.stufe);
+    const f = ctx.flaeche;
+    const loesung = `„${a.wort}“ heisst hier „${a.richtig}“. Der Hinweis: „${a.hinweis}“`;
+    f.append(el("div", { class: "frage", html: `Was bedeutet <b>${a.wort}</b> hier?` }));
+    let text = textEl(a, false);
+    f.append(text);
+
+    if (!STUFE[ctx.stufe].tippen) {
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 200, loesung,
+        hinweis: w => hinweisFuer(a, w),
+        lob: `Richtig! Verraten hat es: „${a.hinweis}“`,
+        beiRichtig: () => zeigeHinweis(f),
+      });
+      box.classList.add("wsn-wahl");
+      box.addEventListener("click", () => { if (ctx.vorbei()) zeigeHinweis(f); });
+      return;
+    }
+
+    // Königsstufe: zwei Schritte — Bedeutung, dann den Hinweis im Text antippen.
+    ctx.loesung(loesung);
+    ctx.schritte(2);
+    const schritt = el("div", { class: "wsn-schritt", text: "1. Welche Bedeutung passt?" });
+    const wahl = el("div", { class: "wahl wsn-wahl" });
+    wahl.style.setProperty("--wahl-breite", "200px");
+    f.append(schritt, wahl);
+    let bedeutungDa = false;
+    const nachFehler = () => { if (ctx.vorbei()) { zeigeHinweis(f); wahl.querySelectorAll("button").forEach(b => { b.disabled = true; }); } };
+
+    const beimTipp = (k, istHinweis) => {
+      if (ctx.vorbei()) return;
+      if (istHinweis) {
+        k.classList.add("richtig");
+        zeigeHinweis(f);
+        ctx.richtig(`Genau! Der Hinweis war „${a.hinweis}“.`);
+        return;
+      }
+      k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+      ctx.falsch("Dieses Wort hilft hier nicht. Such eines, das zur Bedeutung passt.", loesung);
+      nachFehler();
+    };
+
+    for (const o of a.optionen) {
+      const k = el("button", { type: "button", class: "wahl-knopf", text: o });
+      k.addEventListener("click", () => {
+        if (bedeutungDa || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+        if (o === a.richtig) {
+          bedeutungDa = true;
+          k.classList.add("richtig");
+          wahl.querySelectorAll("button").forEach(b => { b.disabled = true; });
+          LS.ton("tipp");
+          schritt.textContent = "2. Tipp das Wort im Text an, das dir geholfen hat.";
+          const neu = textEl(a, true, beimTipp);
+          text.replaceWith(neu);
+          text = neu;
+          ctx.sag("Richtig! Und welches Wort im Text hat es verraten?", "gut");
+          return;
+        }
+        k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+        ctx.falsch(hinweisFuer(a, o), loesung);
+        nachFehler();
+      });
+      wahl.append(k);
+    }
+  },
+});
+</script>
+</body>
+</html>

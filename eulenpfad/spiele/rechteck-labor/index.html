@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rechteck-Labor</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 8px; }
+  .frage b { color: var(--knopf); }
+  .labor { display: block; width: 100%; max-width: 520px; margin: 0 auto; touch-action: manipulation; user-select: none; }
+  .labor .zelle { fill: #fff; stroke: var(--rand); stroke-width: 1.5; cursor: pointer; }
+  .labor .rechteck { fill: var(--deko-3); fill-opacity: .35; stroke: var(--deko-3); stroke-width: 4; pointer-events: none; }
+  .labor .rechteck.loesung { fill: var(--gut); stroke: var(--gut); }
+  .labor .ecke { fill: var(--text); pointer-events: none; }
+  .labor .mass { font-size: 17px; font-weight: 800; fill: var(--text); pointer-events: none; }
+  .labor-mass { text-align: center; font-weight: 800; font-size: clamp(17px, 3.8vw, 22px); margin: 6px 0; min-height: 1.4em; color: var(--text-leise); }
+  .labor-knoepfe { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+  .gefunden { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 6px 0; }
+  .gefunden span { border: 2px solid var(--rand); border-radius: 12px; padding: 4px 10px; font-weight: 800; min-width: 74px; text-align: center; }
+  .gefunden span.da { border-color: var(--gut); background: var(--gut-hell); }
+  .laborbuch { margin: 8px auto 0; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: clamp(14px, 3.4vw, 18px); }
+  .laborbuch th, .laborbuch td { border: 2px solid var(--rand); padding: 4px 8px; text-align: center; }
+  .laborbuch th { color: var(--text-leise); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📐 Rechteck-Labor</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.A.3.e (Grundanspruch 2. Zyklus): Umfang von Vielecken, Flächeninhalt von
+// Rechtecken; MA.2.B.1.f/g: Zusammenhänge zwischen Seitenlänge, Umfang und Fläche erforschen
+// (Beispiel dort sinngemäss: Rechtecke mit gleichem Umfang, welches hat die grösste Fläche?).
+// Basisklasse 5: s1 4. Klasse (Fläche auszählen, MA.2.A.3.d), s2–s4 5. Klasse, s5 6. Klasse, s6 Königsstufe.
+// Bezug: Flächen-Pixel (Basisklasse 2) lässt Fläche und Umfang an fertigen Figuren ablesen; hier
+// baut das Kind das Rechteck selbst und erforscht, welche Rechtecke ein Ziel erfüllen.
+// Bedienung: Die Ecke links oben ist fest; ein Tipp auf ein Häuschen setzt die gegenüberliegende Ecke.
+// Annahme (mit dem Lehrmittel abzugleichen): 1 Häuschen = 1 cm × 1 cm = 1 cm².
+
+const { zufall, waehle, mische, el } = LS;
+const SVGNS = "http://www.w3.org/2000/svg";
+
+const RASTER = { b: 12, h: 10 };          // Häuschen nebeneinander und übereinander
+const Z = 30, RAND_L = 40, RAND_O = 30;   // Zellgrösse und Platz für die Masse im SVG
+
+const flaecheVon = (b, h) => b * h;
+const umfangVon = (b, h) => 2 * (b + h);
+/** Ein Rechteck k × l (k ≤ l) passt, wenn es in einer der beiden Lagen ins Raster geht. */
+const passtInsRaster = (k, l) => k >= 1 && l >= k && k <= Math.min(RASTER.b, RASTER.h) && l <= Math.max(RASTER.b, RASTER.h);
+/** Alle Rechtecke (ungeordnet, k ≤ l), die ins Raster passen und die Bedingung erfüllen. */
+function paare(bedingung) {
+  const p = [];
+  for (let k = 1; k <= RASTER.b; k++) for (let l = k; l <= RASTER.b; l++) if (passtInsRaster(k, l) && bedingung(k, l)) p.push([k, l]);
+  return p;
+}
+const bis = (a, b, schritt = 1) => { const r = []; for (let x = a; x <= b; x += schritt) r.push(x); return r; };
+
+// Je Stufe: Aufgabenarten und Zielwerte. laborbuch: gebaute Rechtecke messen lassen (mit Umfang und Fläche).
+const STUFE = {
+  s1: { arten: ["flaeche"], F: bis(4, 30) },
+  s2: { arten: ["flaeche", "umfang"], F: bis(12, 48), U: bis(8, 30, 2), mitZwei: true },
+  s3: { arten: ["beides"], seiten: bis(2, 10) },
+  s4: { arten: ["alleF", "alleU"], F: [12, 16, 18, 20, 24, 30, 36, 40, 48, 60], U: [10, 12, 14, 16, 18, 20, 22] },
+  s5: { arten: ["maxF", "minU"], U: bis(12, 36, 2), F: bis(12, 72), laborbuch: true },
+  s6: { arten: ["maxF", "minU", "beides"], U: bis(22, 40, 2), F: bis(30, 90), seiten: bis(5, 10) },
+};
+
+const zielPaare = a => {
+  switch (a.art) {
+    case "flaeche": case "alleF": return paare((k, l) => flaecheVon(k, l) === a.F);
+    case "umfang": case "alleU": return paare((k, l) => umfangVon(k, l) === a.U);
+    case "beides": return paare((k, l) => flaecheVon(k, l) === a.F && umfangVon(k, l) === a.U);
+    case "maxF": { const p = paare((k, l) => umfangVon(k, l) === a.U); const m = Math.max(...p.map(([k, l]) => k * l)); return p.filter(([k, l]) => k * l === m); }
+    case "minU": { const p = paare((k, l) => flaecheVon(k, l) === a.F); const m = Math.min(...p.map(([k, l]) => umfangVon(k, l))); return p.filter(([k, l]) => umfangVon(k, l) === m); }
+  }
+  return [];
+};
+/** Rechtecke mit dem vorgegebenen Mass, unter denen das beste gesucht ist (maxF, minU). */
+const kandidaten = a => (a.art === "maxF" ? paare((k, l) => umfangVon(k, l) === a.U) : paare((k, l) => flaecheVon(k, l) === a.F));
+
+// ---------- Aufgaben als Daten ----------
+
+/** Alle gültigen Aufgaben einer Art in der Stufe (wenige Dutzend, einmal ausgerechnet). */
+const MOEGLICH = {};
+function moeglicheAufgaben(stufe, art) {
+  const schluessel = `${stufe}/${art}`;
+  if (MOEGLICH[schluessel]) return MOEGLICH[schluessel];
+  const p = STUFE[stufe];
+  let alle;
+  if (art === "beides") alle = p.seiten.flatMap(k => p.seiten.filter(l => l >= k).map(l => ({ art, F: flaecheVon(k, l), U: umfangVon(k, l) })));
+  else if (art === "flaeche" || art === "alleF" || art === "minU") alle = p.F.map(F => ({ art, F }));
+  else alle = p.U.map(U => ({ art, U }));
+  return (MOEGLICH[schluessel] = alle.filter(a => pruefeAufgabe(a, stufe).length === 0));
+}
+
+function aufgabeErzeugen(stufe) {
+  const a = waehle(moeglicheAufgaben(stufe, waehle(STUFE[stufe].arten)));
+  return a ? { ...a } : { art: "flaeche", F: 12 };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const loes = zielPaare(a);
+  if (!loes.length) m.push("kein Rechteck im Raster erfüllt das Ziel");
+  // jede Lösung nachrechnen
+  for (const [k, l] of loes) {
+    if (!passtInsRaster(k, l)) m.push("Lösung passt nicht ins Raster");
+    if (a.F != null && ["flaeche", "alleF", "beides", "minU"].includes(a.art) && k * l !== a.F) m.push("Fläche der Lösung falsch");
+    if (a.U != null && ["umfang", "alleU", "beides", "maxF"].includes(a.art) && 2 * (k + l) !== a.U) m.push("Umfang der Lösung falsch");
+  }
+  if (a.art === "flaeche" || a.art === "alleF" || a.art === "minU") {
+    if (!p.F.includes(a.F)) m.push("Fläche nicht in der Stufe");
+  }
+  if (a.art === "umfang" || a.art === "alleU" || a.art === "maxF") {
+    if (!p.U.includes(a.U) || a.U % 2) m.push("Umfang nicht in der Stufe");
+  }
+  if (a.art === "flaeche" && p.mitZwei && !loes.some(([k]) => k >= 2)) m.push("nur ein Streifen 1 × n — zu einfach");
+  if (a.art === "beides") {
+    if (loes.length !== 1) m.push("Fläche und Umfang bestimmen das Rechteck nicht eindeutig");
+    if (p.seiten && !loes.every(([k, l]) => p.seiten.includes(k) && p.seiten.includes(l))) m.push("Seiten nicht in der Stufe");
+  }
+  if (a.art === "alleF" || a.art === "alleU") {
+    if (loes.length < 2 || loes.length > 5) m.push(`${loes.length} Rechtecke zu finden — zu wenige oder zu viele`);
+  }
+  if (a.art === "maxF" || a.art === "minU") {
+    // genau ein bestes Rechteck (gedreht zählt nicht), und mindestens drei zum Ausprobieren
+    if (loes.length !== 1) m.push("nicht genau ein bestes Rechteck");
+    if (kandidaten(a).length < 3) m.push("weniger als drei Rechtecke zum Vergleichen");
+    if (a.art === "maxF") { const [k, l] = loes[0] || [0, 0]; if (l - k > 1) m.push("grösste Fläche nicht beim (fast) Quadrat"); }
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const masse = (b, h) => `${b} cm × ${h} cm`;
+const paarText = ([k, l]) => `${k} × ${l}`;
+function zielText(a) {
+  const F = `<b>Fläche ${a.F} cm²</b>`, U = `<b>Umfang ${a.U} cm</b>`;
+  switch (a.art) {
+    case "flaeche": return `Baue ein Rechteck mit der ${F}.`;
+    case "umfang": return `Baue ein Rechteck mit dem ${U}.`;
+    case "beides": return `Baue ein Rechteck mit der ${F} und dem ${U}.`;
+    case "alleF": return `Finde alle Rechtecke mit der ${F}, die ins Raster passen.`;
+    case "alleU": return `Finde alle Rechtecke mit dem ${U}, die ins Raster passen.`;
+    case "maxF": return `Alle Rechtecke mit dem ${U}: Welches hat die <b>grösste Fläche</b>? Baue es.`;
+    case "minU": return `Alle Rechtecke mit der ${F}: Welches hat den <b>kleinsten Umfang</b>? Baue es.`;
+  }
+  return "";
+}
+function loesungFuer(a) {
+  const l = zielPaare(a);
+  switch (a.art) {
+    case "flaeche": return `Fläche ${a.F} cm²: ${l.map(paarText).join(" oder ")} (in cm)`;
+    case "umfang": return `Umfang ${a.U} cm: ${l.map(paarText).join(" oder ")} (in cm)`;
+    case "beides": return `${masse(...l[0])}: Fläche ${a.F} cm², Umfang ${a.U} cm`;
+    case "alleF": return `Alle mit Fläche ${a.F} cm²: ${l.map(paarText).join(", ")} (in cm)`;
+    case "alleU": return `Alle mit Umfang ${a.U} cm: ${l.map(paarText).join(", ")} (in cm)`;
+    case "maxF": return `${masse(...l[0])}: Fläche ${l[0][0] * l[0][1]} cm² — am grössten, wenn es fast ein Quadrat ist`;
+    case "minU": return `${masse(...l[0])}: Umfang ${umfangVon(...l[0])} cm — am kleinsten, wenn es fast ein Quadrat ist`;
+  }
+  return "";
+}
+
+const svgEl = (tag, attr = {}) => { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); return e; };
+
+/** Raster mit fester Ecke links oben; waehle(b, h) wird beim Tippen auf ein Häuschen gerufen. */
+function rasterEl(waehleEcke) {
+  const B = RAND_L + RASTER.b * Z + 6, H = RAND_O + RASTER.h * Z + 6;
+  const svg = svgEl("svg", { class: "labor", viewBox: `0 0 ${B} ${H}`, role: "img", "aria-label": `Raster ${RASTER.b} mal ${RASTER.h} Häuschen` });
+  for (let r = 0; r < RASTER.h; r++) for (let c = 0; c < RASTER.b; c++) {
+    const z = svgEl("rect", { class: "zelle", x: RAND_L + c * Z, y: RAND_O + r * Z, width: Z, height: Z });
+    z.addEventListener("click", () => waehleEcke(c + 1, r + 1));
+    svg.append(z);
+  }
+  const rechteck = svgEl("rect", { class: "rechteck", x: RAND_L, y: RAND_O, width: 0, height: 0 });
+  const breite = svgEl("text", { class: "mass", x: RAND_L, y: RAND_O - 9, "text-anchor": "middle" });
+  const hoehe = svgEl("text", { class: "mass", x: RAND_L - 6, y: RAND_O, "text-anchor": "end" });
+  svg.append(rechteck, svgEl("circle", { class: "ecke", cx: RAND_L, cy: RAND_O, r: 6 }), breite, hoehe);
+  const zeige = (b, h, loesung = false) => {
+    rechteck.setAttribute("width", b * Z); rechteck.setAttribute("height", h * Z);
+    rechteck.classList.toggle("loesung", loesung);
+    breite.setAttribute("x", RAND_L + b * Z / 2); breite.textContent = `${b} cm`;
+    hoehe.setAttribute("y", RAND_O + h * Z / 2 + 6); hoehe.textContent = `${h} cm`;
+  };
+  return { svg, zeige };
+}
+
+// ---------- Hinweise (verraten die Lösung nicht) ----------
+
+const H_FLAECHE = "Fläche: Wie viele Häuschen liegen im Rechteck? Rechne Breite mal Höhe.";
+const H_UMFANG = "Umfang: Fahre einmal rundherum — zweimal die Breite plus zweimal die Höhe.";
+const vergleich = (ist, soll, wer) => `${wer} ist zu ${ist > soll ? "gross" : "klein"}.`;
+
+// ---------- Spiel ----------
+
+LS.spiel({
+  id: "rechteck-labor",
+  einleitung: "Willkommen im Rechteck-Labor! Die Ecke oben links ist fest. Tippe ein Häuschen an — dort ist die andere Ecke. Jedes Häuschen ist 1 cm breit und 1 cm hoch, also 1 cm² gross.",
+  anzahl: 6,
+  stufen: {
+    s1: "Fläche bauen: Rechteck mit 12 cm² (Häuschen zählen).",
+    s2: "Fläche oder Umfang bauen: Umfang 16 cm.",
+    s3: "Fläche und Umfang zugleich: 12 cm² und 14 cm (Lehrplan 5. Klasse).",
+    s4: "Erforschen: alle Rechtecke mit Fläche 24 cm² finden.",
+    s5: "Gleicher Umfang, grösste Fläche — mit Laborbuch (6. Klasse).",
+    s6: "Endgegner: grösste Fläche, kleinster Umfang, ohne Laborbuch.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    const loesungText = loesungFuer(a);
+    const loes = zielPaare(a);
+    const alle = a.art === "alleF" || a.art === "alleU";
+    ctx.loesung(loesungText);
+    ctx.schritte(alle ? 2 * loes.length : 2);
+    if (p.arten.length > 1) ctx.serie("art", a.art);
+
+    let ist = null; // { b, h }
+    const gefunden = [];
+    const anzeige = el("div", { class: "labor-mass", text: "Tippe ein Häuschen an." });
+    const raster = rasterEl((b, h) => {
+      if (ctx.vorbei()) return;
+      ist = { b, h };
+      raster.zeige(b, h);
+      anzeige.textContent = `Breite ${b} cm · Höhe ${h} cm`;
+      LS.ton("tipp");
+    });
+    f.append(el("div", { class: "frage", html: zielText(a) }));
+
+    let gefundenEl = null;
+    const zeichneGefunden = () => {
+      gefundenEl.replaceChildren(...loes.map((_, i) => (i < gefunden.length
+        ? el("span", { class: "da", text: `${paarText(gefunden[i])} ✓` }) : el("span", { text: "? × ?" }))));
+    };
+    if (alle) { gefundenEl = el("div", { class: "gefunden", "aria-live": "polite" }); f.append(gefundenEl); zeichneGefunden(); }
+    f.append(raster.svg, anzeige);
+
+    const buch = p.laborbuch ? el("table", { class: "laborbuch" }, el("tr", {}, ...["Breite", "Höhe", "Umfang", "Fläche"].map(t => el("th", { text: t })))) : null;
+    const gemessen = new Set();
+
+    const zeigeLoesung = () => {
+      const [k, l] = loes[0];
+      const [b, h] = k <= RASTER.h && l <= RASTER.b ? [l, k] : [k, l];
+      raster.zeige(b, h, true);
+      anzeige.textContent = loesungText;
+    };
+    const falsch = hinweis => {
+      ctx.falsch(hinweis, loesungText);
+      if (ctx.vorbei()) zeigeLoesung();
+    };
+
+    const pruefen = el("button", { type: "button", class: "knopf gruen", text: alle ? "Prüfen und eintragen ✓" : "Prüfen ✓" });
+    pruefen.addEventListener("click", () => {
+      if (ctx.vorbei()) return;
+      if (!ist) { ctx.sag("Tippe zuerst ein Häuschen an. Dort ist die zweite Ecke.", "hinweis"); return; }
+      const { b, h } = ist;
+      const F = flaecheVon(b, h), U = umfangVon(b, h);
+      const k = Math.min(b, h), l = Math.max(b, h);
+      const istLoesung = loes.some(([x, y]) => x === k && y === l);
+      if (alle) {
+        if (!istLoesung) {
+          falsch(a.art === "alleF" ? `${H_FLAECHE} ${vergleich(F, a.F, "Die Fläche")}` : `${H_UMFANG} ${vergleich(U, a.U, "Der Umfang")}`);
+          return;
+        }
+        if (gefunden.some(([x, y]) => x === k && y === l)) { ctx.sag("Dieses Rechteck hast du schon. Gedreht zählt nicht als neues.", "hinweis"); return; }
+        gefunden.push([k, l]);
+        gefunden.sort((x, y) => x[0] - y[0]);
+        zeichneGefunden();
+        LS.ton("tipp");
+        if (gefunden.length === loes.length) { ctx.richtig(`Alle gefunden: ${loes.map(paarText).join(", ")}`); return; }
+        const rest = loes.length - gefunden.length;
+        ctx.sag(`Gefunden! Es ${rest === 1 ? "fehlt noch eines" : `fehlen noch ${rest}`}.`, "gut");
+        return;
+      }
+      if (istLoesung) { ctx.richtig(`Richtig: ${masse(b, h)} — Fläche ${F} cm², Umfang ${U} cm`); return; }
+      if (a.art === "flaeche") falsch(`${H_FLAECHE} ${vergleich(F, a.F, "Die Fläche")}`);
+      else if (a.art === "umfang") falsch(`${H_UMFANG} ${vergleich(U, a.U, "Der Umfang")}`);
+      else if (a.art === "beides") {
+        const fOk = F === a.F, uOk = U === a.U;
+        falsch(fOk ? `Die Fläche stimmt, der Umfang noch nicht. ${H_UMFANG}` : uOk ? `Der Umfang stimmt, die Fläche noch nicht. ${H_FLAECHE}` : "Fläche und Umfang stimmen noch nicht. Suche zuerst Rechtecke mit der richtigen Fläche, dann prüfe den Umfang.");
+      } else if (a.art === "maxF") {
+        falsch(U !== a.U ? `Zuerst muss der Umfang stimmen. ${H_UMFANG}` : "Der Umfang stimmt! Aber ein anderes Rechteck mit diesem Umfang hat eine grössere Fläche. Probiere andere Seitenlängen.");
+      } else if (a.art === "minU") {
+        falsch(F !== a.F ? `Zuerst muss die Fläche stimmen. ${H_FLAECHE}` : "Die Fläche stimmt! Aber ein anderes Rechteck mit dieser Fläche hat einen kleineren Umfang. Probiere andere Seitenlängen.");
+      }
+    });
+    const knoepfe = el("div", { class: "labor-knoepfe" });
+    if (buch) {
+      const messen = el("button", { type: "button", class: "knopf hell", text: "📒 Messen" });
+      messen.addEventListener("click", () => {
+        if (ctx.vorbei() || !ist) { if (!ist) ctx.sag("Tippe zuerst ein Häuschen an.", "hinweis"); return; }
+        const schluessel = `${Math.min(ist.b, ist.h)}x${Math.max(ist.b, ist.h)}`;
+        if (gemessen.has(schluessel)) { ctx.sag("Dieses Rechteck steht schon im Laborbuch.", "hinweis"); return; }
+        gemessen.add(schluessel);
+        LS.ton("tipp");
+        buch.append(el("tr", {}, ...[`${ist.b} cm`, `${ist.h} cm`, `${umfangVon(ist.b, ist.h)} cm`, `${flaecheVon(ist.b, ist.h)} cm²`].map(t => el("td", { text: t }))));
+      });
+      knoepfe.append(messen);
+    }
+    knoepfe.append(pruefen);
+    f.append(knoepfe);
+    if (buch) f.append(buch);
+
+    if (ctx.nr === 0) {
+      if (alle) ctx.sag("Baue ein Rechteck und tippe auf Prüfen. Gedreht zählt nicht als neues Rechteck.");
+      else if (buch) ctx.sag("Mit 📒 Messen schreibst du ein Rechteck ins Laborbuch. So kannst du vergleichen.");
+      else ctx.sag("Tippe ein Häuschen an. Dort ist die zweite Ecke des Rechtecks.");
+    }
+  },
+});
+</script>
+</body>
+</html>

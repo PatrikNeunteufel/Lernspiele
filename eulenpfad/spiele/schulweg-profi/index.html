@@ -220,12 +220,14 @@ LS.spiel({
     if (a.art === "signal") ctx.serie("richtung", a.vor);
     if (a.art === "korb") {
       f.append(el("div", { class: "frage", text: "Ist das sicher oder gefährlich?" }));
-      LS.koerbe(ctx, {
+      const { karte } = LS.koerbe(ctx, {
         karte: { bild: a.bild, text: a.text }, koerbe: ["sicher", "gefaehrlich"], richtig: a.richtig, korbInhalt: k => KORB[k],
         farbe: k => (k === "sicher" ? "var(--deko-5)" : "var(--deko-3)"),
         hinweis: "Stell dir vor, ein Auto kommt. Sieht dich der Fahrer, und kannst du rechtzeitig stehen bleiben?",
         loesung: `${a.text}: ${KORB[a.richtig].text}.`,
       });
+      // Die Situation ist Sachkunde, kein Lesestoff: Die Eule liest sie mit vor (rahmen.md Abschnitt 12).
+      karte.querySelector("b").classList.add("frage");
     } else if (a.art === "merksatz") {
       f.append(el("div", { class: "frage", text: "Am Fussgängerstreifen: Was kommt zuerst? Tipp der Reihe nach." }));
       LS.reihenfolge(ctx, {

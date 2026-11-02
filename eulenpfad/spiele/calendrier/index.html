@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendrier</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 2px 0 6px; line-height: 1.35; }
+  .frage b { color: var(--knopf); }
+  .cal-hilfe { text-align: center; font-size: clamp(14px, 3.2vw, 17px); color: var(--text-leise); font-weight: 700; margin: 0 0 10px; }
+  .cal-hoer { display: block; margin: 0 auto 12px; border: none; border-radius: 999px; padding: 10px 24px; font-family: inherit;
+    font-size: clamp(18px, 4vw, 24px); font-weight: 900; background: var(--deko-7); color: #fff; box-shadow: 0 5px 0 var(--deko-6); cursor: pointer; }
+  .cal-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-6); }
+  .cal-wort { text-align: center; font-size: clamp(34px, 8vw, 50px); font-weight: 900; margin: 4px 0 12px; }
+  .cal-mitte { text-align: center; margin: 4px 0 14px; }
+
+  /* Kalenderblatt (Abreisskalender): Monat oben, Tag gross */
+  .blatt { display: inline-flex; flex-direction: column; align-items: stretch; width: 96px; border-radius: 12px; overflow: hidden;
+    background: #fff; border: 2px solid var(--rand); box-shadow: 0 3px 0 var(--rand); }
+  .blatt-mois { background: var(--deko-2); color: #fff; font-size: 16px; font-weight: 800; padding: 3px 4px; text-align: center; }
+  .blatt-zahl { font-size: 42px; font-weight: 900; text-align: center; padding: 2px 0 6px; color: var(--text); }
+  .blatt.gross { width: 150px; }
+  .blatt.gross .blatt-mois { font-size: 22px; }
+  .blatt.gross .blatt-zahl { font-size: 70px; }
+  .cal-blaetter .wahl-knopf { padding: 8px 4px; }
+
+  /* Monatsblatt */
+  .cal-monat { max-width: 400px; margin: 0 auto 12px; background: #fff; border: 2px solid var(--rand); border-radius: 14px; padding: 8px; }
+  .cal-monat-kopf { text-align: center; font-weight: 900; font-size: clamp(18px, 4vw, 22px); background: var(--deko-2); color: #fff; border-radius: 10px; padding: 4px; margin-bottom: 6px; }
+  .cal-gitter { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-kopf { text-align: center; font-size: 14px; font-weight: 800; color: var(--text-leise); padding: 2px 0; }
+  .cal-zelle { text-align: center; font-weight: 800; font-size: clamp(15px, 3.6vw, 18px); padding: 7px 0; border-radius: 8px; }
+  button.cal-zelle { border: none; font-family: inherit; color: var(--text); background: #fff; box-shadow: 0 2px 0 var(--rand); min-height: 42px; cursor: pointer; }
+  .cal-zelle.we { color: var(--deko-2); }
+  button.cal-zelle.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  button.cal-zelle.richtig { background: var(--gut-hell); box-shadow: 0 2px 0 var(--gut); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📆 Calendrier</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS2F.3.A.1 (Französisch, 2. Zyklus): einfache Angaben zu Datum und Zeit verstehen und
+// machen; hier das Datum: Wochentage, Monate, Jahreszeiten, „le 3 mai“, „le premier janvier“,
+// „Mon anniversaire, c’est le …“. Hören (Stimme des Geräts, fr) und lesen.
+// Basisklasse 5 (Französisch ab der 5. Klasse): s1 ist ein Einstieg ohne Vorkenntnisse (hören, mit
+// deutscher Hilfe), s2–s4 5. Klasse, s5 6. Klasse, s6 Königsstufe.
+// Keine Inhaltsliste: Wochentage, Monate, Jahreszeiten und Zahlen 1–31 stehen als Konstanten hier,
+// alle Aufgaben werden berechnet. Gegen den Jahreskreis-Ordner (Deutsch, NMG.9.1: Tage und Monate
+// ordnen, rechnen im Kalender) abgegrenzt: hier geht es um die französischen Wörter und das Datum,
+// gerechnet wird nur ein Tag vor oder zurück.
+
+const { zufall, waehle, mische, el } = LS;
+const mod = (n, m) => ((n % m) + m) % m;
+
+const JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+const JOURS_DE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+const JOURS_KURZ = ["lu", "ma", "me", "je", "ve", "sa", "di"];
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const MOIS_DE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+const SAISONS = ["le printemps", "l’été", "l’automne", "l’hiver"];
+const SAISONS_DE = ["Frühling", "Sommer", "Herbst", "Winter"];
+// Nur Monate, in denen die Jahreszeit nicht wechselt (wie im Jahreskreis-Ordner).
+const SAISON_VON = { 0: 3, 1: 3, 3: 0, 4: 0, 6: 1, 7: 1, 9: 2, 10: 2 };
+// Monate, die man leicht verwechselt (Klang oder Anfang): Ablenker.
+const MOIS_AEHNLICH = { 0: [5, 1], 1: [0, 3], 2: [4, 3], 3: [7, 2], 4: [2, 5], 5: [6, 0], 6: [5, 7], 7: [3, 6], 8: [10, 11], 9: [10, 8], 10: [11, 9], 11: [10, 8] };
+const NOMBRES = [null, "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix",
+  "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf", "vingt",
+  "vingt et un", "vingt-deux", "vingt-trois", "vingt-quatre", "vingt-cinq", "vingt-six", "vingt-sept", "vingt-huit", "vingt-neuf", "trente", "trente et un"];
+// Tage im Monat in einem gewöhnlichen Jahr; der Februar kommt beim Weiterzählen nicht über das Monatsende.
+const TAGE_IM_MONAT = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+const WORT_DE = Object.fromEntries([...JOURS.map((w, i) => [w, JOURS_DE[i]]), ...MOIS.map((w, i) => [w, MOIS_DE[i]]), ...SAISONS.map((w, i) => [w, SAISONS_DE[i]])]);
+
+/** „premier“ für den 1., sonst die Zahl als Wort. */
+const tagWort = t => (t === 1 ? "premier" : NOMBRES[t]);
+/** „le trois mai“, mit Wochentag „le mardi trois mai“. */
+const datumWort = (t, m, jour = null) => `le ${jour === null ? "" : JOURS[jour] + " "}${tagWort(t)} ${MOIS[m]}`;
+/** Ziffern: „le 3 mai“, „le 1er mai“. */
+const datumZiffern = (t, m) => `le ${t === 1 ? "1er" : t} ${MOIS[m]}`;
+const tageIn = (m, jahr) => new Date(jahr, m + 1, 0).getDate();
+const wochentag = (jahr, m, t) => (new Date(jahr, m, t).getDay() + 6) % 7; // Montag = 0
+
+/** Zahlen, die man mit t verwechselt (13 / 3, 21 / 20), zuerst die ähnlich klingenden. */
+function nahe(t, max) {
+  const kand = [t + 10, t - 10, t + 20, t - 20, t + 1, t - 1, t + 2].filter(x => x >= 1 && x <= max && x !== t);
+  return [...new Set(kand)];
+}
+/** n verschiedene Werte aus 0..max-1, der erste ist i. */
+function mitAndern(i, max, n, bevorzugt = []) {
+  const rest = [...bevorzugt.filter(j => j !== i), ...mische(Array.from({ length: max }, (_, j) => j))];
+  return mische([...new Set([i, ...rest])].slice(0, n));
+}
+
+// ---------- Aufgaben als Daten ----------
+// typ: "wahl" (Knöpfe, genau einer richtig), "reihe" (der Reihe nach antippen), "kalender" (Tag im Monatsblatt antippen)
+
+const ARTEN = {
+  /** Einen Wochentag hören, das Wort antippen (s1 mit deutscher Hilfe). */
+  tagHoeren(deutsch) {
+    const i = zufall(0, 6);
+    return { art: "tagHoeren", typ: "wahl", i, deutsch, sprich: JOURS[i], frage: "Hör zu: Welcher Tag ist das?",
+      optionen: mitAndern(i, 7, 4).map(j => JOURS[j]), richtig: JOURS[i], loesung: `${JOURS[i]} = ${JOURS_DE[i]}`,
+      hinweis: "Hör nochmal genau hin, tipp auf 🔊.", kennung: `tagHoeren|${i}` };
+  },
+  /** Wochentage der Reihe nach antippen. */
+  tageOrdnen(n, deutsch) {
+    const start = zufall(0, 6);
+    const reihe = Array.from({ length: n }, (_, k) => JOURS[mod(start + k, 7)]);
+    return { art: "tageOrdnen", typ: "reihe", deutsch, reihe, start, n,
+      frage: `Tipp die Tage der Reihe nach an — beginne bei <b>${reihe[0]}</b>.`, kennung: `tageOrdnen|${start}|${n}` };
+  },
+  /** Deutscher Tag → französisches Wort. */
+  tagDeutsch() {
+    const i = zufall(0, 6);
+    return { art: "tagDeutsch", typ: "wahl", i, frage: `Wie heisst <b>${JOURS_DE[i]}</b> auf Französisch?`,
+      optionen: mitAndern(i, 7, 4, [mod(i + 1, 7), mod(i - 1, 7)]).map(j => JOURS[j]), richtig: JOURS[i], loesung: `${JOURS_DE[i]} = ${JOURS[i]}`,
+      hinweis: "Die französische Woche beginnt wie bei uns am Montag. Sag die Tage leise der Reihe nach auf.", kennung: `tagDeutsch|${i}` };
+  },
+  /** „Aujourd’hui, c’est jeudi. Demain, c’est … ?“ */
+  demainHier() {
+    const h = zufall(0, 6), d = waehle([1, -1]);
+    const r = mod(h + d, 7);
+    const satz = d > 0 ? "Demain, c’est quel jour ?" : "Hier, c’était quel jour ?";
+    return { art: "demainHier", typ: "wahl", h, d, sprich: `Aujourd’hui, c’est ${JOURS[h]}. ${satz}`,
+      frage: `Aujourd’hui, c’est <b>${JOURS[h]}</b>.<br>${d > 0 ? "Demain" : "Hier"}, c’${d > 0 ? "est" : "était"} … ?`,
+      hilfe: "aujourd’hui = heute · demain = morgen · hier = gestern",
+      optionen: mitAndern(r, 7, 4, [mod(h - d, 7), h]).map(j => JOURS[j]), richtig: JOURS[r],
+      loesung: `${d > 0 ? "Demain, c’est" : "Hier, c’était"} ${JOURS[r]}.`,
+      hinweis: d > 0 ? "demain heisst morgen: einen Tag weiter." : "hier heisst gestern: einen Tag zurück.", kennung: `demainHier|${h}|${d}` };
+  },
+  /** Monate der Reihe nach antippen. */
+  moisOrdnen(n) {
+    const start = zufall(0, 11);
+    const reihe = Array.from({ length: n }, (_, k) => MOIS[mod(start + k, 12)]);
+    return { art: "moisOrdnen", typ: "reihe", deutsch: false, reihe, start, n,
+      frage: `Tipp die Monate der Reihe nach an — beginne bei <b>${reihe[0]}</b>.`, kennung: `moisOrdnen|${start}|${n}` };
+  },
+  /** „Quel mois vient après mars ?“ */
+  moisApres() {
+    const m = zufall(0, 11), d = waehle([1, -1]);
+    const r = mod(m + d, 12);
+    const wort = d > 0 ? "après" : "avant";
+    return { art: "moisApres", typ: "wahl", m, d, sprich: `Quel mois vient ${wort} ${MOIS[m]} ?`,
+      frage: `Quel mois vient <b>${wort}</b> ${MOIS[m]} ?`, hilfe: "après = nach · avant = vor",
+      optionen: mitAndern(r, 12, 4, [mod(m - d, 12), m]).map(j => MOIS[j]), richtig: MOIS[r],
+      loesung: `${MOIS[r]} vient ${wort} ${MOIS[m]}.`,
+      hinweis: d > 0 ? "après heisst nach: einen Monat weiter." : "avant heisst vor: einen Monat zurück.", kennung: `moisApres|${m}|${d}` };
+  },
+  /** Monat → Jahreszeit (nur eindeutige Monate). */
+  saison() {
+    const m = Number(waehle(Object.keys(SAISON_VON)));
+    const s = SAISON_VON[m];
+    return { art: "saison", typ: "wahl", m, sprich: MOIS[m], wort: MOIS[m], frage: "In welcher Jahreszeit liegt dieser Monat?",
+      optionen: mische(SAISONS.slice()), richtig: SAISONS[s], loesung: `${MOIS[m]} → ${SAISONS[s]}`,
+      hinweis: "Welcher Monat ist das auf Deutsch? Denk dann an das Wetter in diesem Monat.", kennung: `saison|${m}` };
+  },
+  /** Einen Monat hören, das Wort antippen. */
+  moisHoeren() {
+    const m = zufall(0, 11);
+    return { art: "moisHoeren", typ: "wahl", m, sprich: MOIS[m], frage: "Hör zu: Welcher Monat ist das?",
+      optionen: mitAndern(m, 12, 4, MOIS_AEHNLICH[m]).map(j => MOIS[j]), richtig: MOIS[m], loesung: `${MOIS[m]} = ${MOIS_DE[m]}`,
+      hinweis: "Hör nochmal genau hin, tipp auf 🔊. Achte auf den Anfang und das Ende des Worts.", kennung: `moisHoeren|${m}` };
+  },
+  /** Kalenderblatt → Datum in Worten („le trois mai“; am 1. „le premier“, Ablenker „le un“). */
+  blattZuText(maxTag) {
+    const t = zufall(1, maxTag), m = zufall(0, 11);
+    const t2 = waehle(nahe(t, maxTag).slice(0, 2)), m2 = waehle(MOIS_AEHNLICH[m]);
+    const optionen = mische([datumWort(t, m), t === 1 ? `le un ${MOIS[m]}` : datumWort(t2, m), datumWort(t, m2), datumWort(t2, m2)]);
+    return { art: "blattZuText", typ: "wahl", t, m, frage: "Wie liest man dieses Datum?", blatt: [t, m],
+      optionen, richtig: datumWort(t, m), loesung: `${datumZiffern(t, m)}: ${datumWort(t, m)}`,
+      hinweis: t === 1 ? "Für den ersten Tag im Monat gibt es ein besonderes Wort." : "Lies die Zahl und den Monat genau.",
+      kennung: `blattZuText|${t}|${m}` };
+  },
+  /** Datum hören und lesen → das passende Kalenderblatt (n Blätter). */
+  textZuBlatt(maxTag, n, sichtbar) {
+    const m = zufall(0, 11), t = zufall(1, Math.min(maxTag, TAGE_IM_MONAT[m]));
+    const tage = [t, ...nahe(t, maxTag).slice(0, 3)], monate = [m, ...MOIS_AEHNLICH[m]];
+    const alle = mische(tage.flatMap(x => monate.map(y => `${x}|${y}`))
+      .filter(k => { const [x, y] = k.split("|").map(Number); return k !== `${t}|${m}` && x <= TAGE_IM_MONAT[y]; }));
+    // nah zuerst: gleicher Tag oder gleicher Monat
+    alle.sort((a, b) => nahWert(a, t, m) - nahWert(b, t, m));
+    const optionen = mische([`${t}|${m}`, ...alle.slice(0, n - 1)]);
+    const sprich = sichtbar ? datumWort(t, m) : `Mon anniversaire, c’est ${datumWort(t, m)}.`;
+    return { art: sichtbar ? "textZuBlatt" : "anniversaireHoeren", typ: "wahl", t, m, n, sprich,
+      frage: sichtbar ? `Welches Kalenderblatt passt? <b>${datumWort(t, m)}</b>` : "Hör zu: Wann hat das Kind Geburtstag?",
+      hilfe: sichtbar ? "" : "anniversaire = Geburtstag",
+      optionen, richtig: `${t}|${m}`, loesung: `${datumWort(t, m)} = ${t}. ${MOIS_DE[m]}`, blaetter: true,
+      hinweis: sichtbar ? "Lies die Zahl genau: Wie viele Zehner, wie viele Einer? Und welcher Monat?" : "Hör nochmal genau hin, tipp auf 🔊. Welche Zahl, welcher Monat?",
+      kennung: `${sichtbar ? "textZuBlatt" : "anniversaireHoeren"}|${t}|${m}` };
+  },
+  /** Datum hören und im Monatsblatt antippen. */
+  kalenderZeigen() {
+    const jahr = zufall(2026, 2028), m = zufall(0, 11), t = zufall(1, tageIn(m, jahr));
+    return { art: "kalenderZeigen", typ: "kalender", jahr, m, t, sprich: datumWort(t, m), frage: "Hör zu und tipp den Tag im Kalender an.",
+      loesung: `${datumWort(t, m)} → ${t}`, kennung: `kalenderZeigen|${jahr}|${m}|${t}` };
+  },
+  /** „Le 23 avril, c’est quel jour ?“ — im Monatsblatt nachsehen. */
+  wochentagKalender() {
+    const jahr = zufall(2026, 2028), m = zufall(0, 11), t = zufall(1, tageIn(m, jahr));
+    const w = wochentag(jahr, m, t);
+    const satz = `${datumWort(t, m)}, c’est quel jour ?`;
+    return { art: "wochentagKalender", typ: "wahl", jahr, m, t, monat: true, sprich: satz.replace(/^le/, "Le"),
+      frage: `${datumZiffern(t, m).replace(/^le/, "Le")}, c’est quel jour ?`,
+      optionen: JOURS.slice(), richtig: JOURS[w], loesung: `${datumZiffern(t, m).replace(/^le/, "Le")}, c’est un ${JOURS[w]}.`,
+      hinweis: "Such die Zahl im Kalender und schau ganz oben in ihrer Spalte nach.", kennung: `wochentagKalender|${jahr}|${m}|${t}` };
+  },
+  /** Deutsches Datum → „Mon anniversaire, c’est le …“ richtig sagen. */
+  anniversaireSagen() {
+    const m = zufall(0, 11), t = zufall(1, TAGE_IM_MONAT[m]);
+    const t2 = waehle(nahe(t, TAGE_IM_MONAT[m]).slice(0, 2));
+    const m2s = MOIS_AEHNLICH[m].filter(y => t <= TAGE_IM_MONAT[y]);
+    if (!m2s.length) return null;
+    const m2 = waehle(m2s);
+    const satz = d => `Mon anniversaire, c’est ${d}.`;
+    const optionen = mische([satz(datumWort(t, m)), satz(t === 1 ? `le un ${MOIS[m]}` : datumWort(t2, m)), satz(datumWort(t, m2)),
+      satz(datumWort(t, m).replace(/^le /, ""))]);
+    return { art: "anniversaireSagen", typ: "wahl", t, m, frage: `Dein Geburtstag ist am <b>${t}. ${MOIS_DE[m]}</b>. Was sagst du?`,
+      optionen, richtig: satz(datumWort(t, m)), loesung: satz(datumWort(t, m)), lang: true,
+      hinweis: t === 1 ? "Achte auf die Zahl: Für den ersten Tag im Monat gibt es ein besonderes Wort." : "Achte auf alle Teile: die Zahl, den Monat und das kleine Wort davor.",
+      kennung: `anniversaireSagen|${t}|${m}` };
+  },
+  /** Königsstufe: ganzes Datum mit Wochentag nur hören, dann das Datum von morgen oder gestern. */
+  demainDatum() {
+    const m = zufall(0, 11), d = waehle([1, -1]);
+    const lang = TAGE_IM_MONAT[m];
+    // Oft am Monatsrand: dort wechselt der Monat. Nicht über das Februar-Ende (Schaltjahr).
+    let t = Math.random() < 0.5 ? (d > 0 ? lang : 1) : zufall(1, lang);
+    if ((m === 1 && d > 0 && t === 28) || (m === 2 && d < 0 && t === 1)) return null;
+    const w = zufall(0, 6);
+    const ziel = verschiebe(t, m, d);
+    const w2 = mod(w + d, 7);
+    const richtig = datumWort(ziel.t, ziel.m, w2);
+    // Ablenker: falscher Wochentag; Monat vergessen; Wochentag nicht weitergezählt
+    let vergessen;
+    if (ziel.m !== m) vergessen = datumWort(d > 0 ? 1 : lang, m, w2);      // „le premier avril“ statt „mai“
+    else {
+      // in die falsche Richtung gezählt; am Monatsrand zwei Tage weiter
+      const falsch = t - d >= 1 && t - d <= lang ? t - d : t + 2 * d;
+      vergessen = datumWort(falsch, m, w2);
+    }
+    const optionen = mische([richtig, datumWort(ziel.t, ziel.m, mod(w - d, 7)), vergessen, datumWort(ziel.t, ziel.m, w)]);
+    return { art: "demainDatum", typ: "wahl", t, m, w, d, sprich: `Aujourd’hui, c’est ${datumWort(t, m, w)}.`,
+      frage: d > 0 ? "Hör zu. <b>Demain</b>, c’est … ?" : "Hör zu. <b>Hier</b>, c’était … ?", hilfe: d > 0 ? "Welches Datum ist morgen?" : "Welches Datum war gestern?",
+      optionen, richtig, lang: true, loesung: `${d > 0 ? "Demain, c’est" : "Hier, c’était"} ${richtig}.`,
+      hinweis: "Hör nochmal genau hin, tipp auf 🔊. Zähl einen Tag weiter oder zurück: beim Wochentag und beim Datum. Wie viele Tage hat der Monat?",
+      kennung: `demainDatum|${t}|${m}|${w}|${d}` };
+  },
+};
+
+/** Tag t im Monat m um d Tage verschieben (gewöhnliches Jahr). */
+function verschiebe(t, m, d) {
+  let t2 = t + d, m2 = m;
+  if (t2 > TAGE_IM_MONAT[m]) { t2 = 1; m2 = mod(m + 1, 12); }
+  if (t2 < 1) { m2 = mod(m - 1, 12); t2 = TAGE_IM_MONAT[m2]; }
+  return { t: t2, m: m2 };
+}
+function nahWert(k, t, m) {
+  const [x, y] = k.split("|").map(Number);
+  return (x === t ? 0 : 1) + (y === m ? 0 : 1);
+}
+
+// Je Stufe die Arten (Gewicht durch Wiederholung). Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 6. Klasse.
+// Je Eintrag: [Art, Erzeuger].
+const STUFE = {
+  s1: [["tagHoeren", () => ARTEN.tagHoeren(true)], ["tagHoeren", () => ARTEN.tagHoeren(true)], ["tageOrdnen", () => ARTEN.tageOrdnen(4, true)]],
+  s2: [["demainHier", () => ARTEN.demainHier()], ["demainHier", () => ARTEN.demainHier()], ["tagDeutsch", () => ARTEN.tagDeutsch()],
+    ["tageOrdnen", () => ARTEN.tageOrdnen(5, false)], ["tagHoeren", () => ARTEN.tagHoeren(false)]],
+  s3: [["moisOrdnen", () => ARTEN.moisOrdnen(5)], ["moisApres", () => ARTEN.moisApres()], ["saison", () => ARTEN.saison()], ["moisHoeren", () => ARTEN.moisHoeren()]],
+  s4: [["blattZuText", () => ARTEN.blattZuText(20)], ["textZuBlatt", () => ARTEN.textZuBlatt(20, 4, true)]],
+  s5: [["kalenderZeigen", () => ARTEN.kalenderZeigen()], ["wochentagKalender", () => ARTEN.wochentagKalender()],
+    ["anniversaireSagen", () => ARTEN.anniversaireSagen()], ["anniversaireHoeren", () => ARTEN.textZuBlatt(31, 4, false)]],
+  // Königsstufe: ganzes Datum nur gehört, Monatswechsel, Geburtstag aus sechs Blättern, Wochentag im Kalender
+  s6: [["demainDatum", () => ARTEN.demainDatum()], ["demainDatum", () => ARTEN.demainDatum()],
+    ["anniversaireHoeren", () => ARTEN.textZuBlatt(31, 6, false)], ["wochentagKalender", () => ARTEN.wochentagKalender()]],
+};
+const MAX_TAG = { s4: 20 };
+
+function aufgabeErzeugen(stufe) {
+  for (let versuch = 0; versuch < 200; versuch++) {
+    const a = waehle(STUFE[stufe])[1]();
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  throw new Error(`Stufe ${stufe}: keine gültige Aufgabe`);
+}
+
+// ---------- Prüfung (tools/pruefe_spiele.js) ----------
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!a) return ["keine Aufgabe"];
+  if (!STUFE[stufe].some(([art]) => art === a.art)) m.push(`Art ${a.art} nicht in der Stufe`);
+  if (a.typ === "wahl") {
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Möglichkeit");
+    if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+    if (a.hinweis && !a.blaetter && a.hinweis.toLowerCase().includes(a.richtig.toLowerCase())) m.push("Hinweis verrät die Lösung");
+  }
+  // richtige Antwort unabhängig nachrechnen
+  let soll = null;
+  if (a.art === "tagHoeren") soll = a.sprich;
+  if (a.art === "tagDeutsch") { soll = JOURS[a.i]; if (!a.frage.includes(JOURS_DE[a.i])) m.push("Frage passt nicht"); }
+  if (a.art === "demainHier") soll = JOURS[mod(a.h + a.d, 7)];
+  if (a.art === "moisApres") soll = MOIS[mod(a.m + a.d, 12)];
+  if (a.art === "saison") { if (!(a.m in SAISON_VON)) m.push("Monat ohne eindeutige Jahreszeit"); soll = SAISONS[SAISON_VON[a.m]]; }
+  if (a.art === "moisHoeren") soll = a.sprich;
+  if (a.art === "blattZuText") {
+    soll = `le ${a.t === 1 ? "premier" : NOMBRES[a.t]} ${MOIS[a.m]}`;
+    if (a.t === 1 && !a.optionen.includes(`le un ${MOIS[a.m]}`)) m.push("1. ohne Ablenker „le un“");
+  }
+  if (a.art === "textZuBlatt" || a.art === "anniversaireHoeren") {
+    soll = `${a.t}|${a.m}`;
+    if (!a.sprich.includes(`le ${a.t === 1 ? "premier" : NOMBRES[a.t]} ${MOIS[a.m]}`)) m.push("gesprochenes Datum passt nicht");
+    if (a.optionen.length !== a.n) m.push(`${a.optionen.length} statt ${a.n} Blätter`);
+    if (a.optionen.some(o => { const [x, y] = o.split("|").map(Number); return x > TAGE_IM_MONAT[y] + (y === 1 ? 1 : 0); })) m.push("Kalenderblatt mit einem Tag, den es nicht gibt");
+  }
+  if (a.art === "wochentagKalender") soll = JOURS[(new Date(a.jahr, a.m, a.t).getDay() + 6) % 7];
+  if (a.art === "anniversaireSagen") soll = `Mon anniversaire, c’est le ${a.t === 1 ? "premier" : NOMBRES[a.t]} ${MOIS[a.m]}.`;
+  if (a.art === "demainDatum") {
+    // über Date in einem gewöhnlichen Jahr (2027)
+    const z = new Date(2027, a.m, a.t + a.d);
+    soll = `le ${JOURS[mod(a.w + a.d, 7)]} ${z.getDate() === 1 ? "premier" : NOMBRES[z.getDate()]} ${MOIS[z.getMonth()]}`;
+    if ((a.m === 1 && a.t === 28 && a.d > 0) || (a.m === 2 && a.t === 1 && a.d < 0)) m.push("über das Februar-Ende");
+    if (!a.sprich.includes(`le ${JOURS[a.w]} `)) m.push("gesprochenes Datum ohne Wochentag");
+  }
+  if (a.art === "kalenderZeigen") { if (a.t < 1 || a.t > new Date(a.jahr, a.m + 1, 0).getDate()) m.push("Tag gibt es nicht"); }
+  if (a.art === "tageOrdnen" || a.art === "moisOrdnen") {
+    const liste = a.art === "tageOrdnen" ? JOURS : MOIS;
+    if (a.reihe.some((w, k) => w !== liste[mod(a.start + k, liste.length)])) m.push("Reihe stimmt nicht");
+    if (new Set(a.reihe).size !== a.reihe.length) m.push("Reihe mit doppeltem Teil");
+  }
+  if (soll !== null && soll !== a.richtig) m.push(`Lösung falsch: ${a.richtig} statt ${soll}`);
+  if (MAX_TAG[stufe] && a.t > MAX_TAG[stufe]) m.push("Tag zu gross für die Stufe");
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  if (/'/.test(JSON.stringify(a))) m.push("gerader Apostroph statt ’");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Text vorlesen (fr); der typografische Apostroph wird für die Stimme gerade. */
+const sprich = text => LS.sprich(text.replace(/’/g, "'"), "fr");
+
+function blattEl(t, m, gross = false) {
+  return el("span", { class: "blatt" + (gross ? " gross" : ""), "aria-label": `${t}. ${MOIS_DE[m]}` },
+    el("span", { class: "blatt-mois", text: MOIS[m] }), el("span", { class: "blatt-zahl", text: String(t) }));
+}
+
+/** Monatsblatt (Montag zuerst); mit onTag antippbar. */
+function monatEl(m, jahr, onTag) {
+  const gitter = el("div", { class: "cal-gitter" }, ...JOURS_KURZ.map(k => el("span", { class: "cal-kopf", text: k })));
+  const erster = wochentag(jahr, m, 1);
+  for (let i = 0; i < erster; i++) gitter.append(el("span"));
+  const zellen = [];
+  for (let t = 1; t <= tageIn(m, jahr); t++) {
+    const we = wochentag(jahr, m, t) >= 5 ? " we" : "";
+    const z = onTag ? el("button", { type: "button", class: "cal-zelle" + we, text: String(t), "aria-label": `${t}` }) : el("span", { class: "cal-zelle" + we, text: String(t) });
+    if (onTag) z.addEventListener("click", () => onTag(t, z));
+    zellen.push(z);
+    gitter.append(z);
+  }
+  return { element: el("div", { class: "cal-monat" }, el("div", { class: "cal-monat-kopf", text: `${MOIS[m]} ${jahr}` }), gitter), zellen };
+}
+
+const TIPP = {
+  s1: "Hör gut zu! Unter jedem Wort steht, was es auf Deutsch heisst.",
+  s2: "demain heisst morgen, hier heisst gestern.",
+  s3: "Die Monate heissen fast wie auf Deutsch — hör genau hin.",
+  s4: "Am ersten Tag sagt man nicht „le un“, sondern „le premier“.",
+  s5: "Hör gut zu und schau genau in den Kalender.",
+  s6: "Hör dir das Datum gut an. Wie viele Tage hat der Monat?",
+};
+
+const SPIEL = {
+  id: "calendrier",
+  einleitung: "Lundi, mardi, mercredi … Lerne die Wochentage, die Monate und das Datum auf Französisch. Mit 🔊 hörst du es nochmal.",
+  anzahl: 8,
+  stufen: {
+    s1: "Einstieg: Wochentage hören und ordnen — lundi, mardi …",
+    s2: "Hier und demain: Heute ist jeudi — und morgen?",
+    s3: "Die Monate ordnen und Jahreszeiten: janvier → l’hiver.",
+    s4: "Das Datum lesen: le trois mai, le premier janvier.",
+    s5: "Datum hören und im Kalender zeigen; „Mon anniversaire, c’est …“",
+    s6: "Endgegner: le trente avril — und morgen? Nur hören.",
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(TIPP[ctx.stufe]);
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("art", a.art); // jede Stufe hat mehrere Arten
+    if (a.d !== undefined) ctx.serie("richtung", a.d);
+    ctx.kennung(a.kennung);
+    const f = ctx.flaeche;
+    f.append(el("div", { class: "frage", html: a.frage }));
+    if (a.hilfe) f.append(el("div", { class: "cal-hilfe", text: a.hilfe }));
+    if (a.wort) f.append(el("div", { class: "cal-wort", text: a.wort }));
+    if (a.blatt) f.append(el("div", { class: "cal-mitte" }, blattEl(a.blatt[0], a.blatt[1], true)));
+    if (a.monat) f.append(monatEl(a.m, a.jahr, null).element);
+    if (a.sprich) {
+      f.append(el("button", { type: "button", class: "cal-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(a.sprich) }));
+      sprich(a.sprich);
+    }
+
+    if (a.typ === "reihe") {
+      LS.reihenfolge(ctx, {
+        reihe: a.reihe, breite: 130, pfeile: true,
+        inhalt: w => (a.deutsch ? { text: w, klein: WORT_DE[w] } : w),
+        hinweis: (w, erwartet) => (a.reihe.indexOf(erwartet) === 0 ? "Beginne beim fett geschriebenen Wort." : "Sag die Reihe leise auf: Was kommt als Nächstes?"),
+        beiRichtig: () => sprich(a.reihe.join(", ")),
+      });
+      return;
+    }
+    if (a.typ === "kalender") {
+      ctx.loesung(a.loesung);
+      ctx.schritte(1);
+      let fertig = false;
+      const monat = monatEl(a.m, a.jahr, (t, z) => {
+        if (fertig) return;
+        if (t === a.t) { fertig = true; z.classList.add("richtig"); ctx.richtig(`Oui ! ${a.loesung}`); return; }
+        z.classList.remove("falsch"); void z.offsetWidth; z.classList.add("falsch");
+        ctx.falsch("Hör nochmal genau hin, tipp auf 🔊. Welche Zahl hörst du?", a.loesung);
+        if (ctx.vorbei()) { fertig = true; monat.zellen[a.t - 1].classList.add("richtig"); }
+      });
+      f.append(monat.element);
+      return;
+    }
+    const box = LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.richtig, hinweis: a.hinweis, loesung: a.loesung, lob: waehle(["Oui !", "Super !", "Bravo !", "Très bien !"]),
+      breite: a.blaetter ? 110 : a.lang ? 260 : 130,
+      inhalt: a.blaetter ? (k => { const [t, m] = k.split("|").map(Number); return blattEl(t, m); })
+        : (w => (a.deutsch ? { text: w, klein: WORT_DE[w] } : w)),
+      beiRichtig: () => { if (!a.blaetter) sprich(a.richtig); },
+    });
+    if (a.blaetter) box.classList.add("cal-blaetter");
+  },
+};
+
+LS.spielMitStimme(SPIEL, "fr");
+</script>
+</body>
+</html>

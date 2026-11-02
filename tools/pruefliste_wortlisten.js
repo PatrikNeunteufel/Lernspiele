@@ -371,6 +371,112 @@ z("Die Lage stammt aus swissBOUNDARIES3D (swisstopo); zu prüfen sind die Namen,
 z("");
 for (const [titel, hinweis, kopf, daten] of Object.values(KARTE_TEILE)) tabelle(`### ${titel}`, hinweis, kopf, daten);
 
+// LERN_Session8: Geheimschrift-Knacker, Komma-Jagd, Morphem-Schere
+const { GEHEIM_WOERTER } = lade("spiele/geheimschrift-knacker/woerter.js", ["GEHEIM_WOERTER"]);
+const { KOMMA_SAETZE } = lade("spiele/komma-jagd/woerter.js", ["KOMMA_SAETZE"]);
+const { MORPHEM_LISTEN } = lade("spiele/morphem-schere/woerter.js", ["MORPHEM_LISTEN"]);
+const KOMMA_TITEL = { aufzaehlung: "Sätze mit Aufzählungen", verbgruppen: "Sätze mit zwei Verbgruppen", ohne: "Sätze ohne Komma (nur zusätzlich zu den anderen)" };
+const morphemZeile = w => [w.replace(/[|()]/g, ""), w.replace(/[()]/g, "").split("|").join(" | "), (w.match(/\(([^)]+)\)/) || [])[1] || ""];
+const eaZeile = ([w, verwandt]) => { const m = w.match(/^(.*)\{([^|]+)\|([^}]+)\}(.*)$/); return [m[1] + m[2] + m[4], m[2], m[1] + m[3] + m[4], verwandt]; };
+z("## 41. Geheimschrift-Knacker (Lehrplan SG MI.2.1) — Geheimwörter");
+z("");
+z("Nur Grossbuchstaben A–Z, ohne Umlaute (sonst geht die Verschiebung nicht auf).");
+z("");
+tabelle("### Wörter", null, ["Wort"], GEHEIM_WOERTER.map(w => [w]));
+z("## 42. Komma-Jagd (Lehrplan SG D.5.E.1, D.4.F.1)");
+z("");
+z("Die Kommas stehen im Satz; das Spiel nimmt sie heraus, und das Kind setzt sie wieder. Nur Muss-Kommas.");
+z("");
+for (const [liste, saetze] of Object.entries(KOMMA_SAETZE)) tabelle(`### ${KOMMA_TITEL[liste] || liste}`, null, ["Satz"], saetze.map(s => [s]));
+z("## 43. Morphem-Schere (Lehrplan SG D.5.D.1, D.5.E.1)");
+z("");
+tabelle("### Wörter mit Bausteinen", "Der Stamm ist die dritte Spalte; „Endung“ im Spiel auch für -ung, -lich, -keit.", ["Wort", "Bausteine", "Stamm"], MORPHEM_LISTEN.bausteine.map(morphemZeile));
+tabelle("### Stammregel e oder ä", "Ohne verwandtes Wort: e oder eu.", ["Wort", "richtig", "falsche Auswahl", "verwandt mit"], MORPHEM_LISTEN["stamm-ea"].map(eaZeile));
+
+// LERN_Session8, Runde 2: je Liste eine oder mehrere Tabellen [Titel, Hinweis, Kopf, Zeilen]
+const R2 = (datei, namen) => lade(datei, namen);
+const objZeile = o => (Array.isArray(o) ? o.map(zelle) : [zelle(o)]);
+const RE = R2("spiele/rede-zeichen/woerter.js", ["REDE_SAETZE"]).REDE_SAETZE;
+const TR = R2("spiele/trenn-schere/woerter.js", ["TRENN_WOERTER"]).TRENN_WOERTER;
+const VF = R2("spiele/verben-faecher/woerter.js", ["VERBEN_LISTEN"]).VERBEN_LISTEN;
+const WS = R2("spiele/wort-spuernase/woerter.js", ["SPUER_SAETZE"]).SPUER_SAETZE;
+const SO = R2("spiele/sound-sorter/woerter.js", ["SOUND_LAUTE", "SOUND_WOERTER"]);
+const TG = R2("spiele/taschengeld-planer/woerter.js", ["TASCHEN_WAREN"]).TASCHEN_WAREN;
+const WT = R2("spiele/wassertropfen-reise/woerter.js", ["WASSER_FRAGEN"]).WASSER_FRAGEN;
+const EZ = R2("spiele/erdzeit-leiter/woerter.js", ["ERDZEIT_EREIGNISSE"]).ERDZEIT_EREIGNISSE;
+const PB = R2("spiele/pflanzen-bestimmer/woerter.js", ["PFLANZEN_LISTE"]).PFLANZEN_LISTE;
+const KW = R2("spiele/kakao-weg/woerter.js", ["WEGE"]).WEGE;
+const BK = R2("spiele/blutkreislauf-lotse/woerter.js", ["KREISLAUF_FRAGEN"]).KREISLAUF_FRAGEN;
+const EW = R2("spiele/energie-wandler/woerter.js", ["ENERGIEFORMEN", "ENERGIE_GERAETE", "ENERGIE_KETTEN", "ENERGIE_FRAGEN"]);
+const BP = R2("spiele/bionik-paare/woerter.js", ["BIONIK_PAARE"]).BIONIK_PAARE;
+const RUNDE2 = [
+  ["44. Rede-Zeichen (Lehrplan SG D.4.F.1)", "rede-zeichen/vorne", "Begleitsatz vorne", "Anführungszeichen „…“ nach Schweizer Schulschrift angenommen.", ["Satz"], RE.vorne.map(s => [s])],
+  [null, "rede-zeichen/hinten", "Begleitsatz hinten", "„|“ = Stelle für den eingeschobenen Begleitsatz (Königsstufe).", ["Satz"], RE.hinten.map(s => [s])],
+  ["45. Trenn-Schere (Lehrplan SG D.5.E.1)", "trenn-schere/woerter", "Wörter mit Trennstellen", "Trennung nach Duden prüfen.", ["Wort"], TR.woerter.map(w => [w])],
+  ["46. Verben-Fächer (Lehrplan SG D.5.D.1)", "verben-faecher/verben", "Verben mit Ergänzungen", "[frage:Wörter] = Ergänzung mit ihrer Frage.", ["Infinitiv", "Präsens | Präteritum | Perfekt", "Beispielsatz"], VF.verben.map(objZeile)],
+  ["47. Wort-Spürnase (Lehrplan SG D.2.B.1)", "wort-spuernase/saetze", "Sätze mit schwierigem Wort", "{Wort} = gesucht, [Wörter] = Hinweis im Text.", ["Stufe", "Satz", "richtig", "falsch", "falsch"], WS.map(objZeile)],
+  ["48. Sound-Sorter (Lehrplan SG FS1E.5.C.2)", "sound-sorter/woerter", "Englische Wörter nach Laut", "Britische Aussprache. Laute: " + Object.entries(SO.SOUND_LAUTE).map(([k, l]) => `${k} ${l.ipa}`).join(", "), ["Wort", "Laut", "Bild"], SO.SOUND_WOERTER.map(objZeile)],
+  ["49. Taschengeld-Planer (Lehrplan SG NMG.6.5)", "taschengeld-planer/waren", "Waren mit Preisen", "Preis in Rappen, gerundet für die Schweiz 2026 (geschätzt).", ["Bild", "Ware", "Rappen", "Bedarf / Wunsch", "…"], TG.map(objZeile)],
+  ["50. Wassertropfen-Reise (Lehrplan SG NMG.2.2)", "wassertropfen-reise/fragen", "Fragen zum Wasserkreislauf", "Fakten bitte nachprüfen.", ["Frage"], WT.map(objZeile)],
+  ["51. Erdzeit-Leiter (Lehrplan SG NMG.2.5)", "erdzeit-leiter/ereignisse", "Ereignisse der Erdgeschichte", "Zeit in Millionen Jahren, gerundet — bitte nachprüfen.", ["Ereignis"], EZ.map(objZeile)],
+  ["52. Pflanzen-Bestimmer (Lehrplan SG NMG.2.4)", "pflanzen-bestimmer/pflanzen", "Pflanzen mit Merkmalen", "Merkmale bitte nachprüfen; null = nicht verwendet.", ["Pflanze"], PB.map(objZeile)],
+  ["53. Kakao-Weg (Lehrplan SG NMG.6.3)", "kakao-weg/wege", "Wege der Produkte", "Je Produkt die Schritte in Reihenfolge.", ["Produkt", "Nr.", "Schritt", "wer"], KW.flatMap(w => w.schritte.map((s, i) => [w.name, i + 1, zelle(s[0]), zelle(s[1])]))],
+  ["54. Blutkreislauf-Lotse (Lehrplan SG NMG.1.4)", "blutkreislauf-lotse/fragen", "Fragen zu Herz, Lunge und Blut", "Fakten bitte nachprüfen.", ["Stufe", "Thema", "Frage", "richtig", "falsch", "falsch", "Erklärung"], BK.map(objZeile)],
+  ["55. Energie-Wandler (Lehrplan SG NMG.3.2)", "energie-wandler/geraete", "Geräte", "Energieformen: " + Object.entries(EW.ENERGIEFORMEN).map(([k, v]) => `${k} = ${zelle(v)}`).join("; "), ["Gerät"], EW.ENERGIE_GERAETE.map(objZeile)],
+  [null, "energie-wandler/geraete", "Ketten", null, ["Kette"], EW.ENERGIE_KETTEN.map(objZeile)],
+  [null, "energie-wandler/geraete", "Fragen", null, ["Frage"], EW.ENERGIE_FRAGEN.map(objZeile)],
+  ["56. Bionik-Paare (Lehrplan SG NMG.5.3)", "bionik-paare/paare", "Vorbild und Erfindung", "Beispiele bitte nachprüfen (einige sind in Entwicklung).", ["Paar"], BP.map(objZeile)],
+];
+for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE2) {
+  if (teilTitel) { z(`## ${teilTitel}`); z(""); }
+  tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
+}
+
+// LERN_Session8, Runde 3: Französisch, Englisch, Informatik
+const MM = lade("spiele/mots-match/woerter.js", ["THEMEN_FR"]).THEMEN_FR;
+const PW = lade("spiele/parallelwort-bruecke/woerter.js", ["PARALLEL", "PARALLEL_SAETZE"]);
+const LL = lade("spiele/le-ou-la/woerter.js", ["NOMEN"]).NOMEN;
+const SL = lade("spiele/son-lauscher/woerter.js", ["SON_LAUTE", "SON_WOERTER"]);
+const AC = lade("spiele/au-cafe/woerter.js", ["CAFE_DIALOGE", "CAFE_SITUATIONEN", "CAFE_BEFINDEN", "CAFE_TU_VOUS", "CAFE_PERSONEN", "CAFE_SACHEN"]);
+const WR = lade("spiele/weather-report/woerter.js", ["WR_WETTER", "WR_WOERTER", "WR_DURCHSAGEN", "WR_ORTE"]);
+const DT = lade("spiele/datei-typen/woerter.js", ["DATEI_PROGRAMME", "DATEI_ENDUNGEN", "DATEI_DINGE", "DATEI_NEUTRAL"]);
+const RUNDE3 = [
+  ...Object.entries(MM).map(([liste, t], i) => [i ? null : "57. Mots-Match (Lehrplan SG FS2F.5.B.1)", `mots-match/${liste}`, t.name, null, ["Artikel", "Wort", "Deutsch", "Bild"], t.woerter.map(objZeile)]),
+  ["58. Wörter-Brücke (Lehrplan SG FS2F.2.B.1)", "parallelwort-bruecke/parallel", "Parallelwörter", "Kennzeichen gleich / aehnlich / falle; bei Fallen das letzte Feld = falsche Bedeutung.", ["Französisch", "Deutsch", "Englisch", "Bild", "Kennzeichen", "falsche Bedeutung"], PW.PARALLEL.map(objZeile)],
+  [null, "parallelwort-bruecke/parallel", "Sätze mit einem Parallelwort", null, ["Satz", "Parallelwort", "Deutsch"], PW.PARALLEL_SAETZE.map(objZeile)],
+  ["59. Le ou la? (Lehrplan SG FS2F.5.D.2)", "le-ou-la/nomen", "Nomen", "Geschlecht m/f, Mehrzahl, Bild, Deutsch, Ausnahme.", ["Nomen", "m/f", "Mehrzahl", "Bild", "Deutsch", "Ausnahme"], LL.map(objZeile)],
+  ["60. Son-Lauscher (Lehrplan SG FS2F.5.C.2)", "son-lauscher/woerter", "Wörter nach Laut", "[…] = Lautgruppe. Laute: " + Object.entries(SL.SON_LAUTE).map(([k, l]) => `${k} ${l.ipa}`).join(", "), ["Wort", "Laut", "Bild"], SL.SON_WOERTER.map(objZeile)],
+  ["61. Au café (Lehrplan SG FS2F.3.A.1)", "au-cafe/dialoge", "Dialoge", null, ["Dialog"], AC.CAFE_DIALOGE.map(objZeile)],
+  [null, "au-cafe/dialoge", "Situationen zum Bild", null, ["Situation"], AC.CAFE_SITUATIONEN.map(objZeile)],
+  [null, "au-cafe/dialoge", "Antworten auf « Ça va ? »", null, ["Antwort"], AC.CAFE_BEFINDEN.map(objZeile)],
+  [null, "au-cafe/dialoge", "tu oder vous", null, ["Satzpaar"], AC.CAFE_TU_VOUS.map(objZeile)],
+  [null, "au-cafe/dialoge", "Personen und Sachen", null, ["Eintrag"], [...AC.CAFE_PERSONEN, ...Object.entries(AC.CAFE_SACHEN)].map(objZeile)],
+  ["62. Weather-Report (Lehrplan SG FS1E.1.A.1)", "weather-report/durchsagen", "Durchsagen", "Britisches Englisch, selbst geschrieben.", ["Durchsage"], WR.WR_DURCHSAGEN.map(objZeile)],
+  [null, "weather-report/durchsagen", "Wetterwörter", null, ["Wort", "Bild und Deutsch"], Object.entries(WR.WR_WETTER).map(objZeile)],
+  ["63. Datei-Typen (Lehrplan SG MI.2.1)", "datei-typen/endungen", "Endungen", "Grössen wie in der Speicher-Leiter.", ["Endung"], DT.DATEI_ENDUNGEN.map(objZeile)],
+  [null, "datei-typen/endungen", "Programme", null, ["Programm"], Object.entries(DT.DATEI_PROGRAMME).map(objZeile)],
+  [null, "datei-typen/endungen", "Dinge (Stufe 1) und neutrale Namen", null, ["Eintrag"], [...DT.DATEI_DINGE, ...DT.DATEI_NEUTRAL].map(objZeile)],
+];
+for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE3) {
+  if (teilTitel) { z(`## ${teilTitel}`); z(""); }
+  tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
+}
+
+// LERN_Session8, Runde 4: Kindergarten
+const GW = lade("spiele/gegenteil-wippe/woerter.js", ["GEGENTEIL_LISTEN"]).GEGENTEIL_LISTEN.gegenteile;
+const TS = lade("spiele/tageslauf-sonne/woerter.js", ["TAETIGKEITEN", "WOCHENPLAN"]);
+const RUNDE4 = [
+  ["64. Gegenteil-Wippe (Lehrplan SG MA.3.A.1)", "gegenteil-wippe/gegenteile", "Bildpaare", "Erstes Bild hat MEHR davon (bei vorher: zuerst).", ["Merkmal", "mehr / zuerst", "weniger / danach"], GW.paare.map(objZeile)],
+  [null, "gegenteil-wippe/gegenteile", "Gezeichnete Dinge", null, ["Eintrag"], (GW.gezeichnet || []).map(objZeile)],
+  [null, "gegenteil-wippe/gegenteile", "Reihen zum Ordnen", null, ["Reihe"], (GW.reihen || []).map(objZeile)],
+  ["65. Tageslauf-Sonne (Lehrplan SG MA.3.A.2, NMG.9.1)", "tageslauf-sonne/taetigkeiten", "Tätigkeiten", null, ["Bild", "Tätigkeit", "Tageszeit"], TS.TAETIGKEITEN.map(objZeile)],
+  [null, "tageslauf-sonne/taetigkeiten", "Wochenplan (gestern, heute, morgen)", null, ["Bild", "Tätigkeit"], TS.WOCHENPLAN.map(objZeile)],
+];
+for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE4) {
+  if (teilTitel) { z(`## ${teilTitel}`); z(""); }
+  tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
+}
+
 process.stdout.write(zeilen.join("\n"));
 
 // ---------- Inhalte je Liste: docs/eulenpfad/pruefung/listen.json ----------
@@ -598,6 +704,17 @@ for (const [liste, gedichte] of Object.entries(GB.VIERZEILER)) inListe(`gedicht-
 inListeTeil("gedicht-baukasten/strophen", "Gedichte mit Strophen", null, ["Titel", "Strophen (Reimschema / Verse)"], GB.STROPHEN_GEDICHTE);
 
 for (const [liste, [titel, hinweis, kopf, daten]] of Object.entries(KARTE_TEILE)) inListe(`schweiz-karte/${liste}`, titel, hinweis, kopf, daten);
+
+inListe("geheimschrift-knacker/woerter", "Geheimwörter", "Nur A–Z, ohne Umlaute.", ["Wort"], GEHEIM_WOERTER.map(w => [w]));
+for (const [liste, saetze] of Object.entries(KOMMA_SAETZE)) inListe(`komma-jagd/${liste}`, KOMMA_TITEL[liste] || liste, null, ["Satz"], saetze.map(s => [s]));
+inListe("morphem-schere/bausteine", "Wörter mit Bausteinen", null, ["Wort", "Bausteine", "Stamm"], MORPHEM_LISTEN.bausteine.map(morphemZeile));
+inListe("morphem-schere/stamm-ea", "Stammregel e oder ä", "Ohne verwandtes Wort: e oder eu.", ["Wort", "richtig", "falsche Auswahl", "verwandt mit"], MORPHEM_LISTEN["stamm-ea"].map(eaZeile));
+
+for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE2) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
+
+for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE3) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
+
+for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE4) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
 
 // Jede Quell-Liste braucht einen Eintrag — sonst bricht der Lauf ab, statt still eine Lücke zu schreiben.
 const fehlend = Object.keys(QUELL_LISTEN).filter(k => !listen[k] || listen[k].tabellen.every(t => !t.zeilen.length));

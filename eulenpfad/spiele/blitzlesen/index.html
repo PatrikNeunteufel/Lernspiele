@@ -128,7 +128,9 @@ LS.spiel({
     };
     let uhr = null;
     ctx.flaeche.append(tafel, el("div", { class: "hoer-zeile" }, el("button", { type: "button", class: "knopf hell", text: "⚡ Nochmal blitzen", onclick: zeige })));
-    zeige();
+    // Erst wenn das Kind bereit ist: ▶ Los, 3-2-1, dann blitzt das Wort (LS.losGehts, Wunsch Patrik LERN_Session8)
+    tafel.replaceChildren(el("div", { class: "leer", text: "👀" }));
+    LS.losGehts(ctx, tafel, zeige);
 
     const frage = a.art === "wort" ? "Welches Wort hast du gelesen?" : "Welches Bild passt?";
     ctx.flaeche.append(el("div", { class: "auftrag", text: frage }));

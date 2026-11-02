@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rhythmus-Diktat</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 10px; }
+  .diktat { display: flex; align-items: stretch; gap: 0; background: #fff; border: 3px solid var(--rand); border-radius: 18px;
+    padding: 6px 8px; margin: 0 auto 12px; max-width: 640px; min-height: 92px; }
+  .diktat .takt-platz { display: flex; flex: 1 1 0; align-items: stretch; min-width: 0; }
+  .diktat .takt-platz + .takt-platz { border-left: 3px solid var(--text); margin-left: 4px; padding-left: 4px; }
+  .diktat .gelegt { flex: var(--l) 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; }
+  .diktat .gelegt svg { width: 100%; max-width: 110px; height: auto; }
+  .diktat .frei { flex: var(--l) 1 0; min-width: 0; border: 3px dashed var(--deko-4); background: var(--hinweis-hell); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; color: var(--deko-4); font-weight: 900; font-size: 15px; margin: 4px 2px; }
+  .karten-wahl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(96px, 100%), 1fr)); gap: 8px; max-width: 640px; margin: 0 auto; }
+  .karte-knopf { border: none; border-radius: 14px; background: #fff; box-shadow: 0 5px 0 var(--rand); padding: 4px 4px 6px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 0; font-family: inherit; color: var(--text); min-height: 96px; }
+  .karte-knopf svg { width: 100%; max-width: 110px; height: 64px; }
+  .karte-knopf small { font-size: 13px; font-weight: 800; color: var(--text-leise); line-height: 1.15; text-align: center; }
+  .karte-knopf:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--rand); }
+  .karte-knopf:disabled { opacity: .35; cursor: default; }
+  .rhythmus .linie { stroke: var(--text-leise); stroke-width: 1.4; }
+  .rhythmus .kopf { fill: var(--text); stroke: var(--text); stroke-width: 1.6; }
+  .rhythmus .kopf.hohl { fill: #fff; stroke-width: 2.4; }
+  .rhythmus .hals { stroke: var(--text); stroke-width: 1.8; }
+  .rhythmus .balken, .rhythmus .faehnchen, .rhythmus .punkt { fill: var(--text); }
+  .rhythmus .pause { stroke: var(--text); stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .rd-zeile { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🥁 Rhythmus-Diktat</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/noten.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MU.6.B.1.g (Grundanspruch 2. Zyklus): rhythmische Motive mit Sechzehnteln und punktierten
+// Noten lesen und notieren — hier als Diktat: hören und aus Notenkarten nachlegen. MU.6.B.1.c (Halbe,
+// Viertel, Achtel) als Einstieg. Basisklasse 5: Stufe 1 = 4. Klasse, 2–4 = 5. Klasse, 5 = 6. Klasse,
+// 6 Endgegner. Immer 4/4-Takt.
+// Bezug: Der Rhythmus-Leser (Basisklasse 2) lässt Notenwerte benennen und Takte füllen — mit dem Bild
+// vor Augen. Hier gibt es kein Bild: Das Kind hört und schreibt selbst.
+// noten.js zeichnet Einzelnoten mit Fähnchen; Balken (Achtelpaar, Sechzehntelgruppen) und Pausen fehlen
+// dort. Die Karten zeichnet darum dieses Spiel selbst (karteSvg), im Stil von noten.js.
+
+const { waehle, el } = LS;
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+// Notenkarten: je Karte die Noten in Vierteln (w), punktiert (p), Pause (pause); laenge in Vierteln.
+// Keine halbe Pause: Sie klingt wie zwei Viertelpausen, das Diktat wäre nicht eindeutig.
+const KARTEN = {
+  v: { name: "Viertel", noten: [{ w: 1 }] },
+  a2: { name: "zwei Achtel", noten: [{ w: 0.5 }, { w: 0.5 }] },
+  h: { name: "Halbe", noten: [{ w: 2 }] },
+  pv: { name: "Viertelpause", noten: [{ w: 1, pause: true }] },
+  s4: { name: "vier Sechzehntel", noten: [{ w: 0.25 }, { w: 0.25 }, { w: 0.25 }, { w: 0.25 }] },
+  as2: { name: "Achtel, zwei Sechzehntel", noten: [{ w: 0.5 }, { w: 0.25 }, { w: 0.25 }] },
+  s2a: { name: "zwei Sechzehntel, Achtel", noten: [{ w: 0.25 }, { w: 0.25 }, { w: 0.5 }] },
+  sas: { name: "Sechzehntel, Achtel, Sechzehntel", noten: [{ w: 0.25 }, { w: 0.5 }, { w: 0.25 }] },
+  vpa: { name: "punktierte Viertel, Achtel", noten: [{ w: 1.5, p: true }, { w: 0.5 }] },
+  aps: { name: "punktierte Achtel, Sechzehntel", noten: [{ w: 0.75, p: true }, { w: 0.25 }] },
+};
+for (const k of Object.values(KARTEN)) k.laenge = k.noten.reduce((s, n) => s + n.w, 0);
+
+// Je Stufe: Karten zur Wahl, Karten, von denen mindestens eine vorkommen muss, Zahl der Takte.
+const STUFE = {
+  s1: { karten: ["v", "a2"], takte: 1 },
+  s2: { karten: ["v", "a2", "h", "pv"], muss: ["h", "pv"], takte: 1 },
+  s3: { karten: ["v", "a2", "h", "pv", "s4"], muss: ["s4"], takte: 1 },
+  s4: { karten: ["v", "a2", "h", "s4", "as2", "s2a", "pv"], muss: ["as2", "s2a"], takte: 1 },
+  s5: { karten: ["v", "a2", "h", "s4", "as2", "s2a", "vpa", "aps", "pv"], muss: ["vpa", "aps"], takte: 1 },
+  s6: { karten: ["v", "a2", "h", "s4", "as2", "s2a", "sas", "vpa", "aps", "pv"], muss: ["vpa", "aps", "sas"], takte: 2 },
+};
+const TAKT = 4;            // Viertel je Takt
+const TEMPO = 0.7;         // Sekunden je Viertel (etwa 86 Schläge in der Minute)
+
+// ---------- Aufgaben als Daten ----------
+
+/** Einen Takt füllen: Karten, die noch Platz haben; höchstens eine Pause; die Pflichtkarten bevorzugt. */
+function taktFuellen(s) {
+  const takt = [];
+  let rest = TAKT;
+  while (rest > 0) {
+    const passt = s.karten.filter(k => KARTEN[k].laenge <= rest && !(k === "pv" && takt.includes("pv")));
+    const bevorzugt = (s.muss || []).filter(k => passt.includes(k));
+    const k = bevorzugt.length && Math.random() < 0.35 ? waehle(bevorzugt) : waehle(passt);
+    takt.push(k);
+    rest -= KARTEN[k].laenge;
+  }
+  return takt;
+}
+
+function aufgabeErzeugen(stufe) {
+  const s = STUFE[stufe];
+  for (;;) {
+    const takte = Array.from({ length: s.takte }, () => taktFuellen(s));
+    const alle = takte.flat();
+    if (s.muss && !alle.some(k => s.muss.includes(k))) continue;
+    if (alle.every(k => k === "pv")) continue;
+    return { takte };
+  }
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const s = STUFE[stufe];
+  if (a.takte.length !== s.takte) m.push("falsche Zahl Takte");
+  for (const t of a.takte) {
+    if (t.reduce((x, k) => x + KARTEN[k].laenge, 0) !== TAKT) m.push("Takt geht nicht auf");
+    if (t.some(k => !s.karten.includes(k))) m.push("Karte nicht in der Stufe");
+    if (t.filter(k => k === "pv").length > 1) m.push("mehr als eine Pause im Takt");
+  }
+  if (s.muss && !a.takte.flat().some(k => s.muss.includes(k))) m.push("Pflichtkarte fehlt");
+  // Eindeutig hörbar: Aus den Tönen und Pausen lässt sich nur diese Kartenfolge legen.
+  if (zerlegungen(klang(a.takte.flat()), s.karten) !== 1) m.push("nicht eindeutig zu hören");
+  return m;
+}
+
+/** Was man hört: Folge aus [Dauer in Sechzehnteln, Pause?]. */
+const klang = karten => karten.flatMap(k => KARTEN[k].noten.map(n => `${n.w * 4}${n.pause ? "p" : ""}`));
+
+/** Wie viele Kartenfolgen ergeben genau diesen Klang? (Taktstriche bleiben ausser Acht: strenger.) */
+function zerlegungen(ziel, erlaubt, ab = 0) {
+  if (ab === ziel.length) return 1;
+  let n = 0;
+  for (const k of erlaubt) {
+    const teil = klang([k]);
+    if (teil.every((x, i) => ziel[ab + i] === x)) n += zerlegungen(ziel, erlaubt, ab + teil.length);
+  }
+  return n;
+}
+
+// ---------- Zeichnen ----------
+
+function svgEl(tag, attr = {}) {
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  return e;
+}
+
+/** Notenkarte als SVG: Noten auf einer Rhythmuslinie, Hälse nach oben, Balken über kurzen Noten. */
+function karteSvg(id) {
+  const k = KARTEN[id];
+  const breite = 40 + 50 * k.laenge;
+  const Y = 58, OBEN = 16;
+  const svg = svgEl("svg", { viewBox: `0 0 ${breite} 76`, class: "rhythmus", role: "img", "aria-label": k.name });
+  svg.append(svgEl("line", { x1: 2, x2: breite - 2, y1: Y, y2: Y, class: "linie" }));
+  let pos = 0;
+  const xs = [];
+  const innen = breite - 44;
+  for (const n of k.noten) {
+    const x = 18 + (pos / k.laenge) * innen + (k.noten.length === 1 ? innen / 2 - 4 : 0);
+    xs.push(x);
+    pos += n.w;
+    if (n.pause) {
+      // Viertelpause als Zickzack
+      svg.append(svgEl("path", { d: `M${x - 4},${Y - 38} L${x + 5},${Y - 27} L${x - 3},${Y - 17} L${x + 5},${Y - 6} Q${x - 8},${Y - 11} ${x - 1},${Y + 4}`, class: "pause" }));
+      continue;
+    }
+    const grund = n.p ? n.w / 1.5 : n.w;
+    svg.append(svgEl("ellipse", { cx: x, cy: Y, rx: 7.2, ry: 5.2, transform: `rotate(-20 ${x} ${Y})`, class: grund >= 2 ? "kopf hohl" : "kopf" }));
+    svg.append(svgEl("line", { x1: x + 6.4, x2: x + 6.4, y1: Y, y2: OBEN, class: "hals" }));
+    if (n.p) svg.append(svgEl("circle", { cx: x + 13, cy: Y - 3, r: 2.6, class: "punkt" }));
+  }
+  // Balken: alle Noten der Karte kürzer als ein Viertel, ausser der Achtel nach der punktierten Viertel (Fähnchen).
+  const kurz = k.noten.map((n, i) => (!n.pause && n.w < 1 ? i : -1)).filter(i => i >= 0);
+  const stiel = i => xs[i] + 6.4;
+  if (kurz.length >= 2) {
+    svg.append(svgEl("rect", { x: stiel(kurz[0]) - 0.9, y: OBEN, width: stiel(kurz.at(-1)) - stiel(kurz[0]) + 1.8, height: 5.5, class: "balken" }));
+    // zweiter Balken für Sechzehntel: über benachbarte Sechzehntel durchgehend, sonst ein kurzes Stück
+    const sech = kurz.filter(i => k.noten[i].w === 0.25);
+    for (const i of sech) {
+      const nachbar = sech.includes(i + 1);
+      if (nachbar) svg.append(svgEl("rect", { x: stiel(i) - 0.9, y: OBEN + 9, width: stiel(i + 1) - stiel(i) + 1.8, height: 5.5, class: "balken" }));
+      else if (!sech.includes(i - 1)) {
+        const links = i === kurz.at(-1);
+        const x0 = links ? stiel(i) - 11 : stiel(i) - 0.9;
+        svg.append(svgEl("rect", { x: x0, y: OBEN + 9, width: 11.9, height: 5.5, class: "balken" }));
+      }
+    }
+  } else if (kurz.length === 1) {
+    const hx = stiel(kurz[0]);
+    svg.append(svgEl("path", { d: `M${hx},${OBEN} q12,8 9,22 q-1,-12 -9,-14`, class: "faehnchen" }));
+  }
+  return svg;
+}
+
+// ---------- Hören ----------
+
+const toene = karten => karten.flatMap(k => KARTEN[k].noten.map(n => ({ midi: n.pause ? null : 72, dauer: n.w * TEMPO })));
+const vorzaehlen = () => Array.from({ length: TAKT }, () => ({ midi: 84, dauer: TEMPO, klick: true }));
+const kartenText = takte => takte.map(t => t.map(k => KARTEN[k].name).join(" · ")).join(" | ");
+
+// Für das Prüfskript im Scratchpad: die laufende Aufgabe.
+let AKTUELL = null;
+
+LS.spiel({
+  id: "rhythmus-diktat",
+  einleitung: "Hör gut zu: Erst zählen vier Klicks vor, dann kommt ein Rhythmus. Lege ihn mit den Notenkarten nach!",
+  anzahl: 6,
+  stufen: {
+    s1: "Viertel und zwei Achtel (4. Klasse).",
+    s2: "Dazu Halbe und Viertelpausen.",
+    s3: "Vier Sechzehntel: ganz schnell.",
+    s4: "Gemischt: Achtel und zwei Sechzehntel.",
+    s5: "Punktierte Noten: punktierte Viertel und Achtel (6. Klasse).",
+    s6: "Endgegner: zwei Takte mit allem.",
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Tipp: Klatsch den Rhythmus leise mit. Mit «Meine Karten» hörst du, was du gelegt hast.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    AKTUELL = a;
+    const s = STUFE[ctx.stufe];
+    const loesung = kartenText(a.takte);
+    const ziel = a.takte.flat();
+    ctx.loesung(loesung);
+    ctx.kennung(JSON.stringify(a.takte));
+    ctx.schritte(ziel.length);
+    const vorspiel = () => [...vorzaehlen(), ...toene(ziel)];
+    ctx.wartezeit(vorspiel().reduce((x, t) => x + t.dauer, 0));
+
+    const gelegt = [];
+    const diktat = el("div", { class: "diktat", "aria-label": "Dein Rhythmus" });
+    const knoepfe = {};
+
+    const zeichne = () => {
+      diktat.innerHTML = "";
+      let pos = 0;
+      for (let t = 0; t < s.takte; t++) {
+        const platz = el("div", { class: "takt-platz" });
+        let inTakt = 0;
+        while (pos < gelegt.length && inTakt + KARTEN[gelegt[pos]].laenge <= TAKT) {
+          const k = gelegt[pos];
+          const g = el("div", { class: "gelegt", style: `--l: ${KARTEN[k].laenge}` });
+          g.append(karteSvg(k));
+          platz.append(g);
+          inTakt += KARTEN[k].laenge;
+          pos++;
+        }
+        if (inTakt < TAKT) platz.append(el("div", { class: "frei", style: `--l: ${TAKT - inTakt}`, text: inTakt === 0 ? "?" : "…" }));
+        diktat.append(platz);
+      }
+      // Karten, die nicht mehr in den Takt passen, sind ausgegraut.
+      const frei = TAKT - (belegt() % TAKT);
+      for (const [k, knopf] of Object.entries(knoepfe)) knopf.disabled = ctx.vorbei() || belegt() >= s.takte * TAKT || KARTEN[k].laenge > frei;
+    };
+    const belegt = () => gelegt.reduce((x, k) => x + KARTEN[k].laenge, 0);
+
+    const pruefen = () => {
+      let fehlerAb = 0;
+      while (fehlerAb < Math.max(ziel.length, gelegt.length) && gelegt[fehlerAb] === ziel[fehlerAb]) fehlerAb++;
+      if (fehlerAb === ziel.length && gelegt.length === ziel.length) {
+        NOTEN.spiele(toene(gelegt));
+        ctx.richtig(`Richtig: ${loesung}`);
+        zeichne();
+        return;
+      }
+      // Bis zur ersten falschen Karte bleibt alles liegen.
+      const schlag = ziel.slice(0, fehlerAb).reduce((x, k) => x + KARTEN[k].laenge, 0);
+      const takt = Math.floor(schlag / TAKT) + 1, imTakt = (schlag % TAKT) + 1;
+      gelegt.splice(fehlerAb);
+      const wo = s.takte > 1 ? `Takt ${takt}, Schlag ${imTakt}` : `Schlag ${imTakt}`;
+      ctx.falsch(`Bis vor ${wo} stimmt alles. Ab ${wo} hör nochmal genau hin: Wie viele Töne, wie lang?`, loesung);
+      zeichne();
+    };
+
+    const wahl = el("div", { class: "karten-wahl" });
+    for (const k of s.karten) {
+      const knopf = el("button", { type: "button", class: "karte-knopf", "data-karte": k, "aria-label": KARTEN[k].name });
+      knopf.append(karteSvg(k), el("small", { text: KARTEN[k].name }));
+      knopf.addEventListener("click", () => {
+        if (ctx.vorbei() || knopf.disabled) return;
+        gelegt.push(k);
+        LS.ton("tipp");
+        zeichne();
+        if (belegt() === s.takte * TAKT) pruefen();
+      });
+      knoepfe[k] = knopf;
+      wahl.append(knopf);
+    }
+
+    const zurueck = el("button", { type: "button", class: "knopf hell klein", text: "⌫ Zurück",
+      onclick: () => { if (!ctx.vorbei() && gelegt.length) { gelegt.pop(); zeichne(); } } });
+    const meine = el("button", { type: "button", class: "knopf hell klein", text: "▶ Meine Karten",
+      onclick: () => { if (gelegt.length && !NOTEN.spiele(toene(gelegt))) ctx.sag("Der Ton ist aus. Schalte ihn oben rechts ein: 🔊", "hinweis"); } });
+
+    ctx.flaeche.append(
+      el("div", { class: "frage", text: s.takte > 1 ? "Hör zu und lege die zwei Takte nach." : "Hör zu und lege den Takt nach." }),
+      el("div", { class: "rd-zeile" }, NOTEN.hoerKnopf(ctx, vorspiel, "🔊 Nochmal hören"), meine, zurueck),
+      diktat, wahl);
+    zeichne();
+    // Gleich vorspielen — aber nur, wenn diese Aufgabe auch gestellt bleibt (der Rahmen zieht manchmal neu).
+    setTimeout(() => { if (document.body.contains(diktat) && !ctx.vorbei()) NOTEN.spiele(vorspiel()); }, 250);
+  },
+});
+</script>
+</body>
+</html>

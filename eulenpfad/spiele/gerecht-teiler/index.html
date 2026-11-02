@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerecht-Teiler</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+
+  /* Tisch mit Tellern (SVG im Hintergrund) und einer Schale für den Rest */
+  .tisch { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 6px auto 4px; max-width: 640px; }
+  .teller { position: relative; flex: 1 1 140px; max-width: 280px; min-height: 140px; padding: 22px 8px;
+    display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 0; border-radius: 50%; }
+  .teller.schale { flex: 0 1 220px; min-height: 96px; padding: 14px 26px 20px; border-radius: 0 0 50% 50%; }
+  .teller > svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  .teller-bild .flaeche-teller { fill: #fff; stroke-width: 5; }
+  .teller-bild .innen { fill: none; stroke: #eef0fa; stroke-width: 3; }
+  .teller-bild .schale-koerper { fill: #fff6d6; stroke: var(--deko-4); stroke-width: 5; }
+  .teller.waehlbar { cursor: pointer; }
+  /* Etwas ist angehoben: alle anderen Teller zeigen, dass man dorthin tippen kann (auch ohne Maus sichtbar). */
+  .teller.ziel-frei { outline: 4px dashed var(--knopf); outline-offset: -6px; }
+
+  .ding { position: relative; z-index: 1; border: none; background: none; padding: 0; font-family: inherit;
+    font-size: 30px; line-height: 1; width: 42px; height: 42px; border-radius: 50%; cursor: pointer;
+    transition: transform .15s; touch-action: manipulation; }
+  .tisch.gross .ding { font-size: 44px; width: 64px; height: 64px; }
+  .tisch.mittel .ding { font-size: 36px; width: 52px; height: 52px; }
+  .ding.gehoben { transform: translateY(-8px) scale(1.18); background: var(--hinweis-hell); box-shadow: 0 6px 0 var(--rand); }
+  .tisch.fest .ding { cursor: default; }
+
+  .zuege { text-align: center; font-weight: 800; color: var(--text-leise); margin-top: 4px; }
+  .teiler-knoepfe .knopf { min-width: 72px; min-height: 64px; font-size: 30px; }
+  .zahlwahl .wahl-knopf { font-size: clamp(28px, 7vw, 38px); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🍪 Gerecht-Teiler</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.4.a (1. Zyklus, erste Stufe): unterschiedliche Anzahlen einander angleichen
+// (z. B. 8 und 4 Knöpfe → 6 und 6); MA.3.A.2.a Dinge verteilen; Stufe 5 MA.1.A.3.a halbieren.
+// Basisklasse 1: s1 Kindergarten, s2–s4 1. Klasse, s5 2. Klasse, s6 Königsstufe.
+// s1–s3 und s5–s6 legen die Dinge selbst um, s4 sagt nur, wie viele hinüber müssen (Bilder bleiben).
+// Bezug: Zahlen-Waage (Gleichgewicht mit Zahlen) und Mittelwert-Türme (Basisklasse 5, Säulen
+// ausgleichen ohne Rest). Hier neu ab s5: ein Rest, der nicht aufgeht, kommt in die Schale; s6 verteilt
+// zusätzlich, was schon in der Schale liegt, auf vier Teller.
+
+const { zufall, waehle, el } = LS;
+
+// Dinge aus dem Znüni; Name in Einzahl und Mehrzahl, mit Artikel für „Tippe auf …“
+const DINGE = [
+  { bild: "🍪", eins: "Guetzli", viele: "Guetzli", ein: "ein Guetzli" },
+  { bild: "🍎", eins: "Apfel", viele: "Äpfel", ein: "einen Apfel" },
+  { bild: "🍓", eins: "Erdbeere", viele: "Erdbeeren", ein: "eine Erdbeere" },
+  { bild: "🥕", eins: "Rüebli", viele: "Rüebli", ein: "ein Rüebli" },
+];
+const nameVon = (d, n) => (n === 1 ? d.eins : d.viele);
+
+// Je Stufe: Art, Anzahl Teller, höchstens je Teller, höchstens alle zusammen, Züge (von–bis),
+// Schale für den Rest; halbieren = oft alles auf einem Teller; schaleStart = so viele liegen höchstens schon in der Schale
+const STUFE = {
+  s1: { art: "legen", teller: 2, max: 6, summe: 12, zuege: [1, 2] },
+  s2: { art: "legen", teller: 2, max: 10, summe: 10, zuege: [1, 4] },
+  s3: { art: "legen", teller: 3, max: 8, summe: 24, zuege: [2, 5] },
+  s4: { art: "zahl", teller: 2, max: 16, summe: 20, zuege: [1, 6] },
+  s5: { art: "legen", teller: 2, max: 20, summe: 20, summeMin: 7, zuege: [2, 8], schale: true, halbieren: true },
+  s6: { art: "legen", teller: 4, max: 8, summe: 40, zuege: [3, 8], schale: true, schaleStart: 5 },
+};
+
+const summe = w => w.reduce((s, x) => s + x, 0);
+
+/** Wenigste Züge, bis alle Teller 'ziel' haben und 'rest' in der Schale liegt. */
+function minZuege(teller, ziel) {
+  const fehlt = summe(teller.map(c => Math.max(0, ziel - c)));
+  const zuViel = summe(teller.map(c => Math.max(0, c - ziel)));
+  return Math.max(fehlt, zuViel); // der Rest gleicht sich über die Schale aus
+}
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let versuch = 0; versuch < 2000; versuch++) {
+    const a = erzeuge(p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return erzeuge(p, true);
+}
+
+function erzeuge(p, ersatz = false) {
+  let teller, schale = 0;
+  if (ersatz) teller = p.teller === 2 ? [4, 2] : p.teller === 3 ? [5, 2, 2] : [5, 3, 2, 2];
+  else if (p.halbieren) {
+    const n = zufall(p.summeMin, p.summe);
+    const a = Math.random() < 0.4 ? n : zufall(0, n);  // halbieren: oft alles auf einem Teller
+    teller = Math.random() < 0.5 ? [a, n - a] : [n - a, a];
+  } else {
+    teller = Array.from({ length: p.teller }, () => zufall(0, p.max));
+    if (p.schaleStart) schale = zufall(0, p.schaleStart);
+  }
+  const alle = summe(teller) + schale;
+  const ziel = Math.floor(alle / p.teller), rest = alle % p.teller;
+  const a = { teller, schale, ziel, rest, zuege: minZuege(teller, ziel), ding: zufall(0, DINGE.length - 1) };
+  if (p.art === "zahl") a.optionen = zahlOptionen(a.zuege);
+  return a;
+}
+
+/** Antworten für „wie viele hinüber?“: richtig, das Doppelte (häufiger Fehler: den Unterschied nehmen), Nachbarn. */
+function zahlOptionen(k) {
+  const o = [k, 2 * k, k + 1, k - 1, k + 2].filter(x => x >= 1 && x <= 12);
+  return [...new Set(o)].slice(0, 4).sort((x, y) => x - y);
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (a.teller.length !== p.teller) m.push("falsche Anzahl Teller");
+  if (a.teller.some(c => !Number.isInteger(c) || c < 0 || c > p.max)) m.push("Teller ausserhalb des Zahlenraums");
+  const alle = summe(a.teller) + a.schale;
+  if (alle > p.summe || (p.summeMin && alle < p.summeMin)) m.push("Summe ausserhalb des Zahlenraums");
+  if (a.ziel * p.teller + a.rest !== alle || a.rest < 0 || a.rest >= p.teller) m.push("Ziel oder Rest falsch");
+  if (a.rest && !p.schale) m.push("Rest ohne Schale");
+  if (a.schale && !p.schaleStart) m.push("Schale nicht leer");
+  if (a.ziel < 1) m.push("nichts zu verteilen");
+  if (a.zuege !== minZuege(a.teller, a.ziel)) m.push("Züge falsch");
+  if (a.zuege < p.zuege[0] || a.zuege > p.zuege[1]) m.push("Züge ausserhalb der Stufe");
+  if (a.teller.every(c => c === a.ziel) && a.schale === a.rest) m.push("schon gerecht");
+  if (p.art === "zahl") {
+    if (!a.optionen || a.optionen.filter(x => x === a.zuege).length !== 1) m.push("Lösung nicht genau einmal unter den Antworten");
+    if (a.optionen && new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+    // die beiden Teller müssen nach dem Hinüberlegen gleich sein
+    const [x, y] = a.teller;
+    if (Math.abs(x - y) !== 2 * a.zuege) m.push("Hinüberlegen ergibt nicht gleich viele");
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+const SVG = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attr = {}) => { const e = document.createElementNS(SVG, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); return e; };
+const RANDFARBEN = ["var(--deko-1)", "var(--deko-5)", "var(--deko-3)", "var(--deko-6)"];
+
+function tellerBild(i) {
+  const s = svgEl("svg", { viewBox: "0 0 200 120", preserveAspectRatio: "none", class: "teller-bild", "aria-hidden": "true" });
+  const rand = svgEl("ellipse", { cx: 100, cy: 60, rx: 96, ry: 56, class: "flaeche-teller" });
+  rand.style.stroke = RANDFARBEN[i % RANDFARBEN.length];
+  s.append(rand, svgEl("ellipse", { cx: 100, cy: 60, rx: 74, ry: 40, class: "innen" }));
+  return s;
+}
+function schaleBild() {
+  const s = svgEl("svg", { viewBox: "0 0 200 100", preserveAspectRatio: "none", class: "teller-bild", "aria-hidden": "true" });
+  s.append(svgEl("path", { d: "M6,10 L194,10 Q190,94 100,94 Q10,94 6,10 Z", class: "schale-koerper" }));
+  return s;
+}
+
+function groesse(stufe) { return stufe === "s1" ? "gross" : stufe === "s2" ? "mittel" : ""; }
+
+const HINWEIS_ZAEHLEN = {
+  2: "Zähle beide Teller nochmal: Sind es wirklich gleich viele?",
+  3: "Zähle jeden Teller nochmal: Haben alle drei gleich viele?",
+  4: "Zähle jeden Teller nochmal: Haben alle vier gleich viele?",
+};
+
+LS.spiel({
+  id: "gerecht-teiler",
+  einleitung: "Teilen ist gerecht, wenn jeder gleich viel hat. Hilf mir, die Guetzli und Äpfel zu verteilen!",
+  anzahl: 6,
+  stufen: {
+    s1: "Zwei Teller, bis 6 Stück: eins oder zwei hinüberlegen.",
+    s2: "Zwei Teller bis 10.",
+    s3: "Drei Teller gerecht machen.",
+    s4: "Wie viele muss ich hinüberlegen? Zahl wählen (8 und 4 → 2).",
+    s5: "Halbieren bis 20 — bleibt eines übrig, kommt es in die Schale.",
+    s6: "Endgegner: vier Teller und die Schale, mit möglichst wenigen Zügen.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const d = DINGE[a.ding];
+    if (ctx.nr === 0) ctx.sag(p.art === "zahl" ? `Zähle beide Teller. Wie viele ${d.viele} müssen hinüber?`
+      : p.teller === 2 && !p.schale ? `Tippe auf ${d.ein}: Es hüpft auf den anderen Teller.`
+      : `Tippe zuerst auf ${d.ein}, dann auf den Teller, wo es hin soll.`);
+    ctx.kennung(JSON.stringify([a.teller, a.schale, a.ding]));
+    if (p.teller === 2 && !p.schale) ctx.serie("seite", a.teller[0] > a.teller[1] ? "links" : "rechts");
+    if (ctx.stufe === "s5") ctx.serie("rest", a.rest ? "ja" : "nein");
+    if (p.art === "zahl") zahlAufgabe(ctx, a, d);
+    else legen(ctx, a, d, p);
+  },
+});
+
+/** Stufe 4: Wie viele muss ich hinüberlegen? Die Teller bleiben, wie sie sind. */
+function zahlAufgabe(ctx, a, d) {
+  const f = ctx.flaeche;
+  const loesungText = `Leg ${a.zuege} ${nameVon(d, a.zuege)} hinüber: Dann haben beide Teller ${a.ziel}.`;
+  f.append(el("div", { class: "frage", text: `Wie viele ${d.viele} musst du hinüberlegen, damit beide Teller gleich viele haben?` }));
+  let tisch = tischEl(a.teller, d, "fest");
+  f.append(tisch);
+  const box = LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.zuege, breite: 72,
+    hinweis: w => (w === 2 * a.zuege
+      ? "Pass auf: Was du hinüberlegst, fehlt hier und ist drüben eines mehr. Probier es in Gedanken."
+      : "Probier es in Gedanken: Leg eines hinüber und zähle. Sind es jetzt gleich viele?"),
+    loesung: loesungText,
+    lob: `Genau! ${loesungText}`,
+    beiRichtig() {
+      const neu = tischEl([a.ziel, a.ziel], d, "fest");
+      tisch.replaceWith(neu);
+      tisch = neu;
+    },
+  });
+  box.classList.add("zahlwahl");
+}
+
+/** Tisch zum Anschauen (Stufe 4): Teller mit ihren Dingen, nichts antippbar. */
+function tischEl(teller, d, zusatz = "") {
+  const tisch = el("div", { class: `tisch ${zusatz}` });
+  teller.forEach((n, i) => {
+    const t = el("div", { class: "teller", "aria-label": `Teller ${i + 1}` });
+    t.append(tellerBild(i));
+    for (let k = 0; k < n; k++) t.append(el("span", { class: "ding", text: d.bild, "aria-hidden": "true" }));
+    tisch.append(t);
+  });
+  return tisch;
+}
+
+/** Dinge umlegen, bis es gerecht ist; „✓“ prüft. */
+function legen(ctx, a, d, p) {
+  const f = ctx.flaeche;
+  const zweiSchritte = p.teller > 2 || p.schale; // mehr als ein mögliches Ziel: zuerst antippen, dann Ziel wählen
+  const loesungText = `Jeder Teller bekommt ${a.ziel} ${nameVon(d, a.ziel)}` + (a.rest ? `, ${a.rest} ${a.rest === 1 ? "bleibt" : "bleiben"} übrig und ${a.rest === 1 ? "kommt" : "kommen"} in die Schale.` : ".");
+  ctx.loesung(loesungText);
+  ctx.schritte((zweiSchritte ? 2 : 1) * a.zuege + 1); // Züge und das Häkchen
+  const frage = p.schale && p.teller === 2 ? `Teile die ${d.viele} gerecht auf beide Teller. Bleibt etwas übrig, kommt es in die Schale.`
+    : p.schale ? `Teile die ${d.viele} gerecht auf alle vier Teller, mit möglichst wenigen Zügen. Was übrig bleibt, kommt in die Schale.`
+    : p.teller === 3 ? `Mach es gerecht: Alle drei Teller sollen gleich viele ${d.viele} haben.`
+    : `Mach es gerecht: Beide Teller sollen gleich viele ${d.viele} haben.`;
+  f.append(el("div", { class: "frage", text: frage }));
+
+  const lage = { teller: [...a.teller], schale: a.schale };
+  let gehoben = null; // { wo, i } — angehobenes Ding (wo −1 = Schale)
+  let zuege = 0;      // alle Züge, auch vor „von vorn“ — für das Vorgehen
+  let tisch = null;
+  const zaehler = p.teller === 4 ? el("div", { class: "zuege", "aria-live": "polite" }) : null;
+
+  const anzahl = wo => (wo === -1 ? lage.schale : lage.teller[wo]);
+  const aendere = (wo, n) => { if (wo === -1) lage.schale += n; else lage.teller[wo] += n; };
+  const lege = (von, nach) => {
+    aendere(von, -1); aendere(nach, 1);
+    zuege++;
+    LS.ton("tipp");
+  };
+
+  const zeichne = () => {
+    const neu = el("div", { class: `tisch ${groesse(ctx.stufe)}` });
+    const behaelter = [...lage.teller.map((n, i) => ({ wo: i, n })), ...(p.schale ? [{ wo: -1, n: lage.schale }] : [])];
+    for (const { wo, n } of behaelter) {
+      const t = el("div", { class: "teller" + (wo === -1 ? " schale" : ""), "aria-label": wo === -1 ? "Schale" : `Teller ${wo + 1}` });
+      t.append(wo === -1 ? schaleBild() : tellerBild(wo));
+      for (let i = 0; i < n; i++) {
+        const k = el("button", { type: "button", class: "ding" + (gehoben && gehoben.wo === wo && gehoben.i === i ? " gehoben" : ""), text: d.bild, "aria-label": d.eins });
+        k.addEventListener("click", e => { e.stopPropagation(); tippeDing(wo, i); });
+        t.append(k);
+      }
+      if (zweiSchritte) {
+        t.classList.add("waehlbar");
+        if (gehoben && gehoben.wo !== wo) t.classList.add("ziel-frei");
+        t.addEventListener("click", () => tippeTeller(wo));
+      }
+      neu.append(t);
+    }
+    if (tisch) tisch.replaceWith(neu); else f.append(neu);
+    tisch = neu;
+    if (zaehler) zaehler.textContent = `Züge: ${zuege}`;
+  };
+
+  const tippeDing = (wo, i) => {
+    if (ctx.vorbei()) return;
+    if (!zweiSchritte) { lege(wo, 1 - wo); zeichne(); return; }
+    if (gehoben && gehoben.wo !== wo) { lege(gehoben.wo, wo); gehoben = null; }
+    else if (gehoben && gehoben.i === i) gehoben = null;
+    else { gehoben = { wo, i }; LS.ton("tipp"); }
+    zeichne();
+  };
+  const tippeTeller = wo => {
+    if (ctx.vorbei() || !gehoben) return;
+    if (gehoben.wo !== wo) lege(gehoben.wo, wo);
+    gehoben = null;
+    zeichne();
+  };
+
+  zeichne();
+  if (zaehler) f.append(zaehler);
+
+  const fertig = el("button", { type: "button", class: "knopf gruen", text: "✓", "aria-label": "Fertig" });
+  const vonVorn = el("button", { type: "button", class: "knopf hell", text: "↺", "aria-label": "Nochmal von vorn" });
+  fertig.addEventListener("click", () => {
+    if (ctx.vorbei()) return;
+    gehoben = null;
+    zeichne();
+    const gleich = lage.teller.every(c => c === lage.teller[0]);
+    if (!gleich) { ctx.falsch(HINWEIS_ZAEHLEN[p.teller], loesungText); return; }
+    if (lage.schale >= p.teller) {
+      ctx.falsch(`In der Schale liegen noch so viele, dass jeder Teller eines mehr bekommen kann.`, loesungText);
+      return;
+    }
+    const ohneUmweg = zuege === a.zuege;
+    ctx.vorgehen("ausgleichen", ohneUmweg ? "kuerzest" : "umwege");
+    const satz = p.teller === 2 ? "Gerecht! Beide Teller haben gleich viele." : "Gerecht! Alle Teller haben gleich viele.";
+    const zugText = n => `${n} ${n === 1 ? "Zug" : "Zügen"}`;
+    ctx.richtig(ctx.stufe === "s1" || ctx.stufe === "s2" ? satz
+      : ohneUmweg ? `${satz} Und mit nur ${zugText(a.zuege)} — kein Zug zu viel!`
+      : `${satz} Es ginge sogar mit ${zugText(a.zuege)}.`);
+  });
+  vonVorn.addEventListener("click", () => {
+    if (ctx.vorbei()) return;
+    lage.teller = [...a.teller]; lage.schale = a.schale; gehoben = null;
+    zeichne();
+  });
+  f.append(el("div", { class: "knopfzeile teiler-knoepfe" }, vonVorn, fertig));
+}
+</script>
+</body>
+</html>

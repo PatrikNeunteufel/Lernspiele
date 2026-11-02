@@ -39,6 +39,28 @@ weiter gelten.
 - **A3 a:** Basisklasse je Spiel aus dem Lehrmittel belegen, für Basisklasse 6 den 3. Zyklus
   nachlesen. Belegt bisher nur über das Schweizer Zahlenbuch (Abschnitt 9, Punkt 1).
 
+### Stand LERN_Session8
+
+- **Runde 1 gebaut** (Auftrag Patrik 2026-11-02, 15 Spiele): M2 Schoggi-Brüche, M3 Zehntel-Lupe, M4
+  Dezimal-Rakete, M5 Dezimal-Rutsche, M8 Probe-Stempel, M11 Zufalls-Skala, M13 Rechteck-Labor, M14
+  Würfel-Kipper, M15 Flächenmass-Treppe, M17 Begriffs-Geodreieck, M18 Speicher-Leiter, I2
+  Geheimschrift-Knacker, N6 Hebel-Wippe, D1 Komma-Jagd, D2 Morphem-Schere. Lernziele in
+  [lehrplan_sg_session8.md](../lernziele/lehrplan_sg_session8.md). Eingabe von Dezimalzahlen:
+  `LS.tastatur({ dezimal: true })`.
+- **Nicht gebaut, weil ein vorhandenes Spiel den Stoff trägt:** M12 (Möglichkeiten-Finder), M16
+  (Koordinaten-Schatzsuche), I1 (Roboter-Pfad hat in Stufe 5/6 Wiederholung und Bedingung — die
+  Begründung „Roboter-Pfad endet ohne Schleifen“ in der Top 15 ist überholt).
+- **Runde 2 gebaut** (Frage 5 a, 2026-11-02): D3 Rede-Zeichen, D5 Trenn-Schere, D7 Verben-Fächer, D8
+  Wort-Spürnase, N2 Wassertropfen-Reise, N3 Erdzeit-Leiter, N4 Blutkreislauf-Lotse, N5 Pflanzen-Bestimmer,
+  N7 Energie-Wandler, N8 Bionik-Paare, N12 Kakao-Weg, N13 Taschengeld-Planer, E2 Sound-Sorter, U1
+  Rhythmus-Diktat, U2 Tonleiter-Treppe.
+- **Runde 3 gebaut** (Frage 6 a, 2026-11-02): F1 Mots-Match, F2 Wörter-Brücke, F3 Le ou la?, F4 Son-Lauscher,
+  dazu Nombres-Rallye, Quelle heure?, Calendrier, Au café (FS2F.3.A.1), E3 Weather-Report, I3 Datei-Typen und die
+  Randidee Brailleschrift als Braille-Finger.
+- **Offen aus der Liste:** M1, M6, M7, M9, M10 gebaut (LERN_Session7). Übrig D4, D6, D9, N1, N9–N11, E1. D4, D6, D9, N1, N10, E1 überschneiden sich stark mit vorhandenen
+  Spielen (Fehler-Lupe, ABC-Sortierer, Echt oder erfunden, Lebensraum, Schulweg-Profi, Sentence-Builder);
+  F1–F4 warten auf das Französisch-Lehrmittel; N9 braucht eine Fachstelle; N11 Kartendaten.
+
 ### Stufenskala für Spiele mit Basisklasse 5 oder 6
 
 Die Skala `LS.SKALA` gilt unverändert. Für Basisklasse 5: 1 = 4. Klasse (Stufe bis und mit OP) ·

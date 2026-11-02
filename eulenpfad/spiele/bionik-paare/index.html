@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bionik-Paare</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .problem { max-width: 640px; margin: 0 auto 12px; padding: 10px 16px; border-radius: 16px; background: #fff8e1; border: 3px dashed var(--deko-4);
+    font-size: clamp(16px, 3.8vw, 20px); font-weight: 700; text-align: center; }
+
+  /* Vorbild → Erfindung */
+  .bionik-zeile { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin: 2px auto 12px; }
+  .bionik-teil { display: flex; flex-direction: column; align-items: center; min-width: 120px; max-width: 220px; padding: 8px 12px; border-radius: 18px;
+    background: #fff; box-shadow: 0 4px 0 var(--rand); text-align: center; font-weight: 800; font-size: clamp(15px, 3.6vw, 19px); line-height: 1.2; }
+  .bionik-teil .bild { font-size: clamp(40px, 9vw, 56px); line-height: 1.1; }
+  .bionik-teil small { color: var(--text-leise); font-weight: 700; font-size: 13px; }
+  .bionik-teil.vorbild { border: 3px solid var(--deko-5); }
+  .bionik-teil.erfindung { border: 3px solid var(--deko-6); }
+  .bionik-teil.offen { border: 3px dashed var(--knopf); color: var(--knopf); }
+  .bionik-pfeil { font-size: clamp(24px, 5vw, 32px); font-weight: 900; color: var(--text-leise); }
+
+  /* Paare finden: alle Karten offen */
+  .bionik-feld { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; max-width: 760px; margin: 0 auto; }
+  .bionik-karte { border: 3px solid var(--rand); border-radius: 16px; min-height: 104px; background: #fff; box-shadow: 0 5px 0 var(--rand);
+    font-family: inherit; color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; padding: 6px; font-size: clamp(14px, 3.4vw, 17px); font-weight: 800; line-height: 1.15; }
+  .bionik-karte .bild { font-size: clamp(30px, 7vw, 40px); line-height: 1.1; }
+  .bionik-karte small { color: var(--text-leise); font-size: 12px; font-weight: 700; }
+  .bionik-karte.art-v { border-color: var(--deko-5); }
+  .bionik-karte.art-e { border-color: var(--deko-6); }
+  .bionik-karte.art-k { border-color: var(--deko-3); }
+  .bionik-karte.gewaehlt { outline: 5px solid var(--deko-4); }
+  .bionik-karte.gefunden { background: var(--gut-hell); box-shadow: 0 5px 0 var(--gut); cursor: default; opacity: .75; }
+  .bionik-karte.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+
+  .wahl-knopf { font-size: clamp(15px, 3.6vw, 19px); font-weight: 800; }
+  .wahl.lang .wahl-knopf { text-align: left; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🦎 Bionik-Paare</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.5.3.e (2. Zyklus): Bionik — erkennen, dass Menschen Lösungen aus der Natur abschauen und
+// technisch umsetzen (Lehrplan-Beispiel: Klette – Klettverschluss).
+// Basisklasse 5: s1 4. Klasse (Was kann das Tier oder die Pflanze besonders?), s2–s4 5. Klasse (Vorbild und
+// Erfindung zuordnen → abgeschaute Eigenschaft → Paare finden), s5 6. Klasse (ein Problem lösen: Welches
+// Vorbild hilft?), s6 Königsstufe (Dreier finden: Vorbild, Eigenschaft, Erfindung).
+// Bezug: Fledermaus-Forscher (Basisklasse 2, Liste „anpassungen“) ordnet Merkmal und Nutzen bei einem Tier zu;
+// hier geht es um die Übertragung in die Technik. Alle Inhalte aus der Liste „paare“ (woerter.js).
+
+const { waehle, mische, el } = LS;
+
+const LISTE = "paare";
+const FREI = new Set(LS.spielListen("bionik-paare").length ? LS.freieListen("bionik-paare") : [LISTE]);
+const P = Object.fromEntries(BIONIK_PAARE.map(p => [p.id, p]));
+const verwandt = (p, q) => p === q || p.gruppen.some(g => q.gruppen.includes(g));
+/** n Paare, die untereinander nicht verwandt sind (mit p als erstem, falls angegeben). */
+function unverwandte(n, p = null) {
+  const gewaehlt = p ? [p] : [];
+  for (const q of mische(BIONIK_PAARE)) {
+    if (gewaehlt.length >= n) break;
+    if (!gewaehlt.some(x => verwandt(x, q))) gewaehlt.push(q);
+  }
+  return gewaehlt.length === n ? gewaehlt : null;
+}
+
+const STUFE = {
+  s1: { arten: ["kann"] },
+  s2: { arten: ["erfindung", "vorbild"] },
+  s3: { arten: ["eigenschaft"] },
+  s4: { arten: ["paare"], paare: 4 },
+  s5: { arten: ["problem"] },
+  s6: { arten: ["dreier"], paare: 3 },
+};
+const artenIn = stufe => (FREI.has(LISTE) ? STUFE[stufe].arten : []);
+const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => artenIn(s).length));
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const art = waehle(artenIn(stufe));
+  for (let versuch = 0; versuch < 100; versuch++) {
+    let a;
+    if (art === "paare" || art === "dreier") {
+      const liste = unverwandte(STUFE[stufe].paare);
+      a = liste && { art, paare: liste.map(p => p.id) };
+    } else {
+      const liste = unverwandte(3, waehle(BIONIK_PAARE));
+      a = liste && { art, richtig: liste[0].id, optionen: mische(liste.map(p => p.id)) };
+    }
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  throw new Error(`keine Aufgabe für ${art}`);
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!STUFE[stufe].arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (!FREI.has(LISTE)) m.push("Liste nicht frei");
+  const ids = a.paare || a.optionen;
+  if (!ids || ids.some(id => !P[id])) { m.push("unbekanntes Paar"); return m; }
+  if (new Set(ids).size !== ids.length) m.push("doppelte Paare");
+  if (a.paare && a.paare.length !== STUFE[stufe].paare) m.push("falsche Anzahl Paare");
+  if (a.optionen && a.optionen.filter(id => id === a.richtig).length !== 1) m.push("Lösung nicht genau einmal unter den Antworten");
+  // Eindeutig: keine zwei verwandten Vorbilder (gleiche Gruppe) in derselben Aufgabe.
+  for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) if (verwandt(P[ids[i]], P[ids[j]])) m.push(`${ids[i]} und ${ids[j]} sind verwandt`);
+  // Texte, die angezeigt werden, müssen sich unterscheiden.
+  const feld = { kann: "kann", erfindung: "erfindung", vorbild: "vorbild", eigenschaft: "eigenschaft", problem: "vorbild", paare: "erfindung", dreier: "kurz" }[a.art];
+  if (new Set(ids.map(id => P[id][feld])).size !== ids.length) m.push("gleiche Texte auf den Knöpfen");
+  for (const id of ids) for (const f of ["vorbild", "vbild", "erfindung", "ebild", "kann", "eigenschaft", "kurz", "problem", "text"]) if (!P[id][f]) m.push(`${id}: ${f} fehlt`);
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const teil = (bild, text, klasse, klein) => el("div", { class: `bionik-teil ${klasse}` }, el("span", { class: "bild", text: bild }), el("span", { text }), klein ? el("small", { text: klein }) : null);
+const pfeil = () => el("span", { class: "bionik-pfeil", "aria-hidden": "true", text: "→" });
+
+/** Karteninhalt im Feld: Vorbild (v), Erfindung (e) oder abgeschaute Eigenschaft (k). */
+const KARTE = {
+  v: p => ({ bild: p.vbild, text: p.vorbild, klein: "Vorbild" }),
+  e: p => ({ bild: p.ebild, text: p.erfindung, klein: "Erfindung" }),
+  k: p => ({ bild: "🔍", text: p.kurz, klein: "abgeschaut" }),
+};
+
+/** Paare (oder Dreier) finden: alle Karten offen; zusammengehörige nacheinander antippen. */
+function finden(ctx, a, arten) {
+  const paare = a.paare.map(id => P[id]);
+  const loesung = paare.map(p => arten.map(x => KARTE[x](p).text).join(" – ")).join(" · ");
+  ctx.loesung(loesung);
+  ctx.schritte(paare.length * arten.length);
+  const feld = el("div", { class: "bionik-feld" });
+  let gewaehlt = [];
+  let gefunden = 0;
+  let fertig = false;
+  const karten = mische(paare.flatMap(p => arten.map(x => ({ p, x }))));
+  for (const k of karten) {
+    const inh = KARTE[k.x](k.p);
+    const knopf = el("button", { type: "button", class: `bionik-karte art-${k.x}`, "data-karte": `${k.p.id}:${k.x}` },
+      el("span", { class: "bild", text: inh.bild }), el("span", { text: inh.text }), el("small", { text: inh.klein }));
+    k.knopf = knopf;
+    knopf.addEventListener("click", () => {
+      if (fertig || ctx.vorbei() || knopf.classList.contains("gefunden")) return;
+      if (gewaehlt.includes(k)) { knopf.classList.remove("gewaehlt"); gewaehlt = gewaehlt.filter(x => x !== k); return; }
+      // Zwei Karten derselben Art: die neue ersetzt die alte, ohne Fehler.
+      const gleich = gewaehlt.find(x => x.x === k.x);
+      if (gleich) { gleich.knopf.classList.remove("gewaehlt"); gewaehlt = gewaehlt.filter(x => x !== gleich); }
+      const anders = gewaehlt.find(x => x.p !== k.p);
+      if (anders) {
+        for (const x of [...gewaehlt, k]) { x.knopf.classList.remove("gewaehlt", "falsch"); void x.knopf.offsetWidth; x.knopf.classList.add("falsch"); }
+        ctx.falsch(`«${KARTE[anders.x](anders.p).text}» und «${inh.text}» gehören nicht zusammen. Was kann das Vorbild besonders?`, loesung);
+        gewaehlt = [];
+        if (ctx.vorbei()) fertig = true;
+        return;
+      }
+      gewaehlt.push(k);
+      knopf.classList.add("gewaehlt");
+      LS.ton("tipp");
+      if (gewaehlt.length < arten.length) return;
+      for (const x of gewaehlt) { x.knopf.classList.remove("gewaehlt"); x.knopf.classList.add("gefunden"); }
+      gewaehlt = [];
+      gefunden++;
+      LS.ton("huepf");
+      if (gefunden === paare.length) { fertig = true; ctx.richtig(arten.length === 3 ? "Alle Dreier gefunden! 🎉" : "Alle Paare gefunden! 🎉"); }
+      else ctx.sag(`${k.p.vorbild} → ${k.p.erfindung}: passt!`, "gut");
+    });
+    feld.append(knopf);
+  }
+  ctx.flaeche.append(feld);
+}
+
+/** Texte bzw. Karten, die der Reihe nach richtig sind (für Prüfskripte). */
+function loesungsTexte(a) {
+  if (a.paare) return a.paare.flatMap(id => (a.art === "dreier" ? ["v", "k", "e"] : ["v", "e"]).map(x => `karte:${id}:${x}`));
+  const p = P[a.richtig];
+  const inh = { kann: { text: p.kann }, erfindung: { bild: p.ebild, text: p.erfindung }, vorbild: { bild: p.vbild, text: p.vorbild },
+    eigenschaft: { text: p.eigenschaft }, problem: { bild: p.vbild, text: p.vorbild } }[a.art];
+  return [`${inh.bild || ""}${inh.text}`];
+}
+
+let gezeigt = null; // zuletzt gezeichnete Aufgabe (Prüfskripte, Entwickler-Leiste)
+
+LS.spiel({
+  id: "bionik-paare",
+  einleitung: "Die Natur hatte viele gute Ideen zuerst. Menschen schauen sie ab und bauen daraus Erfindungen – das heisst Bionik.",
+  anzahl: 8,
+  stufen: nurMoegliche({
+    s1: "Was kann das Tier oder die Pflanze besonders? Gecko, Eule, Klette … (4. Klasse)",
+    s2: "Vorbild und Erfindung: Klette → Klettverschluss.",
+    s3: "Was wurde abgeschaut? Die winzigen Häkchen der Klette.",
+    s4: "Paare finden: vier Vorbilder und ihre Erfindungen.",
+    s5: "Du hast ein Problem: Welches Vorbild aus der Natur hilft dir?",
+    s6: "Endgegner: Dreier finden – Vorbild, abgeschaute Eigenschaft, Erfindung.",
+  }),
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag({
+      s1: "Schau das Bild an und überleg, was dieses Tier oder diese Pflanze besonders gut kann.",
+      s2: "Überleg: Was kann das Vorbild besonders? Welche Erfindung braucht genau das?",
+      s3: "Nicht das ganze Tier wird nachgebaut, nur eine Eigenschaft. Welche?",
+      s4: "Tipp ein Vorbild und dann seine Erfindung an.",
+      s5: "Lies das Problem genau. Welches Vorbild kann genau das, was du brauchst?",
+      s6: "Immer drei gehören zusammen: das Vorbild 🌿, was abgeschaut wurde 🔍, und die Erfindung.",
+    }[ctx.stufe]);
+    const a = aufgabeErzeugen(ctx.stufe);
+    gezeigt = a;
+    if (artenIn(ctx.stufe).length > 1) ctx.serie("art", a.art);
+    const f = ctx.flaeche;
+
+    if (a.paare) {
+      f.append(el("div", { class: "frage", text: a.art === "dreier"
+        ? "Finde die Dreier: Tipp ein Vorbild, das, was abgeschaut wurde, und die Erfindung an."
+        : "Finde die Paare: Tipp ein Vorbild und seine Erfindung an." }));
+      finden(ctx, a, a.art === "dreier" ? ["v", "k", "e"] : ["v", "e"]);
+      return;
+    }
+
+    const p = P[a.richtig];
+    const opt = { optionen: a.optionen, richtig: a.richtig, lob: `Richtig! ${p.text}`, breite: 220 };
+    switch (a.art) {
+      case "kann":
+        f.append(el("div", { class: "bionik-zeile" }, teil(p.vbild, p.vorbild, "vorbild")),
+          el("div", { class: "frage", text: `${p.vorbild}: Was kann dieses Vorbild besonders?` }));
+        Object.assign(opt, { inhalt: id => ({ text: P[id].kann }), breite: 300, loesung: `${p.vorbild}: ${p.kann}`, lob: `Richtig! ${p.kann}`,
+          hinweis: id => `Das passt zu einem anderen Vorbild: ${P[id].vbild} ${P[id].vorbild}.` });
+        break;
+      case "erfindung":
+        f.append(el("div", { class: "bionik-zeile" }, teil(p.vbild, p.vorbild, "vorbild", "Vorbild"), pfeil(), teil("?", "", "erfindung offen", "Erfindung")),
+          el("div", { class: "frage", text: `Vorbild: ${p.vorbild}. Welche Erfindung gehört dazu?` }));
+        Object.assign(opt, { inhalt: id => ({ bild: P[id].ebild, text: P[id].erfindung }), loesung: `${p.vorbild} → ${p.erfindung}. ${p.text}`,
+          hinweis: id => `${P[id].erfindung} hat ein anderes Vorbild: ${P[id].vorbild}. Was kann dein Vorbild besonders?` });
+        break;
+      case "vorbild":
+        f.append(el("div", { class: "bionik-zeile" }, teil("?", "", "vorbild offen", "Vorbild"), pfeil(), teil(p.ebild, p.erfindung, "erfindung", "Erfindung")),
+          el("div", { class: "frage", text: `Welches Vorbild aus der Natur hatte diese Erfindung: ${p.erfindung}?` }));
+        Object.assign(opt, { inhalt: id => ({ bild: P[id].vbild, text: P[id].vorbild }), loesung: `${p.vorbild} → ${p.erfindung}. ${p.text}`,
+          hinweis: id => `${P[id].vorbild} war das Vorbild für etwas anderes: ${P[id].erfindung}.` });
+        break;
+      case "eigenschaft":
+        f.append(el("div", { class: "bionik-zeile" }, teil(p.vbild, p.vorbild, "vorbild", "Vorbild"), pfeil(), teil(p.ebild, p.erfindung, "erfindung", "Erfindung")),
+          el("div", { class: "frage", text: `${p.vorbild} → ${p.erfindung}: Was hat man beim Vorbild abgeschaut?` }));
+        Object.assign(opt, { inhalt: id => ({ text: P[id].eigenschaft }), breite: 300, loesung: `${p.vorbild} → ${p.erfindung}: ${p.eigenschaft}`,
+          hinweis: id => `Das hat man bei einem anderen Vorbild abgeschaut: ${P[id].vorbild}. Was kann dein Vorbild besonders?` });
+        break;
+      case "problem":
+        f.append(el("div", { class: "problem auftrag", text: p.problem }), el("div", { class: "frage", text: "Welches Vorbild aus der Natur hilft dir?" }));
+        Object.assign(opt, { inhalt: id => ({ bild: P[id].vbild, text: P[id].vorbild }), loesung: `${p.vorbild} hilft: ${p.eigenschaft} So entstand: ${p.erfindung}.`,
+          hinweis: id => `${P[id].vorbild} kann etwas anderes: ${P[id].kann}` });
+        break;
+    }
+    const box = LS.auswahl(ctx, opt);
+    if (opt.breite >= 300) box.classList.add("lang");
+  },
+});
+</script>
+</body>
+</html>

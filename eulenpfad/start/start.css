@@ -107,6 +107,8 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
   display: flex; flex-direction: column; gap: 6px;
 }
 .spielkarte { cursor: pointer; }
+/* Langes Drücken liest Karte und Stufenknopf vor: kein Kontextmenü, keine Textauswahl auf dem Tablet */
+.spielkarte, .stufenknopf { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .spielkarte .kopfzeile { display: flex; align-items: center; gap: 12px; }
 .spielkarte .kopfzeile .name { flex: 1; min-width: 0; }
 .spielkarte .spiel-bild { font-size: 44px; line-height: 1; }
@@ -176,7 +178,7 @@ td .marke.such-grund { display: inline-block; margin-top: 4px; }
 
 .profil h2 { margin: 0 0 12px; font-size: 22px; }
 .profil-felder { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
-.profil label { font-weight: 800; display: flex; flex-direction: column; gap: 4px; font-size: 16px; }
+.profil label { font-weight: 800; display: flex; flex-direction: column; gap: 4px; font-size: 16px; max-width: 100%; min-width: 0; }
 .profil input[type=number], .profil select, .verwaltung select {
   font: inherit; font-size: 18px; border: 3px solid var(--rand); border-radius: 12px; padding: 6px 10px; min-width: 110px; max-width: 100%; background: #fff;
 }

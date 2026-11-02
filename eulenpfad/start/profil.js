@@ -21,11 +21,14 @@ function zeichneProfil(box, neu) {
     karte.append(el("div", { class: "profil-felder" }, el("label", {}, "Profil von", wahl)));
   }
 
-  const alter = el("input", { type: "number", min: "5", max: "14", value: p.alter ?? "", "aria-label": "Alter" });
+  const alter = el("input", { type: "number", min: "4", max: "14", value: p.alter ?? "", "aria-label": "Alter" });
   const klasse = el("select", { "aria-label": "Klasse" },
     el("option", { value: "", text: "—" }),
-    ...[1, 2, 3, 4, 5, 6].map(k => el("option", { value: String(k), text: `${k}. Klasse` })));
-  klasse.value = p.klasse ?? "";
+    ...LS.KLASSEN.map(k => el("option", { value: String(k), text: LS.klasseText(k) })));
+  klasse.value = LS.klasseVon(p) ?? "";
+  const vorlesen = el("select", { "aria-label": "Vorlesen" },
+    ...Object.entries(LS.VORLESEN_ARTEN).map(([k, t]) => el("option", { value: k, text: t })));
+  vorlesen.value = p.vorlesen ?? "";
   const fokus = el("div", { class: "fokus-liste" });
   for (const lz of LERNZIELE) {
     const cb = el("input", { type: "checkbox", value: lz.lz });
@@ -87,7 +90,8 @@ function zeichneProfil(box, neu) {
     }
     LS.speichereProfil(name, {
       alter: alter.value ? Number(alter.value) : null,
-      klasse: klasse.value ? Number(klasse.value) : null,
+      klasse: klasse.value !== "" ? Number(klasse.value) : null,
+      vorlesen: vorlesen.value || null,
       fokus: [...fokus.querySelectorAll("input:checked")].map(c => c.value),
       reihenfolge: { global: reihenfolgeGlobal.value, spiele },
       timer: { an: timerGlobal.value === "an", faktor: Number(faktor.value), spiele: timerJeSpiel },
@@ -97,6 +101,8 @@ function zeichneProfil(box, neu) {
   karte.append(
     el("h2", { text: `Profil von ${LS.spielerName(name)}` }),
     el("div", { class: "profil-felder" }, el("label", {}, "Alter", alter), el("label", {}, "Klasse", klasse)),
+    el("div", { html: "<b>Vorlesen</b> — die Eule liest Aufträge und Tipps vor (🗣️ neben der Eule; auch auf der Stufenwahl jedes Spiels einstellbar). „Nach Klasse“: im Kindergarten und in der 1. Klasse automatisch, sonst auf 🗣️. 🔇 in der Kopfzeile schaltet auch die Stimme stumm. Nicht im Lese-Detektiv, in Englisch und Französisch." }),
+    el("div", { class: "profil-felder", style: "margin-top:8px" }, el("label", {}, "Vorlesen", vorlesen)),
     el("div", { html: "<b>Fokus</b> — was soll vermehrt geübt werden?" }),
     fokus,
     el("div", { html: "<b>Reihenfolge der Teile</b> — stehen Bausteine wie 3 ZT + 4 H geordnet (grösste Stelle links) oder gemischt?" }),

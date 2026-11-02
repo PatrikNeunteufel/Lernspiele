@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dezimal-Rutsche</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .zahl-gross { text-align: center; font-size: clamp(40px, 9vw, 64px); font-weight: 900; margin: 0 0 4px; font-variant-numeric: tabular-nums; }
+  .auf { text-align: center; font-size: clamp(20px, 4vw, 26px); font-weight: 800; color: var(--text-leise); margin-bottom: 8px; }
+  .auf b { color: var(--knopf); }
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); white-space: nowrap; }
+
+  .rutsche { width: 100%; max-width: 720px; display: block; margin: 0 auto; overflow: visible; }
+  .rutsche .bahn { stroke: #f5b301; stroke-width: 14; stroke-linecap: round; fill: none; }
+  .rutsche .strich { stroke: #c9cde0; stroke-width: 2; }
+  .rutsche .mitte { stroke: var(--hinweis); stroke-width: 3; stroke-dasharray: 5 4; }
+  .rutsche text { font-family: var(--schrift); font-weight: 800; fill: var(--text-leise); font-size: 20px; }
+  .rutsche .kugel { transition: transform .9s cubic-bezier(.5, 0, .5, 1.2); }
+
+  .ziele { display: flex; justify-content: space-between; gap: 12px; max-width: 760px; margin: 6px auto 0; }
+  .ziel {
+    border: none; border-radius: 18px; padding: 12px 18px; min-height: 72px; min-width: 130px;
+    font-family: inherit; font-size: clamp(24px, 5vw, 34px); font-weight: 900;
+    background: #fff; color: var(--text); box-shadow: 0 6px 0 var(--rand), 0 8px 16px rgba(45, 48, 71, .1); cursor: pointer;
+    font-variant-numeric: tabular-nums;
+  }
+  .ziel small { display: block; font-size: 14px; color: var(--text-leise); font-weight: 700; }
+  .ziel.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .ziel.richtig { background: var(--gut-hell); }
+  .wahl-knopf { font-size: clamp(22px, 5vw, 30px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  @media (max-width: 420px) { .ziel { min-width: 0; flex: 1; padding: 10px 8px; } }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎢 Dezimal-Rutsche</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.A.4.g (Grundanspruch 2. Zyklus): Dezimalzahlen runden (Beispiel dort: 1.745 auf
+// Zehntel). Basisklasse 5: s1 4. Klasse — Dezimalzahlen nur als Geld, auf Franken runden; s2–s4
+// 5. Klasse (auf Ganze, auf Zehntel, auf Hundertstel mit Fallen); s5 6. Klasse = Grundanspruch
+// (selbst eintippen, mit der richtigen Stellenzahl); s6 Königsstufe (rückwärts: welche Zahl rundet
+// auf 4.5, kleinste und grösste solche Zahl, Übertrag über mehrere Stellen).
+// Fortsetzung der Runden-Rutsche (natürliche Zahlen auf 10er bis Millionen, MA.1.A.4.f) mit derselben
+// Rutsche; Regel 0–4 ab, 5–9 auf, nur die Ziffer direkt rechts der Rundungsstelle zählt (Falle
+// 1.745 → 1.75 → 1.8). Beim Runden auf Zehntel bleibt die Endnull stehen: 2.96 ≈ 3.0.
+// Dezimalzahlen mit dem eingestellten Zeichen (LS.dezimalText), Geld mit LS.geldText.
+// Gerechnet wird in Tausendsteln als ganze Zahlen: 1.745 = 1745.
+
+const { dezimalText, geldText, zufall, waehle, mische, el } = LS;
+
+// Rundungsstelle in Tausendsteln: 1000 Ganze, 100 Zehntel, 10 Hundertstel.
+const NAME = { 1000: "Ganze", 100: "Zehntel", 10: "Hundertstel" };
+const DATIV = { 1000: "Ganzen", 100: "Zehnteln", 10: "Hundertsteln" };
+const STELLEN_VON = { 1000: 0, 100: 1, 10: 2 };
+const nachkommaVon = t => (t % 1000 === 0 ? 0 : t % 100 === 0 ? 1 : t % 10 === 0 ? 2 : 3);
+const zeichenName = () => (LS.einstellung("dezimal") === "komma" ? "Komma" : "Punkt");
+
+// Je Stufe: Arten, Rundungsstellen, Nachkommastellen der Zahl, grösster ganzer Teil, Anteil
+// kniffliger Fälle (genau die Mitte, Übertrag 2.96 → 3.0, Doppelrundung 1.745), Eingabe per Tastatur.
+// knapp (Königsstufe): Hinweis ohne die entscheidende Ziffer.
+const STUFE = {
+  s1: { arten: ["runden"], geld: true, auf: [1000], stellen: [2], ganz: 20, knifflig: 0.3 },
+  s2: { arten: ["runden"], auf: [1000], stellen: [1, 2], ganz: 50, knifflig: 0.3 },
+  s3: { arten: ["runden"], auf: [100], stellen: [2, 3], ganz: 20, knifflig: 0.4 },
+  s4: { arten: ["runden"], auf: [100, 10], stellen: [2, 3], ganz: 20, knifflig: 0.6 },
+  s5: { arten: ["runden"], auf: [1000, 100, 10], stellen: [1, 2, 3], ganz: 99, knifflig: 0.5, tippen: true },
+  s6: { arten: ["runden", "rueckwaerts", "grenze"], auf: [1000, 100, 10], stellen: [2, 3], ganz: 99, knifflig: 0.8, tippen: true, knapp: true },
+};
+
+/** Zahl als Text: Geld in Franken, sonst wie getippt (st: feste Nachkommastellen). */
+const zahl = (t, geld, st) => (geld ? geldText(t / 10) : dezimalText(t / 1000, st));
+/** Gerundeter Wert als Text, mit so vielen Stellen wie die Rundungsstelle verlangt (3.0, 5.00). */
+const gerundet = (t, auf, geld) => zahl(t, geld, STELLEN_VON[auf]);
+const runde = (z, auf) => { const unten = Math.floor(z / auf) * auf; return (z - unten) * 2 >= auf ? unten + auf : unten; };
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 1000; versuch++) {
+    const a = art === "runden" ? erzeugeRunden(p) : art === "rueckwaerts" ? erzeugeRueckwaerts(p) : erzeugeGrenze(p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  // Notausgang (praktisch nie): 3.7 auf Ganze bzw. 3.75 auf Zehntel
+  const auf = p.auf[0];
+  const z = 3000 + (auf === 1000 ? 700 : auf === 100 ? 750 : 755);
+  return { art: "runden", zahl: z, auf, unten: Math.floor(z / auf) * auf, oben: Math.floor(z / auf) * auf + auf, loesung: runde(z, auf), geld: !!p.geld };
+}
+
+/** Rest unter einer Stelle mit genau 'st' Nachkommastellen insgesamt (letzte Ziffer ≠ 0), kleiner als auf. */
+function restMit(auf, st) {
+  const fein = 10 ** (3 - st);
+  for (;;) { const r = fein * zufall(1, auf / fein - 1); if (r % (fein * 10)) return r; }
+}
+
+function erzeugeRunden(p) {
+  const auf = waehle(p.auf);
+  const st = waehle(p.stellen.filter(s => s > STELLEN_VON[auf]));
+  if (st === undefined) return null;
+  const fein = 10 ** (3 - st);
+  let zahl;
+  const art = Math.random() < p.knifflig ? waehle(["mitte", "uebertrag", "uebertrag", "doppel"]) : "frei";
+  if (p.geld) {
+    // Franken und Rappen in 5-Rappen-Schritten; knifflig: genau 50 Rappen oder knapp darunter
+    const fr = zufall(1, p.ganz);
+    const rp = art === "frei" ? 5 * zufall(1, 19) : art === "mitte" ? 50 : waehle([45, 55, 95, 5]);
+    zahl = fr * 1000 + rp * 10;
+  } else if (art === "mitte") {
+    if (st !== STELLEN_VON[auf] + 1) return null;
+    zahl = auf * zufall(1, p.ganz * 1000 / auf) + auf / 2;            // 2.35 → 2.4
+  } else if (art === "uebertrag") {
+    const oben = auf * 10 * zufall(1, p.ganz * 100 / auf);              // 3.0, 5.00, 10
+    zahl = oben - fein * zufall(1, auf / 2 / fein);                       // 2.96, 4.995, 9.7
+    if (nachkommaVon(zahl) !== st) return null;
+  } else if (art === "doppel") {
+    // rechts der Stelle eine 4, danach mindestens die Hälfte: 1.745 rundet auf 1.7, nicht auf 1.8
+    if (st < STELLEN_VON[auf] + 2) return null;
+    const r = 4 * auf / 10 + fein * zufall(Math.ceil(auf / 20 / fein), auf / 10 / fein - 1);
+    zahl = auf * zufall(1, p.ganz * 1000 / auf) + r;
+    if (nachkommaVon(zahl) !== st) return null;
+  } else {
+    zahl = auf * zufall(1, p.ganz * 1000 / auf - 1) + restMit(auf, st);
+  }
+  const unten = Math.floor(zahl / auf) * auf;
+  return { art: "runden", zahl, auf, unten, oben: unten + auf, loesung: runde(zahl, auf), geld: !!p.geld };
+}
+
+/** Rückwärts: Welche Zahl wird auf Zehntel gerundet zu 4.5? Genau eine von vier. */
+function erzeugeRueckwaerts(p) {
+  const auf = waehle([100, 100, 10]);
+  const st = STELLEN_VON[auf] + 1;
+  const fein = 10 ** (3 - st);
+  const ziel = auf * zufall(10, p.ganz * 1000 / auf - 1);
+  const richtig = ziel - auf / 2 + fein * zufall(0, auf / fein - 1);
+  if (richtig === ziel || nachkommaVon(richtig) !== st) return null;
+  const kand = [
+    ziel + auf / 2,                                   // 4.55 rundet schon auf 4.6
+    ziel - auf / 2 - fein,                            // 4.44 rundet noch auf 4.4
+    ziel + auf / 2 + fein * zufall(1, 4),             // knapp darüber
+    ziel - auf / 2 - fein * zufall(2, 4),             // knapp darunter
+    Math.floor(ziel / 1000) * 1000 + (ziel % 1000) / 10 + (auf === 100 ? 0 : 1), // 4.05 statt 4.5
+  ].filter(x => x > 0 && runde(x, auf) !== ziel && x !== richtig);
+  const falsche = mische([...new Set(kand)]).slice(0, 3);
+  if (falsche.length < 3) return null;
+  return { art: "rueckwaerts", ziel, auf, optionen: mische([richtig, ...falsche]), richtig };
+}
+
+/** Grenze: die kleinste (grösste) Zahl mit st Nachkommastellen, die auf 'ziel' rundet: 4.45 (4.54). */
+function erzeugeGrenze(p) {
+  const auf = waehle([1000, 100, 10]);
+  const st = STELLEN_VON[auf] + 1;
+  const ziel = auf * zufall(auf === 1000 ? 2 : 10, p.ganz * 1000 / auf - 1);
+  const kleinste = Math.random() < 0.5;
+  const antwort = kleinste ? ziel - auf / 2 : ziel + auf / 2 - 10 ** (3 - st);
+  return { art: "grenze", ziel, auf, st, kleinste, antwort };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (!p.auf.includes(a.auf)) m.push("Rundungsstelle nicht erlaubt");
+  const max = (p.ganz + 1) * 1000;
+  if (a.art === "runden") {
+    const st = nachkommaVon(a.zahl);
+    if (!(a.zahl > 0 && a.zahl < max)) m.push("Zahl ausserhalb des Zahlenraums");
+    if (a.geld ? a.zahl % 50 || !p.geld : !p.stellen.includes(st)) m.push("Nachkommastellen nicht in der Stufe");
+    if (st <= STELLEN_VON[a.auf]) m.push("Zahl ist schon gerundet");
+    if (!(a.unten < a.zahl && a.zahl < a.oben) || a.unten % a.auf || a.oben - a.unten !== a.auf) m.push("Nachbarn falsch");
+    if (a.unten <= 0) m.push("rundet auf 0");
+    if (a.loesung !== runde(a.zahl, a.auf)) m.push("Rundung falsch");
+  }
+  if (a.art === "rueckwaerts") {
+    if (a.optionen.length !== 4 || new Set(a.optionen).size !== 4) m.push("nicht vier verschiedene Antworten");
+    if (a.optionen.filter(x => runde(x, a.auf) === a.ziel).length !== 1 || runde(a.richtig, a.auf) !== a.ziel) m.push("nicht genau eine Zahl rundet auf das Ziel");
+    if (!a.optionen.includes(a.richtig) || a.optionen.some(x => !(x > 0 && x < max))) m.push("Antworten ausserhalb");
+    if (a.optionen.some(x => nachkommaVon(x) <= STELLEN_VON[a.auf])) m.push("Antwort ist schon gerundet");
+  }
+  if (a.art === "grenze") {
+    const fein = 10 ** (3 - a.st);
+    if (runde(a.antwort, a.auf) !== a.ziel) m.push("Antwort rundet nicht auf das Ziel");
+    const nachbar = a.kleinste ? a.antwort - fein : a.antwort + fein;
+    if (runde(nachbar, a.auf) === a.ziel) m.push("nicht die kleinste/grösste");
+    if (a.antwort % fein || !(a.antwort > 0 && a.antwort < max)) m.push("Antwort ausserhalb");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Rutsche als SVG wie in der Runden-Rutsche: Bogen von „unten“ nach „oben“, Kugel an der Zahl. */
+function rutscheZeichnen(a) {
+  const B = 700, H = 150, x0 = 50, x1 = B - 50;
+  const anteil = (a.zahl - a.unten) / a.auf;
+  const xPos = x0 + anteil * (x1 - x0);
+  const yBahn = x => 110 - 70 * Math.sin(Math.PI * (x - x0) / (x1 - x0));
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${B} ${H}`);
+  svg.setAttribute("class", "rutsche");
+  svg.setAttribute("aria-hidden", "true");
+  let pfad = "";
+  for (let x = x0; x <= x1; x += 10) pfad += `${x === x0 ? "M" : "L"}${x},${yBahn(x).toFixed(1)} `;
+  let striche = "";
+  for (let i = 0; i <= 10; i++) {
+    const x = x0 + i * (x1 - x0) / 10;
+    striche += `<line class="${i === 5 ? "mitte" : "strich"}" x1="${x}" x2="${x}" y1="${yBahn(x) + 10}" y2="${yBahn(x) + (i === 5 ? 34 : 18)}"/>`;
+  }
+  const st = STELLEN_VON[a.auf];
+  const mitteText = a.geld ? zahl(a.unten + a.auf / 2, true) : dezimalText((a.unten + a.auf / 2) / 1000, st + 1);
+  svg.innerHTML = `<path class="bahn" d="${pfad}"/>${striche}
+    <text x="${x0}" y="${H - 4}" text-anchor="middle">${gerundet(a.unten, a.auf, a.geld)}</text>
+    <text x="${(x0 + x1) / 2}" y="${H - 4}" text-anchor="middle" style="fill:var(--hinweis)">${mitteText}</text>
+    <text x="${x1}" y="${H - 4}" text-anchor="middle">${gerundet(a.oben, a.auf, a.geld)}</text>
+    <g class="kugel"><circle cx="${xPos}" cy="${yBahn(xPos) - 16}" r="15" fill="var(--knopf)"/><circle cx="${xPos - 5}" cy="${yBahn(xPos) - 21}" r="4" fill="#fff" opacity=".7"/></g>`;
+  svg.rutschen = (ziel) => {
+    const xz = ziel === a.oben ? x1 : x0;
+    svg.querySelector(".kugel").style.transform = `translate(${xz - xPos}px, ${yBahn(xz) - yBahn(xPos)}px)`;
+  };
+  return svg;
+}
+
+function hinweisFuer(a, knapp) {
+  if (a.geld) return "Sind es weniger als 50 Rappen, rundet man ab, ab 50 Rappen auf.";
+  if (knapp) return `Welche Ziffer steht direkt rechts von den ${DATIV[a.auf]}?`;
+  const ziffer = Math.floor(a.zahl / (a.auf / 10)) % 10;
+  return `Schau nur auf die Ziffer direkt rechts von den ${DATIV[a.auf]}: Es ist eine ${ziffer}. Bei 0–4 rundet man ab, bei 5–9 auf.`;
+}
+
+/** Endnull: auf Zehntel gerundet 3.0, auf Hundertstel 5.00 — die Null zeigt, wie genau gerundet ist. */
+const endnullLob = a => (STELLEN_VON[a.auf] > 0 && a.loesung % (a.auf * 10) === 0 && !a.geld
+  ? ` Die Null bleibt stehen: Sie zeigt, dass auf ${NAME[a.auf]} gerundet ist.` : "");
+
+/**
+ * Tastatur, die auch die Stellenzahl prüft: auf Zehntel gerundet heisst 3.0, nicht 3.
+ * stellen: verlangte Nachkommastellen oder null (dann zählt nur der Wert).
+ */
+function eintippen(ctx, richtig, stellen, hinweis, loesungText, lob, beiRichtig) {
+  ctx.loesung(loesungText);
+  ctx.schritte(LS.tippSchritte(richtig / 1000, stellen ?? nachkommaVon(richtig)));
+  const anzeige = el("div", { class: "anzeige leer", style: "margin-top:10px", "aria-label": "Deine Zahl" });
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 3, dezimal: true, nachkomma: 3,
+    onOk(w, text) {
+      const getippt = (text.split(".")[1] || "").length;
+      if (Math.round(w * 1000) === richtig && (stellen === null || getippt === stellen)) {
+        tasten.gesperrt = true; anzeige.classList.add("richtig");
+        if (beiRichtig) beiRichtig();
+        ctx.richtig(lob);
+        return;
+      }
+      anzeige.classList.add("falsch");
+      const nurStellen = Math.round(w * 1000) === richtig;
+      ctx.falsch(nurStellen
+        ? `Der Wert stimmt fast — aber gerundet steht ${stellen === 0 ? "keine Stelle" : stellen === 1 ? "genau eine Stelle" : `genau ${stellen} Stellen`} nach dem ${zeichenName()}.`
+        : hinweis, loesungText);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(anzeige, tasten.element);
+}
+
+function runden(ctx, a, p) {
+  if (p.arten.length === 1) ctx.serie("antwort", a.loesung === a.oben ? "auf" : "ab");
+  const Z = zahl(a.zahl, a.geld);
+  const L = gerundet(a.loesung, a.auf, a.geld);
+  ctx.flaeche.append(
+    el("div", { class: "zahl-gross", text: Z }),
+    el("div", { class: "auf", html: a.geld ? "runde auf <b>ganze Franken</b>" : `runde auf <b>${NAME[a.auf]}</b>` }));
+  const svg = rutscheZeichnen(a);
+  ctx.flaeche.append(svg);
+  const loesungText = `${Z} ≈ ${L}`;
+  const lob = `Richtig: ${loesungText}.${endnullLob(a)}`;
+  if (p.tippen) {
+    eintippen(ctx, a.loesung, STELLEN_VON[a.auf], hinweisFuer(a, p.knapp), loesungText, lob, () => svg.rutschen(a.loesung));
+  } else {
+    ctx.loesung(loesungText);
+    ctx.schritte(1);
+    const ziele = el("div", { class: "ziele" });
+    let fertig = false;
+    for (const wert of [a.unten, a.oben]) {
+      const knopf = el("button", { type: "button", class: "ziel" }, el("small", { text: wert === a.unten ? "⬅ abrunden" : "aufrunden ➡" }), gerundet(wert, a.auf, a.geld));
+      knopf.addEventListener("click", () => {
+        if (fertig) return;
+        if (wert === a.loesung) {
+          fertig = true;
+          knopf.classList.add("richtig");
+          svg.rutschen(wert);
+          LS.ton("huepf");
+          ctx.richtig(lob);
+          return;
+        }
+        knopf.classList.remove("falsch");
+        void knopf.offsetWidth;
+        knopf.classList.add("falsch");
+        ctx.falsch(hinweisFuer(a, p.knapp), loesungText);
+        if (ctx.vorbei()) fertig = true;
+      });
+      ziele.append(knopf);
+    }
+    ctx.flaeche.append(ziele);
+  }
+}
+
+function rueckwaerts(ctx, a, p) {
+  const st = STELLEN_VON[a.auf];
+  const Zl = dezimalText(a.ziel / 1000, st);
+  ctx.flaeche.append(el("div", { class: "frage", html: `Welche Zahl wird auf ${NAME[a.auf]} gerundet zu <b>${Zl}</b>?` }));
+  LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.richtig, breite: 130,
+    inhalt: x => dezimalText(x / 1000),
+    loesung: `${dezimalText(a.richtig / 1000)} ≈ ${Zl}`,
+    hinweis: x => (p.knapp ? `${dezimalText(x / 1000)} ergibt gerundet etwas anderes.`
+      : `${dezimalText(x / 1000)} ≈ ${gerundet(runde(x, a.auf), a.auf)}. Schau auf die Ziffer direkt rechts von den ${DATIV[a.auf]}.`),
+  });
+}
+
+function grenze(ctx, a, p) {
+  const st = STELLEN_VON[a.auf];
+  const Zl = dezimalText(a.ziel / 1000, st);
+  const stellenText = a.st === 1 ? "einer Stelle" : `${a.st} Stellen`;
+  ctx.flaeche.append(el("div", { class: "frage", html: `Welches ist die <b>${a.kleinste ? "kleinste" : "grösste"}</b> Zahl mit ${stellenText} nach dem ${zeichenName()}, die auf ${NAME[a.auf]} gerundet <b>${Zl}</b> ergibt?` }));
+  const loesungText = `${dezimalText(a.antwort / 1000, a.st)} ≈ ${Zl}`;
+  eintippen(ctx, a.antwort, a.st, p.knapp
+    ? `Wo liegt die Mitte zwischen ${Zl} und der Nachbarzahl ${a.kleinste ? "darunter" : "darüber"}?`
+    : `Die Grenze ist die Mitte zwischen ${Zl} und der Nachbarzahl ${a.kleinste ? "darunter" : "darüber"}. Was passiert genau auf der Mitte?`, loesungText, `Richtig: ${loesungText}`);
+}
+
+const ARTEN = { runden, rueckwaerts, grenze };
+
+LS.spiel({
+  id: "dezimal-rutsche",
+  einleitung: "Auf welche Seite rutscht die Kugel? Schau nur auf die Ziffer direkt rechts von der Rundungsstelle: 0–4 ab, 5–9 auf. Genau in der Mitte rutscht sie nach oben!",
+  anzahl: 8,
+  stufen: {
+    s1: "Geld auf ganze Franken: 3.40 Fr. ≈ 3 Fr.",
+    s2: "Auf Ganze: 4.7 ≈ 5, 12.38 ≈ 12.",
+    s3: "Auf Zehntel: 1.745 ≈ 1.7 — nur die Ziffer direkt rechts zählt.",
+    s4: "Auf Zehntel und Hundertstel, mit Fallen: 2.96 ≈ 3.0.",
+    s5: "Ohne Auswahl: selbst eintippen, mit der Endnull (Lehrplan 6. Klasse).",
+    s6: "Endgegner: Welche Zahl rundet auf 4.5? Die kleinste, die grösste?",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (p.arten.length > 1) ctx.serie("art", a.art);
+    ARTEN[a.art](ctx, a, p);
+    if (ctx.nr === 0) ctx.sag(p.geld ? "Die gestrichelte Linie ist bei 50 Rappen. Liegt die Kugel davor oder dahinter?" : "Die gestrichelte Linie ist die Mitte. Liegt die Kugel davor oder dahinter?");
+  },
+});
+</script>
+</body>
+</html>

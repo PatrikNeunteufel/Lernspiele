@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tonleiter-Treppe</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 10px; }
+  .frage b { color: var(--knopf); }
+  .unterzeile { text-align: center; color: var(--text-leise); font-weight: 700; margin: -4px 0 10px; font-size: clamp(14px, 3.3vw, 17px); }
+  .treppe, .klaviatur { display: block; width: 100%; height: auto; margin: 0 auto 12px; }
+  .treppe { max-width: 460px; }
+  .klaviatur { max-width: 560px; touch-action: manipulation; }
+  .treppe .stufe-block { fill: #fff; stroke: var(--deko-6); stroke-width: 2.5; }
+  .treppe .stufe-block.dran { fill: var(--hinweis-hell); stroke: var(--deko-4); }
+  .treppe .stufe-name { font-size: 17px; font-weight: 900; fill: var(--text); }
+  .treppe .stufe-nr { font-size: 13px; font-weight: 800; fill: var(--text-leise); }
+  .treppe .ziel { fill: var(--hinweis-hell); stroke: var(--deko-4); stroke-width: 2.5; cursor: pointer; }
+  .treppe .ziel.gefunden { fill: var(--gut-hell); stroke: var(--gut); }
+  .treppe .ziel.falsch { fill: #eceef6; stroke: var(--rand); }
+  .treppe .ziel-text { font-size: 14px; font-weight: 900; fill: var(--text); pointer-events: none; }
+  .treppe .art-text { font-size: 11px; font-weight: 800; fill: var(--text-leise); }
+  .klaviatur .weiss { fill: #fff; stroke: var(--text); stroke-width: 1.5; cursor: pointer; }
+  .klaviatur .schwarz { fill: var(--text); stroke: var(--text); stroke-width: 1.5; cursor: pointer; }
+  .klaviatur .start { fill: var(--deko-4); }
+  .klaviatur .gesetzt { fill: var(--gut); }
+  .klaviatur .falsch { fill: var(--hinweis); }
+  .klaviatur .tasten-name { font-size: 15px; font-weight: 800; fill: var(--text-leise); pointer-events: none; }
+  .klaviatur .tasten-name.fett { fill: var(--text); font-weight: 900; }
+  .klaviatur .tasten-name.hell { fill: #fff; font-size: 13px; }
+  .bauplan { text-align: center; font-weight: 800; color: var(--text-leise); margin: 0 0 10px; font-size: clamp(13px, 3.2vw, 16px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎼 Tonleiter-Treppe</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/noten.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MU.6.A.1.2e (Orientierungspunkt 2. Zyklus): Halb- und Ganztonschritte in Dur und Moll
+// erkennen (hören, lesen). Basisklasse 5: Stufe 1 = 4. Klasse (Tonleiter hören, hinauf oder hinunter),
+// 2–4 = 5. Klasse (C-Dur, Klaviatur, G- und F-Dur), 5 = 6. Klasse (Dur oder Moll, a-Moll), 6 Endgegner.
+// Deutsche Notennamen wie in der Schweizer Schule: c d e f g a h c, b ist das h mit ♭.
+// Moll ist hier das natürliche (reine) Moll: a-Moll hat dieselben Töne wie C-Dur.
+// Bezug: Hoch-Tief-Ohr (Basisklasse 2) fragt in der Königsstufe Halbton oder Ganzton zwischen zwei
+// Stammtönen — hier geht es um die Lage der Halbtöne in der ganzen Leiter, um schwarze Tasten und um
+// Dur und Moll. Noten-Namen übt die Namen im Notensystem; hier stehen sie auf der Treppe.
+
+const { zufall, waehle, mische, el } = LS;
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+const DUR = [2, 2, 1, 2, 2, 2, 1];
+const MOLL = [2, 1, 2, 2, 1, 2, 2]; // natürliches Moll
+// Grundton als Position in noten.js (p = 0 ist e') mit Vorzeichen.
+const LEITERN = {
+  C: { name: "C-Dur", p: -2, vz: 0, muster: DUR },
+  G: { name: "G-Dur", p: 2, vz: 0, muster: DUR },
+  F: { name: "F-Dur", p: 1, vz: 0, muster: DUR },
+  D: { name: "D-Dur", p: -1, vz: 0, muster: DUR },
+  B: { name: "B-Dur", p: 4, vz: -1, muster: DUR },
+  a: { name: "a-Moll", p: 3, vz: 0, muster: MOLL },
+  e: { name: "e-Moll", p: 0, vz: 0, muster: MOLL },
+  d: { name: "d-Moll", p: -1, vz: 0, muster: MOLL },
+};
+
+/** Die acht Töne einer Leiter mit richtigem Namen: je Stufe der nächste Buchstabe, Vorzeichen nach Muster. */
+function leiter(id) {
+  const l = LEITERN[id];
+  const start = NOTEN.midi(l.p, l.vz);
+  let soll = start;
+  return Array.from({ length: 8 }, (_, i) => {
+    if (i) soll += l.muster[i - 1];
+    const p = l.p + i;
+    const vz = soll - NOTEN.midi(p);
+    return { p, vz, midi: soll, name: NOTEN.name(p, vz) };
+  });
+}
+/** Stammtöne ab Position p (ohne Vorzeichen). */
+const stammtoene = (p, n) => Array.from({ length: n }, (_, i) => ({ p: p + i, vz: 0, midi: NOTEN.midi(p + i), name: NOTEN.name(p + i) }));
+/** Lücken (zwischen Ton i und i+1) mit Halbtonschritt. */
+const halbe = toene => toene.slice(1).map((t, i) => (t.midi - toene[i].midi === 1 ? i : -1)).filter(i => i >= 0);
+const schrittName = d => (d === 1 ? "Halbton" : "Ganzton");
+
+const istSchwarz = m => [1, 3, 6, 8, 10].includes(((m % 12) + 12) % 12);
+const WEISS_NAMEN = { 0: "c", 2: "d", 4: "e", 5: "f", 7: "g", 9: "a", 11: "h" };
+const weissName = m => WEISS_NAMEN[((m % 12) + 12) % 12];
+const KLAVIER = { von: 60, bis: 77 }; // c' bis f''
+
+// ---------- Aufgaben als Daten ----------
+
+const STUFE = {
+  s1: ["hoeren", "lesen"],
+  s2: ["setzen"],
+  s3: ["abstand", "taste"],
+  s4: ["bauen", "vorzeichen", "falsch"],
+  s5: ["durmoll", "setzen", "bild"],
+  s6: ["bauen", "durmoll", "setzen"],
+};
+const S4_LEITERN = ["G", "F"];
+const S6_BAUEN = ["D", "B", "e", "d", "G", "F"];
+const S6_SETZEN = ["G", "F", "D", "e", "d"];
+const GELAEUFIG = ["fis", "cis", "gis", "dis", "ais", "b", "es", "as", "des", "ges"];
+
+function aufgabeErzeugen(stufe) {
+  const art = waehle(STUFE[stufe]);
+  if (art === "hoeren") {
+    // Ausschnitt aus der C-Dur-Leiter (c' bis c'''), hinauf oder hinunter
+    const laenge = zufall(3, 5);
+    const start = zufall(-2, 12 - laenge + 1);
+    const richtung = waehle(["hinauf", "hinunter"]);
+    const p = Array.from({ length: laenge }, (_, i) => start + i);
+    return { art, p: richtung === "hinauf" ? p : p.reverse(), richtig: richtung };
+  }
+  if (art === "lesen") {
+    // zwei Stufen der C-Dur-Treppe mit verschiedenen Namen (ohne c, das zweimal vorkommt)
+    const [x, y] = mische([1, 2, 3, 4, 5, 6]).slice(0, 2);
+    return { art, von: x, nach: y, richtig: y > x ? "hinauf" : "hinunter" };
+  }
+  if (art === "setzen") {
+    if (stufe === "s2") {
+      // C-Dur ganz oder ein Ausschnitt aus Stammtönen mit mindestens einem Halbtonschritt
+      for (;;) {
+        const ganz = Math.random() < 0.25;
+        const n = ganz ? 8 : zufall(4, 7);
+        const start = ganz ? -2 : zufall(-2, 5);
+        if (halbe(stammtoene(start, n)).length) return { art, start, n };
+      }
+    }
+    return { art, leiter: stufe === "s5" ? "a" : waehle(S6_SETZEN) };
+  }
+  if (art === "abstand") {
+    for (;;) {
+      const a = zufall(KLAVIER.von, KLAVIER.bis), d = zufall(1, 2) * waehle([1, -1]);
+      const b = a + d;
+      if (b >= KLAVIER.von && b <= KLAVIER.bis) return { art, a, b, richtig: schrittName(Math.abs(d)) };
+    }
+  }
+  if (art === "taste") {
+    for (;;) {
+      const a = zufall(KLAVIER.von, KLAVIER.bis);
+      if (istSchwarz(a)) continue;
+      const d = zufall(1, 2), richtung = waehle([1, -1]);
+      const ziel = a + d * richtung;
+      if (ziel >= KLAVIER.von && ziel <= KLAVIER.bis) return { art, a, d, richtung, ziel };
+    }
+  }
+  if (art === "bauen") return { art, leiter: stufe === "s4" ? waehle(S4_LEITERN) : waehle(S6_BAUEN) };
+  if (art === "vorzeichen") return { art, leiter: waehle(S4_LEITERN) };
+  if (art === "falsch") {
+    const id = waehle(S4_LEITERN);
+    const toene = leiter(id);
+    for (;;) {
+      const i = zufall(1, 6);
+      const t = toene[i];
+      const vz = t.vz !== 0 ? 0 : waehle([1, -1]);
+      const name = NOTEN.name(t.p, vz);
+      if (vz === 0 || GELAEUFIG.includes(name)) return { art, leiter: id, stufe: i, vz };
+    }
+  }
+  if (art === "durmoll") {
+    // nur hören: Leiter oder Dreiklang auf einem Grundton zwischen c' und h'
+    const form = stufe === "s6" ? "dreiklang" : waehle(["leiter", "dreiklang"]);
+    return { art, grund: zufall(60, 71), geschlecht: waehle(["Dur", "Moll"]), form };
+  }
+  // bild: Treppe mit allen Namen, Dur oder Moll?
+  return { art: "bild", leiter: waehle(["C", "G", "F", "D", "a", "e", "d"]) };
+}
+
+/** Töne einer Setzen-Aufgabe. */
+const setzenToene = a => (a.leiter ? leiter(a.leiter) : stammtoene(a.start, a.n));
+const falscheLeiter = a => leiter(a.leiter).map((t, i) => (i === a.stufe ? { ...t, vz: a.vz, midi: NOTEN.midi(t.p, a.vz), name: NOTEN.name(t.p, a.vz) } : t));
+const hoerToene = a => {
+  const muster = a.geschlecht === "Dur" ? DUR : MOLL;
+  const stufen = [0];
+  for (const s of muster) stufen.push(stufen.at(-1) + s);
+  return a.form === "leiter" ? stufen.map(s => a.grund + s) : [0, 2, 4, 7, 4, 2, 0].map(i => a.grund + stufen[i]);
+};
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!STUFE[stufe].includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  // Die Leitern selbst: Dur hat Halbtöne zwischen Stufe 3–4 und 7–8, Moll zwischen 2–3 und 5–6; je Buchstabe ein Ton.
+  for (const [id, l] of Object.entries(LEITERN)) {
+    const t = leiter(id);
+    const soll = l.muster === DUR ? "2,6" : "1,4";
+    if (halbe(t).join() !== soll) m.push(`${l.name}: Halbtöne falsch`);
+    if (t.some(x => Math.abs(x.vz) > 1)) m.push(`${l.name}: doppeltes Vorzeichen`);
+    if (t[7].midi - t[0].midi !== 12) m.push(`${l.name}: keine Oktave`);
+  }
+  if (a.art === "hoeren") {
+    const midi = a.p.map(p => NOTEN.midi(p));
+    const auf = midi.every((x, i) => !i || x > midi[i - 1]), ab = midi.every((x, i) => !i || x < midi[i - 1]);
+    if ((a.richtig === "hinauf") !== auf || (a.richtig === "hinunter") !== ab) m.push("Richtung falsch");
+    if (midi.slice(1).some((x, i) => Math.abs(x - midi[i]) > 2)) m.push("kein Tonleiter-Ausschnitt");
+  }
+  if (a.art === "lesen" && ((a.nach > a.von) !== (a.richtig === "hinauf") || a.von === a.nach)) m.push("Richtung falsch");
+  if (a.art === "setzen" && !halbe(setzenToene(a)).length) m.push("kein Halbtonschritt");
+  if (a.art === "abstand" && schrittName(Math.abs(a.a - a.b)) !== a.richtig) m.push("Abstand falsch");
+  if (a.art === "taste" && (a.ziel < KLAVIER.von || a.ziel > KLAVIER.bis || istSchwarz(a.a))) m.push("Taste ausserhalb oder Start schwarz");
+  if (a.art === "falsch") {
+    const f = falscheLeiter(a), r = leiter(a.leiter);
+    const anders = f.map((t, i) => (t.midi !== r[i].midi ? i : -1)).filter(i => i >= 0);
+    if (anders.length !== 1 || anders[0] !== a.stufe) m.push("nicht genau ein falscher Ton");
+    if (new Set(f.slice(0, 7).map(t => t.name)).size !== 7) m.push("Name doppelt");
+  }
+  if (a.art === "durmoll") {
+    const t = hoerToene(a);
+    const terz = (a.form === "leiter" ? t[2] : t[1]) - t[0];
+    if ((terz === 4) !== (a.geschlecht === "Dur")) m.push("Terz passt nicht zu Dur/Moll");
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+function svgEl(tag, attr = {}, text) {
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+/**
+ * Treppe: je Ton ein Block, Ganzton = ganze Stufe, Halbton = halbe Stufe.
+ * opt.toene: [{ name }]; opt.halb(i): Lücke i als halbe Stufe zeichnen; opt.namen: Namen zeigen (Vorgabe ja)
+ * opt.ziele: Lücken antippbar ({ i → Zustand "offen" | "gefunden" | "falsch" }), opt.onZiel(i)
+ * opt.dran: Index eines hervorgehobenen Blocks
+ */
+function treppeSvg(opt) {
+  const n = opt.toene.length;
+  const B = 42, GANZ = 22, OBEN = 36, MIN = 30;
+  const hub = [0];
+  for (let i = 0; i < n - 1; i++) hub.push(hub[i] + (opt.halb(i) ? GANZ / 2 : GANZ));
+  const unten = OBEN + hub[n - 1] + MIN;
+  const breite = 16 + n * B;
+  const svg = svgEl("svg", { viewBox: `0 0 ${breite} ${unten + 22}`, class: "treppe", role: "img", "aria-label": "Tonleiter-Treppe" });
+  svg.style.maxWidth = `${Math.min(460, breite * 1.3)}px`;
+  opt.toene.forEach((t, i) => {
+    const x = 8 + i * B, y = unten - MIN - hub[i];
+    svg.append(svgEl("rect", { x, y, width: B - 2, height: unten - y, rx: 5, class: i === opt.dran ? "stufe-block dran" : "stufe-block" }));
+    if (opt.namen !== false) svg.append(svgEl("text", { x: x + B / 2 - 1, y: y + 21, "text-anchor": "middle", class: "stufe-name" }, t.name));
+    svg.append(svgEl("text", { x: x + B / 2 - 1, y: unten + 16, "text-anchor": "middle", class: "stufe-nr" }, String(i + 1)));
+  });
+  if (opt.ziele) {
+    for (let i = 0; i < n - 1; i++) {
+      const zustand = opt.ziele[i] || "offen";
+      const cx = 8 + (i + 1) * B - 1, cy = unten - MIN - hub[i + 1] - 16;
+      const g = svgEl("g", { "data-luecke": i });
+      g.append(svgEl("circle", { cx, cy, r: 13, class: `ziel ${zustand === "offen" ? "" : zustand}` }),
+        svgEl("text", { x: cx, y: cy + 5, "text-anchor": "middle", class: "ziel-text" }, zustand === "gefunden" ? "½" : zustand === "falsch" ? "1" : "?"));
+      g.addEventListener("click", () => opt.onZiel(i));
+      svg.append(g);
+    }
+  }
+  return svg;
+}
+
+/**
+ * Klaviatur von opt.von bis opt.bis (MIDI). opt.farbe(m): Zusatzklasse; opt.text(m): Beschriftung;
+ * opt.onTaste(m): antippen.
+ */
+function klaviaturSvg(opt) {
+  const weisse = [];
+  for (let m = opt.von; m <= opt.bis; m++) if (!istSchwarz(m)) weisse.push(m);
+  const W = 36, H = 150, SB = 22, SH = 92;
+  const svg = svgEl("svg", { viewBox: `0 0 ${weisse.length * W + 4} ${H + 4}`, class: "klaviatur", role: "img", "aria-label": "Klaviatur" });
+  const xWeiss = new Map(weisse.map((m, i) => [m, 2 + i * W]));
+  const taste = (m, x, schwarz) => {
+    const r = svgEl("rect", { x, y: 2, width: schwarz ? SB : W, height: schwarz ? SH : H, rx: 4, "data-midi": m,
+      class: `${schwarz ? "schwarz" : "weiss"} ${opt.farbe?.(m) || ""}` });
+    r.addEventListener("click", () => opt.onTaste?.(m));
+    svg.append(r);
+    const text = opt.text?.(m);
+    const name = text ?? (schwarz ? null : weissName(m));
+    if (name) svg.append(svgEl("text", { x: x + (schwarz ? SB : W) / 2, y: schwarz ? SH - 10 : H - 12, "text-anchor": "middle",
+      class: `tasten-name${text != null ? " fett" : ""}${schwarz ? " hell" : ""}` }, name));
+  };
+  for (const m of weisse) taste(m, xWeiss.get(m), false);
+  for (let m = opt.von; m <= opt.bis; m++) if (istSchwarz(m) && xWeiss.has(m - 1)) taste(m, xWeiss.get(m - 1) + W - SB / 2, true);
+  return svg;
+}
+
+const tonFolge = (midis, dauer = 0.5) => midis.map((m, i) => ({ midi: m, dauer: i === midis.length - 1 ? dauer * 1.6 : dauer }));
+const spielen = (ctx, wurzel, folge) => setTimeout(() => { if (document.body.contains(wurzel) && !ctx.vorbei()) NOTEN.spiele(folge); }, 250);
+const dauerVon = folge => folge.reduce((x, t) => x + t.dauer, 0);
+
+// Für das Prüfskript im Scratchpad: die laufende Aufgabe.
+let AKTUELL = null;
+
+// ---------- Aufgabenarten zeichnen ----------
+
+/** Halbtonschritte auf der Treppe antippen. */
+function zeichneSetzen(ctx, a) {
+  const toene = setzenToene(a);
+  const soll = halbe(toene);
+  const titel = a.leiter ? LEITERN[a.leiter].name : toene.length === 8 && a.start === -2 ? "C-Dur" : null;
+  const loesung = `Halbtonschritte: ${soll.map(i => `${toene[i].name}–${toene[i + 1].name} (Stufe ${i + 1}–${i + 2})`).join(" und ")}`;
+  ctx.loesung(loesung);
+  ctx.schritte(soll.length);
+  const zustand = {};
+  const zahl = soll.length === 1 ? "einen Halbtonschritt" : `${soll.length} Halbtonschritte`;
+  const frage = el("div", { class: "frage", html: titel ? `<b>${titel}</b>: Wo sind die Halbtonschritte?` : "Wo sind die Halbtonschritte?" });
+  const halter = el("div");
+  const zeichne = () => {
+    halter.innerHTML = "";
+    halter.append(treppeSvg({
+      toene, halb: i => zustand[i] === "gefunden" || (ctx.vorbei() && soll.includes(i)), ziele: zustand,
+      onZiel: i => {
+        if (ctx.vorbei() || zustand[i]) return;
+        if (soll.includes(i)) {
+          zustand[i] = "gefunden";
+          NOTEN.spiele(tonFolge([toene[i].midi, toene[i + 1].midi], 0.45));
+          if (soll.every(j => zustand[j] === "gefunden")) ctx.richtig(`Richtig! ${loesung}.`);
+          else LS.ton("tipp");
+        } else {
+          zustand[i] = "falsch";
+          ctx.falsch(`Zwischen ${toene[i].name} und ${toene[i + 1].name} ist ein Ganztonschritt: Auf dem Klavier liegt dort noch eine Taste dazwischen.`, loesung);
+        }
+        zeichne();
+      },
+    }));
+  };
+  ctx.flaeche.append(frage, el("div", { class: "unterzeile", text: `Tippe auf die ❓ — hier gibt es ${zahl}.` }), halter,
+    el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => tonFolge(toene.map(t => t.midi), 0.45), "🔊 Treppe anhören")));
+  zeichne();
+}
+
+/** Tonleiter auf der Klaviatur bauen: Ton für Ton antippen. */
+function zeichneBauen(ctx, a, mitPlan) {
+  const toene = leiter(a.leiter);
+  const l = LEITERN[a.leiter];
+  const loesung = `${l.name}: ${toene.map(t => t.name).join(" ")}`;
+  ctx.loesung(loesung);
+  ctx.schritte(7);
+  const von = istSchwarz(toene[0].midi) ? toene[0].midi - 1 : toene[0].midi;
+  const bis = istSchwarz(toene[7].midi) ? toene[7].midi + 1 : toene[7].midi;
+  let dran = 1;
+  let falschTaste = null;
+  const halter = el("div");
+  const plan = l.muster.map(schrittName).map(s => (s === "Halbton" ? "½" : "1")).join(" · ");
+  const zeichne = () => {
+    halter.innerHTML = "";
+    halter.append(klaviaturSvg({
+      von, bis,
+      farbe: m => (m === toene[0].midi ? "start" : toene.slice(1, dran).some(t => t.midi === m) ? "gesetzt" : m === falschTaste ? "falsch" : ""),
+      text: m => { const i = toene.findIndex((t, j) => t.midi === m && (j === 0 || j < dran)); return i >= 0 ? toene[i].name : null; },
+      onTaste: m => {
+        if (ctx.vorbei()) return;
+        if (m === toene[dran].midi) {
+          NOTEN.spiele([{ midi: m, dauer: 0.5 }]);
+          dran++;
+          falschTaste = null;
+          if (dran === 8) { zeichne(); NOTEN.spiele(tonFolge(toene.map(t => t.midi), 0.4)); ctx.richtig(`Richtig! ${loesung}`); return; }
+          LS.ton("tipp");
+        } else {
+          falschTaste = m;
+          const schritt = schrittName(toene[dran].midi - toene[dran - 1].midi);
+          ctx.falsch(mitPlan ? `Von Stufe ${dran} zu Stufe ${dran + 1} braucht es einen ${schritt}. Zähle die Tasten, auch die schwarzen.`
+            : `Denk an den Bauplan von ${l.muster === DUR ? "Dur" : "Moll"}: Wo liegen die halben Stufen? Zähle die Tasten, auch die schwarzen.`, loesung);
+        }
+        zeichne();
+      },
+    }));
+  };
+  ctx.flaeche.append(el("div", { class: "frage", html: `Baue <b>${l.name}</b>: Tippe die Töne von unten nach oben.` }));
+  if (mitPlan) ctx.flaeche.append(el("div", { class: "bauplan", text: `Bauplan ${l.muster === DUR ? "Dur" : "Moll"}: ${plan} (1 = Ganzton, ½ = Halbton)` }));
+  ctx.flaeche.append(halter, el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => tonFolge(toene.map(t => t.midi), 0.45), `🔊 ${l.name} anhören`)));
+  zeichne();
+}
+
+LS.spiel({
+  id: "tonleiter-treppe",
+  einleitung: "Eine Tonleiter ist wie eine Treppe: meist ganze Stufen, aber an zwei Stellen nur halbe. Wo sind sie? Mach den Ton an: 🔊",
+  anzahl: 8,
+  stufen: {
+    s1: "Tonleiter hören: Geht sie hinauf oder hinunter? (4. Klasse)",
+    s2: "C-Dur: Wo sind die Halbtonschritte? (e–f und h–c)",
+    s3: "Auf der Klaviatur: Halbton oder Ganzton? Tippe die Taste.",
+    s4: "G-Dur mit fis und F-Dur mit b selbst bauen.",
+    s5: "Dur oder Moll? Hören und a-Moll bauen (6. Klasse).",
+    s6: "Endgegner: D-Dur, B-Dur, e-Moll und d-Moll ohne Bauplan, Dur oder Moll am Dreiklang.",
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s1" ? "Hör gut zu und sing leise mit." : "Tipp: Auf dem Klavier ist ein Halbton die nächste Taste — weiss oder schwarz.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    AKTUELL = a;
+    if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.art);
+    const f = ctx.flaeche;
+    const cdur = leiter("C");
+
+    if (a.art === "hoeren") {
+      ctx.serie("antwort", a.richtig);
+      const folge = tonFolge(a.p.map(p => NOTEN.midi(p)), 0.5);
+      ctx.kennung(JSON.stringify(a.p));
+      ctx.wartezeit(dauerVon(folge));
+      f.append(el("div", { class: "frage", text: "Geht die Tonleiter hinauf oder hinunter?" }),
+        treppeSvg({ toene: cdur, halb: i => i === 2 || i === 6 }),
+        el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => folge, "🔊 Nochmal hören")));
+      LS.auswahl(ctx, {
+        optionen: ["hinauf", "hinunter"], richtig: a.richtig, breite: 150,
+        inhalt: o => ({ bild: o === "hinauf" ? "⬆️" : "⬇️", text: o }),
+        hinweis: "Hör nochmal und sing leise mit: Wird deine Stimme höher oder tiefer?",
+        loesung: `Die Töne gingen ${a.richtig}: ${a.p.map(p => NOTEN.name(p)).join(" ")}`,
+      });
+      spielen(ctx, f.lastChild, folge);
+    } else if (a.art === "lesen") {
+      ctx.serie("antwort", a.richtig);
+      const x = cdur[a.von], y = cdur[a.nach];
+      f.append(el("div", { class: "frage", html: `Von <b>${x.name}</b> nach <b>${y.name}</b>: hinauf oder hinunter?` }),
+        treppeSvg({ toene: cdur, halb: i => i === 2 || i === 6 }));
+      LS.auswahl(ctx, {
+        optionen: ["hinauf", "hinunter"], richtig: a.richtig, breite: 150,
+        inhalt: o => ({ bild: o === "hinauf" ? "⬆️" : "⬇️", text: o }),
+        hinweis: "Such beide Namen auf der Treppe. Steht der zweite weiter oben oder weiter unten?",
+        loesung: `${y.name} liegt ${a.richtig === "hinauf" ? "höher" : "tiefer"} als ${x.name}.`,
+        beiRichtig: () => NOTEN.spiele(tonFolge([x.midi, y.midi])),
+      });
+    } else if (a.art === "setzen") {
+      zeichneSetzen(ctx, a);
+    } else if (a.art === "abstand") {
+      ctx.serie("antwort", a.richtig);
+      ctx.kennung(JSON.stringify([a.a, a.b]));
+      const folge = tonFolge([a.a, a.b], 0.6);
+      f.append(el("div", { class: "frage", text: "Halbton oder Ganzton zwischen den zwei gelben Tasten?" }),
+        klaviaturSvg({ ...KLAVIER, farbe: m => (m === a.a || m === a.b ? "start" : "") }),
+        el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => folge, "🔊 Beide Töne")));
+      LS.auswahl(ctx, {
+        optionen: ["Halbton", "Ganzton"], richtig: a.richtig, breite: 150,
+        hinweis: "Zähle die Schritte von Taste zu Taste — auch die schwarzen zählen. Ein Schritt ist ein Halbton.",
+        loesung: `Das ist ein ${a.richtig}: ${Math.abs(a.a - a.b)} ${Math.abs(a.a - a.b) === 1 ? "Taste" : "Tasten"} weiter.`,
+      });
+    } else if (a.art === "taste") {
+      const was = `${a.d === 1 ? "einen Halbton" : "einen Ganzton"} ${a.richtung > 0 ? "höher" : "tiefer"}`;
+      const loesung = `${was} als ${weissName(a.a)}: ${a.d} ${a.d === 1 ? "Taste" : "Tasten"} nach ${a.richtung > 0 ? "rechts" : "links"}`;
+      ctx.loesung(loesung);
+      ctx.kennung(JSON.stringify([a.a, a.ziel]));
+      ctx.schritte(1);
+      let falschTaste = null;
+      let fertig = false;
+      const halter = el("div");
+      const zeichne = () => {
+        halter.innerHTML = "";
+        halter.append(klaviaturSvg({ ...KLAVIER,
+          farbe: m => (m === a.a ? "start" : fertig && m === a.ziel ? "gesetzt" : m === falschTaste ? "falsch" : ""),
+          onTaste: m => {
+            if (ctx.vorbei() || fertig) return;
+            if (m === a.ziel) {
+              fertig = true;
+              NOTEN.spiele(tonFolge([a.a, m], 0.6));
+              ctx.richtig(`Richtig: ${loesung}.`);
+            } else {
+              falschTaste = m;
+              ctx.falsch(`Du hast ${Math.abs(m - a.a) === 0 ? "die gelbe Taste selbst" : `${Math.abs(m - a.a)} ${Math.abs(m - a.a) === 1 ? "Taste" : "Tasten"} ${m > a.a ? "nach rechts" : "nach links"}`} getippt. Ein Halbton ist die nächste Taste, auch eine schwarze.`, loesung);
+            }
+            zeichne();
+          },
+        }));
+      };
+      f.append(el("div", { class: "frage", html: `Tippe die Taste <b>${was}</b> als die gelbe (${weissName(a.a)}).` }), halter);
+      zeichne();
+    } else if (a.art === "bauen") {
+      zeichneBauen(ctx, a, ctx.stufe === "s4");
+    } else if (a.art === "vorzeichen") {
+      const toene = leiter(a.leiter);
+      const mit = toene.find(t => t.vz !== 0);
+      const l = LEITERN[a.leiter];
+      f.append(el("div", { class: "frage", html: `Welcher Ton bekommt in <b>${l.name}</b> ein Vorzeichen?` }),
+        el("div", { class: "bauplan", text: `Bauplan Dur: 1 · 1 · ½ · 1 · 1 · 1 · ½ (1 = Ganzton, ½ = Halbton)` }),
+        treppeSvg({ toene: toene.map(t => ({ name: t.vz ? "?" : t.name })), halb: i => i === 2 || i === 6, dran: toene.indexOf(mit) }));
+      LS.auswahl(ctx, {
+        optionen: ["fis", "cis", "b", "es"], richtig: mit.name, breite: 90,
+        hinweis: "Spiel die Leiter auf dem Klavier im Kopf: Wo braucht es eine schwarze Taste, damit die halben Stufen am richtigen Platz sind?",
+        loesung: `${l.name} hat ${mit.name}: ${toene.map(t => t.name).join(" ")}`,
+        beiRichtig: () => NOTEN.spiele(tonFolge(toene.map(t => t.midi), 0.4)),
+      });
+    } else if (a.art === "falsch") {
+      const l = LEITERN[a.leiter];
+      const toene = falscheLeiter(a);
+      const richtig = leiter(a.leiter);
+      f.append(el("div", { class: "frage", html: `Ein Ton in dieser <b>${l.name}</b>-Leiter ist falsch. Welcher?` }),
+        el("div", { class: "bauplan", text: "Bauplan Dur: 1 · 1 · ½ · 1 · 1 · 1 · ½" }));
+      LS.auswahl(ctx, {
+        optionen: toene.map((_, i) => i), richtig: a.stufe, breite: 64,
+        inhalt: i => ({ text: toene[i].name, klein: String(i + 1) }),
+        hinweis: "Prüfe Schritt für Schritt mit dem Bauplan. Wo stimmt der Abstand nicht?",
+        loesung: `Stufe ${a.stufe + 1} heisst ${richtig[a.stufe].name}, nicht ${toene[a.stufe].name}.`,
+        beiRichtig: () => NOTEN.spiele(tonFolge(richtig.map(t => t.midi), 0.4)),
+      });
+    } else if (a.art === "durmoll") {
+      ctx.serie("antwort", a.geschlecht);
+      const folge = tonFolge(hoerToene(a), a.form === "leiter" ? 0.42 : 0.5);
+      ctx.kennung(JSON.stringify([a.form, hoerToene(a)]));
+      ctx.wartezeit(dauerVon(folge));
+      f.append(el("div", { class: "frage", text: a.form === "leiter" ? "Dur oder Moll? Hör die Tonleiter." : "Dur oder Moll? Hör den Dreiklang." }),
+        el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => folge, "🔊 Nochmal hören")));
+      LS.auswahl(ctx, {
+        optionen: ["Dur", "Moll"], richtig: a.geschlecht, breite: 150,
+        inhalt: o => ({ bild: o === "Dur" ? "☀️" : "🌧️", text: o }),
+        hinweis: `Hör auf ${a.form === "leiter" ? "den dritten Ton der Leiter" : "den zweiten Ton, die Terz"}: Klingt es hell und fröhlich oder eher dunkel und traurig?`,
+        loesung: `Das war ${a.geschlecht}.`,
+      });
+      spielen(ctx, f.lastChild, folge);
+    } else {
+      // bild: Treppe mit Namen, Dur oder Moll?
+      const toene = leiter(a.leiter);
+      const geschlecht = LEITERN[a.leiter].muster === DUR ? "Dur" : "Moll";
+      ctx.serie("antwort", geschlecht);
+      f.append(el("div", { class: "frage", text: "Dur oder Moll? Schau, wo die halben Stufen liegen." }),
+        treppeSvg({ toene, halb: i => halbe(toene).includes(i) }));
+      LS.auswahl(ctx, {
+        optionen: ["Dur", "Moll"], richtig: geschlecht, breite: 150,
+        inhalt: o => ({ bild: o === "Dur" ? "☀️" : "🌧️", text: o }),
+        hinweis: "Bei Dur liegen die halben Stufen nach Stufe 3 und 7, bei Moll nach Stufe 2 und 5.",
+        loesung: `${LEITERN[a.leiter].name}: halbe Stufen nach Stufe ${halbe(toene).map(i => i + 1).join(" und ")}.`,
+        beiRichtig: () => NOTEN.spiele(tonFolge(toene.map(t => t.midi), 0.4)),
+      });
+    }
+  },
+});
+</script>
+</body>
+</html>

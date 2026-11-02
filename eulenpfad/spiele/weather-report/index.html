@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weather-Report</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 25px); font-weight: 800; margin: 2px 0 2px; line-height: 1.35; }
+  .wr-de { text-align: center; font-size: clamp(14px, 3.2vw, 17px); color: var(--text-leise); font-weight: 700; margin: 0 0 10px; }
+  .wr-hoer { display: block; margin: 0 auto 12px; border: none; border-radius: 999px; padding: 10px 24px; font-family: inherit;
+    font-size: clamp(18px, 4vw, 24px); font-weight: 900; background: var(--deko-6); color: #fff; box-shadow: 0 5px 0 var(--deko-1); cursor: pointer; }
+  .wr-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-1); }
+  .wr-radio { text-align: center; font-size: clamp(44px, 10vw, 64px); line-height: 1.1; margin: 0 0 4px; }
+  .wr-text { max-width: 620px; margin: 12px auto 0; background: #fff; border: 2px dashed var(--rand); border-radius: 14px; padding: 8px 12px;
+    font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; color: var(--text-leise); }
+  .wr-wahl .wahl-knopf .bild { font-size: clamp(40px, 9vw, 54px); }
+  .wr-wahl .wahl-knopf { min-height: 84px; }
+  .wr-schritt { margin-top: 14px; }
+  .wr-schritt .frage { font-size: clamp(17px, 3.8vw, 22px); }
+
+  /* Plan für die Wegbeschreibung: Hauptstrasse von unten nach oben, zwei Querstrassen */
+  .wr-plan { display: grid; grid-template-columns: 1fr 58px 1fr; grid-template-rows: repeat(8, auto); max-width: 420px; margin: 0 auto 8px;
+    background: #e8f5e3; border-radius: 14px; overflow: hidden; }
+  .wr-strasse { background: var(--deko-7); min-height: 30px; }
+  .wr-strasse.quer { min-height: 34px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 800; }
+  .wr-leer { min-height: 54px; }
+  .wr-haus { margin: 6px 10px; border: none; border-radius: 12px; background: #fff; box-shadow: 0 3px 0 var(--rand); font-family: inherit;
+    min-height: 54px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2px; }
+  .wr-haus .bild { font-size: 26px; line-height: 1.1; }
+  .wr-haus small { font-size: 12px; font-weight: 800; color: var(--text-leise); }
+  .wr-haus.nord { border-bottom: 5px solid var(--deko-4); margin-bottom: 0; border-radius: 12px 12px 4px 4px; }
+  .wr-haus.sued { border-top: 5px solid var(--deko-4); margin-top: 0; border-radius: 4px 4px 12px 12px; }
+  .wr-haus.ende { border-bottom: 5px solid var(--deko-4); margin: 6px 0 0; border-radius: 12px 12px 4px 4px; }
+  .wr-haus.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .wr-haus.richtig { background: var(--gut-hell); }
+  .wr-start { background: var(--deko-7); display: flex; align-items: center; justify-content: center; font-size: 26px; min-height: 44px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🌦️ Weather-Report</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS1E.1.A.1 (Englisch, Hörverstehen): .a/.b vertraute Wörter verstehen (s1, 4. Klasse);
+// .c kurze, einfache Texte und Durchsagen verstehen — Wettervorhersage, Sportresultat, Wegbeschreibung
+// (Lehrplan-Beispiele; s2–s6). Gehört wird über die Stimme des Geräts (en-GB bevorzugt), wie in Listen & Tap.
+// Basisklasse 5: s1 4. Klasse, s5 6. Klasse, s6 Königsstufe. Inhalte in woerter.js (Liste „durchsagen“).
+// Abgrenzung: Listen & Tap (Basisklasse 4) hat kein Wetter; Word-Match liest die Nomen sun, rain …;
+// Wetter und Jahreszeiten (NMG, Deutsch) übt das Wetter selbst. Hier: das Wichtige aus einer Durchsage.
+
+const { waehle, mische, el } = LS;
+const ID = "weather-report";
+
+// Freigabe (Entscheid L4 a): eine Liste. Kennt der Katalog sie nicht, gilt sie als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : WR_LISTEN);
+const DURCHSAGEN = FREI.has("durchsagen") ? WR_DURCHSAGEN : [];
+const WOERTER = FREI.has("durchsagen") ? WR_WOERTER : [];
+
+/** Vorlesen (en); der typografische Apostroph wird für die Stimme gerade. */
+const sprich = t => LS.sprich(t.replace(/’/g, "'"), "en");
+const HAUPT_WETTER = ["sunny", "cloudy", "rainy", "windy", "snowy", "foggy", "stormy"];
+// Woran man ein Wetter im Text erkennt (für die Prüfung: keine weiteren Wetter im Text).
+const STAMM = { sunny: /\bsun(ny|shine)?\b/i, cloudy: /\bcloud/i, rainy: /\brain/i, windy: /\bwind/i, snowy: /\bsnow/i, foggy: /\bfog/i, stormy: /\bstorm|\bthunder/i };
+
+const EINER = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen",
+  "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+const ZEHNER = { 20: "twenty", 30: "thirty", 40: "forty" };
+/** Englisches Zahlwort (bis 49, negativ mit „minus“). */
+function enZahl(n) {
+  if (n < 0) return `minus ${enZahl(-n)}`;
+  if (n < 20) return EINER[n];
+  const z = Math.floor(n / 10) * 10;
+  return n % 10 ? `${ZEHNER[z]}-${EINER[n % 10]}` : ZEHNER[z];
+}
+const gradText = g => `${g < 0 ? "−" : ""}${Math.abs(g)} °C`;
+
+// ---------- Fragen zu einer Angabe ----------
+
+const label = x => (x.wo ? (x.wo === "the mountains" ? "in the mountains" : `in ${x.wo}`) : x.wann);
+const labelDe = x => (x.wo ? `in ${WR_ORTE[x.wo]}` : WR_ORTE[x.wann]);
+const futur = (d, x) => !!(x.futur || d.futur);
+
+/** Fakten einer Durchsage, nach denen man fragen kann. */
+function fakten(d) {
+  const f = [];
+  for (const x of d.angaben || []) {
+    f.push({ typ: "wetter", x, id: `wetter|${label(x)}` });
+    if (x.grad !== undefined) f.push({ typ: "grad", x, id: `grad|${label(x)}` });
+  }
+  const mehrere = (d.spiele || []).length > 1;
+  for (const s of d.spiele || []) {
+    f.push({ typ: "sieger", s, mehrere, id: `sieger|${s.sport}` });
+    f.push({ typ: "resultat", s, mehrere, id: `resultat|${s.sport}` });
+  }
+  return f;
+}
+
+/** Frage (en, de), Möglichkeiten, Lösung zu einem Fakt. n: Zahl der Möglichkeiten. */
+function frageZu(d, fakt, n) {
+  if (fakt.typ === "wetter") {
+    const x = fakt.x;
+    const en = futur(d, x) ? `What will the weather be like ${label(x)}?` : `What’s the weather like ${label(x)}?`;
+    // Die anderen Wetter aus der Durchsage sind die besten Ablenker.
+    const imText = [...new Set((d.angaben || []).map(y => y.wetter).filter(w => w !== x.wetter))];
+    const rest = mische(HAUPT_WETTER.filter(w => w !== x.wetter && !imText.includes(w)));
+    const optionen = mische([x.wetter, ...imText, ...rest].slice(0, n));
+    return { en, de: `Wie ist das Wetter ${labelDe(x)}?`, optionen, richtig: x.wetter,
+      inhalt: "wetter", loesung: `${label(x)}: ${x.wetter} ${WR_WETTER[x.wetter][0]}` };
+  }
+  if (fakt.typ === "grad") {
+    const x = fakt.x, g = x.grad;
+    const en = futur(d, x) ? `What will the temperature be ${label(x)}?` : `What’s the temperature ${label(x)}?`;
+    const imText = (d.angaben || []).map(y => y.grad).filter(y => y !== undefined && y !== g);
+    const nah = [g + 10, g - 10, -g, g + 1, g - 1, g + 2].filter(y => y !== g && y >= -10 && y <= 35);
+    // 13 / 30, 14 / 40 klingen ähnlich: „-teen“ und „-ty“
+    if (g >= 13 && g <= 19) nah.unshift((g - 10) * 10);
+    const optionen = [...new Set([g, ...imText, ...nah.filter(y => y >= -10 && y <= 40)])].slice(0, n);
+    return { en, de: `Wie warm ist es ${labelDe(x)}?`, optionen: mische(optionen), richtig: g, inhalt: "grad",
+      loesung: `${label(x)}: ${enZahl(g)} degrees = ${gradText(g)}` };
+  }
+  const s = fakt.s, [a, b] = s.teams, [ta, tb] = s.tore;
+  const sport = fakt.mehrere ? ` the ${s.sport} match` : "";
+  if (fakt.typ === "sieger") {
+    const richtig = ta === tb ? "draw" : ta > tb ? a : b;
+    return { en: `Who won${sport}?`, de: `Wer hat gewonnen${fakt.mehrere ? ` (${s.sport})` : ""}?`, optionen: [a, b, "draw"], richtig, inhalt: "team",
+      loesung: `${a} ${enZahl0(ta)}, ${b} ${enZahl0(tb)} → ${richtig === "draw" ? "a draw 🤝" : richtig}` };
+  }
+  const k = (x, y) => `${a}|${x}|${y}|${b}`;
+  const kand = [k(tb, ta), k(ta + 1, tb), k(ta, tb + 1), k(Math.max(0, ta - 1), tb), k(ta, Math.max(0, tb - 1)), k(ta + 2, tb)];
+  const optionen = [...new Set([k(ta, tb), ...mische(kand)])].filter((o, i) => i === 0 || o !== k(ta, tb)).slice(0, n);
+  return { en: `What was the score${sport}?`, de: `Wie ist das Resultat${fakt.mehrere ? ` (${s.sport})` : ""}?`, optionen: mische(optionen), richtig: k(ta, tb),
+    inhalt: "resultat", loesung: `${a} ${enZahl0(ta)}, ${b} ${enZahl0(tb)} = ${ta} : ${tb}` };
+}
+const enZahl0 = n => (n === 0 ? "nil" : enZahl(n));
+
+// ---------- Weg auf dem Plan ----------
+// Erlaubte Sätze; jeder Satz einer Wegbeschreibung muss einer davon sein.
+const WEG_SAETZE = [
+  [/^(Start at the star|Go straight on|Go straight on past the first street)$/, () => ({})],
+  [/^(?:Go straight on and take|Take) the (first|second) (?:street|turning) on the (left|right)$/, (n, r) => ({ strasse: n, richtung: r })],
+  [/^Turn (left|right) into the (first|second) street$/, (r, n) => ({ strasse: n, richtung: r })],
+  [/^(?:Go straight on|Walk) to the end of the street$/, () => ({ ende: true })],
+  [/^(?:It’s|The place is) (?:on your|the building on your) (left|right)$/, s => ({ seite: s })],
+  [/^It’s (?:right )?in front of you$/, () => ({ vorn: true })],
+];
+/** Ziel einer Wegbeschreibung aus dem Text („1L-r“, „ende“) oder null, wenn ein Satz unbekannt ist. */
+function wegZiel(text) {
+  const z = {};
+  for (const satz of text.split(/(?<=\.) /).map(s => s.replace(/\.$/, ""))) {
+    const treffer = WEG_SAETZE.find(([re]) => re.test(satz));
+    if (!treffer) return null;
+    Object.assign(z, treffer[1](...satz.match(treffer[0]).slice(1)));
+  }
+  if (z.ende && z.vorn && !z.strasse && !z.seite) return "ende";
+  if (z.strasse && z.seite && !z.ende && !z.vorn) return `${z.strasse === "first" ? 1 : 2}${z.richtung === "left" ? "L" : "R"}-${z.seite === "left" ? "l" : "r"}`;
+  return null;
+}
+// Lage der Häuser im Plan (Zeile, Spalte; Spalte 1 ist die Hauptstrasse). Nach links abgebogen schaut man
+// nach Westen: rechts ist Norden (oben). Nach rechts abgebogen: links ist Norden.
+const PLATZ = {
+  ende: [0, 1, "ende"],
+  "2L-r": [1, 0, "nord"], "2R-l": [1, 2, "nord"], "2L-l": [3, 0, "sued"], "2R-r": [3, 2, "sued"],
+  "1L-r": [4, 0, "nord"], "1R-l": [4, 2, "nord"], "1L-l": [6, 0, "sued"], "1R-r": [6, 2, "sued"],
+};
+
+// ---------- Aufgaben als Daten ----------
+
+const ARTEN = {
+  /** s1: ein Wetterwort hören → Bild. */
+  wort() {
+    if (!WOERTER.length) return null;
+    const [en, w] = waehle(WOERTER);
+    const optionen = mische([w, ...mische(Object.keys(WR_WETTER).filter(x => x !== w)).slice(0, 3)]);
+    return { art: "wort", sprich: en, en: "Listen. What’s the weather like?", de: "Hör zu: Welches Bild passt?",
+      optionen, richtig: w, inhalt: "wetter", loesung: `${en} = ${WR_WETTER[w][1]} ${WR_WETTER[w][0]}`, kennung: `wort|${en}` };
+  },
+  /** Eine Frage zu einer Durchsage. anzahl: Angaben im Text (1, 2); typen: Fakt-Typen. */
+  frage(art, filter, typen, n) {
+    const liste = DURCHSAGEN.filter(d => d.art === art && filter(d) && fakten(d).some(f => typen.includes(f.typ)));
+    if (!liste.length) return null;
+    const d = waehle(liste);
+    const fakt = waehle(fakten(d).filter(f => typen.includes(f.typ)));
+    const q = frageZu(d, fakt, n);
+    return { art: `${art}-${fakt.typ}`, durchsage: d.id, fakt: fakt.id, sprich: d.text, ...q, kennung: `${d.id}|${fakt.id}` };
+  },
+  /** s5: Weg auf dem Plan. */
+  weg() {
+    const liste = DURCHSAGEN.filter(d => d.art === "weg");
+    if (!liste.length) return null;
+    const d = waehle(liste);
+    const haeuser = mische(WR_GEBAEUDE).slice(0, Object.keys(PLATZ).length);
+    const belegung = Object.fromEntries(Object.keys(PLATZ).map((p, i) => [p, haeuser[i]]));
+    return { art: "weg", durchsage: d.id, sprich: d.text, en: "Listen and find the place on the map.", de: "Hör zu und tipp auf das Haus, zu dem der Weg führt.",
+      belegung, richtig: d.ziel, loesung: `${belegung[d.ziel][1]} ${belegung[d.ziel][0]}`, kennung: `weg|${d.id}` };
+  },
+  /** s6: zwei Angaben aus einer längeren Durchsage. */
+  zwei() {
+    const liste = DURCHSAGEN.filter(d => d.art === "lang");
+    if (!liste.length) return null;
+    const d = waehle(liste);
+    const [f1, f2] = mische(fakten(d));
+    const q1 = frageZu(d, f1, 4), q2 = frageZu(d, f2, 4);
+    return { art: "zwei", durchsage: d.id, sprich: d.text, fakten: [f1.id, f2.id], fragen: [q1, q2],
+      loesung: `${q1.loesung} · ${q2.loesung}`, kennung: `zwei|${d.id}|${f1.id}|${f2.id}` };
+  },
+};
+
+const eins = d => (d.angaben || []).length === 1 && !d.spiele;
+const zweiAngaben = d => (d.angaben || []).length === 2 && !d.spiele;
+// Je Stufe: [Art, Erzeuger]. Basisklasse 5: s1 4. Klasse, s5 6. Klasse.
+const STUFE = {
+  s1: [["wort", () => ARTEN.wort()]],
+  s2: [["wetter-wetter", () => ARTEN.frage("wetter", eins, ["wetter"], 4)]],
+  s3: [["wetter-wetter", () => ARTEN.frage("wetter", zweiAngaben, ["wetter"], 4)], ["wetter-wetter", () => ARTEN.frage("wetter", zweiAngaben, ["wetter"], 4)],
+    ["wetter-grad", () => ARTEN.frage("wetter", zweiAngaben, ["grad"], 4)]],
+  s4: [["sport-sieger", () => ARTEN.frage("sport", () => true, ["sieger"], 3)], ["sport-resultat", () => ARTEN.frage("sport", () => true, ["resultat"], 4)]],
+  s5: [["weg", () => ARTEN.weg()]],
+  // Königsstufe: längere Durchsage, zwei Fragen nacheinander, beide müssen stimmen
+  s6: [["zwei", () => ARTEN.zwei()]],
+};
+
+function aufgabeErzeugen(stufe) {
+  for (let versuch = 0; versuch < 100; versuch++) {
+    const a = waehle(STUFE[stufe])[1]();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Ein Wetterwort hören: sunny, rainy, windy (4. Klasse).",
+  s2: "Eine kurze Wettermeldung: Wie ist das Wetter heute?",
+  s3: "Zwei Tage oder zwei Orte: today rainy, tomorrow sunny.",
+  s4: "Sportresultat: Wer hat gewonnen? Lions three, Tigers one.",
+  s5: "Wegbeschreibung: Take the second street on the left … (6. Klasse).",
+  s6: "Endgegner: eine lange Durchsage — zwei Angaben heraushören.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+// ---------- Prüfung (tools/pruefe_spiele.js) ----------
+
+function pruefeOptionen(q, m, n) {
+  if (new Set(q.optionen).size !== q.optionen.length) m.push("doppelte Möglichkeit");
+  if (q.optionen.filter(o => o === q.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+  if (n && q.optionen.length !== n) m.push(`${q.optionen.length} statt ${n} Möglichkeiten`);
+}
+
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [...listenMaengel()];
+  if (!STUFE[stufe].some(([art]) => art === a.art)) m.push(`Art ${a.art} nicht in der Stufe`);
+  const d = a.durchsage && DURCHSAGEN.find(x => x.id === a.durchsage);
+  if (a.durchsage && !d) m.push("Durchsage nicht aus der freien Liste");
+  if (a.art === "wort") {
+    pruefeOptionen(a, m, 4);
+    if (WOERTER.find(w => w[0] === a.sprich)?.[1] !== a.richtig) m.push("Bild passt nicht zum Wort");
+  }
+  if (a.art.startsWith("wetter-") || a.art.startsWith("sport-")) {
+    pruefeOptionen(a, m, a.art === "sport-sieger" ? 3 : 4);
+    if (stufe === "s2" && d.angaben.length !== 1) m.push("Stufe 2: nur eine Angabe");
+    if (stufe === "s3" && d.angaben.length !== 2) m.push("Stufe 3: zwei Angaben");
+    nachrechnen(d, a, m);
+  }
+  if (a.art === "weg") {
+    if (wegZiel(d.text) !== d.ziel) m.push(`Weg führt nicht zum Ziel: ${wegZiel(d.text)} statt ${d.ziel}`);
+    if (new Set(Object.values(a.belegung).map(h => h[0])).size !== Object.keys(PLATZ).length) m.push("Haus doppelt auf dem Plan");
+  }
+  if (a.art === "zwei") {
+    if (a.fakten[0] === a.fakten[1]) m.push("zweimal dieselbe Frage");
+    a.fragen.forEach(q => { pruefeOptionen(q, m, q.inhalt === "team" ? 3 : 4); nachrechnen(d, q, m); });
+  }
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  return m;
+}
+
+/** Richtige Antwort einer Frage unabhängig aus der Durchsage bestimmen. */
+function nachrechnen(d, q, m) {
+  const fakt = fakten(d).find(f => q.en && (f.typ === "wetter" || f.typ === "grad" ? q.en.endsWith(` ${label(f.x)}?`) && (f.typ === "grad") === q.en.includes("temperature")
+    : q.inhalt === (f.typ === "sieger" ? "team" : "resultat") && (!f.mehrere || q.en.includes(f.s.sport))));
+  if (!fakt) { m.push(`Frage passt zu keiner Angabe: ${q.en}`); return; }
+  if (fakt.typ === "wetter" && q.richtig !== fakt.x.wetter) m.push("Wetter falsch");
+  if (fakt.typ === "wetter" && q.optionen.some(o => !HAUPT_WETTER.includes(o))) m.push("Wetterbild, das mehrdeutig ist (hot/cold)");
+  if (fakt.typ === "grad" && q.richtig !== fakt.x.grad) m.push("Temperatur falsch");
+  if (fakt.typ === "sieger") {
+    const [ta, tb] = fakt.s.tore;
+    if (q.richtig !== (ta === tb ? "draw" : ta > tb ? fakt.s.teams[0] : fakt.s.teams[1])) m.push("Sieger falsch");
+  }
+  if (fakt.typ === "resultat" && q.richtig !== `${fakt.s.teams[0]}|${fakt.s.tore[0]}|${fakt.s.tore[1]}|${fakt.s.teams[1]}`) m.push("Resultat falsch");
+  // dieselbe Frage darf nicht auf zwei Angaben passen
+  if (fakten(d).filter(f => f.id === fakt.id).length !== 1) m.push("zwei Angaben mit derselben Frage");
+}
+
+/** Mängel der Liste: Wetter, Temperaturen und Tore stehen wirklich im Text (einmal berechnet). */
+let listenMaengelCache = null;
+function listenMaengel() {
+  if (listenMaengelCache) return listenMaengelCache;
+  const m = [];
+  if (WR_DURCHSAGEN.length < 30) m.push("weniger als 30 Durchsagen");
+  for (const d of WR_DURCHSAGEN) {
+    const t = d.text;
+    if (/'/.test(t)) m.push(`${d.id}: gerader Apostroph`);
+    if (d.angaben) {
+      const genannt = HAUPT_WETTER.filter(w => STAMM[w].test(t));
+      const soll = [...new Set(d.angaben.map(x => x.wetter))];
+      if (genannt.length !== soll.length || !soll.every(w => genannt.includes(w))) m.push(`${d.id}: Wetter im Text ${genannt.join(",")} statt ${soll.join(",")}`);
+      for (const x of d.angaben) {
+        if (x.grad !== undefined && !new RegExp(`(^|[^-a-z])${enZahl(x.grad)} degree`, "i").test(t)) m.push(`${d.id}: Temperatur ${x.grad} nicht im Text`);
+        const l = label(x).replace(/^in the mountains$/, "the mountains");
+        if (!t.toLowerCase().includes(l.toLowerCase().replace(/^in /, "")) && !(x.wann === "today" && /today/i.test(t))) m.push(`${d.id}: „${label(x)}“ nicht im Text`);
+        if (!WR_ORTE[x.wo || x.wann]) m.push(`${d.id}: ${x.wo || x.wann} ohne deutsche Übersetzung`);
+      }
+      if (new Set(d.angaben.map(label)).size !== d.angaben.length) m.push(`${d.id}: zwei Angaben zum selben Tag oder Ort`);
+    }
+    for (const s of d.spiele || []) {
+      for (const [i, team] of s.teams.entries()) {
+        if (!WR_TEAMS[team]) m.push(`${d.id}: Team ${team}`);
+        if (!t.includes(team)) m.push(`${d.id}: ${team} nicht im Text`);
+        if (!new RegExp(`(^|[^-a-z])${enZahl0(s.tore[i])}([^-a-z]|$)`, "i").test(t)) m.push(`${d.id}: ${s.tore[i]} Tore nicht im Text`);
+      }
+      if (!t.includes(s.sport) && !t.toLowerCase().includes(s.sport)) m.push(`${d.id}: Sportart nicht im Text`);
+    }
+    if (d.art === "weg" && wegZiel(t) !== d.ziel) m.push(`${d.id}: Weg führt zu ${wegZiel(t)} statt ${d.ziel}`);
+  }
+  listenMaengelCache = m;
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+function inhaltFuer(q) {
+  if (q.inhalt === "wetter") return w => ({ bild: WR_WETTER[w][0] });
+  if (q.inhalt === "grad") return g => gradText(g);
+  if (q.inhalt === "team") return t => (t === "draw" ? { bild: "🤝", text: "draw" } : { bild: WR_TEAMS[t], text: t });
+  if (q.inhalt === "resultat") return k => { const [a, x, y, b] = k.split("|"); return { text: `${WR_TEAMS[a]} ${x} : ${y} ${WR_TEAMS[b]}` }; };
+  return String;
+}
+
+const HINWEIS = {
+  wetter: "Listen again! Hör nochmal genau hin, tipp auf 🔊.",
+  grad: "Listen again! Achte auf die Zahl vor „degrees“: -teen oder -ty?",
+  team: "Listen again! Welche Mannschaft hat mehr Tore?",
+  resultat: "Listen again! Wie viele Tore hat jede Mannschaft? Die erste Zahl gehört zur ersten Mannschaft.",
+};
+
+const TIPP = {
+  s1: "Hör zu und tipp auf das Wetterbild.",
+  s2: "Du musst nicht jedes Wort verstehen. Hör auf das Wetter!",
+  s3: "Zwei Tage oder zwei Orte — pass auf, nach welchem gefragt wird.",
+  s4: "Bei einem Resultat kommt zuerst die Mannschaft, dann ihre Tore: Lions three.",
+  s5: "Du stehst beim Stern und schaust nach oben. Links und rechts gelten so, wie du gehst.",
+  s6: "Lies zuerst die Frage, dann hör gut zu. Mit 🔊 hörst du es nochmal.",
+};
+
+/** Transkript nach dem Lösen zeigen. */
+const transkript = (f, text) => () => { if (!f.querySelector(".wr-text")) f.append(el("div", { class: "wr-text", text: `📜 ${text}` })); };
+
+/** Plan mit Häusern; onHaus(platz, knopf). */
+function planEl(belegung, onHaus) {
+  const plan = el("div", { class: "wr-plan", "aria-label": "Plan" });
+  const zellen = Array.from({ length: 8 }, () => [null, null, null]);
+  for (const [p, [z, s, art]] of Object.entries(PLATZ)) {
+    const [name, bild] = belegung[p];
+    const k = el("button", { type: "button", class: `wr-haus ${art}`, "aria-label": name }, el("span", { class: "bild", text: bild }), el("small", { text: name }));
+    k.addEventListener("click", () => onHaus(p, k));
+    zellen[z][s] = k;
+  }
+  for (let z = 0; z < 8; z++) {
+    if (z === 2 || z === 5) { plan.append(...[0, 1, 2].map(s => el("div", { class: "wr-strasse quer", text: s === 0 ? (z === 2 ? "2nd" : "1st") : "" }))); continue; }
+    for (let s = 0; s < 3; s++) {
+      if (zellen[z][s]) plan.append(zellen[z][s]);
+      else if (z === 7 && s === 1) plan.append(el("div", { class: "wr-start", text: "⭐" }));
+      else if (s === 1 && z > 0) plan.append(el("div", { class: "wr-strasse" }));
+      else plan.append(el("div", { class: "wr-leer" }));
+    }
+  }
+  return plan;
+}
+
+/** Königsstufe: zwei Fragen nacheinander; gelöst, wenn beide stimmen. */
+function zweiFragen(ctx, a) {
+  ctx.loesung(a.loesung);
+  ctx.schritte(2);
+  let fertig = false;
+  const zeige = i => {
+    const q = a.fragen[i];
+    const teil = el("div", { class: "wr-schritt" }, el("div", { class: "frage", text: `${i + 1}. ${q.en}` }), el("div", { class: "wr-de", text: q.de }));
+    const box = el("div", { class: "wahl wr-wahl" });
+    box.style.setProperty("--wahl-breite", q.inhalt === "resultat" ? "150px" : "110px");
+    const inhalt = inhaltFuer(q);
+    for (const o of q.optionen) {
+      const k = el("button", { type: "button", class: "wahl-knopf" });
+      const c = inhalt(o);
+      if (c.bild) k.append(el("span", { class: "bild", text: c.bild }));
+      if (c.text || typeof c === "string") k.append(el("span", { text: c.text || c }));
+      k.addEventListener("click", () => {
+        if (fertig || k.classList.contains("gewaehlt") || box.classList.contains("fertig")) return;
+        if (o === q.richtig) {
+          k.classList.add("richtig");
+          box.classList.add("fertig");
+          LS.ton("tipp");
+          if (i === 0) zeige(1);
+          else { fertig = true; transkript(ctx.flaeche, a.sprich)(); ctx.richtig(waehle(["Great!", "Well done!", "Brilliant!"])); }
+          return;
+        }
+        k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+        ctx.falsch(HINWEIS[q.inhalt], a.loesung);
+        if (ctx.vorbei()) fertig = true;
+      });
+      box.append(k);
+    }
+    teil.append(box);
+    ctx.flaeche.append(teil);
+  };
+  zeige(0);
+}
+
+const SPIEL = {
+  id: ID,
+  einleitung: "Here is the weather report! Hör dir kurze englische Durchsagen an: Wetter, Sport und Wegbeschreibungen. Mit 🔊 hörst du sie nochmal.",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(TIPP[ctx.stufe]);
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (new Set(STUFE[ctx.stufe].map(x => x[0])).size > 1) ctx.serie("art", a.art);
+    if (a.inhalt === "team") ctx.serie("antwort", a.richtig === "draw" ? "draw" : a.optionen.indexOf(a.richtig));
+    ctx.kennung(a.kennung);
+    const f = ctx.flaeche;
+    f.append(el("div", { class: "wr-radio", "aria-hidden": "true", text: a.art === "weg" ? "🗺️📻" : "📻" }));
+    f.append(el("button", { type: "button", class: "wr-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(a.sprich) }));
+    sprich(a.sprich);
+
+    if (a.art === "zwei") { zweiFragen(ctx, a); return; }
+    f.append(el("div", { class: "frage", text: a.en }), el("div", { class: "wr-de", text: a.de }));
+
+    if (a.art === "weg") {
+      ctx.loesung(a.loesung);
+      ctx.schritte(1);
+      let fertig = false;
+      const plan = planEl(a.belegung, (p, k) => {
+        if (fertig) return;
+        if (p === a.richtig) { fertig = true; k.classList.add("richtig"); transkript(f, a.sprich)(); ctx.richtig(waehle(["Great!", "Well done!", "You found it!"])); return; }
+        k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+        ctx.falsch("Listen again! Erste oder zweite Strasse? Links oder rechts? Und auf welcher Seite steht das Haus?", a.loesung);
+        if (ctx.vorbei()) { fertig = true; zielKnopf.classList.add("richtig"); }
+      });
+      const zielKnopf = [...plan.querySelectorAll(".wr-haus")].find(x => x.getAttribute("aria-label") === a.belegung[a.richtig][0]);
+      f.append(plan);
+      return;
+    }
+
+    const box = LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.richtig, inhalt: inhaltFuer(a), hinweis: HINWEIS[a.inhalt] || HINWEIS.wetter, loesung: a.loesung,
+      breite: a.inhalt === "resultat" ? 150 : 110, lob: waehle(["Great!", "Well done!", "Super!", "Yes!"]),
+      beiRichtig: a.art === "wort" ? undefined : transkript(f, a.sprich),
+    });
+    box.classList.add("wr-wahl");
+  },
+};
+
+// Startet sofort, wenn eine englische Stimme da ist; sonst wartet es kurz oder erklärt, dass sie fehlt.
+LS.spielMitStimme(SPIEL, "en");
+</script>
+</body>
+</html>

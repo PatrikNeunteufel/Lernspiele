@@ -172,7 +172,9 @@ LS.spiel({
         lob: `Richtig: ${a.richtig[1][0].toUpperCase()}${a.richtig[1].slice(1)} ist ${a.eigenschaft}! 💪`,
       });
     } else if (a.art === "ordnen") {
-      ctx.flaeche.append(el("div", { class: "frage", text: `Ordne: ${a.richtung}` }));
+      // Ohne Pfeil, damit die Eule den Auftrag vorlesen kann: „leicht → schwer“ wird „von leicht nach schwer“.
+      const [von, bis] = a.richtung.split(/\s*→\s*/);
+      ctx.flaeche.append(el("div", { class: "frage", text: `Ordne von ${von} nach ${bis}.` }));
       LS.reihenfolge(ctx, {
         reihe: a.reihe, breite: 120, pfeile: true,
         inhalt: ([bild, name]) => ({ bild, text: name }), ablage: ([bild, name]) => `${bild} ${name}`,

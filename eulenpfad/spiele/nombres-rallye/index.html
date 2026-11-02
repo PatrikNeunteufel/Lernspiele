@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nombres-Rallye</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(17px, 3.8vw, 22px); font-weight: 800; margin: 2px 0 10px; color: var(--text-leise); }
+  .nr-hoer { display: block; margin: 0 auto 12px; border: none; border-radius: 999px; padding: 12px 26px; font-family: inherit;
+    font-size: clamp(20px, 4.4vw, 26px); font-weight: 900; background: var(--deko-4); color: #fff; box-shadow: 0 5px 0 var(--deko-7); cursor: pointer; }
+  .nr-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-7); }
+  .wortkarte { text-align: center; font-size: clamp(26px, 6.4vw, 40px); font-weight: 900; margin: 4px auto 6px; overflow-wrap: anywhere; color: var(--deko-4); }
+  .nr-region { text-align: center; font-size: 15px; font-weight: 700; color: var(--text-leise); margin: 0 0 8px; }
+  .zahl-gross { text-align: center; font-size: clamp(48px, 12vw, 72px); font-weight: 900; margin: 0 0 10px; font-variant-numeric: tabular-nums; }
+  .nr-ziffern .wahl-knopf { font-size: clamp(28px, 7vw, 40px); font-weight: 900; min-height: 76px; font-variant-numeric: tabular-nums; }
+  .nr-woerter .wahl-knopf { font-size: clamp(18px, 4.4vw, 24px); font-weight: 900; min-height: 64px; }
+  .nr-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 420px; margin: 0 auto; }
+  .nr-zeile .anzeige { flex: 1; }
+  .nr-zeile .nr-einheit { font-size: clamp(26px, 6vw, 36px); font-weight: 900; color: var(--deko-4); }
+  .nr-info { text-align: center; font-size: 16px; font-weight: 700; color: var(--text-leise); margin: 10px 0 0; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔢 Nombres-Rallye</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS2F.3.A.1 (2. Zyklus): sich in Alltagssituationen verständigen — Zahlen beim Bestellen,
+// beim Datum und bei der Uhrzeit. Hier nur die Zahlen selbst, gehört und gelesen. Basisklasse 5
+// (Französisch beginnt in der 5. Klasse): s1 Einstieg ohne Vorkenntnisse 0–10 hören, s2 bis 20, s3 bis 69,
+// s4 70–100 (soixante-dix, quatre-vingts …; septante, huitante, nonante als Info und beim Lesen),
+// s5 6. Klasse: Preise in Franken und Telefonnummern in Paaren hören, s6 Königsstufe: alles gemischt, schnell.
+// Abgrenzung: Quelle heure? übt die Uhrzeit, Calendrier das Datum, Au café das Bestellen im Gespräch.
+// Geld nur über LS.geldText (Dezimalzeichen wie eingestellt).
+
+const { zahlText, geldText, zufall, waehle, mische, el } = LS;
+
+/*
+ * Zahlwörter 0–100 (fester Wortschatz, keine Inhaltsliste). Schreibweise wie traditionell üblich:
+ * Bindestrich zwischen Zehnern und Einern unter 100, „et“ ohne Bindestrich bei 21, 31, 41, 51, 61, 71;
+ * quatre-vingts mit s, aber quatre-vingt-un ohne s und ohne „et“. (Die Rechtschreibreform von 1990
+ * erlaubt auch überall Bindestriche: vingt-et-un — welche Form das Lehrmittel nimmt, ist abzugleichen.)
+ */
+const ZAHLWORT = [
+  "zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf",                                   // 0–9
+  "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf",               // 10–19
+  "vingt", "vingt et un", "vingt-deux", "vingt-trois", "vingt-quatre", "vingt-cinq", "vingt-six", "vingt-sept", "vingt-huit", "vingt-neuf",
+  "trente", "trente et un", "trente-deux", "trente-trois", "trente-quatre", "trente-cinq", "trente-six", "trente-sept", "trente-huit", "trente-neuf",
+  "quarante", "quarante et un", "quarante-deux", "quarante-trois", "quarante-quatre", "quarante-cinq", "quarante-six", "quarante-sept", "quarante-huit", "quarante-neuf",
+  "cinquante", "cinquante et un", "cinquante-deux", "cinquante-trois", "cinquante-quatre", "cinquante-cinq", "cinquante-six", "cinquante-sept", "cinquante-huit", "cinquante-neuf",
+  "soixante", "soixante et un", "soixante-deux", "soixante-trois", "soixante-quatre", "soixante-cinq", "soixante-six", "soixante-sept", "soixante-huit", "soixante-neuf",
+  // 70–79: soixante + 10 … 19
+  "soixante-dix", "soixante et onze", "soixante-douze", "soixante-treize", "soixante-quatorze", "soixante-quinze", "soixante-seize", "soixante-dix-sept", "soixante-dix-huit", "soixante-dix-neuf",
+  // 80–89: 4 × 20 (+ 1 … 9)
+  "quatre-vingts", "quatre-vingt-un", "quatre-vingt-deux", "quatre-vingt-trois", "quatre-vingt-quatre", "quatre-vingt-cinq", "quatre-vingt-six", "quatre-vingt-sept", "quatre-vingt-huit", "quatre-vingt-neuf",
+  // 90–99: 4 × 20 + 10 … 19
+  "quatre-vingt-dix", "quatre-vingt-onze", "quatre-vingt-douze", "quatre-vingt-treize", "quatre-vingt-quatorze", "quatre-vingt-quinze", "quatre-vingt-seize", "quatre-vingt-dix-sept", "quatre-vingt-dix-huit", "quatre-vingt-dix-neuf",
+  "cent",                                                                                                             // 100
+];
+
+/*
+ * Westschweizer Formen für 70–99 (septante, huitante, nonante; huitante vor allem in der Waadt, im
+ * Wallis und in Freiburg). Gebildet wie 21–69: septante et un, septante-deux …
+ */
+const WESTSCHWEIZ_ZEHNER = { 7: "septante", 8: "huitante", 9: "nonante" };
+function westschweiz(n) {
+  const z = Math.floor(n / 10), e = n % 10;
+  if (!WESTSCHWEIZ_ZEHNER[z]) return null;
+  return WESTSCHWEIZ_ZEHNER[z] + (e === 0 ? "" : e === 1 ? " et un" : "-" + ZAHLWORT[e]);
+}
+
+const wort = n => ZAHLWORT[n];
+/** Preis in Worten, wie man ihn in der Schweiz sagt: „trois francs cinquante“, „un franc vingt“. */
+function preisWort(rp, region = false) {
+  const fr = Math.floor(rp / 100), r = rp % 100;
+  const z = n => (region && westschweiz(n)) || wort(n);
+  return `${z(fr)} ${fr === 1 ? "franc" : "francs"}${r ? " " + z(r) : ""}`;
+}
+const paarText = paare => paare.map(p => String(p).padStart(2, "0")).join(" ");
+const sprich = text => LS.sprich(text, "fr");
+
+// Je Stufe: Zahlenraum, Aufgabenarten
+const STUFE = {
+  s1: { von: 0, bis: 10, arten: ["hoerenWahl", "hoerenTippen"] },
+  s2: { von: 0, bis: 20, arten: ["hoerenWahl", "hoerenTippen", "lesenTippen"] },
+  s3: { von: 0, bis: 69, schwer: 20, arten: ["hoerenTippen", "lesenTippen", "zuordnen"] },
+  s4: { von: 70, bis: 100, arten: ["hoerenTippen", "lesenTippen", "zuordnen"], region: 0.3 },
+  s5: { arten: ["preisWahl", "preisTippen", "telefon"], franken: [1, 20], paare: 3 },
+  // Königsstufe: alles gemischt, Westschweizer Formen auch gehört, längere Nummern, Preise bis 99 Fr.
+  s6: { von: 0, bis: 100, schwer: 70, arten: ["hoerenTippen", "zuordnen", "preisTippen", "telefon"], franken: [1, 99], paare: 4, region: 0.3 },
+};
+// Rappen, die man beim Einkaufen hört (in 5er-Schritten)
+const RAPPEN = [0, 10, 15, 20, 25, 30, 40, 45, 50, 60, 70, 75, 80, 90, 95];
+
+/** Zahl der Stufe; „schwer“: meist ab dieser Zahl (s3 meist ab 20, s6 meist 70–99). */
+function zahlFuer(p) {
+  if (p.schwer !== undefined && Math.random() < 0.75) return zufall(p.schwer, Math.min(p.bis, p.schwer === 70 ? 99 : p.bis));
+  return zufall(p.von, p.bis);
+}
+
+/** Zahlen, die man leicht verwechselt: Nachbarn, vertauschte Ziffern, ±10, soixante-dix-sept ↔ dix-sept … */
+function aehnliche(n, p) {
+  const kand = [n + 1, n - 1, n + 10, n - 10, Number(String(n).split("").reverse().join("")), n + 20, n - 20, n - 60, n % 10, n % 10 + 10];
+  if (n === 6) kand.push(10); if (n === 10) kand.push(6);
+  return [...new Set(kand)].filter(x => x !== n && x >= 0 && x <= 100 && (!p.bis || p.bis > 20 || (x >= p.von && x <= p.bis)));
+}
+function optionenFuer(n, p) {
+  const nah = mische(aehnliche(n, p));
+  const rest = mische(Array.from({ length: (p.bis ?? 100) - (p.von ?? 0) + 1 }, (_, i) => i + (p.von ?? 0)).filter(x => x !== n && !nah.includes(x)));
+  return mische([n, ...[...nah, ...rest].slice(0, 3)]);
+}
+
+/** Preis-Ablenker: quinze ↔ cinquante, treize ↔ trente, soixante-dix ↔ soixante, Franken ±1. */
+function preisOptionen(rp) {
+  const fr = Math.floor(rp / 100), r = rp % 100;
+  const VERWECHSLUNG = { 15: 50, 50: 15, 30: 13, 60: 16, 40: 14, 20: 12, 70: 60, 80: 20, 90: 80, 10: 0, 75: 65, 95: 85, 0: 10, 25: 35, 45: 55 };
+  const kand = [fr * 100 + VERWECHSLUNG[r], (fr + 1) * 100 + r, (fr - 1) * 100 + r, fr * 100 + ((r + 50) % 100)];
+  const gut = [...new Set(kand)].filter(x => x >= 100 && x !== rp && x < 10000);
+  return mische([rp, ...mische(gut).slice(0, 3)]);
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  if (art === "preisWahl" || art === "preisTippen") {
+    const rp = zufall(p.franken[0], p.franken[1]) * 100 + waehle(RAPPEN);
+    const region = !!p.region && Math.random() < p.region && (westschweiz(rp % 100) || westschweiz(Math.floor(rp / 100))) !== null;
+    return { art, rp, region, ...(art === "preisWahl" ? { optionen: preisOptionen(rp) } : {}) };
+  }
+  if (art === "telefon") {
+    const paare = Array.from({ length: p.paare }, () => zufall(10, 99));
+    return { art, paare, region: !!p.region && Math.random() < p.region && paare.some(x => westschweiz(x)) };
+  }
+  const n = zahlFuer(p);
+  const region = !!p.region && art !== "zuordnen" && !!westschweiz(n) && Math.random() < p.region;
+  return { art, n, region, ...(art === "hoerenWahl" ? { optionen: optionenFuer(n, p) } : art === "zuordnen" ? { optionen: optionenFuer(n, { von: 0, bis: 100 }) } : {}) };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Art ${a.art} nicht in ${stufe}`);
+  if (a.n !== undefined) {
+    if (!(a.n >= p.von && a.n <= p.bis)) m.push(`Zahl ${a.n} ausserhalb ${p.von}–${p.bis}`);
+    if (!wort(a.n)) m.push("kein Zahlwort");
+    if (a.region && !westschweiz(a.n)) m.push("Westschweizer Form ohne eigene Form");
+  }
+  if (a.optionen) {
+    const soll = a.art === "preisWahl" ? a.rp : a.n;
+    if (new Set(a.optionen).size !== a.optionen.length || a.optionen.length !== 4) m.push("nicht vier verschiedene Antworten");
+    if (a.optionen.filter(o => o === soll).length !== 1) m.push("Lösung nicht genau einmal");
+    if (a.art !== "preisWahl" && a.optionen.some(o => !wort(o))) m.push("Antwort ohne Zahlwort");
+    if (a.art === "zuordnen" && new Set(a.optionen.map(wort)).size !== 4) m.push("doppelte Zahlwörter");
+    if (a.art === "preisWahl" && new Set(a.optionen.map(rp => geldText(rp, 5))).size !== 4) m.push("doppelte Preise");
+  }
+  if (a.rp !== undefined) {
+    const fr = Math.floor(a.rp / 100), r = a.rp % 100;
+    if (fr < p.franken[0] || fr > p.franken[1] || !RAPPEN.includes(r)) m.push("Preis ausserhalb der Stufe");
+    if (/undefined|null/.test(preisWort(a.rp, a.region))) m.push("Preis ohne Zahlwort");
+  }
+  if (a.paare) {
+    if (a.paare.length !== p.paare || !a.paare.every(x => x >= 10 && x <= 99)) m.push("Telefonnummer nicht aus Paaren 10–99");
+  }
+  return m;
+}
+
+/** Zahlwort zu n (Westschweizer Form, wenn verlangt). */
+const gesagt = (n, region) => (region && westschweiz(n)) || wort(n);
+/** Info zu 70–99: die andere Form. */
+const westInfo = n => (westschweiz(n) ? `In der Westschweiz: ${westschweiz(n)}` : "");
+
+const HINWEIS_70 = "Tipp: soixante-dix heisst 60 + 10, quatre-vingts heisst 4 × 20.";
+function hinweisZahl(n, getippt) {
+  const teile = [getippt !== null && wort(getippt) ? `Du hast ${zahlText(getippt)} gewählt, das heisst «${wort(getippt)}».` : "",
+    n >= 70 && n < 100 ? HINWEIS_70 : "Achte auf den Anfang und das Ende des Wortes."];
+  return teile.filter(Boolean).join(" ");
+}
+
+const hoerKnopf = text => el("button", { type: "button", class: "nr-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(text) });
+
+LS.spielMitStimme({
+  id: "nombres-rallye",
+  einleitung: "Nombres-Rallye! Un, deux, trois … Hör gut zu und finde die Zahl. Achtung bei soixante-dix: Das ist 60 + 10!",
+  anzahl: 8,
+  stufen: {
+    s1: "Ohne Vorkenntnisse: 0 bis 10 hören. un, deux, trois …",
+    s2: "Bis 20: onze, douze … hören und lesen.",
+    s3: "Bis 69: quarante-six, soixante et un.",
+    s4: "70 bis 100: soixante-dix, quatre-vingts — und septante, nonante.",
+    s5: "Preise und Telefonnummern: trois francs cinquante.",
+    s6: "Endgegner: alles gemischt, schnell — auch huitante-sept.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s5" || ctx.stufe === "s6"
+      ? "Hör genau hin. Mit 🔊 hörst du es nochmal."
+      : "Hör gut zu oder lies genau. Mit 🔊 hörst du die Zahl nochmal.");
+    if (p.arten.length > 1) ctx.serie("art", a.art);
+    const f = ctx.flaeche;
+
+    /** Zahl eintippen; prüft gegen soll (Zahl), ok-Text wie loesung. */
+    const eintippen = (soll, loesung, hinweis, opt = {}) => {
+      ctx.loesung(loesung);
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort" });
+      f.append(opt.einheit ? el("div", { class: "nr-zeile" }, anzeige, el("span", { class: "nr-einheit", text: opt.einheit })) : anzeige);
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: opt.maxStellen || 3, dezimal: !!opt.dezimal, nachkomma: 2,
+        onAenderung: opt.formatiere ? z => { if (z !== null) anzeige.textContent = opt.formatiere(z); } : undefined,
+        onOk(z) {
+          if (opt.gleich ? opt.gleich(z) : z === soll) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(opt.lob); return; }
+          anzeige.classList.add("falsch");
+          ctx.falsch(typeof hinweis === "function" ? hinweis(z) : hinweis, loesung);
+          if (ctx.vorbei()) tasten.gesperrt = true;
+        },
+      });
+      f.append(tasten.element);
+    };
+
+    if (a.art === "hoerenWahl" || a.art === "hoerenTippen" || a.art === "lesenTippen") {
+      const text = gesagt(a.n, a.region);
+      ctx.kennung(`${a.art}:${a.n}:${a.region ? "ch" : ""}`);
+      const info = westInfo(a.n);
+      const lob = `Richtig: ${text} = ${zahlText(a.n)}${a.region ? "" : info ? ` · ${info}` : ""}`;
+      if (a.art === "lesenTippen") {
+        f.append(el("div", { class: "frage", text: "Lies das Wort. Welche Zahl ist das?" }), el("div", { class: "wortkarte", text: text }));
+        if (a.region) f.append(el("div", { class: "nr-region", text: "🇨🇭 so sagt man in der Westschweiz" }));
+      } else {
+        f.append(el("div", { class: "frage", text: a.region ? "Hör zu (so sagt man in der Westschweiz). Welche Zahl hörst du?" : "Hör zu: Welche Zahl hörst du?" }), hoerKnopf(text));
+        sprich(text);
+      }
+      const loesung = `${text} = ${zahlText(a.n)}`;
+      if (a.art === "hoerenWahl") {
+        const box = LS.auswahl(ctx, {
+          optionen: a.optionen, richtig: a.n, inhalt: o => zahlText(o), breite: 90, loesung, lob,
+          hinweis: o => hinweisZahl(a.n, o),
+        });
+        box.classList.add("nr-ziffern");
+        return;
+      }
+      ctx.schritte(LS.tippSchritte(a.n));
+      eintippen(a.n, loesung, z => hinweisZahl(a.n, z), { lob });
+      return;
+    }
+
+    if (a.art === "zuordnen") {
+      ctx.kennung(`zuordnen:${a.n}`);
+      f.append(el("div", { class: "frage", text: "Welches Wort passt zur Zahl?" }), el("div", { class: "zahl-gross", text: zahlText(a.n) }));
+      const info = westInfo(a.n);
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.n, inhalt: o => wort(o), breite: 200,
+        loesung: `${zahlText(a.n)} = ${wort(a.n)}`, lob: `Richtig: ${wort(a.n)}${info ? ` · ${info}` : ""}`,
+        hinweis: o => `«${wort(o)}» ist ${zahlText(o)}. ${a.n >= 70 && a.n < 100 ? HINWEIS_70 : "Lies Teil für Teil: zuerst die Zehner, dann die Einer."}`,
+        beiRichtig: () => sprich(wort(a.n)),
+      });
+      box.classList.add("nr-woerter");
+      return;
+    }
+
+    if (a.art === "preisWahl" || a.art === "preisTippen") {
+      const text = preisWort(a.rp, a.region);
+      ctx.kennung(`${a.art}:${a.rp}:${a.region ? "ch" : ""}`);
+      const loesung = `${text} = ${geldText(a.rp)}`;
+      const hinweis = "Hör zuerst auf die Franken (… francs), dann auf die Rappen dahinter.";
+      f.append(el("div", { class: "frage", text: a.region ? "Was kostet es? (so sagt man in der Westschweiz)" : "Was kostet es? Hör zu." }), hoerKnopf(text));
+      sprich(text);
+      if (a.art === "preisWahl") {
+        const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: a.rp, inhalt: o => geldText(o), breite: 130, loesung, hinweis, lob: `Richtig: ${loesung}` });
+        box.classList.add("nr-ziffern");
+        return;
+      }
+      ctx.schritte(LS.tippSchritte(a.rp / 100));
+      eintippen(a.rp, loesung, hinweis, { dezimal: true, maxStellen: 2, einheit: "Fr.", gleich: z => Math.round(z * 100) === a.rp, lob: `Richtig: ${loesung}` });
+      return;
+    }
+
+    // Telefonnummer in Paaren
+    const text = a.paare.map(x => gesagt(x, a.region)).join(", ");
+    const ziffern = a.paare.join("");
+    ctx.kennung(`telefon:${ziffern}:${a.region ? "ch" : ""}`);
+    const loesung = `${text} = ${paarText(a.paare)}`;
+    f.append(el("div", { class: "frage", text: `Hör die Telefonnummer: ${a.paare.length} Paare. Tipp alle Ziffern ein.` }), hoerKnopf(text));
+    sprich(text);
+    ctx.schritte(LS.tippSchritte(Number(ziffern)));
+    eintippen(Number(ziffern), loesung, z => {
+      const s = String(z);
+      const richtigePaare = a.paare.filter((x, i) => s.slice(2 * i, 2 * i + 2) === String(x)).length;
+      return s.length !== ziffern.length
+        ? `Es sind ${a.paare.length} Paare, also ${ziffern.length} Ziffern. Hör nochmal (🔊).`
+        : `${richtigePaare} von ${a.paare.length} Paaren stimmen. Hör nochmal genau hin (🔊).`;
+    }, { maxStellen: ziffern.length, formatiere: z => String(z).replace(/(\d{2})(?=\d)/g, "$1 "), lob: `Richtig: ${paarText(a.paare)}` });
+  },
+}, "fr");
+</script>
+</body>
+</html>

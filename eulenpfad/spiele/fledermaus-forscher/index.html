@@ -153,11 +153,12 @@ LS.spiel({
       if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
       if (a.art === "aussage") ctx.serie("antwort", a.a.stimmt);
     }
+    // Aussage und Frage sind Sachkunde, nicht Lesen: Klasse „frage“, damit die Eule sie vorliest (rahmen.md 12).
     const kopf =el("div", { class: "nacht" }, el("div", { class: "bild", text: "🦇" }));
     ctx.flaeche.append(kopf);
 
     if (a.art === "aussage") {
-      kopf.append(el("div", { class: "aussage", text: a.a.text }));
+      kopf.append(el("div", { class: "aussage frage", text: a.a.text }));
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Stimmt das?" }));
       const box = LS.auswahl(ctx, {
         optionen: [true, false], richtig: a.a.stimmt, breite: 150,
@@ -169,7 +170,7 @@ LS.spiel({
       box.children[0].classList.add("ja");
       box.children[1].classList.add("nein");
     } else if (a.art === "frage") {
-      kopf.append(el("div", { class: "aussage", text: a.f.frage }));
+      kopf.append(el("div", { class: "aussage frage", text: a.f.frage }));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.f.richtig, breite: 200,
         hinweis: "Hm, das passt nicht zur Fledermaus. Versuch es nochmal.",
@@ -177,7 +178,7 @@ LS.spiel({
         lob: `Richtig: ${a.f.richtig}. ${a.f.erklaerung}`,
       });
     } else if (a.art === "jahr") {
-      kopf.append(el("div", { class: "aussage", text: "Das Jahr einer Fledermaus — fang beim Winter an." }));
+      kopf.append(el("div", { class: "aussage frage", text: "Das Jahr einer Fledermaus — fang beim Winter an." }));
       // Königsstufe: Karten ohne Jahreszeit — man ordnet nach dem, was passiert.
       const ohneZeit = ctx.stufe === "s6";
       LS.reihenfolge(ctx, {
@@ -193,7 +194,7 @@ LS.spiel({
         lob: "Super! Danach beginnt wieder der Winterschlaf. ❄️",
       });
     } else {
-      kopf.append(el("div", { class: "aussage", text: `Wozu helfen der Fledermaus: ${a.merkmal}?` }));
+      kopf.append(el("div", { class: "aussage frage", text: `Wozu helfen der Fledermaus: ${a.merkmal}?` }));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 200,
         hinweis: w => `«${w}» — dafür hat die Fledermaus ein anderes Merkmal. Wozu braucht sie ${a.merkmal}?`,
@@ -201,7 +202,7 @@ LS.spiel({
         lob: `Genau: ${a.merkmal} — ${a.richtig}.`,
       });
     }
-    if (ctx.nr === 0) ctx.sag("Lies genau und tipp auf deine Antwort.");
+    if (ctx.nr === 0) ctx.sag("Hör gut zu oder lies genau und tipp auf deine Antwort.");
   },
 });
 </script>

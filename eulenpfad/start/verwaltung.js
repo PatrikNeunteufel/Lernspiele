@@ -122,7 +122,7 @@ function zeichneVerwaltung(box, neu) {
       const pin = el("input", { class: "feld", type: "password", inputmode: "numeric", maxlength: "6", placeholder: "neue PIN", "aria-label": `Neue PIN für ${n}`, style: "width:120px;font-size:16px" });
       const ich = n === LS.aktuellerSpieler();
       return el("tr", {},
-        el("td", {}, el("b", { text: LS.spielerName(n) }), p.klasse ? el("span", { class: "leise-text", text: ` · ${p.klasse}. Klasse` }) : null),
+        el("td", {}, el("b", { text: LS.spielerName(n) }), LS.klasseVon(p) !== null ? el("span", { class: "leise-text", text: ` · ${LS.klasseText(LS.klasseVon(p))}` }) : null),
         el("td", { text: p.rolle === "aufsicht" ? (p.pin ? "Aufsicht" : "Aufsicht (ohne PIN)") : "Kind" }),
         el("td", {}, el("div", { class: "zeile-knoepfe" },
           p.rolle === "aufsicht" ? el("span", { class: "zeile-knoepfe" }, pin,
@@ -139,9 +139,9 @@ function zeichneVerwaltung(box, neu) {
     });
     const neuName = el("input", { class: "feld", type: "text", maxlength: "20", placeholder: "Name", "aria-label": "Name des neuen Kindes" });
     const neuKlasse = el("select", { "aria-label": "Klasse" }, el("option", { value: "", text: "Klasse —" }),
-      ...[1, 2, 3, 4, 5, 6].map(k => el("option", { value: String(k), text: `${k}. Klasse` })));
+      ...LS.KLASSEN.map(k => el("option", { value: String(k), text: LS.klasseText(k) })));
     const anlegen = () => {
-      const n = LS.neuerSpieler(neuName.value, { klasse: neuKlasse.value ? Number(neuKlasse.value) : null });
+      const n = LS.neuerSpieler(neuName.value, { klasse: neuKlasse.value !== "" ? Number(neuKlasse.value) : null });
       if (!n) return (meldung.textContent = "Bitte einen neuen, noch nicht vergebenen Namen eingeben.");
       neu();
     };

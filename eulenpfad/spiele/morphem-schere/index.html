@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Morphem-Schere</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .regelkarte { background: #fff8e1; border: 3px dashed #f5c451; border-radius: 16px; padding: 8px 14px; font-size: 16px; margin: 0 auto 14px; max-width: 700px; }
+  .regelkarte b { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: #a0703d; }
+
+  /* Wort zum Schneiden: Buchstaben mit Fugen dazwischen; die Fuge ist breiter als sie aussieht. */
+  .wortkarte { display: flex; justify-content: center; align-items: center; flex-wrap: nowrap; margin: 6px auto 16px;
+    font-weight: 900; line-height: 1.3; max-width: 100%; }
+  .wortkarte .ms-buchstabe { position: relative; z-index: 0; }
+  .wortkarte .ms-fuge { position: relative; z-index: 1; width: 26px; height: 1.6em; margin: 0 -10px; padding: 0; border: none; background: transparent;
+    cursor: pointer; transition: margin .2s; }
+  .wortkarte .ms-fuge::after { content: ""; position: absolute; left: 50%; top: 15%; height: 70%; width: 2px; margin-left: -1px; border-radius: 2px; background: var(--rand); }
+  .wortkarte .ms-fuge:hover::after { background: var(--text-leise); }
+  .wortkarte .ms-fuge.geschnitten { margin: 0 -4px; }
+  .wortkarte .ms-fuge.geschnitten::after { background: var(--knopf); width: 4px; margin-left: -2px; }
+  .wortkarte .ms-fuge.geschnitten::before { content: "✂"; position: absolute; left: 50%; top: -0.55em; transform: translateX(-50%); font-size: .45em; color: var(--knopf); }
+  .wortkarte .ms-fuge:focus-visible { outline: 3px solid var(--knopf); border-radius: 6px; }
+
+  /* Geschnittene Teile: Vorsilbe, Stamm, Endung */
+  .teile { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 6px auto 16px; }
+  .ms-teil { font: inherit; font-size: clamp(24px, 6vw, 40px); font-weight: 900; padding: 6px 14px; border-radius: 14px; border: 3px solid var(--rand);
+    background: #fff; color: var(--text); min-height: 60px; }
+  button.ms-teil { cursor: pointer; box-shadow: 0 5px 0 var(--rand); }
+  .ms-teil.vorsilbe { border-color: var(--deko-1); }
+  .ms-teil.stamm { border-color: var(--deko-5); background: #e6faf7; }
+  .ms-teil.endung { border-color: var(--deko-3); }
+  .ms-teil.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .ms-teil small { display: block; font-size: 12px; font-weight: 800; color: var(--text-leise); }
+  .ms-zeile { display: flex; justify-content: center; margin-top: 4px; }
+
+  .lueckenwort { text-align: center; font-size: clamp(38px, 9vw, 62px); font-weight: 900; margin: 8px 0 18px; }
+  .lueckenwort .luecke { display: inline-block; min-width: 1.4em; border-bottom: 6px solid var(--knopf); color: var(--knopf); margin: 0 2px; }
+  .lueckenwort .luecke.richtig { color: var(--gut); border-color: var(--gut); }
+  .ms-optionen { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; margin-bottom: 8px; }
+  .ms-option { font: inherit; font-size: clamp(26px, 6vw, 38px); font-weight: 900; min-width: 120px; min-height: 72px; padding: 6px 16px;
+    border: none; border-radius: 18px; background: #fff; color: var(--text); box-shadow: 0 6px 0 var(--rand), 0 8px 16px rgba(45, 48, 71, .1); cursor: pointer; }
+  .ms-option.wort { font-size: clamp(18px, 4.4vw, 24px); min-width: 140px; }
+  .ms-option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .ms-option.richtig { background: var(--gut-hell); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>✂️ Morphem-Schere</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.5.D.1.c (Grundanspruch 2. Zyklus): Stamm, Wortfamilie, Morpheme; D.5.E.1.d (GA):
+// Morpheme für die Stammregel nutzen (e oder ä, eu oder äu). Basisklasse 5: s1 4. Klasse (Stamm und
+// Endung, ein Schnitt), s2 mit Vorsilbe, s3 alle Schnitte selbst finden und den Stamm zeigen, s4 lange
+// Wörter und e/ä über den Stamm mit Regelkarte, s5 6. Klasse: e/ä ohne Regelkarte und mit Begründung
+// (welches verwandte Wort?), s6 Königsstufe: Wörter mit vier Bausteinen, knappe Hinweise.
+// Bezug: Der Wortfamilien-Baum (Basisklasse 4) ordnet ganze Wörter nach dem Stamm; hier wird das Wort
+// selbst zerlegt. Die Regel-Lücke (Liste e-ae) fragt e/ä mit Bild und Regel; hier kommt die Begründung
+// über das verwandte Wort dazu und eu/äu. Inhalte nur aus woerter.js und nur aus freien Listen.
+
+const { waehle, mische, el } = LS;
+const ID = "morphem-schere";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : Object.keys(MORPHEM_LISTEN));
+
+/** "ver|(kauf)|en" → { wort: "verkaufen", teile: ["ver","kauf","en"], stamm: 1, fugen: [3, 7] } — Fuge nach so vielen Buchstaben. */
+function zerlegeBausteine(text) {
+  const roh = text.split("|");
+  const stamm = roh.findIndex(t => /^\(.+\)$/.test(t));
+  const teile = roh.map(t => t.replace(/[()]/g, ""));
+  const fugen = [];
+  let n = 0;
+  for (let i = 0; i < teile.length - 1; i++) { n += [...teile[i]].length; fugen.push(n); }
+  return { text, wort: teile.join(""), teile, stamm, fugen };
+}
+/** "B{ä|e}cker" → { vor: "B", richtig: "ä", falsch: "e", nach: "cker", ganz: "Bäcker" } */
+function zerlegeLuecke(text) {
+  const m = text.match(/^(.*)\{([^|]+)\|([^}]+)\}(.*)$/);
+  return { vor: m[1], richtig: m[2], falsch: m[3], nach: m[4], ganz: m[1] + m[2] + m[4] };
+}
+
+// Je Stufe: Aufgabenarten mit Filter für die Bausteine, Anzahl Schnitte zeigen, Stamm antippen,
+// Regelkarte und Begründung bei e/ä, knappe Hinweise.
+const STUFE = {
+  s1: { schneiden: t => t.teile.length === 2 && t.stamm === 0, anzahl: true },
+  s2: { schneiden: t => t.stamm > 0 && t.teile.length <= 3, anzahl: true },
+  s3: { schneiden: t => t.teile.length <= 3, stammZeigen: true },
+  s4: { schneiden: t => t.teile.length >= 3, stammZeigen: true, ea: { regel: true } },
+  s5: { schneiden: t => t.teile.length >= 3 && t.stamm > 0, stammZeigen: true, ea: { begruenden: true } },
+  s6: { schneiden: t => t.teile.length >= 4, stammZeigen: true, ea: { begruenden: true }, knapp: true },
+};
+
+/** Freie Inhalte einer Stufe: { schneiden: [...], ea: [...] }; leere Arten fehlen. */
+function inhalteIn(stufe) {
+  const p = STUFE[stufe];
+  const r = {};
+  if (FREI.has("bausteine")) {
+    const w = MORPHEM_LISTEN.bausteine.map(zerlegeBausteine).filter(p.schneiden);
+    if (w.length) r.schneiden = w;
+  }
+  if (p.ea && FREI.has("stamm-ea")) r.ea = MORPHEM_LISTEN["stamm-ea"];
+  return r;
+}
+const angeboten = stufe => Object.keys(inhalteIn(stufe)).length > 0;
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const inhalte = inhalteIn(stufe);
+  const arten = Object.keys(inhalte);
+  if (!arten.length) throw new Error(`Stufe ${stufe}: keine Liste frei`);
+  const a = waehle(arten);
+  if (a === "schneiden") return { art: a, ...waehle(inhalte.schneiden) };
+  const [text, verwandt] = waehle(inhalte.ea);
+  const l = zerlegeLuecke(text);
+  const aufgabe = { art: "ea", text, verwandt, ...l };
+  if (STUFE[stufe].ea.begruenden) {
+    // Begründung: das verwandte Wort unter drei, dazu „kein Wort mit a oder au“
+    const andere = mische([...new Set(inhalte.ea.map(e => e[1]).filter(v => v && v !== verwandt))]).slice(0, verwandt ? 2 : 3);
+    aufgabe.gruende = mische([...(verwandt ? [verwandt] : []), ...andere]).concat([KEIN]);
+  }
+  return aufgabe;
+}
+const KEIN = "kein Wort mit a oder au";
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!angeboten(stufe)) m.push("Stufe mit den freien Listen nicht angeboten");
+  if (a.art === "schneiden") {
+    if (!FREI.has("bausteine")) m.push("Liste bausteine nicht frei");
+    if (!MORPHEM_LISTEN.bausteine.includes(a.text)) m.push("Wort nicht in der Liste");
+    if (!p.schneiden(a)) m.push("Wort passt nicht zur Stufe");
+    if (a.stamm < 0 || a.teile.filter((_, i) => i === a.stamm).length !== 1 || (a.text.match(/\(/g) || []).length !== 1) m.push("nicht genau ein Stamm markiert");
+    if (a.teile.some(t => !/^[A-Za-zÄÖÜäöü]+$/.test(t))) m.push("Baustein leer oder mit falschen Zeichen");
+    if (a.teile.length < 2) m.push("nichts zu schneiden");
+    if (/ß/.test(a.text)) m.push("ß im Wort");
+  } else if (a.art === "ea") {
+    if (!p.ea) m.push("e/ä nicht in der Stufe");
+    if (!FREI.has("stamm-ea")) m.push("Liste stamm-ea nicht frei");
+    if (!MORPHEM_LISTEN["stamm-ea"].some(([t]) => t === a.text)) m.push("Wort nicht in der Liste");
+    const paar = [a.richtig.toLowerCase(), a.falsch.toLowerCase()].sort().join("|");
+    if (paar !== "e|ä" && paar !== "eu|äu") m.push("Lücke ist nicht e/ä oder eu/äu");
+    const mitA = /^ä/i.test(a.richtig);
+    if (mitA !== !!a.verwandt) m.push("verwandtes Wort passt nicht zu ä/e");
+    if (a.verwandt && !/[aA]/.test(a.verwandt)) m.push("verwandtes Wort ohne a");
+    if (/ß/.test(a.text + a.verwandt)) m.push("ß im Wort");
+    if (a.gruende) {
+      const richtig = a.verwandt || KEIN;
+      if (a.gruende.filter(g => g === richtig).length !== 1) m.push("Begründung nicht genau einmal unter den Antworten");
+      if (new Set(a.gruende).size !== a.gruende.length) m.push("doppelte Antworten");
+      if (a.gruende.length !== 4) m.push("nicht vier Antworten");
+    }
+  } else m.push("unbekannte Aufgabenart");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const ROLLE = (t, i) => (i === t.stamm ? "stamm" : i < t.stamm ? "vorsilbe" : "endung");
+const ROLLE_TEXT = { stamm: "Stamm", vorsilbe: "Vorsilbe", endung: "Endung" };
+const REGEL_SCHNEIDEN = "Vorsilben wie be-, ver-, ent-, un- stehen vorne, Endungen wie -en, -er, -ung, -lich, -keit hinten. Dazwischen steckt der Stamm.";
+const REGEL_STAMM = "Der Stamm trägt die Bedeutung. Er kommt auch in den verwandten Wörtern vor; Vorsilben und Endungen kann man weglassen oder tauschen.";
+const REGEL_EA = "Gibt es ein verwandtes Wort mit a oder au, schreibt man ä oder äu (Hand → Hände, Schaum → schäumen). Sonst schreibt man e oder eu.";
+
+function teileEl(t, alsKnopf, beiWahl) {
+  const box = el("div", { class: "teile" });
+  t.teile.forEach((teil, i) => {
+    const rolle = ROLLE(t, i);
+    const k = el(alsKnopf ? "button" : "span", alsKnopf ? { type: "button", class: "ms-teil" } : { class: `ms-teil ${rolle}` }, teil);
+    if (!alsKnopf) k.append(el("small", { text: ROLLE_TEXT[rolle] }));
+    if (alsKnopf) k.addEventListener("click", () => beiWahl(i, k));
+    box.append(k);
+  });
+  return box;
+}
+
+/** Schneiden: Fugen antippen, „Prüfen“; danach (je nach Stufe) den Stamm antippen. */
+function schneiden(ctx, a, p) {
+  const f = ctx.flaeche;
+  const loesung = `${a.teile.join(" | ")} — Stamm: ${a.teile[a.stamm]}`;
+  ctx.loesung(loesung);
+  ctx.schritte(a.fugen.length + 1 + (p.stammZeigen ? 1 : 0));
+  const n = a.fugen.length;
+  f.append(el("div", { class: "frage", html: p.anzahl
+    ? `Schneide das Wort in ${a.stamm === 0 ? "Stamm und Endung" : a.stamm === a.teile.length - 1 ? "Vorsilbe und Stamm" : "Vorsilbe, Stamm und Endung"} — <b>${n === 1 ? "ein Schnitt" : `${n} Schnitte`}</b>.`
+    : "Schneide das Wort in alle Bausteine: Vorsilbe, Stamm, Endung." }));
+  const buchstaben = [...a.wort];
+  const karte = el("div", { class: "wortkarte", "aria-label": `Wort ${a.wort}` });
+  karte.style.fontSize = `min(56px, ${(86 / (buchstaben.length + 1)).toFixed(2)}vw)`;
+  const fugen = [];
+  buchstaben.forEach((b, i) => {
+    karte.append(el("span", { class: "ms-buchstabe", text: b }));
+    if (i === buchstaben.length - 1) return;
+    const fuge = el("button", { type: "button", class: "ms-fuge", "aria-label": `Schnitt nach ${b}`, "aria-pressed": "false" });
+    fuge.addEventListener("click", () => {
+      if (ctx.vorbei() || fertig) return;
+      const an = !fuge.classList.contains("geschnitten");
+      fuge.classList.toggle("geschnitten", an);
+      fuge.setAttribute("aria-pressed", String(an));
+      LS.ton("tipp");
+    });
+    karte.append(fuge);
+    fugen.push(fuge);
+  });
+  f.append(karte);
+  let fertig = false;
+  const pruefen = el("button", { type: "button", class: "knopf gruen", text: "Prüfen ✓" });
+  const zeile = el("div", { class: "ms-zeile" }, pruefen);
+  f.append(zeile);
+  pruefen.addEventListener("click", () => {
+    if (ctx.vorbei() || fertig) return;
+    const gesetzt = fugen.map((x, i) => (x.classList.contains("geschnitten") ? i + 1 : -1)).filter(i => i > 0);
+    const fehlen = a.fugen.filter(i => !gesetzt.includes(i)).length;
+    const zuviel = gesetzt.filter(i => !a.fugen.includes(i)).length;
+    if (!fehlen && !zuviel) {
+      fertig = true;
+      karte.remove(); zeile.remove();
+      if (!p.stammZeigen) { f.append(teileEl(a, false)); ctx.richtig(`Richtig: ${loesung}`); return; }
+      stammZeigen(ctx, a, p, loesung);
+      return;
+    }
+    const teile = [];
+    if (p.knapp) teile.push("Noch nicht ganz.");
+    else {
+      if (zuviel) teile.push(zuviel === 1 ? "Ein Schnitt liegt an einer falschen Stelle." : `${zuviel} Schnitte liegen an falschen Stellen.`);
+      if (fehlen) teile.push(fehlen === 1 ? "Es fehlt noch ein Schnitt." : `Es fehlen noch ${fehlen} Schnitte.`);
+    }
+    teile.push(REGEL_SCHNEIDEN);
+    ctx.falsch(teile.join(" "), loesung);
+  });
+  if (ctx.nr === 0) ctx.sag("Tippe zwischen zwei Buchstaben, dann schneidet die Schere dort. Nochmals tippen klebt wieder zusammen.");
+}
+
+function stammZeigen(ctx, a, p, loesung) {
+  const f = ctx.flaeche;
+  const frage = el("div", { class: "frage", html: "Gut geschnitten! <b>Welcher Teil ist der Stamm?</b>" });
+  let fertig = false;
+  const box = teileEl(a, true, (i, k) => {
+    if (fertig || ctx.vorbei()) return;
+    if (i === a.stamm) {
+      fertig = true;
+      box.replaceWith(teileEl(a, false));
+      ctx.richtig(`Richtig: ${loesung}`);
+      return;
+    }
+    k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+    ctx.falsch(p.knapp ? "Welcher Teil trägt die Bedeutung?" : `„${a.teile[i]}“ ist ${i < a.stamm ? "eine Vorsilbe" : "eine Endung"}. ${REGEL_STAMM}`, loesung);
+  });
+  f.append(frage, box);
+}
+
+/** e oder ä (eu oder äu) über den Stamm; je nach Stufe mit Regelkarte oder mit Begründung. */
+function eaAufgabe(ctx, a, p) {
+  const f = ctx.flaeche;
+  const loesung = a.verwandt ? `${a.ganz} — verwandt mit ${a.verwandt}` : `${a.ganz} — kein verwandtes Wort mit a oder au`;
+  ctx.loesung(loesung);
+  ctx.schritte(a.gruende ? 2 : 1);
+  ctx.serie("antwort", /^ä/i.test(a.richtig) ? "ä" : "e");
+  if (p.ea.regel) f.append(el("div", { class: "regelkarte" }, el("b", { text: "Stammregel" }), REGEL_EA));
+  f.append(el("div", { class: "frage", text: "Welche Schreibweise ist richtig? Denk an den Stamm." }));
+  const luecke = el("span", { class: "luecke", text: "?" });
+  f.append(el("div", { class: "lueckenwort", "aria-label": "Wort mit Lücke" }, a.vor, luecke, a.nach));
+  const hinweisEa = p.knapp ? "Denk an ein verwandtes Wort." : REGEL_EA;
+  knoepfe(ctx, mische([a.richtig, a.falsch]), a.richtig, "", hinweisEa, loesung, () => {
+    luecke.textContent = a.richtig;
+    luecke.classList.add("richtig");
+    if (!a.gruende) { ctx.richtig(`Richtig: ${loesung}`); return; }
+    f.append(el("div", { class: "frage", html: "<b>Woher weisst du das?</b> Welches Wort ist verwandt?" }));
+    knoepfe(ctx, a.gruende, a.verwandt || KEIN, "wort", p.knapp ? "Welches Wort hat denselben Stamm?" : "Das verwandte Wort hat denselben Stamm und dieselbe Bedeutung, nur mit a oder au. Gibt es kein solches Wort, bleibt es beim e.", loesung, () => ctx.richtig(`Richtig: ${loesung}`));
+  });
+  if (ctx.nr === 0) ctx.sag("Such ein verwandtes Wort: Bäcker kommt von backen.");
+}
+
+/** Eigene Wahlknöpfe (zwei Schritte in einer Aufgabe); beiRichtig statt ctx.richtig. */
+function knoepfe(ctx, optionen, richtig, klasse, hinweis, loesung, beiRichtig) {
+  const box = el("div", { class: "ms-optionen" });
+  let fertig = false;
+  for (const o of optionen) {
+    const k = el("button", { type: "button", class: `ms-option ${klasse}`, text: o });
+    k.addEventListener("click", () => {
+      if (fertig || ctx.vorbei() || k.classList.contains("falsch")) return;
+      if (o === richtig) { fertig = true; k.classList.add("richtig"); beiRichtig(); return; }
+      k.classList.add("falsch");
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) fertig = true;
+    });
+    box.append(k);
+  }
+  ctx.flaeche.append(box);
+}
+
+// ---------- Spiel ----------
+
+const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => angeboten(s)));
+
+LS.spiel({
+  id: ID,
+  einleitung: "Wörter sind aus Bausteinen gebaut: Vorsilbe, Stamm und Endung — wie ver | kauf | en. Schneide sie mit der Schere auseinander! Der Stamm verrät dir auch, ob man e oder ä schreibt.",
+  anzahl: 8,
+  stufen: nurAngebotene({
+    s1: "Stamm und Endung: spiel | en — ein Schnitt.",
+    s2: "Mit Vorsilbe: ver | kauf | en. Die Zahl der Schnitte steht dabei.",
+    s3: "Alle Schnitte selbst finden und den Stamm zeigen (Lehrplan 5. Klasse).",
+    s4: "Lange Wörter schneiden — und e oder ä über den Stamm: Bäcker kommt von backen.",
+    s5: "e oder ä, eu oder äu ohne Regelkarte — und welches Wort verwandt ist.",
+    s6: "Endgegner: Wörter mit vier Bausteinen, e/ä mit Begründung.",
+  }),
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    if (Object.keys(inhalteIn(ctx.stufe)).length > 1) ctx.serie("art", a.art);
+    if (a.art === "schneiden") schneiden(ctx, a, p);
+    else eaAufgabe(ctx, a, p);
+  },
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Au café</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 2px 0 10px; line-height: 1.35; }
+  .frage b { color: var(--knopf); }
+  .cafe-hoer { display: block; margin: 0 auto 12px; border: none; border-radius: 999px; padding: 10px 24px; font-family: inherit;
+    font-size: clamp(18px, 4vw, 24px); font-weight: 900; background: var(--deko-2); color: #fff; box-shadow: 0 5px 0 var(--deko-1); cursor: pointer; }
+  .cafe-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-1); }
+  .cafe-bild { text-align: center; font-size: clamp(54px, 13vw, 80px); line-height: 1.1; margin: 0 0 6px; }
+  .cafe-situation { text-align: center; font-size: clamp(18px, 4vw, 23px); font-weight: 800; margin: 0 0 12px; }
+
+  /* Gespräch: Sprecher und Sprechblase */
+  .cafe-gespraech { max-width: 620px; margin: 0 auto 14px; display: flex; flex-direction: column; gap: 8px; }
+  .cafe-zeile { display: flex; align-items: flex-start; gap: 8px; }
+  .cafe-zeile.rechts { flex-direction: row-reverse; }
+  .cafe-wer { font-size: 34px; line-height: 1; flex: none; text-align: center; }
+  .cafe-wer small { display: block; font-size: 11px; font-weight: 700; color: var(--text-leise); max-width: 70px; }
+  .cafe-blase { background: #fff; border: 2px solid var(--rand); border-radius: 16px; padding: 8px 12px; font-size: clamp(17px, 3.8vw, 21px); font-weight: 800; }
+  .cafe-zeile.rechts .cafe-blase { background: var(--gut-hell); }
+  .cafe-blase.leer { color: var(--text-leise); letter-spacing: 2px; }
+
+  .cafe-saetze .wahl-knopf { font-size: clamp(16px, 3.6vw, 20px); text-align: center; }
+  .ablage.cafe-ablage { flex-direction: column; align-items: stretch; }
+  .ablage.cafe-ablage > span { font-size: clamp(16px, 3.6vw, 20px); }
+  .cafe-tv .wahl-knopf { font-size: clamp(18px, 4vw, 24px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>☕ Au café</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS2F.3.A.1 (Französisch, 2. Zyklus): a begrüssen, sich verabschieden, sich vorstellen;
+// b nach dem Befinden fragen, bestellen, nach dem Preis fragen — in kurzen Alltagsgesprächen.
+// Hier: die passende Antwort wählen, Repliken ordnen, die Kellnerin hören (Stimme des Geräts, fr).
+// Basisklasse 5: s1 Einstieg ohne Vorkenntnisse (Formeln, die man oft schon kennt: Bonjour, Merci),
+// s2–s4 5. Klasse, s5 6. Klasse (nur hören), s6 Königsstufe. Inhalte in woerter.js (Liste „dialoge“).
+// tu / vous: im Café und mit fremden Erwachsenen vous, unter Kindern tu (Aufgabe in s4 und s6).
+// Zahlen bis 20 nur als Preise; das Zahlenspiel „Nombres“ übt sie für sich.
+
+const { waehle, mische, el } = LS;
+const ID = "au-cafe";
+
+// Freigabe (Entscheid L4 a): eine Liste. Kennt der Katalog sie nicht, gilt sie als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : CAFE_LISTEN);
+const DIALOGE = FREI.has("dialoge") ? CAFE_DIALOGE : [];
+
+/** Französisch anzeigen: Leerzeichen vor ? ! : ; geschützt. */
+const fr = t => t.replace(/ ([?!:;])/g, " $1");
+/** Vorlesen (fr); der typografische Apostroph wird für die Stimme gerade. */
+const sprich = t => LS.sprich(t.replace(/’/g, "'"), "fr");
+const ZAHLEN = [null, "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix",
+  "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf", "vingt"];
+const preisText = p => LS.geldText(p * 100);
+
+// ---------- Welche Antwort passt? ----------
+// Schlüssel einer Replik: ihre Art, bei befinden/name/alter/wohnort mit „?“, wenn sie zurückfragt („Et toi ?“).
+const MIT_RUECKFRAGE = ["befinden", "name", "alter", "wohnort"];
+const schluessel = r => r[3] + (MIT_RUECKFRAGE.includes(r[3]) && r[1].trim().endsWith("?") ? "?" : "");
+// Was nach einer Replik plausibel folgt. Ablenker kommen nur aus Arten, die hier NICHT stehen.
+const PLAUSIBEL = {
+  gruss: ["gruss", "gruss-frage", "name-frage", "alter-frage", "wohnort-frage", "bestell-frage", "bestellung", "name?", "name"],
+  "gruss-frage": ["befinden", "befinden?", "gruss"],
+  "befinden?": ["befinden", "befinden?"],
+  "name-frage": ["name", "name?"],
+  "name?": ["name", "name?"],
+  "alter-frage": ["alter", "alter?"],
+  "alter?": ["alter", "alter?"],
+  "wohnort-frage": ["wohnort", "wohnort?"],
+  "wohnort?": ["wohnort", "wohnort?"],
+  "bestell-frage": ["bestellung", "gruss"],
+  "groesse-frage": ["groesse"],
+  "noch-frage": ["noch", "bestellung", "preis-frage", "dank", "bezahlen"],
+  "preis-frage": ["preis"],
+  bringen: ["dank", "preis-frage", "bezahlen", "abschied"],
+  preis: ["bezahlen", "dank", "abschied", "bestellung"],
+  abschied: ["abschied", "dank"],
+};
+/** Alle Paare Replik → Antwort, die als Aufgabe taugen. */
+const PAARE = DIALOGE.flatMap(d => d.repliken.slice(0, -1).map((r, i) => ({ d, i, frage: r, antwort: d.repliken[i + 1] }))
+  .filter(p => PLAUSIBEL[schluessel(p.frage)]?.includes(schluessel(p.antwort))));
+const ALLE_REPLIKEN = DIALOGE.flatMap(d => d.repliken);
+/** Ablenker zu einem Paar: Repliken aus den Themen, die sicher nicht passen. */
+const ablenkerFuer = (p, themen) => {
+  const ok = PLAUSIBEL[schluessel(p.frage)];
+  const texte = new Set();
+  return DIALOGE.filter(d => themen.includes(d.thema)).flatMap(d => d.repliken).filter(r => !ok.includes(schluessel(r)) && !ok.includes(r[3]) && r[1] !== p.antwort[1] && !texte.has(r[1]) && texte.add(r[1]));
+};
+
+// ---------- Aufgaben als Daten ----------
+
+const ARTEN = {
+  /** s1: Situation mit Bild → Formel. */
+  formel() {
+    if (!FREI.has("dialoge")) return null;
+    const [bild, text, key] = waehle(CAFE_SITUATIONEN);
+    return { art: "formel", bild, situation: text, key, frage: "Was sagst du?",
+      optionen: mische(Object.keys(CAFE_FORMELN)), richtig: key, inhalt: "formel",
+      loesung: `${CAFE_FORMELN[key][0]} (${CAFE_FORMELN[key][1]})`,
+      hinweis: "Kommst du, gehst du, bekommst du etwas oder bittest du um etwas?", kennung: `formel|${text}` };
+  },
+  /** s1: Formel hören → was heisst das? */
+  formelHoeren() {
+    if (!FREI.has("dialoge")) return null;
+    const key = waehle(Object.keys(CAFE_FORMELN));
+    return { art: "formelHoeren", key, sprich: CAFE_FORMELN[key][0], frage: "Hör zu: Was heisst das?",
+      optionen: mische(Object.keys(CAFE_FORMELN)), richtig: key, inhalt: "deutsch",
+      loesung: `${CAFE_FORMELN[key][0]} = ${CAFE_FORMELN[key][1]}`, hinweis: "Hör nochmal genau hin, tipp auf 🔊.", kennung: `formelHoeren|${key}` };
+  },
+  /** s2: „Ça va ?“ — Gesicht → passende Antwort (je Gefühl eine). */
+  befinden() {
+    if (!FREI.has("dialoge")) return null;
+    const gefuehl = waehle(Object.keys(CAFE_GESICHTER));
+    const optionen = mische(Object.keys(CAFE_GESICHTER).map(g => waehle(CAFE_BEFINDEN.filter(b => b[0] === g))[1]));
+    const richtig = optionen.find(o => CAFE_BEFINDEN.find(b => b[1] === o)[0] === gefuehl);
+    return { art: "befinden", gefuehl, bild: CAFE_GESICHTER[gefuehl], sprich: "Ça va ?", frage: fr("« Ça va ? » — Was antwortet das Kind?"),
+      optionen, richtig, inhalt: "satz", loesung: `${richtig} (${CAFE_BEFINDEN.find(b => b[1] === richtig)[2]})`,
+      hinweis: "Schau das Gesicht an: Geht es gut, so lala oder schlecht?", kennung: `befinden|${gefuehl}|${optionen.slice().sort().join("|")}` };
+  },
+  /** Welche Antwort passt? n Antworten; nurHoeren: die erste Replik nur gehört. */
+  antwort(n, themen, nurHoeren) {
+    const paare = PAARE.filter(p => themen.includes(p.d.thema));
+    if (!paare.length) return null;
+    const p = waehle(paare);
+    const ablenker = mische(ablenkerFuer(p, themen)).slice(0, n - 1);
+    if (ablenker.length < n - 1) return null;
+    const optionen = mische([p.antwort[1], ...ablenker.map(r => r[1])]);
+    const [bild, name] = CAFE_SPRECHER[p.antwort[0]];
+    return { art: nurHoeren ? "antwortHoeren" : "antwort", dialog: p.d.id, i: p.i, sprich: p.frage[1], nurHoeren,
+      frage: `Was antwortet ${bild} ${name}?`, optionen, richtig: p.antwort[1], inhalt: "satz",
+      loesung: `${p.antwort[1]} (${p.antwort[2]})`,
+      hinweis: nurHoeren ? "Hör nochmal genau hin, tipp auf 🔊. Was wird gefragt oder gesagt?" : "Lies nochmal genau, was gesagt wird. Passt die Antwort dazu?",
+      kennung: `antwort|${p.d.id}|${p.i}|${nurHoeren}` };
+  },
+  /** Gespräch ordnen: Dialoge mit min–max Repliken (mindestens drei, sonst ist die Reihenfolge offen). */
+  ordnen(min, max) {
+    const dialoge = DIALOGE.filter(d => d.repliken.length >= Math.max(3, min) && d.repliken.length <= max);
+    if (!dialoge.length) return null;
+    const d = waehle(dialoge);
+    return { art: "ordnen", dialog: d.id, reihe: d.repliken.map((_, i) => i), frage: "Bring das Gespräch in die richtige Reihenfolge.",
+      kennung: `ordnen|${d.id}` };
+  },
+  /** Bestellung: Was wird bestellt? (sichtbar oder nur gehört) */
+  bestellenWas(nurHoeren) {
+    const dialoge = DIALOGE.filter(d => d.bestellung);
+    if (!dialoge.length) return null;
+    const d = waehle(dialoge);
+    const sache = d.bestellung.sache;
+    const andere = mische(Object.keys(CAFE_SACHEN).filter(s => s !== sache)).slice(0, 3);
+    return { art: nurHoeren ? "bestellenHoeren" : "bestellenWas", dialog: d.id, nurHoeren, sprich: d.repliken.map(r => r[1]).join(" "),
+      frage: "Was wird bestellt?", optionen: mische([sache, ...andere]), richtig: sache, inhalt: "sache",
+      loesung: `${CAFE_SACHEN[sache][0]} = ${CAFE_SACHEN[sache][2]}`,
+      hinweis: nurHoeren ? "Hör nochmal genau hin, tipp auf 🔊. Was sagt das Kind nach „Je voudrais“ oder vor „s’il vous plaît“?" : "Lies nochmal, was das Kind sagt.",
+      kennung: `bestellenWas|${d.id}|${nurHoeren}` };
+  },
+  /** Bestellung: Wie viel kostet es? */
+  bestellenPreis() {
+    const dialoge = DIALOGE.filter(d => d.bestellung);
+    if (!dialoge.length) return null;
+    const d = waehle(dialoge);
+    const p = d.bestellung.preis;
+    const optionen = mische([p, ...mische(nahePreise(p)).slice(0, 3)]);
+    return { art: "bestellenPreis", dialog: d.id, sprich: d.repliken.map(r => r[1]).join(" "),
+      frage: "Wie viel kostet es?", optionen, richtig: p, inhalt: "preis", loesung: `${ZAHLEN[p]} francs = ${preisText(p)}`,
+      hinweis: "Achte auf die Zahl vor „francs“.", kennung: `bestellenPreis|${d.id}` };
+  },
+  /** Königsstufe: nur hören — was und wie viel zusammen (sechs Möglichkeiten). */
+  bestellenBeides() {
+    const dialoge = DIALOGE.filter(d => d.bestellung);
+    if (!dialoge.length) return null;
+    const d = waehle(dialoge);
+    const { sache, preis } = d.bestellung;
+    const andere = mische(Object.keys(CAFE_SACHEN).filter(s => s !== sache));
+    const nah = mische(nahePreise(preis));
+    const kand = [`${sache}|${nah[0]}`, `${sache}|${nah[1]}`, `${andere[0]}|${preis}`, `${andere[1]}|${preis}`, `${andere[2]}|${nah[0]}`];
+    const optionen = mische([`${sache}|${preis}`, ...new Set(kand)]);
+    return { art: "bestellenBeides", dialog: d.id, nurHoeren: true, sprich: d.repliken.map(r => r[1]).join(" "),
+      frage: "Was wird bestellt, und wie viel kostet es?", optionen, richtig: `${sache}|${preis}`, inhalt: "beides",
+      loesung: `${CAFE_SACHEN[sache][2]}, ${preisText(preis)}`, hinweis: "Hör nochmal genau hin, tipp auf 🔊. Beides muss stimmen: was und wie viel.",
+      kennung: `bestellenBeides|${d.id}` };
+  },
+  /** tu oder vous? bisStufe: welche Personen (6 = auch mehrere Personen). */
+  tuVous(bisStufe) {
+    if (!FREI.has("dialoge")) return null;
+    const person = waehle(CAFE_PERSONEN.filter(p => p[3] <= bisStufe));
+    const paar = waehle(CAFE_TU_VOUS);
+    const form = person[2];
+    return { art: "tuVous", person: person[1], form, bild: person[0], situation: `Du sprichst ${person[1]}. ${paar[2]}`,
+      frage: "Was sagst du?", optionen: mische([paar[0], paar[1]]), richtig: form === "tu" ? paar[0] : paar[1], inhalt: "satz",
+      loesung: `${form === "tu" ? paar[0] : paar[1]} (${form})`,
+      hinweis: "Mit wem sprichst du? Kinder und Freunde: tu. Fremde Erwachsene, im Café und mehrere Personen: vous.",
+      kennung: `tuVous|${person[1]}|${paar[0]}` };
+  },
+};
+
+/** Preise, die man mit p verwechseln kann (deux / douze, six / seize), bis 20. */
+function nahePreise(p) {
+  return [...new Set([p + 10, p - 10, p + 1, p - 1, p + 2, p - 2].filter(x => x >= 2 && x <= 20 && x !== p))];
+}
+
+// Je Stufe: [Art, Erzeuger]. Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 6. Klasse.
+const STUFE = {
+  s1: [["formel", () => ARTEN.formel()], ["formel", () => ARTEN.formel()], ["formelHoeren", () => ARTEN.formelHoeren()]],
+  s2: [["befinden", () => ARTEN.befinden()], ["antwort", () => ARTEN.antwort(3, ["gruss", "vorstellen"], false)]],
+  s3: [["ordnen", () => ARTEN.ordnen(3, 4)], ["antwort", () => ARTEN.antwort(4, ["gruss", "vorstellen", "bestellen"], false)]],
+  s4: [["bestellenWas", () => ARTEN.bestellenWas(false)], ["bestellenPreis", () => ARTEN.bestellenPreis()], ["tuVous", () => ARTEN.tuVous(4)]],
+  s5: [["antwortHoeren", () => ARTEN.antwort(4, ["gruss", "vorstellen", "bestellen"], true)], ["bestellenHoeren", () => ARTEN.bestellenWas(true)]],
+  // Königsstufe: nur hören und beides wissen, lange Gespräche ordnen, tu/vous auch bei mehreren Personen
+  s6: [["bestellenBeides", () => ARTEN.bestellenBeides()], ["ordnen", () => ARTEN.ordnen(5, 6)], ["tuVous", () => ARTEN.tuVous(6)]],
+};
+
+/** Eine Aufgabe der Stufe; null, wenn die freien Inhalte nichts hergeben. */
+function aufgabeErzeugen(stufe) {
+  for (let versuch = 0; versuch < 100; versuch++) {
+    const a = waehle(STUFE[stufe])[1]();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Einstieg: Bonjour, Au revoir, Merci — was passt zum Bild?",
+  s2: fr("« Ça va ? » — die passende Antwort."),
+  s3: "Ein Gespräch ordnen: Wer sagt was zuerst?",
+  s4: "Bestellen: Was wird bestellt, wie viel kostet es? Dazu tu oder vous.",
+  s5: "Nur hören, dann antworten (6. Klasse).",
+  s6: "Endgegner: Bestellung nur hören, lange Gespräche, tu und vous.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [...listenMaengel()];
+  if (!STUFE[stufe].some(([art]) => art === a.art)) m.push(`Art ${a.art} nicht in der Stufe`);
+  if (a.optionen) {
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Möglichkeit");
+    if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+  }
+  const d = a.dialog && DIALOGE.find(x => x.id === a.dialog);
+  if (a.dialog && !d) m.push("Dialog nicht aus der freien Liste");
+  if (a.art === "formel" && CAFE_SITUATIONEN.find(s => s[1] === a.situation)?.[2] !== a.richtig) m.push("Formel passt nicht zur Situation");
+  if (a.art === "befinden") {
+    const passend = a.optionen.filter(o => CAFE_BEFINDEN.find(b => b[1] === o)[0] === a.gefuehl);
+    if (passend.length !== 1 || passend[0] !== a.richtig) m.push("nicht genau eine Antwort passt zum Gesicht");
+  }
+  if (a.art === "antwort" || a.art === "antwortHoeren") {
+    const frage = d.repliken[a.i], antwort = d.repliken[a.i + 1];
+    if (antwort[1] !== a.richtig) m.push("Antwort ist nicht die nächste Replik");
+    const ok = PLAUSIBEL[schluessel(frage)];
+    if (!ok) m.push("Replik taugt nicht als Frage");
+    for (const o of a.optionen.filter(o => o !== a.richtig)) {
+      const r = ALLE_REPLIKEN.find(x => x[1] === o);
+      if (!r || ok.includes(schluessel(r)) || ok.includes(r[3])) m.push(`Ablenker könnte passen: ${o}`);
+    }
+    if (a.optionen.length !== (stufe === "s2" ? 3 : 4)) m.push("falsche Zahl Antworten");
+    if (stufe === "s2" && d.thema === "bestellen") m.push("Bestellen erst ab Stufe 3");
+  }
+  if (a.art === "ordnen") {
+    const n = d.repliken.length;
+    const [min, max] = stufe === "s6" ? [5, 6] : [3, 4];
+    if (n < min || n > max) m.push(`Gespräch mit ${n} Repliken in ${stufe}`);
+    if (new Set(d.repliken.map(r => r[1])).size !== n) m.push("zwei gleiche Repliken: Reihenfolge nicht eindeutig");
+  }
+  if (["bestellenWas", "bestellenHoeren", "bestellenPreis", "bestellenBeides"].includes(a.art)) {
+    if (!d.bestellung) m.push("Dialog ohne Bestellung");
+    const text = d.repliken.map(r => r[1]).join(" ");
+    const { sache, preis } = d.bestellung;
+    if (!new RegExp(`${CAFE_SACHEN[sache][0].split(" ")[0].slice(0, 5)}`).test(text)) m.push("bestellte Sache steht nicht im Gespräch");
+    if (!new RegExp(`(^|[^-\\p{L}])${ZAHLEN[preis]} francs`, "u").test(text.toLowerCase())) m.push("Preis steht nicht im Gespräch");
+    if (a.art === "bestellenPreis" && a.richtig !== preis) m.push("Preis falsch");
+    if ((a.art === "bestellenWas" || a.art === "bestellenHoeren") && a.richtig !== sache) m.push("Sache falsch");
+    if (a.art === "bestellenBeides" && (a.richtig !== `${sache}|${preis}` || a.optionen.length !== 6)) m.push("Kombination falsch oder nicht sechs Möglichkeiten");
+    if (a.optionen.some(o => String(o).split("|").some(x => /^\d+$/.test(x) && (Number(x) < 2 || Number(x) > 20)))) m.push("Preis ausserhalb 2–20");
+  }
+  if (a.art === "tuVous") {
+    const paar = CAFE_TU_VOUS.find(p => a.optionen.includes(p[0]) && a.optionen.includes(p[1]));
+    const person = CAFE_PERSONEN.find(p => p[1] === a.person);
+    if (!paar || !person || a.richtig !== (person[2] === "tu" ? paar[0] : paar[1])) m.push("tu/vous falsch");
+    if (person && person[3] > (stufe === "s6" ? 6 : 4)) m.push("Person zu schwer für die Stufe");
+  }
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  return m;
+}
+
+/** Mängel der Liste selbst (einmal berechnet). */
+let listenMaengelCache = null;
+function listenMaengel() {
+  if (listenMaengelCache) return listenMaengelCache;
+  const m = [];
+  const arten = new Set([...Object.keys(PLAUSIBEL), ...Object.values(PLAUSIBEL).flat(), "freude"].map(k => k.replace("?", "")));
+  if (CAFE_DIALOGE.length < 20) m.push("weniger als 20 Dialoge");
+  for (const d of CAFE_DIALOGE) {
+    if (d.repliken.length < 2 || d.repliken.length > 6) m.push(`${d.id}: ${d.repliken.length} Repliken`);
+    for (const r of d.repliken) {
+      if (!CAFE_SPRECHER[r[0]]) m.push(`${d.id}: Sprecher ${r[0]}`);
+      if (!arten.has(r[3])) m.push(`${d.id}: Art ${r[3]}`);
+      if (/'/.test(r[1])) m.push(`${d.id}: gerader Apostroph`);
+      if (/[^ ][?!]/.test(r[1])) m.push(`${d.id}: ohne Leerzeichen vor ? oder !`);
+    }
+    if (d.thema === "bestellen" && !d.bestellung) m.push(`${d.id}: Bestellung fehlt`);
+    // im Café siezen sich Gast und Bedienung
+    if (d.thema === "bestellen" && d.repliken.some(r => /\b(tu|te|toi|t’)\b/.test(r[1]))) m.push(`${d.id}: tu im Café`);
+  }
+  listenMaengelCache = m;
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+function zeileEl(r, rechts, verborgen = false) {
+  const [bild, name] = CAFE_SPRECHER[r[0]];
+  return el("div", { class: "cafe-zeile" + (rechts ? " rechts" : "") },
+    el("div", { class: "cafe-wer" }, bild, el("small", { text: name })),
+    el("div", { class: "cafe-blase satz" + (verborgen ? " leer" : ""), text: verborgen ? "🔊 …" : fr(r[1]) }));
+}
+
+/** Knopfinhalt je Art. */
+function inhaltFuer(a) {
+  if (a.inhalt === "formel") return k => fr(CAFE_FORMELN[k][0]);
+  if (a.inhalt === "deutsch") return k => CAFE_FORMELN[k][1];
+  if (a.inhalt === "sache") return k => ({ bild: CAFE_SACHEN[k][1], text: CAFE_SACHEN[k][2] });
+  if (a.inhalt === "preis") return p => preisText(p);
+  if (a.inhalt === "beides") return k => { const [s, p] = k.split("|"); return { bild: CAFE_SACHEN[s][1], text: CAFE_SACHEN[s][2], klein: preisText(Number(p)) }; };
+  return t => fr(t);
+}
+
+const TIPP = {
+  s1: "Viele Wörter kennst du schon: Merci sagt man auch bei uns!",
+  s2: fr("« Ça va ? » heisst: Geht es dir gut?"),
+  s3: "Ein Gespräch beginnt meist mit einer Begrüssung oder einer Frage.",
+  s4: "Je voudrais … heisst: Ich hätte gern … Achte auf die Zahl vor „francs“.",
+  s5: "Hör gut zu — mit 🔊 hörst du es nochmal.",
+  s6: "Endgegner! Hör und lies genau: Wer sagt was? tu oder vous? Was kostet es?",
+};
+
+const SPIEL = {
+  id: ID,
+  einleitung: "Bienvenue au café ! Begrüssen, nach dem Befinden fragen, bestellen — kurze Gespräche auf Französisch.",
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(TIPP[ctx.stufe]);
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (new Set(STUFE[ctx.stufe].map(x => x[0])).size > 1) ctx.serie("art", a.art);
+    if (a.art === "formel" || a.art === "formelHoeren") ctx.serie("antwort", a.richtig);
+    if (a.art === "befinden") ctx.serie("antwort", a.gefuehl);
+    if (a.art === "tuVous") ctx.serie("antwort", a.form);
+    ctx.kennung(a.kennung);
+    const f = ctx.flaeche;
+    const d = a.dialog && DIALOGE.find(x => x.id === a.dialog);
+
+    if (a.bild) f.append(el("div", { class: "cafe-bild", "aria-hidden": "true", text: a.bild }));
+    if (a.situation) f.append(el("div", { class: "cafe-situation auftrag", text: a.situation }));
+    // Gespräch zeigen: beim Bestellen ganz, bei „Welche Antwort?“ die Replik davor (oder nur 🔊)
+    if (d && (a.art === "bestellenWas" || a.art === "bestellenPreis")) {
+      f.append(el("div", { class: "cafe-gespraech" }, ...d.repliken.map((r, i) => zeileEl(r, i % 2 === 1))));
+    }
+    if (a.art === "antwort" || a.art === "antwortHoeren") {
+      f.append(el("div", { class: "cafe-gespraech" }, zeileEl(d.repliken[a.i], false, a.nurHoeren)));
+    }
+    if (a.nurHoeren && a.art !== "antwortHoeren") f.append(el("div", { class: "cafe-bild", "aria-hidden": "true", text: "☕👂" }));
+    f.append(el("div", { class: "frage", html: a.frage }));
+    if (a.sprich) {
+      f.append(el("button", { type: "button", class: "cafe-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(a.sprich) }));
+      sprich(a.sprich);
+    }
+
+    if (a.art === "ordnen") {
+      const { ablage, box } = LS.reihenfolge(ctx, {
+        reihe: a.reihe, breite: 260,
+        inhalt: i => `${CAFE_SPRECHER[d.repliken[i][0]][0]} ${fr(d.repliken[i][1])}`,
+        ablage: i => `${CAFE_SPRECHER[d.repliken[i][0]][0]} ${fr(d.repliken[i][1])}`,
+        hinweis: (w, erwartet) => (erwartet === 0 ? "Wer beginnt? Meist mit einer Begrüssung oder einer Frage." : "Was antwortet man darauf? Lies die letzte Zeile oben nochmal."),
+        loesung: d.repliken.map(r => fr(r[1])).join(" → "),
+        beiRichtig: () => sprich(d.repliken.map(r => r[1]).join(" ")),
+      });
+      ablage.classList.add("cafe-ablage");
+      box.classList.add("cafe-saetze");
+      return;
+    }
+
+    const box = LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.richtig, inhalt: inhaltFuer(a), hinweis: a.hinweis, loesung: fr(a.loesung),
+      breite: a.inhalt === "satz" || a.inhalt === "formel" ? 240 : a.inhalt === "preis" ? 120 : 150,
+      lob: waehle(["Oui !", "Super !", "Bravo !", "Très bien !"]),
+      beiRichtig: () => { if (a.inhalt === "satz" || a.inhalt === "formel") sprich(a.inhalt === "formel" ? CAFE_FORMELN[a.richtig][0] : a.richtig); },
+    });
+    box.classList.add(a.art === "tuVous" ? "cafe-tv" : "cafe-saetze");
+  },
+};
+
+// Startet sofort, wenn eine französische Stimme da ist; sonst wartet es kurz oder erklärt, dass sie fehlt.
+LS.spielMitStimme(SPIEL, "fr");
+</script>
+</body>
+</html>

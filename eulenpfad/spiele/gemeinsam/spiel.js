@@ -161,6 +161,7 @@ const LS = (() => {
   //   mix: zuletzt gewählte Einstellungen des Zufallsmix (mix/mix.js) oder null
   //   meineKlasse: Filter „🎒 Meine Klasse“ im Tab Spiele (K2 a); fehlt = an
   //   optionen: { <spiel-id>: { <option>: Wert } } — Spieloptionen aus def.optionen (UE1 a); fehlt = "stufe"
+  //   vorlesen: "auto" | "knopf" | fehlt = nach Klasse (Kindergarten und 1. Klasse automatisch), siehe Vorlesen
   //   geaendert: { <feld>: ISO, angelegt: ISO } — setzt speichereProfil; beim Abgleich gewinnt je Feld der jüngere Stand
   const LEERES_PROFIL = {
     alter: null, klasse: null, fokus: [], rolle: "kind",
@@ -578,6 +579,14 @@ const LS = (() => {
     return eintrag?.klasse ?? null;
   }
 
+  // Klassen im Profil: 0 = Kindergarten (Wunsch Patrik, LERN_Session8), dann 1. bis 6. Klasse.
+  const KLASSEN = [0, 1, 2, 3, 4, 5, 6];
+  /** Klasse aus einem Profil als Zahl; 0 = Kindergarten, null = nicht angegeben. */
+  function klasseVon(p) {
+    const k = p?.klasse;
+    return k === null || k === undefined || k === "" || Number.isNaN(Number(k)) ? null : Number(k);
+  }
+
   /** Schulklasse, für die eine Stufe gedacht ist (Basisklasse + Abstand); die Königsstufe zählt wie Stufe 5. */
   function klasseDerStufe(spielId, stufeId) {
     const b = basisKlasse(spielId);
@@ -589,13 +598,15 @@ const LS = (() => {
   /**
    * Empfohlene Stufe aus der Klasse des Kindes und der Basisklasse des Spiels: gleiche Klasse →
    * Stufe 3, eine Klasse tiefer oder mehr → Stufe 1, eine höher → Stufe 5, zwei und mehr höher →
-   * Königsstufe. Ohne Spiel (Filter auf der Startseite) gilt Stufe 3 = die eigene Klasse.
+   * Königsstufe. Ohne Spiel (Filter auf der Startseite) gilt Stufe 3 = die eigene Klasse, für den
+   * Kindergarten Stufe 1.
    */
   function empfohleneStufe(name, spielId) {
-    const k = Number(profil(name).klasse);
-    if (!k) return null;
-    const b = spielId ? basisKlasse(spielId) : k;
-    if (!b) return null;
+    const k = klasseVon(profil(name));
+    if (k === null) return null;
+    // Ohne Spiel: die eigene Klasse als Basisklasse — Spiele für den Kindergarten haben Basisklasse 1.
+    const b = spielId ? basisKlasse(spielId) : Math.max(k, 1);
+    if (b === null) return null;
     const d = k - b;
     return d < 0 ? "s1" : d === 0 ? "s3" : d === 1 ? "s5" : "s6";
   }
@@ -677,8 +688,9 @@ const LS = (() => {
   // ---------- Sprachausgabe (Entscheid G2 a) ----------
   // Offline nur über die Stimmen des Geräts (speechSynthesis); welche es gibt, hängt vom Gerät ab.
 
-  // Bevorzugte Varianten: britisches Englisch wie im Schweizer Lehrmittel, Schweizer bzw. deutsches Deutsch.
-  const BEVORZUGT = { en: ["en-gb", "en"], de: ["de-ch", "de-de", "de"] };
+  // Bevorzugte Varianten: britisches Englisch wie im Schweizer Lehrmittel, Schweizer bzw. deutsches Deutsch,
+  // Französisch aus der Schweiz, sonst aus Frankreich (LERN_Session8).
+  const BEVORZUGT = { en: ["en-gb", "en"], de: ["de-ch", "de-de", "de"], fr: ["fr-ch", "fr-fr", "fr"] };
   /** Stimme für eine Sprache ("en", "de", …) oder null; zuerst die bevorzugte Variante. */
   function stimme(sprache) {
     try {
@@ -700,15 +712,22 @@ const LS = (() => {
       setTimeout(ende, 1500);
     });
   }
-  /** Text vorlesen (ruhiges Tempo); false, wenn es keine Stimme gibt. */
-  function sprich(text, sprache = "en") {
+  // Stimmlage je Art (Wunsch Patrik, LERN_Session8): Lob höher und lebhafter, Tipps tiefer und ruhiger,
+  // damit man Rückmeldung und Aufgabe am Klang unterscheidet. Mehr als Tonhöhe und Tempo bietet die
+  // Sprachausgabe der Browser nicht.
+  const STIMMLAGE = { "": { pitch: 1, rate: 0.85 }, gut: { pitch: 1.35, rate: 1 }, hinweis: { pitch: 0.85, rate: 0.78 } };
+  /** Text vorlesen; art: "" (Aufgabe), "gut" (Lob), "hinweis" (Tipp). false ohne Stimme oder bei Ton aus. */
+  function sprich(text, sprache = "en", art = "") {
+    if (!tonAn) return false; // Ton aus (🔇 in der Kopfzeile) gilt auch für die Stimme
     const v = stimme(sprache);
     if (!v) return false;
     try {
       const u = new SpeechSynthesisUtterance(text);
       u.voice = v;
       u.lang = v.lang;
-      u.rate = 0.85;
+      const lage = STIMMLAGE[art] || STIMMLAGE[""];
+      u.rate = lage.rate;
+      u.pitch = lage.pitch;
       speechSynthesis.cancel();
       speechSynthesis.speak(u);
       return true;
@@ -723,6 +742,75 @@ const LS = (() => {
       einleitung: "Oh! Dieses Gerät hat keine passende Stimme, darum kannst du hier nichts hören. Bitte einen Erwachsenen, eine Stimme einzuschalten, oder spiel ein anderes Spiel." });
     if (stimme(sprache)) spiel(def);
     else stimmeBereit(sprache).then(ok => (ok ? spiel(def) : ohne()));
+  }
+
+  // ---------- Vorlesen (Wunsch Patrik, LERN_Session8) ----------
+  // Für Kinder, die noch nicht sicher lesen: Die Eule liest ihre Sprechblase und den Auftrag der Aufgabe
+  // vor, also nur die Elemente .frage und .auftrag — nie Satz, Wortkarte oder Sachtext und damit nie den
+  // Stoff eines Lesespiels. Profil-Feld vorlesen: "auto" (jede Aufgabe und jeder Tipp), "knopf" (nur auf 🔊),
+  // fehlt = nach Klasse: Kindergarten und 1. Klasse automatisch. Ein Spiel schliesst es im Katalog mit
+  // vorlesen: false aus; Englisch und Französisch sind ausgeschlossen (fremde Wörter, eigene Stimmen).
+  const OHNE_VORLESEN = ["Englisch", "Französisch"];
+  const VORLESEN_ARTEN = { "": "nach Klasse", auto: "automatisch", knopf: "nur auf 🗣️" };
+  function vorlesenErlaubt(spielId) {
+    const s = typeof SPIELE !== "undefined" ? SPIELE.find(x => x.id === spielId) : null;
+    if (!s) return false;
+    if (s.vorlesen !== undefined) return s.vorlesen;
+    const fach = typeof THEMEN !== "undefined" ? THEMEN.find(t => t.id === s.thema)?.fach : null;
+    return !OHNE_VORLESEN.includes(fach);
+  }
+  /** Antwortknöpfe durch langes Drücken vorlesen? Nicht in Deutsch (Buchstaben und Wörter sind dort Stoff). */
+  function knoepfeVorlesen(spielId) {
+    const s = typeof SPIELE !== "undefined" ? SPIELE.find(x => x.id === spielId) : null;
+    if (!s || !vorlesenErlaubt(spielId)) return false;
+    if (s.knoepfeVorlesen !== undefined) return s.knoepfeVorlesen;
+    return (typeof THEMEN !== "undefined" ? THEMEN.find(t => t.id === s.thema)?.fach : null) !== "Deutsch";
+  }
+  function vorlesenArt(name) {
+    const p = profil(name);
+    if (p.vorlesen === "auto" || p.vorlesen === "knopf") return p.vorlesen;
+    const k = klasseVon(p);
+    return k !== null && k <= 1 ? "auto" : "knopf";
+  }
+  /**
+   * Langes Drücken (0.5 s) auf einen Knopf in der Fläche liest seinen Text vor; der Knopf wird dabei nicht
+   * ausgelöst (der folgende Klick wird in der Einfangphase verworfen). Kurzes Tippen wirkt wie bisher.
+   */
+  // Die Hörer hängen einmal am Dokument (nicht an jeder Fläche einer Runde) und gelten für die aktuelle Fläche.
+  let langDrueckenFlaeche = null;
+  function langDruecken(flaeche) {
+    const ersteMal = !langDrueckenFlaeche;
+    langDrueckenFlaeche = flaeche;
+    if (!ersteMal) return;
+    let uhr = null, gelesen = false, start = null;
+    const halt = () => { clearTimeout(uhr); uhr = null; };
+    // Knöpfe, Links (Stufenknöpfe der Startseite) und alles mit data-vorlesen (Spielkarten der Startseite)
+    const knopf = e => { const k = e.target.closest?.("[data-vorlesen], button, a"); return k && langDrueckenFlaeche.contains(k) ? k : null; };
+    document.addEventListener("pointerdown", e => {
+      const k = knopf(e);
+      if (!k) return;
+      gelesen = false; start = [e.clientX, e.clientY];
+      halt();
+      uhr = setTimeout(() => {
+        const text = fuerStimme(k.dataset.vorlesen || k.getAttribute("aria-label") || k.textContent || "");
+        if (text && sprich(text, "de")) gelesen = true; // ohne Stimme bleibt der Klick erhalten
+      }, 500);
+    });
+    document.addEventListener("pointermove", e => { if (uhr && start && Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 12) halt(); });
+    for (const t of ["pointerup", "pointercancel"]) document.addEventListener(t, halt);
+    document.addEventListener("click", e => { if (gelesen) { gelesen = false; e.stopPropagation(); e.preventDefault(); } }, true);
+    document.addEventListener("contextmenu", e => { if (knopf(e)) e.preventDefault(); });
+  }
+
+  /** Text für die Stimme: ohne Bildzeichen (sonst liest sie „roter Apfel“ mit), Rechenzeichen ausgeschrieben. */
+  function fuerStimme(text) {
+    return text
+      .replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}]/gu, " ")
+      .replace(/(\d)\s*[×·]\s*(\d)/g, "$1 mal $2").replace(/(\d)\s*:\s*(\d)/g, "$1 durch $2")
+      .replace(/\s*=\s*\?/g, " gleich wie viel?")
+      // zwischen Wörtern: „gross/klein“, „Wort antippen = …“, „A · B“ — sonst „Schrägstrich“, „gleich“, „Punkt“
+      .replace(/(\p{L})\s*\/\s*(\p{L})/gu, "$1 oder $2").replace(/(\p{L})\s*=\s*(\p{L})/gu, "$1: $2")
+      .replace(/\s+·\s+/g, ", ").replace(/\s+/g, " ").trim();
   }
 
   // ---------- Töne ----------
@@ -761,11 +849,14 @@ const LS = (() => {
   function tonSchalter(knopf, beimWechsel = null) {
     if (!knopf) return;
     const setze = () => { knopf.textContent = tonAn ? "🔊" : "🔇"; };
-    knopf.addEventListener("click", () => { tonAn = !tonAn; schreibe("ton", tonAn); setze(); ton("tipp"); beimWechsel?.(tonAn); });
+    knopf.addEventListener("click", () => {
+      tonAn = !tonAn; schreibe("ton", tonAn); setze(); ton("tipp"); beimWechsel?.(tonAn);
+      if (!tonAn) try { speechSynthesis.cancel(); } catch { /* ohne Stimme */ }
+    });
     setze();
   }
   /** Ton an oder aus, ohne zu speichern (im Mix: Meldung der Mix-Seite). */
-  const setzeTon = an => { tonAn = !!an; };
+  const setzeTon = an => { tonAn = !!an; if (!tonAn) try { speechSynthesis.cancel(); } catch { /* ohne Stimme */ } };
 
   // ---------- Eule ----------
 
@@ -794,16 +885,20 @@ const LS = (() => {
     const blase = el("div", { class: "blase", "aria-live": "polite" });
     zeile.append(blase);
     const eule = zeile.querySelector(".eule");
-    return {
+    const api = {
       element: zeile,
+      blase,
+      beiSag: null, // Vorlesen: hört mit, was die Eule sagt
       sag(text, art = "") {
         blase.className = "blase" + (art ? " " + art : "");
         blase.textContent = text;
         eule.classList.remove("huepft");
         void eule.offsetWidth; // Animation neu starten
         eule.classList.add("huepft");
+        if (api.beiSag && text) api.beiSag(text, art);
       },
     };
+    return api;
   }
 
   // ---------- Konfetti ----------
@@ -828,6 +923,7 @@ const LS = (() => {
   document.addEventListener("keydown", (e) => {
     if (!aktiveTastatur || !document.body.contains(aktiveTastatur.element)) return;
     if (/^[0-9]$/.test(e.key)) aktiveTastatur.tippe(e.key);
+    else if ((e.key === "." || e.key === ",") && aktiveTastatur.dezimal) aktiveTastatur.zeichen();
     else if (e.key === "Backspace") aktiveTastatur.loesche();
     else if (e.key === "Enter") aktiveTastatur.ok();
     else return;
@@ -837,29 +933,48 @@ const LS = (() => {
   /**
    * Zifferntastatur, die in ein Anzeigefeld schreibt.
    * opt.anzeige: Element, in dem die Zahl formatiert erscheint
-   * opt.maxStellen: höchstens so viele Ziffern
-   * opt.onOk(wert): beim Drücken von OK (wert als Zahl)
+   * opt.maxStellen: höchstens so viele Ziffern vor dem Dezimalzeichen
+   * opt.dezimal: Taste für das Dezimalzeichen (Punkt oder Komma nach LS.einstellung("dezimal"))
+   * opt.nachkomma: höchstens so viele Ziffern danach (Standard 3)
+   * opt.onOk(wert, text): beim Drücken von OK (wert als Zahl; text wie getippt mit „.“, z. B. „3.0“ —
+   *   für Spiele, bei denen die Zahl der Nachkommastellen zählt)
    */
   function tastatur(opt) {
-    let ziffern = "";
+    let ziffern = ""; // wie getippt, Dezimalzeichen intern immer "."
     const max = opt.maxStellen || 7;
+    const nachkomma = opt.nachkomma ?? 3;
     const t = el("div", { class: "tastatur" });
     let okKnopf;
+
+    /** Angezeigt wie dezimalText, aber mit den getippten Nullen am Ende („4.50“). */
+    function text() {
+      const [ganz, rest] = ziffern.split(".");
+      return zahlText(Number(ganz)) + (rest === undefined ? "" : (einstellung("dezimal") === "komma" ? "," : ".") + rest);
+    }
 
     function zeige() {
       opt.anzeige.classList.remove("richtig", "falsch");
       opt.anzeige.classList.toggle("leer", ziffern === "");
-      opt.anzeige.textContent = ziffern === "" ? "" : zahlText(Number(ziffern));
-      okKnopf.disabled = ziffern === "";
-      if (opt.onAenderung) opt.onAenderung(ziffern === "" ? null : Number(ziffern));
+      opt.anzeige.textContent = ziffern === "" ? "" : text();
+      okKnopf.disabled = ziffern === "" || ziffern.endsWith(".");
+      if (opt.onAenderung) opt.onAenderung(ziffern === "" || ziffern.endsWith(".") ? null : Number(ziffern));
     }
 
     const api = {
       element: t,
+      dezimal: !!opt.dezimal,
       tippe(z) {
-        if (api.gesperrt || ziffern.length >= max) return;
+        if (api.gesperrt) return;
+        const [ganz, rest] = ziffern.split(".");
+        if (rest === undefined ? ganz.length >= max : rest.length >= nachkomma) return;
         if (ziffern === "0") ziffern = "";
         ziffern += z;
+        ton("tipp");
+        zeige();
+      },
+      zeichen() {
+        if (api.gesperrt || !api.dezimal || ziffern.includes(".")) return;
+        ziffern = (ziffern === "" ? "0" : ziffern) + ".";
         ton("tipp");
         zeige();
       },
@@ -869,8 +984,8 @@ const LS = (() => {
         zeige();
       },
       ok() {
-        if (api.gesperrt || ziffern === "") return;
-        opt.onOk(Number(ziffern));
+        if (api.gesperrt || ziffern === "" || ziffern.endsWith(".")) return;
+        opt.onOk(Number(ziffern), ziffern);
       },
       leeren() { ziffern = ""; zeige(); },
       gesperrt: false,
@@ -878,6 +993,10 @@ const LS = (() => {
 
     for (const z of ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]) {
       t.append(el("button", { type: "button", text: z, onclick: () => api.tippe(z) }));
+    }
+    if (api.dezimal) {
+      const zeichen = einstellung("dezimal") === "komma" ? "," : ".";
+      t.append(el("button", { type: "button", class: "zeichen", text: zeichen, "aria-label": zeichen === "," ? "Komma" : "Punkt", onclick: () => api.zeichen() }));
     }
     t.append(el("button", { type: "button", class: "loeschen", text: "⌫", "aria-label": "Löschen", onclick: () => api.loesche() }));
     t.append(el("button", { type: "button", class: "loeschen", text: "✕", "aria-label": "Alles löschen", onclick: () => api.leeren() }));
@@ -889,8 +1008,45 @@ const LS = (() => {
     return api;
   }
 
-  /** Handgriffe, um wert auf der Zifferntastatur einzutippen: je Ziffer ein Tipp, dazu OK (für ctx.schritte). */
-  const tippSchritte = wert => String(Math.abs(wert)).length + 1;
+  /**
+   * Handgriffe, um wert auf der Zifferntastatur einzutippen: je Ziffer und Dezimalzeichen ein Tipp, dazu OK
+   * (für ctx.schritte). Die Null vor dem Zeichen („0.5“) setzt die Tastatur selbst.
+   * stellen: verlangte Nachkommastellen („3.0“ sind vier Handgriffe, nicht zwei).
+   */
+  const tippSchritte = (wert, stellen) => {
+    const s = stellen === undefined ? String(Math.abs(wert)) : Math.abs(wert).toFixed(stellen);
+    return (s.startsWith("0.") ? s.length - 1 : s.length) + 1;
+  };
+
+  // ---------- Bereit machen: ▶ Los, 3-2-1 (Wunsch Patrik, LERN_Session8) ----------
+
+  /**
+   * Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): Erst ist element verdeckt und darüber steht
+   * „▶ Los!“; nach dem Tippen zählt es 3, 2, 1 herunter, dann wird element sichtbar und weiter() läuft (dort startet
+   * das Spiel seine Zeigezeit). Mit Timer (ctx.mitTimer) fehlt der Knopf, weil die Zeit schon läuft: nur 3-2-1.
+   * element muss schon in der Fläche hängen. Wird die Aufgabe inzwischen ersetzt, passiert nichts mehr.
+   */
+  function losGehts(ctx, element, weiter, { zaehlen = 3 } = {}) {
+    const huelle = el("div", { class: "los-huelle wartet" });
+    element.replaceWith(huelle);
+    const zahl = el("div", { class: "los-zahl" });
+    const ueber = el("div", { class: "los-ueber" }, zahl);
+    huelle.append(element, ueber);
+    ctx.wartezeit(zaehlen);
+    const noch = () => ctx.flaeche.contains(huelle) && !ctx.vorbei();
+    const zaehle = n => {
+      if (!noch()) return;
+      if (n === 0) { huelle.classList.remove("wartet"); ueber.remove(); weiter(); return; }
+      zahl.textContent = String(n);
+      ton("tipp");
+      setTimeout(() => zaehle(n - 1), 800);
+    };
+    if (ctx.mitTimer) return zaehle(zaehlen);
+    const los = el("button", { type: "button", class: "knopf gruen los-knopf", text: "▶ Los!", "aria-label": "Los, ich bin bereit",
+      onclick: () => { los.remove(); zaehle(zaehlen); } });
+    ueber.prepend(los);
+    ctx.schritte(1);
+  }
 
   // ---------- Flug in einen Korb ----------
 
@@ -1181,19 +1337,35 @@ const LS = (() => {
         k => setzeOption(name, def.id, id, k), neuZeichnen));
     }
 
+    /** Schalter „Vorlesen: gleich / auf Knopfdruck“ (Wunsch Patrik, LERN_Session8); gilt wie im Profil für alle Spiele. */
+    function vorlesenZeile(neuZeichnen) {
+      if (!vorlesenErlaubt(def.id)) return null;
+      const name = aktuellerSpieler();
+      return optionsZeile({
+        titel: "🗣️ Vorlesen:", wert: vorlesenArt(name),
+        werte: { auto: "gleich", knopf: "auf Knopfdruck" },
+        erklaerung: {
+          auto: "Die Eule liest jede Aufgabe und jeden Tipp gleich vor. 🔇 oben schaltet alles stumm.",
+          knopf: "Die Eule liest vor, wenn du auf 🗣️ neben ihr tippst.",
+        },
+      }, k => speichereProfil(name, { vorlesen: k }), neuZeichnen);
+    }
+
     function stufenwahl() {
       if (!zugang()) return;
       buehne.innerHTML = "";
       const name = aktuellerSpieler();
       const karte = el("div", { class: "karte" });
       const eule = euleZeile();
-      karte.append(spielerZeile(), eule.element, timerZeile(stufenwahl), reihenfolgeZeile(stufenwahl) || "", ...spielOptionsZeilen(stufenwahl));
+      karte.append(spielerZeile(), eule.element, timerZeile(stufenwahl), vorlesenZeile(stufenwahl) || "", reihenfolgeZeile(stufenwahl) || "", ...spielOptionsZeilen(stufenwahl));
       eule.sag(def.einleitung);
       const stufen = el("div", { class: "stufen" });
       for (const st of stufenListe) {
         const beste = besteSterne(name, def.id, st.id);
         const timer = timerFuer(name, def.id, st.id);
-        const knopf = el("button", { class: "stufe", type: "button", onclick: () => runde(st) },
+        // aria-label: was langes Drücken vorliest (Vorlesen auf dem Startblatt, Wunsch Patrik LERN_Session8)
+        const knopf = el("button", { class: "stufe", type: "button", onclick: () => runde(st),
+          "aria-label": `Stufe ${st.nr}, ${st.name}. ${stufeFuer(def.id, st.id)}${st.id === empfohleneStufe(name, def.id) ? ", für dich empfohlen" : ""}. ${st.text}` },
           el("b", { text: `${st.icon} Stufe ${st.nr} · ${st.name}` }),
           el("div", { class: "fuer", text: stufeFuer(def.id, st.id) + (st.id === empfohleneStufe(name, def.id) ? " · 👍 für dich empfohlen" : "") }),
           el("span", { text: st.text }),
@@ -1203,6 +1375,18 @@ const LS = (() => {
         stufen.append(knopf);
       }
       karte.append(stufen);
+      // Vorlesen auf dem Startblatt: 🗣️ liest die Einleitung, langes Drücken einen Stufenknopf — nur auf
+      // Knopfdruck; automatisch liest die Eule nur im Spiel selbst (Vorgabe Patrik, LERN_Session8).
+      if (vorlesenErlaubt(def.id)) {
+        const einleitung = () => sprich(fuerStimme(def.einleitung), "de");
+        const einrichten = ok => {
+          if (!ok) return;
+          eule.element.append(el("button", { type: "button", class: "vorlesen", text: "🗣️", "aria-label": "Vorlesen", onclick: einleitung }));
+          langDruecken(karte);
+        };
+        // Kommt die Stimme erst später, nur noch einrichten, wenn das Startblatt noch zu sehen ist.
+        if (stimme("de")) einrichten(true); else stimmeBereit("de").then(ok => document.body.contains(karte) && einrichten(ok));
+      }
       // Endlos: so viele wie möglich bis zum ersten Fehler — nur Stufen mit genug verschiedenen Aufgaben (Katalog).
       const endlosListe = stufenListe.filter(st => endlosStufen(def.id).includes(st.id));
       if (endlosListe.length) {
@@ -1294,6 +1478,33 @@ const LS = (() => {
         eule.sag(text ? `🔑 ${text}` : "🔑 Dieses Spiel nennt seine Lösung erst nach drei Fehlversuchen.", "hinweis");
       } });
       const weiterKnopf = el("button", { type: "button", class: "knopf hell klein", text: "⏭ Aufgabe überspringen", onclick: () => { hilfen++; jetzt?.ueberspringen(); } });
+      // Vorlesen: Knopf 🔊 neben der Eule; automatisch liest sie jede neue Aufgabe und jeden Tipp vor.
+      // Während eine Aufgabe gezeichnet wird, schweigt sie (sonst doppelt: Tipp und dann Tipp mit Auftrag).
+      // Die Stimmen lädt der Browser oft erst nach; kommt die Stimme nach der ersten Aufgabe, liest die Eule
+      // diese nachträglich.
+      let zeichnet = false;
+      let gezeigt = false; // steht schon eine Aufgabe?
+      let blaseNeu = false; // hat die Eule in der laufenden Aufgabe etwas gesagt?
+      // Ist die Stimme schon da, sofort einrichten (so auch im Testskript), sonst sobald sie geladen ist.
+      const vorlesenEinrichten = ok => {
+        if (!ok) return;
+        const auto = vorlesenArt(name) === "auto";
+        const auftrag = () => [...flaeche.querySelectorAll(".frage, .auftrag")]
+          .filter(e => !e.parentElement.closest(".frage, .auftrag")).map(e => e.textContent.trim()).filter(Boolean);
+        const satz = t => (/[.!?…:]$/.test(t) ? t : `${t}.`);
+        // Die Blase nur, wenn die Eule in dieser Aufgabe etwas gesagt hat — sonst steht dort noch das Lob der
+        // vorigen, und es käme zweimal (Meldung Patrik, LERN_Session8).
+        const lies = () => sprich(fuerStimme([blaseNeu ? eule.blase.textContent.trim() : "", ...auftrag()].filter(Boolean).map(satz).join(" ")), "de");
+        // 🗣️ statt 🔊: Das Lautsprecher-Zeichen ist der Ton-Schalter in der Kopfzeile.
+        eule.element.append(el("button", { type: "button", class: "vorlesen", text: "🗣️", "aria-label": "Vorlesen", onclick: lies }));
+        eule.beiSag = (text, art) => { blaseNeu = true; if (auto && !zeichnet) sprich(fuerStimme(text), "de", art); };
+        if (auto) { eule.vorlesen = lies; if (gezeigt) lies(); }
+        if (knoepfeVorlesen(def.id)) langDruecken(flaeche);
+      };
+      if (vorlesenErlaubt(def.id)) {
+        if (stimme("de")) vorlesenEinrichten(true);
+        else stimmeBereit("de").then(vorlesenEinrichten);
+      }
       // Eule oben, damit ihre Rückmeldung auch auf kleinen Bildschirmen neben der Aufgabe sichtbar bleibt.
       karte.append(eule.element);
       if (test) karte.append(el("div", { class: "testhilfe" }, el("span", { text: "🧪 Test" }), loesungKnopf, weiterKnopf));
@@ -1415,6 +1626,7 @@ const LS = (() => {
           option: id => optionWert(name, def, id, stufe.id),
           nr,
           flaeche,
+          mitTimer: !!timer.an, // läuft die Zeit schon? (LS.losGehts verzichtet dann auf den Knopf)
           sag: (t, art) => eule.sag(t, art),
           /** Lösung der Aufgabe gleich beim Zeichnen nennen (Text wie loesungText); zeigt sie nur die Testhilfe. */
           loesung(text) { loesungVorab = text || null; },
@@ -1490,6 +1702,8 @@ const LS = (() => {
           const bisher = serienVerlauf[name] || [];
           return bisher.length >= SERIE_MAX && bisher.slice(-SERIE_MAX).every(w => w === wert);
         });
+        zeichnet = true;
+        blaseNeu = false;
         for (let versuch = 0; ; versuch++) {
           def.aufgabe(ctx);
           const k = kennung(flaeche, loesungVorab, eigeneKennung);
@@ -1503,6 +1717,9 @@ const LS = (() => {
             letzte = k;
             for (const [name, wert] of Object.entries(serien)) (serienVerlauf[name] ||= []).push(wert);
             pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, serieErzwungen: zuLang && versuch >= SERIE_VERSUCHE });
+            zeichnet = false;
+            gezeigt = true;
+            if (eule.vorlesen) setTimeout(eule.vorlesen, 300);
             break;
           }
           if (versuch >= 60) {
@@ -1700,13 +1917,13 @@ const LS = (() => {
    * bausteine: Teile der Bausteine (auswahl, reihenfolge, koerbe, tastatur, Noten), die ein Spiel anpassen darf.
    */
   const RAHMEN_KLASSEN = {
-    reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein",
+    reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein", "vorlesen", "los-huelle", "los-ueber", "los-zahl", "los-knopf",
       "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
       "spieler-zeile",
       "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
-      "tastatur", "anzeige", "ok", "loeschen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
+      "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
 
   return {
@@ -1716,7 +1933,7 @@ const LS = (() => {
     beiAenderung, abgleichDaten, spielStand: () => spielStand,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
     freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, spielListen, listeFrei, setzeListeFrei, freieListen,
-    basisKlasse, stufeFuer, klasseText, loescheRunden, zusammenfuehren,
+    basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, vorgabeZeit, timerFuer, setzeTimerSpiel, zeitVorschlag,
     stimmeBereit, sprich, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen,
     protokoll, besteSterne, auswahl, reihenfolge, fliegen, koerbe, pruefung, RAHMEN_KLASSEN,

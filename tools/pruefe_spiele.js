@@ -169,6 +169,7 @@ const TREIBER = `
     // Knöpfe und alles andere, das auf Tippen hört (SVG-Felder, Zahlenstrahl).
     const knoepfe = buehne.querySelectorAll("*").filter(b => (b.localName === "button" || b.__hoerer.click || b.__hoerer.pointerdown)
       && !b.disabled && !b.classList.contains("link") && !b.classList.contains("timer-schalter") && !b.classList.contains("option-schalter") && !/Andere Stufe/.test(b.textContent)
+      && !b.classList.contains("vorlesen") // 🔊 neben der Eule gehört zum Rahmen, nicht zur Aufgabe
       && !b.closest(".testhilfe"));
     if (!knoepfe.length) { __uhr.weiter(2000); if (++ohneFortschritt > 50) { melde("Hänger", "keine Knöpfe mehr"); break; } continue; }
     // Weiter- und Nochmal-Knöpfe bevorzugen, damit die Runde vorankommt; selten eine Testhilfe.
@@ -225,19 +226,21 @@ const MIX_TREIBER = `
   const neue = () => __nachrichten.splice(0);
   const sende = d => document.dispatchEvent(Object.assign(new Event("message"), { data: { lern: "mix", ...d }, source: parent }));
   const knoepfe = () => buehne.querySelectorAll("*").filter(b => (b.localName === "button" || b.__hoerer.click || b.__hoerer.pointerdown)
-    && !b.disabled && !b.classList.contains("link") && !b.closest(".testhilfe"));
+    && !b.disabled && !b.classList.contains("link") && !b.classList.contains("vorlesen") && !b.closest(".testhilfe"));
   __uhr.weiter(50);
   let n = neue();
   if (n.some(m => m.typ === "geht-nicht")) return { geht: false, funde, ergebnisse: 0, klicks: 0 };
   if (n.length !== 1 || n[0].typ !== "bereit") melde("Mix", "statt «bereit» kam: " + JSON.stringify(n).slice(0, 120));
   if (knoepfe().length) melde("Mix", "zeichnet eine Aufgabe, bevor der Mix sie verlangt");
-  let klicks = 0, ergebnisse = 0;
+  let klicks = 0, ergebnisse = 0, warten = 0;
   for (let i = 0; i < aufgaben && klicks < maxKlicks; i++) {
     sende({ typ: "aufgabe", geschafft: i });
     n = [];
     while (!n.length && klicks < maxKlicks) {
       const liste = knoepfe();
-      if (!liste.length) { __uhr.weiter(2000); n = neue(); if (!n.length && ++klicks % 50 === 0) melde("Hänger", "keine Knöpfe und keine Meldung"); continue; }
+      // Hänger erst nach 50 Wartezeiten am Stück (100 s ohne Knöpfe); kurze Pausen wie beim Einprägen sind erlaubt.
+      if (!liste.length) { __uhr.weiter(2000); n = neue(); klicks++; if (!n.length && ++warten === 50) melde("Hänger", "keine Knöpfe und keine Meldung"); continue; }
+      warten = 0;
       const vor = liste.filter(b => /Weiter|Prüfen|OK/.test(b.textContent));
       const k = vor.length && Math.random() < 0.4 ? vor[Math.floor(Math.random() * vor.length)] : liste[Math.floor(Math.random() * liste.length)];
       if (k.__hoerer.pointerdown) k.dispatchEvent(Object.assign(new Event("pointerdown", { bubbles: true }), { clientX: Math.random() * 600 }));
@@ -458,8 +461,8 @@ const SUCHFAELLE = [
   { q: "stellen", zuerst: ["stellen-detektiv"], enthaelt: ["zahlen-baukasten", "ziffernkarten"] },
   { q: "zahlenstral", zuerst: ["zahlenstrahl-pfeil"], anzahl: 1 },
   { q: "wortschatz", enthaelt: ["word-match", "wort-zwillinge"], grund: "word-match" },
-  { q: "MA.3.A.2", zuerst: ["uhr-werkstatt", "kiosk-kasse", "masse-umwandler"], anzahl: 3 },
-  { q: "englisch wörter", enthaelt: ["word-match", "wort-zwillinge", "listen-tap"], anzahl: 3 },
+  { q: "MA.3.A.2", zuerst: ["uhr-werkstatt", "kiosk-kasse", "masse-umwandler"], anzahl: 7 },
+  { q: "englisch wörter", enthaelt: ["word-match", "wort-zwillinge", "listen-tap", "sound-sorter"], anzahl: 4 },
   { q: "gipfeli", zuerst: ["preis-tabelle"], anzahl: 1, grund: "preis-tabelle" },
   { q: "xyzqw", anzahl: 0 },
 ];

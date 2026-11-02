@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Begriffs-Geodreieck</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 8px; }
+  .frage b { color: var(--knopf); }
+  .geo { display: block; width: 100%; max-width: 480px; margin: 0 auto; touch-action: manipulation; user-select: none; }
+  .geo .flaeche { fill: color-mix(in srgb, var(--deko-6) 10%, #fff); stroke: none; }
+  .geo .umriss { fill: color-mix(in srgb, var(--deko-6) 10%, #fff); stroke: var(--text); stroke-width: 4; stroke-linejoin: round; }
+  .geo .kreis { fill: color-mix(in srgb, var(--deko-6) 10%, #fff); stroke: var(--text); stroke-width: 4; }
+  .geo .strich { stroke: var(--text); stroke-width: 4; stroke-linecap: round; }
+  .geo .strich.hilfe { stroke: var(--deko-7); stroke-width: 3; stroke-dasharray: 8 6; }
+  .geo .strich.farbig { stroke: var(--deko-2); stroke-width: 8; }
+  .geo .punkt { fill: var(--text); }
+  .geo .winkel-ziel { fill: #fff; stroke: var(--deko-6); stroke-width: 3; stroke-dasharray: 4 3; }
+  .geo .zeichen { fill: none; stroke: var(--deko-1); stroke-width: 3; }
+  .geo .zeichen-punkt { fill: var(--deko-1); }
+  .geo .treffer { stroke: transparent; fill: transparent; stroke-width: 26; cursor: pointer; pointer-events: all; stroke-linecap: round; }
+  .geo .ziel.gewaehlt .strich, .geo .ziel.gewaehlt .winkel-ziel { stroke: var(--knopf); stroke-width: 8; }
+  .geo .ziel.gewaehlt .punkt { fill: var(--knopf); }
+  .geo .ziel.richtig .strich, .geo .ziel.richtig .winkel-ziel { stroke: var(--gut); stroke-width: 8; }
+  .geo .ziel.richtig .punkt { fill: var(--gut); }
+  .geo .ziel.falsch .strich, .geo .ziel.falsch .winkel-ziel { stroke: var(--hinweis); }
+  .geo .ziel.falsch .punkt { fill: var(--hinweis); }
+  .geo-knoepfe { display: flex; justify-content: center; margin-top: 12px; }
+  .wahl-knopf { font-size: clamp(20px, 4.6vw, 26px); font-weight: 800; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📏 Begriffs-Geodreieck</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.A.1.g (2. Zyklus): „verstehen und verwenden die Begriffe Seite, Diagonale,
+// Durchmesser, Radius, Flächeninhalt, Mittelpunkt, Parallele, …, Schnittpunkt, schneiden,
+// Senkrechte, …, Winkel, rechtwinklig …“ und „verwenden die Symbole für rechte Winkel und parallele
+// Linien“ (sg.lehrplan.ch, abgerufen 2026-11-02). MA.2.A.1.e (Orientierungspunkt): Punkt, Ecke.
+// Basisklasse 5: s1 4. Klasse (Ecke, Seite, erste Diagonale, Mittelpunkt), s2–s4 5. Klasse,
+// s5 6. Klasse (Eigenschaften der Diagonalen), s6 Königsstufe (alle finden, gedrehte Figuren).
+// Bezug: Formen-Detektiv (Basisklasse 1) benennt Formen und zählt in Stufe 6 rechte Winkel und
+// parallele Seiten. Hier zeigt das Kind die Begriffe an der Figur: antippen statt zählen.
+// Die Begriffe sind Fachwörter des Lehrplans, keine Inhaltsliste.
+// Jede Figur wird zufällig erzeugt (Grösse, Form, Drehung); ob eine Linie Seite oder Diagonale ist,
+// ein Winkel recht, zwei Linien parallel, rechnet pruefeAufgabe aus den Koordinaten nach.
+// Annahme (mit dem Lehrmittel abzugleichen): Zeichen für den rechten Winkel als Viertelkreis mit
+// Punkt, für parallele Linien als gleiche Pfeilchen auf beiden Linien.
+
+const { zufall, waehle, mische, el } = LS;
+const SVGNS = "http://www.w3.org/2000/svg";
+const BREITE = 300, HOEHE = 240, MITTE = [150, 120];
+
+// ---------- Geometrie ----------
+
+const abst = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
+const gleichPunkt = (p, q) => abst(p, q) < 0.01;
+const mittePunkt = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+const richtung = l => [l.b[0] - l.a[0], l.b[1] - l.a[1]];
+/** Spitzer Winkel zwischen zwei Linien in Grad (0 = parallel, 90 = senkrecht). */
+function zwischenWinkel(l1, l2) {
+  const [x1, y1] = richtung(l1), [x2, y2] = richtung(l2);
+  const c = Math.abs(x1 * x2 + y1 * y2) / (Math.hypot(x1, y1) * Math.hypot(x2, y2));
+  return Math.acos(Math.min(1, c)) * 180 / Math.PI;
+}
+const istParallel = (l1, l2) => zwischenWinkel(l1, l2) < 1e-4;
+const istSenkrecht = (l1, l2) => zwischenWinkel(l1, l2) > 90 - 1e-4;
+/** Deutlich weder parallel noch senkrecht (für das Auge unterscheidbar). */
+const deutlichSchief = (l1, l2) => { const w = zwischenWinkel(l1, l2); return w >= 12 && w <= 78; };
+
+const seitenVon = fig => fig.punkte.map((p, i) => ({ a: p, b: fig.punkte[(i + 1) % fig.punkte.length] }));
+/** Innenwinkel an Ecke i in Grad. */
+function innenWinkel(fig, i) {
+  const n = fig.punkte.length, v = fig.punkte[i], p = fig.punkte[(i + n - 1) % n], q = fig.punkte[(i + 1) % n];
+  const u = [p[0] - v[0], p[1] - v[1]], w = [q[0] - v[0], q[1] - v[1]];
+  return Math.acos((u[0] * w[0] + u[1] * w[1]) / (Math.hypot(...u) * Math.hypot(...w))) * 180 / Math.PI;
+}
+const istRecht = (fig, i) => Math.abs(innenWinkel(fig, i) - 90) < 1e-4;
+/** Schnittpunkt der Strecken pq und rs als Parameter (t auf pq, s auf rs) und Punkt; null wenn keiner. */
+function schnitt(p, q, r, s) {
+  const d1 = [q[0] - p[0], q[1] - p[1]], d2 = [s[0] - r[0], s[1] - r[1]];
+  const nenner = d1[0] * d2[1] - d1[1] * d2[0];
+  if (Math.abs(nenner) < 1e-9) return null;
+  const t = ((r[0] - p[0]) * d2[1] - (r[1] - p[1]) * d2[0]) / nenner;
+  const u = ((r[0] - p[0]) * d1[1] - (r[1] - p[1]) * d1[0]) / nenner;
+  if (t < 0 || t > 1 || u < 0 || u > 1) return null;
+  return { t, u, p: [p[0] + t * d1[0], p[1] + t * d1[1]] };
+}
+const diagonalSchnitt = fig => { const [A, B, C, D] = fig.punkte; return schnitt(A, C, B, D); };
+
+/** Was ist diese Linie an der Figur? seite, diagonale, radius, durchmesser, sehne, andere */
+function linieRolle(fig, l) {
+  if (fig.art === "kreis") {
+    const d1 = abst(l.a, fig.m), d2 = abst(l.b, fig.m), aufKreis = d => Math.abs(d - fig.r) < 0.01;
+    if ((d1 < 0.01 && aufKreis(d2)) || (d2 < 0.01 && aufKreis(d1))) return "radius";
+    if (aufKreis(d1) && aufKreis(d2)) return gleichPunkt(mittePunkt(l.a, l.b), fig.m) ? "durchmesser" : "sehne";
+    return "andere";
+  }
+  const i = fig.punkte.findIndex(p => gleichPunkt(p, l.a)), j = fig.punkte.findIndex(p => gleichPunkt(p, l.b)), n = fig.punkte.length;
+  if (i < 0 || j < 0 || i === j) return "andere";
+  return Math.abs(i - j) === 1 || Math.abs(i - j) === n - 1 ? "seite" : "diagonale";
+}
+/** Was ist dieser Punkt? ecke, schnittpunkt, seitenmitte, mittelpunkt, aufKreis, innen */
+function punktRolle(fig, p) {
+  if (fig.art === "kreis") {
+    const d = abst(p, fig.m);
+    return d < 0.01 ? "mittelpunkt" : Math.abs(d - fig.r) < 0.01 ? "aufKreis" : "innen";
+  }
+  if (fig.punkte.some(e => gleichPunkt(e, p))) return "ecke";
+  if (fig.punkte.length === 4) { const s = diagonalSchnitt(fig); if (s && gleichPunkt(s.p, p)) return "schnittpunkt"; }
+  if (seitenVon(fig).some(s => gleichPunkt(mittePunkt(s.a, s.b), p))) return "seitenmitte";
+  return "innen";
+}
+
+// ---------- Figuren ----------
+
+const r1 = (a, b) => a + Math.random() * (b - a);
+const FIGUR = {
+  quadrat: () => { const s = r1(110, 160); return [[-s / 2, -s / 2], [s / 2, -s / 2], [s / 2, s / 2], [-s / 2, s / 2]]; },
+  rechteck: () => { const b = r1(160, 210), h = r1(80, 125); return [[-b / 2, -h / 2], [b / 2, -h / 2], [b / 2, h / 2], [-b / 2, h / 2]]; },
+  raute: () => { const d1 = r1(170, 210), d2 = r1(90, 130); return [[0, -d2 / 2], [d1 / 2, 0], [0, d2 / 2], [-d1 / 2, 0]]; },
+  parallelogramm: () => { const b = r1(130, 170), h = r1(80, 115), k = r1(35, 60) * waehle([1, -1]); return [[-b / 2 + k / 2, -h / 2], [b / 2 + k / 2, -h / 2], [b / 2 - k / 2, h / 2], [-b / 2 - k / 2, h / 2]]; },
+  trapez: () => { const b1 = r1(180, 210), b2 = r1(70, 105), h = r1(80, 120); return [[-b2 / 2, -h / 2], [b2 / 2, -h / 2], [b1 / 2, h / 2], [-b1 / 2, h / 2]]; },
+  trapezRecht: () => { const b1 = r1(170, 210), b2 = r1(80, 120), h = r1(85, 125); return [[-b1 / 2, -h / 2], [-b1 / 2 + b2, -h / 2], [b1 / 2, h / 2], [-b1 / 2, h / 2]]; },
+  drachen: () => { const w = r1(60, 85), a = r1(40, 60), c = r1(105, 135); return [[0, -a], [w, 0], [0, c], [-w, 0]]; },
+  viereck: () => [[-90, -60], [90, -60], [90, 60], [-90, 60]].map(([x, y]) => [x + r1(-28, 28), y + r1(-22, 22)]),
+  dreieckRecht: () => { const b = r1(140, 190), h = r1(100, 140); return [[0, 0], [b, 0], [0, -h]]; },
+  haus: () => { const b = r1(120, 160), hw = r1(70, 100), hd = r1(45, 65); return [[-b / 2, hw / 2], [b / 2, hw / 2], [b / 2, -hw / 2], [0, -hw / 2 - hd], [-b / 2, -hw / 2]]; },
+  fuenfeck: () => regelmaessig(5, r1(90, 105)),
+  sechseck: () => regelmaessig(6, r1(90, 105)),
+};
+function regelmaessig(n, r) {
+  const p = [];
+  for (let i = 0; i < n; i++) { const w = -Math.PI / 2 + 2 * Math.PI * i / n; p.push([r * Math.cos(w), r * Math.sin(w)]); }
+  return p;
+}
+/** Drehen (Grad) und in die Mitte des Bilds schieben. */
+function platziere(lokal, grad) {
+  const w = grad * Math.PI / 180, c = Math.cos(w), s = Math.sin(w);
+  const p = lokal.map(([x, y]) => [x * c - y * s, x * s + y * c]);
+  const xs = p.map(q => q[0]), ys = p.map(q => q[1]);
+  const mx = (Math.min(...xs) + Math.max(...xs)) / 2, my = (Math.min(...ys) + Math.max(...ys)) / 2;
+  return p.map(([x, y]) => [x - mx + MITTE[0], y - my + MITTE[1]]);
+}
+const imBild = p => p[0] >= 14 && p[0] <= BREITE - 14 && p[1] >= 14 && p[1] <= HOEHE - 14;
+const vieleck = (art, grad) => ({ art, punkte: platziere(FIGUR[art](), grad) });
+const kreis = () => ({ art: "kreis", m: [...MITTE], r: r1(80, 100) });
+const aufKreis = (fig, grad) => [fig.m[0] + fig.r * Math.cos(grad * Math.PI / 180), fig.m[1] + fig.r * Math.sin(grad * Math.PI / 180)];
+
+/** Alle Diagonalen eines Vielecks als Linien. */
+function diagonalenVon(fig) {
+  const n = fig.punkte.length, d = [];
+  for (let i = 0; i < n; i++) for (let j = i + 2; j < n; j++) if (!(i === 0 && j === n - 1)) d.push({ a: fig.punkte[i], b: fig.punkte[j] });
+  return d;
+}
+/** Zielpunkt für einen Winkel: etwas innerhalb der Ecke, auf der Winkelhalbierenden. */
+function winkelPunkt(fig, i) {
+  const n = fig.punkte.length, v = fig.punkte[i], p = fig.punkte[(i + n - 1) % n], q = fig.punkte[(i + 1) % n];
+  const e = (a) => { const d = abst(a, v); return [(a[0] - v[0]) / d, (a[1] - v[1]) / d]; };
+  const [u, w] = [e(p), e(q)];
+  const h = [u[0] + w[0], u[1] + w[1]], l = Math.hypot(...h);
+  return [v[0] + 26 * h[0] / l, v[1] + 26 * h[1] / l];
+}
+
+// ---------- Stufen ----------
+
+const DREHUNG = { keine: () => 0, viertel: () => waehle([0, 90]), schritte15: () => 15 * zufall(0, 23), frei: () => zufall(0, 359) };
+const STUFE = {
+  s1: { arten: ["ecke", "seite", "diagonale", "mittelpunkt"], drehung: "keine", figuren: ["quadrat", "rechteck"] },
+  s2: { arten: ["seite", "diagonale", "diagonale", "radius", "durchmesser", "mittelpunkt"], drehung: "viertel" },
+  s3: { arten: ["lage", "lage", "rechterWinkel", "parallelZu", "senkrechtZu", "radius", "durchmesser"], drehung: "schritte15" },
+  s4: { arten: ["benennen", "symbol", "schnittpunkt", "lage", "parallelZu", "senkrechtZu"], drehung: "frei" },
+  s5: { arten: ["diagEigenschaft", "diagEigenschaft", "rechterWinkel", "benennen", "schnittpunkt"], drehung: "frei" },
+  s6: { arten: ["alleRecht", "alleDiag", "alleRadien", "alleSenkrecht"], drehung: "frei" },
+};
+// Figuren je Aufgabenart (Stufe 1 schränkt ein)
+const FIGUREN_FUER = {
+  seite: ["quadrat", "rechteck", "raute", "parallelogramm", "trapez", "fuenfeck", "sechseck"],
+  diagonale: ["quadrat", "rechteck", "raute", "parallelogramm", "trapez", "fuenfeck", "sechseck", "haus"],
+  ecke: ["quadrat", "rechteck"],
+  rechterWinkel: ["trapezRecht", "dreieckRecht", "haus"],
+  parallelZu: ["trapez", "trapezRecht", "parallelogramm", "sechseck", "haus"],
+  senkrechtZu: ["trapezRecht", "dreieckRecht", "haus", "rechteck"],
+  benennen: ["quadrat", "rechteck", "raute", "parallelogramm", "trapez", "fuenfeck", "sechseck", "viereck"],
+  symbol: ["trapezRecht", "rechteck", "parallelogramm", "dreieckRecht", "trapez"],
+  schnittpunkt: ["viereck", "parallelogramm", "drachen", "trapez", "raute", "trapezRecht"],
+  diagEigenschaft: ["quadrat", "rechteck", "raute", "parallelogramm", "drachen", "trapez", "viereck"],
+  alleRecht: ["trapezRecht", "dreieckRecht", "haus", "rechteck", "quadrat"],
+  alleDiag: ["fuenfeck", "sechseck", "haus", "viereck", "trapez"],
+  alleSenkrecht: ["trapezRecht", "haus", "rechteck", "dreieckRecht"],
+};
+const ALLE = ["alleRecht", "alleDiag", "alleRadien", "alleSenkrecht"];
+const LAGE_ANTWORT = { parallel: "parallel", senkrecht: "senkrecht", weder: "weder noch" };
+const ROLLE_NAME = { seite: "Seite", diagonale: "Diagonale", radius: "Radius", durchmesser: "Durchmesser" };
+const SYMBOL_NAME = { recht: "rechter Winkel", parallel: "parallel" };
+const EIGENSCHAFT = {
+  senkrecht: "Stehen die beiden Diagonalen <b>senkrecht</b> aufeinander?",
+  gleichLang: "Sind die beiden Diagonalen <b>gleich lang</b>?",
+  halbieren: "<b>Halbieren</b> sich die beiden Diagonalen gegenseitig?",
+};
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(art, p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  const fig = vieleck("quadrat", 0);
+  return { art: "ecke", figur: fig, linien: [], ziele: fig.punkte.map(q => ({ typ: "punkt", p: q })), richtig: [0, 1, 2, 3] };
+}
+
+/** Ziele (Linien, Punkte, Winkel) mit den Indizes der richtigen. */
+const mitRichtig = (a, istRichtig) => ({ ...a, richtig: a.ziele.map((z, i) => (istRichtig(z) ? i : -1)).filter(i => i >= 0) });
+
+function erzeuge(art, p) {
+  const grad = DREHUNG[p.drehung]();
+  const figurArt = waehle(p.figuren && FIGUREN_FUER[art] ? p.figuren.filter(f => FIGUREN_FUER[art].includes(f)) : FIGUREN_FUER[art] || ["quadrat"]);
+  switch (art) {
+    case "ecke": {
+      const fig = vieleck(figurArt, grad);
+      const s = seitenVon(fig);
+      const andere = [mittePunkt(s[0].a, s[0].b), mittePunkt(s[2].a, s[2].b), diagonalSchnitt(fig).p];
+      const ziele = mische([...fig.punkte, ...andere].map(q => ({ typ: "punkt", p: q })));
+      return mitRichtig({ art, figur: fig, linien: [], ziele }, z => fig.punkte.some(e => gleichPunkt(e, z.p)));
+    }
+    case "seite": case "diagonale": case "alleDiag": {
+      const fig = vieleck(figurArt, grad);
+      const n = fig.punkte.length;
+      const d = n === 4 ? diagonalenVon(fig) : mische(diagonalenVon(fig)).slice(0, art === "alleDiag" ? zufall(2, 4) : zufall(2, 3));
+      const ziele = [...seitenVon(fig), ...d].map(l => ({ typ: "linie", ...l }));
+      return mitRichtig({ art, figur: fig, linien: [], ziele }, z => (art === "seite" ? z.a && seitenVon(fig).some(s => s.a === z.a && s.b === z.b) : !seitenVon(fig).some(s => s.a === z.a && s.b === z.b)));
+    }
+    case "mittelpunkt": {
+      const fig = kreis();
+      const w = zufall(0, 359);
+      const ziele = [fig.m, aufKreis(fig, w), aufKreis(fig, w + zufall(100, 160)),
+        (() => { const g = (w + zufall(200, 240)) * Math.PI / 180, d = fig.r * r1(0.45, 0.65); return [fig.m[0] + d * Math.cos(g), fig.m[1] + d * Math.sin(g)]; })()]
+        .map(q => ({ typ: "punkt", p: q }));
+      return mitRichtig({ art, figur: fig, linien: [], ziele: mische(ziele) }, z => gleichPunkt(z.p, fig.m));
+    }
+    case "radius": case "durchmesser": case "alleRadien": {
+      const fig = kreis();
+      const w = zufall(0, 359);
+      const radien = art === "alleRadien" ? zufall(1, 3) : 1;
+      const winkel = [w, w + 180]; // Durchmesser
+      const linien = [{ a: aufKreis(fig, w), b: aufKreis(fig, w + 180) }];
+      const frei = g => winkel.every(x => Math.abs(((g - x) % 360 + 540) % 360 - 180) >= 50);
+      for (let i = 0; i < radien; i++) {
+        let g = null;
+        for (let k = 0; k < 40 && g == null; k++) { const x = zufall(0, 359); if (frei(x)) g = x; }
+        if (g == null) return null;
+        winkel.push(g);
+        linien.push({ a: [...fig.m], b: aufKreis(fig, g) });
+      }
+      // Sehne: nicht durch den Mittelpunkt, in einer freien Gegend
+      let g = null;
+      for (let k = 0; k < 40 && g == null; k++) { const x = zufall(0, 359); if (frei(x)) g = x; }
+      if (g == null) return null;
+      const halb = zufall(28, 42);
+      linien.push({ a: aufKreis(fig, g - halb), b: aufKreis(fig, g + halb) });
+      const ziele = mische(linien).map(l => ({ typ: "linie", ...l }));
+      const gesucht = art === "durchmesser" ? "durchmesser" : "radius";
+      return mitRichtig({ art, figur: fig, linien: [], ziele, mitMittelpunkt: true }, z => linieRolle(fig, z) === gesucht);
+    }
+    case "lage": {
+      const antwort = waehle(["parallel", "senkrecht", "weder"]);
+      const phi = grad * Math.PI / 180, len1 = r1(130, 170), len2 = r1(110, 160);
+      const d1 = [Math.cos(phi), Math.sin(phi)], n1 = [-d1[1], d1[0]];
+      const c1 = [MITTE[0] - n1[0] * 30, MITTE[1] - n1[1] * 30];
+      const l1 = { a: [c1[0] - d1[0] * len1 / 2, c1[1] - d1[1] * len1 / 2], b: [c1[0] + d1[0] * len1 / 2, c1[1] + d1[1] * len1 / 2] };
+      let psi = phi, c2;
+      if (antwort === "parallel") {
+        c2 = [c1[0] + n1[0] * r1(55, 75) + d1[0] * r1(-30, 30), c1[1] + n1[1] * r1(55, 75) + d1[1] * r1(-30, 30)];
+      } else {
+        psi = phi + (antwort === "senkrecht" ? Math.PI / 2 : waehle([1, -1]) * r1(25, 65) * Math.PI / 180);
+        const d2 = [Math.cos(psi), Math.sin(psi)];
+        const kreuzen = antwort === "senkrecht" || Math.random() < 0.5;
+        // Durch einen Punkt der ersten Linie (kreuzen) oder daneben
+        const t = r1(-0.35, 0.35) * len1, s = r1(-0.45, 0.45) * len2;
+        const q = kreuzen ? [c1[0] + d1[0] * t, c1[1] + d1[1] * t] : [c1[0] + n1[0] * 80 + d1[0] * t, c1[1] + n1[1] * 80 + d1[1] * t];
+        c2 = [q[0] - d2[0] * s, q[1] - d2[1] * s];
+      }
+      const d2 = [Math.cos(psi), Math.sin(psi)];
+      const l2 = { a: [c2[0] - d2[0] * len2 / 2, c2[1] - d2[1] * len2 / 2], b: [c2[0] + d2[0] * len2 / 2, c2[1] + d2[1] * len2 / 2] };
+      return { art, figur: null, linien: [l1, l2], ziele: [], antwort };
+    }
+    case "rechterWinkel": case "alleRecht": {
+      const fig = vieleck(figurArt, grad);
+      const ziele = fig.punkte.map((_, i) => ({ typ: "winkel", ecke: i, p: winkelPunkt(fig, i) }));
+      return mitRichtig({ art, figur: fig, linien: [], ziele }, z => istRecht(fig, z.ecke));
+    }
+    case "parallelZu": case "senkrechtZu": case "alleSenkrecht": {
+      const fig = vieleck(figurArt, grad);
+      const s = seitenVon(fig);
+      const rot = zufall(0, s.length - 1);
+      const ziele = s.filter((_, i) => i !== rot).map(l => ({ typ: "linie", ...l }));
+      const passt = art === "parallelZu" ? istParallel : istSenkrecht;
+      return mitRichtig({ art, figur: fig, linien: [{ ...s[rot], farbig: true }], ziele }, z => passt(z, s[rot]));
+    }
+    case "benennen": {
+      const rolle = waehle(["seite", "diagonale", "radius", "durchmesser"]);
+      if (rolle === "seite" || rolle === "diagonale") {
+        const fig = vieleck(figurArt, grad);
+        const l = waehle(rolle === "seite" ? seitenVon(fig) : diagonalenVon(fig));
+        return { art, figur: fig, linien: [{ ...l, farbig: true }], ziele: [], antwort: rolle };
+      }
+      const fig = kreis(), w = zufall(0, 359);
+      const l = rolle === "radius" ? { a: [...fig.m], b: aufKreis(fig, w) } : { a: aufKreis(fig, w), b: aufKreis(fig, w + 180) };
+      return { art, figur: fig, linien: [{ ...l, farbig: true }], ziele: [], antwort: rolle, mitMittelpunkt: true };
+    }
+    case "symbol": {
+      const fig = vieleck(figurArt, grad);
+      const n = fig.punkte.length, s = seitenVon(fig);
+      const rechte = fig.punkte.map((_, i) => i).filter(i => istRecht(fig, i));
+      const paare = [];
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) if (istParallel(s[i], s[j])) paare.push([i, j]);
+      const moeglich = [...(rechte.length ? ["recht"] : []), ...(paare.length ? ["parallel"] : [])];
+      if (!moeglich.length) return null;
+      const antwort = waehle(moeglich);
+      return { art, figur: fig, linien: [], ziele: [], antwort, ecke: antwort === "recht" ? waehle(rechte) : null, paar: antwort === "parallel" ? waehle(paare) : null };
+    }
+    case "schnittpunkt": {
+      const fig = vieleck(figurArt, grad);
+      const sp = diagonalSchnitt(fig);
+      if (!sp) return null;
+      const s = waehle(seitenVon(fig));
+      const innen = [MITTE[0] + r1(-70, 70), MITTE[1] + r1(-50, 50)];
+      const ziele = mische([sp.p, waehle(fig.punkte), mittePunkt(s.a, s.b), innen]).map(q => ({ typ: "punkt", p: q }));
+      return mitRichtig({ art, figur: fig, linien: diagonalenVon(fig).map(l => ({ ...l, hilfe: true })), ziele }, z => gleichPunkt(z.p, sp.p));
+    }
+    case "diagEigenschaft": {
+      const fig = vieleck(figurArt, grad);
+      const frage = waehle(Object.keys(EIGENSCHAFT));
+      const e = diagEigenschaften(fig);
+      if (!e || e[frage] === null) return null;
+      return { art, figur: fig, linien: diagonalenVon(fig).map(l => ({ ...l, hilfe: true })), ziele: [], frage, antwort: e[frage] ? "ja" : "nein" };
+    }
+  }
+  return null;
+}
+
+/** Eigenschaften der Diagonalen eines Vierecks: true, false oder null (zu knapp für das Auge). */
+function diagEigenschaften(fig) {
+  const [A, B, C, D] = fig.punkte;
+  const sp = schnitt(A, C, B, D);
+  if (!sp) return null;
+  const e = { a: A, b: C }, f = { a: B, b: D };
+  const w = zwischenWinkel(e, f), le = abst(A, C), lf = abst(B, D), dt = Math.max(Math.abs(sp.t - 0.5), Math.abs(sp.u - 0.5));
+  return {
+    senkrecht: w > 90 - 1e-4 ? true : w < 78 ? false : null,
+    gleichLang: Math.abs(le - lf) < 1e-6 ? true : Math.abs(le - lf) > 0.12 * Math.max(le, lf) ? false : null,
+    halbieren: dt < 1e-6 ? true : dt > 0.1 ? false : null,
+  };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const fig = a.figur;
+  // alles im Bild
+  const punkte = [...(fig && fig.punkte ? fig.punkte : []), ...a.linien.flatMap(l => [l.a, l.b]), ...a.ziele.flatMap(z => (z.typ === "linie" ? [z.a, z.b] : [z.p]))];
+  if (fig && fig.art === "kreis") punkte.push([fig.m[0] - fig.r, fig.m[1] - fig.r], [fig.m[0] + fig.r, fig.m[1] + fig.r]);
+  if (!punkte.every(imBild)) m.push("Figur ragt aus dem Bild");
+  if (p.figuren && fig && fig.art !== "kreis" && !p.figuren.includes(fig.art)) m.push("Figur nicht in der Stufe");
+  // Antippen: richtige Ziele nachrechnen
+  if (a.ziele.length) {
+    const soll = a.ziele.map((z, i) => (zielRichtig(a, z) ? i : -1)).filter(i => i >= 0);
+    if (soll.join() !== a.richtig.join()) m.push(`richtige Ziele ${a.richtig} statt ${soll}`);
+    if (!soll.length) m.push("kein richtiges Ziel");
+    if (soll.length === a.ziele.length) m.push("alle Ziele richtig — nichts zu unterscheiden");
+    if (!ALLE.includes(a.art) && a.art !== "ecke" && a.art !== "seite" && soll.length > 2 && a.art !== "diagonale") m.push("zu viele richtige Ziele zum Antippen");
+    // Fingerabstand: Punkte und Winkelziele mindestens 34 Einheiten auseinander
+    const orte = a.ziele.filter(z => z.typ !== "linie").map(z => z.p);
+    for (let i = 0; i < orte.length; i++) for (let j = i + 1; j < orte.length; j++) if (abst(orte[i], orte[j]) < 34) m.push("Ziele zu nah beieinander");
+    // Linien: genug lang zum Antippen
+    if (a.ziele.some(z => z.typ === "linie" && abst(z.a, z.b) < 40)) m.push("Linie zu kurz zum Antippen");
+    // Für das Auge eindeutig: nicht richtige Winkel und Lagen deutlich daneben
+    if (["rechterWinkel", "alleRecht"].includes(a.art) && a.ziele.some(z => !istRecht(fig, z.ecke) && Math.abs(innenWinkel(fig, z.ecke) - 90) < 10)) m.push("Winkel fast recht");
+    if (["parallelZu", "senkrechtZu", "alleSenkrecht"].includes(a.art)) {
+      const rot = a.linien.find(l => l.farbig);
+      if (a.ziele.some(z => !istParallel(z, rot) && !istSenkrecht(z, rot) && !deutlichSchief(z, rot))) m.push("Seite fast parallel oder senkrecht");
+    }
+  }
+  if (a.art === "lage") {
+    const [l1, l2] = a.linien;
+    const ist = istParallel(l1, l2) ? "parallel" : istSenkrecht(l1, l2) ? "senkrecht" : deutlichSchief(l1, l2) ? "weder" : "knapp";
+    if (ist !== a.antwort) m.push(`Lage ${ist} statt ${a.antwort}`);
+    if (a.antwort === "parallel" && schnitt(l1.a, l1.b, l2.a, l2.b)) m.push("parallele Linien schneiden sich");
+    if (a.antwort === "senkrecht" && !schnitt(l1.a, l1.b, l2.a, l2.b)) m.push("senkrechte Linien treffen sich nicht");
+  }
+  if (a.art === "benennen") {
+    const l = a.linien[0];
+    if (linieRolle(fig, l) !== a.antwort) m.push(`farbige Linie ist ${linieRolle(fig, l)}, nicht ${a.antwort}`);
+  }
+  if (a.art === "symbol") {
+    if (a.antwort === "recht" && !istRecht(fig, a.ecke)) m.push("Zeichen für den rechten Winkel an einer schiefen Ecke");
+    if (a.antwort === "parallel") { const s = seitenVon(fig); if (!istParallel(s[a.paar[0]], s[a.paar[1]])) m.push("Zeichen für parallel an nicht parallelen Seiten"); }
+  }
+  if (a.art === "diagEigenschaft") {
+    const e = diagEigenschaften(fig);
+    if (!e || e[a.frage] === null) m.push("Eigenschaft zu knapp für das Auge");
+    else if ((e[a.frage] ? "ja" : "nein") !== a.antwort) m.push("Antwort zur Diagonalen falsch");
+  }
+  return m;
+}
+
+/** Unabhängig von der Erzeugung: Ist dieses Ziel für die Aufgabe richtig? */
+function zielRichtig(a, z) {
+  const fig = a.figur;
+  switch (a.art) {
+    case "ecke": return punktRolle(fig, z.p) === "ecke";
+    case "seite": return linieRolle(fig, z) === "seite";
+    case "diagonale": case "alleDiag": return linieRolle(fig, z) === "diagonale";
+    case "mittelpunkt": return punktRolle(fig, z.p) === "mittelpunkt";
+    case "radius": case "alleRadien": return linieRolle(fig, z) === "radius";
+    case "durchmesser": return linieRolle(fig, z) === "durchmesser";
+    case "rechterWinkel": case "alleRecht": return istRecht(fig, z.ecke) && abst(z.p, fig.punkte[z.ecke]) < 30;
+    case "parallelZu": return istParallel(z, a.linien.find(l => l.farbig));
+    case "senkrechtZu": case "alleSenkrecht": return istSenkrecht(z, a.linien.find(l => l.farbig));
+    case "schnittpunkt": return punktRolle(fig, z.p) === "schnittpunkt";
+  }
+  return false;
+}
+
+// ---------- Zeichnen ----------
+
+const zahl = v => (Math.round(v * 10) / 10).toString();
+const svgEl = (tag, attr = {}) => { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, typeof v === "number" ? zahl(v) : v); return e; };
+const strich = (l, klasse = "strich") => svgEl("line", { class: klasse, x1: l.a[0], y1: l.a[1], x2: l.b[0], y2: l.b[1] });
+
+/** Lage im Bild in Worten, für die Lösung („oben links“). */
+function ortText(q) {
+  const v = q[1] < MITTE[1] - 25 ? "oben" : q[1] > MITTE[1] + 25 ? "unten" : "";
+  const h = q[0] < MITTE[0] - 30 ? "links" : q[0] > MITTE[0] + 30 ? "rechts" : "";
+  return [v, h].filter(Boolean).join(" ") || "in der Mitte";
+}
+const linieText = l => `von ${ortText(l.a)} nach ${ortText(l.b)}`;
+
+/** Zeichen für den rechten Winkel (Viertelkreis mit Punkt) an Ecke i. */
+function rechterWinkelZeichen(fig, i) {
+  const n = fig.punkte.length, v = fig.punkte[i], p = fig.punkte[(i + n - 1) % n], q = fig.punkte[(i + 1) % n];
+  const e = a => { const d = abst(a, v); return [(a[0] - v[0]) / d, (a[1] - v[1]) / d]; };
+  const [u, w] = [e(p), e(q)], R = 24;
+  const s = [v[0] + R * u[0], v[1] + R * u[1]], t = [v[0] + R * w[0], v[1] + R * w[1]];
+  const kreuz = u[0] * w[1] - u[1] * w[0];
+  const g = svgEl("g", {});
+  g.append(svgEl("path", { class: "zeichen", d: `M${zahl(s[0])},${zahl(s[1])} A${R},${R} 0 0 ${kreuz > 0 ? 1 : 0} ${zahl(t[0])},${zahl(t[1])}` }));
+  const h = [u[0] + w[0], u[1] + w[1]], l = Math.hypot(...h);
+  g.append(svgEl("circle", { class: "zeichen-punkt", cx: v[0] + 10 * h[0] / l, cy: v[1] + 10 * h[1] / l, r: 3.5 }));
+  return g;
+}
+/** Zeichen für parallel: zwei gleiche Pfeilchen in der Mitte der Seite. */
+function parallelZeichen(l) {
+  const [dx, dy] = richtung(l), d = Math.hypot(dx, dy), u = [dx / d, dy / d], n = [-u[1], u[0]];
+  const g = svgEl("g", {});
+  for (const k of [-6, 6]) {
+    const m = [(l.a[0] + l.b[0]) / 2 + u[0] * k, (l.a[1] + l.b[1]) / 2 + u[1] * k];
+    const spitze = [m[0] + u[0] * 6, m[1] + u[1] * 6];
+    g.append(svgEl("polyline", { class: "zeichen", points: [[spitze[0] - u[0] * 12 + n[0] * 8, spitze[1] - u[1] * 12 + n[1] * 8], spitze, [spitze[0] - u[0] * 12 - n[0] * 8, spitze[1] - u[1] * 12 - n[1] * 8]].map(q => q.map(zahl).join(",")).join(" ") }));
+  }
+  return g;
+}
+
+/** Bild der Aufgabe; beiTipp(i, gruppe) für Ziele. Liefert { svg, gruppen }. */
+function bildEl(a, beiTipp) {
+  const svg = svgEl("svg", { class: "geo", viewBox: `0 0 ${BREITE} ${HOEHE}`, role: "img", "aria-label": "Figur" });
+  const fig = a.figur;
+  const zielLinien = a.ziele.filter(z => z.typ === "linie");
+  if (fig && fig.art === "kreis") svg.append(svgEl("circle", { class: "kreis", cx: fig.m[0], cy: fig.m[1], r: fig.r }));
+  else if (fig) {
+    // Sind die Seiten selbst Ziele, zeichnen sie die Ziele; sonst ein gewöhnlicher Umriss.
+    const seitenSindZiele = zielLinien.some(z => linieRolle(fig, z) === "seite");
+    svg.append(svgEl("polygon", { class: seitenSindZiele ? "flaeche" : "umriss", points: fig.punkte.map(q => q.map(zahl).join(",")).join(" ") }));
+    if (seitenSindZiele) for (const s of seitenVon(fig)) if (!zielLinien.some(z => z.a === s.a && z.b === s.b) && !a.linien.some(l => l.a === s.a && l.b === s.b)) svg.append(strich(s));
+  }
+  for (const l of a.linien) svg.append(strich(l, l.farbig ? "strich farbig" : l.hilfe ? "strich hilfe" : "strich"));
+  if (a.mitMittelpunkt) svg.append(svgEl("circle", { class: "punkt", cx: fig.m[0], cy: fig.m[1], r: 5 }));
+  if (a.art === "symbol" && a.antwort === "recht") svg.append(rechterWinkelZeichen(fig, a.ecke));
+  if (a.art === "symbol" && a.antwort === "parallel") { const s = seitenVon(fig); for (const i of a.paar) svg.append(parallelZeichen(s[i])); }
+  const gruppen = a.ziele.map((z, i) => {
+    const g = svgEl("g", { class: "ziel" });
+    if (z.typ === "linie") {
+      g.append(strich(z), strich(z, "treffer"));
+    } else if (z.typ === "punkt") {
+      g.append(svgEl("circle", { class: "punkt", cx: z.p[0], cy: z.p[1], r: 7 }), svgEl("circle", { class: "treffer", cx: z.p[0], cy: z.p[1], r: 20 }));
+    } else {
+      g.append(svgEl("circle", { class: "winkel-ziel", cx: z.p[0], cy: z.p[1], r: 13 }), svgEl("circle", { class: "treffer", cx: z.p[0], cy: z.p[1], r: 19 }));
+    }
+    g.lastChild.addEventListener("click", () => beiTipp(i, g));
+    return g;
+  });
+  // Linien zuerst, Punkte darüber, damit Punkte auf Linien antippbar bleiben
+  for (const g of gruppen.filter((_, i) => a.ziele[i].typ === "linie")) svg.append(g);
+  for (const g of gruppen.filter((_, i) => a.ziele[i].typ !== "linie")) svg.append(g);
+  return { svg, gruppen };
+}
+
+// ---------- Texte ----------
+
+const FRAGE = {
+  ecke: "Tippe eine <b>Ecke</b> an.",
+  seite: "Tippe eine <b>Seite</b> an.",
+  diagonale: "Tippe eine <b>Diagonale</b> an.",
+  mittelpunkt: "Tippe den <b>Mittelpunkt</b> des Kreises an.",
+  radius: "Tippe den <b>Radius</b> an.",
+  durchmesser: "Tippe den <b>Durchmesser</b> an.",
+  lage: "Wie liegen die beiden Linien zueinander?",
+  rechterWinkel: "Tippe eine Ecke mit einem <b>rechten Winkel</b> an.",
+  parallelZu: "Tippe die Seite an, die <b>parallel</b> zur farbigen Seite ist.",
+  senkrechtZu: "Tippe eine Seite an, die <b>senkrecht</b> zur farbigen Seite steht.",
+  benennen: "Wie heisst die farbige Linie?",
+  symbol: "Was zeigt das violette Zeichen?",
+  schnittpunkt: "Tippe den <b>Schnittpunkt</b> der beiden Diagonalen an.",
+  alleRecht: "Tippe <b>alle</b> Ecken mit einem rechten Winkel an. Dann „Fertig“.",
+  alleDiag: "Tippe <b>alle</b> Diagonalen an. Dann „Fertig“.",
+  alleRadien: "Tippe <b>alle</b> Radien an. Dann „Fertig“.",
+  alleSenkrecht: "Tippe <b>alle</b> Seiten an, die senkrecht zur farbigen stehen. Dann „Fertig“.",
+};
+const HINWEIS = {
+  ecke: "Eine Ecke ist dort, wo zwei Seiten zusammenstossen.",
+  seite: "Eine Seite ist eine Randlinie der Figur: von einer Ecke zur nächsten.",
+  diagonale: "Eine Diagonale verbindet zwei Ecken, die nicht nebeneinander liegen. Sie läuft durch das Innere der Figur.",
+  mittelpunkt: "Der Mittelpunkt ist von jedem Punkt auf dem Kreis gleich weit weg.",
+  radius: "Der Radius geht vom Mittelpunkt bis zum Kreis.",
+  durchmesser: "Der Durchmesser geht von Kreis zu Kreis und genau durch den Mittelpunkt.",
+  lage: "Parallel: überall gleich weit auseinander, sie treffen sich nie. Senkrecht: Sie bilden einen rechten Winkel wie die Ecke eines Blatts Papier.",
+  rechterWinkel: "Ein rechter Winkel ist so wie die Ecke eines Blatts Papier. Lege in Gedanken das Geodreieck an.",
+  parallelZu: "Parallele Seiten haben überall den gleichen Abstand. Verlängere sie in Gedanken: Sie treffen sich nie.",
+  senkrechtZu: "Senkrecht heisst: Die beiden Seiten bilden einen rechten Winkel — wie die Ecke eines Blatts Papier.",
+  benennen: "Schau, wo die farbige Linie anfängt und aufhört: an zwei Ecken nebeneinander, an zwei Ecken gegenüber, am Mittelpunkt oder zweimal am Kreis?",
+  symbol: "Ein Bogen mit Punkt in der Ecke heisst: rechter Winkel. Gleiche Pfeilchen auf zwei Linien heissen: parallel.",
+  schnittpunkt: "Fahre beide gestrichelten Diagonalen mit dem Finger nach. Wo kreuzen sie sich?",
+  diagEigenschaft: {
+    senkrecht: "Lege in Gedanken das Geodreieck an den Punkt, wo sich die Diagonalen kreuzen: Ist dort ein rechter Winkel?",
+    gleichLang: "Vergleiche die Längen der beiden gestrichelten Diagonalen. Miss mit zwei Fingern.",
+    halbieren: "Halbieren heisst: Der Kreuzungspunkt liegt bei beiden Diagonalen genau in der Mitte.",
+  },
+  alleRecht: "Prüfe jede Ecke einzeln: Passt die Ecke eines Blatts Papier genau hinein?",
+  alleDiag: "Diagonalen verbinden Ecken, die nicht nebeneinander liegen. Seiten sind keine Diagonalen.",
+  alleRadien: "Ein Radius geht vom Mittelpunkt bis zum Kreis — nicht durch den Mittelpunkt hindurch.",
+  alleSenkrecht: "Prüfe jede Seite einzeln: Bildet sie mit der farbigen Seite einen rechten Winkel? Verlängere in Gedanken.",
+};
+const NAME_ZIEL = {
+  ecke: "Ecken", seite: "Seiten", diagonale: "Diagonalen", alleDiag: "Diagonalen", mittelpunkt: "Mittelpunkt", radius: "Radius", alleRadien: "Radien",
+  durchmesser: "Durchmesser", rechterWinkel: "rechte Winkel", alleRecht: "rechte Winkel", parallelZu: "parallele Seite",
+  senkrechtZu: "senkrechte Seiten", alleSenkrecht: "senkrechte Seiten", schnittpunkt: "Schnittpunkt",
+};
+
+function loesungFuer(a) {
+  if (a.art === "lage") return `Die Linien sind ${LAGE_ANTWORT[a.antwort]}.`;
+  if (a.art === "benennen") return `Die farbige Linie ist ein${a.antwort === "seite" || a.antwort === "diagonale" ? "e" : ""} ${ROLLE_NAME[a.antwort]}.`;
+  if (a.art === "symbol") return a.antwort === "recht" ? "Das Zeichen zeigt einen rechten Winkel." : "Das Zeichen zeigt: Die beiden Seiten sind parallel.";
+  if (a.art === "diagEigenschaft") return `${{ senkrecht: "Senkrecht aufeinander", gleichLang: "Gleich lang", halbieren: "Gegenseitig halbiert" }[a.frage]}: ${a.antwort}`;
+  const orte = a.richtig.map(i => { const z = a.ziele[i]; return z.typ === "linie" ? linieText(z) : ortText(z.p); });
+  return `${NAME_ZIEL[a.art]}: ${orte.join("; ")} (grün markiert)`;
+}
+
+// ---------- Spiel ----------
+
+LS.spiel({
+  id: "begriffs-geodreieck",
+  einleitung: "Diagonale, Radius, parallel, senkrecht, rechter Winkel: Hier zeigst du an Figuren, was die Wörter bedeuten. Tippe genau auf die Linie, die Ecke oder den Punkt.",
+  anzahl: 8,
+  stufen: {
+    s1: "Ecke, Seite, Diagonale im Rechteck und den Mittelpunkt im Kreis.",
+    s2: "Diagonalen in Vielecken, Radius und Durchmesser.",
+    s3: "Parallel, senkrecht, rechter Winkel (Lehrplan 5. Klasse).",
+    s4: "Linien benennen, Zeichen lesen, Schnittpunkt — gedrehte Figuren.",
+    s5: "Diagonalen erforschen: senkrecht, gleich lang, halbiert? (6. Klasse)",
+    s6: "Endgegner: alle rechten Winkel, alle Diagonalen, alle Radien finden.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    const loesungText = loesungFuer(a);
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    const frage = a.art === "diagEigenschaft" ? EIGENSCHAFT[a.frage] : FRAGE[a.art];
+    const hinweis = a.art === "diagEigenschaft" ? HINWEIS.diagEigenschaft[a.frage] : HINWEIS[a.art];
+    f.append(el("div", { class: "frage", html: frage }));
+
+    // Antwort mit Knöpfen
+    if (["lage", "benennen", "symbol", "diagEigenschaft"].includes(a.art)) {
+      const { svg } = bildEl(a, () => {});
+      f.append(svg);
+      const optionen = a.art === "lage" ? ["parallel", "senkrecht", "weder"] : a.art === "benennen" ? ["seite", "diagonale", "radius", "durchmesser"]
+        : a.art === "symbol" ? ["recht", "parallel"] : ["ja", "nein"];
+      const name = o => (a.art === "lage" ? LAGE_ANTWORT[o] : a.art === "benennen" ? ROLLE_NAME[o] : a.art === "symbol" ? SYMBOL_NAME[o] : o);
+      if (a.art !== "benennen") ctx.serie("antwort", a.antwort);
+      LS.auswahl(ctx, {
+        optionen, richtig: a.antwort, inhalt: name, hinweis, loesung: loesungText, breite: 140,
+        lob: `Richtig: ${loesungText}`,
+        beiRichtig: () => { if (a.art === "diagEigenschaft") svg.querySelectorAll(".hilfe").forEach(l => l.classList.remove("hilfe")); },
+      });
+      return;
+    }
+
+    // Antippen
+    ctx.loesung(loesungText);
+    const mehrere = ALLE.includes(a.art);
+    ctx.schritte(mehrere ? a.richtig.length + 1 : 1);
+    const gewaehlt = new Set();
+    const zeigeLoesung = () => { gruppen.forEach((g, i) => { g.classList.remove("gewaehlt", "falsch"); if (a.richtig.includes(i)) g.classList.add("richtig"); }); };
+    const { svg, gruppen } = bildEl(a, (i, g) => {
+      if (ctx.vorbei()) return;
+      if (mehrere) {
+        if (gewaehlt.has(i)) { gewaehlt.delete(i); g.classList.remove("gewaehlt"); } else { gewaehlt.add(i); g.classList.add("gewaehlt"); }
+        g.classList.remove("falsch");
+        LS.ton("tipp");
+        return;
+      }
+      if (g.classList.contains("falsch")) return;
+      if (a.richtig.includes(i)) { g.classList.add("richtig"); ctx.richtig(); return; }
+      g.classList.add("falsch");
+      ctx.falsch(hinweis, loesungText);
+      if (ctx.vorbei()) zeigeLoesung();
+    });
+    f.append(svg);
+    if (mehrere) {
+      const fertig = el("button", { type: "button", class: "knopf gruen", text: "Fertig ✓" });
+      fertig.addEventListener("click", () => {
+        if (ctx.vorbei()) return;
+        const falscheWahl = [...gewaehlt].filter(i => !a.richtig.includes(i));
+        const fehlen = a.richtig.filter(i => !gewaehlt.has(i)).length;
+        if (!falscheWahl.length && !fehlen) { zeigeLoesung(); ctx.richtig(a.richtig.length === 1 ? "Gefunden — es war nur eine!" : `Alle ${a.richtig.length} gefunden!`); return; }
+        for (const i of falscheWahl) { gruppen[i].classList.add("falsch"); gruppen[i].classList.remove("gewaehlt"); gewaehlt.delete(i); }
+        const teil = falscheWahl.length ? "Mindestens eine Wahl passt nicht — sie ist jetzt orange." : "Es fehlen noch welche.";
+        ctx.falsch(`${teil} ${hinweis}`, loesungText);
+        if (ctx.vorbei()) zeigeLoesung();
+      });
+      f.append(el("div", { class: "geo-knoepfe" }, fertig));
+    }
+    if (ctx.nr === 0) ctx.sag(mehrere ? "Es können mehrere sein. Tippe nochmals, um eine Wahl zurückzunehmen." : "Tippe direkt auf die Linie oder den Punkt.");
+  },
+});
+</script>
+</body>
+</html>

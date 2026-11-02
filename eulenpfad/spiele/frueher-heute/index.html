@@ -6,7 +6,8 @@
 <title>Früher und heute</title>
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  /* nur die Fragezeile; Namen auf Karten tragen „frage“ nur fürs Vorlesen */
+  div.frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
   .fh-svg svg { width: 1.25em; height: 1.25em; display: block; margin: 0 auto; }
   .fh-inhalt { display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .fh-zeile { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
@@ -215,6 +216,8 @@ const ding = (bild, text, extra = "") => el("div", { class: "fh-ding" + extra },
 function karteInKorb(ctx, a, opt) {
   const { karte } = LS.koerbe(ctx, { karte: { bild: istSvg(a.bild) ? "" : a.bild, text: a.name }, ...opt });
   if (istSvg(a.bild)) karte.prepend(bildEl(a.bild));
+  // Der Name des Dings ist Sachkunde, kein Lesestoff: Die Eule liest ihn mit vor (rahmen.md Abschnitt 12).
+  karte.querySelector("b").classList.add("frage");
 }
 
 LS.spiel({
@@ -238,8 +241,10 @@ LS.spiel({
       });
     } else if (a.art === "paar") {
       const bilder = Object.fromEntries(a.optionen.map(o => [o, paarDing(o).bild]));
+      const gegeben = ding(a.bild, a.name);
+      gegeben.lastChild.classList.add("frage"); // Name vorlesen (rahmen.md Abschnitt 12)
       f.append(el("div", { class: "frage", text: a.vor ? "Früher war es so. Was nimmt man heute dafür?" : "Heute ist es so. Was nahm man früher dafür?" }),
-        el("div", { class: "fh-zeile" }, ding(a.bild, a.name)));
+        el("div", { class: "fh-zeile" }, gegeben));
       const loesung = a.vor ? `Früher: ${a.name} — heute: ${a.richtig}.` : `Heute: ${a.name} — früher: ${a.richtig}.`;
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 170, inhalt: o => inhalt(bilder[o], o),

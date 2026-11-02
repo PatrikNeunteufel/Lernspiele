@@ -188,8 +188,8 @@ LS.spiel({
         loesung: a.zeige.join(" "),
       });
     } else if (a.art === "nachbar") {
-      ctx.flaeche.append(el("div", { class: "auftrag", text: `Welcher Buchstabe kommt ${a.nach ? "nach" : "vor"} ${a.buchstabe}?` }),
-        el("div", { class: "leiste" }, ...(a.nach ? [a.buchstabe, "?"] : ["?", a.buchstabe]).map(b => el("span", { class: b === "?" ? "luecke" : "", text: b }))));
+      ctx.flaeche.append(el("div", { class: "auftrag", text: `Welcher Buchstabe kommt ${a.nach ? "danach" : "davor"}?` }),
+        el("div", { class: "leiste vorgabe" }, ...(a.nach ? [a.buchstabe, "?"] : ["?", a.buchstabe]).map(b => el("span", { class: b === "?" ? "luecke" : "", text: b }))));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 80,
         hinweis: `Sag das ABC laut bis ${a.buchstabe}. Welcher Buchstabe kommt ${a.nach ? "danach" : "davor"}?`,

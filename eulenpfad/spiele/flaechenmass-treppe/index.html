@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flächenmass-Treppe</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .rechnung { text-align: center; font-size: clamp(26px, 6.4vw, 46px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 6px 0 12px; }
+  .rechnung .einheit { color: var(--knopf); }
+  .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
+  .ergebnis-zeile .anzeige { flex: 1; min-width: 0; }
+  .ergebnis-zeile .einheit { font-size: clamp(24px, 5.6vw, 36px); font-weight: 900; color: var(--knopf); min-width: 2.4em; }
+
+  .ft-treppe { display: flex; justify-content: center; align-items: flex-end; gap: 2px; margin: 0 auto 12px; flex-wrap: wrap; }
+  .ft-stufe { display: flex; flex-direction: column; align-items: center; }
+  .ft-stufe b { background: var(--f, var(--deko-6)); color: #fff; border-radius: 10px; padding: 6px 10px; font-size: 18px; }
+  .ft-pfeil { font-size: 13px; font-weight: 800; color: var(--text-leise); text-align: center; padding: 0 3px 8px; }
+
+  .ft-raster { display: block; width: 100%; max-width: 260px; height: auto; margin: 0 auto 10px; }
+  .ft-raster rect { fill: #fff; stroke: var(--rand); stroke-width: 1.5; }
+  .ft-raster rect.voll { fill: var(--deko-5); stroke: #fff; }
+  .ft-raster .rand-gross { fill: none; stroke: var(--deko-6); stroke-width: 4; }
+  .ft-legende { text-align: center; color: var(--text-leise); font-weight: 700; margin: 0 0 6px; }
+  .wahl-knopf.ft-zeichen { font-size: clamp(30px, 7vw, 44px); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🪜 Flächenmass-Treppe</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.A.1.h (Grundanspruch 2. Zyklus): Referenzgrössen 1 m², 1 dm², 1 cm², 1 mm²;
+// MA.3.A.2.g/h: Flächenmasse umwandeln, mit zweifach benannten Grössen rechnen (3 m² 25 dm²).
+// Fortsetzung des Masse-Umwandlers (Basisklasse 3, Faktor 10/100/1000 bei Längen, Hohlmassen,
+// Gewichten): hier eine eigene Treppe mit Faktor 100 je Stufe, weil eine Fläche lang mal breit ist.
+// Basisklasse 5: s1 4. Klasse (Fläche auslegen, Referenzgrössen), s2–s4 5. Klasse (umwandeln,
+// zweifach benannt, Falle ×10 statt ×100, vergleichen), s5 6. Klasse (a, ha, km² — Annahme, ob das im
+// 2. Zyklus steht), s6 Königsstufe mit Dezimalzahlen (LS.dezimalText, Einstellung „dezimal“).
+
+const { zahlText, dezimalText, zufall, waehle, mische, el } = LS;
+
+// Flächenmasse von klein nach gross, Wert in mm². Je Stufe der Treppe Faktor 100.
+const FLAECHEN = ["mm²", "cm²", "dm²", "m²", "a", "ha", "km²"];
+const WERT = Object.fromEntries(FLAECHEN.map((e, i) => [e, 100n ** BigInt(i)]));
+const schritteZwischen = (gross, klein) => FLAECHEN.indexOf(gross) - FLAECHEN.indexOf(klein);
+
+const STUFE = {
+  // Auslegen: ein grosses Quadrat aus 10 × 10 kleinen
+  s1: { arten: ["gefaerbt", "fehlen"], paare: [["dm²", "cm²"], ["cm²", "mm²"], ["m²", "dm²"]], treppe: null },
+  s2: { arten: ["einfach"], paare: [["m²", "dm²"], ["dm²", "cm²"]], max: 30, treppe: ["m²", "dm²", "cm²"] },
+  s3: {
+    arten: ["einfach", "einfach", "gemischt"], max: 30, treppe: ["m²", "dm²", "cm²", "mm²"],
+    paare: [["m²", "dm²"], ["dm²", "cm²"], ["cm²", "mm²"], ["m²", "cm²"], ["dm²", "mm²"]],
+    gemischt: [["m²", "dm²"], ["dm²", "cm²"], ["cm²", "mm²"]], bMin: 10,
+  },
+  // Falle: der zweite Teil einstellig (4 m² 7 dm² = 407 dm², nicht 47); Treppe erst nach dem ersten Fehler
+  s4: { arten: ["null", "vergleich"], gemischt: [["m²", "dm²"], ["dm²", "cm²"], ["cm²", "mm²"]], treppe: ["m²", "dm²", "cm²", "mm²"], spaet: true },
+  s5: {
+    arten: ["einfach", "einfach", "gemischt"], max: 30, treppe: ["km²", "ha", "a", "m²"],
+    paare: [["km²", "ha"], ["ha", "a"], ["a", "m²"], ["ha", "m²"]],
+    gemischt: [["km²", "ha"], ["ha", "a"], ["a", "m²"]], bMin: 1,
+  },
+  // Königsstufe: Dezimalzahlen in beide Richtungen und weite Sprünge über zwei, drei Stufen
+  s6: {
+    arten: ["dezGross", "dezKlein", "weit"], treppe: FLAECHEN.slice().reverse(), spaet: true, dezimal: true,
+    nah: [["m²", "dm²"], ["dm²", "cm²"], ["cm²", "mm²"], ["ha", "a"], ["a", "m²"], ["km²", "ha"], ["m²", "cm²"], ["ha", "m²"]],
+    weit: [["m²", "cm²"], ["dm²", "mm²"], ["ha", "m²"], ["km²", "a"], ["m²", "mm²"], ["km²", "m²"]],
+  },
+};
+
+/** Summe der Teile ({ z, d, e }: z / 10^d in Einheit e) in Tausendsteln der Zieleinheit, oder null, wenn es nicht aufgeht. */
+function inTausendstel(teile, ziel) {
+  // Tausendstel mm²: jeder Teil z / 10^d auf den Nenner 1000 gebracht (d ≤ 3)
+  let tausendstel = 0n;
+  for (const t of teile) tausendstel += BigInt(t.z) * WERT[t.e] * 10n ** BigInt(3 - t.d);
+  if (tausendstel % WERT[ziel] !== 0n) return null;
+  return Number(tausendstel / WERT[ziel]);
+}
+
+const teilText = t => `${t.d ? dezimalText(t.z / 10 ** t.d) : zahlText(t.z)} ${t.e}`;
+const teileText = teile => teile.map(teilText).join(" ");
+const ergebnisText = L => (L % 1000 === 0 ? zahlText(L / 1000) : dezimalText(L / 1000));
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(waehle(p.arten), p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "einfach", teile: [{ z: 1, d: 0, e: "m²" }], ziel: "dm²", L: 100000 };
+}
+
+function erzeuge(art, p) {
+  if (art === "gefaerbt" || art === "fehlen") {
+    const [gross, klein] = waehle(p.paare);
+    let reihen = zufall(0, 9), einzeln = zufall(0, 9);
+    if (art === "gefaerbt" && Math.random() < 0.04) { reihen = 10; einzeln = 0; } // das ganze Quadrat
+    if (reihen + einzeln === 0) return null;
+    const n = reihen * 10 + einzeln;
+    return { art, gross, ziel: klein, reihen, einzeln, L: (art === "gefaerbt" ? n : 100 - n) * 1000 };
+  }
+  if (art === "einfach") {
+    const [gross, klein] = waehle(p.paare);
+    const k = schritteZwischen(gross, klein);
+    const v = zufall(1, k > 1 ? 9 : p.max);
+    const f = 100 ** k;
+    const a = Math.random() < 0.5
+      ? { art, teile: [{ z: v, d: 0, e: gross }], ziel: klein, richtung: "gross→klein" }
+      : { art, teile: [{ z: v * f, d: 0, e: klein }], ziel: gross, richtung: "klein→gross" };
+    a.L = inTausendstel(a.teile, a.ziel);
+    return a;
+  }
+  if (art === "gemischt" || art === "null") {
+    const [gross, klein] = waehle(p.gemischt);
+    const b = art === "null" ? zufall(1, 9) : zufall(p.bMin, 99);
+    const a = { art, teile: [{ z: zufall(1, 9), d: 0, e: gross }, { z: b, d: 0, e: klein }], ziel: klein };
+    a.L = inTausendstel(a.teile, a.ziel);
+    return a;
+  }
+  if (art === "vergleich") {
+    // 3 m² 5 dm² ○ 350 dm²: Wer ×10 statt ×100 rechnet oder die Ziffern aneinanderhängt, liegt falsch.
+    const [gross, klein] = waehle(p.gemischt);
+    const g = zufall(1, 9), b = waehle([zufall(1, 9), zufall(10, 99)]);
+    const wahr = g * 100 + b;
+    const fallen = [Number(`${g}${b}`), Number(`${g}${b}0`), g * 10 + b, wahr + 100, wahr - 100, wahr + 10, wahr - 10, wahr]
+      .filter(x => x > 0);
+    const antwort = waehle(["<", "=", ">"]);
+    const passend = fallen.filter(r => (wahr < r ? "<" : wahr > r ? ">" : "=") === antwort);
+    if (!passend.length) return null;
+    const r = waehle(passend);
+    return { art, teile: [{ z: g, d: 0, e: gross }, { z: b, d: 0, e: klein }], rechts: [{ z: r, d: 0, e: klein }], ziel: klein, antwort };
+  }
+  if (art === "dezGross") {
+    // 2.5 m² = 250 dm²; 0.75 ha = 75 a
+    const [gross, klein] = waehle(p.nah);
+    const d = waehle([1, 2]);
+    const z = d === 1 ? zufall(1, 99) : zufall(1, 999);
+    if (z % 10 === 0) return null;
+    const a = { art, teile: [{ z, d, e: gross }], ziel: klein };
+    a.L = inTausendstel(a.teile, a.ziel);
+    return a;
+  }
+  if (art === "dezKlein") {
+    // 350 cm² = 3.5 dm²; 2500 cm² = 0.25 m²
+    const [gross, klein] = waehle(p.nah);
+    const k = schritteZwischen(gross, klein);
+    const n = k === 1 ? zufall(1, 999) : zufall(1, 99) * 100;
+    if (n % (100 ** k) === 0) return null;
+    const a = { art, teile: [{ z: n, d: 0, e: klein }], ziel: gross };
+    a.L = inTausendstel(a.teile, a.ziel);
+    return a;
+  }
+  if (art === "weit") {
+    const [gross, klein] = waehle(p.weit);
+    const f = 100 ** schritteZwischen(gross, klein);
+    const v = zufall(1, 9);
+    const a = Math.random() < 0.6
+      ? { art, teile: [{ z: v, d: 0, e: gross }], ziel: klein, richtung: "gross→klein" }
+      : { art, teile: [{ z: v * f, d: 0, e: klein }], ziel: gross, richtung: "klein→gross" };
+    a.L = inTausendstel(a.teile, a.ziel);
+    return a;
+  }
+  return null;
+}
+
+/** Mängel: Lösung unabhängig nachgerechnet, Einheiten der Stufe, Zahlenraum und Nachkommastellen. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (a.art === "gefaerbt" || a.art === "fehlen") {
+    const n = a.reihen * 10 + a.einzeln;
+    const soll = a.art === "gefaerbt" ? n : 100 - n;
+    if (a.L !== soll * 1000) m.push("Anzahl stimmt nicht");
+    if (!(soll > 0) || n > 100 || a.einzeln > 9) m.push("Raster unmöglich");
+    if (schritteZwischen(a.gross, a.ziel) !== 1) m.push("Raster passt nicht zu den Einheiten");
+    return m;
+  }
+  const erlaubt = new Set([...(p.paare || []), ...(p.gemischt || []), ...(p.nah || []), ...(p.weit || [])].flat());
+  for (const t of [...a.teile, ...(a.rechts || [])]) {
+    if (!erlaubt.has(t.e)) m.push(`Einheit ${t.e} nicht in der Stufe`);
+    if (!(t.z > 0) || !Number.isInteger(t.z)) m.push("Teil nicht positiv");
+    if (t.d && !p.dezimal) m.push("Dezimalzahl ausserhalb der Königsstufe");
+  }
+  if (a.art === "vergleich") {
+    const l = inTausendstel(a.teile, a.ziel), r = inTausendstel(a.rechts, a.ziel);
+    if (l === null || r === null) { m.push("Vergleich geht nicht auf"); return m; }
+    if ((l < r ? "<" : l > r ? ">" : "=") !== a.antwort) m.push("Vergleich falsch");
+    return m;
+  }
+  const soll = inTausendstel(a.teile, a.ziel);
+  if (soll === null || soll !== a.L) m.push(`Lösung stimmt nicht (nachgerechnet ${soll})`);
+  if (!(a.L > 0)) m.push("Lösung nicht positiv");
+  if (a.L % 10 !== 0) m.push("mehr als zwei Nachkommastellen");
+  if (!p.dezimal && a.L % 1000 !== 0) m.push("Dezimalzahl als Lösung ausserhalb der Königsstufe");
+  if (String(Math.floor(a.L / 1000)).length > 9) m.push("Lösung passt nicht in die Tastatur");
+  if (a.teile.length === 2 && schritteZwischen(a.teile[0].e, a.teile[1].e) !== 1) m.push("zweifach benannt nicht benachbart");
+  if (a.teile.length === 2 && a.teile[1].z >= 100) m.push("zweiter Teil ist schon eine ganze grosse Einheit");
+  if (a.art === "null" && a.teile[1].z >= 10) m.push("Falle ohne Null");
+  if (a.art === "dezKlein" && a.L % 1000 === 0) m.push("keine Dezimalzahl als Lösung");
+  if (a.art === "dezGross" && a.teile[0].d === 0) m.push("keine Dezimalzahl in der Aufgabe");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Treppe der Flächenmasse (von gross nach klein) mit „×100 →“ dazwischen. */
+function treppe(einheiten) {
+  const box = el("div", { class: "ft-treppe", "aria-label": "Treppe der Flächenmasse" });
+  einheiten.forEach((e, i) => {
+    if (i) box.append(el("div", { class: "ft-pfeil", html: "×100<br>→" }));
+    box.append(el("div", { class: "ft-stufe", style: `--f: var(--deko-${(FLAECHEN.indexOf(e) % 6) + 1})` }, el("b", { text: e })));
+  });
+  return box;
+}
+
+const SVG = "http://www.w3.org/2000/svg";
+/** Grosses Quadrat aus 10 × 10 kleinen; die ersten reihen·10 + einzeln sind gefärbt. */
+function raster(reihen, einzeln) {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", "0 0 212 212");
+  svg.setAttribute("class", "ft-raster");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `${reihen} volle Reihen und ${einzeln} einzelne Quadrate gefärbt`);
+  const n = reihen * 10 + einzeln;
+  for (let i = 0; i < 100; i++) {
+    const r = document.createElementNS(SVG, "rect");
+    r.setAttribute("x", 6 + (i % 10) * 20);
+    r.setAttribute("y", 6 + Math.floor(i / 10) * 20);
+    r.setAttribute("width", 20);
+    r.setAttribute("height", 20);
+    if (i < n) r.setAttribute("class", "voll");
+    svg.append(r);
+  }
+  const rand = document.createElementNS(SVG, "rect");
+  rand.setAttribute("x", 6); rand.setAttribute("y", 6); rand.setAttribute("width", 200); rand.setAttribute("height", 200);
+  rand.setAttribute("class", "rand-gross");
+  svg.append(rand);
+  return svg;
+}
+
+/** Hinweis nach einer falschen Eingabe w (Zahl); erkennt ×10 statt ×100 und die falsche Richtung. */
+function hinweisFuer(a, w, p) {
+  const W = Math.round(w * 1000);
+  if (a.art === "gefaerbt") return `Zähle die vollen Reihen: Jede hat 10 ${a.ziel}. Dann die einzelnen dazu.`;
+  if (a.art === "fehlen") return `Ein ${a.gross} hat 10 Reihen zu 10 ${a.ziel}. Wie viele sind noch weiss?`;
+  const ohneTreppe = p.spaet;
+  if (a.teile.length === 1) {
+    const t = a.teile[0];
+    const k = Math.abs(schritteZwischen(t.e, a.ziel));
+    const gross = schritteZwischen(t.e, a.ziel) > 0;
+    const v = t.z / 10 ** t.d;
+    const mal10 = Math.round((gross ? v * 10 ** k : v / 10 ** k) * 1000);
+    const verkehrt = Math.round((gross ? v / 100 ** k : v * 100 ** k) * 1000);
+    if (W === mal10) return "Achtung Falle: Bei Flächen ist jede Stufe ×100, nicht ×10 — eine Fläche ist lang mal breit.";
+    if (W === verkehrt) return ohneTreppe ? "Fast — du hast in die falsche Richtung umgerechnet."
+      : "Fast — du hast in die falsche Richtung umgerechnet. Von gross nach klein wird die Zahl grösser.";
+    if (ohneTreppe) return k > 1 ? "Geh die Treppe Stufe für Stufe: Jede Stufe ist ×100." : "Eine Stufe auf der Treppe ist ×100.";
+    return `Schau auf die Treppe: ${k} ${k === 1 ? "Stufe" : "Stufen"}, jede ×100.`;
+  }
+  const [g, b] = a.teile;
+  if (W === Math.round((g.z * 10 + b.z) * 1000) || W === Number(`${g.z}${b.z}`) * 1000)
+    return `Achtung Falle: 1 ${g.e} sind 100 ${b.e}, nicht 10.`;
+  return `Rechne zuerst ${teilText(g)} in ${b.e} um und zähle ${teilText(b)} dazu.`;
+}
+
+LS.spiel({
+  id: "flaechenmass-treppe",
+  einleitung: "Flächen messen wir mit kleinen Quadraten. Auf der Flächenmass-Treppe ist jede Stufe ×100 — denn ein Quadrat ist 10 lang und 10 breit!",
+  anzahl: 8,
+  stufen: {
+    s1: "Auslegen: Wie viele cm²-Quadrate passen in 1 dm²?",
+    s2: "m², dm², cm²: 3 m² = 300 dm² — jede Stufe ×100.",
+    s3: "Bis mm², auch zweifach benannt: 3 m² 25 dm² = 325 dm².",
+    s4: "Vorsicht Falle: 4 m² 7 dm² = 407 dm². Und vergleichen: <, = oder >?",
+    s5: "Grosse Flächen (6. Klasse): a, ha und km² — 3 ha = 300 a.",
+    s6: `Endgegner: ${dezimalText(2.5)} m² = ? dm², 350 cm² = ? dm², 3 ha = ? m² — Treppe erst beim Fehler.`,
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const f = ctx.flaeche;
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    if (a.richtung) ctx.serie("richtung", a.richtung);
+    const hilfeOrt = el("div");
+    f.append(hilfeOrt);
+    if (p.treppe && !p.spaet) hilfeOrt.append(treppe(p.treppe));
+
+    if (a.art === "vergleich") {
+      const loesung = `${teileText(a.teile)} = ${zahlText(inTausendstel(a.teile, a.ziel) / 1000)} ${a.ziel}, also ${teileText(a.teile)} ${a.antwort} ${teileText(a.rechts)}`;
+      ctx.serie("antwort", a.antwort);
+      f.append(el("div", { class: "frage", html: "<b>&lt;, = oder &gt;?</b>" }),
+        el("div", { class: "rechnung", html: `${teileText(a.teile)} <span class="einheit">?</span> ${teileText(a.rechts)}` }));
+      LS.auswahl(ctx, {
+        optionen: ["<", "=", ">"], richtig: a.antwort, breite: 90,
+        hinweis: () => {
+          if (!hilfeOrt.firstChild) hilfeOrt.append(treppe(p.treppe));
+          return `Rechne die linke Seite ganz in ${a.ziel} um. Achtung: 1 ${a.teile[0].e} sind 100 ${a.ziel}, nicht 10.`;
+        },
+        loesung,
+      });
+      ctx.flaeche.querySelectorAll(".wahl-knopf").forEach(k => k.classList.add("ft-zeichen"));
+      if (ctx.nr === 0) ctx.sag("Tipp: Rechne beide Seiten in dieselbe Einheit um.");
+      return;
+    }
+
+    let loesung;
+    if (a.art === "gefaerbt" || a.art === "fehlen") {
+      const n = a.reihen * 10 + a.einzeln;
+      loesung = a.art === "gefaerbt"
+        ? `${a.reihen} · 10 + ${a.einzeln} = ${zahlText(a.L / 1000)} ${a.ziel}`
+        : `100 − ${n} = ${zahlText(a.L / 1000)} ${a.ziel}`;
+      f.append(el("div", { class: "ft-legende", text: `Das grosse Quadrat ist 1 ${a.gross}. Jedes kleine ist 1 ${a.ziel}.` }),
+        raster(a.reihen, a.einzeln),
+        el("div", { class: "frage", html: a.art === "gefaerbt" ? `Wie viele <b>${a.ziel}</b> sind gefärbt?` : `Wie viele <b>${a.ziel}</b> fehlen noch bis 1 ${a.gross}?` }));
+    } else {
+      loesung = `${teileText(a.teile)} = ${ergebnisText(a.L)} ${a.ziel}`;
+      f.append(el("div", { class: "rechnung", html: `${teileText(a.teile)} = <span class="einheit">? ${a.ziel}</span>` }));
+    }
+    ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(a.L / 1000));
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": `Ergebnis in ${a.ziel}` });
+    f.append(el("div", { class: "ergebnis-zeile" }, anzeige, el("span", { class: "einheit", text: a.ziel })));
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: 9, dezimal: !!p.dezimal, nachkomma: 2,
+      onOk(w) {
+        if (Math.round(w * 1000) === a.L) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+        anzeige.classList.add("falsch");
+        if (p.treppe && !hilfeOrt.firstChild) hilfeOrt.append(treppe(p.treppe));
+        ctx.falsch(hinweisFuer(a, w, p), loesung);
+        if (ctx.vorbei()) tasten.gesperrt = true;
+      },
+    });
+    f.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s1" ? "Tipp: Jede volle Reihe hat 10 kleine Quadrate."
+      : "Von gross nach klein wird die Zahl grösser — und zwar ×100 je Stufe.");
+  },
+});
+</script>
+</body>
+</html>

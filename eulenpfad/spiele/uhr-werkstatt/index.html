@@ -24,6 +24,10 @@
     background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; font-variant-numeric: tabular-nums;
   }
   .option svg { width: 100%; max-width: 130px; display: block; margin: 0 auto; }
+  .option svg.viertel { width: 1.15em; display: inline-block; vertical-align: -0.18em; margin: 0 .35em 0 0; }
+  .viertel .kreis { fill: #fff; stroke: var(--text); stroke-width: 2; }
+  .viertel .stueck { fill: var(--knopf); }
+  .viertel .null { stroke: var(--text); stroke-width: 2; }
   .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .option.richtig { background: var(--gut-hell); }
   .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
@@ -73,6 +77,22 @@ function uhr(h, m, klasse = "uhr") {
   inhalt += `<line class="minute" x1="0" y1="0" x2="${Math.sin(wm) * 44}" y2="${-Math.cos(wm) * 44}"/>`;
   inhalt += `<circle class="mitte" r="4"/>`;
   svg.innerHTML = inhalt;
+  return svg;
+}
+
+/**
+ * Bildzeichen zur Uhrzeit in Worten (lesearm, rahmen.md Abschnitt 12): der Teil der Stunde, den der lange
+ * Zeiger schon überstrichen hat — leer bei „3 Uhr“, ein Viertel bei „Viertel nach“, die Hälfte bei „halb“,
+ * drei Viertel bei „Viertel vor“. Die Stunde muss das Kind weiterhin selbst ablesen.
+ */
+function viertelBild(m) {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("viewBox", "-12 -12 24 24");
+  svg.setAttribute("class", "viertel");
+  svg.setAttribute("aria-hidden", "true");
+  const w = m * 6 * Math.PI / 180;
+  const stueck = m ? `<path class="stueck" d="M0 0 L0 -10 A10 10 0 ${m > 30 ? 1 : 0} 1 ${(Math.sin(w) * 10).toFixed(2)} ${(-Math.cos(w) * 10).toFixed(2)} Z"/>` : "";
+  svg.innerHTML = `<circle class="kreis" r="10"/>${stueck}<line class="null" x1="0" y1="0" x2="0" y2="-10"/>`;
   return svg;
 }
 
@@ -235,8 +255,9 @@ LS.spiel({
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie spät ist es?" }));
       const gross = uhr(h, m, "uhr-gross"); ctx.flaeche.append(gross);
       const text = (hh, mm) => art === "lesenWorte" ? inWorten(hh, mm) : digital(hh, mm);
-      auswahl([{ h, m }, ...ablenker(h, m, ctx.stufe)], (k, o) => k.append(text(o.h, o.m)), o => o.h === h && o.m === m,
-        `Es ist ${text(h, m)}.`, zeigerHinweis);
+      // In Worten mit Bildzeichen für Viertel und halb (für Kinder, die noch kaum lesen).
+      auswahl([{ h, m }, ...ablenker(h, m, ctx.stufe)], (k, o) => art === "lesenWorte" ? k.append(viertelBild(o.m), text(o.h, o.m)) : k.append(text(o.h, o.m)),
+        o => o.h === h && o.m === m, `Es ist ${text(h, m)}.`, zeigerHinweis);
     } else if (art === "stellenWahl") {
       const text = ctx.stufe === "s2" ? inWorten(h, m) : digital(h, m);
       ctx.flaeche.append(el("div", { class: "frage", html: `Welche Uhr zeigt <b>${text}</b>?` }));

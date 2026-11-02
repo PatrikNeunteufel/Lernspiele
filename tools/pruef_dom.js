@@ -49,6 +49,11 @@ function __fange(fn) {
   try { fn(); } catch (e) { __fehler.push(e && e.stack ? e.stack.split("\n").slice(0, 3).join(" | ") : String(e)); }
 }
 
+// Die Hilfen bis und mit document stehen in einer Funktion: Spiele teilen den globalen Namensraum mit
+// diesem Ersatz-DOM, und ein Spiel mit eigenem „passt“ oder „sammle“ brach sonst nur im Test ab
+// (LERN_Session8). Nach aussen gehen nur Namen, die auch der Browser kennt.
+const { Knoten: __Knoten, Text, Element, neuesEreignis: __ereignis, document } = (() => {
+
 // ---------- Knoten ----------
 const VOID = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"]);
 
@@ -351,6 +356,9 @@ const document = (() => {
   return d;
 })();
 
+return { Knoten, Text, Element, neuesEreignis, document };
+})();
+
 const window = globalThis;
 const self = globalThis;
 const __speicher = new Map();
@@ -379,20 +387,20 @@ const alert = () => {};
 const innerWidth = 1024;
 const innerHeight = 768;
 const scrollTo = () => {};
-// Sprachausgabe: eine englische und eine deutsche Test-Stimme; gesprochen wird nichts, gemerkt wird der Text.
+// Sprachausgabe: je eine englische, deutsche und französische Test-Stimme; gesprochen wird nichts, gemerkt wird der Text.
 const __gesprochen = [];
 class SpeechSynthesisUtterance { constructor(text) { this.text = text; } }
-const speechSynthesis = { getVoices: () => [{ lang: "en-GB", name: "Test" }, { lang: "de-CH", name: "Test" }],
+const speechSynthesis = { getVoices: () => [{ lang: "en-GB", name: "Test" }, { lang: "de-CH", name: "Test" }, { lang: "fr-FR", name: "Test" }],
   speak: u => __gesprochen.push(u.text), cancel() {}, addEventListener() {} };
 // Zufallsmix: Das Spiel läuft „im iframe“; parent sammelt seine Nachrichten (das Testskript spielt den Mix).
 const __nachrichten = [];
 const parent = { postMessage: d => __nachrichten.push(structuredClone(d)) };
 const addEventListener = (t, fn) => document.addEventListener(t, fn);
 const removeEventListener = (t, fn) => document.removeEventListener(t, fn);
-const Node = Knoten;
+const Node = __Knoten;
 const HTMLElement = Element;
 const SVGElement = Element;
-const Event = function (type, opt) { return neuesEreignis(type, opt); };
+const Event = function (type, opt) { return __ereignis(type, opt); };
 const KeyboardEvent = Event;
 const MouseEvent = Event;
 const PointerEvent = Event;

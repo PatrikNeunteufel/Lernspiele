@@ -33,6 +33,8 @@
 const { waehle, mische, el } = LS;
 const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
 const WASSER = { schwimmt: { bild: "🛟", text: "schwimmt" }, sinkt: { bild: "⬇️", text: "sinkt" } };
+/** Name auf der Korbkarte ist Sachkunde, kein Lesestoff: Die Eule liest ihn mit vor (rahmen.md Abschnitt 12). */
+const vorlesbar = ({ karte }) => karte.querySelector("b").classList.add("frage");
 const MATERIALIEN = { Holz: "🪵", Metall: "🔩", Glas: "🫙", Kunststoff: "🧴", Papier: "📄" };
 
 const ID = "schwimmt-sinkt";
@@ -141,20 +143,20 @@ LS.spiel({
     if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
     if (a.art === "wasser") ctx.serie("antwort", a.richtig);
     if (a.art === "wasser") {
-      ctx.flaeche.append(el("div", { class: "frage", text: "Was passiert im Wasser?" }));
-      LS.koerbe(ctx, {
+      ctx.flaeche.append(el("div", { class: "frage", text: "Was passiert im Wasser: Schwimmt es oder sinkt es?" }));
+      vorlesbar(LS.koerbe(ctx, {
         karte: { bild: a.bild, text: a.name }, koerbe: ["schwimmt", "sinkt"], richtig: a.richtig, korbInhalt: k => WASSER[k],
         farbe: k => (k === "schwimmt" ? "#2f8fe0" : "var(--deko-7)"),
         hinweis: "Ist es für seine Grösse leicht wie Holz — oder schwer wie Metall und Stein?",
         loesung: `${a.name} ${a.richtig}.`, lob: `Richtig: ${a.name} ${a.richtig}! Probier es zu Hause aus.`,
-      });
+      }));
     } else if (a.art === "material") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Aus welchem Material ist das?" }));
-      LS.koerbe(ctx, {
+      vorlesbar(LS.koerbe(ctx, {
         karte: { bild: a.bild, text: a.name }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: m => ({ bild: MATERIALIEN[m], text: m }),
         hinweis: "Wie fühlt es sich an? Hart und kalt, durchsichtig, leicht und biegsam?",
         loesung: `${a.name}: ${a.richtig}.`,
-      });
+      }));
     } else {
       ctx.flaeche.append(el("div", { class: "frage", text: a.frage }));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 200, hinweis: "Denk an deine Versuche mit Wasser und verschiedenen Dingen.", loesung: `${a.frage} ${a.richtig}` });

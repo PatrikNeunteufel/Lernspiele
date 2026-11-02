@@ -189,7 +189,7 @@ LS.spiel({
       return;
     }
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Wo lebt das?" }));
-    LS.koerbe(ctx, {
+    const { karte } = LS.koerbe(ctx, {
       karte: { bild: a.w.bild || "❔", text: a.w.name },
       koerbe: a.raeume, richtig: a.w.lebensraum,
       korbInhalt: r => ({ bild: RAEUME[r].bild, text: RAEUME[r].name }),
@@ -200,6 +200,8 @@ LS.spiel({
       loesung: `${a.w.name} lebt typisch im Lebensraum ${RAEUME[a.w.lebensraum].name}.`,
       lob: `Richtig: ${a.w.name} — ${RAEUME[a.w.lebensraum].name}.`,
     });
+    // Name des Lebewesens ist Sachkunde, kein Lesestoff: Die Eule liest ihn mit vor (rahmen.md Abschnitt 12).
+    karte.querySelector("b").classList.add("frage");
     if (ctx.nr === 0) ctx.sag("Tipp auf den Lebensraum, wo man es am meisten findet.");
   },
 });

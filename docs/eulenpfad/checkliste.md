@@ -5,7 +5,7 @@ wird im Entwickler-Modus (Spiel angesehen, Inhaltsliste geprüft; schreibt `eule
 Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
 `docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
-**Stand:** 91 Spiele gebaut, 2 Ideen offen · für Kinder frei: 34 von 91 · 2 von 35 neuen Spielen angesehen · 3 von 166 Inhaltslisten geprüft.
+**Stand:** 140 Spiele gebaut, 2 Ideen offen · für Kinder frei: 34 von 140 · 2 von 84 neuen Spielen angesehen · 3 von 199 Inhaltslisten geprüft.
 
 Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit
 Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.
@@ -40,18 +40,55 @@ Je gebautem Spiel:
 
 #### Zahlen ordnen
 
+- [x] **Finger-Zähler** (`finger-zaehler`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
 - [x] **Muster-Fortsetzer** (`muster-fortsetzer`) — für Kinder frei
 - [x] **Punkte-Blitz** (`punkte-blitz`) — für Kinder frei
 
 #### Rechnen
 
 - [x] **Doppel-Spiegel** (`doppel-spiegel`) — für Kinder frei
+- [x] **Gerecht-Teiler** (`gerecht-teiler`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
 - [x] **Zahlen-Waage** (`zahlen-waage`) — für Kinder frei
 - [x] **Zahlenhaus** (`zahlenhaus`) — für Kinder frei
 
 #### Form und Raum
 
 - [x] **Formen-Detektiv** (`formen-detektiv`) — für Kinder frei
+- [x] **Merk-Blick** (`merk-blick`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+
+#### Daten
+
+- [x] **Sortier-Kiste** (`sortier-kiste`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+
+#### Grössen
+
+- [x] **Gegenteil-Wippe** (`gegenteil-wippe`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Bilder zu Gegensätzen (gross – klein, dick – dünn …))
+
+### NMG
+
+#### Orientierung
+
+- [x] **Teddy-Versteck** (`teddy-versteck`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+
+#### Zeit
+
+- [x] **Tageslauf-Sonne** (`tageslauf-sonne`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Tätigkeiten im Tageslauf mit Bild (dazu der Wochenplan für gestern, heute, morgen))
+
+### Musik
+
+#### Noten und Töne
+
+- [x] **Klang-Wichtel** (`klang-wichtel`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
 
 ## 2. Klasse
 
@@ -270,9 +307,10 @@ Je gebautem Spiel:
   - [ ] angesehen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Rechen-Rakete** (`rechen-rakete`) — für Kinder frei
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 - [x] **Rechentrick-Detektiv** (`rechentrick-detektiv`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
-  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`, `lehrplan_sg_session8.md`
 - [x] **Schriftlich-Werkstatt** (`schriftlich-werkstatt`) — für Kinder frei
   - [x] angesehen 2026-11-01 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
@@ -424,12 +462,216 @@ Je gebautem Spiel:
 - [x] **Mittelwert-Türme** (`mittelwert-waage`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`
+- [x] **Zufalls-Skala** (`zufalls-skala`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Dezimalzahlen
+
+- [x] **Dezimal-Rakete** (`dezimal-rakete`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Dezimal-Rutsche** (`dezimal-rutsche`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Zehntel-Lupe** (`zehntel-lupe`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Rechnen
+
+- [x] **Probe-Stempel** (`rechenprobe`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Form und Raum
+
+- [x] **Begriffs-Geodreieck** (`begriffs-geodreieck`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Rechteck-Labor** (`rechteck-labor`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Würfel-Kipper** (`wuerfel-kipper`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Grössen
+
+- [x] **Flächenmass-Treppe** (`flaechenmass-treppe`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+### Medien und Informatik
+
+#### Informatik
+
+- [x] **Datei-Typen** (`datei-typen`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Dateiendungen und ihre Art)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Geheimschrift-Knacker** (`geheimschrift-knacker`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Geheimwörter (kurze Nomen))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Speicher-Leiter** (`speicher-leiter`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+### NMG
+
+#### Forschen
+
+- [x] **Bionik-Paare** (`bionik-paare`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Vorbild aus der Natur und Erfindung)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Energie-Wandler** (`energie-wandler`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Geräte und Energieformen (von → zu))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Hebel-Wippe** (`hebel-wippe`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Wassertropfen-Reise** (`wassertropfen-reise`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Fragen zum Wasserkreislauf und zu den Aggregatzuständen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Wirtschaft
+
+- [x] **Kakao-Weg** (`kakao-weg`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Wege eines Produkts in Schritten)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Taschengeld-Planer** (`taschengeld-planer`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Waren mit Preisen und Bedarf oder Wunsch)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Zeit
+
+- [x] **Erdzeit-Leiter** (`erdzeit-leiter`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Ereignisse der Erdgeschichte mit ungefährer Zeit)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Tiere
+
+- [x] **Pflanzen-Bestimmer** (`pflanzen-bestimmer`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Pflanzen mit Blattform und Blüte)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Körper und Ernährung
+
+- [x] **Blutkreislauf-Lotse** (`blutkreislauf-lotse`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Fragen zu Herz, Lunge, Blut und Kreislauf)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Braille-Finger** (`braille-finger`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Geheimwörter (kurze Nomen) (Liste von Geheimschrift-Knacker))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+### Deutsch
+
+#### Sätze
+
+- [x] **Komma-Jagd** (`komma-jagd`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 3 Listen (offen: Sätze mit Aufzählungen; Sätze mit zwei Verbgruppen (Teilsätzen); Sätze ohne Komma (mit „und“, „oder“))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Rede-Zeichen** (`rede-zeichen`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 2 Listen (offen: Direkte Rede mit vorangestelltem Begleitsatz; Direkte Rede mit nachgestelltem Begleitsatz)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Rechtschreibung
+
+- [x] **Morphem-Schere** (`morphem-schere`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 2 Listen (offen: Wörter aus Vorsilbe, Stamm und Endung; Stammregel: e oder ä über den Stamm)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Trenn-Schere** (`trenn-schere`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Wörter zum Trennen am Zeilenende)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Wortarten
+
+- [x] **Verben-Fächer** (`verben-faecher`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Verben mit ihren Ergänzungen (wer, wen, wem, wo, wohin))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Lesen
+
+- [x] **Wort-Spürnase** (`wort-spuernase`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Sätze mit einem schwierigen Wort und drei Bedeutungen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+### Englisch
+
+#### Hören und Buchstabieren
+
+- [x] **Sound-Sorter** (`sound-sorter`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Englische Wörter nach Laut (Schreibung und Aussprache))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Weather-Report** (`weather-report`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Englische Durchsagen: Wetter, Sport, Weg)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 
 ### Französisch
 
-#### neues Thema (FS2F.5.B)
+#### Wörter und Laute
 
+- [x] **Le ou la?** (`le-ou-la`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Französische Nomen mit Geschlecht und Mehrzahl)
+- [x] **Mots-Match** (`mots-match`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 5 Listen (offen: Französisch: Farben (les couleurs); Französisch: Tiere (les animaux); Französisch: Essen und Trinken (manger et boire); Französisch: Schule (l’école); Französisch: Körper und Familie (le corps, la famille))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Son-Lauscher** (`son-lauscher`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Französische Wörter nach Laut (ou, au, on, ch, é, Nasallaute))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Wörter-Brücke** (`parallelwort-bruecke`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Französische Parallelwörter (bekannt aus anderen Sprachen))
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 - [ ] Mots-Match / Épeler — Idee, Klassen 5–6
+
+#### Alltag
+
+- [x] **Au café** (`au-cafe`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Kurze Dialoge: begrüssen, Befinden, bestellen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Calendrier** (`calendrier`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Nombres-Rallye** (`nombres-rallye`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Quelle heure?** (`quelle-heure`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+### Musik
+
+#### Noten und Töne
+
+- [x] **Rhythmus-Diktat** (`rhythmus-diktat`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+- [x] **Tonleiter-Treppe** (`tonleiter-treppe`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 
 ## 6. Klasse
 
@@ -442,10 +684,16 @@ Je gebautem Spiel:
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`
 - [x] **Überschlags-Radar** (`ueberschlags-blitz`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
-  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`, `lehrplan_sg_session8.md`
 
 #### Zahlen ordnen
 
 - [x] **Velo-Tabelle** (`velo-tabelle`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`
+
+#### Brüche
+
+- [x] **Schoggi-Brüche** (`bruch-rechteck`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`

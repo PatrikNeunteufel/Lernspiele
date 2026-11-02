@@ -155,12 +155,13 @@ LS.spiel({
     if (a.art === "poleWahl") ctx.serie("ziel", a.ziel);
     if (a.art === "ding") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Zieht der Magnet das an?" }));
-      LS.koerbe(ctx, {
+      const { karte } = LS.koerbe(ctx, {
         karte: { bild: a.bild, text: a.name }, koerbe: ["ja", "nein"], richtig: a.richtig, korbInhalt: k => KOERBE[k],
         farbe: k => (k === "ja" ? "var(--deko-6)" : "var(--deko-7)"),
         hinweis: "Ein Magnet zieht Dinge aus Eisen an — nicht Holz, Papier, Glas oder Stoff.",
         loesung: `${a.name}: ${KOERBE[a.richtig].text}.`, lob: `Richtig: ${a.name} — ${KOERBE[a.richtig].text}.`,
       });
+      karte.querySelector("b").classList.add("frage"); // Name des Dings vorlesen (rahmen.md Abschnitt 12)
     } else if (a.art === "pole") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Ziehen sich die Magnete an oder stossen sie sich ab?" }),
         el("div", { class: "magnete" }, stab(a.links), stab(a.rechts)));

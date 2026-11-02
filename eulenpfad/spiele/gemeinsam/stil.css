@@ -309,6 +309,25 @@ button { font-family: inherit; }
   border-right: 12px solid #fff;
 }
 
+/* Vorlesen (LERN_Session8): runder Knopf rechts neben der Sprechblase */
+.eule-zeile .vorlesen { flex: none; align-self: center; width: 52px; height: 52px; border: none; border-radius: 50%;
+  background: #fff; box-shadow: var(--schatten); font-size: 24px; cursor: pointer; }
+.eule-zeile .vorlesen:active { transform: translateY(2px); }
+/* Langes Drücken liest einen Knopf vor: kein Kontextmenü, keine Textauswahl auf dem Tablet */
+.karte button { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+
+/* LS.losGehts (LERN_Session8): Bild verdeckt, darüber „▶ Los!“ und dann 3-2-1 */
+.los-huelle { position: relative; min-height: 140px; }
+.los-huelle.wartet > :not(.los-ueber) { visibility: hidden; }
+.los-ueber { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 10px;
+  border-radius: 16px; background: repeating-linear-gradient(45deg, #eef0fa 0 12px, #f7f8fd 12px 24px); }
+.los-ueber .los-knopf { font-size: 26px; min-width: 160px; }
+.los-zahl { font-size: 72px; font-weight: 900; color: var(--knopf); line-height: 1; }
+.los-zahl:empty { display: none; }
+
+/* Ohne Text keine leere Blase (die Eule schweigt, bis das Spiel etwas sagt); der Platz bleibt, damit nichts springt. */
+.blase:empty { visibility: hidden; }
+
 .blase.gut { background: var(--gut-hell); }
 .blase.gut::before { border-right-color: var(--gut-hell); }
 .blase.hinweis { background: var(--hinweis-hell); }
