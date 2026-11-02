@@ -1,7 +1,7 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
-**2026-11-01, nach LERN_Session6** ([Report](report/LERN_Session6_2026-11-01.md)):
+**2026-11-02, nach LERN_Session7** ([Report](report/LERN_Session7_2026-11-01.md)):
 - **Reihe und Ordner** (P1 a, P2 a): App in `eulenpfad/`, Doku in `docs/eulenpfad/`; Grundgerüste
   `lernsteig/`, `gratwanderung/` (Handover in `docs/lernsteig/`, `docs/gratwanderung/`); Einstiegsseite
   `portal/`. **Online** unter patrikneunteufel.github.io/Lernspiele/ (Pages bei jedem Push, der eine App
@@ -12,20 +12,23 @@
   Velo-Tabelle (6) in LERN_Session7.
 - **Anleitungen** für Erwachsene und Kinder in `eulenpfad/anleitung/`, vom Portal verlinkt; Bilder neu mit
   `node tools/anleitung_bilder.js` (Server auf Port 8765 nötig), nach Änderungen an der Oberfläche.
-- **Einstellungen der Aufsicht** je Gerät (Verwaltung → Einstellungen): Dezimalzeichen Punkt/Komma,
-  Standard Punkt, `LS.dezimalText`. Klasseneinstellungen durch Lehrpersonen nur als Konzept:
-  `konzept_klasseneinstellungen.md` (offene Fragen F1–F8).
+- **Einstellungen der Aufsicht** je Gerät (Verwaltung → Einstellungen): Dezimalzeichen global und je
+  Spiel, Standard Punkt (`LS.dezimalText`); Geld nach Klasse der Stufe (`LS.geldText`, C1 a).
+  Klasseneinstellungen durch Lehrpersonen nur als Konzept: `konzept_klasseneinstellungen.md` (F1–F8).
+- **Statistik:** Karte „Vorgehen“ (`ctx.vorgehen`), heute für Möglichkeiten-Finder, Teiler-Spürnase,
+  Mittelwert-Türme.
 - **Prüfstand** in `eulenpfad/spiele/gemeinsam/pruefstand.js`, gesetzt im **Entwickler-Modus**
   (`python tools/entwickler_server.py`, Schlüssel in `entwickler.key`, rahmen.md Abschnitt 11):
-  2 von 30 neuen Spielen angesehen, 3 von 166 Inhaltslisten geprüft; für Kinder frei 34 von 86.
+  2 von 35 neuen Spielen angesehen, 3 von 166 Inhaltslisten geprüft; für Kinder frei 34 von 91.
   Bemerkungen in `docs/eulenpfad/bemerkungen.json` (heute leer).
 - **Abgleich zwischen Geräten** (S1 a, rahmen.md Abschnitt 10): Ordner je Gerät oder Abgleich-Datei;
   auf echten Geräten ungeprüft (LERN-31).
 - **Bedienung:** Suche mit Rangfolge (SU1 a), Filter „Meine Klasse“ (K1 a, K2 a) und „Zu prüfen“,
   Verwaltung mit Untertabs, Spieloptionen auf der Stufenwahl (Reihenfolge R1 a, Übertrag UE1 a).
 - **Tests:** `node tools/pruefe_spiele.js` — alle Spiele × Stufen, Endlos, Inhaltslisten als Kind, Mix,
-  zehn Beispielsuchen, Hinweis „Einzahl?“. Stand 2026-11-01: „Keine Fehler.“, 11 bekannte Hinweise
-  „zu wenig verschiedene Aufgaben“.
+  zehn Beispielsuchen, Hinweis „Einzahl?“, Namen (doppelt = Fehler, Grundwort > 2 = Hinweis). Stand
+  2026-11-02: „Keine Fehler.“, 11 bekannte Hinweise „zu wenig verschiedene Aufgaben“, Grundwörter
+  Detektiv, Sortierer, Puzzle über der Grenze.
 - **Datenschutz:** Scan von Arbeitsbaum, Pages-Auslieferung und Git-Historie ohne Funde (D2 a, D3 a).
 - **Offen:**
   - Noch kein Kind hat gespielt; Spiele ansehen und Listen prüfen (LERN-21, LERN-11).
@@ -33,12 +36,12 @@
   - Grundzeit und Schrittzeit des Endlos-Bodens sind Annahmen bis zur Testrunde (LERN-4).
 
 **Nächste Session — Plan:**
-1. 5./6. Klasse weiter nach `docs/eulenpfad/spielideen/lehrplan_sg_5-6.md`: M3–M5 (Dezimalzahlen,
-   jetzt mit `LS.dezimalText`), dann die übrigen Top 15; die fünf neuen Spiele im Entwickler-Modus ansehen.
-2. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
-3. LERN-21 / LERN-11 im Entwickler-Modus: neue Spiele ansehen, Inhaltslisten prüfen.
-4. Schweiz-Karten-Suche: Seen, Flüsse, Gebirge (Download anfragen); Namen in `orte.js` prüfen.
-5. LERN-31 (Abgleich auf den echten Geräten), LERN-4 (Testrunde mit den Kindern), LERN-28 (Statistik).
+1. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
+2. Die fünf neuen Spiele der 5./6. Klasse im Entwickler-Modus ansehen und freigeben (LERN-21).
+3. 5./6. Klasse weiter nach `docs/eulenpfad/spielideen/lehrplan_sg_5-6.md`: M3–M5 mit Dezimalzahlen
+   (LERN-36), dann die übrigen Top 15.
+4. Umbenennen der Grundwörter Detektiv, Sortierer, Puzzle vorschlagen (LERN-35).
+5. LERN-34 (Entscheide F1–F8 Klasseneinstellungen), LERN-31, LERN-4, LERN-33, LERN-11.
 
 Technik: HTML/CSS/JS ohne Build (Entscheid LERN-1). Vertrag zwischen Rahmen und Spielen: [rahmen.md](rahmen.md).
 Übersicht aller Spiele und was zu prüfen ist: [checkliste.md](checkliste.md) (erzeugt mit `node tools/checkliste.js`). Gemeinsamer Rahmen `spiele/gemeinsam/`:
@@ -124,3 +127,6 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-31 | Abgleich-Ordner auf den echten Geräten prüfen (`file://`, Netzwerk- und Cloud-Ordner, iPad/Android nur Datei) | in Arbeit seit 2026-11-01 (LERN_Session6); gebaut, nur auf localhost geprüft | rahmen.md Abschnitt 10 |
 | LERN-32 | Lehrplan SG 5./6. Klasse auswerten, Spielideen mit Basisklasse 5/6 (Entscheid P56 a) | erledigt 2026-11-01 (LERN_Session7, 52 Ideen, Top 15) | docs/eulenpfad/spielideen/lehrplan_sg_5-6.md; Auswahl offen |
 | LERN-33 | Schweiz-Karten-Suche: Seen, Flüsse, Gebirge (swisstopo-Datensatz, Download anfragen) | offen | `tools/karte_schweiz.py`; Report LERN_Session6 |
+| LERN-34 | Klasseneinstellungen durch Lehrpersonen | offen (Konzept, Entscheide F1–F8) | docs/eulenpfad/konzept_klasseneinstellungen.md |
+| LERN-35 | Grundwörter in Spielnamen über der Grenze (Detektiv 5, Sortierer 4, Puzzle 4) umbenennen | offen (D2 a, später) | Testskript, Namensprüfung; Report LERN_Session7 |
+| LERN-36 | Dezimalzahlen-Spiele M3–M5 und Eingabe von Dezimalzahlen; Dezimalzeichen der Zahlenbuch-Neuausgabe | offen | lehrplan_sg_5-6.md Abschnitt 9; Konzept F5 |
