@@ -562,6 +562,23 @@ const NAME_ZIEL = {
   senkrechtZu: "senkrechte Seiten", alleSenkrecht: "senkrechte Seiten", schnittpunkt: "Schnittpunkt",
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst ein Anstoss, dann die Regel aus HINWEIS
+ * (Begriffe erklären, ohne auf das Ziel zu zeigen). Beim Zeichen nicht HINWEIS — der übersetzt das Zeichen.
+ */
+const ANSTOSS = {
+  lage: "Verlängere beide Linien in Gedanken: Treffen sie sich? Und wenn ja, wie?",
+  benennen: "Fahre die farbige Linie mit dem Finger nach: Wo beginnt sie, wo endet sie?",
+  diagEigenschaft: "Schau nur die beiden gestrichelten Diagonalen an.",
+  schnittpunkt: "Schau nur die beiden gestrichelten Linien an.",
+};
+function tippsFuer(a, hinweis) {
+  if (a.art === "symbol") return ["Wo steht das Zeichen: in einer Ecke oder auf zwei Seiten?",
+    "In einer Ecke geht es um den Winkel. Auf zwei Seiten geht es darum, wie die Seiten zueinander liegen."];
+  const anstoss = ANSTOSS[a.art] || (ALLE.includes(a.art) ? "Es können mehrere sein. Prüfe jede Möglichkeit einzeln." : "Was bedeutet das fett gedruckte Wort? Denk daran, bevor du tippst.");
+  return [anstoss, hinweis];
+}
+
 function loesungFuer(a) {
   if (a.art === "lage") return `Die Linien sind ${LAGE_ANTWORT[a.antwort]}.`;
   if (a.art === "benennen") return `Die farbige Linie ist ein${a.antwort === "seite" || a.antwort === "diagonale" ? "e" : ""} ${ROLLE_NAME[a.antwort]}.`;
@@ -575,6 +592,7 @@ function loesungFuer(a) {
 
 LS.spiel({
   id: "begriffs-geodreieck",
+  hilfe: "Tippe direkt auf die Linie, die Ecke oder den Punkt im Bild. Können mehrere passen, tippst du alle an und dann „Fertig ✓“; nochmals tippen nimmt eine Wahl zurück. Stehen unten Knöpfe, tippst du die passende Antwort an.",
   einleitung: "Diagonale, Radius, parallel, senkrecht, rechter Winkel: Hier zeigst du an Figuren, was die Wörter bedeuten. Tippe genau auf die Linie, die Ecke oder den Punkt.",
   anzahl: 8,
   stufen: {
@@ -595,6 +613,7 @@ LS.spiel({
     const frage = a.art === "diagEigenschaft" ? EIGENSCHAFT[a.frage] : FRAGE[a.art];
     const hinweis = a.art === "diagEigenschaft" ? HINWEIS.diagEigenschaft[a.frage] : HINWEIS[a.art];
     f.append(el("div", { class: "frage", html: frage }));
+    ctx.tipp(tippsFuer(a, hinweis)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
 
     // Antwort mit Knöpfen
     if (["lage", "benennen", "symbol", "diagEigenschaft"].includes(a.art)) {

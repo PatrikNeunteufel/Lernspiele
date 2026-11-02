@@ -708,6 +708,25 @@ function zeigeFunktion(ctx, a) {
   LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 170, hinweis: f.tipp, loesung: a.richtig });
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): worauf man im Bild schaut, dann die Beschreibung
+ * des Teils (wo er sitzt, wozu er da ist) — nie der Name, die Pflanze oder der Fachbegriff der Antwort.
+ */
+function tippsFuer(a) {
+  switch (a.art) {
+    case "laubNadel": return ["Schau auf die Blätter: Sind sie breit oder dünn wie Nadeln?"];
+    case "form": case "formBild": return ["Besteht das Blatt aus mehreren kleinen Blättchen oder aus einem Stück?",
+      "Ist es breit oder schmal? Hat es Ecken, Lappen oder einen Bogen beim Stiel?"];
+    case "rand": return ["Fahre mit den Augen ganz genau dem Rand entlang.", "Hat der Rand Zähne? Sind sie spitz oder rund?"];
+    case "stellung": return ["Schau, wo die Blätter am Zweig ansetzen.", "Wie viele Blätter sitzen auf derselben Höhe?"];
+    case "schluessel": return ["Beantworte jede Frage nur mit dem, was du im Bild siehst.", "Bei Zählfragen: Zähl langsam, einmal rundherum, und merk dir, wo du angefangen hast."];
+    case "merkmale": return ["Prüfe jedes Bild Merkmal für Merkmal.", "Ein einziges falsches Merkmal genügt, und die Pflanze fällt weg."];
+    case "teilName": return ["Schau, wo der Teil sitzt: aussen, in der Mitte, oben oder unten?", (a.unterteile ? TEILE : GRUPPEN).find(x => x.id === a.teil).tipp];
+    case "teilTippen": return ["Überleg zuerst, wozu dieser Teil da ist.", GRUPPEN.find(x => x.id === a.richtig).tipp];
+    default: return ["Schau dir die Blüte im Bild an. Welcher Teil passt zur Frage?", FUNKTIONEN.find(x => x.frage === a.frage).tipp];
+  }
+}
+
 const ZEIGE = { laubNadel: zeigeLaubNadel, form: zeigeForm, formBild: zeigeFormBild, rand: zeigeRand, stellung: zeigeStellung, schluessel: zeigeSchluessel,
   merkmale: zeigeMerkmale, teilName: zeigeTeilName, teilTippen: zeigeTeilTippen, funktion: zeigeFunktion };
 const ARTEN_JE_STUFE = Object.fromEntries(Object.keys(STUFE).map(s => [s, new Set(STUFE[s].map(f => f()?.art).filter(Boolean)).size]));
@@ -725,6 +744,7 @@ const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => au
 LS.spiel({
   id: "pflanzen-bestimmer",
   einleitung: "Wie heisst diese Pflanze? Schau genau auf Blätter und Blüten — so bestimmen auch Fachleute Pflanzen!",
+  hilfe: "Schau das Bild genau an und tippe die passende Antwort an. Beim Bestimmungsschlüssel beantwortest du Frage für Frage mit Ja oder Nein, bis nur eine Pflanze übrig ist. Manchmal tippst du direkt auf einen Teil der Blüte.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -732,6 +752,7 @@ LS.spiel({
     if (ctx.nr === 0) ctx.sag("Tipp: Schau ganz genau hin — auf den Umriss, den Rand und die Blüte.");
     const a = aufgabeErzeugen(ctx.stufe);
     if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a));
     ZEIGE[a.art](ctx, a);
   },
 });

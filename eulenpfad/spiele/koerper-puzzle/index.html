@@ -138,8 +138,18 @@ function pruefeAufgabe(a, stufe) {
 
 const sinnBild = Object.fromEntries(SINNE.map(([, bild, organ]) => [organ, bild]));
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): am eigenen Körper nachspüren — kein Name eines Körperteils. */
+function tippsFuer(a) {
+  if (a.art === "teil") return ["Zeig auf deinen eigenen Körper: Wo ist das?", "Was kannst du damit machen? Das hilft dir beim Namen."];
+  if (a.art === "finde") return ["Zeig zuerst auf deinem Körper, wo das ist.", "Schau die Bilder an: Welches sieht aus wie dieser Teil an dir?"];
+  if (a.art === "sinn") return ["Probier es aus: Mach es nach.", "Welchen Teil deines Körpers brauchst du dabei?"];
+  if (a.art === "frage") return ["Lies alle Antworten genau.", "Denk an deinen eigenen Körper: Was kannst du fühlen oder ausprobieren?"];
+  return ["Wo beginnt der Weg? Wo kommt das Essen oder die Luft in den Körper hinein?", "Dann geht es Schritt für Schritt von oben nach unten weiter."];
+}
+
 LS.spiel({
   id: "koerper-puzzle",
+  hilfe: "Lies oder hör die Frage und schau die Bilder genau an. Beim Weg durch den Körper tippst du die Stationen der Reihe nach an.",
   einleitung: "Dein Körper kann so viel: sehen, hören, rennen, denken! Kennst du dich aus?",
   anzahl: 8,
   stufen: STUFEN,
@@ -148,6 +158,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     // Königsstufe: nur zwei Wege durch den Körper — zu wenige, um Fragen-Serien zu brechen.
     if (MEHRERE_ARTEN.has(ctx.stufe) && ctx.stufe !== "s6") ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "teil") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst dieser Körperteil?" }), el("div", { class: "bild-gross", text: a.bild }));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 110, hinweis: "Zeig auf deinen eigenen Körper: Wo ist das?", loesung: `Das ist ${a.artikel} ${a.richtig}.` });

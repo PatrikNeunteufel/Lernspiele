@@ -41,6 +41,13 @@
   .kreuz .feld.rand.geloest { border-color: var(--f); color: var(--f); background: #fff; }
   .kreuz .feld.falsch { animation: wackeln .4s; }
   .kreuz .summe { background: #fff7e6; }
+  /* Das Kreuz sichtbar machen: Faktoren links und oben abgerückt, die Zeilensumme ebenfalls — sonst
+     sieht der Faktor links aus wie ein Feld der Zeile, das man mitzählt (Bemerkung 2, Patrik, LERN_Session9). */
+  .kreuz .links, .kreuz .ecke { margin-right: 10px; }
+  .kreuz .oben, .kreuz .ecke, .kreuz .kopf-summe { margin-bottom: 8px; }
+  .kreuz .summe, .kreuz .kopf-summe { margin-left: 10px; }
+  .kreuz .links { position: relative; }
+  .kreuz .links::after { content: ""; position: absolute; right: -11px; top: -4px; bottom: -4px; border-right: 3px solid #c5c9de; }
   .kreuz .zusammen { grid-column: 1 / -2; justify-content: flex-end; font-size: clamp(14px, 3.4vw, 20px); color: var(--text-leise); padding-right: 8px; }
   .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
 </style>
@@ -195,9 +202,25 @@ function nullTipp(l, o) {
   return nl + no ? ` Tipp: zuerst ${kl} × ${ko}, dann ${NULLEN[nl + no]} anhängen.` : "";
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man im Malkreuz vorgeht — ohne Feldwerte. */
+function tippsFuer(raetsel, mehr) {
+  const zusammen = mehr ? "Zähl zuerst jede Zeile zusammen, dann die Zeilensummen." : "Am Schluss zählst du alle Felder der Zeile zusammen.";
+  if (raetsel) return [
+    "Such ein Feld, bei dem in seiner Zeile oder Spalte schon zwei Zahlen stehen.",
+    "Fehlt eine Zahl am Rand: Welche Zahl mal die andere Randzahl gibt das Feld innen? Denk an die Umkehraufgabe.",
+    zusammen,
+  ];
+  return [
+    "Jedes Feld innen ist die Zahl links mal die Zahl oben.",
+    "Bei Zehnern und Hundertern: rechne zuerst ohne Nullen und hänge die Nullen danach an.",
+    zusammen,
+  ];
+}
+
 LS.spiel({
   id: "malkreuz",
   einleitung: "Grosse Malrechnungen werden klein: Zerlege die Zahlen im Malkreuz, rechne jedes Feld aus und zähl alles zusammen!",
+  hilfe: "Tippe auf ein Feld mit ? und tippe die Zahl ein. Ist sie richtig, springt das Malkreuz von selbst zum nächsten Feld. Fertig ist es, wenn kein ? mehr da ist.",
   anzahl: 5,
   stufen: {
     s1: "Zweistellig mal einstellig, klein: 23 × 4 = 20 × 4 + 3 × 4.",
@@ -215,6 +238,7 @@ LS.spiel({
     const mehr = links.length > 1;
     if (ctx.stufe === "s3") ctx.serie("art", mehr ? "2×2" : "3×1"); // zwei Formen des Malkreuzes
     ctx.loesung(`${zahlText(a)} × ${zahlText(b)} = ${zahlText(a * b)}`);
+    ctx.tipp(tippsFuer(raetsel, mehr));
 
     const offen = new Set(x.offen);
     // Jedes offene Feld eintippen; das nächste Feld wählt das Malkreuz selbst.
@@ -228,7 +252,7 @@ LS.spiel({
 
     /** Ein Feld: offen = Knopf mit „?“, sonst die Zahl. 'rand' = Teil am Rand mit Stellenfarbe. */
     const feld = (k, zusatz = "") => {
-      const randKlasse = /^[ol]/.test(k) ? ` rand st st-${stelleVon(werte[k])}` : "";
+      const randKlasse = /^[ol]/.test(k) ? ` rand ${k[0] === "l" ? "links" : "oben"} st st-${stelleVon(werte[k])}` : "";
       let e;
       if (offen.has(k)) {
         e = el("button", { type: "button", class: "feld" + randKlasse + zusatz, text: "?", "aria-label": "leeres Feld" });
@@ -242,7 +266,7 @@ LS.spiel({
 
     kreuz.append(el("div", { class: "ecke", text: "×" }));
     oben.forEach((_, j) => feld("o" + j));
-    kreuz.append(el("div", { class: "gleich", text: mehr ? "Zeile" : "=" }));
+    kreuz.append(el("div", { class: "gleich kopf-summe", text: mehr ? "Zeile" : "=" }));
     links.forEach((_, i) => {
       feld("l" + i);
       oben.forEach((_, j) => feld(`z${i}_${j}`));

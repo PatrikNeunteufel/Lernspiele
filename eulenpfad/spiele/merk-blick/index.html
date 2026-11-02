@@ -234,6 +234,17 @@ const HINWEIS = {
   zwei: "Zwei Formen sind anders: gedreht, umgefärbt oder ausgetauscht.",
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man sich das Bild merkt und worauf man nachher
+ * achtet — sie nennen kein Ding und keinen Platz, verraten also nichts vom Gezeigten.
+ */
+function tippsFuer(a, s) {
+  const merken = s.formen ? "Merk dir bei jeder Form die Farbe und wohin ihre Spitze zeigt."
+    : a.art === "tausch" ? "Merk dir, wo jedes Ding steht: oben, unten, links, rechts."
+    : "Sag dir die Dinge leise vor, während du schaust.";
+  return [merken, HINWEIS[a.art]];
+}
+
 function loesungText(a) {
   if (a.art === "fehlt") return `Es fehlt: ${NAME[a.weg]} ${a.weg} (${ort(a.ort, a.n)}).`;
   if (a.art === "neu") return `Neu ist ${NAME[a.nachher[a.ziele[0]]]} ${a.nachher[a.ziele[0]]} (${ort(a.ziele[0], a.n)}).`;
@@ -244,6 +255,7 @@ function loesungText(a) {
 LS.spiel({
   id: "merk-blick",
   einleitung: "Schau dir das Bild gut an und merk es dir. Dann deckt die Eule es zu — und verändert etwas!",
+  hilfe: "Schau dir das Bild an, bis die Eule es zudeckt. Dann siehst du es verändert: Tippe auf das, was anders ist.",
   anzahl: 8,
   stufen: {
     s1: "3 Dinge — dann fehlt eines: Was fehlt? 🧸🍎⚽",
@@ -262,6 +274,7 @@ LS.spiel({
     ctx.kennung(JSON.stringify([a.vorher, a.nachher]));
     const loesung = loesungText(a);
     ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(a, s));
     ctx.schritte(a.art === "fehlt" ? 1 : a.ziele.length);
     const f = ctx.flaeche;
     const auftrag = el("div", { class: "auftrag", text: "Schau gut hin und merk dir alles!" });

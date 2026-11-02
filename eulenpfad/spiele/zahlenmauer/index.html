@@ -121,6 +121,7 @@ function aufgabeErzeugen(stufe) {
 LS.spiel({
   id: "zahlenmauer",
   einleitung: "Baue die Zahlenmauer fertig! Jeder Stein ist so gross wie die beiden Steine darunter zusammen.",
+  hilfe: "Tipp auf einen leeren Stein mit „?“ — er leuchtet auf. Dann tippst du seine Zahl ein und drückst OK. Ist sie richtig, kommt von selbst der nächste leere Stein dran; du kannst aber jederzeit einen anderen antippen.",
   anzahl: 5,
   stufen: {
     s1: "Kleine Mauer bis 20 — nur zusammenzählen.",
@@ -136,6 +137,12 @@ LS.spiel({
     ctx.loesung("Von unten nach oben: " + w.map(reihe => reihe.map(zahlText).join(", ")).join(" | "));
     // Jeden leeren Stein eintippen; den nächsten Stein wählt die Mauer selbst.
     for (const k of leer) { const [r, i] = k.split(",").map(Number); ctx.schritte(LS.tippSchritte(w[r][i])); }
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): die Regel, wo man anfängt, und rückwärts rechnen.
+    const untenLeer = [...leer].some(k => k.startsWith("0,"));
+    ctx.tipp(["Jeder Stein ist so gross wie die beiden Steine direkt darunter zusammen.",
+      "Fang bei einem leeren Stein an, bei dem du schon zwei Nachbarn kennst — unten oder oben.",
+      untenLeer ? "Fehlt ein Stein unten: Nimm den Stein darüber und zieh den bekannten Nachbarn ab."
+        : "Arbeite dich von unten nach oben: Jeder fertige Stein hilft dir beim nächsten."]);
     const mauer = el("div", { class: "mauer" + (w.length >= 5 ? " fuenf" : "") });
     const steine = {};
     let aktiv = null;

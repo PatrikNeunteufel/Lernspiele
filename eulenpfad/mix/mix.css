@@ -19,6 +19,13 @@
 .mix-ergebnis li span:nth-child(2) { flex: 1; font-weight: 700; }
 .mix-ergebnis .mix-bild { box-shadow: none; background: none; padding: 0; }
 
+/* Übertritts-Check: je Thema eine Zeile, die schwächsten zuerst */
+.mix-bericht { list-style: none; padding: 0; margin: 12px auto; max-width: 460px; text-align: left; }
+.mix-bericht li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 12px; border-radius: 12px; margin-bottom: 6px; background: #f6f7fd; }
+.mix-bericht li span:first-child { flex: 1; min-width: 160px; font-weight: 700; }
+.mix-bericht li.gut { background: var(--gut-hell); }
+.mix-bericht li.schwach { background: #fff4e0; }
+
 @media (max-width: 560px) {
   .mix-bild { font-size: 22px; padding: 2px; }
   .mix-rahmen { margin: 0 -10px; }

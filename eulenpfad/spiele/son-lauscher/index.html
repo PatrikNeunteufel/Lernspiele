@@ -274,18 +274,38 @@ const TIPP = {
   hoeren: "Hör zu und sortiere. Mit 🔊 hörst du das Wort nochmal.",
   lesen: "Hier hörst du erst nach der Antwort etwas. Lies genau!",
   luecke: "Hör zu: Welche Buchstaben fehlen?",
-  tippen: "Hör genau hin — und denk an die Schreibweise: au oder eau? in oder ain?",
+  // Keine Schreibweise nennen (Entscheid S1 a, 2026-11-02): sonst bliebe oft nur eine Wahl aus zwei.
+  tippen: "Hör genau hin — im Französischen schreibt man einen Laut oft auf mehrere Arten. Welche passt zu diesem Wort?",
+};
+
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): nochmals hören, nachsprechen, mit den Beispielwörtern
+ * vergleichen — keine Schreibweise und kein Laut als Antwort (in der Königsstufe auch nicht „au oder eau“).
+ */
+const TIPPS = {
+  paar: ["Hör beide Wörter nochmal (🔊).", "Sprich nur den Schluss der beiden Wörter leise nach. Klingt er gleich?"],
+  hoeren: ["Hör das Wort nochmal (🔊) und sprich es leise nach.", "Sprich auch die Beispielwörter an den Körben: Welches klingt gleich wie dein Wort?"],
+  lesen: ["Sprich das Wort leise. Achtung: Verschiedene Schreibweisen können gleich klingen.", "Sprich die Beispielwörter an den Körben: Welches klingt gleich?"],
+  luecke: ["Hör das Wort nochmal (🔊) und sprich es leise nach.", "Sprich jede Schreibweise leise aus. Nur eine klingt so wie im Wort."],
+  tippen: ["Hör das Wort nochmal (🔊). Welchen Laut hörst du in der Lücke?", "Ein Laut kann verschieden geschrieben werden. Hast du das Wort schon geschrieben gesehen?"],
 };
 
 const SPIEL = {
   id: ID,
   einleitung: "Son-Lauscher! Französisch klingt anders, als es aussieht: ou klingt wie u, eau wie o. Hör genau hin!",
+  hilfe: stufe => ({
+    s1: "Hör die beiden Wörter (🔊 1 und 🔊 2) und tippe an: Klingen sie am Schluss gleich oder verschieden?",
+    s4: "Hör das Wort und lege die Karte in den Korb mit dem gleichen Laut. Steht ein Wort ohne Ton da, liest du es und vergleichst mit den Beispielwörtern.",
+    s5: "Hör das Wort und lege die Karte in den passenden Korb — oder tippe die Buchstaben an, die in die Lücke gehören.",
+    s6: "Hör das Wort und tippe die fehlenden Buchstaben auf der Buchstabentastatur, dann OK ✓. ⌫ löscht den letzten Buchstaben.",
+  })[stufe] || "Hör das Wort (🔊 nochmal) und lege die Karte in den Korb mit dem gleichen Laut.",
   anzahl: 8,
   stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     if (ctx.nr === 0) ctx.sag(TIPP[a.art]);
+    ctx.tipp(TIPPS[a.art]);
     if (new Set(STUFE[ctx.stufe]).size > 1) ctx.serie("art", a.art);
     const f = ctx.flaeche;
 

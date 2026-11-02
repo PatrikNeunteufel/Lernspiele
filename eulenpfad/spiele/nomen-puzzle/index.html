@@ -127,9 +127,22 @@ function puzzle(k, mitArtikel, ergebnis) {
   return box;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): die Grundwort-Regel und wie man liest — ohne das Wort oder den Artikel. */
+function tippsFuer(a, stufe) {
+  switch (a.art) {
+    case "zusammen": return ["Das hintere Wort sagt, was es ist.", "Welches der beiden Wörter kommt hinten hin? Lies jede Antwort laut."];
+    case "legen": return ["Lies das Wort oben langsam, Silbe für Silbe.", "Welcher Teil steht ganz vorne?"];
+    case "zerlegen": return ["Such die Nomen, die im Wort stecken.", "Achte auf die Reihenfolge: Welches Nomen steht vorne?"];
+    case "artikel": return ["Das hintere Wort bestimmt den Artikel.",
+      stufe === "s6" ? "Sag nur das hintere Wort mit seinem Artikel laut." : "Schau beim hinteren Teil: Welcher Artikel steht dort?"];
+    default: return ["Sprich das zusammengesetzte Wort laut.", "Hörst du zwischen den Teilen einen kleinen Laut wie -n-, -e- oder -s-? Oder fällt ein Buchstabe weg?"];
+  }
+}
+
 LS.spiel({
   id: "nomen-puzzle",
   einleitung: "Aus zwei Nomen wird ein neues: Haus + Tür = Haustür. Das hintere Wort sagt, was es ist — eine Tür!",
+  hilfe: "Schau die Wortteile an und tippe die passende Antwort an. Beim Legen tippst du die Teile in der richtigen Reihenfolge an.",
   anzahl: 8,
   stufen: nurMoegliche({
     s1: "Haus + Tür = ? Welches neue Wort entsteht?",
@@ -144,6 +157,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     if (a.art === "artikel" && MEHRERE_ARTIKEL) ctx.serie("antwort", a.richtig);
+    ctx.tipp(tippsFuer(a, ctx.stufe));
     const { k } = a;
     const grund = k.teile[k.teile.length - 1];
     if (a.art === "zusammen") {

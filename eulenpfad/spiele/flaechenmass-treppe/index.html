@@ -279,8 +279,25 @@ function hinweisFuer(a, w, p) {
   return `Rechne zuerst ${teilText(g)} in ${b.e} um und zähle ${teilText(b)} dazu.`;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Richtung und ×100 je Stufe — nie die umgerechnete Zahl. */
+function tippsFuer(a, p) {
+  if (a.art === "gefaerbt") return ["Jede volle Reihe hat 10 kleine Quadrate.", "Zähle die vollen Reihen, dann die einzelnen dazu."];
+  if (a.art === "fehlen") return [`Ein ${a.gross} hat 10 Reihen zu 10 ${a.ziel}.`, "Zähle, wie viele gefärbt sind. Wie viele fehlen bis 100?"];
+  if (a.art === "vergleich") return ["Rechne beide Seiten in dieselbe Einheit um.", `Achtung: 1 ${a.teile[0].e} sind 100 ${a.ziel}, nicht 10.`];
+  if (a.teile.length === 2) {
+    const [g, b] = a.teile;
+    return [`Rechne zuerst ${teilText(g)} in ${b.e} um.`, `Achtung: 1 ${g.e} sind 100 ${b.e}, nicht 10. Dann zähle ${teilText(b)} dazu.`];
+  }
+  const tipps = ["Von gross nach klein wird die Zahl grösser, von klein nach gross kleiner.",
+    p.treppe && !p.spaet ? "Schau auf die Treppe: Wie viele Stufen liegen dazwischen? Jede Stufe ist ×100." : "Bei Flächen ist jede Stufe ×100. Wie viele Stufen liegen dazwischen?"];
+  if (a.art === "dezGross") tipps.push("Bei ×100 rückt jede Ziffer zwei Stellen nach links.");
+  if (a.art === "dezKlein") tipps.push("Bei : 100 rückt jede Ziffer zwei Stellen nach rechts.");
+  return tipps;
+}
+
 LS.spiel({
   id: "flaechenmass-treppe",
+  hilfe: "Rechne die Fläche in die verlangte Einheit um und tippe die Zahl mit den Zifferntasten ein; die Einheit steht schon daneben. Beim Vergleichen tippst du <, = oder > an. Die Treppe zeigt dir die Einheiten von gross nach klein.",
   einleitung: "Flächen messen wir mit kleinen Quadraten. Auf der Flächenmass-Treppe ist jede Stufe ×100 — denn ein Quadrat ist 10 lang und 10 breit!",
   anzahl: 8,
   stufen: {
@@ -298,6 +315,7 @@ LS.spiel({
     const f = ctx.flaeche;
     if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
     if (a.richtung) ctx.serie("richtung", a.richtung);
+    ctx.tipp(tippsFuer(a, p)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const hilfeOrt = el("div");
     f.append(hilfeOrt);
     if (p.treppe && !p.spaet) hilfeOrt.append(treppe(p.treppe));

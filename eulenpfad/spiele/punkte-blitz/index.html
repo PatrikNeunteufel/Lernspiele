@@ -136,9 +136,23 @@ function stellenMaterial(n) {
   return zeile;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man auf einen Blick erfasst — ohne Bezug auf
+ * das gezeigte Bild (keine Zahl, keine Seite), denn es ist nur kurz zu sehen.
+ */
+const TIPPS = {
+  wuerfel: ["Nicht zählen: Denk an die Bilder auf dem Würfel."],
+  vergleich: ["Schau auf die vollen Reihen.", "Vergleiche, wo mehr Plätze leer bleiben."],
+  zehner: ["Ein volles Feld hat zwei volle Reihen mit je fünf.", "Schau auf die leeren Plätze: Wie viele fehlen bis zum vollen Feld?"],
+  gerade: ["Gerade heisst: Jeder Punkt hat einen Partner.", "Bleibt ein Punkt allein, ist die Zahl ungerade."],
+  stellen: ["Eine Platte sind 100, eine Stange 10, ein Würfelchen 1.", "Zähle zuerst die grossen Teile, dann die kleinen."],
+};
+
 LS.spiel({
   id: "punkte-blitz",
   einleitung: "Wie viele sind es? Schau ganz schnell — nicht zählen, sondern auf einen Blick sehen!",
+  hilfe: stufe => stufe === "s1" ? "Schau das Bild an und tippe auf die Antwort."
+    : "Schau das Bild an — gleich wird es zugedeckt. Dann tippst du auf die Antwort. Mit „👀 Nochmal zeigen“ siehst du es noch einmal kurz.",
   anzahl: 10,
   stufen: {
     s1: "Würfelbilder bis 6: Wie viele? Wo sind mehr?",
@@ -154,6 +168,7 @@ LS.spiel({
     const s = STUFE[ctx.stufe];
     if (new Set(s.arten).size > 1) ctx.serie("art", a.art);
     if (a.art === "vergleich" || a.art === "gerade") ctx.serie("antwort", a.richtig);
+    ctx.tipp(TIPPS[a.art]);
     const feld = el("div", { class: "bildfeld", "aria-label": "Bild" });
     let frage = "Wie viele Punkte sind es?";
     if (a.art === "wuerfel") feld.append(wuerfel(a.n));

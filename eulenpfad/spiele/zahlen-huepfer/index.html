@@ -166,9 +166,34 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Richtung, eine Rechenstrategie für den Schritt
+ * (fast rund: runden und ausgleichen; sonst zerlegen), dann der Stellenübergang — nie eine Landestelle.
+ */
+function tippsFuer(schritt, vorwaerts) {
+  const z = vorwaerts ? "+" : "−", gegen = vorwaerts ? "−" : "+";
+  const rund = Number(schritt.toPrecision(1));
+  const diff = schritt - rund;
+  const stellen = String(rund).length - 1;
+  const fuehrend = Math.floor(schritt / 10 ** stellen) * 10 ** stellen;
+  let strategie;
+  if (diff && Math.abs(diff) / rund <= 0.02) {
+    strategie = `${zahlText(schritt)} ist fast ${zahlText(rund)}: Rechne ${z} ${zahlText(rund)} und dann ${diff < 0 ? gegen : z} ${zahlText(Math.abs(diff))}.`;
+  } else if (fuehrend !== schritt && fuehrend > 0) {
+    strategie = `Zerlege den Schritt: ${zahlText(schritt)} = ${zahlText(fuehrend)} + ${zahlText(schritt - fuehrend)}. Hüpf in zwei kleinen Sprüngen.`;
+  } else {
+    strategie = "Schau, welche Stelle sich bei jedem Sprung ändert. Die anderen Stellen bleiben gleich.";
+  }
+  return [vorwaerts ? "Der Frosch hüpft vorwärts: Die Zahl wird bei jedem Sprung grösser." : "Der Frosch hüpft rückwärts: Die Zahl wird bei jedem Sprung kleiner.",
+    strategie,
+    vorwaerts ? "Kommt eine Stelle über 9, gibt es einen Übertrag zur nächsten Stelle links. Rechne dort besonders genau."
+      : "Reicht eine Stelle nicht, musst du bei der nächsten Stelle links entbündeln. Rechne dort besonders genau."];
+}
+
 LS.spiel({
   id: "zahlen-huepfer",
   einleitung: "Quak! Der Frosch hüpft von Seerose zu Seerose — immer gleich weit. Schreib auf, wo er landet. Pass auf, ob er vorwärts (+) oder rückwärts (−) hüpft!",
+  hilfe: "Auf dem Schild steht, wie weit der Frosch hüpft. Tipp die Zahl der leuchtenden Seerose ein und drück OK — dann hüpft der Frosch dorthin, und die nächste Seerose ist dran.",
   anzahl: 6,
   stufen: {
     s1: "Bis 1000 in Schritten wie +20, +50 oder −100.",
@@ -187,6 +212,7 @@ LS.spiel({
     const zahlen = Array.from({ length: SPRUENGE + 1 }, (_, i) => start + i * d);
     ctx.loesung(`Der Frosch landet auf ${zahlen.slice(1).map(zahlText).join(" → ")}.`);
     for (const z of zahlen.slice(1)) ctx.schritte(LS.tippSchritte(z)); // jede Landestelle eintippen
+    ctx.tipp(tippsFuer(schritt, vorwaerts));
 
     ctx.flaeche.append(el("div", { class: "auftrag", html: `Der Frosch hüpft immer <span class="schritt-schild">${zeichen} ${zahlText(schritt)}</span>` }));
 

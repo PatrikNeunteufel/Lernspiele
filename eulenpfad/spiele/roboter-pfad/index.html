@@ -521,9 +521,30 @@ function zeigeFehler(ctx, a, loesung) {
   if (ctx.nr === 0) ctx.sag("Die grünen Felder zeigen, wo der Roboter gefahren ist.");
 }
 
+// Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Blickrichtung, Mitfahren, Felder zählen — nie Feld, Karte oder Programm.
+const BLICK = "Schau zuerst: Wohin schaut der Roboter? Das Dreieck zeigt es.";
+function tippsFuer(a) {
+  switch (a.art) {
+    case "befolgen": return [BLICK, "Fahr mit dem Finger Karte für Karte mit. Beim Drehen bleibt der Roboter stehen und schaut nur anders."];
+    case "befolgenWdh": return [BLICK, "„3× vor“ heisst: dreimal ein Feld vor. Bei „2× [ … ]“ machst du alles in der Klammer zweimal.", "Fahr mit dem Finger Schritt für Schritt mit."];
+    case "wenn": return ["Frag bei jedem Durchgang: Ist das Feld vor dem Roboter frei?", "Frei: ein Feld vor. Stein oder Rand: nur drehen. Zähl die Durchgänge mit."];
+    case "fehler": return ["Fahr das Programm mit dem Finger nach, Karte für Karte.", "Wo fährt oder schaut der Roboter zum ersten Mal in die falsche Richtung?"];
+    case "legenWdh": return [BLICK, "Zähl die Felder bis zum Stern: Wie viele geradeaus, wo musst du abbiegen?", "Mehrmals vor hintereinander? Tipp zuerst „3×“ und dann den Befehl — das gibt eine Karte."];
+  }
+  return [BLICK + " Muss er sich zuerst drehen?", "Zähl die Felder bis zum Stern: Wie viele geradeaus, wo musst du abbiegen? Fahr um die Steine herum."];
+}
+
 LS.spiel({
   id: "roboter-pfad",
   einleitung: "Piep! Ich bin ein Roboter und mache genau, was die Karten sagen: vor, links drehen, rechts drehen.",
+  hilfe: stufe => {
+    const arten = Object.keys(STUFE[stufe]?.arten || { befolgen: 1, legen: 1, fehler: 1 });
+    const t = [];
+    if (arten.some(x => x.startsWith("befolgen") || x === "wenn")) t.push("„Wo hält der Roboter?“: Tippe auf das Feld, auf dem er stehen bleibt.");
+    if (arten.some(x => x.startsWith("legen"))) t.push(`Programm legen: Tippe die Befehle unten der Reihe nach an${arten.includes("legenWdh") ? " (zuerst „3×“, dann „vor“ gibt „3× vor“)" : ""} und dann „▶ fahren“. ⌫ nimmt die letzte Karte weg.`);
+    if (arten.includes("fehler")) t.push("„Eine Karte ist falsch“: Tippe die falsche Karte an.");
+    return t.join(" ");
+  },
   anzahl: 6,
   stufen: {
     s1: "Wo hält der Roboter? Zwei, drei Befehle.",
@@ -537,6 +558,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (Object.keys(STUFE[ctx.stufe].arten).length > 1) ctx.serie("art", a.art);
     const loesung = loesungText(a);
+    ctx.tipp(tippsFuer(a));
     ctx.kennung(JSON.stringify([a.art, a.feld.hin, a.start, a.ziel || null, a.prog || null, a.wenn || null]));
     // Legen: je Karte des kürzesten Programms ein Tipp (mit Wiederholung einer mehr), dann ▶.
     // Befolgen und Fehler finden: ein Feld oder eine Karte antippen.

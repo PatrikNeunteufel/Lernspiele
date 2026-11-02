@@ -132,9 +132,17 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+// Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Fragen zum Vorstellen und Untersuchen — nie die Antwort.
+const TIPPS = {
+  wasser: ["Ist das Ding für seine Grösse leicht oder schwer?", "Woraus ist es? Dinge aus Holz oder mit Luft drin schwimmen oft, Dinge aus Metall oder Stein sinken."],
+  material: ["Wie fühlt es sich an: hart und kalt, durchsichtig, leicht und biegsam?", "Kannst du hindurchsehen? Kann man es reissen oder falten? Klingt es beim Klopfen hell?"],
+  frage: ["Stell dir die Dinge in echt vor.", "Prüfe jede Antwort: Hast du das schon gesehen oder ausprobiert?"],
+};
+
 LS.spiel({
   id: "schwimmt-sinkt",
   einleitung: "Plumps! Was passiert, wenn du das ins Wasser legst? Schwimmt es oder sinkt es?",
+  hilfe: "Schau das Ding an und überleg, was passiert. Dann legst du die Karte in den passenden Korb oder tippst die passende Antwort an. Zu Hause kannst du es mit einer Schüssel Wasser ausprobieren!",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -142,6 +150,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
     if (a.art === "wasser") ctx.serie("antwort", a.richtig);
+    ctx.tipp(TIPPS[a.art]);
     if (a.art === "wasser") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Was passiert im Wasser: Schwimmt es oder sinkt es?" }));
       vorlesbar(LS.koerbe(ctx, {

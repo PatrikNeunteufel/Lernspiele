@@ -108,6 +108,7 @@ const text = t => (t.op ? `${zahlText(t.a)} ${t.op} ${zahlText(t.b)}` : zahlText
 LS.spiel({
   id: "zahlen-waage",
   einleitung: "Die Waage ist nur dann gerade, wenn beide Seiten gleich viel sind. Welche Zahl fehlt?",
+  hilfe: "Tipp die Zahl ein, die beim „?“ fehlt. Die Waage neigt sich schon beim Eintippen: Die schwerere Seite geht nach unten. Ist sie gerade, drückst du OK.",
   anzahl: 8,
   stufen: {
     s1: "Bis 5: 2 + 3 = ?",
@@ -124,6 +125,16 @@ LS.spiel({
     const loesung = `${text(a.links)} = ${a.rechts.a === null ? zahlText(a.richtig) : `${zahlText(a.rechts.a)} ${a.rechts.op} ${zahlText(a.richtig)}`}`;
     ctx.loesung(loesung);
     ctx.schritte(LS.tippSchritte(a.richtig));
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst links ausrechnen, dann was rechts fehlt —
+    // ohne den Wert links zu nennen (steht rechts nur „?“, wäre er schon die Lösung).
+    const tippRechts = { "+": "Rechts muss genau gleich viel herauskommen. Wie viel fehlt noch bis dahin?",
+      "−": "Rechts nimmst du etwas weg. Wie viel musst du wegnehmen, damit gleich viel übrig bleibt wie links?",
+      "·": `Wie oft passt die ${zahlText(a.rechts.a)} in das Ergebnis links?` };
+    ctx.tipp(a.rechts.a === null
+      ? ["Rechne die linke Seite aus.", a.links.op === "+" ? "Nimm die Finger: Fang bei der ersten Zahl an und zähl weiter."
+        : a.links.op === "−" ? "Zähl von der ersten Zahl aus rückwärts." : "Mal heisst: die Zahl immer wieder dazurechnen."]
+      : ["Rechne zuerst die linke Seite aus.", tippRechts[a.rechts.op],
+        "Tipp eine Zahl ein, ohne OK: Die Waage zeigt dir, ob rechts zu schwer oder zu leicht ist."]);
     const luecke = el("span", { class: "luecke", text: "?" });
     const rechtsInhalt = a.rechts.a === null ? [luecke] : [`${zahlText(a.rechts.a)} ${a.rechts.op} `, luecke];
     const balken = el("div", { class: "balken" },

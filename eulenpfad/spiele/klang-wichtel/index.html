@@ -287,8 +287,21 @@ const HINWEISE = {
 const WORT = { laut: "Lautstärke", laenge: "Länge", tempo: "Geschwindigkeit" };
 const PAAR_TEXT = { laut: "laut oder leise", tempo: "schnell oder langsam", laenge: "kurz oder lang" };
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man hinhört — ganz kurz, sie verraten nichts über den Klang. */
+function tippsFuer(a) {
+  if (a.art === "eins") return a.werte && Object.keys(a.werte).length > 1
+    ? [`Achte nur auf die ${WORT[a.merkmal]} — alles andere ist egal.`, HINWEISE[a.merkmal]] : [HINWEISE[a.merkmal]];
+  if (a.art === "vergleich") return [`Hör nochmal beide Klänge. Achte nur auf die ${WORT[a.merkmal]}.`,
+    "Sag nach dem ersten Klang leise «eins» und nach dem zweiten «zwei». So weisst du, welcher welcher war."];
+  if (a.art === "legen") return ["Zähl mit den Fingern: Wie viele Klänge sind es?",
+    a.merkmal === "laenge" ? "Hör jeden Ton einzeln: Hört er gleich auf, oder klingt er lange?" : "Hör jeden Klang einzeln: Brüllt da ein Löwe, oder piepst eine Maus?"];
+  return [`Achte zuerst nur auf die ${WORT[a.paar[0]]}.`, `Hör dann nochmal und achte nur auf die ${WORT[a.paar[1]]}.`];
+}
+
 LS.spiel({
   id: "klang-wichtel",
+  hilfe: stufe => "Der Wichtel spielt die Töne gleich vor. Mit dem grossen Knopf 🔊 beim Wichtel hörst du sie nochmal."
+    + (stufe === "s5" ? " Tipp für jeden Klang ein Zeichen. ⌫ nimmt das letzte weg, ✓ prüft." : ""),
   einleitung: "Der Klang-Wichtel spielt dir Töne vor. Hör genau hin! Mach den Ton an: 🔊",
   anzahl: 6,
   stufen: {
@@ -309,6 +322,7 @@ LS.spiel({
     if (ctx.stufe === "s6") ctx.serie("art", a.art === "eins" ? a.merkmal : "zwei");
     if (a.art === "eins" || a.art === "vergleich") ctx.serie("antwort", a.richtig);
     if (a.art === "legen") ctx.serie("zeichen", a.merkmal);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     // Die Uhr startet, wenn die Töne das erste Mal verklungen sind — das Vorspielen wartet auf die Eule (F2 a).
     const uhrLos = ctx.uhrWarten();
 

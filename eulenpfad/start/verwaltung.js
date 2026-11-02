@@ -29,6 +29,7 @@ function zeichneVerwaltung(box, neu) {
     { id: "freigabe", text: "✓ Freigabe", zeichne: freigabeTeil },
     { id: "abgleich", text: "🔄 Abgleich", zeichne: abgleich },
     { id: "einstellungen", text: "⚙️ Einstellungen", zeichne: einstellungen },
+    { id: "meldungen", text: `🙋 Meldungen${LS.meldungen().filter(m => m.status === "neu").length ? ` (${LS.meldungen().filter(m => m.status === "neu").length})` : ""}`, zeichne: meldungenTeil },
     { id: "entwicklung", text: "🛠 Entwicklung", zeichne: entwicklung },
   ];
   const dev = LS.entwicklung.aktiv();
@@ -260,11 +261,28 @@ function zeichneVerwaltung(box, neu) {
       // Bemerkungen: offene zuerst; ich arbeite sie ab und setze sie in bemerkungen.json auf „erledigt“.
       const liste = el("div", { text: "Bemerkungen werden geladen …", class: "leise-text" });
       const neueBemerkung = el("div");
+      // Per E-Mail angekommene Fehlermeldung (Entscheid M1 a): Text einfügen → Bemerkung mit derselben Kennung.
+      const einfuegen = () => {
+        neueBemerkung.innerHTML = "";
+        const feld = el("textarea", { rows: "6", class: "feld", style: "width:100%;box-sizing:border-box;font-size:15px", placeholder: "Text der E-Mail hier einfügen (ab „Meldung M-…“)", "aria-label": "Text der Meldung" });
+        const hinweis = el("span", { class: "leise-text" });
+        neueBemerkung.append(feld, zeile(knopf("Als Bemerkung speichern", async () => {
+          const kennung = LS.meldungAusText(feld.value);
+          if (!kennung) return (hinweis.textContent = "Keine Kennung „Meldung M-…“ gefunden.");
+          const b = await en.bemerkung({ text: feld.value.trim(), ...kennung });
+          if (b) { hinweis.textContent = `✓ Bemerkung Nr. ${b.nr} (${kennung.meldung}).`; setTimeout(neu, 900); }
+        }, "gruen"), knopf("Abbrechen", () => (neueBemerkung.innerHTML = "")), hinweis));
+        feld.focus();
+      };
       teile.push(el("h3", { text: "Bemerkungen" }),
         zeile(knopf("📝 Allgemeine Bemerkung", () => {
           neueBemerkung.innerHTML = "";
           neueBemerkung.append(en.bemerkungsFeld(() => ({}), () => neu()));
-        })), neueBemerkung, liste);
+        }), knopf("🙋 Meldung aus E-Mail einfügen", einfuegen)),
+        el("p", { class: "klein", text: LS.meldungAdresse()
+          ? `Meldungen per E-Mail an: ${LS.meldungAdresse()} (eulenpfad/kontakt.js)`
+          : "Noch keine Adresse für Meldungen: in eulenpfad/kontakt.js bei „meldungen“ eintragen. Bis dahin kann die Aufsicht Meldungen nur als Text kopieren." }),
+        neueBemerkung, liste);
       en.bemerkungen().then(b => {
         liste.innerHTML = "";
         if (!b) return (liste.textContent = "Nur mit laufendem Entwickler-Server sichtbar.");
@@ -287,4 +305,93 @@ function zeichneVerwaltung(box, neu) {
 
   /** Inhaltsliste ansehen (Entscheid E3 a); danach die Seite neu zeichnen. */
   function zeigeListe(s, l) { LS.entwicklung.zeigeListe(s, l, neu); }
+
+  // ----- Fehlermeldungen der Kinder (Wunsch Patrik, LERN_Session9) -----
+  // Die Aufsicht prüft jede Meldung: kein Fehler (mit Erklärung ans Kind) oder bestätigt; Bestätigtes gibt
+  // sie an die Entwicklung weiter, ohne den Namen. Antworten der Entwicklung holt „Antworten abfragen“.
+  function meldungenTeil() {
+    const ich = LS.aktuellerSpieler();
+    const REIHE = ["neu", "bestaetigt", "weitergeleitet", "geplant", "behoben", "kein-fehler"];
+    const alle = [...LS.meldungen()].sort((a, b) => REIHE.indexOf(a.status) - REIHE.indexOf(b.status) || (a.zeit < b.zeit ? 1 : -1));
+    const meldung = el("p", { class: "leise-text", "aria-live": "polite" });
+    const spielName = id => SPIELE.find(s => s.id === id)?.name || id;
+    const datum = iso => new Date(iso).toLocaleDateString("de-CH", { day: "2-digit", month: "2-digit", year: "numeric" });
+
+    /**
+     * An die Entwicklung: mit Entwickler-Server direkt in die Bemerkungen; sonst per E-Mail aus dem eigenen
+     * Mailprogramm (Entscheid M1 a; die Aufsicht sieht den Text und sendet selbst); ohne Adresse als Text.
+     */
+    async function weitergeben(m) {
+      const text = LS.meldungFuerEntwicklung(m);
+      if (LS.entwicklung.freigeschaltet() && (await LS.entwicklung.server())) {
+        const b = await LS.entwicklung.bemerkung({ text, spiel: m.spiel, stufe: m.stufe, aufgabe: m.aufgabe ? `Aufgabe ${m.aufgabeNr}: ${m.aufgabe}` : undefined, meldung: m.id });
+        if (!b) return;
+        LS.setzeMeldung(m.id, { status: "weitergeleitet" }, { von: ich, notiz: `Bemerkung Nr. ${b.nr}` });
+        return neu();
+      }
+      const mail = LS.meldungMailLink(m);
+      if (mail) {
+        if (!confirm("Das Mailprogramm öffnet sich mit der Meldung — ohne den Namen des Kindes. Bitte ansehen und senden.")) return;
+        location.href = mail;
+        LS.setzeMeldung(m.id, { status: "weitergeleitet" }, { von: ich, notiz: "per E-Mail" });
+        return neu();
+      }
+      try { await navigator.clipboard.writeText(text); } catch { prompt("Diesen Text an die Entwicklung schicken:", text); }
+      LS.setzeMeldung(m.id, { status: "weitergeleitet" }, { von: ich, notiz: "als Text kopiert" });
+      neu();
+    }
+    /** Antworten der Entwicklung holen: Bemerkungen (Entwickler-Server) und die veröffentlichte Datei. */
+    async function abfragen() {
+      const stand = {};
+      try {
+        const r = await fetch("meldungen-stand.json", { cache: "no-store" });
+        if (r.ok) Object.assign(stand, await r.json());
+      } catch { /* offline oder ohne Datei */ }
+      const b = LS.entwicklung.freigeschaltet() ? await LS.entwicklung.bemerkungen() : null;
+      for (const x of b || []) {
+        const s = LS.meldungStatusAusBemerkung(x.status);
+        if (x.meldung && s) stand[x.meldung] = { status: s, ...(x.antwort ? { antwort: x.antwort } : {}) };
+      }
+      const n = LS.meldungStandAnwenden(stand);
+      neu();
+      setTimeout(() => alert(n ? `${n} Antwort${n === 1 ? "" : "en"} der Entwicklung übernommen.` : "Keine neuen Antworten der Entwicklung."), 0);
+    }
+
+    function eintrag(m) {
+      const st = LS.MELDUNG_STATUS[m.status] || { text: m.status };
+      const antwortFeld = el("textarea", { rows: "2", class: "feld", placeholder: "Nachricht an das Kind (freundlich, ohne Fachsprache)", "aria-label": "Nachricht an das Kind" });
+      antwortFeld.value = m.antwort || "";
+      const aktionen = [];
+      if (m.status === "neu") {
+        aktionen.push(knopf("✓ Ist ein Fehler", () => { LS.setzeMeldung(m.id, { status: "bestaetigt", antwort: antwortFeld.value.trim() || undefined }, { von: ich }); neu(); }, "gruen"),
+          knopf("✗ Kein Fehler", () => {
+            if (!antwortFeld.value.trim()) { antwortFeld.focus(); meldung.textContent = "Bitte dem Kind kurz erklären, warum es kein Fehler ist."; return; }
+            LS.setzeMeldung(m.id, { status: "kein-fehler", antwort: antwortFeld.value.trim() }, { von: ich }); neu();
+          }));
+      }
+      if (m.status === "bestaetigt") aktionen.push(knopf("📤 An die Entwicklung", () => weitergeben(m), "gruen"));
+      aktionen.push(knopf("💬 Nachricht speichern", () => { LS.setzeMeldung(m.id, { antwort: antwortFeld.value.trim() }, { von: ich }); meldung.textContent = "✓ Nachricht gespeichert."; }),
+        knopf("📋 Text kopieren", async () => { try { await navigator.clipboard.writeText(LS.meldungFuerEntwicklung(m)); meldung.textContent = "✓ Kopiert."; } catch { prompt("Text:", LS.meldungFuerEntwicklung(m)); } }));
+      const zeilen = [
+        ["Art", LS.MELDUNG_ARTEN[m.art] || m.art], ["Aufgabe", m.aufgabe], ["Erwartete Lösung", m.loesung],
+        ["Eingaben des Kindes", m.eingabe], ["Gewertet", m.ergebnis], ["Begründung", m.text],
+      ].filter(([, w]) => w);
+      return el("details", { class: `meldung-eintrag status-${m.status}`, ...(["neu", "bestaetigt"].includes(m.status) ? { open: "" } : {}) },
+        el("summary", {}, el("b", { text: `${m.name} · ${spielName(m.spiel)} · Stufe ${String(m.stufe).slice(1)}` }),
+          el("span", { class: "leise-text", text: ` · ${datum(m.zeit)} · ${st.text}` })),
+        el("dl", {}, ...zeilen.flatMap(([k, w]) => [el("dt", { text: k }), el("dd", { text: w })])),
+        (m.verlauf || []).length > 1 ? el("p", { class: "leise-text", text: "Verlauf: " + m.verlauf.map(v => `${datum(v.zeit)} ${LS.MELDUNG_STATUS[v.status]?.text || v.status}${v.von ? ` (${v.von})` : ""}${v.notiz ? `: ${v.notiz}` : ""}`).join(" → ") }) : null,
+        antwortFeld, zeile(...aktionen));
+    }
+
+    const offen = alle.filter(m => ["neu", "bestaetigt"].includes(m.status)).length;
+    seite.append(karte(
+      el("h2", { text: "🙋 Fehlermeldungen der Kinder" }),
+      el("p", { class: "leise-text", style: "margin-top:0", text: "Kinder melden mit „🙋 Melden“ im Spiel einen Fehler in der Aufgabe oder der Aufgabe davor (Einstellungen: ab welcher Klasse). Bitte jede Meldung ansehen: Ist es ein Fehler, bestätigen und an die Entwicklung weitergeben — dabei reist der Name nicht mit. Ist es keiner, dem Kind kurz erklären, warum. Ein echter Fehler, den die Entwicklung behebt, zählt in der Statistik des Kindes als „🏅 Fehlerfinder“." }),
+      zeile(knopf("🔄 Antworten der Entwicklung abfragen", abfragen)),
+      meldung,
+      alle.length ? el("div", { class: "meldungen" }, ...alle.map(eintrag))
+        : el("p", { class: "leise-text", text: "Noch keine Meldungen." }),
+      alle.length ? el("p", { class: "leise-text", text: `${offen} offen, ${alle.length - offen} weitergegeben oder abgeschlossen.` }) : null));
+  }
 }

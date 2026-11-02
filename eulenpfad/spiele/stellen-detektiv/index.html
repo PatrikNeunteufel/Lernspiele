@@ -179,12 +179,28 @@ function zahlZeichnen(ctx, liste, klickbar, onKlick) {
   return knoepfe;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): von rechts abzählen, dann die Dreiergruppen —
+ * nie die Stelle der Ziffer unter der Lupe oder die gesuchte Ziffer.
+ */
+function tippsFuer(zahl, umgekehrt, st, gleicheZiffern) {
+  const n = String(zahl).length;
+  const t = [umgekehrt ? `Die Einer stehen ganz rechts. Zähl von dort nach links, bis du bei den ${LS.dativ(st)} bist.`
+    : "Zähl von rechts: Einer, Zehner, Hunderter, Tausender, …"];
+  if (n >= 5) t.push("Die Lücken teilen die Zahl in Dreiergruppen. Rechte Gruppe: Einer, Zehner, Hunderter. Nächste Gruppe: Tausender, Zehntausender, Hunderttausender."
+    + (n >= 7 ? " Ganz links: Millionen." : ""));
+  else t.push("Leg den Finger auf die Ziffer ganz rechts. Sag bei jedem Schritt nach links die nächste Stelle.");
+  if (gleicheZiffern) t.push("Gleiche Ziffern kommen mehrmals vor — es zählt der Platz, nicht die Ziffer.");
+  return t;
+}
+
 /** Lupe auf eine Ziffer → richtige Stelle aus den Knöpfen wählen. */
 function stelleBenennen(ctx, zahl, knapp = false) {
   const liste = ziffernMitStelle(zahl);
   const ziel = waehle(liste);
   const loesung = `Die ${ziel.z} steht bei den ${LS.dativ(ziel.st)} (${ziel.st.k}).`;
   ctx.loesung(loesung);
+  ctx.tipp(tippsFuer(zahl, false, ziel.st, knapp));
   ctx.flaeche.append(el("div", { class: "auftrag", text: "An welcher Stelle steht die Ziffer unter der Lupe?" }));
   const knoepfe = zahlZeichnen(ctx, liste, false);
   knoepfe[liste.indexOf(ziel)].classList.add("gesucht");
@@ -220,6 +236,7 @@ function zifferFinden(ctx, zahl, knapp = false) {
   const ziel = waehle(liste);
   const loesung = `Bei den ${LS.dativ(ziel.st)} steht die ${ziel.z}.`;
   ctx.loesung(loesung);
+  ctx.tipp(tippsFuer(zahl, true, ziel.st, knapp));
   ctx.flaeche.append(el("div", { class: "auftrag", html: `Tipp die Ziffer an, die bei den <span style="color:var(--st-${ziel.st.k})">${LS.dativ(ziel.st)} (${ziel.st.k})</span> steht!` }));
   let fertig = false;
   zahlZeichnen(ctx, liste, true, (d, knopf) => {
@@ -242,6 +259,8 @@ function zifferFinden(ctx, zahl, knapp = false) {
 LS.spiel({
   id: "stellen-detektiv",
   einleitung: "Psst, Detektiv! Jede Ziffer hat ihren Platz in der Zahl. Findest du heraus, wie die Stellen heissen?",
+  hilfe: stufe => "Die Lupe zeigt auf eine Ziffer: Tipp auf den Namen ihrer Stelle."
+    + (!stufe || STUFE[stufe]?.umgekehrt ? " Oder die Stelle ist genannt: Dann tippst du die Ziffer in der Zahl an, die dort steht." : ""),
   anzahl: 8,
   stufen: {
     s1: "Zahlen bis 1000: Wie heisst die Stelle unter der Lupe?",

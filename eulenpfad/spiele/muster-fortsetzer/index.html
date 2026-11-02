@@ -125,9 +125,19 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Muster sprechen, Sprünge anschauen — ohne Sprung und Zahl. */
+function tippsFuer(a) {
+  if (a.art === "bild") return ["Sprich das Muster laut.", "Welcher Teil kommt immer wieder?"];
+  if (a.typ === "linear") return ["Wird es mehr oder weniger?", "Wie gross ist der Sprung von einer Zahl zur nächsten? Ist er immer gleich?"];
+  const t = ["Rechne die Sprünge von Zahl zu Zahl aus. Sind sie gleich?", "Schau, wie sich die Sprünge ändern. Wie gross wird der nächste Sprung?"];
+  if (a.typ === "quadrat") t.push("Diese Zahlen kennst du vom Einmaleins: eine Zahl mal sich selbst.");
+  return t;
+}
+
 LS.spiel({
   id: "muster-fortsetzer",
   einleitung: "Muster wiederholen sich. Findest du heraus, wie es weitergeht?",
+  hilfe: "Schau die Reihe an. Was kommt beim ? als Nächstes? Bei Bildern tippst du das Bild an, bei Zahlen tippst du die Zahl ein.",
   anzahl: 8,
   stufen: {
     s1: "Bildmuster: 🔴🔵🔴🔵 … was kommt als Nächstes?",
@@ -144,6 +154,7 @@ LS.spiel({
     if (ctx.stufe === "s6") ctx.serie("art", a.typ);
     // aufwärts oder abwärts; in Stufe 3 geht es nur aufwärts
     if (a.art === "zahl" && ctx.stufe !== "s3") ctx.serie("richtung", a.folge[1] > a.folge[0]);
+    ctx.tipp(tippsFuer(a));
     const luecke = el("span", { class: "luecke", text: "?" });
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Wie geht es weiter?" }),
       el("div", { class: "reihe" }, ...a.folge.map(x => el("span", { text: typeof x === "number" ? zahlText(x) : x })), luecke));

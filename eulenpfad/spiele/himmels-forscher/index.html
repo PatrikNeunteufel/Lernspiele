@@ -182,8 +182,30 @@ function planetKnopfInhalt(name) {
   return el("span", { class: "planet-knopf" }, kugel, name);
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst worauf schauen, dann die Regel oder der
+ * Merksatz (die Hinweise der Arten passen schon vor dem Antworten) — nie ein Planetenname als Antwort.
+ */
+const MERKSATZ = "Sag den Merksatz: Mein Vater erklärt mir jeden Sonntag unseren Nachthimmel. Jedes Wort beginnt wie ein Planet.";
+function tippsFuer(a) {
+  switch (a.art) {
+    case "vollNeu": return ["Schau, wie viel vom Mond hell ist.", a.hinweis];
+    case "zuOderAb": return ["Schau, welche Seite des Mondes hell ist: die rechte oder die linke?", a.hinweis];
+    case "naechste": return ["Wird der Mond gerade grösser oder kleiner?", a.hinweis];
+    case "vorher": return [a.hinweis, "Bis zum Vollmond wird der Mond von rechts her hell, danach wird er von rechts her wieder dunkel."];
+    case "ordnen": return [a.reihe.length === 4 ? "Zwischen zwei Bildern vergehen jedes Mal gleich viele Tage — es fehlt immer ein Bild dazwischen."
+      : "Fang beim genannten Bild an und such dann immer das nächste.", a.hinweis];
+    case "planetenOrdnen": return ["Fang bei der Sonne an: Welcher Planet ist ihr am nächsten?", MERKSATZ];
+    case "planetenRueckwaerts": return [MERKSATZ, a.hinweis];
+    case "zeitdauer": return ["Was passiert in dieser Zeit: Tag und Nacht, die Mondbilder oder die Jahreszeiten?",
+      "Tag und Nacht: Die Erde dreht sich. Mondbilder: Der Mond kreist um die Erde. Jahreszeiten: Die Erde kreist um die Sonne."];
+    default: return [MERKSATZ, "Denk an das Bild vom Sonnensystem."];
+  }
+}
+
 LS.spiel({
   id: "himmels-forscher",
+  hilfe: "Schau die Mondbilder genau an: Welche Seite ist hell? Bei einer Reihe tippst du die Mondbilder oder Planeten der Reihe nach an.",
   einleitung: "Schau in den Nachthimmel! Der Mond sieht jede Nacht ein bisschen anders aus. Und um die Sonne kreisen acht Planeten.",
   anzahl: 6,
   stufen: {
@@ -199,6 +221,7 @@ LS.spiel({
     const a = STUFE[ctx.stufe]();
     ctx.serie("art", a.art); // jede Stufe hat mehrere Arten
     if (a.art === "vollNeu" || a.art === "zuOderAb") ctx.serie("antwort", a.richtig); // Vollmond/Neumond, zunehmend/abnehmend
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     let fertig = false;
     const nacht = el("div", { class: "nacht" }, el("div", { class: "frage", html: a.frage }));
     if (a.gross) nacht.append(el("div", { class: "mond-gross", text: a.gross }));

@@ -456,9 +456,32 @@ function mitte(ctx, a, p) {
 
 const ARTEN = { setzen, ablesen, vergleich, ordnen, zaehlen, mitte };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Stelle für Stelle vorgehen, Strichwert in Worten
+ * (wie strichName), Nullen anhängen — nie die gesuchte Zahl oder ein Zeichen.
+ */
+function tippsFuer(a, p) {
+  const nullen = `Häng Nullen an, bis alle Zahlen gleich viele Stellen haben: ${dezimalText(0.5)} ist dasselbe wie ${dezimalText(0.5, 2)}.`;
+  if (a.art === "setzen") return ["Schau zuerst auf die Ganzen: Zwischen welchen zwei beschrifteten Strichen liegt die Zahl?",
+    a.ebenen ? "Dann auf die Zehntel: Tipp das Stück an, das sie zeigen. Die Lupe zeigt es feiner — dort schaust du auf die nächste Stelle."
+      : `Jeder Strich ist ${strichName(0, a.einheit)}. Zähl die Striche ab dem Anfang.`];
+  if (a.art === "ablesen") return ["Lies zuerst ab, wo der unterste Strahl anfängt.",
+    `Zähl dann die Striche bis zum Pfeil. Jeder Strich ist ${strichName(a.ebenen, a.einheit)}.`];
+  if (a.art === "vergleich") return ["Vergleiche Stelle für Stelle von links: zuerst die Ganzen, dann die Zehntel, dann die Hundertstel.",
+    `Mehr Ziffern heisst nicht mehr wert! ${nullen}`];
+  if (a.art === "ordnen") return ["Vergleiche zuerst die Zehntel, dann die Hundertstel, dann die Tausendstel.", nullen];
+  if (a.art === "zaehlen") return ["Schau, um wie viel sich die Zahlen jedes Mal ändern — der Schritt steht dazwischen.",
+    a.richtung > 0 ? "Zähl den Schritt Stelle für Stelle dazu. Sind bei einer Stelle 10 voll, gibt es eine mehr bei der Stelle links davon."
+      : "Zähl den Schritt Stelle für Stelle weg. Reicht eine Stelle nicht, nimm eine von der Stelle links davon."];
+  const st = nachkommaVon(a.b - a.a);
+  return ["Die Mitte ist von beiden Zahlen gleich weit weg.",
+    `Schreib beide Zahlen mit einer Stelle mehr: ${dezimalText(a.a / 1000, st + 1)} und ${dezimalText(a.b / 1000, st + 1)}. Welche Zahl liegt jetzt genau dazwischen?`];
+}
+
 LS.spiel({
   id: "zehntel-lupe",
   einleitung: "Zwischen zwei Strichen hat es noch viel Platz! Die Lupe zeigt ein Stück des Zahlenstrahls zehnmal grösser. Setze, lies ab, ordne und zähle mit Dezimalzahlen.",
+  hilfe: "Zum Setzen tippst du auf den Strahl: zuerst auf das Stück, in dem die Zahl liegt — die Lupe darunter zeigt es zehnmal grösser —, dann auf den Strich. Beim Ablesen, Zählen und bei der Mitte tippst du die Zahl ein, sonst die Antwort oder die Zahlen der Reihe nach.",
   anzahl: 8,
   stufen: {
     s1: "Franken und Meter: Wo liegt 3.40 Fr., wo 1.5 m? In 10-Rappen-Schritten zählen.",
@@ -473,6 +496,7 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const a = aufgabeErzeugen(ctx.stufe);
     ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a, p));
     ARTEN[a.art](ctx, a, p);
     if (ctx.nr === 0) ctx.sag(p.ebenen ? "Tipp: Schau zuerst auf die Zehntel, dann zeigt dir die Lupe die Hundertstel." : "Tipp: Zähl die Striche ab dem Anfang.");
   },

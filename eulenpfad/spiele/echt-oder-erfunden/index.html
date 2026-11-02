@@ -171,8 +171,20 @@ const HINWEIS = {
   textmerkmal: "Überlege zuerst, was für ein Text das ist.",
 };
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Prüffragen, die für echt und erfunden gleich gelten. */
+const TIPPS = {
+  aussage: ["Stell es dir vor: Hast du so etwas schon einmal gesehen?", "Könnte ein Tier, ein Mensch oder ein Ding das wirklich tun?"],
+  geschichte: ["Lies jeden Satz einzeln.", "Frag bei jedem Satz: Kann das wirklich passieren? Ein einziger erfundener Satz macht die Geschichte erfunden."],
+  staunen: ["Denk an das, was du über Tiere und die Natur weisst.", "Manches Wahre ist erstaunlich! Klingt es nur seltsam, oder ist es unmöglich?"],
+  welcherSatz: ["Lies jeden Satz einzeln.", HINWEIS.welcherSatz],
+  merkmal: ["Such zuerst den Satz, der nicht passieren kann.", "Wer tut dort etwas? Und kann der das wirklich?"],
+  textsorte: ["Wie beginnt der Text?", "Spielt er an einem echten Ort? Sprechen Tiere? Erklärt er etwas?"],
+  textmerkmal: ["Lies den Text noch einmal genau.", "Welche Antwort passt zu genau diesem Text?"],
+};
+
 LS.spiel({
   id: ID,
+  hilfe: "Lies oder hör den Satz oder die Geschichte. Dann legst du die Karte in den passenden Korb oder tippst die passende Antwort an.",
   einleitung: "Manche Geschichten könnten wirklich passieren, andere sind erfunden. Findest du heraus, was echt ist?",
   anzahl: 8,
   stufen: STUFEN,
@@ -181,6 +193,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     if (a.optionen.length === 2) ctx.serie("antwort", a.richtig); // echt/erfunden, stimmt/erfunden
+    ctx.tipp(TIPPS[a.art]); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const f = ctx.flaeche;
     const text =(t, klasse = "sachtext") => f.append(el("div", { class: klasse, text: t }));
     if (ctx.nr === 0) ctx.sag(`${a.art === "aussage" ? "Hör oder lies genau." : "Lies genau."} Könnte das wirklich so passieren?`);

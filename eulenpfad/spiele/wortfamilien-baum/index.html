@@ -279,9 +279,39 @@ function neuesBlatt(krone, wort, fam) {
 
 const MIT_STAMM = { s1: true, s2: true, s3: true, s4: true, s5: false, s6: false };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man den Stamm sucht und welche Fallen es gibt —
+ * nie das gesuchte Wort. Den Stamm nennen sie nur, wo er ohnehin am Baum steht (Stufe 1–4).
+ */
+function tippsFuer(a, stufe) {
+  const { fam } = a;
+  const umlaut = "Aus a, o, u kann in einer Familie ä, ö, ü werden. Solche Wörter gehören trotzdem dazu.";
+  if (a.art === "zugehoerig") return ["Schau dir die Wörter am Baum an. Welcher Teil steckt in beiden?",
+    `Such unten das Wort, in dem auch «${fam.stamm}» steckt.`];
+  if (a.art === "ausreisser" && !a.falschFreund) return ["Drei Wörter gehören zur selben Familie. Welches ist anders?",
+    `Such in jedem Wort den Stamm «${fam.stamm}».`];
+  if (a.art === "ausreisser") return [`Überlege bei jedem Wort: Hat es wirklich etwas mit «${fam.wort}» zu tun?`,
+    "Ein Wort sieht nur ähnlich aus, bedeutet aber etwas ganz anderes.", umlaut];
+  if (a.art === "baum") return stufe === "s5"
+    ? ["Das Wort ist aus zwei Wörtern zusammengesetzt. Zerlege es in seine Teile.", "Passt einer der Teile zu einem Baum? Er darf vorn oder hinten stehen."]
+    : a.wortArt === "umlaut"
+      ? ["Such in jedem Baum den Stamm. Steckt er im Wort?", "Mach im Wort aus ä ein a, aus ö ein o, aus ü ein u, aus äu ein au — welcher Stamm passt dann?"]
+      : ["Such in jedem Baum den Stamm. Steckt er im Wort?", "Deck Vorsilben und Endungen ab (ab-, ver-, -er, -ung): Was bleibt übrig?"];
+  if (a.art === "stamm") return ["Lies die drei Wörter langsam. Welcher Teil kommt in jedem Wort vor?",
+    "Deck Vorsilben und Endungen ab (ab-, ver-, -er, -ung): Was bleibt in allen drei Wörtern gleich?"];
+  return [`Such in jedem Wort einen Teil, der zu «${fam.wort}» passt.`,
+    "Vorsicht: Manche Wörter sehen nur ähnlich aus. Passt auch die Bedeutung zur Familie?",
+    "Auch lange, zusammengesetzte Wörter gehören dazu, wenn ein Teil zur Familie passt. " + umlaut];
+}
+
 LS.spiel({
   id: "wortfamilien-baum",
   einleitung: "Wörter mit demselben Stamm gehören zu einer Familie: fahren, Fahrer, Abfahrt. Hilf mir, die Wörter an den richtigen Baum zu hängen!",
+  hilfe: stufe => ({
+    s1: "Am Baum hängen schon zwei Wörter einer Familie. Tipp unten das Wort an, das auch dazugehört.",
+    s2: "Drei Wörter gehören zur Familie, eines nicht. Tipp das Wort an, das nicht dazugehört.",
+    s6: "Tipp alle Wörter an, die zur Familie am Baum gehören. Die Zahl unter dem Baum sagt, wie viele noch fehlen.",
+  }[stufe] || "Tipp den Baum an, an den das Wort gehört — oder die Antwort, nach der gefragt ist. Am Holz steht das Familienwort."),
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries({
     s1: "Welches Wort gehört auch zur Familie? Fahrer, Fahrt, …",
@@ -297,6 +327,7 @@ LS.spiel({
     if (ARTEN_ZAHL[ctx.stufe] > 1) ctx.serie("art", a.art);
     const { fam } = a;
     const mitStamm = MIT_STAMM[ctx.stufe];
+    ctx.tipp(tippsFuer(a, ctx.stufe));
 
     if (a.art === "zugehoerig") {
       const b = baumBild(fam, a.blaetter, true);

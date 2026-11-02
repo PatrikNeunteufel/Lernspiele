@@ -128,6 +128,7 @@ function zehnerfelder(a) {
 LS.spiel({
   id: "zehner-ergaenzer",
   einleitung: "Wie viel fehlt bis zur runden Zahl? Ergänze bis zum nächsten Zehner — und später bis zum Hunderter, Tausender und zur Million.",
+  hilfe: "Tipp ein, wie viel von der ersten Zahl bis zur runden Zahl fehlt. Deine Zahl erscheint gleich im „?“ der Rechnung. Dann drückst du OK.",
   anzahl: 10,
   stufen: {
     s1: "Bis 20 mit Zehnerfeldern: 7 + ? = 10, 13 + ? = 20.",
@@ -144,6 +145,10 @@ LS.spiel({
     const loesung = `${zahlText(a.start)} + ${zahlText(a.fehlt)} = ${zahlText(a.ziel)}`;
     ctx.loesung(loesung);
     ctx.schritte(LS.tippSchritte(a.fehlt));
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Anstoss, dann der Weg mit Zwischenhalt wie im Hinweis.
+    ctx.tipp([ctx.stufe === "s1" ? "Schau ins Zehnerfeld: Wie viele Plätze sind noch frei?"
+      : `Von ${zahlText(a.start)} bis ${zahlText(a.ziel)}: Wie gross ist der Sprung? Zähl in grossen Schritten weiter.`,
+      hinweisFuer(a, ctx.stufe)]);
     const luecke = el("span", { class: "luecke", text: "?" });
     ctx.flaeche.append(el("div", { class: "auftrag", text: `Ergänze ${BIS_ZUM[a.einheit]}.` }));
     if (ctx.stufe === "s1") ctx.flaeche.append(zehnerfelder(a));

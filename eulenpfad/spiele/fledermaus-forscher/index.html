@@ -139,9 +139,25 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Vorgehen und Steckbrief — nie die Antwort und
+ * kein Wort aus den Antwortknöpfen.
+ */
+function tippsFuer(a) {
+  if (a.art === "aussage") return ["Lies den Satz langsam — oft macht ein einziges Wort ihn falsch.",
+    "Denk an den Steckbrief: Die Fledermaus ist ein Säugetier, sie ist nachts wach und findet ihre Beute mit den Ohren."];
+  if (a.art === "frage") return ["Lies alle Antworten, bevor du tippst.", "Streich im Kopf zuerst die Antwort, die sicher nicht passt."];
+  if (a.art === "jahr") return ["Fang beim Winter an: Was macht die Fledermaus, wenn es kalt ist?",
+    "Danach geht das Jahr weiter: Frühling, Sommer, Herbst."];
+  return ["Stell dir vor, die Fledermaus hätte das nicht: Was könnte sie dann nicht?",
+    "Denk an ihr Leben: nachts jagen, am Tag schlafen, im Winter ruhen."];
+}
+
 LS.spiel({
   id: "fledermaus-forscher",
   einleitung: "Fledermäuse fliegen in der Nacht, hängen kopfüber und hören, wo die Mücken sind. Was weisst du über sie?",
+  hilfe: stufe => "Hör zu oder lies die Aussage oder Frage und wähl deine Antwort."
+    + (["s4", "s5", "s6"].includes(stufe) ? " Beim Jahr der Fledermaus tippst du die Karten der Reihe nach an, angefangen beim Winter." : ""),
   anzahl: 8,
   stufen: STUFEN,
 
@@ -202,6 +218,7 @@ LS.spiel({
         lob: `Genau: ${a.merkmal} — ${a.richtig}.`,
       });
     }
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (ctx.nr === 0) ctx.sag("Hör gut zu oder lies genau und tipp auf deine Antwort.");
   },
 });

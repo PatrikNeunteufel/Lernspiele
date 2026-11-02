@@ -252,8 +252,19 @@ function hinweisFuer(x, p) {
   return verraet(h, z(x.ergebnis)) ? ALLGEMEIN : h;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst die Regel, dann der Rechenweg aus hinweisFuer
+ * (zerlegen oder über die Stelle rechnen; hinweisFuer prüft selbst, dass das Ergebnis nicht darin steht).
+ */
+function tippsFuer(x, p) {
+  const erster = x.art === "?" ? "Wie viel fehlt bis zum nächsten Ganzen? Ergänze in kleinen Schritten."
+    : x.geld ? "Rechne zuerst die Franken, dann die Rappen." : ALLGEMEIN;
+  return [...new Set([erster, hinweisFuer(x, p)])];
+}
+
 LS.spiel({
   id: "dezimal-rakete",
+  hilfe: "Rechne die Aufgabe im Kopf und tippe das Ergebnis mit den Zifferntasten ein; das Zeichen nach den Ganzen hat eine eigene Taste. Steht ein „?“ in der Rechnung, tippst du, was fehlt. Mit jeder richtigen Aufgabe fliegt die Rakete höher 🚀.",
   einleitung: "3, 2, 1 … Start! Diesmal rechnet die Rakete mit Dezimalzahlen. Zehntel zu Zehnteln, Hundertstel zu Hundertsteln — rechne im Kopf!",
   anzahl: 8,
   stufen: {
@@ -273,6 +284,7 @@ LS.spiel({
     const gesucht = x.art === "?" ? x.b : x.ergebnis;
     const loesung = x.art === "?" ? `${z(x.ergebnis)} − ${z(x.a)} = ${z(x.b)}` : `${z(x.a)} ${x.art} ${z(x.b)} = ${z(x.ergebnis)}`;
     ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(x, p)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     ctx.schritte(LS.tippSchritte(gesucht / 1000));
 
     const bahn = el("div", { class: "bahn", "aria-hidden": "true" });

@@ -313,6 +313,33 @@ button { font-family: inherit; }
 .eule-zeile .vorlesen { flex: none; align-self: center; width: 52px; height: 52px; border: none; border-radius: 50%;
   background: #fff; box-shadow: var(--schatten); font-size: 24px; cursor: pointer; }
 .eule-zeile .vorlesen:active { transform: translateY(2px); }
+/* Fehler melden (LERN_Session9): kleiner runder Knopf neben der Blase, Formular über der Seite */
+.melde-zeile { display: flex; justify-content: flex-end; margin: -4px 0 8px; }
+.melde-zeile .melden { height: 36px; padding: 0 12px; border: none; border-radius: 999px;
+  background: #fff; box-shadow: var(--schatten); font: inherit; font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer; white-space: nowrap; }
+.melde-zeile .melden:active { transform: translateY(2px); }
+/* Gescrollt wird der Hintergrund, nicht das Fenster: ein Scrollbalken im Fenster schnitte die Rundung ab.
+   margin: auto zentriert und lässt bei langem Inhalt den Anfang erreichbar (place-items: center nicht). */
+.melde-hintergrund { position: fixed; inset: 0; z-index: 50; background: rgba(30, 30, 60, .45); display: grid; padding: 12px; overflow-y: auto; overscroll-behavior: contain; }
+.melde-fenster { width: min(560px, 100%); margin: auto; }
+.melde-fenster h2 { margin: 0 0 6px; }
+.melde-fenster h3 { margin: 14px 0 6px; font-size: 17px; }
+.melde-fenster textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: 17px; padding: 10px; border-radius: 12px; border: 2px solid #c5c9de; }
+.melde-wahl { display: flex; flex-direction: column; gap: 6px; }
+.melde-wahl button { text-align: left; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 14px;
+  border: 2px solid var(--rand); border-radius: 14px; min-height: 44px; font: inherit; font-size: 16px; background: #fff; color: var(--text); cursor: pointer; }
+.melde-wahl button[aria-pressed="true"] { background: var(--knopf); border-color: var(--knopf); color: #fff; }
+.melde-zusatz { font-weight: 400; font-size: 14px; opacity: .8; }
+.melde-meldung { color: var(--hinweis); font-weight: 700; min-height: 1em; margin: 6px 0; }
+/* Hilfe und Tipp (LERN_Session9). Während ❓ Hilfe oder 🙋 Melden ist die Aufgabe verdeckt. */
+.pause-verdeckt { filter: blur(12px); pointer-events: none; user-select: none; }
+.kopf .hilfe-knopf { border: none; background: var(--karte); box-shadow: var(--schatten); border-radius: 50%; width: 52px; height: 52px;
+  font-size: 24px; cursor: pointer; flex: none; }
+.hilfe-eigen { font-size: 17px; font-weight: 700; }
+.hilfe-liste { padding-left: 20px; margin: 8px 0 12px; }
+.hilfe-liste li { margin-bottom: 6px; }
+.tipp-zeile { display: flex; justify-content: flex-start; margin-top: 10px; }
+.tipp-zeile[hidden] { display: none; }
 /* Langes Drücken liest einen Knopf vor: kein Kontextmenü, keine Textauswahl auf dem Tablet */
 .karte button { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 

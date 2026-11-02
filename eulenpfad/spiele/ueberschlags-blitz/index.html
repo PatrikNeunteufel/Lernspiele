@@ -183,8 +183,31 @@ function pruefeAufgabe(a, stufe) {
 const rechnungText = r => `${zahlText(r.a)} ${ZEICHEN[r.op]} ${zahlText(r.b)}`;
 const HINWEIS = "Runde jede Zahl auf ihre erste Stelle und rechne mit den runden Zahlen. Wie viele Nullen hat das Ergebnis?";
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): runden, dann wie man mit den runden Zahlen rechnet —
+ * ohne Zahlen, die eine Antwort sein könnten.
+ */
+const RECHNEN_TIPP = {
+  "+": "Rechne mit den gerundeten Zahlen. Wie viele Nullen hat das Ergebnis?",
+  "-": "Rechne mit den gerundeten Zahlen. Wie viele Nullen hat das Ergebnis?",
+  "·": "Rechne die ersten Ziffern mal und häng dann alle Nullen der beiden Zahlen an.",
+  ":": "Runde die Zahl, durch die du teilst, auf ihre erste Stelle. Such dann vorne eine runde Zahl in der Nähe, die gut aufgeht.",
+};
+function tippsFuer(a) {
+  switch (a.art) {
+    case "ueberschlag": return ["Runde jede Zahl auf ihre erste Stelle.", RECHNEN_TIPP[a.op]];
+    case "stellen": return ["Überschlage zuerst: Runde beide Zahlen und rechne mit den runden Zahlen.", "Zähl dann die Ziffern des runden Ergebnisses."];
+    case "pruefen": return ["Überschlage jede Rechnung im Kopf und vergleiche mit dem Ergebnis daneben.",
+      "Die falsche Rechnung liegt weit daneben: Ihr Ergebnis hat eine Stelle zu viel oder zu wenig."];
+    case "anteil": return ["Runde beide Zahlen.", "Ist der Teil etwa die Hälfte, ein Viertel oder ein Zehntel des Ganzen — oder ein paar Zehntel?",
+      "Denk an Brüche: die Hälfte, ein Viertel, ein Zehntel — und wie viel Prozent das jeweils sind."];
+    default: return ["Runde das Ganze auf seine erste Stelle.", "Wie viel sind 10 % davon? Von dort aus kannst du weiterrechnen."];
+  }
+}
+
 LS.spiel({
   id: "ueberschlags-blitz",
+  hilfe: "Du musst nicht genau rechnen: Runde die Zahlen, überschlage im Kopf und tippe die Antwort an, die am besten passt.",
   einleitung: "Das Radar peilt nur ungefähr — du auch! Du musst nicht genau rechnen: Runde die Zahlen und finde heraus, ungefähr wie gross das Ergebnis ist.",
   anzahl: 8,
   stufen: {
@@ -199,6 +222,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const f = ctx.flaeche;
+    ctx.tipp(tippsFuer(a));
     if (a.art === "ueberschlag") {
       ctx.serie("rechenart", a.op);
       f.append(el("div", { class: "frage", text: "Ungefähr wie gross ist das Ergebnis?" }), el("div", { class: "rechnung", text: `${rechnungText(a)} ≈ ?` }));

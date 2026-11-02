@@ -321,8 +321,40 @@ const TIPP = {
   brauche: "Überlege: Wie viele brauchst du wirklich? Was kostet das einzeln?",
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst der Plan (TIPP), dann ein Rechenweg — nie ein
+ * Betrag, der gesucht ist, oder die passende Wahl.
+ */
+function tippsFuer(a) {
+  const zweiter = {
+    reicht: "Rechne zuerst die Franken zusammen, dann die Rappen. Reicht es knapp, zählt jeder Rappen.",
+    rest: "Du kannst auch ergänzen: Von den Ausgaben aus — wie viel fehlt bis zu deinem Geld?",
+    woche: "Schau zuerst die günstigen Sachen an. Dann siehst du, ob noch etwas Teureres Platz hat.",
+    sparen: a.schon ? "Zieh zuerst ab, was schon im Kässeli ist. Dann: Wie oft passt der Wochenbetrag in den Rest?"
+      : "Wie oft passt der Wochenbetrag in den Preis?",
+    fest: a.fest?.some(([, k]) => k > 1) ? "Bei „3 ×“ rechnest du zuerst das Mal. Dann zählst du alles zusammen und ziehst es vom Budget ab."
+      : "Zähl die festen Ausgaben zusammen und zieh sie vom Budget ab.",
+    wunsch: "Vergleiche den Rest mit jedem Preis: Was höchstens so viel kostet wie der Rest, passt noch.",
+    sortieren: "Stell dir vor, du hättest es nicht: Fehlt dir dann etwas Wichtiges?",
+    vergleich: "Teile den Preis durch die Anzahl Stück. Oder rechne beide Angebote auf gleich viele Stück um.",
+    brauche: `Rechne aus, was deine ${a.k} Stück einzeln kosten, und vergleiche mit dem Preis für den ganzen Pack.`,
+  }[a.art];
+  const t = [TIPP[a.art], zweiter];
+  if (a.art === "sparen") t.push("Bleibt dabei ein Rest, brauchst du noch eine Woche mehr.");
+  return t;
+}
+const HILFE = {
+  s1: "Lies, wie viel Geld du hast und was die Sachen kosten. Dann tippst du an, ob dein Geld reicht.",
+  s2: "Lies, wie viel Geld du hast und was du kaufst. Tipp ein, wie viel übrig bleibt (in Franken).",
+  s3: "Tipp Sachen im Regal an, um sie in den Korb zu legen; nochmal tippen nimmt sie wieder heraus. Ist der Korb voll, prüfst du mit „Prüfen ✓“.",
+  s4: "Lies das Sparziel, was schon im Kässeli ist und was du jede Woche dazulegst. Tipp ein, nach wie vielen Wochen du es kaufen kannst.",
+  s5: "Zuerst kommt, was du brauchst. Tipp dann ein, was übrig bleibt, wähle den passenden Wunsch oder leg die Sache in den Korb „Bedarf“ oder „Wunsch“.",
+  s6: "Vergleiche die Angebote und tippe an, was günstiger ist.",
+};
+
 LS.spiel({
   id: ID,
+  hilfe: stufe => HILFE[stufe] || HILFE.s1,
   einleitung: "Dein Taschengeld, dein Plan! Rechne nach, was du dir leisten kannst — und überlege, was du wirklich brauchst.",
   anzahl: 8,
   stufen: STUFEN,
@@ -330,6 +362,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     if (ctx.nr === 0) ctx.sag(TIPP[a.art]);
+    ctx.tipp(tippsFuer(a));
     if (new Set(STUFE[ctx.stufe]).size > 1) ctx.serie("art", a.art);
     const f = ctx.flaeche;
     const karte = el("div", { class: "tg-karte sachtext" });

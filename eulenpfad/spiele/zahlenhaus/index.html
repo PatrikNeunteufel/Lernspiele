@@ -100,6 +100,7 @@ function pruefeAufgabe(a, stufe) {
 LS.spiel({
   id: "zahlenhaus",
   einleitung: "Im Zahlenhaus wohnt oben die Dachzahl. In jedem Stockwerk wohnen zwei Zahlen, die zusammen die Dachzahl ergeben.",
+  hilfe: "Oben im Dach steht die Dachzahl. In einem Stockwerk fehlt eine Zahl — dort steht „?“. Tipp die fehlende Zahl ein und drück OK.",
   anzahl: 10,
   stufen: {
     s1: "Kleine Häuser bis 5.",
@@ -126,6 +127,15 @@ LS.spiel({
     const loesung = `${rechnung(a.richtig)} = ${zahlText(a.dach)}`;
     ctx.loesung(loesung);
     ctx.schritte(LS.tippSchritte(a.richtig));
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): ergänzen bis zur Dachzahl, je Stufe ein Weg dazu.
+    ctx.tipp(["Wie viel fehlt vom Stockwerk bis zur Dachzahl?",
+      reihe.length === 3 ? "Rechne zuerst die zwei Zahlen im Stockwerk zusammen. Wie viel fehlt dann noch bis zur Dachzahl?"
+        : { s1: "Nimm die Finger: Zeig die Dachzahl und klapp so viele weg, wie schon im Stockwerk stehen.",
+          s2: "Nimm die Finger: Zeig die Dachzahl und klapp so viele weg, wie schon im Stockwerk stehen.",
+          s3: "Nimm die Finger: Zeig die Dachzahl und klapp so viele weg, wie schon im Stockwerk stehen.",
+          s4: "Zähl von der Zahl im Stockwerk weiter bis zur Dachzahl. Geht es über die 10, mach dort einen Halt.",
+          s5: "Ergänze zuerst die Zehner, dann die Einer.",
+          s6: "Rechne mit Zehnern: 10 Zehner sind 100." }[ctx.stufe]]);
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl fehlt im Stockwerk?" }), haus);
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Fehlende Zahl" });
     ctx.flaeche.append(anzeige);

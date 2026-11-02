@@ -346,9 +346,23 @@ function zahlAntwort(ctx, soll, loesung, hinweis) {
   ctx.flaeche.append(tasten.element);
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Vorgehen je Art — ohne Zwischenergebnis und ohne Regel. */
+function tippsFuer(a) {
+  if (a.art === "vor") return a.ops.length > 1
+    ? ["Steck die Zahl vorne hinein und rechne Kasten für Kasten.", "Merk dir jedes Zwischenergebnis, bevor du zum nächsten Kasten gehst."]
+    : ["Steck die Zahl vorne hinein und rechne, was im Kasten steht."];
+  if (a.art === "rueck") return ["Starte hinten bei der Zahl, die herauskommt.", "Mach jeden Schritt rückgängig: aus + wird −, aus × wird : — und umgekehrt.",
+    "Mach am Schluss die Probe: Steck deine Zahl vorne hinein."];
+  if (a.art === "weiche") return ["Beantworte in jeder Runde zuerst die Frage: ja oder nein?",
+    "Nimm dann den passenden Kasten. Was herauskommt, geht wieder oben hinein — zähl die Runden mit."];
+  return [a.art === "regel2" ? "Rechne beim ersten Zahlenpaar zuerst den Kasten aus, den du kennst." : "Schau das erste Zahlenpaar an: Wird die Zahl grösser oder kleiner? Viel oder wenig?",
+    "Prüf jede Regel an allen Zahlenpaaren. Nur eine passt bei allen."];
+}
+
 LS.spiel({
   id: "rechen-maschine",
   einleitung: "Die Rechen-Maschine rechnet Schritt für Schritt. Was kommt heraus — und was ging hinein?",
+  hilfe: "Die Zahl geht vorne hinein, jeder Kasten rechnet einen Schritt. Tippe die Zahl ein, die herauskommt oder hineinging. Fehlt ein Kasten, tippst du die passende Regel an.",
   anzahl: 8,
   stufen: {
     s1: "Ein Kasten: 15 → + 7 → ?",
@@ -362,6 +376,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     ctx.serie("art", a.art); // vorwärts, rückwärts, Regel finden, Weiche
+    ctx.tipp(tippsFuer(a));
     const loesung = loesungText(a);
 
     if (a.art === "vor" || a.art === "rueck") {

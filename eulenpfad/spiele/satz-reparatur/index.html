@@ -22,7 +22,8 @@
   }
   .zeichen.gesetzt { border-style: solid; border-color: var(--knopf); }
   .zeichen.fehler { border-color: var(--hinweis); }
-  .tipp-zeile { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
+  /* früher .tipp-zeile — die Klasse gehört seit LERN_Session9 dem Rahmen (💡 Tipp) */
+  .sr-anleitung { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -110,9 +111,20 @@ function pruefeAufgabe(satz, stufe) {
   return m;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wo man hinschaut und welche Probe hilft — nie ein Wort oder Zeichen. */
+function tippsFuer(stufe, satz) {
+  const t = [(satz.match(/[.!?]/g) || []).length > 1
+    ? "Wo fängt ein Satz an? Auch nach jedem Satzzeichen beginnt ein neuer Satz — wieder gross."
+    : "Wo fängt der Satz an? Der erste Buchstabe ist gross."];
+  if (stufe !== "s1") t.push("Nomen schreibt man gross. Probe: Passt der, die oder das davor? Namen schreibt man auch gross.");
+  t.push("Lies jeden Satz laut: Ist es eine Frage, ein Ausruf oder ein normaler Satz? Danach wählst du das Zeichen.");
+  return t;
+}
+
 LS.spiel({
   id: "satz-reparatur",
   einleitung: "Oje, in diesen Sätzen ist alles klein geschrieben und die Satzzeichen fehlen! Repariere sie: Tipp ein Wort an, um den ersten Buchstaben gross zu machen.",
+  hilfe: "Tippe ein Wort an, dann wird der erste Buchstabe gross; nochmals antippen macht ihn wieder klein. Tippe das Kästchen am Satzende an, bis das richtige Zeichen drinsteht. Am Schluss „Fertig ✓“.",
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries({
     s1: "Satzanfang gross und Punkt am Ende.",
@@ -126,10 +138,11 @@ LS.spiel({
   aufgabe(ctx) {
     const satz = aufgabeErzeugen(ctx.stufe);
     ctx.loesung(satz);
+    ctx.tipp(tippsFuer(ctx.stufe, satz));
     if (ZEICHEN_WECHSELT.has(ctx.stufe)) ctx.serie("satzzeichen", satzende(satz));
     const woerter = zerlege(satz);
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Repariere den Satz!" }),
-      el("div", { class: "tipp-zeile frage", text: "Tipp ein Wort an: gross oder klein. Tipp das Kästchen an: Satzzeichen wählen." }));
+      el("div", { class: "sr-anleitung frage", text: "Tipp ein Wort an: gross oder klein. Tipp das Kästchen an: Satzzeichen wählen." }));
     const zeile = el("div", { class: "satz" });
     const zustand = woerter.map(w => ({ ...w, gross: false, zeichen: "" }));
     let fertig = false;

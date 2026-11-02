@@ -116,9 +116,28 @@ const STUFEN_TEXT = {
   s6: "Endgegner: Ein Kanton oder Hauptort ist markiert — wie heisst er?",
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Himmelsrichtungen auf der Karte und die grobe
+ * Gegend des Ziels (vom Mittelpunkt des Ausschnitts aus) — nie das Gebiet selbst.
+ */
+function tippsFuer(p, ziel, gebiete) {
+  const ganz = p.ansicht !== "sg";
+  const [vx, vy, vb, vh] = ganz ? [0, 0, KARTE.breite, KARTE.hoehe] : ausschnitt(gebiete);
+  const mitte = { x: vx + vb / 2, y: vy + vh / 2 }, z = lage(ziel);
+  const nahe = Math.hypot(z.x - mitte.x, z.y - mitte.y) < Math.min(vb, vh) / 6;
+  const wo = `${ganz ? "der Schweiz" : "des Kantons St. Gallen"}`;
+  if (p.art === "erkennen") return ["Wo liegt das Markierte: im Norden, im Süden, im Osten oder im Westen " + wo + "?",
+    "Welche Kantone und Orte kennst du in dieser Gegend? Schliesse zuerst aus, was sicher woanders liegt."];
+  return ["Auf der Karte ist oben Norden, unten Süden, rechts Osten und links Westen.",
+    nahe ? `Was du suchst, liegt ungefähr in der Mitte ${wo}.` : `Was du suchst, liegt ${richtung(mitte, z)} ${wo}.`];
+}
+
 LS.spiel({
   id: SPIEL_ID,
   einleitung: "Auf dieser Karte steht kein einziger Name! Ich sage dir, was du suchst — tipp es auf der Karte an.",
+  hilfe: stufe => (STUFE[stufe]?.art === "erkennen"
+    ? "Auf der Karte ist ein Kanton oder Hauptort rot markiert. Tippe unten den passenden Namen an."
+    : "Auf der Karte stehen keine Namen. Lies, was gesucht ist, und tippe es auf der Karte an: ein Gebiet oder einen Punkt."),
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => STUFE[s].ziele().length)),
 
@@ -132,6 +151,7 @@ LS.spiel({
 
     // Karte: Ausschnitt St. Gallen (Stufe 1) oder die ganze Schweiz
     const gebiete = p.ansicht === "sg" ? KARTE.wahlkreise : KARTE.kantone;
+    ctx.tipp(tippsFuer(p, ziel, gebiete));
     const [vx, vy, vb, vh] = p.ansicht === "sg" ? ausschnitt(gebiete) : [0, 0, KARTE.breite, KARTE.hoehe];
     const svg = svgEl("svg", { class: "karte-svg", viewBox: `${vx} ${vy} ${vb} ${vh}`, role: "img", "aria-label": "Stumme Karte" });
     const flaechen = new Map();

@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Komma-Messband</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4.2vw, 26px); font-weight: 800; margin: 0 0 8px; }
+  .familie { text-align: center; color: var(--text-leise); font-weight: 700; margin-bottom: 4px; }
+  .rechnung { text-align: center; font-size: clamp(24px, 6.4vw, 46px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 6px 0 12px; }
+  .rechnung .gesucht { color: var(--knopf); }
+  .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
+  .ergebnis-zeile .anzeige { flex: 1; }
+  .ergebnis-zeile .einheit { font-size: clamp(26px, 6vw, 38px); font-weight: 900; color: var(--knopf); min-width: 1.8em; }
+
+  /* Messband: eine Spalte je Stelle, beschriftet mit der Einheit dieser Stelle */
+  .messband { display: flex; justify-content: center; margin: 0 auto 12px; max-width: 100%; }
+  .mb-spalte { display: flex; flex-direction: column; align-items: stretch; min-width: clamp(34px, 11vw, 58px); }
+  .mb-kopf { text-align: center; font-weight: 900; font-size: clamp(14px, 3.6vw, 18px); color: #fff; background: var(--deko-5); padding: 4px 2px; border-right: 2px solid #fff; }
+  .mb-kopf.leer { background: color-mix(in srgb, var(--deko-5) 35%, #fff); color: var(--text-leise); }
+  .mb-ziffer { text-align: center; font-weight: 900; font-size: clamp(20px, 5vw, 30px); font-variant-numeric: tabular-nums; height: 1.6em; line-height: 1.6em; border: 2px solid var(--rand); border-top: 0; border-left: 0; background: #fff; position: relative; }
+  .mb-spalte:first-child .mb-ziffer { border-left: 2px solid var(--rand); }
+  .mb-ziffer.komma::after { content: var(--komma, "."); position: absolute; right: -0.28em; bottom: -0.1em; color: var(--knopf); font-size: 1.1em; z-index: 1; }
+  .mb-legende { text-align: center; font-size: 14px; color: var(--text-leise); font-weight: 700; margin: -6px 0 10px; }
+  .wahl-knopf { font-size: clamp(20px, 4.6vw, 28px); font-weight: 900; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📏 Komma-Messband</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan 21 MA.3.A.2 (Grössen umwandeln und mit ihnen rechnen), MA.3.A.1 (Masseinheiten, Referenzgrössen):
+//   s1 MA.3.A.2.g (5. Klasse): benachbarte Einheiten, Dezimalzahl → ganze Zahl (3.25 m = 325 cm, 4.50 Fr. = 450 Rp.)
+//   s2 MA.3.A.2.g/h: beide Richtungen, dazu kg/g, l/dl, cm/mm, km/m (2.4 kg = 2400 g, 75 cm = 0.75 m)
+//   s3 MA.3.A.2.h (Grundanspruch Ende 6. Klasse): benachbarte Einheiten in Dezimalschreibweise, auch auf
+//      beiden Seiten mit Komma (0.75 l = 7.5 dl), t/kg, l/cl/ml, Nullen (4.05 Fr. = 405 Rp.)
+//   s4 MA.3.A.2.h, schwerer: Lücke links oder rechts, viele Nullen (0.05 m = 5 cm, ? kg = 40 g)
+//   s5 MA.3.A.2.j/k (3. Zyklus): dezimales Masssystem nutzen, mit zusammengesetzten Masszahlen rechnen
+//      (1.25 kg + 750 g = ? kg)
+//   s6 Königsstufe: Sprünge über mehrere Einheiten (0.035 km = ? cm), Vergleichen über Einheiten
+//      (MA.3.A.1.h Referenzgrössen: welche Länge ist am grössten?), drei Grössen verrechnen.
+// Basisklasse 6. Der Masse-Umwandler (Basisklasse 3) wandelt nur ganze Zahlen und zweifach benannte
+// Grössen um („3 m 25 cm = 325 cm“); hier immer mit Dezimalzahlen, nie zweifach benannt.
+// Gerechnet wird in ganzen Zahlen der kleinsten Einheit (mm, g, ml, Rp.), Antworten in Tausendsteln.
+// Hinweise fangen das verrutschte Komma (Faktor 10, 100, 1000), die falsche Richtung, vergessene Nullen und
+// das Zusammenzählen verschiedener Einheiten ab. Das Messband (Stellentafel mit Einheiten) zeigt danach,
+// wo die Ziffern stehen.
+
+const { zahlText, dezimalText, zufall, waehle, mische, el } = LS;
+
+// Familien: Einheiten von gross nach klein mit Wert in der kleinsten Einheit; band: Spalten des Messbands
+// (Wert der Stelle, Beschriftung oder "" für Stellen ohne eigene Einheit).
+const FAMILIEN = {
+  laenge: { name: "Längen", einheiten: { km: 1e6, m: 1000, dm: 100, cm: 10, mm: 1 },
+    band: [[1e6, "km"], [1e5, ""], [1e4, ""], [1000, "m"], [100, "dm"], [10, "cm"], [1, "mm"]], max: 1e7 },
+  gewicht: { name: "Gewichte", einheiten: { t: 1e6, kg: 1000, g: 1 },
+    band: [[1e6, "t"], [1e5, ""], [1e4, ""], [1000, "kg"], [100, ""], [10, ""], [1, "g"]], max: 1e7 },
+  hohl: { name: "Hohlmasse", einheiten: { l: 1000, dl: 100, cl: 10, ml: 1 },
+    band: [[1e4, ""], [1000, "l"], [100, "dl"], [10, "cl"], [1, "ml"]], max: 1e5 },
+  geld: { name: "Geld", einheiten: { "Fr.": 100, "Rp.": 1 },
+    band: [[1000, ""], [100, "Fr."], [10, ""], [1, "Rp."]], max: 1e4 },
+};
+const f = (fam, e) => FAMILIEN[fam].einheiten[e];
+
+const PAARE_2 = [["laenge", "m", "cm"], ["geld", "Fr.", "Rp."], ["gewicht", "kg", "g"], ["hohl", "l", "dl"], ["laenge", "cm", "mm"], ["laenge", "km", "m"]];
+const PAARE_3 = [...PAARE_2, ["gewicht", "t", "kg"], ["hohl", "l", "ml"], ["hohl", "l", "cl"], ["hohl", "dl", "cl"], ["laenge", "m", "dm"], ["laenge", "dm", "cm"], ["laenge", "m", "mm"]];
+const SPRUENGE = [["laenge", "km", "cm"], ["laenge", "km", "mm"], ["laenge", "m", "mm"], ["laenge", "dm", "mm"], ["gewicht", "t", "g"], ["hohl", "l", "ml"], ["hohl", "dl", "ml"]];
+const RECHNEN = [["gewicht", "kg", "g"], ["laenge", "m", "cm"], ["laenge", "km", "m"], ["hohl", "l", "dl"], ["hohl", "l", "ml"], ["geld", "Fr.", "Rp."], ["gewicht", "t", "kg"]];
+
+// Je Stufe: Aufgabenarten und Paare; richtung: nur "gk" (gross → klein) oder beide; komma2: auch die kleine
+// Einheit mit Dezimalzahl; nullen: true = verlangt, false = keine Null nach dem Komma, null = beliebig.
+const STUFE = {
+  s1: { arten: ["umwandeln"], paare: [["laenge", "m", "cm"], ["geld", "Fr.", "Rp."]], richtungen: ["gk"], nullen: false },
+  s2: { arten: ["umwandeln"], paare: PAARE_2, richtungen: ["gk", "kg"], nullen: false },
+  s3: { arten: ["umwandeln"], paare: PAARE_3, richtungen: ["gk", "kg"], nullen: null, komma2: true },
+  s4: { arten: ["umwandeln"], paare: PAARE_3, richtungen: ["gk", "kg"], nullen: true, komma2: true, luecke: true },
+  s5: { arten: ["rechnen"], paare: RECHNEN },
+  s6: { arten: ["sprung", "vergleich", "rechnen3"], paare: SPRUENGE },
+};
+
+// ---------- Zahlen und Texte ----------
+
+/** Anzahl Nachkommastellen von q (in der kleinsten Einheit) in der Einheit e; > 3 heisst „zu viele“. */
+function stellenVon(q, fam, e) {
+  const w = f(fam, e);
+  for (let s = 0; s <= 3; s++) if ((q * 10 ** s) % w === 0) return s;
+  return 99;
+}
+/** Wert von q in Einheit e als Zahl (q · 1000 / w ist ganz, sonst nie aufgerufen). */
+const wertIn = (q, fam, e) => Math.round((q * 1000) / f(fam, e)) / 1000;
+/** Grösse als Text: „3.25 m“, „2400 g“, Geld mit LS.geldText („4.05 Fr.“), Rappen als ganze Zahl. */
+function menge(q, fam, e) {
+  if (fam === "geld" && e === "Fr.") return LS.geldText(q);
+  const v = wertIn(q, fam, e);
+  return `${Number.isInteger(v) ? zahlText(v) : dezimalText(v)} ${e}`;
+}
+const tausendstel = (q, fam, e) => Math.round((q * 1000) / f(fam, e));
+/** Hat der Wert eine Null direkt nach dem Komma oder ist er kleiner als 1? (0.05, 4.05, 3.008) */
+const hatNullen = v => /^0\.|\.0/.test(String(v));
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(art, p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "umwandeln", fam: "laenge", gross: "m", klein: "cm", richtung: "gk", q: 3250, von: "m", ziel: "cm", luecke: "rechts" };
+}
+
+function erzeuge(art, p) {
+  if (art === "umwandeln") {
+    const [fam, gross, klein] = waehle(p.paare);
+    const richtung = waehle(p.richtungen);
+    // Schritt in der kleinsten Einheit: mit Komma in der kleinen Einheit ein Zehntel davon
+    const zehntel = p.komma2 && f(fam, klein) >= 10 && Math.random() < 0.3;
+    const schritt = zehntel ? f(fam, klein) / 10 : f(fam, klein);
+    const bis = Math.min(FAMILIEN[fam].max, f(fam, gross) * (fam === "geld" ? 50 : 10));
+    const q = zufall(1, Math.floor(bis / schritt) - 1) * schritt;
+    const vGross = wertIn(q, fam, gross);
+    if (Number.isInteger(vGross) || stellenVon(q, fam, gross) > 3) return null;
+    if (p.nullen === false && /\.\d*0/.test(String(vGross))) return null;
+    if (p.nullen === true && !hatNullen(vGross)) return null;
+    const [von, ziel] = richtung === "gk" ? [gross, klein] : [klein, gross];
+    const luecke = p.luecke ? waehle(["links", "rechts"]) : "rechts";
+    return { art, fam, gross, klein, richtung, q, von, ziel, luecke };
+  }
+  if (art === "sprung") {
+    const [fam, gross, klein] = waehle(p.paare);
+    const richtung = waehle(["gk", "kg"]);
+    const schritt = waehle([f(fam, klein), f(fam, klein) * 10, f(fam, klein) * 100]);
+    const q = zufall(1, Math.floor((f(fam, gross) * 10) / schritt) - 1) * schritt;
+    const vGross = wertIn(q, fam, gross);
+    if (Number.isInteger(vGross) || stellenVon(q, fam, gross) > 3 || !Number.isInteger(wertIn(q, fam, klein))) return null;
+    const [von, ziel] = richtung === "gk" ? [gross, klein] : [klein, gross];
+    return { art, fam, gross, klein, richtung, q, von, ziel, luecke: waehle(["links", "rechts"]) };
+  }
+  if (art === "rechnen" || art === "rechnen3") {
+    const [fam, gross, klein] = art === "rechnen" ? waehle(p.paare) : waehle(RECHNEN);
+    const fg = f(fam, gross), fk = f(fam, klein);
+    // erste Grösse in der grossen Einheit mit Komma, die zweite in der kleinen (ganz), die dritte gross
+    const teil = e => (e === gross ? zufall(2, 9 * (fg / fk) * (fam === "geld" ? 5 : 1)) * fk : zufall(1, Math.min(99, fg / fk - 1)) * fk * (fg / fk >= 1000 ? 10 : 1));
+    const einheiten = art === "rechnen" ? [gross, klein] : mische([gross, klein, waehle([gross, klein])]);
+    const terme = einheiten.map((e, i) => ({ q: teil(e), e, op: i === 0 ? "+" : waehle(["+", "−"]) }));
+    const summe = terme.reduce((s, t) => s + (t.op === "−" ? -t.q : t.q), 0);
+    if (summe <= 0) return null;
+    if (!terme.some(t => t.e === gross && !Number.isInteger(wertIn(t.q, fam, gross)))) return null;
+    const ziel = waehle([gross, klein]);
+    if (stellenVon(summe, fam, ziel) > 3 || (fam === "geld" && stellenVon(summe, fam, ziel) > 2)) return null;
+    return { art, fam, gross, klein, terme, q: summe, ziel, op: terme.slice(1).map(t => t.op).join("") };
+  }
+  if (art === "vergleich") {
+    const fam = waehle(["laenge", "gewicht", "hohl"]);
+    const einheiten = Object.keys(FAMILIEN[fam].einheiten);
+    const skala = fam === "laenge" ? waehle([1e3, 1e4, 1e5, 1e6]) : fam === "gewicht" ? waehle([1e3, 1e4, 1e5, 1e6]) : waehle([100, 1e3, 1e4]);
+    const schritt = skala / 100;
+    const werte = new Set();
+    while (werte.size < 4) werte.add(Math.round((skala * (0.5 + Math.random())) / schritt) * schritt);
+    const qs = [...werte];
+    const teile = qs.map(q => {
+      const passend = einheiten.filter(e => stellenVon(q, fam, e) <= 3 && wertIn(q, fam, e) < 1e5 && wertIn(q, fam, e) >= 0.01);
+      return { q, e: waehle(passend) };
+    });
+    if (new Set(teile.map(t => t.e)).size < 3) return null;
+    const frage = waehle(["gross", "klein"]);
+    const ziel = frage === "gross" ? Math.max(...qs) : Math.min(...qs);
+    return { art, fam, teile, frage, wahl: qs.indexOf(ziel) };
+  }
+  return null;
+}
+
+/**
+ * Mängel: Die Texte werden zurückgelesen (Zahl und Einheit, auch Franken) und unabhängig vom Generator
+ * nachgerechnet; dazu Stellenzahl der Antwort, Platz auf der Tastatur und auf dem Messband.
+ */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  /** „3.25 m“ → Menge in der kleinsten Einheit (Prüfung mit Punkt als Dezimalzeichen). */
+  const lies = text => {
+    const t = text.replace(/[    ]+(?=\d)/g, "").replace(",", ".");
+    const mm = t.match(/^(\d+(?:\.\d+)?) ?(\S+)$/);
+    const w = mm && FAMILIEN[a.fam].einheiten[mm[2]];
+    if (!w) { m.push(`unlesbar «${text}»`); return NaN; }
+    return Math.round(Number(mm[1]) * w);
+  };
+  if (a.art === "umwandeln" || a.art === "sprung") {
+    const paar = [a.fam, a.gross, a.klein];
+    if (!(a.art === "sprung" ? p.paare : p.paare).some(x => x.join() === paar.join())) m.push("Paar nicht in der Stufe");
+    if (lies(menge(a.q, a.fam, a.von)) !== a.q || lies(menge(a.q, a.fam, a.ziel)) !== a.q) m.push("Text passt nicht zur Menge");
+    if (stellenVon(a.q, a.fam, a.ziel) > 3) m.push("Antwort mit mehr als drei Nachkommastellen");
+    const vg = wertIn(a.q, a.fam, a.gross);
+    if (Number.isInteger(vg)) m.push("grosse Einheit ohne Komma — zu einfach");
+    if (p.nullen === false && /\.\d*0/.test(String(vg))) m.push("Null nach dem Komma in einer leichten Stufe");
+    if (p.nullen === true && !hatNullen(vg)) m.push("keine Null nach dem Komma");
+    if (!p.richtungen?.includes(a.richtung) && a.art !== "sprung") m.push("Richtung nicht in der Stufe");
+    if (a.art === "sprung" && f(a.fam, a.gross) / f(a.fam, a.klein) < 100) m.push("kein Sprung über mehrere Einheiten");
+  }
+  if (a.art === "rechnen" || a.art === "rechnen3") {
+    const summe = a.terme.reduce((s, t) => s + (t.op === "−" ? -1 : 1) * lies(menge(t.q, a.fam, t.e)), 0);
+    if (summe !== a.q) m.push(`Summe stimmt nicht (nachgerechnet ${summe})`);
+    if (!(a.q > 0)) m.push("Ergebnis nicht positiv");
+    if (stellenVon(a.q, a.fam, a.ziel) > 3) m.push("Antwort mit mehr als drei Nachkommastellen");
+    if (new Set(a.terme.map(t => t.e)).size < 2) m.push("nur eine Einheit — nichts umzuwandeln");
+    if (a.terme.length !== (a.art === "rechnen" ? 2 : 3)) m.push("Anzahl Grössen falsch");
+  }
+  if (a.art === "vergleich") {
+    const qs = a.teile.map(t => lies(menge(t.q, a.fam, t.e)));
+    if (new Set(qs).size !== qs.length) m.push("zwei gleich grosse Angaben");
+    const ziel = a.frage === "gross" ? Math.max(...qs) : Math.min(...qs);
+    if (qs.indexOf(ziel) !== a.wahl || qs.filter(q => q === ziel).length !== 1) m.push("nicht genau eine richtige Antwort");
+    if (new Set(a.teile.map(t => menge(t.q, a.fam, t.e))).size !== 4) m.push("doppelte Antworten");
+  }
+  if (a.q !== undefined) {
+    if (!(a.q > 0 && a.q < FAMILIEN[a.fam].max)) m.push("Menge passt nicht aufs Messband");
+    const v = wertIn(a.q, a.fam, a.ziel);
+    if (String(Math.floor(v)).length > 7) m.push("Antwort passt nicht in die Tastatur");
+  }
+  return m;
+}
+
+// ---------- Messband ----------
+
+/** Messband der Familie; mit q die Ziffern dieser Menge, das Komma hinter der Spalte der Einheit e. */
+function messband(fam, q = null, e = null) {
+  const band = FAMILIEN[fam].band;
+  const box = el("div", { class: "messband", "aria-label": "Messband mit Einheiten" });
+  let hi = -1, lo = -1;
+  if (q !== null) {
+    const ie = band.findIndex(([w]) => w === f(fam, e));
+    const ziffer = i => Math.floor(q / band[i][0]) % 10;
+    const nichtNull = band.map((_, i) => i).filter(i => ziffer(i) && q >= band[i][0] / 10);
+    hi = Math.min(ie, nichtNull[0] ?? ie);
+    lo = Math.max(ie, nichtNull.at(-1) ?? ie);
+    box.style.setProperty("--komma", `"${LS.einstellung("dezimal") === "komma" ? "," : "."}"`);
+    band.forEach(([w, name], i) => {
+      const z = i >= hi && i <= lo ? String(Math.floor(q / w) % 10) : "";
+      box.append(el("div", { class: "mb-spalte" },
+        el("div", { class: "mb-kopf" + (name ? "" : " leer"), text: name || "·" }),
+        el("div", { class: "mb-ziffer" + (i === ie && i < lo ? " komma" : ""), text: z })));
+    });
+  } else {
+    band.forEach(([, name]) => box.append(el("div", { class: "mb-spalte" },
+      el("div", { class: "mb-kopf" + (name ? "" : " leer"), text: name || "·" }), el("div", { class: "mb-ziffer", text: "" }))));
+  }
+  return box;
+}
+
+// ---------- Hinweise ----------
+
+/** Wie viele Stellen wandert das Komma zwischen zwei Einheiten? */
+const stellenZwischen = (fam, e1, e2) => Math.round(Math.log10(Math.max(f(fam, e1), f(fam, e2)) / Math.min(f(fam, e1), f(fam, e2))));
+const stellenWort = n => ["keine", "eine", "zwei", "drei", "vier", "fünf", "sechs"][n] + (n === 1 ? " Stelle" : " Stellen");
+
+/** Hinweis zu einer falschen Eingabe kt (in Tausendsteln der Zieleinheit). */
+function hinweisFuer(a, kt) {
+  const ct = tausendstel(a.q, a.fam, a.ziel);
+  const verh = kt > ct ? kt / ct : ct / kt;
+  const zehnerPotenz = [10, 100, 1000, 1e4, 1e5, 1e6].includes(Math.round(verh * 1e6) / 1e6) && kt > 0;
+  const ohneNull = s => s.replace(/[0.]/g, "");
+  if (a.art === "umwandeln" || a.art === "sprung") {
+    const n = stellenZwischen(a.fam, a.von, a.ziel);
+    const F = 10 ** n;
+    const regel = `Von ${a.gross} zu ${a.klein} wandert das Komma um ${stellenWort(n)}.`;
+    // falsche Richtung: geteilt statt mal (oder umgekehrt) → Faktor F² daneben
+    if (zehnerPotenz && Math.round(verh) === F * F)
+      return a.richtung === "gk" ? "Falsche Richtung: Von der grossen zur kleinen Einheit wird die Zahl grösser." : "Falsche Richtung: Von der kleinen zur grossen Einheit wird die Zahl kleiner.";
+    if (zehnerPotenz) return `Das Komma ist verrutscht. ${regel}`;
+    if (kt > 0 && ohneNull(String(kt / 1000)) === ohneNull(String(ct / 1000))) return "Achte auf die Nullen: Auch eine Null ist eine Stelle.";
+    return `Schau aufs Messband: ${regel}`;
+  }
+  if (a.art === "rechnen" || a.art === "rechnen3") {
+    // Zahlen mit verschiedenen Einheiten einfach verrechnet (1.25 + 750)
+    const roh = a.terme.reduce((s, t) => s + (t.op === "−" ? -1 : 1) * Math.round(wertIn(t.q, a.fam, t.e) * 1000), 0);
+    if (kt === roh) return `Du hast Zahlen mit verschiedenen Einheiten verrechnet. Rechne zuerst alles in ${a.ziel} um.`;
+    if (zehnerPotenz) return `Das Komma ist verrutscht. Schreib zuerst jede Grösse in ${a.ziel}, dann rechne.`;
+    return `Rechne zuerst jede Grösse in ${a.ziel} um, dann rechne.`;
+  }
+  return "Rechne alle Angaben in dieselbe Einheit um.";
+}
+
+// ---------- Spiel ----------
+
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Richtung, Stellen zwischen den Einheiten, erst
+ * umrechnen, dann rechnen — nie die Zahl der Antwort.
+ */
+function tippsFuer(a, stufeNr) {
+  if (a.art === "vergleich") return ["Rechne alle Angaben in dieselbe Einheit um.", "Mehr Ziffern heisst nicht grösser — die Einheit zählt."];
+  const stellen = `Von ${a.gross} zu ${a.klein} wandert das Komma um ${stellenWort(stellenZwischen(a.fam, a.gross, a.klein))}.`;
+  if (a.art === "rechnen" || a.art === "rechnen3") return [`Rechne zuerst jede Grösse in ${a.ziel} um. ${stellen}`,
+    "Erst wenn alle Zahlen dieselbe Einheit haben, rechnest du: Komma unter Komma."];
+  const richtung = a.richtung === "gk" ? "Von der grossen zur kleinen Einheit wird die Zahl grösser." : "Von der kleinen zur grossen Einheit wird die Zahl kleiner.";
+  return [stufeNr <= 2 ? richtung : `Stell dir das Messband vor: Jede Spalte ist eine Stelle. ${richtung}`,
+    stellen + (STUFE[`s${stufeNr}`].nullen !== false ? " Auch eine Null ist eine Stelle." : "")];
+}
+
+/** Lösung und Antwort für Prüfung und Löser */
+const antwortWert = a => wertIn(a.q, a.fam, a.ziel);
+const antwortZiffern = a => String(antwortWert(a));
+
+LS.spiel({
+  id: "komma-messband",
+  hilfe: stufe => (stufe === "s6" ? "Tipp das Ergebnis mit den Zifferntasten ein, das Dezimalzeichen hat eine eigene Taste. Bei «am grössten» oder «am kleinsten» wählst du eine Angabe."
+    : "Tipp das Ergebnis mit den Zifferntasten ein, das Dezimalzeichen hat eine eigene Taste. Das Messband zeigt dir, in welcher Spalte jede Ziffer steht."),
+  einleitung: "Meter, Kilo, Liter und Franken mit Komma: Wandle die Grössen um. Das Messband zeigt dir, wo jede Ziffer steht!",
+  anzahl: 8,
+  stufen: {
+    s1: `Meter und Franken mit Komma: ${dezimalText(3.25)} m = 325 cm.`,
+    s2: `Beide Richtungen, auch kg, l, mm, km: 75 cm = ${dezimalText(0.75)} m.`,
+    s3: `Auch zwei Kommazahlen und Nullen: ${dezimalText(0.75)} l = ${dezimalText(7.5)} dl (Lehrplan 6. Klasse).`,
+    s4: `Lücke links oder rechts, viele Nullen: ? m = 5 cm.`,
+    s5: `Rechnen mit zwei Einheiten: ${dezimalText(1.25)} kg + 750 g = ? kg.`,
+    s6: `Endgegner: ${dezimalText(0.035)} km = ? cm, welche Länge ist am grössten?`,
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Tipp: Von gross nach klein wird die Zahl grösser. Zähl, um wie viele Stellen das Komma wandert.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    const fl = ctx.flaeche;
+    if (ctx.stufe === "s6") ctx.serie("art", a.art);
+    if (a.richtung && STUFE[ctx.stufe].richtungen?.length > 1 || a.art === "sprung") ctx.serie("richtung", a.richtung);
+    if (STUFE[ctx.stufe].luecke || a.art === "sprung") ctx.serie("luecke", a.luecke);
+    if (a.art === "rechnen") ctx.serie("op", a.op);
+    fl.append(el("div", { class: "familie", text: FAMILIEN[a.fam].name }));
+    ctx.tipp(tippsFuer(a, Number(ctx.stufe.slice(1)))); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
+
+    if (a.art === "vergleich") {
+      const texte = a.teile.map(t => menge(t.q, a.fam, t.e));
+      ctx.serie("frage", a.frage);
+      fl.append(el("div", { class: "frage", text: `Welche Angabe ist am ${a.frage === "gross" ? "grössten" : "kleinsten"}?` }));
+      const hilfe = el("div");
+      fl.append(hilfe);
+      const loesung = `Am ${a.frage === "gross" ? "grössten" : "kleinsten"}: ${texte[a.wahl]}`;
+      LS.auswahl(ctx, {
+        optionen: [0, 1, 2, 3], richtig: a.wahl, breite: 140, inhalt: i => texte[i], loesung,
+        hinweis: i => {
+          if (!hilfe.firstChild) hilfe.append(messband(a.fam));
+          const mehrStellen = String(wertIn(a.teile[i].q, a.fam, a.teile[i].e)).length > String(wertIn(a.teile[a.wahl].q, a.fam, a.teile[a.wahl].e)).length;
+          return mehrStellen && a.frage === "gross" ? "Mehr Ziffern heisst nicht grösser — die Einheit zählt. Rechne alle in dieselbe Einheit um."
+            : "Rechne alle Angaben in dieselbe Einheit um, dann vergleiche.";
+        },
+      });
+      return;
+    }
+
+    // Umwandeln, Sprung, Rechnen: Zahl eintippen
+    const zielText = `? ${a.ziel}`;
+    let links, loesung;
+    if (a.art === "rechnen" || a.art === "rechnen3") {
+      links = a.terme.map((t, i) => (i ? ` ${t.op} ` : "") + menge(t.q, a.fam, t.e)).join("");
+      loesung = `${links} = ${menge(a.q, a.fam, a.ziel)}`;
+      fl.append(el("div", { class: "frage", text: `Rechne. Antwort in ${a.ziel}.` }));
+      fl.append(el("div", { class: "rechnung", html: `${links} = <span class="gesucht">${zielText}</span>` }));
+    } else {
+      const gegeben = menge(a.q, a.fam, a.von);
+      loesung = `${gegeben} = ${menge(a.q, a.fam, a.ziel)}`;
+      fl.append(el("div", { class: "frage", text: "Wandle um." }));
+      fl.append(el("div", { class: "rechnung", html: a.luecke === "links"
+        ? `<span class="gesucht">${zielText}</span> = ${gegeben}` : `${gegeben} = <span class="gesucht">${zielText}</span>` }));
+    }
+    ctx.loesung(loesung);
+    // Messband: Stufe 1–2 gleich (leer), nach dem ersten Fehler mit den Ziffern; Königsstufe nur leer
+    const hilfe = el("div");
+    fl.append(hilfe);
+    const stufeNr = Number(ctx.stufe.slice(1));
+    const mitZiffern = () => (a.art === "umwandeln" ? messband(a.fam, a.q, a.von) : messband(a.fam));
+    if (stufeNr <= 2) hilfe.append(messband(a.fam));
+    let fehler = 0;
+
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": `Ergebnis in ${a.ziel}` });
+    fl.append(el("div", { class: "ergebnis-zeile" }, anzeige, el("span", { class: "einheit", text: a.ziel })));
+    const wert = antwortWert(a);
+    ctx.schritte(LS.tippSchritte(wert));
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: 7, dezimal: true, nachkomma: a.fam === "geld" ? 2 : 3,
+      onOk(w) {
+        const kt = Math.round(w * 1000);
+        if (kt === tausendstel(a.q, a.fam, a.ziel)) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+        anzeige.classList.add("falsch");
+        fehler++;
+        if (fehler === 1) { hilfe.replaceChildren(stufeNr === 6 ? messband(a.fam) : mitZiffern()); }
+        ctx.falsch(hinweisFuer(a, kt), loesung);
+        if (ctx.vorbei()) tasten.gesperrt = true;
+      },
+    });
+    fl.append(tasten.element);
+  },
+});
+</script>
+</body>
+</html>

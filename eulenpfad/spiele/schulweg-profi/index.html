@@ -206,9 +206,19 @@ function ampelEl(farbe) {
 const bildEl = bild => (bild.startsWith("ampel:") ? ampelEl(bild.slice(6)) : el("div", { class: "sw-bild", text: bild }));
 const ohnePunkt = t => t.replace(/\.$/, "");
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Fragen zum Vorstellen und Form/Farbe der Signale — nie die Antwort. */
+const SIGNAL_TIPP = "Rund mit rotem Rand heisst: verboten. Rund und blau heisst: Diesen Weg musst du benutzen. Ein blaues Viereck gibt einen Hinweis.";
+function tippsFuer(a) {
+  if (a.art === "korb") return ["Stell dir vor, ein Auto kommt. Sieht dich der Fahrer?", "Könntest du rechtzeitig stehen bleiben — oder das Auto?"];
+  if (a.art === "merksatz") return ["Denk an den Merksatz vom Fussgängerstreifen.", "Was machst du, bevor sich deine Füsse bewegen? Augen und Ohren helfen dir."];
+  if (a.art === "signal") return ["Schau zuerst Form und Farbe an.", SIGNAL_TIPP];
+  return ["Denk an deinen Schulweg: Was ist am sichersten?", HINWEIS[a.liste]].filter(Boolean);
+}
+
 LS.spiel({
   id: ID,
   einleitung: "Auf dem Schulweg gibt es viel zu beachten. Weisst du, wie du sicher ankommst?",
+  hilfe: "Schau das Bild oder das Signal genau an und lies die Frage. Dann wählst du, was auf dem Schulweg richtig und sicher ist. Beim Merksatz kommen die vier Schritte in die richtige Reihenfolge.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -218,6 +228,7 @@ LS.spiel({
     if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
     if (a.art === "korb") ctx.serie("antwort", a.richtig);
     if (a.art === "signal") ctx.serie("richtung", a.vor);
+    ctx.tipp(tippsFuer(a));
     if (a.art === "korb") {
       f.append(el("div", { class: "frage", text: "Ist das sicher oder gefährlich?" }));
       const { karte } = LS.koerbe(ctx, {

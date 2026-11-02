@@ -1,7 +1,15 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
-**2026-11-02, nach LERN_Session8** ([Report](report/LERN_Session8_2026-11-02.md)):
+**2026-11-02, nach LERN_Session9** ([Report](report/LERN_Session9_2026-11-02.md)):
+- **Spiele:** 150 (10 neu, Runde A 6. Klasse mit Blick auf den Übertritt; `lernziele/lehrplan_sg_session9.md`,
+  Plan in `spielideen/lehrplan_3_und_6.md`, als Nächstes Runde B 3. Klasse). Übertritts-Check im Zufallsmix.
+- **Rahmen neu:** Fazit in der Statistik (regelbasiert, fürs Kind nach Freigabe), Fehler melden 🙋 über die
+  Aufsicht mit Rückmeldung (rahmen.md Abschnitt 13; Adresse in `eulenpfad/kontakt.js`, noch leer, LERN-40),
+  Hilfe ❓ und Tipp 💡 in allen Spielen (Abschnitt 14), Uhr erst wenn das Kind antworten kann (LERN-38).
+- **Tests:** 2026-11-02 „Keine Fehler.“ über alle 150 Spiele, jedes Spiel mit Tipps.
+
+Stand nach LERN_Session8 ([Report](report/LERN_Session8_2026-11-02.md)):
 - **Spiele:** 140 (49 neu in LERN_Session8: drei Runden 5./6. Klasse und ein Kindergarten-Paket; Lernziele in
   `lernziele/lehrplan_sg_session8.md`). Fach Französisch neu, Thema Wirtschaft, Dezimalzahlen.
 - **Kindergarten und Vorlesen** (rahmen.md Abschnitt 12): Klasse 0 = Kindergarten; die Eule liest Aufträge und
@@ -116,7 +124,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-10 | Spielideen aus dem Lehrplan Volksschule SG, alle Fächer 1.–6. Kl. | erledigt 2026-10-31 (LERN_Session1) | docs/spielideen/lehrplan_sg_spielideen.md |
 | LERN-11 | Inhaltslisten prüfen lassen | offen (Prüfung durch Patrik oder Lehrperson, Entscheid a) | docs/pruefung/wortlisten_zur_pruefung.md (Teile 1–39); geprüfte Listen im Katalog `geprueft` |
 | LERN-12 | Timer, Zeitmessung und didaktische Statistik | erledigt 2026-10-31 (LERN_Session1) | spiel.js, auswertung.js, statistik.html |
-| LERN-13 | Weitere Spiele aus den Spielideen | in Arbeit seit 2026-10-31 (LERN_Session2); 140 Spiele gebaut | checkliste.md; lehrplan_sg_5-6.md Stand LERN_Session8 |
+| LERN-13 | Weitere Spiele aus den Spielideen | in Arbeit seit 2026-10-31 (LERN_Session2); 150 Spiele gebaut | checkliste.md; lehrplan_sg_5-6.md; lehrplan_3_und_6.md (Runde B offen) |
 | LERN-14 | Testskript für die Aufgabengeneratoren aller Spiele (Node) | erledigt 2026-10-31 (LERN_Session2) | tools/pruefe_spiele.js |
 | LERN-15 | Stufenskala mit Basisklasse und Königsstufe | erledigt 2026-10-31 (LERN_Session2, Entscheid Patrik) | CLAUDE.md; docs/lernziele/lehrplan_sg_session2.md |
 | LERN-16 | Spielstand zurücksetzen und zwischen Geräten abgleichen | erledigt 2026-10-31 (LERN_Session2, Entscheid a: Zusammenführen) | statistik.html, LS.zusammenfuehren |
@@ -124,7 +132,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-18 | Kiosk-Kasse Stufe 3–4 (Franken/Rappen) auf Basisklasse 2 prüfen | offen | docs/lernziele/lehrplan_sg_session2.md, Bekannte Grenzen |
 | LERN-19 | Prüfer: Hinweis verrät die Lösung automatisch erkennen | erledigt 2026-10-31 (LERN_Session3) | tools/pruefe_spiele.js, LS.pruefung.haken |
 | LERN-20 | Testspieler und Testhilfen (Entscheid T1 a, T2 a) | erledigt 2026-10-31 (LERN_Session3; heute Rolle Aufsicht, L2 a) | spiel.js (ctx.loesung), rahmen.md Abschnitt 6 |
-| LERN-21 | Neue Spiele (2 von 84 angesehen) und die Startseite auf Desktop, Tablet und Handy ansehen | offen | checkliste.md |
+| LERN-21 | Neue Spiele (2 von 94 angesehen) und die Startseite auf Desktop, Tablet und Handy ansehen | offen | checkliste.md |
 | LERN-22 | Startseite mit Anmeldung, Tabs, Gruppen, Favoriten; Rollen Kind/Aufsicht mit PIN (L1–L3 a) | erledigt 2026-10-31 (LERN_Session3), im Browser noch nicht angesehen | rahmen.md Abschnitt 6, start/ |
 | LERN-23 | Prüfstand und Freigabe je Spiel und Inhaltsliste (L4 a) | erledigt 2026-10-31 (LERN_Session3) | katalog.js (geprueft, listen), Tab Verwaltung |
 | LERN-24 | Checkliste Klasse → Fach → Thema → Spiel | erledigt 2026-10-31 (LERN_Session3) | checkliste.md, tools/checkliste.js |
@@ -141,5 +149,8 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-35 | Grundwörter in Spielnamen über der Grenze (Detektiv 5, Sortierer 4, Puzzle 4) umbenennen | offen (D2 a, später) | Testskript, Namensprüfung; Report LERN_Session7 |
 | LERN-36 | Dezimalzahlen-Spiele M3–M5 und Eingabe von Dezimalzahlen; Dezimalzeichen der Zahlenbuch-Neuausgabe | erledigt 2026-11-02 (LERN_Session8; Dezimalzeichen der Neuausgabe weiter offen) | lehrplan_sg_session8.md; rahmen.md 4.3 |
 | LERN-37 | Vorlesen und Kindergarten auf echten Geräten anhören und prüfen | offen | rahmen.md Abschnitt 12 |
-| LERN-38 | „▶ Los! 3-2-1“ nur bei der ersten Aufgabe und nach Fehlern, dazwischen kurz ein Aufpassen-Zeichen 👀 (Hinweis Patrik) | offen | Report LERN_Session8, Plan 0 |
+| LERN-38 | „▶ Los! 3-2-1“ nur bei der ersten Aufgabe und nach Fehlern, dazwischen kurz ein Aufpassen-Zeichen 👀 (Hinweis Patrik) | erledigt 2026-11-02 (LERN_Session9, F1–F4 a) | rahmen.md (`ctx.uhrWarten`, `ctx.losKnopf`) |
 | LERN-39 | Entscheide aus LERN_Session8: Farben rechts vom Komma, Malzeichen, Braille-Finger ohne freie Liste | offen | Report LERN_Session8, Plan 1 |
+| LERN-40 | E-Mail-Adresse für Fehlermeldungen bestimmen (eigenes Postfach, A1 a) und eintragen | offen | `eulenpfad/kontakt.js`, Feld `meldungen`; rahmen.md Abschnitt 13 |
+| LERN-41 | Fachlich unsichere Stellen aus LERN_Session9 prüfen (Tipps, Regeln, Fakten, Preise; Annahmen Runde A) | offen | Report LERN_Session9, Plan 1 |
+| LERN-42 | Prüfer: Spiel-CSS definiert eine reservierte Rahmen-Klasse neu | offen | Report LERN_Session9, Stolperfallen |

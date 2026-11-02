@@ -210,8 +210,23 @@ const dateiEl = (name, endung) => el("span", {}, `${name}.`, el("span", { class:
 const programmText = id => `${DATEI_PROGRAMME[id].bild} ${DATEI_PROGRAMME[id].name}`;
 const HINWEIS_ENDUNG = "Schau auf die Endung nach dem Punkt. Sie verrät die Art der Datei.";
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): worauf schauen — keine Tabelle Endung → Art, die verriete es. */
+function tippsFuer(a) {
+  switch (a.art) {
+    case "ding": return ["Was machst du damit: lesen, anschauen oder anhören?", "Lesen heisst Text, anschauen heisst Bild, anhören heisst Ton."];
+    case "korb": return [HINWEIS_ENDUNG, "Was passiert, wenn du die Datei öffnest: Liest du, schaust du ein Bild an, hörst du zu oder schaust du einen Film?"];
+    case "falle": return ["Lass dich nicht vom Namen täuschen!", HINWEIS_ENDUNG];
+    case "welche": return ["Alle heissen gleich. Nur die Endung nach dem Punkt ist verschieden.", "Geh die Endungen einzeln durch: Welche kennst du schon? Was steckt darin?"];
+    case "programm": return ["Überlege zuerst: Was steckt in der Datei? Text, ein Bild, Ton, ein Video — oder etwas anderes?", "Welches Programm kann genau das zeigen oder abspielen?"];
+    case "groesste": return ["Text braucht wenig Platz, Bilder und Ton mehr, bewegte Bilder am meisten.", "Lies unter jeder Datei, was darin steckt. Ein ganzer Film braucht mehr als ein kurzer."];
+    case "wieGross": return ["Braucht diese Datei wenig, mittel oder sehr viel Platz?", "Denk an die Leiter: 1000 kB = 1 MB, 1000 MB = 1 GB."];
+  }
+  return [];
+}
+
 LS.spiel({
   id: "datei-typen",
+  hilfe: "Schau auf die Datei, vor allem auf die Endung nach dem Punkt. Dann legst du sie in den passenden Korb oder tippst die passende Antwort an.",
   einleitung: "Jede Datei hat einen Namen und eine Endung nach dem Punkt: ferien.jpg, lied.mp3. Die Endung verrät, ob Text, ein Bild, Ton oder ein Video darin steckt!",
   anzahl: 8,
   stufen: nurMoegliche({
@@ -229,6 +244,7 @@ LS.spiel({
     const f = ctx.flaeche;
     if (ctx.nr === 0) ctx.sag(ctx.stufe === "s1" ? "Lesen, anschauen oder anhören? Das zeigt dir die Art." : ctx.stufe === "s5" ? "Text braucht wenig Platz, Fotos und Lieder mehr, Videos am meisten." : "Schau immer zuerst auf die Endung nach dem Punkt.");
     if (new Set(p.arten).size > 1) ctx.serie("art", a.art === "falle" ? "korb" : a.art);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
 
     if (a.art === "ding") {
       const d = DATEI_DINGE[a.ding];

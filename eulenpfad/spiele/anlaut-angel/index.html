@@ -127,8 +127,17 @@ function verdeckt(w, wo, i) {
 
 const WO_TEXT = { anfang: "am Anfang", ende: "am Ende", mitte: "in der Mitte" };
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): ganz kurz, ohne das Wort oder den Laut zu nennen. */
+function tippsFuer(a) {
+  if (a.art === "bildZumLaut") return ["Sag jedes Bild ganz langsam.", `Hörst du am Anfang ${a.buchstabe}? Dann hast du es.`];
+  if (a.art === "luecke") return ["Sag das Wort zum Bild ganz langsam, Laut für Laut.",
+    "Zeig beim Sprechen mit dem Finger mit. Bei welchem Laut kommst du zur Lücke?"];
+  return ["Sag das Wort zum Bild ganz langsam.", `Zieh die Laute lang. Was hörst du ${WO_TEXT[a.wo]}?`];
+}
+
 LS.spiel({
   id: "anlaut-angel",
+  hilfe: "Schau das Bild an und sag das Wort laut. Dann tippst du den Buchstaben an, den du hörst. Steht oben ein Buchstabe, tippst du das Bild an, das so beginnt.",
   einleitung: "Sprich das Wort laut! Welchen Laut hörst du am Anfang? Und am Ende?",
   anzahl: 10,
   stufen: nurMoegliche({
@@ -144,6 +153,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     // Jede Art einer Stufe fragt anders (Bild, Anfang, Ende, Mitte, Lücke).
     if (moeglich(ctx.stufe).length > 1) ctx.serie("art", a.art === "laut" ? a.wo : a.art);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "bildZumLaut") {
       ctx.flaeche.append(el("div", { class: "see" }, el("div", { class: "frage", text: "Angle das Bild, das so beginnt:" }), el("div", { class: "buchstabe-gross vorgabe", text: `${a.buchstabe} ${a.buchstabe.toLowerCase()}` })));
       LS.auswahl(ctx, {

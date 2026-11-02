@@ -274,8 +274,28 @@ const HINWEIS_GLEICH = "Gleich gross bleibt ein Bruch nur, wenn du Zähler und N
 
 // ---------- Spiel ----------
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): was Zähler und Nenner bedeuten, wie man vergleicht — nie der Bruch oder das Zeichen. */
+function tippsFuer(a) {
+  switch (a.art) {
+    case "ablesen": return ["Zähle zuerst alle Teile — das ist der Nenner unten.", "Dann zähle die gefärbten Teile — das ist der Zähler oben."];
+    case "legen": return ["Der Nenner unten sagt, in wie viele Teile das Ganze geteilt ist.", "Der Zähler oben sagt, wie viele Teile du färbst."];
+    case "erweitertLegen": {
+      const n = teile(a.bruch)[1];
+      return ["Der Streifen hat mehr Teile, als der Nenner sagt — die Teile sind kleiner.",
+        `Wie oft passt ${n} in ${a.teile}? So viele kleine Teile sind zusammen ein grosses. Dann nimm den Zähler so oft.`];
+    }
+    case "vergleich": case "vergleichBild": return [a.art === "vergleichBild" ? "Vergleiche die gefärbten Flächen in beiden Streifen."
+      : "Schau zuerst: Haben die Brüche den gleichen Nenner oder den gleichen Zähler?", hinweisVergleich(a.a, a.b)];
+    case "ordnen": return ["Vergleiche immer zwei Brüche miteinander. Ist einer kleiner als ein Halbes, der andere grösser?",
+      "Gleicher Nenner: mehr Teile ist grösser. Gleicher Zähler: der grössere Nenner gibt kleinere Teile. Sonst auf den gleichen Nenner bringen."];
+    case "gleichwertig": return ["Gleich gross heisst: gleich viel vom Ganzen, nur anders geteilt.", HINWEIS_GLEICH];
+  }
+  return [];
+}
+
 LS.spiel({
   id: "bruch-werkstatt",
+  hilfe: "Tippe den passenden Bruch oder das passende Zeichen an. Beim Färben tippst du Teile an — nochmals tippen nimmt die Farbe weg — und dann „Fertig ✓“. Beim Ordnen tippst du die Brüche der Grösse nach an, den kleinsten zuerst.",
   einleitung: "Willkommen in der Bruch-Pizzeria! Hier wird geteilt: Pizzas, Schokolade und Streifen. Unten steht, in wie viele Teile das Ganze geteilt ist, oben, wie viele Teile gemeint sind.",
   anzahl: 8,
   stufen: {
@@ -290,6 +310,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const f = ctx.flaeche;
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "ablesen") {
       ctx.serie("modell", a.modell);
       f.append(el("div", { class: "frage", text: "Welcher Bruch ist gefärbt?" }), modellEl(a.modell, teile(a.bruch)[1], teile(a.bruch)[0]));

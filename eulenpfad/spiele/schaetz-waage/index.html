@@ -146,9 +146,24 @@ function schaetzHinweis(a, knapp) {
   return `Denk an etwas, das du kennst: ${saetze.join(", ")}.`;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): sich die Dinge vorstellen, Referenzgrössen
+ * (schaetzHinweis lässt eine Referenz mit dem gesuchten Wert schon weg), Unmögliches ausschliessen.
+ */
+function tippsFuer(a) {
+  if (a.art === "vergleich") return [HINWEIS[a.eigenschaft], "Denk an die echten Dinge, nicht an die Bilder: Die Bilder sind alle gleich gross."];
+  if (a.art === "ordnen") {
+    const wort = a.richtung.startsWith("leicht") ? "Leichteste" : a.richtung.startsWith("kurz") ? "Kürzeste" : "Kleinste";
+    return [`Fang mit dem ${wort}n an.`, `Dann suchst du von den übrigen Dingen wieder das ${wort}.`];
+  }
+  return ["Stell dir das Ding gut vor und vergleiche mit etwas, das du kennst.", schaetzHinweis(a, false),
+    "Zwei Antworten sind viel zu gross oder viel zu klein. Welche wären unmöglich?"].filter((t, i, l) => l.indexOf(t) === i);
+}
+
 LS.spiel({
   id: "schaetz-waage",
   einleitung: "Was ist schwerer, was ist länger? Und wie lang ist eigentlich ein Bleistift? Schätz mal!",
+  hilfe: "Tippe die passende Antwort an. Sollst du ordnen, tippst du die Dinge der Reihe nach an — zuerst das, was vorne in die Reihe gehört.",
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries({
     s1: "Vergleichen: Was ist schwerer, länger, grösser?",
@@ -162,6 +177,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     if (STUFE[ctx.stufe].artWechselt) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a));
     if (a.art === "vergleich") {
       ctx.flaeche.append(el("div", { class: "frage", text: `Was ist ${a.eigenschaft}?` }));
       LS.auswahl(ctx, {

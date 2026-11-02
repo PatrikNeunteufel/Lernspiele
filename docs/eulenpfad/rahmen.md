@@ -108,6 +108,7 @@ Farbwerte für diese Zwecke.
 LS.spiel({
   id: "<id>",                     // wie Ordner und Katalog
   einleitung: "…",                // sagt die Eule im Startbild
+  hilfe: "…",                     // „❓ So geht das Spiel“: Bedienung dieses Spiels (oder stufe => Text), Abschnitt 14
   anzahl: 8,                      // Aufgaben je Runde
   stufen: { s1: "…", …, s6: "…" },// alle sechs Stufen mit kurzer Beschreibung ✔
   aufgabe(ctx) { … },             // zeichnet eine Aufgabe in ctx.flaeche
@@ -133,6 +134,7 @@ LS.spiel({
 | `ctx.serie(name, wert)` | Ein zufällig gewähltes Merkmal, das das Kind als Muster erkennen kann: Richtung oder Aufgabenart, oder die richtige Antwort bei höchstens drei festen Antworten (ja/nein, <, =, >, auf/ab). **Serienbremse** (Vorgabe Patrik 2026-11-01): Der Rahmen zieht neu, statt dasselbe Merkmal öfter als `LS.SERIE_MAX` = 3-mal hintereinander zu stellen (bis zu 40 Versuche). Nicht für Zahlenwerte oder Knopfpositionen, und nur in Stufen, die wirklich mehrere Werte haben ✔. |
 | `ctx.vorgehen(art, wert)` | Wie das Kind die Aufgabe angegangen ist, vor `ctx.richtig()` gemeldet (LERN_Session7). Landet in `aufgabenZeiten[i].vorgehen` und in der Statistik, Karte „Vorgehen“ (Punkte der letzten 12 Aufgaben). Arten und Werte (vom besten zum schwächsten, Ton gut/mittel/schwach) stehen in `AUSWERTUNG.VORGEHEN`: `systematik` (Möglichkeiten-Finder: Zählwerk, geordnet, kreuz und quer, mit Hilfe), `teilerpaare` (Teiler-Spürnase: in Paaren, der Grösse nach, durcheinander), `ausgleichen` (Mittelwert-Türme: ohne Umweg, mit Umwegen). |
 | `ctx.wartezeit(s)` | Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne). Uhr und Zeitmessung beginnen so viel später (Entscheide F1 a, F2 a, LERN_Session9). |
+| `ctx.tipp(texte)` | Gestufte Tipps zur Aufgabe (Text oder Liste), vom Anstoss zum Konkreten; nie die Lösung (das Testskript prüft es wie Hinweise). Beim Zeichnen rufen. Das Kind holt sie mit „💡 Tipp“ einzeln; ein Tipp zählt für die Sterne wie ein halber Fehler, „auf Anhieb“ heisst ohne Tipp; im Endlos-Modus keine Tipps (Abschnitt 14). |
 | `ctx.uhrWarten()` | Uhr und Zeitmessung beginnen erst, wenn die zurückgegebene Funktion gerufen wird: Jetzt kann das Kind antworten. Beim Zeichnen rufen. Für eine Stimme, die gleich vorspricht: `LS.sprich(text, sprache, "", ctx.uhrWarten())` (die Uhr startet, wenn die Stimme fertig ist, ohne Stimme sofort). `LS.losGehts` nutzt es selbst. **Regel** (F1 a, F2 a): Die Uhr läuft nie, solange das Kind nur warten kann — „▶ Los!“, 3-2-1, Zeigen, Vorspielen. |
 | `ctx.losKnopf` | Für `LS.losGehts`: „▶ Los!“ mit 3-2-1 (erste Aufgabe, nach einer Aufgabe mit Fehler oder Zeit um, im Mix) oder nur kurz 👀 (LERN-38). |
 | `ctx.sag(text, art?)` | Die Eule spricht (`art`: `"gut"` oder `"hinweis"`). |
@@ -239,6 +241,26 @@ zu prüfen hat (Präzisierung Patrik 2026-10-31).
   das Spiel nicht an.
 - Öffnet ein Kind ein gesperrtes Spiel über die Adresse, zeigt der Rahmen „noch nicht freigegeben“.
 
+**Fazit in der Statistik** (Wunsch Patrik, LERN_Session9; `AUSWERTUNG.fazit` in `spiele/gemeinsam/auswertung.js`,
+Karte oben im Tab Statistik, nur für die Aufsicht): ein Urteil in Worten, **regelbasiert, ohne KI** — jede
+Aussage nennt ihre Zahlen, bei zu wenig Daten schweigt eine Regel, alles bleibt im Browser (LERN-5 b).
+Grenzen in `AUSWERTUNG.FAZIT` (Annahmen bis zu Erfahrungen mit Kindern). Abschnitte:
+- **Menge:** Runden, Aufgaben, Minuten, Übungstage (14 Tage), Verteilung auf Fächer, einseitig ab 75 %.
+- **Qualität:** auf Anhieb richtig, Lösung gezeigt; Fortschritt **nur im selben Spiel und derselben Stufe**
+  (frühere gegen neuere Hälfte) — ein Wechsel zu schwereren Spielen ist kein Rückschritt; Niveau der Stufen
+  gegen die Klasse im Profil.
+- **Konzentration:** Befunde aus `konzentration()` (seit LERN_Session9 gemessen am eigenen Schnitt im selben
+  Spiel und derselben Stufe), dazu mit Timer oder im Zufallsmix deutlich schwächer.
+- **Stärken und Schwächen** je Thema (Katalog `THEMEN`), erst ab 12 Aufgaben in 2 Runden; stark ab 85 %
+  und über dem eigenen Schnitt, schwach unter 60 % oder 15 Punkte unter dem Schnitt.
+- **Auffälligkeiten:** (a) ein Thema weicht vom Rest seines Fachs um 20 Punkte ab („in Mathe sonst sicher,
+  aber Brüche“; die Gegenrichtung nur, wenn der Rest aus mindestens zwei Themen besteht); (b) über Fächer
+  hinweg, fachlich begründet: Lesen, Sachrechnen und Rechnen (`BEREICHE`) — Sachaufgaben schwach und Lesen
+  schwach, Lesen schwach aber Sachaufgaben gut, Lesen gut aber Sachaufgaben schwach; Zuhören besser als
+  Lesen; (c) Zusammenhänge mit Tageszeit und Pause **je Sitzung**, mit der Runde in der Sitzung je Runde,
+  jeweils mit der Leistung gegenüber dem eigenen Schnitt im selben Spiel und derselben Stufe; erwähnt nur ab
+  12 Einheiten und |r| ≥ max(0.35, 2/√n), mit dem Satz „ein Zusammenhang, noch keine Ursache“.
+
 **Startseite** (`index.html`, Code in `start/`): Ohne Anmeldung zeigt sie die Anmeldung, danach
 die Tabs Spiele, Profil, Statistik und, nur für die Aufsicht, Verwaltung mit den Untertabs Konten,
 Freigabe, Abgleich, Einstellungen (für alle auf diesem Gerät, „↺ Alles auf Standard“) und Entwicklung. Der Tab steht in der Adresse (`#statistik`, Untertab `#verwaltung/abgleich`;
@@ -343,6 +365,15 @@ sechs Spielen in einer Runde (10 oder 20 Aufgaben) oder einer Endlos-Serie. Eins
 
 Die Einstellungen stehen im Profil (`mix`). Teil des Mix ist jedes Spiel, das das Kind sehen darf und
 das die Stufe anbietet; im Endlos-Mix nur Stufen mit `endlos` im Katalog.
+
+- **Übertritts-Check 6. Klasse** (Entscheid H1 a, LERN_Session9; `UEBERTRITT` in `mix.js`): Mischung
+  „🎒 Übertritts-Check“ statt „frei“. Fächer und Stufe stehen dann fest: alle sichtbaren Spiele in
+  Mathematik und Deutsch, die die 6. Klasse üben — Basisklasse 6 in Stufe 3, Basisklasse 5 in Stufe 5.
+  Grund: Beim Übertritt in die Oberstufe zählen in den gelesenen Kantonen Mathematik und Deutsch
+  (`docs/eulenpfad/spielideen/lehrplan_3_und_6.md`, Abschnitt 2). Bis zu acht Spiele je Runde. Am
+  Schluss statt der Liste je Spiel ein **Bericht je Thema**: auf Anhieb richtig, „✅ sitzt“ ab 80 %,
+  „🙂 fast“ ab 50 %, sonst „💪 üben“ (Grenzen sind Annahmen); die Eule nennt die Themen zum Üben.
+  Auswahl-Kennung `uebertritt-6` (Protokoll `mix`, Rekord `mix:uebertritt-6`).
 
 - **Bauweise:** Jedes Spiel läuft unverändert in einem eigenen iframe (`?stufe=…&mix=1&timer=0|1`,
   dazu `&endlos=1`). Mit `mix=1` blendet der Rahmen Kopfzeile und Fortschritt aus (`body.im-mix`) und
@@ -481,3 +512,64 @@ Spielen, die das Lesen selbst üben; ein Kind im Kindergarten soll sich eintrage
     der Knopf wird dabei nicht ausgelöst (`langDruecken` in `spiel.js`). Nicht in Deutsch (Buchstaben und
     Wörter auf Knöpfen sind dort Stoff) und überall, wo nicht vorgelesen wird; Katalog-Feld `knoepfeVorlesen`
     schaltet es je Spiel an oder aus.
+
+## 13. Fehler melden durch Kinder
+
+Wunsch Patrik, LERN_Session9. Kinder sollen Fehler im Programm melden können; ein echter Fehler zählt
+für sie positiv. Code: Speicher, Formular und Abgleich in `spiel.js` (`LS.meldungen`, `LS.meldeFormular` …),
+Aufsicht in `start/verwaltung.js` (Untertab „🙋 Meldungen“), Kind in `start/statistik.js`.
+
+- **Wer meldet:** Einstellung der Aufsicht `melden` (Verwaltung → Einstellungen): aus, ab der 3. Klasse
+  (Standard, weil die Begründung geschrieben wird), ab der 5. Klasse, alle Kinder. Die Aufsicht immer.
+- **Im Spiel:** Knopf „🙋 Melden“ in einer eigenen kleinen Zeile rechts unter der Eule (Klassen `melde-zeile`,
+  `melden`; neben der Blase machte das Wort sie auf dem Handy zu schmal), auch im Zufallsmix (Entscheid K1 a: „sich melden“ kennen Kinder aus der Schule, „Bug“ nicht). Das Formular bietet
+  „Diese Aufgabe“ und „Die Aufgabe davor“, die Art (falsch gewertet, Fehler in Text/Bild/Lösung, nicht
+  lösbar, anderes) und eine Begründung (mindestens ein paar Wörter, „bitte keine Namen“). Der Rahmen gibt
+  dazu mit: Aufgabentext, erwartete Lösung (`ctx.loesung`), die letzten Eingaben des Kindes (angetippte
+  Knöpfe, bei OK das Getippte; ein Hörer am Dokument) und wie gewertet wurde.
+- **Speicher:** `lernspiele:meldungen` = `[{ id, name, zeit, stand, status, verlauf, spiel, stufe, klasse,
+  aufgabeNr, aufgabe, loesung, eingabe, ergebnis, art, text, antwort?, gelesen }]`. Reist mit dem Abgleich
+  (je Kennung gewinnt der jüngere `stand`) und beim Sichern mit.
+- **Status:** neu → (Aufsicht) bestätigt oder kein Fehler (mit Erklärung ans Kind) → weitergeleitet →
+  (Entwicklung) geplant, behoben oder kein Fehler. Status- und Antwortwechsel zeigen dem Kind 🔔 an der
+  Statistik, bis es sie gesehen hat; neue Meldungen zeigen der Aufsicht 🙋 an der Verwaltung.
+- **Weitergeben:** nur die Aufsicht, ohne den Namen des Kindes (`LS.meldungFuerEntwicklung`: Kennung,
+  Klasse, Spiel, Stufe, Aufgabe, Lösung, Eingaben, Begründung). Mit Entwickler-Server direkt als Bemerkung
+  in `docs/eulenpfad/bemerkungen.json` (Feld `meldung` = Kennung, nur einmal). Ohne Entwickler-Server per
+  E-Mail (Entscheid M1 a): Das Mailprogramm der Aufsicht öffnet sich mit Betreff und Text
+  (`LS.meldungMailLink`). **Die Adresse trägt die Entwicklung an genau einer Stelle ein:**
+  `eulenpfad/kontakt.js`, Feld `meldungen` (Entscheid A1 a: ein eigenes Postfach nur für Eulenpfad-Meldungen,
+  keine private Adresse — die Seite ist öffentlich). Nur die Startseite lädt die Datei; `LS.meldungAdresse()`
+  liest sie. Leer = kein E-Mail-Knopf, nur Text kopieren; der Tab Entwicklung zeigt, ob sie eingetragen ist. Bei der
+  Entwicklung: Tab Entwicklung → „🙋 Meldung aus E-Mail einfügen“ macht daraus eine Bemerkung mit derselben
+  Kennung (`LS.meldungAusText`). Datenschutz: CLAUDE.md, Ausnahme Fehlermeldungen.
+- **Antwort zurück:** Die Entwicklung setzt den Status der Bemerkung („erledigt …“ → behoben, „kein
+  Fehler …“, „geplant …“/„in Arbeit …“) und schreibt die Antwort fürs Kind ins Feld `antwort`.
+  `python tools/meldungen_stand.py` veröffentlicht daraus `eulenpfad/meldungen-stand.json` (je Kennung nur
+  Status und Antwort). „🔄 Antworten der Entwicklung abfragen“ liest diese Datei und, mit Entwickler-Server,
+  die Bemerkungen (`LS.meldungStandAnwenden`).
+- **Positiv gewertet:** Behobene Meldungen zählen als „🏅 Fehlerfinder“ in der Statistik des Kindes und im
+  Fazit (auch in der freundlichen Fassung fürs Kind; Freigabe durch die Aufsicht je Kind, Profil-Feld
+  `fazitFuerKind`, Entscheid G3).
+
+## 14. Hilfe und Tipp
+
+Wunsch Patrik, Entscheide T1 a, T2 a, T3 a (LERN_Session9). **Hilfe** erklärt die Bedienung des Spiels,
+**Tipp** hilft bei der aktuellen Aufgabe.
+
+- **❓ Hilfe** in der Kopfzeile jeder Spielseite (Klasse `hilfe-knopf`, auch auf der Stufenwahl); im Zufallsmix
+  in dessen Leiste, die Mix-Seite schickt `{ typ: "hilfe" }` ans laufende Spiel. Das Fenster „So geht das
+  Spiel“ zeigt oben `def.hilfe` (Text oder `stufe => Text`: was in diesem Spiel zu tun ist, 1–3 Sätze) und
+  darunter, was der Rahmen auf der Seite findet: Stufenwahl, Zifferntastatur, Antworten, Körbe,
+  Reihenfolge, ▶ Los, 🔊, 💡 Tipp, Zeitbalken, „Falsch ist nicht schlimm“, 🗣️, 🙋 Melden. Ohne Folgen; die
+  Runde notiert nur, wie oft (`bedienhilfe` im Protokoll).
+- **💡 Tipp** unter der Aufgabe (Klasse `tipp-zeile`), nur wenn das Spiel `ctx.tipp([...])` gibt, nie im
+  Endlos-Modus. Jedes Antippen zeigt den nächsten Tipp in der Eulenblase („💡 Noch ein Tipp“, zuletzt
+  „Keine Tipps mehr“). Die Uhr läuft weiter. Gezählt wird je Aufgabe (`aufgabenZeiten[i].tipps`) und je
+  Runde (`tipps`); die **Sterne** rechnen `sterneFuer(fehler + tipps / 2)` — fragen ist günstiger als
+  raten, aber nicht gratis. „Auf Anhieb“ heisst ohne Fehler und ohne Tipp (Auswertung, Mix, Fazit); der
+  Abschluss nennt die Tipps, Fazit und Statistik ebenso.
+- **Pause** bei ❓ Hilfe und 🙋 Melden: Die Uhr hält an (Restzeit bleibt), die Aufgabe ist verdeckt
+  (`pause-verdeckt`), die Pause zählt nicht zur Zeit der Aufgabe. Ein Tipp pausiert nicht.
+- **Testskript:** Tipps werden wie Hinweise geprüft („Hinweis verrät“); am Ende eine Liste „Ohne Tipps
+  (ctx.tipp)“ je Spiel und Stufe (Übersicht, kein Fehler). Versteckte Knöpfe (`hidden`) tippt es nicht an.

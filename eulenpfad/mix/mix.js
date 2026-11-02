@@ -12,7 +12,21 @@ const MIX = {
   laengen: [10, 20, "endlos"], // Aufgaben je Runde; endlos = bis zum ersten Fehler
   amStueck: [1, 3],          // Aufgaben am Stück aus einem Spiel, bevor es wechselt
 };
-const MIX_VORGABE = { faecher: [], fokus: false, stufe: "passend", timer: false, laenge: 10, amStueck: 3 };
+const MIX_VORGABE = { faecher: [], fokus: false, stufe: "passend", timer: false, laenge: 10, amStueck: 3, check: false };
+
+/**
+ * Übertritts-Check (Entscheid H1 a, LERN_Session9; docs/eulenpfad/spielideen/lehrplan_3_und_6.md, R1):
+ * Mathematik und Deutsch — die Fächer, die beim Übertritt in die Oberstufe zählen (SG: Art. 24 des
+ * Reglements über Beurteilung, Promotion und Übertritt) — je Spiel in der Stufe der 6. Klasse: das
+ * Klassenziel (Stufe 3) der Spiele mit Basisklasse 6, Stufe 5 der Spiele mit Basisklasse 5. Mehr Spiele
+ * je Runde, damit viele Teilgebiete vorkommen; am Ende ein Bericht je Thema.
+ * Die Grenzen im Bericht sind Annahmen, bis Erfahrungen mit Kindern vorliegen.
+ */
+const UEBERTRITT = {
+  klasse: 6, faecher: ["Mathe", "Deutsch"], spieleJeRunde: 8,
+  stufeNachAbstand: { 0: "s3", 1: "s5" }, // Klasse 6 minus Basisklasse → Stufe
+  sicher: 0.8, fast: 0.5,                 // Anteil auf Anhieb richtig je Thema
+};
 
 const buehne = document.querySelector(".buehne");
 let laufend = null; // laufende Runde: { ton(an) }
@@ -30,6 +44,7 @@ function einstellungen(name) {
 
 /** Auswahl als Teil der Rekord-Kennung: alle, fokus und/oder Fächer mit + (sortiert). */
 function auswahlSchluessel(e) {
+  if (e.check) return `uebertritt-${UEBERTRITT.klasse}`;
   const teile = [...(e.fokus ? ["fokus"] : []), ...[...e.faecher].sort()];
   return teile.length ? teile.join("+") : "alle";
 }
@@ -40,9 +55,13 @@ const rekordKennung = e => LS.MIX_PRAEFIX + auswahlSchluessel(e);
  * die Stufe angeboten — „passend“ ist die empfohlene Stufe je Spiel (sonst 3) —, im Endlos-Mix nur
  * Stufen mit Endlos-Modus (Katalog endlos).
  */
+const fachVon = s => THEMEN.find(t => t.id === s.thema)?.fach;
+
 function kandidaten(name, e) {
+  if (e.check) return SPIELE.filter(s => LS.spielSichtbar(s.id) && UEBERTRITT.faecher.includes(fachVon(s)))
+    .map(s => ({ s, stufe: UEBERTRITT.stufeNachAbstand[UEBERTRITT.klasse - s.klasse] }))
+    .filter(x => x.stufe && x.s.stufen.includes(x.stufe) && (!istEndlos(e) || (x.s.endlos || []).includes(x.stufe)));
   const fokus = LS.profil(name).fokus;
-  const fachVon = s => THEMEN.find(t => t.id === s.thema)?.fach;
   return SPIELE.filter(s => LS.spielSichtbar(s.id)
       && (!e.faecher.length || e.faecher.includes(fachVon(s)))
       && (!e.fokus || s.lernziele.some(l => fokus.includes(l.lz))))
@@ -76,34 +95,73 @@ function zeichneEinstellungen() {
 
   const karte = el("div", { class: "karte" });
   const eule = LS.euleZeile();
-  karte.append(eule.element, el("div", { class: "filter mix-filter" },
+  // Beim Übertritts-Check stehen Fächer und Stufe fest; die Zeilen dafür fallen weg.
+  const auswahlZeilen = e.check ? [] : [
     zeile("Fächer", chip("Alle", !e.faecher.length, () => setze({ faecher: [] })),
       ...FAECHER.map(f => chip(f, e.faecher.includes(f), () => setze({ faecher: umschalten(e.faecher, f) }))),
       ...(fokus.length ? [chip("⭐ Mein Fokus", e.fokus, () => setze({ fokus: !e.fokus }))] : [])),
     zeile("Stufe", chip("👍 passend für mich", e.stufe === "passend", () => setze({ stufe: "passend" })),
       ...LS.SKALA.map(s => chip(`${s.icon} ${s.nr} ${s.name}`, e.stufe === s.id, () => setze({ stufe: s.id })))),
+  ];
+  karte.append(eule.element, el("div", { class: "filter mix-filter" },
+    zeile("Mischung", chip("🎲 frei", !e.check, () => setze({ check: false })),
+      chip(`🎒 Übertritts-Check ${UEBERTRITT.klasse}. Klasse`, e.check, () => setze({ check: true }))),
+    ...auswahlZeilen,
     zeile("Timer", chip("aus", !e.timer, () => setze({ timer: false })), chip("⏱ an", e.timer, () => setze({ timer: true }))),
     zeile("Länge", ...MIX.laengen.map(l => chip(l === "endlos" ? "♾ Endlos" : `${l} Aufgaben`, e.laenge === l, () => setze({ laenge: l })))),
     zeile("Wechsel", ...MIX.amStueck.map(n => chip(n === 1 ? "nach jeder Aufgabe" : `nach ${n} Aufgaben`, e.amStueck === n, () => setze({ amStueck: n }))))));
 
   const n = kandidaten(name, e).length;
+  const jeRunde = e.check ? UEBERTRITT.spieleJeRunde : MIX.spieleJeRunde;
   karte.append(
     el("p", { class: "leise mitte", text: n
-      ? `${n} Spiel${n === 1 ? " passt" : "e passen"}, gemischt ${n === 1 ? "wird es" : `werden ${Math.min(n, MIX.spieleJeRunde)} davon`}.`
+      ? `${n} Spiel${n === 1 ? " passt" : "e passen"}, gemischt ${n === 1 ? "wird es" : `werden ${Math.min(n, jeRunde)} davon`}.`
       : "Für diese Auswahl gibt es kein freigegebenes Spiel." }),
     el("div", { class: "knopfzeile" },
       el("button", { class: "knopf gruen", type: "button", text: "🎲 Los geht's", ...(n ? {} : { disabled: "" }), onclick: () => starte(name, e) })));
   if (istEndlos(e)) karte.append(LS.rangliste(rekordKennung(e), e.stufe, e.timer, name));
   buehne.append(karte);
   const rekord = istEndlos(e) ? LS.besterRekord(name, rekordKennung(e), e.stufe, e.timer) : 0;
-  eule.sag(`Ich mische dir Aufgaben aus verschiedenen Spielen. Stell ein, wie du spielen willst!${rekord ? ` Dein Rekord hier: ${rekord}.` : ""}`);
+  eule.sag(e.check
+    ? `Der Übertritts-Check mischt Mathe und Deutsch auf dem Stand der ${UEBERTRITT.klasse}. Klasse. Am Schluss siehst du, was schon sitzt und was du noch üben kannst.${rekord ? ` Dein Rekord hier: ${rekord}.` : ""}`
+    : `Ich mische dir Aufgaben aus verschiedenen Spielen. Stell ein, wie du spielen willst!${rekord ? ` Dein Rekord hier: ${rekord}.` : ""}`);
+}
+
+// ---------- Bericht des Übertritts-Checks ----------
+
+// Auf Anhieb heisst: ohne Fehlversuch, ohne „Zeit um“ und ohne Tipp (Entscheid T1 a).
+const anhiebRichtig = a => a.geloest && !a.versuche && !a.zeitUm && !a.tipps;
+
+/**
+ * Je Thema (Fach und Thema aus dem Katalog): wie viele Aufgaben auf Anhieb richtig waren, eingeteilt in
+ * „sitzt“, „fast“ und „üben“ (Grenzen UEBERTRITT.sicher und .fast). Die schwächsten zuerst.
+ */
+function uebertrittsBericht(gespielt) {
+  const { el } = LS;
+  const je = new Map();
+  for (const g of gespielt) {
+    const t = THEMEN.find(x => x.id === g.s.thema);
+    const eintrag = je.get(t.id) || { t, aufgaben: 0, anhieb: 0 };
+    eintrag.aufgaben += g.aufgaben.length;
+    eintrag.anhieb += g.aufgaben.filter(anhiebRichtig).length;
+    je.set(t.id, eintrag);
+  }
+  const stand = x => (x.anhieb / x.aufgaben >= UEBERTRITT.sicher ? { text: "✅ sitzt", art: "gut" }
+    : x.anhieb / x.aufgaben >= UEBERTRITT.fast ? { text: "🙂 fast", art: "mittel" } : { text: "💪 üben", art: "schwach" });
+  const zeilen = [...je.values()].sort((a, b) => a.anhieb / a.aufgaben - b.anhieb / b.aufgaben);
+  const ueben = zeilen.filter(x => stand(x).art === "schwach").map(x => x.t.name);
+  return {
+    element: el("ul", { class: "mix-bericht" }, ...zeilen.map(x => el("li", { class: stand(x).art },
+      el("span", { text: `${x.t.fach}: ${x.t.name}` }), el("b", { text: `${x.anhieb} von ${x.aufgaben}` }), el("span", { text: stand(x).text })))),
+    ueben,
+  };
 }
 
 // ---------- Eine Runde ----------
 
 function starte(name, e) {
   const { el } = LS;
-  const auswahl = LS.mische(kandidaten(name, e)).slice(0, MIX.spieleJeRunde);
+  const auswahl = LS.mische(kandidaten(name, e)).slice(0, e.check ? UEBERTRITT.spieleJeRunde : MIX.spieleJeRunde);
   if (!auswahl.length) return zeichneEinstellungen();
   buehne.innerHTML = "";
   const endlos = istEndlos(e);
@@ -126,6 +184,9 @@ function starte(name, e) {
   const rahmen = el("div", { class: "mix-rahmen" });
   buehne.append(el("div", { class: "mix-leiste" },
     el("div", { class: "mix-spiele" }, ...spiele.map(g => g.bild)), punkte,
+    // ❓ Hilfe zum gerade laufenden Spiel (Entscheid T3 a): das Spiel im iframe zeigt sie und hält die Uhr an.
+    el("button", { type: "button", class: "knopf hell klein", text: "❓", "aria-label": "Hilfe: So geht das Spiel",
+      onclick: () => aktuell?.frame.contentWindow?.postMessage({ lern: "mix", typ: "hilfe" }, "*") }),
     el("button", { type: "button", class: "knopf hell klein", text: "✕ Beenden", onclick: () => beende("beendet") })), rahmen);
   for (const g of spiele) {
     g.frame = el("iframe", { class: "mix-spiel", title: g.s.name,
@@ -205,7 +266,9 @@ function starte(name, e) {
     }
     const zeit = new Date().toISOString();
     for (const g of spiele.filter(x => x.aufgaben.length)) {
+      const tipps = g.aufgaben.reduce((n, a) => n + (a.tipps || 0), 0);
       LS.protokolliere({
+        ...(tipps ? { tipps } : {}),
         name, zeit, spiel: g.s.id, stufe: g.stufe, sterne: null, mix: auswahlSchluessel(e),
         fehler: g.fehler, aufgaben: g.aufgaben.length,
         dauer: Math.round(g.aufgaben.reduce((n, a) => n + a.ms, 0) / 1000),
@@ -270,20 +333,25 @@ function starte(name, e) {
         : rekordVorher ? `Dein Rekord bleibt ${rekordVorher}. Gleich nochmal?` : "Gut gemacht! Schaffst du nächstes Mal mehr?", "gut");
     }
     const fehler = summe(g => g.fehler);
-    const anhieb = summe(g => g.aufgaben.filter(a => a.geloest && !a.versuche && !a.zeitUm).length);
+    const anhieb = summe(g => g.aufgaben.filter(anhiebRichtig).length);
+    // Übertritts-Check: statt der Liste je Spiel der Bericht je Thema.
+    const bericht = e.check ? uebertrittsBericht(gespielt) : null;
+    const tipp = bericht?.ueben.length ? ` Üben lohnt sich bei: ${bericht.ueben.join(", ")}.` : bericht ? " Alles, was vorkam, sitzt schon recht gut." : "";
     if (grund === "beendet") {
-      karte.append(el("div", { class: "auftrag", text: `${gestellt} Aufgabe${gestellt === 1 ? "" : "n"} gespielt` }), eule.element, liste, knoepfe);
+      karte.append(el("div", { class: "auftrag", text: `${gestellt} Aufgabe${gestellt === 1 ? "" : "n"} gespielt` }), eule.element, bericht?.element || liste, knoepfe);
       buehne.append(karte);
-      return eule.sag(`${anhieb} davon auf Anhieb richtig. Bis zum nächsten Mal!`, "gut");
+      return eule.sag(`${anhieb} davon auf Anhieb richtig.${tipp || " Bis zum nächsten Mal!"}`, "gut");
     }
-    const sterne = LS.sterneFuer(fehler);
+    // Ein Tipp zählt wie ein halber Fehler (Entscheid T1 a).
+    const sterne = LS.sterneFuer(fehler + summe(g => g.aufgaben.reduce((n, a) => n + (a.tipps || 0), 0)) / 2);
     LS.konfetti();
     const st = el("div", { class: "sterne" });
     for (let i = 0; i < 3; i++) st.append(el("span", { class: i < sterne ? "" : "aus", style: i < sterne ? "color:#f5b301" : "", text: "★" }));
-    karte.append(el("div", { class: "auftrag", text: `Geschafft, ${name}!` }), st, eule.element, liste, knoepfe);
+    karte.append(el("div", { class: "auftrag", text: `Geschafft, ${name}!` }), st, eule.element, bericht?.element || liste, knoepfe);
     buehne.append(karte);
-    eule.sag(fehler === 0 ? "Perfekt! Alles auf Anhieb richtig! 🏆"
-      : `${anhieb} von ${gestellt} auf Anhieb richtig — aus ${gespielt.length} verschiedenen Spielen!`, "gut");
+    // „Perfekt“ nur, wenn wirklich alles auf Anhieb gelöst ist (übersprungene Aufgaben zählen nicht als Fehler).
+    eule.sag((anhieb === gestellt ? "Perfekt! Alles auf Anhieb richtig! 🏆"
+      : `${anhieb} von ${gestellt} auf Anhieb richtig — aus ${gespielt.length} verschiedenen Spielen!`) + tipp, "gut");
   }
 
   wechsle();

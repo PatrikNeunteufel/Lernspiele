@@ -205,11 +205,31 @@ const H_FLAECHE = "Fläche: Wie viele Häuschen liegen im Rechteck? Rechne Breit
 const H_UMFANG = "Umfang: Fahre einmal rundherum — zweimal die Breite plus zweimal die Höhe.";
 const vergleich = (ist, soll, wer) => `${wer} ist zu ${ist > soll ? "gross" : "klein"}.`;
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Formel und Vorgehen beim Suchen — nie Seitenlängen.
+ */
+const T_UMFANG_HALB = "Breite plus Höhe ist die Hälfte vom Umfang.";
+function tippsFuer(a, p) {
+  switch (a.art) {
+    case "flaeche": return ["Die Fläche ist Breite mal Höhe — so viele Häuschen liegen im Rechteck.", `Suche zwei Zahlen, die malgerechnet ${a.F} geben. Eine Malreihe hilft.`];
+    case "umfang": return ["Der Umfang ist einmal rundherum: zweimal die Breite plus zweimal die Höhe.", T_UMFANG_HALB];
+    case "beides": return ["Suche zuerst Rechtecke mit der richtigen Fläche: zwei Zahlen, die malgerechnet die Fläche geben.", `Prüfe dann bei jedem den Umfang. ${T_UMFANG_HALB}`];
+    case "alleF": return ["Geh die Breiten der Reihe nach durch: 1, 2, 3 … Geht die Fläche ohne Rest auf?", "Gedreht zählt nicht. Wiederholen sich die Rechtecke nur noch gedreht, hast du alle. Alles muss ins Raster passen."];
+    case "alleU": return [T_UMFANG_HALB, "Geh die Breiten der Reihe nach durch: 1, 2, 3 … und rechne jedes Mal die passende Höhe aus. Gedreht zählt nicht."];
+    case "maxF": return [`Baue mehrere Rechtecke mit diesem Umfang und vergleiche ihre Flächen${p.laborbuch ? " im Laborbuch 📒" : ""}. ${T_UMFANG_HALB}`, "Vergleiche: Hat ein langes, schmales Rechteck mehr Fläche oder eines, das fast ein Quadrat ist?"];
+    case "minU": return [`Baue mehrere Rechtecke mit dieser Fläche und vergleiche ihre Umfänge${p.laborbuch ? " im Laborbuch 📒" : ""}.`, "Vergleiche: Hat ein langes, schmales Rechteck den kleineren Umfang oder eines, das fast ein Quadrat ist?"];
+  }
+  return [];
+}
+
 // ---------- Spiel ----------
 
 LS.spiel({
   id: "rechteck-labor",
   einleitung: "Willkommen im Rechteck-Labor! Die Ecke oben links ist fest. Tippe ein Häuschen an — dort ist die andere Ecke. Jedes Häuschen ist 1 cm breit und 1 cm hoch, also 1 cm² gross.",
+  hilfe: stufe => "Die Ecke oben links ist fest. Tippe ein Häuschen an — dort ist die andere Ecke. Dann tippst du auf „Prüfen ✓“."
+    + (!stufe || STUFE[stufe].arten.some(x => x === "alleF" || x === "alleU") ? " Sollst du alle Rechtecke finden, baust und prüfst du jedes einzeln." : "")
+    + (!stufe || STUFE[stufe].laborbuch ? " Mit „📒 Messen“ schreibst du ein Rechteck ins Laborbuch." : ""),
   anzahl: 6,
   stufen: {
     s1: "Fläche bauen: Rechteck mit 12 cm² (Häuschen zählen).",
@@ -230,6 +250,7 @@ LS.spiel({
     ctx.loesung(loesungText);
     ctx.schritte(alle ? 2 * loes.length : 2);
     if (p.arten.length > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a, p));
 
     let ist = null; // { b, h }
     const gefunden = [];

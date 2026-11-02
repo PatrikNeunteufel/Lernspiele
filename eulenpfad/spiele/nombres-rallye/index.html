@@ -187,11 +187,31 @@ function hinweisZahl(n, getippt) {
   return teile.filter(Boolean).join(" ");
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie französische Zahlwörter gebaut sind — ohne
+ * das gesuchte Wort vorzusagen und ohne Zehnerwort mit seiner Zahl (trente = 30 wäre bei 30 die Lösung).
+ */
+function tippsZahl(n, region, lesen) {
+  const nach = lesen ? "Lies das Wort halblaut." : "Hör mit 🔊 noch einmal und sprich leise nach.";
+  if (n <= 16) return [nach, "Zähle auf Französisch von un an, bis du beim Wort bist."];
+  if (n < 70 || n === 100) return [nach, "Zuerst kommen die Zehner, dann die Einer. Die Zehner heissen vingt, trente, quarante, cinquante, soixante."];
+  if (region) return [nach, "In der Westschweiz zählt man weiter wie bis 69: nach soixante kommen septante, huitante, nonante."];
+  return [nach, "Achte auf den Anfang: soixante … oder quatre-vingt …?", "Ab 70 wird gerechnet: Was nach soixante oder quatre-vingt kommt, zählst du dazu."];
+}
+function tippsFuer(a) {
+  if (a.art === "zuordnen") return ["Lies jedes Wort Teil für Teil: zuerst die Zehner, dann die Einer.",
+    a.n >= 70 && a.n < 100 ? "Ab 70 wird gerechnet: soixante plus etwas oder quatre-vingt plus etwas." : "Achte auf kleine Unterschiede am Anfang und am Ende der Wörter."];
+  if (a.art === "preisWahl" || a.art === "preisTippen") return ["Hör zuerst auf die Franken: die Zahl vor „francs“.", "Die Zahl danach sind die Rappen."];
+  if (a.art === "telefon") return ["Die Nummer kommt in Paaren: Jedes Paar ist eine Zahl von 10 bis 99.", "Hör mit 🔊 Paar für Paar und tippe jedes Paar gleich ein."];
+  return tippsZahl(a.n, a.region, a.art === "lesenTippen");
+}
+
 const hoerKnopf = text => el("button", { type: "button", class: "nr-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(text) });
 
 LS.spielMitStimme({
   id: "nombres-rallye",
   einleitung: "Nombres-Rallye! Un, deux, trois … Hör gut zu und finde die Zahl. Achtung bei soixante-dix: Das ist 60 + 10!",
+  hilfe: "Hör die Zahl oder lies das Wort. Dann tippst du die Zahl ein oder tippst die passende Antwort an. Mit „🔊 nochmal“ hörst du es noch einmal.",
   anzahl: 8,
   stufen: {
     s1: "Ohne Vorkenntnisse: 0 bis 10 hören. un, deux, trois …",
@@ -209,6 +229,7 @@ LS.spielMitStimme({
       ? "Hör genau hin. Mit 🔊 hörst du es nochmal."
       : "Hör gut zu oder lies genau. Mit 🔊 hörst du die Zahl nochmal.");
     if (p.arten.length > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a));
     const f = ctx.flaeche;
 
     /** Zahl eintippen; prüft gegen soll (Zahl), ok-Text wie loesung. */

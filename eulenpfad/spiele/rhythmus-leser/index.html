@@ -120,9 +120,22 @@ const symbol = v => NOTEN.zeile({ noten: [{ wert: v.wert, punkt: v.punkt }], lin
 const notenAus = werte => werte.map(x => ({ wert: x, punkt: w(x).punkt }));
 const viertel = x => (x === 1 ? "1 Viertel" : `${w(x).schlaege} Viertel`);
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): woran man Noten erkennt und wie man Schläge zählt —
+ * bei „dauer“ keine Dauer einer bestimmten Note (die gefragte Note könnte genau diese sein).
+ */
+function tippsFuer(a) {
+  if (a.art === "benennen") return ["Schau den Notenkopf an: leer oder ausgemalt?", "Hat die Note einen Hals? Und ein Fähnchen?"];
+  if (a.art === "dauer") return ["Hör dir die Note an 🔊 und zähl beim Klatschen mit: 1, 2, 3, 4.",
+    "Schau genau: Leerer Kopf oder ausgemalt? Fähnchen? Punkt? Ein leerer Kopf dauert länger, ein Fähnchen macht kürzer."];
+  if (a.art === "fuellen") return ["Zähl die Schläge der Noten, die schon da sind.", `Im ${a.takt}/4-Takt hat es ${a.takt} Schläge. Wie viele fehlen noch?`];
+  return ["Zähle alle Notenwerte im Takt zusammen.", "Eine Viertel ist ein Schlag, eine Halbe zwei Schläge, eine Achtel ein halber Schlag."];
+}
+
 LS.spiel({
   id: "rhythmus-leser",
   einleitung: "Ganze, Halbe, Viertel, Achtel — jede Note dauert verschieden lang. Kannst du Rhythmen lesen?",
+  hilfe: "Schau die Noten an und tippe die passende Antwort an. Mit 🔊 hörst du, wie lange die Noten klingen.",
   anzahl: 8,
   stufen: {
     s1: "Wie heisst die Note? Ganze, Halbe, Viertel.",
@@ -138,6 +151,7 @@ LS.spiel({
     if (ctx.stufe !== "s1" && ctx.stufe !== "s3") ctx.serie("art", a.art);
     // Antwort als Merkmal, wo höchstens drei Noten oder Taktarten zur Wahl stehen.
     if (a.optionen.length <= 3) ctx.serie("antwort", a.richtig.wert ?? a.richtig);
+    ctx.tipp(tippsFuer(a));
     if (a.art === "benennen") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst diese Note?" }),
         el("div", { class: "notenblatt" }, NOTEN.zeile({ noten: [{ wert: a.richtig.wert }], linien: 1, mindestBreite: 160 })));

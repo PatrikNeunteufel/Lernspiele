@@ -477,6 +477,29 @@ function zeigeKlaerWas(ctx, a) {
   LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, hinweis: "Denk an den Namen der Station: Was steckt darin?", loesung: `${k.text}: ${k.was}`, breite: 200 });
 }
 
+// Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst hinschauen oder sich die Sache vorstellen, dann
+// die vorhandenen Tipps der Fragen, Pfeile und Schichten — nie eine Station oder ein Begriff, der Antwort ist.
+const WEG_TIPP = {
+  boden: "Was im Boden versickert, kommt irgendwo wieder heraus.",
+  berg: "Was auf dem Berg liegen bleibt, schmilzt erst, wenn es warm wird.",
+};
+function tippsFuer(a) {
+  switch (a.art) {
+    case "frage": return ["Stell dir die Sache genau vor: Was passiert mit dem Wasser?", a.f.tipp];
+    case "reise":
+    case "danach": return [TIPP_REISE, "Folge in der Grafik den Pfeilen, vom Ort des Tropfens aus.", WEG_TIPP[a.weg]];
+    case "pfeilBegriff": return ["Schau, wo der leuchtende Pfeil beginnt und wohin er zeigt.", VORGANG[a.richtig].tipp];
+    case "begriffPfeil": return ["Überleg, was das Wort bedeutet: Wo ist das Wasser vorher, wo nachher?", VORGANG[a.richtig].suche.replace(/^Gesucht: /, "")];
+    case "beschreibung": return ["Lies genau: Wo ist das Wasser vorher, und wo ist es nachher?",
+      "Überleg, was das Wasser macht: Steigt es auf, bildet es Tröpfchen, fällt es herunter, sinkt es in den Boden oder fliesst es weg?"];
+    case "nummern": return ["Schau jeden Pfeil an: Wo beginnt er, und wohin führt er?", "Fang bei Pfeil 1 an und überleg, was dort mit dem Wasser passiert."];
+    case "schicht": return ["Schau die Farben an und das, was in den Schichten zu sehen ist.", SCHICHT_FRAGEN[a.nr].tipp];
+    case "klaer": return ["Zuerst kommt das Grobe aus dem Wasser, dann das Feine, ganz am Schluss der gelöste Schmutz.",
+      a.reihe.length === KLAERANLAGE.length ? "Am Schluss ist das Wasser sauber genug für die Natur." : "Lies bei jeder Station, was dort passiert."];
+    default: return ["Denk an den Namen der Station: Was steckt darin?", "Überleg, wo die Station in der Kläranlage steht: Am Anfang kommt das Grobe weg, später das Feine."];
+  }
+}
+
 const ZEIGE = { frage: zeigeFrage, reise: zeigeReise, danach: zeigeDanach, pfeilBegriff: zeigePfeilBegriff, beschreibung: zeigeBeschreibung,
   begriffPfeil: zeigeBegriffPfeil, nummern: zeigeNummern, schicht: zeigeSchicht, klaer: zeigeKlaer, klaerWas: zeigeKlaerWas };
 
@@ -495,6 +518,7 @@ const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => au
 
 LS.spiel({
   id: "wassertropfen-reise",
+  hilfe: "Manchmal tippst du direkt in der Grafik auf einen Pfeil oder eine Bodenschicht. Bei einer Reise kommen die Stationen dran, die nach dem Start des Tropfens folgen.",
   einleitung: "Ein Wassertropfen ist immer unterwegs: vom Meer in die Wolke, als Regen auf die Erde und wieder zurück. Begleite ihn!",
   anzahl: 8,
   stufen: STUFEN,
@@ -503,6 +527,7 @@ LS.spiel({
     if (ctx.nr === 0) ctx.sag("Tipp: Die Sonne wärmt das Wasser — dort beginnt die Reise des Tropfens.");
     const a = aufgabeErzeugen(ctx.stufe);
     if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a));
     ZEIGE[a.art](ctx, a);
   },
 });

@@ -267,10 +267,29 @@ function zeilenende(ctx, a, p) {
 
 // ---------- Spiel ----------
 
+// Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst in Silben sprechen, dann worauf bei diesem Wort
+// zu achten ist — nie, wo getrennt wird. Für Wörter mit einzelnem Vokal und nicht trennbare derselbe Text,
+// damit der Tipp die Art nicht verrät.
+const SILBEN_TIPP = "Sprich das Wort langsam und klatsch bei jeder Silbe.";
+const REGEL_TIPP = {
+  einfach: "Treffen zwischen zwei Silben mehrere Mitlaute aufeinander, kommt nur der letzte auf die neue Zeile.",
+  ckst: "Such im Wort nach ck, ch, sch und st. Welche davon bleiben zusammen, welche werden getrennt?",
+  zusammen: "Aus welchen Wörtern oder Teilen ist das Wort gebaut? Zwischen den Teilen darfst du trennen — und die Teile selbst nach Silben.",
+  vokal: "Wie viele Silben hörst du? Eine Silbe, die nur aus einem einzelnen Vokal am Anfang oder Ende besteht, trennt man nicht ab.",
+};
+REGEL_TIPP.ohne = REGEL_TIPP.vokal;
+function tippsFuer(a) {
+  if (a.art === "zeile") return ["Such zuerst alle Stellen, an denen man das Wort trennen darf.",
+    "Nimm davon die, die am weitesten rechts liegt und noch vor den roten Rand passt.",
+    "Passt keine Trennstelle, schreibst du das Wort auf der nächsten Zeile."];
+  return [SILBEN_TIPP, REGEL_TIPP[a.regel]];
+}
 const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => angeboten(s)));
 
 LS.spiel({
   id: ID,
+  hilfe: stufe => "Tippe zwischen zwei Buchstaben, dann setzt die Schere dort einen Trennstrich; nochmal tippen nimmt ihn weg. Sind alle gesetzt, tippst du „Prüfen ✓“."
+    + (STUFE[stufe]?.zeile ? " Am Zeilenende tippst du die eine Stelle an, wo du trennst — oder „Ganzes Wort auf die neue Zeile“." : ""),
   einleitung: "Am Ende der Zeile ist kein Platz mehr? Dann trennst du das Wort — aber nur an den richtigen Stellen! Tippe zwischen zwei Buchstaben, dann setzt die Schere einen Trennstrich.",
   anzahl: 8,
   stufen: nurAngebotene({
@@ -289,6 +308,7 @@ LS.spiel({
       : "Sprich das Wort langsam in Silben und tippe dort zwischen die Buchstaben, wo du trennen darfst.");
     const a = aufgabeErzeugen(ctx.stufe);
     if (p.zeile) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a));
     if (a.art === "zeile") zeilenende(ctx, a, p);
     else alleStellen(ctx, a, p);
   },

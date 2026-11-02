@@ -190,8 +190,27 @@ function pruefeAufgabe(a, stufe) {
 
 // ---------- Spiel ----------
 
+// ---------- Tipps vor dem Antworten (ctx.tipp, LERN_Session9) ----------
+// Erst wo man hinschaut, dann die Regel oder das Vorgehen — nie, ob es aufgeht, und keine Zahl, die eine
+// der Antworten sein könnte.
+function tippsFuer(a) {
+  switch (a.art) {
+    case "teilbar": return [[3, 6, 9].includes(a.durch) ? "Rechne die Quersumme aus: Zähl alle Ziffern zusammen."
+      : [4, 8].includes(a.durch) ? `Schau nur auf die letzten ${a.durch === 4 ? "zwei" : "drei"} Ziffern.` : "Schau dir die letzten Ziffern der Zahl genau an.", REGEL[a.durch]];
+    case "vielfaches": return [`Ein Vielfaches von ${a.durch} findest du in der ${a.durch}er-Reihe.`, `Teile jede Zahl durch ${a.durch}: Geht es ohne Rest auf?`];
+    case "alleTeiler": return ["Teiler kommen in Paaren: Zwei Teiler mal genommen ergeben die Zahl.",
+      `Fang mit 1 · ${a.zahl} an. Dann probier 2, 3, 4 … der Reihe nach.`, "Treffen sich die Paare in der Mitte, hast du alle."];
+    case "keinTeiler": return ["Prüf jede Zahl: Geht die Division ohne Rest auf?", "Ein Teiler hat einen Partner: Beide mal genommen ergeben die Zahl."];
+    case "primzahl": return ["Probiere die kleinen Primzahlen als Teiler aus, der Reihe nach: 3, 5, 7 und so weiter.",
+      "Findest du einen Teiler ausser 1 und der Zahl selbst, ist es keine Primzahl."];
+    default: return ["Schreib zu jeder Zahl die Teilerpaare auf, zum Beispiel 12 = 3 · 4.",
+      "Ein Teiler hat keinen Partner, wenn er mit sich selbst mal genommen die Zahl gibt."];
+  }
+}
+
 LS.spiel({
   id: "teiler-detektiv",
+  hilfe: "Leg die Zahl in den passenden Korb, tippe die passende Zahl an, oder tippe alle Teiler an und dann „Fertig ✓“ (nochmal tippen nimmt ein Kärtchen weg).",
   einleitung: "Mit deiner Spürnase findest du heraus, durch welche Zahlen sich eine Zahl ohne Rest teilen lässt. Die Endziffern verraten oft schon viel!",
   anzahl: 8,
   stufen: {
@@ -206,6 +225,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const f = ctx.flaeche;
+    ctx.tipp(tippsFuer(a));
     if (a.art === "teilbar") {
       ctx.serie("antwort", a.loesung);
       const loesungText = a.loesung ? `${zahlText(a.zahl)} : ${a.durch} = ${zahlText(a.zahl / a.durch)} — teilbar` : `${zahlText(a.zahl)} : ${a.durch} geht nicht auf — nicht teilbar`;

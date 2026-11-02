@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "nr": 1,
+    "zeit": "2026-11-02T20:18:52+01:00",
+    "status": "erledigt 2026-11-02 (LERN_Session9)",
+    "text": "wenn die richtige zahl an fingern angeklickt wurden, wird automatisch als richtig erkannt. unabhängig davon, ob evtl. falsch mehr geöffnet worden werden",
+    "von": "Patrik",
+    "spiel": "finger-zaehler",
+    "stufe": "s3",
+    "aufgabe": "Aufgabe 8: Wie viele Finger sind das?",
+    "seite": "/eulenpfad/spiele/finger-zaehler/index.html"
+  },
+  {
+    "nr": 2,
+    "zeit": "2026-11-02T20:22:39+01:00",
+    "status": "erledigt 2026-11-02 (LERN_Session9)",
+    "text": "zeilen zusammen zählen, der multiplikator soll aber nicht, dass es keinen abstand hat verwirrt das daher",
+    "von": "Patrik",
+    "spiel": "malkreuz",
+    "stufe": "s3",
+    "aufgabe": "Aufgabe 3: Rechne im Malkreuz: 19 × 15 · 19 × 15 = ?",
+    "seite": "/eulenpfad/spiele/malkreuz/index.html"
+  }
+]

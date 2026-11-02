@@ -407,6 +407,7 @@ const titel = a => el("div", { class: "titel", text: UMFRAGEN[a.u].titel });
 
 LS.spiel({
   id: "diagramm-detektiv",
+  hilfe: "Lies die Strichliste, die Tabelle oder das Säulendiagramm und beantworte die Frage: Antwort antippen oder Zahl eintippen. Fehlt eine Säule, tippst du in der leeren Spalte an, wie hoch sie sein muss, und dann auf «Prüfen ✓».",
   einleitung: "Detektivarbeit! Lies Strichlisten, Tabellen und Säulendiagramme genau — dann findest du jede Antwort.",
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries({
@@ -451,6 +452,10 @@ LS.spiel({
         ? `${zahlText(a.total)} − (${a.werte.filter((w, i) => i !== a.i).join(" + ")}) = ${a.loesung}`
         : `${k(a.i).Wo} ${a.loesung === 1 ? "ist" : "sind"} es ${a.loesung} — die Säule reicht bis ${a.loesung}.`;
       ctx.loesung?.(loesung);
+      // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man die Höhe findet, nie die Zahl
+      ctx.tipp(a.art === "fehlendTotal" ? ["Zähle alle Säulen zusammen, die schon da sind.", "Was fehlt noch bis zum Total? So hoch muss die Säule sein."]
+        : a.art === "uebertragen" ? ["Zähle die Striche in der Strichliste: Ein Bündel sind fünf.", "Folge dann der Linie von dieser Zahl an der Achse bis zur leeren Spalte."]
+        : ["Such die Zahl in der Tabelle.", "Folge der Linie von dieser Zahl an der Achse bis zur leeren Spalte."]);
       const pruefen = el("button", { class: "knopf gruen", type: "button", text: "Prüfen ✓" });
       pruefen.addEventListener("click", () => {
         if (ctx.vorbei()) return;
@@ -487,6 +492,14 @@ LS.spiel({
       doppelGroesst: "Rechne bei jedem Säulenpaar: höhere minus niedrigere Säule. Wo kommt am meisten heraus?",
       doppelMehr: "Lies beide Säulen dieses Paars ab und rechne: höhere minus niedrigere.",
     }[a.art];
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst worauf achten, dann der Weg aus grundHinweis
+    const ANSTOSS = {
+      durchschnitt: "Durchschnitt heisst: So viel wäre es an jedem Tag, wenn alle Tage gleich viel hätten.",
+      doppelGroesst: "Die zwei Farben zeigen die zwei Gruppen. Schau jedes Säulenpaar einzeln an.",
+      doppelMehr: "Die zwei Farben zeigen die zwei Gruppen. Welche Farbe gehört zu welcher?",
+      vergleich: "Nur eine Säule ist falsch gezeichnet, alle anderen stimmen mit der Tabelle überein.",
+    };
+    ctx.tipp([ANSTOSS[a.art] || "Lies die Frage genau: Wonach wird gefragt?", grundHinweis]);
 
     const loesungText = {
       wieviel: () => (a.loesung === 1 ? `${k(a.i).Wo} ist es 1 ${UMFRAGEN[a.u].einzahl}.` : `${k(a.i).Wo} sind es ${a.loesung} ${einheit}.`),

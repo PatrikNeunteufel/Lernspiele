@@ -76,9 +76,22 @@ function pruefeAufgabe(x, stufe) {
   return m;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Malreihe, grobe Schritte, Regel zum Rest — nie Ergebnis oder Rest. */
+function tippsFuer(x, p) {
+  if (x.rueckwaerts) return ["Rechne rückwärts mit der Umkehraufgabe: mal statt durch.", "Nimm zuerst das Ergebnis mal den Teiler. Dann zählst du den Rest dazu."];
+  const t = [];
+  if (p.bilder) t.push("Verteile die Bilder eins nach dem anderen an die Kinder, bis es nicht mehr für alle reicht.");
+  if (x.q > 100) t.push(`Rechne zuerst mit Hundertern: 100 × ${x.d}, 200 × ${x.d} … Wie weit kommst du?`);
+  else if (x.q > 10) t.push(`Rechne zuerst mit Zehnern: 10 × ${x.d}, 20 × ${x.d} … Wie weit kommst du?`);
+  t.push(`Welche Zahl aus der ${x.d}er-Reihe ist am nächsten bei ${zahlText(x.a)}, aber nicht grösser?`);
+  t.push(`Der Rest ist das, was übrig bleibt. Er ist immer kleiner als ${x.d}.`);
+  return t.slice(0, 3);
+}
+
 LS.spiel({
   id: "rest-raetsel",
   einleitung: "Verteilen und teilen! Wie viel bekommt jeder — und bleibt ein Rest übrig? Die Umkehraufgabe zeigt, ob es stimmt.",
+  hilfe: "Tippe zuerst ein, wie oft der Teiler hineinpasst, dann den Rest. Bei „? :“ tippst du die gesuchte Zahl ein. Zum Schluss zeigt die Umkehraufgabe, dass es stimmt.",
   anzahl: 8,
   stufen: {
     s1: "Mit Bildern: 7 Äpfel für 2 Kinder.",
@@ -92,6 +105,7 @@ LS.spiel({
   aufgabe(ctx) {
     const x = aufgabeErzeugen(ctx.stufe);
     if (STUFE[ctx.stufe].rueckwaerts) ctx.serie("richtung", x.rueckwaerts);
+    ctx.tipp(tippsFuer(x, STUFE[ctx.stufe]));
     const umkehr = `${zahlText(x.q)} × ${x.d}${x.r ? ` + ${x.r}` : ""} = ${zahlText(x.a)}`;
     const umkehrZeile = el("div", { class: "umkehr" });
 

@@ -58,6 +58,10 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
   wird an einen Server geschickt; Sichern/Einlesen als JSON-Datei nur auf Knopfdruck in der
   Statistik. Ausnahme Abgleich (Entscheid S1 a, 2026-11-01): Daten verlassen den Browser nur in
   einen Ordner, den die Aufsicht wählt (Netzwerkordner oder Ordner eines Cloud-Dienstes), ohne PIN.
+  Ausnahme Fehlermeldungen (Entscheid M1 a, 2026-11-02): Eine Meldung, die die Aufsicht bestätigt hat, geht
+  nur auf ihren Knopfdruck an die Entwicklung — per E-Mail aus ihrem eigenen Mailprogramm oder als Bemerkung
+  über den lokalen Entwickler-Server —, ohne den Namen des Kindes (Klasse, Aufgabe, Begründung). Zurück kommt
+  nur `eulenpfad/meldungen-stand.json` (je Kennung Status und Antwort).
   Keine weiteren Angaben (Nachname, Schule, Foto) erfassen.
 
 ## Projekt-Steckbrief

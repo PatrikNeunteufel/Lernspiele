@@ -103,8 +103,17 @@ function pruefeAufgabe(a) {
   return m;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man liest — nie das Wort selbst. */
+const BLITZ_TIPP = "Tipp auf «⚡ Nochmal blitzen» und schau genau hin.";
+function tippsFuer(a) {
+  if (a.art === "bild") return [BLITZ_TIPP, "Merk dir den ersten Buchstaben. Welches Bild beginnt so?"];
+  if (a.art === "wort") return [BLITZ_TIPP, "Die Wörter sehen fast gleich aus. Achte auf jeden Buchstaben, auch in der Mitte."];
+  return [BLITZ_TIPP, "Lies zuerst die Zahl, dann das Ding: Wie viele, und was?"];
+}
+
 LS.spiel({
   id: "blitzlesen",
+  hilfe: "Ein Wort blitzt kurz auf der Tafel auf. Lies es und tippe das passende Bild oder Wort an. Mit «⚡ Nochmal blitzen» siehst du es noch einmal.",
   einleitung: "Ein Wort blitzt auf — und ist gleich wieder weg! Lies schnell und tipp auf das passende Bild.",
   anzahl: 10,
   stufen: nurMoegliche({
@@ -119,6 +128,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     if (moeglich(ctx.stufe).length > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const zeit = STUFE[ctx.stufe].zeit;
     const tafel = el("div", { class: "tafel", "aria-live": "polite" });
     const zeige = () => {

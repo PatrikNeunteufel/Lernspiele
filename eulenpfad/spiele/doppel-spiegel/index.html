@@ -94,8 +94,18 @@ function hinweisFuer(a) {
   return `Halbieren heisst: in zwei gleiche Teile teilen. Welche Zahl plus sich selbst gibt ${zahlText(a.n)}?`;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst was verdoppeln/halbieren heisst, dann der Weg aus hinweisFuer. */
+function tippsFuer(a, stufe) {
+  if (a.art === "halb") return ["Denk an eine Verdoppel-Aufgabe, die du schon kennst.", hinweisFuer(a)];
+  const regel = "Verdoppeln heisst: noch einmal gleich viel dazu.";
+  if (STUFE[stufe].spiegel) return ["Zähle die Punkte links und die Punkte im Spiegel.", regel];
+  if (a.n <= 10) return [regel, "Zähle mit den Fingern weiter: noch einmal so viele, wie die Zahl sagt."];
+  return [regel, hinweisFuer(a)];
+}
+
 LS.spiel({
   id: "doppel-spiegel",
+  hilfe: "Rechne und tippe das Ergebnis mit den Zifferntasten ein. Der Spiegel zeigt dir die Punkte doppelt.",
   einleitung: "Der Spiegel zeigt alles doppelt! Verdoppeln heisst: noch einmal gleich viel dazu. Halbieren heisst: in zwei gleiche Teile teilen.",
   anzahl: 10,
   stufen: {
@@ -112,6 +122,7 @@ LS.spiel({
     if (STUFE[ctx.stufe].halb.length) ctx.serie("art", a.art);
     const loesung = a.art === "doppel" ? `${zahlText(a.n)} + ${zahlText(a.n)} = ${zahlText(a.richtig)}` : `${zahlText(a.richtig)} + ${zahlText(a.richtig)} = ${zahlText(a.n)}`;
     ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(a, ctx.stufe)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     ctx.schritte(LS.tippSchritte(a.richtig));
     const luecke = el("span", { class: "luecke", text: "?" });
     ctx.flaeche.append(el("div", { class: "auftrag", text: a.art === "doppel" ? `Verdopple ${zahlText(a.n)}.` : `Halbiere ${zahlText(a.n)}.` }));

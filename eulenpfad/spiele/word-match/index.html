@@ -125,9 +125,34 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst ein Anstoss, dann eine Strategie — nie das Wort.
+ * Beispiele für ähnliche Wörter nur aus Paaren, die in dieser Aufgabe nicht vorkommen.
+ */
+const AEHNLICH = [["mouse", "Maus"], ["hand", "Hand"], ["brown", "braun"], ["father", "Vater"], ["fish", "Fisch"], ["apple", "Apfel"]];
+function tippsFuer(a) {
+  const bilder = new Set(a.optionen || []); // Wort → Bild: auch die Wörter hinter den gezeigten Bildern
+  const belegt = new Set([a.en, a.de, ...bilder, ...ALLE_WOERTER.filter(w => bilder.has(w[2])).map(w => w[0])]);
+  const [bspEn, bspDe] = AEHNLICH.find(([e, d]) => !belegt.has(e) && !belegt.has(d)) || AEHNLICH[0];
+  const aehnlich = `Manche englischen Wörter klingen fast wie deutsche: ${bspEn} – ${bspDe}. Sprich das Wort laut und hör genau hin.`;
+  if (a.art === "wendung") return ["Überlege, wann man diesen Satz sagt: beim Grüssen, beim Abschied, beim Danken oder beim Fragen?",
+    "Lies jedes Wort einzeln. Die Wörter, die du kennst, verraten dir, worum es geht."];
+  if (a.art === "bildZuEn") return ["Sprich die englischen Wörter leise aus. Welches kennst du schon?",
+    `Auf Deutsch heisst das Bild: ${a.de}. Welches englische Wort bedeutet dasselbe?`];
+  if (a.art === "enZuBild" || a.art === "enZuDe") return ["Sprich das englische Wort leise aus. Erinnert es dich an ein deutsches Wort?", aehnlich];
+  if (a.art === "deZuEnAehnlich") return ["Die Wörter sehen sich ähnlich. Lies jedes ganz genau, Buchstabe für Buchstabe.", aehnlich];
+  if (a.art === "deZuEn") return ["Sprich die englischen Wörter leise aus. Welches kennst du schon?", aehnlich];
+  if (a.art === "buchstabierenSchwer") return ["Sprich das englische Wort ganz langsam und hör auf jeden Laut.",
+    "Zwei Buchstaben gehören nicht ins Wort. Beginne mit denen, die du sicher brauchst."];
+  return ["Sprich das englische Wort ganz langsam und hör auf jeden Laut.", `Das Wort fängt mit „${a.ziel[0]}“ an.`];
+}
+
 LS.spiel({
   id: "word-match",
   einleitung: "Hello! Let's play! Welches englische Wort passt zum Bild? Und was heisst das auf Deutsch?",
+  hilfe: stufe => (stufe === "s5" || stufe === "s6"
+    ? "Schau das Bild oder das Wort an und tipp die richtige Antwort. Beim Buchstabieren tippst du die Buchstaben der Reihe nach an — sie wandern in die Kästchen."
+    : "Schau das Bild oder das Wort oben an und tipp unten die Antwort, die dazu passt."),
   anzahl: 8,
   stufen: nurMoegliche({
     s1: "Bild → englisches Wort: Farben, Tiere, Zahlen.",
@@ -162,6 +187,7 @@ LS.spiel({
     if (a.art === "wendung") ctx.serie("richtung", a.richtig === a.en ? "deZuEn" : "enZuDe");
     const { art, en, de, bild, loesung } = a;
     ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(a));
     ctx.flaeche.append(el("div", { class: "thema-name", text: a.thema }));
 
     if (a.optionen) {

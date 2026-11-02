@@ -17,12 +17,28 @@ const PRUEFSTAND = {
     }
   },
   "spiele": {
+    "finger-zaehler": {
+      "am": "2026-11-02",
+      "von": "Patrik"
+    },
+    "malkreuz": {
+      "am": "2026-11-02",
+      "von": "Patrik"
+    },
     "preis-tabelle": {
       "am": "2026-11-01",
       "von": "Patrik"
     },
+    "rechentrick-detektiv": {
+      "am": "2026-11-02",
+      "von": "Patrik"
+    },
     "schriftlich-werkstatt": {
       "am": "2026-11-01",
+      "von": "Patrik"
+    },
+    "velo-tabelle": {
+      "am": "2026-11-02",
       "von": "Patrik"
     }
   }

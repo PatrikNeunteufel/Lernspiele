@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sachtext-Spurensuche</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .sachtext { background: #fffdf5; border: 3px solid var(--rand); border-radius: 18px; padding: 12px 16px; margin: 4px auto 12px; max-width: 680px; font-size: clamp(17px, 3.9vw, 21px); line-height: 1.55; text-align: left; overflow-wrap: break-word; }
+  .sachtext h2 { margin: 0 0 6px; font-size: clamp(19px, 4.4vw, 25px); }
+  .sachtext p { margin: 0 0 8px; }
+  .sachtext p:last-child { margin-bottom: 0; }
+  .spur-abschnitt { display: inline-block; margin-right: 6px; padding: 0 8px; border-radius: 8px; background: var(--deko-4); color: #fff; font-size: .8em; font-weight: 800; }
+  .spur-tabelle-rahmen { overflow-x: auto; max-width: 100%; margin: 4px 0 10px; }
+  .spur-tabelle-titel { font-weight: 800; font-size: .9em; margin: 0 0 4px; }
+  .spur-tabelle { border-collapse: collapse; font-size: .92em; font-variant-numeric: tabular-nums; }
+  .spur-tabelle th, .spur-tabelle td { border: 2px solid var(--rand); padding: 4px 10px; text-align: left; }
+  .spur-tabelle th { background: var(--karte); color: var(--text-leise); }
+  .spur-tabelle td { background: #fff; }
+  .frage { text-align: center; font-size: clamp(18px, 4vw, 23px); font-weight: 800; margin: 0 auto 10px; max-width: 680px; }
+  .spur-aussage { display: block; margin: 8px auto 0; padding: 8px 14px; max-width: 620px; border: 3px dashed var(--deko-4); border-radius: 14px; background: #fff; font-weight: 700; }
+  .wahl-knopf.spur-satz { font-size: clamp(16px, 3.6vw, 20px); text-align: left; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔎 Sachtext-Spurensuche</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan 21 D.2.B.1 (wichtige Informationen aus Sachtexten entnehmen), Basisklasse 6:
+//   s1 (5. Klasse, nach dem OP e): kurzer Text (etwa 4 Sätze), Angabe finden, stimmt / stimmt nicht,
+//      Titel zum ganzen Text
+//   s2: längerer Text (5–6 Sätze), dazu „steht nicht im Text“
+//   s3 (GA f, Ende 6. Klasse): zwei Abschnitte — Struktur erkennen (Titel je Abschnitt), explizite
+//      Informationen, Text als Ganzes verstehen
+//   s4: dazu naheliegende Schlussfolgerungen und eine Tabelle im Text (f: implizite Informationen,
+//      Abbildung und Text in Bezug setzen)
+//   s5 (3. Zyklus g/h): Tabelle und Text verbinden, kleine Rechnungen aus der Tabelle
+//   s6 (Königsstufe): längere Abschnitte, mehrere Schlussfolgerungen
+// Bezug: Lese-Detektiv (Basisklasse 2) stellt eine Frage je Text; die Wort-Spürnase (5) übt nur
+// Wortbedeutungen aus dem Kontext. Hier geht es um Struktur, Belegen und „steht nicht im Text“.
+// Vorlesen aus (Katalog vorlesen: false): Lesen ist der Stoff.
+
+const { waehle, mische, el } = LS;
+const ID = "sachtext-spurensuche";
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Eine Liste „texte“. Kennt der Katalog die Listen nicht, gilt alles als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["texte"]);
+const TEXTE = FREI.has("texte") ? SPUREN_TEXTE : [];
+
+/** Fragearten, die eine Stufe stellt; „fehlt“ = „steht nicht im Text“ als Antwort möglich. */
+const STUFE = {
+  s1: { arten: ["angabe", "stimmt", "titel"], fehlt: false },
+  s2: { arten: ["angabe", "stimmt", "titel"], fehlt: true },
+  s3: { arten: ["angabe", "stimmt", "abschnitt"], fehlt: true },
+  s4: { arten: ["angabe", "stimmt", "abschnitt", "folgern", "tabelle"], fehlt: true },
+  s5: { arten: ["angabe", "stimmt", "abschnitt", "folgern", "tabelle"], fehlt: true },
+  s6: { arten: ["angabe", "stimmt", "abschnitt", "folgern", "tabelle"], fehlt: true, knapp: true },
+};
+const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+
+const STIMMT = { ja: { bild: "✅", text: "stimmt" }, nein: { bild: "❌", text: "stimmt nicht" }, fehlt: { bild: "🤷", text: "steht nicht im Text" } };
+
+/** Alle Fragen eines Texts als Aufgaben; Abschnitts-Titel ergeben je eine Frage „Welcher Titel passt?“. */
+function fragenVon(t) {
+  const liste = t.fragen.map(([art, ...rest]) => {
+    if (art === "stimmt") return { art, aussage: rest[0], richtig: rest[1], optionen: null };
+    if (art === "titel") return { art, frage: "Welcher Titel passt am besten zum ganzen Text?", richtig: rest[0], optionen: [rest[0], rest[1], rest[2]] };
+    return { art, frage: rest[0], richtig: rest[1], optionen: [rest[1], rest[2], rest[3]] };
+  });
+  (t.abschnitte || []).forEach(([titel], i) => liste.push({
+    art: "abschnitt", nr: i + 1, frage: `Welcher Titel passt am besten zu Abschnitt ${i + 1}?`, richtig: titel,
+    optionen: [...t.abschnitte.map(a => a[0]), t.ablenker],
+  }));
+  return liste;
+}
+
+/** Alle (Text, Frage) einer Stufe. */
+const paareIn = stufe => TEXTE.filter(t => t.stufe === STUFE_NR[stufe])
+  .flatMap(t => fragenVon(t).filter(f => STUFE[stufe].arten.includes(f.art)).map(f => ({ t, f })));
+const ANGEBOTEN = new Set(Object.keys(STUFE).filter(s => paareIn(s).length));
+
+function aufgabeErzeugen(stufe) {
+  const { t, f } = waehle(paareIn(stufe));
+  return { t, f, optionen: f.art === "stimmt" ? (STUFE[stufe].fehlt ? ["ja", "nein", "fehlt"] : ["ja", "nein"]) : mische(f.optionen) };
+}
+
+// ---------- Prüfung ----------
+
+// Satzende: Punkt, Frage- oder Ausrufezeichen, nicht nach einer Ziffer („1. August“).
+const ANZAHL_SAETZE = text => (text.match(/(?<!\d)[.!?](?=\s|$)/g) || []).length;
+
+/** Mängel der ganzen Liste — einmal berechnet. */
+const LISTEN_MAENGEL = (() => {
+  const m = [];
+  for (const t of SPUREN_TEXTE) {
+    const wo = `«${t.titel}»`;
+    if (!(t.stufe >= 1 && t.stufe <= 6)) m.push(`${wo}: Stufe fehlt`);
+    const abschnitte = t.abschnitte ? t.abschnitte.map(a => a[1]) : [t.text];
+    if (t.stufe <= 2 && (t.abschnitte || typeof t.text !== "string")) m.push(`${wo}: Stufe 1–2 hat genau einen Abschnitt (text)`);
+    if (t.stufe >= 3 && (!t.abschnitte || t.abschnitte.length < 2 || !t.ablenker)) m.push(`${wo}: ab Stufe 3 mindestens zwei Abschnitte und ein Ablenker-Titel`);
+    const saetze = abschnitte.reduce((s, a) => s + ANZAHL_SAETZE(a), 0);
+    const grenzen = { 1: [3, 5], 2: [5, 6], 3: [6, 9], 4: [6, 11], 5: [7, 12], 6: [7, 12] }[t.stufe] || [0, 99];
+    if (saetze < grenzen[0] || saetze > grenzen[1]) m.push(`${wo}: ${saetze} Sätze, Stufe ${t.stufe} erwartet ${grenzen[0]}–${grenzen[1]}`);
+    if (t.tabelle && (t.stufe < 4 || !t.tabelle.zeilen.every(z => z.length === t.tabelle.kopf.length) || !(t.tabelle.nach >= 1 && t.tabelle.nach <= abschnitte.length))) m.push(`${wo}: Tabelle falsch aufgebaut oder zu früh`);
+    const fragen = fragenVon(t);
+    if (fragen.length < 4) m.push(`${wo}: weniger als vier Fragen`);
+    for (const f of fragen) {
+      if (f.art === "stimmt") {
+        if (!["ja", "nein", "fehlt"].includes(f.richtig)) m.push(`${wo}: «${f.aussage}» ohne ja/nein/fehlt`);
+        if (f.richtig === "fehlt" && t.stufe < 2) m.push(`${wo}: «steht nicht im Text» erst ab Stufe 2`);
+        continue;
+      }
+      if (["folgern", "tabelle"].includes(f.art) && t.stufe < 4) m.push(`${wo}: ${f.art} erst ab Stufe 4`);
+      if (f.art === "tabelle" && !t.tabelle) m.push(`${wo}: Tabellenfrage ohne Tabelle`);
+      if (f.art === "titel" && t.stufe > 2) m.push(`${wo}: Titel zum ganzen Text nur in Stufe 1–2`);
+      if (!["angabe", "folgern", "tabelle", "titel", "abschnitt"].includes(f.art)) m.push(`${wo}: unbekannte Frageart ${f.art}`);
+      if (f.optionen.length !== 3 || new Set(f.optionen).size !== 3 || f.optionen.some(o => !o)) m.push(`${wo}: «${f.frage}» braucht drei verschiedene Antworten`);
+      if (f.art !== "abschnitt" && f.optionen[0] !== f.richtig) m.push(`${wo}: «${f.frage}» richtig nicht an erster Stelle`);
+    }
+    // Abschnitts-Titel und Ablenker dürfen nicht im Text stehen (sonst sieht man die Lösung).
+    for (const [titel] of t.abschnitte || []) if (abschnitte.some(a => a.includes(titel))) m.push(`${wo}: Abschnitts-Titel «${titel}» steht im Text`);
+    if (/ß/.test(JSON.stringify(t))) m.push(`${wo}: ß im Text`);
+    if (/"/.test(abschnitte.join(" "))) m.push(`${wo}: gerade Anführungszeichen im Text`);
+  }
+  return m;
+})();
+
+function pruefeAufgabe(a, stufe) {
+  const m = [...LISTEN_MAENGEL];
+  if (!ANGEBOTEN.has(stufe)) return ["Stufe wird mit den freien Listen nicht angeboten"];
+  if (a.t.stufe !== STUFE_NR[stufe]) m.push("Text aus einer anderen Stufe");
+  if (!STUFE[stufe].arten.includes(a.f.art)) m.push(`Frageart ${a.f.art} nicht in der Stufe`);
+  if (!FREI.has("texte")) m.push("Liste texte nicht frei");
+  if (a.f.art === "stimmt") {
+    if (!a.optionen.includes(a.f.richtig)) m.push("«steht nicht im Text» als Lösung in einer Stufe ohne diese Antwort");
+  } else {
+    if (a.optionen.filter(o => o === a.f.richtig).length !== 1) m.push("Lösung nicht genau einmal unter den Antworten");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Sachtext mit Titel (ausser bei der Titelfrage), Abschnitten und Tabelle. */
+function textEl(t, f) {
+  const box = el("div", { class: "sachtext" });
+  if (f.art !== "titel") box.append(el("h2", { text: t.titel }));
+  const abschnitte = t.abschnitte ? t.abschnitte.map(a => a[1]) : [t.text];
+  abschnitte.forEach((text, i) => {
+    const p = el("p");
+    if (t.abschnitte) p.append(el("span", { class: "spur-abschnitt", text: `Abschnitt ${i + 1}` }));
+    p.append(text);
+    box.append(p);
+    if (t.tabelle && t.tabelle.nach === i + 1) box.append(tabelleEl(t.tabelle));
+  });
+  return box;
+}
+
+function tabelleEl(tab) {
+  return el("div", { class: "spur-tabelle-rahmen" },
+    tab.titel ? el("div", { class: "spur-tabelle-titel", text: tab.titel }) : null,
+    el("table", { class: "spur-tabelle" },
+      el("tr", {}, ...tab.kopf.map(k => el("th", { text: k }))),
+      ...tab.zeilen.map(z => el("tr", {}, ...z.map(w => el("td", { text: w }))))));
+}
+
+/** Hinweis nach falscher Wahl; nennt die Lösung nicht. */
+function hinweisFuer(f, p) {
+  if (p.knapp) return "Lies die Stelle im Text noch einmal genau.";
+  switch (f.art) {
+    case "stimmt": return p.fehlt
+      ? "Such die Stelle im Text. Steht dort dasselbe, etwas anderes – oder gar nichts dazu?"
+      : "Such die Stelle im Text. Steht dort dasselbe oder etwas anderes?";
+    case "titel": return "Worum geht es im ganzen Text? Ein guter Titel passt zu allen Sätzen, nicht nur zu einem.";
+    case "abschnitt": return "Worum geht es in diesem Abschnitt vor allem? Der Titel passt zum ganzen Abschnitt.";
+    case "tabelle": return "Schau in der Tabelle nach: Welche Zeile und welche Spalte passen zur Frage?";
+    case "folgern": return "Die Antwort steht nicht wörtlich da. Welche Stellen im Text helfen dir weiter?";
+    default: return "Such im Text die Stelle, die zur Frage passt.";
+  }
+}
+
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Lesestrategien je Frageart — nie eine Stelle des
+ * Texts vorlesen oder eine Antwort nennen (Lesen ist der Stoff).
+ */
+const TIPPS = {
+  angabe: ["Welches Wort aus der Frage findest du im Text wieder?", "Lies den Satz mit diesem Wort genau — und auch den Satz davor und danach."],
+  titel: ["Worum geht es im ganzen Text? Sag es dir in einem Satz.", "Ein guter Titel passt zu allen Sätzen, nicht nur zu einem."],
+  abschnitt: ["Lies nur diesen Abschnitt noch einmal. Worum geht es darin vor allem?", "Der Titel passt zum ganzen Abschnitt. Einer der Titel passt zu keinem Abschnitt."],
+  tabelle: ["Schau in der Tabelle nach: Welche Zeile und welche Spalte passen zur Frage?", "Manchmal musst du zwei Werte aus der Tabelle vergleichen oder verrechnen."],
+  folgern: ["Die Antwort steht nicht wörtlich da. Welche Stellen im Text helfen dir weiter?", "Prüfe jede Antwort: Passt sie zu allem, was im Text steht?"],
+};
+function tippsFuer(f, p) {
+  if (f.art !== "stimmt") return TIPPS[f.art] || TIPPS.angabe;
+  return ["Such im Text die Stelle, die zur Aussage passt. Welche Wörter der Aussage findest du wieder?",
+    p.fehlt ? "Steht dort dasselbe, etwas anderes — oder gar nichts dazu? Was du sonst weisst, zählt hier nicht."
+      : "Steht dort dasselbe oder etwas anderes? Achte auf kleine Wörter wie «immer», «meistens», «alle»."];
+}
+
+LS.spiel({
+  id: ID,
+  einleitung: "Spurensuche im Sachtext! Lies genau: Was steht im Text, was nicht, und welcher Titel passt?",
+  hilfe: "Lies zuerst den ganzen Text. Dann lies die Frage und tippe die Antwort an, die laut Text passt.",
+  anzahl: 6,
+  stufen: Object.fromEntries(Object.entries({
+    s1: "Kurze Texte: Was steht drin? Stimmt das?",
+    s2: "Längere Texte — und manches steht gar nicht im Text.",
+    s3: "Zwei Abschnitte: Welcher Titel passt wozu? (Lehrplan 6. Klasse)",
+    s4: "Dazu Tabellen und Fragen zum Nachdenken.",
+    s5: "Text und Tabelle zusammen lesen (7. Klasse).",
+    s6: "Endgegner: lange Texte, viel Nachdenken.",
+  }).filter(([s]) => ANGEBOTEN.has(s))),
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Lies zuerst den ganzen Text. Dann such die Stelle, die zur Frage passt.");
+    const p = STUFE[ctx.stufe];
+    const { t, f, optionen } = aufgabeErzeugen(ctx.stufe);
+    if (new Set(p.arten).size > 1) ctx.serie("art", f.art === "abschnitt" ? "titel" : f.art);
+    ctx.flaeche.append(textEl(t, f));
+    const hinweis = hinweisFuer(f, p);
+    ctx.tipp(tippsFuer(f, p));
+    if (f.art === "stimmt") {
+      ctx.serie("antwort", f.richtig);
+      const loesung = `Richtig: «${STIMMT[f.richtig].text}» — «${f.aussage}»`;
+      ctx.flaeche.append(el("div", { class: "frage" }, "Stimmt das laut Text?", el("span", { class: "spur-aussage", text: f.aussage })));
+      LS.auswahl(ctx, { optionen, richtig: f.richtig, inhalt: o => STIMMT[o], hinweis, loesung, breite: 150, lob: "Gut belegt, Spürnase! 🔎" });
+      return;
+    }
+    const loesung = `Richtig: ${f.richtig}`;
+    ctx.flaeche.append(el("div", { class: "frage", text: f.frage }));
+    const box = LS.auswahl(ctx, { optionen, richtig: f.richtig, hinweis, loesung, breite: optionen.some(o => o.length > 22) ? 280 : 170, lob: "Spur gefunden! 🔎" });
+    if (optionen.some(o => o.length > 22)) for (const k of box.children) k.classList.add("spur-satz");
+  },
+});
+</script>
+</body>
+</html>

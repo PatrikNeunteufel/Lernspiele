@@ -342,8 +342,21 @@ function teilSvg(zellen, farbe, g = 13) {
 
 const zellGroesse = b => `min(56px, calc((100vw - 52px - ${(b - 1) * 3}px) / ${b}))`;
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Felder zählen, im Kopf drehen — ohne ein Teil zu
+ * nennen. Beim Legen gibt es dazu den Knopf „🧩 Ein Teil legen“ (Entscheid P1 a, 2026-11-02): er legt ein
+ * Teil richtig hin und zählt als ganzer Fehler, weil er ein Stück Lösung zeigt, kein Hinweis ist.
+ */
+const TIPPS = {
+  gleich: ["Zähl die Felder in jeder Reihe der Vorlage.", "Dreh oder klapp jedes Teil im Kopf, bis es so liegt wie die Vorlage."],
+  luecke: ["Zähl, wie viele Felder die Lücke in jeder Reihe hat.", "Dreh oder klapp die Teile im Kopf: Welches deckt die Lücke genau, ohne dass etwas übersteht?"],
+  legen: ["Fang in einer Ecke an — dort passen nur wenige Teile.", "Schau die schmalste Lücke an: Welches Teil passt nur so hinein?"],
+  drehen: ["Drehen ist erlaubt, umklappen nicht.", "Such ein besonderes Feld der Vorlage, etwa eine Ecke, die heraussteht. Dreh das Teil im Kopf Vierteldrehung für Vierteldrehung und schau, wo diese Ecke landet."],
+};
+
 function auswahlAufgabe(ctx, a) {
   const LOESUNG = `Es ist das ${a.richtig + 1}. Teil von links.`;
+  ctx.tipp(TIPPS[a.art]);
   const frage = {
     gleich: "Welches Teil hat <b>dieselbe Form</b>? Es darf gedreht oder gespiegelt sein.",
     luecke: "Welches Teil passt genau in die <b>Lücke</b>?",
@@ -388,6 +401,7 @@ function legen(ctx, a) {
   }
   const LOESUNG = `So passen alle Teile (Zahl = Teil von links): ${loesungsKarte.join(" / ")}`;
   ctx.loesung(LOESUNG);
+  ctx.tipp(TIPPS.legen);
   ctx.kennung("legen|" + [...a.felder].sort().join(" ") + "|" + a.teile.map(formSchluessel).sort().join("/"));
 
   ctx.flaeche.append(el("div", { class: "frage", html: `Lege alle ${n} Teile so, dass der Umriss <b>ganz voll</b> ist.` }));
@@ -413,7 +427,7 @@ function legen(ctx, a) {
   const drehKnopf = el("button", { type: "button", class: "knopf hell klein", text: "⟳ Drehen", onclick: () => veraendere(drehe) });
   const spiegelKnopf = el("button", { type: "button", class: "knopf hell klein", text: "⇋ Spiegeln", onclick: () => veraendere(spiegle) });
   const neuKnopf = el("button", { type: "button", class: "knopf hell klein", text: "↺ Alles zurück", onclick: () => { if (fertig) return; [...gelegt.keys()].forEach(nimmWeg); gewaehlt = 0; zeichne(); } });
-  const tippKnopf = el("button", { type: "button", class: "knopf hell klein", text: "💡 Tipp", onclick: hilfe });
+  const tippKnopf = el("button", { type: "button", class: "knopf hell klein", text: "🧩 Ein Teil legen", onclick: hilfe });
   ctx.flaeche.append(brett, vorrat, el("div", { class: "werkzeug" }, drehKnopf, spiegelKnopf, neuKnopf, tippKnopf));
 
   function zeichne() {
@@ -522,6 +536,7 @@ function legen(ctx, a) {
 LS.spiel({
   id: "pentomino-puzzle",
   einleitung: "Puzzle-Zeit! Leg die Teile in den Umriss – du darfst sie drehen und spiegeln.",
+  hilfe: "Beim Legen tippst du unten ein Teil an, drehst oder spiegelst es mit „⟳ Drehen“ und „⇋ Spiegeln“ und tippst dann ins Feld. Ein gelegtes Teil nimmst du mit Antippen wieder weg. Kommst du nicht weiter, legt „🧩 Ein Teil legen“ ein Teil richtig hin — das zählt als Fehler. Bei den anderen Aufgaben tippst du das passende Teil an.",
   anzahl: 6,
   stufen: {
     s1: "Vierlinge: gleiche Formen finden und zwei Teile legen.",

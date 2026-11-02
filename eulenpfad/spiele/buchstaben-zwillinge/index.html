@@ -105,8 +105,18 @@ function pruefeAufgabe(a) {
   return m;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): ganz kurz, ohne Buchstaben oder Wort zu nennen. */
+function tippsFuer(a) {
+  if (a.art === "zwilling") return VERWECHSELBAR.has(a.richtig)
+    ? ["Schau genau hin: Wo ist der Bauch, wo der Strich?", "Ist der Bauch links oder rechts? Geht der Strich nach oben oder nach unten?"]
+    : ["Sprich den Buchstaben laut.", "Kennst du ein Wort mit diesem Laut? Wie sieht der Buchstabe mitten im Wort aus?"];
+  if (a.art === "wortpaar") return ["Sag das Bild leise.", "Die Wörter sehen fast gleich aus. Lies jedes langsam, Buchstabe für Buchstabe."];
+  return ["Sag das Wort zum Bild ganz langsam.", "Welchen Laut hörst du zuerst? Dann den nächsten."];
+}
+
 LS.spiel({
   id: "buchstaben-zwillinge",
+  hilfe: "Tippe den passenden Buchstaben oder das passende Wort an. Beim Buchstabensalat tippst du die Buchstaben der Reihe nach an, bis das Wort zum Bild dasteht.",
   einleitung: "Jeder grosse Buchstabe hat einen kleinen Zwilling: A und a, B und b. Findest du sie?",
   anzahl: 10,
   stufen: nurMoegliche({
@@ -121,6 +131,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "zwilling") {
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Welcher kleine Buchstabe ist der Zwilling?" }), el("div", { class: "vorlage" }, el("div", { class: "gross", text: a.gross })));
       const box = LS.auswahl(ctx, {

@@ -121,8 +121,19 @@ function pruefeAufgabe(a, stufe) {
 
 const alsToene = folge => folge.map(p => ({ midi: NOTEN.midi(p), dauer: 0.75 }));
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man hinhört — sie verraten nichts über die Töne. */
+function tippsFuer(a) {
+  if (a.art === "vergleich") return ["Hör nochmal hin und sing die beiden Töne leise mit.", "Geht deine Stimme vom ersten zum zweiten Ton hinauf oder hinunter?"];
+  if (a.art === "kontur") return ["Zeig mit der Hand mit, während du hörst.", "Geht die Hand beim zweiten Ton hinauf oder hinunter? Und beim dritten?"];
+  if (a.art === "notenbild") return ["Hör die Melodie und zeig mit der Hand mit.",
+    "Je höher eine Note auf den Linien steht, desto höher klingt sie. Such das Bild, das sich bewegt wie deine Hand."];
+  return ["Hör genau hin: Ist der Schritt ganz klein oder etwas grösser?",
+    "Schau die Noten an: Ohne Vorzeichen liegen die Halbtöne zwischen e und f und zwischen h und c."];
+}
+
 LS.spiel({
   id: "hoch-tief-ohr",
+  hilfe: "Die Töne erklingen gleich zu Beginn. Mit dem Knopf „🔊 … anhören“ hörst du sie nochmal, so oft du willst. Dann wähl deine Antwort.",
   einleitung: "Spitz die Ohren! Ist der Ton hoch wie ein Vogel oder tief wie ein Bär? Mach den Ton an: 🔊",
   anzahl: 8,
   stufen: {
@@ -140,6 +151,7 @@ LS.spiel({
     if (a.art === "vergleich" || a.art === "schritt") ctx.serie("antwort", a.richtig); // erster/zweiter/gleich, Halbton/Ganzton
     // Gehört, nicht gesehen: die Melodie selbst macht die Aufgabe aus (Regel gegen Wiederholungen).
     ctx.kennung(JSON.stringify(a.folge));
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const hoeren = () => alsToene(a.folge);
     ctx.wartezeit(hoeren().reduce((s, t) => s + t.dauer, 0)); // die Töne laufen gleich zu Beginn
     ctx.flaeche.append(el("div", { class: "ohr", text: "👂" }),

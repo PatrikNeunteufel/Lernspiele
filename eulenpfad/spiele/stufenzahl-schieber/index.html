@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stufenzahl-Schieber</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.4vw, 26px); font-weight: 800; margin: 0 0 8px; }
+  .frage b { color: var(--knopf); }
+  .rechnung { text-align: center; font-size: clamp(28px, 7vw, 44px); font-weight: 900; margin: 2px 0 10px; font-variant-numeric: tabular-nums; }
+  .rechnung .luecke { display: inline-block; min-width: 1.4em; color: var(--text-leise); border-bottom: 4px dashed var(--rand); }
+  .sachtext { text-align: center; font-size: clamp(18px, 4.2vw, 24px); font-weight: 700; margin: 0 auto 10px; max-width: 560px; }
+
+  /* Stellentafel: Stellenfarben nur für die ganzen Stellen, rechts vom Dezimalzeichen neutral */
+  .ss-rahmen { max-width: 100%; overflow-x: auto; margin: 0 auto 10px; }
+  .ss-tafel { margin: 0 auto; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .ss-tafel th, .ss-tafel td { width: clamp(26px, 8vw, 52px); text-align: center; padding: 0; }
+  .ss-tafel th { color: #fff; background: var(--f, var(--text-leise)); font-size: clamp(12px, 3.2vw, 17px); font-weight: 900; padding: 4px 0; border: 2px solid #fff; border-radius: 6px; }
+  .ss-tafel th.ss-nach { background: var(--text-leise); }
+  .ss-tafel td { height: clamp(36px, 9vw, 52px); border: 2px solid var(--rand); background: #fff; font-size: clamp(20px, 5.6vw, 32px); font-weight: 900; color: var(--f, var(--text)); overflow: hidden; }
+  .ss-tafel td.ss-nach { color: var(--text); background: #f6f7fb; }
+  .ss-tafel .ss-komma { width: 12px; border: none; background: none; color: var(--text); font-size: clamp(20px, 5.6vw, 32px); font-weight: 900; }
+  .ss-tafel th.ss-komma { background: none; }
+  .ss-tafel tr.ss-ziel td:not(.ss-komma) { border-style: dashed; }
+  .ss-tafel tr.ss-ziel.ss-fertig td:not(.ss-komma) { border-style: solid; border-color: var(--gut); }
+  .ss-ziffer { display: block; }
+  .ss-tafel tr.ss-fertig .ss-ziffer { animation: ss-wandern .9s ease-out; }
+  @keyframes ss-wandern { from { transform: translateX(calc(var(--von, 0) * 100%)); opacity: .2; } to { transform: none; opacity: 1; } }
+  .ss-pfeil { text-align: center; font-weight: 800; color: var(--text-leise); min-height: 1.4em; margin: 0 0 6px; }
+
+  .wahl-knopf { font-size: clamp(22px, 5vw, 30px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  .ss-eingabe { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 4px 0 8px; }
+  .ss-einheit { font-size: clamp(22px, 5vw, 30px); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔟 Stufenzahl-Schieber</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan 21 MA.1.A.3.f (Grundanspruch Ende 6. Klasse): Dezimalzahlen addieren und subtrahieren —
+// dazu gehört das Verschieben in der Stellentafel; MA.1.A.1.g: Dezimalzahlen lesen und schreiben.
+// MA.1.A.3.e (Orientierungspunkt Ende 4. Klasse): natürliche Zahlen multiplizieren (Stufe 1).
+// 3. Zyklus MA.1.A.3.g: Dezimalzahlen multiplizieren (z. B. 12 · 0.3): Stufe 5 und 6 mit den
+// Faktoren 0.1, 0.01, 0.001 (· 0.1 = : 10) und, in Stufe 6, durch 0.1.
+// Mal und durch 10, 100, 1000: Jede Ziffer wandert in der Stellentafel um so viele Stellen, wie die
+// Stufenzahl Nullen hat. Basisklasse 6: s1 5. Klasse, s3 Grundanspruch, s5 7. Klasse, s6 Königsstufe.
+// Abgrenzung: Dezimal-Rakete (5) addiert und subtrahiert, Zehntel-Lupe (5) zählt und ordnet, die
+// Stellenwert-Spiele der 4. Klasse lesen Stellen ab; Masseinheiten umwandeln übt das Komma-Messband,
+// hier nur am Rand (Geld). Zahlen werden als ganze Tausendstel gerechnet, nie mit Gleitkomma verglichen.
+
+const { zufall, waehle, mische, el, zahlText, dezimalText } = LS;
+
+// Stellen von 6 (Millionen) bis −3 (Tausendstel)
+const STELLE = { 6: "M", 5: "HT", 4: "ZT", 3: "T", 2: "H", 1: "Z", 0: "E", "-1": "z", "-2": "h", "-3": "t" };
+const STELLEN_NAME = { 6: "Millionen", 5: "Hunderttausender", 4: "Zehntausender", 3: "Tausender", 2: "Hunderter", 1: "Zehner", 0: "Einer",
+  "-1": "Zehntel", "-2": "Hundertstel", "-3": "Tausendstel" };
+
+const op = (z, e) => ({ z, e });
+const GROSS = [op("·", 1), op("·", 2), op("·", 3), op(":", 1), op(":", 2), op(":", 3)];
+const KLEIN_MAL = [op("·", -1), op("·", -2), op("·", -3)];
+const KLEIN_DURCH = [op(":", -1), op(":", -2), op(":", -3)];
+/** Um so viele Stellen wandern die Ziffern (positiv: nach links, die Zahl wird grösser). */
+const schub = o => (o.z === "·" ? o.e : -o.e);
+const faktorText = e => (e >= 0 ? zahlText(10 ** e) : dezimalText(10 ** e));
+const opText = o => `${o.z} ${faktorText(o.e)}`;
+const opGleich = (a, b) => a.z === b.z && a.e === b.e;
+
+// Je Stufe: Arten, Stellen der Tafel (hi bis lo), höchstens so viele Wertziffern, Rechenzeichen,
+// live: die Tafel zeigt die getippte Zahl gleich mit; dezimal: Start oder Ergebnis hat Nachkommastellen.
+const STUFE = {
+  s1: { arten: ["ergebnis", "ergebnis", "operator"], hi: 5, lo: 0, wz: 3, ops: GROSS, live: true },
+  s2: { arten: ["ergebnis", "ergebnis", "operator"], hi: 3, lo: -2, wz: 3, ops: [op("·", 1), op("·", 2), op(":", 1), op(":", 2)], live: true, dezimal: true },
+  s3: { arten: ["ergebnis", "ergebnis", "operator"], hi: 4, lo: -3, wz: 4, ops: GROSS, live: true, dezimal: true },
+  s4: { arten: ["ergebnis", "start", "kette", "operator", "sach"], hi: 4, lo: -3, wz: 4, ops: GROSS, kette: 2, dezimal: true },
+  s5: { arten: ["ergebnis", "ergebnis", "operator", "gleich"], hi: 4, lo: -3, wz: 4, ops: [...GROSS, ...KLEIN_MAL], klein: KLEIN_MAL, dezimal: true },
+  s6: { arten: ["ergebnis", "kette", "start", "operator"], hi: 6, lo: -3, wz: 5, ops: [...GROSS, ...KLEIN_MAL, ...KLEIN_DURCH], klein: [...KLEIN_MAL, ...KLEIN_DURCH], kette: 3, dezimal: true },
+};
+
+const SACHEN = [
+  { ein: "Ein Heft", mehr: "Hefte" }, { ein: "Ein Bleistift", mehr: "Bleistifte" }, { ein: "Ein Radiergummi", mehr: "Radiergummis" },
+  { ein: "Ein Kaugummi", mehr: "Kaugummis" }, { ein: "Eine Postkarte", mehr: "Postkarten" }, { ein: "Ein Brötli", mehr: "Brötli" },
+];
+
+// ---------- Zahlen ----------
+
+/** Wert in Tausendsteln aus Ziffernfolge D, deren letzte Ziffer an Stelle pos steht. */
+const milli = (D, pos) => D * 10 ** (pos + 3);
+const zahl = m => dezimalText(m / 1000);
+const laenge = D => String(D).length;
+
+/** Ziffernfolge mit 1 bis wz Ziffern, erste und letzte nicht 0. */
+function ziffern(wz) {
+  const n = zufall(1, wz);
+  let s = String(zufall(1, 9));
+  for (let i = 1; i < n; i++) s += String(i === n - 1 ? zufall(1, 9) : zufall(0, 9));
+  return Number(s);
+}
+
+/** Stellen-Bereich der Zahl (höchste, tiefste Stelle) wie sie geschrieben wird: 0.045 → E bis t, 340 → H bis E. */
+const bereich = (D, pos) => [Math.max(pos + laenge(D) - 1, 0), Math.min(pos, 0)];
+
+/** Eine Lage pos, bei der Start und alle Zwischenergebnisse in die Tafel passen. */
+function lage(D, schuebe, p) {
+  const summen = [0];
+  for (const s of schuebe) summen.push(summen.at(-1) + s);
+  const moeglich = [];
+  for (let pos = p.lo; pos <= p.hi; pos++) {
+    if (summen.every(c => pos + c >= p.lo && pos + c + laenge(D) - 1 <= p.hi)) moeglich.push(pos);
+  }
+  return moeglich.length ? waehle(moeglich) : null;
+}
+
+/** Stelle der letzten Ziffer nach allen Rechenschritten. */
+const posNach = a => a.pos + a.ops.reduce((s, o) => s + schub(o), 0);
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(art, p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return null;
+}
+
+function erzeuge(art, p) {
+  if (art === "sach") return erzeugeSach();
+  if (art === "gleich") {
+    const frage = waehle(p.klein);
+    const optionen = optionenFuer(schub(frage), { ...p, ops: GROSS }, 4);
+    return optionen && { art, frage, optionen };
+  }
+  const n = art === "kette" ? p.kette : 1;
+  // Stufe 5 und 6: meist mit einem Faktor wie 0.1
+  const ziehe = () => (p.klein && Math.random() < 0.6 ? waehle(p.klein) : waehle(p.ops));
+  const ops = Array.from({ length: n }, ziehe);
+  if (art === "kette" && ops.every(o => schub(o) === schub(ops[0]) && o.z === ops[0].z) && n === 2) return null;
+  const D = ziffern(p.wz);
+  const pos = lage(D, ops.map(schub), p);
+  if (pos === null) return null;
+  const a = { art, D, pos, ops };
+  if (p.dezimal && pos >= 0 && posNach(a) >= 0) return null;
+  if (art === "operator") {
+    a.optionen = p.ops === GROSS && p.lo === 0 || p.ops.length <= 6 && !p.klein ? p.ops.map(opText) : optionenFuer(schub(ops[0]), p, 4, ops[0]);
+    if (!a.optionen) return null;
+  }
+  return a;
+}
+
+/**
+ * Antwortknöpfe mit Rechenzeichen, je mit einem anderen Schub; genau einer hat den Schub s.
+ * richtig: so wird die richtige Antwort geschrieben (sonst ein zufälliges Zeichen mit diesem Schub).
+ */
+function optionenFuer(s, p, anzahl, richtig) {
+  const mitSchub = t => p.ops.filter(o => schub(o) === t);
+  if (!mitSchub(s).length && !richtig) return null;
+  const schuebe = [s, ...mische([1, 2, 3, -1, -2, -3].filter(t => t !== s && mitSchub(t).length))].slice(0, anzahl);
+  if (schuebe.length < anzahl) return null;
+  return mische(schuebe.map((t, i) => opText(i === 0 && richtig ? richtig : waehle(mitSchub(t)))));
+}
+
+function erzeugeSach() {
+  const ding = zufall(0, SACHEN.length - 1);
+  const e = zufall(1, 3);
+  const preis = 5 * zufall(1, 199); // Rappen, 5 Rp. bis 9.95 Fr.
+  return { art: "sach", ding, e, preis, richtung: waehle(["mal", "durch"]) };
+}
+
+/** Wert in Tausendsteln nach einem Rechenschritt, null wenn er nicht aufgeht. */
+function rechne(m, o) {
+  const s = schub(o);
+  if (s >= 0) return m * 10 ** s;
+  return m % 10 ** -s === 0 ? m / 10 ** -s : null;
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!a) return ["keine Aufgabe"];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  if (a.art === "sach") {
+    if (a.preis % 5 || a.preis <= 0 || a.preis >= 1000 || ![1, 2, 3].includes(a.e)) m.push("Preis oder Menge nicht in der Stufe");
+    return m;
+  }
+  if (a.art === "gleich") {
+    if (!p.klein.some(o => opGleich(o, a.frage))) m.push("Frage nicht in der Stufe");
+    const gleiche = a.optionen.filter(t => GROSS.some(o => opText(o) === t && schub(o) === schub(a.frage)));
+    if (gleiche.length !== 1) m.push("nicht genau eine gleichwertige Antwort");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+    return m;
+  }
+  if (!a.ops.every(o => p.ops.some(q => opGleich(o, q)))) m.push("Rechenzeichen nicht in der Stufe");
+  if (laenge(a.D) > p.wz || a.D % 10 === 0) m.push("zu viele Wertziffern");
+  // Schritt für Schritt nachrechnen, jede Zahl muss in die Tafel passen
+  let w = milli(a.D, a.pos), pos = a.pos;
+  const passt = () => pos >= p.lo && pos + laenge(a.D) - 1 <= p.hi;
+  if (!passt()) m.push("Startzahl passt nicht in die Tafel");
+  for (const o of a.ops) {
+    w = rechne(w, o);
+    pos += schub(o);
+    if (w === null || w !== milli(a.D, pos)) m.push("Rechnung geht nicht auf");
+    if (!passt()) m.push("Zahl passt nicht in die Tafel");
+  }
+  if (a.art === "kette" && a.ops.length !== p.kette) m.push("Kette mit falscher Länge");
+  if (p.dezimal && a.pos >= 0 && posNach(a) >= 0) m.push("keine Dezimalzahl dabei");
+  if (p.lo === 0 && (a.pos < 0 || posNach(a) < 0)) m.push("Dezimalzahl in Stufe 1");
+  if (a.art === "operator") {
+    const richtige = a.optionen.filter(t => p.ops.some(o => opText(o) === t && schub(o) === schub(a.ops[0])));
+    if (richtige.length !== 1) m.push("nicht genau ein passendes Rechenzeichen");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+  }
+  return m;
+}
+
+// ---------- Stellentafel ----------
+
+const zeichenName = () => (LS.einstellung("dezimal") === "komma" ? "Komma" : "Punkt");
+const dezimalZeichen = () => (LS.einstellung("dezimal") === "komma" ? "," : ".");
+
+/** Tafel mit zwei Zeilen; zeile(i).zeige(D, pos) füllt eine Zeile, zeige(null) leert sie. */
+function tafel(p) {
+  const stellen = [];
+  for (let e = p.hi; e >= p.lo; e--) stellen.push(e);
+  const kopf = el("tr", {});
+  const zelleKlasse = e => (e >= 0 ? `st-${STELLE[e]}` : "ss-nach");
+  for (const e of stellen) {
+    kopf.append(el("th", { class: zelleKlasse(e), text: STELLE[e], title: STELLEN_NAME[e], "aria-label": STELLEN_NAME[e] }));
+    if (e === 0 && p.lo < 0) kopf.append(el("th", { class: "ss-komma" }));
+  }
+  const zeilen = [0, 1].map(i => {
+    const tr = el("tr", { class: i === 1 ? "ss-ziel" : "" });
+    const zellen = {};
+    let komma = null;
+    for (const e of stellen) {
+      zellen[e] = el("td", { class: zelleKlasse(e) });
+      tr.append(zellen[e]);
+      if (e === 0 && p.lo < 0) { komma = el("td", { class: "ss-komma" }); tr.append(komma); }
+    }
+    return {
+      tr,
+      /** D an Stelle pos; von: um so viele Stellen kommen die Ziffern her (für das Wandern). */
+      zeige(D, pos, von = 0) {
+        for (const e of stellen) zellen[e].textContent = "";
+        if (komma) komma.textContent = "";
+        if (D === null) return;
+        const [hoch, tief] = bereich(D, pos);
+        if (hoch > p.hi || tief < p.lo) return;
+        const s = String(D);
+        for (let e = hoch; e >= tief; e--) {
+          const i = s.length - 1 - (e - pos);
+          const z = el("span", { class: "ss-ziffer", text: i >= 0 && i < s.length ? s[i] : "0" });
+          z.style.setProperty("--von", String(von));
+          zellen[e].append(z);
+        }
+        if (komma && tief < 0) komma.textContent = dezimalZeichen();
+      },
+      /** Getippte Zahl (in Tausendsteln) zeigen. */
+      zeigeMilli(mm) {
+        if (mm === null || mm <= 0) return this.zeige(null);
+        let D = mm, pos = -3;
+        while (D % 10 === 0) { D /= 10; pos++; }
+        this.zeige(D, pos);
+      },
+    };
+  });
+  const t = el("table", { class: "ss-tafel", "aria-label": "Stellentafel" }, kopf, ...zeilen.map(z => z.tr));
+  return { element: el("div", { class: "ss-rahmen" }, t), zeilen };
+}
+
+// ---------- Hinweise (verraten die Lösung nicht) ----------
+
+const WORT = { 1: "eine Stelle", 2: "zwei Stellen", 3: "drei Stellen" };
+function hinweisOp(o) {
+  const s = schub(o);
+  if (o.e < 0) {
+    return o.z === "·" ? `Mal ${faktorText(o.e)} heisst: davon nur ${o.e === -1 ? "ein Zehntel" : o.e === -2 ? "ein Hundertstel" : "ein Tausendstel"}. Die Zahl wird kleiner.`
+      : `Durch ${faktorText(o.e)} heisst: Wie oft passt ${faktorText(o.e)} hinein? Die Zahl wird grösser.`;
+  }
+  return s > 0 ? `Mal ${faktorText(o.e)}: Jede Ziffer wandert ${WORT[s]} nach links. Fehlt etwas, kommt eine Null dazu.`
+    : `Durch ${faktorText(o.e)}: Jede Ziffer wandert ${WORT[-s]} nach rechts. Vor dem ${zeichenName()} steht mindestens eine Null.`;
+}
+const HINWEIS_OPERATOR = "Ist die Zahl grösser oder kleiner geworden? Zähle, um wie viele Stellen die Ziffern gewandert sind.";
+const HINWEIS_KETTE = "Rechne Schritt für Schritt. Oder zähle: Wie viele Stellen nach links, wie viele nach rechts?";
+const HINWEIS_START = "Rechne rückwärts: Die Umkehrung von mal ist durch, die Umkehrung von durch ist mal.";
+const HINWEIS_GLEICH = "Wird die Zahl damit grösser oder kleiner? Und um wie viele Stellen wandern die Ziffern?";
+
+function wanderText(s) {
+  if (s === 0) return "Die Ziffern bleiben, wo sie sind.";
+  return `Jede Ziffer ist ${WORT[Math.abs(s)] || Math.abs(s) + " Stellen"} nach ${s > 0 ? "links" : "rechts"} gewandert.`;
+}
+
+// ---------- Tipps vor dem Antworten (ctx.tipp, LERN_Session9) ----------
+// Erst die Regel (grösser oder kleiner, wie viele Stellen), dann der Rechenschritt in Worten — nie die
+// Zahl, die gesucht ist. Auswahl-Aufgaben: ohne Stufenzahlen in Ziffern, damit kein Knopf genannt wird.
+const KLEIN_TIPP = "Aufgepasst bei Stufenzahlen kleiner als 1: Mal sie macht die Zahl kleiner, durch sie grösser.";
+const NULLEN_TIPP = () => `Zähl die Nullen der Stufenzahl, auch die vor dem ${zeichenName()}: So viele Stellen wandern die Ziffern.`;
+function tippsFuer(a, p) {
+  if (a.art === "operator") return [HINWEIS_OPERATOR, "Grösser heisst bei den Stufenzahlen ab zehn: mal. Kleiner heisst: durch.", ...(p.klein ? [KLEIN_TIPP] : [])];
+  if (a.art === "gleich") return [HINWEIS_GLEICH, "Wird die Zahl kleiner, passt ein «durch»; wird sie grösser, ein «mal».", NULLEN_TIPP()];
+  if (a.art === "kette") return [HINWEIS_KETTE, "Mal schiebt die Ziffern nach links, durch nach rechts. Zähl die Stellen aller Schritte zusammen.",
+    ...(p.klein ? [KLEIN_TIPP + " " + NULLEN_TIPP()] : [])];
+  if (a.art === "start") return [HINWEIS_START, "Fang beim Ergebnis an und mach jeden Schritt rückwärts: aus mal wird durch, aus durch wird mal — mit derselben Stufenzahl."];
+  const o = a.ops[0];
+  const t = [o.e < 0 ? NULLEN_TIPP() : "Wie viele Nullen hat die Stufenzahl? So viele Stellen wandern die Ziffern.", hinweisOp(o)];
+  if (o.e < 0) t.push(o.z === "·" ? `Mal ${faktorText(o.e)} ist dasselbe wie durch ${zahlText(10 ** -o.e)}.` : `Durch ${faktorText(o.e)} ist dasselbe wie mal ${zahlText(10 ** -o.e)}.`);
+  return t;
+}
+
+// ---------- Spiel ----------
+
+const D = x => dezimalText(x);
+LS.spiel({
+  id: "stufenzahl-schieber",
+  einleitung: "Mal 10, mal 100, durch 1000: Bei Stufenzahlen wandern die Ziffern in der Stellentafel nach links oder nach rechts. Schieb mit!",
+  hilfe: stufe => "Die Stellentafel zeigt die Zahlen; tippe das Ergebnis oder die gesuchte Zahl ein, oder wähle die passende Rechnung."
+    + (STUFE[stufe]?.live ? " Beim Tippen zeigt die Tafel gleich, wo deine Ziffern stehen." : ""),
+  anzahl: 8,
+  stufen: {
+    s1: "Ganze Zahlen: 45 · 100, 7200 : 10, 36 · 1000.",
+    s2: `Mit Dezimalzahlen: ${D(3.4)} · 10, ${D(5.6)} : 10, ${D(0.7)} · 100.`,
+    s3: `Bis zu den Tausendsteln: ${D(0.25)} · 1000, ${D(4.5)} : 100 (Lehrplan 6. Klasse).`,
+    s4: `Rückwärts und in Ketten: ? · 100 = 45, ${D(3.6)} · 10 : 100, und mit Geld.`,
+    s5: `Mal ${D(0.1)} und mal ${D(0.01)}: ${D(36)} · ${D(0.1)} (Lehrplan 7. Klasse).`,
+    s6: `Endgegner: durch ${D(0.1)}, Ketten mit drei Schritten, bis zu den Millionen.`,
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    if (a.art === "sach") return sach(ctx, a);
+    if (a.art === "gleich") return gleichwertig(ctx, a);
+    const f = ctx.flaeche;
+    const start = milli(a.D, a.pos), posZiel = posNach(a), ziel = milli(a.D, posZiel);
+    const schubGesamt = posZiel - a.pos;
+    const rechenweg = a.ops.map(opText).join(" ");
+    const loesung = `${zahl(start)} ${rechenweg} = ${zahl(ziel)}`;
+    ctx.tipp(tippsFuer(a, p));
+    const t = tafel(p);
+    const [oben, unten] = t.zeilen;
+    const pfeil = el("div", { class: "ss-pfeil", "aria-live": "polite" });
+    const geloest = () => {
+      unten.tr.classList.add("ss-fertig");
+      oben.zeige(a.D, a.pos);
+      unten.zeige(a.D, posZiel, schubGesamt);
+      pfeil.textContent = wanderText(schubGesamt);
+    };
+    if (a.art === "operator") {
+      f.append(el("div", { class: "frage", html: "Welche Rechnung macht <b>aus der oberen Zahl die untere</b>?" }),
+        el("div", { class: "rechnung", html: `${zahl(start)} <span class="luecke">?</span> = ${zahl(ziel)}` }), t.element, pfeil);
+      oben.zeige(a.D, a.pos);
+      unten.zeige(a.D, posZiel);
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: opText(a.ops[0]), hinweis: HINWEIS_OPERATOR, loesung, lob: `Genau: ${loesung}`, breite: 100, beiRichtig: geloest });
+      if (ctx.nr === 0) ctx.sag("Tipp: Vergleiche in der Tafel, wohin die Ziffern gewandert sind.");
+      return;
+    }
+    // Eintippen: Ergebnis, Kette (unten) oder Startzahl (oben)
+    const gesucht = a.art === "start" ? start : ziel;
+    const zeile = a.art === "start" ? oben : unten;
+    const anzeigeRechnung = a.art === "start"
+      ? `<span class="luecke">?</span> ${rechenweg} = ${zahl(ziel)}` : `${zahl(start)} ${rechenweg} = <span class="luecke">?</span>`;
+    f.append(el("div", { class: "frage", html: a.art === "start" ? "Welche Zahl war es <b>vorher</b>?" : "Wie heisst das <b>Ergebnis</b>?" }),
+      el("div", { class: "rechnung", html: anzeigeRechnung }), t.element, pfeil);
+    if (a.art === "start") unten.zeige(a.D, posZiel); else oben.zeige(a.D, a.pos);
+    const hinweis = a.art === "kette" ? HINWEIS_KETTE : a.art === "start" ? HINWEIS_START : hinweisOp(a.ops[0]);
+    ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(gesucht / 1000));
+    if (a.ops.length === 1) ctx.serie("richtung", schub(a.ops[0]) > 0 ? "links" : "rechts");
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort" });
+    f.append(el("div", { class: "ss-eingabe" }, anzeige));
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: p.hi + 1, dezimal: p.lo < 0, nachkomma: -p.lo,
+      onAenderung: w => { if (p.live && !ctx.vorbei()) zeile.zeigeMilli(w === null ? null : Math.round(w * 1000)); },
+      onOk(w) {
+        if (Math.round(w * 1000) === gesucht) {
+          tasten.gesperrt = true;
+          anzeige.classList.add("richtig");
+          geloest();
+          ctx.richtig(`Richtig: ${loesung}`);
+          return;
+        }
+        anzeige.classList.add("falsch");
+        ctx.falsch(hinweis, loesung);
+        if (ctx.vorbei()) { tasten.gesperrt = true; geloest(); }
+      },
+    });
+    f.append(tasten.element);
+    if (ctx.nr === 0) {
+      ctx.sag(a.art === "kette" ? "Tipp: Rechne Schritt für Schritt — oder zähle alle Stellen zusammen."
+        : a.art === "start" ? "Tipp: Rechne rückwärts. Was ist die Umkehrung?"
+        : p.live ? "Tipp: Tipp das Ergebnis ein. Die Tafel zeigt dir gleich, wo deine Ziffern stehen." : "Tipp: Wie viele Nullen hat die Stufenzahl? So viele Stellen wandern die Ziffern.");
+    }
+  },
+});
+
+/** · 0.1 ist dasselbe wie …? */
+function gleichwertig(ctx, a) {
+  const richtig = a.optionen.find(t => GROSS.some(o => opText(o) === t && schub(o) === schub(a.frage)));
+  const loesung = `${opText(a.frage)} ist dasselbe wie ${richtig}`;
+  ctx.tipp(tippsFuer(a, STUFE[ctx.stufe]));
+  ctx.flaeche.append(el("div", { class: "frage", html: "Was ist <b>dasselbe</b>?" }),
+    el("div", { class: "rechnung", html: `${opText(a.frage)} = <span class="luecke">?</span>` }));
+  LS.auswahl(ctx, { optionen: a.optionen, richtig, hinweis: HINWEIS_GLEICH, loesung, lob: `Genau: ${loesung}`, breite: 100 });
+  if (ctx.nr === 0) ctx.sag(`Tipp: Mal ${D(0.1)} heisst, nur ein Zehntel davon nehmen.`);
+}
+
+/** „Ein Heft“ mitten im Satz: nur der Artikel klein — toLowerCase machte auch das Nomen klein (LERN_Session9). */
+const einKlein = s => s.ein.replace(/^E/, "e");
+/** Geld am Rand: Preis für 10, 100, 1000 Stück oder für ein Stück. */
+function sach(ctx, a) {
+  const s = SACHEN[a.ding];
+  const n = 10 ** a.e;
+  const total = a.preis * n;
+  const antwort = a.richtung === "mal" ? total : a.preis;
+  const text = a.richtung === "mal"
+    ? `${s.ein} kostet ${LS.geldText(a.preis)}. Wie viel kosten ${zahlText(n)} ${s.mehr}?`
+    : `${zahlText(n)} ${s.mehr} kosten ${LS.geldText(total)}. Wie viel kostet ${einKlein(s)}?`;
+  const loesung = a.richtung === "mal" ? `${LS.geldText(a.preis)} · ${zahlText(n)} = ${LS.geldText(total)}` : `${LS.geldText(total)} : ${zahlText(n)} = ${LS.geldText(a.preis)}`;
+  const hinweis = hinweisOp(op(a.richtung === "mal" ? "·" : ":", a.e)) + " Antwort in Franken.";
+  ctx.loesung(loesung);
+  ctx.tipp([a.richtung === "mal" ? `${zahlText(n)} ${s.mehr} kosten ${zahlText(n)}-mal so viel wie ${einKlein(s)}.`
+    : `Für ${einKlein(s)} teilst du den Preis durch ${zahlText(n)}.`,
+  "Rechne zuerst in Rappen und schreib die Antwort dann wieder in Franken.", hinweis]);
+  ctx.schritte(LS.tippSchritte(antwort / 100));
+  ctx.serie("richtung", a.richtung === "mal" ? "links" : "rechts");
+  const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort" });
+  ctx.flaeche.append(el("div", { class: "frage", text: "Rechne im Kopf." }), el("div", { class: "sachtext", text }),
+    el("div", { class: "ss-eingabe" }, anzeige, el("span", { class: "ss-einheit", text: "Fr." })));
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 5, dezimal: true, nachkomma: 2,
+    onOk(w) {
+      if (Math.round(w * 100) === antwort) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${loesung}`); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(tasten.element);
+}
+</script>
+</body>
+</html>

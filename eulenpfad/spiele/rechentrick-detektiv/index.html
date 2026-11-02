@@ -364,9 +364,26 @@ function pruefeAufgabe(x, stufe) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): die Regel hinter dem Trick und eine Hilfsfrage —
+ * nie die leichte Aufgabe selbst (t.tipp nennt sie, darum erst nach einem Fehler) und nie den Trick-Namen.
+ */
+const REGEL = {
+  tausch: "Beim Plus darfst du die Zahlen tauschen — das Ergebnis bleibt gleich. Fang mit der leichtesten an.",
+  nachbar: "Rechnest du mit der runden Nachbarzahl, rechnest du etwas zu viel oder zu wenig. Das musst du am Schluss ausgleichen.",
+  verdoppeln: "Wird die eine Zahl doppelt so gross, muss die andere halb so gross werden — dann bleibt das Ergebnis gleich.",
+  zusammen: "Bei Plus und Mal darfst du zuerst die zwei Zahlen zusammennehmen, die eine runde Zahl geben.",
+};
+function tippsFuer(x) {
+  if (x.modus === "trick") return ["Vergleiche links und rechts: Welche Zahlen bleiben gleich, welche ändern sich?",
+    "Frag dich: Wechseln die Zahlen nur den Platz? Wird eine doppelt so gross? Wandert nur die Klammer? Kommt eine neue runde Zahl dazu?"];
+  return [x.wahlTipp.replace(/^Tipp: /, ""), REGEL[x.trick]];
+}
+
 LS.spiel({
   id: "rechentrick-detektiv",
   einleitung: "Detektive rechnen schlau! Finde den Trick, der eine schwere Aufgabe leicht macht: tauschen, verdoppeln und halbieren, anders zusammenfassen oder die Nachbaraufgabe.",
+  hilfe: stufe => "Tippe die Aufgabe an, die gleich viel gibt und leichter ist, und rechne sie dann mit den Zifferntasten aus." + (STUFE[stufe]?.trickFrage !== 0 ? " Steht eine fertige Gleichung da, tippst du den Trick an, der dahintersteckt." : ""),
   anzahl: 8,
   stufen: {
     s1: "Bis 100: 3 + 58 = 58 + 3, 9 × 6 = 10 × 6 − 6, 5 × 14 = 10 × 7.",
@@ -381,6 +398,7 @@ LS.spiel({
     const x = aufgabeErzeugen(ctx.stufe);
     if (STUFE[ctx.stufe].trickFrage) ctx.serie("art", x.modus);
     ctx.serie("trick", x.trick);
+    ctx.tipp(tippsFuer(x));
 
     if (x.modus === "trick") {
       ctx.flaeche.append(

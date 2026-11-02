@@ -194,10 +194,27 @@ function loesungsTexte(a) {
   return [`${inh.bild || ""}${inh.text}`];
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Denkweg vom Vorbild zur Erfindung, ohne die Lösung zu nennen. */
+const WER_KANN = "Welches Tier oder welche Pflanze kann genau das in der Natur?";
+function tippsFuer(a) {
+  const p = a.richtig && P[a.richtig];
+  switch (a.art) {
+    case "kann": return ["Stell dir das Tier oder die Pflanze in der Natur vor: Wo lebt es, was macht es?", `Lies jede Antwort und frag dich: Passt das zu ${p.vorbild}?`];
+    case "erfindung": return [`Was kann ${p.vorbild} besonders?`, `${p.vorbild}: ${p.kann} Welche Erfindung braucht genau das?`];
+    case "vorbild": return ["Was muss die Erfindung besonders gut können?", WER_KANN];
+    case "eigenschaft": return ["Nicht das ganze Tier oder die ganze Pflanze wird nachgebaut, nur eine Eigenschaft.", `Was muss die Erfindung besonders gut können? Und was davon kann ${p.vorbild}?`];
+    case "problem": return ["Lies das Problem genau: Was genau brauchst du?", WER_KANN];
+    case "paare": return ["Fang mit einem Vorbild an: Was kann es besonders?", "Such dann die Erfindung, die genau das braucht."];
+    case "dreier": return ["Fang mit einem Vorbild an: Was kann es besonders?", "Die 🔍-Karte sagt, was abgeschaut wurde. Welche Erfindung braucht genau das?"];
+  }
+  return [];
+}
+
 let gezeigt = null; // zuletzt gezeichnete Aufgabe (Prüfskripte, Entwickler-Leiste)
 
 LS.spiel({
   id: "bionik-paare",
+  hilfe: "Lies die Frage und tippe die passende Antwort an. Beim Paare- oder Dreier-Finden tippst du die Karten, die zusammengehören, nacheinander an; nochmals tippen nimmt eine Karte zurück.",
   einleitung: "Die Natur hatte viele gute Ideen zuerst. Menschen schauen sie ab und bauen daraus Erfindungen – das heisst Bionik.",
   anzahl: 8,
   stufen: nurMoegliche({
@@ -220,6 +237,7 @@ LS.spiel({
     }[ctx.stufe]);
     const a = aufgabeErzeugen(ctx.stufe);
     gezeigt = a;
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (artenIn(ctx.stufe).length > 1) ctx.serie("art", a.art);
     const f = ctx.flaeche;
 

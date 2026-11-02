@@ -420,12 +420,29 @@ const HINWEIS_FUENF = "Zähle die passenden Möglichkeiten und vergleiche mit al
 const HINWEIS_ANTEIL = "Zähle zuerst alle Möglichkeiten: Das ist die zweite Zahl. Dann die passenden: Das ist die erste.";
 const HINWEIS_SUMME = "Denk an beide Würfel: erster und zweiter Würfel geben 36 Paare. Zähle die Paare, die passen.";
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Bedeutung der Skala, dann wie man zählt (die Hinweise
+ * passen auch vorab) — nie eine Anzahl, eine Stufe oder A/B als Antwort.
+ */
+const TIPP_PAARE = "Schreib die Paare geordnet auf: zuerst alle mit 1 beim ersten Würfel, dann alle mit 2 und so weiter. Erst 1 und dann 2 ist ein anderes Paar als erst 2 und dann 1.";
+function tippsFuer(a) {
+  if (a.art === "drei") return ["Unmöglich heisst nie, sicher heisst immer, möglich heisst vielleicht.", HINWEIS_DREI];
+  if (a.art === "fuenf") return ["Die Knöpfe sind wie eine Skala: links nie, rechts immer.", HINWEIS_FUENF];
+  if (a.art === "vergleich") return ["Zähle bei A und bei B: Wie viele passen, und wie viele sind es insgesamt?",
+    "Nicht nur die Anzahl zählt: Wie viele sind es jeweils von allen?"];
+  if (a.art === "anteil") return ["Zähle zuerst alle Möglichkeiten, die herauskommen können.", HINWEIS_ANTEIL];
+  if (a.art === "eintippen") return ["Zähle zuerst alle Möglichkeiten, die herauskommen können.",
+    "Zähle dann die, die passen — jede gleich wahrscheinliche zählt einmal."];
+  return [HINWEIS_SUMME, TIPP_PAARE];
+}
+
 /** Begründung „4 von 6 passen“. */
 const begruendung = ({ k, n }) => `${k} von ${n} ${k === 1 ? "passt" : "passen"}`;
 
 LS.spiel({
   id: "zufalls-skala",
   einleitung: "Würfel, Glücksrad, Säckchen und Karten: Was kommt heraus? Das weiss niemand genau — aber du kannst sagen, wie wahrscheinlich es ist!",
+  hilfe: "Schau den Würfel, das Glücksrad, das Säckchen oder die Karten an und lies die Frage. Dann tippst du an, wie wahrscheinlich es ist — oder tippst die Anzahl ein, die passt.",
   anzahl: 8,
   stufen: {
     s1: "Unmöglich, möglich oder sicher? Mit Würfel und Säckchen.",
@@ -441,6 +458,7 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const f = ctx.flaeche;
     if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a));
 
     if (a.art === "drei" || a.art === "fuenf" || a.art === "summeSkala") {
       const fuenf = a.art !== "drei";

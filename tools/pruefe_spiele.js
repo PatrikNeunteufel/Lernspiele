@@ -56,6 +56,7 @@ function skripte(seitenPfad, html) {
 const TREIBER = `
 (function treiber(runden, maxKlicks, endlos) {
   const buehne = document.querySelector(".buehne");
+  const versteckt = e => !!e && (e.hidden === true || versteckt(e.parentNode));
   const funde = [];
   // Je Fund nur einmal melden (Schlüssel: der gefundene Ausschnitt, nicht der Klick davor).
   const gemeldet = new Set();
@@ -92,6 +93,7 @@ const TREIBER = `
   const aufgabenText = (e) => e.nodeType === 3 ? e.data : klickbar(e) ? " " : e.childNodes.map(aufgabenText).join(" ");
   const optionen = (flaeche) => flaeche.querySelectorAll("*").filter(klickbar).map(text).filter(t => t && t.length <= 40 && !KEIN_WERT.test(t));
   let ohneVorab = 0; // Aufgaben, deren Lösung das Spiel nicht mit ctx.loesung() nennt
+  let mitTipp = false; // gab irgendeine Aufgabe einen Tipp mit (ctx.tipp)?
   // Wiederholungen je Runde: höchstens eine Aufgabe ein zweites Mal, nie direkt hintereinander.
   let gestellt = new Map();
   let letzte = null;
@@ -125,6 +127,14 @@ const TREIBER = `
       melde("Handgriffe", "mit " + (klicks - klicksBeiStart + 1) + " Klicks gelöst, das Spiel nennt " + schritte, "zu viele");
     // Neue Aufgabe: Hinweise einer übersprungenen Aufgabe mit derselben Nummer vergessen.
     if (art === "aufgabe") { hinweise.delete(a.nr); return; }
+    if (art === "gestellt" && a.tipps) mitTipp = true;
+    // Ein Tipp (ctx.tipp, LERN_Session9) darf die Lösung so wenig verraten wie ein Hinweis nach einem Fehler.
+    if (art === "tipp") {
+      const liste = hinweise.get(a.nr) || [];
+      liste.push({ ...a, loesung: a.vorab || "", gewaehlt: "", aufgabe: aufgabenText(a.flaeche), optionen: optionen(a.flaeche) });
+      hinweise.set(a.nr, liste);
+      return;
+    }
     // Ab hier nur Aufgaben und Antworten; andere Haken (etwa „uhr“, ctx.uhrWarten) sind keine Antwort.
     if (art !== "gestellt" && art !== "falsch" && art !== "richtig") return;
     if (art === "gestellt" && endlos) return; // Endlos: eigene Regel (keine der letzten 30)
@@ -171,7 +181,8 @@ const TREIBER = `
     // Knöpfe und alles andere, das auf Tippen hört (SVG-Felder, Zahlenstrahl).
     const knoepfe = buehne.querySelectorAll("*").filter(b => (b.localName === "button" || b.__hoerer.click || b.__hoerer.pointerdown)
       && !b.disabled && !b.classList.contains("link") && !b.classList.contains("timer-schalter") && !b.classList.contains("option-schalter") && !/Andere Stufe/.test(b.textContent)
-      && !b.classList.contains("vorlesen") // 🔊 neben der Eule gehört zum Rahmen, nicht zur Aufgabe
+      && !b.classList.contains("vorlesen") && !b.classList.contains("melden") // 🗣️ und 🙋 neben der Eule gehören zum Rahmen, nicht zur Aufgabe
+      && !versteckt(b) // ausgeblendet (hidden, etwa „💡 Tipp“ ohne Tipps) kann niemand antippen
       && !b.closest(".testhilfe"));
     if (!knoepfe.length) { __uhr.weiter(2000); if (++ohneFortschritt > 50) { melde("Hänger", "keine Knöpfe mehr"); break; } continue; }
     // Weiter- und Nochmal-Knöpfe bevorzugen, damit die Runde vorankommt; selten eine Testhilfe.
@@ -215,7 +226,7 @@ const TREIBER = `
     for (const f of e.fehlerAufgaben || []) if (${VERDAECHTIG}.test(f.text + " " + f.loesung)) melde("Protokoll", "Fehleraufgabe: " + (f.text + " → " + f.loesung).slice(0, 160));
   }
   const gekuerzt = protokoll().filter(e => e.gekuerzt).map(e => e.aufgaben + "/" + e.gekuerzt);
-  return { runden: protokoll().length, klicks, funde, ohneVorab, gekuerzt, handgriffe };
+  return { runden: protokoll().length, klicks, funde, ohneVorab, gekuerzt, handgriffe, mitTipp };
 })`;
 
 // Zufallsmix (Entscheid M1 a): Der Treiber spielt die Mix-Seite. Das Spiel meldet „bereit“, zeichnet erst
@@ -223,12 +234,13 @@ const TREIBER = `
 const MIX_TREIBER = `
 (function mixTreiber(aufgaben, maxKlicks, endlos) {
   const buehne = document.querySelector(".buehne");
+  const versteckt = e => !!e && (e.hidden === true || versteckt(e.parentNode));
   const funde = [];
   const melde = (art, text) => { if (funde.length < 10 && !funde.some(f => f.text === text)) funde.push({ art, text }); };
   const neue = () => __nachrichten.splice(0);
   const sende = d => document.dispatchEvent(Object.assign(new Event("message"), { data: { lern: "mix", ...d }, source: parent }));
   const knoepfe = () => buehne.querySelectorAll("*").filter(b => (b.localName === "button" || b.__hoerer.click || b.__hoerer.pointerdown)
-    && !b.disabled && !b.classList.contains("link") && !b.classList.contains("vorlesen") && !b.closest(".testhilfe"));
+    && !b.disabled && !b.classList.contains("link") && !b.classList.contains("vorlesen") && !b.classList.contains("melden") && !versteckt(b) && !b.closest(".testhilfe"));
   __uhr.weiter(50);
   let n = neue();
   if (n.some(m => m.typ === "geht-nicht")) return { geht: false, funde, ergebnisse: 0, klicks: 0 };
@@ -358,6 +370,7 @@ function pruefe(id, stufe, liste = null, endlos = false, mix = false) {
     ergebnis.runden = t.runden;
     ergebnis.klicks = t.klicks;
     ergebnis.handgriffe = t.handgriffe;
+    ergebnis.mitTipp = t.mitTipp;
     for (const f of t.funde) (/^(Hänger|Hinweis)/.test(f.art) ? ergebnis.hinweise : ergebnis.fehler).push(`${f.art}: ${f.text}`);
     if (t.gekuerzt.length) ergebnis.hinweise.push(`zu wenig verschiedene Aufgaben: ${t.gekuerzt.length} von ${t.runden} Runden früher beendet (Aufgaben ${[...new Set(t.gekuerzt)].join(", ")})`);
     if (t.ohneVorab) ergebnis.fehler.push(`Testhilfe: ${t.ohneVorab} Antworten auf Aufgaben ohne ctx.loesung() — 🔑 kennt dort keine Lösung`);
@@ -373,10 +386,12 @@ const ids = fs.readdirSync(SPIELE_DIR)
   .filter(d => !nurSpiele.length || nurSpiele.includes(d));
 
 let fehlerZahl = 0;
+const ohneTipp = new Map(); // Spiel → Stufen ohne ctx.tipp (Übersicht am Ende, LERN_Session9)
 console.log(`Prüfe ${ids.length} Spiele × ${STUFEN.length} Stufen (je ${opt.runden} Runden, ${opt.aufgaben} Generator-Aufgaben, Startwert ${opt.seed})\n`);
 for (const id of ids) {
   for (const stufe of STUFEN) {
     const e = pruefe(id, stufe);
+    if (e.runden && !e.mitTipp) ohneTipp.set(id, [...(ohneTipp.get(id) || []), stufe]);
     const gen = e.generator ? ` · Generator ${e.generator.anzahl}${e.generator.mitPruefung ? " fachlich" : ""}` : "";
     const zeichen = e.fehler.length ? "✗" : e.hinweise.length ? "~" : "✓";
     console.log(`${zeichen} ${id.padEnd(22)} ${stufe}  Runden ${e.runden ?? "-"} · Klicks ${e.klicks ?? "-"}${gen}`);
@@ -463,7 +478,7 @@ const SUCHFAELLE = [
   { q: "stellen", zuerst: ["stellen-detektiv"], enthaelt: ["zahlen-baukasten", "ziffernkarten"] },
   { q: "zahlenstral", zuerst: ["zahlenstrahl-pfeil"], anzahl: 1 },
   { q: "wortschatz", enthaelt: ["word-match", "wort-zwillinge"], grund: "word-match" },
-  { q: "MA.3.A.2", zuerst: ["uhr-werkstatt", "kiosk-kasse", "masse-umwandler"], anzahl: 7 },
+  { q: "MA.3.A.2", zuerst: ["uhr-werkstatt", "kiosk-kasse", "masse-umwandler"], enthaelt: ["fahrplan-rechner", "komma-messband"], anzahl: 9 },
   { q: "englisch wörter", enthaelt: ["word-match", "wort-zwillinge", "listen-tap", "sound-sorter"], anzahl: 4 },
   { q: "gipfeli", zuerst: ["preis-tabelle"], anzahl: 1, grund: "preis-tabelle" },
   { q: "xyzqw", anzahl: 0 },
@@ -509,5 +524,10 @@ if (opt.namen !== 0 && !nurSpiele.length) {
   if (!gemeldet) console.log(`✓ ${kat.SPIELE.length} Namen, keiner doppelt, kein Grundwort öfter als ${NAMEN_GRUNDWORT_MAX}-mal`);
 }
 
+// Tipps (ctx.tipp, Entscheid T2 a): welche Spiele in welchen Stufen noch keine haben — eine Übersicht, kein Fehler.
+if (ohneTipp.size) {
+  console.log(`\nOhne Tipps (ctx.tipp): ${ohneTipp.size} Spiel${ohneTipp.size === 1 ? "" : "e"}`);
+  for (const [id, st] of ohneTipp) console.log(`    ${id.padEnd(22)} ${st.length === STUFEN.length ? "alle Stufen" : st.join(" ")}`);
+}
 console.log(`\n${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`);
 process.exitCode = fehlerZahl ? 1 : 0;

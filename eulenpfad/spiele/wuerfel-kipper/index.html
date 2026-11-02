@@ -351,11 +351,32 @@ const H_KIPP = {
 };
 const H_SCHRITTE = "Kippe Schritt für Schritt im Kopf und merke dir nach jedem Kipp, was oben, vorne und rechts liegt.";
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst die Vorstellung, dann die Kipp-Regel für den
+ * ersten Kipp, zuletzt die 7er-Regel für unsichtbare Seiten — nie eine Zahl, die schon die Antwort ist.
+ */
+const T_UNSICHTBAR = "Seiten, die du nicht siehst, findest du mit der 7er-Regel: Gegenüberliegende Seiten ergeben zusammen 7.";
+function tippsFuer(a) {
+  if (a.art === "gegenseite") return [H_SIEBEN,
+    { u: "Unten liegt gegenüber von oben.", h: "Hinten liegt gegenüber von vorne.", l: "Links liegt gegenüber von rechts." }[a.frage]];
+  if (a.art === "ziel") return [`Plane im Kopf, bevor du tippst: Wo liegt die ${a.zielZahl} jetzt?`,
+    "Siehst du die Zahl nicht, liegt sie gegenüber einer Zahl, die du siehst — zusammen ergeben sie 7.",
+    `${H_KIPP[a.hr]} ${H_KIPP[a.vr]}`];
+  if (a.art === "viermal") return ["Kippe in Gedanken mit und verfolge die obere Seite bei jedem Kipp.",
+    `Beim ersten Kipp landet die obere Seite ${ORT[{ rechts: "r", links: "l", vorne: "v", hinten: "h" }[a.weg[0]]]}. Und wo ist sie nach dem zweiten, dritten, vierten Kipp?`];
+  if (a.weg.length === 1) return ["Stell dir vor, du stösst den Würfel an. Welche Seite wandert nach oben?", H_KIPP[a.weg[0]], T_UNSICHTBAR];
+  return [a.art === "weg" ? `${H_SCHRITTE} Auf der Karte ist hinten oben im Bild.` : H_SCHRITTE,
+    `Beim ersten Kipp gilt: ${H_KIPP[a.weg[0]]}`, T_UNSICHTBAR];
+}
+
 // ---------- Spiel ----------
 
 LS.spiel({
   id: "wuerfel-kipper",
   einleitung: "Ein Spielwürfel: Gegenüberliegende Seiten ergeben zusammen 7. Kippe ihn im Kopf — rollt er nach rechts, landet die obere Seite rechts. Welche Zahl liegt danach oben?",
+  hilfe: stufe => (stufe === "s6"
+    ? "Tipp die Pfeilknöpfe, um den Würfel Feld für Feld zur 🏁 zu kippen. Am Ziel soll die gesuchte Zahl oben liegen. Mit „↺ zum Start“ beginnst du neu."
+    : "Schau den Würfel und die Kipp-Pfeile (oder den Weg auf der Karte) an. Kippe im Kopf mit und tipp dann die Zahl an, nach der gefragt ist."),
   anzahl: 8,
   stufen: {
     s1: "Gegenseiten: Welche Zahl liegt unten? (Zusammen 7.)",
@@ -370,6 +391,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     const p = STUFE[ctx.stufe];
     const f = ctx.flaeche;
+    ctx.tipp(tippsFuer(a));
     if (a.art === "ziel") { zielAufgabe(ctx, a, p); return; }
 
     const loesungText = a.art === "gegenseite"

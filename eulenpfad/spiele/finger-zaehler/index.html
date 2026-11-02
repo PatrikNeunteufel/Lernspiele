@@ -265,8 +265,27 @@ const HINWEIS = {
   gleich: "Vergleiche: Eine ganze Hand sind fünf, ein volles Zehnerfeld sind zehn.",
 };
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): ganz kurz, wie man zählt — nie die Anzahl. */
+const FUENF = "Eine ganze Hand sind fünf, zwei ganze Hände zehn.";
+function tippsFuer(a) {
+  switch (a.art) {
+    case "zeigen": return a.n <= 5 ? ["Zähl laut mit, während du tippst.", "Fang beim Daumen an: Daumen, Zeigefinger, Mittelfinger …"]
+      : ["Eine ganze Hand sind fünf.", "Zeig zuerst eine ganze Hand. Dann tippst du noch Finger an, bis es stimmt."];
+    case "zeigenRest": return ["Schau oben: Wie viele Finger sind eingeklappt?", FUENF];
+    case "wieviele": return a.bild.length === 1 ? ["Zähl die offenen Finger.", "Eine ganze Hand hat fünf Finger. Sind alle offen?"]
+      : ["Eine ganze Hand sind fünf.", "Ist eine Hand ganz offen? Dann zähl von fünf weiter."];
+    case "handZuBild": return ["Zähl zuerst die Finger.", HINWEIS.gleich];
+    case "bildZuHand": return ["Wie viele zeigt das Bild oben?", HINWEIS.gleich];
+    case "fehlen": return ["Zähl die eingeklappten Finger.", FUENF];
+    case "blitz": return ["Merk dir: Ist eine Hand ganz offen?", HINWEIS.blitz];
+    case "blitzFehlen": return ["Merk dir, wie viele Finger eingeklappt sind.", FUENF];
+  }
+  return [];
+}
+
 LS.spiel({
   id: "finger-zaehler",
+  hilfe: "Schau auf die Hände und tippe die passende Antwort an. Sollst du Finger zeigen, tippst du die Finger an — nochmals tippen klappt einen wieder ein — und dann «✓ Fertig».",
   einleitung: "Wie viele Finger sind es? Schau auf die Hände — und zeig es auch mit deinen eigenen!",
   anzahl: 8,
   stufen: {
@@ -284,6 +303,7 @@ LS.spiel({
     const s = STUFE[ctx.stufe];
     if (new Set(s.arten).size > 1) ctx.serie("art", a.art);
     if (ctx.stufe === "s1" && a.art === "wieviele") ctx.serie("antwort", a.richtig);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const f = ctx.flaeche;
 
     if (a.art === "zeigen" || a.art === "zeigenRest") {
@@ -293,7 +313,7 @@ LS.spiel({
         ? `Zeig ${ziel} Finger${ziel <= 5 ? `: ${FINGER.slice(0, ziel).join(", ")}` : `: eine ganze Hand und ${ziel - 5} Finger`}.`
         : ziel === 1 ? "Bis 10 fehlt 1 Finger." : `Bis 10 fehlen ${ziel} Finger.`;
       ctx.loesung(loesung);
-      ctx.schritte(a.tipps);
+      ctx.schritte(a.tipps + 1); // die Finger und „✓ Fertig“
       f.append(el("div", { class: "auftrag", text: a.art === "zeigen" ? `Zeig ${ziel} Finger! Tipp die Finger an.` : "Wie viele Finger fehlen bis zehn? Zeig sie unten mit den Fingern!" }));
       if (a.art === "zeigen") {
         // Ziel: in Stufe 1 als Punktbild, in Stufe 2 Ziffer und Punkte, danach Ziffer
@@ -303,9 +323,10 @@ LS.spiel({
         f.append(zielBild);
       } else f.append(haendeSvg(a.bild));
       // Alle Finger zu; Tippen klappt einzelne Finger auf oder zu (gestrichelter Umriss = hier tippen).
+      // Geprüft wird erst mit „✓ Fertig“: Sonst gälte die Aufgabe als gelöst, sobald die Zahl einmal
+      // stimmt, und das Kind könnte nichts mehr ändern (Bemerkung 1, Patrik, LERN_Session9).
       const finger = Array.from({ length: a.haende }, () => []);
       const feld = el("div", { class: "fz-feld" });
-      f.append(feld);
       const zeichne = () => {
         feld.replaceChildren(haendeSvg(finger, a.hand, (h, x) => {
           if (ctx.vorbei()) return;
@@ -313,11 +334,15 @@ LS.spiel({
           finger[h] = finger[h].includes(x) ? finger[h].filter(i => i !== x) : [...finger[h], x].sort();
           LS.ton("tipp");
           zeichne();
-          const n = anzahl(finger);
-          if (n === ziel) ctx.richtig(ziel <= 5 ? `Ja, das sind ${ZAHLWORT[ziel]}!` : `Super, ${ZAHLWORT[ziel]} Finger!`);
-          else if (n > ziel) ctx.sag("Das sind zu viele. Klapp einen Finger wieder ein.", "hinweis");
         }));
       };
+      const fertig = el("button", { type: "button", class: "knopf gruen", text: "✓ Fertig", "aria-label": "Fertig", onclick: () => {
+        if (ctx.vorbei()) return;
+        const n = anzahl(finger);
+        if (n === ziel) return ctx.richtig(ziel <= 5 ? `Ja, das sind ${ZAHLWORT[ziel]}!` : `Super, ${ZAHLWORT[ziel]} Finger!`);
+        ctx.falsch(n > ziel ? "Das sind zu viele. Klapp einen Finger wieder ein." : "Das sind noch zu wenige. Zähl deine Finger nach.", loesung);
+      } });
+      f.append(feld, el("div", { class: "knopfzeile" }, fertig));
       zeichne();
       return;
     }

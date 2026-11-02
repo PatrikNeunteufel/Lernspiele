@@ -382,8 +382,36 @@ const TIPP = {
   s6: "Hör dir das Datum gut an. Wie viele Tage hat der Monat?",
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): worauf hören, wie man zählt — nie das gesuchte Wort.
+ * Keine französischen Tag- oder Monatsnamen in den Tipps: Sie könnten die Antwort sein.
+ */
+const HOER = "Tipp auf «🔊 nochmal» und hör genau hin.";
+const ERSTER = "Für den ersten Tag im Monat gibt es ein besonderes Wort.";
+function tippsFuer(a) {
+  switch (a.art) {
+    case "tagHoeren": return [HOER, "Fast alle Tage enden auf «-di». Hör auf den Anfang."];
+    case "tageOrdnen": return ["Sag die Tage leise der Reihe nach auf, wie auf Deutsch.", "Die Woche beginnt wie bei uns am Montag und endet am Sonntag — dann geht es von vorne los."];
+    case "tagDeutsch": return ["Die französische Woche beginnt wie bei uns am Montag. Der wievielte Tag ist es?", "Sag die französischen Tage leise der Reihe nach auf und zähle mit."];
+    case "demainHier": return [a.hinweis, "Sag die Tage leise der Reihe nach auf."];
+    case "moisOrdnen": return ["Sag die Monate leise der Reihe nach auf, wie auf Deutsch.", "Viele Monate klingen fast wie auf Deutsch. Nach dem Dezember beginnt das Jahr von vorne."];
+    case "moisApres": return [a.hinweis, "Sag die Monate leise der Reihe nach auf — viele klingen fast wie auf Deutsch."];
+    case "saison": return [a.hinweis, "Frühling: Blumen. Sommer: heiss. Herbst: Blätter fallen. Winter: Schnee."];
+    case "moisHoeren": return [HOER, "Achte auf den Anfang und das Ende des Worts. Viele Monate klingen fast wie auf Deutsch."];
+    case "blattZuText": return ["Lies die Zahl und den Monat auf dem Blatt genau.", a.t === 1 ? ERSTER : "Vergleiche in jeder Antwort zuerst die Zahl, dann den Monat."];
+    case "textZuBlatt": return ["Lies zuerst den Monat, dann die Zahl.", "Wie viele Zehner, wie viele Einer hat die Zahl?"];
+    case "anniversaireHoeren": return [HOER, "Hör einmal auf die Zahl, einmal auf den Monat. Wie viele Zehner, wie viele Einer?"];
+    case "kalenderZeigen": return [HOER, "Hör vor allem auf die Zahl. Wie viele Zehner, wie viele Einer?"];
+    case "wochentagKalender": return ["Such die Zahl im Kalender.", "Schau ganz oben in ihrer Spalte nach: Dort steht der Tag."];
+    case "anniversaireSagen": return ["Achte auf alle Teile: die Zahl, den Monat und das kleine Wort davor.", a.t === 1 ? ERSTER : "Lies die Zahl in jeder Antwort genau."];
+    case "demainDatum": return [HOER, "Zähl einen Tag weiter oder zurück: beim Wochentag und beim Datum. Wie viele Tage hat der Monat?"];
+  }
+  return [];
+}
+
 const SPIEL = {
   id: "calendrier",
+  hilfe: "Lies oder hör, was gefragt ist, und tippe die passende Antwort an. Mit «🔊 nochmal» hörst du das Französische noch einmal. Beim Ordnen tippst du die Wörter der Reihe nach an; im Kalender tippst du auf den Tag.",
   einleitung: "Lundi, mardi, mercredi … Lerne die Wochentage, die Monate und das Datum auf Französisch. Mit 🔊 hörst du es nochmal.",
   anzahl: 8,
   stufen: {
@@ -401,6 +429,7 @@ const SPIEL = {
     ctx.serie("art", a.art); // jede Stufe hat mehrere Arten
     if (a.d !== undefined) ctx.serie("richtung", a.d);
     ctx.kennung(a.kennung);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const f = ctx.flaeche;
     f.append(el("div", { class: "frage", html: a.frage }));
     if (a.hilfe) f.append(el("div", { class: "cal-hilfe", text: a.hilfe }));

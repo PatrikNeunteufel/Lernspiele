@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prozent-Brücke</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(19px, 4.4vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .frage b { color: var(--knopf); }
+  .vorgabe { display: flex; justify-content: center; align-items: center; gap: 12px; font-size: clamp(38px, 9vw, 56px); font-weight: 900; margin: 4px 0 14px; font-variant-numeric: tabular-nums; }
+  .vorgabe .pb-feld { width: min(170px, 44vw); }
+  .vorgabe .pb-streifen { width: min(300px, 80vw); }
+
+  /* Bruch übereinander; der Schrägstrich ist nur für Protokoll und Vorleser da (wie Bruch-Pizzeria). */
+  .bruch { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.05; margin: 0 .12em; font-variant-numeric: tabular-nums; font-weight: 900; }
+  .bruch .z { border-bottom: .09em solid currentColor; padding: 0 .15em; }
+  .bruch .n { padding: 0 .15em; }
+  .bruch .schraeg { font-size: 0; }
+  .pb-zahl { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  .pb-feld, .pb-streifen { display: block; max-width: 100%; height: auto; }
+  .pb-feld rect { fill: #fff; stroke: var(--text-leise); stroke-width: .5; }
+  .pb-streifen rect { fill: #fff; stroke: var(--text); stroke-width: 1.5; }
+  .pb-feld rect.voll, .pb-streifen rect.voll { fill: var(--deko-2); }
+
+  .wahl-knopf { font-size: clamp(22px, 5vw, 30px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  .wahl-knopf .bruch { font-size: clamp(24px, 5.4vw, 30px); }
+  .wahl-knopf .pb-feld { width: min(96px, 24vw); }
+  .wahl-knopf .pb-streifen { width: min(150px, 36vw); }
+
+  /* Brücke: je gefundenes Paar (oder Dreier) eine Planke */
+  .pb-bruecke { display: flex; gap: 6px; justify-content: center; align-items: stretch; max-width: 560px; margin: 0 auto 4px; }
+  .pb-planke { flex: 1; min-width: 0; min-height: 40px; border: 3px dashed var(--rand); border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: clamp(12px, 3vw, 16px); padding: 2px 4px; text-align: center; color: var(--text-leise); background: rgba(255, 255, 255, .6); }
+  .pb-planke.gelegt { border-style: solid; border-color: var(--deko-3); background: var(--deko-3); color: #fff; }
+  .pb-fluss { max-width: 560px; height: 12px; margin: 0 auto 12px; border-radius: 8px; background: var(--deko-6); opacity: .35; }
+  .pb-ufer { display: grid; gap: 10px; grid-template-columns: repeat(var(--sp, 2), minmax(0, 1fr)); max-width: 560px; margin: 0 auto; }
+  .pb-spalte { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .pb-kopf { text-align: center; font-weight: 800; color: var(--text-leise); font-size: clamp(13px, 3.2vw, 16px); }
+  .pb-karte { min-height: 66px; border: 3px solid var(--rand); border-radius: 14px; background: #fff; color: var(--text); font-family: inherit;
+    font-size: clamp(20px, 5vw, 28px); font-weight: 900; display: flex; align-items: center; justify-content: center; padding: 6px; cursor: pointer;
+    box-shadow: 0 4px 0 var(--rand); touch-action: manipulation; }
+  .pb-karte .bruch { font-size: clamp(22px, 5.2vw, 28px); }
+  .pb-karte .pb-feld { width: min(84px, 22vw); }
+  .pb-karte .pb-streifen { width: 100%; }
+  .pb-karte.aktiv { border-color: var(--deko-1); box-shadow: 0 4px 0 var(--deko-1); background: #f3ecff; }
+  .pb-karte.fertig { border-color: var(--gut); background: var(--gut-hell); box-shadow: none; opacity: .7; cursor: default; }
+  .pb-karte.daneben { border-color: var(--hinweis); animation: wackeln .4s; }
+
+  .pb-eingabe { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 6px 0 8px; }
+  .pb-einheit { font-size: clamp(22px, 5vw, 30px); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🌉 Prozent-Brücke</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan 21 MA.1.A.1.g (Grundanspruch Ende 6. Klasse): Begriffe Bruch, Prozent, Zähler, Nenner;
+// Symbole % und ≈; Dezimalzahlen und Brüche lesen und schreiben. MA.1.A.2.g: Brüche mit den Nennern
+// 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 ordnen. 3. Zyklus (Stufe 5 und 6): MA.1.A.1.h Brüche (auch Nenner
+// 1000), Dezimalzahlen und Prozent in die anderen Schreibweisen übertragen; MA.1.A.3.h Prozentrechnungen;
+// MA.1.A.2.h in Prozentrechnungen überschlagen („263 von 830 sind etwa 30 %“).
+// Basisklasse 6: s1 5. Klasse (Zehntel und Halbe), s3 Grundanspruch, s5 7. Klasse, s6 Königsstufe.
+// Abgrenzung: Bruch-Pizzeria (5) übt Brüche ablesen, vergleichen, erweitern; Schoggi-Brüche (6) rechnet
+// mit Brüchen; Zehntel-Lupe (5) ordnet Dezimalzahlen. Hier geht es um die Brücke zwischen den drei
+// Schreibweisen: Was ist gleich viel?
+// Ein Wert ist ein gekürzter Bruch [z, n]; gerechnet wird nur mit ganzen Zahlen (Promille, Rappen).
+
+const { zufall, waehle, mische, el, zahlText, dezimalText } = LS;
+
+const ggT = (a, b) => (b ? ggT(b, a % b) : a);
+const wert = (z, n) => { const g = ggT(z, n); return [z / g, n / g]; };
+const gleich = (a, b) => a[0] * b[1] === b[0] * a[1];
+const vergleiche = (a, b) => a[0] * b[1] - b[0] * a[1];
+/** Wert in Tausendsteln, wenn er aufgeht (½ → 500), sonst null (⅓). */
+const promille = w => ((1000 * w[0]) % w[1] === 0 ? (1000 * w[0]) / w[1] : null);
+const genugAbstand = (a, b, abstand) => Math.abs(a[0] * b[1] - b[0] * a[1]) * 1000 >= abstand * a[1] * b[1];
+
+const ZEHNTEL = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => wert(k, 10)); // mit ½ = 5/10
+const HUNDERTSTEL = Array.from({ length: 99 }, (_, i) => wert(i + 1, 100));
+const GRUND = [[1, 2], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5], [1, 10], [3, 10], [7, 10], [9, 10], [1, 20], [1, 50], [1, 100]];
+const MEHR = [...GRUND, [1, 25], [2, 25], [3, 25], [3, 20], [7, 20], [9, 20], [3, 50], [7, 50]];
+const ACHTEL = [...MEHR, [1, 8], [3, 8], [5, 8], [7, 8]];
+const UNGEFAEHR = [[1, 3], [2, 3], [1, 6], [5, 6]];
+
+const DINGE = [
+  { dativ: "Kindern", plural: "Kinder" }, { dativ: "Seiten", plural: "Seiten" },
+  { dativ: "Plätzen", plural: "Plätze" }, { dativ: "Äpfeln", plural: "Äpfel" },
+];
+
+// Je Stufe: Aufgabenarten, Werte, erlaubte Nenner beim Schreiben eines Bruchs („gekuerzt“: nur der
+// gekürzte), Formen, Spalten der Brücke, Zeilen, Nachkommastellen (dezimal), Prozent mit Komma.
+const STUFE = {
+  s1: { arten: ["zuordnen", "zuordnen", "paare"], werte: ZEHNTEL, nenner: [2, 10], stellen: 2,
+    formen: ["bruch", "dezimal", "streifen"], paare: [["bruch", "streifen"], ["dezimal"]], zeilen: 3 },
+  s2: { arten: ["zuordnen", "zuordnen", "paare"], werte: HUNDERTSTEL, nenner: [100], stellen: 3,
+    formen: ["feld", "prozent", "bruch", "dezimal"], paare: [["feld", "bruch"], ["prozent", "dezimal"]], zeilen: 3 },
+  s3: { arten: ["zuordnen", "paare", "paare", "ordnen"], werte: GRUND, nenner: "gekuerzt", stellen: 3,
+    formen: ["bruch", "dezimal", "prozent", "feld"], paare: [["bruch"], ["prozent", "dezimal"]], zeilen: 3, ordnen: 3, abstand: 50 },
+  s4: { arten: ["zuordnen", "dreier", "dreier", "ordnen"], werte: MEHR, nenner: [2, 4, 5, 10, 20, 25, 50, 100], stellen: 3,
+    formen: ["bruch", "dezimal", "prozent"], zeilen: 3, ordnen: 4, abstand: 20 },
+  s5: { arten: ["prozentVon", "prozentVon", "ungefaehr", "gleichOder", "dreier"], werte: ACHTEL,
+    nenner: [2, 4, 5, 8, 10, 20, 25, 50, 100, 1000], stellen: 3, prozentKomma: true, formen: ["bruch", "dezimal", "prozent"], zeilen: 3,
+    prozente: [100, 200, 250, 500, 750], betraege: [20, 30, 40, 50, 60, 80, 90, 120, 150, 200, 240, 300, 360, 400],
+    anzahlen: [20, 40, 60, 80, 100, 120, 160, 200, 240, 300, 400], rundung: 50 },
+  s6: { arten: ["ordnen", "prozentSatz", "ueberschlag", "prozentVon"], werte: ACHTEL, extra: UNGEFAEHR,
+    nenner: [2, 3, 4, 5, 6, 8, 10, 20, 25, 50, 100, 1000], stellen: 3, prozentKomma: true, formen: ["bruch", "dezimal", "prozent"],
+    ordnen: 5, abstand: 10, prozente: [50, 125, 150, 300, 350, 400, 600, 800, 900],
+    betraege: [16, 24, 36, 40, 48, 64, 72, 80, 120, 140, 160, 180, 250, 320, 360], anzahlen: [40, 80, 120, 160, 200, 240, 320, 400, 480, 800], rundung: 5 },
+};
+
+const BILD = new Set(["feld", "streifen"]);
+const NAME = { bruch: "Bruch", dezimal: "Dezimalzahl", prozent: "Prozent", feld: "Bild", streifen: "Bild" };
+const NENNER_NAME = { 2: "Halbe", 3: "Drittel", 4: "Viertel", 5: "Fünftel", 6: "Sechstel", 8: "Achtel", 10: "Zehntel", 20: "Zwanzigstel",
+  25: "Fünfundzwanzigstel", 40: "Vierzigstel", 50: "Fünfzigstel", 100: "Hundertstel", 1000: "Tausendstel" };
+
+// ---------- Darstellungen ----------
+
+function nennerFuer(w, p, form) {
+  const liste = p.nenner === "gekuerzt" ? [w[1]] : p.nenner;
+  return liste.filter(d => d % w[1] === 0 && (form !== "streifen" || d <= 20));
+}
+
+function darstellbar(w, form, p) {
+  if (w[0] <= 0 || w[0] >= w[1]) return false;
+  if (form === "bruch" || form === "streifen") return nennerFuer(w, p, form).length > 0;
+  const pm = promille(w);
+  if (pm === null) return false;
+  if (form === "feld") return pm % 10 === 0;
+  if (form === "prozent") return p.prozentKomma || pm % 10 === 0;
+  if (form === "dezimal") return pm % 10 ** (3 - p.stellen) === 0;
+  return false;
+}
+
+/** Eine Karte: Wert [z, n] in einer Form; d = geschriebener Nenner (Bruch, Streifen). */
+function karte(w, form, p) {
+  const k = { form, z: w[0], n: w[1] };
+  if (form === "bruch" || form === "streifen") k.d = waehle(nennerFuer(w, p, form));
+  return k;
+}
+
+const wertVon = k => [k.z, k.n];
+const prozText = pm => `${pm % 10 === 0 ? zahlText(pm / 10) : dezimalText(pm / 10)} %`;
+
+/** Text einer Karte (Schlüssel, Lösung, Protokoll). */
+function kartenText(k) {
+  const pm = promille(wertVon(k));
+  if (k.form === "bruch") return `${k.z * k.d / k.n}/${k.d}`;
+  if (k.form === "dezimal") return dezimalText(pm / 1000);
+  if (k.form === "prozent") return prozText(pm);
+  if (k.form === "feld") return `Hunderterfeld mit ${pm / 10} von 100`;
+  return `Streifen mit ${k.z * k.d / k.n} von ${k.d}`;
+}
+
+const SVG = "http://www.w3.org/2000/svg";
+function svgEl(tag, attr) {
+  const e = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  return e;
+}
+
+function bruchEl(z, n) {
+  return el("span", { class: "bruch", "aria-label": `${z} ${NENNER_NAME[n] || "von " + n}` },
+    el("span", { class: "z", text: String(z) }), el("span", { class: "schraeg", text: "/" }), el("span", { class: "n", text: String(n) }));
+}
+
+/** Hunderterfeld: 10 × 10 Felder, die ersten anzahl Zeile für Zeile gefärbt. */
+function feldEl(anzahl) {
+  const s = svgEl("svg", { class: "pb-feld", viewBox: "-1 -1 102 102", role: "img", "aria-label": `Hunderterfeld, ${anzahl} von 100 Feldern gefärbt` });
+  for (let i = 0; i < 100; i++) {
+    s.append(svgEl("rect", { x: (i % 10) * 10, y: Math.floor(i / 10) * 10, width: 10, height: 10, class: i < anzahl ? "voll" : "leer" }));
+  }
+  return s;
+}
+
+/** Streifen mit d gleichen Teilen, die ersten voll gefärbt. */
+function streifenEl(voll, d) {
+  const s = svgEl("svg", { class: "pb-streifen", viewBox: "-2 -2 304 54", role: "img", "aria-label": `Streifen mit ${d} Teilen, ${voll} gefärbt` });
+  for (let i = 0; i < d; i++) s.append(svgEl("rect", { x: i * 300 / d, y: 0, width: 300 / d, height: 50, class: i < voll ? "voll" : "leer" }));
+  return s;
+}
+
+function kartenEl(k) {
+  if (k.form === "bruch") return bruchEl(k.z * k.d / k.n, k.d);
+  if (k.form === "feld") return feldEl(promille(wertVon(k)) / 10);
+  if (k.form === "streifen") return streifenEl(k.z * k.d / k.n, k.d);
+  return el("span", { class: "pb-zahl", text: kartenText(k) });
+}
+
+// ---------- Aufgaben als Daten ----------
+
+/** Typische Verwechslungen zu einem Wert: ¼ → 0.4, 0.14, 4 %, ¾, 0.025, 1/25 … */
+function fehlerWerte(w) {
+  const [z, n] = w;
+  const pm = promille(w);
+  const l = [[n - z, n]];
+  if (z < 10) l.push([z, 10]);
+  if (n < 10) l.push([n, 10]);
+  if (z < 10 && n < 10) l.push([10 * z + n, 100]);
+  if (n < 100) l.push([n, 100]);
+  if (pm !== null) {
+    l.push([pm, 10000]);
+    if (pm * 10 < 1000) l.push([pm * 10, 1000]);
+    if (pm % 10 === 0 && pm / 10 > 1 && pm / 10 <= 100) l.push([1, pm / 10]);
+    const q = pm / 10;
+    if (Number.isInteger(q) && q >= 10 && q < 100) l.push([Number(String(q).split("").reverse().join("")), 100]);
+  }
+  return l.filter(([a, b]) => a > 0 && a < b);
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(art, p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return null;
+}
+
+function erzeuge(art, p) {
+  if (art === "zuordnen") return erzeugeZuordnen(p);
+  if (art === "paare" || art === "dreier") return erzeugeBruecke(art, p);
+  if (art === "ordnen") return erzeugeOrdnen(p);
+  if (art === "prozentVon") return erzeugeProzentVon(p);
+  if (art === "prozentSatz") return erzeugeProzentSatz();
+  if (art === "ueberschlag") return erzeugeUeberschlag();
+  if (art === "ungefaehr") return erzeugeUngefaehr();
+  if (art === "gleichOder") return { art, ...waehle(GLEICH_ODER) };
+  return null;
+}
+
+function erzeugeZuordnen(p) {
+  const w = waehle(p.werte);
+  const formen = p.formen.filter(f => darstellbar(w, f, p));
+  const fv = waehle(formen);
+  const ziele = formen.filter(f => f !== fv && !(BILD.has(f) && BILD.has(fv)));
+  if (!ziele.length) return null;
+  const fz = waehle(ziele);
+  const andere = [];
+  const typisch = mische(fehlerWerte(w)).slice(0, 2);
+  for (const v of [...typisch, ...mische(p.werte)]) {
+    if (andere.length === 3) break;
+    if (!(v[0] > 0 && v[0] < v[1])) continue;
+    const vv = wert(v[0], v[1]);
+    if (gleich(vv, w) || andere.some(x => gleich(x, vv)) || !darstellbar(vv, fz, p)) continue;
+    andere.push(vv);
+  }
+  if (andere.length < 3) return null;
+  const richtig = karte(w, fz, p);
+  return { art: "zuordnen", vorgabe: karte(w, fv, p), optionen: mische([richtig, ...andere.map(v => karte(v, fz, p))]), richtig: kartenText(richtig) };
+}
+
+function erzeugeBruecke(art, p) {
+  const spalten = art === "dreier" ? [["bruch"], ["dezimal"], ["prozent"]] : p.paare;
+  const werte = [];
+  for (const w of mische(p.werte)) {
+    if (werte.length === p.zeilen) break;
+    if (werte.some(v => gleich(v, w)) || !spalten.every(g => g.some(f => darstellbar(w, f, p)))) continue;
+    werte.push(w);
+  }
+  if (werte.length < p.zeilen) return null;
+  const zeilen = werte.map(w => spalten.map(g => karte(w, waehle(g.filter(f => darstellbar(w, f, p))), p)));
+  return { art, spalten: spalten.map(g => [...new Set(g.map(f => NAME[f]))].join(" / ")), zeilen };
+}
+
+function erzeugeOrdnen(p) {
+  const werte = p.extra ? [waehle(p.extra)] : [];
+  for (const w of mische([...p.werte, ...(p.extra || [])])) {
+    if (werte.length === p.ordnen) break;
+    if (werte.some(v => gleich(v, w) || !genugAbstand(v, w, p.abstand))) continue;
+    werte.push(w);
+  }
+  if (werte.length < p.ordnen) return null;
+  // Königsstufe knapp: mindestens zwei Werte liegen weniger als 0.06 auseinander.
+  if (p.extra && !werte.some((v, i) => werte.some((u, j) => j > i && !genugAbstand(u, v, 60)))) return null;
+  const reihe = werte.map(w => karte(w, waehle(["bruch", "dezimal", "prozent"].filter(f => darstellbar(w, f, p))), p))
+    .sort((a, b) => vergleiche(wertVon(a), wertVon(b)));
+  if (new Set(reihe.map(k => k.form)).size < 2) return null;
+  return { art: "ordnen", reihe };
+}
+
+function erzeugeProzentVon(p) {
+  const P = waehle(p.prozente);
+  if (Math.random() < 0.6) {
+    const betrag = waehle(p.betraege);
+    const rp = P * betrag / 10;
+    if (!Number.isInteger(rp) || rp % p.rundung !== 0) return null;
+    return { art: "prozentVon", P, geld: true, ganzes: betrag, ergebnis: rp };
+  }
+  const ganzes = waehle(p.anzahlen);
+  const e = P * ganzes / 1000;
+  if (!Number.isInteger(e) || e <= 0) return null;
+  return { art: "prozentVon", P, geld: false, ganzes, ding: zufall(0, DINGE.length - 1), ergebnis: e };
+}
+
+const SATZ_GANZE = [20, 25, 40, 50, 200, 250, 400, 500];
+const SATZ_PROZENTE = [5, 10, 15, 20, 25, 30, 35, 40, 45, 60, 70, 75, 80, 90];
+function erzeugeProzentSatz() {
+  const ganzes = waehle(SATZ_GANZE), q = waehle(SATZ_PROZENTE);
+  const teil = q * ganzes / 100;
+  if (!Number.isInteger(teil) || teil <= 0 || teil >= ganzes) return null;
+  return { art: "prozentSatz", ganzes, teil, ding: zufall(0, DINGE.length - 1), ergebnis: q };
+}
+
+const UEBER = [10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90];
+function erzeugeUeberschlag() {
+  const ganzes = zufall(150, 990), q = waehle(UEBER);
+  const teil = Math.round(q * ganzes / 100 + (Math.random() * 2 - 1) * 0.015 * ganzes);
+  if (Math.abs(teil * 100 / ganzes - q) > 1.6) return null;
+  const optionen = [q];
+  for (const o of mische(UEBER)) if (optionen.length < 4 && optionen.every(x => Math.abs(x - o) >= 10)) optionen.push(o);
+  if (optionen.length < 4) return null;
+  return { art: "ueberschlag", ganzes, teil, optionen: mische(optionen), ergebnis: q };
+}
+
+// ≈: Brüche, die als Prozent oder Dezimalzahl nicht aufgehen. Werte in Promille, wie angezeigt.
+const UNGEFAEHR_AUFG = [
+  { w: [1, 3], richtig: 330, falsche: [130, 30, 670] },
+  { w: [2, 3], richtig: 670, falsche: [230, 320, 330] },
+  { w: [1, 6], richtig: 170, falsche: [60, 600, 330] },
+  { w: [5, 6], richtig: 830, falsche: [560, 650, 170] },
+];
+function erzeugeUngefaehr() {
+  const u = waehle(UNGEFAEHR_AUFG);
+  return { art: "ungefaehr", w: u.w, form: waehle(["prozent", "dezimal"]), optionen: mische([u.richtig, ...u.falsche]), richtig: u.richtig };
+}
+/** Gleich oder ungefähr? pm wie angezeigt. */
+const GLEICH_ODER = [
+  [[1, 8], "prozent", 125], [[3, 8], "prozent", 375], [[1, 8], "dezimal", 125], [[5, 8], "prozent", 625], [[7, 8], "dezimal", 875],
+  [[3, 20], "prozent", 150], [[3, 25], "dezimal", 120], [[7, 50], "prozent", 140],
+  [[1, 3], "prozent", 330], [[2, 3], "prozent", 670], [[1, 6], "prozent", 170], [[5, 6], "prozent", 830], [[1, 3], "dezimal", 330],
+  [[2, 3], "dezimal", 670], [[1, 8], "prozent", 130], [[3, 8], "prozent", 380], [[1, 8], "dezimal", 130], [[5, 8], "prozent", 630],
+].map(([w, form, pm]) => ({ w, form, pm, loesung: promille(w) === pm ? "=" : "≈" }));
+
+const zahlInForm = (form, pm) => (form === "prozent" ? prozText(pm) : dezimalText(pm / 1000));
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!a) return ["keine Aufgabe"];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const imPool = k => [...p.werte, ...(p.extra || [])].some(w => gleich(w, wertVon(k)));
+  const gueltig = k => (k.form === "bruch" || k.form === "streifen" ? nennerFuer(wertVon(k), p, k.form).includes(k.d) : darstellbar(wertVon(k), k.form, p));
+  if (a.art === "zuordnen") {
+    if (!imPool(a.vorgabe)) m.push("Vorgabe nicht im Zahlenraum der Stufe");
+    if (![a.vorgabe, ...a.optionen].every(gueltig)) m.push("Darstellung nicht erlaubt");
+    if (a.optionen.length !== 4) m.push("nicht vier Antworten");
+    if (a.optionen.filter(k => gleich(wertVon(k), wertVon(a.vorgabe))).length !== 1) m.push("nicht genau eine gleich grosse Antwort");
+    if (a.optionen.find(k => gleich(wertVon(k), wertVon(a.vorgabe))) && kartenText(a.optionen.find(k => gleich(wertVon(k), wertVon(a.vorgabe)))) !== a.richtig) m.push("Lösung falsch");
+    if (new Set(a.optionen.map(kartenText)).size !== 4) m.push("doppelte Antworten");
+    if (new Set(a.optionen.map(k => k.form)).size !== 1 || a.optionen[0].form === a.vorgabe.form) m.push("Formen passen nicht");
+  }
+  if (a.art === "paare" || a.art === "dreier") {
+    if (a.zeilen.length !== p.zeilen) m.push("falsche Zahl Zeilen");
+    if (!a.zeilen.every(z => z.every(k => gleich(wertVon(k), wertVon(z[0]))))) m.push("Zeile nicht gleich viel");
+    const werte = a.zeilen.map(z => wertVon(z[0]));
+    if (werte.some((w, i) => werte.some((v, j) => j > i && gleich(v, w)))) m.push("zwei Zeilen gleich viel");
+    if (!a.zeilen.every(z => z.every(gueltig) && z.every(imPool))) m.push("Darstellung oder Zahlenraum nicht erlaubt");
+    if (a.art === "dreier" && !a.zeilen.every(z => z.map(k => k.form).join() === "bruch,dezimal,prozent")) m.push("Dreier ohne alle drei Schreibweisen");
+  }
+  if (a.art === "ordnen") {
+    if (a.reihe.length !== p.ordnen) m.push("falsche Anzahl zum Ordnen");
+    for (let i = 1; i < a.reihe.length; i++) if (vergleiche(wertVon(a.reihe[i - 1]), wertVon(a.reihe[i])) >= 0) m.push("nicht aufsteigend oder gleich gross");
+    if (!a.reihe.every(k => imPool(k) && gueltig(k))) m.push("Zahl nicht in der Stufe");
+    const w = a.reihe.map(wertVon);
+    if (w.some((v, i) => w.some((u, j) => j > i && !genugAbstand(u, v, p.abstand)))) m.push("zu knapp");
+    if (new Set(a.reihe.map(kartenText)).size !== a.reihe.length) m.push("doppelte Teile");
+  }
+  if (a.art === "prozentVon") {
+    if (!p.prozente.includes(a.P)) m.push("Prozentsatz nicht in der Stufe");
+    const soll = a.geld ? a.P * a.ganzes / 10 : a.P * a.ganzes / 1000;
+    if (soll !== a.ergebnis || !Number.isInteger(soll) || soll <= 0) m.push("Ergebnis falsch");
+    if (a.geld && (!p.betraege.includes(a.ganzes) || a.ergebnis % p.rundung)) m.push("Betrag nicht in der Stufe");
+    if (!a.geld && !p.anzahlen.includes(a.ganzes)) m.push("Anzahl nicht in der Stufe");
+  }
+  if (a.art === "prozentSatz") {
+    if (a.teil * 100 !== a.ergebnis * a.ganzes || a.teil <= 0 || a.teil >= a.ganzes) m.push("Prozentsatz falsch");
+  }
+  if (a.art === "ueberschlag") {
+    const ist = a.teil * 100 / a.ganzes;
+    const naechste = [...a.optionen].sort((x, y) => Math.abs(x - ist) - Math.abs(y - ist));
+    if (naechste[0] !== a.ergebnis) m.push("Überschlag zeigt nicht auf die Lösung");
+    if (Math.abs(naechste[1] - ist) - Math.abs(naechste[0] - ist) < 5) m.push("zwei Antworten zu nah");
+    if (new Set(a.optionen).size !== 4) m.push("doppelte Antworten");
+  }
+  if (a.art === "ungefaehr") {
+    const genau = a.w[0] * 1000 / a.w[1];
+    const naechste = [...a.optionen].sort((x, y) => Math.abs(x - genau) - Math.abs(y - genau));
+    if (naechste[0] !== a.richtig || Math.round(genau / 10) * 10 !== a.richtig || promille(a.w) !== null) m.push("ungefähr falsch");
+    if (Math.abs(naechste[1] - genau) < 30) m.push("zweite Antwort zu nah");
+    if (new Set(a.optionen).size !== 4) m.push("doppelte Antworten");
+  }
+  if (a.art === "gleichOder") {
+    const genau = a.w[0] * 1000 / a.w[1];
+    if (a.loesung === "=" ? promille(a.w) !== a.pm : Math.abs(genau - a.pm) > 5 || promille(a.w) === a.pm) m.push("gleich oder ungefähr falsch");
+  }
+  return m;
+}
+
+// ---------- Hinweise (verraten die Lösung nicht) ----------
+
+const HINWEIS_PROZENT = "Prozent heisst „von Hundert“: Ein Prozent ist ein Hundertstel. Wie viele Hundertstel sind es?";
+const HINWEIS_DEZIMAL = "Erweitere den Bruch auf Zehntel, Hundertstel oder Tausendstel. Dann kannst du ihn als Dezimalzahl schreiben.";
+const HINWEIS_FELD = "Das Hunderterfeld hat hundert kleine Felder. Eine ganze Zeile sind zehn Felder.";
+const HINWEIS_STREIFEN = "Zähle alle Teile des Streifens, das ist der Nenner. Die gefärbten Teile sind der Zähler.";
+const HINWEIS_PAAR = "Diese zwei sind nicht gleich viel. Schreib beide als Hundertstel und vergleiche.";
+const HINWEIS_ORDNEN = "Da ist noch eine kleinere Zahl. Schreib alle als Hundertstel oder als Prozent und vergleiche.";
+
+function hinweisZuordnen(fv, fz) {
+  const f = new Set([fv, fz]);
+  if (f.has("feld")) return HINWEIS_FELD;
+  if (f.has("streifen")) return HINWEIS_STREIFEN;
+  if (f.has("prozent")) return HINWEIS_PROZENT;
+  return HINWEIS_DEZIMAL;
+}
+
+function tippProzent(P) {
+  const q = prozText(P);
+  const t = {
+    50: `${q} ist die Hälfte von ${prozText(100)}.`, 100: `${q} ist ein Zehntel: Teile durch zehn.`,
+    125: `${q} ist die Hälfte von ${prozText(250)}.`, 150: `${q} sind ${prozText(100)} und noch die Hälfte davon.`,
+    200: `${q} sind zwei Zehntel: zuerst ${prozText(100)}, dann das Doppelte.`, 250: `${q} ist ein Viertel: die Hälfte von der Hälfte.`,
+    350: `${q} sind ${prozText(250)} und ${prozText(100)} zusammen.`, 500: `${q} ist die Hälfte.`,
+    750: `${q} sind drei Viertel: zuerst ein Viertel, dann das Dreifache.`,
+  };
+  return t[P] || `Rechne zuerst ${prozText(100)} aus, dann das ${["", "", "Doppelte", "Dreifache", "Vierfache", "Fünffache", "Sechsfache", "Siebenfache", "Achtfache", "Neunfache"][P / 100]}.`;
+}
+
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Umweg über Hundertstel, Runden, Rechenweg — ohne Ergebnis. */
+function tippsFuer(a) {
+  switch (a.art) {
+    case "zuordnen": return ["Denk an hundert Teile: Wie viele davon sind es?", hinweisZuordnen(a.vorgabe.form, a.optionen[0].form)];
+    case "paare": case "dreier": return ["Schreib jede Karte im Kopf als Hundertstel oder als Prozent.", "Fang mit den einfachen an: ein Halbes, ein Viertel, ein Zehntel."];
+    case "ordnen": return ["Schreib alle Zahlen im Kopf als Prozent.", "Dann vergleichst du nur noch Prozentzahlen: Welche ist die kleinste?"];
+    case "prozentVon": return [...new Set([`Rechne zuerst ${prozText(100)} aus: Teile durch zehn.`, tippProzent(a.P)])];
+    case "prozentSatz": return ["Schreib es als Bruch: der Teil oben, das Ganze unten.", "Erweitere oder kürze den Bruch auf Hundertstel. Die Zahl oben sind dann die Prozent."];
+    case "ueberschlag": return ["Runde beide Zahlen auf schöne Zahlen.", "Welcher einfache Bruch passt dazu: ein Viertel, die Hälfte, drei Viertel …?"];
+    case "ungefaehr": return ["Teile den Zähler durch den Nenner.", `Die Division geht nicht auf. Runde auf ${a.form === "prozent" ? "ganze Prozent" : "Hundertstel"}.`];
+    default: return ["Rechne nach: Zähler durch Nenner.", "Kommt genau diese Zahl heraus, oder musst du runden?"];
+  }
+}
+
+// ---------- Spiel ----------
+
+const STUFENTEXT = {
+  s1: `Zehntel und Halbe: 3/10 = ${dezimalText(0.3)}, mit Streifen.`,
+  s2: `Prozent heisst Hundertstel: 37 % = 37/100 = ${dezimalText(0.37)}.`,
+  s3: `Brücken bauen: ½ = 50 %, ¼ = ${dezimalText(0.25)}, und ordnen (Lehrplan 6. Klasse).`,
+  s4: `Dreier finden: 3/20 = ${dezimalText(0.15)} = 15 %, und vier Zahlen ordnen.`,
+  s5: "Prozent von Beträgen: 25 % von 80 Fr. Und: ⅓ ≈ 33 %.",
+  s6: "Endgegner: Wie viel Prozent sind 12 von 40? Überschlagen und knapp ordnen.",
+};
+
+LS.spiel({
+  id: "prozent-bruecke",
+  einleitung: "Bruch, Dezimalzahl und Prozent sind drei Schreibweisen für dieselbe Menge. Ein Halbes ist dasselbe wie 50 Prozent. Finde, was gleich viel ist, und bau eine Brücke!",
+  hilfe: "Tippe die Karte an, die gleich viel ist, oder tippe die Zahl ein. Beim Brückenbau tippst du in jeder Spalte eine Karte an; sind alle gleich viel, entsteht eine Planke. Nochmals antippen nimmt eine Karte zurück.",
+  anzahl: 8,
+  stufen: STUFENTEXT,
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a));
+    const f = ctx.flaeche;
+    if (a.art === "zuordnen") {
+      const ziel = a.optionen[0].form;
+      const was = { bruch: "Welcher <b>Bruch</b>", dezimal: "Welche <b>Dezimalzahl</b>", prozent: "Welche <b>Prozentzahl</b>", feld: "Welches <b>Hunderterfeld</b>", streifen: "Welcher <b>Streifen</b>" }[ziel];
+      f.append(el("div", { class: "frage", html: `${was} ist gleich viel?` }), el("div", { class: "vorgabe" }, kartenEl(a.vorgabe)));
+      const loesung = `${kartenText(a.vorgabe)} = ${a.richtig}`;
+      LS.auswahl(ctx, {
+        optionen: a.optionen.map(kartenText), richtig: a.richtig, breite: BILD.has(ziel) ? 150 : 110,
+        inhalt: t => kartenEl(a.optionen.find(k => kartenText(k) === t)),
+        hinweis: hinweisZuordnen(a.vorgabe.form, ziel), loesung, lob: `Genau: ${loesung}`,
+      });
+      if (ctx.nr === 0) ctx.sag("Tipp: Denk an hundert Teile. Wie viele davon sind es?");
+    } else if (a.art === "paare" || a.art === "dreier") {
+      bruecke(ctx, a);
+      if (ctx.nr === 0) ctx.sag(a.art === "dreier" ? "Tippe in jeder Spalte eine Karte an, die gleich viel ist wie die anderen zwei. Jeder Dreier ist eine Planke für die Brücke." : "Tippe zwei Karten an, die gleich viel sind: eine links, eine rechts. Jedes Paar ist eine Planke für die Brücke.");
+    } else if (a.art === "ordnen") {
+      f.append(el("div", { class: "frage", html: "Tippe die Zahlen der Grösse nach an — <b>die kleinste zuerst</b>." }));
+      const texte = a.reihe.map(kartenText);
+      LS.reihenfolge(ctx, {
+        reihe: texte, pfeile: true, breite: 100,
+        inhalt: t => kartenEl(a.reihe[texte.indexOf(t)]),
+        hinweis: HINWEIS_ORDNEN, loesung: texte.join(" < "),
+      });
+      if (ctx.nr === 0) ctx.sag("Tipp: Schreib alle Zahlen im Kopf als Prozent. Dann siehst du, welche die kleinste ist.");
+    } else if (a.art === "prozentVon") {
+      const ding = DINGE[a.ding];
+      const ganzesText = a.geld ? LS.geldText(a.ganzes * 100) : `${zahlText(a.ganzes)} ${ding.dativ}`;
+      const ergebnisText = a.geld ? LS.geldText(a.ergebnis) : `${zahlText(a.ergebnis)} ${ding.plural}`;
+      f.append(el("div", { class: "frage", text: "Wie viel ist das?" }), el("div", { class: "vorgabe" }, el("span", { class: "pb-zahl", text: `${prozText(a.P)} von ${ganzesText}` })));
+      eintippen(ctx, {
+        wert: a.geld ? a.ergebnis / 100 : a.ergebnis, geld: a.geld, einheit: a.geld ? "Fr." : ding.plural,
+        hinweis: tippProzent(a.P), loesung: `${prozText(a.P)} von ${ganzesText} = ${ergebnisText}`,
+        stimmt: w => (a.geld ? Math.round(w * 100) === a.ergebnis : w === a.ergebnis),
+      });
+      if (ctx.nr === 0) ctx.sag(`Tipp: ${prozText(100)} ist ein Zehntel, ${prozText(500)} die Hälfte. Von da aus kommst du weiter.`);
+    } else if (a.art === "prozentSatz") {
+      const ding = DINGE[a.ding];
+      f.append(el("div", { class: "frage", text: "Wie viel Prozent sind das?" }), el("div", { class: "vorgabe" }, el("span", { class: "pb-zahl", text: `${zahlText(a.teil)} von ${zahlText(a.ganzes)} ${ding.dativ}` })));
+      eintippen(ctx, {
+        wert: a.ergebnis, einheit: "%",
+        hinweis: "Wie viele wären es von hundert? Schreib es als Bruch und erweitere oder kürze auf Hundertstel.",
+        loesung: `${zahlText(a.teil)} von ${zahlText(a.ganzes)} ${ding.dativ} = ${prozText(a.ergebnis * 10)}`, stimmt: w => w === a.ergebnis,
+      });
+      if (ctx.nr === 0) ctx.sag("Tipp: 12 von 40 ist der Bruch 12/40. Wie viele Hundertstel sind das?");
+    } else if (a.art === "ueberschlag") {
+      f.append(el("div", { class: "frage", text: "Etwa wie viel Prozent sind das?" }), el("div", { class: "vorgabe" }, el("span", { class: "pb-zahl", text: `${zahlText(a.teil)} von ${zahlText(a.ganzes)}` })));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.ergebnis, breite: 110, inhalt: q => `≈ ${prozText(q * 10)}`,
+        hinweis: "Runde beide Zahlen auf schöne Zahlen. Welcher einfache Bruch passt dazu: ein Viertel, die Hälfte, drei Viertel …?",
+        loesung: `${zahlText(a.teil)} von ${zahlText(a.ganzes)} ≈ ${prozText(a.ergebnis * 10)}`,
+      });
+      if (ctx.nr === 0) ctx.sag("Tipp: Überschlagen heisst runden. 198 von 400 ist etwa 200 von 400, also die Hälfte.");
+    } else if (a.art === "ungefaehr") {
+      f.append(el("div", { class: "frage", html: `Welche ${a.form === "prozent" ? "Prozentzahl" : "Dezimalzahl"} passt <b>ungefähr</b>?` }),
+        el("div", { class: "vorgabe" }, bruchEl(a.w[0], a.w[1]), el("span", { class: "pb-zahl", text: "≈ ?" })));
+      const loesung = `${a.w[0]}/${a.w[1]} ≈ ${zahlInForm(a.form, a.richtig)}`;
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: 110, inhalt: pm => zahlInForm(a.form, pm),
+        hinweis: `Teile den Zähler durch den Nenner. Die Division geht nicht auf. Runde auf ${a.form === "prozent" ? "ganze Prozent" : "Hundertstel"}.`,
+        loesung, lob: `Genau: ${loesung}`,
+      });
+      if (ctx.nr === 0) ctx.sag("Das Zeichen ≈ heisst „ungefähr gleich“. Manche Brüche gehen als Dezimalzahl nicht auf.");
+    } else if (a.art === "gleichOder") {
+      ctx.serie("antwort", a.loesung);
+      const luecke = el("span", { class: "pb-zahl", text: "?" });
+      f.append(el("div", { class: "frage", html: "Genau <b>gleich</b> (=) oder nur <b>ungefähr</b> (≈)?" }),
+        el("div", { class: "vorgabe" }, bruchEl(a.w[0], a.w[1]), luecke, el("span", { class: "pb-zahl", text: zahlInForm(a.form, a.pm) })));
+      LS.auswahl(ctx, {
+        optionen: ["=", "≈"], richtig: a.loesung, breite: 110,
+        inhalt: z => ({ text: z, klein: z === "=" ? "genau gleich" : "ungefähr" }),
+        hinweis: "Rechne nach: Zähler durch Nenner. Kommt genau diese Zahl heraus, oder musst du runden?",
+        loesung: `${a.w[0]}/${a.w[1]} ${a.loesung} ${zahlInForm(a.form, a.pm)}`, beiRichtig: () => { luecke.textContent = a.loesung; },
+      });
+      if (ctx.nr === 0) ctx.sag("Das Zeichen ≈ heisst „ungefähr gleich“: Die Zahl ist gerundet.");
+    }
+  },
+});
+
+/** Zahl eintippen (Prozent von, Prozentsatz). */
+function eintippen(ctx, o) {
+  ctx.loesung(o.loesung);
+  ctx.schritte(o.geld ? LS.tippSchritte(o.wert) : LS.tippSchritte(o.wert));
+  const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort" });
+  ctx.flaeche.append(el("div", { class: "pb-eingabe" }, anzeige, el("span", { class: "pb-einheit", text: o.einheit })));
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 4, dezimal: !!o.geld, nachkomma: 2,
+    onOk(w) {
+      if (o.stimmt(w)) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${o.loesung}`); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(o.hinweis, o.loesung);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(tasten.element);
+}
+
+/**
+ * Brücke bauen: je Spalte eine Karte antippen; sind alle gewählten gleich viel, wird daraus eine Planke.
+ * Eine Karte aus einer anderen Zeile ist ein Fehlversuch. Nochmals antippen nimmt die Wahl zurück.
+ */
+function bruecke(ctx, a) {
+  const K = a.spalten.length, R = a.zeilen.length;
+  const texte = a.zeilen.map(z => z.map(kartenText));
+  const loesung = texte.map(z => z.join(" = ")).join(" · ");
+  ctx.loesung(loesung);
+  ctx.schritte(K * R);
+  ctx.kennung(texte.map(z => z.join("=")).sort().join("|"));
+  const f = ctx.flaeche;
+  const planken = Array.from({ length: R }, () => el("div", { class: "pb-planke", text: "?" }));
+  f.append(el("div", { class: "frage", html: K === 3 ? "Finde je <b>drei Karten</b>, die gleich viel sind." : "Finde je <b>zwei Karten</b>, die gleich viel sind." }),
+    el("div", { class: "pb-bruecke", "aria-label": "Brücke" }, ...planken), el("div", { class: "pb-fluss" }));
+  const ufer = el("div", { class: "pb-ufer" });
+  ufer.style.setProperty("--sp", String(K));
+  const gewaehlt = Array(K).fill(null);
+  let fertig = 0;
+  for (let j = 0; j < K; j++) {
+    const spalte = el("div", { class: "pb-spalte" }, el("div", { class: "pb-kopf", text: a.spalten[j] }));
+    for (const r of mische([...Array(R).keys()])) {
+      const k = el("button", { type: "button", class: "pb-karte", "aria-label": texte[r][j] }, kartenEl(a.zeilen[r][j]));
+      k.dataset.zeile = String(r);
+      k.addEventListener("click", () => {
+        if (ctx.vorbei() || k.classList.contains("fertig")) return;
+        k.classList.remove("daneben");
+        if (gewaehlt[j] === k) { k.classList.remove("aktiv"); gewaehlt[j] = null; return; }
+        if (gewaehlt[j]) gewaehlt[j].classList.remove("aktiv");
+        gewaehlt[j] = k;
+        k.classList.add("aktiv");
+        const wahl = gewaehlt.filter(Boolean);
+        if (wahl.some(b => b.dataset.zeile !== k.dataset.zeile)) {
+          k.classList.remove("aktiv");
+          void k.offsetWidth;
+          k.classList.add("daneben");
+          gewaehlt[j] = null;
+          ctx.falsch(HINWEIS_PAAR, loesung);
+          return;
+        }
+        LS.ton("tipp");
+        if (wahl.length < K) return;
+        for (const b of wahl) { b.classList.remove("aktiv"); b.classList.add("fertig"); }
+        gewaehlt.fill(null);
+        const planke = planken[fertig++];
+        planke.textContent = texte[r].filter((_, i) => !BILD.has(a.zeilen[r][i].form)).join(" = ") + " ✓";
+        planke.classList.add("gelegt");
+        if (fertig === R) ctx.richtig("Die Brücke steht! 🌉");
+      });
+      spalte.append(k);
+    }
+    ufer.append(spalte);
+  }
+  f.append(ufer);
+}
+</script>
+</body>
+</html>

@@ -378,8 +378,34 @@ function planZeichnen(a, onTipp) {
   return box;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Merkspruch, wo Norden ist, Feld für Feld zählen —
+ * nie die gesuchte Richtung, der Weg oder das Ziel.
+ */
+const MERKSPRUCH = "Beim N beginnen und im Uhrzeigersinn weiter: Nie Ohne Seife Waschen.";
+function tippsFuer(a) {
+  if (a.art === "zeigen") return ["Such zuerst den Buchstaben N auf der Rose.",
+    a.ziel % 2 ? "Zwei Richtungen zusammen: Der Arm liegt genau zwischen den beiden." : MERKSPRUCH];
+  if (a.art === "lesen") return ["Such zuerst den Buchstaben N auf der Rose.", MERKSPRUCH];
+  if (a.art === "buchstabe") return a.ziel % 2
+    ? ["Zwei Buchstaben: Der erste steht für Norden oder Süden, der zweite für Osten oder Westen.", MERKSPRUCH]
+    : ["Jede Himmelsrichtung beginnt mit ihrem Buchstaben.", MERKSPRUCH];
+  if (a.art === "drehen") return ["Nach rechts drehen heisst im Uhrzeigersinn: N, O, S, W.",
+    "Eine Vierteldrehung geht eine Richtung weiter, eine halbe Drehung zwei. Mach die Drehungen nacheinander."];
+  const karte = a.k > 0
+    ? "Achtung, die Karte ist gedreht: Das N ist dort, wohin der Nordpfeil zeigt. Dreh die Karte in Gedanken, bis der Pfeil nach oben zeigt."
+    : "Auf der Karte ist Norden oben, Osten rechts, Süden unten und Westen links.";
+  if (a.art === "richtung") return [`Stell dich in Gedanken zu ${ORTE[a.plan[a.start].o][3]}: Liegt das Ziel oben, rechts, unten oder links?`,
+    karte + (a.dirs.length > 4 ? " Liegt es schräg, nimm zwei Richtungen zusammen." : "")];
+  if (a.art === "beschreiben") return ["Zähle vom Start aus: Wie viele Felder nach rechts oder links? Wie viele nach oben oder unten?", karte];
+  if (a.art === "weg") return ["Starte beim blauen Rahmen und zähle Feld für Feld.",
+    karte + (a.schritte.some(([ri]) => ri % 2) ? " Ein schräger Schritt geht zugleich ein Feld nach oben oder unten und eines zur Seite." : "")];
+  return ["Such zuerst den Start mit dem blauen Rahmen.", `Geh genau ein Feld weiter. ${karte}`];
+}
+
 LS.spiel({
   id: "kompass",
+  hilfe: "Auf der Kompassrose tippst du auf den richtigen Arm oder wählst den Namen der Richtung. Auf dem Plan zeigt der blaue Rahmen den Start; dort tippst du auf das Feld, wo du ankommst, oder wählst eine Antwort. Ist die Karte gedreht, schau auf den Nordpfeil.",
   einleitung: "Wo ist Norden? Mit dem Kompass findest du dich überall zurecht — auf der Kompassrose und auf dem Dorfplan.",
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries({
@@ -395,6 +421,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     const p = STUFE[ctx.stufe];
     if (new Set(p.arten).size > 1) ctx.serie("art", a.art); // ohne freie Orte bleibt manchmal nur eine Art
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const f = ctx.flaeche;
     const R = RICHTUNGEN;
     const merkspruch = "Beim N beginnen und im Uhrzeigersinn weiter: Nie Ohne Seife Waschen.";
@@ -470,7 +497,7 @@ LS.spiel({
         LS.auswahl(ctx, {
           optionen: a.optionen, richtig: a.loesung, breite: a.dirs.length > 4 ? 120 : 130,
           hinweis: gedreht ? kartenHinweis
-            : `Stell dich in Gedanken auf ${aNom}: Liegt das Ziel oben, rechts, unten oder links?${a.dirs.length > 4 ? " Liegt es schräg, nimm zwei Richtungen zusammen." : ""} ${merkspruch}`,
+            : `Stell dich in Gedanken zu ${aDat}: Liegt das Ziel oben, rechts, unten oder links?${a.dirs.length > 4 ? " Liegt es schräg, nimm zwei Richtungen zusammen." : ""} ${merkspruch}`,
           loesung: `${gross(bNom)} liegt von ${aDat} aus im ${a.loesung}.`,
         });
       } else {
@@ -500,7 +527,7 @@ LS.spiel({
       feld.classList.add("daneben");
       const schraeg = a.art === "weg" && a.schritte.some(([ri]) => ri % 2) ? " Ein schräger Schritt geht zugleich ein Feld nach oben oder unten und eines zur Seite." : "";
       ctx.falsch(a.art === "weg" ? `Starte bei ${aDat} ${aBild} und zähle Feld für Feld. ${kartenHinweis}${schraeg}`
-        : `Such zuerst ${aNom} ${aBild} und geh ein Feld weiter. ${kartenHinweis}`, loesung);
+        : `Fang bei ${aDat} ${aBild} an und geh ein Feld weiter. ${kartenHinweis}`, loesung);
       if (ctx.vorbei()) { fertig = true; zeigeLoesung(); }
     });
     plan.felder[A.c + "," + A.r].classList.add("start");

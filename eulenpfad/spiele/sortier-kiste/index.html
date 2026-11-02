@@ -284,9 +284,20 @@ function zaehlKnoepfe(ctx, a, frage, loesung, lob) {
   ctx.flaeche.append(box);
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): worauf schauen, wie zählen — kurz, nie Kiste oder Zahl. */
+function tippsFuer(a) {
+  if (a.art === "regel") return [HINWEIS.regel, "Ist es bei allen in einer Kiste die Farbe, die Form oder die Grösse?"];
+  if (a.art === "weiter") return [HINWEIS.regel, "Was hat deine Form auch? Such die Kiste mit dem Gleichen."];
+  return [HINWEIS[a.regel], ...(a.zaehlen ? [HINWEIS[a.zaehlen]] : [])];
+}
+
 LS.spiel({
   id: "sortier-kiste",
   einleitung: "Hilf beim Aufräumen! Jede Form kommt in die passende Kiste. Schau genau: Farbe, Form oder Grösse?",
+  hilfe: stufe => (stufe === "s6"
+    ? "Schau in die grauen Kisten. Tippe an, wonach sortiert wurde — oder in welche Kiste die neue Form gehört."
+    : "Oben liegt eine Form. Tippe auf die Kiste, in die sie gehört. Dann kommt die nächste Form."
+      + (STUFE[stufe]?.zaehlen ? ` Am Schluss zählst du und tippst auf die passende ${STUFE[stufe].zaehlen === "strich" ? "Strichliste" : "Zahl"}.` : "")),
   anzahl: 6,
   stufen: {
     s1: "Nach Farbe sortieren: zwei Kisten.",
@@ -301,6 +312,7 @@ LS.spiel({
     if (ctx.nr === 0) ctx.sag(ctx.stufe === "s6" ? "Schau in die Kisten: Was ist darin gleich?" : "Schau dir jede Form genau an und tipp auf die passende Kiste.");
     const a = aufgabeErzeugen(ctx.stufe);
     const st = STUFE[ctx.stufe];
+    ctx.tipp(tippsFuer(a));
     const lob = waehle(LOB);
     ctx.flaeche.classList.add("sortier");
 

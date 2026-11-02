@@ -134,8 +134,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if not text:
                 return self.antwort(400, {"fehler": "Bemerkung ist leer"})
             liste = lies_bemerkungen()
+            # Fehlermeldung eines Kindes (Kennung „meldung“, LERN_Session9): nur einmal aufnehmen.
+            schon = next((b for b in liste if daten.get("meldung") and b.get("meldung") == daten.get("meldung")), None)
+            if schon:
+                return self.antwort(200, schon)
             eintrag = {"nr": max((b["nr"] for b in liste), default=0) + 1, "zeit": jetzt, "status": "offen", "text": text[:2000]}
-            for feld in ("von", "spiel", "stufe", "liste", "eintrag", "aufgabe", "seite"):
+            for feld in ("von", "spiel", "stufe", "liste", "eintrag", "aufgabe", "seite", "meldung"):
                 if daten.get(feld):
                     eintrag[feld] = str(daten[feld])[:500]
             liste.append(eintrag)

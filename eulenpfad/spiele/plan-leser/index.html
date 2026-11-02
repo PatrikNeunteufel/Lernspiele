@@ -399,8 +399,30 @@ const HINWEIS = {
   beschreiben: "Geh den gestrichelten Weg Stück für Stück. Zähle die Felder und schau, wohin du dich drehst.",
 };
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Legende, Lagewort, Massstab — ohne Feld oder Ergebnis. */
+const LAGE_TIPP = {
+  "rechts neben": "Rechts neben heisst: im Feld gleich rechts davon, in derselben Reihe.",
+  "links neben": "Links neben heisst: im Feld gleich links davon, in derselben Reihe.",
+  "auf dem Plan direkt über": "Über heisst auf dem Plan: im Feld gleich darüber, näher beim oberen Rand.",
+  "auf dem Plan direkt unter": "Unter heisst auf dem Plan: im Feld gleich darunter, näher beim unteren Rand.",
+  zwischen: "Zwischen heisst: Such beide Zeichen. Was liegt genau in der Mitte auf der Linie zwischen ihnen?",
+};
+function tippsFuer(a) {
+  switch (a.art) {
+    case "zeichen": return ["Schau in die Legende neben dem Plan.", HINWEIS.zeichen];
+    case "tippen": return ["Schau zuerst in die Legende: Wie sieht das Zeichen aus?", "Such dann genau dieses Zeichen auf dem Plan."];
+    case "zaehlen": return ["Schau in der Legende, wie das Zeichen aussieht.", HINWEIS.zaehlen];
+    case "lage": return ["Finde zuerst das Zeichen aus der Frage auf dem Plan.", LAGE_TIPP[a.wort]];
+    case "strecke": case "weglaenge": return ["Schau beim Massstab, wie lang ein Feld ist.",
+      `Zähle die Schritte von Feld zu Feld${a.art === "weglaenge" ? " auf dem gestrichelten Weg" : ""} und rechne: Schritte mal Massstab.`];
+    case "abbiegen": return ["Stell dir vor, du gehst selbst auf dem gestrichelten Weg.", "Dreh das Gerät so, dass du in Gehrichtung schaust. Wohin zeigt der Weg an der Ecke?"];
+    default: return ["Fahre den Weg Stück für Stück mit dem Finger nach.", "Zähle bei jedem Stück die Felder und merk dir, wohin du abbiegst. Vergleiche dann mit jeder Beschreibung."];
+  }
+}
+
 LS.spiel({
   id: ID,
+  hilfe: "Schau dir den Plan und die Legende an und tippe die passende Antwort an. Heisst es „Tippe auf dem Plan“, tippst du direkt auf das Feld im Plan.",
   einleitung: "Ein Plan zeigt alles von oben. Die Legende verrät, was die Zeichen bedeuten. Kannst du den Plan lesen?",
   anzahl: 8,
   stufen: STUFEN,
@@ -409,6 +431,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     ctx.serie("art", a.art);
     if (a.art === "abbiegen") ctx.serie("antwort", a.richtig);
+    ctx.tipp(tippsFuer(a));
     const p = a.plan;
     const name = d => ding(p.liste, d)[0];
     const dativ = d => ding(p.liste, d)[1];

@@ -11,7 +11,7 @@
 LS.abgleich = (() => {
   const PRAEFIX = "lernspiele-sync-";
   // Was abgeglichen wird; alles andere (Anmeldung, Filter, Gerät) bleibt auf dem Gerät.
-  const GETEILT = new Set(["profile", "protokoll", "rekorde", "freigabe", "geloescht"]);
+  const GETEILT = new Set(["profile", "protokoll", "rekorde", "freigabe", "geloescht", "meldungen"]);
   const kannOrdner = typeof window !== "undefined" && typeof window.showDirectoryPicker === "function"
     && typeof indexedDB !== "undefined";
   // Im Zufallsmix laufen die Spiele im iframe; dort gleicht nur die Mix-Seite selbst ab.
@@ -77,7 +77,7 @@ LS.abgleich = (() => {
     if (!h) return { status: "kein-ordner" };
     try {
       if (!(await erlaubt(h, fragen))) return { status: "keine-erlaubnis" };
-      const neu = { runden: 0, kinder: 0, rekorde: 0, profile: 0, freigabe: false };
+      const neu = { runden: 0, kinder: 0, rekorde: 0, profile: 0, meldungen: 0, freigabe: false };
       const geraete = [];
       still = true;
       try {
@@ -86,7 +86,7 @@ LS.abgleich = (() => {
           try {
             const daten = JSON.parse(await (await eintrag.getFile()).text());
             const r = LS.zusammenfuehren(daten);
-            for (const k of ["runden", "kinder", "rekorde", "profile"]) neu[k] += r[k];
+            for (const k of ["runden", "kinder", "rekorde", "profile", "meldungen"]) neu[k] += r[k] || 0;
             neu.freigabe ||= r.freigabe;
             geraete.push({ id: daten.geraet?.id, name: daten.geraet?.name || "", gesichert: daten.gesichert });
           } catch { geraete.push({ datei: name, fehler: true }); }
@@ -94,7 +94,7 @@ LS.abgleich = (() => {
       } finally { still = false; }
       await schreibeEigene(h);
       LS.schreibe("abgleichStand", { zuletzt: new Date().toISOString(), ordner: h.name, geraete });
-      if (neu.runden || neu.kinder || neu.rekorde || neu.profile || neu.freigabe) {
+      if (neu.runden || neu.kinder || neu.rekorde || neu.profile || neu.meldungen || neu.freigabe) {
         dispatchEvent(new CustomEvent("lernspiele:abgeglichen", { detail: neu }));
       }
       return { status: "ok", neu, geraete };
@@ -161,6 +161,7 @@ LS.abgleich = (() => {
       r.rekorde && `${r.rekorde} Endlos-Rekord${r.rekorde === 1 ? "" : "e"}`,
       r.kinder && `${r.kinder} neue${r.kinder === 1 ? "s Kind" : " Kinder"}`,
       r.profile && `${r.profile} geänderte${r.profile === 1 ? "s Profil" : " Profile"}`,
+      r.meldungen && `${r.meldungen} neue oder geänderte Fehlermeldung${r.meldungen === 1 ? "" : "en"}`,
       r.freigabe && "die Freigaben",
     ].filter(Boolean);
     return teile.length ? `Dazugekommen: ${teile.join(", ")}.` : "Nichts Neues — alles war schon da.";

@@ -364,10 +364,37 @@ function satzBauen(ctx, a, p, luecken, loesung) {
 
 // ---------- Spiel ----------
 
+// Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Proben und Regeln, mit denen man Verb, Personalform,
+// Infinitiv und Fragen findet — ohne ein Wort des Satzes oder eine Verbform zu nennen (auch nicht „hat“,
+// „ist“ oder „steht“: sie können selbst die Lösung sein).
+function tippsFuer(a, p) {
+  if (a.art === "finden") return ["Frag dich: Was tut jemand, oder was geschieht?",
+    "Im Aussagesatz kommt das Verb an die zweite Stelle, direkt nach dem ersten Satzglied."];
+  if (a.art === "zeitform") return a.frage === "personalform"
+    ? ["Setz eine andere Person ein (ich, du, wir): Welches Wort verändert sich mit?",
+      a.zeit === "perfekt" ? "Im Perfekt besteht das Verb aus zwei Teilen. Nur einer davon passt sich der Person an."
+        : "Die Personalform kommt im Aussagesatz an die zweite Stelle."]
+    : ["Der Infinitiv ist die Grundform, wie im Wörterbuch.", "Er endet auf -en oder -n und verrät nicht, wer etwas tut.",
+      "Probe: Setz das Verb hinter „Ich will …“ — so heisst der Infinitiv."];
+  const t = ["Bau mit dem Verb einen kurzen Satz. Was fehlt noch, damit er fertig ist?",
+    "Ohne „Wer oder was?“ geht kein Satz. Die anderen Fragen braucht nicht jedes Verb — nur, wenn der Satz sonst nicht fertig ist."];
+  const satz = ["Beim Satz helfen die Begleiter: der, den, dem zeigen, welche Frage passt."];
+  if (p.angebot.includes("wo")) satz.push("Wo? antwortet mit dem Ort, Wohin? mit dem Ziel.");
+  if (p.falsche) satz.push("Nicht jede Karte gehört in den Satz.");
+  t.push(satz.join(" "));
+  return t;
+}
+const HILFE = {
+  finden: "Tippe im Satz das Wort an, das das Verb ist.",
+  zeitform: "Tippe im Satz die Personalform an — oder tippe den Infinitiv des Verbs an.",
+  faecher: "Tippe im Fächer die Fragen an, die das Verb braucht (nochmal tippen nimmt sie weg), dann „Prüfen ✓“. Danach tippst du für jede Lücke im Satz die passende Wortkarte an.",
+};
+
 const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => angeboten(s)));
 
 LS.spiel({
   id: ID,
+  hilfe: stufe => HILFE[STUFE[stufe]?.art] || HILFE.faecher,
   einleitung: "Jedes Verb braucht seine Fragen: geben braucht Wer? Wem? Was? — wie ein Fächer, der aufgeht. Finde die Fragen und baue dann den Satz.",
   anzahl: 8,
   stufen: nurAngebotene({
@@ -387,6 +414,7 @@ LS.spiel({
       faecher: "Tippe die Fragen an, die das Verb braucht. Dann „Prüfen“ — und der Satz kommt.",
     }[p.art]);
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.tipp(tippsFuer(a, p));
     if (a.art === "finden") finden(ctx, a);
     else if (a.art === "zeitform") zeitform(ctx, a);
     else faecher(ctx, a, p);

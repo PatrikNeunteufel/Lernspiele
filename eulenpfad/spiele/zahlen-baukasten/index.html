@@ -128,6 +128,7 @@ function pruefeAufgabe(a, stufe) {
 LS.spiel({
   id: "zahlen-baukasten",
   einleitung: "Hallo! Ich bin Eule Zahlina. Setz die Bausteine zu einer Zahl zusammen. Tipp auf einen Baustein, dann verrate ich dir, wie viel er wert ist.",
+  hilfe: "Die Bausteine zeigen, wie viele Einer, Zehner, Hunderter … die Zahl hat. Tipp die ganze Zahl ein. Tippst du einen Baustein an, sagt die Eule, wie viel er wert ist; die Tabelle unter der Anzeige zeigt, wo deine Ziffern landen.",
   anzahl: 8,
   stufen: {
     s1: "Mit Hundertern — Achtung, leere Stellen: 4 H + 2 E",
@@ -144,6 +145,14 @@ LS.spiel({
     const loesungText = `${teile.map(t => `${t.ziffer} ${t.st.k}`).join(" + ")} = ${zahlText(loesung)}`;
     ctx.loesung(loesungText);
     ctx.schritte(LS.tippSchritte(loesung));
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): grösste Stelle, leere Stellen, Bündeln — nie die Zahl.
+    ctx.tipp([
+      "Such den Baustein mit der grössten Stelle. Wie viele Stellen hat dann deine Zahl?",
+      "Jede Ziffer kommt an ihre Stelle. Stellen ohne Baustein bekommen eine 0 — die Tabelle unter der Anzeige hilft dir.",
+      teile.some(t => t.ziffer > 9)
+        ? "Ein Baustein hat mehr als 9: Zehn davon sind einer der nächsten Stelle, zum Beispiel 10 Z = 1 H."
+        : "Weisst du nicht, was ein Baustein wert ist? Tipp ihn an.",
+    ]);
 
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl bauen diese Bausteine?" }));
 

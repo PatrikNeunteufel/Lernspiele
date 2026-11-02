@@ -249,6 +249,7 @@ const luecke = () => el("span", { class: "luecke", text: "?" });
 LS.spiel({
   id: "preis-tabelle",
   einleitung: "Willkommen im Laden! In der Preistabelle fehlen Zahlen. Findest du heraus, was hineingehört?",
+  hilfe: "Lies die Tabelle und die Frage darunter. Tippe die fehlende Zahl ein; sie gehört ins Feld mit dem ?. Steht ein Preis falsch in der Tabelle, tippst du ihn direkt an.",
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries({
     s1: "Folgen in Tabellen weiterführen: jede Woche 3 Fr. mehr.",
@@ -275,6 +276,8 @@ LS.spiel({
       let fertig = false;
       const loesungText = satz(`${a.anzahl[a.luecke]} × ${betrag(a.e)} = ${betrag(a.richtigerPreis)}, nicht ${betrag(a.loesung)}.`);
       ctx.loesung?.(loesungText);
+      // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Vorgehen, ohne die falsche Zeile zu nennen.
+      ctx.tipp(["Finde zuerst heraus, was 1 Stück kostet.", "Rechne jede Zeile nach: Anzahl mal Preis für 1 Stück."]);
       f.append(wertetabelle(["Anzahl", "Preis"], a.anzahl, (i, s) => {
         if (s === 0) return String(a.anzahl[i]);
         const k = el("button", { type: "button", class: "zelle", text: betrag(a.preise[i]) });
@@ -359,6 +362,9 @@ LS.spiel({
     f.append(el("div", { class: "frage", text: satz(frage) }));
     loesungText = satz(loesungText);
     ctx.loesung?.(loesungText);
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst die vollen Zeilen anschauen, dann der Rechenweg
+    // (die Hinweise nach einem Fehler nennen nur den Weg, keine Zahl).
+    ctx.tipp(["Schau zuerst die Zeilen an, die schon ganz ausgefüllt sind.", hinweis]);
 
     // Eingabe: Betrag (Franken oder Rappen) oder Anzahl
     const istGeld = a.art === "folge" ? FOLGEN[a.f][3] : a.nach !== "anzahl";

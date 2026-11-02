@@ -426,11 +426,35 @@ const HINWEIS_PFEILE = "Folge den Pfeilen. Wohin fliesst das Blut von hier aus?"
 const HINWEIS_HERZ = "Im Herzen fliesst das Blut immer zuerst in einen Vorhof und dann in die Kammer darunter. Folge den Pfeilen.";
 const kreisName = k => (k === "lunge" ? "Lungenkreislauf" : "Körperkreislauf");
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Regel und Blickrichtung, nie die Station oder Antwort. */
+const VON_VORNE = "Das Herz ist von vorne gezeichnet: Seine rechte Hälfte ist im Bild links.";
+const ARTERIE_VENE = "Arterien führen vom Herzen weg, Venen zum Herzen hin.";
+function tippsFuer(a, stufe) {
+  switch (a.art) {
+    case "ort": return ["Denk an deinen eigenen Körper: im Kopf, in der Brust oder im Bauch?", "Du schaust die Person von vorne an: Ihre linke Seite ist im Bild rechts."];
+    case "frage": return ["Lies die Frage und alle drei Antworten genau.", KREISLAUF_TIPPS[KREISLAUF_FRAGEN[a.frage][1]]];
+    case "rund": case "naechste": case "weg":
+      if (stufe === "s2") return ["Folge den Pfeilen.", ARTERIE_VENE];
+      if (stufe === "s6") return [HINWEIS_PFEILE, HINWEIS_HERZ];
+      return [HINWEIS_PFEILE, `${VON_VORNE} Aus jeder Herzhälfte geht es in einen anderen Kreislauf.`];
+    case "kreislauf": return ["Folge den Pfeilen von der markierten Stelle aus: Wo war das Blut, bevor es zum Herzen zurückkommt?",
+      "Der Lungenkreislauf führt vom Herzen zur Lunge und zurück, der Körperkreislauf vom Herzen in den Körper und zurück."];
+    case "gefaess": return [ARTERIE_VENE, "Schau auf den Pfeil: Fliesst das Blut zum Herzen hin oder vom Herzen weg?"];
+    case "sauerstoff": return ["In der Lunge bekommt das Blut Sauerstoff, im Körper gibt es ihn ab.", "Folge den Pfeilen zurück: Kommt das Blut gerade aus der Lunge oder aus dem Körper?"];
+    case "wo": return ["Lies die Frage genau: Geht es um Arterie oder Vene, um Lunge oder Körper?",
+      /Herzhälfte/.test(WO[a.wo].frage) ? `${VON_VORNE} Folge den Pfeilen aus jeder Hälfte heraus.` : "Schau auf die Pfeile: Wo kommt das Blut gerade her, und wohin fliesst es?"];
+  }
+  return [];
+}
+
 // Zuletzt gezeichnete Aufgabe (für Prüfskripte und die Entwickler-Leiste).
 let gezeigt = null;
 
 LS.spiel({
   id: "blutkreislauf-lotse",
+  hilfe: stufe => (stufe === "s1" ? "Tippe im Körperbild auf das Organ, nach dem gefragt wird, oder tippe die passende Antwort an."
+    : stufe === "s5" ? "Lies die Frage und tippe die passende Antwort an."
+    : "Lotse das Blutkörperchen: Tippe im Bild Station für Station an, wohin es fliesst. Ist etwas gelb markiert, tippst du unten die passende Antwort an."),
   einleitung: "Dein Herz pumpt das Blut ohne Pause durch den Körper und durch die Lunge. Lotse ein Blutkörperchen auf seinem Weg!",
   anzahl: 8,
   stufen: nurMoegliche({
@@ -454,6 +478,7 @@ LS.spiel({
     }[ctx.stufe]);
     const a = aufgabeErzeugen(ctx.stufe);
     gezeigt = a;
+    ctx.tipp(tippsFuer(a, ctx.stufe)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (artenIn(ctx.stufe).length > 1) ctx.serie("art", a.art);
     const f = ctx.flaeche;
 

@@ -330,8 +330,27 @@ function mitEigenschaft(d, merkmal) {
   return `${art} ${adj}e ${rest.join(" ")}`;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): ganz kurz (Kindergarten), aus HINWEIS — die
+ * Antworten sind Bilder, ein Tipp zeigt nie auf eines.
+ */
+function tippsFuer(a) {
+  const W = MERKMAL[a.merkmal] || {};
+  if (a.art === "vergleich") return ["Schau beide Bilder genau an.", HINWEIS[a.merkmal]];
+  if (a.art === "gegenteil") return a.merkmal === "vorher"
+    ? ["Denk an die Reihenfolge: Was kommt zuerst, was danach?", HINWEIS.vorher]
+    : [`Gesucht ist ein Bild, das ${a.seite === "a" ? W.b : W.a} ist.`, HINWEIS[a.merkmal]];
+  if (a.art === "steigerung") return ["Vergleiche zuerst zwei Bilder.", "Das Gewinnerbild vergleichst du dann mit dem nächsten."];
+  if (a.art === "ordnen") return [`Such zuerst das ${gross1(ohneN(a.frage === "b" ? W.bs : W.as))}.`, HINWEIS.ordnen];
+  return a.frage === "a" ? ["Auf jeder Wippe ist das schwerere Paket unten.", "Such das Paket, das nie oben ist."]
+    : ["Auf jeder Wippe ist das leichtere Paket oben.", "Such das Paket, das nie unten ist."];
+}
+
 LS.spiel({
   id: SPIEL_ID,
+  hilfe: stufe => (stufe === "s6" ? "Schau auf die Wippen: Das schwerere Paket ist immer unten. Dann tipp auf das gesuchte Paket."
+    : stufe === "s5" ? "Hör die Frage und tipp die Bilder der Reihe nach an."
+      : "Hör die Frage und tipp auf das passende Bild. Wenn es stimmt, kippt die Wippe."),
   einleitung: "Gross oder klein, schwer oder leicht? Hör die Frage und tipp auf das passende Bild. Die Wippe zeigt es dir!",
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries({
@@ -349,6 +368,7 @@ LS.spiel({
     const lob = waehle(LOB);
     const W = MERKMAL[a.merkmal] || {};
     ctx.serie("frage", a.frage || a.seite);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
 
     if (a.art === "vergleich") {
       ctx.kennung(`v|${schluessel(a.a)}|${schluessel(a.b)}|${a.frage}`);

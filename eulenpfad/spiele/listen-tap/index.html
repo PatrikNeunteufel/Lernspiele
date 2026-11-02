@@ -193,9 +193,26 @@ function bildInhalt(a, wert) {
   return szene;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): worauf beim Hören achten — nie das gehörte Wort.
+ * Die Ortswörter stehen alle zusammen da, also verrät die Liste keinen Satz.
+ */
+function tippsFuer(a) {
+  if (a.art === "wo") return [
+    "Hör zuerst nur auf das Tier. Welches Tier ist es?",
+    "Dann das Ortswort: on = auf, under = unter, in = in, next to = neben.",
+  ];
+  if (a.art === "anweisung") return [
+    "Der Satz hat zwei wichtige Wörter: eine Farbe und eine Form.",
+    "Form: circle = Kreis, square = Quadrat, heart = Herz. Welche Bilder haben die Farbe, die du hörst?",
+  ];
+  return ["Hör mit 🔊 noch einmal und sprich das Wort leise nach.", "Klingt das Wort wie ein deutsches Wort, das du kennst?"];
+}
+
 const SPIEL = {
   id: ID,
   einleitung: "Listen! Hör gut zu und tipp auf das richtige Bild. Mit 🔊 hörst du es nochmal.",
+  hilfe: "Die Eule sagt etwas auf Englisch. Tippe auf das Bild, das dazu passt. Mit „🔊 nochmal“ hörst du es so oft du willst.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -203,6 +220,7 @@ const SPIEL = {
     const a = aufgabeErzeugen(ctx.stufe);
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     ctx.kennung(a.sprich);
+    ctx.tipp(tippsFuer(a));
     ctx.flaeche.append(el("div", { class: "frage", text: a.art === "anweisung" ? "Hör zu und tu, was du hörst." : "Hör zu: Welches Bild passt?" }));
     ctx.flaeche.append(el("button", { type: "button", class: "lt-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => LS.sprich(a.sprich, "en") }));
     const hinweis = a.art === "wo" ? "Hör genau hin: Welches Tier? Und wo ist es? Tipp auf 🔊."

@@ -166,8 +166,30 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Wie entsteht der Ton? — ohne Namen der Körbe
+ * und ohne Zahl.
+ */
+function tippsFuer(a) {
+  if (a.art === "name") return ["Schau genau: Hat es Saiten, Tasten, ein Mundstück — oder schlägt man darauf?",
+    "Denk daran, wo du so ein Instrument schon gesehen oder gehört hast."];
+  if (a.art === "frage") return INSTRUMENT_FRAGEN.find(f => f[0] === a.frage)?.[4] === "klang"
+    ? ["Ein Ton entsteht immer dort, wo etwas schwingt.", "Überleg, welcher Teil des Instruments sich bewegt, wenn man es spielt."]
+    : ["Denk an Musik, die du kennst: Wie viele spielen mit?", "Lies alle Antworten. Welche passt zu einer kleinen Gruppe, welche zu einem grossen Orchester?"];
+  const saiten = "Bei Saiten: Fährt man mit einem Bogen darüber, oder reisst man sie mit den Fingern an?";
+  const blasen = "Beim Blasen: Schwingen die Lippen im Mundstück, oder schwingt ein Rohrblatt oder die Luft an einer Kante? Das Material zählt nicht.";
+  if (a.nach === "spielart") return ["Stell dir vor, du spielst es: Was machen deine Hände oder dein Mund?",
+    "Hat es Saiten, Tasten oder ein Mundstück — oder schlägt oder schüttelt man es?"];
+  if (a.nach === "gruppe") return ["Wie entsteht der Ton? Schlägt man, zupft man, streicht man oder bläst man?",
+    "Saiten zupft oder streicht man, Luft bläst man hinein, auf Fell, Holz oder Metall schlägt man, und Tasten drückt man."];
+  if (a.koerbe.length === 2) return a.koerbe.includes("Zupfinstrument") ? ["Wie bringt man die Saiten zum Klingen?", saiten]
+    : ["Achte darauf, wie der Ton entsteht — nicht auf das Material.", blasen];
+  return ["Hat es Saiten, oder bläst man hinein?", a.x.genauer.includes("blas") ? blasen : saiten];
+}
+
 LS.spiel({
   id: "instrumente",
+  hilfe: "Schau das Instrument genau an und überleg, wie man darauf spielt: Wie entsteht der Ton?",
   einleitung: "Trommel, Geige, Flöte — kennst du die Instrumente? Und wie macht man mit ihnen Musik?",
   anzahl: 8,
   stufen: STUFEN,
@@ -177,6 +199,7 @@ LS.spiel({
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", artVon(a));
     // Zwei feste Körbe (Holz/Blech, Streichen/Zupfen); mit allen vier Körben (Königsstufe) nicht.
     if (a.nach === "genauer" && a.koerbe.length === 2) ctx.serie("antwort", a.richtig);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "name") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst dieses Instrument?" }), el("div", { class: "bild-gross" }, bildVon(a.x)));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 130, hinweis: "Schau genau: Hat es Saiten, Tasten, ein Mundstück — oder schlägt man darauf?", loesung: `Das ist: ${a.x.name}.` });

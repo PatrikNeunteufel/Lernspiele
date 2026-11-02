@@ -487,14 +487,40 @@ function zaehlen(ctx, a) {
   if (ctx.nr === 0) ctx.sag("Du kannst sie in Gedanken legen — oder geschickt rechnen.");
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): systematisch vorgehen, Reihenfolge egal oder
+ * nicht — nie die Anzahl.
+ */
+function tippsFuer(a) {
+  if (a.typ === "kleider") return a.art === "legen"
+    ? ["Nimm ein Stück und kombiniere es der Reihe nach mit allen Stücken der anderen Gruppen.", "Erst wenn das Stück mit allem kombiniert ist, nimm das nächste."]
+    : ["Nimm das erste Stück der ersten Gruppe: Wie viele Sets gibt es damit?", "Mit jedem anderen Stück der ersten Gruppe gibt es gleich viele Sets — da hilft Malrechnen."];
+  if (a.typ === "turm") return a.art === "legen"
+    ? ["Wähl zuerst die Sorte unten und bau alle Türme damit fertig.", "Tausch dann nur die oberen Kugeln, bevor du unten eine neue Sorte nimmst."]
+    : ["Wie viele Sorten können unten sein?", "Darüber bleibt jedes Mal eine Sorte weniger übrig. Rechne mal."];
+  const gleich = a.gleich ? " Denk auch an die Glace mit zweimal derselben Sorte." : "";
+  if (a.art === "legen") return ["Geh der Reihe nach vor: zuerst alle Glace mit der ersten Sorte, dann mit der nächsten.",
+    (a.reihenfolge ? "Beim Cornet zählt, welche Kugel unten ist: A unten und B oben ist eine andere Glace als B unten und A oben."
+      : "Im Becher ist die Reihenfolge egal: A + B ist dieselbe Glace wie B + A.") + gleich];
+  if (a.kugeln === 3) return a.reihenfolge
+    ? ["Wie viele Sorten können unten sein? Und wie viele dann in der Mitte und oben?", "Mit jeder Kugel bleibt eine Sorte weniger übrig. Rechne mal."]
+    : ["Zähl zuerst so, als ob die Reihenfolge zählen würde.", "Im Becher ist die Reihenfolge egal: Wie oft lassen sich drei Kugeln umstellen? So oft hast du jede Glace gezählt."];
+  if (a.reihenfolge) return ["Wie viele Sorten können unten sein?",
+    a.gleich ? "Und wie viele oben, wenn auch dieselbe Sorte erlaubt ist?" : "Und wie viele andere Sorten passen dann noch oben drauf?"];
+  return ["Zähl zuerst alle Glace mit der ersten Sorte. Dann die mit der zweiten, ohne die schon gezählten.",
+    "Im Becher ist die Reihenfolge egal: Zählst du A + B und B + A, hast du jede Glace doppelt." + gleich];
+}
+
 LS.spiel({
   id: ID,
   einleitung: "Wie viele verschiedene Glace kannst du machen? Probier alle Möglichkeiten — aber keine doppelt!",
+  hilfe: "Beim Finden tippst du Sorten oder Kleider an — jede fertige Glace und jedes Set kommt zu deinen Funden. Beim Zählen tippst du die Anzahl ein.",
   anzahl: 6,
   stufen: STUFEN,
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "legen") legen(ctx, a); else zaehlen(ctx, a);
   },
 });

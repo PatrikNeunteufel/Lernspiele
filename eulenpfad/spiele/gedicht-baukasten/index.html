@@ -217,6 +217,23 @@ const HINWEIS = {
   schema: "Gib Versen, die sich reimen, den gleichen Buchstaben: der erste Vers ist a. Welcher Vers reimt sich mit ihm?",
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Vorgehen und Begriffe — kein Reimwort, keine Zahl.
+ * Das Reim-Beispiel (Hose, Rose) kommt in gedichte.js nicht vor.
+ */
+function tippsFuer(a) {
+  if (a.art === "reimwort") return ["Sprich den ersten Vers laut und hör gut auf sein letztes Wort.",
+    a.optionen.includes(REIMPAARE[a.nr][5]) ? "Das Wort muss beides können: sich reimen und zum Sinn passen. Lies den Vers mit jedem Wort."
+      : "Setz jedes Wort in die Lücke und sprich den Vers: Welches klingt am Schluss gleich wie der erste Vers?"];
+  if (a.art === "reim") return ["Sprich die Wörter am Ende der Verse halblaut.", "Reimwörter klingen am Schluss gleich, wie Hose und Rose."];
+  if (a.art === "zaehlen") return a.was === "Verse" ? ["Ein Vers ist eine Zeile des Gedichts.", "Zeig mit dem Finger auf jede Zeile und zähl mit — in allen Strophen."]
+    : ["Eine Strophe ist eine Gruppe von Versen.", "Zwischen zwei Strophen ist ein Abstand. Zähl die Gruppen."];
+  if (a.art === "vers") return ["Ein Vers ist eine Zeile.", strophenVon(a).length > 1 ? "Such zuerst die richtige Strophe. Dann zähl die Verse darin von oben." : "Zähl die Verse von oben."];
+  if (a.art === "ordnen") return ["Lies den ersten Vers: Wie könnte der Satz weitergehen?", "Hör auf die Reime. Nur der letzte Vers endet mit einem Punkt oder Ausrufezeichen."];
+  return ["Gib dem ersten Vers den Buchstaben a. Welcher Vers reimt sich mit ihm?",
+    "Verse, die sich reimen, bekommen den gleichen Buchstaben. Vergleich dein Muster mit den Buchstaben in den Antworten."];
+}
+
 /** Gedicht als Kasten; mit opt.vers(vers, strophe, nr) statt Text eigene Elemente je Vers. */
 function gedichtKasten(a, opt = {}) {
   const box = el("div", { class: "gedicht" });
@@ -235,6 +252,7 @@ function gedichtKasten(a, opt = {}) {
 LS.spiel({
   id: ID,
   einleitung: "Reime, Verse, Strophen: Bau mit mir Gedichte! Lies die Verse ruhig laut vor.",
+  hilfe: "Lies die Verse halblaut vor, dann hörst du die Reime. Sollst du einen Vers suchen, tippst du die Zeile direkt im Gedicht an.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -249,6 +267,7 @@ LS.spiel({
     const f = ctx.flaeche;
     const frage = t => f.append(el("div", { class: "frage", text: t }));
     if (ctx.nr === 0) ctx.sag("Lies die Verse halblaut vor, dann hörst du die Reime.");
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
 
     if (a.art === "reimwort") {
       const [v1, v2, richtig] = REIMPAARE[a.nr];

@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Korrektur-Stift</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .sachtext.ks-text { background: #fffdf5; border: 3px solid var(--rand); border-radius: 18px; padding: 10px 12px; margin: 4px auto 10px; max-width: 700px; font-size: clamp(18px, 4.2vw, 23px); line-height: 1.9; text-align: left; overflow-wrap: break-word; }
+  .ks-wort {
+    font: inherit; font-weight: 600; color: var(--text); background: transparent; border: none; border-radius: 8px;
+    padding: 2px 3px; margin: 0; min-height: 38px; cursor: pointer; touch-action: manipulation;
+  }
+  .ks-wort:active { background: var(--karte); }
+  .ks-wort.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  .ks-wort.gepeilt { opacity: .5; }
+  .ks-wort.gefunden { background: #fff1c2; box-shadow: 0 0 0 3px #f5b301; }
+  .ks-wort.repariert { background: var(--gut-hell); box-shadow: 0 0 0 3px var(--gut); }
+  .ks-wort.aufgedeckt { background: var(--hinweis-hell); box-shadow: 0 0 0 3px var(--hinweis); }
+  .ks-stand { text-align: center; font-weight: 800; font-size: clamp(17px, 3.8vw, 21px); color: var(--text-leise); margin: 0 0 8px; }
+  .ks-panel .frage { text-align: center; font-weight: 800; font-size: clamp(18px, 4vw, 22px); margin: 4px 0 8px; }
+  .ks-panel .wahl-knopf { font-size: clamp(22px, 5vw, 30px); font-weight: 800; }
+  .ks-zeile { display: flex; justify-content: center; margin: 10px 0 4px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>✏️ Korrektur-Stift</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan 21 D.4.F.1 (Text in Bezug auf Rechtschreibung überarbeiten) und D.5.E.1 (Rechtschreibregeln),
+// Basisklasse 6:
+//   s1 (5. Klasse, nach dem OP D.4.F.1.c): kurzer Text, 2 Fehler — Nomen gross, ie, e/ä, f/v,
+//      Komma bei Aufzählungen, Satzzeichen am Schluss
+//   s2: kurzer Text, 3 Fehler, dazu Doppelkonsonant, ck/tz, Endungen (d/t, g/k, -ig/-lich)
+//   s3 (GA D.4.F.1.d, D.5.E.1.d): längerer Text, 3 Fehler, dazu abstrakte Nomen (Angst, Glück) und
+//      Komma zwischen Verbgruppen — „die meisten Unkorrektheiten finden, Punkt für Punkt“
+//   s4: wie s3 mit 4 Fehlern
+//   s5 (3. Zyklus D.4.F.1.e): langer Text, 3–5 Fehler, Anzahl unbekannt, dazu abgeleitete Nomen
+//      (Freiheit, Überraschung); das Kind entscheidet selbst, wann der Text stimmt (✓ Prüfen)
+//   s6 (Königsstufe, D.5.E.1.f): dazu Verben als Nomen (beim Schwimmen), 4–5 Fehler, knappe Hinweise
+// Bezug: Fehler-Lupe (Basisklasse 4) zeigt einzelne Sätze mit genau einem Fehler; Komma-Jagd (5) und
+// Rede-Zeichen (5) üben Kommas und direkte Rede einzeln, Regel-Lücke (3) einzelne Wörter mit Regel.
+// Hier steckt eine unbekannte Zahl Fehler verschiedener Art in einem ganzen Text. Direkte Rede und
+// das/dass kommen nicht vor (das/dass nennt der Lehrplan in D.4.F.1/D.5.E.1 nicht).
+// Vorlesen aus (Katalog vorlesen: false): Fehler finden ist der Stoff.
+
+const { waehle, mische, zufall, el } = LS;
+const ID = "korrektur-stift";
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["texte"]);
+const TEXTE = FREI.has("texte") ? KORREKTUR_TEXTE : [];
+
+// ---------- Fehlerarten ----------
+
+const REGELN = {
+  // Die Regeln sind Hinweise: Sie dürfen kein Lösungswort enthalten (auch nicht man, ein, wir, ist) —
+  // LISTEN_MAENGEL prüft das.
+  gross: "Nomen werden gross geschrieben. Probe: Passt der, die oder das davor?",
+  klein: "Verben und Adjektive werden klein geschrieben, ausser am Satzanfang.",
+  abstrakt: "Auch Nomen für Gefühle und Gedanken werden gross geschrieben. Probe: Passt der, die oder das davor?",
+  ableitung: "Wörter, die auf -heit, -keit, -ung, -nis, -schaft oder -ität enden, sind Nomen. Sie werden gross geschrieben.",
+  verbnomen: "Steht der, das, beim, zum oder vom vor einem Verb, wird es zum Nomen und gross geschrieben.",
+  ie: "Lang gesprochenes i wird meistens ie geschrieben, kurzes i nur i.",
+  stamm: "Such verwandte Wörter: Kommt das Wort von einem Wort mit a oder au, gehört ä oder äu hinein.",
+  fv: "Die Vorsilben ver- und vor- werden mit v geschrieben. Andere Wörter mit v musst du dir merken.",
+  doppel: "Nach einem kurzen Vokal folgen oft zwei gleiche Konsonanten. Sprich das Wort langsam.",
+  cktz: "Nach einem kurzen Vokal steht ck oder tz, nach einem Konsonanten nur k oder z.",
+  endung: "Verlängere das Wort: Dann hörst du, ob es mit d oder t, g oder k, -ig oder -lich endet.",
+  komma: "Bei Aufzählungen stehen Kommas zwischen den Teilen, vor und oder oder aber keines.",
+  kommaverb: "Zwei Verbgruppen trennt das Komma, zum Beispiel vor weil, dass oder wenn.",
+  punkt: "Jeder Satz endet mit einem Satzzeichen.",
+};
+const S1 = ["gross", "klein", "ie", "stamm", "fv", "komma", "punkt"];
+const S2 = [...S1, "doppel", "cktz", "endung"];
+const S3 = [...S2, "abstrakt", "kommaverb"];
+const S5 = [...S3, "ableitung"];
+const S6 = [...S5, "verbnomen"];
+const STUFE = {
+  s1: { laenge: "kurz", arten: S1, fehler: [2, 2], zaehlen: true },
+  s2: { laenge: "kurz", arten: S2, fehler: [3, 3], zaehlen: true, neu: ["doppel", "cktz", "endung"] },
+  s3: { laenge: "mittel", arten: S3, fehler: [3, 3], zaehlen: true, neu: ["abstrakt", "kommaverb", "doppel", "stamm"] },
+  s4: { laenge: "mittel", arten: S3, fehler: [4, 4], zaehlen: true },
+  s5: { laenge: "lang", arten: S5, fehler: [3, 5], zaehlen: false, neu: ["ableitung"] },
+  s6: { laenge: "lang", arten: S6, fehler: [4, 5], zaehlen: false, neu: ["verbnomen", "ableitung"], knapp: true },
+};
+const SAETZE_JE_LAENGE = { kurz: [3, 4], mittel: [4, 6], lang: [6, 7] };
+
+const ABSTRAKT = new Set(["Angst", "Freude", "Glück", "Hunger", "Durst", "Mut", "Wut", "Liebe", "Spass", "Ruhe", "Ärger", "Trauer", "Zeit", "Vorfreude"]);
+const ABLEITUNG = /(heit|keit|ung|nis|schaft|ität|tum)$/;
+// Wörter, nach denen ein Teilsatz beginnt (für das Komma zwischen Verbgruppen).
+const KONJ = new Set(["weil", "dass", "wenn", "als", "ob", "damit", "bevor", "nachdem", "obwohl", "während", "bis"]);
+const SATZ_ENDE = /[.!?]$/;
+
+const gross1 = w => w[0].toUpperCase() + w.slice(1);
+const klein1 = w => w[0].toLowerCase() + w.slice(1);
+const kern = w => w.replace(/[.,!?:;]+$/, "");
+const zeichen = w => w.slice(kern(w).length);
+
+/** Alle Formen, die aus w entstehen, wenn man an einer Stelle a durch b ersetzt (und umgekehrt). */
+function tausche(w, paare) {
+  const aus = [];
+  for (const [a, b] of paare) {
+    for (let i = w.indexOf(a); i >= 0; i = w.indexOf(a, i + 1)) aus.push(w.slice(0, i) + b + w.slice(i + a.length));
+  }
+  return aus;
+}
+const KONS = "bcdfgklmnprstz";
+const VARIANTEN = {
+  // ie ↔ i (ein i, das nicht zu ie oder ei gehört)
+  ie: w => [...tausche(w, [["ie", "i"]]), ...[...w].map((c, i) => (c === "i" && w[i + 1] !== "e" && w[i - 1] !== "e" ? w.slice(0, i) + "ie" + w.slice(i + 1) : null)).filter(Boolean)],
+  stamm: w => tausche(w, [["äu", "eu"], ["ä", "e"], ["Ä", "E"], ["Äu", "Eu"]]),
+  fv: w => tausche(w, [["v", "f"], ["V", "F"], ["f", "v"], ["F", "V"]]),
+  doppel: w => [...w].flatMap((c, i) => {
+    if (!KONS.includes(c) || i === 0) return [];
+    if (w[i + 1] === c) return [w.slice(0, i) + w.slice(i + 1)];
+    if (w[i - 1] === c || i === w.length - 1) return [];
+    return [w.slice(0, i) + c + w.slice(i)];
+  }),
+  cktz: w => [...tausche(w, [["ck", "k"], ["tz", "z"]]),
+    ...[...w].map((c, i) => (c === "k" && w[i - 1] !== "c" ? w.slice(0, i) + "ck" + w.slice(i + 1) : c === "z" && w[i - 1] !== "t" ? w.slice(0, i) + "tz" + w.slice(i + 1) : null)).filter(Boolean)],
+  endung: w => {
+    const aus = [];
+    const ende = { d: "t", t: "d", g: "k", k: "g", b: "p", p: "b" }[w.slice(-1)];
+    if (ende) aus.push(w.slice(0, -1) + ende);
+    const m = w.match(/^(.*)(ig|ich)(e|en|er|es|em)?$/);
+    if (m) aus.push(m[1] + (m[2] === "ig" ? "ich" : "ig") + (m[3] || ""));
+    return aus;
+  },
+};
+
+/** Wörter des Texts: { text } oder { stelle: { richtig, falsch, weitere, nach, art } }. */
+function zerlege(text) {
+  const woerter = text.split(" ").map(t => {
+    const m = t.match(/^\{([^}]+)\}([.,!?:;]*)$/);
+    if (!m) return { text: t };
+    const teile = m[1].split("|");
+    const art = teile.find(x => x.startsWith("#"));
+    const [richtig, falsch, ...weitere] = teile.filter(x => !x.startsWith("#"));
+    return { text: richtig + m[2], stelle: { richtig, falsch, weitere, nach: m[2], artVorgabe: art ? art.slice(1) : null } };
+  });
+  woerter.forEach((w, i) => { if (w.stelle) w.stelle.art = artVon(woerter, i); });
+  return woerter;
+}
+
+/** Satz, zu dem Wort i gehört: { anfang, ende } (Indizes). */
+function satzUm(woerter, i) {
+  let a = i, e = i;
+  while (a > 0 && !SATZ_ENDE.test(woerter[a - 1].text)) a--;
+  while (e < woerter.length - 1 && !SATZ_ENDE.test(woerter[e].text)) e++;
+  return { anfang: a, ende: e };
+}
+
+/** Art der Fehlerstelle i — oder null, wenn sie zu keiner Regel passt. */
+function artVon(woerter, i) {
+  const s = woerter[i].stelle;
+  const r = s.richtig, f = s.falsch;
+  const vorgabe = s.artVorgabe;
+  if (vorgabe === "verbnomen") return f === klein1(r) && /n$/.test(r) && r !== f ? "verbnomen" : null;
+  if (vorgabe) return null;
+  if (kern(r) === kern(f)) {
+    const zr = zeichen(r), zf = zeichen(f);
+    if (zr === zf) return null;
+    if (zr === "," || zf === ",") {
+      const { anfang, ende } = satzUm(woerter, i);
+      const naechstes = (woerter[i + 1]?.text || "").toLowerCase();
+      const davor = woerter.slice(anfang, i + 1).some(w => KONJ.has(kern(w.text).toLowerCase()));
+      if (zr === "," && zf === "" && (KONJ.has(naechstes) || davor)) return "kommaverb";
+      const danach = woerter.slice(i + 1, ende + 1).map(w => kern(w.text));
+      if (zr === "," && zf === "" && (danach.includes("und") || danach.includes("oder"))) return "komma";
+      if (zr === "" && zf === "," && ["und", "oder"].includes(naechstes)) return "komma";
+      return null;
+    }
+    if (/^[.!?]$/.test(zr) && (zf === "" || /^[.!?]$/.test(zf))) return "punkt";
+    return null;
+  }
+  if (zeichen(r) !== zeichen(f)) return null;
+  const kr = kern(r), kf = kern(f);
+  if (kf === klein1(kr) && kr !== kf) {
+    if (ABLEITUNG.test(kr)) return "ableitung";
+    if (ABSTRAKT.has(kr)) return "abstrakt";
+    return "gross";
+  }
+  if (kf === gross1(kr) && kr !== kf) return "klein";
+  for (const art of ["ie", "stamm", "doppel", "cktz", "endung", "fv"]) if (VARIANTEN[art](kr).includes(kf)) return art;
+  return null;
+}
+
+const KANDIDATEN = new Map(KORREKTUR_TEXTE.map(t => [t.id, zerlege(t.text)]));
+const stellenVon = (t, stufe) => KANDIDATEN.get(t.id).map((w, i) => ({ w, i })).filter(({ w }) => w.stelle && w.stelle.art && STUFE[stufe].arten.includes(w.stelle.art));
+const texteIn = stufe => TEXTE.filter(t => t.laenge === STUFE[stufe].laenge && stellenVon(t, stufe).length >= STUFE[stufe].fehler[1]);
+const ANGEBOTEN = new Set(Object.keys(STUFE).filter(s => texteIn(s).length));
+
+/** Eine Aufgabe als Daten: Text, Wörter (gezeigt), gewählte Fehlerstellen. ohne: Text-ids, die schon dran waren. */
+function aufgabeErzeugen(stufe, ohne = []) {
+  const p = STUFE[stufe];
+  const alle = texteIn(stufe);
+  const frisch = alle.filter(t => !ohne.includes(t.id));
+  const t = waehle(frisch.length ? frisch : alle);
+  const pool = mische(stellenVon(t, stufe));
+  const n = zufall(p.fehler[0], p.fehler[1]);
+  const gewaehlt = [];
+  if (p.neu && Math.random() < 0.7) { const k = pool.find(k => p.neu.includes(k.w.stelle.art)); if (k) gewaehlt.push(k); }
+  for (const k of pool) if (gewaehlt.length < n && !gewaehlt.includes(k) && !gewaehlt.some(g => g.w.stelle.art === k.w.stelle.art)) gewaehlt.push(k);
+  for (const k of pool) if (gewaehlt.length < n && !gewaehlt.includes(k)) gewaehlt.push(k);
+  const fehlerNr = new Set(gewaehlt.map(k => k.i));
+  const woerter = KANDIDATEN.get(t.id).map((w, i) => {
+    if (!fehlerNr.has(i)) return { anzeige: w.text, richtig: w.text, fehler: null };
+    const s = w.stelle;
+    return { anzeige: s.falsch + s.nach, richtig: w.text, fehler: { ...s, optionen: mische([s.richtig, s.falsch, ...s.weitere]) } };
+  });
+  return { id: t.id, laenge: t.laenge, woerter, anzahl: fehlerNr.size };
+}
+
+// ---------- Prüfung ----------
+
+/** Mängel eines Texts mit lauter richtigen Formen. */
+function textMaengel(woerter) {
+  const m = [];
+  const ganz = woerter.map(w => w.text).join(" ");
+  if (!/^[A-ZÄÖÜ]/.test(ganz) || !SATZ_ENDE.test(ganz)) m.push("Anfang oder Ende des Texts");
+  woerter.forEach((w, i) => {
+    if (i && SATZ_ENDE.test(woerter[i - 1].text) && !/\d[.]$/.test(woerter[i - 1].text) && !/^[A-ZÄÖÜ]/.test(w.text)) m.push(`nach Satzende klein: «${w.text}»`);
+    if (/^[,.;:!?]/.test(w.text) || !w.text) m.push("Satzzeichen ohne Wort oder doppelte Leerstelle");
+  });
+  if (/[{}|#]/.test(ganz)) m.push("Klammer nicht aufgelöst");
+  if (/ß/.test(ganz)) m.push("ß im Text");
+  if (/,\s*(und|oder)\s/.test(ganz)) m.push("Komma vor und/oder in einer Aufzählung");
+  return m;
+}
+
+const LISTEN_MAENGEL = (() => {
+  const m = [];
+  const regelText = Object.values(REGELN).join(" ");
+  const ids = new Set();
+  for (const t of KORREKTUR_TEXTE) {
+    const wo = `«${t.id}»`;
+    if (ids.has(t.id)) m.push(`${wo}: id doppelt`);
+    ids.add(t.id);
+    if (!SAETZE_JE_LAENGE[t.laenge]) { m.push(`${wo}: Länge ${t.laenge} unbekannt`); continue; }
+    const woerter = KANDIDATEN.get(t.id);
+    for (const x of textMaengel(woerter)) m.push(`${wo}: ${x}`);
+    const saetze = woerter.filter((w, i) => SATZ_ENDE.test(w.text) && !/^\d+\.$/.test(w.text)).length;
+    const [min, max] = SAETZE_JE_LAENGE[t.laenge];
+    if (saetze < min || saetze > max) m.push(`${wo}: ${saetze} Sätze, ${t.laenge} erwartet ${min}–${max}`);
+    if (/[{}]/.test(t.text.replace(/\{[^{}]+\}/g, ""))) m.push(`${wo}: Klammer ohne Gegenstück`);
+    woerter.forEach((w, i) => {
+      if (!w.stelle) return;
+      const s = w.stelle;
+      const stelle = `${wo} {${s.richtig}|${s.falsch}}`;
+      if (!s.art) m.push(`${stelle}: passt zu keiner Fehlerart`);
+      if (!s.richtig || !s.falsch || s.richtig === s.falsch) m.push(`${stelle}: richtig und falsch fehlen oder sind gleich`);
+      if (new Set([s.richtig, s.falsch, ...s.weitere]).size !== 2 + s.weitere.length) m.push(`${stelle}: Auswahl doppelt`);
+      const { anfang, ende } = satzUm(woerter, i);
+      if (["gross", "klein", "abstrakt", "ableitung", "verbnomen"].includes(s.art) && i === anfang) m.push(`${stelle}: Gross/Klein am Satzanfang ist nicht eindeutig`);
+      if (s.art === "punkt" && i !== woerter.length - 1) m.push(`${stelle}: Satzzeichen fehlt nur am Schluss des Texts`);
+      if (s.art === "punkt" && i !== ende) m.push(`${stelle}: Satzzeichen nicht am Satzende`);
+      if (new RegExp(`(^|[^\\p{L}])${kern(s.richtig)}([^\\p{L}]|$)`, "iu").test(regelText)) m.push(`${stelle}: eine Regel nennt das Lösungswort`);
+      // Die falsche Form darf nicht als richtiges Wort im selben Text stehen (sonst widerspricht er sich).
+      if (!["komma", "kommaverb", "punkt"].includes(s.art) && woerter.some((x, j) => j !== i && !x.stelle && x.text === s.falsch + s.nach)) m.push(`${stelle}: falsche Form steht anderswo als richtig`);
+    });
+    for (const [stufe, p] of Object.entries(STUFE)) {
+      if (p.laenge !== t.laenge) continue;
+      const n = stellenVon(t, stufe).length;
+      if (n < p.fehler[1]) m.push(`${wo}: nur ${n} Stellen für ${stufe} (braucht ${p.fehler[1]})`);
+    }
+  }
+  return m;
+})();
+
+function pruefeAufgabe(a, stufe) {
+  const m = [...LISTEN_MAENGEL];
+  const p = STUFE[stufe];
+  if (!ANGEBOTEN.has(stufe)) return ["Stufe wird mit den freien Listen nicht angeboten"];
+  if (a.laenge !== p.laenge) m.push("Textlänge passt nicht zur Stufe");
+  const fehler = a.woerter.filter(w => w.fehler);
+  if (fehler.length !== a.anzahl || a.anzahl < p.fehler[0] || a.anzahl > p.fehler[1]) m.push(`${fehler.length} Fehler, Stufe verlangt ${p.fehler.join("–")}`);
+  for (const w of fehler) {
+    if (!p.arten.includes(w.fehler.art)) m.push(`Fehlerart ${w.fehler.art} nicht in der Stufe`);
+    if (w.fehler.optionen.filter(o => o === w.fehler.richtig).length !== 1 || new Set(w.fehler.optionen).size !== w.fehler.optionen.length) m.push("Auswahl ohne Lösung oder doppelt");
+    if (w.anzeige === w.richtig) m.push("Fehlerstelle zeigt die richtige Form");
+  }
+  if (a.woerter.some(w => !w.fehler && w.anzeige !== w.richtig)) m.push("falsche Form ausserhalb einer Fehlerstelle");
+  // Der verbesserte Text ist vollständig richtig.
+  for (const x of textMaengel(a.woerter.map(w => ({ text: w.richtig })))) m.push(`verbesserter Text: ${x}`);
+  return m;
+}
+
+// ---------- Spiel ----------
+
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): ctx.tipp gilt für den ganzen Text. Erst das Vorgehen,
+ * dann die Fehlerarten, die in diesem Text stecken (Namen der Regeln, kein Wort und keine Stelle). Die
+ * Fehlversuchs-Regeln (Entscheid G4 a) bleiben unberührt: Ein Tipp ist kein Fehlversuch.
+ */
+const ART_KURZ = {
+  gross: "Nomen gross", klein: "Verben und Adjektive klein", abstrakt: "Nomen für Gefühle und Gedanken gross",
+  ableitung: "Nomen auf -heit, -keit, -ung, -nis, -schaft", verbnomen: "Verben, die zu Nomen werden",
+  ie: "langes i (ie)", stamm: "ä und äu (verwandte Wörter)", fv: "f oder v", doppel: "doppelte Konsonanten",
+  cktz: "ck und tz", endung: "Endungen (d/t, g/k, -ig/-lich)", komma: "Komma bei Aufzählungen",
+  kommaverb: "Komma zwischen Verbgruppen", punkt: "Satzzeichen am Schluss",
+};
+function tippsFuer(a, p) {
+  const arten = Object.keys(ART_KURZ).filter(art => a.woerter.some(w => w.fehler?.art === art));
+  const t = ["Lies den Text Satz für Satz, langsam und Wort für Wort. Sprich schwierige Wörter halblaut."];
+  if (!p.zaehlen) t.push("Lies jeden Satz noch einmal: Anfang gross, Kommas, Satzzeichen am Ende?");
+  t.push(`Achte in diesem Text besonders auf: ${arten.map(art => ART_KURZ[art]).join(", ")}.`);
+  return t;
+}
+
+// Texte, die in dieser Runde schon dran waren (je Aufgabennummer; aufgabe() kann mehrmals laufen).
+let rundeTexte = new Map();
+
+LS.spiel({
+  id: ID,
+  hilfe: stufe => "Tipp auf ein Wort, das falsch ist, und wähl dann, wie man es richtig schreibt. Fehlt ein Komma oder ein Satzzeichen, tippst du auf das Wort davor."
+    + (STUFE[stufe].zaehlen ? "" : " Hast du alle Fehler verbessert, tipp auf „✓ Prüfen“."),
+  einleitung: "Du bist der Korrektur-Stift! In jedem Text haben sich Fehler versteckt. Tipp auf ein falsches Wort und verbessere es.",
+  anzahl: 5,
+  stufen: Object.fromEntries(Object.entries({
+    s1: "Kurze Texte mit 2 Fehlern: gross oder klein, ie, ä, Komma.",
+    s2: "3 Fehler, dazu Sommer, Zucker, Hund.",
+    s3: "Längere Texte, 3 Fehler: auch Angst, Glück und das Komma vor weil (Lehrplan 6. Klasse).",
+    s4: "Wie Stufe 3, aber 4 Fehler.",
+    s5: "Wie viele Fehler? Das findest du selbst heraus. Neu: Freiheit, Überraschung (7. Klasse).",
+    s6: "Endgegner: lange Texte, alle Regeln, auch beim Schwimmen.",
+  }).filter(([s]) => ANGEBOTEN.has(s))),
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) {
+      rundeTexte = new Map();
+      ctx.sag("Lies den Text Satz für Satz. Fehlt ein Komma oder ein Punkt, tipp auf das Wort davor.");
+    }
+    const p = STUFE[ctx.stufe];
+    const ohne = [...rundeTexte].filter(([nr]) => nr < ctx.nr).map(([, id]) => id);
+    const a = aufgabeErzeugen(ctx.stufe, ohne);
+    rundeTexte.set(ctx.nr, a.id);
+    const fehler = a.woerter.filter(w => w.fehler);
+    const loesung = "Verbessern: " + fehler.map(w => `${w.fehler.falsch} → ${w.fehler.richtig}`).join(" · ");
+    ctx.loesung(loesung);
+    ctx.schritte(fehler.length * 2 + (p.zaehlen ? 0 : 1));
+    ctx.tipp(tippsFuer(a, p)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
+
+    ctx.flaeche.append(el("div", { class: "auftrag", text: p.zaehlen
+      ? `✏️ In diesem Text stecken ${a.anzahl} Fehler. Finde und verbessere sie!`
+      : "✏️ Finde alle Fehler und verbessere sie. Stimmt alles, tipp auf ✓ Prüfen." }));
+    const box = el("div", { class: "sachtext ks-text" });
+    const stand = el("div", { class: "ks-stand" });
+    const panel = el("div", { class: "ks-panel" });
+    let verbessert = 0;
+    const zeigeStand = () => { stand.textContent = p.zaehlen ? `Verbessert: ${verbessert} von ${a.anzahl}` : `Verbessert: ${verbessert}`; };
+    zeigeStand();
+    const knoepfe = [];
+    let offen = null; // Wort, dessen Verbesserung gerade gewählt wird
+
+    // Fehlversuche (Entscheid G4 a, LERN_Session9): Ein Text ist eine Sammlung von Fehlerstellen, nicht eine
+    // einzige Aufgabe. Drei falsche Verbesserungen an derselben Stelle zeigen nur diese Stelle; aufgelöst wird
+    // der ganze Text erst, wenn die Fehlversuche die Zahl der Fehlerstellen um drei übersteigen. Bis dahin
+    // meldet das Spiel Fehlversuche ohne Lösung — dann bleibt die Aufgabe im Rahmen offen.
+    const JE_STELLE = 3;
+    const grenze = a.anzahl + 3;
+    let fehlgriffe = 0;
+    let gezeigt = 0; // Stellen, die das Spiel nach drei Versuchen gezeigt hat
+
+    /** Ein Fehlerwort zeigen: richtig geschrieben, als „aufgedeckt“ markiert. */
+    const zeigeStelle = i => {
+      const w = a.woerter[i];
+      w.erledigt = true;
+      knoepfe[i].textContent = w.richtig;
+      knoepfe[i].classList.remove("gefunden");
+      knoepfe[i].classList.add("aufgedeckt");
+    };
+    /** Aufgelöst: alle noch offenen Fehler im Text zeigen. */
+    const aufdecken = () => {
+      if (!ctx.vorbei()) return;
+      panel.innerHTML = "";
+      a.woerter.forEach((w, i) => { if (w.fehler && !w.erledigt) zeigeStelle(i); });
+    };
+    /** Sind alle Stellen erledigt (verbessert oder gezeigt), endet die Aufgabe; mit gezeigten Stellen als aufgelöst. */
+    const vielleichtFertig = () => {
+      if (verbessert + gezeigt < a.anzahl || !p.zaehlen) return false;
+      if (!gezeigt) { ctx.richtig("Alles verbessert — jetzt ist der Text fehlerfrei! ✏️"); return true; }
+      ctx.falsch(`Fertig! ${gezeigt === 1 ? "Eine Stelle hat" : `${gezeigt} Stellen hat`} dir der Stift gezeigt.`, loesung);
+      aufdecken();
+      return true;
+    };
+    /** Ein Fehlversuch; erst ab der Grenze mit Lösung (dann löst der Rahmen auf). */
+    const fehlversuch = hinweis => {
+      fehlgriffe++;
+      ctx.falsch(hinweis, fehlgriffe >= grenze ? loesung : undefined);
+      aufdecken();
+    };
+
+    function oeffne(w, knopf) {
+      if (offen) offen.knopf.classList.remove("gefunden");
+      offen = { w, knopf };
+      knopf.classList.add("gefunden");
+      LS.ton("tipp");
+      panel.innerHTML = "";
+      const wahl = el("div", { class: "wahl" });
+      wahl.style.setProperty("--wahl-breite", "130px");
+      for (const o of w.fehler.optionen) {
+        const k = el("button", { type: "button", class: "wahl-knopf", text: o });
+        k.addEventListener("click", () => {
+          if (ctx.vorbei() || w.erledigt || k.classList.contains("gewaehlt")) return;
+          if (o === w.fehler.richtig) {
+            w.erledigt = true;
+            offen = null;
+            knopf.textContent = w.richtig;
+            knopf.classList.remove("gefunden");
+            knopf.classList.add("repariert");
+            panel.innerHTML = "";
+            verbessert++;
+            zeigeStand();
+            if (vielleichtFertig()) return;
+            LS.ton("tipp");
+            ctx.sag(p.zaehlen ? `Verbessert! Noch ${a.anzahl - verbessert - gezeigt} Fehler.` : "Verbessert! Such weiter.", "gut");
+            return;
+          }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+          w.versuche = (w.versuche || 0) + 1;
+          fehlversuch(p.knapp ? "So stimmt es noch nicht. Welche Regel passt zu diesem Wort?" : `So stimmt es noch nicht. ${REGELN[w.fehler.art]}`);
+          if (ctx.vorbei() || w.versuche < JE_STELLE) return;
+          // Drei Versuche an dieser Stelle: der Stift zeigt sie, weiter geht es mit den übrigen.
+          offen = null;
+          panel.innerHTML = "";
+          zeigeStelle(a.woerter.indexOf(w));
+          gezeigt++;
+          zeigeStand();
+          if (!vielleichtFertig()) ctx.sag(`So schreibt man es: «${w.richtig}». Such die übrigen Fehler.`, "hinweis");
+        });
+        wahl.append(k);
+      }
+      panel.append(el("div", { class: "frage", text: `Wie schreibt man «${w.anzeige}» richtig?` }), wahl);
+    }
+
+    a.woerter.forEach((w, i) => {
+      const knopf = el("button", { type: "button", class: "ks-wort", text: w.anzeige });
+      knopf.addEventListener("click", () => {
+        if (ctx.vorbei() || w.erledigt || knopf.classList.contains("gepeilt")) return;
+        if (w.fehler) { oeffne(w, knopf); return; }
+        knopf.classList.remove("falsch"); void knopf.offsetWidth; knopf.classList.add("falsch", "gepeilt");
+        fehlversuch(p.knapp ? `Bei «${w.anzeige}» ist alles richtig.` : `Bei «${w.anzeige}» ist alles richtig. Lies weiter, Wort für Wort.`);
+      });
+      knoepfe.push(knopf);
+      if (i) box.append(" ");
+      box.append(knopf);
+    });
+    ctx.flaeche.append(box, stand, panel);
+
+    if (!p.zaehlen) {
+      const pruefen = el("button", { type: "button", class: "knopf", text: "✓ Prüfen" });
+      pruefen.addEventListener("click", () => {
+        if (ctx.vorbei()) return;
+        if (verbessert === a.anzahl) { ctx.richtig("Genau geprüft — der Text ist jetzt fehlerfrei! ✏️"); return; }
+        if (verbessert + gezeigt === a.anzahl) { ctx.falsch("Jetzt stimmt der Text — mit Hilfe des Stifts.", loesung); aufdecken(); return; }
+        fehlversuch(p.knapp ? "Da versteckt sich noch etwas." : "Da hat sich noch mindestens ein Fehler versteckt. Lies Satz für Satz.");
+      });
+      ctx.flaeche.append(el("div", { class: "ks-zeile" }, pruefen));
+    }
+  },
+});
+</script>
+</body>
+</html>

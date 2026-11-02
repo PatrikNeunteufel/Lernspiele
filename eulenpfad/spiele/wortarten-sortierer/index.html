@@ -165,9 +165,29 @@ function pruefeAufgabe(a, stufe) {
 
 const zaehler = { N: 0, V: 0, A: 0 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): alle drei Proben nennen (nie nur die richtige),
+ * dazu je Stufe, worauf man achten muss.
+ */
+const TIPP_STUFE = {
+  s1: "Schau auch auf den ersten Buchstaben: Nomen schreibt man gross.",
+  s2: "Hier ist alles klein geschrieben. Die Grossschreibung hilft nicht — nur die Probe.",
+  s3: "Mach die Probe mit dem Wort so, wie es im Satz gemeint ist.",
+  s4: "Verben können in der Vergangenheit stehen (er sprang), Adjektive gesteigert sein (höher). Denk an die Grundform.",
+  s5: "Achtung: Steht der, das oder beim davor, kann aus einem Tunwort oder Wiewort ein Nomen werden.",
+  s6: "Mach die Probe für jedes markierte Wort neu. Achte auf Vergangenheit und auf der, das oder beim davor.",
+};
+function tippsFuer(stufe) {
+  return ["Probier die drei Proben mit dem Wort aus: der, die, das davor? ich, du, er davor? Kann man es steigern?",
+    TIPP_STUFE[stufe]];
+}
+
 LS.spiel({
   id: "wortarten-sortierer",
   einleitung: "Jedes Wort gehört in einen Korb: Nomen, Verb oder Adjektiv. Weisst du, wohin?",
+  hilfe: stufe => (stufe === "s6"
+    ? "Im Satz sind mehrere Wörter markiert. Tipp für das hervorgehobene Wort auf den Korb mit seiner Wortart — dann kommt das nächste dran."
+    : "Lies das Wort und tipp auf den Korb mit seiner Wortart: Nomen, Verb oder Adjektiv. Die Zahl am Korb zählt mit."),
   anzahl: 10,
   stufen: nurMoegliche({
     s1: "Einzelne Wörter: Hund, spielen, rot.",
@@ -189,6 +209,7 @@ LS.spiel({
     const ziele = a.ziele || [{ wort: a.wort, art: a.art }];
     const loesung = ziele.map(x => `«${x.wort}» ist ${ist(x.art)}.`).join(" ") + (ziele.length === 1 ? ` ${ARTEN[ziele[0].art].probe}` : "");
     ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(ctx.stufe));
     const marken = new Map(); // Satzteil → <mark>
     let pos = 0;
     if (a.satz) {

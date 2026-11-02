@@ -220,9 +220,25 @@ function karteInKorb(ctx, a, opt) {
   karte.querySelector("b").classList.add("frage");
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Fragen zum Nachdenken, kein Korb- und kein Dingname. */
+function tippsFuer(a) {
+  if (a.art === "korb") return ["Hast du das schon bei dir zu Hause oder auf der Strasse gesehen?",
+    "Sieht man es fast nur noch im Museum oder auf alten Bildern? Dann ist es ein altes Ding."];
+  if (a.art === "paar") return ["Wozu braucht man das?", a.vor ? "Such das Ding, das heute dieselbe Arbeit macht." : "Such das Ding, mit dem man früher dieselbe Arbeit machte."];
+  if (a.art === "ordnen") return ["Was ist ganz einfach und braucht keine Maschine? Das gab es zuerst.",
+    "Was braucht eine Maschine, Strom oder einen Motor? Das kam später."];
+  if (a.art === "dazwischen") return ["Such das Ding, das zum selben Thema gehört.", "Es ist neuer als das Erste und älter als das Letzte."];
+  return a.jahre === 60
+    ? ["Frag dich: Hatten deine Grosseltern das schon, als sie Kinder waren — oder kam es erst später dazu?",
+      "Alles, was mit Computer und Internet zu tun hat, ist noch ziemlich neu."]
+    : ["Vor 100 Jahren waren sogar deine Grosseltern nicht auf der Welt.",
+      "Denk an sehr alte Fotos und Filme: Was sieht man darauf schon?"];
+}
+
 LS.spiel({
   id: ID,
   einleitung: "Wie hat man früher Licht gemacht, Wäsche gewaschen, telefoniert? Finde heraus, was sich verändert hat!",
+  hilfe: "Schau das Ding genau an und überleg, wozu man es braucht und wie alt es ist. Bei einer Reihe tippst du die Dinge vom ältesten zum neusten an.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -278,6 +294,7 @@ LS.spiel({
         loesung: `${a.name}: ${a.richtig === "ja" ? "Das gab es vor " + a.jahre + " Jahren schon." : "Das gab es vor " + a.jahre + " Jahren noch nicht."}`,
       });
     }
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (ctx.nr === 0) ctx.sag("Schau genau hin: Wozu braucht man das?");
   },
 });

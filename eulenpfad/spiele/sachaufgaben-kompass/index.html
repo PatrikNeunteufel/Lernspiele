@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sachaufgaben-Kompass</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .kompass-text { background: #fff; border: 2px solid var(--rand); border-radius: 16px; padding: 12px 14px; margin: 0 0 10px;
+    font-size: clamp(17px, 4vw, 22px); line-height: 1.7; }
+  .frage { text-align: center; font-size: clamp(18px, 4.2vw, 24px); font-weight: 800; margin: 4px 0 10px; line-height: 1.6; }
+  .angabe { display: inline-block; font: inherit; font-weight: 900; color: var(--text); background: var(--karte);
+    border: 2px solid var(--rand); border-radius: 10px; padding: 0 8px; margin: 2px 1px; line-height: 1.5; white-space: nowrap; }
+  button.angabe { cursor: pointer; min-height: 40px; border-color: var(--deko-4); }
+  button.angabe.gewaehlt { background: var(--deko-4); color: #fff; }
+  button.angabe.richtig { background: var(--gut-hell); border-color: var(--gut); color: var(--text); }
+  button.angabe.unnoetig { opacity: .45; }
+  button.angabe:disabled { cursor: default; }
+  .kompass-tabelle-rahmen { overflow-x: auto; max-width: 100%; margin: 0 0 10px; }
+  .kompass-tabelle { margin: 0 auto; border-collapse: collapse; font-size: clamp(15px, 3.6vw, 20px); }
+  .kompass-tabelle caption { font-weight: 800; color: var(--text-leise); padding-bottom: 4px; }
+  .kompass-tabelle th, .kompass-tabelle td { border: 2px solid var(--rand); padding: 4px clamp(4px, 1.5vw, 10px); text-align: center; background: #fff; }
+  .kompass-tabelle th { color: var(--text-leise); background: var(--karte); }
+  .kompass-tabelle td.name { text-align: left; font-weight: 700; }
+  .kompass-diagramm { margin: 0 auto 10px; max-width: 520px; }
+  .kompass-diagramm .titel { text-align: center; font-weight: 800; color: var(--text-leise); margin-bottom: 4px; }
+  .kompass-saeulen { display: flex; align-items: flex-end; justify-content: space-around; gap: 6px; height: 190px;
+    border-bottom: 3px solid var(--text-leise); padding: 0 4px; }
+  .kompass-saeule { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
+  .kompass-saeule .balken { width: min(56px, 80%); background: var(--deko-2); border-radius: 8px 8px 0 0; }
+  .kompass-saeule .angabe { font-size: clamp(13px, 3.4vw, 18px); padding: 0 4px; margin-bottom: 4px; }
+  .kompass-namen { display: flex; justify-content: space-around; gap: 6px; padding: 4px 4px 0; font-weight: 800; }
+  .kompass-namen span { flex: 1; text-align: center; min-width: 0; overflow-wrap: anywhere; }
+  .kompass-schritt { text-align: center; font-weight: 800; color: var(--text-leise); margin: 10px 0 6px; }
+  .kompass-pruefen { display: flex; justify-content: center; margin: 6px 0; }
+  .kompass-antwort { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 6px 0; }
+  .kompass-antwort .anzeige { margin: 0; }
+  .kompass-einheiten { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .kompass-einheit { font: inherit; font-weight: 900; font-size: clamp(17px, 4vw, 22px); min-width: 64px; min-height: 52px;
+    border: 3px solid var(--rand); border-radius: 12px; background: #fff; color: var(--text); cursor: pointer; padding: 0 10px; }
+  .kompass-einheit.gewaehlt { border-color: var(--deko-4); background: var(--deko-4); color: #fff; }
+  .kompass-weg { --wahl-breite: 210px; }
+  .kompass-weg .wahl-knopf { font-size: clamp(18px, 4.2vw, 24px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  .kompass-zusammenhang { --wahl-breite: 220px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧭 Sachaufgaben-Kompass</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan 21 MA.3.C.2 (Sachsituationen mathematisieren, berechnen, Ergebnisse überprüfen):
+//   d (Orientierungspunkt 2. Zyklus) zu Texten, Tabellen und Diagrammen Berechnungen ausführen und
+//     Ergebnisse überprüfen → Stufe 1 und 2 (eine Rechnung, zwei Schritte; Rechenweg wählen);
+//   e (Grundanspruch Ende 6. Klasse) Proportionalitäten in Sachsituationen erkennen, Informationen aus
+//     Sachtexten, Tabellen und Diagrammen verarbeiten → Stufe 3 (wichtige Angaben antippen, Dreisatz)
+//     und Stufe 4 (Angaben aus Tabelle oder Säulendiagramm);
+//   f (3. Zyklus) proportionale und lineare Zusammenhänge erkennen (Taxipreis aus Grundtaxe und festem
+//     Preis je km), Grössen identifizieren und Masseinheiten wählen → Stufe 5 und Königsstufe 6
+//     (mehrschrittig, Grundtaxe aus zwei Fahrten).
+// Basisklasse 6: s1 5. Klasse, s3 Klassenziel, s5 7. Klasse. Die Sachtexte entstehen im Code aus
+// Vorlagen (Rechenstoff, kein Lesestoff zum Prüfen); Zahlen und Preise sind plausible Annahmen, keine
+// echten Tarife, und es kommen keine echten Orte mit Distanzen vor.
+// Abgrenzung: Rechengeschichten (Basisklasse 2) stellt eine Rechnung aus einer Geschichte, die
+// Preis-Tabelle (4) und die Velo-Tabelle (6) üben Wertetabellen, der Taschengeld-Planer (5) ein Budget —
+// hier geht es um das Auswählen der Angaben, den Rechenweg und die Einheit.
+// Geld nur über LS.geldText, Dezimalzahlen nur über LS.dezimalText; gerechnet wird in Rappen.
+
+const { zahlText, dezimalText, geldText, zufall, waehle, mische, el } = LS;
+
+const fr = rp => geldText(rp, 6);
+/** Geldbetrag als Zahl im Term: „12.50“ oder „12“. */
+const g = rp => (rp % 100 ? (rp / 100).toFixed(2) : String(rp / 100));
+const ORDNUNG = ["ersten", "zweiten", "dritten", "vierten"];
+const NAMEN = [["Mia", "Ihre"], ["Noah", "Sein"], ["Lea", "Ihre"], ["Luca", "Sein"], ["Elena", "Ihre"], ["Jonas", "Sein"], ["Sara", "Ihre"], ["Leon", "Sein"]];
+
+// ---------- Bausteine einer Aufgabe ----------
+
+function neu(vorlage) { return { vorlage, saetze: [], frage: [], angaben: [], tabelle: null, diagramm: null, konstanten: [] }; }
+/** Eine Angabe im Text: text wie gezeigt, wert wie im Term, noetig: wird für die Rechnung gebraucht. */
+function ang(a, text, wert, noetig = true) { a.angaben.push({ text, wert: String(wert), noetig }); return { a: a.angaben.length - 1 }; }
+
+// Überflüssige Angaben je Umfeld: Sätze mit Zahlen, die für die Frage nicht gebraucht werden.
+const EXTRA = {
+  dauer: a => { const d = 5 * zufall(7, 19); return ["Die Fahrt dauert ", ang(a, `${d} min`, d, false), "."]; },
+  abfahrt: a => { const h = zufall(7, 10); return ["Der Zug fährt um ", ang(a, `${h} Uhr`, h, false), " ab."]; },
+  hoehe: a => { const h = 50 * zufall(18, 32); return ["Das Lagerhaus liegt auf ", ang(a, `${zahlText(h)} m ü. M.`, h, false), "."]; },
+  car: a => { const d = 5 * zufall(9, 30); return ["Die Carfahrt dauert ", ang(a, `${d} min`, d, false), "."]; },
+  zimmer: a => { const z = zufall(4, 9); return ["Im Lagerhaus gibt es ", ang(a, `${z} Schlafräume`, z, false), "."]; },
+  start: a => { const h = zufall(8, 10); return ["Die Gruppe startet um ", ang(a, `${h} Uhr`, h, false), "."]; },
+  gaenge: a => { const n = waehle([7, 21, 24, 27]); return ["Jedes Velo hat ", ang(a, `${n} Gänge`, n, false), "."]; },
+  pass: a => { const h = 50 * zufall(14, 30); return ["Der höchste Punkt liegt auf ", ang(a, `${zahlText(h)} m ü. M.`, h, false), "."]; },
+  laden: a => { const m = 50 * zufall(4, 18); return ["Der Laden ist ", ang(a, `${m} m`, m, false), " vom Lagerhaus entfernt."]; },
+  schluss: a => { const h = zufall(18, 20); return ["Der Laden schliesst um ", ang(a, `${h} Uhr`, h, false), "."]; },
+  einkaufen: a => { const d = 5 * zufall(3, 9); return ["Der Einkauf dauert ", ang(a, `${d} min`, d, false), "."]; },
+  beginn: a => { const h = zufall(8, 9); return ["Der Sporttag beginnt um ", ang(a, `${h} Uhr`, h, false), "."]; },
+  rundbahn: a => { const m = waehle([200, 250, 300, 400]); return ["Die Rundbahn ist ", ang(a, `${m} m`, m, false), " lang."]; },
+  wasser: a => { const p = 10 * zufall(12, 25); return ["Am Stand kostet ein Mineralwasser ", ang(a, fr(p), g(p), false), "."]; },
+  taxidauer: a => { const d = zufall(6, 25); return ["Die Fahrt dauert ", ang(a, `${d} min`, d, false), "."]; },
+  plaetze: a => { const n = waehle([4, 6, 8]); return ["Im Taxi haben ", ang(a, `${n} Personen`, n, false), " Platz."]; },
+  tour: a => { const d = zufall(18, 45); return ["Die Tour ist ", ang(a, `${d} km`, d, false), " lang."]; },
+  verleih: a => { const h = zufall(8, 10); return ["Der Verleih öffnet um ", ang(a, `${h} Uhr`, h, false), "."]; },
+  laenge: a => { const m = zufall(2, 4); return ["Das Becken ist ", ang(a, `${m} m`, m, false), " lang."]; },
+  waerme: a => { const t = zufall(24, 33); return ["Draussen ist es ", ang(a, `${t} °C`, t, false), " warm."]; },
+  kochen: a => { const d = zufall(8, 12); return ["Die Teigwaren kochen ", ang(a, `${d} min`, d, false), "."]; },
+  paket: a => { const kg = zufall(2, 9); return ["Das Paket wiegt ", ang(a, `${kg} kg`, kg, false), "."]; },
+  lauf: a => { const d = 5 * zufall(6, 12); return ["Der Lauf dauert ", ang(a, `${d} min`, d, false), "."]; },
+};
+
+/** n überflüssige Sätze aus den genannten Arten, an zufälligen Stellen nach dem ersten Satz. */
+function extras(a, arten, n) {
+  for (const art of mische(arten).slice(0, n)) {
+    a.saetze.splice(zufall(1, a.saetze.length), 0, EXTRA[art](a));
+  }
+}
+
+const name = () => waehle(NAMEN);
+
+// ---------- Vorlagen ----------
+// Jede Vorlage füllt: saetze, frage, angaben, term (ASCII: * / + - und Klammern), wege (term zuerst,
+// dann typische falsche Wege), ergebnis (ganzzahlig, Geld in Rappen), einheit, einheiten, tipp,
+// bei Bedarf plan (zweiter Hinweis), loesung (eigener Lösungstext), zusammenhang (Stufe 5).
+
+const VORLAGEN = {
+  // --- eine Rechnung (Stufe 1) ---
+  billette1(x) {
+    const a = neu("billette1"), n = zufall(16, 26), p = zufall(6, 15) * 100;
+    a.saetze = [["Die Klasse fährt mit dem Zug ins Klassenlager."], ["Es fahren ", ang(a, `${n} Kinder`, n), " mit."],
+      ["Ein Kinderbillett kostet ", ang(a, fr(p), g(p)), "."]];
+    a.frage = ["Wie viel kosten alle Kinderbillette zusammen?"];
+    a.term = `${n}*${g(p)}`;
+    a.wege = [a.term, `${n}+${g(p)}`, `${n}-${g(p)}`];
+    return geld(a, n * p, ["Kinder", "min"], "Jedes Kind braucht ein Billett. Wie oft musst du den Preis zählen?");
+  },
+  velo1summe(x) {
+    const a = neu("velo1summe"); let v = zufall(14, 32), n = zufall(10, 28);
+    if (v === n) n++;
+    a.saetze = [["Die Klasse macht eine Velotour."], ["Am Vormittag fährt sie ", ang(a, `${v} km`, v), ", am Nachmittag ", ang(a, `${n} km`, n), "."]];
+    a.frage = ["Wie weit fährt sie an diesem Tag?"];
+    a.term = `${v}+${n}`;
+    a.wege = [a.term, v > n ? `${v}-${n}` : `${n}-${v}`, `${v}*${n}`];
+    return menge(a, v + n, "km", ["m", "min"], "Gesucht ist die ganze Strecke des Tages.");
+  },
+  velo1mal(x) {
+    const a = neu("velo1mal"), t = zufall(3, 5), d = 2 * zufall(12, 24);
+    a.saetze = [["Die Klasse macht eine Velotour."], ["Sie fährt ", ang(a, `${t} Tage`, t), " lang jeden Tag ", ang(a, `${d} km`, d), "."]];
+    a.frage = ["Wie weit fährt sie insgesamt?"];
+    a.term = `${t}*${d}`;
+    a.wege = [a.term, `${t}+${d}`, `${d}-${t}`];
+    return menge(a, t * d, "km", ["m", "Tage"], "Jeden Tag kommt dieselbe Strecke dazu.");
+  },
+  rueckgeld1(x) {
+    const a = neu("rueckgeld1"), s = waehle([50, 100]), k = zufall(12, s - 8);
+    a.saetze = [["Die Klasse kauft für den Wandertag ein."], ["Der Einkauf kostet ", ang(a, fr(k * 100), k), "."],
+      ["Die Lehrerin bezahlt mit ", ang(a, fr(s * 100), s), "."]];
+    a.frage = ["Wie viel Rückgeld bekommt sie?"];
+    a.term = `${s}-${k}`;
+    a.wege = [a.term, `${s}+${k}`, `${s}*${k}`];
+    return geld(a, (s - k) * 100, ["kg", "min"], "Rückgeld ist das, was vom bezahlten Geld übrig bleibt.");
+  },
+  znueni1(x) {
+    const a = neu("znueni1"), n = zufall(4, 9), p = 10 * zufall(18, 39);
+    a.saetze = [["Für das Znüni kauft die Klasse ein."], ["Sie nimmt ", ang(a, `${n} Packungen`, n), " Knäckebrot."],
+      ["Eine Packung kostet ", ang(a, fr(p), g(p)), "."]];
+    a.frage = ["Wie viel kostet das Knäckebrot zusammen?"];
+    a.term = `${n}*${g(p)}`;
+    a.wege = [a.term, `${n}+${g(p)}`, `${g(p)}/${n}`];
+    return geld(a, n * p, ["Packungen", "kg"], "Jede Packung kostet gleich viel. Wie oft kommt der Preis vor?");
+  },
+  teams1(x) {
+    const a = neu("teams1"), k = zufall(4, 8), t = zufall(6, 14), n = k * t;
+    a.saetze = [["Am Sporttag machen ", ang(a, `${n} Kinder`, n), " mit."], ["Sie bilden Teams mit je ", ang(a, `${k} Kindern`, k), "."]];
+    a.frage = ["Wie viele Teams gibt es?"];
+    a.term = `${n}/${k}`;
+    a.wege = [a.term, `${n}*${k}`, `${n}-${k}`];
+    return menge(a, t, "Teams", ["Kinder", "min"], "Die Kinder werden in gleich grosse Gruppen aufgeteilt.");
+  },
+  staffel1(x) {
+    const a = neu("staffel1"), k = zufall(4, 8), m = waehle([50, 60, 80, 100]);
+    a.saetze = [["Am Sporttag läuft jedes Team eine Staffel."], ["Im Team laufen ", ang(a, `${k} Kinder`, k), " nacheinander je ", ang(a, `${m} m`, m), "."]];
+    a.frage = ["Wie lang ist die ganze Staffel?"];
+    a.term = `${k}*${m}`;
+    a.wege = [a.term, `${k}+${m}`, `${m}-${k}`];
+    return menge(a, k * m, "m", ["km", "min"], "Jedes Kind läuft gleich weit. Wie viele Teilstücke sind es?");
+  },
+
+  // --- zwei Schritte (Stufe 2; mit überflüssigen Angaben Stufe 3) ---
+  billette2(x) {
+    const a = neu("billette2"), n = zufall(16, 26), l = zufall(2, 3), p = 20 * zufall(32, 74), q = 2 * p;
+    a.saetze = [["Die Klasse fährt mit dem Zug ins Klassenlager."], ["Es fahren ", ang(a, `${n} Kinder`, n), " und ", ang(a, `${l} Begleitpersonen`, l), " mit."],
+      ["Ein Kinderbillett kostet ", ang(a, fr(p), g(p)), ", ein Billett für Erwachsene ", ang(a, fr(q), g(q)), "."]];
+    a.frage = ["Wie viel kosten alle Billette zusammen?"];
+    a.term = `${n}*${g(p)}+${l}*${g(q)}`;
+    a.wege = [a.term, `(${n}+${l})*${g(p)}`, `(${n}+${l})*${g(q)}`, `${n}*${g(p)}+${g(q)}`];
+    extras(a, ["dauer", "abfahrt", "hoehe"], x.extra);
+    return geld(a, n * p + l * q, ["Personen", "min"], "Kinder und Erwachsene bezahlen verschieden viel. Rechne für jede Gruppe einzeln.");
+  },
+  lagerkosten(x) {
+    const a = neu("lagerkosten"), n = zufall(18, 25), h = 5 * zufall(14, 28), c = 5 * zufall(4, 9);
+    const haus = n * h, car = n * c;
+    a.saetze = [["Die Klasse plant ein Klassenlager."], ["Das Lagerhaus kostet für die ganze Woche ", ang(a, fr(haus * 100), haus), "."],
+      ["Der Car für die Hin- und Rückfahrt kostet ", ang(a, fr(car * 100), car), "."],
+      ["Die Kosten werden gleichmässig auf die ", ang(a, `${n} Kinder`, n), " verteilt."]];
+    a.frage = ["Wie viel bezahlt jedes Kind?"];
+    a.term = `(${haus}+${car})/${n}`;
+    a.wege = [a.term, `${haus}+${car}/${n}`, `(${haus}+${car})*${n}`, `${haus}/${n}+${car}`];
+    extras(a, ["car", "hoehe", "zimmer"], x.extra);
+    return geld(a, (h + c) * 100, ["Kinder", "Tage"], "Was kostet das Lager alles zusammen? Und wie viele teilen sich das?");
+  },
+  velo2(x) {
+    const a = neu("velo2"), t = zufall(2, 4), d = 2 * zufall(14, 24); let e = 2 * zufall(6, 14);
+    if (e === d) e += 2;
+    a.saetze = [["Die Klasse macht eine Velotour."], ["An den ersten ", ang(a, `${t} Tagen`, t), " fährt sie je ", ang(a, `${d} km`, d), "."],
+      ["Am letzten Tag fährt sie noch ", ang(a, `${e} km`, e), " bis zum Bahnhof."]];
+    a.frage = ["Wie lang ist die ganze Velotour?"];
+    a.term = `${t}*${d}+${e}`;
+    a.wege = [a.term, `(${t}+1)*${d}`, `${t}*(${d}+${e})`, `${t}+${d}+${e}`];
+    extras(a, ["start", "gaenge", "pass"], x.extra);
+    return menge(a, t * d + e, "km", ["m", "Tage"], "Die ersten Tage sind gleich lang, der letzte Tag ist anders.");
+  },
+  einkauf2(x) {
+    const a = neu("einkauf2"), n1 = zufall(4, 8), p1 = 10 * zufall(26, 42), n2 = zufall(6, 12), p2 = 5 * zufall(30, 39);
+    a.saetze = [["Für das Lagerfrühstück kauft die Köchin ein."], ["Sie nimmt ", ang(a, `${n1} Brote`, n1), " zu je ", ang(a, fr(p1), g(p1)),
+      " und ", ang(a, `${n2} Liter`, n2), " Milch zu je ", ang(a, fr(p2), g(p2)), "."]];
+    a.frage = ["Wie viel bezahlt sie?"];
+    a.term = `${n1}*${g(p1)}+${n2}*${g(p2)}`;
+    a.wege = [a.term, `(${n1}+${n2})*${g(p1)}`, `${n1}*${g(p1)}+${g(p2)}`, `(${n1}+${n2})*(${g(p1)}+${g(p2)})`];
+    extras(a, ["laden", "schluss", "einkaufen"], x.extra);
+    return geld(a, n1 * p1 + n2 * p2, ["Liter", "kg"], "Brot und Milch kosten verschieden viel. Rechne beides einzeln.");
+  },
+  glace2(x) {
+    const a = neu("glace2"); let n, p, s;
+    do { n = zufall(3, 6); p = 10 * zufall(15, 35); s = waehle([20, 50]); } while (n * p >= s * 100 - 100);
+    a.saetze = [["Nach dem Sporttag kauft Frau Huber Glace für ihr Team."], ["Sie kauft ", ang(a, `${n} Glace`, n), " zu je ", ang(a, fr(p), g(p)), "."],
+      ["Sie bezahlt mit ", ang(a, fr(s * 100), s), "."]];
+    a.frage = ["Wie viel Rückgeld bekommt sie?"];
+    a.term = `${s}-${n}*${g(p)}`;
+    a.wege = [a.term, `${s}-${n}-${g(p)}`, `(${s}-${n})*${g(p)}`, `${s}-${g(p)}`];
+    extras(a, ["beginn", "wasser", "rundbahn"], x.extra);
+    return geld(a, s * 100 - n * p, ["kg", "min"], "Was kosten zuerst alle Glace zusammen?");
+  },
+  baelle2(x) {
+    const a = neu("baelle2"), k = zufall(5, 6), t = zufall(4, 8), n = k * t, b = zufall(2, 4);
+    a.saetze = [["Am Sporttag spielen ", ang(a, `${n} Kinder`, n), " Unihockey."], ["Sie bilden Teams mit je ", ang(a, `${k} Kindern`, k), "."],
+      ["Zum Üben bekommt jedes Team ", ang(a, `${b} Bälle`, b), "."]];
+    a.frage = ["Wie viele Bälle braucht es?"];
+    a.term = `${n}/${k}*${b}`;
+    a.wege = [a.term, `${n}*${b}`, `${n}/${k}+${b}`, `${n}/${b}*${k}`];
+    extras(a, ["beginn", "rundbahn", "wasser"], x.extra);
+    return menge(a, t * b, "Bälle", ["Kinder", "Teams"], "Die Bälle gibt es für jedes Team, nicht für jedes Kind.");
+  },
+  sponsor2(x) {
+    const a = neu("sponsor2"), [wer, sein] = name(), r = zufall(8, 20), p = waehle([50, 100, 150, 200]);
+    const q = waehle([50, 100, 150, 200, 250].filter(v => v !== p));
+    a.saetze = [["Beim Sponsorenlauf läuft ", wer, " ", ang(a, `${r} Runden`, r), "."],
+      [`${sein}${sein === "Ihre" ? "" : "e"} Grossmutter gibt `, ang(a, fr(p), g(p)), " pro Runde, ", sein === "Ihre" ? "ihr" : "sein", " Onkel ", ang(a, fr(q), g(q)), " pro Runde."]];
+    a.frage = [`Wie viel Geld sammelt ${wer} für die Klassenkasse?`];
+    a.term = `${r}*(${g(p)}+${g(q)})`;
+    a.wege = [a.term, `${r}*${g(p)}+${g(q)}`, `${r}+${g(p)}+${g(q)}`, `(${r}+${g(p)})*${g(q)}`];
+    extras(a, ["beginn", "lauf", "wasser"], x.extra);
+    return geld(a, r * (p + q), ["Runden", "km"], "Beide geben für jede Runde etwas.");
+  },
+  dreisatz(x) {
+    const a = neu("dreisatz"), k = zufall(3, 6), b = zufall(7, 12), p = 20 * zufall(32, 64), P = k * p;
+    a.saetze = [["Herr Brunner kauft Kinderbillette für den Schulausflug."], ["Für ", ang(a, `${k} Billette`, k), " bezahlt er ", ang(a, fr(P), g(P)), "."],
+      ["Alle Billette kosten gleich viel."]];
+    a.frage = ["Wie viel kosten ", ang(a, `${b} Billette`, b), "?"];
+    a.term = `${g(P)}/${k}*${b}`;
+    a.wege = [a.term, `${g(P)}*${b}`, `${g(P)}/${b}*${k}`, `${g(P)}+${b}`];
+    extras(a, ["dauer", "abfahrt"], x.extra);
+    return geld(a, b * p, ["Billette", "min"], "Was kostet ein einziges Billett?");
+  },
+  kaese(x) {
+    const a = neu("kaese"), g1 = waehle([200, 300, 400, 500]); let g2 = 100 * zufall(6, 15);
+    const c = 10 * zufall(18, 32), P = (g1 / 100) * c;
+    a.saetze = [["Die Klasse macht Sandwiches für den Wandertag."], ["Im Laden kosten ", ang(a, `${g1} g`, g1), " Käse ", ang(a, fr(P), g(P)), "."]];
+    a.frage = ["Wie viel kosten ", ang(a, `${g2} g`, g2), " Käse?"];
+    a.term = `${g(P)}/${g1}*${g2}`;
+    a.wege = [a.term, `${g(P)}*${g2}`, `${g(P)}+${g2}-${g1}`, `${g(P)}/${g2}*${g1}`];
+    extras(a, ["laden", "einkaufen", "schluss"], x.extra);
+    return geld(a, (g2 / 100) * c, ["g", "kg"], "Was kosten 100 g Käse?");
+  },
+
+  // --- Tabelle und Diagramm (Stufe 4) ---
+  eintritt(x) {
+    const a = neu("eintritt");
+    const ort = waehle([{ ort: "in die Badi", wo: "Badi", k: [300, 500] }, { ort: "in den Zoo", wo: "Zoo", k: [800, 1200] }, { ort: "auf die Eisbahn", wo: "Eisbahn", k: [400, 600] }]);
+    const kp = 50 * zufall(ort.k[0] / 50, ort.k[1] / 50), jp = kp + 50 * zufall(2, 4), ep = jp + 50 * zufall(2, 6);
+    const sp = 50 * zufall(kp / 50 + 1, ep / 50 - 1), ne = zufall(2, 3), nk = zufall(2, 4);
+    if (sp === jp) return null;
+    a.saetze = [["Familie Keller geht ", ort.ort, ": ", ang(a, `${ne} Erwachsene`, ne), " und ", ang(a, `${nk} Kinder`, nk), " im Primarschulalter."]];
+    a.tabelle = { titel: `Eintritt ${ort.wo}`, kopf: ["", "Preis"], zeilen: [
+      ["Kinder (6 bis 15 Jahre)", ang(a, fr(kp), g(kp))], ["Jugendliche (16 bis 19 Jahre)", ang(a, fr(jp), g(jp), false)],
+      ["Erwachsene", ang(a, fr(ep), g(ep))], ["Seniorinnen und Senioren", ang(a, fr(sp), g(sp), false)]] };
+    a.frage = ["Wie viel bezahlt die Familie für die Einzeleintritte?"];
+    a.term = `${ne}*${g(ep)}+${nk}*${g(kp)}`;
+    return geld(a, ne * ep + nk * kp, ["Personen", "min"], "Erwachsene und Kinder bezahlen verschieden viel. Such in der Tabelle die passenden Zeilen.");
+  },
+  altpapier(x) {
+    const a = neu("altpapier");
+    const klassen = mische(["4a", "4b", "5a", "5b", "6a", "6b"]).slice(0, 4).sort();
+    const werte = mische([...Array(37)].map((_, i) => 120 + 10 * i)).slice(0, 4);
+    a.saetze = [["Die Klassen haben Altpapier gesammelt. Das Diagramm zeigt, wie viel."]];
+    a.diagramm = { titel: "Altpapier in kg", balken: klassen.map((k, i) => ({ name: k, wert: werte[i], ...ang(a, `${werte[i]} kg`, werte[i], false) })) };
+    const [i, j] = mische([0, 1, 2, 3]).slice(0, 2);
+    a.angaben[i].noetig = a.angaben[j].noetig = true;
+    if (Math.random() < 0.5) {
+      a.frage = [`Wie viel Altpapier haben die Klassen ${klassen[i]} und ${klassen[j]} zusammen gesammelt?`];
+      a.term = `${werte[i]}+${werte[j]}`;
+      return menge(a, werte[i] + werte[j], "kg", ["g", "t"], "Lies bei beiden Klassen die Säule ab.");
+    }
+    const [m, w] = werte[i] > werte[j] ? [i, j] : [j, i];
+    a.frage = [`Wie viel mehr hat die Klasse ${klassen[m]} gesammelt als die Klasse ${klassen[w]}?`];
+    a.term = `${werte[m]}-${werte[w]}`;
+    return menge(a, werte[m] - werte[w], "kg", ["g", "t"], "Gesucht ist der Unterschied zwischen zwei Säulen.");
+  },
+  etappen(x) {
+    const a = neu("etappen");
+    const km = mische([...Array(15)].map((_, i) => 28 + 2 * i)).slice(0, 4), hm = mische([...Array(15)].map((_, i) => 200 + 50 * i)).slice(0, 4);
+    a.saetze = [["Die 6. Klasse macht eine Velotour über vier Tage. Die Tabelle zeigt die Etappen."]];
+    a.tabelle = { titel: "Etappen der Velotour", kopf: ["", "Strecke", "Aufstieg"],
+      zeilen: km.map((k, i) => [`${i + 1}. Tag`, ang(a, `${k} km`, k, false), ang(a, `${hm[i]} m`, hm[i], false)]) };
+    const [i, j] = mische([0, 1, 2, 3]).slice(0, 2).sort();
+    a.angaben[2 * i].noetig = a.angaben[2 * j].noetig = true;
+    if (Math.random() < 0.5) {
+      a.frage = [`Wie viele Kilometer fährt die Klasse am ${ORDNUNG[i]} und am ${ORDNUNG[j]} Tag zusammen?`];
+      a.term = `${km[i]}+${km[j]}`;
+      return menge(a, km[i] + km[j], "km", ["m", "min"], "Gesucht sind die Strecken, nicht der Aufstieg.");
+    }
+    const [m, w] = km[i] > km[j] ? [i, j] : [j, i];
+    a.frage = [`Wie viel länger ist die Strecke am ${ORDNUNG[m]} Tag als am ${ORDNUNG[w]} Tag?`];
+    a.term = `${km[m]}-${km[w]}`;
+    return menge(a, km[m] - km[w], "km", ["m", "min"], "Gesucht ist der Unterschied der Strecken, nicht der Aufstieg.");
+  },
+  lagerkasse(x) {
+    const a = neu("lagerkasse"), tage = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
+    const aus = tage.map(() => 5 * zufall(1708, 4816)), B = 50 * zufall(14, 24);
+    a.saetze = [["Im Klassenlager führt die Klasse eine Lagerkasse."], ["Am Anfang sind ", ang(a, fr(B * 100), B, false), " in der Kasse."]];
+    a.tabelle = { titel: "Ausgaben der Lagerkasse", kopf: ["", "Ausgaben"], zeilen: tage.map((t, i) => [t, ang(a, fr(aus[i]), g(aus[i]), false)]) };
+    if (Math.random() < 0.5) {
+      const k = zufall(2, 3);
+      a.angaben[0].noetig = true;
+      for (let i = 0; i < k; i++) a.angaben[1 + i].noetig = true;
+      const rest = B * 100 - aus.slice(0, k).reduce((s, v) => s + v, 0);
+      if (rest <= 0) return null;
+      a.frage = [`Wie viel Geld ist nach dem ${tage[k - 1]} noch in der Kasse?`];
+      a.term = `${B}-(${aus.slice(0, k).map(g).join("+")})`;
+      return geld(a, rest, ["Tage", "kg"], "Vom Geld am Anfang gehen die Ausgaben bis und mit diesem Tag weg.");
+    }
+    const [i, j] = mische([0, 1, 2, 3, 4]).slice(0, 2).sort();
+    a.angaben[1 + i].noetig = a.angaben[1 + j].noetig = true;
+    a.frage = [`Wie viel gab die Klasse am ${tage[i]} und am ${tage[j]} zusammen aus?`];
+    a.term = `${g(aus[i])}+${g(aus[j])}`;
+    return geld(a, aus[i] + aus[j], ["Tage", "kg"], "Gesucht sind nur die Ausgaben an diesen zwei Tagen.");
+  },
+  runden(x) {
+    const a = neu("runden");
+    const leute = mische(NAMEN).slice(0, 4).map(n => n[0]), werte = mische([...Array(17)].map((_, i) => 8 + i)).slice(0, 4);
+    a.saetze = [["Beim Sponsorenlauf zählt die Klasse die Runden. Das Diagramm zeigt vier Kinder."]];
+    a.diagramm = { titel: "Gelaufene Runden", balken: leute.map((n, i) => ({ name: n, wert: werte[i], ...ang(a, `${werte[i]}`, werte[i], false) })) };
+    const [i, j] = mische([0, 1, 2, 3]).slice(0, 2);
+    a.angaben[i].noetig = a.angaben[j].noetig = true;
+    if (Math.random() < 0.5) {
+      a.frage = [`Wie viele Runden sind ${leute[i]} und ${leute[j]} zusammen gelaufen?`];
+      a.term = `${werte[i]}+${werte[j]}`;
+      return menge(a, werte[i] + werte[j], "Runden", ["km", "Fr."], "Lies bei beiden Kindern die Säule ab.");
+    }
+    const [m, w] = werte[i] > werte[j] ? [i, j] : [j, i];
+    a.frage = [`Wie viele Runden ist ${leute[m]} mehr gelaufen als ${leute[w]}?`];
+    a.term = `${werte[m]}-${werte[w]}`;
+    return menge(a, werte[m] - werte[w], "Runden", ["km", "Fr."], "Gesucht ist der Unterschied zwischen zwei Säulen.");
+  },
+
+  // --- proportional oder linear (Stufe 5) ---
+  taxi(x) {
+    const a = neu("taxi"), gt = zufall(6, 8), k = 10 * zufall(32, 42), n = zufall(3, 15);
+    a.saetze = [["Ein Taxi verlangt ", ang(a, fr(gt * 100), gt), " Grundtaxe und ", ang(a, fr(k), g(k)), " pro Kilometer."]];
+    a.frage = ["Was kostet eine Fahrt von ", ang(a, `${n} km`, n), "?"];
+    a.term = `${gt}+${n}*${g(k)}`;
+    a.zusammenhang = "linear";
+    extras(a, ["taxidauer", "plaetze"], x.extra);
+    return geld(a, gt * 100 + n * k, ["km", "min"], "Rechne den Preis für die Kilometer. Fehlt noch etwas?");
+  },
+  kurier(x) {
+    const a = neu("kurier"), k = 10 * zufall(22, 36), n = zufall(3, 15);
+    a.saetze = [["Ein Velokurier bringt Pakete durch die Stadt."], ["Er verlangt ", ang(a, fr(k), g(k)), " für jeden Kilometer, sonst nichts."]];
+    a.frage = ["Was kostet eine Fahrt von ", ang(a, `${n} km`, n), "?"];
+    a.term = `${n}*${g(k)}`;
+    a.zusammenhang = "proportional";
+    extras(a, ["taxidauer", "paket"], x.extra);
+    return geld(a, n * k, ["km", "min"], "Für jeden Kilometer kommt gleich viel dazu.");
+  },
+  velomiete(x) {
+    const a = neu("velomiete"), gt = zufall(5, 10), s = 50 * zufall(6, 12), h = zufall(2, 6);
+    a.saetze = [["Beim Veloverleih kostet die Miete ", ang(a, fr(gt * 100), gt), " Grundgebühr und ", ang(a, fr(s), g(s)), " pro Stunde."]];
+    a.frage = ["Was kostet die Miete für ", ang(a, `${h} Stunden`, h), "?"];
+    a.term = `${gt}+${h}*${g(s)}`;
+    a.zusammenhang = "linear";
+    extras(a, ["tour", "verleih"], x.extra);
+    return geld(a, gt * 100 + h * s, ["Stunden", "km"], "Rechne den Preis für die Stunden. Fehlt noch etwas?");
+  },
+  becken(x) {
+    const a = neu("becken"), b = zufall(12, 30), m = zufall(5, 20), s = 10 * zufall(5, 20);
+    a.saetze = [["Ein Planschbecken wird mit dem Schlauch gefüllt."], ["Es sind schon ", ang(a, `${s} Liter`, s), " Wasser darin."],
+      ["Jede Minute fliessen ", ang(a, `${b} Liter`, b), " dazu."]];
+    a.frage = ["Wie viel Wasser ist nach ", ang(a, `${m} min`, m), " im Becken?"];
+    a.term = `${s}+${m}*${b}`;
+    a.zusammenhang = "linear";
+    extras(a, ["laenge", "waerme"], x.extra);
+    return menge(a, s + m * b, "Liter", ["min", "kg"], "Rechne, wie viel in dieser Zeit dazukommt. War schon etwas da?");
+  },
+  becken0(x) {
+    const a = neu("becken0"), b = zufall(12, 30), m = zufall(5, 20);
+    a.saetze = [["Ein leeres Planschbecken wird mit dem Schlauch gefüllt."], ["Jede Minute fliessen ", ang(a, `${b} Liter`, b), " hinein."]];
+    a.frage = ["Wie viel Wasser ist nach ", ang(a, `${m} min`, m), " im Becken?"];
+    a.term = `${m}*${b}`;
+    a.zusammenhang = "proportional";
+    extras(a, ["laenge", "waerme"], x.extra);
+    return menge(a, m * b, "Liter", ["min", "kg"], "Jede Minute kommt gleich viel dazu.");
+  },
+  gruppe(x) {
+    const a = neu("gruppe"), r = 5 * zufall(4, 8), p = 20 * zufall(30, 60), n = zufall(18, 26);
+    a.saetze = [["Für eine Gruppenreise verlangt die Bahn ", ang(a, fr(r * 100), r), " für die Reservation."], ["Dazu kostet jedes Billett ", ang(a, fr(p), g(p)), "."]];
+    a.frage = ["Was kostet die Reise für ", ang(a, `${n} Kinder`, n), "?"];
+    a.term = `${r}+${n}*${g(p)}`;
+    a.zusammenhang = "linear";
+    extras(a, ["dauer", "abfahrt"], x.extra);
+    return geld(a, r * 100 + n * p, ["Kinder", "min"], "Rechne den Preis für alle Billette. Fehlt noch etwas?");
+  },
+  billettProp(x) {
+    const a = neu("billettProp"), p = 20 * zufall(30, 60), n = zufall(18, 26);
+    a.saetze = [["Die Klasse fährt mit der Bahn ins Museum."], ["Jedes Kinderbillett kostet ", ang(a, fr(p), g(p)), ". Eine Reservation braucht es nicht."]];
+    a.frage = ["Was kostet die Reise für ", ang(a, `${n} Kinder`, n), "?"];
+    a.term = `${n}*${g(p)}`;
+    a.zusammenhang = "proportional";
+    extras(a, ["dauer", "abfahrt"], x.extra);
+    return geld(a, n * p, ["Kinder", "min"], "Jedes Kind braucht ein Billett.");
+  },
+
+  // --- mehrere Schritte (Stufe 6) ---
+  lager(x) {
+    const a = neu("lager"), n = zufall(18, 24), l = zufall(2, 4), u = 2 * zufall(18, 29), t = zufall(3, 5);
+    const z = 100 * zufall(4, 16);
+    a.saetze = [["Ins Klassenlager fahren ", ang(a, `${n} Kinder`, n), " und ", ang(a, `${l} Begleitpersonen`, l), "."],
+      ["Eine Übernachtung mit Essen kostet ", ang(a, fr(u * 100), u), " pro Person."], ["Das Lager dauert ", ang(a, `${t} Nächte`, t), "."],
+      ["Die Gemeinde bezahlt ", ang(a, fr(z * 100), z), " an das Lager."]];
+    a.frage = ["Wie viel muss die Lagerkasse noch bezahlen?"];
+    a.term = `(${n}+${l})*${u}*${t}-${z}`;
+    a.plan = "Wie viele Personen sind es? Was kostet eine Nacht für alle? Und alle Nächte?";
+    extras(a, ["hoehe", "car", "zimmer"], x.extra);
+    return geld(a, ((n + l) * u * t - z) * 100, ["Personen", "Nächte"], "Die Begleitpersonen übernachten auch. Was die Gemeinde bezahlt, muss die Kasse nicht mehr zahlen.");
+  },
+  taxi2(x) {
+    const a = neu("taxi2"), gt = zufall(6, 8), k = 10 * zufall(32, 42), n1 = zufall(2, 5), n2 = n1 + zufall(3, 8);
+    let n3; do { n3 = zufall(3, 15); } while (n3 === n1 || n3 === n2);
+    const P1 = gt * 100 + n1 * k, P2 = gt * 100 + n2 * k, E = gt * 100 + n3 * k;
+    a.saetze = [["Ein Taxi verlangt eine Grundtaxe und einen festen Preis pro Kilometer."],
+      ["Eine Fahrt von ", ang(a, `${n1} km`, n1), " kostet ", ang(a, fr(P1), g(P1)), "."],
+      ["Eine Fahrt von ", ang(a, `${n2} km`, n2), " kostet ", ang(a, fr(P2), g(P2)), "."]];
+    a.frage = ["Was kostet eine Fahrt von ", ang(a, `${n3} km`, n3), "?"];
+    a.term = `${g(P1)}+(${g(P2)}-${g(P1)})/(${n2}-${n1})*(${n3}-${n1})`;
+    a.loesung = `Pro km: (${termText(g(P2))} − ${termText(g(P1))}) : ${n2 - n1} = ${fr(k)}; Grundtaxe: ${termText(g(P1))} − ${n1} × ${termText(g(k))} = ${fr(gt * 100)}; ${gt} + ${n3} × ${termText(g(k))} = ${fr(E)}`;
+    a.plan = "Die längere Fahrt kostet mehr, weil sie mehr Kilometer hat. Was kostet also ein Kilometer?";
+    extras(a, ["taxidauer", "plaetze"], x.extra);
+    return geld(a, E, ["km", "min"], "Vergleiche die zwei Fahrten: Wie viele Kilometer mehr, wie viel teurer?");
+  },
+  velozeit(x) {
+    const a = neu("velozeit"), v = waehle([12, 15, 16, 18, 20]);
+    const minuten = [...Array(13)].map((_, i) => 60 + 15 * i).filter(m => (v * m) % 60 === 0);
+    const m = waehle(minuten), d = (v * m) / 60, k = zufall(2, 3), p = waehle([10, 15, 20]);
+    a.saetze = [["Die Klasse fährt mit dem Velo zum See."], ["Die Strecke ist ", ang(a, `${d} km`, d), " lang."],
+      ["Die Klasse fährt im Durchschnitt ", ang(a, `${v} km pro Stunde`, v), "."], ["Unterwegs macht sie ", ang(a, `${k} Pausen`, k), " von je ", ang(a, `${p} min`, p), "."]];
+    a.frage = ["Wie lange ist die Klasse insgesamt unterwegs? Gib die Zeit in Minuten an."];
+    a.term = `${d}/${v}*60+${k}*${p}`;
+    a.konstanten = ["60"];
+    a.plan = "Wie viele Stunden fährt sie? Wie viele Minuten sind das? Dann kommen die Pausen dazu.";
+    extras(a, ["start", "gaenge", "pass"], x.extra);
+    return menge(a, m + k * p, "min", ["km", "m"], "Rechne zuerst die Fahrzeit ohne Pausen.");
+  },
+  teigwaren(x) {
+    const a = neu("teigwaren"), [pk, gr, schritt] = waehle([[500, 100, 5], [500, 125, 4], [500, 150, 10], [1000, 125, 8]]);
+    const n = schritt * zufall(Math.ceil(16 / schritt), Math.floor(30 / schritt)), p = pk === 500 ? 10 * zufall(14, 26) : 10 * zufall(24, 42);
+    a.saetze = [["Im Klassenlager gibt es Teigwaren."], ["Die Köchin rechnet mit ", ang(a, `${gr} g`, gr), " pro Kind."],
+      ["Es essen ", ang(a, `${n} Kinder`, n), " mit."], ["Eine Packung mit ", ang(a, `${pk} g`, pk), " kostet ", ang(a, fr(p), g(p)), "."]];
+    a.frage = ["Wie viel kosten die Teigwaren für alle Kinder?"];
+    a.term = `${n}*${gr}/${pk}*${g(p)}`;
+    a.plan = "Wie viele Gramm braucht es für alle? Wie viele Packungen sind das?";
+    extras(a, ["kochen", "zimmer", "hoehe"], x.extra);
+    return geld(a, (n * gr / pk) * p, ["g", "Packungen"], "Rechne zuerst, wie viel Teigwaren alle Kinder zusammen essen.");
+  },
+  sponsor6(x) {
+    const a = neu("sponsor6"), [wer, sein] = name(), m = waehle([200, 250, 400, 500]);
+    const runden = [...Array(23)].map((_, i) => 8 + i).filter(r => (r * m) % 1000 === 0);
+    const r = waehle(runden), p = waehle([200, 250, 300, 400, 500]);
+    a.saetze = [["Beim Sponsorenlauf läuft ", wer, " ", ang(a, `${r} Runden`, r), "."], ["Eine Runde ist ", ang(a, `${m} m`, m), " lang."],
+      [`${sein === "Ihre" ? "Ihre" : "Seine"} Tante bezahlt `, ang(a, fr(p), g(p)), " pro Kilometer."]];
+    a.frage = [`Wie viel Geld gibt die Tante für den Lauf von ${wer}?`];
+    a.term = `${r}*${m}/1000*${g(p)}`;
+    a.konstanten = ["1000"];
+    a.plan = "Wie viele Meter sind es? Wie viele Kilometer sind das?";
+    extras(a, ["beginn", "lauf", "wasser"], x.extra);
+    return geld(a, (r * m / 1000) * p, ["km", "Runden"], "Die Tante bezahlt pro Kilometer, nicht pro Runde.");
+  },
+  einkauf6(x) {
+    const a = neu("einkauf6"); let n1, p1, n2, p2, s;
+    do { n1 = zufall(2, 5); p1 = 10 * zufall(28, 48); n2 = zufall(2, 6); p2 = 10 * zufall(18, 32); s = waehle([50, 100]); }
+    while (n1 * p1 + n2 * p2 >= s * 100 - 200);
+    a.saetze = [["Die Köchin kauft für das Lager ein."], ["Sie nimmt ", ang(a, `${n1} kg`, n1), " Äpfel zu ", ang(a, fr(p1), g(p1)), " pro Kilogramm",
+      " und ", ang(a, `${n2} Packungen`, n2), " Reis zu je ", ang(a, fr(p2), g(p2)), "."], ["Sie bezahlt mit ", ang(a, fr(s * 100), s), "."]];
+    a.frage = ["Wie viel Rückgeld bekommt sie?"];
+    a.term = `${s}-(${n1}*${g(p1)}+${n2}*${g(p2)})`;
+    a.plan = "Was kosten die Äpfel? Was kostet der Reis? Was kostet alles zusammen?";
+    extras(a, ["laden", "schluss", "einkaufen"], x.extra);
+    return geld(a, s * 100 - n1 * p1 - n2 * p2, ["kg", "Packungen"], "Rechne zuerst, was der ganze Einkauf kostet.");
+  },
+};
+
+/** Ergebnis in Franken (ganzzahlig in Rappen). */
+function geld(a, rp, andere, tipp) { return Object.assign(a, { ergebnis: rp, einheit: "Fr.", einheiten: ["Fr.", ...andere], tipp }); }
+/** Ergebnis als ganze Zahl mit Einheit. */
+function menge(a, n, einheit, andere, tipp) { return Object.assign(a, { ergebnis: n, einheit, einheiten: [einheit, ...andere], tipp }); }
+
+// Je Stufe: Ablauf (Phasen) und Vorlagen; extra = Anzahl überflüssiger Sätze [von, bis].
+const STUFE = {
+  s1: { phasen: ["weg", "ergebnis"], vorlagen: ["billette1", "velo1summe", "velo1mal", "rueckgeld1", "znueni1", "teams1", "staffel1"], extra: [0, 0] },
+  s2: { phasen: ["weg", "ergebnis"], vorlagen: ["billette2", "lagerkosten", "velo2", "einkauf2", "glace2", "baelle2", "sponsor2"], extra: [0, 0] },
+  s3: { phasen: ["angaben", "weg", "ergebnis"], vorlagen: ["billette2", "lagerkosten", "velo2", "einkauf2", "glace2", "baelle2", "sponsor2", "dreisatz", "kaese"], extra: [1, 2] },
+  s4: { phasen: ["angaben", "ergebnis"], vorlagen: ["eintritt", "altpapier", "etappen", "lagerkasse", "runden"], extra: [0, 0] },
+  s5: { phasen: ["angaben", "zusammenhang", "ergebnis"], vorlagen: ["taxi", "kurier", "velomiete", "becken", "becken0", "gruppe", "billettProp"], extra: [1, 1] },
+  s6: { phasen: ["angaben", "ergebnis"], vorlagen: ["lager", "taxi2", "velozeit", "teigwaren", "sponsor6", "einkauf6"], extra: [1, 2] },
+};
+const PROPORTIONAL = ["kurier", "becken0", "billettProp"];
+
+// ---------- Rechnen mit Termen ----------
+
+/** Wert eines Terms aus Zahlen, + - * / und Klammern; NaN, wenn er nicht lesbar ist. */
+function rechne(term) {
+  const t = term.match(/\d+(?:\.\d+)?|[-+*/()]/g) || [];
+  let i = 0;
+  const faktor = () => { if (t[i] === "(") { i++; const v = summe(); if (t[i++] !== ")") return NaN; return v; } return Number(t[i++]); };
+  const produkt = () => { let v = faktor(); while (t[i] === "*" || t[i] === "/") { const op = t[i++], w = faktor(); v = op === "*" ? v * w : v / w; } return v; };
+  const summe = () => { let v = produkt(); while (t[i] === "+" || t[i] === "-") { const op = t[i++], w = produkt(); v = op === "+" ? v + w : v - w; } return v; };
+  const v = summe();
+  return i === t.length ? v : NaN;
+}
+const ZEICHEN = { "*": " × ", "/": " : ", "+": " + ", "-": " − " };
+/** Term so, wie die Schule ihn schreibt: × und :, Dezimalzahlen mit dem eingestellten Zeichen. */
+const termText = term => term.replace(/\d+(?:\.\d+)?|[-+*/]/g, s => ZEICHEN[s] ?? (s.includes(".") ? dezimalText(Number(s), s.split(".")[1].length) : zahlText(Number(s))));
+const zahlenIm = term => term.match(/\d+(?:\.\d+)?/g) || [];
+const ergebnisText = a => (a.einheit === "Fr." ? fr(a.ergebnis) : `${zahlText(a.ergebnis)} ${a.einheit}`);
+const loesungVon = a => a.loesung || `${termText(a.term)} = ${ergebnisText(a)}`;
+/** Alle Textteile der Aufgabe (für die Kennung gegen Wiederholungen). */
+const teileText = teile => teile.map(t => (typeof t === "string" ? t : `[${t.a}]`)).join("");
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let versuch = 0; versuch < 500; versuch++) {
+    let vorlagen = p.vorlagen, zusammenhang = null;
+    if (p.phasen.includes("zusammenhang")) {
+      zusammenhang = Math.random() < 0.5 ? "proportional" : "linear";
+      vorlagen = vorlagen.filter(v => PROPORTIONAL.includes(v) === (zusammenhang === "proportional"));
+    }
+    const a = VORLAGEN[waehle(vorlagen)]({ extra: zufall(p.extra[0], p.extra[1]) });
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return VORLAGEN.billette1({ extra: 0 });
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.vorlagen.includes(a.vorlage)) m.push(`Vorlage ${a.vorlage} nicht in der Stufe`);
+  // Jede Angabe kommt genau einmal vor, mit eigenem Wert und eigenem Text.
+  const verweise = [];
+  const sammle = teile => { for (const t of teile) if (typeof t === "object" && t) verweise.push(t.a); };
+  a.saetze.forEach(sammle); sammle(a.frage);
+  if (a.tabelle) a.tabelle.zeilen.forEach(sammle);
+  if (a.diagramm) sammle(a.diagramm.balken);
+  if (verweise.length !== a.angaben.length || new Set(verweise).size !== a.angaben.length) m.push("Angabe fehlt oder kommt doppelt vor");
+  if (new Set(a.angaben.map(x => x.wert)).size !== a.angaben.length) m.push("zwei Angaben mit derselben Zahl");
+  if (new Set(a.angaben.map(x => x.text)).size !== a.angaben.length) m.push("zwei Angaben mit demselben Text");
+  const noetig = a.angaben.filter(x => x.noetig), unnoetig = a.angaben.filter(x => !x.noetig);
+  if (noetig.length < 2) m.push("weniger als zwei wichtige Angaben");
+  // Der Term braucht genau die wichtigen Angaben (und feste Umrechnungszahlen wie 60 oder 1000).
+  const imTerm = zahlenIm(a.term);
+  for (const x of noetig) if (!imTerm.includes(x.wert)) m.push(`wichtige Angabe ${x.text} fehlt im Term`);
+  for (const x of unnoetig) if (imTerm.includes(x.wert)) m.push(`überflüssige Angabe ${x.text} steht im Term`);
+  for (const z of imTerm) if (!noetig.some(x => x.wert === z) && !a.konstanten.includes(z) && !(a.vorlage === "velo2" && z === "1")) m.push(`Zahl ${z} im Term ohne Angabe`);
+  // Term und Ergebnis sind getrennt gerechnet; sie müssen übereinstimmen.
+  const faktor = a.einheit === "Fr." ? 100 : 1;
+  const wert = rechne(a.term);
+  if (!Number.isInteger(a.ergebnis) || a.ergebnis <= 0) m.push("Ergebnis keine positive ganze Zahl");
+  if (!(Math.abs(wert * faktor - a.ergebnis) < 1e-6)) m.push(`Term ${a.term} ergibt ${wert}, nicht ${a.ergebnis / faktor}`);
+  if (a.ergebnis / faktor >= 100000) m.push("Ergebnis ausserhalb des Zahlenraums");
+  if (a.einheit === "Fr." && a.ergebnis % 5) m.push("Geldbetrag nicht auf 5 Rappen");
+  // Überflüssige Angaben je Stufe
+  const imText = unnoetig.filter(x => !(a.tabelle || a.diagramm) || a.saetze.some(s => s.some(t => typeof t === "object" && a.angaben[t.a] === x))).length;
+  if (stufe === "s1" || stufe === "s2") { if (unnoetig.length) m.push("überflüssige Angabe in Stufe 1 oder 2"); }
+  else if (!unnoetig.length) m.push("keine überflüssige Angabe");
+  if (imText > 2) m.push("zu viele überflüssige Sätze");
+  if (stufe === "s4" && !(a.tabelle || a.diagramm)) m.push("Stufe 4 ohne Tabelle oder Diagramm");
+  // Rechenwege: genau einer richtig, alle verschieden
+  if (p.phasen.includes("weg")) {
+    if (!a.wege || a.wege[0] !== a.term) m.push("Rechenweg fehlt");
+    else {
+      const werte = a.wege.map(rechne);
+      if (werte.some(w => !Number.isFinite(w) || w < 0)) m.push("Rechenweg nicht rechenbar oder negativ");
+      if (werte.slice(1).some(w => Math.abs(w - werte[0]) < 1e-9)) m.push("falscher Rechenweg mit richtigem Ergebnis");
+      if (new Set(a.wege.map(termText)).size !== a.wege.length) m.push("doppelter Rechenweg");
+      if (a.wege.length < 3) m.push("zu wenige Rechenwege");
+    }
+  }
+  if (p.phasen.includes("zusammenhang")) {
+    const soll = PROPORTIONAL.includes(a.vorlage) ? "proportional" : "linear";
+    if (a.zusammenhang !== soll) m.push("Zusammenhang falsch");
+    // Probe: proportional heisst doppelte Menge, doppeltes Ergebnis
+    const letzte = a.frage.find(t => typeof t === "object");
+    if (letzte) {
+      const w = a.angaben[letzte.a].wert, doppelt = rechne(a.term.replace(new RegExp(`(?<![\\d.])${w.replace(".", "\\.")}(?![\\d.])`), String(2 * Number(w))));
+      if ((Math.abs(doppelt - 2 * wert) < 1e-9) !== (soll === "proportional")) m.push("Probe mit dem Doppelten passt nicht zum Zusammenhang");
+    } else m.push("Frage ohne Angabe");
+  }
+  if (new Set(a.einheiten).size !== 3 || a.einheiten.filter(e => e === a.einheit).length !== 1) m.push("Einheiten nicht drei verschiedene");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Text mit Angaben: als Knöpfe zum Antippen oder fest hervorgehoben. */
+function teileEl(a, teile, knoepfe) {
+  return teile.map(t => (typeof t === "string" ? t : knoepfe[t.a]));
+}
+
+function tabelleEl(a, knoepfe) {
+  const t = a.tabelle;
+  const tab = el("table", { class: "kompass-tabelle" }, el("caption", { text: t.titel }),
+    el("tr", {}, ...t.kopf.map(k => el("th", { text: k }))),
+    ...t.zeilen.map(z => el("tr", {}, ...z.map((c, i) => (typeof c === "string" ? el("td", { class: i === 0 ? "name" : "", text: c }) : el("td", {}, knoepfe[c.a]))))));
+  return el("div", { class: "kompass-tabelle-rahmen" }, tab);
+}
+
+function diagrammEl(a, knoepfe) {
+  const d = a.diagramm, max = Math.max(...d.balken.map(b => b.wert));
+  return el("div", { class: "kompass-diagramm" }, el("div", { class: "titel", text: d.titel }),
+    el("div", { class: "kompass-saeulen" }, ...d.balken.map(b => el("div", { class: "kompass-saeule" }, knoepfe[b.a],
+      el("div", { class: "balken", style: `height:${Math.round(150 * b.wert / max)}px` })))),
+    el("div", { class: "kompass-namen" }, ...d.balken.map(b => el("span", { text: b.name }))));
+}
+
+const SCHRITT_TEXT = {
+  angaben: "① Tippe die Angaben an, die du für die Frage brauchst.",
+  weg: "② Welcher Rechenweg passt?",
+  zusammenhang: "② Wie hängt das Ergebnis von der Menge ab?",
+  ergebnis: "③ Rechne und gib das Ergebnis mit Einheit an.",
+};
+
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst die Frage lesen, dann der Hinweis der Vorlage
+ * (a.tipp, a.plan) — beide nennen keinen Term und kein Ergebnis. In Stufe 5 nicht a.tipp: er verriete,
+ * ob ein fester Teil dazukommt, also den Zusammenhang; dort nur die Probe mit dem Doppelten.
+ */
+function tippsFuer(a, p) {
+  const erst = p.phasen.includes("angaben")
+    ? "Lies zuerst die Frage. Tippe nur die Zahlen an, die du dafür brauchst — manche Sätze lenken nur ab."
+    : "Lies zuerst die Frage: Was ist gesucht, und in welcher Einheit?";
+  if (p.phasen.includes("zusammenhang")) return [erst, "Mach die Probe mit dem Doppelten: Kostet oder ergibt die doppelte Menge genau das Doppelte? Oder kommt ein fester Teil immer dazu?"];
+  return [erst, a.tipp, a.plan].filter(Boolean);
+}
+
+LS.spiel({
+  id: "sachaufgaben-kompass",
+  einleitung: "Ein Sachtext steckt voller Zahlen. Finde heraus, welche du wirklich brauchst, wähle den Rechenweg und gib das Ergebnis mit der richtigen Einheit an!",
+  hilfe: stufe => {
+    const ph = STUFE[stufe]?.phasen || ["angaben", "weg", "zusammenhang", "ergebnis"];
+    const t = ["Lies den Sachtext und die Frage. Die Aufgabe geht in Schritten, oben steht jeweils, was zu tun ist."];
+    if (ph.includes("angaben")) t.push("Tippe die Zahlen an, die du brauchst (nochmals antippen nimmt sie weg), dann „Prüfen ✓“.");
+    if (ph.includes("weg")) t.push("Tippe den passenden Rechenweg an.");
+    if (ph.includes("zusammenhang")) t.push("Tippe an, ob das Ergebnis proportional zur Menge wächst oder nicht.");
+    t.push("Zum Schluss tippst du das Ergebnis ein, wählst die Einheit und drückst OK.");
+    return t.join(" ");
+  },
+  anzahl: 6,
+  stufen: {
+    s1: "Eine Rechnung: 24 Kinder, ein Billett kostet 12 Fr. — Rechenweg wählen, Ergebnis mit Einheit.",
+    s2: "Zwei Schritte: Kinder und Erwachsene, Rückgeld nach dem Einkauf.",
+    s3: "Nur die wichtigen Zahlen antippen, auch Dreisatz: 3 Billette kosten 21.60 Fr. (Lehrplan 6. Klasse).",
+    s4: "Angaben aus Tabelle und Säulendiagramm: Eintrittspreise, Altpapier, Lagerkasse.",
+    s5: "Proportional oder nicht? Taxi mit Grundtaxe und Preis pro km (7. Klasse).",
+    s6: "Endgegner: viele Schritte — Lagerkosten, zwei Taxifahrten, Velozeit mit Pausen.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const a = aufgabeErzeugen(ctx.stufe);
+    const f = ctx.flaeche;
+    const loesungText = loesungVon(a);
+    ctx.loesung(loesungText);
+    ctx.kennung(`${a.vorlage}|${a.saetze.map(teileText).join(" ")}|${teileText(a.frage)}|${a.angaben.map(x => x.text).join(",")}`);
+    ctx.serie("vorlage", a.vorlage);
+    if (a.zusammenhang) ctx.serie("zusammenhang", a.zusammenhang);
+    ctx.tipp(tippsFuer(a, p));
+
+    const tippen = p.phasen.includes("angaben");
+    const knoepfe = a.angaben.map(x => (tippen
+      ? el("button", { type: "button", class: "angabe", text: x.text, "aria-pressed": "false" })
+      : el("span", { class: "angabe", text: x.text })));
+    f.append(el("div", { class: "kompass-text sachtext" }, ...a.saetze.flatMap((s, i) => [...(i ? [" "] : []), ...teileEl(a, s, knoepfe)])));
+    if (a.tabelle) f.append(tabelleEl(a, knoepfe));
+    if (a.diagramm) f.append(diagrammEl(a, knoepfe));
+    f.append(el("div", { class: "frage" }, ...teileEl(a, a.frage, knoepfe)));
+    const schritt = el("div", { class: "kompass-schritt", "aria-live": "polite" });
+    const bereich = el("div", {});
+    f.append(schritt, bereich);
+
+    // Handgriffe: Angaben antippen und Prüfen, je ein Tipp für Weg und Zusammenhang, Ziffern, Einheit und OK.
+    const st = a.einheit === "Fr." ? 2 : 0;
+    ctx.schritte(p.phasen.reduce((s, ph) => s + (ph === "angaben" ? a.angaben.filter(x => x.noetig).length + 1
+      : ph === "ergebnis" ? LS.tippSchritte(a.ergebnis / 10 ** st) + 1 : 1), 0));
+
+    const phasen = [...p.phasen];
+    const weiter = () => {
+      const ph = phasen.shift();
+      bereich.innerHTML = "";
+      schritt.textContent = SCHRITT_TEXT[ph];
+      ({ angaben: phaseAngaben, weg: phaseWeg, zusammenhang: phaseZusammenhang, ergebnis: phaseErgebnis })[ph]();
+    };
+
+    function phaseAngaben() {
+      knoepfe.forEach(k => k.addEventListener("click", () => {
+        if (ctx.vorbei() || k.disabled) return;
+        const an = !k.classList.contains("gewaehlt");
+        k.classList.toggle("gewaehlt", an);
+        k.setAttribute("aria-pressed", String(an));
+        LS.ton("tipp");
+      }));
+      const pruefen = el("button", { type: "button", class: "knopf", text: "Prüfen ✓", onclick() {
+        if (ctx.vorbei()) return;
+        const gewaehlt = knoepfe.map(k => k.classList.contains("gewaehlt"));
+        if (!gewaehlt.some(Boolean)) { ctx.sag("Tippe zuerst die Zahlen an, die du brauchst.", "hinweis"); return; }
+        const fehlt = a.angaben.some((x, i) => x.noetig && !gewaehlt[i]), zuviel = a.angaben.some((x, i) => !x.noetig && gewaehlt[i]);
+        if (!fehlt && !zuviel) {
+          knoepfe.forEach((k, i) => { k.disabled = true; k.classList.remove("gewaehlt"); k.classList.add(a.angaben[i].noetig ? "richtig" : "unnoetig"); });
+          LS.ton("tipp");
+          weiter();
+          return;
+        }
+        ctx.falsch(fehlt && zuviel ? "Eine Zahl brauchst du nicht, und eine wichtige fehlt noch. Lies die Frage nochmal."
+          : fehlt ? "Es fehlt noch eine wichtige Angabe. Was brauchst du alles für die Frage?"
+          : "Du hast eine Zahl gewählt, die du für diese Frage nicht brauchst.", loesungText);
+        if (ctx.vorbei()) knoepfe.forEach(k => { k.disabled = true; });
+      } });
+      bereich.append(el("div", { class: "kompass-pruefen" }, pruefen));
+    }
+
+    /** Auswahl in einem Zwischenschritt: richtig führt weiter, falsch zählt als Fehlversuch. */
+    function wahl(optionen, richtig, inhalt, hinweis, klasse) {
+      const box = el("div", { class: `wahl ${klasse}` });
+      let fertig = false;
+      for (const o of optionen) {
+        const k = el("button", { type: "button", class: "wahl-knopf" });
+        const i = inhalt(o);
+        if (typeof i === "string") k.textContent = i;
+        else { k.append(el("span", { text: i.text })); if (i.klein) k.append(el("small", { text: i.klein })); }
+        k.addEventListener("click", () => {
+          if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+          if (o === richtig) { fertig = true; k.classList.add("richtig"); LS.ton("tipp"); setTimeout(weiter, 400); return; }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+          ctx.falsch(hinweis, loesungText);
+          if (ctx.vorbei()) fertig = true;
+        });
+        box.append(k);
+      }
+      bereich.append(box);
+    }
+
+    function phaseWeg() {
+      wahl(mische(a.wege), a.term, termText, a.tipp, "kompass-weg");
+    }
+
+    function phaseZusammenhang() {
+      wahl(["proportional", "linear"], a.zusammenhang,
+        o => (o === "proportional" ? { text: "📈 proportional", klein: "doppelt so viel → doppeltes Ergebnis" } : { text: "➕ linear, nicht proportional", klein: "ein fester Teil ist immer dabei" }),
+        "Mach die Probe mit dem Doppelten: Wird das Ergebnis auch genau doppelt so gross?", "kompass-zusammenhang");
+    }
+
+    function phaseErgebnis() {
+      let einheit = null, versuche = 0;
+      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Dein Ergebnis" });
+      const einheiten = el("div", { class: "kompass-einheiten", role: "group", "aria-label": "Einheit" });
+      for (const e of mische(a.einheiten)) {
+        const k = el("button", { type: "button", class: "kompass-einheit", text: e, "aria-pressed": "false", onclick() {
+          if (ctx.vorbei() || tasten.gesperrt) return;
+          einheit = e;
+          einheiten.querySelectorAll(".kompass-einheit").forEach(b => { const an = b === k; b.classList.toggle("gewaehlt", an); b.setAttribute("aria-pressed", String(an)); });
+          LS.ton("tipp");
+        } });
+        einheiten.append(k);
+      }
+      const ganz = String(Math.floor(a.ergebnis / 10 ** st)).length;
+      const tasten = LS.tastatur({
+        anzeige, maxStellen: Math.max(3, ganz + 1), dezimal: st > 0, nachkomma: st,
+        onOk(w) {
+          if (!einheit) { ctx.sag("Wähle noch die Einheit.", "hinweis"); return; }
+          const zahlStimmt = Math.abs(w * 10 ** st - a.ergebnis) < 1e-6;
+          if (zahlStimmt && einheit === a.einheit) {
+            tasten.gesperrt = true;
+            anzeige.classList.add("richtig");
+            ctx.richtig(`Richtig: ${ergebnisText(a)}`);
+            return;
+          }
+          anzeige.classList.add("falsch");
+          versuche++;
+          ctx.falsch(zahlStimmt ? "Die Zahl stimmt. Welche Einheit passt zur Frage?"
+            : versuche === 1 ? a.tipp : a.plan || `Rechenweg: ${termText(a.term)}. Rechne Schritt für Schritt.`, loesungText);
+          if (ctx.vorbei()) tasten.gesperrt = true;
+        },
+      });
+      bereich.append(el("div", { class: "kompass-antwort" }, anzeige, einheiten), tasten.element);
+    }
+
+    weiter();
+    if (ctx.nr === 0) ctx.sag(tippen ? "Tipp: Lies zuerst die Frage. Tippe dann nur die Zahlen an, die du dafür brauchst." : "Tipp: Lies zuerst die Frage. Was ist gesucht? Dann wähle den Rechenweg.");
+  },
+});
+</script>
+</body>
+</html>

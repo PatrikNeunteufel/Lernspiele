@@ -108,8 +108,30 @@ const STUFEN_TEXT = {
   s6: "Endgegner: zwei Sätze hintereinander.",
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie die Tastatur aufgebaut ist und worauf beim Abtippen
+ * zu achten ist — ohne einen Buchstaben zu nennen. Beim einzelnen Buchstaben zuletzt die Reihe.
+ */
+function tippsFuer(a, art) {
+  const t = a.text;
+  if (art === "buchstabe") {
+    const reihe = REIHEN.findIndex(r => r.includes(t));
+    return ["Die Tasten stehen nicht nach dem ABC. Such Reihe für Reihe, von links nach rechts.",
+      `Der Buchstabe steht in der ${["oberen", "mittleren", "unteren"][reihe]} Reihe.`];
+  }
+  const liste = [art === "wort" ? "Ein Nomen beginnt gross: Drück zuerst ⇧, dann den Buchstaben." : "Ein Satz beginnt gross: Drück zuerst ⇧, dann den Buchstaben."];
+  if (/[äöü]/i.test(t)) liste.push("Die Buchstaben mit zwei Pünktchen stehen ganz rechts auf der Tastatur.");
+  if (art === "satz") {
+    liste.push("Zwischen zwei Wörtern kommt ein Leerschlag: die lange Taste ganz unten.");
+    liste.push(/[.?!] [A-ZÄÖÜ]/.test(t) ? "Nach dem Satzzeichen kommt ein Leerschlag, dann beginnt der nächste Satz wieder gross."
+      : "Die Satzzeichen findest du in der unteren Reihe, rechts.");
+  }
+  return liste;
+}
+
 LS.spiel({
   id: SPIEL_ID,
+  hilfe: "Tipp ab, was oben steht: Zeichen für Zeichen, das blau markierte ist dran. Du kannst die Tasten unten antippen oder eine echte Tastatur benutzen. Für einen Grossbuchstaben drückst du zuerst ⇧.",
   einleitung: "Willkommen im Tipp-Trainer! Tipp ab, was oben steht — auf den Tasten unten oder auf einer echten Tastatur. Für einen Grossbuchstaben drückst du zuerst ⇧.",
   anzahl: 6,
   // Nur Stufen, für die die freien Listen etwas hergeben.
@@ -119,6 +141,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     const text = a.text;
     ctx.loesung(text);
+    ctx.tipp(tippsFuer(a, STUFE[ctx.stufe].art));
     // Handgriffe: jedes Zeichen eine Taste, Grossbuchstaben zusätzlich ⇧
     ctx.schritte([...text].length + [...text].filter(z => z !== z.toLowerCase()).length);
 

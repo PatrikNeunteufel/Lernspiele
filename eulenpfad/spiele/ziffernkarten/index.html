@@ -261,6 +261,7 @@ function pruefeAufgabe(a, stufe) {
 LS.spiel({
   id: "ziffernkarten",
   einleitung: "Ich habe Ziffernkarten gemischt! Leg sie in die Fächer, sodass eine Zahl entsteht, die zur Vorgabe passt. Jede Karte wird genau einmal gebraucht.",
+  hilfe: "Tipp eine Karte an — sie rutscht ins nächste freie Fach. Nochmals antippen holt sie zurück. Sind alle Fächer voll, drückst du „OK ✓“.",
   anzahl: 8,
   stufen: {
     s1: "3 Karten: grösste, kleinste Zahl, eine Ziffer an fester Stelle.",
@@ -277,6 +278,18 @@ LS.spiel({
     const loesung = `Eine richtige Lösung ist ${zahlText(richtig[0])}.`;
     ctx.loesung(loesung);
     ctx.schritte(karten.length + 1); // jede Karte einmal antippen, dann OK
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Vorgabe zerlegen, welche Ziffern nach vorne,
+    // was zuerst festlegen — nie eine Ziffernfolge.
+    const tippZiel = {
+      max: "Für eine möglichst grosse Zahl gehören die grossen Ziffern nach vorne.",
+      min: "Für eine möglichst kleine Zahl gehören die kleinen Ziffern nach vorne.",
+      nah: `Schau zuerst auf die vorderste Stelle: Mit welcher Ziffer kommst du am nächsten an ${zahlText(vorgabe.bei || 0)} heran? Dann die nächste Stelle.`,
+      alle: "Leg zuerst die Karte, deren Platz festgelegt ist. Die vorderste Ziffer entscheidet, wie gross die Zahl ungefähr wird.",
+    }[vorgabe.ziel];
+    const t = ["Lies die Vorgabe Stück für Stück: Was muss die Zahl alles erfüllen?", tippZiel];
+    if (vorgabe.regel && vorgabe.ziel !== "alle") t.push("Leg zuerst fest, was vorgegeben ist — eine Ziffer an fester Stelle, eine gerade oder ungerade Einerziffer. Dann verteilst du die übrigen Karten.");
+    if (karten.includes(0)) t.push("Eine Zahl fängt nie mit 0 an.");
+    ctx.tipp(t);
     ctx.flaeche.append(el("div", { class: "vorgabe", text: vorgabe.text }));
 
     const faecher = el("div", { class: "faecher" });

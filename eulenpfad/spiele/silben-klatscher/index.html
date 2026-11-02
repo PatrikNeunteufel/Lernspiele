@@ -130,9 +130,18 @@ const klatschen = n => "👏".repeat(n);
 const silbenBoegen = silben => el("div", { class: "silben" }, ...silben.map(s => el("span", { text: s })));
 const silbenText = silben => silben.join(" - ");
 
+// Tipps vor dem Antworten (ctx.tipp, LERN_Session9): ganz kurz (Kindergarten/1. Klasse), nie Silbenzahl, Silbe oder Wort.
+const TIPPS = {
+  zaehlen: ["Sag das Wort langsam und klatsch mit.", "Hand unters Kinn: Jedes Mal, wenn das Kinn runtergeht, ist eine Silbe."],
+  welchesWort: ["Sag jedes Wort langsam und klatsch mit.", "Zähl deine Klatscher. Passt die Zahl?"],
+  trennung: ["Sag das Wort langsam und klatsch mit.", "Jeder Bogen ist ein Klatscher. Wo macht dein Wort eine kleine Pause?"],
+  ordnen: ["Sag das ganze Wort langsam.", "Welche Silbe hörst du zuerst?"],
+};
+
 LS.spiel({
   id: "silben-klatscher",
   einleitung: "Sprich das Wort laut und klatsche bei jeder Silbe: Ba-na-ne — drei Mal klatschen!",
+  hilfe: "Sprich das Wort laut und klatsche bei jeder Silbe. Dann tippst du die passende Antwort an — oder die Silben der Reihe nach.",
   anzahl: 10,
   stufen: nurMoegliche({
     s1: "Kurze Wörter: Wie oft klatschst du? Hund, Kat-ze.",
@@ -147,6 +156,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     const { w } = a;
     if (moeglich(ctx.stufe).length > 1) ctx.serie("art", a.art);
+    ctx.tipp(TIPPS[a.art]);
     if (a.art === "zaehlen" && a.antworten >= 2 && a.antworten <= 3) ctx.serie("antwort", a.richtig);
     const loesung = `${w.wort}: ${silbenText(w.silben)} — ${w.silben.length} ${w.silben.length === 1 ? "Silbe" : "Silben"}`;
     // Der Hinweis darf die Silbenzahl nicht zeigen — er erklärt nur, wie man sie findet.

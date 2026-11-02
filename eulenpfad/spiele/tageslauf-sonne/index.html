@@ -172,8 +172,33 @@ function himmelSvg() {
   return svg;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): ganz kurz, die Eule liest vor. Sie fragen nach dem
+ * eigenen Tag und erklären den Sonnenbogen — nie die Tageszeit des Bilds oder den gesuchten Tag.
+ */
+const BOGEN_TIPP = "Links geht die Sonne auf: Morgen. Oben ist Mittag. Rechts geht sie unter: Abend. Unten ist Nacht.";
+function tippsFuer(a, stufe) {
+  if (a.art === "zuordnen") return stufe === "s1"
+    ? ["Ist es dabei hell oder dunkel?", "Hell ist es am Tag ☀️, dunkel in der Nacht 🌙."]
+    : ["Denk an deinen Tag: Machst du das nach dem Aufstehen, in der Mitte vom Tag oder vor dem Schlafen?", BOGEN_TIPP];
+  if (a.art === "ordnen") return ["Denk an deinen Tag: vom Aufstehen bis zum Schlafen.", "Was machst du zuerst, wenn du aufwachst? Das tippst du zuerst an."];
+  if (a.art === "passtNicht") return ["Überleg bei jedem Bild: Wann macht man das?", "Drei Bilder haben die gleiche Tageszeit. Ein Bild hat eine andere."];
+  const t = ["Such zuerst die Sonne 🌞: Das ist heute.", a.d < 0 ? "Die Tage gehen von links nach rechts. Was schon vorbei ist, steht links."
+    : "Die Tage gehen von links nach rechts. Was erst noch kommt, steht rechts."];
+  if (a.d === -2) t.push("Vorgestern ist noch einen Tag vor gestern.");
+  if (a.d === 2) t.push("Übermorgen ist noch einen Tag nach morgen.");
+  return t;
+}
+const HILFE = {
+  zuordnen: "Hör zu, was du machst. Dann tippst du auf die Sonne oder den Mond am Himmel, wo es passt.",
+  ordnen: "Tipp die Bilder der Reihe nach an: zuerst, was am Morgen kommt. Drück lange auf ein Bild, dann sagt die Eule, was es ist.",
+  tage: "Die Blätter sind Tage, die Sonne 🌞 zeigt heute. Tipp auf den Tag, nach dem die Eule fragt.",
+};
+
 LS.spiel({
   id: "tageslauf-sonne",
+  hilfe: stufe => (stufe === "s6" ? `${HILFE.ordnen} Oder du tippst das Bild, das nicht zu den anderen passt.`
+    : HILFE[STUFE[stufe]?.arten[0]] || HILFE.zuordnen),
   einleitung: "Die Sonne wandert über den Himmel: Am Morgen geht sie auf, am Abend geht sie unter. Was machst du wann?",
   anzahl: 8,
   stufen: nurMoegliche({
@@ -192,6 +217,7 @@ LS.spiel({
     const f = ctx.flaeche;
     if (ctx.stufe === "s1") ctx.serie("antwort", a.richtig);
     if (ctx.stufe === "s6") ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a, ctx.stufe));
 
     if (a.art === "zuordnen") {
       ctx.kennung(`${a.art}|${a.bild}`);

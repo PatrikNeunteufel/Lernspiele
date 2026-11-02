@@ -150,8 +150,26 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Rechenweg in Worten — kein Betrag, keine Anzahl. */
+function tippsFuer(art, mitRappen) {
+  switch (art) {
+    case "legen": return ["Fang mit der grössten Note oder Münze an, die noch passt.", "Zähl nach jedem Stück mit: Wie viel fehlt noch bis zum Preis?"];
+    case "zaehlen": return ["Beginne mit den Noten und den grössten Münzen.", "Zähl Stück für Stück weiter und merk dir, wie viel du schon hast."];
+    case "addieren": return mitRappen ? ["Zähl zuerst die Franken zusammen, dann die Rappen.", "Hundert Rappen sind ein Franken."]
+      : ["Zähl die beiden Preise zusammen.", "Rechne zuerst bis zum nächsten Zehner, dann weiter."];
+    case "rueckgeld": return ["Zähl vom Preis aus hoch bis zur Note.", "Zuerst bis zum nächsten ganzen Franken, dann bis zur Note."];
+    case "einkauf": return ["Rechne zuerst zusammen, was alles kostet.", "Dann zähl vom Preis aus hoch bis zur Note."];
+    case "rueckgeldLegen": return ["Rechne zuerst: Wie viel fehlt vom Preis bis zur Note?", "Leg dann immer das grösste Stück, das noch passt — so brauchst du am wenigsten Stücke."];
+    case "mengeRueckgeld": return ["Rechne zuerst aus, was alles zusammen kostet: Anzahl mal Preis.", "Dann: Wie viel fehlt bis zur Note?"];
+    case "wieViele": return ["Zähl den Preis immer wieder dazu, bis das Geld nicht mehr reicht.", "Oder rechne geteilt: Wie oft passt der Preis ganz in dein Geld?"];
+    default: return ["Rechne zuerst alles zusammen — Franken und Rappen getrennt.", "Dann ergänze bis zur Note."];
+  }
+}
+
 LS.spiel({
   id: "kiosk-kasse",
+  hilfe: stufe => (stufe === "s5" ? "Rechne und tipp den Betrag ein." : "Beim Legen tippst du auf Münzen und Noten, sie kommen in die Kasse; tipp ein Stück in der Kasse nochmal an, um es zurückzunehmen.")
+    + (STUFE[stufe].raster < 100 ? ` Beträge tippst du ohne Komma ein: 1 3 6 0 heisst ${LS.geldText(1360)}` : " Beträge tippst du in Franken ein."),
   einleitung: "Willkommen im Kiosk! Lege Geld in die Kasse, zähl zusammen und gib das Rückgeld richtig heraus.",
   anzahl: 8,
   stufen: {
@@ -169,6 +187,7 @@ LS.spiel({
     const auf = aufgabeErzeugen(ctx.stufe);
     const art = auf.art;
     ctx.serie("art", art); // jede Stufe hat mehrere Arten
+    ctx.tipp(tippsFuer(art, p.raster < 100)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
 
     // Tastatur für Beträge: Ab Stufe 3 in Rappen getippt (1 3 6 0 → 13 Fr. 60 Rp.), sonst ganze Franken.
     const mitRappen = p.raster < 100;

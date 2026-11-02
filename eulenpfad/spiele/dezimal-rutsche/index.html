@@ -341,8 +341,27 @@ function grenze(ctx, a, p) {
 
 const ARTEN = { runden, rueckwaerts, grenze };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): die Regel und wo man hinschaut. Anders als
+ * hinweisFuer nennen sie die entscheidende Ziffer nicht — bei zwei Knöpfen wäre das die Lösung.
+ */
+const REGEL = "Bei 0–4 rundet man ab, bei 5–9 auf.";
+function tippsFuer(a, p) {
+  if (a.art === "rueckwaerts") return [`Runde jede Zahl im Kopf auf ${NAME[a.auf]}.`, `Schau bei jeder Zahl auf die Ziffer direkt rechts von den ${DATIV[a.auf]}. ${REGEL}`];
+  if (a.art === "grenze") return [`Die Grenze ist die Mitte zwischen ${dezimalText(a.ziel / 1000, STELLEN_VON[a.auf])} und der Nachbarzahl ${a.kleinste ? "darunter" : "darüber"}.`,
+    "Was passiert genau auf der Mitte? Dort rutscht die Kugel nach oben."];
+  const tipps = a.geld ? ["Schau nur auf die Rappen.", "Weniger als 50 Rappen: abrunden. Ab 50 Rappen: aufrunden."]
+    : [`Schau nur auf die Ziffer direkt rechts von den ${DATIV[a.auf]}.`, `${REGEL} Liegt die Kugel vor oder hinter der gestrichelten Linie?`];
+  const st = STELLEN_VON[a.auf];
+  if (p.tippen) tipps.push(`Auf ${NAME[a.auf]} gerundet steht ${st === 0 ? "keine Stelle" : st === 1 ? "genau eine Stelle" : `genau ${st} Stellen`} nach dem ${zeichenName()} — auch wenn es eine Null ist.`);
+  return tipps;
+}
+
 LS.spiel({
   id: "dezimal-rutsche",
+  hilfe: stufe => (stufe === "s5" || stufe === "s6"
+    ? "Runde die Zahl und tippe das Ergebnis mit den Zifferntasten ein, mit allen Stellen, die zum Runden gehören. Stehen Zahlen auf Knöpfen, tippst du die passende an."
+    : "Schau, auf welche Seite der gestrichelten Linie die Kugel fällt, und tippe auf «abrunden» oder «aufrunden»."),
   einleitung: "Auf welche Seite rutscht die Kugel? Schau nur auf die Ziffer direkt rechts von der Rundungsstelle: 0–4 ab, 5–9 auf. Genau in der Mitte rutscht sie nach oben!",
   anzahl: 8,
   stufen: {
@@ -358,6 +377,7 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const a = aufgabeErzeugen(ctx.stufe);
     if (p.arten.length > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a, p)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     ARTEN[a.art](ctx, a, p);
     if (ctx.nr === 0) ctx.sag(p.geld ? "Die gestrichelte Linie ist bei 50 Rappen. Liegt die Kugel davor oder dahinter?" : "Die gestrichelte Linie ist die Mitte. Liegt die Kugel davor oder dahinter?");
   },

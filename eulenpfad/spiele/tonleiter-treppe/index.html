@@ -380,8 +380,47 @@ function zeichneBauen(ctx, a, mitPlan) {
   zeichne();
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst hinhören oder hinschauen, dann die Regel
+ * (Halbton = nächste Taste, Bauplan) — nie die Richtung, der Schritt, der Ton oder Dur/Moll selbst.
+ */
+const BAUPLAN_TEXT = { Dur: "1 · 1 · ½ · 1 · 1 · 1 · ½", Moll: "1 · ½ · 1 · 1 · ½ · 1 · 1" };
+const TASTEN_TIPP = "1 heisst Ganzton: zwei Tasten weiter. ½ heisst Halbton: die nächste Taste. Auch die schwarzen Tasten zählen.";
+function tippsFuer(a, stufe) {
+  switch (a.art) {
+    case "hoeren": return ["Hör nochmal mit 🔊 und sing leise mit.", "Wird deine Stimme dabei höher oder tiefer?"];
+    case "lesen": return ["Such beide Namen auf der Treppe.", "Steht der zweite Name weiter oben oder weiter unten als der erste?"];
+    case "setzen": return ["Ein Halbtonschritt ist auf dem Klavier die nächste Taste — ohne Taste dazwischen.",
+      a.leiter === "a" ? "a-Moll hat dieselben Töne wie C-Dur, nur beginnt die Treppe auf a. Zwischen welchen weissen Tasten liegt keine schwarze?"
+        : a.leiter ? "Die Vorzeichen verschieben Töne auf schwarze Tasten. Prüf jeden Schritt einzeln: Liegt eine Taste dazwischen?"
+        : "Zwischen welchen weissen Tasten liegt keine schwarze? Stell dir das Klavier vor."];
+    case "abstand": return ["Zähl die Schritte von der einen gelben Taste zur anderen — auch die schwarzen Tasten zählen.",
+      "Ein Schritt zur nächsten Taste ist ein Halbton, zwei Schritte sind ein Ganzton."];
+    case "taste": return ["Höher ist auf dem Klavier rechts, tiefer links.", "Ein Halbton ist die nächste Taste, weiss oder schwarz. Ein Ganzton sind zwei Halbtöne."];
+    case "bauen": {
+      const g = LEITERN[a.leiter].muster === DUR ? "Dur" : "Moll";
+      return stufe === "s4" ? ["Lies den Bauplan von links nach rechts: ein Zeichen für jeden Schritt.", TASTEN_TIPP]
+        : [g === "Dur" ? "Bei Dur liegen die halben Stufen nach Stufe 3 und nach Stufe 7." : "Bei Moll liegen die halben Stufen nach Stufe 2 und nach Stufe 5.",
+          `Der Bauplan von ${g}: ${BAUPLAN_TEXT[g]}.`, TASTEN_TIPP];
+    }
+    case "vorzeichen": return ["Spiel die Leiter im Kopf auf dem Klavier: Wo braucht es eine schwarze Taste, damit die halben Stufen am richtigen Platz sind?",
+      "Geh den Bauplan vom Grundton aus Schritt für Schritt durch. " + TASTEN_TIPP];
+    case "falsch": return ["Prüfe Schritt für Schritt mit dem Bauplan.", "Stell dir jeden Ton auf dem Klavier vor und zähl die Tasten bis zum nächsten."];
+    case "durmoll": return ["Hör nochmal mit 🔊. Dur klingt meist hell und fröhlich, Moll eher dunkel und traurig.",
+      `Achte auf ${a.form === "leiter" ? "den dritten Ton der Leiter" : "den zweiten Ton, die Terz"}: Bei Dur liegt er etwas höher als bei Moll.`];
+    default: return ["Schau, wo auf der Treppe die halben Stufen liegen.", "Bei Dur liegen die halben Stufen nach Stufe 3 und 7, bei Moll nach Stufe 2 und 5."];
+  }
+}
+
 LS.spiel({
   id: "tonleiter-treppe",
+  hilfe: stufe => ({
+    s1: "Hör die Töne an und tippe, ob sie hinauf- oder hinuntergehen. Oder lies zwei Namen auf der Treppe und vergleiche.",
+    s2: "Tippe auf die ❓ zwischen zwei Stufen, wo ein Halbtonschritt ist. Mit „🔊 Treppe anhören“ hörst du die Leiter.",
+    s3: "Halbton oder Ganzton zwischen den gelben Tasten? Oder tippe die Taste auf der Klaviatur, die verlangt ist.",
+    s4: "Baue die Tonleiter auf der Klaviatur: Tippe die Töne von unten nach oben. Oder finde den Ton mit dem Vorzeichen oder den falschen Ton.",
+    s5: "Hör zu und tippe Dur oder Moll; oder tippe auf die ❓ der Treppe, wo die Halbtonschritte sind.",
+  }[stufe] || "Baue Tonleitern auf der Klaviatur, finde die Halbtonschritte auf der Treppe, oder hör: Dur oder Moll?"),
   einleitung: "Eine Tonleiter ist wie eine Treppe: meist ganze Stufen, aber an zwei Stellen nur halbe. Wo sind sie? Mach den Ton an: 🔊",
   anzahl: 8,
   stufen: {
@@ -397,6 +436,7 @@ LS.spiel({
     if (ctx.nr === 0) ctx.sag(ctx.stufe === "s1" ? "Hör gut zu und sing leise mit." : "Tipp: Auf dem Klavier ist ein Halbton die nächste Taste — weiss oder schwarz.");
     const a = aufgabeErzeugen(ctx.stufe);
     AKTUELL = a;
+    ctx.tipp(tippsFuer(a, ctx.stufe));
     if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.art);
     const f = ctx.flaeche;
     const cdur = leiter("C");

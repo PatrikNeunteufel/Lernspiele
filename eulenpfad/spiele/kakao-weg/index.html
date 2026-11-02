@@ -291,8 +291,27 @@ const wegText = (p, idx) => idx.map(i => p.schritte[i][0]).join(" → ");
 // Für das Prüfskript im Scratchpad: die laufende Aufgabe.
 let AKTUELL = null;
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Fragen zum Weg und Regeln des Kreislaufs — nie ein Schritt oder Korb. */
+const GELD_REGEL = "Geld fliesst immer in die andere Richtung als Arbeit oder Waren.";
+function tippsFuer(a) {
+  switch (a.art) {
+    case "ordnen": return ["Such zuerst den Anfang: Wo wächst oder entsteht der Rohstoff?", "Überleg bei jedem Schritt, was vorher passiert sein muss. Am Schluss kauft jemand ein."];
+    case "fehlt": return ["Lies den Schritt vor und nach der Lücke.", "Was muss dazwischen passieren — und gehört die Antwort wirklich zu diesem Produkt?"];
+    case "wer": return ["Lies genau: Wo passiert das?", "Auf dem Feld oder im Wald, in einem Betrieb, unterwegs, im Lager, im Geschäft oder zu Hause?"];
+    case "herkunft": return ["Denk an das Wetter bei uns.", "Kann der Rohstoff auf Schweizer Feldern, im Wald oder auf dem Bauernhof wachsen?"];
+    case "transport": return ["Wo beginnt der Weg — in der Schweiz oder weit weg, hinter dem Meer?", "Lies, wie der Weg beginnt: Wird dort ein fernes Land genannt?"];
+    case "verschoben": return ["Lies den Weg der Reihe nach, Schritt für Schritt.", "Frag dich bei jedem Schritt: Ist das, was er braucht, vorher schon passiert?"];
+    case "pfeil": return ["Schau die Farbe an: Fliesst Geld oder etwas anderes?", "Und in welche Richtung zeigt der Pfeil — zu den Haushalten oder zu den Unternehmen?"];
+    case "richtung": return ["Denk an eine Familie: Was gibt sie weg, und was bekommt sie?", GELD_REGEL];
+    case "szene": return [SZENEN[a.szene].hinweis, GELD_REGEL];
+    case "sektor": return ["Wohnen hier Menschen zusammen?", "Oder wird hier für Lohn gearbeitet und etwas hergestellt oder verkauft?"];
+    default: return ["Schau jeden Pfeil an: Welche Farbe hat er, und wohin zeigt er?", "Haushalte geben Arbeit und Geld, Unternehmen geben Lohn und Waren."];
+  }
+}
+
 LS.spiel({
   id: ID,
+  hilfe: "Lies die Schritte genau. Je nach Aufgabe tippst du sie der Reihe nach an, wählst eine Antwort oder legst die Karte in den passenden Korb. Im Kreislauf zeigt die Farbe der Pfeile, ob Geld fliesst.",
   einleitung: "Woher kommt eigentlich die Schoggi? Verfolge den Weg der Waren vom Feld bis in den Laden — und finde heraus, wie Geld und Arbeit im Kreis laufen.",
   anzahl: 8,
   stufen: nurAngebotene({
@@ -309,6 +328,7 @@ LS.spiel({
       : "Tipp: Überlege bei jedem Schritt, was vorher passiert sein muss.");
     const a = aufgabeErzeugen(ctx.stufe);
     AKTUELL = a;
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (artenIn(ctx.stufe).length > 1) ctx.serie("art", a.art);
     const f = ctx.flaeche;
     const p = a.produkt && produkt(a.produkt);

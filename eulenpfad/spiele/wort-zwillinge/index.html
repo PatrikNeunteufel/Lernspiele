@@ -171,9 +171,26 @@ const HINWEIS = {
 };
 const ENTSCHEID = { zwillinge: { bild: "👯", text: "echte Zwillinge" }, freunde: { bild: "⚠️", text: "falsche Freunde" } };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Anstoss wie der Hinweis, dann eine Strategie.
+ * Das Beispielpaar kommt nie in der Aufgabe vor (weder als Wort noch hinter einem Bild).
+ */
+function tippsFuer(a) {
+  if (a.art === "freund") return ["Vorsicht: Das Wort sieht deutsch aus, bedeutet aber etwas anderes.",
+    "Das deutsche Wort, das gleich aussieht, ist die Falle. Welche andere Bedeutung passt zum englischen Wort?"];
+  if (a.art === "entscheid") return [HINWEIS.entscheid,
+    "Denk an einen Satz mit dem englischen Wort. Würde das deutsche Wort dort genau dasselbe sagen?"];
+  const belegt = new Set([a.en, a.de, ...a.optionen]);
+  const bsp = PAARE.find(z => !belegt.has(z[0]) && !belegt.has(z[1]) && !belegt.has(z[2]));
+  return [HINWEIS[a.art], bsp
+    ? `Zwillinge unterscheiden sich oft nur in wenigen Buchstaben, so wie ${bsp[0]} – ${bsp[1]}. Achte auf den Anfang und den Klang.`
+    : "Zwillinge unterscheiden sich oft nur in wenigen Buchstaben. Achte auf den Anfang und den Klang."];
+}
+
 LS.spiel({
   id: ID,
   einleitung: "Viele englische Wörter haben einen deutschen Zwilling: house – Haus! Findest du sie? Aber Vorsicht vor falschen Freunden.",
+  hilfe: "Lies das Wort auf der Karte und tipp darunter die Antwort an, die dazu passt. In den letzten Stufen musst du aufpassen: Manche Wörter sehen nur gleich aus.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -181,6 +198,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.art);
     if (a.art === "entscheid") ctx.serie("antwort", a.richtig);
+    ctx.tipp(tippsFuer(a));
     ctx.flaeche.append(el("div", { class: "frage", text: FRAGE[a.art] }));
     ctx.flaeche.append(el("div", { class: "wortkarte" + (a.art === "freund" ? " freund" : ""), text: a.zeige }));
     const hinweis = a.art === "freund"

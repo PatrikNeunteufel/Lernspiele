@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fahrplan-Rechner</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(18px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; line-height: 1.3; }
+  .frage b { color: var(--knopf); }
+  .rechnung { text-align: center; font-size: clamp(24px, 6vw, 42px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 6px 0 12px; }
+  .rechnung .gesucht { color: var(--knopf); }
+  .fp-rahmen { max-width: 100%; overflow-x: auto; }
+  .fahrplan { margin: 4px auto 12px; border-collapse: collapse; font-size: clamp(15px, 3.9vw, 22px); font-variant-numeric: tabular-nums; }
+  .fahrplan th, .fahrplan td { border: 2px solid var(--rand); padding: 6px clamp(5px, 1.8vw, 12px); text-align: center; white-space: nowrap; }
+  .fahrplan th { color: var(--text-leise); font-weight: 800; background: var(--karte); }
+  .fahrplan td { font-weight: 800; background: #fff; }
+  .fahrplan td.halt { text-align: left; }
+  .fahrplan td.mittel { font-size: 1.2em; padding: 2px 6px; }
+  .fahrplan tr.umsteigen td { background: color-mix(in srgb, var(--deko-2) 16%, #fff); }
+  .fahrplan caption { font-weight: 800; color: var(--deko-2); padding-bottom: 4px; }
+  .fp-legende { text-align: center; font-size: 14px; color: var(--text-leise); font-weight: 700; margin: -6px 0 8px; }
+  .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
+  .ergebnis-zeile .anzeige { flex: 1; }
+  .ergebnis-zeile .einheit { font-size: clamp(26px, 6vw, 38px); font-weight: 900; color: var(--knopf); min-width: 1.6em; }
+  .fr-beispiel { text-align: center; font-size: 15px; color: var(--text-leise); font-weight: 700; margin: 4px 0 8px; }
+  .wahl-knopf { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🚆 Fahrplan-Rechner</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan 21 MA.3.A.2 (Grössen schätzen, messen, umwandeln, runden und mit ihnen rechnen), Grösse Zeit:
+//   s1 MA.3.A.2.g (5. Klasse): mit Zeitangaben rechnen, benachbarte Einheiten (h, min) — Fahrplan einer Linie lesen
+//   s2 MA.3.A.2.g/h: Umsteigen, Wartezeit, Reisedauer über zwei Abschnitte
+//   s3 MA.3.A.2.h (Grundanspruch Ende 6. Klasse): mit Zeit rechnen, umwandeln, zweifach benannt
+//      (2 h 45 min + 1 h 30 min; 1.5 h = 90 min; Reise mit zwei Umstiegen)
+//   s4 MA.3.A.2.h, schwerer: über Mitternacht, rückwärts planen (spätester Zug, der reicht)
+//   s5 MA.3.A.2.k (3. Zyklus): Berechnungen mit zusammengesetzten Masszahlen, in eine andere Einheit
+//      umrechnen (Dezimalstunden: 1 h 12 min = 1.2 h, 2.4 h = 2 h 24 min); MA.3.A.2.i Zeitdauern
+//   s6 Königsstufe: gemischte Summen (1.75 h + 50 min + 1 h 20 min), Nachtreise mit zwei Umstiegen,
+//      Ankunft nach Mitternacht aus Dezimalstunden.
+// Basisklasse 6. Setzt die Uhr-Werkstatt (Basisklasse 2: Zeitdauern bis „Von 8:47 bis 11:20?“) fort: hier
+// Fahrpläne, Umsteigen, Mitternacht und Dezimalstunden. Masse-Umwandler (Basisklasse 3) wandelt h und min
+// nur ganzzahlig um. Orte und Fahrzeiten sind erfunden (keine echten Fahrplandaten).
+// Rechnen in ganzen Minuten seit Mitternacht (über Mitternacht: ab 1440), Dezimalstunden in Hundertsteln.
+// Eingabe: eine Zifferntastatur, die letzten zwei Ziffern sind die Minuten („1 3 0“ = 1 h 30 min,
+// bei Uhrzeiten „2 1 5“ = 2:15) — wie in der Uhr-Werkstatt.
+
+const { zufall, waehle, mische, el, dezimalText } = LS;
+
+// Erfundene Ortsnamen (klingen schweizerisch, sind aber keine echten Bahnhöfe gemeint).
+const ORTE = ["Seewil", "Talbach", "Holzikon", "Bergmatt", "Moosrüti", "Erlenau", "Rotbach", "Lindenegg", "Steinwil", "Grünau", "Feldmoos", "Birchwil"];
+// Fahrzeiten je Abschnitt (min), plausibel für Regionalverkehr
+const MITTEL = {
+  zug: { bild: "🚆", name: "Zug", min: 12, max: 55 },
+  bus: { bild: "🚌", name: "Bus", min: 8, max: 35 },
+  schiff: { bild: "⛴️", name: "Schiff", min: 20, max: 50 },
+  bahn: { bild: "🚡", name: "Gondelbahn", min: 6, max: 15 },
+};
+const TAG = ["zug", "zug", "bus", "bus", "schiff", "bahn"];
+const NACHT = ["zug", "bus"];
+
+// Je Stufe die Aufgabenarten (doppelt = häufiger)
+const STUFE = {
+  s1: { arten: ["fahrzeit", "fahrzeit", "warten"] },
+  s2: { arten: ["umsteigeWarten", "reiseGesamt"] },
+  s3: { arten: ["reiseMehr", "addieren", "dezZuMin", "minZuDez"] },
+  s4: { arten: ["mitternacht", "ankunftNacht", "rueckwaerts"] },
+  s5: { arten: ["dezZuHmin", "hminZuDez", "fahrzeitDez"] },
+  s6: { arten: ["mischSumme", "nachtReise", "ankunftDez"] },
+};
+
+// ---------- Zeiten als Text ----------
+
+const zwei = n => String(n).padStart(2, "0");
+/** Uhrzeit aus Minuten seit Mitternacht (auch ≥ 1440, dann nächster Tag): „7:05“, „0:21“. */
+const uhr = t => `${Math.floor(t / 60) % 24}:${zwei(t % 60)}`;
+/** Zeitdauer zweifach benannt: „2 h 45 min“, „45 min“, „3 h“. */
+const dauerText = d => (d >= 60 ? `${Math.floor(d / 60)} h${d % 60 ? ` ${d % 60} min` : ""}` : `${d} min`);
+/** Dezimalstunden aus Hundertsteln: 150 → „1.5 h“. */
+const stdText = k => `${dezimalText(k / 100)} h`;
+/** Ziffern, die das Kind tippt: 2 h 45 min → 245, 0:21 → 21. */
+const ziffernDauer = d => Math.floor(d / 60) * 100 + (d % 60);
+const ziffernUhr = t => (Math.floor(t / 60) % 24) * 100 + (t % 60);
+/** Hundertstelstunden → Minuten (nur wenn ganz), Minuten → Hundertstelstunden. */
+const minAusStd = k => (k * 60) / 100;
+const stdAusMin = d => (d * 100) / 60;
+
+// ---------- Aufgaben als Daten ----------
+
+/**
+ * Verbindung mit n Abschnitten: [{ mittel, von, nach, ab, an }]; zwischen den Abschnitten wird umgestiegen
+ * (Wartezeit warten[0]–warten[1] min). linie: ein Zug mit kurzen Halten (1–2 min) statt Umsteigen.
+ */
+function verbindung(n, start, { nacht = false, linie = false, warten = [3, 18] } = {}) {
+  const orte = mische(ORTE).slice(0, n + 1);
+  const teile = [];
+  let t = start;
+  for (let i = 0; i < n; i++) {
+    const mittel = linie ? "zug" : waehle(nacht ? NACHT : TAG);
+    const m = MITTEL[mittel];
+    const f = linie ? zufall(6, 24) : zufall(m.min, m.max);
+    teile.push({ mittel, von: orte[i], nach: orte[i + 1], ab: t, an: t + f });
+    t += f + (linie ? zufall(1, 2) : zufall(warten[0], warten[1]));
+  }
+  return teile;
+}
+
+function aufgabeErzeugen(stufe) {
+  const art = waehle(STUFE[stufe].arten);
+  for (let versuch = 0; versuch < 500; versuch++) {
+    const a = erzeuge(art);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { art: "addieren", teile: [100, 45], typ: "dauer", loesung: 145 };
+}
+
+function erzeuge(art) {
+  if (art === "fahrzeit") {
+    const fp = verbindung(3, zufall(6 * 60, 20 * 60), { linie: true });
+    const i = zufall(0, 2), j = zufall(i, 2);
+    if (j === i && Math.random() < 0.6) return null; // meist über mindestens einen Halt
+    return { art, fp, linie: true, von: i, bis: j, typ: "dauer", loesung: fp[j].an - fp[i].ab };
+  }
+  if (art === "warten") {
+    const takt = waehle([30, 30, 60]);
+    const erste = zufall(6, 19) * 60 + zufall(0, takt - 1);
+    const abfahrten = [0, 1, 2, 3].map(k => erste + k * takt);
+    const k = zufall(1, 3);
+    const jetzt = abfahrten[k] - zufall(1, takt - 1);
+    const [von, nach] = mische(ORTE);
+    return { art, von, nach, takt, abfahrten, jetzt, typ: "minuten", loesung: abfahrten[k] - jetzt };
+  }
+  if (art === "umsteigeWarten" || art === "reiseGesamt") {
+    const fp = verbindung(2, zufall(6 * 60, 20 * 60), { warten: [3, 25] });
+    return art === "umsteigeWarten"
+      ? { art, fp, typ: "minuten", loesung: fp[1].ab - fp[0].an }
+      : { art, fp, typ: "dauer", loesung: fp[1].an - fp[0].ab };
+  }
+  if (art === "reiseMehr") {
+    const fp = verbindung(3, zufall(6 * 60, 18 * 60));
+    return { art, fp, typ: "dauer", loesung: fp[2].an - fp[0].ab };
+  }
+  if (art === "addieren") {
+    // Teile einer Ferienreise (5-Minuten-Schritte), meist mit Übertrag über 60 min
+    const n = waehle([2, 2, 3]);
+    const teile = Array.from({ length: n }, () => zufall(4, 35) * 5);
+    if (teile.reduce((s, d) => s + (d % 60), 0) < 60 && Math.random() < 0.7) return null;
+    const mittel = mische(["zug", "bus", "schiff", "zug"]).slice(0, n);
+    return { art, teile, mittel, typ: "dauer", loesung: teile.reduce((s, d) => s + d, 0) };
+  }
+  if (art === "dezZuMin") {
+    // halbe und Viertelstunden: 1.5 h = 90 min
+    const k = zufall(0, 3) * 100 + waehle([25, 50, 75]);
+    return { art, k, typ: "minuten", loesung: minAusStd(k) };
+  }
+  if (art === "minZuDez") {
+    const d = zufall(0, 3) * 60 + waehle([15, 30, 45]);
+    return { art, d, alsHmin: d > 60 && Math.random() < 0.6, typ: "dezimal", loesung: stdAusMin(d) };
+  }
+  if (art === "mitternacht") {
+    const n = waehle([1, 2]);
+    const fp = verbindung(n, n === 1 ? zufall(22 * 60 + 30, 23 * 60 + 50) : zufall(21 * 60 + 50, 23 * 60 + 30), { nacht: true });
+    const ende = fp[n - 1].an;
+    if (ende <= 24 * 60 + 2 || fp[0].ab >= 24 * 60) return null;
+    return { art, fp, typ: "dauer", loesung: ende - fp[0].ab };
+  }
+  if (art === "ankunftNacht") {
+    const ab = zufall(22 * 60 + 15, 23 * 60 + 55), f = zufall(35, 170);
+    if (ab + f <= 24 * 60) return null;
+    const [von, nach] = mische(ORTE);
+    return { art, von, nach, ab, f, typ: "uhrzeit", loesung: ab + f };
+  }
+  if (art === "rueckwaerts") {
+    const takt = 30, f = zufall(25, 70), weg = zufall(5, 15);
+    const erste = zufall(6, 17) * 60 + zufall(0, 29);
+    const abfahrten = [0, 1, 2, 3].map(k => erste + k * takt);
+    const k = zufall(0, 2); // der richtige Zug; der nächste wäre zu spät
+    const termin = abfahrten[k] + f + weg + zufall(0, takt - 1);
+    const [von, nach] = mische(ORTE);
+    const ziel = waehle(["beim Kino", "im Training", "bei deiner Tante", "im Schwimmbad", "beim Konzert"]);
+    return { art, von, nach, takt, f, weg, abfahrten, termin, ziel, typ: "wahl", loesung: k };
+  }
+  if (art === "dezZuHmin") {
+    // Dezimalstunden in Hundertsteln, Minuten ganz: Hundertstel in 5er-Schritten (0.05 h = 3 min)
+    const frac = Math.random() < 0.6 ? zufall(1, 9) * 10 : zufall(1, 19) * 5;
+    if (frac === 50) return null; // halbe Stunde übt schon Stufe 3
+    const k = zufall(0, 4) * 100 + frac;
+    if (k < 100 && Math.random() < 0.7) return null;
+    return { art, k, typ: "dauer", loesung: minAusStd(k) };
+  }
+  if (art === "hminZuDez") {
+    const m = Math.random() < 0.7 ? zufall(1, 9) * 6 : zufall(1, 19) * 3;
+    if (m % 15 === 0) return null; // Viertel und halbe Stunden übt schon Stufe 3
+    const d = zufall(0, 4) * 60 + m;
+    return { art, d, alsHmin: d > 60, typ: "dezimal", loesung: stdAusMin(d) };
+  }
+  if (art === "fahrzeitDez") {
+    const n = waehle([1, 2]);
+    const fp = verbindung(n, zufall(6 * 60, 19 * 60));
+    const d = fp[n - 1].an - fp[0].ab;
+    if (d % 3 !== 0 || d % 15 === 0 || d < 20) return null;
+    return { art, fp, typ: "dezimal", loesung: stdAusMin(d) };
+  }
+  if (art === "mischSumme") {
+    const k = zufall(0, 2) * 100 + waehle([25, 75, 20, 40, 60, 80, 10, 30, 70, 90]);
+    if (k < 20) return null;
+    const minuten = zufall(5, 19) * 5;
+    const hmin = zufall(1, 2) * 60 + zufall(1, 11) * 5;
+    const teile = mische([{ k }, { d: minuten, nurMin: true }, { d: hmin }]);
+    return { art, teile, typ: "dauer", loesung: minAusStd(k) + minuten + hmin };
+  }
+  if (art === "nachtReise") {
+    const fp = verbindung(3, zufall(21 * 60 + 15, 23 * 60), { nacht: true });
+    if (fp[2].an <= 24 * 60 + 5 || fp[0].ab >= 24 * 60) return null;
+    return { art, fp, typ: "dauer", loesung: fp[2].an - fp[0].ab };
+  }
+  if (art === "ankunftDez") {
+    const k = zufall(1, 3) * 100 + zufall(1, 19) * 5;
+    if (k % 25 === 0 && Math.random() < 0.7) return null;
+    const ab = zufall(21 * 60 + 30, 23 * 60 + 50);
+    if (ab + minAusStd(k) <= 24 * 60) return null;
+    const [von, nach] = mische(ORTE);
+    return { art, von, nach, ab, k, typ: "uhrzeit", loesung: ab + minAusStd(k) };
+  }
+  return null;
+}
+
+/**
+ * Mängel: Die Lösung wird unabhängig aus den Daten nachgerechnet (Fahrplan, Teile, Umrechnung);
+ * dazu Zeiten im Tag, Eingabe passt in die Tastatur, genau ein Zug reicht.
+ */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  if (!STUFE[stufe].arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in der Stufe`);
+  const nacht = ["mitternacht", "nachtReise", "ankunftNacht", "ankunftDez"].includes(a.art);
+  if (a.fp) {
+    for (let i = 0; i < a.fp.length; i++) {
+      const s = a.fp[i];
+      if (!(s.an > s.ab)) m.push("Ankunft nicht nach Abfahrt");
+      if (i && !(s.ab > a.fp[i - 1].an)) m.push("Anschluss vor der Ankunft");
+      if (i && s.von !== a.fp[i - 1].nach) m.push("Abschnitte hängen nicht zusammen");
+      if (a.linie && i && s.ab - a.fp[i - 1].an > 2) m.push("Halt zu lang für eine Linie");
+      const mm = MITTEL[s.mittel];
+      if (!a.linie && !(s.an - s.ab >= mm.min && s.an - s.ab <= mm.max)) m.push("Fahrzeit unplausibel");
+      if (nacht && !NACHT.includes(s.mittel)) m.push("in der Nacht kein Schiff und keine Gondelbahn");
+    }
+    if (new Set(a.fp.flatMap(s => [s.von, s.nach])).size !== a.fp.length + 1) m.push("Ort doppelt");
+    const erst = a.fp[0], letzt = a.fp.at(-1);
+    const soll = a.art === "fahrzeit" ? a.fp[a.bis].an - a.fp[a.von].ab
+      : a.art === "umsteigeWarten" ? a.fp[1].ab - a.fp[0].an
+      : a.art === "fahrzeitDez" ? stdAusMin(letzt.an - erst.ab)
+      : letzt.an - erst.ab;
+    if (soll !== a.loesung) m.push(`Lösung stimmt nicht (nachgerechnet ${soll})`);
+    if (nacht && !(erst.ab < 1440 && letzt.an > 1440)) m.push("Reise geht nicht über Mitternacht");
+    if (!nacht && letzt.an >= 1440) m.push("Reise am Tag endet nach Mitternacht");
+  }
+  if (a.art === "warten") {
+    const naechste = a.abfahrten.find(t => t >= a.jetzt);
+    if (naechste - a.jetzt !== a.loesung) m.push("Wartezeit stimmt nicht");
+    if (!(a.loesung >= 1 && a.loesung < a.takt)) m.push("Wartezeit ausserhalb des Takts");
+    if (!(a.jetzt > a.abfahrten[0])) m.push("Ankunft vor der ersten Abfahrt");
+  }
+  if (a.art === "addieren" && a.teile.reduce((s, d) => s + d, 0) !== a.loesung) m.push("Summe stimmt nicht");
+  if (a.art === "mischSumme") {
+    const s = a.teile.reduce((x, t) => x + (t.k !== undefined ? (t.k * 60) / 100 : t.d), 0);
+    if (s !== a.loesung) m.push("Summe stimmt nicht");
+    if (a.teile.filter(t => t.k !== undefined).length !== 1) m.push("nicht genau ein Teil in Dezimalstunden");
+  }
+  if (a.art === "dezZuMin" || a.art === "dezZuHmin") {
+    if (a.k % 100 === 0) m.push("ganze Stunden");
+    if ((a.k * 60) / 100 !== a.loesung) m.push("Umrechnung stimmt nicht");
+  }
+  if (a.art === "minZuDez" || a.art === "hminZuDez" || a.art === "fahrzeitDez") {
+    if (a.d !== undefined && (a.loesung * 60) / 100 !== a.d) m.push("Umrechnung stimmt nicht");
+    if (a.loesung % 100 === 0) m.push("ganze Stunden");
+  }
+  if (a.art === "ankunftNacht" && a.ab + a.f !== a.loesung) m.push("Ankunft stimmt nicht");
+  if (a.art === "ankunftDez" && a.ab + (a.k * 60) / 100 !== a.loesung) m.push("Ankunft stimmt nicht");
+  if (a.art === "rueckwaerts") {
+    const reicht = a.abfahrten.map(t => t + a.f + a.weg <= a.termin);
+    const spaetester = reicht.lastIndexOf(true);
+    if (spaetester !== a.loesung) m.push("nicht der späteste Zug, der reicht");
+    if (reicht.every(Boolean)) m.push("alle Züge reichen — zu einfach");
+    if (new Set(a.abfahrten).size !== 4) m.push("doppelte Abfahrt");
+  }
+  // Eingabe: ganze Zahl bzw. Hundertstel, passt in vier Ziffern
+  if (!Number.isInteger(a.loesung) || a.loesung < 0) m.push("Lösung keine ganze Zahl (Minuten oder Hundertstel)");
+  const ziffern = a.typ === "dauer" ? ziffernDauer(a.loesung) : a.typ === "uhrzeit" ? ziffernUhr(a.loesung) : a.loesung;
+  if (String(ziffern).length > 4) m.push("Eingabe passt nicht in die Tastatur");
+  if (a.typ === "uhrzeit" && !(a.loesung > 1440 && a.loesung < 1440 + 4 * 60)) m.push("Ankunft nicht in der Nacht");
+  if (a.typ === "dauer" && !(a.loesung > 0)) m.push("Dauer nicht positiv");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+/** Verbindung als Fahrplan: je Halt an, ab und das Verkehrsmittel, das dort abfährt. */
+function fahrplanEl(a) {
+  const fp = a.fp;
+  const zeilen = [el("tr", {}, el("th", { text: "" }), el("th", { text: "Halt" }), el("th", { text: "an" }), el("th", { text: "ab" }))];
+  for (let i = 0; i <= fp.length; i++) {
+    const an = i > 0 ? fp[i - 1].an : null, ab = i < fp.length ? fp[i].ab : null;
+    const umsteigen = !a.linie && an !== null && ab !== null;
+    const bild = i < fp.length && (!a.linie || i === 0) ? MITTEL[fp[i].mittel].bild : "";
+    zeilen.push(el("tr", { class: umsteigen ? "umsteigen" : "" },
+      el("td", { class: "mittel", text: bild, "aria-label": i < fp.length ? MITTEL[fp[i].mittel].name : "" }),
+      el("td", { class: "halt", text: i < fp.length ? fp[i].von : fp[i - 1].nach }),
+      el("td", { text: an === null ? "" : uhr(an) }),
+      el("td", { text: ab === null ? "" : uhr(ab) })));
+  }
+  const box = el("div", { class: "fp-rahmen" }, el("table", { class: "fahrplan" }, ...zeilen));
+  return a.linie ? [box] : [box, el("div", { class: "fp-legende", text: "Farbige Zeile: hier umsteigen" })];
+}
+
+/** Abfahrtstafel: ab (und an) je Zug. */
+function tafelEl(a, mitAnkunft) {
+  const zeilen = [el("tr", {}, el("th", { text: `ab ${a.von}` }), ...(mitAnkunft ? [el("th", { text: `an ${a.nach}` })] : []))];
+  for (const t of a.abfahrten) zeilen.push(el("tr", {}, el("td", { text: uhr(t) }), ...(mitAnkunft ? [el("td", { text: uhr(t + a.f) })] : [])));
+  return el("div", { class: "fp-rahmen" }, el("table", { class: "fahrplan" }, el("caption", { text: `🚆 Zug nach ${a.nach}` }), ...zeilen));
+}
+
+/** Text der Aufgabe (Frage) und die Antwort als Text (für den Lösungssatz). */
+function antwortText(a) {
+  if (a.typ === "dauer") return dauerText(a.loesung);
+  if (a.typ === "uhrzeit") return uhr(a.loesung);
+  if (a.typ === "minuten") return `${a.loesung} min`;
+  if (a.typ === "dezimal") return stdText(a.loesung);
+  return uhr(a.abfahrten[a.loesung]);
+}
+
+function loesungsSatz(a) {
+  const r = antwortText(a);
+  const fp = a.fp;
+  switch (a.art) {
+    case "fahrzeit": return `${uhr(fp[a.von].ab)} → ${uhr(fp[a.bis].an)} = ${r}`;
+    case "warten": return `${uhr(a.jetzt)} → ${uhr(a.jetzt + a.loesung)} = ${r}`;
+    case "umsteigeWarten": return `an ${uhr(fp[0].an)}, ab ${uhr(fp[1].ab)} = ${r}`;
+    case "reiseGesamt": case "reiseMehr": case "mitternacht": case "nachtReise":
+      return `${uhr(fp[0].ab)} → ${uhr(fp.at(-1).an)} = ${r}`;
+    case "addieren": return `${a.teile.map(dauerText).join(" + ")} = ${r}`;
+    case "dezZuMin": return `${stdText(a.k)} = ${r}`;
+    case "dezZuHmin": return `${stdText(a.k)} = ${a.loesung} min = ${r}`;
+    case "minZuDez": case "hminZuDez": return `${dauerText(a.d)} = ${a.d} min = ${r}`;
+    case "fahrzeitDez": return `${uhr(fp[0].ab)} → ${uhr(fp.at(-1).an)} = ${dauerText((a.loesung * 60) / 100)} = ${r}`;
+    case "mischSumme": return `${a.teile.map(teilText).join(" + ")} = ${r}`;
+    case "ankunftNacht": return `${uhr(a.ab)} + ${dauerText(a.f)} = ${r}`;
+    case "ankunftDez": return `${uhr(a.ab)} + ${stdText(a.k)} (${dauerText((a.k * 60) / 100)}) = ${r}`;
+    case "rueckwaerts": {
+      const t = a.abfahrten[a.loesung];
+      return `Der Zug um ${r} ist um ${uhr(t + a.f)} da, mit ${a.weg} min Fussweg um ${uhr(t + a.f + a.weg)}`;
+    }
+  }
+  return r;
+}
+
+const teilText = t => (t.k !== undefined ? stdText(t.k) : t.nurMin ? `${t.d} min` : dauerText(t.d));
+
+/** Frage und Aufgabenbild je Art. */
+function aufgabeZeigen(a, f) {
+  const frage = html => f.append(el("div", { class: "frage", html }));
+  const rechnung = html => f.append(el("div", { class: "rechnung", html }));
+  const fp = a.fp;
+  switch (a.art) {
+    case "fahrzeit":
+      frage(`Wie lange fährt der Zug von <b>${fp[a.von].von}</b> nach <b>${fp[a.bis].nach}</b>?`);
+      f.append(...fahrplanEl(a)); break;
+    case "warten":
+      frage(`Du bist um <b>${uhr(a.jetzt)}</b> am Bahnhof ${a.von}. Wie lange wartest du auf den nächsten Zug?`);
+      f.append(tafelEl(a, false)); break;
+    case "umsteigeWarten":
+      frage(`Wie lange musst du in <b>${fp[0].nach}</b> auf den Anschluss warten?`);
+      f.append(...fahrplanEl(a)); break;
+    case "reiseGesamt": case "reiseMehr": case "mitternacht": case "nachtReise":
+      frage(`Wie lange dauert die ganze Reise von <b>${fp[0].von}</b> nach <b>${fp.at(-1).nach}</b>?`);
+      f.append(...fahrplanEl(a)); break;
+    case "fahrzeitDez":
+      frage(`Wie lange dauert die Reise von <b>${fp[0].von}</b> nach <b>${fp.at(-1).nach}</b>? Antwort in Stunden.`);
+      f.append(...fahrplanEl(a)); break;
+    case "addieren":
+      frage("Eine Reise hat mehrere Teile. Wie lange dauert sie zusammen?");
+      rechnung(a.teile.map((d, i) => `${MITTEL[a.mittel[i]].bild} ${dauerText(d)}`).join(" + ") + ' = <span class="gesucht">?</span>'); break;
+    case "mischSumme":
+      frage("Wie lange dauert alles zusammen?");
+      rechnung(a.teile.map(teilText).join(" + ") + ' = <span class="gesucht">?</span>'); break;
+    case "dezZuMin":
+      frage("Wie viele Minuten sind das?");
+      rechnung(`${stdText(a.k)} = <span class="gesucht">? min</span>`); break;
+    case "dezZuHmin":
+      frage("Wie viele Stunden und Minuten sind das?");
+      rechnung(`${stdText(a.k)} = <span class="gesucht">? h ? min</span>`); break;
+    case "minZuDez": case "hminZuDez":
+      frage("Schreib die Zeit in Stunden, mit Dezimalzahl.");
+      rechnung(`${a.alsHmin ? dauerText(a.d) : `${a.d} min`} = <span class="gesucht">? h</span>`); break;
+    case "ankunftNacht":
+      frage(`Der Nachtzug fährt um <b>${uhr(a.ab)}</b> in ${a.von} ab. Die Fahrt dauert <b>${dauerText(a.f)}</b>. Wann kommt er in ${a.nach} an?`); break;
+    case "ankunftDez":
+      frage(`Der Nachtbus fährt um <b>${uhr(a.ab)}</b> in ${a.von} ab. Die Fahrt dauert <b>${stdText(a.k)}</b>. Wann kommt er in ${a.nach} an?`); break;
+    case "rueckwaerts":
+      frage(`Du willst um <b>${uhr(a.termin)}</b> ${a.ziel} in ${a.nach} sein. Vom Bahnhof gehst du <b>${a.weg} min</b> zu Fuss. Welchen Zug nimmst du — den spätesten, der noch reicht?`);
+      f.append(tafelEl(a, true)); break;
+  }
+}
+
+// ---------- Hinweise (verraten die Lösung nicht, fangen typische Fehler ab) ----------
+
+const H_HUNDERT = "Eine Stunde hat 60 Minuten, nicht 100. Rechne nicht wie mit gewöhnlichen Zahlen: zuerst bis zur vollen Stunde, dann weiter.";
+const H_MITTERNACHT = "Über Mitternacht: Rechne zuerst bis Mitternacht (0:00), dann weiter bis zur Ankunft.";
+const zeichenName = () => (LS.einstellung("dezimal") === "komma" ? "Komma" : "Punkt");
+const hDezimal = () => `Die Ziffern nach dem ${zeichenName()} sind keine Minuten, sondern Teile einer Stunde. Eine Stunde hat 60 Minuten.`;
+const H_HUNDERTSTEL = "Minuten sind keine Hundertstel. Frag dich: Welcher Teil einer Stunde (60 min) ist das?";
+
+/** Wie hätte ein Kind gerechnet, das Uhrzeiten wie Dezimalzahlen abzieht? 8:19 − 7:42 → 77. */
+function hundertFehler(von, bis) {
+  const hhmm = t => Math.floor(t / 60) * 100 + (t % 60);
+  return hhmm(bis) - hhmm(von);
+}
+
+/** Hinweis zu einer falschen Eingabe z (getippte Ziffern bzw. Hundertstel). */
+function hinweisFuer(a, z) {
+  const fp = a.fp;
+  if (a.typ === "dauer" || a.typ === "minuten") {
+    const minuten = a.typ === "dauer" ? Math.floor(z / 100) * 60 + (z % 100) : z;
+    const von = fp ? (a.art === "fahrzeit" ? fp[a.von].ab : a.art === "umsteigeWarten" ? fp[0].an : fp[0].ab) : null;
+    const bis = fp ? (a.art === "fahrzeit" ? fp[a.bis].an : a.art === "umsteigeWarten" ? fp[1].ab : fp.at(-1).an) : null;
+    if (fp && bis >= 1440 && minuten === 1440 - a.loesung) return H_MITTERNACHT;
+    if (fp && z === hundertFehler(von, bis) && z !== (a.typ === "dauer" ? ziffernDauer(a.loesung) : a.loesung)) return H_HUNDERT;
+    if (a.typ === "dauer" && z % 100 >= 60) return "Bei den Minuten höchstens 59 — 60 min sind schon 1 h.";
+    if (fp && fp.length > 1 && a.art !== "umsteigeWarten" && minuten === fp.reduce((s, t) => s + t.an - t.ab, 0))
+      return "Das ist nur die Fahrzeit. Die Wartezeit beim Umsteigen gehört auch zur Reise.";
+    if (a.k !== undefined && (z === a.k || minuten === Math.floor(a.k / 100) * 60 + (a.k % 100) || minuten === Math.floor(a.k / 100) * 60 + (a.k % 10 ? a.k % 100 : (a.k % 100) / 10))) return hDezimal();
+  }
+  if (a.typ === "dezimal") {
+    const d = (a.loesung * 60) / 100, h = Math.floor(d / 60), mm = d % 60;
+    if (z === h * 100 + mm || (mm < 10 && z === h * 100 + mm * 10)) return H_HUNDERTSTEL;
+  }
+  if (a.typ === "uhrzeit") {
+    if (Math.floor(z / 100) >= 24) return "Nach 23:59 kommt 0:00 — dann beginnt ein neuer Tag.";
+    if (z % 100 >= 60) return "Bei den Minuten höchstens 59.";
+    if (a.art === "ankunftDez" && ziffernUhr(a.ab + Math.floor(a.k / 100) * 60 + (a.k % 100)) === z) return hDezimal();
+  }
+  return wegHinweis(a);
+}
+
+/** Rechenweg je Aufgabenart, ohne Bezug auf eine Eingabe (nach einem Fehler und als Tipp). */
+function wegHinweis(a) {
+  switch (a.art) {
+    case "fahrzeit": return "Lies die Abfahrt (ab) beim ersten Ort und die Ankunft (an) beim zweiten. Rechne dann bis zur vollen Stunde und weiter.";
+    case "warten": return "Such in der Tafel den ersten Zug nach deiner Zeit. Zähl die Minuten bis dahin.";
+    case "umsteigeWarten": return "Wartezeit: von der Ankunft (an) bis zur Abfahrt (ab) des nächsten Fahrzeugs am selben Ort.";
+    case "reiseGesamt": case "reiseMehr": case "nachtReise": case "mitternacht":
+      return "Die Reise beginnt bei der ersten Abfahrt und endet bei der letzten Ankunft. Rechne in Schritten: bis zur vollen Stunde, dann die ganzen Stunden, dann den Rest.";
+    case "addieren": case "mischSumme":
+      return a.art === "mischSumme" ? `Rechne zuerst alles in Minuten um: 1 h = 60 min, ${dezimalText(0.1)} h = 6 Minuten. Zähle dann zusammen.`
+        : "Zähle zuerst die Stunden zusammen, dann die Minuten. Sind es 60 min oder mehr, gibt das eine Stunde mehr.";
+    case "dezZuMin": return "Eine Stunde hat 60 Minuten. Wie viel ist ein Viertel, die Hälfte, drei Viertel davon?";
+    case "dezZuHmin": return "Eine Stunde hat 60 Minuten. Ein Zehntel Stunde sind 6 Minuten, ein Hundertstel noch weniger.";
+    case "minZuDez": case "hminZuDez": case "fahrzeitDez": return "Rechne die Minuten in einen Teil der Stunde um: 6 Minuten sind ein Zehntel Stunde, 15 Minuten ein Viertel.";
+    case "ankunftNacht": return "Zähle die Stunden dazu, dann die Minuten. Nach Mitternacht beginnt die Uhr wieder bei 0.";
+    case "ankunftDez": return "Rechne die Fahrzeit zuerst in Stunden und Minuten um, dann zähle sie zur Abfahrt dazu.";
+  }
+  return "Rechne noch einmal Schritt für Schritt.";
+}
+
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst was man im Fahrplan sucht, dann der Rechenweg — nie die Zeit. */
+const ANSTOSS = {
+  fahrzeit: "Such im Fahrplan die Abfahrt (ab) beim ersten Ort und die Ankunft (an) beim zweiten.",
+  warten: "Wann bist du am Bahnhof? Welcher Zug fährt danach als erster?",
+  umsteigeWarten: "Wo steigst du um? Schau dort auf an und ab.",
+  reiseGesamt: "Wann fährst du ganz am Anfang ab, wann kommst du ganz am Schluss an?",
+  reiseMehr: "Wann fährst du ganz am Anfang ab, wann kommst du ganz am Schluss an?",
+  mitternacht: "Über Mitternacht: Rechne zuerst bis 24:00, dann weiter.",
+  nachtReise: "Über Mitternacht: Rechne zuerst bis 24:00, dann weiter.",
+  addieren: "Stunden zu Stunden, Minuten zu Minuten.",
+  mischSumme: "Bring zuerst alles in dieselbe Einheit.",
+  dezZuMin: "Eine Stunde hat 60 Minuten.",
+  dezZuHmin: "Eine Stunde hat 60 Minuten.",
+  minZuDez: "Eine Stunde hat 60 Minuten. Welcher Teil der Stunde ist das?",
+  hminZuDez: "Die ganzen Stunden bleiben. Welcher Teil der Stunde sind die Minuten?",
+  fahrzeitDez: "Rechne zuerst die Fahrzeit in Stunden und Minuten aus.",
+  ankunftNacht: "Zähle zuerst die ganzen Stunden zur Abfahrt dazu.",
+  ankunftDez: "Rechne die Dezimalstunden zuerst in Stunden und Minuten um.",
+};
+function tippsFuer(a) {
+  if (a.art === "rueckwaerts") return ["Wann musst du spätestens dort sein? Rechne rückwärts: Fussweg und Fahrzeit abziehen.",
+    "Prüfe jeden Zug: Abfahrt plus Fahrzeit plus Fussweg — reicht es noch? Nimm den spätesten, der reicht."];
+  return [ANSTOSS[a.art] || "Lies die Aufgabe genau.", wegHinweis(a)];
+}
+
+// ---------- Eingabe ----------
+
+/** Beispiel für die Tippzeile, das nicht die Lösung ist. */
+function tippBeispiel(a) {
+  if (a.typ === "dauer") return ziffernDauer(a.loesung) === 130 ? "Tipp: 2 1 0 heisst 2 h 10 min." : "Tipp: 1 3 0 heisst 1 h 30 min.";
+  if (a.typ === "uhrzeit") return ziffernUhr(a.loesung) === 215 ? "Tipp: 1 4 0 heisst 1:40." : "Tipp: 2 1 5 heisst 2:15.";
+  return "";
+}
+
+function eingabe(ctx, a, loesung) {
+  const typ = a.typ;
+  const einheit = typ === "minuten" ? "min" : typ === "dezimal" ? "h" : "";
+  const anzeige = el("div", { class: "anzeige leer", "aria-label": typ === "uhrzeit" ? "Uhrzeit" : "Zeitdauer" });
+  ctx.flaeche.append(el("div", { class: "ergebnis-zeile" }, anzeige, ...(einheit ? [el("span", { class: "einheit", text: einheit })] : [])));
+  const tipp = tippBeispiel(a);
+  // eigene Klasse: „tipp-zeile“ gehört dem Rahmen (💡 Tipp, LERN_Session9)
+  if (tipp) ctx.flaeche.append(el("div", { class: "fr-beispiel", text: tipp }));
+  ctx.schritte(typ === "dauer" ? LS.tippSchritte(ziffernDauer(a.loesung))
+    : typ === "uhrzeit" ? LS.tippSchritte(ziffernUhr(a.loesung))
+    : typ === "dezimal" ? LS.tippSchritte(a.loesung / 100) : LS.tippSchritte(a.loesung));
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: typ === "dezimal" ? 2 : typ === "minuten" ? 3 : 4, dezimal: typ === "dezimal", nachkomma: 2,
+    onAenderung(z) {
+      if (z === null || typ === "minuten" || typ === "dezimal") return;
+      const h = Math.floor(z / 100), m = z % 100;
+      anzeige.textContent = typ === "uhrzeit" ? `${h}:${zwei(m)}` : h ? `${h} h ${m} min` : `${m} min`;
+    },
+    onOk(w) {
+      const z = typ === "dezimal" ? Math.round(w * 100) : w;
+      const soll = typ === "dauer" ? ziffernDauer(a.loesung) : typ === "uhrzeit" ? ziffernUhr(a.loesung) : a.loesung;
+      if (z === soll) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(hinweisFuer(a, z), loesung);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  ctx.flaeche.append(tasten.element);
+}
+
+LS.spiel({
+  id: "fahrplan-rechner",
+  hilfe: "Lies den Fahrplan und rechne. Die Zeit tippst du ohne Doppelpunkt ein: Die letzten zwei Ziffern sind die Minuten. Bei Dezimalstunden hat das Zeichen nach den Ganzen eine eigene Taste. Stehen Züge auf Knöpfen, tippst du den passenden an.",
+  einleitung: "Fahrpläne lesen und mit Zeiten rechnen: Wie lange dauert die Reise, wie lange wartest du beim Umsteigen, und wie viele Minuten sind anderthalb Stunden?",
+  anzahl: 8,
+  stufen: {
+    s1: "Fahrplan lesen: Von 7:42 bis 8:19 sind es 37 min.",
+    s2: "Umsteigen: Wartezeit und ganze Reise.",
+    s3: `Zeiten addieren und ${dezimalText(1.5)} h = 90 min (Lehrplan 6. Klasse).`,
+    s4: "Über Mitternacht und rückwärts: Welcher Zug reicht noch?",
+    s5: `Dezimalstunden: 1 h 12 min = ${dezimalText(1.2)} h.`,
+    s6: `Endgegner: ${dezimalText(1.75)} h + 50 min + 1 h 20 min, Nachtreise mit zwei Umstiegen.`,
+  },
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(ctx.stufe === "s5" || ctx.stufe === "s6"
+      ? "Tipp: 6 Minuten sind ein Zehntel Stunde."
+      : "Tipp: Eine Stunde hat 60 Minuten. Rechne zuerst bis zur vollen Stunde.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("art", a.art);
+    const loesung = loesungsSatz(a);
+    ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
+    aufgabeZeigen(a, ctx.flaeche);
+    if (a.typ === "wahl") {
+      LS.auswahl(ctx, {
+        optionen: [0, 1, 2, 3], richtig: a.loesung, breite: 120,
+        inhalt: i => ({ bild: "🚆", text: `ab ${uhr(a.abfahrten[i])}` }),
+        hinweis: i => (i > a.loesung
+          ? `Mit diesem Zug bist du erst um ${uhr(a.abfahrten[i] + a.f + a.weg)} dort — zu spät. Denk an den Fussweg.`
+          : "Der reicht — aber es gibt einen späteren Zug, der auch noch reicht."),
+        loesung,
+      });
+    } else {
+      eingabe(ctx, a, loesung);
+    }
+  },
+});
+</script>
+</body>
+</html>

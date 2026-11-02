@@ -152,6 +152,7 @@ function pruefeAufgabe(a, stufe) {
 LS.spiel({
   id: "zielzahl-jagd",
   einleitung: "Triff die Zielzahl! Nimm zwei Karten und ein Rechenzeichen — das Ergebnis wird eine neue Karte. Jeder richtige Weg gilt.",
+  hilfe: "Tipp eine Karte, dann ein Rechenzeichen, dann eine zweite Karte. Das Ergebnis wird eine neue Karte, und die Rechnung erscheint unten in der Liste. So rechnest du weiter, bis die Zielzahl da ist. Mit „↺ Von vorn“ fängst du neu an.",
   anzahl: 6,
   stufen: {
     s1: "Drei Karten, plus und minus: Triff die 15!",
@@ -170,6 +171,15 @@ LS.spiel({
     ctx.kennung(`${a.karten.slice().sort((x, y) => x - y).join(",")}→${a.ziel}`);
     // Je Rechenschritt drei Tipps (Karte, Zeichen, Karte); a.weg ist der kürzeste Weg.
     ctx.schritte(3 * a.weg.length);
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Abstand zur Zielzahl, welche Rechenart hilft,
+    // zuletzt Länge und erstes Rechenzeichen eines Lösungswegs — ohne Karten oder Zwischenergebnisse.
+    const erstesZeichen = a.weg[0].split(" ")[1];
+    ctx.tipp([
+      "Welche Karte ist schon nah an der Zielzahl? Wie viel fehlt noch — oder wie viel ist es zu viel?",
+      p.ops.includes("×") ? "Ist die Zielzahl viel grösser als die Karten, hilft meist ein Mal-Schritt."
+        : "Ist die Zielzahl grösser als jede Karte, musst du zusammenzählen.",
+      `Ein Weg, der klappt, hat ${a.weg.length} Rechenschritt${a.weg.length === 1 ? "" : "e"} und beginnt mit „${erstesZeichen}“.${p.alle ? " Und denk daran: alle Karten müssen hinein." : ""}`,
+    ]);
 
     ctx.flaeche.append(
       el("div", { class: "auftrag", text: p.alle ? "Benutze alle Karten und triff die Zielzahl!" : "Rechne mit den Karten, bis du die Zielzahl hast!" }),

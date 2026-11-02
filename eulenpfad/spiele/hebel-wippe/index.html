@@ -282,8 +282,36 @@ const REGEL = "Rechne auf jeder Seite Gewicht mal Platz. Sind beide Zahlen gleic
 const beschreibe = (liste, seite) => (liste.length ? `${seitenText(seite)[0].toUpperCase() + seitenText(seite).slice(1)}: ${liste.map(k => `${k.kg} kg auf Platz ${k.p}`).join(", ")}.` : "");
 const rechnung = (liste) => (liste.length ? `${term(liste)} = ${moment(liste)}` : "0");
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): die Hebelregel und der Rechenweg in Worten —
+ * kein Produkt und kein Ergebnis.
+ */
+function tippsFuer(a, p) {
+  const eigene = a.kind === "links" ? a.links : a.rechts;
+  if (a.art === "seite") return p.einfach
+    ? ["Schau: Sind beide gleich schwer, oder sitzen beide gleich weit weg vom Drehpunkt?",
+      "Gleich schwer: Wer weiter weg sitzt, drückt stärker. Gleich weit weg: Das schwerere Gewicht drückt stärker."]
+    : ["Rechne auf jeder Seite Gewicht mal Platz.",
+      "Bei mehreren Klötzen zählst du die Produkte einer Seite zusammen. Die Seite mit der grösseren Zahl drückt stärker."];
+  if (a.art === "platz") return p.doppelt
+    ? ["Vergleich die beiden Klötze: Ist deiner gleich schwer, doppelt so schwer oder halb so schwer?",
+      "Gleich schwer: gleich weit weg. Doppelt so schwer: halb so weit weg. Halb so schwer: doppelt so weit weg."]
+    : ["Rechne die andere Seite: Gewicht mal Platz, alles zusammen.",
+      eigene.length ? "Zieh ab, was auf deiner Seite schon drückt. Welcher Platz mal dein Gewicht ergibt den Rest?"
+        : "Welcher Platz mal das Gewicht deines Klotzes ergibt dieselbe Zahl?"];
+  if (a.art === "gewicht") return ["Rechne die andere Seite: Gewicht mal Platz, alles zusammen.",
+    eigene.length ? "Zieh ab, was auf deiner Seite schon drückt. Den Rest teilst du durch die Nummer des Platzes."
+      : "Teil diese Zahl durch die Nummer des Platzes mit dem Fragezeichen."];
+  if (a.art === "kraft") return ["Rechne beim Stein: Gewicht mal Platz.", "Deine Kraft mal dein Platz muss gleich viel geben. Teil also durch deinen Platz."];
+  return ["Rechne beim Stein: Gewicht mal Platz.", "Welcher Platz mal deine Kraft ergibt dieselbe Zahl?"];
+}
+
 LS.spiel({
   id: "hebel-wippe",
+  hilfe: stufe => (stufe === "s5"
+    ? "Links liegt der Stein, rechts drückst du. Je nach Frage tippst du die Kraft in kg ein oder tippst den Platz an, wo du drückst."
+    : stufe === "s1" ? "Die Zahl auf dem Klotz sind kg, die Zahlen unter dem Balken die Plätze. Wähl, was beim Loslassen passiert."
+      : "Die Zahl auf dem Klotz sind kg, die Zahlen unter dem Balken die Plätze. Je nach Frage wählst du, was beim Loslassen passiert, tippst einen Platz an (die Wippe zeigt es dir) oder tippst die kg ein."),
   einleitung: "Auf der Wippe zählt nicht nur das Gewicht, sondern auch, wie weit weg vom Drehpunkt es liegt. Die Zahl auf dem Klotz sind kg, die Zahlen unter dem Balken die Plätze.",
   anzahl: 8,
   stufen: {
@@ -299,6 +327,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     const p = STUFE[ctx.stufe];
     if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a, p)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const w = wippe(a.nL, a.nR);
     const f = ctx.flaeche;
     for (const k of a.links) w.klotz("links", k.p, k.kg, k.stein ? "stein" : "");

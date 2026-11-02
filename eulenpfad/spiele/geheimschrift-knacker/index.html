@@ -258,8 +258,38 @@ function buchstabenEingabe(laenge, onOk) {
   return api;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Richtung, Umgang mit Scheibe oder Kreis,
+ * Strategie beim Knacken — nie ein Buchstabe der Lösung, nie der Schlüssel.
+ */
+function tippsFuer(a, p) {
+  const schritte = `${a.k} Schritt${a.k > 1 ? "e" : ""}`;
+  if (a.art === "buchstabe") return [`Such ${a.von} auf dem Kreis und leg den Finger darauf.`,
+    `${a.richtung === "ver" ? "Weiter heisst: im Alphabet Richtung Z." : "Zurück heisst: im Alphabet Richtung A."} Zähl ${schritte}.`];
+  if (a.art === "knacken") return ["Ein echtes Wort hat Selbstlaute wie A, E, I, O, U.",
+    "Dreh die Scheibe Schritt für Schritt und lies zuerst nur den ersten Buchstaben. Passt der Anfang zu einem Wort, lies weiter."];
+  if (a.art === "knackenWort") return ["Probier zuerst nur den ersten Buchstaben mit verschiedenen Schlüsseln.",
+    "Ein echtes Wort hat Selbstlaute (A, E, I, O, U). Kommt im Geheimwort ein Buchstabe doppelt vor, ist er auch im Wort doppelt."];
+  const zurueck = a.richtung === "ent";
+  const ende = p.ueberlauf ? (zurueck ? " Vor A geht es hinten mit Z weiter." : " Nach Z geht es vorne mit A weiter.") : "";
+  const wie = p.hilfe === "fest" ? "Such jeden Buchstaben innen auf der Scheibe und lies aussen ab."
+    : p.hilfe === "drehen" ? `Dreh die Scheibe auf Schlüssel ${a.k}. Dann such jeden Buchstaben aussen und lies innen ab.`
+      : `Such jeden Buchstaben auf dem Kreis und geh ${schritte} ${zurueck ? "zurück" : "weiter"}.`;
+  return [zurueck ? "Entschlüsseln heisst: jeden Buchstaben zurück im Alphabet." : "Verschlüsseln heisst: jeden Buchstaben weiter im Alphabet.", wie + ende];
+}
+
+const EINGABE_HILFE = "Tipp die Buchstaben deiner Antwort auf den Buchstabentasten, ⌫ löscht, „OK ✓“ prüft.";
+
 LS.spiel({
   id: "geheimschrift-knacker",
+  hilfe: stufe => ({
+    s1: "Schau auf den Buchstabenkreis und geh die Schritte. Dann tipp auf den Buchstaben, bei dem du landest.",
+    s2: `${EINGABE_HILFE} Die Schlüsselscheibe ist schon eingestellt: aussen Klartext, innen Geheimschrift.`,
+    s3: `${EINGABE_HILFE} Mit ◀ ▶ drehst du die Schlüsselscheibe auf den Schlüssel: aussen Klartext, innen Geheimschrift.`,
+    s4: `${EINGABE_HILFE} Der Buchstabenkreis hilft dir beim Zählen.`,
+    s5: "Dreh die Scheibe mit ◀ ▶ und lies das Geheimwort innen → aussen. Dann tipp auf den Schlüssel, der ein echtes Wort macht.",
+    s6: `${EINGABE_HILFE} Die Schlüsselscheibe kommt erst nach dem ersten Fehler dazu.`,
+  })[stufe],
   einleitung: "Schon Julius Caesar schrieb geheime Briefe: Jeder Buchstabe wird im Alphabet ein paar Schritte verschoben. Der Schlüssel sagt, wie viele. Kannst du die Geheimschrift knacken?",
   anzahl: 8,
   stufen: nurMoegliche({
@@ -276,6 +306,7 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const f = ctx.flaeche;
     if (p.richtungen && p.richtungen.length > 1) ctx.serie("richtung", a.richtung);
+    ctx.tipp(tippsFuer(a, p)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
 
     if (a.art === "buchstabe") {
       const weiter = a.richtung === "ver";

@@ -147,9 +147,28 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): je Regel eine Hilfsfrage zum Hinhören — keine
+ * Schreibweise als Antwortknopf, keine Beispielwörter aus den Listen (sie könnten das gesuchte Wort sein).
+ */
+const TIPPS = {
+  "sp-st": ["Sprich das Wort langsam. Steht der Laut am Wortanfang?", "Denk an die Regel: Am Wortanfang schreibt man diesen Laut anders, als man ihn hört."],
+  "ie-i": ["Sprich das Wort langsam: Klingt der Laut lang wie in «Lied» oder kurz wie in «Ding»?"],
+  "ck-tz": ["Sprich das Wort langsam: Ist der Vokal vor der Lücke kurz oder lang?", "Steht vor der Lücke l, n, r oder au, ei, eu? Denk an die Regel."],
+  "f-v": ["Die meisten Wörter mit diesem Laut schreibt man wie «Ferien». Nur wenige Merkwörter schreibt man anders.", "Stell dir das Wort geschrieben vor: Hast du es schon oft gelesen?"],
+  "e-ae": ["Such ein verwandtes Wort: die Einzahl oder die Grundform.", "Hat das verwandte Wort ein a? Denk an die Regel."],
+  doppel: ["Sprich das Wort langsam: Ist der Vokal vor der Lücke kurz oder lang?", "Nach einem kurzen Vokal folgt oft ein doppelter Konsonant, nach einem langen nicht."],
+};
+function tippsFuer(a, p) {
+  const t = [...(p.sichtbar ? ["Lies zuerst die Regel auf der Karte."] : []), ...TIPPS[a.regelId]];
+  if (a.regelId === "ie-i" && p.ausnahmen) t.push("Vorsicht: Einige Wörter klingen lang wie «Lied» und haben trotzdem kein e. Die muss man sich merken.");
+  return t;
+}
+
 LS.spiel({
   id: "regel-luecke",
   einleitung: "In jedem Wort fehlt etwas. Welche Schreibweise ist richtig? Die Regel hilft dir!",
+  hilfe: "Schau das Bild an und lies das Wort mit der Lücke. Tippe unten die Schreibweise an, die in die Lücke gehört.",
   anzahl: 10,
   stufen: nurMoegliche({
     s1: "sp oder schp, st oder scht: Stern, Spiel.",
@@ -167,6 +186,7 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const loesung = p.knapp ? `Man schreibt ${a.ganz}. ${a.regel.regel}` : `Man schreibt ${a.ganz}.`;
     ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(a, p));
     if (p.sichtbar) ctx.flaeche.append(el("div", { class: "regelkarte" }, el("b", { text: `Regel: ${a.regel.name}` }), a.regel.regel));
     if (a.bild) ctx.flaeche.append(el("div", { class: "bild-gross", "aria-hidden": "true", text: a.bild }));
 

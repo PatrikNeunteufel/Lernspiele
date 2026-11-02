@@ -53,9 +53,15 @@ function zeichneStart(mitAufsicht = null) {
 
   const tab = aktuellerTab();
   const tabs = el("nav", { class: "tabs", role: "tablist" });
+  // Fehlermeldungen (LERN_Session9): neue Antwort fürs Kind 🔔 bei der Statistik, neue Meldung 🙋 bei der Verwaltung.
+  const ich = LS.aktuellerSpieler();
+  const zeichen = {
+    statistik: !LS.istAufsicht(ich) && LS.ungeleseneMeldungen(ich).length ? " 🔔" : "",
+    verwaltung: LS.meldungen().some(m => m.status === "neu") ? " 🙋" : "",
+  };
   for (const t of START_TABS) {
     if (t.nurAufsicht && !LS.aufsichtAngemeldet()) continue;
-    tabs.append(el("a", { class: "tab", role: "tab", href: "#" + t.id, "aria-selected": String(t === tab), text: t.text }));
+    tabs.append(el("a", { class: "tab", role: "tab", href: "#" + t.id, "aria-selected": String(t === tab), text: t.text + (zeichen[t.id] || "") }));
   }
   leiste.append(tabs, werWahl());
   abgleichKnopf(leiste);

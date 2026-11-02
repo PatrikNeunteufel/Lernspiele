@@ -98,9 +98,29 @@ function hinweisFuer(p) {
   return "Die oberste Linie ist das f. Darüber geht es weiter: g, a, h, c.";
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): eine Merknote in der Nähe, von der aus man zählt —
+ * nie die gesuchte Note selbst (die Merknote hat immer einen anderen Namen), Vorzeichen als Regel.
+ */
+const MERKNOTEN = [[-2, "Die Note mit der kleinen Hilfslinie unten"], [0, "Die unterste Linie"], [4, "Die mittlere Linie"], [8, "Die oberste Linie"]];
+function merkTipp(p) {
+  const passend = MERKNOTEN.filter(([q]) => ((q - p) % 7 + 7) % 7 !== 0)
+    .sort((x, y) => Math.abs(x[0] - p) - Math.abs(y[0] - p))[0];
+  const [q, wo] = passend;
+  return `${wo} ist das ${NOTEN.name(q)}. Zähle von dort ${q < p ? "hinauf" : "hinunter"}: Linie, Zwischenraum, Linie …`;
+}
+function tippsFuer(a) {
+  if (a.art === "finden") return ["Überleg zuerst: Sitzt diese Note auf einer Linie oder in einem Zwischenraum?", merkTipp(a.p)];
+  const t = ["Sitzt die Note auf einer Linie oder in einem Zwischenraum?", merkTipp(a.p)];
+  if (a.vorzeichen > 0) t.push("♯ heisst: einen halben Ton höher. Man hängt -is an den Namen.");
+  if (a.vorzeichen < 0) t.push("♭ heisst: einen halben Ton tiefer. Meist hängt man -es an; bei e, a und h sind die Namen kürzer.");
+  return t;
+}
+
 LS.spiel({
   id: "noten-namen",
   einleitung: "Jede Note hat einen Namen: c, d, e, f, g, a, h. Wo sitzt sie im Notensystem?",
+  hilfe: "Schau, wo die Note im Notensystem sitzt, und tippe ihren Namen an. Steht oben ein Name, tippst du die Note, die so heisst. Mit 🔊 hörst du, wie die Note klingt.",
   anzahl: 10,
   stufen: {
     s1: "Fünf Töne: c, d, e, f, g.",
@@ -115,6 +135,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (STUFE[ctx.stufe].umgekehrt) ctx.serie("art", a.art);
     if (STUFE[ctx.stufe].vorzeichen && a.art === "benennen") ctx.serie("vorzeichen", a.vorzeichen); // ohne, ♯ oder ♭
+    ctx.tipp(tippsFuer(a));
     const folge =() => [{ midi: NOTEN.midi(a.p, a.vorzeichen || 0), dauer: 0.9 }];
     // Beim Treffer die Note vorspielen — so hängen Bild und Klang zusammen.
     const vorspielen = () => NOTEN.spiele(folge());

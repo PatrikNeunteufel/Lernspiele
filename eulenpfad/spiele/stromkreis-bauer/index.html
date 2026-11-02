@@ -442,6 +442,35 @@ const HINWEIS = {
   welche: "Verfolge den Strom von + nach −. Ein Weg durch eine Lampe muss ganz geschlossen sein.",
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst den Weg des Stroms verfolgen, dann worauf in
+ * diesem Schaltbild zu achten ist — nie, ob oder welche Lampe brennt.
+ */
+function tippsFuer(a, s, g) {
+  if (a.art === "korb") return ["Überleg, aus welchem Stoff der Gegenstand gemacht ist.",
+    g[3] ? "Achte genau auf den Stoff: Was gleich aussieht, ist nicht immer aus dem gleichen Stoff — und nicht nur Metalle leiten."
+      : "Metalle wie Eisen, Kupfer oder Stahl leiten den Strom gut."];
+  if (a.art === "kurzfrage") return [HINWEIS.kurzfrage,
+    "Fahre mit dem Finger vom Pluspol zum Minuspol und nimm dabei nur Drähte. Kommst du hin, ohne durch eine Lampe zu gehen?"];
+  if (a.art === "warum") return [HINWEIS.warum,
+    "Prüf der Reihe nach: den Schalter, die Drähte, die zwei Pole der Batterie, den Gegenstand in der Lücke und den Draht in Orange, falls es einen gibt."];
+  if (a.art === "welche") {
+    const t = [HINWEIS.welche, s.parallel
+      ? "Wo sich der Draht teilt, hat jeder Zweig seinen eigenen Weg. Prüf jeden Zweig für sich — und auch die Teile davor und danach."
+      : "Lampen hintereinander (in Serie) teilen sich einen Weg: Ist er irgendwo offen, bleiben alle dunkel."];
+    const zusatz = [herausgedreht(s).length ? "Eine herausgedrehte Lampe unterbricht ihren Weg." : "",
+      s.kurz ? "Der orange Draht ist ein Weg ohne Lampe. Was er überbrückt, bekommt keinen Strom mehr." : ""].filter(Boolean);
+    if (zusatz.length) t.push(zusatz.join(" "));
+    return t;
+  }
+  // brennt
+  const t = [HINWEIS.brennt];
+  if (s.kurz) t.push(HINWEIS.kurz);
+  else t.push("Prüf jedes Teil auf dem Weg: Ist der Schalter zu? Sind alle Drähte angeschlossen? Gehen die Drähte an verschiedene Pole?"
+    + (g ? " Leitet der Gegenstand in der Lücke den Strom?" : ""));
+  return t;
+}
+
 function loesungText(a, s, g, e) {
   if (a.art === "korb") return `${g[1]}: ${g[2] ? "leitet den Strom" : "leitet den Strom nicht"}.`;
   if (a.art === "kurzfrage") return e.kurzschluss ? "Ja, das ist ein Kurzschluss: Plus und Minus sind ohne Lampe verbunden." : "Nein, kein Kurzschluss: Der Strom muss durch die Lampe.";
@@ -455,6 +484,7 @@ function loesungText(a, s, g, e) {
 LS.spiel({
   id: ID,
   einleitung: "Batterie, Drähte, Lampe: Brennt das Licht? Bau im Kopf mit! Experimentiere nur mit Batterien, nie mit der Steckdose.",
+  hilfe: "Schau das Schaltbild an und verfolge den Strom vom Pluspol (+) zum Minuspol (−); die lange dünne Platte der Batterie ist der Pluspol. Dann tippst du die Antwort an. Bei einem Gegenstand allein legst du ihn in den passenden Korb.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -464,6 +494,7 @@ LS.spiel({
     const g = a.ding === null ? null : GEGENSTAENDE[a.ding];
     const e = s ? ergebnis(s, g) : null;
     const loesung = loesungText(a, s, g, e);
+    ctx.tipp(tippsFuer(a, s, g));
     ctx.kennung(`${a.art}|${a.sch}|${a.ding}`);
     if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
     // ja/nein, leitet/nicht; nicht in Stufe 1: Ihre drei geschlossenen Stromkreise reichen nicht für die Bremse.

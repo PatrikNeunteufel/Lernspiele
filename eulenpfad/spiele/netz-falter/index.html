@@ -358,6 +358,20 @@ const FRAGEN = {
 };
 const FALT_HINWEIS = "Falte in Gedanken Fläche für Fläche: Liegen zwei Flächen aufeinander, oder bleibt eine Seite offen?";
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Faltregeln und Vorgehen, ohne ein Feld zu nennen. */
+const GERADE_REIHE = "In einer geraden Reihe aus drei Flächen liegen die erste und die dritte einander gegenüber.";
+const TIPPS = {
+  wahl3: ["Stell dir vor, eine Fläche ist der Boden. Klapp die anderen in Gedanken hoch.", "Ein Block aus 2 × 2 Quadraten oder fünf Quadrate in einer Reihe ergeben nie ein Würfelnetz."],
+  janein: ["Stell dir vor, eine Fläche ist der Boden. Klapp die anderen in Gedanken hoch.", "Ein Block aus 2 × 2 Quadraten oder fünf Quadrate in einer Reihe ergeben nie ein Würfelnetz.", FALT_HINWEIS],
+  gegenueber: ["Flächen, die im Netz aneinanderstossen, werden Nachbarn — sie liegen nie gegenüber.", GERADE_REIHE],
+  quaderGegenueber: ["Flächen, die im Netz aneinanderstossen, werden Nachbarn — sie liegen nie gegenüber.", GERADE_REIHE, "Beim Quader sind gegenüberliegende Flächen gleich gross."],
+  wuerfelzahl: ["Gegenüberliegende Seiten ergeben zusammen immer 7.", "Such zuerst die Fläche, die dem ? gegenüberliegt. " + GERADE_REIHE],
+  ergaenzen: ["Falte die fünf Flächen in Gedanken. Welche Seite des Würfels bleibt offen?", "Das neue Feld muss genau auf diese offene Seite klappen — es darf nicht auf einer anderen Fläche landen."],
+  quaderJanein: ["Ein Quader hat sechs Rechtecke; je zwei gleiche liegen einander gegenüber.", "Klapp in Gedanken: Sind die Kanten, die zusammenstossen, gleich lang? Liegen zwei Flächen aufeinander?"],
+  koerperJanein: ["Falte in Gedanken Fläche für Fläche.", "Sind die Kanten, die zusammenstossen, gleich lang? Bleibt eine Seite offen?"],
+  koerper: ["Zähl die Flächen: Wie viele Dreiecke, wie viele Vierecke?", "Sind alle Vierecke gleich gross?"],
+};
+
 /** Antippen eines Feldes im Netz (Gegenüber, Ergänzen). */
 function tippAufgabe(ctx, { netz, svgOpt, tippbar, richtig, hinweis, loesung }) {
   const { svg, flaechen } = netzSvg(netz, svgOpt);
@@ -383,6 +397,7 @@ function tippAufgabe(ctx, { netz, svgOpt, tippbar, richtig, hinweis, loesung }) 
 LS.spiel({
   id: "netz-falter",
   einleitung: "Schneiden, falten, kleben – im Kopf! Finde Würfelnetze und sag, welche Flächen sich gegenüberliegen.",
+  hilfe: "Falte das Netz im Kopf. Je nach Frage tippst du ein Netz, „Ja“ oder „Nein“, einen Körper oder eine Fläche direkt im Netz an.",
   anzahl: 6,
   stufen: {
     s1: "Welches der drei ist ein Würfelnetz?",
@@ -396,6 +411,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (new Set(STUFE[ctx.stufe].arten).size > 1) ctx.serie("art", a.art);
     if (["janein", "quaderJanein", "koerperJanein"].includes(a.art)) ctx.serie("antwort", a.richtig);
+    ctx.tipp(TIPPS[a.art]);
     const frage = a.art === "koerperJanein"
       ? `Kann man aus diesem Netz ${a.k.typ === "prisma" ? "ein <b>Dreiecksprisma</b>" : "eine <b>Pyramide</b>"} falten?`
       : FRAGEN[a.art];

@@ -176,8 +176,18 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man geschickt zählt — ohne die Masse des Rechtecks. */
+function tippsFuer(a) {
+  if (a.art === "vergleich") return ["Zähl die Häuschen der linken Figur.", "Zähl dann die rechte und vergleiche."];
+  if (a.art === "flaeche") return a.b ? ["Das ist ein Rechteck: Alle Reihen sind gleich lang.", "Wie viele Häuschen hat eine Reihe? Wie viele Reihen sind es? Dann rechne."]
+    : ["Zähle Reihe für Reihe.", "Zähle dann die Reihen zusammen. Mit dem Finger geht es leichter."];
+  return a.b ? ["Jede kleine Seite am Rand zählt 1.", "Oben und unten sind gleich lang, links und rechts auch."]
+    : ["Fahr mit dem Finger einmal rund um die Figur.", "Jede kleine Seite am Rand zählt — auch in den Ecken und Buchten."];
+}
+
 LS.spiel({
   id: "flaechen-pixel",
+  hilfe: "Zähle die Häuschen oder die kleinen Seiten am Rand. Dann tippst du die Zahl mit den Zifferntasten ein oder tippst die passende Antwort an. Beim Vergleichen tippst du auf die Figur mit mehr Häuschen.",
   einleitung: "Jede Figur besteht aus Häuschen. Wie viele sind es? Und wie lang ist der Rand?",
   anzahl: 8,
   stufen: {
@@ -192,6 +202,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     if (STUFE[ctx.stufe].arten.length > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "vergleich") {
       ctx.serie("antwort", a.richtig); // linke oder rechte Figur
       ctx.flaeche.append(el("div", { class: "frage", text: "Welche Figur hat mehr Häuschen?" }));

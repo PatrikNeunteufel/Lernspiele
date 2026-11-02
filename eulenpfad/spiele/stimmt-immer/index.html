@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stimmt immer?</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .aussage-karte { background: #fff; border: 3px solid var(--deko-3); border-radius: 18px; padding: 14px 16px; margin: 0 0 12px; }
+  .aussage-karte .auftrag { font-size: clamp(19px, 4.4vw, 26px); font-weight: 800; text-align: center; line-height: 1.4; margin: 0; }
+  .stimmt-frage { text-align: center; font-weight: 800; color: var(--text-leise); margin: 6px 0; font-size: clamp(16px, 3.8vw, 20px); }
+  .stimmt-antwort .wahl-knopf { font-size: clamp(18px, 4.2vw, 23px); font-weight: 900; }
+  .stimmt-beispiele .wahl-knopf { font-size: clamp(16px, 3.8vw, 21px); font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; overflow-wrap: anywhere; }
+  .stimmt-beispiele.zahlen { --wahl-breite: 220px; }
+  .stimmt-beispiele svg { width: 100%; max-width: 150px; height: auto; display: block; margin: 0 auto 4px; }
+  .stimmt-figur { fill: color-mix(in srgb, var(--deko-2) 18%, #fff); stroke: var(--deko-2); stroke-width: 3; stroke-linejoin: round; }
+  .stimmt-diagonale { stroke: var(--deko-5); stroke-width: 2.5; stroke-dasharray: 6 4; }
+  .stimmt-kreis { fill: none; stroke: var(--deko-6); stroke-width: 3; }
+  .stimmt-punkt { fill: var(--deko-7); stroke: #fff; stroke-width: 1.5; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🤔 Stimmt immer?</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan 21 MA.1.B.2 (Aussagen zu Zahlen erläutern, überprüfen, begründen):
+//   e (Orientierungspunkt) Division mit Rest über die Umkehroperation, f Anzahl Stellen von Produkten
+//     → Stufe 1 und 2 (gerade/ungerade, Teilbarkeit durch 5, Rest, Vielfache, Stellen);
+//   g (Grundanspruch Ende 6. Klasse) Ergebnisse durch Vereinfachen (8 · 13 = 4 · 26), Zerlegen und
+//     Umkehroperationen prüfen → Stufe 3 und 4 (Rechengesetze und Rechentricks prüfen);
+//   h, j (3. Zyklus) arithmetische Gesetzmässigkeiten begründen oder widerlegen (ungerade Summe, Produkt
+//     von vier Nachbarzahlen durch 24, a³ + 5a durch 6), Nachkommastellen von Produkten → Stufe 5 und 6.
+// MA.2.B.2 (Aussagen zu geometrischen Beziehungen überprüfen):
+//   c (Grundanspruch) Dreieck, Viereck, Kreis (ein Kreis und ein Viereck können sich in mehr als 4
+//     Punkten schneiden) → Stufe 3 und 4; d, e, f (3. Zyklus) Diagonalen in Rechteck und Quadrat,
+//     Flächen, Winkel im rechtwinkligen Dreieck → Stufe 5 und 6.
+// Basisklasse 6: s1 5. Klasse, s3 Klassenziel, s5 7. Klasse.
+// Die Aussagen stehen als Konstante im Code (Mathematik, kein Lesestoff). Jede trägt eine Begründung.
+// Die Antwort wird nicht nur behauptet: pruefeAufgabe sucht in einem festen Zahlenraum bzw. in den
+// gezeichneten Figuren nach Beispielen und Gegenbeispielen; die Figuren-Eigenschaften werden aus den
+// Koordinaten berechnet. Aussagen, deren Antwort davon abhinge, ob ein Quadrat als Rechteck oder Raute
+// zählt, kommen nicht vor (Voraussetzungen über Eigenschaften, nicht über Namen).
+// Abgrenzung: Probe-Stempel (rechenprobe, 5) rechnet Proben, Rechentrick-Detektiv (4) wendet Tricks an,
+// Teiler-Spürnase (teiler-detektiv, 6) prüft Teilbarkeit einzelner Zahlen, Begriffs-Geodreieck (5)
+// benennt Eigenschaften einzelner Figuren — hier wird eine allgemeine Aussage geprüft und widerlegt.
+
+const { zahlText, dezimalText, waehle, mische, el } = LS;
+
+// ---------- Zahlen ----------
+
+const bis = (a, b) => [...Array(b - a + 1)].map((_, i) => a + i);
+const paare = (as, bs) => as.flatMap(a => bs.map(b => [a, b]));
+const gerade = n => n % 2 === 0;
+const quersumme = n => String(n).split("").reduce((s, z) => s + Number(z), 0);
+const prim = n => n > 1 && bis(2, Math.floor(Math.sqrt(n))).every(t => n % t);
+const stellen = n => String(n).length;
+const z = zahlText;
+const dz = zehntel => dezimalText(zehntel / 10);
+const divText = (n, d) => (n % d ? `${z(n)} : ${d} = ${Math.floor(n / d)} Rest ${n % d}` : `${z(n)} : ${d} = ${n / d}`);
+
+// ---------- Figuren (Eigenschaften aus den Koordinaten) ----------
+
+const W3 = Math.sqrt(3);
+const FIGUREN = {
+  quadrat: { name: "Quadrat", p: [[0, 0], [60, 0], [60, 60], [0, 60]] },
+  rechteck: { name: "Rechteck", p: [[0, 0], [90, 0], [90, 50], [0, 50]] },
+  raute: { name: "Raute", p: [[40, 0], [80, 30], [40, 60], [0, 30]] },
+  parallelogramm: { name: "Parallelogramm", p: [[0, 50], [65, 50], [90, 0], [25, 0]] },
+  drachen: { name: "Drachenviereck", p: [[40, 0], [70, 40], [40, 90], [10, 40]] },
+  trapezGS: { name: "gleichschenkliges Trapez", p: [[0, 50], [90, 50], [70, 0], [20, 0]] },
+  trapezR: { name: "rechtwinkliges Trapez", p: [[0, 0], [50, 0], [80, 50], [0, 50]] },
+  viereck: { name: "unregelmässiges Viereck", p: [[0, 10], [70, 0], [85, 60], [15, 45]] },
+  dreieckGS: { name: "gleichseitiges Dreieck", p: [[0, 30 * W3], [60, 30 * W3], [30, 0]] },
+  dreieckGSch: { name: "gleichschenkliges Dreieck", p: [[0, 70], [50, 70], [25, 0]] },
+  dreieckR: { name: "rechtwinkliges Dreieck", p: [[0, 60], [70, 60], [0, 0]] },
+  dreieckRGS: { name: "rechtwinklig-gleichschenkliges Dreieck", p: [[0, 60], [60, 60], [0, 0]] },
+  dreieckS: { name: "stumpfwinkliges Dreieck", p: [[20, 40], [110, 40], [0, 0]] },
+  dreieckU: { name: "spitzwinkliges Dreieck", p: [[0, 50], [70, 60], [30, 0]] },
+};
+
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+const kreuz = (a, b) => a[0] * b[1] - a[1] * b[0];
+const len = a => Math.hypot(a[0], a[1]);
+const nah = (x, y, tol = 1e-6) => Math.abs(x - y) <= tol * Math.max(1, Math.abs(x), Math.abs(y));
+const flaeche = q => Math.abs(q.reduce((s, a, i) => s + kreuz(a, q[(i + 1) % q.length]), 0)) / 2;
+
+/** Anzahl Symmetrieachsen: Kandidaten durch den Schwerpunkt der Ecken und eine Ecke oder Seitenmitte. */
+function achsen(p) {
+  const n = p.length, s = [p.reduce((t, a) => t + a[0], 0) / n, p.reduce((t, a) => t + a[1], 0) / n];
+  const kand = [...p, ...p.map((a, i) => [(a[0] + p[(i + 1) % n][0]) / 2, (a[1] + p[(i + 1) % n][1]) / 2])];
+  const richtungen = [];
+  for (const k of kand) {
+    const d = sub(k, s), l = len(d);
+    if (l < 1e-9) continue;
+    const u = [d[0] / l, d[1] / l];
+    const spiegel = a => { const v = sub(a, s), t = dot(v, u); return [s[0] + 2 * t * u[0] - v[0], s[1] + 2 * t * u[1] - v[1]]; };
+    const passt = p.every(a => { const b = spiegel(a); return p.some(c => len(sub(b, c)) < 1e-6); });
+    const winkel = ((Math.atan2(u[1], u[0]) + Math.PI) % Math.PI);
+    if (passt && !richtungen.some(w => Math.abs(w - winkel) < 1e-6 || Math.abs(Math.abs(w - winkel) - Math.PI) < 1e-6)) richtungen.push(winkel);
+  }
+  return richtungen.length;
+}
+
+function eigenschaften(p) {
+  const n = p.length, seiten = p.map((a, i) => len(sub(p[(i + 1) % n], a)));
+  const cos = p.map((a, i) => { const u = sub(p[(i + n - 1) % n], a), v = sub(p[(i + 1) % n], a); return dot(u, v) / (len(u) * len(v)); });
+  const e = {
+    ecken: n,
+    seitenGleich: seiten.every(s => nah(s, seiten[0])),
+    zweiGleich: seiten.some((s, i) => seiten.some((t, j) => i < j && nah(s, t))),
+    rechte: cos.filter(c => Math.abs(c) < 1e-9).length,
+    stumpfe: cos.filter(c => c < -1e-9).length,
+    winkel: cos.map(c => Math.acos(Math.max(-1, Math.min(1, c))) * 180 / Math.PI),
+    achsen: achsen(p),
+  };
+  if (n === 4) {
+    const d1 = sub(p[2], p[0]), d2 = sub(p[3], p[1]);
+    const m1 = [(p[0][0] + p[2][0]) / 2, (p[0][1] + p[2][1]) / 2], m2 = [(p[1][0] + p[3][0]) / 2, (p[1][1] + p[3][1]) / 2];
+    const par = (i, j) => Math.abs(kreuz(sub(p[(i + 1) % 4], p[i]), sub(p[(j + 1) % 4], p[j]))) < 1e-9;
+    Object.assign(e, {
+      parallelPaare: (par(0, 2) ? 1 : 0) + (par(1, 3) ? 1 : 0),
+      diagGleich: nah(len(d1), len(d2)),
+      diagSenkrecht: Math.abs(dot(d1, d2)) < 1e-9,
+      diagHalbieren: len(sub(m1, m2)) < 1e-9,
+    });
+    // Die Diagonalen zerlegen das Viereck in vier Dreiecke um ihren Schnittpunkt.
+    const t = kreuz(sub(p[1], p[0]), d2) / kreuz(d1, d2), m = [p[0][0] + t * d1[0], p[0][1] + t * d1[1]];
+    const dreiecke = p.map((a, i) => flaeche([a, p[(i + 1) % 4], m]));
+    e.vierGleicheDreiecke = dreiecke.every(x => nah(x, dreiecke[0]));
+  }
+  return e;
+}
+for (const f of Object.values(FIGUREN)) f.e = eigenschaften(f.p);
+const VIERECKE = Object.keys(FIGUREN).filter(k => FIGUREN[k].e.ecken === 4);
+const DREIECKE = Object.keys(FIGUREN).filter(k => FIGUREN[k].e.ecken === 3);
+
+// ---------- Kreis und Vieleck: gemeinsame Punkte berechnet ----------
+
+const QU = [[-40, -40], [40, -40], [40, 40], [-40, 40]];
+const RE = [[-50, -30], [50, -30], [50, 30], [-50, 30]];
+const DR = [[0, -50], [25 * W3, 25], [-25 * W3, 25]]; // gleichseitig, Umkreis 50, Inkreis 25
+const KREISE = {
+  q0: { form: "quadrat", p: QU, c: [0, 0], r: 25 }, q4: { form: "quadrat", p: QU, c: [0, 0], r: 40 },
+  q8: { form: "quadrat", p: QU, c: [0, 0], r: 48 }, q4e: { form: "quadrat", p: QU, c: [0, 0], r: 40 * Math.SQRT2 },
+  q2: { form: "quadrat", p: QU, c: [40, 40], r: 25 },
+  r2: { form: "rechteck", p: RE, c: [0, 0], r: 30 }, r4: { form: "rechteck", p: RE, c: [0, 0], r: 40 }, r8: { form: "rechteck", p: RE, c: [0, 0], r: 55 },
+  d0: { form: "dreieck", p: DR, c: [0, 0], r: 12 }, d3: { form: "dreieck", p: DR, c: [0, 0], r: 25 },
+  d6: { form: "dreieck", p: DR, c: [0, 0], r: 36 }, d3e: { form: "dreieck", p: DR, c: [0, 0], r: 50 }, d2: { form: "dreieck", p: DR, c: [0, -50], r: 20 },
+};
+const FORM_NAME = { quadrat: "Kreis und Quadrat", rechteck: "Kreis und Rechteck", dreieck: "Kreis und Dreieck" };
+
+/** Gemeinsame Punkte von Kreis (c, r) und Rand des Vielecks p. */
+function schnittpunkte(p, c, r) {
+  const pkt = [];
+  p.forEach((a, i) => {
+    const b = p[(i + 1) % p.length], d = sub(b, a), f = sub(a, c);
+    const A = dot(d, d), B = 2 * dot(d, f), C = dot(f, f) - r * r, D = B * B - 4 * A * C;
+    if (D < -1e-7 * B * B - 1e-9) return;
+    const w = D > 1e-7 * B * B ? Math.sqrt(D) : 0;
+    for (const t of new Set([(-B - w) / (2 * A), (-B + w) / (2 * A)])) {
+      if (t < -1e-9 || t > 1 + 1e-9) continue;
+      const q = [a[0] + t * d[0], a[1] + t * d[1]];
+      if (!pkt.some(s => len(sub(s, q)) < 1e-4)) pkt.push(q);
+    }
+  });
+  return pkt;
+}
+for (const k of Object.values(KREISE)) k.punkte = schnittpunkte(k.p, k.c, k.r);
+
+// ---------- Aussagen ----------
+// art "zahl": raum() liefert alle Fälle im geprüften Bereich, vor(t) die Voraussetzung, dann(t) die
+// Behauptung, zeige(t) den Text des Beispiels. art "figur": Fälle sind die Figuren, art "kreis" die
+// Kreisbilder. Ein Gegenbeispiel erfüllt vor, aber nicht dann; bei „nie“ ist jedes passende Beispiel eines.
+
+const A = [
+  // --- Stufe 1 und 2: gerade, ungerade, Teilbarkeit, Rest, Vielfache, Stellen ---
+  { id: "g+g", stufen: ["s1"], art: "zahl", antwort: "immer", text: "Die Summe von zwei geraden Zahlen ist gerade.",
+    raum: () => paare(bis(0, 40), bis(0, 40)), vor: ([a, b]) => gerade(a) && gerade(b), dann: ([a, b]) => gerade(a + b),
+    grund: "Gerade Zahlen bestehen aus lauter Zweierpaaren. Legt man zwei solche Zahlen zusammen, bleibt kein Stein allein." },
+  { id: "u+u", stufen: ["s1", "s2"], art: "zahl", antwort: "nie", text: "Die Summe von zwei ungeraden Zahlen ist ungerade.",
+    raum: () => paare(bis(1, 40), bis(1, 40)), vor: ([a, b]) => !gerade(a) && !gerade(b), dann: ([a, b]) => !gerade(a + b),
+    zeige: ([a, b]) => `${a} + ${b} = ${a + b}`,
+    grund: "Jede ungerade Zahl hat einen Stein ohne Partner. Zwei solche Steine bilden zusammen ein Paar — die Summe ist immer gerade." },
+  { id: "g+u", stufen: ["s1"], art: "zahl", antwort: "nie", text: "Die Summe von einer geraden und einer ungeraden Zahl ist gerade.",
+    raum: () => paare(bis(1, 40), bis(1, 40)), vor: ([a, b]) => gerade(a) !== gerade(b), dann: ([a, b]) => gerade(a + b),
+    zeige: ([a, b]) => `${a} + ${b} = ${a + b}`,
+    grund: "Die gerade Zahl besteht aus Paaren, die ungerade hat einen Stein übrig. Dieser eine Stein bleibt auch in der Summe allein: Sie ist immer ungerade." },
+  { id: "u·u", stufen: ["s1"], art: "zahl", antwort: "immer", text: "Das Produkt von zwei ungeraden Zahlen ist ungerade.",
+    raum: () => paare(bis(1, 30), bis(1, 30)), vor: ([a, b]) => !gerade(a) && !gerade(b), dann: ([a, b]) => !gerade(a * b),
+    grund: "3 × 5 heisst 5 + 5 + 5: eine ungerade Anzahl ungerader Zahlen. Je zwei davon geben eine gerade Zahl, eine bleibt übrig — das Ergebnis ist ungerade." },
+  { id: "g·x", stufen: ["s1"], art: "zahl", antwort: "immer", text: "Ist einer von zwei Faktoren gerade, ist auch das Produkt gerade.",
+    raum: () => paare(bis(0, 30), bis(0, 30)), vor: ([a, b]) => gerade(a) || gerade(b), dann: ([a, b]) => gerade(a * b),
+    grund: "Ist zum Beispiel 4 ein Faktor, ist das Produkt 4 × 7 = 7 + 7 + 7 + 7, eine gerade Anzahl gleicher Summanden — sie bilden Paare. Das Produkt ist durch 2 teilbar." },
+  { id: "5→0", stufen: ["s1", "s2"], art: "zahl", antwort: "manchmal", text: "Eine Zahl, die durch 5 teilbar ist, endet auf 0.",
+    raum: () => bis(5, 200).map(n => [n]), vor: ([n]) => n % 5 === 0, dann: ([n]) => n % 10 === 0, zeige: ([n]) => divText(n, 5),
+    grund: "Die Zahlen der 5er-Reihe enden abwechselnd auf 5 und auf 0. Nur die geraden enden auf 0, zum Beispiel 40 — aber 35 endet auf 5." },
+  { id: "0→5", stufen: ["s1"], art: "zahl", antwort: "immer", text: "Eine Zahl, die auf 0 endet, ist durch 5 teilbar.",
+    raum: () => bis(1, 300).map(n => [n]), vor: ([n]) => n % 10 === 0, dann: ([n]) => n % 5 === 0,
+    grund: "Eine Zahl mit 0 am Ende ist ein Vielfaches von 10. Jeder Zehner besteht aus zwei Fünfern, also geht auch die Division durch 5 auf." },
+  { id: "rest6", stufen: ["s1"], art: "zahl", antwort: "immer", text: "Teilt man eine Zahl durch 6, ist der Rest höchstens 5.",
+    raum: () => bis(0, 200).map(n => [n]), vor: () => true, dann: ([n]) => n % 6 <= 5,
+    grund: "Bleiben 6 oder mehr übrig, passt noch einmal eine 6 hinein. Der Rest ist darum immer kleiner als 6: 0, 1, 2, 3, 4 oder 5." },
+  { id: "rest4", stufen: ["s1", "s2"], art: "zahl", antwort: "nie", text: "Teilt man eine Zahl durch 4, bleibt der Rest 4.",
+    raum: () => paare(bis(10, 60), [4, 5, 6]), vor: ([n, d]) => d === 4, dann: ([n, d]) => n % d === 4, zeige: ([n, d]) => divText(n, d),
+    grund: "Wären 4 übrig, passte noch einmal eine 4 hinein. Beim Teilen durch 4 ist der Rest immer 0, 1, 2 oder 3." },
+  { id: ">100", stufen: ["s1", "s2"], art: "zahl", antwort: "manchmal", text: "Ist eine von zwei Zahlen grösser als 50, ist ihre Summe grösser als 100.",
+    raum: () => paare(bis(10, 90), bis(5, 60)), vor: ([a, b]) => a > 50 || b > 50, dann: ([a, b]) => a + b > 100,
+    zeige: ([a, b]) => `${a} + ${b} = ${a + b}`,
+    grund: "Es kommt auch auf die andere Zahl an: 60 + 50 = 110 ist grösser als 100, aber 60 + 10 = 70 nicht." },
+  { id: "5ungerade", stufen: ["s1", "s2"], art: "zahl", antwort: "manchmal", text: "Ein Vielfaches von 5 ist ungerade.",
+    raum: () => bis(1, 150).map(n => [n]), vor: ([n]) => n % 5 === 0, dann: ([n]) => !gerade(n), zeige: ([n]) => divText(n, 5),
+    grund: "Die 5er-Reihe wechselt ab: 5, 10, 15, 20 … Die Zahlen auf 5 sind ungerade, die auf 0 gerade." },
+  { id: "stellen4", stufen: ["s2"], art: "zahl", antwort: "manchmal", text: "Das Produkt von zwei zweistelligen Zahlen ist vierstellig.",
+    raum: () => paare(bis(10, 99), [7, 11, 15, 23, 34, 48, 62, 85, 99, 105, 120]), vor: ([a, b]) => stellen(a) === 2 && stellen(b) === 2,
+    dann: ([a, b]) => stellen(a * b) === 4, zeige: ([a, b]) => `${a} × ${b} = ${z(a * b)}`,
+    grund: "Das kleinste Produkt ist 10 × 10 = 100 (dreistellig), das grösste 99 × 99 = 9801 (vierstellig). Beides kommt vor." },
+  { id: "stellen5", stufen: ["s2"], art: "zahl", antwort: "nie", text: "Das Produkt von zwei zweistelligen Zahlen hat fünf Stellen.",
+    raum: () => paare(bis(10, 99), [9, 12, 25, 47, 66, 88, 99, 110, 150, 240]), vor: ([a, b]) => stellen(a) === 2 && stellen(b) === 2,
+    dann: ([a, b]) => stellen(a * b) === 5, zeige: ([a, b]) => `${a} × ${b} = ${z(a * b)}`,
+    grund: "Beide Zahlen sind kleiner als 100, also ist das Produkt kleiner als 100 × 100 = 10 000. Mehr als vier Stellen sind nicht möglich (99 × 99 = 9801)." },
+  { id: "6→3", stufen: ["s2"], art: "zahl", antwort: "immer", text: "Ein Vielfaches von 6 ist auch ein Vielfaches von 3.",
+    raum: () => bis(1, 200).map(n => [n]), vor: ([n]) => n % 6 === 0, dann: ([n]) => n % 3 === 0,
+    grund: "6 = 2 × 3. Wer eine Zahl aus lauter Sechsern bauen kann, kann sie auch aus doppelt so vielen Dreiern bauen." },
+  { id: "3→6", stufen: ["s2"], art: "zahl", antwort: "manchmal", text: "Ein Vielfaches von 3 ist auch ein Vielfaches von 6.",
+    raum: () => bis(3, 120).map(n => [n]), vor: ([n]) => n % 3 === 0, dann: ([n]) => n % 6 === 0, zeige: ([n]) => `Die Zahl ${n}`,
+    grund: "Nur die geraden Zahlen der 3er-Reihe sind auch in der 6er-Reihe: 12 ja, 15 nicht." },
+  { id: "10ungerade", stufen: ["s2"], art: "zahl", antwort: "nie", text: "Ein Vielfaches von 10 ist ungerade.",
+    raum: () => bis(1, 150).map(n => [n]), vor: ([n]) => n % 10 === 0, dann: ([n]) => !gerade(n), zeige: ([n]) => `Die Zahl ${n}`,
+    grund: "Ein Vielfaches von 10 endet auf 0, und Zahlen mit der Endziffer 0 sind gerade: 10 = 5 × 2." },
+  { id: "4→8", stufen: ["s2"], art: "zahl", antwort: "manchmal", text: "Eine Zahl, die durch 4 teilbar ist, ist auch durch 8 teilbar.",
+    raum: () => bis(4, 160).map(n => [n]), vor: ([n]) => n % 4 === 0, dann: ([n]) => n % 8 === 0, zeige: ([n]) => `${divText(n, 4)}, ${divText(n, 8)}`,
+    grund: "Jede zweite Zahl der 4er-Reihe ist in der 8er-Reihe: 16 ja, 12 nicht (12 : 8 gibt Rest 4)." },
+  { id: "8→4", stufen: ["s2"], art: "zahl", antwort: "immer", text: "Eine Zahl, die durch 8 teilbar ist, ist auch durch 4 teilbar.",
+    raum: () => bis(1, 200).map(n => [n]), vor: ([n]) => n % 8 === 0, dann: ([n]) => n % 4 === 0,
+    grund: "8 = 2 × 4. Jeder Achter besteht aus zwei Vierern, also geht die Division durch 4 auch auf." },
+  { id: "4gerade", stufen: ["s2"], art: "zahl", antwort: "immer", text: "Ein Vielfaches von 4 ist gerade.",
+    raum: () => bis(1, 200).map(n => [n]), vor: ([n]) => n % 4 === 0, dann: ([n]) => gerade(n),
+    grund: "4 = 2 × 2. Jedes Vielfache von 4 ist auch ein Vielfaches von 2, also gerade." },
+
+  // --- Stufe 3 und 4: Rechenwege prüfen, Figuren ---
+  { id: "doppelt-halb", stufen: ["s3"], art: "zahl", antwort: "immer", text: "Verdoppelt man einen Faktor und halbiert den anderen, bleibt das Produkt gleich.",
+    raum: () => paare(bis(1, 30), bis(1, 15).map(n => 2 * n)), vor: () => true, dann: ([a, b]) => (2 * a) * (b / 2) === a * b,
+    grund: "Beispiel 8 × 13 = 4 × 26: Das Rechteck mit 8 Reihen zu 13 wird halb so hoch und doppelt so breit. Die Anzahl Felder bleibt gleich." },
+  { id: "beide-doppelt", stufen: ["s3"], art: "zahl", antwort: "immer", text: "Verdoppelt man beide Faktoren, wird das Produkt viermal so gross.",
+    raum: () => paare(bis(0, 30), bis(0, 30)), vor: () => true, dann: ([a, b]) => (2 * a) * (2 * b) === 4 * a * b,
+    grund: "Der erste verdoppelte Faktor verdoppelt das Produkt, der zweite verdoppelt es noch einmal: 2 × 2 = 4. Beispiel 3 × 5 = 15, 6 × 10 = 60." },
+  { id: "plus5minus5", stufen: ["s3"], art: "zahl", antwort: "immer", text: "Zählt man bei einer Plusaufgabe zur einen Zahl 5 dazu und nimmt von der anderen 5 weg, bleibt das Ergebnis gleich.",
+    raum: () => paare(bis(0, 60), bis(5, 60)), vor: () => true, dann: ([a, b]) => (a + 5) + (b - 5) === a + b,
+    grund: "Was die eine Zahl bekommt, gibt die andere ab. Insgesamt bleibt es gleich viel: 38 + 27 = 43 + 22 = 65." },
+  { id: "minus-beide", stufen: ["s3"], art: "zahl", antwort: "immer", text: "Zählt man bei einer Minusaufgabe zu beiden Zahlen 10 dazu, bleibt das Ergebnis gleich.",
+    raum: () => paare(bis(10, 80), bis(0, 60)).filter(([a, b]) => a >= b), vor: () => true, dann: ([a, b]) => (a + 10) - (b + 10) === a - b,
+    grund: "Das Ergebnis einer Minusaufgabe ist der Abstand der zwei Zahlen. Rücken beide um 10 weiter, bleibt der Abstand gleich: 52 − 18 = 62 − 28 = 34." },
+  { id: "minus-plusminus", stufen: ["s3", "s4"], art: "zahl", antwort: "nie", text: "Zählt man bei einer Minusaufgabe zur ersten Zahl 10 dazu und nimmt von der zweiten 10 weg, bleibt das Ergebnis gleich.",
+    raum: () => paare(bis(20, 70).filter(n => n % 2 === 0), bis(10, 20)).flatMap(([a, b]) => [[a, b, "pm"], [a, b, "beide"]]),
+    vor: ([, , art]) => art === "pm", dann: ([a, b, art]) => (art === "pm" ? (a + 10) - (b - 10) : (a + 10) - (b + 10)) === a - b,
+    zeige: ([a, b, art]) => (art === "pm" ? `${a} − ${b} = ${a - b}, aber ${a + 10} − ${b - 10} = ${a - b + 20}` : `${a} − ${b} = ${a - b} und ${a + 10} − ${b + 10} = ${a - b}`),
+    grund: "Die erste Zahl wird grösser, und es wird weniger abgezogen — beides macht das Ergebnis grösser, zusammen um 20." },
+  { id: "umkehr", stufen: ["s3"], art: "zahl", antwort: "immer", text: "Bei einer Division ohne Rest gibt das Ergebnis mal die Zahl, durch die man teilt, wieder die erste Zahl.",
+    raum: () => paare(bis(1, 20), bis(1, 12)).map(([q, d]) => [q * d, d]), vor: ([n, d]) => n % d === 0, dann: ([n, d]) => (n / d) * d === n,
+    grund: "Mal und durch sind Umkehraufgaben: 96 : 8 = 12, also 12 × 8 = 96. So kann man jede Division ohne Rest prüfen." },
+  { id: "umkehr-rest", stufen: ["s3"], art: "zahl", antwort: "nie", text: "Bei einer Division mit Rest gibt das Ergebnis mal die Zahl, durch die man teilt, genau die erste Zahl.",
+    raum: () => paare(bis(20, 70), [3, 4, 6, 7, 8, 9]), vor: ([n, d]) => n % d !== 0, dann: ([n, d]) => Math.floor(n / d) * d === n,
+    zeige: ([n, d]) => `${divText(n, d)} → ${Math.floor(n / d)} × ${d} = ${Math.floor(n / d) * d}`,
+    grund: "Der Rest fehlt noch: Ergebnis mal Teiler plus Rest gibt die erste Zahl. Bei 38 : 6 = 6 Rest 2 ist 6 × 6 = 36, erst 36 + 2 = 38." },
+  { id: "div-tausch", stufen: ["s4"], art: "zahl", antwort: "manchmal", text: "Bei einer Division darf man die zwei Zahlen vertauschen, das Ergebnis bleibt gleich.",
+    raum: () => [2, 3, 4, 5, 6, 7, 8, 9].flatMap(b => [[b, b, ":"], [2 * b, b, ":"], [4 * b, b, ":"], [5 * b, b, ":"], [2 * b, b, "+"], [5 * b, b, "×"]]),
+    vor: ([, , op]) => op === ":", dann: ([a, b, op]) => (op === ":" ? a / b === b / a : true),
+    zeige: ([a, b, op]) => (op === ":" ? (a === b ? `${a} : ${b} = 1 und ${b} : ${a} = 1` : `${a} : ${b} = ${a / b}, aber ${b} : ${a} = ${dezimalText(b / a)}`)
+      : op === "+" ? `${a} + ${b} = ${b} + ${a} = ${a + b}` : `${a} × ${b} = ${b} × ${a} = ${a * b}`),
+    grund: "Nur wenn beide Zahlen gleich sind, bleibt das Ergebnis 1. Sonst nicht: 8 : 4 = 2, aber 4 : 8 = 0.5. Vertauschen darf man bei Plus und Mal." },
+  { id: "produkt-groesser", stufen: ["s4"], art: "zahl", antwort: "manchmal", text: "Das Produkt von zwei Zahlen ist grösser als jede der beiden Zahlen.",
+    raum: () => paare(bis(0, 12), bis(0, 12)), vor: () => true, dann: ([a, b]) => a * b > a && a * b > b, zeige: ([a, b]) => `${a} × ${b} = ${a * b}`,
+    grund: "Mit 0 oder 1 als Faktor klappt es nicht: 1 × 7 = 7 ist nicht grösser als 7, und 0 × 5 = 0. Ab 2 × 2 stimmt es." },
+  { id: "halb-kleiner", stufen: ["s4"], art: "zahl", antwort: "manchmal", text: "Teilt man eine Zahl durch 2, wird sie kleiner.",
+    raum: () => bis(0, 40).map(n => [n]), vor: () => true, dann: ([n]) => n / 2 < n, zeige: ([n]) => `${n} : 2 = ${dezimalText(n / 2)}`,
+    grund: "Für jede Zahl grösser als 0 stimmt es. Aber 0 : 2 = 0 — die Null wird nicht kleiner." },
+  { id: "drei-nachbarn", stufen: ["s4"], art: "zahl", antwort: "immer", text: "Die Summe von drei aufeinanderfolgenden Zahlen ist durch 3 teilbar.",
+    raum: () => bis(0, 200).map(n => [n]), vor: () => true, dann: ([n]) => (n + (n + 1) + (n + 2)) % 3 === 0,
+    grund: "Gibt die kleinste Zahl 1 an die grösste ab, sind alle drei gleich der mittleren: 7 + 8 + 9 = 8 + 8 + 8 = 3 × 8." },
+  { id: "zwei-nachbarn", stufen: ["s4"], art: "zahl", antwort: "nie", text: "Die Summe von zwei aufeinanderfolgenden Zahlen ist gerade.",
+    raum: () => paare(bis(1, 60), [1, 2]), vor: ([, d]) => d === 1, dann: ([a, d]) => gerade(2 * a + d), zeige: ([a, d]) => `${a} + ${a + d} = ${2 * a + d}`,
+    grund: "Von zwei Nachbarzahlen ist eine gerade und eine ungerade. Ihre Summe ist darum immer ungerade." },
+  { id: "5mal-gerade", stufen: ["s4"], art: "zahl", antwort: "immer", text: "Multipliziert man eine Zahl, die auf 5 endet, mit einer geraden Zahl, endet das Ergebnis auf 0.",
+    raum: () => paare(bis(0, 30).map(n => 10 * n + 5), bis(1, 20).map(n => 2 * n)), vor: () => true, dann: ([a, b]) => (a * b) % 10 === 0,
+    grund: "Die Zahl auf 5 ist ein Vielfaches von 5, die gerade Zahl ein Vielfaches von 2. Zusammen steckt 5 × 2 = 10 im Produkt." },
+
+  { id: "4R-diag", stufen: ["s3"], art: "figur", antwort: "immer", text: "Hat ein Viereck vier rechte Winkel, sind seine Diagonalen gleich lang.", diagonalen: true,
+    vor: e => e.ecken === 4 && e.rechte === 4, dann: e => e.diagGleich,
+    grund: "Jede Diagonale schneidet ein rechtwinkliges Dreieck mit denselben zwei Seiten ab (Länge und Breite). Die zwei Dreiecke sind deckungsgleich, also auch ihre langen Seiten, die Diagonalen." },
+  { id: "4S-4R", stufen: ["s3"], art: "figur", antwort: "manchmal", text: "Sind alle vier Seiten eines Vierecks gleich lang, hat es vier rechte Winkel.",
+    vor: e => e.ecken === 4 && e.seitenGleich, dann: e => e.rechte === 4,
+    grund: "Beim Quadrat stimmt es. Eine Raute hat auch vier gleich lange Seiten, aber schiefe Winkel." },
+  { id: "diag-senkrecht", stufen: ["s3"], art: "figur", antwort: "manchmal", text: "Die Diagonalen eines Vierecks stehen senkrecht aufeinander.", diagonalen: true,
+    vor: e => e.ecken === 4, dann: e => e.diagSenkrecht,
+    grund: "Beim Quadrat, bei der Raute und beim Drachenviereck stimmt es, beim Rechteck oder beim Trapez nicht." },
+  { id: "4S-senkrecht", stufen: ["s3"], art: "figur", antwort: "immer", text: "Sind alle vier Seiten eines Vierecks gleich lang, stehen seine Diagonalen senkrecht aufeinander.", diagonalen: true,
+    vor: e => e.ecken === 4 && e.seitenGleich, dann: e => e.diagSenkrecht,
+    grund: "Ein solches Viereck ist eine Raute oder ein Quadrat. Jede Diagonale ist eine Symmetrieachse: Faltet man längs der einen, fällt die andere auf sich selbst — das geht nur, wenn sie senkrecht steht." },
+  { id: "D-2R", stufen: ["s3"], art: "figur", antwort: "nie", text: "Ein Dreieck hat zwei rechte Winkel.", bevorzugt: ["dreieckR", "dreieckRGS"],
+    vor: e => e.ecken === 3, dann: e => e.rechte >= 2,
+    grund: "Stehen zwei Seiten beide senkrecht auf der dritten, laufen sie parallel und treffen sich nie. Eine dritte Ecke gibt es nicht." },
+  { id: "D-2S-achse", stufen: ["s3"], art: "figur", antwort: "immer", text: "Ein Dreieck mit zwei gleich langen Seiten hat mindestens eine Symmetrieachse.",
+    vor: e => e.ecken === 3 && e.zweiGleich, dann: e => e.achsen >= 1,
+    grund: "Die Achse geht durch die Spitze zwischen den zwei gleich langen Seiten und durch die Mitte der dritten Seite. Faltet man dort, fallen die zwei Hälften aufeinander." },
+  { id: "4S-4A", stufen: ["s3"], art: "figur", antwort: "manchmal", text: "Ein Viereck mit vier gleich langen Seiten hat vier Symmetrieachsen.",
+    vor: e => e.ecken === 4 && e.seitenGleich, dann: e => e.achsen === 4,
+    grund: "Das Quadrat hat vier Symmetrieachsen. Die Raute hat auch vier gleich lange Seiten, aber nur zwei Achsen: ihre Diagonalen." },
+  { id: "kreis-viereck", stufen: ["s3"], art: "kreis", antwort: "manchmal", text: "Ein Kreis und ein Viereck haben höchstens 4 gemeinsame Punkte.",
+    vor: k => k.form !== "dreieck", dann: k => k.punkte.length <= 4,
+    grund: "Jede der vier Seiten kann den Kreis zweimal treffen. So entstehen bis zu 8 gemeinsame Punkte — aber auch 4, 2 oder keiner." },
+
+  { id: "3R", stufen: ["s4"], art: "figur", antwort: "nie", text: "Ein Viereck hat genau drei rechte Winkel.", bevorzugt: ["rechteck", "quadrat"],
+    vor: e => e.ecken === 4, dann: e => e.rechte === 3,
+    grund: "Bei drei rechten Winkeln stehen zwei Seiten senkrecht auf derselben Seite, laufen also parallel. Die vierte Seite steht senkrecht auf der einen, also auch auf der anderen — der vierte Winkel ist auch ein rechter." },
+  { id: "diag-halb", stufen: ["s4"], art: "figur", antwort: "manchmal", text: "Die Diagonalen eines Vierecks halbieren sich gegenseitig.", diagonalen: true,
+    vor: e => e.ecken === 4, dann: e => e.diagHalbieren,
+    grund: "In jedem Viereck mit zwei Paaren paralleler Seiten (Parallelogramm, Rechteck, Raute, Quadrat) stimmt es, beim Drachenviereck und beim Trapez nicht." },
+  { id: "diaggleich-4R", stufen: ["s4"], art: "figur", antwort: "manchmal", text: "Sind die Diagonalen eines Vierecks gleich lang, hat es vier rechte Winkel.", diagonalen: true,
+    vor: e => e.ecken === 4 && e.diagGleich, dann: e => e.rechte === 4,
+    grund: "Beim Rechteck stimmt es. Das gleichschenklige Trapez hat aber auch gleich lange Diagonalen und keinen rechten Winkel." },
+  { id: "RD-achse", stufen: ["s4"], art: "figur", antwort: "manchmal", text: "Ein rechtwinkliges Dreieck hat eine Symmetrieachse.",
+    vor: e => e.ecken === 3 && e.rechte === 1, dann: e => e.achsen >= 1,
+    grund: "Nur wenn die zwei Seiten am rechten Winkel gleich lang sind. Sonst passen die Hälften beim Falten nicht aufeinander." },
+  { id: "par-diag", stufen: ["s4"], art: "figur", antwort: "manchmal", text: "Ein Viereck mit zwei Paaren paralleler Seiten hat gleich lange Diagonalen.", diagonalen: true,
+    vor: e => e.ecken === 4 && e.parallelPaare === 2, dann: e => e.diagGleich,
+    grund: "Beim Rechteck und beim Quadrat stimmt es. Beim schiefen Parallelogramm und bei der Raute ist eine Diagonale länger." },
+  { id: "kreis-quadrat", stufen: ["s4"], art: "kreis", antwort: "manchmal", text: "Ein Kreis und ein Quadrat haben genau 4 gemeinsame Punkte.",
+    vor: k => k.form === "quadrat", dann: k => k.punkte.length === 4,
+    grund: "Es hängt von der Grösse und der Lage des Kreises ab: Es können 0, 2, 4 oder sogar 8 gemeinsame Punkte sein." },
+  { id: "kreis-dreieck", stufen: ["s4", "s6"], art: "kreis", antwort: "nie", text: "Ein Kreis und ein Dreieck haben mehr als 6 gemeinsame Punkte.", bevorzugt: ["d6"],
+    vor: k => k.form === "dreieck", dann: k => k.punkte.length > 6,
+    grund: "Eine gerade Seite trifft einen Kreis höchstens zweimal. Drei Seiten geben also höchstens 3 × 2 = 6 gemeinsame Punkte." },
+
+  // --- Stufe 5 und 6: 3. Zyklus ---
+  { id: "ungerade-summe", stufen: ["s5"], art: "zahl", antwort: "immer", text: "Ist die Summe von zwei Zahlen ungerade, ist eine der beiden Zahlen gerade.",
+    raum: () => paare(bis(0, 50), bis(0, 50)), vor: ([a, b]) => !gerade(a + b), dann: ([a, b]) => gerade(a) || gerade(b),
+    grund: "Gerade + gerade und ungerade + ungerade geben beide eine gerade Summe. Eine ungerade Summe gibt es nur mit einer geraden und einer ungeraden Zahl." },
+  { id: "vier-nachbarn-24", stufen: ["s5"], art: "zahl", antwort: "immer", text: "Das Produkt von vier aufeinanderfolgenden Zahlen ist durch 24 teilbar.",
+    raum: () => bis(0, 40).map(n => [n]), vor: () => true, dann: ([n]) => (n * (n + 1) * (n + 2) * (n + 3)) % 24 === 0,
+    grund: "Unter vier Nachbarzahlen ist immer eine durch 3 teilbar und es sind zwei gerade, davon eine sogar durch 4 teilbar. Im Produkt steckt also 3 × 2 × 4 = 24." },
+  { id: "zwei-nachbarn-mal", stufen: ["s5"], art: "zahl", antwort: "immer", text: "Das Produkt von zwei aufeinanderfolgenden Zahlen ist gerade.",
+    raum: () => bis(0, 100).map(n => [n]), vor: () => true, dann: ([n]) => gerade(n * (n + 1)),
+    grund: "Eine der zwei Nachbarzahlen ist gerade. Ist ein Faktor gerade, ist das Produkt gerade." },
+  { id: "qs3-9", stufen: ["s5"], art: "zahl", antwort: "manchmal", text: "Ist die Quersumme einer Zahl durch 3 teilbar, ist die Zahl durch 9 teilbar.",
+    raum: () => bis(10, 300).map(n => [n]), vor: ([n]) => quersumme(n) % 3 === 0, dann: ([n]) => n % 9 === 0,
+    zeige: ([n]) => `Die Zahl ${n} (Quersumme ${quersumme(n)})`,
+    grund: "Für die Teilbarkeit durch 9 muss die Quersumme durch 9 teilbar sein. Bei 12 ist die Quersumme 3: 12 ist durch 3 teilbar, aber nicht durch 9." },
+  { id: "dezimal-kleiner", stufen: ["s5"], art: "zahl", antwort: "manchmal", text: "Multipliziert man eine Zahl mit einer Dezimalzahl, wird das Ergebnis kleiner.",
+    raum: () => paare(bis(2, 12), [5, 2, 4, 8, 15, 25, 12]), vor: () => true, dann: ([n, x]) => n * x < 10 * n,
+    zeige: ([n, x]) => `${n} × ${dz(x)} = ${dz(n * x)}`,
+    grund: "Mal eine Dezimalzahl kleiner als 1 wird es kleiner (8 × 0.5 = 4), mal eine Dezimalzahl grösser als 1 grösser (8 × 1.5 = 12)." },
+  { id: "durch-halb", stufen: ["s5"], art: "zahl", antwort: "immer", text: "Teilt man eine Zahl durch 0.5, ist das Ergebnis doppelt so gross wie die Zahl.",
+    raum: () => bis(0, 100).map(n => [n]), vor: () => true, dann: ([n]) => (n * 10) / 5 === 2 * n,
+    grund: "Durch 0.5 heisst: Wie oft passt ein Halbes hinein? In jedes Ganze passen zwei Halbe, also doppelt so viele: 7 : 0.5 = 14." },
+  { id: "nachkomma", stufen: ["s5"], art: "zahl", antwort: "immer", text: "Das Produkt von zwei Dezimalzahlen mit je einer Stelle nach dem Komma hat höchstens zwei Stellen nach dem Komma.",
+    raum: () => paare(bis(1, 40), bis(1, 40)), vor: () => true, dann: ([a, b]) => Number.isInteger(a * b), // Zehntel mal Zehntel: a × b Hundertstel
+    grund: "Zehntel mal Zehntel gibt Hundertstel: 0.3 × 0.7 = 0.21. Mehr als zwei Stellen entstehen nicht; manchmal fällt eine Null am Ende weg (0.5 × 0.4 = 0.2)." },
+  { id: "quadrat-flaeche", stufen: ["s5"], art: "zahl", antwort: "nie", text: "Verdoppelt man die Seitenlänge eines Quadrats, verdoppelt sich sein Flächeninhalt.",
+    raum: () => bis(1, 9).flatMap(a => [[a, a, "q"], [a, a + 1, "r"], [a, a + 3, "r"]]), vor: ([, , art]) => art === "q",
+    dann: ([a, b, art]) => (art === "q" ? 4 * a * a === 2 * a * a : true),
+    zeige: ([a, b, art]) => (art === "q" ? `Quadrat ${a} cm: ${a * a} cm², Quadrat ${2 * a} cm: ${4 * a * a} cm²` : `Rechteck ${a} cm × ${b} cm: ${a * b} cm², ${a} cm × ${2 * b} cm: ${2 * a * b} cm²`),
+    grund: "Mit doppelter Seite passt das alte Quadrat viermal hinein (2 × 2). Der Flächeninhalt wird viermal so gross, nicht doppelt." },
+  { id: "umfang-doppelt", stufen: ["s5"], art: "zahl", antwort: "immer", text: "Verdoppelt man Länge und Breite eines Rechtecks, verdoppelt sich sein Umfang.",
+    raum: () => paare(bis(1, 30), bis(1, 30)), vor: () => true, dann: ([a, b]) => 2 * (2 * a + 2 * b) === 2 * (2 * (a + b)),
+    grund: "Der Umfang ist die Summe der vier Seiten. Ist jede Seite doppelt so lang, ist auch die Summe doppelt so gross." },
+  { id: "umfang-flaeche", stufen: ["s5"], art: "zahl", antwort: "manchmal", text: "Von zwei Rechtecken hat das mit dem grösseren Umfang auch den grösseren Flächeninhalt.",
+    raum: () => [[1, 9, 4, 4], [1, 8, 3, 4], [2, 9, 5, 5], [1, 7, 3, 3], [5, 6, 2, 3], [4, 8, 3, 4], [6, 6, 2, 5], [3, 9, 2, 6], [1, 10, 5, 5], [7, 8, 3, 5]]
+      .filter(([a, b, c, d]) => a + b > c + d), vor: () => true, dann: ([a, b, c, d]) => a * b > c * d,
+    zeige: ([a, b, c, d]) => `${a} × ${b}: U ${2 * (a + b)}, A ${a * b} · ${c} × ${d}: U ${2 * (c + d)}, A ${c * d}`,
+    grund: "Ein langes, schmales Rechteck hat viel Umfang und wenig Fläche: 1 cm × 9 cm hat U = 20 cm und A = 9 cm², das Quadrat 4 cm × 4 cm hat U = 16 cm und A = 16 cm²." },
+  { id: "R-stumpf", stufen: ["s5"], art: "figur", antwort: "nie", text: "Ein rechtwinkliges Dreieck hat einen stumpfen Winkel.", bevorzugt: ["dreieckR", "dreieckRGS"],
+    vor: e => e.ecken === 3 && e.rechte === 1, dann: e => e.stumpfe >= 1,
+    grund: "Die drei Winkel eines Dreiecks ergeben zusammen 180°. Ein rechter (90°) und ein stumpfer Winkel (mehr als 90°) wären schon mehr als 180°." },
+  { id: "4R-senkrecht", stufen: ["s5"], art: "figur", antwort: "manchmal", text: "Hat ein Viereck vier rechte Winkel, stehen seine Diagonalen senkrecht aufeinander.", diagonalen: true,
+    vor: e => e.ecken === 4 && e.rechte === 4, dann: e => e.diagSenkrecht,
+    grund: "Beim Quadrat stimmt es. Beim Rechteck mit verschieden langen Seiten schneiden sich die Diagonalen schief." },
+  { id: "3R-s5", stufen: ["s5"], art: "figur", antwort: "nie", text: "Ein Viereck hat genau drei rechte Winkel.", bevorzugt: ["rechteck", "quadrat"],
+    vor: e => e.ecken === 4, dann: e => e.rechte === 3,
+    grund: "Die vier Winkel eines Vierecks ergeben zusammen 360°. Drei rechte Winkel sind 270°, für den vierten bleiben genau 90° — er ist auch ein rechter." },
+
+  { id: "drei-nachbarn-6", stufen: ["s6"], art: "zahl", antwort: "manchmal", text: "Die Summe von drei aufeinanderfolgenden Zahlen ist durch 6 teilbar.",
+    raum: () => bis(1, 100).map(n => [n]), vor: () => true, dann: ([n]) => (3 * n + 3) % 6 === 0, zeige: ([n]) => `${n} + ${n + 1} + ${n + 2} = ${3 * n + 3}`,
+    grund: "Die Summe ist 3 × die mittlere Zahl. Durch 6 teilbar ist sie nur, wenn die mittlere Zahl gerade ist: 1 + 2 + 3 = 6, aber 2 + 3 + 4 = 9." },
+  { id: "a3+5a", stufen: ["s6"], art: "zahl", antwort: "immer", text: "Für jede Zahl a ist a × a × a + 5 × a durch 6 teilbar.",
+    raum: () => bis(0, 60).map(n => [n]), vor: () => true, dann: ([a]) => (a * a * a + 5 * a) % 6 === 0,
+    grund: "a × a × a + 5 × a = (a − 1) × a × (a + 1) + 6 × a. Drei Nachbarzahlen enthalten eine gerade und eine durch 3 teilbare Zahl, ihr Produkt ist durch 6 teilbar — und 6 × a sowieso. Probe: 4 × 4 × 4 + 5 × 4 = 84 = 6 × 14." },
+  { id: "4und6-24", stufen: ["s6"], art: "zahl", antwort: "manchmal", text: "Ist eine Zahl durch 4 und durch 6 teilbar, ist sie auch durch 24 teilbar.",
+    raum: () => bis(4, 240).map(n => [n]), vor: ([n]) => n % 4 === 0 && n % 6 === 0, dann: ([n]) => n % 24 === 0,
+    zeige: ([n]) => `Die Zahl ${n}`,
+    grund: "4 und 6 haben den Faktor 2 gemeinsam. Die kleinste Zahl, die durch beide teilbar ist, ist 12 — und 12 ist nicht durch 24 teilbar." },
+  { id: "3und5-15", stufen: ["s6"], art: "zahl", antwort: "immer", text: "Ist eine Zahl durch 3 und durch 5 teilbar, ist sie auch durch 15 teilbar.",
+    raum: () => bis(1, 300).map(n => [n]), vor: ([n]) => n % 3 === 0 && n % 5 === 0, dann: ([n]) => n % 15 === 0,
+    grund: "3 und 5 haben keinen gemeinsamen Teiler ausser 1. Die gemeinsamen Vielfachen sind darum genau die Vielfachen von 3 × 5 = 15." },
+  { id: "prim-summe", stufen: ["s6"], art: "zahl", antwort: "manchmal", text: "Die Summe von zwei Primzahlen ist gerade.",
+    raum: () => paare(bis(2, 30), bis(2, 30)), vor: ([a, b]) => prim(a) && prim(b), dann: ([a, b]) => gerade(a + b), zeige: ([a, b]) => `${a} + ${b} = ${a + b}`,
+    grund: "Alle Primzahlen ausser 2 sind ungerade, und zwei ungerade geben eine gerade Summe (3 + 5 = 8). Mit der 2 nicht: 2 + 3 = 5." },
+  { id: "prim-ungerade", stufen: ["s6"], art: "zahl", antwort: "manchmal", text: "Eine Primzahl ist ungerade.",
+    raum: () => bis(2, 60).map(n => [n]), vor: ([n]) => prim(n), dann: ([n]) => !gerade(n), zeige: ([n]) => `Die Zahl ${n}`,
+    grund: "2 ist eine Primzahl (nur durch 1 und 2 teilbar) und gerade. Alle anderen Primzahlen sind ungerade." },
+  { id: "prim-produkt", stufen: ["s6"], art: "zahl", antwort: "nie", text: "Das Produkt von zwei Primzahlen ist eine Primzahl.",
+    raum: () => paare(bis(2, 13), bis(2, 13)), vor: ([a, b]) => prim(a) && prim(b), dann: ([a, b]) => prim(a * b), zeige: ([a, b]) => `${a} × ${b} = ${a * b}`,
+    grund: "Das Produkt ist durch beide Primzahlen teilbar, hat also mehr Teiler als 1 und sich selbst. 3 × 5 = 15 ist durch 3 und 5 teilbar. (1 ist keine Primzahl.)" },
+  { id: "u-quadrat", stufen: ["s6"], art: "zahl", antwort: "immer", text: "Das Quadrat einer ungeraden Zahl ist ungerade.",
+    raum: () => bis(0, 100).map(n => [n]), vor: ([n]) => !gerade(n), dann: ([n]) => !gerade(n * n),
+    grund: "Das Quadrat ist das Produkt von zwei ungeraden Zahlen, zum Beispiel 7 × 7 = 49. Ein solches Produkt ist immer ungerade." },
+  { id: "diag-halb-gleich", stufen: ["s6"], art: "figur", antwort: "immer", text: "Sind die Diagonalen eines Vierecks gleich lang und halbieren sie sich, hat es vier rechte Winkel.", diagonalen: true,
+    vor: e => e.ecken === 4 && e.diagGleich && e.diagHalbieren, dann: e => e.rechte === 4,
+    grund: "Alle vier Ecken sind dann gleich weit vom Schnittpunkt entfernt, liegen also auf einem Kreis. Jeder Winkel steht über einer Diagonale als Durchmesser — nach Thales ist er ein rechter." },
+  { id: "senkrecht-4S", stufen: ["s6"], art: "figur", antwort: "manchmal", text: "Stehen die Diagonalen eines Vierecks senkrecht aufeinander, sind alle vier Seiten gleich lang.", diagonalen: true,
+    vor: e => e.ecken === 4 && e.diagSenkrecht, dann: e => e.seitenGleich,
+    grund: "Bei der Raute und beim Quadrat stimmt es. Auch beim Drachenviereck stehen die Diagonalen senkrecht — seine Seiten sind aber verschieden lang." },
+  { id: "D-2stumpf", stufen: ["s6"], art: "figur", antwort: "nie", text: "Ein Dreieck hat zwei stumpfe Winkel.", bevorzugt: ["dreieckS"],
+    vor: e => e.ecken === 3, dann: e => e.stumpfe >= 2,
+    grund: "Die drei Winkel eines Dreiecks ergeben zusammen 180°. Zwei stumpfe Winkel wären zusammen schon mehr als 180°." },
+  { id: "R-90", stufen: ["s6"], art: "figur", antwort: "immer", text: "In einem rechtwinkligen Dreieck ergeben die beiden anderen Winkel zusammen 90°.",
+    vor: e => e.ecken === 3 && e.rechte === 1, dann: e => nah(e.winkel.filter(w => !nah(w, 90)).reduce((s, w) => s + w, 0), 90),
+    grund: "Alle drei Winkel ergeben 180°. Der rechte Winkel braucht 90°, für die beiden anderen bleiben zusammen 90°." },
+  { id: "R-4dreiecke", stufen: ["s6"], art: "figur", antwort: "immer", text: "Die Diagonalen eines Rechtecks zerlegen es in vier Dreiecke mit gleichem Flächeninhalt.", diagonalen: true,
+    vor: e => e.ecken === 4 && e.rechte === 4, dann: e => e.vierGleicheDreiecke,
+    grund: "Jedes Dreieck hat eine Rechteckseite als Grundseite und die Mitte als Spitze. Auf der Seite a ist die Höhe b : 2, auf der Seite b ist sie a : 2 — beide Male ist der Flächeninhalt a × b : 4." },
+];
+
+const STUFEN_IDS = ["s1", "s2", "s3", "s4", "s5", "s6"];
+const AUSSAGEN = Object.fromEntries(STUFEN_IDS.map(s => [s, A.filter(x => x.stufen.includes(s))]));
+
+// ---------- Beispiele zu einer Aussage ----------
+
+/** Alle Fälle einer Aussage mit Text und Einteilung: gegen (vor, nicht dann), passt (vor und dann), fremd (nicht vor). */
+const FAELLE = new Map();
+function faelle(x) {
+  if (FAELLE.has(x.id)) return FAELLE.get(x.id);
+  let liste;
+  if (x.art === "zahl") liste = x.raum().map(t => ({ t, vor: !!x.vor(t), dann: !!x.dann(t), text: x.zeige ? x.zeige(t) : "" }));
+  else if (x.art === "figur") liste = Object.keys(FIGUREN).map(k => ({ t: k, vor: !!x.vor(FIGUREN[k].e), dann: !!x.dann(FIGUREN[k].e), text: FIGUREN[k].name }));
+  else liste = Object.keys(KREISE).map(k => ({ t: k, vor: !!x.vor(KREISE[k]), dann: !!x.dann(KREISE[k]), text: FORM_NAME[KREISE[k].form] }));
+  for (const f of liste) f.art = f.vor ? (f.dann ? "passt" : "gegen") : "fremd";
+  FAELLE.set(x.id, liste);
+  return liste;
+}
+/** Antwort aus den Fällen: Was ein Beispiel zeigt, nicht was behauptet ist. */
+function antwortAusFaellen(x) {
+  const f = faelle(x), gegen = f.some(c => c.art === "gegen"), passt = f.some(c => c.art === "passt");
+  return gegen && passt ? "manchmal" : gegen ? "nie" : "immer";
+}
+const schluessel = (x, c) => (x.art === "zahl" ? c.text : String(c.t));
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  for (let versuch = 0; versuch < 200; versuch++) {
+    const x = waehle(AUSSAGEN[stufe]);
+    const a = { id: x.id, antwort: x.antwort, beispiele: [] };
+    if (x.antwort !== "immer") {
+      const f = faelle(x);
+      const gegenAlle = f.filter(c => c.art === "gegen");
+      const gegenWahl = x.bevorzugt ? gegenAlle.filter(c => x.bevorzugt.includes(c.t)) : gegenAlle;
+      const gegen = waehle(gegenWahl.length ? gegenWahl : gegenAlle);
+      // Ablenker: bei „manchmal“ mindestens ein Beispiel, bei dem es stimmt; bei „nie“ Beispiele, auf die
+      // die Voraussetzung nicht passt — lieber solche, bei denen die Behauptung trotzdem zutrifft.
+      const passt = mische(f.filter(c => c.art === "passt"));
+      const fremdAlle = f.filter(c => c.art === "fremd");
+      const fremdGut = fremdAlle.filter(c => c.dann);
+      const fremd = mische(fremdGut.length >= 2 ? fremdGut : fremdAlle);
+      let ablenker;
+      if (x.antwort === "manchmal") ablenker = [passt[0], fremd.length && Math.random() < 0.5 ? fremd[0] : passt[1] || fremd[0]];
+      else ablenker = fremd.slice(0, 2);
+      a.beispiele = mische([gegen, ...ablenker].filter(Boolean)).map(c => ({ schluessel: schluessel(x, c), text: c.text, art: c.art, t: c.t }));
+    }
+    if (pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  return { id: AUSSAGEN[stufe][0].id, antwort: AUSSAGEN[stufe][0].antwort, beispiele: [] };
+}
+
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const x = AUSSAGEN[stufe].find(y => y.id === a.id);
+  if (!x) return ["Aussage nicht in der Stufe"];
+  // Die behauptete Antwort muss zu den Beispielen im geprüften Bereich passen.
+  if (antwortAusFaellen(x) !== x.antwort) m.push(`Antwort ${x.antwort}, die Fälle zeigen ${antwortAusFaellen(x)}`);
+  if (a.antwort !== x.antwort) m.push("Antwort der Aufgabe weicht ab");
+  if (!x.grund) m.push("Begründung fehlt");
+  if (x.antwort === "immer") { if (a.beispiele.length) m.push("Beispiele bei immer"); return m; }
+  if (a.beispiele.length !== 3) m.push("nicht drei Beispiele");
+  if (a.beispiele.filter(b => b.art === "gegen").length !== 1) m.push("nicht genau ein Gegenbeispiel");
+  if (x.antwort === "nie" && a.beispiele.some(b => b.art === "passt")) m.push("passendes Beispiel bei nie");
+  if (x.antwort === "manchmal" && !a.beispiele.some(b => b.art === "passt")) m.push("kein Beispiel, bei dem es stimmt");
+  if (new Set(a.beispiele.map(b => b.schluessel)).size !== a.beispiele.length) m.push("doppeltes Beispiel");
+  if (x.art === "zahl" && a.beispiele.some(b => !b.text)) m.push("Beispiel ohne Text");
+  // Die Einteilung jedes Beispiels nachrechnen
+  for (const b of a.beispiele) {
+    const fall = x.art === "zahl" ? b.t : x.art === "figur" ? FIGUREN[b.t].e : KREISE[b.t];
+    const art = x.vor(fall) ? (x.dann(fall) ? "passt" : "gegen") : "fremd";
+    if (art !== b.art) m.push(`Beispiel ${b.text} falsch eingeteilt`);
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const SVG = "http://www.w3.org/2000/svg";
+function svgEl(tag, attr) { const e = document.createElementNS(SVG, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, String(v)); return e; }
+const fix = v => Math.round(v * 10) / 10;
+
+function figurEl(k, diagonalen) {
+  const p = FIGUREN[k].p, xs = p.map(q => q[0]), ys = p.map(q => q[1]);
+  const x0 = Math.min(...xs) - 6, y0 = Math.min(...ys) - 6, b = Math.max(...xs) - x0 + 6, h = Math.max(...ys) - y0 + 6;
+  const svg = svgEl("svg", { viewBox: `${fix(x0)} ${fix(y0)} ${fix(b)} ${fix(h)}`, role: "img", "aria-label": FIGUREN[k].name });
+  svg.append(svgEl("polygon", { class: "stimmt-figur", points: p.map(q => q.map(fix).join(",")).join(" ") }));
+  if (diagonalen && p.length === 4) for (const [i, j] of [[0, 2], [1, 3]]) svg.append(svgEl("line", { class: "stimmt-diagonale", x1: fix(p[i][0]), y1: fix(p[i][1]), x2: fix(p[j][0]), y2: fix(p[j][1]) }));
+  return svg;
+}
+
+function kreisEl(k) {
+  const c = KREISE[k], xs = [...c.p.map(q => q[0]), c.c[0] - c.r, c.c[0] + c.r], ys = [...c.p.map(q => q[1]), c.c[1] - c.r, c.c[1] + c.r];
+  const x0 = Math.min(...xs) - 6, y0 = Math.min(...ys) - 6, b = Math.max(...xs) - x0 + 6, h = Math.max(...ys) - y0 + 6;
+  const svg = svgEl("svg", { viewBox: `${fix(x0)} ${fix(y0)} ${fix(b)} ${fix(h)}`, role: "img", "aria-label": `${FORM_NAME[c.form]}, ${c.punkte.length} gemeinsame Punkte` });
+  svg.append(svgEl("polygon", { class: "stimmt-figur", points: c.p.map(q => q.map(fix).join(",")).join(" ") }));
+  svg.append(svgEl("circle", { class: "stimmt-kreis", cx: c.c[0], cy: c.c[1], r: fix(c.r) }));
+  for (const q of c.punkte) svg.append(svgEl("circle", { class: "stimmt-punkt", cx: fix(q[0]), cy: fix(q[1]), r: 4.5 }));
+  return svg;
+}
+
+const ANTWORTEN = [
+  { wert: "immer", text: "✅ immer wahr" },
+  { wert: "manchmal", text: "🔀 manchmal wahr" },
+  { wert: "nie", text: "❌ nie wahr" },
+];
+// Hinweis nach falscher Wahl: [richtig][gewählt]. Er nennt die Antwort nicht, sondern schickt zu den Beispielen.
+const HINWEIS_ANTWORT = {
+  immer: { manchmal: "Hast du ein Beispiel gefunden, bei dem es nicht klappt? Rechne oder zeichne es genau nach.",
+    nie: "Probiere ein Beispiel genau aus: Klappt es vielleicht doch?" },
+  manchmal: { immer: "Probiere mehr Beispiele aus, auch besondere Fälle. Klappt es wirklich jedes Mal?",
+    nie: "Probiere mehr Beispiele aus. Klappt es wirklich bei keinem?" },
+  nie: { immer: "Probiere ein Beispiel genau aus: Klappt es wirklich?",
+    manchmal: "Hast du ein Beispiel gefunden, bei dem es klappt? Rechne oder zeichne es genau nach." },
+};
+
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man eine Aussage prüft — nach Art der Aussage, bei
+ * Winkeln mit der Winkelsumme. Sie nennen weder immer, manchmal oder nie noch ein Beispiel; der letzte Tipp
+ * erklärt, was ein Gegenbeispiel ist (gilt für jede Aussage, verrät also nichts).
+ */
+const WINKEL_DREIECK = ["D-2R", "R-stumpf", "D-2stumpf", "R-90"];
+const WINKEL_VIERECK = ["3R", "3R-s5"];
+function tippsFuer(x) {
+  const t = [];
+  if (x.art === "kreis") t.push("Stell dir vor, wie der Kreis wächst: Erst liegt er ganz innen, dann berührt er die Seiten, dann schneidet er sie, dann liegt er aussen.",
+    "Eine gerade Seite kann einen Kreis höchstens zweimal treffen.");
+  else if (x.art === "figur") {
+    const dreieck = /Dreieck/.test(x.text);
+    t.push(`Denk an verschiedene ${dreieck ? "Dreiecke" : "Vierecke"}, die zum Anfang der Aussage passen — an schiefe und an besonders regelmässige.`);
+    t.push(WINKEL_DREIECK.includes(x.id) ? "Die drei Winkel eines Dreiecks ergeben zusammen 180°."
+      : WINKEL_VIERECK.includes(x.id) ? "Die vier Winkel eines Vierecks ergeben zusammen 360°."
+      : "Zeichne die Figuren auf ein Blatt und prüf die Behauptung bei jeder einzeln.");
+  } else {
+    t.push("Probiere ein paar Beispiele aus — kleine und grosse Zahlen, auch besondere wie 0, 1 oder 2.");
+    t.push(/gerade/.test(x.text) ? "Denk an Zweierpaare: Eine gerade Zahl lässt sich ganz in Paare legen, bei einer ungeraden bleibt einer allein."
+      : /teilbar|Vielfache|Teilt|Quersumme/.test(x.text) ? "Schreib die ersten Zahlen der Reihe auf und prüf sie eine nach der anderen."
+      : "Such nicht nur Beispiele, sondern auch einen Grund: Warum müsste es so sein — oder warum nicht?");
+  }
+  t.push("Ein Gegenbeispiel passt zum Anfang der Aussage, aber das Ende stimmt nicht. Ein einziges genügt.");
+  return t;
+}
+
+LS.spiel({
+  id: "stimmt-immer",
+  hilfe: "Lies die Aussage und tippe, ob sie immer, manchmal oder nie wahr ist. Stimmt sie nicht immer, tippst du danach das Beispiel an, das es zeigt.",
+  einleitung: "Stimmt das immer, manchmal oder nie? Prüfe die Aussage mit Beispielen. Stimmt sie nicht immer, zeigst du ein Gegenbeispiel!",
+  anzahl: 8,
+  stufen: {
+    s1: "Gerade und ungerade, Teilen durch 5, der Rest beim Teilen (5. Klasse).",
+    s2: "Vielfache und Teiler: Ist jedes Vielfache von 3 auch eines von 6?",
+    s3: "Rechenwege prüfen (8 × 13 = 4 × 26) und Vierecke, Dreiecke, Kreis (Lehrplan 6. Klasse).",
+    s4: "Kniffliger: Division vertauschen, Diagonalen, Kreis und Quadrat mit 8 Punkten.",
+    s5: "Gesetze begründen: vier Nachbarzahlen und 24, Dezimalzahlen, Flächen (7. Klasse).",
+    s6: "Endgegner: Primzahlen, a × a × a + 5 × a, Thales und Winkelsummen.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const x = AUSSAGEN[ctx.stufe].find(y => y.id === a.id);
+    const f = ctx.flaeche;
+    const gegen = a.beispiele.find(b => b.art === "gegen");
+    const loesungText = x.antwort === "immer" ? `immer wahr. ${x.grund}`
+      : `${x.antwort} wahr — ${x.antwort === "nie" ? "Beispiel" : "Gegenbeispiel"}: ${gegen.text}${x.art === "kreis" ? ` (${KREISE[gegen.t].punkte.length} gemeinsame Punkte)` : ""}. ${x.grund}`;
+    ctx.loesung(loesungText);
+    ctx.tipp(tippsFuer(x));
+    ctx.kennung(a.id);
+    ctx.serie("antwort", a.antwort);
+    ctx.schritte(a.antwort === "immer" ? 1 : 2);
+
+    f.append(el("div", { class: "aussage-karte" }, el("p", { class: "auftrag", text: x.text })));
+    const frage = el("div", { class: "stimmt-frage", text: "Stimmt das immer, manchmal oder nie?", "aria-live": "polite" });
+    const bereich = el("div", {});
+    f.append(frage, bereich);
+
+    /** Knöpfe für einen Schritt; richtig → weiter(), falsch → Fehlversuch mit Hinweis. */
+    function knoepfe(optionen, richtig, inhalt, hinweis, klasse, weiter) {
+      const box = el("div", { class: `wahl ${klasse}` });
+      let fertig = false;
+      for (const o of optionen) {
+        const k = el("button", { type: "button", class: "wahl-knopf" });
+        const i = inhalt(o);
+        if (typeof i === "string") k.textContent = i; else k.append(...i);
+        k.addEventListener("click", () => {
+          if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+          if (o === richtig) { fertig = true; k.classList.add("richtig"); weiter(); return; }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+          ctx.falsch(hinweis(o), loesungText);
+          if (ctx.vorbei()) fertig = true;
+        });
+        box.append(k);
+      }
+      bereich.append(box);
+    }
+
+    const fertig = () => ctx.richtig(`Genau! ${x.grund}`);
+    knoepfe(ANTWORTEN, ANTWORTEN.find(o => o.wert === a.antwort), o => o.text, o => HINWEIS_ANTWORT[a.antwort][o.wert], "stimmt-antwort", () => {
+      if (a.antwort === "immer") return fertig();
+      LS.ton("tipp");
+      setTimeout(() => {
+        if (ctx.vorbei()) return;
+        bereich.innerHTML = "";
+        frage.textContent = a.antwort === "manchmal" ? "Richtig! Tippe ein Gegenbeispiel: Hier stimmt die Aussage nicht."
+          : "Richtig! Tippe das Beispiel, das zur Aussage passt — und zeigt, dass sie nicht stimmt.";
+        knoepfe(a.beispiele, gegen, b => (x.art === "zahl" ? b.text
+          : [x.art === "figur" ? figurEl(b.t, x.diagonalen) : kreisEl(b.t), el("small", { text: b.text })]),
+        b => (b.art === "passt" ? "Hier stimmt die Aussage. Gesucht ist ein Beispiel, bei dem sie nicht stimmt."
+          : "Dieses Beispiel passt nicht zum Anfang der Aussage. Lies sie nochmal genau."),
+        `stimmt-beispiele${x.art === "zahl" ? " zahlen" : ""}`, fertig);
+      }, 500);
+    });
+    if (ctx.nr === 0) ctx.sag("Tipp: Probiere zuerst ein paar Beispiele im Kopf aus. Ein einziges Gegenbeispiel genügt, damit etwas nicht immer stimmt.");
+  },
+});
+</script>
+</body>
+</html>

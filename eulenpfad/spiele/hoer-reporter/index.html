@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hör-Reporter</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .hr-titel { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 900; color: var(--deko-2); margin: 0 0 10px; }
+  .hr-hoer {
+    display: block; margin: 0 auto 14px; border: none; border-radius: 18px; padding: 12px 22px; min-height: 56px;
+    font: inherit; font-size: clamp(18px, 4vw, 22px); font-weight: 800; background: var(--karte); color: var(--text);
+    box-shadow: 0 5px 0 var(--rand); cursor: pointer;
+  }
+  .hr-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--rand); }
+  .hr-ohr { text-align: center; font-size: clamp(54px, 13vw, 80px); line-height: 1.1; margin: 4px 0 10px; }
+  .hr-ohr.spricht { animation: hr-puls 1.2s ease-in-out infinite; }
+  @keyframes hr-puls { 50% { transform: scale(1.12); } }
+  .hr-vorschau { max-width: 620px; margin: 0 auto 14px; padding: 10px 14px 10px 36px; border: 3px dashed var(--deko-2);
+    border-radius: 16px; font-size: clamp(16px, 3.6vw, 20px); font-weight: 700; }
+  .hr-vorschau b { display: block; margin-left: -22px; color: var(--text-leise); font-size: 15px; }
+  .hr-text {
+    background: #fff; border: 3px solid var(--rand); border-radius: 18px; padding: 14px 18px; margin: 0 auto 14px;
+    max-width: 680px; font-size: clamp(17px, 3.8vw, 22px); line-height: 1.55;
+  }
+  .hr-ohne { max-width: 680px; margin: 0 auto 10px; padding: 8px 14px; border-radius: 14px; background: var(--hinweis-hell);
+    font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; }
+  .hr .frage { text-align: center; font-size: clamp(19px, 4.2vw, 25px); font-weight: 800; margin: 4px 0 12px; }
+  .hr-nr { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin: 0; }
+  .hr-erledigt { max-width: 680px; margin: 0 auto 8px; padding: 0; list-style: none; font-size: clamp(15px, 3.4vw, 18px); }
+  .hr-erledigt li { padding: 4px 10px; margin: 0 0 4px; border-radius: 10px; background: var(--gut-hell); }
+  .hr-wahl .wahl-knopf { font-size: clamp(16px, 3.6vw, 21px); font-weight: 800; }
+  .hr-los { display: flex; justify-content: center; margin: 0 0 12px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎧 Hör-Reporter</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan D.1.B.1 (Hörverstehen), Basisklasse 6:
+//   s1 5. Klasse (D.1.B.1.e, Orientierungspunkt): Hörerwartung aufbauen — die Fragen stehen schon vor dem
+//      Hören da; kurze Berichte, alles steht im Text.
+//   s2 6. Klasse, leichter: dieselben kurzen Berichte, die Fragen erst danach, dazu Warum?
+//   s3 Klassenziel (D.1.B.1.f, Grundanspruch Ende 6. Klasse): wichtige, auch implizite Informationen —
+//      eine Frage, deren Antwort man erschliessen muss.
+//   s4 schwerer: zwei Fragen zum Erschliessen.
+//   s5 7. Klasse (D.1.B.1.g/h, 3. Zyklus): mehrteilige Mitteilungen, Durchsagen und Vortrag mit Zahlen.
+//   s6 Königsstufe: dazu „Worum geht es vor allem?“ (das Wichtigste zusammenfassen, D.1.B.1.h).
+// Die Stimme liest den Bericht vor (LS.sprich, de-CH bevorzugt); der Text ist dabei nicht zu sehen,
+// „Nochmal hören“ geht immer. Die Uhr startet erst, wenn die Stimme fertig ist (ctx.uhrWarten).
+// Ohne deutsche Stimme oder mit Ton aus: Bericht lesen statt hören, mit Hinweis (dann übt das Spiel
+// Leseverstehen, nicht Hören).
+// Abgrenzung: Lese-Detektiv (2) und Wort-Spürnase (5) üben Lesen; hier wird nur gehört. Listen-Tap ist
+// Englisch. Berichte in woerter.js (Liste „berichte“), selbst geschrieben.
+
+const { waehle, mische, el } = LS;
+const ID = "hoer-reporter";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["berichte"]);
+const BERICHTE = FREI.has("berichte") ? HOER_BERICHTE : [];
+
+const IM_TEXT = ["wer", "wo", "wann", "was", "warum"];
+const W4 = ["wer", "wo", "wann", "was"];
+/** Je Stufe: Gruppe der Berichte, Fragen vorher zeigen, Plätze für Fragen (erlaubte Arten je Platz). */
+const STUFE = {
+  s1: { gruppe: 1, vorher: true, plaetze: [W4, W4] },
+  s2: { gruppe: 1, plaetze: [["warum"], W4, W4] },
+  s3: { gruppe: 2, plaetze: [["schluss"], IM_TEXT, IM_TEXT] },
+  s4: { gruppe: 2, plaetze: [["schluss"], ["schluss"], IM_TEXT] },
+  s5: { gruppe: 3, plaetze: [["zahl"], ["schluss"], [...IM_TEXT, "zahl"]] },
+  s6: { gruppe: 3, plaetze: [["kern"], ["zahl"], ["schluss"], [...IM_TEXT, "zahl"]] },
+};
+
+const vorrat = stufe => BERICHTE.filter(b => b.gruppe === STUFE[stufe].gruppe);
+
+/** Ein Bericht mit den Fragen der Stufe (in der Reihenfolge des Texts), Antworten gemischt. */
+function aufgabeErzeugen(stufe) {
+  const liste = vorrat(stufe);
+  if (!liste.length) return null;
+  const b = waehle(liste);
+  const genommen = new Set();
+  for (const arten of STUFE[stufe].plaetze) {
+    const frei = b.fragen.map((f, i) => i).filter(i => !genommen.has(i) && arten.includes(b.fragen[i][0]));
+    if (frei.length) genommen.add(waehle(frei));
+  }
+  const fragen = [...genommen].sort((x, y) => x - y).map(i => {
+    const [art, frage, richtig, ...falsch] = b.fragen[i];
+    return { art, frage, richtig, optionen: mische([richtig, ...falsch]) };
+  });
+  return { titel: b.titel, text: b.text, gruppe: b.gruppe, fragen };
+}
+
+/** Inhaltswörter ab drei Buchstaben, klein — für die Prüfung „steht im Text“. */
+const KLEINWOERTER = new Set(["der", "die", "das", "den", "dem", "des", "ein", "eine", "einen", "einem", "einer", "und", "mit",
+  "von", "zum", "zur", "aus", "auf", "für", "sie", "ihr", "ihm", "ist", "war", "hat", "seine", "seinen"]);
+const woerter = t => (t.toLowerCase().match(/\p{L}{3,}/gu) || []).filter(w => !KLEINWOERTER.has(w));
+/** Kommt das Wort im Text vor, auch gebeugt (Handy — Handys, Elternabend — Elternabends)? */
+const imText = (w, textWoerter) => textWoerter.some(t => t.startsWith(w) || (w.startsWith(t) && t.length >= 4));
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  const p = STUFE[stufe];
+  if (a.gruppe !== p.gruppe) m.push(`Bericht der Gruppe ${a.gruppe} in ${stufe}`);
+  if (!BERICHTE.some(b => b.titel === a.titel && b.text === a.text)) m.push("Bericht nicht aus einer freien Liste");
+  if (new Set(BERICHTE.map(b => b.titel)).size !== BERICHTE.length) m.push("Titel nicht eindeutig");
+  if (a.fragen.length !== p.plaetze.length) m.push(`${a.fragen.length} statt ${p.plaetze.length} Fragen`);
+  if (new Set(a.fragen.map(f => f.frage)).size !== a.fragen.length) m.push("eine Frage doppelt");
+  // Jeder Platz der Stufe bekommt eine Frage passender Art (Zuordnung der Reihe nach, wie im Generator).
+  const offen = [...a.fragen];
+  for (const arten of p.plaetze) {
+    const i = offen.findIndex(f => arten.includes(f.art));
+    if (i < 0) m.push(`keine Frage der Art ${arten.join("/")}`); else offen.splice(i, 1);
+  }
+  const textWoerter = woerter(a.text);
+  for (const f of a.fragen) {
+    if (f.optionen.length !== 3 || new Set(f.optionen).size !== 3) m.push(`„${f.frage}“: nicht drei verschiedene Antworten`);
+    if (f.optionen.filter(o => o === f.richtig).length !== 1) m.push(`„${f.frage}“: richtige Antwort nicht genau einmal`);
+    if (f.optionen.some(o => !o.trim() || o.length > 70)) m.push(`„${f.frage}“: Antwort leer oder zu lang`);
+    // Was im Text steht, muss man im Text auch finden: ein Wort der Antwort kommt darin vor.
+    if (IM_TEXT.includes(f.art) && !woerter(f.richtig).some(w => imText(w, textWoerter))) m.push(`„${f.frage}“: Antwort steht nicht im Text`);
+  }
+  const laenge = a.text.split(/\s+/).length;
+  const [min, max] = { 1: [35, 70], 2: [40, 90], 3: [40, 100] }[a.gruppe];
+  if (laenge < min || laenge > max) m.push(`Bericht mit ${laenge} Wörtern (Gruppe ${a.gruppe}: ${min}–${max})`);
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  return m;
+}
+
+// Hinweise je Art der Frage: nie die Antwort, nur wohin man hören soll.
+const HINWEIS = {
+  wer: "Von welcher Person ist hier die Rede?",
+  wo: "Achte darauf, an welchem Ort es spielt.",
+  wann: "Achte darauf, wann es passiert ist.",
+  was: "Hör genau hin, was geschehen ist.",
+  warum: "Achte auf Wörter wie weil, denn, darum oder deshalb.",
+  schluss: "Das steht nicht wörtlich im Text. Überleg: Was folgt aus dem, was du weisst?",
+  zahl: "Achte genau auf die Zahlen und Zeiten. Rechnen kann helfen.",
+  kern: "Gesucht ist die wichtigste Nachricht, nicht eine Einzelheit.",
+};
+
+const STUFEN_TEXT = {
+  s1: "Erst die Fragen lesen, dann hören: Wer? Wo? Wann? Was?",
+  s2: "Die Fragen kommen erst nach dem Hören, dazu Warum?",
+  s3: "Eine Antwort steht nicht im Text: Es regnete — woran merkt man das?",
+  s4: "Zwei Antworten musst du selbst erschliessen.",
+  s5: "Durchsagen und Vorträge mit Zahlen: Gleis 7, zehn Minuten später.",
+  s6: "Endgegner: Zahlen, Schlüsse und „Worum geht es vor allem?“",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => vorrat(s).length));
+
+/** Gibt es schon eine deutsche Stimme? (Manche Browser laden sie erst nach.) */
+function deutscheStimmeDa() {
+  try { return speechSynthesis.getVoices().some(v => (v.lang || "").toLowerCase().startsWith("de")); } catch { return false; }
+}
+
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): beim Hören Strategien nach den Fragearten der Stufe,
+ * danach je Frage der Hinweis ihrer Art (ctx.tipp neu gesetzt, sobald die Frage erscheint). Sie verraten
+ * nichts aus dem Gehörten.
+ */
+const NOCHMAL = "Hör oder lies den Bericht nochmal (🔊 oder 📖) und achte gezielt auf die Stelle, nach der gefragt wird.";
+function tippsFuer(stufe) {
+  const arten = new Set(STUFE[stufe].plaetze.flat());
+  const t = [];
+  if (arten.has("kern")) t.push("Frag dich: Worum geht es vor allem? Eine Einzelheit ist noch nicht die Hauptsache.");
+  if (arten.has("zahl")) t.push("Merk dir die Zahlen und Zeiten genau — manchmal musst du damit rechnen.");
+  if (arten.has("schluss") && t.length < 2) t.push("Nicht jede Antwort steht wörtlich im Bericht. Überleg: Was folgt aus dem, was du gehört hast?");
+  if (!t.length) t.push(STUFE[stufe].vorher ? "Lies die Fragen vorher genau: Dann weisst du, worauf du beim Hören achten musst."
+    : "Achte beim Hören auf die W-Fragen: Wer? Wo? Wann? Was?");
+  if (arten.has("warum") && t.length < 2) t.push("Bei «Warum» helfen Wörter wie weil, denn oder darum.");
+  return [...t, NOCHMAL];
+}
+
+const SPIEL = {
+  id: ID,
+  hilfe: stufe => (STUFE[stufe]?.vorher ? "Lies zuerst die Fragen. " : "")
+    + "Die Eule liest dir den Bericht vor, danach kommen die Fragen, eine nach der anderen. Mit „🔊 Nochmal hören“ hörst du ihn nochmal. Hat das Gerät keine deutsche Stimme, liest du den Bericht selbst (📖).",
+  einleitung: "Du bist Reporterin oder Reporter! Die Eule liest dir einen kurzen Bericht vor. Hör gut zu — danach kommen Fragen. Mit 🔊 hörst du ihn nochmal.",
+  anzahl: 4,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    if (ctx.nr === 0) ctx.sag(p.vorher
+      ? "Lies zuerst die Fragen. Dann hör gut zu. Mit 🔊 hörst du den Bericht nochmal."
+      : "Hör gut zu! Die Fragen kommen nach dem Bericht. Mit 🔊 hörst du ihn nochmal.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.kennung(a.titel);
+    ctx.tipp(tippsFuer(ctx.stufe)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
+    const loesung = a.fragen.map(f => `${f.frage} ${f.richtig}`).join(" · ");
+    ctx.loesung(loesung);
+    ctx.schritte(a.fragen.length);
+
+    const hr = el("div", { class: "hr" });
+    ctx.flaeche.append(hr);
+    const auftrag = el("div", { class: "auftrag", text: p.vorher ? "🎧 Lies die Fragen. Dann hör gut zu!" : "🎧 Hör gut zu!" });
+    const ohr = el("div", { class: "hr-ohr", "aria-hidden": "true", text: "👂" });
+    const titel = el("div", { class: "hr-titel", text: `📻 ${a.titel}` });
+    const hoer = el("button", { type: "button", class: "hr-hoer", text: "🔊 Nochmal hören", "aria-label": "Den Bericht nochmal hören" });
+    const textBox = el("div", { class: "hr-text", hidden: "", text: a.text });
+    const erledigt = el("ul", { class: "hr-erledigt" });
+    const fragenBox = el("div", { class: "hr-fragen" });
+    hr.append(auftrag, titel, ohr, hoer);
+    if (p.vorher) {
+      const vorschau = el("ol", { class: "hr-vorschau" }, el("b", { text: "Darauf achtest du:" }));
+      for (const f of a.fragen) vorschau.append(el("li", { text: f.frage }));
+      hr.append(vorschau);
+    }
+    hr.append(textBox, erledigt, fragenBox);
+
+    let modus = "hoeren"; // oder "lesen": ohne Stimme oder mit Ton aus
+    let fragenDa = false;
+    let nrFrage = 0;
+    const tipp = () => (modus === "hoeren" ? " Tipp auf 🔊." : " Tipp auf 📖.");
+
+    const fragenZeigen = () => {
+      if (fragenDa || !ctx.flaeche.contains(hr)) return;
+      fragenDa = true;
+      ohr.classList.remove("spricht");
+      ohr.remove();
+      auftrag.textContent = a.fragen.length > 1 ? "❓ Beantworte die Fragen." : "❓ Beantworte die Frage.";
+      zeigeFrage();
+    };
+
+    const zeigeFrage = () => {
+      const f = a.fragen[nrFrage];
+      fragenBox.textContent = "";
+      ctx.tipp([HINWEIS[f.art], NOCHMAL]); // Tipps zu dieser Frage (ctx.tipp, LERN_Session9)
+      fragenBox.append(el("p", { class: "hr-nr", text: `Frage ${nrFrage + 1} von ${a.fragen.length}` }),
+        el("div", { class: "frage", text: f.frage }));
+      const wahl = el("div", { class: "wahl hr-wahl" });
+      wahl.style.setProperty("--wahl-breite", "200px");
+      const sperren = () => wahl.querySelectorAll("button").forEach(b => { b.disabled = true; });
+      for (const o of f.optionen) {
+        const k = el("button", { type: "button", class: "wahl-knopf", text: o });
+        k.addEventListener("click", () => {
+          if (ctx.vorbei() || k.disabled || k.classList.contains("gewaehlt")) return;
+          if (o === f.richtig) {
+            k.classList.add("richtig");
+            sperren();
+            if (nrFrage === a.fragen.length - 1) return ctx.richtig(waehle(["Super zugehört!", "Ein echter Reporter-Profi!", "Alles richtig — gut zugehört!"]));
+            LS.ton("tipp");
+            erledigt.append(el("li", { text: `✓ ${f.frage} ${f.richtig}` }));
+            nrFrage++;
+            zeigeFrage();
+            return;
+          }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+          ctx.falsch(HINWEIS[f.art] + tipp(), loesung);
+          if (ctx.vorbei()) { sperren(); [...wahl.children].find(b => b.textContent === f.richtig)?.classList.add("richtig"); }
+        });
+        wahl.append(k);
+      }
+      fragenBox.append(wahl);
+    };
+
+    // Ohne Stimme (oder Ton aus): Bericht lesen statt hören. Die Uhr startet, wenn das Kind „Gelesen“ tippt.
+    const uhrLos = ctx.uhrWarten();
+    const lesenStatt = () => {
+      if (modus === "lesen") return;
+      modus = "lesen";
+      ohr.remove();
+      hoer.textContent = "📖 Text zeigen";
+      hoer.setAttribute("aria-label", "Den Bericht nochmal lesen");
+      const tonAus = LS.lies("ton", true) === false;
+      hr.insertBefore(el("p", { class: "hr-ohne", text: tonAus
+        ? "🔇 Der Ton ist aus. Lies den Bericht darum leise und genau durch — oder schalte oben den Ton ein."
+        : "📖 Dieses Gerät hat keine deutsche Stimme. Lies den Bericht darum leise und genau durch." }), hoer);
+      textBox.hidden = false;
+      if (fragenDa) return;
+      auftrag.textContent = "📖 Lies den Bericht genau.";
+      hoer.disabled = true;
+      const gelesen = el("button", { type: "button", class: "knopf gruen", text: "✔ Gelesen — zu den Fragen" });
+      gelesen.addEventListener("click", () => {
+        gelesen.parentElement.remove();
+        textBox.hidden = true;
+        hoer.disabled = false;
+        fragenZeigen();
+        uhrLos();
+      });
+      hr.insertBefore(el("div", { class: "hr-los" }, gelesen), erledigt);
+    };
+
+    hoer.addEventListener("click", () => {
+      if (modus === "lesen") {
+        textBox.hidden = !textBox.hidden;
+        hoer.textContent = textBox.hidden ? "📖 Text zeigen" : "🙈 Text verbergen";
+        return;
+      }
+      if (!LS.sprich(a.text, "de")) lesenStatt();
+    });
+
+    // Vorlesen kurz nach dem Zeichnen: Liest die Eule automatisch vor (Profil „Vorlesen: gleich“), tut sie das
+    // nach 300 ms; ihr Satz würde sonst den Bericht abbrechen. Danach Fragen zeigen und die Uhr starten.
+    setTimeout(() => {
+      if (!ctx.flaeche.contains(hr)) return; // neu gezogen oder schon weiter
+      let gesprochen = false;
+      gesprochen = LS.sprich(a.text, "de", "", () => { if (gesprochen) { fragenZeigen(); uhrLos(); } });
+      if (gesprochen) ohr.classList.add("spricht"); else lesenStatt();
+    }, 450);
+  },
+};
+
+// Startet sofort, wenn eine deutsche Stimme da ist; sonst wartet es kurz auf sie (manche Browser laden
+// die Stimmen nach) und startet dann trotzdem — ohne Stimme wird gelesen statt gehört.
+if (deutscheStimmeDa()) LS.spiel(SPIEL);
+else LS.stimmeBereit("de").then(() => LS.spiel(SPIEL));
+</script>
+</body>
+</html>

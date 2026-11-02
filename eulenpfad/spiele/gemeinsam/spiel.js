@@ -88,6 +88,11 @@ const LS = (() => {
       werte: { punkt: "Punkt: 4.5", komma: "Komma: 4,5" },
       erklaerung: "So stehen Dezimalzahlen in den Spielen (Längen, Wege, Gewichte) und Geldbeträge ab der 4. Klasse (25.60 Fr.). Bis zur 3. Klasse stehen sie als Franken und Rappen: 25 Fr. 60 Rp. Standard ist der Punkt wie im Lehrplan.",
     },
+    melden: {
+      titel: "Fehler melden durch Kinder", standard: "ab3",
+      werte: { aus: "aus", ab3: "ab der 3. Klasse", ab5: "ab der 5. Klasse", alle: "alle Kinder" },
+      erklaerung: "Kinder können in jedem Spiel mit „🙋 Melden“ einen Fehler in der Aufgabe oder der Aufgabe davor melden, mit Begründung. Die Meldung sieht zuerst die Aufsicht (Verwaltung → Meldungen); weitergegeben wird nur, was sie bestätigt, und ohne den Namen. Ab der 3. Klasse, weil die Begründung geschrieben wird.",
+    },
   };
 
   /** Id des Spiels dieser Seite (spiele/<id>/index.html), auch bevor eine Runde läuft; sonst null. */
@@ -563,14 +568,263 @@ const LS = (() => {
       schreibe("freigabe", daten.freigabe);
       neueFreigabe = true;
     }
-    return { runden: neu.length, kinder: neueKinder.length, rekorde: neueRekorde, profile: geaenderteProfile, freigabe: neueFreigabe };
+    const neueMeldungen = meldungenZusammenfuehren(daten.meldungen || []);
+    return { runden: neu.length, kinder: neueKinder.length, rekorde: neueRekorde, profile: geaenderteProfile, freigabe: neueFreigabe, meldungen: neueMeldungen };
   }
 
   /** Alles, was ein Gerät für den Abgleich weitergibt: wie Sichern, aber vollständig und ohne PIN. */
   function abgleichDaten() {
     const ohnePin = Object.fromEntries(Object.entries(profile()).map(([n, { pin, ...rest }]) => [n, rest]));
     return { version: 2, gesichert: new Date().toISOString(), profile: ohnePin, protokoll: protokoll(), rekorde: rekorde(),
-      geloescht: geloescht(), freigabe: lies("freigabe", null), freigabeStand: lies("freigabeStand", null) };
+      geloescht: geloescht(), freigabe: lies("freigabe", null), freigabeStand: lies("freigabeStand", null), meldungen: meldungen() };
+  }
+
+  // ---------- Fehler melden durch Kinder (Wunsch Patrik, LERN_Session9) ----------
+  // lernspiele:meldungen = [{ id, name, zeit, stand, status, verlauf: [{ zeit, status, von, notiz }], spiel, stufe,
+  //   klasse, aufgabeNr, aufgabe, loesung, eingabe, ergebnis, art, text, antwort?, gelesen }].
+  // Die Meldung bleibt beim Kind und reist mit dem Abgleich zur Aufsicht. An die Entwicklung gibt nur die
+  // Aufsicht weiter, ohne den Namen. Die Antwort kommt zurück über die Aufsicht: Stand abfragen beim
+  // Entwickler-Server oder in der veröffentlichten Datei meldungen-stand.json (je Kennung Status und Antwort).
+  const MELDUNG_ARTEN = {
+    wertung: "Meine Antwort war richtig, wurde aber falsch gewertet",
+    inhalt: "Im Text, im Bild oder in der Lösung ist ein Fehler",
+    unloesbar: "Die Aufgabe lässt sich nicht lösen",
+    anderes: "Etwas anderes",
+  };
+  // text: für die Aufsicht; kind: was das Kind liest
+  const MELDUNG_STATUS = {
+    neu: { text: "neu — noch nicht angesehen", kind: "Gemeldet. Deine Aufsicht schaut es sich an." },
+    bestaetigt: { text: "von der Aufsicht bestätigt", kind: "Deine Aufsicht findet auch: Da stimmt etwas nicht." },
+    weitergeleitet: { text: "an die Entwicklung weitergegeben", kind: "Deine Meldung ist bei der Entwicklung." },
+    geplant: { text: "Entwicklung: wird behoben", kind: "Gut gefunden! Der Fehler wird behoben." },
+    behoben: { text: "Entwicklung: behoben", kind: "Danke! Der Fehler ist behoben — du hast einen echten Fehler gefunden. 🏅" },
+    "kein-fehler": { text: "kein Fehler", kind: "Das ist kein Fehler. Lies die Erklärung." },
+  };
+  const meldungen = () => lies("meldungen", []);
+  const meldungenVon = name => meldungen().filter(m => m.name === name);
+  /** Echte Fehler, die ein Kind gefunden hat: von der Entwicklung bestätigt und behoben (für die Statistik). */
+  const gefundeneFehler = name => meldungenVon(name).filter(m => m.status === "behoben").length;
+  /** Neue Rückmeldungen, die das Kind noch nicht gesehen hat. */
+  const ungeleseneMeldungen = name => meldungenVon(name).filter(m => !m.gelesen);
+
+  /** Darf diese Person melden? Aufsicht immer; Kinder nach der Einstellung und der Klasse im Profil. */
+  function meldenErlaubt(name) {
+    if (!name) return false;
+    if (istAufsicht(name)) return true;
+    const e = einstellung("melden", null);
+    if (e === "aus") return false;
+    if (e === "alle") return true;
+    const k = klasseVon(profil(name));
+    return k != null && k >= (e === "ab5" ? 5 : 3);
+  }
+
+  function neueMeldung(daten) {
+    const jetzt = new Date().toISOString();
+    const id = `M-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    const m = { id, zeit: jetzt, stand: jetzt, status: "neu", gelesen: true, ...daten, verlauf: [{ zeit: jetzt, status: "neu", von: daten.name }] };
+    schreibe("meldungen", [...meldungen(), m]);
+    return m;
+  }
+  /**
+   * Meldung ändern (Status, Antwort fürs Kind …). Ein neuer Status kommt in den Verlauf; ändert sich Status
+   * oder Antwort, zeigt das Kind die Meldung als neu (gelesen: false).
+   */
+  function setzeMeldung(id, aenderung, { von = "", notiz = "" } = {}) {
+    const jetzt = new Date().toISOString();
+    schreibe("meldungen", meldungen().map(m => {
+      if (m.id !== id) return m;
+      const n = { ...m, ...aenderung, stand: jetzt };
+      if (aenderung.status && aenderung.status !== m.status) n.verlauf = [...(m.verlauf || []), { zeit: jetzt, status: aenderung.status, von, ...(notiz ? { notiz } : {}) }];
+      if ((aenderung.status && aenderung.status !== m.status) || (aenderung.antwort && aenderung.antwort !== m.antwort)) n.gelesen = false;
+      return n;
+    }));
+  }
+  /** Das Kind hat seine Rückmeldungen gesehen. */
+  function meldungenGelesen(name) {
+    if (!ungeleseneMeldungen(name).length) return;
+    schreibe("meldungen", meldungen().map(m => (m.name === name ? { ...m, gelesen: true } : m)));
+  }
+  /** Abgleich: je Kennung gewinnt der jüngere Stand. Gibt die Zahl neuer oder geänderter Meldungen zurück. */
+  function meldungenZusammenfuehren(fremde = []) {
+    const da = new Map(meldungen().map(m => [m.id, m]));
+    let n = 0;
+    for (const m of fremde) {
+      if (!m?.id) continue;
+      const alt = da.get(m.id);
+      if (!alt || m.stand > alt.stand) { da.set(m.id, m); n++; }
+    }
+    if (n) schreibe("meldungen", [...da.values()].sort((a, b) => (a.zeit < b.zeit ? -1 : 1)));
+    return n;
+  }
+  // Weg zur Entwicklung ohne Entwickler-Server (Entscheid M1 a, LERN_Session9): E-Mail aus dem Mailprogramm
+  // der Aufsicht, die sie selbst sendet. Die Adresse steht in eulenpfad/kontakt.js (nur die Startseite lädt sie);
+  // leer oder nicht geladen: kein E-Mail-Knopf, dann nur Text kopieren.
+  const meldungAdresse = () => (typeof EULENPFAD_KONTAKT !== "undefined" && EULENPFAD_KONTAKT.meldungen) || "";
+  /** mailto-Link mit Betreff und Text (ohne Namen) oder null ohne Adresse. */
+  function meldungMailLink(m) {
+    const MELDUNG_ADRESSE = meldungAdresse();
+    if (!MELDUNG_ADRESSE) return null;
+    const betreff = `Eulenpfad: Fehlermeldung ${m.id} (${m.spiel}, Stufe ${String(m.stufe).slice(1)})`;
+    return `mailto:${MELDUNG_ADRESSE}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(meldungFuerEntwicklung(m))}`;
+  }
+  /**
+   * Eine per E-Mail angekommene Meldung wieder lesen (Tab Entwicklung): { meldung, spiel, stufe } aus dem Text
+   * von meldungFuerEntwicklung, oder null, wenn keine Kennung darin steht.
+   */
+  function meldungAusText(text) {
+    const id = text.match(/Meldung (M-[a-z0-9]+-[a-z0-9]+)/)?.[1];
+    if (!id) return null;
+    const ort = text.match(/\(([a-z0-9-]+)\), Stufe (\d)/);
+    return { meldung: id, ...(ort ? { spiel: ort[1], stufe: `s${ort[2]}` } : {}) };
+  }
+
+  /** Text für die Entwicklung: ohne den Namen des Kindes, mit Klasse und Kennung. */
+  function meldungFuerEntwicklung(m) {
+    const spielName = (typeof SPIELE !== "undefined" && SPIELE.find(s => s.id === m.spiel)?.name) || m.spiel;
+    return [
+      `Meldung ${m.id} (Kind${m.klasse != null ? `, ${klasseText(m.klasse)}` : ""}), ${m.zeit.slice(0, 10)}`,
+      `Spiel: ${spielName} (${m.spiel}), Stufe ${String(m.stufe).slice(1)}, Aufgabe ${m.aufgabeNr ?? "?"}`,
+      `Art: ${MELDUNG_ARTEN[m.art] || m.art}`,
+      `Aufgabe: ${m.aufgabe || "—"}`,
+      m.loesung ? `Erwartete Lösung: ${m.loesung}` : null,
+      m.eingabe ? `Eingaben des Kindes: ${m.eingabe}` : null,
+      m.ergebnis ? `Gewertet: ${m.ergebnis}` : null,
+      `Begründung: ${m.text}`,
+      ...(m.verlauf || []).filter(v => v.notiz).map(v => `Notiz der Aufsicht: ${v.notiz}`),
+    ].filter(Boolean).join("\n");
+  }
+
+  /**
+   * Antworten der Entwicklung übernehmen: { <id>: { status, antwort? } } mit status geplant | behoben | kein-fehler.
+   * Nur für Meldungen, die schon weitergegeben sind; gibt die Zahl der geänderten zurück.
+   */
+  function meldungStandAnwenden(stand) {
+    let n = 0;
+    for (const m of meldungen()) {
+      const s = stand?.[m.id];
+      if (!s || !MELDUNG_STATUS[s.status] || !["weitergeleitet", "geplant", "behoben", "kein-fehler"].includes(m.status)) continue;
+      if (s.status === m.status && (s.antwort || "") === (m.antwort || "")) continue;
+      setzeMeldung(m.id, { status: s.status, ...(s.antwort ? { antwort: s.antwort } : {}) }, { von: "Entwicklung" });
+      n++;
+    }
+    return n;
+  }
+  /** Status einer Bemerkung (bemerkungen.json) als Status einer Meldung; offen = noch keine Antwort. */
+  function meldungStatusAusBemerkung(text = "") {
+    const t = text.toLowerCase();
+    if (t.startsWith("erledigt")) return "behoben";
+    if (t.startsWith("kein fehler")) return "kein-fehler";
+    if (t.startsWith("geplant") || t.startsWith("in arbeit")) return "geplant";
+    return null;
+  }
+
+  // Pause der laufenden Aufgabe für Hilfe und Melden (setzt die Runde je Aufgabe) und Zähler für ❓.
+  let aktuellePause = null;
+  let hilfeGezaehlt = null;
+
+  /**
+   * „❓ So geht das Spiel“ (Entscheid T3 a, LERN_Session9): oben der eigene Text des Spiels (def.hilfe: Text
+   * oder Funktion der Stufe), darunter, was gerade auf der Seite zu bedienen ist. Die Aufgabe ist während
+   * dessen verdeckt und die Uhr angehalten. Geöffnet zu haben, wird nur notiert.
+   */
+  function hilfeFenster(def) {
+    document.querySelector(".melde-hintergrund")?.remove();
+    const b = document.querySelector(".buehne") || document;
+    const da = sel => !!b.querySelector(sel);
+    const sichtbar = sel => [...b.querySelectorAll(sel)].some(e => !e.closest("[hidden]"));
+    const stufe = spielStand?.stufe;
+    const eigen = typeof def.hilfe === "function" ? def.hilfe(stufe) : def.hilfe;
+    const punkte = [
+      da(".stufen") && "⭐ Wähle eine Stufe: Stufe 1 ist am leichtesten, Stufe 6 ist der Endgegner.",
+      da(".tastatur") && "🔢 Tippe die Zahl mit den Tasten. ⌫ löscht die letzte Ziffer, OK prüft.",
+      da(".wahl") && "👆 Tippe auf die Antwort, die passt.",
+      da(".korb-reihe") && "🧺 Tippe auf den Korb, in den die Karte gehört.",
+      da(".ablage") && "🔀 Tippe die Teile in der richtigen Reihenfolge an.",
+      da(".los-knopf") && "▶ Tippe „Los!“, wenn du bereit bist. Dann zählt es 3, 2, 1, und das Bild ist nur kurz zu sehen.",
+      da(".hoer-knopf, .hoer-zeile") && "🔊 Mit dem Lautsprecher-Knopf hörst du es nochmal.",
+      sichtbar(".tipp-zeile") && "💡 „Tipp“ hilft dir weiter, ohne die Lösung zu verraten.",
+      da(".zeitleiste") && "⏱ Der Balken zeigt die Zeit. Ist sie um, zählt das als Fehler — du darfst die Aufgabe trotzdem fertig machen.",
+      da(".fortschritt") && "😊 Falsch ist nicht schlimm: Die Eule gibt dir einen Hinweis, und du versuchst es nochmal. Nach drei Versuchen zeigt sie dir die Lösung.",
+      da(".eule-zeile .vorlesen") && "🗣️ liest dir die Aufgabe vor.",
+      da(".melden") && "🙋 „Melden“: Stimmt im Spiel etwas nicht? Dann sag es deiner Aufsicht.",
+    ].filter(Boolean);
+    aktuellePause?.an();
+    hilfeGezaehlt?.();
+    const hintergrund = el("div", { class: "melde-hintergrund" });
+    const schliessen = () => { hintergrund.remove(); removeEventListener("keydown", taste); aktuellePause?.aus(); };
+    const taste = e => { if (e.key === "Escape") schliessen(); };
+    hintergrund.append(el("div", { class: "karte melde-fenster", role: "dialog", "aria-modal": "true", "aria-label": "So geht das Spiel" },
+      el("h2", { text: "❓ So geht das Spiel" }),
+      eigen ? el("p", { class: "hilfe-eigen", text: eigen }) : null,
+      el("ul", { class: "hilfe-liste" }, ...punkte.map(p => el("li", { text: p }))),
+      el("div", { class: "knopfzeile" }, el("button", { type: "button", class: "knopf gruen", text: "Weiter spielen", onclick: schliessen }))));
+    hintergrund.addEventListener("click", e => { if (e.target === hintergrund) schliessen(); });
+    addEventListener("keydown", taste);
+    document.body.append(hintergrund);
+  }
+
+  // Eingaben für Fehlermeldungen: Die laufende Runde setzt den Hörer (runde()); einer für die ganze Seite.
+  let eingabeHoerer = null;
+  if (typeof document !== "undefined") document.addEventListener("click", ev => eingabeHoerer?.(ev), true);
+
+  /**
+   * Formular „Fehler melden“ über der Seite (kein dialog-Element, damit es überall läuft).
+   * kontext: { name, spiel, stufe, jetzt, vorige } — jetzt/vorige: { nr, text, loesung, eingabe, ergebnis } oder null.
+   */
+  function meldeFormular(kontext) {
+    document.querySelector(".melde-hintergrund")?.remove();
+    const aufgaben = [["jetzt", "Diese Aufgabe", kontext.jetzt], ["vorige", "Die Aufgabe davor", kontext.vorige]].filter(([, , a]) => a);
+    if (!aufgaben.length) return;
+    let welche = aufgaben[0][0];
+    let art = null;
+    const hintergrund = el("div", { class: "melde-hintergrund" });
+    // Während des Meldens hält die Uhr an und die Aufgabe ist verdeckt (wie bei ❓ Hilfe).
+    aktuellePause?.an();
+    const schliessen = () => { hintergrund.remove(); removeEventListener("keydown", taste); aktuellePause?.aus(); };
+    const taste = e => { if (e.key === "Escape") schliessen(); };
+    const wahl = (liste, aktiv, setze) => {
+      const zeile = el("div", { class: "melde-wahl" });
+      for (const [wert, text, zusatz] of liste) {
+        const k = el("button", { type: "button", "aria-pressed": String(wert === aktiv()), onclick: () => {
+          setze(wert);
+          [...zeile.children].forEach(c => c.setAttribute("aria-pressed", String(c === k)));
+        } }, el("b", { text }), zusatz ? el("span", { class: "melde-zusatz", text: zusatz }) : null);
+        zeile.append(k);
+      }
+      return zeile;
+    };
+    const kurz = a => (a.text || "(ohne Text)").slice(0, 80) + ((a.text || "").length > 80 ? " …" : "");
+    const begruendung = el("textarea", { rows: "4", "aria-label": "Begründung",
+      placeholder: "Schreib genau, was nicht stimmt und warum. Zum Beispiel: Ich habe 42 eingetippt, und 6 · 7 ist 42." });
+    const meldung = el("p", { class: "melde-meldung" });
+    const fenster = el("div", { class: "karte melde-fenster", role: "dialog", "aria-modal": "true", "aria-label": "Fehler melden" },
+      el("h2", { text: "🙋 Stimmt etwas nicht?" }),
+      el("p", { class: "leise", text: "Hast du einen Fehler im Spiel gefunden? Super, dass du so genau hinschaust! Deine Aufsicht schaut die Meldung an." }),
+      el("h3", { text: "Welche Aufgabe?" }),
+      wahl(aufgaben.map(([w, t, a]) => [w, t, kurz(a)]), () => welche, w => { welche = w; }),
+      el("h3", { text: "Was stimmt nicht?" }),
+      wahl(Object.entries(MELDUNG_ARTEN), () => art, a => { art = a; }),
+      el("h3", { text: "Warum?" }),
+      begruendung,
+      el("p", { class: "leise", text: "Bitte keine Namen schreiben." }),
+      meldung,
+      el("div", { class: "knopfzeile" },
+        el("button", { type: "button", class: "knopf gruen", text: "Senden", onclick: () => {
+          if (!art) return (meldung.textContent = "Wähle zuerst, was nicht stimmt.");
+          if (begruendung.value.trim().length < 8) return (meldung.textContent = "Schreib bitte genauer, was nicht stimmt.");
+          const a = aufgaben.find(([w]) => w === welche)[2];
+          neueMeldung({ name: kontext.name, spiel: kontext.spiel, stufe: kontext.stufe, klasse: klasseVon(profil(kontext.name)),
+            aufgabeNr: a.nr + 1, aufgabe: a.text, loesung: a.loesung, eingabe: a.eingabe, ergebnis: a.ergebnis, art, text: begruendung.value.trim().slice(0, 1000) });
+          ton("richtig");
+          fenster.replaceChildren(el("h2", { text: "🙋 Danke!" }), el("p", { text: "Deine Meldung ist gespeichert. Deine Aufsicht schaut sie an — in der Statistik siehst du später, was daraus wurde." }));
+          setTimeout(schliessen, 2200);
+        } }),
+        el("button", { type: "button", class: "knopf hell", text: "Abbrechen", onclick: schliessen })));
+    hintergrund.append(fenster);
+    hintergrund.addEventListener("click", e => { if (e.target === hintergrund) schliessen(); });
+    addEventListener("keydown", taste);
+    document.body.append(hintergrund);
+    setTimeout(() => begruendung.focus?.(), 0);
   }
 
   /** Basisklasse eines Spiels aus dem Katalog (null, wenn die Seite den Katalog nicht geladen hat). */
@@ -723,6 +977,8 @@ const LS = (() => {
     const ende = () => { if (!gerufen && fertig) { gerufen = true; fertig(); } };
     const nichts = () => { setTimeout(ende, 0); return false; };
     if (!tonAn) return nichts(); // Ton aus (🔇 in der Kopfzeile) gilt auch für die Stimme
+    // Leerer Text: nichts sagen — und nichts abbrechen, was gerade gesprochen wird (Meldung Hör-Reporter).
+    if (!String(text).trim()) return nichts();
     const v = stimme(sprache);
     if (!v) return nichts();
     try {
@@ -809,10 +1065,15 @@ const LS = (() => {
     document.addEventListener("contextmenu", e => { if (knopf(e)) e.preventDefault(); });
   }
 
-  /** Text für die Stimme: ohne Bildzeichen (sonst liest sie „roter Apfel“ mit), Rechenzeichen ausgeschrieben. */
+  /**
+   * Text für die Stimme: ohne Bildzeichen (sonst liest sie „roter Apfel“ mit), Rechenzeichen ausgeschrieben.
+   * Uhrzeiten stehen ohne Leerzeichen („7:42“), die Division mit („21 : 3“) — so liest sie „7 Uhr 42“ und
+   * „21 durch 3“ (Meldung Fahrplan-Rechner, LERN_Session9).
+   */
   function fuerStimme(text) {
     return text
       .replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}]/gu, " ")
+      .replace(/(?<![\d:])(\d{1,2}):(\d{2})(?![\d:])(?:\s*Uhr\b)?/g, (_, h, m) => (m === "00" ? `${h} Uhr` : `${h} Uhr ${Number(m)}`))
       .replace(/(\d)\s*[×·]\s*(\d)/g, "$1 mal $2").replace(/(\d)\s*:\s*(\d)/g, "$1 durch $2")
       .replace(/\s*=\s*\?/g, " gleich wie viel?")
       // zwischen Wörtern: „gross/klein“, „Wort antippen = …“, „A · B“ — sonst „Schrägstrich“, „gleich“, „Punkt“
@@ -1282,6 +1543,9 @@ const LS = (() => {
     const stufenListe = SKALA.filter(s => def.stufen[s.id]).map(s => ({ ...s, text: def.stufen[s.id] }));
     spielStand = { spiel: def.id };
     tonSchalter(document.querySelector(".kopf .ton"));
+    // ❓ Hilfe zur Bedienung (Entscheid T3 a, LERN_Session9): in der Kopfzeile, auch auf der Stufenwahl.
+    const tonKnopf = document.querySelector(".kopf .ton");
+    tonKnopf?.before(el("button", { type: "button", class: "hilfe-knopf", text: "❓", "aria-label": "Hilfe: So geht das Spiel", title: "So geht das Spiel", onclick: () => hilfeFenster(def) }));
     // Kam beim Abgleich etwas von einem anderen Gerät dazu: die Stufenwahl mit Sternen und Ranglisten neu zeichnen.
     addEventListener("lernspiele:abgeglichen", () => { if (buehne.querySelector(".stufen")) stufenwahl(); });
 
@@ -1375,6 +1639,8 @@ const LS = (() => {
     function stufenwahl() {
       if (!zugang()) return;
       buehne.innerHTML = "";
+      aktuellePause = null; // keine Aufgabe, die eine Hilfe anhalten müsste
+      hilfeGezaehlt = null;
       const name = aktuellerSpieler();
       const karte = el("div", { class: "karte" });
       const eule = euleZeile();
@@ -1493,6 +1759,8 @@ const LS = (() => {
       // Testhilfen (Entscheid T2 a): nur beim Testspieler; wirken auf die gerade gezeigte Aufgabe.
       const test = istAufsicht(name);
       let hilfen = 0;
+      let bedienhilfe = 0; // ❓ Hilfe in dieser Runde geöffnet (nur notiert)
+      hilfeGezaehlt = () => { bedienhilfe++; };
       let jetzt = null; // { loesung(): Text oder null, ueberspringen() } der aktuellen Aufgabe
       const loesungKnopf = el("button", { type: "button", class: "knopf hell klein", text: "🔑 Lösung zeigen", onclick: () => {
         const text = jetzt?.loesung();
@@ -1529,9 +1797,38 @@ const LS = (() => {
       }
       // Eule oben, damit ihre Rückmeldung auch auf kleinen Bildschirmen neben der Aufgabe sichtbar bleibt.
       karte.append(eule.element);
+      // Fehler melden (LERN_Session9): „🙋 Melden“ neben der Eule (Entscheid K1 a: sich melden wie in der Schule). Die Runde merkt sich die laufende und die vorige
+      // Aufgabe samt dem, was das Kind angetippt oder eingetippt hat — damit die Meldung nachvollziehbar ist.
+      let eingaben = [];
+      let laufendeAufgabe = () => null;
+      let abgeschlossen = null; // die zuletzt beendete Aufgabe; wird mit der nächsten zur „vorigen“
+      let vorigeAufgabe = null;
+      // Ein Hörer am Dokument (nicht an der Fläche: die soll nicht selbst als antippbar gelten).
+      eingabeHoerer = ev => {
+        const k = ev.target?.closest?.("button");
+        if (!k || !flaeche.contains(k)) return;
+        // OK der Zifferntastatur: das Getippte zählt, nicht das „OK“
+        const anzeige = /^\s*(OK|✓)/.test(k.textContent || "") ? flaeche.querySelector(".anzeige")?.textContent?.trim() : "";
+        const was = (anzeige || k.getAttribute("aria-label") || k.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60);
+        if (was) eingaben = [...eingaben, was].slice(-6);
+      };
+      // Eigene kleine Zeile unter der Eule: neben der Blase würde das Wort sie auf dem Handy zu schmal machen.
+      if (meldenErlaubt(name)) {
+        karte.append(el("div", { class: "melde-zeile" }, el("button", { type: "button", class: "melden", text: "🙋 Melden", "aria-label": "Fehler melden", title: "Fehler im Spiel melden",
+          onclick: () => meldeFormular({ name, spiel: def.id, stufe: stufe.id, jetzt: laufendeAufgabe(), vorige: vorigeAufgabe }) })));
+      }
       if (test) karte.append(el("div", { class: "testhilfe" }, el("span", { text: "🧪 Test" }), loesungKnopf, weiterKnopf));
       if (timer.an) karte.append(zeitleiste);
       karte.append(flaeche);
+      // Tipp (Entscheide T1 a, T3 a, LERN_Session9): unter der Aufgabe, nur wenn das Spiel Tipps mitgibt
+      // (ctx.tipp), nie im Endlos-Modus. Ein Tipp zählt für die Sterne wie ein halber Fehler; „auf Anhieb“
+      // heisst ohne Tipp. Die Uhr läuft weiter.
+      let tippsRunde = 0;
+      let tippGeben = () => {};
+      const tippKnopf = el("button", { type: "button", class: "knopf hell klein tipp-knopf", text: "💡 Tipp", onclick: () => tippGeben() });
+      const tippZeile = el("div", { class: "tipp-zeile" }, tippKnopf);
+      tippZeile.hidden = true;
+      karte.append(tippZeile);
       buehne.append(punkte, karte);
 
       /** Mix: Ergebnis der letzten Aufgabe melden — oder, vor der ersten, dass das Spiel bereit ist. */
@@ -1572,7 +1869,23 @@ const LS = (() => {
         let vorgehen = null; // wie das Kind vorging (ctx.vorgehen): Art → Wert, für die Statistik
         const start = performance.now();
         let bereit = null; // ab wann das Kind antworten kann (performance.now()); ab da laufen Uhr und Zeitmessung
+        let uhrEnde = null;   // wann die Zeit um ist, solange die Uhr läuft (performance.now())
+        let pauseSeit = null; // Hilfe oder Melden offen: seit wann
+        let restMs = null;    // Restzeit der Uhr während einer Pause
+        let pausiertMs = 0;   // Pausen zählen nicht zur Zeit der Aufgabe
+        let tipps = [];       // gestufte Tipps dieser Aufgabe (ctx.tipp); nie die Lösung
+        let tippsGenutzt = 0; // geholte Tipps dieser Aufgabe (zählen für die Sterne)
+        let tippPos = 0;      // nächster Tipp der aktuellen Liste
         const lauf = ++aufgabeLauf;
+        // Fehler melden: diese Aufgabe so, wie das Kind sie gerade sieht; die beendete davor wird zur „vorigen“.
+        const meineNr = nr;
+        let ergebnisText = "noch nicht beantwortet";
+        vorigeAufgabe = abgeschlossen;
+        eingaben = [];
+        const aufgabeJetzt = () => ({ nr: meineNr, text: aufgabenText(flaeche), loesung: loesungVorab || eintrag?.loesung || "",
+          eingabe: eingaben.join(" → "),
+          ergebnis: erledigt || !versuche ? ergebnisText : `noch offen, ${versuche} Fehlversuch${versuche === 1 ? "" : "e"} als falsch gewertet` });
+        laufendeAufgabe = aufgabeJetzt;
         // „▶ Los!“ (LS.losGehts) bei der ersten Aufgabe, nach einer Aufgabe mit Fehler und im Mix (dort kommt
         // dazwischen meist ein anderes Spiel); sonst nur kurz 👀 (LERN-38).
         const vorige = aufgabenZeiten.at(-1);
@@ -1598,7 +1911,16 @@ const LS = (() => {
           // laufen), ab dem Zeichnen.
           const jetztMs = performance.now();
           const ab = bereit !== null && bereit <= jetztMs ? bereit : start;
-          aufgabenZeiten.push({ ms: Math.round(jetztMs - ab), versuche, zeitUm, geloest, ...(uebersprungen ? { uebersprungen } : {}), ...(vorgehen ? { vorgehen } : {}) });
+          uhrEnde = null;
+          tippZeile.hidden = true;
+          tippsRunde += tippsGenutzt;
+          aufgabenZeiten.push({ ms: Math.round(Math.max(0, jetztMs - ab - pausiertMs)), versuche, zeitUm, geloest, ...(tippsGenutzt ? { tipps: tippsGenutzt } : {}),
+            ...(uebersprungen ? { uebersprungen } : {}), ...(vorgehen ? { vorgehen } : {}) });
+          // Für eine Fehlermeldung: wie die Aufgabe gewertet wurde, und sie als „vorige“ für die nächste merken.
+          ergebnisText = uebersprungen ? "übersprungen" : geloest
+            ? (versuche ? `richtig nach ${versuche} Fehlversuch${versuche === 1 ? "" : "en"}` : "richtig") + (zeitUm ? ", Zeit um" : "")
+            : `nicht gelöst, Lösung gezeigt nach ${versuche} Fehlversuch${versuche === 1 ? "" : "en"}`;
+          abgeschlossen = aufgabeJetzt();
         };
 
         jetzt = {
@@ -1646,18 +1968,70 @@ const LS = (() => {
           void balken.offsetWidth;
           balken.style.transition = `width ${sekunden}s linear`;
           balken.style.width = "0%";
-          uhr = setTimeout(() => {
-            if (erledigt) return;
-            zeitUm = true;
-            fehler++;
-            fehlerEintrag("").zeitUm = true;
-            zeitleiste.classList.add("um");
-            ton("falsch");
-            if (endlos) return endlosVorbei("⏰ Die Zeit ist um!");
-            eule.sag("⏰ Die Zeit ist um! Mach die Aufgabe trotzdem fertig.", "hinweis");
-          }, sekunden * 1000);
+          uhrEnde = performance.now() + sekunden * 1000;
+          uhr = setTimeout(zeitIstUm, sekunden * 1000);
           if (endlos) punkte.textContent = `♾ ${geschafft} · ⏱ ${sekundenText(sekunden)}`;
         }
+        function zeitIstUm() {
+          if (erledigt) return;
+          uhrEnde = null;
+          zeitUm = true;
+          fehler++;
+          fehlerEintrag("").zeitUm = true;
+          zeitleiste.classList.add("um");
+          ton("falsch");
+          if (endlos) return endlosVorbei("⏰ Die Zeit ist um!");
+          eule.sag("⏰ Die Zeit ist um! Mach die Aufgabe trotzdem fertig.", "hinweis");
+        }
+
+        // Pause für Hilfe und Melden (Wunsch Patrik, LERN_Session9): Die Uhr hält an und die Aufgabe ist
+        // verdeckt, damit niemand in der Pause weiterdenkt; die Pause zählt nicht zur Zeit der Aufgabe.
+        // Ein Tipp pausiert nicht — er ist gleich da.
+        function pausiere() {
+          if (pauseSeit !== null) return;
+          pauseSeit = performance.now();
+          flaeche.classList.add("pause-verdeckt");
+          if (uhrEnde !== null && !erledigt) {
+            clearTimeout(uhr);
+            restMs = Math.max(0, uhrEnde - pauseSeit);
+            const balken = zeitleiste.firstChild;
+            balken.style.width = getComputedStyle(balken).width;
+            balken.style.transition = "none";
+          }
+        }
+        function fortsetzen() {
+          if (pauseSeit === null) return;
+          const jetztMs = performance.now();
+          pausiertMs += jetztMs - pauseSeit;
+          pauseSeit = null;
+          flaeche.classList.remove("pause-verdeckt");
+          if (restMs !== null && !erledigt) {
+            const balken = zeitleiste.firstChild;
+            void balken.offsetWidth;
+            balken.style.transition = `width ${restMs / 1000}s linear`;
+            balken.style.width = "0%";
+            uhrEnde = jetztMs + restMs;
+            uhr = setTimeout(zeitIstUm, restMs);
+          }
+          restMs = null;
+        }
+        aktuellePause = { an: pausiere, aus: fortsetzen };
+
+        /** Den nächsten Tipp in der Eulenblase zeigen; der Knopf sagt, ob noch einer kommt. */
+        const zeigeTippKnopf = () => {
+          tippZeile.hidden = endlos || erledigt || !tipps.length;
+          tippKnopf.disabled = tippPos >= tipps.length;
+          tippKnopf.textContent = tippPos >= tipps.length ? "💡 Keine Tipps mehr" : tippPos ? "💡 Noch ein Tipp" : "💡 Tipp";
+        };
+        tippGeben = () => {
+          if (erledigt || tippPos >= tipps.length) return;
+          const text = tipps[tippPos++];
+          tippsGenutzt++;
+          ton("tipp");
+          eule.sag(`💡 ${text}`, "hinweis");
+          pruefung.haken?.("tipp", { nr, hinweis: text, flaeche, vorab: loesungVorab });
+          zeigeTippKnopf();
+        };
 
         /** Endlos: erste falsche Antwort oder Zeit um — Lösung zeigen, dann zum Ergebnis. */
         function endlosVorbei(text) {
@@ -1722,6 +2096,17 @@ const LS = (() => {
            * Uhr und Zeitmessung beginnen so viel später.
            */
           wartezeit(s) { warten += s; },
+          /**
+           * Tipps zur Aufgabe, vom kleinen Anstoss zum grösseren (Text oder Liste; Entscheid T2 a). Das Kind holt
+           * sie mit „💡 Tipp“ einzeln; keiner verrät die Lösung (das Testskript prüft es). Beim Zeichnen rufen.
+           */
+          // Auch später aufrufbar (zweiter Schritt einer Aufgabe): neue Tipps beginnen wieder beim ersten, gezählt
+          // werden alle geholten.
+          tipp(texte) {
+            tipps = [].concat(texte).filter(t => typeof t === "string" && t.trim());
+            tippPos = 0;
+            if (!zeichnet) zeigeTippKnopf();
+          },
           /** Ist die Aufgabe gelöst oder nach drei Fehlversuchen aufgelöst? Dann nimmt sie keine Antwort mehr an. */
           vorbei: () => erledigt,
           richtig(text) {
@@ -1783,7 +2168,7 @@ const LS = (() => {
             if (k) gestellt.set(k, n + 1);
             letzte = k;
             for (const [name, wert] of Object.entries(serien)) (serienVerlauf[name] ||= []).push(wert);
-            pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, serieErzwungen: zuLang && versuch >= SERIE_VERSUCHE });
+            pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: zuLang && versuch >= SERIE_VERSUCHE });
             zeichnet = false;
             gezeigt = true;
             if (eule.vorlesen) setTimeout(eule.vorlesen, 300);
@@ -1803,10 +2188,13 @@ const LS = (() => {
           schritte = 0;
           warten = 0;
           uhrWartet = false;
+          tipps = [];
+          tippPos = 0;
           zug++;
           serien = {};
         }
         bereitMachen();
+        zeigeTippKnopf();
       }
 
       /**
@@ -1833,7 +2221,8 @@ const LS = (() => {
       }
 
       function schluss() {
-        const sterne = sterneFuer(fehler);
+        // Ein Tipp zählt wie ein halber Fehler (Entscheid T1 a): fragen ist günstiger als raten, aber nicht gratis.
+        const sterne = sterneFuer(fehler + tippsRunde / 2);
         protokolliere({
           name,
           zeit: new Date().toISOString(),
@@ -1852,6 +2241,8 @@ const LS = (() => {
           // Testrunden zählen nicht in der Statistik (Entscheid T1 a); hilfe = Testhilfen benutzt.
           ...(test ? { test: true } : {}),
           ...(hilfen ? { hilfe: hilfen } : {}),
+          ...(tippsRunde ? { tipps: tippsRunde } : {}),
+          ...(bedienhilfe ? { bedienhilfe } : {}), // ❓ Hilfe geöffnet: nur notiert, ohne Folgen
         });
         ton("fertig");
         konfetti();
@@ -1868,11 +2259,13 @@ const LS = (() => {
             el("button", { class: "knopf gruen", type: "button", text: "Nochmal spielen", onclick: () => runde(stufe) }),
             el("button", { class: "knopf hell", type: "button", text: "Andere Stufe", onclick: stufenwahl })));
         buehne.append(karte);
-        // Text nach der Fehlerzahl dieser Runde — 3 Sterne gibt es auch mit einem Fehler.
-        eule.sag(fehler === 0 ? "Perfekt! Alles auf Anhieb richtig! 🏆"
+        // Text nach der Fehlerzahl dieser Runde — 3 Sterne gibt es auch mit einem Fehler. Tipps werden genannt.
+        const mitTipps = tippsRunde ? ` Du hast ${tippsRunde === 1 ? "einen Tipp" : `${tippsRunde} Tipps`} geholt.` : "";
+        eule.sag((fehler === 0 && !tippsRunde ? "Perfekt! Alles auf Anhieb richtig! 🏆"
+          : fehler === 0 ? "Alles richtig!"
           : fehler === 1 ? "Wow, fast alles auf Anhieb richtig!"
           : sterne === 2 ? "Gut gemacht! Mit etwas Übung schaffst du drei Sterne."
-          : "Du hast durchgehalten! Spiel nochmal, dann wird es leichter.", "gut");
+          : "Du hast durchgehalten! Spiel nochmal, dann wird es leichter.") + mitTipps, "gut");
       }
 
       /**
@@ -1911,6 +2304,7 @@ const LS = (() => {
       if (mix) addEventListener("message", e => {
         if (e.source !== parent || e.data?.lern !== "mix") return;
         if (e.data.typ === "ton") return setzeTon(e.data.an);
+        if (e.data.typ === "hilfe") return hilfeFenster(def); // ❓ in der Leiste des Mix
         if (e.data.typ !== "aufgabe") return;
         mixGeschafft = e.data.geschafft || 0;
         mixFreigabe = true;
@@ -1990,7 +2384,9 @@ const LS = (() => {
       "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
       "spieler-zeile",
       "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
-      "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich"],
+      "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
+      "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
+      "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
@@ -2000,6 +2396,9 @@ const LS = (() => {
     MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     beiAenderung, abgleichDaten, spielStand: () => spielStand,
+    MELDUNG_ARTEN, MELDUNG_STATUS, meldungen, meldungenVon, gefundeneFehler, ungeleseneMeldungen, meldenErlaubt, neueMeldung,
+    setzeMeldung, meldungenGelesen, meldungFuerEntwicklung, meldeFormular, meldungStandAnwenden, meldungStatusAusBemerkung,
+    meldungAdresse, meldungMailLink, meldungAusText,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
     freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,

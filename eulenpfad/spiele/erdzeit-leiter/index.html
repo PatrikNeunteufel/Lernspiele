@@ -359,6 +359,30 @@ function zeigeAbstand(ctx, a) {
     loesung: `${dauerText(jahreVon(x))} − ${dauerText(jahreVon(y))} = ${dauerText(a.richtig)}` });
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Denkwege (was musste es schon geben, Zahlen vergleichen),
+ * keine Zuordnung Tier → Zeitalter wie im Hinweis nach einem Fehler — die verriete die Lösung.
+ */
+function tippsFuer(a) {
+  switch (a.art) {
+    case "frueher": return ["Was musste es schon geben, damit das andere passieren konnte?", "Stell dir die Erde ganz am Anfang vor: heiss und ohne Leben. Was davon kam zuerst dazu?"];
+    case "ordnen": return a.zahlen ? [TIPP_ZAHLEN, "Die grösste Zeit ist am längsten her — sie kommt zuerst."] : ["Such zuerst das Ereignis, das am längsten her ist.", TIPP_ORDNEN];
+    case "leiter": return a.zahl
+      ? ["Lies die Zeit auf der Karte und vergleiche sie mit den Zahlen an den Sprossen.", "Such die zwei Sprossen, zwischen denen die Zeit liegt. Achte auf Millionen und Tausende!"]
+      : ["Jede Sprosse liegt zehnmal so weit zurück wie die darunter.", "Ist es eher Tausende oder Millionen Jahre her? Was gab es davor, was danach?"];
+    case "zeitalter": return a.zahl
+      ? ["Lies die Zeit auf der Karte.", "Vergleiche sie mit den Zeiten bei den Körben. Wo passt sie hinein?"]
+      : ["Denk an die Tiere und Pflanzen, die es damals gab.", "Die Reihenfolge: Erdurzeit, Erdaltertum, Erdmittelalter, Erdneuzeit. Was gab es damals schon, was noch nicht?"];
+    case "tag": {
+      const e = ereignis(a.text);
+      return ["Je länger es her ist, desto früher am Tag.", `Die ganze Erdgeschichte sind ${dauerText(ERDALTER)}. Welcher Teil davon ist ${dauerText(jahreVon(e))}? So viel fehlt bis Mitternacht.`];
+    }
+    case "tagRueck": return ["Je später am Tag, desto näher an heute.", "Was ist kurz vor Mitternacht, was am Morgen? Vergleiche die Zeiten auf den Karten."];
+    case "abstand": return ["Rechne grob: die grössere Zeit minus die kleinere.", "Achte auf Millionen und Tausende! Ist eine Zeit viel kleiner als die andere, zählt fast nur die grössere."];
+  }
+  return [];
+}
+
 const ZEIGE = { frueher: zeigeFrueher, ordnen: zeigeOrdnen, leiter: zeigeLeiter, zeitalter: zeigeZeitalter, tag: zeigeTag, tagRueck: zeigeTagRueck, abstand: zeigeAbstand };
 const ARTEN_JE_STUFE = Object.fromEntries(Object.keys(STUFE).map(s => [s, new Set(STUFE[s].map(f => f()?.art).filter(Boolean)).size]));
 
@@ -374,6 +398,7 @@ const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => au
 
 LS.spiel({
   id: "erdzeit-leiter",
+  hilfe: "Tippe die passende Antwort an oder lege die Karte in den passenden Korb. Beim Ordnen tippst du die Ereignisse der Reihe nach an, das älteste zuerst. Auf der Erdzeit-Leiter tippst du den Abschnitt an, in den das Ereignis gehört.",
   einleitung: "Die Erde ist unvorstellbar alt: etwa 4600 Millionen Jahre! Klettere die Erdzeit-Leiter hinauf und ordne, was wann geschah.",
   anzahl: 8,
   stufen: STUFEN,
@@ -382,6 +407,7 @@ LS.spiel({
     if (ctx.nr === 0) ctx.sag("Tipp: Zuerst gab es nur Leben im Meer, dann an Land. Die Menschen kamen ganz zum Schluss.");
     const a = aufgabeErzeugen(ctx.stufe);
     if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     ZEIGE[a.art](ctx, a);
   },
 });

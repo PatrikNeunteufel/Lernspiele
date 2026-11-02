@@ -108,9 +108,26 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Satzbau-Regel je Liste — kein englisches Wort des
+ * Satzes nennen (sonst wäre die nächste Karte verraten).
+ */
+const SATZBAU = {
+  "ich-saetze": "Im Englischen kommt zuerst, wer etwas tut. Gleich danach kommt das Tun-Wort, dann der Rest.",
+  "er-sie-saetze": "Zuerst kommt, wer etwas tut (er, sie oder ein Name). Gleich danach kommt das Tun-Wort, dann der Rest.",
+  fragen: "Bei einer Frage steht das kleine Hilfswort ganz vorne, noch vor der Person. Das Fragezeichen kommt ans Ende.",
+  verneinung: "Das Wort mit n’t (nicht) steht gleich nach dem, der etwas tut.",
+};
+function tippsFuer(a) {
+  const t = ["Such zuerst die Karte mit dem grossen Anfangsbuchstaben — und die mit dem Satzzeichen fürs Ende.", SATZBAU[a.liste]];
+  if (a.extra) t.push("Eine Karte ist zu viel: Zwei Karten sehen fast gleich aus. Welche Form passt zur Person im Satz — ich, du, er, sie oder mehrere?");
+  return t;
+}
+
 LS.spiel({
   id: ID,
   einleitung: "Let's build sentences! Tipp die englischen Wortkarten in der richtigen Reihenfolge an.",
+  hilfe: "Lies den deutschen Satz. Tippe die englischen Wortkarten in der richtigen Reihenfolge an — jede richtige Karte wandert nach oben in den Satz.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -118,6 +135,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     const loesung = a.en;
     ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(a));
     ctx.flaeche.append(el("div", { class: "sb-auf", text: "Sag es auf Englisch:" }), el("div", { class: "frage", text: a.de }));
     const ablage = el("div", { class: "ablage", "aria-live": "polite" });
     const box = el("div", { class: "sb-karten" });

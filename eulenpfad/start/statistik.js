@@ -58,6 +58,45 @@ function zeichneStatistik(box, neu) {
       kachel(prozent(mittel(runden.map(anhieb))), "Aufgaben auf Anhieb richtig"),
       kachel(String(runden.reduce((s, e) => s + e.fehlerAufgaben.filter(f => !f.geloest).length, 0)), "Aufgaben mit Lösung gezeigt"))));
 
+  // ----- Fazit in Worten (AUSWERTUNG.fazit, LERN_Session9) -----
+  // Die Aufsicht sieht das ganze Fazit; dem Kind gibt sie eine freundliche Fassung frei (Entscheid G3,
+  // Profil-Feld fazitFuerKind, Vorgabe aus).
+  const meine = LS.meldungenVon(gewaehlt);
+  if (aufsicht) {
+    const f = AUSWERTUNG.fazit(runden, p, Date.now(), meine);
+    const freigabe = el("button", { type: "button", class: "chip", "aria-pressed": String(!!p.fazitFuerKind),
+      text: p.fazitFuerKind ? `👀 ${LS.spielerName(gewaehlt)} sieht ein freundliches Fazit` : `👀 Fazit für ${LS.spielerName(gewaehlt)} freigeben`,
+      onclick: () => { LS.speichereProfil(gewaehlt, { fazitFuerKind: !p.fazitFuerKind }); neu(); } });
+    seite.append(karte(
+      el("div", { class: "fazit-kopf" }, el("h2", { text: `Fazit — ${gewaehlt}` }), freigabe),
+      el("p", { class: "fazit-kurz", text: f.kurz }),
+      ...f.abschnitte.map(a => el("div", { class: "fazit-abschnitt" },
+        el("h3", { text: a.titel }), el("ul", {}, ...a.saetze.map(s => el("li", { text: s }))))),
+      f.genug ? el("p", { class: "leise-text", text: `Regelbasiert aus den gespielten Runden, ohne KI; jede Aussage nennt ihre Zahlen. Ein Thema braucht mindestens ${AUSWERTUNG.FAZIT.minAufgaben} Aufgaben in ${AUSWERTUNG.FAZIT.minRunden} Runden, bevor es beurteilt wird. Die Grenzen sind Annahmen, bis Erfahrungen mit Kindern vorliegen.` }) : null,
+      p.fazitFuerKind ? el("details", {}, el("summary", { text: `So liest es ${LS.spielerName(gewaehlt)}` }),
+        el("ul", {}, ...AUSWERTUNG.fazitFuerKind(runden, p, Date.now(), meine).map(s => el("li", { text: s })))) : null));
+  } else if (p.fazitFuerKind) {
+    seite.append(karte(
+      el("h2", { text: "🦉 Mein Fazit" }),
+      el("ul", { class: "fazit-kind" }, ...AUSWERTUNG.fazitFuerKind(runden, p, Date.now(), meine).map(s => el("li", { text: s })))));
+  }
+
+  // ----- Fehlermeldungen und Fehlerfinder (LERN_Session9) -----
+  // Das Kind sieht, was aus seinen Meldungen wurde; neue Antworten sind markiert, bis es sie hier gesehen hat.
+  if (meine.length) {
+    const gefunden = LS.gefundeneFehler(gewaehlt);
+    const spielName2 = id => SPIELE.find(s => s.id === id)?.name || id;
+    seite.append(karte(
+      el("h2", { text: aufsicht ? `🙋 Meldungen von ${gewaehlt}` : "🙋 Meine Meldungen" }),
+      gefunden ? el("p", { class: "fehlerfinder", text: `🏅 Fehlerfinder: ${gefunden} echte${gefunden === 1 ? "n Fehler gefunden, den" : " Fehler gefunden, die"} die Entwicklung behoben hat. Danke fürs genaue Hinschauen!` }) : null,
+      el("ul", { class: "meine-meldungen" }, ...[...meine].reverse().map(m => el("li", {},
+        el("b", { text: `${m.gelesen ? "" : "🔔 "}${new Date(m.zeit).toLocaleDateString("de-CH")} · ${spielName2(m.spiel)}` }),
+        el("div", { text: (aufsicht ? LS.MELDUNG_STATUS[m.status]?.text : LS.MELDUNG_STATUS[m.status]?.kind) || m.status }),
+        m.antwort ? el("div", { class: "leise-text", text: `💬 ${m.antwort}` }) : null))),
+      aufsicht ? el("p", { class: "leise-text", text: "Bearbeiten in der Verwaltung → 🙋 Meldungen." }) : null));
+    if (!aufsicht) LS.meldungenGelesen(gewaehlt);
+  }
+
   // ----- Auswertung und Vorschläge -----
   const vorschlaege = AUSWERTUNG.vorschlaege(gewaehlt, runden, p);
   seite.append(karte(
@@ -221,7 +260,7 @@ function zeichneStatistik(box, neu) {
   const verlauf = el("div");
   if (!letzte.length) verlauf.append(el("p", { class: "leise-text", text: "Noch keine Runde gespielt." }));
   for (const e of letzte) {
-    const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.spiel)} · Stufe ${stufeName(e.stufe)} · ${e.mix ? "🎲 im Zufallsmix" : "★".repeat(e.sterne)} · ${e.fehler} Fehler${e.test ? " · 🧪 Test" : ""}${e.hilfe ? " · 🔑 mit Hilfe" : ""}` }));
+    const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.spiel)} · Stufe ${stufeName(e.stufe)} · ${e.mix ? "🎲 im Zufallsmix" : "★".repeat(e.sterne)} · ${e.fehler} Fehler${e.tipps ? ` · 💡 ${e.tipps} Tipp${e.tipps === 1 ? "" : "s"}` : ""}${e.bedienhilfe ? " · ❓ Hilfe" : ""}${e.test ? " · 🧪 Test" : ""}${e.hilfe ? " · 🔑 mit Hilfe" : ""}` }));
     if (e.fehlerAufgaben.length) {
       d.append(el("ul", {}, ...e.fehlerAufgaben.map(f => el("li", {},
         el("div", { text: f.text || "(Aufgabe)" }),
@@ -280,7 +319,8 @@ function zeichneStatistik(box, neu) {
     const profile = Object.fromEntries(wer.map(n => { const { pin, ...rest } = LS.lies("profile", {})[n] || {}; return [n, rest]; }));
     const daten = { version: 1, gesichert: new Date().toISOString(), profile,
       protokoll: LS.protokoll().filter(e => sichtbareRunde(e) && e.name in profile),
-      rekorde: LS.rekorde().filter(e => sichtbareRunde(e) && e.name in profile) };
+      rekorde: LS.rekorde().filter(e => sichtbareRunde(e) && e.name in profile),
+      meldungen: LS.meldungen().filter(m => m.name in profile) };
     // Das Muster lernspiele-*.json hält .gitignore aus dem Repo heraus.
     const namen = Object.keys(profile).map(n => n.replace(/[^\p{L}\p{N}_-]+/gu, "_")).filter(Boolean).join("-");
     const dateiname = `lernspiele-${namen ? namen + "-" : ""}${new Date().toISOString().slice(0, 10)}.json`;

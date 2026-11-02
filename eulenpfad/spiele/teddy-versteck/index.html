@@ -415,10 +415,27 @@ function szeneSvg(sz, teddy) {
   return s + "</svg>";
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst genau hinhören, dann erklärt die Eule das Lagewort
+ * (wie HINWEIS) und, wo links und rechts mitspielen, das L der linken Hand — nie, welcher Platz es ist.
+ */
+function tippsFuer(a) {
+  const t = ["Hör genau hin: Wo soll der Teddy sein?"];
+  if (a.rel === "welches") t.push("Zuerst: Welches Ding ist gemeint, das linke oder das rechte? Dann: Wo dort?", HINWEIS.links);
+  else if (a.rel === "fach") { t.push(HINWEIS.fach); if (/^(links|rechts)@/.test(a.key)) t.push(HINWEIS.links); }
+  else {
+    t.push(HINWEIS[a.rel] + (a.rel === "mitte" && a.szene.regal3 ? " Und oben und unten auch." : ""));
+    if (/^aussen-/.test(a.key)) t.push(HINWEIS.links);
+  }
+  return t;
+}
+
 const LOB = ["Gefunden! 🧸", "Genau dort! 🧸", "Super, der Teddy freut sich! 🧸", "Richtig! 🧸"];
 
 LS.spiel({
   id: "teddy-versteck",
+  hilfe: stufe => (stufe === "s6" ? "Hör zu, in welches Fach der Teddy soll. Dann tippst du auf das Fach."
+    : "Hör zu, wo der Teddy ist. Dann tippst du auf das Bild, das passt — oder auf den Platz, wohin der Teddy soll. Dort erscheint er dann."),
   einleitung: "Der Teddy spielt Verstecken! Hör gut zu, wo er ist. Dann tipp auf das richtige Bild oder auf den richtigen Platz.",
   anzahl: 8,
   stufen: {
@@ -440,6 +457,7 @@ LS.spiel({
     const hinweis = HINWEIS[a.rel === "fach" && /^ecke/.test(a.key) ? "ecke" : a.rel] || HINWEIS.welches;
     const loesung = a.loesung;
     const lob = waehle(LOB);
+    ctx.tipp(tippsFuer(a));
     ctx.flaeche.classList.add("teddy-spiel");
 
     if (a.typ === "bild") {

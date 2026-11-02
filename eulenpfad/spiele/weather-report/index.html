@@ -363,6 +363,26 @@ const TIPP = {
   s6: "Lies zuerst die Frage, dann hör gut zu. Mit 🔊 hörst du es nochmal.",
 };
 
+// Tipps vor dem Antworten (ctx.tipp, LERN_Session9): worauf man beim Hören achtet — nie, was gesagt wird,
+// und keine Wörter der Antwortknöpfe (auch nicht „draw“).
+const ZAHL_TIPP = "Bei Zahlen: -teen ist eine Zahl von 13 bis 19, -ty ein Zehner wie 20, 30 oder 40. Hörst du „minus“, ist es kälter als 0 °C.";
+function tippsFuer(a) {
+  const hoeren = "Hör nochmal mit 🔊. Du musst nicht jedes Wort verstehen.";
+  if (a.art === "wort") return [hoeren, "Viele Wetterwörter sind ein Nomen mit -y am Ende. Das Nomen verrät dir das Wetter."];
+  if (a.art === "weg") return ["Du stehst beim Stern ⭐ und gehst nach oben.",
+    "Hör auf drei Dinge: erste oder zweite Strasse, links oder rechts abbiegen, und auf welcher Seite das Haus steht.",
+    "Links und rechts gelten so, wie du gehst — nicht so, wie du auf den Plan schaust."];
+  if (a.art === "zwei") return ["Hör die ganze Durchsage. Mit 🔊 hörst du sie so oft, wie du willst.",
+    "Merk dir zu jeder Frage das Stichwort: einen Ort, einen Tag oder eine Mannschaft. Hör, was direkt danach kommt.",
+    ...(a.fragen.some(q => q.inhalt === "grad") ? [ZAHL_TIPP] : a.fragen.some(q => q.inhalt === "team" || q.inhalt === "resultat") ? ["„nil“ heisst: keine Tore."] : [])];
+  if (a.inhalt === "wetter") return [hoeren + " Hör auf das Wetterwort.",
+    ...((DURCHSAGEN.find(d => d.id === a.durchsage)?.angaben || []).length > 1 ? ["Es kommen zwei Tage oder Orte vor. Hör auf das Wort aus der Frage — das Wetter kommt gleich danach."] : [])];
+  if (a.inhalt === "grad") return ["Hör auf das Wort aus der Frage und dann auf die Zahl vor „degrees“.", ZAHL_TIPP];
+  return ["Hör auf die Zahl direkt nach jeder Mannschaft.",
+    a.inhalt === "team" ? "Wer mehr Tore hat, hat gewonnen. Gleich viele Tore heisst: unentschieden." : "Die erste Zahl gehört zur ersten Mannschaft.",
+    "„nil“ heisst: keine Tore."];
+}
+
 /** Transkript nach dem Lösen zeigen. */
 const transkript = (f, text) => () => { if (!f.querySelector(".wr-text")) f.append(el("div", { class: "wr-text", text: `📜 ${text}` })); };
 
@@ -428,6 +448,9 @@ function zweiFragen(ctx, a) {
 
 const SPIEL = {
   id: ID,
+  hilfe: stufe => (stufe === "s5" ? "Hör die Wegbeschreibung, folge ihr auf dem Plan vom Stern ⭐ aus und tipp auf das Haus, zu dem sie führt."
+    : "Hör die englische Durchsage und tippe auf die passende Antwort. Unter der englischen Frage steht sie auf Deutsch."
+      + (stufe === "s6" ? " Es kommen zwei Fragen nacheinander; beide müssen stimmen." : "")),
   einleitung: "Here is the weather report! Hör dir kurze englische Durchsagen an: Wetter, Sport und Wegbeschreibungen. Mit 🔊 hörst du sie nochmal.",
   anzahl: 8,
   stufen: STUFEN,
@@ -435,6 +458,7 @@ const SPIEL = {
   aufgabe(ctx) {
     if (ctx.nr === 0) ctx.sag(TIPP[ctx.stufe]);
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.tipp(tippsFuer(a));
     if (new Set(STUFE[ctx.stufe].map(x => x[0])).size > 1) ctx.serie("art", a.art);
     if (a.inhalt === "team") ctx.serie("antwort", a.richtig === "draw" ? "draw" : a.optionen.indexOf(a.richtig));
     ctx.kennung(a.kennung);

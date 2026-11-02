@@ -85,6 +85,7 @@ const STUFEN_TEXT = {
 LS.spiel({
   id: "woerter-trenner",
   einleitung: "Hilfe, die Wörter kleben aneinander! Tipp zwischen die Buchstaben, um die Wörter zu trennen.",
+  hilfe: "Die Wörter kleben ohne Lücke aneinander. Tipp zwischen zwei Buchstaben, wo ein Wort aufhört — dort erscheint ein Strich. Nochmals tippen nimmt ihn weg. Bist du fertig, tippst du auf „Fertig ✓“.",
   anzahl: 8,
   // Nur Stufen, für die die freien Sätze etwas hergeben.
   stufen: Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => kandidaten(s).length)),
@@ -98,6 +99,13 @@ LS.spiel({
     woerter.slice(0, -1).forEach(w => { pos += w.length; soll.add(pos); });
     const loesungText = `Der ${ctx.stufe === "s6" ? "Text" : "Satz"} heisst: ${woerter.join(" ")}`;
     ctx.loesung(loesungText);
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Strategie, dann die Zahl der Wörter — nie eine Trennstelle.
+    ctx.tipp([
+      "Lies ganz langsam von vorn. Sobald du ein Wort erkennst, setzt du dahinter einen Strich.",
+      ctx.stufe === "s6"
+        ? "Hier stehen zwei Sätze hintereinander. Nach jedem Wort kommt ein Strich — nur nach dem allerletzten nicht."
+        : `Der Satz hat ${woerter.length} Wörter. Du brauchst also ${woerter.length - 1} Strich${woerter.length === 2 ? "" : "e"}.`,
+    ]);
 
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Wo hört ein Wort auf?" }));
     const schlange = el("div", { class: "schlange", "aria-label": "Buchstaben ohne Lücken" });

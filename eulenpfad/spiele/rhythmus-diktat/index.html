@@ -205,12 +205,29 @@ const toene = karten => karten.flatMap(k => KARTEN[k].noten.map(n => ({ midi: n.
 const vorzaehlen = () => Array.from({ length: TAKT }, () => ({ midi: 84, dauer: TEMPO, klick: true }));
 const kartenText = takte => takte.map(t => t.map(k => KARTEN[k].name).join(" · ")).join(" | ");
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie die Karten der Stufe klingen und wie man
+ * vergleicht — nie welche Karten in diesem Takt liegen.
+ */
+function tippsFuer(s) {
+  const k = s.karten;
+  const klingt = ["Ein Ton auf einem Schlag ist eine Viertel, zwei schnelle Töne auf einem Schlag sind zwei Achtel."];
+  if (k.includes("h")) klingt.push("Ein Ton über zwei Schläge ist eine Halbe; ein stiller Schlag ist eine Viertelpause.");
+  if (k.includes("s4")) klingt.push("Vier ganz schnelle Töne auf einem Schlag sind Sechzehntel.");
+  if (k.includes("as2")) klingt.push("Drei Töne auf einem Schlag: Ist der lange Ton vorne oder hinten?");
+  if (k.includes("vpa")) klingt.push("Punktierte Noten klingen hüpfend: lang und dann kurz.");
+  return ["Klatsch den Rhythmus leise mit und zähl dazu: 1, 2, 3, 4. Leg Schlag für Schlag.",
+    klingt.slice(-2).join(" "),
+    "Mit „▶ Meine Karten“ hörst du, was du gelegt hast. Vergleiche mit „🔊 Nochmal hören“."];
+}
+
 // Für das Prüfskript im Scratchpad: die laufende Aufgabe.
 let AKTUELL = null;
 
 LS.spiel({
   id: "rhythmus-diktat",
   einleitung: "Hör gut zu: Erst zählen vier Klicks vor, dann kommt ein Rhythmus. Lege ihn mit den Notenkarten nach!",
+  hilfe: "Hör zu: Erst klickt es viermal vor, dann kommt der Rhythmus. Tippe die Notenkarten der Reihe nach an — ist der Takt voll, wird geprüft. „⌫ Zurück“ nimmt die letzte Karte weg.",
   anzahl: 6,
   stufen: {
     s1: "Viertel und zwei Achtel (4. Klasse).",
@@ -231,6 +248,7 @@ LS.spiel({
     ctx.loesung(loesung);
     ctx.kennung(JSON.stringify(a.takte));
     ctx.schritte(ziel.length);
+    ctx.tipp(tippsFuer(s));
     const vorspiel = () => [...vorzaehlen(), ...toene(ziel)];
     ctx.wartezeit(vorspiel().reduce((x, t) => x + t.dauer, 0));
 

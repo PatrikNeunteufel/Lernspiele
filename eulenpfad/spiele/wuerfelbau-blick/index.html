@@ -399,9 +399,32 @@ function rasterSvg(raster, { zahlen = false, vorneUnten = false, g = 22 } = {}) 
   return el("span", { html: `<svg viewBox="0 0 ${breite * g + 4} ${hoehe * g + 4 + extra}" width="${breite * g + 4}" height="${hoehe * g + 4 + extra}" aria-hidden="true">${teile.join("")}</svg>` });
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): ein Anstoss zum Vorgehen, dann die Regel der Ansicht
+ * (die Hinweise unten passen auch vorab) — nie welches Bild oder welche Zahl richtig ist.
+ */
+const TIPPS = {
+  zaehlen: ["Zähl Säule für Säule: Wie viele Würfel stehen an jeder Stelle aufeinander?",
+    "Denk an die Würfel, die unten tragen — oben kann nur etwas stehen, wenn darunter ein Würfel ist."],
+  oben: ["Stell dir vor, du bist ein Vogel und schaust von oben auf das Gebäude.",
+    "Von oben siehst du nur die Felder, auf denen etwas steht – egal wie hoch."],
+  vorne: ["Stell dich in Gedanken vor das Gebäude. Was siehst du in jeder Spalte?",
+    "Von vorne zählt in jeder Spalte die höchste Säule. Was dahinter steht, ist verdeckt."],
+  rechts: ["Stell dich in Gedanken rechts neben das Gebäude.", "Von rechts gesehen: Was ganz vorne steht, ist jetzt links."],
+  hinten: ["Stell dich in Gedanken hinter das Gebäude.", "Von hinten ist alles vertauscht: Was von vorne links ist, ist jetzt rechts."],
+  links: ["Stell dich in Gedanken links neben das Gebäude.", "Von links gesehen: Was ganz vorne steht, ist jetzt rechts."],
+  seite: ["Vergleiche die Höhen in der Ansicht mit den Säulen im Gebäude.",
+    "Stell dich in Gedanken auf jede Seite: Wie hoch ist jede Säule, die du von dort siehst?"],
+  plan: ["Im Bauplan steht in jedem Feld, wie viele Würfel dort aufeinander stehen.", "Vergleiche Feld für Feld mit dem Gebäude. Unten im Plan ist vorne."],
+  planZuBau: ["Im Bauplan steht in jedem Feld, wie viele Würfel dort aufeinander stehen. Unten im Plan ist vorne.",
+    "Such zuerst die höchste Säule im Bauplan und schau, wo sie steht."],
+  dreiAnsichten: ["Nimm eine Ansicht nach der anderen.", "Prüf jedes Gebäude: Passt es von vorne? Von rechts? Von oben? Streich die weg, die nicht passen."],
+};
+
 LS.spiel({
   id: "wuerfelbau-blick",
   einleitung: "Schau genau hin! Zähl die Würfel und finde heraus, wie das Gebäude von vorne, von rechts und von oben aussieht.",
+  hilfe: "Schau das Würfelgebäude (oder den Bauplan, die Ansichten) genau an und tipp unten die passende Antwort an: eine Zahl, ein Bild oder ein Gebäude. In Bauplänen ist unten vorne.",
   anzahl: 6,
   stufen: {
     s1: "Kleine Gebäude: Würfel zählen.",
@@ -415,6 +438,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (new Set(STUFE[ctx.stufe].arten).size > 1) ctx.serie("art", a.art);
     if (a.art === "seite") ctx.serie("antwort", a.gezeigt);
+    ctx.tipp(TIPPS[a.art]);
     ctx.flaeche.append(el("div", { class: "frage", html: FRAGEN[a.art] }));
     const zeigeBau = !["planZuBau", "dreiAnsichten"].includes(a.art);
     if (zeigeBau) ctx.flaeche.append(el("div", { class: "bau" }, bauSvg(a)));

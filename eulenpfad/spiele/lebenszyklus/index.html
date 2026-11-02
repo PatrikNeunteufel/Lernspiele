@@ -129,8 +129,18 @@ function pruefeAufgabe(a, stufe) {
 
 const stadiumInhalt = ([bild, text]) => ({ bild: bild || "", text });
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Anfang suchen, Tiergruppe bedenken — nie ein Stadium oder Korb. */
+function tippsFuer(a) {
+  if (a.art === "ordnen") return ["Such zuerst den Anfang: Was ist zuerst da?", "Was wird daraus? Denk daran, wie es wächst."];
+  if (a.art === "geburt") return ["Zu welcher Tiergruppe gehört das Tier: Säugetier, Vogel, Reptil, Fisch oder Frosch?",
+    "Die meisten Säugetiere werden lebend geboren. Vögel, Reptilien, Fische und Frösche schlüpfen aus dem Ei. Junge Beuteltiere wachsen im Beutel auf."];
+  if (a.art === "naechstes") return ["Sag die ganze Reihe vom Anfang an leise auf.", "Was wird aus diesem Stadium, wenn es weiter wächst?"];
+  return ["Lies alle Antworten genau.", "Denk an das, was du über Pflanzen und Tiere weisst: Was passt zum Leben im Wasser, an Land oder im Garten?"];
+}
+
 LS.spiel({
   id: "lebenszyklus",
+  hilfe: "Tipp die Bilder der Reihe nach an, vom Anfang bis zum Ende. Bei „Wie kommen die Jungen zur Welt?“ legst du das Tier in den passenden Korb.",
   einleitung: "Aus dem Ei wird ein Küken, aus der Raupe ein Schmetterling. Bringst du alles in die richtige Reihenfolge?",
   anzahl: 6,
   stufen: STUFEN,
@@ -139,6 +149,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     if (a.art === "geburt" && MEHRERE_GEBURTEN) ctx.serie("antwort", a.richtig);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "ordnen") {
       ctx.flaeche.append(el("div", { class: "frage", text: `${a.z.name}: Was kommt zuerst? Tipp der Reihe nach.` }));
       LS.reihenfolge(ctx, {

@@ -140,11 +140,24 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Regel oder Versuch zum Nachdenken, nie die Antwort. */
+const FRAGE_TIPPS = {
+  wirkung: ["Stell dir den Versuch mit Magnet und Büroklammer vor.", "Überleg: Was ändert sich, wenn etwas zwischen Magnet und Büroklammer ist — oder wenn sie weiter weg ist?"],
+  "kompass-pole": ["Eine Kompassnadel ist selbst ein kleiner Magnet.", "Denk daran: Jeder Magnet hat einen Nordpol und einen Südpol."],
+  strom: ["Stell dir den Versuch mit Batterie, Kabel und Lämpchen vor.", "Lies jede Antwort und frag dich: Kann das bei einem echten Versuch so sein?"],
+};
+function tippsFuer(a) {
+  if (a.art === "ding") return ["Ein Magnet zieht nur Dinge aus Eisen an.", "Woraus ist das Ding gemacht: aus Eisen, Holz, Papier, Glas oder Stoff?"];
+  if (a.art === "pole" || a.art === "poleWahl") return ["Schau nur auf die zwei Pole in der Mitte, wo sich die Magnete treffen.", "Gleiche Pole stossen sich ab, verschiedene ziehen sich an."];
+  return FRAGE_TIPPS[herkunft(a)[0]] || ["Denk an deine Versuche mit Magneten und Batterien."];
+}
+
 const stab = pole => el("div", { class: "stab" }, ...pole.map(p => el("span", { class: p, text: p })));
 
 LS.spiel({
   id: "magnet-labor",
   einleitung: "Willkommen im Labor! Was zieht der Magnet an? Und was passiert, wenn zwei Magnete sich treffen?",
+  hilfe: "Überleg, was der Magnet mit dem Ding oder mit dem anderen Magneten macht, und gib deine Antwort.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -153,6 +166,7 @@ LS.spiel({
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     if (a.art !== "frage") ctx.serie("antwort", a.richtig); // ja/nein, anziehen/abstossen, N/S
     if (a.art === "poleWahl") ctx.serie("ziel", a.ziel);
+    ctx.tipp(tippsFuer(a));
     if (a.art === "ding") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Zieht der Magnet das an?" }));
       const { karte } = LS.koerbe(ctx, {

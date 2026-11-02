@@ -134,9 +134,34 @@ function treppe(fam) {
   return box;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Richtung, Faktor, Vorgehen — nie das Ergebnis.
+ * Ein Tipp, der die Lösung als Zahl enthält (1 m = ? cm mit dem Faktor 100), fällt weg.
+ */
+function tippsFuer(a) {
+  const zeit = a.fam === "zeit" ? "Bei der Zeit geht jeder Schritt mal 60, nicht mal 10." : "";
+  let liste;
+  if (a.art === "einfach") liste = [
+    "Wird die Einheit kleiner, wird die Zahl grösser — und umgekehrt.",
+    `Zwischen ${a.links.split(" ").pop()} und ${a.ziel} liegt der Faktor ${zahlText(a.f)}. Mal oder geteilt?`,
+  ];
+  else if (a.art === "weit") liste = [
+    "Wird die Einheit kleiner, wird die Zahl grösser — und umgekehrt.",
+    "Geh die Einheiten-Treppe Stufe für Stufe und rechne jeden Schritt.", zeit,
+  ];
+  else if (a.art === "gemischt") liste = [`Rechne zuerst die grosse Einheit in ${a.ziel} um.`, "Zähl dann den Rest dazu.", zeit];
+  else if (a.art === "rechnen") liste = [`Rechne beide Grössen ganz in ${a.ziel} um.`, "Zähl sie danach zusammen.", zeit];
+  else liste = [`Rechne beide Grössen ganz in ${a.ziel} um.`, "Subtrahiere danach die zweite von der ersten.", zeit];
+  const zahlen = t => t.replace(/[   ']/g, "").match(/\d+/g) || [];
+  return liste.filter(t => t && !zahlen(t).includes(String(a.loesung)));
+}
+
 LS.spiel({
   id: "masse-umwandler",
   einleitung: "Meter, Liter, Kilo und Co.: Wandle die Grössen in die andere Einheit um. Die Einheiten-Treppe hilft dir!",
+  hilfe: stufe => "Lies die Grösse links und rechne sie in die Einheit hinter dem ? um."
+    + (stufe === "s5" ? "" : stufe === "s6" ? " Die Einheiten-Treppe erscheint erst nach einem Fehler."
+      : " Die Einheiten-Treppe zeigt, mit welcher Zahl du von einer Einheit zur nächsten kommst."),
   anzahl: 8,
   stufen: {
     s1: "Meter und Zentimeter, Franken und Rappen: 2 m = 200 cm.",
@@ -153,6 +178,7 @@ LS.spiel({
     if (a.richtung) ctx.serie("richtung", a.richtung);
     const loesung = `${a.links} = ${zahlText(a.loesung)} ${a.ziel}`;
     ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(a));
     ctx.schritte(LS.tippSchritte(a.loesung));
     ctx.flaeche.append(el("div", { class: "familie", text: FAMILIEN[a.fam].name }));
     // Königsstufe: Treppe erst nach dem ersten Fehler, über der Rechnung eingefügt.

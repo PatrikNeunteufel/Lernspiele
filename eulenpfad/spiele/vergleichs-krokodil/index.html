@@ -142,8 +142,23 @@ function pruefeAufgabe(paar, stufe) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Stelle für Stelle vergleichen bzw. zuerst rechnen —
+ * ohne die Wörter der Knöpfe („kleiner“, „gleich“, „grösser“), damit kein Tipp nach einer Antwort klingt.
+ */
+function tippsFuer(stufe) {
+  if (!STUFE[stufe].rechnen) return ["Zähl zuerst die Ziffern. Die Zahl mit mehr Ziffern ist mehr wert.",
+    "Haben beide dieselbe Anzahl Ziffern, vergleiche von links Stelle für Stelle: Die erste Ziffer, die verschieden ist, entscheidet.",
+    "Das offene Maul zeigt immer zur grösseren Zahl."];
+  return ["Rechne zuerst beide Seiten aus — ganz genau.",
+    "Bei · und : hilft es, zuerst ohne die Nullen zu rechnen und sie dann wieder anzuhängen.",
+    stufe === "s6" ? "Schau genau hin: Manchmal liegt die Zahl nur ganz knapp neben dem Ergebnis. Vergleiche Stelle für Stelle."
+      : "Vergleiche dann die zwei Ergebnisse Stelle für Stelle."];
+}
+
 LS.spiel({
   id: "vergleichs-krokodil",
+  hilfe: "Schau beide Seiten an und tippe das Zeichen, das in die Mitte gehört: < (kleiner als), = (gleich) oder > (grösser als). Das Maul des Krokodils zeigt zur grösseren Zahl.",
   einleitung: "Das hungrige Krokodil frisst immer die grössere Zahl! Wähle das richtige Zeichen: < (kleiner als), > (grösser als) oder = (gleich).",
   anzahl: 10,
   stufen: {
@@ -163,6 +178,7 @@ LS.spiel({
     const loesung = `${a.text} ${richtig} ${b.text}${rechnen ? ` (${zahlText(a.wert)} ${richtig} ${zahlText(b.wert)})` : ""}`;
     ctx.loesung(loesung);
     ctx.schritte(1); // ein Zeichen antippen
+    ctx.tipp(tippsFuer(ctx.stufe));
     const seite = x => x.punkte ? el("div", { class: "seite" }, el("div", { class: "punkte", text: x.punkte })) : el("div", { class: "seite", text: x.text });
     const mitte = el("div", { class: "kroko-mitte", text: "?" });
     ctx.flaeche.append(el("div", { class: "vergleich" }, seite(a), mitte, seite(b)));

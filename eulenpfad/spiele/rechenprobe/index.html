@@ -255,9 +255,24 @@ function knoepfe(ctx, ort, { optionen, richtig, inhalt = String, hinweis, loesun
   return box;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): die Art der Probe und worauf achten — nie das
+ * Ergebnis der Probe und nie der Stempel.
+ */
+function tippsFuer(x) {
+  if (x.art === "schnell") return ["Prüfe zuerst die Grösse: Passt Robos Ergebnis ungefähr zu den Zahlen?",
+    "Dann die Einer: Passt die letzte Ziffer? Zeigen beide nichts, hilft nur noch die Umkehraufgabe."];
+  if (x.art === "endziffer") return ["Für die Endziffer reichen die Einer der beiden Zahlen.",
+    "Rechne nur mit den Einern. Die letzte Ziffer davon vergleichst du mit der letzten Ziffer von Robos Ergebnis."];
+  const vergleich = "Vergleiche das Ergebnis der Probe mit der Zahl aus Robos Aufgabe: Sind sie gleich, hat Robo richtig gerechnet.";
+  if (x.art === "wahl") return ["Die Umkehraufgabe rechnet rückwärts: Sie beginnt mit Robos Ergebnis.", HINWEIS_WAHL[x.op], vergleich];
+  return ["Die Umkehraufgabe rechnet rückwärts und macht Robos Rechnung rückgängig.", vergleich];
+}
+
 LS.spiel({
   id: "rechenprobe",
   einleitung: "Robo hat gerechnet, aber Robo macht manchmal Fehler! Prüfe mit einer Probe und drücke den Stempel: stimmt oder falsch?",
+  hilfe: "Schau Robos Rechnung an. Wähle, wenn gefragt, die passende Probe, rechne sie aus und drücke dann den Stempel: ✔ stimmt oder ✘ falsch. Bei „Welche schnelle Probe?“ tippst du die Probe an, die Robos Fehler zeigt.",
   anzahl: 8,
   stufen: {
     s1: "Plus und minus bis 1000: die Umkehraufgabe rechnen.",
@@ -273,6 +288,7 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const f = ctx.flaeche;
     if (new Set(p.arten).size > 1) ctx.serie("art", x.art);
+    ctx.tipp(tippsFuer(x));
     const roboter = el("div", { class: "roboter" }, el("span", { class: "figur", text: "🤖" }),
       el("span", { class: "rechnung", html: `${rechnungText(x.a, x.op, x.b)} = <b>${zt(x.r)}</b>` }));
     f.append(roboter);

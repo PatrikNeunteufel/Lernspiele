@@ -287,8 +287,25 @@ const teilInhalt = w => (w.startsWith("g:") ? geraetInhalt(w.slice(2)) : formInh
 
 let gezeigt = null; // zuletzt gezeichnete Aufgabe (Prüfskripte, Entwickler-Leiste)
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Prüffragen zum Gerät oder zur Kette, nie die Energieform selbst. */
+const KETTE = "Was ein Wandler abgibt, nimmt der nächste auf.";
+const TIPPS = {
+  strom: ["Muss man es einstecken, oder hat es eine Batterie oder einen Akku?", "Stell dir vor, der Strom fällt aus: Würde es trotzdem gehen?"],
+  erneuerbar: ["Erneuerbar heisst: Die Energiequelle wächst nach oder geht nicht aus.", "Wächst die Energiequelle nach, oder ist sie irgendwann aufgebraucht?"],
+  woher: ["Was muss da sein, damit es arbeitet?", "Was wird dabei verbraucht?"],
+  kraftwerk: ["Was treibt das Kraftwerk an?", "Was wird im Kraftwerk verbraucht oder genutzt, damit der Generator sich dreht?"],
+  wohin: ["Was spürst, siehst oder hörst du, wenn es arbeitet?", "Wird es warm? Leuchtet es? Bewegt sich etwas? Es können auch zwei Energien sein."],
+  paar: ["Achte auf die Richtung: Was ist vorher da, was kommt heraus?", "Was braucht das Gerät, damit es arbeitet? Das steht vor dem Pfeil."],
+  fehlt: [KETTE, "Der Wandler muss genau die Energie aufnehmen, die davor steht, und die Energie danach abgeben."],
+  mitte: [KETTE, "Was gibt der erste Wandler ab? Und was braucht der zweite, damit er arbeitet?"],
+  frage: ["Lies alle Antworten genau.", "Denk an die Berge, das Wasser, den Wind und die Sonne."],
+  ordnen: ["Beginne mit der Energie, die am Anfang da ist.", "Was kommt aus dem letzten Teil heraus, und welcher Wandler nimmt genau das auf?"],
+  falsch: ["Prüfe jeden Wandler einzeln: Passt die Energie davor und die Energie danach?", "Der falsche Wandler nimmt eine andere Energie auf oder gibt eine andere ab."],
+};
+
 LS.spiel({
   id: "energie-wandler",
+  hilfe: "Schau dir das Gerät oder die Kette an und tippe die passende Antwort an. Beim Kette-Bauen tippst du der Reihe nach Energie, Wandler, Energie … an, von Anfang bis Ende.",
   einleitung: "Energie geht nie verloren – sie wird nur umgewandelt. Finde heraus, welche Energie hineingeht und welche herauskommt!",
   anzahl: 8,
   stufen: nurMoegliche({
@@ -311,6 +328,7 @@ LS.spiel({
     }[ctx.stufe]);
     const a = aufgabeErzeugen(ctx.stufe);
     gezeigt = a;
+    ctx.tipp(TIPPS[a.art]); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (new Set(artenIn(ctx.stufe)).size > 1) ctx.serie("art", a.art);
     const f = ctx.flaeche;
     const g = a.geraet && G[a.geraet];

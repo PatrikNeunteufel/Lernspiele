@@ -193,9 +193,46 @@ const ERKLAERUNG = {
   Pyramide: "Die Pyramide hat unten ein Viereck und läuft oben in einer Spitze zusammen.",
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Merkmale ohne Namen (ERKLAERUNG nennt den Namen —
+ * beim Benennen wäre das die Lösung), Zählstrategie ohne Zahl.
+ */
+const MERKMAL = {
+  Kreis: "ist rund und hat keine Ecken", Dreieck: "hat drei Ecken und drei Seiten",
+  Rechteck: "hat vier Ecken, zwei lange und zwei kurze Seiten", Quadrat: "hat vier Ecken, und alle Seiten sind gleich lang",
+  Würfel: "hat sechs gleiche quadratische Flächen", Quader: "hat sechs rechteckige Flächen, wie eine Schachtel",
+  Kugel: "ist überall rund und hat keine Ecken", Zylinder: "hat oben und unten eine runde Fläche, wie eine Dose",
+  Pyramide: "hat unten ein Viereck und oben eine Spitze",
+};
+const ZAEHL_TIPP = {
+  Ecken: "Auch hinten gibt es Ecken, die man nicht sieht.",
+  Kanten: "Eine Kante ist dort, wo zwei Flächen zusammenstossen. Zähl oben, unten und an den Seiten.",
+  Flächen: "Denk auch an die Flächen hinten und unten, die man nicht sieht.",
+};
+const EIGEN_TIPP = {
+  achsen: ["Eine Symmetrieachse teilt die Form so, dass beide Hälften genau aufeinander passen.", "Stell dir vor, du faltest die Form: Wo passen die Hälften genau? Probier auch schräg."],
+  rechte: ["Ein rechter Winkel ist eine Ecke wie bei einem Blatt Papier.", "Prüf jede Ecke einzeln: Passt die Ecke eines Blatts genau hinein?"],
+  parallel: ["Parallele Seiten laufen nebeneinander her und treffen sich nie.", "Schau immer zwei gegenüberliegende Seiten an — zähl die Paare, nicht die Seiten."],
+};
+function tippsFuer(a) {
+  const gross = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const merkmal = `${gross(der(a.ziel))} ${a.ziel} ${MERKMAL[a.ziel]}.`;
+  if (a.art === "findeFigur") return a.drehen ? ["Eine gedrehte Form bleibt dieselbe Form.", merkmal] : ["Zähl die Ecken.", merkmal];
+  if (a.art === "benenne") return ["Zähl zuerst die Ecken.", "Hat die Form vier Ecken? Dann vergleich die Seiten: Sind alle gleich lang?"];
+  if (a.art === "ecken") return ["Zeig mit dem Finger auf jede Ecke und zähl leise mit.", "Eine Ecke ist dort, wo zwei Seiten zusammenstossen."];
+  if (a.art === "koerperFlach") return ["Flache Formen sind wie auf Papier gezeichnet. Einen Körper kann man in die Hand nehmen.", merkmal];
+  if (a.art === "koerper") return ["Hat der Körper Ecken und Kanten, oder ist er rund?", merkmal];
+  if (a.art === "ding") return a.optionen.some(k => FLACH.includes(k))
+    ? ["Das Ding kann man in die Hand nehmen — also ist es ein Körper, keine flache Form.", "Ist es überall rund, oder hat es Ecken und Kanten?"]
+    : ["Hat das Ding Ecken und Kanten, oder ist es rund?", "Schau, welche Flächen es hat: Quadrate, Rechtecke oder runde Flächen?"];
+  if (a.art === "zaehlen") return ["Zähl der Reihe nach: zuerst vorne, dann hinten — nichts doppelt.", ZAEHL_TIPP[a.was]];
+  return EIGEN_TIPP[a.was];
+}
+
 LS.spiel({
   id: "formen-detektiv",
   einleitung: "Kreis, Dreieck, Rechteck, Quadrat — und Körper wie Würfel und Kugel. Erkennst du sie alle?",
+  hilfe: "Hör oder lies die Frage. Dann schau die Formen genau an: Ecken, Seiten, rund?",
   anzahl: 8,
   stufen: {
     s1: "Kreis, Dreieck und Quadrat finden.",
@@ -252,6 +289,7 @@ LS.spiel({
       ctx.flaeche.append(figurBild(a.ziel, { klasse: "form-gross" }));
       zahlWahl(a.richtig, `${a.ziel}: ${EIGENSCHAFTEN[a.ziel].achsen} Symmetrieachsen, ${EIGENSCHAFTEN[a.ziel].rechte} rechte Winkel, ${EIGENSCHAFTEN[a.ziel].parallel} Paare paralleler Seiten.`);
     }
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (ctx.nr === 0) ctx.sag("Schau die Form genau an: Ecken, Seiten, rund?");
   },
 });

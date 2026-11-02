@@ -190,8 +190,24 @@ function eintippen(ctx, richtig, hinweis, loesungText) {
   ctx.flaeche.append(anzeige, tasten.element);
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst der Zusammenhang (doppelte Zeit, doppelter Weg),
+ * dann der Weg über eine kleine Zeit oder eine Stunde — nie der gesuchte Wert oder wer schneller ist.
+ */
+function tippsFuer(a, p) {
+  if (a.art === "weg") return ["Doppelt so lange heisst doppelt so weit.",
+    p.stunden ? "Rechne zuerst, wie weit es in 1 h kommt." : `Rechne zuerst aus der ersten Spalte, wie weit es in einer kleinen Zeit kommt, zum Beispiel in ${p.dezimal ? 10 : 15} min.`,
+    "Dann nimmst du das so oft, wie die kleine Zeit in die gesuchte Zeit passt."];
+  if (a.art === "zeit") return ["Gleichmässig heisst: Doppelt so weit dauert doppelt so lange.",
+    "Wie weit kommt es in 10 min? Wie oft passt das in den gesuchten Weg?"];
+  if (a.art === "vergleich") return ["Rechne beide auf dieselbe Zeit um, zum Beispiel auf eine Stunde (60 min).",
+    "Wie oft passt die Zeit in 60 min? So oft weiter kommt es in einer Stunde."];
+  return ["Prüf jeden Wert: Doppelte Zeit, doppelter Weg?", "Rechne aus der ersten Spalte, wie weit es in 10 min kommt, und prüf damit alle anderen."];
+}
+
 LS.spiel({
   id: "velo-tabelle",
+  hilfe: "Lies die Tabelle: oben die Zeit, unten der Weg. Tipp die fehlende Zahl ein oder tippe die passende Antwort an.",
   einleitung: "Wer gleichmässig fährt, kommt in doppelt so viel Zeit doppelt so weit. Fülle die Tabellen aus und finde heraus, wer schneller ist!",
   anzahl: 8,
   stufen: {
@@ -207,6 +223,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     const p = STUFE[ctx.stufe];
     const f = ctx.flaeche;
+    ctx.tipp(tippsFuer(a, p));
     if (a.art === "weg" || a.art === "zeit") {
       const fa = FAHRER[a.fahrer];
       const wege = a.zeiten.map(t => wegVon(a.v, t));

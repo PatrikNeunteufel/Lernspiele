@@ -171,6 +171,10 @@ function einsortieren(ctx, zahl) {
   const ersteStelle = 7 - String(zahl).length; // Index der höchsten Stelle in STELLEN
   const loesung = `${zahlText(zahl)} → ` + spalten.filter(s => STELLEN.indexOf(s) >= ersteStelle).map(s => `${soll[s.k]} ${s.k}`).join(", ");
   ctx.loesung(loesung);
+  // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): von den Einern her denken — nie, was in welches Fach kommt.
+  ctx.tipp(["Die letzte Ziffer der Zahl gehört immer zu den Einern (E), ganz rechts.",
+    "Zähl die Ziffern der Zahl. So viele Fächer von rechts brauchst du — links davon bleibt alles leer.",
+    ...(String(zahl).includes("0") ? ["Auch eine Null bekommt ihr Fach. Sie zeigt: An dieser Stelle ist nichts."] : [])]);
   // Handgriffe: zum ersten Fach der Zahl springen (wenn sie die Tabelle nicht füllt), je Ziffer ein Tipp, OK.
   ctx.schritte((STELLEN.indexOf(spalten[0]) < ersteStelle ? 1 : 0) + String(zahl).length + 1);
   ctx.flaeche.append(
@@ -247,6 +251,11 @@ function ablesen(ctx, zahl) {
   const ersteStelle = 7 - String(zahl).length;
   const loesung = `In der Tabelle steht ${zahlText(zahl)}.`;
   ctx.loesung(loesung);
+  // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
+  ctx.tipp(gebuendelt
+    ? ["Ein Fach zeigt mehr als 9. Zehn davon sind eins im Fach links daneben.", "Rechne das Fach zuerst um. Dann liest du Fach für Fach von links nach rechts."]
+    : ["Lies Fach für Fach von links nach rechts und tipp jede Ziffer.",
+      ...(String(zahl).includes("0") ? ["Leere Fächer ganz links zählen nicht. Eine Null in der Mitte tippst du mit."] : ["Deine Zahl hat so viele Ziffern, wie Fächer gefüllt sind."])]);
   ctx.schritte(LS.tippSchritte(zahl));
   ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl steht in der Tabelle?" }));
   const { tab, faecher } = tabelleZeichnen(spalten);
@@ -277,6 +286,7 @@ function ablesen(ctx, zahl) {
 
 LS.spiel({
   id: "tabellen-post",
+  hilfe: "Einsortieren: Tipp auf ein Fach und dann auf eine Ziffer — danach geht es von selbst ein Fach weiter; ◀ springt zurück, ⌫ leert das Fach, „OK ✓“ prüft. Ablesen: Lies die Tabelle und tipp die Zahl ein.",
   einleitung: "Hallo, hier ist Eule Zahlina mit der Zahlen-Post! Jede Ziffer muss ins richtige Fach der Stellenwerttabelle. Manchmal musst du auch eine Zahl aus der Tabelle ablesen.",
   anzahl: 8,
   stufen: {

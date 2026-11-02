@@ -477,6 +477,36 @@ for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE4) {
   tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
 }
 
+// LERN_Session9, Runde A: 6. Klasse, Übertritt
+const SPUR = lade("spiele/sachtext-spurensuche/woerter.js", ["SPUREN_TEXTE"]).SPUREN_TEXTE;
+const KORR = lade("spiele/korrektur-stift/woerter.js", ["KORREKTUR_TEXTE"]).KORREKTUR_TEXTE;
+const HOER = lade("spiele/hoer-reporter/woerter.js", ["HOER_BERICHTE"]).HOER_BERICHTE;
+const PROBE = lade("spiele/wortarten-probe/woerter.js", ["PROBE_SAETZE"]).PROBE_SAETZE;
+/** Fragen als Zeilen „Art: Frage → richtig (falsch: …)“; die erste Antwort ist die richtige. */
+const fragenText = fragen => fragen.map(([art, frage, richtig, ...falsch]) =>
+  `${art}: ${frage} → ${richtig}${falsch.length ? ` (falsch: ${falsch.join("; ")})` : ""}`).join("<br>");
+/** Fehlerstellen {richtig|falsch}: der richtige Text und die eingebauten Fehler. */
+const korrekturText = t => t.replace(/\{([^|}]*)\|[^}]*\}/g, "$1");
+const korrekturFehler = t => [...t.matchAll(/\{([^|}]*)\|([^}]*)\}/g)].map(m => `${m[2]} → ${m[1]}`).join("; ");
+const RUNDE5 = [
+  ["66. Sachtext-Spurensuche (Lehrplan SG D.2.B.1)", "sachtext-spurensuche/texte", "Sachtexte mit Fragen",
+    "Selbst geschrieben. Sachangaben bitte nachprüfen. Bei „stimmt“: ja, nein oder „steht nicht im Text“.",
+    ["Stufe", "Titel", "Text", "Fragen"], SPUR.map(t => [t.stufe, t.titel, zelle(t.text), fragenText(t.fragen || [])])],
+  ["67. Korrektur-Stift (Lehrplan SG D.4.F.1, D.5.E.1)", "korrektur-stift/texte", "Texte und mögliche Fehlerstellen",
+    "Richtiger Text; das Spiel baut je Aufgabe einige der Fehler ein.", ["Text", "Länge", "richtiger Text", "Fehler → richtig"],
+    KORR.map(t => [t.id, t.laenge, zelle(korrekturText(t.text)), korrekturFehler(t.text)])],
+  ["68. Hör-Reporter (Lehrplan SG D.1.B.1)", "hoer-reporter/berichte", "Berichte zum Vorlesen mit Fragen",
+    "Selbst geschrieben; der Text wird vorgelesen, nicht gezeigt. Sachangaben bitte nachprüfen.",
+    ["Gruppe", "Titel", "Text", "Fragen"], HOER.map(t => [t.gruppe, t.titel, zelle(t.text), fragenText(t.fragen || [])])],
+  ["69. Wortarten-Probe (Lehrplan SG D.5.D.1)", "wortarten-probe/woerter", "Sätze mit markiertem Wort",
+    "N Nomen, V Verb, A Adjektiv, P Pronomen, sonst Partikel; letzte Spalte: was die Probe zeigt.",
+    ["Gruppe", "Satz", "Wortart", "Probe"], PROBE.map(objZeile)],
+];
+for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE5) {
+  if (teilTitel) { z(`## ${teilTitel}`); z(""); }
+  tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
+}
+
 process.stdout.write(zeilen.join("\n"));
 
 // ---------- Inhalte je Liste: docs/eulenpfad/pruefung/listen.json ----------
@@ -715,6 +745,8 @@ for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE2) inListe(
 for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE3) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
 
 for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE4) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
+
+for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE5) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
 
 // Jede Quell-Liste braucht einen Eintrag — sonst bricht der Lauf ab, statt still eine Lücke zu schreiben.
 const fehlend = Object.keys(QUELL_LISTEN).filter(k => !listen[k] || listen[k].tabellen.every(t => !t.zeilen.length));

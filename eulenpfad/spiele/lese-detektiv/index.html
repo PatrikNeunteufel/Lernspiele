@@ -71,9 +71,19 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Lesestrategie je Textstufe, nie die Antwort. */
+function tippsFuer(t) {
+  if (t.stufe === 1) return ["Lies den Satz langsam, Wort für Wort.", "Welches Wort im Satz zeigt, was auf dem Bild sein muss?"];
+  if (t.stufe <= 3) return ["Lies zuerst die Frage. Was willst du wissen?", "Such im Text den Satz, der zur Frage passt. Lies ihn noch einmal."];
+  return ["Lies zuerst die Frage. Was willst du wissen?",
+    "Die Antwort steht vielleicht nicht wörtlich da. Welche Wörter im Text geben dir Hinweise?",
+    "Prüf jede Antwort: Passt sie zu allem, was im Text steht?"];
+}
+
 LS.spiel({
   id: "lese-detektiv",
   einleitung: "Lies genau wie ein Detektiv! Im Text steckt die Antwort — manchmal musst du ein bisschen nachdenken.",
+  hilfe: "Lies den Text und dann die Frage darunter. Tippe die Antwort an, die zum Text passt.",
   anzahl: 6,
   stufen: Object.fromEntries(Object.entries({
     s1: "Ein Satz: Welches Bild passt?",
@@ -91,6 +101,7 @@ LS.spiel({
     if (t.titel) box.append(el("h2", { text: t.titel }));
     box.append(t.text);
     ctx.flaeche.append(box, el("div", { class: "frage", text: t.frage }));
+    ctx.tipp(tippsFuer(t));
     const knoepfe = LS.auswahl(ctx, {
       optionen, richtig: t.richtig, breite: t.stufe === 1 ? 110 : t.richtig.length > 20 ? 260 : 150,
       hinweis: t.stufe === 1 ? "Lies den Satz nochmal Wort für Wort. Was siehst du im Bild?" : t.stufe >= 4 ? "Lies nochmal genau. Die Antwort steht vielleicht nicht wörtlich da — welche Hinweise gibt der Text?" : "Lies nochmal genau. Such die Stelle im Text, die zur Frage passt.",

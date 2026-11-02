@@ -212,14 +212,32 @@ function korbInhalt(a, k) {
 
 const hoerKnopf = wort => el("button", { type: "button", class: "ss-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => LS.sprich(wort, "en") });
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): hören, nachsprechen, mit Beispielwörtern
+ * vergleichen, auf das stumme e schauen — nie Wort oder Laut als Antwort.
+ */
+const TIPPS = {
+  bild: ["Hör das Wort nochmal (🔊).", "Sprich es leise nach. Mit welchem Laut fängt es an?"],
+  hoeren: ["Hör das Wort nochmal (🔊) und sprich es leise nach.", "Sprich auch die Beispielwörter an den Körben: Welches klingt gleich wie dein Wort?"],
+  stummesE: ["Schau aufs Ende des Wortes.", "Ein e am Ende, das man nicht spricht, macht den Vokal davor lang. Ohne dieses e bleibt er kurz."],
+  gleicherLaut: ["Hör das Wort nochmal (🔊).", "Sprich die Beispielwörter an den Körben leise: Welches klingt gleich — auch wenn es anders geschrieben ist?"],
+  anders: ["Sprich jedes Wort leise vor dich hin.", "Achte nur auf den Laut beim gleichen Buchstaben. Drei klingen gleich, eines anders."],
+};
+
 const SPIEL = {
   id: ID,
   einleitung: "Sound-Sorter! Gleicher Buchstabe, anderer Laut: i in sit klingt anders als i in bike. Hör genau hin und sortiere!",
+  hilfe: stufe => ({
+    s1: "Hör das englische Wort (🔊 nochmal) und tippe das passende Bild an.",
+    s4: "Lies das Wort — hier gibt es erst nach der Antwort Ton. Lege die Karte in den Korb: kurz oder lang?",
+    s6: "Lies die vier Wörter — erst nach der Antwort gibt es Ton. Tippe das Wort an, das anders klingt.",
+  })[stufe] || "Hör das Wort (🔊 nochmal) und lege die Karte in den Korb mit dem gleichen Laut.",
   anzahl: 8,
   stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.tipp(TIPPS[a.art]);
     if (ctx.nr === 0) ctx.sag(a.art === "stummesE" || a.art === "anders"
       ? "Hier hörst du erst nach der Antwort etwas. Lies genau!"
       : "Hör zu und sortiere. Mit 🔊 hörst du das Wort nochmal.");

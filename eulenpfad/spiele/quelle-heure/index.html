@@ -264,8 +264,29 @@ const TIPP = {
   s6: "Nur hören! Mit 🔊 hörst du die Zeit nochmal.",
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Zeiger und Ausdrücke als Regel — ohne Beispielsatz,
+ * damit kein Tipp den gehörten oder gesuchten Satz vorsagt.
+ */
+function minutenRegel(stufe) {
+  if (stufe === "s1" || stufe === "s2") return "Bei einer vollen Stunde zeigt der lange Zeiger auf die 12.";
+  if (stufe === "s3") return "et quart = Viertel nach, et demie = halb, moins le quart = Viertel vor.";
+  return "Bis zur halben Stunde zählt man die Minuten dazu. Mit „moins“ zieht man sie von der nächsten Stunde ab — der kurze Zeiger steht dann noch vor dieser Stunde.";
+}
+function tippsFuer(a, stufe) {
+  const hoeren = a.modus === "hoeren" ? ["Hör mit 🔊 noch einmal: zuerst auf die Stunde, dann auf das, was danach kommt."] : [];
+  if (a.art === "tippen24") return [...hoeren, "Nach 12 Uhr zählt man weiter: 13, 14, 15 … heures.", "Zuerst kommt die Stunde (… heures), dann die Minuten."];
+  const mittag = a.art.startsWith("mittag") ? ["midi ist 12 Uhr am Tag, minuit 12 Uhr in der Nacht."] : [];
+  const zeiger = a.art.endsWith("Satz") ? "Lies zuerst die Uhr: Der kurze Zeiger zeigt die Stunde, der lange die Minuten."
+    : "Der kurze Zeiger zeigt die Stunde, der lange die Minuten.";
+  return [...hoeren, ...mittag, zeiger, minutenRegel(stufe)];
+}
+
 LS.spielMitStimme({
   id: "quelle-heure",
+  hilfe: stufe => "Hör zu oder lies, wie spät es ist. Dann tippst du die passende Uhr oder den passenden Satz an, tippst die Uhrzeit ein oder stellst die Uhr."
+    + (stufe === "s1" || stufe === "s2" ? " Zum Stellen tippst du die Zahl an, auf die der kurze Zeiger zeigen soll, dann „OK ✓“."
+      : " Zum Stellen wählst du oben den kurzen oder den langen Zeiger und tippst dann die Zahl an; zum Schluss „OK ✓“."),
   einleitung: "Quelle heure est-il? Wie spät ist es? Hör zu, lies und stell die Uhr — auf Französisch!",
   anzahl: 8,
   stufen: {
@@ -282,6 +303,7 @@ LS.spielMitStimme({
     if (ctx.nr === 0) ctx.sag(TIPP[ctx.stufe]);
     ctx.serie("art", a.art);
     ctx.kennung(`${a.art}:${a.modus}:${a.h}:${a.m}`);
+    ctx.tipp(tippsFuer(a, ctx.stufe));
     const f = ctx.flaeche;
     const mittag = a.art.startsWith("mittag");
     const satz = a.art === "tippen24" ? offiziell(a.h, a.m) : alltag(a.h, a.m);

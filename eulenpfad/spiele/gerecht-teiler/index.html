@@ -175,8 +175,24 @@ const HINWEIS_ZAEHLEN = {
   4: "Zähle jeden Teller nochmal: Haben alle vier gleich viele?",
 };
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Zählen und Vorgehen beim Umlegen — keine Zahl. */
+function tippsFuer(p) {
+  if (p.art === "zahl") return ["Was du hinüberlegst, fehlt auf dem einen Teller und kommt auf dem anderen dazu.",
+    "Probier es in Gedanken: Leg eines hinüber und zähl beide Teller. Sind es jetzt gleich viele?"];
+  if (p.teller === 4) return ["Zähl zuerst alle zusammen, auch die in der Schale.",
+    "Leg nur von Tellern mit zu vielen auf Teller mit zu wenigen — so sparst du Züge. Was übrig bleibt, kommt in die Schale."];
+  if (p.schale) return ["Zähl zuerst alle zusammen.",
+    "Leg eines nach dem anderen hinüber, bis beide gleich viele haben. Bleibt eines übrig, kommt es in die Schale."];
+  if (p.teller === 3) return ["Zähl jeden Teller. Welcher hat am meisten, welcher am wenigsten?",
+    "Leg immer eines vom vollsten Teller auf den leersten. Zähl nach jedem Zug."];
+  return ["Zähl beide Teller.", "Nimm eines vom vollen Teller und leg es auf den anderen. Zähl dann nochmal."];
+}
+
 LS.spiel({
   id: "gerecht-teiler",
+  hilfe: stufe => (stufe === "s4" ? "Zähl die Teller und tipp auf die Zahl: So viele musst du hinüberlegen."
+    : stufe === "s1" || stufe === "s2" ? "Tipp auf ein Ding: Es hüpft auf den anderen Teller. Ist es gerecht, tipp auf ✓. Mit ↺ fängst du von vorn an."
+      : "Tipp zuerst auf ein Ding, dann auf den Teller oder die Schale, wo es hin soll. Ist es gerecht, tipp auf ✓. Mit ↺ fängst du von vorn an."),
   einleitung: "Teilen ist gerecht, wenn jeder gleich viel hat. Hilf mir, die Guetzli und Äpfel zu verteilen!",
   anzahl: 6,
   stufen: {
@@ -196,6 +212,7 @@ LS.spiel({
       : p.teller === 2 && !p.schale ? `Tippe auf ${d.ein}: Es hüpft auf den anderen Teller.`
       : `Tippe zuerst auf ${d.ein}, dann auf den Teller, wo es hin soll.`);
     ctx.kennung(JSON.stringify([a.teller, a.schale, a.ding]));
+    ctx.tipp(tippsFuer(p)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (p.teller === 2 && !p.schale) ctx.serie("seite", a.teller[0] > a.teller[1] ? "links" : "rechts");
     if (ctx.stufe === "s5") ctx.serie("rest", a.rest ? "ja" : "nein");
     if (p.art === "zahl") zahlAufgabe(ctx, a, d);

@@ -226,8 +226,27 @@ function hinweisFuer(a) {
   }
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Brücke über Klang, Englisch oder Wortbild —
+ * das englische Wort nur, wenn es nicht das deutsche ist (wie im Hinweis nach einem Fehler).
+ */
+function tippsFuer(a) {
+  const englisch = hinweisFuer({ ...a, art: "bild" });
+  const mitEnglisch = typeof englisch === "string" && englisch.startsWith("Tipp:") ? englisch.replace(/^Tipp: /, "") : null;
+  switch (a.art) {
+    case "bild": return ["Lies das Wort halblaut. An welches deutsche Wort erinnert es?", mitEnglisch].filter(Boolean);
+    case "hoerBild": return ["Hör mit 🔊 noch einmal und sprich leise nach.", "Klingt es wie ein deutsches oder englisches Wort?"];
+    case "deutsch": return ["Lies das Wort laut. Welches deutsche Wort klingt ähnlich?", mitEnglisch].filter(Boolean);
+    case "franz": return ["Sprich die französischen Wörter halblaut.", "Welches klingt wie das deutsche Wort? Schau auch auf den Anfang."];
+    case "satz": return ["Du musst nicht jedes Wort verstehen.", "Such im Satz ein Wort, das wie ein deutsches oder englisches Wort aussieht."];
+    case "freund": return ["Vorsicht: Das Wort sieht bekannt aus, bedeutet aber etwas anderes.", "Denk an die Lage, in der man das Wort braucht. Was passt dann?"];
+    default: return ["Sprich das französische Wort halblaut.", "Denk an falsche Freunde: Manche Wörter sehen gleich aus, bedeuten aber etwas anderes."];
+  }
+}
+
 LS.spiel({
   id: ID,
+  hilfe: "Lies oder hör das französische Wort und tippe die passende Antwort an. Mit „🔊 anhören“ hörst du es. Bei „Brücke oder Falle“ entscheidest du, ob beide Wörter dasselbe bedeuten.",
   einleitung: "Viele französische Wörter verstehst du schon: la banane, le train, la musique! Bau eine Brücke vom Deutschen oder Englischen. Aber Vorsicht vor Fallen.",
   anzahl: 8,
   stufen: STUFEN,
@@ -237,6 +256,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     if (a.art === "entscheid") ctx.serie("antwort", a.richtig);
+    ctx.tipp(tippsFuer(a));
     const z = a.ziel;
     const franz = a.art === "satz" ? a.satz : z.fr;
     const sag = (fertig = null) => LS.sprich(sprechText(franz), "fr", "", fertig);

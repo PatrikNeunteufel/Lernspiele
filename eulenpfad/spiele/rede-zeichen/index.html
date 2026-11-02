@@ -336,6 +336,18 @@ function zeichenSetzen(ctx, a, p) {
   zeige();
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): woran man Begleitsatz und Rede erkennt, dann die
+ * Regel — nie welche Wörter gesprochen werden und nie die Zeichen an einer bestimmten Lücke.
+ */
+function tippsFuer(a, p) {
+  if (p.modus === "erkennen") return ["Der Begleitsatz sagt, wer spricht: sagt Lea, fragt Tim, ruft Mama.",
+    `Schau ${a.art === "vorne" ? "den Doppelpunkt" : "das Komma"} an: Was steht davor, was danach? Was sagt die Person selbst?`];
+  const t = ["Such zuerst den Begleitsatz: Er sagt, wer spricht. Steht er vorne, hinten oder in der Mitte?", REGEL[a.art]];
+  if (p.typen.includes("frage")) t.push("Ist die Rede eine Frage oder ein Ausruf, bleiben ? und ! stehen — auch wenn der Begleitsatz hinten kommt.");
+  return t;
+}
+
 // ---------- Spiel ----------
 
 const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => angeboten(s)));
@@ -343,6 +355,10 @@ const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter((
 LS.spiel({
   id: ID,
   einleitung: "Wenn jemand spricht, braucht der Satz besondere Zeichen: Lea sagt: „Ich komme mit.“ Setz sie richtig — das Schema hilft dir!",
+  hilfe: stufe => (STUFE[stufe]?.modus === "erkennen"
+    ? "Tippe alle Wörter an, die die Person selbst sagt, dann auf „Prüfen ✓“. Nochmals antippen nimmt ein Wort wieder weg."
+    : "Tippe zuerst auf eine Lücke zwischen den Wörtern, dann unten auf die Zeichen. Eine Lücke kann zwei Zeichen brauchen; ⌫ löscht das letzte Zeichen der Lücke. Am Schluss „Prüfen ✓“."
+      + (STUFE[stufe]?.schema ? " Das Schema oben zeigt dir, wie es geht." : "")),
   anzahl: 8,
   stufen: nurAngebotene({
     s1: "Was wird gesprochen? Die Wörter der Rede antippen.",
@@ -361,6 +377,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     const arten = new Set(kandidaten(ctx.stufe).map(s => s.art));
     if (arten.size > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a, p));
     if (p.modus === "erkennen") erkennen(ctx, a);
     else zeichenSetzen(ctx, a, p);
   },

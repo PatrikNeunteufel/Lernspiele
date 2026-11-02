@@ -183,14 +183,36 @@ const KLASSE_TEXT = {
   Reptil: ["ein Reptil", "Reptilien"], Amphibie: ["eine Amphibie", "Amphibien"], Insekt: ["ein Insekt", "Insekten"],
 };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): worauf man beim Tier schaut (Haut, Beine, Zähne,
+ * Junge) und die Merkmale aller Körbe — nie der Korb oder das Tier, das passt.
+ */
+function tippsFuer(a) {
+  if (a.art === "merkmal") return ["Lies das Merkmal und prüf jedes Tier einzeln: Passt es?",
+    "Denk an den Körper der Tiere: die Haut, die Beine, und wie die Jungen zur Welt kommen."];
+  if (a.merkmal === "haltung") return ["Wo lebt das Tier: frei in der Natur, auf dem Bauernhof oder bei uns zu Hause?",
+    "Wildtiere leben frei, Nutztiere geben uns etwas, Heimtiere leben bei uns zu Hause."];
+  if (a.merkmal === "gruppe") return ["Schau auf die Zähne und die Füsse des Tiers.",
+    "Nagetiere haben grosse Nagezähne, Raubtiere Fangzähne. Huftiere stehen auf Hufen.",
+    ...(a.falle ? ["Achtung: Nicht jedes kleine Säugetier ist ein Nagetier. Schau genau auf die Zähne."] : [])];
+  const t = [a.koerbe.some(k => ["Insekt", "Spinnentier", "Weichtier", "Wurm"].includes(k))
+    ? "Schau die Haut an: Fell, Federn, Schuppen oder feuchte Haut? Und zähl die Beine."
+    : "Schau die Haut an: Fell, Federn, Schuppen oder feuchte Haut?",
+  "Wie kommen die Jungen zur Welt: Trinken sie Milch bei der Mutter, oder schlüpfen sie aus Eiern?"];
+  if (a.falle) t.push("Pass auf: Das Tier sieht aus wie ein Tier aus einer anderen Gruppe. Es zählt der Körper, nicht wo es lebt oder wie es sich bewegt.");
+  return t;
+}
+
 LS.spiel({
   id: "tier-sortierer",
+  hilfe: "Schau das Tier an und tipp auf den Korb, in den es gehört. Unter jedem Korb steht, was die Tiere darin gemeinsam haben. Fragt die Eule nach einem Merkmal, tippst du auf das passende Tier.",
   einleitung: "Jedes Tier gehört in eine Gruppe. Schau genau: Hat es Fell, Federn oder Schuppen? Wie viele Beine?",
   anzahl: 10,
   stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.tipp(tippsFuer(a));
     if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
     if (a.merkmal === "haltung") ctx.serie("antwort", a.richtig); // drei feste Körbe
     if (a.art === "merkmal") {

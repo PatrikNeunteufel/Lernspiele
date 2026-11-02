@@ -139,9 +139,20 @@ function maengel(a, stufe) {
   return m;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): was in der Geschichte passiert — nicht die Rechnung, nicht die Zahl. */
+function tippsFuer(a) {
+  if (a.art === "rechnen") return ["Was ist gefragt? Lies die Frage am Schluss genau.", "Nicht jede Zahl in der Geschichte brauchst du zum Rechnen."];
+  const t = [a.g.bild ? "Schau die Bilder an: Kommen welche dazu, oder gehen welche weg?"
+    : "Was passiert in der Geschichte: Kommt etwas dazu, geht etwas weg, kommt etwas mehrmals vor, oder wird verteilt?",
+    "Plus: es kommt dazu. Minus: es geht weg oder fehlt. Mal: mehrmals gleich viel. Geteilt: gerecht verteilen."];
+  if (a.optionen.some(o => o.includes("_"))) t.push("Steht ein ? in der Rechnung: Erzählt die Rechnung dieselbe Geschichte?");
+  return t;
+}
+
 LS.spiel({
   id: "rechengeschichten",
   einleitung: "In jeder Geschichte steckt eine Rechnung. Findest du sie?",
+  hilfe: "Lies oder hör die Geschichte. Dann tippst du die Rechnung an, die dazu passt — oder du rechnest aus und tippst das Ergebnis ein.",
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries({
     s1: "Bildgeschichten bis 10: dazu oder weg?",
@@ -155,6 +166,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const { g, werte } = a;
+    ctx.tipp(tippsFuer(a));
     if (MEHRERE_RECHENARTEN.has(ctx.stufe)) ctx.serie("rechenart", rechenart(g));
     if (g.bild) {
       // Stufe 1: Bilder zeigen, was passiert

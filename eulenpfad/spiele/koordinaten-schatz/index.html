@@ -158,8 +158,26 @@ function figurErzeugen(maxX, maxY) {
   ]);
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man abzählt — nie Koordinaten der Lösung. */
+function tippsFuer(art, form) {
+  switch (art) {
+    case "tafelSetzen": return ["E sind die Spalten oben, Z die Zeilen links.", "Such zuerst die Zeile der Zehner, dann geh nach rechts bis zur Spalte der Einer."];
+    case "tafelLesen": return ["Lies zuerst oben die Spalte ab (E).", "Dann lies links die Zeile ab (Z)."];
+    case "punktSetzen": return ["Starte unten links bei (0|0).", "Zuerst x Schritte nach rechts, dann y Schritte nach oben."];
+    case "punktLesen": return ["Zuerst x: Wie weit nach rechts liegt der Schatz?", "Dann y: Wie weit nach oben? In der Klammer steht x zuerst."];
+    case "verschieben": return ["Such zuerst die gefragte Ecke in der Figur.", "Zähl von dort die Schritte ab: zuerst nach rechts, dann nach oben oder unten."];
+    case "vektor": return ["Zähl die Schritte von A nach A': nach rechts oder links, nach oben oder unten.", "Genau so viele Schritte in dieselben Richtungen geht auch die gesuchte Ecke."];
+    case "ergaenzen": return [form === "Quadrat" ? "Beim Quadrat sind alle Seiten gleich lang, auch wenn es schräg liegt." : "Beim Rechteck sind gegenüberliegende Seiten gleich lang und laufen parallel.",
+      "Geh von C aus so viele Schritte, wie es von B nach A geht."];
+    default: return ["Tipp die Ecken in der Reihenfolge A, B, C … an.", "Bei jeder Ecke: zuerst x nach rechts, dann y nach oben."];
+  }
+}
+
 LS.spiel({
   id: "koordinaten-schatz",
+  hilfe: stufe => (stufe === "s1" || stufe === "s2"
+    ? "Auf der Hundertertafel stehen die Einer (E) oben und die Zehner (Z) links. Tipp auf das Feld oder wähl die passenden Koordinaten."
+    : "Auf der Schatzkarte tippst du auf einen Gitterpunkt oder wählst die passenden Koordinaten (x|y): x zählt nach rechts, y nach oben."),
   einleitung: "Ahoi! Schätze sind versteckt. Mit Koordinaten findest du sie — erst auf der Hundertertafel, dann auf der Schatzkarte.",
   anzahl: 6,
   stufen: {
@@ -174,6 +192,7 @@ LS.spiel({
   aufgabe(ctx) {
     const art = waehle(STUFE[ctx.stufe]);
     if (STUFE[ctx.stufe].length > 1) ctx.serie("art", art);
+    if (art !== "ergaenzen") ctx.tipp(tippsFuer(art)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     let fertig = false;
 
     const auswahl = (optionen, richtig, hinweis, loesungText) => {
@@ -284,6 +303,7 @@ LS.spiel({
     } else if (art === "ergaenzen") {
       // Drei Ecken sind gezeichnet, die vierte (D) fehlt.
       const { art: form, ecken } = viereckErzeugen();
+      ctx.tipp(tippsFuer(art, form)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
       const [zx, zy] = ecken[3]; // gesuchte Ecke D
       const loesung = `D liegt bei ${pt(zx, zy)}.`;
       ctx.loesung(loesung);

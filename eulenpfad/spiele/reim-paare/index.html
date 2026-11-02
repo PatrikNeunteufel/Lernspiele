@@ -192,9 +192,20 @@ function paareSpielen(ctx, a) {
   ctx.flaeche.append(box);
 }
 
+// Tipps vor dem Antworten (ctx.tipp, LERN_Session9): kurz und anschaulich (1. Klasse), nie ein Wort nennen.
+const TIPPS = {
+  welcheReimt: ["Sag das Wort laut. Hör aufs Ende.", "Sag jedes Bild laut. Welches klingt am Ende gleich?"],
+  paare: ["Sag jedes Bild laut.", "Hör aufs Ende: Welche zwei klingen gleich?"],
+  reimtNicht: ["Sag alle vier Wörter laut.", "Drei klingen am Ende gleich. Eines klingt anders."],
+  vers: ["Lies den Vers laut.", "Das fehlende Wort klingt am Ende wie ein Wort im Vers."],
+};
+
 LS.spiel({
   id: "reim-paare",
   einleitung: "Maus und Haus — das reimt sich! Hör genau hin: Welche Wörter klingen am Ende gleich?",
+  hilfe: stufe => (STUFE[stufe] && STUFE[stufe].every(([, art]) => art === "paare")
+    ? "Tippe zwei Bilder an, die sich reimen. Passen sie, bleiben sie liegen. Mach weiter, bis alle Paare gefunden sind."
+    : "Tippe das Bild an, das passt. Bei den Reim-Paaren tippst du immer zwei Bilder an, die sich reimen."),
   anzahl: 8,
   stufen: nurMoegliche({
     s1: "Welches Bild reimt sich? Drei Bilder zur Auswahl.",
@@ -208,6 +219,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     if (artenIn(ctx.stufe) > 1) ctx.serie("art", a.art);
+    ctx.tipp(TIPPS[a.art]);
     if (a.art === "paare") {
       paareSpielen(ctx, a);
       if (ctx.nr === 0) ctx.sag("Sprich die Wörter laut. Welche klingen am Ende gleich?");

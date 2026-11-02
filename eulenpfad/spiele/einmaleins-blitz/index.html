@@ -160,11 +160,25 @@ function hinweisFuer(a) {
   return `Tipp: ${a.k} × ${a.r} ist ${a.r} mehr als ${a.k - 1} × ${a.r} = ${(a.k - 1) * a.r}.`;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst ein Anstoss, dann die Strategie — nie das Ergebnis.
+ * 1 × n: der Hinweis nach einem Fehler nennt das Ergebnis beinahe; als Tipp nur die Regel.
+ */
+function tippsFuer(a) {
+  if (a.fa !== undefined) return ["Rechne zuerst ohne die Nullen.", hinweisFuer(a)];
+  if (a.faktor > 1) return [a.art === "geteilt" ? "Teilen ist die Umkehrung vom Malnehmen." : `Mal ${zahlText(a.faktor)} heisst: ${NULLEN(a.faktor)} anhängen.`, hinweisFuer(a)];
+  if (a.art === "geteilt") return ["Teilen ist die Umkehrung vom Malnehmen.", hinweisFuer(a)];
+  if (a.art === "luecke") return ["Lies die Aufgabe als Frage: Wie oft passt die eine Zahl in die andere?", hinweisFuer(a)];
+  if (a.k === 1) return ["Einmal eine Zahl bleibt die Zahl selbst."];
+  return [`Denk an die ${a.r}er-Reihe.`, hinweisFuer(a)];
+}
+
 let serie = 0;
 
 LS.spiel({
   id: "einmaleins-blitz",
   einleitung: "Blitzschnell rechnen! Löse die Malaufgaben — je mehr du hintereinander richtig hast, desto länger wird deine Blitz-Serie.",
+  hilfe: "Rechne die Aufgabe im Kopf und tippe das Ergebnis mit den Zifferntasten ein. Steht ein „?“ in der Mitte, tippst du die fehlende Zahl. Je mehr Aufgaben du hintereinander richtig hast, desto länger wird deine Blitz-Serie ⚡.",
   anzahl: 10,
   stufen: {
     s1: "Die 2er-, 5er- und 10er-Reihe.",
@@ -181,6 +195,7 @@ LS.spiel({
     if (STUFE[ctx.stufe].arten.length > 1) ctx.serie("art", a.art);
     const loesung = a.teile.map(t => t === null ? zahlText(a.loesung) : typeof t === "number" ? zahlText(t) : t).join(" ");
     ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(a));
     ctx.schritte(LS.tippSchritte(a.loesung));
     const serieZeile = el("div", { class: "serie", text: serie >= 2 ? `⚡ ${serie} in Folge!` : "" });
     const rechnung = el("div", { class: "rechnung", "aria-live": "polite" });

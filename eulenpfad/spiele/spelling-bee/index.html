@@ -124,9 +124,26 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Vorgehen und Merkmale des Worts (stummes e am Ende,
+ * Doppelbuchstabe, überzählige Kacheln) — nie ein Buchstabe und nie das Wort selbst.
+ */
+function tippsFuer(a, st) {
+  const t = [st.wort ? "Schau auf das Wort und leg es von links nach rechts, Buchstabe für Buchstabe."
+    : "Hör das Wort mit 🔊 und sprich es leise mit. Welchen Laut hörst du zuerst?"];
+  const merkmale = [];
+  if (/(.)\1/.test(a.en)) merkmale.push("Zwei gleiche Buchstaben stehen im Wort direkt nebeneinander.");
+  if (a.en.length >= 4 && /[^aeiou]e$/.test(a.en)) merkmale.push("Am Ende steht ein Buchstabe, den man nicht hört.");
+  if (merkmale.length) t.push(merkmale.join(" "));
+  else if (!st.wort) t.push("Im Englischen schreibt man oft anders, als man hört. Denk an das Wortbild, wenn du es schon einmal gesehen hast.");
+  if (a.extra.length) t.push(a.extra.length === 1 ? "Ein Buchstabe bleibt am Ende übrig — nicht jede Kachel gehört ins Wort."
+    : `${a.extra.length} Buchstaben bleiben am Ende übrig${st.verwechselbar ? " — sie sehen ähnlich aus oder klingen ähnlich wie die richtigen" : ""}.`);
+  return t;
+}
 const SPIEL = {
   id: ID,
   einleitung: "Spelling Bee! Hör das englische Wort und leg es aus Buchstaben. Mit 🔊 hörst du es nochmal.",
+  hilfe: "Hör das englische Wort und tippe seine Buchstaben der Reihe nach an — sie füllen die Felder von links. Mit „🔊 nochmal“ hörst du das Wort so oft du willst.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -136,6 +153,7 @@ const SPIEL = {
     const ziel = a.en;
     ctx.kennung(ziel);
     ctx.loesung(a.loesung);
+    ctx.tipp(tippsFuer(a, st));
     ctx.flaeche.append(el("div", { class: "frage", text: st.wort ? "Hör zu, schau genau und leg das Wort:" : "Hör zu und leg das Wort:" }));
     ctx.flaeche.append(el("button", { type: "button", class: "spb-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => LS.sprich(ziel, "en") }));
     if (st.bild) ctx.flaeche.append(el("div", { class: "spb-bild", text: a.bild }));

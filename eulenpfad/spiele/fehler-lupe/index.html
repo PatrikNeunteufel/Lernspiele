@@ -172,6 +172,7 @@ function pruefeAufgabe(a, stufe) {
 
 LS.spiel({
   id: "fehler-lupe",
+  hilfe: "Tippe zuerst das Wort an, das falsch geschrieben ist. Dann tippst du an, wie man es richtig schreibt.",
   einleitung: "In jedem Satz hat sich genau ein Fehler versteckt. Nimm die Lupe: Tipp auf das falsche Wort und repariere es!",
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries({
@@ -189,6 +190,9 @@ LS.spiel({
     if (p.regeln.length > 1) ctx.serie("regel", a.regelId);
     const loesung =`Richtig ist «${a.richtig}»: ${ganz(a.woerter)}`;
     ctx.loesung?.(loesung); // für die Testhilfe 🔑
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst genau lesen, dann welche Regel — nie das Wort.
+    ctx.tipp([p.zusatz ? "Nur ein einziges Wort in beiden Sätzen ist falsch. Lies langsam, Wort für Wort." : "Lies den Satz langsam, Wort für Wort.",
+      p.hilfe === "regel" ? "Prüfe jedes Wort mit der Regel auf der Karte." : `Achte besonders auf: ${a.regel.name}.`]);
 
     ctx.flaeche.append(el("div", { class: "auftrag", text: "🔍 Welches Wort ist falsch geschrieben? Tipp es an!" }));
     if (p.hilfe === "regel") ctx.flaeche.append(el("div", { class: "regelkarte" }, el("b", { text: `Achte auf: ${a.regel.name}` }), a.regel.regel));

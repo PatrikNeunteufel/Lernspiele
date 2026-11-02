@@ -202,8 +202,33 @@ function knopfFuer(art, i, text) {
   return k;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Zählweise und Kalenderregeln — nie der gesuchte
+ * Tag, Monat oder die Jahreszeit.
+ */
+function tippsFuer(a) {
+  const richtung = a.zurueck ? "zurück" : "weiter";
+  const rund = "Nach dem letzten fängt es wieder von vorne an.";
+  switch (a.art) {
+    case "tagMorgen": return [`${a.zurueck ? "Gestern" : "Morgen"} heisst: ein Tag ${richtung}.`, "Sag die Wochentage leise auf und hör beim heutigen Tag genau hin."];
+    case "tagWeit": return ["Übermorgen heisst zwei Tage weiter, vorgestern zwei Tage zurück, in einer Woche sieben Tage weiter.",
+      "Zähl mit den Fingern Tag für Tag. Nach dem letzten Tag der Woche fängt sie wieder von vorne an."];
+    case "tagRechnen": return [`Zähl Tag für Tag mit den Fingern ${richtung}.`, "Sieben Tage später ist wieder derselbe Wochentag. Nimm zuerst eine ganze Woche weg, dann zähl den Rest."];
+    case "monatNach": return ["Sag die Monate leise auf, vom Januar an.", `Die Nummern auf den Knöpfen helfen: Welcher Monat hat eine Nummer ${a.zurueck ? "weniger" : "mehr"}? ${rund}`];
+    case "monatRechnen": return [`Die Nummern auf den Knöpfen helfen: Zähl so viele Monate ${richtung}.`, "Nach dem 12. Monat geht es wieder beim 1. weiter."];
+    case "jahreszeit": return ["Denk daran, wie das Wetter in diesem Monat meistens ist.", "Was machst du in diesem Monat draussen: schlitteln, baden, Blätter sammeln oder Blumen pflücken?"];
+    case "ordnenTage": case "ordnenMonate": return ["Sag die Reihe leise auf und fang beim genannten an.", rund];
+    case "tagWochen": return ["Wie viele ganze Wochen stecken darin?", a.hinweis];
+    case "monatWeit": return ["Wie viele ganze Jahre stecken darin?", a.hinweis];
+    case "datumTag": return ["Wie viele Tage liegen zwischen den beiden Daten?", a.hinweis];
+    case "monatsLaenge": return ["Lange Monate haben 31 Tage, kurze 30 — und der Februar ist besonders kurz.", a.hinweis];
+    default: return [a.hinweis, "Winter: Dezember bis Februar. Frühling: März bis Mai. Sommer: Juni bis August. Herbst: September bis November."];
+  }
+}
+
 LS.spiel({
   id: "jahreskreis",
+  hilfe: "Lies die Frage und tipp auf den richtigen Tag, Monat oder die Jahreszeit. Bei einer Reihe tippst du der Reihe nach an.",
   einleitung: "Gestern, heute, morgen — Wochentage, Monate und Jahreszeiten. Kennst du dich im Jahreskreis aus?",
   anzahl: 8,
   stufen: {
@@ -220,6 +245,7 @@ LS.spiel({
     ctx.serie("art", a.art); // jede Stufe hat mehrere Arten
     if (a.zurueck !== undefined) ctx.serie("richtung", a.zurueck); // vorwärts oder zurück im Kalender
     const namen = NAMEN[a.liste];
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     ctx.flaeche.append(el("div", { class: "frage", html: a.frage }));
     let fertig = false;
 

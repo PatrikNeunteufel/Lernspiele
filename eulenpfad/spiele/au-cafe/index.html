@@ -350,8 +350,31 @@ const TIPP = {
   s6: "Endgegner! Hör und lies genau: Wer sagt was? tu oder vous? Was kostet es?",
 };
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): worauf hören oder achten — nie die Antwort selbst. */
+const HOER_TIPP = "Tipp auf «🔊 nochmal» und hör genau hin.";
+const ZAHL_TIPP = "Pass auf ähnliche Zahlen auf: deux und douze, trois und treize, six und seize.";
+function tippsFuer(a) {
+  switch (a.art) {
+    case "formel": return ["Schau das Bild an: Was passiert gerade?", "Kommst du, gehst du, bekommst du etwas oder bittest du um etwas?"];
+    case "formelHoeren": return [HOER_TIPP, "Wann sagt man das: beim Kommen, beim Gehen, wenn man etwas bekommt, oder wenn man um etwas bittet?"];
+    case "befinden": return ["Schau das Gesicht an: Geht es gut, so lala oder schlecht?", "Such in jeder Antwort ein Wort, das du kennst: bien, super, comme ci, malade, mal …"];
+    case "antwort": return ["Lies genau, was gesagt wird. Ist es eine Frage? Wonach wird gefragt?",
+      "Fragewörter helfen: comment = wie, où = wo, quel âge = wie alt. Die Antwort muss dazu passen."];
+    case "antwortHoeren": return [HOER_TIPP + " Ist es eine Frage?",
+      "Fragewörter helfen: comment = wie, où = wo, quel âge = wie alt. Die Antwort muss dazu passen."];
+    case "ordnen": return ["Wer beginnt? Meist mit einer Begrüssung oder einer Frage.", "Lies die letzte Zeile, die schon liegt: Was antwortet man darauf?"];
+    case "bestellenWas": return ["Lies, was das Kind sagt.", "Was es möchte, steht nach «Je voudrais» oder vor «s’il vous plaît»."];
+    case "bestellenHoeren": return [HOER_TIPP, "Was das Kind möchte, hörst du nach «Je voudrais» oder vor «s’il vous plaît»."];
+    case "bestellenPreis": return ["Achte auf die Zahl vor «francs».", ZAHL_TIPP];
+    case "bestellenBeides": return [HOER_TIPP + " Einmal auf das Essen oder Trinken, einmal auf den Preis.", "Der Preis steht vor «francs». " + ZAHL_TIPP];
+    case "tuVous": return ["Mit wem sprichst du?", "Kinder und Freunde: tu. Fremde Erwachsene, im Café und mehrere Personen: vous."];
+  }
+  return [];
+}
+
 const SPIEL = {
   id: ID,
+  hilfe: "Lies oder hör, was gesagt wird, und tippe die passende Antwort an. Mit «🔊 nochmal» hörst du das Französische noch einmal. Beim Gespräch ordnen tippst du die Sätze der Reihe nach an, den ersten zuerst.",
   einleitung: "Bienvenue au café ! Begrüssen, nach dem Befinden fragen, bestellen — kurze Gespräche auf Französisch.",
   anzahl: 8,
   stufen: STUFEN,
@@ -364,6 +387,7 @@ const SPIEL = {
     if (a.art === "befinden") ctx.serie("antwort", a.gefuehl);
     if (a.art === "tuVous") ctx.serie("antwort", a.form);
     ctx.kennung(a.kennung);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const f = ctx.flaeche;
     const d = a.dialog && DIALOGE.find(x => x.id === a.dialog);
 

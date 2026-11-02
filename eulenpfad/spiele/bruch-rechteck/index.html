@@ -419,8 +419,37 @@ function lobFuer(loesungText, [rz, rn]) {
 
 // ---------- Spiel ----------
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): der Weg (gleichnamig machen, Zähler rechnen,
+ * kürzen), nie der gemeinsame Nenner samt Zählern oder das Ergebnis.
+ */
+function tippsFuer(a, p) {
+  switch (a.art) {
+    case "gleichnamig": return ["Die Stückchen sind gleich gross — der Nenner bleibt.",
+      a.ops[0] === "+" ? "Zähle die gefärbten Stückchen beider Farben zusammen." : "Zähle, wie viele gefärbte Stückchen übrig bleiben."];
+    case "erweitern": return a.linien
+      ? ["Die Tafel ist feiner geteilt, die Schoggi bleibt gleich viel.", "Zähle die gefärbten Stückchen, nicht die Spalten."]
+      : ["Die Schoggi bleibt gleich viel, nur die Stückchen werden kleiner.", `Wie oft passt ${a.bruch[1]} in ${a.nenner}? Mit dieser Zahl nimmst du auch den Zähler mal.`];
+    case "kuerzenBild": return ["Die Schoggi bleibt gleich viel, nur die Stückchen werden grösser.", "Zähle nur die dicken Spalten: Wie viele davon sind gefärbt?"];
+    case "nennerWahl": return ["Beide Brüche müssen in die Tafel passen: Spalten für den einen, Zeilen für den anderen.",
+      `Die Zahl muss durch ${a.b} und durch ${a.d} teilbar sein.`];
+    case "rechnen":
+      if (p.bild) return ["Beide Tafeln sind gleich geteilt: Alle Stückchen sind gleich gross.",
+        a.ops[0] === "+" ? "Zähle die gefärbten Stückchen in beiden Tafeln zusammen." : "Zähle die gefärbten Stückchen in beiden Tafeln und zieh ab."];
+      return ["Mache zuerst die Nenner gleich: Such eine Zahl, die durch beide Nenner teilbar ist.",
+        `Erweitere beide Brüche auf diesen Nenner. Dann rechnest du nur mit den Zählern.${p.gekuerzt ? " Am Schluss kürzen!" : ""}`];
+    case "drei": return ["Such einen Nenner, der für alle drei Brüche passt.", "Erweitere alle drei Brüche und rechne von links nach rechts nur mit den Zählern. Am Schluss kürzen!"];
+    case "kuerzen": return ["Durch welche Zahl kannst du Zähler und Nenner beide teilen?", "Teile so lange, bis Zähler und Nenner keinen gemeinsamen Teiler mehr haben (ausser 1)."];
+    case "ueberEins": return ["Mache zuerst die Nenner gleich und zähle zusammen.", "Ist der Zähler grösser als der Nenner, steckt eine ganze Tafel darin. Nimm sie heraus."];
+    case "luecke": return [`Mache ${bText(...a.terme[0])} und ${bText(...a.summe)} gleichnamig.`,
+      `Was fehlt ${a.ops[0] === "+" ? "bis zum Ergebnis" : "dazwischen"}? Dann erweitere oder kürze auf ${a.nenner}.`];
+  }
+  return [];
+}
+
 LS.spiel({
   id: "bruch-rechteck",
+  hilfe: "Tippe den Zähler mit den Zifferntasten ein. Fehlt auch der Nenner, tippst du zuerst den Zähler, dann OK, dann den Nenner. Die Schoggi-Tafeln zeigen dir die Brüche als Stückchen; bei Knöpfen tippst du die passende Antwort an.",
   einleitung: "Willkommen in der Schoggi-Fabrik! Teilst du eine Tafel in Spalten und Zeilen, werden die Stückchen gleich gross — dann kannst du Brüche zusammenzählen und abziehen.",
   anzahl: 8,
   stufen: {
@@ -437,6 +466,7 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const f = ctx.flaeche;
     if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a, p)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
 
     if (a.art === "gleichnamig") {
       const [[z1, n], [z2]] = a.terme, op = a.ops[0];

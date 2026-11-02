@@ -272,15 +272,43 @@ function strahl(von, bis, strich, zahl, marken) {
 
 const bildText = (typ, t) => ({ bild: teilBild(typ, t), text: t });
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): ein Anstoss, dann das Vorgehen wie in den Hinweisen
+ * nach einem Fehler (die passen auch vorab) — nie eine Jahrzahl, ein Alter oder ein Zeitalter als Antwort.
+ */
+const TIPP_ORDNEN = {
+  abschnitte: "Wie wächst ein Mensch? Wer ist am kleinsten, wer ist schon lange erwachsen?",
+  leben: "Denk an dein eigenes Leben: Was hast du schon erlebt, was kommt noch?",
+  gen: "Eltern sind älter als ihre Kinder, Grosseltern älter als Eltern.",
+  epochen: "Was ist am längsten her? Denk an die Werkzeuge und Häuser der Menschen.",
+  ereignisse: "Vergleiche die Jahrzahlen: Die kleinste Zahl ist am längsten her.",
+};
+function tippsFuer(a) {
+  if (a.art === "ordnen") return ["Such zuerst, was ganz am Anfang kommt.", TIPP_ORDNEN[a.typ]];
+  if (a.art === "genStrahl" || a.art === "pfeil") return [`Schau zuerst: Ein kleiner Strich sind ${a.strich} Jahre.`,
+    "Such die nächste Jahrzahl links davon und zähl die Striche bis zur Stelle weiter."];
+  if (a.art === "alter") return ["Das Alter sind die Jahre vom Geburtsjahr bis zu diesem Jahr.", "Rechne: dieses Jahr minus das Geburtsjahr."];
+  if (a.art === "unterschied") return ["Wer früher geboren ist, ist älter.", "Rechne: das spätere Geburtsjahr minus das frühere."];
+  if (a.art === "geburtstag") return ["Jedes Jahr wird das Kind ein Jahr älter.", "Zähl das Alter zum Geburtsjahr dazu."];
+  if (a.art === "buchstabe") return ["Such zuerst die zwei Jahrzahlen unter dem Strahl, zwischen denen das Jahr liegt.",
+    "Ein kleiner Strich sind 100 Jahre. Zähl von der Jahrzahl links davon weiter."];
+  if (a.art === "jahrhundert") return ["Ein Jahrhundert sind 100 Jahre.",
+    "Das 1. Jahrhundert sind die Jahre 1 bis 100, das 2. Jahrhundert die Jahre 101 bis 200. Wie geht es weiter?"];
+  return ["Was weisst du über diese Zeit? Wie lebten die Menschen damals?",
+    a.art === "epocheJahr" ? "Burgen und Ritter gab es bis etwa zum Jahr 1500. Was liegt davor, was danach?" : "Denk an die Werkzeuge, Häuser und Wege der Menschen damals."];
+}
+
 LS.spiel({
   id: ID,
   einleitung: "Was war zuerst, was kam danach? Bring Menschen und Ereignisse auf dem Zeitstrahl in die richtige Reihenfolge!",
+  hilfe: "Lies die Frage. Beim Ordnen tippst du die Karten der Reihe nach an, sie wandern dann in die Reihe. Sonst tippst du die Antwort an, die passt — die Jahrzahl, das Alter, den Buchstaben oder das Zeitalter.",
   anzahl: 8,
   stufen: STUFEN,
 
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.art === "ordnen" ? a.typ : a.art);
+    ctx.tipp(tippsFuer(a));
     const f = ctx.flaeche;
     if (a.art === "ordnen") {
       const titel = {

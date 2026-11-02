@@ -48,6 +48,8 @@ const THEMEN = [
   { id: "verkehr", fach: "NMG", name: "Sicher unterwegs", titel: "Schulweg, Verkehrsregeln und Signale", quelle: "Lehrplan SG NMG.1.2" },
   { id: "gedichte", fach: "Deutsch", name: "Gedichte", titel: "Reim, Vers, Strophe und Reimschema", quelle: "Lehrplan SG D.6.C.1" },
   { id: "geschichten", fach: "NMG", name: "Geschichten", titel: "Echt oder erfunden: Geschichten und Textsorten", quelle: "Lehrplan SG NMG.9.4" },
+  { id: "begruenden", fach: "Mathe", name: "Prüfen und begründen", titel: "Aussagen prüfen: immer, manchmal oder nie wahr?", quelle: "Lehrplan SG MA.1.B.2, MA.2.B.2" },
+  { id: "zuhoeren", fach: "Deutsch", name: "Zuhören", titel: "Hörtexten wichtige Informationen entnehmen", quelle: "Lehrplan SG D.1.B.1" },
 ];
 
 /** Fächer in der Reihenfolge der Themen (Startseite, Zufallsmix). */
@@ -992,6 +994,60 @@ const SPIELE = [
     pfad: "spiele/tonleiter-treppe/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s3"], zeiten: { s1: 14, s2: 20, s3: 25, s4: 30, s5: 33, s6: 43 },
     beschreibung: "Halb- und Ganztonschritte auf der Treppe — Dur oder Moll?",
     lernziele: [{ lz: "MU.6.A.1", stufen: ALLE_STUFEN }] },
+  // Runde A, 6. Klasse mit Schwerpunkt Übertritt in die Oberstufe (Entscheide G1 a, H1 a, LERN_Session9;
+  // docs/eulenpfad/spielideen/lehrplan_3_und_6.md). Zeiten: Antwortzeit nach den Berichten der Bau-Agenten.
+  { id: "sachaufgaben-kompass", klasse: 6, neu: "LERN_Session9", bild: "🧭", name: "Sachaufgaben-Kompass", thema: "sachrechnen", farbe: "var(--deko-4)",
+    pfad: "spiele/sachaufgaben-kompass/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], endlos: ["s1", "s2", "s3"], zeiten: { s1: 35, s2: 50, s3: 75, s4: 75, s5: 75, s6: 110 },
+    beschreibung: "Sachaufgaben: wichtige Angaben finden, den Rechenweg wählen, das Ergebnis mit Einheit",
+    lernziele: [{ lz: "MA.3.C.2", stufen: ALLE_STUFEN }] },
+  { id: "fahrplan-rechner", klasse: 6, neu: "LERN_Session9", bild: "🚆", name: "Fahrplan-Rechner", thema: "groessen", farbe: "var(--deko-2)",
+    pfad: "spiele/fahrplan-rechner/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 25, s2: 30, s3: 35, s4: 40, s5: 40, s6: 55 },
+    beschreibung: "Mit Zeiten rechnen: Fahrplan, Umsteigen, über Mitternacht, anderthalb Stunden sind 90 Minuten",
+    lernziele: [{ lz: "MA.3.A.2", stufen: ALLE_STUFEN }] },
+  { id: "komma-messband", klasse: 6, neu: "LERN_Session9", bild: "📏", name: "Komma-Messband", thema: "groessen", farbe: "var(--deko-5)",
+    pfad: "spiele/komma-messband/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 18, s3: 20, s4: 25, s5: 30, s6: 40 },
+    beschreibung: "Masse mit Dezimalzahlen umwandeln und damit rechnen: Meter, Kilogramm, Liter und Franken mit Komma",
+    lernziele: [{ lz: "MA.3.A.2", stufen: ALLE_STUFEN }, { lz: "MA.3.A.1", stufen: ["s3", "s4", "s5", "s6"] }] },
+  { id: "prozent-bruecke", klasse: 6, neu: "LERN_Session9", bild: "🌉", name: "Prozent-Brücke", thema: "brueche", farbe: "var(--deko-6)",
+    pfad: "spiele/prozent-bruecke/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 15, s3: 20, s4: 25, s5: 25, s6: 30 },
+    beschreibung: "Bruch, Dezimalzahl und Prozent: Was ist gleich viel?",
+    lernziele: [{ lz: "MA.1.A.1", stufen: ALLE_STUFEN }, { lz: "MA.1.A.2", stufen: ["s3", "s4", "s6"] }, { lz: "MA.1.A.3", stufen: ["s5", "s6"] }] },
+  { id: "stufenzahl-schieber", klasse: 6, neu: "LERN_Session9", bild: "🔟", name: "Stufenzahl-Schieber", thema: "dezimal", farbe: "var(--deko-1)",
+    pfad: "spiele/stufenzahl-schieber/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 15, s4: 25, s5: 20, s6: 30 },
+    beschreibung: "Mal und durch 10, 100 und 1000 — wohin wandert das Komma?",
+    lernziele: [{ lz: "MA.1.A.3", stufen: ALLE_STUFEN }, { lz: "MA.1.A.1", stufen: ["s2", "s3"] }] },
+  { id: "stimmt-immer", klasse: 6, neu: "LERN_Session9", bild: "🤔", name: "Stimmt immer?", thema: "begruenden", farbe: "var(--deko-3)",
+    pfad: "spiele/stimmt-immer/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 25, s2: 25, s3: 30, s4: 35, s5: 40, s6: 45 },
+    beschreibung: "Aussagen über Zahlen und Figuren: immer, manchmal oder nie wahr — und ein Gegenbeispiel",
+    lernziele: [{ lz: "MA.1.B.2", stufen: ALLE_STUFEN }, { lz: "MA.2.B.2", stufen: ["s3", "s4", "s5", "s6"] }] },
+  { id: "sachtext-spurensuche", klasse: 6, neu: "LERN_Session9", bild: "🔎", name: "Sachtext-Spurensuche", thema: "lesen", farbe: "var(--deko-4)",
+    pfad: "spiele/sachtext-spurensuche/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 40, s2: 50, s3: 60, s4: 70, s5: 80, s6: 90 },
+    beschreibung: "Kurze Sachtexte lesen: Was steht drin, was nicht, und welcher Titel passt?",
+    listen: {
+      "texte": { name: "Kurze Sachtexte mit Fragen" },
+    },
+    lernziele: [{ lz: "D.2.B.1", stufen: ALLE_STUFEN }] },
+  { id: "korrektur-stift", klasse: 6, neu: "LERN_Session9", bild: "✏️", name: "Korrektur-Stift", thema: "saetze", farbe: "var(--deko-7)",
+    pfad: "spiele/korrektur-stift/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 40, s2: 50, s3: 60, s4: 70, s5: 90, s6: 100 },
+    beschreibung: "Den eigenen Text prüfen: Fehler ohne Markierung finden und verbessern",
+    listen: {
+      "texte": { name: "Kurze Texte mit Fehlern" },
+    },
+    lernziele: [{ lz: "D.4.F.1", stufen: ALLE_STUFEN }, { lz: "D.5.E.1", stufen: ["s3", "s4", "s5", "s6"] }] },
+  { id: "hoer-reporter", klasse: 6, neu: "LERN_Session9", bild: "🎧", name: "Hör-Reporter", thema: "zuhoeren", farbe: "var(--deko-2)",
+    pfad: "spiele/hoer-reporter/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 15, s2: 25, s3: 30, s4: 35, s5: 35, s6: 45 },
+    beschreibung: "Die Eule liest einen kurzen Bericht vor: gut zuhören und die Fragen beantworten",
+    listen: {
+      "berichte": { name: "Kurze Berichte zum Vorlesen mit Fragen" },
+    },
+    lernziele: [{ lz: "D.1.B.1", stufen: ALLE_STUFEN }] },
+  { id: "wortarten-probe", klasse: 6, neu: "LERN_Session9", bild: "🧪", name: "Wortarten-Probe", thema: "wortarten", farbe: "var(--deko-5)",
+    pfad: "spiele/wortarten-probe/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 12, s2: 15, s3: 15, s4: 20, s5: 25, s6: 30 },
+    beschreibung: "Nomen, Verb oder Adjektiv? Mit der richtigen Probe sicher entscheiden",
+    listen: {
+      "woerter": { name: "Wörter und Sätze für die Wortarten-Proben" },
+    },
+    lernziele: [{ lz: "D.5.D.1", stufen: ALLE_STUFEN }] },
 ];
 
 /** Lernziele (Lernzielblatt 4.2 und Lehrplan SG) — für Profil-Fokus und Statistik je Lernziel. */
@@ -1037,6 +1093,8 @@ const LERNZIELE = [
   { lz: "D.1.A.1", niveau: "Lehrplan SG", text: "Laute heraushören: Anlaut, Mittellaut, Endlaut" },
   { lz: "D.2.A.1", niveau: "Lehrplan SG", text: "Buchstaben und Wörter erkennen, Sichtwortschatz" },
   { lz: "D.2.B.1", niveau: "Lehrplan SG", text: "Sätze und Sachtexte lesen und verstehen" },
+  { lz: "D.1.B.1", niveau: "Lehrplan SG", text: "Hörtexten wichtige, auch versteckte Informationen entnehmen" },
+  { lz: "MA.2.B.2", niveau: "Lehrplan SG", text: "Aussagen zu Figuren prüfen, mit Beispielen belegen und begründen" },
   { lz: "D.4.A.1", niveau: "Lehrplan SG", text: "Schreibflüssigkeit: Alphabet kennen, Wörter lautgetreu schreiben, auf der Tastatur schreiben" },
   { lz: "NMG.1.3", niveau: "Lehrplan SG", text: "Lebensmittel ordnen, ausgewogen essen" },
   { lz: "NMG.1.4", niveau: "Lehrplan SG", text: "Körperteile, Sinne, Organe und ihre Funktion" },

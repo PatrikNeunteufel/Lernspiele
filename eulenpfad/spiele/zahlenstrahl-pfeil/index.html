@@ -132,6 +132,7 @@ function strahlZeichnen(a, onTipp) {
 LS.spiel({
   id: "zahlenstrahl-pfeil",
   einleitung: "Wo steht die Zahl auf dem Zahlenstrahl? Tipp auf die richtige Stelle — oder lies ab, wohin der Pfeil zeigt.",
+  hilfe: "Steht oben eine Zahl, tippst du auf dem Zahlenstrahl auf ihre Stelle — der Pfeil springt dorthin — und dann auf „OK ✓“. Zeigt schon ein Pfeil, tippst du die Zahl ein. Ungefähr genügt.",
   anzahl: 8,
   stufen: {
     s1: "Bis 1000 in Hunderterschritten, auch ablesen.",
@@ -149,6 +150,16 @@ LS.spiel({
     // Stelle antippen und OK, oder die Zahl eintippen — ungefähr genügt, also die kürzeste Zahl im
     // Toleranzbereich (die kleinste hat die wenigsten Ziffern).
     ctx.schritte(a.ablesen ? LS.tippSchritte(Math.max(0, Math.ceil(a.ziel - a.toleranz))) : 2);
+    // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Strichwert, Mitte, zwischen zwei Strichen schätzen.
+    // Den Wert der Mitte nicht nennen: Liegt das Ziel nahe der Mitte, wäre er schon eine gültige Antwort.
+    const halb = "die Hälfte zwischen Anfang und Ende";
+    ctx.tipp(a.ablesen
+      ? [`Von welchem beschrifteten Strich aus zählst du? Jeder Strich ist ${zahlText(a.schritt)}.`,
+        `Der lange Strich in der Mitte ist ${halb}. Steht der Pfeil rechts davon, zählst du von dort weiter.`,
+        "Der Pfeil steht zwischen zwei Strichen: Schätze, wie weit er vom linken Strich weg ist — eher ein Viertel, die Hälfte oder drei Viertel?"]
+      : [`Wie viel ist ein Strich? Zähl vom Anfang aus in Schritten von ${zahlText(a.schritt)}.`,
+        `Der lange Strich in der Mitte ist ${halb}. Ist deine Zahl kleiner oder grösser?`,
+        "Such die zwei Striche, zwischen denen die Zahl liegt. Liegt sie näher beim einen oder beim anderen?"]);
 
     if (!a.ablesen) {
       // Für die Testhilfe: der grüne Pfeil des Lösungstexts erscheint erst nach dem Aufgeben.

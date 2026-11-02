@@ -172,9 +172,40 @@ function aufgabeErzeugen(stufe) {
     frage: `Verschiebe die blaue Figur um <b>${dx} nach rechts</b>${dy ? ` und <b>${dy} nach unten</b>` : ""}.` };
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst die Regel der Abbildung, dann wie man abzählt,
+ * zuletzt wie viele Felder es braucht — nie, welche Felder.
+ */
+function tippsFuer(a) {
+  const k = a.vorlage.size;
+  const anzahl = n => `Die Vorlage hat ${k} Felder — du brauchst ${n === k ? "genau so viele" : `${n}`}.`;
+  if (a.art === "senkrecht" || a.art === "versetzt") return [
+    "Jedes blaue Feld hat sein Spiegelbild in derselben Zeile, gleich weit weg von der roten Achse.",
+    (a.art === "versetzt" ? "Die Achse steht nicht in der Mitte — zähl von der Achse aus, nicht vom Rand. " : "")
+      + "Zähl bei einem blauen Feld die Felder bis zur Achse. Auf der anderen Seite gehst du gleich viele weiter.",
+    anzahl(a.ziel.size)];
+  if (a.art === "waagrecht") return [
+    "Jedes blaue Feld hat sein Spiegelbild in derselben Spalte, gleich weit weg von der roten Achse.",
+    "Zähl bei einem blauen Feld die Felder bis zur Achse. Unter der Achse gehst du gleich viele weiter.",
+    anzahl(a.ziel.size)];
+  if (a.art === "diagonal" || a.art === "gegendiagonal") return [
+    "Das Spiegelbild liegt auf der anderen Seite der schrägen Achse, gleich weit weg von ihr.",
+    "Geh von einem blauen Feld schräg über die Ecken auf die Achse zu. Auf der anderen Seite gehst du gleich viele Schritte weiter.",
+    anzahl(a.ziel.size)];
+  if (a.art === "doppelt") return [
+    "Es braucht drei Spiegelbilder: eins rechts, eins unten und eins schräg gegenüber.",
+    "Spiegle zuerst an der senkrechten Achse. Dann spiegelst du beide Figuren an der waagrechten Achse.",
+    anzahl(a.ziel.size)];
+  return [
+    "Beim Verschieben rutscht jedes Feld gleich weit — die Form bleibt genau gleich.",
+    "Nimm eine Ecke der Figur, zähl die Schritte ab und setz dort das erste Feld. Dann baust du die Form drum herum nach.",
+    anzahl(a.ziel.size)];
+}
+
 LS.spiel({
   id: "spiegel-raster",
   einleitung: "Spieglein, Spieglein! Tipp die Felder an, damit auf der anderen Seite das Spiegelbild entsteht.",
+  hilfe: "Tipp ein Feld an, um es zu färben; nochmal tippen macht es wieder weiss. Wenn das Spiegelbild (oder die verschobene Figur) fertig ist, tippst du auf „Fertig ✓“.",
   anzahl: 6,
   stufen: {
     s1: "Kleines Raster, senkrechte Achse in der Mitte.",
@@ -191,6 +222,7 @@ LS.spiel({
     const proZeile = {};
     for (const k of a.ziel) { const [r, c] = teile(k); (proZeile[r] ||= []).push(c + 1); }
     ctx.loesung("Färbe " + Object.keys(proZeile).map(r => `Zeile ${+r + 1}: Spalte ${proZeile[r].sort((x, y) => x - y).join(", ")}`).join(" · "));
+    ctx.tipp(tippsFuer(a));
     ctx.flaeche.append(el("div", { class: "frage", html: a.frage }),
       el("div", { class: "legende", html: `<span><i style="background:var(--deko-6)"></i>Vorlage</span><span><i style="background:var(--deko-3)"></i>deine Felder</span>` }));
     const rahmen = el("div", { class: "raster-rahmen" });

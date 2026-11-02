@@ -216,9 +216,25 @@ function eintippen(ctx, richtig, hinweis, loesungText) {
 
 const HINWEIS_MITTEL = "Zähle alle Werte zusammen und teile durch die Anzahl Werte.";
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Bedeutung und Rechenweg, ohne Zwischenergebnisse. */
+function tippsFuer(a) {
+  const n = a.werte.length;
+  switch (a.art) {
+    case "meist": return ["Vergleiche, wie hoch die Säulen sind.", "Suche die höchste Säule."];
+    case "wenigst": return ["Vergleiche, wie hoch die Säulen sind.", "Suche die niedrigste Säule."];
+    case "unterschied": return ["Suche zuerst die höchste und die niedrigste Säule.", "Unterschied heisst: höchste minus niedrigste."];
+    case "ausgleichen": return ["Nimm Klötze von hohen Säulen und leg sie auf niedrige.", "Es kommt kein Klotz dazu und keiner kommt weg. Am Schluss sind alle Säulen gleich hoch."];
+    case "mittelwert": return ["Mittelwert heisst: So viel hätte jeder, wenn alle gleich viel hätten.", HINWEIS_MITTEL];
+    case "fehlt": return ["Der Mittelwert mal die Anzahl Werte gibt die Summe aller Werte.", `Rechne die Summe aller ${n} Werte aus und zieh die bekannten Werte davon ab.`];
+    default: return ["Rechne zuerst die Summe vorher: alter Mittelwert mal Anzahl Werte.",
+      `Nachher sind es ${n + 1} Werte: Neuer Mittelwert mal ${n + 1} gibt die neue Summe. Der Unterschied der beiden Summen ist der neue Wert.`];
+  }
+}
+
 LS.spiel({
   id: "mittelwert-waage",
   einleitung: "Bei den Mittelwert-Türmen wird ausgeglichen: Wie hoch wären alle Säulen, wenn jede gleich viel hätte? Das ist der Mittelwert.",
+  hilfe: "Lies die Frage und schau dir die Säulen oder die Tabelle an. Beim Ausgleichen tippst du zuerst eine hohe Säule an und dann eine niedrige: Ein Klotz wandert hinüber. Mit „↺ von vorn“ fängst du neu an.",
   anzahl: 8,
   stufen: {
     s1: "Am meisten, am wenigsten und der Unterschied.",
@@ -236,6 +252,7 @@ LS.spiel({
     const t = DATEN[a.thema];
     const namen = namenFuer(a);
     const titel = el("div", { class: "auftrag", text: t.was });
+    ctx.tipp(tippsFuer(a));
     if (a.art === "meist" || a.art === "wenigst") {
       ctx.serie("art", a.art);
       f.append(el("div", { class: "frage", html: a.art === "meist" ? "Wo ist es <b>am meisten</b>?" : "Wo ist es <b>am wenigsten</b>?" }), titel, saeulenEl(a, a.werte, false));

@@ -250,8 +250,28 @@ function hinweisFuer(a) {
   };
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): die Artikelregeln — nie das Geschlecht oder die
+ * Form des gezeigten Worts.
+ */
+function tippsFuer(a) {
+  const lApo = "Schau auf den ersten Buchstaben: Vor a, e, i, o, u und stummem h wird aus le und la ein l’.";
+  const einsMehr = a.mitBild ? "Zähl die Bilder: eins oder mehrere?" : "Schau auf das Wortende: Endet es auf -s oder -x?";
+  switch (a.art) {
+    case "bestimmt": return a.koerbe.includes("l’") ? [lApo, "Sonst steht le vor männlichen Wörtern und la vor weiblichen. Sag das Wort halblaut mit beiden Artikeln: Was hast du schon gehört?"]
+      : ["le steht vor männlichen Wörtern, la vor weiblichen.", "Sag das Wort halblaut mit beiden Artikeln: Was hast du schon gehört?"];
+    case "unbestimmt": return ["un steht vor männlichen Wörtern, une vor weiblichen.", "Weisst du, ob es le oder la heisst? Aus le wird un, aus la wird une."];
+    case "hoerZahl": return ["Hör genau auf den Anfang: le oder les? un oder des?", "les und des stehen vor der Mehrzahl. Tipp auf „🔊 nochmal“."];
+    case "mitLes": return [einsMehr, "In der Mehrzahl heisst der Artikel immer les. In der Einzahl le, la oder l’."];
+    case "mitDes": return [einsMehr, "In der Mehrzahl heisst der Artikel immer des. In der Einzahl un oder une."];
+    case "mehrzahl": return ["In der Mehrzahl heisst der Artikel les oder des.", "Meistens kommt ein -s ans Ende. Wörter auf -eau und -eu bekommen meist ein -x, aus -al wird meist -aux."];
+    default: return ["In der Einzahl heisst der Artikel le, la, l’, un oder une — welcher passt zu diesem Wort?", "Schau aufs Ende: Das -s oder -x der Mehrzahl fällt weg. Aus -eaux wird -eau, aus -aux ohne e meist -al."];
+  }
+}
+
 LS.spiel({
   id: ID,
+  hilfe: "Tipp auf den richtigen Artikel oder die richtige Form. Beim Hören tippst du auf „eins“ oder „mehrere“; mit „🔊 nochmal“ hörst du das Wort nochmal. Zum Schluss spricht dir die Eule das Wort auf Französisch vor.",
   einleitung: "Im Französischen hat jedes Nomen einen Artikel: le chat, la pomme. Lern das Wort immer mit dem Artikel! Hilfst du mir, die Artikel zu finden?",
   anzahl: 8,
   stufen: STUFEN,
@@ -261,6 +281,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     if (a.koerbe && a.koerbe.length <= 3) ctx.serie("antwort", a.richtig);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const w = a.w;
     const sag = (fertig = null) => LS.sprich(sprechText(a.sprich), "fr", "", fertig);
     const loesung = a.art === "hoerZahl" ? `„${a.sprich}“ → ${a.richtig}`

@@ -162,8 +162,25 @@ function pruefeAufgabe(a) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst ein Anstoss, dann wie man vorgeht —
+ * nie den gesuchten Buchstaben oder das gesuchte Wort.
+ */
+function tippsFuer(a) {
+  if (a.art === "luecke") return ["Sag das ABC leise bis zur Lücke.",
+    "Schau den Buchstaben vor der Lücke an: Welcher kommt im ABC gleich danach?"];
+  if (a.art === "nachbar") return [`Sag das ABC leise bis ${a.buchstabe}.`,
+    a.nach ? `Welcher Buchstabe kommt im ABC gleich nach ${a.buchstabe}?` : `Welcher Buchstabe kommt im ABC gleich vor ${a.buchstabe}? Sag das ABC und halte vor ${a.buchstabe} an.`];
+  if (a.art === "ordnen") return ["Schau zuerst nur den ersten Buchstaben jedes Wortes an. Welcher kommt im ABC am weitesten vorne?",
+    a.stelle === 1 ? "Alle Wörter beginnen verschieden — der erste Buchstabe genügt."
+      : "Beginnen zwei Wörter gleich? Dann vergleiche den nächsten Buchstaben, und so weiter."];
+  return [`Das gesuchte Wort kommt im ABC nach «${a.links.wort}» und vor «${a.rechts.wort}».`,
+    "Vergleiche den ersten Buchstaben jedes Wortes mit den beiden Wörtern oben. Sind sie gleich, nimm den zweiten."];
+}
+
 LS.spiel({
   id: "abc-sortierer",
+  hilfe: "Fehlt ein Buchstabe, tippst du den passenden an. Beim Ordnen tippst du die Wörter der Reihe nach an — das Wort, das im ABC zuerst kommt, zuerst. Bei der Wörterbuch-Seite tippst du das Wort an, das zwischen dem ersten und dem letzten Wort steht.",
   einleitung: "A, B, C, D … Kennst du das ABC? Dann kannst du Wörter ordnen wie im Wörterbuch!",
   anzahl: 8,
   stufen: nurMoegliche({
@@ -179,6 +196,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     if (a.art === "nachbar") ctx.serie("richtung", a.nach);
+    ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "luecke") {
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Welcher Buchstabe fehlt?" }),
         el("div", { class: "leiste" }, ...a.zeige.map(b => el("span", { class: b === a.richtig ? "luecke" : "", text: b === a.richtig ? "?" : b }))));

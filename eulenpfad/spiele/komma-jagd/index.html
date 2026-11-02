@@ -125,10 +125,23 @@ function pruefeAufgabe(a, stufe) {
 
 // ---------- Spiel ----------
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Was suchen? — nie wie viele Kommas oder wo. */
+function tippsFuer(stufe) {
+  const p = STUFE[stufe];
+  const ohne = ohneFrei(stufe) ? " Ein Satz kann auch ganz ohne Komma richtig sein." : "";
+  if (p.regel === "aufzaehlung") return ["Such die Aufzählung: Welche Dinge oder Tätigkeiten werden nacheinander genannt?",
+    "Zwischen die Teile kommt ein Komma, vor „und“ und „oder“ keines." + ohne];
+  if (p.regel === "verbgruppen") return ["Such die Verben im Satz.",
+    "Jede Verbgruppe hat ihr eigenes Verb. Wo endet die erste, wo beginnt die zweite? Achte auf weil, wenn, dass, als." + ohne];
+  return ["Lies den Satz halblaut: Wo machst du eine kleine Pause?",
+    "Prüf beides: Gibt es eine Aufzählung (vor „und“ kein Komma)? Gibt es zwei Verben, also zwei Verbgruppen?" + ohne];
+}
+
 const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => angeboten(s)));
 
 LS.spiel({
   id: ID,
+  hilfe: "Tipp auf die kleinen Lücken zwischen den Wörtern, um ein Komma zu setzen; nochmals tippen nimmt es weg. Dann tippst du auf „Prüfen ✓“.",
   einleitung: "Auf der Jagd nach Kommas! Tippe zwischen die Wörter, wo ein Komma hingehört. Nochmals tippen nimmt es weg. Dann „Prüfen“.",
   anzahl: 8,
   stufen: nurAngebotene({
@@ -147,6 +160,7 @@ LS.spiel({
     const loesung = a.satz;
     ctx.loesung(loesung);
     ctx.schritte(a.kommas.length + 1);
+    ctx.tipp(tippsFuer(ctx.stufe)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const f = ctx.flaeche;
     if (!p.ohneKarte) {
       const r = REGELN[p.regel];

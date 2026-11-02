@@ -274,8 +274,37 @@ function berichtEl(a) {
       el("span", { class: "wj-grad", text: grad(a.grade[i]) }))));
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): beobachten, ablesen, rechnen — ohne Jahreszeit, Symbolname,
+ * Gradzahl oder Tag, der Antwort sein könnte. Die Wissensfragen (wetter.js) haben keine eigenen Tipps; dort
+ * bleibt es beim Vorgehen, statt Inhalte zu erfinden.
+ */
+function tippsFuer(a) {
+  switch (a.art) {
+    case "zeit": return ["Denk an draussen: Wie warm ist es? Was blüht, was wächst, was machen die Tiere?",
+      "Überleg, in welchen Monaten du das siehst. Dann weisst du die Jahreszeit."];
+    case "kleidung": return ["Schau auf das Bild: Ist es nass, kalt, heiss oder sonnig?", "Was hält dich trocken oder warm? Was schützt dich vor zu viel Hitze?"];
+    case "symbol": return ["Schau genau: Was siehst du? Sonne, Wolken, Tropfen, Flocken oder einen Blitz?",
+      "Viele Symbole bestehen aus zwei Teilen. Schau jeden Teil einzeln an."];
+    case "thermo": {
+      const t = THERMO[a.stufe];
+      return ["Schau, wo die rote Säule aufhört.",
+        a.richtig < 0 ? "Unter dem Strich bei 0 sind es Minusgrade. Zähl von 0 aus nach unten." : "Such die nächste Zahl darunter und zähl die Striche von dort aus.",
+        `Ein kleiner Strich bedeutet hier ${t.strich === 1 ? "ein Grad" : `${t.strich} Grad`}.`];
+    }
+    case "differenz": return ["Wie viele Grad fehlen von der Temperatur am Morgen bis zu der am Mittag?",
+      a.morgen < 0 ? "Zähl zuerst von den Minusgraden bis 0, dann weiter bis zur Temperatur am Mittag." : "Rechne: Temperatur am Mittag minus Temperatur am Morgen."];
+    case "bericht": return ["Lies jeden Tag: Welches Bild und welche Zahl stehen darunter?",
+      /kältesten|wärmsten/.test(a.frage) ? "Vergleiche die Zahlen. Bei Minusgraden ist die Zahl mit dem Minus kälter — je grösser die Zahl nach dem Minus, desto kälter."
+        : /Wie warm/.test(a.frage) ? "Such zuerst den Tag, dann lies die Zahl darunter."
+        : "Welches Symbol passt zur Frage? Such es in der Zeile."];
+    default: return ["Denk an das, was du beim Wetter schon beobachtet hast.", "Lies alle Antworten und überleg bei jeder: Kann das stimmen?"];
+  }
+}
+
 LS.spiel({
   id: ID,
+  hilfe: "Leg die Karte in den Korb der passenden Jahreszeit, oder tippe die passende Antwort an. Beim Thermometer schaust du, wo die rote Säule aufhört.",
   einleitung: "Sonne, Regen, Schnee — welches Wetter passt zu welcher Jahreszeit? Und wie warm ist es?",
   anzahl: 8,
   stufen: STUFEN,
@@ -283,6 +312,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a));
     const f = ctx.flaeche;
     if (a.art === "zeit") {
       f.append(el("div", { class: "frage", text: "Zu welcher Jahreszeit passt das am besten?" }));

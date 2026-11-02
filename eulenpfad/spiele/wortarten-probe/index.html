@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wortarten-Probe</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .wp .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 10px; }
+  .wp .satz {
+    background: #fff; border: 3px solid var(--rand); border-radius: 18px; padding: 14px 18px; margin: 0 auto 14px;
+    max-width: 680px; text-align: center; font-size: clamp(21px, 4.8vw, 28px); line-height: 1.5; font-weight: 600;
+  }
+  .wp-ziel { color: var(--deko-5); font-weight: 900; border-bottom: 4px solid var(--deko-5); }
+  .wp-liste { max-width: 680px; margin: 0 auto 12px; padding: 8px 14px; border: 3px dashed var(--deko-5); border-radius: 14px;
+    font-size: clamp(14px, 3.3vw, 17px); line-height: 1.45; }
+  .wp-liste b { color: var(--text-leise); }
+  .wp-befunde { max-width: 680px; margin: 0 auto 10px; padding: 0; list-style: none; font-size: clamp(15px, 3.4vw, 18px); }
+  .wp-befunde li { padding: 5px 10px; margin: 0 0 4px; border-radius: 10px; }
+  .wp-befunde li.gut { background: var(--gut-hell); font-weight: 700; }
+  .wp-befunde li.nein { background: var(--hinweis-hell); }
+  .wp-schritt { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin: 0; }
+  .wp-wahl .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); }
+  .wp-wahl .wahl-knopf small { font-size: 14px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧪 Wortarten-Probe</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="woerter.js"></script>
+<script>
+"use strict";
+// Lehrplan D.5.D.1 (Grammatikbegriffe), Basisklasse 6. Das Kind bestimmt die Wortart mit einer formalen
+// Probe: erst die Probe wählen, die bei diesem Wort in diesem Satz klappt, dann sagen, was sie zeigt.
+//   s1 5. Klasse (D.5.D.1.b → c): typische Nomen, Verben, Adjektive in einfachen Sätzen.
+//   s2 6. Klasse, leichter: veränderte Formen (Bäume, sprang, kälter).
+//   s3 Klassenziel (D.5.D.1.c, Grundanspruch Ende 6. Klasse): Fallen — das Lachen, beim Essen, das Gute,
+//      der kleine Hund, wir wollen baden.
+//   s4 schwerer: dasselbe Wort als zwei Wortarten (die Fliegen — sie fliegen, arm — der Arm).
+//   s5 7. Klasse (D.5.D.1.d/e): dazu Pronomen (Pronomenliste) und Partikeln (unveränderlich).
+//   s6 Königsstufe (D.5.D.1.f): alle fünf Wortarten mit Doppelgängern (sein Velo — muss sein, laut,
+//      seit, während), bei Partikeln dazu Präposition oder Konjunktion.
+// Abgrenzung: Der Wortarten-Sortierer (Basisklasse 3) sortiert in Körbe, ohne die Probe zu benennen
+// (inhaltliche Proben); Verben-Fächer (5) übt Personalform/Infinitiv, Zeitreise-Verben (4) die Zeitformen,
+// Nomen-Puzzle (3) zusammengesetzte Nomen. Hier zählt die Probe als Werkzeug. Sätze in woerter.js.
+
+const { waehle, mische, el } = LS;
+const ID = "wortarten-probe";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["woerter"]);
+const SAETZE = FREI.has("woerter") ? PROBE_SAETZE : [];
+
+// Proben: welche Wortart sie zeigt, Knopf, Frage auf dem Knopf.
+const PROBEN = {
+  artikel: { art: "N", name: "🏷️ Artikelprobe", kurz: "Artikelprobe", frage: "der, die, das dazu?" },
+  konjug: { art: "V", name: "👤 Konjugationsprobe", kurz: "Konjugationsprobe", frage: "ich …, du …, er …?" },
+  steiger: { art: "A", name: "📈 Steigerungsprobe", kurz: "Steigerungsprobe", frage: "…er, am …sten?" },
+  liste: { art: "PRO", name: "📋 Pronomenliste", kurz: "Pronomenliste", frage: "steht es in der Liste?" },
+  fest: { art: "PART", name: "🔒 Unveränderlich", kurz: "Unveränderlich", frage: "bleibt es immer gleich?" },
+};
+const WORTARTEN = { N: "Nomen", V: "Verb", A: "Adjektiv", PRO: "Pronomen", PART: "Partikel" };
+const PARTIKELN = { PRAEP: "Präposition", KONJ: "Konjunktion", PART: "andere Partikel" };
+/** Wortart der fünf (Präposition und Konjunktion sind Partikeln). */
+const wortartVon = art => (PARTIKELN[art] ? "PART" : art);
+
+const STUFE = {
+  s1: { gruppen: [1], proben: ["artikel", "konjug", "steiger"] },
+  s2: { gruppen: [2], proben: ["artikel", "konjug", "steiger"] },
+  s3: { gruppen: [3], proben: ["artikel", "konjug", "steiger"] },
+  s4: { gruppen: [4], proben: ["artikel", "konjug", "steiger"] },
+  s5: { gruppen: [5], proben: Object.keys(PROBEN), liste: true },
+  s6: { gruppen: [4, 5, 6], proben: Object.keys(PROBEN), liste: true, partikelArt: true },
+};
+
+const vorrat = stufe => SAETZE.filter(s => STUFE[stufe].gruppen.includes(s[0]));
+
+function aufgabeErzeugen(stufe) {
+  const liste = vorrat(stufe);
+  if (!liste.length) return null;
+  const [gruppe, quelle, artRoh, beleg] = waehle(liste);
+  const m = quelle.match(/^(.*)\[([^\]]+)\](.*)$/);
+  const falle = artRoh.startsWith("!");
+  const art = artRoh.replace("!", "");
+  const wortart = wortartVon(art);
+  const p = STUFE[stufe];
+  return {
+    gruppe, quelle, vor: m[1], wort: m[2], nach: m[3], satz: m[1] + m[2] + m[3], art, wortart, falle, beleg: beleg || "",
+    probe: Object.keys(PROBEN).find(k => PROBEN[k].art === wortart),
+    proben: p.proben,
+    wortarten: mische(Object.keys(WORTARTEN).filter(w => p.liste || ["N", "V", "A"].includes(w))),
+    partikelArt: p.partikelArt && wortart === "PART" ? art : null,
+  };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.gruppen.includes(a.gruppe)) m.push(`Satz der Gruppe ${a.gruppe} in ${stufe}`);
+  if (!SAETZE.some(s => s[1] === a.quelle)) m.push("Satz nicht aus einer freien Liste");
+  if ((a.quelle.match(/\[/g) || []).length !== 1 || (a.quelle.match(/\]/g) || []).length !== 1) m.push("nicht genau ein [Wort]");
+  if (!WORTARTEN[a.wortart] || !(a.art in WORTARTEN || a.art in PARTIKELN)) m.push(`unbekannte Wortart ${a.art}`);
+  if (!p.liste && !["N", "V", "A"].includes(a.wortart)) m.push("Pronomen oder Partikel in einer Stufe ohne sie");
+  if (!a.probe || !p.proben.includes(a.probe)) m.push("die richtige Probe wird nicht angeboten");
+  if (!a.wortarten.includes(a.wortart) || new Set(a.wortarten).size !== a.wortarten.length) m.push("Wortarten zur Wahl falsch");
+  // Formale Merkmale, damit der Eintrag zur Wortart passt.
+  const w = a.wort;
+  const klein = w.toLowerCase();
+  if (a.wortart === "N" && w[0] !== w[0].toUpperCase()) m.push(`Nomen „${w}“ klein geschrieben`);
+  if (a.wortart !== "N" && a.vor !== "" && w[0] !== klein[0]) m.push(`„${w}“ gross geschrieben, ist aber kein Nomen`);
+  if (a.wortart === "N" && !/^(der|die|das) /.test(a.beleg)) m.push("Nomen ohne Begleiter im Beleg");
+  if (a.wortart === "V" && !/^(ich|es) /.test(a.beleg)) m.push("Verb ohne ich/es im Beleg");
+  if (a.wortart === "A" && !/ am \p{L}+sten$/u.test(a.beleg)) m.push("Adjektiv ohne „am …sten“ im Beleg");
+  if (["N", "V", "A"].includes(a.wortart) && a.wortart !== "V" && PROBE_PRONOMEN.includes(klein)) m.push("Wort steht in der Pronomenliste");
+  if (a.wortart === "PRO" && !PROBE_PRONOMEN.includes(klein)) m.push(`Pronomen „${w}“ fehlt in der Pronomenliste`);
+  if (a.wortart === "PART" && PROBE_PRONOMEN.includes(klein)) m.push(`Partikel „${w}“ steht in der Pronomenliste`);
+  if (PROBE_PRONOMEN.includes(klein) && a.wortart !== "PRO" && !a.falle) m.push("Wort der Pronomenliste ohne Falle-Zeichen");
+  if (["der", "die", "das", "ein", "eine"].includes(klein)) m.push("Artikel abgefragt");
+  if (stufe === "s6" && a.wortart === "PART" && !a.partikelArt) m.push("Königsstufe ohne Art der Partikel");
+  if (/ß/.test(a.quelle + a.beleg)) m.push("ß im Text");
+  return m;
+}
+
+/** Was eine Probe bei diesem Wort ergibt (für das Protokoll unter dem Satz). */
+function befund(probe, a) {
+  const w = `„${a.wort}“`;
+  if (probe === a.probe) return {
+    artikel: `✓ Artikelprobe klappt: ${a.beleg}`,
+    konjug: `✓ Konjugationsprobe klappt: ${a.beleg}`,
+    steiger: `✓ Steigerungsprobe klappt: ${a.beleg}`,
+    liste: `✓ ${w} steht in der Pronomenliste.`,
+    fest: `✓ ${w} bleibt immer gleich: Es hat keine anderen Formen.`,
+  }[probe];
+  // Bei einer Falle („das Schönste“, „sein“) nur sagen, dass die Probe hier nicht passt — die Begründung
+  // wäre ohne die richtige Probe schief („Schönste lässt sich nicht steigern“).
+  if (a.falle) return `✗ ${PROBEN[probe].kurz}: passt in diesem Satz nicht.`;
+  return {
+    artikel: `✗ Artikelprobe: Zu ${w} gehört in diesem Satz kein eigener Begleiter wie der, die oder das.`,
+    konjug: `✗ Konjugationsprobe: ${w} lässt sich in diesem Satz nicht mit ich, du, er verändern.`,
+    steiger: `✗ Steigerungsprobe: ${w} lässt sich hier nicht steigern.`,
+    liste: `✗ Pronomenliste: ${w} steht nicht darin.`,
+    fest: `✗ Unveränderlich: ${w} hat noch andere Formen.`,
+  }[probe];
+}
+
+// Hinweis nach einer falschen Wortart: was die gelungene Probe bedeutet, ohne den Namen der Wortart.
+const BEDEUTUNG = {
+  artikel: "Die Artikelprobe hat geklappt. Welche Wortart hat einen Begleiter wie der, die, das?",
+  konjug: "Die Konjugationsprobe hat geklappt. Welche Wortart kann man mit ich, du, er verändern?",
+  steiger: "Die Steigerungsprobe hat geklappt. Welche Wortart kann man steigern?",
+  liste: "Das Wort steht in der Liste. Wie heissen die Wörter dieser Liste?",
+  fest: "Das Wort verändert sich nie. Wie heissen solche Wörter?",
+};
+
+const STUFEN_TEXT = {
+  s1: "Nomen, Verb oder Adjektiv — welche Probe klappt? Der Hund, er spielt, heiss.",
+  s2: "Veränderte Formen: Bäume, sprang, kälter.",
+  s3: "Fallen: das Lachen, beim Essen, der kleine Hund.",
+  s4: "Ein Wort, zwei Wortarten: die Fliegen — die Vögel fliegen.",
+  s5: "Dazu Pronomen und Partikeln: sie, unser, auf, weil, heute.",
+  s6: "Endgegner: sein Velo — muss sein, seit, laut — und welche Partikel?",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => vorrat(s).length));
+
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man die Proben ausprobiert, worauf bei Fallen
+ * zu achten ist — nie welche Probe klappt. Die Partikel-Regel steht in der Königsstufe bei jedem Wort,
+ * damit sie nicht verrät, dass es eine Partikel ist.
+ */
+function tippsFuer(a, p) {
+  const t = [p.liste
+    ? "Schau zuerst in der Pronomenliste nach. Steht das Wort nicht darin: Probier die anderen Proben im Kopf aus."
+    : "Probier jede Probe im Kopf aus: Passt der, die oder das davor? Kannst du ich …, du … sagen? Kannst du …er, am …sten bilden?"];
+  t.push(a.falle
+    ? "Vorsicht, Falle! Schau, welche Wörter direkt davor stehen und ob das Wort gross oder klein geschrieben ist."
+    : "Probier die Probe mit dem Wort genau in diesem Satz, nicht mit dem Wort allein.");
+  if (p.partikelArt) t.push("Ist es eine Partikel, fragst du weiter: Verbindet sie zwei Sätze? Oder steht sie vor einem Nomen und sagt, wo, wann oder wie?");
+  return t;
+}
+
+LS.spiel({
+  id: ID,
+  einleitung: "Nomen, Verb oder Adjektiv? Raten gilt nicht! Im Labor prüfst du jedes Wort mit einer Probe — und die Probe verrät die Wortart.",
+  hilfe: stufe => "Zuerst tippst du die Probe an, die beim farbigen Wort in diesem Satz klappt. Das Ergebnis erscheint unter dem Satz. Dann tippst du die Wortart an, die die Probe zeigt."
+    + (STUFE[stufe].partikelArt ? " Ist es eine Partikel, bestimmst du zum Schluss noch, welche." : ""),
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    if (ctx.nr === 0) ctx.sag("Wähle zuerst die Probe, die bei dem farbigen Wort in diesem Satz klappt. Dann sagst du, welche Wortart sie zeigt.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("art", a.wortart);
+    ctx.kennung(a.quelle);
+    const name = `„${a.wort}“`;
+    const loesung = `${name} ist hier ${a.wortart === "PART" ? "eine" : "ein"} ${a.partikelArt ? PARTIKELN[a.partikelArt] : WORTARTEN[a.wortart]}. ${befund(a.probe, a).slice(2)}`;
+    ctx.loesung(loesung);
+    ctx.schritte(a.partikelArt ? 3 : 2);
+    ctx.tipp(tippsFuer(a, p));
+
+    const wp = el("div", { class: "wp" });
+    ctx.flaeche.append(wp);
+    const schritt = el("p", { class: "wp-schritt", text: "1. Probe wählen" });
+    const frage = el("div", { class: "frage", text: `Welche Probe klappt bei ${name}?` });
+    wp.append(schritt, frage, el("div", { class: "satz" }, a.vor, el("span", { class: "wp-ziel", text: a.wort }), a.nach));
+    if (p.liste) wp.append(el("div", { class: "wp-liste" }, el("b", { text: "📋 Pronomenliste: " }), PROBE_PRONOMEN.join(", ")));
+    const befunde = el("ul", { class: "wp-befunde", "aria-live": "polite" });
+    const wahl = el("div", { class: "wahl wp-wahl" });
+    wahl.style.setProperty("--wahl-breite", p.liste ? "180px" : "200px");
+    wp.append(befunde, wahl);
+
+    const fehler = (k, hinweis) => {
+      k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) wahl.querySelectorAll("button").forEach(b => { b.disabled = true; });
+    };
+    const knopf = (text, klein, beimTipp) => {
+      const k = el("button", { type: "button", class: "wahl-knopf" }, text);
+      if (klein) k.append(el("small", { text: klein }));
+      k.addEventListener("click", () => { if (!ctx.vorbei() && !k.disabled && !k.classList.contains("gewaehlt")) beimTipp(k); });
+      wahl.append(k);
+      return k;
+    };
+
+    // Schritt 3 (Königsstufe, nur Partikeln): Präposition, Konjunktion oder andere Partikel?
+    const schrittPartikel = () => {
+      schritt.textContent = "3. Welche Partikel?";
+      frage.textContent = `Welche Partikel ist ${name} hier?`;
+      wahl.textContent = "";
+      for (const art of mische(Object.keys(PARTIKELN))) {
+        knopf(PARTIKELN[art], "", k => {
+          if (art === a.partikelArt) { k.classList.add("richtig"); return ctx.richtig(`Genau: ${name} ist eine ${PARTIKELN[art]}.`); }
+          fehler(k, "Verbindet das Wort zwei Sätze? Oder steht es vor einem Nomen und sagt, wo, wann oder wie? Sonst ist es eine andere.");
+        });
+      }
+    };
+
+    // Schritt 2: Welche Wortart zeigt die Probe?
+    const schrittWortart = () => {
+      schritt.textContent = "2. Was zeigt die Probe?";
+      frage.textContent = `Welche Wortart ist ${name} hier?`;
+      wahl.textContent = "";
+      for (const wa of a.wortarten) {
+        knopf(WORTARTEN[wa], "", k => {
+          if (wa !== a.wortart) return fehler(k, BEDEUTUNG[a.probe]);
+          k.classList.add("richtig");
+          if (a.partikelArt) { LS.ton("tipp"); befunde.append(el("li", { class: "gut", text: `✓ ${name} ist eine Partikel.` })); return schrittPartikel(); }
+          ctx.richtig(waehle(["Richtig geprüft!", "Die Probe hat es verraten!", "Sauber bestimmt!"]));
+        });
+      }
+    };
+
+    // Schritt 1: die Probe wählen.
+    for (const probe of p.proben) {
+      knopf(PROBEN[probe].name, PROBEN[probe].frage, k => {
+        if (probe === a.probe) {
+          k.classList.add("richtig");
+          LS.ton("tipp");
+          befunde.append(el("li", { class: "gut", text: befund(probe, a) }));
+          return schrittWortart();
+        }
+        befunde.append(el("li", { class: "nein", text: befund(probe, a) }));
+        fehler(k, a.falle
+          ? `Achtung, Falle! Wie wird ${name} in diesem Satz gebraucht? Achte auf die Wörter rundherum und auf die Schreibung.`
+          : "Diese Probe klappt hier nicht. Probier eine andere.");
+      });
+    }
+  },
+});
+</script>
+</body>
+</html>

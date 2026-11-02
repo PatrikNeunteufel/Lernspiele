@@ -127,9 +127,29 @@ function pruefeAufgabe(a, stufe) {
 
 const korbInfo = k => (ALLTAG[k] ? ALLTAG[k] : { bild: GRUPPEN_ZNUENI[k].bild, text: GRUPPEN_ZNUENI[k].name });
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Fragen, die die Gruppen unterscheiden, und die Regel
+ * für alle Körbe zugleich — nie die Erklärung nur des richtigen Korbs.
+ */
+function tippsFuer(a) {
+  if (a.typ === "alltag") return ["Ist viel Zucker, Fett oder Salz darin?",
+    "Wasser, Früchte, Gemüse, Brot, Milch und Ei: jeden Tag. Viel Zucker, Fett oder Salz: nur ab und zu."];
+  if (a.typ === "fruchtGemuese") return ["Wo wächst es: an einem Baum oder Strauch? Oder sind es Blätter, Wurzeln oder Knollen?",
+    "Früchte wachsen an Bäumen und Sträuchern. Gemüse sind Blätter, Wurzeln oder Knollen von Pflanzen."];
+  if (a.art === "korb") return ["Wofür braucht dein Körper das? Für Vitamine, für Kraft, zum Wachsen — oder ist es nur zum Schlecken?",
+    "Frag dich: Wächst es an einer Pflanze? Kommt es von einem Tier? Ist viel Zucker oder Salz darin? Trinkt man es?"];
+  if (a.art === "znueni") return ["Schau jeden Teller genau an: Was liegt alles darauf?",
+    "Ein gutes Znüni hat Frucht oder Gemüse, etwas für lange Kraft und Wasser zum Trinken."];
+  const liste = ZNUENI_FRAGEN.find(f => f[0] === a.frage)?.[4];
+  return ["Lies die Frage genau und dann jede Antwort.", liste === "region-saison"
+    ? "Denk an den Markt, den Bauernhof oder den Garten: Was wächst hier bei uns, und wann ist es reif?"
+    : "Denk an die Ernährungspyramide: unten das, wovon wir viel brauchen, oben das, wovon wir wenig brauchen."];
+}
+
 LS.spiel({
   id: "znueni-teller",
   einleitung: "Was gibt dir Kraft für die Schule? Stell dir ein feines und gesundes Znüni zusammen!",
+  hilfe: "Schau das Lebensmittel an und tipp den Korb an, in den es gehört. Bei den Tellern und Fragen tippst du die Antwort an, die passt.",
   anzahl: 8,
   stufen: STUFEN,
 
@@ -137,6 +157,7 @@ LS.spiel({
     const a = aufgabeErzeugen(ctx.stufe);
     if (STUFE[ctx.stufe].length > 1) ctx.serie("art", a.typ || a.art);
     if (a.art === "korb" && a.koerbe.length <= 3) ctx.serie("antwort", a.richtig);
+    ctx.tipp(tippsFuer(a));
     if (a.art === "korb") {
       ctx.flaeche.append(el("div", { class: "frage", text: KORB_FRAGE[a.typ] }));
       const erkl = GRUPPEN_ZNUENI[a.x.gruppe].erklaerung;

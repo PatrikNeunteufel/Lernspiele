@@ -271,9 +271,42 @@ function leiter(einheiten) {
 
 const dingText = i => `${DINGE[i].bild} ${DINGE[i].name}: ${DINGE[i].text}`;
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Leiter-Regeln und Rechenweg in Worten — Faktoren
+ * als Wörter („acht“, „tausend“), damit kein Tipp eine Zahl mit Einheit nennt, die schon die Lösung ist
+ * (1 Byte = 8 bit, 4 GB : 4 MB = 1000).
+ */
+const T_GB = "Rechne die Karte zuerst in MB um: Ein GB sind tausend MB.";
+const T_SPROSSE = "Eine Sprosse auf der Leiter ist mal tausend.";
+function tippsFuer(a) {
+  switch (a.art) {
+    case "ordnen": return ["Text braucht wenig Platz, Bilder mehr, bewegte Bilder am meisten.", "Nimm immer das, was von den übrigen am wenigsten Platz braucht."];
+    case "groesser": return ["Text braucht wenig Platz, Bilder mehr, Ton und bewegte Bilder am meisten."];
+    case "byteZuBit": return ["Von Byte zu bit geht es auf der Leiter hinunter: Jedes Byte hat acht bit.", "Rechne die Zahl der Byte mal acht."];
+    case "bitZuByte": return ["Von bit zu Byte geht es auf der Leiter hinauf: Acht bit sind ein Byte.", "Wie oft passen acht bit in die Zahl?"];
+    case "muster": return a.frage === "bit"
+      ? ["Jede Stelle, 0 oder 1, ist ein bit.", "Zähle die Kästchen: Jedes hat vier Stellen."]
+      : ["Immer acht Stellen zusammen ergeben ein Byte.", "Jedes Kästchen hat vier Stellen. Wie viele Achtergruppen findest du?"];
+    case "wort": return ["Jeder Buchstabe ist ein Byte. Wie viele Byte hat das Wort?", "Jedes Byte hat acht bit."];
+    case "leiter": return ["Schau zuerst auf die Einheit: kB ist kleiner als MB, MB kleiner als GB.", `Nur bei gleicher Einheit vergleichst du die Zahlen. ${T_SPROSSE}`];
+    case "vergleich": return ["Rechne beide in dieselbe Einheit um.", T_SPROSSE];
+    case "einfach": return [T_SPROSSE, a.richtung === "gross→klein" ? "Von gross nach klein wird die Zahl grösser." : "Von klein nach gross wird die Zahl kleiner."];
+    case "gemischt": return [`Rechne zuerst den grossen Teil in ${a.ziel} um. ${T_SPROSSE}`, `Dann zählst du den Rest in ${a.ziel} dazu.`];
+    case "bit": return ["Geh die Leiter Sprosse für Sprosse.", "Bis zum Byte ist jede Sprosse mal tausend, vom Byte zum bit mal acht. Hinauf rechnest du geteilt."];
+    case "anzahl": return [T_GB, "Dann teilst du durch die Grösse eines Stücks."];
+    case "passt": return [T_GB, "Wie viel brauchen alle zusammen? Vergleiche mit dem Platz auf der Karte."];
+    case "laden": return ["Achtung: Die Leitung rechnet in bit, die Datei in Byte.", "Rechne die Datei zuerst in Mbit um (ein Byte sind acht bit). Dann teilst du durch das, was die Leitung pro Sekunde schafft."];
+  }
+  return ["Wie viel ist noch frei? Rechne alles in MB.", "Teile den freien Platz durch die Grösse eines Videos. Nur ganze Videos zählen."];
+}
+
 LS.spiel({
   id: "speicher-leiter",
   einleitung: "Ein Buchstabe, ein Foto, ein Film — alles braucht Speicherplatz. Klettere die Speicher-Leiter hinauf: bit, Byte, kB, MB, GB!",
+  hilfe: stufe => (stufe === "s1"
+    ? "Tippe an, was mehr oder weniger Platz braucht — oder tippe die Dinge der Reihe nach an, von wenig zu viel."
+    : "Lies die Aufgabe und tippe die Antwort an oder gib die Zahl mit den Zifferntasten ein. Die Leiter zeigt, wie die Einheiten zusammenhängen."
+      + (STUFE[stufe]?.spaet ? " Hier erscheint die Leiter erst nach einem Fehler." : "")),
   anzahl: 8,
   stufen: {
     s1: "Was braucht mehr Platz? Buchstabe, SMS, Foto, Film ordnen.",
@@ -289,6 +322,7 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const f = ctx.flaeche;
     if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
+    ctx.tipp(tippsFuer(a));
     if (ctx.nr === 0) ctx.sag(ctx.stufe === "s1" ? "Ein Film braucht viel mehr Platz als ein Foto." : ctx.stufe === "s2" ? "Ein bit ist eine einzige 0 oder 1." : "Eine Sprosse auf der Leiter ist ×1000.");
     if (a.richtung) ctx.serie("richtung", a.richtung);
     const hilfeOrt = el("div");

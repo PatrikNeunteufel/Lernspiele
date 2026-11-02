@@ -157,9 +157,22 @@ function hinweisFuer(a, gewaehlt) {
   return `„${gewaehlt}“ passt nicht zum Text. ${wo}`;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wo die Erklärung steht und wie man prüft — ohne sie zu zitieren. */
+function tippsFuer(a) {
+  if (a.nr <= 2) return ["Lies den ganzen Satz, nicht nur das farbige Wort.",
+    "Die Erklärung steht im selben Satz. Such die Wörter, die beschreiben, was passiert oder wie etwas ist."];
+  if (a.nr <= 4) return ["Lies den ganzen Text, nicht nur den Satz mit dem farbigen Wort.",
+    "Die Erklärung steht in einem anderen Satz. Was passiert dort — und passt das zu einer der Bedeutungen?"];
+  return ["Setz jede Bedeutung anstelle des Wortes ein und lies den Satz nochmals. Ergibt er dann Sinn?",
+    "Achte auf Wörter wie „nicht … sondern“ oder „aber“: Dort steht manchmal das Gegenteil des schwierigen Wortes."];
+}
+
 LS.spiel({
   id: ID,
   einleitung: "Ein Wort ist schwierig — aber der Text verrät, was es bedeutet. Schnüffle wie eine Spürnase nach dem Hinweis!",
+  hilfe: stufe => (STUFE[stufe].tippen
+    ? "Lies den Text und tipp die Bedeutung an, die zum farbigen Wort passt. Danach tippst du im Text das Wort an, das dir geholfen hat."
+    : "Lies den Text und tipp die Bedeutung an, die zum farbigen Wort passt. Danach zeigt das Spiel, welches Wort im Text der Hinweis war."),
   anzahl: 8,
   stufen: STUFEN,
 
@@ -168,6 +181,7 @@ LS.spiel({
       ? "Wähle zuerst die Bedeutung. Dann tippst du das Wort im Text an, das dir geholfen hat."
       : "Lies den Text genau. Welche Bedeutung passt zum farbigen Wort?");
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.tipp(tippsFuer(a));
     const f = ctx.flaeche;
     const loesung = `„${a.wort}“ heisst hier „${a.richtig}“. Der Hinweis: „${a.hinweis}“`;
     f.append(el("div", { class: "frage", html: `Was bedeutet <b>${a.wort}</b> hier?` }));

@@ -219,9 +219,26 @@ function hinweisSpalte(x, i) {
     (d * x.zahlen[1] + c >= 10 ? " Schreib nur die Einer hin — die Zehner trägst du weiter." : "");
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): das Verfahren je Rechenart — für die ganze Aufgabe,
+ * nicht je Spalte (die Tipps stehen beim Zeichnen fest); keine Ziffer und keine Spaltenrechnung.
+ */
+function tippsFuer(x) {
+  if (x.art === "×") return [`Fang rechts bei den Einern an: Rechne jede Ziffer oben mal ${x.zahlen[1]}.`,
+    "Schreib nur die Einer hin. Die Zehner kommen als Übertrag in die nächste Spalte.",
+    "Den Übertrag zählst du erst nach dem Malrechnen dazu."];
+  if (x.art === "−") return ["Fang rechts bei den Einern an: Wie viel fehlt in jeder Spalte von unten bis oben?",
+    "Ist unten mehr als oben, rechnest du oben mit 10 mehr und gibst 1 weiter.",
+    "Der Übertrag kommt in der nächsten Spalte unten dazu."];
+  return ["Fang rechts bei den Einern an. Zähl in jeder Spalte die Ziffern zusammen.",
+    "Gibt eine Spalte 10 oder mehr, schreibst du nur die Einer hin. Die Zehner wandern als Übertrag in die nächste Spalte.",
+    "Vergiss den kleinen Übertrag über dem Strich nicht: Er zählt in seiner Spalte mit."];
+}
+
 LS.spiel({
   id: "schriftlich-werkstatt",
   einleitung: "Willkommen in der Werkstatt! Rechne schriftlich: Fang rechts bei den Einern an und arbeite Stelle für Stelle nach links. Den Übertrag schreibe ich klein über den Strich — oder du selbst, wie auf dem Blatt.",
+  hilfe: "Tippe für das blaue Feld eine Ziffer ein und drück OK — Spalte für Spalte, von rechts nach links. Schreibst du den Übertrag selbst, kommt danach das Bläschen über dem Strich dran: Ziffer eintippen, kein Übertrag heisst 0.",
   anzahl: 5,
   // Übertrag selbst schreiben (Entscheid UE1 a): Teil des schriftlichen Verfahrens, darum hier und nicht als eigenes Spiel.
   optionen: {
@@ -255,6 +272,7 @@ LS.spiel({
     const links = mal ? 0 : 1;
     const rechnung = x.zahlen.map(zahlText).join(` ${x.art} `);
     ctx.loesung(`${rechnung} = ${zahlText(x.ergebnis)}`);
+    ctx.tipp(tippsFuer(x));
     const selbstUeber = ctx.option("uebertrag") === "selbst";
     // je Spalte eine Ziffer und OK; schreibt das Kind den Übertrag selbst, je Spalte ausser der letzten noch einmal
     ctx.schritte(2 * n + (selbstUeber ? 2 * (n - 1) : 0));

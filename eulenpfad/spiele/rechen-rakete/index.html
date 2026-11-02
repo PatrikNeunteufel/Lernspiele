@@ -162,9 +162,17 @@ function hinweisFuer(x, knapp) {
   return `Zerlege: ${zahlText(x.a)} ${x.art} ${teile.map(zahlText).join(` ${x.art} `)}`;
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst die Strategie, dann der Hinweis (Zerlegen, ohne Nullen). */
+function tippsFuer(x, knapp) {
+  const anstoss = { "+": "Rechne Stelle für Stelle, zuerst die grossen Stellen.", "−": "Rechne Stelle für Stelle, zuerst die grossen Stellen.",
+    "×": "Zähl zuerst die Nullen beider Zahlen.", ":": "Teilen ist die Umkehrung vom Malnehmen." }[x.art];
+  return [anstoss, hinweisFuer(x, knapp)];
+}
+
 LS.spiel({
   id: "rechen-rakete",
   einleitung: "3, 2, 1 … Start! Jede richtige Antwort bringt die Rakete höher ins All. Rechne im Kopf!",
+  hilfe: "Rechne die Aufgabe im Kopf und tippe das Ergebnis ein. Jede richtige Antwort bringt die Rakete ein Stück höher.",
   anzahl: 8,
   stufen: {
     s1: "Bis 100 mit Übergang und bis 1000 mit Zehnern: 47 + 28, 340 + 50.",
@@ -180,6 +188,7 @@ LS.spiel({
     ctx.serie("rechenart", x.art);
     const loesung = `${zahlText(x.a)} ${x.art} ${zahlText(x.b)} = ${zahlText(x.ergebnis)}`;
     ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(x, STUFE[ctx.stufe].knapp));
     ctx.schritte(LS.tippSchritte(x.ergebnis));
     const bahn = el("div", { class: "bahn", "aria-hidden": "true" });
     const rakete = el("div", { class: "rakete", text: "🚀" });

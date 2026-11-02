@@ -55,6 +55,18 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
 }
 .pin-zeile input:focus, .feld:focus { outline: none; border-color: var(--knopf); }
 .meldung { text-align: center; color: #b45309; font-weight: 800; min-height: 24px; margin-top: 8px; }
+/* Fehlermeldungen der Kinder (Verwaltung → Meldungen, Statistik → Meine Meldungen; LERN_Session9) */
+.meldungen { display: flex; flex-direction: column; gap: 10px; }
+.meldung-eintrag { background: #f6f7fd; border-radius: 14px; padding: 10px 14px; border-left: 6px solid var(--rand); }
+.meldung-eintrag.status-neu, .meldung-eintrag.status-bestaetigt { border-left-color: var(--hinweis); }
+.meldung-eintrag.status-behoben { border-left-color: var(--gut); }
+.meldung-eintrag summary { cursor: pointer; }
+.meldung-eintrag dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 10px 0; font-size: 15px; }
+.meldung-eintrag dt { font-weight: 700; }
+.meldung-eintrag dd { margin: 0; overflow-wrap: anywhere; }
+.meldung-eintrag textarea.feld { width: 100%; box-sizing: border-box; font-size: 16px; }
+@media (max-width: 560px) { .meldung-eintrag dl { grid-template-columns: 1fr; } .meldung-eintrag dd { margin-bottom: 6px; } }
+.fehlerfinder { background: var(--gut-hell); border-radius: 14px; padding: 10px 14px; font-weight: 700; }
 
 /* ---------- Spiele: Filter ---------- */
 
@@ -237,6 +249,15 @@ td .marke.such-grund { display: inline-block; margin-top: 4px; }
 .statistik .vorschlag.konzentration { border-left-color: #b45309; }
 .statistik .vorschlag.weiter, .statistik .vorschlag.timer { border-left-color: var(--gut); }
 .statistik .befund { background: var(--hinweis-hell); border-radius: 12px; padding: 4px 12px; margin-bottom: 8px; }
+/* Fazit in Worten (AUSWERTUNG.fazit) */
+.statistik .fazit-kurz { font-size: 17px; font-weight: 700; margin: 0 0 10px; }
+.statistik .fazit-kopf { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.statistik .fazit-kopf h2 { margin: 0; }
+.statistik .fazit-kind { margin: 0; padding-left: 22px; font-size: 17px; }
+.statistik .fazit-kind li { margin-bottom: 6px; }
+.statistik .fazit-abschnitt h3 { margin: 12px 0 4px; }
+.statistik .fazit-abschnitt ul { margin: 0; padding-left: 20px; }
+.statistik .fazit-abschnitt li { margin-bottom: 4px; font-size: 15px; }
 .statistik .diagramme { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 18px; }
 .statistik .diagramme h3 { font-size: 15px; margin: 0 0 6px; color: var(--text-leise); }
 .statistik .saeulen { position: relative; display: flex; align-items: flex-end; gap: 4px; height: calc(var(--h) + 44px); border-bottom: 1px solid var(--rand); padding-top: 4px; }

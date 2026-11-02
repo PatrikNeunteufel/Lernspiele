@@ -274,9 +274,37 @@ function bildenAuswahl(ctx, a) {
 
 const ZIEL_TEXT = { praesens: "⏩ Reise in die Gegenwart: ins Präsens!", praeteritum: "⏪ Reise ins Präteritum!", perfekt: "⏪ Reise ins Perfekt!" };
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): woran man die Zeitformen erkennt und wie man sie
+ * bildet — als Regel für alle Formen, nie die gesuchte Form oder der richtige Satz.
+ */
+const TIPP_ZIEL = {
+  praesens: "Im Präsens passiert es gerade. Das Verb ist ein einziges Wort.",
+  praeteritum: "Im Präteritum ist das Verb ein einziges Wort, und es ist schon vorbei.",
+  perfekt: "Im Perfekt hat das Verb zwei Teile: hat oder ist — und die ge-Form am Satzende.",
+};
+const TIPP_HILF = "Bewegt sich jemand oder etwas von einem Ort weg oder an einen Ort hin, heisst es meist «ist», sonst meist «hat».";
+const TIPP_ZAEHLEN = "Zähl die Teile des Verbs: Ist es ein einziges Wort, oder sind es zwei?";
+function tippsFuer(a) {
+  if (a.art === "jetztFrueher") return ["Schau dir das gelbe Verb genau an — auch am Satzende.",
+    "Frag dich: Passiert das gerade, oder ist es schon vorbei? Formen auf -te oder mit hat/ist und ge- erzählen von der Vergangenheit."];
+  if (a.art === "erkennen") return [TIPP_ZAEHLEN,
+    "Zwei Teile (hat/ist und ge-Form) sind Perfekt. Bei einem Wort fragst du: Passiert es gerade (Präsens) oder ist es vorbei (Präteritum)?"];
+  if (a.art === "hilfsverb") return ["Sprich den Satz leise mit beiden Hilfsverben. Welcher klingt richtig?", TIPP_HILF];
+  const t = a.art === "zweischritt" ? [TIPP_ZAEHLEN] : ["Schau zuerst, wohin die Reise geht."];
+  t.push(TIPP_ZIEL[a.ziel]);
+  if (a.ziel === "perfekt" && !a.v.regel) t.push("Dieses Verb ist unregelmässig: Seine ge-Form wird anders gebildet als bei spielen – gespielt. Sprich die Sätze leise: Welcher klingt richtig?");
+  else if (!a.v.regel) t.push("Dieses Verb ist unregelmässig: Es ändert sich stärker als nur mit -te. Sprich die Sätze leise: Welcher klingt richtig?");
+  else if (a.ziel === "perfekt") t.push(TIPP_HILF);
+  return t;
+}
+
 LS.spiel({
   id: "zeitreise-verben",
   einleitung: "Steig ein in die Zeitmaschine! Verben verraten, wann etwas passiert: jetzt oder früher.",
+  hilfe: stufe => (stufe === "s6"
+    ? "Lies den Satz mit dem gelben Verb. Zuerst tippst du an, in welcher Zeitform er steht. Dann tippst du den Satz an, der in der neuen Zeit richtig ist."
+    : "Lies den Satz — das Verb ist gelb markiert. Tipp die passende Antwort an: die Zeit, das Hilfsverb oder den Satz in der neuen Zeit."),
   anzahl: 8,
   stufen: Object.fromEntries(Object.entries({
     s1: "Jetzt oder früher? Lina spielt — Lina spielte.",
@@ -293,6 +321,7 @@ LS.spiel({
     // Antwort bei höchstens drei festen Antworten; Zielzeit, wo es zwei gibt (Stufe 5 nur Perfekt)
     if (a.art !== "bilden") ctx.serie("antwort", a.art === "zweischritt" ? a.erkennen.richtig : a.richtig);
     if (a.ziel && ctx.stufe !== "s5") ctx.serie("ziel", a.ziel);
+    ctx.tipp(tippsFuer(a));
 
     if (a.art === "jetztFrueher") {
       ctx.flaeche.append(el("div", { class: "auftrag", text: "Passiert das jetzt oder früher?" }), satzBild(a.teile));

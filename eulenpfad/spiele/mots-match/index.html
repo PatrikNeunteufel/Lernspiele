@@ -217,8 +217,23 @@ const FRAGE = {
   deZuFrAehnlich: "Wie heisst das auf Französisch? Schau genau hin!",
 };
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man das Wort findet — nie das Wort selbst. */
+function tippsFuer(a) {
+  const hoer = "Tipp auf 🔊 und sprich das Wort leise nach.";
+  const artikel = "Achte auch auf den Artikel: le, la, l’ oder les.";
+  switch (a.art) {
+    case "bildZuFr": return ["Sag zuerst auf Deutsch, was du siehst.", a.ton ? hoer : "Lies jedes Wort halblaut."];
+    case "frZuBild": return ["Lies das Wort halblaut. Klingt es wie ein Wort, das du kennst?", a.ton ? hoer : "Denk an das Thema oben: Welches Bild passt dazu?"];
+    case "deZuFr": return ["Lies die französischen Wörter halblaut. Welches kennst du schon?", artikel];
+    case "hoerZuBild": return [hoer, "Hör auf den Anfang des Worts. Welches Bild könnte so heissen?"];
+    case "aehnlich": return ["Sag zuerst auf Deutsch, was du siehst.", "Die Wörter sehen ähnlich aus. Schau auf jeden Buchstaben — und auf den Artikel."];
+    default: return ["Die Wörter sehen ähnlich aus. Lies jedes Buchstabe für Buchstabe.", artikel];
+  }
+}
+
 const SPIEL = {
   id: ID,
+  hilfe: "Schau das Bild oder das Wort an — oder hör zu — und tippe die passende Antwort an. Mit 🔊 hörst du das französische Wort, wo der Knopf da ist.",
   einleitung: "Bonjour ! Welches französische Wort passt zum Bild? Mit 🔊 hörst du, wie man es sagt.",
   anzahl: 8,
   stufen: STUFEN,
@@ -229,6 +244,7 @@ const SPIEL = {
     if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
     const { ziel } = a;
     const loesung = `${ziel.bild} ${ziel.fr} = ${ziel.de}`;
+    ctx.tipp(tippsFuer(a));
     if (a.hoeren) ctx.kennung(ziel.fr);
     ctx.flaeche.append(el("div", { class: "thema-name", text: a.alleThemen || a.art === "aehnlich" || a.art === "deZuFrAehnlich" ? "Tous les thèmes" : THEMEN_FR[ziel.thema].name }));
     ctx.flaeche.append(el("div", { class: "frage", text: FRAGE[a.art] }));

@@ -199,6 +199,8 @@ const istAufgegeben = ctx => !!ctx.flaeche.querySelector(".knopfzeile .knopf:not
 function punkteText(p) { return SPALTEN.filter(st => p[st.k]).map(st => `${p[st.k]} ${st.k}`).join(", "); }
 
 // ---------- Aufgabenarten ----------
+// Tipps vor dem Antworten (ctx.tipp, LERN_Session9) je Art: die Regel der Stellenwerttabelle, nie die
+// fertige Punktverteilung, der Zug oder die Zahl.
 
 /** Zahl mit Punkten legen. */
 function legen(ctx) {
@@ -206,6 +208,7 @@ function legen(ctx) {
   const zahl = wert(ziel);
   const loesung = `${zahlText(zahl)} = ${punkteText(ziel)}`;
   ctx.loesung(loesung);
+  ctx.tipp(["Jede Ziffer der Zahl sagt, wie viele Punkte in ihre Spalte gehören.", "Eine 0 heisst: kein Punkt in diesem Feld."]);
   ctx.flaeche.append(el("div", { class: "auftrag", html: `Lege die Zahl <b>${zahlText(zahl)}</b> mit Punkten.` }));
   const t = punkteTabelle(ctx, Object.fromEntries(SPALTEN.map(st => [st.k, 0])), "legen");
   const ok = okZeile(ctx, () => {
@@ -224,6 +227,7 @@ function lesen(ctx) {
   const zahl = wert(start);
   const loesung = `${punkteText(start)} = ${zahlText(zahl)}`;
   ctx.loesung(loesung);
+  ctx.tipp(["Zähl die Punkte in jedem Feld: Das ist die Ziffer dieser Stelle.", "Ein leeres Feld ist eine 0 — vergiss sie nicht."]);
   ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl zeigen die Punkte?" }));
   punkteTabelle(ctx, start, "fest");
   const anzeige = el("div", { class: "anzeige leer", style: "margin-top:14px", "aria-label": "Deine Zahl" });
@@ -253,6 +257,7 @@ function verschiebeNachVorgabe(ctx) {
     ziel[nach.k]++;
     const loesung = `Ein Punkt wandert von ${von.k} nach ${nach.k}: ${zahlText(wert(ziel))}.`;
     ctx.loesung(loesung);
+    ctx.tipp(["Such die beiden Spalten aus dem Auftrag oben in der Tabelle.", "Heb genau einen Punkt hoch und leg ihn im anderen Feld ab. Alle anderen Punkte bleiben liegen."]);
     ctx.flaeche.append(el("div", { class: "auftrag", html: `Die Punkte zeigen <b>${zahlText(wert(start))}</b>.<br>Verschiebe einen Punkt von den <span style="color:var(--st-${von.k})">${von.k}</span> zu den <span style="color:var(--st-${nach.k})">${nach.k}</span>.` }));
     const t = punkteTabelle(ctx, start, "schieben");
     const ok = okZeile(ctx, () => {
@@ -282,6 +287,8 @@ function verschiebeZumZiel(ctx) {
   const zielWert = wert(start) + diff;
   const loesung = `Ein Punkt von ${von.k} nach ${nach.k}: ${zahlText(zielWert)}.`;
   ctx.loesung(loesung);
+  ctx.tipp(["Wandert ein Punkt nach links, wird die Zahl grösser; nach rechts wird sie kleiner.",
+    "Was ändert sich, wenn ein Punkt wandert? Wert der neuen Stelle minus Wert der alten Stelle. Probier das für Spalten nahe beieinander."]);
   ctx.flaeche.append(el("div", { class: "auftrag", html: `Die Punkte zeigen <b>${zahlText(wert(start))}</b>.<br>Verschiebe <u>genau einen</u> Punkt, sodass die Zahl um <b>${zahlText(Math.abs(diff))}</b> ${diff > 0 ? "grösser" : "kleiner"} wird.` }));
   const t = punkteTabelle(ctx, start, "schieben");
   const ok = okZeile(ctx, () => {
@@ -322,6 +329,10 @@ function mitAnzahlPunkten(ctx) {
   const v = vorgaben[art];
   const loesung = `Die Lösung ist ${zahlText(v.loesung)} (${punkteText(zerlege(v.loesung))}).`;
   ctx.loesung(loesung);
+  ctx.tipp(art.startsWith("groesste")
+    ? ["Grösste Zahl heisst: Die Punkte sollen möglichst viel wert sein.", "Welches erlaubte Feld zählt am meisten?",
+      ...(v.ungerade ? ["Ungerade heisst: Bei den Einern liegt eine ungerade Anzahl Punkte."] : [])]
+    : ["Die Zahl muss genau so viele Stellen haben: Die erste Stelle braucht einen Punkt.", "Die übrigen Punkte sollen möglichst wenig wert sein."]);
   ctx.flaeche.append(el("div", { class: "auftrag", text: v.text }));
   const t = punkteTabelle(ctx, Object.fromEntries(SPALTEN.map(st => [st.k, 0])), "legen");
   const ok = okZeile(ctx, () => {
@@ -349,6 +360,7 @@ const ABLAUF = {
 LS.spiel({
   id: "punkte-schieber",
   einleitung: "In der Stellenwerttabelle kann man Zahlen auch mit Punkten zeigen: 3 Punkte bei den H sind 300. Und wenn du Punkte verschiebst, wird die Zahl eine ganz andere!",
+  hilfe: "Beim Legen tippst du in ein Feld, um einen Punkt dazuzulegen, und auf einen Punkt, um ihn wegzunehmen. Beim Verschieben tippst du einen Punkt an und dann das Feld, wohin er soll. Mit „OK ✓“ prüfst du, mit „↺ Neu anfangen“ ist alles wie am Anfang.",
   anzahl: 8,
   stufen: {
     s1: "Tabelle mit H, Z und E: legen, ablesen, einen Punkt verschieben.",

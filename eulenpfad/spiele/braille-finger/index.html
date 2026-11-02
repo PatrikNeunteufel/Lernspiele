@@ -273,8 +273,32 @@ function setzFeld(ctx, pruefe) {
   ctx.flaeche.append(ort, el("div", { class: "bf-knoepfe" }, leeren, pruefen));
 }
 
+/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man eine Zelle liest — nie Buchstabe oder Punkte der Lösung. */
+const LINKS_RECHTS = "Punkt 1, 2, 3 stehen links von oben nach unten, Punkt 4, 5, 6 rechts.";
+function tippsFuer(a, stufe) {
+  switch (a.art) {
+    case "zaehlen": return ["Zähle nur die schwarzen Punkte.", "Zähle zuerst links von oben nach unten, dann rechts."];
+    case "gleich": return ["Vergleiche Punkt für Punkt: oben, in der Mitte, unten.", "Gespiegelt ist nicht gleich! Schau, ob die Punkte links oder rechts stehen."];
+    case "lesen":
+      if (stufe === "s2") return ["Welche Punkte sind schwarz? Schau sie dir genau an.", "Such in der Tafel die Zelle, die genau gleich aussieht."];
+      if (stufe === "s3") return ["Der Punkt unten links gehört zur zweiten Zehnerreihe.",
+        "Denk dir den Punkt unten links weg und such diese Zelle in der Tafel. Dein Buchstabe kommt zehn Buchstaben später im Alphabet."];
+      return ["Schau zuerst die unteren Punkte an: keiner, nur links, oder beide?", REGEL_ALLE];
+    case "finden":
+      if (stufe === "s3") return ["Welcher Buchstabe kommt zehn Buchstaben früher im Alphabet? Such ihn in der Tafel.", "Zu dieser Zelle kommt dann der Punkt unten links dazu."];
+      return ["Such den Buchstaben in der Tafel.", "Vergleiche die Punkte genau — gespiegelte Zellen sind nicht gleich."];
+    case "wort": return ["Lies Zelle für Zelle, von links nach rechts.", REGEL_ALLE];
+    case "setzen": return [LINKS_RECHTS, REGEL_ALLE];
+    case "schreiben": return [`Setz einen Buchstaben nach dem andern. ${LINKS_RECHTS}`, REGEL_ALLE];
+  }
+  return [];
+}
+
 LS.spiel({
   id: "braille-finger",
+  hilfe: stufe => (stufe === "s1" ? "Schau die Braille-Zelle an und tippe die passende Antwort an."
+    : stufe === "s5" || stufe === "s6" ? `Tippe in der grossen Zelle die Punkte an, die schwarz sein sollen; nochmals tippen nimmt einen Punkt weg, «Alle weg ↺» leert die Zelle. Dann tippst du «Prüfen ✓»${stufe === "s6" ? " — so schreibst du das Wort Buchstabe für Buchstabe" : ""}.`
+    : "Lies die Braille-Zelle und tippe die passende Antwort an. Die Tafel zeigt dir, wie die Buchstaben aussehen."),
   einleitung: "Louis Braille aus Frankreich wurde als kleines Kind blind. Als Jugendlicher erfand er vor rund 200 Jahren eine Schrift aus erhabenen Punkten, die man mit den Fingern liest. Jeder Buchstabe ist eine Zelle mit sechs Punkten!",
   anzahl: 8,
   stufen: nurMoegliche({
@@ -296,6 +320,7 @@ LS.spiel({
     if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
     // Zellen sind SVG ohne Text: Die Aufgabe erkennt man an Art und Buchstabe, Muster oder Wort.
     ctx.kennung(`${a.art}|${a.b || a.m || a.w}`);
+    ctx.tipp(tippsFuer(a, ctx.stufe)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const tafelOrt = el("div");
     f.append(tafelOrt);
     if (p.tafel === "aj") tafelOrt.append(tafelEl(AJ, ctx.stufe === "s3" ? REGEL_KT : null));

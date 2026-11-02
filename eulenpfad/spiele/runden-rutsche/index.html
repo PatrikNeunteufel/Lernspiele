@@ -138,9 +138,23 @@ function hinweisFuer(a, knapp) {
   return `Schau auf die Ziffer rechts von den ${dativ(a.auf)}: Es ist eine ${ziffer}. Bei 0–4 rundet man ab, bei 5–9 auf.`;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Rutsche, entscheidende Stelle und Regel — ohne die
+ * Ziffer selbst zu nennen (Ziffer + Regel wäre bei zwei Antworten schon die Lösung).
+ */
+function tippsFuer(a, p) {
+  const t = [p.knapp ? "Wo liegt die Zahl: näher bei der kleineren oder bei der grösseren runden Zahl?" : "Schau die Kugel an: Liegt sie vor oder hinter der Mitte der Rutsche?",
+    `Welche Ziffer steht rechts von den ${dativ(a.auf)}? Bei 0–4 rundet man ab, bei 5–9 auf.`];
+  if (p.tippen) t.push(`Gerundet auf ${NAME[a.auf]} endet die Zahl auf ${String(a.auf).slice(1)}. Die Stellen davor bleiben — oder die ${NAME[a.auf]}-Stelle wird eins grösser.`);
+  return t;
+}
+
 LS.spiel({
   id: "runden-rutsche",
   einleitung: "Auf welche Seite rutscht die Kugel? Liegt die Zahl näher bei der kleineren oder der grösseren runden Zahl? Genau in der Mitte rutscht sie nach oben!",
+  hilfe: stufe => (STUFE[stufe]?.tippen
+    ? "Runde die grosse Zahl auf die genannte Stelle und tippe die gerundete Zahl ein. Die Rutsche zeigt, zwischen welchen runden Zahlen sie liegt."
+    : "Die Kugel liegt zwischen zwei runden Zahlen. Tippe an, wohin sie rutscht: ⬅ abrunden oder aufrunden ➡."),
   anzahl: 8,
   stufen: {
     s1: "Bis 1000 auf Zehner und Hunderter.",
@@ -162,6 +176,7 @@ LS.spiel({
 
     const loesungText = `${zahlText(a.zahl)} ≈ ${zahlText(a.loesung)}`;
     ctx.loesung(loesungText);
+    ctx.tipp(tippsFuer(a, STUFE[ctx.stufe]));
     const knapp = !!STUFE[ctx.stufe].knapp;
     ctx.schritte(STUFE[ctx.stufe].tippen ? LS.tippSchritte(a.loesung) : 1);
     if (!STUFE[ctx.stufe].tippen) {

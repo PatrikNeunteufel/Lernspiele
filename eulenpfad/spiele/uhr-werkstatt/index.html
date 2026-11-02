@@ -189,8 +189,36 @@ function zeitAusZiffern(z) {
   return { h: Number(s.slice(0, -2)), m: Number(s.slice(-2)) };
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst welcher Zeiger was zeigt, dann wie man abzählt
+ * oder rechnet — nie die Uhrzeit oder Dauer selbst.
+ */
+const UEBER_STUNDE = "Geht es über die volle Stunde? Dann rechne zuerst bis dorthin.";
+function tippsFuer(a, stufe) {
+  switch (a.art) {
+    case "lesenWorte": return ["Schau zuerst auf den langen blauen Zeiger: Zeigt er nach oben, nach unten oder zur Seite?",
+      stufe === "s1" ? "Steht der kurze Zeiger zwischen zwei Zahlen, sagst du bei „halb“ die Zahl, zu der er gerade hinwandert."
+        : "Steht der kurze Zeiger zwischen zwei Zahlen: Bei „halb“ und „Viertel vor“ sagst du die Zahl, zu der er hinwandert, bei „Viertel nach“ die, an der er schon vorbei ist."];
+    case "stellenWahl": return ["Der kurze Zeiger zeigt die Stunden, der lange blaue die Minuten.",
+      stufe === "s2" ? "Der lange Zeiger zeigt die Minuten: bei der 3 sind es 15, bei der 6 sind es 30 Minuten."
+        : "Jede Zahl auf dem Rand sind 5 Minuten. Zähl beim langen Zeiger in 5er-Schritten."];
+    case "lesenDigital":
+    case "lesenTippen": return ["Lies zuerst die Stunde am kurzen Zeiger. Steht er zwischen zwei Zahlen, gilt die, an der er schon vorbei ist.",
+      "Zähl beim langen Zeiger in 5er-Schritten von oben aus" + (STUFE[stufe].raster === "1" ? ", dann die kleinen Striche dazu." : ".")];
+    case "spanne": return [UEBER_STUNDE, "Zähl dann die ganzen Stunden dazu (1 h = 60 min) und am Schluss den Rest."];
+    case "rueckwaerts": return ["Rechne rückwärts: Zieh zuerst die ganzen Stunden ab.", "Dann ziehst du die Minuten ab. Reicht es nicht, gehst du über die volle Stunde zurück."];
+    case "lesen24": return ["Lies die Uhr zuerst wie immer.", "Am Nachmittag und am Abend zählst du zur Stunde 12 dazu: 1 Uhr nachmittags ist 13 Uhr."];
+    default: return [UEBER_STUNDE, "Dann zählst du den Rest dazu. 60 Minuten sind 1 Stunde."];
+  }
+}
+const HILFE_LESEN = "Schau die Uhr an und tippe auf die passende Zeit — oder auf die Uhr, die die genannte Zeit zeigt.";
+const HILFE_TIPPEN = "Eine Uhrzeit tippst du so: zuerst die Stunde, dann zwei Ziffern für die Minuten (7 4 5 für 7:45).";
+
 LS.spiel({
   id: "uhr-werkstatt",
+  hilfe: stufe => (["s1", "s2"].includes(stufe) ? HILFE_LESEN
+    : ["s3", "s4"].includes(stufe) ? `${HILFE_LESEN} ${HILFE_TIPPEN}`
+    : `Rechne mit der Zeit und tipp das Ergebnis ein: Minuten oder eine Uhrzeit. ${HILFE_TIPPEN}`),
   einleitung: "Tick, tack! Wie spät ist es? Der kurze Zeiger zeigt die Stunden, der lange blaue die Minuten.",
   anzahl: 8,
   stufen: {
@@ -205,6 +233,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     const { art, h, m } = a;
+    ctx.tipp(tippsFuer(a, ctx.stufe));
     if (new Set(STUFE[ctx.stufe].arten).size > 1) ctx.serie("art", art);
     let fertig = false;
     /** Handgriffe, um eine Uhrzeit einzutippen: 7:45 als 7 4 5, dann OK. */

@@ -263,9 +263,31 @@ function pruefeAufgabe(r, stufe) {
   return m;
 }
 
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Vorgehen je Rätselart, ausführlicher als die knappen
+ * Hinweise der Königsstufe (ein Tipp kostet einen halben Fehler) — nie der Code oder eine Zwischenzahl.
+ * Das Beispiel bei der Knacknuss ist viel kleiner als jede Rätselzahl, also nie die Lösung.
+ */
+const WIEVIELE_BSP = Object.fromEntries([["Z", 560], ["H", 3400], ["T", 72000], ["ZT", 830000]]
+  .map(([k, z]) => [k, `In ${zahlText(z)} stecken ${zahlText(z / ST[k].wert)} ${k}.`]));
+function tippsFuer(r, p) {
+  if (r.art === "buendeln") return ["Schreib jeden Teil an seine Stelle in einer Stellenwerttabelle.",
+    "Hat ein Teil mehr als 9, bündelst du: 10 Einer sind 1 Zehner, 10 Zehner sind 1 Hunderter, …",
+    "Stellen ohne Teil bekommen eine 0."];
+  if (r.art === "nachbar") return ["Schreib die Zahl ab und schau, an welchen Stellen sich etwas ändert.",
+    r.plus ? "Zähl die Teile an ihrer Stelle dazu. Wird eine Stelle grösser als 9, gibt es einen Übertrag nach links."
+      : "Nimm die Teile an ihrer Stelle weg. Reicht eine Stelle nicht, entbündelst du einen von der Stelle links davon."];
+  if (r.art === "ziffernraetsel") return ["Mach dir eine Stellenwerttabelle und trag jede Ziffer ein, die du schon weisst.",
+    "Fang mit den Hinweisen an, die eine Ziffer direkt nennen. Dann kommen die, die zwei Ziffern vergleichen.",
+    ...(p.summe ? ["Beim Zusammenzählen-Hinweis: Zähl die Ziffern, die du schon kennst, zusammen. Wie viel fehlt noch?"] : [])];
+  return [`Nicht nur die ${r.k}-Ziffer zählt! Alles links davon sind auch ${ST[r.k].name}.`,
+    `${WIEVIELE_BSP[r.k]} Deck die Ziffern rechts von der ${r.k}-Stelle ab.`];
+}
+
 LS.spiel({
   id: "zahlenraetsel-tresor",
   einleitung: "Im Tresor liegt ein Schatz! Jedes Rätsel verrät dir den Code. Rechne gut — die Zahl ist der Schlüssel.",
+  hilfe: "Lies das Rätsel neben dem Tresor. Die gesuchte Zahl ist der Code: Tipp sie ein und drück OK. Stimmt der Code, geht der Tresor auf.",
   anzahl: 6,
   stufen: {
     s1: "Bis 1000, mit einem Bündel wie 13 Z.",
@@ -286,6 +308,7 @@ LS.spiel({
     const loesung = `${r.erklaerung} → Code ${zahlText(r.loesung)}`;
     ctx.loesung(loesung);
     ctx.schritte(LS.tippSchritte(r.loesung));
+    ctx.tipp(tippsFuer(r, P[ctx.stufe]));
 
     const tresor = el("div", { class: "tresor", "aria-hidden": "true",
       html: `<div class="innen">${waehle(["💎", "👑", "🏆", "💰", "🪙", "🎁"])}</div><div class="tuer"><div class="rad"></div></div>` });
