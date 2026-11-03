@@ -57,12 +57,14 @@ const rekordKennung = e => LS.MIX_PRAEFIX + auswahlSchluessel(e);
  */
 const fachVon = s => THEMEN.find(t => t.id === s.thema)?.fach;
 
-function kandidaten(name, e) {
-  if (e.check) return SPIELE.filter(s => LS.spielSichtbar(s.id) && UEBERTRITT.faecher.includes(fachVon(s)))
+function kandidaten(name, e, auchGesperrte = false) {
+  // auchGesperrte: alle Spiele, die passen würden — um zu sagen, wie viele die Aufsicht noch freigeben kann.
+  const sichtbar = s => auchGesperrte || LS.spielSichtbar(s.id);
+  if (e.check) return SPIELE.filter(s => sichtbar(s) && UEBERTRITT.faecher.includes(fachVon(s)))
     .map(s => ({ s, stufe: UEBERTRITT.stufeNachAbstand[UEBERTRITT.klasse - s.klasse] }))
     .filter(x => x.stufe && x.s.stufen.includes(x.stufe) && (!istEndlos(e) || (x.s.endlos || []).includes(x.stufe)));
   const fokus = LS.profil(name).fokus;
-  return SPIELE.filter(s => LS.spielSichtbar(s.id)
+  return SPIELE.filter(s => sichtbar(s)
       && (!e.faecher.length || e.faecher.includes(fachVon(s)))
       && (!e.fokus || s.lernziele.some(l => fokus.includes(l.lz))))
     .map(s => ({ s, stufe: e.stufe === "passend" ? LS.empfohleneStufe(name, s.id) || "s3" : e.stufe }))
@@ -113,10 +115,16 @@ function zeichneEinstellungen() {
 
   const n = kandidaten(name, e).length;
   const jeRunde = e.check ? UEBERTRITT.spieleJeRunde : MIX.spieleJeRunde;
+  // Gesperrte Spiele, die passen würden (Hinweis Patrik, LERN_Session10: der Übertritts-Check „mischt nicht“, wenn
+  // für das Kind erst ein Spiel der 5./6. Klasse freigegeben ist) — nur für Kinder, die Aufsicht sieht alle.
+  const gesperrt = LS.aufsichtAngemeldet() ? 0 : kandidaten(name, e, true).length - n;
   karte.append(
     el("p", { class: "leise mitte", text: n
       ? `${n} Spiel${n === 1 ? " passt" : "e passen"}, gemischt ${n === 1 ? "wird es" : `werden ${Math.min(n, jeRunde)} davon`}.`
-      : "Für diese Auswahl gibt es kein freigegebenes Spiel." }),
+      : "Für diese Auswahl gibt es kein freigegebenes Spiel." }));
+  if (gesperrt > 0 && n < jeRunde) karte.append(el("p", { class: "leise mitte",
+    text: `${gesperrt} weitere${gesperrt === 1 ? "s" : ""} Spiel${gesperrt === 1 ? " ist" : "e sind"} noch nicht freigegeben — die Aufsicht gibt sie in der Verwaltung frei.` }));
+  karte.append(
     el("div", { class: "knopfzeile" },
       el("button", { class: "knopf gruen", type: "button", text: "🎲 Los geht's", ...(n ? {} : { disabled: "" }), onclick: () => starte(name, e) })));
   if (istEndlos(e)) karte.append(LS.rangliste(rekordKennung(e), e.stufe, e.timer, name));
