@@ -1,6 +1,7 @@
 # Konzept: Gruppen — Familie, Klasse, Lerngruppe
 
-Stand: 03.11.2026 (LERN_Session11) · **Entwurf, nicht umgesetzt** (Entscheid K1 a: erst Konzept, dann bauen).
+Stand: 03.11.2026 (LERN_Session11) · **Entschieden (G1–G10, Abschnitt 9), nicht gebaut** (Entscheid K1 a: erst
+Konzept, dann bauen).
 Gilt für die ganze Reihe (Eulenpfad → Lernsteig → Gratwanderung): dasselbe Prinzip in allen Apps.
 Ersetzt nicht, sondern umfasst [konzept_klasseneinstellungen.md](eulenpfad/konzept_klasseneinstellungen.md)
 (LERN-34, Fragen F1–F8): Die Klasseneinstellungen werden zu den Einstellungen einer Gruppe der Art Klasse.
@@ -64,6 +65,9 @@ Gruppe = {
 - **Beitritt:** Je Kind erzeugt die Lehrperson einen **Beitrittscode** (Gruppen-Id, Mitglieds-Id, Schlüssel;
   als Text und QR). Die **Aufsicht der Familie** gibt ihn auf ihrem Gerät ein und wählt, welches Kind gemeint
   ist. Erst damit fliessen Daten (G3) — der Beitritt ist die Einwilligung der Familie, je Kind.
+- **Ab wann** (G3 a mit Zusatz Patrik): Beim Beitritt wählt die Aufsicht der Familie das Startdatum — Vorgabe der
+  Beitrittstag, auch früher möglich („rückwirkend ab …“, bis „alles“), damit die Lehrperson den Stand vor dem Beitritt
+  sieht. Später zurücksetzen lässt es sich nur nach vorn (was geteilt ist, ist geteilt).
 - Austreten kann die Familie jederzeit; danach schreibt das Gerät nichts mehr an den Ort der Klasse.
 - **Klassenstatistik:** dieselben Auswertungen wie heute (`auswertung.js`), über alle Mitglieder: je Lernziel
   Anteil auf Anhieb richtig, Verlauf, wer welche Stufe erreicht, Lernplan erfüllt, Meldungen.
@@ -87,12 +91,26 @@ Gruppe = {
 - **Verschlüsselt** (G4): AES-GCM mit 256-Bit-Schlüssel der Gruppe (WebCrypto, im Browser eingebaut, keine
   Abhängigkeit). Der Schlüssel reist nur im Beitrittscode, nie an den Ort. Wer den Ordner sieht (Cloud-Dienst,
   Schul-IT), sieht nur Gerätedateien mit Zufallsnamen.
-- **Geräte-Kennung je Gruppe** (G5): Für jede Gruppe zieht das Gerät eine eigene zufällige Kennung; der
-  Dateiname am Ort ist `lernspiele-<gruppe>-<geraet>.json`. Zwei Gruppen können so nicht erkennen, dass
-  dasselbe Gerät in beiden ist, und ein Austritt hinterlässt nur eine verwaiste Datei.
+- **Umstellung bestehender Orte** (G4 a mit Zusatz Patrik): Die neue Fassung liest unverschlüsselte Dateien
+  weiterhin ein (abwärtskompatibel). Beim ersten Abgleich schreibt jedes Gerät seine eigene Datei verschlüsselt und
+  löscht seine unverschlüsselte gleich danach. Fremde unverschlüsselte Dateien (ein Gerät, das noch die alte Fassung
+  hat) liest es weiter und zeigt in der Verwaltung „Gerät … noch unverschlüsselt“; löschen tut sie das Gerät selbst
+  beim eigenen Update, oder die Aufsicht von Hand (für ein Gerät, das es nicht mehr gibt). Ein Gerät löscht nie
+  von sich aus die Datei eines anderen — es könnte sie gleich danach neu schreiben.
+- **Geräte-Kennung je Gruppe** (G5 a): Für jede Gruppe zieht das Gerät eine eigene zufällige Kennung (128 Bit aus
+  `crypto.getRandomValues`); der Dateiname am Ort ist `lernspiele-<gruppe>-<geraet>.json`. Zusatz Patrik: Vor dem
+  ersten Schreiben prüft das Gerät, dass es die Kennung am Ort noch nicht gibt, sonst zieht es neu. Zufall statt Hash:
+  Ein Hash aus Geräte- und Gruppen-Kennung wäre aus beiden nachrechenbar und verbände die Gruppen wieder; die
+  Wahrscheinlichkeit, dass zwei Zufallskennungen gleich sind, liegt bei 30 Geräten unter 10⁻³⁵ — die Prüfung fängt nur
+  Fehler im Zufallsgenerator. Zwei Gruppen können so nicht erkennen, dass dasselbe Gerät in beiden ist, und ein
+  Austritt hinterlässt nur eine verwaiste Datei.
+- **QR-Code** (Frage zu G7): für den **Beitrittscode** ja (Gruppe, Mitglied, Schlüssel; etwa 100 Zeichen, passt in
+  einen kleinen QR-Code; die Kamera des Tablets liest ihn). Für die **Daten** nein: Eine Woche einer Klasse sind rund
+  100 000 Zeichen, ein QR-Code fasst höchstens rund 3 000. Den QR-Erzeuger baut das Projekt selbst (keine
+  Abhängigkeit); lesen tut ihn die Kamera-App des Geräts, die den Link öffnet.
 - **Transport** (G7): Ordner (File System Access, heute Chrome und Edge am Computer), sonst eine verschlüsselte
   **Gruppendatei** über den Teilen-Dialog des Geräts (E-Mail, Schulplattform, AirDrop — der Kanal ist egal, weil
-  der Inhalt verschlüsselt ist). Die Lehrperson liest mehrere Dateien auf einmal ein.
+  der Inhalt verschlüsselt ist; Intranet wie Internet). Die Lehrperson liest mehrere Dateien auf einmal ein.
 - Zusammenführen wie heute (`LS.zusammenfuehren`), je Gruppe.
 - Dritter Weg, wenn eine Lehrperson oder Aufsicht ihn einrichtet: ein **Klassenserver im Intranet** (G9, G10).
 
@@ -167,6 +185,15 @@ Folgen, die vor einem Entscheid gerechnet sein müssen (alle **nicht gemessen**)
    Aufsicht wählt“), ist aber eine neue Art Ort: Er sieht, wann welches Gerät abgleicht. Inhalte bleiben
    verschlüsselt (G4), der Server hat den Schlüssel nicht.
 
+**Im Internet statt im Intranet** (Frage Patrik zu G7/G9): technisch derselbe Server mit öffentlicher Adresse und
+einem Zertifikat einer öffentlichen Stelle (z. B. Let's Encrypt, braucht einen Domainnamen). Vorteile: Die App von
+GitHub Pages darf ihn ansprechen (https zu https, mit CORS-Freigabe des Servers) — Punkte 2 und 3 entfallen, Kinder
+gleichen zu Hause und in der Schule mit demselben Ort ab; auf den Geräten ist kein Zertifikat zu installieren.
+Kosten: Der Rechner ist aus dem Internet erreichbar (Betrieb, Updates, Schutz vor Missbrauch der Ablage), und wer
+ihn betreibt, sieht Zugriffszeiten und Adressen. Der Inhalt bleibt Ende-zu-Ende verschlüsselt, also gilt das
+Grundprinzip weiter. Gebaut wird der Server so, dass er beides kann; ob und wo er im Internet läuft, entscheidet die
+Aufsicht — als **G11** vor dem ersten Betrieb im Internet vorzulegen (wer betreibt, Domain, Schutz der Ablage).
+
 ## 6. Lerngruppen von Kindern
 
 - Gleiche Struktur, Art `lerngruppe`; die Leitung ist ein Kind. Ein Kind lädt andere über einen Code ein.
@@ -187,12 +214,31 @@ Folgen, die vor einem Entscheid gerechnet sein müssen (alle **nicht gemessen**)
 Neu verlassen Daten das Gerät **in einen Ort, den die Leitung einer Gruppe gewählt hat**, verschlüsselt, nur für
 verknüpfte Kinder und nur nach dem Beitritt durch ihre Aufsicht. Vorschlag für CLAUDE.md (nach G3, G4):
 
-> Ausnahme Gruppen (Entscheid G…, Konzept `docs/konzept_gruppen.md`): Ist ein Kind durch seine Aufsicht einer
-> Gruppe (Familie, Klasse, Lerngruppe) beigetreten, gehen seine Runden, Rekorde, Meldungen und seine Anzeige in
-> dieser Gruppe verschlüsselt an den Abgleich-Ort der Gruppe; den Schlüssel haben nur die Geräte der Gruppe.
-> Austreten beendet das. Keine Daten anderer Kinder des Geräts.
+> Ausnahme Gruppen (Entscheide G1–G10, 2026-11-03, Konzept `docs/konzept_gruppen.md`): Ist ein Kind durch seine
+> Aufsicht einer Gruppe (Familie, Klasse) beigetreten, gehen seine Runden, Rekorde, Meldungen und seine Anzeige in
+> dieser Gruppe ab dem Datum, das die Aufsicht beim Beitritt wählt, verschlüsselt an den Abgleich-Ort der Gruppe
+> (Ordner, Gruppendatei oder Klassenserver); den Schlüssel haben nur die Geräte der Gruppe. Austreten beendet das.
+> Keine Daten anderer Kinder des Geräts.
+
+Eingetragen wird der Text in CLAUDE.md mit dem Bau (Abschnitt 10, Schritt 10), nicht vorher — er beschreibt, was
+die App dann tut.
 
 ## 9. Entscheidungen
+
+**Entschieden** von Patrik am 03.11.2026 (LERN_Session11): alle nach Empfehlung, mit Zusätzen.
+
+| Nr. | Entscheid | Zusatz Patrik |
+|---|---|---|
+| G1 | a — ein Modell `Gruppe` mit Art | — |
+| G2 | a — „Ich bin Lehrperson“ selbst gesetzt | — |
+| G3 | a — Runden, Rekorde, Meldungen nach dem Beitritt | auch rückwirkend datierbar (Abschnitt 4) |
+| G4 | a — immer verschlüsseln | abwärtskompatibel einlesen, unverschlüsselte Datei gleich durch verschlüsselte ersetzen (Abschnitt 5) |
+| G5 | a — Kennung je Gruppe | vor dem ersten Schreiben auf Eindeutigkeit am Ort prüfen (Abschnitt 5) |
+| G6 | a — keine Lerngruppen von Kindern im Eulenpfad | — |
+| G7 | a — Gruppendatei über den Teilen-Dialog | QR für den Beitrittscode; Intranet wie Internet (Abschnitt 5) |
+| G8 | a — Gruppen-Erfolge nur gemeinsam | Challenges unter Kindern mit Zustimmung der Lehrperson (unten) |
+| G9 | a — Klassenserver als zusätzlicher Ort | auch im Internet möglich, Betrieb dort als G11 vorzulegen (Abschnitt 5c) |
+| G10 | a — Zertifikat der Schul-IT, sonst selbst erstellt | eigene Anleitung: [anleitung_zertifikat_klassenserver.md](anleitung_zertifikat_klassenserver.md) |
 
 ### G1 — Ein Modell für Familie, Klasse und Lerngruppe?
 **Ort:** Abschnitt 3; heute `konzept_klasseneinstellungen.md` Abschnitt 4 (eigene Struktur „Klasse“).
@@ -310,6 +356,12 @@ Einen dritten Weg ohne fremden Dienst, den Klassenserver im Intranet, stellt G9.
 einer ganzen Klasse stellt die schwächsten bloss — genau die, für die die Klassenstatistik gedacht ist. Kippt
 nicht für Kinder; im Lernsteig neu zu stellen.
 
+**Zusatz Patrik (Challenges):** Mit Zustimmung der Lehrperson sind Challenges unter Kindern möglich — freiwillig für
+beide Seiten: ein Kind fordert ein anderes heraus (z. B. Endlos-Rekord in einem Spiel und einer Stufe, oder wer diese
+Woche zuerst sein Wochenziel schafft), das andere nimmt an oder lehnt ab, ohne dass jemand es sieht. Sichtbar ist das
+Ergebnis nur den beiden; keine Rangliste der ganzen Klasse. Die Lehrperson schaltet Challenges je Klasse ein und sieht
+in der Klassenstatistik nur, ob sie genutzt werden.
+
 ### G9 — Klassenserver im Intranet anbieten?
 **Ort:** Abschnitt 5c; Werkzeug `tools/server.py` (liefert heute nur aus).
 **Heutiger Wortlaut:** Abgleich nur über einen Ordner oder eine Datei (rahmen.md 10, S1 a).
@@ -340,9 +392,10 @@ vertrauen, zeigt Warnungen, die Kinder nicht wegklicken sollen.
 
 *Warum die Empfehlung:* a nutzt die geprüfte Verschlüsselung des Browsers und lässt das Netz ohne Klartext. b wäre
 ohne Installation auf den Geräten, aber selbst geschriebene Kryptografie ist eine bekannte Fehlerquelle, die
-niemand hier prüfen kann. c gibt Vornamen und Lernstand jedem preis, der im Netz mitliest. **Nicht nachgerechnet:**
-Python erzeugt mit der Standardbibliothek keine Zertifikate; nötig wäre `openssl` (unter Windows mit Git dabei)
-— ob das als Werkzeug ohne Abhängigkeit gilt, ist mit zu entscheiden. Kippt, wenn die Installation auf
+niemand hier prüfen kann. c gibt Vornamen und Lernstand jedem preis, der im Netz mitliest. **Nachgerechnet am
+03.11.2026:** `openssl` 3.2.3 aus Git for Windows erzeugt eigene Zertifizierungsstelle und Serverzertifikat; ein
+Server nur mit der Python-Standardbibliothek (`ssl`) liefert damit https aus, ein Client mit der eigenen CA nimmt
+an, ohne sie lehnt er ab. `openssl` wird nur einmal beim Einrichten gebraucht, die App bleibt ohne Abhängigkeit. Kippt, wenn die Installation auf
 verwalteten Schul-iPads nicht erlaubt ist (dann nur mit dem Zertifikat der Schul-IT, sonst G9 b).
 
 ## 10. Schritte, wenn es gebaut wird
