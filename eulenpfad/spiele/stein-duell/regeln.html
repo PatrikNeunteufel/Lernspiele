@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stein-Duell — Regeln</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<link rel="stylesheet" href="../gemeinsam/regeln.css">
+<style>
+  .regeln svg .st { fill: var(--deko-7); }
+  .regeln svg .wahl { fill: var(--deko-7); stroke: var(--knopf); stroke-width: 4; }
+  .regeln svg .weg { fill: var(--deko-7); opacity: .18; }
+  .regeln svg text { font: 800 18px var(--schrift); fill: var(--deko-1); }
+</style>
+</head>
+<body>
+<main class="regeln">
+  <a class="zurueck-link" href="index.html">← Zurück zum Spiel</a>
+  <h1>🪨 Stein-Duell</h1>
+  <p class="unter">Ein Spiel für zwei: du gegen die Eule.</p>
+
+  <section>
+    <h2>Die Steine</h2>
+    <p>Auf dem Tisch liegen Steine. Manchmal in einer Reihe, manchmal in zwei oder drei Reihen.</p>
+    <figure>
+      <svg viewBox="0 0 360 60" role="img" aria-label="Eine Reihe mit 7 Steinen">
+        <circle class="st" cx="30" cy="30" r="20"/><circle class="st" cx="80" cy="30" r="20"/><circle class="st" cx="130" cy="30" r="20"/>
+        <circle class="st" cx="180" cy="30" r="20"/><circle class="st" cx="230" cy="30" r="20"/><circle class="st" cx="280" cy="30" r="20"/>
+        <circle class="st" cx="330" cy="30" r="20"/>
+      </svg>
+      <figcaption>Eine Reihe mit 7 Steinen</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Ein Zug</h2>
+    <p>Ihr seid abwechselnd dran. Wer dran ist, nimmt Steine weg — mindestens einen.</p>
+    <ul>
+      <li><b>Eine Reihe:</b> Du nimmst 1 bis 2 Steine, 1 bis 3 Steine … Die Zahl steht über den Steinen.</li>
+      <li><b>Mehrere Reihen:</b> Du nimmst aus <b>einer</b> Reihe so viele, wie du willst. Auch die ganze Reihe.</li>
+    </ul>
+    <figure>
+      <svg viewBox="0 0 360 130" role="img" aria-label="Zwei Reihen; aus Reihe 1 werden 2 Steine genommen">
+        <text x="4" y="37">1</text>
+        <circle class="st" cx="50" cy="30" r="20"/><circle class="st" cx="100" cy="30" r="20"/><circle class="st" cx="150" cy="30" r="20"/>
+        <circle class="wahl" cx="200" cy="30" r="20"/><circle class="wahl" cx="250" cy="30" r="20"/>
+        <text x="4" y="102">2</text>
+        <circle class="st" cx="50" cy="95" r="20"/><circle class="st" cx="100" cy="95" r="20"/><circle class="st" cx="150" cy="95" r="20"/>
+      </svg>
+      <figcaption>Erlaubt: 2 Steine aus Reihe 1. Nicht erlaubt: Steine aus beiden Reihen zugleich.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Wer gewinnt?</h2>
+    <p>Wer den <b>letzten Stein</b> nimmt, gewinnt.</p>
+    <figure>
+      <svg viewBox="0 0 360 60" role="img" aria-label="Ein Stein bleibt übrig, die anderen sind weg">
+        <circle class="weg" cx="30" cy="30" r="20"/><circle class="weg" cx="80" cy="30" r="20"/><circle class="weg" cx="130" cy="30" r="20"/>
+        <circle class="weg" cx="180" cy="30" r="20"/><circle class="weg" cx="230" cy="30" r="20"/><circle class="weg" cx="280" cy="30" r="20"/>
+        <circle class="wahl" cx="330" cy="30" r="20"/>
+      </svg>
+      <figcaption>Nimmst du diesen letzten Stein, hast du gewonnen.</figcaption>
+    </figure>
+    <p>Im Endgegner gibt es manchmal die umgekehrte Regel: <b>Wer den letzten Stein nimmt, verliert.</b> Dann steht über den Steinen ⚠️ Achtung.</p>
+    <p class="merke">Lies zuerst die Regel über den Steinen: Wie viele darfst du nehmen, und gewinnt oder verliert der letzte Stein?</p>
+  </section>
+
+  <section>
+    <h2>So spielst du hier</h2>
+    <ol>
+      <li>Du bist dran. Tippe die Steine an, die du nehmen willst.</li>
+      <li>Tippe auf „✋ Nehmen“.</li>
+      <li>Ist dein Zug gut, kann die Eule nicht mehr gewinnen. Sonst zeigt sie dir, wie sie antworten würde — und du versuchst es nochmal.</li>
+    </ol>
+    <p>Manchmal fragt die Eule: Willst du anfangen, oder soll sie anfangen?</p>
+    <p class="merke">Probier aus und denk vom Ende her. So findest du die Züge, mit denen du gewinnst.</p>
+  </section>
+
+  <a class="knopf los" href="index.html">Zum Spiel</a>
+</main>
+</body>
+</html>

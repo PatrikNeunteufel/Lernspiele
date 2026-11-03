@@ -638,6 +638,19 @@ for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE7) {
   tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
 }
 
+// LERN_Session11: Strategie-Rätsel — nur König in der Falle hat eine Inhaltsliste (Stein-Duell und Steine fangen
+// erzeugen ihre Stellungen und prüfen sie mit der eigenen Regel-Maschine).
+const KOENIG_FALLE = lade("spiele/koenig-falle/stellungen.js", ["STELLUNGEN"]);
+const RUNDE8 = [
+  ["83. König in der Falle (Lehrplan SG MI.2.2)", "koenig-falle/stellungen", "Schachstellungen",
+    "Selbst gebaut und von der Regel-Maschine geprüft (genau ein Mattzug, s6 Matt in 2). Zu prüfen: wirkt die Stellung natürlich, passt der Hinweis? FEN: Weiss gross, Schwarz klein, von Reihe 8 nach Reihe 1.",
+    ["Stufe", "Stellung (FEN)", "Hinweis", "Lösung"], KOENIG_FALLE.STELLUNGEN.map(s => [s.stufe, s.fen.split(" ")[0], s.hinweis, s.loesung])],
+];
+for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE8) {
+  if (teilTitel) { z(`## ${teilTitel}`); z(""); }
+  tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
+}
+
 process.stdout.write(zeilen.join("\n"));
 
 // ---------- Inhalte je Liste: docs/eulenpfad/pruefung/listen.json ----------
@@ -882,6 +895,8 @@ for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE5) inListe(
 for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE6) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
 
 for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE7) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
+
+for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE8) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
 
 // Jede Quell-Liste braucht einen Eintrag — sonst bricht der Lauf ab, statt still eine Lücke zu schreiben.
 const fehlend = Object.keys(QUELL_LISTEN).filter(k => !listen[k] || listen[k].tabellen.every(t => !t.zeilen.length));

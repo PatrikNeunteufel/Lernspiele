@@ -135,7 +135,7 @@ LS.spiel({
 | `ctx.vorgehen(art, wert)` | Wie das Kind die Aufgabe angegangen ist, vor `ctx.richtig()` gemeldet (LERN_Session7). Landet in `aufgabenZeiten[i].vorgehen` und in der Statistik, Karte „Vorgehen“ (Punkte der letzten 12 Aufgaben). Arten und Werte (vom besten zum schwächsten, Ton gut/mittel/schwach) stehen in `AUSWERTUNG.VORGEHEN`: `systematik` (Möglichkeiten-Finder: Zählwerk, geordnet, kreuz und quer, mit Hilfe), `teilerpaare` (Teiler-Spürnase: in Paaren, der Grösse nach, durcheinander), `ausgleichen` (Mittelwert-Türme: ohne Umweg, mit Umwegen). |
 | `ctx.wartezeit(s)` | Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne). Uhr und Zeitmessung beginnen so viel später (Entscheide F1 a, F2 a, LERN_Session9); wartet das Spiel mit `ctx.nachAnsage`, zählt die Wartezeit ab dann. |
 | `ctx.nachAnsage(fn)` | `fn` erst rufen, wenn die Eule fertig ist: Lob der vorigen Aufgabe ausgesprochen, Auftrag vorgelesen (falls automatisch). **Pflicht für alles, was ein Spiel beim Zeichnen vorspielt oder vorspricht** (Melodie, Rhythmus, Hörtext, Satz) — sonst überlagern sich Stimme und Ton, oder die Eule bricht den Hörtext ab (Meldung Patrik zum Hoch-Tief-Ohr, LERN_Session11). Ohne Stimme 300 ms nach dem Zeichnen; eine neu gezogene Fassung der Aufgabe ruft nie. Ersetzt die früheren Verzögerungen von 250/450 ms in sechs Spielen. |
-| `ctx.tipp(texte)` | Gestufte Tipps zur Aufgabe (Text oder Liste), vom Anstoss zum Konkreten; nie die Lösung (das Testskript prüft es wie Hinweise). Beim Zeichnen rufen. Das Kind holt sie mit „💡 Tipp“ einzeln; ein Tipp zählt für die Sterne wie ein halber Fehler, „auf Anhieb“ heisst ohne Tipp; im Endlos-Modus keine Tipps (Abschnitt 14). |
+| `ctx.tipp(texte, beiTipp?)` | Gestufte Tipps zur Aufgabe (Text oder Liste), vom Anstoss zum Konkreten; nie die Lösung (das Testskript prüft es wie Hinweise). Beim Zeichnen rufen. `beiTipp(i, letzter)` wird gerufen, nachdem Tipp i gezeigt ist — für Tipps mit Bild (LERN_Session11, Steine fangen); kein eigener Klick-Hörer am Tipp-Knopf. Das Kind holt sie mit „💡 Tipp“ einzeln; ein Tipp zählt für die Sterne wie ein halber Fehler, „auf Anhieb“ heisst ohne Tipp; im Endlos-Modus keine Tipps (Abschnitt 14). |
 | `ctx.uhrWarten()` | Uhr und Zeitmessung beginnen erst, wenn die zurückgegebene Funktion gerufen wird: Jetzt kann das Kind antworten. Beim Zeichnen rufen. Für eine Stimme, die gleich vorspricht: `LS.sprich(text, sprache, "", ctx.uhrWarten())` (die Uhr startet, wenn die Stimme fertig ist, ohne Stimme sofort). `LS.losGehts` nutzt es selbst. **Regel** (F1 a, F2 a): Die Uhr läuft nie, solange das Kind nur warten kann — „▶ Los!“, 3-2-1, Zeigen, Vorspielen. |
 | `ctx.losKnopf` | Für `LS.losGehts`: „▶ Los!“ mit 3-2-1 (erste Aufgabe, nach einer Aufgabe mit Fehler oder Zeit um, im Mix) oder nur kurz 👀 (LERN-38). |
 | `ctx.sag(text, art?)` | Die Eule spricht (`art`: `"gut"` oder `"hinweis"`). |
@@ -637,3 +637,17 @@ Protokoll, den Endlos-Rekorden und den Meldungen; gespeichert werden nur zwei Pr
   `CLAUDE.md`.
 - **Neue Abzeichen** kommen in `ABZEICHEN` dazu, mit Id, Bild, Titel, `stufen` (steigend, höchstens fünf), `text(n)` und
   `pruefe(k, n)`; mehr braucht es nicht.
+
+## 16. Regelseite
+
+Wunsch Patrik, LERN_Session11 (zu ST3 a): Spiele mit Regeln, die man kennen muss, bevor man spielen kann (Schach,
+Go, Nim), erklären sie auf einer eigenen Seite statt in Stufen. Die Stufen bleiben beim einen Lernziel.
+
+- **Katalog:** `regeln: true`. Dann gehört neben `index.html` eine Seite `spiele/<id>/regeln.html` ✔.
+- **Zugang:** „📖 Regeln“ auf dem Startblatt (neben „🔗 Ähnliche Spiele“, gleicher Tab) und im Fenster „❓ So geht
+  das Spiel“ (im laufenden Spiel in einem neuen Tab, damit die Runde bleibt). Klasse `regeln-link` ist reserviert.
+- **Seite:** eigenständig, ohne Spielrahmen; lädt `../gemeinsam/stil.css` und `../gemeinsam/regeln.css` ✔, oben
+  „← Zurück zum Spiel“ mit `href="index.html"` ✔, darunter `<main class="regeln">` mit kurzen Abschnitten
+  (`section`, `h2`, ein Bild als inline-SVG, `.merke` für den einen Satz, der zählt) und am Ende ein Knopf zurück zum
+  Spiel. Kurze Sätze, Bilder vor Text, Schweizer Schreibweise; was die Regeln nicht verraten dürfen (die
+  Gewinnstrategie), bleibt weg.

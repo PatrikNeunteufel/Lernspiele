@@ -1,0 +1,16 @@
+/* Regelseite eines Spiels (spiele/<id>/regeln.html, Katalog regeln: true; LERN_Session11). Lädt nach stil.css;
+   kurze Abschnitte mit Bild, grosse Schrift, ohne Spielrahmen — die Seite läuft auch für sich. Vertrag: rahmen.md 16. */
+.regeln { max-width: 760px; margin: 0 auto; padding: 16px 16px 48px; }
+.regeln .zurueck-link { display: inline-block; margin-bottom: 10px; font-weight: 800; color: var(--knopf); text-decoration: none; font-size: 18px; }
+.regeln h1 { font-size: clamp(26px, 6vw, 36px); margin: 0 0 4px; line-height: 1.2; }
+.regeln .unter { color: var(--text-leise); margin: 0 0 18px; font-size: 18px; }
+.regeln section { background: var(--karte); border-radius: 20px; padding: 18px 20px; margin: 0 0 16px; box-shadow: var(--schatten); }
+.regeln h2 { margin: 0 0 8px; font-size: 22px; }
+.regeln p, .regeln li { font-size: 19px; line-height: 1.5; }
+.regeln p { margin: 0 0 10px; }
+.regeln ul, .regeln ol { margin: 0 0 10px; padding-left: 24px; }
+.regeln figure { margin: 10px 0; text-align: center; }
+.regeln figure svg { max-width: 100%; height: auto; }
+.regeln figcaption { color: var(--text-leise); font-size: 16px; margin-top: 4px; }
+.regeln .merke { background: #eef2ff; border-left: 5px solid var(--knopf); border-radius: 10px; padding: 10px 14px; margin: 10px 0; font-weight: 700; }
+.regeln .los { display: block; margin: 20px auto 0; text-align: center; }

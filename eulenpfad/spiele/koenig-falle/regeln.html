@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regeln — König in der Falle</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<link rel="stylesheet" href="../gemeinsam/regeln.css">
+<style>
+  /* Kleine Bretter wie im Spiel: Felder, Figuren, grüne Punkte = dorthin kann die Figur ziehen. */
+  .kf-mini .hell { fill: #f3e3c3; }
+  .kf-mini .dunkel { fill: #c49a6c; }
+  .kf-mini .fig { font-size: 30px; text-anchor: middle; dominant-baseline: central;
+    font-family: "Segoe UI Symbol", "DejaVu Sans", "Noto Sans Symbols 2", "Apple Symbols", serif; }
+  .kf-mini .w { fill: #fff; stroke: #2d3047; stroke-width: 1.5px; paint-order: stroke; }
+  .kf-mini .b { fill: #2d3047; }
+  .kf-mini .punkt { fill: var(--gut); opacity: .8; }
+  .kf-mini .schach { fill: var(--hinweis); opacity: .55; }
+  .kf-mini .weg { fill: var(--hinweis); opacity: .35; }
+  .regeln .figuren { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+  .regeln .figuren figure { margin: 0; }
+</style>
+</head>
+<body>
+<main class="regeln">
+  <a class="zurueck-link" href="index.html">← Zurück zum Spiel</a>
+  <h1>♟️ Regeln: König in der Falle</h1>
+  <p class="unter">Schach-Rätsel. Du spielst Weiss und bist immer dran.</p>
+
+  <section>
+    <h2>Das Ziel: Matt</h2>
+    <p>Greift eine Figur den König an, steht er <b>im Schach</b>. Er muss sich dann retten.</p>
+    <p>Kann er sich nicht retten, ist er <b>matt</b>. Dann ist das Spiel aus.</p>
+    <figure>
+      <svg class="kf-mini" viewBox="0 0 160 160" width="200" role="img" aria-label="Der schwarze König in der Ecke h8, der weisse Turm auf h5 gibt Schach, der weisse König auf f7 hält ihm die Felder g7 und g8 zu: Matt.">
+        <g id="kf-ecke"></g>
+      </svg>
+      <figcaption>Der Turm greift den König an. Der weisse König sperrt die Fluchtfelder: Matt.</figcaption>
+    </figure>
+    <p class="merke">Matt heisst: Der König steht im Schach und kann sich nicht mehr retten.</p>
+  </section>
+
+  <section>
+    <h2>Drei Wege aus dem Schach</h2>
+    <ol>
+      <li><b>Wegziehen:</b> Der König zieht auf ein freies Feld, das niemand angreift.</li>
+      <li><b>Schlagen:</b> Jemand schlägt die Figur, die Schach gibt.</li>
+      <li><b>Dazwischenstellen:</b> Eine Figur stellt sich in den Weg.</li>
+    </ol>
+    <p>Gibt es keinen dieser Wege, ist es Matt. Die Eule zeigt dir im Spiel, welchen Weg sie findet.</p>
+  </section>
+
+  <section>
+    <h2>So ziehen die Figuren</h2>
+    <p>Die grünen Punkte zeigen, wohin die Figur ziehen kann. Keine Figur darf über andere ziehen, nur der Springer springt.</p>
+    <div class="figuren" id="kf-figuren"></div>
+    <p>Schlagen: Eine Figur zieht auf das Feld einer gegnerischen Figur und nimmt sie vom Brett.</p>
+  </section>
+
+  <section>
+    <h2>Der König passt auf sich auf</h2>
+    <p>Kein Zug darf den <b>eigenen</b> König ins Schach stellen. Die Könige stehen deshalb nie direkt nebeneinander.</p>
+    <p>Steht der König nicht im Schach, kann aber nicht ziehen, heisst das <b>Patt</b>. Das ist unentschieden — kein Sieg.</p>
+    <p class="merke">Pass auf: Patt ist kein Matt.</p>
+  </section>
+
+  <section>
+    <h2>Matt in 2 (Königsstufe)</h2>
+    <p>Du hast zwei Züge. Nach deinem ersten Zug antwortet die Eule, so gut sie kann. Mit dem zweiten Zug setzt du matt.</p>
+    <p>Der erste Zug gibt oft noch kein Schach. Er bereitet die Falle vor.</p>
+  </section>
+
+  <section>
+    <h2>Kommt hier nicht vor</h2>
+    <p>Im echten Schach gibt es drei Sonderregeln. In diesen Rätseln braucht es sie nie:</p>
+    <ul>
+      <li><b>Rochade</b> (König und Turm ziehen zusammen),</li>
+      <li><b>en passant</b> (ein Bauer schlägt einen Bauern, der zwei Felder vorbeizog),</li>
+      <li><b>Umwandlung</b> (ein Bauer auf der letzten Reihe wird zu einer Dame oder einer anderen Figur).</li>
+    </ul>
+    <p>Die Stellungen sind so gewählt, dass keine davon möglich ist.</p>
+  </section>
+
+  <a class="knopf los" href="index.html">Zum Spiel</a>
+</main>
+
+<script>
+"use strict";
+// Kleine Bretter zeichnen: 4 × 4 (Matt-Bild) und 5 × 5 Felder je Figur. Ohne Spielrahmen und ohne Abhängigkeit.
+const SVG = "http://www.w3.org/2000/svg";
+const ZEICHEN = { K: "♚︎", Q: "♛︎", R: "♜︎", B: "♝︎", N: "♞︎", P: "♟︎" };
+function s(tag, attr, text) {
+  const e = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  if (text) e.textContent = text;
+  return e;
+}
+/** Brett mit n × n Feldern; figuren: [[x, y, "K" | "k" …]], punkte: [[x, y]], marken: [[x, y, klasse]]; (0, 0) unten links. */
+function brett(ziel, n, figuren, punkte = [], marken = [], hellUntenLinks = false) {
+  const F = 40;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    ziel.append(s("rect", { class: (x + y) % 2 === (hellUntenLinks ? 0 : 1) ? "hell" : "dunkel", x: x * F, y: (n - 1 - y) * F, width: F, height: F }));
+  }
+  for (const [x, y, k] of marken) ziel.append(s("rect", { class: k, x: x * F, y: (n - 1 - y) * F, width: F, height: F }));
+  for (const [x, y] of punkte) ziel.append(s("circle", { class: "punkt", cx: x * F + F / 2, cy: (n - 1 - y) * F + F / 2, r: 6 }));
+  for (const [x, y, p] of figuren) {
+    const weiss = p === p.toUpperCase();
+    ziel.append(s("text", { class: `fig ${weiss ? "w" : "b"}`, x: x * F + F / 2, y: (n - 1 - y) * F + F / 2 + 2 }, ZEICHEN[p.toUpperCase()]));
+  }
+}
+
+// Matt-Bild: Ausschnitt e5–h8 (x 0..3 = e..h, y 0..3 = Reihe 5..8): König h8, weisser König f7, Turm h5.
+brett(document.getElementById("kf-ecke"), 4, [[3, 3, "k"], [1, 2, "K"], [3, 0, "R"]], [], [[3, 3, "schach"], [3, 1, "weg"], [3, 2, "weg"]]);
+
+const FIGUREN = [
+  { p: "K", name: "König", text: "ein Feld in jede Richtung", ziele: [[1, 1], [2, 1], [3, 1], [1, 2], [3, 2], [1, 3], [2, 3], [3, 3]] },
+  { p: "Q", name: "Dame", text: "gerade und schräg, so weit sie will", ziele: null },
+  { p: "R", name: "Turm", text: "gerade, so weit er will", ziele: null },
+  { p: "B", name: "Läufer", text: "schräg, so weit er will", ziele: null },
+  { p: "N", name: "Springer", text: "zwei Felder gerade und eins zur Seite — er springt über Figuren", ziele: [[0, 1], [0, 3], [1, 0], [1, 4], [3, 0], [3, 4], [4, 1], [4, 3]] },
+  { p: "P", name: "Bauer", text: "ein Feld nach vorn (beim ersten Zug auch zwei); er schlägt schräg nach vorn", ziele: [[2, 2], [2, 3]] },
+];
+const linien = (gerade, schraeg) => {
+  const z = [];
+  for (let x = 0; x < 5; x++) for (let y = 0; y < 5; y++) {
+    if (x === 2 && y === 2) continue;
+    if ((gerade && (x === 2 || y === 2)) || (schraeg && Math.abs(x - 2) === Math.abs(y - 2))) z.push([x, y]);
+  }
+  return z;
+};
+const ort = document.getElementById("kf-figuren");
+for (const f of FIGUREN) {
+  const ziele = f.ziele || linien(f.p !== "B", f.p !== "R");
+  const svg = s("svg", { class: "kf-mini", viewBox: "0 0 200 200", width: "180", role: "img", "aria-label": `${f.name}: zieht ${f.text}` });
+  // Der Bauer steht auf seiner Grundreihe (Reihe 2) und hat zwei schwarze Bauern schräg vor sich zum Schlagen.
+  const figuren = f.p === "P" ? [[2, 1, "P"], [1, 2, "p"], [3, 2, "p"]] : [[2, 2, f.p]];
+  const punkte = f.p === "P" ? [...ziele, [1, 2], [3, 2]] : ziele;
+  brett(svg, 5, figuren, punkte);
+  const fig = document.createElement("figure");
+  const cap = document.createElement("figcaption");
+  cap.innerHTML = `<b>${f.name}</b>: ${f.text}`;
+  fig.append(svg, cap);
+  ort.append(fig);
+}
+</script>
+</body>
+</html>

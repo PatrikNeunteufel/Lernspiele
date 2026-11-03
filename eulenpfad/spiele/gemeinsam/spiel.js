@@ -773,6 +773,17 @@ const LS = (() => {
    * oder Funktion der Stufe), darunter, was gerade auf der Seite zu bedienen ist. Die Aufgabe ist während
    * dessen verdeckt und die Uhr angehalten. Geöffnet zu haben, wird nur notiert.
    */
+  /**
+   * Eigene Regelseite eines Spiels (Wunsch Patrik, LERN_Session11): Spiele mit Regeln, die man vorher kennen muss
+   * (Schach, Go), tragen im Katalog regeln: true und haben neben index.html eine Seite regeln.html. Startblatt und
+   * Hilfe verweisen darauf; im laufenden Spiel öffnet sie sich in einem neuen Tab, damit die Runde nicht verloren geht.
+   */
+  function hatRegeln(id) {
+    return typeof SPIELE !== "undefined" && !!SPIELE.find(s => s.id === id)?.regeln;
+  }
+  const regelnLink = (neuerTab, klasse = "knopf hell klein") => el("a", { class: `${klasse} regeln-link`, href: "regeln.html",
+    text: "📖 Regeln", ...(neuerTab ? { target: "_blank", rel: "noopener" } : {}) });
+
   function hilfeFenster(def) {
     document.querySelector(".melde-hintergrund")?.remove();
     const b = document.querySelector(".buehne") || document;
@@ -803,7 +814,8 @@ const LS = (() => {
       el("h2", { text: "❓ So geht das Spiel" }),
       eigen ? el("p", { class: "hilfe-eigen", text: eigen }) : null,
       el("ul", { class: "hilfe-liste" }, ...punkte.map(p => el("li", { text: p }))),
-      el("div", { class: "knopfzeile" }, el("button", { type: "button", class: "knopf gruen", text: "Weiter spielen", onclick: schliessen }))));
+      el("div", { class: "knopfzeile" }, hatRegeln(def.id) ? regelnLink(!da(".stufen"), "knopf hell") : null,
+        el("button", { type: "button", class: "knopf gruen", text: "Weiter spielen", onclick: schliessen }))));
     hintergrund.addEventListener("click", e => { if (e.target === hintergrund) schliessen(); });
     addEventListener("keydown", taste);
     document.body.append(hintergrund);
@@ -1722,7 +1734,8 @@ const LS = (() => {
       }
       karte.append(stufen);
       // Ähnliche Spiele (Wunsch Patrik, LERN_Session10): die Startseite zeigt sie als Liste (start/spiele.js, ?aehnlich=).
-      karte.append(el("div", { class: "knopfzeile" }, el("a", { class: "knopf hell klein", href: `${START}?aehnlich=${def.id}#spiele`, text: "🔗 Ähnliche Spiele" })));
+      karte.append(el("div", { class: "knopfzeile" }, hatRegeln(def.id) ? regelnLink(false) : null,
+        el("a", { class: "knopf hell klein", href: `${START}?aehnlich=${def.id}#spiele`, text: "🔗 Ähnliche Spiele" })));
       // Vorlesen auf dem Startblatt: 🗣️ liest die Einleitung, langes Drücken einen Stufenknopf — nur auf
       // Knopfdruck; automatisch liest die Eule nur im Spiel selbst (Vorgabe Patrik, LERN_Session8).
       if (vorlesenErlaubt(def.id)) {
@@ -1950,6 +1963,7 @@ const LS = (() => {
         let pausiertMs = 0;   // Pausen zählen nicht zur Zeit der Aufgabe
         let tipps = [];       // gestufte Tipps dieser Aufgabe (ctx.tipp); nie die Lösung
         let tippsGenutzt = 0; // geholte Tipps dieser Aufgabe (zählen für die Sterne)
+        let tippRueckruf = null; // ctx.tipp(texte, beiTipp)
         let tippPos = 0;      // nächster Tipp der aktuellen Liste
         const lauf = ++aufgabeLauf;
         // Fehler melden: diese Aufgabe so, wie das Kind sie gerade sieht; die beendete davor wird zur „vorigen“.
@@ -2108,6 +2122,7 @@ const LS = (() => {
           eule.sag(`💡 ${text}`, "hinweis");
           pruefung.haken?.("tipp", { nr, hinweis: text, flaeche, vorab: loesungVorab });
           zeigeTippKnopf();
+          tippRueckruf?.(tippPos - 1, tippPos >= tipps.length);
         };
 
         /** Endlos: erste falsche Antwort oder Zeit um — Lösung zeigen, dann zum Ergebnis. */
@@ -2185,9 +2200,11 @@ const LS = (() => {
            * sie mit „💡 Tipp“ einzeln; keiner verrät die Lösung (das Testskript prüft es). Beim Zeichnen rufen.
            */
           // Auch später aufrufbar (zweiter Schritt einer Aufgabe): neue Tipps beginnen wieder beim ersten, gezählt
-          // werden alle geholten.
-          tipp(texte) {
+          // werden alle geholten. beiTipp(i, letzter): gerufen, nachdem Tipp i gezeigt ist — für Tipps mit Bild
+          // (Steine fangen zeigt beim letzten die Freiheiten; LERN_Session11).
+          tipp(texte, beiTipp = null) {
             tipps = [].concat(texte).filter(t => typeof t === "string" && t.trim());
+            tippRueckruf = beiTipp;
             tippPos = 0;
             if (!zeichnet) zeigeTippKnopf();
           },
@@ -2286,6 +2303,7 @@ const LS = (() => {
           uhrWartet = false;
           ansagen = [];
           tipps = [];
+          tippRueckruf = null;
           tippPos = 0;
           zug++;
           serien = {};
@@ -2485,7 +2503,7 @@ const LS = (() => {
       "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
-      "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt"],
+      "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "regeln-link"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };

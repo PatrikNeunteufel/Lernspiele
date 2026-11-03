@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steine fangen — Regeln</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<link rel="stylesheet" href="../gemeinsam/regeln.css">
+<style>
+  .regeln .bildpaar { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; align-items: center; }
+  .regeln .bildpaar .pfeil-gross { font-size: 32px; font-weight: 900; color: var(--text-leise); }
+</style>
+</head>
+<body>
+<main class="regeln">
+  <a class="zurueck-link" href="index.html">← Zurück zum Spiel</a>
+  <h1>⚫ Steine fangen</h1>
+  <p class="unter">Die Regeln von Atari-Go — einer kleinen Form des Go-Spiels.</p>
+
+  <section>
+    <h2>Das Brett und die Steine</h2>
+    <figure><svg viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="Kleines Go-Brett mit zwei schwarzen und zwei weissen Steinen auf den Schnittpunkten"><rect width="180" height="180" rx="8" fill="#e8c88c"/><line x1="18" y1="18" x2="162" y2="18" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="18" x2="18" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="54" x2="162" y2="54" stroke="#6b5235" stroke-width="1.3"/><line x1="54" y1="18" x2="54" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="90" x2="162" y2="90" stroke="#6b5235" stroke-width="1.3"/><line x1="90" y1="18" x2="90" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="126" x2="162" y2="126" stroke="#6b5235" stroke-width="1.3"/><line x1="126" y1="18" x2="126" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="162" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="162" y1="18" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><circle cx="54" cy="54" r="15" fill="#23263a" stroke="#111"/><circle cx="90" cy="90" r="15" fill="#23263a" stroke="#111"/><circle cx="126" cy="126" r="15" fill="#fff" stroke="#6b6f8a" stroke-width="1.6"/><circle cx="126" cy="90" r="15" fill="#fff" stroke="#6b6f8a" stroke-width="1.6"/></svg><figcaption>Die Steine liegen auf den Schnittpunkten der Linien.</figcaption></figure>
+    <p>Du spielst mit den schwarzen Steinen, die Eule mit den weissen.</p>
+    <p>Man setzt abwechselnd einen Stein auf einen freien Schnittpunkt. Gesetzte Steine bleiben liegen.</p>
+  </section>
+
+  <section>
+    <h2>Freiheiten</h2>
+    <figure><svg viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="Schwarzer Stein in der Mitte mit vier Freiheiten, weisser Stein in der Ecke mit zwei Freiheiten"><rect width="180" height="180" rx="8" fill="#e8c88c"/><line x1="18" y1="18" x2="162" y2="18" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="18" x2="18" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="54" x2="162" y2="54" stroke="#6b5235" stroke-width="1.3"/><line x1="54" y1="18" x2="54" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="90" x2="162" y2="90" stroke="#6b5235" stroke-width="1.3"/><line x1="90" y1="18" x2="90" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="126" x2="162" y2="126" stroke="#6b5235" stroke-width="1.3"/><line x1="126" y1="18" x2="126" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="162" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="162" y1="18" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><circle cx="90" cy="90" r="15" fill="#23263a" stroke="#111"/><circle cx="18" cy="162" r="15" fill="#fff" stroke="#6b6f8a" stroke-width="1.6"/><circle cx="90" cy="54" r="6" fill="#5b6cff"/><circle cx="90" cy="126" r="6" fill="#5b6cff"/><circle cx="54" cy="90" r="6" fill="#5b6cff"/><circle cx="126" cy="90" r="6" fill="#5b6cff"/><circle cx="18" cy="126" r="6" fill="#5b6cff"/><circle cx="54" cy="162" r="6" fill="#5b6cff"/></svg><figcaption>Die blauen Punkte sind Freiheiten: Mitte 4, Ecke 2.</figcaption></figure>
+    <p>Freiheiten sind die freien Punkte direkt neben einem Stein — oben, unten, links und rechts auf der Linie.
+      Schräg zählt nicht.</p>
+    <p>Am Rand und in der Ecke hat ein Stein weniger Nachbarn, also auch weniger Freiheiten.</p>
+  </section>
+
+  <section>
+    <h2>Gruppen</h2>
+    <figure><svg viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="Zwei verbundene schwarze Steine mit fünf Freiheiten; ein weisser Stein nimmt eine weg"><rect width="180" height="180" rx="8" fill="#e8c88c"/><line x1="18" y1="18" x2="162" y2="18" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="18" x2="18" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="54" x2="162" y2="54" stroke="#6b5235" stroke-width="1.3"/><line x1="54" y1="18" x2="54" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="90" x2="162" y2="90" stroke="#6b5235" stroke-width="1.3"/><line x1="90" y1="18" x2="90" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="126" x2="162" y2="126" stroke="#6b5235" stroke-width="1.3"/><line x1="126" y1="18" x2="126" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="162" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="162" y1="18" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><circle cx="54" cy="90" r="15" fill="#23263a" stroke="#111"/><circle cx="90" cy="90" r="15" fill="#23263a" stroke="#111"/><circle cx="90" cy="54" r="15" fill="#fff" stroke="#6b6f8a" stroke-width="1.6"/><circle cx="54" cy="54" r="6" fill="#5b6cff"/><circle cx="18" cy="90" r="6" fill="#5b6cff"/><circle cx="126" cy="90" r="6" fill="#5b6cff"/><circle cx="54" cy="126" r="6" fill="#5b6cff"/><circle cx="90" cy="126" r="6" fill="#5b6cff"/></svg><figcaption>Zwei verbundene schwarze Steine haben zusammen 5 Freiheiten.</figcaption></figure>
+    <p>Steine gleicher Farbe, die auf einer Linie direkt nebeneinander liegen, bilden eine Gruppe.
+      Eine Gruppe teilt ihre Freiheiten.</p>
+    <p>Ein Stein des Gegners auf einem Nachbarpunkt nimmt eine Freiheit weg.</p>
+  </section>
+
+  <section>
+    <h2>Fangen</h2>
+    <div class="bildpaar">
+      <figure><svg viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="Weisser Stein mit nur noch einer Freiheit"><rect width="180" height="180" rx="8" fill="#e8c88c"/><line x1="18" y1="18" x2="162" y2="18" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="18" x2="18" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="54" x2="162" y2="54" stroke="#6b5235" stroke-width="1.3"/><line x1="54" y1="18" x2="54" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="90" x2="162" y2="90" stroke="#6b5235" stroke-width="1.3"/><line x1="90" y1="18" x2="90" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="126" x2="162" y2="126" stroke="#6b5235" stroke-width="1.3"/><line x1="126" y1="18" x2="126" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="162" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="162" y1="18" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><circle cx="54" cy="90" r="15" fill="#23263a" stroke="#111"/><circle cx="90" cy="54" r="15" fill="#23263a" stroke="#111"/><circle cx="126" cy="90" r="15" fill="#23263a" stroke="#111"/><circle cx="90" cy="90" r="15" fill="#fff" stroke="#6b6f8a" stroke-width="1.6"/><circle cx="90" cy="126" r="6" fill="#5b6cff"/></svg><figcaption>Weiss hat nur noch eine Freiheit.</figcaption></figure>
+      <span class="pfeil-gross" aria-hidden="true">➜</span>
+      <figure><svg viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="Schwarz hat auf die letzte Freiheit gesetzt, der weisse Stein ist gefangen"><rect width="180" height="180" rx="8" fill="#e8c88c"/><line x1="18" y1="18" x2="162" y2="18" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="18" x2="18" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="54" x2="162" y2="54" stroke="#6b5235" stroke-width="1.3"/><line x1="54" y1="18" x2="54" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="90" x2="162" y2="90" stroke="#6b5235" stroke-width="1.3"/><line x1="90" y1="18" x2="90" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="126" x2="162" y2="126" stroke="#6b5235" stroke-width="1.3"/><line x1="126" y1="18" x2="126" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="162" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="162" y1="18" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><circle cx="54" cy="90" r="15" fill="#23263a" stroke="#111"/><circle cx="90" cy="54" r="15" fill="#23263a" stroke="#111"/><circle cx="126" cy="90" r="15" fill="#23263a" stroke="#111"/><circle cx="90" cy="126" r="15" fill="#23263a" stroke="#111"/><circle cx="90" cy="90" r="18" fill="none" stroke="#2fbf71" stroke-width="4"/></svg><figcaption>Schwarz setzt dorthin: gefangen!</figcaption></figure>
+    </div>
+    <p>Nimmt ein Zug einer Gruppe die letzte Freiheit, ist sie gefangen. Ihre Steine kommen vom Brett.</p>
+    <div class="merke">Ein Stein oder eine Gruppe ohne Freiheiten wird gefangen.</div>
+  </section>
+
+  <section>
+    <h2>Verboten: ein Stein ohne Freiheit</h2>
+    <figure><svg viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="Ein Punkt, rundum von Weiss umgeben: Schwarz darf dort nicht setzen"><rect width="180" height="180" rx="8" fill="#e8c88c"/><line x1="18" y1="18" x2="162" y2="18" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="18" x2="18" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="18" y1="54" x2="162" y2="54" stroke="#6b5235" stroke-width="1.3"/><line x1="54" y1="18" x2="54" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="90" x2="162" y2="90" stroke="#6b5235" stroke-width="1.3"/><line x1="90" y1="18" x2="90" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="126" x2="162" y2="126" stroke="#6b5235" stroke-width="1.3"/><line x1="126" y1="18" x2="126" y2="162" stroke="#6b5235" stroke-width="1.3"/><line x1="18" y1="162" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><line x1="162" y1="18" x2="162" y2="162" stroke="#6b5235" stroke-width="2.4"/><circle cx="54" cy="90" r="15" fill="#fff" stroke="#6b6f8a" stroke-width="1.6"/><circle cx="90" cy="54" r="15" fill="#fff" stroke="#6b6f8a" stroke-width="1.6"/><circle cx="126" cy="90" r="15" fill="#fff" stroke="#6b6f8a" stroke-width="1.6"/><circle cx="90" cy="126" r="15" fill="#fff" stroke="#6b6f8a" stroke-width="1.6"/><path d="M82 82L98 98M98 82L82 98" stroke="#ff9f1c" stroke-width="4" stroke-linecap="round"/></svg><figcaption>Hier darf Schwarz nicht setzen.</figcaption></figure>
+    <p>Du darfst keinen Stein so setzen, dass er selbst keine Freiheit hat — ausser er fängt dabei Steine
+      der Eule. Dann bekommt er neue Freiheiten.</p>
+    <p>Gut zu wissen: Hat ein einzelner Stein gerade einen einzelnen Stein gefangen, darf man ihn nicht sofort
+      zurückfangen. Diese Regel heisst Ko.</p>
+  </section>
+
+  <section>
+    <h2>Wer gewinnt?</h2>
+    <p>Bei Atari-Go gewinnt, wer <strong>zuerst</strong> einen Stein fängt.</p>
+    <p>In den Rätseln bist du immer am Zug. Manchmal fängst du sofort, manchmal rettest du deine Steine, und
+      in den höchsten Stufen brauchst du zwei Züge: Die Eule antwortet dazwischen so gut sie kann.</p>
+  </section>
+
+  <a class="knopf los" href="index.html">Zum Spiel</a>
+</main>
+</body>
+</html>

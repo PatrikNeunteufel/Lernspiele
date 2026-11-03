@@ -5,7 +5,7 @@ wird im Entwickler-Modus (Spiel angesehen, Inhaltsliste geprüft; schreibt `eule
 Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
 `docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
-**Stand:** 165 Spiele gebaut, 0 Ideen offen · für Kinder frei: 38 von 165 · 6 von 109 neuen Spielen angesehen · 3 von 216 Inhaltslisten geprüft.
+**Stand:** 168 Spiele gebaut, 0 Ideen offen · für Kinder frei: 38 von 168 · 6 von 112 neuen Spielen angesehen · 3 von 217 Inhaltslisten geprüft.
 
 Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit
 Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.
@@ -585,6 +585,16 @@ Je gebautem Spiel:
 - [x] **Speicher-Leiter** (`speicher-leiter`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
+
+#### Strategie
+
+- [x] **König in der Falle** (`koenig-falle`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Schachstellungen: Matt in 1 und Matt in 2)
+- [x] **Stein-Duell** (`stein-duell`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+- [x] **Steine fangen** (`steine-fangen`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
 
 ### NMG
 

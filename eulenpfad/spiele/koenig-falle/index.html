@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>König in der Falle</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .kf { display: flex; flex-direction: column; align-items: center; }
+  .kf .auftrag { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 8px; }
+  .kf-seite { font-size: 16px; color: var(--text-leise); margin: 0 0 6px; text-align: center; }
+  /* Für Vorleser und Protokoll: die Stellung in Worten, auf dem Bildschirm nur als Brett. */
+  .kf .vorgabe { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* Brett: 8 × 50 Einheiten, links und unten Platz für die Koordinaten. Auf 375 px gut 40 px je Feld. */
+  .kf-brett { width: min(100%, 500px); height: auto; display: block; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+  .kf-brett .kf-hell { fill: #f3e3c3; }
+  .kf-brett .kf-dunkel { fill: #c49a6c; }
+  .kf-brett .kf-feld.kf-tippbar { cursor: pointer; }
+  .kf-brett .kf-wahl { fill: var(--knopf); opacity: .45; }
+  .kf-brett .kf-ziel { fill: var(--gut); opacity: .75; }
+  .kf-brett .kf-ziel-ring { fill: none; stroke: var(--gut); stroke-width: 5; opacity: .85; }
+  .kf-brett .kf-weg { fill: var(--hinweis); opacity: .45; }
+  .kf-brett .kf-eule { fill: var(--deko-6); opacity: .45; }
+  .kf-brett .kf-matt { fill: var(--gut); opacity: .6; }
+  .kf-brett .kf-schach { fill: var(--hinweis); opacity: .55; }
+  .kf-brett .kf-fig { font-size: 42px; text-anchor: middle; dominant-baseline: central; pointer-events: none;
+    font-family: "Segoe UI Symbol", "DejaVu Sans", "Noto Sans Symbols 2", "Apple Symbols", serif; }
+  .kf-brett .kf-w { fill: #ffffff; stroke: #2d3047; stroke-width: 1.8px; paint-order: stroke; }
+  .kf-brett .kf-b { fill: #2d3047; stroke: #2d3047; stroke-width: .6px; }
+  .kf-brett .kf-koord { font-size: 14px; font-weight: 700; fill: var(--text-leise); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>♟️ König in der Falle</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="schach.js"></script>
+<script src="stellungen.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MI.2.2.b (2. Zyklus): durch Probieren Lösungswege für einfache Problemstellungen suchen und auf
+// Korrektheit prüfen (eine Spielstrategie entwickeln); dazu MA.1.B.1.h (heuristische Strategien). Basisklasse 5
+// (Entscheid ST2 a). Vorlage: docs/eulenpfad/spielideen/strategie_raetsel.md, Abschnitt 2.3, Entscheid ST3 a.
+// Jede Aufgabe ist eine Stellung aus stellungen.js, das Kind spielt Weiss: Figur antippen, Zielfeld antippen.
+//   s1 4. Klasse: König und Turm gegen König am Rand (Matt in 1)
+//   s2 König und Dame gegen König, Matt aus Abstand
+//   s3 5. Klasse: zwei Türme, oder die Dame mit Deckung direkt neben dem König
+//   s4 mit Läufer und Springer; der König hat mehr Fluchtfelder
+//   s5 6. Klasse: schwarze Figuren verstellen ihrem König den Weg, manches Matt ist ein Schlagzug
+//   s6 Königsstufe: Matt in 2 — der erste Zug ist still oder ein Opfer; die Eule verteidigt sich am zähesten
+// ST3 a: In s1 und s2 zeigt das Brett nach dem Antippen einer Figur ihre Zielfelder; ab s3 erst, wenn das Kind in
+// dieser Aufgabe einen Tipp geholt hat (der erste Tipp sagt es an). Die Zugregeln stehen in Hilfe, Tipp und
+// auf der Regelseite (regeln.html). Ob ein Zug matt setzt, rechnet die Regel-Maschine (schach.js) selbst.
+
+const { waehle, el } = LS;
+const ID = "koenig-falle";
+const S = SCHACH;
+
+// Freigabe: eine Liste „stellungen“. Kennt der Katalog die Liste nicht, gilt sie als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["stellungen"]);
+const LISTE = FREI.has("stellungen") ? STELLUNGEN : [];
+const JE_STUFE = st => LISTE.filter(x => x.stufe === st);
+/** Mindestens so viele Stellungen je Stufe, damit sich Runden nicht wiederholen. */
+const MINDESTENS = 12;
+
+const STUFEN_TEXT = {
+  s1: "König und Turm gegen König am Rand: ein Zug, und er sitzt in der Falle.",
+  s2: "König und Dame gegen König.",
+  s3: "Zwei Türme — oder die Dame mit Deckung direkt neben dem König.",
+  s4: "Mit Läufer und Springer: Der König hat mehr Fluchtfelder.",
+  s5: "Schwarze Figuren stehen ihrem König im Weg. Manchmal ist Schlagen das Matt.",
+  s6: "Endgegner: Matt in 2 Zügen. Der erste Zug gibt kein Schach oder ist ein Opfer.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => JE_STUFE(s).length));
+/** Zielfelder gleich nach dem Antippen zeigen (ST3 a: s1 und s2). */
+const ZIELE_IMMER = new Set(["s1", "s2"]);
+
+/** Eine Stellung der Stufe aus der freien Liste, oder null. */
+function aufgabeErzeugen(stufe) {
+  const liste = JE_STUFE(stufe);
+  return liste.length ? waehle(liste) : null;
+}
+
+// Die Prüfung einer Stellung ist bei Matt in 2 teuer; das Testskript fragt dieselbe Stellung oft.
+const geprueft = new Map();
+function analyse(fen, stufe) {
+  const k = `${stufe} ${fen}`;
+  if (!geprueft.has(k)) geprueft.set(k, S.pruefeRaetsel(fen, stufe));
+  return geprueft.get(k);
+}
+
+/** Lösung als Text, aus der Regel-Maschine (nicht aus der Liste). */
+function loesungText(a) {
+  const { brett } = S.ausFen(a.fen);
+  const l = analyse(a.fen, a.stufe).loesung;
+  if (a.stufe !== "s6") return `${S.zugText(brett, l)} matt`;
+  const b1 = S.ziehe(brett, l.erster), b2 = S.ziehe(b1, l.antwort);
+  return `${S.zugText(brett, l.erster)}, Eule ${S.zugText(b1, l.antwort)}, ${S.zugText(b2, l.matt)} matt`;
+}
+
+/** Mängel — für tools/pruefe_spiele.js: Stellung gültig, genau eine Lösung (s6: genau ein erster Zug), Liste gross genug. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (a.stufe !== stufe) m.push(`Stellung der Stufe ${a.stufe} in ${stufe}`);
+  if (!LISTE.includes(a)) m.push("Stellung nicht aus der freien Liste");
+  if (!/ w - - 0 1$/.test(a.fen)) m.push("FEN ohne „w - - 0 1“ (Weiss am Zug, keine Rochade, kein en passant)");
+  const r = analyse(a.fen, stufe);
+  m.push(...r.maengel);
+  if (!r.maengel.length) {
+    const text = loesungText(a);
+    if (text !== a.loesung) m.push(`Lösung in der Liste «${a.loesung}», die Regel-Maschine findet «${text}»`);
+    // Der Hinweis nennt das Zielfeld des (ersten) Zugs nicht.
+    const z = stufe === "s6" ? r.loesung.erster : r.loesung;
+    if (new RegExp(`\\b${S.feld(z.nach)}\\b`).test(a.hinweis)) m.push("Hinweis nennt das Zielfeld der Lösung");
+  }
+  if (!a.hinweis || /ß/.test(a.hinweis)) m.push("Hinweis fehlt oder hat ß");
+  if (JE_STUFE(stufe).length < MINDESTENS) m.push(`nur ${JE_STUFE(stufe).length} Stellungen in ${stufe}, mindestens ${MINDESTENS}`);
+  if (new Set(JE_STUFE(stufe).map(x => x.fen)).size !== JE_STUFE(stufe).length) m.push(`Stellung doppelt in ${stufe}`);
+  return m;
+}
+
+// ---------- Texte ----------
+
+const MIT = { K: "deinem König", Q: "deiner Dame", R: "deinem Turm", B: "deinem Läufer", N: "deinem Springer", P: "deinem Bauern" };
+const MEHRERE = { R: "einem deiner Türme", B: "einem deiner Läufer", N: "einem deiner Springer", P: "einem deiner Bauern" };
+const REGEL = {
+  K: "Der König zieht ein Feld in jede Richtung.",
+  Q: "Die Dame zieht gerade und schräg, so weit sie will.",
+  R: "Der Turm zieht gerade, so weit er will.",
+  B: "Der Läufer zieht schräg, so weit er will.",
+  N: "Der Springer springt zwei Felder gerade und eins zur Seite, auch über Figuren.",
+  P: "Der Bauer zieht ein Feld nach vorn und schlägt schräg nach vorn.",
+};
+const TIPP_ZEIGEN = "Tippe eine deiner Figuren an — jetzt zeige ich dir, wohin sie ziehen kann.";
+const TIPP_FLUCHT = "Wohin kann der schwarze König noch ziehen? Zähle die Felder um ihn herum.";
+const LOB = ["Matt! Der König sitzt in der Falle. 🎉", "Schachmatt! Gut gedacht. 👑", "Matt! Der König kann nirgends mehr hin. ⭐"];
+
+/** „mit deinem Turm“ oder „mit einem deiner Türme“. */
+function mitFigur(brett, fig) {
+  return brett.filter(p => p === fig).length > 1 ? `mit ${MEHRERE[fig]}` : `mit ${MIT[fig]}`;
+}
+
+/** Stellung in Worten (für Vorleser und Protokoll). */
+function stellungText(brett) {
+  const seite = c => brett.map((p, i) => (p && S.farbe(p) === c ? { p: p.toUpperCase(), i } : null)).filter(Boolean)
+    .sort((a, b) => "KQRBNP".indexOf(a.p) - "KQRBNP".indexOf(b.p)).map(x => `${S.NAME[x.p]} ${S.feld(x.i)}`).join(", ");
+  return `Weiss: ${seite("w")}. Schwarz: ${seite("b")}.`;
+}
+
+/** Warum der Zug kein Matt ist — so, wie die Eule antwortet. Nennt nie den richtigen Zug. */
+function warumText(brett, z, zwei) {
+  const w = S.warumNicht(brett, z, zwei);
+  const b1 = S.ziehe(brett, z);
+  if (w.art === "patt") return { text: "Patt! Der König steht nicht im Schach, kann aber nicht mehr ziehen. Das wäre unentschieden.", w };
+  if (zwei) return { text: `Die Eule antwortet: ${S.zugText(b1, w.antwort)}. Danach kannst du nicht mehr mit einem Zug matt setzen. Versuch einen anderen ersten Zug.`, w };
+  const f = w.antwort.fig;
+  switch (w.art) {
+    case "kein-schach": return { text: `Das ist noch kein Schach. Die Eule zieht einfach weiter: ${S.zugText(b1, w.antwort)}.`, w };
+    case "flucht": return { text: `Schach! Aber der König entkommt nach ${S.feld(w.antwort.nach)}.`, w };
+    case "schlagen": return { text: `Schach! Aber die Eule schlägt ${S.DEN[z.fig]} ${S.NAME[z.fig]}${f === "K" ? " mit dem König" : ""}.`, w };
+    default: return { text: `Schach! Aber die Eule stellt ${S.DEN[f]} ${S.NAME[f]} dazwischen.`, w };
+  }
+}
+
+// ---------- Brett ----------
+
+const SVG = "http://www.w3.org/2000/svg";
+function svgEl(tag, attr = {}, text) {
+  const e = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  if (text != null) e.textContent = text;
+  return e;
+}
+const F = 50;   // Feldgrösse
+const RAND = 22; // Platz für die Koordinaten
+const xVon = i => RAND + S.linie(i) * F;
+const yVon = i => (7 - S.reihe(i)) * F;
+
+/**
+ * Brett zeichnen. z: { brett, wahl, ziele (Set), marken ({ Feld: Klasse }), tippe (Feld) → …, tippbar (Feld) → bool }.
+ * Antippbar sind nur Felder mit tippbar(i): so hört das Brett nur dort, wo ein Tippen etwas tut.
+ */
+function brettEl(z) {
+  const svg = svgEl("svg", { class: "kf-brett", viewBox: `0 0 ${RAND + 8 * F} ${8 * F + RAND}`, role: "img", "aria-label": "Schachbrett" });
+  for (let i = 0; i < 64; i++) {
+    const x = xVon(i), y = yVon(i);
+    const hell = (S.linie(i) + S.reihe(i)) % 2 === 1;
+    const p = z.brett[i];
+    const feld = svgEl("rect", { class: `kf-feld ${hell ? "kf-hell" : "kf-dunkel"}`, x, y, width: F, height: F,
+      "aria-label": `${S.feld(i)}${p ? ` ${S.istWeiss(p) ? "weisser" : "schwarzer"} ${S.NAME[p.toUpperCase()]}` : ""}` });
+    svg.append(feld);
+    const marke = z.marken?.[i];
+    if (marke) svg.append(svgEl("rect", { class: marke, x, y, width: F, height: F, "pointer-events": "none" }));
+    if (z.wahl === i) svg.append(svgEl("rect", { class: "kf-wahl", x, y, width: F, height: F, "pointer-events": "none" }));
+    if (p) svg.append(svgEl("text", { class: `kf-fig ${S.istWeiss(p) ? "kf-w" : "kf-b"}`, x: x + F / 2, y: y + F / 2 + 2 }, S.ZEICHEN[p.toUpperCase()]));
+    if (z.ziele?.has(i)) svg.append(p ? svgEl("circle", { class: "kf-ziel-ring", cx: x + F / 2, cy: y + F / 2, r: F / 2 - 4, "pointer-events": "none" })
+      : svgEl("circle", { class: "kf-ziel", cx: x + F / 2, cy: y + F / 2, r: 8, "pointer-events": "none" }));
+    if (z.tippbar?.(i)) {
+      feld.classList.add("kf-tippbar");
+      feld.addEventListener("click", () => z.tippe(i));
+    }
+  }
+  for (let k = 0; k < 8; k++) {
+    svg.append(svgEl("text", { class: "kf-koord", x: RAND + k * F + F / 2, y: 8 * F + RAND / 2 + 1 }, "abcdefgh"[k]));
+    svg.append(svgEl("text", { class: "kf-koord", x: RAND / 2, y: (7 - k) * F + F / 2 }, String(k + 1)));
+  }
+  return svg;
+}
+
+// ---------- Spiel ----------
+
+LS.spiel({
+  id: ID,
+  einleitung: "Schach-Rätsel! Du spielst Weiss und bist dran. Finde den Zug, nach dem der schwarze König nicht mehr entkommt: Matt!",
+  hilfe: stufe => (stufe === "s6"
+    ? "Du hast zwei Züge: Tippe eine weisse Figur an, dann das Feld, wohin sie ziehen soll. Die Eule antwortet, dann setzt du mit dem zweiten Zug matt. Wie die Figuren ziehen, steht unter „📖 Regeln“."
+    : `Tippe eine weisse Figur an, dann das Feld, wohin sie ziehen soll${ZIELE_IMMER.has(stufe) ? " — grüne Punkte zeigen, wohin sie kann" : "; nach einem Tipp zeigen grüne Punkte, wohin sie kann"}. Matt ist, wenn der schwarze König im Schach steht und nicht mehr entkommt. Wie die Figuren ziehen, steht unter „📖 Regeln“.`),
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const zwei = ctx.stufe === "s6";
+    const start = S.ausFen(a.fen).brett;
+    const r = analyse(a.fen, ctx.stufe);
+    const loesung = loesungText(a);
+    ctx.loesung(loesung);
+    ctx.kennung(a.fen);
+    ctx.schritte(zwei ? 4 : 2);
+
+    const ersterZug = zwei ? r.loesung.erster : r.loesung;
+    // Tipps vom Anstoss zum Konkreten: Fluchtfelder zählen (ab s3: Zielfelder einblenden), der Hinweis der
+    // Stellung, dann die Figur, die zieht, mit ihrer Zugregel — nie das Zielfeld.
+    const figurTipp = zwei ? `Beginne ${mitFigur(start, ersterZug.fig)}. ${REGEL[ersterZug.fig]}` : `Setz ${mitFigur(start, ersterZug.fig)} matt. ${REGEL[ersterZug.fig]}`;
+    // ST3 a: Ab s3 zeigt das Brett die Zielfelder erst nach einem Tipp in dieser Aufgabe (ctx.tipp mit beiTipp).
+    const tippGeholt = () => { if (lebt() && !zieleSehen) { zieleSehen = true; zeichne(); } };
+    ctx.tipp([ZIELE_IMMER.has(ctx.stufe) ? TIPP_FLUCHT : TIPP_ZEIGEN, a.hinweis, figurTipp], tippGeholt);
+
+    const kf = el("div", { class: "kf" });
+    kf.append(el("div", { class: "auftrag", text: zwei ? "Setz den schwarzen König in zwei Zügen matt!" : "Setz den schwarzen König mit einem Zug matt!" }),
+      el("div", { class: "kf-seite", text: "Du spielst Weiss ♔ und bist dran." }));
+    const vorgabe = el("div", { class: "vorgabe", text: stellungText(start) });
+    const halter = el("div", { style: "width:100%;display:flex;justify-content:center" });
+    kf.append(vorgabe, halter);
+    ctx.flaeche.append(kf);
+
+    // Zustand: aktuelle Stellung (s6: nach der Antwort der Eule die zweite), gewählte Figur, ob das Brett annimmt.
+    let basis = start;        // Stellung, zu der ein falscher Zug zurückkehrt
+    let phase = 1;            // s6: 1 = erster Zug, 2 = Mattzug
+    let wahl = null;
+    let aktiv = true;
+    let zieleSehen = ZIELE_IMMER.has(ctx.stufe);
+    const lebt = () => ctx.flaeche.contains(halter);
+    const spaeter = (ms, fn) => setTimeout(() => { if (lebt()) fn(); }, ms);
+
+    function zeichne(brett = basis, marken = null) {
+      const ziele = aktiv && wahl !== null && zieleSehen ? new Set(S.zuege(brett, "w").filter(z => z.von === wahl).map(z => z.nach)) : null;
+      halter.replaceChildren(brettEl({
+        brett, wahl: aktiv ? wahl : null, ziele, marken,
+        tippbar: i => aktiv && !ctx.vorbei() && (wahl !== null || S.istWeiss(brett[i])),
+        tippe,
+      }));
+    }
+
+    function tippe(i) {
+      if (!aktiv || ctx.vorbei()) return;
+      const p = basis[i];
+      if (p && S.istWeiss(p)) { wahl = wahl === i ? null : i; zeichne(); return; }
+      if (wahl === null) return;
+      const z = S.zuege(basis, "w").find(x => x.von === wahl && x.nach === i);
+      if (!z) {
+        // Kein Fehlversuch: Das Kind hat nur ein Feld angetippt, auf das die Figur nicht darf.
+        const fig = basis[wahl].toUpperCase();
+        const nurSchach = S.zuegeOhneSchach(basis, "w").some(x => x.von === wahl && x.nach === i);
+        ctx.sag(nurSchach ? "So nicht — sonst stünde dein König im Schach." : `Dorthin kann ${S.DER[fig]} ${S.NAME[fig]} nicht ziehen. ${REGEL[fig]}`, "hinweis");
+        return;
+      }
+      ziehe(z);
+    }
+
+    function ziehe(z) {
+      wahl = null;
+      const nach = S.ziehe(basis, z);
+      const marken = { [z.von]: "kf-weg", [z.nach]: "kf-weg" };
+      if (S.matt(nach, "b")) {
+        aktiv = false;
+        marken[S.koenig(nach, "b")] = "kf-matt";
+        zeichne(nach, marken);
+        ctx.richtig(waehle(LOB));
+        return;
+      }
+      if (zwei && phase === 1 && zwingt(basis, z)) {
+        // Richtiger erster Zug: Die Eule verteidigt sich am zähesten, dann ist das Kind wieder dran.
+        aktiv = false;
+        zeichne(nach, marken);
+        const antwort = S.verteidigung(basis, z).zug;
+        ctx.sag("Gut! Jetzt antwortet die Eule …", "gut");
+        spaeter(900, () => {
+          basis = S.ziehe(nach, antwort);
+          phase = 2;
+          aktiv = true;
+          zeichne(basis, { [antwort.von]: "kf-eule", [antwort.nach]: "kf-eule" });
+          ctx.sag(`Die Eule zieht: ${S.zugText(nach, antwort)}. Jetzt setz sie matt!`);
+          const matt = S.mattZuege(basis)[0];
+          ctx.tipp([TIPP_FLUCHT, `Setz ${mitFigur(basis, matt.fig)} matt. ${REGEL[matt.fig]}`], tippGeholt);
+        });
+        return;
+      }
+      // Falscher Zug: zeigen, wie die Eule antwortet, dann zurück zur Stellung davor.
+      aktiv = false;
+      const { text, w } = warumText(basis, z, zwei && phase === 1);
+      if (S.imSchach(nach, "b")) marken[S.koenig(nach, "b")] = "kf-schach";
+      zeichne(nach, marken);
+      ctx.falsch(text, loesung);
+      const zurueck = () => {
+        if (ctx.vorbei()) return zeigeLoesung();
+        aktiv = true;
+        zeichne();
+      };
+      if (!w.antwort) return spaeter(1800, zurueck);
+      spaeter(900, () => {
+        zeichne(S.ziehe(nach, w.antwort), { [z.von]: "kf-weg", [z.nach]: "kf-weg", [w.antwort.von]: "kf-eule", [w.antwort.nach]: "kf-eule" });
+        spaeter(1700, zurueck);
+      });
+    }
+
+    /** Nach dem dritten Fehlversuch: die Lösung auf dem Brett (s6 die ganze Folge bis zum Matt). */
+    function zeigeLoesung() {
+      aktiv = false;
+      let b = start;
+      const zuege = zwei ? [r.loesung.erster, r.loesung.antwort, r.loesung.matt] : [r.loesung];
+      for (const z of zuege) b = S.ziehe(b, z);
+      const letzter = zuege[zuege.length - 1];
+      zeichne(b, { [letzter.von]: "kf-matt", [letzter.nach]: "kf-matt", [S.koenig(b, "b")]: "kf-matt" });
+    }
+
+    zeichne();
+    if (ctx.nr === 0) ctx.sag(zwei ? "Zwei Züge bis zum Matt: Tippe eine weisse Figur an, dann ihr Zielfeld." : "Tippe eine weisse Figur an und dann das Feld, wohin sie ziehen soll.");
+  },
+});
+
+/** Erzwingt der Zug z Matt im nächsten Zug? (Jede Antwort der Eule lässt ein Matt zu.) */
+function zwingt(brett, z) {
+  const b1 = S.ziehe(brett, z);
+  const antworten = S.zuege(b1, "b");
+  return antworten.length > 0 && antworten.every(x => S.mattZuege(S.ziehe(b1, x)).length > 0);
+}
+</script>
+</body>
+</html>

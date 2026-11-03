@@ -77,8 +77,11 @@ ungeprüft bis zum Prüfstand.
 Stein-Duell, Steine fangen, König in der Falle — kein Grundwort doppelt mit vorhandenen Namen (Detektiv, Sortierer,
 Puzzle über der Grenze); vor dem Bau mit dem Testskript nachzählen.
 
-## 4. Offen (Fragen ST1–ST3 an Patrik)
+## 4. Entscheide (Patrik, 03.11.2026)
 
-- ST1: Lernziel und Fach (MI.2.2.b oder MA.1.B.1.h).
-- ST2: Basisklasse 5 oder 4.
-- ST3: Zugregeln beim Schach als eigene Stufen oder nur in Hilfe und Tipp.
+- **ST1 a:** Lernziel MI.2.2 (Stufe .b), Thema „Strategie“ im Fach Medien und Informatik, für alle drei Spiele.
+- **ST2 a:** Basisklasse 5 (Stufe 1 = 4. Klasse, Stufe 5 = 6. Klasse).
+- **ST3 a:** Zugregeln nur in Hilfe und Tipp, dazu in s1 und s2 die möglichen Züge der angetippten Figur
+  einblenden; alle Stufen bleiben Rätsel. **Dazu** (Wunsch Patrik): Jedes der drei Spiele hat eine eigene
+  **Regelseite**, erreichbar vom Startblatt und aus der Hilfe — als Baustein des Rahmens für ähnliche Fälle
+  (rahmen.md Abschnitt 16).

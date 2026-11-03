@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steine fangen</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .go-feld { max-width: 520px; margin: 4px auto 6px; }
+  .go-brett { display: block; width: 100%; height: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+  .go-brett .go-holz { fill: #e8c88c; }
+  .go-brett .go-linie { stroke: #6b5235; stroke-width: 1.4; }
+  .go-brett .go-randlinie { fill: none; stroke: #6b5235; stroke-width: 2.6; }
+  .go-brett .go-stern { fill: #6b5235; }
+  .go-brett .go-koord { fill: #6b5235; font-size: 13px; font-weight: 800; text-anchor: middle; dominant-baseline: middle; font-family: var(--schrift); }
+  .go-brett .go-stein.schwarz { fill: #23263a; stroke: #111; stroke-width: 1; }
+  .go-brett .go-stein.weiss { fill: #fff; stroke: #6b6f8a; stroke-width: 1.6; }
+  .go-brett .go-stein.neu { stroke: var(--hinweis); stroke-width: 4; }
+  .go-brett .go-ring { fill: none; stroke: var(--knopf); stroke-width: 4; }
+  .go-brett .go-nachbar { fill: none; stroke: var(--knopf); stroke-width: 3; stroke-dasharray: 5 4; }
+  .go-brett .go-frei { fill: var(--knopf); }
+  .go-brett .go-loesung { fill: none; stroke: var(--gut); stroke-width: 5; }
+  .go-brett .go-gefangen { fill: none; stroke: var(--hinweis); stroke-width: 3; stroke-dasharray: 4 4; }
+  .go-brett .go-ziel { fill: #fff; fill-opacity: 0; cursor: pointer; }
+  .go-legende { text-align: center; color: var(--text-leise); font-weight: 700; font-size: 16px; margin: 0 0 6px; }
+  .go-zahlen .wahl-knopf { min-width: 64px; font-size: 28px; }
+  @media (max-width: 560px) { .go-feld { margin-left: -8px; margin-right: -8px; } }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>⚫ Steine fangen</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MI.2.2.b: durch Probieren Lösungswege suchen und auf Korrektheit prüfen (eine Spielstrategie
+// entwickeln); MA.1.B.1.h heuristische Strategien. Atari-Go (Steine fangen): Wer zuerst fängt, gewinnt.
+// Vorlage: docs/eulenpfad/spielideen/strategie_raetsel.md, Abschnitt 2.2; Entscheide ST1 a – ST3 a.
+// Das Kind spielt Schwarz, die Eule Weiss. Jede Stellung kommt aus einem Generator und wird von der
+// Regel-Maschine unten geprüft (Freiheiten, Fangen, Selbstmord verboten, Ko).
+
+const { zufall, waehle, mische, el } = LS;
+
+// ---------------------------------------------------------------------------------------------------
+// Regel-Maschine. Brett = Liste der Länge n·n, Index i = Zeile · n + Spalte (Zeile 0 oben).
+// ---------------------------------------------------------------------------------------------------
+const LEER = 0, SCHWARZ = 1, WEISS = 2;
+const gegner = f => 3 - f;
+const NACHBARN = {};
+
+/** Nachbarpunkte je Punkt (oben, unten, links, rechts), je Brettgrösse einmal gerechnet. */
+function nachbarn(n) {
+  if (!NACHBARN[n]) {
+    NACHBARN[n] = [];
+    for (let i = 0; i < n * n; i++) {
+      const r = Math.floor(i / n), c = i % n, l = [];
+      if (r > 0) l.push(i - n);
+      if (r < n - 1) l.push(i + n);
+      if (c > 0) l.push(i - 1);
+      if (c < n - 1) l.push(i + 1);
+      NACHBARN[n].push(l);
+    }
+  }
+  return NACHBARN[n];
+}
+
+/** Gruppe am Punkt i: alle über Linien verbundenen Steine gleicher Farbe und ihre Freiheiten. */
+function gruppe(b, n, i) {
+  const nb = nachbarn(n), f = b[i], steine = [i], gesehen = new Set([i]), frei = new Set();
+  for (let k = 0; k < steine.length; k++) {
+    for (const j of nb[steine[k]]) {
+      if (b[j] === LEER) frei.add(j);
+      else if (b[j] === f && !gesehen.has(j)) { gesehen.add(j); steine.push(j); }
+    }
+  }
+  return { farbe: f, steine, freiheiten: [...frei] };
+}
+
+/** Alle Gruppen des Bretts. */
+function gruppen(b, n) {
+  const gesehen = new Set(), liste = [];
+  for (let i = 0; i < n * n; i++) {
+    if (b[i] === LEER || gesehen.has(i)) continue;
+    const g = gruppe(b, n, i);
+    g.steine.forEach(s => gesehen.add(s));
+    liste.push(g);
+  }
+  return liste;
+}
+
+const gleich = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+
+/**
+ * Stein der Farbe f auf Punkt i setzen. null, wenn der Zug nicht erlaubt ist: Punkt besetzt,
+ * Selbstmord (eigene Gruppe ohne Freiheit, ohne zu fangen) oder Ko (das Brett wäre wieder wie
+ * `vorher`, vor dem letzten Zug des Gegners). Sonst { brett, gefangen }.
+ */
+function setze(b, n, i, f, vorher) {
+  if (b[i] !== LEER) return null;
+  const neu = b.slice();
+  neu[i] = f;
+  const gefangen = [];
+  for (const j of nachbarn(n)[i]) {
+    if (neu[j] !== gegner(f)) continue;
+    const g = gruppe(neu, n, j);
+    if (g.freiheiten.length) continue;
+    for (const s of g.steine) { neu[s] = LEER; gefangen.push(s); }
+  }
+  if (!gefangen.length && !gruppe(neu, n, i).freiheiten.length) return null;
+  if (vorher && gleich(neu, vorher)) return null;
+  return { brett: neu, gefangen };
+}
+
+/** Erlaubte Züge der Farbe f, die sofort fangen. */
+function fangZuege(b, n, f, vorher) {
+  const z = new Set();
+  for (const g of gruppen(b, n)) {
+    if (g.farbe !== gegner(f) || g.freiheiten.length !== 1) continue;
+    const p = g.freiheiten[0];
+    const r = setze(b, n, p, f, vorher);
+    if (r && r.gefangen.length) z.add(p);
+  }
+  return [...z].sort((x, y) => x - y);
+}
+
+/** Gruppen der Farbe f mit genau einer Freiheit (im Atari). */
+const imAtari = (b, n, f) => gruppen(b, n).filter(g => g.farbe === f && g.freiheiten.length === 1);
+
+/** Erlaubtes Brett: jede Gruppe hat mindestens eine Freiheit. */
+const erlaubt = (b, n) => gruppen(b, n).every(g => g.freiheiten.length > 0);
+
+/** Ein freier Punkt ohne Steine daneben, oder -1. Ein Zug dorthin ändert keine Freiheit (wie Passen). */
+function inselPunkt(b, n) {
+  const nb = nachbarn(n);
+  for (let i = 0; i < n * n; i++) if (b[i] === LEER && nb[i].every(j => b[j] === LEER)) return i;
+  return -1;
+}
+
+/**
+ * Züge der Eule nach b1, die etwas ändern können: freie Punkte neben einem Stein, dazu ein Inselpunkt
+ * als Stellvertreter für alle Züge, die nichts berühren. Der Inselpunkt zuerst: er widerlegt schnell
+ * jeden Zug, der nichts bedroht.
+ */
+function eulenZuege(b1, n) {
+  const nb = nachbarn(n), z = [];
+  const insel = inselPunkt(b1, n);
+  if (insel >= 0) z.push(insel);
+  for (let i = 0; i < n * n; i++) if (b1[i] === LEER && nb[i].some(j => b1[j] !== LEER)) z.push(i);
+  return z;
+}
+
+/**
+ * Antworten der Eule auf den ersten Zug (Brett b1, vorher b0), die den Fang in 2 verhindern:
+ * sie fängt selbst zuerst, oder danach kann Schwarz nichts fangen. Mit `alle` alle solchen, sonst
+ * nur die erste (für die Prüfung genügt eine).
+ */
+function widerlegungen(b1, n, b0, alle) {
+  const liste = [];
+  for (const q of eulenZuege(b1, n)) {
+    const r = setze(b1, n, q, WEISS, b0);
+    if (!r) continue;
+    if (r.gefangen.length || !fangZuege(r.brett, n, SCHWARZ, b1).length) {
+      liste.push({ zug: q, brett: r.brett, gefangen: r.gefangen });
+      if (!alle) break;
+    }
+  }
+  return liste;
+}
+
+/**
+ * Fang in 2 (Schwarz am Zug): alle ersten Züge, nach denen Schwarz bei jeder Antwort der Eule im
+ * zweiten Zug fängt. Durchgerechnet werden alle freien Punkte und alle Antworten (eulenZuege).
+ * ataris: erste Züge, die eine weisse Gruppe auf eine Freiheit setzen (der naheliegende Gedanke).
+ */
+function fangInZwei(b, n) {
+  const richtig = [], ataris = [];
+  for (let p = 0; p < n * n; p++) {
+    const r1 = setze(b, n, p, SCHWARZ, null);
+    if (!r1 || r1.gefangen.length) continue;
+    if (imAtari(r1.brett, n, WEISS).length) ataris.push(p);
+    if (!widerlegungen(r1.brett, n, b, false).length) richtig.push(p);
+  }
+  return { richtig, ataris };
+}
+
+/**
+ * Beste Verteidigung der Eule nach einem richtigen ersten Zug: die Antwort, nach der Schwarz am
+ * wenigsten Fangzüge hat; bei Gleichstand verlängert sie lieber eine Gruppe im Atari.
+ */
+function besteVerteidigung(b1, n, b0) {
+  const atariFrei = new Set(imAtari(b1, n, WEISS).flatMap(g => g.freiheiten));
+  let beste = null;
+  for (const q of eulenZuege(b1, n)) {
+    const r = setze(b1, n, q, WEISS, b0);
+    if (!r) continue;
+    const fang = fangZuege(r.brett, n, SCHWARZ, b1);
+    const wert = fang.length * 2 - (atariFrei.has(q) ? 1 : 0);
+    if (!beste || wert < beste.wert) beste = { zug: q, brett: r.brett, fang, wert };
+  }
+  return beste;
+}
+
+/** Rettende Züge: Schwarz fängt selbst, oder die Eule kann danach nichts fangen. */
+function rettungsZuege(b, n) {
+  const z = [];
+  for (let p = 0; p < n * n; p++) {
+    const r = setze(b, n, p, SCHWARZ, null);
+    if (r && (r.gefangen.length || !fangZuege(r.brett, n, WEISS, b).length)) z.push(p);
+  }
+  return z;
+}
+
+/** Wie die Eule auf einen falschen Zug antwortet: fangen, wenn sie kann, sonst wegläufen. */
+function euleAntwort(b1, n, b0) {
+  const fang = fangZuege(b1, n, WEISS, b0);
+  if (fang.length) { const r = setze(b1, n, fang[0], WEISS, b0); return { zug: fang[0], ...r, art: "faengt" }; }
+  for (const g of imAtari(b1, n, WEISS)) {
+    const r = setze(b1, n, g.freiheiten[0], WEISS, b0);
+    if (r) return { zug: g.freiheiten[0], ...r, art: "laeuft" };
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Aufgaben: Generator und Prüfung
+// ---------------------------------------------------------------------------------------------------
+const ZEICHEN = [".", "x", "o"];
+const alsText = b => b.map(f => ZEICHEN[f]).join("");
+const ausText = t => [...t].map(z => ZEICHEN.indexOf(z));
+const BUCHSTABEN = "ABCDEFGHJ"; // wie im Go üblich ohne I
+const koord = (i, n) => BUCHSTABEN[i % n] + (n - Math.floor(i / n));
+
+// Je Stufe: Brettgrössen, Grösse der Hauptgruppe, Anzahl Zusatzsteine.
+const STUFE = {
+  s1: { art: "zaehlen", groessen: [5, 6], steine: [5, 10] },
+  s2: { art: "fangen", groessen: [5, 6, 7], gruppe: [1, 1], extra: [2, 5] },
+  s3: { arten: ["fangen", "gefahr"], groessen: [6, 7], gruppe: [2, 4], extra: [3, 6] },
+  s4: { art: "retten", groessen: [6, 7], gruppe: [1, 3], extra: [3, 6] },
+  s5: { art: "fang2", groessen: [7, 8], gruppe: [1, 3], extra: [3, 7], maxRichtig: 2 },
+  s6: { art: "fang2", groessen: [8, 9], gruppe: [1, 4], extra: [5, 10], maxRichtig: 2, faehrte: true },
+};
+
+/** Zusammenhängende Gruppe aus `groesse` Punkten, zufällig gewachsen. */
+function baueGruppe(n, groesse) {
+  const nb = nachbarn(n);
+  const g = [zufall(0, n * n - 1)];
+  while (g.length < groesse) {
+    const rand = [...new Set(g.flatMap(i => nb[i]))].filter(j => !g.includes(j));
+    if (!rand.length) break;
+    g.push(waehle(rand));
+  }
+  return g;
+}
+
+/** Punkte im Umkreis (Schachbrett-Abstand ≤ d) der Punkte in `um`. */
+function umkreis(n, um, d) {
+  const s = new Set();
+  for (const i of um) {
+    const r = Math.floor(i / n), c = i % n;
+    for (let dr = -d; dr <= d; dr++) for (let dc = -d; dc <= d; dc++) {
+      const rr = r + dr, cc = c + dc;
+      if (rr >= 0 && rr < n && cc >= 0 && cc < n) s.add(rr * n + cc);
+    }
+  }
+  return [...s];
+}
+
+/**
+ * Hauptgruppe der Farbe `farbe`, von `frei` Freiheiten bleiben genau so viele offen, die übrigen
+ * besetzt der Gegner; dazu `extra` Zusatzsteine beider Farben, meist in der Nähe.
+ */
+function stellung(n, farbe, groesse, frei, extra) {
+  const b = new Array(n * n).fill(LEER);
+  const g = baueGruppe(n, groesse);
+  if (g.length < groesse) return null;
+  g.forEach(i => { b[i] = farbe; });
+  const lib = mische(gruppe(b, n, g[0]).freiheiten);
+  if (lib.length < frei) return null;
+  const offen = lib.slice(0, frei);
+  lib.slice(frei).forEach(i => { b[i] = gegner(farbe); });
+  const nah = umkreis(n, g, 2);
+  for (let k = 0; k < extra; k++) {
+    const pool = (Math.random() < 0.75 ? nah : [...Array(n * n).keys()]).filter(i => b[i] === LEER && !offen.includes(i));
+    if (!pool.length) break;
+    b[waehle(pool)] = Math.random() < 0.5 ? SCHWARZ : WEISS;
+  }
+  return { b, g, offen };
+}
+
+const ERZEUGER = {
+  zaehlen(p) {
+    const k = zufall(1, 4); // gesuchte Anzahl Freiheiten, gleich verteilt
+    for (;;) {
+      const n = waehle(p.groessen);
+      const b = new Array(n * n).fill(LEER);
+      const anzahl = zufall(...p.steine);
+      for (let s = 0; s < anzahl; s++) b[zufall(0, n * n - 1)] = s % 2 ? WEISS : SCHWARZ;
+      if (!erlaubt(b, n)) continue;
+      const kandidaten = gruppen(b, n).filter(g => g.steine.length === 1 && g.freiheiten.length === k);
+      if (!kandidaten.length) continue;
+      const ziel = waehle(kandidaten).steine[0];
+      return { art: "zaehlen", n, brett: alsText(b), ziel, antwort: k };
+    }
+  },
+  fangen(p) {
+    for (;;) {
+      const n = waehle(p.groessen);
+      const s = stellung(n, WEISS, zufall(...p.gruppe), 1, zufall(...p.extra));
+      if (!s || !erlaubt(s.b, n)) continue;
+      const a = { art: "fangen", n, brett: alsText(s.b), richtig: fangZuege(s.b, n, SCHWARZ, null) };
+      if (!pruefeFangen(a, p).length) return a;
+    }
+  },
+  gefahr(p) {
+    for (;;) {
+      const n = waehle(p.groessen);
+      const s = stellung(n, SCHWARZ, zufall(1, 3), 1, zufall(...p.extra));
+      if (!s || !erlaubt(s.b, n)) continue;
+      const atari = imAtari(s.b, n, SCHWARZ);
+      const a = { art: "gefahr", n, brett: alsText(s.b), richtig: atari.length === 1 ? atari[0].steine.slice().sort((x, y) => x - y) : [] };
+      if (!pruefeGefahr(a).length) return a;
+    }
+  },
+  retten(p) {
+    for (;;) {
+      const n = waehle(p.groessen);
+      const s = stellung(n, SCHWARZ, zufall(...p.gruppe), 1, zufall(...p.extra));
+      if (!s || !erlaubt(s.b, n)) continue;
+      const a = { art: "retten", n, brett: alsText(s.b), richtig: rettungsZuege(s.b, n) };
+      if (!pruefeRetten(a).length) return a;
+    }
+  },
+  fang2(p) {
+    for (;;) {
+      const n = waehle(p.groessen);
+      const s = stellung(n, WEISS, zufall(...p.gruppe), 2, zufall(...p.extra));
+      if (!s || !vorpruefungFang2(s.b, n, p)) continue;
+      const { richtig } = fangInZwei(s.b, n);
+      const a = { art: "fang2", n, brett: alsText(s.b), richtig };
+      if (!pruefeFang2(a, p).length) return a;
+    }
+  },
+};
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  return ERZEUGER[p.art || waehle(p.arten)](p);
+}
+
+// Prüfungen je Art: Mängelliste (leer = in Ordnung). Sie rechnen die richtigen Züge selbst nach.
+function pruefeFangen(a, p) {
+  const b = ausText(a.brett), n = a.n, m = [];
+  const atari = imAtari(b, n, WEISS);
+  if (atari.length !== 1) m.push(`${atari.length} weisse Gruppen im Atari statt einer`);
+  else if (atari[0].steine.length < p.gruppe[0] || atari[0].steine.length > p.gruppe[1]) m.push("Gruppe im Atari hat die falsche Grösse");
+  if (gruppen(b, n).filter(g => g.farbe === WEISS).length < 2) m.push("nur eine weisse Gruppe (der Tipp mit den Punkten verriete sie)");
+  if (imAtari(b, n, SCHWARZ).length) m.push("eigene Steine im Atari");
+  const soll = fangZuege(b, n, SCHWARZ, null);
+  if (soll.length !== 1) m.push(`${soll.length} Fangzüge statt genau einem`);
+  if (!gleich(soll, a.richtig)) m.push("gespeicherte Lösung passt nicht zur Regel-Maschine");
+  return m;
+}
+
+function pruefeGefahr(a) {
+  const b = ausText(a.brett), n = a.n, m = [];
+  const atari = imAtari(b, n, SCHWARZ);
+  if (atari.length !== 1) m.push(`${atari.length} schwarze Gruppen im Atari statt einer`);
+  else if (!gleich(atari[0].steine.slice().sort((x, y) => x - y), a.richtig)) m.push("gespeicherte Lösung passt nicht zur Regel-Maschine");
+  if (imAtari(b, n, WEISS).length) m.push("weisse Steine im Atari (Fangen wäre die bessere Antwort)");
+  if (gruppen(b, n).filter(g => g.farbe === SCHWARZ).length < 2) m.push("nur eine schwarze Gruppe");
+  return m;
+}
+
+function pruefeRetten(a) {
+  const b = ausText(a.brett), n = a.n, m = [];
+  if (imAtari(b, n, SCHWARZ).length !== 1) m.push("nicht genau eine schwarze Gruppe im Atari");
+  if (fangZuege(b, n, SCHWARZ, null).length) m.push("Schwarz kann sofort fangen");
+  const soll = rettungsZuege(b, n);
+  if (soll.length !== 1) m.push(`${soll.length} rettende Züge statt genau einem`);
+  if (!gleich(soll, a.richtig)) m.push("gespeicherte Lösung passt nicht zur Regel-Maschine");
+  return m;
+}
+
+/** Schnelle Bedingungen vor dem teuren Durchrechnen. */
+function vorpruefungFang2(b, n, p) {
+  if (!erlaubt(b, n) || imAtari(b, n, WEISS).length) return false;
+  if (!p.faehrte && imAtari(b, n, SCHWARZ).length) return false;
+  return true;
+}
+
+function pruefeFang2(a, p) {
+  const b = ausText(a.brett), n = a.n, m = [];
+  if (imAtari(b, n, WEISS).length) m.push("Fang in 1 möglich");
+  if (!p.faehrte && imAtari(b, n, SCHWARZ).length) m.push("eigene Steine im Atari");
+  const { richtig, ataris } = fangInZwei(b, n);
+  if (!richtig.length) m.push("kein Fang in 2");
+  if (richtig.length > p.maxRichtig) m.push(`${richtig.length} richtige erste Züge (höchstens ${p.maxRichtig})`);
+  if (!gleich(richtig, a.richtig)) m.push("gespeicherte Lösung passt nicht zur Regel-Maschine");
+  if (p.faehrte && !ataris.some(z => !richtig.includes(z))) m.push("keine falsche Fährte (kein Atari, der scheitert)");
+  // Jede Antwort der Eule durchgerechnet: nach der besten Verteidigung bleibt ein Fangzug.
+  for (const z of richtig) {
+    const r1 = setze(b, n, z, SCHWARZ, null);
+    const v = besteVerteidigung(r1.brett, n, b);
+    if (!v || !v.fang.length) m.push(`nach ${koord(z, n)} kein Fang im zweiten Zug`);
+  }
+  return m;
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const p = STUFE[stufe], m = [];
+  if (!p.groessen.includes(a.n)) m.push("Brettgrösse passt nicht zur Stufe");
+  if (typeof a.brett !== "string" || a.brett.length !== a.n * a.n || /[^.xo]/.test(a.brett)) return [...m, "Brett unvollständig"];
+  const b = ausText(a.brett);
+  if (!erlaubt(b, a.n)) m.push("Gruppe ohne Freiheit auf dem Brett");
+  if (!(p.art === a.art || (p.arten || []).includes(a.art))) m.push("Aufgabenart passt nicht zur Stufe");
+  if (a.art === "zaehlen") {
+    const g = b[a.ziel] ? gruppe(b, a.n, a.ziel) : null;
+    if (!g || g.steine.length !== 1) m.push("markierter Punkt ist kein einzelner Stein");
+    else if (g.freiheiten.length !== a.antwort) m.push("Anzahl Freiheiten falsch");
+    if (!(a.antwort >= 1 && a.antwort <= 4)) m.push("Antwort ausserhalb 1–4");
+  }
+  if (a.art === "fangen") m.push(...pruefeFangen(a, p));
+  if (a.art === "gefahr") m.push(...pruefeGefahr(a));
+  if (a.art === "retten") m.push(...pruefeRetten(a));
+  if (a.art === "fang2") m.push(...pruefeFang2(a, p));
+  return m;
+}
+
+// ---------------------------------------------------------------------------------------------------
+// Brett zeichnen
+// ---------------------------------------------------------------------------------------------------
+const SVG = "http://www.w3.org/2000/svg";
+function svgEl(tag, attr = {}) {
+  const e = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
+  return e;
+}
+const Z = 40, RAND_L = 30, RAND_O = 20, RAND_R = 20, RAND_U = 30;
+const px = (i, n) => RAND_L + (i % n) * Z;
+const py = (i, n) => RAND_O + Math.floor(i / n) * Z;
+
+/** Go-Brett als SVG; zeige(brett) setzt die Steine, marke(...) legt Ringe und Punkte darüber. */
+function brettAnsicht(n, beiTippen) {
+  const B = RAND_L + (n - 1) * Z + RAND_R, H = RAND_O + (n - 1) * Z + RAND_U;
+  const svg = svgEl("svg", { class: "go-brett", viewBox: `0 0 ${B} ${H}`, role: "img", "aria-label": `Go-Brett mit ${n} mal ${n} Linien` });
+  svg.append(svgEl("rect", { class: "go-holz", x: 0, y: 0, width: B, height: H, rx: 10 }));
+  const ende = (n - 1) * Z;
+  for (let k = 1; k < n - 1; k++) {
+    svg.append(svgEl("line", { class: "go-linie", x1: RAND_L, y1: RAND_O + k * Z, x2: RAND_L + ende, y2: RAND_O + k * Z }));
+    svg.append(svgEl("line", { class: "go-linie", x1: RAND_L + k * Z, y1: RAND_O, x2: RAND_L + k * Z, y2: RAND_O + ende }));
+  }
+  svg.append(svgEl("rect", { class: "go-randlinie", x: RAND_L, y: RAND_O, width: ende, height: ende }));
+  const sterne = n === 9 ? [20, 24, 40, 56, 60] : n === 7 ? [16, 18, 24, 30, 32] : [];
+  for (const i of sterne) svg.append(svgEl("circle", { class: "go-stern", cx: px(i, n), cy: py(i, n), r: 3.5 }));
+  for (let k = 0; k < n; k++) {
+    const t1 = svgEl("text", { class: "go-koord", x: RAND_L + k * Z, y: RAND_O + ende + 20 }); t1.textContent = BUCHSTABEN[k];
+    const t2 = svgEl("text", { class: "go-koord", x: 12, y: RAND_O + k * Z }); t2.textContent = String(n - k);
+    svg.append(t1, t2);
+  }
+  const steine = svgEl("g"), marken = svgEl("g"), ziele = svgEl("g");
+  svg.append(steine, marken, ziele);
+  if (beiTippen) {
+    for (let i = 0; i < n * n; i++) {
+      const r = svgEl("rect", { class: "go-ziel", x: px(i, n) - Z / 2, y: py(i, n) - Z / 2, width: Z, height: Z, "aria-label": koord(i, n) });
+      r.addEventListener("click", () => beiTippen(i));
+      ziele.append(r);
+    }
+  }
+  return {
+    svg,
+    zeige(b, neu = []) {
+      steine.innerHTML = "";
+      b.forEach((f, i) => {
+        if (f === LEER) return;
+        steine.append(svgEl("circle", { class: `go-stein ${f === SCHWARZ ? "schwarz" : "weiss"}${neu.includes(i) ? " neu" : ""}`, cx: px(i, n), cy: py(i, n), r: 17 }));
+      });
+    },
+    marke(punkte, art) {
+      for (const i of punkte) {
+        marken.append(art === "go-frei"
+          ? svgEl("circle", { class: art, cx: px(i, n), cy: py(i, n), r: 7 })
+          : svgEl("circle", { class: art, cx: px(i, n), cy: py(i, n), r: 21 }));
+      }
+    },
+    leereMarken(art) {
+      for (const k of [...marken.childNodes]) if (!art || k.getAttribute("class") === art) k.remove();
+    },
+  };
+}
+
+const TIPPS = {
+  zaehlen: ["Freiheiten sind freie Nachbarpunkte auf den Linien: oben, unten, links und rechts.",
+    "Ein Punkt mit einem Stein ist nicht frei. Am Rand und in der Ecke fehlen Nachbarn.",
+    "Ich zeige dir die Nachbarpunkte mit Ringen. Welche davon sind frei?"],
+  fangen1: ["Ein Stein ohne Freiheiten wird gefangen.",
+    "Suche einen weissen Stein mit nur noch einer Freiheit.",
+    "Ich zeige dir die Freiheiten der weissen Steine als Punkte."],
+  fangen: ["Verbundene Steine teilen ihre Freiheiten. Zähle sie für die ganze Gruppe.",
+    "Welche weisse Gruppe hat nur noch eine Freiheit?"],
+  gefahr: ["In Gefahr ist ein Stein, den die Eule mit einem einzigen Zug fangen kann.",
+    "Zähle die Freiheiten deiner Steine. Welche Gruppe hat nur noch eine?"],
+  retten: ["Eine deiner Gruppen hat nur noch eine Freiheit. Die Eule will sie fangen.",
+    "Ein neuer Stein, der mit der Gruppe verbunden ist, bringt neue Freiheiten — aber nur am richtigen Ort.",
+    "Zähle nach deinem Zug: Hat die Gruppe dann mindestens zwei Freiheiten?"],
+  fang2: ["Suche eine weisse Gruppe mit zwei Freiheiten.",
+    "Denk voraus: Wohin läuft die Eule, wenn du drohst? Hat sie dort mehr Freiheiten?",
+    "Der Rand und deine eigenen Steine nehmen der Eule Freiheiten weg."],
+  faehrte: ["Vorsicht: Der erste Gedanke ist nicht immer der beste.",
+    "Prüfe jede Drohung: Wohin läuft die Eule? Kann sie dabei deine Steine fangen?",
+    "Schau auch auf deine eigenen Steine: Haben sie genug Freiheiten?"],
+  zweiter: ["Die Eule hat geantwortet. Welche weisse Gruppe hat jetzt nur noch eine Freiheit?"],
+};
+
+const AUFTRAG = {
+  zaehlen: "Wie viele Freiheiten hat der Stein im Ring?",
+  fangen: "Fang weisse Steine mit einem Zug!",
+  gefahr: "Welcher deiner schwarzen Steine ist in Gefahr? Tippe ihn an.",
+  retten: "Deine Steine sind in Gefahr. Rette sie!",
+  fang2: "Fang weisse Steine in zwei Zügen!",
+};
+
+LS.spiel({
+  id: "steine-fangen",
+  einleitung: "Steine fangen! Du spielst Schwarz, ich spiele Weiss. Ein Stein ohne Freiheiten wird gefangen — wer zuerst fängt, gewinnt.",
+  hilfe: stufe => stufe === "s1"
+    ? "Zähle die freien Nachbarpunkte des Steins im Ring und tippe unten auf die Zahl."
+    : "Du spielst Schwarz, die Eule Weiss. Tippe auf einen Schnittpunkt der Linien, um deinen Stein dorthin zu setzen."
+      + (stufe === "s5" || stufe === "s6" ? " Nach deinem ersten Zug antwortet die Eule, dann bist du nochmals dran." : ""),
+  anzahl: 8,
+  stufen: {
+    s1: "Freiheiten zählen: Wie viele freie Nachbarpunkte hat der Stein?",
+    s2: "Fang einen Stein, der nur noch eine Freiheit hat.",
+    s3: "Gruppen fangen — und erkennen, welcher deiner Steine in Gefahr ist.",
+    s4: "Retten: Deine Steine haben nur noch eine Freiheit. Bring sie in Sicherheit.",
+    s5: "Fang in zwei Zügen: Treib die Eule an den Rand oder in deine Steine.",
+    s6: "Endgegner: Fang in zwei Zügen — der naheliegende Zug ist eine Falle.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const p = STUFE[ctx.stufe];
+    const n = a.n, start = ausText(a.brett);
+    if (p.arten) ctx.serie("art", a.art);
+    ctx.kennung(`${a.art}|${n}|${a.brett}|${a.ziel ?? ""}`);
+    ctx.flaeche.append(el("div", { class: "auftrag", text: AUFTRAG[a.art] }));
+
+    let brett = start;       // was das Brett gerade zeigt
+    let vorher = null;       // Brett vor dem letzten Zug der Eule (Ko)
+    let gesperrt = false;    // während die Eule zeigt oder antwortet
+    let schritt = 1;         // Fang in 2: erster oder zweiter Zug
+    let ersterZug = null;
+    const noch = () => ctx.flaeche.contains(ansicht.svg) && !ctx.vorbei();
+    const spaeter = (ms, fn) => setTimeout(() => { if (ctx.flaeche.contains(ansicht.svg)) fn(); }, ms);
+
+    // Lösungstext und Lösungspunkte (für die Auflösung nach drei Fehlversuchen)
+    let loesungText, loesungPunkte;
+    if (a.art === "zaehlen") {
+      loesungText = a.antwort === 1 ? "Der Stein hat nur eine Freiheit." : `Der Stein hat ${a.antwort} Freiheiten.`;
+      loesungPunkte = gruppe(start, n, a.ziel).freiheiten;
+    } else if (a.art === "gefahr") {
+      loesungText = a.richtig.length === 1 ? `Der Stein auf ${koord(a.richtig[0], n)} hat nur noch eine Freiheit.`
+        : `Die Gruppe auf ${a.richtig.map(i => koord(i, n)).join(", ")} hat nur noch eine Freiheit.`;
+      loesungPunkte = a.richtig;
+    } else if (a.art === "fangen") {
+      loesungText = `Setze auf ${koord(a.richtig[0], n)}: Dort nimmst du die letzte Freiheit.`;
+      loesungPunkte = a.richtig;
+    } else if (a.art === "retten") {
+      loesungText = `Setze auf ${koord(a.richtig[0], n)}: So bekommt deine Gruppe neue Freiheiten.`;
+      loesungPunkte = a.richtig;
+    } else {
+      const z = a.richtig[0];
+      const v = besteVerteidigung(setze(start, n, z, SCHWARZ, null).brett, n, start);
+      loesungText = `Zuerst ${koord(z, n)}. Die Eule antwortet ${koord(v.zug, n)}, dann fängst du auf ${koord(v.fang[0], n)}.`;
+      loesungPunkte = a.richtig;
+    }
+    ctx.loesung(loesungText);
+    ctx.schritte(a.art === "fang2" ? 2 : 1);
+
+    const ansicht = brettAnsicht(n, a.art === "zaehlen" ? null : tippe);
+    ansicht.zeige(start);
+    if (a.art === "zaehlen") ansicht.marke([a.ziel], "go-ring");
+    ctx.flaeche.append(el("div", { class: "go-feld" }, ansicht.svg),
+      el("div", { class: "go-legende", text: "⚫ du · ⚪ Eule" }));
+
+    // Tipps; in s1 und s2 zeigt der letzte das Brett mit Nachbarpunkten bzw. Freiheiten.
+    const tipps = a.art === "fangen" && ctx.stufe === "s2" ? TIPPS.fangen1 : a.art === "fang2" && p.faehrte ? TIPPS.faehrte : TIPPS[a.art];
+    // Tipp mit Bild (s1, s2): Beim letzten Tipp zeigt das Brett die Nachbarpunkte bzw. Freiheiten (ctx.tipp mit beiTipp).
+    ctx.tipp(tipps, (i, letzter) => {
+      if (!noch() || !letzter) return;
+      if (a.art === "zaehlen") ansicht.marke(nachbarn(n)[a.ziel], "go-nachbar");
+      else if (ctx.stufe === "s2") ansicht.marke(gruppen(start, n).filter(g => g.farbe === WEISS).flatMap(g => g.freiheiten), "go-frei");
+    });
+
+    /** Nach einem Fehlversuch: hat der Rahmen aufgelöst, die Lösung auf dem Brett zeigen. */
+    const nachFehler = () => {
+      if (!ctx.vorbei()) return false;
+      gesperrt = true;
+      ansicht.zeige(brett);
+      ansicht.leereMarken("go-nachbar");
+      ansicht.marke(loesungPunkte, "go-loesung");
+      return true;
+    };
+
+    /** Die Eule zeigt kurz, wie sie antworten würde; danach steht das Brett wieder wie vorher. */
+    const zeigeAntwort = (b1, kind, antwort) => {
+      gesperrt = true;
+      ansicht.zeige(b1, [kind]);
+      spaeter(600, () => {
+        if (antwort) ansicht.zeige(antwort.brett, [antwort.zug]);
+        if (antwort && antwort.gefangen.length) ansicht.marke(antwort.gefangen, "go-gefangen");
+        spaeter(1500, () => {
+          ansicht.leereMarken("go-gefangen");
+          ansicht.zeige(brett);
+          gesperrt = ctx.vorbei();
+        });
+      });
+    };
+
+    function tippe(i) {
+      if (gesperrt || !noch()) return;
+      if (a.art === "gefahr") return tippeGefahr(i);
+      if (brett[i] !== LEER) { ctx.sag("Da liegt schon ein Stein. Tippe auf einen freien Punkt."); return; }
+      const r = setze(brett, n, i, SCHWARZ, vorher);
+      if (!r) {
+        ctx.falsch("Dort hätte dein Stein keine Freiheit und fängt nichts — das ist verboten.", loesungText);
+        nachFehler();
+        return;
+      }
+      if (a.art === "fangen") return zugFangen(i, r);
+      if (a.art === "retten") return zugRetten(i, r);
+      return schritt === 1 ? zugFang2Erster(i, r) : zugFang2Zweiter(i, r);
+    }
+
+    function gewonnen(i, r, lob) {
+      gesperrt = true;
+      brett = r.brett;
+      ansicht.zeige(brett, [i]);
+      ansicht.marke(r.gefangen, "go-gefangen");
+      ctx.richtig(lob);
+    }
+
+    function zugFangen(i, r) {
+      if (r.gefangen.length) return gewonnen(i, r, r.gefangen.length > 1 ? `Gefangen — gleich ${r.gefangen.length} Steine!` : "Gefangen! 🎉");
+      const antwort = euleAntwort(r.brett, n, brett);
+      ctx.falsch(antwort && antwort.art === "faengt"
+        ? "Oh, jetzt fängt die Eule zuerst! Suche einen weissen Stein mit nur einer Freiheit."
+        : "Damit fängst du noch nichts — die Eule läuft weg. Wo ist ihre letzte Freiheit?", loesungText);
+      if (!nachFehler()) zeigeAntwort(r.brett, i, antwort);
+    }
+
+    function zugRetten(i, r) {
+      if (r.gefangen.length) return gewonnen(i, r, "Gefangen — damit hast du gewonnen!");
+      const fang = fangZuege(r.brett, n, WEISS, brett);
+      if (!fang.length) {
+        gesperrt = true;
+        brett = r.brett;
+        ansicht.zeige(brett, [i]);
+        ansicht.marke(gruppe(brett, n, i).freiheiten, "go-frei");
+        ctx.richtig("Gerettet! Jetzt hat deine Gruppe genug Freiheiten.");
+        return;
+      }
+      ctx.falsch("So fängt die Eule deine Steine. Gib deiner Gruppe neue Freiheiten.", loesungText);
+      if (!nachFehler()) zeigeAntwort(r.brett, i, { ...setze(r.brett, n, fang[0], WEISS, brett), zug: fang[0] });
+    }
+
+    function zugFang2Erster(i, r) {
+      if (r.gefangen.length) return gewonnen(i, r, "Gefangen! 🎉");
+      if (!a.richtig.includes(i)) {
+        // Zeigen, wie die Eule widerlegt: lieber selbst fangen, sonst die bedrohte Gruppe verlängern.
+        const w = widerlegungen(r.brett, n, brett, true);
+        const flucht = new Set(imAtari(r.brett, n, WEISS).flatMap(g => g.freiheiten));
+        const antwort = w.find(x => x.gefangen.length) || w.find(x => flucht.has(x.zug)) || (flucht.size ? w[0] : null);
+        ctx.falsch(antwort && antwort.gefangen.length
+          ? "Oh, dann fängt die Eule zuerst! Pass auch auf deine eigenen Steine auf."
+          : imAtari(r.brett, n, WEISS).length
+            ? "Die Eule läuft weg und hat dann genug Freiheiten. Versuch eine andere Drohung."
+            : "Nach diesem Zug ist kein weisser Stein bedroht — die Eule hat Zeit.", loesungText);
+        if (!nachFehler()) zeigeAntwort(r.brett, i, antwort || null);
+        return;
+      }
+      // Richtig: Die Eule verteidigt sich so gut sie kann, dann ist das Kind wieder dran.
+      gesperrt = true;
+      ersterZug = i;
+      const vor = brett;
+      brett = r.brett;
+      ansicht.zeige(brett, [i]);
+      const v = besteVerteidigung(brett, n, vor);
+      ctx.sag("Gut gedacht! Jetzt antwortet die Eule …", "gut");
+      spaeter(800, () => {
+        vorher = brett;
+        brett = v.brett;
+        schritt = 2;
+        ansicht.zeige(brett, [v.zug]);
+        loesungText = `Fang auf ${v.fang.map(z => koord(z, n)).join(" oder ")}.`;
+        loesungPunkte = v.fang;
+        ctx.loesung(loesungText);
+        ctx.tipp(TIPPS.zweiter);
+        ctx.sag(`Die Eule hat auf ${koord(v.zug, n)} gespielt. Jetzt du: Fang weisse Steine!`);
+        gesperrt = false;
+      });
+    }
+
+    function zugFang2Zweiter(i, r) {
+      if (r.gefangen.length) return gewonnen(i, r, r.gefangen.length > 1 ? `Gefangen in zwei Zügen — ${r.gefangen.length} Steine!` : "Gefangen in zwei Zügen! 🎉");
+      const antwort = euleAntwort(r.brett, n, brett);
+      ctx.falsch("Damit fängst du nichts. Welche weisse Gruppe hat nur noch eine Freiheit?", loesungText);
+      if (!nachFehler()) zeigeAntwort(r.brett, i, antwort);
+    }
+
+    function tippeGefahr(i) {
+      if (brett[i] === LEER) { ctx.sag("Tippe auf einen deiner schwarzen Steine."); return; }
+      if (brett[i] === WEISS) { ctx.sag("Das ist ein Stein der Eule. Tippe auf einen deiner schwarzen Steine."); return; }
+      if (a.richtig.includes(i)) {
+        gesperrt = true;
+        ansicht.marke(a.richtig, "go-loesung");
+        ansicht.marke(gruppe(brett, n, i).freiheiten, "go-frei");
+        ctx.richtig("Genau! Diese Steine haben nur noch eine Freiheit.");
+        return;
+      }
+      const g = gruppe(brett, n, i), frei = g.freiheiten.length;
+      ctx.falsch(`${g.steine.length === 1 ? "Dieser Stein hat" : "Diese Gruppe hat"} noch ${frei} Freiheiten. Suche Steine mit nur einer.`, loesungText);
+      nachFehler();
+    }
+
+    if (a.art === "zaehlen") {
+      const box = LS.auswahl(ctx, {
+        optionen: [1, 2, 3, 4], richtig: a.antwort, breite: 70,
+        hinweis: () => "Zähle nochmal: nur freie Punkte, die auf einer Linie direkt neben dem Stein liegen.",
+        loesung: loesungText,
+        beiRichtig: () => ansicht.marke(loesungPunkte, "go-frei"),
+      });
+      box.classList.add("go-zahlen");
+    }
+    if (ctx.nr === 0) ctx.sag(a.art === "zaehlen" ? "Freiheiten sind die freien Punkte neben einem Stein." : "Du spielst Schwarz ⚫, ich spiele Weiss ⚪.");
+  },
+});
+</script>
+</body>
+</html>

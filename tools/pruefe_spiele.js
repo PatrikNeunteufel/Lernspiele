@@ -400,6 +400,25 @@ for (const id of ids) {
     fehlerZahl += e.fehler.length;
   }
 }
+// Regelseiten (LERN_Session11, rahmen.md 16): Katalog regeln: true verlangt regeln.html mit regeln.css und Weg zurück.
+{
+  const kat = vm.createContext({ LS: { SKALA: [] } });
+  vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", "katalog.js"), "utf8") + ";this.SPIELE = SPIELE;", kat);
+  for (const s of kat.SPIELE.filter(x => ids.includes(x.id))) {
+    const datei = path.join(SPIELE_DIR, s.id, "regeln.html");
+    const da = fs.existsSync(datei);
+    const m = [];
+    if (s.regeln && !da) m.push("Katalog regeln: true, aber regeln.html fehlt");
+    if (!s.regeln && da) m.push("regeln.html vorhanden, aber im Katalog nicht regeln: true (kein Knopf führt hin)");
+    if (s.regeln && da) {
+      const h = fs.readFileSync(datei, "utf8");
+      if (!h.includes("../gemeinsam/regeln.css")) m.push("regeln.html lädt ../gemeinsam/regeln.css nicht");
+      if (!/href="index\.html"/.test(h)) m.push("regeln.html führt nicht zurück zum Spiel (href=\"index.html\")");
+    }
+    for (const f of m) console.log(`    FEHLER  ${s.id} Regeln: ${f}`);
+    fehlerZahl += m.length;
+  }
+}
 // Endlos-Modus: je Spiel und Stufe mit endlos im Katalog einige Endlos-Runden (--endlos=0 schaltet ab).
 if (opt.endlos !== 0) {
   const kat = vm.createContext({ LS: { SKALA: [] } });

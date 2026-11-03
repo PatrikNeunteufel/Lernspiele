@@ -6931,3 +6931,156 @@ Die erste Antwort ist die richtige.
 | 🏢 | Betonwand | false | ☐ |
 | 🔩 | Metallplatte | false | ☐ |
 | 🪨 | Felswand | false | ☐ |
+
+## 83. König in der Falle (Lehrplan SG MI.2.2)
+
+### Schachstellungen
+
+Selbst gebaut und von der Regel-Maschine geprüft (genau ein Mattzug, s6 Matt in 2). Zu prüfen: wirkt die Stellung natürlich, passt der Hinweis? FEN: Weiss gross, Schwarz klein, von Reihe 8 nach Reihe 1.
+
+| Stufe | Stellung (FEN) | Hinweis | Lösung | ☐ |
+|---|---|---|---|---|
+| s1 | 8/8/1R6/8/8/6K1/8/6k1 | Der schwarze König steht am unteren Rand. Dein König hält ihm Felder zu. | Turm b6 → b1 matt | ☐ |
+| s1 | 7R/8/8/8/8/8/8/k1K5 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm h8 → a8 matt | ☐ |
+| s1 | 8/8/8/4R3/8/8/5K2/7k | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm e5 → h5 matt | ☐ |
+| s1 | 5K1k/8/6R1/8/8/8/8/8 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm g6 → h6 matt | ☐ |
+| s1 | 8/8/8/8/8/K5R1/8/k7 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm g3 → g1 matt | ☐ |
+| s1 | 2k5/R7/2K5/8/8/8/8/8 | Der schwarze König steht am oberen Rand. Dein König hält ihm Felder zu. | Turm a7 → a8 matt | ☐ |
+| s1 | 8/8/6R1/8/k1K5/8/8/8 | Der schwarze König steht am linken Rand. Dein König hält ihm Felder zu. | Turm g6 → a6 matt | ☐ |
+| s1 | 8/8/8/8/8/1K1R4/8/1k6 | Der schwarze König steht am unteren Rand. Dein König hält ihm Felder zu. | Turm d3 → d1 matt | ☐ |
+| s1 | 2R5/8/8/8/k1K5/8/8/8 | Der schwarze König steht am linken Rand. Dein König hält ihm Felder zu. | Turm c8 → a8 matt | ☐ |
+| s1 | 8/8/8/8/1R6/8/2K5/k7 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm b4 → a4 matt | ☐ |
+| s1 | 4k3/8/4K3/1R6/8/8/8/8 | Der schwarze König steht am oberen Rand. Dein König hält ihm Felder zu. | Turm b5 → b8 matt | ☐ |
+| s1 | 8/8/8/8/k1K5/8/1R6/8 | Der schwarze König steht am linken Rand. Dein König hält ihm Felder zu. | Turm b2 → a2 matt | ☐ |
+| s1 | k1K5/8/8/1R6/8/8/8/8 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm b5 → a5 matt | ☐ |
+| s1 | k7/8/K1R5/8/8/8/8/8 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm c6 → c8 matt | ☐ |
+| s1 | 3R4/8/8/8/8/8/2K5/k7 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm d8 → a8 matt | ☐ |
+| s1 | 8/8/8/8/8/6R1/8/k1K5 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm g3 → a3 matt | ☐ |
+| s1 | 8/8/8/8/8/3R4/2K5/k7 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm d3 → a3 matt | ☐ |
+| s1 | 7R/8/8/8/8/2K5/8/2k5 | Der schwarze König steht am unteren Rand. Dein König hält ihm Felder zu. | Turm h8 → h1 matt | ☐ |
+| s1 | 8/2R5/8/k1K5/8/8/8/8 | Der schwarze König steht am linken Rand. Dein König hält ihm Felder zu. | Turm c7 → a7 matt | ☐ |
+| s1 | k7/8/K2R4/8/8/8/8/8 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm d6 → d8 matt | ☐ |
+| s1 | k7/8/K7/8/5R2/8/8/8 | Der schwarze König steht in der Ecke. Dein König hält ihm Felder zu. | Turm f4 → f8 matt | ☐ |
+| s1 | 8/8/8/8/8/5K1R/8/5k2 | Der schwarze König steht am unteren Rand. Dein König hält ihm Felder zu. | Turm h3 → h1 matt | ☐ |
+| s1 | 8/5K1k/8/8/8/8/8/R7 | Der schwarze König steht am rechten Rand. Dein König hält ihm Felder zu. | Turm a1 → h1 matt | ☐ |
+| s1 | 5k2/8/3R1K2/8/8/8/8/8 | Der schwarze König steht am oberen Rand. Dein König hält ihm Felder zu. | Turm d6 → d8 matt | ☐ |
+| s2 | 8/5Q2/8/8/5K1k/8/8/8 | Der schwarze König steht am rechten Rand. Welche Felder nimmt ihm dein König weg? | Dame f7 → h7 matt | ☐ |
+| s2 | 8/8/8/8/8/k1K5/5Q2/8 | Der schwarze König steht am linken Rand. Welche Felder nimmt ihm dein König weg? | Dame f2 → a7 matt | ☐ |
+| s2 | 7k/8/7K/8/8/7Q/8/8 | Der schwarze König steht in der Ecke. Welche Felder nimmt ihm dein König weg? | Dame h3 → c8 matt | ☐ |
+| s2 | 8/8/8/Q7/8/2K5/8/2k5 | Der schwarze König steht am unteren Rand. Welche Felder nimmt ihm dein König weg? | Dame a5 → a1 matt | ☐ |
+| s2 | 8/3Q4/8/8/8/K7/8/k7 | Der schwarze König steht in der Ecke. Welche Felder nimmt ihm dein König weg? | Dame d7 → d1 matt | ☐ |
+| s2 | 8/5K1k/8/8/8/4Q3/8/8 | Der schwarze König steht am rechten Rand. Welche Felder nimmt ihm dein König weg? | Dame e3 → h3 matt | ☐ |
+| s2 | 8/8/8/8/5Q2/8/k1K5/8 | Der schwarze König steht am linken Rand. Welche Felder nimmt ihm dein König weg? | Dame f4 → a4 matt | ☐ |
+| s2 | 8/7Q/8/8/8/4K3/8/5k2 | Der schwarze König steht am unteren Rand. Welche Felder nimmt ihm dein König weg? | Dame h7 → h1 matt | ☐ |
+| s2 | 8/7Q/8/8/8/4K3/8/3k4 | Der schwarze König steht am unteren Rand. Welche Felder nimmt ihm dein König weg? | Dame h7 → b1 matt | ☐ |
+| s2 | 3Q4/8/8/8/8/8/7k/5K2 | Der schwarze König steht am rechten Rand. Welche Felder nimmt ihm dein König weg? | Dame d8 → h4 matt | ☐ |
+| s2 | 8/5K1k/8/8/Q7/8/8/8 | Der schwarze König steht am rechten Rand. Welche Felder nimmt ihm dein König weg? | Dame a4 → h4 matt | ☐ |
+| s2 | 8/1Q6/8/8/8/5K2/8/5k2 | Der schwarze König steht am unteren Rand. Welche Felder nimmt ihm dein König weg? | Dame b7 → b1 matt | ☐ |
+| s2 | 2Q5/8/8/k1K5/8/8/8/8 | Der schwarze König steht am linken Rand. Welche Felder nimmt ihm dein König weg? | Dame c8 → a8 matt | ☐ |
+| s2 | 8/8/5K1k/8/8/8/8/3Q4 | Der schwarze König steht am rechten Rand. Welche Felder nimmt ihm dein König weg? | Dame d1 → h1 matt | ☐ |
+| s2 | 8/8/6Q1/8/k1K5/8/8/8 | Der schwarze König steht am linken Rand. Welche Felder nimmt ihm dein König weg? | Dame g6 → a6 matt | ☐ |
+| s2 | 8/8/8/8/5Q2/5K2/8/4k3 | Der schwarze König steht am unteren Rand. Welche Felder nimmt ihm dein König weg? | Dame f4 → c1 matt | ☐ |
+| s2 | 8/8/4Q3/8/8/2K5/8/2k5 | Der schwarze König steht am unteren Rand. Welche Felder nimmt ihm dein König weg? | Dame e6 → e1 matt | ☐ |
+| s2 | 5Q2/8/8/8/8/8/k1K5/8 | Der schwarze König steht am linken Rand. Welche Felder nimmt ihm dein König weg? | Dame f8 → a8 matt | ☐ |
+| s2 | 8/7Q/8/8/k1K5/8/8/8 | Der schwarze König steht am linken Rand. Welche Felder nimmt ihm dein König weg? | Dame h7 → a7 matt | ☐ |
+| s2 | 8/Q7/8/7k/5K2/8/8/8 | Der schwarze König steht am rechten Rand. Welche Felder nimmt ihm dein König weg? | Dame a7 → h7 matt | ☐ |
+| s2 | 8/8/8/2Q5/8/7k/5K2/8 | Der schwarze König steht am rechten Rand. Welche Felder nimmt ihm dein König weg? | Dame c5 → h5 matt | ☐ |
+| s2 | 6k1/8/6K1/8/6Q1/8/8/8 | Der schwarze König steht am oberen Rand. Welche Felder nimmt ihm dein König weg? | Dame g4 → c8 matt | ☐ |
+| s2 | 8/8/8/5K1k/8/8/8/1Q6 | Der schwarze König steht am rechten Rand. Welche Felder nimmt ihm dein König weg? | Dame b1 → h1 matt | ☐ |
+| s2 | 3k4/8/2K4Q/8/8/8/8/8 | Der schwarze König steht am oberen Rand. Welche Felder nimmt ihm dein König weg? | Dame h6 → f8 matt | ☐ |
+| s3 | 8/8/8/7k/5K2/6Q1/8/8 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame g3 → g5 matt | ☐ |
+| s3 | 8/8/8/8/8/K7/5Q2/1k6 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame f2 → b2 matt | ☐ |
+| s3 | k7/3Q4/2K5/8/8/8/8/8 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame d7 → b7 matt | ☐ |
+| s3 | 8/8/1Q6/8/8/6K1/8/5k2 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame b6 → f2 matt | ☐ |
+| s3 | 8/5K2/7k/8/8/8/6Q1/8 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame g2 → g6 matt | ☐ |
+| s3 | 2k5/Q7/1K6/8/8/8/8/8 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame a7 → c7 matt | ☐ |
+| s3 | 8/8/8/8/8/2K5/3Q4/1k6 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame d2 → b2 matt | ☐ |
+| s3 | 2K5/k7/2Q5/8/8/8/8/8 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame c6 → b7 matt | ☐ |
+| s3 | 8/8/8/8/8/3K4/5Q2/2k5 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame f2 → c2 matt | ☐ |
+| s3 | 8/8/8/8/8/8/k1K5/2Q5 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame c1 → b2 matt | ☐ |
+| s3 | k7/5Q2/2K5/8/8/8/8/8 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame f7 → b7 matt | ☐ |
+| s3 | 8/2K5/k7/2Q5/8/8/8/8 | Die Dame darf direkt neben den König, wenn dein König sie beschützt. | Dame c5 → b6 matt | ☐ |
+| s3 | 8/8/4K3/3R4/1R6/8/k7/8 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm d5 → a5 matt | ☐ |
+| s3 | 4k3/2R5/3K4/1R6/8/8/8/8 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm b5 → b8 matt | ☐ |
+| s3 | 7k/R7/5R2/8/3K4/8/8/8 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm f6 → f8 matt | ☐ |
+| s3 | 8/8/2R5/8/8/7K/6R1/7k | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm c6 → c1 matt | ☐ |
+| s3 | 2K1k3/8/8/5R2/8/8/8/R7 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm a1 → e1 matt | ☐ |
+| s3 | 7k/5R2/7K/8/8/8/7R/8 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm f7 → f8 matt | ☐ |
+| s3 | 3K1k2/4R3/7R/8/8/8/8/8 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm h6 → h8 matt | ☐ |
+| s3 | 8/8/8/8/K7/R7/1R6/4k3 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm a3 → a1 matt | ☐ |
+| s3 | 4R3/8/1K6/1R6/8/k7/8/8 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm e8 → a8 matt | ☐ |
+| s3 | 7K/8/7k/4R3/8/R7/8/8 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm a3 → a6 matt | ☐ |
+| s3 | 8/8/8/8/1R6/5R2/8/2K1k3 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm b4 → e4 matt | ☐ |
+| s3 | 6R1/5R2/8/4K2k/8/8/8/8 | Ein Turm sperrt eine Reihe oder Linie ab, der andere gibt Schach. | Turm f7 → h7 matt | ☐ |
+| s4 | 8/4N3/3N4/6k1/5p2/3p1K1Q/8/8 | Der Springer springt auch über Figuren hinweg. | Springer d6 → e4 matt | ☐ |
+| s4 | 8/8/3N2K1/8/4p2k/8/5N2/8 | Der Springer springt auch über Figuren hinweg. | Springer d6 → f5 matt | ☐ |
+| s4 | 2k5/Q2NBp2/8/p1K5/8/8/8/8 | Der Springer springt auch über Figuren hinweg. | Springer d7 → b6 matt | ☐ |
+| s4 | 4K1k1/7p/8/3NQ3/8/8/8/8 | Der Springer springt auch über Figuren hinweg. | Springer d5 → e7 matt | ☐ |
+| s4 | 8/8/8/4B2p/4Q3/7k/3KN3/8 | Der Springer springt auch über Figuren hinweg. | Springer e2 → g1 matt | ☐ |
+| s4 | 8/1K6/1R1p4/k7/p7/8/1N6/8 | Der Springer springt auch über Figuren hinweg. | Springer b2 → c4 matt | ☐ |
+| s4 | 8/8/8/8/1p3N2/6N1/8/2K1k3 | Der Springer springt auch über Figuren hinweg. | Springer f4 → d3 matt | ☐ |
+| s4 | 8/8/2Q1K3/k7/N2B4/8/8/8 | Der Läufer zieht schräg, so weit er will. | Läufer d4 → c3 matt | ☐ |
+| s4 | 6B1/8/4K3/7k/5Q2/8/8/8 | Der Läufer zieht schräg, so weit er will. | Läufer g8 → f7 matt | ☐ |
+| s4 | 8/5Q2/7k/4B3/8/8/3K4/8 | Der Läufer zieht schräg, so weit er will. | Läufer e5 → f4 matt | ☐ |
+| s4 | 8/7K/8/8/5Npk/2BQ4/8/8 | Der Läufer zieht schräg, so weit er will. | Läufer c3 → f6 matt | ☐ |
+| s4 | 8/8/8/8/KpB5/3p4/8/1kBQ4 | Der Läufer zieht schräg, so weit er will. | Läufer c1 → a3 matt | ☐ |
+| s4 | 8/8/1B6/8/8/k1N5/2K5/8 | Der Läufer zieht schräg, so weit er will. | Läufer b6 → c5 matt | ☐ |
+| s4 | 5k2/8/5NK1/8/8/8/8/2B5 | Der Läufer zieht schräg, so weit er will. | Läufer c1 → a3 matt | ☐ |
+| s4 | N1k5/p3Q3/8/8/5K2/8/8/8 | Der schwarze König steht am oberen Rand. Dein Springer bewacht ein wichtiges Feld. | Dame e7 → c7 matt | ☐ |
+| s4 | 2k2K2/4QB2/8/3N4/8/8/8/8 | Der schwarze König steht am oberen Rand. Dein Springer bewacht ein wichtiges Feld. | Dame e7 → c7 matt | ☐ |
+| s4 | 8/8/4N3/5KR1/5N1k/8/8/8 | Der schwarze König steht am rechten Rand. Dein Springer bewacht ein wichtiges Feld. | Turm g5 → g4 matt | ☐ |
+| s4 | 8/8/8/8/4R1K1/6BB/8/6k1 | Der schwarze König steht am unteren Rand. Dein Läufer bewacht ein wichtiges Feld. | Turm e4 → e1 matt | ☐ |
+| s4 | 5k2/6N1/2Q3KB/4p3/8/8/8/8 | Der schwarze König steht am oberen Rand. Dein Springer bewacht ein wichtiges Feld. | Dame c6 → e8 matt | ☐ |
+| s4 | 7N/6k1/4Q1N1/6K1/8/8/8/8 | Der schwarze König steht mitten auf dem Brett. Dein Springer bewacht ein wichtiges Feld. | Dame e6 → f7 matt | ☐ |
+| s4 | 8/6p1/4k1K1/1N6/5Q2/8/8/8 | Der schwarze König steht mitten auf dem Brett. Dein Springer bewacht ein wichtiges Feld. | Dame f4 → d6 matt | ☐ |
+| s4 | 8/2N5/3R4/k7/8/2K5/8/8 | Der schwarze König steht am linken Rand. Dein Springer bewacht ein wichtiges Feld. | Turm d6 → a6 matt | ☐ |
+| s4 | 8/8/8/5K2/B7/8/5Q2/2k5 | Der schwarze König steht am unteren Rand. Dein Läufer bewacht ein wichtiges Feld. | Dame f2 → c2 matt | ☐ |
+| s4 | 8/8/8/6K1/8/2B3Q1/4N3/5k2 | Der schwarze König steht am unteren Rand. Dein Springer bewacht ein wichtiges Feld. | Dame g3 → f3 matt | ☐ |
+| s5 | 6K1/8/4BBpp/7k/6np/8/5N2/8 | Auch ein Schlagzug kann Matt sein. | Läufer e6 schlägt auf g4 matt | ☐ |
+| s5 | 5N2/5K2/3N3k/5ppp/8/8/8/8 | Auch ein Schlagzug kann Matt sein. | Springer d6 schlägt auf f5 matt | ☐ |
+| s5 | 8/1p4K1/2kb4/Bp6/8/N7/4Q3/8 | Auch ein Schlagzug kann Matt sein. | Dame e2 schlägt auf b5 matt | ☐ |
+| s5 | 8/pr6/kP6/1p6/2Q5/2N1K3/8/8 | Auch ein Schlagzug kann Matt sein. | Dame c4 schlägt auf b5 matt | ☐ |
+| s5 | 8/K7/1p6/kp6/8/r7/Q7/8 | Auch ein Schlagzug kann Matt sein. | Dame a2 schlägt auf a3 matt | ☐ |
+| s5 | 8/np6/k7/nN1K4/8/p7/3Q4/4B3 | Auch ein Schlagzug kann Matt sein. | Dame d2 schlägt auf a5 matt | ☐ |
+| s5 | 8/6Rp/6pk/6N1/6K1/7N/8/8 | Auch ein Schlagzug kann Matt sein. | Turm g7 schlägt auf h7 matt | ☐ |
+| s5 | 1Rnk4/1K1pp3/8/8/8/8/8/8 | Auch ein Schlagzug kann Matt sein. | Turm b8 schlägt auf c8 matt | ☐ |
+| s5 | 5Knk/6Rp/8/6p1/8/8/8/8 | Auch ein Schlagzug kann Matt sein. | Turm g7 schlägt auf g8 matt | ☐ |
+| s5 | 8/2B5/pp2N3/kp1N4/p7/8/8/2K5 | Auch ein Schlagzug kann Matt sein. | Läufer c7 schlägt auf b6 matt | ☐ |
+| s5 | 7k/5Rpp/8/5K2/2N5/8/8/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Turm f7 → f8 matt | ☐ |
+| s5 | 3K2N1/8/6N1/7k/6rp/6p1/3Q4/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Dame d2 → h6 matt | ☐ |
+| s5 | 8/8/3K4/1b6/kp6/1p6/1P4P1/3R4 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Turm d1 → a1 matt | ☐ |
+| s5 | 8/7p/7k/5Qp1/3K2P1/7p/8/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Dame f5 → f6 matt | ☐ |
+| s5 | 8/5N2/7K/8/6bk/6pp/1Q6/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Dame b2 → f6 matt | ☐ |
+| s5 | 1k2K3/pp2Q3/4B3/8/8/8/8/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Dame e7 → d8 matt | ☐ |
+| s5 | k7/pp2K3/2R5/8/8/8/3N4/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Turm c6 → c8 matt | ☐ |
+| s5 | K2k4/2p1p1R1/8/5Q2/8/8/8/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Turm g7 → g8 matt | ☐ |
+| s5 | 6R1/8/6p1/6pk/4Q3/8/4K3/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Turm g8 → h8 matt | ☐ |
+| s5 | 5k2/3K1pb1/4R1pn/5P2/8/8/8/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Turm e6 → e8 matt | ☐ |
+| s5 | 8/6b1/4N1pk/5p2/8/7P/4KQ2/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Dame f2 → h4 matt | ☐ |
+| s5 | 4K3/8/8/1p1Q4/kp6/8/8/1N6 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Dame d5 → a2 matt | ☐ |
+| s5 | 5N2/2p4R/2pk4/R5K1/8/8/8/8 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Turm h7 → d7 matt | ☐ |
+| s5 | 8/8/4Q3/8/4Pp1p/6k1/4K1n1/6N1 | Die schwarzen Figuren stehen ihrem eigenen König im Weg. | Dame e6 → h3 matt | ☐ |
+| s6 | 8/8/8/1pK5/R7/ppQ5/k7/8 | Der erste Zug darf etwas kosten: Die Eule darf deine Figur schlagen. | Turm a4 schlägt auf a3, Eule König a2 schlägt auf a3, Dame c3 → a1 matt | ☐ |
+| s6 | 8/8/8/8/1r1N4/2R5/k3K3/3Q4 | Der erste Zug darf etwas kosten: Die Eule darf deine Figur schlagen. | Turm c3 → a3, Eule König a2 schlägt auf a3, Dame d1 → a1 matt | ☐ |
+| s6 | 3K3k/6p1/4Rp2/7B/8/8/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Läufer h5 → g6, Eule König h8 → g8, Turm e6 → e8 matt | ☐ |
+| s6 | 3k3K/1B3R2/3B4/8/8/8/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Läufer b7 → c6, Eule König d8 → c8, Turm f7 → f8 matt | ☐ |
+| s6 | 8/8/8/5R2/4P3/4K3/6P1/7k | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | König e3 → f2, Eule König h1 → h2, Turm f5 → h5 matt | ☐ |
+| s6 | 8/8/8/8/5R2/7k/8/6K1 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | König g1 → f2, Eule König h3 → h2, Turm f4 → h4 matt | ☐ |
+| s6 | 3k4/5R2/1K6/8/8/1R6/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Turm b3 → e3, Eule König d8 → c8, Turm e3 → e8 matt | ☐ |
+| s6 | 3Q4/8/k7/8/2R1K3/8/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Turm c4 → b4, Eule König a6 → a7, Dame d8 → a5 matt | ☐ |
+| s6 | 2K5/8/k7/2R5/8/1P6/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | König c8 → c7, Eule König a6 → a7, Turm c5 → a5 matt | ☐ |
+| s6 | 8/5R2/8/8/3B4/8/R7/3kn2K | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Turm f7 → f1, Eule König d1 → c1, Turm f1 schlägt auf e1 matt | ☐ |
+| s6 | k3K3/2Q5/p7/2P5/8/8/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Bauer c5 → c6, Eule Bauer a6 → a5, Dame c7 → b7 matt | ☐ |
+| s6 | 8/7k/8/4K3/2B5/5Q2/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | König e5 → f6, Eule König h7 → h6, Dame f3 → h3 matt | ☐ |
+| s6 | 8/5K2/8/7k/8/8/8/4Q3 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Dame e1 → g3, Eule König h5 → h6, Dame g3 → g6 matt | ☐ |
+| s6 | 8/8/8/8/4RK2/4R3/8/7k | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | König f4 → g3, Eule König h1 → g1, Turm e3 → e1 matt | ☐ |
+| s6 | 8/3R4/k7/8/K2N4/R7/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Turm a3 → c3, Eule König a6 → b6, Turm c3 → c6 matt | ☐ |
+| s6 | 8/8/6R1/8/8/2K5/8/1k6 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Turm g6 → a6, Eule König b1 → c1, Turm a6 → a1 matt | ☐ |
+| s6 | 3RK3/k7/8/8/8/8/8/4R3 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Turm e1 → b1, Eule König a7 → a6, Turm d8 → a8 matt | ☐ |
+| s6 | 3k4/8/p7/1Q2RP2/3K4/8/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Dame b5 → c6, Eule Bauer a6 → a5, Turm e5 → e8 matt | ☐ |
+| s6 | 3K4/8/8/7k/8/4N1Q1/7P/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Dame g3 → g7, Eule König h5 → h4, Dame g7 → g4 matt | ☐ |
+| s6 | 3R4/8/8/8/8/4K3/8/4NB1k | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | König e3 → f2, Eule König h1 → h2, Turm d8 → h8 matt | ☐ |
+| s6 | 6k1/8/3R3K/8/8/8/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Turm d6 → f6, Eule König g8 → h8, Turm f6 → f8 matt | ☐ |
+| s6 | 8/8/6R1/5K2/8/1R2B3/8/5k2 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Turm b3 → b2, Eule König f1 → e1, Turm g6 → g1 matt | ☐ |
+| s6 | 8/8/8/3K4/8/pQ6/8/k7 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Dame b3 → c2, Eule Bauer a3 → a2, Dame c2 → c1 matt | ☐ |
+| s6 | 8/8/2K5/kp6/1p6/3p1Q2/8/8 | Der erste Zug gibt noch kein Schach. Er bereitet das Matt vor. | Dame f3 → d5, Eule König a5 → a6, Dame d5 → a2 matt | ☐ |

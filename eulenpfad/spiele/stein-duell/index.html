@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stein-Duell</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .regel-zeile { text-align: center; font-size: clamp(17px, 3.8vw, 21px); font-weight: 800; margin: 0 0 6px; color: var(--text-leise); }
+  .regel-zeile.umgekehrt { color: var(--text); background: var(--hinweis-hell); border: 3px solid var(--deko-2); border-radius: 14px; padding: 6px 10px; }
+  .vorgabe { text-align: center; font-size: clamp(16px, 3.6vw, 19px); font-weight: 700; color: var(--text-leise); margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+
+  .reihen { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 8px 0 12px; }
+  .reihe { display: flex; align-items: center; gap: 10px; max-width: 100%; }
+  .reihe-name { font-weight: 900; color: var(--deko-1); min-width: 1.6em; text-align: right; font-size: clamp(18px, 4vw, 22px); font-variant-numeric: tabular-nums; }
+  .reihe-steine { display: flex; flex-wrap: wrap; gap: 6px; max-width: min(540px, 78vw); }
+
+  .stein { width: clamp(38px, 9vw, 48px); height: clamp(38px, 9vw, 48px); border-radius: 50%; padding: 0; border: 3px solid transparent;
+           background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .55) 0 16%, transparent 17%), var(--deko-7);
+           box-shadow: inset 0 -5px 0 rgba(0, 0, 0, .2); transition: transform .15s, opacity .35s, border-color .15s; }
+  button.stein { cursor: pointer; }
+  .stein.gewaehlt { border-color: var(--knopf); transform: translateY(-7px); box-shadow: inset 0 -5px 0 rgba(0, 0, 0, .2), 0 6px 0 var(--knopf); }
+  .stein.falsch { border-color: var(--hinweis); }
+  .stein.weg { opacity: .12; transform: scale(.6); }
+  .stein.eule-weg { opacity: .12; transform: scale(.6); border-color: var(--deko-1); }
+  button.stein:disabled { cursor: default; }
+
+  .nehmen-zeile { display: flex; justify-content: center; margin: 6px 0 4px; }
+  .nehmen-zeile .knopf { min-width: 180px; }
+  .eule-antwort { text-align: center; min-height: 28px; font-weight: 800; color: var(--deko-1); font-size: clamp(17px, 3.8vw, 20px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🪨 Stein-Duell</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MI.2.2.b (2. Zyklus): „durch Probieren Lösungswege für einfache Problemstellungen suchen und auf
+// Korrektheit prüfen (z.B. … eine Spielstrategie entwickeln)“; MA.1.B.1.h heuristische Strategien (ausprobieren,
+// Regelmässigkeiten untersuchen). Vorlage docs/eulenpfad/spielideen/strategie_raetsel.md, Abschnitt 2.1 (Nim).
+// Basisklasse 5: Stufe 1 = 4. Klasse, 2–4 = 5. Klasse, 5 = 6. Klasse, 6 Königsstufe.
+// Jede Aufgabe ist eine Stellung „Du bist dran“; richtig ist jeder Zug, nach dem die Eule verliert. Das prüft die
+// Regel-Maschine unten (Formel), nicht eine gespeicherte Lösung; pruefeAufgabe gleicht die Formel mit einer
+// vollständigen Suche über alle Züge ab.
+
+const { zufall, waehle, el } = LS;
+
+// ---------- Regel-Maschine ----------
+// Stellung: { reihen: [Anzahl je Reihe], k: höchstens so viele je Zug (null = beliebig viele aus einer Reihe),
+//             letzterVerliert: true = „wer den letzten Stein nimmt, verliert“ }. Zug: [Reihe, Anzahl].
+
+const summe = a => a.reduce((s, x) => s + x, 0);
+
+/** Alle erlaubten Züge: aus genau einer Reihe 1 bis k Steine (ohne k: bis alle). */
+function zuege(st) {
+  const z = [];
+  st.reihen.forEach((n, r) => { for (let m = 1; m <= Math.min(n, st.k || n); m++) z.push([r, m]); });
+  return z;
+}
+
+function erlaubt(st, [r, m]) {
+  return Number.isInteger(r) && r >= 0 && r < st.reihen.length && Number.isInteger(m) && m >= 1 && m <= st.reihen[r] && (!st.k || m <= st.k);
+}
+
+/** Stellung nach dem Zug. */
+function nach(st, [r, m]) {
+  const reihen = st.reihen.slice();
+  reihen[r] -= m;
+  return { ...st, reihen };
+}
+
+/**
+ * Verliert, wer jetzt dran ist (bei bestem Spiel des Gegners)? Formeln:
+ * eine Reihe, 1 bis k: Rest von n durch k + 1 ist 0 (umgekehrt: Rest von n − 1 ist 0);
+ * Reihen ohne Grenze: Nim-Summe (XOR) ist 0, bei zwei Reihen heisst das „gleich lang“ (Gleichgewicht);
+ * umgekehrt (Bouton): sind alle Reihen höchstens 1, verliert, wer bei ungerader Zahl von Einsen dran ist.
+ */
+function verliert(st) {
+  const { reihen, k, letzterVerliert } = st;
+  if (k) {
+    const n = summe(reihen); // mit Grenze nur eine Reihe
+    return letzterVerliert ? (n - 1) % (k + 1) === 0 : n % (k + 1) === 0;
+  }
+  if (letzterVerliert && reihen.every(n => n <= 1)) return reihen.filter(n => n === 1).length % 2 === 1;
+  return reihen.reduce((a, b) => a ^ b, 0) === 0;
+}
+
+/** Dasselbe durch Suche über alle Züge — nur zur Prüfung der Formel (pruefeAufgabe). */
+const suchSpeicher = new Map();
+function verliertSuche(st) {
+  const schluessel = `${st.reihen.join(",")}|${st.k}|${st.letzterVerliert}`;
+  if (suchSpeicher.has(schluessel)) return suchSpeicher.get(schluessel);
+  // Kein Stein mehr: Der Gegner hat den letzten genommen.
+  const v = summe(st.reihen) === 0 ? !st.letzterVerliert : !zuege(st).some(z => verliertSuche(nach(st, z)));
+  suchSpeicher.set(schluessel, v);
+  return v;
+}
+
+/** Ein Zug ist richtig, wenn danach die Eule dran ist und verliert. */
+const istRichtig = (st, zug) => erlaubt(st, zug) && verliert(nach(st, zug));
+const richtigeZuege = st => zuege(st).filter(z => verliert(nach(st, z)));
+
+// ---------- Stufen ----------
+
+const bis = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+
+// Alle Stellungen je Stufe (Gewinnstellungen für das Kind; in s4 auch Verluststellungen).
+const STUFE = {
+  // Der Gewinnzug lässt der Eule genau k + 1: Sie muss dir danach den Rest lassen.
+  s1: { art: "zug", stellungen: [2, 3, 4].flatMap(k => bis(k + 2, Math.min(8, 2 * k + 1)).map(n => ({ reihen: [n], k }))) },
+  s2: { art: "zug", stellungen: [2, 3].flatMap(k => bis(7, 12).filter(n => n % (k + 1)).map(n => ({ reihen: [n], k }))) },
+  s3: { art: "zug", stellungen: bis(6, 20).filter(n => n % 4).map(n => ({ reihen: [n], k: 3 })) },
+  s4: { art: "wahl", stellungen: [4, 5].flatMap(k => bis(8, 25).map(n => ({ reihen: [n], k }))) },
+  s5: { art: "zug", stellungen: bis(1, 9).flatMap(a => bis(1, 9).filter(b => b !== a && Math.max(a, b) >= 3).map(b => ({ reihen: [a, b], k: null }))) },
+  s6: { art: "zug", stellungen: [
+    ...bis(1, 7).flatMap(a => bis(1, 7).flatMap(b => bis(1, 7).map(c => [a, b, c])))
+      .filter(r => (r[0] ^ r[1] ^ r[2]) !== 0 && summe(r) >= 6).map(reihen => ({ reihen, k: null })),
+    ...[2, 3, 4].flatMap(k => bis(7, 20).filter(n => (n - 1) % (k + 1)).map(n => ({ reihen: [n], k, letzterVerliert: true }))),
+  ] },
+};
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  let liste = p.stellungen;
+  if (stufe === "s4") {
+    // Antwort zuerst ziehen: Verluststellungen sind seltener als Gewinnstellungen.
+    const eule = Math.random() < 0.5;
+    liste = liste.filter(s => verliert({ ...s, letzterVerliert: false }) === eule);
+  }
+  if (stufe === "s6") {
+    const umgekehrt = Math.random() < 0.5;
+    liste = liste.filter(s => !!s.letzterVerliert === umgekehrt);
+  }
+  const s = waehle(liste);
+  const st = { reihen: s.reihen.slice(), k: s.k, letzterVerliert: !!s.letzterVerliert };
+  return p.art === "wahl" ? { art: "wahl", ...st, richtig: verliert(st) ? "eule" : "ich" } : { art: "zug", ...st };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const st = { reihen: a.reihen, k: a.k, letzterVerliert: a.letzterVerliert };
+  if (a.art !== STUFE[stufe].art) m.push("Aufgabenart nicht in der Stufe");
+  if (!a.reihen.every(n => Number.isInteger(n) && n >= 1)) m.push("leere oder ungültige Reihe");
+  if (a.k && a.reihen.length !== 1) m.push("Grenze k nur bei einer Reihe");
+  // Zahlenraum und Regeln je Stufe (Vorlage 2.1)
+  const n = summe(a.reihen), zahl = a.reihen.length;
+  const soll = {
+    s1: zahl === 1 && [2, 3, 4].includes(a.k) && n >= 4 && n <= 8 && !a.letzterVerliert,
+    s2: zahl === 1 && [2, 3].includes(a.k) && n >= 7 && n <= 12 && !a.letzterVerliert,
+    s3: zahl === 1 && a.k === 3 && n <= 20 && !a.letzterVerliert,
+    s4: zahl === 1 && [4, 5].includes(a.k) && n >= 8 && n <= 25 && !a.letzterVerliert,
+    s5: zahl === 2 && !a.k && Math.max(...a.reihen) <= 9 && !a.letzterVerliert,
+    s6: (zahl === 3 && !a.k && Math.max(...a.reihen) <= 7 && !a.letzterVerliert) || (zahl === 1 && a.k >= 2 && n <= 20 && a.letzterVerliert),
+  }[stufe];
+  if (!soll) m.push("Stellung passt nicht zur Stufe");
+  // Formel gegen Suche: für die Stellung und für jede Stellung nach einem Zug.
+  if (verliert(st) !== verliertSuche(st)) m.push("Formel und Suche widersprechen sich (Stellung)");
+  for (const z of zuege(st)) if (verliert(nach(st, z)) !== verliertSuche(nach(st, z))) m.push("Formel und Suche widersprechen sich (nach Zug)");
+  const gut = zuege(st).filter(z => verliertSuche(nach(st, z)));
+  if (a.art === "zug") {
+    if (verliertSuche(st)) m.push("keine Gewinnstellung für das Kind");
+    if (!gut.length) m.push("kein richtiger Zug");
+    // Eine Reihe und zwei Reihen: genau ein richtiger Zug; drei Reihen: einer bis drei.
+    if (zahl <= 2 && gut.length !== 1) m.push(`nicht genau ein richtiger Zug (${gut.length})`);
+    if (zahl === 3 && gut.length > 3) m.push("mehr als drei richtige Züge");
+    if (stufe === "s1" && !gut.every(z => summe(nach(st, z).reihen) === a.k + 1)) m.push("Stufe 1: Gewinnzug lässt nicht genau k + 1");
+  } else {
+    if (a.richtig !== (verliertSuche(st) ? "eule" : "ich")) m.push("Antwort „wer fängt an“ falsch");
+  }
+  return m;
+}
+
+// ---------- Texte ----------
+
+const steinText = n => (n === 1 ? "1 Stein" : `${n} Steine`);
+const bleibtText = n => (n === 1 ? "bleibt 1 Stein" : `bleiben ${n} Steine`);
+const reihenText = r => r.join(" – ");
+
+function zugText(st, [r, m]) {
+  return `${steinText(m)}${st.reihen.length > 1 ? ` aus Reihe ${r + 1}` : ""}`;
+}
+
+/** Lösung: alle richtigen Züge, mit der Stellung danach. */
+function loesungFuer(st) {
+  const gut = richtigeZuege(st);
+  const teile = gut.map(z => {
+    const r = nach(st, z).reihen;
+    if (summe(r) === 0) return `Nimm alle ${steinText(z[1])}, dann hast du den letzten.`;
+    return st.reihen.length > 1 ? `Nimm ${zugText(st, z)} — dann stehen die Reihen ${reihenText(r)}.` : `Nimm ${steinText(z[1])} — dann ${bleibtText(r[0])} für die Eule.`;
+  });
+  return teile.length > 1 ? `Es gibt ${teile.length} gute Züge. ${teile.join(" Oder: ")}` : teile[0];
+}
+
+/** Was die Eule nach einem falschen Zug tun würde — sie zeigt, warum er nicht geht. */
+function eulenAntwort(st, zug) {
+  const q = nach(st, zug);
+  if (summe(q.reihen) === 0) return "Du hast den letzten Stein genommen — heute verliert, wer den letzten nimmt! Such einen anderen Zug.";
+  const z = richtigeZuege(q)[0];
+  const r = nach(q, z).reihen;
+  const wo = st.reihen.length > 1 ? ` aus Reihe ${z[0] + 1}` : "";
+  if (summe(r) === 0) return `Dann nehme ich ${z[1] === 1 ? "den letzten Stein" : `die letzten ${z[1]}`}${wo} und gewinne! Such einen anderen Zug.`;
+  const danach = st.reihen.length > 1 ? `Dann stehen die Reihen ${reihenText(r)}` : `Dann ${bleibtText(r[0])} für dich`;
+  return `Dann nehme ich ${steinText(z[1])}${wo}. ${danach} — und ich gewinne. Such einen anderen Zug.`;
+}
+
+function regelText(st) {
+  if (st.k) return `Nimm 1 bis ${st.k} Steine.`;
+  return st.reihen.length > 1 ? "Nimm aus einer Reihe so viele Steine, wie du willst." : "Nimm so viele Steine, wie du willst.";
+}
+
+/** Tipps je Stufe, vom Anstoss zum Konkreten — nie der Zug selbst. */
+function tippsFuer(a, stufe) {
+  const k = a.k;
+  if (a.letzterVerliert) return [
+    "Diesmal willst du den letzten Stein nicht nehmen. Wer soll ihn bekommen?",
+    "Lass der Eule am Schluss genau 1 Stein — dann muss sie ihn nehmen.",
+    `Rechne vom Ende her: Bei 1 Stein verliert, wer dran ist. Bei wie vielen davor noch? Ihr nehmt zusammen immer ${k + 1}.`,
+  ];
+  if (a.reihen.length === 3) return [
+    "Bei zwei gleich langen Reihen kannst du die Eule nachmachen. Wie bekommst du bei drei Reihen ein Gleichgewicht?",
+    "Zerlege jede Reihe in 4er, 2er und 1er. Ein Gleichgewicht heisst: Jede Sorte kommt gerade oft vor.",
+    "Beispiel: 1 – 2 – 3 ist im Gleichgewicht, denn 3 = 2 + 1. Jede Sorte kommt zweimal vor.",
+  ];
+  if (a.reihen.length === 2) return [
+    "Was passiert, wenn beide Reihen gleich lang sind und die Eule dran ist?",
+    "Was die Eule in einer Reihe nimmt, kannst du in der anderen Reihe nachmachen.",
+  ];
+  if (stufe === "s1") return [
+    "Was passiert, wenn du der Eule nur wenige Steine lässt?",
+    `Lässt du der Eule ${k} oder weniger, nimmt sie alle. Lass ihr ein bisschen mehr.`,
+    `Lass der Eule so viele, dass sie nicht alle nehmen kann — aber du nach ihr alle nehmen kannst.`,
+  ];
+  if (stufe === "s4") return [
+    "Stell dir vor, du fängst an: Kannst du der Eule eine Anzahl lassen, bei der sie verliert?",
+    `Bei ${k + 1} Steinen verliert, wer dran ist: Nimmt er 1 bis ${k}, nimmt der andere den Rest. Welche Anzahlen sind genauso schlecht?`,
+    `Ihr könnt zusammen immer ${k + 1} nehmen. Teile die Steine in ${k + 1}er-Gruppen ein: Geht es auf?`,
+  ];
+  return [
+    "Welche Anzahl willst du der Eule lassen?",
+    `Bei ${k + 1} Steinen verliert, wer dran ist. Welche Anzahlen sind genauso schlecht für die Eule?`,
+    `Nimmt die Eule etwas, kannst du immer so viel nehmen, dass ihr zusammen ${k + 1} nehmt.`,
+  ];
+}
+
+// ---------- Darstellung ----------
+
+/** Reihen mit Steinen; tippbar = Knöpfe, sonst nur Bild. Liefert die Liste der Steine je Reihe. */
+function brettEl(st, tippbar) {
+  const steine = [];
+  const box = el("div", { class: "reihen" });
+  st.reihen.forEach((n, r) => {
+    const reihe = el("div", { class: "reihe-steine" });
+    steine[r] = [];
+    for (let i = 0; i < n; i++) {
+      const s = tippbar
+        ? el("button", { type: "button", class: "stein", "aria-label": `Stein ${i + 1}${st.reihen.length > 1 ? ` in Reihe ${r + 1}` : ""}` })
+        : el("span", { class: "stein", "aria-hidden": "true" });
+      steine[r].push(s);
+      reihe.append(s);
+    }
+    box.append(el("div", { class: "reihe" }, st.reihen.length > 1 ? el("span", { class: "reihe-name", text: String(r + 1) }) : null, reihe));
+  });
+  return { box, steine };
+}
+
+function vorgabeText(st) {
+  return st.reihen.length > 1 ? `Reihen: ${reihenText(st.reihen)}` : `🪨 ${steinText(st.reihen[0])}`;
+}
+
+function zugAufgabe(ctx, a) {
+  const st = { reihen: a.reihen, k: a.k, letzterVerliert: a.letzterVerliert };
+  const loesung = loesungFuer(st);
+  ctx.loesung(loesung);
+  const gut = richtigeZuege(st);
+  ctx.schritte(Math.min(...gut.map(z => z[1])) + 1); // Steine antippen, dann „Nehmen“
+  const f = ctx.flaeche;
+  f.append(el("div", { class: "auftrag", text: `Du bist dran! ${regelText(st)}` }));
+  f.append(el("div", { class: `regel-zeile${a.letzterVerliert ? " umgekehrt" : ""}`,
+    text: a.letzterVerliert ? "⚠️ Achtung: Wer den letzten Stein nimmt, verliert!" : "🏆 Wer den letzten Stein nimmt, gewinnt." }));
+  f.append(el("div", { class: "vorgabe", text: vorgabeText(st) }));
+  const { box, steine } = brettEl(st, true);
+  const antwort = el("div", { class: "eule-antwort", "aria-live": "polite" });
+  const nehmen = el("button", { type: "button", class: "knopf", text: "✋ Nehmen", "aria-label": "Nehmen" });
+  f.append(box, el("div", { class: "nehmen-zeile" }, nehmen), antwort);
+
+  let reihe = null;          // Reihe der gewählten Steine
+  let gewaehlt = new Set();  // gewählte Steine (Index in der Reihe)
+  let zuruecksetzen = null;  // nach einem falschen Zug: Markierung kurz zeigen, dann weg
+
+  const zeige = () => {
+    steine.forEach((liste, r) => liste.forEach((s, i) => s.classList.toggle("gewaehlt", r === reihe && gewaehlt.has(i))));
+    nehmen.disabled = !gewaehlt.size || ctx.vorbei();
+    nehmen.textContent = gewaehlt.size ? `✋ Nehmen (${steinText(gewaehlt.size)})` : "✋ Nehmen";
+    nehmen.setAttribute("aria-label", gewaehlt.size ? `${zugText(st, [reihe, gewaehlt.size])} nehmen` : "Nehmen");
+  };
+  const aufraeumen = () => {
+    if (!zuruecksetzen) return;
+    clearTimeout(zuruecksetzen);
+    zuruecksetzen = null;
+    steine.flat().forEach(s => s.classList.remove("falsch"));
+    reihe = null;
+    gewaehlt = new Set();
+  };
+  const sperren = () => { steine.flat().forEach(s => { s.disabled = true; }); nehmen.disabled = true; };
+
+  steine.forEach((liste, r) => liste.forEach((s, i) => s.addEventListener("click", () => {
+    if (ctx.vorbei()) return;
+    aufraeumen();
+    if (reihe !== r) {
+      if (reihe !== null && gewaehlt.size) ctx.sag("Du nimmst immer nur aus einer Reihe.", "hinweis");
+      reihe = r;
+      gewaehlt = new Set();
+    }
+    if (gewaehlt.has(i)) gewaehlt.delete(i);
+    else if (st.k && gewaehlt.size >= st.k) { ctx.sag(`Du darfst höchstens ${steinText(st.k)} nehmen.`, "hinweis"); return; }
+    else gewaehlt.add(i);
+    zeige();
+  })));
+
+  nehmen.addEventListener("click", () => {
+    if (ctx.vorbei() || !gewaehlt.size) return;
+    const zug = [reihe, gewaehlt.size];
+    if (!erlaubt(st, zug)) { ctx.sag(regelText(st), "hinweis"); return; }
+    const genommen = [...gewaehlt].map(i => steine[reihe][i]);
+    if (istRichtig(st, zug)) {
+      genommen.forEach(s => s.classList.add("weg"));
+      sperren();
+      const q = nach(st, zug);
+      if (summe(q.reihen) === 0) { ctx.richtig("Du hast den letzten Stein — gewonnen! 🎉"); return; }
+      ctx.richtig(a.letzterVerliert ? "Gut gezogen! Die Eule muss am Ende den letzten Stein nehmen."
+        : "Gut gezogen! Die Eule steckt in der Falle: Was sie auch nimmt, du gewinnst.");
+      // Die Eule antwortet kurz (irgendein erlaubter Zug); die Aufgabe ist schon gelöst.
+      const ez = waehle(zuege(q));
+      setTimeout(() => {
+        const uebrig = steine[ez[0]].filter(s => !s.classList.contains("weg"));
+        uebrig.slice(-ez[1]).forEach(s => s.classList.add("eule-weg"));
+        antwort.textContent = `🦉 Die Eule nimmt ${zugText(st, ez)} … «Oh nein!»`;
+      }, 450);
+      return;
+    }
+    genommen.forEach(s => s.classList.add("falsch"));
+    ctx.falsch(eulenAntwort(st, zug), loesung);
+    if (ctx.vorbei()) { sperren(); return; }
+    zuruecksetzen = setTimeout(() => { aufraeumen(); zeige(); }, 1200);
+    nehmen.disabled = true;
+  });
+  zeige();
+  if (ctx.nr === 0) ctx.sag("Tippe die Steine an, die du nehmen willst. Dann tippe auf „Nehmen“.");
+}
+
+function wahlAufgabe(ctx, a) {
+  const st = { reihen: a.reihen, k: a.k, letzterVerliert: false };
+  const n = a.reihen[0], k = a.k;
+  const m = n % (k + 1);
+  ctx.serie("antwort", a.richtig);
+  const f = ctx.flaeche;
+  f.append(el("div", { class: "auftrag", text: "Wer soll anfangen, damit du gewinnst?" }));
+  f.append(el("div", { class: "regel-zeile", text: `${regelText(st)} 🏆 Wer den letzten Stein nimmt, gewinnt.` }));
+  f.append(el("div", { class: "vorgabe", text: vorgabeText(st) }));
+  f.append(brettEl(st, false).box);
+  const loesung = a.richtig === "ich"
+    ? `Fang an! Nimm ${steinText(m)} — dann ${bleibtText(n - m)} für die Eule.`
+    : `Lass die Eule anfangen: Bei ${steinText(n)} verliert, wer anfängt. Was sie auch nimmt, du ergänzt auf ${k + 1}.`;
+  LS.auswahl(ctx, {
+    optionen: ["ich", "eule"], richtig: a.richtig, breite: 170, loesung,
+    inhalt: o => (o === "ich" ? { bild: "🙋", text: "Ich fange an" } : { bild: "🦉", text: "Die Eule soll anfangen" }),
+    hinweis: o => (o === "ich"
+      ? `Probier es aus: Nimmst du 1, nehme ich ${k}. Nimmst du 2, nehme ich ${k - 1}. So bekomme ich am Schluss den letzten Stein.`
+      : `Dann fange ich an und nehme ${steinText(m)}. Dann ${bleibtText(n - m)} für dich — und ich gewinne.`),
+    lob: a.richtig === "ich" ? `Richtig! Du nimmst ${steinText(m)}, dann steckt die Eule in der Falle.` : "Richtig! Wer hier anfängt, verliert — das soll die Eule sein.",
+  });
+  if (ctx.nr === 0) ctx.sag("Überleg zuerst: Wer gewinnt, wenn du anfängst?");
+}
+
+LS.spiel({
+  id: "stein-duell",
+  einleitung: "Du und ich nehmen abwechselnd Steine. Wer den letzten Stein nimmt, gewinnt! Findest du den Zug, nach dem ich nicht mehr gewinnen kann?",
+  hilfe: stufe => (stufe === "s4"
+    ? "Schau die Steine und die Regel an. Dann entscheide: Fängst du an, oder soll die Eule anfangen? Richtig ist, womit du sicher gewinnst."
+    : "Tippe die Steine an, die du nehmen willst — alle aus derselben Reihe. Nochmal antippen legt einen Stein zurück. Dann tippe auf „✋ Nehmen“."),
+  anzahl: 8,
+  stufen: {
+    s1: "Wenige Steine: Mit welchem Zug gewinnst du gleich danach?",
+    s2: "Bis 12 Steine: Welche Anzahl lässt du der Eule?",
+    s3: "Bis 20 Steine, nimm 1 bis 3.",
+    s4: "Willst du anfangen? Erkenne, wer gewinnt — mit 1 bis 4 und 1 bis 5.",
+    s5: "Zwei Reihen: aus einer Reihe so viele, wie du willst.",
+    s6: "Endgegner: drei Reihen — oder wer den letzten nimmt, verliert.",
+  },
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.stufe === "s6") ctx.serie("regel", a.letzterVerliert ? "umgekehrt" : "normal");
+    ctx.kennung(`${a.art}|${a.reihen.join("-")}|k${a.k || "-"}|${a.letzterVerliert ? "umgekehrt" : "normal"}`);
+    ctx.tipp(tippsFuer(a, ctx.stufe));
+    if (a.art === "wahl") wahlAufgabe(ctx, a);
+    else zugAufgabe(ctx, a);
+  },
+});
+</script>
+</body>
+</html>

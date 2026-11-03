@@ -44,6 +44,8 @@ const THEMEN = [
   { id: "wirtschaft", fach: "NMG", name: "Wirtschaft", titel: "Taschengeld, Wege der Waren und Wirtschaftskreislauf", quelle: "Lehrplan SG NMG.6.3, NMG.6.4, NMG.6.5" },
   { id: "teiler", fach: "Mathe", name: "Teiler und Überschlag", titel: "Teilbarkeit, Teiler, Vielfache, Primzahlen und Überschlagen", quelle: "Lehrplan SG MA.1.A.1, MA.1.A.2, MA.1.A.4, MA.1.B.2" },
   { id: "informatik", fach: "Medien und Informatik", name: "Informatik", titel: "Anleitungen befolgen, Abläufe planen, Wiederholungen und Bedingungen", quelle: "Lehrplan SG MI.2.2" },
+  // Strategie-Rätsel (Entscheide S1 a, ST1 a, LERN_Session11): MI.2.2.b „eine Spielstrategie entwickeln“
+  { id: "strategie", fach: "Medien und Informatik", name: "Strategie", titel: "Spielstrategien finden: Nim, Go-Fangen, Matt in 1", quelle: "Lehrplan SG MI.2.2.b" },
   { id: "wetter", fach: "NMG", name: "Wetter", titel: "Wetter, Jahreszeiten und Temperatur", quelle: "Lehrplan SG NMG.4.4" },
   { id: "verkehr", fach: "NMG", name: "Sicher unterwegs", titel: "Schulweg, Verkehrsregeln und Signale", quelle: "Lehrplan SG NMG.1.2" },
   { id: "gedichte", fach: "Deutsch", name: "Gedichte und Gattungen", titel: "Reim, Vers, Strophe und Reimschema; Märchen, Sage, Fabel, Bericht", quelle: "Lehrplan SG D.6.C.1" },
@@ -1152,6 +1154,23 @@ const SPIELE = [
       "geraeusche": { name: "Geräusche mit Lautstärke und Schutzmassnahmen" },
     },
     lernziele: [{ lz: "NMG.4.2", stufen: ALLE_STUFEN }] },
+  // LERN_Session11: Strategie-Rätsel (Vorlage docs/eulenpfad/spielideen/strategie_raetsel.md; ST1 a, ST2 a, ST3 a).
+  // regeln: true — eigene Regelseite regeln.html neben index.html (rahmen.md 16). Zeiten nach den Berichten der Bau-Agenten.
+  { id: "stein-duell", klasse: 5, neu: "LERN_Session11", bild: "🪨", name: "Stein-Duell", thema: "strategie", farbe: "var(--deko-3)",
+    pfad: "spiele/stein-duell/index.html", stufen: ALLE_STUFEN, regeln: true, zeiten: { s1: 15, s2: 20, s3: 25, s4: 20, s5: 30, s6: 45 },
+    beschreibung: "Wer nimmt den letzten Stein? Gegen die Eule die Gewinnstrategie finden",
+    lernziele: [{ lz: "MI.2.2", stufen: ALLE_STUFEN }] },
+  { id: "steine-fangen", klasse: 5, neu: "LERN_Session11", bild: "⚫", name: "Steine fangen", thema: "strategie", farbe: "var(--deko-7)",
+    pfad: "spiele/steine-fangen/index.html", stufen: ALLE_STUFEN, regeln: true, zeiten: { s1: 15, s2: 20, s3: 25, s4: 25, s5: 40, s6: 60 },
+    beschreibung: "Atari-Go: Freiheiten zählen, Steine fangen und retten — wer zuerst fängt, gewinnt",
+    lernziele: [{ lz: "MI.2.2", stufen: ALLE_STUFEN }] },
+  { id: "koenig-falle", klasse: 5, neu: "LERN_Session11", bild: "♟️", name: "König in der Falle", thema: "strategie", farbe: "var(--deko-1)",
+    pfad: "spiele/koenig-falle/index.html", stufen: ALLE_STUFEN, regeln: true, zeiten: { s1: 45, s2: 45, s3: 60, s4: 75, s5: 75, s6: 120 },
+    beschreibung: "Schach-Rätsel: Setz den schwarzen König matt — mit wenigen Figuren beginnen",
+    listen: {
+      "stellungen": { name: "Schachstellungen: Matt in 1 und Matt in 2" },
+    },
+    lernziele: [{ lz: "MI.2.2", stufen: ALLE_STUFEN }] },
 ];
 
 /** Lernziele (Lernzielblatt 4.2 und Lehrplan SG) — für Profil-Fokus und Statistik je Lernziel. */
