@@ -17,6 +17,7 @@
     margin: 0 auto 18px;
     max-width: 720px;
   }
+  .vorgabe-regel { font-size: .75em; font-weight: 700; margin-top: 6px; }
 
   .faecher {
     display: grid;
@@ -260,7 +261,7 @@ function pruefeAufgabe(a, stufe) {
 
 LS.spiel({
   id: "ziffernkarten",
-  einleitung: "Ich habe Ziffernkarten gemischt! Leg sie in die Fächer, sodass eine Zahl entsteht, die zur Vorgabe passt. Jede Karte wird genau einmal gebraucht.",
+  einleitung: "Ich habe Ziffernkarten gemischt! Leg sie in die Fächer, sodass eine Zahl entsteht, die zur Vorgabe passt. Jede Karte wird genau einmal gebraucht. Eine Zahl fängt nie mit 0 an.",
   hilfe: "Tipp eine Karte an — sie rutscht ins nächste freie Fach. Nochmals antippen holt sie zurück. Sind alle Fächer voll, drückst du „OK ✓“.",
   anzahl: 8,
   stufen: {
@@ -290,7 +291,10 @@ LS.spiel({
     if (vorgabe.regel && vorgabe.ziel !== "alle") t.push("Leg zuerst fest, was vorgegeben ist — eine Ziffer an fester Stelle, eine gerade oder ungerade Einerziffer. Dann verteilst du die übrigen Karten.");
     if (karten.includes(0)) t.push("Eine Zahl fängt nie mit 0 an.");
     ctx.tipp(t);
-    ctx.flaeche.append(el("div", { class: "vorgabe", text: vorgabe.text }));
+    // Mit Null die Regel gleich sichtbar nennen, nicht erst als Tipp oder nach dem Fehler (Meldung 8, LERN_Session12).
+    const vorgabeKasten = el("div", { class: "vorgabe", text: vorgabe.text });
+    if (karten.includes(0)) vorgabeKasten.append(el("div", { class: "vorgabe-regel", text: "Vorne darf keine 0 stehen." }));
+    ctx.flaeche.append(vorgabeKasten);
 
     const faecher = el("div", { class: "faecher" });
     faecher.style.setProperty("--n", stellen.length);
@@ -311,7 +315,7 @@ LS.spiel({
       ok.disabled = !voll || gesperrt;
       // Mit führender Null die Karten so zeigen, wie sie liegen — sonst verschwände die Null still.
       const roh = plaetze.map(p => p.firstChild?.textContent).join("");
-      ergebnis.textContent = !voll ? "" : roh.startsWith("0") ? `Deine Karten: ${roh}` : `Deine Zahl: ${zahlText(gelegt())}`;
+      ergebnis.textContent = !voll ? "" : roh.startsWith("0") ? `Deine Karten: ${roh} — vorne steht eine 0.` :`Deine Zahl: ${zahlText(gelegt())}`;
       faecher.classList.remove("falsch");
     }
     const gelegt = () => Number(plaetze.map(p => p.firstChild.textContent).join(""));

@@ -96,6 +96,10 @@ const PRUEFSTAND = {
     "velo-tabelle": {
       "am": "2026-11-02",
       "von": "Patrik"
+    },
+    "ziffernkarten": {
+      "am": "2026-11-03",
+      "von": "Patrik"
     }
   }
 };

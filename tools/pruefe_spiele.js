@@ -36,21 +36,7 @@ for (const a of process.argv.slice(2)) {
   if (m) opt[m[1]] = Number(m[2]); else nurSpiele.push(a);
 }
 
-/** Skripte einer Seite in Reihenfolge: { name, code }. */
-function skripte(seitenPfad, html) {
-  const liste = [];
-  const re = /<script(?:\s+src="([^"]+)")?[^>]*>([\s\S]*?)<\/script>/g;
-  let m;
-  while ((m = re.exec(html))) {
-    if (m[1]) {
-      const datei = path.join(path.dirname(seitenPfad), m[1]);
-      liste.push({ name: path.relative(WURZEL, datei), code: fs.readFileSync(datei, "utf8") });
-    } else {
-      liste.push({ name: path.relative(WURZEL, seitenPfad) + " (inline)", code: m[2] });
-    }
-  }
-  return liste;
-}
+const { skripte, abweichungen } = require("./listen_fingerabdruck");
 
 // Treiber im Kontext: Runden spielen, bis opt.runden protokolliert sind oder die Klicks ausgehen.
 const TREIBER = `
@@ -422,6 +408,16 @@ for (const id of ids) {
     }
     for (const f of m) console.log(`    FEHLER  ${s.id} Regeln: ${f}`);
     fehlerZahl += m.length;
+  }
+}
+// Geprüfte Listen unverändert? (LP3-H a, LERN_Session12): Wer eine Liste mit pruefung.js nach der Prüfung ändert,
+// muss die geänderten Einträge in der Prüfansicht neu abhaken — sonst wäre sie mit Ungeprüftem für Kinder frei.
+{
+  const kat = vm.createContext({});
+  vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", "pruefstand.js"), "utf8") + ";this.PRUEFSTAND = PRUEFSTAND;", kat);
+  for (const a of abweichungen(kat.PRUEFSTAND, ids)) {
+    if (a.stand) { console.log(`    FEHLER  ${a.schluessel}: Liste nach der Prüfung geändert — in der Prüfansicht die neuen Einträge abhaken`); fehlerZahl++; }
+    else console.log(`    hinweis ${a.schluessel}: geprüft vor der Prüfung je Eintrag (ohne Fingerabdruck) — einmal in der Prüfansicht bestätigen`);
   }
 }
 // Freiwillige Beiträge (LERN-50): Kinder sollen nie um Geld gebeten werden. Im App-Ordner darf die Beitragsseite nur

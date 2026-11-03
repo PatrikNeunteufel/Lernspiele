@@ -18,6 +18,9 @@ const katalog = vm.createContext({ LS: { SKALA: [] } });
 vm.runInContext(lies("eulenpfad/spiele/gemeinsam/katalog.js") + ";this.SPIELE = SPIELE; this.THEMEN = THEMEN;", katalog);
 vm.runInContext(lies("eulenpfad/spiele/gemeinsam/pruefstand.js") + ";this.PRUEFSTAND = PRUEFSTAND;", katalog);
 const { SPIELE, THEMEN, PRUEFSTAND } = katalog;
+// Nach der Prüfung geänderte Listen (Fingerabdruck weicht ab, LP3-H a) gelten wieder als zu prüfen.
+const geaendert = new Set(require("./listen_fingerabdruck").abweichungen(PRUEFSTAND).filter(a => a.stand).map(a => a.schluessel));
+const geprueftStand = schluessel => (geaendert.has(schluessel) ? null : PRUEFSTAND.listen[schluessel] || null);
 
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[^a-z]/g, "");
 
@@ -102,10 +105,10 @@ for (const s of SPIELE) {
   if (idee) gebauteIdeen.add(idee.name);
   // Verweis auf die Liste eines anderen Spiels: Name und Prüfstand von dort, geprüft wird sie dort.
   const listen = Object.entries(s.listen || {}).map(([id, l]) => {
-    if (!l.von) return { ...l, geprueft: PRUEFSTAND.listen[`${s.id}/${id}`] || null };
+    if (!l.von) return { ...l, geprueft: geprueftStand(`${s.id}/${id}`) };
     const [spiel, liste] = l.von.split("/");
     const quelle = SPIELE.find(x => x.id === spiel);
-    return { ...quelle.listen[liste], geprueft: PRUEFSTAND.listen[l.von] || null,
+    return { ...quelle.listen[liste], geprueft: geprueftStand(l.von),
       name: `${quelle.listen[liste].name} (Liste von ${quelle.name})`, verweis: true };
   });
   eintraege.push({

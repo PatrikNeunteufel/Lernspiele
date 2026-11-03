@@ -675,7 +675,7 @@ Go, Nim), erklären sie auf einer eigenen Seite statt in Stufen. Die Stufen blei
 
 ## 17. Prüfung der Inhaltslisten je Eintrag
 
-Entscheide LP1 a, LP2 a, LP4 a, LP5 a (Patrik, LERN_Session11; LP3 offen). Code: `spiele/gemeinsam/listenpruefung.js`
+Entscheide LP1 a, LP2 a, LP4 a, LP5 a (Patrik, LERN_Session11), LP3 a (Patrik, LERN_Session12). Code: `spiele/gemeinsam/listenpruefung.js`
 (Ansicht), `spiel.js` (`LS.listenPruefung`, `LS.listenPruefen`, `LS.fingerabdruck`, lokale Haken), Entwickler-Server
 (`/entwicklung/eintraege`, `/entwicklung/bemerkung-status`).
 
@@ -698,6 +698,12 @@ Entscheide LP1 a, LP2 a, LP4 a, LP5 a (Patrik, LERN_Session11; LP3 offen). Code:
   Gerät frei (`LS.setzeListeFrei`), sonst zurück auf den Prüfstand. ✓E zeigt, was die Entwicklung schon geprüft hat.
   ✏️ schreibt eine **Korrektur** — eine Anregung der Art `korrektur` mit Liste, Eintrag und Schlüssel, gesendet unter
   Verwaltung → Meldungen; solange sie nicht gesendet ist, lässt sie sich in der Ansicht entfernen.
+- **Freigabe nur ganz** (LP3 a): Eine Liste geht erst in die Aufgaben, wenn alle ihre Einträge geprüft sind; einzelne
+  Haken geben nichts frei. Bis dahin sehen Kinder sie nicht (`LS.freieListen`), die Aufsicht schon.
+  **Geändert nach der Prüfung** (LP3-H a): `tools/listen_fingerabdruck.js` rechnet je Liste mit pruefung.js den
+  Fingerabdruck nach; weicht er vom `hash` im Prüfstand ab, meldet `tools/pruefe_spiele.js` einen Fehler und
+  `tools/checkliste.js` führt die Liste wieder als zu prüfen (ohne `hash`, also vor der Prüfung je Eintrag geprüft:
+  ein Hinweis). Geprüft wird im Repo, nicht zur Laufzeit — Listen ändern sich nur dort.
 - **Darstellung:** Linien zwischen den Zeilen, kurze Spalten so breit wie ihr Inhalt, lange Zellen (über 24 Zeichen)
   brechen um. Regeln für die Listen selbst (ein Inhalt je Abschnitt, Spalten mit fester Bedeutung, Gruppen, Beschreibung
   mit Stufen): die Pilotspiele Anlaut-Angel und Auge-Entdecker zeigen sie.

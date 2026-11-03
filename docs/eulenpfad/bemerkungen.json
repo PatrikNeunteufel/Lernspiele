@@ -81,5 +81,18 @@
     "stufe": "s6",
     "aufgabe": "Aufgabe 10: Welches Bild passt?",
     "seite": "/eulenpfad/spiele/blitzlesen/index.html"
+  },
+  {
+    "nr": 8,
+    "zeit": "2026-11-03T21:20:05+01:00",
+    "status": "erledigt 2026-11-03 (LERN_Session12)",
+    "text": "Meldung M-mw14ns1r-2gnv (Kind), 2026-11-03\nSpiel: Ziffernkarten (ziffernkarten), Stufe 3, Aufgabe 3\nArt: Etwas anderes\nAufgabe: Bilde die kleinste Zahl.\nErwartete Lösung: Eine richtige Lösung ist 1024.\nEingaben des Kindes: 0 → 1 → 2 → 4 → OK ✓\nGewertet: noch offen, 1 Fehlversuch als falsch gewertet\nBegründung: es wird reklamiert, dass eine zahl nicht mit 0 anfangen kann... das sollte aber auch klar genannt werden",
+    "von": "Patrik",
+    "spiel": "ziffernkarten",
+    "stufe": "s3",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "aufgabe": "Aufgabe 3: Bilde die kleinste Zahl.",
+    "seite": "/eulenpfad/index.html",
+    "meldung": "M-mw14ns1r-2gnv"
   }
 ]
