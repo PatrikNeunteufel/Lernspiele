@@ -57,5 +57,18 @@
     "aufgabe": "Aufgabe 1: 👆 Tipp auf das Augenlid!",
     "seite": "/eulenpfad/index.html",
     "meldung": "M-mw0zf0bu-3zkb"
+  },
+  {
+    "nr": 6,
+    "zeit": "2026-11-03T19:20:03+01:00",
+    "status": "erledigt 2026-11-03 (LERN_Session11): Au café spricht nach einer richtigen Antwort den französischen Satz nach; der Rahmen zeigte die nächste Aufgabe nach festen 1,3 s, während die Stimme noch sprach. Jetzt erst, wenn die Stimme fertig ist (höchstens 6 s), für alle Spiele; gemessen: Stimme bis 1867 ms, neue Aufgabe 1993 ms",
+    "antwort": "Danke! Die Stimme hat noch die alte Antwort gesprochen, als schon die neue Aufgabe kam. Jetzt wartet das Spiel, bis sie fertig ist.",
+    "text": "Meldung M-mw10hrt7-q2xq (Kind), 2026-11-03\nSpiel: Au café (au-cafe), Stufe 1, Aufgabe 5\nArt: Etwas anderes\nAufgabe: Du triffst am Morgen deine Nachbarin. · Was sagst du?\nErwartete Lösung: Bonjour ! (Guten Tag!)\nGewertet: noch nicht beantwortet\nBegründung: die stimme sagte nochmals si'l vous plais von der letzten antwort, als die aufgabe geeladen wurde",
+    "von": "Patrik",
+    "spiel": "au-cafe",
+    "stufe": "s1",
+    "aufgabe": "Aufgabe 5: Du triffst am Morgen deine Nachbarin. · Was sagst du?",
+    "seite": "/eulenpfad/index.html",
+    "meldung": "M-mw10hrt7-q2xq"
   }
 ]

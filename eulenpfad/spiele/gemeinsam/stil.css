@@ -374,6 +374,10 @@ button { font-family: inherit; }
 /* ---------- Timer ---------- */
 
 .timer-zeile, .option-zeile { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 4px 0 8px; }
+/* Stimmen des Spiels auf dem Startblatt (LERN_Session11): welche gefunden ist, Probe, Fehler */
+.stimmen-zeile { display: flex; flex-direction: column; gap: 4px; margin: 2px 0 10px; font-size: 15px; }
+.stimme-eintrag { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.stimme-meldung { font-weight: 700; }
 
 /* Testhilfen, nur beim Testspieler (Entscheid T2 a) */
 .testhilfe { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; padding: 6px 10px;

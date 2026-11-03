@@ -533,6 +533,11 @@ Spielen, die das Lesen selbst üben; ein Kind im Kindergarten soll sich eintrage
   - **Auftrag nur, wenn er neu ist** (LERN_Session11): Lautet der Auftrag gleich wie bei der vorigen Aufgabe
     („Wohin geht die Melodie?“), liest die Eule ihn automatisch nicht nochmals; 🗣️ liest ihn immer.
   - **Reihenfolge:** Lob der vorigen Aufgabe ausreden lassen (`nachStimme`), dann vorlesen, dann `ctx.nachAnsage`.
+  - **Stimmen sichtbar** (Meldung Patrik, LERN_Session11): Das Startblatt zeigt je Sprache, die das Spiel braucht
+    (`def.stimme` aus `LS.spielMitStimme`, dazu Deutsch fürs Vorlesen), die gefundene Stimme mit Sprache, „⏳ wird
+    geladen“ oder „⚠ keine Stimme“ mit Hinweis, und „▶ Probe“ mit Rückmeldung („✓ gesprochen“, Fehlercode, Ton aus)
+    — Klassen `stimmen-zeile`, `stimme-eintrag`, `stimme-meldung`. Scheitert das Sprechen im Spiel (nicht abgebrochen
+    oder unterbrochen), sagt die Eule es einmal je Runde.
   - **Ton aus** (🔇 in der Kopfzeile) geht vor: Dann spricht keine Stimme, auch nicht in den Hörspielen (`sprich`
     prüft `tonAn`); Ausschalten bricht eine laufende Ansage ab.
   - **Stimmlage:** Aufgaben normal, Lob (`ctx.richtig`, Blase „gut“) höher und lebhafter, Tipps (Blase „hinweis“)

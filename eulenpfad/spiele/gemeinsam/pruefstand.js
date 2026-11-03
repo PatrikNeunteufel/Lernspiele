@@ -3,6 +3,10 @@
    Geschrieben vom Entwickler-Server (tools/entwickler_server.py) — nicht von Hand ändern. */
 const PRUEFSTAND = {
   "listen": {
+    "abc-sortierer/nomen-bild": {
+      "am": "2026-11-03",
+      "von": "Patrik"
+    },
     "preis-tabelle/folgen": {
       "am": "2026-11-01",
       "von": "Patrik"
@@ -22,6 +26,10 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "anlaut-angel": {
+      "am": "2026-11-03",
+      "von": "Patrik"
+    },
+    "au-cafe": {
       "am": "2026-11-03",
       "von": "Patrik"
     },

@@ -367,3 +367,6 @@
   sichtbare Formen fangen keine Tipps mehr); `meldungen-stand.json` mit zwei Antworten.
 - Entwickler-Leiste erscheint auch in Spielen, die auf eine Stimme warten (Au café und 12 weitere; Ereignis
   `lernspiele:spiel` beim Start).
+- Stimmen sichtbar: Startblatt zeigt die Stimme je Sprache (gefunden, lädt, fehlt) mit „▶ Probe“ und Rückmeldung;
+  Fehler beim Sprechen meldet die Eule einmal je Runde (rahmen.md 12).
+- Meldung 6 (Au café): Die nächste Aufgabe kommt erst, wenn die Stimme fertig ist (höchstens 6 s), in allen Spielen.

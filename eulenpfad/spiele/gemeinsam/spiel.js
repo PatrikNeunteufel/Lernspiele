@@ -1107,7 +1107,15 @@ const LS = (() => {
       const lage = STIMMLAGE[art] || STIMMLAGE[""];
       u.rate = lage.rate;
       u.pitch = lage.pitch;
-      u.onend = u.onerror = ende;
+      u.onend = ende;
+      // Fehler sichtbar machen (Meldung Patrik, LERN_Session11: in Au café war nicht zu sehen, ob eine Stimme da ist
+      // oder etwas scheitert). Abgebrochen und unterbrochen sind keine Fehler: das tut sprich selbst (cancel).
+      u.onerror = e => {
+        ende();
+        if (["interrupted", "canceled"].includes(e?.error)) return;
+        stimmFehler = { sprache, fehler: e?.error || "unbekannt", stimme: v.name };
+        stimmFehlerHoerer?.(stimmFehler);
+      };
       // Manche Browser melden das Ende nicht: spätestens nach einer groben Sprechdauer.
       if (fertig) setTimeout(ende, (1 + text.length * 0.1) / lage.rate * 1000);
       speechSynthesis.cancel();
@@ -1133,10 +1141,57 @@ const LS = (() => {
    * sonst nach stimmeBereit. Ohne Stimme erklärt die Eule es und bietet keine Runde an.
    */
   function spielMitStimme(def, sprache = "en") {
-    const ohne = () => spiel({ ...def, stufen: {},
+    const ohne = () => spiel({ ...def, stufen: {}, stimme: sprache,
       einleitung: "Oh! Dieses Gerät hat keine passende Stimme, darum kannst du hier nichts hören. Bitte einen Erwachsenen, eine Stimme einzuschalten, oder spiel ein anderes Spiel." });
-    if (stimme(sprache)) spiel(def);
-    else stimmeBereit(sprache).then(ok => (ok ? spiel(def) : ohne()));
+    if (stimme(sprache)) spiel({ ...def, stimme: sprache });
+    else stimmeBereit(sprache).then(ok => (ok ? spiel({ ...def, stimme: sprache }) : ohne()));
+  }
+
+  // ---------- Stimmen sichtbar machen (Meldung Patrik, LERN_Session11) ----------
+  // Auf dem Startblatt: welche Stimme das Spiel nutzt (def.stimme aus spielMitStimme, „de“ fürs Vorlesen), ob sie
+  // noch lädt oder fehlt, und ein Probeknopf. Im Spiel sagt die Eule einmal je Runde, wenn das Sprechen scheitert.
+  const SPRACHNAME = { de: "Deutsch", fr: "Französisch", en: "Englisch" };
+  const SPRACH_ADJ = { de: "deutsche", fr: "französische", en: "englische" };
+  const PROBE = { de: "Hallo, ich bin die Eule.", fr: "Bonjour !", en: "Hello!" };
+  let stimmFehler = null;        // letzter echter Fehler beim Sprechen { sprache, fehler, stimme }
+  let stimmFehlerHoerer = null;  // setzt die laufende Seite (Startblatt oder Runde)
+  /** Zeile „🗣️ Französisch: Google français ✓ · ▶ Probe“ je Sprache; aktualisiert sich, wenn Stimmen nachladen. */
+  function stimmenZeile(sprachen) {
+    const zeile = el("div", { class: "stimmen-zeile leise" });
+    const zeichne = () => {
+      zeile.innerHTML = "";
+      for (const sp of sprachen) {
+        const v = stimme(sp);
+        const teil = el("span", { class: "stimme-eintrag" });
+        teil.append(`🗣️ ${SPRACHNAME[sp] || sp}${sp === "de" && sprachen.length > 1 ? " (Vorlesen)" : ""}: `);
+        if (!v) teil.append(el("b", { text: geladen ? "⚠ keine Stimme auf diesem Gerät" : "⏳ wird geladen …" }),
+          geladen ? ` — eine ${SPRACH_ADJ[sp] || sp} Stimme lässt sich in den Einstellungen des Geräts (Sprache oder Bedienungshilfen) dazuladen.` : "");
+        else {
+          teil.append(`${v.name} (${v.lang}) ✓ `);
+          const meldung = el("span", { class: "stimme-meldung" });
+          teil.append(el("button", { type: "button", class: "knopf hell klein", text: "▶ Probe", onclick: () => {
+            stimmFehler = null;
+            meldung.textContent = !tonAn ? " Der Ton ist aus — oben rechts 🔊 einschalten." : "";
+            if (!tonAn) return;
+            sprich(PROBE[sp] || "Test", sp, "", () => { meldung.textContent = stimmFehler?.sprache === sp ? ` ⚠ Fehler beim Sprechen: ${stimmFehler.fehler}` : " ✓ gesprochen"; });
+          } }), meldung);
+        }
+        zeile.append(teil);
+      }
+    };
+    let geladen = sprachen.every(sp => stimme(sp));
+    zeichne();
+    if (!geladen) Promise.all(sprachen.map(stimmeBereit)).then(() => { geladen = true; if (zeile.isConnected) zeichne(); });
+    return zeile;
+  }
+  /** Hinweis der Eule bei einem echten Fehler beim Sprechen, einmal je Runde. */
+  function stimmFehlerFuer(eule) {
+    let gesagt = false;
+    return f => {
+      if (gesagt) return;
+      gesagt = true;
+      eule.sag(`🗣️ Die ${SPRACH_ADJ[f.sprache] || f.sprache} Stimme hat nicht gesprochen (${f.fehler}). Ist der Ton an? Sonst bitte einen Erwachsenen, die Stimmen des Geräts zu prüfen.`, "hinweis");
+    };
   }
 
   // ---------- Vorlesen (Wunsch Patrik, LERN_Session8) ----------
@@ -1780,6 +1835,10 @@ const LS = (() => {
       const karte = el("div", { class: "karte" });
       const eule = euleZeile();
       karte.append(spielerZeile(), eule.element, timerZeile(stufenwahl), vorlesenZeile(stufenwahl) || "", reihenfolgeZeile(stufenwahl) || "", ...spielOptionsZeilen(stufenwahl));
+      // Stimmen des Spiels (def.stimme) und fürs Vorlesen sichtbar, mit Probe (LERN_Session11)
+      const sprachen = [...new Set([def.stimme, vorlesenErlaubt(def.id) ? "de" : null].filter(Boolean))];
+      if (sprachen.length) karte.append(stimmenZeile(sprachen));
+      stimmFehlerHoerer = stimmFehlerFuer(eule);
       eule.sag(def.einleitung);
       const stufen = el("div", { class: "stufen" });
       for (const st of stufenListe) {
@@ -1893,6 +1952,7 @@ const LS = (() => {
       const karte = el("div", { class: "karte" });
       const flaeche = el("div");
       const eule = euleZeile();
+      stimmFehlerHoerer = stimmFehlerFuer(eule);
       const zeitleiste = el("div", { class: "zeitleiste", "aria-hidden": "true" }, el("div", { class: "zeitbalken" }));
       // Testhilfen (Entscheid T2 a): nur beim Testspieler; wirken auf die gerade gezeigte Aufgabe.
       const test = istAufsicht(name);
@@ -2284,7 +2344,10 @@ const LS = (() => {
             eule.sag(text || waehle(LOB), "gut");
             nr++;
             if (endlos) { geschafft++; punkte.textContent = `♾ ${geschafft}`; }
-            setTimeout(naechste, endlos ? 900 : 1300);
+            // Die nächste Aufgabe erst, wenn die Stimme fertig ist (Lob, gesprochene Antwort des Spiels; höchstens 6 s):
+            // sonst sprach in Au café der Satz der vorigen Antwort noch, als die neue Aufgabe schon stand (Meldung 6,
+            // LERN_Session11).
+            setTimeout(() => nachStimme(naechste, 6000), endlos ? 900 : 1300);
           },
           falsch(hinweis, loesungText) {
             if (erledigt) return;
@@ -2567,7 +2630,8 @@ const LS = (() => {
       "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
-      "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "regeln-link"],
+      "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "regeln-link",
+      "stimmen-zeile", "stimme-eintrag", "stimme-meldung"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
