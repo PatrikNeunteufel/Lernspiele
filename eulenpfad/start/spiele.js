@@ -82,6 +82,14 @@ function zeichneSpiele(box, neu) {
   // Protokoll (AUSWERTUNG.bedarf in der empfohlenen Stufe); die Aufsicht sucht neutral.
   const protokoll = LS.protokoll().filter(e => e.name === name);
   const person = aufsicht ? null : { klasse, bedarf: id => AUSWERTUNG.bedarf(id, LS.empfohleneStufe(name, id) || "s3", protokoll, fokus) };
+  // Neue Abzeichen (LERN_Session10): ein Hinweis ganz oben, bis das Kind den Tab Erfolge öffnet.
+  if (!aufsicht) {
+    const neue = ERFOLGE.abzeichen(name, p, protokoll, LS.rekorde(), LS.gefundeneFehler(name)).filter(a => a.neu);
+    if (neue.length) box.append(el("a", { class: "abzeichen-hinweis", href: "#erfolge" },
+      el("span", { class: "abzeichen-hinweis-bild", text: neue[0].bild }),
+      el("span", {}, el("b", { text: (neue.length === 1 ? `Neues Abzeichen: ${neue[0].titel}` : `${neue.length} neue Abzeichen: ${neue.map(a => a.titel).join(", ")}`) + (neue[neue.length - 1].titel.endsWith("!") ? "" : "!") }),
+        el("span", { class: "leise-text", text: " Antippen zum Ansehen." }))));
+  }
   // Wochenziel des Lernplans (Entscheid L1 a, LERN_Session10): kompakt ganz oben, nur wenn die Aufsicht eines gesetzt hat.
   if (!aufsicht && p.lernplan?.tage > 0) {
     const w = wochenKarte(ERFOLGE.lernplan(p, protokoll.filter(e => !e.test)), true);

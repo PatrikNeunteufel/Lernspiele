@@ -103,6 +103,9 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .gruppe .gruppe { margin-bottom: 6px; }
 
 /* Erfolge: Wochenziel und Abzeichen (Entscheid L1 a, LERN_Session10) */
+.abzeichen-hinweis { display: flex; align-items: center; gap: 12px; padding: 10px 16px; margin-bottom: 14px; border-radius: var(--rund);
+  background: linear-gradient(160deg, #fff6d6, #ffe9a8); box-shadow: 0 3px 0 #e8c76a; color: var(--text); text-decoration: none; font-size: 16px; }
+.abzeichen-hinweis-bild { font-size: 36px; line-height: 1; }
 .woche { background: #fff; border-radius: var(--rund); box-shadow: var(--schatten); padding: 12px 16px; margin-bottom: 14px; }
 .woche.kompakt { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; cursor: pointer; }
 .woche-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; font-size: 17px; margin-bottom: 8px; }
