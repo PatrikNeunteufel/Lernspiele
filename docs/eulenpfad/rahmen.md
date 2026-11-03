@@ -598,3 +598,30 @@ Wunsch Patrik, Entscheide T1 a, T2 a, T3 a (LERN_Session9). **Hilfe** erklärt d
   (`pause-verdeckt`), die Pause zählt nicht zur Zeit der Aufgabe. Ein Tipp pausiert nicht.
 - **Testskript:** Tipps werden wie Hinweise geprüft („Hinweis verrät“); am Ende eine Liste „Ohne Tipps
   (ctx.tipp)“ je Spiel und Stufe (Übersicht, kein Fehler). Versteckte Knöpfe (`hidden`) tippt es nicht an.
+
+## 15. Lernplan und Erfolge
+
+Entscheid L1 a und Wunsch Patrik (Abzeichen zum Teilen, eigene Seite), LERN_Session10. Rechnen tut
+`spiele/gemeinsam/erfolge.js` (`ERFOLGE`), zeigen `start/erfolge.js` (Tab „🏅 Erfolge“). Alles entsteht aus dem
+Protokoll, den Endlos-Rekorden und den Meldungen; gespeichert werden nur zwei Profilfelder.
+
+- **Lernplan (Wochenziel):** Die Aufsicht setzt je Kind in der Verwaltung (Konten, Spalte 📅) Tage pro Woche und
+  Minuten je Tag (Vorgabe 3 × 10; Profilfeld `lernplan`, „aus“ = kein Ziel). Ein Tag ist erfüllt, wenn die Runden des
+  Tages zusammen die Minuten erreichen; eine Woche (Montag bis Sonntag) ist erfüllt, wenn genug Tage erfüllt sind.
+  Jede erfüllte Woche gibt einen **Wochenstern 🌟**, unabhängig von Fehlern und Tempo; die **Serie** zählt erfüllte
+  Wochen in Folge (die laufende Woche bricht sie nicht, solange sie läuft). `ERFOLGE.lernplan(profil, runden)` liefert
+  alle Wochen seit der ersten Runde. Das Kind sieht die Woche als sieben Tage (★ erfüllt, • gespielt, Rahmen = heute)
+  oben im Tab Spiele (kompakt, nur mit Ziel) und im Tab Erfolge; die Aufsicht sieht in der Statistik die letzten zwölf
+  Wochen als Reihe.
+- **Abzeichen:** 24 Stück in `ERFOLGE.ABZEICHEN` (Runden 1/10/50/100, drei Sterne, Sternensammler, Perfekt, Aus eigener
+  Kraft, Königsstufe, alle sechs Stufen, Spiel-Meister, Entdecker, Weltreisender, Vielseitig, Mathe-/Deutsch-Ass,
+  Forscher, Sprachtalent, Endlos-Läufer, Mix-Meister, Wochenstern, Dranbleiber, Fehlerfinder, Frühaufsteher). Jedes hat
+  `pruefe(k)` → `{ ist, soll, wann }`; erreicht ist es mit der Zeit der Runde, die es vollendet hat. Offene zeigen
+  einen Fortschrittsbalken. Neu erreichte tragen 🆕 (und der Tab „🏅 Erfolge 🆕“), bis das Kind den Tab öffnet
+  (Profilfeld `erfolgeGesehen`). Testrunden zählen nicht. Die Aufsicht sieht die Erfolge jedes Kindes (Auswahl wie in
+  der Statistik), ohne 🆕.
+- **Teilen (Annahme B1):** „📤 Teilen“ zeichnet das Abzeichen als PNG (Bild, Titel, Text, Vorname des Kindes, Datum,
+  „🦉 Eulenpfad“) und übergibt es dem Teilen-Dialog des Geräts (`navigator.share` mit Datei), sonst wird es
+  gespeichert. Nur auf Knopfdruck; es reist nur der Vorname mit, kein weiteres Profil. Datenschutz-Ausnahme in
+  `CLAUDE.md`.
+- **Neue Abzeichen** kommen in `ABZEICHEN` dazu, mit Id, Bild, Titel, Text und `pruefe`; mehr braucht es nicht.

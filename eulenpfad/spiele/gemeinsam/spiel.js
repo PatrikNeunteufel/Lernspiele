@@ -167,12 +167,15 @@ const LS = (() => {
   //   meineKlasse: Filter „🎒 Meine Klasse“ im Tab Spiele (K2 a); fehlt = an
   //   optionen: { <spiel-id>: { <option>: Wert } } — Spieloptionen aus def.optionen (UE1 a); fehlt = "stufe"
   //   vorlesen: "auto" | "knopf" | fehlt = nach Klasse (Kindergarten und 1. Klasse automatisch), siehe Vorlesen
+  //   lernplan: { tage, minuten } — Wochenziel, von der Aufsicht gesetzt (Entscheid L1 a, erfolge.js); fehlt = kein Ziel
+  //   erfolgeGesehen: [ids] — Abzeichen, die das Kind im Tab Erfolge schon gesehen hat (🆕 bis dahin)
   //   geaendert: { <feld>: ISO, angelegt: ISO } — setzt speichereProfil; beim Abgleich gewinnt je Feld der jüngere Stand
   const LEERES_PROFIL = {
     alter: null, klasse: null, fokus: [], rolle: "kind",
     reihenfolge: { global: "stufe", spiele: {} },
     timer: { an: false, faktor: 1, spiele: {} },
     favoriten: [], endlosAn: [], ansicht: "kacheln", zu: [], mix: null,
+    lernplan: null, erfolgeGesehen: [],
   };
 
   /** Vorgabezeit je Aufgabe aus dem Katalog (Sekunden), falls die Seite ihn geladen hat. */

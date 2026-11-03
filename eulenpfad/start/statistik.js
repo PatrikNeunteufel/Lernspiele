@@ -119,6 +119,23 @@ function zeichneStatistik(box, neu) {
       el("div", {}, el("h3", { text: "Wochentage (gesamt)" }), saeulen(lz.wochentage.map(t => ({ name: t.name, wert: t.minuten, titel: `${t.name}: ${minFormat(t.minuten)} in ${t.runden} Runden` })), minFormat, { hoehe: 90 })),
       el("div", {}, el("h3", { text: "Tageszeit (Uhr)" }), saeulen(lz.fenster.map(t => ({ name: t.name, wert: t.minuten, titel: `${t.name} Uhr: ${minFormat(t.minuten)} in ${t.runden} Runden` })), minFormat, { hoehe: 90 })))));
 
+  // ----- Lernplan: Wochen (Entscheid L1 a, LERN_Session10) — Regelmässigkeit für die Aufsicht -----
+  {
+    const plan = ERFOLGE.lernplan(p, runden);
+    const letzte = plan.wochen.slice(-12);
+    const wochenText = w => `${w.von.toLocaleDateString("de-CH", { day: "numeric", month: "numeric" })}`;
+    seite.append(karte(
+      el("h2", { text: "📅 Lernplan" }),
+      el("p", { class: "leise-text", style: "margin:0 0 8px", text: plan.plan
+        ? `Wochenziel: ${plan.plan.tage} Tage × ${plan.plan.minuten} Minuten · ${plan.sterne} Wochenstern${plan.sterne === 1 ? "" : "e"}, ${plan.serie} in Folge.`
+        : "Kein Wochenziel gesetzt (Verwaltung → Konten → 📅). Gezeigt werden die Tage mit Runden." }),
+      wochenKarte(plan),
+      letzte.length > 1 ? el("div", { class: "wochen-reihe" }, ...letzte.map(w => el("span", {
+        class: "wochen-punkt" + (w.erfuellt ? " erfuellt" : w.erfuellteTage ? " etwas" : "") + (w.laufend ? " laufend" : ""),
+        title: `Woche ab ${wochenText(w)}: ${w.erfuellteTage} Tag${w.erfuellteTage === 1 ? "" : "e"}${plan.plan ? (w.erfuellt ? ", Ziel erreicht" : ", Ziel nicht erreicht") : ""}`,
+      }, el("b", { text: wochenText(w) }), el("i", { text: w.erfuellt ? "🌟" : String(w.erfuellteTage) })))) : null));
+  }
+
   // ----- Konzentration -----
   const k = AUSWERTUNG.konzentration(runden);
   const zeitFormat = x => `${Math.round(x * 100)} %`;

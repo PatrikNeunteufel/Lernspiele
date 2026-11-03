@@ -5,6 +5,7 @@ const START_TABS = [
   { id: "spiele", text: "🎮 Spiele", zeichne: zeichneSpiele },
   { id: "profil", text: "👤 Profil", zeichne: zeichneProfil },
   { id: "statistik", text: "📊 Statistik", zeichne: zeichneStatistik },
+  { id: "erfolge", text: "🏅 Erfolge", zeichne: zeichneErfolge },
   { id: "verwaltung", text: "⚙️ Verwaltung", zeichne: zeichneVerwaltung, nurAufsicht: true },
 ];
 
@@ -58,6 +59,7 @@ function zeichneStart(mitAufsicht = null) {
   const zeichen = {
     statistik: !LS.istAufsicht(ich) && LS.ungeleseneMeldungen(ich).length ? " 🔔" : "",
     verwaltung: LS.meldungen().some(m => m.status === "neu") ? " 🙋" : "",
+    erfolge: !LS.istAufsicht(ich) && neueAbzeichen(ich) ? " 🆕" : "", // neue Abzeichen (LERN_Session10)
   };
   for (const t of START_TABS) {
     if (t.nurAufsicht && !LS.aufsichtAngemeldet()) continue;

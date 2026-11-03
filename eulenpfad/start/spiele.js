@@ -82,6 +82,13 @@ function zeichneSpiele(box, neu) {
   // Protokoll (AUSWERTUNG.bedarf in der empfohlenen Stufe); die Aufsicht sucht neutral.
   const protokoll = LS.protokoll().filter(e => e.name === name);
   const person = aufsicht ? null : { klasse, bedarf: id => AUSWERTUNG.bedarf(id, LS.empfohleneStufe(name, id) || "s3", protokoll, fokus) };
+  // Wochenziel des Lernplans (Entscheid L1 a, LERN_Session10): kompakt ganz oben, nur wenn die Aufsicht eines gesetzt hat.
+  if (!aufsicht && p.lernplan?.tage > 0) {
+    const w = wochenKarte(ERFOLGE.lernplan(p, protokoll.filter(e => !e.test)), true);
+    w.addEventListener("click", () => { location.hash = "#erfolge"; });
+    w.title = "Antippen: zu den Erfolgen";
+    box.append(w);
+  }
   const nurKlasse = !aufsicht && klasse !== null && p.meineKlasse !== false;
   if (!aufsicht && klasse !== null) nur.append(chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), LS.klasseText(klasse)));
   // Für die Aufsicht: nur, was noch zu prüfen ist — Spiel nicht angesehen oder eine eigene Inhaltsliste ungeprüft.

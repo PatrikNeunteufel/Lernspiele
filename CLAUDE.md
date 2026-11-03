@@ -62,6 +62,9 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
   nur auf ihren Knopfdruck an die Entwicklung — per E-Mail aus ihrem eigenen Mailprogramm oder als Bemerkung
   über den lokalen Entwickler-Server —, ohne den Namen des Kindes (Klasse, Aufgabe, Begründung). Zurück kommt
   nur `eulenpfad/meldungen-stand.json` (je Kennung Status und Antwort).
+  Ausnahme Abzeichen (Entscheid L1 a, Annahme B1, 2026-11-03): Ein Abzeichen aus dem Tab Erfolge verlässt den
+  Browser nur auf Knopfdruck des Kindes als Bild (Vorname, Titel, Datum) über den Teilen-Dialog des Geräts oder als
+  gespeicherte Datei.
   Keine weiteren Angaben (Nachname, Schule, Foto) erfassen.
 
 ## Projekt-Steckbrief

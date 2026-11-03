@@ -102,6 +102,41 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .gruppe .gruppe > summary { font-size: clamp(18px, 4vw, 21px); padding-left: 18px; }
 .gruppe .gruppe { margin-bottom: 6px; }
 
+/* Erfolge: Wochenziel und Abzeichen (Entscheid L1 a, LERN_Session10) */
+.woche { background: #fff; border-radius: var(--rund); box-shadow: var(--schatten); padding: 12px 16px; margin-bottom: 14px; }
+.woche.kompakt { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; cursor: pointer; }
+.woche-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; font-size: 17px; margin-bottom: 8px; }
+.woche.kompakt .woche-kopf { margin: 0; }
+.woche-tage { display: flex; gap: 6px; }
+.woche-tag { display: flex; flex-direction: column; align-items: center; width: 40px; padding: 4px 0; border-radius: 12px; background: #f1f2fb; font-size: 13px; font-weight: 800; color: var(--text-leise); }
+.woche-tag i { font-style: normal; font-size: 18px; min-height: 22px; line-height: 22px; }
+.woche-tag.etwas { color: var(--text); }
+.woche-tag.erfuellt { background: #fff1c2; color: #a86a00; }
+.woche-tag.heute { outline: 3px solid var(--knopf); outline-offset: -3px; }
+.woche-tag.zukunft { opacity: .45; }
+.woche-text { margin: 8px 0 0; font-weight: 700; }
+.woche.kompakt .woche-text { margin: 0; flex: 1 1 200px; font-size: 15px; }
+.erfolge .kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 12px; margin-top: 12px; }
+.erfolge .kachel { background: #f6f7fd; border-radius: 16px; padding: 12px 14px; }
+.erfolge .kachel .zahl { font-size: 32px; font-weight: 900; }
+.erfolge .kachel .was { font-size: 14px; color: var(--text-leise); font-weight: 700; }
+.abzeichen-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(170px, 100%), 1fr)); gap: 12px; margin-bottom: 12px; }
+.abzeichen { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 12px 10px; border-radius: 18px; background: #f6f7fd; }
+.abzeichen.erreicht { background: linear-gradient(160deg, #fff6d6, #ffe9a8); box-shadow: 0 3px 0 #e8c76a; }
+.abzeichen.neu { outline: 3px solid var(--knopf); }
+.abzeichen.offen .abzeichen-bild { filter: grayscale(1); opacity: .45; }
+.abzeichen-bild { font-size: 52px; line-height: 1.1; }
+.abzeichen p { margin: 0; font-size: 13px; color: var(--text-leise); }
+.abzeichen-datum, .abzeichen-stand { font-size: 13px; font-weight: 800; }
+.abzeichen-balken { width: 100%; height: 8px; border-radius: 4px; background: #e4e6f5; overflow: hidden; }
+.abzeichen-balken span { display: block; height: 100%; background: var(--knopf); }
+.wochen-reihe { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.wochen-punkt { display: flex; flex-direction: column; align-items: center; min-width: 48px; padding: 4px 6px; border-radius: 12px; background: #f1f2fb; font-size: 12px; font-weight: 800; color: var(--text-leise); }
+.wochen-punkt i { font-style: normal; font-size: 16px; }
+.wochen-punkt.etwas { color: var(--text); }
+.wochen-punkt.erfuellt { background: #fff1c2; color: #a86a00; }
+.wochen-punkt.laufend { outline: 3px solid var(--knopf); outline-offset: -3px; }
+
 /* Zufallsmix und Zufälliges Spiel: Karten wie die Spiele, unter dem Filter (LERN_Session10) */
 .spielkarte.zufall .stufenknoepfe { margin-top: 10px; }
 

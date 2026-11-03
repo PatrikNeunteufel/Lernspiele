@@ -116,6 +116,22 @@ function zeichneVerwaltung(box, neu) {
   }
 
   // ----- Konten -----
+  /** Lernplan je Kind (Entscheid L1 a, LERN_Session10): Tage pro Woche und Minuten je Tag, „aus“ = kein Wochenziel. */
+  function lernplanWahl(n, p) {
+    const plan = p.lernplan || { tage: 0, minuten: ERFOLGE.LERNPLAN_VORGABE.minuten };
+    const tage = el("select", { "aria-label": `Lernplan für ${n}: Tage pro Woche` },
+      el("option", { value: "0", text: "aus" }), ...ERFOLGE.LERNPLAN_TAGE.map(t => el("option", { value: String(t), text: `${t} Tag${t === 1 ? "" : "e"}/Woche` })));
+    const minuten = el("select", { "aria-label": `Lernplan für ${n}: Minuten je Tag` },
+      ...ERFOLGE.LERNPLAN_MINUTEN.map(m => el("option", { value: String(m), text: `${m} min/Tag` })));
+    tage.value = String(plan.tage || 0);
+    minuten.value = String(plan.minuten || ERFOLGE.LERNPLAN_VORGABE.minuten);
+    minuten.disabled = !(plan.tage > 0);
+    const setze = () => { LS.speichereProfil(n, { lernplan: { tage: Number(tage.value), minuten: Number(minuten.value) } }); neu(); };
+    tage.addEventListener("change", setze);
+    minuten.addEventListener("change", setze);
+    return el("span", { class: "zeile-knoepfe", title: "Wochenziel: so viele Tage mit so vielen Minuten — jede erfüllte Woche gibt einen Wochenstern" }, el("span", { text: "📅" }), tage, minuten);
+  }
+
   function konten() {
     const meldung = el("div", { class: "meldung", style: "text-align:left", "aria-live": "polite" });
     const kontoZeilen = LS.spielerListe().map(n => {
@@ -125,6 +141,7 @@ function zeichneVerwaltung(box, neu) {
       return el("tr", {},
         el("td", {}, el("b", { text: LS.spielerName(n) }), LS.klasseVon(p) !== null ? el("span", { class: "leise-text", text: ` · ${LS.klasseText(LS.klasseVon(p))}` }) : null),
         el("td", { text: p.rolle === "aufsicht" ? (p.pin ? "Aufsicht" : "Aufsicht (ohne PIN)") : "Kind" }),
+        el("td", {}, p.rolle === "aufsicht" ? null : lernplanWahl(n, p)),
         el("td", {}, el("div", { class: "zeile-knoepfe" },
           p.rolle === "aufsicht" ? el("span", { class: "zeile-knoepfe" }, pin,
             el("button", { type: "button", class: "schalter", text: "PIN setzen", onclick: async () => {
@@ -150,7 +167,7 @@ function zeichneVerwaltung(box, neu) {
       el("h2", { text: "Konten" }),
       el("p", { class: "leise-text", style: "margin-top:0", text: "Kinder melden sich ohne PIN an. Die Aufsicht braucht ihre PIN, sieht alle Spiele und Statistiken und spielt als Tester (Runden zählen nicht in der Statistik, im Spiel gibt es Testhilfen). Eine neue Aufsicht: als Kind anlegen, „→ Aufsicht“ und PIN setzen." }),
       el("div", { class: "tabelle-rahmen" }, el("table", {},
-        el("thead", {}, el("tr", {}, ...["Name", "Rolle", ""].map(t => el("th", { text: t })))),
+        el("thead", {}, el("tr", {}, ...["Name", "Rolle", "📅 Lernplan", ""].map(t => el("th", { text: t })))),
         el("tbody", {}, ...kontoZeilen))),
       el("h3", { text: "Neues Kind" }),
       el("div", { class: "pin-zeile", style: "justify-content:flex-start" }, neuName, neuKlasse, knopf("＋ Anlegen", anlegen, "gruen")),
