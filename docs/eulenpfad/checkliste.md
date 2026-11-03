@@ -5,7 +5,7 @@ wird im Entwickler-Modus (Spiel angesehen, Inhaltsliste geprüft; schreibt `eule
 Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
 `docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
-**Stand:** 165 Spiele gebaut, 2 Ideen offen · für Kinder frei: 38 von 165 · 6 von 109 neuen Spielen angesehen · 3 von 216 Inhaltslisten geprüft.
+**Stand:** 165 Spiele gebaut, 0 Ideen offen · für Kinder frei: 38 von 165 · 6 von 109 neuen Spielen angesehen · 3 von 216 Inhaltslisten geprüft.
 
 Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit
 Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.
@@ -127,10 +127,6 @@ Je gebautem Spiel:
 #### Zahlen ordnen
 
 - [x] ~~Folgen-Fortsetzer~~ — ersetzt: Zahlenfolgen übt der Muster-Fortsetzer (Stufen 5–6), den OP 4. Klasse (MA.3.A.3.d) die Preis-Tabelle
-
-#### Kombinieren
-
-- [ ] Glace-Kombinator — Idee, Klassen 2–6
 
 ### NMG
 
@@ -716,7 +712,6 @@ Je gebautem Spiel:
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Französische Parallelwörter (bekannt aus anderen Sprachen))
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
-- [ ] Mots-Match / Épeler — Idee, Klassen 5–6
 
 #### Alltag
 
