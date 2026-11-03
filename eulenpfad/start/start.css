@@ -112,7 +112,9 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 /* Erfolge: Wochenziel und Abzeichen (Entscheid L1 a, LERN_Session10) */
 .abzeichen-hinweis { display: flex; align-items: center; gap: 12px; padding: 10px 16px; margin-bottom: 14px; border-radius: var(--rund);
   background: linear-gradient(160deg, #fff6d6, #ffe9a8); box-shadow: 0 3px 0 #e8c76a; color: var(--text); text-decoration: none; font-size: 16px; }
-.abzeichen-hinweis-bild { font-size: 36px; line-height: 1; }
+.abzeichen-hinweis-bild { font-size: 36px; line-height: 0; display: inline-flex; }
+.abzeichen-frei { font-size: 13px; font-weight: 800; color: var(--deko-1); }
+.abzeichen .abzeichen-bild svg { width: 56px; height: 56px; }
 .woche { background: #fff; border-radius: var(--rund); box-shadow: var(--schatten); padding: 12px 16px; margin-bottom: 14px; }
 .woche.kompakt { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; cursor: pointer; }
 .woche-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; font-size: 17px; margin-bottom: 8px; }
@@ -278,6 +280,12 @@ button.stufenknopf { border: none; border-bottom: 4px solid var(--sf); font-fami
 .avatar-knopf { border: 3px solid transparent; background: #fff; border-radius: 50%; padding: 3px; cursor: pointer; line-height: 0; justify-self: center; }
 .avatar-knopf.an { border-color: var(--knopf); box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--knopf); }
 .avatar-farben { display: flex; gap: 10px; flex-wrap: wrap; }
+.avatar-saetze { display: flex; gap: 8px; flex-wrap: wrap; }
+.avatar-rahmen { display: flex; gap: 10px; flex-wrap: wrap; }
+.avatar-knopf { position: relative; }
+.avatar-knopf.gesperrt svg { filter: grayscale(1); opacity: .4; }
+.avatar-knopf.gesperrt { cursor: not-allowed; }
+.avatar-schloss, .avatar-neu { position: absolute; right: -2px; bottom: -2px; font-size: 20px; line-height: 1; }
 .avatar-farbe { width: 48px; height: 48px; border-radius: 50%; border: 5px solid var(--fr); background: var(--fh); cursor: pointer; }
 .avatar-farbe.an { box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--fr); }
 .kind-wahl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: -4px 0 14px; }

@@ -47,7 +47,18 @@ async function teileAbzeichen(a, name) {
   g.fillStyle = "#ffffff"; g.beginPath(); g.roundRect(40, 40, 720, 420, 36); g.fill();
   if (a.rang) { g.strokeStyle = RANG_FARBE[a.rang.id]; g.lineWidth = 10; g.beginPath(); g.roundRect(55, 55, 690, 390, 28); g.stroke(); }
   g.textAlign = "center"; g.fillStyle = farbe("--text");
-  g.font = "140px 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif"; g.fillText(a.bild, 400, 215);
+  // Symbol gezeichnet (AV5 a): auf jedem Gerät gleich, anders als ein Emoji
+  const svgBild = async (svg, x, y, b) => {
+    const bild = new Image();
+    bild.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" '));
+    await new Promise(f => { bild.onload = f; bild.onerror = f; });
+    if (bild.naturalWidth) g.drawImage(bild, x, y, b, b);
+    return !!bild.naturalWidth;
+  };
+  const symbol = AVATARE.motivSvg(`abz-${a.id}`, 150);
+  if (!symbol || !(await svgBild(symbol, 325, 85, 150))) {
+    g.font = "140px 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif"; g.fillText(a.bild, 400, 215);
+  }
   g.font = "900 44px 'Nunito', 'Segoe UI', sans-serif"; g.fillText(ERFOLGE.titelMitRang(a), 400, 290, 680);
   g.font = "600 24px 'Nunito', 'Segoe UI', sans-serif"; g.fillStyle = "#5b6080";
   g.fillText(a.text, 400, 332, 680);
@@ -55,13 +66,8 @@ async function teileAbzeichen(a, name) {
   g.font = "800 26px 'Nunito', 'Segoe UI', sans-serif"; g.fillStyle = farbe("--text");
   g.fillText(`${name} hat das geschafft · ${datum}`, 400, 390, 680);
   // Avatar oben links (AV3 a), als Bild aus dem SVG; ohne Avatar bleibt die Ecke leer.
-  const svg = AVATARE.svg(LS.profil(name).avatar, 110);
-  if (svg) {
-    const bild = new Image();
-    bild.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" '));
-    await new Promise(f => { bild.onload = f; bild.onerror = f; });
-    if (bild.naturalWidth) g.drawImage(bild, 70, 70, 110, 110);
-  }
+  const avatar = AVATARE.svg(LS.profil(name).avatar, 110);
+  if (avatar) await svgBild(avatar, 70, 70, 110);
   g.font = "800 20px 'Nunito', 'Segoe UI', sans-serif"; g.fillStyle = farbe("--deko-1");
   g.fillText("🦉 Eulenpfad", 400, 436);
   const blob = await new Promise(f => c.toBlob(f, "image/png"));
@@ -112,8 +118,9 @@ function zeichneErfolge(box, neu) {
   const balken = (ist, soll) => el("div", { class: "abzeichen-balken" }, el("span", { style: `width:${Math.round(100 * ist / soll)}%` }));
   const kachel = a => {
     const k = el("div", { class: "abzeichen" + (a.erreicht ? ` erreicht rang-${a.rang.id}` : " offen") + (a.neu ? " neu" : "") },
-      el("div", { class: "abzeichen-bild", text: a.bild }),
+      abzeichenBild(a, 56),
       el("b", { text: a.titel }),
+      a.stufe >= 3 ? el("span", { class: "abzeichen-frei", text: "🖼️ als Bild wählbar" }) : null,
       a.rang ? el("span", { class: "abzeichen-rang", text: `${a.rang.zeichen} ${a.rang.name}` }) : null,
       el("p", { text: a.text }),
       a.erreicht ? el("span", { class: "abzeichen-datum", text: (a.neu ? "🆕 " : "") + datum(a.erreicht) })
@@ -162,9 +169,31 @@ function zeichneErfolge(box, neu) {
   if (!aufsicht && erreicht.some(a => a.neu)) LS.speichereProfil(name, { erfolgeGesehen: erreicht.map(a => a.schluessel) });
 }
 
+/** Abzeichen eines Kindes (wie im Tab Erfolge). */
+function abzeichenVon(name) {
+  const runden = LS.protokoll().filter(e => e.name === name && !e.test);
+  const fehlerWann = LS.meldungenVon(name).filter(m => m.status === "behoben").map(m => m.zeit).sort().pop() || null;
+  return ERFOLGE.abzeichen(name, LS.profil(name), runden, LS.rekorde(), LS.gefundeneFehler(name), fehlerWann);
+}
+
 /** Für den Tab Spiele und die Tab-Leiste: gibt es neue Abzeichen fürs Kind? */
 function neueAbzeichen(name) {
-  const p = LS.profil(name);
-  const runden = LS.protokoll().filter(e => e.name === name && !e.test);
-  return ERFOLGE.abzeichen(name, p, runden, LS.rekorde(), LS.gefundeneFehler(name)).filter(a => a.neu).length;
+  return abzeichenVon(name).filter(a => a.neu).length;
+}
+
+/** Bilder und Rahmen, die die Abzeichen für den Avatar freigeschaltet haben (AV5 a, AV6 a). */
+const freischaltungenVon = name => ERFOLGE.freischaltungen(abzeichenVon(name));
+/** Noch nicht gesehene Freischaltungen (Hinweis „neu freigeschaltet“, bis das Kind das Profil öffnet). */
+function neueFreischaltungen(name) {
+  const gesehen = new Set(LS.profil(name).freiGesehen || []);
+  const f = freischaltungenVon(name);
+  return [...f.motive, ...f.rahmen].filter(x => !gesehen.has(x.schluessel)).map(x => ({ ...x, art: x.schluessel.startsWith("rahmen:") ? "rahmen" : "motiv" }));
+}
+
+/** Symbol eines Abzeichens: gezeichnet aus avatare.js (AV5 a), sonst das frühere Zeichen. */
+function abzeichenBild(a, groesse) {
+  const svg = AVATARE.motivSvg(`abz-${a.id}`, groesse);
+  const box = LS.el("div", { class: "abzeichen-bild" });
+  if (svg) box.innerHTML = svg; else box.textContent = a.bild;
+  return box;
 }

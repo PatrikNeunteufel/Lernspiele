@@ -5,29 +5,66 @@
 "use strict";
 
 let profilVon = null; // nur für die Aufsicht: wessen Profil gerade offen ist
+let avatarSatz = null; // gewählter Reiter der Bildwahl (nur Anzeige)
+let avatarNeu = null;  // { name, neu }: was beim ersten Öffnen neu freigeschaltet war; 🆕 bleibt bis zum Neuladen
 
-/** Avatar wählen: grosses Bild, darunter die Tiere in der gewählten Farbe und die Farben (AV2 a). */
-function avatarWahl(name, neu) {
+/**
+ * Avatar wählen (AV2 a, AV4 a–AV6 a): grosses Bild, Reiter je Satz (Tiere, Weltall und Technik, Fantasie, aus den
+ * Spielen, Abzeichen), die Motive in der gewählten Farbe, die Farben und die Rahmen. Abzeichen-Bilder ab Gold des
+ * Abzeichens, Rahmen ab dem ersten Abzeichen in Gold, Platin, Diamant; Gesperrtes steht mit 🔒 und dem Weg dahin.
+ */
+function avatarWahl(name, neu, alsKind) {
   const { el } = LS;
   const jetzt = AVATARE.zerlege(LS.profil(name).avatar);
-  const tier = jetzt?.tier.id || null;
+  const motiv = jetzt?.motiv.id || null;
   const farbe = jetzt?.farbe.id || AVATARE.FARBEN[0].id;
-  const setze = (t, f) => { LS.speichereProfil(name, { avatar: `${t}-${f}` }); LS.ton?.("tipp"); neu(); };
-  const knopf = (kennung, an, text, onclick) => {
-    const b = el("button", { type: "button", class: "avatar-knopf" + (an ? " an" : ""), "aria-pressed": String(an), "aria-label": text, title: text, onclick });
+  const rahmen = jetzt?.rahmen.id || "einfach";
+  const frei = freischaltungenVon(name);
+  const freiMotive = new Set(frei.motive.map(x => x.id));
+  const freiRahmen = new Set(["einfach", ...frei.rahmen.map(x => x.id)]);
+  // 🆕 für Neues: Öffnet das Kind die Bildwahl, gilt alles Freigeschaltete als gesehen (der Hinweis im Tab Spiele
+  // verschwindet); die Marken bleiben bis zum Neuladen, auch wenn das Kind Reiter wechselt. Die Aufsicht ändert nichts.
+  const gesehen = new Set(LS.profil(name).freiGesehen || []);
+  if (alsKind && avatarNeu?.name !== name) avatarNeu = { name, neu: new Set(frei.schluessel.filter(s => !gesehen.has(s))) };
+  if (alsKind && frei.schluessel.some(s => !gesehen.has(s))) LS.speichereProfil(name, { freiGesehen: frei.schluessel });
+  const neuFrei = s => (alsKind ? avatarNeu.neu.has(s) : !gesehen.has(s));
+  const setze = (m, f, r) => { LS.speichereProfil(name, { avatar: AVATARE.kennung(m, f, r) }); LS.ton?.("tipp"); neu(); };
+  const satz = AVATARE.SAETZE.find(s => s.id === avatarSatz) || AVATARE.SAETZE.find(s => s.motive.some(m => m.id === motiv)) || AVATARE.SAETZE[0];
+  const titelVon = id => ERFOLGE.ABZEICHEN.find(a => `abz-${a.id}` === id)?.titel || "";
+  const knopf = (kennung, an, offen, text, onclick, neuMarke) => {
+    const b = el("button", { type: "button", class: "avatar-knopf" + (an ? " an" : "") + (offen ? "" : " gesperrt"), "aria-pressed": String(an),
+      "aria-label": text, title: text, onclick: offen ? onclick : () => LS.ton?.("falsch") });
     b.innerHTML = AVATARE.svg(kennung, 64);
+    if (!offen) b.append(el("span", { class: "avatar-schloss", text: "🔒" }));
+    else if (neuMarke) b.append(el("span", { class: "avatar-neu", text: "🆕" }));
     return b;
   };
+  const motivKnopf = m => {
+    const offen = !satz.freischalten || freiMotive.has(m.id);
+    const text = offen ? m.name : `${m.name} — wählbar ab 🥇 Gold bei „${titelVon(m.id)}“`;
+    return knopf(AVATARE.kennung(m.id, farbe, rahmen), m.id === motiv, offen, text, () => setze(m.id, farbe, rahmen), satz.freischalten && neuFrei(`motiv:${m.id}`));
+  };
+  const RAHMEN_WEG = { gold: "ab dem ersten Abzeichen in 🥇 Gold", platin: "ab dem ersten Abzeichen in 🏆 Platin", diamant: "ab dem ersten Abzeichen in 💎 Diamant" };
   return el("div", { class: "avatar-wahl" },
     el("div", { class: "avatar-jetzt" }, LS.avatarBild(name, 120),
-      el("b", { text: jetzt ? `${LS.spielerName(name)} · ${jetzt.tier.name}` : "Tipp ein Tier an!" })),
-    el("div", { class: "avatar-tiere" }, ...AVATARE.TIERE.map(t => knopf(`${t.id}-${farbe}`, t.id === tier, t.name, () => setze(t.id, farbe)))),
+      el("b", { text: jetzt ? `${LS.spielerName(name)} · ${jetzt.motiv.name}` : "Tipp ein Bild an!" })),
+    el("div", { class: "avatar-saetze", role: "tablist" }, ...AVATARE.SAETZE.map(s => el("button", { type: "button", class: "chip", role: "tab",
+      "aria-pressed": String(s === satz), onclick: () => { avatarSatz = s.id; neu(); } },
+      s.freischalten ? `🏅 ${s.name}` : s.name, s.freischalten && s.motive.some(m => freiMotive.has(m.id) && neuFrei(`motiv:${m.id}`)) ? " 🆕" : ""))),
+    satz.freischalten ? el("p", { class: "leise-text", style: "margin:0", text: `Ein Abzeichen in 🥇 Gold schaltet sein Bild frei. Frei: ${freiMotive.size} von ${satz.motive.length}.` }) : "",
+    el("div", { class: "avatar-tiere" }, ...satz.motive.map(motivKnopf)),
     el("div", { class: "avatar-farben" }, ...AVATARE.FARBEN.map(f => {
       const b = el("button", { type: "button", class: "avatar-farbe" + (f.id === farbe ? " an" : ""), "aria-pressed": String(f.id === farbe),
-        "aria-label": f.name, title: f.name, onclick: () => setze(tier || AVATARE.TIERE[0].id, f.id) });
+        "aria-label": f.name, title: f.name, onclick: () => setze(motiv || AVATARE.SAETZE[0].motive[0].id, f.id, rahmen) });
       b.style.setProperty("--fh", f.hell);
       b.style.setProperty("--fr", f.rand);
       return b;
+    })),
+    el("b", { text: "Rahmen" }),
+    el("div", { class: "avatar-rahmen" }, ...AVATARE.RAHMEN.map(r => {
+      const offen = freiRahmen.has(r.id);
+      return knopf(AVATARE.kennung(motiv || AVATARE.SAETZE[0].motive[0].id, farbe, r.id), r.id === rahmen, offen,
+        offen ? `Rahmen ${r.name}` : `Rahmen ${r.name} — ${RAHMEN_WEG[r.id]}`, () => setze(motiv || AVATARE.SAETZE[0].motive[0].id, farbe, r.id), r.id !== "einfach" && neuFrei(`rahmen:${r.id}`));
     })));
 }
 
@@ -42,7 +79,7 @@ function zeichneProfil(box, neu) {
   const karte = el("section", { class: "karte profil" });
   box.append(karte);
   if (!aufsicht) {
-    karte.append(el("h2", { text: "🖼️ Mein Bild" }), avatarWahl(name, neu));
+    karte.append(el("h2", { text: "🖼️ Mein Bild" }), avatarWahl(name, neu, true));
     return;
   }
   const wahl = el("select", { "aria-label": "Profil von" }, ...LS.spielerListe().map(n => el("option", { value: n, text: LS.spielerName(n) })));

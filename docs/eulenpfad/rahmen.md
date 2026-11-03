@@ -314,9 +314,11 @@ Vorgabe Patrik 2026-10-31.
 - **Ablauf:** Aufgaben, bis die erste falsch ist oder, mit Timer, die Zeit um ist. Gezählt werden die
   richtig gelösten. Im Startbild des Spiels unter den Stufen „♾ Endlos“, mit dem eigenen Rekord;
   direkt über `?stufe=s3&endlos=1`.
-- **Welche Spiele:** Der Katalog nennt je Spiel die Stufen mit `endlos: [...]`. Ausgewählt sind
-  Spiele ohne Inhaltslisten, die ihre Aufgaben berechnen, in Stufen mit mindestens 100 verschiedenen
-  Aufgaben (gemessen in LERN_Session3). Bei Wortlisten wäre Endlos nur ein Durchlauf durch die Liste.
+- **Welche Spiele** (Entscheide EN1 a, EN2 a, LERN_Session12): Der Katalog nennt je Spiel die Stufen mit
+  `endlos: [...]` — jede Stufe mit mindestens 100 verschiedenen Aufgaben, mit Inhaltsliste oder ohne. Gezählt wird mit
+  der Kennung des Rahmens, die auch Wiederholungen erkennt (`LS.pruefung.zaehle`): Das Testskript misst je Stufe und
+  meldet einen Hinweis, wenn der Katalog davon abweicht (`ENDLOS_MIN` in `tools/pruefe_spiele.js`). Ist bei einer
+  Liste alles gestellt, endet die Runde mit „alles geschafft“; es zählen nur freie Listen (LP3 a).
 - **Wiederholungen:** keine der letzten 30 Aufgaben nochmal. Findet sich keine neue mehr, ist die
   Stufe „alles geschafft“.
 - **Timer im Endlos-Modus** (Wunsch Patrik 2026-10-31; Boden und Verlauf: Entscheide F1 a und F2 a,
@@ -713,8 +715,12 @@ Entscheide LP1 a, LP2 a, LP4 a, LP5 a (Patrik, LERN_Session11), LP3 a (Patrik, L
 Entscheide AV1–AV3, ST1, ST2, ZG1, RF1, VR1 a (Patrik, LERN_Session12); Konzept und offene Teile (VR2, VR3, Ziele der
 Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
 
-- **Avatar** (`spiele/gemeinsam/avatare.js`, auf jeder Seite vor `spiel.js` geladen): 16 gezeichnete Tiere auf 6
-  Hintergrundfarben (Deko-Farben, nie Stellenfarben), Kennung `<tier>-<farbe>` im Profilfeld `avatar`; keine Fotos.
+- **Avatar** (`spiele/gemeinsam/avatare.js`, auf jeder Seite vor `spiel.js` geladen): gezeichnete Motive in Sätzen
+  (16 Tiere; je 6 Weltall und Technik, Fantasie, aus den Spielen; 19 Abzeichen-Symbole) auf 6 Hintergrundfarben
+  (Deko-Farben, nie Stellenfarben) und 4 Rahmen; Kennung `<motiv>-<farbe>[-<rahmen>]` im Profilfeld `avatar`; keine
+  Fotos. Freigeschaltet (`ERFOLGE.freischaltungen`, AV5 a, AV6 a): das Symbol eines Abzeichens ab Gold, die Rahmen
+  Gold, Platin, Diamant ab dem ersten Abzeichen in diesem Rang. Neues meldet der Tab Spiele, bis das Kind die Bildwahl
+  öffnet (`freiGesehen`). Die Abzeichen zeigen dieselben Symbole statt Emoji, auch im geteilten Bild.
   `LS.avatarBild(name, groesse)` gibt das Bild als Element, ohne Avatar den Anfangsbuchstaben. Es steht vor dem Namen:
   Anmeldung (Kachel), Kopfzeile, Spielerzeile im Spiel, Endlos-Ranglisten, Namens-Chips der Aufsicht, Abzeichen-Bild.
 - **Profil:** Ein Kind sieht nur „Mein Bild“. Die Aufsicht setzt Alter, Klasse, Fokus und die Vorgaben für Vorlesen,

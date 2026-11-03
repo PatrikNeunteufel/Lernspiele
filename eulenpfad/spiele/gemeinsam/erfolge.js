@@ -212,5 +212,18 @@ const ERFOLGE = (() => {
   /** Titel mit Stufe: „Fleissig · 🥇 Gold“. */
   const titelMitRang = a => (a.rang ? `${a.titel} · ${a.rang.zeichen} ${a.rang.name}` : a.titel);
 
-  return { LERNPLAN_VORGABE, LERNPLAN_TAGE, LERNPLAN_MINUTEN, WOCHENTAGE, wochenStart, lernplan, RAENGE, ABZEICHEN, abzeichen, titelMitRang };
+  /**
+   * Was die Abzeichen für den Avatar freischalten (Entscheide AV5 a, AV6 a, LERN_Session12): das Symbol jedes
+   * Abzeichens ab Gold (Kennung „abz-<id>“ in avatare.js) und je einen Rahmen ab dem ersten Abzeichen in Gold, Platin,
+   * Diamant. liste: Ergebnis von abzeichen(). Schlüssel „motiv:<id>“ und „rahmen:<id>“ (für „neu freigeschaltet“).
+   */
+  function freischaltungen(liste) {
+    const GOLD = RAENGE.findIndex(r => r.id === "gold") + 1;
+    const motive = liste.filter(a => a.stufe >= GOLD).map(a => ({ id: `abz-${a.id}`, titel: a.titel, schluessel: `motiv:abz-${a.id}` }));
+    const hoechste = liste.reduce((m, a) => Math.max(m, a.stufe), 0);
+    const rahmen = RAENGE.slice(GOLD - 1).filter((r, i) => hoechste >= GOLD + i).map(r => ({ id: r.id, titel: r.name, schluessel: `rahmen:${r.id}` }));
+    return { motive, rahmen, schluessel: [...motive, ...rahmen].map(x => x.schluessel) };
+  }
+
+  return { LERNPLAN_VORGABE, LERNPLAN_TAGE, LERNPLAN_MINUTEN, WOCHENTAGE, wochenStart, lernplan, RAENGE, ABZEICHEN, abzeichen, titelMitRang, freischaltungen };
 })();

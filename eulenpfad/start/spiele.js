@@ -93,11 +93,25 @@ function zeichneSpiele(box, neu) {
   const person = aufsicht ? null : { klasse, bedarf: id => AUSWERTUNG.bedarf(id, LS.empfohleneStufe(name, id) || "s3", protokoll, fokus) };
   // Neue Abzeichen (LERN_Session10): ein Hinweis ganz oben, bis das Kind den Tab Erfolge öffnet.
   if (!aufsicht) {
-    const neue = ERFOLGE.abzeichen(name, p, protokoll, LS.rekorde(), LS.gefundeneFehler(name)).filter(a => a.neu);
+    const neue = abzeichenVon(name).filter(a => a.neu);
     if (neue.length) box.append(el("a", { class: "abzeichen-hinweis", href: "#erfolge" },
-      el("span", { class: "abzeichen-hinweis-bild", text: neue[0].bild }),
+      el("span", { class: "abzeichen-hinweis-bild" }, abzeichenBild(neue[0], 40)),
       el("span", {}, el("b", { text: (neue.length === 1 ? `Neues Abzeichen: ${ERFOLGE.titelMitRang(neue[0])}` : `${neue.length} neue Abzeichen: ${neue.map(ERFOLGE.titelMitRang).join(", ")}`) + (ERFOLGE.titelMitRang(neue[neue.length - 1]).endsWith("!") ? "" : "!") }),
         el("span", { class: "leise-text", text: " Antippen zum Ansehen." }))));
+    // Neu freigeschaltet (Wunsch Patrik, LERN_Session12): Bilder ab Gold eines Abzeichens, Rahmen ab dem ersten Gold,
+    // Platin, Diamant — bis das Kind das Profil öffnet.
+    const frei = neueFreischaltungen(name);
+    if (frei.length) {
+      const bilder = frei.filter(x => x.art === "motiv"), rahmen = frei.filter(x => x.art === "rahmen");
+      const teile = [bilder.length ? `${bilder.length === 1 ? "neues Bild" : `${bilder.length} neue Bilder`}: ${bilder.map(x => x.titel).join(", ")}` : null,
+        rahmen.length ? `${rahmen.length === 1 ? "neuer Rahmen" : `${rahmen.length} neue Rahmen`}: ${rahmen.map(x => x.titel).join(", ")}` : null].filter(Boolean);
+      const vorschau = bilder.length ? AVATARE.svg(AVATARE.kennung(bilder[0].id, "gelb", rahmen.at(-1)?.id), 40)
+        : AVATARE.svg(AVATARE.kennung(AVATARE.zerlege(p.avatar)?.motiv.id || "eule", AVATARE.zerlege(p.avatar)?.farbe.id || "gelb", rahmen.at(-1).id), 40);
+      const bild = el("span", { class: "abzeichen-hinweis-bild" });
+      bild.innerHTML = vorschau;
+      box.append(el("a", { class: "abzeichen-hinweis", href: "#profil" }, bild,
+        el("span", {}, el("b", { text: `Freigeschaltet — ${teile.join(" · ")}!` }), el("span", { class: "leise-text", text: " Im Profil wählbar." }))));
+    }
   }
   // Wochenziel des Lernplans (Entscheid L1 a, LERN_Session10): kompakt ganz oben, nur wenn die Aufsicht eines gesetzt hat.
   if (!aufsicht && p.lernplan?.tage > 0) {
@@ -187,10 +201,12 @@ function zeichneSpiele(box, neu) {
   // Zufälliges Spiel: die Eule zieht ein Spiel aus der gefilterten Auswahl; je Stufe ein Knopf.
   const gross = filter.stufe.length === 1;
   /** Karte ohne Thema; freie Stellen lösen `beiTipp` aus (wie bei den Spielkarten das Startbild). */
-  function zufallsKarte({ bild, name: titel, ziel, farbe, knoepfe, beiTipp, titelText }) {
-    const k = el("div", { class: "spielkarte zufall", title: titelText, "data-vorlesen": `${titel}. ${ziel}` });
+  function zufallsKarte({ bild, name: titel, ziel, farbe, knoepfe, beiTipp, titelText, schalter = null }) {
+    const k = el("div", { class: "spielkarte zufall" + (schalter?.an ? " endlos-an" : ""), title: titelText, "data-vorlesen": `${titel}. ${ziel}` });
     k.style.setProperty("--f", farbe);
     k.addEventListener("click", e => { if (!e.target.closest("a, button")) beiTipp(); });
+    if (schalter) k.append(el("div", { class: "karten-schalter-zeile" }, el("button", { type: "button", class: "karten-schalter" + (schalter.an ? " an" : ""),
+      "aria-pressed": String(schalter.an), "aria-label": schalter.text, title: schalter.text, onclick: schalter.onclick }, schalterSymbol("endlos", schalter.an))));
     k.append(el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: bild }), el("b", { class: "name", text: titel })),
       el("div", { class: "ziel", text: ziel }), el("div", { class: "stufenknoepfe" }, ...knoepfe));
     return k;
@@ -199,12 +215,15 @@ function zeichneSpiele(box, neu) {
   // dieselbe Gewichtung wie im Zufallsmix.
   const bedarf = (s, stufeId) => AUSWERTUNG.bedarf(s.id, stufeId, protokoll, fokus);
   const ziehe = AUSWERTUNG.ziehe;
-  const stufenZufall = st => auswahl.filter(s => s.stufen.includes(st.id));
-  const zufallsSpiel = st => { const s = ziehe(stufenZufall(st), x => bedarf(x, st.id)); location.href = `${s.pfad}?stufe=${st.id}`; };
+  // ♾ auf der Karte (Wunsch Patrik, LERN_Session12): dann nur Spiele, die in dieser Stufe Endlos anbieten, endlos gestartet.
+  const zufallEndlos = p.endlosAn.includes("zufall");
+  const stufenZufall = st => auswahl.filter(s => s.stufen.includes(st.id) && (!zufallEndlos || (s.endlos || []).includes(st.id)));
+  const zufallsSpiel = st => { const s = ziehe(stufenZufall(st), x => bedarf(x, st.id)); location.href = `${s.pfad}?stufe=${st.id}${zufallEndlos ? "&endlos=1" : ""}`; };
   const zufallsKnoepfe = LS.SKALA.filter(st => (!filter.stufe.length || filter.stufe.includes(st.id)) && stufenZufall(st).length).map(st => {
     const b = el("button", { type: "button", class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empfohlen && !gross ? " empfohlen" : ""),
-      "data-vorlesen": `Zufälliges Spiel, Stufe ${st.nr}, ${st.name}.`, title: `Stufe ${st.nr} · ${st.name}: ein zufälliges Spiel aus deiner Auswahl`,
-      onclick: () => zufallsSpiel(st) }, el("span", { class: "stufen-text" }, st.icon, gross ? ` Stufe ${st.nr} spielen` : `${st.nr}`), el("span", { class: "s" }));
+      "data-vorlesen": `Zufälliges Spiel, Stufe ${st.nr}, ${st.name}${zufallEndlos ? ", endlos" : ""}.`,
+      title: `${zufallEndlos ? "♾ Endlos · " : ""}Stufe ${st.nr} · ${st.name}: ein zufälliges Spiel aus deiner Auswahl`,
+      onclick: () => zufallsSpiel(st) }, el("span", { class: "stufen-text" }, zufallEndlos ? schalterSymbol("endlos", true) : st.icon, gross ? ` Stufe ${st.nr} spielen` : `${st.nr}`), el("span", { class: "s" }));
     b.style.setProperty("--sf", st.farbe);
     return b;
   });
@@ -240,10 +259,19 @@ function zeichneSpiele(box, neu) {
     ziel: "Aufgaben aus vielen Spielen gemischt — du stellst ein, wie schwer, wie lang und ob mit Timer.",
     titelText: "Antippen: zur Mix-Seite", beiTipp: () => { location.href = "mix.html"; },
     knoepfe: [el("a", { class: "stufenknopf gross", href: "mix.html", "data-vorlesen": "Zufallsmix einstellen und los." }, el("span", { class: "stufen-text", text: "🎲 Einstellen und los" }))] }));
-  if (zufallsKnoepfe.length) zufallsKarten.push(zufallsKarte({ bild: "🎯", name: "Zufälliges Spiel", farbe: "var(--deko-6)",
-    ziel: "Die Eule zieht ein Spiel aus deiner Auswahl — eher eines, das du noch üben solltest.",
-    titelText: "Antippen: Startbild eines zufälligen Spiels", knoepfe: zufallsKnoepfe,
-    beiTipp: () => { const st = LS.SKALA.find(x => x.id === (gross ? filter.stufe[0] : empfohlen)) || LS.SKALA[2]; const s = ziehe(auswahl, x => bedarf(x, st.id)); location.href = s.pfad; } }));
+  // Die Karte bleibt auch mit ♾ ohne passendes Spiel stehen, damit der Schalter erreichbar ist.
+  if (zufallsKnoepfe.length || (zufallEndlos && auswahl.length)) zufallsKarten.push(zufallsKarte({ bild: "🎯", name: "Zufälliges Spiel", farbe: "var(--deko-6)",
+    ziel: zufallEndlos ? "Die Eule zieht ein Endlos-Spiel aus deiner Auswahl: so viele Aufgaben wie möglich ohne Fehler."
+      : "Die Eule zieht ein Spiel aus deiner Auswahl — eher eines, das du noch üben solltest.",
+    titelText: "Antippen: Startbild eines zufälligen Spiels",
+    knoepfe: zufallsKnoepfe.length ? zufallsKnoepfe : [el("span", { class: "leise-text", text: "Kein Endlos-Spiel in dieser Auswahl." })],
+    schalter: { an: zufallEndlos, text: zufallEndlos ? "Endlos aus" : "Endlos ein: ein zufälliges Spiel im Endlos-Modus",
+      onclick: () => speichere({ endlosAn: zufallEndlos ? p.endlosAn.filter(x => x !== "zufall") : [...p.endlosAn, "zufall"] }) },
+    beiTipp: () => {
+      const st = LS.SKALA.find(x => x.id === (gross ? filter.stufe[0] : empfohlen)) || LS.SKALA[2];
+      const s = ziehe(zufallEndlos ? stufenZufall(st) : auswahl, x => bedarf(x, st.id));
+      if (s) location.href = s.pfad;
+    } }));
   if (zufallsKarten.length) box.append(el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") }, ...zufallsKarten));
 
   /** Auf- und zuklappbare Gruppe; der Zustand landet im Profil. */

@@ -423,6 +423,54 @@ for (const id of ids) {
     fehlerZahl += m.length;
   }
 }
+// Endlos-Stufen (Entscheide EN1 a, EN2 a, LERN_Session12): Endlos gibt es in jeder Stufe mit mindestens ENDLOS_MIN
+// verschiedenen Aufgaben, mit Inhaltsliste oder ohne. Gezählt wird mit der Kennung des Rahmens (wie gegen
+// Wiederholungen, LS.pruefung.zaehle), als Aufsicht mit allen Listen. Weicht der Katalog ab, ist das ein Hinweis.
+const ENDLOS_MIN = 100;
+const ENDLOS_ZUEGE = 3000;
+/** Verschiedene Aufgaben einer Stufe (höchstens ENDLOS_MIN, dann bricht die Messung ab); null, wenn nichts gezogen wurde. */
+function messeStufe(id, stufe) {
+  const seitenPfad = path.join(SPIELE_DIR, id, "index.html");
+  const html = fs.readFileSync(seitenPfad, "utf8");
+  const body = (html.match(/<body[^>]*>([\s\S]*)<\/body>/) || [, html])[1].replace(/<script[\s\S]*?<\/script>/g, "");
+  const kontext = vm.createContext({ __seite: { html: body, search: "?stufe=" + stufe, seed: opt.seed }, console: { log() {}, warn() {}, error() {} }, URL, URLSearchParams, structuredClone });
+  const lauf = (code, name) => vm.runInContext(code, kontext, { filename: name, timeout: 60000 });
+  lauf(DOM, "pruef_dom.js");
+  lauf(`localStorage.setItem("lernspiele:profile", JSON.stringify({ Testlauf: { rolle: "aufsicht" } }));
+     localStorage.setItem("lernspiele:spieler", JSON.stringify("Testlauf")); sessionStorage.setItem("lernspiele:aufsicht", "Testlauf");
+     var __messung = { verschieden: new Set(), zuege: 0 };`, "vorbereitung");
+  for (const s of skripte(seitenPfad, html)) {
+    lauf(s.code, s.name);
+    if (/gemeinsam[\\/]spiel\.js$/.test(s.name)) lauf(`LS.pruefung.zaehle = k => { if (k) __messung.verschieden.add(k); __messung.zuege++;
+      return __messung.verschieden.size < ${ENDLOS_MIN} && __messung.zuege < ${ENDLOS_ZUEGE}; };`, "messung");
+  }
+  for (let i = 0; i < 20 && !lauf("__messung.zuege", "stand"); i++) lauf("__uhr.weiter(1000)", "uhr");
+  return lauf("__messung.zuege", "stand") ? lauf("__messung.verschieden.size", "ergebnis") : null;
+}
+if (opt.endlosMessen !== 0) {
+  const kat = vm.createContext({ LS: { SKALA: [] } });
+  vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", "katalog.js"), "utf8") + ";this.SPIELE = SPIELE;", kat);
+  console.log(`\nEndlos-Stufen (ab ${ENDLOS_MIN} verschiedenen Aufgaben):\n`);
+  let abweichend = 0;
+  for (const s of kat.SPIELE.filter(x => ids.includes(x.id))) {
+    const passt = [], fehlt = [], zuViel = [], ungemessen = [];
+    for (const st of s.stufen) {
+      let n;
+      try { n = messeStufe(s.id, st); } catch { n = null; }
+      const hat = (s.endlos || []).includes(st);
+      if (n == null) ungemessen.push(st);
+      else if (n >= ENDLOS_MIN) (hat ? passt : fehlt).push(st);
+      else if (hat) zuViel.push(`${st}:${n}`);
+    }
+    if (fehlt.length || zuViel.length) {
+      abweichend++;
+      console.log(`    hinweis ${s.id}: Katalog endlos` + (fehlt.length ? ` — fehlt ${fehlt.join(" ")}` : "") + (zuViel.length ? ` — unter ${ENDLOS_MIN}: ${zuViel.join(" ")}` : "")
+        + ` → endlos: [${[...passt, ...fehlt].sort().map(x => `"${x}"`).join(", ")}]`);
+    }
+    if (ungemessen.length) console.log(`    hinweis ${s.id}: nicht messbar in ${ungemessen.join(" ")} (keine Aufgabe gezogen)`);
+  }
+  if (!abweichend) console.log("✓ Katalog endlos stimmt mit der Messung überein");
+}
 // Geprüfte Listen unverändert? (LP3-H a, LERN_Session12): Wer eine Liste mit pruefung.js nach der Prüfung ändert,
 // muss die geänderten Einträge in der Prüfansicht neu abhaken — sonst wäre sie mit Ungeprüftem für Kinder frei.
 {

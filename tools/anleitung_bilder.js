@@ -168,7 +168,9 @@ async function einrichten() {
     LS.neuerSpieler("Muster Kind", { rolle: "kind", alter: 10, klasse: 4 });
     LS.neuerSpieler("Muster Kind 2", { rolle: "kind", alter: 9, klasse: 4 });
     LS.neuerSpieler("Muster Kind 3", { rolle: "kind", alter: 11, klasse: 5 });
-    LS.speichereProfil("Muster Kind", { lernplan: { tage: 3, minuten: 10 } });
+    LS.speichereProfil("Muster Kind", { lernplan: { tage: 3, minuten: 10 }, avatar: "fuchs-tuerkis" });
+    LS.speichereProfil("Muster Kind 2", { avatar: "panda-gelb" });
+    LS.speichereProfil("Muster Kind 3", { avatar: "frosch-lila" });
     ${BEISPIELRUNDEN}
     ${BEISPIELREKORDE}
     localStorage.removeItem("lernspiele:spieler");`);
@@ -234,6 +236,13 @@ async function aufsicht() {
   await rahmen([{ css: ".einstellung .zeile-knoepfe" }, { css: ".einstellung-spiele" }, { text: "Alles auf Standard" }]);
   await bild("a08-einstellungen", { maxHoehe: 1000 });
 
+  // Profil eines Kindes: Vorgaben mit „fest“ (VR1 a, LERN_Session12); das Kind hat beim Timer selbst gewählt
+  await js(`LS.waehleTimer("Muster Kind", "runden-rutsche", true);`);
+  await gehe("/eulenpfad/index.html#profil");
+  await js(`const s = document.querySelector('select[aria-label="Profil von"]'); s.value = "Muster Kind"; s.dispatchEvent(new Event("change")); await new Promise(r => setTimeout(r, 400));`);
+  await rahmen([{ css: ".profil summary" }, { css: ".kind-wahl" }, { text: "Auf Vorgabe zurück" }]);
+  await bild("a19-profil", { maxHoehe: 1300 });
+
   await js(`LS.setzeSpieler?.("Muster Kind");`);
   await alsAufsicht();
   await gehe("/eulenpfad/index.html#statistik");
@@ -273,7 +282,13 @@ async function kind() {
   await bild("k01-anmelden", { maxHoehe: 844 });
 
   await alsKind();
+  // Mein Bild (AV1 a, LERN_Session12)
+  await gehe("/eulenpfad/index.html#profil");
+  await rahmen([{ css: ".avatar-tiere" }, { css: ".avatar-farben" }]);
+  await bild("k13-bild", { maxHoehe: 1100 });
+
   await gehe("/eulenpfad/index.html#spiele");
+  await rahmen([{ css: ".weiter-zeile", wennDa: true }]);
   await bild("k02-spiele", { maxHoehe: 1400 });
 
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html");

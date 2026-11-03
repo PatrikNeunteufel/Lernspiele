@@ -52,8 +52,8 @@ const rekordKennung = e => LS.MIX_PRAEFIX + auswahlSchluessel(e);
 
 /**
  * Spiele, die zur Einstellung passen, je mit ihrer Stufe: frei für das Kind, im gewählten Fach und Fokus,
- * die Stufe angeboten — „passend“ ist die empfohlene Stufe je Spiel (sonst 3) —, im Endlos-Mix nur
- * Stufen mit Endlos-Modus (Katalog endlos).
+ * die Stufe angeboten — „passend“ ist die empfohlene Stufe je Spiel (sonst 3). Der Endlos-Mix nimmt alle Spiele
+ * (Wunsch Patrik, LERN_Session12): dasselbe Spiel folgt nur begrenzt aufeinander, ist es erschöpft, kommen die anderen.
  */
 const fachVon = s => THEMEN.find(t => t.id === s.thema)?.fach;
 
@@ -62,13 +62,13 @@ function kandidaten(name, e, auchGesperrte = false) {
   const sichtbar = s => auchGesperrte || LS.spielSichtbar(s.id);
   if (e.check) return SPIELE.filter(s => sichtbar(s) && UEBERTRITT.faecher.includes(fachVon(s)))
     .map(s => ({ s, stufe: UEBERTRITT.stufeNachAbstand[UEBERTRITT.klasse - s.klasse] }))
-    .filter(x => x.stufe && x.s.stufen.includes(x.stufe) && (!istEndlos(e) || (x.s.endlos || []).includes(x.stufe)));
+    .filter(x => x.stufe && x.s.stufen.includes(x.stufe));
   const fokus = LS.profil(name).fokus;
   return SPIELE.filter(s => sichtbar(s)
       && (!e.faecher.length || e.faecher.includes(fachVon(s)))
       && (!e.fokus || s.lernziele.some(l => fokus.includes(l.lz))))
     .map(s => ({ s, stufe: e.stufe === "passend" ? LS.empfohleneStufe(name, s.id) || "s3" : e.stufe }))
-    .filter(x => x.s.stufen.includes(x.stufe) && (!istEndlos(e) || (x.s.endlos || []).includes(x.stufe)));
+    .filter(x => x.s.stufen.includes(x.stufe));
 }
 
 function ohneAnmeldung() {

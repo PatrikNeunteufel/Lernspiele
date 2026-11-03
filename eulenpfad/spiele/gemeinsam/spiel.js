@@ -2521,6 +2521,7 @@ const LS = (() => {
         for (let versuch = 0; ; versuch++) {
           def.aufgabe(ctx);
           const k = kennung(flaeche, loesungVorab, eigeneKennung);
+          const messen = !!pruefung.zaehle?.(k); // nur das Testskript: weiter ziehen, nichts stellen
           const n = k ? gestellt.get(k) || 0 : 0;
           const zuLang = serieZuLang();
           // Stufen der Suche (das Spiel zieht zufällig; die Menge der möglichen Aufgaben kennt der Rahmen nicht):
@@ -2533,7 +2534,7 @@ const LS = (() => {
           const ungestellt = n === 0 && (!fp || !gedaechtnis.has(fp));
           if (ungestellt) sahUngestellt = true;
           const stufeSuche = versuch < VERSUCHE.serie ? 1 : versuch < VERSUCHE.gedaechtnis ? 2 : versuch < VERSUCHE.erzwingen ? 3 : versuch < VERSUCHE.durchgang ? 4 : 5;
-          const passt = endlos ? (!k || !zuletzt.includes(k)) && (!zuLang || versuch >= SERIE_VERSUCHE)
+          const passt = messen ? false : endlos ? (!k || !zuletzt.includes(k)) && (!zuLang || versuch >= SERIE_VERSUCHE)
             : stufeSuche === 1 ? ungestellt && !zuLang
             : stufeSuche === 2 ? n === 0 && !zuLang
             : stufeSuche === 3 ? ungestellt
@@ -2571,7 +2572,7 @@ const LS = (() => {
             }), 300);
             break;
           }
-          if (versuch >= VERSUCHE.ende) {
+          if (versuch >= VERSUCHE.ende && !messen) {
             clearTimeout(uhr);
             // Mix: Das Spiel hat keine neue Aufgabe mehr; der Mix nimmt dann die anderen.
             if (mix) { flaeche.innerHTML = ""; return anMix({ typ: "erschoepft" }); }
@@ -2748,7 +2749,8 @@ const LS = (() => {
     if (adresse.get("mix") === "1" && parent !== window) {
       document.body.classList.add("im-mix");
       const endlos = adresse.get("endlos") === "1";
-      if (!direkt || !aktuellerSpieler() || !spielSichtbar(def.id) || (endlos && !endlosStufen(def.id).includes(direkt.id)))
+      // Endlos im Mix in jeder Stufe (Wunsch Patrik, LERN_Session12): ein Spiel stellt dort nur wenige Aufgaben am Stück.
+      if (!direkt || !aktuellerSpieler() || !spielSichtbar(def.id))
         return parent.postMessage({ lern: "mix", spiel: def.id, typ: "geht-nicht" }, "*");
       return runde(direkt, endlos, { timer: adresse.get("timer") === "1" });
     }
@@ -2772,8 +2774,11 @@ const LS = (() => {
    * (art "aufgabe", { nr }; nach der Wiederholungsprüfung art "gestellt", { nr, kennung })
    * und jede Antwort (art "richtig" oder "falsch";
    * angaben { nr, hinweis, loesung, aufgeloest, flaeche, vorab }).
+   * pruefung.zaehle(kennung) misst, wie viele verschiedene Aufgaben eine Stufe hat (Entscheid EN1 a, LERN_Session12):
+   * Solange sie true gibt, zieht der Rahmen neu, ohne eine Aufgabe zu stellen — mit derselben Kennung wie gegen
+   * Wiederholungen.
    */
-  const pruefung = { haken: null };
+  const pruefung = { haken: null, zaehle: null };
 
   /**
    * CSS-Klassen des Rahmens (Vertrag in docs/rahmen.md; einzige Liste, das Testskript liest sie hier).

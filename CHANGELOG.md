@@ -382,3 +382,25 @@
   `antwortenNachBlitz`; Blitzlesen, Punkte-Blitz, Finger-Zähler); die Uhr startet erst dann.
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session11_2026-11-03.md`; Tests „Keine Fehler.“ über alle 168 Spiele.
 - Nach dem Abschluss, DD1 a: Diagramm-Detektiv heisst **Daten-Detektiv** (zeigt Strichlisten, Tabellen und Säulendiagramme, Lehrplan MA.3.C.1 Daten); Kennung `diagramm-detektiv` bleibt, Checkliste ordnet die Idee unter dem alten Namen zu.
+
+## 2026-11-03 — LERN_Session12
+- Meldung 8: Ziffernkarten nennen „Vorne darf keine 0 stehen.“ gleich unter der Aufgabe, im Ergebnis und in der
+  Einleitung; Antwort in `meldungen-stand.json`.
+- LP3 a: Eine Liste geht erst ganz geprüft in die Aufgaben. LP3-H a: `tools/listen_fingerabdruck.js`; Testskript
+  meldet nach der Prüfung geänderte Listen als Fehler, die Checkliste führt sie wieder als zu prüfen.
+- Profil für Kinder (AV1–AV6, ST1, ST2, ZG1, RF1, VR1; konzept_profil_kind.md, rahmen.md 18): Kind sieht nur „Mein
+  Bild“; Avatare (`avatare.js`) in fünf Sätzen auf 6 Farben mit 4 Rahmen, vor dem Namen überall; Abzeichen-Symbole
+  gezeichnet (auch im Tab Erfolge und im geteilten Bild), ab Gold als Bild wählbar; Rahmen Gold/Platin/Diamant ab dem
+  ersten Abzeichen in diesem Rang; Hinweis „Freigeschaltet“ im Tab Spiele, 🆕 und 🔒 in der Bildwahl.
+- Wahl des Kindes (Stufenwahl, Spielkarte) getrennt von der Vorgabe der Aufsicht, mit „🔒 fest“ und „↺ Auf Vorgabe
+  zurück“ (VR1 a); vorher überschrieb das Kind die Vorgabe still. Profil der Aufsicht: „wie global“.
+- Schalter Reihenfolge auf den Karten von Zahlen-Baukasten und Zahlenrätsel-Tresor; „▶️ Weiterspielen“ im Tab Spiele;
+  Statistik des Kindes mit vier Karten; „🏆 Meine Podestplätze“ im Tab Erfolge.
+- Endlos (EN1 a, EN2 a): jede Stufe ab 100 verschiedenen Aufgaben, mit Liste oder ohne, gemessen mit der Kennung des
+  Rahmens (`LS.pruefung.zaehle`, Testskript meldet Abweichungen); Katalog 129 statt 63 Spiele. Endlos beim Zufälligen
+  Spiel (♾ auf der Karte), Endlos-Mix mit allen Spielen.
+- Fix: Eine neue Rahmenfunktion `waehle` verdeckte die zufällige Auswahl (`LS.waehle`); umbenannt in `setzeWahl`,
+  das Testskript meldet doppelte Namen in `spiel.js`.
+- Anleitungen: Bildwahl, Profil der Aufsicht, Hinweis zu PINs, Endlos bei Zufall und Mix; Bilder a19, k13 neu.
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session12_2026-11-03.md`; letzter Testlauf nach 168 Spielen × 6 Stufen
+  ohne Fehler abgebrochen, Endlos, Mix und Kind-Läufe ungeprüft.

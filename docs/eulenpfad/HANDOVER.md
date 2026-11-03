@@ -1,7 +1,15 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
-**2026-11-03, nach LERN_Session11** ([Report](report/LERN_Session11_2026-11-03.md)):
+**2026-11-04, nach LERN_Session12** ([Report](report/LERN_Session12_2026-11-03.md)):
+- **Profil für Kinder** (konzept_profil_kind.md, rahmen.md 18): Kind sieht nur „Mein Bild“; Avatare in fünf Sätzen
+  mit Farben und Rahmen, Abzeichen-Symbole ab Gold und Rahmen ab dem ersten Gold/Platin/Diamant freigeschaltet;
+  Wahl des Kindes getrennt von der Vorgabe der Aufsicht mit „fest“; Weiterspielen; Statistik des Kindes; Podestplätze.
+- **Endlos** in jeder Stufe ab 100 verschiedenen Aufgaben (Messung mit der Kennung im Testskript): 129 Spiele; dazu
+  beim Zufälligen Spiel, Endlos-Mix mit allen Spielen.
+- **Tests:** letzter Lauf abgebrochen nach 168 Spielen × 6 Stufen ohne Fehler; Endlos, Mix, Kind ungeprüft.
+
+Stand nach LERN_Session11 ([Report](report/LERN_Session11_2026-11-03.md)):
 - **Spiele:** 168 (drei Strategie-Rätsel mit Regelseite, LERN-49). Katalogfeld `art`, Sortierung im Tab Spiele,
   Spieltabelle im Portal (`portal/eulenpfad-spiele.html`).
 - **Prüfung je Eintrag** (rahmen.md 17): Prüfansicht mit Haken je Eintrag, Gruppen und Bemerkungen; je Spiel eine
@@ -74,15 +82,18 @@ Stand nach LERN_Session8 ([Report](report/LERN_Session8_2026-11-02.md)):
 
 **Nächste Session — Plan:**
 1. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
-2. Entscheid **LP3**: Inhalte einer Liste erst in die Aufgaben, wenn sie ganz geprüft ist (heute so), oder teilweise.
-3. **LP5 / LERN-51:** alle Listen überarbeiten — je Spiel `pruefung.js`, gemischte Listen trennen (Au café: Dialog
-   eigene Liste, „Personen und Sachen“), Bau mit Agenten nach festem Regelwerk; danach `tools/pruefliste_wortlisten.js`
-   auf `pruefung.js` umstellen und das Testskript `pruefung.js` prüfen lassen.
-4. **VL1 a / LERN-52:** zweisprachiges Vorlesen, Pilot Au café (Sprachwechsel messen).
-5. **Gruppen bauen** (LERN-48).
-6. Patrik: Strategie-Rätsel ansehen und freigeben (LERN-49), Beitrags-Links eintragen (LERN-50), Annahmen
-   Runde B/C (LERN-43), Teilen eines Abzeichens auf Geräten (LERN-46), Vorlesen anhören (LERN-37).
-7. Weiter offen: LERN-45, LERN-35, LERN-39, LERN-40, LERN-41, LERN-31, LERN-4, LERN-33.
+2. Testlauf über alles (`node tools/pruefe_spiele.js`) — der letzte wurde nach den Spielen × Stufen abgebrochen;
+   Endlos-Modus (jetzt 129 Spiele), Zufallsmix und Läufe als Kind stehen aus. Danach Bilder der Anleitungen neu
+   (`node tools/anleitung_bilder.js`, Server 8765).
+3. **Entscheid PIN1** (LERN-53): Wiederherstellungscode beim Einrichten der PIN, statt Code per E-Mail.
+4. **LP5 / LERN-51:** alle Listen auf `pruefung.js` umstellen, gemischte Listen trennen; danach
+   `tools/pruefliste_wortlisten.js` auf `pruefung.js` umstellen.
+5. Avatare auch in Verwaltung → Konten; VR2, VR3 und Ziele der Klasse mit den Gruppen (LERN-48).
+6. **VL1 a / LERN-52:** zweisprachiges Vorlesen, Pilot Au café.
+7. Patrik: Spieler mit Farbcodes (aus dem Namensfehler `waehle`) im eigenen Browser löschen; Strategie-Rätsel
+   freigeben (LERN-49), Beitrags-Links (LERN-50), Annahmen Runde B/C (LERN-43), Teilen auf Geräten (LERN-46),
+   Vorlesen anhören (LERN-37).
+8. Weiter offen: LERN-45, LERN-35, LERN-39, LERN-40, LERN-41, LERN-31, LERN-4, LERN-33.
 
 Technik: HTML/CSS/JS ohne Build (Entscheid LERN-1). Vertrag zwischen Rahmen und Spielen: [rahmen.md](rahmen.md).
 Übersicht aller Spiele und was zu prüfen ist: [checkliste.md](checkliste.md) (erzeugt mit `node tools/checkliste.js`). Gemeinsamer Rahmen `spiele/gemeinsam/`:
@@ -180,10 +191,12 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-43 | Fachlich unsichere Stellen aus LERN_Session10 prüfen (Annahmen Runde B und C, ZU-PRÜFEN-Köpfe der 13 Inhaltsdateien) | offen | lernziele/lehrplan_sg_session10.md; Report LERN_Session10, Plan 1 |
 | LERN-44 | Lernplan: Wochenziel je Kind, Wochenstern, Tab Erfolge mit Abzeichen und Teilen (R2, Entscheid L1 a) | erledigt 2026-11-03 (LERN_Session10) | rahmen.md Abschnitt 15 |
 | LERN-45 | Rahmen-Baustein „Fragenfolge“ (mehrere Fragen je Aufgabe), danach sechs Spiele darauf umstellen | offen | Report LERN_Session10, Stolperfallen |
-| LERN-46 | Teilen eines Abzeichens auf Tablet und Handy prüfen (Teilen-Dialog, Emoji im PNG) | offen | start/erfolge.js, `teileAbzeichen` |
+| LERN-46 | Teilen eines Abzeichens auf Tablet und Handy prüfen (Teilen-Dialog, Bild im PNG) | offen | start/erfolge.js, `teileAbzeichen`; seit LERN_Session12 gezeichnete Symbole statt Emoji |
 | LERN-47 | Weitere Sektion im Portal für ein Publikum ausserhalb der Schulstufen, Arbeitsname „Eulerpfad“ (R1 a) | später | Report LERN_Session11 |
 | LERN-48 | Gruppen: Familie, Klasse, Lerngruppe; Rolle Lehrperson, Klassenstatistik, Abgleich je Gruppe verschlüsselt | offen (Entscheide G1–G11 und G3b getroffen 2026-11-03, Bau ausstehend) | docs/konzept_gruppen.md, Abschnitt 9; docs/anleitung_zertifikat_klassenserver.md; docs/anleitung_klassenserver_internet.md; umfasst LERN-34 |
 | LERN-50 | Freiwillige Beiträge (Kaffee-Link, QR-Rechnung, GitHub Sponsors) nur für Erwachsene; Links leer bis aktiviert | in Arbeit seit 2026-11-03 (LERN_Session11); vorbereitet, Links leer — Patrik trägt sie ein, Steuern und Impressum klären | docs/anleitung_freiwillige_beitraege.md; portal/unterstuetzen.js |
 | LERN-49 | Strategie-Rätsel im Eulenpfad (Matt in 1, Atari-Go, Nim); ganze Partien Schach und Go erst im Lernsteig (S1 a) | in Arbeit seit 2026-11-03 (LERN_Session11); drei Spiele gebaut, Annahmen offen | lernziele/lehrplan_sg_session11.md; spielideen/strategie_raetsel.md |
 | LERN-51 | Alle Inhaltslisten je Eintrag prüfbar machen (`pruefung.js` je Spiel, gemischte Listen trennen; LP5 a) | in Arbeit seit 2026-11-03 (LERN_Session11); Pilot Anlaut-Angel und Auge-Entdecker | rahmen.md 17; spiele/gemeinsam/listenpruefung.js |
 | LERN-52 | Zweisprachiges Vorlesen (VL1 a), Pilot Au café | offen | Report LERN_Session11, Plan 4 |
+| LERN-53 | PIN der Aufsicht ohne zweite Aufsicht wiederherstellen (Entscheid PIN1) | offen (vorgelegt) | Report LERN_Session12, Plan 3 |
+| LERN-54 | Profil für Kinder: Avatar, Wahl gegen Vorgabe, Statistik, Endlos nach Messung (AV1–AV6, ST1, ST2, ZG1, RF1, VR1–VR3, EN1, EN2) | erledigt 2026-11-04 (LERN_Session12) bis auf VR2, VR3 und Ziele der Klasse (mit LERN-48) | docs/eulenpfad/konzept_profil_kind.md; rahmen.md 7, 18 |

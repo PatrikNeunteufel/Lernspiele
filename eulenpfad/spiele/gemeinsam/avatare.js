@@ -1,6 +1,7 @@
 /* Avatare (Entscheide AV1 a, AV2 a, AV3 a, LERN_Session12; docs/eulenpfad/konzept_profil_kind.md).
-   Ein Kind wählt sein Bild selbst: ein gezeichnetes Tier auf einer Hintergrundfarbe. Eigene SVG statt Emoji, damit es
-   auf jedem Gerät gleich aussieht (auch im geteilten Abzeichen-Bild). Gespeichert wird nur die Kennung „<tier>-<farbe>“
+   Ein Kind wählt sein Bild selbst: ein gezeichnetes Motiv (Tiere, Weltall und Technik, Fantasie, aus den Spielen; ab
+   Gold eines Abzeichens auch dessen Symbol, AV4 a, AV5 a) auf einer Hintergrundfarbe, dazu einen Rahmen (AV6 a). Eigene SVG statt Emoji, damit es
+   auf jedem Gerät gleich aussieht (auch im geteilten Abzeichen-Bild). Gespeichert wird nur die Kennung „<motiv>-<farbe>[-<rahmen>]“
    im Profil (Feld avatar); keine Fotos, kein Hochladen. Die Farben sind die Deko-Farben (stil.css), nie Stellenfarben.
    Braucht nichts vom Rahmen; spiel.js nutzt AVATARE, wenn die Seite diese Datei geladen hat (LS.avatarBild). */
 "use strict";
@@ -99,23 +100,209 @@ const AVATARE = (() => {
       + augen(52, 11) + pfad("M43 59 L57 59 L50 67 Z", "#f28a1e") + wangen(63, 18) },
   ];
 
-  const tier = id => TIERE.find(t => t.id === id);
+  // Weitere Sätze (Entscheid AV4 a, LERN_Session12): gezeichnet wie die Tiere, dieselben Farben.
+  const eck = (x, y, b, h, r, f, extra = "") => `<rect x="${x}" y="${y}" width="${b}" height="${h}" rx="${r}" fill="${f}"${extra}/>`;
+  const schrift = (x, y, t, groesse, f = DUNKEL) => `<text x="${x}" y="${y}" font-family="Nunito, 'Segoe UI', Arial, sans-serif" font-weight="900" font-size="${groesse}" text-anchor="middle" fill="${f}">${t}</text>`;
+  /** Stern mit fünf Zacken um (x, y). */
+  const stern = (x, y, r, f, extra = "") => `<polygon points="${[...Array(10)].map((_, i) => {
+    const w = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r;
+    return `${(x + rr * Math.cos(w)).toFixed(1)},${(y + rr * Math.sin(w)).toFixed(1)}`; }).join(" ")}" fill="${f}" stroke-linejoin="round"${extra}/>`;
+  const funkeln = (x, y, r, f = "#fff") => pfad(`M${x} ${y - r}Q${x} ${y} ${x + r} ${y}Q${x} ${y} ${x} ${y + r}Q${x} ${y} ${x - r} ${y}Q${x} ${y} ${x} ${y - r}Z`, f);
+
+  const WELTALL = [
+    { id: "rakete", name: "Rakete", zeichne: () =>
+      pfad("M38 58 L26 74 L38 70 Z", "#e5484d") + pfad("M62 58 L74 74 L62 70 Z", "#e5484d")
+      + pfad("M43 70 L50 90 L57 70 Z", "#f5a623") + pfad("M46 70 L50 82 L54 70 Z", "#ffe27a")
+      + pfad("M50 12 C64 24 66 46 62 70 L38 70 C34 46 36 24 50 12 Z", "#f1f3f8", ' stroke="#c3c9d8" stroke-width="2"')
+      + kreis(50, 40, 9, "#6ec6ff", ' stroke="#8a94a8" stroke-width="3"') + kreis(47, 37, 2.5, "#fff") + pfad("M44 22 Q50 14 56 22 Z", "#e5484d") },
+    { id: "roboter", name: "Roboter", zeichne: () =>
+      linie("M50 28 V18", 3, "#8a94a8") + kreis(50, 16, 4, "#e5484d")
+      + eck(18, 44, 8, 16, 3, "#8a94a8") + eck(74, 44, 8, 16, 3, "#8a94a8")
+      + eck(24, 28, 52, 46, 10, "#b8c2d6", ' stroke="#8a94a8" stroke-width="2"')
+      + kreis(39, 46, 7, "#fff") + kreis(61, 46, 7, "#fff") + kreis(39, 46, 3.5, "#2f8fe0") + kreis(61, 46, 3.5, "#2f8fe0")
+      + eck(36, 60, 28, 7, 2, DUNKEL) + linie("M43 60v7M50 60v7M57 60v7", 1.6, "#b8c2d6") + eck(30, 76, 40, 16, 6, "#b8c2d6") },
+    { id: "ufo", name: "Ufo", zeichne: () =>
+      pfad("M34 52 Q34 28 50 28 Q66 28 66 52 Z", "#9fe3ff", ' opacity=".9"') + kreis(50, 44, 7, "#7ad66b") + kreis(47.5, 43, 1.8, DUNKEL) + kreis(52.5, 43, 1.8, DUNKEL)
+      + oval(50, 58, 34, 11, "#8e9bb5") + oval(50, 55, 26, 6, "#b8c2d6")
+      + [26, 38, 50, 62, 74].map(x => kreis(x, 60, 2.8, "#ffd23f")).join("") + pfad("M40 68 L34 86 H66 L60 68 Z", "#fff6b0", ' opacity=".55"') },
+    { id: "planet", name: "Planet", zeichne: () =>
+      funkeln(22, 24, 5) + funkeln(78, 78, 4) + kreis(78, 22, 2, "#fff") + kreis(50, 52, 22, "#f39a3b")
+      + linie("M30 46 Q50 52 70 44M29 58 Q50 64 71 56", 4, "#d9822b")
+      + `<ellipse cx="50" cy="52" rx="38" ry="10" fill="none" stroke="#ffd166" stroke-width="5" transform="rotate(-18 50 52)"/>` },
+    { id: "astronaut", name: "Astronaut", zeichne: () =>
+      pfad("M20 92 Q22 70 50 70 Q78 70 80 92 Z", "#f1f3f8", ' stroke="#c3c9d8" stroke-width="2"') + kreis(50, 46, 28, "#f1f3f8", ' stroke="#c3c9d8" stroke-width="3"')
+      + oval(50, 47, 20, 16, "#2d3a6b") + pfad("M36 42 Q40 34 48 33", "none", ' stroke="#9fe3ff" stroke-width="4" stroke-linecap="round"')
+      + kreis(76, 34, 4, "#e5484d") + eck(42, 78, 16, 8, 2, "#6ec6ff") },
+    { id: "satellit", name: "Satellit", zeichne: () =>
+      funkeln(80, 20, 4) + funkeln(20, 82, 4)
+      + eck(10, 40, 26, 20, 2, "#2f6fd6", ' stroke="#9fc3ff" stroke-width="1.5"') + eck(64, 40, 26, 20, 2, "#2f6fd6", ' stroke="#9fc3ff" stroke-width="1.5"')
+      + linie("M19 40v20M27 40v20M73 40v20M81 40v20M10 50h26M64 50h26", 1, "#9fc3ff") + linie("M36 50h6M58 50h6", 3, "#8a94a8")
+      + eck(42, 38, 16, 24, 3, "#f2c14e", ' stroke="#c98400" stroke-width="1.5"') + linie("M50 38 V28", 2.4, "#8a94a8") + pfad("M42 28 Q50 18 58 28 Z", "#d9dbe6") },
+  ];
+
+  const FANTASIE = [
+    { id: "drache", name: "Drache", zeichne: () =>
+      pfad("M32 34 L28 16 L42 28 Z", "#ffd23f") + pfad("M68 34 L72 16 L58 28 Z", "#ffd23f")
+      + kreis(50, 54, 28, "#4cbf73") + oval(50, 70, 18, 12, "#9be3a8") + pfad("M44 28 L50 18 L56 28 Z", "#2f9e5a")
+      + augen(48, 12) + kreis(45, 68, 2, "#2f7a48") + kreis(55, 68, 2, "#2f7a48") + linie("M40 76 q10 6 20 0", 2.4, "#2f7a48") + wangen(60, 22) },
+    { id: "einhorn", name: "Einhorn", zeichne: () =>
+      pfad("M22 70 Q14 44 30 30 Q26 50 34 62 Z", "#e0569a") + pfad("M26 76 Q18 58 30 46 Q30 62 36 70 Z", "#8e5bd6")
+      + pfad("M52 30 L58 4 L64 30 Z", "#ffd23f") + linie("M54 22l8-3M55 15l6-2", 1.6, "#e6a800")
+      + oval(56, 56, 24, 28, "#fff", ' stroke="#e3e0ea" stroke-width="1.5"') + pfad("M40 36 L36 24 L48 32 Z", "#fff")
+      + oval(62, 76, 14, 10, "#fbdcea") + kreis(58, 76, 1.6, "#c06090") + kreis(66, 76, 1.6, "#c06090")
+      + linie("M50 52 q4 4 8 0", 2.6) + oval(66, 62, 5, 3.2, "#f7a8b8", ' opacity=".7"') },
+    { id: "monster", name: "Monster", zeichne: () =>
+      pfad("M32 30 L28 14 L42 26 Z", "#ffd23f") + pfad("M68 30 L72 14 L58 26 Z", "#ffd23f")
+      + pfad("M20 82 Q18 30 50 26 Q82 30 80 82 Q72 76 65 82 Q58 76 50 82 Q42 76 35 82 Q28 76 20 82 Z", "#8e5bd6")
+      + kreis(50, 48, 13, "#fff") + kreis(51, 49, 6, DUNKEL) + kreis(53, 46, 2, "#fff")
+      + pfad("M38 66 Q50 74 62 66 Z", DUNKEL) + pfad("M42 66 L45 71 L48 67 Z", "#fff") + pfad("M52 67 L55 71 L58 66 Z", "#fff") },
+    { id: "gespenst", name: "Gespenst", zeichne: () =>
+      pfad("M24 84 L24 46 Q24 20 50 20 Q76 20 76 46 L76 84 Q70 78 63 84 Q56 78 50 84 Q44 78 37 84 Q30 78 24 84 Z", "#fff", ' stroke="#d9dbe6" stroke-width="2"')
+      + oval(41, 46, 4.5, 6, DUNKEL) + oval(59, 46, 4.5, 6, DUNKEL) + oval(50, 60, 4, 5, DUNKEL) + wangen(54, 18) },
+    { id: "zauberer", name: "Zauberhut", zeichne: () =>
+      pfad("M50 10 L74 70 L26 70 Z", "#6366f1") + oval(50, 72, 36, 9, "#4b4fd0") + pfad("M31 60 L69 60 L72 68 L28 68 Z", "#ffd23f")
+      + stern(48, 36, 6, "#ffd23f") + stern(58, 50, 4, "#fff") + kreis(42, 52, 2, "#fff") + funkeln(80, 26, 5, "#ffd23f") + funkeln(20, 38, 4, "#ffd23f") },
+    { id: "nessie", name: "Seeungeheuer", zeichne: () =>
+      pfad("M10 72 Q20 66 30 72 T50 72 T70 72 T90 72 V96 H10 Z", "#6ec6ff")
+      + pfad("M60 72 Q60 56 70 56 Q80 56 80 72 Z", "#14b8a6") + pfad("M26 72 Q26 30 44 26 Q56 24 58 34 Q60 42 50 42 Q40 44 40 72 Z", "#14b8a6")
+      + kreis(48, 32, 2.6, DUNKEL) + kreis(49, 31, 0.9, "#fff") + kreis(54, 37, 1.3, "#0d7a6e") + pfad("M38 30 L34 22 L42 26 Z", "#0d7a6e") },
+  ];
+
+  const AUS_DEN_SPIELEN = [
+    { id: "zahlina", name: "Eule Zahlina", zeichne: () =>
+      oval(50, 58, 28, 30, "#8e6b4f") + oval(50, 68, 16, 14, "#d8b98f")
+      + kreis(38, 52, 10, "#fff", ' stroke="#2d3047" stroke-width="2.5"') + kreis(62, 52, 10, "#fff", ' stroke="#2d3047" stroke-width="2.5"') + linie("M48 52h4", 2.5)
+      + kreis(39, 53, 4.5, DUNKEL) + kreis(61, 53, 4.5, DUNKEL) + pfad("M46 62 L54 62 L50 69 Z", "#f5a623")
+      + pfad("M22 28 L50 18 L78 28 L50 38 Z", DUNKEL) + eck(38, 30, 24, 8, 2, DUNKEL) + linie("M74 28 v14", 2, "#ffd23f") + kreis(74, 44, 2.6, "#ffd23f") },
+    { id: "lupe", name: "Lupe", zeichne: () =>
+      linie("M60 62 L80 82", 10, "#8a5a32") + kreis(44, 44, 22, "#cfeeff", ' stroke="#5b6080" stroke-width="7"') + pfad("M32 38 Q36 28 46 28", "none", ' stroke="#fff" stroke-width="4" stroke-linecap="round"') },
+    { id: "schatzkiste", name: "Schatzkiste", zeichne: () =>
+      kreis(40, 40, 6, "#ffd23f") + kreis(52, 36, 6, "#ffd23f") + kreis(62, 41, 5, "#ffe27a")
+      + pfad("M20 46 Q20 30 50 30 Q80 30 80 46 Z", "#a0714a") + eck(20, 46, 60, 34, 4, "#8a5a32")
+      + linie("M20 46h60M34 30v50M66 30v50", 4, "#f2c14e") + eck(44, 50, 12, 12, 2, "#f2c14e") + kreis(50, 56, 2, DUNKEL) },
+    { id: "bausteine", name: "Bausteine", zeichne: () =>
+      eck(18, 56, 30, 18, 3, "#f07c2a", ' stroke="#c0581a" stroke-width="2"') + eck(52, 56, 30, 18, 3, "#f07c2a", ' stroke="#c0581a" stroke-width="2"')
+      + eck(35, 36, 30, 18, 3, "#f07c2a", ' stroke="#c0581a" stroke-width="2"') + schrift(50, 50, "3 T", 12, "#fff") + schrift(33, 70, "4 H", 12, "#fff") + schrift(67, 70, "5 E", 12, "#fff") },
+    { id: "pentomino", name: "Pentomino", zeichne: () =>
+      [[40, 22], [22, 40], [40, 40], [58, 40], [40, 58]].map(([x, y]) => eck(x, y, 18, 18, 3, "#4cbf73", ' stroke="#2f7a48" stroke-width="2.5"')).join("") },
+    { id: "ziffernkarte", name: "Ziffernkarte", zeichne: () =>
+      `<g transform="rotate(-10 50 52)">` + eck(28, 20, 44, 62, 7, "#fff", ' stroke="#c3c9d8" stroke-width="2.5"') + kreis(36, 28, 3, "#8e5bd6") + kreis(64, 74, 3, "#8e5bd6") + schrift(50, 64, "7", 40) + `</g>` },
+  ];
+
+  // Abzeichen-Symbole (Entscheid AV5 a): ersetzen die Emoji der Abzeichen (Tab Erfolge, Teilen) und sind ab Gold des
+  // jeweiligen Abzeichens als Avatar wählbar. Kennung „abz-<abzeichen>“.
+  const ABZEICHEN = [
+    { id: "abz-runden", name: "Fleissig", zeichne: () =>
+      linie("M38 30 Q38 16 50 16 Q62 16 62 30", 4, "#a8401f") + eck(26, 28, 48, 56, 12, "#e5484d") + eck(34, 56, 32, 20, 6, "#f07c2a") + linie("M34 44h32", 3, "#a8401f") + kreis(50, 66, 2.5, "#ffd23f") },
+    { id: "abz-drei-sterne", name: "Sternensammler", zeichne: () => stern(28, 58, 14, "#ffd23f", ' stroke="#e6a800" stroke-width="2"') + stern(72, 58, 14, "#ffd23f", ' stroke="#e6a800" stroke-width="2"') + stern(50, 40, 18, "#ffd23f", ' stroke="#e6a800" stroke-width="2"') },
+    { id: "abz-perfekt", name: "Perfekt!", zeichne: () =>
+      kreis(46, 54, 30, "#e5484d") + kreis(46, 54, 22, "#fff") + kreis(46, 54, 14, "#e5484d") + kreis(46, 54, 6, "#fff")
+      + linie("M46 54 L78 22", 4, "#5b6080") + pfad("M78 22 L80 12 L86 18 L88 24 L78 22 Z", "#2f8fe0") },
+    { id: "abz-ohne-tipp", name: "Aus eigener Kraft", zeichne: () =>
+      oval(38, 50, 18, 22, "#f7a8c4") + oval(62, 50, 18, 22, "#f7a8c4") + linie("M50 30 V72", 2.4, "#c06090")
+      + linie("M30 42 q6 -4 10 2M28 56 q8 2 12 -4M60 40 q6 -2 8 4M58 58 q8 4 12 -4", 2.2, "#c06090") },
+    { id: "abz-koenigsstufe", name: "Königsstufe", zeichne: () =>
+      pfad("M20 70 L16 32 L34 48 L50 24 L66 48 L84 32 L80 70 Z", "#ffd23f", ' stroke="#c98400" stroke-width="2.5" stroke-linejoin="round"')
+      + eck(20, 70, 60, 10, 3, "#f2c14e", ' stroke="#c98400" stroke-width="2"') + kreis(50, 56, 5, "#e5484d") + kreis(34, 60, 3.5, "#2f8fe0") + kreis(66, 60, 3.5, "#4cbf73") },
+    { id: "abz-alle-stufen", name: "Alle sechs Stufen", zeichne: () =>
+      linie("M32 14 V88M68 14 V88", 6, "#8a5a32") + ["#14b8a6", "#6366f1", "#e9b300", "#f07c2a", "#8e5bd6", "#e0569a"].map((f, i) => linie(`M32 ${80 - i * 12}H68`, 5, f)).join("") },
+    { id: "abz-meister", name: "Spiel-Meister", zeichne: () =>
+      pfad("M34 52 V66 Q50 76 66 66 V52 Z", "#3a3f63") + pfad("M14 40 L50 26 L86 40 L50 54 Z", DUNKEL) + linie("M78 43 V62", 2.4, "#ffd23f") + kreis(78, 64, 3.5, "#ffd23f") },
+    { id: "abz-entdecker", name: "Entdecker", zeichne: () =>
+      kreis(50, 50, 32, "#f2c14e", ' stroke="#c98400" stroke-width="2"') + kreis(50, 50, 25, "#fff") + pfad("M50 26 L57 50 L50 50 Z", "#e5484d") + pfad("M50 26 L43 50 L50 50 Z", "#f06a6e")
+      + pfad("M50 74 L43 50 L50 50 Z", "#5b6080") + pfad("M50 74 L57 50 L50 50 Z", "#8a94a8") + kreis(50, 50, 3, DUNKEL) + schrift(50, 23, "N", 7, "#e5484d") },
+    { id: "abz-vielseitig", name: "Vielseitig", zeichne: () =>
+      pfad("M50 18 Q86 18 84 52 Q82 70 66 66 Q56 64 58 74 Q60 86 46 84 Q16 80 16 50 Q16 18 50 18 Z", "#f1e3c8", ' stroke="#c9a46b" stroke-width="2"')
+      + kreis(34, 40, 6, "#e5484d") + kreis(50, 32, 6, "#ffd23f") + kreis(66, 38, 6, "#4cbf73") + kreis(70, 54, 6, "#2f8fe0") + kreis(30, 60, 6, "#8e5bd6") + kreis(44, 70, 4, "#fff") },
+    { id: "abz-mathe-ass", name: "Mathe-Ass", zeichne: () =>
+      eck(20, 22, 60, 58, 12, "#2f8fe0") + schrift(50, 50, "1 2 3", 17, "#fff") + schrift(50, 72, "+ − ×", 15, "#cfe6ff") },
+    { id: "abz-deutsch-ass", name: "Deutsch-Ass", zeichne: () =>
+      eck(18, 64, 64, 12, 3, "#e5484d") + eck(22, 50, 58, 12, 3, "#2f8fe0") + eck(20, 36, 60, 12, 3, "#4cbf73")
+      + `<rect x="34" y="14" width="12" height="22" rx="2" fill="#ffd23f" transform="rotate(12 40 25)"/>` + linie("M26 70h48M30 56h44M28 42h46", 1.4, "#fff") },
+    { id: "abz-forscher", name: "Forschen", zeichne: () =>
+      pfad("M42 18 H58 V40 L76 76 Q78 84 70 84 H30 Q22 84 24 76 L42 40 Z", "#e8f6ff", ' stroke="#8a94a8" stroke-width="3"')
+      + pfad("M32 62 H68 L75 77 Q76 81 71 81 H29 Q24 81 25 77 Z", "#4cbf73") + kreis(44, 70, 3, "#c8f5d2") + kreis(56, 66, 2, "#c8f5d2") + kreis(52, 52, 2.5, "#9be3a8") + linie("M40 18h20", 3, "#8a94a8") },
+    { id: "abz-sprachtalent", name: "Sprachtalent", zeichne: () =>
+      pfad("M14 22 H58 Q64 22 64 28 V48 Q64 54 58 54 H30 L20 64 V54 H20 Q14 54 14 48 V28 Q14 22 20 22 Z", "#6366f1") + schrift(39, 45, "Hi", 18, "#fff")
+      + pfad("M42 46 H80 Q86 46 86 52 V70 Q86 76 80 76 H76 V86 L66 76 H48 Q42 76 42 70 V52 Q42 46 48 46 Z", "#e0569a") + schrift(64, 68, "Salut", 12, "#fff") },
+    { id: "abz-endlos", name: "Endlos-Läufer", zeichne: () =>
+      `<path d="M30 36 C16 36 10 44 10 50 C10 56 16 64 30 64 C46 64 54 36 70 36 C84 36 90 44 90 50 C90 56 84 64 70 64 C54 64 46 36 30 36 Z" fill="none" stroke="#8e5bd6" stroke-width="9" stroke-linejoin="round"/>`
+      + stern(50, 50, 6, "#ffd23f") },
+    { id: "abz-mix", name: "Mix-Meister", zeichne: () =>
+      `<g transform="rotate(-14 50 50)">` + eck(24, 24, 52, 52, 10, "#fff", ' stroke="#c3c9d8" stroke-width="3"')
+      + [[36, 36], [64, 36], [50, 50], [36, 64], [64, 64]].map(([x, y]) => kreis(x, y, 5, y === 50 ? "#e5484d" : DUNKEL)).join("") + `</g>` },
+    { id: "abz-wochenstern", name: "Wochenstern", zeichne: () => stern(50, 52, 32, "#ffd23f", ' stroke="#e6a800" stroke-width="2.5"') + funkeln(18, 22, 7, "#ffd23f") + funkeln(84, 30, 6, "#ffd23f") + funkeln(78, 82, 5, "#ffd23f") + kreis(44, 44, 4, "#fff3b0") },
+    { id: "abz-dranbleiber", name: "Dranbleiber", zeichne: () =>
+      eck(18, 22, 64, 62, 8, "#fff", ' stroke="#c3c9d8" stroke-width="2.5"') + pfad("M18 30 Q18 22 26 22 H74 Q82 22 82 30 V38 H18 Z", "#e5484d") + linie("M34 16 v12M66 16 v12", 4, "#5b6080")
+      + [[30, 50], [50, 50], [70, 50], [30, 68], [50, 68]].map(([x, y]) => linie(`M${x - 6} ${y} l4 5 l8 -9`, 3, "#4cbf73")).join("") + kreis(70, 68, 4, "#d9dbe6") },
+    { id: "abz-fehlerfinder", name: "Fehlerfinder", zeichne: () =>
+      pfad("M36 10 L44 36 L50 30 L56 36 L64 10 Z", "#2f8fe0") + kreis(50, 60, 26, "#f2c14e", ' stroke="#c98400" stroke-width="3"')
+      + oval(50, 62, 13, 15, "#e5484d") + kreis(50, 48, 6, DUNKEL) + linie("M50 50 V77", 1.6) + kreis(44, 58, 2.4, DUNKEL) + kreis(56, 58, 2.4, DUNKEL) + kreis(45, 68, 2.4, DUNKEL) + kreis(55, 68, 2.4, DUNKEL) },
+    { id: "abz-fruehaufsteher", name: "Frühaufsteher", zeichne: () =>
+      eck(0, 0, 100, 64, 0, "#ffd9b0") + [...Array(7)].map((_, i) => { const w = Math.PI + (i + 0.5) * Math.PI / 7; return linie(`M${50 + 26 * Math.cos(w)} ${64 + 26 * Math.sin(w)} L${50 + 38 * Math.cos(w)} ${64 + 38 * Math.sin(w)}`, 4, "#f5a623"); }).join("")
+      + pfad("M28 64 A22 22 0 0 1 72 64 Z", "#ffd23f") + eck(0, 64, 100, 36, 0, "#4cbf73") + linie("M10 76 q20 -6 40 0 t40 0", 3, "#2f9e5a") },
+  ];
+
+  // Sätze im Profil; abzeichen: erst wählbar, wenn das Abzeichen Gold hat (AV5 a, freigeschaltet bestimmt erfolge.js).
+  const SAETZE = [
+    { id: "tiere", name: "Tiere", motive: TIERE },
+    { id: "weltall", name: "Weltall und Technik", motive: WELTALL },
+    { id: "fantasie", name: "Fantasie", motive: FANTASIE },
+    { id: "spiele", name: "Aus den Spielen", motive: AUS_DEN_SPIELEN },
+    { id: "abzeichen", name: "Abzeichen", motive: ABZEICHEN, freischalten: true },
+  ];
+  // Rahmen (Entscheid AV6 a): einfach immer; Gold, Platin und Diamant ab dem ersten Abzeichen in diesem Rang.
+  const RAHMEN = [
+    { id: "einfach", name: "Einfach" },
+    { id: "gold", name: "Gold", rang: "gold" },
+    { id: "platin", name: "Platin", rang: "platin" },
+    { id: "diamant", name: "Diamant", rang: "diamant" },
+  ];
+  const ALLE = SAETZE.flatMap(s => s.motive.map(m => ({ ...m, satz: s.id })));
+  const motiv = id => ALLE.find(m => m.id === id);
   const farbe = id => FARBEN.find(f => f.id === id);
-  /** Kennung zerlegen; null, wenn Tier oder Farbe unbekannt. */
+  const rahmen = id => RAHMEN.find(r => r.id === id);
+  /** Kennung „<motiv>-<farbe>[-<rahmen>]“ zerlegen (Motive dürfen Bindestriche haben); null, wenn unbekannt. */
   function zerlege(kennung) {
-    const [t, f] = String(kennung || "").split("-");
-    return tier(t) && farbe(f) ? { tier: tier(t), farbe: farbe(f) } : null;
+    const teile = String(kennung || "").split("-");
+    const r = rahmen(teile.at(-1)) ? rahmen(teile.pop()) : RAHMEN[0];
+    const f = farbe(teile.pop());
+    const m = motiv(teile.join("-"));
+    return m && f ? { motiv: m, farbe: f, rahmen: r } : null;
   }
-  let zaehler = 0; // je Bild eine eigene Id für den Zuschnitt (mehrere Avatare auf einer Seite)
+  const kennung = (motivId, farbId, rahmenId = "einfach") => `${motivId}-${farbId}${rahmenId && rahmenId !== "einfach" ? `-${rahmenId}` : ""}`;
+
+  let zaehler = 0; // je Bild eigene Ids für Zuschnitt und Verläufe (mehrere Avatare auf einer Seite)
+  /** Rahmen um den Kreis (Radius 46): einfach in der Farbe, sonst Gold, Platin oder Diamant. */
+  function rahmenSvg(r, f, id) {
+    const verlauf = (stopps) => `<linearGradient id="${id}-v" x1="0" y1="0" x2="1" y2="1">${stopps.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join("")}</linearGradient>`;
+    const ring = (breite, rand = "") => `<circle cx="50" cy="50" r="47" fill="none" stroke="url(#${id}-v)" stroke-width="${breite}"${rand}/>`;
+    const rund = (n, fn) => [...Array(n)].map((_, i) => fn(-Math.PI / 2 + i * 2 * Math.PI / n)).join("");
+    if (r.id === "gold") return `<defs>${verlauf([[0, "#fff3b0"], [0.45, "#ffc107"], [1, "#c98400"]])}</defs>` + ring(7)
+      + rund(12, w => kreis((50 + 47 * Math.cos(w)).toFixed(1), (50 + 47 * Math.sin(w)).toFixed(1), 2.8, "#fff7cc", ' stroke="#c98400" stroke-width="1"'));
+    if (r.id === "platin") return `<defs>${verlauf([[0, "#ffffff"], [0.5, "#cfd6e3"], [1, "#8a94a8"]])}</defs>` + ring(7)
+      + [-1, 1].map(s => [...Array(6)].map((_, i) => {
+        const w = Math.PI / 2 + s * (0.35 + i * 0.32), x = 50 + 50 * Math.cos(w), y = 50 + 50 * Math.sin(w);
+        return `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="3.4" ry="7" fill="#e6ebf3" stroke="#8a94a8" stroke-width="1" transform="rotate(${(w * 180 / Math.PI + 90 + s * 35).toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
+      }).join("")).join("");
+    if (r.id === "diamant") return `<defs>${verlauf([[0, "#ffffff"], [0.4, "#9fe3ff"], [1, "#2f8fe0"]])}</defs>` + ring(6)
+      + rund(8, w => { const x = 50 + 47 * Math.cos(w), y = 50 + 47 * Math.sin(w), g = w === -Math.PI / 2 ? 8 : 5;
+        return `<polygon points="${x},${y - g} ${x + g * 0.75},${y} ${x},${y + g} ${x - g * 0.75},${y}" fill="#e0f7ff" stroke="#2f8fe0" stroke-width="1.2"/>`; });
+    return `<circle cx="50" cy="50" r="47" fill="none" stroke="${f.rand}" stroke-width="4"/>`;
+  }
   /** SVG als Text; ohne gültige Kennung null. */
-  function svg(kennung, groesse = 48) {
-    const a = zerlege(kennung);
+  function svg(k, groesse = 48) {
+    const a = zerlege(k);
     if (!a) return null;
-    const id = `avatar-rund-${++zaehler}`;
-    return `<svg class="avatar-bild" viewBox="0 0 100 100" width="${groesse}" height="${groesse}" role="img" aria-label="${a.tier.name}">`
-      + `<defs><clipPath id="${id}"><circle cx="50" cy="50" r="46"/></clipPath></defs>`
-      + kreis(50, 50, 48, a.farbe.hell, ` stroke="${a.farbe.rand}" stroke-width="4"`)
-      + `<g clip-path="url(#${id})">${a.tier.zeichne()}</g></svg>`;
+    const id = `avatar-${++zaehler}`;
+    return `<svg class="avatar-bild" viewBox="-6 -6 112 112" width="${groesse}" height="${groesse}" role="img" aria-label="${a.motiv.name}">`
+      + `<defs><clipPath id="${id}-rund"><circle cx="50" cy="50" r="46"/></clipPath></defs>`
+      + kreis(50, 50, 47, a.farbe.hell) + `<g clip-path="url(#${id}-rund)">${a.motiv.zeichne()}</g>` + rahmenSvg(a.rahmen, a.farbe, id) + `</svg>`;
   }
-  return { TIERE, FARBEN, zerlege, svg, name: kennung => zerlege(kennung)?.tier.name || null };
+  /** Nur das Motiv ohne Kreis (Abzeichen-Symbol im Tab Erfolge); null, wenn unbekannt. */
+  function motivSvg(id, groesse = 48) {
+    const m = motiv(id);
+    return m ? `<svg class="motiv-bild" viewBox="0 0 100 100" width="${groesse}" height="${groesse}" role="img" aria-label="${m.name}">${m.zeichne()}</svg>` : null;
+  }
+  return { SAETZE, FARBEN, RAHMEN, zerlege, kennung, svg, motivSvg, motiv, name: k => zerlege(k)?.motiv.name || null };
 })();
