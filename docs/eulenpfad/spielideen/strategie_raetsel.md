@@ -85,3 +85,6 @@ Puzzle über der Grenze); vor dem Bau mit dem Testskript nachzählen.
   einblenden; alle Stufen bleiben Rätsel. **Dazu** (Wunsch Patrik): Jedes der drei Spiele hat eine eigene
   **Regelseite**, erreichbar vom Startblatt und aus der Hilfe — als Baustein des Rahmens für ähnliche Fälle
   (rahmen.md Abschnitt 16).
+- **SD1 a:** Stein-Duell s1/s2 mit wechselnder Höchstzahl je Zug (s1: 2–4, s2: 2–3) statt „nimm 1–2“.
+- **SF1 a:** Steine fangen, letzter Tipp in s1/s2 zeigt Nachbarpunkte bzw. Freiheiten aller weissen Gruppen, nicht die Lösung.
+- **SF2 a:** Go-Koordinaten A–I ohne Lücke.

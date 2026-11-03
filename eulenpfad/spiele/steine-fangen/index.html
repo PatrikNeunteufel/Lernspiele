@@ -236,7 +236,7 @@ function euleAntwort(b1, n, b0) {
 const ZEICHEN = [".", "x", "o"];
 const alsText = b => b.map(f => ZEICHEN[f]).join("");
 const ausText = t => [...t].map(z => ZEICHEN.indexOf(z));
-const BUCHSTABEN = "ABCDEFGHJ"; // wie im Go üblich ohne I
+const BUCHSTABEN = "ABCDEFGHI"; // ohne Lücke wie Schachbrett und Koordinaten in Mathe (Entscheid SF2 a; Go-Brauch liesse I aus)
 const koord = (i, n) => BUCHSTABEN[i % n] + (n - Math.floor(i / n));
 
 // Je Stufe: Brettgrössen, Grösse der Hauptgruppe, Anzahl Zusatzsteine.

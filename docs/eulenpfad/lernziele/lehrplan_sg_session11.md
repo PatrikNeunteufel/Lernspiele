@@ -16,10 +16,12 @@ Thema neu: **Strategie** (Fach Medien und Informatik). Jedes Spiel hat eine Rege
 
 - **Einordnung 5./6. Klasse:** Medien und Informatik ist in St. Gallen ein Fach ab der 5. Klasse; MI.2.2.b steht im 2.
   Zyklus ohne Grundanspruch. Stufe 1 (4. Klasse) ist damit ein Vorgriff.
-- **Stein-Duell s1/s2:** abweichend von der Vorlage „nimm 1–2“ erlaubt das Spiel bis 4 bzw. 3 Steine je Zug, weil
-  „nimm 1–2“ nur 3 bzw. 6 verschiedene Gewinnstellungen ergibt (zu wenig für eine Runde mit 8 Aufgaben). Vorlage an Patrik.
-- **Steine fangen:** Atari-Go = wer zuerst irgendeinen Stein fängt, gewinnt; einfaches Ko; Koordinaten A–J ohne I
-  (Go-Brauch); Tipp mit Bild in s1/s2 zeigt Nachbarpunkte bzw. die Freiheiten aller weissen Gruppen, nicht die Lösung.
+- **Stein-Duell s1/s2 (Entscheid SD1 a):** Abweichend von der Vorlage „nimm 1–2“ wechselt die Höchstzahl je Zug
+  (s1: 2–4, s2: 2–3), weil „nimm 1–2“ nur 3 bzw. 6 verschiedene Gewinnstellungen ergibt und das Muster „k + 1 lassen“
+  erst an mehreren k sichtbar wird.
+- **Steine fangen:** Atari-Go = wer zuerst irgendeinen Stein fängt, gewinnt; einfaches Ko. Koordinaten A–I ohne Lücke
+  (Entscheid SF2 a, gegen den Go-Brauch ohne I). Tipp mit Bild in s1/s2 zeigt Nachbarpunkte bzw. die Freiheiten aller
+  weissen Gruppen, nicht die Lösung (Entscheid SF1 a).
 - **König in der Falle:** keine Rochade, kein en passant, keine Umwandlung (Stellungen, in denen sie zählten, sind
   ausgeschlossen); weisser König nie im Schach vor dem Zug; s6 die zäheste Verteidigung der Eule. 144 Stellungen,
   selbst gebaut und geprüft, als Inhaltsliste ungeprüft (Prüfliste Teil 83). Schachzeichen auf iPad/Android ungeprüft.
