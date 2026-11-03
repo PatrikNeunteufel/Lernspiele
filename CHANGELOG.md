@@ -352,3 +352,6 @@
 - G3b a (Austritt: Geteiltes bei der Klasse löschen, vorgewählt Ja), G11 a und b mit c beschrieben; QR auch für die
   Adresse des Klassenservers. Neue Anleitungen `docs/anleitung_klassenserver_internet.md` (Vergleichsmatrix a/b/c)
   und `docs/anleitung_freiwillige_beitraege.md` (LERN-50; Angaben der Anbieter ungeprüft).
+- Freiwillige Beiträge vorbereitet (LERN-50): `portal/unterstuetzen.js` (leere Links = unsichtbar),
+  `portal/unterstuetzen.html`, Hinweis in Portal-Fusszeile, Anleitung für Erwachsene und Verwaltung → Einstellungen,
+  nie für Kinder; Testskript prüft, dass sonst nichts im App-Ordner die Beitragsseite verlinkt.

@@ -245,7 +245,12 @@ function zeichneVerwaltung(box, neu) {
       el("h2", { text: "Einstellungen" }),
       el("p", { class: "leise-text", style: "margin-top:0", text: "Gelten für alle Kinder auf diesem Gerät, je Spiel auch abweichend. „Alles auf Standard“ setzt auch die Spiele zurück." }),
       ...zeilen,
-      zeile(knopf("↺ Alles auf Standard", () => { LS.einstellungenZuruecksetzen(); neu(); }))));
+      zeile(knopf("↺ Alles auf Standard", () => { LS.einstellungenZuruecksetzen(); neu(); })),
+      // Freiwillige Beiträge (LERN-50): nur hier für die Aufsicht und nur, wenn ein Link eingetragen ist
+      typeof unterstuetzenAktiv === "function" && unterstuetzenAktiv().length
+        ? el("p", { class: "leise-text", style: "margin-top:14px" }, el("a", { href: "../portal/unterstuetzen.html", text: "☕ Eulenpfad unterstützen" }),
+          document.createTextNode(" — freiwillig; alle Spiele bleiben für alle gleich."))
+        : null));
   }
 
   // ----- Entwicklung (Entscheide E1 a, E2 a) -----

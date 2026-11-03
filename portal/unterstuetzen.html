@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eulenpfad unterstützen</title>
+<!-- Freiwillige Beiträge (LERN-50, LERN_Session11). Inhalt aus unterstuetzen.js; nur für Erwachsene verlinkt
+     (Portal-Fusszeile, Anleitung für Erwachsene, Verwaltung). Schlichte Links, nichts vom Anbieter eingebettet. -->
+<style>
+  :root { --text: #2b2d42; --leise: #6b7089; --karte: #fff; --rand: #e3e6f3; --akzent: #6366f1; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 32px 16px; font: 18px/1.5 system-ui, "Segoe UI", sans-serif;
+    color: var(--text); background: linear-gradient(180deg, #e0f2fe, #fef9e7);
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  .zurueck { display: inline-block; margin-bottom: 12px; color: var(--akzent); font-weight: 700; text-decoration: none; }
+  h1 { font-size: clamp(26px, 5vw, 36px); margin: 0 0 8px; }
+  .unter { color: var(--leise); margin: 0 0 20px; }
+  .weg { display: flex; gap: 14px; align-items: center; padding: 16px 18px; margin: 0 0 12px; border-radius: 18px;
+    background: var(--karte); color: inherit; text-decoration: none; box-shadow: 0 4px 0 var(--rand); }
+  a.weg:hover, a.weg:focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; }
+  .weg .bild { font-size: 36px; }
+  .weg span:last-child { color: var(--leise); font-size: 16px; }
+  .weg b { color: var(--text); font-size: 18px; }
+  .qr img { display: block; max-width: 240px; margin: 8px auto 0; }
+  .hinweis { color: var(--leise); font-size: 15px; margin-top: 18px; }
+</style>
+</head>
+<body>
+<main>
+  <a class="zurueck" href="index.html">← Zur Startseite</a>
+  <h1>☕ Eulenpfad unterstützen</h1>
+  <p class="unter">Alle Spiele bleiben kostenlos, ohne Anmeldung und ohne Werbung — für alle gleich. Wer die Arbeit
+    daran trotzdem unterstützen möchte, kann das hier freiwillig tun. Danke!</p>
+  <div id="wege"></div>
+  <p class="hinweis">Die Links führen zu Seiten anderer Anbieter; dort gelten deren Bedingungen. Eulenpfad schickt dabei
+    nichts mit — keine Angaben über Kinder, kein Lernstand.</p>
+</main>
+<script src="unterstuetzen.js"></script>
+<script>
+  "use strict";
+  const box = document.getElementById("wege");
+  const aktiv = unterstuetzenAktiv();
+  if (!aktiv.length) box.innerHTML = '<p class="unter">Noch ist keine Möglichkeit eingerichtet.</p>';
+  for (const u of aktiv) {
+    const text = document.createElement("span");
+    text.innerHTML = "<b></b><br><span></span>";
+    text.querySelector("b").textContent = u.name;
+    text.querySelector("span").textContent = u.text;
+    const bild = document.createElement("span");
+    bild.className = "bild";
+    bild.textContent = u.bild;
+    if (u.qr) {
+      // QR-Rechnung: das Bild selbst zeigen (zum Scannen mit der Banking-App)
+      const k = document.createElement("div");
+      k.className = "weg qr";
+      k.append(bild, text);
+      const img = document.createElement("img");
+      img.src = u.url;
+      img.alt = "QR-Rechnung zum Scannen";
+      const wrap = document.createElement("div");
+      wrap.append(k, img);
+      box.append(wrap);
+    } else {
+      const a = document.createElement("a");
+      a.className = "weg";
+      a.href = u.url;
+      a.rel = "noopener";
+      a.target = "_blank";
+      a.append(bild, text);
+      box.append(a);
+    }
+  }
+</script>
+</body>
+</html>

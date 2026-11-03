@@ -302,6 +302,13 @@
       Kinder. Die Aufsicht kann immer melden.</p>
   </section>
 
+  <!-- Freiwillige Beiträge (LERN-50): erscheint erst, wenn in portal/unterstuetzen.js ein Link eingetragen ist -->
+  <section id="unterstuetzen" hidden>
+    <h2>☕ Eulenpfad unterstützen</h2>
+    <p>Alle Spiele bleiben kostenlos, ohne Anmeldung und ohne Werbung. Wer die Arbeit daran unterstützen möchte, kann das
+      <a href="../../portal/unterstuetzen.html">freiwillig hier</a> tun. Die Kinder sehen diesen Hinweis nirgends.</p>
+  </section>
+
   <section id="fragen">
     <h2>18. Häufige Fragen</h2>
     <h3>Die Spielstände sind weg — was ist passiert?</h3>
@@ -321,5 +328,7 @@
 
   <p class="unter">Die Anleitung für Kinder: <a href="kinder.html">So spielst du</a>.</p>
 </main>
+<script src="../../portal/unterstuetzen.js"></script>
+<script>if (typeof unterstuetzenAktiv === "function" && unterstuetzenAktiv().length) document.getElementById("unterstuetzen").hidden = false;</script>
 </body>
 </html>

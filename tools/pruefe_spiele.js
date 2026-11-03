@@ -419,6 +419,26 @@ for (const id of ids) {
     fehlerZahl += m.length;
   }
 }
+// Freiwillige Beiträge (LERN-50): Kinder sollen nie um Geld gebeten werden. Im App-Ordner darf die Beitragsseite nur
+// aus der Verwaltung (nur Aufsicht) und der Anleitung für Erwachsene verlinkt sein (docs/anleitung_freiwillige_beitraege.md).
+{
+  const APP = path.join(WURZEL, "eulenpfad");
+  const ERLAUBT = [path.join("start", "verwaltung.js"), path.join("anleitung", "aufsicht.html")];
+  const dateien = [];
+  const sammle = d => { for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+    const p = path.join(d, e.name);
+    if (e.isDirectory()) sammle(p); else if (/\.(html|js)$/.test(e.name)) dateien.push(p);
+  } };
+  sammle(APP);
+  for (const p of dateien) {
+    const rel = path.relative(APP, p);
+    if (ERLAUBT.includes(rel)) continue;
+    if (fs.readFileSync(p, "utf8").includes("unterstuetzen.html")) {
+      console.log(`    FEHLER  ${rel}: verlinkt die Beitragsseite — nur Verwaltung und Anleitung für Erwachsene dürfen das`);
+      fehlerZahl++;
+    }
+  }
+}
 // Endlos-Modus: je Spiel und Stufe mit endlos im Katalog einige Endlos-Runden (--endlos=0 schaltet ab).
 if (opt.endlos !== 0) {
   const kat = vm.createContext({ LS: { SKALA: [] } });

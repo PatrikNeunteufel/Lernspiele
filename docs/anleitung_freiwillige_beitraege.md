@@ -2,7 +2,7 @@
 
 Stand: 03.11.2026 (LERN_Session11, Wunsch Patrik) · Für Patrik. Ziel: Erwachsene können die Reihe Eulenpfad →
 Lernsteig → Gratwanderung freiwillig unterstützen; die Links werden vorbereitet und erst aktiv, wenn eine Adresse
-eingetragen ist. **Noch nicht gebaut** (Abschnitt 4).
+eingetragen ist. **Vorbereitung gebaut** (Abschnitt 4); aktiv wird erst, was in `portal/unterstuetzen.js` eine `url` hat.
 
 Eine frühere Besprechung dazu fand ich in den Sitzungen nicht (gesucht am 03.11.2026 in allen Sitzungen, auch
 archivierten, nach Spende, buymeacoffee, Ko-fi, Twint, „freiwillige Zahlung“, GitHub Sponsors, donation, Gönner,
@@ -47,24 +47,25 @@ Zahlungsdienst wollen. GitHub Sponsors zusätzlich, wenn das Repo öffentlich au
 - **Name des Kontos:** Öffentlich sichtbar wird, was beim Anbieter steht (Name, bei der QR-Rechnung auch IBAN). Wenn
   nicht der eigene Name erscheinen soll: Konto auf den Namen der Reihe, soweit der Anbieter das erlaubt.
 
-## 4. Was im Projekt vorbereitet wird (zu bauen)
+## 4. Was im Projekt vorbereitet ist (gebaut LERN_Session11)
+
+Geprüft am 03.11.2026 im Browser: mit leeren Links nirgends sichtbar; mit einem Probe-Link (danach wieder entfernt)
+in Portal-Fusszeile, Beitragsseite (Link öffnet neuen Tab), Anleitung für Erwachsene und Verwaltung → Einstellungen
+sichtbar, als Kind in keinem Tab. Das Testskript meldet einen Fehler, sobald eine andere Datei im App-Ordner die
+Beitragsseite verlinkt (Gegenprobe mit einer Probedatei, danach gelöscht).
 
 - **Eine Datei** `portal/unterstuetzen.js` für die ganze Reihe, wie `eulenpfad/kontakt.js` für Meldungen:
 
-  ```js
-  const UNTERSTUETZEN = [
-    { id: "kaffee", name: "Einen Kaffee spendieren", url: "", bild: "☕" },
-    { id: "github", name: "GitHub Sponsors", url: "", bild: "💜" },
-    { id: "qr", name: "Banküberweisung (QR-Rechnung)", url: "", bild: "🏦" }, // url = Pfad zum Bild/PDF der QR-Rechnung
-  ];
-  ```
+  Einträge `kaffee`, `github`, `qr` mit `bild`, `name`, `text`, `url`; bei `qr` ist `url` der Pfad zum Bild der
+  QR-Rechnung relativ zu `portal/` (die Seite zeigt das Bild zum Scannen).
 
   **Leer = unsichtbar.** Aktivieren heisst: `url` eintragen, committen, pushen — sonst nichts.
-- **Wo es erscheint:** im Portal eine kleine Zeile in der Fusszeile „☕ Eulenpfad unterstützen“ (öffnet eine kurze
+- **Wo es erscheint:** im Portal eine kleine Zeile in der Fusszeile „☕ Eulenpfad unterstützen“ (öffnet die kurze
   Seite `portal/unterstuetzen.html` mit den aktiven Möglichkeiten, dem Satz „freiwillig, alle Spiele bleiben für alle
-  gleich“ und dem Hinweis, dass die Links zu fremden Seiten führen); in der Anleitung für Erwachsene ein Abschnitt; in
-  der Verwaltung (nur Aufsicht) ein Verweis. Nirgends für Kinder.
-- **Prüfung im Testskript:** keine Beitrags-Links in Spielseiten oder in Tabs, die Kinder sehen.
+  gleich“ und dem Hinweis, dass die Links zu fremden Seiten führen); in der Anleitung für Erwachsene ein Abschnitt vor
+  den häufigen Fragen; in der Verwaltung unter Einstellungen (nur Aufsicht) ein Verweis. Nirgends für Kinder.
+- **Prüfung im Testskript** (`tools/pruefe_spiele.js`): Im App-Ordner dürfen nur `start/verwaltung.js` und
+  `anleitung/aufsicht.html` auf `unterstuetzen.html` verweisen.
 
 ## 5. Einrichten, Schritt für Schritt
 

@@ -1,5 +1,23 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
+## HALTEPUNKT 2026-11-03 16:58 — LERN_Session11_2026-11-03_anleitungen-portal (aufgenommen 2026-11-03)
+Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
+
+- **Angehalten — beim Weitermachen neu starten:** Vorschau-Server `lernspiele-3` (Port 8769, nur für Browser-Prüfungen)
+  beendet; bei Bedarf mit preview_start `lernspiele-3` neu. Sonst war nichts aktiv (drei Bau-Agenten fertig, alle
+  Hintergrundläufe ausgewertet). Der Server auf Port 8765 gehört Patrik und läuft weiter.
+- **Stand:** Arbeitsbaum sauber, letzter Commit `6066f1c` (G3b, G11, Anleitungen Internet-Server und freiwillige
+  Beiträge). Voller Testlauf nach den Strategie-Rätseln: 168 Spiele „Keine Fehler.“; seither nur Doku und eine
+  Konstante in Steine fangen (A–I, Einzeltest „Keine Fehler.“).
+- **Weiter mit:**
+  1. **Beitrags-Links bauen** (LERN-50) nach `docs/anleitung_freiwillige_beitraege.md`, Abschnitt 4: `portal/unterstuetzen.js`
+     (leere `url` = unsichtbar), Fusszeile im Portal „☕ Eulenpfad unterstützen“ → `portal/unterstuetzen.html`, Abschnitt
+     in der Anleitung für Erwachsene, Verweis in der Verwaltung (nur Aufsicht), Prüfung im Testskript „keine
+     Beitrags-Links in Spielen und Kinder-Tabs“; Pages-Workflow prüfen, ob `portal/` mit neuen Dateien ausgeliefert wird.
+  2. Danach Session-Abschluss (Report LERN_Session11, Handover-Stand, Changelog) — mit `session-abschluss`.
+- **Offen bei Patrik:** Strategie-Rätsel ansehen und freigeben (gesperrt bis angesehen; Prüfliste Teil 83); Konzept
+  Gruppen ist entschieden, Bau noch nicht beauftragt; Steuern und Impressum zu den Beiträgen klären (Anleitung Abschnitt 3).
+
 ## Stand
 **2026-11-03, nach LERN_Session10** ([Report](report/LERN_Session10_2026-11-03.md)):
 - **Spiele:** 165 (15 neu: Runde B 3. Klasse T1–T8 und Runde C S8, S9, S14, S15, T9–T11; Lernziele und Annahmen in
@@ -172,5 +190,5 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-46 | Teilen eines Abzeichens auf Tablet und Handy prüfen (Teilen-Dialog, Emoji im PNG) | offen | start/erfolge.js, `teileAbzeichen` |
 | LERN-47 | Weitere Sektion im Portal für ein Publikum ausserhalb der Schulstufen, Arbeitsname „Eulerpfad“ (R1 a) | später | Report LERN_Session11 |
 | LERN-48 | Gruppen: Familie, Klasse, Lerngruppe; Rolle Lehrperson, Klassenstatistik, Abgleich je Gruppe verschlüsselt | offen (Entscheide G1–G11 und G3b getroffen 2026-11-03, Bau ausstehend) | docs/konzept_gruppen.md, Abschnitt 9; docs/anleitung_zertifikat_klassenserver.md; docs/anleitung_klassenserver_internet.md; umfasst LERN-34 |
-| LERN-50 | Freiwillige Beiträge (Kaffee-Link, QR-Rechnung, GitHub Sponsors) nur für Erwachsene; Links leer bis aktiviert | offen (Anleitung steht, Bau ausstehend; Steuern und Impressum klären) | docs/anleitung_freiwillige_beitraege.md |
+| LERN-50 | Freiwillige Beiträge (Kaffee-Link, QR-Rechnung, GitHub Sponsors) nur für Erwachsene; Links leer bis aktiviert | in Arbeit seit 2026-11-03 (LERN_Session11); vorbereitet, Links leer — Patrik trägt sie ein, Steuern und Impressum klären | docs/anleitung_freiwillige_beitraege.md; portal/unterstuetzen.js |
 | LERN-49 | Strategie-Rätsel im Eulenpfad (Matt in 1, Atari-Go, Nim); ganze Partien Schach und Go erst im Lernsteig (S1 a) | in Arbeit seit 2026-11-03 (LERN_Session11); drei Spiele gebaut, Annahmen offen | lernziele/lehrplan_sg_session11.md; spielideen/strategie_raetsel.md |
