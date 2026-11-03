@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hör-Geschichte</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  /* Die Geschichte liegt wie ein aufgeschlagenes Buch auf der Bühne: cremefarbene Seite, Lesezeichen oben rechts. */
+  .hg-buch {
+    position: relative; max-width: 680px; margin: 0 auto 14px; padding: 14px 16px 12px;
+    background: var(--karte); border: 3px solid var(--rand); border-radius: 20px; box-shadow: var(--schatten);
+  }
+  .hg-buch::after {
+    content: "🔖"; position: absolute; top: -6px; right: 14px; font-size: clamp(26px, 6vw, 34px); line-height: 1;
+  }
+  .hg-titel { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 900; color: var(--deko-2); margin: 0 0 6px; padding-right: 36px; }
+  .hg-ohr { text-align: center; font-size: clamp(54px, 13vw, 80px); line-height: 1.1; margin: 2px 0 6px; }
+  .hg-ohr.spricht { animation: hg-lauschen 1.3s ease-in-out infinite; }
+  @keyframes hg-lauschen { 50% { transform: scale(1.12) rotate(-6deg); } }
+  .hg-hoer {
+    display: block; margin: 0 auto; border: none; border-radius: 18px; padding: 12px 22px; min-height: 56px;
+    font: inherit; font-size: clamp(18px, 4vw, 22px); font-weight: 800; background: var(--deko-2); color: #fff;
+    box-shadow: 0 5px 0 rgba(45, 48, 71, .25); cursor: pointer;
+  }
+  .hg-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(45, 48, 71, .25); }
+  .hg-hoer:disabled { opacity: .45; cursor: default; }
+  .hg-text {
+    margin: 12px 0 0; padding: 12px 14px; border-radius: 14px; background: var(--himmel-unten);
+    font-size: clamp(17px, 3.8vw, 22px); line-height: 1.55;
+  }
+  .hg-ohne { max-width: 680px; margin: 0 auto 10px; padding: 8px 14px; border-radius: 14px; background: var(--hinweis-hell);
+    font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; }
+  .hg-vorschau { max-width: 680px; margin: 0 auto 14px; padding: 10px 14px 10px 36px; border: 3px dashed var(--deko-4);
+    border-radius: 16px; font-size: clamp(16px, 3.6vw, 20px); font-weight: 700; }
+  .hg-vorschau b { display: block; margin-left: -22px; color: var(--text-leise); font-size: 15px; }
+  .hg .frage { text-align: center; font-size: clamp(19px, 4.2vw, 25px); font-weight: 800; margin: 4px 0 12px; }
+  .hg-nr { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin: 0; }
+  .hg-nr span { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--rand); }
+  .hg-erledigt { max-width: 680px; margin: 0 auto 8px; padding: 0; list-style: none; font-size: clamp(15px, 3.4vw, 18px); }
+  .hg-erledigt li { padding: 4px 10px; margin: 0 0 4px; border-radius: 10px; background: var(--gut-hell); }
+  .hg-wahl .wahl-knopf { font-size: clamp(16px, 3.6vw, 21px); font-weight: 800; }
+  .hg-wahl.bilder .wahl-knopf { min-height: 96px; }
+  .hg-wahl.bilder .wahl-knopf .bild { font-size: clamp(40px, 10vw, 54px); }
+  .hg-fragen .ablage { margin-bottom: 10px; }
+  .hg-los { display: flex; justify-content: center; margin: 0 0 12px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>👂 Hör-Geschichte</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="geschichten.js"></script>
+<script>
+"use strict";
+// Lehrplan D.1.B.1 (Hörverstehen), Basisklasse 3. Annahme (aus der Spielidee, nicht am Lehrplan belegt):
+// D.1.B.1.d = globales Hörverständnis in kurzen erzählten Geschichten — Wer? Wo? Was passiert?
+//   s1 2. Klasse (Annahme D.1.B.1.c): sehr kurze Geschichte (drei Sätze), eine Frage mit Bild-Antworten.
+//   s2 3. Klasse, leichter (Annahme D.1.B.1.c → d): Hörerwartung — die Fragen stehen schon vor dem Hören da;
+//      zwei Fragen mit Bild-Antworten.
+//   s3 Klassenziel (Annahme D.1.B.1.d): Geschichte mit 40–70 Wörtern, danach drei Fragen mit Textantworten:
+//      Wer? Wo? Was passiert?
+//   s4 schwerer (Annahme D.1.B.1.d): dazu die Reihenfolge von drei Ereignissen („Was passierte zuerst?“,
+//      LS.reihenfolge) oder eine Warum-Frage.
+//   s5 4. Klasse (Annahme D.1.B.1.e): längere Geschichte (60–90 Wörter), drei Fragen, eine davon zum
+//      Erschliessen (steht nicht wörtlich im Text).
+//   s6 Königsstufe (Annahme D.1.B.1.e/f): dazu „Welcher Titel passt am besten?“ und „Wie geht die Geschichte
+//      wohl weiter?“ — vier Fragen; der Titel der Geschichte bleibt verborgen.
+// Die Stimme erzählt die Geschichte (LS.sprich, de-CH bevorzugt); der Text ist dabei nicht zu sehen,
+// „Nochmal hören“ geht immer. Die Uhr startet erst, wenn die Stimme fertig ist (ctx.uhrWarten).
+// Ohne deutsche Stimme oder mit Ton aus: Geschichte lesen statt hören, mit Hinweis (dann übt das Spiel
+// Leseverstehen, nicht Hören). Die Eule liest die Fragen nicht vor (Katalog vorlesen: false).
+// Abgrenzung: Der Hör-Reporter (6) hört Berichte und Durchsagen und erschliesst Verstecktes; hier sind es
+// kurze Geschichten für die 3. Klasse mit Figuren, Ort, Ereignis und Reihenfolge. Lese-Detektiv (2) übt
+// Lesen. Geschichten in geschichten.js (Liste „geschichten“), selbst geschrieben.
+
+const { waehle, mische, el } = LS;
+const ID = "hoer-geschichte";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["geschichten"]);
+const GESCHICHTEN = FREI.has("geschichten") ? HOER_GESCHICHTEN : [];
+
+const IM_TEXT = ["wer", "wo", "was", "warum"];
+const W3 = ["wer", "wo", "was"];
+/** Je Stufe: Gruppe der Geschichten, Fragen vorher zeigen, Antworten mit Bild, Plätze (erlaubte Arten). */
+const STUFE = {
+  s1: { gruppe: 1, bilder: true, plaetze: [W3] },
+  s2: { gruppe: 2, bilder: true, vorher: true, plaetze: [W3, W3] },
+  s3: { gruppe: 2, plaetze: [["wer"], ["wo"], ["was"]] },
+  s4: { gruppe: 2, plaetze: [W3, W3, ["reihenfolge", "warum"]] },
+  s5: { gruppe: 3, plaetze: [W3, W3, ["schluss"]] },
+  s6: { gruppe: 3, plaetze: [W3, ["schluss"], ["titel"], ["weiter"]] },
+};
+const WORTZAHL = { 1: [25, 40], 2: [40, 70], 3: [60, 90] };
+
+const vorrat = stufe => GESCHICHTEN.filter(g => g.gruppe === STUFE[stufe].gruppe);
+
+/** Bild-Antwort „🧒 Lina“ → { bild: "🧒", text: "Lina" }; ohne Bild bleibt der Text ganz. */
+const BILD = /^([\p{Extended_Pictographic}️‍\u{1F3FB}-\u{1F3FF}]+)\s+(\S.*)$/u;
+function teile(antwort) {
+  const m = antwort.match(BILD);
+  return m ? { bild: m[1], text: m[2] } : { bild: "", text: antwort };
+}
+
+/** Eine Geschichte mit den Fragen der Stufe (in der Reihenfolge der Geschichte, die Reihenfolge-Frage zuletzt). */
+function aufgabeErzeugen(stufe) {
+  const liste = vorrat(stufe);
+  if (!liste.length) return null;
+  const g = waehle(liste);
+  const genommen = new Set();
+  for (const arten of STUFE[stufe].plaetze) {
+    const frei = g.fragen.map((f, i) => i).filter(i => !genommen.has(i) && arten.includes(g.fragen[i][0]));
+    if (frei.length) genommen.add(waehle(frei));
+  }
+  const fragen = [...genommen].sort((x, y) => x - y).map(i => {
+    const [art, frage, richtig, ...falsch] = g.fragen[i];
+    if (art === "reihenfolge") return { art, frage, reihe: richtig };
+    return { art, frage, richtig, optionen: mische([richtig, ...falsch]) };
+  });
+  // Die Reihenfolge-Frage schliesst die Aufgabe ab (LS.reihenfolge ruft ctx.richtig), darum zuletzt.
+  fragen.sort((x, y) => (x.art === "reihenfolge") - (y.art === "reihenfolge"));
+  return { titel: g.titel, text: g.text, gruppe: g.gruppe, fragen };
+}
+
+/** Inhaltswörter ab drei Buchstaben, klein — für die Prüfung „steht in der Geschichte“. */
+const KLEINWOERTER = new Set(["der", "die", "das", "den", "dem", "des", "ein", "eine", "einen", "einem", "einer", "und", "mit",
+  "von", "zum", "zur", "aus", "auf", "für", "sie", "ihr", "ihm", "ist", "war", "hat", "seine", "seinen", "ihre", "ihren"]);
+const woerter = t => (t.toLowerCase().match(/\p{L}{3,}/gu) || []).filter(w => !KLEINWOERTER.has(w));
+/** Kommt das Wort in der Geschichte vor, auch gebeugt (Schlitten — Schlittens, Igel — Igels)? */
+const imText = (w, textWoerter) => textWoerter.some(t => t.startsWith(w) || (w.startsWith(t) && t.length >= 4));
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  const p = STUFE[stufe];
+  if (a.gruppe !== p.gruppe) m.push(`Geschichte der Gruppe ${a.gruppe} in ${stufe}`);
+  const quelle = GESCHICHTEN.find(g => g.titel === a.titel && g.text === a.text);
+  if (!quelle) m.push("Geschichte nicht aus einer freien Liste");
+  if (new Set(GESCHICHTEN.map(g => g.titel)).size !== GESCHICHTEN.length) m.push("Titel nicht eindeutig");
+  if (a.fragen.length !== p.plaetze.length) m.push(`${a.fragen.length} statt ${p.plaetze.length} Fragen`);
+  if (new Set(a.fragen.map(f => f.frage)).size !== a.fragen.length) m.push("eine Frage doppelt");
+  // Jeder Platz der Stufe bekommt eine Frage passender Art (Zuordnung der Reihe nach, wie im Generator).
+  const offen = [...a.fragen];
+  for (const arten of p.plaetze) {
+    const i = offen.findIndex(f => arten.includes(f.art));
+    if (i < 0) m.push(`keine Frage der Art ${arten.join("/")}`); else offen.splice(i, 1);
+  }
+  const textWoerter = woerter(a.text);
+  a.fragen.forEach((f, i) => {
+    if (f.art === "reihenfolge") {
+      if (i !== a.fragen.length - 1) m.push("Reihenfolge-Frage nicht zuletzt");
+      if (!Array.isArray(f.reihe) || f.reihe.length !== 3 || new Set(f.reihe).size !== 3) m.push("Reihenfolge: nicht drei verschiedene Ereignisse");
+      else if (f.reihe.some(e => !String(e).trim() || e.length > 70)) m.push("Reihenfolge: Ereignis leer oder zu lang");
+      return;
+    }
+    const maxLaenge = ["schluss", "weiter"].includes(f.art) ? 90 : 70;
+    if (f.optionen.length !== 3 || new Set(f.optionen).size !== 3) m.push(`„${f.frage}“: nicht drei verschiedene Antworten`);
+    if (f.optionen.filter(o => o === f.richtig).length !== 1) m.push(`„${f.frage}“: richtige Antwort nicht genau einmal`);
+    if (f.optionen.some(o => !o.trim() || o.length > maxLaenge)) m.push(`„${f.frage}“: Antwort leer oder zu lang`);
+    if (new Set(f.optionen.map(o => teile(o).text)).size !== 3) m.push(`„${f.frage}“: zwei Antworten mit gleichem Wort`);
+    // Was in der Geschichte steht, muss man darin auch finden: ein Wort der Antwort kommt vor.
+    if (IM_TEXT.includes(f.art) && !woerter(f.richtig).some(w => imText(w, textWoerter))) m.push(`„${f.frage}“: Antwort steht nicht in der Geschichte`);
+    // Bild-Antworten (Gruppe 1 und 2, wer/wo/was): jede Antwort beginnt mit einem Bildzeichen.
+    if (a.gruppe <= 2 && W3.includes(f.art) && f.optionen.some(o => !teile(o).bild)) m.push(`„${f.frage}“: Antwort ohne Bild`);
+    if (f.art === "titel" && f.richtig !== a.titel) m.push("Titel-Frage: richtige Antwort ist nicht der Titel der Geschichte");
+  });
+  const laenge = a.text.split(/\s+/).length;
+  const [min, max] = WORTZAHL[a.gruppe];
+  if (laenge < min || laenge > max) m.push(`Geschichte mit ${laenge} Wörtern (Gruppe ${a.gruppe}: ${min}–${max})`);
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  return m;
+}
+
+// Hinweise je Art der Frage: nie die Antwort, nur worauf man hören soll.
+const HINWEIS = {
+  wer: "Von welcher Person ist in der Geschichte die Rede? Achte auf die Namen.",
+  wo: "Achte darauf, an welchem Ort die Geschichte spielt.",
+  was: "Hör genau hin, was in der Geschichte passiert.",
+  warum: "Achte auf Wörter wie weil, darum oder damit.",
+  reihenfolge: "Überleg: Womit fängt die Geschichte an? Was kommt danach? Was ganz am Ende?",
+  schluss: "Das steht nicht wörtlich in der Geschichte. Überleg: Was passt zu dem, was du gehört hast?",
+  titel: "Ein guter Titel passt zur ganzen Geschichte, nicht nur zu einem kleinen Teil.",
+  weiter: "Die Fortsetzung muss zum Schluss der Geschichte passen — und zu allem, was vorher passiert ist.",
+};
+
+const STUFEN_TEXT = {
+  s1: "Eine ganz kurze Geschichte und eine Frage mit Bildern: Wer? Wo? Was?",
+  s2: "Erst die Fragen anschauen, dann hören — zwei Fragen mit Bildern.",
+  s3: "Eine längere Geschichte, danach drei Fragen: Wer? Wo? Was passiert?",
+  s4: "Dazu: Was passierte zuerst? Oder: Warum?",
+  s5: "Längere Geschichten; eine Antwort steht nicht wörtlich im Text.",
+  s6: "Endgegner: Welcher Titel passt? Wie geht es wohl weiter?",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => vorrat(s).length));
+
+/** Gibt es schon eine deutsche Stimme? (Manche Browser laden sie erst nach.) */
+function deutscheStimmeDa() {
+  try { return speechSynthesis.getVoices().some(v => (v.lang || "").toLowerCase().startsWith("de")); } catch { return false; }
+}
+
+/**
+ * Tipps vor dem Antworten (ctx.tipp): beim Hören Strategien nach den Fragearten der Stufe, danach je Frage
+ * der Hinweis ihrer Art (ctx.tipp neu gesetzt, sobald die Frage erscheint). Sie verraten nichts aus der Geschichte.
+ */
+const NOCHMAL = "Hör die Geschichte nochmal (🔊).";
+function tippsFuer(stufe) {
+  const p = STUFE[stufe];
+  const arten = new Set(p.plaetze.flat());
+  const t = [];
+  if (p.vorher) t.push("Schau die Fragen vorher gut an: Dann weisst du, worauf du beim Hören achten musst.");
+  else t.push("Achte beim Hören darauf: Wer kommt vor? Wo spielt es? Was passiert?");
+  if (arten.has("reihenfolge")) t.push("Merk dir, was zuerst passiert und was am Schluss.");
+  else if (arten.has("warum")) t.push("Bei «Warum» helfen Wörter wie weil, darum oder damit.");
+  if (arten.has("schluss") && t.length < 3) t.push("Nicht jede Antwort steht wörtlich in der Geschichte. Überleg: Was passt zu dem, was du gehört hast?");
+  if (arten.has("titel") && t.length < 3) t.push("Frag dich am Ende: Worum ging es in der ganzen Geschichte?");
+  return [...t.slice(0, 2), NOCHMAL];
+}
+
+const SPIEL = {
+  id: ID,
+  hilfe: stufe => (STUFE[stufe]?.vorher ? "Schau zuerst die Fragen an. " : "")
+    + "Die Eule erzählt dir eine Geschichte. Hör gut zu! Danach kommen die Fragen, eine nach der anderen — tipp die richtige Antwort an. Mit „🔊 Nochmal hören“ hörst du die Geschichte noch einmal."
+    + (stufe === "s4" ? " Bei „Was passierte zuerst?“ tippst du die drei Dinge der Reihe nach an." : "")
+    + " Hat das Gerät keine deutsche Stimme, liest du die Geschichte selbst (📖).",
+  einleitung: "Setz dich bequem hin und spitz die Ohren! Die Eule erzählt dir eine kurze Geschichte. Danach fragt sie: Wer? Wo? Was ist passiert? Mit 🔊 hörst du die Geschichte nochmal.",
+  anzahl: 4,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    if (ctx.nr === 0) ctx.sag(p.vorher
+      ? "Schau zuerst die Fragen an. Dann hör gut zu. Mit 🔊 hörst du die Geschichte nochmal."
+      : "Hör gut zu! Die Fragen kommen nach der Geschichte. Mit 🔊 hörst du sie nochmal.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.kennung(a.titel);
+    ctx.tipp(tippsFuer(ctx.stufe));
+    const loesung = a.fragen.map(f => `${f.frage} ${f.art === "reihenfolge" ? f.reihe.join(" → ") : teile(f.richtig).text}`).join(" · ");
+    ctx.loesung(loesung);
+    ctx.schritte(a.fragen.filter(f => f.art !== "reihenfolge").length); // die Reihenfolge zählt der Baustein selbst
+    const ohneTitel = a.fragen.some(f => f.art === "titel"); // Königsstufe: der Titel wird gesucht
+
+    const hg = el("div", { class: "hg" });
+    ctx.flaeche.append(hg);
+    const auftrag = el("div", { class: "auftrag", text: p.vorher ? "👂 Schau die Fragen an. Dann hör gut zu!" : "👂 Hör gut zu!" });
+    const buch = el("div", { class: "hg-buch" });
+    const titel = el("div", { class: "hg-titel", text: ohneTitel ? "📖 Eine Geschichte ohne Titel" : `📖 ${a.titel}` });
+    const ohr = el("div", { class: "hg-ohr", "aria-hidden": "true", text: "👂" });
+    const hoer = el("button", { type: "button", class: "hg-hoer", text: "🔊 Nochmal hören", "aria-label": "Die Geschichte nochmal hören" });
+    const textBox = el("div", { class: "hg-text", hidden: "", text: a.text });
+    buch.append(titel, ohr, hoer, textBox);
+    const erledigt = el("ul", { class: "hg-erledigt" });
+    const fragenBox = el("div", { class: "hg-fragen" });
+    hg.append(auftrag, buch);
+    if (p.vorher) {
+      const vorschau = el("ol", { class: "hg-vorschau" }, el("b", { text: "Darauf achtest du:" }));
+      for (const f of a.fragen) vorschau.append(el("li", { text: f.frage }));
+      hg.append(vorschau);
+    }
+    hg.append(erledigt, fragenBox);
+
+    let modus = "hoeren"; // oder "lesen": ohne Stimme oder mit Ton aus
+    let fragenDa = false;
+    let nrFrage = 0;
+    const tipp = () => (modus === "hoeren" ? " Tipp auf 🔊." : " Tipp auf 📖.");
+    const LOB = ["Super zugehört!", "Du hast die Geschichte genau verstanden!", "Alles richtig — ein echtes Hör-Ass!"];
+
+    const fragenZeigen = () => {
+      if (fragenDa || !ctx.flaeche.contains(hg)) return;
+      fragenDa = true;
+      ohr.classList.remove("spricht");
+      ohr.remove();
+      auftrag.textContent = a.fragen.length > 1 ? "❓ Beantworte die Fragen." : "❓ Beantworte die Frage.";
+      zeigeFrage();
+    };
+
+    const zeigeFrage = () => {
+      const f = a.fragen[nrFrage];
+      fragenBox.textContent = "";
+      ctx.tipp([HINWEIS[f.art], NOCHMAL]);
+      fragenBox.append(el("p", { class: "hg-nr" }, el("span", { text: `Frage ${nrFrage + 1} von ${a.fragen.length}` })),
+        el("div", { class: "frage", text: f.frage }));
+      if (f.art === "reihenfolge") {
+        // Der Baustein hängt Ablage und Knöpfe an die Fläche; sie wandern in die Fragen-Box. Er schliesst die Aufgabe ab.
+        const { ablage, box } = LS.reihenfolge(ctx, {
+          reihe: f.reihe, loesung, lob: waehle(LOB), pfeile: true, breite: 220,
+          hinweis: () => HINWEIS.reihenfolge + tipp(),
+        });
+        box.classList.add("hg-wahl");
+        fragenBox.append(ablage, box);
+        return;
+      }
+      const wahl = el("div", { class: "wahl hg-wahl" + (p.bilder ? " bilder" : "") });
+      wahl.style.setProperty("--wahl-breite", p.bilder ? "150px" : "230px");
+      const sperren = () => wahl.querySelectorAll("button").forEach(b => { b.disabled = true; });
+      for (const o of f.optionen) {
+        const { bild, text } = teile(o);
+        const mitBild = p.bilder && bild;
+        const k = el("button", { type: "button", class: "wahl-knopf" });
+        if (mitBild) k.append(el("span", { class: "bild", text: bild }));
+        k.append(el("span", { text }));
+        k.addEventListener("click", () => {
+          if (ctx.vorbei() || k.disabled || k.classList.contains("gewaehlt")) return;
+          if (o === f.richtig) {
+            k.classList.add("richtig");
+            sperren();
+            if (nrFrage === a.fragen.length - 1) return ctx.richtig(waehle(LOB));
+            LS.ton("tipp");
+            erledigt.append(el("li", { text: `✓ ${f.frage} ${text}` }));
+            nrFrage++;
+            zeigeFrage();
+            return;
+          }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+          ctx.falsch(HINWEIS[f.art] + tipp(), loesung);
+          if (ctx.vorbei()) {
+            sperren();
+            const r = teile(f.richtig);
+            [...wahl.children].find(b => b.textContent === (mitBild ? r.bild : "") + r.text)?.classList.add("richtig");
+          }
+        });
+        wahl.append(k);
+      }
+      fragenBox.append(wahl);
+    };
+
+    // Ohne Stimme (oder Ton aus): Geschichte lesen statt hören. Die Uhr startet, wenn das Kind „Gelesen“ tippt.
+    const uhrLos = ctx.uhrWarten();
+    const lesenStatt = () => {
+      if (modus === "lesen") return;
+      modus = "lesen";
+      ohr.remove();
+      hoer.textContent = "📖 Text zeigen";
+      hoer.setAttribute("aria-label", "Die Geschichte nochmal lesen");
+      const tonAus = LS.lies("ton", true) === false;
+      hg.insertBefore(el("p", { class: "hg-ohne", text: tonAus
+        ? "🔇 Der Ton ist aus. Lies die Geschichte darum leise und genau durch — oder schalte oben den Ton ein."
+        : "📖 Dieses Gerät hat keine deutsche Stimme. Lies die Geschichte darum leise und genau durch." }), buch);
+      textBox.hidden = false;
+      if (fragenDa) return;
+      auftrag.textContent = "📖 Lies die Geschichte genau.";
+      hoer.disabled = true;
+      const gelesen = el("button", { type: "button", class: "knopf gruen", text: "✔ Gelesen — zu den Fragen" });
+      gelesen.addEventListener("click", () => {
+        gelesen.parentElement.remove();
+        textBox.hidden = true;
+        hoer.disabled = false;
+        fragenZeigen();
+        uhrLos();
+      });
+      hg.insertBefore(el("div", { class: "hg-los" }, gelesen), erledigt);
+    };
+
+    hoer.addEventListener("click", () => {
+      if (modus === "lesen") {
+        textBox.hidden = !textBox.hidden;
+        hoer.textContent = textBox.hidden ? "📖 Text zeigen" : "🙈 Text verbergen";
+        return;
+      }
+      if (!LS.sprich(a.text, "de")) lesenStatt();
+    });
+
+    // Erzählen kurz nach dem Zeichnen (ein Satz der Eule gleich beim Zeichnen würde die Geschichte sonst abbrechen).
+    // Danach Fragen zeigen und die Uhr starten.
+    setTimeout(() => {
+      if (!ctx.flaeche.contains(hg)) return; // neu gezogen oder schon weiter
+      let gesprochen = false;
+      gesprochen = LS.sprich(a.text, "de", "", () => { if (gesprochen) { fragenZeigen(); uhrLos(); } });
+      if (gesprochen) ohr.classList.add("spricht"); else lesenStatt();
+    }, 450);
+  },
+};
+
+// Startet sofort, wenn eine deutsche Stimme da ist; sonst wartet es kurz auf sie (manche Browser laden
+// die Stimmen nach) und startet dann trotzdem — ohne Stimme wird gelesen statt gehört.
+if (deutscheStimmeDa()) LS.spiel(SPIEL);
+else LS.stimmeBereit("de").then(() => LS.spiel(SPIEL));
+</script>
+</body>
+</html>

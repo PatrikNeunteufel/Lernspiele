@@ -5,7 +5,7 @@ wird im Entwickler-Modus (Spiel angesehen, Inhaltsliste geprüft; schreibt `eule
 Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
 `docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
-**Stand:** 150 Spiele gebaut, 2 Ideen offen · für Kinder frei: 35 von 150 · 3 von 94 neuen Spielen angesehen · 3 von 203 Inhaltslisten geprüft.
+**Stand:** 158 Spiele gebaut, 2 Ideen offen · für Kinder frei: 38 von 158 · 6 von 102 neuen Spielen angesehen · 3 von 210 Inhaltslisten geprüft.
 
 Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit
 Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.
@@ -40,8 +40,8 @@ Je gebautem Spiel:
 
 #### Zahlen ordnen
 
-- [x] **Finger-Zähler** (`finger-zaehler`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Finger-Zähler** (`finger-zaehler`) — für Kinder frei
+  - [x] angesehen 2026-11-02 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 - [x] **Muster-Fortsetzer** (`muster-fortsetzer`) — für Kinder frei
 - [x] **Punkte-Blitz** (`punkte-blitz`) — für Kinder frei
@@ -239,10 +239,24 @@ Je gebautem Spiel:
 #### Grössen
 
 - [x] **Masse-Umwandler** (`masse-umwandler`) — für Kinder frei
+- [x] **Zeit-Schätzer** (`zeit-schaetzer`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Tätigkeiten mit ungefährer Dauer und Zeitpunkte)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
 
 #### Form und Raum
 
 - [x] **Koordinaten-Schatzsuche** (`koordinaten-schatz`) — für Kinder frei
+- [x] **Würfel-Zähler** (`wuerfel-zaehler`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
+
+#### Sachrechnen
+
+- [x] **Platzhalter-Geschichten** (`platzhalter-geschichten`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Geschichten mit Platzhalter-Gleichungen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
 
 ### Deutsch
 
@@ -264,6 +278,24 @@ Je gebautem Spiel:
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 6 Listen (offen: Nomen mit Bild zum Ordnen nach dem ABC (Liste von ABC-Sortierer); Sätze ohne Nomen: Satzanfang und Punkt (Liste von Satz-Reparatur); Sätze mit Namen und konkreten Nomen (Liste von Satz-Reparatur); Sätze mit abstrakten Nomen, Frage- und Ausrufesätze (Liste von Satz-Reparatur); Längere Sätze mit mehreren Nomen (Liste von Satz-Reparatur); Zwei Sätze hintereinander (Liste von Satz-Reparatur))
 
+#### Zuhören
+
+- [x] **Gefühle-Radar** (`gefuehle-radar`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Gesichter, Sätze und Situationen mit Gefühl)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
+- [x] **Hör-Geschichte** (`hoer-geschichte`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Kurze Geschichten zum Vorlesen mit Fragen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
+
+#### Erzählen
+
+- [x] **Geschichten-Ordner** (`geschichten-ordner`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Kurze Geschichten in Schritten)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
+
 ### NMG
 
 #### Himmel
@@ -275,6 +307,20 @@ Je gebautem Spiel:
 - [x] **Tier-Sortierer** (`tier-sortierer`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
   - [ ] Inhalte geprüft: 0 von 3 Listen (offen: Tierklassen (Säugetier, Vogel, Fisch … Insekt, Spinnentier) inkl. knifflige Tiere; Gruppen der Säugetiere (Nagetier, Raubtier, Paarhufer …); Wildtier, Nutztier oder Heimtier)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session2.md`
+
+#### Körper und Ernährung
+
+- [x] **Auge-Entdecker** (`auge-entdecker`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Teile des Auges mit Aufgabe und Fragen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
+
+#### Gemeinschaft
+
+- [x] **Gemeinde-Helfer** (`gemeinde-helfer`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Anliegen, Einrichtungen, Notrufnummern, zuständige Stellen und Abläufe)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
 
 ### Musik
 
@@ -306,16 +352,16 @@ Je gebautem Spiel:
 
 #### Rechnen
 
-- [x] **Malkreuz** (`malkreuz`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Malkreuz** (`malkreuz`) — für Kinder frei
+  - [x] angesehen 2026-11-02 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Rechen-Maschine** (`rechen-maschine`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Rechen-Rakete** (`rechen-rakete`) — für Kinder frei
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`, `lehrplan_sg_session9.md`
-- [x] **Rechentrick-Detektiv** (`rechentrick-detektiv`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Rechentrick-Detektiv** (`rechentrick-detektiv`) — für Kinder frei
+  - [x] angesehen 2026-11-02 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`, `lehrplan_sg_session8.md`
 - [x] **Schriftlich-Werkstatt** (`schriftlich-werkstatt`) — für Kinder frei
   - [x] angesehen 2026-11-01 · Patrik
@@ -358,7 +404,7 @@ Je gebautem Spiel:
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Würfelbau-Blick** (`wuerfelbau-blick`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
-  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`, `lehrplan_sg_session3.md`
 
 ### Englisch
 

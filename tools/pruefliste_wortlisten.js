@@ -507,6 +507,69 @@ for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE5) {
   tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
 }
 
+// LERN_Session10, Runde B: 3. Klasse
+const PG = lade("spiele/platzhalter-geschichten/geschichten.js", ["PLATZHALTER_GESCHICHTEN"]).PLATZHALTER_GESCHICHTEN;
+const ZSCH = lade("spiele/zeit-schaetzer/taetigkeiten.js", ["ZS_TAETIGKEITEN", "ZS_ZEITPUNKTE", "ZS_DAUERN"]);
+const AE = lade("spiele/auge-entdecker/teile.js", ["AUGE_TEILE", "AUGE_PUPILLE", "AUGE_AUGEN", "AUGE_AUSSAGEN", "AUGE_WARUM", "AUGE_LICHTWEG"]);
+const GH = lade("spiele/gemeinde-helfer/anliegen.js", ["GEMEINDE_EINRICHTUNGEN", "GEMEINDE_ANLIEGEN", "GEMEINDE_NOTRUF", "GEMEINDE_NOTRUF_EUROPA", "GEMEINDE_STELLEN", "GEMEINDE_STELLEN_ANLIEGEN", "GEMEINDE_EBENEN", "GEMEINDE_ABLAEUFE"]);
+const GS = lade("spiele/gefuehle-radar/situationen.js", ["GS_GEFUEHLE", "GS_BILDER", "GS_SAETZE", "GS_SITUATIONEN", "GS_KOERPER", "GS_GESPRAECHE", "GS_PAARE", "GS_REAKTIONEN"]);
+const GO = lade("spiele/geschichten-ordner/geschichten.js", ["GESCHICHTEN"]).GESCHICHTEN;
+const HG = lade("spiele/hoer-geschichte/geschichten.js", ["HOER_GESCHICHTEN"]).HOER_GESCHICHTEN;
+/** Fragen „Art: Frage → richtig (falsch: …)“; richtig darf eine Liste sein (Reihenfolge). */
+const fragenText6 = fragen => fragen.map(([art, frage, richtig, ...falsch]) =>
+  `${art}: ${frage} → ${zelle(richtig)}${falsch.length ? ` (falsch: ${falsch.map(zelle).join("; ")})` : ""}`).join("<br>");
+/** Platzhalter-Vorlagen: je Variante eine Zeile. */
+const pgZeilen = PG.flatMap(g => (g.varianten || [g]).map(v => [g.g, g.bild || "", v.text, zelle(v.gl), zelle(g.zahlen), g.abgeleitet ? zelle(g.abgeleitet) : ""]));
+const gsName = id => GS.GS_GEFUEHLE.find(g => g.id === id)?.wort || id;
+const RUNDE6 = [
+  ["70. Platzhalter-Geschichten (Lehrplan SG MA.3.C.2, MA.3.C.3)", "platzhalter-geschichten/geschichten", "Vorlagen mit Platzhalter-Gleichungen",
+    "Selbst geschrieben. {a}, {b} … werden durch Zahlen aus den Bereichen ersetzt; [x] ist die Lücke. Gruppe 1 bis 20, 2 bis 100, 3 bis 1000, 4 Zweischritt bis 10 000.",
+    ["Gruppe", "Bild", "Text", "Gleichung", "Zahlen", "abgeleitet"], pgZeilen],
+  ["71. Zeit-Schätzer (Lehrplan SG MA.3.A.1, NMG.9.1)", "zeit-schaetzer/taetigkeiten", "Tätigkeiten mit ungefährer Dauer",
+    "Dauer als Zahl und Einheit, dazu die Spanne in Sekunden, innerhalb derer die Dauer als richtig gilt. Bitte prüfen, ob die Dauern für Kinder stimmen.",
+    ["Bild", "Tätigkeit", "Dauer", "Einheit", "Spanne (s)"], ZSCH.ZS_TAETIGKEITEN.map(([bild, name, zahl, einheit, von, bis]) => [bild, name, zahl, einheit, `${von}–${bis}`])],
+  ["", "zeit-schaetzer/taetigkeiten", "Zeitpunkt-Sätze", "Gruppe 1 klar, 2 knifflig.", ["Gruppe", "Satz"], ZSCH.ZS_ZEITPUNKTE],
+  ["", "zeit-schaetzer/taetigkeiten", "Zeitdauer-Sätze", "Gruppe 1 klar, 2 knifflig („In 5 Minuten geht es los.“ zählt als Dauer).", ["Gruppe", "Satz"], ZSCH.ZS_DAUERN],
+  ["72. Auge-Entdecker (Lehrplan SG NMG.4.3)", "auge-entdecker/teile", "Teile des Auges",
+    "Lage, Aufgaben und Aussehen sind die Tipps im Spiel. Gruppe aussen (NMG.4.3.c), innen (NMG.4.3.e), weg (Weg des Lichts).",
+    ["Name", "Gruppe", "Lage", "Aufgaben", "Aussehen"], AE.AUGE_TEILE.map(t => [`${t.artikel} ${t.name}${t.zusatz ? ` (${t.zusatz})` : ""}`, t.gruppe, t.lage, zelle(t.aufgaben), t.aussehen])],
+  ["", "auge-entdecker/teile", "Pupille", null, ["Satz", "Antwort"], [...AE.AUGE_PUPILLE, ...AE.AUGE_AUGEN]],
+  ["", "auge-entdecker/teile", "Aussagen (stimmt / stimmt nicht)", "Fakten bitte nachprüfen.", ["Aussage", "stimmt", "Erklärung"], AE.AUGE_AUSSAGEN],
+  ["", "auge-entdecker/teile", "Warum-Fragen", "Die erste Antwort ist die richtige.", ["Frage", "richtig", "falsch", "falsch", "Tipp"], AE.AUGE_WARUM],
+  ["", "auge-entdecker/teile", "Weg des Lichts", null, ["Reihenfolge"], [[AE.AUGE_LICHTWEG.join(" → ")]]],
+  ["73. Gemeinde-Helfer (Lehrplan SG NMG.10.3)", "gemeinde-helfer/anliegen", "Einrichtungen",
+    "Ebene: Gemeinde, Kanton oder Bund (leer = je nach Ort verschieden). Was je Gemeinde abweicht, bitte markieren.",
+    ["Bild", "Name", "tut", "öffentlich", "Ebene"], GH.GEMEINDE_EINRICHTUNGEN.map(e => [e.bild, e.name, e.tut, e.oeffentlich, e.ebene || ""])],
+  ["", "gemeinde-helfer/anliegen", "Anliegen", "Kurzform für Stufe 1; Ablenker = der nächstliegende falsche Korb.",
+    ["Satz", "Kurzform", "Einrichtung", "Schwierigkeit", "Ablenker"], GH.GEMEINDE_ANLIEGEN.map(a => [a.satz, a.kurz || "", a.ziel, a.schwierigkeit, a.ablenker || ""])],
+  ["", "gemeinde-helfer/anliegen", "Notrufnummern", "Bitte prüfen (Schweiz).", ["Nummer", "Stelle", "Situationen"],
+    [...GH.GEMEINDE_NOTRUF.map(n => [n.nummer, n.name, zelle(n.situationen)]), [GH.GEMEINDE_NOTRUF_EUROPA.nummer, "Europa", GH.GEMEINDE_NOTRUF_EUROPA.frage]]],
+  ["", "gemeinde-helfer/anliegen", "Zuständige Stellen", null, ["Satz", "Stelle", "Ablenker"], GH.GEMEINDE_STELLEN_ANLIEGEN.map(a => [a.satz, a.ziel, a.ablenker || ""])],
+  ["", "gemeinde-helfer/anliegen", "Gemeinde, Kanton oder Bund", "Annahme für SG; bitte prüfen.", ["Bild", "Name", "Ebene"], GH.GEMEINDE_EBENEN.map(e => [e.bild, e.name, e.ebene])],
+  ["", "gemeinde-helfer/anliegen", "Abläufe (Königsstufe)", "Stark vereinfacht.", ["Titel", "Schritte"], GH.GEMEINDE_ABLAEUFE.map(a => [a.titel, a.schritte.map(s => s.text).join(" → ")])],
+  ["74. Gefühle-Radar (Lehrplan SG D.1.C.1)", "gefuehle-radar/situationen", "Gefühle", null,
+    ["Wort", "Bild", "Gruppe", "Ablenker"], GS.GS_GEFUEHLE.map(g => [g.wort, g.gesichter ? g.gesichter.join(" ") : g.bild, g.gruppe, g.ablenker.map(gsName).join(", ")])],
+  ["", "gefuehle-radar/situationen", "Bild-Situationen (Stufe 1)", null, ["Bild", "Text", "Gefühl"], GS.GS_BILDER.map(b => [b.bild, b.text, gsName(b.gefuehl)])],
+  ["", "gefuehle-radar/situationen", "Sätze (Stufe 2)", null, ["Satz", "Gefühl", "Ablenker"], GS.GS_SAETZE.map(s => [s.satz, gsName(s.gefuehl), s.ablenker.map(gsName).join(", ")])],
+  ["", "gefuehle-radar/situationen", "Situationen (Stufe 3 und 4)", "Jede Situation muss eindeutig sein.",
+    ["Gruppe", "Text", "Wer", "Gefühl", "Ablenker", "Tipp"], GS.GS_SITUATIONEN.map(s => [s.gruppe, s.text, s.wer, gsName(s.gefuehl), s.ablenker.map(gsName).join(", "), s.tipp || ""])],
+  ["", "gefuehle-radar/situationen", "Körpersignale", null, ["Satz", "Gefühl", "Ablenker"], GS.GS_KOERPER.map(s => [s.satz, gsName(s.gefuehl), s.ablenker.map(gsName).join(", ")])],
+  ["", "gefuehle-radar/situationen", "Gespräche (Stufe 5)", "Die erste Hilfe ist die passende.",
+    ["A", "B", "Gefühl von B", "passende Hilfe", "unpassend"], GS.GS_GESPRAECHE.map(g => [g.a.join(": "), g.b.join(": "), gsName(g.gefuehl), g.hilfe.richtig, g.hilfe.falsch.join("; ")])],
+  ["", "gefuehle-radar/situationen", "Zwei Gefühle zugleich (Königsstufe)", null, ["Text", "Paar", "Ablenker-Paare", "Tipp"],
+    GS.GS_PAARE.map(p => [p.text, p.paar.map(gsName).join(" und "), p.ablenker.map(a => a.map(gsName).join(" und ")).join("; "), p.tipp || ""])],
+  ["", "gefuehle-radar/situationen", "Passende Antwort (Königsstufe)", null, ["Situation", "richtig", "falsch"], GS.GS_REAKTIONEN.map(r => [r.text, r.richtig, r.falsch.join("; ")])],
+  ["75. Geschichten-Ordner (Lehrplan SG D.4.D.1, D.3.B.1)", "geschichten-ordner/geschichten", "Geschichten in Schritten",
+    "Die Reihenfolge muss zwingend sein. Gruppe 1 mit Bild und Wort, 2 mit einem Satz, der nicht dazugehört, 3 fünf bis sechs Schritte.",
+    ["Gruppe", "Titel", "Schritte", "gehört nicht dazu", "Tipp"], GO.map(g => [g.gruppe, g.titel, g.schritte.map((s, i) => `${i + 1}. ${s.bild ? s.bild + " " : ""}${s.satz}`).join("<br>"), g.ablenker || "", g.tipp || ""])],
+  ["76. Hör-Geschichte (Lehrplan SG D.1.B.1)", "hoer-geschichte/geschichten", "Geschichten zum Vorlesen mit Fragen",
+    "Selbst geschrieben; der Text wird vorgelesen, nicht gezeigt.", ["Gruppe", "Titel", "Text", "Fragen"], HG.map(t => [t.gruppe, t.titel, zelle(t.text), fragenText6(t.fragen || [])])],
+];
+for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE6) {
+  if (teilTitel) { z(`## ${teilTitel}`); z(""); }
+  tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
+}
+
 process.stdout.write(zeilen.join("\n"));
 
 // ---------- Inhalte je Liste: docs/eulenpfad/pruefung/listen.json ----------
@@ -747,6 +810,8 @@ for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE3) inListe(
 for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE4) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
 
 for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE5) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
+
+for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE6) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
 
 // Jede Quell-Liste braucht einen Eintrag — sonst bricht der Lauf ab, statt still eine Lücke zu schreiben.
 const fehlend = Object.keys(QUELL_LISTEN).filter(k => !listen[k] || listen[k].tabellen.every(t => !t.zeilen.length));

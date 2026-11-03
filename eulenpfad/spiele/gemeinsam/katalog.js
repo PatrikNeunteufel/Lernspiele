@@ -49,7 +49,9 @@ const THEMEN = [
   { id: "gedichte", fach: "Deutsch", name: "Gedichte", titel: "Reim, Vers, Strophe und Reimschema", quelle: "Lehrplan SG D.6.C.1" },
   { id: "geschichten", fach: "NMG", name: "Geschichten", titel: "Echt oder erfunden: Geschichten und Textsorten", quelle: "Lehrplan SG NMG.9.4" },
   { id: "begruenden", fach: "Mathe", name: "Prüfen und begründen", titel: "Aussagen prüfen: immer, manchmal oder nie wahr?", quelle: "Lehrplan SG MA.1.B.2, MA.2.B.2" },
-  { id: "zuhoeren", fach: "Deutsch", name: "Zuhören", titel: "Hörtexten wichtige Informationen entnehmen", quelle: "Lehrplan SG D.1.B.1" },
+  { id: "zuhoeren", fach: "Deutsch", name: "Zuhören", titel: "Hörtexten wichtige Informationen entnehmen, Stimmungen und Gefühle wahrnehmen", quelle: "Lehrplan SG D.1.B.1, D.1.C.1" },
+  { id: "erzaehlen", fach: "Deutsch", name: "Erzählen", titel: "Geschichten in der richtigen Abfolge ordnen und nacherzählen", quelle: "Lehrplan SG D.3.B.1, D.4.D.1" },
+  { id: "gemeinschaft", fach: "NMG", name: "Gemeinschaft", titel: "Zusammenleben in der Gemeinde und öffentliche Einrichtungen", quelle: "Lehrplan SG NMG.10.3" },
 ];
 
 /** Fächer in der Reihenfolge der Themen (Startseite, Zufallsmix). */
@@ -1048,6 +1050,60 @@ const SPIELE = [
       "woerter": { name: "Wörter und Sätze für die Wortarten-Proben" },
     },
     lernziele: [{ lz: "D.5.D.1", stufen: ALLE_STUFEN }] },
+  // LERN_Session10, Runde B: 3. Klasse (docs/eulenpfad/spielideen/lehrplan_3_und_6.md, T1–T8)
+  { id: "platzhalter-geschichten", klasse: 3, neu: "LERN_Session10", bild: "❔", name: "Platzhalter-Geschichten", thema: "sachrechnen", farbe: "var(--deko-4)",
+    pfad: "spiele/platzhalter-geschichten/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 20, s2: 25, s3: 30, s4: 45, s5: 55, s6: 75 },
+    beschreibung: "Was fehlt in der Geschichte? Platzhalter-Gleichungen mit der Umkehrrechnung lösen",
+    listen: {
+      "geschichten": { name: "Geschichten mit Platzhalter-Gleichungen" },
+    },
+    lernziele: [{ lz: "MA.3.C.2", stufen: ALLE_STUFEN }, { lz: "MA.3.C.3", stufen: ["s3", "s4", "s5", "s6"] }] },
+  { id: "zeit-schaetzer", klasse: 3, neu: "LERN_Session10", bild: "⏱️", name: "Zeit-Schätzer", thema: "groessen", farbe: "var(--deko-2)",
+    pfad: "spiele/zeit-schaetzer/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 15, s4: 25, s5: 25, s6: 40 },
+    beschreibung: "Zeitpunkt oder Zeitdauer? Sekunden, Minuten oder Stunden? Dauern schätzen, vergleichen und ordnen",
+    listen: {
+      "taetigkeiten": { name: "Tätigkeiten mit ungefährer Dauer und Zeitpunkte" },
+    },
+    lernziele: [{ lz: "MA.3.A.1", stufen: ALLE_STUFEN }, { lz: "NMG.9.1", stufen: ["s1", "s2", "s3", "s4"] }] },
+  { id: "wuerfel-zaehler", klasse: 3, neu: "LERN_Session10", bild: "🧱", name: "Würfel-Zähler", thema: "geometrie", farbe: "var(--deko-6)",
+    pfad: "spiele/wuerfel-zaehler/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 12, s2: 15, s3: 25, s4: 40, s5: 30, s6: 60 },
+    beschreibung: "Welches Würfelgebäude hat mehr Würfel? Gleich gross bauen und Kisten füllen",
+    lernziele: [{ lz: "MA.2.A.3", stufen: ALLE_STUFEN }, { lz: "MA.2.C.1", stufen: ["s5", "s6"] }] },
+  { id: "auge-entdecker", klasse: 3, neu: "LERN_Session10", bild: "👁️", name: "Auge-Entdecker", thema: "koerper", farbe: "var(--deko-3)",
+    pfad: "spiele/auge-entdecker/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 15, s4: 25, s5: 25, s6: 40 },
+    beschreibung: "Augenlid, Wimpern, Iris, Pupille, Hornhaut und Bindehaut: Teile des Auges finden, benennen und ihre Aufgabe kennen",
+    listen: {
+      "teile": { name: "Teile des Auges mit Aufgabe und Fragen" },
+    },
+    lernziele: [{ lz: "NMG.4.3", stufen: ALLE_STUFEN }] },
+  { id: "gemeinde-helfer", klasse: 3, neu: "LERN_Session10", bild: "🏛️", name: "Gemeinde-Helfer", thema: "gemeinschaft", farbe: "var(--deko-1)",
+    pfad: "spiele/gemeinde-helfer/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 18, s4: 20, s5: 25, s6: 45 },
+    beschreibung: "Wer hilft bei welchem Anliegen? Feuerwehr, Spital, Gemeindehaus, Bibliothek und Werkhof — dazu Notrufnummern, öffentlich oder privat, und wer wofür zuständig ist",
+    listen: {
+      "anliegen": { name: "Anliegen, Einrichtungen, Notrufnummern, zuständige Stellen und Abläufe" },
+    },
+    lernziele: [{ lz: "NMG.10.3", stufen: ALLE_STUFEN }] },
+  { id: "gefuehle-radar", klasse: 3, neu: "LERN_Session10", bild: "🎭", name: "Gefühle-Radar", thema: "zuhoeren", farbe: "var(--deko-5)",
+    pfad: "spiele/gefuehle-radar/index.html", stufen: ALLE_STUFEN, knoepfeVorlesen: true, zeiten: { s1: 8, s2: 10, s3: 15, s4: 20, s5: 30, s6: 30 },
+    beschreibung: "Wie fühlt sich das Kind? Gesichter, Sätze und Situationen deuten — fast ohne Lesen",
+    listen: {
+      "situationen": { name: "Gesichter, Sätze und Situationen mit Gefühl" },
+    },
+    lernziele: [{ lz: "D.1.C.1", stufen: ALLE_STUFEN }] },
+  { id: "geschichten-ordner", klasse: 3, neu: "LERN_Session10", bild: "📚", name: "Geschichten-Ordner", thema: "erzaehlen", farbe: "var(--deko-7)",
+    pfad: "spiele/geschichten-ordner/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 15, s2: 20, s3: 40, s4: 55, s5: 55, s6: 75 },
+    beschreibung: "Bilder und Sätze einer Geschichte in die richtige Reihenfolge bringen: zuerst, dann, am Schluss",
+    listen: {
+      "geschichten": { name: "Kurze Geschichten in Schritten" },
+    },
+    lernziele: [{ lz: "D.4.D.1", stufen: ALLE_STUFEN }, { lz: "D.3.B.1", stufen: ["s3", "s4", "s5", "s6"] }] },
+  { id: "hoer-geschichte", klasse: 3, neu: "LERN_Session10", bild: "👂", name: "Hör-Geschichte", thema: "zuhoeren", farbe: "var(--deko-2)",
+    pfad: "spiele/hoer-geschichte/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 15, s2: 20, s3: 30, s4: 35, s5: 35, s6: 45 },
+    beschreibung: "Die Eule erzählt eine kurze Geschichte: Wer? Wo? Was passiert?",
+    listen: {
+      "geschichten": { name: "Kurze Geschichten zum Vorlesen mit Fragen" },
+    },
+    lernziele: [{ lz: "D.1.B.1", stufen: ALLE_STUFEN }] },
 ];
 
 /** Lernziele (Lernzielblatt 4.2 und Lehrplan SG) — für Profil-Fokus und Statistik je Lernziel. */
@@ -1143,4 +1199,11 @@ const LERNZIELE = [
   { lz: "FS2F.5.E.2", niveau: "Lehrplan SG", text: "Französisch: Rechtschreibung (é, è, Nasallaute)" },
   { lz: "NMG.4.1", niveau: "Lehrplan SG", text: "Sinne: Sinnesleistungen von Menschen und Tieren, Brailleschrift" },
   { lz: "NMG.5.1", niveau: "Lehrplan SG", text: "Technik verstehen: Hebel, Rolle und schiefe Ebene" },
+  // LERN_Session10 — Codes aus docs/eulenpfad/spielideen/lehrplan_3_und_6.md (Runde B, 3. Klasse), Wortlaut geprüft an sg.lehrplan.ch 2026-11-03
+  { lz: "MA.3.C.3", niveau: "Lehrplan SG", text: "Rechnungen und Gleichungen mit Platzhalter durch Rechengeschichten und Bilder konkretisieren" },
+  { lz: "NMG.4.3", niveau: "Lehrplan SG", text: "Optische Phänomene: äussere Merkmale und Aufbau des Auges, Licht und Schatten" },
+  { lz: "NMG.10.3", niveau: "Lehrplan SG", text: "Öffentliche Institutionen und Einrichtungen der Gemeinde: Funktion, öffentlich und privat, zuständige Stellen" },
+  { lz: "D.1.C.1", niveau: "Lehrplan SG", text: "Gesprächen folgen: Stimmungen wahrnehmen, Aufmerksamkeit zeigen" },
+  { lz: "D.3.B.1", niveau: "Lehrplan SG", text: "Monologisch sprechen: Geschichten nacherzählen und erzählen" },
+  { lz: "D.4.D.1", niveau: "Lehrplan SG", text: "Schreiben: Gedanken und Ideen in eine verständliche Abfolge bringen" },
 ];

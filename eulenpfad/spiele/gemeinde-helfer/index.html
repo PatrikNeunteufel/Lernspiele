@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gemeinde-Helfer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .gh > .frage, .gh > .auftrag { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 4px 0 12px; }
+  .gh-karte {
+    background: #fff; border: 3px solid var(--rand); border-radius: 18px; padding: 12px 16px; margin: 0 auto 14px;
+    max-width: 640px; text-align: center; font-size: clamp(18px, 4.2vw, 24px); line-height: 1.45; font-weight: 700;
+    box-shadow: var(--schatten);
+  }
+  .gh-karte .gh-bild { display: block; font-size: clamp(44px, 10vw, 64px); line-height: 1.1; }
+  /* Anliegen als Satz auf der Korb-Karte: kleiner als der Name eines Lebewesens (Baustein-Klasse, anpassbar) */
+  .korb-karte.gh-satz { max-width: 640px; padding: 12px 18px; }
+  .korb-karte.gh-satz b { font-size: clamp(18px, 4.2vw, 23px); font-weight: 700; line-height: 1.4; }
+  .korb-knopf.gh-korb small { font-size: 13px; line-height: 1.25; }
+  .wahl.gh-ablauf { --wahl-breite: 320px; }
+  .wahl.gh-ablauf .wahl-knopf { font-size: clamp(16px, 3.6vw, 20px); font-weight: 700; text-align: left; justify-content: flex-start; }
+  .wahl.gh-ebene .wahl-knopf small { font-size: 13px; }
+  .gh-nummer .wahl-knopf { font-size: clamp(24px, 5.6vw, 34px); font-weight: 900; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🏛️ Gemeinde-Helfer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="anliegen.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.10.3 (Gemeinschaft), Basisklasse 3. Das Kind lernt, welche öffentlichen Einrichtungen es in der
+// Gemeinde gibt, was sie tun und wohin ein Anliegen gehört. Zuordnung der Buchstaben nach dem Wortlaut auf
+// sg.lehrplan.ch (gelesen 2026-11-03); s1 und s6 sind Annahmen.
+//   s1 2. Klasse (Annahme, Vorstufe zu NMG.10.3.c): Bild-Karte „🔥 Es brennt!“ in einen von zwei Körben mit Bild und
+//      Namen; nur klare Paare (Feuerwehr, Spital, Bibliothek, Post, Schwimmbad, Schule), fast ohne Lesetext.
+//   s2 3. Klasse, leichter (NMG.10.3.c): Anliegen als kurzer Satz, drei Körbe; alle Einrichtungen ausser Fundbüro,
+//      Abfallentsorgung und Gericht.
+//   s3 Klassenziel (NMG.10.3.c „öffentliche Institutionen und Einrichtungen in der Gemeinde benennen und deren
+//      Funktion verstehen“): vier Körbe, alle Einrichtungen, mit Fallen (Velo gestohlen → Polizei, Velo verloren →
+//      Fundbüro); dazu die Notrufnummern 117, 118, 144 und 112.
+//   s4 3. Klasse, schwerer (NMG.10.3.d „Unterschied zwischen privater und öffentlicher Sphäre“): öffentlich oder
+//      privat? Dazu Anliegen mit fünf Körben, darunter ein privater Betrieb als Ablenker.
+//   s5 4. Klasse (NMG.10.3.e „zuständige Stellen für Fragen und Anliegen identifizieren“): Wer ist zuständig —
+//      Lehrperson, Schulleitung, Hauswart, Gemeindeverwaltung oder Gemeinderat? Dazu, nur in eindeutigen Fällen:
+//      Gemeinde, Kanton oder Bund?
+//   s6 Königsstufe (Annahme, über .c–.e hinaus): den Weg eines Anliegens durch die Gemeinde ordnen (Vorschlag →
+//      prüfen → entscheiden → bauen → benutzen), dazu alle Fragen aus s3–s5 gemischt.
+// Abgrenzung: Der Schulweg-Profi (3) übt Verkehrsregeln, Früher-Heute (3) den Wandel; hier zählt die Zuständigkeit.
+// Inhalte in anliegen.js (Liste „anliegen“ im Katalog).
+
+const { waehle, mische, el } = LS;
+const ID = "gemeinde-helfer";
+
+// Freigabe (Entscheid L4 a): alle Inhalte gehören zur Liste „anliegen“. Kennt der Katalog die Listen des Spiels noch
+// nicht, gilt der Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["anliegen"]);
+const INHALT_FREI = FREI.has("anliegen");
+
+const E = Object.fromEntries(GEMEINDE_EINRICHTUNGEN.map(e => [e.id, e]));
+const OEFFENTLICH = GEMEINDE_EINRICHTUNGEN.filter(e => e.oeffentlich).map(e => e.id);
+const PRIVAT = GEMEINDE_EINRICHTUNGEN.filter(e => !e.oeffentlich).map(e => e.id);
+const KLAR = GEMEINDE_EINRICHTUNGEN.filter(e => e.klar).map(e => e.id);
+const S2_AUS = ["fundbuero", "entsorgung", "gericht"];
+const S2_POOL = OEFFENTLICH.filter(id => !S2_AUS.includes(id));
+const N = Object.fromEntries(GEMEINDE_NOTRUF.map(n => [n.nummer, n]));
+const NUMMERN = GEMEINDE_NOTRUF.map(n => n.nummer);
+const S = Object.fromEntries(GEMEINDE_STELLEN.map(s => [s.id, s]));
+const EBENEN = Object.keys(GEMEINDE_EBENE_TEXT);
+const SPHAERE = {
+  oeffentlich: { bild: "🏘️", text: "Öffentlich", klein: "gehört allen in der Gemeinde", farbe: "var(--deko-6)" },
+  privat: { bild: "🏪", text: "Privat", klein: "gehört einer Person oder Firma", farbe: "var(--deko-3)" },
+};
+/** Wofür man die Notrufnummer ruft — für Tipps, ohne den Namen der Stelle. */
+const NOTRUF_WOFUER = { 117: "wenn jemand in Gefahr ist oder etwas gestohlen wird", 118: "wenn es brennt", 144: "wenn jemand verletzt oder sehr krank ist" };
+
+/** Anliegen je Stufe: Filter auf die Liste, Zahl der Körbe, erlaubte Einrichtungen, ein privater Betrieb dazu? */
+const ANLIEGEN_STUFE = {
+  s1: { filter: a => !!a.kurz && KLAR.includes(a.ziel), n: 2, pool: KLAR, privat: false, kurz: true },
+  s2: { filter: a => a.schwierigkeit <= 2 && S2_POOL.includes(a.ziel), n: 3, pool: S2_POOL, privat: false },
+  s3: { filter: () => true, n: 4, pool: OEFFENTLICH, privat: false },
+  s4: { filter: a => a.schwierigkeit >= 2, n: 5, pool: OEFFENTLICH, privat: true },
+  s6: { filter: a => a.schwierigkeit === 3, n: 5, pool: OEFFENTLICH, privat: true },
+};
+
+/** Körbe: Ziel, der nächstliegende Ablenker (wenn erlaubt), weitere aus dem Pool, dazu extra; gemischt. */
+function koerbeFuer(a, p) {
+  const k = [a.ziel];
+  if (p.pool.includes(a.ablenker)) k.push(a.ablenker);
+  const extra = p.privat ? [waehle(PRIVAT)] : [];
+  const rest = mische(p.pool.filter(id => !k.includes(id)));
+  while (k.length + extra.length < p.n && rest.length) k.push(rest.pop());
+  return mische([...k, ...extra]);
+}
+
+const ARTEN = {
+  anliegen(stufe) {
+    const p = ANLIEGEN_STUFE[stufe];
+    const a = waehle(GEMEINDE_ANLIEGEN.filter(p.filter));
+    return { art: "anliegen", a, koerbe: koerbeFuer(a, p), kurz: !!p.kurz };
+  },
+  /** Notruf: meist Situation → Nummer; sonst Nummer → Stelle; selten die europäische 112. */
+  notruf() {
+    const form = waehle(["vor", "vor", "vor", "zurueck", "europa"]);
+    if (form === "europa") return { art: "notruf", form, frage: GEMEINDE_NOTRUF_EUROPA.frage, text: "", optionen: mische([GEMEINDE_NOTRUF_EUROPA.nummer, ...NUMMERN]), richtig: GEMEINDE_NOTRUF_EUROPA.nummer };
+    const n = waehle(GEMEINDE_NOTRUF);
+    if (form === "zurueck") return { art: "notruf", form, frage: `Wen erreichst du mit der Nummer ${n.nummer}?`, text: "", optionen: mische(NUMMERN), richtig: n.nummer, namen: true };
+    return { art: "notruf", form, frage: "Welche Nummer rufst du?", text: waehle(n.situationen), optionen: mische(NUMMERN), richtig: n.nummer };
+  },
+  sphaere() {
+    const e = waehle(GEMEINDE_EINRICHTUNGEN);
+    return { art: "sphaere", e, richtig: e.oeffentlich ? "oeffentlich" : "privat" };
+  },
+  stelle() {
+    const a = waehle(GEMEINDE_STELLEN_ANLIEGEN);
+    const rest = mische(Object.keys(S).filter(id => id !== a.ziel && id !== a.ablenker)).slice(0, 2);
+    return { art: "stelle", a, optionen: mische([a.ziel, a.ablenker, ...rest]) };
+  },
+  ebene() {
+    return { art: "ebene", x: waehle(GEMEINDE_EBENEN), optionen: EBENEN };
+  },
+  ablauf() {
+    return { art: "ablauf", ab: waehle(GEMEINDE_ABLAEUFE) };
+  },
+};
+
+// Je Stufe die Arten (mehrfach genannt = häufiger).
+const STUFE = {
+  s1: ["anliegen"],
+  s2: ["anliegen"],
+  s3: ["anliegen", "anliegen", "notruf"],
+  s4: ["sphaere", "anliegen"],
+  s5: ["stelle", "stelle", "ebene"],
+  s6: ["ablauf", "ablauf", "anliegen", "notruf", "sphaere", "stelle", "ebene"],
+};
+
+function aufgabeErzeugen(stufe) {
+  if (!INHALT_FREI) return null;
+  const art = waehle(STUFE[stufe]);
+  return ARTEN[art](stufe);
+}
+
+const STUFEN_TEXT = {
+  s1: "Bild-Karten: Wer hilft? Zwei Körbe — Feuerwehr, Spital, Bibliothek, Post, Schwimmbad, Schule.",
+  s2: "Kurze Sätze, drei Körbe: dazu Polizei, Gemeindehaus und Werkhof.",
+  s3: "Vier Körbe mit Fallen: gestohlen oder verloren? Und: Welche Notrufnummer rufst du?",
+  s4: "Öffentlich oder privat? Fünf Körbe, einer gehört nicht der Gemeinde.",
+  s5: "Wer ist zuständig: Lehrperson, Hauswart oder Gemeinderat? Gemeinde, Kanton oder Bund?",
+  s6: "Endgegner: der Weg eines Wunsches durch die Gemeinde, dazu alle Fragen gemischt.",
+};
+const STUFEN = INHALT_FREI ? STUFEN_TEXT : {};
+
+const kurzTeile = kurz => { const m = kurz.match(/^(\S+)\s+(.+)$/); return m ? { bild: m[1], text: m[2] } : null; };
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!INHALT_FREI) m.push("Aufgabe, obwohl die Liste nicht frei ist");
+  if (!STUFE[stufe].includes(a.art)) m.push(`Art ${a.art} nicht in ${stufe}`);
+  const doppelt = liste => new Set(liste).size !== liste.length;
+  if (a.art === "anliegen") {
+    const p = ANLIEGEN_STUFE[stufe];
+    if (!GEMEINDE_ANLIEGEN.includes(a.a)) m.push("Anliegen nicht aus der Liste");
+    const z = E[a.a.ziel];
+    if (!z) m.push(`Ziel ${a.a.ziel} unbekannt`);
+    else if (!z.oeffentlich) m.push("Ziel ist ein privater Betrieb");
+    if (!E[a.a.ablenker]) m.push(`Ablenker ${a.a.ablenker} unbekannt`);
+    if (a.a.ablenker === a.a.ziel) m.push("Ablenker gleich Ziel");
+    if (!a.koerbe.includes(a.a.ziel)) m.push("richtige Einrichtung fehlt unter den Körben");
+    if (doppelt(a.koerbe)) m.push("Körbe doppelt");
+    if (a.koerbe.some(id => !E[id])) m.push("unbekannter Korb");
+    if (p && a.koerbe.length !== p.n) m.push(`${a.koerbe.length} statt ${p.n} Körbe`);
+    if (p && !p.filter(a.a)) m.push("Anliegen passt nicht zur Stufe");
+    const privat = a.koerbe.filter(id => E[id] && !E[id].oeffentlich).length;
+    if (p && privat !== (p.privat ? 1 : 0)) m.push(`${privat} private Körbe`);
+    if (a.kurz) {
+      if (!a.a.kurz || !kurzTeile(a.a.kurz)) m.push("Stufe 1 ohne Kurzform mit Bild");
+      if (a.koerbe.some(id => !KLAR.includes(id))) m.push("Stufe 1 mit unklarer Einrichtung");
+    }
+    if (a.a.hinweis && z && new RegExp(`\\b${z.name}\\b`, "i").test(a.a.hinweis)) m.push("Fallen-Hinweis nennt das Ziel");
+    if (a.a.schwierigkeit === 3 && !a.a.hinweis) m.push("Falle ohne eigenen Hinweis");
+  }
+  if (a.art === "notruf") {
+    if (doppelt(a.optionen)) m.push("Nummern doppelt");
+    if (!a.optionen.includes(a.richtig)) m.push("richtige Nummer fehlt");
+    if (a.form === "europa") {
+      if (a.richtig !== GEMEINDE_NOTRUF_EUROPA.nummer || a.optionen.length !== 4) m.push("Europa-Frage ohne 112 und drei Schweizer Nummern");
+    } else {
+      if (!N[a.richtig]) m.push("Nummer nicht in der Liste");
+      if (a.optionen.includes(GEMEINDE_NOTRUF_EUROPA.nummer)) m.push("112 wäre ebenfalls richtig");
+      if (a.form === "vor" && !N[a.richtig].situationen.includes(a.text)) m.push("Situation gehört nicht zur Nummer");
+      if (a.form === "vor" && GEMEINDE_NOTRUF.some(n => n.nummer !== a.richtig && n.situationen.includes(a.text))) m.push("Situation bei zwei Nummern");
+    }
+  }
+  if (a.art === "sphaere") {
+    if (!GEMEINDE_EINRICHTUNGEN.includes(a.e)) m.push("Einrichtung nicht aus der Liste");
+    if ((a.richtig === "oeffentlich") !== a.e.oeffentlich) m.push("Sphäre falsch");
+  }
+  if (a.art === "stelle") {
+    if (!GEMEINDE_STELLEN_ANLIEGEN.includes(a.a)) m.push("Anliegen nicht aus der Liste");
+    if (!S[a.a.ziel] || !S[a.a.ablenker]) m.push("Stelle unbekannt");
+    if (!a.optionen.includes(a.a.ziel)) m.push("richtige Stelle fehlt");
+    if (doppelt(a.optionen) || a.optionen.length !== 4) m.push("Stellen zur Wahl falsch");
+  }
+  if (a.art === "ebene") {
+    if (!GEMEINDE_EBENEN.includes(a.x)) m.push("Einrichtung nicht aus der Liste");
+    if (!GEMEINDE_EBENE_TEXT[a.x.ebene]) m.push(`Ebene ${a.x.ebene} unbekannt`);
+    const e = GEMEINDE_EINRICHTUNGEN.find(e => e.name === a.x.name);
+    if (e && e.ebene !== a.x.ebene) m.push("Ebene widerspricht der Einrichtung (nicht eindeutig)");
+    if (doppelt(a.optionen) || a.optionen.length !== 3) m.push("Ebenen zur Wahl falsch");
+  }
+  if (a.art === "ablauf") {
+    if (!GEMEINDE_ABLAEUFE.includes(a.ab)) m.push("Ablauf nicht aus der Liste");
+    if (a.ab.schritte.length !== 5) m.push("Ablauf ohne fünf Schritte");
+    if (doppelt(a.ab.schritte.map(s => s.text)) || doppelt(a.ab.schritte.map(s => s.kurz))) m.push("Schritte doppelt");
+  }
+  const texte = JSON.stringify(a);
+  if (/ß/.test(texte)) m.push("ß im Text");
+  return m;
+}
+
+/** Tipps vor dem Antworten (ctx.tipp): vom Anstoss zur Umschreibung zum Bild — nie der Name. */
+function tippsFuer(a) {
+  if (a.art === "anliegen") {
+    const z = E[a.a.ziel];
+    return ["Wer kann hier helfen — jemand, der löscht, heilt, sucht, baut oder verwaltet?", `Gesucht ist: ${z.umschreibung}.`, `Schau nach dem Korb mit ${z.bild}.`];
+  }
+  if (a.art === "notruf") {
+    if (a.form === "europa") return ["Diese Nummer gilt in jedem Land Europas — auch bei uns.", "Sie steht auf jedem Handy als Notruf, auch wenn es gesperrt ist."];
+    if (a.form === "zurueck") return ["Überleg, wer bei Feuer kommt, wer bei Verletzten und wer bei Gefahr durch Menschen.", `Diese Nummer ruft man, ${NOTRUF_WOFUER[a.richtig]}.`];
+    return ["Was ist passiert: Feuer, ein Verletzter oder eine Gefahr durch Menschen? Jede Hilfe hat ihre eigene Nummer.",
+      "Alle drei Nummern beginnen mit 1. Überleg, wer kommen muss: löschen, heilen oder für Sicherheit sorgen.",
+      `Hier muss die ${N[a.richtig].name} kommen. Welche Nummer hat sie?`];
+  }
+  if (a.art === "sphaere") return ["Gehört das allen Leuten in der Gemeinde — oder einer einzelnen Person oder Firma?",
+    "Wer bezahlt dafür: alle zusammen mit ihren Steuern, oder die Kundinnen und Kunden?",
+    a.e.oeffentlich ? "Das bezahlt die Gemeinde für alle. Es gehört nicht einer Person." : "Das ist ein Laden oder ein Geschäft. Jemand verdient damit Geld."];
+  if (a.art === "stelle") {
+    const s = S[a.a.ziel];
+    return ["Geht es um den Unterricht, um das ganze Schulhaus, um das Gebäude oder um die ganze Gemeinde?", `Gesucht ist: ${s.umschreibung}.`, `Schau nach dem Knopf mit ${s.bild}.`];
+  }
+  if (a.art === "ebene") return ["Ist das nur für dein Dorf oder deine Stadt da, für ein grösseres Gebiet oder für die ganze Schweiz?",
+    "Steht im Namen schon, wer zuständig ist?",
+    "Der Bund ist die ganze Schweiz, der Kanton ein Teil davon mit vielen Gemeinden, die Gemeinde dein Dorf oder deine Stadt."];
+  return ["Zuerst muss jemand den Wunsch äussern. Was kommt danach?", "Bevor gebaut wird, muss jemand prüfen und entscheiden.", "Ganz am Schluss wird das Neue benutzt."];
+}
+
+/** Hinweis nach einem falschen Korb: bei der Falle der eigene Hinweis, sonst was die gewählte Einrichtung tut. */
+function korbHinweis(anl, id) {
+  if (id === anl.ablenker && anl.hinweis) return anl.hinweis;
+  const e = E[id];
+  if (!e.oeffentlich) return `${e.name}: ${e.tut}. Das ist ein privater Laden, keine Einrichtung der Gemeinde.`;
+  return `${e.name}: ${e.tut}. Passt das zu diesem Anliegen?`;
+}
+
+const HILFE = {
+  s1: "Oben siehst du ein Bild: Was ist los? Tippe auf den Korb, der hilft.",
+  s2: "Lies das Anliegen und tippe auf den Korb mit der Einrichtung, die dafür da ist.",
+  s3: "Lies das Anliegen und tippe auf den richtigen Korb. Bei einer Notrufnummer tippst du die Nummer an, die du wählen würdest.",
+  s4: "Bei „Öffentlich oder privat?“ legst du die Einrichtung in den passenden Korb. Sonst tippst du den Korb an, der bei diesem Anliegen hilft — ein Korb ist ein privater Laden und hilft nicht.",
+  s5: "Lies das Anliegen und tippe auf die Stelle, die dafür zuständig ist. Bei „Gemeinde, Kanton oder Bund?“ tippst du an, wer sich darum kümmert.",
+  s6: "Beim Ablauf tippst du die Schritte der Reihe nach an, vom ersten bis zum letzten. Sonst wie in den Stufen davor: Korb, Nummer oder Stelle antippen.",
+};
+
+LS.spiel({
+  id: ID,
+  einleitung: "Es brennt, das Velo ist weg, ein Buch soll her — wer in der Gemeinde hilft dir? Leg jedes Anliegen in den richtigen Korb!",
+  hilfe: stufe => HILFE[stufe],
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "sphaere") ctx.serie("sphaere", a.richtig);
+    if (a.art === "ebene") ctx.serie("ebene", a.x.ebene);
+    ctx.tipp(tippsFuer(a));
+    const gh = el("div", { class: "gh" });
+    ctx.flaeche.append(gh);
+    // Anliegen, Situation und Name sind Sachkunde, kein Lesestoff: Die Eule liest sie mit vor (rahmen.md 12).
+    const karteText = (bild, text) => el("div", { class: "gh-karte" }, bild ? el("span", { class: "gh-bild", text: bild }) : null, el("span", { class: "frage", text }));
+
+    if (a.art === "anliegen") {
+      const z = E[a.a.ziel];
+      const loesung = `${z.bild} ${z.name}: ${z.tut}`;
+      gh.append(el("div", { class: "auftrag", text: a.kurz ? "Wer hilft?" : "Wohin gehst du? Wer hilft dir?" }));
+      const kurz = a.kurz ? kurzTeile(a.a.kurz) : null;
+      const { karte } = LS.koerbe(ctx, {
+        karte: kurz || { bild: "", text: a.a.satz },
+        koerbe: a.koerbe, richtig: a.a.ziel,
+        korbInhalt: id => ({ bild: E[id].bild, text: E[id].name }),
+        hinweis: id => korbHinweis(a.a, id),
+        loesung,
+        lob: `Genau: ${z.name} — ${z.tut}.`,
+      });
+      if (!kurz) karte.classList.add("gh-satz");
+      karte.querySelector("b").classList.add("frage");
+      if (ctx.nr === 0) ctx.sag(a.kurz ? "Tipp auf den Korb, der hilft." : "Lies das Anliegen und tipp auf den Korb, der dafür da ist.");
+      return;
+    }
+
+    if (a.art === "notruf") {
+      const n = N[a.richtig];
+      const loesung = a.form === "zurueck" ? `${a.richtig} — ${n.name}` : a.form === "europa" ? `${a.richtig} — der Notruf für ganz Europa` : `${a.richtig} — ${n.name}`;
+      if (a.text) gh.append(karteText("📞", a.text));
+      gh.append(el("div", { class: "frage", text: a.frage }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.richtig, breite: a.namen ? 150 : 110,
+        inhalt: o => (a.namen ? { bild: N[o].bild, text: N[o].name } : { text: o }),
+        hinweis: o => {
+          if (a.namen) return `Die ${N[o].name} hat eine andere Nummer. Überleg, wer bei Feuer, bei Verletzten und bei Gefahr kommt.`;
+          if (a.form === "europa") return `${o} ist die Nummer der ${N[o].name} in der Schweiz. Gesucht ist die Nummer, die in ganz Europa gilt.`;
+          return `Mit ${o} erreichst du die ${N[o].name}. Passt das zu dem, was passiert ist?`;
+        },
+        loesung,
+        lob: a.form === "europa" ? "Richtig: 112 gilt in ganz Europa, auch in der Schweiz." : `Richtig: ${a.richtig} ist die ${n.name}.`,
+      });
+      if (!a.namen) box.classList.add("gh-nummer");
+      if (ctx.nr === 0) ctx.sag("Tipp die Nummer an, die du wählen würdest.");
+      return;
+    }
+
+    if (a.art === "sphaere") {
+      const e = a.e;
+      const loesung = `${e.bild} ${e.name} ist ${e.oeffentlich ? "öffentlich: gehört allen in der Gemeinde" : "privat: gehört einer Person oder Firma"}. ${e.tut}.`;
+      gh.append(el("div", { class: "frage", text: "Öffentlich oder privat?" }));
+      const { karte, box } = LS.koerbe(ctx, {
+        karte: { bild: e.bild, text: e.name },
+        koerbe: Object.keys(SPHAERE), richtig: a.richtig,
+        korbInhalt: id => ({ bild: SPHAERE[id].bild, text: SPHAERE[id].text, klein: SPHAERE[id].klein }),
+        farbe: id => SPHAERE[id].farbe,
+        hinweis: id => (id === "privat"
+          ? `${e.name}: ${e.tut}. Das bezahlt die Gemeinde mit den Steuern von allen. Gehört es einer einzelnen Person?`
+          : `${e.name}: ${e.tut}. Das ist ein Laden: Jemand hat ihn gegründet und verdient damit Geld. Gehört er allen?`),
+        loesung,
+        lob: e.oeffentlich ? `Genau: ${e.name} gehört allen in der Gemeinde.` : `Genau: ${e.name} gehört einer Person oder Firma.`,
+      });
+      karte.querySelector("b").classList.add("frage");
+      box.querySelectorAll(".korb-knopf").forEach(k => k.classList.add("gh-korb"));
+      if (ctx.nr === 0) ctx.sag("Gehört das allen in der Gemeinde oder einer Person oder Firma?");
+      return;
+    }
+
+    if (a.art === "stelle") {
+      const z = S[a.a.ziel];
+      const loesung = `${z.bild} ${z.name}: ${z.tut}`;
+      gh.append(karteText("", a.a.satz), el("div", { class: "frage", text: "Wer ist dafür zuständig?" }));
+      LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.a.ziel, breite: 160,
+        inhalt: id => ({ bild: S[id].bild, text: S[id].name }),
+        hinweis: id => `${S[id].name}: ${S[id].tut}. Ist das hier die richtige Stelle?`,
+        loesung,
+        lob: `Genau: ${z.name} — ${z.tut}.`,
+      });
+      if (ctx.nr === 0) ctx.sag("Tipp auf die Stelle, die sich darum kümmert.");
+      return;
+    }
+
+    if (a.art === "ebene") {
+      const t = GEMEINDE_EBENE_TEXT[a.x.ebene];
+      const loesung = `${a.x.name} → ${t.name} (${t.erklaerung})`;
+      gh.append(karteText(a.x.bild, a.x.name), el("div", { class: "frage", text: "Wer kümmert sich darum: Gemeinde, Kanton oder Bund?" }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: a.x.ebene, breite: 150,
+        inhalt: id => ({ bild: GEMEINDE_EBENE_TEXT[id].bild, text: GEMEINDE_EBENE_TEXT[id].name, klein: GEMEINDE_EBENE_TEXT[id].erklaerung }),
+        hinweis: id => `${GEMEINDE_EBENE_TEXT[id].name} heisst: ${GEMEINDE_EBENE_TEXT[id].erklaerung}. Ist das hier dafür zuständig?`,
+        loesung,
+        lob: `Genau: ${a.x.name} — ${t.name}.`,
+      });
+      box.classList.add("gh-ebene");
+      if (ctx.nr === 0) ctx.sag("Gemeinde, Kanton oder Bund — wer ist zuständig?");
+      return;
+    }
+
+    // Ablauf (Königsstufe): die Schritte der Reihe nach antippen.
+    const ab = a.ab;
+    gh.append(karteText(ab.bild, ab.titel), el("div", { class: "frage", text: "Tippe die Schritte der Reihe nach an. Was passiert zuerst?" }));
+    const { box } = LS.reihenfolge(ctx, {
+      reihe: ab.schritte, pfeile: true,
+      inhalt: s => s.text, ablage: s => s.kurz,
+      hinweis: () => "Dieser Schritt kommt später. Was muss vorher geschehen, damit das überhaupt möglich wird?",
+      loesung: ab.schritte.map(s => s.kurz).join(" → "),
+      lob: "Richtig! So kommt ein Wunsch durch die Gemeinde bis zum Ziel.",
+    });
+    box.classList.add("gh-ablauf");
+    if (ctx.nr === 0) ctx.sag("Was passiert zuerst, was danach? Tipp die Schritte der Reihe nach an.");
+  },
+});
+</script>
+</body>
+</html>

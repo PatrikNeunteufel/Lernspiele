@@ -5390,3 +5390,742 @@ N Nomen, V Verb, A Adjektiv, P Pronomen, sonst Partikel; letzte Spalte: was die 
 | 6 | [Dank] deiner Hilfe sind wir fertig. | !PRAEP | ☐ |
 | 6 | Wir warten, [bis] der Bus kommt. | !KONJ | ☐ |
 | 6 | Ich bleibe [bis] Freitag. | !PRAEP | ☐ |
+
+## 70. Platzhalter-Geschichten (Lehrplan SG MA.3.C.2, MA.3.C.3)
+
+### Vorlagen mit Platzhalter-Gleichungen
+
+Selbst geschrieben. {a}, {b} … werden durch Zahlen aus den Bereichen ersetzt; [x] ist die Lücke. Gruppe 1 bis 20, 2 bis 100, 3 bis 1000, 4 Zweischritt bis 10 000.
+
+| Gruppe | Bild | Text | Gleichung | Zahlen | abgeleitet | ☐ |
+|---|---|---|---|---|---|---|
+| 1 | 🍎 | Im Korb liegen {a} Äpfel. Mama legt {b} dazu. Wie viele Äpfel sind jetzt im Korb? | a + b = [c] | a: 3 · 12; b: 2 · 8 |  | ☐ |
+| 1 | 🐦 | Auf dem Dach sitzen {a} Spatzen. {b} fliegen weg. Wie viele Spatzen sitzen noch da? | a − b = [c] | b: 2 · 8; c: 2 · 10 | a: b + c | ☐ |
+| 1 | 🚲 | Vor der Schule stehen {a} Velos. {b} Kinder stellen ihr Velo dazu. Wie viele Velos stehen jetzt da? | a + b = [c] | a: 4 · 12; b: 2 · 8 |  | ☐ |
+| 1 | 🧁 | Auf dem Teller liegen {a} Muffins. {b} werden gegessen. Wie viele Muffins bleiben? | a − b = [c] | b: 2 · 8; c: 2 · 10 | a: b + c | ☐ |
+| 1 | 🚌 | Im Bus sitzen {a} Kinder. An der Haltestelle steigen {b} ein. Wie viele Kinder sitzen jetzt im Bus? | a + b = [c] | a: 3 · 12; b: 2 · 8 |  | ☐ |
+| 1 | 🎈 | Lena hat {a} Ballone. {b} fliegen davon. Wie viele Ballone hat Lena noch? | a − b = [c] | b: 2 · 7; c: 2 · 10 | a: b + c | ☐ |
+| 1 | ⚽ | Auf dem Pausenplatz spielen {a} Kinder Fussball. {b} Kinder kommen dazu. Wie viele spielen jetzt? | a + b = [c] | a: 4 · 12; b: 2 · 8 |  | ☐ |
+| 1 | 🥕 | Im Beet wachsen {a} Rüebli. Der Hase frisst {b}. Wie viele Rüebli bleiben? | a − b = [c] | b: 2 · 8; c: 2 · 10 | a: b + c | ☐ |
+| 1 | 📚 | Noah leiht {a} Bücher aus. Seine Schwester leiht {b} aus. Wie viele Bücher nehmen sie mit? | a + b = [c] | a: 3 · 10; b: 2 · 8 |  | ☐ |
+| 1 | 🍪 | In der Dose sind {a} Guetsli. Finn isst {b}. Wie viele Guetsli sind noch in der Dose? | a − b = [c] | b: 2 · 8; c: 2 · 10 | a: b + c | ☐ |
+| 1 | ⭐ | Mia hat {a} Sammelbilder. Sie bekommt {b} geschenkt. Wie viele Sammelbilder hat sie jetzt? | a + b = [c] | a: 5 · 12; b: 2 · 8 |  | ☐ |
+| 1 | 🧦 | An der Leine hängen {a} Socken. Der Wind weht {b} weg. Wie viele Socken hängen noch? | a − b = [c] | b: 2 · 8; c: 2 · 10 | a: b + c | ☐ |
+| 1 | 🐸 | Am Teich sitzen {a} Frösche. {b} hüpfen ins Wasser. Wie viele Frösche sitzen noch am Teich? | a − b = [c] | b: 2 · 7; c: 2 · 10 | a: b + c | ☐ |
+| 1 | 🍓 | Elin pflückt {a} Erdbeeren. Dann pflückt sie noch {b}. Wie viele Erdbeeren hat sie? | a + b = [c] | a: 4 · 12; b: 2 · 8 |  | ☐ |
+| 2 |  | Jonas hat {geld a} im Kässeli. Zum Geburtstag bekommt er Geld dazu. Jetzt hat er {geld c}. Wie viel Geld hat er bekommen? | a + [b] = c | a: 12 · 55; b: 5 · 40 | c: a + b | ☐ |
+| 2 |  | Im Zug sitzen {a} Leute. In Olten steigen Leute ein. Jetzt sind es {c}. Wie viele Leute sind eingestiegen? | a + [b] = c | a: 20 · 60; b: 8 · 38 | c: a + b | ☐ |
+| 2 |  | Mia liest ein Buch mit {c} Seiten. {a} Seiten hat sie schon gelesen. Wie viele Seiten fehlen noch? | a + [b] = c | a: 12 · 55; b: 8 · 40 | c: a + b | ☐ |
+| 2 |  | Am Morgen liegen {a} Gipfeli in der Bäckerei. Am Mittag sind noch {c} da. Wie viele Gipfeli wurden verkauft? | a − [b] = c | b: 10 · 50; c: 5 · 45 | a: b + c | ☐ |
+| 2 |  | Auf dem Pausenplatz sind {a} Kinder. Es läutet, und einige gehen hinein. Draussen bleiben {c}. Wie viele Kinder sind hineingegangen? | a − [b] = c | b: 8 · 45; c: 5 · 40 | a: b + c | ☐ |
+| 2 |  | Im Velokeller stehen Velos. {b} Velos kommen dazu. Jetzt sind es {c}. Wie viele Velos waren es zuerst? | [a] + b = c | a: 10 · 50; b: 5 · 30 | c: a + b | ☐ |
+| 2 |  | Lena hat Sammelbilder. Sie bekommt {b} dazu. Jetzt hat sie {c}. Wie viele hatte sie zuerst? | [a] + b = c | a: 12 · 60; b: 5 · 35 | c: a + b | ☐ |
+| 2 |  | Noah hat Guetsli gebacken. Er verschenkt {b}. Jetzt hat er noch {c}. Wie viele Guetsli hat er gebacken? | [a] − b = c | b: 8 · 40; c: 5 · 45 | a: b + c | ☐ |
+| 2 |  | Im Zug sitzen Leute. In Bern steigen {b} aus. Danach sind noch {c} im Zug. Wie viele Leute waren es vor Bern? | [a] − b = c | b: 10 · 45; c: 10 · 50 | a: b + c | ☐ |
+| 2 |  | Die Bäckerei packt Guetsli in Säckli, {a} in jedes. Es sind {c} Guetsli. Wie viele Säckli werden voll? | a · [b] = c | a: 3 · 9; b: 3 · 10 | c: a · b | ☐ |
+| 2 |  | Ein Zug hat {b} Wagen. In jedem Wagen sitzen gleich viele Leute, zusammen {c}. Wie viele Leute sitzen in einem Wagen? | [a] · b = c | a: 5 · 12; b: 2 · 8 | c: a · b | ☐ |
+| 2 |  | Die Lehrerin hat {a} Farbstifte. Sie verteilt sie gerecht auf Gruppen. Jede Gruppe bekommt {c} Stifte. Wie viele Gruppen sind es? | a : [b] = c | b: 2 · 9; c: 3 · 10 | a: b · c | ☐ |
+| 2 |  | {a} Kinder fahren mit dem Car auf die Schulreise. In jeder Sitzreihe sitzen gleich viele. Es braucht {c} Reihen. Wie viele Kinder sitzen in einer Reihe? | a : [b] = c | b: 3 · 5; c: 4 · 20 | a: b · c | ☐ |
+| 2 |  | Mia verteilt ihre Sammelbilder gerecht an {b} Freundinnen. Jede bekommt {c} Bilder. Wie viele Sammelbilder hat Mia verteilt? | [a] : b = c | b: 2 · 6; c: 3 · 12 | a: b · c | ☐ |
+| 2 |  | Die Bäckerei verteilt alle Brötli auf {b} Körbe, in jeden gleich viele. In jedem Korb liegen {c}. Wie viele Brötli sind es zusammen? | [a] : b = c | b: 3 · 8; c: 4 · 12 | a: b · c | ☐ |
+| 3 |  | Die Bibliothek hat {a} Bücher. Sie kauft neue dazu. Jetzt sind es {c}. Wie viele Bücher hat sie gekauft? | a + [b] = c | a: 120 · 600; b: 50 · 350 | c: a + b | ☐ |
+| 3 |  | Die Bibliothek hat {a} Bücher. Sie kauft {c} neue dazu. Wie viele Bücher hat sie jetzt? | a + c = [s] | a: 120 · 600; b: 50 · 350 | c: a + b | ☐ |
+| 3 |  | Die Bibliothek hatte viele Bücher. Sie gibt {a} alte weg. Jetzt sind es noch {c}. Wie viele waren es zuerst? | [s] − a = c | a: 120 · 600; b: 50 · 350 | c: a + b | ☐ |
+| 3 |  | Im Zug nach Chur sitzen {a} Leute. In Sargans steigen viele aus. Danach sind noch {c} im Zug. Wie viele sind ausgestiegen? | a − [b] = c | b: 80 · 400; c: 60 · 450 | a: b + c | ☐ |
+| 3 |  | Im Zug nach Chur sitzen {a} Leute. In Sargans steigen {c} ein. Wie viele sind jetzt im Zug? | a + c = [s] | b: 80 · 400; c: 60 · 450 | a: b + c | ☐ |
+| 3 |  | Im Zug nach Chur sassen Leute. In Sargans steigen {a} aus. Danach sind noch {c} im Zug. Wie viele waren es vorher? | [s] − a = c | b: 80 · 400; c: 60 · 450 | a: b + c | ☐ |
+| 3 |  | Die Bäckerei backt Gipfeli auf Blechen, {a} auf jedem Blech. Am Morgen sind {c} Gipfeli fertig. Wie viele Bleche waren das? | a · [b] = c | a: 12 · 48; b: 4 · 20 | c: a · b | ☐ |
+| 3 |  | Die Bäckerei hat {c} Gipfeli gebacken. {a} davon sind schon verkauft. Wie viele sind noch da? | c − a = [s] | a: 12 · 48; b: 4 · 20 | c: a · b | ☐ |
+| 3 |  | Die Bäckerei backt {c} Gipfeli und dazu {a} Brötli. Wie viele Stück backt sie zusammen? | c + a = [s] | a: 12 · 48; b: 4 · 20 | c: a · b | ☐ |
+| 3 |  | An der Schule sind {a} Kinder. Für den Sporttag werden sie in gleich grosse Gruppen eingeteilt. Es gibt {c} Gruppen. Wie viele Kinder sind in einer Gruppe? | a : [b] = c | b: 5 · 25; c: 12 · 40 | a: b · c | ☐ |
+| 3 |  | An der Schule sind {a} Kinder. Am Sporttag sind {c} Kinder krank. Wie viele Kinder machen mit? | a − c = [s] | b: 5 · 25; c: 12 · 40 | a: b · c | ☐ |
+| 3 |  | Am Sporttag sind {a} Kinder und {c} Erwachsene auf dem Platz. Wie viele Leute sind es zusammen? | a + c = [s] | b: 5 · 25; c: 12 · 40 | a: b · c | ☐ |
+| 3 |  | Nino spart für ein Velo. Er hat {geld a} im Kässeli. Von den Grosseltern bekommt er Geld dazu. Jetzt hat er {geld c}. Wie viel hat er bekommen? | a + [b] = c | a: 120 · 500; b: 50 · 400 | c: a + b | ☐ |
+| 3 |  | Nino hat {geld a} im Kässeli. Von den Grosseltern bekommt er {geld c} dazu. Wie viel Geld hat er jetzt? | a + c = [s] | a: 120 · 500; b: 50 · 400 | c: a + b | ☐ |
+| 3 |  | Nino hatte Geld im Kässeli. Er kauft ein Velo für {geld a}. Jetzt hat er noch {geld c}. Wie viel hatte er zuerst? | [s] − a = c | a: 120 · 500; b: 50 · 400 | c: a + b | ☐ |
+| 3 |  | Lia hatte viele Sammelbilder. Sie tauscht {b} weg. Jetzt hat sie noch {c}. Wie viele hatte sie zuerst? | [a] − b = c | b: 200 · 500; c: 50 · 190 | a: b + c | ☐ |
+| 3 |  | Lia hat {b} Sammelbilder. Sie tauscht einige weg. Jetzt hat sie noch {c}. Wie viele hat sie weggetauscht? | b − [s] = c | b: 200 · 500; c: 50 · 190 | a: b + c | ☐ |
+| 3 |  | Lia hat {c} Sammelbilder. Sie möchte {b} haben. Wie viele fehlen ihr noch? | c + [s] = b | b: 200 · 500; c: 50 · 190 | a: b + c | ☐ |
+| 3 |  | Finn fährt an jedem Tag der Velotour gleich weit. Nach {b} Tagen hat er {c} km geschafft. Wie viele Kilometer fährt er an einem Tag? | [a] · b = c | a: 15 · 80; b: 3 · 12 | c: a · b | ☐ |
+| 3 |  | Finn plant eine Velotour von {c} km. {b} km ist er schon gefahren. Wie viele Kilometer fehlen noch? | c − b = [s] | a: 15 · 80; b: 3 · 12 | c: a · b | ☐ |
+| 3 |  | Finn fährt {c} km mit dem Velo und geht {b} km zu Fuss. Wie viele Kilometer ist er unterwegs? | c + b = [s] | a: 15 · 80; b: 3 · 12 | c: a · b | ☐ |
+| 3 |  | Für den Znüni-Tag verteilt der Hauswart alle Äpfel gerecht auf {b} Klassen. Jede Klasse bekommt {c} Äpfel. Wie viele Äpfel hat er verteilt? | [a] : b = c | b: 5 · 16; c: 30 · 60 | a: b · c | ☐ |
+| 3 |  | Der Hauswart hat {b} Kisten Äpfel und {c} Kisten Birnen für den Znüni-Tag. Wie viele Kisten sind es? | b + c = [s] | b: 5 · 16; c: 30 · 60 | a: b · c | ☐ |
+| 3 |  | Der Hauswart hat {c} Äpfel für den Znüni-Tag. {b} davon sind faul. Wie viele kann er verteilen? | c − b = [s] | b: 5 · 16; c: 30 · 60 | a: b · c | ☐ |
+| 3 |  | Die Bäckerei backt am Morgen {a} Brötli. Am Mittag backt sie noch einmal. Am Abend hat sie {c} Brötli gebacken. Wie viele hat sie am Mittag gebacken? | a + [b] = c | a: 150 · 500; b: 60 · 450 | c: a + b | ☐ |
+| 3 |  | Die Bäckerei backt am Morgen {a} Brötli und am Mittag {c}. Wie viele Brötli hat sie gebacken? | a + c = [s] | a: 150 · 500; b: 60 · 450 | c: a + b | ☐ |
+| 3 |  | Die Bäckerei hat Brötli gebacken. Sie verkauft {a}. Jetzt sind noch {c} da. Wie viele hat sie gebacken? | [s] − a = c | a: 150 · 500; b: 60 · 450 | c: a + b | ☐ |
+| 3 |  | Am Samstag kommen {a} Leute ins Hallenbad. Am Nachmittag gehen viele nach Hause. Am Abend sind noch {c} da. Wie viele sind gegangen? | a − [b] = c | b: 80 · 450; c: 40 · 400 | a: b + c | ☐ |
+| 3 |  | Am Samstag kommen {a} Leute ins Hallenbad, am Sonntag {c}. Wie viele Leute waren es am Wochenende? | a + c = [s] | b: 80 · 450; c: 40 · 400 | a: b + c | ☐ |
+| 3 |  | Am Samstag waren Leute im Hallenbad. {a} gehen am Mittag nach Hause. Jetzt sind noch {c} da. Wie viele waren es? | [s] − a = c | b: 80 · 450; c: 40 · 400 | a: b + c | ☐ |
+| 3 |  | In jedem Päckli sind {a} Sammelbilder. Die Klasse hat zusammen {c} Bilder aus Päckli. Wie viele Päckli hat sie geöffnet? | a · [b] = c | a: 4 · 9; b: 12 · 100 | c: a · b | ☐ |
+| 3 |  | Die Klasse hat {c} Sammelbilder. {a} davon sind doppelt. Wie viele sind nicht doppelt? | c − a = [s] | a: 4 · 9; b: 12 · 100 | c: a · b | ☐ |
+| 3 |  | Die Klasse hat {c} Sammelbilder. Sie bekommt {a} dazu. Wie viele hat sie jetzt? | c + a = [s] | a: 4 · 9; b: 12 · 100 | c: a · b | ☐ |
+| 3 |  | Die Schulreise kostet für alle zusammen {geld a}. Jedes Kind zahlt gleich viel. {c} Kinder fahren mit. Wie viel zahlt ein Kind? | a : [b] = c | b: 8 · 30; c: 15 · 30 | a: b · c | ☐ |
+| 3 |  | Die Schulreise kostet {geld a}. {geld c} hat die Klasse schon gesammelt. Wie viel fehlt noch? | a − c = [s] | b: 8 · 30; c: 15 · 30 | a: b · c | ☐ |
+| 3 |  | Die Schulreise kostet {geld a}. Der Zoo kostet noch {geld c} dazu. Wie viel kostet alles zusammen? | a + c = [s] | b: 8 · 30; c: 15 · 30 | a: b · c | ☐ |
+| 4 |  | Die Bibliothek hat {a} Bücher. Sie kauft neue dazu, jetzt sind es {c}. Davon sind {d} ausgeliehen. Wie viele Bücher hat sie gekauft? Und wie viele stehen noch im Regal? | a + [b] = c · c − d = [e] | a: 1200 · 6000; b: 300 · 2500; d: 200 · 1400 | c: a + b; e: c − d | ☐ |
+| 4 |  | Der Zug hat {a} Plätze. In Zürich sind einige Plätze frei, {c} sind besetzt. In Bern steigen {d} Leute aus. Wie viele Plätze waren in Zürich frei? Wie viele Leute sitzen nach Bern noch im Zug? | a − [b] = c · c − d = [e] | a: 400 · 900; b: 50 · 300; d: 40 · 90 | c: a − b; e: c − d | ☐ |
+| 4 |  | Die Bäckerei backt Gipfeli, {a} auf jedem Blech. Am Morgen sind {c} Gipfeli fertig. Bis zum Mittag werden {d} verkauft. Wie viele Bleche hat die Bäckerei gebacken? Wie viele Gipfeli sind am Mittag noch da? | a · [b] = c · c − d = [e] | a: 20 · 40; b: 10 · 30; d: 50 · 180 | c: a · b; e: c − d | ☐ |
+| 4 |  | Lia hat {a} Sammelbilder. Sie bekommt noch viele dazu, jetzt sind es {c}. Sie klebt alle in Alben mit je {d} Bildern. Wie viele Bilder hat sie bekommen? Wie viele Alben füllt sie? | a + [b] = c · c : d = [e] | d: 20 · 50; e: 30 · 100; a: 100 · 500 | c: d · e; b: c − a | ☐ |
+| 4 |  | Die Schule sammelt Geld für das Schulfest. Zuerst hat sie {geld a}. Nach dem Kuchenverkauf hat sie {geld c}. Davon zahlt sie {geld d} für die Musik. Wie viel hat der Kuchenverkauf gebracht? Wie viel Geld bleibt? | a + [b] = c · c − d = [e] | a: 1500 · 4000; b: 500 · 3000; d: 300 · 1400 | c: a + b; e: c − d | ☐ |
+| 4 |  | Die Klasse fährt auf der Velotour jeden Tag gleich weit. Nach {b} Tagen sind es {c} km. Die ganze Tour ist {d} km lang. Wie viele Kilometer fährt die Klasse an einem Tag? Wie viele Kilometer fehlen noch? | [a] · b = c · d − c = [e] | a: 20 · 60; b: 3 · 6; d: 400 · 900 | c: a · b; e: d − c | ☐ |
+| 4 |  | Das Hallenbad verkauft {a} Eintritte. Jeder Eintritt kostet gleich viel. Zusammen nimmt es {geld c} ein. Davon zahlt es {geld d} für den Bademeister. Wie viel kostet ein Eintritt? Wie viel Geld bleibt? | a · [b] = c · c − d = [e] | a: 150 · 600; b: 4 · 12; d: 300 · 500 | c: a · b; e: c − d | ☐ |
+| 4 |  | Auf dem Pausenplatz sind {a} Kinder. Es läutet, einige gehen hinein, {c} bleiben draussen. Dann kommen {d} Kinder aus dem Kindergarten dazu. Wie viele Kinder sind hineingegangen? Wie viele sind jetzt draussen? | a − [b] = c · c + d = [e] | b: 30 · 200; c: 40 · 300; d: 10 · 60 | a: b + c; e: c + d | ☐ |
+| 4 |  | In Olten steigen Leute in den Zug. Vorher sassen {a} Leute drin, nachher {c}. In Aarau steigen Leute aus, dann sind es noch {e}. Wie viele sind in Olten eingestiegen? Wie viele sind in Aarau ausgestiegen? | a + [b] = c · c − [d] = e | a: 200 · 500; b: 60 · 400; d: 50 · 250 | c: a + b; e: c − d | ☐ |
+| 4 |  | Die Bäckerei bestellt Mehl. Im Lager liegen {a} kg. Nach der Lieferung sind es {c} kg. Jeden Tag braucht sie {d} kg. Wie viele Kilogramm wurden geliefert? Für wie viele Tage reicht das Mehl? | a + [b] = c · c : d = [e] | d: 20 · 60; e: 30 · 150; a: 100 · 550 | c: d · e; b: c − a | ☐ |
+| 4 |  | Noah kauft Päckli mit Sammelbildern, in jedem sind {a} Bilder. Zusammen hat er {c} Bilder. {d} davon hat er doppelt. Wie viele Päckli hat er gekauft? Wie viele Bilder hat er nur einmal? | a · [b] = c · c − d = [e] | a: 5 · 8; b: 25 · 120; d: 20 · 100 | c: a · b; e: c − d | ☐ |
+
+## 71. Zeit-Schätzer (Lehrplan SG MA.3.A.1, NMG.9.1)
+
+### Tätigkeiten mit ungefährer Dauer
+
+Dauer als Zahl und Einheit, dazu die Spanne in Sekunden, innerhalb derer die Dauer als richtig gilt. Bitte prüfen, ob die Dauern für Kinder stimmen.
+
+| Bild | Tätigkeit | Dauer | Einheit | Spanne (s) | ☐ |
+|---|---|---|---|---|---|
+| 🤧 | einmal niesen | 1 | s | 0.5–2 | ☐ |
+| 💡 | das Licht anmachen | 1 | s | 0.5–2 | ☐ |
+| 🚪 | eine Tür öffnen | 2 | s | 1–4 | ☐ |
+| 🫧 | einmal tief atmen | 3 | s | 2–6 | ☐ |
+| 🐸 | zehnmal hüpfen | 10 | s | 5–20 | ☐ |
+| 🔥 | ein Streichholz brennt | 10 | s | 5–20 | ☐ |
+| 🎈 | einen Ballon aufblasen | 20 | s | 10–40 | ☐ |
+| 👟 | die Schuhe binden | 20 | s | 10–40 | ☐ |
+| 🏃 | 100 Meter rennen | 20 | s | 15–40 | ☐ |
+| 🧦 | Socken anziehen | 20 | s | 10–40 | ☐ |
+| 🚦 | an der Ampel warten | 1 | min | 30–120 | ☐ |
+| 🪥 | Zähne putzen | 3 | min | 120–240 | ☐ |
+| 🎵 | ein Lied hören | 3 | min | 120–300 | ☐ |
+| 🥚 | ein Ei kochen | 5 | min | 240–600 | ☐ |
+| 🚿 | duschen | 5 | min | 180–600 | ☐ |
+| 🥪 | ein Sandwich essen | 5 | min | 180–600 | ☐ |
+| 🌧️ | ein Regenschauer | 10 | min | 300–1800 | ☐ |
+| 📖 | ein Bilderbuch lesen | 10 | min | 300–1200 | ☐ |
+| 🚶 | der Schulweg | 15 | min | 300–1800 | ☐ |
+| 🍳 | Frühstück essen | 15 | min | 600–1500 | ☐ |
+| 🍕 | eine Pizza backen | 15 | min | 600–1200 | ☐ |
+| ☕ | die grosse Pause | 20 | min | 900–1800 | ☐ |
+| 🎹 | Klavier üben | 20 | min | 900–1800 | ☐ |
+| 🛁 | baden | 20 | min | 900–2400 | ☐ |
+| 🍽️ | Mittagessen | 30 | min | 1200–2700 | ☐ |
+| 🦷 | beim Zahnarzt | 30 | min | 1200–2700 | ☐ |
+| 🏫 | eine Schullektion | 45 | min | 2400–3000 | ☐ |
+| 🧁 | einen Kuchen backen | 45 | min | 1800–3600 | ☐ |
+| ⚽ | ein Fussballspiel | 90 | min | 4800–7200 | ☐ |
+| 🏊 | das Schwimmtraining | 1 | h | 2700–5400 | ☐ |
+| 🧱 | eine Lego-Burg bauen | 1 | h | 1800–7200 | ☐ |
+| 🎬 | ein Kinofilm | 2 | h | 5400–10800 | ☐ |
+| 🧊 | Eiswürfel gefrieren | 2 | h | 3600–14400 | ☐ |
+| 🥾 | eine Wanderung | 3 | h | 7200–18000 | ☐ |
+| 🎂 | ein Geburtstagsfest | 3 | h | 7200–14400 | ☐ |
+| 📚 | ein Schulmorgen | 4 | h | 10800–18000 | ☐ |
+| 🚗 | die Autofahrt in die Ferien | 5 | h | 10800–28800 | ☐ |
+| 😴 | eine Nacht schlafen | 10 | h | 28800–43200 | ☐ |
+| 🎉 | ein Wochenende | 2 | d | 172800–172800 | ☐ |
+| 🏕️ | das Klassenlager | 5 | d | 345600–604800 | ☐ |
+| 🌱 | bis ein Samen keimt | 1 | w | 432000–1209600 | ☐ |
+| 🎄 | die Weihnachtsferien | 2 | w | 1209600–1209600 | ☐ |
+| 🏖️ | die Sommerferien | 5 | w | 2419200–3628800 | ☐ |
+
+### Zeitpunkt-Sätze
+
+Gruppe 1 klar, 2 knifflig.
+
+| Gruppe | Satz | ☐ |
+|---|---|---|
+| 1 | Die Schule beginnt um 8:00. | ☐ |
+| 1 | Der Zug fährt um 9:15 ab. | ☐ |
+| 1 | Wir essen um 18:30 zu Abend. | ☐ |
+| 1 | Das Training beginnt um 16:00. | ☐ |
+| 1 | Am Samstag ist mein Geburtstag. | ☐ |
+| 1 | Der Film beginnt um 20:15. | ☐ |
+| 1 | Ich gehe um 20:00 ins Bett. | ☐ |
+| 1 | Der Bus kommt um 7:42. | ☐ |
+| 1 | Am 1. August feiern wir. | ☐ |
+| 1 | Die Pause beginnt um 10:00. | ☐ |
+| 1 | Um 15:30 hole ich dich ab. | ☐ |
+| 1 | Der Wecker klingelt um 6:45. | ☐ |
+| 2 | Um 12:00 läutet es. | ☐ |
+| 2 | Wir treffen uns um Viertel vor drei. | ☐ |
+| 2 | Das Konzert fängt um halb acht an. | ☐ |
+| 2 | Mitternacht ist um 0:00. | ☐ |
+| 2 | Heute Abend um sieben schauen wir den Film. | ☐ |
+| 2 | Im Juli beginnen die Sommerferien. | ☐ |
+| 2 | Morgen früh um 7:00 fahren wir los. | ☐ |
+| 2 | Punkt zwölf gibt es Mittagessen. | ☐ |
+
+### Zeitdauer-Sätze
+
+Gruppe 1 klar, 2 knifflig („In 5 Minuten geht es los.“ zählt als Dauer).
+
+| Gruppe | Satz | ☐ |
+|---|---|---|
+| 1 | Die Pause dauert 20 Minuten. | ☐ |
+| 1 | Der Film dauert 2 Stunden. | ☐ |
+| 1 | Ich schlafe 10 Stunden. | ☐ |
+| 1 | Die Fahrt dauert 45 Minuten. | ☐ |
+| 1 | Das Spiel dauert 90 Minuten. | ☐ |
+| 1 | Wir warten 5 Minuten. | ☐ |
+| 1 | Die Ferien dauern 2 Wochen. | ☐ |
+| 1 | Ein Niesen dauert 1 Sekunde. | ☐ |
+| 1 | Zähne putzen dauert 3 Minuten. | ☐ |
+| 1 | Das Lager dauert 5 Tage. | ☐ |
+| 1 | Die Lektion dauert 45 Minuten. | ☐ |
+| 1 | Der Schulweg dauert 15 Minuten. | ☐ |
+| 2 | In 5 Minuten geht es los. | ☐ |
+| 2 | Seit 3 Stunden regnet es. | ☐ |
+| 2 | Noch 2 Tage bis zum Fest. | ☐ |
+| 2 | Wir brauchen eine halbe Stunde bis zum See. | ☐ |
+| 2 | Das Ei kocht 5 Minuten lang. | ☐ |
+| 2 | Eine Viertelstunde später sind wir da. | ☐ |
+| 2 | Der Kuchen muss 45 Minuten in den Ofen. | ☐ |
+| 2 | Noch 10 Sekunden, dann ist das Rennen fertig. | ☐ |
+
+## 72. Auge-Entdecker (Lehrplan SG NMG.4.3)
+
+### Teile des Auges
+
+Lage, Aufgaben und Aussehen sind die Tipps im Spiel. Gruppe aussen (NMG.4.3.c), innen (NMG.4.3.e), weg (Weg des Lichts).
+
+| Name | Gruppe | Lage | Aufgaben | Aussehen | ☐ |
+|---|---|---|---|---|---|
+| die Augenbraue | aussen | Es ist ganz oben, über dem Auge. | fängt Schweiss von der Stirn ab, damit er nicht ins Auge läuft · leitet Regentropfen von der Stirn am Auge vorbei | ein Bogen aus kurzen Härchen | ☐ |
+| das Augenlid | aussen | Es liegt oben und unten als Rand um das Auge und kann sich schliessen. | schliesst sich beim Schlafen und schützt das Auge · wischt beim Blinzeln wie ein Scheibenwischer über das Auge | zwei Hautfalten, die sich wie ein Vorhang schliessen | ☐ |
+| die Wimpern | aussen | Sie sitzen am Rand des Lids und zeigen nach aussen. | fangen Staub und kleine Dinge ab, bevor sie ins Auge kommen · lassen uns sofort blinzeln, wenn etwas sie berührt | viele feine Härchen in einer Reihe | ☐ |
+| das Weisse (Lederhaut) | aussen | Es ist die grosse weisse Fläche rund um den farbigen Ring. | ist die feste, weisse Hülle, die das Auge aussen schützt · gibt dem Auge seine runde Form | weiss und fest | ☐ |
+| die Iris (Regenbogenhaut) | aussen | Es ist der farbige Ring in der Mitte des Auges. | gibt dem Auge seine Farbe: braun, blau oder grün · macht mit kleinen Muskeln das Loch in der Mitte enger oder weiter | braun, blau oder grün — bei jedem Menschen anders | ☐ |
+| die Pupille | aussen | Es ist ganz in der Mitte, im farbigen Ring. | ist das Loch, durch das das Licht ins Auge kommt · wird im Dunkeln gross und im Hellen klein | ein dunkles, rundes Loch, das gross und klein werden kann | ☐ |
+| die Tränenflüssigkeit | aussen | Es ist ganz innen im Augenwinkel, bei der Nase. | spült Staub und Schmutz aus dem Auge · hält das Auge immer feucht | ein kleiner Tropfen | ☐ |
+| die Hornhaut | aussen | Es liegt ganz vorn, als Glanz über dem farbigen Ring und dem dunklen Loch. | ist die durchsichtige Scheibe ganz vorn, durch die das Licht hineinkommt · schützt den farbigen Ring und das Loch in der Mitte wie ein Uhrglas | durchsichtig wie ein Uhrglas, man sieht nur einen Glanz | ☐ |
+| die Bindehaut | aussen | Es liegt als dünne Haut über dem Weissen und innen am Lid. | ist die dünne, glatte Haut über dem Weissen und innen am Lid · schützt das Auge vor Keimen, die krank machen | so dünn, dass man sie fast nicht sieht | ☐ |
+| die Linse | innen | Sie liegt gleich hinter dem Loch, durch das das Licht kommt. | bündelt das Licht, damit hinten im Auge ein scharfes Bild entsteht · kann sich dicker und dünner machen, um nah und fern scharf zu sehen | durchsichtig und geformt wie eine Lupe: in der Mitte dicker als am Rand | ☐ |
+| der Glaskörper | innen | Es füllt den grossen Raum im Inneren des Auges aus. | füllt das Innere des Auges wie durchsichtiges Gelee · hält das Auge von innen in Form | durchsichtig wie Gelee | ☐ |
+| die Netzhaut | innen | Sie liegt ganz hinten im Auge, innen an der Wand. | nimmt hinten im Auge das Licht auf · verwandelt das Licht in Signale für das Gehirn | eine dünne Schicht, die wie eine Leinwand das Bild auffängt | ☐ |
+| der Sehnerv | innen | Er führt hinten aus dem Auge heraus in den Kopf. | leitet die Signale von der Netzhaut ans Gehirn · ist das Kabel vom Auge zum Gehirn | wie ein dickes Kabel | ☐ |
+| das Gehirn | weg | Es ist im Kopf, am Ende des Kabels. | macht aus den Signalen des Auges ein Bild | der Teil im Kopf, der aus Signalen ein Bild macht | ☐ |
+
+### Pupille
+
+| Satz | Antwort | ☐ |
+|---|---|---|
+| Im Hellen wird die Pupille … | klein | ☐ |
+| Im Dunkeln wird die Pupille … | gross | ☐ |
+| Du gehst aus dem Haus in die Sonne. Die Pupille wird … | klein | ☐ |
+| Du gehst in einen dunklen Keller. Die Pupille wird … | gross | ☐ |
+| Jemand leuchtet mit einer Taschenlampe in dein Auge. Die Pupille wird … | klein | ☐ |
+| Im Kino geht das Licht aus. Die Pupille wird … | gross | ☐ |
+| Am Morgen ziehst du den Vorhang auf. Die Pupille wird … | klein | ☐ |
+| In der Nacht löschst du das Licht. Die Pupille wird … | gross | ☐ |
+| Welches Auge ist im Dunkeln? | gross | ☐ |
+| Welches Auge ist im Hellen? | klein | ☐ |
+| Welches Auge schaut in eine helle Lampe? | klein | ☐ |
+| Welches Auge ist im dunklen Keller? | gross | ☐ |
+
+### Aussagen (stimmt / stimmt nicht)
+
+Fakten bitte nachprüfen.
+
+| Aussage | stimmt | Erklärung | ☐ |
+|---|---|---|---|
+| Mit einer Sonnenbrille kannst du gefahrlos direkt in die Sonne schauen. | false | Auch durch eine Sonnenbrille kommt noch sehr viel Licht ins Auge. | ☐ |
+| Die Hornhaut ist durchsichtig. | true | Das Licht muss ganz vorn ins Auge hineinkommen. | ☐ |
+| Die Linse bündelt das Licht. | true | Denk an eine Lupe. | ☐ |
+| Die Netzhaut nimmt hinten im Auge das Licht auf. | true | Wo entsteht das Bild — vorn oder hinten? | ☐ |
+| Der Sehnerv leitet die Signale ans Gehirn. | true | Irgendwie muss die Nachricht vom Auge in den Kopf kommen. | ☐ |
+| Im Dunkeln wird die Pupille klein. | false | Wie viel Licht braucht das Auge im Dunkeln — mehr oder weniger? | ☐ |
+| Das Bild entsteht vorn auf der Hornhaut. | false | Die Hornhaut ist durchsichtig. Kann darauf ein Bild entstehen? | ☐ |
+| Beim Blinzeln verteilt das Lid die Tränenflüssigkeit über das Auge. | true | Wozu ist das Lid wie ein Scheibenwischer? | ☐ |
+| Der Glaskörper füllt das Innere des Auges aus. | true | Was ist im Auge zwischen Linse und Netzhaut? | ☐ |
+| Ein Laserpointer ins Auge ist harmlos. | false | Ein Laser bündelt sehr viel Licht auf einen einzigen Punkt. | ☐ |
+| Beim Werken mit Hammer und Holz schützt eine Schutzbrille vor Splittern. | true | Was passiert, wenn ein Splitter ins Auge fliegt? | ☐ |
+| Die Augen mit schmutzigen Händen zu reiben ist in Ordnung. | false | Was bringen schmutzige Hände mit ans Auge? | ☐ |
+| Die Pupille ist ein Loch in der Iris. | true | Ist das Dunkle in der Mitte etwas Festes? | ☐ |
+| Die Linse liegt hinter der Pupille. | true | Wohin geht das Licht, nachdem es durch das Loch gekommen ist? | ☐ |
+| Die Netzhaut liegt ganz vorn am Auge. | false | Wo fängt das Auge das Bild auf — vorn oder hinten? | ☐ |
+| Der Sehnerv ist das Kabel vom Auge zum Gehirn. | true | Wie kommt die Nachricht vom Auge in den Kopf? | ☐ |
+| Beim langen Schauen auf einen Bildschirm blinzeln wir weniger, und die Augen werden trocken. | true | Was macht das Lid beim Blinzeln mit der Tränenflüssigkeit? | ☐ |
+| Die Iris gibt dem Auge seine Farbe. | true | Was ist bei braunen und blauen Augen verschieden? | ☐ |
+| Im Hellen wird die Pupille gross. | false | Soll im Hellen viel oder wenig Licht ins Auge? | ☐ |
+| Ein Sandkorn im Auge spült man mit sauberem Wasser heraus, statt zu reiben. | true | Was macht ein Sandkorn beim Reiben auf dem Auge? | ☐ |
+| Die Wimpern lassen das Licht ins Auge. | false | Wozu sind die Härchen am Lidrand da? | ☐ |
+| Die Augenbraue bündelt das Licht. | false | Was macht die Augenbraue mit dem Schweiss von der Stirn? | ☐ |
+| Der Glaskörper gibt dem Auge seine Farbe. | false | Welcher Teil ist braun, blau oder grün? | ☐ |
+| Die Linse sitzt ganz hinten im Auge an der Wand. | false | Wo liegt die Lupe des Auges — vorn beim Loch oder hinten? | ☐ |
+| Die Tränenflüssigkeit spült Staub aus dem Auge. | true | Was passiert, wenn dir etwas ins Auge fliegt? | ☐ |
+| Zu viel Sonnenlicht, das vom Schnee gespiegelt wird, schadet den Augen. | true | Warum tragen viele Leute beim Skifahren eine Sonnenbrille? | ☐ |
+| Ohne Licht kann die Netzhaut nichts aufnehmen. | true | Was siehst du in einem ganz dunklen Raum? | ☐ |
+| Die Hornhaut liegt hinter der Netzhaut. | false | Was ist ganz vorn am Auge, was ganz hinten? | ☐ |
+
+### Warum-Fragen
+
+Die erste Antwort ist die richtige.
+
+| Frage | richtig | falsch | falsch | Tipp | ☐ |
+|---|---|---|---|---|---|
+| Warum werden die Pupillen im Dunkeln gross? | Damit mehr Licht ins Auge kommt. | Damit das Auge wärmer wird. | Damit wir besser hören. | Im Dunkeln gibt es wenig Licht. Was braucht das Auge dann? | ☐ |
+| Warum werden die Pupillen im Hellen klein? | Damit nicht zu viel Licht ins Auge kommt. | Damit das Auge nicht austrocknet. | Damit wir Farben sehen. | Im Hellen gibt es sehr viel Licht. Was wäre zu viel? | ☐ |
+| Warum blinzeln wir? | Damit das Lid die Tränenflüssigkeit über das Auge verteilt und es feucht bleibt. | Damit die Iris ihre Farbe behält. | Damit die Linse scharf wird. | Denk an einen Scheibenwischer. | ☐ |
+| Warum haben wir Augenbrauen? | Damit Schweiss von der Stirn nicht ins Auge läuft. | Damit mehr Licht ins Auge kommt. | Damit die Pupille rund bleibt. | Was läuft beim Rennen von der Stirn herunter? | ☐ |
+| Warum haben wir Wimpern? | Sie fangen Staub und kleine Dinge ab, bevor sie ins Auge kommen. | Sie helfen beim Scharfsehen. | Sie halten das Auge warm. | Wo sitzen die Wimpern, und was fliegt dort vorbei? | ☐ |
+| Warum ist die Hornhaut durchsichtig? | Damit das Licht ins Auge hineinkommen kann. | Damit man die Netzhaut von aussen sieht. | Damit das Auge leichter ist. | Was muss ganz vorn ins Auge hinein, damit wir sehen? | ☐ |
+| Warum braucht das Auge den Sehnerv? | Er leitet die Signale von der Netzhaut ans Gehirn. | Er macht die Pupille gross und klein. | Er hält das Auge feucht. | Das Auge fängt das Bild auf. Wo muss es dann hin? | ☐ |
+| Was macht das Gehirn beim Sehen? | Es setzt die Signale aus dem Auge zu einem Bild zusammen. | Es bündelt das Licht. | Es gibt der Iris ihre Farbe. | Die Netzhaut schickt nur Signale. Wer macht daraus ein Bild? | ☐ |
+| Warum schauen wir nie direkt in die Sonne? | Das starke Licht kann die Netzhaut verletzen. | Die Iris wird sonst blass. | Die Wimpern fallen sonst aus. | Welches Teil nimmt das Licht auf, und was macht zu viel Licht damit? | ☐ |
+| Warum tränen die Augen, wenn Staub hineinkommt? | Die Tränen spülen den Staub wieder heraus. | Das Auge will die Pupille schliessen. | Der Sehnerv wird nass. | Was macht Wasser mit Staub? | ☐ |
+| Warum sehen wir mit der Linse scharf? | Sie bündelt das Licht so, dass auf der Netzhaut ein scharfes Bild entsteht. | Sie macht das Licht heller. | Sie färbt das Bild bunt. | Denk an eine Lupe: Was macht sie mit den Lichtstrahlen? | ☐ |
+| Warum hilft eine Brille manchen Kindern? | Sie lenkt das Licht so, dass das Bild auf der Netzhaut scharf wird. | Sie macht die Pupille grösser. | Sie färbt die Iris. | Wenn das Bild hinten im Auge unscharf ist — was muss sich ändern? | ☐ |
+| Warum siehst du in einem ganz dunklen Raum nichts? | Ohne Licht kommt nichts ins Auge, das die Netzhaut aufnehmen könnte. | Die Pupille ist dann zu. | Der Sehnerv schläft. | Was braucht das Auge zum Sehen, und was fehlt im Dunkeln? | ☐ |
+| Warum tragen viele Leute beim Werken eine Schutzbrille? | Splitter und Staub dürfen nicht ins Auge fliegen. | Damit sie besser hören. | Damit die Pupille klein bleibt. | Was fliegt beim Sägen und Hämmern durch die Luft? | ☐ |
+
+### Weg des Lichts
+
+| Reihenfolge | ☐ |
+|---|---|
+| hornhaut → pupille → linse → glaskoerper → netzhaut → sehnerv → gehirn | ☐ |
+
+## 73. Gemeinde-Helfer (Lehrplan SG NMG.10.3)
+
+### Einrichtungen
+
+Ebene: Gemeinde, Kanton oder Bund (leer = je nach Ort verschieden). Was je Gemeinde abweicht, bitte markieren.
+
+| Bild | Name | tut | öffentlich | Ebene | ☐ |
+|---|---|---|---|---|---|
+| 🚒 | Feuerwehr | löscht Brände, pumpt Wasser aus Kellern und rettet bei Unfällen | true | gemeinde | ☐ |
+| 👮 | Polizei | sorgt für Sicherheit, fängt Diebe und nimmt Unfälle auf | true |  | ☐ |
+| 🏥 | Spital | behandelt Kranke und Verletzte, auch im Notfall | true |  | ☐ |
+| 🏛️ | Gemeindehaus | hier arbeitet die Gemeindeverwaltung: anmelden, Ausweise, Hundemarke | true | gemeinde | ☐ |
+| 📚 | Bibliothek | leiht Bücher, Hörbücher und Spiele aus | true | gemeinde | ☐ |
+| 🚜 | Werkhof | unterhält die Strassen, räumt Schnee, stellt Strassenschilder auf und leert die öffentlichen Abfalleimer | true | gemeinde | ☐ |
+| 📮 | Post | befördert Briefe und Päckli und verkauft Briefmarken | true | bund | ☐ |
+| 🏫 | Schule | hier lernen Kinder lesen, schreiben und rechnen | true | gemeinde | ☐ |
+| 🏊 | Schwimmbad | hier kann man baden und schwimmen lernen | true | gemeinde | ☐ |
+| ♻️ | Abfallentsorgung | holt den Kehricht ab und nimmt Glas, Papier und Sperrgut an der Sammelstelle an | true | gemeinde | ☐ |
+| 🧤 | Fundbüro | sammelt verlorene Sachen, bis jemand sie abholt | true | gemeinde | ☐ |
+| ⚖️ | Gericht | entscheidet bei Streit, was recht ist, und bestimmt die Strafe, wenn jemand ein Gesetz gebrochen hat | true |  | ☐ |
+| 🥐 | Bäckerei | backt und verkauft Brot und Gipfeli | false |  | ☐ |
+| 💇 | Coiffeur | schneidet Haare | false |  | ☐ |
+| 🔧 | Velowerkstatt | repariert und verkauft Velos | false |  | ☐ |
+| 🛒 | Supermarkt | verkauft Lebensmittel und Dinge für den Haushalt | false |  | ☐ |
+
+### Anliegen
+
+Kurzform für Stufe 1; Ablenker = der nächstliegende falsche Korb.
+
+| Satz | Kurzform | Einrichtung | Schwierigkeit | Ablenker | ☐ |
+|---|---|---|---|---|---|
+| In der Küche brennt es, und der Rauch wird immer dichter. | 🔥 Es brennt! | feuerwehr | 1 | polizei | ☐ |
+| Nach dem Gewitter steht der Keller voll Wasser. | 🌊 Keller voll Wasser | feuerwehr | 2 | werkhof | ☐ |
+| Eine Katze sitzt seit Stunden hoch oben im Baum und traut sich nicht mehr herunter. | 🐱 Katze im Baum | feuerwehr | 2 | polizei | ☐ |
+| Aus einem Lastwagen läuft Öl auf die Strasse. |  | feuerwehr | 3 | werkhof | ☐ |
+| Dein Velo wurde vor dem Schulhaus gestohlen. |  | polizei | 3 | fundbuero | ☐ |
+| Ein Auto rast jeden Tag viel zu schnell durch die Quartierstrasse. |  | polizei | 2 | werkhof | ☐ |
+| Zwei Autos sind zusammengestossen. Niemand ist verletzt, aber jemand muss den Unfall aufnehmen. |  | polizei | 2 | spital | ☐ |
+| Jemand ist in der Nacht in ein Haus eingebrochen. |  | polizei | 1 | feuerwehr | ☐ |
+| Im Einkaufszentrum hat ein kleines Kind seine Eltern verloren und weint. |  | polizei | 3 | fundbuero | ☐ |
+| Du bist vom Velo gestürzt, und dein Arm ist gebrochen. | 🦴 Arm gebrochen | spital | 1 | feuerwehr | ☐ |
+| Beim Fussball hat sich dein Freund das Bein schwer verletzt. | 🩹 Bein verletzt | spital | 1 | polizei | ☐ |
+| Deine Tante bekommt ein Baby. | 👶 Baby kommt | spital | 1 | gemeindehaus | ☐ |
+| Opa muss am Knie operiert werden. | 🛏️ Operation | spital | 1 | schwimmbad | ☐ |
+| Eure Familie ist neu ins Dorf gezogen und muss sich anmelden. |  | gemeindehaus | 2 | post | ☐ |
+| Du brauchst eine Identitätskarte für die Ferien im Ausland. |  | gemeindehaus | 2 | post | ☐ |
+| Ihr habt einen Hund gekauft. Er muss angemeldet werden und braucht eine Marke. |  | gemeindehaus | 2 | polizei | ☐ |
+| Du möchtest wissen, wann die nächste Gemeindeversammlung ist. |  | gemeindehaus | 2 | bibliothek | ☐ |
+| Deine Eltern brauchen eine Bestätigung, dass sie in dieser Gemeinde wohnen. |  | gemeindehaus | 2 | post | ☐ |
+| Du möchtest ein Buch ausleihen. | 📖 Buch ausleihen | bibliothek | 1 | schule | ☐ |
+| Du suchst ein Hörbuch für die Ferien. | 🎧 Hörbuch leihen | bibliothek | 1 | post | ☐ |
+| Für einen Vortrag brauchst du drei Bücher über Dinosaurier. |  | bibliothek | 2 | schule | ☐ |
+| Es hat die ganze Nacht geschneit. Die Strasse muss geräumt werden. |  | werkhof | 1 | feuerwehr | ☐ |
+| Ein Strassenschild ist umgefallen und liegt auf dem Trottoir. |  | werkhof | 2 | polizei | ☐ |
+| Der Abfalleimer beim Spielplatz quillt über. |  | werkhof | 3 | entsorgung | ☐ |
+| In der Strasse ist ein tiefes Loch, in dem die Velos hängen bleiben. |  | werkhof | 2 | polizei | ☐ |
+| Das Gras am Strassenrand ist so hoch, dass man die Kreuzung nicht mehr sieht. |  | werkhof | 3 | polizei | ☐ |
+| Du willst deiner Cousine ein Päckli schicken. | 📦 Päckli schicken | post | 1 | gemeindehaus | ☐ |
+| Du brauchst Briefmarken für die Geburtstagskarten. | ✉️ Briefmarken kaufen | post | 1 | supermarkt | ☐ |
+| Ein Brief muss bis morgen bei deiner Grossmutter sein. |  | post | 2 | gemeindehaus | ☐ |
+| Hier lernst du jeden Morgen lesen, schreiben und rechnen. | ✏️ Lesen und rechnen lernen | schule | 1 | bibliothek | ☐ |
+| Hier triffst du jeden Tag deine Klasse und deine Lehrerin. | 👩‍🏫 Klasse und Lehrerin | schule | 1 | bibliothek | ☐ |
+| Du hast dein Mathebuch im Klassenzimmer liegen lassen und holst es. |  | schule | 2 | fundbuero | ☐ |
+| Es ist heiss, und du möchtest baden gehen. | ☀️ Baden gehen | schwimmbad | 1 | spital | ☐ |
+| Du willst endlich richtig schwimmen lernen. | 🩱 Schwimmen lernen | schwimmbad | 1 | schule | ☐ |
+| Deine Klasse hat heute Schwimmunterricht. |  | schwimmbad | 2 | schule | ☐ |
+| Der alte Kühlschrank muss weg. |  | entsorgung | 2 | werkhof | ☐ |
+| Ihr habt eine Kiste voll leerer Flaschen und Gläser gesammelt. |  | entsorgung | 2 | supermarkt | ☐ |
+| Der Kehrichtsack vor dem Haus soll abgeholt werden. |  | entsorgung | 2 | werkhof | ☐ |
+| Dein Velo ist weg, und du weisst nicht mehr, wo du es abgestellt hast. |  | fundbuero | 3 | polizei | ☐ |
+| Du hast deine Mütze auf dem Spielplatz verloren. |  | fundbuero | 2 | polizei | ☐ |
+| Jemand hat deinen verlorenen Schlüssel abgegeben. Wo holst du ihn ab? |  | fundbuero | 2 | gemeindehaus | ☐ |
+| Zwei Nachbarn streiten seit Monaten um einen Zaun und finden keine Lösung. |  | gericht | 3 | polizei | ☐ |
+| Ein Dieb wurde gefasst. Wer bestimmt, welche Strafe er bekommt? |  | gericht | 3 | polizei | ☐ |
+
+### Notrufnummern
+
+Bitte prüfen (Schweiz).
+
+| Nummer | Stelle | Situationen | ☐ |
+|---|---|---|---|
+| 117 | Polizei | Du siehst, wie jemand in ein Auto einbricht. · Ein Fremder verfolgt dich auf dem Heimweg. · Auf der Strasse ist ein Unfall passiert, und die Autos blockieren alles. Niemand ist verletzt. | ☐ |
+| 118 | Feuerwehr | Aus dem Fenster des Nachbarhauses kommt Rauch. · Im Wald neben dem Spielplatz brennt es. · Eine Kerze hat den Vorhang angezündet, und die Flammen werden grösser. | ☐ |
+| 144 | Sanität | Dein Grossvater fällt um und wacht nicht mehr auf. · Ein Kind ist vom Klettergerüst gefallen und kann nicht mehr aufstehen. · Jemand bekommt kaum noch Luft. | ☐ |
+| 112 | Europa | Welche Nummer gilt in ganz Europa — und auch in der Schweiz? | ☐ |
+
+### Zuständige Stellen
+
+| Satz | Stelle | Ablenker | ☐ |
+|---|---|---|---|
+| Du verstehst die Hausaufgabe nicht. | lehrperson | schulleitung | ☐ |
+| Du hast dein Heft verloren und brauchst ein neues. | lehrperson | hauswart | ☐ |
+| Ein Kind in deiner Klasse wird immer wieder geärgert. | lehrperson | gemeinderat | ☐ |
+| Du wirst am Montag fehlen, weil du zum Zahnarzt musst. | lehrperson | schulleitung | ☐ |
+| Die Heizung im Schulzimmer ist seit Tagen kalt. | hauswart | lehrperson | ☐ |
+| Im Gang des Schulhauses ist eine Lampe kaputt. | hauswart | verwaltung | ☐ |
+| Die Türe zur Turnhalle klemmt. | hauswart | schulleitung | ☐ |
+| Im Schulhaus ist ein Fenster zerbrochen. | hauswart | gemeinderat | ☐ |
+| Deine Familie zieht um. Du musst in ein anderes Schulhaus wechseln. | schulleitung | lehrperson | ☐ |
+| Eure Klasse möchte für das Schulfest die ganze Aula benutzen. | schulleitung | hauswart | ☐ |
+| Eine neue Familie ist im Dorf angekommen und muss sich anmelden. | verwaltung | gemeinderat | ☐ |
+| Deine Eltern brauchen eine Hundemarke für den neuen Hund. | verwaltung | gemeinderat | ☐ |
+| Du brauchst eine Identitätskarte. | verwaltung | schulleitung | ☐ |
+| Die Kinder im Quartier wünschen sich einen neuen Spielplatz. | gemeinderat | verwaltung | ☐ |
+| Viele Leute wünschen sich eine neue Turnhalle für das Dorf. | gemeinderat | schulleitung | ☐ |
+| Der Schulweg braucht einen Fussgängerstreifen. Wer kann das beschliessen? | gemeinderat | verwaltung | ☐ |
+
+### Gemeinde, Kanton oder Bund
+
+Annahme für SG; bitte prüfen.
+
+| Bild | Name | Ebene | ☐ |
+|---|---|---|---|
+| 🏫 | Primarschule | gemeinde | ☐ |
+| 🚜 | Werkhof | gemeinde | ☐ |
+| 📚 | Gemeindebibliothek | gemeinde | ☐ |
+| 🗑️ | Kehrichtabfuhr | gemeinde | ☐ |
+| 🛝 | Spielplatz im Dorf | gemeinde | ☐ |
+| 🏥 | Kantonsspital | kanton | ☐ |
+| 👮 | Kantonspolizei | kanton | ☐ |
+| 🛣️ | Kantonsstrasse | kanton | ☐ |
+| 🎓 | Kantonsschule | kanton | ☐ |
+| 📮 | Post | bund | ☐ |
+| 🚆 | Bahn (SBB) | bund | ☐ |
+| 🎖️ | Armee | bund | ☐ |
+| 🛤️ | Autobahn | bund | ☐ |
+| 🛃 | Zoll an der Grenze | bund | ☐ |
+
+### Abläufe (Königsstufe)
+
+Stark vereinfacht.
+
+| Titel | Schritte | ☐ |
+|---|---|---|
+| Die Kinder wünschen sich einen neuen Spielplatz. | Die Kinder schreiben einen Brief mit ihrem Vorschlag an den Gemeinderat. → Der Gemeinderat prüft den Vorschlag und rechnet aus, was er kostet. → Die Stimmberechtigten entscheiden an der Gemeindeversammlung. → Der Werkhof baut den Spielplatz. → Die Kinder spielen auf dem neuen Spielplatz. | ☐ |
+| Eine Strassenlampe im Quartier ist kaputt. | Eine Nachbarin meldet die kaputte Lampe der Gemeindeverwaltung. → Die Verwaltung gibt die Meldung an den Werkhof weiter. → Der Werkhof schaut die Lampe an und bestellt das Ersatzteil. → Der Werkhof wechselt die Lampe aus. → Am Abend ist die Strasse wieder hell. | ☐ |
+| Der Schulweg braucht einen sicheren Übergang. | Die Eltern schreiben dem Gemeinderat, dass die Strasse am Schulweg gefährlich ist. → Der Gemeinderat lässt die Stelle von Fachleuten anschauen. → Der Gemeinderat beschliesst einen Fussgängerstreifen mit Insel. → Der Werkhof malt den Streifen und baut die Insel. → Die Kinder überqueren die Strasse sicher. | ☐ |
+
+## 74. Gefühle-Radar (Lehrplan SG D.1.C.1)
+
+### Gefühle
+
+| Wort | Bild | Gruppe | Ablenker | ☐ |
+|---|---|---|---|---|
+| fröhlich | 😀 😄 😊 | grund | traurig, wütend, müde, ängstlich | ☐ |
+| traurig | 😢 😭 | grund | fröhlich, wütend, überrascht | ☐ |
+| wütend | 😠 😡 | grund | fröhlich, müde, ängstlich | ☐ |
+| ängstlich | 😨 😱 | grund | fröhlich, müde, wütend | ☐ |
+| überrascht | 😲 😮 | grund | traurig, müde, wütend | ☐ |
+| müde | 😴 😪 | grund | fröhlich, überrascht, wütend | ☐ |
+| stolz | 😌 | fein | enttäuscht, gelangweilt, traurig | ☐ |
+| enttäuscht | 😞 | fein | stolz, neugierig, fröhlich | ☐ |
+| neugierig | 🤔 | fein | gelangweilt, traurig, müde | ☐ |
+| nervös | 😬 | fein | gelangweilt, stolz, müde | ☐ |
+| gelangweilt | 🥱 | fein | neugierig, ängstlich, stolz | ☐ |
+| erleichtert | 😮‍💨 | fein | wütend, gelangweilt, enttäuscht | ☐ |
+| eifersüchtig | 😒 | fein | fröhlich, gelangweilt, müde | ☐ |
+| beschämt | 😳 | fein | stolz, fröhlich, neugierig | ☐ |
+
+### Bild-Situationen (Stufe 1)
+
+| Bild | Text | Gefühl | ☐ |
+|---|---|---|---|
+| 🎁 | Ein Geschenk | fröhlich | ☐ |
+| 🍦 | Eine Glace | fröhlich | ☐ |
+| 🎂 | Geburtstag | fröhlich | ☐ |
+| 💔 | Spielzeug kaputt | traurig | ☐ |
+| 🧸 | Teddy ist weg | traurig | ☐ |
+| 🎈 | Ballon weggeflogen | traurig | ☐ |
+| 🧱 | Turm umgestossen | wütend | ☐ |
+| ✏️ | Stift zerbrochen | wütend | ☐ |
+| 🎮 | Spiel weggenommen | wütend | ☐ |
+| 🐻 | Bär im Wald | ängstlich | ☐ |
+| ⚡ | Gewitter nachts | ängstlich | ☐ |
+| 🕷️ | Grosse Spinne | ängstlich | ☐ |
+| 🎉 | Überraschungsfest | überrascht | ☐ |
+| 📦 | Paket vor der Tür | überrascht | ☐ |
+| 🎩 | Zaubertrick | überrascht | ☐ |
+| 🌙 | Spät in der Nacht | müde | ☐ |
+| 🥾 | Lange Wanderung | müde | ☐ |
+| 🛏️ | Kaum geschlafen | müde | ☐ |
+
+### Sätze (Stufe 2)
+
+| Satz | Gefühl | Ablenker | ☐ |
+|---|---|---|---|
+| Lea bekommt ein Velo und jubelt. | fröhlich | traurig, müde | ☐ |
+| Ben weint, sein Hamster ist weg. | traurig | fröhlich, wütend | ☐ |
+| Mia stampft und schreit: Das ist gemein! | wütend | fröhlich, müde | ☐ |
+| Noah zittert, ein grosser Hund knurrt. | ängstlich | fröhlich, müde | ☐ |
+| Elin staunt: Ein Esel steht im Garten! | überrascht | traurig, müde | ☐ |
+| Luca gähnt und reibt sich die Augen. | müde | fröhlich, wütend | ☐ |
+| Amira lacht und tanzt durchs Zimmer. | fröhlich | traurig, ängstlich | ☐ |
+| Jonas sitzt allein und weint leise. | traurig | fröhlich, überrascht | ☐ |
+| Lea knallt die Tür zu und schimpft. | wütend | fröhlich, müde | ☐ |
+| Ben versteckt sich, es donnert laut. | ängstlich | fröhlich, müde | ☐ |
+| Mia staunt: Ein Paket für mich! | überrascht | traurig, müde | ☐ |
+| Noah schläft fast beim Znüni ein. | müde | wütend, überrascht | ☐ |
+| Elin hüpft: Morgen ist Schulreise! | fröhlich | traurig, ängstlich | ☐ |
+| Luca vermisst sein Grosi sehr. | traurig | fröhlich, wütend | ☐ |
+| Amira ballt die Fäuste: Immer ich! | wütend | fröhlich, müde | ☐ |
+| Jonas traut sich nicht in den Keller. | ängstlich | fröhlich, müde | ☐ |
+| Lea staunt: Es schneit im Mai! | überrascht | traurig, wütend | ☐ |
+| Ben gähnt, es ist schon spät. | müde | fröhlich, wütend | ☐ |
+
+### Situationen (Stufe 3 und 4)
+
+Jede Situation muss eindeutig sein.
+
+| Gruppe | Text | Wer | Gefühl | Ablenker | Tipp | ☐ |
+|---|---|---|---|---|---|---|
+| 3 | Lea hat lange auf ihren Geburtstag gewartet. Heute kommen alle Freundinnen zur Party. | Lea | fröhlich | traurig, wütend, müde | Lea hat sich lange auf diesen Tag gefreut. | ☐ |
+| 3 | Ben hat sein Lieblingsbuch verloren. Er sucht überall, aber es ist weg. | Ben | traurig | fröhlich, überrascht, müde | Etwas, das Ben lieb hat, ist weg. | ☐ |
+| 3 | Mia baut einen hohen Turm. Ihr Bruder wirft ihn absichtlich um. | Mia | wütend | fröhlich, müde, ängstlich | Jemand hat Mia mit Absicht etwas kaputt gemacht. | ☐ |
+| 3 | Noah ist allein zu Hause. Plötzlich klopft es laut an der Tür. | Noah | ängstlich | fröhlich, müde, wütend | Noah weiss nicht, wer da ist. | ☐ |
+| 3 | Elin öffnet die Haustür. Ihre Cousine aus Italien steht davor, und niemand hat davon gewusst. | Elin | überrascht | traurig, müde, wütend | Elin hat damit gar nicht gerechnet. | ☐ |
+| 3 | Luca war den ganzen Tag im Lager wandern. Jetzt sitzt er am Feuer, und die Augen fallen ihm zu. | Luca | müde | fröhlich, wütend, überrascht | Luca war den ganzen Tag unterwegs. | ☐ |
+| 3 | Amira hat ein Rechenblatt ganz allein gelöst. Die Lehrerin lobt sie vor der Klasse. | Amira | fröhlich | traurig, wütend, ängstlich | Amira hat etwas geschafft und bekommt ein Lob. | ☐ |
+| 3 | Jonas' bester Freund zieht in eine andere Stadt. Heute sagen sie sich Tschüss. | Jonas | traurig | fröhlich, wütend, müde | Jonas muss jemanden gehen lassen, den er mag. | ☐ |
+| 3 | Lea wartet in der Reihe vor der Rutschbahn. Ein Kind drängt sich einfach vor. | Lea | wütend | fröhlich, müde, überrascht | Da ist etwas ungerecht. | ☐ |
+| 3 | Ben steht oben auf dem Sprungturm im Schwimmbad. Das Wasser ist sehr weit unten. | Ben | ängstlich | fröhlich, müde, wütend | Ben schaut hinunter, und sein Herz klopft. | ☐ |
+| 3 | Mia macht ihre Znünibox auf. Ein Marienkäfer sitzt darin und krabbelt heraus. | Mia | überrascht | traurig, müde, wütend | Damit hat Mia nicht gerechnet. | ☐ |
+| 3 | Noah hat in der Nacht kaum geschlafen. Im Unterricht gähnt er immer wieder. | Noah | müde | fröhlich, wütend, überrascht | Noah hat zu wenig geschlafen. | ☐ |
+| 3 | Elin darf zum ersten Mal mit dem Velo zur Schule fahren. Sie strahlt den ganzen Weg. | Elin | fröhlich | traurig, ängstlich, müde | Elin darf etwas, worauf sie lange gewartet hat. | ☐ |
+| 3 | Lucas Hamster ist gestorben. Er schaut lange in den leeren Käfig. | Luca | traurig | fröhlich, überrascht, wütend | Luca hat ein Tier verloren, das er lieb hatte. | ☐ |
+| 3 | Amira hat ihr Bild sorgfältig gemalt. Jonas kritzelt mit Absicht darüber. | Amira | wütend | fröhlich, müde, ängstlich | Jemand hat Amira mit Absicht etwas kaputt gemacht. | ☐ |
+| 3 | Jonas soll im Lager allein Holz aus dem dunklen Keller holen. Die Lampe geht nicht. | Jonas | ängstlich | fröhlich, müde, wütend | Es ist dunkel, und Jonas ist allein. | ☐ |
+| 3 | Lea schaut aus dem Fenster. Auf dem Pausenplatz steht ein echtes Pony. | Lea | überrascht | traurig, müde, wütend | So etwas sieht Lea sonst nie. | ☐ |
+| 3 | Ben ist beim Turnen zehn Runden gerannt. Jetzt liegt er auf der Matte und will nur noch ruhen. | Ben | müde | fröhlich, wütend, ängstlich | Ben hat sich sehr angestrengt. | ☐ |
+| 4 | Lea hat Mia beim Üben für den Vortrag geholfen. Heute hält Mia den Vortrag ohne einen einzigen Stolperer vor der Klasse. | Mia | stolz | enttäuscht, gelangweilt, traurig | Mia hat etwas Schweres geschafft, für das sie geübt hat. | ☐ |
+| 4 | Noah hat Elin versprochen, in der Pause mit ihr zu spielen. Dann spielt er doch mit anderen Fussball. | Elin | enttäuscht | stolz, neugierig, fröhlich | Elin hat auf etwas gezählt, das nicht passiert ist. | ☐ |
+| 4 | Luca bringt eine geheimnisvolle Kiste mit in die Schule. Amira will unbedingt wissen, was darin ist. | Amira | neugierig | gelangweilt, traurig, müde | Amira möchte etwas herausfinden. | ☐ |
+| 4 | Jonas sagt zu Lea: Du bist als Nächste mit dem Vorsingen dran. Lea geht nach vorne, ihre Hände sind feucht und ihr Herz klopft. | Lea | nervös | gelangweilt, stolz, müde | Lea muss gleich etwas vor allen tun. | ☐ |
+| 4 | Ben erzählt Mia zum dritten Mal dieselbe Geschichte vom Fussballmatch. Mia schaut aus dem Fenster und gähnt. | Mia | gelangweilt | neugierig, ängstlich, stolz | Mia hört das alles schon zum dritten Mal. | ☐ |
+| 4 | Elin hat ihr Portemonnaie überall gesucht. Dann findet Noah es unter der Bank und gibt es ihr. | Elin | erleichtert | wütend, gelangweilt, enttäuscht | Elins Sorge ist jetzt vorbei. | ☐ |
+| 4 | Amira hat aus Versehen Jonas' Znüni eingepackt. Sie bringt es ihm zurück, bevor die Pause beginnt, und Jonas atmet auf. | Jonas | erleichtert | wütend, gelangweilt, traurig | Jonas hat sich kurz Sorgen gemacht, und jetzt ist alles gut. | ☐ |
+| 4 | Lea übt mit Ben das Kopfrechnen. Beim Test schafft Ben zum ersten Mal alle Aufgaben. | Ben | stolz | enttäuscht, gelangweilt, ängstlich | Ben hat etwas geschafft, das er vorher nicht konnte. | ☐ |
+| 4 | Mia hat Noah zu ihrem Fest eingeladen. Am Morgen ruft Mia an: Das Fest fällt aus, sie ist krank. | Noah | enttäuscht | stolz, neugierig, erleichtert | Noah hat sich auf etwas gefreut, das nun nicht stattfindet. | ☐ |
+| 4 | Elin erzählt Luca von einer Höhle im Wald hinter dem Schulhaus. Luca fragt sie tausend Sachen und will sofort hin. | Luca | neugierig | gelangweilt, enttäuscht, müde | Luca will mehr wissen und es selbst sehen. | ☐ |
+| 4 | Amira sagt zu Jonas: Morgen ist der Schwimmtest. Jonas kann in der Nacht kaum einschlafen und denkt immer daran. | Jonas | nervös | gelangweilt, stolz, erleichtert | Jonas denkt an etwas, das erst noch kommt. | ☐ |
+| 4 | Lea und Ben warten auf den Zug, der eine Stunde Verspätung hat. Ben hat nichts zu tun und seufzt immer wieder. | Ben | gelangweilt | neugierig, stolz, erleichtert | Ben muss lange warten, und nichts passiert. | ☐ |
+| 4 | Mia denkt, sie hat den Vortrag vergessen. Dann sagt Noah ihr, dass der Vortrag erst nächste Woche ist. | Mia | erleichtert | wütend, gelangweilt, enttäuscht | Mias Sorge war unnötig. | ☐ |
+| 4 | Elin zeigt Luca, wie man einen Papierflieger faltet. Lucas Flieger fliegt beim ersten Versuch durch das ganze Zimmer. | Luca | stolz | enttäuscht, gelangweilt, traurig | Luca hat etwas Neues gleich gut hingekriegt. | ☐ |
+| 4 | Jonas bekommt von Amira ein Bild und sagt nur: Aha. Amira hat eine ganze Woche daran gemalt. | Amira | enttäuscht | stolz, neugierig, erleichtert | Amira hat sich mehr erhofft. | ☐ |
+| 4 | Lea bringt Mia ein Paket mit vielen Klebestreifen darum. Mia dreht es hin und her und schüttelt es. | Mia | neugierig | gelangweilt, traurig, ängstlich | Mia will wissen, was drin ist. | ☐ |
+| 4 | Noah sagt zu Elin, dass gleich ihr Name beim Vorlesen aufgerufen wird. Elin rutscht auf dem Stuhl hin und her und kaut an den Nägeln. | Elin | nervös | gelangweilt, stolz, müde | Elin ist gleich dran, und das spürt sie im Körper. | ☐ |
+| 4 | Luca liest Amira die Anleitung vom Drucker vor. Amira schaut auf die Uhr und spielt mit ihren Haaren. | Amira | gelangweilt | neugierig, ängstlich, stolz | Amira hört nicht mehr richtig zu. | ☐ |
+
+### Körpersignale
+
+| Satz | Gefühl | Ablenker | ☐ |
+|---|---|---|---|
+| Lea hat Tränen in den Augen und schaut auf den Boden. | traurig | fröhlich, wütend, überrascht | ☐ |
+| Ben hat rote Ohren und ballt die Fäuste. | wütend | fröhlich, müde, überrascht | ☐ |
+| Mia hüpft und strahlt über das ganze Gesicht. | fröhlich | traurig, wütend, müde | ☐ |
+| Noah zittert, und seine Hände sind ganz kalt. | ängstlich | fröhlich, müde, wütend | ☐ |
+| Elin reisst die Augen auf und hält sich die Hand vor den Mund. | überrascht | traurig, müde, wütend | ☐ |
+| Luca gähnt, und seine Augen fallen fast zu. | müde | fröhlich, wütend, überrascht | ☐ |
+| Amira lacht laut und klatscht in die Hände. | fröhlich | traurig, ängstlich, müde | ☐ |
+| Jonas lässt die Schultern hängen und spricht ganz leise. | traurig | fröhlich, wütend, überrascht | ☐ |
+| Lea stampft mit dem Fuss und presst die Lippen zusammen. | wütend | fröhlich, müde, ängstlich | ☐ |
+| Bens Herz klopft schnell, und er versteckt sich hinter Mama. | ängstlich | fröhlich, müde, wütend | ☐ |
+| Mia bleibt mit offenem Mund stehen und sagt: Oh! | überrascht | traurig, müde, wütend | ☐ |
+| Noah reibt sich die Augen und legt den Kopf auf den Tisch. | müde | fröhlich, wütend, überrascht | ☐ |
+| Elin rennt mit ausgebreiteten Armen auf ihre Freundin zu und jubelt. | fröhlich | traurig, wütend, ängstlich | ☐ |
+| Luca schnieft und wischt sich über die Augen. | traurig | fröhlich, wütend, müde | ☐ |
+| Amira wird rot im Gesicht und schreit: Hör auf! | wütend | fröhlich, müde, überrascht | ☐ |
+| Jonas hält sich die Ohren zu und macht sich ganz klein. | ängstlich | fröhlich, müde, überrascht | ☐ |
+| Lea zuckt zusammen und ruft: Was war das? | überrascht | traurig, müde, wütend | ☐ |
+| Ben streckt sich und gähnt immer wieder. | müde | fröhlich, wütend, ängstlich | ☐ |
+
+### Gespräche (Stufe 5)
+
+Die erste Hilfe ist die passende.
+
+| A | B | Gefühl von B | passende Hilfe | unpassend | ☐ |
+|---|---|---|---|---|---|
+| Lea: Kommst du morgen mit ins Schwimmbad? | Ben: Ich weiss nicht … ich kann noch nicht so gut schwimmen, und alle schauen zu. | nervös | Lea sagt: Wir bleiben zusammen im flachen Becken, ich bin bei dir. | Lea erzählt ihm von ihrem neuen Hund.; Lea fragt, ob er ihr Glace will. | ☐ |
+| Mia: Hast du mein Buch dabei? Ich brauche es heute. | Noah: Oh nein, ich habe es zu Hause vergessen. Es tut mir so leid. | beschämt | Mia sagt: Kein Problem, bring es einfach morgen mit. | Mia erzählt ihm einen Witz über Bücher.; Mia zeigt ihm ihr neues Etui. | ☐ |
+| Elin: Ich habe die Mathe-Prüfung geschafft! | Luca: Schön für dich … ich habe schon wieder nicht alles hingekriegt. | enttäuscht | Elin sagt: Sollen wir nächste Woche zusammen üben? | Elin fragt ihn, ob er ihre neue Jacke mag.; Elin erzählt ihm, was es zum Zmittag gibt. | ☐ |
+| Amira: Ich habe gehört, deine Katze ist wieder da! | Jonas: Ja! Sie war drei Tage weg, und heute Morgen sass sie vor der Tür. | erleichtert | Amira freut sich mit: Zum Glück! Erzähl, wo war sie? | Amira wechselt das Thema und redet vom Wetter.; Amira fragt, ob Jonas ihr Znüni will. | ☐ |
+| Ben: Wollen wir die Hütte heute fertig bauen? | Lea: Schon wieder die Hütte? Wir bauen seit drei Tagen daran, ich will endlich etwas anderes machen. | gelangweilt | Ben sagt: Okay, dann suchen wir uns zusammen etwas Neues aus. | Ben holt noch mehr Bretter für die Hütte.; Ben zeigt ihr sein neues Sackmesser. | ☐ |
+| Mia: Ich habe gesehen, dass du beim Turnen hingefallen bist. Alles okay? | Noah: Es tut nicht weh … aber alle haben gelacht. | beschämt | Mia sagt: Das passiert jedem mal. Komm, wir gehen zusammen zurück. | Mia erzählt ihm von ihrem Hamster.; Mia fragt, ob er ihr beim Aufräumen hilft. | ☐ |
+| Luca: Du hast beim Vorlesen keinen einzigen Fehler gemacht! | Elin: Wirklich? Ich habe so lange geübt! | stolz | Luca sagt: Das hat sich gelohnt, du warst richtig gut. | Luca erzählt, dass er gestern Pizza gegessen hat.; Luca fragt, wo seine Mütze ist. | ☐ |
+| Jonas: Heute kommt ein Zauberer in die Schule! | Amira: Echt? Was macht er? Kann er Sachen verschwinden lassen? Wann kommt er? | neugierig | Jonas erzählt ihr alles, was er über den Zauberer weiss. | Jonas zeigt ihr seine Hausaufgaben.; Jonas erzählt ihr, was er gestern gegessen hat. | ☐ |
+| Lea: Warum bist du so still? Was ist los? | Ben: Meine beste Freundin ist für drei Wochen in den Ferien. Ich vermisse sie jetzt schon. | traurig | Lea sagt: Wollen wir ihr zusammen eine Karte schreiben? | Lea erzählt von ihren eigenen Ferien.; Lea zeigt ihm ihr neues Velo. | ☐ |
+| Mia: Hast du schon gehört? Noah hat den Preis beim Malwettbewerb gewonnen. | Elin: Schon wieder Noah! Immer gewinnt er, und ich gebe mir auch so viel Mühe. | eifersüchtig | Mia sagt: Dein Bild war auch toll. Gewinnen ist nicht alles. | Mia erzählt, wie schön Noahs Bild ist.; Mia fragt, ob Elin ihr Znüni teilt. | ☐ |
+| Luca: Du hast doch gesagt, du kommst zu meinem Fest! | Jonas: Ich wollte ja, aber Mama hat Nein gesagt. Ich hatte mich so gefreut. | enttäuscht | Luca sagt: Schade! Dann feiern wir am Montag noch ein bisschen nach. | Luca erzählt, wer alles zum Fest kommt.; Luca zeigt ihm die Einladungskarte. | ☐ |
+| Amira: Gleich ist unser Theaterstück dran. | Lea: Ich habe ganz kalte Hände, und ich weiss nicht mehr, wie mein erster Satz geht! | nervös | Amira sagt: Atme tief ein, ich sage dir den ersten Satz leise vor. | Amira erzählt, wer alles im Publikum sitzt.; Amira fragt, ob Lea später Fussball spielt. | ☐ |
+| Ben: Das war aber ein langer Wandertag! | Mia: Ich will nur noch sitzen. Meine Beine sind wie aus Stein. | müde | Ben sagt: Komm, wir setzen uns in den Schatten und trinken etwas. | Ben schlägt vor, noch schnell auf den Hügel zu rennen.; Ben erzählt von seinem Fussballtraining. | ☐ |
+| Noah: Ich habe aus Versehen dein Heft nass gemacht. | Luca: Was?! Das war meine ganze Arbeit von dieser Woche! | wütend | Noah sagt: Es tut mir leid. Ich helfe dir, die Seiten neu zu schreiben. | Noah erzählt, wie das Wasser umgekippt ist.; Noah fragt, ob Luca zum Fussball kommt. | ☐ |
+| Elin: Schau, im Garten sitzt ein Igel! | Amira: Was? Mitten am Tag? So etwas habe ich ja noch nie gesehen! | überrascht | Elin sagt: Komm, wir schauen ihn ganz leise von weitem an. | Elin erzählt, dass es heute Spaghetti gibt.; Elin fragt, ob Amira die Hausaufgaben hat. | ☐ |
+| Jonas: Kommst du mit? Wir gehen am Nachbarhaus vorbei. | Ben: Da ist dieser grosse Hund. Er bellt so laut, ich traue mich nicht am Zaun vorbei. | ängstlich | Jonas sagt: Ich gehe mit dir, wir laufen auf der anderen Strassenseite. | Jonas erzählt, was er zum Znüni hat.; Jonas zeigt ihm seinen neuen Ball. | ☐ |
+| Lea: Wir haben das Fussballturnier gewonnen! | Mia: Juhu! Ich könnte den ganzen Tag tanzen! | fröhlich | Lea tanzt mit ihr über den ganzen Platz. | Lea fragt, wo ihre Trinkflasche ist.; Lea erzählt von den Hausaufgaben. | ☐ |
+
+### Zwei Gefühle zugleich (Königsstufe)
+
+| Text | Paar | Ablenker-Paare | Tipp | ☐ |
+|---|---|---|---|---|
+| Das Lager ist vorbei. Lea hat die ganze Woche beim Abschlussfest geholfen, und jetzt winkt sie ihren neuen Freunden nach. | stolz und traurig | wütend und gelangweilt; ängstlich und müde; fröhlich und eifersüchtig | Lea hat etwas gut gemacht — und muss jetzt Abschied nehmen. | ☐ |
+| Ben steht am Start des Velorennens. Er hat lange trainiert und freut sich, aber sein Herz klopft bis zum Hals. | fröhlich und nervös | gelangweilt und traurig; wütend und müde; enttäuscht und beschämt | Ben freut sich — und gleich geht es los. | ☐ |
+| Mia öffnet das Geschenk: ein Kätzchen! Damit hat sie nie gerechnet, und sie strahlt. | überrascht und fröhlich | traurig und müde; wütend und gelangweilt; enttäuscht und ängstlich | Mia hat nicht damit gerechnet — und es gefällt ihr sehr. | ☐ |
+| Noah hat beim Fussball ein Eigentor geschossen. Sein Team hat trotzdem gewonnen, und alle jubeln. | beschämt und erleichtert | wütend und gelangweilt; traurig und müde; neugierig und ängstlich | Noah hat einen Fehler gemacht — und es ist trotzdem gut ausgegangen. | ☐ |
+| Elins Schwester hat ein neues Velo bekommen. Elin freut sich für sie, möchte aber auch so eines haben. | fröhlich und eifersüchtig | traurig und müde; ängstlich und gelangweilt; wütend und beschämt | Elin gönnt es ihrer Schwester — und hätte es gern selbst. | ☐ |
+| Luca hat sich beim Rennen den Fuss verstaucht. Die Ärztin sagt, es ist nichts gebrochen, aber er darf zwei Wochen nicht Fussball spielen. | erleichtert und enttäuscht | fröhlich und stolz; wütend und neugierig; gelangweilt und überrascht | Eine gute Nachricht und eine schlechte zugleich. | ☐ |
+| Amira hält ihren ersten Vortrag. Die Klasse klatscht lange, und Amira muss sich erst einmal hinsetzen und durchatmen. | stolz und erleichtert | traurig und wütend; gelangweilt und müde; enttäuscht und ängstlich | Amira hat es geschafft — und die Anspannung fällt ab. | ☐ |
+| Jonas darf zum ersten Mal allein mit dem Zug zum Grosi fahren. Er hat alles vorbereitet, aber es kribbelt im Bauch. | stolz und nervös | traurig und gelangweilt; wütend und müde; enttäuscht und eifersüchtig | Jonas darf etwas Grosses — und es ist das erste Mal. | ☐ |
+| Ben hat den ganzen Tag im Wald eine Hütte gebaut. Am Abend steht sie fertig da, und er kann kaum noch die Arme heben. | stolz und müde | traurig und wütend; ängstlich und gelangweilt; enttäuscht und beschämt | Ben hat etwas geschafft — und dafür den ganzen Tag gearbeitet. | ☐ |
+| Mia hat gehört, dass ihre Familie in eine andere Stadt zieht. Sie weiss nicht, wie die neue Schule ist, und sie muss ihre Freundinnen verlassen. | traurig und ängstlich | fröhlich und stolz; gelangweilt und erleichtert; wütend und eifersüchtig | Mia verliert etwas — und weiss nicht, was kommt. | ☐ |
+| Noahs Bruder hat ohne zu fragen Noahs Lieblingsspiel mitgenommen und es im Bus liegen lassen. | wütend und traurig | fröhlich und stolz; gelangweilt und müde; neugierig und erleichtert | Jemand hat etwas ohne Erlaubnis genommen — und nun ist es weg. | ☐ |
+| Elin findet auf dem Dachboden eine alte Kiste mit Briefen vom Urgrosi. Sie darf sie aber erst morgen mit Mama öffnen. | neugierig und enttäuscht | traurig und wütend; müde und gelangweilt; ängstlich und beschämt | Elin will wissen, was drin ist — und muss warten. | ☐ |
+| Lucas Freund hat genau das Zaubertrick-Set bekommen, das Luca sich gewünscht hat. Luca will trotzdem unbedingt wissen, wie der Trick geht. | eifersüchtig und neugierig | traurig und müde; gelangweilt und ängstlich; stolz und erleichtert | Luca hätte es gern selbst — und will es trotzdem verstehen. | ☐ |
+| Amira hat beim Wettlauf den zweiten Platz gemacht. Sie hat sich den ersten gewünscht, aber sie war noch nie so schnell wie heute. | enttäuscht und stolz | wütend und gelangweilt; ängstlich und müde; beschämt und traurig | Amira hat ihr Ziel verpasst — und doch ihr Bestes gegeben. | ☐ |
+| Jonas hat im Lager bis spät in die Nacht Geschichten erzählt. Am Morgen gähnt er, aber er erzählt gleich weiter, weil alle lachen. | müde und fröhlich | traurig und wütend; ängstlich und enttäuscht; gelangweilt und beschämt | Jonas hat kaum geschlafen — und es macht ihm trotzdem Spass. | ☐ |
+| Lea hat vergessen, dass heute der Schwimmtest ist. Dann sagt die Lehrerin, dass der Test verschoben wurde, weil das Bad geschlossen ist. | überrascht und erleichtert | traurig und wütend; gelangweilt und müde; stolz und eifersüchtig | Lea hat mit etwas nicht gerechnet — und eine Sorge ist weg. | ☐ |
+| Ben hat aus Versehen Mias Zeichnung zerrissen. Mia sagt, es ist nicht schlimm, sie zeichnet es neu — aber Ben wird trotzdem rot. | beschämt und erleichtert | wütend und gelangweilt; fröhlich und stolz; neugierig und müde | Ben hat etwas kaputt gemacht — und Mia ist nicht böse. | ☐ |
+
+### Passende Antwort (Königsstufe)
+
+| Situation | richtig | falsch | ☐ |
+|---|---|---|---|
+| Lea erzählt dir aufgeregt: Ich bin heute zum ersten Mal ohne Stützräder Velo gefahren! | Wow, super! Wie war das? | Ich habe heute Spaghetti gegessen.; Hast du das Mathe-Blatt dabei? | ☐ |
+| Ben sagt leise: Mein Hamster ist gestern gestorben. | Das tut mir leid. Willst du darüber reden? | Kriegst du jetzt einen neuen?; Hast du mein Etui gesehen? | ☐ |
+| Mia ruft wütend: Jemand hat mein Znüni aus dem Rucksack genommen! | Das ist ärgerlich. Komm, wir suchen es zusammen. | Ich habe heute ein Gipfeli dabei.; Weisst du, wann die Pause fertig ist? | ☐ |
+| Noah flüstert: Ich traue mich nicht auf den hohen Sprungturm. | Musst du nicht. Wir springen zusammen vom kleinen Brett. | Ich springe vom höchsten Turm, schau zu!; Hast du meine Schwimmbrille gesehen? | ☐ |
+| Elin staunt: Schau, da fliegt ein Heissluftballon über das Schulhaus! | Wow, wo? Den will ich auch sehen! | Hast du die Hausaufgaben gemacht?; Mir ist kalt. | ☐ |
+| Luca gähnt: Ich bin so müde, ich habe die ganze Nacht kaum geschlafen. | Setz dich kurz hin, ich hole dir Wasser. | Wollen wir eine Runde ums Schulhaus rennen?; Ich habe eine neue Trinkflasche. | ☐ |
+| Amira zeigt stolz ihr Bild: Ich habe drei Tage daran gemalt! | Das sieht toll aus! Was ist das für ein Tier? | Mein Bild ist auch fertig.; Wann gibt es Zmittag? | ☐ |
+| Jonas sagt enttäuscht: Mein Fussballtraining fällt aus, dabei habe ich mich so gefreut. | Schade! Wollen wir stattdessen auf dem Pausenplatz kicken? | Ich gehe heute ins Kino.; Gib mir mal den Radiergummi. | ☐ |
+| Lea sagt nervös: Gleich muss ich mein Gedicht vor der ganzen Klasse aufsagen. | Du kannst das. Ich sitze vorne und schaue dich an. | Ich habe gestern Pizza gegessen.; Hast du den Bleistift gespitzt? | ☐ |
+| Ben seufzt: Der Regen hört nicht auf, und mir ist so langweilig. | Wollen wir zusammen ein Spiel spielen? | Ich habe heute früh geduscht.; Weisst du, wo mein Turnsack ist? | ☐ |
+| Mia atmet auf: Mein Schlüssel war die ganze Zeit in der Jackentasche! | Zum Glück! Da bist du bestimmt froh. | Ich habe heute Mathe.; Kommst du mit zum Kiosk? | ☐ |
+| Noah sagt leise: Alle haben ein neues Velo, nur ich nicht. | Dein Velo ist doch super. Wollen wir eine Runde fahren? | Meins ist ganz neu und rot.; Weisst du, wann der Bus kommt? | ☐ |
+| Elin wird rot: Ich habe im Turnen den Ball ins eigene Tor geschossen. | Das passiert jedem mal. Nächstes Mal klappt es. | Ich habe heute ein neues Trikot.; Wie spät ist es? | ☐ |
+| Luca fragt neugierig: Was ist wohl in der grossen Kiste beim Lehrerpult? | Keine Ahnung! Wollen wir die Lehrerin fragen? | Ich habe eine neue Mütze.; Mir ist gerade sehr warm. | ☐ |
+| Amira sagt mit Tränen: Meine beste Freundin zieht nächsten Monat weg. | Das ist traurig. Wir können ihr zusammen Briefe schreiben. | Ich ziehe nie um.; Hast du den Radiergummi? | ☐ |
+| Jonas hüpft herum: Morgen fahren wir ins Lager! | Cool! Was nimmst du alles mit? | Ich gehe jetzt nach Hause.; Hast du deine Jacke gefunden? | ☐ |
+
+## 75. Geschichten-Ordner (Lehrplan SG D.4.D.1, D.3.B.1)
+
+### Geschichten in Schritten
+
+Die Reihenfolge muss zwingend sein. Gruppe 1 mit Bild und Wort, 2 mit einem Satz, der nicht dazugehört, 3 fünf bis sechs Schritte.
+
+| Gruppe | Titel | Schritte | gehört nicht dazu | Tipp | ☐ |
+|---|---|---|---|---|---|
+| 1 | Kuchen backen | 1. 🥣 Mia rührt den Teig.<br>2. 🔥 Der Kuchen backt im Ofen.<br>3. 🍰 Mia isst ein Stück Kuchen. |  | Am Anfang ist noch nichts vorbereitet. | ☐ |
+| 1 | Der Schneemann | 1. ❄️ Es schneit die ganze Nacht.<br>2. ⚪ Luca rollt drei Kugeln.<br>3. ⛄ Der Schneemann steht im Garten. |  | Am Anfang ist der Garten noch grün. | ☐ |
+| 1 | Die Sonnenblume | 1. 🌱 Lena steckt einen Samen in die Erde.<br>2. 💧 Lena giesst die Erde.<br>3. 🌻 Die Sonnenblume blüht. |  | Am Anfang ist die Erde noch leer. | ☐ |
+| 1 | Das Geburtstagsfest | 1. ✉️ Tim verteilt die Einladungen.<br>2. 🚪 Die Gäste klingeln an der Tür.<br>3. 🎂 Tim bläst die Kerzen aus. |  | Am Anfang weiss noch niemand vom Fest. | ☐ |
+| 1 | Beim Zahnarzt | 1. 🦷 Nina hat Zahnweh.<br>2. 🚗 Mama fährt mit Nina zum Zahnarzt.<br>3. 😁 Nina lacht wieder ohne Schmerzen. |  | Am Anfang geht es Nina nicht gut. | ☐ |
+| 1 | Das platte Velo | 1. 💨 Der Reifen ist platt.<br>2. 🔧 Papa flickt den Reifen.<br>3. 🚲 Finn fährt wieder los. |  | Am Anfang stimmt etwas mit dem Velo nicht. | ☐ |
+| 1 | Der Schulweg | 1. ⏰ Der Wecker klingelt.<br>2. 🎒 Lara packt den Schulsack.<br>3. 🏫 Lara sitzt im Klassenzimmer. |  | Am Anfang schläft Lara noch. | ☐ |
+| 1 | In der Bibliothek | 1. 📚 Ben leiht ein Buch aus.<br>2. 📖 Ben liest das Buch.<br>3. ↩️ Ben bringt das Buch zurück. |  | Am Anfang hat Ben noch kein Buch. | ☐ |
+| 1 | Der Hamster | 1. 🏠 Emma baut den Käfig auf.<br>2. 🐹 Der Hamster zieht ein.<br>3. 🥕 Emma füttert den Hamster. |  | Am Anfang ist noch kein Tier da. | ☐ |
+| 1 | Das Zeltlager | 1. 🎒 Jonas packt den Rucksack.<br>2. 🚌 Der Car fährt ins Lager.<br>3. ⛺ Jonas stellt das Zelt auf. |  | Am Anfang ist Jonas noch zu Hause. | ☐ |
+| 1 | Der Brief | 1. ✍️ Sara schreibt einen Brief.<br>2. 📮 Sara wirft den Brief ein.<br>3. 📖 Oma liest den Brief. |  | Am Anfang ist das Blatt noch leer. | ☐ |
+| 1 | Die Pizza | 1. 📞 Papa bestellt eine Pizza.<br>2. 🛵 Der Kurier bringt die Pizza.<br>3. 🍕 Alle essen Pizza. |  | Am Anfang hat Papa noch nicht angerufen. | ☐ |
+| 1 | Die Wäsche | 1. 🧺 Mama wäscht die Kleider.<br>2. 👕 Die Kleider hängen an der Leine.<br>3. 🗄️ Alina räumt die Kleider in den Schrank. |  | Am Anfang sind die Kleider noch schmutzig. | ☐ |
+| 1 | Zähne putzen | 1. 🧴 Elin drückt Zahnpasta auf die Bürste.<br>2. 🪥 Elin putzt die Zähne.<br>3. 💦 Elin spült den Mund aus. |  | Am Anfang ist die Bürste noch leer. | ☐ |
+| 2 | Im Schwimmbad | 1. Nina kauft ein Ticket.<br>2. Nina zieht sich in der Kabine um.<br>3. Nina springt ins Wasser.<br>4. Nina trocknet sich mit dem Tuch ab. | Das Schwimmbad hat eine lange Rutschbahn. | Am Anfang ist Nina noch nicht im Schwimmbad drin. | ☐ |
+| 2 | Der Kuchen für Oma | 1. Tim rührt Mehl, Eier und Zucker zu einem Teig.<br>2. Tim füllt den Teig in die Form.<br>3. Der Kuchen backt eine Stunde im Ofen.<br>4. Oma isst ein Stück vom Kuchen. | Oma hat am Sonntag Geburtstag. | Am Anfang sind die Zutaten noch nicht gemischt. | ☐ |
+| 2 | Der platte Reifen | 1. Finn fährt über einen spitzen Stein.<br>2. Die Luft zischt aus dem Reifen.<br>3. Finn klebt einen Flicken auf das Loch.<br>4. Finn pumpt den Reifen wieder auf. | Finns Velo hat eine laute Klingel. | Am Anfang ist das Velo noch heil. | ☐ |
+| 2 | Das Zeltlager | 1. Lara packt den Schlafsack in den Rucksack.<br>2. Der Car fährt die Klasse ins Lager.<br>3. Die Kinder stellen die Zelte auf.<br>4. Lara schläft im Zelt ein. | Das Lager ist in den Bergen. | Am Anfang ist Lara noch zu Hause. | ☐ |
+| 2 | Beim Zahnarzt | 1. Ben hat beim Frühstück plötzlich Zahnweh.<br>2. Mama ruft beim Zahnarzt an.<br>3. Der Zahnarzt flickt das Loch im Zahn.<br>4. Ben kann wieder ohne Schmerzen essen. | Ben putzt seine Zähne mit einer blauen Bürste. | Am Anfang sitzt Ben noch gemütlich am Tisch. | ☐ |
+| 2 | Der neue Hund | 1. Mia holt den Welpen Bello aus dem Tierheim.<br>2. Mia übt jeden Tag mit Bello das Sitzen.<br>3. Bello setzt sich auf Mias Befehl.<br>4. Bello bekommt zur Belohnung ein Guetzli. | Bello hat braune Ohren. | Am Anfang hat Mia noch keinen Hund. | ☐ |
+| 2 | Ein Brief an Opa | 1. Sara schreibt Opa einen Brief.<br>2. Sara klebt eine Briefmarke auf den Umschlag.<br>3. Sara wirft den Brief in den Briefkasten.<br>4. Opa liest den Brief am Küchentisch. | Opa wohnt in einem Dorf am See. | Am Anfang ist das Papier noch leer. | ☐ |
+| 2 | Das Geburtstagsfest | 1. Leo schreibt die Einladungen.<br>2. Die Gäste klingeln an der Tür.<br>3. Leo bläst die Kerzen auf dem Kuchen aus.<br>4. Alle essen ein Stück Kuchen. | Leo wünscht sich ein Skateboard. | Am Anfang weiss noch niemand vom Fest. | ☐ |
+| 2 | Die Sonnenblume | 1. Elin steckt einen Samen in einen Topf.<br>2. Ein kleiner grüner Spross zeigt sich.<br>3. Die Pflanze wächst höher als Elin.<br>4. Eine grosse gelbe Blüte öffnet sich. | Sonnenblumen drehen sich nach der Sonne. | Am Anfang ist der Topf noch leer. | ☐ |
+| 2 | Der Schneemann | 1. In der Nacht fällt viel Schnee.<br>2. Jonas rollt drei grosse Kugeln.<br>3. Jonas setzt die Kugeln aufeinander.<br>4. Jonas steckt dem Schneemann ein Rüebli als Nase an. | Jonas trägt warme Handschuhe. | Am Anfang ist der Garten noch grün. | ☐ |
+| 2 | In der Bibliothek | 1. Alina sucht im Regal ein Buch über Pferde.<br>2. Alina leiht das Buch an der Theke aus.<br>3. Alina liest das Buch bis zur letzten Seite.<br>4. Alina bringt das Buch zurück. | Die Bibliothek ist am Montag geschlossen. | Am Anfang hat Alina noch kein Buch in der Hand. | ☐ |
+| 2 | Der Schulweg | 1. Der Wecker klingelt um sieben Uhr.<br>2. Samuel steigt aus dem Bett und zieht sich an.<br>3. Samuel geht zur Bushaltestelle.<br>4. Der Bus bringt Samuel zur Schule. | Samuels Schulsack ist rot. | Am Anfang schläft Samuel noch. | ☐ |
+| 2 | Die Pizza | 1. Papa knetet den Pizzateig.<br>2. Papa belegt die Pizza mit Tomaten und Käse.<br>3. Die Pizza backt im heissen Ofen.<br>4. Die Familie isst die Pizza. | Papa kocht am liebsten am Samstag. | Am Anfang gibt es nur Mehl und Wasser. | ☐ |
+| 2 | Das Vogelhaus | 1. Luca sägt die Bretter zu.<br>2. Luca nagelt die Bretter zusammen.<br>3. Luca hängt das Vogelhaus an den Baum.<br>4. Eine Meise pickt Körner im Vogelhaus. | Meisen sind kleine Vögel. | Am Anfang sind die Bretter noch zu lang. | ☐ |
+| 3 | Das Zeltlager | 1. Noah packt den Rucksack.<br>2. Der Car fährt die Klasse in die Berge.<br>3. Die Kinder stellen die Zelte auf.<br>4. Noah rollt den Schlafsack im Zelt aus.<br>5. Noah schläft im Zelt ein. |  | Am Anfang ist Noah noch zu Hause. | ☐ |
+| 3 | Kuchen für das Fest | 1. Mia holt Mehl, Eier und Zucker aus dem Schrank.<br>2. Mia rührt alles zu einem Teig.<br>3. Mia füllt den Teig in die Form.<br>4. Der Kuchen backt im Ofen.<br>5. Alle essen ein Stück Kuchen. |  | Am Anfang ist der Schrank noch zu. | ☐ |
+| 3 | Der platte Reifen | 1. Finn fährt über eine Scherbe.<br>2. Die Luft zischt aus dem Reifen.<br>3. Finn sucht das Loch im Schlauch.<br>4. Finn klebt einen Flicken auf das Loch.<br>5. Finn pumpt den Reifen auf und fährt weiter. |  | Am Anfang ist das Velo noch ganz. | ☐ |
+| 3 | Beim Zahnarzt | 1. Lena beisst in einen Apfel und spürt einen Stich im Zahn.<br>2. Mama ruft beim Zahnarzt an.<br>3. Lena sitzt im Wartezimmer.<br>4. Der Zahnarzt flickt das Loch im Zahn.<br>5. Lena beisst wieder ohne Schmerzen in den Apfel. |  | Am Anfang weiss noch niemand vom Loch im Zahn. | ☐ |
+| 3 | Der neue Hamster | 1. Emma kauft im Tierladen einen Hamster.<br>2. Zu Hause setzt Emma ihn in den Käfig.<br>3. Der Hamster schnuppert in jeder Ecke.<br>4. Der Hamster findet den Napf mit den Körnern.<br>5. Der Hamster frisst sich satt. |  | Am Anfang hat Emma noch kein Tier. | ☐ |
+| 3 | Der Schulweg | 1. Der Wecker klingelt um sieben.<br>2. Tim steigt aus dem Bett.<br>3. Tim zieht sich an.<br>4. Tim wartet an der Bushaltestelle.<br>5. Der Bus bringt Tim zur Schule. |  | Am Anfang schläft Tim noch. | ☐ |
+| 3 | Das Vogelhaus | 1. Luca zeichnet einen Plan für ein Vogelhaus.<br>2. Luca sägt die Bretter zu.<br>3. Luca nagelt die Bretter zusammen.<br>4. Luca hängt das Vogelhaus an den Baum.<br>5. Eine Meise pickt Körner im Vogelhaus. |  | Am Anfang gibt es nur ein leeres Blatt. | ☐ |
+| 3 | Der Brief an Oma | 1. Sara schreibt Oma einen Brief.<br>2. Sara steckt den Brief in den Umschlag.<br>3. Sara wirft den Brief in den Briefkasten.<br>4. Der Pöstler bringt den Brief zu Oma.<br>5. Oma liest den Brief. |  | Am Anfang ist das Blatt noch leer. | ☐ |
+| 3 | Der Schneemann | 1. In der Nacht fällt viel Schnee.<br>2. Jonas rollt drei Kugeln.<br>3. Jonas setzt die Kugeln aufeinander.<br>4. Jonas steckt dem Schneemann ein Rüebli als Nase an.<br>5. Jonas macht ein Foto vom fertigen Schneemann. |  | Am Anfang ist der Garten noch grün. | ☐ |
+| 3 | Die Sonnenblume | 1. Elin steckt einen Samen in die Erde.<br>2. Elin giesst die Erde jeden Tag.<br>3. Ein kleiner Spross zeigt sich.<br>4. Die Pflanze wächst bis zum Fenster.<br>5. Eine grosse gelbe Blüte öffnet sich. |  | Am Anfang ist der Topf noch leer. | ☐ |
+| 3 | Pizza backen | 1. Papa knetet den Teig.<br>2. Papa rollt den Teig flach aus.<br>3. Ben belegt die Pizza mit Tomaten und Käse.<br>4. Die Pizza backt im heissen Ofen.<br>5. Die Familie isst die Pizza. |  | Am Anfang gibt es nur Mehl und Wasser. | ☐ |
+| 3 | Im Schwimmbad | 1. Nina kauft an der Kasse ein Ticket.<br>2. Nina zieht sich in der Kabine um.<br>3. Nina springt ins Wasser.<br>4. Nina schwimmt drei Längen.<br>5. Nina trocknet sich mit dem Tuch ab. |  | Am Anfang steht Nina noch vor dem Eingang. | ☐ |
+| 3 | In der Bibliothek | 1. Alina geht in die Bibliothek.<br>2. Alina sucht im Regal ein Buch über Pferde.<br>3. Alina leiht das Buch an der Theke aus.<br>4. Alina liest das Buch bis zur letzten Seite.<br>5. Alina bringt das Buch zurück. |  | Am Anfang hat Alina noch kein Buch. | ☐ |
+| 3 | Das Geburtstagsfest | 1. Leo schreibt die Einladungen.<br>2. Leo verteilt sie in der Klasse.<br>3. Am Samstag klingeln die Gäste.<br>4. Leo bläst die Kerzen auf dem Kuchen aus.<br>5. Alle essen ein Stück Kuchen.<br>6. Die Gäste gehen nach Hause. |  | Am Anfang weiss noch niemand vom Fest. | ☐ |
+| 3 | Der Kuchen | 1. Mia liest das Rezept.<br>2. Mia holt die Zutaten aus dem Schrank.<br>3. Mia rührt alles zu einem Teig.<br>4. Mia füllt den Teig in die Form.<br>5. Der Kuchen backt im Ofen.<br>6. Mia isst ein Stück Kuchen. |  | Am Anfang weiss Mia noch nicht, was sie alles braucht. | ☐ |
+| 3 | Das Velo | 1. Finn fährt über eine Scherbe.<br>2. Die Luft zischt aus dem Reifen.<br>3. Finn schiebt das Velo nach Hause.<br>4. Papa sucht das Loch im Schlauch.<br>5. Papa klebt einen Flicken auf das Loch.<br>6. Finn pumpt den Reifen auf und fährt weiter. |  | Am Anfang ist das Velo noch ganz. | ☐ |
+| 3 | Eine Nacht im Zelt | 1. Noah packt den Rucksack.<br>2. Die Klasse fährt mit dem Car in die Berge.<br>3. Die Kinder stellen die Zelte auf.<br>4. Noah rollt den Schlafsack im Zelt aus.<br>5. Noah schläft im Zelt ein.<br>6. Am Morgen weckt ihn die Sonne. |  | Am Anfang ist Noah noch zu Hause. | ☐ |
+| 3 | Das Loch im Zahn | 1. Lena spürt beim Essen einen Stich im Zahn.<br>2. Mama ruft beim Zahnarzt an.<br>3. Lena sitzt im Wartezimmer.<br>4. Der Zahnarzt schaut in Lenas Mund.<br>5. Der Zahnarzt flickt das Loch im Zahn.<br>6. Lena beisst wieder ohne Schmerzen in den Apfel. |  | Am Anfang weiss noch niemand vom Loch. | ☐ |
+| 3 | Der Hund Bello | 1. Lena holt den Welpen Bello aus dem Tierheim.<br>2. Zu Hause zeigt Lena ihm sein Körbchen.<br>3. Lena übt mit Bello das Sitzen.<br>4. Bello setzt sich endlich auf Befehl.<br>5. Lena gibt ihm ein Guetzli.<br>6. Bello schläft müde in seinem Körbchen ein. |  | Am Anfang hat Lena noch keinen Hund. | ☐ |
+| 3 | Bis ins Klassenzimmer | 1. Der Wecker klingelt um sieben.<br>2. Tim steigt aus dem Bett.<br>3. Tim zieht sich an.<br>4. Tim wartet an der Bushaltestelle.<br>5. Der Bus bringt Tim zur Schule.<br>6. Tim setzt sich an seinen Platz im Klassenzimmer. |  | Am Anfang schläft Tim noch. | ☐ |
+| 3 | Ein Haus für die Meise | 1. Luca zeichnet einen Plan.<br>2. Luca sägt die Bretter zu.<br>3. Luca nagelt die Bretter zusammen.<br>4. Luca streicht das Vogelhaus rot an.<br>5. Luca hängt das Vogelhaus an den Baum.<br>6. Eine Meise pickt Körner im Vogelhaus. |  | Am Anfang gibt es nur ein leeres Blatt. | ☐ |
+| 3 | Post für Oma | 1. Sara schreibt Oma einen Brief.<br>2. Sara steckt den Brief in den Umschlag.<br>3. Sara wirft den Brief in den Briefkasten.<br>4. Der Pöstler bringt den Brief zu Oma.<br>5. Oma liest den Brief.<br>6. Oma ruft Sara an und bedankt sich. |  | Am Anfang ist das Blatt noch leer. | ☐ |
+| 3 | Schnee im Garten | 1. In der Nacht fällt viel Schnee.<br>2. Jonas zieht die Stiefel an und geht in den Garten.<br>3. Jonas rollt drei Kugeln.<br>4. Jonas setzt die Kugeln aufeinander.<br>5. Jonas steckt dem Schneemann ein Rüebli als Nase an.<br>6. Jonas macht ein Foto vom fertigen Schneemann. |  | Am Anfang ist der Garten noch grün. | ☐ |
+| 3 | Vom Samen zur Blüte | 1. Elin steckt einen Samen in die Erde.<br>2. Elin giesst die Erde jeden Tag.<br>3. Ein kleiner Spross zeigt sich.<br>4. Die Pflanze wächst bis zum Fenster.<br>5. Eine grosse gelbe Blüte öffnet sich.<br>6. Elin erntet im Herbst die Kerne. |  | Am Anfang ist der Topf noch leer. | ☐ |
+| 3 | Pizza-Abend | 1. Papa knetet den Teig.<br>2. Papa rollt den Teig flach aus.<br>3. Ben belegt die Pizza mit Tomaten und Käse.<br>4. Papa schiebt die Pizza in den heissen Ofen.<br>5. Papa holt die fertige Pizza aus dem Ofen.<br>6. Die Familie isst die Pizza. |  | Am Anfang gibt es nur Mehl und Wasser. | ☐ |
+| 3 | Ein Nachmittag im Schwimmbad | 1. Nina kauft an der Kasse ein Ticket.<br>2. Nina zieht sich in der Kabine um.<br>3. Nina duscht sich kurz ab.<br>4. Nina springt ins Wasser.<br>5. Nina schwimmt drei Längen.<br>6. Nina trocknet sich mit dem Tuch ab. |  | Am Anfang steht Nina noch vor dem Eingang. | ☐ |
+
+## 76. Hör-Geschichte (Lehrplan SG D.1.B.1)
+
+### Geschichten zum Vorlesen mit Fragen
+
+Selbst geschrieben; der Text wird vorgelesen, nicht gezeigt.
+
+| Gruppe | Titel | Text | Fragen | ☐ |
+|---|---|---|---|---|
+| 1 | Der rote Drachen | Am Samstag geht Lina mit ihrem Grossvater auf den Hügel. Dort lässt sie ihren roten Drachen steigen. Der Wind bläst stark, und der Drachen fliegt hoch über die Bäume. | wer: Wer lässt den Drachen steigen? → 🧒 Lina (falsch: 👴 der Grossvater; 👦 Nico)<br>wo: Wo lässt sie ihn steigen? → ⛰️ auf dem Hügel (falsch: 🏖️ am See; 🏫 auf dem Pausenplatz)<br>was: Was macht der Wind? → 💨 Er bläst stark. (falsch: 🌧️ Er bringt Regen.; 😴 Er schläft ein.) | ☐ |
+| 1 | Die Mütze in der Pfütze | In der grossen Pause spielt Jonas auf dem Pausenplatz Fangen. Dabei fällt seine blaue Mütze in eine Pfütze. Seine Freundin Ayla fischt sie heraus und hängt sie zum Trocknen an die Heizung. | wer: Wer fischt die Mütze heraus? → 👧 Ayla (falsch: 👦 Jonas; 👩‍🏫 die Lehrerin)<br>wo: Wo spielt Jonas Fangen? → 🏫 auf dem Pausenplatz (falsch: 🌲 im Wald; 🏡 im Garten)<br>was: Was passiert mit der Mütze? → 💧 Sie fällt in eine Pfütze. (falsch: 🌳 Sie hängt im Baum.; 🐕 Ein Hund nimmt sie mit.) | ☐ |
+| 1 | Das Kalb Flöckli | Auf dem Bauernhof von Tante Rosa ist in der Nacht ein Kalb geboren. Am Morgen darf Samuel es im Stall besuchen. Das Kalb heisst Flöckli und trinkt Milch aus einer grossen Flasche. | wer: Wer besucht das Kalb? → 👦 Samuel (falsch: 👩 Tante Rosa; 👧 Mia)<br>wo: Wo ist das Kalb? → 🐄 im Stall (falsch: 🌳 auf der Wiese; 🚜 auf dem Traktor)<br>was: Was trinkt das Kalb? → 🍼 Milch aus der Flasche (falsch: 💧 Wasser aus dem Bach; 🧃 Saft aus dem Becher) | ☐ |
+| 1 | Der Sprung ins Wasser | Am Mittwoch geht die Klasse ins Hallenbad. Noah traut sich zum ersten Mal vom Sprungbrett. Er springt mit einem lauten Platsch ins Wasser, und alle Kinder klatschen. | wer: Wer springt vom Sprungbrett? → 👦 Noah (falsch: 👩‍🏫 die Lehrerin; 👧 Elina)<br>wo: Wo ist die Klasse? → 🏊 im Hallenbad (falsch: 🏫 im Schulzimmer; ⛰️ in den Bergen)<br>was: Was machen die anderen Kinder? → 👏 Sie klatschen. (falsch: 😴 Sie schlafen.; 🏃 Sie rennen weg.) | ☐ |
+| 1 | Die Zugfahrt | Am Bahnhof wartet Elina mit ihrer Mutter auf den Zug. Der Zug kommt um 9 Uhr 20 auf Gleis drei. Elina darf am Fenster sitzen und winkt dem Lokführer. | wer: Wer wartet auf den Zug? → 👧 Elina (falsch: 👨 der Lokführer; 👦 Ben)<br>wo: Wo warten die beiden? → 🚉 am Bahnhof (falsch: 🚌 an der Bushaltestelle; ✈️ am Flughafen)<br>was: Was macht Elina im Zug? → 👋 Sie winkt dem Lokführer. (falsch: 😴 Sie schläft.; 📖 Sie liest ein Buch.) | ☐ |
+| 1 | Pilze im Wald | Am Sonntag sucht Ben mit seinem Vater im Wald Pilze. Ben findet unter einer Tanne einen grossen braunen Pilz. Zu Hause kocht der Vater daraus eine feine Suppe. | wer: Wer findet den grossen Pilz? → 👦 Ben (falsch: 👨 der Vater; 👧 Lina)<br>wo: Wo suchen sie Pilze? → 🌲 im Wald (falsch: 🏡 im Garten; 🏔️ auf der Alp)<br>was: Was kocht der Vater? → 🍲 eine Suppe (falsch: 🍕 eine Pizza; 🎂 einen Kuchen) | ☐ |
+| 1 | Bruno, der neue Hund | Mia bekommt einen kleinen Hund. Er heisst Bruno und hat weiche braune Ohren. Im Garten rennt Bruno dem Ball nach und bringt ihn Mia jedes Mal zurück. | wer: Wer bekommt einen Hund? → 👧 Mia (falsch: 👦 Noah; 👵 die Grossmutter)<br>wo: Wo rennt Bruno dem Ball nach? → 🏡 im Garten (falsch: 🏫 im Schulhaus; 🏊 im Hallenbad)<br>was: Was bringt Bruno zurück? → ⚽ den Ball (falsch: 🥏 die Frisbee; 🥖 das Brot) | ☐ |
+| 1 | Die Schlittenfahrt | Im Winter fahren Leo und seine Schwester Nora mit dem Schlitten den Hügel hinunter. Nora steuert, Leo hält sich fest. Unten landen beide lachend im tiefen Schnee. | wer: Wer steuert den Schlitten? → 👧 Nora (falsch: 👦 Leo; 👨 der Vater)<br>wo: Wo fahren sie Schlitten? → ⛰️ auf dem Hügel (falsch: 🛣️ auf der Strasse; 🏫 auf dem Pausenplatz)<br>was: Was passiert unten? → ❄️ Sie landen im Schnee. (falsch: 💧 Sie fallen in den Bach.; 🏆 Sie gewinnen einen Preis.) | ☐ |
+| 1 | Das Picknick am See | Am Nachmittag macht Familie Keller am See ein Picknick. Yara verteilt die Sandwiches. Plötzlich kommt eine Ente ganz nah und bettelt um ein Stück Brot. | wer: Wer verteilt die Sandwiches? → 👧 Yara (falsch: 👩 die Mutter; 🦆 die Ente)<br>wo: Wo ist das Picknick? → 🏖️ am See (falsch: 🌲 im Wald; 🏡 im Garten)<br>was: Was macht die Ente? → 🍞 Sie bettelt um Brot. (falsch: 🏊 Sie taucht unter.; 😴 Sie schläft am Ufer.) | ☐ |
+| 1 | Am Lagerfeuer | Im Klassenlager sitzen die Kinder am Abend um ein Lagerfeuer. Herr Baumann erzählt eine lustige Geschichte. Danach brät Amir für alle Schlangenbrot über der Glut. | wer: Wer erzählt etwas Lustiges? → 👨‍🏫 Herr Baumann (falsch: 👦 Amir; 👧 Lina)<br>wo: Wo sitzen die Kinder? → 🔥 am Lagerfeuer (falsch: 🏫 im Schulzimmer; 🚌 im Bus)<br>was: Was brät Amir? → 🥖 Schlangenbrot (falsch: 🌭 Würste; 🍎 Äpfel) | ☐ |
+| 1 | Selinas Geburtstag | Heute wird Selina acht Jahre alt. Ihre Mutter backt einen Schokoladenkuchen mit acht Kerzen. Am Nachmittag kommen drei Freundinnen, und sie spielen im Garten Verstecken. | wer: Wer hat Geburtstag? → 👧 Selina (falsch: 👩 die Mutter; 👦 Leo)<br>wo: Wo spielen die Kinder? → 🏡 im Garten (falsch: 🏊 im Hallenbad; 🏫 in der Turnhalle)<br>was: Was backt die Mutter? → 🎂 einen Schokoladenkuchen (falsch: 🍪 Guetzli; 🍞 ein Brot) | ☐ |
+| 1 | Auf dem Markt | Am Samstagmorgen geht Tim mit seiner Grossmutter auf den Markt. Sie kaufen Äpfel, Rüebli und einen Strauss Blumen. Der Gemüsehändler schenkt Tim eine süsse Erdbeere. | wer: Wer schenkt Tim eine Erdbeere? → 🧑‍🌾 der Gemüsehändler (falsch: 👵 die Grossmutter; 👩 die Mutter)<br>wo: Wo sind Tim und seine Grossmutter? → 🧺 auf dem Markt (falsch: 🏫 in der Schule; 🌲 im Wald)<br>was: Was kaufen sie? → 🥕 Äpfel, Rüebli und Blumen (falsch: 🍞 Brot und Käse; 🧸 ein Spielzeug) | ☐ |
+| 2 | Der Igel unter dem Laub | Am Herbstnachmittag räumt Lena mit ihrem Vater den Garten auf. Unter einem Haufen Laub entdeckt sie plötzlich einen kleinen Igel. Er rollt sich sofort zu einer Kugel zusammen. Lena lässt das Laub an dieser Stelle liegen, weil der Igel darin seinen Winterschlaf halten will. Am Abend stellt sie ihm noch ein Schälchen Wasser hin. | wer: Wer entdeckt den Igel? → 👧 Lena (falsch: 👨 der Vater; 🐱 die Katze)<br>wo: Wo ist der Igel? → 🍂 unter dem Laub (falsch: 🌳 auf dem Baum; 🏠 im Keller)<br>was: Was macht der Igel? → 🦔 Er rollt sich zusammen. (falsch: 🏃 Er rennt davon.; 😴 Er schläft auf Lenas Hand.)<br>warum: Warum lässt Lena das Laub liegen? → Der Igel will darin seinen Winterschlaf halten. (falsch: Sie hat keine Lust mehr zum Aufräumen.; Der Vater braucht es für den Kompost.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Lena räumt den Garten auf. · Sie entdeckt einen Igel. · Sie stellt ihm Wasser hin. | ☐ |
+| 2 | Ein Ei aus dem Nest | Am Dienstag fährt die Klasse von Frau Imhof mit dem Bus zu einem Bauernhof. Zuerst zeigt der Bauer den Kindern die Kühe im Stall. Dann dürfen alle die Hühner füttern. Elias bekommt ein Ei direkt aus dem Nest in die Hand. Er trägt es ganz vorsichtig, weil es noch warm und zerbrechlich ist. Zum Schluss gibt es für alle Apfelsaft. | wer: Wer bekommt ein Ei? → 👦 Elias (falsch: 👩‍🏫 Frau Imhof; 🧑‍🌾 der Bauer)<br>wo: Wo sind die Kühe? → 🐄 im Stall (falsch: 🌳 auf der Wiese; 🚜 beim Traktor)<br>was: Was gibt es zum Schluss? → 🧃 Apfelsaft (falsch: 🥛 Milch; 🍪 Guetzli)<br>warum: Warum trägt Elias das Ei so vorsichtig? → Es ist noch warm und zerbrechlich. (falsch: Er will es verstecken.; Der Bauer schimpft sonst.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Der Bauer zeigt die Kühe. · Die Kinder füttern die Hühner. · Alle trinken Apfelsaft. | ☐ |
+| 2 | Die Kuh auf den Gleisen | Jana steht am Bahnhof und wartet auf ihre Grossmutter. Der Zug sollte um halb drei kommen. Doch die Zeit vergeht, und kein Zug fährt ein. Eine Durchsage erklärt, dass der Zug zehn Minuten später kommt, weil eine Kuh auf den Gleisen stand. Jana muss lachen. Als die Grossmutter endlich aussteigt, umarmen sich die beiden ganz fest. | wer: Auf wen wartet Jana? → 👵 auf ihre Grossmutter (falsch: 👨 auf ihren Vater; 👧 auf ihre Freundin)<br>wo: Wo wartet Jana? → 🚉 am Bahnhof (falsch: 🏠 zu Hause; 🚌 an der Bushaltestelle)<br>was: Was passiert, als die Grossmutter aussteigt? → 🤗 Die beiden umarmen sich. (falsch: 😢 Jana weint.; 🏃 Jana rennt weg.)<br>warum: Warum kommt der Zug später? → Eine Kuh stand auf den Gleisen. (falsch: Der Lokführer hat verschlafen.; Es hat stark geschneit.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Jana wartet am Bahnhof. · Eine Durchsage erklärt die Verspätung. · Die Grossmutter steigt aus. | ☐ |
+| 2 | Das schwarze Schlangenbrot | Im Klassenlager machen die Kinder am Abend ein Feuer. Herr Weber zeigt, wie man den Teig um einen Stecken wickelt. Noah hält sein Schlangenbrot zu nah an die Flammen, darum wird es auf einer Seite ganz schwarz. Seine Freundin Lea teilt ihr Brot mit ihm. Dann singen alle zusammen ein Lied. | wer: Wer zeigt, wie man den Teig wickelt? → 👨‍🏫 Herr Weber (falsch: 👦 Noah; 👧 Lea)<br>wo: Wo sind die Kinder? → 🏕️ im Klassenlager (falsch: 🏫 im Schulzimmer; 🏡 zu Hause)<br>was: Was macht Lea? → 🥖 Sie teilt ihr Brot. (falsch: 🎤 Sie singt allein.; 🔥 Sie löscht das Feuer.)<br>warum: Warum wird Noahs Brot schwarz? → Er hält es zu nah an die Flammen. (falsch: Er hat zu viel Teig genommen.; Lea hat ihn gestossen.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Die Kinder machen ein Feuer. · Noahs Brot wird schwarz. · Alle singen ein Lied. | ☐ |
+| 2 | Der Sprung vom Dreimeterbrett | Am Freitag geht Amira mit ihrem Bruder Karim ins Hallenbad. Karim will vom Dreimeterbrett springen. Oben zögert er lange, weil das Wasser so weit unten ist. Amira ruft: Du schaffst das! Dann springt Karim, taucht unter und kommt strahlend wieder hoch. Als Belohnung kaufen sich die beiden am Kiosk ein Glace. | wer: Wer springt vom Dreimeterbrett? → 👦 Karim (falsch: 👧 Amira; 👨 der Bademeister)<br>wo: Wo sind die beiden? → 🏊 im Hallenbad (falsch: 🏖️ am See; 🏫 in der Turnhalle)<br>was: Was kaufen sie am Kiosk? → 🍦 ein Glace (falsch: 🍟 Pommes; 🧃 einen Saft)<br>warum: Warum zögert Karim oben so lange? → Das Wasser ist so weit unten. (falsch: Er hat die Badehose vergessen.; Der Bademeister pfeift.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Karim zögert auf dem Brett. · Karim springt ins Wasser. · Die beiden kaufen ein Glace. | ☐ |
+| 2 | Schnee in der Pause | In der grossen Pause liegt zum ersten Mal Schnee auf dem Pausenplatz. Sofort beginnt eine Schneeballschlacht. Luca trifft aus Versehen die Lehrerin am Rücken. Er erschrickt, doch Frau Steiner lacht und wirft zurück. Die Pause dauert heute länger, weil die Lehrerin selbst nicht aufhören will. Am Ende sind alle nass und fröhlich. | wer: Wer trifft die Lehrerin? → 👦 Luca (falsch: 👧 Nina; 👨 der Hauswart)<br>wo: Wo ist die Schneeballschlacht? → 🏫 auf dem Pausenplatz (falsch: 🌲 im Wald; 🏡 im Garten)<br>was: Was macht Frau Steiner? → ❄️ Sie lacht und wirft zurück. (falsch: 😠 Sie schimpft.; 🚪 Sie geht ins Schulhaus.)<br>warum: Warum dauert die Pause länger? → Die Lehrerin will selbst nicht aufhören. (falsch: Die Glocke ist kaputt.; Es ist der letzte Schultag.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Die Schneeballschlacht beginnt. · Luca trifft die Lehrerin. · Alle sind nass und fröhlich. | ☐ |
+| 2 | Ein Brief für Opa | Finn möchte seinem Opa einen Brief schreiben, weil Opa für zwei Wochen weit weg in den Ferien ist. Er malt ein Bild von ihrem Hund Lotte dazu. Dann geht Finn mit seiner Mutter zur Post. Dort kauft er eine Briefmarke mit einem Vogel darauf. Finn wirft den Brief selbst in den gelben Briefkasten. Zwei Tage später ruft Opa an und bedankt sich. | wer: Wer bekommt den Brief? → 👴 Opa (falsch: 👵 Oma; 🐕 Lotte)<br>wo: Wo kauft Finn die Briefmarke? → 📮 auf der Post (falsch: 🏪 im Laden; 🏫 in der Schule)<br>was: Was malt Finn dazu? → 🐕 ein Bild vom Hund (falsch: 🌳 einen Baum; 🚂 einen Zug)<br>warum: Warum schreibt Finn den Brief? → Opa ist weit weg in den Ferien. (falsch: Finn hat Geburtstag.; Die Lehrerin will es so.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Finn malt ein Bild dazu. · Finn kauft eine Briefmarke. · Opa ruft an. | ☐ |
+| 2 | Der platte Reifen | Am Sonntag macht Familie Brunner eine Velotour dem Fluss entlang. Nach einer Stunde hat Mila einen platten Reifen. Ihr Vater holt das Flickzeug aus dem Rucksack, weil er so etwas schon erwartet hat. Mila hilft beim Aufpumpen. Danach fahren alle weiter bis zu einer Badestelle, wo sie die Füsse ins kühle Wasser halten. | wer: Wer hat einen platten Reifen? → 👧 Mila (falsch: 👨 der Vater; 👩 die Mutter)<br>wo: Wo fahren sie mit dem Velo? → 🏞️ dem Fluss entlang (falsch: ⛰️ den Berg hinauf; 🏙️ durch die Stadt)<br>was: Was machen sie an der Badestelle? → 💧 Füsse ins Wasser halten (falsch: 🏊 um die Wette schwimmen; 🎣 fischen)<br>warum: Warum hat der Vater Flickzeug dabei? → Er hat so etwas schon erwartet. (falsch: Er will ein Velo kaufen.; Mila hat es ihm geschenkt.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Mila hat einen platten Reifen. · Der Vater flickt den Reifen. · Alle halten die Füsse ins Wasser. | ☐ |
+| 2 | Das Lied in der Aula | Die Klasse von Herrn Roth übt seit Wochen ein Lied für das Schulfest. Am Abend des Fests ist die Aula voll. Kurz vor dem Auftritt vergisst Sara ihren Text, weil ihr vor Aufregung die Hände zittern. Herr Roth flüstert ihr die erste Zeile zu, und dann klappt alles. Die Eltern klatschen so laut, dass die Klasse das Lied noch einmal singt. | wer: Wer flüstert Sara die erste Zeile zu? → 👨‍🏫 Herr Roth (falsch: 👧 ihre Freundin; 👩 ihre Mutter)<br>wo: Wo singt die Klasse? → 🎤 in der Aula (falsch: 🏫 im Schulzimmer; ⛪ in der Kirche)<br>was: Was macht die Klasse am Schluss? → 🎶 Sie singt das Lied noch einmal. (falsch: 🍰 Sie isst Kuchen.; 🏃 Sie läuft nach Hause.)<br>warum: Warum vergisst Sara ihren Text? → Ihr zittern vor Aufregung die Hände. (falsch: Sie hat das Lied nie geübt.; Das Licht geht aus.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Die Klasse übt das Lied. · Sara vergisst ihren Text. · Die Klasse singt noch einmal. | ☐ |
+| 2 | Das Baumhaus | Im Wald hinter dem Dorf bauen Elin und Jonas ein Baumhaus. Jonas sägt die Bretter, Elin schlägt die Nägel ein. Als es fertig ist, klettern sie hinauf und schauen über die Wipfel. Am nächsten Tag hängen sie ein Schild hin: Nur für Freunde! Sie laden ihre Nachbarin Amira ein, weil sie beim Tragen der Bretter geholfen hat. | wer: Wer schlägt die Nägel ein? → 👧 Elin (falsch: 👦 Jonas; 🧒 Amira)<br>wo: Wo steht das Baumhaus? → 🌲 im Wald (falsch: 🏡 im Garten; 🏫 beim Schulhaus)<br>was: Was hängen sie am nächsten Tag hin? → 🪧 ein Schild (falsch: 🏳️ eine Fahne; 🔔 eine Glocke)<br>warum: Warum laden sie Amira ein? → Sie hat beim Tragen der Bretter geholfen. (falsch: Sie hat Geburtstag.; Sie hat Guetzli mitgebracht.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Jonas sägt die Bretter. · Sie klettern ins fertige Baumhaus. · Sie hängen ein Schild hin. | ☐ |
+| 2 | Die Katze auf dem Dach | Am Morgen miaut es laut vor dem Haus. Die Katze von Nachbar Ruedi sitzt auf dem Garagendach und traut sich nicht hinunter. Leonie holt ihren Vater. Der stellt die lange Leiter an das Dach, weil die Katze sonst den ganzen Tag dort oben bliebe. Leonie klettert hinauf, nimmt die Katze auf den Arm und trägt sie vorsichtig zu Ruedi. | wer: Wer trägt die Katze zu Ruedi? → 👧 Leonie (falsch: 👨 der Vater; 👵 die Grossmutter)<br>wo: Wo sitzt die Katze? → 🏠 auf dem Garagendach (falsch: 🌳 auf dem Baum; 🚗 im Auto)<br>was: Was holt der Vater? → 🪜 die lange Leiter (falsch: 🐟 einen Fisch; 📞 das Telefon)<br>warum: Warum stellt der Vater die Leiter an? → Die Katze bliebe sonst den ganzen Tag oben. (falsch: Er will das Dach putzen.; Leonie will auf dem Dach spielen.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Die Katze miaut auf dem Dach. · Der Vater stellt die Leiter an. · Leonie trägt die Katze zu Ruedi. | ☐ |
+| 2 | Der Wettlauf | Beim Sporttag auf dem Sportplatz läuft Timo beim Wettlauf mit. Beim Start stolpert er und ist zuerst Letzter. Er gibt nicht auf, weil seine Klasse am Rand laut seinen Namen ruft. Runde um Runde holt er auf. Am Ende wird Timo Dritter und bekommt eine Medaille aus Schokolade. Die teilt er mit seiner Schwester. | wer: Wer bekommt eine Medaille? → 👦 Timo (falsch: 👧 seine Schwester; 👨‍🏫 der Lehrer)<br>wo: Wo ist der Wettlauf? → 🏟️ auf dem Sportplatz (falsch: 🌲 im Wald; 🏊 im Hallenbad)<br>was: Was passiert beim Start? → 🤕 Timo stolpert. (falsch: 🏆 Timo gewinnt sofort.; 😴 Timo verschläft den Start.)<br>warum: Warum gibt Timo nicht auf? → Seine Klasse ruft laut seinen Namen. (falsch: Der Lehrer rennt mit.; Es gibt ein Velo zu gewinnen.)<br>reihenfolge: Was passierte zuerst? Tipp die drei Dinge der Reihe nach an. → Timo stolpert beim Start. · Timo holt Runde um Runde auf. · Timo bekommt eine Medaille. | ☐ |
+| 3 | Der Regenschirm im Wald | Am Samstag wandert Nora mit ihrer Familie durch den Wald zum Aussichtsturm. Ihr grosser Bruder Dario trägt den Rucksack mit dem Picknick. Unterwegs wird der Himmel immer dunkler, und bald fallen die ersten Tropfen. Nora hat als Einzige einen Regenschirm dabei. Darunter drängen sich plötzlich alle vier zusammen und lachen. Beim Turm angekommen, scheint die Sonne schon wieder, und die Familie isst ihr Picknick auf der Bank. | wer: Wer trägt den Rucksack? → Dario (falsch: Nora; der Vater)<br>wo: Wohin wandert die Familie? → zum Aussichtsturm (falsch: zum See; auf den Bauernhof)<br>was: Was passiert unterwegs? → Die ersten Tropfen fallen. (falsch: Nora verliert einen Schuh.; Sie sehen einen Hirsch.)<br>schluss: Warum hat Nora den Schirm wohl mitgenommen? → Sie hat am Morgen Wolken gesehen und an Regen gedacht. (falsch: Sie wollte ihn dem Bruder schenken.; Im Wald ist es immer dunkel.)<br>titel: Welcher Titel passt am besten? → Der Regenschirm im Wald (falsch: Darios schwerer Rucksack; Ein Tag im Hallenbad)<br>weiter: Wie geht die Geschichte wohl weiter? → Nach dem Picknick steigen alle auf den Turm und schauen weit über das Land. (falsch: Nora kauft im Wald einen neuen Schirm.; Die Familie steigt in ihr Boot und rudert über den See.) | ☐ |
+| 3 | Das Rennen der Schnecken | In der Pause finden Mila und Ben auf dem nassen Pausenplatz zwei Schnecken. Sie legen ein Blatt als Ziel auf den Boden und lassen die Schnecken um die Wette kriechen. Bald stehen zehn Kinder im Kreis und feuern die Schnecken an. Mila nennt ihre Schnecke Blitz, Ben seine Turbo. Blitz kriecht langsam, aber immer geradeaus. Turbo dreht immer wieder um. Als die Glocke läutet, hat noch keine Schnecke das Blatt erreicht. Die Kinder setzen beide vorsichtig ins Gras. | wer: Wer findet die Schnecken? → Mila und Ben (falsch: die Lehrerin; zehn Kinder)<br>wo: Wo sind die Schnecken? → auf dem Pausenplatz (falsch: im Schulzimmer; im Wald)<br>was: Was machen die Kinder, als die Glocke läutet? → Sie setzen die Schnecken ins Gras. (falsch: Sie nehmen die Schnecken mit nach Hause.; Sie bauen ein Schneckenhaus.)<br>schluss: Welche Schnecke war wohl näher beim Blatt? → Blitz, weil sie immer geradeaus kroch. (falsch: Turbo, weil sie den schnelleren Namen hat.; Keine, denn beide haben die ganze Zeit geschlafen.)<br>titel: Welcher Titel passt am besten? → Das Rennen der Schnecken (falsch: Die Glocke läutet; Milas neues Haustier)<br>weiter: Wie geht die Geschichte wohl weiter? → Am nächsten Tag schauen Mila und Ben nach, ob die Schnecken noch im Gras sind. (falsch: Die Kinder spielen im Schulzimmer mit den Schnecken weiter.; Ben verkauft Turbo auf dem Markt.) | ☐ |
+| 3 | Die verpasste Haltestelle | Jeden Morgen fährt Leon mit dem Bus zur Schule. Heute liest er unterwegs ein so spannendes Buch, dass er die Haltestelle beim Schulhaus verpasst. Erst beim Bahnhof merkt er es. Der Busfahrer sieht Leons erschrockenes Gesicht und sagt: Keine Sorge, in fünf Minuten fahre ich zurück. Leon darf sitzen bleiben und fährt mit zurück. Als er endlich ins Schulzimmer kommt, lächelt die Lehrerin und sagt: Das Buch muss wirklich spannend sein. | wer: Wer verpasst die Haltestelle? → Leon (falsch: der Busfahrer; die Lehrerin)<br>wo: Wo merkt Leon, dass er zu weit gefahren ist? → beim Bahnhof (falsch: beim Schulhaus; zu Hause)<br>was: Was sagt der Busfahrer? → In fünf Minuten fahre ich zurück. (falsch: Du musst zu Fuss gehen.; Der Bus ist kaputt.)<br>schluss: Woher weiss die Lehrerin wohl vom Buch? → Leon kommt zu spät und hat das Buch noch in der Hand. (falsch: Sie hat das Buch selbst geschrieben.; Der Busfahrer hat ihr einen Brief geschickt.)<br>titel: Welcher Titel passt am besten? → Die verpasste Haltestelle (falsch: Ein Tag am Bahnhof; Der kaputte Bus)<br>weiter: Wie geht die Geschichte wohl weiter? → Leon erzählt der Klasse, warum er zu spät kam, und alle wollen das Buch lesen. (falsch: Leon fährt mit dem Bus in die Berge und geht nie mehr zur Schule.; Der Busfahrer verkauft den Bus und kauft sich ein Velo.) | ☐ |
+| 3 | Das Kalb auf der Alp | In den Sommerferien darf Selin eine Woche bei ihrem Onkel auf der Alp verbringen. Jeden Morgen hilft sie im Stall und bringt den Kälbern Heu. Ein Kalb mit einem weissen Fleck auf der Stirn folgt ihr überall hin. Selin nennt es Sternli. Am letzten Tag will Sternli nicht von ihrer Seite weichen, und Selin muss sich dreimal verabschieden. Im Auto nach Hause schaut sie lange aus dem Fenster und sagt kein Wort. | wer: Wer folgt Selin überall hin? → das Kalb Sternli (falsch: der Onkel; der Hofhund)<br>wo: Wo verbringt Selin die Ferien? → auf der Alp (falsch: am Meer; im Lager)<br>was: Was bringt Selin den Kälbern? → Heu (falsch: Brot; Wasser)<br>schluss: Warum sagt Selin im Auto kein Wort? → Sie ist traurig, weil sie Sternli vermisst. (falsch: Sie ist müde vom Autofahren.; Sie hat Halsweh.)<br>titel: Welcher Titel passt am besten? → Das Kalb auf der Alp (falsch: Ein Morgen im Stall; Die Fahrt im Auto)<br>weiter: Wie geht die Geschichte wohl weiter? → Zu Hause schreibt Selin dem Onkel und fragt, wie es Sternli geht. (falsch: Selin kauft sich am nächsten Tag ein eigenes Kalb für den Balkon.; Selin vergisst die Alp sofort und denkt nie mehr an Sternli.) | ☐ |
+| 3 | Der Vogel im Schulzimmer | Am Montagmorgen steht das Fenster im Schulzimmer offen. Plötzlich flattert eine Amsel herein und setzt sich auf die Lampe. Die Kinder kichern, Frau Blum legt den Finger auf die Lippen. Alle werden ganz still. Yusuf öffnet vorsichtig das zweite Fenster, damit der Vogel mehr Platz zum Hinausfliegen hat. Nach einer langen Minute hüpft die Amsel aufs Fensterbrett und fliegt in den Garten. Die Klasse klatscht leise, und Frau Blum schreibt an die Wandtafel: Heute Besuch gehabt. | wer: Wer öffnet das zweite Fenster? → Yusuf (falsch: Frau Blum; der Hauswart)<br>wo: Wo setzt sich die Amsel zuerst hin? → auf die Lampe (falsch: auf das Pult; auf die Wandtafel)<br>was: Was schreibt Frau Blum an die Wandtafel? → Heute Besuch gehabt. (falsch: Fenster schliessen!; Hausaufgaben für morgen.)<br>schluss: Warum legt Frau Blum den Finger auf die Lippen? → Damit die Kinder still sind und der Vogel keine Angst bekommt. (falsch: Weil sie Zahnweh hat.; Weil die Pause beginnt.)<br>titel: Welcher Titel passt am besten? → Der Vogel im Schulzimmer (falsch: Yusuf und die Lampe; Ein Tag im Garten)<br>weiter: Wie geht die Geschichte wohl weiter? → Die Klasse malt später Bilder von der Amsel und hängt sie ans Fenster. (falsch: Die Amsel kommt am Nachmittag zurück und schreibt die Prüfung mit.; Frau Blum nimmt den Vogel mit nach Hause in einen Käfig.) | ☐ |
+| 3 | Die Schatzkarte vom Grossvater | Zum Geburtstag bekommt Nino von seinem Grossvater eine alte Karte. Darauf ist der Garten gezeichnet, und beim Apfelbaum steht ein rotes Kreuz. Nino holt die Schaufel aus dem Gartenhaus und gräbt. Nach einer Weile stösst die Schaufel auf etwas Hartes. Es ist eine Blechdose. Darin liegen ein Brief und eine Tüte mit Samen. Im Brief steht: Pflanze sie ein, und im Sommer siehst du den Schatz. Nino gräbt ein zweites Loch und legt die Samen hinein. | wer: Wer schenkt Nino die Karte? → der Grossvater (falsch: die Mutter; sein Freund)<br>wo: Wo steht das rote Kreuz? → beim Apfelbaum (falsch: beim Gartenhaus; beim Teich)<br>was: Was ist in der Blechdose? → ein Brief und Samen (falsch: Goldmünzen; ein altes Foto)<br>schluss: Was ist der Schatz wohl? → Blumen, die aus den Samen wachsen. (falsch: Eine zweite Blechdose.; Ein Goldstück unter dem Apfelbaum.)<br>titel: Welcher Titel passt am besten? → Die Schatzkarte vom Grossvater (falsch: Die kaputte Schaufel; Ninos Geburtstagskuchen)<br>weiter: Wie geht die Geschichte wohl weiter? → Nino giesst die Stelle jeden Tag und wartet auf den Sommer. (falsch: Nino wirft die Samen weg, weil er lieber Gold wollte.; Nino baut aus der Blechdose ein Boot und fährt damit aufs Meer.) | ☐ |
+| 3 | Der Hamster ist weg | Am Freitag soll Lea den Hamster der Klasse übers Wochenende nach Hause nehmen. Doch als sie den Käfig holen will, ist die Tür offen und Pino verschwunden. Lea sucht unter den Pulten und hinter dem Schrank. Dann hört sie ein leises Rascheln aus der Papierkiste. Pino sitzt mitten in einem Nest aus zerknüllten Blättern und frisst eine Erdnuss. Lea trägt ihn vorsichtig zurück in den Käfig und prüft zweimal, ob die Tür zu ist. | wer: Wer nimmt den Hamster übers Wochenende mit? → Lea (falsch: die Lehrerin; der Hauswart)<br>wo: Wo findet Lea den Hamster? → in der Papierkiste (falsch: hinter dem Schrank; unter dem Pult)<br>was: Was frisst Pino? → eine Erdnuss (falsch: ein Rüebli; ein Stück Käse)<br>schluss: Warum prüft Lea die Tür zweimal? → Pino soll nicht noch einmal entwischen. (falsch: Die Tür ist neu.; Die Lehrerin schaut zu.)<br>titel: Welcher Titel passt am besten? → Der Hamster ist weg (falsch: Die Erdnuss; Ein Wochenende bei Lea)<br>weiter: Wie geht die Geschichte wohl weiter? → Lea trägt den Käfig nach Hause und richtet Pino ein gemütliches Plätzchen ein. (falsch: Lea lässt Pino im Schulhaus und fährt in die Ferien.; Pino baut sich aus der Papierkiste ein Flugzeug.) | ☐ |
+| 3 | Die Durchsage im Hallenbad | Im Hallenbad ist am Mittwoch viel los. Jan und seine Cousine Ida rutschen zum zehnten Mal die grosse Rutschbahn hinunter. Plötzlich kommt eine Durchsage: Ein blaues Badetuch mit gelben Fischen liegt an der Kasse. Ida schaut auf ihren Platz am Beckenrand, dort liegt nur noch Jans Tuch. Sie rennt zur Kasse, und die Frau dort lacht: Du bist schon die Dritte heute. Ida bedankt sich und hängt das Tuch diesmal an den Haken. | wer: Wer holt das Badetuch an der Kasse? → Ida (falsch: Jan; die Frau an der Kasse)<br>wo: Wo liegt das Badetuch? → an der Kasse (falsch: auf der Rutschbahn; am Beckenrand)<br>was: Was machen Jan und Ida vor der Durchsage? → Sie rutschen die Rutschbahn hinunter. (falsch: Sie essen Pommes.; Sie schwimmen um die Wette.)<br>schluss: Wem gehört das blaue Badetuch? → Ida (falsch: Jan; der Frau an der Kasse)<br>titel: Welcher Titel passt am besten? → Die Durchsage im Hallenbad (falsch: Jans Badetuch; Die Frau an der Kasse)<br>weiter: Wie geht die Geschichte wohl weiter? → Jan und Ida rutschen noch ein paar Mal und gehen dann zusammen nach Hause. (falsch: Ida verliert das Tuch gleich wieder im Zug nach Italien.; Die Frau an der Kasse behält das Tuch und geht schwimmen.) | ☐ |
+| 3 | Der Fuchs beim Zelt | Im Klassenlager dürfen die Kinder eine Nacht im Zelt schlafen. Noemi und Zoe bauen ihr Zelt neben dem grossen Baum auf. Am Abend hören sie in der Dunkelheit ein Rascheln. Zoe knipst die Taschenlampe an. Im Lichtkegel sitzt ein Fuchs und schaut neugierig herüber, dann trottet er gemütlich davon. Am Morgen erzählen die beiden allen vom Fuchs. Herr Keller zeigt ihnen die kleinen Spuren im feuchten Gras neben dem Zelt. | wer: Wer knipst die Taschenlampe an? → Zoe (falsch: Noemi; Herr Keller)<br>wo: Wo steht das Zelt? → neben dem grossen Baum (falsch: am Fluss; vor dem Haus)<br>was: Was zeigt Herr Keller am Morgen? → die Spuren im Gras (falsch: ein Foto vom Fuchs; den Weg zum Wald)<br>schluss: Warum hatten Noemi und Zoe wohl keine Angst? → Der Fuchs war nur neugierig und ging gleich wieder weg. (falsch: Herr Keller schlief im selben Zelt.; Sie hatten einen Hund dabei.)<br>titel: Welcher Titel passt am besten? → Der Fuchs beim Zelt (falsch: Die kaputte Taschenlampe; Ein Tag am Fluss)<br>weiter: Wie geht die Geschichte wohl weiter? → In der nächsten Nacht legen die Kinder Brot vors Zelt und warten auf den Fuchs. (falsch: Noemi nimmt den Fuchs mit nach Hause und hält ihn im Zimmer.; Die Kinder bauen das Zelt ab und reisen noch am selben Morgen ab.) | ☐ |
+| 3 | Der Teddy mit einem Ohr | Am Samstag findet auf dem Dorfplatz der Kinderflohmarkt statt. Emil breitet auf einer Decke alte Spielsachen aus: ein Puzzle, zwei Autos und einen Teddy mit nur einem Ohr. Eine alte Frau mit einem Stock bleibt lange vor dem Teddy stehen. Sie erzählt, dass sie als Kind genau so einen hatte. Emil sagt: Den schenke ich Ihnen. Die Frau drückt den Teddy an sich. Am Abend hat Emil zwölf Franken verdient und ein grosses Lächeln im Gesicht. | wer: Wer bleibt lange vor dem Teddy stehen? → eine alte Frau mit einem Stock (falsch: Emils Mutter; ein Junge aus der Klasse)<br>wo: Wo ist der Flohmarkt? → auf dem Dorfplatz (falsch: im Schulhaus; im Wald)<br>was: Was macht Emil mit dem Teddy? → Er schenkt ihn der Frau. (falsch: Er verkauft ihn für zwölf Franken.; Er nimmt ihn wieder nach Hause.)<br>schluss: Warum hat Emil am Abend ein grosses Lächeln? → Er hat Geld verdient und der Frau eine Freude gemacht. (falsch: Er hat das Puzzle fertig gelöst.; Der Teddy hat ein neues Ohr bekommen.)<br>titel: Welcher Titel passt am besten? → Der Teddy mit einem Ohr (falsch: Zwei Autos auf der Decke; Ein Tag im Hallenbad)<br>weiter: Wie geht die Geschichte wohl weiter? → Emil kauft mit dem Geld ein neues Puzzle und denkt noch oft an die Frau. (falsch: Die Frau bringt den Teddy am Abend zurück, weil er ihr nicht gefällt.; Emil verkauft seine Decke und geht ohne Geld nach Hause.) | ☐ |
+| 3 | Der kleine Bruder | Seit drei Wochen hat Aisha einen kleinen Bruder. Er heisst Samir und schläft fast den ganzen Tag. Am Sonntag darf Aisha ihn zum ersten Mal allein auf dem Arm halten. Sie sitzt ganz still auf dem Sofa und wagt kaum zu atmen. Samir öffnet die Augen, schaut sie an und greift nach ihrem Finger. Aisha flüstert: Ich bin deine grosse Schwester. Die Mutter macht ein Foto, und das hängt jetzt an der Wand im Flur. | wer: Wer darf Samir auf dem Arm halten? → Aisha (falsch: die Mutter; die Nachbarin)<br>wo: Wo sitzt Aisha mit Samir? → auf dem Sofa (falsch: im Garten; im Auto)<br>was: Was macht die Mutter? → Sie macht ein Foto. (falsch: Sie kocht Suppe.; Sie singt ein Lied.)<br>schluss: Warum wagt Aisha kaum zu atmen? → Sie will mit dem Baby ganz vorsichtig sein. (falsch: Sie hat Schnupfen.; Im Zimmer ist es stickig.)<br>titel: Welcher Titel passt am besten? → Der kleine Bruder (falsch: Das Sofa im Wohnzimmer; Ein Foto im Flur)<br>weiter: Wie geht die Geschichte wohl weiter? → Aisha zeigt das Foto allen, die zu Besuch kommen. (falsch: Samir läuft am nächsten Tag allein in den Kindergarten.; Aisha schenkt das Sofa ihrer Lehrerin.) | ☐ |
+| 3 | Die Nachbarin und der Schlüssel | Als Dario am Mittag von der Schule kommt, ist niemand zu Hause, und sein Schlüssel steckt noch im Turnsack im Schulhaus. Er setzt sich auf die Treppe. Da öffnet Frau Egli, die Nachbarin, ihre Tür. Sie lädt ihn zu Suppe und Brot ein. Dario erzählt ihr von seiner Klasse, und Frau Egli zeigt ihm Fotos von ihren Enkeln. Um zwei Uhr kommt seine Mutter nach Hause. Dario sagt: Nächstes Mal vergesse ich den Schlüssel absichtlich. | wer: Wer lädt Dario zum Essen ein? → Frau Egli, die Nachbarin (falsch: seine Mutter; sein Lehrer)<br>wo: Wo ist Darios Schlüssel? → im Turnsack im Schulhaus (falsch: bei Frau Egli; unter der Treppe)<br>was: Was zeigt Frau Egli? → Fotos von ihren Enkeln (falsch: ihren Garten; ein Buch)<br>schluss: Warum will Dario den Schlüssel nächstes Mal absichtlich vergessen? → Bei Frau Egli hat es ihm gefallen. (falsch: Er sitzt gern auf Treppen.; Er findet seinen Turnsack zu schwer.)<br>titel: Welcher Titel passt am besten? → Die Nachbarin und der Schlüssel (falsch: Suppe und Brot; Fotos von den Enkeln)<br>weiter: Wie geht die Geschichte wohl weiter? → Am nächsten Tag bringt Dario Frau Egli als Dank eine Zeichnung. (falsch: Dario zieht bei Frau Egli ein und kommt nie mehr nach Hause.; Die Mutter wirft den Schlüssel in den Fluss.) | ☐ |

@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platzhalter-Geschichten</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .pg-schritt { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin: 0 0 6px; min-height: 18px; }
+  .pg-bilder { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px; font-size: clamp(30px, 7vw, 42px); margin: 4px 0 10px; }
+  .pg-bilder .weg { opacity: .35; text-decoration: line-through; }
+  .pg-bilder .plus { font-size: 28px; font-weight: 900; margin: 0 6px; color: var(--text-leise); }
+  .pg-geschichte {
+    background: var(--karte); border: 3px solid var(--rand); border-radius: 18px; padding: 12px 16px; margin: 0 auto 12px;
+    max-width: 640px; font-size: clamp(18px, 4.2vw, 24px); font-weight: 700; line-height: 1.5; text-align: center;
+  }
+  .pg-gleichung {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 10px;
+    font-size: clamp(26px, 7vw, 40px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 4px 0 8px; color: var(--text);
+  }
+  .pg-gleichung.erledigt { font-size: clamp(20px, 5vw, 28px); color: var(--text-leise); }
+  .pg-luecke {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 2.2em; min-height: 1.45em; padding: 0 .3em;
+    border: 4px dashed var(--deko-4); border-radius: 12px; background: #fbfcff; color: var(--text); transition: border-color .2s, background .2s;
+  }
+  .pg-luecke.leer::after { content: "?"; color: #c5c9de; }
+  .pg-luecke.richtig { border-style: solid; border-color: var(--gut); background: var(--gut-hell); }
+  .pg-luecke.falsch { border-style: solid; border-color: var(--hinweis); background: var(--hinweis-hell); animation: wackeln .4s; }
+  .pg-weg { text-align: center; font-size: clamp(17px, 4vw, 22px); font-weight: 800; color: var(--gut); margin: 0 0 8px; }
+  .pg-wahl .wahl-knopf { font-variant-numeric: tabular-nums; font-size: clamp(19px, 4.5vw, 26px); }
+  .pg-geschichten { --wahl-breite: 640px; }
+  .pg-geschichten .wahl-knopf { font-size: clamp(15px, 3.6vw, 19px); font-weight: 700; line-height: 1.4; text-align: left; align-items: flex-start; padding: 12px 16px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>❔ Platzhalter-Geschichten</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="geschichten.js"></script>
+<script>
+"use strict";
+// Lehrplan MA.3.C.2 (c: zu Sachsituationen Rechnungen mit Platzhaltern bzw. Umkehroperationen notieren und
+// lösen), MA.3.C.3 (Rechnungen eine Bedeutung geben), Basisklasse 3. Zu einer Geschichte steht eine Gleichung
+// mit Lücke; das Kind erkennt die Umkehrrechnung, rechnet aus und macht die Probe.
+//   s1 2. Klasse (MA.3.C.2.b): Bildgeschichte bis 20, Lücke am Ende (7 + 5 = _), Zahl eintippen.
+//   s2 3. Klasse, leichter (MA.3.C.2.c): bis 100, plus und minus, Lücke in der Mitte (28 + _ = 50) —
+//      Umkehrrechnung wählen, dann tippen.
+//   s3 Klassenziel (MA.3.C.2.c, MA.3.C.3.c): bis 100 mit allen vier Rechenarten, Lücke vorn oder in der
+//      Mitte (_ − 15 = 27, 6 · _ = 42) — Umkehrrechnung wählen, dann tippen.
+//   s4 schwerer (MA.3.C.2.c, notieren): drei Schritte — Lückengleichung zur Geschichte wählen, Umkehrrechnung
+//      wählen, tippen; Ergebnis bei mal und geteilt bis 1000.
+//   s5 4. Klasse (MA.3.C.2.d, Annahme): wie s4 bis 1000, Lücke auch als Faktor oder Divisor.
+//   s6 Königsstufe (MA.3.C.3.d): Gleichung gegeben — welche von drei Geschichten passt? Und
+//      Zweischritt-Geschichten mit zwei Lücken nacheinander bis 10 000.
+// Abgrenzung: Rechengeschichten (Basisklasse 2) lässt die passende Rechnung aus mehreren wählen, auch mit
+// Platzhalter (seine Stufen 4–5); hier wird die Lücke wirklich gelöst. Geschichten in geschichten.js.
+
+const { zufall, waehle, mische, el, zahlText } = LS;
+const ID = "platzhalter-geschichten";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : [PLATZHALTER_LISTE]);
+const VORLAGEN = FREI.has(PLATZHALTER_LISTE) ? PLATZHALTER_GESCHICHTEN : [];
+
+// Je Stufe: Gruppen der Geschichten, erlaubte Rechenarten, erlaubte Lücken (x vorn, y Mitte, z Ende), Schritte,
+// Zahlenraum (zahl: plus/minus und Faktoren; produkt: das Produkt bei mal und geteilt), gross: Bereiche „gross“.
+const STUFE = {
+  s1: { gruppen: [1], ops: "+−", luecken: "z", schritte: ["tippen"], zahl: 20, produkt: 20, gross: false, arten: null },
+  s2: { gruppen: [2], ops: "+−", luecken: "y", schritte: ["umkehr", "tippen"], zahl: 100, produkt: 100, gross: false, arten: null },
+  s3: { gruppen: [2], ops: "+−·:", luecken: "xy", schritte: ["umkehr", "tippen"], zahl: 100, produkt: 100, gross: false, arten: null },
+  s4: { gruppen: [2], ops: "+−·:", luecken: "xy", schritte: ["gleichung", "umkehr", "tippen"], zahl: 100, produkt: 1000, gross: true, arten: null },
+  s5: { gruppen: [3], ops: "+−·:", luecken: "xy", schritte: ["gleichung", "umkehr", "tippen"], zahl: 1000, produkt: 1000, gross: false, arten: null },
+  s6: { gruppen: [3, 4], ops: "+−·:", luecken: "xyz", schritte: ["umkehr", "tippen"], zahl: 10000, produkt: 10000, gross: false, arten: ["geschichte", "zweischritt"] },
+};
+const GEGEN = { "+": "−", "−": "+", "·": ":", ":": "·" };
+const LOB = ["Super!", "Genau!", "Richtig gerechnet!", "Die Probe stimmt!"];
+const ERSATZ_TIPP = "Rechne Schritt für Schritt und mach am Schluss die Probe.";
+const ERSATZ_HINWEIS = "Das stimmt noch nicht. Setz deine Zahl in die Lücke und rechne nach.";
+
+// ---------- Rechnen ----------
+
+/** p op q; bei geteilt durch 0 null. */
+function rechne(op, p, q) {
+  if (op === "+") return p + q;
+  if (op === "−") return p - q;
+  if (op === "·") return p * q;
+  return q === 0 ? null : p / q;
+}
+
+/** Ausdruck wie „a · b + c“ mit den Werten ausrechnen (mal und geteilt vor plus und minus). */
+function wertVon(ausdruck, werte) {
+  const t = ausdruck.split(" ").map(x => (x in werte ? werte[x] : x));
+  for (let i = 1; i < t.length; i += 2) {
+    if (t[i] === "·" || t[i] === ":") { t.splice(i - 1, 3, rechne(t[i], t[i - 1], t[i + 1])); i -= 2; }
+  }
+  let r = Number(t[0]);
+  for (let i = 1; i < t.length; i += 2) r = rechne(t[i], r, Number(t[i + 1]));
+  return r;
+}
+
+/** „a + [b] = c“ → { op, slots: ["a", "b", "c"], luecke: 0 vorn, 1 Mitte, 2 Ende }. */
+function parseGl(gl) {
+  const m = gl.match(/^(\S+) ([+−·:]) (\S+) = (\S+)$/);
+  const roh = [m[1], m[3], m[4]];
+  const luecke = roh.findIndex(s => s.startsWith("["));
+  return { op: m[2], slots: roh.map(s => s.replace(/[[\]]/g, "")), luecke };
+}
+
+/** Die Lücke aus den zwei bekannten Zahlen: x op y = z. */
+function loeseLuecke(op, [x, y, z], luecke) {
+  if (luecke === 2) return rechne(op, x, y);
+  if (luecke === 0) return op === "+" ? z - y : op === "−" ? z + y : op === "·" ? rechne(":", z, y) : z * y;
+  return op === "+" ? z - x : op === "−" ? x - z : op === "·" ? rechne(":", z, x) : rechne(":", x, z);
+}
+
+/** Gleichung mit Zahlen: { op, zahlen: [x, y, z], luecke, name } — die Lücke ausgerechnet. */
+function gleichung(gl, werte) {
+  const { op, slots, luecke } = parseGl(gl);
+  const zahlen = slots.map((s, i) => (i === luecke ? null : werte[s]));
+  zahlen[luecke] = loeseLuecke(op, zahlen, luecke);
+  return { op, zahlen, luecke, name: slots[luecke] };
+}
+
+/** Text der Gleichung, die Lücke als „_“ (oder ein anderer Text). */
+const gleichungText = (g, luecke = "_") => {
+  const t = i => (i === g.luecke ? luecke : zahlText(g.zahlen[i]));
+  return `${t(0)} ${g.op} ${t(1)} = ${t(2)}`;
+};
+
+/** Umkehrrechnung { p, op, q }, die die Lücke liefert. */
+function umkehr({ op, zahlen: [x, y, z], luecke }) {
+  if (luecke === 2) return { p: x, op, q: y };
+  if (luecke === 0) return { "+": { p: z, op: "−", q: y }, "−": { p: z, op: "+", q: y }, "·": { p: z, op: ":", q: y }, ":": { p: z, op: "·", q: y } }[op];
+  return { "+": { p: z, op: "−", q: x }, "−": { p: x, op: "−", q: z }, "·": { p: z, op: ":", q: x }, ":": { p: x, op: ":", q: z } }[op];
+}
+const ausdruckText = ({ p, op, q }) => `${zahlText(p)} ${op} ${zahlText(q)}`;
+const ausdruckWert = ({ p, op, q }) => rechne(op, p, q);
+const ausdruckOption = u => ({ text: ausdruckText(u), wert: ausdruckWert(u), op: u.op, p: u.p, q: u.q });
+
+/**
+ * Drei Rechnungen zur Wahl: die Umkehrrechnung und zwei Ablenker, die Kinder wirklich wählen — die
+ * Gegenrechenart mit denselben Zahlen (50 + 28) und die Zahlen vertauscht (28 − 50). Jeder Ablenker ergibt
+ * etwas anderes als die Umkehrrechnung; nur Rechenarten der Stufe.
+ */
+function umkehrOptionen(u, ops) {
+  const andere = [..."+−·:"].filter(o => o !== u.op && o !== GEGEN[u.op]);
+  const kandidaten = [
+    { p: u.p, op: GEGEN[u.op], q: u.q }, { p: u.q, op: u.op, q: u.p }, { p: u.q, op: GEGEN[u.op], q: u.p },
+    ...andere.flatMap(o => [{ p: u.p, op: o, q: u.q }, { p: u.q, op: o, q: u.p }]),
+  ];
+  const aus = [ausdruckOption(u)];
+  for (const k of kandidaten) {
+    if (!ops.includes(k.op)) continue;
+    const o = ausdruckOption(k);
+    if (aus.some(x => x.text === o.text || x.wert === o.wert)) continue;
+    aus.push(o);
+    if (aus.length === 3) break;
+  }
+  return mische(aus);
+}
+
+/** Gleichung als Option: Text mit „_“ und der Wert, den die Lücke hätte. */
+function gleichungOption(k) {
+  const zahlen = k.zahlen.slice();
+  zahlen[k.luecke] = loeseLuecke(k.op, zahlen, k.luecke);
+  return { text: gleichungText({ ...k, zahlen }), wert: zahlen[k.luecke], op: k.op, luecke: k.luecke };
+}
+
+/**
+ * Drei Lückengleichungen zur Wahl: die passende und zwei Ablenker — die Lücke am Ende mit den zwei bekannten
+ * Zahlen (28 + 50 = _), die Gegenrechenart an derselben Stelle (28 − _ = 50), die Zahlen vertauscht. Ein
+ * Ablenker hat nie dieselbe Lösung wie die passende Gleichung (48 : 6 = _ zu 48 : _ = 6 fällt weg).
+ */
+function gleichungOptionen(g, ops) {
+  const L = g.luecke;
+  const bekannt = g.zahlen.filter((_, i) => i !== L);
+  const [p, q] = g.op === "−" || g.op === ":" ? [Math.max(...bekannt), Math.min(...bekannt)] : bekannt;
+  const vertauscht = g.zahlen.slice();
+  const [i, j] = [0, 1, 2].filter(k => k !== L);
+  [vertauscht[i], vertauscht[j]] = [vertauscht[j], vertauscht[i]];
+  const kandidaten = [
+    { op: g.op, zahlen: [p, q, null], luecke: 2 },
+    { op: GEGEN[g.op], zahlen: g.zahlen, luecke: L },
+    { op: g.op, zahlen: vertauscht, luecke: L },
+    { op: GEGEN[g.op], zahlen: [p, q, null], luecke: 2 },
+    { op: GEGEN[g.op], zahlen: vertauscht, luecke: L },
+  ];
+  const richtig = { text: gleichungText(g), wert: g.zahlen[L], op: g.op, luecke: L };
+  const aus = [richtig];
+  for (const k of kandidaten) {
+    if (!ops.includes(k.op)) continue;
+    const o = gleichungOption({ ...k, zahlen: k.zahlen.map((n, idx) => (idx === k.luecke ? null : n)) });
+    if (o.wert === richtig.wert || aus.some(x => x.text === o.text)) continue;
+    aus.push(o);
+    if (aus.length === 3) break;
+  }
+  return mische(aus);
+}
+
+// ---------- Geschichten ----------
+
+/** Zahlen ziehen: Bereiche (in Stufe 4 die „gross“-Bereiche darüber), dann die abgeleiteten. */
+function zieheWerte(vorlage, gross) {
+  const werte = {};
+  const bereiche = { ...vorlage.zahlen, ...(gross && vorlage.gross ? vorlage.gross : {}) };
+  for (const [k, [min, max]] of Object.entries(bereiche)) werte[k] = zufall(min, max);
+  for (const [k, ausdruck] of Object.entries(vorlage.abgeleitet || {})) werte[k] = wertVon(ausdruck, werte);
+  return werte;
+}
+
+/** Text mit eingesetzten Zahlen: {b:wird|werden} nach b, {geld a} als Franken, {a} als Zahl. Nach „Fr.“ kein zweiter Punkt. */
+const textMit = (text, werte) => text
+  .replace(/\{(\w):([^|}]*)\|([^}]*)\}/g, (_, k, eins, mehr) => (werte[k] === 1 ? eins : mehr))
+  .replace(/\{geld (\w)\}/g, (_, k) => LS.geldText(werte[k] * 100))
+  .replace(/\{(\w)\}/g, (_, k) => zahlText(werte[k]))
+  .replace(/(Fr\.|Rp\.)\./g, "$1");
+
+/** Steht der Buchstabe im Text? */
+const imText = (text, k) => text.includes(`{${k}}`) || text.includes(`{geld ${k}}`) || text.includes(`{${k}:`);
+
+/** Geschichten einer Stufe 1–5 als { vorlage, variante }: nur mit Rechenart und Lücke der Stufe. */
+function kandidaten(stufe) {
+  const p = STUFE[stufe];
+  const aus = [];
+  for (const vorlage of VORLAGEN) {
+    if (!p.gruppen.includes(vorlage.g)) continue;
+    const varianten = vorlage.varianten || [{ text: vorlage.text, gl: vorlage.gl }];
+    varianten.forEach((va, i) => {
+      const erste = parseGl([].concat(va.gl)[0]);
+      if (p.ops.includes(erste.op) && p.luecken.includes("xyz"[erste.luecke])) aus.push({ vorlage, variante: i });
+    });
+  }
+  return aus;
+}
+
+/** Aufgabe „Lücke lösen“ (Stufen 1–5) oder „Zweischritt“ (Königsstufe): ein Teil je Gleichung. */
+function baueLoesen(stufe, art, vorlage, variante, werte) {
+  const p = STUFE[stufe];
+  const va = vorlage.varianten ? vorlage.varianten[variante] : vorlage;
+  const teile = [].concat(va.gl).map(gl => {
+    const g = gleichung(gl, werte);
+    const u = umkehr(g);
+    const schritte = p.schritte.filter(s => s !== "umkehr" || g.luecke !== 2); // Lücke am Ende: nichts umzukehren
+    return {
+      gl, g, loesung: g.zahlen[g.luecke], umkehr: u, umkehrText: ausdruckText(u), schritte,
+      umkehrOptionen: schritte.includes("umkehr") ? umkehrOptionen(u, p.ops) : [],
+      gleichungOptionen: schritte.includes("gleichung") ? gleichungOptionen(g, p.ops) : [],
+    };
+  });
+  return { stufe, art, gruppe: vorlage.g, quellen: [va.text], werte, text: textMit(va.text, werte), bild: vorlage.bild || null, teile,
+    g: null, gleichungText: null, optionen: [], richtig: null, varianten: [] };
+}
+
+/** Aufgabe „Gleichung gegeben — welche Geschichte passt?“ (Königsstufe): die richtige Variante hat eine eigene Lösung. */
+function baueGeschichte(stufe, vorlage, werte) {
+  const varianten = vorlage.varianten.map(va => {
+    const g = gleichung(va.gl, werte);
+    return { text: textMit(va.text, werte), quelle: va.text, g, op: g.op, luecke: g.luecke, wert: g.zahlen[g.luecke] };
+  });
+  const moeglich = varianten.filter((v, i) => v.luecke !== 2 && varianten.every((w, j) => j === i || w.wert !== v.wert));
+  if (!moeglich.length) return null;
+  const richtig = waehle(moeglich);
+  return { stufe, art: "geschichte", gruppe: vorlage.g, quellen: varianten.map(v => v.quelle), werte, text: null, bild: null, teile: [],
+    g: richtig.g, gleichungText: gleichungText(richtig.g), optionen: mische(varianten.map(v => v.text)), richtig: richtig.text,
+    varianten: varianten.map(v => ({ text: v.text, op: v.op, luecke: v.luecke, wert: v.wert })) };
+}
+
+/** Zahlen ziehen, bis die Aufgabe im Zahlenraum liegt und eindeutig ist; nach je 50 Versuchen die nächste Geschichte. */
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = p.arten ? waehle(p.arten) : "loesen";
+  const liste = art === "zweischritt" ? VORLAGEN.filter(v => v.g === 4).map(vorlage => ({ vorlage, variante: 0 }))
+    : art === "geschichte" ? VORLAGEN.filter(v => v.g === 3 && v.varianten).map(vorlage => ({ vorlage, variante: 0 }))
+    : kandidaten(stufe);
+  if (!liste.length) return null;
+  const start = zufall(0, liste.length - 1);
+  let a = null;
+  for (let v = 0; v < 5000; v++) {
+    const { vorlage, variante } = liste[(start + Math.floor(v / 50)) % liste.length];
+    const werte = zieheWerte(vorlage, p.gross);
+    const b = art === "geschichte" ? baueGeschichte(stufe, vorlage, werte) : baueLoesen(stufe, art, vorlage, variante, werte);
+    if (!b) continue;
+    a = b;
+    if (!maengel(a, stufe).length) return a;
+  }
+  return a;
+}
+
+/** Mängel einer Aufgabe — auch für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  return maengel(a, stufe);
+}
+function maengel(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!STUFEN[stufe]) m.push("Stufe wird mit den freien Listen nicht angeboten");
+  if (!p.gruppen.includes(a.gruppe)) m.push(`Geschichte der Gruppe ${a.gruppe} in ${stufe}`);
+  const quelleFrei = q => VORLAGEN.some(v => v.text === q || (v.varianten || []).some(va => va.text === q));
+  if (!a.quellen.every(quelleFrei)) m.push("Geschichte nicht aus einer freien Liste");
+  if (Object.values(a.werte).some(w => !Number.isInteger(w) || w <= 0)) m.push("Zahl in der Geschichte keine natürliche Zahl");
+  for (const q of a.quellen) {
+    if (/ß/.test(q)) m.push("ß im Text");
+    for (const [, k] of q.matchAll(/\{(\w)\}/g)) if (a.werte[k] === 1 && !q.includes(`{${k}:`)) m.push(`Zahl ${k} ist 1, der Satz hat keine Einzahlform`);
+  }
+  const imRaum = ({ op, zahlen }) => {
+    const grenzen = op === "·" ? [p.zahl, p.zahl, p.produkt] : op === ":" ? [p.produkt, p.zahl, p.zahl] : [p.zahl, p.zahl, p.zahl];
+    return zahlen.every((n, i) => n <= grenzen[i]);
+  };
+  const pruefeGleichung = (g, erlaubteLuecken) => {
+    const [x, y, z] = g.zahlen;
+    if (!g.zahlen.every(n => Number.isInteger(n) && n > 0)) m.push(`Gleichung ${gleichungText(g)} ohne natürliche Zahlen`);
+    else if (rechne(g.op, x, y) !== z) m.push(`Lösung erfüllt die Gleichung ${gleichungText(g)} nicht`);
+    if (!imRaum(g)) m.push(`${gleichungText(g)} ausserhalb des Zahlenraums`);
+    if (!p.ops.includes(g.op)) m.push(`Rechenart ${g.op} in ${stufe}`);
+    if (!erlaubteLuecken.includes("xyz"[g.luecke])) m.push(`Lücke ${"xyz"[g.luecke]} in ${stufe}`);
+    if (g.name in a.werte && a.werte[g.name] !== g.zahlen[g.luecke]) m.push(`Lücke ${g.name} passt nicht zur Zahl der Geschichte`);
+    if (a.quellen.some(q => imText(q, g.name))) m.push(`gesuchte Zahl ${g.name} steht in der Geschichte`);
+  };
+  const pruefeOptionen = (optionen, richtigText, loesung, was) => {
+    if (optionen.length !== 3) m.push(`${was}: nicht drei Optionen`);
+    if (new Set(optionen.map(o => o.text)).size !== optionen.length) m.push(`${was}: doppelte Option`);
+    if (optionen.filter(o => o.text === richtigText).length !== 1) m.push(`${was}: die richtige fehlt oder ist doppelt`);
+    if (optionen.some(o => o.text !== richtigText && o.wert === loesung)) m.push(`${was}: ein Ablenker ergibt auch die Lösung`);
+  };
+  if (a.art === "geschichte") {
+    if (!p.arten?.includes("geschichte")) m.push(`Aufgabenart geschichte in ${stufe}`);
+    pruefeGleichung(a.g, "xy");
+    if (a.optionen.length !== 3 || new Set(a.optionen).size !== 3) m.push("Geschichten: nicht drei verschiedene");
+    if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("Geschichten: die richtige fehlt oder ist doppelt");
+    if (a.varianten.length !== 3) m.push("nicht drei Varianten");
+    if (a.varianten.some(v => v.text !== a.richtig && v.wert === a.g.zahlen[a.g.luecke])) m.push("eine andere Geschichte hat dieselbe Lösung");
+    return m;
+  }
+  if (a.art === "zweischritt" && !p.arten?.includes("zweischritt")) m.push(`Aufgabenart zweischritt in ${stufe}`);
+  if (a.teile.length !== (a.art === "zweischritt" ? 2 : 1)) m.push("falsche Zahl Gleichungen");
+  a.teile.forEach((t, i) => {
+    pruefeGleichung(t.g, i === 0 && a.art === "zweischritt" ? "xy" : i === 0 ? p.luecken : "xyz");
+    if (ausdruckWert(t.umkehr) !== t.loesung) m.push(`Umkehrrechnung ${t.umkehrText} liefert nicht die Lösung`);
+    if (t.loesung !== t.g.zahlen[t.g.luecke]) m.push("Lösung passt nicht zur Lücke");
+    if (t.schritte.includes("umkehr")) pruefeOptionen(t.umkehrOptionen, t.umkehrText, t.loesung, "Umkehrrechnungen");
+    if (t.schritte.includes("gleichung")) pruefeOptionen(t.gleichungOptionen, gleichungText(t.g), t.loesung, "Gleichungen");
+    if (!t.schritte.includes("tippen")) m.push("Teil ohne Eintippen");
+  });
+  return m;
+}
+
+const STUFEN_TEXT = {
+  s1: "Bildgeschichten bis 20: 7 + 5 = _ — tipp die Zahl ein.",
+  s2: "Was fehlt in der Mitte? 28 + _ = 50 — finde die Umkehrrechnung.",
+  s3: "Lücke vorn oder in der Mitte: _ − 15 = 27, 6 · _ = 42.",
+  s4: "Zuerst die passende Gleichung, dann die Umkehrrechnung — bei mal bis 1000.",
+  s5: "Grosse Zahlen bis 1000, Lücke auch bei mal und geteilt.",
+  s6: "Endgegner: Welche Geschichte passt zur Gleichung? Und zwei Lücken in einer Geschichte.",
+};
+const angeboten = stufe => (STUFE[stufe].arten
+  ? VORLAGEN.some(v => v.g === 3 && v.varianten) && VORLAGEN.some(v => v.g === 4)
+  : kandidaten(stufe).length > 0);
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => angeboten(s)));
+
+// ---------- Tipps und Hinweise (nie die Lösung) ----------
+
+const T_GESUCHT = "Welche Zahl ist gesucht — die am Anfang, die dazukommt oder weggeht, oder das Ergebnis?";
+const wort = t => new RegExp("(?<![\\p{L}\\p{N}])" + t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![\\p{L}\\p{N}])", "u");
+
+function tippsGleichung() {
+  return [T_GESUCHT,
+    "Die Lücke steht dort, wo die gesuchte Zahl hingehört. Die Zahlen aus der Geschichte stehen an ihrem Platz.",
+    "Kommt etwas dazu: plus. Geht etwas weg: minus. Mehrmals gleich viel: mal. Gerecht verteilen: geteilt."];
+}
+function tippsUmkehr(t) {
+  const { op, luecke } = t.g;
+  const dreht = luecke === 0 || op === "+" || op === "·";
+  const satz = dreht
+    ? { "+": "Plus wird beim Zurückrechnen zu Minus.", "−": "Minus wird beim Zurückrechnen zu Plus.", "·": "Mal wird beim Zurückrechnen zu Geteilt.", ":": "Geteilt wird beim Zurückrechnen zu Mal." }[op]
+    : op === "−" ? "Was weggegangen ist, ist der Unterschied zwischen der Zahl am Anfang und dem Rest."
+    : "Die Zahl am Anfang wurde verteilt. Wie oft passt das Ergebnis hinein?";
+  return [T_GESUCHT, satz, `Du kennst ${zahlText(t.umkehr.p)} und ${zahlText(t.umkehr.q)}. Welche Rechnung mit diesen zwei Zahlen führt zur Lücke?`];
+}
+function tippsTippen(t, mitBild) {
+  const [x, y] = t.g.zahlen;
+  if (t.g.luecke === 2 && mitBild) return ["Schau die Bilder an: Kommt etwas dazu oder geht etwas weg?", "Dazu heisst plus, weg heisst minus.",
+    t.g.op === "+" ? `Zähl von ${zahlText(x)} aus ${zahlText(y)} weiter.` : `Zähl von ${zahlText(x)} aus ${zahlText(y)} zurück.`];
+  const u = t.umkehr;
+  const gross = u.p >= 100 || u.q >= 100;
+  const weg = {
+    "+": gross ? "Rechne Stelle für Stelle: erst die Tausender und Hunderter, dann die Zehner, dann die Einer." : "Zähl zuerst die Zehner dazu, dann die Einer.",
+    "−": gross ? "Rechne Stelle für Stelle: erst die Tausender und Hunderter, dann die Zehner, dann die Einer." : "Nimm zuerst die Zehner weg, dann die Einer.",
+    "·": "Zerlege die eine Zahl in Zehner und Einer und nimm jeden Teil für sich mal.",
+    ":": u.q >= 10 ? `Wie oft passt ${zahlText(u.q)} in ${zahlText(u.p)}? Fang mit 10 · ${zahlText(u.q)} an.` : `Geh die ${zahlText(u.q)}er-Reihe durch, bis du bei ${zahlText(u.p)} bist.`,
+  }[u.op];
+  const erster = t.g.luecke === 2 ? "Hier ist das Ergebnis gesucht: Rechne die zwei Zahlen so zusammen, wie es die Gleichung sagt." : `Rechne ${t.umkehrText}.`;
+  return [erster, weg, "Mach die Probe: Setz deine Zahl in die Lücke und rechne nach."];
+}
+function tippsGeschichte() {
+  return ["Lies die Gleichung: Welche Zahlen sind bekannt, welche ist gesucht?",
+    "Die Lücke steht für die gesuchte Zahl. In welcher Geschichte wird genau nach dieser Zahl gefragt?",
+    "Schau, welche Zahl in der Geschichte das Ergebnis ist — und ob sie in der Gleichung hinter dem Gleichzeichen steht."];
+}
+
+/** Hinweis nach einer falschen Gleichung (die gewählte Option). */
+function hinweisGleichung(o, g) {
+  if (o.luecke === 2) return "In der Geschichte ist das Ergebnis schon bekannt. Die Lücke gehört dorthin, wo die gesuchte Zahl steht.";
+  if (o.op !== g.op) return "Was passiert in der Geschichte: Kommt etwas dazu, geht etwas weg, ist es mehrmals gleich viel, oder wird verteilt?";
+  return "Schau, welche Zahl am Anfang steht, welche dazukommt oder weggeht, und welche das Ergebnis ist.";
+}
+/** Hinweis nach einer falschen Umkehrrechnung. */
+function hinweisUmkehr(o, t) {
+  const { op, luecke } = t.g;
+  if (o.op === t.umkehr.op) return "Die Rechenart stimmt. Schau auf die Reihenfolge: Bei minus und geteilt steht die grössere Zahl zuerst.";
+  if (luecke === 0) return "Die Zahl am Anfang findest du, wenn du vom Ergebnis zurückrechnest: Die Rechenart dreht sich um.";
+  if (op === "+" || op === "·") return "Die Zahl in der Mitte findest du, wenn du vom Ergebnis zurückrechnest: Die Rechenart dreht sich um.";
+  if (op === "−") return "Was weggegangen ist, ist der Unterschied zwischen der Zahl am Anfang und dem Rest.";
+  return "Die Zahl am Anfang wurde verteilt. Wie oft passt das Ergebnis hinein?";
+}
+/** Hinweis nach einer falschen Zahl: die Probe mit der getippten Zahl — ohne das Ergebnis zu verraten. */
+function hinweisZahl(t, w, mitBild) {
+  if (t.g.luecke === 2) return mitBild ? "Das stimmt noch nicht. Schau die Bilder an und zähl nochmals genau." : "Das stimmt noch nicht. Rechne nochmals genau.";
+  const z = t.g.zahlen.slice();
+  z[t.g.luecke] = w;
+  const links = rechne(t.g.op, z[0], z[1]);
+  if (!Number.isInteger(links)) return ERSATZ_HINWEIS;
+  return `Probe: ${zahlText(z[0])} ${t.g.op} ${zahlText(z[1])} = ${zahlText(links)}, nicht ${zahlText(z[2])}. Rechne nochmals.`;
+}
+/** Hinweis nach einer falschen Geschichte (Königsstufe). */
+function hinweisGeschichte(v) {
+  if (v.luecke === 2) return "In dieser Geschichte ist das Ergebnis gesucht. In der Gleichung ist das Ergebnis aber schon bekannt.";
+  return "Schau genau: Welche Zahl ist in der Gleichung gesucht? Und was passiert in der Geschichte — dazu, weg, mal oder geteilt?";
+}
+
+// ---------- Darstellung ----------
+
+/** Gleichung als Zeile; die Lücke ist ein Kästchen, das später die Tastatur füllt. */
+function gleichungElement(g) {
+  const zeile = el("div", { class: "pg-gleichung" });
+  const box = el("span", { class: "pg-luecke leer", "aria-label": "Lücke" });
+  const teil = i => (i === g.luecke ? box : el("span", { text: zahlText(g.zahlen[i]) }));
+  zeile.append(teil(0), el("span", { text: g.op }), teil(1), el("span", { text: "=" }), teil(2));
+  return { zeile, box };
+}
+
+/** Bildreihe der Stufe 1: dazu (a + b) oder weg (die letzten b durchgestrichen). */
+function bilderZeile(a) {
+  const [x, y] = a.teile[0].g.zahlen;
+  const bilder = el("div", { class: "pg-bilder", "aria-hidden": "true" });
+  const reihe = (n, klasse) => Array.from({ length: n }, () => el("span", { class: klasse, text: a.bild }));
+  if (a.teile[0].g.op === "+") bilder.append(...reihe(x, ""), el("span", { class: "plus", text: "+" }), ...reihe(y, ""));
+  else bilder.append(...reihe(x - y, ""), ...reihe(y, "weg"));
+  return bilder;
+}
+
+const SCHRITT_NAME = { gleichung: "Gleichung wählen", umkehr: "Umkehrrechnung wählen", tippen: "Ausrechnen" };
+
+LS.spiel({
+  id: ID,
+  einleitung: "In jeder Geschichte fehlt eine Zahl. Mit der Umkehrrechnung findest du sie — und die Probe zeigt, dass sie stimmt!",
+  hilfe: stufe => ({
+    s1: "Lies oder hör die Geschichte. Darunter steht die Rechnung mit einer Lücke. Rechne aus und tipp die Zahl auf der Tastatur ein.",
+    s2: "Lies die Geschichte. In der Gleichung fehlt eine Zahl. Tipp zuerst die Rechnung an, mit der du die Zahl findest. Dann rechne aus und tipp die Zahl ein.",
+    s3: "Lies die Geschichte. In der Gleichung fehlt eine Zahl. Tipp zuerst die Rechnung an, mit der du die Zahl findest. Dann rechne aus und tipp die Zahl ein.",
+    s4: "Lies die Geschichte. Tipp zuerst die Gleichung an, die zur Geschichte passt. Dann wählst du die Rechnung, mit der du die Lücke findest, und tippst die Zahl ein.",
+    s5: "Lies die Geschichte. Tipp zuerst die Gleichung an, die zur Geschichte passt. Dann wählst du die Rechnung, mit der du die Lücke findest, und tippst die Zahl ein.",
+    s6: "Steht eine Gleichung da, tippst du die Geschichte an, die dazu passt. Hat eine Geschichte zwei Lücken, löst du sie nacheinander: Rechnung wählen, Zahl eintippen.",
+  }[stufe]),
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (p.arten) ctx.serie("art", a.art);
+    else if (ctx.stufe === "s1") ctx.serie("rechenart", a.teile[0].g.op);
+    else if (p.luecken.length > 1) ctx.serie("luecke", "xyz"[a.teile[0].g.luecke]);
+
+    const pg = el("div", { class: "pg" });
+    ctx.flaeche.append(pg);
+    if (a.art === "geschichte") return geschichteWaehlen(ctx, a, pg);
+    lueckenLoesen(ctx, a, pg);
+  },
+});
+
+/** Königsstufe (a): Gleichung gegeben, welche Geschichte passt? */
+function geschichteWaehlen(ctx, a, pg) {
+  if (ctx.nr === 0) ctx.sag("Hier ist die Gleichung schon da. Welche Geschichte erzählt sie?");
+  ctx.tipp(tippsGeschichte());
+  pg.append(el("div", { class: "auftrag", text: "Welche Geschichte passt zu dieser Gleichung?" }), gleichungElement(a.g).zeile);
+  const loesung = `Zu ${a.gleichungText} passt: ${a.richtig}`;
+  const box = LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.richtig, loesung,
+    hinweis: o => hinweisGeschichte(a.varianten.find(v => v.text === o)),
+    lob: `Genau! ${a.gleichungText} — die Lücke ist ${zahlText(a.g.zahlen[a.g.luecke])}.`,
+  });
+  box.classList.add("pg-geschichten");
+}
+
+/** Stufen 1–5 und Königsstufe (b): je Gleichung Gleichung wählen, Umkehrrechnung wählen, Zahl tippen. */
+function lueckenLoesen(ctx, a, pg) {
+  if (ctx.nr === 0) ctx.sag(a.teile[0].schritte.length === 1 ? "Lies die Geschichte und rechne aus." : "Lies die Geschichte. Welche Zahl fehlt? Finde die Rechnung, die sie dir verrät.");
+  const loesung = a.teile.map(t => `${gleichungText(t.g)} → ${t.umkehrText} = ${zahlText(t.loesung)}`).join(" · ");
+  ctx.loesung(loesung);
+  ctx.schritte(a.teile.reduce((n, t) => n + t.schritte.length - 1 + LS.tippSchritte(t.loesung), 0));
+  // Zahlen, die das Kind schon sieht: Tipps und Hinweise dürfen jede andere Lösung nicht nennen.
+  const bekannt = new Set(Object.entries(a.werte).filter(([k]) => a.quellen.some(q => imText(q, k))).map(([, v]) => v));
+  const sicher = (text, ersatz) => (a.teile.some(t => !bekannt.has(t.loesung) && wort(zahlText(t.loesung)).test(text)) ? ersatz : text);
+  const tipp = texte => ctx.tipp(texte.map(t => sicher(t, ERSATZ_TIPP)));
+  const gesamt = a.teile.reduce((n, t) => n + t.schritte.length, 0);
+  let nr = 0;
+
+  const schritt = el("p", { class: "pg-schritt" });
+  pg.append(schritt);
+  if (a.bild) pg.append(bilderZeile(a));
+  // Die Geschichte ist Mathe, nicht Lesestoff: als .frage liest die Eule sie vor (wie bei den Rechengeschichten).
+  pg.append(el("div", { class: "pg-geschichte frage", text: a.text }));
+  const gleichungen = el("div", { class: "pg-gleichungen" });
+  const auftrag = el("div", { class: "auftrag" });
+  const bereich = el("div", { class: "pg-bereich" });
+  pg.append(gleichungen, auftrag, bereich);
+
+  const beginne = (art, text) => {
+    nr++;
+    schritt.textContent = gesamt > 1 ? `Schritt ${nr} von ${gesamt}: ${SCHRITT_NAME[art]}` : "";
+    auftrag.textContent = text;
+    bereich.textContent = "";
+  };
+  const fehler = (knopf, hinweis, wahl) => {
+    knopf.classList.remove("falsch"); void knopf.offsetWidth; knopf.classList.add("falsch", "gewaehlt");
+    ctx.falsch(sicher(hinweis, ERSATZ_HINWEIS), loesung);
+    if (ctx.vorbei()) wahl.querySelectorAll("button").forEach(b => { b.disabled = true; });
+  };
+  /** Wahlknöpfe für Optionen { text }; richtig(knopf) läuft bei der richtigen, hinweis(option) gibt den Text bei einer falschen. */
+  const wahlKnoepfe = (optionen, istRichtig, hinweis, richtig) => {
+    const wahl = el("div", { class: "wahl pg-wahl" });
+    wahl.style.setProperty("--wahl-breite", "170px");
+    for (const o of optionen) {
+      const k = el("button", { type: "button", class: "wahl-knopf", text: o.text });
+      k.addEventListener("click", () => {
+        if (ctx.vorbei() || k.disabled || k.classList.contains("gewaehlt")) return;
+        if (!istRichtig(o)) return fehler(k, hinweis(o), wahl);
+        k.classList.add("richtig");
+        LS.ton("tipp");
+        richtig();
+      });
+      wahl.append(k);
+    }
+    bereich.append(wahl);
+  };
+
+  const teilLoesen = i => {
+    const t = a.teile[i];
+    const letzter = i === a.teile.length - 1;
+    const kette = t.schritte.slice();
+    let box = null;
+    const zeigeGleichung = () => {
+      const g = gleichungElement(t.g);
+      box = g.box;
+      gleichungen.append(g.zeile);
+    };
+    const schrittGleichung = () => {
+      beginne("gleichung", "Welche Gleichung passt zur Geschichte?");
+      tipp(tippsGleichung());
+      wahlKnoepfe(t.gleichungOptionen, o => o.text === gleichungText(t.g), o => hinweisGleichung(o, t.g), () => { zeigeGleichung(); weiter(); });
+    };
+    const schrittUmkehr = () => {
+      beginne("umkehr", "Mit welcher Rechnung findest du die Zahl in der Lücke?");
+      tipp(tippsUmkehr(t));
+      wahlKnoepfe(t.umkehrOptionen, o => o.text === t.umkehrText, o => hinweisUmkehr(o, t), () => {
+        gleichungen.append(el("div", { class: "pg-weg", text: `✓ Rechne: ${t.umkehrText}` }));
+        weiter();
+      });
+    };
+    const schrittTippen = () => {
+      beginne("tippen", "Rechne aus und tipp die Zahl ein.");
+      tipp(tippsTippen(t, !!a.bild));
+      const tasten = LS.tastatur({
+        anzeige: box,
+        maxStellen: 5,
+        onOk(w) {
+          if (w !== t.loesung) {
+            box.classList.add("falsch");
+            ctx.falsch(sicher(hinweisZahl(t, w, !!a.bild), ERSATZ_HINWEIS), loesung);
+            if (ctx.vorbei()) tasten.gesperrt = true;
+            return;
+          }
+          tasten.gesperrt = true;
+          box.classList.add("richtig");
+          bekannt.add(t.loesung);
+          const probe = `Probe: ${gleichungText(t.g, zahlText(t.loesung))} ✓`;
+          if (letzter) return ctx.richtig(`${waehle(LOB)} ${probe}`);
+          LS.ton("tipp");
+          gleichungen.append(el("div", { class: "pg-weg", text: probe }));
+          gleichungen.querySelectorAll(".pg-gleichung").forEach(z => z.classList.add("erledigt"));
+          teilLoesen(i + 1);
+        },
+      });
+      bereich.append(tasten.element);
+    };
+    const weiter = () => {
+      const s = kette.shift();
+      if (s === "gleichung") return schrittGleichung();
+      if (s === "umkehr") return schrittUmkehr();
+      schrittTippen();
+    };
+    if (!kette.includes("gleichung")) zeigeGleichung();
+    weiter();
+  };
+  teilLoesen(0);
+}
+</script>
+</body>
+</html>

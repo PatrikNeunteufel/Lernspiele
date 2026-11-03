@@ -486,7 +486,10 @@ Spielen, die das Lesen selbst üben; ein Kind im Kindergarten soll sich eintrage
   Sprechblase und den Auftrag der Aufgabe vor, also
   **nur die Elemente `.frage` und `.auftrag`** (die obersten, ohne verschachtelte). Satz, Wortkarte, Sachtext und
   Antwortknöpfe liest sie nie. Daraus folgt für jedes Spiel: In `.frage` und `.auftrag` steht nur die Anweisung,
-  nie der Stoff, den ein Lesespiel üben will (das Wort, der Buchstabe, der Text).
+  nie der Stoff, den ein **Lesespiel** üben will (das Wort, der Buchstabe, der Text). Rechen- und Sachtexte, die
+  nicht das Lesen üben (Rechengeschichte, Anliegen, Lebensraum-Frage), dürfen in `.frage` stehen und werden
+  vorgelesen — sonst misst das Spiel bei Kindern der 2. Klasse das Lesen statt Rechnen oder Sachwissen
+  (Entscheid V1 a, LERN_Session10; so schon Rechengeschichten und Lebensraum-Zuordnung).
   - Profil-Feld `vorlesen`: `auto` (jede neue Aufgabe und jeden Tipp), `knopf` (nur auf 🗣️), fehlt = nach Klasse:
     Kindergarten und 1. Klasse automatisch, sonst auf 🗣️ (`LS.vorlesenArt`). Auch auf der Stufenwahl jedes Spiels
     umschaltbar („🗣️ Vorlesen: gleich / auf Knopfdruck“, schreibt dasselbe Profil-Feld).

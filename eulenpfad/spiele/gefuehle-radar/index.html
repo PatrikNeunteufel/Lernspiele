@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gefühle-Radar</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .gs .frage { text-align: center; font-size: clamp(19px, 4.2vw, 25px); font-weight: 800; margin: 4px 0 12px; }
+  .gs-schritt { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin: 0 0 4px; }
+  .gs-gesicht { text-align: center; font-size: clamp(96px, 30vw, 150px); line-height: 1.15; margin: 0 0 10px; }
+  .gs .satz {
+    background: var(--karte); border: 3px solid var(--rand); border-radius: 18px; padding: 14px 18px; margin: 0 auto 12px;
+    max-width: 680px; text-align: center; font-size: clamp(18px, 4.2vw, 25px); line-height: 1.5; font-weight: 600;
+  }
+  .gs .satz.gs-rede { text-align: left; }
+  .gs-rede p { margin: 4px 0; }
+  .gs-rede b { color: var(--deko-5); }
+  .gs-hoer {
+    display: block; margin: 0 auto 14px; border: none; border-radius: 18px; padding: 10px 22px; min-height: 56px;
+    font: inherit; font-size: clamp(18px, 4vw, 22px); font-weight: 800; background: var(--karte); color: var(--text);
+    box-shadow: 0 5px 0 var(--rand); cursor: pointer;
+  }
+  .gs-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--rand); }
+  .gs-erledigt { max-width: 680px; margin: 0 auto 10px; padding: 6px 12px; border-radius: 12px; background: var(--gut-hell);
+    font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; text-align: center; }
+  .gs-wahl .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); font-weight: 800; }
+  .gs-wahl .wahl-knopf .bild { font-size: clamp(40px, 9vw, 54px); }
+  .gs-wahl.gs-paar .wahl-knopf .bild { font-size: clamp(30px, 7vw, 42px); letter-spacing: 4px; }
+  .gs-wahl.gs-text .wahl-knopf { font-size: clamp(15px, 3.5vw, 19px); font-weight: 700; line-height: 1.35; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🎭 Gefühle-Radar</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="situationen.js"></script>
+<script>
+"use strict";
+// Lehrplan D.1.C.1 (Zuhören: Stimmungen und Gefühle wahrnehmen), Basisklasse 3. Lesearm: Das Kind deutet
+// Gesichter, hört Sätze mit 🔊 und wählt das Gefühl aus Knöpfen mit Bild und Wort (langes Drücken liest vor).
+// Die Buchstaben-Zuordnung ist eine ANNAHME aus der Spielidee und noch gegen den Lehrplan abzugleichen:
+//   s1 2. Klasse (D.1.C.1.a/b, Annahme): ein grosses Gesicht → Gefühl (drei Knöpfe) oder → passende
+//      Situation als Bild (Geschenk, Spielzeug kaputt, Bär im Wald); fast ohne Lesen.
+//   s2 3. Klasse, leichter (D.1.C.1.b, Annahme): ein kurzer Satz mit Namen, vorgesprochen mit 🔊 → Gefühl.
+//   s3 Klassenziel (D.1.C.1.c, Annahme): eine Situation in zwei Sätzen → Gefühl (vier Knöpfe), oder
+//      Körpersignale (Tränen, Fäuste, Hüpfen) → Gefühl.
+//   s4 schwerer (D.1.C.1.c, Annahme): feinere Gefühle (stolz, enttäuscht, neugierig, nervös, gelangweilt,
+//      erleichtert) in Situationen mit zwei Personen: Wie fühlt sich die zweite?
+//   s5 4. Klasse (D.1.C.1.d, Annahme): ein kurzes Gespräch → Stimmung der antwortenden Person, danach
+//      „Was könnte … jetzt helfen?“ (auf die Stimmung reagieren).
+//   s6 Königsstufe (D.1.C.1.d/e, Annahme): zwei Gefühle zugleich (stolz und ein bisschen traurig) aus
+//      vier Paaren, oder zur Situation die passende freundliche Antwort wählen.
+// Abgrenzung: Hör-Geschichte (3) fragt Wer/Wo/Was aus einer vorgelesenen Geschichte, Hör-Reporter (6)
+// Sachinformationen; hier geht es nur um Stimmungen und Gefühle. Alle Inhalte in situationen.js
+// (Liste „situationen“), selbst geschrieben, zu prüfen.
+
+const { waehle, mische, el } = LS;
+const ID = "gefuehle-radar";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["situationen"]);
+const DA = FREI.has("situationen");
+const GEFUEHL = Object.fromEntries(GS_GEFUEHLE.map(g => [g.id, g]));
+const GRUND = GS_GEFUEHLE.filter(g => g.gruppe === "grund").map(g => g.id);
+const BILDER = DA ? GS_BILDER : [];
+const SAETZE = DA ? GS_SAETZE : [];
+const SITUATIONEN = DA ? GS_SITUATIONEN : [];
+const KOERPER = DA ? GS_KOERPER : [];
+const GESPRAECHE = DA ? GS_GESPRAECHE : [];
+const PAARE = DA ? GS_PAARE : [];
+const REAKTIONEN = DA ? GS_REAKTIONEN : [];
+
+/** Je Stufe: Aufgabenarten, Zahl der Gefühl-Knöpfe, Gruppe der Situationen, erlaubte Gefühle. */
+const STUFE = {
+  s1: { arten: ["gesicht", "bild"], knoepfe: 3, nurGrund: true },
+  s2: { arten: ["satz"], knoepfe: 3, nurGrund: true },
+  s3: { arten: ["situation", "koerper"], knoepfe: 4, gruppe: 3, nurGrund: true },
+  s4: { arten: ["situation"], knoepfe: 4, gruppe: 4 },
+  s5: { arten: ["gespraech"], knoepfe: 4 },
+  s6: { arten: ["paar", "reaktion"], knoepfe: 4 },
+};
+
+const paarKey = paar => paar.join("+");
+
+/** Vorrat einer Aufgabenart in einer Stufe. */
+function vorrat(art, stufe) {
+  switch (art) {
+    case "gesicht": return DA ? GRUND : [];
+    case "bild": return BILDER;
+    case "satz": return SAETZE;
+    case "situation": return SITUATIONEN.filter(s => s.gruppe === STUFE[stufe].gruppe);
+    case "koerper": return KOERPER;
+    case "gespraech": return GESPRAECHE;
+    case "paar": return PAARE;
+    case "reaktion": return REAKTIONEN;
+    default: return [];
+  }
+}
+const vorratDa = stufe => STUFE[stufe].arten.every(art => vorrat(art, stufe).length);
+
+/** Zwei Bild-Situationen anderer, klar unpassender Gefühle (verschiedene Gefühle). */
+function ablenkerBilder(gefuehl) {
+  const passend = mische(GEFUEHL[gefuehl].ablenker);
+  const bilder = [];
+  for (const g of passend) {
+    const kandidaten = BILDER.filter(b => b.gefuehl === g);
+    if (kandidaten.length) bilder.push(waehle(kandidaten));
+    if (bilder.length === 2) break;
+  }
+  return bilder;
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const arten = p.arten.filter(art => vorrat(art, stufe).length);
+  if (!arten.length) return null;
+  const art = waehle(arten);
+  const q = waehle(vorrat(art, stufe));
+  switch (art) {
+    case "gesicht": {
+      const g = GEFUEHL[q];
+      const gesicht = waehle(g.gesichter);
+      return { art, gefuehl: q, gesicht, optionen: mische([q, ...mische(g.ablenker).slice(0, 2)]), richtig: q, kennung: `gesicht:${gesicht}` };
+    }
+    case "bild": {
+      const gesicht = waehle(GEFUEHL[q.gefuehl].gesichter);
+      return { art, gefuehl: q.gefuehl, gesicht, optionen: mische([q, ...ablenkerBilder(q.gefuehl)]), richtig: q, kennung: `bild:${gesicht}>${q.bild}` };
+    }
+    case "satz":
+      return { art, satz: q.satz, wer: q.name, gefuehl: q.gefuehl, optionen: mische([q.gefuehl, ...q.ablenker]), richtig: q.gefuehl, kennung: `satz:${q.satz}` };
+    case "situation":
+      return { art, gruppe: q.gruppe, text: q.text, wer: q.wer, gefuehl: q.gefuehl, tipp: q.tipp, optionen: mische([q.gefuehl, ...q.ablenker]), richtig: q.gefuehl, kennung: `situation:${q.text}` };
+    case "koerper":
+      return { art, satz: q.satz, wer: q.wer, gefuehl: q.gefuehl, optionen: mische([q.gefuehl, ...q.ablenker]), richtig: q.gefuehl, kennung: `koerper:${q.satz}` };
+    case "gespraech":
+      return { art, a: q.a, b: q.b, wer: q.b[0], gefuehl: q.gefuehl, optionen: mische([q.gefuehl, ...q.ablenker]), richtig: q.gefuehl,
+        hilfe: { richtig: q.hilfe.richtig, optionen: mische([q.hilfe.richtig, ...q.hilfe.falsch]) }, kennung: `gespraech:${q.b[1]}` };
+    case "paar":
+      return { art, text: q.text, paar: q.paar, tipp: q.tipp, optionen: mische([q.paar, ...q.ablenker].map(paarKey)), richtig: paarKey(q.paar), kennung: `paar:${q.text}` };
+    case "reaktion":
+      return { art, text: q.text, wer: q.wer, optionen: mische([q.richtig, ...q.falsch]), richtig: q.richtig, kennung: `reaktion:${q.text}` };
+    default: return null;
+  }
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Art ${a.art} in ${stufe}`);
+  const pruefeOptionen = (optionen, richtig, anzahl, was) => {
+    if (!Array.isArray(optionen) || optionen.length !== anzahl) m.push(`${was}: nicht ${anzahl} Optionen`);
+    else {
+      if (new Set(optionen).size !== optionen.length) m.push(`${was}: Optionen doppelt`);
+      if (optionen.filter(o => o === richtig).length !== 1) m.push(`${was}: richtige Antwort nicht genau einmal`);
+    }
+  };
+  const pruefeGefuehle = ids => {
+    for (const id of ids) {
+      if (!GEFUEHL[id]) m.push(`unbekanntes Gefühl ${id}`);
+      else if (p.nurGrund && GEFUEHL[id].gruppe !== "grund") m.push(`feines Gefühl ${id} in ${stufe}`);
+    }
+  };
+  const gefuehlOptionen = () => {
+    pruefeOptionen(a.optionen, a.richtig, p.knoepfe, "Gefühle");
+    pruefeGefuehle(a.optionen);
+    if (a.richtig !== a.gefuehl) m.push("richtig ist nicht das Gefühl");
+  };
+  const wort = id => GEFUEHL[id]?.wort || "";
+  switch (a.art) {
+    case "gesicht":
+      gefuehlOptionen();
+      if (!GEFUEHL[a.gefuehl]?.gesichter.includes(a.gesicht)) m.push("Gesicht passt nicht zum Gefühl");
+      if (a.optionen.some(o => o !== a.gefuehl && !GEFUEHL[a.gefuehl]?.ablenker.includes(o))) m.push("Ablenker nicht aus der Liste des Gefühls");
+      break;
+    case "bild":
+      pruefeOptionen(a.optionen, a.richtig, p.knoepfe, "Bilder");
+      if (!BILDER.includes(a.richtig)) m.push("Bild nicht aus einer freien Liste");
+      if (a.richtig?.gefuehl !== a.gefuehl) m.push("Bild passt nicht zum Gefühl");
+      if (!GEFUEHL[a.gefuehl]?.gesichter.includes(a.gesicht)) m.push("Gesicht passt nicht zum Gefühl");
+      for (const b of a.optionen || []) {
+        if (!BILDER.includes(b)) m.push("Ablenker-Bild nicht aus einer freien Liste");
+        else if (b !== a.richtig && (b.gefuehl === a.gefuehl || !GEFUEHL[a.gefuehl].ablenker.includes(b.gefuehl))) m.push("Ablenker-Bild passt zum Gefühl oder ist kein klarer Ablenker");
+        if (!b.text?.trim() || !b.bild) m.push("Bild ohne Text oder Zeichen");
+      }
+      if (new Set((a.optionen || []).map(b => b.gefuehl)).size !== (a.optionen || []).length) m.push("zwei Bilder desselben Gefühls");
+      break;
+    case "satz": {
+      gefuehlOptionen();
+      const q = SAETZE.find(s => s.satz === a.satz);
+      if (!q) m.push("Satz nicht aus einer freien Liste");
+      else if (q.gefuehl !== a.gefuehl) m.push("Gefühl passt nicht zum Satz");
+      const n = (a.satz || "").split(/\s+/).filter(Boolean).length;
+      if (n < 5 || n > 8) m.push(`Satz mit ${n} Wörtern (5–8)`);
+      if (!a.satz?.includes(a.wer)) m.push("Name steht nicht im Satz");
+      if (!/[.!?]$/.test(a.satz || "")) m.push("Satz ohne Satzzeichen am Ende");
+      break;
+    }
+    case "situation": {
+      gefuehlOptionen();
+      const q = SITUATIONEN.find(s => s.text === a.text);
+      if (!q) m.push("Situation nicht aus einer freien Liste");
+      else if (q.gefuehl !== a.gefuehl || q.wer !== a.wer) m.push("Gefühl oder Person passt nicht zur Situation");
+      if (a.gruppe !== p.gruppe) m.push(`Situation der Gruppe ${a.gruppe} in ${stufe}`);
+      if (!a.text?.includes(a.wer)) m.push("Person steht nicht im Text");
+      if ((a.text || "").split(/[.!?]\s/).length < 2) m.push("Situation hat nicht zwei Sätze");
+      if (!a.tipp?.trim()) m.push("ohne dritten Tipp");
+      else if (a.tipp.toLowerCase().includes(wort(a.gefuehl))) m.push("Tipp verrät das Gefühl");
+      break;
+    }
+    case "koerper": {
+      gefuehlOptionen();
+      const q = KOERPER.find(s => s.satz === a.satz);
+      if (!q) m.push("Körpersignal-Satz nicht aus einer freien Liste");
+      else if (q.gefuehl !== a.gefuehl || q.wer !== a.wer) m.push("Gefühl oder Person passt nicht zum Satz");
+      if (!a.satz?.includes(a.wer)) m.push("Person steht nicht im Satz");
+      if (a.satz?.toLowerCase().includes(wort(a.gefuehl))) m.push("Satz nennt das Gefühl");
+      break;
+    }
+    case "gespraech": {
+      gefuehlOptionen();
+      const q = GESPRAECHE.find(g => g.b[1] === a.b?.[1] && g.a[1] === a.a?.[1]);
+      if (!q) m.push("Gespräch nicht aus einer freien Liste");
+      else if (q.gefuehl !== a.gefuehl || q.b[0] !== a.wer) m.push("Gefühl oder Person passt nicht zum Gespräch");
+      if (!a.a?.[1]?.trim() || !a.b?.[1]?.trim()) m.push("leere Rede");
+      if (a.a?.[0] === a.b?.[0]) m.push("beide Personen heissen gleich");
+      pruefeOptionen(a.hilfe?.optionen, a.hilfe?.richtig, 3, "Hilfe");
+      if ((a.hilfe?.optionen || []).some(o => !String(o).trim())) m.push("leerer Hilfe-Vorschlag");
+      break;
+    }
+    case "paar": {
+      pruefeOptionen(a.optionen, a.richtig, p.knoepfe, "Paare");
+      const q = PAARE.find(s => s.text === a.text);
+      if (!q) m.push("Paar-Situation nicht aus einer freien Liste");
+      else if (paarKey(q.paar) !== a.richtig) m.push("richtiges Paar passt nicht zur Situation");
+      for (const key of a.optionen || []) {
+        const ids = key.split("+");
+        if (ids.length !== 2 || ids[0] === ids[1]) m.push(`Paar ${key} hat nicht zwei verschiedene Gefühle`);
+        pruefeGefuehle(ids);
+        if (key !== a.richtig && ids.every(id => a.paar.includes(id))) m.push(`Ablenker ${key} enthält nur richtige Gefühle`);
+      }
+      if (!a.tipp?.trim()) m.push("ohne dritten Tipp");
+      else if (a.paar.some(id => a.tipp.toLowerCase().includes(wort(id)))) m.push("Tipp verrät ein Gefühl");
+      break;
+    }
+    case "reaktion": {
+      pruefeOptionen(a.optionen, a.richtig, 3, "Antworten");
+      const q = REAKTIONEN.find(s => s.text === a.text);
+      if (!q) m.push("Reaktion nicht aus einer freien Liste");
+      else if (q.richtig !== a.richtig) m.push("richtige Antwort passt nicht zur Situation");
+      if (!a.text?.includes(a.wer)) m.push("Person steht nicht im Text");
+      if ((a.optionen || []).some(o => !String(o).trim() || o.length > 80)) m.push("Antwort leer oder zu lang");
+      break;
+    }
+    default: m.push(`unbekannte Art ${a.art}`);
+  }
+  if (!a.kennung) m.push("ohne Kennung");
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  return m;
+}
+
+// Dritter Tipp zu einem Gesicht: was man sieht — nie das Wort für das Gefühl.
+const GESICHT_TIPP = {
+  froehlich: "Der Mund lacht, und die Augen strahlen.",
+  traurig: "Da sind Tränen, und die Mundwinkel hängen nach unten.",
+  wuetend: "Die Augenbrauen sind zusammengezogen, der Mund ist streng.",
+  aengstlich: "Die Augen sind weit offen, und das Gesicht zittert.",
+  ueberrascht: "Der Mund ist offen, die Augen sind gross — wie bei einem Oh!",
+  muede: "Die Augen sind fast zu, und der Mund gähnt.",
+};
+// Dritter Tipp zu einem Satz: welche Körpersignale und Handlungen dazu passen — nie das Wort.
+const SIGNAL_TIPP = {
+  froehlich: "Lachen, jubeln, hüpfen: So zeigt man, dass es einem gut geht.",
+  traurig: "Weinen oder jemanden vermissen: Das fühlt sich schwer an.",
+  wuetend: "Schreien, stampfen, Türen knallen: Da kocht es innen drin.",
+  aengstlich: "Zittern, sich verstecken, sich nicht trauen: Da ist etwas unheimlich.",
+  ueberrascht: "Staunen und grosse Augen: Da passiert etwas, womit niemand rechnet.",
+  muede: "Gähnen, Augen reiben, fast einschlafen: Der Körper braucht Ruhe.",
+};
+
+const gefuehlInhalt = id => ({ bild: GEFUEHL[id].bild, text: GEFUEHL[id].wort });
+const paarInhalt = key => {
+  const [x, y] = key.split("+");
+  return { bild: GEFUEHL[x].bild + GEFUEHL[y].bild, text: `${GEFUEHL[x].wort} und ${GEFUEHL[y].wort}` };
+};
+const istGefuehl = (wer, id) => `${wer} ist ${GEFUEHL[id].wort} ${GEFUEHL[id].bild}`;
+const LOB = ["Gut gespürt!", "Dein Gefühle-Radar funktioniert!", "Genau, das passt!", "Richtig erkannt!"];
+
+/** 🔊-Knopf: liest den Text vor (LS.sprich, deutsche Stimme); ohne Stimme bleibt der Text sichtbar. */
+function hoerKnopf(text) {
+  const k = el("button", { type: "button", class: "gs-hoer", text: "🔊 Anhören", "aria-label": "Den Text anhören" });
+  k.addEventListener("click", () => LS.sprich(text, "de"));
+  return k;
+}
+
+const STUFEN_TEXT = {
+  s1: "Ein Gesicht: Wie fühlt sich das Kind? Und was ist wohl passiert?",
+  s2: "Ein kurzer Satz zum Anhören: Wie fühlt sich Lea?",
+  s3: "Zwei Sätze oder Körpersignale: Tränen, Fäuste, Hüpfen — welches Gefühl?",
+  s4: "Feinere Gefühle: stolz, enttäuscht, neugierig, nervös, gelangweilt, erleichtert.",
+  s5: "Ein Gespräch: Wie fühlt sich Ben — und was könnte ihm jetzt helfen?",
+  s6: "Endgegner: zwei Gefühle zugleich — und welche Antwort passt zur Stimmung?",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => vorratDa(s)));
+
+const HILFE = {
+  s1: "Schau das grosse Gesicht an. Tippe das Gefühl an, das dazu passt — oder das Bild, das zeigt, was passiert ist. Halte einen Knopf lange gedrückt, dann liest die Eule ihn vor.",
+  s2: "Tippe auf 🔊, dann hörst du den Satz. Dann tippst du das Gefühl an, das zum Kind passt. Halte einen Knopf lange gedrückt, dann liest die Eule ihn vor.",
+  s3: "Lies oder hör die Sätze (🔊). Tippe das Gefühl an, das zum Kind passt. Halte einen Knopf lange gedrückt, dann liest die Eule ihn vor.",
+  s4: "Lies oder hör die Situation (🔊). Gefragt ist das Gefühl der Person in der Frage. Tippe es an.",
+  s5: "Lies oder hör das Gespräch (🔊). Zuerst tippst du an, wie sich die zweite Person fühlt. Dann wählst du, was ihr jetzt helfen oder zu ihr passen könnte.",
+  s6: "Lies oder hör die Geschichte (🔊). Manchmal passen zwei Gefühle zugleich: Tippe das Paar an. Oder wähle die Antwort, die zur Stimmung passt.",
+};
+
+const ZEICHNE = {
+  gesicht(ctx, a, gs) {
+    const loesung = istGefuehl("Das Kind", a.gefuehl);
+    ctx.tipp(["Schau das Gesicht genau an: Mund, Augen, Augenbrauen.", "Mach das Gesicht nach. Wie fühlt sich das an?", GESICHT_TIPP[a.gefuehl]]);
+    gs.append(el("div", { class: "frage", text: "Wie fühlt sich das Kind?" }), el("div", { class: "gs-gesicht", "aria-hidden": "true", text: a.gesicht }));
+    LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: gefuehlInhalt, breite: 150, loesung, lob: waehle(LOB),
+      hinweis: "Schau nochmal genau auf den Mund und die Augen." }).classList.add("gs-wahl");
+  },
+
+  bild(ctx, a, gs) {
+    const loesung = `${a.richtig.text} ${a.richtig.bild}`;
+    ctx.tipp(["Schau zuerst auf das Gesicht: Wie geht es dem Kind?", "Stell dir vor, dir passiert das Bild. Welches Gesicht machst du dann?", GESICHT_TIPP[a.gefuehl]]);
+    gs.append(el("div", { class: "frage", text: "Was ist passiert?" }), el("div", { class: "gs-gesicht", "aria-hidden": "true", text: a.gesicht }));
+    LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: b => ({ bild: b.bild, text: b.text }), breite: 150, loesung, lob: waehle(LOB),
+      hinweis: "Schau auf das Gesicht: Was macht man bei so einem Gesicht? Was ist da wohl passiert?" }).classList.add("gs-wahl");
+  },
+
+  satz(ctx, a, gs) {
+    const loesung = istGefuehl(a.wer, a.gefuehl);
+    ctx.tipp([`Achte auf die Wörter, die sagen, was ${a.wer} tut oder sagt.`, "Stell dir vor, dir passiert das: Wie wäre das für dich?", SIGNAL_TIPP[a.gefuehl]]);
+    gs.append(el("div", { class: "frage", text: `Wie fühlt sich ${a.wer}?` }), el("div", { class: "satz", text: a.satz }), hoerKnopf(a.satz));
+    LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: gefuehlInhalt, breite: 150, loesung, lob: waehle(LOB),
+      hinweis: `Hör den Satz nochmal an (🔊). Was tut ${a.wer}? Was sagt ${a.wer}?` }).classList.add("gs-wahl");
+    // Vorsprechen kurz nach dem Zeichnen: Liest die Eule die Frage automatisch vor, tut sie das nach 300 ms;
+    // unser Satz käme sonst nicht durch (wie im Hör-Reporter). Ohne Stimme bleibt der Satz sichtbar.
+    setTimeout(() => { if (ctx.flaeche.contains(gs)) LS.sprich(a.satz, "de"); }, 450);
+  },
+
+  situation(ctx, a, gs) {
+    const loesung = istGefuehl(a.wer, a.gefuehl);
+    ctx.tipp([`Achte auf die Wörter, die sagen, was passiert ist und was ${a.wer} tut.`, "Stell dir vor, dir passiert das: Wie wäre das für dich?", a.tipp]);
+    gs.append(el("div", { class: "frage", text: `Wie fühlt sich ${a.wer}?` }), el("div", { class: "satz", text: a.text }), hoerKnopf(a.text));
+    LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: gefuehlInhalt, breite: 150, loesung, lob: waehle(LOB),
+      hinweis: `Stell dir vor, das passiert dir. Wie wäre das für dich? Lies nochmal, was ${a.wer} erlebt.` }).classList.add("gs-wahl");
+  },
+
+  koerper(ctx, a, gs) {
+    const loesung = istGefuehl(a.wer, a.gefuehl);
+    ctx.tipp([`Achte auf die Wörter, die sagen, was der Körper von ${a.wer} tut.`, "Mach es nach und spür hinein: Was fühlst du dabei?", "Stell dir vor, dir geht es gerade so: Was ist wohl passiert?"]);
+    gs.append(el("div", { class: "frage", text: `Wie fühlt sich ${a.wer}?` }), el("div", { class: "satz", text: a.satz }), hoerKnopf(a.satz));
+    LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: gefuehlInhalt, breite: 150, loesung, lob: waehle(LOB),
+      hinweis: "Was macht der Körper? Mach es nach und spür, welches Gefühl dazu passt." }).classList.add("gs-wahl");
+  },
+
+  gespraech(ctx, a, gs) {
+    const g = GEFUEHL[a.gefuehl];
+    const loesung = `${istGefuehl(a.wer, a.gefuehl)} · ${a.hilfe.richtig}`;
+    ctx.loesung(loesung);
+    ctx.schritte(1); // Schritt 1 (die Stimmung); Schritt 2 zählt LS.auswahl
+    ctx.tipp([`Achte auf die Wörter von ${a.wer}: Was sagt ${a.wer} über sich?`, `Stell dir vor, du bist ${a.wer}: Wie wäre das für dich?`, "Danach: Was würde dir in so einem Moment guttun?"]);
+    const schritt = el("p", { class: "gs-schritt", text: "1. Die Stimmung" });
+    const frage = el("div", { class: "frage", text: `Wie fühlt sich ${a.wer}?` });
+    const rede = el("div", { class: "satz gs-rede" },
+      el("p", {}, el("b", { text: `${a.a[0]}: ` }), a.a[1]),
+      el("p", {}, el("b", { text: `${a.b[0]}: ` }), a.b[1]));
+    const erledigt = el("div", { class: "gs-erledigt", hidden: "" });
+    gs.append(schritt, frage, rede, hoerKnopf(`${a.a[0]} sagt: ${a.a[1]} ${a.b[0]} antwortet: ${a.b[1]}`), erledigt);
+
+    // Schritt 2: Was könnte helfen (oder: was passt jetzt)?
+    const schrittHilfe = () => {
+      schritt.textContent = g.positiv ? "2. Was passt jetzt?" : "2. Was hilft jetzt?";
+      frage.textContent = g.positiv ? `Was passt jetzt zu ${a.wer}?` : `Was könnte ${a.wer} jetzt helfen?`;
+      erledigt.hidden = false;
+      erledigt.textContent = `✓ ${a.wer} ist ${g.wort} ${g.bild}`;
+      LS.auswahl(ctx, { optionen: a.hilfe.optionen, richtig: a.hilfe.richtig, breite: 300, loesung, lob: waehle(["Das tut gut!", "Genau das hilft!", "So fühlt sich jemand verstanden!"]),
+        hinweis: `Das ist nett, aber es passt nicht zu dem, was ${a.wer} gerade fühlt. Was braucht ${a.wer} jetzt?` }).classList.add("gs-wahl", "gs-text");
+    };
+
+    // Schritt 1: eigene Knöpfe, weil die Aufgabe danach weitergeht (LS.auswahl würde sie beenden).
+    const wahl = el("div", { class: "wahl gs-wahl" });
+    wahl.style.setProperty("--wahl-breite", "150px");
+    for (const id of a.optionen) {
+      const k = el("button", { type: "button", class: "wahl-knopf" }, el("span", { class: "bild", text: GEFUEHL[id].bild }), el("span", { text: GEFUEHL[id].wort }));
+      k.addEventListener("click", () => {
+        if (ctx.vorbei() || k.disabled || k.classList.contains("gewaehlt")) return;
+        if (id === a.gefuehl) {
+          k.classList.add("richtig");
+          LS.ton("tipp");
+          wahl.remove();
+          schrittHilfe();
+          return;
+        }
+        k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+        ctx.falsch(`Lies nochmal, was ${a.wer} antwortet. Welche Wörter zeigen, wie es ${a.wer} geht?`, loesung);
+        if (ctx.vorbei()) wahl.querySelectorAll("button").forEach(b => { b.disabled = true; });
+      });
+      wahl.append(k);
+    }
+    ctx.flaeche.append(wahl);
+  },
+
+  paar(ctx, a, gs) {
+    const loesung = `${paarInhalt(a.richtig).text} ${paarInhalt(a.richtig).bild}`;
+    ctx.tipp(["Die Geschichte hat zwei Seiten. Achte auf Wörter wie „aber“ und „trotzdem“.", "Stell dir vor, dir passiert das: Was fühlst du zuerst, was danach?", a.tipp]);
+    gs.append(el("div", { class: "frage", text: "Welche zwei Gefühle passen zur Geschichte?" }), el("div", { class: "satz", text: a.text }), hoerKnopf(a.text));
+    LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: paarInhalt, breite: 170, loesung, lob: waehle(["Beide Seiten gespürt!", "Zwei Gefühle, richtig erkannt!", "Ein feines Radar!"]),
+      hinweis: "Es sind zwei Gefühle zugleich. Passen wirklich beide zur Geschichte?" }).classList.add("gs-wahl", "gs-paar");
+  },
+
+  reaktion(ctx, a, gs) {
+    const loesung = a.richtig;
+    ctx.tipp([`Finde zuerst heraus, wie sich ${a.wer} fühlt: Achte auf die Wörter und darauf, wie ${a.wer} spricht.`, `Stell dir vor, du wärst ${a.wer}: Welche Antwort würde dir guttun?`, `Eine passende Antwort geht auf das ein, was ${a.wer} erzählt — nicht auf etwas anderes.`]);
+    gs.append(el("div", { class: "frage", text: "Welche Antwort passt zur Stimmung?" }), el("div", { class: "satz", text: a.text }), hoerKnopf(a.text));
+    LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 300, loesung, lob: waehle(["Das passt zur Stimmung!", "So fühlt sich jemand verstanden!", "Eine freundliche Antwort!"]),
+      hinweis: `Wie fühlt sich ${a.wer} gerade? Deine Antwort sollte dazu passen und auf das eingehen, was ${a.wer} erzählt.` }).classList.add("gs-wahl", "gs-text");
+  },
+};
+
+const ANSAGE = {
+  s1: "Schau das Gesicht genau an. Wie fühlt sich das Kind? Tippe das passende Bild an.",
+  s2: "Hör gut zu! Mit 🔊 hörst du den Satz nochmal. Dann tippst du das Gefühl an.",
+  s3: "Lies oder hör genau hin. Wie fühlt sich das Kind? Tippe das Gefühl an.",
+  s4: "Jetzt sind die Gefühle feiner. Achte darauf, wer in der Frage gemeint ist.",
+  s5: "Zuerst die Stimmung, dann: Was könnte jetzt helfen?",
+  s6: "Endgegner! Manchmal fühlt man zwei Dinge zugleich. Und: Welche Antwort passt zur Stimmung?",
+};
+
+LS.spiel({
+  id: ID,
+  einleitung: "Schalte dein Gefühle-Radar ein! Schau auf Gesichter, hör auf Sätze und finde heraus, wie sich die Kinder fühlen. Tippe das passende Gefühl an.",
+  hilfe: stufe => HILFE[stufe] || HILFE.s3,
+  anzahl: 6,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    if (ctx.nr === 0) ctx.sag(ANSAGE[ctx.stufe]);
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (p.arten.length > 1) ctx.serie("art", a.art);
+    ctx.kennung(a.kennung);
+    const gs = el("div", { class: "gs" });
+    ctx.flaeche.append(gs);
+    ZEICHNE[a.art](ctx, a, gs);
+  },
+});
+</script>
+</body>
+</html>

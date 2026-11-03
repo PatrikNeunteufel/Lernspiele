@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auge-Entdecker</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .ae .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .ae .frage b { color: var(--knopf); }
+  .ae-satz {
+    background: var(--karte); border: 3px solid var(--rand); border-radius: 18px; padding: 12px 16px; margin: 0 auto 12px;
+    max-width: 640px; text-align: center; font-size: clamp(19px, 4.4vw, 26px); line-height: 1.45; font-weight: 700;
+  }
+  .ae-bild { display: block; width: 100%; max-width: 520px; margin: 0 auto 12px; touch-action: manipulation; user-select: none; }
+  .ae-bild.ae-klein { max-width: 240px; margin: 0 auto; }
+  .ae-bild.ae-antippen .ae-teil { cursor: pointer; }
+  .ae-bild text { font-family: var(--schrift); font-weight: 800; fill: var(--text-leise); font-size: 14px; text-anchor: middle; pointer-events: none; }
+  .ae-bild .ae-halo { fill: none; stroke: var(--deko-4); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+  .ae-bild .ae-halo-dick { stroke-width: 24; }
+  .ae-bild .ae-markiert .ae-halo { opacity: 1; animation: ae-blink 1s ease-in-out infinite; }
+  .ae-bild .ae-daneben .ae-halo { opacity: 1; stroke: var(--hinweis); animation: none; }
+  .ae-bild .ae-richtig .ae-halo { opacity: 1; stroke: var(--gut); animation: none; }
+  .ae-bild .ae-treffer { fill: transparent; stroke: transparent; pointer-events: all; }
+  .ae-bild .ae-treffer-strich { fill: none; stroke: transparent; pointer-events: stroke; stroke-linecap: round; }
+  .ae-bild .ae-pupille { transition: r .6s ease; }
+  @keyframes ae-blink { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+  .ae .wahl-knopf { font-size: clamp(16px, 3.6vw, 22px); overflow-wrap: anywhere; }
+  .ae .wahl-knopf small { font-size: 13px; }
+  .ae .wahl-knopf svg { width: 100%; max-width: 220px; margin: 0 auto; display: block; }
+  .ae .korb-karte { padding: 10px 18px; }
+  .ae .korb-karte b { font-size: clamp(17px, 4vw, 22px); line-height: 1.4; display: block; max-width: 560px; }
+  .ae .korb-karte .bild { font-size: clamp(40px, 9vw, 56px); }
+  .ae .korb-knopf { font-size: clamp(15px, 3.4vw, 20px); overflow-wrap: anywhere; }
+  .ae .ablage > span { font-size: clamp(15px, 3.4vw, 20px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>👁️ Auge-Entdecker</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="teile.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.4.3 (Sehen und Licht), Basisklasse 3. Wortlaut (sg.lehrplan.ch, 2026-11-03):
+//   c „können die äusseren Merkmale des Auges benennen und die jeweiligen Vorgänge und Funktionen beschreiben.
+//      Auge: Augenbraue, Augenlid mit Wimpern, Tränenflüssigkeit, Hornhaut, Bindehaut“
+//   e „können den prinzipiellen Aufbau des Auges beschreiben und ein einfaches Augenmodell herstellen“
+// Das Kind sieht ein gezeichnetes Auge (SVG, kein Bild aus einer Datei) und tippt Teile an, benennt
+// markierte Teile, ordnet Aufgaben zu und beobachtet die Pupille bei hell und dunkel.
+//   s1 2. Klasse (Vorstufe zu NMG.4.3.c — Zuordnung eine Annahme, lesearm): „Tipp auf die Wimpern!“ mit
+//      Augenbraue, Wimpern, Pupille und Augenlid.
+//   s2 3. Klasse, leichter (Vorstufe zu c, Annahme): Ein Teil leuchtet, der Name wird aus drei gewählt;
+//      dazu Iris und das Weisse.
+//   s3 Klassenziel (NMG.4.3.c): alle äusseren Teile antippen oder benennen — mit Tränenflüssigkeit,
+//      Hornhaut und Bindehaut; dazu die Pupille bei hell und dunkel (zwei Augen, grösser/kleiner).
+//   s4 schwerer (NMG.4.3.c, „Vorgänge und Funktionen“): Wozu ist das da? Aufgabe → Teil in Körbe.
+//   s5 4. Klasse (NMG.4.3.e, Aufbau des Auges): Schnitt von der Seite — Hornhaut, Linse, Glaskörper,
+//      Netzhaut, Sehnerv antippen oder benennen; dazu Aussagen zum Augenschutz: stimmt / stimmt nicht.
+//   s6 Königsstufe (über e hinaus): Weg des Lichts ordnen (Hornhaut → Pupille → Linse → Netzhaut →
+//      Sehnerv → Gehirn) und Warum-Fragen.
+// Abgrenzung: Körper-Puzzle (Basisklasse 2) fragt nur „Womit siehst du?“ → Auge; Braille-Finger (5) übt
+// die Punktschrift; Blutkreislauf-Lotse (5) das Herz. Hier geht es allein um das Auge. Inhalte in teile.js.
+// Die Bindehaut liegt über dem Weissen: Beide werden auf derselben Fläche angetippt, darum wird die
+// Bindehaut nie als markiertes Teil benannt (teile.js, Feld ziel/benennbar).
+
+const { waehle, mische, el, zufall } = LS;
+const ID = "auge-entdecker";
+const SVGNS = "http://www.w3.org/2000/svg";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["teile"]);
+const TEILE = FREI.has("teile") ? AUGE_TEILE : [];
+const TEIL = Object.fromEntries(TEILE.map(t => [t.id, t]));
+const PUPILLE_SAETZE = FREI.has("teile") ? AUGE_PUPILLE : [];
+const AUGEN_FRAGEN = FREI.has("teile") ? AUGE_AUGEN : [];
+const AUSSAGEN = FREI.has("teile") ? AUGE_AUSSAGEN : [];
+const WARUM = FREI.has("teile") ? AUGE_WARUM : [];
+const LICHTWEG = FREI.has("teile") ? AUGE_LICHTWEG : [];
+
+const imBild = (id, bild) => !!TEIL[id] && TEIL[id].bild.includes(bild);
+const ziel = id => TEIL[id]?.ziel || id;
+const benennbar = id => !!TEIL[id] && TEIL[id].benennbar !== false;
+const AUSSEN = TEILE.filter(t => t.gruppe === "aussen").map(t => t.id);
+const INNEN = TEILE.filter(t => t.bild.includes("schnitt")).map(t => t.id);
+
+// Farbe der Iris (Deko-Farben, keine Stellenfarben) und Grösse der Pupille (Radius im Bild).
+const FARBEN = ["var(--deko-5)", "var(--deko-6)", "var(--deko-3)"];
+const PUPILLEN = { hell: 14, mittel: 22, dunkel: 32 };
+
+// Teilstücke des Lichtwegs (Stufe 6): Anfang und Länge in AUGE_LICHTWEG.
+const WEG_STUECKE = {
+  ganz: [0, 7], ohneGelee: null, vorn: [0, 4], mitte: [1, 4], hinten: [3, 4],
+};
+
+const STUFE = {
+  s1: { arten: ["tippen"], teile: ["braue", "wimpern", "pupille", "lid"], pupillen: ["mittel", "dunkel"], bild: "auge" },
+  s2: { arten: ["benennen"], teile: ["braue", "wimpern", "pupille", "lid", "iris", "weiss"], optionen: 3, bild: "auge" },
+  s3: { arten: ["tippen", "benennen", "pupille"], teile: AUSSEN, optionen: 3, bild: "auge" },
+  s4: { arten: ["koerbe"], teile: AUSSEN, koerbe: 4, bild: "auge" },
+  s5: { arten: ["tippen", "benennen", "aussage"], teile: INNEN, optionen: 3, bild: "schnitt" },
+  s6: { arten: ["lichtweg", "warum"], teile: [], bild: "schnitt" },
+};
+
+const gross = s => s.charAt(0).toUpperCase() + s.slice(1);
+const nom = id => `${TEIL[id].artikel} ${TEIL[id].name}`;
+const akk = id => `${TEIL[id].artikel === "der" ? "den" : TEIL[id].artikel} ${TEIL[id].name}`;
+/** „Es fängt …“ / „Sie fangen …“ — der Hauptsatz des Teils ohne seinen Namen. */
+const tut = id => `${TEIL[id].mz ? "Sie" : "Es"} ${TEIL[id].aufgaben[0]}.`;
+const lobFuer = id => `Genau! ${gross(nom(id))} ${TEIL[id].aufgaben[0]}.`;
+
+/** Andere Teile zur Wahl: nicht dasselbe, nicht auf derselben Fläche (Bindehaut und das Weisse). */
+const andere = (teil, pool) => mische(pool.filter(id => id !== teil && ziel(id) !== ziel(teil)));
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  if (!TEILE.length) return null;
+  const art = waehle(p.arten);
+  const basis = { stufe, art, bild: p.bild, farbe: zufall(0, FARBEN.length - 1), pupille: waehle(p.pupillen || Object.keys(PUPILLEN)) };
+  switch (art) {
+    case "tippen": {
+      const teil = waehle(p.teile);
+      return { ...basis, teil, ziel: ziel(teil) };
+    }
+    case "benennen": {
+      const teil = waehle(p.teile.filter(benennbar));
+      return { ...basis, teil, optionen: mische([teil, ...andere(teil, p.teile.filter(benennbar)).slice(0, p.optionen - 1)]) };
+    }
+    case "koerbe": {
+      const teil = waehle(p.teile);
+      const satz = zufall(0, TEIL[teil].aufgaben.length - 1);
+      return { ...basis, teil, satz, optionen: mische([teil, ...andere(teil, p.teile).slice(0, p.koerbe - 1)]) };
+    }
+    case "pupille": {
+      if (Math.random() < 0.4) {
+        const [frage, gesucht] = waehle(AUGEN_FRAGEN);
+        const links = waehle(["gross", "klein"]);
+        const rechts = links === "gross" ? "klein" : "gross";
+        return { ...basis, form: "augen", frage, gesucht, links, rechts, richtig: links === gesucht ? "links" : "rechts" };
+      }
+      const [satz, gesucht] = waehle(PUPILLE_SAETZE);
+      return { ...basis, form: "wird", satz, gesucht, richtig: gesucht === "gross" ? "grösser" : "kleiner", optionen: mische(["grösser", "kleiner"]) };
+    }
+    case "aussage": {
+      const [text, richtig, tipp] = waehle(AUSSAGEN);
+      return { ...basis, text, richtig, tipp };
+    }
+    case "lichtweg": {
+      const stueck = waehle(Object.keys(WEG_STUECKE));
+      const reihe = stueck === "ohneGelee" ? LICHTWEG.filter(id => id !== "glaskoerper") : LICHTWEG.slice(WEG_STUECKE[stueck][0], WEG_STUECKE[stueck][0] + WEG_STUECKE[stueck][1]);
+      return { ...basis, stueck, reihe };
+    }
+    case "warum": {
+      const [frage, richtig, f1, f2, tipp] = waehle(WARUM);
+      return { ...basis, frage, richtig, tipp, optionen: mische([richtig, f1, f2]) };
+    }
+  }
+  return null;
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Art ${a.art} nicht in ${stufe}`);
+  if (!(a.farbe >= 0 && a.farbe < FARBEN.length) || !PUPILLEN[a.pupille]) m.push("Farbe oder Pupille ungültig");
+  if (p.pupillen && !p.pupillen.includes(a.pupille)) m.push(`Pupille ${a.pupille} nicht in ${stufe}`);
+  const kennt = id => !!TEIL[id];
+  if (["tippen", "benennen", "koerbe"].includes(a.art)) {
+    if (!kennt(a.teil)) m.push(`unbekanntes Teil ${a.teil}`);
+    else {
+      if (!p.teile.includes(a.teil)) m.push(`Teil ${a.teil} nicht in ${stufe}`);
+      if (!imBild(a.teil, a.bild)) m.push(`Teil ${a.teil} nicht im Bild ${a.bild}`);
+    }
+  }
+  if (a.art === "tippen" && (!kennt(a.ziel) || !imBild(a.ziel, a.bild) || a.ziel !== ziel(a.teil))) m.push("Tippziel fehlt im Bild");
+  if (a.art === "benennen" || a.art === "koerbe") {
+    const o = a.optionen || [];
+    const soll = a.art === "benennen" ? p.optionen : p.koerbe;
+    if (o.length !== soll) m.push(`${o.length} statt ${soll} Optionen`);
+    if (new Set(o).size !== o.length) m.push("doppelte Optionen");
+    if (o.filter(x => x === a.teil).length !== 1) m.push("nicht genau eine richtige Antwort");
+    if (o.some(x => !kennt(x))) m.push("unbekannte Option");
+    if (o.some(x => x !== a.teil && ziel(x) === ziel(a.teil))) m.push("zwei Optionen für dieselbe Fläche");
+    if (a.art === "benennen" && !benennbar(a.teil)) m.push(`${a.teil} ist nicht benennbar`);
+    if (a.art === "benennen" && o.some(x => !benennbar(x))) m.push("nicht benennbares Teil als Option");
+    if (a.art === "koerbe" && !(TEIL[a.teil].aufgaben || [])[a.satz]) m.push("Aufgabensatz fehlt");
+    if (a.art === "koerbe" && o.some(x => x !== a.teil && (TEIL[x].aufgaben || []).includes(TEIL[a.teil].aufgaben[a.satz]))) m.push("Satz passt auf zwei Körbe");
+  }
+  if (a.art === "pupille") {
+    if (a.form === "augen") {
+      const eintrag = AUGEN_FRAGEN.find(f => f[0] === a.frage);
+      if (!eintrag) m.push("Augen-Frage nicht in der Liste");
+      else if (eintrag[1] !== a.gesucht) m.push("gesuchte Pupille passt nicht zur Frage");
+      if (!["gross", "klein"].includes(a.links) || !["gross", "klein"].includes(a.rechts) || a.links === a.rechts) m.push("beide Augen gleich");
+      if ((a.richtig === "links" ? a.links : a.rechts) !== a.gesucht) m.push("Pupillengrösse falsch zugeordnet");
+      // Dunkel = grosse Pupille, hell = kleine: steht so in der Liste.
+      if (/Dunkeln|dunklen/.test(a.frage) && a.gesucht !== "gross") m.push("im Dunkeln muss die Pupille gross sein");
+      if (/Hellen|helle/.test(a.frage) && a.gesucht !== "klein") m.push("im Hellen muss die Pupille klein sein");
+    } else if (a.form === "wird") {
+      const eintrag = PUPILLE_SAETZE.find(s => s[0] === a.satz);
+      if (!eintrag) m.push("Pupillen-Satz nicht in der Liste");
+      else if (eintrag[1] !== a.gesucht) m.push("gesuchte Grösse passt nicht zum Satz");
+      if (a.richtig !== (a.gesucht === "gross" ? "grösser" : "kleiner")) m.push("Antwort passt nicht zur Grösse");
+      if ([...a.optionen].sort().join() !== "grösser,kleiner") m.push("Optionen grösser/kleiner fehlen");
+      if (/Dunkeln|dunklen|Licht aus|löschst/.test(a.satz) && a.gesucht !== "gross") m.push("im Dunkeln wird die Pupille grösser");
+      if (/Hellen|Sonne|Taschenlampe|Vorhang/.test(a.satz) && a.gesucht !== "klein") m.push("im Hellen wird die Pupille kleiner");
+    } else m.push("unbekannte Pupillen-Form");
+  }
+  if (a.art === "aussage") {
+    if (typeof a.richtig !== "boolean") m.push("Aussage ohne stimmt/stimmt nicht");
+    if (!AUSSAGEN.some(s => s[0] === a.text && s[1] === a.richtig)) m.push("Aussage nicht in der Liste");
+    if (!a.tipp) m.push("Aussage ohne Tipp");
+  }
+  if (a.art === "lichtweg") {
+    if (!(a.reihe?.length >= 4)) m.push("Weg zu kurz");
+    else {
+      if (a.reihe.some(id => !kennt(id))) m.push("unbekannte Station");
+      const lagen = a.reihe.map(id => LICHTWEG.indexOf(id));
+      if (lagen.some((l, i) => l < 0 || (i && l <= lagen[i - 1]))) m.push("Weg nicht in der Reihenfolge des Lichts");
+      if (new Set(a.reihe).size !== a.reihe.length) m.push("Station doppelt");
+    }
+  }
+  if (a.art === "warum") {
+    const eintrag = WARUM.find(w => w[0] === a.frage);
+    if (!eintrag) m.push("Warum-Frage nicht in der Liste");
+    else if (eintrag[1] !== a.richtig) m.push("richtige Antwort passt nicht zur Frage");
+    if (a.optionen.length !== 3 || new Set(a.optionen).size !== 3 || a.optionen.filter(o => o === a.richtig).length !== 1) m.push("Antworten zur Wahl falsch");
+  }
+  if (/ß/.test(JSON.stringify(a))) m.push("ß im Text");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+function svgEl(tag, attr = {}, ...kinder) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attr)) if (v != null) e.setAttribute(k, v);
+  for (const k of kinder) if (k != null) e.append(k);
+  return e;
+}
+let bildZaehler = 0;
+
+/** Punkt auf der Kurve M p0 Q p1 p2 bei t. */
+const quad = (p0, p1, p2, t) => [
+  (1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0],
+  (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1],
+];
+
+/**
+ * Auge von vorn. Liefert { svg, teile: Map id → g, pupille(r) }.
+ * Jedes Teil ist eine <g data-teil> mit Halo (leuchtet bei ae-markiert), Form und unsichtbarer Trefferfläche
+ * (gross genug für den Finger; Augenbraue und Wimpern als breite Striche dahinter).
+ */
+function augeBild({ farbe = 0, pupille = "mittel", antippen = false, klein = false } = {}) {
+  const svg = svgEl("svg", { viewBox: "0 0 400 320", class: `ae-bild${antippen ? " ae-antippen" : ""}${klein ? " ae-klein" : ""}`, role: "img", "aria-label": "Ein Auge" });
+  const clipId = `ae-clip-${++bildZaehler}`;
+  const OEFFNUNG = "M40 190 Q200 70 360 190 Q200 310 40 190 Z";
+  svg.append(svgEl("defs", {}, svgEl("clipPath", { id: clipId }, svgEl("path", { d: OEFFNUNG }))),
+    svgEl("rect", { x: 0, y: 0, width: 400, height: 320, rx: 36, fill: "var(--himmel-unten)" }));
+  const teile = new Map();
+  const teil = (id, attr, ...kinder) => {
+    const g = svgEl("g", { class: "ae-teil", "data-teil": id, ...attr }, ...kinder);
+    svg.append(g);
+    teile.set(id, g);
+    return g;
+  };
+  // Augenbraue
+  const BRAUE = "M60 82 Q200 16 345 72";
+  teil("braue", {}, svgEl("path", { class: "ae-halo ae-halo-dick", d: BRAUE }),
+    svgEl("path", { d: BRAUE, fill: "none", stroke: "var(--deko-7)", "stroke-width": 16, "stroke-linecap": "round" }),
+    svgEl("path", { class: "ae-treffer-strich", d: BRAUE, "stroke-width": 38 }));
+  // Das Weisse (Lederhaut, mit der Bindehaut darüber)
+  teil("weiss", {}, svgEl("path", { class: "ae-halo", d: OEFFNUNG }),
+    svgEl("path", { d: OEFFNUNG, fill: "var(--karte)", stroke: "var(--deko-7)", "stroke-width": 3 }),
+    svgEl("path", { class: "ae-treffer", d: OEFFNUNG }));
+  // Iris
+  teil("iris", { "clip-path": `url(#${clipId})` }, svgEl("circle", { class: "ae-halo", cx: 200, cy: 190, r: 58 }),
+    svgEl("circle", { cx: 200, cy: 190, r: 58, fill: FARBEN[farbe] }),
+    svgEl("circle", { cx: 200, cy: 190, r: 46, fill: "none", stroke: "var(--karte)", "stroke-opacity": .25, "stroke-width": 8 }),
+    svgEl("circle", { class: "ae-treffer", cx: 200, cy: 190, r: 58 }));
+  // Pupille
+  const r = PUPILLEN[pupille] || PUPILLEN.mittel;
+  const pupilleHalo = svgEl("circle", { class: "ae-halo", cx: 200, cy: 190, r });
+  const pupilleForm = svgEl("circle", { class: "ae-pupille", cx: 200, cy: 190, r, fill: "var(--text)" });
+  const pupilleTreffer = svgEl("circle", { class: "ae-treffer", cx: 200, cy: 190, r: Math.max(r, 20) });
+  teil("pupille", {}, pupilleHalo, pupilleForm, pupilleTreffer);
+  // Hornhaut: durchsichtig vorn über Iris und Pupille — ein leichter Rand und ein Glanz.
+  teil("hornhaut", { "clip-path": `url(#${clipId})` }, svgEl("circle", { class: "ae-halo", cx: 200, cy: 190, r: 68 }),
+    svgEl("circle", { cx: 200, cy: 190, r: 68, fill: "var(--karte)", "fill-opacity": .08, stroke: "var(--himmel-oben)", "stroke-width": 5 }),
+    svgEl("ellipse", { cx: 178, cy: 164, rx: 13, ry: 8, fill: "var(--karte)", "fill-opacity": .9 }),
+    svgEl("circle", { class: "ae-treffer-strich", cx: 200, cy: 190, r: 70, "stroke-width": 20 }),
+    svgEl("ellipse", { class: "ae-treffer", cx: 178, cy: 164, rx: 19, ry: 13 }));
+  // Augenlid oben und unten (eine Gruppe)
+  const LID_OBEN = "M40 190 Q200 30 360 190 Q200 70 40 190 Z";
+  const LID_UNTEN = "M40 190 Q200 350 360 190 Q200 310 40 190 Z";
+  teil("lid", {}, svgEl("path", { class: "ae-halo", d: LID_OBEN }), svgEl("path", { class: "ae-halo", d: LID_UNTEN }),
+    svgEl("path", { d: LID_OBEN, fill: "var(--hinweis-hell)", stroke: "var(--deko-7)", "stroke-width": 3 }),
+    svgEl("path", { d: LID_UNTEN, fill: "var(--hinweis-hell)", stroke: "var(--deko-7)", "stroke-width": 3 }),
+    svgEl("path", { class: "ae-treffer-strich", d: "M40 190 Q200 50 360 190", "stroke-width": 34 }),
+    svgEl("path", { class: "ae-treffer-strich", d: "M40 190 Q200 330 360 190", "stroke-width": 34 }));
+  // Wimpern: vom oberen Lidrand nach aussen, fächerförmig
+  const p0 = [40, 190], p1 = [200, 30], p2 = [360, 190];
+  const wimpern = [];
+  for (let i = 1; i <= 9; i++) {
+    const [x, y] = quad(p0, p1, p2, i / 10);
+    const dx = x - 200, dy = y - 190;
+    const l = Math.hypot(dx, dy);
+    wimpern.push(`M${x.toFixed(1)} ${y.toFixed(1)} L${(x + dx / l * 26).toFixed(1)} ${(y + dy / l * 26).toFixed(1)}`);
+  }
+  const WIMPERN = wimpern.join(" ");
+  teil("wimpern", {}, svgEl("path", { class: "ae-halo ae-halo-dick", d: WIMPERN }),
+    svgEl("path", { d: WIMPERN, fill: "none", stroke: "var(--text)", "stroke-width": 4, "stroke-linecap": "round" }),
+    svgEl("path", { class: "ae-treffer-strich", d: "M50 170 Q200 0 350 170", "stroke-width": 36 }));
+  // Tränenflüssigkeit: ein Tropfen innen im Augenwinkel
+  const TROPFEN = "M58 178 C 58 178, 45 196, 45 204 A 13 13 0 0 0 71 204 C 71 196, 58 178, 58 178 Z";
+  teil("traene", {}, svgEl("path", { class: "ae-halo", d: TROPFEN }),
+    svgEl("path", { d: TROPFEN, fill: "var(--himmel-oben)", stroke: "var(--knopf)", "stroke-width": 2.5 }),
+    svgEl("circle", { class: "ae-treffer", cx: 58, cy: 198, r: 24 }));
+  return {
+    svg, teile,
+    pupille(neu) { pupilleForm.setAttribute("r", neu); pupilleHalo.setAttribute("r", neu); pupilleTreffer.setAttribute("r", Math.max(neu, 20)); },
+  };
+}
+
+/** Auge von der Seite aufgeschnitten, das Licht kommt von links. Liefert { svg, teile }. */
+function schnittBild({ farbe = 0, antippen = false } = {}) {
+  const svg = svgEl("svg", { viewBox: "0 0 400 300", class: `ae-bild${antippen ? " ae-antippen" : ""}`, role: "img", "aria-label": "Ein Auge von der Seite, aufgeschnitten" });
+  svg.append(svgEl("rect", { x: 0, y: 0, width: 400, height: 300, rx: 36, fill: "var(--himmel-unten)" }));
+  // Licht von links
+  for (const y of [120, 150, 180]) {
+    svg.append(svgEl("line", { x1: 12, y1: y, x2: 72, y2: y, stroke: "var(--hinweis)", "stroke-width": 4, "stroke-linecap": "round" }),
+      svgEl("polygon", { points: `72,${y - 7} 86,${y} 72,${y + 7}`, fill: "var(--hinweis)" }));
+  }
+  svg.append(svgEl("text", { x: 44, y: 104 }, "Licht"));
+  // Augapfel (Lederhaut)
+  svg.append(svgEl("circle", { cx: 220, cy: 150, r: 112, fill: "var(--karte)", stroke: "var(--deko-7)", "stroke-width": 7 }));
+  // Strahlen im Auge: gebündelt auf die Netzhaut
+  svg.append(svgEl("path", { d: "M98 122 L152 122 L318 150 M98 178 L152 178 L318 150 M98 150 L318 150", fill: "none", stroke: "var(--hinweis)", "stroke-width": 2.5, "stroke-dasharray": "6 5" }));
+  const teile = new Map();
+  const teil = (id, ...kinder) => {
+    const g = svgEl("g", { class: "ae-teil", "data-teil": id }, ...kinder);
+    svg.append(g);
+    teile.set(id, g);
+    return g;
+  };
+  // Glaskörper: füllt das Innere
+  teil("glaskoerper", svgEl("circle", { class: "ae-halo", cx: 226, cy: 150, r: 96 }),
+    svgEl("circle", { cx: 226, cy: 150, r: 96, fill: "var(--himmel-oben)", "fill-opacity": .35 }),
+    svgEl("circle", { class: "ae-treffer", cx: 226, cy: 150, r: 96 }));
+  // Netzhaut: hinten innen an der Wand
+  const NETZ = "M262 59 A100 100 0 0 1 262 241";
+  teil("netzhaut", svgEl("path", { class: "ae-halo ae-halo-dick", d: NETZ }),
+    svgEl("path", { d: NETZ, fill: "none", stroke: "var(--deko-2)", "stroke-width": 9, "stroke-linecap": "round" }),
+    svgEl("path", { class: "ae-treffer-strich", d: NETZ, "stroke-width": 34 }));
+  // Sehnerv: hinten hinaus zum Gehirn
+  const NERV = "M322 134 Q360 138 394 148 L394 184 Q360 174 322 172 Z";
+  teil("sehnerv", svgEl("path", { class: "ae-halo", d: NERV }),
+    svgEl("path", { d: NERV, fill: "var(--deko-4)", stroke: "var(--deko-7)", "stroke-width": 3 }),
+    svgEl("rect", { class: "ae-treffer", x: 318, y: 122, width: 80, height: 72 }));
+  svg.append(svgEl("text", { x: 356, y: 212 }, "zum Gehirn →"));
+  // Hornhaut: durchsichtige Wölbung vorn
+  const HORN = "M132 78 Q72 150 132 222 Q118 150 132 78 Z";
+  teil("hornhaut", svgEl("path", { class: "ae-halo", d: HORN }),
+    svgEl("path", { d: HORN, fill: "var(--himmel-oben)", "fill-opacity": .7, stroke: "var(--knopf)", "stroke-width": 3 }),
+    svgEl("path", { class: "ae-treffer", d: HORN, stroke: "transparent", "stroke-width": 26 }));
+  // Iris als zwei Klappen, dazwischen die Pupille (Loch)
+  teil("iris", svgEl("rect", { class: "ae-halo", x: 128, y: 90, width: 12, height: 42, rx: 4 }), svgEl("rect", { class: "ae-halo", x: 128, y: 168, width: 12, height: 42, rx: 4 }),
+    svgEl("rect", { x: 128, y: 90, width: 12, height: 42, rx: 4, fill: FARBEN[farbe] }),
+    svgEl("rect", { x: 128, y: 168, width: 12, height: 42, rx: 4, fill: FARBEN[farbe] }),
+    svgEl("rect", { class: "ae-treffer", x: 122, y: 84, width: 24, height: 54 }),
+    svgEl("rect", { class: "ae-treffer", x: 122, y: 162, width: 24, height: 54 }));
+  // Linse hinter der Pupille
+  teil("linse", svgEl("ellipse", { class: "ae-halo", cx: 154, cy: 150, rx: 13, ry: 36 }),
+    svgEl("ellipse", { cx: 154, cy: 150, rx: 13, ry: 36, fill: "var(--himmel-oben)", stroke: "var(--knopf)", "stroke-width": 3 }),
+    svgEl("ellipse", { class: "ae-treffer", cx: 154, cy: 150, rx: 22, ry: 42 }));
+  return { svg, teile };
+}
+
+const bildFuer = (a, opt) => (a.bild === "schnitt" ? schnittBild({ farbe: a.farbe, ...opt }) : augeBild({ farbe: a.farbe, pupille: a.pupille, ...opt }));
+
+/** Kurz aufleuchten lassen, wo falsch getippt wurde. */
+function daneben(g) {
+  g.classList.remove("ae-daneben");
+  void g.getBoundingClientRect();
+  g.classList.add("ae-daneben");
+  setTimeout(() => g.classList.remove("ae-daneben"), 700);
+}
+
+/** Teil im Bild antippen: gesucht ist das Teil, die Fläche (ziel) zählt. */
+function tippAufgabe(ctx, a) {
+  const b = bildFuer(a, { antippen: true });
+  const loesung = `${gross(nom(a.teil))}: ${TEIL[a.teil].lage}`;
+  ctx.loesung(loesung);
+  ctx.schritte(1);
+  ctx.tipp([`Schau hier: ${TEIL[a.teil].lage}`, tut(a.teil), `So sieht es aus: ${TEIL[a.teil].aussehen}.`]);
+  const frage = el("div", { class: "frage", text: `👆 Tipp auf ${akk(a.teil)}!` });
+  ctx.flaeche.querySelector(".ae").append(frage, b.svg);
+  let fertig = false;
+  for (const [id, g] of b.teile) g.addEventListener("click", () => {
+    if (fertig || ctx.vorbei()) return;
+    if (id === a.ziel) { fertig = true; g.classList.add("ae-richtig"); ctx.richtig(lobFuer(a.teil)); return; }
+    daneben(g);
+    // Das angetippte Teil benennen ist erlaubt: Es ist nicht die Lösung.
+    ctx.falsch(`Das ist ${nom(id)}. Such weiter!`, loesung);
+    if (ctx.vorbei()) fertig = true;
+  });
+}
+
+/** Ein Teil leuchtet, der Name wird gewählt. */
+function benennAufgabe(ctx, a) {
+  const b = bildFuer(a, {});
+  b.teile.get(ziel(a.teil)).classList.add("ae-markiert");
+  const loesung = `${gross(nom(a.teil))}${TEIL[a.teil].zusatz ? ` (${TEIL[a.teil].zusatz})` : ""}`;
+  ctx.tipp([`Schau, wo es leuchtet: ${TEIL[a.teil].lage}`, tut(a.teil), `So sieht es aus: ${TEIL[a.teil].aussehen}.`]);
+  ctx.flaeche.querySelector(".ae").append(el("div", { class: "frage", text: "Wie heisst das Teil, das leuchtet?" }), b.svg);
+  LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.teil, breite: 160, loesung,
+    inhalt: id => ({ text: nom(id), klein: TEIL[id].zusatz }),
+    hinweis: id => `Nein, ${nom(id)} ist es nicht. Schau genau, wo es leuchtet: ${TEIL[a.teil].lage}`,
+    lob: lobFuer(a.teil),
+  });
+}
+
+/** Wozu ist das da? Aufgabe → Teil in Körbe. */
+function korbAufgabe(ctx, a) {
+  const satz = TEIL[a.teil].aufgaben[a.satz];
+  ctx.tipp(["Lies den Satz genau: Wo passiert das — oben, vorn, innen? Und was wird dabei gemacht?",
+    `Das gesuchte Teil: ${TEIL[a.teil].lage}`, `So sieht es aus: ${TEIL[a.teil].aussehen}.`]);
+  ctx.flaeche.querySelector(".ae").append(el("div", { class: "frage", text: "Welches Teil des Auges macht das?" }));
+  LS.koerbe(ctx, {
+    karte: { bild: "👁️", text: `… ${satz}.` },
+    koerbe: a.optionen, richtig: a.teil,
+    korbInhalt: id => ({ text: nom(id), klein: TEIL[id].zusatz }),
+    hinweis: id => `Nein, das ist nicht die Aufgabe von ${nom(id)}. Überleg: ${TEIL[a.teil].lage}`,
+    loesung: `${gross(nom(a.teil))} ${satz}.`,
+    lob: lobFuer(a.teil),
+  });
+}
+
+/** Pupille bei hell und dunkel: zwei Augen vergleichen oder grösser/kleiner sagen. */
+function pupillenAufgabe(ctx, a) {
+  ctx.serie("pupille", a.gesucht);
+  const wurzel = ctx.flaeche.querySelector(".ae");
+  const TIPPS = ["Die Pupille ist das dunkle Loch in der Mitte. Durch sie kommt das Licht ins Auge.",
+    "Im Dunkeln braucht das Auge mehr Licht, im Hellen weniger.", "Ein grosses Loch lässt mehr Licht hinein als ein kleines."];
+  ctx.tipp(TIPPS);
+  if (a.form === "augen") {
+    wurzel.append(el("div", { class: "frage", text: a.frage }));
+    const seite = w => (w === "links" ? a.links : a.rechts);
+    LS.auswahl(ctx, {
+      optionen: ["links", "rechts"], richtig: a.richtig, breite: 150,
+      loesung: `Das Auge mit der ${a.gesucht === "gross" ? "grossen" : "kleinen"} Pupille (${a.richtig}).`,
+      inhalt: w => augeBild({ farbe: a.farbe, pupille: seite(w) === "gross" ? "dunkel" : "hell", klein: true }).svg,
+      hinweis: "Schau auf das dunkle Loch in der Mitte: Wo ist es gross, wo klein? Und wie viel Licht soll hinein?",
+      lob: `Genau! ${a.gesucht === "gross" ? "Im Dunkeln ist die Pupille gross, damit mehr Licht hineinkommt." : "Im Hellen ist die Pupille klein, damit nicht zu viel Licht hineinkommt."}`,
+    });
+    return;
+  }
+  const b = augeBild({ farbe: a.farbe, pupille: "mittel" });
+  wurzel.append(el("div", { class: "frage", text: "Was passiert mit der Pupille?" }), el("div", { class: "ae-satz", text: a.satz }), b.svg);
+  LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.richtig, breite: 150,
+    loesung: `${a.satz.replace(" …", "")} ${a.richtig}.`,
+    inhalt: w => ({ bild: w === "grösser" ? "⚫" : "•", text: w }),
+    hinweis: "Denk an eine Taschenlampe: Wie viel Licht soll jetzt ins Auge — mehr oder weniger?",
+    lob: `Genau! ${a.gesucht === "gross" ? "Im Dunkeln wird die Pupille gross, damit mehr Licht hineinkommt." : "Im Hellen wird die Pupille klein, damit nicht zu viel Licht hineinkommt."}`,
+    beiRichtig: () => b.pupille(PUPILLEN[a.gesucht === "gross" ? "dunkel" : "hell"]),
+  });
+}
+
+/** Stimmt das? Aussage zum Auge und zum Augenschutz. */
+function aussageAufgabe(ctx, a) {
+  ctx.serie("stimmt", a.richtig ? "ja" : "nein");
+  ctx.tipp(["Lies den Satz langsam. Um welches Teil geht es, und was tut es wirklich?", a.tipp]);
+  ctx.flaeche.querySelector(".ae").append(el("div", { class: "frage", text: "Stimmt das?" }), el("div", { class: "ae-satz", text: a.text }));
+  LS.auswahl(ctx, {
+    optionen: [true, false], richtig: a.richtig, breite: 150,
+    loesung: `„${a.text}“ — das ${a.richtig ? "stimmt" : "stimmt nicht"}.`,
+    inhalt: w => ({ bild: w ? "✅" : "❌", text: w ? "Stimmt" : "Stimmt nicht" }),
+    hinweis: "Überleg noch einmal: Passt der Satz zu dem, was du über das Auge weisst?",
+    lob: a.richtig ? "Richtig, das ist so!" : "Richtig, so ist es nicht!",
+  });
+}
+
+/** Weg des Lichts ordnen. */
+function lichtwegAufgabe(ctx, a) {
+  const b = schnittBild({ farbe: a.farbe });
+  ctx.tipp(["Das Licht kommt von vorn ins Auge und wandert nach hinten, bis die Nachricht im Kopf ankommt.",
+    `Die erste Station — so sieht sie aus: ${TEIL[a.reihe[0]].aussehen}.`,
+    `Die letzte Station — so sieht sie aus: ${TEIL[a.reihe[a.reihe.length - 1]].aussehen}.`]);
+  ctx.flaeche.querySelector(".ae").append(el("div", { class: "frage", text: a.stueck === "ganz" || a.stueck === "ohneGelee"
+    ? "Welchen Weg nimmt das Licht? Tipp die Stationen der Reihe nach an." : "Ordne diese Stationen auf dem Weg des Lichts: Was kommt zuerst?" }), b.svg);
+  LS.reihenfolge(ctx, {
+    reihe: a.reihe, breite: 150, pfeile: true,
+    inhalt: id => ({ text: TEIL[id].name }),
+    ablage: id => TEIL[id].name,
+    hinweis: "Das Licht geht von vorn nach hinten. Welche Station kommt direkt nach der letzten in der Ablage?",
+    lob: "Genau so wandert das Licht durch das Auge!",
+  });
+}
+
+/** Warum-Frage. */
+function warumAufgabe(ctx, a) {
+  ctx.tipp(["Überleg zuerst: Um welches Teil des Auges geht es, und wozu ist es da?", a.tipp]);
+  ctx.flaeche.querySelector(".ae").append(el("div", { class: "frage", text: a.frage }));
+  LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.richtig, breite: 320, loesung: a.richtig,
+    hinweis: "Das passt nicht. Überleg: Was tut dieses Teil wirklich, und welche Antwort erklärt das?",
+    lob: "Genau, so ist es!",
+  });
+}
+
+const STUFEN_TEXT = {
+  s1: "Tipp auf die Wimpern! Augenbraue, Wimpern, Pupille und Augenlid im Bild finden.",
+  s2: "Ein Teil leuchtet — wie heisst es? Dazu Iris und das Weisse.",
+  s3: "Alle Teile von aussen finden und benennen: mit Tränen, Hornhaut und Bindehaut. Und: Wann ist die Pupille gross?",
+  s4: "Wozu ist das da? Jede Aufgabe zum richtigen Teil.",
+  s5: "Ins Auge hinein: Linse, Glaskörper, Netzhaut und Sehnerv. Und: Stimmt das, beim Augenschutz?",
+  s6: "Endgegner: der Weg des Lichts von der Hornhaut bis ins Gehirn — und Warum-Fragen.",
+};
+const STUFEN = TEILE.length ? STUFEN_TEXT : {};
+
+const HILFE = {
+  s1: "Lies den Auftrag (oder lass ihn vorlesen) und tipp im Bild auf das gesuchte Teil des Auges.",
+  s2: "Ein Teil des Auges leuchtet gelb. Tipp unten auf seinen Namen.",
+  s3: "Mal tippst du im Bild auf das gesuchte Teil, mal leuchtet ein Teil und du tippst auf seinen Namen. Bei den Pupillen-Fragen tippst du auf das passende Auge oder auf grösser oder kleiner.",
+  s4: "Auf der Karte steht, was ein Teil des Auges tut. Tipp auf den Korb mit dem Teil, das das macht.",
+  s5: "Das Auge ist von der Seite aufgeschnitten, das Licht kommt von links. Tipp auf das gesuchte Teil oder auf den Namen des leuchtenden Teils. Bei einem Satz tippst du auf Stimmt oder Stimmt nicht.",
+  s6: "Tipp die Stationen in der Reihenfolge an, in der das Licht sie durchläuft. Bei einer Warum-Frage tippst du auf die passende Antwort.",
+};
+
+LS.spiel({
+  id: ID,
+  einleitung: "Schau mir in die Augen! Findest du Augenbraue, Wimpern und Pupille? Dann entdecken wir, wozu sie da sind — und was im Auge drin ist.",
+  hilfe: stufe => HILFE[stufe],
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    if (ctx.nr === 0 && ctx.stufe === "s1") ctx.sag("Tipp im Bild auf das Teil, das ich sage!");
+    if (ctx.nr === 0 && ctx.stufe === "s5") ctx.sag("Jetzt schauen wir ins Auge hinein — von der Seite.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (p.arten.length > 1) ctx.serie("art", a.art);
+    ctx.kennung([a.art, a.teil || a.frage || a.satz || a.text || a.stueck || "", a.form || "", a.links || "", a.satz ?? "", a.farbe, a.pupille].join("|"));
+    ctx.flaeche.append(el("div", { class: "ae" }));
+    switch (a.art) {
+      case "tippen": return tippAufgabe(ctx, a);
+      case "benennen": return benennAufgabe(ctx, a);
+      case "koerbe": return korbAufgabe(ctx, a);
+      case "pupille": return pupillenAufgabe(ctx, a);
+      case "aussage": return aussageAufgabe(ctx, a);
+      case "lichtweg": return lichtwegAufgabe(ctx, a);
+      case "warum": return warumAufgabe(ctx, a);
+    }
+  },
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Würfel-Zähler</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .wz .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
+  .wz-bau { display: flex; justify-content: center; align-items: flex-end; flex-wrap: wrap; gap: 10px 16px; margin: 0 auto 12px; }
+  .wz-geb { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .wz-geb svg { display: block; max-width: min(100%, 42vw); height: auto; }
+  .wz-name { font-weight: 800; font-size: clamp(15px, 3.4vw, 18px); color: var(--text-leise); }
+  .wz-mass { text-align: center; font-weight: 700; color: var(--text-leise); font-size: clamp(14px, 3.2vw, 17px); margin: 0 0 10px; }
+  .wz-planbox { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 4px; }
+  .wz-plan-titel { font-size: 13px; font-weight: 800; color: var(--text-leise); }
+  .wz-plan { display: grid; gap: 2px; }
+  .wz-plan span { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--rand);
+    border-radius: 6px; font-weight: 900; font-size: 16px; background: var(--karte); }
+  .wz-plan span.voll { background: var(--hinweis-hell); border-color: var(--deko-4); }
+  .wz-vorne { width: 100%; height: 4px; border-radius: 2px; background: var(--text-leise); margin-top: 2px; }
+  .wz-felder { display: grid; gap: 6px; margin: 6px auto 0; }
+  .wz-felder button { width: 52px; height: 52px; border-radius: 12px; border: 3px solid var(--rand); background: var(--karte);
+    font-size: 22px; font-weight: 900; color: var(--text); font-family: inherit; box-shadow: 0 4px 0 var(--rand); cursor: pointer; }
+  .wz-felder button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--rand); }
+  .wz-felder button:disabled { opacity: .5; cursor: default; }
+  .wz-felder button.voll { background: var(--hinweis-hell); border-color: var(--deko-3); }
+  .wz-knoepfe { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .wz-wahl .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); }
+  .wz .anzeige { margin: 0 auto 10px; }
+  .wz-abc { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;
+    color: var(--karte); background: var(--f, var(--deko-6)); font-weight: 900; font-size: 20px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧱 Würfel-Zähler</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.A.3 (Volumen) und MA.2.C.1 (Körper darstellen), Basisklasse 3. Das Kind vergleicht
+// Würfelgebäude nach ihrer Würfelzahl, baut gleich gross und füllt Kisten (Quader).
+//   s1 2. Klasse (MA.2.A.3.c, Vorstufe): zwei Türme oder Reihen bis 6 Würfel, alle sichtbar — wo sind mehr?
+//   s2 3. Klasse, leichter (MA.2.A.3.c): zwei kleine Gebäude bis 10 Würfel ohne verdeckte Würfel vergleichen.
+//   s3 Klassenziel (MA.2.A.3.c „Volumen von Würfeln und Quadern vergleichen“, dazu MA.2.C.1.d Aufsicht):
+//      Gebäude bis 12 Würfel mit verdeckten Würfeln, je Gebäude der Bauplan (Aufsicht mit Höhenzahlen) als
+//      Hilfe; mehr, weniger oder gleich — und wie viele mehr.
+//   s4 schwerer (MA.2.A.3.c): gleich gross bauen — rechts Würfel setzen, bis beide Gebäude gleich viele haben.
+//   s5 4. Klasse (MA.2.A.3.e „Quader aus einer gegebenen Anzahl Würfeln bilden“, MA.2.C.1): Quader-Packungen
+//      vergleichen und Kisten: Wie viele Würfel fehlen, bis die Kiste voll ist? (Schichten unten ganz voll.)
+//   s6 Königsstufe (MA.2.A.3.c/e, MA.2.C.1): drei Gebäude bis 27 Würfel nach Anzahl ordnen, Kisten mit
+//      verdeckter Füllung.
+// Abgrenzung: Würfelbau-Blick (Basisklasse 4) zählt, ordnet Ansichten zu und liest Baupläne. Hier wird
+// verglichen (mehr, weniger, gleich viele), gleich gross gebaut und eine Kiste gefüllt.
+//
+// Ein Gebäude ist eine Höhenkarte: n Spalten (c, von vorne gesehen links → rechts), m Reihen (r, vorne 0 →
+// hinten), plan[c * m + r] Würfel aufeinander (0 bis H). Gezeichnet wird ein Schrägbild (Kavalierprojektion):
+// Vorderseite als Quadrat, Tiefe halb so lang nach rechts oben; sichtbar sind Vorderseite, Oberseite und rechte
+// Seite. Ob ein Würfel sichtbar ist, rechnet ein kleines Raster des Bildes aus (siehe „Sichtbarkeit“).
+
+const { zufall, waehle, el, tippSchritte } = LS;
+const ID = "wuerfel-zaehler";
+const H = 3; // höchste Säule
+const R = 8; // Rasterpunkte je Würfelkante für die Sichtbarkeitsprüfung
+
+// ---------- Gebäude ----------
+
+const geb = (n, m, plan) => ({ n, m, plan });
+const hoehe = (g, c, r) => g.plan[c * g.m + r];
+const anzahl = g => g.plan.reduce((x, y) => x + y, 0);
+const saeulen = g => g.plan.filter(h => h > 0).length;
+const seq = k => [...Array(k).keys()];
+const schluessel = g => `${g.n}x${g.m}:${g.plan.join("")}`;
+
+/** Nachbarfelder (links, rechts, vorne, hinten) eines Feldindex. */
+function nachbarn(g, f) {
+  const c = Math.floor(f / g.m), r = f % g.m, liste = [];
+  for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const cc = c + dc, rr = r + dr;
+    if (cc >= 0 && cc < g.n && rr >= 0 && rr < g.m) liste.push(cc * g.m + rr);
+  }
+  return liste;
+}
+
+function zusammenhaengend(g) {
+  const start = g.plan.findIndex(h => h > 0);
+  if (start < 0) return false;
+  const gesehen = new Set([start]), stapel = [start];
+  while (stapel.length) for (const nb of nachbarn(g, stapel.pop())) if (g.plan[nb] > 0 && !gesehen.has(nb)) { gesehen.add(nb); stapel.push(nb); }
+  return gesehen.size === saeulen(g);
+}
+
+/** Zusammenhängendes Gebäude mit genau w Würfeln: Würfel für Würfel auf ein Feld neben dem Gebäude setzen. */
+function baue(n, m, w) {
+  const g = geb(n, m, new Array(n * m).fill(0));
+  for (let i = 0; i < w; i++) {
+    const frei = seq(n * m).filter(f => g.plan[f] < H && (i === 0 || g.plan[f] > 0 || nachbarn(g, f).some(nb => g.plan[nb] > 0)));
+    if (!frei.length) return null;
+    g.plan[waehle(frei)]++;
+  }
+  return g;
+}
+
+// ---------- Schrägbild und Sichtbarkeit ----------
+// Punkt (c, r, z) → Bild in Würfelkanten, y nach oben: x = c + r/2, y = z + r/2.
+// Zeichenreihenfolge von hinten nach vorne: Reihe m−1 zuerst, in der Reihe Spalte für Spalte, je Spalte von unten
+// nach oben. In einer Reihe überlappt nur die rechte Seite eines Würfels die Vorderseite des rechten Nachbarn
+// (der liegt davor); alles andere berührt sich nur an Kanten. Das ist zugleich die Tiefenreihenfolge, weil die
+// Projektion parallel ist und nur über r nach hinten geht: Der Rang eines Würfels sagt, was vor ihm liegt.
+const rang = (g, c, r, z) => ((g.m - 1 - r) * g.n + c) * H + z + 1; // 0 = Boden, −1 = leer
+// Eine Seite als Parallelogramm [ox, oy, e1x, e1y, e2x, e2y].
+const SEITEN = {
+  vorne: (c, r, z) => [c + r / 2, z + r / 2, 1, 0, 0, 1],
+  oben: (c, r, z) => [c + r / 2, z + 1 + r / 2, 1, 0, .5, .5],
+  rechts: (c, r, z) => [c + 1 + r / 2, z + r / 2, .5, .5, 0, 1],
+};
+const SEITE_NR = { vorne: 1, oben: 2, rechts: 3 };
+const boden = (c, r) => [c + r / 2, r / 2, 1, 0, .5, .5];
+
+/** Rasterpunkte eines Parallelogramms durchlaufen (Punkte liegen nie auf einer Kante: x + ½, y + ¼ Raster). */
+function punkte(img, [ox, oy, e1x, e1y, e2x, e2y], f) {
+  const det = e1x * e2y - e1y * e2x;
+  const xs = [ox, ox + e1x, ox + e2x, ox + e1x + e2x], ys = [oy, oy + e1y, oy + e2y, oy + e1y + e2y];
+  const i0 = Math.max(0, Math.floor(Math.min(...xs) * R)), i1 = Math.min(img.W, Math.ceil(Math.max(...xs) * R));
+  const j0 = Math.max(0, Math.floor(Math.min(...ys) * R)), j1 = Math.min(img.H, Math.ceil(Math.max(...ys) * R));
+  for (let j = j0; j < j1; j++) for (let i = i0; i < i1; i++) {
+    const dx = (i + .5) / R - ox, dy = (j + .25) / R - oy;
+    const s = (dx * e2y - dy * e2x) / det, t = (e1x * dy - e1y * dx) / det;
+    if (s > 0 && s < 1 && t > 0 && t < 1) f(j * img.W + i);
+  }
+}
+const male = (img, fl, k, seite) => punkte(img, fl, i => { img.rg[i] = k; img.sd[i] = seite; });
+
+/** Das Bild als Raster: je Punkt der Rang des vordersten Würfels und seine Seite. */
+function bild(g) {
+  const W = Math.round((g.n + g.m / 2) * R), Hh = Math.round((H + g.m / 2) * R);
+  const img = { W, H: Hh, rg: new Int16Array(W * Hh).fill(-1), sd: new Int8Array(W * Hh) };
+  for (let r = 0; r < g.m; r++) for (let c = 0; c < g.n; c++) male(img, boden(c, r), 0, 0);
+  for (let r = g.m - 1; r >= 0; r--) for (let c = 0; c < g.n; c++) for (let z = 0; z < hoehe(g, c, r); z++) {
+    const k = rang(g, c, r, z);
+    for (const s of Object.keys(SEITEN)) male(img, SEITEN[s](c, r, z), k, SEITE_NR[s]);
+  }
+  return img;
+}
+
+/**
+ * Anteil einer Seite, der frei zu sehen ist. Beim gesetzten Würfel: Punkte, die seine Seite zeigen. Beim
+ * gedachten Würfel (hypothetisch, noch nicht im Bild): Punkte, auf denen nur liegt, was hinter ihm wäre.
+ */
+function anteil(img, fl, k, seite, gedacht) {
+  let alle = 0, frei = 0;
+  punkte(img, fl, i => { alle++; if (gedacht ? img.rg[i] < k : img.rg[i] === k && img.sd[i] === seite) frei++; });
+  return alle ? frei / alle : 0;
+}
+
+/** Regel: Ein Würfel ist sichtbar, wenn mindestens eine seiner drei Seiten zur Hälfte oder mehr frei ist. */
+const SICHTBAR = 0.5;
+const wuerfelSichtbar = (img, c, r, z, k, gedacht = false) =>
+  Object.keys(SEITEN).some(s => anteil(img, SEITEN[s](c, r, z), k, SEITE_NR[s], gedacht) >= SICHTBAR);
+
+/**
+ * verdeckt: Würfel, die nicht sichtbar sind.
+ * lesbar: Die Höhenkarte lässt sich aus dem Bild ablesen — in jeder Säule ist der oberste Würfel sichtbar, und
+ * ein weiterer Würfel obendrauf (oder auf dem leeren Feld) wäre sichtbar; was darunter steckt, folgt aus
+ * „unter einem Würfel muss einer stehen“. Kein anderes Gebäude ergibt dann dasselbe Bild.
+ */
+const SICHT = new Map();
+function sicht(g) {
+  const k = schluessel(g);
+  if (SICHT.has(k)) return SICHT.get(k);
+  const img = bild(g);
+  const verdeckt = [];
+  let lesbar = true;
+  for (let c = 0; c < g.n; c++) for (let r = 0; r < g.m; r++) {
+    const h = hoehe(g, c, r);
+    for (let z = 0; z < h; z++) if (!wuerfelSichtbar(img, c, r, z, rang(g, c, r, z))) verdeckt.push([c, r, z]);
+    if (h > 0 && !wuerfelSichtbar(img, c, r, h - 1, rang(g, c, r, h - 1))) lesbar = false;
+    if (h < H && !wuerfelSichtbar(img, c, r, h, rang(g, c, r, h), true)) lesbar = false;
+  }
+  const s = { verdeckt, lesbar };
+  if (SICHT.size > 4000) SICHT.clear();
+  SICHT.set(k, s);
+  return s;
+}
+const regelOk = (regel, g) => (regel === "sichtbar" ? sicht(g).verdeckt.length === 0 : regel === "lesbar" ? sicht(g).lesbar : true);
+
+// ---------- Stufen ----------
+// platten: [n, m]; min/max: Würfel je Gebäude; regel: sichtbar (kein verdeckter Würfel) oder lesbar (Höhen ablesbar).
+const STUFE = {
+  s1: { arten: ["vergleich"], platten: [[1, 1], [2, 1], [3, 1]], min: 1, max: 6, regel: "sichtbar" },
+  s2: { arten: ["vergleich"], platten: [[2, 2], [3, 2], [2, 3], [3, 3]], min: 3, max: 10, regel: "sichtbar" },
+  s3: { arten: ["vergleich"], platten: [[3, 2], [2, 3], [3, 3]], min: 4, max: 12, regel: "lesbar", bauplan: true, differenz: true },
+  s4: { arten: ["bauen"], platten: [[2, 2], [3, 2], [3, 3]], min: 4, max: 12, regel: "sichtbar" },
+  s5: { arten: ["quader", "kiste"], kiste: { breit: [2, 3], tief: [1, 3], hoch: [1, 3] }, schichten: true },
+  s6: { arten: ["ordnen", "kiste"], platten: [[3, 3], [3, 2], [2, 3]], min: 5, max: 27, regel: "lesbar", kiste: { breit: [2, 3], tief: [2, 3], hoch: [2, 3] } },
+};
+const VERGLEICH = ["links", "gleich", "rechts"];
+const vergleichVon = (wa, wb) => (wa > wb ? "links" : wa < wb ? "rechts" : "gleich");
+// Quader-Packungen: breit × tief × hoch, je 1 bis 3, mindestens 2 Würfel.
+const QUADER = [];
+for (let a = 1; a <= H; a++) for (let b = 1; b <= H; b++) for (let c = 1; c <= H; c++) if (a * b * c >= 2) QUADER.push([a, b, c]);
+const quaderGeb = ([a, b, c]) => ({ n: a, m: b, plan: new Array(a * b).fill(c), quader: [a, b, c] });
+const volumen = ([a, b, c]) => a * b * c;
+
+/** Gebäude der Stufe mit w Würfeln, das die Regel erfüllt (null, wenn keines gefunden). */
+function gebaeude(p, w, { ausser = [], platte = null } = {}) {
+  const platten = (platte ? [platte] : p.platten).filter(([n, m]) => n * m * H >= w);
+  if (!platten.length) return null;
+  for (let v = 0; v < 300; v++) {
+    const [n, m] = waehle(platten);
+    const g = baue(n, m, w);
+    if (!g || ausser.includes(schluessel(g)) || !regelOk(p.regel, g)) continue;
+    return g;
+  }
+  return null;
+}
+
+function paar(p) {
+  const ergebnis = waehle(VERGLEICH);
+  for (let v = 0; v < 60; v++) {
+    const wa = zufall(p.min, p.max);
+    if ((ergebnis === "links" && wa <= p.min) || (ergebnis === "rechts" && wa >= p.max)) continue;
+    const wb = ergebnis === "gleich" ? wa : ergebnis === "links" ? zufall(p.min, wa - 1) : zufall(wa + 1, p.max);
+    const links = gebaeude(p, wa);
+    const rechts = links && gebaeude(p, wb, { ausser: [schluessel(links)] });
+    if (!links || !rechts) continue;
+    return { links, rechts, ergebnis };
+  }
+  throw new Error("kein Gebäudepaar gefunden");
+}
+
+/** Kiste breit × tief × hoch, teilweise gefüllt; mit schichten: untere Schichten voll, oben eine angefangen. */
+function kiste(p) {
+  const k = p.kiste;
+  let erste = null;
+  for (let v = 0; v < 300; v++) {
+    const a = zufall(...k.breit), b = zufall(...k.tief), c = zufall(...k.hoch);
+    const vol = a * b * c;
+    if (vol < 4) continue;
+    let plan;
+    if (p.schichten) {
+      const voll = zufall(0, c - 1), teil = zufall(voll === 0 ? 1 : 0, a * b - 1);
+      // angefangene Schicht: von hinten links nach vorne rechts
+      const reihenfolge = [];
+      for (let r = b - 1; r >= 0; r--) for (let cc = 0; cc < a; cc++) reihenfolge.push(cc * b + r);
+      plan = new Array(a * b).fill(voll);
+      reihenfolge.slice(0, teil).forEach(f => { plan[f]++; });
+    } else plan = seq(a * b).map(() => zufall(0, c));
+    const drin = plan.reduce((x, y) => x + y, 0);
+    if (drin < 1 || drin >= vol) continue;
+    const g = { n: a, m: b, plan, kiste: c };
+    const s = sicht(g);
+    if (!s.lesbar) continue;
+    if (p.schichten || s.verdeckt.length) return g;
+    erste ||= g; // ohne verdeckte Würfel nur, wenn sich sonst nichts findet
+  }
+  if (erste) return erste;
+  throw new Error("keine Kiste gefunden");
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  if (art === "vergleich") {
+    const { links, rechts, ergebnis } = paar(p);
+    return { art, links, rechts, ergebnis, differenz: p.differenz ? Math.abs(anzahl(links) - anzahl(rechts)) : null,
+      kennung: `${art}|${schluessel(links)}|${schluessel(rechts)}` };
+  }
+  if (art === "bauen") {
+    for (let v = 0; v < 60; v++) {
+      const links = gebaeude(p, zufall(p.min, p.max));
+      if (!links) continue;
+      const wa = anzahl(links);
+      const fehlt = zufall(1, Math.min(5, wa - 1));
+      const rechts = baue(links.n, links.m, wa - fehlt);
+      if (!rechts) continue;
+      return { art, links, rechts, fehlt, kennung: `${art}|${schluessel(links)}|${schluessel(rechts)}` };
+    }
+    throw new Error("keine Bauaufgabe gefunden");
+  }
+  if (art === "quader") {
+    const ergebnis = waehle(VERGLEICH);
+    for (let v = 0; v < 200; v++) {
+      const q1 = waehle(QUADER), q2 = waehle(QUADER);
+      if (q1.join() === q2.join() || vergleichVon(volumen(q1), volumen(q2)) !== ergebnis) continue;
+      return { art, links: quaderGeb(q1), rechts: quaderGeb(q2), ergebnis, kennung: `${art}|${q1.join("x")}|${q2.join("x")}` };
+    }
+    throw new Error("kein Quaderpaar gefunden");
+  }
+  if (art === "kiste") {
+    const k = kiste(p);
+    const vol = k.n * k.m * k.kiste;
+    return { art, kiste: k, voll: vol, drin: anzahl(k), fehlen: vol - anzahl(k), kennung: `${art}|${k.kiste}|${schluessel(k)}` };
+  }
+  // ordnen: drei Gebäude mit verschiedenen Würfelzahlen, A B C der Reihe nach von wenig nach viel
+  for (let v = 0; v < 60; v++) {
+    const zahlen = new Set();
+    while (zahlen.size < 3) zahlen.add(zufall(p.min, p.max));
+    const gebaeudeListe = [...zahlen].map(w => gebaeude(p, w));
+    if (gebaeudeListe.some(g => !g)) continue;
+    const namen = ["A", "B", "C"];
+    const reihe = namen.slice().sort((x, y) => anzahl(gebaeudeListe[namen.indexOf(x)]) - anzahl(gebaeudeListe[namen.indexOf(y)]));
+    return { art, gebaeude: gebaeudeListe, namen, reihe, kennung: `${art}|${gebaeudeListe.map(schluessel).join("|")}` };
+  }
+  throw new Error("keine Ordnungsaufgabe gefunden");
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Art ${a.art} nicht in ${stufe}`);
+  const pruefeGeb = (g, name, { platten = p.platten, min = p.min, max = p.max, regel = p.regel, hMax = H } = {}) => {
+    if (!platten.some(([n, mm]) => n === g.n && mm === g.m)) m.push(`${name}: Platte ${g.n}×${g.m} nicht in der Stufe`);
+    if (g.plan.length !== g.n * g.m || g.plan.some(h => !Number.isInteger(h) || h < 0 || h > hMax)) m.push(`${name}: Höhen ausserhalb 0–${hMax}`);
+    const w = anzahl(g);
+    if (w < min || w > max) m.push(`${name}: ${w} Würfel ausserhalb ${min}–${max}`);
+    if (!zusammenhaengend(g)) m.push(`${name}: nicht zusammenhängend`);
+    const s = sicht(g);
+    if (regel === "sichtbar" && s.verdeckt.length) m.push(`${name}: verdeckter Würfel`);
+    if (regel === "lesbar" && !s.lesbar) m.push(`${name}: Würfelzahl nicht ablesbar`);
+  };
+  if (a.art === "vergleich") {
+    pruefeGeb(a.links, "links"); pruefeGeb(a.rechts, "rechts");
+    if (schluessel(a.links) === schluessel(a.rechts)) m.push("beide Gebäude gleich");
+    if (!VERGLEICH.includes(a.ergebnis) || vergleichVon(anzahl(a.links), anzahl(a.rechts)) !== a.ergebnis) m.push("Vergleich stimmt nicht mit den Zahlen");
+    if (p.differenz) {
+      const d = Math.abs(anzahl(a.links) - anzahl(a.rechts));
+      if (a.differenz !== d) m.push("Unterschied falsch");
+      if (a.ergebnis !== "gleich" && d === 0) m.push("„Wie viele mehr?“ bei Unterschied 0");
+    } else if (a.differenz != null) m.push("Unterschied in einer Stufe ohne Frage danach");
+  } else if (a.art === "bauen") {
+    pruefeGeb(a.links, "links");
+    pruefeGeb(a.rechts, "rechts", { min: 1, max: p.max - 1, regel: null });
+    if (a.rechts.n !== a.links.n || a.rechts.m !== a.links.m) m.push("rechte Platte anders als links");
+    const d = anzahl(a.links) - anzahl(a.rechts);
+    if (d < 1 || d !== a.fehlt) m.push(`rechts fehlen ${d}, gemeldet ${a.fehlt}`);
+  } else if (a.art === "quader") {
+    for (const [g, name] of [[a.links, "links"], [a.rechts, "rechts"]]) {
+      if (!g.quader || g.quader.length !== 3 || g.quader.some(x => !Number.isInteger(x) || x < 1 || x > H)) m.push(`${name}: Quadermasse ausserhalb 1–${H}`);
+      else if (anzahl(g) !== volumen(g.quader) || g.n !== g.quader[0] || g.m !== g.quader[1] || g.plan.some(h => h !== g.quader[2])) m.push(`${name}: Höhenkarte passt nicht zum Quader`);
+      if (!g.quader || volumen(g.quader) < 2) m.push(`${name}: zu kleiner Quader`);
+    }
+    if (a.links.quader.join() === a.rechts.quader.join()) m.push("beide Quader gleich");
+    if (!VERGLEICH.includes(a.ergebnis) || vergleichVon(anzahl(a.links), anzahl(a.rechts)) !== a.ergebnis) m.push("Vergleich stimmt nicht mit den Zahlen");
+  } else if (a.art === "kiste") {
+    const k = a.kiste, kk = p.kiste;
+    const im = (x, [lo, hi]) => Number.isInteger(x) && x >= lo && x <= hi;
+    if (!im(k.n, kk.breit) || !im(k.m, kk.tief) || !im(k.kiste, kk.hoch)) m.push("Kistenmasse ausserhalb der Stufe");
+    if (k.plan.length !== k.n * k.m || k.plan.some(h => !Number.isInteger(h) || h < 0 || h > k.kiste)) m.push("Füllung höher als die Kiste");
+    const vol = k.n * k.m * k.kiste, drin = anzahl(k);
+    if (a.voll !== vol || a.drin !== drin || a.fehlen !== vol - drin) m.push("Zahlen der Kiste stimmen nicht");
+    if (drin < 1 || drin >= vol) m.push("Kiste leer oder schon voll");
+    if (vol < 4) m.push("Kiste zu klein");
+    if (p.schichten) {
+      const unten = Math.min(...k.plan);
+      if (k.plan.some(h => h > unten + 1)) m.push("mehr als eine angefangene Schicht");
+    }
+    if (!sicht(k).lesbar) m.push("Füllung nicht ablesbar");
+  } else if (a.art === "ordnen") {
+    if (!a.gebaeude || a.gebaeude.length !== 3) m.push("nicht drei Gebäude");
+    else {
+      a.gebaeude.forEach((g, i) => pruefeGeb(g, a.namen[i]));
+      const zahlen = a.gebaeude.map(anzahl);
+      if (new Set(zahlen).size !== 3) m.push("zwei Gebäude mit gleich vielen Würfeln — Ordnung nicht eindeutig");
+      const soll = a.namen.slice().sort((x, y) => zahlen[a.namen.indexOf(x)] - zahlen[a.namen.indexOf(y)]);
+      if (a.reihe.join() !== soll.join()) m.push("Reihenfolge falsch");
+      if (new Set(a.gebaeude.map(schluessel)).size !== 3) m.push("doppelte Gebäude");
+    }
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+/**
+ * Schrägbild als SVG: Grundplatte, dann Würfel von hinten nach vorne, je Würfel drei Seiten in drei Helligkeiten
+ * einer Deko-Farbe (Oberseite aufgehellt, rechte Seite abgedunkelt — mit einer Deckschicht, damit es ohne
+ * color-mix() geht). Mit kiste: Rahmen eines Quaders breit × tief × kiste, hintere Kanten gestrichelt.
+ */
+function bauSvg(g, { farbe = "var(--deko-6)", u = 30 } = {}) {
+  const ymax = H + g.m / 2;
+  const X = x => (x * u + 3).toFixed(1), Y = y => ((ymax - y) * u + 3).toFixed(1);
+  const pt = (c, r, z) => `${X(c + r / 2)},${Y(z + r / 2)}`;
+  const pts = ecken => ecken.map(e => pt(...e)).join(" ");
+  const teile = [];
+  for (let r = 0; r < g.m; r++) for (let c = 0; c < g.n; c++) {
+    teile.push(`<polygon points="${pts([[c, r, 0], [c + 1, r, 0], [c + 1, r + 1, 0], [c, r + 1, 0]])}" fill="var(--rand)" stroke="var(--text-leise)" stroke-width="1"/>`);
+  }
+  const kante = (p1, p2, extra = "") => `<line x1="${pt(...p1).replace(",", '" y1="')}" x2="${pt(...p2).replace(",", '" y2="')}" stroke="var(--text)" stroke-width="2" stroke-linecap="round"${extra}/>`;
+  const k = g.kiste;
+  if (k) for (const [p1, p2] of [[[0, g.m, 0], [g.n, g.m, 0]], [[0, g.m, 0], [0, g.m, k]], [[0, 0, 0], [0, g.m, 0]]]) teile.push(kante(p1, p2, ' stroke-dasharray="4 4" opacity=".6"'));
+  const seite = (ecken, deck, deckung) => {
+    const p = pts(ecken);
+    teile.push(`<polygon points="${p}" fill="${farbe}" stroke="none"/>`);
+    if (deck) teile.push(`<polygon points="${p}" fill="${deck}" opacity="${deckung}" stroke="none"/>`);
+    teile.push(`<polygon points="${p}" fill="none" stroke="var(--text)" stroke-width="1.6" stroke-linejoin="round"/>`);
+  };
+  for (let r = g.m - 1; r >= 0; r--) for (let c = 0; c < g.n; c++) for (let z = 0; z < hoehe(g, c, r); z++) {
+    seite([[c, r, z], [c + 1, r, z], [c + 1, r, z + 1], [c, r, z + 1]], null, 0);
+    seite([[c, r, z + 1], [c + 1, r, z + 1], [c + 1, r + 1, z + 1], [c, r + 1, z + 1]], "var(--karte)", .45);
+    seite([[c + 1, r, z], [c + 1, r + 1, z], [c + 1, r + 1, z + 1], [c + 1, r, z + 1]], "var(--text)", .3);
+  }
+  if (k) {
+    const n = g.n, m = g.m;
+    for (const [p1, p2] of [[[0, 0, 0], [n, 0, 0]], [[n, 0, 0], [n, 0, k]], [[n, 0, k], [0, 0, k]], [[0, 0, k], [0, 0, 0]],
+      [[n, 0, 0], [n, m, 0]], [[n, m, 0], [n, m, k]], [[n, 0, k], [n, m, k]], [[0, 0, k], [0, m, k]], [[0, m, k], [n, m, k]]]) teile.push(kante(p1, p2));
+  }
+  const w = (g.n + g.m / 2) * u + 6, h = ymax * u + 6;
+  return el("span", { class: "wz-svg", html: `<svg viewBox="0 0 ${w.toFixed(1)} ${h.toFixed(1)}" width="${Math.round(w)}" height="${Math.round(h)}" aria-hidden="true">${teile.join("")}</svg>` });
+}
+
+/** Bauplan: Raster mit Höhenzahlen, hinten oben, vorne unten (Balken). */
+function bauplanEl(g) {
+  const raster = el("div", { class: "wz-plan" });
+  raster.style.gridTemplateColumns = `repeat(${g.n}, 26px)`;
+  for (let r = g.m - 1; r >= 0; r--) for (let c = 0; c < g.n; c++) {
+    const h = hoehe(g, c, r);
+    raster.append(el("span", { class: h ? "voll" : "leer", text: h ? String(h) : "" }));
+  }
+  return el("div", { class: "wz-planbox" }, el("div", { class: "wz-plan-titel", text: "Bauplan" }), raster, el("div", { class: "wz-vorne" }), el("div", { class: "wz-plan-titel", text: "vorne" }));
+}
+
+/** Karte eines Gebäudes: Bild, Name darunter, bei Bedarf der Bauplan. */
+function gebKarte(g, name, { bauplan = false, farbe } = {}) {
+  const karte = el("div", { class: "wz-geb" }, bauSvg(g, { farbe }), el("div", { class: "wz-name", text: name }));
+  if (bauplan) karte.append(bauplanEl(g));
+  return karte;
+}
+
+const NAME = { links: { bild: "⬅️", text: "Links" }, gleich: { bild: "🟰", text: "Gleich viele" }, rechts: { bild: "➡️", text: "Rechts" } };
+/** „stehen 3 Säulen“, „steht 1 Säule“. */
+const saeulenText = n => `${n === 1 ? "steht" : "stehen"} ${n} ${n === 1 ? "Säule" : "Säulen"}`;
+const TIPP_VERSTECKT = "Denk an die Würfel, die du nicht siehst — unter einem Würfel oben muss einer stehen.";
+
+// ---------- Aufgabenarten ----------
+
+/** Mehr, weniger oder gleich viele (s1, s2, s5 Quader) — und in s3 danach „Wie viele mehr?“. */
+function zeigeVergleich(ctx, a, wz, p) {
+  const wa = anzahl(a.links), wb = anzahl(a.rechts);
+  const zahlen = a.art === "quader"
+    ? `Links ${a.links.quader.join(" · ")} = ${wa} Würfel, rechts ${a.rechts.quader.join(" · ")} = ${wb} Würfel.`
+    : `Links ${wa} Würfel, rechts ${wb} Würfel.`;
+  const frage = el("div", { class: "frage", text: "Wo sind mehr Würfel?" });
+  wz.append(frage, el("div", { class: "wz-bau" },
+    gebKarte(a.links, "⬅️ Links", { bauplan: p.bauplan }), gebKarte(a.rechts, "➡️ Rechts", { bauplan: p.bauplan })));
+  if (a.art === "quader") ctx.tipp(["Zähl zuerst eine Schicht: breit mal tief.", "Dann mal die Höhe: so viele Schichten liegen aufeinander.", "Du siehst nur die Würfel aussen. Die innen zählen auch!"]);
+  else if (ctx.stufe === "s1") ctx.tipp(["Zähl die Würfel auf jeder Seite, einen nach dem anderen.", "Tipp mit dem Finger auf jeden Würfel, damit du keinen zweimal zählst.", `Links ${saeulenText(saeulen(a.links))}, rechts ${saeulenText(saeulen(a.rechts))}.`]);
+  else if (ctx.stufe === "s2") ctx.tipp(["Zähle Säule für Säule.", "Die Würfel ganz hinten sind weiter oben gezeichnet. Sie zählen auch.", `Links ${saeulenText(saeulen(a.links))}, rechts ${saeulenText(saeulen(a.rechts))}. Wie hoch ist jede?`]);
+  else ctx.tipp(["Zähle Säule für Säule.", TIPP_VERSTECKT, "Schau in die Baupläne: Zähl die Zahlen von jedem Bauplan zusammen."]);
+  const hinweis = a.art === "quader" ? "Zähl eine Schicht, dann die Schichten: breit mal tief mal hoch."
+    : ctx.stufe === "s1" ? "Zähl nochmal: Wie viele Würfel stehen auf jeder Seite?"
+    : "Zähl nochmal Säule für Säule: Wie viele Würfel stehen aufeinander?";
+
+  if (!p.differenz) {
+    const loesung = zahlen + (a.ergebnis === "gleich" ? " Gleich viele." : "");
+    const box = LS.auswahl(ctx, { optionen: VERGLEICH, richtig: a.ergebnis, inhalt: o => NAME[o], breite: 110, loesung, hinweis });
+    box.classList.add("wz-wahl");
+    return;
+  }
+
+  // s3: Schritt 1 mehr/weniger/gleich mit eigenen Knöpfen, Schritt 2 die Zahl
+  const d = a.differenz;
+  const loesung = a.ergebnis === "gleich" ? `${zahlen} Gleich viele.` : `${zahlen} Unterschied: ${Math.max(wa, wb)} − ${Math.min(wa, wb)} = ${d}.`;
+  ctx.loesung(loesung);
+  ctx.schritte(1 + (d ? tippSchritte(d) : 0));
+  const wahl = el("div", { class: "wahl wz-wahl" });
+  wahl.style.setProperty("--wahl-breite", "110px");
+  wz.append(wahl);
+  const sperren = () => wahl.querySelectorAll("button").forEach(b => { b.disabled = true; });
+  const schrittZahl = () => {
+    frage.textContent = "Wie viele Würfel mehr?";
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Wie viele mehr" });
+    wahl.replaceWith(anzeige);
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: 2,
+      onOk(w) {
+        if (ctx.vorbei()) return;
+        if (w === d) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Genau, ${d} mehr!`); return; }
+        anzeige.classList.add("falsch");
+        ctx.falsch("Rechne: die grössere Zahl weniger die kleinere Zahl.", loesung);
+        if (ctx.vorbei()) tasten.gesperrt = true;
+      },
+    });
+    wz.append(tasten.element);
+  };
+  for (const o of VERGLEICH) {
+    const k = el("button", { type: "button", class: "wahl-knopf" }, el("span", { class: "bild", text: NAME[o].bild }), el("span", { text: NAME[o].text }));
+    k.addEventListener("click", () => {
+      if (ctx.vorbei() || k.disabled || k.classList.contains("gewaehlt")) return;
+      if (o === a.ergebnis) {
+        k.classList.add("richtig");
+        if (a.ergebnis === "gleich") return ctx.richtig("Genau, gleich viele!");
+        LS.ton("tipp");
+        return schrittZahl();
+      }
+      k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+      ctx.falsch(`${hinweis} Der Bauplan hilft: Jede Zahl sagt, wie viele Würfel aufeinander stehen.`, loesung);
+      if (ctx.vorbei()) sperren();
+    });
+    wahl.append(k);
+  }
+}
+
+/** s4: rechts Würfel setzen, bis beide Gebäude gleich viele haben. */
+function zeigeBauen(ctx, a, wz) {
+  const wa = anzahl(a.links);
+  const rechts = geb(a.rechts.n, a.rechts.m, a.rechts.plan.slice());
+  const loesung = `Links stehen ${wa} Würfel, rechts am Anfang ${anzahl(a.rechts)}. Es fehlten ${a.fehlt}.`;
+  ctx.loesung(loesung);
+  ctx.schritte(a.fehlt + 1);
+  ctx.tipp(["Zähl links Säule für Säule.", TIPP_VERSTECKT, `Links ${saeulenText(saeulen(a.links))}. Bau rechts so lange, bis es gleich viele Würfel sind.`]);
+  wz.append(el("div", { class: "frage", text: "Bau rechts gleich viele Würfel wie links!" }));
+  const karteRechts = el("div", { class: "wz-geb" });
+  let svgRechts = bauSvg(rechts, { farbe: "var(--deko-5)" });
+  const felder = el("div", { class: "wz-felder" });
+  felder.style.gridTemplateColumns = `repeat(${rechts.n}, 52px)`;
+  karteRechts.append(svgRechts, el("div", { class: "wz-name", text: "➡️ Rechts" }), felder, el("div", { class: "wz-plan-titel", text: "Tippen setzt einen Würfel (vorne ist unten)" }));
+  wz.append(el("div", { class: "wz-bau" }, gebKarte(a.links, "⬅️ Links"), karteRechts));
+  const gesetzt = []; // Felder in der Reihenfolge des Setzens, für ↩
+  const knoepfe = new Map();
+  const zurueck = el("button", { type: "button", class: "knopf hell", text: "↩ Einen weg" });
+  const fertig = el("button", { type: "button", class: "knopf gruen", text: "✔ Fertig" });
+  const zeichne = () => {
+    const neu = bauSvg(rechts, { farbe: "var(--deko-5)" });
+    svgRechts.replaceWith(neu);
+    svgRechts = neu;
+    for (const [f, k] of knoepfe) {
+      const h = rechts.plan[f];
+      k.textContent = h ? String(h) : "";
+      k.classList.toggle("voll", h > 0);
+      k.disabled = ctx.vorbei() || h >= H;
+    }
+    zurueck.disabled = ctx.vorbei() || !gesetzt.length;
+    fertig.disabled = ctx.vorbei();
+  };
+  for (let r = rechts.m - 1; r >= 0; r--) for (let c = 0; c < rechts.n; c++) {
+    const f = c * rechts.m + r;
+    const k = el("button", { type: "button", "aria-label": `Feld ${c + 1}, Reihe ${rechts.m - r}` });
+    k.addEventListener("click", () => {
+      if (ctx.vorbei() || rechts.plan[f] >= H) return;
+      rechts.plan[f]++;
+      gesetzt.push(f);
+      LS.ton("tipp");
+      zeichne();
+    });
+    knoepfe.set(f, k);
+    felder.append(k);
+  }
+  zurueck.addEventListener("click", () => {
+    if (ctx.vorbei() || !gesetzt.length) return;
+    rechts.plan[gesetzt.pop()]--;
+    zeichne();
+  });
+  fertig.addEventListener("click", () => {
+    if (ctx.vorbei()) return;
+    const wb = anzahl(rechts);
+    if (wb === wa) { zeichne(); fertig.disabled = true; return ctx.richtig("Beide Gebäude haben gleich viele Würfel!"); }
+    ctx.falsch(wb < wa
+      ? "Rechts stehen noch zu wenig Würfel. Zähl links nochmal Säule für Säule und bau weiter."
+      : "Jetzt stehen rechts zu viele Würfel. Nimm mit ↩ welche weg.", loesung);
+    zeichne();
+  });
+  wz.append(el("div", { class: "wz-knoepfe" }, zurueck, fertig));
+  zeichne();
+}
+
+/** s5, s6: Wie viele Würfel fehlen, bis die Kiste voll ist? */
+function zeigeKiste(ctx, a, wz, p) {
+  const k = a.kiste;
+  const loesung = `Die Kiste fasst ${k.n} · ${k.m} · ${k.kiste} = ${a.voll} Würfel, ${a.drin} ${a.drin === 1 ? "ist" : "sind"} drin. Es fehlen ${a.voll} − ${a.drin} = ${a.fehlen}.`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(a.fehlen));
+  ctx.tipp(["Rechne zuerst, wie viele Würfel in die ganze Kiste passen: breit mal tief mal hoch.",
+    p.schichten ? "Zähl dann die Würfel, die schon drin sind. Die unteren Schichten sind ganz voll." : TIPP_VERSTECKT,
+    p.schichten ? "Voll weniger drin: So viele fehlen noch." : "Zähl Säule für Säule, wie viele Würfel schon drin sind. Voll weniger drin: So viele fehlen."]);
+  wz.append(el("div", { class: "frage", text: "Wie viele Würfel fehlen, bis die Kiste voll ist?" }),
+    el("div", { class: "wz-bau" }, el("div", { class: "wz-geb" }, bauSvg(k, { farbe: "var(--deko-3)" }))),
+    el("div", { class: "wz-mass", text: `Die Kiste ist ${k.n} Würfel breit, ${k.m} Würfel tief und ${k.kiste} Würfel hoch.` }));
+  const anzeige = el("div", { class: "anzeige leer", "aria-label": "Fehlende Würfel" });
+  wz.append(anzeige);
+  const tasten = LS.tastatur({
+    anzeige, maxStellen: 2,
+    onOk(w) {
+      if (ctx.vorbei()) return;
+      if (w === a.fehlen) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig("Genau, dann ist die Kiste voll!"); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(w > a.fehlen
+        ? "Das sind zu viele. Rechne: breit mal tief mal hoch — und zieh ab, was schon drin ist."
+        : "Das sind zu wenige. Zähl die Würfel, die schon drin sind, und rechne: voll weniger drin.", loesung);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  wz.append(tasten.element);
+}
+
+/** s6: drei Gebäude ordnen, wenigste → meiste. */
+function zeigeOrdnen(ctx, a, wz) {
+  const farben = ["var(--deko-6)", "var(--deko-5)", "var(--deko-1)"];
+  const zahlen = a.gebaeude.map(anzahl);
+  const loesung = `${a.namen.map((n, i) => `${n} ${zahlen[i]}`).join(", ")} Würfel: ${a.reihe.join(" → ")}.`;
+  ctx.tipp(["Zähle bei jedem Gebäude Säule für Säule.", TIPP_VERSTECKT, "Merk dir die drei Zahlen. Fang mit der kleinsten an."]);
+  wz.append(el("div", { class: "frage", text: "Ordne die Gebäude: zuerst das mit den wenigsten Würfeln, zuletzt das mit den meisten." }));
+  const abc = (n, i) => { const s = el("span", { class: "wz-abc", text: n }); s.style.setProperty("--f", farben[i]); return s; };
+  wz.append(el("div", { class: "wz-bau" }, ...a.gebaeude.map((g, i) => el("div", { class: "wz-geb" }, bauSvg(g, { farbe: farben[i] }), abc(a.namen[i], i)))));
+  const { box } = LS.reihenfolge(ctx, {
+    reihe: a.reihe, breite: 90, pfeile: true,
+    inhalt: n => abc(n, a.namen.indexOf(n)),
+    hinweis: (n, erwartet) => (a.reihe.indexOf(erwartet) === 0
+      ? "Fang mit dem Gebäude an, das am wenigsten Würfel hat. Zähl bei jedem Säule für Säule."
+      : "Das kommt noch nicht. Welches der übrigen Gebäude hat am wenigsten Würfel?"),
+    loesung, lob: "Richtig geordnet!",
+  });
+  box.classList.add("wz-wahl");
+}
+
+const SAG = {
+  s1: "Schau auf die zwei Türme. Wo stehen mehr Würfel? Tipp auf den Pfeil — oder auf „Gleich viele“.",
+  s2: "Zähl die Würfel in beiden Gebäuden. Wo sind mehr?",
+  s3: "Manche Würfel siehst du nicht. Der Bauplan hilft dir: Die Zahl sagt, wie viele Würfel aufeinander stehen.",
+  s4: "Links steht ein Gebäude. Bau rechts eines mit gleich vielen Würfeln: Tipp auf ein Feld, dann steht dort ein Würfel mehr.",
+  s5: "Quader sind in Schichten gebaut: breit mal tief, und das so oft, wie sie hoch sind.",
+  s6: "Jetzt wird es knifflig: grosse Gebäude ordnen und Kisten mit versteckten Würfeln.",
+};
+
+LS.spiel({
+  id: ID,
+  einleitung: "Wo stehen mehr Würfel? Zähl genau — auch die Würfel, die sich verstecken! Bau gleich grosse Gebäude und füll die Kiste.",
+  hilfe: stufe => ({
+    s1: "Schau die zwei Würfeltürme an. Tipp auf ⬅️, wenn links mehr Würfel stehen, auf ➡️, wenn rechts mehr stehen, und auf 🟰, wenn es gleich viele sind.",
+    s2: "Zähl die Würfel in beiden Gebäuden und tipp an, wo mehr stehen — oder „Gleich viele“.",
+    s3: "Zähl die Würfel in beiden Gebäuden; der Bauplan darunter zeigt, wie viele in jeder Säule stehen. Tipp an, wo mehr stehen. Danach tippst du ein, wie viele Würfel mehr es sind.",
+    s4: "Zähl die Würfel links. Rechts tippst du auf ein Feld, dann steht dort ein Würfel mehr; ↩ nimmt den letzten wieder weg. Hast du gleich viele wie links, tippst du auf ✔ Fertig.",
+    s5: "Bei zwei Quadern tippst du an, wo mehr Würfel sind. Bei der Kiste tippst du ein, wie viele Würfel noch hineinpassen, und drückst OK.",
+    s6: "Beim Ordnen tippst du zuerst das Gebäude mit den wenigsten Würfeln an, dann das nächste, zuletzt das mit den meisten. Bei der Kiste tippst du ein, wie viele Würfel fehlen.",
+  }[stufe]),
+  anzahl: 8,
+  stufen: {
+    s1: "Zwei Türme oder Reihen: Wo sind mehr Würfel?",
+    s2: "Zwei kleine Gebäude vergleichen — alle Würfel sind zu sehen.",
+    s3: "Versteckte Würfel, dazu der Bauplan. Wo sind mehr — und wie viele mehr?",
+    s4: "Gleich gross bauen: Setz rechts Würfel, bis es gleich viele sind.",
+    s5: "Quader-Packungen vergleichen und Kisten füllen: Wie viele fehlen?",
+    s6: "Endgegner: drei grosse Gebäude ordnen, Kisten mit versteckten Würfeln.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (p.arten.length > 1) ctx.serie("art", a.art);
+    if (a.art === "vergleich" || a.art === "quader") ctx.serie("vergleich", a.ergebnis);
+    ctx.kennung(a.kennung);
+    if (ctx.nr === 0) ctx.sag(SAG[ctx.stufe]);
+    const wz = el("div", { class: "wz" });
+    ctx.flaeche.append(wz);
+    if (a.art === "vergleich" || a.art === "quader") zeigeVergleich(ctx, a, wz, p);
+    else if (a.art === "bauen") zeigeBauen(ctx, a, wz);
+    else if (a.art === "kiste") zeigeKiste(ctx, a, wz, p);
+    else zeigeOrdnen(ctx, a, wz);
+  },
+});
+</script>
+</body>
+</html>

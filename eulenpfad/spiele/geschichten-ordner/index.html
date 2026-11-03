@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geschichten-Ordner</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .go .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 10px; line-height: 1.35; }
+  .go-bilder .frage { font-size: clamp(22px, 5vw, 30px); }
+  .go-titel { text-align: center; font-size: clamp(16px, 3.6vw, 20px); font-weight: 800; color: var(--deko-7); margin: 0 0 8px; }
+  .go-schritt { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin: 0 0 4px; }
+  .go-weg { max-width: 720px; margin: 0 auto 12px; padding: 8px 14px; border-radius: 12px; background: var(--hinweis-hell);
+    font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; text-decoration: line-through; text-align: center; }
+  /* Stufe 1: grosse Bildkarten mit einem Wort */
+  .go-bilder .wahl-knopf { font-size: clamp(16px, 3.6vw, 20px); min-height: 110px; }
+  .go-bilder .wahl-knopf .bild { font-size: clamp(48px, 13vw, 72px); }
+  .go-bilder .ablage > span { font-size: clamp(16px, 3.6vw, 20px); }
+  /* Stufen 2–6: Sätze als Zeilen, die Ablage zeigt die gelegten Sätze untereinander und nummeriert */
+  .go-liste .wahl-knopf { flex-direction: row; justify-content: flex-start; gap: 12px; text-align: left;
+    font-size: clamp(16px, 3.6vw, 20px); font-weight: 700; min-height: 52px; padding: 10px 14px; line-height: 1.35; }
+  .go-liste .wahl-knopf .bild { font-size: clamp(32px, 8vw, 44px); flex: 0 0 auto; }
+  .go-liste .ablage { flex-direction: column; align-items: stretch; counter-reset: go-schritt; }
+  .go-liste .ablage > span { font-size: clamp(15px, 3.4vw, 19px); font-weight: 700; text-align: left; line-height: 1.35; counter-increment: go-schritt; }
+  .go-liste .ablage > span::before { content: counter(go-schritt) ". "; color: var(--text-leise); }
+  /* Königsstufe, Lücken: je Satz eine Karte mit drei Zeitwörtern darunter */
+  .go-luecke { background: var(--karte); border: 3px solid var(--rand); border-radius: 16px; padding: 10px 12px; margin: 0 auto 12px; max-width: 720px; }
+  .go-luecke.gut { border-color: var(--gut); }
+  .go-luecke-satz { font-size: clamp(17px, 3.8vw, 22px); font-weight: 700; margin: 0 0 8px; line-height: 1.4; }
+  .go-lueckenwort { display: inline-block; min-width: 3.4em; border-bottom: 3px solid var(--deko-7); text-align: center; color: var(--deko-7); font-weight: 900; }
+  .go-luecke .wahl-knopf { min-height: 48px; font-size: clamp(15px, 3.4vw, 19px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📚 Geschichten-Ordner</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="geschichten.js"></script>
+<script>
+"use strict";
+// Lehrplan D.4.D.1.c (Texte mit erkennbarer Abfolge aufbauen) und D.3.B.1.d (Geschichten in der
+// richtigen Reihenfolge nacherzählen) — die Buchstaben sind eine Annahme aus der Spielidee und mit dem
+// Lehrplan abzugleichen. Basisklasse 3. Das Kind bringt die Schritte einer erzählten Geschichte in die
+// richtige Reihenfolge: zuerst, dann, am Schluss.
+//   s1 2. Klasse (lesearm; D.3.B.1.d, Annahme): drei Bildkarten (Emoji und ein Wort) einer Geschichte der
+//      Reihe nach antippen.
+//   s2 3. Klasse, leichter (D.3.B.1.d, Annahme): drei kurze Sätze mit Bild ordnen.
+//   s3 Klassenziel (D.4.D.1.c und D.3.B.1.d, Annahme): vier Sätze ohne Bild ordnen, mit Titel der Geschichte.
+//   s4 3. Klasse, schwerer (D.4.D.1.c, Annahme): fünf Sätze, einer gehört nicht in den Ablauf — zuerst
+//      aussortieren, dann die vier ordnen.
+//   s5 4. Klasse (D.4.D.1.c, Annahme): fünf Sätze mit Zeitwörtern (Zuerst, Dann, Danach, Später, Am
+//      Schluss) ordnen — die Zeitwörter helfen.
+//   s6 Königsstufe (D.4.D.1.c → d, Annahme): sechs Sätze ohne Zeitwörter ordnen, oder bei drei Sätzen
+//      das passende Zeitwort in die Lücke setzen (Zuerst / Dann / Am Schluss).
+// Abgrenzung: Der Zeitstrahl-Sortierer ordnet Ereignisse auf einem Zeitstrahl (NMG), das Lebenszyklus-
+// Puzzle Entwicklungsstufen; hier geht es um den Aufbau einer erzählten Geschichte. Geschichten in
+// geschichten.js.
+
+const { waehle, mische, el } = LS;
+const ID = "geschichten-ordner";
+
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["geschichten"]);
+const VORRAT = FREI.has("geschichten") ? GESCHICHTEN : [];
+
+const ZEITWOERTER = ["Zuerst", "Dann", "Danach", "Später", "Am Schluss"];
+/** Zeitwörter der Lücken in der Königsstufe: erster, zweiter und letzter Schritt. */
+const LUECKEN = ["Zuerst", "Dann", "Am Schluss"];
+
+// Je Stufe: Gruppe der Geschichten, Aufgabenart(en) und Zahl der Schritte (null = beliebig).
+const STUFE = {
+  s1: { gruppe: 1, arten: ["bilder"], schritte: 3 },
+  s2: { gruppe: 1, arten: ["bildsatz"], schritte: 3 },
+  s3: { gruppe: 2, arten: ["saetze"], schritte: 4 },
+  s4: { gruppe: 2, arten: ["ablenker"], schritte: 4 },
+  s5: { gruppe: 3, arten: ["zeitwoerter"], schritte: 5 },
+  s6: { gruppe: 3, arten: ["ordnen", "luecken"], schritte: 6 },
+};
+/** Wie viele Schritte eine Geschichte für diese Aufgabenart haben muss (Lücken: fünf oder sechs). */
+const schritteFuer = (stufe, art) => (art === "luecken" ? null : STUFE[stufe].schritte);
+
+const vorrat = (stufe, art) => VORRAT.filter(g => g.gruppe === STUFE[stufe].gruppe
+  && (schritteFuer(stufe, art) === null || g.schritte.length === schritteFuer(stufe, art)));
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  const liste = vorrat(stufe, art);
+  if (!liste.length) return null;
+  const g = waehle(liste);
+  const a = { art, titel: g.titel, gruppe: g.gruppe, schritte: g.schritte, tipp: g.tipp };
+  if (art === "ablenker") a.ablenker = g.ablenker;
+  if (art === "zeitwoerter") a.saetze = g.schritte.map((s, i) => `${ZEITWOERTER[i]} ${s.nach}`);
+  if (art === "luecken") {
+    const n = g.schritte.length;
+    a.luecken = [0, 1, n - 1].map((i, j) => ({ nach: g.schritte[i].nach, wort: LUECKEN[j] }));
+  }
+  return a;
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  const p = STUFE[stufe];
+  const g = VORRAT.find(x => x.titel === a.titel && x.schritte === a.schritte);
+  if (!g) m.push("Geschichte nicht aus einer freien Liste");
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} in ${stufe}`);
+  if (a.gruppe !== p.gruppe) m.push(`Geschichte der Gruppe ${a.gruppe} in ${stufe}`);
+  const n = a.schritte.length;
+  const soll = schritteFuer(stufe, a.art);
+  if (soll !== null && n !== soll) m.push(`${n} Schritte statt ${soll}`);
+  if (a.art === "luecken" && n < 3) m.push("zu wenig Schritte für drei Lücken");
+  const saetze = a.schritte.map(s => s.satz);
+  if (new Set(saetze).size !== n) m.push("doppelter Satz");
+  const text = [a.titel, a.tipp, a.ablenker || "", ...saetze, ...a.schritte.map(s => s.nach || "")].join(" ");
+  if (/ß/.test(text)) m.push("ß im Text");
+  if (!a.tipp) m.push("Geschichte ohne dritten Tipp");
+  for (const s of a.schritte) {
+    if (!/^\p{Lu}.*\.$/u.test(s.satz)) m.push(`Satz „${s.satz}“ nicht gross begonnen oder ohne Punkt`);
+    if (a.gruppe === 3 && !/^\p{Ll}.*\.$/u.test(s.nach || "")) m.push(`Umstellung „${s.nach}“ nicht klein begonnen oder ohne Punkt`);
+  }
+  if (a.gruppe === 1) {
+    if (new Set(a.schritte.map(s => s.kurz)).size !== n) m.push("doppeltes Wort auf den Bildkarten");
+    if (new Set(a.schritte.map(s => s.bild)).size !== n) m.push("doppeltes Bild");
+    if (a.schritte.some(s => !s.bild || !s.kurz)) m.push("Schritt ohne Bild oder Wort");
+    // Der dritte Tipp darf das Wort des letzten Schritts nicht nennen (das ist der Knopf, der die Aufgabe löst).
+    const letztes = a.schritte[n - 1].kurz;
+    if (new RegExp(`(?<!\\p{L})${letztes}(?!\\p{L})`, "iu").test(a.tipp)) m.push(`Tipp nennt den letzten Schritt „${letztes}“`);
+  }
+  if (a.art === "ablenker") {
+    if (!a.ablenker) m.push("kein Ablenker");
+    else if (saetze.includes(a.ablenker)) m.push("Ablenker ist ein Schritt der Geschichte");
+  }
+  if (a.art === "zeitwoerter") {
+    if (!a.saetze || a.saetze.length !== n) m.push("Zeitwort-Sätze fehlen");
+    else a.saetze.forEach((s, i) => {
+      if (!s.startsWith(ZEITWOERTER[i] + " ")) m.push(`Satz ${i + 1} beginnt nicht mit „${ZEITWOERTER[i]}“`);
+      if (s !== `${ZEITWOERTER[i]} ${a.schritte[i].nach}`) m.push(`Zeitwort-Satz ${i + 1} passt nicht zum Schritt`);
+    });
+  }
+  if (a.art === "luecken") {
+    if (!a.luecken || a.luecken.length !== 3) m.push("nicht drei Lücken");
+    else {
+      const erwartet = [a.schritte[0].nach, a.schritte[1].nach, a.schritte[n - 1].nach];
+      a.luecken.forEach((l, j) => {
+        if (l.nach !== erwartet[j]) m.push(`Lücke ${j + 1} zeigt nicht den erwarteten Schritt`);
+        if (l.wort !== LUECKEN[j]) m.push(`Lücke ${j + 1} erwartet ${l.wort} statt ${LUECKEN[j]}`);
+        if (!LUECKEN.includes(l.wort)) m.push(`Zeitwort ${l.wort} nicht wählbar`);
+      });
+      if (new Set(a.luecken.map(l => l.nach)).size !== 3) m.push("zwei Lücken mit demselben Satz");
+    }
+  }
+  return m;
+}
+
+const STUFEN_TEXT = {
+  s1: "Drei Bilder: Was passiert zuerst, was dann, was am Schluss?",
+  s2: "Drei kurze Sätze mit Bild in die richtige Reihenfolge bringen.",
+  s3: "Vier Sätze einer Geschichte ordnen — ohne Bilder.",
+  s4: "Fünf Sätze, einer gehört nicht dazu: zuerst aussortieren, dann ordnen.",
+  s5: "Fünf Sätze mit Zeitwörtern: Zuerst, Dann, Danach, Später, Am Schluss.",
+  s6: "Endgegner: sechs Sätze ordnen — oder Zeitwörter in Lücken setzen.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => STUFE[s].arten.every(art => vorrat(s, art).length)));
+
+const LOB = ["Richtig geordnet!", "Genau so geht die Geschichte!", "Super, alles in der richtigen Reihenfolge!", "So erzählt man das!"];
+
+/** Hinweis nach einem falsch angetippten Teil: Was in der Ablage liegt, ist richtig — gefragt ist das Nächste. */
+function ordnungsHinweis(a, erwartet, lesearm) {
+  const anfang = erwartet === a.schritte[0];
+  if (lesearm) return anfang ? "Das ist nicht der Anfang. Was passiert ganz zuerst?" : "Das kommt später. Was passiert direkt danach?";
+  return anfang
+    ? "Das ist nicht der Anfang der Geschichte. Womit fängt alles an?"
+    : "Das kommt erst später. Was passiert direkt nach dem letzten Satz in der Ablage?";
+}
+
+/** Gestufte Tipps fürs Ordnen (ctx.tipp): Anstoss, Anfang und Schluss suchen, dann der Tipp der Geschichte. */
+const ordnungsTipps = (a, lesearm) => [
+  "Was muss zuerst passieren, damit das Nächste überhaupt geht?",
+  lesearm ? "Such das Bild vom Anfang und das Bild vom Schluss." : "Such den Satz mit dem Anfang (jemand beginnt etwas) und den mit dem Schluss.",
+  a.tipp,
+];
+
+LS.spiel({
+  id: ID,
+  einleitung: "Jede Geschichte hat einen Anfang, eine Mitte und einen Schluss. Bring die Teile in die richtige Reihenfolge: Was passiert zuerst, was dann, was am Schluss?",
+  hilfe: stufe => ({
+    s1: "Tippe die Bilder der Reihe nach an: zuerst das, was am Anfang passiert, dann das Nächste. Jedes richtige Bild wandert nach oben in die Ablage.",
+    s2: "Tippe die Sätze der Reihe nach an: zuerst den Anfang der Geschichte, dann den nächsten Satz. Jeder richtige Satz wandert in die Ablage.",
+    s3: "Tippe die Sätze der Reihe nach an: zuerst den Anfang der Geschichte, dann den nächsten Satz. Jeder richtige Satz wandert in die Ablage.",
+    s4: "Zuerst tippst du den Satz an, der nicht zur Geschichte gehört. Danach tippst du die übrigen Sätze der Reihe nach an.",
+    s5: "Tippe die Sätze der Reihe nach an. Die Zeitwörter am Satzanfang helfen dir: Zuerst, Dann, Danach, Später, Am Schluss.",
+    s6: "Mal ordnest du sechs Sätze der Reihe nach. Mal setzt du bei drei Sätzen das passende Zeitwort ein: Tippe unter jedem Satz das richtige an.",
+  })[stufe],
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].arten.length > 1) ctx.serie("art", a.art);
+    if (ctx.nr === 0) ctx.sag(a.art === "luecken"
+      ? "Lies jeden Satz und tippe das Zeitwort an, das passt."
+      : "Tippe die Teile der Reihe nach an: Was passiert zuerst?");
+    const lesearm = a.art === "bilder";
+    const go = el("div", { class: `go ${lesearm ? "go-bilder" : "go-liste"}` });
+    ctx.flaeche.append(go);
+    if (!lesearm) go.append(el("div", { class: "vorgabe go-titel", text: `📖 ${a.titel}` }));
+
+    // Ordnen mit dem Baustein: Teile sind die Schritte (Objekte), gezeigt je nach Stufe.
+    const ordnen = (teile, inhalt, ablage, loesung) => {
+      ctx.tipp(ordnungsTipps(a, lesearm));
+      const { ablage: ab, box } = LS.reihenfolge(ctx, {
+        reihe: teile, breite: lesearm ? 100 : 720, pfeile: lesearm, inhalt, ablage, loesung,
+        hinweis: (wert, erwartet) => ordnungsHinweis(a, erwartet, lesearm),
+        lob: waehle(LOB),
+      });
+      go.append(ab, box);
+    };
+
+    if (a.art === "bilder") {
+      go.append(el("div", { class: "frage", text: "Was passiert zuerst? Tippe der Reihe nach." }));
+      ordnen(a.schritte, s => ({ bild: s.bild, text: s.kurz }), s => `${s.bild} ${s.kurz}`);
+    } else if (a.art === "bildsatz") {
+      go.append(el("div", { class: "frage", text: "Was passiert zuerst? Tippe die Sätze der Reihe nach an." }));
+      ordnen(a.schritte, s => ({ bild: s.bild, text: s.satz }), s => s.satz);
+    } else if (a.art === "saetze" || a.art === "ordnen") {
+      go.append(el("div", { class: "frage", text: a.art === "ordnen" ? "Ordne die sechs Sätze der Geschichte: Was passiert zuerst?" : "Bring die Sätze in die richtige Reihenfolge: Was passiert zuerst?" }));
+      ordnen(a.schritte, s => s.satz, s => s.satz);
+    } else if (a.art === "zeitwoerter") {
+      go.append(el("div", { class: "frage", text: "Ordne die Sätze. Die Zeitwörter am Anfang helfen dir." }));
+      const teile = a.saetze;
+      ctx.tipp([
+        "Schau auf das erste Wort jedes Satzes: Es sagt dir, wann das passiert.",
+        "Zuerst kommt vor Dann, Danach vor Später — und Am Schluss ist das Ende.",
+        a.tipp,
+      ]);
+      const { ablage: ab, box } = LS.reihenfolge(ctx, {
+        reihe: teile, breite: 720, inhalt: s => s, ablage: s => s,
+        hinweis: (wert, erwartet) => (erwartet === teile[0]
+          ? "Das ist nicht der Anfang. Welches Zeitwort sagt, dass etwas ganz am Anfang passiert?"
+          : "Das kommt erst später. Schau auf die Zeitwörter: Welches kommt direkt nach dem letzten Satz in der Ablage?"),
+        lob: waehle(LOB),
+      });
+      go.append(ab, box);
+    } else if (a.art === "ablenker") {
+      // Schritt 1: Welcher Satz gehört nicht dazu? Schritt 2: die übrigen vier ordnen.
+      const saetze = a.schritte.map(s => s.satz);
+      const loesung = `Gehört nicht dazu: „${a.ablenker}“ · Reihenfolge: ${saetze.join(" → ")}`;
+      ctx.loesung(loesung);
+      ctx.schritte(1);
+      ctx.tipp([
+        "Lies jeden Satz: Passiert darin etwas, das die Geschichte weiterführt?",
+        "Einer der Sätze beschreibt nur etwas. Er passt zum Thema, aber nicht in den Ablauf.",
+      ]);
+      const schritt = el("p", { class: "go-schritt", text: "1. Aussortieren" });
+      const frage = el("div", { class: "frage", text: "Welcher Satz gehört nicht zur Geschichte?" });
+      const wahl = el("div", { class: "wahl" });
+      wahl.style.setProperty("--wahl-breite", "720px");
+      go.append(schritt, frage, wahl);
+      let fertig = false;
+      for (const satz of mische([...saetze, a.ablenker])) {
+        const k = el("button", { type: "button", class: "wahl-knopf", text: satz });
+        k.addEventListener("click", () => {
+          if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+          if (satz !== a.ablenker) {
+            k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+            ctx.falsch("Dieser Satz gehört zur Geschichte: Darin passiert etwas. Such den Satz, der nur etwas beschreibt.", loesung);
+            if (ctx.vorbei()) { fertig = true; wahl.querySelectorAll("button").forEach(b => { b.disabled = true; }); }
+            return;
+          }
+          fertig = true;
+          k.classList.add("richtig");
+          LS.ton("tipp");
+          wahl.remove();
+          schritt.textContent = "2. Ordnen";
+          frage.textContent = "Jetzt ordne die vier Sätze: Was passiert zuerst?";
+          go.append(el("div", { class: "go-weg", text: satz }));
+          ordnen(a.schritte, s => s.satz, s => s.satz, loesung);
+        });
+        wahl.append(k);
+      }
+    } else if (a.art === "luecken") {
+      // Drei Sätze ohne Zeitwort, gemischt; unter jedem die drei Zeitwörter zur Wahl.
+      const loesung = a.luecken.map(l => `${l.wort} ${l.nach}`).join(" · ");
+      ctx.loesung(loesung);
+      ctx.schritte(a.luecken.length);
+      ctx.tipp([
+        "Lies alle drei Sätze: Welcher passiert ganz am Anfang, welcher ganz am Ende?",
+        "Das Zeitwort für den Anfang steht in der Liste vorne, das für das Ende hinten. Der dritte Satz bekommt das mittlere.",
+        a.tipp,
+      ]);
+      go.append(el("div", { class: "frage", text: "Welches Zeitwort passt in die Lücke: Zuerst, Dann oder Am Schluss?" }));
+      let offen = a.luecken.length;
+      const karten = [];
+      for (const l of mische(a.luecken)) {
+        const wort = el("span", { class: "go-lueckenwort", text: "___" });
+        const karte = el("div", { class: "go-luecke" }, el("p", { class: "go-luecke-satz" }, wort, " " + l.nach));
+        const wahl = el("div", { class: "wahl" });
+        wahl.style.setProperty("--wahl-breite", "100px");
+        for (const z of LUECKEN) {
+          const k = el("button", { type: "button", class: "wahl-knopf", text: z });
+          k.addEventListener("click", () => {
+            if (k.disabled || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
+            if (z === l.wort) {
+              k.classList.add("richtig");
+              wort.textContent = z;
+              karte.classList.add("gut");
+              wahl.querySelectorAll("button").forEach(b => { b.disabled = true; });
+              offen--;
+              if (offen) LS.ton("tipp");
+              else ctx.richtig(waehle(["Alle Zeitwörter passen!", "Genau so erzählt man die Geschichte!", "Richtig eingesetzt!"]));
+              return;
+            }
+            k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+            ctx.falsch("Lies den Satz nochmal: Passiert das ganz am Anfang, in der Mitte oder ganz am Ende der Geschichte?", loesung);
+            if (ctx.vorbei()) karten.forEach(c => c.querySelectorAll("button").forEach(b => { b.disabled = true; }));
+          });
+          wahl.append(k);
+        }
+        karte.append(wahl);
+        karten.push(karte);
+        go.append(karte);
+      }
+    }
+  },
+});
+</script>
+</body>
+</html>
