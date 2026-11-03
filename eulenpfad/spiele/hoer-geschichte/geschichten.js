@@ -122,7 +122,7 @@ const HOER_GESCHICHTEN = [
     text: "Am Herbstnachmittag räumt Lena mit ihrem Vater den Garten auf. Unter einem Haufen Laub entdeckt sie plötzlich einen kleinen Igel. Er rollt sich sofort zu einer Kugel zusammen. Lena lässt das Laub an dieser Stelle liegen, weil der Igel darin seinen Winterschlaf halten will. Am Abend stellt sie ihm noch ein Schälchen Wasser hin.",
     fragen: [
       ["wer", "Wer entdeckt den Igel?", "👧 Lena", "👨 der Vater", "🐱 die Katze"],
-      ["wo", "Wo ist der Igel?", "🍂 unter dem Laub", "🌳 auf dem Baum", "🏠 im Keller"],
+      ["wo", "Wo ist der Igel?", "🍂 unter dem Laub", "🌳 auf dem Baum", "⬇️ im Keller"],
       ["was", "Was macht der Igel?", "🦔 Er rollt sich zusammen.", "🏃 Er rennt davon.", "😴 Er schläft auf Lenas Hand."],
       ["warum", "Warum lässt Lena das Laub liegen?", "Der Igel will darin seinen Winterschlaf halten.", "Sie hat keine Lust mehr zum Aufräumen.", "Der Vater braucht es für den Kompost."],
       ["reihenfolge", "Was passierte zuerst? Tipp die drei Dinge der Reihe nach an.", ["Lena räumt den Garten auf.", "Sie entdeckt einen Igel.", "Sie stellt ihm Wasser hin."]],
@@ -212,7 +212,7 @@ const HOER_GESCHICHTEN = [
     text: "Am Morgen miaut es laut vor dem Haus. Die Katze von Nachbar Ruedi sitzt auf dem Garagendach und traut sich nicht hinunter. Leonie holt ihren Vater. Der stellt die lange Leiter an das Dach, weil die Katze sonst den ganzen Tag dort oben bliebe. Leonie klettert hinauf, nimmt die Katze auf den Arm und trägt sie vorsichtig zu Ruedi.",
     fragen: [
       ["wer", "Wer trägt die Katze zu Ruedi?", "👧 Leonie", "👨 der Vater", "👵 die Grossmutter"],
-      ["wo", "Wo sitzt die Katze?", "🏠 auf dem Garagendach", "🌳 auf dem Baum", "🚗 im Auto"],
+      ["wo", "Wo sitzt die Katze?", "⬆️ auf dem Garagendach", "🌳 auf dem Baum", "🚗 im Auto"],
       ["was", "Was holt der Vater?", "🪜 die lange Leiter", "🐟 einen Fisch", "📞 das Telefon"],
       ["warum", "Warum stellt der Vater die Leiter an?", "Die Katze bliebe sonst den ganzen Tag oben.", "Er will das Dach putzen.", "Leonie will auf dem Dach spielen."],
       ["reihenfolge", "Was passierte zuerst? Tipp die drei Dinge der Reihe nach an.", ["Die Katze miaut auf dem Dach.", "Der Vater stellt die Leiter an.", "Leonie trägt die Katze zu Ruedi."]],

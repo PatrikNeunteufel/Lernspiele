@@ -67,7 +67,7 @@ const GESCHICHTEN = [
     { bild: "📖", kurz: "Lesen", satz: "Ben liest das Buch." },
     { bild: "↩️", kurz: "Zurückbringen", satz: "Ben bringt das Buch zurück." } ] },
   { gruppe: 1, titel: "Der Hamster", tipp: "Am Anfang ist noch kein Tier da.", schritte: [
-    { bild: "🏠", kurz: "Käfig", satz: "Emma baut den Käfig auf." },
+    { bild: "📦", kurz: "Aufbauen", satz: "Emma baut den Käfig auf." },
     { bild: "🐹", kurz: "Einzug", satz: "Der Hamster zieht ein." },
     { bild: "🥕", kurz: "Füttern", satz: "Emma füttert den Hamster." } ] },
   { gruppe: 1, titel: "Das Zeltlager", tipp: "Am Anfang ist Jonas noch zu Hause.", schritte: [

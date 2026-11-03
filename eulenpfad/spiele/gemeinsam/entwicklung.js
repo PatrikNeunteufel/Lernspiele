@@ -149,10 +149,12 @@ LS.entwicklung = (() => {
   }
 
   let listenOffen = false; // Inhaltslisten in der Leiste aufgeklappt (bleibt beim Neuzeichnen)
+  let leisteDa = false;
   function spielLeiste() {
     const { el } = LS;
     const stand = LS.spielStand();
-    if (!stand || !aktiv() || window.parent !== window) return;
+    if (leisteDa || !stand || !aktiv() || window.parent !== window) return;
+    leisteDa = true;
     const leiste = el("div", { class: "entwickler-leiste" });
     document.body.append(leiste);
     const zeichne = async () => {
@@ -194,7 +196,11 @@ LS.entwicklung = (() => {
     };
     zeichne();
   }
-  if (typeof document !== "undefined") addEventListener("DOMContentLoaded", spielLeiste);
+  // Beim Laden der Seite und, für Spiele, die auf eine Stimme warten (spielMitStimme), wenn das Spiel startet.
+  if (typeof document !== "undefined") {
+    addEventListener("DOMContentLoaded", spielLeiste);
+    document.addEventListener("lernspiele:spiel", () => { if (document.readyState !== "loading") spielLeiste(); });
+  }
 
   return { freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, server, setzeGeprueft,
     bemerkung, bemerkungen, bemerkungsFeld, zeigeListe, zustand, serverMeldung };

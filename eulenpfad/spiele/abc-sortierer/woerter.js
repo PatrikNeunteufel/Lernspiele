@@ -10,7 +10,7 @@ const ABC_WOERTER = [
   ["Affe", "🐒"], ["Ameise", "🐜"], ["Apfel", "🍎"], ["Auto", "🚗"],
   ["Ball", "⚽"], ["Banane", "🍌"], ["Baum", "🌳"], ["Biene", "🐝"], ["Birne", "🍐"], ["Blume", "🌸"],
   ["Boot", "⛵"], ["Brot", "🍞"], ["Bus", "🚌"],
-  ["Dach", "🏠"], ["Delfin", "🐬"], ["Drache", "🐉"],
+  ["Daumen", "👍"], ["Delfin", "🐬"], ["Drache", "🐉"],
   ["Ei", "🥚"], ["Eis", "🍦"], ["Elefant", "🐘"], ["Ente", "🦆"], ["Esel", "🫏"],
   ["Fisch", "🐟"], ["Flasche", "🍾"], ["Fuchs", "🦊"],
   ["Gabel", "🍴"], ["Giraffe", "🦒"], ["Gurke", "🥒"],

@@ -591,10 +591,13 @@ Je gebautem Spiel:
 - [x] **König in der Falle** (`koenig-falle`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Schachstellungen: Matt in 1 und Matt in 2)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session11.md`
 - [x] **Stein-Duell** (`stein-duell`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session11.md`
 - [x] **Steine fangen** (`steine-fangen`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session11.md`
 
 ### NMG
 

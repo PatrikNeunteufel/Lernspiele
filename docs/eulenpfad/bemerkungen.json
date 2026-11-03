@@ -24,12 +24,38 @@
   {
     "nr": 3,
     "zeit": "2026-11-03T18:39:08+01:00",
-    "status": "offen",
+    "status": "erledigt 2026-11-03 (LERN_Session11): „Dach 🏠“ → „Daumen 👍“; dieselbe Unstimmigkeit (Bild zeigt etwas anderes als das Wort) auch im Geschichten-Ordner (Käfig 🏠 → Aufbauen 📦) und in der Hör-Geschichte (🏠 im Keller / auf dem Garagendach → ⬇️ / ⬆️) behoben",
     "text": "ein  Haus ist mehr als nur ein Dach",
     "von": "Patrik",
     "spiel": "abc-sortierer",
     "liste": "abc-sortierer/nomen-bild",
     "eintrag": "Dach | 🏠",
     "seite": "/eulenpfad/spiele/abc-sortierer/index.html"
+  },
+  {
+    "nr": 4,
+    "zeit": "2026-11-03T18:52:21+01:00",
+    "status": "erledigt 2026-11-03 (LERN_Session11): die durchsichtige Hornhaut lag über der Pupille und fing den Tipp ab; jetzt nehmen nur die Trefferflächen Tipps an, in fester Reihenfolge (Pupille obenauf)",
+    "antwort": "Danke! Du hattest recht: Die Pupille liess sich nicht antippen. Jetzt geht es.",
+    "text": "Meldung M-mw0zi4eq-quqq (Kind), 2026-11-03\nSpiel: Auge-Entdecker (auge-entdecker), Stufe 1, Aufgabe 3\nArt: Die Aufgabe lässt sich nicht lösen\nAufgabe: 👆 Tipp auf die Pupille!\nErwartete Lösung: Die Pupille: Es ist ganz in der Mitte, im farbigen Ring.\nGewertet: nicht gelöst, Lösung gezeigt nach 3 Fehlversuchen\nBegründung: pupille kann nicht angeklickt werden",
+    "von": "Patrik",
+    "spiel": "auge-entdecker",
+    "stufe": "s1",
+    "aufgabe": "Aufgabe 3: 👆 Tipp auf die Pupille!",
+    "seite": "/eulenpfad/index.html",
+    "meldung": "M-mw0zi4eq-quqq"
+  },
+  {
+    "nr": 5,
+    "zeit": "2026-11-03T18:52:22+01:00",
+    "status": "erledigt 2026-11-03 (LERN_Session11): der Trefferstreifen der Wimpern lag über dem oberen Lid; jetzt liegt das Lid in der Trefferebene über den Wimpern (geprüft an vier Stellen des oberen und am unteren Lid)",
+    "antwort": "Danke! Du hattest recht: Beim Augenlid hat das Spiel manchmal die Wimpern erkannt. Das ist behoben.",
+    "text": "Meldung M-mw0zf0bu-3zkb (Kind), 2026-11-03\nSpiel: Auge-Entdecker (auge-entdecker), Stufe 1, Aufgabe 1\nArt: Meine Antwort war richtig, wurde aber falsch gewertet\nAufgabe: 👆 Tipp auf das Augenlid!\nErwartete Lösung: Das Augenlid: Es liegt oben und unten als Rand um das Auge und kann sich schliessen.\nGewertet: richtig nach 2 Fehlversuchen\nBegründung: flache des augenlied geklickt, wimper erkannt",
+    "von": "Patrik",
+    "spiel": "auge-entdecker",
+    "stufe": "s1",
+    "aufgabe": "Aufgabe 1: 👆 Tipp auf das Augenlid!",
+    "seite": "/eulenpfad/index.html",
+    "meldung": "M-mw0zf0bu-3zkb"
   }
 ]

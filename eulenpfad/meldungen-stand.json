@@ -1,1 +1,10 @@
-{}
+{
+  "M-mw0zf0bu-3zkb": {
+    "antwort": "Danke! Du hattest recht: Beim Augenlid hat das Spiel manchmal die Wimpern erkannt. Das ist behoben.",
+    "status": "behoben"
+  },
+  "M-mw0zi4eq-quqq": {
+    "antwort": "Danke! Du hattest recht: Die Pupille liess sich nicht antippen. Jetzt geht es.",
+    "status": "behoben"
+  }
+}

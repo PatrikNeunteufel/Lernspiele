@@ -1674,6 +1674,9 @@ const LS = (() => {
     const buehne = document.querySelector(".buehne");
     const stufenListe = SKALA.filter(s => def.stufen[s.id]).map(s => ({ ...s, text: def.stufen[s.id] }));
     spielStand = { spiel: def.id };
+    // Spiele mit Stimme starten erst, wenn sie geladen ist (spielMitStimme) — oft nach DOMContentLoaded. Die
+    // Entwickler-Leiste wartet deshalb auf dieses Ereignis statt nur auf das Laden der Seite (LERN_Session11).
+    document.dispatchEvent(new Event("lernspiele:spiel"));
     tonSchalter(document.querySelector(".kopf .ton"));
     // ❓ Hilfe zur Bedienung (Entscheid T3 a, LERN_Session9): in der Kopfzeile, auch auf der Stufenwahl.
     const tonKnopf = document.querySelector(".kopf .ton");

@@ -362,3 +362,8 @@
 - Katalogfeld `art` (Spielweise, SP1 a) für alle 168 Spiele: 145 aus den Bausteinen, 23 nach dem Hilfetext; Testskript
   prüft es. Spieltabelle im Portal `portal/eulenpfad-spiele.html` (Name, Fach, Thema, Art, Klasse, Verfügbarkeit nach
   Prüfstand; Sortieren nach mehreren Spalten mit Priorität, Filter).
+- Bemerkungen 3–5 erledigt: Bild und Wort stimmen überein (ABC-Sortierer „Daumen 👍“ statt „Dach 🏠“, ebenso
+  Geschichten-Ordner und Hör-Geschichte); Auge-Entdecker mit eigener Trefferebene (Pupille und Augenlid antippbar,
+  sichtbare Formen fangen keine Tipps mehr); `meldungen-stand.json` mit zwei Antworten.
+- Entwickler-Leiste erscheint auch in Spielen, die auf eine Stimme warten (Au café und 12 weitere; Ereignis
+  `lernspiele:spiel` beim Start).

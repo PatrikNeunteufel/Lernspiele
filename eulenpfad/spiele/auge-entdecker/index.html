@@ -21,6 +21,10 @@
   .ae-bild .ae-markiert .ae-halo { opacity: 1; animation: ae-blink 1s ease-in-out infinite; }
   .ae-bild .ae-daneben .ae-halo { opacity: 1; stroke: var(--hinweis); animation: none; }
   .ae-bild .ae-richtig .ae-halo { opacity: 1; stroke: var(--gut); animation: none; }
+  /* Nur die unsichtbaren Trefferflächen nehmen Tipps an, nicht die sichtbaren Formen (Bemerkungen 4 und 5,
+     LERN_Session11: die durchsichtige Hornhaut lag über der Pupille, die Wimpern über dem Lid). */
+  .ae-bild .ae-teil, .ae-bild .ae-trefferebene { pointer-events: none; }
+  .ae-bild.ae-antippen .ae-trefferebene g { cursor: pointer; }
   .ae-bild .ae-treffer { fill: transparent; stroke: transparent; pointer-events: all; }
   .ae-bild .ae-treffer-strich { fill: none; stroke: transparent; pointer-events: stroke; stroke-linecap: round; }
   .ae-bild .ae-pupille { transition: r .6s ease; }
@@ -326,10 +330,30 @@ function augeBild({ farbe = 0, pupille = "mittel", antippen = false, klein = fal
   teil("traene", {}, svgEl("path", { class: "ae-halo", d: TROPFEN }),
     svgEl("path", { d: TROPFEN, fill: "var(--himmel-oben)", stroke: "var(--knopf)", "stroke-width": 2.5 }),
     svgEl("circle", { class: "ae-treffer", cx: 58, cy: 198, r: 24 }));
+  // Treffer obenauf in fester Reihenfolge, kleine Teile zuletzt: Pupille über dem Glanz der Hornhaut, Lid über dem
+  // Streifen der Wimpern, Träne über dem Lid. Das Bild selbst bleibt in der Zeichenreihenfolge.
+  trefferEbene(svg, teile, ["braue", "weiss", "iris", "hornhaut", "wimpern", "lid", "traene", "pupille"]);
   return {
     svg, teile,
     pupille(neu) { pupilleForm.setAttribute("r", neu); pupilleHalo.setAttribute("r", neu); pupilleTreffer.setAttribute("r", Math.max(neu, 20)); },
   };
+}
+
+/**
+ * Trefferflächen (.ae-treffer, .ae-treffer-strich) jedes Teils in eine eigene Ebene über dem Bild legen, in der
+ * Reihenfolge `reihe` (spätere liegen oben). Ein Tipp darauf löst den Klick auf der Gruppe des Teils aus — dort hängen
+ * die Hörer der Aufgaben, und dort leuchtet der Halo.
+ */
+function trefferEbene(svg, teile, reihe) {
+  const ebene = svgEl("g", { class: "ae-trefferebene" });
+  for (const id of reihe) {
+    const g = teile.get(id);
+    if (!g) continue;
+    const t = svgEl("g", { "data-treffer": id }, ...g.querySelectorAll(".ae-treffer, .ae-treffer-strich"));
+    t.addEventListener("click", () => g.dispatchEvent(new MouseEvent("click")));
+    ebene.append(t);
+  }
+  svg.append(ebene);
 }
 
 /** Auge von der Seite aufgeschnitten, das Licht kommt von links. Liefert { svg, teile }. */
@@ -383,6 +407,7 @@ function schnittBild({ farbe = 0, antippen = false } = {}) {
   teil("linse", svgEl("ellipse", { class: "ae-halo", cx: 154, cy: 150, rx: 13, ry: 36 }),
     svgEl("ellipse", { cx: 154, cy: 150, rx: 13, ry: 36, fill: "var(--himmel-oben)", stroke: "var(--knopf)", "stroke-width": 3 }),
     svgEl("ellipse", { class: "ae-treffer", cx: 154, cy: 150, rx: 22, ry: 42 }));
+  trefferEbene(svg, teile, ["glaskoerper", "netzhaut", "sehnerv", "hornhaut", "iris", "linse"]);
   return { svg, teile };
 }
 
