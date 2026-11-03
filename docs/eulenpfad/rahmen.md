@@ -274,8 +274,10 @@ Klasse im Profil nur Spiele, deren Basisklasse höchstens eine Klasse daneben li
 Stufe genau für seine Klasse haben. Er ist vorgegeben an, das Kind darf ihn ausschalten (Profil-Feld
 `meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Er steht mit „⭐ Mein Fokus“ und
 „🔍 Zu prüfen“ in einer eigenen Zeile **Nur** unter den Fächern, weil er kein Fach ist (Hinweis Patrik, LERN_Session10).
-**Thema und Stufe sind Mehrfachwahl** (Wunsch Patrik, LERN_Session10): jeder Chip schaltet einzeln, leer heisst keine
-Einschränkung; „Alle“ wählt alle an und, nochmals angetippt, alle ab. Bei genau einer Stufe zeigen die Karten den
+**Thema, Stufe und Klasse sind Mehrfachwahl** (Wunsch Patrik, LERN_Session10): jeder Chip schaltet einzeln, leer heisst keine
+Einschränkung; „Alle“ wählt alle an und, nochmals angetippt, alle ab. Die Zeile **Klasse** filtert nach der Basisklasse
+des Spiels (1.–6. Klasse) und steht allen offen, gedacht vor allem für die Aufsicht; „🎒 Meine Klasse“ bleibt die
+Abkürzung des Kindes. Bei genau einer Stufe zeigen die Karten den
 grossen Knopf „Stufe n spielen“, bei mehreren nur die gewählten Stufen. Gespeichert wird der Filter je Browser
 (`lernspiele:filter`, Listen von Ids; ältere Speicherungen mit einem Wert werden umgedeutet). Unter dem Filter stehen
 zwei Karten im Aufbau der Spielkarten, ohne Thema: **🎲 Zufallsmix** (öffnet die Mix-Seite) und **🎯 Zufälliges Spiel**

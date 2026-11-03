@@ -47,7 +47,7 @@ function zeichneSpiele(box, neu) {
   // Ältere Speicherungen hielten einen Wert oder "alle".
   const gespeichert = LS.lies("filter", {});
   const liste = v => (Array.isArray(v) ? v : !v || v === "alle" ? [] : [v]);
-  const filter = { fach: "alle", fokus: false, ...gespeichert, thema: liste(gespeichert.thema), stufe: liste(gespeichert.stufe) };
+  const filter = { fach: "alle", fokus: false, ...gespeichert, thema: liste(gespeichert.thema), stufe: liste(gespeichert.stufe), klasse: liste(gespeichert.klasse) };
   const setze = (k, v) => () => { filter[k] = v; if (k === "fach") filter.thema = []; LS.schreibe("filter", filter); neu(); };
   /** Einen Chip der Mehrfachwahl an- oder abwählen. */
   const schalte = (k, id) => () => { const s = new Set(filter[k]); if (s.has(id)) s.delete(id); else s.add(id); setze(k, [...s])(); };
@@ -79,7 +79,13 @@ function zeichneSpiele(box, neu) {
   const zuPruefen = s => LS.spielZuPruefen(s.id) || LS.spielListen(s.id).some(l => !l.von && !l.geprueft);
   const nurZuPruefen = aufsicht && filter.zuPruefen;
   if (aufsicht) nur.append(chip("🔍 Zu prüfen", nurZuPruefen, setze("zuPruefen", !filter.zuPruefen), `${SPIELE.filter(zuPruefen).length}`));
-  const zeilen = [faecher];
+  // Klasse (Wunsch Patrik, LERN_Session10): Basisklasse des Spiels, Mehrfachwahl wie Thema und Stufe; für alle sichtbar,
+  // gedacht vor allem für die Aufsicht. „🎒 Meine Klasse“ bleibt die Abkürzung des Kindes (Basisklasse ±1).
+  const basisklassen = [...new Set(SPIELE.map(s => s.klasse))].sort((a, b) => a - b);
+  const klassen = el("div", { class: "filter-zeile" }, el("span", { text: "Klasse" }),
+    alleChip("klasse", basisklassen),
+    ...basisklassen.map(k => chip(LS.klasseText(k), filter.klasse.includes(k), schalte("klasse", k))));
+  const zeilen = [faecher, klassen];
   if (nur.childElementCount > 1) zeilen.push(nur);
   if (filter.fach !== "alle") {
     const themen = THEMEN.filter(t => t.fach === filter.fach);
@@ -99,6 +105,7 @@ function zeichneSpiele(box, neu) {
     && (!filter.stufe.length || s.stufen.some(st => filter.stufe.includes(st)))
     && (!filter.fokus || s.lernziele.some(l => fokus.includes(l.lz)))
     && (!nurKlasse || Math.abs(s.klasse - klasse) <= 1)
+    && (!filter.klasse.length || filter.klasse.includes(s.klasse))
     && (!nurZuPruefen || zuPruefen(s))
     && (!treffer || treffer.has(s.id));
   // Suche (Entscheid SU1 a): Treffer nach Relevanz, sonst Fokus-Spiele zuerst und Katalog-Reihenfolge.
