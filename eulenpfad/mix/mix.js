@@ -161,7 +161,13 @@ function uebertrittsBericht(gespielt) {
 
 function starte(name, e) {
   const { el } = LS;
-  const auswahl = LS.mische(kandidaten(name, e)).slice(0, e.check ? UEBERTRITT.spieleJeRunde : MIX.spieleJeRunde);
+  // Spiele der Runde nach Bedarf ziehen (Wunsch Patrik, LERN_Session10; AUSWERTUNG.bedarf): wackelnde und noch nie
+  // gespielte Spiele kommen eher dran als sicher gekonnte. Der Übertritts-Check bleibt eine gleichmässige Stichprobe.
+  const runden = LS.protokoll().filter(r => r.name === name);
+  const fokusZiele = LS.profil(name).fokus;
+  const moeglich = kandidaten(name, e);
+  const auswahl = e.check ? LS.mische(moeglich).slice(0, UEBERTRITT.spieleJeRunde)
+    : AUSWERTUNG.ziehe(moeglich, x => AUSWERTUNG.bedarf(x.s.id, x.stufe, runden, fokusZiele), MIX.spieleJeRunde);
   if (!auswahl.length) return zeichneEinstellungen();
   buehne.innerHTML = "";
   const endlos = istEndlos(e);

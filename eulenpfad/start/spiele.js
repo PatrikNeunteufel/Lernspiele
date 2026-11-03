@@ -130,30 +130,11 @@ function zeichneSpiele(box, neu) {
       el("div", { class: "ziel", text: ziel }), el("div", { class: "stufenknoepfe" }, ...knoepfe));
     return k;
   }
-  /**
-   * Bedarf eines Spiels in einer Stufe für dieses Kind (Wunsch Patrik, LERN_Session10: der Zufall soll wählen,
-   * wo die Statistik Bedarf zeigt). Gewicht für die Zufallswahl: wackelnde Runden hoch, noch nie gespielt mittel,
-   * sicher und kürzlich geübt niedrig, sicher aber lange her wieder mittel (verteiltes Üben); Fokus-Lernziel verdoppelt.
-   */
+  // Bedarf (Wunsch Patrik, LERN_Session10): der Zufall wählt, wo die Statistik Bedarf zeigt — AUSWERTUNG.bedarf,
+  // dieselbe Gewichtung wie im Zufallsmix.
   const protokoll = LS.protokoll().filter(e => e.name === name);
-  function bedarf(s, stufeId) {
-    const rs = protokoll.filter(e => e.spiel === s.id && e.stufe === stufeId);
-    let g = 2; // noch nie gespielt: ausprobieren
-    if (rs.length) {
-      const letzte = rs.slice(-3);
-      const q = letzte.reduce((a, e) => a + AUSWERTUNG.anhieb(e), 0) / letzte.length;
-      const tage = (Date.now() - Date.parse(rs[rs.length - 1].zeit)) / 86400000;
-      g = q < AUSWERTUNG.QUOTE_UEBEN ? 1 + 4 * (1 - q) : tage >= 7 ? 2 : 0.5;
-    }
-    return imFokus(s) ? g * 2 : g;
-  }
-  /** Zufällig nach Gewicht ziehen. */
-  function ziehe(kandidaten, gewicht) {
-    const g = kandidaten.map(gewicht);
-    let r = Math.random() * g.reduce((a, b) => a + b, 0);
-    for (let i = 0; i < kandidaten.length; i++) { r -= g[i]; if (r < 0) return kandidaten[i]; }
-    return kandidaten[kandidaten.length - 1];
-  }
+  const bedarf = (s, stufeId) => AUSWERTUNG.bedarf(s.id, stufeId, protokoll, fokus);
+  const ziehe = AUSWERTUNG.ziehe;
   const stufenZufall = st => auswahl.filter(s => s.stufen.includes(st.id));
   const zufallsSpiel = st => { const s = ziehe(stufenZufall(st), x => bedarf(x, st.id)); location.href = `${s.pfad}?stufe=${st.id}`; };
   const zufallsKnoepfe = LS.SKALA.filter(st => (!filter.stufe.length || filter.stufe.includes(st.id)) && stufenZufall(st).length).map(st => {

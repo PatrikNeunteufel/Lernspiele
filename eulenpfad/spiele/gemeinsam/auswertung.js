@@ -134,6 +134,39 @@ const AUSWERTUNG = (() => {
    * (verteiltes Üben); bei sicherem Können eine Stufe höher; Fokus-Lernziele regelmässig;
    * bei nachlassender Konzentration kürzere Einheiten; lieber oft kurz als selten lang.
    */
+  /**
+   * Bedarf eines Spiels in einer Stufe für ein Kind (Wunsch Patrik, LERN_Session10): Gewicht für Zufallswahlen —
+   * „Zufälliges Spiel“ auf der Startseite und die Spiele einer Zufallsmix-Runde. Wackelnde Runden hoch
+   * (1 + 4 · (1 − Quote auf Anhieb der letzten drei)), noch nie gespielt 2 (ausprobieren), sicher und kürzlich
+   * geübt 0.5, sicher aber über sieben Tage her wieder 2 (verteiltes Üben); ein Fokus-Lernziel verdoppelt.
+   * runden: die Runden dieses Kindes (LS.protokoll(), nach Name gefiltert); fokus: seine Fokus-Lernziele.
+   */
+  function bedarf(spielId, stufe, runden, fokus = [], jetzt = Date.now()) {
+    const rs = runden.filter(e => e.spiel === spielId && e.stufe === stufe);
+    let g = 2;
+    if (rs.length) {
+      const letzte = rs.slice(-3);
+      const q = mittel(letzte.map(anhieb));
+      const tage = (jetzt - Date.parse(rs[rs.length - 1].zeit)) / TAG_MS;
+      g = q < QUOTE_UEBEN ? 1 + 4 * (1 - q) : tage >= 7 ? 2 : 0.5;
+    }
+    const s = spielVon(spielId);
+    return s && s.lernziele.some(l => fokus.includes(l.lz)) ? g * 2 : g;
+  }
+
+  /** Zufällig nach Gewicht ziehen: ohne n ein Element, mit n eine Liste ohne Zurücklegen (höchstens n). */
+  function ziehe(kandidaten, gewicht, n) {
+    const rest = kandidaten.map(x => ({ x, g: Math.max(0, gewicht(x)) }));
+    const aus = [];
+    while (rest.length && aus.length < (n ?? 1)) {
+      let r = Math.random() * rest.reduce((a, e) => a + e.g, 0);
+      let i = rest.findIndex(e => (r -= e.g) < 0);
+      if (i < 0) i = rest.length - 1;
+      aus.push(rest.splice(i, 1)[0].x);
+    }
+    return n === undefined ? aus[0] : aus;
+  }
+
   function vorschlaege(name, runden, profil, jetzt = Date.now()) {
     const v = [];
     const link = (spiel, stufe) => `${spielVon(spiel)?.pfad}?stufe=${stufe}`;
@@ -511,5 +544,5 @@ const AUSWERTUNG = (() => {
     return s;
   }
 
-  return { anhieb, mittel, median, sitzungen, lernzeiten, konzentration, vorschlaege, rundenZuLernziel, QUOTE_UEBEN, VORGEHEN, vorgehen, FAZIT, fazit, fazitFuerKind, korrelation };
+  return { anhieb, mittel, median, sitzungen, lernzeiten, konzentration, vorschlaege, rundenZuLernziel, QUOTE_UEBEN, VORGEHEN, vorgehen, FAZIT, fazit, fazitFuerKind, korrelation, bedarf, ziehe };
 })();
