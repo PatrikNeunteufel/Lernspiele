@@ -372,6 +372,19 @@ const ids = fs.readdirSync(SPIELE_DIR)
   .filter(d => !nurSpiele.length || nurSpiele.includes(d));
 
 let fehlerZahl = 0;
+// Doppelte Namen im Rahmen (LERN_Session12): eine zweite Funktion waehle(name, art, …) verdeckte still die zufällige
+// Auswahl waehle(liste) — jedes LS.waehle in 167 Dateien lief in die falsche Funktion, das Konfetti legte die
+// Farbliste als Spieler an. Zwei Deklarationen gleichen Namens auf der obersten Ebene der IIFE oder zweimal derselbe
+// Schlüssel in der Exportliste sind ein Fehler.
+{
+  const code = fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", "spiel.js"), "utf8");
+  const zaehle = namen => [...namen.reduce((m, n) => m.set(n, (m.get(n) || 0) + 1), new Map())].filter(([, n]) => n > 1).map(([k]) => k);
+  const deklariert = [...code.matchAll(/^ {2}(?:async )?(?:function|const|let) ([A-Za-z_$][\w$]*)/gm)].map(m => m[1]);
+  const exportBlock = (code.match(/^ {2}return \{\n([\s\S]*?)^ {2}\};/m) || [, ""])[1];
+  const exportiert = exportBlock.split(/[,\n]/).map(s => s.trim()).filter(s => /^[A-Za-z_$][\w$]*$/.test(s));
+  for (const n of zaehle(deklariert)) { console.log(`    FEHLER  spiel.js: ${n} ist auf oberster Ebene doppelt deklariert (die spätere verdeckt die frühere)`); fehlerZahl++; }
+  for (const n of zaehle(exportiert)) { console.log(`    FEHLER  spiel.js: ${n} steht doppelt in der Exportliste`); fehlerZahl++; }
+}
 const ohneTipp = new Map(); // Spiel → Stufen ohne ctx.tipp (Übersicht am Ende, LERN_Session9)
 console.log(`Prüfe ${ids.length} Spiele × ${STUFEN.length} Stufen (je ${opt.runden} Runden, ${opt.aufgaben} Generator-Aufgaben, Startwert ${opt.seed})\n`);
 for (const id of ids) {

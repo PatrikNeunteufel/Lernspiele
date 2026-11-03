@@ -400,6 +400,14 @@ button { font-family: inherit; }
 }
 
 .timer-schalter.an { background: var(--hinweis); color: #fff; box-shadow: 0 4px 0 #d97f00; }
+/* Avatar vor dem Namen (AV3 a): Bild aus avatare.js oder Anfangsbuchstabe */
+.avatar { display: inline-flex; width: var(--g, 32px); height: var(--g, 32px); flex: none; vertical-align: middle; }
+.avatar .avatar-bild { width: 100%; height: 100%; }
+.avatar-ersatz { width: 100%; height: 100%; border-radius: 50%; background: #eceef6; color: var(--deko-7);
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: calc(var(--g, 32px) * .5); }
+.spieler-zeile .avatar { margin-right: 6px; }
+/* Von der Aufsicht festgelegt (VR1 a): nur anzeigen, nicht antippbar */
+.aufsicht-fest { display: inline-flex; align-items: center; cursor: default; opacity: .85; }
 
 /* Entwickler-Leiste (Entscheid E2 a): nur bei freigeschaltetem Entwickler-Modus, unten fest */
 .entwickler-leiste {

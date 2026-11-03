@@ -182,13 +182,17 @@ const LS = (() => {
   //   erfolgeGesehen: [ids] — Abzeichen, die das Kind im Tab Erfolge schon gesehen hat (🆕 bis dahin)
   //   sortierung: { art, ab } — Sortierung im Tab Spiele (art aus EINSTELLUNGEN.sortierung, ab = absteigend);
   //     fehlt = Vorgabe der Aufsicht. sortierungWahl: true | false | fehlt = nach Einstellung und Klasse (SO1 a)
+  //   wahl: { timer: { <spiel>: bool }, reihenfolge: { <spiel>: Wert }, vorlesen: Wert } — was das Kind selbst auf der
+  //     Stufenwahl oder der Spielkarte umgestellt hat; gilt vor der Vorgabe (timer, reihenfolge, vorlesen), siehe VR1 a
+  //   fest: { timer, reihenfolge, vorlesen: bool } — von der Aufsicht festgelegt: die Wahl des Kindes gilt dann nicht
+  //   avatar: "<tier>-<farbe>" (avatare.js) — vom Kind selbst gewählt (AV1 a); fehlt = Anfangsbuchstabe
   //   geaendert: { <feld>: ISO, angelegt: ISO } — setzt speichereProfil; beim Abgleich gewinnt je Feld der jüngere Stand
   const LEERES_PROFIL = {
     alter: null, klasse: null, fokus: [], rolle: "kind",
     reihenfolge: { global: "stufe", spiele: {} },
     timer: { an: false, faktor: 1, spiele: {} },
     favoriten: [], endlosAn: [], ansicht: "kacheln", zu: [], mix: null,
-    lernplan: null, erfolgeGesehen: [], sortierung: null, sortierungWahl: null,
+    lernplan: null, erfolgeGesehen: [], sortierung: null, sortierungWahl: null, avatar: null,
   };
 
   /**
@@ -226,7 +230,7 @@ const LS = (() => {
     const t = { ...LEERES_PROFIL.timer, ...(profil(name).timer || {}) };
     const s = t.spiele?.[spiel] || {};
     return {
-      an: s.an ?? t.an,
+      an: wahlFuer(name, "timer")?.[spiel] ?? s.an ?? t.an,
       sekunden: s.sekunden?.[stufe] ?? Math.max(5, Math.round(vorgabeZeit(spiel, stufe) * (t.faktor || 1))),
     };
   }
@@ -244,11 +248,37 @@ const LS = (() => {
     return { sekunden: Math.max(5, Math.round(ms[Math.floor(ms.length / 2)] * 1.5 / 1000)), n: ms.length };
   }
 
-  /** Timer eines Spiels für einen Spieler ein- oder ausschalten (null = wie global). */
-  function setzeTimerSpiel(name, spiel, an) {
-    const t = { ...LEERES_PROFIL.timer, ...(profil(name).timer || {}) };
-    t.spiele = { ...t.spiele, [spiel]: { ...(t.spiele[spiel] || {}), an } };
-    speichereProfil(name, { timer: t });
+  // Wahl des Kindes und Vorgabe der Aufsicht (Entscheid VR1 a, LERN_Session12): Was das Kind auf der Stufenwahl oder
+  // der Spielkarte umstellt, steht eigens im Profil (wahl) und gilt vor der Vorgabe, die die Aufsicht im Profil setzt —
+  // ausser sie hat die Einstellung festgelegt (fest). Vorher schrieben beide dasselbe Feld, das Kind überschrieb still.
+  const WAHL_ARTEN = { timer: "Timer", reihenfolge: "Reihenfolge der Teile", vorlesen: "Vorlesen" };
+  /** Hat die Aufsicht diese Einstellung für das Kind festgelegt? */
+  const istFest = (name, art) => !!profil(name).fest?.[art];
+  /** Wahl des Kindes, soweit sie gilt (nicht festgelegt): bei timer und reihenfolge { <spiel>: Wert }, sonst der Wert. */
+  const wahlFuer = (name, art) => (istFest(name, art) ? undefined : profil(name).wahl?.[art]);
+  /** Das Kind wählt selbst (spiel = null bei Einstellungen für alle Spiele); false, wenn festgelegt. */
+  function setzeWahl(name, art, spiel, wert) {
+    if (istFest(name, art)) return false;
+    const w = { ...(profil(name).wahl || {}) };
+    w[art] = spiel == null ? wert : { ...(w[art] || {}), [spiel]: wert };
+    speichereProfil(name, { wahl: w });
+    return true;
+  }
+  /** Timer eines Spiels: Wahl des Kindes (Stufenwahl, Spielkarte); die Vorgabe je Spiel setzt die Aufsicht im Profil. */
+  const waehleTimer = (name, spiel, an) => setzeWahl(name, "timer", spiel, an);
+  const FEST_TEXT = "Das hat deine Aufsicht so eingestellt.";
+  /** „Auf Vorgabe zurück“: die Wahl des Kindes für eine Einstellung löschen. */
+  function wahlZuruecksetzen(name, art) {
+    const w = { ...(profil(name).wahl || {}) };
+    delete w[art];
+    speichereProfil(name, { wahl: w });
+  }
+  /** Festlegen oder freigeben (Aufsicht, im Profil). */
+  const setzeFest = (name, art, an) => speichereProfil(name, { fest: { ...(profil(name).fest || {}), [art]: !!an } });
+  /** Wie viele eigene Wahlen das Kind für eine Einstellung getroffen hat (für die Anzeige im Profil). */
+  function wahlAnzahl(name, art) {
+    const w = profil(name).wahl?.[art];
+    return w == null ? 0 : typeof w === "object" ? Object.keys(w).length : 1;
   }
 
   /** Reihenfolge-Werte für die Einstellung „Teile einer Aufgabe“. */
@@ -267,10 +297,10 @@ const LS = (() => {
     return wert === "stufe" ? ["s1", "s2", "s3"].includes(stufe) : wert === "geordnet";
   }
 
-  /** Gültige Reihenfolge eines Spiels: Einstellung je Spiel schlägt die globale (auch „stufe“). */
+  /** Gültige Reihenfolge eines Spiels: Wahl des Kindes → Vorgabe je Spiel → globale Vorgabe (auch „stufe“). */
   function reihenfolgeFuer(name, spiel) {
     const r = profil(name).reihenfolge || LEERES_PROFIL.reihenfolge;
-    return r.spiele?.[spiel] || r.global || "stufe";
+    return wahlFuer(name, "reihenfolge")?.[spiel] || r.spiele?.[spiel] || r.global || "stufe";
   }
 
   // Spieloptionen (Entscheid UE1 a, LERN_Session6): Ein Spiel beschreibt sie in def.optionen =
@@ -288,13 +318,6 @@ const LS = (() => {
     return w === "stufe" ? def.optionen[id].nachStufe(stufe) : w;
   }
 
-  /** Reihenfolge eines Spiels für einen Spieler setzen (wie die Wahl je Spiel im Profil). */
-  function setzeReihenfolgeSpiel(name, spiel, wert) {
-    const r = { ...LEERES_PROFIL.reihenfolge, ...(profil(name).reihenfolge || {}) };
-    r.spiele = { ...r.spiele, [spiel]: wert };
-    speichereProfil(name, { reihenfolge: r });
-  }
-
   /** Profile; frühere Testspieler (test: true, LERN_Session3) werden zur Aufsicht. */
   const profile = () => {
     const alle = lies("profile", {});
@@ -308,6 +331,19 @@ const LS = (() => {
   const aufsichtListe = () => spielerListe().filter(istAufsicht);
   /** Name mit 🔑 davor, wenn es eine Aufsicht ist — nur zur Anzeige. */
   const spielerName = name => (istAufsicht(name) ? `🔑 ${name}` : name);
+  /**
+   * Bild eines Spielers (AV3 a, LERN_Session12): sein Avatar (avatare.js, Profilfeld avatar), sonst ein Kreis mit dem
+   * Anfangsbuchstaben. Als Element, das vor dem Namen steht.
+   */
+  function avatarBild(name, groesse = 32) {
+    const kennung = profile()[name]?.avatar;
+    const svg = typeof AVATARE !== "undefined" && kennung ? AVATARE.svg(kennung, groesse) : null;
+    const box = el("span", { class: "avatar", "aria-hidden": "true" });
+    box.style.setProperty("--g", `${groesse}px`);
+    if (svg) box.innerHTML = svg;
+    else box.append(el("span", { class: "avatar-ersatz", text: (name || "?").trim().charAt(0).toUpperCase() }));
+    return box;
+  }
 
   // Anmeldung (Entscheid L1 a): Kinder ohne PIN. Die Aufsicht gilt nur in diesem Browser-Tab
   // (sessionStorage) — schliesst man ihn, ist sie abgemeldet und kein Kind erbt ihre Rechte.
@@ -1101,7 +1137,7 @@ const LS = (() => {
     return el("div", { class: "rangliste" },
       el("b", { text: mitTimer ? "⏱ mit Timer" : "ohne Timer" }),
       el("ol", {}, ...liste.slice(0, hoechstens).map(r => el("li", { class: r.name === ich ? "ich" : "" },
-        el("span", { text: r.name }), el("b", { text: String(r.punkte) })))));
+        el("span", {}, avatarBild(r.name, 22), ` ${r.name}`), el("b", { text: String(r.punkte) })))));
   }
 
   function besteSterne(name, spiel, stufe) {
@@ -1270,6 +1306,8 @@ const LS = (() => {
   }
   function vorlesenArt(name) {
     const p = profil(name);
+    const w = wahlFuer(name, "vorlesen");
+    if (w === "auto" || w === "knopf") return w;
     if (p.vorlesen === "auto" || p.vorlesen === "knopf") return p.vorlesen;
     const k = klasseVon(p);
     return k !== null && k <= 1 ? "auto" : "knopf";
@@ -1826,6 +1864,7 @@ const LS = (() => {
       const name = aktuellerSpieler();
       return el("div", { class: "spieler-zeile" },
         el("span", { text: "Du spielst als " }),
+        avatarBild(name, 30),
         el("b", { text: spielerName(name) }),
         el("a", { class: "link", href: `${START}#anmelden`, text: "wechseln" }));
     }
@@ -1834,34 +1873,41 @@ const LS = (() => {
     function timerZeile(neuZeichnen) {
       const name = aktuellerSpieler();
       const an = stufenListe.some(st => timerFuer(name, def.id, st.id).an);
+      const fest = istFest(name, "timer");
       return el("div", { class: "timer-zeile" },
-        el("button", {
-          type: "button", class: "timer-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
-          onclick: () => { setzeTimerSpiel(name, def.id, !an); ton("tipp"); neuZeichnen(); },
-        }, an ? "⏱ Timer an" : "⏱ Timer aus"),
-        el("span", { class: "leise", text: an ? "Jede Aufgabe hat eine Zeit. Ist sie um, zählt es als Fehler." : "Für mehr Spannung: Timer einschalten." }));
+        fest
+          ? el("span", { class: "timer-schalter aufsicht-fest" + (an ? " an" : ""), title: FEST_TEXT, text: `🔒 ${an ? "⏱ Timer an" : "⏱ Timer aus"}` })
+          : el("button", {
+            type: "button", class: "timer-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
+            onclick: () => { waehleTimer(name, def.id, !an); ton("tipp"); neuZeichnen(); },
+          }, an ? "⏱ Timer an" : "⏱ Timer aus"),
+        el("span", { class: "leise", text: fest ? FEST_TEXT : an ? "Jede Aufgabe hat eine Zeit. Ist sie um, zählt es als Fehler." : "Für mehr Spannung: Timer einschalten." }));
     }
 
     /**
      * Schalter „Teile: nach Stufe / geordnet / gemischt“ für Spiele mit `reihenfolge: true` im Katalog
-     * (Entscheid R1 a, LERN_Session6); schreibt dieselbe Wahl je Spiel wie das Profil.
+     * (Entscheid R1 a, LERN_Session6); schreibt die Wahl des Kindes (VR1 a), die Vorgabe steht im Profil.
      */
     function reihenfolgeZeile(neuZeichnen) {
       if (typeof SPIELE === "undefined" || !SPIELE.find(s => s.id === def.id)?.reihenfolge) return null;
       const name = aktuellerSpieler();
       return optionsZeile({
-        titel: "🔀 Teile:", wert: reihenfolgeFuer(name, def.id),
+        titel: "🔀 Teile:", wert: reihenfolgeFuer(name, def.id), fest: istFest(name, "reihenfolge"),
         werte: { stufe: "nach Stufe", geordnet: "geordnet", gemischt: "gemischt" },
         erklaerung: {
           stufe: "Stufe 1–3 geordnet, ab Stufe 4 gemischt.",
           geordnet: "Grösste Stelle links, kleinste rechts.",
           gemischt: "Die Teile stehen durcheinander. Das ist kniffliger.",
         },
-      }, k => setzeReihenfolgeSpiel(name, def.id, k), neuZeichnen);
+      }, k => setzeWahl(name, "reihenfolge", def.id, k), neuZeichnen);
     }
 
-    /** Eine Zeile mit Knöpfen je Wert, der gewählte gefüllt, darunter leise, was er heisst. */
+    /** Eine Zeile mit Knöpfen je Wert, der gewählte gefüllt, darunter leise, was er heisst; o.fest: nur der Wert mit 🔒. */
     function optionsZeile(o, setze, neuZeichnen) {
+      if (o.fest) return el("div", { class: "option-zeile" },
+        el("b", { text: o.titel }),
+        el("span", { class: "option-schalter an aufsicht-fest", title: FEST_TEXT, text: `🔒 ${o.werte[o.wert]}` }),
+        el("span", { class: "leise", text: `${o.erklaerung[o.wert]} ${FEST_TEXT}` }));
       return el("div", { class: "option-zeile" },
         el("b", { text: o.titel }),
         ...Object.entries(o.werte).map(([k, text]) => el("button", {
@@ -1883,13 +1929,13 @@ const LS = (() => {
       if (!vorlesenErlaubt(def.id)) return null;
       const name = aktuellerSpieler();
       return optionsZeile({
-        titel: "🗣️ Vorlesen:", wert: vorlesenArt(name),
+        titel: "🗣️ Vorlesen:", wert: vorlesenArt(name), fest: istFest(name, "vorlesen"),
         werte: { auto: "gleich", knopf: "auf Knopfdruck" },
         erklaerung: {
           auto: "Die Eule liest jede Aufgabe und jeden Tipp gleich vor. 🔇 oben schaltet alles stumm.",
           knopf: "Die Eule liest vor, wenn du auf 🗣️ neben ihr tippst.",
         },
-      }, k => speichereProfil(name, { vorlesen: k }), neuZeichnen);
+      }, k => setzeWahl(name, "vorlesen", null, k), neuZeichnen);
     }
 
     function stufenwahl() {
@@ -2739,7 +2785,7 @@ const LS = (() => {
     reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein", "vorlesen", "los-huelle", "los-ueber", "los-zahl", "los-knopf",
       "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
       "spieler-zeile",
-      "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
+      "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "aufsicht-fest", "avatar", "avatar-ersatz", "avatar-bild", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
       "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
@@ -2762,7 +2808,8 @@ const LS = (() => {
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
     freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, aehnlich, passung, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, sortierungFuer, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
-    REIHENFOLGEN, geordnet, vorgabeZeit, timerFuer, setzeTimerSpiel, zeitVorschlag,
+    REIHENFOLGEN, geordnet, reihenfolgeFuer, vorgabeZeit, timerFuer, waehleTimer, zeitVorschlag,
+    WAHL_ARTEN, istFest, wahlFuer, setzeWahl, wahlZuruecksetzen, setzeFest, wahlAnzahl, FEST_TEXT, avatarBild,
     stimmeBereit, sprich, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen,
     protokoll, besteSterne, auswahl, reihenfolge, fliegen, koerbe, pruefung, RAHMEN_KLASSEN,
   };

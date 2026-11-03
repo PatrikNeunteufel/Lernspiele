@@ -1,4 +1,5 @@
-/* Tab „Statistik“. Ein Kind sieht und sichert nur seine eigenen Runden. Die Aufsicht wählt jedes
+/* Tab „Statistik“. Ein Kind sieht vier Karten zu sich: was es als Nächstes übt, seine Woche, seine Runden, seine
+   Meldungen (Entscheid ST1 a, LERN_Session12). Die Aufsicht wählt jedes
    Kind, sieht den Vergleich, sichert alle oder einzelne, liest ein und setzt zurück (Entscheid L3 a).
    Runden der Aufsicht tragen test: true und zählen nur auf Wunsch mit (Entscheid T1 a). */
 "use strict";
@@ -35,7 +36,7 @@ function zeichneStatistik(box, neu) {
 
   const kopf = el("div", { class: "chips" });
   if (aufsicht) {
-    for (const n of namen) kopf.append(el("button", { type: "button", class: "chip", "aria-pressed": String(n === gewaehlt), text: LS.spielerName(n), onclick: () => { statistikVon = n; neu(); } }));
+    for (const n of namen) kopf.append(el("button", { type: "button", class: "chip", "aria-pressed": String(n === gewaehlt), onclick: () => { statistikVon = n; neu(); } }, LS.avatarBild(n, 22), ` ${LS.spielerName(n)}`));
     kopf.append(el("button", { type: "button", class: "chip", "aria-pressed": String(zeigeTest), text: zeigeTest ? "🧪 Testrunden ausblenden" : "🧪 Testrunden zeigen",
       onclick: () => { LS.schreibe("statistikTest", !zeigeTest); neu(); } }));
   }
@@ -49,6 +50,83 @@ function zeichneStatistik(box, neu) {
   const minuten = Math.round(runden.reduce((s, e) => s + (e.dauer || 0), 0) / 60);
   const profilText = [p.alter ? `${p.alter} Jahre` : null, LS.klasseVon(p) !== null ? LS.klasseText(LS.klasseVon(p)) : null].filter(Boolean).join(" · ") || "Profil noch ohne Alter und Klasse";
 
+  const meine = LS.meldungenVon(gewaehlt);
+
+  /** Vorschläge mit Knopf „Jetzt üben“. */
+  function vorschlagListe(vorschlaege) {
+    return vorschlaege.length
+      ? el("div", { class: "vorschlaege" }, ...vorschlaege.map(v => el("div", { class: `vorschlag ${v.art}` },
+          el("b", { text: v.titel }),
+          el("p", { text: v.text }),
+          v.link ? el("a", { class: "knopf gruen klein", href: v.link, text: "Jetzt üben ➜" }) : null)))
+      : el("p", { class: "leise-text", text: runden.length ? "Alles im grünen Bereich — weiter so!" : "Sobald ein paar Runden gespielt sind, erscheinen hier Vorschläge." });
+  }
+  /** Fehlermeldungen und Fehlerfinder (LERN_Session9): das Kind sieht, was aus seinen Meldungen wurde. */
+  function meldungenKarte() {
+    const gefunden = LS.gefundeneFehler(gewaehlt);
+    const spielName2 = id => SPIELE.find(s => s.id === id)?.name || id;
+    const k = karte(
+      el("h2", { text: aufsicht ? `🙋 Meldungen von ${gewaehlt}` : "🙋 Meine Meldungen" }),
+      gefunden ? el("p", { class: "fehlerfinder", text: `🏅 Fehlerfinder: ${gefunden} echte${gefunden === 1 ? "n Fehler gefunden, den" : " Fehler gefunden, die"} die Entwicklung behoben hat. Danke fürs genaue Hinschauen!` }) : null,
+      el("ul", { class: "meine-meldungen" }, ...[...meine].reverse().map(m => el("li", {},
+        el("b", { text: `${m.gelesen ? "" : "🔔 "}${new Date(m.zeit).toLocaleDateString("de-CH")} · ${spielName2(m.spiel)}` }),
+        el("div", { text: (aufsicht ? LS.MELDUNG_STATUS[m.status]?.text : LS.MELDUNG_STATUS[m.status]?.kind) || m.status }),
+        m.antwort ? el("div", { class: "leise-text", text: `💬 ${m.antwort}` }) : null))),
+      aufsicht ? el("p", { class: "leise-text", text: "Bearbeiten in der Verwaltung → 🙋 Meldungen." }) : null);
+    // Neue Antworten sind markiert, bis das Kind sie hier gesehen hat.
+    if (!aufsicht) LS.meldungenGelesen(gewaehlt);
+    return k;
+  }
+  /** Lernplan (Entscheid L1 a, LERN_Session10): Wochenziel und die letzten zwölf Wochen. */
+  function lernplanKarte(titel) {
+    const plan = ERFOLGE.lernplan(p, runden);
+    const letzte = plan.wochen.slice(-12);
+    const wochenText = w => `${w.von.toLocaleDateString("de-CH", { day: "numeric", month: "numeric" })}`;
+    return karte(
+      el("h2", { text: titel }),
+      // Ohne Wochenziel sagt es dem Kind die Wochenkarte selbst; die Aufsicht erfährt, wo sie eines setzt.
+      plan.plan || aufsicht ? el("p", { class: "leise-text", style: "margin:0 0 8px", text: plan.plan
+        ? `Wochenziel: ${plan.plan.tage} Tage × ${plan.plan.minuten} Minuten · ${plan.sterne} Wochenstern${plan.sterne === 1 ? "" : "e"}, ${plan.serie} in Folge.`
+        : "Kein Wochenziel gesetzt (Verwaltung → Konten → 📅). Gezeigt werden die Tage mit Runden." }) : null,
+      wochenKarte(plan),
+      letzte.length > 1 ? el("div", { class: "wochen-reihe" }, ...letzte.map(w => el("span", {
+        class: "wochen-punkt" + (w.erfuellt ? " erfuellt" : w.erfuellteTage ? " etwas" : "") + (w.laufend ? " laufend" : ""),
+        title: `Woche ab ${wochenText(w)}: ${w.erfuellteTage} Tag${w.erfuellteTage === 1 ? "" : "e"}${plan.plan ? (w.erfuellt ? ", Ziel erreicht" : ", Ziel nicht erreicht") : ""}`,
+      }, el("b", { text: wochenText(w) }), el("i", { text: w.erfuellt ? "🌟" : String(w.erfuellteTage) })))) : null);
+  }
+  /** Letzte Runden, die falsch gelösten Aufgaben aufklappbar. */
+  function rundenKarte(titel, anzahl) {
+    const letzte = runden.slice(-anzahl).reverse();
+    const verlauf = el("div");
+    if (!letzte.length) verlauf.append(el("p", { class: "leise-text", text: "Noch keine Runde gespielt." }));
+    for (const e of letzte) {
+      const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.spiel)} · Stufe ${stufeName(e.stufe)} · ${e.mix ? "🎲 im Zufallsmix" : "★".repeat(e.sterne)} · ${e.fehler} Fehler${e.tipps ? ` · 💡 ${e.tipps} Tipp${e.tipps === 1 ? "" : "s"}` : ""}${e.bedienhilfe ? " · ❓ Hilfe" : ""}${e.test ? " · 🧪 Test" : ""}${e.hilfe ? " · 🔑 mit Hilfe" : ""}` }));
+      if (e.fehlerAufgaben.length) {
+        d.append(el("ul", {}, ...e.fehlerAufgaben.map(f => el("li", {},
+          el("div", { text: f.text || "(Aufgabe)" }),
+          el("div", { class: "leise-text", text: `${f.versuche} Fehlversuch${f.versuche === 1 ? "" : "e"} · ${f.geloest ? "dann gelöst" : "Lösung gezeigt"}${f.loesung ? " · " + f.loesung : ""}` })))));
+      } else {
+        d.append(el("p", { class: "gut", text: "Alles auf Anhieb richtig!" }));
+      }
+      verlauf.append(d);
+    }
+    return karte(el("h2", { text: titel }), verlauf);
+  }
+
+  // ----- Ein Kind (Entscheid ST1 a, LERN_Session12) -----
+  // Es sieht, worauf es selbst handeln kann: was es als Nächstes übt, seine Woche, seine Runden, seine Meldungen.
+  // Auswertungen für Erwachsene (Lernzeiten, Konzentration, Vorgehen, Lernziele, Sterne, Daten) sieht nur die Aufsicht;
+  // Endlos-Plätze stehen im Tab Erfolge (ST2 a).
+  if (!aufsicht) {
+    seite.append(karte(el("h2", { text: "🦉 Das übe ich als Nächstes" }),
+      // Das freundliche Fazit erst, wenn die Aufsicht es freigegeben hat (Entscheid G3, Profil-Feld fazitFuerKind)
+      p.fazitFuerKind ? el("ul", { class: "fazit-kind" }, ...AUSWERTUNG.fazitFuerKind(runden, p, Date.now(), meine).map(s => el("li", { text: s }))) : null,
+      vorschlagListe(AUSWERTUNG.vorschlaege(gewaehlt, runden, p).slice(0, 4))));
+    seite.append(lernplanKarte("📅 Meine Woche"), rundenKarte("🔁 Meine Runden", 15));
+    if (meine.length) seite.append(meldungenKarte());
+    return;
+  }
+
   seite.append(karte(
     kopf,
     el("p", { class: "leise-text", style: "margin:0 0 12px", text: `${LS.spielerName(gewaehlt)} · ${profilText}` + (p.fokus.length ? ` · Fokus: ${p.fokus.join(", ")}` : "") }),
@@ -61,8 +139,7 @@ function zeichneStatistik(box, neu) {
   // ----- Fazit in Worten (AUSWERTUNG.fazit, LERN_Session9) -----
   // Die Aufsicht sieht das ganze Fazit; dem Kind gibt sie eine freundliche Fassung frei (Entscheid G3,
   // Profil-Feld fazitFuerKind, Vorgabe aus).
-  const meine = LS.meldungenVon(gewaehlt);
-  if (aufsicht) {
+  {
     const f = AUSWERTUNG.fazit(runden, p, Date.now(), meine);
     const freigabe = el("button", { type: "button", class: "chip", "aria-pressed": String(!!p.fazitFuerKind),
       text: p.fazitFuerKind ? `👀 ${LS.spielerName(gewaehlt)} sieht ein freundliches Fazit` : `👀 Fazit für ${LS.spielerName(gewaehlt)} freigeben`,
@@ -75,38 +152,14 @@ function zeichneStatistik(box, neu) {
       f.genug ? el("p", { class: "leise-text", text: `Regelbasiert aus den gespielten Runden, ohne KI; jede Aussage nennt ihre Zahlen. Ein Thema braucht mindestens ${AUSWERTUNG.FAZIT.minAufgaben} Aufgaben in ${AUSWERTUNG.FAZIT.minRunden} Runden, bevor es beurteilt wird. Die Grenzen sind Annahmen, bis Erfahrungen mit Kindern vorliegen.` }) : null,
       p.fazitFuerKind ? el("details", {}, el("summary", { text: `So liest es ${LS.spielerName(gewaehlt)}` }),
         el("ul", {}, ...AUSWERTUNG.fazitFuerKind(runden, p, Date.now(), meine).map(s => el("li", { text: s })))) : null));
-  } else if (p.fazitFuerKind) {
-    seite.append(karte(
-      el("h2", { text: "🦉 Mein Fazit" }),
-      el("ul", { class: "fazit-kind" }, ...AUSWERTUNG.fazitFuerKind(runden, p, Date.now(), meine).map(s => el("li", { text: s })))));
   }
 
-  // ----- Fehlermeldungen und Fehlerfinder (LERN_Session9) -----
-  // Das Kind sieht, was aus seinen Meldungen wurde; neue Antworten sind markiert, bis es sie hier gesehen hat.
-  if (meine.length) {
-    const gefunden = LS.gefundeneFehler(gewaehlt);
-    const spielName2 = id => SPIELE.find(s => s.id === id)?.name || id;
-    seite.append(karte(
-      el("h2", { text: aufsicht ? `🙋 Meldungen von ${gewaehlt}` : "🙋 Meine Meldungen" }),
-      gefunden ? el("p", { class: "fehlerfinder", text: `🏅 Fehlerfinder: ${gefunden} echte${gefunden === 1 ? "n Fehler gefunden, den" : " Fehler gefunden, die"} die Entwicklung behoben hat. Danke fürs genaue Hinschauen!` }) : null,
-      el("ul", { class: "meine-meldungen" }, ...[...meine].reverse().map(m => el("li", {},
-        el("b", { text: `${m.gelesen ? "" : "🔔 "}${new Date(m.zeit).toLocaleDateString("de-CH")} · ${spielName2(m.spiel)}` }),
-        el("div", { text: (aufsicht ? LS.MELDUNG_STATUS[m.status]?.text : LS.MELDUNG_STATUS[m.status]?.kind) || m.status }),
-        m.antwort ? el("div", { class: "leise-text", text: `💬 ${m.antwort}` }) : null))),
-      aufsicht ? el("p", { class: "leise-text", text: "Bearbeiten in der Verwaltung → 🙋 Meldungen." }) : null));
-    if (!aufsicht) LS.meldungenGelesen(gewaehlt);
-  }
+  if (meine.length) seite.append(meldungenKarte());
 
   // ----- Auswertung und Vorschläge -----
-  const vorschlaege = AUSWERTUNG.vorschlaege(gewaehlt, runden, p);
   seite.append(karte(
-    el("h2", { text: aufsicht ? `Das empfehle ich für ${gewaehlt}` : "Das empfehle ich dir" }),
-    vorschlaege.length
-      ? el("div", { class: "vorschlaege" }, ...vorschlaege.slice(0, 8).map(v => el("div", { class: `vorschlag ${v.art}` },
-          el("b", { text: v.titel }),
-          el("p", { text: v.text }),
-          v.link ? el("a", { class: "knopf gruen klein", href: v.link, text: "Jetzt üben ➜" }) : null)))
-      : el("p", { class: "leise-text", text: runden.length ? "Alles im grünen Bereich — weiter so!" : "Sobald ein paar Runden gespielt sind, erscheinen hier Vorschläge." })));
+    el("h2", { text: `Das empfehle ich für ${gewaehlt}` }),
+    vorschlagListe(AUSWERTUNG.vorschlaege(gewaehlt, runden, p).slice(0, 8))));
 
   // ----- Wann wird gelernt -----
   const lz = AUSWERTUNG.lernzeiten(runden);
@@ -119,22 +172,8 @@ function zeichneStatistik(box, neu) {
       el("div", {}, el("h3", { text: "Wochentage (gesamt)" }), saeulen(lz.wochentage.map(t => ({ name: t.name, wert: t.minuten, titel: `${t.name}: ${minFormat(t.minuten)} in ${t.runden} Runden` })), minFormat, { hoehe: 90 })),
       el("div", {}, el("h3", { text: "Tageszeit (Uhr)" }), saeulen(lz.fenster.map(t => ({ name: t.name, wert: t.minuten, titel: `${t.name} Uhr: ${minFormat(t.minuten)} in ${t.runden} Runden` })), minFormat, { hoehe: 90 })))));
 
-  // ----- Lernplan: Wochen (Entscheid L1 a, LERN_Session10) — Regelmässigkeit für die Aufsicht -----
-  {
-    const plan = ERFOLGE.lernplan(p, runden);
-    const letzte = plan.wochen.slice(-12);
-    const wochenText = w => `${w.von.toLocaleDateString("de-CH", { day: "numeric", month: "numeric" })}`;
-    seite.append(karte(
-      el("h2", { text: "📅 Lernplan" }),
-      el("p", { class: "leise-text", style: "margin:0 0 8px", text: plan.plan
-        ? `Wochenziel: ${plan.plan.tage} Tage × ${plan.plan.minuten} Minuten · ${plan.sterne} Wochenstern${plan.sterne === 1 ? "" : "e"}, ${plan.serie} in Folge.`
-        : "Kein Wochenziel gesetzt (Verwaltung → Konten → 📅). Gezeigt werden die Tage mit Runden." }),
-      wochenKarte(plan),
-      letzte.length > 1 ? el("div", { class: "wochen-reihe" }, ...letzte.map(w => el("span", {
-        class: "wochen-punkt" + (w.erfuellt ? " erfuellt" : w.erfuellteTage ? " etwas" : "") + (w.laufend ? " laufend" : ""),
-        title: `Woche ab ${wochenText(w)}: ${w.erfuellteTage} Tag${w.erfuellteTage === 1 ? "" : "e"}${plan.plan ? (w.erfuellt ? ", Ziel erreicht" : ", Ziel nicht erreicht") : ""}`,
-      }, el("b", { text: wochenText(w) }), el("i", { text: w.erfuellt ? "🌟" : String(w.erfuellteTage) })))) : null));
-  }
+  // ----- Lernplan: Wochen — Regelmässigkeit -----
+  seite.append(lernplanKarte("📅 Lernplan"));
 
   // ----- Konzentration -----
   const k = AUSWERTUNG.konzentration(runden);
@@ -272,32 +311,11 @@ function zeichneStatistik(box, neu) {
       legende));
   }
 
-  // ----- Letzte Runden -----
-  const letzte = runden.slice(-30).reverse();
-  const verlauf = el("div");
-  if (!letzte.length) verlauf.append(el("p", { class: "leise-text", text: "Noch keine Runde gespielt." }));
-  for (const e of letzte) {
-    const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.spiel)} · Stufe ${stufeName(e.stufe)} · ${e.mix ? "🎲 im Zufallsmix" : "★".repeat(e.sterne)} · ${e.fehler} Fehler${e.tipps ? ` · 💡 ${e.tipps} Tipp${e.tipps === 1 ? "" : "s"}` : ""}${e.bedienhilfe ? " · ❓ Hilfe" : ""}${e.test ? " · 🧪 Test" : ""}${e.hilfe ? " · 🔑 mit Hilfe" : ""}` }));
-    if (e.fehlerAufgaben.length) {
-      d.append(el("ul", {}, ...e.fehlerAufgaben.map(f => el("li", {},
-        el("div", { text: f.text || "(Aufgabe)" }),
-        el("div", { class: "leise-text", text: `${f.versuche} Fehlversuch${f.versuche === 1 ? "" : "e"} · ${f.geloest ? "dann gelöst" : "Lösung gezeigt"}${f.loesung ? " · " + f.loesung : ""}` })))));
-    } else {
-      d.append(el("p", { class: "gut", text: "Alles auf Anhieb richtig!" }));
-    }
-    verlauf.append(d);
-  }
-  seite.append(karte(el("h2", { text: "Letzte Runden" }), verlauf));
+  seite.append(rundenKarte("Letzte Runden", 30));
 
-  // ----- Daten -----
+  // ----- Daten (nur Aufsicht) -----
   const knopf = (text, onclick) => el("button", { class: "knopf hell klein", type: "button", text, onclick });
   const zeile = (...k) => el("div", { class: "knopfzeile", style: "justify-content:flex-start" }, ...k);
-  if (!aufsicht) {
-    seite.append(karte(el("h2", { text: "Meine Daten" }),
-      el("p", { class: "leise-text", style: "margin-top:0", text: "Alles bleibt in diesem Browser. Sichern speichert deine Runden in einer Datei." }),
-      zeile(knopf("💾 Meine Daten sichern", () => sichern([ich])))));
-    return;
-  }
   const datei = el("input", { type: "file", accept: "application/json", style: "display:none" });
   datei.addEventListener("change", async () => {
     const f = datei.files[0];

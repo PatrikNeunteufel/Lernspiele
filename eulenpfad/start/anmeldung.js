@@ -14,8 +14,9 @@ function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
     karte.innerHTML = "";
     karte.append(el("h2", { text: "Wer bist du?" }));
     const namen = el("div", { class: "namen" },
-      ...kinder.map(n => el("button", { type: "button", class: "name-knopf", text: n,
-        onclick: () => { LS.setzeSpieler(n); nachAnmeldung(); } })),
+      // Kachel mit Avatar und Namen darunter (AV3 a)
+      ...kinder.map(n => el("button", { type: "button", class: "name-knopf",
+        onclick: () => { LS.setzeSpieler(n); nachAnmeldung(); } }, LS.avatarBild(n, 64), el("span", { text: n }))),
       ...aufsichten.map(n => el("button", { type: "button", class: "name-knopf aufsicht", text: LS.spielerName(n),
         onclick: () => pinFrage(n) })));
     karte.append(namen);

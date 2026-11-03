@@ -8,6 +8,15 @@ const SCHALTER_SYMBOL = {
   stern: '<path d="M12 2.6l2.85 6 6.55.82-4.85 4.55 1.27 6.5L12 17.3l-5.82 3.17 1.27-6.5L2.6 9.42l6.55-.82z"/>',
   endlos: '<path class="linie" d="M7.6 8.2C5.3 8.2 3.5 9.9 3.5 12s1.8 3.8 4.1 3.8c3.6 0 5.2-7.6 8.8-7.6 2.3 0 4.1 1.7 4.1 3.8s-1.8 3.8-4.1 3.8c-3.6 0-5.2-7.6-8.8-7.6z"/>',
   uhr: '<rect x="10.2" y="1.8" width="3.6" height="2.6" rx="1"/><circle cx="12" cy="13.6" r="7.6"/><path class="zeiger" d="M12 13.6V9.2M12 13.6l3 2"/>',
+  // Reihenfolge der Teile (RF1 a, Satz B): drei absteigende Balken (grösste Stelle links), gemischt ein Mischpfeil
+  balken: '<rect x="3.4" y="4.5" width="4.4" height="15.5" rx="1"/><rect x="9.8" y="8.8" width="4.4" height="11.2" rx="1"/><rect x="16.2" y="13.2" width="4.4" height="6.8" rx="1"/>',
+  mischen: '<path d="M3 7h3.5c4.5 0 6.5 10 11 10H20M3 17h3.5c4.5 0 6.5-10 11-10H20M17.5 4.5 20.5 7l-3 2.5M17.5 14.5l3 2.5-3 2.5"/>',
+};
+// Reihenfolge auf der Karte: Antippen schaltet weiter (nach Stufe → geordnet → gemischt → nach Stufe).
+const REIHENFOLGE_KARTE = {
+  stufe: { symbol: "balken", an: false, naechste: "geordnet", text: "Teile nach Stufe (1–3 geordnet, ab 4 gemischt)" },
+  geordnet: { symbol: "balken", an: true, naechste: "gemischt", text: "Teile geordnet: grösste Stelle links" },
+  gemischt: { symbol: "mischen", an: true, naechste: "stufe", text: "Teile gemischt" },
 };
 function schalterSymbol(art, an) {
   if (!document.getElementById("gold-verlauf")) {
@@ -199,6 +208,33 @@ function zeichneSpiele(box, neu) {
     b.style.setProperty("--sf", st.farbe);
     return b;
   });
+  // Weiterspielen (Entscheid ZG1 a, LERN_Session12): die letzten fünf Spiele, Antippen startet die zuletzt gespielte
+  // Stufe (nach einer Endlos-Runde wieder endlos). Runden im Zufallsmix zählen nicht — dort hat der Mix gewählt.
+  if (!spielSuche.trim()) {
+    const zuletzt = [
+      ...protokoll.filter(e => !e.mix).map(e => ({ spiel: e.spiel, stufe: e.stufe, zeit: e.zeit, endlos: false })),
+      ...LS.rekorde().filter(e => e.name === name && !e.mix).map(e => ({ spiel: e.spiel, stufe: e.stufe, zeit: e.zeit, endlos: true })),
+    ].sort((a, b) => (a.zeit < b.zeit ? 1 : -1));
+    const gesehen = new Set();
+    const weiter = [];
+    for (const r of zuletzt) {
+      const s = SPIELE.find(x => x.id === r.spiel);
+      if (!s || gesehen.has(s.id) || !(aufsicht ? LS.spielSichtbar(s.id) : LS.fuerKinderSichtbar(s.id))) continue;
+      gesehen.add(s.id);
+      weiter.push({ s, ...r });
+      if (weiter.length === 5) break;
+    }
+    if (weiter.length) box.append(el("div", { class: "weiter-zeile" }, el("b", { class: "weiter-titel", text: "▶️ Weiterspielen" }),
+      ...weiter.map(({ s, stufe, endlos }) => {
+        const st = LS.SKALA.find(x => x.id === stufe) || LS.SKALA[0];
+        const a = el("a", { class: "weiter-karte", href: `${s.pfad}?stufe=${st.id}${endlos ? "&endlos=1" : ""}`,
+          "data-vorlesen": `${s.name}, Stufe ${st.nr}${endlos ? ", endlos" : ""}. Weiterspielen.`, title: `${s.name} · Stufe ${st.nr}${endlos ? " · ♾ Endlos" : ""}` },
+          el("span", { class: "weiter-bild", text: s.bild }), el("span", { class: "weiter-name", text: s.name }),
+          el("span", { class: "weiter-stufe" }, endlos ? schalterSymbol("endlos", true) : st.icon, ` ${st.nr}`));
+        a.style.setProperty("--f", s.farbe);
+        return a;
+      })));
+  }
   const zufallsKarten = [];
   if (SPIELE.some(s => LS.spielSichtbar(s.id))) zufallsKarten.push(zufallsKarte({ bild: "🎲", name: "Zufallsmix", farbe: "var(--deko-2)",
     ziel: "Aufgaben aus vielen Spielen gemischt — du stellst ein, wie schwer, wie lang und ob mit Timer.",
@@ -248,9 +284,17 @@ function zeichneSpiele(box, neu) {
     if (grund) marken.push(el("span", { class: "marke such-grund", text: aehnlichZu ? `🔗 ${grund}` : `🔍 gefunden ${grund}` }));
     const schalter = (an, art, text, onclick) => el("button", { type: "button", class: "karten-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
       "aria-label": text, title: text, onclick }, schalterSymbol(art, an));
+    // Von der Aufsicht festgelegt (VR1 a): Symbol mit 🔒, Antippen ändert nichts.
+    const festSchalter = (an, art, text) => el("span", { class: "karten-schalter fest", role: "img", "aria-label": `${text} — ${LS.FEST_TEXT}`,
+      title: `${text} — ${LS.FEST_TEXT}` }, schalterSymbol(art, an), el("span", { class: "schloss", text: "🔒" }));
+    const reihenfolge = s.reihenfolge ? REIHENFOLGE_KARTE[LS.reihenfolgeFuer(name, s.id)] || REIHENFOLGE_KARTE.stufe : null;
     // Schalter in einer eigenen schmalen Leiste oben rechts; darunter hat der Name die volle Breite.
     const schalterZeile = el("div", { class: "karten-schalter-zeile" },
-        schalter(timerAn, "uhr", timerAn ? "Timer aus" : "Timer ein: jede Aufgabe hat eine Zeit", () => { LS.setzeTimerSpiel(name, s.id, !timerAn); neu(); }),
+        reihenfolge && (LS.istFest(name, "reihenfolge") ? festSchalter(reihenfolge.an, reihenfolge.symbol, reihenfolge.text)
+          : schalter(reihenfolge.an, reihenfolge.symbol, `${reihenfolge.text} — antippen wechselt`,
+            () => { LS.setzeWahl(name, "reihenfolge", s.id, reihenfolge.naechste); neu(); })),
+        LS.istFest(name, "timer") ? festSchalter(timerAn, "uhr", timerAn ? "Timer an" : "Timer aus")
+          : schalter(timerAn, "uhr", timerAn ? "Timer aus" : "Timer ein: jede Aufgabe hat eine Zeit", () => { LS.waehleTimer(name, s.id, !timerAn); neu(); }),
         s.endlos?.length ? schalter(endlosAn, "endlos", endlosAn ? "Endlos aus" : "Endlos ein: so viele wie möglich ohne Fehler",
           () => speichere({ endlosAn: endlosAn ? p.endlosAn.filter(x => x !== s.id) : [...p.endlosAn, s.id] })) : null,
         schalter(favorit, "stern", favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten",

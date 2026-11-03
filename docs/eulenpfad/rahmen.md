@@ -707,3 +707,26 @@ Entscheide LP1 a, LP2 a, LP4 a, LP5 a (Patrik, LERN_Session11), LP3 a (Patrik, L
 - **Darstellung:** Linien zwischen den Zeilen, kurze Spalten so breit wie ihr Inhalt, lange Zellen (über 24 Zeichen)
   brechen um. Regeln für die Listen selbst (ein Inhalt je Abschnitt, Spalten mit fester Bedeutung, Gruppen, Beschreibung
   mit Stufen): die Pilotspiele Anlaut-Angel und Auge-Entdecker zeigen sie.
+
+## 18. Profil des Kindes, Avatar, Wahl und Vorgabe
+
+Entscheide AV1–AV3, ST1, ST2, ZG1, RF1, VR1 a (Patrik, LERN_Session12); Konzept und offene Teile (VR2, VR3, Ziele der
+Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
+
+- **Avatar** (`spiele/gemeinsam/avatare.js`, auf jeder Seite vor `spiel.js` geladen): 16 gezeichnete Tiere auf 6
+  Hintergrundfarben (Deko-Farben, nie Stellenfarben), Kennung `<tier>-<farbe>` im Profilfeld `avatar`; keine Fotos.
+  `LS.avatarBild(name, groesse)` gibt das Bild als Element, ohne Avatar den Anfangsbuchstaben. Es steht vor dem Namen:
+  Anmeldung (Kachel), Kopfzeile, Spielerzeile im Spiel, Endlos-Ranglisten, Namens-Chips der Aufsicht, Abzeichen-Bild.
+- **Profil:** Ein Kind sieht nur „Mein Bild“. Die Aufsicht setzt Alter, Klasse, Fokus und die Vorgaben für Vorlesen,
+  Reihenfolge und Timer, je Einstellung mit „🔒 fest“ und „↺ Auf Vorgabe zurück“.
+- **Wahl des Kindes** (VR1 a): Was das Kind auf der Stufenwahl oder der Spielkarte umstellt, steht im Profilfeld `wahl`
+  (`LS.waehle`, `LS.waehleTimer`) und gilt vor der Vorgabe (`timerFuer`, `reihenfolgeFuer`, `vorlesenArt`). Hat die
+  Aufsicht festgelegt (`fest`, `LS.setzeFest`), gilt die Wahl nicht; Stufenwahl und Karte zeigen den Wert mit 🔒
+  (Klasse `aufsicht-fest`). Später kommt die Ebene Klasse dazwischen (VR2, VR3, mit den Gruppen).
+- **Spielkarte:** Spiele mit `reihenfolge: true` haben einen vierten Schalter, der weiterschaltet: nach Stufe (Balken
+  grau), geordnet (Balken gold), gemischt (Mischpfeil gold).
+- **Tab Spiele:** zuoberst „▶️ Weiterspielen“ mit den letzten fünf Spielen (ohne Zufallsmix), Antippen startet die
+  zuletzt gespielte Stufe, nach einer Endlos-Runde wieder endlos.
+- **Statistik des Kindes:** „Das übe ich als Nächstes“ (Vorschläge, Fazit wenn freigegeben), „Meine Woche“, „Meine
+  Runden“, „Meine Meldungen“. Alles andere nur für die Aufsicht. **Erfolge:** „🏆 Meine Podestplätze“ — Platz 1–3 der
+  Endlos-Ranglisten dieses Geräts.

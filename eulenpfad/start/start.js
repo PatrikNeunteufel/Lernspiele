@@ -39,7 +39,7 @@ function werWahl() {
     LS.setzeSpieler(v);
     zeichneStart();
   });
-  return el("label", { class: "wer" }, el("span", { text: "Angemeldet:" }), wahl);
+  return el("label", { class: "wer" }, el("span", { text: "Angemeldet:" }), jetzt ? LS.avatarBild(jetzt, 34) : "", wahl);
 }
 
 /** Ganze Seite neu zeichnen; mitAufsicht: in der Anmeldung gleich die PIN dieser Aufsicht abfragen. */

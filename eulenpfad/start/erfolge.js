@@ -54,6 +54,14 @@ async function teileAbzeichen(a, name) {
   const datum = new Date(a.erreicht).toLocaleDateString("de-CH", { day: "numeric", month: "long", year: "numeric" });
   g.font = "800 26px 'Nunito', 'Segoe UI', sans-serif"; g.fillStyle = farbe("--text");
   g.fillText(`${name} hat das geschafft · ${datum}`, 400, 390, 680);
+  // Avatar oben links (AV3 a), als Bild aus dem SVG; ohne Avatar bleibt die Ecke leer.
+  const svg = AVATARE.svg(LS.profil(name).avatar, 110);
+  if (svg) {
+    const bild = new Image();
+    bild.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" '));
+    await new Promise(f => { bild.onload = f; bild.onerror = f; });
+    if (bild.naturalWidth) g.drawImage(bild, 70, 70, 110, 110);
+  }
   g.font = "800 20px 'Nunito', 'Segoe UI', sans-serif"; g.fillStyle = farbe("--deko-1");
   g.fillText("🦉 Eulenpfad", 400, 436);
   const blob = await new Promise(f => c.toBlob(f, "image/png"));
@@ -81,7 +89,7 @@ function zeichneErfolge(box, neu) {
   if (aufsicht && !kinder.includes(statistikVon)) statistikVon = kinder[0] || null;
   const name = aufsicht ? statistikVon : ich;
   const kopf = el("div", { class: "chips" });
-  if (aufsicht) for (const n of kinder) kopf.append(el("button", { type: "button", class: "chip", "aria-pressed": String(n === name), text: n, onclick: () => { statistikVon = n; neu(); } }));
+  if (aufsicht) for (const n of kinder) kopf.append(el("button", { type: "button", class: "chip", "aria-pressed": String(n === name), onclick: () => { statistikVon = n; neu(); } }, LS.avatarBild(n, 22), ` ${n}`));
   if (!name) { seite.append(karte(kopf, el("p", { text: "Noch keine Kinder. In der Verwaltung ein Kind anlegen." }))); return; }
 
   const p = LS.profil(name);
@@ -125,6 +133,29 @@ function zeichneErfolge(box, neu) {
       : el("p", { class: "leise-text", text: "Noch kein Abzeichen — das erste gibt es für die erste Runde!" }),
     offen.length ? el("h3", { text: "Noch zu holen" }) : null,
     offen.length ? el("div", { class: "abzeichen-raster" }, ...offen.map(kachel)) : null));
+
+  // Podestplätze (Entscheid ST2 a, LERN_Session12): je Spiel, Stufe und Timer, wo das Kind in der Endlos-Rangliste
+  // dieses Geräts auf Platz 1–3 steht. Plätze ab 4 erscheinen nicht; die ganze Rangliste steht im Startbild des Spiels.
+  const modi = new Map();
+  for (const e of LS.rekorde()) {
+    if (e.name !== name || e.test) continue;
+    const k = `${e.spiel}|${e.stufe}|${e.timer ?? ""}`;
+    if (!modi.has(k) || e.punkte > modi.get(k).punkte) modi.set(k, e);
+  }
+  const MEDAILLE = ["🥇", "🥈", "🥉"];
+  const podest = [...modi.values()].map(e => ({ e, platz: LS.ranglisteFuer(e.spiel, e.stufe, e.timer ?? null).findIndex(r => r.name === name) + 1 }))
+    .filter(x => x.platz >= 1 && x.platz <= 3).sort((a, b) => a.platz - b.platz || b.e.punkte - a.e.punkte);
+  if (podest.length) seite.append(karte(el("h2", { text: `🏆 Meine Podestplätze: ${podest.length}` }),
+    el("p", { class: "leise-text", text: "Im Endlos-Modus: so viele Aufgaben hintereinander ohne Fehler wie möglich. Verglichen wird bei gleicher Stufe und gleichem Timer." }),
+    el("div", { class: "podest-liste" }, ...podest.map(({ e, platz }) => {
+      const s = SPIELE.find(x => x.id === e.spiel);
+      const st = LS.SKALA.find(x => x.id === e.stufe);
+      return el("a", { class: "podest", href: s ? `${s.pfad}?stufe=${e.stufe}&endlos=1` : "mix.html" },
+        el("span", { class: "podest-platz", text: MEDAILLE[platz - 1] }),
+        el("span", { class: "podest-spiel", text: s ? `${s.bild} ${s.name}` : `🎲 ${LS.mixName(e.spiel)}` }),
+        el("span", { class: "leise-text", text: `Stufe ${st ? `${st.icon} ${st.nr}` : e.stufe}${e.timer ? " · ⏱" : ""}` }),
+        el("b", { text: `♾ ${e.punkte}` }));
+    }))));
   LS.langDruecken(seite);
 
   // Gesehen: Das Kind selbst merkt sich die erreichten Abzeichen; 🆕 verschwindet beim nächsten Zeichnen.

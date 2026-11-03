@@ -73,6 +73,10 @@ const PRUEFSTAND = {
       "am": "2026-11-02",
       "von": "Patrik"
     },
+    "koenig-falle": {
+      "am": "2026-11-03",
+      "von": "Patrik"
+    },
     "malkreuz": {
       "am": "2026-11-02",
       "von": "Patrik"
@@ -91,6 +95,14 @@ const PRUEFSTAND = {
     },
     "schriftlich-werkstatt": {
       "am": "2026-11-01",
+      "von": "Patrik"
+    },
+    "stein-duell": {
+      "am": "2026-11-03",
+      "von": "Patrik"
+    },
+    "steine-fangen": {
+      "am": "2026-11-03",
       "von": "Patrik"
     },
     "velo-tabelle": {
