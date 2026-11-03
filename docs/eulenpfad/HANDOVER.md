@@ -1,7 +1,18 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
-**2026-11-02, nach LERN_Session9** ([Report](report/LERN_Session9_2026-11-02.md)):
+**2026-11-03, nach LERN_Session10** ([Report](report/LERN_Session10_2026-11-03.md)):
+- **Spiele:** 165 (15 neu: Runde B 3. Klasse T1–T8 und Runde C S8, S9, S14, S15, T9–T11; Lernziele und Annahmen in
+  `lernziele/lehrplan_sg_session10.md`). **Beide Ideenlisten sind abgearbeitet** (Checkliste: 0 Ideen offen); der
+  Rest deckt sich mit vorhandenen Spielen oder braucht Daten von aussen (N9, N11).
+- **Startseite:** Zeile „Nur“ (Meine Klasse, Fokus, Zu prüfen), Thema/Stufe/Klasse als Mehrfachwahl, Karten
+  Zufallsmix und Zufälliges Spiel (rahmen.md 6). **Bedarf** (`AUSWERTUNG.bedarf`) gewichtet Zufall, Mix und
+  Suche (`LS.passung`); **„🔗 Ähnliche Spiele“** (`LS.aehnlich`) auf Startblatt und Schlusskarte.
+- **Lernplan und Erfolge** (L1 a, rahmen.md 15): Wochenziel je Kind, Wochenstern, Tab „🏅 Erfolge“ mit 24
+  Abzeichen und Teilen als Bild (Annahme B1: Vorname reist nur auf Knopfdruck mit).
+- **Tests:** 2026-11-03 „Keine Fehler.“ über alle 165 Spiele (17 bekannte Hinweise). Teilen auf echtem Gerät offen.
+
+Stand nach LERN_Session9 ([Report](report/LERN_Session9_2026-11-02.md)):
 - **Spiele:** 150 (10 neu, Runde A 6. Klasse mit Blick auf den Übertritt; `lernziele/lehrplan_sg_session9.md`,
   Plan in `spielideen/lehrplan_3_und_6.md`, als Nächstes Runde B 3. Klasse). Übertritts-Check im Zufallsmix.
 - **Rahmen neu:** Fazit in der Statistik (regelbasiert, fürs Kind nach Freigabe), Fehler melden 🙋 über die
@@ -54,12 +65,13 @@ Stand nach LERN_Session8 ([Report](report/LERN_Session8_2026-11-02.md)):
 
 **Nächste Session — Plan:**
 1. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
-2. „▶ Los! 3-2-1“ (`LS.losGehts`) nur bei der ersten Aufgabe einer Runde und nach Fehlern wieder (LERN-38).
-3. Entscheide: Umbenennen Detektiv / Sortierer / Puzzle (LERN-35), Farben rechts vom Komma, Malzeichen
-   „·“/„×“, Braille-Finger ohne freie Liste sichtbar (LERN-39).
-4. Patrik: neue Spiele ansehen und freigeben (LERN-21), Listen prüfen (LERN-11), Vorlesen auf dem Tablet
-   anhören (LERN-37).
-5. Rahmen-Wünsche aus LERN_Session8 (Report, Punkt 4); LERN-34, LERN-31, LERN-4, LERN-33.
+2. Patrik: Annahmen Runde B und C prüfen (LERN-43, `lernziele/lehrplan_sg_session10.md`), neue Spiele ansehen
+   und freigeben (LERN-21; der Übertritts-Check braucht freie Spiele der Basisklasse 5/6), Teilen eines
+   Abzeichens auf Tablet und Handy prüfen (LERN-46), Vorlesen anhören (LERN-37).
+3. Rahmen-Kandidat LERN-45: Baustein „Fragenfolge“ für Spiele mit mehreren Fragen je Aufgabe.
+4. Entscheide: Umbenennen Detektiv / Sortierer / Puzzle (LERN-35), Farben rechts vom Komma, Malzeichen
+   „·“/„×“, Braille-Finger ohne freie Liste sichtbar (LERN-39); Postfach für Meldungen (LERN-40).
+5. Weiter offen: LERN-41, LERN-34, LERN-31, LERN-4, LERN-33.
 
 Technik: HTML/CSS/JS ohne Build (Entscheid LERN-1). Vertrag zwischen Rahmen und Spielen: [rahmen.md](rahmen.md).
 Übersicht aller Spiele und was zu prüfen ist: [checkliste.md](checkliste.md) (erzeugt mit `node tools/checkliste.js`). Gemeinsamer Rahmen `spiele/gemeinsam/`:
@@ -124,7 +136,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-10 | Spielideen aus dem Lehrplan Volksschule SG, alle Fächer 1.–6. Kl. | erledigt 2026-10-31 (LERN_Session1) | docs/spielideen/lehrplan_sg_spielideen.md |
 | LERN-11 | Inhaltslisten prüfen lassen | offen (Prüfung durch Patrik oder Lehrperson, Entscheid a) | docs/pruefung/wortlisten_zur_pruefung.md (Teile 1–39); geprüfte Listen im Katalog `geprueft` |
 | LERN-12 | Timer, Zeitmessung und didaktische Statistik | erledigt 2026-10-31 (LERN_Session1) | spiel.js, auswertung.js, statistik.html |
-| LERN-13 | Weitere Spiele aus den Spielideen | in Arbeit seit 2026-10-31 (LERN_Session2); 150 Spiele gebaut | checkliste.md; lehrplan_sg_5-6.md; lehrplan_3_und_6.md (Runde B offen) |
+| LERN-13 | Weitere Spiele aus den Spielideen | erledigt 2026-11-03 (LERN_Session10, 165 Spiele; beide Ideenlisten abgearbeitet, Rest deckt sich mit vorhandenen Spielen oder braucht Daten von aussen) | checkliste.md; lehrplan_sg_5-6.md; lehrplan_3_und_6.md |
 | LERN-14 | Testskript für die Aufgabengeneratoren aller Spiele (Node) | erledigt 2026-10-31 (LERN_Session2) | tools/pruefe_spiele.js |
 | LERN-15 | Stufenskala mit Basisklasse und Königsstufe | erledigt 2026-10-31 (LERN_Session2, Entscheid Patrik) | CLAUDE.md; docs/lernziele/lehrplan_sg_session2.md |
 | LERN-16 | Spielstand zurücksetzen und zwischen Geräten abgleichen | erledigt 2026-10-31 (LERN_Session2, Entscheid a: Zusammenführen) | statistik.html, LS.zusammenfuehren |
@@ -153,4 +165,8 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-39 | Entscheide aus LERN_Session8: Farben rechts vom Komma, Malzeichen, Braille-Finger ohne freie Liste | offen | Report LERN_Session8, Plan 1 |
 | LERN-40 | E-Mail-Adresse für Fehlermeldungen bestimmen (eigenes Postfach, A1 a) und eintragen | offen | `eulenpfad/kontakt.js`, Feld `meldungen`; rahmen.md Abschnitt 13 |
 | LERN-41 | Fachlich unsichere Stellen aus LERN_Session9 prüfen (Tipps, Regeln, Fakten, Preise; Annahmen Runde A) | offen | Report LERN_Session9, Plan 1 |
-| LERN-42 | Prüfer: Spiel-CSS definiert eine reservierte Rahmen-Klasse neu | offen | Report LERN_Session9, Stolperfallen |
+| LERN-42 | Prüfer: Spiel-CSS definiert eine reservierte Rahmen-Klasse neu | erledigt 2026-11-02 (LERN_Session9, `rahmenKlassenImStil` im Testskript; im Handover erst 2026-11-03 nachgetragen) | tools/pruefe_spiele.js |
+| LERN-43 | Fachlich unsichere Stellen aus LERN_Session10 prüfen (Annahmen Runde B und C, ZU-PRÜFEN-Köpfe der 13 Inhaltsdateien) | offen | lernziele/lehrplan_sg_session10.md; Report LERN_Session10, Plan 1 |
+| LERN-44 | Lernplan: Wochenziel je Kind, Wochenstern, Tab Erfolge mit Abzeichen und Teilen (R2, Entscheid L1 a) | erledigt 2026-11-03 (LERN_Session10) | rahmen.md Abschnitt 15 |
+| LERN-45 | Rahmen-Baustein „Fragenfolge“ (mehrere Fragen je Aufgabe), danach sechs Spiele darauf umstellen | offen | Report LERN_Session10, Stolperfallen |
+| LERN-46 | Teilen eines Abzeichens auf Tablet und Handy prüfen (Teilen-Dialog, Emoji im PNG) | offen | start/erfolge.js, `teileAbzeichen` |
