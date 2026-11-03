@@ -437,10 +437,27 @@ const LS = (() => {
       listen: spielListen(e.id).map(l => l.name), thema: thema ? [`${thema.name}: ${thema.titel}`] : [] };
   }
   /**
-   * Spiele zur Suche, beste zuerst: [{ id, wert, grund }]; grund z. B. „im Thema Wortschatz: …“ oder null,
-   * wenn alle Suchwörter auf der Karte stehen. Leere Suche: null.
+   * Persönliche Passung eines Spiels, 0 bis 1 (Wunsch Patrik, LERN_Session10: Suche und Ähnliche Spiele sollen
+   * Profil und Statistik mitnehmen). person = { klasse, bedarf(spielId) } — klasse des Kindes (null = unbekannt),
+   * bedarf wie AUSWERTUNG.bedarf (0.5 sicher … 5 wackelnd, Fokus doppelt); null ohne person (Aufsicht, Testskript).
+   * Hälfte Nähe der Basisklasse (gleich 1, eine daneben 0.6, zwei 0.2, sonst 0), Hälfte Bedarf (auf 5 gedeckelt).
    */
-  function suche(text) {
+  const PASSUNG_FAKTOR = 0.5; // höchstens das Anderthalbfache der Textrelevanz — der Text bleibt massgebend
+  function passung(spielId, person) {
+    if (!person) return null;
+    const b = basisKlasse(spielId);
+    const naehe = person.klasse == null || b == null ? 0.5 : ([1, 0.6, 0.2][Math.abs(person.klasse - b)] ?? 0);
+    const bedarf = person.bedarf ? Math.min(Math.max(person.bedarf(spielId), 0) / 5, 1) : 0.5;
+    return (naehe + bedarf) / 2;
+  }
+  const mitPassung = (wert, p) => (p === null ? wert : wert * (1 + PASSUNG_FAKTOR * p));
+
+  /**
+   * Spiele zur Suche, beste zuerst: [{ id, wert, grund, passung }]; grund z. B. „im Thema Wortschatz: …“ oder null,
+   * wenn alle Suchwörter auf der Karte stehen. Leere Suche: null. Mit person (siehe passung) zählt die Passung
+   * als Faktor auf die Textrelevanz; bei gleich gutem Text kommt zuerst, was zur Klasse passt und Bedarf hat.
+   */
+  function suche(text, person = null) {
     const qs = suchWoerter(text);
     if (!qs.length || typeof SPIELE === "undefined") return null;
     const treffer = [];
@@ -458,9 +475,35 @@ const LS = (() => {
         wert += best;
         if (!SUCH_SICHTBAR.has(wo.feld)) gruende.push(wo.feld === "thema" ? `im Thema ${wo.t}` : `in der Liste „${wo.t}“`);
       }
-      treffer.push({ id: e.id, wert, rang, grund: gruende.length ? [...new Set(gruende)].join("; ") : null });
+      const p = passung(e.id, person);
+      treffer.push({ id: e.id, wert: mitPassung(wert, p), passung: p, rang, grund: gruende.length ? [...new Set(gruende)].join("; ") : null });
     });
     return treffer.sort((a, b) => b.wert - a.wert || a.rang - b.rang).map(({ rang, ...t }) => t);
+  }
+
+  /**
+   * Ähnliche Spiele zu einem Spiel, ähnlichste zuerst: [{ id, wert, grund, passung }] (Wunsch Patrik, LERN_Session10).
+   * Gleiches Lernziel 4 je Code, gleiches Thema 3, gleiches Fach 1; je Basisklasse Abstand 0.5 Abzug (höchstens 1);
+   * dazu die Passung wie bei der Suche. grund nennt, was gleich ist.
+   */
+  function aehnlich(spielId, person = null) {
+    const e = katalogEintrag(spielId);
+    if (!e || typeof SPIELE === "undefined") return [];
+    const fachVon = x => (typeof THEMEN !== "undefined" ? THEMEN.find(t => t.id === x.thema)?.fach : null);
+    const liste = [];
+    SPIELE.forEach((x, rang) => {
+      if (x.id === spielId) return;
+      const lz = x.lernziele.filter(l => e.lernziele.some(m => m.lz === l.lz)).map(l => l.lz);
+      const thema = x.thema === e.thema;
+      const fach = fachVon(x) === fachVon(e);
+      if (!lz.length && !thema) return; // nur das Fach gemeinsam: zu wenig für „ähnlich“
+      let wert = 4 * lz.length + (thema ? 3 : 0) + (fach ? 1 : 0);
+      wert -= Math.min(2, Math.abs((x.klasse || 0) - (e.klasse || 0))) * 0.5;
+      const gruende = [lz.length ? `gleiches Lernziel ${[...new Set(lz)].join(", ")}` : null, thema ? "gleiches Thema" : null].filter(Boolean);
+      const p = passung(x.id, person);
+      liste.push({ id: x.id, wert: mitPassung(wert, p), passung: p, rang, grund: gruende.join("; ") });
+    });
+    return liste.sort((a, b) => b.wert - a.wert || a.rang - b.rang).map(({ rang, ...t }) => t);
   }
   /** Warum sehen Kinder das Spiel nicht? Kurzer Text oder null, wenn sie es sehen. */
   function sperrGrund(spielId) {
@@ -1662,6 +1705,8 @@ const LS = (() => {
         stufen.append(knopf);
       }
       karte.append(stufen);
+      // Ähnliche Spiele (Wunsch Patrik, LERN_Session10): die Startseite zeigt sie als Liste (start/spiele.js, ?aehnlich=).
+      karte.append(el("div", { class: "knopfzeile" }, el("a", { class: "knopf hell klein", href: `${START}?aehnlich=${def.id}#spiele`, text: "🔗 Ähnliche Spiele" })));
       // Vorlesen auf dem Startblatt: 🗣️ liest die Einleitung, langes Drücken einen Stufenknopf — nur auf
       // Knopfdruck; automatisch liest die Eule nur im Spiel selbst (Vorgabe Patrik, LERN_Session8).
       if (vorlesenErlaubt(def.id)) {
@@ -2257,7 +2302,8 @@ const LS = (() => {
           eule.element,
           el("div", { class: "knopfzeile" },
             el("button", { class: "knopf gruen", type: "button", text: "Nochmal spielen", onclick: () => runde(stufe) }),
-            el("button", { class: "knopf hell", type: "button", text: "Andere Stufe", onclick: stufenwahl })));
+            el("button", { class: "knopf hell", type: "button", text: "Andere Stufe", onclick: stufenwahl }),
+            el("a", { class: "knopf hell", href: `${START}?aehnlich=${def.id}#spiele`, text: "🔗 Ähnliche Spiele" })));
         buehne.append(karte);
         // Text nach der Fehlerzahl dieser Runde — 3 Sterne gibt es auch mit einem Fehler. Tipps werden genannt.
         const mitTipps = tippsRunde ? ` Du hast ${tippsRunde === 1 ? "einen Tipp" : `${tippsRunde} Tipps`} geholt.` : "";
@@ -2327,7 +2373,8 @@ const LS = (() => {
           rangliste(def.id, stufe.id, mitTimer, name),
           el("div", { class: "knopfzeile" },
             el("button", { class: "knopf gruen", type: "button", text: "♾ Nochmal", onclick: () => runde(stufe, true) }),
-            el("button", { class: "knopf hell", type: "button", text: "Andere Stufe", onclick: stufenwahl })));
+            el("button", { class: "knopf hell", type: "button", text: "Andere Stufe", onclick: stufenwahl }),
+            el("a", { class: "knopf hell", href: `${START}?aehnlich=${def.id}#spiele`, text: "🔗 Ähnliche Spiele" })));
         buehne.append(karte);
         eule.sag(allesGeschafft ? "Unglaublich — du hast alle Aufgaben dieser Stufe geschafft! 🏆"
           : neuerRekord ? `Neuer Rekord, ${name}! 🎉` + (vorher ? ` Vorher waren es ${vorher}.` : "")
@@ -2400,7 +2447,7 @@ const LS = (() => {
     setzeMeldung, meldungenGelesen, meldungFuerEntwicklung, meldeFormular, meldungStandAnwenden, meldungStatusAusBemerkung,
     meldungAdresse, meldungMailLink, meldungAusText,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
-    freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, spielListen, listeFrei, setzeListeFrei, freieListen,
+    freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, aehnlich, passung, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, vorgabeZeit, timerFuer, setzeTimerSpiel, zeitVorschlag,
     stimmeBereit, sprich, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen,

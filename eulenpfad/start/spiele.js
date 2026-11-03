@@ -28,13 +28,18 @@ let spielSucheTippt = false; // nach dem Neuzeichnen das Suchfeld wieder fokussi
 /** Suchfeld, das bei jeder Eingabe neu zeichnet und danach den Fokus zurückholt. */
 function suchFeld(wert, setze, neu, platzhalter) {
   const feld = LS.el("input", { class: "feld suche", type: "search", placeholder: platzhalter, "aria-label": platzhalter, value: wert });
-  feld.addEventListener("input", () => { setze(feld.value); spielSucheTippt = true; neu(); });
+  feld.addEventListener("input", () => { setze(feld.value); spielSucheTippt = true; aehnlichSchliessen(); neu(); });
   if (spielSucheTippt) {
     spielSucheTippt = false;
     requestAnimationFrame(() => { feld.focus(); feld.setSelectionRange(feld.value.length, feld.value.length); });
   }
   return feld;
 }
+
+/** Spiel-Id aus „?aehnlich=<id>“ in der Adresse (Knopf „🔗 Ähnliche Spiele“ im Spiel), oder null. */
+const aehnlichId = () => new URLSearchParams(location.search).get("aehnlich");
+/** Die Liste der ähnlichen Spiele verlassen: Parameter aus der Adresse nehmen (Tab bleibt). */
+function aehnlichSchliessen() { if (aehnlichId()) history.replaceState(null, "", location.pathname + location.hash); }
 
 function zeichneSpiele(box, neu) {
   const { el } = LS;
@@ -73,6 +78,10 @@ function zeichneSpiele(box, neu) {
   // des Kindes, also Basisklasse ±1. Für Kinder mit Klasse im Profil, vorgegeben an; das Kind darf ihn
   // ausschalten (Profil-Feld meineKlasse, je Kind statt je Browser).
   const klasse = LS.klasseVon(p); // 0 = Kindergarten
+  // Persönliche Passung für Suche und Ähnliche Spiele (Wunsch Patrik, LERN_Session10): Klasse und Bedarf aus dem
+  // Protokoll (AUSWERTUNG.bedarf in der empfohlenen Stufe); die Aufsicht sucht neutral.
+  const protokoll = LS.protokoll().filter(e => e.name === name);
+  const person = aufsicht ? null : { klasse, bedarf: id => AUSWERTUNG.bedarf(id, LS.empfohleneStufe(name, id) || "s3", protokoll, fokus) };
   const nurKlasse = !aufsicht && klasse !== null && p.meineKlasse !== false;
   if (!aufsicht && klasse !== null) nur.append(chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), LS.klasseText(klasse)));
   // Für die Aufsicht: nur, was noch zu prüfen ist — Spiel nicht angesehen oder eine eigene Inhaltsliste ungeprüft.
@@ -109,7 +118,10 @@ function zeichneSpiele(box, neu) {
     && (!nurZuPruefen || zuPruefen(s))
     && (!treffer || treffer.has(s.id));
   // Suche (Entscheid SU1 a): Treffer nach Relevanz, sonst Fokus-Spiele zuerst und Katalog-Reihenfolge.
-  const treffer = spielSuche.trim() ? new Map((LS.suche(spielSuche) || []).map((t, i) => [t.id, { ...t, i }])) : null;
+  // Ohne Suche, aber mit „?aehnlich=<id>“: die ähnlichen Spiele als Liste, ähnlichste zuerst (LERN_Session10).
+  const aehnlichZu = !spielSuche.trim() && aehnlichId() ? SPIELE.find(s => s.id === aehnlichId()) : null;
+  const treffer = spielSuche.trim() ? new Map((LS.suche(spielSuche, person) || []).map((t, i) => [t.id, { ...t, i }]))
+    : aehnlichZu ? new Map(LS.aehnlich(aehnlichZu.id, person).map((t, i) => [t.id, { ...t, i }])) : null;
   const imFokus = s => s.lernziele.some(l => fokus.includes(l.lz));
   const auswahl = SPIELE.filter(passt).sort(treffer
     ? (a, b) => treffer.get(a.id).i - treffer.get(b.id).i
@@ -139,7 +151,6 @@ function zeichneSpiele(box, neu) {
   }
   // Bedarf (Wunsch Patrik, LERN_Session10): der Zufall wählt, wo die Statistik Bedarf zeigt — AUSWERTUNG.bedarf,
   // dieselbe Gewichtung wie im Zufallsmix.
-  const protokoll = LS.protokoll().filter(e => e.name === name);
   const bedarf = (s, stufeId) => AUSWERTUNG.bedarf(s.id, stufeId, protokoll, fokus);
   const ziehe = AUSWERTUNG.ziehe;
   const stufenZufall = st => auswahl.filter(s => s.stufen.includes(st.id));
@@ -197,7 +208,7 @@ function zeichneSpiele(box, neu) {
     if (aufsicht && !frei) marken.unshift(el("span", { class: "marke warnung", text: `🔒 für Kinder nicht sichtbar: ${LS.sperrGrund(s.id)}` }));
     // Treffer über ein Feld, das nicht auf der Karte steht: sagen, wo (Entscheid SU1 a).
     const grund = treffer?.get(s.id)?.grund;
-    if (grund) marken.push(el("span", { class: "marke such-grund", text: `🔍 gefunden ${grund}` }));
+    if (grund) marken.push(el("span", { class: "marke such-grund", text: aehnlichZu ? `🔗 ${grund}` : `🔍 gefunden ${grund}` }));
     const schalter = (an, art, text, onclick) => el("button", { type: "button", class: "karten-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
       "aria-label": text, title: text, onclick }, schalterSymbol(art, an));
     // Schalter in einer eigenen schmalen Leiste oben rechts; darunter hat der Name die volle Breite.
@@ -235,7 +246,10 @@ function zeichneSpiele(box, neu) {
   }
 
   // ----- Bei einer Suche: eine Liste, beste Treffer zuerst; sonst Favoriten, dann Fach → Thema -----
-  if (treffer && auswahl.length) box.append(el("h2", { class: "treffer-titel", text: `🔍 ${auswahl.length} Treffer, beste zuerst` }), gitter(auswahl));
+  if (treffer && aehnlichZu) box.append(el("h2", { class: "treffer-titel" },
+    el("span", { text: `🔗 Ähnlich wie ${aehnlichZu.name}: ${auswahl.length} Spiel${auswahl.length === 1 ? "" : "e"} ` }),
+    chip("✕ Alle Spiele", false, () => { aehnlichSchliessen(); neu(); }, null, "klein")));
+  if (treffer && auswahl.length) box.append(aehnlichZu ? gitter(auswahl) : el("h2", { class: "treffer-titel", text: `🔍 ${auswahl.length} Treffer, beste zuerst` }), aehnlichZu ? "" : gitter(auswahl));
   const favoriten = treffer ? [] : auswahl.filter(s => p.favoriten.includes(s.id));
   if (favoriten.length) box.append(gruppe("favoriten", "⭐ Favoriten", favoriten.length, gitter(favoriten)));
   for (const fach of treffer ? [] : FAECHER) {

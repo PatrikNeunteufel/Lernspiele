@@ -269,7 +269,15 @@ ohne Untertab Konten). `#anmelden` meldet ab und führt zur Anmeldung; dorthin v
 nach Relevanz: Feldgewichte Name 6, Lernziel-Kürzel 4, Beschreibung 3, Inhaltslisten 2, Thema 1;
 Wortanfang vor Wortteil, genaue Umlaute vor ä = a; ein Tippfehler nur im Namen ab 5 Buchstaben und nie bei
 Kürzeln mit Ziffern; jedes Suchwort muss passen. Während einer Suche steht statt der Gruppen eine Liste,
-beste Treffer zuerst; wer nur über Thema oder Inhaltsliste passt, trägt „🔍 gefunden …“. Der Filter „🎒 Meine Klasse“ (Entscheide K1 a, K2 a) zeigt einem Kind mit
+beste Treffer zuerst; wer nur über Thema oder Inhaltsliste passt, trägt „🔍 gefunden …“. **Persönliche Passung**
+(Wunsch Patrik, LERN_Session10): Für ein angemeldetes Kind rechnet `LS.passung` aus der Nähe der Basisklasse zu
+seiner Klasse (gleich 1, eine daneben 0.6, zwei 0.2) und dem Bedarf aus dem Protokoll (`AUSWERTUNG.bedarf` in der
+empfohlenen Stufe, auf 5 gedeckelt) einen Wert 0–1; die Suche nimmt ihn als Faktor 1 + 0.5 · Passung auf die
+Textrelevanz, der Text bleibt also massgebend. Die Aufsicht und das Testskript suchen neutral. **Ähnliche Spiele:**
+`LS.aehnlich(id, person)` ordnet nach gleichem Lernziel (4 je Code) und gleichem Thema (3), gleiches Fach zählt 1 dazu (allein reicht es nicht), je Basisklasse
+Abstand 0.5 Abzug, mit derselben Passung; der Knopf „🔗 Ähnliche Spiele“ auf dem Startblatt und der Schlusskarte
+jedes Spiels öffnet `index.html?aehnlich=<id>#spiele`, die Startseite zeigt die Liste wie eine Suche (mit „🔗 gleiches
+Lernziel …“ an der Karte), „✕ Alle Spiele“ oder eine Eingabe im Suchfeld beendet sie. Der Filter „🎒 Meine Klasse“ (Entscheide K1 a, K2 a) zeigt einem Kind mit
 Klasse im Profil nur Spiele, deren Basisklasse höchstens eine Klasse daneben liegt, die also eine
 Stufe genau für seine Klasse haben. Er ist vorgegeben an, das Kind darf ihn ausschalten (Profil-Feld
 `meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Er steht mit „⭐ Mein Fokus“ und
