@@ -1,4 +1,4 @@
-// Inhalte des Diagramm-Detektivs (Lehrplan SG MA.3.C.1): Umfragen und Zählungen aus dem Schulalltag.
+// Inhalte des Daten-Detektivs (Lehrplan SG MA.3.C.1): Umfragen und Zählungen aus dem Schulalltag.
 // Je Umfrage:
 //   titel      Überschrift über Tabelle und Diagramm
 //   einheit    was gezählt wird, in der Mehrzahl („Kinder“) — für „Wie viele … sind es insgesamt?“

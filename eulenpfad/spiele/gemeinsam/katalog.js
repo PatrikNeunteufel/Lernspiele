@@ -493,7 +493,7 @@ const SPIELE = [
     lernziele: [{ lz: "MU.4.C.1", stufen: ALLE_STUFEN }] },
   // LERN_Session3: Lücken im Orientierungspunkt der 4. Klasse (Entscheid Patrik T3 a). neu: für Kinder
   // gesperrt, bis das Spiel angesehen ist (Prüfstand in pruefstand.js)
-  { id: "diagramm-detektiv", art: ["eintippen", "antippen"], klasse: 4, neu: "LERN_Session3", bild: "🔎", name: "Diagramm-Detektiv", thema: "daten", farbe: "var(--deko-6)",
+  { id: "diagramm-detektiv", art: ["eintippen", "antippen"], klasse: 4, neu: "LERN_Session3", bild: "🔎", name: "Daten-Detektiv", thema: "daten", farbe: "var(--deko-6)",
     pfad: "spiele/diagramm-detektiv/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 15, s2: 15, s3: 25, s4: 30, s5: 45, s6: 56 },
     beschreibung: "Strichlisten, Tabellen und Säulendiagramme lesen: Wie viele mehr? Wo am meisten?",
     listen: {

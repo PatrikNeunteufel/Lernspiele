@@ -32,6 +32,7 @@ const GEBAUT_ALS = {
   "Jahreskreis-Ordner": "jahreskreis", "Laut-Detektiv": "anlaut-angel",
   "Früher-heute-Paare": "frueher-heute", "Wetter-Jahreszeiten": "wetter-jahreszeiten",
   "Glace-Kombinator": "glace-kombinator", "Mots-Match / Épeler": "mots-match",
+  "Diagramm-Detektiv": "diagramm-detektiv", // heisst seit DD1 a (2026-11-03) Daten-Detektiv
 };
 const ERSETZT = {
   "Folgen-Fortsetzer": "ersetzt: Zahlenfolgen übt der Muster-Fortsetzer (Stufen 5–6), den OP 4. Klasse (MA.3.A.3.d) die Preis-Tabelle",

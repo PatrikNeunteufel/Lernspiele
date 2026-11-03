@@ -281,7 +281,7 @@ for (const r of Object.values(FL.FEHLER_REGELN)) tabelle(`### ${r.name}`, `Regel
   [...r.kurz, ...r.lang].map(s => { const m = s.match(/\{([^}]+)\}/)[1].split("|"); return [s.replace(/\{([^|}]+)[^}]*\}/, "**$1**"), m[1], m.slice(2).join(", ")]; }));
 tabelle("### Fehlerfreie Sätze (Königsstufe)", null, ["Satz"], FL.FEHLERFREIE_SAETZE.map(s => [s]));
 const { UMFRAGEN } = lade("spiele/diagramm-detektiv/umfragen.js", ["UMFRAGEN"]);
-tabelle("## 25. Diagramm-Detektiv (Lehrplan SG MA.3.C.1) — Umfragen", "Die Zahlen erzeugt das Spiel; zu prüfen sind Fragen und Kategorien.", ["Titel", "Frage", "Kategorien"],
+tabelle("## 25. Daten-Detektiv (Lehrplan SG MA.3.C.1) — Umfragen", "Die Zahlen erzeugt das Spiel; zu prüfen sind Fragen und Kategorien.", ["Titel", "Frage", "Kategorien"],
   UMFRAGEN.map(u => [u.titel, u.frage, u.kategorien.map(([b, n, f]) => `${b} ${n} (${f})`).join(", ")]));
 const { ARTIKEL: PREIS_ARTIKEL } = lade("spiele/preis-tabelle/artikel.js", ["ARTIKEL"]);
 tabelle("## 26. Preis-Tabelle (Lehrplan SG MA.3.A.3) — Artikel", "Preis je Stück in Rappen: kleinster bis grösster Wert, den das Spiel wählt.", ["Bild", "Einzahl", "Mehrzahl", "von Rp.", "bis Rp."], PREIS_ARTIKEL);
@@ -785,7 +785,7 @@ for (const [gruppe, liste] of Object.entries(INSTRUMENT_LISTE_JE_GRUPPE)) inList
   ["Bild", "Name", "Gruppe", "Spielweise", "genauer"], INSTR.INSTRUMENTE.filter(i => i[2] === gruppe));
 for (const liste of ["ensembles", "klang"]) inListe(`instrumente/${liste}`, "Fragen", null, ["Frage", "richtig", "falsch"], fragenMit(INSTR.INSTRUMENT_FRAGEN, liste).map(([f, r, a, b]) => [f, r, `${a}; ${b}`]));
 
-// Diagramm-Detektiv, Preis-Tabelle, Kompass
+// Daten-Detektiv, Preis-Tabelle, Kompass
 inListe("diagramm-detektiv/umfragen", "Umfragen", "Die Zahlen erzeugt das Spiel; zu prüfen sind Fragen und Kategorien.", ["Titel", "Frage", "Kategorien"],
   UMFRAGEN.map(u => [u.titel, u.frage, u.kategorien.map(([b, name, f]) => `${b} ${name} (${f})`).join(", ")]));
 const PREIS = lade("spiele/preis-tabelle/artikel.js", ["WARE_GEWICHT", "FOLGEN"]);

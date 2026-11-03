@@ -1813,7 +1813,7 @@ Regel im Spiel: Steht beim Verb ein Artikel (das, beim, zum), wird es zum Nomen 
 | Nach der Schule mache ich meine Hausaufgaben. | ☐ |
 | Der Himmel ist blau. | ☐ |
 
-## 25. Diagramm-Detektiv (Lehrplan SG MA.3.C.1) — Umfragen
+## 25. Daten-Detektiv (Lehrplan SG MA.3.C.1) — Umfragen
 
 Die Zahlen erzeugt das Spiel; zu prüfen sind Fragen und Kategorien.
 

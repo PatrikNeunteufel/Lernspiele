@@ -5,7 +5,7 @@ wird im Entwickler-Modus (Spiel angesehen, Inhaltsliste geprüft; schreibt `eule
 Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
 `docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
-**Stand:** 168 Spiele gebaut, 0 Ideen offen · für Kinder frei: 38 von 168 · 6 von 112 neuen Spielen angesehen · 3 von 217 Inhaltslisten geprüft.
+**Stand:** 168 Spiele gebaut, 0 Ideen offen · für Kinder frei: 44 von 168 · 15 von 112 neuen Spielen angesehen · 4 von 217 Inhaltslisten geprüft.
 
 Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit
 Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.
@@ -193,8 +193,8 @@ Je gebautem Spiel:
 
 #### Rechtschreibung
 
-- [x] **ABC-Sortierer** (`abc-sortierer`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
-  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Nomen mit Bild zum Ordnen nach dem ABC)
+- [x] **ABC-Sortierer** (`abc-sortierer`) — für Kinder frei
+  - [x] Inhalte geprüft: 1 von 1 Listen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session2.md`
 
 #### Lesen
@@ -270,9 +270,9 @@ Je gebautem Spiel:
 
 #### Schreiben
 
-- [x] **Tipp-Trainer** (`tipp-trainer`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+- [x] **Tipp-Trainer** (`tipp-trainer`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
-  - [ ] Inhalte geprüft: 0 von 6 Listen (offen: Nomen mit Bild zum Ordnen nach dem ABC (Liste von ABC-Sortierer); Sätze ohne Nomen: Satzanfang und Punkt (Liste von Satz-Reparatur); Sätze mit Namen und konkreten Nomen (Liste von Satz-Reparatur); Sätze mit abstrakten Nomen, Frage- und Ausrufesätze (Liste von Satz-Reparatur); Längere Sätze mit mehreren Nomen (Liste von Satz-Reparatur); Zwei Sätze hintereinander (Liste von Satz-Reparatur))
+  - [ ] Inhalte geprüft: 1 von 6 Listen (offen: Sätze ohne Nomen: Satzanfang und Punkt (Liste von Satz-Reparatur); Sätze mit Namen und konkreten Nomen (Liste von Satz-Reparatur); Sätze mit abstrakten Nomen, Frage- und Ausrufesätze (Liste von Satz-Reparatur); Längere Sätze mit mehreren Nomen (Liste von Satz-Reparatur); Zwei Sätze hintereinander (Liste von Satz-Reparatur))
 
 #### Zuhören
 
@@ -398,10 +398,9 @@ Je gebautem Spiel:
 
 #### Daten
 
-- [x] **Diagramm-Detektiv** (`diagramm-detektiv`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+- [x] **Daten-Detektiv** (`diagramm-detektiv`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Umfragen und Zählungen (Titel, Fragen, Kategorien))
-  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
 #### Kombinieren
 
@@ -521,8 +520,8 @@ Je gebautem Spiel:
 
 #### Brüche
 
-- [x] **Bruch-Pizzeria** (`bruch-werkstatt`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Bruch-Pizzeria** (`bruch-werkstatt`) — für Kinder frei
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session7.md`
 
 #### Daten
@@ -536,11 +535,11 @@ Je gebautem Spiel:
 
 #### Dezimalzahlen
 
-- [x] **Dezimal-Rakete** (`dezimal-rakete`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Dezimal-Rakete** (`dezimal-rakete`) — für Kinder frei
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
-- [x] **Dezimal-Rutsche** (`dezimal-rutsche`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Dezimal-Rutsche** (`dezimal-rutsche`) — für Kinder frei
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 - [x] **Zehntel-Lupe** (`zehntel-lupe`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
@@ -554,8 +553,8 @@ Je gebautem Spiel:
 
 #### Form und Raum
 
-- [x] **Begriffs-Geodreieck** (`begriffs-geodreieck`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Begriffs-Geodreieck** (`begriffs-geodreieck`) — für Kinder frei
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 - [x] **Rechteck-Labor** (`rechteck-labor`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
@@ -574,8 +573,8 @@ Je gebautem Spiel:
 
 #### Informatik
 
-- [x] **Datei-Typen** (`datei-typen`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
-  - [ ] angesehen
+- [x] **Datei-Typen** (`datei-typen`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Dateiendungen und ihre Art)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 - [x] **Geheimschrift-Knacker** (`geheimschrift-knacker`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
@@ -603,8 +602,8 @@ Je gebautem Spiel:
 
 #### Forschen
 
-- [x] **Bionik-Paare** (`bionik-paare`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
-  - [ ] angesehen
+- [x] **Bionik-Paare** (`bionik-paare`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Vorbild aus der Natur und Erfindung)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 - [x] **Energie-Wandler** (`energie-wandler`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
@@ -646,8 +645,8 @@ Je gebautem Spiel:
 
 #### Körper und Ernährung
 
-- [x] **Blutkreislauf-Lotse** (`blutkreislauf-lotse`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
-  - [ ] angesehen
+- [x] **Blutkreislauf-Lotse** (`blutkreislauf-lotse`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Fragen zu Herz, Lunge, Blut und Kreislauf)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 - [x] **Braille-Finger** (`braille-finger`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
@@ -728,12 +727,12 @@ Je gebautem Spiel:
 
 #### Alltag
 
-- [x] **Au café** (`au-cafe`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
-  - [ ] angesehen
+- [x] **Au café** (`au-cafe`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Kurze Dialoge: begrüssen, Befinden, bestellen)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
-- [x] **Calendrier** (`calendrier`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Calendrier** (`calendrier`) — für Kinder frei
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 - [x] **Nombres-Rallye** (`nombres-rallye`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
