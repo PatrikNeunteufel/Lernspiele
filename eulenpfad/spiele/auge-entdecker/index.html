@@ -18,6 +18,9 @@
   .ae-bild text { font-family: var(--schrift); font-weight: 800; fill: var(--text-leise); font-size: 14px; text-anchor: middle; pointer-events: none; }
   .ae-bild .ae-halo { fill: none; stroke: var(--deko-4); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
   .ae-bild .ae-halo-dick { stroke-width: 24; }
+  .ae-bild .ae-halo-flaeche { fill: var(--deko-4); fill-opacity: .55; stroke: none; }
+  .ae-bild .ae-daneben .ae-halo-flaeche { fill: var(--hinweis); }
+  .ae-bild .ae-richtig .ae-halo-flaeche { fill: var(--gut); }
   .ae-bild .ae-markiert .ae-halo { opacity: 1; animation: ae-blink 1s ease-in-out infinite; }
   .ae-bild .ae-daneben .ae-halo { opacity: 1; stroke: var(--hinweis); animation: none; }
   .ae-bild .ae-richtig .ae-halo { opacity: 1; stroke: var(--gut); animation: none; }
@@ -284,8 +287,11 @@ function augeBild({ farbe = 0, pupille = "mittel", antippen = false, klein = fal
     svgEl("path", { d: BRAUE, fill: "none", stroke: "var(--deko-7)", "stroke-width": 16, "stroke-linecap": "round" }),
     svgEl("path", { class: "ae-treffer-strich", d: BRAUE, "stroke-width": 38 }));
   // Das Weisse (Lederhaut, mit der Bindehaut darüber)
-  teil("weiss", {}, svgEl("path", { class: "ae-halo", d: OEFFNUNG }),
-    svgEl("path", { d: OEFFNUNG, fill: "var(--karte)", stroke: "var(--deko-7)", "stroke-width": 3 }),
+  // Halo als Fläche ohne die Iris: Ein Rand um die ganze Öffnung lief in die Ecken und sah aus wie die Augenwinkel
+  // (Hinweis Patrik, LERN_Session11). Über der weissen Füllung, sonst deckt sie ihn zu.
+  teil("weiss", {}, svgEl("path", { d: OEFFNUNG, fill: "var(--karte)", stroke: "var(--deko-7)", "stroke-width": 3 }),
+    svgEl("path", { class: "ae-halo ae-halo-flaeche", "fill-rule": "evenodd",
+      d: `${OEFFNUNG} M258 190 A58 58 0 1 0 142 190 A58 58 0 1 0 258 190 Z` }),
     svgEl("path", { class: "ae-treffer", d: OEFFNUNG }));
   // Iris
   teil("iris", { "clip-path": `url(#${clipId})` }, svgEl("circle", { class: "ae-halo", cx: 200, cy: 190, r: 58 }),
