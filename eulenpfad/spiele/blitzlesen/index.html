@@ -131,16 +131,17 @@ LS.spiel({
     ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     const zeit = STUFE[ctx.stufe].zeit;
     const tafel = el("div", { class: "tafel", "aria-live": "polite" });
-    const zeige = () => {
+    // vorbei (aus LS.losGehts): Antworten erst nach dem ersten Blitz zeigen (Bemerkung 7, LERN_Session11)
+    const zeige = (_, vorbei) => {
       tafel.replaceChildren(el("div", { class: "blitz", text: a.text }));
       clearTimeout(uhr);
-      uhr = setTimeout(() => tafel.replaceChildren(el("div", { class: "leer", text: "👀" })), zeit);
+      uhr = setTimeout(() => { tafel.replaceChildren(el("div", { class: "leer", text: "👀" })); if (typeof vorbei === "function") vorbei(); }, zeit);
     };
     let uhr = null;
     ctx.flaeche.append(tafel, el("div", { class: "hoer-zeile" }, el("button", { type: "button", class: "knopf hell", text: "⚡ Nochmal blitzen", onclick: zeige })));
     // Erst wenn das Kind bereit ist: ▶ Los, 3-2-1, dann blitzt das Wort (LS.losGehts, Wunsch Patrik LERN_Session8)
     tafel.replaceChildren(el("div", { class: "leer", text: "👀" }));
-    LS.losGehts(ctx, tafel, zeige);
+    LS.losGehts(ctx, tafel, zeige, { antwortenNachBlitz: true });
 
     const frage = a.art === "wort" ? "Welches Wort hast du gelesen?" : "Welches Bild passt?";
     ctx.flaeche.append(el("div", { class: "auftrag", text: frage }));

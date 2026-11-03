@@ -370,3 +370,14 @@
 - Stimmen sichtbar: Startblatt zeigt die Stimme je Sprache (gefunden, lädt, fehlt) mit „▶ Probe“ und Rückmeldung;
   Fehler beim Sprechen meldet die Eule einmal je Runde (rahmen.md 12).
 - Meldung 6 (Au café): Die nächste Aufgabe kommt erst, wenn die Stimme fertig ist (höchstens 6 s), in allen Spielen.
+- Auge-Entdecker: Beim Weissen leuchtet die Fläche statt des Randes der Augenöffnung (wirkte wie die Augenwinkel).
+- Prüfung je Eintrag (LP1 a, LP2 a, LP4 a; rahmen.md 17): Prüfansicht im Spiel mit Abschnitten und Gruppen
+  (aufklappbar, geprüfte zu), Haken je Eintrag am Fingerabdruck, „✓ alle“ und „Ganze Liste geprüft“, Bemerkungen je
+  Eintrag sichtbar und entfernbar, Bilder vom Spiel gezeichnet; Entwicklung schreibt den Prüfstand, Aufsicht und
+  Lehrperson haken auf ihrem Gerät ab und schicken Korrekturen. Pilot: Anlaut-Angel (je Buchstabe bzw. Laut gruppiert),
+  Auge-Entdecker (sieben Abschnitte, Teile mit markiertem Bild).
+- Wiederholungen: Eine Aufgabe kommt erst wieder, wenn alle verschiedenen der Stufe einmal dran waren, auch über Runden
+  (Gedächtnis je Kind, Spiel, Stufe); die Serienbremse geht vor.
+- Bemerkung 7: Blitz-Spiele verdecken die Antworten, bis das Aufblitzen vorbei ist (`LS.losGehts` mit
+  `antwortenNachBlitz`; Blitzlesen, Punkte-Blitz, Finger-Zähler); die Uhr startet erst dann.
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session11_2026-11-03.md`; Tests „Keine Fehler.“ über alle 168 Spiele.

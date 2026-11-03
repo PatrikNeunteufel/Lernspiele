@@ -71,7 +71,10 @@ function zeichneVerwaltung(box, neu) {
         zeilen.push(el("tr", {},
           el("td", { style: "padding-left:36px" }, "↳ ", dev && !quelle
             ? el("button", { type: "button", class: "liste-link" + (l.geprueft ? " geprueft" : ""), text: l.name, title: "Liste ansehen", onclick: () => zeigeListe(s, l) })
-            : l.name),
+            : l.name,
+            // Prüfansicht je Eintrag im Spiel selbst (LP1 a, LP4 a): für Aufsicht und Lehrperson, auch online
+            quelle ? null : el("a", { class: "knopf hell klein", style: "margin-left:8px", href: `${s.pfad}?pruefen=${l.id}`, text: "🔍 prüfen",
+              title: "Liste Eintrag für Eintrag prüfen (öffnet das Spiel)" })),
           el("td", {}, stand(l.geprueft)),
           el("td", {}, quelle
             ? el("span", { class: "leise-text", text: `${LS.listeFrei(s.id, l.id) ? "✓ frei" : "🔒 gesperrt"} — wie bei ${quelle.name}` })

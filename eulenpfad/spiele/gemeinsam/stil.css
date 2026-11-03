@@ -333,6 +333,8 @@ button { font-family: inherit; }
 .melde-meldung { color: var(--hinweis); font-weight: 700; min-height: 1em; margin: 6px 0; }
 /* Hilfe und Tipp (LERN_Session9). Während ❓ Hilfe oder 🙋 Melden ist die Aufgabe verdeckt. */
 .pause-verdeckt { filter: blur(12px); pointer-events: none; user-select: none; }
+/* Blitz-Spiele (LS.losGehts mit antwortenNachBlitz, LERN_Session11): Antworten erst nach dem Aufblitzen */
+.antworten-warten .wahl, .antworten-warten .tastatur, .antworten-warten .korb-reihe { visibility: hidden; }
 .kopf .hilfe-knopf { border: none; background: var(--karte); box-shadow: var(--schatten); border-radius: 50%; width: 52px; height: 52px;
   font-size: 24px; cursor: pointer; flex: none; }
 .hilfe-eigen { font-size: 17px; font-weight: 700; }
@@ -430,6 +432,26 @@ body:has(.entwickler-leiste) { padding-bottom: 90px; }
 .listen-dialog td { padding: 6px 8px; background: #f8f9fe; }
 .listen-dialog .knopf.klein { min-height: 34px; padding: 2px 10px; font-size: 15px; }
 .listen-dialog textarea { font: inherit; width: 100%; border-radius: 10px; border: 2px solid var(--rand); padding: 8px; }
+/* Prüfansicht je Eintrag (listenpruefung.js, LERN_Session11): Linien zwischen den Zeilen, Spalten so breit wie ihr
+   Inhalt, Abschnitte und Gruppen aufklappbar (ganz geprüfte zu). */
+.pruef-dialog .pruef-stand { font-weight: 800; margin: 4px 0; }
+.pruef-gruppe { border: 2px solid var(--rand); border-radius: 12px; margin: 8px 0; padding: 4px 10px; background: var(--karte); }
+.pruef-gruppe.fertig { border-color: var(--gut); }
+.pruef-gruppe > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; cursor: pointer; padding: 4px 0; }
+.pruef-gruppe .pruef-gruppe { margin-left: 4px; }
+.pruef-zahl { color: var(--text-leise); font-size: 14px; }
+.pruef-rahmen { overflow-x: auto; }
+.pruef-dialog table.pruef-tabelle { border-collapse: collapse; border-spacing: 0; width: auto; min-width: 100%; }
+.pruef-tabelle th, .pruef-tabelle td { border-bottom: 1px solid var(--rand); background: none; padding: 6px 10px; vertical-align: top; }
+.pruef-tabelle th { white-space: nowrap; }
+.pruef-tabelle td { width: 1%; white-space: nowrap; }
+.pruef-tabelle td.lang { width: auto; white-space: normal; min-width: 12em; }
+.pruef-tabelle .pruef-haken input { width: 22px; height: 22px; }
+.pruef-e { margin-left: 4px; font-size: 12px; font-weight: 800; color: var(--gut); }
+.pruef-bild svg { width: 110px; height: auto; display: block; }
+.pruef-tabelle tr.mit-bemerkung td { background: #fff7ed; }
+.pruef-tabelle tr.pruef-bemerkung td { background: #fff7ed; white-space: normal; font-size: 14px; }
+.pruef-tabelle tr.pruef-bemerkung button { margin-left: 8px; }
 
 /* Spieloptionen auf der Stufenwahl (Reihenfolge der Teile R1 a, Übertrag UE1 a): je Wert ein Knopf, der gewählte gefüllt — Deko-Farbe, keine Stellenfarbe */
 .option-zeile { gap: 8px; }

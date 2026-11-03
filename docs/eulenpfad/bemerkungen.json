@@ -70,5 +70,16 @@
     "aufgabe": "Aufgabe 5: Du triffst am Morgen deine Nachbarin. · Was sagst du?",
     "seite": "/eulenpfad/index.html",
     "meldung": "M-mw10hrt7-q2xq"
+  },
+  {
+    "nr": 7,
+    "zeit": "2026-11-03T20:34:21+01:00",
+    "status": "erledigt 2026-11-03 (LERN_Session11): LS.losGehts mit antwortenNachBlitz verdeckt die Antworten, bis das Aufblitzen vorbei ist, und startet erst dann die Uhr; eingeschaltet in Blitzlesen, Punkte-Blitz und Finger-Zähler (Merk-Blick deckt schon selbst auf)",
+    "text": "sollten bis die vorgabe aufgeblitzt ist nicht die antwortmöglichkeiten verdeckt werden? sollte bei ähnlichen spielen gleich sein",
+    "von": "Patrik",
+    "spiel": "blitzlesen",
+    "stufe": "s6",
+    "aufgabe": "Aufgabe 10: Welches Bild passt?",
+    "seite": "/eulenpfad/spiele/blitzlesen/index.html"
   }
 ]

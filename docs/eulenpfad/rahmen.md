@@ -140,11 +140,15 @@ LS.spiel({
 | `ctx.losKnopf` | Für `LS.losGehts`: „▶ Los!“ mit 3-2-1 (erste Aufgabe, nach einer Aufgabe mit Fehler oder Zeit um, im Mix) oder nur kurz 👀 (LERN-38). |
 | `ctx.sag(text, art?)` | Die Eule spricht (`art`: `"gut"` oder `"hinweis"`). |
 
-**Wiederholungen** (Vorgabe Patrik 2026-10-31): In einer Runde kommt höchstens eine Aufgabe ein
-zweites Mal, nie direkt hintereinander. Der Rahmen zieht eine nicht erlaubte Aufgabe neu (das Spiel
-zieht in `aufgabe()` zufällig). Gibt eine Stufe nicht genug verschiedene Aufgaben her, endet die Runde
-früher; das Protokoll vermerkt dann `gekuerzt` mit der geplanten Anzahl, und das Testskript meldet es
-als Hinweis.
+**Wiederholungen** (Vorgabe Patrik 2026-10-31, verschärft LERN_Session11): Eine Aufgabe kommt erst wieder, wenn alle
+verschiedenen Aufgaben der Stufe einmal dran waren — auch über Runden hinweg. Der Rahmen merkt sich dafür je Kind, Spiel
+und Stufe die Fingerabdrücke der gestellten Aufgaben (`lernspiele:gestellt`, nur dieses Gerät, höchstens 400 je Stufe)
+und zieht eine nicht erlaubte Aufgabe neu (das Spiel zieht in `aufgabe()` zufällig). Suchstufen (`VERSUCHE` in
+`spiel.js`): 1. ungestellt und ohne zu lange Serie; 2. aus einer früheren Runde, wenn sonst ein Muster entstünde (die
+Serienbremse geht vor); 3. ungestellt, Serie erzwungen; 4. ist keine ungestellte mehr zu finden, beginnt ein neuer
+Durchgang; 5. höchstens eine Aufgabe ein zweites Mal je Runde, nie direkt hintereinander — sonst endet die Runde früher. Weil der Rahmen den Vorrat nicht kennt, ist „alle“ eine
+Suche mit vielen Zügen, kein Abzählen. Gibt eine Stufe nicht genug verschiedene Aufgaben her, endet die Runde früher; das
+Protokoll vermerkt dann `gekuerzt` mit der geplanten Anzahl, und das Testskript meldet es als Hinweis.
 
 Ausserhalb von `ctx`, für Spiele mit Inhaltslisten: `LS.freieListen("<id>")` liefert die Listen,
 die der angemeldete Spieler üben darf. Die Aufsicht bekommt alle, ein Kind nur die freigegebenen
@@ -160,7 +164,7 @@ auf. Die Optionen sind in `spiel.js` beschrieben.
 | `LS.auswahl(ctx, opt)` | genau eine richtige Antwort unter mehreren Knöpfen |
 | `LS.reihenfolge(ctx, opt)` | Teile in der richtigen Reihenfolge antippen |
 | `LS.koerbe(ctx, opt)` | Karte in den richtigen Korb (sie fliegt hinein) |
-| `LS.losGehts(ctx, element, weiter, { uhr })` | Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): element bleibt verdeckt. Bei der ersten Aufgabe einer Runde, nach einer Aufgabe mit Fehler und im Mix darüber „▶ Los!“, nach dem Tippen 3-2-1; sonst nur 1 s 👀 (`ctx.losKnopf`, LERN-38). Dann sichtbar, und `weiter(uhrLos)` startet die Zeigezeit. Mit und ohne Timer gleich: Die Uhr startet nach `weiter()`, mit `{ uhr: false }` erst, wenn das Spiel `uhrLos()` ruft (Merk-Blick: mit dem veränderten Bild). Benutzt von Merk-Blick, Punkte-Blitz, Blitzlesen, Finger-Zähler (Wunsch Patrik, LERN_Session8) |
+| `LS.losGehts(ctx, element, weiter, { uhr })` | Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): element bleibt verdeckt. Bei der ersten Aufgabe einer Runde, nach einer Aufgabe mit Fehler und im Mix darüber „▶ Los!“, nach dem Tippen 3-2-1; sonst nur 1 s 👀 (`ctx.losKnopf`, LERN-38). Dann sichtbar, und `weiter(uhrLos)` startet die Zeigezeit. Mit und ohne Timer gleich: Die Uhr startet nach `weiter()`, mit `{ uhr: false }` erst, wenn das Spiel `uhrLos()` ruft (Merk-Blick: mit dem veränderten Bild). Mit `{ antwortenNachBlitz: true }` bleiben die Antworten (`.wahl`, `.tastatur`, `.korb-reihe`) verdeckt, bis das Spiel `weiter(uhrLos, vorbei)` → `vorbei()` ruft; erst dann startet die Uhr (höchstens 8 s, Bemerkung 7, LERN_Session11: Blitzlesen, Punkte-Blitz, Finger-Zähler). Benutzt von Merk-Blick, Punkte-Blitz, Blitzlesen, Finger-Zähler (Wunsch Patrik, LERN_Session8) |
 | `LS.tastatur(opt)` | Zifferntastatur mit Anzeigefeld; das Spiel prüft selbst in `onOk`. Mit `dezimal: true` eine Taste für das eingestellte Dezimalzeichen (auch `.` und `,` auf der Tastatur), `nachkomma` begrenzt die Ziffern danach (Standard 3); `onOk(wert, text)` bekommt die Zahl und den getippten Text mit „.“, wenn die Stellenzahl zählt („3.0“ beim Runden) (LERN_Session8, LERN-36) |
 | `NOTEN.zeile`, `NOTEN.hoerKnopf` | Notenbild und Hörknopf (`noten.js`) |
 
@@ -668,3 +672,32 @@ Go, Nim), erklären sie auf einer eigenen Seite statt in Stufen. Die Stufen blei
   (`section`, `h2`, ein Bild als inline-SVG, `.merke` für den einen Satz, der zählt) und am Ende ein Knopf zurück zum
   Spiel. Kurze Sätze, Bilder vor Text, Schweizer Schreibweise; was die Regeln nicht verraten dürfen (die
   Gewinnstrategie), bleibt weg.
+
+## 17. Prüfung der Inhaltslisten je Eintrag
+
+Entscheide LP1 a, LP2 a, LP4 a, LP5 a (Patrik, LERN_Session11; LP3 offen). Code: `spiele/gemeinsam/listenpruefung.js`
+(Ansicht), `spiel.js` (`LS.listenPruefung`, `LS.listenPruefen`, `LS.fingerabdruck`, lokale Haken), Entwickler-Server
+(`/entwicklung/eintraege`, `/entwicklung/bemerkung-status`).
+
+- **pruefung.js je Spiel** neben den Inhalten meldet mit `LS.listenPruefung(spielId, { <liste>: { beschreibung,
+  abschnitte } })`, wie seine Listen geprüft werden. Ein Abschnitt: `id`, `titel`, `hinweis?`, `spalten`,
+  `eintraege()` (Rohdaten wie im Spiel), `zeile(e)` (Zellen), `gruppe?(e)` (Untergruppen), `bild?(e)` (Bild, vom Spiel
+  gezeichnet). Eine Liste mit gemischtem Inhalt bekommt mehrere Abschnitte; jeder ist für sich abzuhaken.
+- **Laden:** Die Spielseite bindet nichts zusätzlich ein. `LS.listenPruefen(spiel, liste)` lädt `listenpruefung.js` und
+  `pruefung.js` nach und öffnet die Ansicht — vom Startblatt („🔍 Inhalte prüfen“, Aufsicht und Entwicklung), aus der
+  Entwickler-Leiste und über `?pruefen=<liste>` (Verwaltung → Freigabe, „🔍 prüfen“). Ohne pruefung.js bleibt die alte
+  Tabelle aus `docs/eulenpfad/pruefung/listen.json` (nur Entwickler-Modus).
+- **Haken je Eintrag** hängen am Fingerabdruck von Abschnitt und Rohdaten (`<abschnitt>:<cyrb53>`): Ändert sich ein
+  Eintrag, ist sein Haken weg. Abschnitte und Gruppen klappen auf und zu; ganz geprüfte sind beim Öffnen zu. „✓ alle“ je
+  Gruppe, „✓ Ganze Liste geprüft“ übernimmt die gesetzten Haken und hakt den Rest ab; Einträge mit offener Bemerkung
+  bleiben offen.
+- **Entwicklung** (Entwickler-Modus): Haken in `spiele/gemeinsam/pruefstand-eintraege.json`; ist alles abgehakt, steht die
+  Liste in `pruefstand.js` mit `hash` (Fingerabdruck der ganzen Liste). Bemerkungen je Eintrag (mit `schluessel`) stehen
+  in der Ansicht und lassen sich entfernen (Status „erledigt … (in der Prüfansicht entfernt)“).
+- **Aufsicht und Lehrperson** (LP4 a): Haken auf dem Gerät (`lernspiele:pruefungLokal`); ganz geprüft heisst auf diesem
+  Gerät frei (`LS.setzeListeFrei`), sonst zurück auf den Prüfstand. ✓E zeigt, was die Entwicklung schon geprüft hat.
+  ✏️ schreibt eine **Korrektur** — eine Anregung der Art `korrektur` mit Liste, Eintrag und Schlüssel, gesendet unter
+  Verwaltung → Meldungen; solange sie nicht gesendet ist, lässt sie sich in der Ansicht entfernen.
+- **Darstellung:** Linien zwischen den Zeilen, kurze Spalten so breit wie ihr Inhalt, lange Zellen (über 24 Zeichen)
+  brechen um. Regeln für die Listen selbst (ein Inhalt je Abschnitt, Spalten mit fester Bedeutung, Gruppen, Beschreibung
+  mit Stufen): die Pilotspiele Anlaut-Angel und Auge-Entdecker zeigen sie.

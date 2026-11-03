@@ -416,6 +416,46 @@ const LS = (() => {
   const setzeListeFrei = (spielId, listeId, wert) => setzeFreigabe("listen", listenQuelle(spielId, listeId), wert);
   /** Listen, die der angemeldete Spieler üben darf (die Aufsicht alle) — Spiele filtern ihre Inhalte danach. */
   const freieListen = spielId => spielListen(spielId).filter(l => aufsichtAngemeldet() || listeFrei(spielId, l.id)).map(l => l.id);
+  // ---------- Prüfung je Eintrag (Entscheide LP1 a–LP5 a, LERN_Session11; rahmen.md 17) ----------
+  /** Kurzer Fingerabdruck eines Werts (cyrb53 über JSON): gleich bei gleichem Inhalt, sonst fast sicher verschieden. */
+  function fingerabdruck(wert) {
+    const s = typeof wert === "string" ? wert : JSON.stringify(wert);
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < s.length; i++) {
+      const c = s.charCodeAt(i);
+      h1 = Math.imul(h1 ^ c, 2654435761);
+      h2 = Math.imul(h2 ^ c, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+  }
+  const PRUEFUNGEN = {};
+  /** Ein Spiel meldet in spiele/<id>/pruefung.js, wie seine Listen geprüft werden (listenpruefung.js). */
+  const listenPruefung = (spielId, defs) => { PRUEFUNGEN[spielId] = { ...(PRUEFUNGEN[spielId] || {}), ...defs }; };
+  const pruefungDefinition = spielId => PRUEFUNGEN[spielId] || null;
+  /** Haken einer Aufsicht oder Lehrperson auf diesem Gerät: { "<schlüssel>": { am, von } } je Liste. */
+  const pruefungLokal = quelle => ({ ...(lies("pruefungLokal", {})[quelle] || {}) });
+  const setzePruefungLokal = (quelle, haken) => schreibe("pruefungLokal", { ...lies("pruefungLokal", {}), [quelle]: haken });
+  const ladeSkript = src => new Promise((ok, fehler) => {
+    if ([...document.scripts].some(s => s.getAttribute("src") === src)) return ok();
+    const s = document.createElement("script");
+    s.src = src; s.onload = ok; s.onerror = fehler;
+    document.head.append(s);
+  });
+  /**
+   * Prüfansicht einer Liste öffnen (nur auf der Seite des Spiels, das sie besitzt). Lädt listenpruefung.js und
+   * pruefung.js des Spiels nach; false, wenn das Spiel noch keine Prüfansicht hat.
+   */
+  async function listenPruefen(spielId, listeId) {
+    try {
+      await ladeSkript("../gemeinsam/listenpruefung.js");
+      await ladeSkript("pruefung.js");
+    } catch { return false; }
+    if (!pruefungDefinition(spielId)?.[listeId]) return false;
+    await LISTENPRUEFUNG.oeffne(spielId, listeId);
+    return true;
+  }
   /** Muss das Spiel als Ganzes noch angesehen werden (neu und nicht geprüft)? */
   const spielZuPruefen = spielId => !!katalogEintrag(spielId)?.neu && !pruefstand("spiele", spielId);
   /** Wann und von wem das Spiel angesehen wurde ({ am, von }) oder null. */
@@ -688,6 +728,7 @@ const LS = (() => {
     inhalt: "Inhalte: Wörter, Aufgaben, Lehrmittel",
     bedienung: "Bedienung, Startseite, Statistik",
     anderes: "Etwas anderes",
+    korrektur: "Korrektur an einer Inhaltsliste",
   };
   const ANREGUNG_STATUS = {
     neu: "noch nicht gesendet",
@@ -702,6 +743,12 @@ const LS = (() => {
   const anregungen = () => meldungen().filter(istAnregung);
   /** Neue Anregung der Aufsicht: { name, art, text, spiel? }; Status „neu“, bis sie gesendet ist. */
   const neueAnregung = daten => neueMeldung({ ...daten, typ: "anregung" });
+  // Korrekturen an Inhaltslisten (LP4 a, LERN_Session11): eine Anregung der Art „korrektur“ mit Liste, Eintrag und dessen
+  // Schlüssel (Fingerabdruck); gesendet wie jede Anregung, angezeigt in der Prüfansicht der Liste.
+  const neueKorrektur = daten => neueAnregung({ ...daten, art: "korrektur" });
+  const korrekturen = () => anregungen().filter(m => m.art === "korrektur");
+  /** Eigene, noch nicht gesendete Meldung oder Anregung löschen. */
+  const entferneMeldung = id => schreibe("meldungen", meldungen().filter(m => m.id !== id));
   /** Echte Fehler, die ein Kind gefunden hat: von der Entwicklung bestätigt und behoben (für die Statistik). */
   const gefundeneFehler = name => meldungenVon(name).filter(m => m.status === "behoben").length;
   /** Neue Rückmeldungen, die das Kind noch nicht gesehen hat. */
@@ -786,6 +833,8 @@ const LS = (() => {
       `Anregung ${m.id} (Aufsicht), ${m.zeit.slice(0, 10)}`,
       `Art: ${ANREGUNG_ARTEN[m.art] || m.art}`,
       m.spiel ? `Spiel: ${spielName} (${m.spiel})` : null,
+      m.liste ? `Liste: ${m.liste}` : null,
+      m.eintrag ? `Eintrag: ${m.eintrag}${m.schluessel ? ` [${m.schluessel}]` : ""}` : null,
       `Anregung: ${m.text}`,
     ].filter(Boolean).join("\n");
     return [
@@ -1018,6 +1067,9 @@ const LS = (() => {
    */
   const SERIE_MAX = 3;
   const SERIE_VERSUCHE = 40;
+  // Suche nach einer neuen Aufgabe (LERN_Session11): so viele Züge nur Ungestelltes, dann auch Gestelltes aus früheren
+  // Runden, dann Wiederholungen der Runde; danach ist die Stufe erschöpft.
+  const VERSUCHE = { serie: 40, gedaechtnis: 70, erzwingen: 90, durchgang: 105, ende: 120 };
 
   const ENDLOS_TEMPO = { annaeherung: 0.92, grundzeit: 1.2, jeSchritt: 0.5, ersatzBoden: 0.4 };
   const endlosBoden = (start, schritte) => Math.min(start,
@@ -1485,8 +1537,21 @@ const LS = (() => {
    * ersetzt, passiert nichts mehr.
    */
   const AUFPASSEN_MS = 1000;
-  function losGehts(ctx, element, weiter, { zaehlen = 3, uhr = true } = {}) {
-    const uhrLos = ctx.uhrWarten();
+  const BLITZ_HOECHSTENS_MS = 8000; // losGehts mit antwortenNachBlitz: spätestens dann die Antworten zeigen
+  function losGehts(ctx, element, weiter, { zaehlen = 3, uhr = true, antwortenNachBlitz = false } = {}) {
+    const uhrStart = ctx.uhrWarten();
+    // antwortenNachBlitz (Bemerkung 7, LERN_Session11): Antworten verdeckt, bis das Spiel mit dem zweiten Argument von
+    // weiter() meldet, dass das Aufblitzen vorbei ist — sonst vergleicht das Kind während des Blitzes. Erst dann läuft die
+    // Uhr (F1 a). Ruft das Spiel es nicht, zeigt der Rahmen sie spätestens nach BLITZ_HOECHSTENS_MS.
+    let antwortenDa = !antwortenNachBlitz;
+    const blitzVorbei = () => {
+      if (antwortenDa) return;
+      antwortenDa = true;
+      ctx.flaeche.classList.remove("antworten-warten");
+      if (uhr) uhrStart();
+    };
+    if (antwortenNachBlitz) ctx.flaeche.classList.add("antworten-warten");
+    const uhrLos = antwortenNachBlitz ? () => {} : uhrStart;
     const huelle = el("div", { class: "los-huelle wartet" });
     element.replaceWith(huelle);
     const zahl = el("div", { class: "los-zahl" });
@@ -1497,8 +1562,9 @@ const LS = (() => {
       if (!noch()) return;
       huelle.classList.remove("wartet");
       ueber.remove();
-      weiter(uhrLos);
+      weiter(uhrLos, blitzVorbei);
       if (uhr) uhrLos();
+      if (antwortenNachBlitz) setTimeout(() => { if (ctx.flaeche.contains(huelle)) blitzVorbei(); }, BLITZ_HOECHSTENS_MS);
     };
     const zaehle = n => {
       if (!noch()) return;
@@ -1859,6 +1925,20 @@ const LS = (() => {
       // Ähnliche Spiele (Wunsch Patrik, LERN_Session10): die Startseite zeigt sie als Liste (start/spiele.js, ?aehnlich=).
       karte.append(el("div", { class: "knopfzeile" }, hatRegeln(def.id) ? regelnLink(false) : null,
         el("a", { class: "knopf hell klein", href: `${START}?aehnlich=${def.id}#spiele`, text: "🔗 Ähnliche Spiele" })));
+      // Inhalte prüfen (LP1 a, LP4 a, LERN_Session11): Aufsicht, Lehrperson und Entwicklung sehen je eigene Liste des
+      // Spiels einen Knopf, sobald das Spiel eine pruefung.js hat; ?pruefen=<liste> öffnet sie gleich (Verwaltung).
+      const eigeneListen = spielListen(def.id).filter(l => !l.von);
+      if (eigeneListen.length && (istAufsicht(name) || LS.entwicklung?.aktiv?.())) {
+        ladeSkript("pruefung.js").then(() => {
+          const defs = pruefungDefinition(def.id);
+          if (!defs || !document.body.contains(karte)) return;
+          const mit = eigeneListen.filter(l => defs[l.id]);
+          if (mit.length) karte.append(el("div", { class: "knopfzeile pruef-zeile" }, el("span", { class: "leise", text: "🔍 Inhalte prüfen:" }),
+            ...mit.map(l => el("button", { type: "button", class: "knopf hell klein", text: `${l.geprueft ? "✓" : "○"} ${l.name}`, onclick: () => listenPruefen(def.id, l.id) }))));
+          const gefragt = new URLSearchParams(location.search).get("pruefen");
+          if (gefragt && mit.some(l => l.id === gefragt)) listenPruefen(def.id, gefragt);
+        }).catch(() => { /* noch keine Prüfansicht für dieses Spiel */ });
+      }
       // Vorlesen auf dem Startblatt: 🗣️ liest die Einleitung, langes Drücken einen Stufenknopf — nur auf
       // Knopfdruck; automatisch liest die Eule nur im Spiel selbst (Vorgabe Patrik, LERN_Session8).
       if (vorlesenErlaubt(def.id)) {
@@ -1934,9 +2014,15 @@ const LS = (() => {
       // endet die Runde früher (anzahl wird kleiner). Endlos: keine der letzten 30 Aufgaben nochmal;
       // findet sich keine neue mehr, ist alles geschafft.
       let anzahl = endlos || mix ? Infinity : def.anzahl;
-      const gestellt = new Map(); // Kennung → wie oft gestellt
-      let wiederholt = false;
+      const gestellt = new Map(); // Kennung → wie oft gestellt (diese Runde)
+      let wiederholt = false;     // schon eine Aufgabe ein zweites Mal in dieser Runde?
       let letzte = null;
+      // Gedächtnis über Runden (Wunsch Patrik, LERN_Session11): je Kind, Spiel und Stufe die Fingerabdrücke der schon
+      // gestellten Aufgaben. Eine Aufgabe kommt erst wieder, wenn (fast) alle verschiedenen einmal dran waren; dann
+      // beginnt ein neuer Durchgang. Nur dieses Gerät, höchstens 400 je Stufe.
+      const gedaechtnisSchluessel = `${name}|${def.id}/${stufe.id}`;
+      const gedaechtnis = new Set(lies("gestellt", {})[gedaechtnisSchluessel] || []);
+      const merkeGestellt = () => schreibe("gestellt", { ...lies("gestellt", {}), [gedaechtnisSchluessel]: [...gedaechtnis].slice(-400) });
       const zuletzt = []; // Endlos: die letzten Kennungen
       let allesGeschafft = false;
       const serienVerlauf = {}; // je Merkmal (ctx.serie) die Werte der gestellten Aufgaben dieser Runde
@@ -2065,6 +2151,7 @@ const LS = (() => {
           p.classList.toggle("aktiv", i === nr);
         });
         flaeche.innerHTML = "";
+        flaeche.classList.remove("antworten-warten"); // LS.losGehts: eine vorige Aufgabe kann mitten im Blitz geendet haben
         let versuche = 0;
         let erledigt = false;
         let zeitUm = false;
@@ -2384,19 +2471,43 @@ const LS = (() => {
         });
         zeichnet = true;
         blaseNeu = false;
+        let sahUngestellt = false; // hat die Suche überhaupt eine ungestellte Aufgabe gefunden (nur durch ein Muster gesperrt)?
         for (let versuch = 0; ; versuch++) {
           def.aufgabe(ctx);
           const k = kennung(flaeche, loesungVorab, eigeneKennung);
           const n = k ? gestellt.get(k) || 0 : 0;
           const zuLang = serieZuLang();
-          if ((endlos ? !k || !zuletzt.includes(k) : n === 0 || (n === 1 && !wiederholt && k !== letzte))
-            && (!zuLang || versuch >= SERIE_VERSUCHE)) {
+          // Stufen der Suche (das Spiel zieht zufällig; die Menge der möglichen Aufgaben kennt der Rahmen nicht):
+          //   1. weder in dieser Runde noch im Gedächtnis, ohne zu lange Serie (ctx.serie);
+          //   2. aus einer früheren Runde, wenn sonst ein Muster entstünde — die Serienbremse geht vor, der Durchgang bleibt;
+          //   3. ungestellt, Serie notfalls erzwungen;
+          //   4. aus früheren Runden: (fast) alle waren dran → neuer Durchgang, das Gedächtnis beginnt neu;
+          //   5. Wiederholung dieser Runde, nie zweimal hintereinander (die Stufe hat weniger Aufgaben als die Runde).
+          const fp = k ? fingerabdruck(k) : null;
+          const ungestellt = n === 0 && (!fp || !gedaechtnis.has(fp));
+          if (ungestellt) sahUngestellt = true;
+          const stufeSuche = versuch < VERSUCHE.serie ? 1 : versuch < VERSUCHE.gedaechtnis ? 2 : versuch < VERSUCHE.erzwingen ? 3 : versuch < VERSUCHE.durchgang ? 4 : 5;
+          const passt = endlos ? (!k || !zuletzt.includes(k)) && (!zuLang || versuch >= SERIE_VERSUCHE)
+            : stufeSuche === 1 ? ungestellt && !zuLang
+            : stufeSuche === 2 ? n === 0 && !zuLang
+            : stufeSuche === 3 ? ungestellt
+            : stufeSuche === 4 ? n === 0
+            : n === 1 && !wiederholt && k !== letzte; // höchstens eine Wiederholung je Runde (Vorgabe 2026-10-31)
+          if (passt) {
             if (endlos && k) { zuletzt.push(k); if (zuletzt.length > 30) zuletzt.shift(); }
+            if (!endlos && fp) {
+              // Neuer Durchgang, wenn keine ungestellte Aufgabe mehr zu finden war (Stufe 4, oder Stufe 2 ohne eine
+              // einzige ungestellte); in Stufe 2 mit gesperrten ungestellten ist es nur eine Ausnahme gegen ein Muster.
+              const erschoepft = gedaechtnis.has(fp) && (stufeSuche === 4 || (stufeSuche === 2 && !sahUngestellt));
+              if (erschoepft) { gedaechtnis.clear(); for (const x of gestellt.keys()) gedaechtnis.add(fingerabdruck(x)); }
+              gedaechtnis.add(fp);
+              merkeGestellt();
+            }
             if (n) wiederholt = true;
             if (k) gestellt.set(k, n + 1);
             letzte = k;
             for (const [name, wert] of Object.entries(serien)) (serienVerlauf[name] ||= []).push(wert);
-            pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: zuLang && versuch >= SERIE_VERSUCHE });
+            pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: zuLang && (endlos ? versuch >= SERIE_VERSUCHE : stufeSuche >= 3) });
             zeichnet = false;
             gezeigt = true;
             // Reihenfolge: Lob der vorigen Aufgabe ausreden lassen, dann vorlesen, dann die Töne des Spiels.
@@ -2414,7 +2525,7 @@ const LS = (() => {
             }), 300);
             break;
           }
-          if (versuch >= 60) {
+          if (versuch >= VERSUCHE.ende) {
             clearTimeout(uhr);
             // Mix: Das Spiel hat keine neue Aufgabe mehr; der Mix nimmt dann die anderen.
             if (mix) { flaeche.innerHTML = ""; return anMix({ typ: "erschoepft" }); }
@@ -2423,6 +2534,7 @@ const LS = (() => {
             return schluss();
           }
           flaeche.innerHTML = "";
+          flaeche.classList.remove("antworten-warten");
           loesungVorab = null;
           eigeneKennung = null;
           schritte = 0;
@@ -2630,8 +2742,8 @@ const LS = (() => {
       "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
-      "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "regeln-link",
-      "stimmen-zeile", "stimme-eintrag", "stimme-meldung"],
+      "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
+      "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
@@ -2642,6 +2754,8 @@ const LS = (() => {
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     beiAenderung, abgleichDaten, spielStand: () => spielStand,
     MELDUNG_ARTEN, MELDUNG_STATUS, ANREGUNG_ARTEN, ANREGUNG_STATUS, istAnregung, anregungen, neueAnregung,
+    neueKorrektur, korrekturen, entferneMeldung, fingerabdruck, listenPruefung, pruefungDefinition, pruefungLokal, setzePruefungLokal,
+    listenPruefen, katalogEintrag,
     meldungen, meldungenVon, gefundeneFehler, ungeleseneMeldungen, meldenErlaubt, neueMeldung,
     setzeMeldung, meldungenGelesen, meldungFuerEntwicklung, meldeFormular, meldungStandAnwenden, meldungStatusAusBemerkung,
     meldungAdresse, meldungMailLink, meldungAusText,

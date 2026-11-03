@@ -78,7 +78,20 @@ LS.entwicklung = (() => {
     if (typeof PRUEFSTAND !== "undefined") { PRUEFSTAND.spiele = stand.spiele || {}; PRUEFSTAND.listen = stand.listen || {}; }
     return true;
   }
-  /** Bemerkung für die Entwicklung: { text, spiel?, stufe?, liste?, eintrag?, aufgabe? }. */
+  /**
+   * Haken je Eintrag einer Liste (Prüfansicht, LP2 a): { liste, setzen: [schlüssel], entfernen: [schlüssel], komplett, hash }.
+   * Der Server schreibt pruefstand-eintraege.json und bei komplett die Liste in pruefstand.js (mit hash), sonst entfernt
+   * er sie dort.
+   */
+  async function setzeEintraege(daten) {
+    const stand = await sende("/entwicklung/eintraege", { ...daten, von: name() });
+    if (!stand) return false;
+    if (typeof PRUEFSTAND !== "undefined") PRUEFSTAND.listen = stand.listen || {};
+    return true;
+  }
+  /** Status einer Bemerkung setzen (Prüfansicht: „✕ entfernen“ → erledigt). */
+  const bemerkungStatus = async (nr, status) => !!(await sende("/entwicklung/bemerkung-status", { nr, status }));
+  /** Bemerkung für die Entwicklung: { text, spiel?, stufe?, liste?, eintrag?, schluessel?, aufgabe? }. */
   const bemerkung = daten => sende("/entwicklung/bemerkung", { von: name(), seite: location.pathname, ...daten });
   /** Alle Bemerkungen (über den Server) oder null. */
   async function bemerkungen() {
@@ -188,7 +201,9 @@ LS.entwicklung = (() => {
           el("ul", {}, ...listen.map(l => el("li", {},
             el("button", { type: "button", class: "liste-link" + (l.geprueft ? " geprueft" : ""),
               title: l.geprueft ? `geprüft ${l.geprueft.am}${l.geprueft.von ? " · " + l.geprueft.von : ""}` : "noch nicht geprüft",
-              text: `${l.geprueft ? "✓" : "○"} ${l.name}`, onclick: () => zeigeListe(eintrag, l, zeichne) })))));
+              text: `${l.geprueft ? "✓" : "○"} ${l.name}`,
+              // Neue Prüfansicht je Eintrag, wo das Spiel eine pruefung.js hat (LP1 a); sonst die alte Tabelle.
+              onclick: async () => { if (!(await LS.listenPruefen(stand.spiel, l.id))) zeigeListe(eintrag, l, zeichne); } })))));
         auf.open = listenOffen;
         auf.addEventListener("toggle", () => { listenOffen = auf.open; });
         leiste.append(auf);
@@ -202,6 +217,6 @@ LS.entwicklung = (() => {
     document.addEventListener("lernspiele:spiel", () => { if (document.readyState !== "loading") spielLeiste(); });
   }
 
-  return { freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, server, setzeGeprueft,
-    bemerkung, bemerkungen, bemerkungsFeld, zeigeListe, zustand, serverMeldung };
+  return { freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, server, setzeGeprueft, setzeEintraege,
+    bemerkung, bemerkungen, bemerkungStatus, bemerkungsFeld, zeigeListe, zustand, serverMeldung };
 })();

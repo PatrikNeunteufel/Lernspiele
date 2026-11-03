@@ -1,25 +1,16 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
-## HALTEPUNKT 2026-11-03 16:58 — LERN_Session11_2026-11-03_anleitungen-portal (aufgenommen 2026-11-03)
-Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
-
-- **Angehalten — beim Weitermachen neu starten:** Vorschau-Server `lernspiele-3` (Port 8769, nur für Browser-Prüfungen)
-  beendet; bei Bedarf mit preview_start `lernspiele-3` neu. Sonst war nichts aktiv (drei Bau-Agenten fertig, alle
-  Hintergrundläufe ausgewertet). Der Server auf Port 8765 gehört Patrik und läuft weiter.
-- **Stand:** Arbeitsbaum sauber, letzter Commit `6066f1c` (G3b, G11, Anleitungen Internet-Server und freiwillige
-  Beiträge). Voller Testlauf nach den Strategie-Rätseln: 168 Spiele „Keine Fehler.“; seither nur Doku und eine
-  Konstante in Steine fangen (A–I, Einzeltest „Keine Fehler.“).
-- **Weiter mit:**
-  1. **Beitrags-Links bauen** (LERN-50) nach `docs/anleitung_freiwillige_beitraege.md`, Abschnitt 4: `portal/unterstuetzen.js`
-     (leere `url` = unsichtbar), Fusszeile im Portal „☕ Eulenpfad unterstützen“ → `portal/unterstuetzen.html`, Abschnitt
-     in der Anleitung für Erwachsene, Verweis in der Verwaltung (nur Aufsicht), Prüfung im Testskript „keine
-     Beitrags-Links in Spielen und Kinder-Tabs“; Pages-Workflow prüfen, ob `portal/` mit neuen Dateien ausgeliefert wird.
-  2. Danach Session-Abschluss (Report LERN_Session11, Handover-Stand, Changelog) — mit `session-abschluss`.
-- **Offen bei Patrik:** Strategie-Rätsel ansehen und freigeben (gesperrt bis angesehen; Prüfliste Teil 83); Konzept
-  Gruppen ist entschieden, Bau noch nicht beauftragt; Steuern und Impressum zu den Beiträgen klären (Anleitung Abschnitt 3).
-
 ## Stand
-**2026-11-03, nach LERN_Session10** ([Report](report/LERN_Session10_2026-11-03.md)):
+**2026-11-03, nach LERN_Session11** ([Report](report/LERN_Session11_2026-11-03.md)):
+- **Spiele:** 168 (drei Strategie-Rätsel mit Regelseite, LERN-49). Katalogfeld `art`, Sortierung im Tab Spiele,
+  Spieltabelle im Portal (`portal/eulenpfad-spiele.html`).
+- **Prüfung je Eintrag** (rahmen.md 17): Prüfansicht mit Haken je Eintrag, Gruppen und Bemerkungen; je Spiel eine
+  `pruefung.js`, bisher nur Anlaut-Angel und Auge-Entdecker (LERN-51, LP5).
+- **Wiederholungen:** eine Aufgabe erst wieder, wenn alle der Stufe dran waren (Gedächtnis `lernspiele:gestellt`).
+- **Konzept Gruppen** entschieden (G1–G11, G3b), Bau offen (LERN-48); Beiträge vorbereitet, Links leer (LERN-50).
+- **Tests:** 2026-11-03 „Keine Fehler.“ über alle 168 Spiele (19 Hinweise der bekannten Arten: verrät, Serie, Einzahl?).
+
+Stand nach LERN_Session10 ([Report](report/LERN_Session10_2026-11-03.md)):
 - **Spiele:** 165 (15 neu: Runde B 3. Klasse T1–T8 und Runde C S8, S9, S14, S15, T9–T11; Lernziele und Annahmen in
   `lernziele/lehrplan_sg_session10.md`). **Beide Ideenlisten sind abgearbeitet** (Checkliste: 0 Ideen offen); der
   Rest deckt sich mit vorhandenen Spielen oder braucht Daten von aussen (N9, N11).
@@ -83,13 +74,15 @@ Stand nach LERN_Session8 ([Report](report/LERN_Session8_2026-11-02.md)):
 
 **Nächste Session — Plan:**
 1. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
-2. Patrik: Annahmen Runde B und C prüfen (LERN-43, `lernziele/lehrplan_sg_session10.md`), neue Spiele ansehen
-   und freigeben (LERN-21; der Übertritts-Check braucht freie Spiele der Basisklasse 5/6), Teilen eines
-   Abzeichens auf Tablet und Handy prüfen (LERN-46), Vorlesen anhören (LERN-37).
-3. Rahmen-Kandidat LERN-45: Baustein „Fragenfolge“ für Spiele mit mehreren Fragen je Aufgabe.
-4. Entscheide: Umbenennen Detektiv / Sortierer / Puzzle (LERN-35), Farben rechts vom Komma, Malzeichen
-   „·“/„×“, Braille-Finger ohne freie Liste sichtbar (LERN-39); Postfach für Meldungen (LERN-40).
-5. Weiter offen: LERN-41, LERN-34, LERN-31, LERN-4, LERN-33.
+2. Entscheid **LP3**: Inhalte einer Liste erst in die Aufgaben, wenn sie ganz geprüft ist (heute so), oder teilweise.
+3. **LP5 / LERN-51:** alle Listen überarbeiten — je Spiel `pruefung.js`, gemischte Listen trennen (Au café: Dialog
+   eigene Liste, „Personen und Sachen“), Bau mit Agenten nach festem Regelwerk; danach `tools/pruefliste_wortlisten.js`
+   auf `pruefung.js` umstellen und das Testskript `pruefung.js` prüfen lassen.
+4. **VL1 a / LERN-52:** zweisprachiges Vorlesen, Pilot Au café (Sprachwechsel messen).
+5. **Gruppen bauen** (LERN-48).
+6. Patrik: Strategie-Rätsel ansehen und freigeben (LERN-49), Beitrags-Links eintragen (LERN-50), Annahmen
+   Runde B/C (LERN-43), Teilen eines Abzeichens auf Geräten (LERN-46), Vorlesen anhören (LERN-37).
+7. Weiter offen: LERN-45, LERN-35, LERN-39, LERN-40, LERN-41, LERN-31, LERN-4, LERN-33.
 
 Technik: HTML/CSS/JS ohne Build (Entscheid LERN-1). Vertrag zwischen Rahmen und Spielen: [rahmen.md](rahmen.md).
 Übersicht aller Spiele und was zu prüfen ist: [checkliste.md](checkliste.md) (erzeugt mit `node tools/checkliste.js`). Gemeinsamer Rahmen `spiele/gemeinsam/`:
@@ -192,3 +185,5 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-48 | Gruppen: Familie, Klasse, Lerngruppe; Rolle Lehrperson, Klassenstatistik, Abgleich je Gruppe verschlüsselt | offen (Entscheide G1–G11 und G3b getroffen 2026-11-03, Bau ausstehend) | docs/konzept_gruppen.md, Abschnitt 9; docs/anleitung_zertifikat_klassenserver.md; docs/anleitung_klassenserver_internet.md; umfasst LERN-34 |
 | LERN-50 | Freiwillige Beiträge (Kaffee-Link, QR-Rechnung, GitHub Sponsors) nur für Erwachsene; Links leer bis aktiviert | in Arbeit seit 2026-11-03 (LERN_Session11); vorbereitet, Links leer — Patrik trägt sie ein, Steuern und Impressum klären | docs/anleitung_freiwillige_beitraege.md; portal/unterstuetzen.js |
 | LERN-49 | Strategie-Rätsel im Eulenpfad (Matt in 1, Atari-Go, Nim); ganze Partien Schach und Go erst im Lernsteig (S1 a) | in Arbeit seit 2026-11-03 (LERN_Session11); drei Spiele gebaut, Annahmen offen | lernziele/lehrplan_sg_session11.md; spielideen/strategie_raetsel.md |
+| LERN-51 | Alle Inhaltslisten je Eintrag prüfbar machen (`pruefung.js` je Spiel, gemischte Listen trennen; LP5 a) | in Arbeit seit 2026-11-03 (LERN_Session11); Pilot Anlaut-Angel und Auge-Entdecker | rahmen.md 17; spiele/gemeinsam/listenpruefung.js |
+| LERN-52 | Zweisprachiges Vorlesen (VL1 a), Pilot Au café | offen | Report LERN_Session11, Plan 4 |

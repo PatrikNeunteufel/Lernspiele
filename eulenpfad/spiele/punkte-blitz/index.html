@@ -188,7 +188,8 @@ LS.spiel({
       let uhr = null;
       ctx.flaeche.append(el("div", { class: "hoer-zeile" },
         el("button", { type: "button", class: "knopf hell", text: "👀 Nochmal zeigen", onclick: () => { feld.classList.remove("verdeckt"); clearTimeout(uhr); uhr = setTimeout(zudecken, s.zeit); } })));
-      LS.losGehts(ctx, feld, () => { uhr = setTimeout(zudecken, s.zeit); });
+      // Antworten erst, wenn die Punkte zugedeckt sind (Bemerkung 7, LERN_Session11)
+      LS.losGehts(ctx, feld, (_, vorbei) => { uhr = setTimeout(() => { zudecken(); vorbei(); }, s.zeit); }, { antwortenNachBlitz: true });
     }
 
     const hinweis = {

@@ -19,6 +19,8 @@
   .ae-bild .ae-halo { fill: none; stroke: var(--deko-4); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
   .ae-bild .ae-halo-dick { stroke-width: 24; }
   .ae-bild .ae-halo-flaeche { fill: var(--deko-4); fill-opacity: .55; stroke: none; }
+  /* Prüfansicht (pruefung.js): Markierung ruhig, ohne Blinken */
+  .pruef-bild .ae-bild .ae-markiert .ae-halo { animation: none; opacity: 1; }
   .ae-bild .ae-daneben .ae-halo-flaeche { fill: var(--hinweis); }
   .ae-bild .ae-richtig .ae-halo-flaeche { fill: var(--gut); }
   .ae-bild .ae-markiert .ae-halo { opacity: 1; animation: ae-blink 1s ease-in-out infinite; }

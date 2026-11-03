@@ -32,6 +32,7 @@ SCHLUESSEL_DATEI = WURZEL / "entwickler.key"
 PRUEFSTAND = WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "pruefstand.js"
 ENTWICKLUNG_JS = WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "entwicklung.js"
 BEMERKUNGEN = WURZEL / "docs" / "eulenpfad" / "bemerkungen.json"
+EINTRAEGE = WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "pruefstand-eintraege.json"
 SALZ = "eulenpfad-entwickler:"  # wie in entwicklung.js
 
 PRUEFSTAND_KOPF = (
@@ -66,6 +67,10 @@ def lies_pruefstand() -> dict:
 def schreibe_pruefstand(stand: dict) -> None:
     inhalt = PRUEFSTAND_KOPF + json.dumps(stand, ensure_ascii=False, indent=2, sort_keys=True) + ";\n"
     PRUEFSTAND.write_bytes(inhalt.encode("utf-8"))
+
+
+def lies_eintraege() -> dict:
+    return json.loads(EINTRAEGE.read_text(encoding="utf-8")) if EINTRAEGE.exists() else {}
 
 
 def lies_bemerkungen() -> list:
@@ -129,6 +134,41 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             schreibe_pruefstand(stand)
             return self.antwort(200, stand)
 
+        if self.path == "/entwicklung/eintraege":
+            # Haken je Eintrag einer Liste (Prüfansicht, LP2 a, LERN_Session11)
+            liste = str(daten.get("liste", ""))
+            if not re.fullmatch(r"[a-z0-9-]+/[a-z0-9-]+", liste):
+                return self.antwort(400, {"fehler": "liste ungültig"})
+            schluessel_ok = lambda s: isinstance(s, str) and re.fullmatch(r"[a-z0-9-]+:[a-z0-9]+", s)
+            alle = lies_eintraege()
+            haken = alle.setdefault(liste, {})
+            von = str(daten.get("von", ""))[:40]
+            for s in daten.get("setzen", []):
+                if schluessel_ok(s):
+                    haken[s] = {"am": jetzt[:10], "von": von}
+            for s in daten.get("entfernen", []):
+                if schluessel_ok(s):
+                    haken.pop(s, None)
+            if not haken:
+                alle.pop(liste, None)
+            EINTRAEGE.write_bytes((json.dumps(alle, ensure_ascii=False, indent=1, sort_keys=True) + "\n").encode("utf-8"))
+            stand = lies_pruefstand()
+            if daten.get("komplett"):
+                stand.setdefault("listen", {})[liste] = {"am": jetzt[:10], "von": von, "hash": str(daten.get("hash", ""))[:20]}
+            else:
+                stand.get("listen", {}).pop(liste, None)
+            schreibe_pruefstand(stand)
+            return self.antwort(200, stand)
+
+        if self.path == "/entwicklung/bemerkung-status":
+            liste = lies_bemerkungen()
+            b = next((x for x in liste if x.get("nr") == daten.get("nr")), None)
+            if not b:
+                return self.antwort(404, {"fehler": "Bemerkung nicht gefunden"})
+            b["status"] = str(daten.get("status", ""))[:300]
+            BEMERKUNGEN.write_bytes((json.dumps(liste, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+            return self.antwort(200, b)
+
         if self.path == "/entwicklung/bemerkung":
             text = str(daten.get("text", "")).strip()
             if not text:
@@ -139,7 +179,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if schon:
                 return self.antwort(200, schon)
             eintrag = {"nr": max((b["nr"] for b in liste), default=0) + 1, "zeit": jetzt, "status": "offen", "text": text[:2000]}
-            for feld in ("von", "spiel", "stufe", "liste", "eintrag", "aufgabe", "seite", "meldung"):
+            for feld in ("von", "spiel", "stufe", "liste", "eintrag", "schluessel", "aufgabe", "seite", "meldung"):
                 if daten.get(feld):
                     eintrag[feld] = str(daten[feld])[:500]
             liste.append(eintrag)

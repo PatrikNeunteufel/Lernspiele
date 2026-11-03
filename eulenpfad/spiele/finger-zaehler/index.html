@@ -373,7 +373,8 @@ LS.spiel({
     if (s.blitz) {
       // Erst wenn das Kind bereit ist: ▶ Los, 3-2-1, dann blitzen die Hände (LS.losGehts, Wunsch Patrik LERN_Session8)
       const zu = () => { if (f.contains(feld)) feld.classList.add("verdeckt"); };
-      LS.losGehts(ctx, feld, () => setTimeout(zu, s.blitz));
+      // Antworten erst, wenn die Hände zugedeckt sind (Bemerkung 7, LERN_Session11)
+      LS.losGehts(ctx, feld, (_, vorbei) => setTimeout(() => { zu(); vorbei(); }, s.blitz), { antwortenNachBlitz: true });
     }
     const art = a.art === "handZuBild" ? a.darstellung : s.antwort;
     const inhalt = o => (art === "punkte" ? wuerfel(o) : art === "beides" ? el("span", { class: "fz-beides" }, ziffer(o), wuerfel(o)) : darstellen(art, o));
