@@ -17,6 +17,14 @@ const PRUEFSTAND = {
     }
   },
   "spiele": {
+    "abc-sortierer": {
+      "am": "2026-11-03",
+      "von": "Patrik"
+    },
+    "anlaut-angel": {
+      "am": "2026-11-03",
+      "von": "Patrik"
+    },
     "finger-zaehler": {
       "am": "2026-11-02",
       "von": "Patrik"
@@ -31,6 +39,10 @@ const PRUEFSTAND = {
     },
     "rechentrick-detektiv": {
       "am": "2026-11-02",
+      "von": "Patrik"
+    },
+    "schaetz-waage": {
+      "am": "2026-11-03",
       "von": "Patrik"
     },
     "schriftlich-werkstatt": {

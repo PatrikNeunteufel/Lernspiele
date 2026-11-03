@@ -403,8 +403,13 @@ for (const id of ids) {
 // Regelseiten (LERN_Session11, rahmen.md 16): Katalog regeln: true verlangt regeln.html mit regeln.css und Weg zurück.
 {
   const kat = vm.createContext({ LS: { SKALA: [] } });
-  vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", "katalog.js"), "utf8") + ";this.SPIELE = SPIELE;", kat);
+  vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", "katalog.js"), "utf8") + ";this.SPIELE = SPIELE; this.SPIELWEISEN = SPIELWEISEN;", kat);
   for (const s of kat.SPIELE.filter(x => ids.includes(x.id))) {
+    // Spielweise (Entscheid SP1 a, LERN_Session11): jedes Spiel trägt art mit Schlüsseln aus SPIELWEISEN.
+    const ohneArt = !Array.isArray(s.art) || !s.art.length;
+    const fremd = ohneArt ? [] : s.art.filter(a => !(a in kat.SPIELWEISEN));
+    if (ohneArt) { console.log(`    FEHLER  ${s.id} Katalog: Feld art fehlt (Spielweise, SPIELWEISEN in katalog.js)`); fehlerZahl++; }
+    if (fremd.length) { console.log(`    FEHLER  ${s.id} Katalog: art kennt ${fremd.join(", ")} nicht (SPIELWEISEN)`); fehlerZahl++; }
     const datei = path.join(SPIELE_DIR, s.id, "regeln.html");
     const da = fs.existsSync(datei);
     const m = [];

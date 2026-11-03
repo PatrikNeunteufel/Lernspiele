@@ -93,6 +93,17 @@ const LS = (() => {
       werte: { aus: "aus", ab3: "ab der 3. Klasse", ab5: "ab der 5. Klasse", alle: "alle Kinder" },
       erklaerung: "Kinder können in jedem Spiel mit „🙋 Melden“ einen Fehler in der Aufgabe oder der Aufgabe davor melden, mit Begründung. Die Meldung sieht zuerst die Aufsicht (Verwaltung → Meldungen); weitergegeben wird nur, was sie bestätigt, und ohne den Namen. Ab der 3. Klasse, weil die Begründung geschrieben wird.",
     },
+    // Sortierung im Tab Spiele (Wunsch Patrik, Entscheide SO1 a, SO2 a, LERN_Session11)
+    sortierung: {
+      titel: "Sortierung der Spiele", standard: "thema",
+      werte: { thema: "Nach Fach und Thema", passung: "Passt zu dir zuerst", name: "Nach Alphabet", klasse: "Nach Klasse" },
+      erklaerung: "So stehen die Spiele im Tab Spiele, wenn ein Kind nichts anderes gewählt hat. „Passt zu dir“ ordnet nach Klasse und dem, was das Kind noch üben sollte (wie die Suche) — die Liste ändert sich dann mit jeder Runde. Je Kind lässt es sich in Konten abweichend setzen.",
+    },
+    sortierungWahl: {
+      titel: "Kinder wählen die Sortierung selbst", standard: "ab4",
+      werte: { nie: "nie", ab4: "ab der 4. Klasse", ab5: "ab der 5. Klasse", alle: "alle Kinder" },
+      erklaerung: "Darf ein Kind im Tab Spiele selbst wählen, wie sortiert wird (Thema, passt zu dir, Alphabet, Klasse, auf- oder absteigend)? Je Kind lässt es sich in Konten ein- oder ausschalten. Ab der 4. Klasse, weil die Wahl gelesen werden muss.",
+    },
   };
 
   /** Id des Spiels dieser Seite (spiele/<id>/index.html), auch bevor eine Runde läuft; sonst null. */
@@ -169,14 +180,36 @@ const LS = (() => {
   //   vorlesen: "auto" | "knopf" | fehlt = nach Klasse (Kindergarten und 1. Klasse automatisch), siehe Vorlesen
   //   lernplan: { tage, minuten } — Wochenziel, von der Aufsicht gesetzt (Entscheid L1 a, erfolge.js); fehlt = kein Ziel
   //   erfolgeGesehen: [ids] — Abzeichen, die das Kind im Tab Erfolge schon gesehen hat (🆕 bis dahin)
+  //   sortierung: { art, ab } — Sortierung im Tab Spiele (art aus EINSTELLUNGEN.sortierung, ab = absteigend);
+  //     fehlt = Vorgabe der Aufsicht. sortierungWahl: true | false | fehlt = nach Einstellung und Klasse (SO1 a)
   //   geaendert: { <feld>: ISO, angelegt: ISO } — setzt speichereProfil; beim Abgleich gewinnt je Feld der jüngere Stand
   const LEERES_PROFIL = {
     alter: null, klasse: null, fokus: [], rolle: "kind",
     reihenfolge: { global: "stufe", spiele: {} },
     timer: { an: false, faktor: 1, spiele: {} },
     favoriten: [], endlosAn: [], ansicht: "kacheln", zu: [], mix: null,
-    lernplan: null, erfolgeGesehen: [],
+    lernplan: null, erfolgeGesehen: [], sortierung: null, sortierungWahl: null,
   };
+
+  /**
+   * Sortierung im Tab Spiele für eine Person: { art, ab, waehlbar }. Die Aufsicht wählt immer selbst; ein Kind, wenn
+   * sein Profil es erlaubt (sortierungWahl) oder sonst nach der Einstellung sortierungWahl und seiner Klasse.
+   */
+  function sortierungFuer(name) {
+    const p = profil(name);
+    const standard = einstellung("sortierung", null);
+    const art = p.sortierung?.art in EINSTELLUNGEN.sortierung.werte ? p.sortierung.art : standard;
+    let waehlbar = istAufsicht(name);
+    if (!waehlbar) {
+      if (typeof p.sortierungWahl === "boolean") waehlbar = p.sortierungWahl;
+      else {
+        const e = einstellung("sortierungWahl", null);
+        const k = klasseVon(p);
+        waehlbar = e === "alle" || (e !== "nie" && k != null && k >= (e === "ab5" ? 5 : 4));
+      }
+    }
+    return { art, ab: !!p.sortierung?.ab, waehlbar };
+  }
 
   /** Vorgabezeit je Aufgabe aus dem Katalog (Sekunden), falls die Seite ihn geladen hat. */
   function vorgabeZeit(spiel, stufe) {
@@ -646,8 +679,29 @@ const LS = (() => {
     behoben: { text: "Entwicklung: behoben", kind: "Danke! Der Fehler ist behoben — du hast einen echten Fehler gefunden. 🏅" },
     "kein-fehler": { text: "kein Fehler", kind: "Das ist kein Fehler. Lies die Erklärung." },
   };
+  // Anregungen der Aufsicht an die Entwicklung (Wunsch Patrik, LERN_Session11): derselbe Speicher und derselbe Weg
+  // (E-Mail oder Entwickler-Server, Antwort über meldungen-stand.json), aber typ: "anregung", nur von der Aufsicht,
+  // ohne Spiel-Pflicht und ohne Daten über ein Kind. Kinder sehen sie nie; sie zählen nicht als Fehlerfinder.
+  const ANREGUNG_ARTEN = {
+    neu: "Idee für ein neues Spiel oder Thema",
+    verbessern: "Ein Spiel verbessern",
+    inhalt: "Inhalte: Wörter, Aufgaben, Lehrmittel",
+    bedienung: "Bedienung, Startseite, Statistik",
+    anderes: "Etwas anderes",
+  };
+  const ANREGUNG_STATUS = {
+    neu: "noch nicht gesendet",
+    weitergeleitet: "an die Entwicklung geschickt",
+    geplant: "Entwicklung: geplant",
+    behoben: "Entwicklung: umgesetzt",
+    "kein-fehler": "Entwicklung: nicht geplant (siehe Antwort)",
+  };
+  const istAnregung = m => m?.typ === "anregung";
   const meldungen = () => lies("meldungen", []);
-  const meldungenVon = name => meldungen().filter(m => m.name === name);
+  const meldungenVon = name => meldungen().filter(m => m.name === name && !istAnregung(m));
+  const anregungen = () => meldungen().filter(istAnregung);
+  /** Neue Anregung der Aufsicht: { name, art, text, spiel? }; Status „neu“, bis sie gesendet ist. */
+  const neueAnregung = daten => neueMeldung({ ...daten, typ: "anregung" });
   /** Echte Fehler, die ein Kind gefunden hat: von der Entwicklung bestätigt und behoben (für die Statistik). */
   const gefundeneFehler = name => meldungenVon(name).filter(m => m.status === "behoben").length;
   /** Neue Rückmeldungen, die das Kind noch nicht gesehen hat. */
@@ -710,7 +764,8 @@ const LS = (() => {
   function meldungMailLink(m) {
     const MELDUNG_ADRESSE = meldungAdresse();
     if (!MELDUNG_ADRESSE) return null;
-    const betreff = `Eulenpfad: Fehlermeldung ${m.id} (${m.spiel}, Stufe ${String(m.stufe).slice(1)})`;
+    const betreff = istAnregung(m) ? `Eulenpfad: Anregung ${m.id}${m.spiel ? ` (${m.spiel})` : ""}`
+      : `Eulenpfad: Fehlermeldung ${m.id} (${m.spiel}, Stufe ${String(m.stufe).slice(1)})`;
     return `mailto:${MELDUNG_ADRESSE}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(meldungFuerEntwicklung(m))}`;
   }
   /**
@@ -718,7 +773,7 @@ const LS = (() => {
    * von meldungFuerEntwicklung, oder null, wenn keine Kennung darin steht.
    */
   function meldungAusText(text) {
-    const id = text.match(/Meldung (M-[a-z0-9]+-[a-z0-9]+)/)?.[1];
+    const id = text.match(/(?:Meldung|Anregung) (M-[a-z0-9]+-[a-z0-9]+)/)?.[1];
     if (!id) return null;
     const ort = text.match(/\(([a-z0-9-]+)\), Stufe (\d)/);
     return { meldung: id, ...(ort ? { spiel: ort[1], stufe: `s${ort[2]}` } : {}) };
@@ -727,6 +782,12 @@ const LS = (() => {
   /** Text für die Entwicklung: ohne den Namen des Kindes, mit Klasse und Kennung. */
   function meldungFuerEntwicklung(m) {
     const spielName = (typeof SPIELE !== "undefined" && SPIELE.find(s => s.id === m.spiel)?.name) || m.spiel;
+    if (istAnregung(m)) return [
+      `Anregung ${m.id} (Aufsicht), ${m.zeit.slice(0, 10)}`,
+      `Art: ${ANREGUNG_ARTEN[m.art] || m.art}`,
+      m.spiel ? `Spiel: ${spielName} (${m.spiel})` : null,
+      `Anregung: ${m.text}`,
+    ].filter(Boolean).join("\n");
     return [
       `Meldung ${m.id} (Kind${m.klasse != null ? `, ${klasseText(m.klasse)}` : ""}), ${m.zeit.slice(0, 10)}`,
       `Spiel: ${spielName} (${m.spiel}), Stufe ${String(m.stufe).slice(1)}, Aufgabe ${m.aufgabeNr ?? "?"}`,
@@ -2513,12 +2574,13 @@ const LS = (() => {
     MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     beiAenderung, abgleichDaten, spielStand: () => spielStand,
-    MELDUNG_ARTEN, MELDUNG_STATUS, meldungen, meldungenVon, gefundeneFehler, ungeleseneMeldungen, meldenErlaubt, neueMeldung,
+    MELDUNG_ARTEN, MELDUNG_STATUS, ANREGUNG_ARTEN, ANREGUNG_STATUS, istAnregung, anregungen, neueAnregung,
+    meldungen, meldungenVon, gefundeneFehler, ungeleseneMeldungen, meldenErlaubt, neueMeldung,
     setzeMeldung, meldungenGelesen, meldungFuerEntwicklung, meldeFormular, meldungStandAnwenden, meldungStatusAusBemerkung,
     meldungAdresse, meldungMailLink, meldungAusText,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
     freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, aehnlich, passung, spielListen, listeFrei, setzeListeFrei, freieListen,
-    basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
+    basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, sortierungFuer, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, vorgabeZeit, timerFuer, setzeTimerSpiel, zeitVorschlag,
     stimmeBereit, sprich, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen,
     protokoll, besteSterne, auswahl, reihenfolge, fliegen, koerbe, pruefung, RAHMEN_KLASSEN,

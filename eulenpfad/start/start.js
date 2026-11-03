@@ -58,7 +58,7 @@ function zeichneStart(mitAufsicht = null) {
   const ich = LS.aktuellerSpieler();
   const zeichen = {
     statistik: !LS.istAufsicht(ich) && LS.ungeleseneMeldungen(ich).length ? " 🔔" : "",
-    verwaltung: LS.meldungen().some(m => m.status === "neu") ? " 🙋" : "",
+    verwaltung: LS.meldungen().some(m => m.status === "neu" && !LS.istAnregung(m)) ? " 🙋" : "",
     erfolge: !LS.istAufsicht(ich) && neueAbzeichen(ich) ? " 🆕" : "", // neue Abzeichen (LERN_Session10)
   };
   for (const t of START_TABS) {

@@ -142,14 +142,36 @@ function zeichneSpiele(box, neu) {
     ? (a, b) => treffer.get(a.id).i - treffer.get(b.id).i
     : (a, b) => Number(imFokus(b)) - Number(imFokus(a)));
 
+  // ----- Sortierung (Wunsch Patrik, Entscheide SO1 a, SO2 a, LERN_Session11) -----
+  // Vorgabe „nach Fach und Thema“ wie bisher; sonst eine Liste ohne Gruppen. Wählen darf die Aufsicht immer, ein Kind
+  // nach Einstellung und Klasse (LS.sortierungFuer). Eine Suche ordnet weiter nach Relevanz.
+  const sort = LS.sortierungFuer(name);
+  const nachName = (a, b) => a.name.localeCompare(b.name, "de");
+  const SORTIERER = {
+    passung: (a, b) => (LS.passung(b.id, person) ?? 0) - (LS.passung(a.id, person) ?? 0) || nachName(a, b),
+    name: nachName,
+    klasse: (a, b) => a.klasse - b.klasse || nachName(a, b),
+  };
+  const flach = !treffer && sort.art !== "thema";
+  if (flach) {
+    auswahl.sort(SORTIERER[sort.art]);
+    if (sort.ab) auswahl.reverse();
+  }
+  const SORT_PFEIL = { thema: ["Katalog", "rückwärts"], passung: ["beste zuerst", "beste zuletzt"], name: ["A → Z", "Z → A"], klasse: ["tiefe zuerst", "hohe zuerst"] };
+  const sortWahl = sort.waehlbar ? el("label", { class: "sortier-wahl" }, el("span", { text: "Sortieren:" }),
+    el("select", { class: "feld klein", "aria-label": "Spiele sortieren", onchange: e => speichere({ sortierung: { art: e.target.value, ab: false } }) },
+      ...Object.entries(LS.EINSTELLUNGEN.sortierung.werte).map(([w, t]) => el("option", { value: w, text: t, ...(w === sort.art ? { selected: "" } : {}) }))),
+    chip(sort.ab ? "↓ " + SORT_PFEIL[sort.art][1] : "↑ " + SORT_PFEIL[sort.art][0], sort.ab, () => speichere({ sortierung: { art: sort.art, ab: !sort.ab } }), null, "klein")) : null;
+
   // ----- Werkzeuge: Ansicht und alle auf/zu -----
   const gruppenIds = ["favoriten", ...FAECHER.map(f => "fach:" + f), ...THEMEN.map(t => "thema:" + t.id)];
   box.append(el("div", { class: "werkzeuge" },
     suchFeld(spielSuche, v => { spielSuche = v; }, neu, "🔍 Spiel suchen"),
+    sortWahl,
     chip("▦ Kacheln", p.ansicht !== "kompakt", () => speichere({ ansicht: "kacheln" }), null, "klein"),
     chip("☰ Kompakt", p.ansicht === "kompakt", () => speichere({ ansicht: "kompakt" }), null, "klein"),
-    chip("Alle auf", false, () => speichere({ zu: [] }), null, "klein"),
-    chip("Alle zu", false, () => speichere({ zu: gruppenIds }), null, "klein")));
+    flach ? null : chip("Alle auf", false, () => speichere({ zu: [] }), null, "klein"),
+    flach ? null : chip("Alle zu", false, () => speichere({ zu: gruppenIds }), null, "klein")));
 
   // ----- Zufallsmix und Zufälliges Spiel: Karten wie die Spiele, ohne Thema (Wunsch Patrik, LERN_Session10) -----
   // Zufallsmix (Entscheid M1 a): Aufgaben aus mehreren Spielen, Einstellungen auf der Mix-Seite.
@@ -267,8 +289,11 @@ function zeichneSpiele(box, neu) {
   if (treffer && auswahl.length) box.append(aehnlichZu ? gitter(auswahl) : el("h2", { class: "treffer-titel", text: `🔍 ${auswahl.length} Treffer, beste zuerst` }), aehnlichZu ? "" : gitter(auswahl));
   const favoriten = treffer ? [] : auswahl.filter(s => p.favoriten.includes(s.id));
   if (favoriten.length) box.append(gruppe("favoriten", "⭐ Favoriten", favoriten.length, gitter(favoriten)));
-  for (const fach of treffer ? [] : FAECHER) {
-    const themen = THEMEN.filter(t => t.fach === fach)
+  // Flache Sortierung: alle Spiele in einer Liste (Favoriten bleiben oben in ihrer Gruppe).
+  if (flach && auswahl.length) box.append(el("h2", { class: "treffer-titel", text: `${auswahl.length} Spiele · ${LS.EINSTELLUNGEN.sortierung.werte[sort.art]}` }), gitter(auswahl));
+  const faecherReihe = sort.ab ? [...FAECHER].reverse() : FAECHER;
+  for (const fach of treffer || flach ? [] : faecherReihe) {
+    const themen = (sort.ab ? [...THEMEN].reverse() : THEMEN).filter(t => t.fach === fach)
       .map(t => ({ t, spiele: auswahl.filter(s => s.thema === t.id) }))
       .filter(x => x.spiele.length);
     if (!themen.length) continue;

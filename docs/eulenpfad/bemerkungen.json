@@ -20,5 +20,16 @@
     "stufe": "s3",
     "aufgabe": "Aufgabe 3: Rechne im Malkreuz: 19 × 15 · 19 × 15 = ?",
     "seite": "/eulenpfad/spiele/malkreuz/index.html"
+  },
+  {
+    "nr": 3,
+    "zeit": "2026-11-03T18:39:08+01:00",
+    "status": "offen",
+    "text": "ein  Haus ist mehr als nur ein Dach",
+    "von": "Patrik",
+    "spiel": "abc-sortierer",
+    "liste": "abc-sortierer/nomen-bild",
+    "eintrag": "Dach | 🏠",
+    "seite": "/eulenpfad/spiele/abc-sortierer/index.html"
   }
 ]

@@ -23,13 +23,15 @@ function zeichneVerwaltung(box, neu) {
       eigen ? el("button", { type: "button", class: "schalter", text: "↺ wie Prüfstand", title: "Eigene Einstellung entfernen", onclick: () => { setze(null); neu(); } }) : null);
   }
 
+  // Neue Fehlermeldungen der Kinder (Anregungen der Aufsicht zählen nicht: die hat sie selbst geschrieben).
+  const neueMeldungen = () => LS.meldungen().filter(m => m.status === "neu" && !LS.istAnregung(m)).length;
   // Untertabs (Wunsch Patrik, LERN_Session6), in der Adresse #verwaltung/<id>; ohne Angabe Konten.
   const UNTER = [
     { id: "konten", text: "👥 Konten", zeichne: konten },
     { id: "freigabe", text: "✓ Freigabe", zeichne: freigabeTeil },
     { id: "abgleich", text: "🔄 Abgleich", zeichne: abgleich },
     { id: "einstellungen", text: "⚙️ Einstellungen", zeichne: einstellungen },
-    { id: "meldungen", text: `🙋 Meldungen${LS.meldungen().filter(m => m.status === "neu").length ? ` (${LS.meldungen().filter(m => m.status === "neu").length})` : ""}`, zeichne: meldungenTeil },
+    { id: "meldungen", text: `🙋 Meldungen${neueMeldungen() ? ` (${neueMeldungen()})` : ""}`, zeichne: meldungenTeil },
     { id: "entwicklung", text: "🛠 Entwicklung", zeichne: entwicklung },
   ];
   const dev = LS.entwicklung.aktiv();
@@ -132,6 +134,24 @@ function zeichneVerwaltung(box, neu) {
     return el("span", { class: "zeile-knoepfe", title: "Wochenziel: so viele Tage mit so vielen Minuten — jede erfüllte Woche gibt einen Wochenstern" }, el("span", { text: "📅" }), tage, minuten);
   }
 
+  /**
+   * Sortierung im Tab Spiele je Kind (Entscheide SO1 a, SO2 a, LERN_Session11): Art (oder „wie Vorgabe“) und ob das
+   * Kind selbst wählt (oder „nach Klasse“, Einstellung sortierungWahl).
+   */
+  function sortierungWahl(n, p) {
+    const art = el("select", { "aria-label": `Sortierung für ${n}` },
+      el("option", { value: "", text: "wie Vorgabe" }),
+      ...Object.entries(LS.EINSTELLUNGEN.sortierung.werte).map(([w, t]) => el("option", { value: w, text: t })));
+    art.value = p.sortierung?.art || "";
+    const wahl = el("select", { "aria-label": `Darf ${n} die Sortierung selbst wählen?` },
+      el("option", { value: "", text: "wählt selbst: nach Einstellung" }),
+      el("option", { value: "ja", text: "wählt selbst: ja" }), el("option", { value: "nein", text: "wählt selbst: nein" }));
+    wahl.value = p.sortierungWahl === true ? "ja" : p.sortierungWahl === false ? "nein" : "";
+    art.addEventListener("change", () => { LS.speichereProfil(n, { sortierung: art.value ? { art: art.value, ab: false } : null }); neu(); });
+    wahl.addEventListener("change", () => { LS.speichereProfil(n, { sortierungWahl: wahl.value === "ja" ? true : wahl.value === "nein" ? false : null }); neu(); });
+    return el("span", { class: "zeile-knoepfe", title: "Wie das Kind die Spiele im Tab Spiele sortiert sieht, und ob es das selbst ändern darf" }, el("span", { text: "🔀" }), art, wahl);
+  }
+
   function konten() {
     const meldung = el("div", { class: "meldung", style: "text-align:left", "aria-live": "polite" });
     const kontoZeilen = LS.spielerListe().map(n => {
@@ -142,6 +162,7 @@ function zeichneVerwaltung(box, neu) {
         el("td", {}, el("b", { text: LS.spielerName(n) }), LS.klasseVon(p) !== null ? el("span", { class: "leise-text", text: ` · ${LS.klasseText(LS.klasseVon(p))}` }) : null),
         el("td", { text: p.rolle === "aufsicht" ? (p.pin ? "Aufsicht" : "Aufsicht (ohne PIN)") : "Kind" }),
         el("td", {}, p.rolle === "aufsicht" ? null : lernplanWahl(n, p)),
+        el("td", {}, p.rolle === "aufsicht" ? null : sortierungWahl(n, p)),
         el("td", {}, el("div", { class: "zeile-knoepfe" },
           p.rolle === "aufsicht" ? el("span", { class: "zeile-knoepfe" }, pin,
             el("button", { type: "button", class: "schalter", text: "PIN setzen", onclick: async () => {
@@ -167,7 +188,7 @@ function zeichneVerwaltung(box, neu) {
       el("h2", { text: "Konten" }),
       el("p", { class: "leise-text", style: "margin-top:0", text: "Kinder melden sich ohne PIN an. Die Aufsicht braucht ihre PIN, sieht alle Spiele und Statistiken und spielt als Tester (Runden zählen nicht in der Statistik, im Spiel gibt es Testhilfen). Eine neue Aufsicht: als Kind anlegen, „→ Aufsicht“ und PIN setzen." }),
       el("div", { class: "tabelle-rahmen" }, el("table", {},
-        el("thead", {}, el("tr", {}, ...["Name", "Rolle", "📅 Lernplan", ""].map(t => el("th", { text: t })))),
+        el("thead", {}, el("tr", {}, ...["Name", "Rolle", "📅 Lernplan", "🔀 Sortierung", ""].map(t => el("th", { text: t })))),
         el("tbody", {}, ...kontoZeilen))),
       el("h3", { text: "Neues Kind" }),
       el("div", { class: "pin-zeile", style: "justify-content:flex-start" }, neuName, neuKlasse, knopf("＋ Anlegen", anlegen, "gruen")),
@@ -334,7 +355,7 @@ function zeichneVerwaltung(box, neu) {
   function meldungenTeil() {
     const ich = LS.aktuellerSpieler();
     const REIHE = ["neu", "bestaetigt", "weitergeleitet", "geplant", "behoben", "kein-fehler"];
-    const alle = [...LS.meldungen()].sort((a, b) => REIHE.indexOf(a.status) - REIHE.indexOf(b.status) || (a.zeit < b.zeit ? 1 : -1));
+    const alle = LS.meldungen().filter(m => !LS.istAnregung(m)).sort((a, b) => REIHE.indexOf(a.status) - REIHE.indexOf(b.status) || (a.zeit < b.zeit ? 1 : -1));
     const meldung = el("p", { class: "leise-text", "aria-live": "polite" });
     const spielName = id => SPIELE.find(s => s.id === id)?.name || id;
     const datum = iso => new Date(iso).toLocaleDateString("de-CH", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -346,14 +367,15 @@ function zeichneVerwaltung(box, neu) {
     async function weitergeben(m) {
       const text = LS.meldungFuerEntwicklung(m);
       if (LS.entwicklung.freigeschaltet() && (await LS.entwicklung.server())) {
-        const b = await LS.entwicklung.bemerkung({ text, spiel: m.spiel, stufe: m.stufe, aufgabe: m.aufgabe ? `Aufgabe ${m.aufgabeNr}: ${m.aufgabe}` : undefined, meldung: m.id });
+        const b = await LS.entwicklung.bemerkung({ text, spiel: m.spiel || undefined, stufe: m.stufe, aufgabe: m.aufgabe ? `Aufgabe ${m.aufgabeNr}: ${m.aufgabe}` : undefined, meldung: m.id });
         if (!b) return;
         LS.setzeMeldung(m.id, { status: "weitergeleitet" }, { von: ich, notiz: `Bemerkung Nr. ${b.nr}` });
         return neu();
       }
       const mail = LS.meldungMailLink(m);
       if (mail) {
-        if (!confirm("Das Mailprogramm öffnet sich mit der Meldung — ohne den Namen des Kindes. Bitte ansehen und senden.")) return;
+        if (!confirm(LS.istAnregung(m) ? "Das Mailprogramm öffnet sich mit der Anregung. Bitte ansehen und senden."
+          : "Das Mailprogramm öffnet sich mit der Meldung — ohne den Namen des Kindes. Bitte ansehen und senden.")) return;
         location.href = mail;
         LS.setzeMeldung(m.id, { status: "weitergeleitet" }, { von: ich, notiz: "per E-Mail" });
         return neu();
@@ -415,5 +437,38 @@ function zeichneVerwaltung(box, neu) {
       alle.length ? el("div", { class: "meldungen" }, ...alle.map(eintrag))
         : el("p", { class: "leise-text", text: "Noch keine Meldungen." }),
       alle.length ? el("p", { class: "leise-text", text: `${offen} offen, ${alle.length - offen} weitergegeben oder abgeschlossen.` }) : null));
+
+    // ----- Anregungen an die Entwicklung (Wunsch Patrik, LERN_Session11) -----
+    // Die Aufsicht schlägt neue Spiele, Verbesserungen oder Inhalte vor; derselbe Weg wie bei Meldungen, ohne Daten
+    // über ein Kind. Gesendet wird gleich beim Speichern; die Antwort kommt mit „Antworten abfragen“.
+    const art = el("select", { class: "feld", "aria-label": "Art der Anregung" },
+      ...Object.entries(LS.ANREGUNG_ARTEN).map(([w, t]) => el("option", { value: w, text: t })));
+    const spiel = el("select", { class: "feld", "aria-label": "Spiel (falls es um eines geht)" },
+      el("option", { value: "", text: "— kein bestimmtes Spiel —" }),
+      ...[...SPIELE].sort((a, b) => a.name.localeCompare(b.name, "de")).map(s => el("option", { value: s.id, text: `${s.bild} ${s.name}` })));
+    const text = el("textarea", { class: "feld", rows: "4", placeholder: "Was wünschen Sie sich? Bitte keine Namen von Kindern.", "aria-label": "Anregung" });
+    const hinweis = el("p", { class: "leise-text", "aria-live": "polite" });
+    const senden = async () => {
+      const t = text.value.trim();
+      if (t.split(/\s+/).length < 4) { hinweis.textContent = "Bitte in ein paar Worten beschreiben, worum es geht."; text.focus(); return; }
+      const a = LS.neueAnregung({ name: ich, art: art.value, spiel: spiel.value || undefined, text: t });
+      await weitergeben(a);
+      neu(); // auch wenn das Senden abgebrochen wurde: die Anregung steht dann mit „📤 Senden“ in der Liste
+    };
+    const STATUS_REIHE = ["neu", "weitergeleitet", "geplant", "behoben", "kein-fehler"];
+    const eigene = LS.anregungen().sort((a, b) => STATUS_REIHE.indexOf(a.status) - STATUS_REIHE.indexOf(b.status) || (a.zeit < b.zeit ? 1 : -1));
+    const anregungEintrag = m => el("details", { class: `meldung-eintrag status-${m.status}` },
+      el("summary", {}, el("b", { text: `${LS.ANREGUNG_ARTEN[m.art] || m.art}${m.spiel ? ` · ${spielName(m.spiel)}` : ""}` }),
+        el("span", { class: "leise-text", text: ` · ${datum(m.zeit)} · ${LS.ANREGUNG_STATUS[m.status] || m.status}` })),
+      el("p", { text: m.text }),
+      m.antwort ? el("p", {}, el("b", { text: "Antwort der Entwicklung: " }), document.createTextNode(m.antwort)) : null,
+      m.status === "neu" ? zeile(knopf("📤 Senden", () => weitergeben(m), "gruen")) : null);
+    seite.append(karte(
+      el("h2", { text: "💡 Anregungen an die Entwicklung" }),
+      el("p", { class: "leise-text", style: "margin-top:0", text: "Ein Spiel fehlt, eines liesse sich verbessern, ein Lehrmittel schreibt anders? Schreiben Sie es hier. Es geht wie eine Fehlermeldung an die Entwicklung — per E-Mail aus Ihrem Mailprogramm oder, wo eingerichtet, direkt. Die Antwort holen Sie oben mit „Antworten der Entwicklung abfragen“." }),
+      el("div", { class: "anregung-formular" }, art, spiel, text),
+      zeile(knopf("💡 Anregung senden", senden, "gruen")),
+      hinweis,
+      eigene.length ? el("div", { class: "meldungen" }, ...eigene.map(anregungEintrag)) : null));
   }
 }

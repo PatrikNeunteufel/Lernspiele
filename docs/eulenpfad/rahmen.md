@@ -191,9 +191,10 @@ Das Testskript ruft beide je Stufe einige tausend Mal auf ✔.
 ## 5. Katalog und Doku
 
 Ein neues Spiel braucht:
-1. einen Eintrag in `SPIELE` in `katalog.js` (id, klasse, bild, name, thema, farbe `var(--deko-N)`,
+1. einen Eintrag in `SPIELE` in `katalog.js` (id, **art**, klasse, bild, name, thema, farbe `var(--deko-N)`,
    pfad, stufen, zeiten, beschreibung, lernziele; bei Inhaltslisten `listen`; `geprueft` erst nach
-   der Prüfung, siehe Abschnitt 6);
+   der Prüfung, siehe Abschnitt 6). `art`: wie das Kind antwortet, Schlüssel aus `SPIELWEISEN`, wichtigste zuerst
+   (Entscheid SP1 a, LERN_Session11; für die Spieltabelle im Portal `portal/eulenpfad-spiele.html`) ✔;
 2. Thema und Lernziele in `THEMEN` und `LERNZIELE`;
 3. eine Zeile in `docs/lernziele/` mit den Lehrplan-Stufen je Spielstufe;
 4. die Inhaltslisten in `tools/pruefliste_wortlisten.js`, danach die Prüfliste neu erzeugen. Neue
@@ -283,6 +284,11 @@ Klasse im Profil nur Spiele, deren Basisklasse höchstens eine Klasse daneben li
 Stufe genau für seine Klasse haben. Er ist vorgegeben an, das Kind darf ihn ausschalten (Profil-Feld
 `meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Er steht mit „⭐ Mein Fokus“ und
 „🔍 Zu prüfen“ in einer eigenen Zeile **Nur** unter den Fächern, weil er kein Fach ist (Hinweis Patrik, LERN_Session10).
+**Sortierung** (Wunsch Patrik, Entscheide SO1 a, SO2 a, LERN_Session11; `LS.sortierungFuer`): Vorgabe „nach Fach und
+Thema“ (Einstellung `sortierung` der Aufsicht), sonst eine Liste ohne Gruppen „passt zu dir zuerst“ (`LS.passung`),
+„nach Alphabet“ oder „nach Klasse“, je auf- oder absteigend (Profilfeld `sortierung: { art, ab }`). Wählen darf die
+Aufsicht immer, ein Kind ab der 4. Klasse (Einstellung `sortierungWahl`: nie, ab 4., ab 5., alle); je Kind abweichend in
+Verwaltung → Konten, Spalte 🔀 (Art und `sortierungWahl` ja/nein). Eine Suche ordnet weiter nach Relevanz.
 **Thema, Stufe und Klasse sind Mehrfachwahl** (Wunsch Patrik, LERN_Session10): jeder Chip schaltet einzeln, leer heisst keine
 Einschränkung; „Alle“ wählt alle an und, nochmals angetippt, alle ab. Die Zeile **Klasse** filtert nach der Basisklasse
 des Spiels (1.–6. Klasse) und steht allen offen, gedacht vor allem für die Aufsicht; „🎒 Meine Klasse“ bleibt die
@@ -543,6 +549,12 @@ Spielen, die das Lesen selbst üben; ein Kind im Kindergarten soll sich eintrage
     schaltet es je Spiel an oder aus.
 
 ## 13. Fehler melden durch Kinder
+
+**Anregungen der Aufsicht** (Wunsch Patrik, LERN_Session11): Verwaltung → Meldungen, Karte „💡 Anregungen an die
+Entwicklung“ — Art (`LS.ANREGUNG_ARTEN`), wahlweise ein Spiel, Text. Gespeichert wie eine Meldung mit
+`typ: "anregung"` (`LS.neueAnregung`), gesendet gleich beim Speichern auf demselben Weg (E-Mail bzw. Entwickler-Server,
+Text „Anregung M-…“), Antwort über dieselbe Abfrage. Kinder sehen Anregungen nie; sie zählen weder als neue Meldung
+noch als Fehlerfinder (`LS.istAnregung`).
 
 Wunsch Patrik, LERN_Session9. Kinder sollen Fehler im Programm melden können; ein echter Fehler zählt
 für sie positiv. Code: Speicher, Formular und Abgleich in `spiel.js` (`LS.meldungen`, `LS.meldeFormular` …),

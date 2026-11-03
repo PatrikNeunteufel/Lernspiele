@@ -355,3 +355,10 @@
 - Freiwillige Beiträge vorbereitet (LERN-50): `portal/unterstuetzen.js` (leere Links = unsichtbar),
   `portal/unterstuetzen.html`, Hinweis in Portal-Fusszeile, Anleitung für Erwachsene und Verwaltung → Einstellungen,
   nie für Kinder; Testskript prüft, dass sonst nichts im App-Ordner die Beitragsseite verlinkt.
+- Anregungen der Aufsicht an die Entwicklung (Verwaltung → Meldungen, `typ: "anregung"`, gleicher Weg und gleiche
+  Antwort wie Fehlermeldungen, für Kinder unsichtbar).
+- Sortierung im Tab Spiele (SO1 a, SO2 a): Vorgabe nach Fach und Thema, dazu „passt zu dir“, Alphabet, Klasse, je auf
+  oder ab; Kinder ab der 4. Klasse wählen selbst; Vorgabe und Erlaubnis je Kind in Konten.
+- Katalogfeld `art` (Spielweise, SP1 a) für alle 168 Spiele: 145 aus den Bausteinen, 23 nach dem Hilfetext; Testskript
+  prüft es. Spieltabelle im Portal `portal/eulenpfad-spiele.html` (Name, Fach, Thema, Art, Klasse, Verfügbarkeit nach
+  Prüfstand; Sortieren nach mehreren Spalten mit Priorität, Filter).
