@@ -68,7 +68,11 @@ Gruppe = {
 - **Ab wann** (G3 a mit Zusatz Patrik): Beim Beitritt wählt die Aufsicht der Familie das Startdatum — Vorgabe der
   Beitrittstag, auch früher möglich („rückwirkend ab …“, bis „alles“), damit die Lehrperson den Stand vor dem Beitritt
   sieht. Später zurücksetzen lässt es sich nur nach vorn (was geteilt ist, ist geteilt).
-- Austreten kann die Familie jederzeit; danach schreibt das Gerät nichts mehr an den Ort der Klasse.
+- **Austreten** (G3b a) kann die Familie jederzeit. Auf ihrem Gerät bleibt alles, wie es ist; es wird nur nichts mehr
+  geteilt. Der Dialog fragt „Bisher Geteiltes bei der Klasse auch löschen?“ (vorgewählt: Ja). Bei Ja legt das Gerät
+  einen Löschvermerk für dieses Mitglied an den Ort der Klasse (wie `lernspiele:geloescht` heute), und die Geräte der
+  Klasse entfernen seine Runden beim nächsten Abgleich; bei Nein bleiben sie unter der Anzeige in der Klassenstatistik.
+  Grenze, im Dialog genannt: Eine Kopie, die die Lehrperson als Datei gesichert hat, erreicht der Vermerk nicht.
 - **Klassenstatistik:** dieselben Auswertungen wie heute (`auswertung.js`), über alle Mitglieder: je Lernziel
   Anteil auf Anhieb richtig, Verlauf, wer welche Stufe erreicht, Lernplan erfüllt, Meldungen.
 - **Selbstreflexion** (regelbasiert wie das Fazit, ohne KI, jede Aussage mit Zahlen): Wirkung eines gesetzten
@@ -105,7 +109,10 @@ Gruppe = {
   Fehler im Zufallsgenerator. Zwei Gruppen können so nicht erkennen, dass dasselbe Gerät in beiden ist, und ein
   Austritt hinterlässt nur eine verwaiste Datei.
 - **QR-Code** (Frage zu G7): für den **Beitrittscode** ja (Gruppe, Mitglied, Schlüssel; etwa 100 Zeichen, passt in
-  einen kleinen QR-Code; die Kamera des Tablets liest ihn). Für die **Daten** nein: Eine Woche einer Klasse sind rund
+  einen kleinen QR-Code; die Kamera des Tablets liest ihn), samt **Adresse des Klassenservers**, falls die Klasse
+  einen hat — ein Scan richtet dann Gruppe und Ort ein. Für einen **Ordnerpfad** nur als Text zum Lesen: Ein Browser
+  öffnet einen Ordner nie über einen Pfad, sondern nur, wenn jemand ihn im Dialog selbst wählt (Schutzregel von File
+  System Access); der QR kann zeigen, welchen Ordner man wählen soll, ihn aber nicht wählen. Für die **Daten** nein: Eine Woche einer Klasse sind rund
   100 000 Zeichen, ein QR-Code fasst höchstens rund 3 000. Den QR-Erzeuger baut das Projekt selbst (keine
   Abhängigkeit); lesen tut ihn die Kamera-App des Geräts, die den Link öffnet.
 - **Transport** (G7): Ordner (File System Access, heute Chrome und Edge am Computer), sonst eine verschlüsselte
@@ -192,7 +199,10 @@ gleichen zu Hause und in der Schule mit demselben Ort ab; auf den Geräten ist k
 Kosten: Der Rechner ist aus dem Internet erreichbar (Betrieb, Updates, Schutz vor Missbrauch der Ablage), und wer
 ihn betreibt, sieht Zugriffszeiten und Adressen. Der Inhalt bleibt Ende-zu-Ende verschlüsselt, also gilt das
 Grundprinzip weiter. Gebaut wird der Server so, dass er beides kann; ob und wo er im Internet läuft, entscheidet die
-Aufsicht — als **G11** vor dem ersten Betrieb im Internet vorzulegen (wer betreibt, Domain, Schutz der Ablage).
+Aufsicht. **G11 (Patrik, 03.11.2026):** angeboten werden a (Gerät der Aufsicht, das immer läuft, mit DynDNS,
+Portfreigabe und Let's Encrypt) und b (gemieteter Server); c (Tunnel-Dienst eines Dritten) wird der Vollständigkeit
+halber beschrieben, mit Abraten. Die Lehrperson wählt nach der Vergleichsmatrix in
+[anleitung_klassenserver_internet.md](anleitung_klassenserver_internet.md).
 
 ## 6. Lerngruppen von Kindern
 
@@ -239,6 +249,8 @@ die App dann tut.
 | G8 | a — Gruppen-Erfolge nur gemeinsam | Challenges unter Kindern mit Zustimmung der Lehrperson (unten) |
 | G9 | a — Klassenserver als zusätzlicher Ort | auch im Internet möglich, Betrieb dort als G11 vorzulegen (Abschnitt 5c) |
 | G10 | a — Zertifikat der Schul-IT, sonst selbst erstellt | eigene Anleitung: [anleitung_zertifikat_klassenserver.md](anleitung_zertifikat_klassenserver.md) |
+| G3b | a — beim Austritt fragen, Geteiltes bei der Klasse löschen (vorgewählt Ja) | Daten auf dem eigenen Gerät bleiben (Abschnitt 4) |
+| G11 | a und b — Server im Internet auf einem Gerät der Aufsicht mit DynDNS oder gemietet; c (Tunnel-Dienst) nur beschrieben | Anleitung mit Vergleich: [anleitung_klassenserver_internet.md](anleitung_klassenserver_internet.md) |
 
 ### G1 — Ein Modell für Familie, Klasse und Lerngruppe?
 **Ort:** Abschnitt 3; heute `konzept_klasseneinstellungen.md` Abschnitt 4 (eigene Struktur „Klasse“).

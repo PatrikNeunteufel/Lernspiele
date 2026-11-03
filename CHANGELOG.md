@@ -349,3 +349,6 @@
   mit sofortigem Ersatz der unverschlüsselten Datei, G5 Eindeutigkeit am Ort geprüft, G7 QR für den Beitrittscode,
   G8 Challenges mit Zustimmung der Lehrperson, G9 auch Internet, Betrieb dort als G11 offen). Neue Anleitung
   `docs/anleitung_zertifikat_klassenserver.md` (G10; Befehle mit openssl 3.2.3 und Python-https geprüft).
+- G3b a (Austritt: Geteiltes bei der Klasse löschen, vorgewählt Ja), G11 a und b mit c beschrieben; QR auch für die
+  Adresse des Klassenservers. Neue Anleitungen `docs/anleitung_klassenserver_internet.md` (Vergleichsmatrix a/b/c)
+  und `docs/anleitung_freiwillige_beitraege.md` (LERN-50; Angaben der Anbieter ungeprüft).
