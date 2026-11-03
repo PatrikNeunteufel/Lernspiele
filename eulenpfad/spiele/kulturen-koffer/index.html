@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kulturen-Koffer</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .kk > .frage, .kk > .auftrag { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 4px 0 12px; }
+  .kk-karte {
+    background: #fff; border: 3px solid var(--rand); border-radius: 18px; padding: 12px 16px; margin: 0 auto 14px;
+    max-width: 640px; text-align: center; font-size: clamp(18px, 4.2vw, 24px); line-height: 1.45; font-weight: 700;
+    box-shadow: var(--schatten);
+  }
+  .kk-karte .kk-bild { display: block; font-size: clamp(44px, 10vw, 64px); line-height: 1.1; }
+  /* Erzählsatz oder Begriff ohne Bild auf der Korb-Karte: kleiner als der Name eines Dings (Baustein-Klasse, anpassbar) */
+  .korb-karte.kk-satz { max-width: 640px; padding: 12px 18px; }
+  .korb-karte.kk-satz b { font-size: clamp(18px, 4.2vw, 23px); font-weight: 700; line-height: 1.4; }
+  .korb-karte.kk-wort b { font-size: clamp(22px, 5vw, 30px); }
+  .wahl.kk-zwei { --wahl-breite: 150px; }
+  .wahl.kk-zwei .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); }
+  .wahl.kk-janein .wahl-knopf { font-size: clamp(16px, 3.6vw, 20px); }
+  .wahl.kk-quellen .wahl-knopf small { font-size: 13px; }
+  .kk-hinweise {
+    max-width: 640px; margin: 0 auto 12px; padding: 10px 14px 10px 36px; border: 3px dashed var(--deko-2); border-radius: 14px;
+    font-size: clamp(16px, 3.8vw, 21px); line-height: 1.45; font-weight: 600; background: #fff;
+  }
+  .kk-hinweise li { margin: 4px 0; }
+  .kk-hinweise li:last-child { color: var(--deko-2); }
+  .kk-weiter-zeile { text-align: center; margin: 0 0 14px; }
+  .kk-weiter-zeile .knopf { font-size: clamp(15px, 3.4vw, 18px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🧳 Kulturen-Koffer</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="dinge.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.9.3 (Vergangenheit), Basisklasse 3. Das Kind ordnet Dinge, Bauten, Berufe und Fakten alten Kulturen
+// zu: Pfahlbauer, Römer, Altes Ägypten, ab Stufe 5 dazu Altes China und alte Griechen. Zuordnung der Buchstaben nach dem
+// Wortlaut auf sg.lehrplan.ch (gelesen 2026-11-03); s6 ist eine Annahme.
+//   s1 2. Klasse (NMG.9.3.b/c, lesearm): „Früher oder heute?“ — Bild-Karte in einen von zwei Körben; dazu „Was gehört zu
+//      den Römern?“ mit zwei Bildknöpfen, einer davon ein Ding von heute.
+//   s2 3. Klasse, leichter (NMG.9.3.c „aus Funden und alten Gegenständen Vorstellungen über das Leben einer früheren
+//      Gesellschaft gewinnen“): zwei Kulturen aus der Schweiz — Pfahlbauer oder Römer, Bild-Karte in den Korb.
+//   s3 Klassenziel (NMG.9.3.d „sich aus Geschichten, Erzählungen, Bildern ein Bild über eine vergangene Kultur machen“):
+//      drei Körbe Ägypten, Römer, Pfahlbauer für Dinge, Bauten und Berufe; dazu Ich-Sätze („Ich wohne in einem Haus auf
+//      Pfählen am See.“) → wer erzählt?
+//   s4 3. Klasse, schwerer (NMG.9.3.d, vertieft): Aussagen prüfen (stimmt / stimmt nicht) und „Gab es das damals schon?“
+//      (Rad, Schrift, Glas, Strom) je Kultur — nur eindeutige Fälle.
+//   s5 4. Klasse (NMG.9.3.e „aus Sachtexten, Karten, Quellen ein differenziertes Bild einer historischen Epoche
+//      erarbeiten“): Quellenarten — Fundstück, Bauwerk, Bild oder Text? Dazu China und Griechen beim Zuordnen.
+//   s6 Königsstufe (Annahme, über .e hinaus): „Welche Kultur bin ich?“ — drei Hinweise nacheinander, fünf Kulturen;
+//      gemischt mit den Aufgaben aus s4 und s5.
+// Abgrenzung: Der Zeitstrahl-Sortierer ordnet Epochen zeitlich, Früher und heute vergleicht Alltagsdinge; hier zählt,
+// zu welcher Kultur ein Ding, ein Bauwerk oder ein Fakt gehört. Inhalte in dinge.js (Liste „dinge“ im Katalog).
+
+const { waehle, mische, el } = LS;
+const ID = "kulturen-koffer";
+
+// Freigabe: alle Inhalte gehören zur Liste „dinge“. Kennt der Katalog die Listen des Spiels noch nicht, gilt der Inhalt
+// mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["dinge"]);
+const INHALT_FREI = FREI.has("dinge");
+
+const K = Object.fromEntries(KK_KULTUREN.map(k => [k.id, k]));
+const ALLE = KK_KULTUREN.map(k => k.id);
+const NEU = ["china", "griechen"]; // erst ab Stufe 5
+const NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+const ZEIT = {
+  frueher: { bild: "🏺", text: "Früher", farbe: "var(--deko-3)" },
+  heute: { bild: "📱", text: "Heute", farbe: "var(--deko-6)" },
+};
+const WAHR = { ja: { bild: "✅", text: "Stimmt" }, nein: { bild: "❌", text: "Stimmt nicht" } };
+const GAB = { ja: { bild: "✅", text: "Ja, gab es schon" }, nein: { bild: "❌", text: "Nein, gab es noch nicht" } };
+const ALT = KK_DINGE.filter(d => d.alt && d.bild);
+const ROEMER_BILD = KK_DINGE.filter(d => d.kultur === "roemer" && d.alt && d.bild);
+const TIPP_WO = "Überleg: Wo lebten diese Menschen — am See, am Nil oder in grossen Städten mit Strassen?";
+const TIPP_WO_FUENF = "Überleg: Wo lebten diese Menschen — am See, am Nil, am Meer, weit im Osten oder in Städten mit Strassen?";
+
+/** Zuordnen je Stufe: Kulturen im Spiel, Zahl der Körbe (alle Kulturen oder eine Auswahl), nur Dinge mit Bild? */
+const ZUORDNEN = {
+  s2: { kulturen: ["pfahlbauer", "roemer"], n: 2, nurBild: true },
+  s3: { kulturen: ["aegypten", "roemer", "pfahlbauer"], n: 3 },
+  s5: { kulturen: ALLE, n: 4, neu: true },
+  s6: { kulturen: ALLE, n: 4 },
+};
+
+/** Kulturen, die neben der eigenen als Korb stehen dürfen (nicht in ding.auch). */
+const andereFuer = (d, p) => p.kulturen.filter(k => k !== d.kultur && !(d.auch || []).includes(k));
+const alleKoerbe = p => p.n === p.kulturen.length;
+
+/** Dinge, die in dieser Stufe zum Zuordnen taugen: Kultur im Spiel, Stufe erreicht, Bild falls nötig, genug Körbe. */
+function dingPool(stufe) {
+  const p = ZUORDNEN[stufe];
+  return KK_DINGE.filter(d => p.kulturen.includes(d.kultur) && d.ab <= NR[stufe] && (!p.nurBild || d.bild)
+    && (alleKoerbe(p) ? andereFuer(d, p).length === p.n - 1 : andereFuer(d, p).length >= 2));
+}
+
+function koerbeFuer(d, p) {
+  const andere = alleKoerbe(p) ? andereFuer(d, p) : mische(andereFuer(d, p)).slice(0, p.n - 1);
+  return mische([d.kultur, ...andere]);
+}
+
+const ARTEN = {
+  altHeute() {
+    const alt = Math.random() < 0.5;
+    const d = alt ? waehle(ALT) : waehle(KK_HEUTE);
+    return { art: "altHeute", d, alt, richtig: alt ? "frueher" : "heute" };
+  },
+  roemerWahl() {
+    const d = waehle(ROEMER_BILD);
+    const h = waehle(KK_HEUTE);
+    return { art: "roemerWahl", d, h, optionen: mische([d, h]) };
+  },
+  zuordnen(stufe) {
+    const p = ZUORDNEN[stufe];
+    let pool = dingPool(stufe);
+    if (p.neu && Math.random() < 0.6) pool = pool.filter(d => NEU.includes(d.kultur));
+    const d = waehle(pool);
+    return { art: "zuordnen", d, koerbe: koerbeFuer(d, p) };
+  },
+  erzaehl() {
+    return { art: "erzaehl", s: waehle(KK_SAETZE), koerbe: mische(ZUORDNEN.s3.kulturen) };
+  },
+  aussage(stufe) {
+    return { art: "aussage", x: waehle(KK_AUSSAGEN.filter(x => NR[stufe] >= 5 || !NEU.includes(x.kultur))) };
+  },
+  gab(stufe) {
+    return { art: "gab", g: waehle(KK_GAB.filter(g => NR[stufe] >= 5 || !NEU.includes(g.kultur))) };
+  },
+  quelle() {
+    return { art: "quelle", q: waehle(KK_QUELLEN), optionen: Object.keys(KK_QUELLENARTEN) };
+  },
+  raetsel() {
+    return { art: "raetsel", r: waehle(KK_RAETSEL), optionen: mische(ALLE) };
+  },
+};
+
+// Je Stufe die Arten (mehrfach genannt = häufiger).
+const STUFE = {
+  s1: ["altHeute", "altHeute", "roemerWahl"],
+  s2: ["zuordnen"],
+  s3: ["zuordnen", "zuordnen", "erzaehl"],
+  s4: ["aussage", "aussage", "gab"],
+  s5: ["quelle", "quelle", "zuordnen"],
+  s6: ["raetsel", "raetsel", "aussage", "gab", "quelle", "zuordnen"],
+};
+
+function aufgabeErzeugen(stufe) {
+  if (!INHALT_FREI) return null;
+  const art = waehle(STUFE[stufe]);
+  return ARTEN[art](stufe);
+}
+
+const STUFEN_TEXT = {
+  s1: "Früher oder heute? Bild-Karten in zwei Körbe — und was gehört zu den Römern?",
+  s2: "Pfahlbauer oder Römer: Dinge von früher aus der Schweiz zuordnen.",
+  s3: "Ägypten, Römer, Pfahlbauer: Dinge, Bauten und Berufe — und wer erzählt hier?",
+  s4: "Stimmt das? Und: Gab es das damals schon — Rad, Schrift, Glas, Strom?",
+  s5: "Woher wissen wir das? Fundstück, Bauwerk, Bild oder Text — dazu China und Griechen.",
+  s6: "Endgegner: Welche Kultur bin ich? Drei Hinweise, fünf Kulturen, alles gemischt.",
+};
+const STUFEN = INHALT_FREI ? STUFEN_TEXT : {};
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!INHALT_FREI) m.push("Aufgabe, obwohl die Liste nicht frei ist");
+  if (!STUFE[stufe].includes(a.art)) m.push(`Art ${a.art} nicht in ${stufe}`);
+  const doppelt = liste => new Set(liste).size !== liste.length;
+  const nameIn = (name, text) => new RegExp(`(?<![\\p{L}])${name}(?![\\p{L}])`, "iu").test(text);
+  const kulturNameIn = text => KK_KULTUREN.some(k => nameIn(k.name, text) || nameIn(k.id, text));
+  if (a.art === "altHeute") {
+    if (a.alt && !ALT.includes(a.d)) m.push("altes Ding ohne Bild oder ohne Kennzeichen alt");
+    if (!a.alt && !KK_HEUTE.includes(a.d)) m.push("Heute-Ding nicht aus der Liste");
+    if (!a.d.bild) m.push("Stufe 1 ohne Bild");
+    if (a.richtig !== (a.alt ? "frueher" : "heute")) m.push("Korb passt nicht zum Ding");
+  }
+  if (a.art === "roemerWahl") {
+    if (!ROEMER_BILD.includes(a.d)) m.push("Ding gehört nicht zu den Römern, hat kein Bild oder ist nicht eindeutig alt");
+    if (!KK_HEUTE.includes(a.h)) m.push("Heute-Ding nicht aus der Liste");
+    if (a.optionen.length !== 2 || doppelt(a.optionen) || !a.optionen.includes(a.d) || !a.optionen.includes(a.h)) m.push("zwei Bildknöpfe falsch");
+    if (nameIn(a.d.name, a.d.umschreibung)) m.push("Umschreibung nennt das Ding");
+  }
+  if (a.art === "zuordnen") {
+    const p = ZUORDNEN[stufe];
+    if (!KK_DINGE.includes(a.d)) m.push("Ding nicht aus der Liste");
+    if (!K[a.d.kultur]) m.push(`Kultur ${a.d.kultur} unbekannt`);
+    if (!["ding", "bau", "beruf", "wort"].includes(a.d.art)) m.push(`unbekannte Art ${a.d.art}`);
+    if (a.d.ab > NR[stufe]) m.push(`Ding erst ab Stufe ${a.d.ab}`);
+    if (p.nurBild && !a.d.bild) m.push("Ding ohne Bild in einer Bild-Stufe");
+    if (!a.koerbe.includes(a.d.kultur)) m.push("richtige Kultur fehlt unter den Körben");
+    if (doppelt(a.koerbe)) m.push("Körbe doppelt");
+    if (a.koerbe.some(id => !K[id])) m.push("unbekannter Korb");
+    if (a.koerbe.some(id => !p.kulturen.includes(id))) m.push("Korb einer Kultur, die in dieser Stufe nicht vorkommt");
+    if (a.koerbe.some(id => (a.d.auch || []).includes(id))) m.push("ein Korb passt ebenfalls zum Ding (nicht eindeutig)");
+    if (alleKoerbe(p) ? a.koerbe.length !== p.n : (a.koerbe.length < 3 || a.koerbe.length > p.n)) m.push(`${a.koerbe.length} Körbe in ${stufe}`);
+    if (kulturNameIn(a.d.umschreibung)) m.push("Umschreibung nennt eine Kultur");
+    if (NR[stufe] < 5 && NEU.includes(a.d.kultur)) m.push("China oder Griechen vor Stufe 5");
+  }
+  if (a.art === "erzaehl") {
+    if (!KK_SAETZE.includes(a.s)) m.push("Satz nicht aus der Liste");
+    if (!K[a.s.kultur]) m.push(`Kultur ${a.s.kultur} unbekannt`);
+    if (!a.koerbe.includes(a.s.kultur)) m.push("richtige Kultur fehlt unter den Körben");
+    if (doppelt(a.koerbe) || a.koerbe.length !== 3) m.push("drei Körbe falsch");
+    if (kulturNameIn(a.s.satz)) m.push("Erzählsatz nennt die Kultur");
+  }
+  if (a.art === "aussage") {
+    if (!KK_AUSSAGEN.includes(a.x)) m.push("Aussage nicht aus der Liste");
+    if (typeof a.x.wahr !== "boolean") m.push("Aussage ohne eindeutiges stimmt / stimmt nicht");
+    if (!K[a.x.kultur]) m.push(`Kultur ${a.x.kultur} unbekannt`);
+    if (!a.x.grund) m.push("Aussage ohne Begründung");
+    if (NR[stufe] < 5 && NEU.includes(a.x.kultur)) m.push("China oder Griechen vor Stufe 5");
+  }
+  if (a.art === "gab") {
+    if (!KK_GAB.includes(a.g)) m.push("Frage nicht aus der Liste");
+    if (typeof a.g.ja !== "boolean") m.push("Frage ohne eindeutiges Ja / Nein");
+    if (!K[a.g.kultur]) m.push(`Kultur ${a.g.kultur} unbekannt`);
+    if (!a.g.grund) m.push("Frage ohne Begründung");
+    if (NR[stufe] < 5 && NEU.includes(a.g.kultur)) m.push("China oder Griechen vor Stufe 5");
+  }
+  if (a.art === "quelle") {
+    if (!KK_QUELLEN.includes(a.q)) m.push("Quelle nicht aus der Liste");
+    if (!KK_QUELLENARTEN[a.q.art]) m.push(`Quellenart ${a.q.art} unbekannt`);
+    else if (nameIn(KK_QUELLENARTEN[a.q.art].name, a.q.text)) m.push("Quellentext nennt die Quellenart");
+    if (!K[a.q.kultur]) m.push(`Kultur ${a.q.kultur} unbekannt`);
+    if (doppelt(a.optionen) || a.optionen.length !== 4 || !a.optionen.includes(a.q.art)) m.push("Quellenarten zur Wahl falsch");
+  }
+  if (a.art === "raetsel") {
+    if (!KK_RAETSEL.includes(a.r)) m.push("Rätsel nicht aus der Liste");
+    if (!K[a.r.kultur]) m.push(`Kultur ${a.r.kultur} unbekannt`);
+    if (a.r.hinweise.length !== 3) m.push("Rätsel ohne drei Hinweise");
+    if (a.r.hinweise.some(kulturNameIn)) m.push("Rätsel-Hinweis nennt eine Kultur");
+    if (doppelt(a.optionen) || a.optionen.length !== 5 || !a.optionen.includes(a.r.kultur)) m.push("Kulturen zur Wahl falsch");
+  }
+  if (/ß/.test(JSON.stringify(a))) m.push("ß im Text");
+  return m;
+}
+
+/** Tipps vor dem Antworten (ctx.tipp): Anstoss → Umschreibung ohne Namen → Bild der Kultur. */
+function tippsFuer(a) {
+  if (a.art === "altHeute") return [
+    "Gab es das schon vor langer Zeit, als es noch keinen Strom und keine Motoren gab?",
+    `Das ist ${a.d.umschreibung}.`,
+    a.alt ? "Dieses Ding ist aus Stein, Holz, Ton oder Stoff. Menschen machten es mit den Händen." : "Dafür braucht man Strom oder einen Motor. Das haben Menschen erst vor kurzer Zeit erfunden.",
+  ];
+  if (a.art === "roemerWahl") return [
+    "Die Römer lebten vor über 2000 Jahren. Welches Ding ist so alt?",
+    `Gesucht ist ${a.d.umschreibung}.`,
+    "Eines der beiden Dinge braucht Strom oder einen Motor. Das gab es damals noch nicht.",
+  ];
+  if (a.art === "zuordnen") {
+    const k = K[a.d.kultur];
+    return [a.koerbe.length > 3 ? TIPP_WO_FUENF : TIPP_WO, `Das ist ${a.d.umschreibung}.`, `Schau nach dem Korb mit ${k.bild}.`];
+  }
+  if (a.art === "erzaehl") {
+    const k = K[a.s.kultur];
+    return [TIPP_WO, "Welche Wörter im Satz verraten, wo und wie diese Person lebt?", `Schau nach dem Korb mit ${k.bild}.`];
+  }
+  if (a.art === "aussage") {
+    const k = K[a.x.kultur];
+    return [
+      "Überleg, was es damals schon gab und was erst viel später erfunden wurde.",
+      "Strom, Motoren und Bildschirme gab es damals nirgends. Alles wurde mit den Händen, mit Tieren und mit Wasser gemacht.",
+      `${k.leute}: ${k.kurz}.`,
+    ];
+  }
+  if (a.art === "gab") {
+    const k = K[a.g.kultur];
+    return [
+      "Braucht man dafür Strom oder einen Motor? Dann gab es das sicher noch nicht.",
+      "Dinge aus Stein, Holz, Ton und Metall gab es früh. Dinge mit Strom erst seit kurzer Zeit.",
+      `${k.leute}: ${k.kurz}.`,
+    ];
+  }
+  if (a.art === "quelle") {
+    const art = KK_QUELLENARTEN[a.q.art];
+    const was = { fund: "Es ist klein genug, um es ins Museum zu tragen.", bau: "Es ist so gross, dass man hineingehen oder daran entlanggehen kann.",
+      bild: "Jemand hat es gemalt oder gezeichnet.", text: "Jemand hat es aufgeschrieben, mit Buchstaben oder Zeichen." }[a.q.art];
+    return ["Was ist das: etwas zum Anfassen, ein Gebäude, etwas Gemaltes oder etwas Geschriebenes?", was, `Schau nach dem Knopf mit ${art.bild}.`];
+  }
+  const k = K[a.r.kultur];
+  return ["Lies alle Hinweise, bevor du rätst: Tipp auf „Nächster Hinweis“.", TIPP_WO_FUENF, `Schau nach dem Knopf mit ${k.bild}.`];
+}
+
+/** Hinweis nach einem falschen Korb: was die gewählte Kultur ausmacht, ohne die richtige zu nennen. */
+const kulturHinweis = (id, name) => `${K[id].name}: ${K[id].kurz}. Passt „${name}“ dazu?`;
+const korbInhalt = id => ({ bild: K[id].bild, text: K[id].name });
+const korbFarbe = id => K[id].farbe;
+
+const HILFE = {
+  s1: "Oben siehst du ein Bild. Tippe auf den Korb: Gab es das schon vor langer Zeit, oder gibt es das erst seit kurzem? Bei zwei Bildern tippst du das an, das zu den Römern gehört.",
+  s2: "Schau das Bild an und tippe auf den Korb der Menschen, zu denen es gehört: Pfahlbauer oder Römer.",
+  s3: "Lies, was auf der Karte steht, und tippe auf den Korb der passenden Kultur. Bei einem Ich-Satz überlegst du, wer das erzählt.",
+  s4: "Lies den Satz und tippe an, ob er stimmt oder nicht. Bei „Gab es das schon?“ tippst du Ja oder Nein an.",
+  s5: "Bei „Woher wissen wir das?“ tippst du an, was für eine Quelle das ist. Sonst tippst du auf den Korb der passenden Kultur.",
+  s6: "Beim Rätsel liest du die Hinweise. „Nächster Hinweis“ zeigt den nächsten; raten darfst du jederzeit. Sonst wie in den Stufen davor: Korb oder Antwort antippen.",
+};
+
+LS.spiel({
+  id: ID,
+  einleitung: "Pyramide, Amphore oder Haus auf Pfählen? Pack den Koffer aus und finde heraus, zu welchen Menschen von früher jedes Ding gehört!",
+  hilfe: stufe => HILFE[stufe],
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (a.art === "altHeute") ctx.serie("zeit", a.richtig);
+    if (a.art === "aussage") ctx.serie("wahr", a.x.wahr ? "ja" : "nein");
+    if (a.art === "gab") ctx.serie("gab", a.g.ja ? "ja" : "nein");
+    ctx.tipp(tippsFuer(a));
+    const kk = el("div", { class: "kk" });
+    ctx.flaeche.append(kk);
+    // Name, Satz und Frage sind Sachkunde, kein Lesestoff: Die Eule liest sie mit vor (rahmen.md 12, V1 a).
+    const karteText = (bild, text) => el("div", { class: "kk-karte" }, bild ? el("span", { class: "kk-bild", text: bild }) : null, el("span", { class: "frage", text }));
+
+    if (a.art === "altHeute") {
+      const d = a.d;
+      const loesung = `${d.bild} ${d.name} → ${ZEIT[a.richtig].text}: ${d.umschreibung}`;
+      kk.append(el("div", { class: "auftrag", text: "Gab es das schon früher, oder gibt es das erst heute?" }));
+      const { karte } = LS.koerbe(ctx, {
+        karte: { bild: d.bild, text: d.name },
+        koerbe: Object.keys(ZEIT), richtig: a.richtig,
+        korbInhalt: id => ({ bild: ZEIT[id].bild, text: ZEIT[id].text }),
+        farbe: id => ZEIT[id].farbe,
+        hinweis: () => (a.alt
+          ? `${d.name}: ${d.umschreibung}. Das gab es schon, lange bevor es Strom gab.`
+          : `${d.name}: ${d.umschreibung}. Dafür braucht man Strom oder einen Motor — das haben Menschen erst vor kurzer Zeit erfunden.`),
+        loesung,
+        lob: a.alt ? `Genau: ${d.name} ist sehr, sehr alt.` : `Genau: ${d.name} gibt es erst seit kurzer Zeit.`,
+      });
+      karte.querySelector("b").classList.add("frage");
+      if (ctx.nr === 0) ctx.sag("Tipp auf den Korb: von früher oder von heute?");
+      return;
+    }
+
+    if (a.art === "roemerWahl") {
+      const d = a.d;
+      const loesung = `${d.bild} ${d.name}: ${d.umschreibung}`;
+      kk.append(el("div", { class: "frage", text: "Was gehört zu den Römern?" }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: d,
+        inhalt: o => ({ bild: o.bild, text: o.name }),
+        hinweis: o => `${o.name}: ${o.umschreibung}. Das gibt es erst seit kurzer Zeit — die Römer lebten vor über 2000 Jahren.`,
+        loesung,
+        lob: `Genau: ${d.name} gehört zu den Römern.`,
+      });
+      box.classList.add("kk-zwei");
+      if (ctx.nr === 0) ctx.sag("Tipp auf das Bild, das zu den Römern gehört.");
+      return;
+    }
+
+    if (a.art === "zuordnen") {
+      const d = a.d;
+      const k = K[d.kultur];
+      const loesung = `${d.bild} ${d.name} → ${k.bild} ${k.name}: ${k.kurz}`;
+      kk.append(el("div", { class: "auftrag", text: "Zu wem gehört das?" }));
+      const { karte } = LS.koerbe(ctx, {
+        karte: { bild: d.bild, text: d.name },
+        koerbe: a.koerbe, richtig: d.kultur,
+        korbInhalt, farbe: korbFarbe,
+        hinweis: id => kulturHinweis(id, d.name),
+        loesung,
+        lob: `Genau: ${d.name} gehört zu „${k.name}“.`,
+      });
+      if (!d.bild) karte.classList.add("kk-wort");
+      karte.querySelector("b").classList.add("frage");
+      if (ctx.nr === 0) ctx.sag("Tipp auf den Korb der Menschen, zu denen das gehört.");
+      return;
+    }
+
+    if (a.art === "erzaehl") {
+      const k = K[a.s.kultur];
+      const loesung = `${k.bild} ${k.name}: ${k.kurz}`;
+      kk.append(el("div", { class: "auftrag", text: "Wer erzählt hier?" }));
+      const { karte } = LS.koerbe(ctx, {
+        karte: { bild: "💬", text: a.s.satz },
+        koerbe: a.koerbe, richtig: a.s.kultur,
+        korbInhalt, farbe: korbFarbe,
+        hinweis: id => `${K[id].name}: ${K[id].kurz}. Erzählt das jemand von dort?`,
+        loesung,
+        lob: `Genau: So lebten die Menschen „${k.name}“.`,
+      });
+      karte.classList.add("kk-satz");
+      karte.querySelector("b").classList.add("frage");
+      if (ctx.nr === 0) ctx.sag("Lies den Satz. Wer erzählt hier? Tipp auf den Korb.");
+      return;
+    }
+
+    if (a.art === "aussage") {
+      const x = a.x;
+      const k = K[x.kultur];
+      const richtig = x.wahr ? "ja" : "nein";
+      const loesung = `${WAHR[richtig].bild} ${WAHR[richtig].text}: ${x.grund}`;
+      kk.append(karteText("", x.text), el("div", { class: "frage", text: "Stimmt das?" }));
+      const box = LS.auswahl(ctx, {
+        optionen: ["ja", "nein"], richtig, breite: 150,
+        inhalt: id => ({ bild: WAHR[id].bild, text: WAHR[id].text }),
+        hinweis: () => `Überleg nochmal. ${k.leute}: ${k.kurz}.`,
+        loesung,
+        lob: `${WAHR[richtig].text}! ${x.grund}`,
+      });
+      box.classList.add("kk-janein");
+      if (ctx.nr === 0) ctx.sag("Lies den Satz. Stimmt das, oder stimmt das nicht?");
+      return;
+    }
+
+    if (a.art === "gab") {
+      const g = a.g;
+      const k = K[g.kultur];
+      const richtig = g.ja ? "ja" : "nein";
+      const loesung = `${GAB[richtig].bild} ${GAB[richtig].text}: ${g.grund}`;
+      kk.append(karteText(g.bild, g.ding), el("div", { class: "frage", text: `Gab es das ${k.bei} schon?` }));
+      const box = LS.auswahl(ctx, {
+        optionen: ["ja", "nein"], richtig, breite: 150,
+        inhalt: id => ({ bild: GAB[id].bild, text: GAB[id].text }),
+        hinweis: () => `Überleg nochmal: Woraus ist das gemacht, und braucht man Strom dafür? ${k.leute}: ${k.kurz}.`,
+        loesung,
+        lob: `${g.ja ? "Ja" : "Nein"} — ${g.grund}`,
+      });
+      box.classList.add("kk-janein");
+      if (ctx.nr === 0) ctx.sag("Gab es das damals schon? Tipp Ja oder Nein an.");
+      return;
+    }
+
+    if (a.art === "quelle") {
+      const q = a.q;
+      const art = KK_QUELLENARTEN[q.art];
+      const loesung = `${art.bild} ${art.name}: ${art.erklaerung}`;
+      kk.append(karteText(q.bild, q.text),
+        el("div", { class: "frage", text: "Woher wissen wir das? Ist das ein Fundstück, ein Bauwerk, ein Bild oder ein Text?" }));
+      const box = LS.auswahl(ctx, {
+        optionen: a.optionen, richtig: q.art, breite: 150,
+        inhalt: id => ({ bild: KK_QUELLENARTEN[id].bild, text: KK_QUELLENARTEN[id].name, klein: KK_QUELLENARTEN[id].erklaerung }),
+        hinweis: id => `${KK_QUELLENARTEN[id].name} heisst: ${KK_QUELLENARTEN[id].erklaerung}. Ist das hier so etwas?`,
+        loesung,
+        lob: `Genau: Das ist ein ${art.name} — ${art.erklaerung}.`,
+      });
+      box.classList.add("kk-quellen");
+      if (ctx.nr === 0) ctx.sag("Woher wissen wir das? Tipp die Art der Quelle an.");
+      return;
+    }
+
+    // Rätsel (Königsstufe): drei Hinweise nacheinander; raten darf man jederzeit, jeder Fehlversuch zeigt den nächsten
+    // Hinweis, und erst nach dem dritten Hinweis (drittem Fehlversuch) zeigt der Rahmen die Lösung.
+    const r = a.r;
+    const k = K[r.kultur];
+    const loesung = `${k.bild} ${k.name}: ${k.kurz}`;
+    kk.append(el("div", { class: "frage", text: "Welche Kultur bin ich? Lies die Hinweise und tippe die Kultur an." }));
+    const liste = el("ol", { class: "kk-hinweise", "aria-live": "polite" });
+    const zeile = el("p", { class: "kk-weiter-zeile" });
+    const weiter = el("button", { type: "button", class: "knopf hell", text: "➡️ Nächster Hinweis" });
+    let gezeigt = 0;
+    const zeige = () => {
+      if (gezeigt >= r.hinweise.length) return;
+      liste.append(el("li", { text: r.hinweise[gezeigt++] }));
+      if (gezeigt >= r.hinweise.length) zeile.remove();
+    };
+    weiter.addEventListener("click", () => { if (!ctx.vorbei()) zeige(); });
+    zeile.append(weiter);
+    kk.append(liste, zeile);
+    zeige();
+    LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: r.kultur, breite: 150,
+      inhalt: korbInhalt,
+      hinweis: id => { zeige(); return `${K[id].name}: ${K[id].kurz}. Das passt nicht zu allen Hinweisen. Lies den nächsten.`; },
+      loesung,
+      lob: `Richtig geraten: ${k.name} — ${k.kurz}.`,
+    });
+    if (ctx.nr === 0) ctx.sag("Lies die Hinweise. Welche Kultur bin ich? Du darfst jederzeit raten.");
+  },
+});
+</script>
+</body>
+</html>

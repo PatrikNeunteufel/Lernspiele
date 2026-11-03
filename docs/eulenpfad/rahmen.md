@@ -272,7 +272,16 @@ Kürzeln mit Ziffern; jedes Suchwort muss passen. Während einer Suche steht sta
 beste Treffer zuerst; wer nur über Thema oder Inhaltsliste passt, trägt „🔍 gefunden …“. Der Filter „🎒 Meine Klasse“ (Entscheide K1 a, K2 a) zeigt einem Kind mit
 Klasse im Profil nur Spiele, deren Basisklasse höchstens eine Klasse daneben liegt, die also eine
 Stufe genau für seine Klasse haben. Er ist vorgegeben an, das Kind darf ihn ausschalten (Profil-Feld
-`meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Auf jeder Spielkarte schalten ⏱ (Timer dieses Spiels, dieselbe Einstellung wie
+`meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Er steht mit „⭐ Mein Fokus“ und
+„🔍 Zu prüfen“ in einer eigenen Zeile **Nur** unter den Fächern, weil er kein Fach ist (Hinweis Patrik, LERN_Session10).
+**Thema und Stufe sind Mehrfachwahl** (Wunsch Patrik, LERN_Session10): jeder Chip schaltet einzeln, leer heisst keine
+Einschränkung; „Alle“ wählt alle an und, nochmals angetippt, alle ab. Bei genau einer Stufe zeigen die Karten den
+grossen Knopf „Stufe n spielen“, bei mehreren nur die gewählten Stufen. Gespeichert wird der Filter je Browser
+(`lernspiele:filter`, Listen von Ids; ältere Speicherungen mit einem Wert werden umgedeutet). Unter dem Filter stehen
+zwei Karten im Aufbau der Spielkarten, ohne Thema: **🎲 Zufallsmix** (öffnet die Mix-Seite) und **🎯 Zufälliges Spiel**
+(je Stufe ein Knopf; zieht aus der gefilterten Auswahl, gewichtet nach Bedarf aus dem Protokoll des Kindes: wackelnde
+Runden hoch, nie gespielt mittel, kürzlich sicher niedrig, sicher aber über sieben Tage her wieder mittel, Fokus-Lernziel
+doppelt — `bedarf` in `start/spiele.js`). Auf jeder Spielkarte schalten ⏱ (Timer dieses Spiels, dieselbe Einstellung wie
 im Spiel) und ♾ (Endlos, Profil-Feld `endlosAn`), was die Stufenknöpfe starten. Die Symbole sind als
 SVG gezeichnet: aus als grauer Umriss, an in Gold wie der Favoriten-Stern. Ein Tipp auf eine freie
 Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim Antippen ihren Klartext ein. Je Spieler speichert das Profil Favoriten, die Ansicht (`kacheln` oder

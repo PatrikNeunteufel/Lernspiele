@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lärm-Wächter</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .lw > .frage, .lw > .auftrag { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 4px 0 12px; }
+  .lw-karte {
+    background: var(--karte); border: 3px solid var(--rand); border-radius: 18px; padding: 12px 16px; margin: 0 auto 12px;
+    max-width: 640px; text-align: center; font-size: clamp(18px, 4.2vw, 24px); line-height: 1.45; font-weight: 700;
+    box-shadow: var(--schatten);
+  }
+  .lw-karte .lw-bild { display: block; font-size: clamp(44px, 10vw, 64px); line-height: 1.1; }
+  .lw-karte .frage { font-size: clamp(17px, 4vw, 22px); }
+  /* Situation als Satz auf der Korb-Karte (Baustein-Klasse, anpassbar) */
+  .korb-karte.lw-satz { max-width: 640px; padding: 12px 18px; }
+  .korb-karte.lw-satz b { font-size: clamp(17px, 4vw, 22px); font-weight: 700; line-height: 1.4; }
+  .lw .korb-knopf { overflow-wrap: anywhere; }
+  .lw .korb-knopf.lw-gross { font-size: clamp(22px, 5vw, 30px); }
+  .lw-massnahme { text-align: center; font-size: clamp(17px, 4vw, 22px); font-weight: 800; margin: 0 0 8px; }
+  .lw-massnahme b { color: var(--deko-6); }
+  /* Lärm-Skala 1–5: Deko-Farben, keine Stellenfarben */
+  .lw-skala { display: flex; justify-content: center; align-items: center; gap: 5px; margin: 0 auto 12px; font-size: 14px; font-weight: 800; color: var(--text-leise); }
+  .lw-skala span { display: inline-block; width: clamp(22px, 6vw, 34px); height: 16px; border-radius: 6px; background: var(--rand); }
+  .lw-skala span.an { background: var(--deko-3); }
+  .lw-skala span.an.lw-leise { background: var(--deko-5); }
+  .lw-skala i { font-style: normal; margin-left: 6px; }
+  .lw .wahl.lw-paar { --wahl-breite: 220px; }
+  .lw .wahl.lw-erklaerung { --wahl-breite: 320px; }
+  .lw .wahl.lw-erklaerung .wahl-knopf { font-size: clamp(15px, 3.5vw, 19px); font-weight: 700; text-align: left; justify-content: flex-start; line-height: 1.35; }
+  .lw .wahl-knopf { overflow-wrap: anywhere; }
+  .lw .wahl-knopf small { font-size: 13px; }
+  .lw .ablage > span { font-size: clamp(15px, 3.4vw, 20px); }
+  /* Ohr-Bild (SVG, vom Skript gezeichnet) */
+  .lw-bildfeld { display: block; width: 100%; max-width: 480px; margin: 0 auto 12px; touch-action: manipulation; user-select: none; }
+  .lw-bildfeld.lw-antippen .lw-teil { cursor: pointer; }
+  .lw-bildfeld text { font-family: var(--schrift); font-weight: 800; fill: var(--text-leise); font-size: 14px; text-anchor: middle; pointer-events: none; }
+  .lw-bildfeld .lw-halo { fill: none; stroke: var(--deko-4); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+  .lw-bildfeld .lw-halo-dick { stroke-width: 22; }
+  .lw-bildfeld .lw-markiert .lw-halo { opacity: 1; animation: lw-blink 1s ease-in-out infinite; }
+  .lw-bildfeld .lw-daneben .lw-halo { opacity: 1; stroke: var(--hinweis); animation: none; }
+  .lw-bildfeld .lw-richtig .lw-halo { opacity: 1; stroke: var(--gut); animation: none; }
+  .lw-bildfeld .lw-treffer { fill: transparent; stroke: transparent; pointer-events: all; }
+  .lw-bildfeld .lw-treffer-strich { fill: none; stroke: transparent; pointer-events: stroke; stroke-linecap: round; }
+  @keyframes lw-blink { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🦻 Lärm-Wächter</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="geraeusche.js"></script>
+<script>
+"use strict";
+// Lehrplan SG NMG.4.2 (Hören und Schall), Basisklasse 3. Wortlaut von sg.lehrplan.ch (gelesen 2026-11-03):
+//   a (1. Zyklus) Schallquellen und akustische Phänomene erkunden und beschreiben (… Bau- oder Verkehrslärm, Stille)
+//   b (2. Zyklus) Ideen für Schutzmassnahmen gegen laute und anhaltende Geräusche entwickeln und deren Wirkung
+//     einschätzen (z.B. Kopfhörer, Ohrstöpsel, Lärmschutzwände)
+//   c (Orientierungspunkt) Zusammenhang zwischen Schwingungen und Tönen; Merkmale des Ohrs benennen:
+//     Ohrmuschel, Gehörgang, Trommelfell
+//   d (Grundanspruch) akustische Phänomene erforschen (Echo benötigt Zeit; Verstärkung: Schalltrichter;
+//     Dämmung: Vorhang, Teppich)
+// Das Kind ordnet Geräusche nach Lautstärke ein, wählt Schutz gegen lauten und langen Lärm, schätzt dessen
+// Wirkung ein, findet die Teile des Ohrs in einem gezeichneten Schnitt und erklärt Echo, Verstärkung und Dämmung.
+//   s1 2. Klasse (NMG.4.2.a, lesearm): Bild-Karte „Laut oder leise?“ in zwei Körbe — nur klare Fälle
+//      (Lärm-Skala 1–2 gegen 4–5).
+//   s2 3. Klasse, leichter (NMG.4.2.a): drei Geräusche von leise nach laut ordnen (Skala 1-3-5); „Wo ist es still?“
+//   s3 Klassenziel (NMG.4.2.b „Schutzmassnahmen gegen laute und anhaltende Geräusche“): Situation → passender
+//      Schutz im Korb (Ohrstöpsel, Gehörschutz, Kopfhörer leiser, Abstand, Fenster zu, Lärmschutzwand); dazu
+//      „Schadet das den Ohren?“ (Ja/Nein).
+//   s4 3. Klasse, schwerer (NMG.4.2.b „deren Wirkung einschätzen“): „Wie gut hilft das?“ (gut / ein wenig / nicht)
+//      mit Lärm-Skala 1–5; „Was ist schlimmer für die Ohren?“ (laut und lang schlägt laut und kurz, laut schlägt leise).
+//   s5 4. Klasse (NMG.4.2.c): Ohrmuschel, Gehörgang, Trommelfell im gezeichneten Ohr antippen, benennen und
+//      zuordnen; „Was schwingt?“ — Aussagen stimmt / stimmt nicht.
+//   s6 Königsstufe (NMG.4.2.d): Echo, Verstärkung, Dämmung — Phänomen → Erklärung; „Was dämpft den Schall am
+//      besten?“; dazu Aufgaben aus s3–s5 gemischt.
+// Abgrenzung: Hoch-Tief-Ohr und Instrumenten-Kenner (Musik) üben Töne und Klänge; Auge-Entdecker (3) das Auge.
+// Hier zählen Lautstärke, Lärmschutz, das Ohr und der Schall. Keine Dezibel: Lärm-Skala 1–5 (geraeusche.js).
+// Inhalte in geraeusche.js (Liste „geraeusche“ im Katalog).
+
+const { waehle, mische, el, zufall } = LS;
+const ID = "laerm-waechter";
+const SVGNS = "http://www.w3.org/2000/svg";
+
+// Freigabe (Entscheid L4 a): alle Inhalte gehören zur Liste „geraeusche“. Kennt der Katalog die Listen des Spiels
+// noch nicht, gilt der Inhalt mit dem Spiel als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["geraeusche"]);
+const INHALT_FREI = FREI.has("geraeusche");
+const leer = liste => (INHALT_FREI ? liste : []);
+
+const GERAEUSCHE = leer(LAERM_GERAEUSCHE);
+const G = Object.fromEntries(GERAEUSCHE.map(g => [g.id, g]));
+const ORTE = leer(LAERM_ORTE);
+const ORT = Object.fromEntries(ORTE.map(o => [o.name, o]));
+const SCHUTZ = leer(LAERM_SCHUTZ);
+const S = Object.fromEntries(SCHUTZ.map(s => [s.id, s]));
+const ABLENKER = SCHUTZ.filter(s => s.wirkung === 0).map(s => s.id);
+const SITUATIONEN = leer(LAERM_SITUATIONEN);
+const SCHADET = leer(LAERM_SCHADET);
+const OHR = leer(LAERM_OHR_TEILE);
+const TEIL = Object.fromEntries(OHR.map(t => [t.id, t]));
+const OHR_IDS = OHR.map(t => t.id);
+const SCHWINGT = leer(LAERM_SCHWINGT);
+const PHAENOMENE = leer(LAERM_PHAENOMENE);
+const DAEMPFER = leer(LAERM_DAEMPFER);
+
+const LAUT = {
+  leise: { bild: "🔈", text: "leise", farbe: "var(--deko-5)" },
+  laut: { bild: "🔊", text: "laut", farbe: "var(--deko-3)" },
+};
+const WIRKUNG = {
+  2: { bild: "💪", text: "Hilft gut" },
+  1: { bild: "🤏", text: "Hilft ein wenig" },
+  0: { bild: "🚫", text: "Hilft nicht" },
+};
+const PRINZIP = {
+  echo: "Schall, der an etwas Hartem abprallt, kommt zurück — und braucht für den Weg Zeit.",
+  verstaerkung: "Ein Trichter sammelt den Schall und leitet ihn in eine Richtung.",
+  daemmung: "Weiche Dinge schlucken den Schall, harte werfen ihn zurück.",
+};
+const SCHLIMMER_WARUM = {
+  "lang-kurz": "Beide sind laut, aber das eine dauert viel länger. Je länger der Lärm dauert, desto mehr schadet er.",
+  "laut-leise": "Leise Geräusche schaden den Ohren nicht, auch wenn sie lange dauern. Lauter Lärm, der lange dauert, schadet.",
+  "kurz-leise": "Ein sehr lauter Knall kann den Ohren sofort schaden. Leises schadet nicht, auch wenn es lange dauert.",
+};
+const dauerText = d => (d === "lang" ? "dauert lange" : "nur kurz");
+
+/** Wie gut hilft die Massnahme in dieser Situation? 2 gut, 1 ein wenig, 0 nicht — null, wenn nicht gefragt wird. */
+function wirkungFuer(sit, id) {
+  if (!S[id]) return null;
+  if (sit.schutz.includes(id)) return S[id].wirkung;
+  if (sit.wenig.includes(id)) return 1;
+  if (ABLENKER.includes(id)) return 0;
+  return null;
+}
+
+const gross = s => s.charAt(0).toUpperCase() + s.slice(1);
+const nom = id => `${TEIL[id].artikel} ${TEIL[id].name}`;
+const akk = id => `${TEIL[id].artikel === "der" ? "den" : TEIL[id].artikel} ${TEIL[id].name}`;
+
+const ARTEN = {
+  lautleise() {
+    const g = waehle(GERAEUSCHE.filter(x => x.laut <= 2 || x.laut >= 4));
+    return { art: "lautleise", g: g.id, richtig: g.laut >= 4 ? "laut" : "leise" };
+  },
+  ordnen() {
+    const reihe = [1, 3, 5].map(l => waehle(GERAEUSCHE.filter(x => x.laut === l)).id);
+    return { art: "ordnen", reihe };
+  },
+  still() {
+    const ruhig = waehle(ORTE.filter(o => o.laut === 1));
+    const laute = mische(ORTE.filter(o => o.laut >= 4)).slice(0, 2);
+    return { art: "still", richtig: ruhig.name, optionen: mische([ruhig.name, ...laute.map(o => o.name)]) };
+  },
+  schutz() {
+    const i = zufall(0, SITUATIONEN.length - 1);
+    const sit = SITUATIONEN[i];
+    const richtig = waehle(sit.schutz);
+    const andere = mische(SCHUTZ.map(s => s.id).filter(id => !sit.schutz.includes(id) && !sit.wenig.includes(id))).slice(0, 2);
+    return { art: "schutz", sit: i, richtig, koerbe: mische([richtig, ...andere]) };
+  },
+  schadet() {
+    const i = zufall(0, SCHADET.length - 1);
+    return { art: "schadet", i, text: SCHADET[i][0], richtig: SCHADET[i][1] };
+  },
+  wirkung() {
+    const i = zufall(0, SITUATIONEN.length - 1);
+    const sit = SITUATIONEN[i];
+    // Erst die Klasse der Wirkung ziehen, dann eine Massnahme daraus — so kommen alle drei Antworten gleich oft.
+    const klassen = [sit.schutz, sit.wenig, ABLENKER].filter(k => k.length);
+    const schutz = waehle(waehle(klassen));
+    return { art: "wirkung", sit: i, schutz, richtig: wirkungFuer(sit, schutz) };
+  },
+  schlimmer() {
+    const typ = waehle(["lang-kurz", "laut-leise", "kurz-leise"]);
+    let a, b;
+    if (typ === "lang-kurz") {
+      a = waehle(GERAEUSCHE.filter(x => x.laut >= 4 && x.dauer === "lang"));
+      b = waehle(GERAEUSCHE.filter(x => x.laut >= 4 && x.dauer === "kurz" && x.laut <= a.laut));
+    } else if (typ === "laut-leise") {
+      a = waehle(GERAEUSCHE.filter(x => x.laut >= 4 && x.dauer === "lang"));
+      b = waehle(GERAEUSCHE.filter(x => x.laut <= 2 && x.dauer === "lang"));
+    } else {
+      a = waehle(GERAEUSCHE.filter(x => x.laut === 5 && x.dauer === "kurz"));
+      b = waehle(GERAEUSCHE.filter(x => x.laut <= 2 && x.dauer === "lang"));
+    }
+    return { art: "schlimmer", typ, richtig: a.id, optionen: mische([a.id, b.id]) };
+  },
+  "ohr-tippen"() {
+    return { art: "ohr-tippen", teil: waehle(OHR_IDS) };
+  },
+  "ohr-benennen"() {
+    return { art: "ohr-benennen", teil: waehle(OHR_IDS), optionen: mische(OHR_IDS) };
+  },
+  "ohr-aufgabe"() {
+    return { art: "ohr-aufgabe", teil: waehle(OHR_IDS), optionen: mische(OHR_IDS) };
+  },
+  schwingt() {
+    const i = zufall(0, SCHWINGT.length - 1);
+    return { art: "schwingt", i, text: SCHWINGT[i][0], richtig: SCHWINGT[i][1] };
+  },
+  phaenomen() {
+    const i = zufall(0, PHAENOMENE.length - 1);
+    const p = PHAENOMENE[i];
+    return { art: "phaenomen", i, richtig: p.richtig, optionen: mische([p.richtig, ...p.falsch]) };
+  },
+  daempfer() {
+    const weich = waehle(DAEMPFER.filter(d => d.daempft));
+    const hart = mische(DAEMPFER.filter(d => !d.daempft)).slice(0, 2);
+    return { art: "daempfer", richtig: weich.name, optionen: mische([weich.name, ...hart.map(d => d.name)]) };
+  },
+};
+
+// Je Stufe die Arten (mehrfach genannt = häufiger).
+const STUFE = {
+  s1: ["lautleise"],
+  s2: ["ordnen", "ordnen", "still"],
+  s3: ["schutz", "schutz", "schadet"],
+  s4: ["wirkung", "wirkung", "schlimmer"],
+  s5: ["ohr-tippen", "ohr-benennen", "ohr-aufgabe", "schwingt", "schwingt"],
+  s6: ["phaenomen", "phaenomen", "phaenomen", "daempfer", "schutz", "schadet", "wirkung", "schlimmer", "ohr-benennen", "schwingt"],
+};
+/** Gruppe der Art für die Serienbremse (höchstens drei Werte je Stufe). */
+const GRUPPE = { s5: art => (art.startsWith("ohr") ? "ohr" : "schwingt"), s6: art => (["phaenomen", "daempfer"].includes(art) ? art : "gemischt") };
+
+function aufgabeErzeugen(stufe) {
+  if (!INHALT_FREI) return null;
+  return ARTEN[waehle(STUFE[stufe])]();
+}
+
+const STUFEN_TEXT = {
+  s1: "Laut oder leise? Flüstern, Regen, Helikopter — jedes Geräusch in den richtigen Korb.",
+  s2: "Drei Geräusche von leise nach laut ordnen. Und: Wo ist es still?",
+  s3: "Konzert, Baustelle, Rasenmäher: Was schützt deine Ohren? Und: Was schadet ihnen?",
+  s4: "Wie gut hilft das — gut, ein wenig oder gar nicht? Und: Was ist schlimmer für die Ohren?",
+  s5: "Ins Ohr hinein: Ohrmuschel, Gehörgang und Trommelfell. Und: Was schwingt?",
+  s6: "Endgegner: Echo, Schalltrichter und Dämmung erklären — dazu alles aus den Stufen 3 bis 5.",
+};
+const STUFEN = INHALT_FREI ? STUFEN_TEXT : {};
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!INHALT_FREI) m.push("Aufgabe, obwohl die Liste nicht frei ist");
+  if (!STUFE[stufe].includes(a.art)) m.push(`Art ${a.art} nicht in ${stufe}`);
+  const doppelt = liste => new Set(liste).size !== liste.length;
+  const genauEine = (optionen, richtig) => {
+    if (!optionen || doppelt(optionen)) m.push("Optionen doppelt oder fehlen");
+    else if (optionen.filter(o => o === richtig).length !== 1) m.push("nicht genau eine richtige Antwort");
+  };
+  if (a.art === "lautleise") {
+    const g = G[a.g];
+    if (!g) m.push("Geräusch nicht aus der Liste");
+    else {
+      if (g.laut === 3) m.push("mittleres Geräusch in Stufe 1");
+      if (a.richtig !== (g.laut >= 4 ? "laut" : "leise")) m.push("laut/leise falsch");
+    }
+  }
+  if (a.art === "ordnen") {
+    if (a.reihe.length !== 3 || doppelt(a.reihe)) m.push("nicht drei verschiedene Geräusche");
+    if (a.reihe.some(id => !G[id])) m.push("Geräusch nicht aus der Liste");
+    else {
+      const l = a.reihe.map(id => G[id].laut);
+      if (l.some((x, i) => i && x <= l[i - 1])) m.push("Reihe nicht von leise nach laut");
+      if (l.some((x, i) => i && x - l[i - 1] < 2)) m.push("Lautstärken nicht klar verschieden");
+    }
+  }
+  if (a.art === "still") {
+    genauEine(a.optionen, a.richtig);
+    if (a.optionen.length !== 3) m.push("nicht drei Orte");
+    if (!ORT[a.richtig] || ORT[a.richtig].laut !== 1) m.push("stiller Ort fehlt oder ist nicht still");
+    if (a.optionen.some(o => !ORT[o] || (o !== a.richtig && ORT[o].laut < 4))) m.push("zweiter stiller Ort unter den Optionen");
+  }
+  if (a.art === "schutz" || a.art === "wirkung") {
+    const sit = SITUATIONEN[a.sit];
+    if (!sit) m.push("Situation nicht aus der Liste");
+    else {
+      if (sit.laut < 4) m.push("Situation ist nicht laut");
+      if (!sit.schutz.length) m.push("Situation ohne passenden Schutz");
+      if (sit.schutz.some(id => !S[id] || S[id].wirkung !== 2)) m.push("Schutz der Situation ist kein guter Schutz");
+      if (sit.wenig.some(id => !S[id] || S[id].wirkung === 0)) m.push("wenig-Massnahme ist ein Ablenker");
+      if (a.art === "schutz") {
+        if (!sit.schutz.includes(a.richtig)) m.push("Schutz passt nicht zur Situation");
+        genauEine(a.koerbe, a.richtig);
+        if (a.koerbe.length !== 3) m.push("nicht drei Körbe");
+        if (a.koerbe.some(id => !S[id])) m.push("unbekannter Korb");
+        if (a.koerbe.some(id => id !== a.richtig && (sit.schutz.includes(id) || sit.wenig.includes(id)))) m.push("zweiter passender Schutz im Korb");
+      } else {
+        if (!S[a.schutz]) m.push("Massnahme unbekannt");
+        if (a.richtig !== wirkungFuer(sit, a.schutz) || ![0, 1, 2].includes(a.richtig)) m.push("Wirkung passt nicht zur Situation");
+      }
+    }
+  }
+  if (a.art === "schadet" || a.art === "schwingt") {
+    const liste = a.art === "schadet" ? SCHADET : SCHWINGT;
+    const e = liste[a.i];
+    if (!e || e[0] !== a.text || e[1] !== a.richtig) m.push("Aussage nicht aus der Liste");
+    if (typeof a.richtig !== "boolean") m.push("Aussage ohne Ja/Nein");
+    if (e && !e[2]) m.push("Aussage ohne Tipp");
+  }
+  if (a.art === "schlimmer") {
+    genauEine(a.optionen, a.richtig);
+    if (a.optionen.length !== 2 || a.optionen.some(id => !G[id])) m.push("Paar nicht aus der Liste");
+    else {
+      const x = G[a.richtig], y = G[a.optionen.find(id => id !== a.richtig)];
+      const ok = {
+        "lang-kurz": x.laut >= 4 && x.dauer === "lang" && y.laut >= 4 && y.dauer === "kurz" && y.laut <= x.laut,
+        "laut-leise": x.laut >= 4 && x.dauer === "lang" && y.laut <= 2 && y.dauer === "lang",
+        "kurz-leise": x.laut === 5 && x.dauer === "kurz" && y.laut <= 2 && y.dauer === "lang",
+      }[a.typ];
+      if (!ok) m.push(`Paar ${a.typ} nicht eindeutig`);
+    }
+  }
+  if (a.art.startsWith("ohr")) {
+    if (!TEIL[a.teil]) m.push("Ohr-Teil nicht im Bild");
+    if (a.art !== "ohr-tippen") {
+      genauEine(a.optionen, a.teil);
+      if (a.optionen.length !== 3 || a.optionen.some(id => !TEIL[id])) m.push("Ohr-Teile zur Wahl falsch");
+    }
+  }
+  if (a.art === "phaenomen") {
+    const p = PHAENOMENE[a.i];
+    if (!p || p.richtig !== a.richtig) m.push("Phänomen nicht aus der Liste");
+    else {
+      if (!PRINZIP[p.art]) m.push(`Art ${p.art} unbekannt`);
+      if (p.falsch.length !== 2) m.push("nicht zwei Ablenker");
+      if (!p.tipp) m.push("Phänomen ohne Tipp");
+    }
+    genauEine(a.optionen, a.richtig);
+    if (a.optionen.length !== 3) m.push("nicht drei Erklärungen");
+  }
+  if (a.art === "daempfer") {
+    genauEine(a.optionen, a.richtig);
+    if (a.optionen.length !== 3) m.push("nicht drei Stoffe");
+    const d = DAEMPFER.filter(x => a.optionen.includes(x.name));
+    if (d.length !== 3) m.push("Stoff nicht aus der Liste");
+    if (d.some(x => x.daempft !== (x.name === a.richtig))) m.push("zwei dämpfende Stoffe oder der richtige dämpft nicht");
+  }
+  if (/ß/.test(JSON.stringify(a))) m.push("ß im Text");
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+const karteMit = (bild, text) => el("div", { class: "lw-karte" }, bild ? el("span", { class: "lw-bild", text: bild }) : null, el("span", { class: "frage", text }));
+
+/** Lärm-Skala 1–5 als fünf Felder. */
+function skala(n) {
+  const s = el("div", { class: "lw-skala", role: "img", "aria-label": `Lärm ${n} von 5` });
+  for (let i = 1; i <= 5; i++) s.append(el("span", { class: i <= n ? (n <= 2 ? "an lw-leise" : "an") : "" }));
+  s.append(el("i", { text: `Lärm ${n} von 5` }));
+  return s;
+}
+
+function svgEl(tag, attr = {}, ...kinder) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attr)) if (v != null) e.setAttribute(k, v);
+  for (const k of kinder) if (k != null) e.append(k);
+  return e;
+}
+
+/**
+ * Ohr, von der Seite aufgeschnitten: Ohrmuschel aussen, Gehörgang als Tunnel, Trommelfell am Ende; der Schall
+ * kommt von links. Liefert { svg, teile: Map id → g }. Jedes Teil: Halo (leuchtet bei lw-markiert), Form,
+ * unsichtbare Trefferfläche (gross genug für den Finger).
+ */
+function ohrBild({ antippen = false } = {}) {
+  const svg = svgEl("svg", { viewBox: "0 0 400 300", class: `lw-bildfeld${antippen ? " lw-antippen" : ""}`, role: "img", "aria-label": "Ein Ohr von der Seite, aufgeschnitten" });
+  svg.append(svgEl("rect", { x: 0, y: 0, width: 400, height: 300, rx: 36, fill: "var(--himmel-unten)" }));
+  // Kopf (rechts, aufgeschnitten) mit Haaransatz
+  svg.append(svgEl("path", { d: "M170 0 L400 0 L400 300 L170 300 Q130 150 170 0 Z", fill: "var(--hinweis-hell)", stroke: "var(--deko-7)", "stroke-width": 3 }),
+    svgEl("path", { d: "M170 0 L400 0 L400 44 Q290 30 182 50 Q176 24 170 0 Z", fill: "var(--deko-7)", "fill-opacity": .55 }),
+    svgEl("text", { x: 300, y: 282 }, "Kopf, aufgeschnitten"));
+  // Schall von links: Wellen und Pfeil
+  for (const [x, w] of [[36, 70], [62, 46], [84, 26]]) {
+    svg.append(svgEl("path", { d: `M${x} ${150 - w} Q${x + w * 0.55} 150 ${x} ${150 + w}`, fill: "none", stroke: "var(--knopf)", "stroke-width": 4, "stroke-linecap": "round" }));
+  }
+  svg.append(svgEl("line", { x1: 96, y1: 150, x2: 124, y2: 150, stroke: "var(--knopf)", "stroke-width": 4, "stroke-linecap": "round" }),
+    svgEl("polygon", { points: "122,142 136,150 122,158", fill: "var(--knopf)" }),
+    svgEl("text", { x: 60, y: 248 }, "Schall"));
+  const teile = new Map();
+  const teil = (id, ...kinder) => {
+    const g = svgEl("g", { class: "lw-teil", "data-teil": id }, ...kinder);
+    svg.append(g);
+    teile.set(id, g);
+    return g;
+  };
+  // Gehörgang: Tunnel in den Kopf (zuerst, die Ohrmuschel liegt davor)
+  const GANG = "M186 132 C 224 128, 266 130, 302 134 L302 176 C 266 180, 224 182, 186 178 Z";
+  teil("gehoergang", svgEl("path", { class: "lw-halo", d: GANG }),
+    svgEl("path", { d: GANG, fill: "var(--karte)", stroke: "var(--deko-7)", "stroke-width": 3 }),
+    svgEl("path", { d: "M196 150 L292 152", fill: "none", stroke: "var(--knopf)", "stroke-width": 2.5, "stroke-dasharray": "6 5" }),
+    svgEl("path", { class: "lw-treffer-strich", d: "M190 155 L298 155", "stroke-width": 44 }));
+  // Trommelfell: gespanntes Häutchen am Ende des Tunnels
+  teil("trommelfell", svgEl("ellipse", { class: "lw-halo", cx: 304, cy: 155, rx: 8, ry: 28 }),
+    svgEl("ellipse", { cx: 304, cy: 155, rx: 6, ry: 26, fill: "var(--deko-2)", stroke: "var(--text)", "stroke-width": 2 }),
+    svgEl("ellipse", { class: "lw-treffer", cx: 304, cy: 155, rx: 22, ry: 40 }));
+  svg.append(svgEl("text", { x: 354, y: 160 }, "Innenohr →"));
+  // Ohrmuschel: aussen am Kopf, wie ein Trichter
+  const MUSCHEL = "M196 70 C 128 52, 96 128, 124 198 C 140 236, 184 242, 200 212 C 180 206, 164 186, 168 162 C 158 140, 170 118, 190 112 C 186 96, 190 82, 196 70 Z";
+  teil("ohrmuschel", svgEl("path", { class: "lw-halo", d: MUSCHEL }),
+    svgEl("path", { d: MUSCHEL, fill: "var(--hinweis-hell)", stroke: "var(--deko-7)", "stroke-width": 4, "stroke-linejoin": "round" }),
+    svgEl("path", { d: "M184 94 C 156 108, 146 150, 166 188", fill: "none", stroke: "var(--deko-7)", "stroke-width": 3, "stroke-linecap": "round" }),
+    svgEl("path", { class: "lw-treffer", d: MUSCHEL }));
+  return { svg, teile };
+}
+
+/** Kurz aufleuchten lassen, wo falsch getippt wurde. */
+function daneben(g) {
+  g.classList.remove("lw-daneben");
+  void g.getBoundingClientRect();
+  g.classList.add("lw-daneben");
+  setTimeout(() => g.classList.remove("lw-daneben"), 700);
+}
+
+const TIPP_VORSTELLEN = "Stell dir das Geräusch vor: Musst du die Ohren zuhalten?";
+
+// ---------- Aufgaben ----------
+
+function lautLeise(ctx, a, lw) {
+  const g = G[a.g];
+  ctx.serie("laut", a.richtig);
+  ctx.tipp([TIPP_VORSTELLEN, `Du hörst es ${g.ort}. Kannst du dort noch flüstern — und wirst trotzdem verstanden?`,
+    "Überleg: Erschrickst du, oder tut es in den Ohren weh? Oder könntest du dabei einschlafen?"]);
+  lw.append(el("div", { class: "auftrag", text: "Laut oder leise?" }));
+  const loesung = `${g.bild} ${g.name} ist ${a.richtig}.`;
+  const { karte } = LS.koerbe(ctx, {
+    karte: { bild: g.bild, text: g.name },
+    koerbe: ["leise", "laut"], richtig: a.richtig,
+    korbInhalt: id => ({ bild: LAUT[id].bild, text: LAUT[id].text }),
+    farbe: id => LAUT[id].farbe,
+    hinweis: "Stell dir das Geräusch vor. Musst du dir die Ohren zuhalten — oder hörst du es kaum?",
+    loesung,
+    lob: `Genau! ${g.name} ist ${a.richtig}.`,
+  });
+  karte.querySelector("b").classList.add("frage"); // der Name ist Sachkunde, kein Lesestoff: die Eule liest ihn mit vor
+  ctx.flaeche.querySelectorAll(".korb-knopf").forEach(k => k.classList.add("lw-gross"));
+  if (ctx.nr === 0) ctx.sag("Laut oder leise? Tipp auf den passenden Korb.");
+}
+
+function ordnen(ctx, a, lw) {
+  const reihe = a.reihe;
+  ctx.tipp(["Stell dir jedes Geräusch vor: Bei welchem musst du die Ohren zuhalten? Bei welchem hörst du kaum etwas?",
+    "Das leiseste kommt zuerst, das lauteste zuletzt.",
+    `Das leiseste der drei hörst du ${G[reihe[0]].ort}.`]);
+  lw.append(el("div", { class: "frage", text: "Ordne von leise nach laut: Tipp zuerst das leiseste Geräusch an." }));
+  LS.reihenfolge(ctx, {
+    reihe, breite: 170, pfeile: true,
+    inhalt: id => ({ bild: G[id].bild, text: G[id].name }),
+    ablage: id => `${G[id].bild} ${G[id].name}`,
+    hinweis: "Das kommt später dran. Welches der übrigen Geräusche ist das leiseste?",
+    loesung: reihe.map(id => `${G[id].bild} ${G[id].name}`).join(" → "),
+    lob: "Richtig geordnet — von ganz leise bis sehr laut!",
+  });
+  if (ctx.nr === 0) ctx.sag("Tipp die Geräusche der Reihe nach an: zuerst das leiseste.");
+}
+
+function still(ctx, a, lw) {
+  const o = ORT[a.richtig];
+  ctx.tipp(["Still heisst: Du hörst fast nichts. Wo musst du selbst ganz leise sein?",
+    "An zwei Orten gibt es Maschinen, Motoren oder viele Leute.",
+    "Am stillen Ort könntest du einschlafen oder in Ruhe ein Buch lesen."]);
+  lw.append(el("div", { class: "frage", text: "Wo ist es still?" }));
+  LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.richtig, breite: 170,
+    inhalt: n => ({ bild: ORT[n].bild, text: n }),
+    hinweis: n => `${n}: Dort ist es laut. Wo hört man fast nichts?`,
+    loesung: `${o.bild} ${o.name} — dort ist es still.`,
+    lob: `Genau: ${o.name} — dort ist es still.`,
+  });
+  if (ctx.nr === 0) ctx.sag("Tipp auf den Ort, an dem es still ist.");
+}
+
+function schutz(ctx, a, lw) {
+  const sit = SITUATIONEN[a.sit];
+  const r = S[a.richtig];
+  ctx.tipp(["Stell dir den Lärm vor: Musst du die Ohren zuhalten? Was macht ihn an deinen Ohren kleiner?",
+    `Gesucht ist: ${r.umschreibung}.`, sit.tipp]);
+  lw.append(el("div", { class: "auftrag", text: "Was schützt deine Ohren?" }));
+  const loesung = `${r.bild} ${r.name}: ${r.umschreibung}.`;
+  const { karte } = LS.koerbe(ctx, {
+    karte: { bild: sit.bild, text: sit.text },
+    koerbe: a.koerbe, richtig: a.richtig,
+    korbInhalt: id => ({ bild: S[id].bild, text: S[id].name }),
+    hinweis: id => `${S[id].hinweis} Passt das hier?`,
+    loesung,
+    lob: `Genau: ${r.name} — ${r.umschreibung}.`,
+  });
+  karte.classList.add("lw-satz");
+  karte.querySelector("b").classList.add("frage");
+  if (ctx.nr === 0) ctx.sag("Lies, was los ist, und tipp auf den Korb, der deine Ohren schützt.");
+}
+
+function schadet(ctx, a, lw) {
+  ctx.serie("schadet", a.richtig ? "ja" : "nein");
+  ctx.tipp([TIPP_VORSTELLEN, "Lärm schadet, wenn er sehr laut ist — oder laut ist und lange dauert. Leises schadet nicht.", SCHADET[a.i][2]]);
+  lw.append(el("div", { class: "frage", text: "Schadet das den Ohren?" }), karteMit("👂", a.text));
+  LS.auswahl(ctx, {
+    optionen: [true, false], richtig: a.richtig, breite: 190,
+    inhalt: w => (w ? { bild: "⚠️", text: "Ja, das schadet" } : { bild: "🙂", text: "Nein, das ist in Ordnung" }),
+    hinweis: "Überleg: Ist es sehr laut? Dauert es lange? Beides zusammen ist am schlimmsten — Leises schadet nie.",
+    loesung: `„${a.text}“ — ${a.richtig ? "das schadet den Ohren" : "das schadet den Ohren nicht"}.`,
+    lob: a.richtig ? "Richtig, das schadet den Ohren!" : "Richtig, das ist für die Ohren in Ordnung.",
+  });
+  if (ctx.nr === 0) ctx.sag("Schadet das den Ohren? Tipp auf Ja oder Nein.");
+}
+
+function wirkung(ctx, a, lw) {
+  const sit = SITUATIONEN[a.sit];
+  const s = S[a.schutz];
+  ctx.serie("wirkung", String(a.richtig));
+  ctx.tipp(["Stell dir den Lärm vor: Musst du die Ohren zuhalten? Macht das, was du tust, ihn an den Ohren kleiner?",
+    a.richtig === 0 ? "Hat das überhaupt etwas mit den Ohren zu tun?" : `Das tust du: ${s.umschreibung}.`,
+    `Der Lärm ist ${sit.laut} von 5 und ${sit.dauer === "lang" ? "dauert lange" : "dauert nur kurz"}. Reicht das, was du tust, für die ganze Zeit — und dicht an den Ohren?`]);
+  lw.append(el("div", { class: "frage", text: "Wie gut hilft das?" }), karteMit(sit.bild, sit.text), skala(sit.laut),
+    el("p", { class: "lw-massnahme" }, "Du machst: ", el("b", { text: `${s.bild} ${s.name}` })));
+  const w = WIRKUNG[a.richtig];
+  LS.auswahl(ctx, {
+    optionen: [2, 1, 0], richtig: a.richtig, breite: 170,
+    inhalt: v => WIRKUNG[v],
+    hinweis: "Überleg: Kommt damit weniger Lärm bei den Ohren an — und reicht das für die ganze Zeit?",
+    loesung: `${s.name}: ${w.text.toLowerCase()}.`,
+    lob: `Genau: ${s.name} — das ${w.text.toLowerCase()}.`,
+  });
+  if (ctx.nr === 0) ctx.sag("Lies, was los ist und was du tust. Wie gut hilft das?");
+}
+
+function schlimmer(ctx, a, lw) {
+  ctx.serie("paar", a.typ);
+  const r = G[a.richtig];
+  ctx.tipp(["Stell dir beide Geräusche vor: Bei welchem musst du die Ohren zuhalten?",
+    "Schau auf die Lärm-Skala und darauf, wie lange es dauert.",
+    "Laut und lang ist am schlimmsten. Leises schadet nicht, auch wenn es lange dauert."]);
+  lw.append(el("div", { class: "frage", text: "Was ist schlimmer für die Ohren?" }));
+  const box = LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.richtig,
+    inhalt: id => ({ bild: G[id].bild, text: G[id].name, klein: `Lärm ${G[id].laut} von 5 · ${dauerText(G[id].dauer)}` }),
+    hinweis: "Überleg: Wie laut ist es — und wie lange dauert es? Laut und lang zusammen ist am schlimmsten.",
+    loesung: `${r.bild} ${r.name}. ${SCHLIMMER_WARUM[a.typ]}`,
+    lob: `Genau! ${SCHLIMMER_WARUM[a.typ]}`,
+  });
+  box.classList.add("lw-paar");
+  if (ctx.nr === 0) ctx.sag("Zwei Geräusche: Tipp auf das, das schlimmer für die Ohren ist.");
+}
+
+function ohrTippen(ctx, a, lw) {
+  const b = ohrBild({ antippen: true });
+  const t = TEIL[a.teil];
+  const loesung = `${gross(nom(a.teil))}: ${t.lage}`;
+  ctx.loesung(loesung);
+  ctx.schritte(1);
+  ctx.tipp([`Schau hier: ${t.lage}`, `${t.artikel === "die" ? "Sie" : t.artikel === "der" ? "Er" : "Es"} ${t.aufgabe}.`, `So sieht es aus: ${t.aussehen}.`]);
+  lw.append(el("div", { class: "frage", text: `👆 Tipp auf ${akk(a.teil)}!` }), b.svg);
+  let fertig = false;
+  for (const [id, g] of b.teile) g.addEventListener("click", () => {
+    if (fertig || ctx.vorbei()) return;
+    if (id === a.teil) { fertig = true; g.classList.add("lw-richtig"); ctx.richtig(`Genau! ${gross(nom(id))} ${t.aufgabe}.`); return; }
+    daneben(g);
+    ctx.falsch(`Das ist ${nom(id)}. Such weiter!`, loesung);
+    if (ctx.vorbei()) fertig = true;
+  });
+  if (ctx.nr === 0) ctx.sag("Das Ohr ist aufgeschnitten, der Schall kommt von links. Tipp im Bild auf das Teil, das ich sage!");
+}
+
+function ohrBenennen(ctx, a, lw) {
+  const b = ohrBild();
+  const t = TEIL[a.teil];
+  b.teile.get(a.teil).classList.add("lw-markiert");
+  ctx.tipp([`Schau, wo es leuchtet: ${t.lage}`, `Dieses Teil ${t.aufgabe}.`, `So sieht es aus: ${t.aussehen}.`]);
+  lw.append(el("div", { class: "frage", text: "Wie heisst der Teil, der leuchtet?" }), b.svg);
+  LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.teil, breite: 170, loesung: gross(nom(a.teil)),
+    inhalt: id => nom(id),
+    hinweis: id => `Nein, ${nom(id)} ist es nicht. Schau genau, wo es leuchtet: ${t.lage}`,
+    lob: `Genau! ${gross(nom(a.teil))} ${t.aufgabe}.`,
+  });
+  if (ctx.nr === 0) ctx.sag("Ein Teil des Ohrs leuchtet. Tipp auf seinen Namen.");
+}
+
+function ohrAufgabe(ctx, a, lw) {
+  const t = TEIL[a.teil];
+  ctx.tipp(["Lies den Satz genau: Ist das aussen, im Tunnel oder ganz am Ende?", `Das gesuchte Teil: ${t.lage}`, `So sieht es aus: ${t.aussehen}.`]);
+  lw.append(el("div", { class: "frage", text: "Welcher Teil des Ohrs macht das?" }), karteMit("👂", `… ${t.aufgabe}.`), ohrBild().svg);
+  LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.teil, breite: 170, loesung: `${gross(nom(a.teil))} ${t.aufgabe}.`,
+    inhalt: id => nom(id),
+    hinweis: id => `Nein, ${nom(id)} ${TEIL[id].aufgabe}. Überleg: ${t.lage}`,
+    lob: `Genau! ${gross(nom(a.teil))} ${t.aufgabe}.`,
+  });
+  if (ctx.nr === 0) ctx.sag("Auf der Karte steht, was ein Teil des Ohrs tut. Tipp auf seinen Namen.");
+}
+
+function schwingt(ctx, a, lw) {
+  ctx.serie("stimmt", a.richtig ? "ja" : "nein");
+  ctx.tipp(["Lies den Satz langsam. Was schwingt hier — und was passiert, wenn es nicht mehr schwingt?", SCHWINGT[a.i][2]]);
+  lw.append(el("div", { class: "frage", text: "Stimmt das?" }), karteMit("🎸", a.text));
+  LS.auswahl(ctx, {
+    optionen: [true, false], richtig: a.richtig, breite: 150,
+    loesung: `„${a.text}“ — das ${a.richtig ? "stimmt" : "stimmt nicht"}.`,
+    inhalt: w => ({ bild: w ? "✅" : "❌", text: w ? "Stimmt" : "Stimmt nicht" }),
+    hinweis: "Überleg noch einmal: Ein Ton kommt immer von etwas, das schwingt. Passt der Satz dazu?",
+    lob: a.richtig ? "Richtig, das ist so!" : "Richtig, so ist es nicht!",
+  });
+  if (ctx.nr === 0) ctx.sag("Stimmt das? Tipp auf Stimmt oder Stimmt nicht.");
+}
+
+function phaenomen(ctx, a, lw) {
+  const p = PHAENOMENE[a.i];
+  ctx.tipp(["Überleg zuerst: Woher kommt der Schall, und wohin geht er weiter?", p.tipp, PRINZIP[p.art]]);
+  lw.append(el("div", { class: "frage", text: p.frage }), el("div", { class: "lw-karte" }, el("span", { class: "lw-bild", text: p.bild })));
+  const box = LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.richtig, loesung: a.richtig,
+    hinweis: "Das passt nicht. Überleg: Was macht der Schall hier — prallt er ab, wird er gesammelt oder geschluckt?",
+    lob: "Genau, so ist es!",
+  });
+  box.classList.add("lw-erklaerung");
+  if (ctx.nr === 0) ctx.sag("Lies die Frage und tipp auf die Erklärung, die stimmt.");
+}
+
+function daempfer(ctx, a, lw) {
+  const d = DAEMPFER.find(x => x.name === a.richtig);
+  ctx.tipp(["Dämpfen heisst: Der Schall wird geschluckt und kommt nicht zurück.",
+    "Weiche, flauschige Dinge schlucken den Schall. Harte, glatte Dinge werfen ihn zurück.",
+    "Stell dir vor, du wirfst einen Ball dagegen: Wo bleibt er liegen, statt zurückzuspringen?"]);
+  lw.append(el("div", { class: "frage", text: "Was dämpft den Schall am besten?" }));
+  LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.richtig, breite: 170,
+    inhalt: n => ({ bild: DAEMPFER.find(x => x.name === n).bild, text: n }),
+    hinweis: n => `${n}: hart und glatt — daran prallt der Schall ab und kommt zurück. Was ist weich?`,
+    loesung: `${d.bild} ${d.name}: weich — schluckt den Schall.`,
+    lob: `Genau: ${d.name} ist weich und schluckt den Schall.`,
+  });
+  if (ctx.nr === 0) ctx.sag("Tipp auf das, was den Schall am besten schluckt.");
+}
+
+const ZEICHNER = {
+  lautleise: lautLeise, ordnen, still, schutz, schadet, wirkung, schlimmer,
+  "ohr-tippen": ohrTippen, "ohr-benennen": ohrBenennen, "ohr-aufgabe": ohrAufgabe, schwingt, phaenomen, daempfer,
+};
+
+/** Woran die Aufgabe zu erkennen ist (Wiederholungen je Runde). */
+function kennungFuer(a) {
+  const teile = [a.art, a.g, a.sit, a.schutz, a.i, a.teil, a.typ, a.richtig];
+  if (a.reihe) teile.push(a.reihe.join(","));
+  if (a.optionen) teile.push([...a.optionen].sort().join(","));
+  if (a.koerbe) teile.push([...a.koerbe].sort().join(","));
+  return teile.filter(x => x !== undefined).join("|");
+}
+
+const HILFE = {
+  s1: "Oben siehst du ein Geräusch. Tipp auf den Korb, der passt: leise oder laut.",
+  s2: "Beim Ordnen tippst du die Geräusche der Reihe nach an: zuerst das leiseste, zuletzt das lauteste. Bei „Wo ist es still?“ tippst du auf den stillen Ort.",
+  s3: "Lies, was los ist, und tipp auf den Korb mit dem Schutz, der hier hilft. Bei „Schadet das den Ohren?“ tippst du auf Ja oder Nein.",
+  s4: "Lies, was los ist und was du tust. Dann tippst du an, wie gut das hilft: gut, ein wenig oder gar nicht. Bei zwei Geräuschen tippst du auf das, das schlimmer für die Ohren ist.",
+  s5: "Das Ohr ist von der Seite aufgeschnitten, der Schall kommt von links. Tipp im Bild auf das gesuchte Teil oder auf den Namen des leuchtenden Teils. Bei einem Satz tippst du auf Stimmt oder Stimmt nicht.",
+  s6: "Lies die Frage und tipp auf die Erklärung, die passt. Dazu kommen Aufgaben aus den Stufen 3 bis 5: Korb, Ja oder Nein, Stimmt oder Stimmt nicht, Ohr.",
+};
+
+LS.spiel({
+  id: ID,
+  einleitung: "Psst — hörst du das? Flüstern ist leise, ein Helikopter ist laut. Ich bin der Lärm-Wächter: Zusammen finden wir heraus, was deinen Ohren guttut und was sie schützt!",
+  hilfe: stufe => HILFE[stufe],
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    const arten = new Set(STUFE[ctx.stufe]);
+    if (arten.size > 1) ctx.serie("art", GRUPPE[ctx.stufe] ? GRUPPE[ctx.stufe](a.art) : a.art);
+    ctx.kennung(kennungFuer(a));
+    const lw = el("div", { class: "lw" });
+    ctx.flaeche.append(lw);
+    ZEICHNER[a.art](ctx, a, lw);
+  },
+});
+</script>
+</body>
+</html>

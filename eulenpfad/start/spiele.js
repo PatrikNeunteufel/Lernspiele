@@ -43,49 +43,60 @@ function zeichneSpiele(box, neu) {
   const aufsicht = LS.aufsichtAngemeldet();
   const fokus = p.fokus;
   // Filter merkt sich der Browser (nur Bequemlichkeit); Ansicht, Favoriten und Zuklappen das Profil.
-  const filter = { fach: "alle", thema: "alle", stufe: "alle", fokus: false, ...LS.lies("filter", {}) };
-  const setze = (k, v) => () => { filter[k] = v; if (k === "fach") filter.thema = "alle"; LS.schreibe("filter", filter); neu(); };
+  // Thema und Stufe sind Mehrfachwahl (Wunsch Patrik, LERN_Session10): Listen von Ids, leer = keine Einschränkung.
+  // Ältere Speicherungen hielten einen Wert oder "alle".
+  const gespeichert = LS.lies("filter", {});
+  const liste = v => (Array.isArray(v) ? v : !v || v === "alle" ? [] : [v]);
+  const filter = { fach: "alle", fokus: false, ...gespeichert, thema: liste(gespeichert.thema), stufe: liste(gespeichert.stufe) };
+  const setze = (k, v) => () => { filter[k] = v; if (k === "fach") filter.thema = []; LS.schreibe("filter", filter); neu(); };
+  /** Einen Chip der Mehrfachwahl an- oder abwählen. */
+  const schalte = (k, id) => () => { const s = new Set(filter[k]); if (s.has(id)) s.delete(id); else s.add(id); setze(k, [...s])(); };
   const speichere = daten => { LS.speichereProfil(name, daten); neu(); };
   const zu = new Set(p.zu);
   const chip = (text, aktiv, onclick, tipp, klasse = "") =>
     el("button", { type: "button", class: "chip " + klasse, "aria-pressed": String(aktiv), onclick }, text, tipp ? el("span", { class: "tipp", text: tipp }) : null);
+  /** „Alle“ der Mehrfachwahl: wählt alle an; sind schon alle an, wählt es alle ab. */
+  const alleChip = (k, ids, klasse) => {
+    const alle = ids.length > 0 && ids.every(id => filter[k].includes(id));
+    return chip("Alle", alle, setze(k, alle ? [] : ids), null, klasse);
+  };
 
   // ----- Filter: Fach, dann die Themen dieses Fachs; Stufe -----
   const empfohlen = LS.empfohleneStufe(name);
   const faecher = el("div", { class: "filter-zeile" }, el("span", { text: "Fach" }),
     chip("Alle", filter.fach === "alle", setze("fach", "alle")),
     ...FAECHER.map(f => chip(f, filter.fach === f, setze("fach", f))));
-  if (fokus.length) faecher.append(chip("⭐ Mein Fokus", filter.fokus, setze("fokus", !filter.fokus)));
+  // Eigene Zeile „Nur“ für Fokus, Meine Klasse und Zu prüfen — das sind keine Fächer (Hinweis Patrik, LERN_Session10).
+  const nur = el("div", { class: "filter-zeile" }, el("span", { text: "Nur" }));
+  if (fokus.length) nur.append(chip("⭐ Mein Fokus", filter.fokus, setze("fokus", !filter.fokus)));
   // Meine Klasse (Entscheide K1 a, K2 a, LERN_Session6): nur Spiele mit einer Stufe genau für die Klasse
   // des Kindes, also Basisklasse ±1. Für Kinder mit Klasse im Profil, vorgegeben an; das Kind darf ihn
   // ausschalten (Profil-Feld meineKlasse, je Kind statt je Browser).
   const klasse = LS.klasseVon(p); // 0 = Kindergarten
   const nurKlasse = !aufsicht && klasse !== null && p.meineKlasse !== false;
-  if (!aufsicht && klasse !== null) faecher.append(chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), LS.klasseText(klasse)));
+  if (!aufsicht && klasse !== null) nur.append(chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), LS.klasseText(klasse)));
   // Für die Aufsicht: nur, was noch zu prüfen ist — Spiel nicht angesehen oder eine eigene Inhaltsliste ungeprüft.
   const zuPruefen = s => LS.spielZuPruefen(s.id) || LS.spielListen(s.id).some(l => !l.von && !l.geprueft);
   const nurZuPruefen = aufsicht && filter.zuPruefen;
-  if (aufsicht) faecher.append(chip("🔍 Zu prüfen", nurZuPruefen, setze("zuPruefen", !filter.zuPruefen), `${SPIELE.filter(zuPruefen).length}`));
+  if (aufsicht) nur.append(chip("🔍 Zu prüfen", nurZuPruefen, setze("zuPruefen", !filter.zuPruefen), `${SPIELE.filter(zuPruefen).length}`));
   const zeilen = [faecher];
+  if (nur.childElementCount > 1) zeilen.push(nur);
   if (filter.fach !== "alle") {
+    const themen = THEMEN.filter(t => t.fach === filter.fach);
     zeilen.push(el("div", { class: "filter-zeile" }, el("span", { text: "Thema" }),
-      chip("Alle", filter.thema === "alle", setze("thema", "alle"), null, "klein"),
-      ...THEMEN.filter(t => t.fach === filter.fach).map(t => chip(t.name, filter.thema === t.id, setze("thema", t.id), null, "klein"))));
+      alleChip("thema", themen.map(t => t.id), "klein"),
+      ...themen.map(t => chip(t.name, filter.thema.includes(t.id), schalte("thema", t.id), null, "klein"))));
   }
   zeilen.push(el("div", { class: "filter-zeile" }, el("span", { text: "Stufe" }),
-    chip("Alle", filter.stufe === "alle", setze("stufe", "alle")),
-    ...LS.SKALA.map(s => chip(`${s.icon} ${s.nr} ${s.name}`, filter.stufe === s.id, setze("stufe", s.id), s.id === empfohlen ? "👍" : ""))));
-  // Zufallsmix (Entscheid M1 a): Aufgaben aus mehreren Spielen, Einstellungen auf der Mix-Seite.
-  if (SPIELE.some(s => LS.spielSichtbar(s.id))) box.append(el("a", { class: "mix-einstieg", href: "mix.html" },
-    el("span", { class: "spiel-bild", text: "🎲" }),
-    el("span", {}, el("b", { text: "Zufallsmix" }), el("span", { class: "ziel", text: "Aufgaben aus vielen Spielen gemischt — du stellst ein, wie schwer, wie lang und ob mit Timer." }))));
+    alleChip("stufe", LS.SKALA.map(s => s.id)),
+    ...LS.SKALA.map(s => chip(`${s.icon} ${s.nr} ${s.name}`, filter.stufe.includes(s.id), schalte("stufe", s.id), s.id === empfohlen ? "👍" : ""))));
   box.append(el("div", { class: "filter" }, ...zeilen));
 
   // ----- Spiele auswählen -----
   const passt = s => LS.spielSichtbar(s.id)
     && (filter.fach === "alle" || THEMEN.find(t => t.id === s.thema)?.fach === filter.fach)
-    && (filter.thema === "alle" || s.thema === filter.thema)
-    && (filter.stufe === "alle" || s.stufen.includes(filter.stufe))
+    && (!filter.thema.length || filter.thema.includes(s.thema))
+    && (!filter.stufe.length || s.stufen.some(st => filter.stufe.includes(st)))
     && (!filter.fokus || s.lernziele.some(l => fokus.includes(l.lz)))
     && (!nurKlasse || Math.abs(s.klasse - klasse) <= 1)
     && (!nurZuPruefen || zuPruefen(s))
@@ -105,6 +116,63 @@ function zeichneSpiele(box, neu) {
     chip("☰ Kompakt", p.ansicht === "kompakt", () => speichere({ ansicht: "kompakt" }), null, "klein"),
     chip("Alle auf", false, () => speichere({ zu: [] }), null, "klein"),
     chip("Alle zu", false, () => speichere({ zu: gruppenIds }), null, "klein")));
+
+  // ----- Zufallsmix und Zufälliges Spiel: Karten wie die Spiele, ohne Thema (Wunsch Patrik, LERN_Session10) -----
+  // Zufallsmix (Entscheid M1 a): Aufgaben aus mehreren Spielen, Einstellungen auf der Mix-Seite.
+  // Zufälliges Spiel: die Eule zieht ein Spiel aus der gefilterten Auswahl; je Stufe ein Knopf.
+  const gross = filter.stufe.length === 1;
+  /** Karte ohne Thema; freie Stellen lösen `beiTipp` aus (wie bei den Spielkarten das Startbild). */
+  function zufallsKarte({ bild, name: titel, ziel, farbe, knoepfe, beiTipp, titelText }) {
+    const k = el("div", { class: "spielkarte zufall", title: titelText, "data-vorlesen": `${titel}. ${ziel}` });
+    k.style.setProperty("--f", farbe);
+    k.addEventListener("click", e => { if (!e.target.closest("a, button")) beiTipp(); });
+    k.append(el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: bild }), el("b", { class: "name", text: titel })),
+      el("div", { class: "ziel", text: ziel }), el("div", { class: "stufenknoepfe" }, ...knoepfe));
+    return k;
+  }
+  /**
+   * Bedarf eines Spiels in einer Stufe für dieses Kind (Wunsch Patrik, LERN_Session10: der Zufall soll wählen,
+   * wo die Statistik Bedarf zeigt). Gewicht für die Zufallswahl: wackelnde Runden hoch, noch nie gespielt mittel,
+   * sicher und kürzlich geübt niedrig, sicher aber lange her wieder mittel (verteiltes Üben); Fokus-Lernziel verdoppelt.
+   */
+  const protokoll = LS.protokoll().filter(e => e.name === name);
+  function bedarf(s, stufeId) {
+    const rs = protokoll.filter(e => e.spiel === s.id && e.stufe === stufeId);
+    let g = 2; // noch nie gespielt: ausprobieren
+    if (rs.length) {
+      const letzte = rs.slice(-3);
+      const q = letzte.reduce((a, e) => a + AUSWERTUNG.anhieb(e), 0) / letzte.length;
+      const tage = (Date.now() - Date.parse(rs[rs.length - 1].zeit)) / 86400000;
+      g = q < AUSWERTUNG.QUOTE_UEBEN ? 1 + 4 * (1 - q) : tage >= 7 ? 2 : 0.5;
+    }
+    return imFokus(s) ? g * 2 : g;
+  }
+  /** Zufällig nach Gewicht ziehen. */
+  function ziehe(kandidaten, gewicht) {
+    const g = kandidaten.map(gewicht);
+    let r = Math.random() * g.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < kandidaten.length; i++) { r -= g[i]; if (r < 0) return kandidaten[i]; }
+    return kandidaten[kandidaten.length - 1];
+  }
+  const stufenZufall = st => auswahl.filter(s => s.stufen.includes(st.id));
+  const zufallsSpiel = st => { const s = ziehe(stufenZufall(st), x => bedarf(x, st.id)); location.href = `${s.pfad}?stufe=${st.id}`; };
+  const zufallsKnoepfe = LS.SKALA.filter(st => (!filter.stufe.length || filter.stufe.includes(st.id)) && stufenZufall(st).length).map(st => {
+    const b = el("button", { type: "button", class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empfohlen && !gross ? " empfohlen" : ""),
+      "data-vorlesen": `Zufälliges Spiel, Stufe ${st.nr}, ${st.name}.`, title: `Stufe ${st.nr} · ${st.name}: ein zufälliges Spiel aus deiner Auswahl`,
+      onclick: () => zufallsSpiel(st) }, el("span", { class: "stufen-text" }, st.icon, gross ? ` Stufe ${st.nr} spielen` : `${st.nr}`), el("span", { class: "s" }));
+    b.style.setProperty("--sf", st.farbe);
+    return b;
+  });
+  const zufallsKarten = [];
+  if (SPIELE.some(s => LS.spielSichtbar(s.id))) zufallsKarten.push(zufallsKarte({ bild: "🎲", name: "Zufallsmix", farbe: "var(--deko-2)",
+    ziel: "Aufgaben aus vielen Spielen gemischt — du stellst ein, wie schwer, wie lang und ob mit Timer.",
+    titelText: "Antippen: zur Mix-Seite", beiTipp: () => { location.href = "mix.html"; },
+    knoepfe: [el("a", { class: "stufenknopf gross", href: "mix.html", "data-vorlesen": "Zufallsmix einstellen und los." }, el("span", { class: "stufen-text", text: "🎲 Einstellen und los" }))] }));
+  if (zufallsKnoepfe.length) zufallsKarten.push(zufallsKarte({ bild: "🎯", name: "Zufälliges Spiel", farbe: "var(--deko-6)",
+    ziel: "Die Eule zieht ein Spiel aus deiner Auswahl — eher eines, das du noch üben solltest.",
+    titelText: "Antippen: Startbild eines zufälligen Spiels", knoepfe: zufallsKnoepfe,
+    beiTipp: () => { const st = LS.SKALA.find(x => x.id === (gross ? filter.stufe[0] : empfohlen)) || LS.SKALA[2]; const s = ziehe(auswahl, x => bedarf(x, st.id)); location.href = s.pfad; } }));
+  if (zufallsKarten.length) box.append(el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") }, ...zufallsKarten));
 
   /** Auf- und zuklappbare Gruppe; der Zustand landet im Profil. */
   function gruppe(id, titel, anzahl, ...inhalt) {
@@ -158,9 +226,8 @@ function zeichneSpiele(box, neu) {
       el("div", { class: "marken" }, ...marken));
     const knoepfe = el("div", { class: "stufenknoepfe" });
     const empf = LS.empfohleneStufe(name, s.id);
-    const gross = filter.stufe !== "alle";
-    // Endlos an: nur die Endlos-Stufen, mit dem Rekord statt der Sterne.
-    const stufen = LS.SKALA.filter(st => s.stufen.includes(st.id) && (!gross || filter.stufe === st.id) && (!endlosAn || s.endlos.includes(st.id)));
+    // Endlos an: nur die Endlos-Stufen, mit dem Rekord statt der Sterne. Stufenfilter: nur die gewählten.
+    const stufen = LS.SKALA.filter(st => s.stufen.includes(st.id) && (!filter.stufe.length || filter.stufe.includes(st.id)) && (!endlosAn || s.endlos.includes(st.id)));
     for (const st of stufen) {
       const timer = LS.timerFuer(name, s.id, st.id);
       const rekord = endlosAn ? LS.besterRekord(name, s.id, st.id, timer.an) : 0;

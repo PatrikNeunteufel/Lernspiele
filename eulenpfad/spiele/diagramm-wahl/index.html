@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagramm-Wahl</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .dw .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 10px; }
+  .dw .frage .dw-zitat { display: block; margin-top: 6px; font-size: clamp(17px, 3.8vw, 22px); color: var(--deko-1); }
+  .dw-titel { text-align: center; font-size: 16px; font-weight: 900; color: var(--text-leise); margin: 0 0 4px; }
+
+  /* Diagramme als SVG, skaliert auf die Breite (375 px ohne Querscrollen) */
+  .dw-diagramm { display: block; width: min(420px, 100%); margin: 0 auto 8px; touch-action: manipulation; }
+  .dw-diagramm.dw-kreis { width: min(240px, 70%); }
+  .dw-diagramm text { font-family: var(--schrift); font-weight: 800; fill: var(--text); }
+  .dw-diagramm .zahl { font-size: 12px; fill: var(--text-leise); }
+  .dw-diagramm .name { font-size: 12px; }
+  .dw-diagramm .bild { font-size: 16px; }
+  .dw-diagramm .einheit { font-size: 11px; fill: var(--text-leise); }
+  .dw-diagramm .gruppe { font-size: 14px; }
+  .dw-diagramm .gitter { stroke: var(--rand); stroke-width: 1; }
+  .dw-diagramm .achse { stroke: var(--text); stroke-width: 2; }
+  .dw-diagramm .saeule { fill: var(--deko-6); }
+  .dw-diagramm .saeule.b { fill: var(--deko-3); }
+  .dw-diagramm .linie { fill: none; stroke: var(--deko-1); stroke-width: 3; stroke-linejoin: round; }
+  .dw-diagramm .punkt { fill: var(--deko-1); }
+  .dw-diagramm .sektor { stroke: var(--karte); stroke-width: 2; }
+  .dw-diagramm .sektor.tippbar { cursor: pointer; }
+  .dw-diagramm .sektor.falsch { opacity: .35; }
+  .dw-diagramm .sektor.richtig { stroke: var(--gut); stroke-width: 6; }
+  .dw-diagramm .prozent { font-size: 15px; fill: var(--karte); }
+  .dw-diagramm .f0, .dw-farbe.f0 { fill: var(--deko-6); background: var(--deko-6); }
+  .dw-diagramm .f1, .dw-farbe.f1 { fill: var(--deko-3); background: var(--deko-3); }
+  .dw-diagramm .f2, .dw-farbe.f2 { fill: var(--deko-4); background: var(--deko-4); }
+  .dw-diagramm .f3, .dw-farbe.f3 { fill: var(--deko-2); background: var(--deko-2); }
+  .dw-diagramm .f4, .dw-farbe.f4 { fill: var(--deko-1); background: var(--deko-1); }
+  .dw-diagramm .f5, .dw-farbe.f5 { fill: var(--deko-5); background: var(--deko-5); }
+
+  /* Legende unter dem Kreis (nicht daneben: 375 px) */
+  .dw-legende { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin: 0 auto 10px; font-size: 15px; font-weight: 800; }
+  .dw-farbe { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: -2px; margin-right: 4px; }
+
+  .dw-zwei { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 10px 16px; margin-bottom: 8px; }
+  .dw-zwei .dw-diagramm { width: min(300px, 100%); margin: 0; }
+
+  .dw-tabelle { border-collapse: collapse; margin: 0 auto 10px; font-size: clamp(16px, 3.8vw, 20px); font-weight: 800; background: var(--karte); }
+  .dw-tabelle th, .dw-tabelle td { border: 2px solid var(--rand); padding: 4px 10px; text-align: left; }
+  .dw-tabelle th { background: var(--hinweis-hell); font-size: 15px; color: var(--text-leise); }
+  .dw-tabelle td.zahl { text-align: right; font-variant-numeric: tabular-nums; min-width: 50px; }
+
+  /* Mini-Diagramme als Antwortknöpfe (Stufe 3) */
+  .dw-wahl-mini .wahl-knopf { padding: 8px 4px; font-size: clamp(13px, 3.2vw, 17px); overflow-wrap: anywhere; hyphens: auto; }
+  .dw-wahl-mini svg { width: min(110px, 100%); height: auto; display: block; }
+  /* Drei ganze Diagramme als Antwortknöpfe (Stufe 5) */
+  .dw-wahl-gross .wahl-knopf { padding: 6px; }
+  .dw-wahl-gross svg { width: 100%; max-width: 300px; height: auto; display: block; }
+  .dw-buchstabe { font-size: 20px; font-weight: 900; color: var(--deko-1); }
+  .dw-wahl-text .wahl-knopf { font-size: clamp(15px, 3.4vw, 19px); text-align: center; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🥧 Diagramm-Wahl</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="daten.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.3.A.1.h (GA: Begriffe Kreisdiagramm, Säulendiagramm, Liniendiagramm, Daten, Häufigkeit,
+// Mittelwert), MA.3.C.1.d/e/f (Daten in Tabellen und Diagrammen darstellen und interpretieren; Mittelwert,
+// Maximum, Minimum). Basisklasse 6. Das Kind wählt die passende Diagrammart und liest Kreis- und
+// Liniendiagramme. Datensätze in daten.js.
+//   s1 5. Klasse (MA.3.C.1.d): Säulendiagramm lesen — Wert einer Säule, grösste und kleinste Säule.
+//   s2 6. Klasse, leichter (MA.3.A.1.h): Kreisdiagramm in Hälften und Vierteln — den Teil antippen, der die
+//      Hälfte ist; sagen, wie gross ein Teil ist (die Hälfte, ein Viertel, drei Viertel).
+//   s3 Klassenziel (MA.3.A.1.h, Grundanspruch Ende 6. Klasse): „Welches Diagramm passt zur Frage?“ — Anteil →
+//      Kreis, Vergleich → Säulen, Verlauf → Linie; dazu Kreisdiagramme mit Achteln und Dritteln lesen.
+//   s4 schwerer (MA.3.C.1.d/e): Liniendiagramm lesen (wann am höchsten, wie gross der Anstieg) und Aussagen
+//      prüfen — mit Fallen: Achse beginnt nicht bei 0, zwei Diagramme mit verschiedenen Skalen.
+//   s5 7. Klasse (MA.3.C.1.e/f, 3. Zyklus): Prozent im Kreisdiagramm; Tabelle gegeben — welches von drei
+//      gezeichneten Diagrammen stellt sie richtig dar (falsche Säulenhöhe, vertauschte Beschriftung).
+//   s6 Königsstufe (MA.3.C.1.f): irreführende Diagramme erkennen, Aussagen mit „kann man nicht sagen“,
+//      Mittelwert, Maximum und Minimum aus einem Diagramm.
+// Abgrenzung: Der Diagramm-Detektiv (Basisklasse 4) liest Strichlisten, Säulen und Tabellen; die
+// Mittelwert-Türme (5) rechnen den Mittelwert durch Ausgleichen. Hier geht es um die Wahl der Diagrammart
+// und um Kreis- und Liniendiagramme.
+
+const { zufall, waehle, mische, el, zahlText } = LS;
+const ID = "diagramm-wahl";
+const NS = "http://www.w3.org/2000/svg";
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["daten"]);
+const D = FREI.has("daten") ? DIAGRAMM_DATEN : { saeulen: [], kreis: [], linien: [] };
+
+// Achsen: höchster Wert → [Abstand der Gitterlinien, Abstand der Zahlen]
+const RASTER = { 10: [1, 1], 20: [2, 2], 30: [5, 5], 50: [5, 10], 100: [10, 20] };
+const ACHSEN = [10, 20, 30, 50, 100];
+const rasterVon = achse => RASTER[achse][0];
+
+// Farben der Kreisteile (Klassen f0 … f5 im Stil) mit Namen für die Frage „der blaue Teil“.
+const FARBE = ["blaue", "orange", "gelbe", "pinke", "violette", "türkise"];
+
+// Brüche im Kreis, gekürzt: „3/4“ → „drei Viertel“
+const BRUCH = { "1/2": "die Hälfte", "1/4": "ein Viertel", "3/4": "drei Viertel", "1/8": "ein Achtel", "3/8": "drei Achtel",
+  "5/8": "fünf Achtel", "7/8": "sieben Achtel", "1/3": "ein Drittel", "2/3": "zwei Drittel", "1/10": "ein Zehntel", "1/5": "ein Fünftel" };
+const ggt = (a, b) => (b ? ggt(b, a % b) : a);
+const bruchName = (z, n) => { const g = ggt(z, n); return BRUCH[`${z / g}/${n / g}`] || `${z}/${n}`; };
+/** Antworten zur Grösse eines Teils je Nenner — immer mit zwei festen Namen, damit ein Tipp sie nennen darf. */
+function bruchOptionen(nenner, loesung) {
+  const grund = nenner === 3 ? ["ein Drittel", "zwei Drittel", "die Hälfte"]
+    : nenner === 8 ? ["ein Achtel", "ein Viertel", "die Hälfte"]
+    : ["die Hälfte", "ein Viertel", "drei Viertel"];
+  if (grund.includes(loesung)) return mische(nenner === 8 ? [...grund, "drei Achtel"] : grund);
+  return mische([...grund, loesung]);
+}
+
+const NAME = { saeulen: "Säulendiagramm", kreis: "Kreisdiagramm", linien: "Liniendiagramm" };
+const KRITERIUM = { saeulen: /Vergleich/, kreis: /Anteil/, linien: /Verlauf/ };
+const IRRE = {
+  achse: "Die Achse beginnt nicht bei 0.",
+  prozent: "Die Prozente ergeben zusammen nicht 100 %.",
+  zeit: "Die Zeitabstände sind ungleich.",
+  zahlen: "An der Achse fehlen die Zahlen.",
+};
+const ANTWORT = { ja: { bild: "✅", text: "Stimmt" }, nein: { bild: "❌", text: "Stimmt nicht" }, offen: { bild: "🤔", text: "Kann man nicht sagen" } };
+
+// Je Stufe: Aufgabenarten (mit Wiederholung = häufiger), Nenner der Kreisdiagramme
+const STUFE = {
+  s1: { arten: ["wert", "wert", "meist", "wenigst"] },
+  s2: { arten: ["kreisTipp", "kreisGross"], nenner: [2, 4] },
+  s3: { arten: ["wahl", "wahl", "kreisGross", "kreisTipp"], nenner: [8, 3] },
+  s4: { arten: ["linieExtrem", "linieAnstieg", "aussage", "aussage"] },
+  s5: { arten: ["prozent", "prozentTipp", "tabelle"], nenner: [10, 20] },
+  s6: { arten: ["irre", "aussage3", "mittelwert", "extrem"] },
+};
+// Merkmal für die Serienbremse: höchstens drei Werte je Stufe
+const SERIE_ART = { mittelwert: "rechnen", extrem: "rechnen" };
+
+const summe = l => l.reduce((s, x) => s + x, 0);
+const ersetze = (text, felder) => text.replace(/\{(\w+)\}/g, (m, k) => (felder[k] ?? m));
+const kategorie = (d, i) => ({ bild: d.kategorien[i][0], name: d.kategorien[i][1], wert: d.kategorien[i][2], wert2: d.kategorien[i][3] });
+const namen = d => d.kategorien.map(k => k[1]);
+const werte = d => d.kategorien.map(k => k[2]);
+const werte2 = d => d.kategorien.map(k => k[3]);
+const einzig = (liste, wert) => liste.filter(w => w === wert).length === 1;
+/** Wert mit Einheit, bei 1 in der Einzahl: „1 Kind“, „12 Kinder“ */
+const mitEinheit = (d, w) => `${zahlText(w)} ${w === 1 && d.einzahl ? d.einzahl : d.einheit}`;
+/** Beschriftung ohne Präposition: „am Montag“ → „Montag“, „um 6 Uhr“ → „6 Uhr“ */
+const xName = wo => wo.replace(/^(am|um|im|in) /, "");
+const idx = liste => liste.map((x, i) => i);
+
+/** Drei falsche Zahlen nahe der Lösung, dazu typische Fehler. */
+function zahlOptionen(loesung, typisch, schritt = 1) {
+  const kand = [...typisch, loesung + schritt, loesung - schritt, loesung + 2 * schritt, loesung - 2 * schritt, loesung + 5 * schritt];
+  const falsche = [...new Set(kand.filter(z => Number.isInteger(z) && z > 0 && z !== loesung))].slice(0, 3);
+  return mische([loesung, ...falsche]);
+}
+
+// ---------- Aufgaben erzeugen (Daten ohne DOM) ----------
+
+const kreisMit = nenner => idx(D.kreis).filter(i => nenner.includes(D.kreis[i].nenner));
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  if (!p || !D.saeulen.length) return null;
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 40; versuch++) {
+    const a = erzeuge(art, stufe, p);
+    if (a) return { art, ...a };
+  }
+  return null;
+}
+
+function erzeuge(art, stufe, p) {
+  if (art === "wert" || art === "meist" || art === "wenigst" || art === "extrem" || art === "mittelwert") {
+    const s = zufall(0, D.saeulen.length - 1);
+    const d = D.saeulen[s];
+    const w = werte(d);
+    if (art === "wert") {
+      const i = zufall(0, w.length - 1);
+      return { s, i, loesung: w[i], frage: ersetze(d.fragen.wert, { x: kategorie(d, i).name }),
+        optionen: zahlOptionen(w[i], w.filter((x, j) => j !== i), rasterVon(d.achse)) };
+    }
+    if (art === "mittelwert") {
+      const m = summe(w) / w.length;
+      if (!Number.isInteger(m)) return null;
+      return { s, loesung: m, frage: "Wie gross ist der Mittelwert aller Säulen?", optionen: zahlOptionen(m, [Math.max(...w), Math.min(...w)], rasterVon(d.achse)) };
+    }
+    const max = art === "extrem" ? waehle([true, false]) : art === "meist";
+    const ext = max ? Math.max(...w) : Math.min(...w);
+    if (!einzig(w, ext)) return null;
+    const frage = art === "extrem" ? `Welche Säule zeigt das ${max ? "Maximum" : "Minimum"}?` : d.fragen[art];
+    return { s, max, loesung: namen(d)[w.indexOf(ext)], frage, optionen: mische(namen(d)) };
+  }
+
+  if (art === "kreisTipp" || art === "kreisGross" || art === "prozent" || art === "prozentTipp") {
+    const kandidaten = kreisMit(p.nenner);
+    if (!kandidaten.length) return null;
+    const k = waehle(kandidaten);
+    const d = D.kreis[k];
+    const z = d.teile.map(t => t[2]);
+    const prozent = art === "prozent" || art === "prozentTipp";
+    const wertVon = i => (prozent ? z[i] * 100 / d.nenner : bruchName(z[i], d.nenner));
+    if (art === "kreisTipp" || art === "prozentTipp") {
+      // nur Teile, deren Grösse im Kreis einmalig ist — sonst gäbe es zwei richtige Antworten
+      const moeglich = idx(z).filter(i => einzig(z, z[i]));
+      if (!moeglich.length) return null;
+      const i = waehle(moeglich);
+      const groesse = wertVon(i);
+      return { k, i, loesung: groesse, frage: prozent ? `Welcher Teil ist ${groesse} %? Tipp ihn an.` : `Welcher Teil ist ${groesse}? Tipp ihn an.` };
+    }
+    const i = zufall(0, z.length - 1);
+    const groesse = wertVon(i);
+    const teil = `der ${FARBE[i]} Teil (${d.teile[i][0]} ${d.teile[i][1]})`;
+    if (prozent) {
+      const pool = [25, 50, 10, 20, 30, 40, 5, 15, 60, 75].filter(x => x !== groesse);
+      return { k, i, loesung: groesse, frage: `Wie viel Prozent ist ${teil}?`, optionen: mische([groesse, ...pool.slice(0, 3)]) };
+    }
+    return { k, i, loesung: groesse, frage: `Wie gross ist ${teil}?`, optionen: bruchOptionen(d.nenner, groesse) };
+  }
+
+  if (art === "wahl") {
+    const typ = waehle(["saeulen", "kreis", "linien"]);
+    const liste = D[typ];
+    if (!liste.length) return null;
+    const n = zufall(0, liste.length - 1);
+    const d = liste[n];
+    return { typ, n, loesung: typ, frage: d.wahl.frage, grund: d.wahl.grund, optionen: mische(["saeulen", "kreis", "linien"]) };
+  }
+
+  if (art === "linieExtrem" || art === "linieAnstieg") {
+    if (!D.linien.length) return null;
+    const l = zufall(0, D.linien.length - 1);
+    const d = D.linien[l];
+    const w = d.werte;
+    if (art === "linieExtrem") {
+      const max = waehle([true, false]);
+      const ext = max ? Math.max(...w) : Math.min(...w);
+      if (!einzig(w, ext)) return null;
+      return { l, max, loesung: d.x[w.indexOf(ext)], frage: d.fragen[max ? "hoechst" : "tiefst"], optionen: [...d.x] };
+    }
+    const paare = [];
+    for (let i = 0; i < w.length; i++) for (let j = i + 1; j < w.length; j++) if (w[j] > w[i]) paare.push([i, j]);
+    if (!paare.length) return null;
+    const [i, j] = waehle(paare);
+    const diff = w[j] - w[i];
+    return { l, i, j, loesung: diff, frage: ersetze(d.fragen.anstieg, { a: xName(d.xWo[i]), b: xName(d.xWo[j]) }),
+      optionen: zahlOptionen(diff, [w[j], w[i], w[j] + w[i]], rasterVon(d.achse)) };
+  }
+
+  if (art === "aussage" || art === "aussage3") {
+    const drei = art === "aussage3";
+    const typen = drei ? ["mehr", "meist", "doppelt", "gestiegen", "hoechst", "offen", "offen"] : ["mehr", "meist", "doppelt", "doppelt", "gruppen", "gruppen", "gestiegen", "hoechst"];
+    const typ = waehle(typen);
+    const optionen = drei ? mische(["ja", "nein", "offen"]) : mische(["ja", "nein"]);
+    if (typ === "gestiegen" || typ === "hoechst" || (typ === "offen" && waehle([true, false]))) {
+      if (!D.linien.length) return null;
+      const l = zufall(0, D.linien.length - 1);
+      const d = D.linien[l];
+      const w = d.werte;
+      if (typ === "offen") return { typ, quelle: "linien", l, text: waehle(d.offen), loesung: "offen", optionen };
+      if (typ === "hoechst") {
+        const max = waehle([true, false]);
+        const ext = max ? Math.max(...w) : Math.min(...w);
+        if (!einzig(w, ext)) return null;
+        const x = zufall(0, w.length - 1);
+        const wo = d.xWo[x];
+        return { typ, quelle: "linien", l, x, max, text: ersetze(d.satz[max ? "hoechst" : "tiefst"], { x: wo[0].toUpperCase() + wo.slice(1) }), loesung: w[x] === ext ? "ja" : "nein", optionen };
+      }
+      const i = zufall(0, w.length - 2), j = zufall(i + 1, w.length - 1);
+      if (w[i] === w[j]) return null;
+      const steigt = waehle([true, false]);
+      return { typ, quelle: "linien", l, i, j, steigt, text: ersetze(d.satz[steigt ? "gestiegen" : "gesunken"], { a: xName(d.xWo[i]), b: xName(d.xWo[j]) }),
+        loesung: (w[j] > w[i]) === steigt ? "ja" : "nein", optionen };
+    }
+    const s = zufall(0, D.saeulen.length - 1);
+    const d = D.saeulen[s];
+    const w = werte(d);
+    const nm = namen(d);
+    if (typ === "offen") return { typ, quelle: "saeulen", s, text: waehle(d.offen), loesung: "offen", optionen };
+    if (typ === "meist") {
+      const ext = Math.max(...w);
+      if (!einzig(w, ext)) return null;
+      const i = zufall(0, w.length - 1);
+      return { typ, quelle: "saeulen", s, i, text: ersetze(d.satz.meist, { a: nm[i] }), loesung: w[i] === ext ? "ja" : "nein", optionen };
+    }
+    if (typ === "mehr") {
+      const [i, j] = mische(idx(w)).slice(0, 2);
+      if (w[i] === w[j]) return null;
+      return { typ, quelle: "saeulen", s, i, j, text: ersetze(d.satz.mehr, { a: nm[i], b: nm[j] }), loesung: w[i] > w[j] ? "ja" : "nein", optionen };
+    }
+    if (typ === "gruppen") {
+      if (!d.gruppen) return null;
+      const w2 = werte2(d);
+      const i = zufall(0, w.length - 1);
+      if (w[i] === w2[i]) return null;
+      // Falle: zwei Diagramme mit verschiedenen Achsen — die Gruppe mit dem kleineren Wert bekommt die kleinere Achse.
+      const achse2 = ACHSEN.find(x => x >= Math.max(...w2));
+      let achse1 = d.achse;
+      if (achse1 === achse2) achse1 = ACHSEN.find(x => x > achse1) || achse1;
+      return { typ, quelle: "saeulen", s, i, achse1, achse2, text: ersetze(d.satz.gruppen, { x: nm[i], a: d.gruppen[0], b: d.gruppen[1] }), loesung: w[i] > w2[i] ? "ja" : "nein", optionen };
+    }
+    // doppelt: entweder wirklich doppelt (Achse ab 0) oder die Falle — Achse beginnt so, dass die Säule doppelt so hoch aussieht
+    const raster = rasterVon(d.achse);
+    const kleinster = Math.min(...w);
+    const echt = [], falle = [];
+    for (const i of idx(w)) for (const j of idx(w)) {
+      if (i === j) continue;
+      const basis = 2 * w[j] - w[i]; // Achsenanfang, bei dem die Säule i doppelt so hoch aussieht wie j
+      if (w[i] === 2 * w[j]) echt.push([i, j, 0]);
+      else if (w[i] > w[j] && basis > 0 && basis < kleinster && basis % raster === 0) falle.push([i, j, basis]);
+    }
+    const wahlListe = echt.length && (!falle.length || Math.random() < 0.4) ? echt : falle;
+    if (!wahlListe.length) return null;
+    const [i, j, basis] = waehle(wahlListe);
+    return { typ, quelle: "saeulen", s, i, j, basis, text: ersetze(d.satz.doppelt, { a: nm[i], b: nm[j] }), loesung: basis === 0 ? "ja" : "nein", optionen };
+  }
+
+  if (art === "tabelle") {
+    const s = zufall(0, D.saeulen.length - 1);
+    const d = D.saeulen[s];
+    const w = werte(d);
+    const raster = rasterVon(d.achse);
+    // eine Säule falsch hoch: um ein bis drei Raster daneben, auf der Achse
+    const i = zufall(0, w.length - 1);
+    const moeglich = [];
+    for (let v = raster; v <= d.achse; v += raster) if (v !== w[i] && Math.abs(v - w[i]) <= 3 * raster) moeglich.push(v);
+    const hoehe = w.map((x, j) => (j === i ? waehle(moeglich) : x));
+    // zwei Beschriftungen vertauscht (nur bei verschiedenen Werten sichtbar)
+    const paare = [];
+    for (let x = 0; x < w.length; x++) for (let y = x + 1; y < w.length; y++) if (w[x] !== w[y]) paare.push([x, y]);
+    if (!paare.length) return null;
+    const [x, y] = waehle(paare);
+    const vertauscht = idx(w);
+    vertauscht[x] = y; vertauscht[y] = x;
+    return { s, i, hoehe, tausch: [x, y], vertauscht, loesung: "richtig", optionen: mische(["richtig", "hoehe", "vertauscht"]),
+      frage: "Welches Diagramm zeigt die Tabelle richtig? Tipp es an." };
+  }
+
+  if (art === "irre") {
+    const kind = waehle(["achse", "prozent", "zeit", "zahlen"]);
+    const optionen = mische(Object.keys(IRRE));
+    if (kind === "achse" || kind === "zahlen") {
+      const s = zufall(0, D.saeulen.length - 1);
+      const d = D.saeulen[s];
+      const w = werte(d);
+      const raster = rasterVon(d.achse);
+      let basis = 0;
+      if (kind === "achse") {
+        basis = Math.floor((Math.min(...w) - 1) / raster) * raster;
+        if (basis <= 0) return null;
+      }
+      return { kind, s, basis, loesung: kind, optionen, frage: "Was ist an diesem Diagramm irreführend?" };
+    }
+    if (kind === "prozent") {
+      const kandidaten = kreisMit([10, 20]);
+      if (!kandidaten.length) return null;
+      const k = waehle(kandidaten);
+      const d = D.kreis[k];
+      const echt = d.teile.map(t => t[2] * 100 / d.nenner);
+      const i = zufall(0, echt.length - 1);
+      const labels = echt.map((x, j) => (j === i ? x + waehle([5, 10, 15]) : x));
+      return { kind, k, i, labels, loesung: kind, optionen, frage: "Was ist an diesem Diagramm irreführend?" };
+    }
+    const kandidaten = idx(D.linien).filter(i => D.linien[i].xUngleich);
+    if (!kandidaten.length) return null;
+    const l = waehle(kandidaten);
+    return { kind, l, loesung: kind, optionen, frage: "Was ist an diesem Diagramm irreführend?" };
+  }
+  return null;
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. Rechnet die Lösung unabhängig nach. */
+function pruefeAufgabe(a, stufe) {
+  const p = STUFE[stufe];
+  if (!a) return p && D.saeulen.length ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  if (!p.arten.includes(a.art)) m.push("Aufgabenart gehört nicht in diese Stufe");
+  const pruefeOptionen = (loesung, mind = 2) => {
+    if (!a.optionen) return m.push("Auswahl fehlt");
+    if (!a.optionen.includes(loesung)) m.push("Lösung fehlt in der Auswahl");
+    if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Optionen");
+    if (a.optionen.length < mind) m.push("zu wenige Optionen");
+    if (a.optionen.some(o => typeof o === "number" && (!Number.isInteger(o) || o < 1))) m.push("Option nicht positiv");
+  };
+  const pruefeSaeulen = d => {
+    if (!d) return m.push("Säulen-Datensatz fehlt");
+    const w = werte(d);
+    if (!RASTER[d.achse]) m.push("unbekannte Achse");
+    else if (w.some(x => !Number.isInteger(x) || x < 1 || x > d.achse || x % rasterVon(d.achse))) m.push("Wert nicht positiv oder nicht auf dem Raster der Achse");
+    if (d.gruppen && werte2(d).some(x => !Number.isInteger(x) || x < 1 || x > 100)) m.push("zweiter Wert fehlt oder nicht positiv");
+    if (d.kategorien.some(k => k[1].length > 9)) m.push("Name länger als 9 Zeichen");
+    if (new Set(namen(d)).size !== d.kategorien.length) m.push("Namen doppelt");
+    if (!KRITERIUM.saeulen.test(d.wahl.grund)) m.push("Begründung nennt nicht das Kriterium Vergleich");
+  };
+  const pruefeKreis = d => {
+    if (!d) return m.push("Kreis-Datensatz fehlt");
+    const z = d.teile.map(t => t[2]);
+    if (summe(z) !== d.nenner) m.push("Anteile ergeben nicht das Ganze");
+    if (z.some(x => !Number.isInteger(x) || x < 1)) m.push("Anteil nicht positiv");
+    if (![2, 3, 4, 8, 10, 20].includes(d.nenner)) m.push("Nenner nicht erlaubt");
+    if (d.teile.length > FARBE.length) m.push("mehr Teile als Farben");
+    if (!KRITERIUM.kreis.test(d.wahl.grund)) m.push("Begründung nennt nicht das Kriterium Anteil");
+  };
+  const pruefeLinie = d => {
+    if (!d) return m.push("Linien-Datensatz fehlt");
+    if (!RASTER[d.achse]) m.push("unbekannte Achse");
+    else if (d.werte.some(x => !Number.isInteger(x) || x < 1 || x > d.achse || x % rasterVon(d.achse))) m.push("Wert nicht positiv oder nicht auf dem Raster der Achse");
+    if (d.x.length !== d.werte.length || d.xWo.length !== d.werte.length) m.push("Beschriftung und Werte passen nicht zusammen");
+    if (d.xUngleich && d.xUngleich.length !== d.werte.length) m.push("ungleiche Zeitachse hat nicht gleich viele Punkte");
+    if (!KRITERIUM.linien.test(d.wahl.grund)) m.push("Begründung nennt nicht das Kriterium Verlauf");
+  };
+  if (/\{\w+\}|undefined/.test(a.frage || a.text || "")) m.push("Frage unvollständig");
+  if (/ß/.test(JSON.stringify(a))) m.push("ß im Text");
+
+  switch (a.art) {
+    case "wert": case "meist": case "wenigst": case "extrem": case "mittelwert": {
+      const d = D.saeulen[a.s];
+      pruefeSaeulen(d);
+      if (!d) break;
+      const w = werte(d);
+      if (a.art === "wert") { if (a.loesung !== w[a.i]) m.push("Lösung falsch"); pruefeOptionen(a.loesung, 4); break; }
+      if (a.art === "mittelwert") {
+        const soll = summe(w) / w.length;
+        if (!Number.isInteger(soll)) m.push("Mittelwert nicht ganzzahlig");
+        if (a.loesung !== soll) m.push("Mittelwert falsch");
+        pruefeOptionen(a.loesung, 4);
+        break;
+      }
+      const max = a.art === "meist" || (a.art === "extrem" && a.max);
+      const ext = max ? Math.max(...w) : Math.min(...w);
+      if (!einzig(w, ext)) m.push("grösster oder kleinster Wert nicht eindeutig");
+      if (a.loesung !== namen(d)[w.indexOf(ext)]) m.push("Lösung falsch");
+      pruefeOptionen(a.loesung, 3);
+      break;
+    }
+    case "kreisTipp": case "kreisGross": case "prozent": case "prozentTipp": {
+      const d = D.kreis[a.k];
+      pruefeKreis(d);
+      if (!d) break;
+      if (!p.nenner.includes(d.nenner)) m.push("Nenner gehört nicht in diese Stufe");
+      const z = d.teile.map(t => t[2]);
+      const prozent = a.art === "prozent" || a.art === "prozentTipp";
+      const soll = prozent ? z[a.i] * 100 / d.nenner : bruchName(z[a.i], d.nenner);
+      if (prozent && !Number.isInteger(soll)) m.push("Prozent nicht ganzzahlig");
+      if (a.loesung !== soll) m.push("Lösung falsch");
+      if (a.art.endsWith("Tipp")) { if (!einzig(z, z[a.i])) m.push("zwei Teile gleich gross — zwei richtige Antworten"); }
+      else pruefeOptionen(a.loesung, 3);
+      if (!prozent && !/^(die|ein|drei|fünf|sieben|zwei) /.test(a.loesung)) m.push("Bruch ohne Namen");
+      break;
+    }
+    case "wahl": {
+      const d = D[a.typ]?.[a.n];
+      if (!d) { m.push("Datensatz fehlt"); break; }
+      if (a.typ === "saeulen") pruefeSaeulen(d); else if (a.typ === "kreis") pruefeKreis(d); else pruefeLinie(d);
+      if (a.loesung !== a.typ) m.push("Lösung falsch");
+      if (a.frage !== d.wahl.frage || !a.frage) m.push("Frage fehlt");
+      const passende = Object.keys(KRITERIUM).filter(t => KRITERIUM[t].test(a.grund));
+      if (passende.length !== 1 || passende[0] !== a.typ) m.push("Begründung nennt nicht genau das Kriterium der Diagrammart");
+      pruefeOptionen(a.loesung, 3);
+      if (a.optionen.length !== 3) m.push("nicht drei Diagramme");
+      break;
+    }
+    case "linieExtrem": case "linieAnstieg": {
+      const d = D.linien[a.l];
+      pruefeLinie(d);
+      if (!d) break;
+      const w = d.werte;
+      if (a.art === "linieExtrem") {
+        const ext = a.max ? Math.max(...w) : Math.min(...w);
+        if (!einzig(w, ext)) m.push("höchster oder tiefster Wert nicht eindeutig");
+        if (a.loesung !== d.x[w.indexOf(ext)]) m.push("Lösung falsch");
+        pruefeOptionen(a.loesung, 3);
+      } else {
+        if (!(a.i < a.j)) m.push("Reihenfolge der Zeitpunkte falsch");
+        if (w[a.j] - w[a.i] !== a.loesung || a.loesung <= 0) m.push("Anstieg falsch oder nicht positiv");
+        pruefeOptionen(a.loesung, 4);
+      }
+      break;
+    }
+    case "aussage": case "aussage3": {
+      if (!a.text) m.push("Aussage fehlt");
+      if (a.art === "aussage" && a.loesung === "offen") m.push("„kann man nicht sagen“ gehört nicht in Stufe 4");
+      pruefeOptionen(a.loesung, a.art === "aussage3" ? 3 : 2);
+      let soll;
+      if (a.quelle === "linien") {
+        const d = D.linien[a.l];
+        pruefeLinie(d);
+        if (!d) break;
+        const w = d.werte;
+        if (a.typ === "offen") soll = d.offen.includes(a.text) ? "offen" : "?";
+        else if (a.typ === "hoechst") { const ext = a.max ? Math.max(...w) : Math.min(...w); if (!einzig(w, ext)) m.push("Extremwert nicht eindeutig"); soll = w[a.x] === ext ? "ja" : "nein"; }
+        else { if (!(a.i < a.j) || w[a.i] === w[a.j]) m.push("Zeitpunkte unbrauchbar"); soll = (w[a.j] > w[a.i]) === a.steigt ? "ja" : "nein"; }
+      } else {
+        const d = D.saeulen[a.s];
+        pruefeSaeulen(d);
+        if (!d) break;
+        const w = werte(d);
+        if (a.typ === "offen") soll = d.offen.includes(a.text) ? "offen" : "?";
+        else if (a.typ === "meist") { if (!einzig(w, Math.max(...w))) m.push("grösster Wert nicht eindeutig"); soll = w[a.i] === Math.max(...w) ? "ja" : "nein"; }
+        else if (a.typ === "mehr") { if (w[a.i] === w[a.j]) m.push("gleiche Werte"); soll = w[a.i] > w[a.j] ? "ja" : "nein"; }
+        else if (a.typ === "gruppen") {
+          const w2 = werte2(d);
+          if (!d.gruppen || !d.satz.gruppen) m.push("Datensatz ohne zweite Gruppe");
+          if (w[a.i] === w2[a.i]) m.push("gleiche Werte");
+          if (!RASTER[a.achse1] || !RASTER[a.achse2] || a.achse1 < Math.max(...w) || a.achse2 < Math.max(...w2)) m.push("Achse passt nicht zu den Werten");
+          soll = w[a.i] > w2[a.i] ? "ja" : "nein";
+        } else {
+          const raster = rasterVon(d.achse);
+          if (!(a.basis >= 0) || a.basis % raster || a.basis >= Math.min(...w)) m.push("Achsenanfang unbrauchbar");
+          if (a.basis > 0 && w[a.i] - a.basis !== 2 * (w[a.j] - a.basis)) m.push("Falle sieht nicht doppelt aus");
+          soll = w[a.i] === 2 * w[a.j] ? "ja" : "nein";
+        }
+      }
+      if (soll !== undefined && soll !== a.loesung) m.push(`Antwort falsch (${a.loesung} statt ${soll})`);
+      break;
+    }
+    case "tabelle": {
+      const d = D.saeulen[a.s];
+      pruefeSaeulen(d);
+      if (!d) break;
+      const w = werte(d);
+      const raster = rasterVon(d.achse);
+      const anders = idx(w).filter(i => a.hoehe[i] !== w[i]);
+      if (anders.length !== 1 || anders[0] !== a.i) m.push("nicht genau eine Säule falsch hoch");
+      if (a.hoehe[a.i] % raster || a.hoehe[a.i] < 1 || a.hoehe[a.i] > d.achse) m.push("falsche Säule nicht auf der Achse");
+      const [x, y] = a.tausch;
+      if (w[x] === w[y]) m.push("vertauschte Säulen gleich hoch — nicht sichtbar");
+      if (a.vertauscht.some((v, i) => (i === x ? v !== y : i === y ? v !== x : v !== i))) m.push("Vertauschung falsch");
+      if (a.loesung !== "richtig") m.push("Lösung falsch");
+      pruefeOptionen(a.loesung, 3);
+      break;
+    }
+    case "irre": {
+      if (!IRRE[a.kind] || a.loesung !== a.kind) m.push("unbekannte Art oder Lösung falsch");
+      pruefeOptionen(a.loesung, 4);
+      if (a.kind === "achse" || a.kind === "zahlen") {
+        const d = D.saeulen[a.s];
+        pruefeSaeulen(d);
+        if (!d) break;
+        if (a.kind === "achse" && !(a.basis > 0 && a.basis < Math.min(...werte(d)) && a.basis % rasterVon(d.achse) === 0)) m.push("Achsenanfang unbrauchbar");
+        if (a.kind === "zahlen" && a.basis !== 0) m.push("Achse ohne Zahlen beginnt nicht bei 0");
+      } else if (a.kind === "prozent") {
+        const d = D.kreis[a.k];
+        pruefeKreis(d);
+        if (!d) break;
+        if (summe(a.labels) === 100) m.push("Prozente ergeben doch 100");
+        if (a.labels.some((x, j) => j !== a.i && x !== d.teile[j][2] * 100 / d.nenner)) m.push("mehr als eine Zahl verändert");
+        if (a.labels.some(x => !Number.isInteger(x) || x <= 0)) m.push("Prozent nicht positiv");
+      } else {
+        const d = D.linien[a.l];
+        pruefeLinie(d);
+        if (d && !d.xUngleich) m.push("Datensatz ohne ungleiche Zeitachse");
+      }
+      break;
+    }
+    default: m.push(`unbekannte Aufgabenart ${a.art}`);
+  }
+  return m;
+}
+
+// ---------- Zeichnen (SVG) ----------
+
+function svgNeu(viewBox, klasse, label) {
+  const s = document.createElementNS(NS, "svg");
+  s.setAttribute("viewBox", viewBox);
+  s.setAttribute("class", klasse);
+  s.setAttribute("role", "img");
+  s.setAttribute("aria-label", label);
+  return s;
+}
+
+/**
+ * Säulendiagramm. opt.kategorien [{ bild, name, wert }], opt.achse (höchster Wert), opt.basis (Anfang der Achse,
+ * Vorgabe 0), opt.zahlen false = ohne Zahlen an der Achse, opt.gruppe = Überschrift im Bild, opt.farbe "b" = orange.
+ */
+function saeulenSvg(opt) {
+  const B = 360, H = 260, L = 42, R = 10, O = opt.gruppe ? 30 : 14, U = 48;
+  const basis = opt.basis || 0;
+  const [raster, label] = RASTER[opt.achse];
+  const ph = H - O - U, pw = B - L - R, spalte = pw / opt.kategorien.length;
+  const Y = v => O + ph - ((v - basis) / (opt.achse - basis)) * ph;
+  let s = "";
+  for (let v = basis; v <= opt.achse; v += raster) {
+    s += `<line class="gitter" x1="${L}" x2="${B - R}" y1="${Y(v)}" y2="${Y(v)}"/>`;
+    if (opt.zahlen !== false && (v - basis) % label === 0) s += `<text class="zahl" x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
+  }
+  opt.kategorien.forEach((k, i) => {
+    const x0 = L + i * spalte;
+    s += `<rect class="saeule${opt.farbe === "b" ? " b" : ""}" x="${x0 + spalte * 0.2}" y="${Y(k.wert)}" width="${spalte * 0.6}" height="${Y(basis) - Y(k.wert)}" rx="4"/>`;
+    if (k.bild) s += `<text class="bild" x="${x0 + spalte / 2}" y="${H - U + 22}" text-anchor="middle">${k.bild}</text>`;
+    s += `<text class="name" x="${x0 + spalte / 2}" y="${H - U + (k.bild ? 40 : 30)}" text-anchor="middle">${k.name}</text>`;
+  });
+  s += `<line class="achse" x1="${L}" x2="${B - R}" y1="${Y(basis)}" y2="${Y(basis)}"/><line class="achse" x1="${L}" x2="${L}" y1="${Y(basis)}" y2="${O - 4}"/>`;
+  if (opt.einheit) s += `<text class="einheit" x="${L - 4}" y="${O - 6}" text-anchor="end">${opt.einheit}</text>`;
+  if (opt.gruppe) s += `<text class="gruppe" x="${L + pw / 2}" y="16" text-anchor="middle">${opt.gruppe}</text>`;
+  const svg = svgNeu(`0 0 ${B} ${H}`, "dw-diagramm", "Säulendiagramm");
+  svg.innerHTML = s;
+  return svg;
+}
+
+/** Liniendiagramm. opt.x [Beschriftung], opt.werte, opt.achse, opt.einheit */
+function linieSvg(opt) {
+  const B = 360, H = 240, L = 42, R = 16, O = 18, U = 40;
+  const [raster, label] = RASTER[opt.achse];
+  const ph = H - O - U, pw = B - L - R, n = opt.werte.length;
+  const X = i => L + (i + 0.5) * (pw / n);
+  const Y = v => O + ph - (v / opt.achse) * ph;
+  let s = "";
+  for (let v = 0; v <= opt.achse; v += raster) {
+    s += `<line class="gitter" x1="${L}" x2="${B - R}" y1="${Y(v)}" y2="${Y(v)}"/>`;
+    if (v % label === 0) s += `<text class="zahl" x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
+  }
+  s += `<line class="achse" x1="${L}" x2="${B - R}" y1="${Y(0)}" y2="${Y(0)}"/><line class="achse" x1="${L}" x2="${L}" y1="${Y(0)}" y2="${O - 4}"/>`;
+  s += `<polyline class="linie" points="${opt.werte.map((w, i) => `${X(i)},${Y(w)}`).join(" ")}"/>`;
+  opt.werte.forEach((w, i) => {
+    s += `<circle class="punkt" cx="${X(i)}" cy="${Y(w)}" r="5"/>`;
+    s += `<text class="name" x="${X(i)}" y="${H - U + 22}" text-anchor="middle">${opt.x[i]}</text>`;
+  });
+  if (opt.einheit) s += `<text class="einheit" x="${L - 4}" y="${O - 8}" text-anchor="end">${opt.einheit}</text>`;
+  const svg = svgNeu(`0 0 ${B} ${H}`, "dw-diagramm", "Liniendiagramm");
+  svg.innerHTML = s;
+  return svg;
+}
+
+/**
+ * Kreisdiagramm. opt.teile [[bild, name, zaehler]], opt.nenner, opt.labels [Text je Teil, im Teil gezeichnet],
+ * opt.onTipp(i, pfad): Teile antippbar. Die Legende steht als eigenes Element darunter (legende()).
+ */
+function kreisSvg(opt) {
+  const cx = 110, cy = 110, r = 96;
+  const svg = svgNeu("0 0 220 220", "dw-diagramm dw-kreis", "Kreisdiagramm");
+  let winkel = -Math.PI / 2;
+  opt.teile.forEach((t, i) => {
+    const a0 = winkel, a1 = winkel + (t[2] / opt.nenner) * 2 * Math.PI;
+    winkel = a1;
+    const pfad = document.createElementNS(NS, "path");
+    const P = a => `${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`;
+    pfad.setAttribute("d", `M ${cx} ${cy} L ${P(a0)} A ${r} ${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${P(a1)} Z`);
+    pfad.setAttribute("class", `sektor f${i % FARBE.length}${opt.onTipp ? " tippbar" : ""}`);
+    if (opt.onTipp) pfad.addEventListener("click", () => opt.onTipp(i, pfad));
+    svg.append(pfad);
+    if (opt.labels) {
+      const mitte = (a0 + a1) / 2;
+      const text = document.createElementNS(NS, "text");
+      text.setAttribute("class", "prozent");
+      text.setAttribute("x", (cx + r * 0.62 * Math.cos(mitte)).toFixed(1));
+      text.setAttribute("y", (cy + r * 0.62 * Math.sin(mitte) + 5).toFixed(1));
+      text.setAttribute("text-anchor", "middle");
+      text.textContent = opt.labels[i];
+      svg.append(text);
+    }
+  });
+  return svg;
+}
+
+const legende = teile => el("div", { class: "dw-legende" },
+  ...teile.map((t, i) => el("span", {}, el("span", { class: `dw-farbe f${i % FARBE.length}` }), `${t[0]} ${t[1]}`.trim())));
+
+const tabelle = (d, w = werte(d)) => {
+  const t = el("table", { class: "dw-tabelle" });
+  t.append(el("tr", {}, el("th", { text: d.titel }), el("th", { text: d.einheit })));
+  d.kategorien.forEach((k, i) => t.append(el("tr", {}, el("td", { text: `${k[0]} ${k[1]}`.trim() }), el("td", { class: "zahl", text: zahlText(w[i]) }))));
+  return t;
+};
+
+/** Kleines Sinnbild einer Diagrammart für die Antwortknöpfe (ohne Text, der Name steht darunter). */
+function mini(typ) {
+  const svg = svgNeu("0 0 120 84", "dw-diagramm dw-mini", NAME[typ]);
+  if (typ === "saeulen") svg.innerHTML = `<line class="achse" x1="12" y1="74" x2="114" y2="74"/><line class="achse" x1="12" y1="6" x2="12" y2="74"/>`
+    + `<rect class="saeule" x="20" y="42" width="16" height="32" rx="2"/><rect class="saeule" x="44" y="18" width="16" height="56" rx="2"/>`
+    + `<rect class="saeule" x="68" y="52" width="16" height="22" rx="2"/><rect class="saeule" x="92" y="30" width="16" height="44" rx="2"/>`;
+  else if (typ === "kreis") svg.innerHTML = `<path class="sektor f0" d="M 60 42 L 60 6 A 36 36 0 0 1 60 78 Z"/>`
+    + `<path class="sektor f1" d="M 60 42 L 60 78 A 36 36 0 0 1 24 42 Z"/><path class="sektor f2" d="M 60 42 L 24 42 A 36 36 0 0 1 60 6 Z"/>`;
+  else svg.innerHTML = `<line class="achse" x1="12" y1="74" x2="114" y2="74"/><line class="achse" x1="12" y1="6" x2="12" y2="74"/>`
+    + `<polyline class="linie" points="22,60 44,36 66,46 88,16 110,28"/>`
+    + ["22,60", "44,36", "66,46", "88,16", "110,28"].map(p => `<circle class="punkt" cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="4"/>`).join("");
+  return svg;
+}
+
+const titel = text => el("div", { class: "dw-titel", text });
+const frageEl = (text, zitat) => el("div", { class: "frage" }, text, zitat ? el("span", { class: "dw-zitat", text: `«${zitat}»` }) : null);
+
+// ---------- Texte ----------
+
+const STUFEN_TEXT = {
+  s1: "Säulendiagramm lesen: Wie viel? Wo am meisten?",
+  s2: "Kreisdiagramm: Hälfte und Viertel finden.",
+  s3: "Welches Diagramm passt zur Frage? Kreis mit Achteln und Dritteln.",
+  s4: "Liniendiagramm lesen und Aussagen prüfen — Vorsicht, Fallen!",
+  s5: "Prozent im Kreis; Tabelle und Diagramm vergleichen.",
+  s6: "Endgegner: irreführende Diagramme, «kann man nicht sagen», Mittelwert.",
+};
+const STUFEN = D.saeulen.length && D.kreis.length && D.linien.length ? STUFEN_TEXT : {};
+
+const HILFE = {
+  s1: "Lies das Säulendiagramm und tippe die richtige Antwort an.",
+  s2: "Schau das Kreisdiagramm an. Tippe den gesuchten Teil im Kreis an — oder wähle, wie gross der farbige Teil ist.",
+  s3: "Lies die Frage und tippe das Diagramm an, das dazu passt. Bei Kreisdiagrammen tippst du den Teil an oder wählst seine Grösse.",
+  s4: "Lies das Liniendiagramm und tippe die Antwort an. Bei einer Aussage entscheidest du: Stimmt sie oder nicht? Schau dafür genau auf die Zahlen an der Achse.",
+  s5: "Wähle den Prozentanteil oder tippe den Teil im Kreis an. Bei der Tabelle tippst du das Diagramm an, das sie richtig zeigt.",
+  s6: "Schau genau hin: Was ist an diesem Diagramm irreführend? Bei Aussagen gibt es auch «Kann man nicht sagen». Mittelwert, Maximum und Minimum liest du aus dem Diagramm.",
+};
+
+const TIPP_WAHL = [
+  "Frag dich: Geht es um Anteile vom Ganzen, um einen Vergleich oder um eine Veränderung über die Zeit?",
+  "Ein Kreisdiagramm zeigt Anteile vom Ganzen. Ein Säulendiagramm vergleicht Gruppen. Ein Liniendiagramm zeigt, wie sich etwas mit der Zeit verändert.",
+  "Lies die Frage nochmals: Steht da «wie verteilen sich», «welcher Anteil», «am meisten» oder «verändert»?",
+];
+const HINWEIS_WAHL = {
+  kreis: "Ein Kreisdiagramm zeigt Anteile vom Ganzen. Fragt die Frage danach? Lies sie nochmals.",
+  saeulen: "Ein Säulendiagramm vergleicht Gruppen miteinander. Fragt die Frage danach? Lies sie nochmals.",
+  linien: "Ein Liniendiagramm zeigt eine Veränderung über die Zeit. Fragt die Frage danach? Lies sie nochmals.",
+};
+
+// ---------- Spiel ----------
+
+LS.spiel({
+  id: ID,
+  einleitung: "Kreis, Säulen oder Linie? Jedes Diagramm erzählt etwas anderes. Finde heraus, welches zur Frage passt — und lies genau, was es zeigt!",
+  hilfe: stufe => HILFE[stufe],
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    ctx.serie("art", SERIE_ART[a.art] || a.art);
+    const f = el("div", { class: "dw" });
+    ctx.flaeche.append(f);
+    const zuViel = (wert, loesung) => (wert > loesung ? "Das ist zu viel." : "Das ist zu wenig.");
+
+    // ---- Säulen lesen (s1), Maximum/Minimum und Mittelwert (s6) ----
+    if (["wert", "meist", "wenigst", "extrem", "mittelwert"].includes(a.art)) {
+      const d = D.saeulen[a.s];
+      const w = werte(d);
+      f.append(titel(d.titel), saeulenSvg({ kategorien: d.kategorien.map((k, i) => kategorie(d, i)), achse: d.achse, einheit: d.einheit }), frageEl(a.frage));
+      const zahl = typeof a.loesung === "number";
+      const loesung = a.art === "wert" ? `${namen(d)[a.i]}: ${mitEinheit(d, a.loesung)}.`
+        : a.art === "mittelwert" ? `(${w.join(" + ")}) : ${w.length} = ${summe(w)} : ${w.length} = ${a.loesung}`
+        : `${a.art === "wenigst" || (a.art === "extrem" && !a.max) ? "Am wenigsten (Minimum)" : "Am meisten (Maximum)"}: ${a.loesung} mit ${mitEinheit(d, w[namen(d).indexOf(a.loesung)])}.`;
+      const ablesen = "Geh von der Spitze der Säule waagrecht nach links zur Zahl an der Achse.";
+      const hinweis = a.art === "wert" ? v => `${zuViel(v, a.loesung)} ${ablesen}`
+        : a.art === "mittelwert" ? v => `${zuViel(v, a.loesung)} Zähle alle Werte zusammen und teile durch die Anzahl Säulen.`
+        : () => (a.art === "meist" || (a.art === "extrem" && a.max) ? "Such die höchste Säule und lies den Namen darunter." : "Such die niedrigste Säule und lies den Namen darunter.");
+      ctx.tipp(a.art === "wert" ? ["Lies zuerst die Zahlen an der Achse links: In welchen Schritten gehen sie?", ablesen]
+        : a.art === "mittelwert" ? ["Der Mittelwert ist der Wert, den jede Säule hätte, wenn alle gleich hoch wären.", "Zähle alle Werte zusammen und teile durch die Anzahl Säulen.", "Der Mittelwert liegt zwischen dem kleinsten und dem grössten Wert."]
+        : a.art === "extrem" ? ["Maximum heisst der grösste Wert, Minimum der kleinste.", a.max ? "Such die höchste Säule." : "Such die niedrigste Säule."]
+        : [a.art === "meist" ? "Am meisten heisst: die höchste Säule." : "Am wenigsten heisst: die niedrigste Säule.", "Lies den Namen unter dieser Säule."]);
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.loesung, breite: zahl ? 90 : 120,
+        inhalt: zahl ? undefined : name => { const i = namen(d).indexOf(name); return { bild: d.kategorien[i][0] || undefined, text: name }; },
+        hinweis, loesung });
+      if (ctx.nr === 0) ctx.sag("Lies genau: Titel, Achse und Beschriftung.");
+      return;
+    }
+
+    // ---- Kreis: Teil antippen oder Grösse wählen (s2, s3), Prozent (s5) ----
+    if (["kreisTipp", "kreisGross", "prozent", "prozentTipp"].includes(a.art)) {
+      const d = D.kreis[a.k];
+      const prozent = a.art.startsWith("prozent");
+      const tippen = a.art.endsWith("Tipp");
+      const teilName = i => `${d.teile[i][0]} ${d.teile[i][1]} (der ${FARBE[i]} Teil)`;
+      const groesse = prozent ? `${a.loesung} %` : a.loesung;
+      const loesung = tippen ? `${groesse[0].toUpperCase() + groesse.slice(1)} ist ${teilName(a.i)}.` : `${teilName(a.i)} ist ${groesse}.`;
+      ctx.loesung(loesung);
+      let fertig = false;
+      const svg = kreisSvg({ teile: d.teile, nenner: d.nenner, onTipp: tippen ? (i, pfad) => {
+        if (fertig || ctx.vorbei() || pfad.classList.contains("falsch")) return;
+        if (i === a.i) { fertig = true; pfad.classList.add("richtig"); ctx.richtig(); return; }
+        pfad.classList.add("falsch");
+        const z = d.teile.map(t => t[2]);
+        ctx.falsch(`Dieser Teil ist ${z[i] > z[a.i] ? "zu gross. Such einen kleineren" : "zu klein. Such einen grösseren"} Teil.`, loesung);
+        if (ctx.vorbei()) fertig = true;
+      } : null });
+      f.append(titel(d.titel), svg, legende(d.teile), frageEl(a.frage));
+      const grundTipp = prozent ? "Der ganze Kreis sind 100 %. Die Hälfte des Kreises sind 50 %, ein Viertel 25 %."
+        : "Zwei gleich grosse Teile füllen den Kreis: Jeder ist die Hälfte. Vier: Jeder ist ein Viertel. Acht: Jeder ist ein Achtel. Drei: Jeder ist ein Drittel.";
+      if (tippen) {
+        ctx.schritte(1);
+        ctx.tipp(["Stell dir vor, der Kreis ist ein Kuchen: Wie viele gleich grosse Stücke ergeben den gesuchten Teil?", grundTipp, "Vergleiche die Teile miteinander: Welcher ist genau so gross wie gesucht?"]);
+        if (ctx.nr === 0) ctx.sag("Tipp direkt im Kreis auf den Teil.");
+        return;
+      }
+      ctx.tipp(["Vergleiche den farbigen Teil mit dem ganzen Kreis: Wie oft passt er hinein?", grundTipp, prozent ? "Wie oft passt der Teil in den ganzen Kreis? Teile 100 durch diese Zahl." : "Die Legende unter dem Kreis sagt, welche Farbe zu welchem Namen gehört."]);
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.loesung, breite: prozent ? 90 : 130,
+        inhalt: prozent ? v => `${v} %` : undefined,
+        hinweis: v => (prozent ? `${zuViel(v, a.loesung)} Der ganze Kreis sind 100 %.` : "Vergleiche den farbigen Teil mit dem ganzen Kreis: Ist er kleiner oder grösser als das, was du gewählt hast?"),
+        loesung });
+      if (ctx.nr === 0) ctx.sag("Die Legende unter dem Kreis zeigt, welche Farbe zu welchem Namen gehört.");
+      return;
+    }
+
+    // ---- Welches Diagramm passt zur Frage? (s3) ----
+    if (a.art === "wahl") {
+      ctx.serie("diagramm", a.typ);
+      f.append(frageEl("Welches Diagramm passt zu dieser Frage?", a.frage));
+      ctx.tipp(TIPP_WAHL);
+      const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: a.typ, breite: 108,
+        inhalt: typ => el("span", {}, mini(typ), el("span", { text: NAME[typ] })),
+        hinweis: typ => HINWEIS_WAHL[typ],
+        loesung: `${NAME[a.typ]}: ${a.grund}`,
+        lob: waehle(["Genau das richtige Diagramm!", "Passt perfekt!", "Richtig gewählt!"]) });
+      box.classList.add("dw-wahl-mini");
+      if (ctx.nr === 0) ctx.sag("Anteile, Vergleich oder Veränderung über die Zeit? Das entscheidet.");
+      return;
+    }
+
+    // ---- Liniendiagramm lesen (s4) ----
+    if (a.art === "linieExtrem" || a.art === "linieAnstieg") {
+      const d = D.linien[a.l];
+      const w = d.werte;
+      f.append(titel(d.titel), linieSvg({ x: d.x, werte: w, achse: d.achse, einheit: d.einheit }), frageEl(a.frage));
+      if (a.art === "linieExtrem") {
+        const loesung = `${a.max ? "Am höchsten" : "Am tiefsten"}: ${a.loesung} mit ${zahlText(w[d.x.indexOf(a.loesung)])} ${d.einheit}.`;
+        ctx.tipp([a.max ? "Such den höchsten Punkt der Linie." : "Such den tiefsten Punkt der Linie.", "Geh von diesem Punkt senkrecht nach unten: Welche Zeit steht dort?"]);
+        LS.auswahl(ctx, { optionen: a.optionen, richtig: a.loesung, breite: 90,
+          hinweis: () => `Such den ${a.max ? "höchsten" : "tiefsten"} Punkt der Linie und lies die Zeit darunter ab.`, loesung });
+      } else {
+        const loesung = `${zahlText(w[a.j])} − ${zahlText(w[a.i])} = ${a.loesung}`;
+        ctx.tipp(["Lies den Wert am Anfang und am Ende des Abschnitts ab: Geh vom Punkt waagrecht zur Achse.", "Rechne: Wert am Ende minus Wert am Anfang."]);
+        LS.auswahl(ctx, { optionen: a.optionen, richtig: a.loesung, breite: 90,
+          hinweis: v => `${zuViel(v, a.loesung)} Lies beide Werte an der Achse ab und rechne: Wert am Ende minus Wert am Anfang.`, loesung });
+      }
+      if (ctx.nr === 0) ctx.sag("Jeder Punkt ist eine Messung. Die Linie zeigt, wie es weitergeht.");
+      return;
+    }
+
+    // ---- Aussagen prüfen (s4: stimmt / stimmt nicht; s6: dazu kann man nicht sagen) ----
+    if (a.art === "aussage" || a.art === "aussage3") {
+      ctx.serie("antwort", a.loesung);
+      let loesung, zusatz = "";
+      if (a.quelle === "linien") {
+        const d = D.linien[a.l];
+        const w = d.werte;
+        f.append(titel(d.titel), linieSvg({ x: d.x, werte: w, achse: d.achse, einheit: d.einheit }));
+        loesung = a.typ === "offen" ? "Das steht nicht im Diagramm — man kann es nicht sagen."
+          : a.typ === "hoechst" ? `${a.max ? "Am höchsten" : "Am tiefsten"} ist es ${d.xWo[w.indexOf(a.max ? Math.max(...w) : Math.min(...w))]} — ${ANTWORT[a.loesung].text.toLowerCase()}.`
+          : `${xName(d.xWo[a.i])}: ${w[a.i]} ${d.einheit}, ${xName(d.xWo[a.j])}: ${w[a.j]} ${d.einheit} — ${ANTWORT[a.loesung].text.toLowerCase()}.`;
+      } else {
+        const d = D.saeulen[a.s];
+        const w = werte(d);
+        const nm = namen(d);
+        const kat = d.kategorien.map((k, i) => kategorie(d, i));
+        if (a.typ === "gruppen") {
+          const kat2 = d.kategorien.map((k, i) => ({ ...kategorie(d, i), wert: k[3] }));
+          f.append(titel(d.titel), el("div", { class: "dw-zwei" },
+            saeulenSvg({ kategorien: kat, achse: a.achse1, einheit: d.einheit, gruppe: d.gruppen[0] }),
+            saeulenSvg({ kategorien: kat2, achse: a.achse2, einheit: d.einheit, gruppe: d.gruppen[1], farbe: "b" })));
+          loesung = `${nm[a.i]}: ${d.gruppen[0]} ${mitEinheit(d, w[a.i])}, ${d.gruppen[1]} ${mitEinheit(d, werte2(d)[a.i])} — ${ANTWORT[a.loesung].text.toLowerCase()}. Achtung, die beiden Achsen sind verschieden.`;
+          zusatz = "Vorsicht: Die zwei Diagramme haben verschiedene Achsen.";
+        } else {
+          f.append(titel(d.titel), saeulenSvg({ kategorien: kat, achse: d.achse, basis: a.basis || 0, einheit: d.einheit }));
+          loesung = a.typ === "offen" ? "Das steht nicht im Diagramm — man kann es nicht sagen."
+            : a.typ === "meist" ? `Am meisten: ${nm[w.indexOf(Math.max(...w))]} — ${ANTWORT[a.loesung].text.toLowerCase()}.`
+            : `${nm[a.i]}: ${mitEinheit(d, w[a.i])}, ${nm[a.j]}: ${mitEinheit(d, w[a.j])} — ${ANTWORT[a.loesung].text.toLowerCase()}.${a.basis ? " Achtung, die Achse beginnt nicht bei 0." : ""}`;
+          if (a.basis) zusatz = "Vorsicht: Wo beginnt die Achse?";
+        }
+      }
+      f.append(frageEl(a.art === "aussage3" ? "Stimmt diese Aussage — oder kann man das aus dem Diagramm gar nicht sagen?" : "Stimmt diese Aussage?", a.text));
+      ctx.tipp([
+        a.typ === "offen" || a.art === "aussage3" ? "Prüfe zuerst: Zeigt das Diagramm überhaupt etwas zu dieser Aussage? Schau auf Titel, Achse und Beschriftung." : "Lies die Zahlen an der Achse ab — nicht nur die Höhe der Säulen oder Punkte.",
+        zusatz || "Lies die Werte, um die es in der Aussage geht, einzeln ab und vergleiche sie.",
+        "Vergleiche die abgelesenen Zahlen Wort für Wort mit der Aussage.",
+      ]);
+      const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: a.loesung, breite: 120,
+        inhalt: v => ANTWORT[v],
+        hinweis: v => (v === "offen" ? "Das Diagramm zeigt dazu Zahlen. Lies sie ab und vergleiche sie mit der Aussage."
+          : a.typ === "offen" ? "Steht das wirklich im Diagramm? Schau auf Titel, Achse und Beschriftung."
+          : zusatz ? `${zusatz} Lies die Zahlen an der Achse ab und vergleiche sie mit der Aussage.` : "Lies die Zahlen an der Achse ab und vergleiche sie genau mit der Aussage."),
+        loesung });
+      box.classList.add("dw-wahl-text");
+      if (ctx.nr === 0) ctx.sag(a.art === "aussage3" ? "Manches steht gar nicht im Diagramm. Dann: Kann man nicht sagen." : "Lies die Zahlen an der Achse, nicht nur die Höhe.");
+      return;
+    }
+
+    // ---- Tabelle gegeben: welches Diagramm stellt sie richtig dar? (s5) ----
+    if (a.art === "tabelle") {
+      const d = D.saeulen[a.s];
+      const w = werte(d);
+      f.append(tabelle(d), frageEl(a.frage));
+      const buchstabe = v => "ABC"[a.optionen.indexOf(v)];
+      const nm = namen(d);
+      const loesung = `Diagramm ${buchstabe("richtig")} stimmt. In ${buchstabe("hoehe")} ist die Säule ${nm[a.i]} falsch hoch, in ${buchstabe("vertauscht")} sind ${nm[a.tausch[0]]} und ${nm[a.tausch[1]]} vertauscht.`;
+      ctx.tipp(["Vergleiche Säule für Säule mit der Tabelle: Höhe und Name darunter.", "Zwei Diagramme haben je einen Fehler: eine falsche Höhe oder zwei vertauschte Namen.", "Prüfe bei jedem Diagramm zuerst die höchste und die niedrigste Säule."]);
+      const kategorien = v => d.kategorien.map((k, i) => ({ bild: k[0], name: v === "vertauscht" ? d.kategorien[a.vertauscht[i]][1] : k[1], wert: v === "hoehe" ? a.hoehe[i] : w[i] }));
+      const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: "richtig", breite: 300,
+        inhalt: v => el("span", {}, el("span", { class: "dw-buchstabe", text: buchstabe(v) }), saeulenSvg({ kategorien: kategorien(v), achse: d.achse, einheit: d.einheit })),
+        hinweis: v => (v === "hoehe" ? "In diesem Diagramm hat eine Säule die falsche Höhe. Vergleiche jede Zahl der Tabelle mit ihrer Säule." : "In diesem Diagramm sind zwei Namen vertauscht. Vergleiche die Namen unter den Säulen mit der Tabelle."),
+        loesung });
+      box.classList.add("dw-wahl-gross");
+      if (ctx.nr === 0) ctx.sag("Nur eines der drei Diagramme passt zur Tabelle.");
+      return;
+    }
+
+    // ---- Irreführende Diagramme (s6) ----
+    if (a.art === "irre") {
+      if (a.kind === "achse" || a.kind === "zahlen") {
+        const d = D.saeulen[a.s];
+        f.append(titel(d.titel), saeulenSvg({ kategorien: d.kategorien.map((k, i) => kategorie(d, i)), achse: d.achse, basis: a.basis, zahlen: a.kind !== "zahlen", einheit: d.einheit }));
+      } else if (a.kind === "prozent") {
+        const d = D.kreis[a.k];
+        f.append(titel(d.titel), kreisSvg({ teile: d.teile, nenner: d.nenner, labels: a.labels.map(x => `${x} %`) }), legende(d.teile));
+      } else {
+        const d = D.linien[a.l];
+        f.append(titel(d.titel), linieSvg({ x: d.xUngleich, werte: d.werte, achse: d.achse, einheit: d.einheit }));
+      }
+      f.append(frageEl(a.frage));
+      const loesung = IRRE[a.kind] + (a.kind === "achse" ? " Die Unterschiede sehen grösser aus, als sie sind." : a.kind === "prozent" ? ` Zusammen sind es ${summe(a.labels)} %.` : a.kind === "zeit" ? " Alle Punkte sind gleich weit auseinander gezeichnet, obwohl die Zeit dazwischen verschieden lang ist." : " So lässt sich kein Wert ablesen.");
+      ctx.tipp(["Schau die Achse genau an: Wo beginnt sie? Stehen Zahlen daran?", "Prüfe die Beschriftung: Ergeben die Teile zusammen das Ganze? Sind die Abstände auf der Zeitachse gleich lang?", "Geh die vier Antworten der Reihe nach durch und prüfe jede am Diagramm."]);
+      const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: a.kind, breite: 300, inhalt: v => IRRE[v],
+        hinweis: () => "Das trifft hier nicht zu. Schau Achse und Beschriftung nochmals genau an.", loesung });
+      box.classList.add("dw-wahl-text");
+      if (ctx.nr === 0) ctx.sag("Diagramme können täuschen. Schau Achse und Beschriftung genau an.");
+    }
+  },
+});
+</script>
+</body>
+</html>

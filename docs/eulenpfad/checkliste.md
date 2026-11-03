@@ -5,7 +5,7 @@ wird im Entwickler-Modus (Spiel angesehen, Inhaltsliste geprüft; schreibt `eule
 Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
 `docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
-**Stand:** 158 Spiele gebaut, 2 Ideen offen · für Kinder frei: 38 von 158 · 6 von 102 neuen Spielen angesehen · 3 von 210 Inhaltslisten geprüft.
+**Stand:** 165 Spiele gebaut, 2 Ideen offen · für Kinder frei: 38 von 165 · 6 von 109 neuen Spielen angesehen · 3 von 216 Inhaltslisten geprüft.
 
 Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit
 Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.
@@ -314,6 +314,10 @@ Je gebautem Spiel:
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Teile des Auges mit Aufgabe und Fragen)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
+- [x] **Lärm-Wächter** (`laerm-waechter`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Geräusche mit Lautstärke und Schutzmassnahmen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
 
 #### Gemeinschaft
 
@@ -322,12 +326,28 @@ Je gebautem Spiel:
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Anliegen, Einrichtungen, Notrufnummern, zuständige Stellen und Abläufe)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
 
+#### Zeit
+
+- [x] **Kulturen-Koffer** (`kulturen-koffer`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Gegenstände, Bauten und Fakten zu Ägypten, Römern und Pfahlbauern — ab Stufe 5 auch China und Griechen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
+
 ### Musik
 
 #### Noten und Töne
 
 - [x] **Noten-Namen** (`noten-namen`) — für Kinder frei
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session2.md`
+
+### Englisch
+
+#### Dialoge
+
+- [x] **Hello-Dialog** (`hello-dialog`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Englische Mini-Dialoge mit Antworten)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
 
 ## 4. Klasse
 
@@ -442,7 +462,7 @@ Je gebautem Spiel:
 - [x] **Kompass-Spiel** (`kompass`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Orte auf dem Dorfplan (Name mit Artikel))
-  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`, `lehrplan_sg_session9.md`
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`, `lehrplan_sg_session3.md`, `lehrplan_sg_session9.md`
 - [x] **Plan-Leser** (`plan-leser`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 2 Listen (offen: Plan Schulzimmer: Dinge und ihre Zeichen; Plan Quartier: Orte und ihre Zeichen)
@@ -492,7 +512,7 @@ Je gebautem Spiel:
   - [ ] Inhalte geprüft: 0 von 9 Listen (offen: Nomen gross, auch Gefühle (Hund, Angst); sp und st am Wortanfang, sch (Stein, Schule); ie oder i (Biene, Kind); e oder ä, eu oder äu (Hände, Bäume); Komma bei Aufzählungen; Doppelkonsonant, ck und tz (Sonne, Zucker, Katze); Dehnungs-h (fahren, Zahn); Verben als Nomen (beim Essen); Fehlerfreie Sätze (nur Königsstufe, zusätzlich zu einer Regel))
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
-#### Gedichte
+#### Gedichte und Gattungen
 
 - [x] **Gedicht-Baukasten** (`gedicht-baukasten`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
   - [ ] angesehen
@@ -778,10 +798,27 @@ Je gebautem Spiel:
   - [ ] angesehen
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session9.md`
 
+#### Form und Raum
+
+- [x] **Quader-Volumen** (`quader-volumen`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
+
+#### Daten
+
+- [x] **Diagramm-Wahl** (`diagramm-wahl`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Datensätze mit Fragen zu Diagrammen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
+
 ### Deutsch
 
 #### Lesen
 
+- [x] **Figuren-Spiegel** (`figuren-spiegel`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Szenen mit Fragen zu den Figuren)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
 - [x] **Sachtext-Spurensuche** (`sachtext-spurensuche`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Kurze Sachtexte mit Fragen)
@@ -807,3 +844,10 @@ Je gebautem Spiel:
   - [ ] angesehen
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Wörter und Sätze für die Wortarten-Proben)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session9.md`
+
+#### Gedichte und Gattungen
+
+- [x] **Gattungs-Kenner** (`gattungs-kenner`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
+  - [ ] angesehen
+  - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Kurze Textauszüge je Gattung mit Merkmalen)
+  - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`

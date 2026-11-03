@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figuren-Spiegel</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .fs .sachtext { background: #fffdf5; border: 3px solid var(--rand); border-radius: 18px; padding: 12px 16px; margin: 4px auto 12px; max-width: 680px; font-size: clamp(17px, 3.9vw, 21px); line-height: 1.55; text-align: left; overflow-wrap: break-word; }
+  .fs .sachtext h2 { margin: 0 0 6px; font-size: clamp(19px, 4.4vw, 25px); color: var(--deko-6); }
+  .fs .sachtext p { margin: 0; }
+  .fs-figuren { margin: 0 auto 10px; max-width: 680px; text-align: left; font-size: clamp(14px, 3.3vw, 17px); color: var(--text-leise); font-weight: 700; }
+  .fs-figuren span { display: inline-block; margin: 0 6px 4px 0; padding: 2px 10px; border-radius: 10px; border: 2px solid var(--deko-6); color: var(--deko-6); }
+  .fs-schritt { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin: 0 0 4px; }
+  .fs .frage { text-align: center; font-size: clamp(18px, 4vw, 23px); font-weight: 800; margin: 0 auto 10px; max-width: 680px; }
+  .fs-erledigt { max-width: 680px; margin: 0 auto 10px; padding: 0; list-style: none; font-size: clamp(14px, 3.3vw, 17px); text-align: left; }
+  .fs-erledigt li { padding: 5px 10px; margin: 0 0 4px; border-radius: 10px; background: var(--gut-hell); font-weight: 700; }
+  .fs .wahl-knopf.fs-antwort { font-size: clamp(16px, 3.6vw, 20px); font-weight: 700; text-align: left; align-items: flex-start; padding: 10px 14px; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🪞 Figuren-Spiegel</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="szenen.js"></script>
+<script>
+"use strict";
+// Lehrplan 21 D.2.C.1 (Literarische Texte: Figuren verstehen), Basisklasse 6. Das Kind liest eine kurze
+// literarische Szene und beantwortet Fragen zu den Figuren: Gefühl, Stimmung, Grund, Motiv, Sicht,
+// Sagen ≠ Meinen, Fortsetzung, eigene Perspektive, Lebenswelt. Szenen in szenen.js.
+//   s1 5. Klasse (D.2.C.1.d/e): kurze Szene (40–70 Wörter), „Wie fühlt sich die Figur?“ — das Gefühl steht
+//      wörtlich oder fast wörtlich im Text; drei Antworten.
+//   s2 6. Klasse, leichter (D.2.C.1.e, Orientierungspunkt): Stimmung der Szene (spannend, lustig, traurig,
+//      gemütlich, unheimlich) oder „Warum tut sie das?“, wenn der Grund im Text steht.
+//   s3 Klassenziel (D.2.C.1.f, Grundanspruch Ende 6. Klasse): Absicht oder Motiv erschliessen, das nicht
+//      wörtlich dasteht; eine Antwort ist zu wörtlich, eine falsch.
+//   s4 schwerer (D.2.C.1.f): zwei Fragen nacheinander — die Sicht der zweiten Figur und Sagen ≠ Meinen
+//      („Ist mir egal“ heisst das Gegenteil).
+//   s5 7. Klasse (D.2.C.1.f → 3. Zyklus, Annahme): längere Szenen (80–120 Wörter), „Was tut die Figur wohl
+//      als Nächstes?“ (passend zum Motiv) und Ich-Perspektive („Was würdest du an ihrer Stelle fühlen?“).
+//   s6 Königsstufe (D.2.C.1.f, über alles hinweg): drei Fragen je Szene — Motiv aus Andeutungen (Ironie,
+//      Täuschung, Ausrede), Verbindung zur eigenen Lebenswelt, Fortsetzung oder Ich-Perspektive.
+// Abgrenzung: Gefühle-Radar (Basisklasse 3) deutet kurze Alltagssituationen und Gesichter, fast ohne
+// Lesen; die Sachtext-Spurensuche (6) entnimmt Sachtexten Informationen. Hier zählen literarische Szenen:
+// Handeln, Absicht, Motiv, Stimmung und die eigene Lebenswelt. Vorlesen aus (Katalog vorlesen: false):
+// Lesen ist der Stoff — der Text steht in .sachtext, in .frage nur die Frage.
+
+const { waehle, mische, el } = LS;
+const ID = "figuren-spiegel";
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+// Eine Liste „szenen“. Kennt der Katalog die Listen nicht, gilt alles als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["szenen"]);
+const SZENEN = FREI.has("szenen") ? SPIEGEL_SZENEN : [];
+
+const ARTEN = ["gefuehl", "stimmung", "grund", "motiv", "sicht", "meinen", "weiter", "ich", "lebenswelt"];
+const STIMMUNGEN = ["spannend", "lustig", "traurig", "gemütlich", "unheimlich"];
+const WOERTER = { 1: [40, 70], 2: [60, 100], 3: [80, 120] };
+
+/**
+ * Je Stufe: Szenengruppen und Frageblöcke. Jeder Block ergibt eine Frage; sie wird unter den Fragen der
+ * Szene gezogen, deren Art im Block steht. Mehrere Blöcke = mehrere Fragen nacheinander (s4, s6).
+ */
+const STUFE = {
+  s1: { gruppen: [1], bloecke: [["gefuehl"]] },
+  s2: { gruppen: [1], bloecke: [["stimmung", "grund"]] },
+  s3: { gruppen: [2], bloecke: [["motiv"]] },
+  s4: { gruppen: [2], bloecke: [["sicht"], ["meinen", "motiv"]] },
+  s5: { gruppen: [3], bloecke: [["weiter", "ich"]] },
+  s6: { gruppen: [3], bloecke: [["motiv", "meinen"], ["lebenswelt"], ["weiter", "ich"]] },
+};
+
+/** Fragen einer Szene als Objekte. */
+const fragenVon = s => s.fragen.map(([art, frage, richtig, ...falsch]) => ({ art, frage, richtig, falsch }));
+const kandidaten = (s, block) => fragenVon(s).filter(f => block.includes(f.art));
+/** Szenen, die eine Stufe stellen kann: richtige Gruppe und je Block mindestens eine Frage. */
+const vorrat = stufe => SZENEN.filter(s => STUFE[stufe].gruppen.includes(s.gruppe) && STUFE[stufe].bloecke.every(b => kandidaten(s, b).length));
+const ANGEBOTEN = new Set(Object.keys(STUFE).filter(s => vorrat(s).length));
+
+function aufgabeErzeugen(stufe) {
+  const liste = vorrat(stufe);
+  if (!liste.length) return null;
+  const szene = waehle(liste);
+  const fragen = STUFE[stufe].bloecke.map(b => {
+    const f = waehle(kandidaten(szene, b));
+    return { ...f, optionen: mische([f.richtig, ...f.falsch]) };
+  });
+  return { szene, fragen };
+}
+
+// ---------- Prüfung ----------
+
+const woerter = t => t.replace(/[«»„“–…]/g, " ").split(/\s+/).filter(w => /[\p{L}\p{N}]/u.test(w)).length;
+// Wortstamm: die ersten fünf Buchstaben eines Worts ab vier Buchstaben, ohne Füllwörter.
+const FUELL = new Set(["weil", "dass", "sich", "sein", "seine", "seiner", "ihre", "ihren", "ihrer", "nicht", "sehr", "will", "wollte", "haben", "hat", "ist", "sind", "eine", "einen", "einem", "einer", "noch", "auch", "mehr", "etwas", "ganz", "wirklich", "selbst", "selber", "immer", "alle", "allen"]);
+const staemme = t => t.toLowerCase().replace(/[^\p{L}\s]/gu, " ").split(/\s+/).filter(w => w.length >= 4 && !FUELL.has(w)).map(w => w.slice(0, 5));
+
+/** Mängel der ganzen Liste — einmal berechnet. */
+const LISTEN_MAENGEL = (() => {
+  const m = [];
+  const titel = new Set();
+  for (const s of SPIEGEL_SZENEN) {
+    const wo = `«${s.titel}»`;
+    if (titel.has(s.titel)) m.push(`${wo}: Titel doppelt`);
+    titel.add(s.titel);
+    if (!WOERTER[s.gruppe]) m.push(`${wo}: Gruppe fehlt`);
+    const n = woerter(s.text);
+    const [a, b] = WOERTER[s.gruppe] || [0, 999];
+    if (n < a || n > b) m.push(`${wo}: ${n} Wörter, Gruppe ${s.gruppe} erwartet ${a}–${b}`);
+    if (!s.figuren?.length) m.push(`${wo}: keine Figuren`);
+    for (const f of s.figuren || []) if (!s.text.includes(f.split(" ").pop().replace(/s$/, ""))) m.push(`${wo}: Figur «${f}» steht nicht im Text`);
+    if (/ß/.test(JSON.stringify(s))) m.push(`${wo}: ß im Text`);
+    if (/"/.test(s.text)) m.push(`${wo}: gerade Anführungszeichen im Text`);
+    const text = s.text.toLowerCase();
+    for (const f of fragenVon(s)) {
+      const was = `${wo} «${f.frage}»`;
+      if (!ARTEN.includes(f.art)) m.push(`${was}: unbekannte Art ${f.art}`);
+      const antworten = [f.richtig, ...f.falsch];
+      if (antworten.length !== 3 || new Set(antworten).size !== 3 || antworten.some(x => !x)) m.push(`${was}: braucht drei verschiedene Antworten`);
+      if (["gefuehl", "grund"].includes(f.art) && !staemme(f.richtig).some(st => text.includes(st))) m.push(`${was}: kein Wort der Antwort steht im Text`);
+      if (f.art === "motiv" && text.includes(f.richtig.toLowerCase().replace(/[.!]$/, ""))) m.push(`${was}: Motiv steht wörtlich im Text`);
+      if (f.art === "stimmung" && !antworten.every(x => STIMMUNGEN.includes(x))) m.push(`${was}: Stimmung nicht aus der Liste`);
+      if (f.art === "sicht" && s.figuren.length < 2) m.push(`${was}: Sicht braucht zwei Figuren`);
+      if (f.art === "meinen" && !/[«»]/.test(f.frage)) m.push(`${was}: Sagen ≠ Meinen ohne Zitat in der Frage`);
+    }
+  }
+  return m;
+})();
+
+function pruefeAufgabe(a, stufe) {
+  if (!ANGEBOTEN.has(stufe)) return a ? ["Aufgabe in einer Stufe, die nicht angeboten wird"] : [];
+  if (!a) return ["keine Aufgabe in einer angebotenen Stufe"];
+  const m = [...LISTEN_MAENGEL];
+  const p = STUFE[stufe];
+  if (!SZENEN.includes(a.szene)) m.push("Szene nicht aus einer freien Liste");
+  if (!p.gruppen.includes(a.szene.gruppe)) m.push(`Szene der Gruppe ${a.szene.gruppe} in ${stufe}`);
+  if (a.fragen.length !== p.bloecke.length) m.push(`${a.fragen.length} Fragen, Stufe erwartet ${p.bloecke.length}`);
+  a.fragen.forEach((f, i) => {
+    if (!p.bloecke[i] || !p.bloecke[i].includes(f.art)) m.push(`Frageart ${f.art} nicht an Stelle ${i + 1} der Stufe`);
+    if (!a.szene.fragen.some(q => q[1] === f.frage && q[2] === f.richtig)) m.push("Frage nicht aus der Szene");
+    if (f.optionen.length !== 3 || new Set(f.optionen).size !== 3) m.push("nicht drei verschiedene Antworten");
+    if (f.optionen.filter(o => o === f.richtig).length !== 1) m.push("Lösung nicht genau einmal unter den Antworten");
+  });
+  if (new Set(a.fragen.map(f => f.frage)).size !== a.fragen.length) m.push("dieselbe Frage zweimal");
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+function szeneEl(s) {
+  return el("div", { class: "sachtext" }, el("h2", { text: s.titel }), el("p", { text: s.text }));
+}
+
+/** Hinweis nach falscher Wahl je Frageart — nennt nie die Lösung und nie eine Stelle der Szene. */
+const HINWEIS = {
+  gefuehl: "Such die Stelle, an der der Text sagt, wie es der Figur geht.",
+  stimmung: "Wie fühlst du dich beim Lesen? Achte auf die Wörter für Ort, Licht und Geräusche.",
+  grund: "Der Grund steht im Text. Lies nochmal, was kurz vor der Handlung passiert.",
+  motiv: "Das steht nicht wörtlich da. Was will die Figur erreichen oder vermeiden?",
+  sicht: "Lies nur die Sätze über diese Figur. Was weiss sie — und was weiss sie nicht?",
+  meinen: "Achte darauf, ob die Worte zur Handlung passen.",
+  weiter: "Was will die Figur bis jetzt? Die Fortsetzung passt dazu.",
+  ich: "Stell dir vor, du bist an ihrer Stelle — in genau diesem Moment.",
+  lebenswelt: "Worum geht es in der Szene im Kern: Was passiert zwischen den Menschen?",
+};
+
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Lesestrategien je Frageart, vom Anstoss zum Konkreten —
+ * nie der Inhalt der Szene und nie eine Antwort. Bei mehreren Fragen je Frage ein Tipp.
+ */
+const TIPPS = {
+  gefuehl: ["Such die Stelle, an der der Text sagt, wie es der Figur geht.", "Ein Wort aus der richtigen Antwort steht so oder ähnlich im Text."],
+  stimmung: ["Achte auf die Wörter für Ort, Licht, Geräusche und Tempo.", "Welche Antwort passt zur ganzen Szene, nicht nur zu einem Satz?"],
+  grund: ["Der Grund steht im Text. Lies, was kurz vor der Handlung passiert.", "Such nach «weil», «damit» oder «denn» — oder nach dem Satz, der die Handlung erklärt."],
+  motiv: ["Das steht nicht wörtlich da. Was will die Figur erreichen oder vermeiden?", "Eine Antwort wiederholt nur, was im Text steht — das ist noch kein Grund. Eine andere passt gar nicht zur Szene."],
+  sicht: ["Lies nur die Sätze über diese Figur. Was weiss sie, was sieht sie?", "Die beiden Figuren wissen nicht dasselbe. Denk aus ihrem Kopf heraus."],
+  meinen: ["Achte darauf, ob die Worte zur Handlung passen.", "Was tut die Figur, während sie das sagt? Das Tun verrät mehr als die Worte."],
+  weiter: ["Was will die Figur bis jetzt? Die Fortsetzung passt dazu.", "Streich die Antwort, bei der die Figur plötzlich ganz anders handeln würde."],
+  ich: ["Stell dir vor, du stehst an ihrer Stelle — in genau diesem Moment.", "Eine Antwort passt zu dem, was gerade passiert ist. Die anderen passen zu einer anderen Situation."],
+  lebenswelt: ["Worum geht es in der Szene im Kern: Was passiert zwischen den Menschen?", "Such die Situation, in der dasselbe passiert — auch wenn Ort und Personen anders sind."],
+};
+function tippsFuer(fragen) {
+  if (fragen.length === 1) return ["Lies die Szene nochmal.", ...TIPPS[fragen[0].art]];
+  return ["Lies die Szene nochmal.", ...fragen.map((f, i) => `Frage ${i + 1}: ${TIPPS[f.art][0]}`)];
+}
+
+const LOB = ["Gut gelesen!", "Du hast die Figur verstanden!", "Genau hingeschaut!", "Du kannst dich hineinversetzen!"];
+const BREITE = 280; // Antworten sind Sätze: ein Knopf je Zeile auf dem Handy, zwei nebeneinander auf dem Tablet
+
+LS.spiel({
+  id: ID,
+  einleitung: "Schau in den Figuren-Spiegel! Lies die Szene genau: Was fühlt die Figur, was will sie wirklich — und warum tut sie das?",
+  hilfe: stufe => "Lies zuerst die ganze Szene. Dann lies die Frage und tippe die Antwort an, die zur Szene passt."
+    + (STUFE[stufe].bloecke.length > 1 ? ` Zu jeder Szene kommen ${STUFE[stufe].bloecke.length} Fragen nacheinander.` : ""),
+  anzahl: 6,
+  stufen: Object.fromEntries(Object.entries({
+    s1: "Kurze Szenen: Wie fühlt sich die Figur? (5. Klasse)",
+    s2: "Welche Stimmung hat die Szene? Warum tut die Figur das?",
+    s3: "Warum handelt die Figur so? Das steht nicht wörtlich da. (Lehrplan 6. Klasse)",
+    s4: "Zwei Figuren, zwei Sichten — und was sie sagen, ist nicht immer, was sie meinen.",
+    s5: "Längere Szenen: Was tut die Figur als Nächstes? Was würdest du fühlen? (7. Klasse)",
+    s6: "Endgegner: Ironie, Ausreden und Andeutungen — drei Fragen je Szene.",
+  }).filter(([s]) => ANGEBOTEN.has(s))),
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag("Lies zuerst die ganze Szene. Dann beantworte die Frage dazu.");
+    const a = aufgabeErzeugen(ctx.stufe);
+    const fs = el("div", { class: "fs" });
+    ctx.flaeche.append(fs);
+    fs.append(szeneEl(a.szene), el("div", { class: "fs-figuren" }, el("b", { text: "Figuren: " }), ...a.szene.figuren.map(f => el("span", { text: f }))));
+    ctx.tipp(tippsFuer(a.fragen));
+    const mehrere = a.fragen.length > 1;
+    const loesung = "Richtig: " + a.fragen.map((f, i) => (mehrere ? `${i + 1}. ` : "") + f.richtig).join(" ");
+
+    // Eine Frage: der Baustein auswahl.
+    if (!mehrere) {
+      const f = a.fragen[0];
+      fs.append(el("div", { class: "frage", text: f.frage }));
+      const box = LS.auswahl(ctx, { optionen: f.optionen, richtig: f.richtig, hinweis: HINWEIS[f.art], loesung, breite: BREITE, lob: waehle(LOB) });
+      for (const k of box.children) k.classList.add("fs-antwort");
+      fs.append(box);
+      return;
+    }
+
+    // Mehrere Fragen nacheinander (s4, s6): eigene Knöpfe wie in der Wortarten-Probe, weil auswahl die
+    // Aufgabe mit der ersten richtigen Antwort beendet.
+    ctx.loesung(loesung);
+    ctx.schritte(a.fragen.length);
+    const schritt = el("p", { class: "fs-schritt" });
+    const frage = el("div", { class: "frage" });
+    const erledigt = el("ul", { class: "fs-erledigt", "aria-live": "polite" });
+    const wahl = el("div", { class: "wahl" });
+    wahl.style.setProperty("--wahl-breite", BREITE + "px");
+    fs.append(schritt, frage, erledigt, wahl);
+    let i = 0;
+    const stelle = () => {
+      const f = a.fragen[i];
+      schritt.textContent = `Frage ${i + 1} von ${a.fragen.length}`;
+      frage.textContent = f.frage;
+      wahl.textContent = "";
+      for (const o of f.optionen) {
+        const k = el("button", { type: "button", class: "wahl-knopf fs-antwort", text: o });
+        k.addEventListener("click", () => {
+          if (ctx.vorbei() || k.disabled || k.classList.contains("gewaehlt")) return;
+          if (o === f.richtig) {
+            k.classList.add("richtig");
+            i++;
+            if (i === a.fragen.length) return ctx.richtig(waehle(LOB));
+            LS.ton("tipp");
+            erledigt.append(el("li", { text: `✓ ${f.frage} — ${f.richtig}` }));
+            stelle();
+            return;
+          }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+          ctx.falsch(HINWEIS[f.art], loesung);
+          if (ctx.vorbei()) wahl.querySelectorAll("button").forEach(b => { b.disabled = true; });
+        });
+        wahl.append(k);
+      }
+    };
+    stelle();
+  },
+});
+</script>
+</body>
+</html>

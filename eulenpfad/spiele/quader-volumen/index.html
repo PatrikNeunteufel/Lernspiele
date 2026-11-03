@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quader-Volumen</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .qv .frage { text-align: center; font-size: clamp(18px, 4.2vw, 25px); font-weight: 800; margin: 0 0 8px; }
+  .qv-schritt { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin: 0 0 4px; }
+  .qv-bild { display: flex; justify-content: center; align-items: flex-end; flex-wrap: wrap; gap: 6px 18px; margin: 0 auto 10px; }
+  .qv-bild svg { display: block; max-width: 100%; height: auto; }
+  .qv-bild text { font-family: inherit; font-weight: 800; fill: var(--text); }
+  .qv-geb { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .qv-name { font-weight: 800; color: var(--text-leise); font-size: clamp(15px, 3.4vw, 18px); }
+  .qv-legende { text-align: center; font-weight: 700; color: var(--text-leise); font-size: clamp(14px, 3.2vw, 17px); margin: 0 auto 10px; max-width: 640px; }
+  .qv-farbe { display: inline-block; width: .9em; height: .9em; border-radius: 4px; background: var(--f); vertical-align: -.1em; margin-right: 4px; border: 1px solid var(--text-leise); }
+  .qv .rechnung { text-align: center; font-size: clamp(24px, 6.4vw, 44px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 6px 0 12px; }
+  .qv .rechnung .qv-gesucht { color: var(--knopf); }
+  .qv-stapel { text-align: center; font-size: clamp(28px, 7vw, 48px); font-weight: 900; margin: 4px 0 12px; }
+  .qv-ergebnis { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
+  .qv-ergebnis .anzeige { flex: 1; margin: 0 0 10px; }
+  .qv-einheit { font-size: clamp(24px, 5.6vw, 36px); font-weight: 900; color: var(--knopf); min-width: 1.4em; margin-bottom: 10px; }
+  .qv-wahl .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🗃️ Quader-Volumen</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.2.A.3 (Volumen: Quader aus Würfeln bilden und zerlegen, Volumen vergleichen) und MA.3.A.1
+// (Begriffe Volumen, Inhalt; Referenzgrössen), Basisklasse 6. Das Kind zählt Würfel in Schichten, rechnet
+// Länge · Breite · Höhe, ordnet cm³, dm³, m³ und Liter zu und rechnet damit.
+//   s1 5. Klasse (MA.2.A.3.e, Vorstufe): Quader aus Einheitswürfeln bis 4·3·3 zählen — erst eine Schicht, dann
+//      die Zahl der Schichten, dann alle Würfel (Schicht mal Schichten).
+//   s2 6. Klasse, leichter (MA.2.A.3.e): fehlende Würfel bis zum vollen Quader (Kantenrahmen, teilweise gefüllt);
+//      Volumen in Würfeln aus den drei Kantenzahlen.
+//   s3 Klassenziel (MA.2.A.3.e, MA.3.A.1.h, Grundanspruch Ende 6. Klasse): Kanten in cm bis 10 cm, Volumen in cm³;
+//      cm³, dm³ oder m³ — welche Einheit passt zu Zündholzschachtel, Schuhkarton, Zimmer? Merksatz 1 dm³ = 1 l im Tipp.
+//   s4 schwerer (MA.2.A.3.e, MA.3.A.1.h): umrechnen 1 dm³ = 1000 cm³ = 1 l, 1 m³ = 1000 dm³; Quader zerlegen
+//      (wie viele 2·1·1 passen in 4·2·3?); aus einer Würfelzahl den Quader finden, der genau aufgeht.
+//   s5 7. Klasse (MA.2.A.3 nach e und MA.3.A.2, 3. Zyklus — Annahme): Kanten mit Kommazahlen und gemischten
+//      Einheiten (0.5 m = 5 dm) → dm³ und Liter; eine Kante aus Volumen und zwei Kanten.
+//   s6 Königsstufe: zusammengesetzte Körper aus zwei Quadern, Aquarium füllen (dm, Füllhöhe, Liter), zwei Quader
+//      mit verschiedenen Einheiten vergleichen (mehr, weniger, gleich).
+// Abgrenzung: Würfel-Zähler (Basisklasse 3) vergleicht Würfelgebäude und baut gleich gross; Würfelbau-Blick (4)
+// liest Ansichten und Baupläne; Komma-Messband (6) wandelt Längen, Gewichte und Hohlmasse um. Hier wird das
+// Volumen berechnet — Länge · Breite · Höhe — mit den Einheiten cm³, dm³, m³ und Liter.
+//
+// Zeichnung: Schrägbild (Kavalierprojektion) wie im Würfel-Zähler, eigene Funktion koerperSvg: Punkt (x, r, z) →
+// Bild x + r/2, z + r/2 (y nach oben); sichtbar sind Vorderseite, Oberseite und rechte Seite. Länge = Kante nach
+// rechts (x), Breite = Kante nach hinten (r), Höhe = Kante nach oben (z). Blöcke werden in der angegebenen
+// Reihenfolge gezeichnet (hinten vor vorne, unten vor oben), Einheitswürfel Reihe für Reihe von hinten.
+
+const { zufall, waehle, mische, el, zahlText, dezimalText, tippSchritte } = LS;
+const ID = "quader-volumen";
+
+// ---------- Zahlen und Texte ----------
+
+const rund = x => Math.round(x * 1000) / 1000;
+const zahl = x => (Number.isInteger(x) ? zahlText(x) : dezimalText(rund(x)));
+const mass = (x, e) => `${zahl(x)} ${e}`;
+const mal = (...t) => t.join(" · ");
+const seq = k => [...Array(k).keys()];
+const teiler = n => seq(n).map(i => i + 1).filter(d => n % d === 0);
+const istGanz = x => Number.isInteger(x);
+const hatKomma = x => !istGanz(rund(x));
+/** Höchstens zwei Nachkommastellen (Tastatur und Kopfrechnen). */
+const zweiStellen = x => Math.abs(x * 100 - Math.round(x * 100)) < 1e-9;
+const EINHEIT3 = { cm: "cm³", dm: "dm³", m: "m³" };
+/** Kante in dm, angegeben in dm, cm oder m. */
+const kanteIn = (dm, e) => (e === "cm" ? dm * 10 : e === "m" ? dm / 10 : dm);
+const kanteText = (dm, e) => mass(rund(kanteIn(dm, e)), e);
+/** Volumen eines Quaders in cm³ aus Kanten in einer Einheit. */
+const cm3Von = (kanten, e) => Math.round(kanten[0] * kanten[1] * kanten[2] * (e === "dm" ? 1000 : e === "m" ? 1e6 : 1));
+const TIPP_VOLUMEN = "Volumen heisst: Wie viele Würfel passen hinein?";
+const TIPP_SCHICHT = "Rechne zuerst eine Schicht: Länge mal Breite. Dann mal die Zahl der Schichten.";
+
+// Gegenstände für „Welche Einheit passt?“ (s3). Richtwerte: cm³ bis etwa eine Faust, dm³ (Liter) bis etwa ein
+// Koffer, m³ ab Zimmergrösse. Bewusst keine Grenzfälle (Kühlschrank, Badewanne, Trinkpäckli). ZU PRÜFEN.
+const DINGE = [
+  ["cm", "🎲", "Spielwürfel"], ["cm", "🧊", "Eiswürfel"], ["cm", "🧱", "Legostein"], ["cm", "🔥", "Zündholzschachtel"],
+  ["cm", "📱", "Handy"], ["cm", "🔋", "Batterie"], ["cm", "🧼", "Seifenstück"], ["cm", "🥜", "Walnuss"],
+  ["cm", "🍫", "Schokoladenriegel"], ["cm", "🍓", "Erdbeere"],
+  ["dm", "🥛", "Milchpackung"], ["dm", "👟", "Schuhkarton"], ["dm", "⚽", "Fussball"], ["dm", "🎒", "Schulrucksack"],
+  ["dm", "🍲", "Kochtopf"], ["dm", "🪣", "Putzeimer"], ["dm", "🧳", "Reisekoffer"], ["dm", "🧺", "Wäschekorb"],
+  ["m", "🛏️", "Zimmer"], ["m", "🏊", "Schwimmbad"], ["m", "🚚", "Laderaum eines Lastwagens"], ["m", "🚗", "Garage"],
+  ["m", "🏫", "Turnhalle"], ["m", "⛺", "Zelt"], ["m", "🛗", "Lift"], ["m", "🚌", "Innenraum eines Busses"], ["m", "🏠", "Haus"],
+];
+const KORB = {
+  cm: { text: "cm³", klein: "Würfel mit 1 cm Kante" },
+  dm: { text: "dm³", klein: "Würfel mit 1 dm Kante" },
+  m: { text: "m³", klein: "Würfel mit 1 m Kante" },
+};
+const GROESSE = { cm: "cm³ passt zu Dingen, die in eine Hand passen.", dm: "dm³ passt zu Dingen, die man mit den Armen trägt.", m: "m³ passt zu Räumen, in die man hineingehen kann." };
+
+// Umrechnen (s4): [grosse Einheit, kleine Einheit, Faktor]. Die Zahl n ist 2–9, damit der Merksatz im Tipp
+// (1 dm³ = 1000 cm³ = 1 l, 1 m³ = 1000 dm³) nie die Antwort ist.
+const UMRECHNEN = [["dm³", "cm³", 1000], ["m³", "dm³", 1000], ["l", "cm³", 1000], ["dm³", "l", 1]];
+const BILDEN_ZAHLEN = [8, 12, 16, 18, 20, 24, 27, 30, 32, 36, 40, 45, 48, 50, 54, 60, 64, 72];
+const DM_KANTEN = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5];
+const CM_KANTEN = [5, 10, 15, 20, 25, 30, 40, 50];
+const FUELL = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+const VERGLEICH = ["A", "gleich", "B"];
+const vergleichVon = (va, vb) => (va > vb ? "A" : va < vb ? "B" : "gleich");
+
+// Je Stufe: Aufgabenarten und Zahlenräume (Kanten in Würfeln oder cm).
+const STUFE = {
+  s1: { arten: ["zaehlen"], l: [1, 4], b: [1, 3], h: [1, 3] },
+  s2: { arten: ["fehlen", "rechnen"], l: [2, 5], b: [2, 3], h: [2, 4] },
+  s3: { arten: ["cm3", "einheit"], l: [2, 10], b: [2, 10], h: [2, 10] },
+  s4: { arten: ["umrechnen", "zerlegen", "bilden"], l: [2, 6], b: [2, 4], h: [2, 4] },
+  s5: { arten: ["dezimal", "kante"], l: [2, 10], b: [2, 10], h: [2, 10] },
+  s6: { arten: ["zusammen", "aquarium", "vergleich"], l: [3, 10], b: [2, 6], h: [1, 8] },
+};
+
+// ---------- Aufgaben als Daten ----------
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  for (let versuch = 0; versuch < 300; versuch++) {
+    const a = erzeuge(art, p);
+    if (a && pruefeAufgabe(a, stufe).length === 0) return a;
+  }
+  throw new Error(`keine Aufgabe ${art} in ${stufe}`);
+}
+
+/** Höhenkarte eines teilweise gefüllten Quaders: voll Schichten ganz, darüber teil Würfel von hinten links. */
+function fuellung(l, b, voll, teil) {
+  const plan = new Array(l * b).fill(voll);
+  const reihenfolge = [];
+  for (let r = b - 1; r >= 0; r--) for (let c = 0; c < l; c++) reihenfolge.push(c * b + r);
+  reihenfolge.slice(0, teil).forEach(f => { plan[f]++; });
+  return plan;
+}
+
+/** Alle Kantentripel l ≤ b ≤ h mit l · b · h = n, Kanten 1–10, höchstens eine 1. */
+function tripel(n) {
+  const t = [];
+  for (let a = 1; a <= 10; a++) for (let b = a; b <= 10; b++) {
+    if (n % (a * b)) continue;
+    const c = n / (a * b);
+    if (c >= b && c <= 10 && !(a === 1 && b === 1)) t.push([a, b, c]);
+  }
+  return t;
+}
+
+function erzeuge(art, p) {
+  const l = zufall(...p.l), b = zufall(...p.b), h = zufall(...p.h);
+  const V = l * b * h;
+  if (art === "zaehlen") {
+    if (V < 4 || l * b < 2) return null;
+    return { art, l, b, h, V, kennung: `zaehlen|${l}x${b}x${h}` };
+  }
+  if (art === "fehlen") {
+    const voll = zufall(0, h - 1), teil = zufall(voll === 0 ? 1 : 0, l * b - 1);
+    const plan = fuellung(l, b, voll, teil);
+    const drin = voll * l * b + teil;
+    if (drin < 1 || drin >= V) return null;
+    return { art, l, b, h, plan, drin, V, fehlt: V - drin, kennung: `fehlen|${l}x${b}x${h}|${plan.join("")}` };
+  }
+  if (art === "rechnen") return { art, l, b, h, V, kennung: `rechnen|${l}x${b}x${h}` };
+  if (art === "cm3") return { art, l, b, h, V, einheit: "cm", kennung: `cm3|${l}x${b}x${h}` };
+  if (art === "einheit") {
+    const [richtig, bild, name] = waehle(DINGE);
+    return { art, richtig, bild, name, koerbe: ["cm", "dm", "m"], kennung: `einheit|${name}` };
+  }
+  if (art === "umrechnen") {
+    const [gross, klein, faktor] = waehle(UMRECHNEN);
+    const n = zufall(2, 9);
+    const richtung = waehle(["gk", "kg"]);
+    const [von, zu] = richtung === "gk" ? [gross, klein] : [klein, gross];
+    const wert = richtung === "gk" ? n : n * faktor, antwort = richtung === "gk" ? n * faktor : n;
+    return { art, gross, klein, faktor, von, zu, wert, antwort, kennung: `umrechnen|${wert} ${von}|${zu}` };
+  }
+  if (art === "zerlegen") {
+    const q = waehle(teiler(l)), r = waehle(teiler(b)), s = waehle(teiler(h));
+    const klein = q * r * s;
+    if (klein < 2 || klein >= V) return null;
+    return { art, l, b, h, V, klein: [q, r, s], vKlein: klein, antwort: V / klein, kennung: `zerlegen|${l}x${b}x${h}|${q}x${r}x${s}` };
+  }
+  if (art === "bilden") {
+    const n = waehle(BILDEN_ZAHLEN);
+    const richtig = mische(waehle(tripel(n)));
+    const schluessel = t => t.slice().sort((x, y) => x - y).join("x");
+    const optionen = [richtig];
+    for (let s = 0; optionen.length < 3 && s < 200; s++) {
+      const t = [zufall(1, 6), zufall(1, 6), zufall(2, 10)];
+      const prod = t[0] * t[1] * t[2];
+      if (t.filter(x => x === 1).length > 1 || prod === n || Math.abs(prod - n) > Math.max(6, n / 3)) continue;
+      if (optionen.some(o => schluessel(o) === schluessel(t))) continue;
+      optionen.push(mische(t));
+    }
+    if (optionen.length < 3) return null;
+    const texte = mische(optionen.map(t => mal(...t)));
+    return { art, n, optionen: texte, richtig: mal(...richtig), kennung: `bilden|${n}|${texte.join("|")}` };
+  }
+  if (art === "dezimal") {
+    const kanten = [waehle(DM_KANTEN), waehle(DM_KANTEN), waehle(DM_KANTEN)];
+    const Vd = rund(kanten[0] * kanten[1] * kanten[2]);
+    if (!zweiStellen(Vd) || Vd > 60) return null;
+    const einheiten = kanten.map(() => waehle(["dm", "dm", "cm", "m"]));
+    const gemischt = new Set(einheiten).size > 1;
+    const komma = kanten.some((k, i) => hatKomma(kanteIn(k, einheiten[i])));
+    if (!gemischt && !komma) return null;
+    return { art, kanten, einheiten, V: Vd, kennung: `dezimal|${kanten.map((k, i) => kanteText(k, einheiten[i])).join("|")}` };
+  }
+  if (art === "kante") {
+    const einheit = waehle(["cm", "cm", "dm"]);
+    const gesucht = zufall(0, 2);
+    return { art, kanten: [l, b, h], einheit, gesucht, V, kennung: `kante|${l}x${b}x${h}|${einheit}|${gesucht}` };
+  }
+  if (art === "zusammen") {
+    const u = [zufall(3, 8), zufall(2, 5), zufall(1, 4)];
+    const lage = waehle(["oben", "rechts"]);
+    const d = lage === "oben" ? [zufall(1, u[0]), zufall(1, u[1]), zufall(1, 3)] : [zufall(1, 4), zufall(1, u[1]), zufall(1, u[2])];
+    if (lage === "oben" && d[0] === u[0] && d[1] === u[1]) return null; // wäre nur ein höherer Quader
+    if (lage === "rechts" && d[1] === u[1] && d[2] === u[2]) return null; // wäre nur ein längerer Quader
+    const V1 = u[0] * u[1] * u[2], V2 = d[0] * d[1] * d[2];
+    return { art, lage, unten: u, dazu: d, V1, V2, V: V1 + V2, kennung: `zusammen|${lage}|${u.join("x")}|${d.join("x")}` };
+  }
+  if (art === "aquarium") {
+    const hoehe = zufall(3, 8), fuell = waehle(FUELL);
+    if (fuell >= hoehe) return null;
+    const einheiten = [waehle(["dm", "dm", "cm"]), waehle(["dm", "dm", "cm"])];
+    return { art, l, b, hoehe, fuell, einheiten, liter: rund(l * b * fuell), kennung: `aquarium|${l}x${b}x${hoehe}|${fuell}|${einheiten.join("")}` };
+  }
+  if (art === "vergleich") {
+    const dm = [waehle(DM_KANTEN), waehle(DM_KANTEN), waehle(DM_KANTEN)];
+    const vDm = cm3Von(dm, "dm");
+    const ergebnisDm = waehle(["mehr", "gleich", "weniger"]); // der dm-Quader gegenüber dem cm-Quader
+    let cm;
+    if (ergebnisDm === "gleich") {
+      const kandidaten = [];
+      for (const x of CM_KANTEN) for (const y of CM_KANTEN) for (const z of CM_KANTEN) if (x <= y && y <= z && x * y * z === vDm) kandidaten.push([x, y, z]);
+      if (!kandidaten.length) return null;
+      cm = mische(waehle(kandidaten));
+    } else {
+      cm = [waehle(CM_KANTEN), waehle(CM_KANTEN), waehle(CM_KANTEN)];
+      const vCm = cm3Von(cm, "cm"), q = vCm / vDm;
+      if (vCm === vDm || q < 0.5 || q > 2 || (ergebnisDm === "mehr") !== (vDm > vCm)) return null;
+    }
+    const quader = mische([{ kanten: dm, einheit: "dm" }, { kanten: cm, einheit: "cm" }]);
+    const ergebnis = vergleichVon(cm3Von(quader[0].kanten, quader[0].einheit), cm3Von(quader[1].kanten, quader[1].einheit));
+    return { art, quader, ergebnis, kennung: `vergleich|${quader.map(q => q.kanten.join("x") + q.einheit).join("|")}` };
+  }
+  return null;
+}
+
+/**
+ * Mängel einer Aufgabe — für tools/pruefe_spiele.js: Kanten im Zahlenraum der Stufe, Volumen und Antwort
+ * nachgerechnet, Zerlegung passt (Teiler), Einheiten konsistent, Optionen verschieden mit genau einer richtigen,
+ * Dezimalzahlen nur in s5 und s6.
+ */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  if (!p.arten.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in ${stufe}`);
+  const im = (x, [lo, hi]) => Number.isInteger(x) && x >= lo && x <= hi;
+  const kantenOk = (l, b, h) => { if (!im(l, p.l) || !im(b, p.b) || !im(h, p.h)) m.push(`Kanten ${l}·${b}·${h} ausserhalb der Stufe`); };
+  if (a.art === "zaehlen") {
+    kantenOk(a.l, a.b, a.h);
+    if (a.V !== a.l * a.b * a.h) m.push("Volumen falsch");
+    if (a.V < 4 || a.l * a.b < 2) m.push("zu kleiner Quader");
+  } else if (a.art === "fehlen") {
+    kantenOk(a.l, a.b, a.h);
+    if (a.V !== a.l * a.b * a.h) m.push("Volumen falsch");
+    if (a.plan.length !== a.l * a.b || a.plan.some(x => !Number.isInteger(x) || x < 0 || x > a.h)) m.push("Füllung höher als der Quader");
+    const unten = Math.min(...a.plan);
+    if (a.plan.some(x => x > unten + 1)) m.push("mehr als eine angefangene Schicht");
+    const drin = a.plan.reduce((x, y) => x + y, 0);
+    if (a.drin !== drin || a.fehlt !== a.V - drin) m.push("Zahlen der Füllung stimmen nicht");
+    if (drin < 1 || drin >= a.V) m.push("Quader leer oder schon voll");
+  } else if (a.art === "rechnen" || a.art === "cm3") {
+    kantenOk(a.l, a.b, a.h);
+    if (a.V !== a.l * a.b * a.h) m.push("Volumen falsch");
+    if (a.art === "cm3" && a.einheit !== "cm") m.push("Einheit in s3 nicht cm");
+  } else if (a.art === "einheit") {
+    const ding = DINGE.find(d => d[2] === a.name);
+    if (!ding) m.push(`unbekannter Gegenstand ${a.name}`);
+    else if (ding[0] !== a.richtig) m.push(`${a.name}: Einheit ${a.richtig} statt ${ding[0]}`);
+    if (!KORB[a.richtig]) m.push("unbekannte Einheit");
+    if (a.koerbe.length !== 3 || new Set(a.koerbe).size !== 3 || !a.koerbe.includes(a.richtig)) m.push("Körbe falsch");
+  } else if (a.art === "umrechnen") {
+    const paar = UMRECHNEN.find(([g, k]) => g === a.gross && k === a.klein);
+    if (!paar) m.push("Einheitenpaar unbekannt");
+    else if (paar[2] !== a.faktor) m.push("Faktor falsch");
+    if (!((a.von === a.gross && a.zu === a.klein) || (a.von === a.klein && a.zu === a.gross))) m.push("von/zu passen nicht zum Paar");
+    const soll = a.von === a.gross ? a.wert * a.faktor : a.wert / a.faktor;
+    if (soll !== a.antwort || !Number.isInteger(a.antwort)) m.push("Antwort falsch umgerechnet");
+    const n = a.von === a.gross ? a.wert : a.antwort;
+    if (!im(n, [2, 9])) m.push(`Zahl ${n} nicht 2–9`);
+  } else if (a.art === "zerlegen") {
+    kantenOk(a.l, a.b, a.h);
+    const [q, r, s] = a.klein;
+    if (a.V !== a.l * a.b * a.h) m.push("Volumen falsch");
+    if (!Number.isInteger(q) || !Number.isInteger(r) || !Number.isInteger(s) || a.l % q || a.b % r || a.h % s) m.push("kleiner Quader teilt die Kanten nicht");
+    if (a.vKlein !== q * r * s || a.vKlein < 2 || a.vKlein >= a.V) m.push("kleiner Quader zu klein oder zu gross");
+    if (a.antwort !== a.V / a.vKlein || !Number.isInteger(a.antwort) || a.antwort < 2) m.push("Anzahl falsch");
+  } else if (a.art === "bilden") {
+    if (!BILDEN_ZAHLEN.includes(a.n)) m.push("Würfelzahl nicht vorgesehen");
+    if (a.optionen.length !== 3 || new Set(a.optionen).size !== 3) m.push("nicht drei verschiedene Optionen");
+    const produkte = a.optionen.map(o => o.split(" · ").map(Number).reduce((x, y) => x * y, 1));
+    if (produkte.filter(x => x === a.n).length !== 1) m.push("nicht genau eine Option geht auf");
+    if (!a.optionen.includes(a.richtig) || produkte[a.optionen.indexOf(a.richtig)] !== a.n) m.push("richtige Option falsch");
+    for (const o of a.optionen) {
+      const t = o.split(" · ").map(Number);
+      if (t.length !== 3 || t.some(x => !Number.isInteger(x) || x < 1 || x > 10)) m.push(`Option ${o} ausserhalb 1–10`);
+    }
+  } else if (a.art === "dezimal") {
+    if (a.kanten.length !== 3 || a.kanten.some(k => !DM_KANTEN.includes(k))) m.push("Kante nicht aus der Liste");
+    if (a.einheiten.some(e => !["dm", "cm", "m"].includes(e))) m.push("Einheit unbekannt");
+    if (rund(a.kanten[0] * a.kanten[1] * a.kanten[2]) !== a.V) m.push("Volumen falsch");
+    if (!zweiStellen(a.V) || a.V > 60) m.push("Antwort mit mehr als zwei Nachkommastellen oder zu gross");
+    if (new Set(a.einheiten).size < 2 && !a.kanten.some((k, i) => hatKomma(kanteIn(k, a.einheiten[i])))) m.push("weder gemischt noch mit Komma");
+    // Text zurücklesen: Angabe in cm oder m ergibt wieder die Kante in dm
+    a.kanten.forEach((k, i) => {
+      const t = kanteText(k, a.einheiten[i]);
+      const w = Number(t.replace(/\s/g, "").replace(",", ".").replace(/[a-z]+$/, "")) / (a.einheiten[i] === "cm" ? 10 : a.einheiten[i] === "m" ? 0.1 : 1);
+      if (rund(w) !== k) m.push(`Text «${t}» passt nicht zu ${k} dm`);
+    });
+  } else if (a.art === "kante") {
+    kantenOk(...a.kanten);
+    if (a.V !== a.kanten[0] * a.kanten[1] * a.kanten[2]) m.push("Volumen falsch");
+    if (!["cm", "dm"].includes(a.einheit)) m.push("Einheit unbekannt");
+    if (!im(a.gesucht, [0, 2])) m.push("gesuchte Kante unbekannt");
+    const andere = a.kanten.filter((_, i) => i !== a.gesucht);
+    if (a.V % (andere[0] * andere[1]) || a.V / (andere[0] * andere[1]) !== a.kanten[a.gesucht]) m.push("Kante geht nicht auf");
+  } else if (a.art === "zusammen") {
+    const [l, b, h] = a.unten, [l2, b2, h2] = a.dazu;
+    if (!im(l, [3, 8]) || !im(b, [2, 5]) || !im(h, [1, 4])) m.push("unterer Quader ausserhalb");
+    if (a.lage === "oben") {
+      if (!im(l2, [1, l]) || !im(b2, [1, b]) || !im(h2, [1, 3])) m.push("oberer Quader passt nicht auf den unteren");
+      if (l2 === l && b2 === b) m.push("oberer Quader deckt den unteren ganz — nur ein Quader");
+    } else if (a.lage === "rechts") {
+      if (!im(l2, [1, 4]) || !im(b2, [1, b]) || !im(h2, [1, h])) m.push("angebauter Quader passt nicht an den unteren");
+      if (b2 === b && h2 === h) m.push("angebauter Quader verlängert nur — nur ein Quader");
+    } else m.push("Lage unbekannt");
+    if (a.V1 !== l * b * h || a.V2 !== l2 * b2 * h2 || a.V !== a.V1 + a.V2) m.push("Volumen falsch");
+  } else if (a.art === "aquarium") {
+    if (!im(a.l, p.l) || !im(a.b, p.b) || !im(a.hoehe, [3, 8])) m.push("Aquarium ausserhalb");
+    if (!FUELL.includes(a.fuell) || a.fuell >= a.hoehe) m.push("Füllhöhe passt nicht");
+    if (a.einheiten.length !== 2 || a.einheiten.some(e => !["dm", "cm"].includes(e))) m.push("Einheit unbekannt");
+    if (a.liter !== rund(a.l * a.b * a.fuell) || !zweiStellen(a.liter)) m.push("Liter falsch");
+  } else if (a.art === "vergleich") {
+    if (!a.quader || a.quader.length !== 2) m.push("nicht zwei Quader");
+    else {
+      const [q1, q2] = a.quader;
+      if (q1.einheit === q2.einheit) m.push("beide Quader in derselben Einheit");
+      for (const q of a.quader) {
+        if (q.einheit === "dm" && q.kanten.some(k => !DM_KANTEN.includes(k))) m.push("dm-Kante nicht aus der Liste");
+        if (q.einheit === "cm" && q.kanten.some(k => !CM_KANTEN.includes(k))) m.push("cm-Kante nicht aus der Liste");
+        if (!["dm", "cm"].includes(q.einheit)) m.push("Einheit unbekannt");
+      }
+      const v1 = cm3Von(q1.kanten, q1.einheit), v2 = cm3Von(q2.kanten, q2.einheit);
+      if (!VERGLEICH.includes(a.ergebnis) || vergleichVon(v1, v2) !== a.ergebnis) m.push("Vergleich stimmt nicht mit den Volumen");
+      const q = v1 / v2;
+      if (v1 !== v2 && (q < 0.5 || q > 2)) m.push("Volumen zu verschieden");
+    }
+  } else m.push(`unbekannte Art ${a.art}`);
+  // Dezimalzahlen nur in s5 und s6
+  if (!["s5", "s6"].includes(stufe)) {
+    const zahlen = [a.l, a.b, a.h, a.V, a.wert, a.antwort, a.drin, a.fehlt, a.n].filter(x => x !== undefined);
+    if (zahlen.some(x => !Number.isInteger(x))) m.push("Dezimalzahl in einer Stufe ohne Kommazahlen");
+  }
+  return m;
+}
+
+// ---------- Zeichnen ----------
+
+/**
+ * Schrägbild als SVG (Kavalierprojektion). opt.l, opt.b, opt.h: Grösse des ganzen Körpers in Einheiten (Massstab
+ * und Rahmen). opt.bloecke: Blöcke { x, r, z, l, b, h, farbe } in Zeichenreihenfolge. opt.plan: Höhenkarte
+ * [c * b + r] aus Einheitswürfeln in opt.farbe. opt.rahmen: Kanten des Quaders l × b × h, hintere gestrichelt.
+ * opt.marken: Beschriftungen { kante: "l" | "b" | "h" | "links", text } an den Kanten des ganzen Körpers.
+ */
+function koerperSvg(opt) {
+  const L = opt.l, B = opt.b, H = opt.h;
+  const marken = opt.marken || [];
+  const mL = marken.some(m => m.kante === "links") ? 72 : 6;
+  const mR = marken.some(m => m.kante === "b" || m.kante === "h") ? 68 : 6;
+  const mO = 8, mU = marken.some(m => m.kante === "l") ? 28 : 8;
+  const breiteE = L + B / 2, hoeheE = H + B / 2;
+  const u = Math.max(8, Math.min(opt.u || 32, (340 - mL - mR) / breiteE, (240 - mO - mU) / hoeheE));
+  const X = (x, r) => mL + (x + r / 2) * u;
+  const Y = (z, r) => mO + (hoeheE - z - r / 2) * u;
+  const pt = (x, r, z) => `${X(x, r).toFixed(1)},${Y(z, r).toFixed(1)}`;
+  const pts = ecken => ecken.map(e => pt(...e)).join(" ");
+  const teile = [];
+  const linie = (p1, p2, extra = "") => teile.push(`<line x1="${X(p1[0], p1[1]).toFixed(1)}" y1="${Y(p1[2], p1[1]).toFixed(1)}" x2="${X(p2[0], p2[1]).toFixed(1)}" y2="${Y(p2[2], p2[1]).toFixed(1)}" stroke="var(--text)" stroke-width="2" stroke-linecap="round"${extra}/>`);
+  const seite = (ecken, farbe, deck, deckung, dicke) => {
+    const pp = pts(ecken);
+    teile.push(`<polygon points="${pp}" fill="${farbe}" stroke="none"/>`);
+    if (deck) teile.push(`<polygon points="${pp}" fill="${deck}" opacity="${deckung}" stroke="none"/>`);
+    teile.push(`<polygon points="${pp}" fill="none" stroke="var(--text)" stroke-width="${dicke}" stroke-linejoin="round"/>`);
+  };
+  // Ein Block: Vorderseite, Oberseite (aufgehellt), rechte Seite (abgedunkelt — Deckschicht statt color-mix()).
+  const block = ({ x, r, z, l, b, h, farbe }, dicke = 2) => {
+    seite([[x, r, z], [x + l, r, z], [x + l, r, z + h], [x, r, z + h]], farbe, null, 0, dicke);
+    seite([[x, r, z + h], [x + l, r, z + h], [x + l, r + b, z + h], [x, r + b, z + h]], farbe, "var(--karte)", .45, dicke);
+    seite([[x + l, r, z], [x + l, r + b, z], [x + l, r + b, z + h], [x + l, r, z + h]], farbe, "var(--text)", .3, dicke);
+  };
+  // Rahmen: die drei hinteren Kanten gestrichelt zuerst, damit Würfel und Blöcke sie verdecken
+  if (opt.rahmen) for (const [p1, p2] of [[[0, B, 0], [L, B, 0]], [[0, B, 0], [0, B, H]], [[0, 0, 0], [0, B, 0]]]) linie(p1, p2, ' stroke-dasharray="4 4" opacity=".6"');
+  if (opt.plan) for (let r = B - 1; r >= 0; r--) for (let c = 0; c < L; c++) for (let z = 0; z < opt.plan[c * B + r]; z++) block({ x: c, r, z, l: 1, b: 1, h: 1, farbe: opt.farbe }, 1.6);
+  for (const bl of opt.bloecke || []) block(bl, bl.dicke);
+  if (opt.rahmen) for (const [p1, p2] of [[[0, 0, 0], [L, 0, 0]], [[L, 0, 0], [L, 0, H]], [[L, 0, H], [0, 0, H]], [[0, 0, H], [0, 0, 0]],
+    [[L, 0, 0], [L, B, 0]], [[L, B, 0], [L, B, H]], [[L, 0, H], [L, B, H]], [[0, 0, H], [0, B, H]], [[0, B, H], [L, B, H]]]) linie(p1, p2);
+  // Beschriftungen ausserhalb des Körpers: Länge unter der vorderen Kante, Breite rechts neben der unteren rechten
+  // Tiefenkante, Höhe rechts neben der hinteren rechten Kante, „links“ neben der vorderen linken Kante.
+  for (const m of marken) {
+    let x, y, anker = "middle";
+    if (m.kante === "l") { x = X(L / 2, 0); y = Y(0, 0) + 19; }
+    else if (m.kante === "b") { x = X(L, B / 2) + 7; y = Y(0, B / 2) + 14; anker = "start"; }
+    else if (m.kante === "h") { x = X(L, B) + 7; y = Y(H / 2, B) + 5; anker = "start"; }
+    else { x = X(0, 0) - 7; y = Y(m.hoehe !== undefined ? m.hoehe / 2 : H / 2, 0) + 5; anker = "end"; }
+    teile.push(`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anker}" font-size="15">${m.text}</text>`);
+  }
+  const w = breiteE * u + mL + mR, hh = hoeheE * u + mO + mU;
+  return el("span", { html: `<svg viewBox="0 0 ${w.toFixed(1)} ${hh.toFixed(1)}" width="${Math.round(w)}" height="${Math.round(hh)}" aria-hidden="true">${teile.join("")}</svg>` });
+}
+
+/** Voller Quader aus Einheitswürfeln (s1, s2). */
+const wuerfelQuader = (l, b, h, farbe, marken) => koerperSvg({ l, b, h, plan: new Array(l * b).fill(h), farbe, marken });
+/** Glatter Quader mit Massangaben (ab s3). */
+const glatterQuader = (l, b, h, farbe, marken) => koerperSvg({ l, b, h, bloecke: [{ x: 0, r: 0, z: 0, l, b, h, farbe }], marken });
+const marken3 = (tl, tb, th) => [{ kante: "l", text: tl }, { kante: "b", text: tb }, { kante: "h", text: th }];
+const bild = (...teile) => el("div", { class: "qv-bild" }, ...teile);
+const mitName = (svg, name) => el("div", { class: "qv-geb" }, svg, el("div", { class: "qv-name", text: name }));
+const farbfeld = f => { const s = el("span", { class: "qv-farbe", "aria-hidden": "true" }); s.style.setProperty("--f", f); return s; };
+
+// ---------- Tastatur-Antwort ----------
+
+/**
+ * Anzeige (mit Einheit daneben) und Zifferntastatur. pruefe(wert) liefert true (gelöst: Tastatur sperren,
+ * ctx.richtig mit lob), "weiter" (Zwischenschritt richtig: Anzeige leeren) oder den Hinweis für ctx.falsch.
+ */
+function tippfeld(ctx, qv, { einheit = "", dezimal = false, maxStellen = 5, loesung, lob, pruefe }) {
+  const anzeige = el("div", { class: "anzeige leer", "aria-label": einheit ? `Antwort in ${einheit}` : "Antwort" });
+  const zeile = el("div", { class: "qv-ergebnis" }, anzeige);
+  if (einheit) zeile.append(el("span", { class: "qv-einheit", text: einheit }));
+  qv.append(zeile);
+  const tasten = LS.tastatur({
+    anzeige, maxStellen, dezimal, nachkomma: 3,
+    onOk(w) {
+      if (ctx.vorbei()) return;
+      const r = pruefe(w);
+      if (r === true) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(typeof lob === "function" ? lob() : lob); return; }
+      if (r === "weiter") { LS.ton("tipp"); tasten.leeren(); return; }
+      anzeige.classList.add("falsch");
+      ctx.falsch(r, loesung);
+      if (ctx.vorbei()) tasten.gesperrt = true;
+    },
+  });
+  qv.append(tasten.element);
+  return tasten;
+}
+
+/** Ist w das Ergebnis mit verrutschtem Komma (Faktor 10, 100, 1000)? */
+const kommaVerrutscht = (w, soll) => w > 0 && [10, 100, 1000, 0.1, 0.01, 0.001].some(f => Math.abs(w / soll - f) < 1e-9);
+const gleich = (w, soll) => Math.abs(w - soll) < 1e-9;
+
+// ---------- Aufgabenarten ----------
+
+/** s1: eine Schicht, die Zahl der Schichten, alle Würfel — drei Schritte auf der Tastatur. */
+function zeigeZaehlen(ctx, a, qv) {
+  const schicht = a.l * a.b;
+  const loesung = `Eine Schicht: ${a.l} · ${a.b} = ${schicht} Würfel. ${a.h} ${a.h === 1 ? "Schicht" : "Schichten"}. ${schicht} · ${a.h} = ${a.V} Würfel`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(schicht) + tippSchritte(a.h) + tippSchritte(a.V));
+  ctx.tipp([TIPP_VOLUMEN, TIPP_SCHICHT,
+    `Eine Schicht ist ${a.l} Würfel lang und ${a.b} Würfel breit. Zähl dann, wie viele Schichten aufeinander liegen.`]);
+  const schritt = el("p", { class: "qv-schritt", text: "1. Schritt" });
+  const frage = el("div", { class: "frage", text: "Wie viele Würfel hat eine Schicht?" });
+  qv.append(schritt, frage, bild(wuerfelQuader(a.l, a.b, a.h, "var(--deko-6)")));
+  let stufe = 1;
+  tippfeld(ctx, qv, {
+    einheit: "Würfel", maxStellen: 3, loesung, lob: `Genau, ${a.V} Würfel!`,
+    pruefe(w) {
+      if (stufe === 1) {
+        if (w !== schicht) return "Zähl die Würfel in der obersten Schicht: so viele in einer Reihe, mal so viele Reihen.";
+        stufe = 2; schritt.textContent = `✓ Eine Schicht: ${schicht} Würfel — 2. Schritt`; frage.textContent = "Wie viele Schichten liegen aufeinander?";
+        return "weiter";
+      }
+      if (stufe === 2) {
+        if (w !== a.h) return "Zähl, wie viele Würfel übereinander stehen — so viele Schichten sind es.";
+        stufe = 3; schritt.textContent = `✓ Schicht: ${schicht} Würfel, ${a.h} ${a.h === 1 ? "Schicht" : "Schichten"} — 3. Schritt`; frage.textContent = "Wie viele Würfel sind es zusammen?";
+        return "weiter";
+      }
+      if (w === a.V) return true;
+      return w === schicht ? "Das ist erst eine Schicht. Nimm sie mal die Zahl der Schichten."
+        : "Rechne: Würfel in einer Schicht mal Zahl der Schichten.";
+    },
+  });
+}
+
+/** s2: Wie viele Würfel fehlen, bis der Quader voll ist? */
+function zeigeFehlen(ctx, a, qv) {
+  const loesung = `Der ganze Quader: ${mal(a.l, a.b, a.h)} = ${a.V} Würfel. Drin sind ${a.drin}. Es fehlen ${a.V} − ${a.drin} = ${a.fehlt} Würfel`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(a.fehlt));
+  ctx.tipp([TIPP_VOLUMEN, "Rechne zuerst, wie viele Würfel in den ganzen Quader passen: Länge mal Breite mal Höhe.",
+    "Zähl dann die Würfel, die schon drin sind — die unteren Schichten sind ganz voll. Voll weniger drin: So viele fehlen."]);
+  qv.append(el("div", { class: "frage", text: `Wie viele Würfel fehlen, bis der Quader voll ist? Er ist ${a.l} Würfel lang, ${a.b} Würfel breit und ${a.h} Würfel hoch.` }),
+    bild(koerperSvg({ l: a.l, b: a.b, h: a.h, plan: a.plan, farbe: "var(--deko-3)", rahmen: true, marken: marken3(a.l, a.b, a.h) })));
+  tippfeld(ctx, qv, {
+    einheit: "Würfel", maxStellen: 3, loesung, lob: "Genau, dann ist der Quader voll!",
+    pruefe(w) {
+      if (w === a.fehlt) return true;
+      if (w === a.V) return "Das ist der ganze Quader. Ein Teil ist schon drin — zieh ihn ab.";
+      if (w === a.drin) return "So viele sind schon drin. Gefragt ist, wie viele noch fehlen: voll weniger drin.";
+      return w > a.fehlt ? "Das sind zu viele. Rechne: Länge mal Breite mal Höhe — und zieh ab, was schon drin ist."
+        : "Das sind zu wenige. Zähl die Würfel, die schon drin sind, und rechne: voll weniger drin.";
+    },
+  });
+}
+
+/** s2: Volumen in Würfeln aus den drei Kantenzahlen. */
+function zeigeRechnen(ctx, a, qv) {
+  const loesung = `${mal(a.l, a.b, a.h)} = ${a.V} Würfel`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(a.V));
+  ctx.tipp([TIPP_VOLUMEN, TIPP_SCHICHT, `Rechne ${a.l} · ${a.b}, und das Ergebnis mal ${a.h}.`]);
+  qv.append(el("div", { class: "frage", text: `Wie viele Würfel hat der Quader? Er ist ${a.l} Würfel lang, ${a.b} Würfel breit und ${a.h} Würfel hoch.` }),
+    bild(wuerfelQuader(a.l, a.b, a.h, "var(--deko-6)", marken3(a.l, a.b, a.h))));
+  tippfeld(ctx, qv, { einheit: "Würfel", maxStellen: 3, loesung, lob: "Richtig gerechnet!", pruefe: w => hinweisProdukt(w, a.l, a.b, a.h, a.V) });
+}
+
+/** Hinweis für ein falsches Produkt Länge · Breite · Höhe (true, wenn richtig). */
+function hinweisProdukt(w, l, b, h, V) {
+  if (w === V) return true;
+  if (w === l * b) return "Das ist erst eine Schicht (Länge mal Breite). Nimm sie mal die Höhe.";
+  if (w === l + b + h) return "Nicht zusammenzählen, sondern malnehmen: Länge mal Breite mal Höhe.";
+  if (w === l * b + h || w === l * h || w === b * h) return "Alle drei Kanten gehören dazu: Länge mal Breite mal Höhe.";
+  return "Rechne Länge mal Breite — das ist eine Schicht. Dann mal die Höhe.";
+}
+
+/** s3: Volumen in cm³. */
+function zeigeCm3(ctx, a, qv) {
+  const e = a.einheit, e3 = EINHEIT3[e];
+  const loesung = `V = ${mal(mass(a.l, e), mass(a.b, e), mass(a.h, e))} = ${a.V} ${e3}`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(a.V));
+  ctx.tipp([`Volumen heisst: Wie viel Platz ist drin — wie viele Würfel mit 1 ${e} Kante passen hinein?`,
+    `Volumen = Länge · Breite · Höhe. Die Einheit ist ${e3}.`, `Rechne ${mal(a.l, a.b, a.h)}.`]);
+  qv.append(el("div", { class: "frage", text: `Wie gross ist das Volumen? Der Quader ist ${mass(a.l, e)} lang, ${mass(a.b, e)} breit und ${mass(a.h, e)} hoch.` }),
+    bild(glatterQuader(a.l, a.b, a.h, "var(--deko-6)", marken3(mass(a.l, e), mass(a.b, e), mass(a.h, e)))));
+  tippfeld(ctx, qv, { einheit: e3, maxStellen: 4, loesung, lob: `Genau, ${a.V} ${e3}!`, pruefe: w => hinweisProdukt(w, a.l, a.b, a.h, a.V) });
+}
+
+/** s3: Welche Einheit passt zum Gegenstand? Körbe cm³, dm³, m³. */
+function zeigeEinheit(ctx, a, qv) {
+  ctx.tipp(["Welcher Würfel passt zum Ding: einer mit 1 cm Kante (ein Zuckerwürfel), mit 1 dm Kante (eine Milchpackung) oder mit 1 m Kante (ein grosser Kasten)?",
+    "Passt es in eine Hand, trägt man es mit den Armen, oder kann man hineingehen?",
+    "Merk dir: Ein Würfel mit 1 dm Kante fasst genau 1 Liter — so gross wie eine Milchpackung."]);
+  qv.append(el("div", { class: "frage", text: "In welcher Einheit misst man, wie viel da hineinpasst?" }));
+  const { karte, box } = LS.koerbe(ctx, {
+    karte: { bild: a.bild, text: a.name },
+    koerbe: a.koerbe, richtig: a.richtig,
+    korbInhalt: u => KORB[u],
+    hinweis: u => `${GROESSE[u]} Überleg, wie gross das Ding wirklich ist.`,
+    loesung: `${a.name}: ${KORB[a.richtig].text}`,
+    lob: a.richtig === "dm" ? `Richtig, ${a.name} misst man in dm³ — das sind Liter!` : `Richtig, ${a.name} misst man in ${KORB[a.richtig].text}.`,
+  });
+  // Sachaufgabe, kein Lesespiel: Die Eule liest den Namen des Dings mit vor (rahmen.md Abschnitt 12).
+  karte.querySelector("b").classList.add("frage");
+  qv.append(karte, box);
+}
+
+/** s4: Einheiten umrechnen (dm³, cm³, m³, Liter). */
+function zeigeUmrechnen(ctx, a, qv) {
+  const loesung = `${mass(a.wert, a.von)} = ${mass(a.antwort, a.zu)}`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(a.antwort));
+  const richtung = a.faktor === 1 ? "nicht anders — die Einheiten sind gleich gross" : a.von === a.gross ? "1000-mal grösser" : "1000-mal kleiner";
+  ctx.tipp(["Ein Würfel mit 1 dm Kante ist 10 cm lang, 10 cm breit und 10 cm hoch. Rechne aus, wie viele cm³ das sind.",
+    "Merk dir: 1 dm³ = 1000 cm³ = 1 Liter, und 1 m³ = 1000 dm³.",
+    `Von ${a.von} zu ${a.zu} wird die Zahl ${richtung}.`]);
+  qv.append(el("div", { class: "frage", text: "Wandle um." }),
+    el("div", { class: "rechnung", html: `${mass(a.wert, a.von)} = <span class="qv-gesucht">? ${a.zu}</span>` }));
+  tippfeld(ctx, qv, {
+    einheit: a.zu, maxStellen: 5, loesung, lob: "Richtig umgewandelt!",
+    pruefe(w) {
+      if (w === a.antwort) return true;
+      if (a.faktor === 1) return "Liter und dm³ sind gleich gross: Ein Liter ist ein Würfel mit 1 dm Kante.";
+      if (w === a.wert) return a.von === a.gross ? `Die Zahl bleibt nicht gleich: In 1 ${a.von} stecken viele ${a.zu}.` : `Die Zahl bleibt nicht gleich: Viele ${a.von} ergeben erst 1 ${a.zu}.`;
+      if (kommaVerrutscht(w, a.antwort)) return `Das Komma ist verrutscht. Zwischen ${a.gross} und ${a.klein} liegt der Faktor 1000 — drei Stellen.`;
+      return `Zwischen ${a.gross} und ${a.klein} liegt der Faktor 1000. ${a.von === a.gross ? "Von der grossen zur kleinen Einheit wird die Zahl grösser." : "Von der kleinen zur grossen Einheit wird die Zahl kleiner."}`;
+    },
+  });
+}
+
+/** s4: Wie viele kleine Quader passen in den grossen? */
+function zeigeZerlegen(ctx, a, qv) {
+  const [q, r, s] = a.klein;
+  const loesung = `Gross: ${mal(a.l, a.b, a.h)} = ${a.V} Würfel. Klein: ${mal(q, r, s)} = ${a.vKlein} Würfel. ${a.V} : ${a.vKlein} = ${a.antwort}`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(a.antwort));
+  ctx.tipp(["Rechne zuerst, wie viele Würfel der grosse Quader hat — und wie viele der kleine.",
+    "Wie oft passt der kleine Quader in den grossen? Teile: gross durch klein.",
+    `Oder Kante für Kante: In die Länge passt der kleine Quader ${a.l / q}-mal, in die Breite ${a.b / r}-mal, in die Höhe ${a.h / s}-mal. Nimm die drei Zahlen mal.`]);
+  qv.append(el("div", { class: "frage", text: `Wie viele kleine Quader passen in den grossen? Der grosse ist ${mal(a.l, a.b, a.h)} Würfel, der kleine ${mal(q, r, s)}.` }),
+    bild(mitName(wuerfelQuader(a.l, a.b, a.h, "var(--deko-6)", marken3(a.l, a.b, a.h)), "gross"),
+      mitName(koerperSvg({ l: q, b: r, h: s, plan: new Array(q * r).fill(s), farbe: "var(--deko-3)", u: 22, marken: marken3(q, r, s) }), "klein")));
+  tippfeld(ctx, qv, {
+    einheit: "", maxStellen: 3, loesung, lob: "Genau, so oft passt er hinein!",
+    pruefe(w) {
+      if (w === a.antwort) return true;
+      if (w === a.V) return "Das ist die Zahl der Würfel im grossen Quader. Gefragt ist, wie oft der kleine hineinpasst.";
+      if (w === a.vKlein) return "Das ist die Zahl der Würfel im kleinen Quader. Wie oft passt er in den grossen?";
+      if (w === a.V - a.vKlein) return "Nicht abziehen, sondern teilen: gross durch klein.";
+      return "Rechne beide Würfelzahlen aus: Länge mal Breite mal Höhe. Dann: gross durch klein.";
+    },
+  });
+}
+
+/** s4: Aus n Würfeln einen Quader bilden — welcher geht genau auf? */
+function zeigeBilden(ctx, a, qv) {
+  ctx.tipp(["Volumen = Länge · Breite · Höhe. Rechne das bei jedem Vorschlag aus.",
+    `Welcher Vorschlag ergibt genau ${a.n}? Nur einer passt.`,
+    "Zerlege die Würfelzahl in drei Faktoren — probier mit 2 und 3 an."]);
+  qv.append(el("div", { class: "frage", text: `Aus ${a.n} Würfeln soll ein Quader werden, kein Würfel bleibt übrig. Welcher Quader geht?` }),
+    el("div", { class: "qv-stapel", text: `🧊 × ${a.n}` }));
+  const box = LS.auswahl(ctx, {
+    optionen: a.optionen, richtig: a.richtig, breite: 150, inhalt: o => o,
+    loesung: `${a.richtig} = ${a.n} Würfel`, lob: "Der geht genau auf!",
+    hinweis: o => { const prod = o.split(" · ").map(Number).reduce((x, y) => x * y, 1); return `${o} ergibt ${prod} Würfel — das ${prod < a.n ? "sind zu wenige" : "sind zu viele"}. Rechne die anderen nach.`; },
+  });
+  box.classList.add("qv-wahl");
+  qv.append(box);
+}
+
+/** s5: Kanten mit Kommazahlen und gemischten Einheiten → dm³. */
+function zeigeDezimal(ctx, a, qv) {
+  const texte = a.kanten.map((k, i) => kanteText(k, a.einheiten[i]));
+  const inDm = a.kanten.map(k => mass(k, "dm"));
+  const loesung = `${mal(...texte)} = ${mal(...inDm)} = ${a.V} dm³`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(a.V));
+  ctx.tipp(["Bring zuerst alle Kanten in dieselbe Einheit: dm.",
+    "1 m = 10 dm und 1 dm = 10 cm: Von m zu dm wandert das Komma eine Stelle nach rechts, von cm zu dm eine nach links.",
+    `Dann rechne Länge · Breite · Höhe: ${mal(...a.kanten.map(zahl))}, alles in dm.`]);
+  qv.append(el("div", { class: "frage", text: `Wie gross ist das Volumen in dm³? Länge ${texte[0]}, Breite ${texte[1]}, Höhe ${texte[2]}.` }),
+    bild(glatterQuader(a.kanten[0], a.kanten[1], a.kanten[2], "var(--deko-6)", marken3(...texte))));
+  const roh = rund(a.kanten.reduce((s, k, i) => s * kanteIn(k, a.einheiten[i]), 1));
+  tippfeld(ctx, qv, {
+    einheit: "dm³", dezimal: true, maxStellen: 4, loesung, lob: `Richtig: ${a.V} dm³ — das sind ${zahl(a.V)} Liter!`,
+    pruefe(w) {
+      if (gleich(w, a.V)) return true;
+      if (gleich(w, roh) && roh !== a.V) return "Du hast Zahlen mit verschiedenen Einheiten malgenommen. Wandle zuerst alle Kanten in dm um.";
+      if (kommaVerrutscht(w, a.V)) return "Das Komma ist verrutscht. 1 m = 10 dm, 1 dm = 10 cm — wandle jede Kante in dm um.";
+      return "Wandle zuerst jede Kante in dm um, dann rechne Länge · Breite · Höhe.";
+    },
+  });
+}
+
+/** s5: eine Kante aus Volumen und zwei Kanten. */
+function zeigeKante(ctx, a, qv) {
+  const e = a.einheit, e3 = EINHEIT3[e];
+  const namen = ["lang", "breit", "hoch"], fragen = ["Wie lang ist er?", "Wie breit ist er?", "Wie hoch ist er?"];
+  const andere = a.kanten.filter((_, i) => i !== a.gesucht), flaeche = andere[0] * andere[1];
+  const x = a.kanten[a.gesucht];
+  const loesung = `V = Länge · Breite · Höhe. ${a.V} : (${andere[0]} · ${andere[1]}) = ${a.V} : ${flaeche} = ${mass(x, e)}`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(x));
+  ctx.tipp(["Volumen = Länge · Breite · Höhe. Zwei Kanten kennst du schon.",
+    "Nimm die beiden bekannten Kanten mal: So gross ist eine Schicht.",
+    "Dann teile: das Volumen durch die Schicht. Das ergibt die fehlende Kante."]);
+  const angaben = a.kanten.map((k, i) => (i === a.gesucht ? null : `${mass(k, e)} ${namen[i]}`)).filter(Boolean).join(" und ");
+  const marken = marken3(...a.kanten.map((k, i) => (i === a.gesucht ? "?" : mass(k, e))));
+  qv.append(el("div", { class: "frage", text: `Das Volumen ist ${a.V} ${e3}. Der Quader ist ${angaben}. ${fragen[a.gesucht]}` }),
+    bild(glatterQuader(a.kanten[0], a.kanten[1], a.kanten[2], "var(--deko-6)", marken)));
+  tippfeld(ctx, qv, {
+    einheit: e, maxStellen: 4, loesung, lob: "Richtig, die Kante stimmt!",
+    pruefe(w) {
+      if (w === x) return true;
+      if (w === flaeche) return "Das ist die Schicht aus den zwei bekannten Kanten. Teile jetzt das Volumen durch diese Zahl.";
+      if (w === a.V - flaeche || w === a.V - andere[0] - andere[1]) return "Nicht abziehen: Das Volumen ist ein Produkt. Teile es durch die Schicht.";
+      return w * flaeche > a.V ? "Dann wäre das Volumen zu gross. Teile: Volumen durch (Kante mal Kante)."
+        : "Dann wäre das Volumen zu klein. Teile: Volumen durch (Kante mal Kante).";
+    },
+  });
+}
+
+/** s6: Körper aus zwei Quadern. */
+function zeigeZusammen(ctx, a, qv) {
+  const [l, b, h] = a.unten, [l2, b2, h2] = a.dazu;
+  const cm = t => mal(...t.map(k => mass(k, "cm")));
+  const loesung = `Unten ${cm(a.unten)} = ${a.V1} cm³, dazu ${cm(a.dazu)} = ${a.V2} cm³. ${a.V1} + ${a.V2} = ${a.V} cm³`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(a.V));
+  ctx.tipp(["Zerlege den Körper in seine zwei Quader und rechne jeden für sich.",
+    "Volumen = Länge · Breite · Höhe, für jeden Quader. Dann zählst du beide zusammen.",
+    `Der grosse Quader: ${mal(l, b, h)}. Der kleine: ${mal(l2, b2, h2)}. Beide Ergebnisse zusammen.`]);
+  const F1 = "var(--deko-6)", F2 = "var(--deko-3)";
+  const dazu = a.lage === "oben" ? { x: 0, r: b - b2, z: h, l: l2, b: b2, h: h2, farbe: F2 } : { x: l, r: 0, z: 0, l: l2, b: b2, h: h2, farbe: F2 };
+  const ganz = a.lage === "oben" ? { l, b, h: h + h2 } : { l: l + l2, b, h };
+  qv.append(el("div", { class: "frage", text: "Der Körper besteht aus zwei Quadern. Wie gross ist sein Volumen?" }),
+    bild(koerperSvg({ ...ganz, bloecke: [{ x: 0, r: 0, z: 0, l, b, h, farbe: F1 }, dazu] })),
+    el("div", { class: "qv-legende" }, farbfeld(F1), `${a.lage === "oben" ? "unten" : "links"}: ${cm(a.unten)} — `, farbfeld(F2), `${a.lage === "oben" ? "oben drauf" : "rechts dran"}: ${cm(a.dazu)}`));
+  tippfeld(ctx, qv, {
+    einheit: "cm³", maxStellen: 4, loesung, lob: "Richtig, beide Quader zusammen!",
+    pruefe(w) {
+      if (w === a.V) return true;
+      if (w === a.V1) return "Das ist nur der grosse Quader. Der kleine gehört auch zum Körper — zähl ihn dazu.";
+      if (w === a.V2) return "Das ist nur der kleine Quader. Der grosse gehört auch zum Körper — zähl ihn dazu.";
+      if (w === a.V1 - a.V2) return "Nicht abziehen: Beide Quader gehören zum Körper. Zähl die zwei Volumen zusammen.";
+      return "Rechne jeden Quader für sich: Länge · Breite · Höhe. Dann beide zusammenzählen.";
+    },
+  });
+}
+
+/** s6: Aquarium — Masse in dm oder cm, Füllhöhe in dm, Antwort in Litern. */
+function zeigeAquarium(ctx, a, qv) {
+  const tl = kanteText(a.l, a.einheiten[0]), tb = kanteText(a.b, a.einheiten[1]);
+  const loesung = `${mal(mass(a.l, "dm"), mass(a.b, "dm"), mass(a.fuell, "dm"))} = ${zahl(a.liter)} dm³ = ${zahl(a.liter)} l`;
+  ctx.loesung(loesung);
+  ctx.schritte(tippSchritte(a.liter));
+  ctx.tipp(["Das Wasser bildet einen Quader: Länge · Breite · Höhe des Wassers.",
+    "Nimm die Höhe, bis zu der das Wasser steht — nicht die Höhe des Aquariums. Und rechne alles in dm.",
+    "Ein Würfel mit 1 dm Kante fasst genau 1 Liter: dm · dm · dm ergibt Liter."]);
+  qv.append(el("div", { class: "frage", text: `Das Aquarium ist ${tl} lang, ${tb} breit und ${mass(a.hoehe, "dm")} hoch. Das Wasser steht ${mass(a.fuell, "dm")} hoch. Wie viele Liter Wasser sind drin?` }),
+    bild(koerperSvg({ l: a.l, b: a.b, h: a.hoehe, rahmen: true, bloecke: [{ x: 0, r: 0, z: 0, l: a.l, b: a.b, h: a.fuell, farbe: "var(--deko-5)", dicke: 1 }],
+      marken: [...marken3(tl, tb, mass(a.hoehe, "dm")), { kante: "links", text: `💧 ${mass(a.fuell, "dm")}`, hoehe: a.fuell }] })));
+  const mitHoehe = rund(a.l * a.b * a.hoehe);
+  const roh = rund(kanteIn(a.l, a.einheiten[0]) * kanteIn(a.b, a.einheiten[1]) * a.fuell);
+  tippfeld(ctx, qv, {
+    einheit: "l", dezimal: true, maxStellen: 4, loesung, lob: "Richtig, so viel Wasser ist drin!",
+    pruefe(w) {
+      if (gleich(w, a.liter)) return true;
+      if (gleich(w, mitHoehe)) return "Du hast mit der Höhe des Aquariums gerechnet. Das Wasser steht aber nicht so hoch.";
+      if (gleich(w, roh) && roh !== a.liter) return "Wandle alle Angaben zuerst in dm um. Dann ergibt dm · dm · dm gleich dm³, und das sind Liter.";
+      if (kommaVerrutscht(w, a.liter)) return "Das Komma ist verrutscht: Rechne alle Kanten in dm, dann sind dm³ gleich Liter.";
+      return "Wasser ist ein Quader: Länge · Breite · Höhe des Wassers, alles in dm. dm³ sind Liter.";
+    },
+  });
+}
+
+/** s6: zwei Quader mit verschiedenen Einheiten vergleichen. */
+function zeigeVergleich(ctx, a, qv) {
+  const [A, B] = a.quader;
+  const text = q => mal(...q.kanten.map(k => mass(k, q.einheit)));
+  const vA = cm3Von(A.kanten, A.einheit), vB = cm3Von(B.kanten, B.einheit);
+  const ENDE = { A: "A hat mehr Volumen.", gleich: "Beide sind gleich gross.", B: "B hat mehr Volumen." };
+  const loesung = `A: ${text(A)} = ${zahlText(vA)} cm³. B: ${text(B)} = ${zahlText(vB)} cm³. ${ENDE[a.ergebnis]}`;
+  ctx.tipp(["Rechne beide Volumen in derselben Einheit aus — am besten in cm³.",
+    "1 dm = 10 cm. Wandle zuerst die Kanten um, dann rechne Länge · Breite · Höhe.",
+    "Mehr Ziffern heisst nicht mehr Volumen — die Einheit zählt."]);
+  qv.append(el("div", { class: "frage", text: `Welcher Quader hat das grössere Volumen? A: ${text(A)}. B: ${text(B)}.` }),
+    bild(mitName(glatterQuader(...A.kanten, "var(--deko-6)", marken3(...A.kanten.map(k => mass(k, A.einheit)))), "🅰️ A"),
+      mitName(glatterQuader(...B.kanten, "var(--deko-1)", marken3(...B.kanten.map(k => mass(k, B.einheit)))), "🅱️ B")));
+  const NAME = { A: { bild: "🅰️", text: "A ist grösser" }, gleich: { bild: "🟰", text: "Gleich gross" }, B: { bild: "🅱️", text: "B ist grösser" } };
+  const box = LS.auswahl(ctx, {
+    optionen: VERGLEICH, richtig: a.ergebnis, inhalt: o => NAME[o], breite: 110, loesung, lob: "Richtig verglichen!",
+    hinweis: "Rechne beide in derselben Einheit: 1 dm = 10 cm, also 1 dm³ = 1000 cm³. Mehr Ziffern heisst nicht mehr Volumen.",
+  });
+  box.classList.add("qv-wahl");
+  qv.append(box);
+}
+
+// ---------- Spiel ----------
+
+const ZEIGE = { zaehlen: zeigeZaehlen, fehlen: zeigeFehlen, rechnen: zeigeRechnen, cm3: zeigeCm3, einheit: zeigeEinheit, umrechnen: zeigeUmrechnen,
+  zerlegen: zeigeZerlegen, bilden: zeigeBilden, dezimal: zeigeDezimal, kante: zeigeKante, zusammen: zeigeZusammen, aquarium: zeigeAquarium, vergleich: zeigeVergleich };
+
+const SAG = {
+  s1: "Ein Quader ist in Schichten gebaut. Zähl zuerst eine Schicht, dann die Schichten — so findest du alle Würfel.",
+  s2: "Volumen ist Länge mal Breite mal Höhe. So rechnest du aus, wie viele Würfel hineinpassen.",
+  s3: "Jetzt mit Zentimetern: Länge mal Breite mal Höhe ergibt cm³. Und du lernst, wozu cm³, dm³ und m³ passen.",
+  s4: "Merk dir: 1 dm³ sind 1000 cm³ — und genau 1 Liter. Ein m³ sind 1000 dm³.",
+  s5: "Erst alle Kanten in dieselbe Einheit bringen, dann rechnen. Eine Kante findest du mit Teilen.",
+  s6: "Jetzt wird es knifflig: zwei Quader zusammen, ein Aquarium füllen und Quader mit verschiedenen Einheiten vergleichen.",
+};
+
+LS.spiel({
+  id: ID,
+  einleitung: "Wie viel passt in einen Quader? Zähl die Würfel, rechne Länge mal Breite mal Höhe — und finde heraus, was cm³, dm³ und Liter bedeuten!",
+  hilfe: stufe => ({
+    s1: "Tipp zuerst ein, wie viele Würfel in einer Schicht liegen, und drück OK. Dann, wie viele Schichten es sind. Zuletzt alle Würfel zusammen.",
+    s2: "Tipp die Zahl der Würfel mit den Zifferntasten ein und drück OK — einmal die fehlenden Würfel, einmal alle Würfel des Quaders.",
+    s3: "Tipp das Volumen in cm³ ein und drück OK. Bei einem Ding tippst du auf den Korb mit der Einheit, die zu ihm passt.",
+    s4: "Tipp die umgewandelte Zahl oder die Anzahl ein und drück OK. Bei den Würfeln tippst du den Quader an, der genau aufgeht.",
+    s5: "Tipp das Volumen in dm³ ein, das Dezimalzeichen hat eine eigene Taste. Bei der gesuchten Kante tippst du ihre Länge ein.",
+    s6: "Tipp das Volumen oder die Liter ein und drück OK. Beim Vergleich tippst du auf A, B oder „Gleich gross“.",
+  }[stufe]),
+  anzahl: 8,
+  stufen: {
+    s1: "Würfel zählen: erst eine Schicht, dann die Schichten.",
+    s2: "Wie viele Würfel fehlen? Volumen aus Länge, Breite und Höhe.",
+    s3: "Volumen in cm³ rechnen; cm³, dm³ oder m³ — was passt wozu? (Lehrplan 6. Klasse)",
+    s4: "Umrechnen: dm³, cm³ und Liter. Quader zerlegen und aus Würfeln bilden.",
+    s5: `Kommazahlen und gemischte Einheiten (${dezimalText(0.5)} m = 5 dm); eine Kante aus dem Volumen.`,
+    s6: "Endgegner: zwei Quader zusammen, Aquarium füllen, Quader mit verschiedenen Einheiten vergleichen.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (p.arten.length > 1) ctx.serie("art", a.art);
+    if (a.art === "einheit") ctx.serie("einheit", a.richtig);
+    if (a.art === "vergleich") ctx.serie("vergleich", a.ergebnis);
+    ctx.kennung(a.kennung);
+    if (ctx.nr === 0) ctx.sag(SAG[ctx.stufe]);
+    const qv = el("div", { class: "qv" });
+    ctx.flaeche.append(qv);
+    ZEIGE[a.art](ctx, a, qv);
+  },
+});
+</script>
+</body>
+</html>

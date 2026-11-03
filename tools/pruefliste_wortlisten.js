@@ -570,6 +570,74 @@ for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE6) {
   tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
 }
 
+// LERN_Session10, Runde C: Rest der Liste (S8, S9, S14, S15, T9–T11)
+const DW = lade("spiele/diagramm-wahl/daten.js", ["DIAGRAMM_DATEN"]).DIAGRAMM_DATEN;
+const GATT = lade("spiele/gattungs-kenner/texte.js", ["GATTUNGEN", "GATTUNG_TEXTE"]);
+const FSZ = lade("spiele/figuren-spiegel/szenen.js", ["SPIEGEL_SZENEN"]).SPIEGEL_SZENEN;
+const KK = lade("spiele/kulturen-koffer/dinge.js", ["KK_KULTUREN", "KK_DINGE", "KK_HEUTE", "KK_SAETZE", "KK_AUSSAGEN", "KK_GAB", "KK_QUELLENARTEN", "KK_QUELLEN", "KK_RAETSEL"]);
+const HD = lade("spiele/hello-dialog/dialoge.js", ["DIALOG_S1_ANTWORTEN", "DIALOG_SITUATIONEN", "DIALOG_PAARE", "DIALOG_FRAGEN", "DIALOG_DIALOGE", "DIALOG_HOEFLICH"]);
+const LW = lade("spiele/laerm-waechter/geraeusche.js", ["LAERM_GERAEUSCHE", "LAERM_ORTE", "LAERM_SCHUTZ", "LAERM_SITUATIONEN", "LAERM_SCHADET", "LAERM_OHR_TEILE", "LAERM_SCHWINGT", "LAERM_PHAENOMENE", "LAERM_DAEMPFER"]);
+const gattungName = id => GATT.GATTUNGEN[id]?.name || id;
+const kulturName = id => KK.KK_KULTUREN.find(k => k.id === id)?.name || id;
+const RUNDE7 = [
+  ["77. Diagramm-Wahl (Lehrplan SG MA.3.A.1, MA.3.C.1)", "diagramm-wahl/daten", "Säulendiagramme",
+    "Alle Zahlen erfunden. Kategorien: Bild, Name, Wert (bei zwei Gruppen zwei Werte). „offen“: Aussagen, die man aus dem Diagramm nicht beurteilen kann.",
+    ["Titel", "Einheit", "Gruppen", "Kategorien", "Frage zur Wahl", "Grund", "offene Aussagen"],
+    DW.saeulen.map(d => [d.titel, d.einheit, (d.gruppen || []).join(" / "), d.kategorien.map(k => `${k[0]} ${k[1]}: ${k.slice(2).join(" / ")}`).join("<br>"), d.wahl.frage, d.wahl.grund, (d.offen || []).join("<br>")])],
+  ["", "diagramm-wahl/daten", "Kreisdiagramme", "Teile als Zähler zum Nenner (Hälften, Viertel, Achtel, Drittel, Prozent).",
+    ["Titel", "Nenner", "Teile", "Frage zur Wahl", "Grund"], DW.kreis.map(d => [d.titel, d.nenner, d.teile.map(t => `${t[0]} ${t[1]}: ${t[2]}`).join("<br>"), d.wahl.frage, d.wahl.grund])],
+  ["", "diagramm-wahl/daten", "Liniendiagramme", "x-Beschriftung und Werte; „ungleich“ ist die irreführende Zeitachse der Königsstufe.",
+    ["Titel", "Grösse", "Einheit", "x", "Werte", "x ungleich", "Frage zur Wahl", "Grund", "offene Aussagen"],
+    DW.linien.map(d => [d.titel, d.groesse, d.einheit, d.x.join(", "), d.werte.join(", "), (d.xUngleich || []).join(", "), d.wahl.frage, d.wahl.grund, (d.offen || []).join("<br>")])],
+  ["78. Gattungs-Kenner (Lehrplan SG D.6.C.1)", "gattungs-kenner/texte", "Merkmale je Gattung", "Frage = Tipp 2, Suchhinweis = Tipp 3.",
+    ["Gattung", "Merkmal", "Kurz", "Frage", "Suchhinweis"],
+    Object.entries(GATT.GATTUNGEN).flatMap(([id, g]) => Object.values(g.merkmale || {}).map(m => [g.name, m.name, m.kurz, m.frage, m.such]))],
+  ["", "gattungs-kenner/texte", "Texte", "Alle selbst geschrieben. Merkmalszeile: die Zeile, die das Merkmal zeigt (Nummer ab 1). Bei Mischtexten der fremde Satz und seine Gattung.",
+    ["Gattung", "Titel", "Zeilen", "Merkmal (Art, Zeile)", "Lehre / Typisch / Figuren", "fremder Satz"],
+    GATT.GATTUNG_TEXTE.map(t => [gattungName(t.gattung), t.titel, t.zeilen.map((zl, i) => `${i + 1}. ${zl}`).join("<br>"),
+      t.fremd === undefined ? `${t.art}, Zeile ${(t.merkmal ?? 0) + 1}${t.partner !== undefined ? ` (Partner ${t.partner + 1})` : ""}` : "",
+      t.moral ? `Lehre: ${t.moral[0]} (falsch: ${t.moral.slice(1).join("; ")})` : t.typisch ? `Typisch: ${t.typisch[0]} (falsch: ${t.typisch.slice(1).join("; ")})` : t.figuren ? t.figuren.map(f => f.join(" = ")).join("; ") : "",
+      t.fremd !== undefined ? `Zeile ${t.fremd + 1} (${gattungName(t.fremdGattung)}, ${t.fremdArt})` : ""])],
+  ["79. Figuren-Spiegel (Lehrplan SG D.2.C.1)", "figuren-spiegel/szenen", "Szenen mit Fragen",
+    "Alle selbst geschrieben. Arten: gefuehl, stimmung, grund (steht im Text), motiv (erschliessen), sicht, meinen, weiter, ich, lebenswelt. Die erste Antwort ist die richtige.",
+    ["Gruppe", "Titel", "Figuren", "Text", "Fragen"], FSZ.map(s => [s.gruppe, s.titel, s.figuren.join(", "), zelle(s.text), fragenText6(s.fragen || [])])],
+  ["80. Kulturen-Koffer (Lehrplan SG NMG.9.3)", "kulturen-koffer/dinge", "Kulturen", "Fakten bitte nachprüfen.",
+    ["Bild", "Name", "Schweiz", "Kurztext"], KK.KK_KULTUREN.map(k => [k.bild, k.name, k.schweiz, k.kurz])],
+  ["", "kulturen-koffer/dinge", "Dinge, Bauten, Berufe", "„auch“: weitere Kulturen, bei denen das Ding vorkam (stehen nie als Korb daneben). „ab“: ab Stufe.",
+    ["Bild", "Name", "Kultur", "Art", "ab", "auch", "Umschreibung"], KK.KK_DINGE.map(d => [d.bild, d.name, kulturName(d.kultur), d.art, d.ab, (d.auch || []).map(kulturName).join(", "), d.umschreibung])],
+  ["", "kulturen-koffer/dinge", "Dinge von heute (Stufe 1)", null, ["Bild", "Name", "Umschreibung"], KK.KK_HEUTE.map(d => [d.bild, d.name, d.umschreibung])],
+  ["", "kulturen-koffer/dinge", "Erzählsätze", null, ["Satz", "Kultur"], KK.KK_SAETZE.map(s => [s.satz, kulturName(s.kultur)])],
+  ["", "kulturen-koffer/dinge", "Aussagen (stimmt / stimmt nicht)", "Fakten bitte nachprüfen.", ["Aussage", "stimmt", "Kultur", "Begründung"], KK.KK_AUSSAGEN.map(a => [a.text, a.wahr, kulturName(a.kultur), a.grund])],
+  ["", "kulturen-koffer/dinge", "Gab es das damals schon?", "Fakten bitte nachprüfen.", ["Bild", "Ding", "Kultur", "gab es", "Begründung"], KK.KK_GAB.map(g => [g.bild, g.ding, kulturName(g.kultur), g.ja, g.grund])],
+  ["", "kulturen-koffer/dinge", "Quellen (Stufe 5)", "Quellenart: Fundstück, Bauwerk, Bild, Text.", ["Bild", "Quelle", "Art", "Kultur"], KK.KK_QUELLEN.map(q => [q.bild, q.text, KK.KK_QUELLENARTEN[q.art]?.name || q.art, kulturName(q.kultur)])],
+  ["", "kulturen-koffer/dinge", "Rätsel (Königsstufe)", "Drei Hinweise, vom allgemeinen zum genauen.", ["Kultur", "Hinweise"], KK.KK_RAETSEL.map(r => [kulturName(r.kultur), r.hinweise.join("<br>")])],
+  ["81. Hello-Dialog (Lehrplan SG FS1E.3.A.1)", "hello-dialog/dialoge", "Situationen (Stufe 1)", "Britisches Englisch. Die Stimme spricht die Zeile; das Kind wählt den Gruss.",
+    ["Bild", "Situation", "Zeile", "richtiger Gruss", "Tipp"], HD.DIALOG_SITUATIONEN.map(s => [s[0], s[1], s[2], HD.DIALOG_S1_ANTWORTEN[s[3]]?.[0] || s[3], s[4]])],
+  ["", "hello-dialog/dialoge", "Zeile und Antwort (Stufe 2)", "Falsche Antworten passen zu einer anderen Zeile.", ["Zeile", "Antwort", "falsch", "Tipp"], HD.DIALOG_PAARE.map(p => [p[0], p[1], p[2].join("; "), p[3]])],
+  ["", "hello-dialog/dialoge", "Fragen und Antworten (Stufe 4 und 5)", "Gruppe 4: Name, Alter …; Gruppe 5: Datum, Zeit, Farbe, Befinden, Wetter. Thema = Gegenseitig eindeutig.",
+    ["Gruppe", "Thema", "Frage", "Antwort"], HD.DIALOG_FRAGEN],
+  ["", "hello-dialog/dialoge", "Dialoge (Stufe 3, 5 und 6)", "Züge in der richtigen Reihenfolge; „falsch“ sind fremde Zeilen für „Welcher Satz passt nicht?“.",
+    ["Gruppe", "Bild", "Ort", "Züge", "fremde Zeilen", "Tipp"], HD.DIALOG_DIALOGE.map(d => [d.gruppe, d.bild, d.ort, d.zuege.join("<br>"), (d.falsch || []).join("; "), d.tipp || ""])],
+  ["", "hello-dialog/dialoge", "Höflich antworten (Königsstufe)", "Die zweite Antwort ist unhöflich, die dritte passt nicht.",
+    ["Bild", "Zeile", "richtig", "unhöflich", "passt nicht", "Tipp"], HD.DIALOG_HOEFLICH],
+  ["82. Lärm-Wächter (Lehrplan SG NMG.4.2)", "laerm-waechter/geraeusche", "Geräusche", "Lärm-Skala 1 (sehr leise) bis 5 (sehr laut), grobe Reihung.",
+    ["Bild", "Geräusch", "laut", "Dauer", "Ort"], LW.LAERM_GERAEUSCHE.map(g => [g.bild, g.name, g.laut, g.dauer, g.ort])],
+  ["", "laerm-waechter/geraeusche", "Orte", null, ["Bild", "Ort", "laut"], LW.LAERM_ORTE.map(o => [o.bild, o.name, o.laut])],
+  ["", "laerm-waechter/geraeusche", "Schutzmassnahmen", "Wirkung 2 hilft gut, 1 ein wenig, 0 nicht.",
+    ["Bild", "Name", "Wirkung", "Umschreibung", "Hinweis"], LW.LAERM_SCHUTZ.map(s => [s.bild, s.name, s.wirkung, s.umschreibung, s.hinweis || ""])],
+  ["", "laerm-waechter/geraeusche", "Situationen mit Schutz", "„schutz“ hilft gut, „wenig“ ein wenig; alles andere nicht.",
+    ["Bild", "Situation", "laut", "Dauer", "Schutz", "wenig", "Tipp"], LW.LAERM_SITUATIONEN.map(s => [s.bild, s.text, s.laut, s.dauer, s.schutz.join(", "), (s.wenig || []).join(", "), s.tipp || ""])],
+  ["", "laerm-waechter/geraeusche", "Schadet das den Ohren?", null, ["Satz", "schadet", "Begründung"], LW.LAERM_SCHADET],
+  ["", "laerm-waechter/geraeusche", "Teile des Ohrs", null, ["Name", "Lage", "Aufgabe", "Aussehen"], LW.LAERM_OHR_TEILE.map(t => [`${t.artikel} ${t.name}`, t.lage, t.aufgabe, t.aussehen])],
+  ["", "laerm-waechter/geraeusche", "Schwingung und Ton (stimmt / stimmt nicht)", null, ["Aussage", "stimmt", "Erklärung"], LW.LAERM_SCHWINGT],
+  ["", "laerm-waechter/geraeusche", "Echo, Verstärkung, Dämmung", "Die erste Antwort ist die richtige.", ["Art", "Bild", "Frage", "richtig", "falsch", "Tipp"], LW.LAERM_PHAENOMENE.map(p => [p.art, p.bild, p.frage, p.richtig, p.falsch.join("; "), p.tipp || ""])],
+  ["", "laerm-waechter/geraeusche", "Was dämpft den Schall?", null, ["Bild", "Stoff", "dämpft"], LW.LAERM_DAEMPFER.map(d => [d.bild, d.name, d.daempft])],
+];
+for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE7) {
+  if (teilTitel) { z(`## ${teilTitel}`); z(""); }
+  tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
+}
+
 process.stdout.write(zeilen.join("\n"));
 
 // ---------- Inhalte je Liste: docs/eulenpfad/pruefung/listen.json ----------
@@ -812,6 +880,8 @@ for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE4) inListe(
 for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE5) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
 
 for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE6) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
+
+for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE7) inListe(schluessel, titel, hinweis, kopf, zeilenListe);
 
 // Jede Quell-Liste braucht einen Eintrag — sonst bricht der Lauf ab, statt still eine Lücke zu schreiben.
 const fehlend = Object.keys(QUELL_LISTEN).filter(k => !listen[k] || listen[k].tabellen.every(t => !t.zeilen.length));

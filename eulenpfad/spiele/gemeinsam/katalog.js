@@ -19,7 +19,7 @@ const THEMEN = [
   { id: "sachrechnen", fach: "Mathe", name: "Sachrechnen", titel: "Rechengeschichten", quelle: "Lehrplan SG MA.3.C.2, MA.3.C.3" },
   { id: "geometrie", fach: "Mathe", name: "Form und Raum", titel: "Formen, Flächen, Spiegeln, Körper und Netze, Koordinaten", quelle: "Lehrplan SG MA.2.A.1, MA.2.A.2, MA.2.A.3, MA.2.C.1, MA.2.C.3, MA.2.C.4" },
   { id: "groessen", fach: "Mathe", name: "Grössen", titel: "Uhr, Geld, Masseinheiten und Schätzen", quelle: "Lehrplan SG MA.3.A.1, MA.3.A.2" },
-  { id: "zeit", fach: "NMG", name: "Zeit", titel: "Wochentage, Monate, Jahreszeiten, Zeitstrahl, früher und heute", quelle: "Lehrplan SG NMG.9.1, NMG.9.2" },
+  { id: "zeit", fach: "NMG", name: "Zeit", titel: "Wochentage, Monate, Jahreszeiten, Zeitstrahl, früher und heute, alte Kulturen", quelle: "Lehrplan SG NMG.9.1, NMG.9.2, NMG.9.3" },
   { id: "himmel", fach: "NMG", name: "Himmel", titel: "Mond, Sonne und Planeten", quelle: "Lehrplan SG NMG.4.5" },
   { id: "saetze", fach: "Deutsch", name: "Sätze", titel: "Sätze schreiben und überarbeiten", quelle: "Lehrplan SG D.4.F.1" },
   { id: "schreiben", fach: "Deutsch", name: "Schreiben", titel: "Auf der Tastatur schreiben", quelle: "Lehrplan SG D.4.A.1" },
@@ -29,7 +29,7 @@ const THEMEN = [
   { id: "laute", fach: "Deutsch", name: "Laute, Silben, Reime", titel: "Anlaute, Silben klatschen, Reime finden", quelle: "Lehrplan SG D.1.A.1, D.5.C.1" },
   { id: "lesen", fach: "Deutsch", name: "Lesen", titel: "Buchstaben, Wörter und Texte lesen", quelle: "Lehrplan SG D.2.A.1, D.2.B.1, D.4.A.1" },
   { id: "tiere", fach: "NMG", name: "Tiere", titel: "Tiere, Pflanzen und Lebensräume", quelle: "Lehrplan SG NMG.2.1, NMG.2.3, NMG.2.4" },
-  { id: "koerper", fach: "NMG", name: "Körper und Ernährung", titel: "Mein Körper und gesundes Essen", quelle: "Lehrplan SG NMG.1.3, NMG.1.4" },
+  { id: "koerper", fach: "NMG", name: "Körper und Ernährung", titel: "Mein Körper, Sinne, Ohr und Lärm, gesundes Essen", quelle: "Lehrplan SG NMG.1.3, NMG.1.4, NMG.4.1, NMG.4.2, NMG.4.3" },
   { id: "forschen", fach: "NMG", name: "Forschen", titel: "Stoffe, Wasser, Magnete und Strom", quelle: "Lehrplan SG NMG.3.3, NMG.5.2" },
   { id: "musik", fach: "Musik", name: "Noten und Töne", titel: "Instrumente, Noten lesen, Rhythmus, hoch und tief", quelle: "Lehrplan SG MU.4.C.1, MU.6.A.1, MU.6.B.1" },
   { id: "daten", fach: "Mathe", name: "Daten", titel: "Strichlisten, Tabellen und Diagramme", quelle: "Lehrplan SG MA.3.C.1" },
@@ -46,12 +46,13 @@ const THEMEN = [
   { id: "informatik", fach: "Medien und Informatik", name: "Informatik", titel: "Anleitungen befolgen, Abläufe planen, Wiederholungen und Bedingungen", quelle: "Lehrplan SG MI.2.2" },
   { id: "wetter", fach: "NMG", name: "Wetter", titel: "Wetter, Jahreszeiten und Temperatur", quelle: "Lehrplan SG NMG.4.4" },
   { id: "verkehr", fach: "NMG", name: "Sicher unterwegs", titel: "Schulweg, Verkehrsregeln und Signale", quelle: "Lehrplan SG NMG.1.2" },
-  { id: "gedichte", fach: "Deutsch", name: "Gedichte", titel: "Reim, Vers, Strophe und Reimschema", quelle: "Lehrplan SG D.6.C.1" },
+  { id: "gedichte", fach: "Deutsch", name: "Gedichte und Gattungen", titel: "Reim, Vers, Strophe und Reimschema; Märchen, Sage, Fabel, Bericht", quelle: "Lehrplan SG D.6.C.1" },
   { id: "geschichten", fach: "NMG", name: "Geschichten", titel: "Echt oder erfunden: Geschichten und Textsorten", quelle: "Lehrplan SG NMG.9.4" },
   { id: "begruenden", fach: "Mathe", name: "Prüfen und begründen", titel: "Aussagen prüfen: immer, manchmal oder nie wahr?", quelle: "Lehrplan SG MA.1.B.2, MA.2.B.2" },
   { id: "zuhoeren", fach: "Deutsch", name: "Zuhören", titel: "Hörtexten wichtige Informationen entnehmen, Stimmungen und Gefühle wahrnehmen", quelle: "Lehrplan SG D.1.B.1, D.1.C.1" },
   { id: "erzaehlen", fach: "Deutsch", name: "Erzählen", titel: "Geschichten in der richtigen Abfolge ordnen und nacherzählen", quelle: "Lehrplan SG D.3.B.1, D.4.D.1" },
   { id: "gemeinschaft", fach: "NMG", name: "Gemeinschaft", titel: "Zusammenleben in der Gemeinde und öffentliche Einrichtungen", quelle: "Lehrplan SG NMG.10.3" },
+  { id: "englisch-dialog", fach: "Englisch", name: "Dialoge", titel: "Kontakt aufnehmen: begrüssen, fragen, antworten, bestellen", quelle: "Lehrplan SG FS1E.3.A.1" },
 ];
 
 /** Fächer in der Reihenfolge der Themen (Startseite, Zufallsmix). */
@@ -1104,6 +1105,53 @@ const SPIELE = [
       "geschichten": { name: "Kurze Geschichten zum Vorlesen mit Fragen" },
     },
     lernziele: [{ lz: "D.1.B.1", stufen: ALLE_STUFEN }] },
+  // LERN_Session10, Runde C: Rest der Liste (S8, S9, S14, S15, T9–T11 aus lehrplan_3_und_6.md)
+  { id: "quader-volumen", klasse: 6, neu: "LERN_Session10", bild: "🗃️", name: "Quader-Volumen", thema: "geometrie", farbe: "var(--deko-2)",
+    pfad: "spiele/quader-volumen/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal"], zeiten: { s1: 25, s2: 25, s3: 25, s4: 30, s5: 40, s6: 50 },
+    beschreibung: "Quader aus Würfeln zählen und berechnen: Länge mal Breite mal Höhe, cm³, dm³ und Liter",
+    lernziele: [{ lz: "MA.2.A.3", stufen: ALLE_STUFEN }, { lz: "MA.3.A.1", stufen: ["s3", "s4", "s5", "s6"] }] },
+  { id: "diagramm-wahl", klasse: 6, neu: "LERN_Session10", bild: "🥧", name: "Diagramm-Wahl", thema: "daten", farbe: "var(--deko-5)",
+    pfad: "spiele/diagramm-wahl/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 15, s2: 20, s3: 25, s4: 35, s5: 45, s6: 50 },
+    beschreibung: "Welches Diagramm passt zur Frage? Kreis-, Säulen- und Liniendiagramme lesen und wählen",
+    listen: {
+      "daten": { name: "Datensätze mit Fragen zu Diagrammen" },
+    },
+    lernziele: [{ lz: "MA.3.A.1", stufen: ALLE_STUFEN }, { lz: "MA.3.C.1", stufen: ["s1", "s3", "s4", "s5", "s6"] }] },
+  { id: "gattungs-kenner", klasse: 6, neu: "LERN_Session10", bild: "📜", name: "Gattungs-Kenner", thema: "gedichte", farbe: "var(--deko-4)",
+    pfad: "spiele/gattungs-kenner/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 45, s2: 45, s3: 70, s4: 60, s5: 80, s6: 90 },
+    beschreibung: "Märchen, Sage, Fabel, Gedicht oder Bericht? Kurze Auszüge lesen und das Merkmal finden",
+    listen: {
+      "texte": { name: "Kurze Textauszüge je Gattung mit Merkmalen" },
+    },
+    lernziele: [{ lz: "D.6.C.1", stufen: ALLE_STUFEN }] },
+  { id: "figuren-spiegel", klasse: 6, neu: "LERN_Session10", bild: "🪞", name: "Figuren-Spiegel", thema: "lesen", farbe: "var(--deko-6)",
+    pfad: "spiele/figuren-spiegel/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 35, s2: 40, s3: 50, s4: 75, s5: 60, s6: 110 },
+    beschreibung: "Kurze Szenen lesen: Warum handelt die Figur so, was fühlt sie, was will sie?",
+    listen: {
+      "szenen": { name: "Szenen mit Fragen zu den Figuren" },
+    },
+    lernziele: [{ lz: "D.2.C.1", stufen: ALLE_STUFEN }] },
+  { id: "kulturen-koffer", klasse: 3, neu: "LERN_Session10", bild: "🧳", name: "Kulturen-Koffer", thema: "zeit", farbe: "var(--deko-3)",
+    pfad: "spiele/kulturen-koffer/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 15, s4: 20, s5: 25, s6: 40 },
+    beschreibung: "Pyramide, Amphore oder Pfahlbau? Dinge und Bauten den alten Kulturen zuordnen",
+    listen: {
+      "dinge": { name: "Gegenstände, Bauten und Fakten zu Ägypten, Römern und Pfahlbauern — ab Stufe 5 auch China und Griechen" },
+    },
+    lernziele: [{ lz: "NMG.9.3", stufen: ALLE_STUFEN }] },
+  { id: "hello-dialog", klasse: 3, neu: "LERN_Session10", bild: "💬", name: "Hello-Dialog", thema: "englisch-dialog", farbe: "var(--deko-1)",
+    pfad: "spiele/hello-dialog/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 10, s2: 12, s3: 15, s4: 20, s5: 22, s6: 35 },
+    beschreibung: "Hello, my name is … — im Mini-Dialog die passende Antwort wählen",
+    listen: {
+      "dialoge": { name: "Englische Mini-Dialoge mit Antworten" },
+    },
+    lernziele: [{ lz: "FS1E.3.A.1", stufen: ALLE_STUFEN }] },
+  { id: "laerm-waechter", klasse: 3, neu: "LERN_Session10", bild: "🦻", name: "Lärm-Wächter", thema: "koerper", farbe: "var(--deko-7)",
+    pfad: "spiele/laerm-waechter/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 20, s3: 20, s4: 25, s5: 20, s6: 30 },
+    beschreibung: "Laut oder leise? Was schützt die Ohren? Dazu das Ohr und der Schall: Echo, Trichter, Dämmung",
+    listen: {
+      "geraeusche": { name: "Geräusche mit Lautstärke und Schutzmassnahmen" },
+    },
+    lernziele: [{ lz: "NMG.4.2", stufen: ALLE_STUFEN }] },
 ];
 
 /** Lernziele (Lernzielblatt 4.2 und Lehrplan SG) — für Profil-Fokus und Statistik je Lernziel. */
@@ -1206,4 +1254,8 @@ const LERNZIELE = [
   { lz: "D.1.C.1", niveau: "Lehrplan SG", text: "Gesprächen folgen: Stimmungen wahrnehmen, Aufmerksamkeit zeigen" },
   { lz: "D.3.B.1", niveau: "Lehrplan SG", text: "Monologisch sprechen: Geschichten nacherzählen und erzählen" },
   { lz: "D.4.D.1", niveau: "Lehrplan SG", text: "Schreiben: Gedanken und Ideen in eine verständliche Abfolge bringen" },
+  { lz: "D.2.C.1", niveau: "Lehrplan SG", text: "Literarische Texte lesen: sich in Figuren hineinversetzen, Handeln, Absichten und Motive nachvollziehen" },
+  { lz: "NMG.9.3", niveau: "Lehrplan SG", text: "Geschichte rekonstruieren: aus Funden, Bildern und Erzählungen ein Bild vergangener Kulturen gewinnen" },
+  { lz: "FS1E.3.A.1", niveau: "Lehrplan SG", text: "Englisch sprechen: Kontakt aufnehmen, begrüssen, fragen und antworten, bestellen" },
+  { lz: "NMG.4.2", niveau: "Lehrplan SG", text: "Akustische Phänomene: laut und leise, Schutz vor Lärm, Ohr, Schall und Dämmung" },
 ];

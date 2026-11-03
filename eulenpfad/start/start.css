@@ -102,15 +102,8 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .gruppe .gruppe > summary { font-size: clamp(18px, 4vw, 21px); padding-left: 18px; }
 .gruppe .gruppe { margin-bottom: 6px; }
 
-/* Einstieg in den Zufallsmix über den Filtern */
-.mix-einstieg {
-  display: flex; align-items: center; gap: 14px; margin-bottom: 14px; padding: 14px 18px;
-  background: #fff; border-radius: var(--rund); box-shadow: var(--schatten); border-left: 10px solid var(--deko-2);
-  color: var(--text); text-decoration: none;
-}
-.mix-einstieg .spiel-bild { font-size: 44px; line-height: 1; }
-.mix-einstieg b { display: block; font-size: 22px; }
-.mix-einstieg .ziel { font-size: 15px; color: var(--text-leise); }
+/* Zufallsmix und Zufälliges Spiel: Karten wie die Spiele, unter dem Filter (LERN_Session10) */
+.spielkarte.zufall .stufenknoepfe { margin-top: 10px; }
 
 .spiele { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 16px; margin: 6px 0 18px; }
 .spielkarte {
@@ -167,6 +160,7 @@ td .marke.such-grund { display: inline-block; margin-top: 4px; }
   border-bottom: 4px solid var(--sf);
 }
 .stufenknopf:hover { background: #eceffd; }
+button.stufenknopf { border: none; border-bottom: 4px solid var(--sf); font-family: inherit; cursor: pointer; width: 100%; }
 .stufenknopf .s { font-size: 11px; color: #f5b301; letter-spacing: 0; min-height: 13px; }
 .stufenknopf.empfohlen { outline: 3px solid var(--knopf); outline-offset: 1px; }
 .stufenknopf.gross { grid-column: 1 / -1; flex-direction: row; gap: 10px; min-height: 56px; background: var(--knopf); color: #fff; border-bottom-color: var(--knopf-dunkel); font-size: 20px; }

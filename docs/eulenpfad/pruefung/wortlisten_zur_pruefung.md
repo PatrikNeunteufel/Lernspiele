@@ -6129,3 +6129,805 @@ Selbst geschrieben; der Text wird vorgelesen, nicht gezeigt.
 | 3 | Der Teddy mit einem Ohr | Am Samstag findet auf dem Dorfplatz der Kinderflohmarkt statt. Emil breitet auf einer Decke alte Spielsachen aus: ein Puzzle, zwei Autos und einen Teddy mit nur einem Ohr. Eine alte Frau mit einem Stock bleibt lange vor dem Teddy stehen. Sie erzählt, dass sie als Kind genau so einen hatte. Emil sagt: Den schenke ich Ihnen. Die Frau drückt den Teddy an sich. Am Abend hat Emil zwölf Franken verdient und ein grosses Lächeln im Gesicht. | wer: Wer bleibt lange vor dem Teddy stehen? → eine alte Frau mit einem Stock (falsch: Emils Mutter; ein Junge aus der Klasse)<br>wo: Wo ist der Flohmarkt? → auf dem Dorfplatz (falsch: im Schulhaus; im Wald)<br>was: Was macht Emil mit dem Teddy? → Er schenkt ihn der Frau. (falsch: Er verkauft ihn für zwölf Franken.; Er nimmt ihn wieder nach Hause.)<br>schluss: Warum hat Emil am Abend ein grosses Lächeln? → Er hat Geld verdient und der Frau eine Freude gemacht. (falsch: Er hat das Puzzle fertig gelöst.; Der Teddy hat ein neues Ohr bekommen.)<br>titel: Welcher Titel passt am besten? → Der Teddy mit einem Ohr (falsch: Zwei Autos auf der Decke; Ein Tag im Hallenbad)<br>weiter: Wie geht die Geschichte wohl weiter? → Emil kauft mit dem Geld ein neues Puzzle und denkt noch oft an die Frau. (falsch: Die Frau bringt den Teddy am Abend zurück, weil er ihr nicht gefällt.; Emil verkauft seine Decke und geht ohne Geld nach Hause.) | ☐ |
 | 3 | Der kleine Bruder | Seit drei Wochen hat Aisha einen kleinen Bruder. Er heisst Samir und schläft fast den ganzen Tag. Am Sonntag darf Aisha ihn zum ersten Mal allein auf dem Arm halten. Sie sitzt ganz still auf dem Sofa und wagt kaum zu atmen. Samir öffnet die Augen, schaut sie an und greift nach ihrem Finger. Aisha flüstert: Ich bin deine grosse Schwester. Die Mutter macht ein Foto, und das hängt jetzt an der Wand im Flur. | wer: Wer darf Samir auf dem Arm halten? → Aisha (falsch: die Mutter; die Nachbarin)<br>wo: Wo sitzt Aisha mit Samir? → auf dem Sofa (falsch: im Garten; im Auto)<br>was: Was macht die Mutter? → Sie macht ein Foto. (falsch: Sie kocht Suppe.; Sie singt ein Lied.)<br>schluss: Warum wagt Aisha kaum zu atmen? → Sie will mit dem Baby ganz vorsichtig sein. (falsch: Sie hat Schnupfen.; Im Zimmer ist es stickig.)<br>titel: Welcher Titel passt am besten? → Der kleine Bruder (falsch: Das Sofa im Wohnzimmer; Ein Foto im Flur)<br>weiter: Wie geht die Geschichte wohl weiter? → Aisha zeigt das Foto allen, die zu Besuch kommen. (falsch: Samir läuft am nächsten Tag allein in den Kindergarten.; Aisha schenkt das Sofa ihrer Lehrerin.) | ☐ |
 | 3 | Die Nachbarin und der Schlüssel | Als Dario am Mittag von der Schule kommt, ist niemand zu Hause, und sein Schlüssel steckt noch im Turnsack im Schulhaus. Er setzt sich auf die Treppe. Da öffnet Frau Egli, die Nachbarin, ihre Tür. Sie lädt ihn zu Suppe und Brot ein. Dario erzählt ihr von seiner Klasse, und Frau Egli zeigt ihm Fotos von ihren Enkeln. Um zwei Uhr kommt seine Mutter nach Hause. Dario sagt: Nächstes Mal vergesse ich den Schlüssel absichtlich. | wer: Wer lädt Dario zum Essen ein? → Frau Egli, die Nachbarin (falsch: seine Mutter; sein Lehrer)<br>wo: Wo ist Darios Schlüssel? → im Turnsack im Schulhaus (falsch: bei Frau Egli; unter der Treppe)<br>was: Was zeigt Frau Egli? → Fotos von ihren Enkeln (falsch: ihren Garten; ein Buch)<br>schluss: Warum will Dario den Schlüssel nächstes Mal absichtlich vergessen? → Bei Frau Egli hat es ihm gefallen. (falsch: Er sitzt gern auf Treppen.; Er findet seinen Turnsack zu schwer.)<br>titel: Welcher Titel passt am besten? → Die Nachbarin und der Schlüssel (falsch: Suppe und Brot; Fotos von den Enkeln)<br>weiter: Wie geht die Geschichte wohl weiter? → Am nächsten Tag bringt Dario Frau Egli als Dank eine Zeichnung. (falsch: Dario zieht bei Frau Egli ein und kommt nie mehr nach Hause.; Die Mutter wirft den Schlüssel in den Fluss.) | ☐ |
+
+## 77. Diagramm-Wahl (Lehrplan SG MA.3.A.1, MA.3.C.1)
+
+### Säulendiagramme
+
+Alle Zahlen erfunden. Kategorien: Bild, Name, Wert (bei zwei Gruppen zwei Werte). „offen“: Aussagen, die man aus dem Diagramm nicht beurteilen kann.
+
+| Titel | Einheit | Gruppen | Kategorien | Frage zur Wahl | Grund | offene Aussagen | ☐ |
+|---|---|---|---|---|---|---|---|
+| Papiersammlung der Klassen | kg | Herbst / Frühling |  6a: 40 / 30<br> 6b: 25 / 35<br> 5a: 35 / 20<br> 5b: 20 / 15 | Welche Klasse hat am meisten Papier gesammelt? | Hier vergleicht man die Klassen miteinander — ein Vergleich. | Die Klasse 6a hat auch am meisten Glas gesammelt.<br>Die Papiersammlung dauerte eine Woche. | ☐ |
+| Tore im Fussballturnier | Tore | Hinrunde / Rückrunde | 🦅 Adler: 8 / 5<br>🦉 Falken: 6 / 7<br>🐆 Luchse: 4 / 3<br>🐻 Bären: 10 / 9<br>🐺 Wölfe: 2 / 6 | Welche Mannschaft hat am meisten Tore geschossen? | Die Mannschaften werden miteinander verglichen — ein Vergleich. | Die Bären haben das Turnier gewonnen.<br>Die Wölfe hatten die wenigsten Spieler. | ☐ |
+| Unser Schulweg | Kinder |  | 🚶 zu Fuss: 12<br>🚲 Velo: 8<br>🚌 Bus: 4<br>🛴 Trotti: 6<br>🚗 Auto: 10 | Womit kommen die meisten Kinder zur Schule? | Die Schulwege werden miteinander verglichen — ein Vergleich. | Die Kinder mit dem Velo brauchen am kürzesten.<br>Im Winter kommen mehr Kinder mit dem Bus. | ☐ |
+| Gelesene Bücher im Lesemonat | Bücher |  | 🟥 Rot: 15<br>🟦 Blau: 25<br>🟨 Gelb: 10<br>🟩 Grün: 30 | Welche Gruppe hat am meisten Bücher gelesen? | Die Gruppen werden miteinander verglichen — ein Vergleich. | Die Gruppe Grün hat die dicksten Bücher gelesen.<br>Die Gruppe Gelb hat vier Kinder. | ☐ |
+| Lieblingssport der Klasse | Kinder |  | ⚽ Fussball: 10<br>🏊 Schwimmen: 6<br>🤸 Turnen: 4<br>🚴 Velo: 8<br>⛷️ Ski: 2 | Welchen Sport mögen die meisten Kinder am liebsten? | Die Sportarten werden miteinander verglichen — ein Vergleich. | Die Fussball-Kinder spielen in einem Verein.<br>Die Klasse hat jede Woche zwei Turnstunden. | ☐ |
+| Znüni-Umfrage | Kinder |  | 🍎 Apfel: 9<br>🥖 Brot: 6<br>🥕 Rüebli: 3<br>🥐 Gipfeli: 2 | Welches Znüni haben die meisten Kinder dabei? | Die Znüni-Sorten werden miteinander verglichen — ein Vergleich. | Die Äpfel kommen vom Bauernhof im Dorf.<br>Am Freitag gibt es Pausenmilch. | ☐ |
+| Hüpfen am Stück | Sprünge |  |  Lena: 40<br> Noah: 25<br> Mia: 35<br> Elias: 20 | Wer hat am meisten Sprünge geschafft? | Die Kinder werden miteinander verglichen — ein Vergleich. | Lena hat am längsten geübt.<br>Elias ist beim Hüpfen gestolpert. | ☐ |
+| Besucher am Schulfest | Personen |  | 🍰 Kuchen: 45<br>🎯 Spiele: 30<br>🎟️ Tombola: 25<br>🎵 Musik: 20 | Welcher Stand hatte am meisten Besucher? | Die Stände werden miteinander verglichen — ein Vergleich. | Beim Kuchenstand war der Kuchen schon um drei Uhr weg.<br>Das Schulfest dauerte bis am Abend. | ☐ |
+| Runden beim Sponsorenlauf | Runden | Vormittag / Nachmittag |  6a: 80 / 60<br> 6b: 60 / 70<br> 5a: 100 / 50<br> 5b: 40 / 30 | Welche Klasse ist am meisten Runden gelaufen? | Die Klassen werden miteinander verglichen — ein Vergleich. | Die Klasse 5a hat am meisten Geld gesammelt.<br>Eine Runde ist 400 Meter lang. | ☐ |
+| Tiere im Schulgarten | Tiere |  | 🐌 Schnecken: 14<br>🐞 Käfer: 8<br>🪱 Würmer: 6<br>🕷️ Spinnen: 4 | Welche Tiere wurden im Schulgarten am meisten gezählt? | Die Tierarten werden miteinander verglichen — ein Vergleich. | Die Schnecken fressen den Salat.<br>Im Sommer gibt es mehr Käfer. | ☐ |
+| Lieblingsfach | Kinder |  | 🏃 Sport: 8<br>🎨 Zeichnen: 5<br>🔢 Mathe: 4<br>📖 Deutsch: 3 | Welches Fach mögen die meisten Kinder am liebsten? | Die Fächer werden miteinander verglichen — ein Vergleich. | Die Kinder mit Lieblingsfach Sport sind die schnellsten.<br>Die Klasse hat zwanzig Kinder. | ☐ |
+| Punkte im Quiz | Punkte | Runde 1 / Runde 2 | 🟥 Rot: 18 / 12<br>🟦 Blau: 12 / 16<br>🟨 Gelb: 16 / 10<br>🟩 Grün: 14 / 18 | Welche Gruppe hat im Quiz am meisten Punkte? | Die Gruppen werden miteinander verglichen — ein Vergleich. | Die Gruppe Rot kannte alle Tierfragen.<br>Das Quiz hatte zwanzig Fragen. | ☐ |
+| Glace am Sporttag | Kugeln |  | 🍦 Vanille: 30<br>🍫 Schoggi: 45<br>🍓 Erdbeer: 25<br>🍋 Zitrone: 20 | Welche Glace-Sorte wurde am Sporttag am meisten verkauft? | Die Sorten werden miteinander verglichen — ein Vergleich. | Die Schoggi-Glace war am Mittag ausverkauft.<br>Eine Kugel kostete zwei Franken. | ☐ |
+| Haustiere der Klasse 6a | Kinder | 6a / 6b | 🐕 Hund: 6 / 4<br>🐈 Katze: 8 / 7<br>🐇 Hase: 3 / 5<br>🐟 Fisch: 2 / 3<br>🐹 Hamster: 1 / 1 | Welches Haustier haben die meisten Kinder der Klasse 6a? | Die Haustiere werden miteinander verglichen — ein Vergleich. | Die Hunde sind alle gross.<br>Zwei Kinder haben zwei Haustiere. | ☐ |
+
+### Kreisdiagramme
+
+Teile als Zähler zum Nenner (Hälften, Viertel, Achtel, Drittel, Prozent).
+
+| Titel | Nenner | Teile | Frage zur Wahl | Grund | ☐ |
+|---|---|---|---|---|---|
+| Haustiere der Klasse 6a | 4 | 🐕 Hund: 2<br>🐈 Katze: 1<br>🐇 Hase: 1 | Wie verteilen sich die Haustiere in der Klasse 6a? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+| Schulweg der Klasse 5b | 4 | 🚶 zu Fuss: 3<br>🚌 Bus: 1 | Welcher Anteil der Klasse 5b kommt zu Fuss zur Schule? | Es geht um einen Anteil vom Ganzen — ein Anteil. | ☐ |
+| Lieblingsfarbe | 4 | 🔵 Blau: 2<br>🔴 Rot: 1<br>🟢 Grün: 1 | Wie verteilen sich die Lieblingsfarben in der Klasse? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+| Znüni in der Pause | 4 | 🍎 Frucht: 1<br>🥖 Brot: 1<br>🥛 Joghurt: 2 | Welchen Anteil der Znüni machen die Früchte aus? | Es geht um einen Anteil vom Ganzen — ein Anteil. | ☐ |
+| Sport am Nachmittag | 2 | ⚽ Fussball: 1<br>🏑 Unihockey: 1 | Wie teilt sich die Klasse auf Fussball und Unihockey auf? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+| Farbe der Velos | 4 | ⚫ Schwarz: 1<br>🔴 Rot: 3 | Welcher Anteil der Velos ist rot? | Es geht um einen Anteil vom Ganzen — ein Anteil. | ☐ |
+| Lieblingstier im Zoo | 4 | 🐒 Affe: 2<br>🦁 Löwe: 1<br>🐧 Pinguin: 1 | Wie verteilen sich die Lieblingstiere der Klasse? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+| Velo-Check | 4 | ✅ in Ordnung: 3<br>🔦 Licht kaputt: 1 | Welcher Anteil der Velos hat ein kaputtes Licht? | Es geht um einen Anteil vom Ganzen — ein Anteil. | ☐ |
+| Lieblingsglace | 8 | 🍫 Schoggi: 3<br>🍦 Vanille: 2<br>🍓 Erdbeer: 2<br>🍋 Zitrone: 1 | Wie verteilen sich die Lieblingsglaces in der Klasse? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+| Mittwochnachmittag | 8 | ⚽ Sport: 4<br>🎵 Musik: 1<br>👫 Freunde: 2<br>📖 Lesen: 1 | Welchen Anteil des Mittwochnachmittags verbringt die Klasse mit Sport? | Es geht um einen Anteil vom Ganzen — ein Anteil. | ☐ |
+| Schulweg der Klasse 6b | 8 | 🚶 zu Fuss: 5<br>🚲 Velo: 2<br>🚌 Bus: 1 | Wie verteilen sich die Schulwege in der Klasse 6b? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+| Lieblingsfach | 8 | 🏃 Sport: 3<br>🎨 Zeichnen: 3<br>🔢 Mathe: 2 | Welchen Anteil der Klasse hat Mathe als Lieblingsfach? | Es geht um einen Anteil vom Ganzen — ein Anteil. | ☐ |
+| Pausenplatz | 3 | ⚽ Fussball: 2<br>🪁 Schaukel: 1 | Welcher Anteil der Kinder spielt in der Pause Fussball? | Es geht um einen Anteil vom Ganzen — ein Anteil. | ☐ |
+| Lieblingsjahreszeit | 3 | ☀️ Sommer: 2<br>❄️ Winter: 1 | Wie verteilen sich die Lieblingsjahreszeiten in der Klasse? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+| Frühstück | 3 | 🥣 Müesli: 1<br>🍞 Brot: 2 | Welcher Anteil der Kinder isst zum Frühstück Brot? | Es geht um einen Anteil vom Ganzen — ein Anteil. | ☐ |
+| Schulweg der Klasse 6a | 10 | 🚶 zu Fuss: 5<br>🚲 Velo: 3<br>🚌 Bus: 2 | Wie viel Prozent der Klasse 6a kommen zu Fuss zur Schule? | Prozent sind Anteile vom Ganzen — ein Anteil. | ☐ |
+| Haustiere der Klasse 6b | 20 | 🐕 Hund: 10<br>🐈 Katze: 5<br>🐟 Fisch: 3<br>🐇 Hase: 2 | Wie verteilen sich die Haustiere in der Klasse 6b? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+| Lieblingsfarbe der Klasse 5a | 10 | 🔵 Blau: 4<br>🟢 Grün: 3<br>🔴 Rot: 2<br>🟡 Gelb: 1 | Wie verteilen sich die Lieblingsfarben in der Klasse 5a? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+| Freizeit am Samstag | 20 | ⚽ Sport: 8<br>🎲 Spielen: 5<br>🎵 Musik: 4<br>📖 Lesen: 3 | Wie teilt sich die Freizeit am Samstag auf? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+| Glace-Umfrage | 10 | 🍫 Schoggi: 5<br>🍦 Vanille: 3<br>🍓 Erdbeer: 2 | Wie viel Prozent der Kinder mögen Schoggi-Glace am liebsten? | Prozent sind Anteile vom Ganzen — ein Anteil. | ☐ |
+| Pausenplatz der Schule | 20 | ⚽ Fussball: 10<br>🪁 Schaukel: 5<br>🧗 Klettern: 4<br>🪑 Sitzen: 1 | Wie verteilen sich die Kinder in der Pause auf dem Pausenplatz? | Es geht um Anteile vom Ganzen — ein Anteil. | ☐ |
+
+### Liniendiagramme
+
+x-Beschriftung und Werte; „ungleich“ ist die irreführende Zeitachse der Königsstufe.
+
+| Titel | Grösse | Einheit | x | Werte | x ungleich | Frage zur Wahl | Grund | offene Aussagen | ☐ |
+|---|---|---|---|---|---|---|---|---|---|
+| Temperatur am Dienstag | die Temperatur | °C | 6 Uhr, 9 Uhr, 12 Uhr, 15 Uhr, 18 Uhr | 10, 15, 20, 25, 15 | 6 Uhr, 7 Uhr, 8 Uhr, 12 Uhr, 20 Uhr | Wie hat sich die Temperatur am Dienstag verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Am Dienstag hat es am Abend geregnet.<br>Am Mittwoch war es noch wärmer. | ☐ |
+| Wasserstand im Bach | der Wasserstand | cm | Mo, Di, Mi, Do, Fr | 40, 50, 70, 60, 50 |  | Wie hat sich der Wasserstand im Bach in dieser Woche verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Am Mittwoch hat es stark geregnet.<br>Im Bach leben Forellen. | ☐ |
+| Temperatur im Jahr | die Temperatur | °C | Jan, Mär, Mai, Jul, Sep, Nov | 5, 10, 15, 25, 20, 10 | Jan, Feb, Mär, Apr, Aug, Dez | Wie hat sich die Temperatur im Lauf des Jahres verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Im Juli gab es ein Gewitter.<br>Im Januar lag Schnee. | ☐ |
+| Grösse der Sonnenblume | die Sonnenblume | cm | Wo 1, Wo 2, Wo 3, Wo 4, Wo 5, Wo 6 | 10, 20, 40, 70, 90, 100 | Wo 1, Wo 2, Wo 3, Wo 6, Wo 9, Wo 12 | Wie ist die Sonnenblume von Woche zu Woche gewachsen? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Die Sonnenblume wurde jeden Tag gegossen.<br>In Woche 7 hat die Sonnenblume geblüht. | ☐ |
+| Kinder im Hort | die Zahl der Kinder | Kinder | 13 Uhr, 14 Uhr, 15 Uhr, 16 Uhr, 17 Uhr | 20, 25, 15, 10, 5 | 12 Uhr, 13 Uhr, 14 Uhr, 17 Uhr, 18 Uhr | Wie hat sich die Zahl der Kinder im Hort am Nachmittag verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Um 14 Uhr gab es Zvieri.<br>Die meisten Kinder gehen um 16 Uhr nach Hause. | ☐ |
+| Schneehöhe in der Woche | die Schneehöhe | cm | Mo, Di, Mi, Do, Fr, Sa | 10, 25, 30, 20, 15, 5 |  | Wie hat sich die Schneehöhe im Lauf der Woche verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Am Dienstag hat es den ganzen Tag geschneit.<br>Am Sonntag war der Schnee weg. | ☐ |
+| Temperatur in der Nacht | die Temperatur | °C | 20 Uhr, 23 Uhr, 2 Uhr, 5 Uhr, 8 Uhr | 14, 10, 6, 4, 8 | 20 Uhr, 21 Uhr, 22 Uhr, 5 Uhr, 8 Uhr | Wie hat sich die Temperatur in der Nacht verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Um 2 Uhr war der Himmel klar.<br>Am Morgen lag Nebel. | ☐ |
+| Verkaufte Pausenbrote | die Zahl der Pausenbrote | Brote | Mo, Di, Mi, Do, Fr | 30, 25, 40, 35, 20 |  | Wie hat sich der Verkauf der Pausenbrote im Lauf der Woche verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Am Mittwoch gab es Zopf.<br>Die Pausenbrote kosten einen Franken. | ☐ |
+| Pegel im Dorfweiher | der Pegel | cm | Mär, Apr, Mai, Jun, Jul, Aug | 60, 80, 90, 70, 50, 40 | Jan, Mär, Apr, Mai, Nov, Dez | Wie hat sich der Pegel im Dorfweiher vom Frühling bis zum Sommer verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Im August war das Wasser am wärmsten.<br>Im Weiher leben Frösche. | ☐ |
+| Besucher im Hallenbad | die Zahl der Besucher | Personen | 10 Uhr, 12 Uhr, 14 Uhr, 16 Uhr, 18 Uhr | 20, 50, 80, 60, 30 | 9 Uhr, 10 Uhr, 11 Uhr, 16 Uhr, 20 Uhr | Wie hat sich die Zahl der Besucher im Hallenbad über den Tag verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Um 14 Uhr war das Wasser am wärmsten.<br>Am Abend gab es einen Schwimmkurs. | ☐ |
+| Länge des Schattens | der Schatten | cm | 9 Uhr, 11 Uhr, 13 Uhr, 15 Uhr, 17 Uhr | 80, 50, 30, 60, 90 |  | Wie hat sich die Länge des Schattens über den Tag verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Um 13 Uhr stand die Sonne am höchsten.<br>Der Schatten gehört zu einem Stab von einem Meter Länge. | ☐ |
+| Temperatur im Gewächshaus | die Temperatur | °C | 8 Uhr, 10 Uhr, 12 Uhr, 14 Uhr, 16 Uhr | 15, 20, 25, 30, 20 | 8 Uhr, 9 Uhr, 10 Uhr, 14 Uhr, 18 Uhr | Wie hat sich die Temperatur im Gewächshaus über den Tag verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Um 12 Uhr wurde das Fenster geöffnet.<br>Im Gewächshaus wachsen Tomaten. | ☐ |
+| Vögel am Futterhaus | die Zahl der Vögel | Vögel | 7 Uhr, 8 Uhr, 9 Uhr, 10 Uhr, 11 Uhr | 12, 20, 16, 8, 4 |  | Wie hat sich die Zahl der Vögel am Futterhaus am Morgen verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Um 8 Uhr wurde Futter nachgefüllt.<br>Die meisten Vögel waren Meisen. | ☐ |
+| Gelesene Seiten | die Zahl der Seiten | Seiten | Mo, Di, Mi, Do, Fr | 10, 20, 15, 30, 25 |  | Wie hat sich die Zahl der gelesenen Seiten im Lauf der Woche verändert? | Es geht um die Veränderung über die Zeit — ein Verlauf. | Am Donnerstag war das Buch am spannendsten.<br>Das Buch hat 200 Seiten. | ☐ |
+
+## 78. Gattungs-Kenner (Lehrplan SG D.6.C.1)
+
+### Merkmale je Gattung
+
+Frage = Tipp 2, Suchhinweis = Tipp 3.
+
+| Gattung | Merkmal | Kurz | Frage | Suchhinweis | ☐ |
+|---|---|---|---|---|---|
+| Märchen | Formelhafter Anfang | Beginnt mit „Es war einmal“ oder „Vor langer Zeit“. | Wie beginnt der Text? Kennst du solche Anfänge aus alten Geschichten? | Der allererste Satz verrät es. | ☐ |
+| Märchen | Zauber und Verwandlung | Es geschehen Dinge, die es in Wirklichkeit nicht gibt: Zauber, Verwandlungen, sprechende Dinge. | Geschieht hier etwas, das es in Wirklichkeit nicht gibt? | Such den Satz, in dem etwas verzaubert ist oder sich verwandelt. | ☐ |
+| Märchen | Gut gegen Böse | Am Ende wird das Gute belohnt und das Böse bestraft. | Wer ist hier freundlich, wer gemein — und wie geht es am Ende für sie aus? | Such den Satz am Schluss, in dem die Freundlichen belohnt werden. | ☐ |
+| Märchen | Formelhafter Schluss | Endet mit „Und wenn sie nicht gestorben sind …“. | Wie endet der Text? Kennst du solche Schlusssätze? | Der allerletzte Satz verrät es. | ☐ |
+| Märchen | Zauberzahlen | Drei Wünsche, sieben Berge, zwölf Jahre: Zahlen, die in alten Geschichten immer wiederkehren. | Kommt eine Zahl vor, die in alten Geschichten immer wieder auftaucht? |  | ☐ |
+| Sage | Echter Ort | Spielt an einem bestimmten Ort mit Namen: ein Berg, ein See, ein Dorf. | Wird ein bestimmter Ort mit Namen genannt, den es geben könnte? | Such den Satz, der den Ort beim Namen nennt. | ☐ |
+| Sage | Noch heute … | Erklärt, woher ein Stein, ein See oder ein Brauch kommt — man kann es heute noch sehen. | Erklärt der Text etwas, das man heute noch sehen oder hören kann? | Such den Satz, der von heute spricht. | ☐ |
+| Sage | Riesen, Drachen, Geister | Ein übernatürliches Wesen trifft auf gewöhnliche Menschen an einem bestimmten Ort. | Trifft hier ein Wesen, das es nicht gibt, auf gewöhnliche Leute? |  | ☐ |
+| Sage | Man erzählt sich … | Wird weitererzählt, als wäre es wirklich geschehen. | Wird hier etwas erzählt, als wäre es wirklich geschehen — mit „man sagt“ oder „man erzählt“? | Such den Satz, der sagt, dass die Leute es weitererzählen. | ☐ |
+| Fabel | Tiere reden wie Menschen | Tiere sprechen und handeln wie Menschen; jedes steht für eine Eigenschaft. | Reden hier Tiere wie Menschen? | Such den Satz, in dem ein Tier etwas sagt. | ☐ |
+| Fabel | Lehre am Schluss | Ein Satz mit einer Lehre für alle, meist ganz am Ende. | Steht am Ende ein Satz, der eine Lehre für alle enthält? | Der allerletzte Satz verrät es. | ☐ |
+| Fabel | Kurz und knapp | Nur zwei Figuren, eine Begegnung, ein Streit oder eine List. | Gibt es nur zwei Figuren und eine kurze Begegnung? |  | ☐ |
+| Fabel | Schlau, eitel, gierig | Eine Figur ist schlau, eine andere eitel, gierig oder faul — wie Menschen. | Ist eine Figur besonders schlau, eitel oder gierig? |  | ☐ |
+| Gedicht | Reim | Zeilenenden klingen gleich. | Klingen die Zeilenenden gleich? | Sprich das letzte Wort der markierten Zeile und such eine Zeile, die genauso endet. | ☐ |
+| Gedicht | Verse und Strophen | Kurze Zeilen (Verse), oft in Gruppen (Strophen) geordnet. | Sind die Zeilen kurz und in Gruppen geordnet? |  | ☐ |
+| Gedicht | Rhythmus | Beim Lesen entsteht ein Takt, fast wie bei einem Lied. | Entsteht beim Lesen ein Takt? |  | ☐ |
+| Gedicht | Sprachbilder | Dinge werden lebendig oder verglichen: der Wind singt, der Bach hüpft. | Werden Dinge lebendig, als wären sie Menschen? |  | ☐ |
+| Bericht | Datum und Uhrzeit | Sagt genau, wann etwas geschah: Datum, Wochentag, Uhrzeit. | Steht genau da, wann etwas geschehen ist? | Such den Satz mit dem Datum oder der Uhrzeit. | ☐ |
+| Bericht | Zahlen und Fakten | Genaue Zahlen: wie viele, wie lang, wie hoch. | Stehen genaue Zahlen im Text? | Such den Satz mit den Zahlen. | ☐ |
+| Bericht | Wer, was, wann, wo | Beantwortet die W-Fragen: Wer hat was wann und wo getan? | Erfährst du, wer was wann und wo getan hat? |  | ☐ |
+| Bericht | Sachlich, ohne Zauber | Erzählt nur, was wirklich geschehen ist, ohne Gefühle und ohne Erfinden. | Wird hier nur berichtet, was wirklich geschehen ist? |  | ☐ |
+| Kurzgeschichte | Beginnt mitten drin | Fängt ohne Einleitung mitten in einer Situation an. | Beginnt der Text mitten drin, ohne dass die Personen vorgestellt werden? | Der allererste Satz verrät es. | ☐ |
+| Kurzgeschichte | Alltag von heute | Gewöhnliche Menschen an einem gewöhnlichen Tag, ohne Zauber. | Geht es um gewöhnliche Leute an einem gewöhnlichen Tag? |  | ☐ |
+| Kurzgeschichte | Offener Schluss | Hört auf, ohne dass alles gelöst ist — man muss selbst weiterdenken. | Bleibt am Ende etwas offen? | Der allerletzte Satz verrät es. | ☐ |
+| Kurzgeschichte | Ein kleiner Moment | Eine kleine Sache verändert etwas Grosses. | Verändert eine kleine Sache etwas Grosses? |  | ☐ |
+| Theaterszene | Rollennamen vor dem Satz | Vor jedem Satz steht, wer spricht: LEA: … | Steht vor den Sätzen, wer gerade spricht? |  | ☐ |
+| Theaterszene | Regieanweisung | In Klammern steht, was die Figur tut: (zeigt auf das Pult). | Steht irgendwo in Klammern, was eine Figur gerade tut? | Such die Zeile mit der Klammer. | ☐ |
+| Theaterszene | Ort der Szene | Am Anfang steht, wo und wann die Szene spielt. | Steht ganz am Anfang, wo und wann es spielt? | Die allererste Zeile verrät es. | ☐ |
+| Theaterszene | Nur Gespräch | Die Handlung läuft allein über das Gespräch der Figuren. | Läuft alles nur über das Gespräch? |  | ☐ |
+
+### Texte
+
+Alle selbst geschrieben. Merkmalszeile: die Zeile, die das Merkmal zeigt (Nummer ab 1). Bei Mischtexten der fremde Satz und seine Gattung.
+
+| Gattung | Titel | Zeilen | Merkmal (Art, Zeile) | Lehre / Typisch / Figuren | fremder Satz | ☐ |
+|---|---|---|---|---|---|---|
+| Märchen | Die drei Wünsche | 1. Es war einmal ein armer Köhler, der tief im Wald lebte.<br>2. Eines Abends klopfte eine alte Frau an seine Tür und bat um ein Stück Brot.<br>3. Der Köhler teilte sein letztes Brot mit ihr.<br>4. Da verwandelte sich die Alte in eine Fee und schenkte ihm drei Wünsche.<br>5. Sein gieriger Nachbar hörte davon und jagte die Fee mit dem Besen davon, als sie auch zu ihm kam.<br>6. Der Köhler aber wünschte sich ein warmes Haus, und wenn er nicht gestorben ist, so lebt er noch heute darin. | anfang, Zeile 1 | der Köhler = gut; der Nachbar = boese; die Fee = gut |  | ☐ |
+| Märchen | Der Spiegel der Königin | 1. Vor langer Zeit lebte in einem fernen Königreich eine Königin, die niemanden neben sich duldete.<br>2. Jeden Morgen fragte sie ihren Zauberspiegel, wer die Klügste im Land sei.<br>3. Eines Tages antwortete der Spiegel: die Tochter des Gärtners.<br>4. Die Königin liess das Mädchen in einen Turm sperren.<br>5. Doch ein Rabe trug ihm jeden Tag ein Rätsel zu, und das Mädchen löste alle.<br>6. Am Ende öffnete das siebte Rätsel die Turmtür, und die Königin musste das Land verlassen. | zauber, Zeile 2 | die Königin = boese; die Gärtnerstochter = gut; der Rabe = gut |  | ☐ |
+| Märchen | Der Apfelbaum | 1. Es war einmal ein Junge, der jeden Tag an einem alten Apfelbaum vorbeiging.<br>2. Eines Morgens sprach der Baum zu ihm: Befreie meine Wurzeln von den Steinen, und ich belohne dich.<br>3. Der Junge räumte die Steine weg, obwohl es ihn den ganzen Tag kostete.<br>4. Da trug der Baum über Nacht goldene Äpfel.<br>5. Ein neidischer Händler sägte den Baum ab, um alle Äpfel allein zu bekommen.<br>6. Doch in seinen Händen wurden die Äpfel zu Staub, und dem Jungen wuchs ein neuer Baum vor dem Fenster. | anfang, Zeile 1 | der Junge = gut; der Händler = boese |  | ☐ |
+| Märchen | Die Müllerstochter und der Wolf | 1. Vor langer Zeit lebte am Rand eines dunklen Waldes eine Müllerstochter.<br>2. Ein Wolf mit Zauberkräften verlangte jede Nacht einen Sack Mehl, sonst wollte er die Mühle verschlingen.<br>3. Die Müllerstochter füllte den Sack heimlich mit Asche.<br>4. Der Wolf schlang alles hinunter und hustete so lange, bis sein Zauber verflogen war.<br>5. Von da an war er ein gewöhnlicher Wolf und lief in den Wald zurück.<br>6. Die Müllerstochter aber wurde im ganzen Land als die Kluge gefeiert, und die Mühle klapperte in Frieden weiter. | gutboese, Zeile 6 | die Müllerstochter = gut; der Wolf = boese |  | ☐ |
+| Märchen | Das Rätsel des Zwergs | 1. Es war einmal ein König mit drei Söhnen, der nicht wusste, wem er sein Reich geben sollte.<br>2. Ein Zwerg bot ihm ein Rätsel an: Wer es löst, soll König werden.<br>3. Der älteste Sohn lachte den Zwerg aus, der zweite schlug nach ihm.<br>4. Nur der jüngste hörte dem Zwerg zu und fragte ihn, was er sich wünsche.<br>5. Da verriet ihm der Zwerg die Antwort, und der jüngste Sohn wurde König.<br>6. Und wenn sie nicht gestorben sind, dann leben sie noch heute. | schluss, Zeile 6 | der jüngste Sohn = gut; der älteste Sohn = boese; der Zwerg = gut |  | ☐ |
+| Märchen | Die sieben Schlüssel | 1. Vor langer Zeit lebte eine Prinzessin, die von einer Hexe in ein Schloss mit sieben Türen gesperrt wurde.<br>2. Jede Tür hatte ein eigenes Schloss, und die sieben Schlüssel lagen in sieben Ländern verstreut.<br>3. Ein Schäfer, der von der Prinzessin gehört hatte, machte sich auf den Weg.<br>4. Sieben Jahre wanderte er, und in jedem Land half er jemandem, der ihm dafür einen Schlüssel schenkte.<br>5. Als die siebte Tür aufsprang, zerfiel die Hexe zu Staub.<br>6. Der Schäfer und die Prinzessin regierten von da an das Land gerecht und freundlich. | gutboese, Zeile 6 | der Schäfer = gut; die Hexe = boese; die Prinzessin = gut |  | ☐ |
+| Märchen | Der Fischer und der goldene Hecht | 1. Es war einmal ein Fischer, der in seinem Netz einen goldenen Hecht fand.<br>2. Der Hecht sprach: Lass mich frei, und ich erfülle dir einen Wunsch.<br>3. Der Fischer liess ihn frei und wünschte sich nur, dass sein Netz nie mehr leer sei.<br>4. Von da an fing er jeden Tag genug für seine Familie und für die Nachbarn.<br>5. Der habgierige Bürgermeister hörte davon, fing den Hecht und wünschte sich einen Berg aus Gold.<br>6. Da verwandelte sich der Berg in Wasser, und der Bürgermeister stand bis zum Hals im See. | anfang, Zeile 1 | der Fischer = gut; der Bürgermeister = boese; der Hecht = gut |  | ☐ |
+| Märchen | Die Laterne im Moor | 1. Vor langer Zeit lebte am Rand eines Moors eine junge Hirtin mit ihren Ziegen.<br>2. Ein Moorgeist lockte die Wanderer mit einem Licht in den Sumpf, denn er wollte das Moor für sich allein.<br>3. Eines Abends folgte auch die Hirtin dem Licht, doch sie band die Ziegen an ihr Kleid.<br>4. Als der Boden unter ihr nachgab, zogen die Ziegen sie heraus.<br>5. Die Hirtin stellte eine Laterne auf den sicheren Pfad, und von da an fand jeder Wanderer heim.<br>6. Und wenn sie nicht gestorben ist, dann leuchtet ihre Laterne noch heute. | schluss, Zeile 6 | die Hirtin = gut; der Moorgeist = boese |  | ☐ |
+| Sage | Der Stein im Lindensee | 1. Am Ufer des Lindensees liegt ein Felsblock, so gross wie ein Haus.<br>2. Man erzählt sich, dass einst ein Riese auf dem Berg über dem See wohnte.<br>3. Die Glocken des Dorfes störten seinen Schlaf.<br>4. Wütend riss er einen Felsen aus dem Berg und warf ihn nach dem Kirchturm.<br>5. Der Wurf ging fehl, und der Stein landete im Wasser.<br>6. Noch heute ragt er aus dem See, und an klaren Tagen sieht man die Abdrücke der Riesenfinger. | nochheute, Zeile 6 | Typisch: Sie erklärt, woher der grosse Stein im See kommt. (falsch: Ein Drache bewacht einen Schatz im Berg.; Ein Zwerg zeigt den Bauern eine Quelle.) |  | ☐ |
+| Sage | Die Glocke von Oberwil | 1. In Oberwil stand früher eine Kapelle mit einer silbernen Glocke.<br>2. Als Feinde das Dorf überfielen, versenkten die Bauern die Glocke im Moor, damit niemand sie stehlen konnte.<br>3. Nach dem Krieg suchten sie Tag und Nacht, doch das Moor gab die Glocke nicht mehr her.<br>4. Man erzählt sich, dass sie in stillen Nächten aus der Tiefe läutet.<br>5. Wer das Läuten hört, soll im nächsten Jahr Glück haben. | erzaehlt, Zeile 4 | Typisch: Eine Glocke, die im Moor versunken ist, soll noch läuten. (falsch: Ein Riese wirft einen Stein in den See.; Ein Fischer findet einen goldenen Hecht.) |  | ☐ |
+| Sage | Der Drachenfels im Tobeltal | 1. Hoch über dem Tobeltal ragt ein schwarzer Felsen auf.<br>2. Vor vielen hundert Jahren soll dort ein Drache gehaust haben, der jede Nacht ins Tal hinabstieg und Schafe raubte.<br>3. Ein junger Hirt lockte ihn mit einem Schaf aus Stroh, das er mit Pech gefüllt hatte.<br>4. Der Drache verschlang es, und das Pech verklebte ihm das Feuer im Hals.<br>5. Er stürzte in die Schlucht und wurde zu Stein.<br>6. Noch heute zeigt man den Kindern die Risse im Fels: Das seien seine Schuppen. | nochheute, Zeile 6 | Typisch: Sie erklärt, woher die Risse im Felsen kommen. (falsch: Eine Glocke läutet aus dem Moor.; Ein Fischer wünscht sich ein volles Netz.) |  | ☐ |
+| Sage | Die Quelle der Nixe | 1. Zwischen den Hügeln hinter dem Dorf Brunnental sprudelt eine Quelle, die auch im heissesten Sommer nie versiegt.<br>2. Die Leute im Dorf erzählen, dass einst eine Nixe darin wohnte.<br>3. Ein Bauer wollte das Wasser für sich allein und baute eine Mauer um die Quelle.<br>4. In der Nacht darauf hörte man ein Weinen, und am Morgen war die Mauer eingestürzt.<br>5. Der Bauer versuchte es dreimal, und dreimal lag die Mauer am Morgen in Trümmern.<br>6. Seither darf jeder aus der Quelle trinken, und niemand baut dort mehr eine Mauer. | ort, Zeile 1 | Typisch: Sie erklärt, warum die Quelle bei Brunnental allen gehört. (falsch: Ein Drache wird zu Stein.; Ein Riese wirft einen Felsen in den See.) |  | ☐ |
+| Sage | Das versunkene Dorf | 1. Auf dem Grund des Nebelsees, sagen die Fischer, liegen die Mauern eines Dorfes.<br>2. Die Leute dort sollen so reich und so hochmütig gewesen sein, dass sie Bettler mit Hunden vom Hof jagten.<br>3. Eines Nachts kam ein Fremder und bat um ein Dach über dem Kopf; nur eine alte Frau nahm ihn auf.<br>4. Der Fremde riet ihr, noch vor dem Morgen auf den Hügel zu steigen.<br>5. Als sie oben stand, brach das Wasser über das Dorf herein.<br>6. Noch heute, so heisst es, hört man bei Windstille die Glocken aus der Tiefe. | nochheute, Zeile 6 | Typisch: Sie erklärt, warum man im See Glocken hören soll. (falsch: Ein Hirt überlistet einen Drachen.; Eine Nixe beschützt eine Quelle.) |  | ☐ |
+| Sage | Der Hufstein auf der Rotalp | 1. Mitten auf der Weide der Rotalp liegt ein Stein mit einem tiefen Abdruck, der wie ein Huf aussieht.<br>2. Ein Senn soll dem Teufel seine Seele versprochen haben, wenn der ihm bis zum ersten Hahnenschrei eine Brücke über die Schlucht baut.<br>3. Der Teufel schleppte die Steine die ganze Nacht.<br>4. Kurz vor dem Morgen weckte die Frau des Senns den Hahn, und der krähte zu früh.<br>5. Der Teufel warf den letzten Stein wütend auf die Alp und verschwand.<br>6. Man erzählt sich, der Abdruck im Stein stamme von seinem Huf. | erzaehlt, Zeile 6 | Typisch: Sie erklärt, woher der Abdruck im Stein auf der Alp kommt. (falsch: Eine Glocke liegt im Moor.; Ein Dorf versinkt im See.) |  | ☐ |
+| Sage | Die weisse Gämse | 1. Auf dem Grat über dem Dorf Hinterbach lebte, so erzählen die Alten, eine weisse Gämse.<br>2. Wer sie jagte, dem brachte sie Unglück.<br>3. Ein junger Jäger lachte darüber und stieg hinauf.<br>4. Er sah die Gämse, legte an, und im selben Augenblick löste sich der Fels unter seinen Füssen.<br>5. Seine Frau fand nur noch sein Hütchen am Rand der Schlucht.<br>6. Noch heute meiden die Jäger von Hinterbach den Grat, und wer die weisse Gämse sieht, kehrt um. | nochheute, Zeile 6 | Typisch: Sie erklärt, warum die Jäger den Grat meiden. (falsch: Ein Riese stört die Glocken.; Ein Fremder warnt eine alte Frau.) |  | ☐ |
+| Fabel | Der Frosch und der Reiher | 1. Ein Frosch prahlte am Teich, er könne höher springen, als jeder Vogel fliegen könne.<br>2. Ein Reiher hörte zu und bot ihm einen Wettkampf an.<br>3. Der Frosch sprang, so hoch er konnte, und landete im Schnabel des Reihers.<br>4. Der Reiher liess ihn wieder fallen, denn ein Prahler schmeckt ihm nicht.<br>5. Wer prahlt, zeigt dem Feind, wo er steht. | moral, Zeile 5 | Lehre: Wer prahlt, zeigt dem Feind, wo er steht. (falsch: Wer hoch springt, gewinnt jeden Wettkampf.; Wer schweigt, hat immer Unrecht.) |  | ☐ |
+| Fabel | Die Eule und der Specht | 1. Ein Specht klopfte den ganzen Tag an einen hohlen Baum, in dem eine Eule schlief.<br>2. Die Eule bat ihn dreimal um Ruhe, doch der Specht klopfte weiter.<br>3. In der Nacht flog die Eule von Ast zu Ast und rief so laut, dass der Specht kein Auge zutat.<br>4. Am Morgen klopfte er leiser, und die Eule schlief.<br>5. Wer anderen keine Ruhe lässt, findet selbst keine. | moral, Zeile 5 | Lehre: Wer anderen keine Ruhe lässt, findet selbst keine. (falsch: Wer laut ist, bekommt immer Recht.; Wer schläft, verpasst das Beste.) |  | ☐ |
+| Fabel | Die Katze und der Spatz | 1. Eine Katze lauerte unter dem Vogelhaus, in dem ein Spatz Körner pickte.<br>2. Sie rief hinauf: Komm herunter, ich will dir nur mein neues Halsband zeigen.<br>3. Der Spatz pickte weiter und schwieg.<br>4. Die Katze wartete bis zum Abend und ging mit leerem Magen nach Hause.<br>5. Wer dem Feind traut, ist bald sein Essen. | tiere, Zeile 2 | Lehre: Wer dem Feind traut, ist bald sein Essen. (falsch: Wer Körner pickt, wird nie satt.; Wer ein Halsband trägt, ist immer freundlich.) |  | ☐ |
+| Fabel | Der Dachs und der Maulwurf | 1. Ein Dachs und ein Maulwurf gruben nebeneinander ihre Gänge unter der Wiese.<br>2. Der Maulwurf fragte den Dachs, ob sie ihre Gänge verbinden wollten, dann hätten beide zwei Ausgänge.<br>3. Der Dachs schnaubte, er brauche niemanden, und grub allein weiter.<br>4. Als der Fuchs kam, hatte der Maulwurf zwei Fluchtwege, der Dachs sass in der Falle.<br>5. Wer Hilfe ausschlägt, steht in der Not allein. | moral, Zeile 5 | Lehre: Wer Hilfe ausschlägt, steht in der Not allein. (falsch: Wer tief gräbt, findet immer einen Schatz.; Wer zwei Ausgänge hat, braucht keine Freunde.) |  | ☐ |
+| Fabel | Die Elster und der Glitzerstein | 1. Eine Elster fand einen glänzenden Stein und trug ihn in ihr Nest.<br>2. Von da an verliess sie das Nest nicht mehr, aus Angst, jemand könnte ihn stehlen.<br>3. Sie hungerte, während die anderen Vögel Beeren sammelten.<br>4. Im Herbst war sie so schwach, dass der Wind sie samt Stein vom Ast fegte.<br>5. Wer nur hütet, was er hat, verliert darüber alles andere. | moral, Zeile 5 | Lehre: Wer nur hütet, was er hat, verliert darüber alles andere. (falsch: Wer glänzende Steine findet, wird reich.; Wer im Nest bleibt, ist immer sicher.) |  | ☐ |
+| Fabel | Der Hahn und der Wetterhahn | 1. Ein Hahn stolzierte über den Hof und rief: Ohne mich geht die Sonne nicht auf!<br>2. Der Wetterhahn auf dem Dach knarrte, er zeige seit hundert Jahren den Wind an, und noch nie habe ihm jemand gedankt.<br>3. Am nächsten Morgen verschlief der Hahn, und die Sonne ging trotzdem auf.<br>4. Seither krähte er leiser.<br>5. Niemand ist so wichtig, wie er selbst glaubt. | tiere, Zeile 1 | Lehre: Niemand ist so wichtig, wie er selbst glaubt. (falsch: Wer früh aufsteht, bringt die Sonne hervor.; Wer auf dem Dach sitzt, sieht am weitesten.) |  | ☐ |
+| Fabel | Die Schnecke und der Hirsch | 1. Ein Hirsch spottete über eine Schnecke, weil sie für den Weg über die Wiese einen ganzen Tag brauchte.<br>2. Die Schnecke sagte: Dafür trage ich mein Haus bei mir und bin überall daheim.<br>3. In der Nacht kam ein Gewitter.<br>4. Der Hirsch rannte durch den Regen und fand keinen Unterschlupf, die Schnecke schlief trocken.<br>5. Jeder hat etwas, das der andere nicht hat. | tiere, Zeile 2 | Lehre: Jeder hat etwas, das der andere nicht hat. (falsch: Wer schnell ist, gewinnt immer.; Ein Haus auf dem Rücken ist nur eine Last.) |  | ☐ |
+| Fabel | Der Wolf und die Glocke | 1. Ein Wolf wollte die Schafe fangen, doch der Hund hörte ihn jedes Mal kommen.<br>2. Da stahl der Wolf die Glocke vom Hals des Leitschafs und hängte sie sich selbst um, damit alle ihn für ein Schaf hielten.<br>3. Beim ersten Schritt läutete die Glocke, und der Hund jagte ihn über drei Hügel.<br>4. Wer sich verstellt, verrät sich meist selbst. | moral, Zeile 4 | Lehre: Wer sich verstellt, verrät sich meist selbst. (falsch: Wer eine Glocke trägt, ist ein Schaf.; Wer laut ist, fängt die meisten Schafe.) |  | ☐ |
+| Gedicht | Der Herbstwind | 1. Der Wind fegt über Feld und Haus,<br>2. er treibt die Blätter bunt hinaus.<br>3. Sie tanzen wild, sie tanzen leicht,<br>4. bis einer sacht den Boden streicht.<br>5. Der Apfelbaum steht leer und kahl,<br>6. die Sonne scheint noch einmal fahl.<br>7. Dann wird es Nacht, es wird so kühl,<br>8. die Katze schläft auf ihrem Stuhl. | reim, Zeile 2 (Partner 1) |  |  | ☐ |
+| Gedicht | Mein Velo | 1. Mein Velo ist nicht neu, nicht fein,<br>2. der Lack ist ab, der Sattel klein.<br>3. Doch wenn ich fahr, den Berg hinab,<br>4. dann bin ich schnell, dann hält mich nichts ab.<br>5. Die Bremse quietscht, die Kette singt,<br>6. das Rad, das klappert, surrt und klingt.<br>7. Ich fahr bis an den Waldesrand,<br>8. die Sonne scheint mir auf die Hand. | reim, Zeile 6 (Partner 5) |  |  | ☐ |
+| Gedicht | Regentag | 1. Es tropft vom Dach, es tropft vom Baum,<br>2. der Garten ist ein grauer Raum.<br>3. Die Schnecke kriecht, die Amsel schweigt,<br>4. der Himmel hat sich schwer geneigt.<br>5. Ich sitz am Fenster, warm und still,<br>6. und warte, bis der Regen will.<br>7. Dann hol ich Stiefel, Schirm und Hut<br>8. und spring hinein mit frohem Mut. | reim, Zeile 2 (Partner 1) |  |  | ☐ |
+| Gedicht | Die Katze | 1. Die Katze liegt im Sonnenschein,<br>2. sie rollt sich ein, sie schläft so fein.<br>3. Ein Vogel zwitschert auf dem Ast,<br>4. die Katze hat ihn schon erfasst.<br>5. Sie springt, sie fällt, sie landet weich,<br>6. der Vogel sitzt längst überm Teich.<br>7. Die Katze putzt sich still und lang<br>8. und tut, als wär ihr gar nicht bang. | reim, Zeile 4 (Partner 3) |  |  | ☐ |
+| Gedicht | Winternacht | 1. Der Schnee fällt leise auf das Dach,<br>2. kein Hund, kein Mensch ist jetzt noch wach.<br>3. Die Strasse glänzt im Lampenlicht,<br>4. ein Fuchs schleicht durch, man sieht ihn nicht.<br>5. Im Haus ist's warm, der Ofen brummt,<br>6. die Katze schnurrt, der Kessel summt.<br>7. Und morgen früh, da bau ich dann<br>8. den grössten Schneemann, den ich kann. | reim, Zeile 6 (Partner 5) |  |  | ☐ |
+| Gedicht | Der Bach | 1. Der Bach, der plätschert durch den Wald,<br>2. mal ist er warm, mal ist er kalt.<br>3. Er hüpft von Stein zu Stein hinab<br>4. und nimmt die Blätter mit auf Trab.<br>5. Er fragt nicht, wo der Weg hin geht,<br>6. er weiss nur, dass er sich dreht.<br>7. Und kommt er endlich in den See,<br>8. dann ruft er laut und froh: Juhee! | reim, Zeile 4 (Partner 3) |  |  | ☐ |
+| Gedicht | Die Schulreise | 1. Wir fahren früh, der Zug ist voll,<br>2. die Lehrerin findet das ganz toll.<br>3. Der Max hat schon sein Brot verdrückt,<br>4. die Anna ist ganz entzückt.<br>5. Dann wandern wir den Berg hinauf,<br>6. die Sonne geht dabei erst auf.<br>7. Und oben, bei der grossen Tanne,<br>8. trinkt jeder Tee aus einer Kanne. | reim, Zeile 8 (Partner 7) |  |  | ☐ |
+| Gedicht | Nachts im Zelt | 1. Das Zelt steht fest, die Nacht ist schwarz,<br>2. ich hör den Wind, ich riech das Harz.<br>3. Ein Käuzchen ruft, ein Zweig zerbricht,<br>4. ich halte fest mein Taschenlicht.<br>5. Und dann wird's still, der Wald schläft ein,<br>6. der Mond scheint durch das Zelt herein.<br>7. Ich zähl die Sterne, eins, zwei, drei,<br>8. und morgen ist die Nacht vorbei. | reim, Zeile 6 (Partner 5) |  |  | ☐ |
+| Bericht | Sporttag der Schule Waldegg | 1. Am Freitag, 13. Juni, fand auf dem Sportplatz der Schule Waldegg der jährliche Sporttag statt.<br>2. Rund 180 Kinder aus neun Klassen nahmen teil.<br>3. Am Morgen standen Weitsprung, Ballwurf und ein 60-Meter-Lauf auf dem Programm.<br>4. Nach dem Mittagessen folgte ein Stafettenlauf der Klassen.<br>5. Die Klasse 5b gewann die Stafette knapp vor der 6a.<br>6. Die Schulleitung dankte den Eltern, die den Getränkestand betreut hatten. | datum, Zeile 1 |  |  | ☐ |
+| Bericht | Feuerwehr rettet Katze | 1. Am Dienstagabend um 19 Uhr rückte die Feuerwehr Oberfeld zu einem ungewöhnlichen Einsatz aus.<br>2. Eine Katze sass seit dem Morgen in sieben Metern Höhe auf einer Tanne und traute sich nicht mehr hinunter.<br>3. Die Feuerwehrleute stellten eine Leiter auf und holten das Tier in wenigen Minuten herab.<br>4. Die Katze war unverletzt und wurde ihrer Besitzerin übergeben.<br>5. Der Einsatz dauerte eine halbe Stunde. | datum, Zeile 1 |  |  | ☐ |
+| Bericht | Neue Brücke über den Dorfbach | 1. Seit Montag ist die neue Holzbrücke über den Dorfbach in Lindenhof geöffnet.<br>2. Sie ist 14 Meter lang und 3 Meter breit.<br>3. Die alte Brücke war im Winter von einem Hochwasser beschädigt worden.<br>4. Der Bau dauerte vier Monate und kostete die Gemeinde eine Viertelmillion Franken.<br>5. An der Eröffnung durften die Kinder der Schule als Erste hinübergehen. | zahlen, Zeile 2 |  |  | ☐ |
+| Bericht | Flohmarkt in der Turnhalle | 1. Am Samstag, 5. April, verwandelte sich die Turnhalle des Schulhauses Birkenweg in einen Flohmarkt.<br>2. Die Kinder der fünften und sechsten Klassen verkauften Bücher, Spiele und Kleider.<br>3. Der Erlös ist für das Lager im Sommer bestimmt.<br>4. Am Ende des Tages zählten die Klassen den Inhalt der Kassen.<br>5. Zusammen kam mehr als tausend Franken herein. | datum, Zeile 1 |  |  | ☐ |
+| Bericht | Hochwasser im Mühletal | 1. Nach starken Regenfällen trat der Mühlebach in der Nacht auf Donnerstag über die Ufer.<br>2. Das Wasser stand in mehreren Kellern bis zu 40 Zentimeter hoch.<br>3. Die Feuerwehr pumpte bis zum Mittag die Keller leer.<br>4. Verletzt wurde niemand.<br>5. Die Gemeinde prüft nun, ob der Bach ein höheres Ufer bekommen soll. | zahlen, Zeile 2 |  |  | ☐ |
+| Bericht | Lesenacht in der Bibliothek | 1. Am Freitag, 7. November, blieb die Gemeindebibliothek Rosenau bis Mitternacht geöffnet.<br>2. Zweiunddreissig Kinder kamen mit Schlafsack und Taschenlampe.<br>3. Eine Autorin las aus ihrem neuen Buch vor und beantwortete Fragen.<br>4. Danach durften die Kinder in den Regalen stöbern und lesen, so lange sie wollten.<br>5. Um Mitternacht holten die Eltern ihre müden Kinder ab. | datum, Zeile 1 |  |  | ☐ |
+| Bericht | Neuer Rekord im Freibad | 1. Im Freibad Seewiese hat ein Schüler der Oberstufe einen neuen Rekord im Streckentauchen aufgestellt.<br>2. Er tauchte 52 Meter weit, 4 Meter mehr als der bisherige Rekord.<br>3. Der Bademeister mass die Strecke mit einem Band nach.<br>4. Der Versuch fand am Sonntagnachmittag vor etwa hundert Zuschauern statt.<br>5. Der Schüler trainiert seit zwei Jahren im Schwimmverein. | zahlen, Zeile 2 |  |  | ☐ |
+| Bericht | Junge Bäume für den Stadtwald | 1. Am Samstag, 22. März, pflanzten Freiwillige im Stadtwald junge Eichen und Buchen.<br>2. Der Förster hatte die Setzlinge bereitgestellt und zeigte, wie tief sie gesetzt werden.<br>3. Die Freiwilligen arbeiteten vom Morgen bis zum frühen Nachmittag.<br>4. Die Bäume sollen den Teil des Waldes ersetzen, den ein Sturm im Winter umgelegt hat.<br>5. Die nächste Aktion ist für den Herbst geplant. | datum, Zeile 1 |  |  | ☐ |
+| Kurzgeschichte | Der Brief | 1. „Du hast ihn also nicht abgeschickt“, sagte Jonas und schaute nicht hoch.<br>2. Lena drehte den Umschlag in den Händen.<br>3. Seit drei Tagen trug sie ihn in der Jacke herum.<br>4. Draussen fuhr der Bus vorbei, der zweite, den sie verpasste.<br>5. „Morgen“, sagte sie.<br>6. Jonas nickte, als hätte er das schon öfter gehört. | mitten, Zeile 1 |  |  | ☐ |
+| Kurzgeschichte | Die Haltestelle | 1. Der Bus war weg.<br>2. Samir stand an der Haltestelle und sah die roten Lichter um die Ecke verschwinden.<br>3. Neben ihm wartete eine alte Frau mit zwei schweren Taschen.<br>4. Der nächste Bus kam in zwanzig Minuten.<br>5. Samir schaute auf die Taschen, dann auf die Frau, dann auf sein Handy.<br>6. Dann steckte er das Handy ein. | offen, Zeile 6 |  |  | ☐ |
+| Kurzgeschichte | Die Küchentür | 1. Mira sass am Küchentisch und hörte ihre Eltern im Wohnzimmer flüstern.<br>2. Sie verstand kein Wort, nur, dass sie leise waren.<br>3. Auf dem Tisch lag der Brief von der Schule, den sie am Morgen gebracht hatte.<br>4. Sie dachte daran, ihn einfach zu nehmen und in ihren Rucksack zu stecken.<br>5. Die Tür zum Wohnzimmer ging auf. | offen, Zeile 5 |  |  | ☐ |
+| Kurzgeschichte | Montagmorgen | 1. „Wo ist dein Turnsack?“, rief Mama durch den Flur.<br>2. Tim wusste es genau: unter dem Bett, seit Freitag, mit den nassen Schuhen drin.<br>3. Er sagte nichts und zog die Jacke an.<br>4. Auf dem Schulweg überlegte er, was er dem Lehrer erzählen würde.<br>5. Am Schulhaus stand Kim mit zwei Turnsäcken und grinste. | mitten, Zeile 1 |  |  | ☐ |
+| Kurzgeschichte | Die Treppe | 1. Jeden Tag ging Herr Keller die vier Stockwerke zu Fuss hinauf, weil er den Lift nicht mochte.<br>2. An diesem Morgen blieb er im zweiten Stock stehen und hielt sich am Geländer fest.<br>3. Das Mädchen aus dem dritten Stock kam mit dem Schulthek vorbei und blieb ebenfalls stehen.<br>4. „Soll ich jemanden holen?“, fragte sie.<br>5. Herr Keller schüttelte den Kopf, langsam, und lächelte.<br>6. Das Mädchen setzte sich neben ihn auf die Stufe. | offen, Zeile 6 |  |  | ☐ |
+| Kurzgeschichte | Der letzte Platz | 1. Alle hatten schon einen Partner, nur Ali und Noah nicht.<br>2. Die Lehrerin sah auf ihre Liste und dann auf die beiden.<br>3. Seit dem Streit in der Pause hatten sie kein Wort mehr miteinander gesprochen.<br>4. Noah schob seinen Stuhl ein Stück zur Seite, nicht viel.<br>5. Ali nahm sein Heft und setzte sich. | mitten, Zeile 1 |  |  | ☐ |
+| Theaterszene | Der Zettel | 1. Ort: Ein Schulzimmer am Nachmittag. Auf dem Pult liegt ein Zettel.<br>2. LEA: Hast du den Zettel gesehen?<br>3. BEN: Welchen Zettel?<br>4. LEA (zeigt auf das Pult): Den da. Da steht mein Name drauf.<br>5. BEN: Vielleicht ist es ein Brief.<br>6. LEA: Vom Lehrer? Am Nachmittag?<br>7. BEN (nimmt den Zettel): Soll ich ihn lesen? | szene, Zeile 1 |  |  | ☐ |
+| Theaterszene | Im Treppenhaus | 1. Ort: Das Treppenhaus eines Wohnhauses, früher Morgen.<br>2. FRAU HUBER: Du bist aber früh dran, Jonas.<br>3. JONAS: Ich muss vor der Schule noch Brötchen holen.<br>4. FRAU HUBER: Für die ganze Familie?<br>5. JONAS (zögert): Für die Klasse. Ich habe heute Geburtstag.<br>6. FRAU HUBER: Dann warte, ich hole dir etwas. | regie, Zeile 5 |  |  | ☐ |
+| Theaterszene | Das Tor | 1. Ort: Ein Fussballplatz, kurz vor dem Schlusspfiff.<br>2. TRAINERIN: Noch zwei Minuten! Alle nach vorn!<br>3. MAX: Ich bleibe hinten, sonst kriegen wir noch eins.<br>4. TRAINERIN: Max, nach vorn!<br>5. MAX (läuft los): Also schön, aber wenn es schiefgeht …<br>6. SARA: Max! Hier! Schiess! | szene, Zeile 1 |  |  | ☐ |
+| Theaterszene | Die Nachricht | 1. Ort: Die Küche am Abend. Das Handy liegt auf dem Tisch.<br>2. VATER: Dein Handy hat schon dreimal gebrummt.<br>3. NINA: Ich weiss.<br>4. VATER: Willst du nicht nachschauen?<br>5. NINA: Später.<br>6. VATER (setzt sich zu ihr): Ist etwas passiert?<br>7. NINA: Ich glaube, Lina ist sauer auf mich. | regie, Zeile 6 |  |  | ☐ |
+| Theaterszene | Am Bahnhof | 1. Ort: Ein kleiner Bahnhof. Der Zug ist gerade abgefahren.<br>2. OMA: Das war unserer.<br>3. ELIA: Der nächste kommt erst in einer Stunde.<br>4. OMA: Dann haben wir Zeit für ein Glace.<br>5. ELIA: Du hast es gewusst, oder? Dass wir ihn verpassen.<br>6. OMA (lacht): Ich habe die Uhr nur ein bisschen falsch gelesen. | regie, Zeile 6 |  |  | ☐ |
+| Theaterszene | Das Blatt | 1. Ort: Ein Kinderzimmer. Überall liegen Blätter herum.<br>2. LUCA: Ich finde das Blatt nicht.<br>3. SOFIA: Welches Blatt?<br>4. LUCA: Das mit den Brüchen. Für morgen.<br>5. SOFIA: Hast du es vielleicht in der Schule gelassen?<br>6. LUCA (hebt den Kopf): Es liegt unter deinem Fuss. | szene, Zeile 1 |  |  | ☐ |
+| Märchen | Der Mantel des Schneiders | 1. Es war einmal ein Schneider, der so fein nähte, dass die Vögel ihm die Fäden brachten.<br>2. Eines Tages bestellte der König einen Mantel, der ihn unsichtbar machen sollte.<br>3. Der Schneider nähte sieben Nächte lang, ohne zu schlafen.<br>4. Am Montag, 3. März, um 9 Uhr lieferte er den Mantel im Schloss ab.<br>5. Als der König ihn anzog, sah man nur noch seine Krone über dem Boden schweben.<br>6. Der Schneider aber bekam so viel Gold, dass er nie mehr nähen musste. |  |  | Zeile 4 (Bericht, datum) | ☐ |
+| Bericht | Vorlesewettbewerb im Lindenweg | 1. Am Mittwoch, 12. Februar, fand im Schulhaus Lindenweg der Vorlesewettbewerb statt.<br>2. Vierzehn Kinder aus den fünften Klassen lasen je drei Minuten aus einem Buch ihrer Wahl.<br>3. Es war einmal eine Jury, die in einem Zauberschloss aus Glas wohnte.<br>4. Die Jury bestand aus zwei Lehrerinnen und dem Bibliothekar.<br>5. Gewonnen hat eine Schülerin der Klasse 5a mit einer Geschichte über einen Leuchtturm. |  |  | Zeile 3 (Märchen, anfang) | ☐ |
+| Fabel | Die Maus und der Hamster | 1. Eine Maus und ein Hamster sammelten Vorräte für den Winter.<br>2. Der Hamster stopfte seine Backen voll und lachte über die Maus, die jedes Korn einzeln trug.<br>3. Am Samstag, 8. November, um 14 Uhr fiel der erste Schnee.<br>4. Der Hamster hatte so viel gesammelt, dass sein Bau einstürzte und alles verschüttet war.<br>5. Die Maus hatte wenig, doch sie fand es und kam durch den Winter.<br>6. Wer zu viel will, verliert am Ende auch das, was er hat. |  |  | Zeile 3 (Bericht, datum) | ☐ |
+| Sage | Der Hirtenstein | 1. Über dem Dorf Hohenegg steht ein Felsen, der wie ein sitzender Mann aussieht.<br>2. Die Alten erzählen, dass dort ein Hirte sass, der sein Dorf im Nebel bewachte.<br>3. HIRTE (steht auf und ruft ins Tal): Der Nebel kommt, treibt die Herden heim!<br>4. Als er eines Nachts einschlief, kam der Nebel so dicht, dass er die Herden verlor.<br>5. Vor Scham blieb er sitzen, bis er zu Stein wurde.<br>6. Noch heute nennen die Leute den Felsen den Hirtenstein. |  |  | Zeile 3 (Theaterszene, regie) | ☐ |
+| Gedicht | Vollmond | 1. Der Mond hängt rund am Himmelszelt,<br>2. die Sterne blinken überm Feld.<br>3. Der Vollmond erreichte um 22.15 Uhr seinen höchsten Stand, wie die Sternwarte mitteilte.<br>4. Ein Igel raschelt durch das Laub,<br>5. die Wiese schläft, ganz still und taub.<br>6. Ein Hund bellt kurz, dann ist er still,<br>7. weil er auch endlich schlafen will. |  |  | Zeile 3 (Bericht, datum) | ☐ |
+| Kurzgeschichte | Die Bushaltestelle | 1. Der Bus hielt, und Nora stieg nicht aus.<br>2. Durch das Fenster sah sie ihre Schwester auf der Bank warten, mit dem Rucksack auf den Knien.<br>3. Sie hatten seit dem Streit nicht mehr miteinander geredet.<br>4. Die Türen gingen zu, und der Bus fuhr weiter.<br>5. Und wenn sie nicht gestorben sind, dann leben sie noch heute. |  |  | Zeile 5 (Märchen, schluss) | ☐ |
+| Theaterszene | Auf dem Pausenplatz | 1. Ort: Ein Pausenplatz am Morgen.<br>2. KIM: Hast du die Mathe gemacht?<br>3. ALEX: Nein. Du?<br>4. Es war einmal ein Pausenplatz, auf dem jeden Morgen ein Zauber lag.<br>5. KIM (seufzt): Dann machen wir sie jetzt zusammen.<br>6. ALEX: Wir haben noch zehn Minuten.<br>7. KIM: Das reicht, wenn du nicht wieder von Zauberern redest. |  |  | Zeile 4 (Märchen, anfang) | ☐ |
+| Märchen | Die lachende Mühle | 1. Vor langer Zeit lebte ein Müller, dessen Mühle sich nur drehte, wenn jemand darin lachte.<br>2. Der Müller war aber ein griesgrämiger Mann, und so stand die Mühle still.<br>3. Da kam ein Wandermädchen, das so fröhlich war, dass die Räder von selbst zu laufen begannen.<br>4. Der Müller nahm es als Gehilfin, und von da an lachte er jeden Tag.<br>5. Noch heute kann man die Mühle am Ufer des Dorfbachs von Tannwil besichtigen.<br>6. Die Mühle aber mahlte das feinste Mehl im ganzen Königreich, und alle wurden glücklich. |  |  | Zeile 5 (Sage, nochheute) | ☐ |
+| Bericht | Besuch auf dem Bauernhof | 1. Am Dienstag, 20. Mai, besuchte die Klasse 6b den Bauernhof der Familie Steiner.<br>2. Die Kinder halfen beim Füttern der Kälber und beim Einsammeln der Eier.<br>3. Der Bauer erklärte, wie die Milch von der Kuh in die Molkerei kommt.<br>4. Wer anderen hilft, dem hilft man gern zurück.<br>5. Um 15 Uhr fuhr die Klasse mit dem Postauto zurück ins Schulhaus. |  |  | Zeile 4 (Fabel, moral) | ☐ |
+| Sage | Die Höhle bei Eschbach | 1. Am Fuss des Berges hinter dem Dorf Eschbach liegt eine Höhle, in die niemand hineingeht.<br>2. Man erzählt sich, ein Schatz liege darin, bewacht von einem Hund mit glühenden Augen.<br>3. KNECHT (hebt die Fackel): Ich fürchte mich vor keinem Hund!<br>4. Ein Knecht ging mit einer Fackel hinein und kam ohne Fackel und ohne Stimme zurück.<br>5. Nie hat er erzählt, was er gesehen hat.<br>6. Noch heute hält man die Kinder von der Höhle fern. |  |  | Zeile 3 (Theaterszene, regie) | ☐ |
+
+## 79. Figuren-Spiegel (Lehrplan SG D.2.C.1)
+
+### Szenen mit Fragen
+
+Alle selbst geschrieben. Arten: gefuehl, stimmung, grund (steht im Text), motiv (erschliessen), sicht, meinen, weiter, ich, lebenswelt. Die erste Antwort ist die richtige.
+
+| Gruppe | Titel | Figuren | Text | Fragen | ☐ |
+|---|---|---|---|---|---|
+| 1 | Der leere Platz | Nora, Samira | Am Montag kommt Nora in die Klasse und bleibt an der Tür stehen. Der Platz neben ihr ist leer. Samira ist weggezogen, nach Bern. Nora setzt sich langsam hin und schaut auf den leeren Stuhl. Sie ist traurig. In der Pause bleibt sie drinnen und schreibt Samira eine Karte, weil sie ihr erzählen will, wie es in der Klasse ohne sie ist. | gefuehl: Wie fühlt sich Nora? → traurig (falsch: stolz; aufgeregt)<br>stimmung: Welche Stimmung hat die Szene? → traurig (falsch: lustig; unheimlich)<br>grund: Warum schreibt Nora eine Karte? → Weil sie Samira erzählen will, wie es ohne sie ist. (falsch: Weil die Lehrerin es verlangt.; Weil Samira Geburtstag hat.) | ☐ |
+| 1 | Das Tor | Elias, Vater | Beim Fussballturnier in Wil steht es kurz vor Schluss 1:1. Elias bekommt den Ball, läuft los und schiesst. Der Ball fliegt ins Netz! Die ganze Mannschaft rennt auf ihn zu. Elias ist so stolz, dass er fast nicht atmen kann. Auf dem Heimweg erzählt er seinem Vater die Szene dreimal, weil er sie noch einmal erleben will. | gefuehl: Wie fühlt sich Elias nach dem Tor? → stolz (falsch: ängstlich; gelangweilt)<br>stimmung: Welche Stimmung hat die Szene? → spannend (falsch: unheimlich; traurig)<br>grund: Warum erzählt Elias die Szene dreimal? → Weil er sie noch einmal erleben will. (falsch: Weil sein Vater nicht zuhört.; Weil er sie schon vergessen hat.) | ☐ |
+| 1 | Die Nachtwanderung | Lina, Jonas, Herr Keller | Im Klassenlager machen alle eine Nachtwanderung. Der Wald ist dunkel, nur die Taschenlampe von Herrn Keller leuchtet. Ein Ast knackt. Lina hält Jonas am Ärmel fest, weil sie Angst hat, im Dunkeln den Weg zu verlieren. Da ruft eine Eule. Alle lachen erleichtert, und Lina lässt den Ärmel los. | gefuehl: Wie fühlt sich Lina im dunklen Wald? → Sie hat Angst. (falsch: Sie ist stolz.; Sie langweilt sich.)<br>stimmung: Welche Stimmung hat die Szene? → unheimlich (falsch: gemütlich; lustig)<br>grund: Warum hält Lina Jonas am Ärmel fest? → Weil sie Angst hat, den Weg zu verlieren. (falsch: Weil Jonas gestolpert ist.; Weil sie ihm etwas zeigen will.) | ☐ |
+| 1 | Die Überraschung | Mila, Bruder, Eltern | Mila kommt von der Schule nach Hause. Im Flur ist es ganz still. Sie öffnet die Küchentür – und zwanzig Luftballons schweben an die Decke. «Überraschung!», rufen ihre Eltern und ihr kleiner Bruder. Mila hatte ihren Geburtstag fast vergessen. Jetzt ist sie so aufgeregt, dass sie nur noch lachen kann. Ihr Bruder hat die Ballons aufgeblasen, weil er ihr eine Freude machen wollte. | gefuehl: Wie fühlt sich Mila, als sie die Ballons sieht? → aufgeregt und froh (falsch: traurig; wütend)<br>stimmung: Welche Stimmung hat die Szene? → lustig (falsch: unheimlich; traurig)<br>grund: Warum hat der Bruder die Ballons aufgeblasen? → Weil er Mila eine Freude machen wollte. (falsch: Weil er sie an die Decke kleben wollte.; Weil die Eltern es ihm befohlen haben.) | ☐ |
+| 1 | Der Regentag | Ben, Grossmutter | Draussen regnet es seit dem Morgen. Ben und seine Grossmutter sitzen in der Küche. Auf dem Herd köchelt eine Suppe, und es riecht nach Zimt. Die Grossmutter holt das alte Fotoalbum, weil Ben wissen will, wie sie als Kind ausgesehen hat. Ben kuschelt sich an sie. Er ist zufrieden und möchte, dass der Regen noch lange bleibt. | gefuehl: Wie fühlt sich Ben? → zufrieden (falsch: nervös; enttäuscht)<br>stimmung: Welche Stimmung hat die Szene? → gemütlich (falsch: spannend; unheimlich)<br>grund: Warum holt die Grossmutter das Fotoalbum? → Weil Ben wissen will, wie sie als Kind ausgesehen hat. (falsch: Weil sie die Fotos verkaufen will.; Weil der Regen das Album nass gemacht hat.) | ☐ |
+| 1 | Das Diktat | Tarik, Frau Roth | Am Freitag gibt Frau Roth die Diktate zurück. Tarik hat die ganze Woche geübt. Er bekommt sein Blatt und sieht nur zwei Fehler. Letztes Mal waren es elf. Tarik ist erleichtert und grinst bis zu den Ohren. Er steckt das Blatt sorgfältig in die Mappe, weil er es zu Hause seiner Mutter zeigen will. | gefuehl: Wie fühlt sich Tarik? → erleichtert (falsch: beschämt; gelangweilt)<br>grund: Warum steckt Tarik das Blatt sorgfältig in die Mappe? → Weil er es seiner Mutter zeigen will. (falsch: Weil Frau Roth es morgen wieder einsammelt.; Weil er die Fehler verstecken will.) | ☐ |
+| 1 | Der Hund im Garten | Yara, Vater | Als Yara am Samstag aufwacht, hört sie ein Bellen. Im Garten sitzt ein kleiner brauner Hund mit nassem Fell. Yara kennt ihn nicht. Er hat kein Halsband. Sie holt eine Decke und eine Schüssel Wasser, weil er zittert. Dann ruft sie ihren Vater. Yara ist neugierig: Wem gehört der Hund, und wie ist er in den Garten gekommen? | gefuehl: Wie fühlt sich Yara? → neugierig (falsch: wütend; traurig)<br>stimmung: Welche Stimmung hat die Szene? → spannend (falsch: traurig; lustig)<br>grund: Warum holt Yara eine Decke? → Weil der Hund zittert. (falsch: Weil sie selber friert.; Weil der Vater es gesagt hat.) | ☐ |
+| 1 | Der verpasste Bus | Leo | Leo rennt die Strasse hinunter. Der Schulbus steht schon an der Haltestelle. Als Leo noch zwanzig Meter entfernt ist, schliessen sich die Türen, und der Bus fährt ab. Leo bleibt stehen und tritt gegen einen Stein. Er ist wütend auf sich selbst, weil er zu lange gefrühstückt hat. Jetzt muss er eine halbe Stunde warten. | gefuehl: Wie fühlt sich Leo? → wütend (falsch: froh; stolz)<br>grund: Warum ist Leo wütend auf sich selbst? → Weil er zu lange gefrühstückt hat. (falsch: Weil der Bus zu früh gefahren ist.; Weil er den Stein getreten hat.) | ☐ |
+| 1 | Das Rennen im Schnee | Amira | Im Skilager gibt es am letzten Tag ein Rennen. Amira steht am Start und zittert. Nicht wegen der Kälte – sie ist nervös, weil alle zuschauen. Dann geht das Tor auf. Amira fährt los, Tor um Tor, und kommt ohne Sturz ins Ziel. Sie ist nicht die Schnellste, aber sie lacht laut, weil sie es geschafft hat. | gefuehl: Wie fühlt sich Amira am Start? → nervös (falsch: gelangweilt; traurig)<br>stimmung: Welche Stimmung hat die Szene? → spannend (falsch: gemütlich; traurig)<br>grund: Warum lacht Amira im Ziel? → Weil sie es ohne Sturz geschafft hat. (falsch: Weil sie die Schnellste ist.; Weil jemand einen Witz erzählt.) | ☐ |
+| 1 | Die Lesenacht | Selin, Frau Imhof | In der Lesenacht liegen alle in Schlafsäcken im Klassenzimmer. Nur eine Lampe brennt. Frau Imhof liest eine Geschichte von einem Gespenst im Keller vor. Bei jeder Tür, die in der Geschichte knarrt, zieht Selin den Schlafsack höher. Sie gruselt sich – aber es ist ein schönes Gruseln. Am Schluss bittet Selin um noch eine Geschichte, weil sie noch lange nicht schlafen kann. | gefuehl: Wie fühlt sich Selin beim Zuhören? → Sie gruselt sich. (falsch: Sie langweilt sich.; Sie ist wütend.)<br>stimmung: Welche Stimmung hat die Szene? → unheimlich (falsch: lustig; traurig)<br>grund: Warum bittet Selin um noch eine Geschichte? → Weil sie noch lange nicht schlafen kann. (falsch: Weil die Lampe kaputt ist.; Weil Frau Imhof es verlangt.) | ☐ |
+| 1 | Der Zaubertrick | Noah | Beim Klassenfest zeigt Noah einen Zaubertrick. Er steckt ein Tuch in den Hut, klopft dreimal – und zieht eine Gummiente heraus. Alle kichern. Dann rutscht ihm der Hut vom Kopf, und drei weitere Enten purzeln auf den Boden. Jetzt lachen alle, auch Noah. Er verbeugt sich, weil die Pannen am besten ankommen. Noah ist glücklich. | gefuehl: Wie fühlt sich Noah am Ende? → glücklich (falsch: beschämt; ängstlich)<br>stimmung: Welche Stimmung hat die Szene? → lustig (falsch: unheimlich; traurig)<br>grund: Warum verbeugt sich Noah? → Weil die Pannen am besten ankommen. (falsch: Weil er den Hut aufheben will.; Weil die Lehrerin ihn ruft.) | ☐ |
+| 1 | Das kaputte Velo | Finn, Luca | Finn wollte am Nachmittag mit Luca zum See fahren. Aber am Mittag sieht er, dass sein Velo einen platten Reifen hat. Finn ist enttäuscht. Er schiebt das Velo in die Garage und setzt sich auf die Treppe. Da kommt Luca mit zwei Velos um die Ecke, weil er das Velo seiner Schwester ausgeliehen hat. Finn springt auf. | gefuehl: Wie fühlt sich Finn, als er den platten Reifen sieht? → enttäuscht (falsch: stolz; neugierig)<br>grund: Warum kommt Luca mit zwei Velos? → Weil er das Velo seiner Schwester ausgeliehen hat. (falsch: Weil er zwei Velos besitzt.; Weil Finn ihn darum gebeten hat.) | ☐ |
+| 2 | Mira schweigt | Mira, Jonas, Frau Bucher | Im Deutschunterricht fragt Frau Bucher, wer das Gedicht vortragen möchte. Mira kennt es auswendig. Gestern hat sie es ihrer Katze dreimal vorgesagt, ohne einen Fehler. Jetzt schaut sie auf ihr Pult und sagt nichts. Neben ihr meldet sich Jonas, obwohl er nur die erste Strophe kann. «Mira, du?», fragt Frau Bucher. Mira schüttelt den Kopf. «Ich kann es nicht so gut», murmelt sie. Jonas stösst sie unter dem Tisch leicht an. Er hat sie gestern durch das offene Fenster gehört. | motiv: Warum schweigt Mira, als Frau Bucher fragt? → Sie traut sich nicht, vor der Klasse zu sprechen. (falsch: Sie kann das Gedicht nicht so gut.; Sie findet das Gedicht langweilig.)<br>sicht: Was denkt Jonas, als Mira den Kopf schüttelt? → Er weiss, dass Mira das Gedicht kann. (falsch: Er glaubt ihr, dass sie es nicht kann.; Er ist froh, dass er allein vortragen darf.)<br>meinen: Mira sagt: «Ich kann es nicht so gut.» Was ist wirklich los? → Sie hat Angst, vor allen zu sprechen. (falsch: Sie hat das Gedicht nicht gelernt.; Sie möchte, dass Jonas vorträgt.) | ☐ |
+| 2 | Das Geschenk | Lena, Omar, Mutter | Zu Lenas Geburtstag bringt Omar ein Päckchen mit. Lena packt es aus: ein Buch über Pferde. Sie hat genau dieses Buch schon zu Weihnachten bekommen. «Oh, danke, super», sagt Lena und legt es schnell auf den Stapel. Omar strahlt. Er hat sein ganzes Taschengeld dafür gebraucht und wusste, dass Lena Pferde liebt. Am Abend fragt Lenas Mutter, ob sie das Buch umtauschen will. «Nein», sagt Lena, «Omar soll es nicht merken.» | motiv: Warum will Lena das Buch nicht umtauschen? → Sie will Omar nicht enttäuschen. (falsch: Omar soll es nicht merken.; Sie will das Buch zweimal lesen.)<br>sicht: Was denkt Omar, als Lena das Buch auspackt? → Er glaubt, dass Lena sich sehr freut. (falsch: Er merkt, dass Lena das Buch schon hat.; Er findet, dass Lena undankbar ist.)<br>meinen: Lena sagt: «Oh, danke, super.» Was ist wirklich los? → Sie hat das Buch schon und tut nur so, als freue sie sich. (falsch: Sie findet das Buch wirklich super.; Sie mag keine Pferde.) | ☐ |
+| 2 | Der Platz im Team | Dario, Nils, Trainer | Beim Unihockey-Training stellt der Trainer die Mannschaft für das Turnier auf. Dario steht nicht auf der Liste. «Ist mir egal», sagt er laut und lacht, «ich hatte sowieso keine Lust.» Dann packt er seinen Stock ein, ohne jemanden anzuschauen, und geht als Erster in die Garderobe. Sein Freund Nils bleibt noch kurz stehen. Er weiss, dass Dario die letzten drei Wochen jeden Abend im Hof geübt hat. Nils geht ihm nach. | motiv: Warum geht Dario als Erster in die Garderobe? → Er will nicht zeigen, wie enttäuscht er ist. (falsch: Er hatte sowieso keine Lust.; Er muss früh nach Hause.)<br>sicht: Was denkt Nils? → Er weiss, dass Dario sehr enttäuscht ist. (falsch: Er glaubt, dass es Dario wirklich egal ist.; Er findet, dass Dario zu wenig geübt hat.)<br>meinen: Dario sagt: «Ist mir egal.» Was meint er wirklich? → Es ist ihm sehr wichtig, und es tut weh. (falsch: Es ist ihm wirklich egal.; Er freut sich, dass er frei hat.) | ☐ |
+| 2 | Die Hausaufgaben | Sofia, Elia | Sofia sitzt mit ihrem kleinen Bruder Elia am Küchentisch. Elia soll zehn Rechnungen lösen, aber er kommt nicht weiter und schiebt das Heft weg. «Soll ich sie dir vorsagen?», fragt Sofia. Elia nickt. Sofia nimmt den Stift, hält dann aber inne. Stattdessen malt sie zehn Punkte auf ein Blatt und fragt: «Wie viele sind es, wenn drei weggehen?» Elia stöhnt. «Du bist gemein!» Zehn Minuten später hat er alle Rechnungen selbst gelöst und zeigt stolz das Heft. | motiv: Warum sagt Sofia die Lösungen nicht vor? → Elia soll die Rechnungen selbst verstehen. (falsch: Sie malt lieber Punkte.; Sie kann die Rechnungen selbst nicht lösen.)<br>sicht: Was denkt Elia, als Sofia die Punkte malt? → Er findet, dass Sofia ihm nicht helfen will. (falsch: Er merkt sofort, dass Sofia ihm richtig hilft.; Er denkt, dass Sofia mit ihm spielen will.)<br>meinen: Elia sagt: «Du bist gemein!» Was zeigt die Szene am Ende? → Sofia war nicht gemein, sondern hat ihm richtig geholfen. (falsch: Sofia war wirklich gemein zu ihm.; Elia hat die Rechnungen nicht lösen können.) | ☐ |
+| 2 | Der Umweg | Aylin, Ruben | Jeden Morgen geht Aylin mit Ruben zur Schule. Seit einer Woche nimmt Ruben einen Umweg über die Bahnhofstrasse, obwohl der Weg zehn Minuten länger ist. Aylin ärgert sich. «Warum gehen wir nicht am Park vorbei?», fragt sie. «Ist schöner so», sagt Ruben und schaut weg. Aylin weiss, dass die Bahnhofstrasse laut und grau ist. Am Park wohnt seit Kurzem ein grosser Hund, der am Zaun bellt. Ruben hat ihr einmal erzählt, dass ihn als kleines Kind ein Hund gebissen hat. | motiv: Warum nimmt Ruben den Umweg? → Er hat Angst vor dem Hund am Park. (falsch: Er findet die Bahnhofstrasse schöner.; Er will später in die Schule kommen.)<br>sicht: Was weiss Aylin am Ende der Szene? → Sie ahnt, dass Ruben dem Hund ausweichen will. (falsch: Sie glaubt, dass Ruben die Bahnhofstrasse wirklich schöner findet.; Sie denkt, dass Ruben sie ärgern will.)<br>meinen: Ruben sagt: «Ist schöner so.» Was meint er wirklich? → Er will nicht sagen, dass er sich vor dem Hund fürchtet. (falsch: Er findet die Strasse wirklich schöner.; Er will Aylin eine Freude machen.) | ☐ |
+| 2 | Das Lagerfeuer | Tim, Mara | Am letzten Abend im Lager sitzen alle am Feuer. Jede Gruppe soll etwas vorführen. Tims Gruppe hat ein Lied vorbereitet, aber Tim hat seit dem Nachmittag Halsweh und kann kaum sprechen. Als seine Gruppe an der Reihe ist, steht Tim auf, nimmt die Gitarre und spielt. Singen tun die anderen. Nachher sagt Mara: «Du hättest auch einfach zuschauen können.» Tim zuckt mit den Schultern. «Ihr habt so lange geübt», krächzt er. | motiv: Warum spielt Tim trotz Halsweh mit? → Er will seine Gruppe nicht im Stich lassen. (falsch: Mit Halsweh kann man noch Gitarre spielen.; Er will allein im Mittelpunkt stehen.)<br>sicht: Was denkt Mara? → Sie macht sich Sorgen um Tim. (falsch: Sie ärgert sich, dass Tim nicht gesungen hat.; Sie findet, dass Tim schlecht gespielt hat.) | ☐ |
+| 2 | Die Einladung | Jana, Kim, Noemi | Jana hat am Samstag Geburtstag und darf fünf Kinder einladen. Sie schreibt die Karten am Küchentisch. Bei der fünften Karte hält sie an. Noemi oder Kim? Kim ist lustig und hat Jana letzte Woche ihre Stifte geliehen. Noemi ist neu in der Klasse und steht in der Pause meistens allein am Zaun. Jana schreibt «Noemi» auf die Karte. Als Kim davon hört, sagt sie: «Macht nichts, ich habe am Samstag sowieso Training.» Jana sieht, wie Kim dabei auf ihre Schuhe schaut. | motiv: Warum lädt Jana Noemi ein und nicht Kim? → Sie möchte, dass Noemi nicht mehr allein ist. (falsch: Noemi steht in der Pause am Zaun.; Sie ist auf Kim wütend.)<br>sicht: Was denkt Kim wirklich? → Sie ist enttäuscht, dass sie nicht eingeladen ist. (falsch: Sie ist froh, weil sie wirklich Training hat.; Sie ist auf Noemi wütend.)<br>meinen: Kim sagt: «Macht nichts.» Was meint sie? → Es macht ihr etwas aus, sie will es nur nicht zeigen. (falsch: Es macht ihr wirklich nichts aus.; Sie will Jana trösten.) | ☐ |
+| 2 | Das Bild | Lukas, Enzo, Herr Gerber | Im Zeichenunterricht hängt Herr Gerber die Bilder an die Wand. Lukas hat eine Woche an seinem Bild gearbeitet: ein Drache über dem Bodensee. Enzo schaut es an und sagt: «Sieht aus wie ein Krokodil mit Flügeln.» Ein paar Kinder lachen. Lukas lacht mit, ein bisschen zu laut. In der Pause bleibt er im Zimmer und schaut sein Bild lange an. Enzo kommt zurück. «Ehrlich, der Drache ist cool», sagt er. «Ich wollte nur lustig sein.» | motiv: Warum lacht Lukas mit? → Er will nicht zeigen, dass ihn der Spruch verletzt hat. (falsch: Er findet den Spruch wirklich lustig.; Er lacht über Enzos Bild.)<br>sicht: Was denkt Enzo, als er zurückkommt? → Ihm tut leid, was er gesagt hat. (falsch: Er will noch einen Witz machen.; Er findet das Bild immer noch schlecht.)<br>meinen: Lukas lacht «ein bisschen zu laut». Was zeigt das? → Sein Lachen ist nicht echt; der Spruch hat ihn getroffen. (falsch: Er findet die Situation sehr lustig.; Er will Enzo nachmachen.) | ☐ |
+| 2 | Das Velorennen | Nico, Lia | Am Sonntag ist das Velorennen im Quartier. Nico und seine Schwester Lia starten in der gleichen Gruppe. Nico ist schneller, das wissen beide. Auf der letzten Runde liegt er vorne. Er schaut zurück: Lia strampelt mit rotem Kopf hinter ihm. Kurz vor dem Ziel wird Nico langsamer, bis Lia neben ihm ist. Sie fahren zusammen über die Linie. «Mein Bein hat gezwickt», sagt Nico. Lia grinst. Sie kennt ihren Bruder. | motiv: Warum wird Nico langsamer? → Er will mit Lia zusammen ankommen. (falsch: Sein Bein hat gezwickt.; Er hat vergessen, wo das Ziel ist.)<br>sicht: Was denkt Lia? → Sie weiss, dass Nico absichtlich gewartet hat. (falsch: Sie glaubt, dass Nicos Bein wirklich weh tut.; Sie ärgert sich, dass Nico vorne lag.)<br>meinen: Nico sagt: «Mein Bein hat gezwickt.» Was stimmt? → Er sucht eine Ausrede, damit Lia nicht merkt, dass er gewartet hat. (falsch: Sein Bein tut wirklich weh.; Er will das Rennen abbrechen.) | ☐ |
+| 2 | Der Zettel | Samuel, Zoe, Frau Steiner | Nach der Mathestunde findet Frau Steiner einen Zettel unter Samuels Pult: eine Zeichnung von ihr mit riesiger Nase. Sie hält ihn hoch. «Wer war das?» Niemand sagt etwas. Samuel wird rot. Da steht Zoe auf. «Ich war es», sagt sie. Samuel starrt sie an – Zoe war in der Stunde gar nicht da, sie kam erst nach der Pause. Frau Steiner schaut Zoe lange an und legt den Zettel weg. «Wir reden nachher», sagt sie, und ihre Stimme ist nicht böse. | motiv: Warum sagt Zoe, sie sei es gewesen? → Sie will Samuel schützen. (falsch: Weil sie den Zettel gezeichnet hat.; Sie will, dass alle über sie lachen.)<br>sicht: Was weiss Frau Steiner wahrscheinlich? → Dass Zoe es nicht gewesen sein kann. (falsch: Dass Zoe den Zettel gezeichnet hat.; Dass es niemand aus der Klasse war.)<br>meinen: Zoe sagt: «Ich war es.» Was stimmt? → Das stimmt nicht – sie war gar nicht in der Stunde. (falsch: Sie hat den Zettel wirklich gezeichnet.; Sie hat den Zettel gefunden.) | ☐ |
+| 2 | Die Pausenbank | Emma, Yusuf, Ida | Seit die neue Bank im Pausenhof steht, sitzen Emma und Yusuf jeden Tag darauf. Heute sitzt dort Ida aus der Parallelklasse, allein, mit einem Buch. Yusuf will sie wegschicken: «Das ist unsere Bank.» Emma hält ihn zurück. Sie setzt sich neben Ida und fragt, was sie liest. Ida antwortet erst leise, dann immer schneller. Nach der Pause sagt Yusuf: «War ja langweilig.» Am nächsten Tag ist er als Erster bei der Bank – und rückt zur Seite, als Ida kommt. | motiv: Warum setzt sich Emma neben Ida? → Sie will Ida kennenlernen, statt sie wegzuschicken. (falsch: Weil die Bank gross genug ist.; Weil sie Yusuf ärgern will.)<br>sicht: Was denkt Ida, als Emma sie anspricht? → Sie freut sich, dass jemand mit ihr redet. (falsch: Sie ärgert sich über die Störung.; Sie hat Angst vor Emma.)<br>meinen: Yusuf sagt: «War ja langweilig.» Was zeigt der nächste Tag? → Es war ihm nicht langweilig, er mag Ida inzwischen. (falsch: Es war wirklich langweilig für ihn.; Er will die Bank für sich allein.) | ☐ |
+| 2 | Das Referat | Alina, Tobias | Alina und Tobias halten zusammen ein Referat über Wölfe. Alina hat alle Plakate gemacht, Tobias hat nur die Bilder gesucht. Vor der Klasse bleibt Tobias plötzlich stecken. Er weiss nicht mehr, was auf dem zweiten Plakat steht. Alina könnte jetzt einfach weiterreden. Stattdessen zeigt sie auf das Bild und fragt: «Tobias, war das der Wolf aus dem Tessin?» Tobias nickt und findet den Faden wieder. Nach dem Referat sagt Tobias: «Ich hätte es auch allein geschafft.» Alina lächelt nur. | motiv: Warum stellt Alina Tobias die Frage? → Sie hilft ihm, ohne dass es die Klasse merkt. (falsch: Sie will wissen, ob der Wolf aus dem Tessin war.; Sie will zeigen, dass Tobias nichts gelernt hat.)<br>sicht: Was denkt Tobias, als Alina die Frage stellt? → Er merkt, dass sie ihm hilft, und ist erleichtert. (falsch: Er ärgert sich, weil sie ihn unterbricht.; Er versteht die Frage nicht.)<br>meinen: Tobias sagt: «Ich hätte es auch allein geschafft.» Was meint er? → Er will nicht zugeben, dass er Hilfe gebraucht hat. (falsch: Er hätte es wirklich allein geschafft.; Er will Alina loben.) | ☐ |
+| 3 | Der Helikopter | Rafael, Leon | Rafael erzählt in der Pause, dass er am Wochenende mit seinem Onkel in einem Helikopter geflogen sei, über das Matterhorn, bei Sonnenaufgang. Letzte Woche war es ein Haifisch im Zürichsee. Die anderen nicken und wechseln das Thema. Nur Leon fragt nach: «Welche Farbe hatte der Helikopter?» Rafael überlegt kurz. «Rot. Nein, blau.» Nach der Schule geht Leon ein Stück mit ihm. Rafael erzählt nichts mehr von Helikoptern. Er sagt, dass sein Onkel am Wochenende gar nicht gekommen ist, obwohl er es versprochen hatte. Leon sagt nichts, aber er lädt Rafael zum Fussball am Sonntag ein. | motiv: Warum erzählt Rafael solche Geschichten? → Er möchte, dass die anderen ihn beachten und bewundern. (falsch: Er ist wirklich mit dem Helikopter geflogen.; Er will Leon ärgern.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Jemand prahlt mit Dingen, die nicht stimmen, weil er dazugehören will. (falsch: Jemand verliert sein Pausenbrot.; Jemand gewinnt einen Preis und zeigt ihn allen.)<br>weiter: Was tut Rafael wohl als Nächstes? → Er kommt am Sonntag zum Fussball. (falsch: Er erzählt Leon von einem Flug zum Mond.; Er geht nie mehr in die Schule.)<br>ich: Was würdest du an Leons Stelle fühlen, als Rafael von seinem Onkel erzählt? → Mitgefühl – jetzt verstehe ich, warum er so angibt. (falsch: Stolz, weil ich ihn ertappt habe.; Angst vor dem Onkel.) | ☐ |
+| 3 | Die Wette | Malik, Juri | «Wetten, dass du nicht vom Dreimeterbrett springst?», sagt Juri zu Malik im Schwimmbad. Malik schaut hinauf. Das Brett wirkt höher als im letzten Sommer. «Klar spring ich», sagt er und geht zur Leiter. Oben bleibt er stehen. Unten ruft Juri: «Na los!» Malik schaut nach unten, dann zu den Kleinen im Planschbecken. «Ich habe Hunger», ruft er, «ich springe nachher.» Er klettert wieder hinunter und holt sich Pommes. Juri grinst. Beim Umziehen sagt Malik leise: «Nächsten Sommer.» Juri legt ihm den Arm um die Schulter. «Ich bin auch erst mit zwölf gesprungen.» | motiv: Warum holt sich Malik Pommes? → Er sucht eine Ausrede, weil er sich nicht traut zu springen. (falsch: Er hat wirklich grossen Hunger.; Er will Juri die Pommes abgeben.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Du sagst «keine Lust», weil du dich vor etwas fürchtest. (falsch: Du teilst dein Essen mit einem Freund.; Du gewinnst eine Wette.)<br>weiter: Was tut Juri wohl als Nächstes? → Er lässt die Wette sein und redet nicht mehr darüber. (falsch: Er erzählt allen, dass Malik ein Feigling ist.; Er zwingt Malik, sofort zu springen.)<br>ich: Was würdest du an Maliks Stelle oben auf dem Brett fühlen? → Angst – und Scham, weil alle zuschauen. (falsch: Hunger.; Stolz, weil ich gewonnen habe.) | ☐ |
+| 3 | Die Bestnote | Chiara, Paula | Die Klasse bekommt die Prüfung zurück. Chiara hat eine 6. Sie dreht das Blatt sofort um und legt das Etui darauf. Als Paula fragt, winkt sie ab: «Ging so.» In der Pause sucht Chiara Paula, die mit rotem Gesicht am Fenster steht. Paula hat eine 3.5. «Ich habe nur Glück gehabt», sagt Chiara, «die Hälfte habe ich geraten.» Das stimmt nicht; Chiara hat zwei Wochen gelernt. «Willst du nächstes Mal mit mir lernen?», fragt sie. Paula schaut auf. «Du hast doch gar nicht gelernt.» Chiara zögert. «Doch», sagt sie dann. «Ziemlich viel sogar.» | motiv: Warum sagt Chiara, sie habe nur geraten? → Sie will nicht, dass Paula sich noch schlechter fühlt. (falsch: Sie hat die Hälfte wirklich geraten.; Sie schämt sich für die gute Note.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Du spielst deinen Erfolg herunter, damit sich jemand nicht schlecht fühlt. (falsch: Du gibst mit einer guten Note an.; Du schreibst bei jemandem ab.)<br>weiter: Was tun die beiden wohl als Nächstes? → Sie verabreden sich zum Lernen. (falsch: Paula redet nie wieder mit Chiara.; Chiara zerreisst ihre Prüfung.)<br>ich: Was würdest du an Paulas Stelle fühlen, als Chiara die Wahrheit sagt? → Erleichtert – sie ist ehrlich und will mir helfen. (falsch: Stolz auf meine eigene Note.; Langeweile, weil Lernen nichts bringt.) | ☐ |
+| 3 | Der Schlüssel | Benjamin, Fabio | Nach dem Turnen fehlt Benjamins Schlüssel. Er sucht in der Garderobe, im Turnsack, unter der Bank. Nichts. Fabio hilft ihm suchen, besonders eifrig. Er schaut unter alle Bänke, nur nicht unter seine eigene. «Vielleicht hast du ihn zu Hause vergessen», sagt Fabio. Benjamin weiss, dass er ihn am Morgen in der Hand hatte. Als Fabio seine Jacke anzieht, klirrt etwas in der Tasche. Fabio wird rot. «Oh», sagt er, «der muss aus Versehen …» Benjamin nimmt den Schlüssel. Er sagt lange nichts. Dann sagt er: «Nächstes Mal fragst du einfach, wenn du einen Spass machen willst.» | motiv: Warum sucht Fabio «besonders eifrig»? → Er will nicht auffallen, weil er den Schlüssel selbst hat. (falsch: Er will Benjamin wirklich helfen.; Er hat seinen eigenen Schlüssel verloren.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Jemand versteckt etwas aus Spass, und der Spass geht zu weit. (falsch: Jemand findet einen Schlüssel auf der Strasse.; Jemand hilft einem Freund beim Umzug.)<br>weiter: Was tut Fabio wohl als Nächstes? → Er entschuldigt sich bei Benjamin. (falsch: Er versteckt den Schlüssel noch einmal.; Er beschuldigt Benjamin.)<br>ich: Was würdest du an Benjamins Stelle fühlen, als es in der Jacke klirrt? → Enttäuscht, weil ein Freund mich an der Nase herumgeführt hat. (falsch: Froh, weil Fabio so eifrig geholfen hat.; Stolz auf meine neue Jacke.) | ☐ |
+| 3 | Der geheime Fan | Elina, Lou, Nael | Ein Zettel liegt in Elinas Fach: «Du bist die Beste! Dein geheimer Fan.» Elina lacht und zeigt ihn Lou. Lou lacht nicht. «Weisst du, von wem der ist?», fragt sie. Elina zuckt mit den Schultern. Am nächsten Tag liegt wieder einer da: «Dein Vortrag war toll.» Diesmal zeigt Elina ihn nicht herum. Lou beobachtet, wie Elina nach dem Lesen zu Nael hinüberschaut, der sofort auf sein Heft starrt. Nael hat in der Klasse noch nie mit Elina gesprochen. Am Freitag setzt sich Elina in der Bibliothek an seinen Tisch. «Mein Vortrag war nicht so toll», sagt sie. «Aber danke.» | motiv: Warum setzt sich Elina zu Nael? → Sie hat erraten, dass die Zettel von ihm sind, und will mit ihm reden. (falsch: Weil in der Bibliothek kein anderer Platz frei ist.; Sie will ihn wegen der Zettel ausschimpfen.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Jemand traut sich nicht, direkt mit dir zu reden, und zeigt es anders. (falsch: Jemand verliert einen Zettel.; Jemand hält einen Vortrag über Fans.)<br>weiter: Was tut Nael wohl als Nächstes? → Er redet zum ersten Mal mit Elina. (falsch: Er rennt aus der Bibliothek.; Er schreibt Lou einen Zettel.)<br>ich: Was würdest du an Naels Stelle fühlen, als Elina sich an den Tisch setzt? → Aufgeregt und ein bisschen ertappt. (falsch: Gelangweilt.; Wütend auf Elina.) | ☐ |
+| 3 | Das Lager-Tagebuch | Noemi, Till, Herr Vogt | Im Lager wird jeden Abend das Tagebuch vorgelesen. Heute hat Noemi es geschrieben. Sie liest vor: «Das Mittagessen war ein Traum. Die Suppe hatte nur drei Klumpen, und das Brot war erst zwei Tage alt.» Alle lachen, auch der Koch Herr Vogt. Nur Till versteht es nicht: «Wieso ein Traum? Die Suppe war grusig.» Noemi liest weiter: «Herr Vogt ist der grösste Künstler der Küche, vor allem beim Verbrennen.» Herr Vogt verbeugt sich. Am Abend steht ein Teller Guetzli auf dem Tisch, mit einem Zettel: «Für die Kritiker. Nicht verbrannt.» | meinen: Noemi schreibt: «Das Mittagessen war ein Traum.» Was meint sie? → Das Gegenteil – das Essen war schlecht, und sie macht sich darüber lustig. (falsch: Das Essen war wirklich sehr gut.; Sie hat vom Essen geträumt.)<br>motiv: Warum verbeugt sich Herr Vogt? → Er nimmt den Spass mit Humor und spielt mit. (falsch: Er freut sich über das Lob.; Er will, dass alle still sind.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Jemand sagt «super» in einem Ton, der das Gegenteil meint, und alle lachen. (falsch: Jemand kocht eine Suppe für die Familie.; Jemand schreibt einen Brief an den Koch.)<br>weiter: Was tut Till wohl als Nächstes? → Er fragt, warum alle lachen – und versteht den Witz. (falsch: Er geht zum Koch und beschwert sich über die Suppe.; Er isst alle Guetzli allein.)<br>ich: Was würdest du an Herrn Vogts Stelle fühlen, als Noemi vorliest? → Ich würde mitlachen – die Kinder meinen es nicht böse. (falsch: Ich würde die Kinder bestrafen.; Ich wäre stolz auf meine Suppe.) | ☐ |
+| 3 | Die Abstimmung | Jonas, Lea, Levin | Die Klasse stimmt ab, wohin die Schulreise geht: Zoo oder Kletterpark. Vor der Abstimmung sagt Jonas laut: «Zoo ist für Babys.» Mehrere lachen. Dann wird abgestimmt. Lea sieht, wie Jonas beim Zoo nur ganz kurz die Hand hebt und sie gleich wieder senkt, als sein Freund Levin ihn anschaut. Der Kletterpark gewinnt mit einer Stimme. Auf dem Heimweg sagt Jonas zu Lea: «Mir doch egal, wohin.» Lea weiss, dass Jonas seit Jahren Pate eines Pinguins im Zoo ist. Er erzählt sonst jedem davon. Nur Levin nicht. | motiv: Warum zieht Jonas seine Hand beim Zoo wieder zurück? → Er will vor Levin nicht als uncool dastehen. (falsch: Er findet den Zoo wirklich nur für Babys.; Er hat sich beim Abstimmen geirrt.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Du tust so, als magst du etwas nicht, weil ein Freund es uncool findet. (falsch: Du stimmst für das, was du wirklich willst.; Du besuchst den Zoo mit der Familie.)<br>weiter: Was tut Lea wohl als Nächstes? → Sie sagt Jonas, dass er zu seinem Pinguin stehen darf. (falsch: Sie erzählt Levin vom Pinguin, um Jonas zu blamieren.; Sie verlangt, dass noch einmal abgestimmt wird.)<br>ich: Was würdest du an Jonas' Stelle nach der Abstimmung fühlen? → Ärger auf mich selbst, weil ich nicht zu mir gestanden habe. (falsch: Freude, dass der Kletterpark gewonnen hat.; Stolz, weil ich so laut war.) | ☐ |
+| 3 | Nochmal | Ayla, Frau Caduff, Rosa, Sara | Beim Schwimmtraining ist Frau Caduff streng. Heute lässt sie Ayla zehnmal die Wende üben, während die anderen schon spielen dürfen. «Nochmal», sagt sie jedes Mal, ohne zu lächeln. Ayla schluckt die Tränen hinunter. Beim elften Mal klappt die Wende. «Gut», sagt Frau Caduff nur, dreht sich um und geht. In der Garderobe sagt Ayla zu Rosa: «Sie mag mich nicht.» Rosa überlegt. «Weisst du, bei wem sie so streng ist?», fragt sie. «Bei Sara, die im Sommer an die Schweizermeisterschaft geht. Bei mir sagt sie nie nochmal.» | motiv: Warum ist Frau Caduff mit Ayla so streng? → Sie traut Ayla viel zu und will sie weiterbringen. (falsch: Sie mag Ayla nicht.; Sie will, dass Ayla mit dem Schwimmen aufhört.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Jemand verlangt viel von dir, weil er an dich glaubt. (falsch: Jemand lässt dich in Ruhe, weil es ihm egal ist.; Jemand lobt dich für alles, was du tust.)<br>weiter: Was tut Ayla wohl als Nächstes? → Sie sieht die Strenge anders und übt weiter. (falsch: Sie hört mit dem Schwimmen auf.; Sie beschwert sich bei Sara.)<br>ich: Was würdest du an Aylas Stelle nach Rosas Worten fühlen? → Überrascht und ein bisschen stolz. (falsch: Wütend auf Rosa.; Gelangweilt.) | ☐ |
+| 3 | Die Pralinen | Lio, Opa Walter, Mutter | Jede Woche bringt Opa Walter eine Schachtel Pralinen. Jedes Mal sagt Lio: «Danke, Opa!», und jedes Mal landen sie bei seiner Mutter, denn Lio mag keine Pralinen. Das hat er Opa nie gesagt. Heute kommt Opa mit zwei Schachteln. «Weil du sie so gern hast», sagt er und strahlt. Lio schaut seine Mutter an. «Opa», sagt er langsam, «eigentlich esse ich lieber Nüsse.» Opas Lächeln verschwindet kurz. Dann lacht er. «Und ich bringe dir seit zwei Jahren Pralinen! Warum sagst du nichts?» Lio zuckt mit den Schultern. «Ich wollte dich nicht traurig machen.» «Jetzt weiss ich endlich etwas über dich», sagt Opa. | motiv: Warum hat Lio Opa nie die Wahrheit gesagt? → Er wollte Opa nicht enttäuschen. (falsch: Er wollte die Pralinen für seine Mutter.; Er hatte Angst vor Opa.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Du sagst nicht, was du wirklich magst, um niemanden zu verletzen. (falsch: Du tauschst ein Geschenk im Laden um.; Du bekommst jede Woche Taschengeld.)<br>weiter: Was bringt Opa wohl nächste Woche? → Nüsse. (falsch: Drei Schachteln Pralinen.; Gar nichts mehr, weil er beleidigt ist.)<br>ich: Was würdest du an Lios Stelle fühlen, als Opa lacht? → Erleichtert – die Wahrheit war nicht so schlimm. (falsch: Beleidigt, weil Opa lacht.; Traurig, weil die Pralinen weg sind.) | ☐ |
+| 3 | Der Zahnarzt | Sina, Mael | Sina und Mael wollten am Mittwoch zusammen das Baumhaus fertig bauen. Am Dienstagabend schreibt Mael: «Kann morgen nicht, muss zum Zahnarzt.» Am Mittwoch sieht Sina ihn vom Bus aus – auf dem Fussballplatz, mit Kindern aus der Parallelklasse. Am Donnerstag erzählt Mael, der Zahnarzt sei schrecklich gewesen. Sina sagt: «Ich habe dich gestern gesehen.» Mael wird rot. «Die haben mich gefragt, und ich wollte nicht Nein sagen. Und dir wollte ich nicht absagen.» «Hast du aber», sagt Sina. Mael schaut auf den Boden. «Samstag, Baumhaus?», fragt er. Sina lässt ihn warten. «Samstag», sagt sie dann. «Aber ohne Zahnarzt.» | motiv: Warum hat Mael den Zahnarzt erfunden? → Er wollte niemanden enttäuschen und fand keinen anderen Ausweg. (falsch: Er hatte wirklich einen Termin beim Zahnarzt.; Er wollte Sina loswerden.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Du erfindest eine Ausrede, statt ehrlich abzusagen. (falsch: Du gehst zum Zahnarzt.; Du baust ein Baumhaus allein.)<br>weiter: Was tun die beiden wohl am Samstag? → Sie bauen das Baumhaus zusammen weiter. (falsch: Sie gehen zusammen zum Zahnarzt.; Sie reden nie wieder miteinander.)<br>ich: Was würdest du an Sinas Stelle fühlen, als du Mael auf dem Fussballplatz siehst? → Enttäuscht und verletzt, weil er mich angelogen hat. (falsch: Froh, dass sein Zahn gesund ist.; Neidisch auf das Baumhaus.) | ☐ |
+| 3 | Die Ersatzspielerin | Elin, Beat, Kaya, Zoé | Beim Handballturnier sitzt Elin auf der Bank. Sie ist die Neue im Team und hat noch keine Minute gespielt. In der zweiten Halbzeit verletzt sich Kaya am Fuss. Trainer Beat schaut die Bank entlang. «Elin, du gehst rein.» Elin steht auf, sagt aber: «Nimm lieber Zoé, die kennt die Spielzüge.» Zoé hat heute schon dreimal den Ball verloren. Beat schüttelt den Kopf. «Ich habe dich gefragt.» Elin geht aufs Feld. Sie macht einen Fehler, dann noch einen – und dann ein Tor. Nach dem Spiel sagt Kaya: «Du wolltest nur nicht, dass es an dir liegt, wenn wir verlieren.» Elin wird rot. «Vielleicht», sagt sie. | motiv: Warum will Elin, dass Zoé spielt? → Sie hat Angst, am Verlieren schuld zu sein. (falsch: Zoé kennt die Spielzüge wirklich besser.; Sie hat keine Lust zu spielen.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Du lehnst eine Chance ab, weil du Angst hast, Fehler zu machen. (falsch: Du wirst beim Sport verletzt.; Du schiesst ein Tor und feierst.)<br>weiter: Was tut Elin wohl beim nächsten Spiel? → Sie sagt Ja, wenn der Trainer sie ruft. (falsch: Sie bleibt zu Hause.; Sie verlangt, dass Zoé auf die Bank muss.)<br>ich: Was würdest du an Elins Stelle fühlen, als Beat sagt: «Ich habe dich gefragt»? → Nervös – aber auch, dass er mir etwas zutraut. (falsch: Wütend, weil er Zoé nicht nimmt.; Gelangweilt.) | ☐ |
+| 3 | Der Zopf | Dilan, Herr Marti, Mia | Für die Schulreise fehlen der Klasse noch hundert Franken. Herr Marti schlägt einen Kuchenverkauf vor. «Ich backe nicht», sagt Dilan sofort, «Backen ist langweilig.» Die anderen teilen sich die Kuchen auf. Am Verkaufstag bringt Dilan nichts mit – aber er steht drei Stunden am Stand, spricht jeden Passanten an und verkauft am Ende auch das letzte Stück. Als Herr Marti die Kasse zählt, sind es hundertzwanzig Franken. «Wer hat den Zopf gebracht?», fragt Mia. Niemand meldet sich. Dilans Grossmutter backt den besten Zopf im Dorf. Dilan schaut aus dem Fenster und pfeift. | motiv: Warum meldet sich Dilan beim Zopf nicht? → Er will nicht zugeben, dass er doch mitgeholfen hat – das passt nicht zu seinem Spruch. (falsch: Er hat den Zopf nicht gebracht.; Er hat den Zopf selbst gegessen.)<br>lebenswelt: Welche Situation aus dem Alltag passt am ehesten dazu? → Jemand tut cool und hilft dann heimlich doch. (falsch: Jemand kauft Kuchen auf dem Markt.; Jemand backt für die Familie einen Zopf.)<br>weiter: Was tut Mia wohl als Nächstes? → Sie ahnt, von wem der Zopf ist, und lächelt Dilan an. (falsch: Sie wirft den Zopf weg.; Sie beschuldigt Herrn Marti.)<br>ich: Was würdest du an Dilans Stelle fühlen, als Mia fragt? → Ein bisschen ertappt – und stolz, dass der Zopf allen geschmeckt hat. (falsch: Wütend, weil niemand meinen Kuchen will.; Traurig, weil die Schulreise ausfällt.) | ☐ |
+
+## 80. Kulturen-Koffer (Lehrplan SG NMG.9.3)
+
+### Kulturen
+
+Fakten bitte nachprüfen.
+
+| Bild | Name | Schweiz | Kurztext | ☐ |
+|---|---|---|---|---|
+| 🛖 | Pfahlbauer | true | lebten vor mehreren tausend Jahren an Seen in der Schweiz, in Häusern auf Pfählen | ☐ |
+| 🛡️ | Römer | true | kamen vor über 2000 Jahren in die Schweiz und bauten Städte, Strassen und warme Bäder | ☐ |
+| 🏜️ | Altes Ägypten | false | lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König | ☐ |
+| 🐉 | Altes China | false | lebten vor über 2000 Jahren weit im Osten, bauten eine riesige Mauer und erfanden Papier und Kompass | ☐ |
+| 🎭 | Alte Griechen | false | lebten vor über 2000 Jahren am Meer, bauten Tempel mit Säulen und erfanden die Olympischen Spiele | ☐ |
+
+### Dinge, Bauten, Berufe
+
+„auch“: weitere Kulturen, bei denen das Ding vorkam (stehen nie als Korb daneben). „ab“: ab Stufe.
+
+| Bild | Name | Kultur | Art | ab | auch | Umschreibung | ☐ |
+|---|---|---|---|---|---|---|---|
+| 🛖 | Haus auf Pfählen | Pfahlbauer | bau | 1 |  | ein Haus aus Holz, das auf langen Stangen über dem Wasser oder dem feuchten Ufer steht | ☐ |
+| 🛶 | Einbaum | Pfahlbauer | ding | 1 |  | ein Boot, das aus einem einzigen Baumstamm ausgehöhlt wurde | ☐ |
+| 🪓 | Steinbeil | Pfahlbauer | ding | 1 |  | ein Werkzeug zum Holzhacken mit einer geschliffenen Klinge aus Stein | ☐ |
+| 🪵 | Holzpfahl | Pfahlbauer | ding | 2 |  | ein langer Stamm, der in den Seeboden geschlagen wurde und ein Haus trägt | ☐ |
+| 🧺 | Wand aus Flechtwerk | Pfahlbauer | bau | 2 |  | eine Hauswand aus geflochtenen Ästen, mit Lehm verschmiert | ☐ |
+| 🏞️ | Dorf am Seeufer | Pfahlbauer | bau | 2 |  | ein Dorf aus Holzhäusern, das direkt am Ufer eines Sees stand | ☐ |
+|  | Webgewicht | Pfahlbauer | ding | 3 |  | ein Stück Ton mit einem Loch, das am Webstuhl die Fäden spannt | ☐ |
+|  | Tonkrug | Pfahlbauer | ding | 3 | Altes Ägypten, Römer, Alte Griechen, Altes China | ein Gefäss aus gebranntem Ton für Körner und Wasser | ☐ |
+| 🪨 | Steinzeit | Pfahlbauer | wort | 3 |  | die Zeit, in der Werkzeuge aus Stein gemacht wurden, lange bevor es Metall gab | ☐ |
+|  | Bronzezeit | Pfahlbauer | wort | 4 |  | die Zeit, in der Beile und Schmuck aus dem Metall Bronze gegossen wurden | ☐ |
+|  | Mahlstein | Pfahlbauer | ding | 4 | Altes Ägypten, Römer | ein flacher Stein, auf dem Körner mit einem zweiten Stein zu Mehl zerrieben wurden | ☐ |
+| 🏺 | Amphore | Römer | ding | 1 | Alte Griechen | ein grosser Tonkrug mit zwei Henkeln und spitzem Boden für Wein und Öl | ☐ |
+| 🧩 | Mosaik | Römer | ding | 2 | Alte Griechen | ein Bild auf dem Boden, aus tausenden kleinen Steinchen gelegt | ☐ |
+| 🌉 | Aquädukt | Römer | bau | 1 |  | eine Wasserleitung auf hohen Bögen, die frisches Wasser in die Stadt bringt | ☐ |
+| 🛣️ | Gepflasterte Strasse | Römer | bau | 2 |  | ein breiter Weg aus Steinplatten, schnurgerade durch das ganze Land | ☐ |
+| ⚔️ | Legionär | Römer | beruf | 1 |  | ein Soldat mit Helm, Schild und kurzem Schwert, der in einer Legion marschiert | ☐ |
+| 🛁 | Thermen | Römer | bau | 2 |  | ein grosses Badehaus mit warmen und kalten Becken für alle Leute der Stadt | ☐ |
+|  | Latein | Römer | wort | 3 |  | die Sprache, aus der Wörter wie „Villa“ und „Fenster“ zu uns gekommen sind | ☐ |
+| 🪙 | Münze mit Kaiserkopf | Römer | ding | 2 | Alte Griechen, Altes China | Geld aus Metall mit dem Kopf des Herrschers darauf | ☐ |
+| 🏛️ | Augusta Raurica | Römer | bau | 3 |  | eine alte Stadt in der Schweiz mit Theater und Tempelresten, die Soldaten und Händler gründeten | ☐ |
+|  | Aventicum | Römer | bau | 4 |  | eine alte Stadt in der Westschweiz; heute heisst der Ort Avenches | ☐ |
+| 🔢 | Zahlen I, V, X | Römer | wort | 3 |  | Zahlen, die mit Buchstaben geschrieben werden — heute noch auf manchen Uhren | ☐ |
+| ♨️ | Bodenheizung | Römer | bau | 3 |  | warme Luft von einem Feuer strömt unter dem Boden durch und heizt das Haus | ☐ |
+| 🪖 | Soldatenhelm | Römer | ding | 2 | Alte Griechen | ein Schutz aus Metall für den Kopf eines Soldaten | ☐ |
+|  | Wachstafel | Römer | ding | 4 | Alte Griechen | ein Brettchen mit Wachs, in das man mit einem Griffel schreibt und das Geschriebene wieder glattstreicht | ☐ |
+|  | Kaiser | Römer | beruf | 3 | Altes China | der Herrscher über ein riesiges Reich; sein Kopf war auf den Münzen | ☐ |
+| 🔺 | Pyramide | Altes Ägypten | bau | 1 |  | ein riesiges Grab aus Stein mit vier schrägen Seiten und einer Spitze | ☐ |
+| 👑 | Pharao | Altes Ägypten | beruf | 1 |  | der König, der wie ein Gott verehrt wurde und für den ein riesiges Grab gebaut wurde | ☐ |
+|  | Hieroglyphen | Altes Ägypten | wort | 3 |  | eine Schrift aus kleinen Bildern: Vögel, Augen, Wellen | ☐ |
+| 📜 | Papyrus | Altes Ägypten | ding | 1 |  | ein Blatt zum Schreiben, aus den Stängeln einer Pflanze am Fluss gemacht | ☐ |
+| 🌊 | Der Nil | Altes Ägypten | wort | 2 |  | ein sehr langer Fluss, der jedes Jahr über die Ufer trat und die Felder fruchtbar machte | ☐ |
+|  | Mumie | Altes Ägypten | ding | 3 |  | ein toter Mensch, der in Tücher gewickelt wurde, damit er nicht verwest | ☐ |
+| 🦁 | Sphinx | Altes Ägypten | bau | 1 |  | eine riesige Statue: ein Löwe mit dem Kopf eines Menschen | ☐ |
+| 🪲 | Skarabäus | Altes Ägypten | ding | 2 |  | ein Glücksbringer in der Form eines Käfers | ☐ |
+| ✍️ | Schreiber | Altes Ägypten | beruf | 3 | Römer, Altes China | ein Mann, der lesen und schreiben konnte und alles aufschrieb, was der König wollte | ☐ |
+| 🐈 | Heilige Katze | Altes Ägypten | wort | 3 |  | ein Haustier, das verehrt wurde und dem niemand etwas tun durfte | ☐ |
+| ⛵ | Segelboot auf dem Fluss | Altes Ägypten | ding | 3 | Römer, Alte Griechen | ein Boot mit Segel, das Steine und Getreide über den grossen Fluss brachte | ☐ |
+| 🧱 | Grosse Mauer | Altes China | bau | 5 |  | eine Mauer, die tausende Kilometer lang über Berge läuft | ☐ |
+| 🧵 | Seide | Altes China | ding | 5 |  | ein glänzender, weicher Stoff aus den Fäden von Raupen | ☐ |
+| 📄 | Papier | Altes China | ding | 5 |  | ein dünnes Blatt zum Schreiben, aus zerstampften Pflanzenfasern gemacht — eine Erfindung aus dem Osten | ☐ |
+| 🧭 | Kompass | Altes China | ding | 5 |  | ein Gerät mit einer Nadel, die immer nach Norden zeigt | ☐ |
+| 🍵 | Tee | Altes China | ding | 5 |  | ein heisses Getränk aus getrockneten Blättern | ☐ |
+| 🍚 | Reis | Altes China | ding | 5 |  | kleine weisse Körner, die in überschwemmten Feldern wachsen | ☐ |
+|  | Schriftzeichen | Altes China | wort | 5 |  | eine Schrift mit tausenden verschiedenen Zeichen, jedes für ein ganzes Wort | ☐ |
+| 🏛️ | Tempel mit Säulen | Alte Griechen | bau | 5 | Römer, Altes Ägypten | ein Haus für einen Gott, mit vielen hohen Säulen rundherum | ☐ |
+| 🏅 | Olympische Spiele | Alte Griechen | wort | 5 |  | Wettkämpfe im Laufen, Werfen und Ringen, die alle vier Jahre stattfanden | ☐ |
+| 🎭 | Theater unter freiem Himmel | Alte Griechen | bau | 5 | Römer | Sitzreihen im Halbkreis an einem Hang, unten spielen Schauspieler mit Masken | ☐ |
+| 🧔 | Philosoph | Alte Griechen | beruf | 5 |  | ein Denker, der mit seinen Schülern über das Leben und die Welt nachdachte | ☐ |
+| 🔤 | Buchstaben Alpha, Beta | Alte Griechen | wort | 5 |  | ein Alphabet, dessen erste zwei Buchstaben dem Wort „Alphabet“ den Namen gaben | ☐ |
+| ⚡ | Göttervater Zeus | Alte Griechen | wort | 5 |  | der oberste Gott in alten Geschichten, der Blitze schleudert | ☐ |
+| 🏟️ | Stadion | Alte Griechen | bau | 5 | Römer | eine lange Laufbahn mit Rängen für die Zuschauer der Wettkämpfe | ☐ |
+
+### Dinge von heute (Stufe 1)
+
+| Bild | Name | Umschreibung | ☐ |
+|---|---|---|---|
+| 📱 | Handy | damit telefoniert man und schickt Nachrichten | ☐ |
+| 💻 | Computer | damit schreibt, rechnet und spielt man am Bildschirm | ☐ |
+| 🚗 | Auto | ein Wagen mit Motor und vier Rädern | ☐ |
+| ✈️ | Flugzeug | damit fliegt man über die Wolken in andere Länder | ☐ |
+| 📺 | Fernseher | ein Bildschirm, auf dem Filme laufen | ☐ |
+| 🚆 | Zug | er fährt auf Schienen von Stadt zu Stadt | ☐ |
+| 💡 | Glühlampe | sie macht Licht, sobald man den Schalter drückt | ☐ |
+| 🎧 | Kopfhörer | damit hört man Musik, ohne dass andere sie hören | ☐ |
+| 📷 | Fotoapparat | damit macht man Fotos | ☐ |
+| 🚌 | Bus | ein grosser Wagen mit Motor, in dem viele Leute mitfahren | ☐ |
+| 🧊 | Kühlschrank | ein Schrank, der das Essen kalt hält | ☐ |
+| 🎮 | Spielkonsole | damit spielt man Spiele am Bildschirm | ☐ |
+| 🚀 | Rakete | sie fliegt mit Feuer und Donner bis ins Weltall | ☐ |
+| 🤖 | Roboter | eine Maschine, die sich von selbst bewegt und arbeitet | ☐ |
+
+### Erzählsätze
+
+| Satz | Kultur | ☐ |
+|---|---|---|
+| Ich wohne in einem Haus auf Pfählen am See. | Pfahlbauer | ☐ |
+| Mein Vater hackt Holz mit einem Beil aus Stein. | Pfahlbauer | ☐ |
+| Wir fahren mit dem Einbaum über den See zum Fischen. | Pfahlbauer | ☐ |
+| Meine Mutter webt Stoff. Die Fäden spannt sie mit Gewichten aus Ton. | Pfahlbauer | ☐ |
+| Unter unserem Dorf schwappt das Wasser des Sees. | Pfahlbauer | ☐ |
+| Ich bin Soldat in einer Legion und marschiere auf einer gepflasterten Strasse. | Römer | ☐ |
+| Am Nachmittag gehe ich in die Thermen und bade im warmen Wasser. | Römer | ☐ |
+| Wir sprechen Latein. Ich lerne die Zahlen I, V und X. | Römer | ☐ |
+| Das Wasser für unsere Stadt fliesst über ein Aquädukt aus den Bergen. | Römer | ☐ |
+| Ich bezahle den Wein mit einer Münze. Darauf ist der Kopf des Kaisers. | Römer | ☐ |
+| Der Boden in unserem Haus ist ein Mosaik aus tausend kleinen Steinchen. | Römer | ☐ |
+| Ich lebe am Nil. Jedes Jahr tritt der Fluss über die Ufer. | Altes Ägypten | ☐ |
+| Mein Onkel ist Schreiber. Er malt Hieroglyphen auf Papyrus. | Altes Ägypten | ☐ |
+| Unser König heisst Pharao. Für ihn wird eine Pyramide gebaut. | Altes Ägypten | ☐ |
+| Neben der Pyramide liegt die Sphinx, ein Löwe mit Menschenkopf. | Altes Ägypten | ☐ |
+| Unsere Katze ist heilig. Niemand darf ihr etwas tun. | Altes Ägypten | ☐ |
+
+### Aussagen (stimmt / stimmt nicht)
+
+Fakten bitte nachprüfen.
+
+| Aussage | stimmt | Kultur | Begründung | ☐ |
+|---|---|---|---|---|
+| Die Pfahlbauer hatten Handys. | false | Pfahlbauer | Handys gibt es erst seit kurzer Zeit. Die Pfahlbauer hatten keinen Strom. | ☐ |
+| Die Pfahlbauer wohnten in Häusern auf Pfählen am See. | true | Pfahlbauer | Ihre Holzhäuser standen auf Pfählen am Ufer von Seen. | ☐ |
+| Die Pfahlbauer fuhren mit dem Auto zur Arbeit. | false | Pfahlbauer | Autos gibt es erst seit etwa 150 Jahren. Die Pfahlbauer gingen zu Fuss oder fuhren mit dem Einbaum. | ☐ |
+| Die Pfahlbauer benutzten Beile aus Stein. | true | Pfahlbauer | Ihre Beile hatten eine geschliffene Klinge aus Stein. | ☐ |
+| Die Pfahlbauer hatten Strom in ihren Häusern. | false | Pfahlbauer | Strom aus der Steckdose gibt es erst seit gut 100 Jahren. | ☐ |
+| Die Pfahlbauer fuhren mit Einbäumen über den See. | true | Pfahlbauer | Ein Einbaum ist ein Boot aus einem einzigen Baumstamm. | ☐ |
+| Die Pfahlbauer lebten in der Schweiz, lange bevor die Römer kamen. | true | Pfahlbauer | Die Pfahlbauer lebten mehrere tausend Jahre vor den Römern an unseren Seen. | ☐ |
+| Die Pfahlbauer pflanzten Getreide an. | true | Pfahlbauer | Sie waren Bauern: Sie säten Getreide und hielten Tiere. | ☐ |
+| Die Pfahlbauer bauten Pyramiden. | false | Pfahlbauer | Pyramiden stehen in Ägypten. Die Pfahlbauer bauten Holzhäuser am See. | ☐ |
+| Die Römer bauten Strassen durch die Schweiz. | true | Römer | Römerstrassen führten schnurgerade durch das Land und über die Pässe. | ☐ |
+| Die Römer badeten in grossen Badehäusern, den Thermen. | true | Römer | In den Thermen gab es warme und kalte Becken. | ☐ |
+| Die Römer sprachen Latein. | true | Römer | Latein war die Sprache der Römer. | ☐ |
+| Die Römer flogen mit dem Flugzeug nach Rom. | false | Römer | Flugzeuge gibt es erst seit gut 100 Jahren. Die Römer gingen zu Fuss, ritten oder fuhren mit Wagen und Schiffen. | ☐ |
+| Die Römer bauten Wasserleitungen, die Aquädukte. | true | Römer | Aquädukte brachten frisches Wasser über Bögen in die Städte. | ☐ |
+| Die Römer hatten Städte in der Schweiz, zum Beispiel Augusta Raurica. | true | Römer | Augusta Raurica und Aventicum waren Römerstädte in der Schweiz. | ☐ |
+| Die Römer bezahlten mit Münzen. | true | Römer | Römische Münzen aus Metall findet man bis heute in der Erde. | ☐ |
+| Die Römer schauten die Olympischen Spiele im Fernsehen. | false | Römer | Fernseher gibt es erst seit etwa 100 Jahren. | ☐ |
+| Die Römer hatten Handys. | false | Römer | Handys gibt es erst seit kurzer Zeit. Die Römer schickten Boten. | ☐ |
+| Die Römer legten Mosaike aus kleinen Steinchen. | true | Römer | Mosaikböden aus tausenden Steinchen schmückten ihre Häuser. | ☐ |
+| Im Alten Ägypten bauten die Menschen Pyramiden. | true | Altes Ägypten | Die Pyramiden waren riesige Gräber für die Pharaonen. | ☐ |
+| Im Alten Ägypten schrieb man auf Papyrus. | true | Altes Ägypten | Papyrus wurde aus einer Pflanze am Nil gemacht. | ☐ |
+| Die alten Ägypter hatten Fernseher. | false | Altes Ägypten | Fernseher gibt es erst seit etwa 100 Jahren. | ☐ |
+| Im Alten Ägypten regierte ein Pharao. | true | Altes Ägypten | Der Pharao war der König und wurde wie ein Gott verehrt. | ☐ |
+| Die alten Ägypter schrieben mit dem Computer. | false | Altes Ägypten | Computer gibt es erst seit kurzer Zeit. Die Ägypter schrieben Hieroglyphen auf Papyrus. | ☐ |
+| Die alten Ägypter lebten am Fluss Nil. | true | Altes Ägypten | Der Nil machte die Felder in der Wüste fruchtbar. | ☐ |
+| Im Alten Ägypten gab es Pyramiden aus Glas. | false | Altes Ägypten | Die Pyramiden sind aus riesigen Steinblöcken gebaut. | ☐ |
+| Die alten Ägypter fuhren mit dem Zug. | false | Altes Ägypten | Züge gibt es erst seit etwa 200 Jahren. Die Ägypter fuhren mit Booten auf dem Nil. | ☐ |
+| Die alten Ägypter schrieben mit Bildzeichen, den Hieroglyphen. | true | Altes Ägypten | Hieroglyphen sind kleine Bilder: Vögel, Augen, Wellen. | ☐ |
+| Im Alten China wurde das Papier erfunden. | true | Altes China | Papier aus Pflanzenfasern ist eine Erfindung aus China. | ☐ |
+| Die Grosse Mauer in China ist aus Glas. | false | Altes China | Die Grosse Mauer ist aus Stein und Erde gebaut. | ☐ |
+| Im Alten China gab es Fernseher. | false | Altes China | Fernseher gibt es erst seit etwa 100 Jahren. | ☐ |
+| Die alten Griechen erfanden die Olympischen Spiele. | true | Alte Griechen | Die Wettkämpfe fanden alle vier Jahre in Olympia statt. | ☐ |
+| Die alten Griechen fuhren mit dem Auto zum Theater. | false | Alte Griechen | Autos gibt es erst seit etwa 150 Jahren. | ☐ |
+| Die alten Griechen bauten Tempel mit vielen Säulen. | true | Alte Griechen | Ihre Tempel hatten rundherum hohe Säulen aus Stein. | ☐ |
+
+### Gab es das damals schon?
+
+Fakten bitte nachprüfen.
+
+| Bild | Ding | Kultur | gab es | Begründung | ☐ |
+|---|---|---|---|---|---|
+| 🛞 | Rad | Römer | true | Die Römer fuhren mit Wagen auf ihren Strassen. | ☐ |
+| ✍️ | Schrift | Römer | true | Die Römer schrieben Latein, auf Wachstafeln und auf Stein. | ☐ |
+| 🥛 | Glas | Römer | true | Die Römer stellten Gläser, Flaschen und Fensterglas her. | ☐ |
+| ⚡ | Strom | Römer | false | Strom aus der Steckdose gibt es erst seit gut 100 Jahren. | ☐ |
+| 🪙 | Münzen | Römer | true | Römische Münzen findet man bis heute in der Erde. | ☐ |
+| 📱 | Handy | Römer | false | Handys gibt es erst seit kurzer Zeit. | ☐ |
+| 🐎 | Pferde | Römer | true | Die Römer ritten und spannten Pferde vor ihre Wagen. | ☐ |
+| 🛁 | Warmes Bad | Römer | true | In den Thermen gab es warme Becken mit Bodenheizung. | ☐ |
+| ✈️ | Flugzeug | Römer | false | Flugzeuge gibt es erst seit gut 100 Jahren. | ☐ |
+| 📺 | Fernseher | Römer | false | Fernseher gibt es erst seit etwa 100 Jahren. | ☐ |
+| ✍️ | Schrift | Pfahlbauer | false | Die Pfahlbauer hatten noch keine Schrift. Wir kennen sie nur durch Funde. | ☐ |
+| ⚡ | Strom | Pfahlbauer | false | Strom aus der Steckdose gibt es erst seit gut 100 Jahren. | ☐ |
+| 🪙 | Münzen | Pfahlbauer | false | Die Pfahlbauer kannten kein Geld. Sie tauschten Sachen. | ☐ |
+| 🚗 | Auto | Pfahlbauer | false | Autos gibt es erst seit etwa 150 Jahren. | ☐ |
+| 🪓 | Steinbeil | Pfahlbauer | true | Beile mit Klingen aus geschliffenem Stein waren ihre wichtigsten Werkzeuge. | ☐ |
+| 🛶 | Boot | Pfahlbauer | true | Ihre Boote waren Einbäume aus einem Baumstamm. | ☐ |
+| 🛖 | Holzhaus | Pfahlbauer | true | Ihre Häuser aus Holz standen auf Pfählen. | ☐ |
+| 🍲 | Töpfe aus Ton | Pfahlbauer | true | Tonkrüge und Töpfe aus gebranntem Ton wurden in vielen Pfahlbau-Dörfern gefunden. | ☐ |
+| 🌾 | Getreide | Pfahlbauer | true | Die Pfahlbauer waren Bauern und bauten Getreide an. | ☐ |
+| 💡 | Glühlampe | Pfahlbauer | false | Glühlampen gibt es erst seit etwa 150 Jahren. Licht gab nur das Feuer. | ☐ |
+| ✍️ | Schrift | Altes Ägypten | true | Die Ägypter schrieben mit Hieroglyphen, kleinen Bildzeichen. | ☐ |
+| ⚡ | Strom | Altes Ägypten | false | Strom aus der Steckdose gibt es erst seit gut 100 Jahren. | ☐ |
+| 🔺 | Pyramiden | Altes Ägypten | true | Die Pyramiden sind riesige Gräber aus Stein für die Pharaonen. | ☐ |
+| 💻 | Computer | Altes Ägypten | false | Computer gibt es erst seit kurzer Zeit. | ☐ |
+| ⛵ | Boote | Altes Ägypten | true | Auf dem Nil fuhren Segelboote mit Steinen und Getreide. | ☐ |
+| 🐈 | Katzen | Altes Ägypten | true | Katzen waren im Alten Ägypten heilige Tiere. | ☐ |
+| 🚆 | Zug | Altes Ägypten | false | Züge gibt es erst seit etwa 200 Jahren. | ☐ |
+| 📄 | Papier | Altes China | true | Das Papier wurde im Alten China erfunden. | ☐ |
+| 🧭 | Kompass | Altes China | true | Der Kompass ist eine Erfindung aus China. | ☐ |
+| 🧵 | Seide | Altes China | true | Seide aus den Fäden von Raupen kommt aus China. | ☐ |
+| 📺 | Fernseher | Altes China | false | Fernseher gibt es erst seit etwa 100 Jahren. | ☐ |
+| 🎭 | Theater | Alte Griechen | true | Die Griechen spielten Theaterstücke mit Masken unter freiem Himmel. | ☐ |
+| 🏅 | Wettkämpfe | Alte Griechen | true | Die Olympischen Spiele sind eine Erfindung der alten Griechen. | ☐ |
+| ✈️ | Flugzeug | Alte Griechen | false | Flugzeuge gibt es erst seit gut 100 Jahren. | ☐ |
+
+### Quellen (Stufe 5)
+
+Quellenart: Fundstück, Bauwerk, Bild, Text.
+
+| Bild | Quelle | Art | Kultur | ☐ |
+|---|---|---|---|---|
+| 🪓 | Ein Steinbeil aus dem Schlamm am Grund eines Sees. | Fundstück | Pfahlbauer | ☐ |
+| 🧵 | Ein Webgewicht aus Ton, das Taucher im See gefunden haben. | Fundstück | Pfahlbauer | ☐ |
+| 🌾 | Ein Tonkrug mit Resten von Körnern darin. | Fundstück | Pfahlbauer | ☐ |
+| 🌉 | Die Reste eines Aquädukts, die noch auf einer Wiese stehen. | Bauwerk | Römer | ☐ |
+| 🏛️ | Die Ruinen des Theaters von Augusta Raurica. | Bauwerk | Römer | ☐ |
+| 🪖 | Ein Helm eines Legionärs, der beim Pflügen aus der Erde kam. | Fundstück | Römer | ☐ |
+| 🪙 | Eine Münze mit dem Kopf eines Kaisers. | Fundstück | Römer | ☐ |
+| 📜 | Der Bericht des Feldherrn Cäsar über die Menschen in der Schweiz. | Text | Römer | ☐ |
+| 🎨 | Eine Malerei an einer Hauswand: ein Festmahl mit Wein. | Bild | Römer | ☐ |
+| 📜 | Ein Brief auf Papyrus, mit Tinte geschrieben. | Text | Altes Ägypten | ☐ |
+| 🔺 | Eine Pyramide in der Wüste, die noch heute steht. | Bauwerk | Altes Ägypten | ☐ |
+| 🎨 | Eine Malerei an der Wand eines Grabes: Bauern bei der Ernte. | Bild | Altes Ägypten | ☐ |
+| ✍️ | Eine Geschichte, in Hieroglyphen aufgeschrieben. | Text | Altes Ägypten | ☐ |
+| 🪲 | Ein Glücksbringer in Käferform aus einem Grab. | Fundstück | Altes Ägypten | ☐ |
+| 🦁 | Die Sphinx, ein Löwe mit Menschenkopf aus Stein. | Bauwerk | Altes Ägypten | ☐ |
+| 👑 | Eine Zeichnung eines Pharaos auf seinem Wagen. | Bild | Altes Ägypten | ☐ |
+| 🧱 | Ein Stück der Grossen Mauer, das über die Berge läuft. | Bauwerk | Altes China | ☐ |
+| 🧵 | Ein Stück Seidenstoff aus einem alten Grab. | Fundstück | Altes China | ☐ |
+| 🎋 | Schriftzeichen auf dünnen Streifen aus Bambus. | Text | Altes China | ☐ |
+| 🎨 | Eine Malerei auf Seide: ein Kaiser mit seinen Dienern. | Bild | Altes China | ☐ |
+| 🏛️ | Die Säulen eines Tempels, die noch auf einem Hügel stehen. | Bauwerk | Alte Griechen | ☐ |
+| 🏃 | Eine Zeichnung auf einer Vase: Läufer bei den Wettkämpfen. | Bild | Alte Griechen | ☐ |
+| 📜 | Ein Theaterstück, das vor über 2000 Jahren aufgeschrieben wurde und das wir heute noch lesen. | Text | Alte Griechen | ☐ |
+| 🪖 | Ein Helm aus Bronze, den ein Taucher im Meer gefunden hat. | Fundstück | Alte Griechen | ☐ |
+
+### Rätsel (Königsstufe)
+
+Drei Hinweise, vom allgemeinen zum genauen.
+
+| Kultur | Hinweise | ☐ |
+|---|---|---|
+| Pfahlbauer | Wir lebten vor mehreren tausend Jahren in der Schweiz.<br>Unsere Häuser standen auf langen Stangen über dem Wasser.<br>Unsere Beile waren aus Stein, unsere Boote aus einem einzigen Baumstamm. | ☐ |
+| Pfahlbauer | Unsere Dörfer lagen direkt am Ufer eines Sees.<br>Wir hatten noch keine Schrift.<br>Forscher finden unsere Holzstangen noch heute im Seeboden. | ☐ |
+| Römer | Wir kamen vor über 2000 Jahren in die Schweiz.<br>Wir bauten schnurgerade Strassen, Wasserleitungen und warme Bäder.<br>Unsere Sprache war Latein. | ☐ |
+| Römer | Unsere Soldaten hiessen Legionäre.<br>Wir gründeten Städte in der Schweiz, zum Beispiel Augusta Raurica.<br>Unsere Böden schmückten wir mit Mosaiken aus kleinen Steinchen. | ☐ |
+| Altes Ägypten | Wir lebten an einem langen Fluss mitten in der Wüste.<br>Unser König hiess Pharao.<br>Wir bauten riesige Gräber aus Stein mit einer Spitze oben. | ☐ |
+| Altes Ägypten | Wir schrieben mit kleinen Bildzeichen auf Papyrus.<br>Unsere Toten wickelten wir in Tücher, damit sie nicht verwesen.<br>Eine unserer Statuen ist ein Löwe mit Menschenkopf. | ☐ |
+| Altes China | Wir lebten weit weg im Osten.<br>Wir erfanden das Papier und den Kompass.<br>Unsere Mauer ist tausende Kilometer lang. | ☐ |
+| Altes China | Wir machten einen glänzenden Stoff aus den Fäden von Raupen.<br>Unser Glückszeichen ist der Drache.<br>Wir schrieben mit tausenden verschiedenen Schriftzeichen. | ☐ |
+| Alte Griechen | Wir lebten vor über 2000 Jahren am Meer, in vielen kleinen Städten.<br>Wir erfanden Wettkämpfe, die es heute noch alle vier Jahre gibt.<br>Unsere Tempel hatten viele Säulen, unsere Theater waren unter freiem Himmel. | ☐ |
+| Alte Griechen | Unsere Buchstaben heissen Alpha, Beta, Gamma.<br>Wir erzählten Geschichten über Götter wie Zeus.<br>Unsere Schauspieler trugen Masken. | ☐ |
+
+## 81. Hello-Dialog (Lehrplan SG FS1E.3.A.1)
+
+### Situationen (Stufe 1)
+
+Britisches Englisch. Die Stimme spricht die Zeile; das Kind wählt den Gruss.
+
+| Bild | Situation | Zeile | richtiger Gruss | Tipp | ☐ |
+|---|---|---|---|---|---|
+| 🏫 | Ankommen | Hello, Tom! | Hello! | Jemand kommt und grüsst dich. Grüss zurück. | ☐ |
+| 👩‍🏫 | Ankommen | Hello, I'm Mrs Smith. | Hello! | Deine neue Lehrerin grüsst dich. Grüss zurück. | ☐ |
+| 🧑‍🤝‍🧑 | Ankommen | Hi there! | Hello! | Ein Kind grüsst dich. Was sagst du zurück? | ☐ |
+| 🚪 | Gehen | Bye, Tom! See you tomorrow. | Goodbye! | Jemand geht weg. Was sagt man beim Gehen? | ☐ |
+| 🚌 | Gehen | Bye-bye! Have a nice day! | Goodbye! | Der Bus fährt los. Was sagt man beim Abschied? | ☐ |
+| 🏠 | Gehen | See you later! | Goodbye! | Dein Freund geht nach Hause. Was sagst du? | ☐ |
+| 🎁 | Geschenk | Here is a present for you. | Thank you! | Du bekommst etwas. Was sagt man dann? | ☐ |
+| 🍪 | Geschenk | Here you are, a biscuit. | Thank you! | Du bekommst einen Keks. Was sagt man dann? | ☐ |
+| 🎂 | Geschenk | I have got a cake for you! | Thank you! | Du bekommst einen Kuchen. Was sagt man dann? | ☐ |
+| ✏️ | Geschenk | This pencil is for you. | Thank you! | Du bekommst einen Stift. Was sagt man dann? | ☐ |
+| 🌅 | Morgen | Good morning, children! | Good morning! | Es ist früh am Morgen. Wie grüsst man am Morgen? | ☐ |
+| ☀️ | Morgen | Good morning, Tom! Wake up! | Good morning! | Du wachst auf. Wie grüsst man am Morgen? | ☐ |
+| 🌙 | Nacht | Good night, sleep well. | Good night! | Es ist Schlafenszeit. Was sagt man vor dem Schlafen? | ☐ |
+| 🛏️ | Nacht | Time for bed. Good night! | Good night! | Du gehst ins Bett. Was sagt man vor dem Schlafen? | ☐ |
+| 🏫 | Ankommen | Welcome to our school! | Hello! | Jemand heisst dich willkommen. Grüss zurück. | ☐ |
+| 🎒 | Gehen | Time to go home. Bye! | Goodbye! | Die Schule ist aus. Was sagt man beim Gehen? | ☐ |
+| 🍎 | Geschenk | Here you are, an apple. | Thank you! | Du bekommst einen Apfel. Was sagt man dann? | ☐ |
+| 🌞 | Morgen | Good morning, class! | Good morning! | Die Lehrerin grüsst am Morgen. Grüss zurück. | ☐ |
+
+### Zeile und Antwort (Stufe 2)
+
+Falsche Antworten passen zu einer anderen Zeile.
+
+| Zeile | Antwort | falsch | Tipp | ☐ |
+|---|---|---|---|---|
+| Hello! | Hi! | Goodbye!; Thank you! | Jemand grüsst dich. Grüss zurück. | ☐ |
+| Hi, Tom! | Hi, Lea! | Bye, Lea!; Here you are. | Jemand grüsst dich mit Namen. Grüss zurück. | ☐ |
+| How are you? | I'm fine, thank you. | My name is Lea.; I'm eight. | Die Frage fragt, wie es dir geht. | ☐ |
+| What's your name? | My name is Lea. | I'm fine, thank you.; I'm eight. | Die Frage fragt nach deinem Namen. | ☐ |
+| How old are you? | I'm eight. | My name is Tom.; I'm fine. | Die Frage fragt nach deinem Alter. | ☐ |
+| Goodbye! | Bye! | Hello!; Thank you! | Jemand verabschiedet sich. Was sagst du zurück? | ☐ |
+| Thank you! | You're welcome. | Hello!; I'm nine. | Jemand bedankt sich. Was antwortet man darauf? | ☐ |
+| Good morning! | Good morning! | Good night!; Thank you! | Jemand grüsst am Morgen. Grüss gleich zurück. | ☐ |
+| Good night! | Good night! Sleep well. | Good morning!; Here you are. | Jemand wünscht eine gute Nacht. Wünsch sie zurück. | ☐ |
+| Nice to meet you. | Nice to meet you, too. | I'm eight.; Goodbye! | Jemand freut sich, dich kennenzulernen. Du dich auch. | ☐ |
+| Where do you live? | I live in St. Gallen. | I'm nine.; My name is Ben. | Die Frage fragt, wo du wohnst. | ☐ |
+| Do you like apples? | Yes, I do. | I'm eight.; Good night! | Die Frage fragt, ob du etwas magst: Ja oder Nein. | ☐ |
+| Have you got a pet? | Yes, I've got a cat. | I'm from Switzerland.; It's three o'clock. | Die Frage fragt, ob du ein Haustier hast. | ☐ |
+| Can you swim? | Yes, I can. | My name is Anna.; Good morning! | Die Frage fragt, ob du etwas kannst: Ja oder Nein. | ☐ |
+| What's your favourite colour? | My favourite colour is blue. | I'm eight.; I live in Bern. | Die Frage fragt nach deiner Lieblingsfarbe. | ☐ |
+| See you tomorrow! | See you! | Hello!; Here you are. | Jemand verabschiedet sich bis morgen. Was sagst du zurück? | ☐ |
+| Sorry! | That's OK. | I'm nine.; Good morning! | Jemand entschuldigt sich. Was sagt man dann? | ☐ |
+| Happy birthday! | Thank you! | Good night!; I'm from Zurich. | Jemand gratuliert dir. Was sagt man dann? | ☐ |
+| Can I have a biscuit, please? | Here you are. | I'm eight.; Good night! | Jemand möchte etwas haben. Was sagst du beim Geben? | ☐ |
+| Here you are. | Thank you! | Good morning!; My name is Tom. | Jemand gibt dir etwas. Was sagt man dann? | ☐ |
+
+### Fragen und Antworten (Stufe 4 und 5)
+
+Gruppe 4: Name, Alter …; Gruppe 5: Datum, Zeit, Farbe, Befinden, Wetter. Thema = Gegenseitig eindeutig.
+
+| Gruppe | Thema | Frage | Antwort | ☐ |
+|---|---|---|---|---|
+| 4 | name | What's your name? | My name is Tom. | ☐ |
+| 4 | name | What is your name? | I'm Lea. | ☐ |
+| 4 | alter | How old are you? | I'm eight. | ☐ |
+| 4 | alter | How old are you? | I'm nine years old. | ☐ |
+| 4 | befinden | How are you? | I'm fine, thank you. | ☐ |
+| 4 | befinden | How are you? | I'm OK, thanks. | ☐ |
+| 4 | wohnen | Where do you live? | I live in St. Gallen. | ☐ |
+| 4 | wohnen | Where are you from? | I'm from Switzerland. | ☐ |
+| 4 | haben | Have you got a pet? | Yes, I've got a dog. | ☐ |
+| 4 | haben | Have you got a brother? | No, I haven't. | ☐ |
+| 4 | moegen | Do you like pizza? | Yes, I do. | ☐ |
+| 4 | moegen | Do you like spiders? | No, I don't. | ☐ |
+| 4 | koennen | Can you swim? | Yes, I can. | ☐ |
+| 4 | koennen | Can you ride a bike? | Yes, I can. It's fun! | ☐ |
+| 4 | farbe | What's your favourite colour? | My favourite colour is green. | ☐ |
+| 5 | zeit | What time is it? | It's three o'clock. | ☐ |
+| 5 | zeit | What time is it? | It's half past four. | ☐ |
+| 5 | zeit | What time is it, please? | It's ten o'clock. | ☐ |
+| 5 | datum | What's the date today? | It's the fifth of May. | ☐ |
+| 5 | datum | When is your birthday? | It's on the third of July. | ☐ |
+| 5 | datum | What month is it? | It's June. | ☐ |
+| 5 | tag | What day is it today? | It's Monday. | ☐ |
+| 5 | tag | What day is it tomorrow? | It's Saturday. | ☐ |
+| 5 | farbe | What colour is it? | It's red. | ☐ |
+| 5 | farbe | What colour is the sky? | It's blue. | ☐ |
+| 5 | farbe | What colour is your bag? | It's yellow. | ☐ |
+| 5 | befinden | How do you feel? | I'm happy. | ☐ |
+| 5 | befinden | How are you today? | I'm a bit tired. | ☐ |
+| 5 | befinden | Are you OK? | Yes, I'm fine. | ☐ |
+| 5 | wetter | What's the weather like? | It's sunny. | ☐ |
+| 5 | wetter | What's the weather like today? | It's rainy and cold. | ☐ |
+
+### Dialoge (Stufe 3, 5 und 6)
+
+Züge in der richtigen Reihenfolge; „falsch“ sind fremde Zeilen für „Welcher Satz passt nicht?“.
+
+| Gruppe | Bild | Ort | Züge | fremde Zeilen | Tipp | ☐ |
+|---|---|---|---|---|---|---|
+| 3 | 🍎 | Shop | Can I have an apple, please?<br>Here you are.<br>Thank you! | Good night!; I'm eight. | Jemand möchte etwas, bekommt es und bedankt sich. | ☐ |
+| 3 | 🍦 | Kiosk | Can I have an ice cream, please?<br>Yes, of course. Here you are.<br>Thank you very much! | My name is Lea.; See you tomorrow! | Jemand möchte ein Eis, bekommt es und bedankt sich. | ☐ |
+| 3 | 🏫 | School | Good morning, class!<br>Good morning, Mrs Smith!<br>Sit down, please. | It's red.; Good night! | Die Lehrerin grüsst am Morgen, die Klasse grüsst zurück. | ☐ |
+| 3 | 👋 | Playground | Hi, Lea!<br>Hi, Tom! How are you?<br>I'm fine, thanks. | It's five o'clock.; Goodbye! | Zwei Kinder grüssen sich, dann fragt eines, wie es geht. | ☐ |
+| 3 | 🎁 | Birthday | Happy birthday! This is for you.<br>Oh, thank you!<br>You're welcome. | How old are you?; Good morning! | Jemand bekommt ein Geschenk und bedankt sich. | ☐ |
+| 3 | 🚪 | School | Time to go home. Bye, Tom!<br>Bye, Mrs Smith! See you tomorrow.<br>See you! | Here you are.; It's blue. | Die Schule ist aus, alle verabschieden sich. | ☐ |
+| 3 | 🧑‍🤝‍🧑 | Playground | Hello! What's your name?<br>My name is Anna. What's your name?<br>I'm Ben. | Here you are.; Good night! | Zwei Kinder lernen sich kennen und fragen nach dem Namen. | ☐ |
+| 3 | 🥤 | Home | Can I have some water, please?<br>Here you are.<br>Thank you, Mum! | I'm nine.; It's Monday. | Jemand möchte etwas trinken, bekommt es und bedankt sich. | ☐ |
+| 3 | 🌙 | Home | Good night, Mum!<br>Good night, Tom. Sleep well.<br>Thank you, Mum. | Good morning!; Here you are. | Es ist Schlafenszeit, Mutter und Kind wünschen sich eine gute Nacht. | ☐ |
+| 3 | 🍪 | Home | Would you like a biscuit?<br>Yes, please!<br>Here you are. | I'm fine, thank you.; What's your name? | Jemand bietet einen Keks an, das Kind möchte ihn. | ☐ |
+| 3 | ✏️ | School | Can I have a pencil, please?<br>Yes, here you are.<br>Thanks! | Good night!; I'm from Switzerland. | Jemand möchte einen Stift, bekommt ihn und bedankt sich. | ☐ |
+| 3 | 🚌 | Bus | Hello! How are you?<br>I'm fine, thank you. And you?<br>I'm OK, thanks. | It's blue.; Here you are. | Zwei Leute fragen sich, wie es ihnen geht. | ☐ |
+| 5 | ⏰ | Street | Excuse me, what time is it?<br>It's three o'clock.<br>Thank you!<br>You're welcome. | It's red.; I'm eight. | Jemand fragt nach der Uhrzeit und bedankt sich. | ☐ |
+| 5 | 🎨 | School | What's your favourite colour?<br>It's blue. And yours?<br>My favourite colour is green.<br>Green is nice! | It's Monday.; Here you are. | Zwei Kinder fragen sich nach der Lieblingsfarbe. | ☐ |
+| 5 | 📅 | School | What day is it today?<br>It's Friday.<br>Great! Tomorrow is Saturday!<br>Yes, no school! | It's half past two.; I'm from Zurich. | Jemand fragt nach dem Wochentag. | ☐ |
+| 5 | 🤒 | School | How are you today?<br>I'm not so good. I'm tired.<br>Oh, sorry. Sit down.<br>Thank you. | It's sunny.; What's your name? | Die Lehrerin fragt, wie es dem Kind geht. | ☐ |
+| 5 | 🎂 | Playground | When is your birthday?<br>It's in May. And yours?<br>My birthday is in October.<br>Nice! | It's four o'clock.; Here you are. | Zwei Kinder fragen sich nach dem Geburtstag. | ☐ |
+| 5 | 🌦️ | Home | What's the weather like today?<br>It's rainy.<br>Oh no! I want to play outside.<br>Let's play inside, then. | It's Tuesday.; I'm nine. | Jemand fragt nach dem Wetter. | ☐ |
+| 5 | ⏰ | Home | What time is it, please?<br>It's half past four.<br>Oh no, I'm late!<br>Hurry up, then! | It's yellow.; My name is Ben. | Jemand fragt nach der Uhrzeit und ist spät dran. | ☐ |
+| 5 | 🚲 | Playground | What colour is your new bike?<br>It's red.<br>Cool! My bike is blue.<br>Blue is nice, too. | It's June.; Good night! | Zwei Kinder reden über die Farbe ihrer Velos. | ☐ |
+| 5 | 😊 | School | How do you feel?<br>I'm happy! It's my birthday.<br>Happy birthday!<br>Thank you! | It's Monday.; It's green. | Jemand fragt nach dem Befinden, und es gibt einen Grund zur Freude. | ☐ |
+| 5 | 📅 | Home | What's the date today?<br>It's the first of May.<br>Oh, it's Mum's birthday!<br>Let's make a card! | It's six o'clock.; I'm fine. | Jemand fragt nach dem Datum. | ☐ |
+| 6 | 🛒 | Shop | Good morning! Can I have two bananas, please?<br>Yes, of course. Here you are.<br>How much is it?<br>It's one franc.<br>Thank you! Goodbye! | Good night!; I'm eight. | Im Laden: grüssen, bestellen, bekommen, nach dem Preis fragen, bezahlen, gehen. | ☐ |
+| 6 | 🏫 | School | Good morning, Mrs Smith!<br>Good morning, Lea! How are you?<br>I'm fine, thank you.<br>Good. Sit down, please. | It's red.; Can I have an apple, please? | In der Schule: grüssen, nach dem Befinden fragen, antworten. | ☐ |
+| 6 | ⚽ | Playground | Hi! Can I play with you?<br>Yes, sure! What's your name?<br>I'm Ben. And you?<br>I'm Tom. Let's play football!<br>Great idea! | Good night!; It's four o'clock. | Auf dem Spielplatz: fragen, ob man mitspielen darf, dann die Namen. | ☐ |
+| 6 | 🍦 | Kiosk | Hello! Can I have an ice cream, please?<br>Yes. Chocolate or vanilla?<br>Chocolate, please.<br>Here you are.<br>Thank you! Bye! | I'm from Bern.; It's Monday. | Am Kiosk: bestellen, die Sorte wählen, bekommen, bedanken. | ☐ |
+| 6 | ⏰ | School | Sorry, I'm late!<br>That's OK. Sit down, please.<br>Thank you, Mr Brown.<br>Open your books, please. | Here you are.; What's your favourite colour? | In der Schule: Jemand kommt zu spät und entschuldigt sich. | ☐ |
+| 6 | 🛝 | Playground | Hello! Is this your ball?<br>Yes, it is. Thank you!<br>You're welcome. Can I play with you?<br>Yes, of course! | It's half past two.; Good night! | Auf dem Spielplatz: Jemand bringt einen Ball zurück und fragt, ob er mitspielen darf. | ☐ |
+| 6 | 📚 | Shop | Excuse me, how much is this book?<br>It's five francs.<br>OK. Here you are.<br>Thank you. Goodbye!<br>Bye! | I'm nine.; What day is it? | Im Laden: nach dem Preis fragen, bezahlen, sich verabschieden. | ☐ |
+| 6 | ✏️ | School | Excuse me, can I have a pencil, please?<br>Yes, here you are.<br>Thank you very much!<br>You're welcome. | It's sunny.; I'm tired. | In der Schule: höflich um einen Stift bitten, bekommen, bedanken. | ☐ |
+| 6 | 🎒 | Playground | Hello! I'm new here. What's your name?<br>My name is Anna. How old are you?<br>I'm eight. And you?<br>I'm nine. Let's play! | Here you are.; It's blue. | Auf dem Spielplatz: Ein neues Kind fragt nach Name und Alter. | ☐ |
+| 6 | 🏫 | School | It's three o'clock. Time to go home!<br>Bye, Mrs Smith!<br>Bye, children! See you tomorrow!<br>See you! | Can I have a biscuit, please?; It's green. | In der Schule: Die Stunde ist aus, alle verabschieden sich. | ☐ |
+
+### Höflich antworten (Königsstufe)
+
+Die zweite Antwort ist unhöflich, die dritte passt nicht.
+
+| Bild | Zeile | richtig | unhöflich | passt nicht | Tipp | ☐ |
+|---|---|---|---|---|---|---|
+| 🥪 | Can I have a sandwich, please? | Yes, of course. Here you are. | No! Go away! | I'm eight. | Jemand bittet höflich um etwas. Antworte freundlich und passend. | ☐ |
+| 🚻 | Excuse me, where is the toilet? | It's over there, next to the door. | I don't care. Go away! | It's three o'clock. | Jemand fragt nach dem Weg. Antworte freundlich und passend. | ☐ |
+| ⚽ | Can I play with you? | Yes, sure! Come on! | No way! Go home! | My name is Tom. | Jemand möchte mitspielen. Antworte freundlich und passend. | ☐ |
+| 🎁 | Thank you for the present! | You're welcome! | Whatever. Leave me alone. | It's red. | Jemand bedankt sich. Antworte freundlich und passend. | ☐ |
+| ⏰ | Sorry, I'm late. | That's OK. Sit down, please. | Be quiet and sit down! | I like pizza. | Jemand entschuldigt sich. Antworte freundlich und passend. | ☐ |
+| 🙋 | Can you help me, please? | Yes, of course. | No. Do it yourself! | It's Monday. | Jemand bittet um Hilfe. Antworte freundlich und passend. | ☐ |
+| 🍎 | Would you like an apple? | Yes, please. | Give it to me! Now! | I'm from Switzerland. | Jemand bietet dir etwas an. Antworte freundlich und passend. | ☐ |
+| 🖊️ | Excuse me, is this your pen? | Yes, it is. Thank you! | Hands off! It's mine! | I'm nine. | Jemand bringt dir etwas zurück. Antworte freundlich und passend. | ☐ |
+| 🪑 | Can I sit here? | Yes, of course. | No! Go away! | It's half past two. | Jemand möchte sich zu dir setzen. Antworte freundlich und passend. | ☐ |
+| 🏫 | Good morning, Mrs Smith! | Good morning, Tom! | Leave me alone! | It's blue. | Jemand grüsst dich am Morgen. Antworte freundlich und passend. | ☐ |
+| 🍦 | Here is your ice cream. | Thank you very much! | Finally! Give it to me! | I'm fine. | Jemand gibt dir etwas. Antworte freundlich und passend. | ☐ |
+| 🥅 | Do you want to play football? | Yes, good idea! | Football is stupid! No! | It's sunny. | Jemand lädt dich zum Spielen ein. Antworte freundlich und passend. | ☐ |
+| 💥 | Oops! Sorry! | No problem. | Hey! Look where you are going! | It's Tuesday. | Jemand stösst dich an und entschuldigt sich. Antworte freundlich und passend. | ☐ |
+| ✏️ | Can I borrow your pencil? | Yes, here you are. | No! It's mine! | I live in Zurich. | Jemand möchte etwas ausleihen. Antworte freundlich und passend. | ☐ |
+| 🛒 | Excuse me, how much is this? | It's two francs. | Can't you read? Look at the sign! | It's Friday. | Jemand fragt nach dem Preis. Antworte freundlich und passend. | ☐ |
+
+## 82. Lärm-Wächter (Lehrplan SG NMG.4.2)
+
+### Geräusche
+
+Lärm-Skala 1 (sehr leise) bis 5 (sehr laut), grobe Reihung.
+
+| Bild | Geräusch | laut | Dauer | Ort | ☐ |
+|---|---|---|---|---|---|
+| 🤫 | Flüstern | 1 | lang | im Klassenzimmer, wenn alle still sind | ☐ |
+| 🍃 | Blätter rascheln | 1 | lang | im Wald, wenn der Wind weht | ☐ |
+| ⏰ | Eine Uhr tickt | 1 | lang | im stillen Zimmer | ☐ |
+| 🐱 | Eine Katze schnurrt | 1 | lang | auf dem Sofa | ☐ |
+| ❄️ | Schnee fällt | 1 | lang | draussen im Winter | ☐ |
+| 📖 | Eine Seite wird umgeblättert | 1 | kurz | in der Bibliothek | ☐ |
+| 🌧️ | Regen auf dem Dach | 2 | lang | im Haus, wenn es regnet | ☐ |
+| 🗣️ | Ein normales Gespräch | 2 | lang | am Tisch | ☐ |
+| 🐦 | Ein Vogel zwitschert | 2 | lang | im Garten am Morgen | ☐ |
+| 🚰 | Wasser aus dem Hahn | 2 | lang | in der Küche | ☐ |
+| 📻 | Leise Musik aus dem Radio | 2 | lang | in der Küche | ☐ |
+| 🧹 | Staubsauger | 3 | lang | zu Hause beim Putzen | ☐ |
+| 🔔 | Die Schulglocke | 3 | kurz | im Schulhaus | ☐ |
+| 🐕 | Ein Hund bellt | 3 | kurz | auf der Strasse | ☐ |
+| 💨 | Haarföhn | 3 | lang | im Badezimmer | ☐ |
+| 🏫 | Die Pause auf dem Schulhof | 3 | lang | auf dem Pausenplatz | ☐ |
+| 🚲 | Eine Velo-Klingel | 3 | kurz | auf dem Schulweg | ☐ |
+| 🚜 | Rasenmäher | 4 | lang | im Garten | ☐ |
+| 🏍️ | Motorrad | 4 | lang | auf der Strasse | ☐ |
+| 🏗️ | Baustelle | 4 | lang | neben dem Haus, den ganzen Tag | ☐ |
+| 🥤 | Mixer in der Küche | 4 | lang | in der Küche | ☐ |
+| 🚆 | Ein Zug rattert vorbei | 4 | lang | am Bahnhof | ☐ |
+| ⛈️ | Donner | 4 | kurz | beim Gewitter | ☐ |
+| 🚪 | Eine Türe knallt zu | 4 | kurz | im Haus | ☐ |
+| 🎈 | Ein Ballon platzt | 4 | kurz | am Geburtstagsfest | ☐ |
+| ✈️ | Düsenflugzeug beim Start | 5 | lang | am Flughafen | ☐ |
+| 🚁 | Helikopter | 5 | lang | ganz nah über dir | ☐ |
+| 🎆 | Feuerwerk | 5 | lang | am 1. August | ☐ |
+| 🧨 | Knallkörper | 5 | kurz | direkt neben dir | ☐ |
+| 🏁 | Startpistole beim Wettlauf | 5 | kurz | am Sporttag | ☐ |
+| 🚨 | Sirene | 5 | lang | wenn die Feuerwehr vorbeifährt | ☐ |
+| 🚧 | Presslufthammer | 5 | lang | auf der Strassenbaustelle | ☐ |
+| 🎸 | Rockkonzert | 5 | lang | direkt vor der Bühne | ☐ |
+
+### Orte
+
+| Bild | Ort | laut | ☐ |
+|---|---|---|---|
+| 📚 | Bibliothek | 1 | ☐ |
+| 🌲 | Wald in der Nacht | 1 | ☐ |
+| 🛏️ | Schlafzimmer in der Nacht | 1 | ☐ |
+| 🖼️ | Museum | 1 | ☐ |
+| 🏔️ | Verschneite Berge | 1 | ☐ |
+| ⛪ | Leere Kirche | 1 | ☐ |
+| 🏗️ | Baustelle | 5 | ☐ |
+| ✈️ | Flughafen | 5 | ☐ |
+| 🏟️ | Fussballstadion | 5 | ☐ |
+| 🎉 | Party mit lauter Musik | 5 | ☐ |
+| 🚗 | Strasse mit viel Verkehr | 4 | ☐ |
+| 🎡 | Jahrmarkt | 4 | ☐ |
+| 🚉 | Bahnhof | 4 | ☐ |
+| 🏭 | Fabrik mit Maschinen | 5 | ☐ |
+
+### Schutzmassnahmen
+
+Wirkung 2 hilft gut, 1 ein wenig, 0 nicht.
+
+| Bild | Name | Wirkung | Umschreibung | Hinweis | ☐ |
+|---|---|---|---|---|---|
+| 👂 | Ohrstöpsel | 2 | etwas Kleines, Weiches, das du dir in beide Ohren steckst | Ohrstöpsel steckt man in die Ohren, wenn man weiss, dass es lange laut wird. | ☐ |
+| 🎧 | Gehörschutz | 2 | grosse Kapseln, die du über beide Ohren setzt — wie dicke Kopfhörer ohne Musik | Ein Gehörschutz sind dicke Kapseln über den Ohren, für Maschinen und Motoren. | ☐ |
+| 🔉 | Kopfhörer leiser stellen | 2 | am Regler drehen, bis die Musik angenehm ist | Leiser stellen hilft nur, wenn der Lärm aus deinen eigenen Kopfhörern kommt. | ☐ |
+| 🚶 | Abstand nehmen | 2 | ein Stück weiter weg gehen — je weiter weg, desto ruhiger | Abstand nehmen hilft, wenn du selbst weggehen kannst: Weiter weg ist es ruhiger. | ☐ |
+| 🪟 | Fenster schliessen | 2 | den Lärm von draussen aussperren, damit er nicht ins Zimmer kommt | Das Fenster zu schliessen hilft nur drinnen, wenn der Lärm von draussen kommt. | ☐ |
+| 🧱 | Lärmschutzwand | 2 | eine hohe Mauer zwischen der Strasse oder den Gleisen und den Häusern | Eine Lärmschutzwand ist eine hohe Mauer an einer Strasse oder Bahnlinie. Die baut man nicht an ein Fest. | ☐ |
+| 🙉 | Hände auf die Ohren | 1 | schnell die Ohren zuhalten — hilft nur kurz und nicht ganz dicht | Die Hände auf den Ohren helfen nur kurz und nicht dicht. Für langen Lärm gibt es Besseres. | ☐ |
+| 🤫 | Pause in der Stille | 1 | zwischendurch an einen ruhigen Ort gehen und die Ohren ausruhen lassen | Eine Pause in der Stille tut den Ohren gut, aber der Lärm ist danach noch da. | ☐ |
+| 🕶️ | Sonnenbrille aufsetzen | 0 |  | Eine Sonnenbrille schützt die Augen vor Licht. Deine Ohren merken davon nichts. | ☐ |
+| 🙈 | Augen schliessen | 0 |  | Mit geschlossenen Augen hörst du genau gleich viel. | ☐ |
+| 🧤 | Handschuhe anziehen | 0 |  | Handschuhe wärmen die Hände. Mit den Ohren haben sie nichts zu tun. | ☐ |
+| 🎤 | Lauter singen | 0 |  | Lauter singen macht es für deine Ohren noch lauter, nicht leiser. | ☐ |
+
+### Situationen mit Schutz
+
+„schutz“ hilft gut, „wenig“ ein wenig; alles andere nicht.
+
+| Bild | Situation | laut | Dauer | Schutz | wenig | Tipp | ☐ |
+|---|---|---|---|---|---|---|---|
+| 🎸 | Du gehst mit deiner Familie an ein lautes Konzert. | 5 | lang | ohrstoepsel, gehoerschutz, abstand | haende, pause | Das Konzert dauert den ganzen Abend. Etwas, das du die ganze Zeit tragen kannst, oder ein Platz weiter hinten. | ☐ |
+| 🏗️ | Neben eurem Haus ist eine Baustelle. Du machst drinnen Hausaufgaben. | 4 | lang | fenster, ohrstoepsel | pause | Du bist drinnen, der Lärm kommt von draussen. Wo kommt er herein? | ☐ |
+| 🚜 | Papa mäht im Garten den Rasen. Du spielst daneben. | 4 | lang | gehoerschutz, ohrstoepsel, abstand | haende | Das Mähen dauert eine halbe Stunde. Du könntest auch einfach woanders spielen. | ☐ |
+| 🎆 | Am 1. August schaut ihr das grosse Feuerwerk an. | 5 | lang | abstand, ohrstoepsel, gehoerschutz | haende | Ganz vorn ist es am lautesten. Von weiter hinten sieht man es genauso gut. | ☐ |
+| 🎧 | Du hörst mit Kopfhörern Musik. Sie ist so laut, dass Mama dich nicht rufen kann. | 5 | lang | leiser | pause | Der Lärm kommt direkt aus den Kopfhörern. Du selbst bestimmst, wie stark er ist. | ☐ |
+| 🔨 | Dein Onkel bohrt mit der Bohrmaschine Löcher in die Wand. Du hilfst ihm. | 4 | lang | gehoerschutz, ohrstoepsel, abstand | haende | Das Bohren dauert eine Weile. Handwerker tragen bei Maschinen immer etwas über oder in den Ohren. | ☐ |
+| 🏍️ | Vor dem Fenster knattern laute Motorräder vorbei. Du willst schlafen. | 4 | lang | fenster, ohrstoepsel |  | Du liegst drinnen im Bett, der Lärm kommt von der Strasse. Wo kommt er herein? | ☐ |
+| 🎉 | An der Party ist die Musik so laut, dass du dein eigenes Wort nicht verstehst. | 5 | lang | abstand, ohrstoepsel | pause, haende | Direkt beim Lautsprecher ist es am lautesten. Weiter weg hört man die Musik immer noch. | ☐ |
+| 🚆 | Eure Schule liegt direkt an der Bahnlinie. Alle paar Minuten rattert ein Zug vorbei. | 4 | lang | wand, fenster |  | Die Züge fahren jeden Tag. Zwischen Gleise und Schulhaus kann man etwas bauen. | ☐ |
+| 🚧 | Auf der Strasse vor dem Haus arbeitet jemand mit dem Presslufthammer. | 5 | lang | fenster, ohrstoepsel, abstand | haende | Der Lärm kommt von draussen und dauert Stunden. Entweder aussperren, oder weg davon. | ☐ |
+| 🏎️ | Ihr schaut ein Autorennen an. Die Motoren heulen die ganze Zeit. | 5 | lang | gehoerschutz, ohrstoepsel, abstand | haende | Das Rennen dauert Stunden. Die Leute am Rennen tragen fast alle etwas über den Ohren. | ☐ |
+| 🧨 | Ein Kollege will direkt neben dir einen Knallkörper zünden. | 5 | kurz | abstand | haende | Ein Knall ganz nah ist am gefährlichsten. Was kannst du schnell tun, bevor es knallt? | ☐ |
+| 🛣️ | Neben dem Dorf führt die Autobahn vorbei. Tag und Nacht rauschen die Autos. | 4 | lang | wand, fenster |  | Der Lärm hört nie auf. Zwischen Autobahn und Häuser kann man etwas Hohes bauen. | ☐ |
+| 🎺 | Du spielst in der Blasmusik mit — direkt neben der grossen Trommel. | 4 | lang | ohrstoepsel, abstand | pause | Die Probe dauert eine Stunde. Musiker stecken sich dafür etwas in die Ohren, oder sie stellen sich anders hin. | ☐ |
+| 🏭 | Mama arbeitet in einer Fabrik mit lauten Maschinen. | 4 | lang | gehoerschutz, ohrstoepsel | pause | Die Maschinen laufen den ganzen Tag. In der Fabrik tragen alle etwas über oder in den Ohren. | ☐ |
+| 🚁 | Ein Helikopter landet auf der Wiese nebenan. | 5 | lang | abstand, gehoerschutz | haende | Je näher du stehst, desto lauter. Du kannst selbst weggehen. | ☐ |
+
+### Schadet das den Ohren?
+
+| Satz | schadet | Begründung | ☐ |
+|---|---|---|---|
+| Jeden Tag stundenlang sehr laute Musik über Kopfhörer hören. | true | Sehr laut und sehr lange — das ist die schlimmste Mischung für die Ohren. | ☐ |
+| Jemand flüstert dir etwas ins Ohr. | false | Flüstern ist das leiseste Geräusch, das es gibt. | ☐ |
+| Ein Knallkörper explodiert direkt neben deinem Ohr. | true | Ein Knall ganz nah ist so laut, dass er sofort schaden kann. | ☐ |
+| Am Morgen zwitschern die Vögel vor dem Fenster. | false | Vogelgezwitscher ist leise und tut niemandem weh. | ☐ |
+| Am Konzert stehst du den ganzen Abend direkt vor dem Lautsprecher. | true | Direkt am Lautsprecher ist es am lautesten — und das stundenlang. | ☐ |
+| Leise Musik läuft aus dem Radio in der Küche. | false | Leise Musik ist so leise wie ein Gespräch. | ☐ |
+| Regen trommelt auf das Dach. | false | Regen rauscht leise, auch wenn er lange dauert. | ☐ |
+| Du arbeitest eine Stunde mit dem Presslufthammer ohne Gehörschutz. | true | Der Presslufthammer ist eine der lautesten Maschinen, die es gibt. | ☐ |
+| Eine Katze schnurrt auf deinem Schoss. | false | Schnurren ist ganz leise. Man spürt es fast mehr, als man es hört. | ☐ |
+| Jemand schreit dir aus nächster Nähe ins Ohr. | true | Schreien direkt am Ohr ist viel lauter, als du denkst. | ☐ |
+| Du gehst im Wald spazieren und hörst den Wind in den Bäumen. | false | Der Wind in den Blättern rauscht leise. | ☐ |
+| Du stehst jeden Tag neben einem startenden Düsenflugzeug ohne Schutz. | true | Ein Düsenflugzeug beim Start gehört zu den lautesten Dingen überhaupt. | ☐ |
+| Du redest mit deiner Freundin in normaler Lautstärke. | false | Ein Gespräch ist das Geräusch, für das die Ohren gemacht sind. | ☐ |
+| Du hörst ein Hörbuch in angenehmer Lautstärke. | false | Angenehm heisst: Du könntest nebenbei noch reden. | ☐ |
+| Du mähst jede Woche stundenlang ohne Gehörschutz den Rasen. | true | Der Rasenmäher ist laut, und das jede Woche lange. | ☐ |
+| Du stehst am Feuerwerk ganz hinten, weit weg von den Raketen. | false | Mit viel Abstand kommt bei den Ohren viel weniger an. | ☐ |
+
+### Teile des Ohrs
+
+| Name | Lage | Aufgabe | Aussehen | ☐ |
+|---|---|---|---|---|
+| die Ohrmuschel | Sie ist aussen am Kopf — der Teil, den du sehen und anfassen kannst. | fängt den Schall von aussen auf — wie ein Trichter | wie ein gebogener Trichter aus Haut | ☐ |
+| der Gehörgang | Er führt von aussen wie ein Tunnel in den Kopf hinein. | führt den Schall wie ein Tunnel tief in den Kopf hinein | eine Röhre, etwa so dick wie dein kleiner Finger | ☐ |
+| das Trommelfell | Es sitzt ganz am Ende des Tunnels, tief im Kopf. | schwingt, wenn Schall ankommt — wie das Fell einer Trommel | ein dünnes, gespanntes Häutchen | ☐ |
+
+### Schwingung und Ton (stimmt / stimmt nicht)
+
+| Aussage | stimmt | Erklärung | ☐ |
+|---|---|---|---|
+| Wenn du eine Gitarrensaite zupfst, schwingt sie — und du hörst einen Ton. | true | Schau einer Saite zu, wenn sie klingt: Sie zittert ganz schnell. | ☐ |
+| Das Trommelfell im Ohr schwingt, wenn Schall ankommt. | true | Es heisst so, weil es sich wie das Fell einer Trommel verhält. | ☐ |
+| Die Luft trägt den Schall von der Glocke bis zu deinem Ohr. | true | Zwischen Glocke und Ohr ist nichts als Luft — und trotzdem hörst du sie. | ☐ |
+| Ein Ton entsteht auch, wenn gar nichts schwingt. | false | Überleg: Was tut die Saite, die Trommel oder deine Stimme, wenn ein Ton kommt? | ☐ |
+| Hältst du die klingende Saite mit dem Finger fest, hörst du den Ton weiter. | false | Probier es aus: Was passiert mit dem Ton, wenn die Saite nicht mehr schwingen kann? | ☐ |
+| Legst du beim Summen die Hand an den Hals, spürst du ein Zittern. | true | Deine Stimme entsteht im Hals. Probier es aus! | ☐ |
+| Eine Trommel klingt, weil ihr Fell schwingt. | true | Streu Reiskörner auf eine Trommel und schlag daneben: Sie hüpfen. | ☐ |
+| Schall kann man mit den Augen sehen. | false | Überleg: Siehst du, was von der Glocke zu deinem Ohr fliegt? | ☐ |
+| Je stärker die Saite schwingt, desto lauter ist der Ton. | true | Zupf einmal sanft und einmal kräftig: Was ist anders am Ton? | ☐ |
+| Wenn die Lautsprecher-Membran stillsteht, kommt trotzdem Musik heraus. | false | Leg die Hand auf einen Lautsprecher, wenn Musik läuft: Was spürst du? | ☐ |
+| Wenn du sprichst, bringt deine Stimme die Luft zum Schwingen. | true | Halte eine Hand vor den Mund und sag laut „Pa!“. | ☐ |
+| Eine Stimmgabel klingt erst, wenn sie schwingt. | true | Schlag sie an und halte sie dann fest: Was passiert mit dem Ton? | ☐ |
+
+### Echo, Verstärkung, Dämmung
+
+Die erste Antwort ist die richtige.
+
+| Art | Bild | Frage | richtig | falsch | Tipp | ☐ |
+|---|---|---|---|---|---|---|
+| echo | 🏔️ | Du rufst in den Bergen „Hallo!“ — und kurz danach hörst du es noch einmal. Warum? | Der Schall prallt am Berg ab und kommt zurück. Für den Weg braucht er Zeit. | Ein anderes Kind auf dem Berg ruft zurück.; Deine Stimme wird in den Bergen von selbst lauter. | Stell dir den Schall wie einen Ball vor, den du gegen eine Wand wirfst. | ☐ |
+| echo | 🏟️ | In der grossen, leeren Halle hörst du dein Klatschen nachhallen. Warum? | Der Schall prallt an den Wänden ab und kommt zu dir zurück. | Die Halle macht den Schall leiser.; In der grossen Halle ist zu wenig Luft. | Die Wände sind weit weg. Was macht der Schall, wenn er auf eine harte Wand trifft? | ☐ |
+| echo | ⏱️ | Warum hörst du das Echo erst eine kurze Zeit nach dem Rufen? | Der Schall muss erst bis zum Berg und wieder zurück — das dauert. | Der Berg wartet kurz, bevor er antwortet.; Das Echo ist langsamer, weil es leiser ist. | Der Schall legt einen Weg zurück — hin und wieder her. Jeder Weg braucht Zeit. | ☐ |
+| echo | 🛏️ | In deinem Zimmer hörst du kein Echo, in den Bergen schon. Warum? | Die Wand ist so nah, dass der Schall sofort zurück ist — zu schnell, um es getrennt zu hören. | Im Zimmer gibt es keinen Schall.; Zimmerwände lassen den Schall durch. | Je weiter die Wand weg ist, desto länger dauert es, bis der Schall zurück ist. | ☐ |
+| echo | 🚢 | Ein Schiff hupt im Nebel und hört die Hupe von der Felswand zurück. Was verrät das dem Kapitän? | Dass eine Felswand in der Nähe ist — je schneller das Echo kommt, desto näher. | Dass ein anderes Schiff antwortet.; Dass der Nebel den Schall zurückwirft. | Das Echo kommt vom Felsen. Wie lange der Schall hin und zurück braucht, sagt etwas über den Abstand. | ☐ |
+| verstaerkung | 🖐️ | Du hältst die Hand hinter das Ohr. Was passiert? | Die Hand fängt mehr Schall auf und leitet ihn ins Ohr — du hörst besser. | Die Hand hält den Schall vom Ohr fern.; Es ändert sich nichts. | Die Hand wird zu einem grösseren Trichter vor dem Ohr. Was macht ein Trichter? | ☐ |
+| verstaerkung | 📣 | Wozu rufen Leute durch einen Schalltrichter (ein Megafon)? | Der Trichter bündelt den Schall in eine Richtung — so hört man die Stimme weiter weg. | Der Trichter macht die Stimme höher.; Der Trichter macht die Stimme leiser, damit sie nicht schadet. | Ohne Trichter geht der Schall in alle Richtungen. Mit Trichter geht er fast nur noch nach vorn. | ☐ |
+| verstaerkung | 👂 | Warum ist die Ohrmuschel wie ein Trichter geformt? | Sie fängt den Schall auf und leitet ihn in den Gehörgang. | Damit das Ohr schöner aussieht.; Damit kein Schall ins Ohr kommt. | Ein Trichter sammelt, was von aussen kommt, und leitet es nach innen weiter. | ☐ |
+| verstaerkung | 🧻 | Du rollst ein Blatt Papier zum Trichter und hältst das dünne Ende ans Ohr. Was passiert? | Du hörst leise Geräusche besser, weil der Trichter mehr Schall einfängt. | Du hörst gar nichts mehr.; Alle Geräusche werden höher. | Die grosse Öffnung sammelt den Schall, die kleine leitet ihn ins Ohr. | ☐ |
+| daemmung | 🛋️ | Im Zimmer mit Teppich und Vorhängen klingt es leiser als im leeren Zimmer mit Fliesen. Warum? | Weiche Stoffe schlucken den Schall, statt ihn zurückzuwerfen. | Der Teppich macht den Schall schneller.; Im leeren Zimmer ist mehr Luft für den Schall. | Was passiert mit einem Ball, der auf ein Kissen fällt — und was auf Fliesen? | ☐ |
+| daemmung | ❄️ | Nach dem Schneefall ist es draussen ganz still. Warum? | Der weiche, lockere Schnee schluckt den Schall. | Im Winter gibt es keine Geräusche.; Die Kälte lässt den Schall einfrieren. | Frischer Schnee ist weich und voller Luft — wie ein dicker Teppich. | ☐ |
+| daemmung | 🎬 | Warum hängen im Kino dicke Vorhänge und weiche Stoffe an den Wänden? | Sie schlucken den Schall, damit es im Saal nicht hallt. | Damit es im Kino wärmer ist.; Damit der Ton lauter wird. | Harte Wände werfen den Schall zurück. Was tun weiche Stoffe? | ☐ |
+| daemmung | 🏠 | Deine Nachbarn üben Schlagzeug. Was hilft gegen den Lärm durch die Wand? | Dicke, weiche Stoffe an der Wand oder ein Teppich, die den Schall schlucken. | Die Wand mit glatten Fliesen bekleben.; Das Fenster öffnen, damit der Schall hinaus kann. | Du willst, dass der Schall geschluckt wird — mit etwas Weichem, nicht mit etwas Hartem. | ☐ |
+
+### Was dämpft den Schall?
+
+| Bild | Stoff | dämpft | ☐ |
+|---|---|---|---|
+| 🧶 | Dicker Teppich | true | ☐ |
+| 🪟 | Schwerer Vorhang | true | ☐ |
+| ❄️ | Frischer Schnee | true | ☐ |
+| 🛏️ | Kissen | true | ☐ |
+| 🧣 | Wolldecke | true | ☐ |
+| 🧱 | Glatte Fliesen | false | ☐ |
+| 🪞 | Glasscheibe | false | ☐ |
+| 🏢 | Betonwand | false | ☐ |
+| 🔩 | Metallplatte | false | ☐ |
+| 🪨 | Felswand | false | ☐ |

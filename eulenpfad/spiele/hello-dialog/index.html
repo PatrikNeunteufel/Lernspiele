@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hello-Dialog</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .hd .frage { text-align: center; font-size: clamp(17px, 3.8vw, 22px); font-weight: 800; margin: 0 0 10px; color: var(--text-leise); line-height: 1.35; }
+  /* Szene: grosses Bild, dazu ein Wort (Stufe 1) oder der Ort (Dialoge) */
+  .hd-szene { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto 8px; }
+  .hd-szene-bild { font-size: clamp(40px, 10vw, 56px); line-height: 1.1; }
+  .hd-szene-wort { font-size: clamp(16px, 3.6vw, 20px); font-weight: 800; color: var(--deko-1); }
+  /* Sprechblasen: Sprecher A links, Sprecher B rechts */
+  .hd-blasen { display: flex; flex-direction: column; gap: 8px; max-width: 640px; margin: 0 auto 12px; }
+  .hd-blase { display: flex; align-items: flex-end; gap: 8px; max-width: 92%; }
+  .hd-blase.hd-b { flex-direction: row-reverse; align-self: flex-end; }
+  .hd-wer { font-size: clamp(28px, 7vw, 38px); line-height: 1; flex: 0 0 auto; }
+  .hd-text { background: var(--karte); border: 3px solid var(--rand); border-radius: 18px 18px 18px 4px; padding: 8px 14px;
+    font-size: clamp(17px, 3.9vw, 23px); font-weight: 700; line-height: 1.35; }
+  .hd-blase.hd-b .hd-text { border-radius: 18px 18px 4px 18px; background: var(--gut-hell); }
+  .hd-blase.hd-luecke .hd-text { border-style: dashed; border-color: var(--deko-1); color: var(--deko-1); font-weight: 900; min-width: 4em; text-align: center; }
+  .hd-blase.hd-leise .hd-text { opacity: .55; }
+  /* Nochmal hören */
+  .hd-hoer { display: block; margin: 0 auto 14px; border: none; border-radius: 999px; padding: 10px 24px; font-family: inherit;
+    font-size: clamp(18px, 4.2vw, 24px); font-weight: 900; background: var(--deko-5); color: #fff; box-shadow: 0 5px 0 var(--deko-7); cursor: pointer; }
+  .hd-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-7); }
+  /* Antwortknöpfe: Sätze als Zeilen; Stufe 1 mit grossem Bild */
+  .hd-wahl .wahl-knopf { font-size: clamp(17px, 3.9vw, 22px); font-weight: 800; line-height: 1.3; min-height: 60px; padding: 10px 14px; }
+  .hd-bilder .wahl-knopf { min-height: 110px; font-size: clamp(18px, 4.2vw, 24px); }
+  .hd-bilder .wahl-knopf .bild { font-size: clamp(44px, 11vw, 60px); }
+  /* Ordnen (Königsstufe) und „passt nicht“: Sprecherbild klein vor dem Satz, Ablage als Liste */
+  .hd-zeilen .wahl-knopf { flex-direction: row; justify-content: flex-start; gap: 10px; text-align: left; min-height: 52px; }
+  .hd-zeilen .wahl-knopf .bild { font-size: clamp(26px, 6.5vw, 34px); flex: 0 0 auto; }
+  .hd-ordnen .ablage { flex-direction: column; align-items: stretch; counter-reset: hd-zug; }
+  .hd-ordnen .ablage > span { font-size: clamp(15px, 3.5vw, 19px); font-weight: 700; text-align: left; line-height: 1.35; counter-increment: hd-zug; }
+  .hd-ordnen .ablage > span::before { content: counter(hd-zug) ". "; color: var(--text-leise); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>💬 Hello-Dialog</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="dialoge.js"></script>
+<script>
+"use strict";
+// Lehrplan SG FS1E.3.A.1 (Sprechen, dialogisch): a mit ganz einfachen Worten Kontakt aufnehmen (begrüssen,
+// verabschieden, bedanken, etwas bestellen); b (Orientierungspunkt) einfache Fragen zu vertrauten Themen stellen
+// und kurz antworten (Datum, Zeit, Befinden, Farbe); c (Grundanspruch) in alltäglichen Situationen Informationen
+// austauschen und auf Gesagtes reagieren (Unterricht, Einkauf, Rollenspiel). Basisklasse 3 (Englisch beginnt
+// in SG in der 3. Klasse). Die englische Stimme des Geräts spricht die Dialogzeilen; das Kind wählt im
+// Mini-Dialog die passende Antwort oder Frage und ordnet Dialoge.
+//   s1 2. Klasse, Einstieg (FS1E.3.A.1.a, lesearm): Situation als Bild (ankommen, gehen, Geschenk, Morgen,
+//      Nacht), die Stimme spricht die Zeile des Gegenübers, zwei Bildknöpfe: Hello! / Goodbye! / Thank you! …
+//   s2 3. Klasse, leichter (FS1E.3.A.1.a): die passende Antwort auf eine Zeile aus drei Sätzen
+//      (How are you? → I'm fine, thank you.).
+//   s3 Klassenziel (FS1E.3.A.1.a): Dialog mit drei Zügen — bestellen, bedanken, verabschieden — der nächste Zug
+//      wird aus drei Sätzen gewählt.
+//   s4 3. Klasse, schwerer (FS1E.3.A.1.a → b): die passende Frage zur Antwort (My name is Tom. → What's your
+//      name?) und „Welcher Satz passt nicht in den Dialog?“.
+//   s5 4. Klasse (FS1E.3.A.1.b): Datum, Zeit, Befinden, Farbe, Wetter — Fragen und Antworten in beiden
+//      Richtungen und eine Lücke mitten im Dialog füllen.
+//   s6 Königsstufe (FS1E.3.A.1.c): ganze Dialoge mit vier bis fünf Zügen ordnen (Shop, School, Playground)
+//      und „Was antwortest du?“ mit Fallen: eine Antwort ist unhöflich, eine passt nicht.
+// Abgrenzung: Word-Match übt einzelne Wörter, Sentence-Builder baut Sätze aus Wortkarten, Listen & Tap und
+// Sound-Sorter üben das Hören einzelner Wörter und Sätze. Hier zählt das Gespräch: Was antwortet man worauf?
+// Inhalte in dialoge.js (eine Liste „dialoge“). Katalog vorlesen: false — die deutsche Eule liest hier nichts,
+// die englische Stimme spricht die Zeilen (LS.sprich mit "en"), die Uhr startet danach (ctx.uhrWarten).
+
+const { waehle, mische, el } = LS;
+const ID = "hello-dialog";
+
+// Freigabe: eine Liste „dialoge“ für alle Tabellen. Kennt der Katalog die Liste nicht, gilt sie als frei.
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : DIALOG_LISTEN);
+const FREIGEGEBEN = FREI.has("dialoge");
+const dialoge = gruppen => (FREIGEGEBEN ? DIALOG_DIALOGE.filter(d => gruppen.includes(d.gruppe)) : []);
+const fragen = gruppen => (FREIGEGEBEN ? DIALOG_FRAGEN.filter(f => gruppen.includes(f[0])) : []);
+/** Sprecherbild des Zugs i eines Dialogs: a, b, a, b … */
+const wer = (d, i) => (i % 2 ? d.b : d.a);
+const zug = (d, i, text = d.zuege[i]) => ({ wer: wer(d, i), text });
+
+const TIPP_HOEREN = "Hör die Zeile nochmal (🔊). Ist es eine Frage oder ein Gruss?";
+const TIPP_FRAGEWORT = "Fragen mit What fragen nach einer Sache, mit How nach dem Befinden oder Alter.";
+
+// Jede Art liefert null, wenn die Liste nicht frei ist. Eine Aufgabe: art, sprich (Zeilen, die die Stimme
+// vorspricht), vorher/nachher (gezeigte Züge), optionen und richtig (Werte), loesung, tipps, kennung.
+const ARTEN = {
+  /** Stufe 1: Szene mit Bild, die Stimme spricht das Gegenüber, zwei Bildknöpfe. */
+  situation() {
+    if (!FREIGEGEBEN) return null;
+    const [bild, wort, sprich, richtig, tipp] = waehle(DIALOG_SITUATIONEN);
+    const andere = waehle(Object.keys(DIALOG_S1_ANTWORTEN).filter(k => k !== richtig));
+    return { art: "situation", bild, wort, sprich: [sprich], vorher: [{ wer: "🧑", text: sprich }], richtig, optionen: mische([richtig, andere]),
+      loesung: `${sprich} → ${DIALOG_S1_ANTWORTEN[richtig][0]}`, kennung: sprich,
+      tipps: ["Hör nochmal zu (🔊) und schau das Bild an.", "Kommt jemand? Geht jemand? Oder bekommst du etwas?", tipp] };
+  },
+  /** Stufe 2: die passende Antwort aus drei Sätzen. */
+  paar() {
+    if (!FREIGEGEBEN) return null;
+    const [zeile, antwort, falsche, tipp] = waehle(DIALOG_PAARE);
+    return { art: "paar", sprich: [zeile], vorher: [{ wer: "🧑", text: zeile }], richtig: antwort, optionen: mische([antwort, ...falsche]),
+      loesung: `${zeile} → ${antwort}`, kennung: zeile, tipps: [TIPP_HOEREN, TIPP_FRAGEWORT, tipp] };
+  },
+  /** Stufe 3: Dialog bis zu einem Zug, der nächste wird gewählt. */
+  naechste(gruppen) {
+    const vorrat = dialoge(gruppen);
+    if (!vorrat.length) return null;
+    const d = waehle(vorrat);
+    const i = LS.zufall(1, d.zuege.length - 1);
+    const richtig = d.zuege[i];
+    return { art: "naechste", bild: d.bild, ort: d.ort, dialog: d, nr: i, sprich: d.zuege.slice(0, i), vorher: d.zuege.slice(0, i).map((_, j) => zug(d, j)),
+      richtig, optionen: mische([richtig, ...d.falsch]), loesung: `${d.zuege[i - 1]} → ${richtig}`, kennung: `${d.zuege[0]} #${i}`,
+      tipps: [TIPP_HOEREN, TIPP_FRAGEWORT, d.tipp] };
+  },
+  /** Stufen 4 und 5: Frage ↔ Antwort; falsche Möglichkeiten aus anderen Themen. */
+  frage(gruppen, richtung) {
+    const vorrat = fragen(gruppen);
+    if (!vorrat.length) return null;
+    const [, thema, frage, antwort] = waehle(vorrat);
+    const spalte = richtung === "frage" ? 2 : 3;
+    const andere = [];
+    for (const f of mische(vorrat.filter(f => f[1] !== thema))) {
+      if (andere.length === 2) break;
+      if (!andere.includes(f[spalte]) && f[spalte] !== frage && f[spalte] !== antwort) andere.push(f[spalte]);
+    }
+    if (andere.length < 2) return null;
+    const richtig = richtung === "frage" ? frage : antwort;
+    const gezeigt = richtung === "frage" ? antwort : frage;
+    return { art: "frage", richtung, thema, frage, antwort, sprich: [gezeigt], vorher: [{ wer: "🧑", text: gezeigt }], richtig, optionen: mische([richtig, ...andere]),
+      loesung: richtung === "frage" ? `${antwort} ← ${frage}` : `${frage} → ${antwort}`, kennung: `${gezeigt} ?${richtung}`,
+      tipps: [TIPP_HOEREN, TIPP_FRAGEWORT, richtung === "frage"
+        ? "Schau, was in der Antwort steht: ein Name, eine Zahl, eine Farbe, eine Uhrzeit? Die Frage fragt genau danach."
+        : "Schau auf das erste Wort der Frage. Es sagt dir, wonach gefragt wird."] };
+  },
+  /** Stufe 4: ein fremder Satz steckt im Dialog — welcher? */
+  passtNicht(gruppen) {
+    const vorrat = dialoge(gruppen);
+    if (!vorrat.length) return null;
+    const d = waehle(vorrat);
+    const fremd = waehle(d.falsch);
+    const pos = LS.zufall(0, d.zuege.length);
+    const zeilen = [...d.zuege.slice(0, pos), fremd, ...d.zuege.slice(pos)];
+    return { art: "passtNicht", bild: d.bild, ort: d.ort, dialog: d, fremd, sprich: zeilen, vorher: zeilen.map((text, j) => zug(d, j, text)),
+      richtig: fremd, optionen: zeilen, loesung: `Passt nicht: ${fremd}`, kennung: `${d.zuege[0]} ✗${fremd}`,
+      tipps: ["Lies jede Zeile: Antwortet sie auf die Zeile davor?", TIPP_FRAGEWORT, d.tipp] };
+  },
+  /** Stufe 5: ein Zug mitten im Dialog fehlt. */
+  luecke(gruppen) {
+    const vorrat = dialoge(gruppen).filter(d => d.zuege.length >= 4);
+    if (!vorrat.length) return null;
+    const d = waehle(vorrat);
+    const i = LS.zufall(1, d.zuege.length - 2);
+    const richtig = d.zuege[i];
+    return { art: "luecke", bild: d.bild, ort: d.ort, dialog: d, nr: i, sprich: d.zuege.slice(0, i),
+      vorher: d.zuege.slice(0, i).map((_, j) => zug(d, j)), nachher: d.zuege.slice(i + 1).map((_, j) => zug(d, i + 1 + j)), luecke: wer(d, i),
+      richtig, optionen: mische([richtig, ...d.falsch]), loesung: `Lücke: ${richtig}`, kennung: `${d.zuege[0]} _${i}`,
+      tipps: [TIPP_HOEREN, "Die Lücke muss zur Zeile davor und zur Zeile danach passen.", d.tipp] };
+  },
+  /** Königsstufe: ganzen Dialog ordnen. */
+  ordnen(gruppen) {
+    const vorrat = dialoge(gruppen);
+    if (!vorrat.length) return null;
+    const d = waehle(vorrat);
+    return { art: "ordnen", bild: d.bild, ort: d.ort, dialog: d, sprich: [], reihe: d.zuege, loesung: d.zuege.join(" → "), kennung: `${d.zuege[0]} ⇅`,
+      tipps: ["Ein Gespräch fängt mit einem Gruss, einer Bitte oder einer Frage an.", "Die Sprecher wechseln sich ab: Schau auf die Bilder vor den Sätzen.", d.tipp] };
+  },
+  /** Königsstufe: höflich antworten — eine Antwort ist unhöflich, eine passt nicht. */
+  hoeflich() {
+    if (!FREIGEGEBEN) return null;
+    const [bild, zeile, richtig, unhoeflich, fremd, tipp] = waehle(DIALOG_HOEFLICH);
+    return { art: "hoeflich", bild, zeile, unhoeflich, sprich: [zeile], vorher: [{ wer: "🧑", text: zeile }], richtig, optionen: mische([richtig, unhoeflich, fremd]),
+      loesung: `${zeile} → ${richtig}`, kennung: zeile,
+      tipps: ["Hör die Zeile nochmal (🔊). Ist es eine Frage, eine Bitte oder ein Dank?", "Eine Antwort ist unhöflich, eine passt nicht zur Zeile. Nur eine ist freundlich und passt.", tipp] };
+  },
+};
+
+// Je Stufe die Arten. Basisklasse 3: s1 = 2. Klasse, s5 = 4. Klasse.
+const STUFE = {
+  s1: { arten: ["situation"], ziehen: [() => ARTEN.situation()] },
+  s2: { arten: ["paar"], ziehen: [() => ARTEN.paar()] },
+  s3: { arten: ["naechste"], gruppen: [3], ziehen: [() => ARTEN.naechste([3])] },
+  s4: { arten: ["frage", "passtNicht"], gruppen: [3], fragen: [4], richtungen: ["frage"], ziehen: [() => ARTEN.frage([4], "frage"), () => ARTEN.passtNicht([3])] },
+  s5: { arten: ["frage", "luecke"], gruppen: [5], fragen: [5], richtungen: ["frage", "antwort"],
+    ziehen: [() => ARTEN.frage([5], waehle(["frage", "antwort"])), () => ARTEN.luecke([5])] },
+  s6: { arten: ["ordnen", "hoeflich"], gruppen: [6], ziehen: [() => ARTEN.ordnen([6]), () => ARTEN.hoeflich()] },
+};
+
+/** Zufällige Art der Stufe, die mit der freien Liste etwas hergibt; null, wenn keine. */
+function aufgabeErzeugen(stufe) {
+  for (const art of mische(STUFE[stufe].ziehen)) {
+    const a = art();
+    if (a) return a;
+  }
+  return null;
+}
+
+const STUFEN_TEXT = {
+  s1: "Hello, Goodbye, Thank you: Was sagst du? Mit Bild.",
+  s2: "Die passende Antwort: How are you? — I'm fine, thank you.",
+  s3: "Kleine Gespräche: bestellen, bedanken, verabschieden — was kommt als Nächstes?",
+  s4: "Welche Frage passt zur Antwort? Und welcher Satz passt nicht in den Dialog?",
+  s5: "Datum, Zeit, Farbe, Befinden: fragen, antworten, Lücken füllen.",
+  s6: "Endgegner: ganze Gespräche ordnen — Shop, School, Playground — und höflich antworten.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
+/** Stufen mit mehr als einer Art (für ctx.serie). */
+const MEHRERE_ARTEN = new Set(Object.keys(STUFE).filter(s => STUFE[s].arten.length > 1));
+
+/** Deutsch oder Umlaute auf einem Knopf? Sätze enden mit Satzzeichen. */
+const englischerSatz = t => typeof t === "string" && t.trim() === t && /[.!?]$/.test(t) && !/[äöüÄÖÜß]/.test(t);
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [];
+  const p = STUFE[stufe];
+  if (!STUFEN[stufe]) m.push("Aufgabe in einer Stufe, die nicht angeboten wird");
+  if (!p.arten.includes(a.art)) m.push(`Art ${a.art} nicht in ${stufe}`);
+  if (!FREIGEGEBEN) m.push("Inhalt, obwohl die Liste nicht frei ist");
+  if (JSON.stringify(a).includes("ß")) m.push("ß im Text");
+  const satz = a.art === "situation" ? o => DIALOG_S1_ANTWORTEN[o]?.[0] : o => o;
+  const knoepfe = a.art === "ordnen" ? a.reihe : a.optionen.map(satz);
+  if (knoepfe.some(t => !englischerSatz(t))) m.push("Knopf ohne englischen Satz (deutsch, Umlaut oder ohne Satzzeichen)");
+  if (new Set(knoepfe).size !== knoepfe.length) m.push("doppelte Möglichkeit");
+  if (a.art !== "ordnen") {
+    if (a.optionen.filter(o => o === a.richtig).length !== 1) m.push("richtige Antwort nicht genau einmal");
+    const n = { situation: 2, passtNicht: a.optionen.length }[a.art] ?? 3;
+    if (a.optionen.length !== n) m.push(`${a.optionen.length} statt ${n} Möglichkeiten`);
+  }
+  const d = a.dialog;
+  if (d) {
+    if (!DIALOG_DIALOGE.includes(d)) m.push("Dialog nicht aus der Liste");
+    if (!p.gruppen.includes(d.gruppe)) m.push(`Dialog der Gruppe ${d.gruppe} in ${stufe}`);
+    if (d.zuege.length < 3) m.push("Dialog mit weniger als drei Zügen");
+    if (new Set(d.zuege).size !== d.zuege.length) m.push("Dialog mit doppelter Zeile — Reihenfolge nicht eindeutig");
+    if (d.falsch.length < 2 || d.falsch.some(f => d.zuege.includes(f))) m.push("Dialog braucht zwei fremde Zeilen, die nicht im Dialog stehen");
+    if (!d.a || !d.b || !d.ort || !d.tipp) m.push("Dialog ohne Sprecher, Ort oder Tipp");
+  }
+  switch (a.art) {
+    case "situation": {
+      const s = DIALOG_SITUATIONEN.find(x => x[2] === a.sprich[0]);
+      if (!s || s[3] !== a.richtig) m.push("Situation nicht aus der Liste oder Antwort falsch");
+      if (a.optionen.some(o => !DIALOG_S1_ANTWORTEN[o])) m.push("unbekannte Antwort in Stufe 1");
+      break;
+    }
+    case "paar": {
+      const pr = DIALOG_PAARE.find(x => x[0] === a.sprich[0]);
+      if (!pr || pr[1] !== a.richtig) m.push("Paar nicht aus der Liste oder Antwort falsch");
+      if (pr && a.optionen.some(o => o !== a.richtig && !pr[2].includes(o))) m.push("falsche Antwort nicht aus dem Paar");
+      if (pr && pr[2].includes(pr[1])) m.push("richtige Antwort auch als falsche eingetragen");
+      break;
+    }
+    case "naechste":
+      if (a.richtig !== d.zuege[a.nr] || a.nr < 1) m.push("nächster Zug stimmt nicht");
+      if (a.sprich.length !== a.nr || a.vorher.length !== a.nr) m.push("gezeigte Züge stimmen nicht");
+      break;
+    case "frage": {
+      const f = DIALOG_FRAGEN.find(x => x[2] === a.frage && x[3] === a.antwort);
+      if (!f) m.push("Frage nicht aus der Liste");
+      else if (!p.fragen.includes(f[0])) m.push(`Frage der Gruppe ${f[0]} in ${stufe}`);
+      if (!p.richtungen.includes(a.richtung)) m.push(`Richtung ${a.richtung} nicht in ${stufe}`);
+      if (a.richtig !== (a.richtung === "frage" ? a.frage : a.antwort)) m.push("richtige Möglichkeit stimmt nicht");
+      // Falsche Möglichkeiten müssen aus anderen Themen stammen, sonst passen sie womöglich auch.
+      for (const o of a.optionen) {
+        if (o === a.richtig) continue;
+        const spalte = a.richtung === "frage" ? 2 : 3;
+        if (DIALOG_FRAGEN.some(x => x[spalte] === o && x[1] === a.thema)) m.push(`falsche Möglichkeit „${o}“ aus demselben Thema`);
+      }
+      break;
+    }
+    case "passtNicht":
+      if (!d.falsch.includes(a.fremd) || a.richtig !== a.fremd) m.push("fremder Satz nicht aus den fremden Zeilen");
+      if (a.optionen.length !== d.zuege.length + 1 || d.zuege.some(z => !a.optionen.includes(z))) m.push("Dialog unvollständig gezeigt");
+      break;
+    case "luecke":
+      if (a.nr < 1 || a.nr > d.zuege.length - 2) m.push("Lücke nicht in der Mitte");
+      if (a.richtig !== d.zuege[a.nr]) m.push("Lücke stimmt nicht");
+      if (a.vorher.length + 1 + a.nachher.length !== d.zuege.length) m.push("gezeigte Züge stimmen nicht");
+      break;
+    case "ordnen":
+      if (a.reihe !== d.zuege) m.push("Reihe ist nicht der Dialog");
+      if (d.zuege.length < 4 || d.zuege.length > 5) m.push("Königsstufe: vier bis fünf Züge");
+      if (!["Shop", "Kiosk", "School", "Playground"].includes(d.ort)) m.push(`Ort ${d.ort} nicht Shop, School oder Playground`);
+      break;
+    case "hoeflich": {
+      const h = DIALOG_HOEFLICH.find(x => x[1] === a.zeile);
+      if (!h || h[2] !== a.richtig) m.push("höfliche Antwort nicht aus der Liste");
+      if (h && (!a.optionen.includes(h[3]) || !a.optionen.includes(h[4]))) m.push("unhöfliche oder fremde Antwort fehlt");
+      break;
+    }
+    default: m.push(`unbekannte Art ${a.art}`);
+  }
+  return m;
+}
+
+/** Zeilen nacheinander sprechen; fertig nach der letzten (auch ohne Stimme). */
+function sprichReihe(zeilen, fertig) {
+  if (!zeilen.length) { if (fertig) setTimeout(fertig, 0); return; }
+  LS.sprich(zeilen[0], "en", "", () => sprichReihe(zeilen.slice(1), fertig));
+}
+
+const FRAGE = {
+  situation: "Was sagst du?",
+  paar: "Was antwortest du?",
+  naechste: "Was kommt als Nächstes?",
+  passtNicht: "Welcher Satz passt nicht in den Dialog?",
+  luecke: "Was fehlt in der Lücke?",
+  ordnen: "Ordne das Gespräch: Was wird zuerst gesagt?",
+  hoeflich: "Was antwortest du? Sei höflich!",
+};
+const LOB = ["Great!", "Well done!", "Super!", "Yes!", "Lovely!"];
+
+/** Hinweis nach einer falschen Wahl — nie die richtige Zeile. */
+function hinweisFuer(a, gewaehlt) {
+  switch (a.art) {
+    case "situation": return "Hör nochmal zu (🔊) und schau das Bild an: Kommt jemand, geht jemand, oder bekommst du etwas?";
+    case "paar": return "Das passt nicht zur Zeile. Hör sie nochmal (🔊): Ist es ein Gruss, eine Frage oder ein Dank?";
+    case "naechste": return "Das passt hier nicht als Nächstes. Was antwortet man auf die letzte Zeile?";
+    case "frage": return a.richtung === "frage"
+      ? "Diese Frage passt nicht zur Antwort. Wonach wird gefragt: Name, Alter, Zeit, Farbe, Befinden?"
+      : "Diese Antwort passt nicht zur Frage. Hör die Frage nochmal (🔊): Wonach fragt sie?";
+    case "passtNicht": return "Dieser Satz passt in den Dialog. Such den Satz, der auf keine Zeile antwortet und zu dem keine Zeile passt.";
+    case "luecke": return "Das passt nicht in die Lücke. Es muss zur Zeile davor und zur Zeile danach passen.";
+    case "hoeflich": return gewaehlt === a.unhoeflich
+      ? "Das ist unhöflich! Such eine freundliche Antwort, die passt."
+      : "Das passt nicht zur Zeile. Was wurde gesagt oder gefragt? Und sei freundlich.";
+    default: return "Das passt nicht. Versuch es nochmal.";
+  }
+}
+
+/** Sprechblase eines Zugs; Sprecher B rechts. Lücke: gestrichelt mit „…“. */
+function blase(z, d, art = "") {
+  const b = el("div", { class: `hd-blase ${d && z.wer === d.b ? "hd-b" : ""} ${art}`.trim() });
+  b.append(el("span", { class: "hd-wer", text: z.wer, "aria-hidden": "true" }), el("span", { class: "hd-text", text: z.text }));
+  return b;
+}
+
+const SPIEL = {
+  id: ID,
+  einleitung: "Hello! Hör zu, was jemand auf Englisch sagt, und tippe die Antwort an, die passt. Mit 🔊 hörst du es nochmal.",
+  hilfe: stufe => ({
+    s1: "Schau das Bild an und hör zu, was jemand sagt. Tippe den Knopf an, der dazu passt. Mit „🔊 nochmal“ hörst du es wieder.",
+    s2: "Jemand sagt dir etwas auf Englisch. Tippe die Antwort an, die dazu passt. Mit „🔊 nochmal“ hörst du die Zeile wieder.",
+    s3: "Du siehst den Anfang eines Gesprächs. Tippe den Satz an, der als Nächstes kommt. Mit „🔊 nochmal“ hörst du das Gespräch wieder.",
+    s4: "Mal siehst du eine Antwort und tippst die Frage an, die dazu passt. Mal siehst du ein Gespräch mit einem Satz zu viel: Tippe den Satz an, der nicht hineingehört.",
+    s5: "Mal tippst du die Frage oder die Antwort an, die passt. Mal fehlt mitten im Gespräch ein Satz: Tippe den an, der in die Lücke passt.",
+    s6: "Mal ordnest du ein ganzes Gespräch: Tippe die Sätze der Reihe nach an, jeder richtige wandert in die Ablage. Mal antwortest du auf eine Zeile — höflich und passend.",
+  })[stufe],
+  anzahl: 8,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (MEHRERE_ARTEN.has(ctx.stufe)) ctx.serie("art", a.art);
+    ctx.kennung(a.kennung);
+    ctx.tipp(a.tipps);
+    const d = a.dialog;
+    const hd = el("div", { class: `hd hd-${a.art}` });
+    ctx.flaeche.append(hd);
+    hd.append(el("div", { class: "frage", text: FRAGE[a.art] }));
+    if (a.bild) hd.append(el("div", { class: "hd-szene" },
+      el("span", { class: "hd-szene-bild", text: a.bild, "aria-hidden": "true" }),
+      el("span", { class: "hd-szene-wort", text: a.wort || a.ort || "" })));
+
+    // Gezeigte Züge (nicht in .frage: das ist der Stoff, nicht die Anweisung). Beim „passt nicht“ sind die
+    // Zeilen selbst die Knöpfe; die Lücke steht als gestrichelte Blase zwischen davor und danach.
+    if (a.art !== "passtNicht" && a.vorher?.length) {
+      const blasen = el("div", { class: "hd-blasen" });
+      for (const z of a.vorher) blasen.append(blase(z, d));
+      if (a.art === "luecke") {
+        blasen.append(blase({ wer: a.luecke, text: "…" }, d, "hd-luecke"));
+        for (const z of a.nachher) blasen.append(blase(z, d, "hd-leise"));
+      }
+      hd.append(blasen);
+    }
+    if (a.sprich.length) hd.append(el("button", { type: "button", class: "hd-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprichReihe(a.sprich) }));
+
+    if (a.art === "ordnen") {
+      const { ablage, box } = LS.reihenfolge(ctx, {
+        reihe: a.reihe, breite: 720, inhalt: t => ({ bild: wer(d, d.zuege.indexOf(t)), text: t }), ablage: t => `${wer(d, d.zuege.indexOf(t))} ${t}`,
+        loesung: a.loesung, lob: waehle(LOB),
+        hinweis: (wert, erwartet) => (erwartet === d.zuege[0]
+          ? "Womit fängt das Gespräch an? Mit einem Gruss, einer Bitte oder einer Frage."
+          : "Das kommt nicht als Nächstes. Lies die letzte Zeile in der Ablage: Was antwortet man darauf?"),
+      });
+      box.classList.add("hd-wahl", "hd-zeilen");
+      // Jeder richtig gelegte Zug wird gesprochen — so hört das Kind den Dialog, wie er wächst.
+      let gelegt = 0;
+      box.addEventListener("click", () => {
+        const n = ablage.querySelectorAll("span:not(.pfeil)").length;
+        if (n > gelegt) { gelegt = n; LS.sprich(a.reihe[n - 1], "en"); }
+      });
+      hd.append(ablage, box);
+      if (ctx.nr === 0) ctx.sag("Tippe die Sätze der Reihe nach an: Was wird zuerst gesagt?");
+      return;
+    }
+
+    // Der Baustein ruft ctx.loesung(a.loesung) selbst; dieselbe Konstante bekommt ctx.falsch.
+    const inhalt = a.art === "situation" ? o => ({ bild: DIALOG_S1_ANTWORTEN[o][1], text: DIALOG_S1_ANTWORTEN[o][0] })
+      : a.art === "passtNicht" ? o => ({ bild: a.vorher.find(z => z.text === o).wer, text: o })
+      : o => o;
+    const box = LS.auswahl(ctx, {
+      optionen: a.optionen, richtig: a.richtig, inhalt, breite: a.art === "situation" ? 150 : 720,
+      hinweis: gewaehlt => hinweisFuer(a, gewaehlt), loesung: a.loesung, lob: waehle(LOB),
+      // Die richtige Zeile wird gesprochen, wenn sie gefunden ist; beim „passt nicht“ wäre das der fremde Satz.
+      beiRichtig: () => { if (a.art !== "passtNicht") LS.sprich(satzVon(a, a.richtig), "en"); },
+    });
+    box.classList.add("hd-wahl");
+    if (a.art === "situation") box.classList.add("hd-bilder");
+    if (a.art === "passtNicht") box.classList.add("hd-zeilen");
+    // Nach dem dritten Fehlversuch die richtige Zeile zeigen.
+    box.addEventListener("click", () => {
+      if (ctx.vorbei()) box.children[a.optionen.indexOf(a.richtig)]?.classList.add("richtig");
+    });
+    hd.append(box);
+    sprichReihe(a.sprich, ctx.uhrWarten());
+    if (ctx.nr === 0) ctx.sag(a.art === "situation" ? "Hör zu und tippe an, was du sagst." : "Hör zu und tippe die Zeile an, die passt. Mit 🔊 hörst du es nochmal.");
+  },
+};
+
+/** Englischer Satz hinter einem Wert (Stufe 1: Kennung → Satz). */
+const satzVon = (a, wert) => (a.art === "situation" ? DIALOG_S1_ANTWORTEN[wert][0] : wert);
+
+// Startet sofort, wenn eine englische Stimme da ist; sonst wartet es kurz oder erklärt, dass sie fehlt.
+LS.spielMitStimme(SPIEL, "en");
+</script>
+</body>
+</html>

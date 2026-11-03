@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gattungs-Kenner</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .gk .frage { text-align: center; font-size: clamp(18px, 4vw, 23px); font-weight: 800; margin: 0 auto 10px; max-width: 680px; }
+  .gk-schritt { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin: 0 0 4px; }
+  .gk .sachtext { background: #fffdf5; border: 3px solid var(--rand); border-radius: 18px; padding: 12px 16px; margin: 4px auto 12px; max-width: 680px;
+    font-size: clamp(17px, 3.9vw, 21px); line-height: 1.6; text-align: left; overflow-wrap: break-word; }
+  .gk .sachtext h2 { margin: 0 0 6px; font-size: clamp(19px, 4.4vw, 25px); }
+  .gk-zeile { font: inherit; color: inherit; background: transparent; border: 0; padding: 1px 4px; margin: 0; border-radius: 8px; text-align: left; line-height: inherit; }
+  .gk-prosa .gk-zeile { display: inline; margin-right: 4px; }
+  .gk-verse .gk-zeile { display: block; width: 100%; }
+  .gk-verse .gk-strophe { height: 12px; }
+  button.gk-zeile { cursor: pointer; border-bottom: 3px dashed var(--deko-4); }
+  button.gk-zeile:hover { background: var(--karte); }
+  button.gk-zeile.falsch { background: var(--hinweis-hell); border-bottom-color: var(--hinweis); animation: wackeln .4s; }
+  button.gk-zeile.gewaehlt { opacity: .45; }
+  button.gk-zeile.richtig { background: var(--gut-hell); border-bottom-color: var(--gut); opacity: 1; }
+  .gk-markiert { background: var(--gut-hell); border-bottom: 3px solid var(--deko-5) !important; font-weight: 800; }
+  .gk-rolle { font-weight: 900; }
+  .gk-regie { font-style: italic; color: var(--text-leise); }
+  .gk-ort { font-style: italic; }
+  .gk-merkmale { max-width: 680px; margin: 0 auto 12px; padding: 10px 16px; border: 3px dashed var(--deko-4); border-radius: 14px; background: #fff;
+    list-style: none; text-align: left; font-size: clamp(16px, 3.7vw, 20px); line-height: 1.45; }
+  .gk-merkmale li { padding: 4px 0; }
+  .gk-merkmale b { color: var(--deko-3); }
+  .gk-kurz { text-align: center; max-width: 560px; margin: -4px auto 12px; color: var(--text-leise); font-size: clamp(15px, 3.4vw, 18px); }
+  .gk .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); }
+  .gk .wahl-knopf.gk-lang { font-size: clamp(15px, 3.5vw, 19px); text-align: left; }
+  .gk .korb-karte b { font-size: clamp(20px, 4.6vw, 28px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>📜 Gattungs-Kenner</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="texte.js"></script>
+<script>
+"use strict";
+// Lehrplan SG D.6.C.1 (literarische Texte: Gattungen und ihre Merkmale), Basisklasse 6. Das Kind
+// erkennt die Gattung eines kurzen Auszugs und zeigt die Stelle im Text, die sie verrät.
+//   s1 5. Klasse (D.6.C.1.d): Märchen oder nicht? Bei einem Märchen dazu: Ist die Figur gut oder böse?
+//   s2 6. Klasse, leichter (D.6.C.1.e): Gattung aus drei klar unterscheidbaren: Märchen, Gedicht, Bericht.
+//   s3 Klassenziel (D.6.C.1.f, Grundanspruch Ende 6. Klasse): Märchen, Sage, Fabel, Gedicht, Bericht —
+//      zuerst die Gattung wählen, dann den Satz oder die Zeile antippen, die das Merkmal zeigt.
+//   s4 schwerer (f, vertieft): die Lehre einer Fabel wählen, das Typische einer Sage benennen,
+//      Merkmal-Karten in Gattungs-Körbe sortieren.
+//   s5 7. Klasse (3. Zyklus, nach f): dazu Kurzgeschichte und Theaterszene — Gattung aus sieben,
+//      Merkmal antippen.
+//   s6 Königsstufe: Welcher Satz passt nicht zur Gattung? Gattung aus drei Merkmalen raten.
+// Abgrenzung: Der Gedicht-Baukasten (Basisklasse 4) übt Reim, Vers und Strophe; „Echt oder erfunden?“
+// (NMG) unterscheidet echte und erfundene Textsorten; der Figuren-Spiegel (6) fragt nach Gefühlen und
+// Absichten von Figuren. Hier zählt die Gattung und das Merkmal, das sie verrät. Texte und
+// Merkmalskatalog in texte.js. Vorlesen aus (Katalog vorlesen: false): Lesen ist der Stoff.
+
+const { waehle, mische, el } = LS;
+const ID = "gattungs-kenner";
+const G = GATTUNGEN;
+const FUENF = ["maerchen", "sage", "fabel", "gedicht", "bericht"];
+const SIEBEN = [...FUENF, "kurzgeschichte", "theater"];
+// Stufe 1 „kein Märchen“: nur Gattungen, die ein Kind der 5. Klasse nicht mit einem Märchen verwechselt
+// (Sage und Fabel haben auch Wunder und sprechende Tiere).
+const NEIN = ["bericht", "gedicht", "kurzgeschichte"];
+const JA_NEIN = { ja: { bild: "✅", text: "Ja" }, nein: { bild: "❌", text: "Nein" } };
+const GUT_BOESE = { gut: { bild: "😇", text: "gut" }, boese: { bild: "😈", text: "böse" } };
+
+// ---------- Freigabe (Entscheid L4 a) ----------
+const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["texte"]);
+const TEXTE = FREI.has("texte") ? GATTUNG_TEXTE : [];
+const REIN = TEXTE.filter(t => t.fremd == null);  // reine Texte einer Gattung
+const MISCH = TEXTE.filter(t => t.fremd != null); // Mischtexte der Königsstufe
+const texteVon = g => REIN.filter(t => t.gattung === g);
+const merkmalVon = (g, art) => G[g]?.merkmale[art];
+const korbMerkmale = g => Object.entries(G[g].merkmale).filter(([, m]) => m.korb).map(([id]) => id);
+const istVers = t => t.gattung === "gedicht" || t.gattung === "theater";
+const zeilenWort = t => (istVers(t) ? "Zeile" : "Satz");
+
+const STUFE = {
+  s1: { arten: ["ja", "nein"] },
+  s2: { gattungen: ["maerchen", "gedicht", "bericht"] },
+  s3: { gattungen: FUENF, merkmal: true },
+  s4: { arten: ["moral", "sage", "korb"] },
+  s5: { gattungen: SIEBEN, merkmal: true },
+  s6: { arten: ["fremd", "raten"] },
+};
+
+function aufgabeErzeugen(stufe) {
+  if (!TEXTE.length) return null;
+  const p = STUFE[stufe];
+  if (stufe === "s1") {
+    const art = waehle(p.arten);
+    if (art === "ja") { const t = waehle(texteVon("maerchen")); return { art, t, figur: waehle(t.figuren) }; }
+    return { art, t: waehle(texteVon(waehle(NEIN))) };
+  }
+  if (stufe === "s4") {
+    const art = waehle(p.arten);
+    if (art === "moral") { const t = waehle(texteVon("fabel")); return { art, t, optionen: mische(t.moral) }; }
+    if (art === "sage") { const t = waehle(texteVon("sage")); return { art, t, optionen: mische(t.typisch) }; }
+    const gattung = waehle(FUENF);
+    return { art, gattung, merkmal: waehle(korbMerkmale(gattung)), koerbe: FUENF };
+  }
+  if (stufe === "s6") {
+    const art = waehle(p.arten);
+    if (art === "fremd") return { art, t: waehle(MISCH) };
+    const gattung = waehle(SIEBEN);
+    return { art, gattung, merkmale: mische(Object.keys(G[gattung].merkmale)).slice(0, 3), optionen: mische(SIEBEN) };
+  }
+  const t = waehle(texteVon(waehle(p.gattungen)));
+  return { art: p.merkmal ? "merkmal" : "gattung", t, optionen: mische(p.gattungen) };
+}
+
+// ---------- Prüfung ----------
+
+const WORTE = t => t.zeilen.join(" ").split(/\s+/).length;
+/** Reimendung: die letzten zwei Buchstaben ohne Satzzeichen. */
+const endung = z => z.replace(/[^\p{L}]+$/u, "").toLowerCase().slice(-2);
+const reimt = (a, b) => endung(a).length === 2 && endung(a) === endung(b);
+const GATTUNGSNAME = new RegExp("\\b(" + Object.values(G).map(g => g.name).join("|") + ")\\b", "iu");
+
+/** Mängel der ganzen Liste und des Merkmalskatalogs — einmal berechnet. */
+const LISTEN_MAENGEL = (() => {
+  const m = [];
+  // Das Kennzeichen eines Merkmals trifft genau die Merkmalszeile.
+  const pruefeKenn = (wo, t, idx, kenn) => {
+    const treffer = t.zeilen.map((z, i) => (kenn.test(z) ? i : -1)).filter(i => i >= 0);
+    if (treffer.length !== 1 || treffer[0] !== idx) m.push(`${wo}: Kennzeichen trifft Zeilen ${JSON.stringify(treffer)}, erwartet nur ${idx}`);
+  };
+  for (const t of GATTUNG_TEXTE) {
+    const wo = `«${t.titel}»`;
+    const g = G[t.gattung];
+    if (!g) { m.push(`${wo}: unbekannte Gattung ${t.gattung}`); continue; }
+    if (!Array.isArray(t.zeilen) || t.zeilen.length < 3) { m.push(`${wo}: weniger als drei Zeilen`); continue; }
+    const w = WORTE(t);
+    if (w < 40 || w > 90) m.push(`${wo}: ${w} Wörter, erwartet 40–90`);
+    if (/ß/.test(JSON.stringify(t))) m.push(`${wo}: ß im Text`);
+    if (/"/.test(t.zeilen.join(" "))) m.push(`${wo}: gerade Anführungszeichen im Text`);
+    if (t.gattung === "maerchen" && !t.zeilen.some(z => /es war einmal|vor langer zeit/i.test(z))) m.push(`${wo}: Märchen ohne „Es war einmal“ oder „Vor langer Zeit“`);
+    if (t.gattung === "bericht" && !t.zeilen.some(z => /\d/.test(z))) m.push(`${wo}: Bericht ohne Datum oder Zahl`);
+    if (t.gattung === "gedicht" && !t.zeilen.some((z, i) => t.zeilen.some((y, j) => i < j && reimt(z, y)))) m.push(`${wo}: Gedicht ohne Reimpaar`);
+    if (t.fremd != null) { // Mischtext der Königsstufe
+      const fm = merkmalVon(t.fremdGattung, t.fremdArt);
+      if (!fm) m.push(`${wo}: fremdes Merkmal ${t.fremdGattung}/${t.fremdArt} unbekannt`);
+      else if (t.fremdGattung === t.gattung) m.push(`${wo}: fremde Gattung ist die eigene`);
+      else if (!(t.fremd >= 0 && t.fremd < t.zeilen.length)) m.push(`${wo}: fremd zeigt auf keine Zeile`);
+      else if (fm.kenn) pruefeKenn(wo, t, t.fremd, fm.kenn);
+      continue;
+    }
+    const mk = g.merkmale[t.art];
+    if (!mk) { m.push(`${wo}: Merkmal ${t.art} fehlt im Katalog`); continue; }
+    if (!(t.merkmal >= 0 && t.merkmal < t.zeilen.length)) { m.push(`${wo}: merkmal zeigt auf keine Zeile`); continue; }
+    if (!mk.such) m.push(`${wo}: Merkmal ${t.art} hat keinen Such-Tipp`);
+    if (mk.kenn) pruefeKenn(wo, t, t.merkmal, mk.kenn);
+    if (mk.stelle === "erste" && t.merkmal !== 0) m.push(`${wo}: Merkmal ${t.art} gehört in die erste Zeile`);
+    if (mk.stelle === "letzte" && t.merkmal !== t.zeilen.length - 1) m.push(`${wo}: Merkmal ${t.art} gehört in die letzte Zeile`);
+    if (t.art === "ort") {
+      const treffer = t.zeilen.map((z, i) => (t.ort && z.includes(t.ort) ? i : -1)).filter(i => i >= 0);
+      if (!t.ort || treffer.length !== 1 || treffer[0] !== t.merkmal) m.push(`${wo}: Ortsname fehlt oder steht nicht nur in der Merkmalszeile`);
+    }
+    if (t.gattung === "gedicht") {
+      if (!(t.partner >= 0 && t.partner < t.zeilen.length) || t.partner === t.merkmal) m.push(`${wo}: Reimpartner fehlt`);
+      else if (!reimt(t.zeilen[t.merkmal], t.zeilen[t.partner])) m.push(`${wo}: Merkmalszeile und Partner reimen sich nicht`);
+    }
+    if (t.gattung === "maerchen") {
+      const f = t.figuren || [];
+      if (!f.some(x => x[1] === "gut") || !f.some(x => x[1] === "boese") || f.some(x => !["gut", "boese"].includes(x[1]) || !/^(der|die|das) /.test(x[0])))
+        m.push(`${wo}: Figuren brauchen Artikel und je mindestens eine gute und eine böse`);
+    }
+    if (t.gattung === "fabel") {
+      if (!t.moral || t.moral.length !== 3 || new Set(t.moral).size !== 3) m.push(`${wo}: drei verschiedene Lehren erwartet`);
+      else if (t.moral[0] !== t.zeilen[t.zeilen.length - 1]) m.push(`${wo}: die richtige Lehre ist nicht die letzte Zeile`);
+    }
+    if (t.gattung === "sage" && (!t.typisch || t.typisch.length !== 3 || new Set(t.typisch).size !== 3)) m.push(`${wo}: drei verschiedene Antworten „typisch“ erwartet`);
+  }
+  for (const [id, g] of Object.entries(G)) {
+    if (Object.keys(g.merkmale).length < 3) m.push(`Gattung ${g.name}: weniger als drei Merkmale (Königsstufe)`);
+    if (FUENF.includes(id) && !korbMerkmale(id).length) m.push(`Gattung ${g.name}: kein Merkmal für die Körbe`);
+    for (const mk of Object.values(g.merkmale)) if (GATTUNGSNAME.test([mk.kurz, mk.frage, mk.such || ""].join(" "))) m.push(`Merkmal «${mk.name}» nennt eine Gattung beim Namen`);
+  }
+  return m;
+})();
+
+function pruefeAufgabe(a, stufe) {
+  if (!a) return STUFEN[stufe] ? ["keine Aufgabe in einer angebotenen Stufe"] : [];
+  const m = [...LISTEN_MAENGEL];
+  const p = STUFE[stufe];
+  if (a.t && !TEXTE.includes(a.t)) m.push("Text nicht aus einer freien Liste");
+  if (a.t && a.t.fremd != null && a.art !== "fremd") m.push("Mischtext ausserhalb der Königsstufe");
+  const erwartet = p.arten || [p.merkmal ? "merkmal" : "gattung"];
+  if (!erwartet.includes(a.art)) m.push(`Aufgabenart ${a.art} nicht in ${stufe}`);
+  const optionenOk = (optionen, richtig) => {
+    if (!Array.isArray(optionen) || optionen.length < 2) return m.push("keine Antworten zur Wahl");
+    if (new Set(optionen).size !== optionen.length) m.push("doppelte Antworten");
+    if (optionen.filter(o => o === richtig).length !== 1) m.push("Lösung nicht genau einmal unter den Antworten");
+  };
+  switch (a.art) {
+    case "ja":
+      if (a.t.gattung !== "maerchen") m.push("„Ja“ mit einem Text, der kein Märchen ist");
+      if (!(a.t.figuren || []).includes(a.figur)) m.push("Figur nicht aus dem Text");
+      break;
+    case "nein":
+      if (!NEIN.includes(a.t.gattung)) m.push(`„Nein“ mit Gattung ${a.t.gattung}`);
+      break;
+    case "gattung": case "merkmal":
+      if (!p.gattungen.includes(a.t.gattung)) m.push(`Gattung ${a.t.gattung} nicht in ${stufe}`);
+      if (a.optionen.length !== p.gattungen.length) m.push("nicht alle Gattungen der Stufe zur Wahl");
+      optionenOk(a.optionen, a.t.gattung);
+      break;
+    case "moral":
+      if (a.t.gattung !== "fabel") m.push("Lehre zu einem Text, der keine Fabel ist");
+      optionenOk(a.optionen, a.t.moral[0]);
+      break;
+    case "sage":
+      if (a.t.gattung !== "sage") m.push("„typisch“ zu einem Text, der keine Sage ist");
+      optionenOk(a.optionen, a.t.typisch[0]);
+      break;
+    case "korb":
+      if (!FUENF.includes(a.gattung) || !merkmalVon(a.gattung, a.merkmal)?.korb) m.push("Korb-Merkmal unbekannt oder nicht für Körbe gedacht");
+      optionenOk(a.koerbe, a.gattung);
+      break;
+    case "fremd":
+      if (!MISCH.includes(a.t)) m.push("kein Mischtext");
+      break;
+    case "raten":
+      if (!SIEBEN.includes(a.gattung)) m.push(`Gattung ${a.gattung} unbekannt`);
+      else if (a.merkmale.length !== 3 || new Set(a.merkmale).size !== 3 || a.merkmale.some(id => !merkmalVon(a.gattung, id))) m.push("drei verschiedene Merkmale der Gattung erwartet");
+      optionenOk(a.optionen, a.gattung);
+      break;
+    default: m.push(`unbekannte Aufgabenart ${a.art}`);
+  }
+  return m;
+}
+
+// ---------- Darstellung ----------
+
+const gattungInhalt = g => ({ bild: G[g].bild, text: G[g].name });
+
+/** Inhalt einer Zeile: im Theater Rolle, Regieanweisung und Ortsangabe hervorgehoben. */
+function zeilenInhalt(t, z) {
+  if (t.gattung !== "theater") return [z];
+  if (/^Ort:/.test(z)) return [el("span", { class: "gk-ort", text: z })];
+  const m = z.match(/^([A-ZÄÖÜ][A-ZÄÖÜ ]*?)(\s*\([^)]*\))?:\s*(.*)$/);
+  if (!m) return [z];
+  return [el("span", { class: "gk-rolle", text: m[1] }), m[2] ? el("span", { class: "gk-regie", text: m[2] }) : null, ": " + m[3]].filter(Boolean);
+}
+
+/** Textkasten mit Titel; Zeilen als Spans (Prosa fliessend, Gedicht und Theater je eine Zeile). */
+function textEl(t, { ohneLetzte = false, markiert = null } = {}) {
+  const box = el("div", { class: `sachtext ${istVers(t) ? "gk-verse" : "gk-prosa"}` }, el("h2", { text: t.titel }));
+  const zeilen = [];
+  t.zeilen.forEach((z, i) => {
+    if (ohneLetzte && i === t.zeilen.length - 1) return;
+    if (t.strophe && i > 0 && i % t.strophe === 0) box.append(el("div", { class: "gk-strophe" }));
+    const s = el("span", { class: "gk-zeile" + (i === markiert ? " gk-markiert" : "") }, ...zeilenInhalt(t, z));
+    zeilen.push(s);
+    box.append(s);
+  });
+  return { box, zeilen };
+}
+
+/** Schritt „Stelle antippen“: Die Spans werden Knöpfe (ausser 'ausser'); richtig ist der Index. */
+function zeilenTippen(ctx, zeilen, { richtig, ausser = null, hinweis, loesung, lob }) {
+  let fertig = false;
+  zeilen.forEach((s, i) => {
+    if (i === ausser) return;
+    const k = el("button", { type: "button", class: "gk-zeile" }, ...[...s.childNodes]);
+    s.replaceWith(k);
+    k.addEventListener("click", () => {
+      if (fertig || k.classList.contains("gewaehlt")) return;
+      if (i === richtig) { fertig = true; k.classList.add("richtig"); ctx.richtig(lob); return; }
+      k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+      ctx.falsch(hinweis, loesung);
+      if (ctx.vorbei()) fertig = true;
+    });
+  });
+}
+
+/** Zwischenschritt mit Antwortknöpfen: wie LS.auswahl, aber nach der richtigen Wahl geht es mit 'dann' weiter. */
+function wahlSchritt(ctx, wahl, { optionen, inhalt, richtig, hinweis, loesung, dann }) {
+  let fertig = false;
+  for (const wert of optionen) {
+    const k = el("button", { type: "button", class: "wahl-knopf" });
+    const inh = inhalt(wert);
+    k.append(el("span", { class: "bild", text: inh.bild }), el("span", { text: inh.text }));
+    k.addEventListener("click", () => {
+      if (fertig || k.classList.contains("gewaehlt")) return;
+      if (wert === richtig) { fertig = true; k.classList.add("richtig"); LS.ton("tipp"); dann(); return; }
+      k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
+      ctx.falsch(typeof hinweis === "function" ? hinweis(wert) : hinweis, loesung);
+      if (ctx.vorbei()) fertig = true;
+    });
+    wahl.append(k);
+  }
+}
+
+/** Tipps zu einem Text mit gefragtem Merkmal (ctx.tipp): Anstoss, Merkmalsfrage, Stelle — nie die Lösung. */
+const tippsFuer = mk => ["Achte auf den Anfang und den Schluss des Texts.", mk.frage, mk.such];
+const LOB = ["Textsorte erkannt!", "Du kennst dich aus!", "Merkmal gefunden!"];
+
+// Stufe 1: Märchen oder nicht? Bei einem Märchen danach: Ist die Figur gut oder böse?
+function zeichneMaerchenFrage(ctx, a) {
+  const ja = a.art === "ja";
+  const t = a.t;
+  ctx.serie("antwort", a.art);
+  if (ja) ctx.serie("figur", a.figur[1]);
+  const loesung = ja ? `Ja, ein Märchen — ${a.figur[0]} ist ${GUT_BOESE[a.figur[1]].text}` : `Nein, kein Märchen (${G[t.gattung].artikel} ${G[t.gattung].name})`;
+  ctx.loesung(loesung);
+  ctx.schritte(1); // Schritt 1; den zweiten zählt LS.auswahl selbst
+  ctx.tipp(["Achte auf den Anfang und den Schluss des Texts.",
+    "Gibt es Zauber, Könige oder Dinge, die es in Wirklichkeit nicht gibt?",
+    "Frag dich bei jeder Figur: Hilft sie den anderen, oder schadet sie ihnen?"]);
+  const frage = el("div", { class: "frage", text: "Ist das ein Märchen?" });
+  const wahl = el("div", { class: "wahl" });
+  wahl.style.setProperty("--wahl-breite", "150px");
+  ctx.flaeche.append(frage, textEl(t).box, wahl);
+  wahlSchritt(ctx, wahl, {
+    optionen: ["ja", "nein"], inhalt: w => JA_NEIN[w], richtig: a.art, loesung,
+    hinweis: w => (w === "ja"
+      ? "Gibt es hier wirklich Zauber und Könige? Oder ist es etwas anderes: ein Gedicht, ein Bericht, eine Geschichte von heute?"
+      : "Schau auf den Anfang: Beginnt er wie eine alte Geschichte? Gibt es Zauber oder Figuren, die es in Wirklichkeit nicht gibt?"),
+    dann: () => {
+      if (!ja) return ctx.richtig("Richtig erkannt!");
+      frage.textContent = `Wie ist ${a.figur[0]} in diesem Märchen?`;
+      wahl.remove();
+      LS.auswahl(ctx, { optionen: mische(["gut", "boese"]), richtig: a.figur[1], inhalt: w => GUT_BOESE[w], loesung, breite: 150,
+        hinweis: "Was tut diese Figur im Text? Hilft sie den anderen, oder schadet sie ihnen?", lob: "Durchschaut!" });
+    },
+  });
+}
+
+// Stufe 2: Gattung aus drei.
+function zeichneGattung(ctx, a) {
+  const t = a.t;
+  const mk = merkmalVon(t.gattung, t.art);
+  const loesung = `${G[t.gattung].name} — ${mk.name}`;
+  ctx.tipp(tippsFuer(mk));
+  ctx.flaeche.append(el("div", { class: "frage", text: "Welche Textsorte ist das?" }), textEl(t).box);
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: t.gattung, inhalt: gattungInhalt, hinweis: `Das passt nicht. ${mk.frage}`, loesung, breite: 150, lob: waehle(LOB) });
+}
+
+// Stufe 3 und 5: Gattung wählen, dann die Stelle antippen, die das Merkmal zeigt.
+function zeichneMerkmal(ctx, a) {
+  const t = a.t;
+  const mk = merkmalVon(t.gattung, t.art);
+  const reim = t.art === "reim";
+  const loesung = `${G[t.gattung].name} — ${mk.name}: ${zeilenWort(t)} ${t.merkmal + 1} „${t.zeilen[t.merkmal]}“`;
+  ctx.loesung(loesung);
+  ctx.schritte(2);
+  ctx.tipp(tippsFuer(mk));
+  const schritt = el("p", { class: "gk-schritt", text: "1. Textsorte wählen" });
+  const frage = el("div", { class: "frage", text: "Welche Textsorte ist das?" });
+  const { box, zeilen } = textEl(t);
+  const wahl = el("div", { class: "wahl" });
+  wahl.style.setProperty("--wahl-breite", a.optionen.length > 5 ? "150px" : "170px");
+  ctx.flaeche.append(schritt, frage, box, wahl);
+  wahlSchritt(ctx, wahl, {
+    optionen: a.optionen, inhalt: gattungInhalt, richtig: t.gattung, hinweis: `Das passt nicht. ${mk.frage}`, loesung,
+    dann: () => {
+      schritt.textContent = "2. Merkmal zeigen";
+      frage.textContent = reim ? "Welche Zeile reimt sich auf die markierte Zeile?" : `Welche${istVers(t) ? "" : "r"} ${zeilenWort(t)} zeigt das Merkmal „${mk.name}“?`;
+      wahl.remove();
+      if (reim) zeilen[t.partner].classList.add("gk-markiert");
+      zeilenTippen(ctx, zeilen, { richtig: t.merkmal, ausser: reim ? t.partner : null, hinweis: `Das ist nicht die Stelle. ${mk.such}`, loesung, lob: "Merkmal gezeigt!" });
+    },
+  });
+}
+
+// Stufe 4: Lehre der Fabel (die letzte Zeile ist ausgeblendet).
+function zeichneMoral(ctx, a) {
+  const t = a.t;
+  const loesung = `Lehre: „${t.moral[0]}“`;
+  ctx.tipp(["Lies die Geschichte bis zum Schluss: Was ist der einen Figur passiert?",
+    "Was hat diese Figur falsch gemacht — oder richtig?",
+    "Prüfe jede Lehre: Passt sie zu dem, was in der Geschichte wirklich geschieht?"]);
+  ctx.flaeche.append(el("div", { class: "frage", text: "Welche Lehre passt zu dieser Fabel?" }), textEl(t, { ohneLetzte: true }).box);
+  const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: t.moral[0], loesung, breite: 280, lob: "Lehre erkannt!",
+    hinweis: "Diese Lehre passt nicht zu dem, was in der Geschichte geschieht. Was ist der Figur am Ende passiert?" });
+  for (const k of box.children) k.classList.add("gk-lang");
+}
+
+// Stufe 4: Was ist typisch für diese Sage?
+function zeichneSage(ctx, a) {
+  const t = a.t;
+  const loesung = `Typisch: ${t.typisch[0]}`;
+  ctx.tipp(["Was erklärt die Geschichte? Gibt es etwas, das man heute noch sehen oder hören kann?",
+    "Welche Antwort passt genau zu diesem Text — nicht zu irgendeiner Geschichte?",
+    "Lies den letzten Satz: Was bleibt von der Geschichte bis heute übrig?"]);
+  ctx.flaeche.append(el("div", { class: "frage", text: "Was ist typisch für diese Sage?" }), textEl(t).box);
+  const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: t.typisch[0], loesung, breite: 280, lob: "Typisch erkannt!",
+    hinweis: "Das kommt in einer anderen Geschichte vor. Was steht in diesem Text?" });
+  for (const k of box.children) k.classList.add("gk-lang");
+}
+
+// Stufe 4: Merkmal-Karte in den Gattungs-Korb.
+function zeichneKorb(ctx, a) {
+  const mk = merkmalVon(a.gattung, a.merkmal);
+  const loesung = `${mk.name} → ${G[a.gattung].name}`;
+  ctx.tipp(["Lies das Merkmal und die Erklärung darunter genau.",
+    "Bei welcher Textsorte hast du das schon einmal gesehen? Denk an Texte aus der Schule.",
+    "Streich im Kopf die Körbe, zu denen es sicher nicht passt."]);
+  ctx.flaeche.append(el("div", { class: "frage", text: "Zu welcher Textsorte gehört dieses Merkmal?" }));
+  const { box } = LS.koerbe(ctx, { karte: { bild: "🔎", text: mk.name }, koerbe: a.koerbe, korbInhalt: gattungInhalt, richtig: a.gattung, loesung, lob: "Richtig sortiert!",
+    hinweis: "Das Merkmal passt nicht zu dieser Textsorte. Lies die Erklärung noch einmal." });
+  ctx.flaeche.insertBefore(el("p", { class: "gk-kurz", text: mk.kurz }), box);
+}
+
+// Königsstufe: Welcher Satz passt nicht zur Gattung?
+function zeichneFremd(ctx, a) {
+  const t = a.t;
+  const g = G[t.gattung];
+  const fm = merkmalVon(t.fremdGattung, t.fremdArt);
+  const w = zeilenWort(t);
+  const loesung = `Passt nicht: ${w} ${t.fremd + 1} „${t.zeilen[t.fremd]}“ — ${fm.name}, ein Merkmal: ${G[t.fremdGattung].name}`;
+  ctx.loesung(loesung);
+  ctx.schritte(1);
+  ctx.tipp([`Lies jeden ${w} einzeln: Könnte er so in dieser Textsorte stehen?`,
+    `Ein ${w} hat ein Merkmal einer anderen Textsorte. ${fm.frage}`,
+    `Das fremde Merkmal: ${fm.kurz}`]);
+  const { box, zeilen } = textEl(t);
+  ctx.flaeche.append(el("div", { class: "frage", text: `Dieser Text ist ${g.artikel} ${g.name}. Welche${istVers(t) ? "" : "r"} ${w} passt nicht dazu?` }), box);
+  zeilenTippen(ctx, zeilen, { richtig: t.fremd, hinweis: `Diese${istVers(t) ? "" : "r"} ${w} passt zur Textsorte. ${fm.frage}`, loesung, lob: "Eindringling gefunden!" });
+}
+
+// Königsstufe: Gattung aus drei Merkmalen raten.
+function zeichneRaten(ctx, a) {
+  const loesung = G[a.gattung].name;
+  ctx.tipp(["Lies alle drei Merkmale. Welche Textsorte hat alle drei zusammen?",
+    "Streich im Kopf die Textsorten, bei denen schon ein Merkmal nicht passt.",
+    "Denk an einen Text dieser Art, den du in der Schule gelesen hast."]);
+  ctx.flaeche.append(el("div", { class: "frage", text: "Welche Textsorte hat diese drei Merkmale?" }),
+    el("ul", { class: "vorgabe gk-merkmale" }, ...a.merkmale.map(id => {
+      const mk = merkmalVon(a.gattung, id);
+      return el("li", {}, el("b", { text: `${mk.name}: ` }), mk.kurz);
+    })));
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.gattung, inhalt: gattungInhalt, loesung, breite: 150, lob: "Alle drei erkannt!",
+    hinweis: "Mindestens eines der drei Merkmale passt nicht zu dieser Textsorte. Welche hat alle drei?" });
+}
+
+const ZEICHNE = { ja: zeichneMaerchenFrage, nein: zeichneMaerchenFrage, gattung: zeichneGattung, merkmal: zeichneMerkmal,
+  moral: zeichneMoral, sage: zeichneSage, korb: zeichneKorb, fremd: zeichneFremd, raten: zeichneRaten };
+
+const SAG = {
+  s1: "Lies den Text. Ist das ein Märchen? Bei einem Märchen fragst du dich danach, ob die Figur gut oder böse ist.",
+  s2: "Lies den Text und tippe die Textsorte an.",
+  s3: "Zuerst die Textsorte, dann die Stelle im Text, die sie verrät.",
+  s4: "Fabel, Sage oder Merkmal-Karte: Lies genau und tippe an.",
+  s5: "Sieben Textsorten — zuerst die Textsorte, dann die Stelle, die sie verrät.",
+  s6: "Endgegner: Finde den Satz, der nicht passt, oder rate die Textsorte aus drei Merkmalen.",
+};
+const HILFE = {
+  s1: "Lies den Text und tippe an, ob es ein Märchen ist. Bei einem Märchen tippst du danach an, ob die Figur gut oder böse ist.",
+  s2: "Lies den Text und tippe die Textsorte an, zu der er gehört.",
+  s3: "Zuerst tippst du die Textsorte an. Dann tippst du im Text den Satz oder die Zeile an, die das Merkmal zeigt.",
+  s4: "Je nach Aufgabe: die passende Lehre zur Fabel antippen, das Typische der Sage antippen oder die Merkmal-Karte in den richtigen Korb legen.",
+  s5: "Zuerst tippst du eine der sieben Textsorten an. Dann tippst du im Text den Satz oder die Zeile an, die das Merkmal zeigt.",
+  s6: "Entweder tippst du im Text den Satz an, der nicht zur Textsorte passt, oder du liest drei Merkmale und tippst die Textsorte an, die alle drei hat.",
+};
+const STUFEN_TEXT = {
+  s1: "Märchen oder nicht? Und: Ist die Figur gut oder böse?",
+  s2: "Märchen, Gedicht oder Bericht?",
+  s3: "Fünf Textsorten erkennen und das Merkmal im Text zeigen (6. Klasse).",
+  s4: "Lehre der Fabel, Typisches der Sage, Merkmale in Körbe sortieren.",
+  s5: "Dazu Kurzgeschichte und Theaterszene: sieben Textsorten (7. Klasse).",
+  s6: "Endgegner: Welcher Satz passt nicht? Textsorte aus drei Merkmalen raten.",
+};
+const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(() => TEXTE.length));
+
+LS.spiel({
+  id: ID,
+  einleitung: "Märchen, Sage, Fabel, Gedicht oder Bericht? Jede Textsorte verrät sich durch ein Merkmal. Lies genau und finde es!",
+  hilfe: stufe => HILFE[stufe],
+  anzahl: 6,
+  stufen: STUFEN,
+
+  aufgabe(ctx) {
+    if (ctx.nr === 0) ctx.sag(SAG[ctx.stufe]);
+    ctx.flaeche.classList.add("gk");
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.stufe === "s4" || ctx.stufe === "s6") ctx.serie("art", a.art);
+    ctx.kennung(`${a.art}|${a.t ? a.t.titel : a.gattung}|${a.figur ? a.figur[0] : a.merkmal || (a.merkmale || []).join(",")}`);
+    ZEICHNE[a.art](ctx, a);
+  },
+});
+</script>
+</body>
+</html>
