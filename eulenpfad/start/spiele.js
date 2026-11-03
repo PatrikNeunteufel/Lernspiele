@@ -87,7 +87,7 @@ function zeichneSpiele(box, neu) {
     const neue = ERFOLGE.abzeichen(name, p, protokoll, LS.rekorde(), LS.gefundeneFehler(name)).filter(a => a.neu);
     if (neue.length) box.append(el("a", { class: "abzeichen-hinweis", href: "#erfolge" },
       el("span", { class: "abzeichen-hinweis-bild", text: neue[0].bild }),
-      el("span", {}, el("b", { text: (neue.length === 1 ? `Neues Abzeichen: ${neue[0].titel}` : `${neue.length} neue Abzeichen: ${neue.map(a => a.titel).join(", ")}`) + (neue[neue.length - 1].titel.endsWith("!") ? "" : "!") }),
+      el("span", {}, el("b", { text: (neue.length === 1 ? `Neues Abzeichen: ${ERFOLGE.titelMitRang(neue[0])}` : `${neue.length} neue Abzeichen: ${neue.map(ERFOLGE.titelMitRang).join(", ")}`) + (ERFOLGE.titelMitRang(neue[neue.length - 1]).endsWith("!") ? "" : "!") }),
         el("span", { class: "leise-text", text: " Antippen zum Ansehen." }))));
   }
   // Wochenziel des Lernplans (Entscheid L1 a, LERN_Session10): kompakt ganz oben, nur wenn die Aufsicht eines gesetzt hat.

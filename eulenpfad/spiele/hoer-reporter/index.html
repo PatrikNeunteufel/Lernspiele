@@ -304,14 +304,14 @@ const SPIEL = {
       if (!LS.sprich(a.text, "de")) lesenStatt();
     });
 
-    // Vorlesen kurz nach dem Zeichnen: Liest die Eule automatisch vor (Profil „Vorlesen: gleich“), tut sie das
-    // nach 300 ms; ihr Satz würde sonst den Bericht abbrechen. Danach Fragen zeigen und die Uhr starten.
-    setTimeout(() => {
+    // Vorlesen, sobald die Eule fertig ist (Lob der vorigen Aufgabe; ihr Satz würde sonst den Bericht abbrechen).
+    // Danach Fragen zeigen und die Uhr starten.
+    ctx.nachAnsage(() => {
       if (!ctx.flaeche.contains(hr)) return; // neu gezogen oder schon weiter
       let gesprochen = false;
       gesprochen = LS.sprich(a.text, "de", "", () => { if (gesprochen) { fragenZeigen(); uhrLos(); } });
       if (gesprochen) ohr.classList.add("spricht"); else lesenStatt();
-    }, 450);
+    });
   },
 };
 

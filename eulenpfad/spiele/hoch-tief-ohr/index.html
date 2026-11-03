@@ -194,8 +194,8 @@ LS.spiel({
         loesung: `${NOTEN.name(a.folge[0])} – ${NOTEN.name(a.folge[1])} ist ein ${a.richtig}.`,
       });
     }
-    // Die Töne gleich vorspielen; der Knopf spielt sie nochmal.
-    NOTEN.spiele(hoeren());
+    // Die Töne vorspielen, sobald die Eule fertig ist (Lob, Vorlesen); der Knopf spielt sie nochmal.
+    ctx.nachAnsage(() => NOTEN.spiele(hoeren()));
     if (ctx.nr === 0) ctx.sag("Hör gut zu. Mit dem Knopf kannst du nochmal hören.");
   },
 });

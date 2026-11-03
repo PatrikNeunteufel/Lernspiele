@@ -133,7 +133,8 @@ LS.spiel({
 | `ctx.schritte(n)` | Die Aufgabe braucht n Handgriffe mehr: Tipps, Ziffern samt OK, Züge, so viele wie mindestens nötig sind. Aufrufe zählen zusammen. Die Bausteine zählen ihre selbst (`auswahl` und `koerbe` 1, `reihenfolge` je Teil 1); für die Tastatur `LS.tippSchritte(wert)`. **Pflicht in Endlos-Stufen** ✔, daraus folgt der Boden der Endlos-Zeit (Abschnitt 7). |
 | `ctx.serie(name, wert)` | Ein zufällig gewähltes Merkmal, das das Kind als Muster erkennen kann: Richtung oder Aufgabenart, oder die richtige Antwort bei höchstens drei festen Antworten (ja/nein, <, =, >, auf/ab). **Serienbremse** (Vorgabe Patrik 2026-11-01): Der Rahmen zieht neu, statt dasselbe Merkmal öfter als `LS.SERIE_MAX` = 3-mal hintereinander zu stellen (bis zu 40 Versuche). Nicht für Zahlenwerte oder Knopfpositionen, und nur in Stufen, die wirklich mehrere Werte haben ✔. |
 | `ctx.vorgehen(art, wert)` | Wie das Kind die Aufgabe angegangen ist, vor `ctx.richtig()` gemeldet (LERN_Session7). Landet in `aufgabenZeiten[i].vorgehen` und in der Statistik, Karte „Vorgehen“ (Punkte der letzten 12 Aufgaben). Arten und Werte (vom besten zum schwächsten, Ton gut/mittel/schwach) stehen in `AUSWERTUNG.VORGEHEN`: `systematik` (Möglichkeiten-Finder: Zählwerk, geordnet, kreuz und quer, mit Hilfe), `teilerpaare` (Teiler-Spürnase: in Paaren, der Grösse nach, durcheinander), `ausgleichen` (Mittelwert-Türme: ohne Umweg, mit Umwegen). |
-| `ctx.wartezeit(s)` | Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne). Uhr und Zeitmessung beginnen so viel später (Entscheide F1 a, F2 a, LERN_Session9). |
+| `ctx.wartezeit(s)` | Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne). Uhr und Zeitmessung beginnen so viel später (Entscheide F1 a, F2 a, LERN_Session9); wartet das Spiel mit `ctx.nachAnsage`, zählt die Wartezeit ab dann. |
+| `ctx.nachAnsage(fn)` | `fn` erst rufen, wenn die Eule fertig ist: Lob der vorigen Aufgabe ausgesprochen, Auftrag vorgelesen (falls automatisch). **Pflicht für alles, was ein Spiel beim Zeichnen vorspielt oder vorspricht** (Melodie, Rhythmus, Hörtext, Satz) — sonst überlagern sich Stimme und Ton, oder die Eule bricht den Hörtext ab (Meldung Patrik zum Hoch-Tief-Ohr, LERN_Session11). Ohne Stimme 300 ms nach dem Zeichnen; eine neu gezogene Fassung der Aufgabe ruft nie. Ersetzt die früheren Verzögerungen von 250/450 ms in sechs Spielen. |
 | `ctx.tipp(texte)` | Gestufte Tipps zur Aufgabe (Text oder Liste), vom Anstoss zum Konkreten; nie die Lösung (das Testskript prüft es wie Hinweise). Beim Zeichnen rufen. Das Kind holt sie mit „💡 Tipp“ einzeln; ein Tipp zählt für die Sterne wie ein halber Fehler, „auf Anhieb“ heisst ohne Tipp; im Endlos-Modus keine Tipps (Abschnitt 14). |
 | `ctx.uhrWarten()` | Uhr und Zeitmessung beginnen erst, wenn die zurückgegebene Funktion gerufen wird: Jetzt kann das Kind antworten. Beim Zeichnen rufen. Für eine Stimme, die gleich vorspricht: `LS.sprich(text, sprache, "", ctx.uhrWarten())` (die Uhr startet, wenn die Stimme fertig ist, ohne Stimme sofort). `LS.losGehts` nutzt es selbst. **Regel** (F1 a, F2 a): Die Uhr läuft nie, solange das Kind nur warten kann — „▶ Los!“, 3-2-1, Zeigen, Vorspielen. |
 | `ctx.losKnopf` | Für `LS.losGehts`: „▶ Los!“ mit 3-2-1 (erste Aufgabe, nach einer Aufgabe mit Fehler oder Zeit um, im Mix) oder nur kurz 👀 (LERN-38). |
@@ -523,6 +524,9 @@ Spielen, die das Lesen selbst üben; ein Kind im Kindergarten soll sich eintrage
     Eule nur im Spiel selbst (Vorgabe Patrik, LERN_Session8).
   - **Blase nur einmal:** Automatisch liest die Eule mit der neuen Aufgabe die Blase nur, wenn sie in dieser
     Aufgabe etwas gesagt hat — sonst stünde dort noch das Lob der vorigen und käme zweimal.
+  - **Auftrag nur, wenn er neu ist** (LERN_Session11): Lautet der Auftrag gleich wie bei der vorigen Aufgabe
+    („Wohin geht die Melodie?“), liest die Eule ihn automatisch nicht nochmals; 🗣️ liest ihn immer.
+  - **Reihenfolge:** Lob der vorigen Aufgabe ausreden lassen (`nachStimme`), dann vorlesen, dann `ctx.nachAnsage`.
   - **Ton aus** (🔇 in der Kopfzeile) geht vor: Dann spricht keine Stimme, auch nicht in den Hörspielen (`sprich`
     prüft `tonAn`); Ausschalten bricht eine laufende Ansage ab.
   - **Stimmlage:** Aufgaben normal, Lob (`ctx.richtig`, Blase „gut“) höher und lebhafter, Tipps (Blase „hinweis“)
@@ -609,19 +613,27 @@ Protokoll, den Endlos-Rekorden und den Meldungen; gespeichert werden nur zwei Pr
   Minuten je Tag (Vorgabe 3 × 10; Profilfeld `lernplan`, „aus“ = kein Ziel). Ein Tag ist erfüllt, wenn die Runden des
   Tages zusammen die Minuten erreichen; eine Woche (Montag bis Sonntag) ist erfüllt, wenn genug Tage erfüllt sind.
   Jede erfüllte Woche gibt einen **Wochenstern 🌟**, unabhängig von Fehlern und Tempo; die **Serie** zählt erfüllte
-  Wochen in Folge (die laufende Woche bricht sie nicht, solange sie läuft). `ERFOLGE.lernplan(profil, runden)` liefert
+  Wochen in Folge (die laufende Woche bricht sie nicht, solange sie läuft). **Warnung** (Wunsch Patrik,
+  LERN_Session11; `gefahr` im Ergebnis von `lernplan`): Läuft eine Serie und reichen die restlichen Tage der Woche ab
+  heute nur noch knapp (fehlende Tage = verbleibende), mahnt die Wochenkarte „⚠️ Achtung …“ mit orangem Rahmen;
+  reicht es nicht mehr, tröstet sie („nächste Woche startest du neu“), ohne Rot. `ERFOLGE.lernplan(profil, runden)` liefert
   alle Wochen seit der ersten Runde. Das Kind sieht die Woche als sieben Tage (★ erfüllt, • gespielt, Rahmen = heute)
   oben im Tab Spiele (kompakt, nur mit Ziel) und im Tab Erfolge; die Aufsicht sieht in der Statistik die letzten zwölf
   Wochen als Reihe.
-- **Abzeichen:** 24 Stück in `ERFOLGE.ABZEICHEN` (Runden 1/10/50/100, drei Sterne, Sternensammler, Perfekt, Aus eigener
-  Kraft, Königsstufe, alle sechs Stufen, Spiel-Meister, Entdecker, Weltreisender, Vielseitig, Mathe-/Deutsch-Ass,
-  Forscher, Sprachtalent, Endlos-Läufer, Mix-Meister, Wochenstern, Dranbleiber, Fehlerfinder, Frühaufsteher). Jedes hat
-  `pruefe(k)` → `{ ist, soll, wann }`; erreicht ist es mit der Zeit der Runde, die es vollendet hat. Offene zeigen
-  einen Fortschrittsbalken. Neu erreichte tragen 🆕 (und der Tab „🏅 Erfolge 🆕“), bis das Kind den Tab öffnet
-  (Profilfeld `erfolgeGesehen`). Testrunden zählen nicht. Die Aufsicht sieht die Erfolge jedes Kindes (Auswahl wie in
-  der Statistik), ohne 🆕.
-- **Teilen (Annahme B1):** „📤 Teilen“ zeichnet das Abzeichen als PNG (Bild, Titel, Text, Vorname des Kindes, Datum,
+- **Abzeichen:** 19 Stück in `ERFOLGE.ABZEICHEN` (Fleissig, Sternensammler, Perfekt, Aus eigener Kraft, Königsstufe,
+  alle sechs Stufen, Spiel-Meister, Entdecker, Vielseitig, Mathe-/Deutsch-Ass, Forscher, Sprachtalent, Endlos-Läufer,
+  Mix-Meister, Wochenstern, Dranbleiber, Fehlerfinder, Frühaufsteher), **jedes mit Stufen** (Wunsch Patrik,
+  LERN_Session11): `ERFOLGE.RAENGE` = 🥉 Bronze, 🥈 Silber, 🥇 Gold, 🏆 Platin, 💎 Diamant; je Abzeichen eine eigene
+  Abstufung `stufen` (zum Beispiel Runden 1/10/50/100/500, Entdecker 10/25/50/100/150, Vielseitig 2/3/4/5/7 Fächer).
+  `text(n)` sagt, was die Menge n braucht, `pruefe(k, n)` → `{ ist, soll, wann }`; eine Stufe ist erreicht mit der
+  Zeit der Runde, die sie vollendet hat. Dranbleiber zählt die längste Serie, Endlos den Bestwert. Die Kachel zeigt die
+  erreichte Stufe (Rahmenfarbe `rang-<id>`) und den Balken zur nächsten; offene den Balken zu Bronze. Neue Stufen
+  tragen 🆕 (und der Tab „🏅 Erfolge 🆕“), bis das Kind den Tab öffnet (Profilfeld `erfolgeGesehen` = Liste
+  `"<id>:<stufe>"`; Gesehenes gilt für tiefere Stufen mit, frühere Einträge ohne Stufe übersetzt `FRUEHER`).
+  Testrunden zählen nicht. Die Aufsicht sieht die Erfolge jedes Kindes (Auswahl wie in der Statistik), ohne 🆕.
+- **Teilen (Annahme B1):** „📤 Teilen“ zeichnet das Abzeichen als PNG (Bild, Titel mit Stufe und Rahmen in ihrer Farbe, Text, Vorname des Kindes, Datum,
   „🦉 Eulenpfad“) und übergibt es dem Teilen-Dialog des Geräts (`navigator.share` mit Datei), sonst wird es
   gespeichert. Nur auf Knopfdruck; es reist nur der Vorname mit, kein weiteres Profil. Datenschutz-Ausnahme in
   `CLAUDE.md`.
-- **Neue Abzeichen** kommen in `ABZEICHEN` dazu, mit Id, Bild, Titel, Text und `pruefe`; mehr braucht es nicht.
+- **Neue Abzeichen** kommen in `ABZEICHEN` dazu, mit Id, Bild, Titel, `stufen` (steigend, höchstens fünf), `text(n)` und
+  `pruefe(k, n)`; mehr braucht es nicht.

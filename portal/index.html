@@ -20,7 +20,11 @@
   /* Handy: die drei Namen untereinander, ohne Trennpunkte */
   @media (max-width: 560px) { h1 span { display: block; } h1 .weg { display: none; } }
   .unter { text-align: center; color: var(--leise); margin: 0 0 28px; }
-  .apps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  /* Je App eine Spalte: Karte, darunter ihre Anleitungen (Entscheid P1 a, LERN_Session11). Auf dem Handy
+     folgen die Anleitungen so direkt auf ihre App; Lernsteig und Gratwanderung bekommen später an derselben
+     Stelle eigene, in ihrem eigenen Aussehen. */
+  .apps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; align-items: start; }
+  .spalte { display: grid; gap: 10px; }
   .app {
     display: block; padding: 22px; border-radius: 20px; background: var(--karte); color: inherit;
     text-decoration: none; box-shadow: 0 4px 0 var(--rand);
@@ -31,15 +35,17 @@
   .app .stufe { font-weight: 800; color: var(--akzent); font-size: 15px; }
   .app p { margin: 8px 0 0; color: var(--leise); font-size: 16px; }
   .app.bald { opacity: .6; box-shadow: none; border: 2px dashed var(--rand); }
-  .anleitungen { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 18px; }
+  /* Anleitungen zum Eulenpfad: an der Karte eingehängt, in den Farben der Eule (--deko-1 im Spielrahmen) */
+  .eulenpfad .anleitungen { display: grid; gap: 8px; margin: 0 0 0 18px; padding-left: 14px; border-left: 4px solid #d9c6f3; }
+  .eulenpfad .anleitungen h3 { margin: 2px 0 0; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: #8e5bd6; }
   .anleitung {
-    display: flex; gap: 14px; align-items: center; padding: 14px 18px; border-radius: 16px; background: var(--karte);
-    color: inherit; text-decoration: none; box-shadow: 0 3px 0 var(--rand); font-size: 16px; line-height: 1.35;
+    display: flex; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 14px; background: #f6f0fd;
+    color: inherit; text-decoration: none; box-shadow: 0 3px 0 #e6daf6; font-size: 15px; line-height: 1.35;
   }
-  .anleitung .bild { font-size: 34px; }
+  .anleitung .bild { font-size: 28px; }
   .anleitung span:last-child { color: var(--leise); }
   .anleitung b { color: var(--text); }
-  a.anleitung:hover, a.anleitung:focus-visible { outline: 3px solid var(--akzent); outline-offset: 2px; }
+  a.anleitung:hover, a.anleitung:focus-visible { outline: 3px solid #8e5bd6; outline-offset: 2px; }
   footer { margin-top: 28px; text-align: center; color: var(--leise); font-size: 14px; }
 </style>
 </head>
@@ -49,12 +55,20 @@
   <h1><span>Eulenpfad</span> <span class="weg">·</span> <span>Lernsteig</span> <span class="weg">·</span> <span>Gratwanderung</span></h1>
   <p class="unter">Lernspiele, die mit jeder Schulstufe steiler werden.</p>
   <div class="apps">
-    <a class="app" href="../eulenpfad/index.html">
-      <div class="bild">🦉</div>
-      <h2>Eulenpfad</h2>
-      <div class="stufe">Primarschule</div>
-      <p>Kleine Lernspiele für die 1. bis 6. Klasse — die Eule begleitet.</p>
-    </a>
+    <section class="spalte eulenpfad" aria-label="Eulenpfad">
+      <a class="app" href="../eulenpfad/index.html">
+        <div class="bild">🦉</div>
+        <h2>Eulenpfad</h2>
+        <div class="stufe">Kindergarten und Primarschule</div>
+        <p>Kleine Lernspiele bis zur 6. Klasse — die Eule begleitet.</p>
+      </a>
+      <div class="anleitungen">
+        <h3>Anleitungen</h3>
+        <a class="anleitung" href="../eulenpfad/anleitung/kinder.html"><span class="bild">🧒</span><span><b>So spielst du</b><br>für Kinder</span></a>
+        <a class="anleitung" href="../eulenpfad/anleitung/aufsicht.html"><span class="bild">🧑‍🏫</span><span><b>Für Erwachsene</b><br>Konten, Lernplan, Freigabe, Statistik, Abgleich</span></a>
+      </div>
+    </section>
+    <!-- Lernsteig und Gratwanderung: eigene Anleitungen später in ihrer Spalte, in ihrem eigenen Aussehen -->
     <a class="app bald" href="../lernsteig/index.html">
       <div class="bild">⛰️</div>
       <h2>Lernsteig</h2>
@@ -67,11 +81,6 @@
       <div class="stufe">Gymnasium · im Aufbau</div>
       <p>Repetieren bis zur Matura.</p>
     </a>
-  </div>
-  <!-- Anleitungen zum Eulenpfad (Wunsch Patrik, LERN_Session7) -->
-  <div class="anleitungen">
-    <a class="anleitung" href="../eulenpfad/anleitung/kinder.html"><span class="bild">🧒</span><span><b>So spielst du</b><br>Anleitung für Kinder</span></a>
-    <a class="anleitung" href="../eulenpfad/anleitung/aufsicht.html"><span class="bild">🧑‍🏫</span><span><b>Anleitung für Erwachsene</b><br>Konten, Freigabe, Statistik, Sichern, Abgleich</span></a>
   </div>
   <footer>Alles bleibt im Browser auf deinem Gerät. Keine Anmeldung, keine Werbung.</footer>
 </main>

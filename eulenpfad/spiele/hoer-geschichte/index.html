@@ -369,14 +369,14 @@ const SPIEL = {
       if (!LS.sprich(a.text, "de")) lesenStatt();
     });
 
-    // Erzählen kurz nach dem Zeichnen (ein Satz der Eule gleich beim Zeichnen würde die Geschichte sonst abbrechen).
-    // Danach Fragen zeigen und die Uhr starten.
-    setTimeout(() => {
+    // Erzählen, sobald die Eule fertig ist (Lob der vorigen Aufgabe; ein Satz der Eule würde die Geschichte sonst
+    // abbrechen). Danach Fragen zeigen und die Uhr starten.
+    ctx.nachAnsage(() => {
       if (!ctx.flaeche.contains(hg)) return; // neu gezogen oder schon weiter
       let gesprochen = false;
       gesprochen = LS.sprich(a.text, "de", "", () => { if (gesprochen) { fragenZeigen(); uhrLos(); } });
       if (gesprochen) ohr.classList.add("spricht"); else lesenStatt();
-    }, 450);
+    });
   },
 };
 

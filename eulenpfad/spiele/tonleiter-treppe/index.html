@@ -293,7 +293,8 @@ function klaviaturSvg(opt) {
 }
 
 const tonFolge = (midis, dauer = 0.5) => midis.map((m, i) => ({ midi: m, dauer: i === midis.length - 1 ? dauer * 1.6 : dauer }));
-const spielen = (ctx, wurzel, folge) => setTimeout(() => { if (document.body.contains(wurzel) && !ctx.vorbei()) NOTEN.spiele(folge); }, 250);
+// Vorspielen, sobald die Eule fertig ist (Lob, Vorlesen), und nur, wenn die Aufgabe noch steht.
+const spielen = (ctx, wurzel, folge) => ctx.nachAnsage(() => { if (document.body.contains(wurzel) && !ctx.vorbei()) NOTEN.spiele(folge); });
 const dauerVon = folge => folge.reduce((x, t) => x + t.dauer, 0);
 
 // Für das Prüfskript im Scratchpad: die laufende Aufgabe.

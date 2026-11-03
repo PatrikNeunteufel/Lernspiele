@@ -170,3 +170,6 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-44 | Lernplan: Wochenziel je Kind, Wochenstern, Tab Erfolge mit Abzeichen und Teilen (R2, Entscheid L1 a) | erledigt 2026-11-03 (LERN_Session10) | rahmen.md Abschnitt 15 |
 | LERN-45 | Rahmen-Baustein „Fragenfolge“ (mehrere Fragen je Aufgabe), danach sechs Spiele darauf umstellen | offen | Report LERN_Session10, Stolperfallen |
 | LERN-46 | Teilen eines Abzeichens auf Tablet und Handy prüfen (Teilen-Dialog, Emoji im PNG) | offen | start/erfolge.js, `teileAbzeichen` |
+| LERN-47 | Weitere Sektion im Portal für ein Publikum ausserhalb der Schulstufen, Arbeitsname „Eulerpfad“ (R1 a) | später | Report LERN_Session11 |
+| LERN-48 | Gruppen: Familie, Klasse, Lerngruppe; Rolle Lehrperson, Klassenstatistik, Abgleich je Gruppe verschlüsselt | offen (Entscheide G1–G10) | docs/konzept_gruppen.md; umfasst LERN-34 |
+| LERN-49 | Strategie-Rätsel im Eulenpfad (Matt in 1, Atari-Go, Nim) zu „Erforschen und Argumentieren“; ganze Partien Schach und Go erst im Lernsteig (S1 a) | offen | Lehrplan-Codes vor dem Bau prüfen; Report LERN_Session11 |

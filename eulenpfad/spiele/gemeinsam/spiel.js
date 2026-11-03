@@ -1043,6 +1043,19 @@ const LS = (() => {
     } catch { return nichts(); }
   }
   /**
+   * fn rufen, sobald keine Stimme mehr spricht (Lob der vorigen Aufgabe, Vorlesen); spätestens nach max ms.
+   * Abgefragt statt auf onend gewartet: Manche Browser melden das Ende nicht, und sprich bricht Fremdes ab.
+   */
+  function nachStimme(fn, max = 10000) {
+    const bis = Date.now() + max;
+    const schau = () => {
+      let laeuft = false;
+      try { laeuft = tonAn && (speechSynthesis.speaking || speechSynthesis.pending); } catch { /* ohne Stimme */ }
+      if (laeuft && Date.now() < bis) setTimeout(schau, 120); else fn();
+    };
+    schau();
+  }
+  /**
    * Spiel starten, das eine Stimme braucht: sofort, wenn sie schon da ist (so auch im Testskript),
    * sonst nach stimmeBereit. Ohne Stimme erklärt die Eule es und bietet keine Runde an.
    */
@@ -1832,11 +1845,23 @@ const LS = (() => {
         const satz = t => (/[.!?…:]$/.test(t) ? t : `${t}.`);
         // Die Blase nur, wenn die Eule in dieser Aufgabe etwas gesagt hat — sonst steht dort noch das Lob der
         // vorigen, und es käme zweimal (Meldung Patrik, LERN_Session8).
-        const lies = () => sprich(fuerStimme([blaseNeu ? eule.blase.textContent.trim() : "", ...auftrag()].filter(Boolean).map(satz).join(" ")), "de");
+        const text = auftragAuch => fuerStimme([blaseNeu ? eule.blase.textContent.trim() : "", ...(auftragAuch ? auftrag() : [])]
+          .filter(Boolean).map(satz).join(" "));
+        const lies = () => sprich(text(true), "de");
+        // Automatisch liest die Eule den Auftrag nur, wenn er anders lautet als bei der vorigen Aufgabe: Bleibt
+        // die Frage gleich („Wohin geht die Melodie?“), kennt das Kind sie schon (Meldung Patrik, LERN_Session11).
+        // 🗣️ liest ihn immer. fertig: wenn die Stimme fertig ist (ctx.nachAnsage).
+        let zuletztGelesen = null;
+        const liesNeu = fertig => {
+          const jetzt = auftrag().join(" ");
+          const neu = jetzt !== zuletztGelesen;
+          zuletztGelesen = jetzt;
+          sprich(text(neu), "de", "", fertig);
+        };
         // 🗣️ statt 🔊: Das Lautsprecher-Zeichen ist der Ton-Schalter in der Kopfzeile.
         eule.element.append(el("button", { type: "button", class: "vorlesen", text: "🗣️", "aria-label": "Vorlesen", onclick: lies }));
-        eule.beiSag = (text, art) => { blaseNeu = true; if (auto && !zeichnet) sprich(fuerStimme(text), "de", art); };
-        if (auto) { eule.vorlesen = lies; if (gezeigt) lies(); }
+        eule.beiSag = (t, art) => { blaseNeu = true; if (auto && !zeichnet) sprich(fuerStimme(t), "de", art); };
+        if (auto) { eule.vorlesen = liesNeu; if (gezeigt) liesNeu(); }
         if (knoepfeVorlesen(def.id)) langDruecken(flaeche);
       };
       if (vorlesenErlaubt(def.id)) {
@@ -1915,6 +1940,8 @@ const LS = (() => {
         let zug = 0; // zählt die Züge beim Zeichnen; eine verworfene Fassung startet die Uhr nicht
         let serien = {};  // Merkmale dieser Aufgabe (ctx.serie): Name → Wert
         let vorgehen = null; // wie das Kind vorging (ctx.vorgehen): Art → Wert, für die Statistik
+        let ansagen = [];    // ctx.nachAnsage: Töne und Stimmen des Spiels, die auf Lob und Vorlesen warten
+        let angesagt = false;
         const start = performance.now();
         let bereit = null; // ab wann das Kind antworten kann (performance.now()); ab da laufen Uhr und Zeitmessung
         let uhrEnde = null;   // wann die Zeit um ist, solange die Uhr läuft (performance.now())
@@ -1995,11 +2022,13 @@ const LS = (() => {
         // Uhr und Zeitmessung beginnen, wenn das Kind antworten kann (Entscheide F1 a, F2 a, LERN_Session9):
         // gleich nach dem Zeichnen, nach der Wartezeit (ctx.wartezeit: vorgespielte Töne) oder erst auf
         // ctx.uhrWarten() hin (LS.losGehts: nach „▶ Los!“, 3-2-1 und Zeigen; Stimme fertig). Wer wartet,
-        // verliert keine Zeit.
+        // verliert keine Zeit. Spielt das Spiel seine Töne erst nach der Ansage (ctx.nachAnsage), zählt die
+        // Wartezeit ab dann.
         function bereitMachen() {
           if (timer.an) balkenVoll();
           if (uhrWartet) return;
-          if (warten > 0) uhr = setTimeout(starteUhr, warten * 1000);
+          if (warten > 0 && ansagen.length) ansagen.push(() => { uhr = setTimeout(starteUhr, warten * 1000); });
+          else if (warten > 0) uhr = setTimeout(starteUhr, warten * 1000);
           else starteUhr();
         }
 
@@ -2114,6 +2143,13 @@ const LS = (() => {
             return () => { if (meinZug === zug) starteUhr(); };
           },
           sag: (t, art) => eule.sag(t, art),
+          /**
+           * fn erst rufen, wenn die Eule fertig ist: Lob der vorigen Aufgabe ausgesprochen, Auftrag vorgelesen
+           * (falls automatisch). Für alles, was ein Spiel beim Zeichnen vorspielt oder vorspricht (Melodie,
+           * Hörtext) — sonst überlagern sich die Stimmen oder die Eule bricht den Hörtext ab. Ohne Stimme
+           * kurz nach dem Zeichnen; nach einem Neuziehen der Aufgabe nie.
+           */
+          nachAnsage(fn) { if (angesagt) fn(); else ansagen.push(fn); },
           /** Lösung der Aufgabe gleich beim Zeichnen nennen (Text wie loesungText); zeigt sie nur die Testhilfe. */
           loesung(text) { loesungVorab = text || null; },
           /**
@@ -2219,7 +2255,19 @@ const LS = (() => {
             pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: zuLang && versuch >= SERIE_VERSUCHE });
             zeichnet = false;
             gezeigt = true;
-            if (eule.vorlesen) setTimeout(eule.vorlesen, 300);
+            // Reihenfolge: Lob der vorigen Aufgabe ausreden lassen, dann vorlesen, dann die Töne des Spiels.
+            const meinLauf = lauf;
+            const ansagenLos = () => {
+              if (meinLauf !== aufgabeLauf) return;
+              angesagt = true;
+              const faellig = ansagen;
+              ansagen = [];
+              faellig.forEach(fn => fn());
+            };
+            setTimeout(() => nachStimme(() => {
+              if (meinLauf !== aufgabeLauf) return;
+              if (eule.vorlesen) eule.vorlesen(ansagenLos); else ansagenLos();
+            }), 300);
             break;
           }
           if (versuch >= 60) {
@@ -2236,6 +2284,7 @@ const LS = (() => {
           schritte = 0;
           warten = 0;
           uhrWartet = false;
+          ansagen = [];
           tipps = [];
           tippPos = 0;
           zug++;

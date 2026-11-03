@@ -322,8 +322,8 @@ LS.spiel({
       el("div", { class: "rd-zeile" }, NOTEN.hoerKnopf(ctx, vorspiel, "🔊 Nochmal hören"), meine, zurueck),
       diktat, wahl);
     zeichne();
-    // Gleich vorspielen — aber nur, wenn diese Aufgabe auch gestellt bleibt (der Rahmen zieht manchmal neu).
-    setTimeout(() => { if (document.body.contains(diktat) && !ctx.vorbei()) NOTEN.spiele(vorspiel()); }, 250);
+    // Vorspielen, sobald die Eule fertig ist (Lob, Vorlesen); ctx.nachAnsage lässt eine neu gezogene Fassung weg.
+    ctx.nachAnsage(() => { if (document.body.contains(diktat) && !ctx.vorbei()) NOTEN.spiele(vorspiel()); });
   },
 });
 </script>

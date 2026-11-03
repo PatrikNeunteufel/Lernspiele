@@ -73,6 +73,7 @@ async function rahmen(ziele) {
         const kandidaten = [...document.querySelectorAll("body *")].filter(x => x.offsetParent !== null && x.textContent.includes(z.text) && !x.classList.contains("anl-rahmen"));
         e = kandidaten.filter(x => ![...x.children].some(c => c.textContent.includes(z.text) && c.offsetParent !== null)).sort((a, b) => a.textContent.length - b.textContent.length)[0];
       }
+      if (!e && z.wennDa) return; // z. B. 🗣️ nur mit deutscher Stimme; steht darum zuletzt
       if (!e) throw new Error("Rahmen-Ziel fehlt: " + JSON.stringify(z));
       const r = e.getBoundingClientRect();
       const rand = 6;
@@ -120,6 +121,20 @@ async function bild(name, { css = null, ab = null, maxHoehe = 1300, rand = 16 } 
   await js(`document.querySelectorAll(".anl-rahmen, #anl-ab").forEach(e => e.remove());`);
 }
 
+/** Bildbereich #anl-ab über alle sichtbaren Elemente zu css (für bild({ css: "#anl-ab" })). */
+const umfasse = css => js(`const es = [...document.querySelectorAll(${JSON.stringify(css)})].filter(x => x.offsetParent !== null);
+  if (!es.length) throw new Error("Bildbereich fehlt: " + ${JSON.stringify(css)});
+  const rs = es.map(x => x.getBoundingClientRect());
+  const l = Math.min(...rs.map(r => r.left)), t = Math.min(...rs.map(r => r.top)), r = Math.max(...rs.map(r => r.right)), b = Math.max(...rs.map(r => r.bottom));
+  const a = document.createElement("div");
+  a.id = "anl-ab";
+  Object.assign(a.style, { position: "absolute", left: (l + scrollX) + "px", top: (t + scrollY) + "px", width: (r - l) + "px", height: (b - t) + "px", pointerEvents: "none" });
+  document.body.append(a);`);
+
+/** Karte mit der Überschrift h2 (Anfang des Texts) als #anl-karte markieren. */
+const karteMit = h2 => js(`const k = [...document.querySelectorAll(".karte")].find(x => x.querySelector("h2")?.textContent.startsWith(${JSON.stringify(h2)}));
+  if (!k) throw new Error("Karte fehlt: " + ${JSON.stringify(h2)}); k.id = "anl-karte";`);
+
 // ---------- Musterdaten ----------
 
 /** Erfundene Runden für Muster Kind über die letzten zwei Wochen (nur für die Bilder der Statistik). */
@@ -153,6 +168,7 @@ async function einrichten() {
     LS.neuerSpieler("Muster Kind", { rolle: "kind", alter: 10, klasse: 4 });
     LS.neuerSpieler("Muster Kind 2", { rolle: "kind", alter: 9, klasse: 4 });
     LS.neuerSpieler("Muster Kind 3", { rolle: "kind", alter: 11, klasse: 5 });
+    LS.speichereProfil("Muster Kind", { lernplan: { tage: 3, minuten: 10 } });
     ${BEISPIELRUNDEN}
     ${BEISPIELREKORDE}
     localStorage.removeItem("lernspiele:spieler");`);
@@ -197,8 +213,11 @@ async function aufsicht() {
   await rahmen([{ css: "nav.tabs" }]);
   await bild("a04-tabs", { maxHoehe: 760 });
 
+  await rahmen([{ css: ".filter" }, { css: "input.suche" },{ css: ".spielkarte.zufall" }, { css: ".spielkarte.zufall + .spielkarte.zufall" }]);
+  await bild("a16-spiele", { maxHoehe: 1150 });
+
   await gehe("/eulenpfad/index.html#verwaltung/konten");
-  await rahmen([{ css: "nav.untertabs" }]);
+  await rahmen([{ css: "nav.untertabs" }, { css: "td:nth-child(3) .zeile-knoepfe" }]);
   await bild("a05-konten", { maxHoehe: 1100 });
 
   await gehe("/eulenpfad/index.html#verwaltung/freigabe");
@@ -219,8 +238,10 @@ async function aufsicht() {
   await alsAufsicht();
   await gehe("/eulenpfad/index.html#statistik");
   await js(`[...document.querySelectorAll(".statistik .chip")].find(b => b.textContent.trim() === "Muster Kind").click(); await new Promise(r => setTimeout(r, 400));`);
-  await rahmen([{ css: ".statistik .chips" }]);
+  await rahmen([{ css: ".statistik .chips" }, { css: ".fazit-kopf" }]);
   await bild("a09-statistik", { maxHoehe: 1300 });
+  await karteMit("📅 Lernplan");
+  await bild("a17-lernplan", { css: "#anl-karte" });
   await js(`const k = [...document.querySelectorAll(".statistik .karte")].find(x => x.querySelector("h2")?.textContent === "Vorgehen"); k.id = "anl-vorgehen";`);
   await bild("a10-vorgehen", { css: "#anl-vorgehen" });
   await js(`const k = [...document.querySelectorAll(".statistik .karte")].find(x => x.querySelector("h2")?.textContent === "Daten"); k.id = "anl-daten";`);
@@ -228,6 +249,11 @@ async function aufsicht() {
   await bild("a11-daten", { css: "#anl-daten" });
   await js(`const k = [...document.querySelectorAll(".statistik .karte")].find(x => x.querySelector("h2")?.textContent.includes("Endlos")); k.id = "anl-rekorde";`);
   await bild("a15-rekorde", { css: "#anl-rekorde" });
+
+  await gehe("/eulenpfad/index.html#erfolge");
+  await js(`[...document.querySelectorAll(".chip")].find(b => b.textContent.trim() === "Muster Kind")?.click(); await new Promise(r => setTimeout(r, 400));`);
+  await rahmen([{ css: ".woche" }, { css: ".abzeichen" }]);
+  await bild("a18-erfolge", { maxHoehe: 1000 });
 
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html");
   await rahmen([{ text: "Timer aus" }, { css: ".stufe" }, { text: "Endlos —" }]);
@@ -254,9 +280,15 @@ async function kind() {
   await rahmen([{ css: ".stufe" }]);
   await bild("k03-stufen", { maxHoehe: 1400 });
 
+  await gehe("/eulenpfad/index.html#spiele");
+  await umfasse(".spielkarte.zufall");
+  await bild("k10-zufall", { css: "#anl-ab" });
+
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html?stufe=s1");
   await rahmen([{ css: ".zahl-gross" }, { css: ".ziele" }]);
   await bild("k04-aufgabe", { maxHoehe: 480 });
+  await rahmen([{ css: ".hilfe-knopf" }, { css: ".tipp-knopf" }, { css: ".melden" }, { css: ".vorlesen", wennDa: true }]);
+  await bild("k11-hilfe-tipp", { maxHoehe: 640 });
   // Hinweis der Eule nach einer falschen Antwort
   await js(`${RUTSCHE_RICHTIG.replace("k.click();", "")} [...document.querySelectorAll(".ziel")].find(b => b !== k).click(); await new Promise(r => setTimeout(r, 400));`);
   await rahmen([{ css: ".blase" }]);
@@ -274,6 +306,10 @@ async function kind() {
 
   await gehe("/eulenpfad/index.html#statistik");
   await bild("k07-statistik", { maxHoehe: 1400 });
+
+  await gehe("/eulenpfad/index.html#erfolge");
+  await rahmen([{ css: ".woche" }, { css: ".abzeichen" }]);
+  await bild("k12-erfolge", { maxHoehe: 1300 });
 
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html?stufe=s1&endlos=1");
   for (let geloest = 0; geloest < 3;) {

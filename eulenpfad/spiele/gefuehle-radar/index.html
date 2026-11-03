@@ -345,9 +345,8 @@ const ZEICHNE = {
     gs.append(el("div", { class: "frage", text: `Wie fühlt sich ${a.wer}?` }), el("div", { class: "satz", text: a.satz }), hoerKnopf(a.satz));
     LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: gefuehlInhalt, breite: 150, loesung, lob: waehle(LOB),
       hinweis: `Hör den Satz nochmal an (🔊). Was tut ${a.wer}? Was sagt ${a.wer}?` }).classList.add("gs-wahl");
-    // Vorsprechen kurz nach dem Zeichnen: Liest die Eule die Frage automatisch vor, tut sie das nach 300 ms;
-    // unser Satz käme sonst nicht durch (wie im Hör-Reporter). Ohne Stimme bleibt der Satz sichtbar.
-    setTimeout(() => { if (ctx.flaeche.contains(gs)) LS.sprich(a.satz, "de"); }, 450);
+    // Vorsprechen, sobald die Eule fertig ist (Lob, Vorlesen der Frage). Ohne Stimme bleibt der Satz sichtbar.
+    ctx.nachAnsage(() => { if (ctx.flaeche.contains(gs)) LS.sprich(a.satz, "de"); });
   },
 
   situation(ctx, a, gs) {
