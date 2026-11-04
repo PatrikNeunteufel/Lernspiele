@@ -7,6 +7,14 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "gegenteil-wippe/gegenteile": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "platzhalter-geschichten/geschichten": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
     "preis-tabelle/folgen": {
       "am": "2026-11-01",
       "von": "Patrik"
@@ -40,6 +48,30 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "rechengeschichten/verteilen": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "schaetz-waage/gewicht": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "schaetz-waage/hohlmass": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "schaetz-waage/laenge": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "schaetz-waage/reihen": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "schaetz-waage/vergleiche": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "schaetz-waage/zeit": {
       "am": "2026-11-04",
       "von": "Patrik"
     }
@@ -97,7 +129,19 @@ const PRUEFSTAND = {
       "am": "2026-11-02",
       "von": "Patrik"
     },
+    "flaechenmass-treppe": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "gegenteil-wippe": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
     "gerecht-teiler": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "hundertertafel": {
       "am": "2026-11-04",
       "von": "Patrik"
     },
@@ -109,6 +153,10 @@ const PRUEFSTAND = {
       "am": "2026-11-02",
       "von": "Patrik"
     },
+    "merk-blick": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
     "netz-falter": {
       "am": "2026-11-04",
       "von": "Patrik"
@@ -117,8 +165,16 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "platzhalter-geschichten": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
     "preis-tabelle": {
       "am": "2026-11-01",
+      "von": "Patrik"
+    },
+    "quader-volumen": {
+      "am": "2026-11-04",
       "von": "Patrik"
     },
     "rechen-maschine": {
@@ -135,6 +191,10 @@ const PRUEFSTAND = {
     },
     "rechentrick-detektiv": {
       "am": "2026-11-02",
+      "von": "Patrik"
+    },
+    "rechteck-labor": {
+      "am": "2026-11-04",
       "von": "Patrik"
     },
     "sachaufgaben-kompass": {
@@ -161,7 +221,15 @@ const PRUEFSTAND = {
       "am": "2026-11-02",
       "von": "Patrik"
     },
+    "wuerfel-kipper": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
     "wuerfel-zaehler": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "wuerfelbau-blick": {
       "am": "2026-11-04",
       "von": "Patrik"
     },

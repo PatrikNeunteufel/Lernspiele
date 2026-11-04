@@ -423,3 +423,19 @@
   mit den Zahlen der Aufgabe. Rückmeldung lesbar und überspringbar (WZ1 a); Eule zeigt bei neuer Aufgabe den Auftrag.
 - Entschieden, noch nicht gebaut: Sudoku-Familie (SU1–SU3 a), Neunerprobe (PS2 a, Rückfrage offen).
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session13_2026-11-04.md`.
+
+## 2026-11-04 — LERN_Session14
+- README im Repo als Übersicht der Reihe, Eulenpfad-README nach `eulenpfad/`; CLAUDE.md: Kindergarten bis 6. Klasse.
+- Profil: Geburtsmonat statt Alter (`LS.alterVon`, Annahme GM1 ohne Tag); Klassenaufstieg einzeln und als „Neues
+  Schuljahr“ in Verwaltung → Konten, Nachricht ans Kind, Abzeichen „Aufgestiegen“; Profil der Aufsicht neu geordnet
+  (Person, Vorgaben, Fokus je Fach einklappbar, Speichern, darunter die Sofort-Häkchen); Kind sieht Alter und Klasse.
+- Tab Spiele: Klassen-Rand (G1 a, Deko-Farben mit Zeichen), Filter einklappbar, 📖 Anleitungen in der App.
+- Notizblock für schriftliches Rechnen (NB1–NB4 a): `spiele/gemeinsam/notizblock.js`, Vorlagen Plus, Minus, Mal,
+  Geteilt, Häuschen, Dezimalzahlen mit Kommalinie, eigenes Ziffernfeld, `ctx.notizblock`; Schriftlich-Werkstatt auf
+  dem gemeinsamen Raster. Bildschirmtastatur schreibt ins gewählte Notizfeld. Probe-Stempel mit beschrifteten
+  Zerlegungsschritten.
+- Rahmen: Eule zeigt den Auftrag aus `.frage`/`.auftrag`; Ja/Nein auf J/N; Balken der Rückmeldung auf festem Platz.
+- Sachaufgaben-Kompass: Angaben mit Bedeutung (SK1 a). Pentomino-Umriss sichtbar. Rechteck-Labor: Höhe ganz sichtbar.
+- Hilfsmittel als eigene Spiele (HM1 a, `spielideen/hilfsmittel.md`); neu Hundertertafel-Detektiv (169 Spiele).
+- Bemerkungen 9 und 10 erledigt, Meldungsstand neu.
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session14_2026-11-04.md`.

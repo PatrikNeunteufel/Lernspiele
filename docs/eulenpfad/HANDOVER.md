@@ -1,7 +1,18 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
-**2026-11-04, nach LERN_Session13** ([Report](report/LERN_Session13_2026-11-04.md)):
+**2026-11-04, nach LERN_Session14** ([Report](report/LERN_Session14_2026-11-04.md)):
+- **Reihe:** README im Repo als Übersicht der drei Apps, Eulenpfad-README in `eulenpfad/`.
+- **Profil:** Geburtsmonat statt Alter (`LS.alterVon`), Klassenaufstieg einzeln und als „Neues Schuljahr“ mit Nachricht
+  und Abzeichen; Profil der Aufsicht neu geordnet (Formular mit Speichern, darunter die Sofort-Häkchen).
+- **Tab Spiele:** Klassen-Rand (G1 a), Filter einklappbar, 📖 Anleitungen in der App.
+- **Notizblock** für schriftliches Rechnen (NB1–NB4 a, rahmen.md 21) mit Dezimalzahlen und eigenem Ziffernfeld;
+  Bildschirmtastatur schreibt ins gewählte Notizfeld; Balken der Rückmeldung auf festem Platz.
+- **Spiele:** 169 — neu Hundertertafel-Detektiv (Hilfsmittel H2, HM1 a); Sachaufgaben-Kompass mit Angaben mit
+  Bedeutung (SK1 a).
+- **Tests:** 2026-11-04 „Keine Fehler.“ über alle 169 Spiele (22 Hinweise bekannter Arten); der volle Lauf dauert rund 25 min.
+
+Stand nach LERN_Session13 ([Report](report/LERN_Session13_2026-11-04.md)):
 - **Anmeldung:** „🐣 Ich bin neu“ für Kinder und Erwachsene (Frage für Erwachsene, Erlaubnis einer Aufsicht), PIN
   vergessen in vier Stufen (zweite Aufsicht, Code, Sicherheitsfrage, Zurücksetzen mit 3 Tagen Frist; rahmen.md 6).
 - **Bedienung:** Kurztasten für Antwortknöpfe (Schweizer Tastatur, rahmen.md 19); Rückmeldung lesbar und
@@ -93,15 +104,15 @@ Stand nach LERN_Session8 ([Report](report/LERN_Session8_2026-11-02.md)):
 
 **Nächste Session — Plan:**
 1. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
-2. **GR1 a umsetzen** (LERN-55, [bildhoehe_offen.md](bildhoehe_offen.md)): Verdichtung unter 700 px Höhe, Knopf
-   ⛶ Vollbild, sichtbare Flächen als Vorgabe in `tools/bildhoehe.js`, Runde je Spiel; GR1 b zurückgestellt.
-3. **Sudoku-Familie** (LERN-56; SU1 a mit Gebiets-Sudoku, SU2 a, SU3 a): sechs Spiele, Thema „Logikrätsel“,
-   Ideenliste `spielideen/logikraetsel.md`. Zuerst gemeinsamer Löser/Generator, dann die Spiele.
-4. **PS2** (LERN-57): Neunerprobe in der Königsstufe — Rückfrage Patrik (Erklärung, Regeln für 3/6/9, Gruppe für
-   Neugierige ausserhalb des Lehrplans) als Entscheid vorlegen.
-5. **Weitere Erfolge** (LERN-58): Konzept für Abzeichen je Thema und für besondere Spiele.
-6. Anleitungsbilder neu (`node tools/anleitung_bilder.js`, Server 8765); Stichprobe der Notizen und der drei Stempel
-   im Browser ansehen.
+2. **Anleitungen:** Notizen und Notizblock beschreiben, Bilder neu (`node tools/anleitung_bilder.js`, Server 8765):
+   Profil, Tab Spiele mit Filter und Klassen-Rand, Aufstieg.
+3. **Lehrmittel abgleichen:** Hundertertafel ab 0 oder 1 (`START`), Zwanzigerfeld oder Rechenrahmen, Verfahren der
+   Subtraktion (Notizblock und Werkstatt), schriftliche Division in der Primarschule.
+4. **Hilfsmittel weiter** (LERN-60, [spielideen/hilfsmittel.md](spielideen/hilfsmittel.md)): H1 Zwanzigerfeld,
+   H3 Punktefeld, H4 Rechenstrich; H5 als Stufe der Rechen-Maschine.
+5. **Prüfer-Kandidaten:** `tools/meldungen_stand.py` behält veröffentlichte Antworten; Testskript meldet Stellenfarben
+   ausserhalb von Stellen.
+6. Aus LERN_Session13: **GR1 a** (LERN-55), **Sudoku-Familie** (LERN-56), **PS2** (LERN-57), **Weitere Erfolge** (LERN-58).
 7. **LP5 / LERN-51**, **VL1 a / LERN-52**, Avatare in Verwaltung → Konten, LERN-48.
 8. Patrik: Spieler mit Farbcodes im eigenen Browser löschen; LERN-49, LERN-50, LERN-43, LERN-46, LERN-37.
 9. Weiter offen: LERN-45, LERN-35, LERN-39, LERN-40, LERN-41, LERN-31, LERN-4, LERN-33.

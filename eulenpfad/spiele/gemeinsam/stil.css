@@ -699,7 +699,8 @@ button.link, a.link {
 }
 
 /* Rückmeldung überspringen (WZ1 a): Balken läuft ab, „Weiter ➜“ führt sofort zur nächsten Aufgabe */
-.weiter-leiste { display: flex; align-items: center; gap: 10px; margin: -4px 0 8px; }
+/* Der Platz steht immer in der Zeile von „Melden“ (LERN_Session14); er füllt sich nur, die Höhe bleibt */
+.weiter-leiste { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; margin: 0; }
 .weiter-balken { flex: 1; height: 6px; border-radius: 3px; background: var(--gut); transform-origin: left; animation: weiter-ablauf linear forwards; }
 @keyframes weiter-ablauf { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 .weiter-leiste .weiter-knopf { min-height: 40px; padding: 4px 14px; font-size: 17px; }
@@ -780,7 +781,10 @@ button.link, a.link {
 .nb-feld.karo { border-style: solid; border-color: #efe4b8; border-radius: 3px; }
 /* Knopf in der Zeile von „Melden“ (NB2 a): gleich hoch, in den Zettelfarben des Blocks */
 .melde-zeile { gap: 8px; }
-.melde-zeile:not(:has(button)) { display: none; }
+/* Immer da und immer gleich hoch: sonst schöbe der Balken der Rückmeldung die Aufgabe hinunter (LERN_Session14) */
+.melde-zeile { min-height: 40px; align-items: center; flex-wrap: nowrap; }
+/* Handy: während der Rückmeldung nur Balken und Weiter, sonst bräche die Zeile um */
+@media (max-width: 560px) { .melde-zeile.weiter-an .nb-platz, .melde-zeile.weiter-an .melden { display: none; } }
 .melde-zeile .nb-knopf { height: 36px; min-height: 36px; padding: 0 12px; border-radius: 999px; background: #fffbea; color: #6b5a1e;
   border: 2px dashed #c9b87a; box-shadow: none; font-size: 15px; }
 .notizblock .knopf { min-height: 40px; padding: 4px 14px; font-size: 16px; }

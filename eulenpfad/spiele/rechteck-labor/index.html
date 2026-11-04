@@ -61,7 +61,9 @@ const { zufall, waehle, mische, el } = LS;
 const SVGNS = "http://www.w3.org/2000/svg";
 
 const RASTER = { b: 12, h: 10 };          // Häuschen nebeneinander und übereinander
-const Z = 30, RAND_L = 40, RAND_O = 30;   // Zellgrösse und Platz für die Masse im SVG
+// Zellgrösse und Platz für die Masse im SVG; links muss „10 cm“ ganz hineinpassen (bei 40 war schon „6 cm“
+// angeschnitten, Hinweis Patrik, LERN_Session14)
+const Z = 30, RAND_L = 62, RAND_O = 30;
 
 const flaecheVon = (b, h) => b * h;
 const umfangVon = (b, h) => 2 * (b + h);

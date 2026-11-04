@@ -2521,7 +2521,10 @@ const LS = (() => {
       // Eigene kleine Zeile unter der Eule: neben der Blase würde das Wort sie auf dem Handy zu schmal machen.
       // Davor der Platz für „📝 Notizblock“ (NB2 a): immer an derselben Stelle, nicht im Aufbau des Spiels.
       const blockPlatz = el("span", { class: "nb-platz" });
-      const werkzeugZeile = el("div", { class: "melde-zeile" }, blockPlatz);
+      // Platz für den Balken der Rückmeldung (WZ1 a) fest in dieser Zeile, links (Hinweis Patrik, LERN_Session14): Früher kam
+      // eine eigene Leiste unter die Eule und ging wieder weg — die Aufgabe rutschte jedes Mal hinunter und hinauf.
+      const weiterPlatz = el("div", { class: "weiter-leiste" });
+      const werkzeugZeile = el("div", { class: "melde-zeile" }, weiterPlatz, blockPlatz);
       if (meldenErlaubt(name)) {
         werkzeugZeile.append(el("button", { type: "button", class: "melden", text: "🙋 Melden", "aria-label": "Fehler melden", title: "Fehler im Spiel melden",
           onclick: () => meldeFormular({ name, spiel: def.id, stufe: stufe.id, jetzt: laufendeAufgabe(), vorige: vorigeAufgabe }) }));
@@ -2938,7 +2941,7 @@ const LS = (() => {
               if (weiterGegangen) return;
               weiterGegangen = true;
               clearTimeout(wartet);
-              leiste?.remove();
+              if (leiste) { weiterPlatz.replaceChildren(); werkzeugZeile.classList.remove("weiter-an"); }
               eule.blase.removeEventListener("click", weiterJetzt);
               removeEventListener("keydown", tasteWeiter, true);
               naechste();
@@ -2955,10 +2958,11 @@ const LS = (() => {
             if (!endlos) {
               const balken = el("div", { class: "weiter-balken" });
               balken.style.animationDuration = lesen + "ms";
-              leiste = el("div", { class: "weiter-leiste" }, balken,
+              leiste = weiterPlatz;
+              weiterPlatz.replaceChildren(balken,
                 el("button", { type: "button", class: "knopf hell klein weiter-knopf", text: "Weiter ➜",
                   onclick: () => { try { speechSynthesis.cancel(); } catch { /* ohne Stimme */ } weiterJetzt(); } }));
-              eule.element.after(leiste);
+              werkzeugZeile.classList.add("weiter-an");
               eule.blase.addEventListener("click", weiterJetzt);
               addEventListener("keydown", tasteWeiter, true);
             }
