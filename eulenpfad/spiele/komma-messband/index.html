@@ -24,6 +24,10 @@
   .mb-ziffer.komma::after { content: var(--komma, "."); position: absolute; right: -0.28em; bottom: -0.1em; color: var(--knopf); font-size: 1.1em; z-index: 1; }
   .mb-legende { text-align: center; font-size: 14px; color: var(--text-leise); font-weight: 700; margin: -6px 0 10px; }
   .wahl-knopf { font-size: clamp(20px, 4.6vw, 28px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  /* Notizen (NZ1 a): je Summand ein kleines Feld „in der Zieleinheit“, unter der Rechnung */
+  .km-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; margin: -6px 0 10px; font-size: 16px; font-weight: 800; color: var(--text-leise); }
+  .km-notizen .op { font-size: 20px; font-weight: 900; }
+  .km-notizen .zw-notiz { font-size: 18px; min-height: 36px; }
 </style>
 </head>
 <body>
@@ -368,6 +372,18 @@ LS.spiel({
       loesung = `${links} = ${menge(a.q, a.fam, a.ziel)}`;
       fl.append(el("div", { class: "frage", text: `Rechne. Antwort in ${a.ziel}.` }));
       fl.append(el("div", { class: "rechnung", html: `${links} = <span class="gesucht">${zielText}</span>` }));
+      // Notizen (NZ1 a): je Summand ein Feld für die Grösse in der Zieleinheit — nach Stufe immer beim Rechnen mit
+      // zwei, drei Einheiten (s5, s6); Umwandeln ist ein Schritt und bekommt keine.
+      if (ctx.notizen(true)) {
+        const teile = [el("span", { text: `in ${a.ziel}:` })];
+        a.terme.forEach((t, i) => {
+          if (i) teile.push(el("span", { class: "op", text: t.op }));
+          const feld = LS.notizFeld({ breite: 7, label: `${menge(t.q, a.fam, t.e)} in ${a.ziel}` });
+          feld.inputMode = "decimal";
+          teile.push(feld);
+        });
+        fl.append(el("div", { class: "km-notizen" }, ...teile));
+      }
     } else {
       const gegeben = menge(a.q, a.fam, a.von);
       loesung = `${gegeben} = ${menge(a.q, a.fam, a.ziel)}`;

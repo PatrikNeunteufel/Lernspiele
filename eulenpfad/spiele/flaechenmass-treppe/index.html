@@ -25,6 +25,10 @@
   .ft-raster .rand-gross { fill: none; stroke: var(--deko-6); stroke-width: 4; }
   .ft-legende { text-align: center; color: var(--text-leise); font-weight: 700; margin: 0 0 6px; }
   .wahl-knopf.ft-zeichen { font-size: clamp(30px, 7vw, 44px); font-weight: 900; }
+  /* Notizen (NZ1 a): je Zwischenstufe der Treppe ein kleines Feld mit ihrer Einheit, unter der Rechnung */
+  .ft-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px; margin: -6px 0 10px; font-size: 16px; font-weight: 800; color: var(--text-leise); }
+  .ft-notizen label { display: inline-flex; align-items: center; gap: 4px; }
+  .ft-notizen .zw-notiz { font-size: 18px; min-height: 36px; }
   /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy bleibt die Tastatur unten fest; das Raster wird dafür kleiner. */
   @media (max-width: 560px) and (max-height: 820px) {
     .ft-raster { max-width: min(260px, 22vh); margin-bottom: 6px; }
@@ -356,6 +360,20 @@ LS.spiel({
     } else {
       loesung = `${teileText(a.teile)} = ${ergebnisText(a.L)} ${a.ziel}`;
       f.append(el("div", { class: "rechnung", html: `${teileText(a.teile)} = <span class="einheit">? ${a.ziel}</span>` }));
+      // Notizen (NZ1 a): über zwei, drei Stufen ein Feld je Zwischenstufe der Treppe (3 ha = … a = … m²) — nach Stufe
+      // in der Königsstufe; ein Sprung über eine Stufe ist ein Schritt und bekommt keine.
+      if (a.teile.length === 1) {
+        const von = FLAECHEN.indexOf(a.teile[0].e), bis = FLAECHEN.indexOf(a.ziel);
+        const zwischen = FLAECHEN.slice(Math.min(von, bis) + 1, Math.max(von, bis));
+        if (von > bis) zwischen.reverse();
+        if (zwischen.length && ctx.notizen(ctx.stufe === "s6")) {
+          f.append(el("div", { class: "ft-notizen" }, el("span", { text: "=" }), ...zwischen.map((e, i) => {
+            const feld = LS.notizFeld({ breite: 8, label: `${teilText(a.teile[0])} in ${e}` });
+            feld.inputMode = "decimal";
+            return el("label", {}, i ? "=" : "", feld, el("span", { text: e }));
+          })));
+        }
+      }
     }
     ctx.loesung(loesung);
     ctx.schritte(LS.tippSchritte(a.L / 1000));

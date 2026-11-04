@@ -1,7 +1,18 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
-**2026-11-04, nach LERN_Session12** ([Report](report/LERN_Session12_2026-11-03.md)):
+**2026-11-04, nach LERN_Session13** ([Report](report/LERN_Session13_2026-11-04.md)):
+- **Anmeldung:** „🐣 Ich bin neu“ für Kinder und Erwachsene (Frage für Erwachsene, Erlaubnis einer Aufsicht), PIN
+  vergessen in vier Stufen (zweite Aufsicht, Code, Sicherheitsfrage, Zurücksetzen mit 3 Tagen Frist; rahmen.md 6).
+- **Bedienung:** Kurztasten für Antwortknöpfe (Schweizer Tastatur, rahmen.md 19); Rückmeldung lesbar und
+  überspringbar; Eule zeigt bei neuer Aufgabe den Auftrag.
+- **Ganze Aufgabe im Bild** (rahmen.md 20, `tools/bildhoehe.js`): Rahmen und 58 Spiele angepasst; Ziel sichtbare
+  Fläche (GR1 a) noch umzusetzen, offene Punkte in [bildhoehe_offen.md](bildhoehe_offen.md).
+- **Notizen für Zwischenergebnisse** (NZ1 a, [konzept_notizen.md](konzept_notizen.md)) in 32 Spielen, Abzeichen
+  „Kopfrechner“; Probe-Stempel mit „nicht sicher“ und Abzeichen „Ganz sicher“.
+- **Tests:** 2026-11-04 „Keine Fehler.“ über alle 168 Spiele (Hinweise bekannter Arten).
+
+Stand nach LERN_Session12 ([Report](report/LERN_Session12_2026-11-03.md)):
 - **Profil für Kinder** (konzept_profil_kind.md, rahmen.md 18): Kind sieht nur „Mein Bild“; Avatare in fünf Sätzen
   mit Farben und Rahmen, Abzeichen-Symbole ab Gold und Rahmen ab dem ersten Gold/Platin/Diamant freigeschaltet;
   Wahl des Kindes getrennt von der Vorgabe der Aufsicht mit „fest“; Weiterspielen; Statistik des Kindes; Podestplätze.
@@ -82,18 +93,18 @@ Stand nach LERN_Session8 ([Report](report/LERN_Session8_2026-11-02.md)):
 
 **Nächste Session — Plan:**
 1. Offene Bemerkungen aus `docs/eulenpfad/bemerkungen.json` abarbeiten.
-2. Testlauf über alles (`node tools/pruefe_spiele.js`) — der letzte wurde nach den Spielen × Stufen abgebrochen;
-   Endlos-Modus (jetzt 129 Spiele), Zufallsmix und Läufe als Kind stehen aus. Danach Bilder der Anleitungen neu
-   (`node tools/anleitung_bilder.js`, Server 8765).
-3. **Entscheid PIN1** (LERN-53): Wiederherstellungscode beim Einrichten der PIN, statt Code per E-Mail.
-4. **LP5 / LERN-51:** alle Listen auf `pruefung.js` umstellen, gemischte Listen trennen; danach
-   `tools/pruefliste_wortlisten.js` auf `pruefung.js` umstellen.
-5. Avatare auch in Verwaltung → Konten; VR2, VR3 und Ziele der Klasse mit den Gruppen (LERN-48).
-6. **VL1 a / LERN-52:** zweisprachiges Vorlesen, Pilot Au café.
-7. Patrik: Spieler mit Farbcodes (aus dem Namensfehler `waehle`) im eigenen Browser löschen; Strategie-Rätsel
-   freigeben (LERN-49), Beitrags-Links (LERN-50), Annahmen Runde B/C (LERN-43), Teilen auf Geräten (LERN-46),
-   Vorlesen anhören (LERN-37).
-8. Weiter offen: LERN-45, LERN-35, LERN-39, LERN-40, LERN-41, LERN-31, LERN-4, LERN-33.
+2. **GR1 a umsetzen** (LERN-55, [bildhoehe_offen.md](bildhoehe_offen.md)): Verdichtung unter 700 px Höhe, Knopf
+   ⛶ Vollbild, sichtbare Flächen als Vorgabe in `tools/bildhoehe.js`, Runde je Spiel; GR1 b zurückgestellt.
+3. **Sudoku-Familie** (LERN-56; SU1 a mit Gebiets-Sudoku, SU2 a, SU3 a): sechs Spiele, Thema „Logikrätsel“,
+   Ideenliste `spielideen/logikraetsel.md`. Zuerst gemeinsamer Löser/Generator, dann die Spiele.
+4. **PS2** (LERN-57): Neunerprobe in der Königsstufe — Rückfrage Patrik (Erklärung, Regeln für 3/6/9, Gruppe für
+   Neugierige ausserhalb des Lehrplans) als Entscheid vorlegen.
+5. **Weitere Erfolge** (LERN-58): Konzept für Abzeichen je Thema und für besondere Spiele.
+6. Anleitungsbilder neu (`node tools/anleitung_bilder.js`, Server 8765); Stichprobe der Notizen und der drei Stempel
+   im Browser ansehen.
+7. **LP5 / LERN-51**, **VL1 a / LERN-52**, Avatare in Verwaltung → Konten, LERN-48.
+8. Patrik: Spieler mit Farbcodes im eigenen Browser löschen; LERN-49, LERN-50, LERN-43, LERN-46, LERN-37.
+9. Weiter offen: LERN-45, LERN-35, LERN-39, LERN-40, LERN-41, LERN-31, LERN-4, LERN-33.
 
 Technik: HTML/CSS/JS ohne Build (Entscheid LERN-1). Vertrag zwischen Rahmen und Spielen: [rahmen.md](rahmen.md).
 Übersicht aller Spiele und was zu prüfen ist: [checkliste.md](checkliste.md) (erzeugt mit `node tools/checkliste.js`). Gemeinsamer Rahmen `spiele/gemeinsam/`:
@@ -198,5 +209,10 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-49 | Strategie-Rätsel im Eulenpfad (Matt in 1, Atari-Go, Nim); ganze Partien Schach und Go erst im Lernsteig (S1 a) | in Arbeit seit 2026-11-03 (LERN_Session11); drei Spiele gebaut, Annahmen offen | lernziele/lehrplan_sg_session11.md; spielideen/strategie_raetsel.md |
 | LERN-51 | Alle Inhaltslisten je Eintrag prüfbar machen (`pruefung.js` je Spiel, gemischte Listen trennen; LP5 a) | in Arbeit seit 2026-11-03 (LERN_Session11); Pilot Anlaut-Angel und Auge-Entdecker | rahmen.md 17; spiele/gemeinsam/listenpruefung.js |
 | LERN-52 | Zweisprachiges Vorlesen (VL1 a), Pilot Au café | offen | Report LERN_Session11, Plan 4 |
-| LERN-53 | PIN der Aufsicht ohne zweite Aufsicht wiederherstellen (Entscheid PIN1) | offen (vorgelegt) | Report LERN_Session12, Plan 3 |
+| LERN-53 | PIN der Aufsicht ohne zweite Aufsicht wiederherstellen (Entscheid PIN1) | erledigt 2026-11-04 (LERN_Session13, PIN1 a, PIN1-R a) | rahmen.md 6 |
 | LERN-54 | Profil für Kinder: Avatar, Wahl gegen Vorgabe, Statistik, Endlos nach Messung (AV1–AV6, ST1, ST2, ZG1, RF1, VR1–VR3, EN1, EN2) | erledigt 2026-11-04 (LERN_Session12) bis auf VR2, VR3 und Ziele der Klasse (mit LERN-48) | docs/eulenpfad/konzept_profil_kind.md; rahmen.md 7, 18 |
+| LERN-55 | Ganze Aufgabe im Bild auf der sichtbaren Fläche (GR1 a); GR1 b (1000 × 500 ohne Vollbild) zurückgestellt | in Arbeit seit 2026-11-04 (LERN_Session13); BH1–BH3 umgesetzt, GR1 a offen | bildhoehe_offen.md; rahmen.md 20 |
+| LERN-56 | Sudoku-Familie: Bilder-, Zahlen-, Vergleichs-, Käfig-, Gebiets-Sudoku, Sudoku-Duell; Thema Logikrätsel (SU1–SU3 a) | offen (entschieden 2026-11-04) | Report LERN_Session13, Plan 2 |
+| LERN-57 | Neunerprobe im Probe-Stempel (PS2 a) mit Rückfrage Patrik: Erklärung, Regeln für 3/6/9, Gruppe für Neugierige | offen (vorzulegen) | Report LERN_Session13, Plan 3 |
+| LERN-58 | Weitere Erfolge: Abzeichen je Thema und für besondere Spiele (Zusatz Patrik zu NZ1) | offen | Report LERN_Session13, Plan 4 |
+| LERN-59 | Notizen für Zwischenergebnisse (NZ1 a) | erledigt 2026-11-04 (LERN_Session13, 32 Spiele) | konzept_notizen.md; rahmen.md 4.3 |

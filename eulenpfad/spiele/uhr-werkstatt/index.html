@@ -38,6 +38,12 @@
   .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
   .ergebnis-zeile .anzeige { flex: 1; }
   .ergebnis-zeile .einheit { font-size: clamp(28px, 6vw, 40px); font-weight: 900; color: var(--knopf); min-width: 2.2em; }
+  /* Notizen (NZ1 a): Zeitstrahl Anfang → Zwischenzeit → Ende, das Feld für den Sprung über dem Pfeil */
+  .nz-strahl { display: flex; align-items: flex-end; justify-content: center; gap: 4px; margin: -4px 0 10px;
+    font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .nz-strahl > b { padding-bottom: 6px; }
+  .nz-sprung { display: inline-flex; flex-direction: column; align-items: center; color: var(--text-leise); line-height: 1; }
+  .nz-strahl .zw-notiz { font-size: 16px; min-height: 32px; padding: 1px 3px; }
   .digital { text-align: center; font-size: clamp(40px, 9vw, 60px); font-weight: 900; font-variant-numeric: tabular-nums; background: #1f2937; color: #7cf29a; border-radius: 16px; padding: 6px 22px; width: fit-content; margin: 0 auto 14px; letter-spacing: 2px; }
 </style>
 </head>
@@ -262,6 +268,17 @@ LS.spiel({
       });
       ctx.flaeche.append(tasten.element);
     };
+    /**
+     * Notizen (NZ1 a): Zeitstrahl von → Zwischenzeit → bis, ein Feld je Sprung und eines für die Zwischenzeit (meist die
+     * volle Stunde — das Feld nennt sie nicht, sonst wäre es ein Tipp). Nach Stufe nur in der Königsstufe; in s5 ist das
+     * Weiterzählen im Kopf das Lernziel.
+     */
+    const zeitstrahl = (von, bis) => {
+      if (!ctx.notizen(ctx.stufe === "s6")) return;
+      const sprung = nr => el("span", { class: "nz-sprung" }, LS.notizFeld({ breite: 4, label: `Sprung ${nr}` }), el("span", { text: "→" }));
+      ctx.flaeche.append(el("div", { class: "nz-strahl" }, el("b", { text: von }), sprung(1),
+        LS.notizFeld({ breite: 5, label: "Zwischenzeit" }), sprung(2), el("b", { text: bis })));
+    };
     const gleicheZeit = (z, soll) => { const t = zeitAusZiffern(z); return !!t && t.h === soll.h && t.m === soll.m; };
 
     // Auswahl-Knöpfe (Text oder kleine Uhren)
@@ -322,12 +339,14 @@ LS.spiel({
       const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
       ctx.flaeche.append(el("div", { class: "digital", text: `${digital(t0.h, t0.m)} → ${digital(t1.h, t1.m)}` }),
         el("div", { class: "frage", text: "Wie viele Minuten liegen dazwischen?" }));
+      zeitstrahl(digital(t0.h, t0.m), digital(t1.h, t1.m));
       ctx.schritte(LS.tippSchritte(a.dauer));
       eingabe(z => z === a.dauer, "Rechne zuerst bis zur nächsten vollen Stunde, dann die ganzen Stunden, dann den Rest. 1 h = 60 min.",
         `Von ${digital(t0.h, t0.m)} bis ${digital(t1.h, t1.m)} sind es ${a.dauer} min (${minText(a.dauer)}).`, true);
     } else if (art === "rueckwaerts") {
       const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
       ctx.flaeche.append(el("div", { class: "frage", html: `Der Film dauert <b>${minText(a.dauer)}</b> und endet um <b>${digital(t1.h, t1.m)}</b>. Wann hat er begonnen?` }));
+      zeitstrahl("?", digital(t1.h, t1.m));
       ctx.schritte(zeitSchritte(t0.h, t0.m));
       eingabe(z => gleicheZeit(z, t0), "Rechne rückwärts: zuerst die Stunden weg, dann die Minuten.",
         `${digital(t1.h, t1.m)} − ${minText(a.dauer)} = ${digital(t0.h, t0.m)}`);
@@ -335,6 +354,7 @@ LS.spiel({
       const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
       ctx.flaeche.append(el("div", { class: "digital", text: digital(t0.h, t0.m) }),
         el("div", { class: "frage", html: `Wie spät ist es in <b>${a.dauer} Minuten</b>?` }));
+      zeitstrahl(digital(t0.h, t0.m), "?");
       ctx.schritte(zeitSchritte(t1.h, t1.m));
       eingabe(z => gleicheZeit(z, t1), "60 Minuten sind 1 Stunde. Rechne zuerst bis zur vollen Stunde, dann den Rest.",
         `${digital(t0.h, t0.m)} + ${a.dauer} min = ${digital(t1.h, t1.m)}`);
@@ -357,6 +377,7 @@ LS.spiel({
       ctx.schritte(zeitSchritte(t1.h, t1.m));
       ctx.flaeche.append(el("div", { class: "digital", text: digital(t0.h, t0.m) }),
         el("div", { class: "frage", html: `Wie spät ist es in <b>${dauer >= 60 ? `${Math.floor(dauer / 60)} h ${dauer % 60} min` : `${dauer} Minuten`}</b>?` }));
+      if (dauer > 60 - t0.m && t0.m > 0) zeitstrahl(digital(t0.h, t0.m), "?"); // über die volle Stunde: zwei Sprünge
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({

@@ -9,6 +9,9 @@
   .reihe { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 6px 0 16px; }
   .reihe span { min-width: 54px; height: 60px; padding: 0 8px; display: grid; place-items: center; background: #fff; border: 3px solid var(--rand); border-radius: 14px; font-size: clamp(26px, 6vw, 34px); font-weight: 900; font-variant-numeric: tabular-nums; }
   .reihe span.luecke { border: 3px dashed var(--deko-4); color: var(--deko-4); }
+  .mf-spruenge { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; margin: -8px 0 12px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .mf-spruenge .zw-notiz { font-size: 17px; min-height: 34px; }
+  @media (max-width: 560px) { .mf-spruenge .zw-notiz { width: calc(4ch + 12px); padding: 2px 3px; font-size: 15px; min-height: 32px; } }
 </style>
 </head>
 <body>
@@ -170,6 +173,11 @@ LS.spiel({
       if (ctx.nr === 0) ctx.sag("Schau, was sich wiederholt.");
       return;
     }
+    // Notizen (NZ1 a): in der Königsstufe je Sprung zwischen zwei Zahlen ein Feld — dort ändern sich die Sprünge
+    // (1, 4, 9, 16 …) oder sind krumm (+ 125), und das Kind soll sie vergleichen, nicht im Kopf behalten.
+    if (ctx.notizen(ctx.stufe === "s6"))
+      ctx.flaeche.append(el("div", { class: "mf-spruenge" }, el("span", { text: "Sprünge:" }),
+        ...a.folge.slice(1).map((y, i) => LS.notizFeld({ breite: 4, label: `Sprung von ${zahlText(a.folge[i])} zu ${zahlText(y)}` }))));
     const loesung = `Die Regel: ${a.regel} — es kommt ${zahlText(a.richtig)}.`;
     ctx.loesung(loesung);
     ctx.schritte(LS.tippSchritte(a.richtig));

@@ -16,6 +16,12 @@
   .wertetabelle td { font-weight: 900; background: #fff; }
   .wertetabelle td.luecke { color: var(--knopf); }
   .wahl-knopf { font-size: clamp(20px, 4.6vw, 28px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  /* Notizen (NZ1 a): Zusatzspalte in der Tabelle, Feld hinter den Angaben beim Vergleich */
+  .wertetabelle td.nz-spalte { background: #fffbea; color: var(--text-leise); padding: 2px clamp(2px, 1vw, 8px); }
+  .wertetabelle .zw-notiz, .nz-zeile .zw-notiz { font-size: 16px; min-height: 32px; padding: 1px 3px; }
+  .nz-zeile { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 8px; margin: 0 0 8px;
+    font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .nz-zeile.nz-hinter { display: inline-flex; margin: 0 0 0 10px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -166,12 +172,24 @@ function pruefeAufgabe(a, stufe) {
 // ---------- Darstellung ----------
 
 /** Wertetabelle Zeit → Weg; gesucht: "weg" oder "zeit" in der Spalte luecke. */
-function tabelleEl(zeiten, wege, luecke, gesucht, stunden) {
+function tabelleEl(zeiten, wege, luecke, gesucht, stunden, notizZeit = null) {
   const zelle = (frage, text) => el("td", { class: frage ? "luecke" : "", text: frage ? "?" : text });
+  const spalten = zeiten.map((t, i) => ({ t, zeit: zelle(i === luecke && gesucht === "zeit", zeitText(t, stunden)), weg: zelle(i === luecke && gesucht === "weg", kmText(wege[i])) }));
+  // Notizen (NZ1 a): Zusatzspalte für die kleine Zeit (1 h, 15 min, 10 min) an ihrem Platz, darunter ein Feld für den Weg
+  if (notizZeit !== null) {
+    const i = spalten.findIndex(s => s.t > notizZeit);
+    spalten.splice(i < 0 ? spalten.length : i, 0, { t: notizZeit, zeit: el("td", { class: "nz-spalte", text: zeitText(notizZeit, stunden) }),
+      weg: el("td", { class: "nz-spalte" }, notizFeld(`Weg in ${zeitText(notizZeit, stunden)}`)) });
+  }
   return el("div", { class: "tabelle-rahmen" }, el("table", { class: "wertetabelle" },
-    el("tr", {}, el("th", { text: "Zeit" }), ...zeiten.map((t, i) => zelle(i === luecke && gesucht === "zeit", zeitText(t, stunden)))),
-    el("tr", {}, el("th", { text: "Weg" }), ...wege.map((w, i) => zelle(i === luecke && gesucht === "weg", kmText(w))))));
+    el("tr", {}, el("th", { text: "Zeit" }), ...spalten.map(s => s.zeit)),
+    el("tr", {}, el("th", { text: "Weg" }), ...spalten.map(s => s.weg))));
 }
+
+/** Notizfeld für einen Weg in km (Dezimalzahl). */
+const notizFeld = label => Object.assign(LS.notizFeld({ breite: 4, label }), { inputMode: "decimal" });
+/** Kleine Zeit für die Zusatzspalte: 1 h in Stufe 1, 15 min in Stufe 2, sonst 10 min — wenn sie noch nicht dasteht. */
+const notizZeitFuer = (a, p, stufe) => { const t = p.stunden ? 60 : stufe === "s2" ? 15 : 10; return a.zeiten.includes(t) ? null : t; };
 
 const HINWEIS_WEG = "Doppelt so lange heisst doppelt so weit. Rechne zuerst, wie weit es in einer kleinen Zeit kommt, zum Beispiel in 10 min.";
 
@@ -225,14 +243,18 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const f = ctx.flaeche;
     ctx.tipp(tippsFuer(a, p));
+    // Notizen (NZ1 a) nach Stufe ab s3: Kommazahlen und Rückwärtsrechnen über eine kleine Zeit
+    const nachStufe = Number(ctx.stufe.slice(1)) >= 3;
     if (a.art === "weg" || a.art === "zeit") {
+      const nzZeit = notizZeitFuer(a, p, ctx.stufe);
+      const mitNotiz = nzZeit !== null && ctx.notizen(nachStufe);
       const fa = FAHRER[a.fahrer];
       const wege = a.zeiten.map(t => wegVon(a.v, t));
       const loesungText = `${zeitText(a.zeiten[a.luecke], p.stunden)} → ${kmText(wege[a.luecke])}`;
       if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
       f.append(el("div", { class: "fahrer", text: fa.bild }),
         el("div", { class: "frage", html: `${fa.name} ist gleichmässig unterwegs. ${a.art === "weg" ? "<b>Wie weit</b> nach dieser Zeit?" : "<b>Wie lange</b> für diesen Weg?"}` }),
-        tabelleEl(a.zeiten, wege, a.luecke, a.art, p.stunden));
+        tabelleEl(a.zeiten, wege, a.luecke, a.art, p.stunden, mitNotiz ? nzZeit : null));
       if (a.art === "weg" && a.optionen) {
         LS.auswahl(ctx, { optionen: a.optionen, richtig: wege[a.luecke], inhalt: kmText, hinweis: HINWEIS_WEG, loesung: loesungText, breite: 120 });
       } else if (a.art === "weg") {
@@ -243,9 +265,11 @@ LS.spiel({
     } else if (a.art === "vergleich") {
       const g1 = FAHRER[a.f1], g2 = FAHRER[a.f2];
       ctx.serie("antwort", a.loesung);
-      f.append(el("div", { class: "frage", html: "<b>Wer ist schneller?</b>" }),
-        el("div", { class: "auftrag", text: `${g1.bild} ${g1.name}: ${kmText(a.w1)} in ${a.t1} min` }),
-        el("div", { class: "auftrag", text: `${g2.bild} ${g2.name}: ${kmText(a.w2)} in ${a.t2} min` }));
+      // Notizen (NZ1 a): hinter jeder Angabe ein Feld „in 60 min“ (nicht, wo es schon 60 min sind)
+      const mitNotiz = ctx.notizen(nachStufe);
+      const angabe = (g, w, t) => el("div", { class: "auftrag" }, `${g.bild} ${g.name}: ${kmText(w)} in ${t} min`,
+        ...(mitNotiz && t !== 60 ? [el("label", { class: "nz-zeile nz-hinter" }, "→ 60 min:", notizFeld(`${g.name} in 60 min`))] : []));
+      f.append(el("div", { class: "frage", html: "<b>Wer ist schneller?</b>" }), angabe(g1, a.w1, a.t1), angabe(g2, a.w2, a.t2));
       const loesungText = `In 60 min: ${g1.name} ${kmText(a.v1)}, ${g2.name} ${kmText(a.v2)}`;
       LS.auswahl(ctx, {
         optionen: ["erster", "zweiter", "gleich"], richtig: a.loesung, breite: 150,
@@ -257,6 +281,8 @@ LS.spiel({
       const fa = FAHRER[a.fahrer];
       f.append(el("div", { class: "fahrer", text: fa.bild }),
         el("div", { class: "frage", html: `${fa.name} ist gleichmässig unterwegs. <b>Ein Weg</b> stimmt nicht. Welcher?` }));
+      // Notizen (NZ1 a): ein Feld für den Weg in 10 min, wenn er nicht schon als erste Angabe dasteht
+      if (a.zeiten[0] !== 10 && ctx.notizen(nachStufe)) f.append(el("label", { class: "nz-zeile" }, "10 min →", notizFeld("Weg in 10 min"), "km"));
       const richtigerWeg = wegVon(a.v, a.zeiten[a.falsch]);
       LS.auswahl(ctx, {
         optionen: a.zeiten.map((_, i) => i), richtig: a.falsch, breite: 150,

@@ -25,6 +25,24 @@
   .ergebnis-zeile .einheit { font-size: clamp(26px, 6vw, 38px); font-weight: 900; color: var(--knopf); min-width: 1.6em; }
   .fr-beispiel { text-align: center; font-size: 15px; color: var(--text-leise); font-weight: 700; margin: 4px 0 8px; }
   .wahl-knopf { font-variant-numeric: tabular-nums; }
+  /* Notizen (NZ1 a): Spalte im Fahrplan und eine Zeile unter der Aufgabe */
+  .fahrplan .nz-spalte { background: #fffbea; padding: 1px 4px; }
+  .fahrplan .zw-notiz { font-size: 15px; min-height: 30px; padding: 1px 3px; }
+  .nz-zeile { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 14px; margin: -4px 0 8px;
+    font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .nz-zeile label { display: inline-flex; align-items: center; gap: 6px; }
+  .nz-zeile .zw-notiz { font-size: 17px; min-height: 34px; padding: 2px 4px; }
+  /* neben der Antwort: Beschriftung über dem Feld, damit die Zeile nicht höher wird */
+  .nz-zeile.nz-spalten { flex-wrap: nowrap; align-items: flex-end; gap: 8px; margin: 0; flex: none; }
+  .nz-spalten label { flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.1; text-align: center; max-width: 6.5em; }
+  .nz-spalten .zw-notiz { font-size: 16px; min-height: 32px; padding: 1px 3px; }
+  /* Handy: neben der Anzeige wäre eine Dauer zu schmal, darum eine eigene Zeile darüber */
+  @media (max-width: 560px) {
+    .ergebnis-zeile.nz-umbruch { flex-wrap: wrap; row-gap: 4px; }
+    .nz-umbruch > .nz-zeile { flex-basis: 100%; justify-content: center; }
+  }
+  .nz-legende { white-space: nowrap; }
+  .nz-legende .zw-notiz { font-size: 15px; min-height: 28px; padding: 0 3px; }
 </style>
 </head>
 <body>
@@ -309,10 +327,14 @@ function pruefeAufgabe(a, stufe) {
 
 // ---------- Darstellung ----------
 
-/** Verbindung als Fahrplan: je Halt an, ab und das Verkehrsmittel, das dort abfährt. */
-function fahrplanEl(a) {
+/**
+ * Verbindung als Fahrplan: je Halt an, ab und das Verkehrsmittel, das dort abfährt. teilzeit (Notizen, NZ1 a):
+ * eine Spalte mit einem Feld je Halt nach dem ersten — für die Zeit vom Halt davor bis hierher.
+ */
+function fahrplanEl(a, teilzeit = false) {
   const fp = a.fp;
-  const zeilen = [el("tr", {}, el("th", { text: "" }), el("th", { text: "Halt" }), el("th", { text: "an" }), el("th", { text: "ab" }))];
+  const zeilen = [el("tr", {}, el("th", { text: "" }), el("th", { text: "Halt" }), el("th", { text: "an" }), el("th", { text: "ab" }),
+    ...(teilzeit ? [el("th", { class: "nz-spalte", text: "✏️", "aria-label": "Teilzeit" })] : []))];
   for (let i = 0; i <= fp.length; i++) {
     const an = i > 0 ? fp[i - 1].an : null, ab = i < fp.length ? fp[i].ab : null;
     const umsteigen = !a.linie && an !== null && ab !== null;
@@ -321,7 +343,8 @@ function fahrplanEl(a) {
       el("td", { class: "mittel", text: bild, "aria-label": i < fp.length ? MITTEL[fp[i].mittel].name : "" }),
       el("td", { class: "halt", text: i < fp.length ? fp[i].von : fp[i - 1].nach }),
       el("td", { text: an === null ? "" : uhr(an) }),
-      el("td", { text: ab === null ? "" : uhr(ab) })));
+      el("td", { text: ab === null ? "" : uhr(ab) }),
+      ...(teilzeit ? [el("td", { class: "nz-spalte" }, ...(i > 0 ? [LS.notizFeld({ breite: 4, label: `Teilzeit von ${fp[i - 1].von} bis ${fp[i - 1].nach}` })] : []))] : [])));
   }
   const box = el("div", { class: "fp-rahmen" }, el("table", { class: "fahrplan" }, ...zeilen));
   return a.linie ? [box] : [box, el("div", { class: "fp-legende", text: "Farbige Zeile: hier umsteigen" })];
@@ -370,27 +393,48 @@ function loesungsSatz(a) {
 
 const teilText = t => (t.k !== undefined ? stdText(t.k) : t.nurMin ? `${t.d} min` : dauerText(t.d));
 
-/** Frage und Aufgabenbild je Art. */
-function aufgabeZeigen(a, f) {
+/**
+ * Notizen (NZ1 a): Wo stehen Zwischenergebnisse? teilzeit: Spalte im Fahrplan, ein Feld je Abschnitt (ihre Summe ist
+ * die Antwort); legende: ein Feld in der Zeile unter dem Fahrplan (bis 0:00); felder: neben der Antwort (bis 0:00,
+ * Umrechnung in Minuten, auf dem Handy darüber), beim Zug-Wählen unter der Tafel.
+ * Einschrittige Arten (Fahrzeit einer Linie, Warten, Umsteigen, ¼- und ½-Stunden) bekommen keine.
+ */
+function notizPlan(a) {
+  switch (a.art) {
+    case "reiseGesamt": case "reiseMehr": return { teilzeit: true, felder: [] };
+    case "mitternacht": case "nachtReise": return { teilzeit: true, felder: [], legende: "bis 0:00" };
+    case "fahrzeitDez": return { teilzeit: a.fp.length > 1, felder: ["Dauer in min"] };
+    case "addieren": return { felder: ["h zusammen", "min zusammen"] };
+    case "mischSumme": return { felder: [`${stdText(a.teile.find(t => t.k !== undefined).k)} in min`, "Summe in min"] };
+    case "dezZuHmin": case "hminZuDez": return { felder: ["in min"] };
+    case "ankunftNacht": return { felder: ["bis 0:00", "nach 0:00"] };
+    case "ankunftDez": return { felder: ["Fahrzeit", "bis 0:00"] };
+    case "rueckwaerts": return { felder: ["spätestens am Bahnhof", "spätestens ab"] };
+  }
+  return { felder: [] };
+}
+
+/** Frage und Aufgabenbild je Art; teilzeit: Fahrplan mit Spalte für Notizen. */
+function aufgabeZeigen(a, f, teilzeit = false) {
   const frage = html => f.append(el("div", { class: "frage", html }));
   const rechnung = html => f.append(el("div", { class: "rechnung", html }));
   const fp = a.fp;
   switch (a.art) {
     case "fahrzeit":
       frage(`Wie lange fährt der Zug von <b>${fp[a.von].von}</b> nach <b>${fp[a.bis].nach}</b>?`);
-      f.append(...fahrplanEl(a)); break;
+      f.append(...fahrplanEl(a, teilzeit)); break;
     case "warten":
       frage(`Du bist um <b>${uhr(a.jetzt)}</b> am Bahnhof ${a.von}. Wie lange wartest du auf den nächsten Zug?`);
       f.append(tafelEl(a, false)); break;
     case "umsteigeWarten":
       frage(`Wie lange musst du in <b>${fp[0].nach}</b> auf den Anschluss warten?`);
-      f.append(...fahrplanEl(a)); break;
+      f.append(...fahrplanEl(a, teilzeit)); break;
     case "reiseGesamt": case "reiseMehr": case "mitternacht": case "nachtReise":
       frage(`Wie lange dauert die ganze Reise von <b>${fp[0].von}</b> nach <b>${fp.at(-1).nach}</b>?`);
-      f.append(...fahrplanEl(a)); break;
+      f.append(...fahrplanEl(a, teilzeit)); break;
     case "fahrzeitDez":
       frage(`Wie lange dauert die Reise von <b>${fp[0].von}</b> nach <b>${fp.at(-1).nach}</b>? Antwort in Stunden.`);
-      f.append(...fahrplanEl(a)); break;
+      f.append(...fahrplanEl(a, teilzeit)); break;
     case "addieren":
       frage("Eine Reise hat mehrere Teile. Wie lange dauert sie zusammen?");
       rechnung(a.teile.map((d, i) => `${MITTEL[a.mittel[i]].bild} ${dauerText(d)}`).join(" + ") + ' = <span class="gesucht">?</span>'); break;
@@ -510,11 +554,13 @@ function tippBeispiel(a) {
   return "";
 }
 
-function eingabe(ctx, a, loesung) {
+/** Zifferntastatur mit Anzeige; notiz (NZ1 a): Notizfelder links neben der Anzeige, in derselben Zeile. */
+function eingabe(ctx, a, loesung, notiz = null) {
   const typ = a.typ;
   const einheit = typ === "minuten" ? "min" : typ === "dezimal" ? "h" : "";
   const anzeige = el("div", { class: "anzeige leer", "aria-label": typ === "uhrzeit" ? "Uhrzeit" : "Zeitdauer" });
-  ctx.flaeche.append(el("div", { class: "ergebnis-zeile" }, anzeige, ...(einheit ? [el("span", { class: "einheit", text: einheit })] : [])));
+  // Eine Dauer („2 h 47 min“) braucht die ganze Breite: auf dem Handy stehen die Notizen dann darüber
+  ctx.flaeche.append(el("div", { class: `ergebnis-zeile${notiz && typ === "dauer" ? " nz-umbruch" : ""}` }, ...(notiz ? [notiz] : []), anzeige, ...(einheit ? [el("span", { class: "einheit", text: einheit })] : [])));
   const tipp = tippBeispiel(a);
   // eigene Klasse: „tipp-zeile“ gehört dem Rahmen (💡 Tipp, LERN_Session9)
   if (tipp) ctx.flaeche.append(el("div", { class: "fr-beispiel", text: tipp }));
@@ -563,8 +609,16 @@ LS.spiel({
     const loesung = loesungsSatz(a);
     ctx.loesung(loesung);
     ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
-    aufgabeZeigen(a, ctx.flaeche);
+    // Notizen (NZ1 a): nach Stufe ab s2 (Reisen über mehrere Abschnitte); einschrittige Arten haben keine Felder
+    const nz = notizPlan(a);
+    const mitNotiz = (nz.teilzeit || nz.felder.length > 0) && ctx.notizen(Number(ctx.stufe.slice(1)) >= 2);
+    aufgabeZeigen(a, ctx.flaeche, mitNotiz && nz.teilzeit);
+    if (mitNotiz && nz.legende) ctx.flaeche.querySelector(".fp-legende")?.append(" · ",
+      el("label", { class: "nz-legende" }, `${nz.legende} `, LS.notizFeld({ breite: 4, label: nz.legende })));
+    const notiz = mitNotiz && nz.felder.length ? el("div", { class: "nz-zeile" },
+      ...nz.felder.map(n => el("label", {}, el("span", { text: n }), LS.notizFeld({ breite: 4, label: n })))) : null;
     if (a.typ === "wahl") {
+      if (notiz) ctx.flaeche.append(notiz);
       LS.auswahl(ctx, {
         optionen: [0, 1, 2, 3], richtig: a.loesung, breite: 120,
         inhalt: i => ({ bild: "🚆", text: `ab ${uhr(a.abfahrten[i])}` }),
@@ -574,7 +628,8 @@ LS.spiel({
         loesung,
       });
     } else {
-      eingabe(ctx, a, loesung);
+      if (notiz) notiz.classList.add("nz-spalten");
+      eingabe(ctx, a, loesung, notiz);
     }
   },
 });

@@ -48,6 +48,14 @@
   .dd-antwort .anzeige { margin-top: 4px; }
   .dd-antwort .wahl-knopf { flex-direction: row; gap: 8px; min-height: 56px; }
   .dd-antwort .wahl-knopf .bild { font-size: 30px; }
+  /* Notizen (NZ1 a): eine Zeile unter der Frage */
+  .nz-zeile { display: flex; align-items: center; justify-content: center; gap: 6px; margin: -4px 0 4px;
+    font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .nz-zeile .zw-notiz { font-size: 17px; min-height: 34px; padding: 2px 4px; }
+  /* neben der Antwort: Beschriftung über dem Feld, damit die Zeile nicht höher wird */
+  .nz-antwort { display: flex; align-items: flex-end; gap: 10px; }
+  .nz-antwort .anzeige { flex: 1; min-width: 0; }
+  .nz-zeile.nz-spalte { flex-direction: column; gap: 2px; margin: 0; font-size: 13px; line-height: 1.1; }
   @media (max-height: 820px) {
     .frage { margin-bottom: 8px; }
     .diagramm { width: min(440px, 100%, calc((100vh - 430px) * 1.2)); min-width: min(320px, 100%); }
@@ -481,6 +489,12 @@ LS.spiel({
       daten.append(el("div", { class: "zwei" }, links, diagramm(a, werte, a.art === "vergleich" ? {} : { leer: a.i, onTipp: v => tipp(v) })));
     }
     antwort.append(el("div", { class: "frage", text: a.frage }));
+    // Notizen (NZ1 a): ein Feld für die Summe — neben der Antwort (Tastatur) oder unter der Frage (Säule antippen);
+    // nach Stufe ab s5 (mehrere Werte bis 100 zusammenzählen)
+    const NOTIZ = { total: "Zwischensumme", durchschnitt: "Summe", fehlendTotal: "Säulen zusammen" }[a.art];
+    const notiz = NOTIZ && ctx.notizen(Number(ctx.stufe.slice(1)) >= 5)
+      ? el("label", { class: "nz-zeile" }, el("span", { text: NOTIZ }), LS.notizFeld({ breite: 4, label: NOTIZ })) : null;
+    if (notiz && a.art === "fehlendTotal") antwort.append(notiz);
 
     // ---- Säule antippen (ergänzen, übertragen, fehlendes Total) ----
     let gewaehlt = null;
@@ -570,7 +584,7 @@ LS.spiel({
       ctx.loesung?.(loesungText);
       ctx.schritte(LS.tippSchritte(a.loesung));
       const anzeige = el("div", { class: "anzeige leer dd-anzeige", "aria-label": "Antwort" });
-      antwort.append(anzeige);
+      if (notiz) { notiz.classList.add("nz-spalte"); antwort.append(el("div", { class: "nz-antwort" }, notiz, anzeige)); } else antwort.append(anzeige);
       const tasten = LS.tastatur({
         anzeige, maxStellen: 3,
         onOk(z) {

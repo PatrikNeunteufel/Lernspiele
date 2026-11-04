@@ -50,6 +50,14 @@
 
   .pb-eingabe { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 6px 0 8px; }
   .pb-einheit { font-size: clamp(22px, 5vw, 30px); font-weight: 900; }
+
+  /* Notizen (NZ1 a): kleine Felder für den Zwischenschritt (10 % = …, Bruch, gerundete Zahlen), unter der Vorgabe */
+  .pb-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 12px; margin: -6px 0 10px; font-size: 16px; font-weight: 800; color: var(--text-leise); }
+  .pb-notizen label { display: inline-flex; align-items: center; gap: 4px; }
+  .pb-notizen .zw-notiz { font-size: 18px; min-height: 34px; }
+  .pb-notiz-bruch { display: inline-flex; flex-direction: column; align-items: center; }
+  .pb-notiz-bruch .zw-notiz { width: calc(3ch + 12px); min-height: 28px; padding: 1px 3px; font-size: 16px; }
+  .pb-notiz-bruch .strich { align-self: stretch; border-top: 2px solid #c9b87a; margin: 2px 0; }
 </style>
 </head>
 <body>
@@ -454,6 +462,28 @@ function tippsFuer(a) {
   }
 }
 
+// ---------- Notizen (NZ1 a) ----------
+
+// Prozent von: der Zwischenschritt wie im Tipp (tippProzent) — je Prozentsatz in Promille die Prozentsätze, die das
+// Kind zuerst ausrechnet. 10 % und 50 % sind ein einziger Schritt und bekommen keine Notiz.
+const ZWISCHEN = { 50: [100], 125: [250], 150: [100, 50], 200: [100], 250: [500], 300: [100], 350: [250, 100], 400: [100],
+  600: [100], 750: [250], 800: [100], 900: [100] };
+const stufeNr = ctx => Number(ctx.stufe.slice(1));
+
+/** Zeile mit kleinen Feldern; je Eintrag [Text davor, Text danach, Vorlesetext] oder ein fertiges Element. */
+function notizZeile(eintraege, { breite = 5, dezimal = false } = {}) {
+  return el("div", { class: "pb-notizen" }, ...eintraege.map(e => {
+    if (e instanceof Node) return e;
+    const [vor, nach, label] = e;
+    const feld = LS.notizFeld({ breite, label });
+    if (dezimal) feld.inputMode = "decimal";
+    return el("label", {}, vor ? el("span", { text: vor }) : null, feld, nach ? el("span", { text: nach }) : null);
+  }));
+}
+/** Bruch als Notiz: Zähler und Nenner übereinander. */
+const notizBruch = label => el("span", { class: "pb-notiz-bruch" }, LS.notizFeld({ breite: 3, label: `${label}, Zähler` }),
+  el("span", { class: "strich" }), LS.notizFeld({ breite: 3, label: `${label}, Nenner` }));
+
 // ---------- Spiel ----------
 
 const STUFENTEXT = {
@@ -506,6 +536,11 @@ LS.spiel({
       const ganzesText = a.geld ? LS.geldText(a.ganzes * 100) : `${zahlText(a.ganzes)} ${ding.dativ}`;
       const ergebnisText = a.geld ? LS.geldText(a.ergebnis) : `${zahlText(a.ergebnis)} ${ding.plural}`;
       f.append(el("div", { class: "frage", text: "Wie viel ist das?" }), el("div", { class: "vorgabe" }, el("span", { class: "pb-zahl", text: `${prozText(a.P)} von ${ganzesText}` })));
+      // Notizen (NZ1 a): „10 % = …“ (oder 25 %, 50 %), bevor das Vielfache gerechnet wird — nach Stufe ab s5
+      if (ZWISCHEN[a.P] && ctx.notizen(stufeNr(ctx) >= 5)) {
+        f.append(notizZeile(ZWISCHEN[a.P].map(z => [`${prozText(z)} =`, a.geld ? "Fr." : ding.plural, `${prozText(z)} von ${ganzesText}`]),
+          { breite: 6, dezimal: a.geld }));
+      }
       eintippen(ctx, {
         wert: a.geld ? a.ergebnis / 100 : a.ergebnis, geld: a.geld, einheit: a.geld ? "Fr." : ding.plural,
         hinweis: tippProzent(a.P), loesung: `${prozText(a.P)} von ${ganzesText} = ${ergebnisText}`,
@@ -515,6 +550,10 @@ LS.spiel({
     } else if (a.art === "prozentSatz") {
       const ding = DINGE[a.ding];
       f.append(el("div", { class: "frage", text: "Wie viel Prozent sind das?" }), el("div", { class: "vorgabe" }, el("span", { class: "pb-zahl", text: `${zahlText(a.teil)} von ${zahlText(a.ganzes)} ${ding.dativ}` })));
+      // Notizen (NZ1 a): der Anteil als Bruch und erweitert oder gekürzt — nach Stufe ab s5
+      if (ctx.notizen(stufeNr(ctx) >= 5)) {
+        f.append(notizZeile([el("span", { text: "als Bruch:" }), notizBruch("Anteil als Bruch"), el("span", { text: "=" }), notizBruch("Bruch erweitert oder gekürzt")]));
+      }
       eintippen(ctx, {
         wert: a.ergebnis, einheit: "%",
         hinweis: "Wie viele wären es von hundert? Schreib es als Bruch und erweitere oder kürze auf Hundertstel.",
@@ -523,6 +562,10 @@ LS.spiel({
       if (ctx.nr === 0) ctx.sag("Tipp: 12 von 40 ist der Bruch 12/40. Wie viele Hundertstel sind das?");
     } else if (a.art === "ueberschlag") {
       f.append(el("div", { class: "frage", text: "Etwa wie viel Prozent sind das?" }), el("div", { class: "vorgabe" }, el("span", { class: "pb-zahl", text: `${zahlText(a.teil)} von ${zahlText(a.ganzes)}` })));
+      // Notizen (NZ1 a): beide Zahlen gerundet — nach Stufe ab s5
+      if (ctx.notizen(stufeNr(ctx) >= 5)) {
+        f.append(notizZeile([["gerundet:", "", `${zahlText(a.teil)} gerundet`], ["von", "", `${zahlText(a.ganzes)} gerundet`]], { breite: 4 }));
+      }
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.ergebnis, breite: 110, inhalt: q => `≈ ${prozText(q * 10)}`,
         hinweis: "Runde beide Zahlen auf schöne Zahlen. Welcher einfache Bruch passt dazu: ein Viertel, die Hälfte, drei Viertel …?",

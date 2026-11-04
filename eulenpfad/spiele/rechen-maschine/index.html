@@ -13,6 +13,11 @@
   .m-kasten.m-rand { border-color: var(--deko-7); background: #f6f7fb; }
   .m-kasten.m-fehlt { border-style: dashed; border-color: var(--deko-3); color: var(--deko-3); }
   .m-pfeil { font-size: 28px; font-weight: 900; color: var(--text-leise); }
+  /* Notiz auf dem Pfeil (NZ1 a): Feld über dem Pfeil, die Kette bleibt eine Reihe */
+  .m-pfeil-notiz { display: inline-flex; flex-direction: column; align-items: center; gap: 0; }
+  .m-pfeil-notiz .zw-notiz { font-size: 17px; min-height: 34px; }
+  .w-notizen { display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; }
+  .w-notizen label { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 14px; font-weight: 800; color: var(--text-leise); }
   .m-paare { display: grid; grid-template-columns: auto auto auto; gap: 4px 14px; justify-content: center; align-items: center;
     font-size: clamp(22px, 5vw, 30px); font-weight: 900; margin: 0 auto 14px; font-variant-numeric: tabular-nums; }
   .m-paare .m-kopf { font-size: 14px; font-weight: 800; color: var(--text-leise); text-transform: uppercase; }
@@ -35,6 +40,7 @@
     .m-kasten { font-size: 28px; padding: 5px 9px; min-width: 52px; border-width: 3px; }
     .m-kasten small { font-size: 11px; letter-spacing: 0; }
     .m-pfeil { font-size: 20px; }
+    .m-pfeil-notiz .zw-notiz { width: calc(4ch + 12px); padding: 2px 3px; font-size: 15px; min-height: 30px; }
   }
   /* Handy: Eingang und Frage der Weiche in einer Zeile (der Pfeil zeigt dann nach rechts), die Wege darunter. */
   @media (max-width: 560px) {
@@ -337,13 +343,16 @@ const pfeil = () => el("span", { class: "m-pfeil", text: "→" });
  * Maschine als Reihe: Eingabe → Kästen → Ausgabe. werte: { ein, aus } — Zahl, null (gesucht: „?“)
  * oder false (Spalte der Zahlenpaare: „▢“); fehlt: Index des leeren Kastens.
  */
-function reihe(ops, werte, fehlt = -1) {
+function reihe(ops, werte, fehlt = -1, notizen = false) {
   const r = el("div", { class: "maschine vorgabe" });
   const rand = (w, wort) => (w === false ? kasten("▢", wort, "m-rand")
     : w === null ? kasten("?", wort, "m-rand m-fehlt") : kasten(zahlText(w), wort, "m-rand"));
   r.append(rand(werte.ein, "rein"));
   ops.forEach((s, i) => {
-    r.append(pfeil());
+    // Notizen (NZ1 a): auf jedem Pfeil zwischen zwei Kästen ein Feld für das Zwischenergebnis
+    r.append(notizen && i > 0
+      ? el("span", { class: "m-pfeil-notiz" }, LS.notizFeld({ breite: 5, label: `Zwischenergebnis nach Kasten ${i}` }), pfeil())
+      : pfeil());
     r.append(i === fehlt ? kasten("?", "Kasten", "m-fehlt") : kasten(zeigeSchritt(s), wortFuer(s) || "Kasten"));
   });
   r.append(pfeil(), rand(werte.aus, "raus"));
@@ -419,8 +428,10 @@ LS.spiel({
     if (a.art === "vor" || a.art === "rueck") {
       const vor = a.art === "vor";
       ctx.loesung(loesung);
+      // Notizen nach Stufe: ab dem Klassenziel (s3) oder ab drei Kästen (NZ1 a)
+      const notizen = a.ops.length > 1 && ctx.notizen(Number(ctx.stufe.slice(1)) >= 3 || a.ops.length >= 3);
       ctx.flaeche.append(el("div", { class: "auftrag", text: vor ? "Was kommt heraus?" : "Welche Zahl ging hinein?" }),
-        reihe(a.ops, vor ? { ein: a.ein, aus: null } : { ein: null, aus: a.aus }));
+        reihe(a.ops, vor ? { ein: a.ein, aus: null } : { ein: null, aus: a.aus }, -1, notizen));
       const soll = vor ? a.aus : a.ein;
       zahlAntwort(ctx, soll, loesung, w => {
         if (vor) {
@@ -449,6 +460,9 @@ LS.spiel({
           el("div", { class: "w-weg" }, el("b", { text: "ja ↓" }), kasten(zeigeSchritt(a.ja), wortFuer(a.ja) || "Kasten")),
           el("div", { class: "w-weg" }, el("b", { text: "nein ↓" }), kasten(zeigeSchritt(a.nein), wortFuer(a.nein) || "Kasten"))),
         el("div", { class: "w-runden", text: `Die Maschine läuft ${a.runden}-mal: Was herauskommt, geht wieder oben hinein.` }));
+      // Notizen (NZ1 a): je Runde ausser der letzten ein Feld (die letzte ist die Antwort)
+      if (a.runden > 1 && ctx.notizen(true)) w.append(el("div", { class: "w-notizen" },
+        ...Array.from({ length: a.runden - 1 }, (_, i) => el("label", {}, el("span", { text: `nach Runde ${i + 1}` }), LS.notizFeld({ breite: 5, label: `Zahl nach Runde ${i + 1}` })))));
       ctx.flaeche.append(w);
       zahlAntwort(ctx, a.aus, loesung, () => "Noch nicht. Beantworte in jeder Runde zuerst die Frage — ja oder nein? — und nimm dann den passenden Kasten.");
       if (ctx.nr === 0) ctx.sag("Eine Weiche! Die Frage entscheidet, welchen Kasten die Zahl nimmt.");

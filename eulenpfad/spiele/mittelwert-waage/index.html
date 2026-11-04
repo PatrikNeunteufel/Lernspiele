@@ -32,6 +32,17 @@
   .daten td.luecke { color: var(--knopf); }
   .tabelle-rahmen { overflow-x: auto; max-width: 100%; }
   .wahl-knopf { font-size: clamp(22px, 5vw, 30px); font-weight: 900; }
+  /* Notizen (NZ1 a): eine Zeile unter der Tabelle */
+  .nz-zeile { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 14px; margin: 0;
+    font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .nz-zeile label { display: inline-flex; align-items: center; gap: 6px; }
+  .nz-zeile .zw-notiz { font-size: 17px; min-height: 34px; padding: 2px 4px; }
+  /* Handy: Beschriftung über dem Feld, damit zwei Felder in eine Zeile passen */
+  @media (max-width: 560px) {
+    .nz-zeile { align-items: flex-end; font-size: 13px; line-height: 1.1; }
+    .nz-zeile label { flex-direction: column; gap: 2px; }
+    .nz-zeile .zw-notiz { font-size: 16px; min-height: 30px; padding: 1px 3px; }
+  }
 </style>
 </head>
 <body>
@@ -240,7 +251,23 @@ function eintippen(ctx, richtig, hinweis, loesungText) {
   ctx.flaeche.append(anzeige, tasten.element);
 }
 
-const HINWEIS_MITTEL = "Zähle alle Werte zusammen und teile durch die Anzahl Werte.";
+/**
+ * Notizen (NZ1 a): beschriftete Felder unter den Daten — beim Mittelwert die Summe, beim fehlenden Wert
+ * „Mittelwert · Anzahl“ und die bekannten Werte zusammen, beim neuen Wert die Summen vorher und nachher.
+ * Nach Stufe ab s4 (Tabelle bis 100); in s3 rechnen Säulen bis 20 anschaulich.
+ */
+const NOTIZEN = {
+  mittelwert: ["Summe"],
+  fehlt: ["Mittelwert · Anzahl", "bekannte zusammen"],
+  dazu: ["Summe vorher", "Summe nachher"],
+};
+function notizen(ctx, art) {
+  const namen = NOTIZEN[art];
+  if (!namen || !ctx.notizen(Number(ctx.stufe.slice(1)) >= 4)) return;
+  ctx.flaeche.append(el("div", { class: "nz-zeile" }, ...namen.map(n => el("label", {}, el("span", { text: n }), LS.notizFeld({ breite: 5, label: n })))));
+}
+
+const HINWEIS_MITTEL ="Zähle alle Werte zusammen und teile durch die Anzahl Werte.";
 
 /** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Bedeutung und Rechenweg, ohne Zwischenergebnisse. */
 function tippsFuer(a) {
@@ -295,16 +322,19 @@ LS.spiel({
       ausgleichen(ctx, a, titel);
     } else if (a.art === "mittelwert") {
       f.append(el("div", { class: "frage", html: "Wie gross ist der <b>Mittelwert</b>?" }), titel, p.saeulen ? saeulenEl(a, a.werte, false) : tabelleEl(a, a.werte));
+      notizen(ctx, a.art);
       eintippen(ctx, a.loesung, () => HINWEIS_MITTEL,
         `(${a.werte.map(zahlText).join(" + ")}) : ${a.werte.length} = ${zahlText(summe(a.werte))} : ${a.werte.length} = ${zahlText(a.loesung)}`);
     } else if (a.art === "fehlt") {
       const n = a.werte.length, wert = a.werte[a.luecke];
       f.append(el("div", { class: "frage", html: `Der Mittelwert ist <b>${zahlText(a.mittel)}</b>. Welcher Wert fehlt?` }), titel, tabelleEl(a, a.werte, a.luecke));
+      notizen(ctx, a.art);
       eintippen(ctx, wert, () => `Alle ${n} Werte zusammen ergeben ${n} · ${zahlText(a.mittel)}. Zieh davon die bekannten Werte ab.`,
         `${n} · ${zahlText(a.mittel)} = ${zahlText(n * a.mittel)}; ${zahlText(n * a.mittel)} − ${zahlText(summe(a.werte) - wert)} = ${zahlText(wert)}`);
     } else if (a.art === "dazu") {
       const n = a.werte.length;
       f.append(el("div", { class: "frage", html: `Der Mittelwert ist ${zahlText(a.mittelAlt)}. Ein Wert kommt dazu, danach ist er <b>${zahlText(a.mittelNeu)}</b>. Wie gross ist der neue Wert?` }), titel, tabelleEl(a, a.werte));
+      notizen(ctx, a.art);
       eintippen(ctx, a.loesung, () => `Nachher sind es ${n + 1} Werte. Zusammen ergeben sie ${n + 1} · ${zahlText(a.mittelNeu)}.`,
         `${n + 1} · ${zahlText(a.mittelNeu)} − ${n} · ${zahlText(a.mittelAlt)} = ${zahlText((n + 1) * a.mittelNeu)} − ${zahlText(n * a.mittelAlt)} = ${zahlText(a.loesung)}`);
     }

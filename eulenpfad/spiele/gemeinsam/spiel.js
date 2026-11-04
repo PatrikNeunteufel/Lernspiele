@@ -104,6 +104,12 @@ const LS = (() => {
       werte: { nie: "nie", ab4: "ab der 4. Klasse", ab5: "ab der 5. Klasse", alle: "alle Kinder" },
       erklaerung: "Darf ein Kind im Tab Spiele selbst wählen, wie sortiert wird (Thema, passt zu dir, Alphabet, Klasse, auf- oder absteigend)? Je Kind lässt es sich in Konten ein- oder ausschalten. Ab der 4. Klasse, weil die Wahl gelesen werden muss.",
     },
+    // Entscheid NZ1 a (LERN_Session13): Notizfelder für Zwischenergebnisse, dort wo sie hingehören
+    notizen: {
+      titel: "Notizen für Zwischenergebnisse", standard: "stufe",
+      werte: { stufe: "nach Stufe", immer: "immer", nie: "nie (Kopfrechnen)" },
+      erklaerung: "In Aufgaben mit mehreren Rechenschritten gibt es kleine Felder für Zwischenergebnisse (✏️), etwa auf den Pfeilen der Rechen-Maschine. Sie werden nicht bewertet. „Nach Stufe“: in den unteren Stufen ohne, damit Kopfrechnen geübt wird; ab der Stufe, in der es vor allem ums Merken ginge, mit. Die Statistik zeigt, ob ein Kind sie braucht.",
+    },
     // Entscheid KR1 a (LERN_Session13): ein Kind fängt auch ohne Aufsicht an
     selbstAnlegen: {
       titel: "Kinder legen sich selbst an", standard: "ja",
@@ -1519,6 +1525,12 @@ const LS = (() => {
     const api = {
       element: zeile,
       blase,
+      /** Nur anzeigen, ohne Hüpfen und ohne Vorlesen (wiederhergestellter Auftrag; der war schon vorgelesen). */
+      zeige(text) {
+        blase.className = "blase" + (kuerzen ? " kurz" : "");
+        if (kuerzen) { blase.replaceChildren(el("span", { class: "blase-text", text })); pruefeLaenge(); setTimeout(pruefeLaenge, 0); }
+        else blase.textContent = text;
+      },
       beiSag: null, // Vorlesen: hört mit, was die Eule sagt
       sag(text, art = "") {
         blase.className = "blase" + (art ? " " + art : "") + (kuerzen && art !== "hinweis" ? " kurz" : "");
@@ -1557,6 +1569,7 @@ const LS = (() => {
 
   document.addEventListener("keydown", (e) => {
     if (!aktiveTastatur || !document.body.contains(aktiveTastatur.element)) return;
+    if (e.target?.closest?.("input, textarea, select, [contenteditable]")) return; // Notizfeld u. ä.: dort wird getippt
     if (/^[0-9]$/.test(e.key)) aktiveTastatur.tippe(e.key);
     else if ((e.key === "." || e.key === ",") && aktiveTastatur.dezimal) aktiveTastatur.zeichen();
     else if (e.key === "Backspace") aktiveTastatur.loesche();
@@ -1652,6 +1665,18 @@ const LS = (() => {
     const s = stellen === undefined ? String(Math.abs(wert)) : Math.abs(wert).toFixed(stellen);
     return (s.startsWith("0.") ? s.length - 1 : s.length) + 1;
   };
+
+  // ---------- Notizfeld für ein Zwischenergebnis (Entscheid NZ1 a, LERN_Session13) ----------
+  /**
+   * Kleines Feld, in das das Kind ein Zwischenergebnis schreibt — nicht bewertet, nie ein Fehler. Das Spiel setzt es
+   * genau dorthin, wo das Zwischenergebnis hingehört, und nur, wenn ctx.notizen(…) true gab. opt.breite in Zeichen.
+   */
+  function notizFeld({ breite = 6, label = "Notiz für ein Zwischenergebnis" } = {}) {
+    const f = el("input", { class: "zw-notiz", type: "text", inputmode: "numeric", maxlength: String(breite + 3), autocomplete: "off",
+      placeholder: "✏️", "aria-label": label, title: "Notiz (wird nicht bewertet)" });
+    f.style.setProperty("--zw-breite", breite + "ch");
+    return f;
+  }
 
   // ---------- Lesetext (Entscheid BH3 a, LERN_Session13) ----------
   // Bei Lesespielen ist der Text der Stoff und darf lang sein: Er scrollt in seinem eigenen Feld, Auftrag, Frage und
@@ -2312,6 +2337,14 @@ const LS = (() => {
       else for (let i = 0; i < def.anzahl; i++) punkte.append(el("span"));
       const karte = el("div", { class: "karte" });
       const flaeche = el("div");
+      // Notizen (NZ1 a): wurden in dieser Aufgabe Notizfelder angeboten, und hat das Kind eines benutzt?
+      let notizAngeboten = false;
+      let notizBenutzt = false;
+      // Auftrag statt altem Lob (Hinweis Patrik, LERN_Session13): sagt ein Spiel beim Stellen nichts, zeigt die Eule
+      // den Auftrag, den es zuletzt beim Stellen gesagt hat — nie „Richtig wäre …“ der vorigen neben einer neuen Aufgabe.
+      let letzterAuftrag = "";
+      let gesagtBeimZeichnen = false;
+      flaeche.addEventListener("input", e => { if (e.target?.classList?.contains("zw-notiz") && e.target.value.trim()) notizBenutzt = true; });
       const eule = euleZeile({ kuerzen: true });
       stimmFehlerHoerer = stimmFehlerFuer(eule);
       const zeitleiste = el("div", { class: "zeitleiste", "aria-hidden": "true" }, el("div", { class: "zeitbalken" }));
@@ -2465,6 +2498,8 @@ const LS = (() => {
         let zug = 0; // zählt die Züge beim Zeichnen; eine verworfene Fassung startet die Uhr nicht
         let serien = {};  // Merkmale dieser Aufgabe (ctx.serie): Name → Wert
         let vorgehen = null; // wie das Kind vorging (ctx.vorgehen): Art → Wert, für die Statistik
+        notizAngeboten = false;
+        notizBenutzt = false;
         let ansagen = [];    // ctx.nachAnsage: Töne und Stimmen des Spiels, die auf Lob und Vorlesen warten
         let angesagt = false;
         const start = performance.now();
@@ -2515,6 +2550,8 @@ const LS = (() => {
           uhrEnde = null;
           tippZeile.hidden = true;
           tippsRunde += tippsGenutzt;
+          // Notizen (NZ1 a): nur wo sie angeboten waren — „ohne“ zählt für das Abzeichen „Kopfrechner“
+          if (notizAngeboten) vorgehen = { ...vorgehen, notiz: notizBenutzt ? "benutzt" : "ohne" };
           aufgabenZeiten.push({ ms: Math.round(Math.max(0, jetztMs - ab - pausiertMs)), versuche, zeitUm, geloest, ...(tippsGenutzt ? { tipps: tippsGenutzt } : {}),
             ...(uebersprungen ? { uebersprungen } : {}), ...(vorgehen ? { vorgehen } : {}) });
           // Für eine Fehlermeldung: wie die Aufgabe gewertet wurde, und sie als „vorige“ für die nächste merken.
@@ -2672,7 +2709,11 @@ const LS = (() => {
             const meinZug = zug;
             return () => { if (meinZug === zug) starteUhr(); };
           },
-          sag: (t, art) => eule.sag(t, art),
+          sag: (t, art) => {
+            // Was das Spiel beim Stellen sagt, ist sein Auftrag: Er ersetzt bei späteren Aufgaben das Lob der vorigen.
+            if (zeichnet) { gesagtBeimZeichnen = true; if (!art) letzterAuftrag = t; }
+            eule.sag(t, art);
+          },
           /**
            * fn erst rufen, wenn die Eule fertig ist: Lob der vorigen Aufgabe ausgesprochen, Auftrag vorgelesen
            * (falls automatisch). Für alles, was ein Spiel beim Zeichnen vorspielt oder vorspricht (Melodie,
@@ -2700,6 +2741,16 @@ const LS = (() => {
            * und ihre Werte stehen in AUSWERTUNG.VORGEHEN (auswertung.js).
            */
           vorgehen(art, wert) { vorgehen = { ...vorgehen, [art]: String(wert) }; },
+          /**
+           * Notizfelder anbieten? (NZ1 a) empfohlen: ob das Spiel sie bei „nach Stufe“ zeigt (ab welcher Stufe oder
+           * Schrittzahl Kopfrechnen vor allem das Merken prüft). Gibt zurück, ob das Spiel Felder (LS.notizFeld) zeigt.
+           */
+          notizen(empfohlen) {
+            const e = einstellung("notizen");
+            const an = e === "immer" || (e === "stufe" && !!empfohlen);
+            if (an) notizAngeboten = true;
+            return an;
+          },
           /**
            * Diese Aufgabe braucht n Handgriffe mehr (Tipps, Ziffern samt OK, Züge) — wie viele mindestens,
            * wer sie fehlerfrei löst. Die Bausteine zählen ihre selbst; Pflicht in Endlos-Stufen.
@@ -2743,8 +2794,42 @@ const LS = (() => {
             if (endlos) { geschafft++; punkte.textContent = `♾ ${geschafft}`; }
             // Die nächste Aufgabe erst, wenn die Stimme fertig ist (Lob, gesprochene Antwort des Spiels; höchstens 6 s):
             // sonst sprach in Au café der Satz der vorigen Antwort noch, als die neue Aufgabe schon stand (Meldung 6,
-            // LERN_Session11).
-            setTimeout(() => nachStimme(naechste, 6000), endlos ? 900 : 1300);
+            // LERN_Session11). Und erst, wenn eine längere Rückmeldung gelesen sein kann („Gut aufgepasst! Richtig wäre
+            // 14 289.“; Hinweis Patrik, LERN_Session13): 1,3 s, dazu 45 ms je Zeichen über 20, höchstens 5 s.
+            const gesagt = eule.blase.textContent || "";
+            const lesen = endlos ? 900 : Math.min(5000, 1300 + Math.max(0, gesagt.length - 20) * 45);
+            // Überspringen (Entscheid WZ1 a): ablaufender Balken mit „Weiter ➜“ unter der Eule; Antippen der Blase oder
+            // des Knopfs, Enter oder Leertaste führt sofort weiter. Endlos bleibt bei 0,9 s ohne Balken.
+            let weiterGegangen = false;
+            let leiste = null;
+            const weiterJetzt = () => {
+              if (weiterGegangen) return;
+              weiterGegangen = true;
+              clearTimeout(wartet);
+              leiste?.remove();
+              eule.blase.removeEventListener("click", weiterJetzt);
+              removeEventListener("keydown", tasteWeiter, true);
+              naechste();
+            };
+            const tasteWeiter = e => {
+              if (e.key !== "Enter" && e.key !== " ") return;
+              if (e.target?.closest?.("input, textarea, select")) return;
+              e.preventDefault();
+              e.stopPropagation();
+              try { speechSynthesis.cancel(); } catch { /* ohne Stimme */ }
+              weiterJetzt();
+            };
+            const wartet = setTimeout(() => nachStimme(weiterJetzt, 6000), lesen);
+            if (!endlos) {
+              const balken = el("div", { class: "weiter-balken" });
+              balken.style.animationDuration = lesen + "ms";
+              leiste = el("div", { class: "weiter-leiste" }, balken,
+                el("button", { type: "button", class: "knopf hell klein weiter-knopf", text: "Weiter ➜",
+                  onclick: () => { try { speechSynthesis.cancel(); } catch { /* ohne Stimme */ } weiterJetzt(); } }));
+              eule.element.after(leiste);
+              eule.blase.addEventListener("click", weiterJetzt);
+              addEventListener("keydown", tasteWeiter, true);
+            }
           },
           falsch(hinweis, loesungText) {
             if (erledigt) return;
@@ -2783,6 +2868,7 @@ const LS = (() => {
         blaseNeu = false;
         let sahUngestellt = false; // hat die Suche überhaupt eine ungestellte Aufgabe gefunden (nur durch ein Muster gesperrt)?
         for (let versuch = 0; ; versuch++) {
+          gesagtBeimZeichnen = false;
           def.aufgabe(ctx);
           const k = kennung(flaeche, loesungVorab, eigeneKennung);
           const messen = !!pruefung.zaehle?.(k); // nur das Testskript: weiter ziehen, nichts stellen
@@ -2820,6 +2906,7 @@ const LS = (() => {
             for (const [name, wert] of Object.entries(serien)) (serienVerlauf[name] ||= []).push(wert);
             pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: zuLang && (endlos ? versuch >= SERIE_VERSUCHE : stufeSuche >= 3) });
             schritteFest = true;
+            if (nr > 0 && !gesagtBeimZeichnen) eule.zeige(letzterAuftrag || "Weiter geht's mit der nächsten Aufgabe.");
             zeichnet = false;
             gezeigt = true;
             // Reihenfolge: Lob der vorigen Aufgabe ausreden lassen, dann vorlesen, dann die Töne des Spiels.
@@ -2851,6 +2938,7 @@ const LS = (() => {
           eigeneKennung = null;
           schritte = 0;
           schritteFest = false;
+          notizAngeboten = false;
           warten = 0;
           uhrWartet = false;
           ansagen = [];
@@ -3060,13 +3148,13 @@ const LS = (() => {
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
       "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
-      "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "blase-text", "lesetext"],
+      "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "blase-text", "lesetext", "zw-notiz", "weiter-leiste", "weiter-balken", "weiter-knopf"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
 
   return {
-    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
+    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     beiAenderung, abgleichDaten, spielStand: () => spielStand,

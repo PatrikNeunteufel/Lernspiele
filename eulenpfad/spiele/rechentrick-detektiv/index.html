@@ -9,6 +9,7 @@
   .rechnung { text-align: center; font-size: clamp(28px, 7vw, 52px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 0 0 14px; }
   .rechnung.klein { font-size: clamp(24px, 5.6vw, 40px); margin: 18px 0 10px; }
   .wahl-knopf { font-variant-numeric: tabular-nums; }
+  .rt-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: -4px 0 8px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
 </style>
 </head>
 <body>
@@ -436,7 +437,14 @@ LS.spiel({
       for (const k of box.children) if (!k.classList.contains("richtig")) k.style.display = "none";
       ctx.sag("Genau, das gibt gleich viel! Jetzt rechne die leichte Aufgabe aus.", "gut");
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergebnis" });
-      schritt2.append(el("div", { class: "rechnung klein", text: `${x.rechts} =` }), anzeige);
+      schritt2.append(el("div", { class: "rechnung klein", text: `${x.rechts} =` }));
+      // Notizen (NZ1 a): ab Stufe 5 je Teilrechnung ein Feld, wenn die leichte Aufgabe mehr als einen Schritt hat
+      // (1000 × 46 − 46: ein Feld; 1000 × 35 − 2 × 35: zwei). Den Trick zu finden bleibt Kopfarbeit.
+      const teilrechnungen = Math.min(2, (x.rechts.match(/[+−×]/g) || []).length - 1);
+      if (teilrechnungen > 0 && ctx.notizen(Number(ctx.stufe.slice(1)) >= 5))
+        schritt2.append(el("div", { class: "rt-notizen" }, el("span", { text: "Notizen:" }),
+          ...Array.from({ length: teilrechnungen }, (_, i) => LS.notizFeld({ breite: 7, label: `Teilrechnung ${i + 1}` }))));
+      schritt2.append(anzeige);
       const tasten = LS.tastatur({
         anzeige, maxStellen: 7,
         onOk(w) {

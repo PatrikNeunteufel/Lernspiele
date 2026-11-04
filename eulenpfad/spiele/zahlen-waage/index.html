@@ -15,6 +15,10 @@
   .schale .luecke { color: var(--deko-4); }
   .fuss { position: absolute; left: 50%; top: 95px; width: 0; height: 0; transform: translateX(-50%); border-left: 34px solid transparent; border-right: 34px solid transparent; border-bottom: 90px solid var(--deko-7); }
   .gleich { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin-bottom: 8px; }
+  /* Notiz (NZ1 a) unter der linken Schale, links vom Fuss; bleibt stehen, wenn sich der Balken neigt */
+  .waage-notiz { position: absolute; left: 0; top: 136px; width: calc(50% - 40px); display: flex; align-items: center; justify-content: center;
+    gap: 6px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .waage-notiz .zw-notiz { font-size: 17px; min-height: 34px; }
 </style>
 </head>
 <body>
@@ -141,8 +145,13 @@ LS.spiel({
     const balken = el("div", { class: "balken" },
       el("div", { class: "schale links" }, el("span", { text: text(a.links) })),
       el("div", { class: "schale rechts" }, el("span", {}, ...rechtsInhalt)));
-    ctx.flaeche.append(el("div", { class: "auftrag", text: "Mach die Waage gerade!" }),
-      el("div", { class: "waage", "aria-hidden": "true" }, el("div", { class: "fuss" }), balken),
+    const waage = el("div", { class: "waage" }, el("div", { class: "fuss", "aria-hidden": "true" }), balken);
+    balken.setAttribute("aria-hidden", "true");
+    // Notizen (NZ1 a): in der Königsstufe ein Feld für den Wert der linken Seite, unter der linken Schale — nur wenn
+    // rechts noch gerechnet wird (steht rechts nur „?“, wäre der Wert links schon die Antwort).
+    if (a.rechts.a !== null && ctx.notizen(ctx.stufe === "s6"))
+      waage.append(el("label", { class: "waage-notiz" }, el("span", { text: "links =" }), LS.notizFeld({ breite: 4, label: "Notiz: Wert der linken Seite" })));
+    ctx.flaeche.append(el("div", { class: "auftrag", text: "Mach die Waage gerade!" }), waage,
       el("div", { class: "gleich", text: `${text(a.links)} = ${a.rechts.a === null ? "?" : `${zahlText(a.rechts.a)} ${a.rechts.op} ?`}` }));
 
     // Neigung: schwerere Seite nach unten, höchstens 12°. Positiver Winkel dreht im Uhrzeigersinn

@@ -21,6 +21,12 @@
   .zs-ergebnis { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
   .zs-ergebnis .anzeige { flex: 1; min-width: 0; }
   .zs-ergebnis .zs-einheit { font-size: clamp(22px, 5.5vw, 36px); font-weight: 900; color: var(--knopf); min-width: 1.6em; white-space: nowrap; }
+  /* Notizen (NZ1 a): Zeitstrahl Anfang → Zwischenzeit → Ende, das Feld für den Sprung über dem Pfeil */
+  .nz-strahl { display: flex; align-items: flex-end; justify-content: center; gap: 4px; margin: -4px 0 10px;
+    font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .nz-strahl > b { padding-bottom: 6px; }
+  .nz-sprung { display: inline-flex; flex-direction: column; align-items: center; color: var(--text-leise); line-height: 1; }
+  .nz-strahl .zw-notiz { font-size: 16px; min-height: 32px; padding: 1px 3px; }
   .zs-fertig { text-align: center; font-size: clamp(20px, 4.8vw, 28px); font-weight: 900; color: var(--gut); margin: 0 0 8px; }
   /* Grosse Bild-Knöpfe in Stufe 1 (Klasse an die Wahl-Box des Bausteins gehängt) */
   .wahl.zs-gross .wahl-knopf { min-height: 150px; font-size: clamp(18px, 4.4vw, 24px); }
@@ -446,6 +452,18 @@ function hinweisFuer(a, z) {
 /** Karte mit Bild und Name einer Tätigkeit. */
 const taetigkeitKarte = t => el("div", { class: "zs-karte" }, el("span", { class: "zs-bild", text: t.bild }), t.name);
 
+/**
+ * Notizen (NZ1 a): Zeitstrahl von → mitte → bis mit einem Feld je Sprung. mitte: feste Zwischenzeit (0:00) oder
+ * null — dann ist auch sie ein Feld (die volle Stunde nennt der Strahl nicht, sonst wäre er ein Tipp).
+ */
+function zeitstrahl(ctx, zs, von, mitte, bis, empfohlen) {
+  if (!ctx.notizen(empfohlen)) return;
+  const sprung = label => el("span", { class: "nz-sprung" }, LS.notizFeld({ breite: 4, label }), el("span", { text: "→" }));
+  zs.append(el("div", { class: "nz-strahl" }, el("b", { text: von }),
+    sprung(mitte ? `bis ${mitte}` : "Sprung 1"), mitte ? el("b", { text: mitte }) : LS.notizFeld({ breite: 5, label: "Zwischenzeit" }),
+    sprung(mitte ? `nach ${mitte}` : "Sprung 2"), el("b", { text: bis })));
+}
+
 /** Zifferntastatur mit Anzeige und Einheit daneben; prüft gegen soll. */
 function eingabe(ctx, zs, { soll, einheit, label, loesung, hinweis, maxStellen = 3, danach = null }) {
   const anzeige = el("div", { class: "anzeige leer", "aria-label": label });
@@ -574,6 +592,8 @@ LS.spiel({
         if (a.typ === "uhr") {
           frage("Wie viele Minuten sind das?");
           zs.append(el("div", { class: "zs-zeile" }, "von ", el("b", { text: uhr(a.von) }), " bis ", el("b", { text: uhr(a.bis) })));
+          // Notizen nur, wenn es über die volle Stunde geht (zwei Sprünge); nach Stufe ab s5
+          if (a.von % 60 && a.bis % 60 && Math.floor(a.bis / 60) > Math.floor(a.von / 60)) zeitstrahl(ctx, zs, uhr(a.von), null, uhr(a.bis), true);
           const loesung = `${uhr(a.von)} → ${uhr(a.bis)} = ${a.loesung} min`;
           ctx.loesung(loesung);
           ctx.schritte(LS.tippSchritte(a.loesung));
@@ -615,6 +635,7 @@ LS.spiel({
       case "mitternacht": {
         frage("Wie viele Minuten sind das? Es geht über Mitternacht.");
         zs.append(el("div", { class: "zs-zeile" }, "von ", el("b", { text: uhr(a.von) }), " bis ", el("b", { text: uhr(a.bis) })));
+        zeitstrahl(ctx, zs, uhr(a.von), "0:00", uhr(a.bis), true);
         const loesung = `${uhr(a.von)} → 0:00 → ${uhr(a.bis)} = ${a.loesung} min`;
         ctx.loesung(loesung);
         ctx.schritte(LS.tippSchritte(a.loesung));

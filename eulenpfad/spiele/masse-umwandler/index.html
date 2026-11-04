@@ -16,6 +16,11 @@
   .stufe-t { display: flex; flex-direction: column; align-items: center; }
   .stufe-t b { background: var(--f, var(--deko-6)); color: #fff; border-radius: 10px; padding: 6px 12px; font-size: 18px; }
   .pfeil-t { font-size: 13px; font-weight: 800; color: var(--text-leise); text-align: center; padding: 0 4px 10px; }
+  /* Notizen (NZ1 a): eine Zeile unter der Rechnung */
+  .nz-zeile { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 16px; margin: -6px 0 10px;
+    font-size: clamp(16px, 3.8vw, 20px); font-weight: 800; color: var(--text-leise); font-variant-numeric: tabular-nums; }
+  .nz-zeile label { display: inline-flex; align-items: center; gap: 6px; }
+  .nz-zeile .zw-notiz { font-size: 17px; min-height: 34px; padding: 2px 4px; }
   .familie { text-align: center; color: var(--text-leise); font-weight: 700; margin-bottom: 6px; }
 </style>
 </head>
@@ -78,25 +83,27 @@ function aufgabeErzeugen(stufe) {
   const f = wert(fam, gross) / wert(fam, klein);
   // Anteil in der kleinen Einheit, kleiner als eine grosse Einheit (bei 1000er-Schritten in Zehnern: 2 kg 350 g)
   const teil = () => f >= 1000 ? zufall(1, 99) * 10 : zufall(1, f - 1);
+  // groessen (Notizen, NZ1 a): die Grössen, die man einzeln in die Zieleinheit umrechnet; von: Einheit links
   if (art === "einfach" || art === "weit") {
     const v = zufall(1, p.max);
     return Math.random() < 0.5
-      ? { art, fam, f, links: `${zahlText(v)} ${gross}`, ziel: klein, loesung: v * f, richtung: "gross→klein" }
-      : { art, fam, f, links: `${zahlText(v * f)} ${klein}`, ziel: gross, loesung: v, richtung: "klein→gross" };
+      ? { art, fam, f, links: `${zahlText(v)} ${gross}`, von: gross, ziel: klein, loesung: v * f, richtung: "gross→klein" }
+      : { art, fam, f, links: `${zahlText(v * f)} ${klein}`, von: klein, ziel: gross, loesung: v, richtung: "klein→gross" };
   }
   const s = (a, b) => (a ? `${a} ${gross} ` : "") + `${zahlText(b)} ${klein}`;
   if (art === "gemischt") {
     const a = zufall(1, p.max), b = teil();
-    return { art, fam, f, links: s(a, b), ziel: klein, loesung: a * f + b };
+    return { art, fam, f, links: s(a, b), ziel: klein, loesung: a * f + b, groessen: [`${a} ${gross}`] };
   }
   if (art === "minus") {
     // Zwei gemischte Grössen, die erste grösser; meist muss man eine grosse Einheit „aufbrechen“.
     const a1 = zufall(2, p.max), b1 = teil(), a2 = zufall(1, a1 - 1), b2 = teil();
-    return { art, fam, f, links: `${s(a1, b1)} − ${s(a2, b2)}`, ziel: klein, loesung: (a1 - a2) * f + b1 - b2 };
+    return { art, fam, f, links: `${s(a1, b1)} − ${s(a2, b2)}`, ziel: klein, loesung: (a1 - a2) * f + b1 - b2, groessen: [s(a1, b1), s(a2, b2)] };
   }
   // rechnen: zwei gemischte Grössen addieren, Ergebnis in der kleinen Einheit
   const a1 = zufall(0, p.max), b1 = teil(), a2 = zufall(0, p.max), b2 = teil();
-  return { art, fam, f, links: `${s(a1, b1)} + ${s(a2, b2)}`, ziel: klein, loesung: (a1 + a2) * f + b1 + b2 };
+  return { art, fam, f, links: `${s(a1, b1)} + ${s(a2, b2)}`, ziel: klein, loesung: (a1 + a2) * f + b1 + b2,
+    groessen: [[a1, b1], [a2, b2]].filter(([x]) => x).map(([x, y]) => s(x, y)) }; // ohne grosse Einheit steht sie schon in klein
 }
 
 /**
@@ -122,6 +129,18 @@ function pruefeAufgabe(a, stufe) {
   if (String(a.loesung).length > 9) m.push("Lösung passt nicht in die Tastatur");
   if (op === "−" && stufe !== "s6") m.push("Subtraktion ausserhalb der Königsstufe");
   return m;
+}
+
+/**
+ * Notizen (NZ1 a): Felder für Zwischenergebnisse — je Grösse „… = ✏️ mm“ (gemischt, rechnen, minus) oder bei weiten
+ * Sprüngen je Treppenstufe dazwischen „= ✏️ m“. Leer bei einer Umwandlung über eine Stufe.
+ */
+function notizFelder(a) {
+  if (a.groessen) return a.groessen.map(g => ({ vor: `${g} =`, einheit: a.ziel, label: `${g} in ${a.ziel}` }));
+  const e = FAMILIEN[a.fam].einheiten.map(x => x[0]);
+  const [i, j] = [e.indexOf(a.von), e.indexOf(a.ziel)];
+  const zwischen = i < j ? e.slice(i + 1, j) : e.slice(j + 1, i).reverse();
+  return zwischen.map(z => ({ vor: "=", einheit: z, label: `${a.links} in ${z}` }));
 }
 
 /** Einheiten-Treppe der Familie als Hilfe: m —×100→ cm … */
@@ -188,6 +207,10 @@ LS.spiel({
     ctx.flaeche.append(hilfeOrt);
     if (ctx.stufe !== "s5" && !koenig) hilfeOrt.append(treppe(a.fam));
     ctx.flaeche.append(el("div", { class: "rechnung", html: `${a.links} = <span class="einheit">? ${a.ziel}</span>` }));
+    // Notizen (NZ1 a) nach Stufe ab s5: zwei Grössen zusammenrechnen, weite Sprünge über mehrere Treppenstufen
+    const notizen = notizFelder(a);
+    if (notizen.length && ctx.notizen(Number(ctx.stufe.slice(1)) >= 5)) ctx.flaeche.append(el("div", { class: "nz-zeile" },
+      ...notizen.map(n => el("label", {}, el("span", { text: n.vor }), LS.notizFeld({ breite: 7, label: n.label }), el("span", { text: n.einheit })))));
     const anzeige = el("div", { class: "anzeige leer", "aria-label": `Ergebnis in ${a.ziel}` });
     ctx.flaeche.append(el("div", { class: "ergebnis-zeile" }, anzeige, el("span", { class: "einheit", text: a.ziel })));
     const tasten = LS.tastatur({

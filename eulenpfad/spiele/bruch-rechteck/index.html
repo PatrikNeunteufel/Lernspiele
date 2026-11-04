@@ -48,6 +48,13 @@
 
   .wahl-knopf { font-size: clamp(26px, 6vw, 34px); font-weight: 900; font-variant-numeric: tabular-nums; }
   .wahl-knopf .bruch { font-size: 30px; }
+
+  /* Notizen (NZ1 a): je Bruch zwei kleine Felder übereinander (Zähler, Nenner), unter der Rechnung */
+  .br-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 6px; margin: -6px 0 8px; font-size: 16px; font-weight: 800; color: var(--text-leise); }
+  .br-notizen .op { font-size: 20px; font-weight: 900; }
+  .br-notiz { display: inline-flex; flex-direction: column; align-items: center; }
+  .br-notiz .zw-notiz { width: calc(3ch + 12px); min-height: 28px; padding: 1px 3px; font-size: 16px; }
+  .br-notiz .strich { align-self: stretch; border-top: 2px solid #c9b87a; margin: 2px 0; }
 </style>
 </head>
 <body>
@@ -401,6 +408,30 @@ function bruchEingabe(ctx, { nenner = null, pruefe, loesungText, kuerzenText = "
   return { bild, tastatur: tasten.element };
 }
 
+// ---------- Notizen (NZ1 a) ----------
+
+/** Notizfeld für einen Bruch: Zähler und Nenner als zwei kleine Felder übereinander. */
+function notizBruch(label) {
+  return el("span", { class: "br-notiz" }, LS.notizFeld({ breite: 3, label: `${label}, Zähler` }), el("span", { class: "strich" }),
+    LS.notizFeld({ breite: 3, label: `${label}, Nenner` }));
+}
+
+/**
+ * Zeile „erweitert: ▢ + ▢ = ▢“ unter der Rechnung: je Bruch erweitert, danach das Ergebnis vor dem Kürzen. Mit
+ * luecke: die Lücke bleibt „?“ (nur der bekannte Bruch und das Ergebnis werden gleichnamig gemacht). Nach Stufe ab s4,
+ * wo ohne Tafel gerechnet wird; s1–s3 sind Bild und gleiche Nenner.
+ */
+function notizRechnung(ctx, a, { luecke = false } = {}) {
+  if (!ctx.notizen(Number(ctx.stufe.slice(1)) >= 4)) return null;
+  const teile = [el("span", { text: "erweitert:" })];
+  a.terme.forEach((_, i) => {
+    if (i) teile.push(el("span", { class: "op", text: a.ops[i - 1] }));
+    teile.push(luecke && i === 1 ? el("span", { class: "op", text: "?" }) : notizBruch(`Bruch ${i + 1} erweitert`));
+  });
+  teile.push(el("span", { class: "op", text: "=" }), notizBruch(luecke ? "Ergebnis erweitert" : "Ergebnis vor dem Kürzen"));
+  return el("div", { class: "br-notizen" }, ...teile);
+}
+
 // ---------- Hinweise (verraten die Lösung nicht) ----------
 
 const HINWEIS_NENNER_BILD = "Der Nenner muss zu beiden Brüchen passen. Zähle die Stückchen einer ganzen Tafel.";
@@ -534,7 +565,7 @@ LS.spiel({
       ctx.loesung(loesungText);
       ctx.schritte(LS.tippSchritte(a.ergebnis[0]) + LS.tippSchritte(a.ergebnis[1]));
       if (p.bild) f.append(zweiTafeln(a.terme, a.ops[0]));
-      f.append(rechnungEl(a.terme, a.ops, eingabe.bild), eingabe.tastatur);
+      f.append(rechnungEl(a.terme, a.ops, eingabe.bild), notizRechnung(ctx, a) ?? "", eingabe.tastatur);
       if (ctx.nr === 0) ctx.sag(p.bild ? "Beide Tafeln haben gleich viele Stückchen. Zähle die gefärbten!" : "Tippe zuerst den Zähler, dann OK, dann den Nenner.");
 
     } else if (a.art === "kuerzen") {
@@ -557,7 +588,7 @@ LS.spiel({
     } else if (a.art === "ueberEins") {
       const loesungText = `${weg(a.terme, a.ops, a.N)} = ${a.richtig}`;
       f.append(el("div", { class: "auftrag", text: "Mehr als eine ganze Tafel! Welche gemischte Zahl stimmt?" }),
-        rechnungEl(a.terme, a.ops, el("span", { text: "?" })));
+        rechnungEl(a.terme, a.ops, el("span", { text: "?" })), notizRechnung(ctx, a) ?? "");
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 130, inhalt: wertEl, loesung: loesungText, lob: `Richtig: ${loesungText}`,
         hinweis: x => (/ /.test(x) ? "Mache die Nenner gleich, zähle zusammen und nimm dann ganze Tafeln heraus." : "Nenner zählt man nie zusammen. Mache zuerst die Nenner gleich."),
@@ -576,7 +607,7 @@ LS.spiel({
       ctx.schritte(LS.tippSchritte(a.ergebnis[0]));
       f.append(el("div", { class: "auftrag", text: "Welcher Bruch fehlt?" }),
         el("div", { class: "rechnung frage" }, bruchEl(za, na), el("span", { class: "op", text: op }), eingabe.bild,
-          el("span", { class: "op", text: "=" }), bruchEl(...a.summe)), eingabe.tastatur);
+          el("span", { class: "op", text: "=" }), bruchEl(...a.summe)), notizRechnung(ctx, a, { luecke: true }) ?? "", eingabe.tastatur);
     }
   },
 });

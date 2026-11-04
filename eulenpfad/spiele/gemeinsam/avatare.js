@@ -241,6 +241,15 @@ const AVATARE = (() => {
     { id: "abz-fruehaufsteher", name: "Frühaufsteher", zeichne: () =>
       eck(0, 0, 100, 64, 0, "#ffd9b0") + [...Array(7)].map((_, i) => { const w = Math.PI + (i + 0.5) * Math.PI / 7; return linie(`M${50 + 26 * Math.cos(w)} ${64 + 26 * Math.sin(w)} L${50 + 38 * Math.cos(w)} ${64 + 38 * Math.sin(w)}`, 4, "#f5a623"); }).join("")
       + pfad("M28 64 A22 22 0 0 1 72 64 Z", "#ffd23f") + eck(0, 64, 100, 36, 0, "#4cbf73") + linie("M10 76 q20 -6 40 0 t40 0", 3, "#2f9e5a") },
+    // Probe-Stempel (LERN_Session13): nachgerechnet statt „nicht sicher“ — Lupe über einem Häkchen
+    { id: "abz-nachgerechnet", name: "Ganz sicher", zeichne: () =>
+      linie("M24 52 L40 68 L72 30", 9, "#4cbf73") + kreis(62, 58, 18, "rgba(255,255,255,.35)", ' stroke="#5b6080" stroke-width="5"')
+      + linie("M75 71 L88 84", 7, "#5b6080") },
+    // NZ1 a (LERN_Session13): im Kopf gerechnet, wo Notizen angeboten waren — Kopf mit Rechenzeichen, Notizzettel durchgestrichen
+    { id: "abz-kopfrechner", name: "Kopfrechner", zeichne: () =>
+      kreis(50, 50, 32, "#ffd9a8", ' stroke="#d9925a" stroke-width="2.5"') + schrift(38, 50, "+", 22, "#2f8fe0") + schrift(62, 50, "×", 22, "#e5484d")
+      + schrift(38, 72, "−", 22, "#4cbf73") + schrift(62, 72, ":", 22, "#8e5bd6")
+      + eck(70, 12, 20, 24, 3, "#fffbea", ' stroke="#c9b87a" stroke-width="2"') + linie("M70 36 L90 12", 3, "#e5484d") },
   ];
 
   // Sätze im Profil; abzeichen: erst wählbar, wenn das Abzeichen Gold hat (AV5 a, freigeschaltet bestimmt erfolge.js).

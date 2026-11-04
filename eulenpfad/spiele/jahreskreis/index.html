@@ -33,6 +33,11 @@
   .jz-winter { --j: #74a7e0; }
 
   .reihe-gelegt { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 52px; margin: 0 0 14px; }
+  /* Notizen (NZ1 a): eine Zeile unter der Frage */
+  .nz-zeile { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 14px; margin: -8px 0 12px;
+    font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .nz-zeile label { display: inline-flex; align-items: center; gap: 6px; }
+  .nz-zeile .zw-notiz { font-size: 17px; min-height: 34px; padding: 2px 4px; }
   .reihe-gelegt span { background: var(--gut-hell); border-radius: 12px; padding: 8px 14px; font-weight: 900; font-size: 20px; }
 </style>
 </head>
@@ -109,8 +114,9 @@ const ARTEN = {
   tagWochen() {
     const h = zufall(0, 6), w = zufall(1, 4), r = zufall(1, 6), vor = Math.random() < 0.4;
     const d = (7 * w + r) * (vor ? -1 : 1);
-    const text = Math.random() < 0.5 ? `${7 * w + r} Tagen` : `${w === 1 ? "einer Woche" : `${w} Wochen`} und ${r === 1 ? "einem Tag" : `${r} Tagen`}`;
-    return { typ: "tag", h, d, zurueck: vor, frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ${vor ? "war vor" : "ist in"} ${text}?`, liste: "tage", loesung: mod(h + d, 7),
+    const inTagen = Math.random() < 0.5;
+    const text = inTagen ? `${7 * w + r} Tagen` : `${w === 1 ? "einer Woche" : `${w} Wochen`} und ${r === 1 ? "einem Tag" : `${r} Tagen`}`;
+    return { typ: "tag", h, d, inTagen, zurueck: vor, frage: `Heute ist <b>${TAGE[h]}</b>. Welcher Tag ${vor ? "war vor" : "ist in"} ${text}?`, liste: "tage", loesung: mod(h + d, 7),
       hinweis: "Nach einer ganzen Woche ist wieder derselbe Tag. Zähl zuerst die Wochen weg, dann die übrigen Tage." };
   },
   monatWeit() {
@@ -194,6 +200,21 @@ function pruefeAufgabe(a, stufe) {
 
 const NAMEN = { tage: TAGE, monate: MONATE, zeiten: ZEITEN };
 
+/**
+ * Notizen (NZ1 a): Felder für die Zwischenstationen der Königsstufe — die übrigen Tage nach den ganzen Wochen, die
+ * übrigen Monate nach den ganzen Jahren, die Tage zwischen zwei Daten, der Monat vor der Jahreszeit. Bis s5 zählt
+ * das Kind im Kopf oder an den Fingern weiter; das ist dort das Lernziel.
+ */
+function notizFelder(a) {
+  switch (a.art) {
+    case "tagWochen": return a.inTagen ? ["übrige Tage"] : [];
+    case "monatWeit": return ["übrige Monate"];
+    case "datumTag": return ["Tage dazwischen", "übrige Tage"];
+    case "jahreszeitRechnen": return ["Monat"];
+  }
+  return [];
+}
+
 function knopfFuer(art, i, text) {
   // Nur die Jahreszeiten-Knöpfe sind gefärbt; Monate nicht, sonst verrät die Farbe die Jahreszeit.
   const k = el("button", { type: "button", class: "antwort" + (art === "zeiten" ? ` ${ZEIT_KLASSE[text]}` : "") });
@@ -248,6 +269,10 @@ LS.spiel({
     const namen = NAMEN[a.liste];
     ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     ctx.flaeche.append(el("div", { class: "frage", html: a.frage }));
+    const notizen = notizFelder(a);
+    if (notizen.length && ctx.notizen(ctx.stufe === "s6")) ctx.flaeche.append(el("div", { class: "nz-zeile" },
+      ...notizen.map(n => el("label", {}, el("span", { text: n }),
+        Object.assign(LS.notizFeld({ breite: n === "Monat" ? 9 : 3, label: n }), n === "Monat" ? { inputMode: "text" } : {})))));
     let fertig = false;
 
     const loesung = a.reihe ? a.folge.map(j => namen[j]).join(" → ") : `Richtig ist: ${(a.namen || namen)[a.loesung]}.`;

@@ -144,6 +144,17 @@ const ERFOLGE = (() => {
       pruefe: (k, n) => ({ ist: Math.min(k.fehler, n), soll: n, wann: k.fehler >= n ? k.fehlerWann : null }) },
     { id: "fruehaufsteher", bild: "🌅", titel: "Frühaufsteher", stufen: [5, 10, 25, 50, 100],
       text: n => `${n} Runden vor 8 Uhr morgens gespielt.`, pruefe: (k, n) => zaehler(k.runden.filter(e => new Date(e.zeit).getHours() < 8), n) },
+    // Probe-Stempel (Wunsch Patrik, LERN_Session13): Passt die Endziffer, wäre „nicht sicher“ richtig — wer nachrechnet und
+    // sicher stempelt, bekommt dafür ein Abzeichen statt mehr Sterne
+    { id: "nachgerechnet", bild: "🔎", titel: "Ganz sicher", stufen: [5, 10, 25, 50, 100],
+      text: n => `${n}-mal bei passender Endziffer nachgerechnet und sicher gestempelt.`,
+      pruefe: (k, n) => zaehler(k.runden.flatMap(e => (e.aufgabenZeiten || []).filter(a => a.vorgehen?.endprobe === "nachgerechnet" && !a.versuche)
+        .map(() => ({ zeit: e.zeit }))), n) },
+    // NZ1 a mit Zusatz Patrik (LERN_Session13): Aufgaben mit Notizfeldern im Kopf und auf Anhieb gelöst
+    { id: "kopfrechner", bild: "🧠", titel: "Kopfrechner", stufen: [10, 25, 50, 100, 250],
+      text: n => `${n} Aufgaben mit mehreren Rechenschritten ganz im Kopf gelöst — die Notizen blieben leer.`,
+      pruefe: (k, n) => zaehler(k.runden.flatMap(e => (e.aufgabenZeiten || [])
+        .filter(a => a.vorgehen?.notiz === "ohne" && a.geloest && !a.versuche && !a.tipps && !a.zeitUm).map(() => ({ zeit: e.zeit }))), n) },
   ];
   // Frühere Abzeichen (LERN_Session10, ohne Stufen) → Abzeichen und Stufe heute, damit Gesehenes gesehen bleibt.
   const FRUEHER = { "erste-runde": "runden:1", "zehn-runden": "runden:2", "fuenfzig-runden": "runden:3", "hundert-runden": "runden:4",

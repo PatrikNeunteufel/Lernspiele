@@ -19,6 +19,8 @@
   .teiler-chip.an { background: var(--deko-5); color: #fff; box-shadow: 0 5px 0 rgba(0, 0, 0, .25); }
   .teiler-chip.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .fertig-zeile { display: flex; justify-content: center; margin-top: 14px; }
+  .td-notiz { display: flex; align-items: center; justify-content: center; gap: 8px; margin: -4px 0 6px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .td-notiz .zw-notiz { font-size: 17px; min-height: 34px; }
   .korb-karte .bild { font-variant-numeric: tabular-nums; }
   .wahl-knopf { font-size: clamp(24px, 5.5vw, 32px); font-weight: 900; font-variant-numeric: tabular-nums; }
 </style>
@@ -231,6 +233,9 @@ LS.spiel({
       ctx.serie("antwort", a.loesung);
       const loesungText = a.loesung ? `${zahlText(a.zahl)} : ${a.durch} = ${zahlText(a.zahl / a.durch)} — teilbar` : `${zahlText(a.zahl)} : ${a.durch} geht nicht auf — nicht teilbar`;
       f.append(el("div", { class: "frage", html: `Ist die Zahl durch <b>${a.durch}</b> teilbar?` }));
+      // Notizen (NZ1 a): bei 3, 6 und 9 ab Stufe 5 ein Feld für die Quersumme — das Zwischenergebnis der Regel
+      if ([3, 6, 9].includes(a.durch) && ctx.notizen(Number(ctx.stufe.slice(1)) >= 5))
+        f.append(el("label", { class: "td-notiz" }, el("span", { text: "Quersumme:" }), LS.notizFeld({ breite: 3, label: "Notiz: Quersumme" })));
       LS.koerbe(ctx, {
         karte: { bild: zahlText(a.zahl), text: "" },
         koerbe: [true, false],

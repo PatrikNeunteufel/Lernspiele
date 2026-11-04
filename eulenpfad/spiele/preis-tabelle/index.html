@@ -20,6 +20,9 @@
   .werte button.zelle.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .werte button.zelle.richtig { background: var(--gut-hell); box-shadow: 0 3px 0 var(--gut); }
   .werte button.zelle.gewaehlt { opacity: .45; }
+  /* Notizen (NZ1 a): Zusatzzeile „1 Stück“, „100 g“, „50 g“ mit einem Feld statt eines Preises */
+  .werte tr.nz-zeile td { background: #fffbea; color: var(--text-leise); padding-top: 2px; padding-bottom: 2px; }
+  .werte .zw-notiz { width: 100%; font-size: 17px; min-height: 32px; padding: 1px 4px; }
 
   /* Ganze Aufgabe im Bild (BH3 a). Ab Tablet-Breite: Tabelle links, Titel und Frage rechts daneben. */
   .pt-kopf { display: grid; grid-template-columns: auto minmax(0, 28em); grid-template-areas: "werte titel" "werte frage";
@@ -267,6 +270,34 @@ function wertetabelle(kopf, zeilen, inhalt, mehr) {
 
 const luecke = () => el("span", { class: "luecke", text: "?" });
 
+/**
+ * Notizen (NZ1 a): Zusatzzeilen für den Zwischenschritt — „1“ Stück (Dreisatz) oder „100 g“ und „50 g“ (Gewichte) —
+ * an ihrem Platz in der aufsteigenden Tabelle, rechts ein Feld statt des Preises. zusatz: [{ wert, text, label }].
+ */
+function notizZeilen(tabelle, werte, zusatz) {
+  const zeilen = [...tabelle.querySelectorAll("tr")].slice(1);
+  for (const z of [...zusatz].sort((x, y) => x.wert - y.wert)) {
+    const feld = LS.notizFeld({ breite: 6, label: z.label });
+    feld.inputMode = "decimal";
+    const tr = el("tr", { class: "nz-zeile" }, el("td", { text: z.text }), el("td", {}, feld));
+    const i = werte.findIndex(w => w > z.wert);
+    if (i < 0 || !zeilen[i]) tabelle.append(tr); else zeilen[i].before(tr);
+  }
+}
+
+/** Welche Zusatzzeilen hätte die Aufgabe? Nur wo die Zeile für 1 Stück, 100 g oder 50 g fehlt und gebraucht wird. */
+function zusatzFuer(a) {
+  if (a.art === "folge") return [];
+  if (a.art === "gewicht") {
+    const g = a.menge[a.luecke];
+    return [...(a.menge.includes(100) ? [] : [{ wert: 100, text: "100 g", label: "Preis für 100 g" }]),
+      ...(g % 100 && !a.menge.includes(50) ? [{ wert: 50, text: "50 g", label: "Preis für 50 g" }] : [])];
+  }
+  // 1 Stück: fehlt die Zeile, und ist sie nicht selbst gesucht
+  if (a.anzahl.includes(1)) return [];
+  return [{ wert: 1, text: "1", label: "Preis für 1 Stück" }];
+}
+
 /** Titel, Tabelle und Frage in einen Kasten (pt-kopf): ab Tablet-Breite steht die Tabelle links neben Titel und Frage,
  *  auf dem Handy der Titel neben der Tabelle — so passt die ganze Aufgabe ins Bild (BH3 a). */
 function kopfZusammen(f) {
@@ -295,6 +326,12 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     if (new Set(p.arten).size > 1) ctx.serie("art", a.art);
     const f = ctx.flaeche;
+    // Notizen (NZ1 a): Zusatzzeile „1 Stück“, „100 g“, „50 g“ in der Tabelle, wo sie fehlt; nach Stufe ab s4 (ohne die
+    // Zeile für 1 Stück — bis s3 steht sie immer da).
+    const notizen = () => {
+      const zusatz = zusatzFuer(a);
+      if (zusatz.length && ctx.notizen(Number(ctx.stufe.slice(1)) >= 4)) notizZeilen(f.querySelector(".werte"), a.anzahl || a.menge, zusatz);
+    };
     // Ab Stufe 3 wird in Rappen getippt (1 3 6 0 → 13 Fr. 60 Rp.), sonst in ganzen Franken.
     const mitRappen = p.raster < 100 || a.art === "gewicht";
     let zelle = null; // Element der Lücke, wird nach der richtigen Antwort gefüllt
@@ -323,6 +360,7 @@ LS.spiel({
         return k;
       }));
       f.append(el("div", { class: "frage", text: "Ein Preis in der Tabelle ist falsch. Tipp ihn an!" }));
+      notizen();
       kopfZusammen(f);
       if (ctx.nr === 0) ctx.sag("Tipp: Zuerst den Preis für 1 Stück herausfinden — er muss in jeder Zeile passen.");
       return;
@@ -392,6 +430,7 @@ LS.spiel({
       }
     }
     f.append(el("div", { class: "frage", text: satz(frage) }));
+    notizen();
     kopfZusammen(f);
     loesungText = satz(loesungText);
     ctx.loesung?.(loesungText);

@@ -259,6 +259,29 @@ const AUSWERTUNG = (() => {
   // ---------- Vorgehen (ctx.vorgehen): wie ein Kind Aufgaben angeht (Wunsch Patrik, LERN_Session7) ----------
   // Je Art die Werte vom besten zum schwächsten; ton: gut | mittel | schwach (Farbe in der Statistik).
   const VORGEHEN = {
+    // NZ1 a (LERN_Session13): nur Aufgaben, in denen Notizfelder angeboten waren
+    notiz: {
+      titel: "Zwischenergebnisse", spiele: ["rechen-maschine", "rechenprobe", "malkreuz", "rechentrick-detektiv", "zahlenraetsel-tresor",
+        "teiler-detektiv", "wuerfel-zaehler", "zahlen-waage", "zahlenhaus", "muster-fortsetzer", "sachaufgaben-kompass", "kiosk-kasse",
+        "preis-tabelle", "mittelwert-waage", "diagramm-detektiv", "velo-tabelle", "fahrplan-rechner", "uhr-werkstatt", "zeit-schaetzer",
+        "jahreskreis", "masse-umwandler", "komma-messband", "flaechenmass-treppe", "speicher-leiter", "quader-volumen", "bruch-rechteck",
+        "bruch-werkstatt", "prozent-bruecke", "taschengeld-planer", "rest-raetsel", "hebel-wippe", "stufenzahl-schieber"],
+      erklaerung: "In Aufgaben mit mehreren Rechenschritten: im Kopf gerechnet oder Zwischenergebnisse notiert (✏️)?",
+      werte: [
+        { id: "ohne", text: "im Kopf", ton: "gut" },
+        { id: "benutzt", text: "mit Notizen", ton: "mittel" },
+      ],
+    },
+    // Probe-Stempel (LERN_Session13): bei passender Endziffer
+    endprobe: {
+      titel: "Endziffer-Probe", spiele: ["rechenprobe"],
+      erklaerung: "Passt die Endziffer, ist das Ergebnis noch nicht sicher: nachgerechnet, „nicht sicher“ gestempelt, oder (Endziffer passt nicht) gleich „falsch“?",
+      werte: [
+        { id: "nachgerechnet", text: "nachgerechnet", ton: "gut" },
+        { id: "vorsichtig", text: "„nicht sicher“", ton: "gut" },
+        { id: "endziffer", text: "Endziffer passt nicht → falsch", ton: "gut" },
+      ],
+    },
     systematik: {
       titel: "Systematisch kombinieren", spiele: ["glace-kombinator"],
       erklaerung: "Beim Legen aller Möglichkeiten: der Reihe nach wie ein Zählwerk (erst ein Stück mit allem, dann das nächste)?",

@@ -28,6 +28,9 @@
   .wz-knoepfe { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
   .wz-wahl .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); }
   .wz .anzeige { margin: 0 auto 10px; }
+  .wz-notizen { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; align-self: center; flex: none; }
+  .wz-notizen label { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .wz-notizen .zw-notiz { font-size: 17px; min-height: 34px; }
   .wz-abc { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;
     color: var(--karte); background: var(--f, var(--deko-6)); font-weight: 900; font-size: 20px; }
   /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy stehen zwei oder drei Gebäude nebeneinander statt untereinander. */
@@ -591,8 +594,14 @@ function zeigeKiste(ctx, a, wz, p) {
   ctx.tipp(["Rechne zuerst, wie viele Würfel in die ganze Kiste passen: breit mal tief mal hoch.",
     p.schichten ? "Zähl dann die Würfel, die schon drin sind. Die unteren Schichten sind ganz voll." : TIPP_VERSTECKT,
     p.schichten ? "Voll weniger drin: So viele fehlen noch." : "Zähl Säule für Säule, wie viele Würfel schon drin sind. Voll weniger drin: So viele fehlen."]);
-  wz.append(el("div", { class: "frage", text: "Wie viele Würfel fehlen, bis die Kiste voll ist?" }),
-    el("div", { class: "wz-bau" }, el("div", { class: "wz-geb" }, bauSvg(k, { farbe: "var(--deko-3)" }))),
+  const bau = el("div", { class: "wz-bau" }, el("div", { class: "wz-geb" }, bauSvg(k, { farbe: "var(--deko-3)" })));
+  // Notizen (NZ1 a): die zwei Zwischenergebnisse aus den Tipps — so viele passen hinein, so viele sind schon drin;
+  // neben der Kiste, damit die Aufgabe nicht höher wird.
+  if (ctx.notizen(Number(ctx.stufe.slice(1)) >= 5)) // Kisten gibt es nur in s5 und s6
+    bau.append(el("div", { class: "wz-notizen" },
+      el("label", {}, el("span", { text: "ganz voll:" }), LS.notizFeld({ breite: 2, label: "Notiz: so viele Würfel passen in die Kiste" })),
+      el("label", {}, el("span", { text: "schon drin:" }), LS.notizFeld({ breite: 2, label: "Notiz: so viele Würfel sind schon drin" }))));
+  wz.append(el("div", { class: "frage", text: "Wie viele Würfel fehlen, bis die Kiste voll ist?" }), bau,
     el("div", { class: "wz-mass", text: `Die Kiste ist ${k.n} Würfel breit, ${k.m} Würfel tief und ${k.kiste} Würfel hoch.` }));
   const anzeige = el("div", { class: "anzeige leer", "aria-label": "Fehlende Würfel" });
   wz.append(anzeige);

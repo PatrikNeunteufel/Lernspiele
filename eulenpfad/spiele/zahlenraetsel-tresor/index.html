@@ -76,6 +76,21 @@
   .raetsel .titel { font-weight: 900; color: #a0703d; font-size: .8em; text-transform: uppercase; letter-spacing: 1px; }
   .raetsel ul { margin: 6px 0 0; padding-left: 1.1em; }
   .raetsel .wk { display: inline-block; color: #fff; background: var(--f); border-radius: 8px; padding: 0 8px; font-weight: 900; }
+  /* Notizen (NZ1 a): je Bündel „13 T = ✏️“ unter dem Rätsel */
+  .tr-notizen { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; }
+  .tr-notizen label { display: inline-flex; align-items: center; gap: 6px; font-size: .85em; }
+  .tr-notizen .zw-notiz { font-size: 17px; min-height: 34px; width: calc(7ch + 14px); }
+  /* Handy: mit Notizen ein kleinerer Tresor und zwei Notizen je Zeile, damit die Tastatur im Bild bleibt */
+  @media (max-width: 560px) {
+    .tresor-zeile:has(.tr-notizen) { gap: 8px; margin-bottom: 8px; }
+    .tresor-zeile:has(.tr-notizen) .tresor { width: 64px; height: 64px; }
+    .tresor-zeile:has(.tr-notizen) .innen { font-size: 30px; }
+    .tresor-zeile:has(.tr-notizen) .rad { width: 34px; height: 34px; border-width: 4px; }
+    .tresor-zeile:has(.tr-notizen) .raetsel { padding: 10px 12px; }
+    .tr-notizen { gap: 4px 10px; margin-top: 4px; }
+    .tr-notizen label { gap: 4px; }
+    .tr-notizen .zw-notiz { width: calc(6ch + 12px); font-size: 15px; min-height: 32px; padding: 2px 4px; }
+  }
 </style>
 </head>
 <body>
@@ -313,7 +328,14 @@ LS.spiel({
 
     const tresor = el("div", { class: "tresor", "aria-hidden": "true",
       html: `<div class="innen">${waehle(["💎", "👑", "🏆", "💰", "🪙", "🎁"])}</div><div class="tuer"><div class="rad"></div></div>` });
-    ctx.flaeche.append(el("div", { class: "tresor-zeile" }, tresor, el("div", { class: "raetsel", html: r.html })));
+    const raetsel = el("div", { class: "raetsel", html: r.html });
+    // Notizen (NZ1 a): ab Stufe 4 (zwei und mehr Bündel) je Bündel ein Feld „13 T = …“ im Rätsel, dort wo der Teil steht.
+    const buendel = r.art === "buendeln" ? r.teile.filter(t => t.n > 9) : [];
+    if (buendel.length && ctx.notizen(Number(ctx.stufe.slice(1)) >= 4))
+      raetsel.append(el("div", { class: "tr-notizen" }, ...buendel.map(t =>
+        el("label", {}, el("span", { class: `wk st st-${t.k}`, text: `${t.n} ${t.k}` }), el("span", { text: "=" }),
+          LS.notizFeld({ breite: 8, label: `Notiz: ${t.n} ${t.k} als Zahl` })))));
+    ctx.flaeche.append(el("div", { class: "tresor-zeile" }, tresor, raetsel));
 
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Code" });
     ctx.flaeche.append(anzeige);

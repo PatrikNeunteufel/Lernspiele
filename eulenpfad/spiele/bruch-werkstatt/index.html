@@ -30,6 +30,12 @@
   .zaehler-anzeige { text-align: center; font-weight: 800; color: var(--text-leise); margin-top: 6px; }
   .wahl-knopf { font-size: clamp(28px, 6vw, 36px); font-weight: 900; }
   .wahl-knopf .bruch { font-size: 30px; }
+
+  /* Notizen (NZ1 a): je Bruch zwei kleine Felder übereinander (Zähler, Nenner), unter dem Vergleich */
+  .bw-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px; margin: -6px 0 10px; font-size: 16px; font-weight: 800; color: var(--text-leise); }
+  .bw-notiz { display: inline-flex; flex-direction: column; align-items: center; }
+  .bw-notiz .zw-notiz { width: calc(3ch + 12px); min-height: 28px; padding: 1px 3px; font-size: 16px; }
+  .bw-notiz .strich { align-self: stretch; border-top: 2px solid #c9b87a; margin: 2px 0; }
 </style>
 </head>
 <body>
@@ -323,6 +329,15 @@ LS.spiel({
       const luecke = el("span", { class: "luecke", text: "?" });
       f.append(el("div", { class: "frage", text: "Was gehört in die Lücke: <, = oder >?" }),
         el("div", { class: "vergleich" }, bruchEl(a.a), luecke, bruchEl(a.b)));
+      // Notizen (NZ1 a): beide Brüche auf den gleichen Nenner erweitert — nur ohne Bild und nur, wenn weder Nenner
+      // noch Zähler gleich sind (sonst entscheidet die Regel ohne Rechnung); nach Stufe ab s4.
+      const [za, na] = teile(a.a), [zb, nb] = teile(a.b);
+      if (a.art === "vergleich" && na !== nb && za !== zb && ctx.notizen(Number(ctx.stufe.slice(1)) >= 4)) {
+        const notizBruch = label => el("span", { class: "bw-notiz" }, LS.notizFeld({ breite: 3, label: `${label}, Zähler` }),
+          el("span", { class: "strich" }), LS.notizFeld({ breite: 3, label: `${label}, Nenner` }));
+        f.append(el("div", { class: "bw-notizen" }, el("span", { text: "gleicher Nenner:" }),
+          notizBruch(`${a.a} erweitert`), notizBruch(`${a.b} erweitert`)));
+      }
       if (a.art === "vergleichBild") {
         f.append(el("div", { class: "modell-paar" }, modellEl("streifen", teile(a.a)[1], teile(a.a)[0]), modellEl("streifen", teile(a.b)[1], teile(a.b)[0])));
       }

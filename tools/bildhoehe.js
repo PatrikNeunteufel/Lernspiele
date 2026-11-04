@@ -25,6 +25,7 @@ const GERAETE = {
   "quer-sicht": { w: 1024, h: 690 },    // Tablet quer mit Leisten
   "laptop-sicht": { w: 1366, h: 650 },  // Laptop 1366 × 768 mit Browserleisten
   "klein-sicht": { w: 1000, h: 500 },   // Laptop mit 200 % Skalierung (Gerät Patrik)
+  "klein-voll": { w: 1000, h: 600 },    // dasselbe im Vollbild (ohne Browserleisten)
 };
 const opt = { stufen: "s1,s3,s6", geraete: "handy,tablet,quer,desktop", css: null, json: null, port: "9334" }; // --port: eigener Chrome je Lauf, wenn mehrere zugleich messen
 const nurSpiele = [];

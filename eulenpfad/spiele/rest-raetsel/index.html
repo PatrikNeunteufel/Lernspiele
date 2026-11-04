@@ -14,6 +14,9 @@
   .bilder { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; font-size: clamp(26px, 6vw, 36px); max-width: 560px; margin: 0 auto 6px; }
   .sachtext { text-align: center; font-size: clamp(20px, 4vw, 26px); font-weight: 700; margin-bottom: 8px; }
   .umkehr { text-align: center; font-size: 22px; font-weight: 800; color: var(--gut); min-height: 30px; }
+  /* Notizen (NZ1 a): eine Zeile unter der Rechnung, kleine Felder */
+  .rr-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; margin: -4px 0 8px; font-size: 16px; font-weight: 800; color: var(--text-leise); }
+  .rr-notizen .zw-notiz { font-size: 18px; min-height: 36px; }
 </style>
 </head>
 <body>
@@ -37,6 +40,7 @@
 // Erst das Ergebnis, dann der Rest; zum Schluss zeigt die Umkehraufgabe, warum es stimmt.
 
 const { zahlText, zufall, waehle, el } = LS;
+const stufeNr = ctx => Number(ctx.stufe.slice(1));
 const DINGE = ["🍎", "🍪", "⚽", "🧸", "🖍️", "🍓"];
 
 // Je Stufe: Teiler, grösster Quotient, Bilder zum Verteilen, Rückwärts-Rätsel.
@@ -117,6 +121,10 @@ LS.spiel({
       ctx.flaeche.append(
         el("div", { class: "auftrag", text: "Welche Zahl ist gesucht?" }),
         el("div", { class: "rechnung", html: `? : ${x.d} = ${zahlText(x.q)} <span class="rest-wort">Rest</span> ${x.r}` }));
+      // Notizen (NZ1 a): das Produkt der Umkehraufgabe, bevor der Rest dazukommt — nach Stufe ab s4
+      if (ctx.notizen(stufeNr(ctx) >= 4))
+        ctx.flaeche.append(el("div", { class: "rr-notizen" }, el("span", { text: `${zahlText(x.q)} × ${x.d} =` }),
+          LS.notizFeld({ breite: 5, label: `Produkt ${zahlText(x.q)} mal ${x.d}` })));
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Gesuchte Zahl" });
       ctx.flaeche.append(anzeige, umkehrZeile);
       const tasten = LS.tastatur({
@@ -142,6 +150,15 @@ LS.spiel({
     const feldQ = el("span", { class: "feld aktiv", text: "?" });
     const feldR = el("span", { class: "feld", text: "?" });
     ctx.flaeche.append(el("div", { class: "rechnung" }, `${zahlText(x.a)} : ${x.d} = `, feldQ, el("span", { class: "rest-wort", text: " Rest " }), feldR));
+    // Notizen (NZ1 a): Teilschritte zum nächsten Vielfachen (erst Zehner bzw. Hunderter mal den Teiler, dann das
+    // Vielfache selbst) — nach Stufe ab s4, wo das Ergebnis zweistellig wird; s1–s3 sind Einmaleins im Kopf.
+    if (ctx.notizen(stufeNr(ctx) >= 4)) {
+      const n = x.q > 100 ? 3 : x.q > 10 ? 2 : 1;
+      const labels = [...(n === 3 ? [`Teilschritt: Hunderter mal ${x.d}`] : []), ...(n >= 2 ? [`Teilschritt: Zehner mal ${x.d}`] : []),
+        `Zahl aus der ${x.d}er-Reihe, höchstens ${zahlText(x.a)}`];
+      ctx.flaeche.append(el("div", { class: "rr-notizen" }, el("span", { text: `${x.d}er-Reihe:` }),
+        ...labels.map(label => LS.notizFeld({ breite: 5, label }))));
+    }
     const halter = el("div");
     ctx.flaeche.append(halter, umkehrZeile);
 

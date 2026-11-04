@@ -93,6 +93,10 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "rechenprobe": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
     "rechentrick-detektiv": {
       "am": "2026-11-02",
       "von": "Patrik"

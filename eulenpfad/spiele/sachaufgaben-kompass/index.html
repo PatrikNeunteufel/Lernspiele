@@ -42,6 +42,18 @@
   .kompass-weg { --wahl-breite: 210px; }
   .kompass-weg .wahl-knopf { font-size: clamp(18px, 4.2vw, 24px); font-weight: 900; font-variant-numeric: tabular-nums; }
   .kompass-zusammenhang { --wahl-breite: 220px; }
+  /* Notizen (NZ1 a): vor der Antwort, je Teilrechnung ein Feld, Beschriftung über dem Feld */
+  .nz-zeile { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 4px 10px;
+    font-size: 13px; font-weight: 800; color: var(--text-leise); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .nz-zeile label { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+  .nz-zeile > span { align-self: center; }
+  .nz-zeile .zw-notiz { font-size: 16px; min-height: 32px; padding: 1px 3px; }
+  @media (min-width: 561px) { .kompass-antwort:has(> .nz-zeile) .anzeige { min-width: 180px; } }
+  /* Handy: eine eigene Zeile über der Antwort, so niedrig wie möglich */
+  @media (max-width: 560px) {
+    .kompass-antwort > .nz-zeile { flex-basis: 100%; font-size: 12px; }
+    .nz-zeile .zw-notiz { min-height: 30px; }
+  }
 </style>
 </head>
 <body>
@@ -554,6 +566,21 @@ function rechne(term) {
   const v = summe();
   return i === t.length ? v : NaN;
 }
+/**
+ * Teilrechnungen eines Terms in der Reihenfolge, in der man sie ausrechnet, ohne die letzte (sie gibt das Ergebnis):
+ * „20*6.4+3*12.8“ → ["20*6.4", "3*12.8"]. Für die Notizfelder (NZ1 a).
+ */
+function teilterme(term) {
+  const t = term.match(/\d+(?:\.\d+)?|[-+*/()]/g) || [];
+  const teile = [];
+  let i = 0;
+  const faktor = () => { if (t[i] === "(") { i++; summe(); i++; } else i++; };
+  const kette = (unter, ops) => { const s = i; unter(); while (ops.includes(t[i])) { i++; unter(); teile.push(t.slice(s, i).join("")); } };
+  const produkt = () => kette(faktor, "*/");
+  const summe = () => kette(produkt, "+-");
+  summe();
+  return teile.slice(0, -1);
+}
 const ZEICHEN = { "*": " × ", "/": " : ", "+": " + ", "-": " − " };
 /** Term so, wie die Schule ihn schreibt: × und :, Dezimalzahlen mit dem eingestellten Zeichen. */
 const termText = term => term.replace(/\d+(?:\.\d+)?|[-+*/]/g, s => ZEICHEN[s] ?? (s.includes(".") ? dezimalText(Number(s), s.split(".")[1].length) : zahlText(Number(s))));
@@ -730,6 +757,18 @@ LS.spiel({
     ctx.schritte(p.phasen.reduce((s, ph) => s + (ph === "angaben" ? a.angaben.filter(x => x.noetig).length + 1
       : ph === "ergebnis" ? LS.tippSchritte(a.ergebnis / 10 ** st) + 1 : 1), 0));
 
+    // Notizen (NZ1 a): Mit gewähltem Rechenweg (s1–s3) je Teilrechnung ein Feld, beschriftet mit der Teilrechnung;
+    // ohne Rechenweg (s4–s6) neutrale Felder, so viele, wie die Stufe vorsieht — ihre Zahl verrät den Weg nicht.
+    // Nach Stufe ab s2 (zwei Schritte); s1 hat nur eine Rechnung und darum keine Teilrechnung.
+    const notizTeile = p.phasen.includes("weg") ? teilterme(a.term)
+      : Array.from({ length: { s4: 2, s5: 2, s6: 3 }[ctx.stufe] || 0 }, () => null);
+    const notizen = notizTeile.length > 0 && ctx.notizen(Number(ctx.stufe.slice(1)) >= 2);
+    const notizFeld = label => { const n = LS.notizFeld({ breite: 7, label }); n.inputMode = "decimal"; return n; };
+    const notizZeile = () => el("div", { class: "nz-zeile" },
+      ...(notizTeile[0] ? [] : [el("span", { text: "Notizen:" })]),
+      ...notizTeile.map((t, i) => (t ? el("label", {}, el("span", { text: `${termText(t)} =` }), notizFeld(`Zwischenergebnis ${termText(t)}`))
+        : notizFeld(`Zwischenergebnis ${i + 1}`))));
+
     const phasen = [...p.phasen];
     const weiter = () => {
       const ph = phasen.shift();
@@ -828,7 +867,8 @@ LS.spiel({
           if (ctx.vorbei()) tasten.gesperrt = true;
         },
       });
-      bereich.append(el("div", { class: "kompass-antwort" }, anzeige, einheiten), tasten.element);
+      // Notizen vor der Antwort in derselben Zeile; wo der Platz nicht reicht, brechen sie darüber um
+      bereich.append(el("div", { class: "kompass-antwort" }, ...(notizen ? [notizZeile()] : []), anzeige, einheiten), tasten.element);
     }
 
     weiter();

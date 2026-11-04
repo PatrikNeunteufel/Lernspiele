@@ -32,6 +32,13 @@
   .wahl-knopf { font-size: clamp(22px, 5vw, 30px); font-weight: 900; font-variant-numeric: tabular-nums; }
   .ss-eingabe { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 4px 0 8px; }
   .ss-einheit { font-size: clamp(22px, 5vw, 30px); font-weight: 900; }
+  /* Notizen (NZ1 a): bei Ketten je Schritt ausser dem letzten ein Feld, beschriftet mit dem Rechenschritt (wie der
+     Pfeil der Rechen-Maschine) */
+  .ss-notizen { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 10px; margin: -4px 0 8px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .ss-notizen label { display: inline-flex; align-items: center; gap: 4px; }
+  .ss-notizen .zw-notiz { font-size: 17px; min-height: 32px; padding: 2px 4px; }
+  /* Mit Notizen nimmt die Pfeil-Zeile erst Platz ein, wenn sie nach dem Lösen etwas sagt */
+  .ss-notizen ~ .ss-pfeil:empty { min-height: 0; margin: 0; }
 </style>
 </head>
 <body>
@@ -375,7 +382,17 @@ LS.spiel({
     const anzeigeRechnung = a.art === "start"
       ? `<span class="luecke">?</span> ${rechenweg} = ${zahl(ziel)}` : `${zahl(start)} ${rechenweg} = <span class="luecke">?</span>`;
     f.append(el("div", { class: "frage", html: a.art === "start" ? "Welche Zahl war es <b>vorher</b>?" : "Wie heisst das <b>Ergebnis</b>?" }),
-      el("div", { class: "rechnung", html: anzeigeRechnung }), t.element, pfeil);
+      el("div", { class: "rechnung", html: anzeigeRechnung }));
+    // Notizen (NZ1 a): in der Kette nach jedem Schritt ausser dem letzten ein Feld für die Zahl, die dann dasteht — die
+    // Kette gibt es erst ab s4 (zwei, in s6 drei Schritte); ein einzelner Schritt bekommt keine.
+    if (a.art === "kette" && ctx.notizen(true)) {
+      f.append(el("div", { class: "ss-notizen" }, ...a.ops.slice(0, -1).map((o, i) => {
+        const feld = LS.notizFeld({ breite: 6, label: `Zahl nach Schritt ${i + 1} (${opText(o)})` });
+        feld.inputMode = "decimal";
+        return el("label", {}, el("span", { text: `${opText(o)} →` }), feld);
+      })));
+    }
+    f.append(t.element, pfeil);
     if (a.art === "start") unten.zeige(a.D, posZiel); else oben.zeige(a.D, a.pos);
     const hinweis = a.art === "kette" ? HINWEIS_KETTE : a.art === "start" ? HINWEIS_START : hinweisOp(a.ops[0]);
     ctx.loesung(loesung);

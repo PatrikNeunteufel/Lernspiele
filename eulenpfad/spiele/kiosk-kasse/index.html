@@ -27,6 +27,18 @@
   .geld:active { transform: translateY(2px); }
   .haufen { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 12px; }
   .haufen .geld { cursor: default; }
+  /* Notizen (NZ1 a): in der Theke neben den Preisen, Beschriftung über dem Feld */
+  .nz-zeile { display: flex; gap: 10px; align-items: flex-end; }
+  .nz-zeile label { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; font-weight: 800;
+    color: var(--text-leise); line-height: 1.1; text-align: center; max-width: 4.8em; }
+  .nz-zeile .zw-notiz { font-size: 16px; min-height: 32px; padding: 1px 3px; }
+  /* Mit Notizen rückt die Theke enger zusammen, damit die Felder neben die Preise passen */
+  .theke:has(> .nz-zeile) { gap: 8px 14px; }
+  @media (max-width: 560px) {
+    .theke:has(> .nz-zeile) { gap: 4px 10px; }
+    .theke:has(> .nz-zeile) .artikel .bild { font-size: 32px; }
+    .theke:has(> .nz-zeile) .preis { font-size: 15px; padding: 1px 6px; border-width: 2px; }
+  }
 </style>
 </head>
 <body>
@@ -190,6 +202,16 @@ LS.spiel({
     ctx.serie("art", art); // jede Stufe hat mehrere Arten
     ctx.tipp(tippsFuer(art, p.raster < 100)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
 
+    // Notizen (NZ1 a): beim Rückgeld „zusammen“ (mehrere Sachen) und „bis zum Franken“ (Preis mit Rappen) in der Theke
+    // neben den Preisen — so braucht die Aufgabe keine Zeile mehr. Nach Stufe ab s5; in s4 (eine Sache) ist das
+    // Hochzählen im Kopf das Lernziel.
+    const notizen = (summe, zusammen, ...weitere) => {
+      const namen = [...(zusammen ? ["zusammen"] : []), ...(summe % 100 ? ["bis zum Franken"] : []), ...weitere];
+      if (!namen.length || !ctx.notizen(Number(ctx.stufe.slice(1)) >= 5)) return;
+      ctx.flaeche.querySelector(".theke").append(el("div", { class: "nz-zeile" }, ...namen.map(n => el("label", {}, el("span", { text: n }),
+        Object.assign(LS.notizFeld({ breite: 5, label: n }), { inputMode: "decimal" })))));
+    };
+
     // Tastatur für Beträge: Ab Stufe 3 in Rappen getippt (1 3 6 0 → 13 Fr. 60 Rp.), sonst ganze Franken.
     const mitRappen = p.raster < 100;
     const betragEingabe = (soll, hinweis, loesungText) => {
@@ -293,6 +315,7 @@ LS.spiel({
       ctx.schritte(kuerzest.length + 1); // die Stücke legen, dazu «Herausgeben»
       ctx.flaeche.append(theke(auf.preise, [waehle(ARTIKEL)]),
         noteZeile(auf.bezahlt, " — lege das <b>Rückgeld</b> mit möglichst <b>wenigen Stücken</b>."));
+      notizen(auf.preise[0], false, "Rückgeld");
       const kasse = el("div", { class: "kasse", "aria-label": "Rückgeld" });
       const vorrat = el("div", { class: "vorrat" });
       const gelegt = [];
@@ -331,6 +354,7 @@ LS.spiel({
         // Beträge enden auf „Fr.“ oder „Rp.“ — dieser Punkt schliesst auch den Satz.
         el("div", { class: "frage", html: `Du kaufst <b>${auf.n}</b> Stück, jedes kostet <b>${betrag(auf.stueck)}</b>` }),
         noteZeile(auf.bezahlt, " — <b>wie viel Rückgeld</b> gibt es?"));
+      notizen(auf.preise[0], true);
       betragEingabe(auf.loesung, () => "Rechne zuerst aus, was alles zusammen kostet. Dann: Wie viel fehlt bis zur Note?",
         `${auf.n} × ${betrag(auf.stueck)} = ${betrag(auf.preise[0])}; ${betrag(auf.bezahlt)} − ${betrag(auf.preise[0])} = ${betrag(auf.loesung)}`);
       return;
@@ -365,6 +389,7 @@ LS.spiel({
       const summe = auf.preise.reduce((s, x) => s + x, 0);
       ctx.flaeche.append(theke(auf.preise, mische(ARTIKEL).slice(0, auf.preise.length)),
         noteZeile(auf.bezahlt, " — <b>wie viel Rückgeld</b> gibt es?"));
+      notizen(summe, true);
       betragEingabe(auf.loesung, () => "Rechne zuerst alles zusammen — Franken und Rappen getrennt. Dann ergänze bis zur Note.",
         `${auf.preise.map(betrag).join(" + ")} = ${betrag(summe)}; ${betrag(auf.bezahlt)} − ${betrag(summe)} = ${betrag(auf.loesung)}`);
       return;
@@ -379,6 +404,7 @@ LS.spiel({
     ctx.flaeche.append(el("div", { class: "theke" }, ...preise.map((pr, i) => el("div", { class: "artikel" }, el("div", { class: "bild", text: dinge[i] }), el("div", { class: "preis", text: betrag(pr) })))));
     const note = geldKnopf(GELD.find(g => g.rp === bezahlt)); note.disabled = true;
     ctx.flaeche.append(el("div", { class: "frage" }, `Bezahlt wird mit `, note, el("span", { html: ` — <b>wie viel Rückgeld</b> gibt es?` })));
+    notizen(summe, anzahl > 1);
     betragEingabe(bezahlt - summe,
       () => anzahl > 1 ? `Rechne zuerst zusammen: Alles kostet ${betrag(summe)}. Dann: Wie viel fehlt bis ${betrag(bezahlt)}?` : `Zähl vom Preis aus hoch bis ${betrag(bezahlt)}: zuerst bis zum nächsten ganzen Franken.`,
       `${betrag(bezahlt)} − ${betrag(summe)} = ${betrag(bezahlt - summe)}`);

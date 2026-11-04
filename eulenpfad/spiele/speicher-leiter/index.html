@@ -26,6 +26,10 @@
   .sl-bild { text-align: center; font-size: clamp(40px, 9vw, 56px); margin: 0 0 4px; }
   .wahl-knopf.sl-zeichen { font-size: clamp(30px, 7vw, 44px); font-weight: 900; }
   .wahl-knopf { font-weight: 800; }
+  /* Notizen (NZ1 a): kleine Felder je Sprosse oder Teilschritt, unter der Aufgabe */
+  .sl-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; margin: -4px 0 10px; font-size: 16px; font-weight: 800; color: var(--text-leise); }
+  .sl-notizen label { display: inline-flex; align-items: center; gap: 4px; }
+  .sl-notizen .zw-notiz { font-size: 18px; min-height: 36px; }
 </style>
 </head>
 <body>
@@ -273,6 +277,22 @@ function leiter(einheiten) {
 const dingText = i => `${DINGE[i].bild} ${DINGE[i].name}: ${DINGE[i].text}`;
 
 /**
+ * Notizen (NZ1 a): Zeile mit kleinen Feldern; je Eintrag [Text davor, Text danach, Vorlesetext] — die Felder stehen dort,
+ * wo das Zwischenergebnis hingehört (eine Sprosse der Leiter, ein Teilschritt der Rechnung).
+ */
+function notizZeile(eintraege) {
+  return el("div", { class: "sl-notizen" }, ...eintraege.map(([vor, nach, label]) =>
+    el("label", {}, vor ? el("span", { text: vor }) : null, LS.notizFeld({ breite: 9, label }), nach ? el("span", { text: nach }) : null)));
+}
+
+/** Sprossen zwischen der Einheit der Aufgabe und der Zieleinheit (ohne beide), in Rechenrichtung. */
+function zwischenSprossen(von, ziel) {
+  const i = GROSS_NACH_KLEIN.indexOf(von), j = GROSS_NACH_KLEIN.indexOf(ziel);
+  const z = GROSS_NACH_KLEIN.slice(Math.min(i, j) + 1, Math.max(i, j));
+  return i < j ? z : z.reverse();
+}
+
+/**
  * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Leiter-Regeln und Rechenweg in Worten — Faktoren
  * als Wörter („acht“, „tausend“), damit kein Tipp eine Zahl mit Einheit nennt, die schon die Lösung ist
  * (1 Byte = 8 bit, 4 GB : 4 MB = 1000).
@@ -383,6 +403,8 @@ LS.spiel({
       const loesung = `${zahlText(a.c)} GB = ${zahlText(a.c * 1000)} MB; ${zahlText(a.n)} · ${a.s} MB = ${zahlText(a.n * a.s)} MB — ${a.antwort === "ja" ? "es passt" : "zu viel"}`;
       f.append(el("div", { class: "sl-bild", text: "💾" }),
         el("div", { class: "sachtext", text: `Eine Speicherkarte hat ${zahlText(a.c)} GB. Passen ${zahlText(a.n)} ${a.dinge} zu je ${a.s} MB darauf?` }));
+      // Notizen (NZ1 a): die Karte in MB und was alle zusammen brauchen (s5)
+      if (ctx.notizen(true)) f.append(notizZeile([[`${zahlText(a.c)} GB =`, "MB", "Speicherkarte in MB"], ["alle zusammen:", "MB", `${zahlText(a.n)} ${a.dinge} zusammen in MB`]]));
       LS.auswahl(ctx, {
         optionen: ["ja", "nein"], richtig: a.antwort, breite: 140,
         inhalt: o => (o === "ja" ? { bild: "✅", text: "passt" } : { bild: "❌", text: "zu viel" }),
@@ -442,6 +464,23 @@ LS.spiel({
       hinweis = "Wie viel ist noch frei? Rechne alles in MB. Nur ganze Videos zählen.";
     }
     f.append(frageEl);
+    // Notizen (NZ1 a): je Sprosse, über die gerechnet wird, und bei den Sachaufgaben der Teilschritt vor dem Teilen.
+    // Nach Stufe ab s5 und immer, wenn der Weg über mehr als eine Sprosse geht (GB → kB ist zweimal ×1000).
+    let notizen = null;
+    if (a.art === "einfach" || a.art === "bit") {
+      const links = a.links.map(t => grText(...t)).join(" ");
+      const zw = zwischenSprossen(a.links[0][1], a.ziel);
+      if (zw.length && ctx.notizen(true)) notizen = zw.map(e => ["=", e, `${links} in ${e}`]);
+    } else if (a.art === "gemischt") {
+      if (ctx.notizen(Number(ctx.stufe.slice(1)) >= 5)) notizen = [[`${grText(...a.links[0])} =`, a.ziel, `${grText(...a.links[0])} in ${a.ziel}`]];
+    } else if (a.art === "anzahl") {
+      if (ctx.notizen(true)) notizen = [[`${zahlText(a.c)} GB =`, "MB", "Speicherkarte in MB"]];
+    } else if (a.art === "laden") {
+      if (ctx.notizen(true)) notizen = [[`${a.m} MB =`, "Mbit", "Datei in Megabit"]];
+    } else if (a.art === "rest") {
+      if (ctx.notizen(true)) notizen = [["belegt:", "MB", "belegter Platz in MB"], ["frei:", "MB", "freier Platz in MB"]];
+    }
+    if (notizen) f.append(notizZeile(notizen));
     ctx.loesung(loesung);
     ctx.schritte(LS.tippSchritte(a.L));
     const anzeige = el("div", { class: "anzeige leer", "aria-label": `Antwort in ${ziel}` });

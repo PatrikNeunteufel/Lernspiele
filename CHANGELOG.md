@@ -404,3 +404,22 @@
 - Anleitungen: Bildwahl, Profil der Aufsicht, Hinweis zu PINs, Endlos bei Zufall und Mix; Bilder a19, k13 neu.
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session12_2026-11-03.md`; letzter Testlauf nach 168 Spielen × 6 Stufen
   ohne Fehler abgebrochen, Endlos, Mix und Kind-Läufe ungeprüft.
+
+## 2026-11-04 — LERN_Session13
+- Testlauf über alles: Handgriffe in den Endlos-Stufen von 21 Spielen (65 Fehler). HG1 a: Handgriffe gelten ab dem
+  Stellen der Aufgabe, späte Aufrufe meldet das Testskript.
+- Anmeldung (KR1 a, KR2 a): „🐣 Ich bin neu“ für Kinder (Vorname, Klasse) und Erwachsene (Frage über dem Stoff der
+  Primarschule, Erlaubnis einer bestehenden Aufsicht); „Zurück“ im Browser schrittweise. PIN vergessen (PIN1 a,
+  PIN1-R a): zweite Aufsicht, Wiederherstellungscode, Sicherheitsfrage, Zurücksetzen mit 3 Tagen Frist;
+  `LS.ohneGeheimnis` für Sichern, Abgleich und Einlesen.
+- Kurztasten für Antwortknöpfe (TK1 a): Schweizer Tastatur, gleiche Zeichen auf gleichen Tasten, Belegung erkannt in
+  Chrome/Edge; Bausteine und 22 Spiele (rahmen.md 19).
+- Ganze Aufgabe im Bild (BH1–BH3 a): Rahmen nach Höhe, Zifferntastatur daneben oder unten fest, Sprechblase zwei
+  Zeilen, 💡 beim Antwortbereich, `LS.lesetext`; 58 Spiele angepasst; `tools/bildhoehe.js`. GR1 a (sichtbare Fläche)
+  entschieden, Umsetzung und offene Punkte in `docs/eulenpfad/bildhoehe_offen.md`; GR1 b zurückgestellt.
+- Notizen für Zwischenergebnisse (NZ1 a): `ctx.notizen`, `LS.notizFeld`, Einstellung der Aufsicht, Abzeichen
+  „Kopfrechner“; 32 Spiele (`docs/eulenpfad/konzept_notizen.md`).
+- Probe-Stempel: Endziffer-Probe mit „nicht sicher“, getarnte Fehler, Abzeichen „Ganz sicher“. Rechen-Maschine: Tipps
+  mit den Zahlen der Aufgabe. Rückmeldung lesbar und überspringbar (WZ1 a); Eule zeigt bei neuer Aufgabe den Auftrag.
+- Entschieden, noch nicht gebaut: Sudoku-Familie (SU1–SU3 a), Neunerprobe (PS2 a, Rückfrage offen).
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session13_2026-11-04.md`.

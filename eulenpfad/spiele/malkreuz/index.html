@@ -50,6 +50,9 @@
   .kreuz .links::after { content: ""; position: absolute; right: -11px; top: -4px; bottom: -4px; border-right: 3px solid #c5c9de; }
   .kreuz .zusammen { grid-column: 1 / -2; justify-content: flex-end; font-size: clamp(14px, 3.4vw, 20px); color: var(--text-leise); padding-right: 8px; }
   .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
+  /* Notiz (NZ1 a) links vom Text „alles zusammen =“, in derselben Zeile */
+  .kreuz .zusammen { gap: 8px; }
+  .kreuz .zusammen .zw-notiz { font-size: 17px; min-height: 34px; }
   /* Ganze Aufgabe im Bild (BH3 a): Zeilen, Rechnung und Anzeige richten sich nach der Bildhöhe. */
   .kreuz > * { min-height: clamp(46px, min(11vw, 4.9vh), 64px); }
   .rechnung { font-size: clamp(30px, min(7vw, 4.2vh), 52px); margin-bottom: 6px; }
@@ -66,6 +69,9 @@
     /* Hinweis links neben der Anzeige statt darüber */
     .mk-eingabe { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 8px; align-items: center; }
     .mk-eingabe .hinweis-klein { margin: 0; text-align: left; line-height: 1.25; }
+    /* Notiz schmaler, damit „alles zusammen =“ mit ihr in einer Zeile bleibt */
+    .kreuz .zusammen { gap: 4px; padding-right: 4px; }
+    .kreuz .zusammen .zw-notiz { width: calc(6ch + 10px); padding: 2px 3px; font-size: 15px; min-height: 32px; }
   }
 </style>
 </head>
@@ -291,7 +297,10 @@ LS.spiel({
       feld(mehr ? "s" + i : "g", " summe");
     });
     if (mehr) {
-      kreuz.append(el("div", { class: "zusammen", text: "alles zusammen =" }));
+      // Notizen (NZ1 a): ab Stufe 5 ein Feld neben dem Gesamtfeld für das Zusammenzählen der Zeilensummen
+      const notiz = ctx.notizen(Number(ctx.stufe.slice(1)) >= 5)
+        ? LS.notizFeld({ breite: 7, label: "Notiz: Zeilensummen zusammenzählen" }) : null;
+      kreuz.append(el("div", { class: "zusammen" }, ...(notiz ? [notiz] : []), el("span", { text: "alles zusammen =" })));
       feld("g", " summe");
     }
 

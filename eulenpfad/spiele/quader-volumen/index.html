@@ -22,13 +22,24 @@
   .qv-ergebnis .anzeige { flex: 1; margin: 0 0 10px; }
   .qv-einheit { font-size: clamp(24px, 5.6vw, 36px); font-weight: 900; color: var(--knopf); min-width: 1.4em; margin-bottom: 10px; }
   .qv-wahl .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); font-variant-numeric: tabular-nums; }
+  /* Notizen (NZ1 a): kleine Felder für Grundfläche, Kanten in dm oder die Teilvolumen — links neben der Anzeige,
+     beim Zerlegen und Vergleichen unter dem Namen des Quaders; so wird die Aufgabe nicht höher */
+  .qv-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px 10px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .qv-notizen label, .qv-gruppe { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+  .qv-name:has(.zw-notiz) { white-space: nowrap; }
+  .qv-name .zw-notiz { width: calc(6ch + 10px); min-height: 20px; height: 20px; padding: 0 3px; font-size: 14px; line-height: 1; border-radius: 8px; vertical-align: middle; }
+  .qv-notizen .zw-notiz { font-size: 17px; min-height: 32px; padding: 2px 4px; }
+  .qv-ergebnis.mit-notiz { max-width: 640px; }
+  .qv-ergebnis.mit-notiz .qv-notizen { flex: 0 1 auto; margin: 0 0 10px; }
+  .qv-ergebnis.mit-notiz .anzeige { min-width: 88px; }
   /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy bleibt die Tastatur unten fest; der Körper wird dafür etwas flacher. */
   @media (max-width: 560px) and (max-height: 820px) {
     /* höchstens auf 80 % verkleinert: die Masse am Körper bleiben mindestens 12 px gross */
     .qv-bild svg { max-height: 192px; }
     .qv-bild { margin-bottom: 4px; }
     .qv .frage { margin-bottom: 4px; }
-    .qv-ergebnis .anzeige, .qv-einheit { margin-bottom: 2px; }
+    .qv-ergebnis .anzeige, .qv-einheit, .qv-ergebnis.mit-notiz .qv-notizen { margin-bottom: 2px; }
+    .qv-ergebnis.mit-notiz { gap: 6px; }
     .qv-wahl:has(> :nth-child(3)):not(:has(> :nth-child(4))) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   }
   /* Breit und quer: zwei Körper nebeneinander, nie höher als der Rahmen sie zeichnet (240 px). */
@@ -454,7 +465,7 @@ const wuerfelQuader = (l, b, h, farbe, marken) => koerperSvg({ l, b, h, plan: ne
 const glatterQuader = (l, b, h, farbe, marken) => koerperSvg({ l, b, h, bloecke: [{ x: 0, r: 0, z: 0, l, b, h, farbe }], marken });
 const marken3 = (tl, tb, th) => [{ kante: "l", text: tl }, { kante: "b", text: tb }, { kante: "h", text: th }];
 const bild = (...teile) => el("div", { class: "qv-bild" }, ...teile);
-const mitName = (svg, name) => el("div", { class: "qv-geb" }, svg, el("div", { class: "qv-name", text: name }));
+const mitName = (svg, name, ...dazu) => el("div", { class: "qv-geb" }, svg, el("div", { class: "qv-name" }, name, ...dazu));
 const farbfeld = f => { const s = el("span", { class: "qv-farbe", "aria-hidden": "true" }); s.style.setProperty("--f", f); return s; };
 
 // ---------- Tastatur-Antwort ----------
@@ -463,9 +474,9 @@ const farbfeld = f => { const s = el("span", { class: "qv-farbe", "aria-hidden":
  * Anzeige (mit Einheit daneben) und Zifferntastatur. pruefe(wert) liefert true (gelöst: Tastatur sperren,
  * ctx.richtig mit lob), "weiter" (Zwischenschritt richtig: Anzeige leeren) oder den Hinweis für ctx.falsch.
  */
-function tippfeld(ctx, qv, { einheit = "", dezimal = false, maxStellen = 5, loesung, lob, pruefe }) {
+function tippfeld(ctx, qv, { einheit = "", dezimal = false, maxStellen = 5, loesung, lob, pruefe, notiz = null }) {
   const anzeige = el("div", { class: "anzeige leer", "aria-label": einheit ? `Antwort in ${einheit}` : "Antwort" });
-  const zeile = el("div", { class: "qv-ergebnis" }, anzeige);
+  const zeile = el("div", { class: "qv-ergebnis" + (notiz ? " mit-notiz" : "") }, notiz, anzeige);
   if (einheit) zeile.append(el("span", { class: "qv-einheit", text: einheit }));
   qv.append(zeile);
   const tasten = LS.tastatur({
@@ -484,6 +495,27 @@ function tippfeld(ctx, qv, { einheit = "", dezimal = false, maxStellen = 5, loes
   ctx.flaeche.append(tasten.element);
   return tasten;
 }
+
+/** Notizfeld (NZ1 a); dezimal: mit Dezimaltastatur auf dem Tablet. */
+function notizFeld(label, breite, dezimal = false) {
+  const feld = LS.notizFeld({ breite, label });
+  if (dezimal) feld.inputMode = "decimal";
+  return feld;
+}
+
+/**
+ * Notizen (NZ1 a): kleine Felder für die Zwischenergebnisse, nur wenn ctx.notizen(empfohlen) es erlaubt (sonst null).
+ * Je Eintrag [Text davor, Text danach, Vorlesetext, Breite]; ein Eintrag aus solchen Einträgen bleibt in einer Zeile
+ * („in dm: ▢ · ▢“). tippfeld setzt sie links neben die Anzeige, damit die Aufgabe nicht höher wird.
+ */
+function notizZeile(ctx, empfohlen, eintraege, { breite = 5, dezimal = false } = {}) {
+  if (!ctx.notizen(empfohlen)) return null;
+  const teil = ([vor, nach, label, b = breite]) =>
+    el("label", {}, vor ? el("span", { text: vor }) : null, notizFeld(label, b, dezimal), nach ? el("span", { text: nach }) : null);
+  return el("div", { class: "qv-notizen" }, ...eintraege.map(e => (Array.isArray(e[0]) ? el("span", { class: "qv-gruppe" }, ...e.map(teil)) : teil(e))));
+}
+const stufeNr = ctx => Number(ctx.stufe.slice(1));
+const GRUNDFLAECHE = "Grundfläche (Länge mal Breite)";
 
 /** Ist w das Ergebnis mit verrutschtem Komma (Faktor 10, 100, 1000)? */
 const kommaVerrutscht = (w, soll) => w > 0 && [10, 100, 1000, 0.1, 0.01, 0.001].some(f => Math.abs(w / soll - f) < 1e-9);
@@ -532,8 +564,10 @@ function zeigeFehlen(ctx, a, qv) {
     "Zähl dann die Würfel, die schon drin sind — die unteren Schichten sind ganz voll. Voll weniger drin: So viele fehlen."]);
   qv.append(el("div", { class: "frage", text: `Wie viele Würfel fehlen, bis der Quader voll ist? Er ist ${a.l} Würfel lang, ${a.b} Würfel breit und ${a.h} Würfel hoch.` }),
     bild(koerperSvg({ l: a.l, b: a.b, h: a.h, plan: a.plan, farbe: "var(--deko-3)", rahmen: true, marken: marken3(a.l, a.b, a.h) })));
+  // Notizen (NZ1 a): erst der ganze Quader — nach Stufe ab dem Klassenziel s3, hier also nur mit „immer“
+  const notiz = notizZeile(ctx, stufeNr(ctx) >= 3, [["ganzer Quader:", "Würfel", "Würfel im ganzen Quader"]], { breite: 3 });
   tippfeld(ctx, qv, {
-    einheit: "Würfel", maxStellen: 3, loesung, lob: "Genau, dann ist der Quader voll!",
+    notiz, einheit: "Würfel", maxStellen: 3, loesung, lob: "Genau, dann ist der Quader voll!",
     pruefe(w) {
       if (w === a.fehlt) return true;
       if (w === a.V) return "Das ist der ganze Quader. Ein Teil ist schon drin — zieh ihn ab.";
@@ -552,7 +586,8 @@ function zeigeRechnen(ctx, a, qv) {
   ctx.tipp([TIPP_VOLUMEN, TIPP_SCHICHT, `Rechne ${a.l} · ${a.b}, und das Ergebnis mal ${a.h}.`]);
   qv.append(el("div", { class: "frage", text: `Wie viele Würfel hat der Quader? Er ist ${a.l} Würfel lang, ${a.b} Würfel breit und ${a.h} Würfel hoch.` }),
     bild(wuerfelQuader(a.l, a.b, a.h, "var(--deko-6)", marken3(a.l, a.b, a.h))));
-  tippfeld(ctx, qv, { einheit: "Würfel", maxStellen: 3, loesung, lob: "Richtig gerechnet!", pruefe: w => hinweisProdukt(w, a.l, a.b, a.h, a.V) });
+  const notiz = notizZeile(ctx, stufeNr(ctx) >= 3, [[`eine Schicht ${a.l} · ${a.b} =`, "Würfel", "Würfel in einer Schicht"]], { breite: 3 });
+  tippfeld(ctx, qv, { notiz, einheit: "Würfel", maxStellen: 3, loesung, lob: "Richtig gerechnet!", pruefe: w => hinweisProdukt(w, a.l, a.b, a.h, a.V) });
 }
 
 /** Hinweis für ein falsches Produkt Länge · Breite · Höhe (true, wenn richtig). */
@@ -574,7 +609,8 @@ function zeigeCm3(ctx, a, qv) {
     `Volumen = Länge · Breite · Höhe. Die Einheit ist ${e3}.`, `Rechne ${mal(a.l, a.b, a.h)}.`]);
   qv.append(el("div", { class: "frage", text: `Wie gross ist das Volumen? Der Quader ist ${mass(a.l, e)} lang, ${mass(a.b, e)} breit und ${mass(a.h, e)} hoch.` }),
     bild(glatterQuader(a.l, a.b, a.h, "var(--deko-6)", marken3(mass(a.l, e), mass(a.b, e), mass(a.h, e)))));
-  tippfeld(ctx, qv, { einheit: e3, maxStellen: 4, loesung, lob: `Genau, ${a.V} ${e3}!`, pruefe: w => hinweisProdukt(w, a.l, a.b, a.h, a.V) });
+  const notiz = notizZeile(ctx, stufeNr(ctx) >= 3, [[`Grundfläche ${a.l} · ${a.b} =`, `${e}²`, GRUNDFLAECHE]], { breite: 3 });
+  tippfeld(ctx, qv, { notiz, einheit: e3, maxStellen: 4, loesung, lob: `Genau, ${a.V} ${e3}!`, pruefe: w => hinweisProdukt(w, a.l, a.b, a.h, a.V) });
 }
 
 /** s3: Welche Einheit passt zum Gegenstand? Körbe cm³, dm³, m³. */
@@ -628,9 +664,12 @@ function zeigeZerlegen(ctx, a, qv) {
   ctx.tipp(["Rechne zuerst, wie viele Würfel der grosse Quader hat — und wie viele der kleine.",
     "Wie oft passt der kleine Quader in den grossen? Teile: gross durch klein.",
     `Oder Kante für Kante: In die Länge passt der kleine Quader ${a.l / q}-mal, in die Breite ${a.b / r}-mal, in die Höhe ${a.h / s}-mal. Nimm die drei Zahlen mal.`]);
+  // Notizen (NZ1 a): die Würfelzahl je Quader gleich unter seinem Namen
+  const notiz = ctx.notizen(true);
+  const wuerfel = was => (notiz ? [" ", notizFeld(`Würfel im ${was} Quader`, 3), " Würfel"] : []);
   qv.append(el("div", { class: "frage", text: `Wie viele kleine Quader passen in den grossen? Der grosse ist ${mal(a.l, a.b, a.h)} Würfel, der kleine ${mal(q, r, s)}.` }),
-    bild(mitName(wuerfelQuader(a.l, a.b, a.h, "var(--deko-6)", marken3(a.l, a.b, a.h)), "gross"),
-      mitName(koerperSvg({ l: q, b: r, h: s, plan: new Array(q * r).fill(s), farbe: "var(--deko-3)", u: 22, marken: marken3(q, r, s) }), "klein")));
+    bild(mitName(wuerfelQuader(a.l, a.b, a.h, "var(--deko-6)", marken3(a.l, a.b, a.h)), "gross", ...wuerfel("grossen")),
+      mitName(koerperSvg({ l: q, b: r, h: s, plan: new Array(q * r).fill(s), farbe: "var(--deko-3)", u: 22, marken: marken3(q, r, s) }), "klein", ...wuerfel("kleinen"))));
   tippfeld(ctx, qv, {
     einheit: "", maxStellen: 3, loesung, lob: "Genau, so oft passt er hinein!",
     pruefe(w) {
@@ -672,8 +711,11 @@ function zeigeDezimal(ctx, a, qv) {
   qv.append(el("div", { class: "frage", text: `Wie gross ist das Volumen in dm³? Länge ${texte[0]}, Breite ${texte[1]}, Höhe ${texte[2]}.` }),
     bild(glatterQuader(a.kanten[0], a.kanten[1], a.kanten[2], "var(--deko-6)", marken3(...texte))));
   const roh = rund(a.kanten.reduce((s, k, i) => s * kanteIn(k, a.einheiten[i]), 1));
+  // Notizen (NZ1 a): jede Kante in dm, dann die Grundfläche
+  const notiz = notizZeile(ctx, true, [[["in dm:", "", "Länge in dm", 3], ["·", "", "Breite in dm", 3], ["·", "", "Höhe in dm", 3]],
+    ["Grundfläche:", "dm²", GRUNDFLAECHE]], { breite: 4, dezimal: true });
   tippfeld(ctx, qv, {
-    einheit: "dm³", dezimal: true, maxStellen: 4, loesung, lob: `Richtig: ${a.V} dm³ — das sind ${zahl(a.V)} Liter!`,
+    notiz, einheit: "dm³", dezimal: true, maxStellen: 4, loesung, lob: `Richtig: ${a.V} dm³ — das sind ${zahl(a.V)} Liter!`,
     pruefe(w) {
       if (gleich(w, a.V)) return true;
       if (gleich(w, roh) && roh !== a.V) return "Du hast Zahlen mit verschiedenen Einheiten malgenommen. Wandle zuerst alle Kanten in dm um.";
@@ -699,8 +741,9 @@ function zeigeKante(ctx, a, qv) {
   const marken = marken3(...a.kanten.map((k, i) => (i === a.gesucht ? "?" : mass(k, e))));
   qv.append(el("div", { class: "frage", text: `Das Volumen ist ${a.V} ${e3}. Der Quader ist ${angaben}. ${fragen[a.gesucht]}` }),
     bild(glatterQuader(a.kanten[0], a.kanten[1], a.kanten[2], "var(--deko-6)", marken)));
+  const notiz = notizZeile(ctx, true, [[`Schicht ${andere[0]} · ${andere[1]} =`, `${e}²`, "Schicht aus den zwei bekannten Kanten"]], { breite: 4 });
   tippfeld(ctx, qv, {
-    einheit: e, maxStellen: 4, loesung, lob: "Richtig, die Kante stimmt!",
+    notiz, einheit: e, maxStellen: 4, loesung, lob: "Richtig, die Kante stimmt!",
     pruefe(w) {
       if (w === x) return true;
       if (w === flaeche) return "Das ist die Schicht aus den zwei bekannten Kanten. Teile jetzt das Volumen durch diese Zahl.";
@@ -727,8 +770,11 @@ function zeigeZusammen(ctx, a, qv) {
   qv.append(el("div", { class: "frage", text: "Der Körper besteht aus zwei Quadern. Wie gross ist sein Volumen?" }),
     bild(koerperSvg({ ...ganz, bloecke: [{ x: 0, r: 0, z: 0, l, b, h, farbe: F1 }, dazu] })),
     el("div", { class: "qv-legende" }, farbfeld(F1), `${a.lage === "oben" ? "unten" : "links"}: ${cm(a.unten)} — `, farbfeld(F2), `${a.lage === "oben" ? "oben drauf" : "rechts dran"}: ${cm(a.dazu)}`));
+  // Notizen (NZ1 a): je Quader sein Volumen, dann zusammen
+  const notiz = notizZeile(ctx, true, [[`${a.lage === "oben" ? "unten" : "links"}:`, "cm³", "Volumen des ersten Quaders"],
+    [`${a.lage === "oben" ? "oben" : "rechts"}:`, "cm³", "Volumen des zweiten Quaders"]], { breite: 4 });
   tippfeld(ctx, qv, {
-    einheit: "cm³", maxStellen: 4, loesung, lob: "Richtig, beide Quader zusammen!",
+    notiz, einheit: "cm³", maxStellen: 4, loesung, lob: "Richtig, beide Quader zusammen!",
     pruefe(w) {
       if (w === a.V) return true;
       if (w === a.V1) return "Das ist nur der grosse Quader. Der kleine gehört auch zum Körper — zähl ihn dazu.";
@@ -753,8 +799,12 @@ function zeigeAquarium(ctx, a, qv) {
       marken: [...marken3(tl, tb, mass(a.hoehe, "dm")), { kante: "links", text: `💧 ${mass(a.fuell, "dm")}`, hoehe: a.fuell }] })));
   const mitHoehe = rund(a.l * a.b * a.hoehe);
   const roh = rund(kanteIn(a.l, a.einheiten[0]) * kanteIn(a.b, a.einheiten[1]) * a.fuell);
+  // Notizen (NZ1 a): Kanten in cm erst in dm, dann die Grundfläche des Wassers
+  const inDm = [...(a.einheiten[0] !== "dm" ? [["Länge in dm", "Länge"]] : []), ...(a.einheiten[1] !== "dm" ? [["Breite in dm", "Breite"]] : [])];
+  const notiz = notizZeile(ctx, true, [...(inDm.length ? [inDm.map(([label], i) => [i ? "·" : inDm.length > 1 ? "in dm:" : `${inDm[0][1]} in dm:`, "", label, 3])] : []),
+    ["Grundfläche:", "dm²", GRUNDFLAECHE]], { breite: 4, dezimal: true });
   tippfeld(ctx, qv, {
-    einheit: "l", dezimal: true, maxStellen: 4, loesung, lob: "Richtig, so viel Wasser ist drin!",
+    notiz, einheit: "l", dezimal: true, maxStellen: 4, loesung, lob: "Richtig, so viel Wasser ist drin!",
     pruefe(w) {
       if (gleich(w, a.liter)) return true;
       if (gleich(w, mitHoehe)) return "Du hast mit der Höhe des Aquariums gerechnet. Das Wasser steht aber nicht so hoch.";
@@ -775,9 +825,12 @@ function zeigeVergleich(ctx, a, qv) {
   ctx.tipp(["Rechne beide Volumen in derselben Einheit aus — am besten in cm³.",
     "1 dm = 10 cm. Wandle zuerst die Kanten um, dann rechne Länge · Breite · Höhe.",
     "Mehr Ziffern heisst nicht mehr Volumen — die Einheit zählt."]);
+  // Notizen (NZ1 a): beide Volumen in derselben Einheit, je unter dem Namen des Quaders
+  const notiz = ctx.notizen(true);
+  const volumen = q => (notiz ? [" ", notizFeld(`Volumen von ${q} in cm³`, 7), " cm³"] : []);
   qv.append(el("div", { class: "frage", text: `Welcher Quader hat das grössere Volumen? A: ${text(A)}. B: ${text(B)}.` }),
-    bild(mitName(glatterQuader(...A.kanten, "var(--deko-6)", marken3(...A.kanten.map(k => mass(k, A.einheit)))), "🅰️ A"),
-      mitName(glatterQuader(...B.kanten, "var(--deko-1)", marken3(...B.kanten.map(k => mass(k, B.einheit)))), "🅱️ B")));
+    bild(mitName(glatterQuader(...A.kanten, "var(--deko-6)", marken3(...A.kanten.map(k => mass(k, A.einheit)))), "🅰️ A", ...volumen("A")),
+      mitName(glatterQuader(...B.kanten, "var(--deko-1)", marken3(...B.kanten.map(k => mass(k, B.einheit)))), "🅱️ B", ...volumen("B"))));
   const NAME = { A: { bild: "🅰️", text: "A ist grösser" }, gleich: { bild: "🟰", text: "Gleich gross" }, B: { bild: "🅱️", text: "B ist grösser" } };
   const box = LS.auswahl(ctx, {
     optionen: VERGLEICH, richtig: a.ergebnis, inhalt: o => NAME[o], breite: 110, loesung, lob: "Richtig verglichen!",

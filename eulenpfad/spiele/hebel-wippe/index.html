@@ -27,6 +27,21 @@
   .wippe .gleich-zeichen { font-size: 15px; font-weight: 900; fill: var(--gut); text-anchor: middle; }
   .wippe-legende { text-align: center; color: var(--text-leise); font-weight: 700; margin: 0 0 8px; font-size: 15px; }
   .wahl-knopf { font-size: clamp(18px, 4vw, 24px); font-weight: 900; }
+  /* Notizen (NZ1 a): je Seite ein Feld je Klotz (Gewicht mal Platz) und „zusammen“, unter der Wippe */
+  .hw-notizen { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; margin: 0 0 8px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
+  .hw-seite { display: inline-flex; align-items: center; gap: 4px; }
+  .hw-notizen .zw-notiz { width: calc(3ch + 14px); min-height: 32px; padding: 2px 3px; font-size: 17px; }
+  /* Beim Eintippen stehen die Notizen links neben der Anzeige, damit die Aufgabe nicht höher wird */
+  .hw-eingabe { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 620px; margin: 0 auto; }
+  .hw-eingabe .hw-notizen { flex: 1 1 auto; margin: 0; }
+  .hw-eingabe .anzeige { flex: 0 0 auto; min-width: 96px; }
+  /* Handy: Mit Notizen stehen die drei Antworten in einer Reihe (wie in Quader-Volumen), die Felder werden schmaler */
+  @media (max-width: 560px) {
+    .hw-notizen { gap: 4px 12px; }
+    .hw-notizen .zw-notiz { width: calc(3ch + 10px); min-height: 30px; font-size: 16px; }
+    .hw-notizen ~ .wahl { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .hw-notizen ~ .wahl .wahl-knopf { font-size: 16px; padding: 6px 4px; }
+  }
   /* Ganze Aufgabe im Bild (BH3 a): Die Wippe richtet sich nach der Bildhöhe (Seitenverhältnis 400 : 236 ≈ 1,7).
      Breit und quer immer; hoch nur, wenn getippt wird (dann ist die Wippe nur zum Ansehen, ihre Plätze werden
      nicht angetippt und dürfen kleiner werden). */
@@ -299,6 +314,27 @@ const beschreibe = (liste, seite) => (liste.length ? `${seitenText(seite)[0].toU
 const rechnung = (liste) => (liste.length ? `${term(liste)} = ${moment(liste)}` : "0");
 
 /**
+ * Notizen (NZ1 a): unter der Wippe je Seite ein Feld je Klotz für Gewicht mal Platz, bei mehreren Klötzen dazu
+ * „= zusammen“. Nach Stufe ab s4 (mehrere Klötze, Stange); s1–s3 sind ein Produkt je Seite, das im Kopf bleibt.
+ * Der Klotz, den das Kind sucht, bekommt kein Feld.
+ */
+function notizWippe(ctx, a) {
+  if (!ctx.notizen(Number(ctx.stufe.slice(1)) >= 4)) return "";
+  const seite = (liste, name) => {
+    if (!liste.length) return null;
+    const teile = [el("span", { text: `${name}:` })];
+    liste.forEach((k, i) => {
+      if (i) teile.push(el("span", { text: "+" }));
+      teile.push(LS.notizFeld({ breite: 3, label: `${name}: ${k.kg} kg mal Platz ${k.p}` }));
+    });
+    if (liste.length > 1) teile.push(el("span", { text: "=" }), LS.notizFeld({ breite: 3, label: `${name}: zusammen` }));
+    return el("span", { class: "hw-seite" }, ...teile);
+  };
+  const stange = a.links[0]?.stein;
+  return el("div", { class: "hw-notizen" }, seite(a.links, stange ? "Stein" : "links"), seite(a.rechts, "rechts"));
+}
+
+/**
  * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): die Hebelregel und der Rechenweg in Worten —
  * kein Produkt und kein Ergebnis.
  */
@@ -355,7 +391,7 @@ LS.spiel({
       const loesungText = `Links ${rechnung(a.links)}, rechts ${rechnung(a.rechts)}: ${a.loesung === "gleich" ? "Die Wippe bleibt gerade" : `${seitenText(a.loesung)} sinkt`}.`;
       ctx.serie("antwort", a.loesung);
       f.append(el("div", { class: "frage", html: `Man hält die Wippe gerade. <b>Was passiert beim Loslassen?</b>` }),
-        el("div", { class: "auftrag", text: `${beschreibe(a.links, "links")} ${beschreibe(a.rechts, "rechts")}` }), w.svg);
+        el("div", { class: "auftrag", text: `${beschreibe(a.links, "links")} ${beschreibe(a.rechts, "rechts")}` }), w.svg, notizWippe(ctx, a));
       const hinweis = p.einfach
         ? (a.links[0].kg === a.rechts[0].kg ? "Gleich schwer: Wer weiter weg vom Drehpunkt sitzt, drückt stärker." : "Gleich weit weg: Das schwerere Gewicht drückt stärker.")
         : kurzRegel + " Die grössere Zahl sinkt.";
@@ -383,7 +419,7 @@ function platzAufgabe(ctx, a, w, regel) {
   ctx.schritte(1);
   w.neige(moment(a.links), moment(a.rechts));
   ctx.flaeche.append(el("div", { class: "frage", html: `Wohin muss der <b>${a.kg}-kg-Klotz</b> ${seitenText(a.kind)}, damit die Wippe gerade ist?` }),
-    el("div", { class: "auftrag", text: `${beschreibe(a.links, "links")} ${beschreibe(a.rechts, "rechts")}`.trim() }), w.svg);
+    el("div", { class: "auftrag", text: `${beschreibe(a.links, "links")} ${beschreibe(a.rechts, "rechts")}`.trim() }), w.svg, notizWippe(ctx, a));
   let neu = null;
   const frei = [1, 2, 3, 4, 5].filter(x => !eigene.some(k => k.p === x));
   const knoepfe = w.platzKnoepfe(a.kind, frei, (pl, knopf) => {
@@ -417,6 +453,7 @@ function gewichtAufgabe(ctx, a, w, regel) {
   neu.querySelector("text").textContent = "?";
   ctx.flaeche.append(el("div", { class: "frage", html: `Wie viele kg braucht der Klotz ${seitenText(a.kind)} auf <b>Platz ${a.platz}</b>?` }),
     el("div", { class: "auftrag", text: `${beschreibe(a.links, "links")} ${beschreibe(a.rechts, "rechts")}`.trim() }), w.svg);
+  const notiz = notizWippe(ctx, a);
   const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort in kg" });
   const tasten = LS.tastatur({
     anzeige, maxStellen: 2,
@@ -432,7 +469,7 @@ function gewichtAufgabe(ctx, a, w, regel) {
       if (ctx.vorbei()) tasten.gesperrt = true;
     },
   });
-  ctx.flaeche.append(anzeige, tasten.element);
+  ctx.flaeche.append(notiz ? el("div", { class: "hw-eingabe" }, notiz, anzeige) : anzeige, tasten.element);
 }
 
 /** Stange als Hebel: Stein am kurzen Arm, das Kind drückt am langen. */
@@ -449,6 +486,7 @@ function stangeAufgabe(ctx, a, w) {
     w.neige(1, 0);
     let pfeil = w.kraft(a.platz, "?");
     f.append(el("div", { class: "frage", html: `Der Stein wiegt ${stein.kg} kg und liegt auf Platz ${stein.p}. <b>Wie viel Kraft (in kg)</b> brauchst du auf Platz ${a.platz}?` }), w.svg);
+    const notiz = notizWippe(ctx, a);
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort in kg" });
     const tasten = LS.tastatur({
       anzeige, maxStellen: 3,
@@ -462,13 +500,13 @@ function stangeAufgabe(ctx, a, w) {
         if (ctx.vorbei()) tasten.gesperrt = true;
       },
     });
-    f.append(anzeige, tasten.element);
+    f.append(notiz ? el("div", { class: "hw-eingabe" }, notiz, anzeige) : anzeige, tasten.element);
   } else {
     const loesungText = `Platz ${a.loesung}: ${stein.kg} × ${stein.p} = ${M} und ${a.kraft} × ${a.loesung} = ${M}`;
     ctx.loesung(loesungText);
     ctx.schritte(1);
     w.neige(1, 0);
-    f.append(el("div", { class: "frage", html: `Der Stein wiegt ${stein.kg} kg und liegt auf Platz ${stein.p}. Du drückst mit <b>${a.kraft} kg</b>. <b>Wo</b> musst du drücken?` }), w.svg);
+    f.append(el("div", { class: "frage", html: `Der Stein wiegt ${stein.kg} kg und liegt auf Platz ${stein.p}. Du drückst mit <b>${a.kraft} kg</b>. <b>Wo</b> musst du drücken?` }), w.svg, notizWippe(ctx, a));
     let pfeil = null;
     const frei = []; for (let i = stein.p + 1; i <= a.nR; i++) frei.push(i);
     const knoepfe = w.platzKnoepfe("rechts", frei, (pl, knopf) => {
