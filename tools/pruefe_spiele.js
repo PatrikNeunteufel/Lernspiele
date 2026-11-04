@@ -108,6 +108,8 @@ const TREIBER = `
       handgriffe.push(schritte);
       if (!(schritte > 0)) melde("Handgriffe", "Endlos-Aufgabe ohne ctx.schritte: «" + (a.kennung || "").slice(0, 80) + "»", "ohne");
     }
+    // HG1 a: Nach dem Stellen gilt die Zahl; ein späteres ctx.schritte des Spiels zählt nicht mehr.
+    if (art === "schritteSpaet") { melde("Handgriffe", "ctx.schritte(" + a.n + ") erst nach dem Stellen der Aufgabe — zählt nicht; beim Stellen einrechnen", "spaet"); return; }
     // Der Klick, der löst, ist noch nicht gezählt (er läuft gerade).
     if (art === "richtig" && endlos && klicks - klicksBeiStart + 1 < schritte)
       melde("Handgriffe", "mit " + (klicks - klicksBeiStart + 1) + " Klicks gelöst, das Spiel nennt " + schritte, "zu viele");
@@ -167,7 +169,7 @@ const TREIBER = `
     // Knöpfe und alles andere, das auf Tippen hört (SVG-Felder, Zahlenstrahl).
     const knoepfe = buehne.querySelectorAll("*").filter(b => (b.localName === "button" || b.__hoerer.click || b.__hoerer.pointerdown)
       && !b.disabled && !b.classList.contains("link") && !b.classList.contains("timer-schalter") && !b.classList.contains("option-schalter") && !/Andere Stufe/.test(b.textContent)
-      && !b.classList.contains("vorlesen") && !b.classList.contains("melden") // 🗣️ und 🙋 neben der Eule gehören zum Rahmen, nicht zur Aufgabe
+      && !b.classList.contains("vorlesen") && !b.classList.contains("melden") && !b.classList.contains("blase") // 🗣️, 🙋 und die Blase (aufklappbar, BH2 a) gehören zum Rahmen, nicht zur Aufgabe
       && !versteckt(b) // ausgeblendet (hidden, etwa „💡 Tipp“ ohne Tipps) kann niemand antippen
       && !b.closest(".testhilfe"));
     if (!knoepfe.length) { __uhr.weiter(2000); if (++ohneFortschritt > 50) { melde("Hänger", "keine Knöpfe mehr"); break; } continue; }
@@ -226,7 +228,7 @@ const MIX_TREIBER = `
   const neue = () => __nachrichten.splice(0);
   const sende = d => document.dispatchEvent(Object.assign(new Event("message"), { data: { lern: "mix", ...d }, source: parent }));
   const knoepfe = () => buehne.querySelectorAll("*").filter(b => (b.localName === "button" || b.__hoerer.click || b.__hoerer.pointerdown)
-    && !b.disabled && !b.classList.contains("link") && !b.classList.contains("vorlesen") && !b.classList.contains("melden") && !versteckt(b) && !b.closest(".testhilfe"));
+    && !b.disabled && !b.classList.contains("link") && !b.classList.contains("vorlesen") && !b.classList.contains("melden") && !b.classList.contains("blase") && !versteckt(b) && !b.closest(".testhilfe"));
   __uhr.weiter(50);
   let n = neue();
   if (n.some(m => m.typ === "geht-nicht")) return { geht: false, funde, ergebnisse: 0, klicks: 0 };

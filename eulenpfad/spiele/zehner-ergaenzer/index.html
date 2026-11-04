@@ -34,6 +34,12 @@
   }
   .zehnerfeld i { width: 30px; height: 30px; border-radius: 50%; border: 3px dashed var(--rand); }
   .zehnerfeld i.da { background: var(--deko-6); border: 3px solid var(--deko-6); }
+  /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy passen zwei Zehnerfelder mit kleineren Punkten nebeneinander. */
+  @media (max-width: 560px) {
+    .zehnerfelder { gap: 10px; margin-bottom: 10px; }
+    .zehnerfeld { grid-template-columns: repeat(5, 22px); gap: 5px; }
+    .zehnerfeld i { width: 22px; height: 22px; }
+  }
 
   /* Sprung von der Startzahl zur Zielzahl */
   .sprung { display: flex; align-items: flex-end; justify-content: center; gap: 0; margin: 4px 0 14px; }

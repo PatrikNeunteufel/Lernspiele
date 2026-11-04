@@ -10,14 +10,17 @@
   .frage b { color: var(--knopf); white-space: nowrap; }
 
   /* Hundertertafel 0–99 mit Achsen E (Einer, Spalten) und Z (Zehner, Zeilen) */
-  .tafel { display: grid; grid-template-columns: 28px repeat(10, 1fr); gap: 2px; width: min(520px, 94vw); margin: 0 auto 12px; }
+  .tafel { display: grid; grid-template-columns: 28px repeat(10, 1fr); gap: 2px; width: min(520px, 94vw, calc(100vh - 295px)); margin: 0 auto 12px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Tafel und Koordinatensystem folgen auf niedrigen Bildschirmen der Bildhöhe;
+     stehen Antworten darunter, bleibt mehr Platz frei. */
+  .tafel:has(~ .optionen) { width: min(520px, 94vw, calc(100vh - 355px)); }
   .tafel .kopf-e, .tafel .kopf-z { font-weight: 900; font-size: 13px; color: var(--text-leise); display: flex; align-items: center; justify-content: center; }
   .tafel .feld { aspect-ratio: 1; border: none; border-radius: 6px; background: #eaf4ff; font-family: inherit; font-weight: 800; font-size: clamp(11px, 2.6vw, 16px); color: #8aa0bd; cursor: pointer; padding: 0; }
   .tafel .feld.schatz { background: #fff1c2; color: var(--text); font-size: clamp(16px, 4vw, 24px); }
   .tafel .feld.daneben { background: var(--hinweis-hell); }
   .tafel .feld.treffer { background: var(--gut-hell); color: var(--text); }
 
-  .ksys { width: min(440px, 90vw); display: block; margin: 0 auto 12px; touch-action: manipulation; }
+  .ksys { width: min(440px, 90vw, calc(100vh - 365px)); display: block; margin: 0 auto 12px; touch-action: manipulation; }
   .ksys .gitter { stroke: #dfe3ef; stroke-width: 1; }
   .ksys .achse { stroke: var(--text); stroke-width: 2; }
   .ksys text { font-family: var(--schrift); font-size: 10px; font-weight: 800; fill: var(--text-leise); }
@@ -198,6 +201,7 @@ LS.spiel({
 
     const auswahl = (optionen, richtig, hinweis, loesungText) => {
       ctx.loesung(loesungText);
+      ctx.schritte(1); // ein Tipp auf die richtige Antwort
       const box = el("div", { class: "optionen" });
       for (const o of mische(optionen)) {
         const k = el("button", { type: "button", class: "option", text: o });
@@ -211,12 +215,14 @@ LS.spiel({
         box.append(k);
       }
       ctx.flaeche.append(box);
+      LS.kurztasten(box);
     };
 
     if (art === "tafelSetzen") {
       const ziel = zufall(0, 99);
       const loesung = `${ez(ziel)} ist das Feld ${ziel}.`;
       ctx.loesung(loesung);
+      ctx.schritte(1); // ein Tipp auf das Zielfeld
       ctx.flaeche.append(el("div", { class: "frage", html: `Der Schatz liegt bei <b>${ez(ziel)}</b>. Tipp das Feld an!` }));
       const t = tafel((zahl, f) => {
         if (fertig) return;
@@ -240,6 +246,7 @@ LS.spiel({
       const x = zufall(0, N), y = zufall(0, N);
       const loesung = `Der Punkt ${pt(x, y)}.`;
       ctx.loesung(loesung);
+      ctx.schritte(1); // ein Tipp auf den Punkt
       ctx.flaeche.append(el("div", { class: "frage", html: `Vergrabe den Schatz bei <b>${pt(x, y)}</b>.` }));
       const svg = koordinaten((px, py) => {
         if (fertig) return;
@@ -268,6 +275,7 @@ LS.spiel({
       const name = "ABCD"[welche];
       const loesung = `${name} ${pt(...ecken[welche])} → ${pt(...neu[welche])}`;
       ctx.loesung(loesung);
+      ctx.schritte(1); // ein Tipp auf die verschobene Ecke
       ctx.flaeche.append(el("div", { class: "frage", html: `Verschiebe die Figur um <b>${dx} nach rechts</b> und <b>${Math.abs(dy)} nach ${dy > 0 ? "oben" : "unten"}</b>. Wo landet die Ecke <b>${name}</b>?` }));
       const svg = koordinaten((px, py) => {
         if (fertig) return;
@@ -288,6 +296,7 @@ LS.spiel({
       const name = "ABCD"[welche];
       const loesung = `A ${pt(...ecken[0])} → A' ${pt(...neu[0])}, also ${name} ${pt(...ecken[welche])} → ${pt(...neu[welche])}`;
       ctx.loesung(loesung);
+      ctx.schritte(1); // ein Tipp auf die verschobene Ecke
       ctx.flaeche.append(el("div", { class: "frage", html: `Die Figur wird verschoben: <b>A</b> landet auf <b>A'</b>. Wo landet die Ecke <b>${name}</b>?` }));
       const svg = koordinaten((px, py) => {
         if (fertig) return;
@@ -308,6 +317,7 @@ LS.spiel({
       const [zx, zy] = ecken[3]; // gesuchte Ecke D
       const loesung = `D liegt bei ${pt(zx, zy)}.`;
       ctx.loesung(loesung);
+      ctx.schritte(1); // ein Tipp auf die Ecke D
       ctx.flaeche.append(el("div", { class: "frage", html: `<b>A</b>, <b>B</b> und <b>C</b> sind Ecken eines ${form}s. Wo liegt die Ecke <b>D</b>?` }));
       const svg = koordinaten((px, py) => {
         if (fertig) return;
@@ -326,6 +336,7 @@ LS.spiel({
       const ecken = figurErzeugen(N, N);
       const loesung = ecken.map(([a, b], i) => `${"ABCD"[i]} ${pt(a, b)}`).join(", ");
       ctx.loesung(loesung);
+      ctx.schritte(ecken.length); // je Ecke ein Tipp
       ctx.flaeche.append(el("div", { class: "frage", html: `Zeichne die Figur: Tipp die Ecken der Reihe nach an — ${ecken.map(([a, b], i) => `<b>${"ABCD"[i]} ${pt(a, b)}</b>`).join(", ")}.` }));
       let pos = 0;
       const svg = koordinaten((px, py) => {

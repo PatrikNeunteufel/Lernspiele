@@ -195,9 +195,9 @@ async function aufsicht() {
   // Ganz am Anfang: noch niemand da
   await js(`localStorage.clear(); sessionStorage.clear();`);
   await gehe("/eulenpfad/index.html");
-  await klick("Aufsicht einrichten");
-  await js(`const f = document.querySelectorAll(".anmeldung input"); f[0].value = "Muster Admin"; f[1].value = "1111";`);
-  await rahmen([{ css: ".anmeldung details" }, { text: "Neues Kind" }]);
+  // „🐣 Ich bin neu“ fragt Kind oder erwachsen (KR1 a, KR2 a, LERN_Session13)
+  await klick("Ich bin neu");
+  await rahmen([{ text: "Ich bin erwachsen" }, { text: "Ich bin ein Kind" }]); // Nummern wie in der Liste der Anleitung
   await bild("a01-einrichten", { css: ".anmeldung" });
 
   await einrichten();

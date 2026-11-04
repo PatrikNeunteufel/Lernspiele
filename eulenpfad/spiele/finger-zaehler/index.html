@@ -6,8 +6,21 @@
 <title>Finger-Zähler</title>
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .fz-haende { display: block; width: 100%; max-width: 340px; margin: 0 auto 12px; }
-  .fz-haende.zwei { max-width: 560px; }
+  /* Hände nach der Bildhöhe (BH3 a): eine Hand 160 : 170, zwei Hände 320 : 170 */
+  .fz-haende { display: block; width: 100%; max-width: min(340px, (100vh - 480px) * .94); margin: 0 auto 12px; }
+  .fz-haende.zwei { max-width: min(560px, (100vh - 480px) * 1.88); }
+  @media (max-width: 560px) { .fz-haende { max-width: min(340px, (100vh - 495px) * .94); } }
+  @media (min-width: 900px) and (orientation: landscape) {
+    .fz-paar { display: flex; gap: 20px; align-items: center; }
+    .fz-paar > * { flex: 1 1 0; min-width: 0; }
+    .fz-paar > .fz-ziel { flex: none; margin: 0; }
+    .fz-paar:has(> .fz-ziel) { justify-content: center; }
+    .fz-paar:has(> .fz-ziel) > .fz-feld { flex: 0 1 340px; }
+  }
+  @media (min-width: 561px) and (orientation: portrait) {
+    .fz-haende { max-width: min(340px, (100vh - 700px) * .94); }
+    .fz-haende.zwei { max-width: min(560px, (100vh - 765px) * 1.88); }
+  }
   .fz-feld { position: relative; }
   .fz-feld.verdeckt .fz-haende { visibility: hidden; }
   .fz-feld.verdeckt { background: repeating-linear-gradient(45deg, #eef0fa 0 12px, #f7f8fd 12px 24px); border-radius: 16px; }
@@ -316,13 +329,13 @@ LS.spiel({
       ctx.loesung(loesung);
       ctx.schritte(a.tipps + 1); // die Finger und „✓ Fertig“
       f.append(el("div", { class: "auftrag", text: a.art === "zeigen" ? `Zeig ${ziel} Finger! Tipp die Finger an.` : "Wie viele Finger fehlen bis zehn? Zeig sie unten mit den Fingern!" }));
+      // Vorlage: beim Zeigen das Ziel (Stufe 1 Punktbild, Stufe 2 Ziffer und Punkte, danach Ziffer), beim Rest bis 10 die Hände
+      let vorlage;
       if (a.art === "zeigen") {
-        // Ziel: in Stufe 1 als Punktbild, in Stufe 2 Ziffer und Punkte, danach Ziffer
-        const zielBild = el("div", { class: "fz-ziel", "aria-label": `${ziel}` });
-        if (s.antwort !== "ziffer") zielBild.append(wuerfel(ziel, true));
-        if (s.antwort !== "punkte") zielBild.append(ziffer(ziel));
-        f.append(zielBild);
-      } else f.append(haendeSvg(a.bild));
+        vorlage = el("div", { class: "fz-ziel", "aria-label": `${ziel}` });
+        if (s.antwort !== "ziffer") vorlage.append(wuerfel(ziel, true));
+        if (s.antwort !== "punkte") vorlage.append(ziffer(ziel));
+      } else vorlage = haendeSvg(a.bild);
       // Alle Finger zu; Tippen klappt einzelne Finger auf oder zu (gestrichelter Umriss = hier tippen).
       // Geprüft wird erst mit „✓ Fertig“: Sonst gälte die Aufgabe als gelöst, sobald die Zahl einmal
       // stimmt, und das Kind könnte nichts mehr ändern (Bemerkung 1, Patrik, LERN_Session9).
@@ -343,7 +356,8 @@ LS.spiel({
         if (n === ziel) return ctx.richtig(ziel <= 5 ? `Ja, das sind ${ZAHLWORT[ziel]}!` : `Super, ${ZAHLWORT[ziel]} Finger!`);
         ctx.falsch(n > ziel ? "Das sind zu viele. Klapp einen Finger wieder ein." : "Das sind noch zu wenige. Zähl deine Finger nach.", loesung);
       } });
-      f.append(feld, el("div", { class: "knopfzeile" }, fertig));
+      // Vorlage und eigene Hände; breit und quer nebeneinander (fz-paar, BH3 a)
+      f.append(el("div", { class: "fz-paar" }, vorlage, feld), el("div", { class: "knopfzeile" }, fertig));
       zeichne();
       return;
     }

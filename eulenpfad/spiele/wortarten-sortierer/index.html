@@ -230,7 +230,7 @@ LS.spiel({
     let fertig = false;
     for (const [k, info] of Object.entries(ARTEN)) {
       const zahl = el("span", { class: "zahl", text: String(zaehler[k]) });
-      const korb = el("button", { type: "button", class: `korb k-${k}` },
+      const korb = el("button", { type: "button", class: `korb k-${k}`, "data-taste": k }, // Tasten N V A
         el("span", { class: "bild", text: info.bild }), el("b", { text: info.name }), el("small", { text: info.kind }), zahl);
       korb.addEventListener("click", () => {
         if (fertig) return;
@@ -266,6 +266,7 @@ LS.spiel({
       koerbe.append(korb);
     }
     ctx.flaeche.append(koerbe);
+    LS.kurztasten(koerbe);
     if (ctx.nr === 0) ctx.sag(a.satz ? "Lies den Satz und tipp auf den richtigen Korb." : "Tipp auf den richtigen Korb.");
   },
 });

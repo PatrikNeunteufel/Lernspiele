@@ -351,7 +351,7 @@ function zeichneStatistik(box, neu) {
 
   /** Profile und Runden der genannten Personen als JSON-Datei; PIN-Hashes bleiben auf dem Gerät. */
   function sichern(wer) {
-    const profile = Object.fromEntries(wer.map(n => { const { pin, ...rest } = LS.lies("profile", {})[n] || {}; return [n, rest]; }));
+    const profile = Object.fromEntries(wer.map(n => [n, LS.ohneGeheimnis(LS.lies("profile", {})[n] || {})])); // ohne PIN und Wiederherstellung
     const daten = { version: 1, gesichert: new Date().toISOString(), profile,
       protokoll: LS.protokoll().filter(e => sichtbareRunde(e) && e.name in profile),
       rekorde: LS.rekorde().filter(e => sichtbareRunde(e) && e.name in profile),

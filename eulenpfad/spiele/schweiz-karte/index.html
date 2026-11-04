@@ -6,7 +6,12 @@
 <title>Schweiz-Karten-Suche</title>
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .karte-svg { display: block; width: 100%; max-width: 900px; margin: 6px auto 4px; background: #eaf5fb; border-radius: 16px; touch-action: manipulation; }
+  /* Ganze Aufgabe im Bild (BH3 a): Die Breite folgt der Bildhöhe; --seiten = Breite/Höhe des Ausschnitts (aus dem Code),
+     --rest = was über und unter der Karte noch Platz braucht (Kopf, Auftrag, Quelle, Tipp; mit Namen zur Wahl mehr). */
+  .karte-svg { --rest: 330px; display: block; width: min(100%, 900px, calc((100vh - var(--rest)) * var(--seiten, 1.6))); height: auto;
+    margin: 6px auto 4px; background: #eaf5fb; border-radius: 16px; touch-action: manipulation; }
+  .karte-svg.mit-wahl { --rest: 400px; }
+  @media (min-height: 821px) { .karte-svg { --rest: 420px; } .karte-svg.mit-wahl { --rest: 500px; } }
   .karte-svg .land { fill: none; stroke: var(--text); stroke-width: .9; }
   .karte-svg .gebiet { fill: #fbf7ec; stroke: #8a8fa8; stroke-width: .45; stroke-linejoin: round; fill-rule: evenodd; }
   .karte-svg .gebiet.wahl { cursor: pointer; }
@@ -155,6 +160,8 @@ LS.spiel({
     ctx.tipp(tippsFuer(p, ziel, gebiete));
     const [vx, vy, vb, vh] = p.ansicht === "sg" ? ausschnitt(gebiete) : [0, 0, KARTE.breite, KARTE.hoehe];
     const svg = svgEl("svg", { class: "karte-svg", viewBox: `${vx} ${vy} ${vb} ${vh}`, role: "img", "aria-label": "Stumme Karte" });
+    svg.style.setProperty("--seiten", (vb / vh).toFixed(3));
+    if (p.art === "erkennen") svg.classList.add("mit-wahl");
     const flaechen = new Map();
     let fertig = false;
 

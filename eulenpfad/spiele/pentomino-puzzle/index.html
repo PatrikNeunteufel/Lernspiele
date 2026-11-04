@@ -23,6 +23,22 @@
   .werkzeug { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 4px; }
   .vorlage-teil { display: flex; justify-content: center; margin: 0 0 14px; }
   .pento-wahl .wahl-knopf { min-height: 88px; }
+  /* Ganze Aufgabe im Bild (BH3 a), Handy: Felder auch nach der Bildhöhe (nie unter 44 px), Teile im Vorrat kleiner
+     gezeichnet, damit bis sechs in eine Reihe passen, Werkzeugknöpfe zu zweit in einer Reihe */
+  @media (max-width: 560px) {
+    .frage { margin-bottom: 8px; }
+    .brett { --z-hoch: max(44px, (100vh - 490px) / var(--zeilen, 6) - 3px); margin-bottom: 10px; }
+    .teile { gap: 5px; margin-bottom: 8px; }
+    .teil { min-width: 50px; min-height: 50px; padding: 3px; }
+    .teil svg { width: auto; height: auto; max-width: 44px; max-height: 44px; }
+    .werkzeug { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .werkzeug .knopf { min-height: 48px; padding: 6px 8px; font-size: 17px; }
+  }
+  @media (min-width: 900px) and (orientation: landscape) {
+    .pp:has(> .brett) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 28px; align-items: start; align-content: start; }
+    .pp:has(> .brett) > * { grid-column: 2; }
+    .pp:has(> .brett) > .brett { grid-column: 1; grid-row: 1 / span 6; margin: 0; }
+  }
 </style>
 </head>
 <body>
@@ -341,7 +357,8 @@ function teilSvg(zellen, farbe, g = 13) {
   return el("span", { html: `<svg viewBox="0 0 ${b * g} ${h * g}" width="${b * g}" height="${h * g}" aria-hidden="true">${rechtecke}</svg>` });
 }
 
-const zellGroesse = b => `min(56px, calc((100vw - 52px - ${(b - 1) * 3}px) / ${b}))`;
+// Höhe (BH3 a): Auf dem Handy richtet sich die Zelle auch nach der Bildhöhe (--z-hoch im CSS, nie unter 44 px).
+const zellGroesse = b => `min(56px, calc((100vw - 52px - ${(b - 1) * 3}px) / ${b}), var(--z-hoch, 56px))`;
 
 /**
  * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Felder zählen, im Kopf drehen — ohne ein Teil zu
@@ -368,6 +385,7 @@ function auswahlAufgabe(ctx, a) {
     const brett = el("div", { class: "brett", "aria-label": "Brett mit Lücke" });
     brett.style.gridTemplateColumns = `repeat(${a.b}, auto)`;
     brett.style.setProperty("--z", zellGroesse(a.b));
+    brett.style.setProperty("--zeilen", a.h);
     const loch = new Set(a.luecke.map(([x, y]) => fk(x, y)));
     for (let y = 0; y < a.h; y++) for (let x = 0; x < a.b; x++) brett.append(el("div", { class: "feld " + (loch.has(fk(x, y)) ? "luecke" : "voll") }));
     ctx.flaeche.append(brett);
@@ -389,6 +407,50 @@ function auswahlAufgabe(ctx, a) {
   box.classList.add("pento-wahl");
 }
 
+/**
+ * Mindestzahl Handgriffe beim Legen (ctx.schritte): je Teil ein Tipp ins Feld plus die Drehungen und
+ * Spiegelungen bis zu seiner Lage. Gezählt über alle Kachelungen des Umrisses, nicht nur die gespeicherte
+ * Lösung — eine andere kann mit weniger Drehungen auskommen. Antippen eines Teils im Vorrat braucht es nie:
+ * Gewählt ist immer das erste noch offene Teil, also legt man der Reihe nach. Ein Tipp genügt je Teil, denn
+ * auf dem Feld unter der Mitte des Teils (in der Lösungslage) wählt tippe() genau diese Lage.
+ */
+function mindestHandgriffe(a) {
+  const n = a.teile.length;
+  // Abstand je Teil von seiner Lage im Vorrat zu jeder anderen Lage (Breitensuche über ⟳ und ⇋)
+  const abstand = a.teile.map(t => {
+    const d = new Map([[schluessel(t), 0]]);
+    const schlange = [normal(t)];
+    while (schlange.length) {
+      const z = schlange.shift();
+      for (const w of [drehe(z), spiegle(z)]) if (!d.has(schluessel(w))) { d.set(schluessel(w), d.get(schluessel(z)) + 1); schlange.push(w); }
+    }
+    return d;
+  });
+  const lagenJeTeil = a.teile.map(verschiedeneLagen);
+  const frei = [...a.felder].map(k => k.split(",").map(Number)).sort((p, q) => p[1] - q[1] || p[0] - q[0]);
+  const belegt = new Set();
+  const benutzt = new Array(n).fill(false);
+  let beste = Infinity;
+  const gehe = kosten => {
+    if (kosten >= beste) return;
+    const f = frei.find(([x, y]) => !belegt.has(fk(x, y)));
+    if (!f) { beste = kosten; return; }
+    for (let i = 0; i < n; i++) {
+      if (benutzt[i]) continue;
+      for (const lage of lagenJeTeil[i]) {
+        // Das erste Feld der Lage (oben links) kommt auf das erste freie Feld.
+        const zellen = lage.map(([x, y]) => fk(x + f[0] - lage[0][0], y + f[1] - lage[0][1]));
+        if (!zellen.every(k => a.felder.includes(k) && !belegt.has(k))) continue;
+        zellen.forEach(k => belegt.add(k)); benutzt[i] = true;
+        gehe(kosten + abstand[i].get(schluessel(lage)) + 1);
+        zellen.forEach(k => belegt.delete(k)); benutzt[i] = false;
+      }
+    }
+  };
+  gehe(0);
+  return beste;
+}
+
 function legen(ctx, a) {
   const n = a.teile.length;
   const loesungsKarte = [];
@@ -402,6 +464,7 @@ function legen(ctx, a) {
   }
   const LOESUNG = `So passen alle Teile (Zahl = Teil von links): ${loesungsKarte.join(" / ")}`;
   ctx.loesung(LOESUNG);
+  ctx.schritte(mindestHandgriffe(a));
   ctx.tipp(TIPPS.legen);
   ctx.kennung("legen|" + [...a.felder].sort().join(" ") + "|" + a.teile.map(formSchluessel).sort().join("/"));
 
@@ -410,6 +473,7 @@ function legen(ctx, a) {
   const brett = el("div", { class: "brett" });
   brett.style.gridTemplateColumns = `repeat(${a.b}, auto)`;
   brett.style.setProperty("--z", zellGroesse(a.b));
+  brett.style.setProperty("--zeilen", a.h);
   const zellen = {};
   const belegt = new Map();          // Feld → Teil
   const gelegt = new Map();          // Teil → Felder
@@ -550,6 +614,7 @@ LS.spiel({
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
     ctx.serie("art", a.art);
+    ctx.flaeche.classList.add("pp"); // breit und quer: Brett links, Frage, Teile und Knöpfe rechts (BH3 a)
     if (a.art === "legen") legen(ctx, a); else auswahlAufgabe(ctx, a);
   },
 });

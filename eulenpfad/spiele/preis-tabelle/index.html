@@ -20,6 +20,26 @@
   .werte button.zelle.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .werte button.zelle.richtig { background: var(--gut-hell); box-shadow: 0 3px 0 var(--gut); }
   .werte button.zelle.gewaehlt { opacity: .45; }
+
+  /* Ganze Aufgabe im Bild (BH3 a). Ab Tablet-Breite: Tabelle links, Titel und Frage rechts daneben. */
+  .pt-kopf { display: grid; grid-template-columns: auto minmax(0, 28em); grid-template-areas: "werte titel" "werte frage";
+    justify-content: center; align-content: center; column-gap: 24px; margin-bottom: 12px; }
+  .pt-kopf .titel { grid-area: titel; align-self: end; }
+  .pt-kopf .werte { grid-area: werte; margin: 0; align-self: center; }
+  .pt-kopf .frage { grid-area: frage; align-self: start; margin: 0; }
+  /* Handy: Titel neben der Tabelle, Frage darunter; Zeilen enger */
+  @media (max-width: 560px) {
+    .pt-kopf { grid-template-columns: auto auto; grid-template-areas: "titel werte" "frage frage"; column-gap: 10px; row-gap: 6px; margin-bottom: 6px; }
+    .pt-kopf .titel { align-self: center; margin: 0; max-width: 7em; }
+    .werte { font-size: 17px; line-height: 1.15; }
+    .werte th, .werte td { padding: 1px 8px; min-width: 76px; border-width: 2px; }
+    .werte .mehr td { padding: 0 8px; line-height: 1; }
+    .werte th { font-size: 16px; }
+    .werte .luecke { min-width: 46px; border-width: 2px; padding: 0 6px; }
+  }
+  @media (max-height: 820px) and (min-width: 561px) {
+    .werte th, .werte td { padding: 3px 12px; }
+  }
 </style>
 </head>
 <body>
@@ -247,6 +267,15 @@ function wertetabelle(kopf, zeilen, inhalt, mehr) {
 
 const luecke = () => el("span", { class: "luecke", text: "?" });
 
+/** Titel, Tabelle und Frage in einen Kasten (pt-kopf): ab Tablet-Breite steht die Tabelle links neben Titel und Frage,
+ *  auf dem Handy der Titel neben der Tabelle — so passt die ganze Aufgabe ins Bild (BH3 a). */
+function kopfZusammen(f) {
+  const kopf = el("div", { class: "pt-kopf" });
+  const teile = [".titel", ".werte", ".frage"].map(s => f.querySelector(`:scope > ${s}`)).filter(Boolean);
+  teile[0].before(kopf);
+  kopf.append(...teile);
+}
+
 LS.spiel({
   id: "preis-tabelle",
   einleitung: "Willkommen im Laden! In der Preistabelle fehlen Zahlen. Findest du heraus, was hineingehört?",
@@ -277,6 +306,7 @@ LS.spiel({
       let fertig = false;
       const loesungText = satz(`${a.anzahl[a.luecke]} × ${betrag(a.e)} = ${betrag(a.richtigerPreis)}, nicht ${betrag(a.loesung)}.`);
       ctx.loesung?.(loesungText);
+      ctx.schritte(1); // ein Tipp auf den falschen Preis
       // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Vorgehen, ohne die falsche Zeile zu nennen.
       ctx.tipp(["Finde zuerst heraus, was 1 Stück kostet.", "Rechne jede Zeile nach: Anzahl mal Preis für 1 Stück."]);
       f.append(wertetabelle(["Anzahl", "Preis"], a.anzahl, (i, s) => {
@@ -293,6 +323,7 @@ LS.spiel({
         return k;
       }));
       f.append(el("div", { class: "frage", text: "Ein Preis in der Tabelle ist falsch. Tipp ihn an!" }));
+      kopfZusammen(f);
       if (ctx.nr === 0) ctx.sag("Tipp: Zuerst den Preis für 1 Stück herausfinden — er muss in jeder Zeile passen.");
       return;
     }
@@ -361,6 +392,7 @@ LS.spiel({
       }
     }
     f.append(el("div", { class: "frage", text: satz(frage) }));
+    kopfZusammen(f);
     loesungText = satz(loesungText);
     ctx.loesung?.(loesungText);
     // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst die vollen Zeilen anschauen, dann der Rechenweg
@@ -371,6 +403,8 @@ LS.spiel({
     const istGeld = a.art === "folge" ? FOLGEN[a.f][3] : a.nach !== "anzahl";
     const inRappen = istGeld && mitRappen;
     const zeige = v => (istGeld ? betrag(inRappen ? v : v * 100) : zahlText(v));
+    // Getippt wird die Zahl der Rappen, der ganzen Franken oder die Anzahl, dazu OK
+    ctx.schritte(LS.tippSchritte(istGeld && !inRappen ? a.loesung / 100 : a.loesung));
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Antwort" });
     f.append(anzeige);
     const tasten = LS.tastatur({

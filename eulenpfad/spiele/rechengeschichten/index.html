@@ -196,6 +196,7 @@ LS.spiel({
     }
     const loesung = `${einsetzen(g.rechnung, werte)} = ${zahlText(a.ergebnis)}`;
     ctx.loesung(loesung);
+    ctx.schritte(LS.tippSchritte(a.ergebnis));
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Rechne aus." }));
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergebnis" });
     ctx.flaeche.append(anzeige);

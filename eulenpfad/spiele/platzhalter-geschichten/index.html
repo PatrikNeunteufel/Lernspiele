@@ -30,6 +30,22 @@
   .pg-wahl .wahl-knopf { font-variant-numeric: tabular-nums; font-size: clamp(19px, 4.5vw, 26px); }
   .pg-geschichten { --wahl-breite: 640px; }
   .pg-geschichten .wahl-knopf { font-size: clamp(15px, 3.6vw, 19px); font-weight: 700; line-height: 1.4; text-align: left; align-items: flex-start; padding: 12px 16px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Gleichungen auf dem Handy zu zweit nebeneinander; quer steht die
+     Zifferntastatur rechts neben der Geschichte (wie im Rahmen, der hier nicht greift: die Tastatur steht in .pg-bereich). */
+  @media (max-width: 560px) {
+    .pg-wahl.wahl { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+    .pg-wahl .wahl-knopf { min-height: 54px; }
+  }
+  @media (max-height: 820px), (max-width: 560px) {
+    .pg-geschichte { padding: 10px 14px; margin-bottom: 8px; }
+    .pg-bilder { margin-bottom: 6px; }
+  }
+  @media (min-width: 900px) and (orientation: landscape) {
+    .pg:has(> .pg-bereich > .tastatur) { display: grid; grid-template-columns: minmax(0, 1fr) 340px; column-gap: 24px; align-items: start; }
+    .pg:has(> .pg-bereich > .tastatur) > * { grid-column: 1; }
+    .pg:has(> .pg-bereich > .tastatur) > .pg-bereich { grid-column: 2; grid-row: 1 / span 8; }
+    .pg-bereich > .tastatur { margin-top: 0; }
+  }
 </style>
 </head>
 <body>

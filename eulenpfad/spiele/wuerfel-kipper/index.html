@@ -30,6 +30,15 @@
   .kipp-knoepfe { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
   .kipp-knoepfe .knopf { min-width: 120px; }
   .wahl-knopf { font-size: clamp(26px, 6vw, 34px); font-weight: 900; min-width: 64px; }
+  /* Ganze Aufgabe im Bild (BH3 a): auf dem Handy stehen Würfel und Karte (oder Kipp-Folge) nebeneinander,
+     die Knöpfe der Königsstufe sind kleiner und stehen zu zweit in einer Reihe */
+  @media (max-width: 560px) {
+    .kipp-buehne { flex-wrap: nowrap; gap: 10px; }
+    .wuerfel { width: min(170px, 30vw); flex: none; }
+    .weg-karte { min-width: 0; flex: 0 1 auto; }
+    .kipp-knoepfe { gap: 8px; }
+    .kipp-knoepfe .knopf { min-width: 0; min-height: 48px; padding: 8px 14px; font-size: 18px; }
+  }
 </style>
 </head>
 <body>
@@ -420,7 +429,7 @@ LS.spiel({
       hinweis = "Nach jedem Kipp liegt eine andere Seite oben. Wo ist die obere Seite nach dem vierten Kipp? Kippe in Gedanken mit.";
     }
     f.append(el("div", { class: "frage", html: frage }), buehne);
-    LS.auswahl(ctx, { optionen: [1, 2, 3, 4, 5, 6], richtig: a.antwort, hinweis, loesung: loesungText, lob: `Richtig: ${loesungText}.` });
+    LS.auswahl(ctx, { optionen: [1, 2, 3, 4, 5, 6], richtig: a.antwort, breite: 90, hinweis, loesung: loesungText, lob: `Richtig: ${loesungText}.` });
     if (ctx.nr === 0 && a.art !== "gegenseite") ctx.sag("Kippen nach rechts heisst: Der Würfel rollt über seine rechte Kante. Die obere Seite landet rechts.");
   },
 });

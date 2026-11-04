@@ -311,6 +311,7 @@ function zeichenSetzen(ctx, a, p) {
   weg.addEventListener("click", () => { if (!ctx.vorbei()) { inhalt[aktiv] = inhalt[aktiv].slice(0, -1); zeige(); } });
   tasten.append(weg);
   f.append(tasten);
+  LS.kurztasten(tasten); // die Zeichen auf ihren festen Tasten, ⌫ auf der Rücktaste; die Lücken bleiben zum Antippen
 
   const regel = REGEL[a.art];
   const pruefen = el("button", { type: "button", class: "knopf gruen", text: "Prüfen ✓" });

@@ -303,6 +303,7 @@ const wackeln = k => { k.classList.remove("falsch"); void k.offsetWidth; k.class
 function bildWahl(ctx, knoepfe, richtig, hinweis, loesung, lob, beiRichtig) {
   ctx.loesung(loesung);
   ctx.schritte(1);
+  LS.kurztasten(knoepfe[0].parentElement, knoepfe); // Bilder: Grundreihe A S D …
   let fertig = false;
   knoepfe.forEach((k, i) => k.addEventListener("click", () => {
     if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
@@ -434,6 +435,7 @@ LS.spiel({
       ctx.schritte(a.folge.length);
       const knoepfe = a.optionen.map(dingKnopf);
       ctx.flaeche.append(el("div", { class: "auftrag", text: frage }), el("div", { class: "gw-reihe" }, ...knoepfe));
+      LS.kurztasten(knoepfe[0].parentElement, knoepfe);
       let pos = 0;
       const nummer = (k, n) => { k.classList.add("gesetzt"); k.append(el("span", { class: "gw-nr", text: String(n) })); };
       knoepfe.forEach((k, i) => k.addEventListener("click", () => {

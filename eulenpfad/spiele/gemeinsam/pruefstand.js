@@ -73,6 +73,10 @@ const PRUEFSTAND = {
       "am": "2026-11-02",
       "von": "Patrik"
     },
+    "gerecht-teiler": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
     "koenig-falle": {
       "am": "2026-11-03",
       "von": "Patrik"
@@ -83,6 +87,10 @@ const PRUEFSTAND = {
     },
     "preis-tabelle": {
       "am": "2026-11-01",
+      "von": "Patrik"
+    },
+    "rechen-maschine": {
+      "am": "2026-11-04",
       "von": "Patrik"
     },
     "rechentrick-detektiv": {

@@ -19,8 +19,8 @@
     border-radius: 6px; font-weight: 900; font-size: 16px; background: var(--karte); }
   .wz-plan span.voll { background: var(--hinweis-hell); border-color: var(--deko-4); }
   .wz-vorne { width: 100%; height: 4px; border-radius: 2px; background: var(--text-leise); margin-top: 2px; }
-  .wz-felder { display: grid; gap: 6px; margin: 6px auto 0; }
-  .wz-felder button { width: 52px; height: 52px; border-radius: 12px; border: 3px solid var(--rand); background: var(--karte);
+  .wz-felder { --wz-feld: 52px; display: grid; gap: 6px; margin: 6px auto 0; }
+  .wz-felder button { width: var(--wz-feld); height: var(--wz-feld); border-radius: 12px; border: 3px solid var(--rand); background: var(--karte);
     font-size: 22px; font-weight: 900; color: var(--text); font-family: inherit; box-shadow: 0 4px 0 var(--rand); cursor: pointer; }
   .wz-felder button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--rand); }
   .wz-felder button:disabled { opacity: .5; cursor: default; }
@@ -30,6 +30,13 @@
   .wz .anzeige { margin: 0 auto 10px; }
   .wz-abc { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;
     color: var(--karte); background: var(--f, var(--deko-6)); font-weight: 900; font-size: 20px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy stehen zwei oder drei Gebäude nebeneinander statt untereinander. */
+  @media (max-width: 560px) {
+    .wz-bau:has(> .wz-geb:nth-child(2)) { flex-wrap: nowrap; gap: 8px; }
+    .wz-bau:has(> .wz-geb:nth-child(2)) > .wz-geb { flex: 1 1 0; min-width: 0; }
+    .wz-geb svg { max-width: 100%; }
+    .wz-felder { --wz-feld: 46px; gap: 5px; }
+  }
 </style>
 </head>
 <body>
@@ -524,7 +531,7 @@ function zeigeBauen(ctx, a, wz) {
   const karteRechts = el("div", { class: "wz-geb" });
   let svgRechts = bauSvg(rechts, { farbe: "var(--deko-5)" });
   const felder = el("div", { class: "wz-felder" });
-  felder.style.gridTemplateColumns = `repeat(${rechts.n}, 52px)`;
+  felder.style.gridTemplateColumns = `repeat(${rechts.n}, var(--wz-feld))`;
   karteRechts.append(svgRechts, el("div", { class: "wz-name", text: "➡️ Rechts" }), felder, el("div", { class: "wz-plan-titel", text: "Tippen setzt einen Würfel (vorne ist unten)" }));
   wz.append(el("div", { class: "wz-bau" }, gebKarte(a.links, "⬅️ Links"), karteRechts));
   const gesetzt = []; // Felder in der Reihenfolge des Setzens, für ↩

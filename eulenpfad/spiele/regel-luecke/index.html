@@ -187,6 +187,7 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const loesung = p.knapp ? `Man schreibt ${a.ganz}. ${a.regel.regel}` : `Man schreibt ${a.ganz}.`;
     ctx.loesung(loesung);
+    ctx.schritte(1); // eine Schreibweise antippen
     ctx.tipp(tippsFuer(a, p));
     if (p.sichtbar) ctx.flaeche.append(el("div", { class: "regelkarte" }, el("b", { text: `Regel: ${a.regel.name}` }), a.regel.regel));
     if (a.bild) ctx.flaeche.append(el("div", { class: "bild-gross", "aria-hidden": "true", text: a.bild }));
@@ -221,6 +222,7 @@ LS.spiel({
       optionen.append(knopf);
     }
     ctx.flaeche.append(optionen);
+    LS.kurztasten(optionen);
     if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Schreibweise.");
   },
 });

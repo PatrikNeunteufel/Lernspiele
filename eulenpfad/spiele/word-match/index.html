@@ -181,6 +181,7 @@ LS.spiel({
         box.append(k);
       }
       ctx.flaeche.append(box);
+      LS.kurztasten(box);
     };
 
     const a = aufgabeErzeugen(ctx.stufe);
@@ -189,6 +190,8 @@ LS.spiel({
     const { art, en, de, bild, loesung } = a;
     ctx.loesung(loesung);
     ctx.tipp(tippsFuer(a));
+    // Handgriffe: eine Antwort antippen; beim Buchstabieren je Buchstabe des Worts eine Kachel
+    ctx.schritte(a.optionen ? 1 : a.ziel.length);
     ctx.flaeche.append(el("div", { class: "thema-name", text: a.thema }));
 
     if (a.optionen) {
@@ -223,6 +226,8 @@ LS.spiel({
         kacheln.append(k);
       }
       ctx.flaeche.append(ablage, kacheln);
+      // Buchstaben sind selbst die Taste; gelegte Kacheln sind disabled, so nimmt der zweite gleiche Buchstabe die nächste.
+      LS.kurztasten(kacheln);
     }
     if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort. Good luck!");
   },

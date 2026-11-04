@@ -42,6 +42,18 @@
   .rp-befehl:disabled { opacity: .4; cursor: default; }
   .rp-zeile { text-align: center; font-size: 17px; font-weight: 800; color: var(--text-leise); margin: 0 0 6px; }
   @media (max-width: 420px) { .rp-befehl { min-width: 56px; min-height: 56px; font-size: 22px; } .rp-karte { min-width: 44px; font-size: 20px; } }
+  /* Ganze Aufgabe im Bild (BH3 a). Hoch: Ein Raster, das nur gezeigt wird (Legen), richtet sich nach der Bildhöhe;
+     ein Raster zum Antippen bleibt so gross, dass jedes Feld mindestens 44 px misst. */
+  @media not ((min-width: 900px) and (orientation: landscape)) {
+    .rp-ansicht .rp-raster { max-width: min(400px, 100vh - 565px); min-width: 240px; margin-bottom: 8px; }
+  }
+  /* Breit und quer: Raster links, Auftrag, Programm und Befehle rechts */
+  @media (min-width: 900px) and (orientation: landscape) {
+    .rp { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 24px; align-items: start; align-content: start; }
+    .rp > * { grid-column: 2; }
+    .rp > .rp-raster, .rp > :has(> .rp-raster) { grid-column: 1; grid-row: 1 / span 8; }
+    .rp .rp-raster { width: min(400px, 100vh - 300px, 45vw); margin: 0; }
+  }
 </style>
 </head>
 <body>
@@ -433,7 +445,7 @@ function zeigeLegen(ctx, a, loesung) {
   ctx.loesung(loesung);
   const mitWdh = a.art === "legenWdh";
   ctx.flaeche.append(el("div", { class: "auftrag", text: mitWdh ? `Bring den Roboter zum Stern — mit höchstens ${a.limit} Karten!` : "Bring den Roboter zum Stern!" }));
-  const halter = el("div");
+  const halter = el("div", { class: "rp-ansicht" }); // Raster nur zum Ansehen: darf auf dem Handy kleiner sein
   const programm = el("div", { class: "rp-programm", "aria-live": "polite" });
   const zeile = el("div", { class: "rp-zeile" });
   const befehle = el("div", { class: "rp-befehle" });
@@ -449,6 +461,12 @@ function zeigeLegen(ctx, a, loesung) {
   if (mitWdh) for (const n of [2, 3, 4]) befehle.append(knoepfe[n] = knopf(`${n}×`, "mal", "rp-mal", () => { if (ctx.vorbei()) return; mal = mal === n ? 1 : n; LS.ton("tipp"); zeichne(); }));
   befehle.append(knoepfe.weg = knopf("⌫", "zurück", "", () => { if (ctx.vorbei()) return; prog.pop(); ergebnis = null; zeichne(); }));
   befehle.append(knoepfe.los = knopf("▶", "fahren", "", fahren));
+  // Kurztasten (TK1 a): vor/links/rechts auf der Grundreihe, die Wiederholung mit ihrer Ziffer; ⌫ und ▶ nur antippen.
+  LS.kurztasten(befehle, ["V", "L", "R"].map(b => knoepfe[b]));
+  if (mitWdh) {
+    for (const n of [2, 3, 4]) knoepfe[n].dataset.taste = String(n);
+    LS.kurztasten(befehle, [2, 3, 4].map(n => knoepfe[n]));
+  }
 
   function dazu(b) {
     if (ctx.vorbei()) return;
@@ -499,8 +517,8 @@ function zeigeFehler(ctx, a, loesung) {
   ctx.loesung(loesung);
   ctx.flaeche.append(el("div", { class: "auftrag", text: "Eine Karte ist falsch! Tipp sie an." }));
   const r = fahre(a.feld, a.start, flach(a.prog));
-  ctx.flaeche.append(raster(a.feld, { robot: { x: r.x, y: r.y, d: r.d }, ziel: a.ziel, spur: spurSet(r), crash: r.crash,
-    markiert: r.crash && r.crash.art === "hindernis" ? new Map([[k(r.crash.x, r.crash.y), "rp-crash"]]) : null }));
+  ctx.flaeche.append(el("div", { class: "rp-ansicht" }, raster(a.feld, { robot: { x: r.x, y: r.y, d: r.d }, ziel: a.ziel, spur: spurSet(r), crash: r.crash,
+    markiert: r.crash && r.crash.art === "hindernis" ? new Map([[k(r.crash.x, r.crash.y), "rp-crash"]]) : null })));
   ctx.flaeche.append(el("div", { class: "rp-zeile", text: r.crash ? "So fährt das Programm — und stösst an." : "So fährt das Programm — aber nicht zum Stern." }));
   const box = el("div", { class: "rp-programm vorgabe" });
   a.prog.forEach((t, i) => {
@@ -557,6 +575,7 @@ LS.spiel({
   },
   aufgabe(ctx) {
     const a = aufgabeErzeugen(ctx.stufe);
+    ctx.flaeche.classList.add("rp"); // breit und quer: Raster links, Programm und Befehle rechts (BH3 a)
     if (Object.keys(STUFE[ctx.stufe].arten).length > 1) ctx.serie("art", a.art);
     const loesung = loesungText(a);
     ctx.tipp(tippsFuer(a));

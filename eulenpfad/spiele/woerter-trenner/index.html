@@ -100,6 +100,8 @@ LS.spiel({
     woerter.slice(0, -1).forEach(w => { pos += w.length; soll.add(pos); });
     const loesungText = `Der ${ctx.stufe === "s6" ? "Text" : "Satz"} heisst: ${woerter.join(" ")}`;
     ctx.loesung(loesungText);
+    // Handgriffe: je Trennstelle ein Tipp, dazu „Fertig ✓“
+    ctx.schritte(soll.size + 1);
     // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Strategie, dann die Zahl der Wörter — nie eine Trennstelle.
     ctx.tipp([
       "Lies ganz langsam von vorn. Sobald du ein Wort erkennst, setzt du dahinter einen Strich.",

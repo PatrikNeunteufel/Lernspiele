@@ -142,6 +142,10 @@ LS.spiel({
     ctx.tipp(tippsFuer(ctx.stufe, satz));
     if (ZEICHEN_WECHSELT.has(ctx.stufe)) ctx.serie("satzzeichen", satzende(satz));
     const woerter = zerlege(satz);
+    // Handgriffe: je grosses Wort ein Tipp, je Satzende so oft tippen, bis das nächste erlaubte Zeichen
+    // dasteht (. einmal, ! zweimal, ? dreimal), dazu „Fertig ✓“.
+    ctx.schritte(woerter.reduce((s, w) => s + (w.soll[0] !== w.soll[0].toLowerCase() ? 1 : 0)
+      + (w.ende ? Math.min(...w.erlaubt.map(z => ZEICHEN.indexOf(z))) : 0), 1));
     ctx.flaeche.append(el("div", { class: "auftrag", text: "Repariere den Satz!" }),
       el("div", { class: "sr-anleitung frage", text: "Tipp ein Wort an: gross oder klein. Tipp das Kästchen an: Satzzeichen wählen." }));
     const zeile = el("div", { class: "satz" });

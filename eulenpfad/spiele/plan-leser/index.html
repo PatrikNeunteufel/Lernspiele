@@ -29,6 +29,41 @@
   .massstab { margin-top: 8px; font-weight: 800; font-size: 16px; }
   .massstab span { display: inline-block; width: 40px; height: 8px; background: var(--text); border-radius: 2px; margin-right: 6px; vertical-align: middle; }
   .zeichen-gross { display: block; width: 90px; height: 90px; margin: 0 auto 8px; background: #fff; border: 3px solid var(--rand); border-radius: 14px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Legende in Spalten, Legende und Antworten neben dem Plan, wo Platz ist;
+     der Plan richtet sich nach der Bildhöhe. */
+  /* Hoch: Plan | Legende, die Antworten darunter über die ganze Breite (.plan-seite löst sich auf);
+     quer: Plan | Legende und Antworten untereinander. */
+  .plan-zeile { display: grid; grid-template-columns: auto minmax(0, 1fr); justify-content: center; }
+  .plan-seite { display: contents; }
+  .zeichen-frage { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px; }
+  .zeichen-frage .frage, .zeichen-frage .zeichen-gross { margin: 0; flex: none; }
+  .zeichen-frage .frage { flex: 0 1 auto; }
+  .plan-seite .wahl { grid-column: 1 / -1; margin: 0; width: 100%; }
+  .plan-seite .wahl.wege .wahl-knopf { font-size: 19px; line-height: 1.25; min-height: 54px; }
+  .legende { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); column-gap: 10px; align-content: start; }
+  .legende b, .legende .massstab { grid-column: 1 / -1; }
+  @media (max-width: 560px) {
+    .plan-zeile { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 8px; margin-bottom: 8px; width: 100%; }
+    .plan-zeile.mit-wahl .plan-bild { width: min(100%, calc(100vh - 580px)); }
+    .plan-zeile .wahl { gap: 8px; }
+    .plan-zeile .wahl-knopf { min-height: 54px; padding: 6px 8px; }
+    .legende { padding: 6px 10px; min-width: 0; width: 100%; grid-template-columns: repeat(2, minmax(0, auto)); justify-content: space-between; column-gap: 8px; }
+    .legende b { margin-bottom: 2px; }
+    .legende-zeile { margin: 1px 0; line-height: 1.15; }
+    .legende-zeile { gap: 6px; }
+    .legende-zeile svg { width: 24px; height: 24px; }
+    .massstab { margin-top: 4px; }
+    .zeichen-gross { width: 64px; height: 64px; }
+  }
+  @media (max-height: 820px) {
+    .frage { margin-bottom: 6px; }
+    .zeichen-gross { width: 64px; height: 64px; margin-bottom: 4px; }
+  }
+  @media (min-width: 900px) and (orientation: landscape) {
+    .plan-zeile { gap: 18px; }
+    .plan-seite { display: flex; flex-direction: column; gap: 10px; max-width: 520px; }
+    .plan-bild { width: min(360px, calc(100vh - 300px)); }
+  }
 </style>
 </head>
 <body>
@@ -470,14 +505,16 @@ LS.spiel({
     }
     // von dem → vom, zu dem → zum, zu der → zur
     frage = frage.replace(/\bvon dem\b/g, "vom").replace(/\bzu dem\b/g, "zum").replace(/\bzu der\b/g, "zur");
-    ctx.flaeche.append(el("div", { class: "frage", text: frage }));
-    if (a.art === "zeichen") {
+    const frageEl = el("div", { class: "frage", text: frage });
+    if (a.art === "zeichen") { // das Zeichen neben der Frage, nicht darunter (BH3 a)
       const x = ding(p.liste, a.ding);
-      ctx.flaeche.append(svgEl("0 0 40 40", "zeichen-gross", zeichenSvg(x[3], x[4], 20, 20)));
-    }
-    ctx.flaeche.append(el("div", { class: "plan-zeile" }, bild, legende(a)));
+      ctx.flaeche.append(el("div", { class: "zeichen-frage" }, svgEl("0 0 40 40", "zeichen-gross", zeichenSvg(x[3], x[4], 20, 20)), frageEl));
+    } else ctx.flaeche.append(frageEl);
+    const seite = el("div", { class: "plan-seite" }, legende(a)); // Legende und Antworten neben dem Plan (BH3 a)
+    ctx.flaeche.append(el("div", { class: a.art === "tippen" ? "plan-zeile" : "plan-zeile mit-wahl" }, bild, seite));
     if (a.art === "tippen") {
       ctx.loesung(loesung);
+      ctx.schritte(1); // ein Tipp auf das richtige Feld
       for (let z = 0; z < N * N; z++) {
         const r = document.createElementNS(SVG, "rect");
         for (const [k, v] of Object.entries({ class: "plan-feld", x: spalte(z) * F, y: zeile(z) * F, width: F, height: F })) r.setAttribute(k, v);
@@ -490,7 +527,10 @@ LS.spiel({
         bild.append(r);
       }
     } else {
-      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt, hinweis: HINWEIS[a.art], loesung, breite: a.art === "beschreiben" ? 300 : 150 });
+      const kurz = ["zaehlen", "strecke", "weglaenge", "abbiegen"].includes(a.art); // Zahlen und links/rechts: drei in einer Reihe
+      const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt, hinweis: HINWEIS[a.art], loesung, breite: a.art === "beschreiben" ? 300 : kurz ? 96 : 150 });
+      if (a.art === "beschreiben") box.classList.add("wege");
+      seite.append(box);
     }
     if (ctx.nr === 0) ctx.sag("Schau zuerst in die Legende!");
   },

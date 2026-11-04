@@ -16,6 +16,10 @@
     justify-content: center;
     margin: 0 auto 8px;
   }
+  /* Handy (BH3 a): die Zelle auch nach der Bildhöhe, damit die Rechnung über der festen Tastatur Platz hat */
+  @media (max-width: 560px) {
+    .werkstatt { --zelle: clamp(26px, min((100vw - 84px) / var(--spalten) - 4px, (100vh - 540px) / 5.8), 58px); }
+  }
   .werkstatt > div {
     height: var(--zelle);
     display: flex;
@@ -313,12 +317,17 @@ LS.spiel({
     for (let i = n - 1; i >= 0; i--) ergZellen[i] = zelle(`erg st st-${stelle(i).k}`);
     if (mal) leerZellen(2);
 
-    const halter = el("div");
     ctx.flaeche.append(
       el("div", { class: "auftrag", text: `Rechne schriftlich: ${rechnung}` }),
       raster,
-      el("div", { class: "hinweis-klein", text: "Tipp die Ziffer für das blaue Feld ein und drück OK." }),
-      halter);
+      el("div", { class: "hinweis-klein", text: "Tipp die Ziffer für das blaue Feld ein und drück OK." }));
+    // Die Zifferntastatur steht direkt in der Spielfläche: Der Rahmen stellt sie breit neben die Aufgabe
+    // und auf dem Handy unten fest (BH3 a). Jedes Feld bekommt eine neue, sie ersetzt die vorige.
+    let tastenEl = null;
+    const zeigeTasten = tasten => {
+      if (tastenEl) tastenEl.replaceWith(tasten.element); else ctx.flaeche.append(tasten.element);
+      tastenEl = tasten.element;
+    };
 
     let i = 0;            // aktuelle Spalte (0 = Einer)
     const fehlerJe = [];  // Fehlversuche je Spalte
@@ -328,7 +337,6 @@ LS.spiel({
       koepfe[i].classList.add("aktiv");
       const feld = ergZellen[i];
       feld.classList.add("aktiv", "leer");
-      halter.innerHTML = "";
       const tasten = LS.tastatur({
         anzeige: feld, maxStellen: 1,
         onOk(w) {
@@ -343,7 +351,7 @@ LS.spiel({
           if (fehlerJe[i] >= 3) setzen(tasten, false);
         },
       });
-      halter.append(tasten.element);
+      zeigeTasten(tasten);
     };
 
     /** Übertrag ins Bläschen der Spalte j schreiben (leer, wenn 0). */
@@ -376,7 +384,6 @@ LS.spiel({
       const c = x.ueber[i + 1];
       const z = ueberZellen[i + 1];
       z.classList.add("aktiv", "leer");
-      halter.innerHTML = "";
       const weiter = selbst => {
         tasten.gesperrt = true;
         uebertragZeigen(i + 1, c);
@@ -397,7 +404,7 @@ LS.spiel({
           if (fehlerUeber[i] >= 3) weiter(false);
         },
       });
-      halter.append(tasten.element);
+      zeigeTasten(tasten);
     };
 
     spalte();

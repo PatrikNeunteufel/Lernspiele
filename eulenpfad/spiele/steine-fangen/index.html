@@ -6,7 +6,10 @@
 <title>Steine fangen</title>
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .go-feld { max-width: 520px; margin: 4px auto 6px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Das Brett ist quadratisch, seine Breite folgt der Bildhöhe (Platz für Kopf,
+     Eule, Auftrag, Legende; mit Zahlen zur Wahl darunter mehr). */
+  .go-feld { max-width: min(520px, calc(100vh - 345px)); margin: 4px auto 6px; }
+  .go-feld:has(~ .go-zahlen) { max-width: min(520px, calc(100vh - 410px)); }
   .go-brett { display: block; width: 100%; height: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
   .go-brett .go-holz { fill: #e8c88c; }
   .go-brett .go-linie { stroke: #6b5235; stroke-width: 1.4; }
@@ -585,7 +588,8 @@ LS.spiel({
       loesungPunkte = a.richtig;
     }
     ctx.loesung(loesungText);
-    ctx.schritte(a.art === "fang2" ? 2 : 1);
+    // Ein Punkt auf dem Brett, beim Fang in 2 zwei; Zählen läuft über LS.auswahl, das sich selbst zählt.
+    if (a.art !== "zaehlen") ctx.schritte(a.art === "fang2" ? 2 : 1);
 
     const ansicht = brettAnsicht(n, a.art === "zaehlen" ? null : tippe);
     ansicht.zeige(start);

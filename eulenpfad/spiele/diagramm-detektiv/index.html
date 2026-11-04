@@ -36,6 +36,38 @@
   .daten td.zahl { text-align: right; font-variant-numeric: tabular-nums; min-width: 56px; }
   .daten svg { display: block; height: 30px; }
   .daten .strich { stroke: var(--text); stroke-width: 2.6; stroke-linecap: round; }
+
+  /* Ganze Aufgabe im Bild (BH3 a): Frage und Antwort neben den Daten, wo Platz ist, sonst darunter. */
+  .dd-zeile { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 20px; }
+  .dd-daten { flex: 0 1 auto; min-width: 0; max-width: 100%; }
+  .dd-daten:has(> .diagramm) { flex: 0 1 440px; }
+  .dd-daten:has(> .zwei) { flex: 1 1 100%; }
+  .dd-antwort .anzeige.dd-anzeige { min-height: 60px; font-size: clamp(30px, 6vw, 44px); }
+  .dd-daten > :last-child { margin-bottom: 0; }
+  .dd-antwort { flex: 1 1 220px; min-width: 0; max-width: 560px; }
+  .dd-antwort .anzeige { margin-top: 4px; }
+  .dd-antwort .wahl-knopf { flex-direction: row; gap: 8px; min-height: 56px; }
+  .dd-antwort .wahl-knopf .bild { font-size: 30px; }
+  @media (max-height: 820px) {
+    .frage { margin-bottom: 8px; }
+    .diagramm { width: min(440px, 100%, calc((100vh - 430px) * 1.2)); min-width: min(320px, 100%); }
+  }
+  @media (max-width: 560px) {
+    .dd-daten > .diagramm { width: min(100%, 300px); margin-bottom: 0; }
+    .titel { margin-bottom: 2px; }
+  }
+  @media (min-width: 900px) and (orientation: landscape) {
+    /* Tabelle und Diagramm nebeneinander, die Frage rechts daneben */
+    .zwei .diagramm { width: min(400px, calc((100vh - 400px) * 1.2)); min-width: 0; }
+  }
+  @media (min-width: 700px) {
+    /* Ohne Zifferntastatur (Tablet hoch und quer): links Tabelle oder Strichliste, darunter Frage und Antworten, rechts das Diagramm */
+    .dd-zeile.dd-raster { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "links diag" "antw diag"; gap: 12px 20px; align-items: start; }
+    .dd-raster .dd-daten, .dd-raster .zwei { display: contents; }
+    .dd-raster .zwei > .daten { grid-area: links; justify-self: center; }
+    .dd-raster .zwei > .diagramm { grid-area: diag; align-self: center; width: min(400px, calc((100vh - 400px) * 1.2)); }
+    .dd-raster .dd-antwort { grid-area: antw; max-width: none; }
+  }
 </style>
 </head>
 <body>
@@ -429,18 +461,26 @@ LS.spiel({
     const einheit = UMFRAGEN[a.u].einheit;
     const f = ctx.flaeche;
 
+    // Daten links, Frage und Antwort daneben, wo Platz ist, sonst darunter (BH3 a)
+    const daten = el("div", { class: "dd-daten" });
+    const antwort = el("div", { class: "dd-antwort" });
+    const zeile = el("div", { class: "dd-zeile" }, daten, antwort);
+    f.append(zeile);
+
     // Darstellung der Daten
-    if (a.darst === "strich") f.append(strichliste(a));
-    else if (a.darst === "tabelle") f.append(tabelle(a));
-    else if (a.darst === "saeule") f.append(titel(a), diagramm(a, a.art === "fehlendTotal" ? a.werte.map((w, i) => (i === a.i ? null : w)) : a.werte, a.art === "fehlendTotal" ? { leer: a.i, onTipp: v => tipp(v) } : {}));
-    else if (a.darst === "doppel") f.append(titel(a), diagramm(a, a.werte, { werte2: a.werte2, gruppen: a.gruppen }));
+    if (a.darst === "strich") daten.append(strichliste(a));
+    else if (a.darst === "tabelle") daten.append(tabelle(a));
+    else if (a.darst === "saeule") daten.append(titel(a), diagramm(a, a.art === "fehlendTotal" ? a.werte.map((w, i) => (i === a.i ? null : w)) : a.werte, a.art === "fehlendTotal" ? { leer: a.i, onTipp: v => tipp(v) } : {}));
+    else if (a.darst === "doppel") daten.append(titel(a), diagramm(a, a.werte, { werte2: a.werte2, gruppen: a.gruppen }));
     else {
       // zwei Darstellungen nebeneinander: Tabelle oder Strichliste links, Diagramm rechts
       const links = a.darst === "strich+saeule" ? strichliste(a) : tabelle(a);
       const werte = a.art === "vergleich" ? a.gezeichnet : a.werte.map((w, i) => (i === a.i ? null : w));
-      f.append(el("div", { class: "zwei" }, links, diagramm(a, werte, a.art === "vergleich" ? {} : { leer: a.i, onTipp: v => tipp(v) })));
+      // Quer ohne Zifferntastatur: Frage unter der Tabelle, Diagramm rechts (BH3 a)
+      if (a.optionen || ["ergaenzen", "uebertragen", "fehlendTotal"].includes(a.art)) zeile.classList.add("dd-raster");
+      daten.append(el("div", { class: "zwei" }, links, diagramm(a, werte, a.art === "vergleich" ? {} : { leer: a.i, onTipp: v => tipp(v) })));
     }
-    f.append(el("div", { class: "frage", text: a.frage }));
+    antwort.append(el("div", { class: "frage", text: a.frage }));
 
     // ---- Säule antippen (ergänzen, übertragen, fehlendes Total) ----
     let gewaehlt = null;
@@ -471,8 +511,9 @@ LS.spiel({
           : `Die Säule ist ${richtung}. Schau in der Tabelle nach und folge der Linie von der Zahl an der Achse.`, loesung);
         if (ctx.vorbei()) svg.setzeSaeule(a.loesung, "geloest");
       });
-      f.append(el("div", { class: "knopfzeile" }, pruefen));
+      antwort.append(el("div", { class: "knopfzeile" }, pruefen));
       if (ctx.nr === 0) ctx.sag("Tipp in die leere Spalte, dann auf «Prüfen». Du kannst die Höhe vorher noch ändern.");
+      ctx.schritte(2); // Höhe antippen und «Prüfen»
       return;
     }
 
@@ -519,16 +560,17 @@ LS.spiel({
 
     if (a.optionen) {
       const zahlen = typeof a.loesung === "number";
-      LS.auswahl(ctx, {
+      antwort.append(LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.loesung, breite: zahlen ? 90 : 120,
         inhalt: zahlen ? undefined : name => { const i = a.kat.findIndex((x, j) => k(j).name === name); return { bild: k(i).bild, text: name }; },
         hinweis: wert => zahlen ? `${wert > a.loesung ? "Das ist zu viel." : "Das ist zu wenig."} ${grundHinweis}` : grundHinweis,
         loesung: loesungText,
-      });
+      }));
     } else {
       ctx.loesung?.(loesungText);
-      const anzeige = el("div", { class: "anzeige leer", "aria-label": "Antwort" });
-      f.append(anzeige);
+      ctx.schritte(LS.tippSchritte(a.loesung));
+      const anzeige = el("div", { class: "anzeige leer dd-anzeige", "aria-label": "Antwort" });
+      antwort.append(anzeige);
       const tasten = LS.tastatur({
         anzeige, maxStellen: 3,
         onOk(z) {

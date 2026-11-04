@@ -155,6 +155,38 @@ function zeichneVerwaltung(box, neu) {
     return el("span", { class: "zeile-knoepfe", title: "Wie das Kind die Spiele im Tab Spiele sortiert sieht, und ob es das selbst ändern darf" }, el("span", { text: "🔀" }), art, wahl);
   }
 
+  /**
+   * Wiederherstellung der eigenen PIN (PIN1 a, LERN_Session13): Code neu erzeugen (einmal angezeigt) und
+   * Sicherheitsfrage setzen — nur für sich selbst, die Antwort kennt nur, wer sie wählt.
+   */
+  function meineWiederherstellung() {
+    const ich = LS.aktuellerSpieler();
+    if (!LS.istAufsicht(ich)) return "";
+    const w = LS.wiederherstellung(ich);
+    const ausgabe = el("div", { class: "meldung", style: "text-align:left", "aria-live": "polite" });
+    const frage = el("input", { class: "feld", type: "text", maxlength: "120", placeholder: "Sicherheitsfrage", "aria-label": "Sicherheitsfrage", value: w.frage || "", style: "min-width:min(100%, 320px);font-size:16px" });
+    const antwort = el("input", { class: "feld", type: "text", maxlength: "60", placeholder: "Antwort", "aria-label": "Antwort", autocomplete: "off", style: "font-size:16px" });
+    return el("div", { class: "einstellung" },
+      el("h3", { text: "🔑 Falls Sie Ihre PIN vergessen" }),
+      el("p", { class: "leise-text", style: "margin:0 0 6px", text: `Wiederherstellungscode: ${w.code ? "eingerichtet" : "fehlt"} · Sicherheitsfrage: ${w.frage ? `„${w.frage}“` : "fehlt"}. Bei „PIN vergessen?“ auf der Anmeldung führen sie zu einer neuen PIN; ohne beides bleibt nur eine zweite Aufsicht oder das Zurücksetzen mit Frist (${LS.ZURUECKSETZEN_TAGE} Tage).` }),
+      el("div", { class: "zeile-knoepfe" },
+        el("button", { type: "button", class: "schalter", text: w.code ? "Neuen Code erzeugen" : "Code erzeugen", onclick: async () => {
+          if (w.code && !confirm("Einen neuen Code erzeugen? Der bisherige gilt dann nicht mehr.")) return;
+          const code = LS.neuerCode();
+          await LS.setzeWiederherstellung(ich, { code });
+          ausgabe.replaceChildren(el("span", { text: "Ihr neuer Code (erscheint nur jetzt — aufschreiben, fern von den Kindern aufbewahren): " }),
+            el("b", { text: code, style: "font-family:ui-monospace,Consolas,monospace;font-size:20px;letter-spacing:1px;user-select:all" }));
+        } })),
+      el("div", { class: "zeile-knoepfe", style: "margin-top:6px" }, frage, antwort,
+        el("button", { type: "button", class: "schalter", text: "Sicherheitsfrage speichern", onclick: async () => {
+          if (frage.value.trim().length < 5 || antwort.value.trim().length < 2) return (ausgabe.textContent = "Bitte Frage und Antwort eingeben.");
+          await LS.setzeWiederherstellung(ich, { frage: frage.value, antwort: antwort.value });
+          antwort.value = "";
+          ausgabe.textContent = "✓ Sicherheitsfrage gespeichert. Wählen Sie eine, deren Antwort Ihre Kinder nicht kennen.";
+        } })),
+      ausgabe);
+  }
+
   function konten() {
     const meldung = el("div", { class: "meldung", style: "text-align:left", "aria-live": "polite" });
     const kontoZeilen = LS.spielerListe().map(n => {
@@ -172,7 +204,7 @@ function zeichneVerwaltung(box, neu) {
               meldung.textContent = (await LS.setzePin(n, pin.value)) ? `✓ PIN für ${n} gesetzt.` : "Die PIN hat 4 bis 6 Ziffern.";
             } })) : null,
           ich ? null : el("button", { type: "button", class: "schalter", text: p.rolle === "aufsicht" ? "→ Kind" : "→ Aufsicht", onclick: () => {
-            LS.speichereProfil(n, p.rolle === "aufsicht" ? { rolle: "kind", pin: null } : { rolle: "aufsicht" });
+            LS.speichereProfil(n, p.rolle === "aufsicht" ? { rolle: "kind", pin: null, wiederherstellung: null } : { rolle: "aufsicht" });
             neu();
           } }),
           ich ? null : el("button", { type: "button", class: "schalter gesperrt", text: "🗑 löschen", onclick: () => {
@@ -189,10 +221,11 @@ function zeichneVerwaltung(box, neu) {
     };
     seite.append(karte(
       el("h2", { text: "Konten" }),
-      el("p", { class: "leise-text", style: "margin-top:0", text: "Kinder melden sich ohne PIN an. Die Aufsicht braucht ihre PIN, sieht alle Spiele und Statistiken und spielt als Tester (Runden zählen nicht in der Statistik, im Spiel gibt es Testhilfen). Eine neue Aufsicht: als Kind anlegen, „→ Aufsicht“ und PIN setzen." }),
+      el("p", { class: "leise-text", style: "margin-top:0", text: "Kinder melden sich ohne PIN an. Die Aufsicht braucht ihre PIN, sieht alle Spiele und Statistiken und spielt als Tester (Runden zählen nicht in der Statistik, im Spiel gibt es Testhilfen). Eine neue Aufsicht: auf der Anmeldung „🐣 Ich bin neu“ → „Ich bin erwachsen“ (eine Aufsicht bestätigt mit ihrer PIN), oder hier als Kind anlegen, „→ Aufsicht“ und PIN setzen." }),
       el("div", { class: "tabelle-rahmen" }, el("table", {},
         el("thead", {}, el("tr", {}, ...["Name", "Rolle", "📅 Lernplan", "🔀 Sortierung", ""].map(t => el("th", { text: t })))),
         el("tbody", {}, ...kontoZeilen))),
+      meineWiederherstellung(),
       el("h3", { text: "Neues Kind" }),
       el("div", { class: "pin-zeile", style: "justify-content:flex-start" }, neuName, neuKlasse, knopf("＋ Anlegen", anlegen, "gruen")),
       meldung));

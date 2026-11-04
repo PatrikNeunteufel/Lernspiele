@@ -363,6 +363,9 @@ LS.spiel({
       const auftrag = el("div", { class: "auftrag", text: "In welcher Zeitform steht der Satz?" });
       ctx.flaeche.append(schritt, auftrag, satzBild(a.teile));
       ctx.loesung?.(`${ZEITEN[a.quelle].name}, dann ${ZEITEN[a.ziel].name}: ${a.richtig}`); // für die Testhilfe 🔑
+      // Handgriffe: Schritt 1 ein Tipp auf die Zeitform, Schritt 2 ein Tipp auf den Satz. Beide hier nennen:
+      // LS.auswahl in Schritt 2 zählt sich erst nach dem ersten Tipp — da läuft die Uhr schon.
+      ctx.schritte(2);
       const box = el("div", { class: "wahl" });
       box.style.setProperty("--wahl-breite", "150px");
       let weiter = false;

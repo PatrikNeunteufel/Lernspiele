@@ -38,6 +38,22 @@
   .gl-liste > span { display: inline-flex; flex-direction: column; align-items: center; font-size: 15px; font-weight: 800; }
   .gl-liste .gl-bild { font-size: 34px; }
   .gl-anzeige { margin: 0 auto 10px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Die Gruppen beim Zählen der Kleider-Sets stehen nebeneinander, so viele Platz haben. */
+  .gl-gruppen { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 22px; max-width: 680px; margin: 0 auto 8px; }
+  .gl-gruppen .gl-gruppe { margin: 0; max-width: 100%; }
+  .gl-gruppen .gl-liste { gap: 4px 10px; margin: 0 auto 4px; }
+  .gl-gruppen .gl-liste { line-height: 1.15; }
+  .gl-gruppen .gl-liste .gl-bild { font-size: 30px; line-height: 1.05; }
+  .gl-gruppen .gl-gruppe > b { margin-bottom: 0; }
+  /* Niedrige Bildschirme (Handy, Laptop, Tablet quer): Sortenknöpfe enger, Bild etwas kleiner. */
+  @media (max-height: 820px) {
+    .gl-sorten { gap: 8px; margin-bottom: 8px; }
+    .gl-sorte { padding: 5px 6px; gap: 2px; }
+    .gl-sorte .gl-bild { font-size: 32px; }
+    .gl-sorte .gl-kugel { width: 46px; height: 46px; font-size: 20px; }
+    .gl-bau { min-height: 84px; margin-bottom: 6px; }
+    .gl-gruppe > b { margin-bottom: 2px; }
+  }
 </style>
 </head>
 <body>
@@ -347,6 +363,8 @@ function legen(ctx, a) {
   const N = alle.length;
   ctx.loesung(legenLoesung(a));
   const glaceArt = a.typ !== "kleider";
+  // Handgriffe: jede Kombination Stück für Stück antippen; nach jedem Fund beginnt der Bau wieder leer.
+  ctx.schritte(N * (glaceArt ? (a.typ === "turm" ? a.sorten.length : a.kugeln) : a.gruppen.length));
   ctx.flaeche.append(el("div", { class: "auftrag", text: glaceArt ? "Finde alle Glace!" : "Finde alle Kleider-Sets!" }),
     el("div", { class: "frage", text: regelText(a) }));
   const zaehler = el("div", { class: "gl-zaehler", "aria-live": "polite" });
@@ -445,14 +463,15 @@ function zaehlen(ctx, a) {
   const f = formel(a);
   const loesung = f.text;
   ctx.loesung(loesung);
+  ctx.schritte(LS.tippSchritte(f.N));
   const glaceArt = a.typ !== "kleider";
   ctx.flaeche.append(el("div", { class: "auftrag", text: glaceArt ? "Wie viele verschiedene Glace gibt es?" : "Wie viele verschiedene Kleider-Sets gibt es?" }),
     el("div", { class: "frage", text: regelText(a) }));
   if (glaceArt) {
     ctx.flaeche.append(el("div", { class: "gl-liste vorgabe" }, ...a.sorten.map(s => el("span", {}, kugel(s), el("span", { text: s })))));
   } else {
-    for (const g of a.gruppen) ctx.flaeche.append(el("div", { class: "gl-gruppe" }, el("b", { text: KLEIDER_GRUPPEN[g.g].name }),
-      el("div", { class: "gl-liste vorgabe" }, ...g.teile.map(t => el("span", {}, el("span", { class: "gl-bild", text: TEIL[t][1] }), el("span", { text: t }))))));
+    ctx.flaeche.append(el("div", { class: "gl-gruppen" }, ...a.gruppen.map(g => el("div", { class: "gl-gruppe" }, el("b", { text: KLEIDER_GRUPPEN[g.g].name }),
+      el("div", { class: "gl-liste vorgabe" }, ...g.teile.map(t => el("span", {}, el("span", { class: "gl-bild", text: TEIL[t][1] }), el("span", { text: t }))))))));
   }
   const anzeige = el("div", { class: "anzeige leer gl-anzeige", "aria-label": "Anzahl" });
   ctx.flaeche.append(anzeige);

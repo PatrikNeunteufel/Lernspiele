@@ -32,6 +32,15 @@
   .zuege { text-align: center; font-weight: 800; color: var(--text-leise); margin-top: 4px; }
   .teiler-knoepfe .knopf { min-width: 72px; min-height: 64px; font-size: 30px; }
   .zahlwahl .wahl-knopf { font-size: clamp(28px, 7vw, 38px); font-weight: 900; }
+  /* Ganze Aufgabe im Bild (BH3 a): auf niedrigen und schmalen Bildschirmen Teller und Abstände enger. */
+  @media (max-width: 560px), (max-height: 820px) {
+    .frage { margin-bottom: 6px; }
+    .tisch { gap: 8px; margin-top: 2px; }
+    .teller { min-height: 108px; padding: 9px 6px; }
+    .teller.schale { min-height: 80px; padding: 10px 24px 16px; }
+    .teiler-knoepfe { margin-top: 8px; }
+  }
+  .teiler-knoepfe .zuege { margin: 0; align-self: center; }
 </style>
 </head>
 <body>
@@ -322,7 +331,6 @@ function legen(ctx, a, d, p) {
   };
 
   zeichne();
-  if (zaehler) f.append(zaehler);
 
   const fertig = el("button", { type: "button", class: "knopf gruen", text: "✓", "aria-label": "Fertig" });
   const vonVorn = el("button", { type: "button", class: "knopf hell", text: "↺", "aria-label": "Nochmal von vorn" });
@@ -349,7 +357,8 @@ function legen(ctx, a, d, p) {
     lage.teller = [...a.teller]; lage.schale = a.schale; gehoben = null;
     zeichne();
   });
-  f.append(el("div", { class: "knopfzeile teiler-knoepfe" }, vonVorn, fertig));
+  // Der Zugzähler steht in der Zeile der Knöpfe, nicht darüber (BH3 a)
+  f.append(el("div", { class: "knopfzeile teiler-knoepfe" }, ...(zaehler ? [zaehler] : []), vonVorn, fertig));
 }
 </script>
 </body>

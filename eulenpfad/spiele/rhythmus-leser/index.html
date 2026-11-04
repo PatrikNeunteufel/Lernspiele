@@ -9,6 +9,8 @@
   .notenwahl .wahl-knopf { padding: 2px 4px; }
   .notenwahl .noten-zeile { max-width: 120px; }
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Die Notenkarten zur Wahl wachsen auf dem Handy sonst auf 170 px Höhe. */
+  @media (max-width: 560px) { .notenwahl .noten-zeile { max-height: 96px; } }
 </style>
 </head>
 <body>

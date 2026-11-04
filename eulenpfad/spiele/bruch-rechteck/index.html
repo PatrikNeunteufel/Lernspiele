@@ -37,6 +37,14 @@
   .tafel .stueck.weg { fill: var(--deko-1); fill-opacity: .22; stroke-dasharray: 4 3; }
   .tafel .linie { stroke: var(--text); stroke-width: 3; }
   .tafel .rand { fill: none; stroke: var(--text); stroke-width: 4; }
+  /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy stehen beide Tafeln mit dem Rechenzeichen in einer Reihe */
+  @media (max-width: 560px) {
+    .tafeln { gap: 6px 8px; margin-bottom: 6px; }
+    .tafel { width: min(240px, 34vw); }
+    .tafel-box { gap: 2px; }
+    .rechnung { margin: 2px 0 6px; }
+    .tafel.einzeln { width: min(360px, 82vw); }
+  }
 
   .wahl-knopf { font-size: clamp(26px, 6vw, 34px); font-weight: 900; font-variant-numeric: tabular-nums; }
   .wahl-knopf .bruch { font-size: 30px; }

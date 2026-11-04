@@ -24,6 +24,26 @@
   .weiche .w-weg b { font-size: 18px; color: var(--text-leise); }
   .weiche .w-runden { font-size: 18px; font-weight: 800; color: var(--text-leise); text-align: center; }
   .rm-anzeige { margin: 0 auto 10px; }
+  /* Ganze Aufgabe im Bild (BH3 a): die Weiche der Königsstufe etwas enger. */
+  .weiche { gap: 4px; margin: 2px 0 8px; }
+  .weiche .w-weg { gap: 2px; }
+  .weiche + .rm-anzeige, .weiche ~ .rm-anzeige { margin-bottom: 4px; }
+  /* Breit und quer steht die Zifferntastatur daneben (Rahmen BH1 2): die Kette hat dann etwa 550 px — Kästen enger,
+     damit Eingang, Kästen und Ausgang in einer Reihe bleiben (Hinweis Patrik, Laptop 1000 × 500, LERN_Session13). */
+  @media (min-width: 900px) and (orientation: landscape) {
+    .maschine { gap: 4px; }
+    .m-kasten { font-size: 28px; padding: 5px 9px; min-width: 52px; border-width: 3px; }
+    .m-kasten small { font-size: 11px; letter-spacing: 0; }
+    .m-pfeil { font-size: 20px; }
+  }
+  /* Handy: Eingang und Frage der Weiche in einer Zeile (der Pfeil zeigt dann nach rechts), die Wege darunter. */
+  @media (max-width: 560px) {
+    .weiche { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; justify-items: center; column-gap: 6px; }
+    .weiche > .m-pfeil { transform: rotate(-90deg); }
+    .weiche > .w-frage { padding: 6px 10px; }
+    .weiche > .w-wege, .weiche > .w-runden { grid-column: 1 / -1; }
+    .weiche .m-kasten { padding: 6px 12px; }
+  }
 </style>
 </head>
 <body>
@@ -347,16 +367,32 @@ function zahlAntwort(ctx, soll, loesung, hinweis) {
   ctx.flaeche.append(tasten.element);
 }
 
-/** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Vorgehen je Art — ohne Zwischenergebnis und ohne Regel. */
+/**
+ * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Vorgehen je Art — ohne Zwischenergebnis und ohne Regel. Seit
+ * LERN_Session13 mit den Zahlen und Kästen dieser Aufgabe (Hinweis Patrik: „Starte hinten“ war ab der zweiten
+ * Aufgabe kein Tipp mehr); genannt werden Rechenschritte, nie ihr Ergebnis.
+ */
 function tippsFuer(a) {
+  const z = LS.zahlText;
+  // Kästen in Schulschreibweise wie auf dem Bild („+ 30 400“), nie roh
+  const umkehr = s => { const { o, n } = zerlegeSchritt(s); return zeigeSchritt(schritt(UMKEHR[o], n)); };
+  const ops = (a.ops || []).map(zeigeSchritt); // die Weiche (Königsstufe) hat keine Kette
   if (a.art === "vor") return a.ops.length > 1
-    ? ["Steck die Zahl vorne hinein und rechne Kasten für Kasten.", "Merk dir jedes Zwischenergebnis, bevor du zum nächsten Kasten gehst."]
-    : ["Steck die Zahl vorne hinein und rechne, was im Kasten steht."];
-  if (a.art === "rueck") return ["Starte hinten bei der Zahl, die herauskommt.", "Mach jeden Schritt rückgängig: aus + wird −, aus × wird : — und umgekehrt.",
-    "Mach am Schluss die Probe: Steck deine Zahl vorne hinein."];
+    ? [`Steck ${z(a.ein)} vorne hinein. Der erste Kasten rechnet ${z(a.ein)} ${ops[0]}.`,
+      `Mit dem, was herauskommt, gehst du zum nächsten Kasten: ${ops.slice(1).join(", dann ")}. Merk dir jedes Zwischenergebnis.`]
+    : [`Steck ${z(a.ein)} vorne hinein und rechne ${z(a.ein)} ${ops[0]}.`];
+  if (a.art === "rueck") {
+    const letzter = a.ops[a.ops.length - 1];
+    const rest = a.ops.slice(0, -1).reverse().map(umkehr);
+    return [`Starte hinten bei ${z(a.aus)}. Der letzte Kasten rechnet ${zeigeSchritt(letzter)}. Mach ihn rückgängig: ${z(a.aus)} ${umkehr(letzter)}.`,
+      ...(rest.length ? [`Dann die anderen Kästen von hinten nach vorne: ${rest.join(", dann ")}.`] : []),
+      "Mach am Schluss die Probe: Steck deine Zahl vorne hinein."];
+  }
   if (a.art === "weiche") return ["Beantworte in jeder Runde zuerst die Frage: ja oder nein?",
     "Nimm dann den passenden Kasten. Was herauskommt, geht wieder oben hinein — zähl die Runden mit."];
-  return [a.art === "regel2" ? "Rechne beim ersten Zahlenpaar zuerst den Kasten aus, den du kennst." : "Schau das erste Zahlenpaar an: Wird die Zahl grösser oder kleiner? Viel oder wenig?",
+  const [x, y] = a.paare[0];
+  return [a.art === "regel2" ? `Rechne beim ersten Zahlenpaar (${z(x)} → ${z(y)}) zuerst den Kasten aus, den du kennst.`
+    : `Schau das erste Zahlenpaar an: Aus ${z(x)} wird ${z(y)}. Grösser oder kleiner? Viel oder wenig?`,
     "Prüf jede Regel an allen Zahlenpaaren. Nur eine passt bei allen."];
 }
 

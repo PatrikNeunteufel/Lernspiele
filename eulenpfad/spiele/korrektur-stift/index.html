@@ -365,6 +365,13 @@ LS.spiel({
     zeigeStand();
     const knoepfe = [];
     let offen = null; // Wort, dessen Verbesserung gerade gewählt wird
+    /** Die Auswahl unter dem Text hat sich geändert: Höhe des Textfelds neu rechnen (BH3 a), das gewählte Wort sichtbar halten. */
+    const panelNeu = () => {
+      LS.lesetext(box);
+      // nach der zweiten Messung des Rahmens (setTimeout 0), die die Scrollstelle zurücksetzt
+      const wort = offen && offen.knopf;
+      if (wort && wort.scrollIntoView) setTimeout(() => wort.scrollIntoView({ block: "nearest" }), 0);
+    };
 
     // Fehlversuche (Entscheid G4 a, LERN_Session9): Ein Text ist eine Sammlung von Fehlerstellen, nicht eine
     // einzige Aufgabe. Drei falsche Verbesserungen an derselben Stelle zeigen nur diese Stelle; aufgelöst wird
@@ -387,6 +394,7 @@ LS.spiel({
     const aufdecken = () => {
       if (!ctx.vorbei()) return;
       panel.innerHTML = "";
+      panelNeu();
       a.woerter.forEach((w, i) => { if (w.fehler && !w.erledigt) zeigeStelle(i); });
     };
     /** Sind alle Stellen erledigt (verbessert oder gezeigt), endet die Aufgabe; mit gezeigten Stellen als aufgelöst. */
@@ -423,6 +431,7 @@ LS.spiel({
             knopf.classList.remove("gefunden");
             knopf.classList.add("repariert");
             panel.innerHTML = "";
+            panelNeu();
             verbessert++;
             zeigeStand();
             if (vielleichtFertig()) return;
@@ -437,6 +446,7 @@ LS.spiel({
           // Drei Versuche an dieser Stelle: der Stift zeigt sie, weiter geht es mit den übrigen.
           offen = null;
           panel.innerHTML = "";
+          panelNeu();
           zeigeStelle(a.woerter.indexOf(w));
           gezeigt++;
           zeigeStand();
@@ -445,6 +455,8 @@ LS.spiel({
         wahl.append(k);
       }
       panel.append(el("div", { class: "frage", text: `Wie schreibt man «${w.anzeige}» richtig?` }), wahl);
+      LS.kurztasten(wahl); // nur die Schreibweisen; die Wörter im Text bleiben zum Antippen
+      panelNeu();
     }
 
     a.woerter.forEach((w, i) => {
@@ -460,6 +472,8 @@ LS.spiel({
       box.append(knopf);
     });
     ctx.flaeche.append(box, stand, panel);
+    // Der Text scrollt im eigenen Feld (BH3 a); öffnet oder schliesst sich die Auswahl, rechnet panelNeu die Höhe neu.
+    LS.lesetext(box);
 
     if (!p.zaehlen) {
       const pruefen = el("button", { type: "button", class: "knopf", text: "✓ Prüfen" });

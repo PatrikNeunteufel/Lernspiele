@@ -32,6 +32,13 @@
   .gk .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); }
   .gk .wahl-knopf.gk-lang { font-size: clamp(15px, 3.5vw, 19px); text-align: left; }
   .gk .korb-karte b { font-size: clamp(20px, 4.6vw, 28px); }
+  /* Ganze Aufgabe im Bild (BH3 a): auf dem Handy niedrigere Antwortknöpfe (Bild kleiner) und engere Merkmalsliste */
+  @media (max-width: 560px) {
+    .gk .wahl-knopf { min-height: 56px; padding: 4px 6px; gap: 0; }
+    .gk .wahl-knopf .bild { font-size: 28px; }
+    .gk-merkmale { padding: 6px 12px; margin-bottom: 8px; line-height: 1.35; }
+    .gk-merkmale li { padding: 2px 0; }
+  }
 </style>
 </head>
 <body>
@@ -271,6 +278,12 @@ function textEl(t, { ohneLetzte = false, markiert = null } = {}) {
   return { box, zeilen };
 }
 
+/** Langer Text scrollt im eigenen Feld, Frage und Antworten bleiben im Bild (BH3 a); nach jedem Schritt neu gerechnet. */
+function lesetextNeu(ctx) {
+  const text = ctx.flaeche.querySelector(".sachtext");
+  if (text) LS.lesetext(text);
+}
+
 /** Schritt „Stelle antippen“: Die Spans werden Knöpfe (ausser 'ausser'); richtig ist der Index. */
 function zeilenTippen(ctx, zeilen, { richtig, ausser = null, hinweis, loesung, lob }) {
   let fertig = false;
@@ -337,6 +350,7 @@ function zeichneMaerchenFrage(ctx, a) {
       wahl.remove();
       LS.auswahl(ctx, { optionen: mische(["gut", "boese"]), richtig: a.figur[1], inhalt: w => GUT_BOESE[w], loesung, breite: 150,
         hinweis: "Was tut diese Figur im Text? Hilft sie den anderen, oder schadet sie ihnen?", lob: "Durchschaut!" });
+      lesetextNeu(ctx);
     },
   });
 }
@@ -364,7 +378,7 @@ function zeichneMerkmal(ctx, a) {
   const frage = el("div", { class: "frage", text: "Welche Textsorte ist das?" });
   const { box, zeilen } = textEl(t);
   const wahl = el("div", { class: "wahl" });
-  wahl.style.setProperty("--wahl-breite", a.optionen.length > 5 ? "150px" : "170px");
+  wahl.style.setProperty("--wahl-breite", a.optionen.length > 5 ? "150px" : "140px");
   ctx.flaeche.append(schritt, frage, box, wahl);
   wahlSchritt(ctx, wahl, {
     optionen: a.optionen, inhalt: gattungInhalt, richtig: t.gattung, hinweis: `Das passt nicht. ${mk.frage}`, loesung,
@@ -374,6 +388,7 @@ function zeichneMerkmal(ctx, a) {
       wahl.remove();
       if (reim) zeilen[t.partner].classList.add("gk-markiert");
       zeilenTippen(ctx, zeilen, { richtig: t.merkmal, ausser: reim ? t.partner : null, hinweis: `Das ist nicht die Stelle. ${mk.such}`, loesung, lob: "Merkmal gezeigt!" });
+      lesetextNeu(ctx);
     },
   });
 }
@@ -492,6 +507,7 @@ LS.spiel({
     if (ctx.stufe === "s4" || ctx.stufe === "s6") ctx.serie("art", a.art);
     ctx.kennung(`${a.art}|${a.t ? a.t.titel : a.gattung}|${a.figur ? a.figur[0] : a.merkmal || (a.merkmale || []).join(",")}`);
     ZEICHNE[a.art](ctx, a);
+    lesetextNeu(ctx);
   },
 });
 </script>

@@ -27,6 +27,21 @@
   .wippe .gleich-zeichen { font-size: 15px; font-weight: 900; fill: var(--gut); text-anchor: middle; }
   .wippe-legende { text-align: center; color: var(--text-leise); font-weight: 700; margin: 0 0 8px; font-size: 15px; }
   .wahl-knopf { font-size: clamp(18px, 4vw, 24px); font-weight: 900; }
+  /* Ganze Aufgabe im Bild (BH3 a): Die Wippe richtet sich nach der Bildhöhe (Seitenverhältnis 400 : 236 ≈ 1,7).
+     Breit und quer immer; hoch nur, wenn getippt wird (dann ist die Wippe nur zum Ansehen, ihre Plätze werden
+     nicht angetippt und dürfen kleiner werden). */
+  @media (min-width: 900px) and (orientation: landscape) {
+    .wippe { max-width: min(620px, max(400px, (100vh - 530px) * 1.7)); }
+    .frage { margin-bottom: 2px; }
+  }
+  @media not ((min-width: 900px) and (orientation: landscape)) {
+    div:has(> .tastatur) > .wippe { max-width: min(620px, max(260px, (100vh - 770px) * 1.7)); }
+  }
+  @media (max-width: 560px) {
+    div:has(> .tastatur) > .wippe { max-width: min(100%, max(290px, (100vh - 640px) * 1.7)); margin-bottom: 0; }
+    div:has(> .tastatur) > .frage { margin-bottom: 2px; }
+    div:has(> .tastatur) > .wippe-legende { margin-bottom: 2px; }
+  }
 </style>
 </head>
 <body>

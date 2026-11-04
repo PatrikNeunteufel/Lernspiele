@@ -10,6 +10,14 @@
   .wj-bild { text-align: center; font-size: clamp(56px, 13vw, 80px); line-height: 1.1; margin: 0 0 8px; }
   .wj-thermo { display: block; margin: 0 auto 12px; height: min(52vh, 380px); width: auto; max-width: 100%; }
   .wj-thermo text { font-family: inherit; font-weight: 800; fill: var(--text); }
+  /* Ganze Aufgabe im Bild (BH3 a): Thermometer nach der Bildhöhe, auf dem Handy zwei Körbe nebeneinander. */
+  @media (max-width: 560px) {
+    .wj-thermo { height: min(52vh, 380px, calc(100vh - 460px)); min-height: 260px; }
+    .frage { margin-bottom: 8px; }
+    .korb-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .korb-reihe .korb-knopf { min-height: 80px; }
+    .korb-karte { margin-bottom: 10px; }
+  }
   .wj-bericht { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 560px; margin: 0 auto 14px; }
   .wj-tag { background: #fff; border: 3px solid var(--rand); border-radius: 16px; padding: 6px 2px; text-align: center; }
   .wj-tag b { display: block; font-size: clamp(14px, 3.4vw, 18px); }

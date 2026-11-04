@@ -14,7 +14,14 @@
   .saeule { display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; border: none; background: none; padding: 4px; border-radius: 12px; font-family: inherit; }
   .saeule.waehlbar { cursor: pointer; }
   .saeule.gewaehlt-saeule { background: var(--hinweis-hell); }
-  .klotz { width: clamp(34px, 9vw, 52px); height: clamp(14px, 3.4vw, 20px); border-radius: 5px; background: var(--deko-3); }
+  /* Klotzhöhe nach der Bildhöhe (BH3 a): Die höchste Säule (--n Klötze) nimmt höchstens den Platz, den Frage,
+     Antwort und Tastatur übrig lassen (--mw-rest), jeder Klotz mindestens 5 px */
+  .saeulen { --n: 10; --mw-rest: 790px; --mw-fuge: 3px; }
+  .saeule { gap: var(--mw-fuge); }
+  .klotz { width: clamp(34px, 9vw, 52px); height: var(--klotz-h, clamp(5px, calc((100vh - var(--mw-rest)) / var(--n) - var(--mw-fuge)), clamp(14px, 3.4vw, 20px)));
+    border-radius: 5px; background: var(--deko-3); }
+  @media (max-width: 560px) { .saeulen { --mw-rest: 672px; --mw-fuge: 2px; } .klotz { border-radius: 3px; } }
+  @media (min-width: 900px) and (orientation: landscape) { .saeulen { --mw-rest: 540px; } }
   .saeule-name { font-weight: 800; color: var(--text-leise); margin-top: 4px; }
   .saeule-wert { font-weight: 900; font-size: 20px; font-variant-numeric: tabular-nums; }
 
@@ -178,6 +185,8 @@ const wertText = (a, x) => `${zahlText(x)} ${DATEN[a.thema].einheit[x === 1 ? 0 
 /** Säulen aus Klötzen (ein Klotz je Einheit, bei grossen Werten ohne Klötze, nur Zahl). */
 function saeulenEl(a, werte, waehlbar) {
   const box = el("div", { class: "saeulen" });
+  // Massstab: die höchste Säule der Aufgabe (beim Ausgleichen bleibt er, solange keine Säule höher wird)
+  box.style.setProperty("--n", Math.max(...a.werte, ...werte));
   const namen = namenFuer(a);
   werte.forEach((x, i) => {
     const s = el(waehlbar ? "button" : "div", { class: "saeule" + (waehlbar ? " waehlbar" : ""), "aria-label": `${namen[i]}: ${x}` });
@@ -188,7 +197,23 @@ function saeulenEl(a, werte, waehlbar) {
     s.dataset.i = i;
     box.append(s);
   });
+  klotzPassend(box);
   return box;
+}
+
+/**
+ * Läuft die Seite nach dem Einhängen noch unten über (lange Frage, BH3 a), werden die Klötze so viel niedriger,
+ * dass die höchste Säule den Überlauf aufnimmt — nie unter 5 px. Bei jeder neu gezeichneten Säulenreihe neu.
+ */
+function klotzPassend(box) {
+  setTimeout(() => {
+    const k = box.querySelector(".klotz");
+    if (!box.isConnected || !k) return;
+    const ueber = document.scrollingElement.scrollHeight - innerHeight;
+    if (ueber <= 0) return;
+    const n = Number(box.style.getPropertyValue("--n")) || 1;
+    box.style.setProperty("--klotz-h", Math.max(5, Math.floor(k.getBoundingClientRect().height - ueber / n) - 1) + "px");
+  }, 0);
 }
 
 function tabelleEl(a, werte, luecke = -1) {

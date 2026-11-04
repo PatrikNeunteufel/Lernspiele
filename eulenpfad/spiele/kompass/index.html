@@ -36,6 +36,37 @@
   .nordpfeil { width: 64px; flex: none; }
   .nordpfeil .pfeil { fill: var(--text); }
   .nordpfeil text { font-family: var(--schrift); font-weight: 900; font-size: 22px; fill: var(--text); }
+  /* Ganze Aufgabe im Bild (BH3 a): Frage und Antworten hoch unter dem Plan, quer daneben; Plan und Rose nach der Bildhöhe. */
+  .kompass-seite { flex: 1 1 100%; min-width: 0; }
+  .kompass-seite .frage { margin-bottom: 10px; }
+  @media (max-width: 560px), (max-height: 820px) {
+    .karten-zeile { margin-bottom: 6px; }
+    .frage { margin-bottom: 8px; }
+    .achtung { margin-bottom: 4px; }
+    .rose { width: min(300px, 80vw, calc(100vh - 470px)); margin-bottom: 8px; }
+  }
+  @media (max-width: 560px) { /* Nordpfeil oder kleine Rose links neben der Frage, unter dem Plan */
+    .karten-zeile { justify-content: flex-start; align-items: flex-start; }
+    .kompass-seite { flex: 1 1 200px; }
+    .nur-sehen { align-items: center; }
+    .nur-sehen .plan { width: min(calc(100% - 74px), calc(100vh - 560px)); }
+    .nur-sehen:has(.lang) .plan { width: min(calc(100% - 74px), calc(100vh - 595px)); }
+    .nur-sehen .kompass-seite, .kompass-seite.lang { flex-basis: 100%; }
+    .kompass-seite .wahl, .wahl.kompass-wahl { gap: 8px; }
+    .kompass-seite:not(.lang) .wahl, .wahl.kompass-wahl { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); }
+    .wahl.kompass-wahl .wahl-knopf { min-height: 54px; }
+    .kompass-seite.lang .wahl { gap: 6px; }
+    .kompass-seite.lang .wahl-knopf { font-size: 17px; line-height: 1.2; min-height: 48px; padding: 5px 10px; }
+    .kompass-seite .wahl-knopf { min-height: 54px; }
+  }
+  @media (min-width: 561px) and (orientation: portrait) { /* Tablet hoch: Plan nach der Bildhöhe */
+    .plan { width: min(420px, 100%, calc(100vh - 640px)); }
+  }
+  @media (min-width: 900px) and (orientation: landscape) {
+    .karten-zeile { flex-wrap: nowrap; align-items: center; gap: 16px; }
+    .karten-zeile .plan { width: min(420px, calc(100vh - 290px)); flex: none; }
+    .kompass-seite { flex: 0 1 400px; }
+  }
 </style>
 </head>
 <body>
@@ -435,6 +466,7 @@ LS.spiel({
       const d = R[a.ziel];
       const loesung = `${d.name} ist ${d.lage}.`;
       ctx.loesung?.(loesung);
+      ctx.schritte(1); // ein Tipp auf den richtigen Arm
       let fertig = false;
       f.append(el("div", { class: "frage", html: `Tipp auf <b>${d.name}</b>!` }));
       const svg = rose(a.dirs, {
@@ -463,7 +495,7 @@ LS.spiel({
           : a.ziel % 2 ? "Zwei Buchstaben: der erste steht für Norden oder Süden, der zweite für Osten oder Westen."
           : "Jede Himmelsrichtung beginnt mit ihrem Buchstaben.",
         loesung: a.art === "lesen" ? `Der Pfeil zeigt nach ${d.name}.` : `${d.k} steht für ${d.name}.`,
-      });
+      }).classList.add("kompass-wahl");
       return;
     }
     if (a.art === "drehen") {
@@ -474,7 +506,7 @@ LS.spiel({
         optionen: a.optionen, richtig: a.loesung, breite: 130,
         hinweis: "Nach rechts drehen heisst im Uhrzeigersinn: N, O, S, W. Eine Vierteldrehung geht eine Richtung weiter, eine halbe Drehung zwei.",
         loesung: `Von ${start.name} aus: ${a.drehungen.map(d => DREHUNGEN[d].text).join(", dann ")} — jetzt schaust du nach ${a.loesung}.`,
-      });
+      }).classList.add("kompass-wahl");
       return;
     }
 
@@ -489,25 +521,28 @@ LS.spiel({
     const neben = p.rose ? rose(HAUPT, { buchstaben: true, klein: true }) : nordpfeil(a.k);
     if (gedreht) f.append(el("div", { class: "achtung", text: "🔄 Die Karte ist gedreht — schau auf den Nordpfeil!" }));
 
+    // Frage und Antworten stehen quer neben dem Plan, hoch darunter (BH3 a).
+    const seite = el("div", { class: a.art === "beschreiben" ? "kompass-seite lang" : "kompass-seite" });
     if (a.art === "richtung" || a.art === "beschreiben") {
-      f.append(el("div", { class: "karten-zeile" }, planZeichnen(a, null), neben));
+      // Der Plan wird hier nur angeschaut, nicht angetippt: Er darf auf dem Handy kleiner sein.
+      f.append(el("div", { class: "karten-zeile nur-sehen" }, planZeichnen(a, null), neben, seite));
       const startFeld = f.querySelector(".plan").felder[A.c + "," + A.r];
       startFeld.classList.add("start");
       if (a.art === "richtung") {
-        f.append(el("div", { class: "frage", html: `In welcher Richtung liegt ${bNom} ${bBild} von ${aDat} ${aBild} aus?` }));
-        LS.auswahl(ctx, {
+        seite.append(el("div", { class: "frage", html: `In welcher Richtung liegt ${bNom} ${bBild} von ${aDat} ${aBild} aus?` }));
+        seite.append(LS.auswahl(ctx, {
           optionen: a.optionen, richtig: a.loesung, breite: a.dirs.length > 4 ? 120 : 130,
           hinweis: gedreht ? kartenHinweis
             : `Stell dich in Gedanken zu ${aDat}: Liegt das Ziel oben, rechts, unten oder links?${a.dirs.length > 4 ? " Liegt es schräg, nimm zwei Richtungen zusammen." : ""} ${merkspruch}`,
           loesung: `${gross(bNom)} liegt von ${aDat} aus im ${a.loesung}.`,
-        });
+        }));
       } else {
-        f.append(el("div", { class: "frage", html: `Wie kommst du von ${aDat} ${aBild} zu ${bDat} ${bBild}?` }));
-        LS.auswahl(ctx, {
+        seite.append(el("div", { class: "frage", html: `Wie kommst du von ${aDat} ${aBild} zu ${bDat} ${bBild}?` }));
+        seite.append(LS.auswahl(ctx, {
           optionen: a.optionen, richtig: a.loesung, breite: 260,
           hinweis: gedreht ? kartenHinweis : "Zähle vom Start aus: Wie viele Felder nach rechts oder links? Wie viele nach oben oder unten? Osten ist rechts, Norden oben.",
           loesung: `${a.loesung}.`,
-        });
+        }));
       }
       return;
     }
@@ -517,6 +552,7 @@ LS.spiel({
     const loesung = a.art === "weg" ? `${schritteText(a.schritte)}: Du kommst bei ${bDat} ${bBild} an.`
       : `Direkt ${R[a.richtung].adj} neben ${aDat} liegt ${bNom} ${bBild}.`;
     ctx.loesung?.(loesung);
+    ctx.schritte(1); // ein Tipp auf das Zielfeld
     let fertig = false;
     const zeigeLoesung = () => {
       for (const [c, r] of spur.slice(1, -1)) plan.felder[c + "," + r].classList.add("spur");
@@ -532,8 +568,8 @@ LS.spiel({
       if (ctx.vorbei()) { fertig = true; zeigeLoesung(); }
     });
     plan.felder[A.c + "," + A.r].classList.add("start");
-    f.append(el("div", { class: "karten-zeile" }, plan, neben));
-    f.append(el("div", { class: "frage", html: a.art === "weg"
+    f.append(el("div", { class: "karten-zeile" }, plan, neben, seite));
+    seite.append(el("div", { class: "frage", html: a.art === "weg"
       ? `Starte bei ${aDat} ${aBild}. Geh <b>${schritteText(a.schritte)}</b>. Wo kommst du an?`
       : `Was liegt direkt <b>${R[a.richtung].adj}</b> neben ${aDat} ${aBild}?` }));
     if (ctx.nr === 0) ctx.sag("Tipp auf das Feld, wo du ankommst. Der blaue Rahmen zeigt den Start.");

@@ -18,6 +18,11 @@
   .uhr .mitte { fill: var(--text); }
 
   .optionen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; max-width: 700px; margin: 0 auto; }
+  /* Ganze Aufgabe im Bild (BH3 a): auf dem Handy immer zwei Antworten nebeneinander */
+  @media (max-width: 560px) {
+    .optionen { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .uhr-gross { width: min(260px, 62vw, max(180px, 100vh - 630px)); margin-bottom: 10px; } /* Uhr nach der Bildhöhe */
+  }
   .option {
     border: none; border-radius: 16px; min-height: 64px; padding: 8px;
     font-family: inherit; font-size: clamp(20px, 4vw, 26px); font-weight: 900;

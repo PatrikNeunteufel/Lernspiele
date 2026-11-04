@@ -28,6 +28,27 @@
   .wt-grafik .wt-schild { font: 800 13px var(--schrift); fill: #fff; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: 3px; pointer-events: none; }
   .wt-beschreibung { max-width: 640px; margin: 0 auto 12px; padding: 10px 16px; border-radius: 16px; background: #eef6ff; border: 3px dashed #9cc7f0; font-size: clamp(16px, 3.8vw, 20px); font-weight: 700; text-align: center; }
   .wahl-knopf { font-size: clamp(17px, 4vw, 22px); font-weight: 800; }
+  /* Ganze Aufgabe im Bild (BH3 a): Grafik nach der Bildhöhe; quer stehen Frage und Antworten rechts daneben. */
+  @media (max-width: 560px), (max-height: 820px) {
+    .frage { margin-bottom: 8px; }
+    .wt-grafik { margin-bottom: 8px; }
+    .wt-rechts .wahl { gap: 8px; }
+    .wt-rechts .wahl-knopf { min-height: 54px; }
+  }
+  @media (max-width: 560px) {
+    .wt-zeile .wt-grafik { width: min(100%, calc((100vh - 500px) * 400 / 270)); }
+    .wt-rechts .ablage { min-height: 50px; margin-bottom: 8px; padding: 4px; }
+    .wt-rechts .wahl-knopf { flex-direction: row; gap: 6px; }
+    .wt-rechts .wahl-knopf .bild { font-size: 30px; }
+  }
+  @media (min-width: 561px) and (orientation: portrait) { /* Tablet hoch: Grafik nach der Bildhöhe */
+    .wt-zeile .wt-grafik { width: min(100%, 560px, calc((100vh - 700px) * 400 / 270)); }
+  }
+  @media (min-width: 900px) and (orientation: landscape) {
+    .wt-zeile { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: center; }
+    .wt-zeile .wt-grafik { margin: 0 auto; width: min(100%, calc((100vh - 230px) * 400 / 270)); }
+    .wt-zeile .wt-grafik[viewBox="0 0 300 230"] { width: min(100%, 420px, calc((100vh - 230px) * 300 / 230)); }
+  }
 </style>
 </head>
 <body>
@@ -530,6 +551,13 @@ LS.spiel({
     if (ARTEN_JE_STUFE[ctx.stufe] > 1) ctx.serie("art", a.art);
     ctx.tipp(tippsFuer(a));
     ZEIGE[a.art](ctx, a);
+    // Grafik links, Frage und Antworten rechts daneben, wo Platz ist (BH3 a)
+    const grafik = ctx.flaeche.querySelector(":scope > .wt-grafik");
+    if (grafik) {
+      const rechts = el("div", { class: "wt-rechts" });
+      for (const k of [...ctx.flaeche.children]) if (k !== grafik) rechts.append(k);
+      ctx.flaeche.append(el("div", { class: "wt-zeile" }, grafik, rechts));
+    }
   },
 });
 </script>

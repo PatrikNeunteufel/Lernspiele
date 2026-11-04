@@ -104,6 +104,12 @@ const LS = (() => {
       werte: { nie: "nie", ab4: "ab der 4. Klasse", ab5: "ab der 5. Klasse", alle: "alle Kinder" },
       erklaerung: "Darf ein Kind im Tab Spiele selbst wählen, wie sortiert wird (Thema, passt zu dir, Alphabet, Klasse, auf- oder absteigend)? Je Kind lässt es sich in Konten ein- oder ausschalten. Ab der 4. Klasse, weil die Wahl gelesen werden muss.",
     },
+    // Entscheid KR1 a (LERN_Session13): ein Kind fängt auch ohne Aufsicht an
+    selbstAnlegen: {
+      titel: "Kinder legen sich selbst an", standard: "ja",
+      werte: { ja: "ja", nein: "nein, nur die Aufsicht" },
+      erklaerung: "Auf der Anmeldung steht „🐣 Ich bin neu“: Ein Kind gibt seinen Vornamen und die Klasse ein und spielt gleich los. Ausschalten, wenn sonst doppelte oder erfundene Namen die Übersicht stören (etwa in einer Klasse); dann legt nur die Aufsicht Kinder an (Verwaltung → Konten).",
+    },
   };
 
   /** Id des Spiels dieser Seite (spiele/<id>/index.html), auch bevor eine Runde läuft; sonst null. */
@@ -172,6 +178,7 @@ const LS = (() => {
   //   rolle: "kind" | "aufsicht" (Entscheid L2 a) — die Aufsicht meldet sich mit PIN an, verwaltet
   //     Konten und Freigaben und spielt als Tester: Runden mit test: true, im Spiel Testhilfen
   //   pin: { salz, hash } nur bei der Aufsicht (SHA-256, nie die PIN selbst)
+  //   wiederherstellung: { code: { salz, hash }, frage, antwort: { salz, hash } } nur bei der Aufsicht (PIN1 a)
   //   favoriten: [<spiel-id>], endlosAn: [<spiel-id>] (Karte startet Endlos-Runden), ansicht: "kacheln" | "kompakt",
   //   zu: [<Gruppen-Id>] (zugeklappt)
   //   mix: zuletzt gewählte Einstellungen des Zufallsmix (mix/mix.js) oder null
@@ -377,10 +384,65 @@ const LS = (() => {
     speichereProfil(name, { rolle: "aufsicht", pin: { salz, hash: await pinHash(pin, salz) } });
     return true;
   }
+  /** Stimmt die PIN dieser Aufsicht? Meldet nicht an (Bestätigung einer neuen Aufsicht, KR2 a). */
+  async function pinStimmt(name, pin) {
+    const p = profil(name);
+    return p.rolle === "aufsicht" && !!p.pin && (await pinHash(pin, p.pin.salz)) === p.pin.hash;
+  }
+  // ---------- PIN vergessen (Entscheide PIN1 a, PIN1-R a, LERN_Session13) ----------
+  // Stufen: 1 eine zweite Aufsicht setzt die PIN in der Verwaltung · 2 Wiederherstellungscode (einmal angezeigt) ·
+  // 3 Sicherheitsfrage (beim Anlegen selbst gewählt) · 4 Zurücksetzen mit Frist (3 Tage, auf der Anmeldung sichtbar,
+  // abbrechbar mit PIN oder Code). Profil-Feld wiederherstellung: { code: { salz, hash }, frage, antwort: { salz, hash } }
+  // — wie die PIN nur Prüfwerte, nie Code oder Antwort selbst; geht nie in Sicherungen oder den Abgleich (ohneGeheimnis).
+  const CODE_ZEICHEN = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // ohne 0/O und 1/I, die man verwechselt
+  const ZURUECKSETZEN_TAGE = 3;
+  const salzNeu = () => [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(16).padStart(2, "0")).join("");
+  const codeRein = c => String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const antwortRein = a => String(a || "").trim().toLowerCase().replace(/ß/g, "ss").replace(/\s+/g, " ");
+  /** Ein neuer Wiederherstellungscode, 12 Zeichen in drei Gruppen („K7QM-2XRA-9TPL“). */
+  function neuerCode() {
+    const z = [...crypto.getRandomValues(new Uint8Array(12))].map(b => CODE_ZEICHEN[b % CODE_ZEICHEN.length]).join("");
+    return `${z.slice(0, 4)}-${z.slice(4, 8)}-${z.slice(8)}`;
+  }
+  /** Code und (falls angegeben) Sicherheitsfrage einer Aufsicht festlegen; ohne frage bleibt die bisherige. */
+  async function setzeWiederherstellung(name, { code, frage, antwort } = {}) {
+    const alt = profil(name).wiederherstellung || {};
+    const neu = { ...alt };
+    if (code) { const salz = salzNeu(); neu.code = { salz, hash: await pinHash(codeRein(code), salz) }; }
+    if (frage && antwort) { const salz = salzNeu(); neu.frage = frage.trim().slice(0, 120); neu.antwort = { salz, hash: await pinHash(antwortRein(antwort), salz) }; }
+    speichereProfil(name, { wiederherstellung: neu });
+  }
+  const wiederherstellung = name => profil(name).wiederherstellung || {};
+  async function codeStimmt(name, code) {
+    const w = wiederherstellung(name).code;
+    return !!w && (await pinHash(codeRein(code), w.salz)) === w.hash;
+  }
+  async function antwortStimmt(name, antwort) {
+    const w = wiederherstellung(name).antwort;
+    return !!w && !!antwortRein(antwort) && (await pinHash(antwortRein(antwort), w.salz)) === w.hash;
+  }
+  /** Profil ohne PIN und Wiederherstellung — für Sichern, Abgleich und Einlesen. */
+  const ohneGeheimnis = ({ pin, wiederherstellung: w, ...rest }) => rest;
+  /** Frist zum Zurücksetzen (Stufe 4), je Gerät: lernspiele:zuruecksetzen = { angefordert, ab } (ISO-Zeiten). */
+  const zuruecksetzenStand = () => lies("zuruecksetzen", null);
+  function zuruecksetzenAnfordern() {
+    const jetzt = new Date();
+    const ab = new Date(jetzt.getTime() + ZURUECKSETZEN_TAGE * 24 * 3600 * 1000);
+    schreibe("zuruecksetzen", { angefordert: jetzt.toISOString(), ab: ab.toISOString() });
+  }
+  const zuruecksetzenAbbrechen = () => { try { localStorage.removeItem("lernspiele:zuruecksetzen"); } catch { /* egal */ } };
+  /** Ist die Frist abgelaufen, verlieren alle Aufsichten dieses Geräts Rolle, PIN und Wiederherstellung; true dann. */
+  function zuruecksetzenFaellig() {
+    const z = zuruecksetzenStand();
+    if (!z || new Date(z.ab) > new Date()) return false;
+    for (const n of aufsichtListe()) speichereProfil(n, { rolle: "kind", pin: null, wiederherstellung: null });
+    zuruecksetzenAbbrechen();
+    return true;
+  }
+
   /** Aufsicht mit PIN anmelden; true bei Erfolg. Ohne gesetzte PIN geht es nicht. */
   async function meldeAufsichtAn(name, pin) {
-    const p = profil(name);
-    if (p.rolle !== "aufsicht" || !p.pin || (await pinHash(pin, p.pin.salz)) !== p.pin.hash) return false;
+    if (!(await pinStimmt(name, pin))) return false;
     schreibe("spieler", name);
     setzeSitzung(name);
     return true;
@@ -697,7 +759,7 @@ const LS = (() => {
     let geaenderteProfile = 0;
     for (const [n, fp] of Object.entries(daten.profile || {})) {
       if (!fp) continue;
-      const { pin, ...rein } = fp;
+      const rein = ohneGeheimnis(fp); // PIN und Wiederherstellung bleiben auf dem Gerät
       if (g.spieler[n] && profilStand(rein) <= g.spieler[n]) continue;
       if (!(n in alle)) { alle[n] = { ...LEERES_PROFIL, ...rein }; neueKinder.push(n); continue; }
       const da = alle[n];
@@ -729,7 +791,7 @@ const LS = (() => {
 
   /** Alles, was ein Gerät für den Abgleich weitergibt: wie Sichern, aber vollständig und ohne PIN. */
   function abgleichDaten() {
-    const ohnePin = Object.fromEntries(Object.entries(profile()).map(([n, { pin, ...rest }]) => [n, rest]));
+    const ohnePin = Object.fromEntries(Object.entries(profile()).map(([n, p]) => [n, ohneGeheimnis(p)]));
     return { version: 2, gesichert: new Date().toISOString(), profile: ohnePin, protokoll: protokoll(), rekorde: rekorde(),
       geloescht: geloescht(), freigabe: lies("freigabe", null), freigabeStand: lies("freigabeStand", null), meldungen: meldungen() };
   }
@@ -1424,19 +1486,47 @@ const LS = (() => {
   <rect x="34" y="0" width="16" height="8" rx="2" fill="#2d3047"/>
 </svg>`;
 
-  function euleZeile() {
+  /**
+   * Eule mit Sprechblase. kuerzen (in der Runde, Entscheid BH2 a, LERN_Session13): Die Blase zeigt höchstens zwei
+   * Zeilen; ist der Text länger, steht „…“ und ▾ — Antippen zeigt alles, nochmals Antippen klappt zu. Ein Hinweis nach
+   * einem Fehler (art „hinweis“) steht immer ganz. 🗣️ liest immer den ganzen Text. Der Text der Blase bleibt dabei
+   * gleich (nur CSS), damit Vorlesen und Prüfung ihn ganz sehen.
+   */
+  function euleZeile({ kuerzen = false } = {}) {
     const zeile = el("div", { class: "eule-zeile" });
     zeile.innerHTML = EULE_SVG;
     const blase = el("div", { class: "blase", "aria-live": "polite" });
     zeile.append(blase);
     const eule = zeile.querySelector(".eule");
+    const pruefeLaenge = () => {
+      const t = blase.firstElementChild; // span.blase-text: gekürzt wird nur der Text, die Blase behält Zipfel und Rand
+      const zu = blase.classList.contains("kurz") && !!t && t.scrollHeight > t.clientHeight + 2;
+      blase.classList.toggle("gekuerzt", zu);
+      if (zu || blase.classList.contains("offen")) blase.setAttribute("aria-expanded", String(blase.classList.contains("offen")));
+      else blase.removeAttribute("aria-expanded");
+    };
+    if (kuerzen) {
+      blase.addEventListener("click", () => {
+        pruefeLaenge(); // frisch messen: die Breite kann sich seit dem Sprechen geändert haben
+        if (!blase.classList.contains("gekuerzt") && !blase.classList.contains("offen")) return;
+        const auf = !blase.classList.contains("offen");
+        blase.classList.toggle("offen", auf);
+        blase.classList.toggle("kurz", !auf);
+        pruefeLaenge();
+      });
+      addEventListener("resize", pruefeLaenge);
+    }
     const api = {
       element: zeile,
       blase,
       beiSag: null, // Vorlesen: hört mit, was die Eule sagt
       sag(text, art = "") {
-        blase.className = "blase" + (art ? " " + art : "");
-        blase.textContent = text;
+        blase.className = "blase" + (art ? " " + art : "") + (kuerzen && art !== "hinweis" ? " kurz" : "");
+        if (kuerzen) {
+          blase.replaceChildren(el("span", { class: "blase-text", text }));
+          pruefeLaenge(); // gleich, wenn die Blase schon im Bild steht; sonst nach dem Einhängen nochmals
+          setTimeout(pruefeLaenge, 0);
+        } else blase.textContent = text;
         eule.classList.remove("huepft");
         void eule.offsetWidth; // Animation neu starten
         eule.classList.add("huepft");
@@ -1563,6 +1653,142 @@ const LS = (() => {
     return (s.startsWith("0.") ? s.length - 1 : s.length) + 1;
   };
 
+  // ---------- Lesetext (Entscheid BH3 a, LERN_Session13) ----------
+  // Bei Lesespielen ist der Text der Stoff und darf lang sein: Er scrollt in seinem eigenen Feld, Auftrag, Frage und
+  // Antworten bleiben im Bild. Die Höhe rechnet der Rahmen aus dem Platz, den der Rest der Seite übrig lässt
+  // (mindestens LESETEXT_MIN px); bei jeder Grössenänderung neu.
+  const LESETEXT_MIN = 120;
+  const lesetexte = new Set();
+  function lesetextHoehe(feld) {
+    if (!feld.isConnected) { lesetexte.delete(feld); return; }
+    const stelle = feld.scrollTop; // beim Messen spränge das Feld sonst an den Anfang (Hinweis Paket B, LERN_Session13)
+    feld.style.maxHeight = "none";
+    const seite = document.scrollingElement;
+    const ueber = seite.scrollHeight - innerHeight; // so viel ist die Seite zu hoch
+    const hoehe = feld.getBoundingClientRect().height;
+    if (ueber > 0) feld.style.maxHeight = Math.max(LESETEXT_MIN, Math.floor(hoehe - ueber - 8)) + "px";
+    feld.classList.toggle("scrollt", feld.scrollHeight > feld.clientHeight + 2);
+    feld.scrollTop = stelle;
+  }
+  /** Macht feld zum Lesetext; das Spiel ruft es, wenn die Aufgabe ganz steht. */
+  function lesetext(feld) {
+    feld.classList.add("lesetext");
+    lesetexte.add(feld);
+    lesetextHoehe(feld);
+    setTimeout(() => lesetextHoehe(feld), 0);
+  }
+  addEventListener("resize", () => lesetexte.forEach(lesetextHoehe));
+
+  // ---------- Kurztasten für Antwortknöpfe (Entscheid TK1 a mit Zusatz Patrik, LERN_Session13) ----------
+  // Wer mit einer echten Tastatur spielt, wählt Antworten auch mit Tasten. Zwei Arten von Tasten:
+  //  • nach dem Ort (KeyboardEvent.code), ausgelegt für die Schweizer Tastatur (QWERTZ): Gleiche Zeichen liegen in
+  //    jedem Spiel auf denselben, benachbarten Tasten — < = > auf Y X C, + − · : auf V B N M. Alle anderen Antworten
+  //    in Bildschirm-Reihenfolge auf der Grundreihe A S D F G H J K L, danach Q W E R T Z U I O P; nie Ziffern,
+  //    damit die Taste 5 nie die Antwort „5“ meint.
+  //  • nach dem Zeichen (KeyboardEvent.key): Ist jede Antwort ein einzelner Buchstabe oder eine einzelne Ziffer, ist
+  //    sie selbst die Taste (Ziffern nur, wenn keine Zifferntastatur offen ist); die Stellen E Z H T M ebenso, ZT und
+  //    HT mit ⇧Z und ⇧H. Die Zeichen < = > + - * / : wirken immer auch so, wie man sie tippt.
+  // Beschriftet wird nach der erkannten Belegung (navigator.keyboard.getLayoutMap, nur Chrome und Edge); ohne gilt
+  // die Schweizer. Die Marke am Knopf (data-marke, gezeichnet in stil.css) erscheint am Computer mit Maus oder nach
+  // dem ersten Tastendruck (gemerkt je Gerät). Spiele mit eigener Tastenbedienung schalten mit LS.kurztastenAus() ab.
+  const KT_REIHE = ["KeyA", "KeyS", "KeyD", "KeyF", "KeyG", "KeyH", "KeyJ", "KeyK", "KeyL",
+    "KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY", "KeyU", "KeyI", "KeyO", "KeyP"];
+  const KT_FEST = {
+    "<": { code: "KeyZ", zeichen: ["<"] }, "=": { code: "KeyX", zeichen: ["="] }, ">": { code: "KeyC", zeichen: [">"] },
+    "+": { code: "KeyV", zeichen: ["+"] }, "−": { code: "KeyB", zeichen: ["-", "−"] }, "-": { code: "KeyB", zeichen: ["-", "−"] },
+    "·": { code: "KeyN", zeichen: ["*", "·", "×"] }, "×": { code: "KeyN", zeichen: ["*", "·", "×"] },
+    ":": { code: "KeyM", zeichen: [":", "/", "÷"] }, "÷": { code: "KeyM", zeichen: [":", "/", "÷"] },
+    // Satzzeichen: unten rechts, wo , . - auf der Schweizer Tastatur liegen; getippt wirken sie auch
+    ",": { code: "Comma", zeichen: [","] }, ".": { code: "Period", zeichen: ["."] }, "?": { code: "Slash", zeichen: ["?"] },
+    "!": { code: "KeyN", zeichen: ["!"] }, "„": { code: "KeyB", zeichen: ["„"] }, "“": { code: "KeyV", zeichen: ["“", "\""] },
+    "⌫": { code: "Backspace", zeichen: [] },
+  };
+  const KT_STELLEN = { E: ["e"], Z: ["z"], H: ["h"], T: ["t"], M: ["m"], ZT: ["z", true], HT: ["h", true] };
+  // Schweizer Belegung, wo sie vom Namen des Codes abweicht
+  const KT_CH = { KeyZ: "Y", KeyY: "Z", Comma: ",", Period: ".", Slash: "-", Backspace: "⌫" };
+  let ktBelegung = null; // Map code → Zeichen der erkannten Belegung
+  let ktAus = false;
+  const ktGruppen = [];
+  const ktName = code => (ktBelegung?.get(code) || KT_CH[code] || code.replace(/^Key/, "")).toUpperCase();
+  try {
+    navigator.keyboard?.getLayoutMap?.().then(m => { if (m && m.size) { ktBelegung = m; ktGruppen.forEach(ktBeschriften); } }).catch(() => {});
+  } catch { /* ohne Erkennung: Schweizer Belegung */ }
+
+  /** Zeichen eines Knopfs: data-taste des Spiels, sonst der erste Text (ohne Zusatz wie „kleiner“). */
+  const ktZeichen = k => (k.dataset.taste ?? (k.firstChild?.textContent || k.textContent)).trim();
+
+  function ktBeschriften(g) {
+    for (const a of g.tasten) {
+      // Steht der Buchstabe oder die Ziffer sichtbar auf dem Knopf, ist er seine Taste: keine zweite Marke daneben.
+      // Nennt nur data-taste das Zeichen (etwa N für „Nomen“), bleibt die Marke.
+      const sichtbar = (a.knopf.firstChild?.textContent || a.knopf.textContent).trim().toLowerCase();
+      if (a.key && !a.stelle && sichtbar === a.key) delete a.knopf.dataset.marke;
+      else a.knopf.dataset.marke = a.code ? ktName(a.code) : a.shift ? "⇧" + a.key.toUpperCase() : a.key.toUpperCase();
+      a.knopf.setAttribute("aria-keyshortcuts", a.code ? ktName(a.code) : (a.shift ? "Shift+" : "") + a.key.toUpperCase());
+    }
+  }
+
+  /**
+   * Gibt den Knöpfen in box (oder der Liste knoepfe) Kurztasten. Die Bausteine rufen es selbst; Spiele mit eigenen
+   * Antwortknöpfen rufen es, wenn die Knöpfe stehen. data-taste am Knopf nennt sein Zeichen, wo der Text es nicht ist.
+   */
+  function kurztasten(box, knoepfe, { reihe = false } = {}) {
+    const liste = [...(knoepfe || box.querySelectorAll("button"))];
+    if (!liste.length) return;
+    const zeichen = liste.map(ktZeichen);
+    const verschieden = new Set(zeichen.map(z => z.toLowerCase())).size === zeichen.length;
+    let tasten;
+    // reihe: das Spiel verlangt die Grundreihe (gleiche Zeichen meinen verschiedene Plätze, Stellen-Detektiv)
+    if (reihe) tasten = liste.slice(0, KT_REIHE.length).map((knopf, i) => ({ knopf, code: KT_REIHE[i] }));
+    else if (verschieden && zeichen.every(z => KT_FEST[z])) tasten = liste.map((knopf, i) => ({ knopf, code: KT_FEST[zeichen[i]].code, zeichen: KT_FEST[zeichen[i]].zeichen }));
+    else if (verschieden && zeichen.every(z => KT_STELLEN[z])) tasten = liste.map((knopf, i) => ({ knopf, key: KT_STELLEN[zeichen[i]][0], shift: !!KT_STELLEN[zeichen[i]][1], stelle: true }));
+    // Einzelne Buchstaben oder Ziffern sind selbst die Taste, auch doppelte (Buchstabier-Kacheln „apple“): dann wählt
+    // die Taste den ersten noch freien Knopf mit diesem Zeichen (ktFinde).
+    else if (zeichen.every(z => /^[\p{L}\d]$/u.test(z))) tasten = liste.map((knopf, i) => ({ knopf, key: zeichen[i].toLowerCase(), ziffer: /\d/.test(zeichen[i]) }));
+    else tasten = liste.slice(0, KT_REIHE.length).map((knopf, i) => ({ knopf, code: KT_REIHE[i] }));
+    const g = { box, tasten };
+    // Baut ein Spiel die Knöpfe in derselben Box neu auf, ersetzt die neue Gruppe die alte.
+    for (let i = ktGruppen.length - 1; i >= 0; i--) if (ktGruppen[i].box === box) ktGruppen.splice(i, 1);
+    ktGruppen.push(g);
+    ktBeschriften(g);
+  }
+
+  const ktSichtbar = k => k.isConnected && !k.disabled && k.offsetParent !== null && getComputedStyle(k).visibility !== "hidden";
+
+  /** Knopf zur Taste: die jüngste sichtbare Gruppe zuerst. */
+  function ktFinde(e) {
+    for (let i = ktGruppen.length - 1; i >= 0; i--) {
+      const g = ktGruppen[i];
+      if (!g.box.isConnected) { ktGruppen.splice(i, 1); continue; }
+      for (const a of g.tasten) {
+        // schon gelegt oder gewählt (Kachel, Reihe): bei doppelten Zeichen kommt der nächste freie dran
+        if (!ktSichtbar(a.knopf) || a.knopf.classList.contains("gewaehlt") || a.knopf.getAttribute("aria-disabled") === "true") continue;
+        if (a.code ? e.code === a.code || a.zeichen?.includes(e.key)
+          : e.key.toLowerCase() === a.key && (!a.stelle || a.shift === e.shiftKey) && !(a.ziffer && aktiveTastatur?.element.isConnected)) return a.knopf;
+      }
+    }
+    return null;
+  }
+
+  // Marken zeigen: am Computer mit Maus gleich, sonst ab dem ersten echten Tastendruck (gemerkt auf dem Gerät).
+  function ktMarkenZeigen(merken) {
+    document.documentElement.classList.add("mit-tasten");
+    if (merken) try { localStorage.setItem("lernspiele:tasten", "1"); } catch { /* ohne Speicher: nur diese Seite */ }
+  }
+  try {
+    if (matchMedia("(hover: hover) and (pointer: fine)").matches || localStorage.getItem("lernspiele:tasten")) ktMarkenZeigen(false);
+  } catch { /* kein matchMedia/Speicher (Testumgebung) */ }
+
+  document.addEventListener("keydown", (e) => {
+    if (ktAus || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target?.closest?.("input, textarea, select, [contenteditable]")) return;
+    if (e.isTrusted && !document.documentElement.classList.contains("mit-tasten") && e.key.length === 1) ktMarkenZeigen(true);
+    const k = ktFinde(e);
+    if (!k) return;
+    e.preventDefault();
+    k.click();
+  });
+
   // ---------- Bereit machen: ▶ Los, 3-2-1 (Wunsch Patrik, LERN_Session8) ----------
 
   /**
@@ -1674,7 +1900,7 @@ const LS = (() => {
 
   function auswahl(ctx, opt) {
     ctx.loesung(loesungFuer(opt, opt.richtig));
-    ctx.schritte(1);
+    ctx.schritte(1, true);
     const box = el("div", { class: "wahl" });
     if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
     let fertig = false;
@@ -1698,6 +1924,7 @@ const LS = (() => {
       box.append(k);
     }
     ctx.flaeche.append(box);
+    kurztasten(box);
     return box;
   }
 
@@ -1710,7 +1937,7 @@ const LS = (() => {
    */
   function reihenfolge(ctx, opt) {
     ctx.loesung(opt.loesung || opt.reihe.map(w => (opt.ablage ? opt.ablage(w) : String(w))).join(" → "));
-    ctx.schritte(opt.reihe.length);
+    ctx.schritte(opt.reihe.length, true);
     const ablage = el("div", { class: "ablage", "aria-live": "polite" });
     const box = el("div", { class: "wahl" });
     if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
@@ -1738,6 +1965,7 @@ const LS = (() => {
       box.append(k);
     }
     ctx.flaeche.append(ablage, box);
+    kurztasten(box);
     return { ablage, box };
   }
 
@@ -1752,7 +1980,7 @@ const LS = (() => {
    */
   function koerbe(ctx, opt) {
     ctx.loesung(opt.loesung || opt.korbInhalt?.(opt.richtig)?.text || loesungFuer(opt, opt.richtig));
-    ctx.schritte(1);
+    ctx.schritte(1, true);
     const karte = el("div", { class: "korb-karte" },
       opt.karte.bild ? el("span", { class: "bild", text: opt.karte.bild }) : null, el("b", { text: opt.karte.text }));
     const box = el("div", { class: "korb-reihe" });
@@ -1776,6 +2004,7 @@ const LS = (() => {
       box.append(k);
     });
     ctx.flaeche.append(karte, box);
+    kurztasten(box);
     return { karte, box };
   }
 
@@ -2083,7 +2312,7 @@ const LS = (() => {
       else for (let i = 0; i < def.anzahl; i++) punkte.append(el("span"));
       const karte = el("div", { class: "karte" });
       const flaeche = el("div");
-      const eule = euleZeile();
+      const eule = euleZeile({ kuerzen: true });
       stimmFehlerHoerer = stimmFehlerFuer(eule);
       const zeitleiste = el("div", { class: "zeitleiste", "aria-hidden": "true" }, el("div", { class: "zeitbalken" }));
       // Testhilfen (Entscheid T2 a): nur beim Testspieler; wirken auf die gerade gezeigte Aufgabe.
@@ -2148,7 +2377,7 @@ const LS = (() => {
       // Ein Hörer am Dokument (nicht an der Fläche: die soll nicht selbst als antippbar gelten).
       eingabeHoerer = ev => {
         const k = ev.target?.closest?.("button");
-        if (!k || !flaeche.contains(k)) return;
+        if (!k || !flaeche.contains(k) || k.closest(".tipp-zeile")) return; // 💡 ist keine Eingabe
         // OK der Zifferntastatur: das Getippte zählt, nicht das „OK“
         const anzeige = /^\s*(OK|✓)/.test(k.textContent || "") ? flaeche.querySelector(".anzeige")?.textContent?.trim() : "";
         const was = (anzeige || k.getAttribute("aria-label") || k.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60);
@@ -2167,10 +2396,35 @@ const LS = (() => {
       // heisst ohne Tipp. Die Uhr läuft weiter.
       let tippsRunde = 0;
       let tippGeben = () => {};
-      const tippKnopf = el("button", { type: "button", class: "knopf hell klein tipp-knopf", text: "💡 Tipp", onclick: () => tippGeben() });
-      const tippZeile = el("div", { class: "tipp-zeile" }, tippKnopf);
+      // Entscheide BH2 a und BH2-T a (LERN_Session13, ersetzen den Ort aus T1 a): 💡 beim Antwortbereich, ohne eigene
+      // Zeile — die lag auf kleinen Bildschirmen oft unter dem Rand. Den Ort wählt platziereTipp() je Aufgabe.
+      const tippKnopf = el("button", { type: "button", class: "tipp-knopf", text: "💡", "aria-label": "Tipp", title: "Tipp", onclick: () => tippGeben() });
+      const tippZeile = el("span", { class: "tipp-zeile" }, tippKnopf);
       tippZeile.hidden = true;
-      karte.append(tippZeile);
+      /**
+       * Mit Zifferntastatur eine Taste in ihrer untersten Reihe; sonst rechts in der letzten Zeile „auftrag“ oder
+       * „frage“ (der Text fliesst darum herum); fehlen beide, rechts oben in der Spielfläche. Nie unter den Antworten,
+       * damit niemand ihn für eine Antwort hält.
+       */
+      const platziereTipp = () => {
+        // Noch keine Aufgabe in der Fläche (Mix wartet): 💡 nicht hineinlegen
+        if (![...flaeche.children].some(c => c !== tippZeile)) { tippZeile.remove(); return; }
+        const t = flaeche.querySelector(".tastatur");
+        if (t) {
+          tippZeile.className = "tipp-zeile in-tastatur";
+          if (tippZeile.parentElement !== t) t.append(tippZeile);
+          return;
+        }
+        // nur Zeilen direkt in der Fläche: eine „frage“ in einer Karte (Znüni-Teller) liesse 💡 aus der Karte ragen
+        const fragen = flaeche.querySelectorAll(":scope > .auftrag, :scope > .frage");
+        // data-tipp-ziel: das Spiel nennt die Zeile selbst (Frage in einer eigenen Hülle, Kompass, Plan-Leser)
+        const ziel = flaeche.querySelector("[data-tipp-ziel]") || fragen[fragen.length - 1] || flaeche;
+        tippZeile.className = "tipp-zeile schwebt";
+        if (ziel.firstChild !== tippZeile) ziel.prepend(tippZeile);
+        // Ist die Zeile kürzer als 💡, ragte er unten heraus und machte die Antworten darunter schmaler: Die Zeile
+        // umschliesst ihn (nur bei gewöhnlichen Blöcken, damit Flex- und Rasterzeilen des Spiels bleiben, wie sie sind).
+        if (getComputedStyle(ziel).display === "block") ziel.style.display = "flow-root";
+      };
       buehne.append(punkte, karte);
 
       /** Mix: Ergebnis der letzten Aufgabe melden — oder, vor der ersten, dass das Spiel bereit ist. */
@@ -2205,6 +2459,7 @@ const LS = (() => {
         let loesungVorab = null; // vom Spiel mit ctx.loesung() genannt, für die Testhilfe
         let eigeneKennung = null; // vom Spiel mit ctx.kennung() genannt, gegen Wiederholungen
         let schritte = 0; // Handgriffe der Aufgabe (ctx.schritte), für den Boden der Endlos-Zeit
+        let schritteFest = false; // gestellt: die Zahl gilt (HG1 a)
         let warten = 0;   // Sekunden, in denen das Kind nur warten kann (ctx.wartezeit): so viel später startet die Uhr
         let uhrWartet = false; // startet die Uhr erst auf ctx.uhrWarten() hin?
         let zug = 0; // zählt die Züge beim Zeichnen; eine verworfene Fassung startet die Uhr nicht
@@ -2368,8 +2623,11 @@ const LS = (() => {
         /** Den nächsten Tipp in der Eulenblase zeigen; der Knopf sagt, ob noch einer kommt. */
         const zeigeTippKnopf = () => {
           tippZeile.hidden = endlos || erledigt || !tipps.length;
+          if (!tippZeile.hidden) platziereTipp();
           tippKnopf.disabled = tippPos >= tipps.length;
-          tippKnopf.textContent = tippPos >= tipps.length ? "💡 Keine Tipps mehr" : tippPos ? "💡 Noch ein Tipp" : "💡 Tipp";
+          const tippText = tippPos >= tipps.length ? "Keine Tipps mehr" : tippPos ? "Noch ein Tipp" : "Tipp";
+          tippKnopf.setAttribute("aria-label", tippText);
+          tippKnopf.title = tippText;
         };
         tippGeben = () => {
           if (erledigt || tippPos >= tipps.length) return;
@@ -2446,7 +2704,13 @@ const LS = (() => {
            * Diese Aufgabe braucht n Handgriffe mehr (Tipps, Ziffern samt OK, Züge) — wie viele mindestens,
            * wer sie fehlerfrei löst. Die Bausteine zählen ihre selbst; Pflicht in Endlos-Stufen.
            */
-          schritte(n) { schritte += n; },
+          // Entscheid HG1 a (LERN_Session13): Mit dem Stellen der Aufgabe gilt die Zahl fest — Uhr und Testskript
+          // haben sie dann gelesen. Ein Baustein, der erst danach entsteht (zweiter Schritt), zählt nicht mehr;
+          // ein späterer Aufruf des Spiels selbst ist ein Fehler, den das Testskript meldet.
+          schritte(n, vomBaustein) {
+            if (!schritteFest) { schritte += n; return; }
+            if (!vomBaustein) pruefung.haken?.("schritteSpaet", { nr, n });
+          },
           /**
            * Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne):
            * Uhr und Zeitmessung beginnen so viel später.
@@ -2555,6 +2819,7 @@ const LS = (() => {
             letzte = k;
             for (const [name, wert] of Object.entries(serien)) (serienVerlauf[name] ||= []).push(wert);
             pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: zuLang && (endlos ? versuch >= SERIE_VERSUCHE : stufeSuche >= 3) });
+            schritteFest = true;
             zeichnet = false;
             gezeigt = true;
             // Reihenfolge: Lob der vorigen Aufgabe ausreden lassen, dann vorlesen, dann die Töne des Spiels.
@@ -2585,6 +2850,7 @@ const LS = (() => {
           loesungVorab = null;
           eigeneKennung = null;
           schritte = 0;
+          schritteFest = false;
           warten = 0;
           uhrWartet = false;
           ansagen = [];
@@ -2794,13 +3060,13 @@ const LS = (() => {
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
       "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
-      "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile"],
+      "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "blase-text", "lesetext"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
 
   return {
-    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
+    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     beiAenderung, abgleichDaten, spielStand: () => spielStand,
@@ -2810,7 +3076,8 @@ const LS = (() => {
     meldungen, meldungenVon, gefundeneFehler, ungeleseneMeldungen, meldenErlaubt, neueMeldung,
     setzeMeldung, meldungenGelesen, meldungFuerEntwicklung, meldeFormular, meldungStandAnwenden, meldungStatusAusBemerkung,
     meldungAdresse, meldungMailLink, meldungAusText,
-    istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinGueltig,
+    istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinStimmt, pinGueltig, neuerCode, setzeWiederherstellung, wiederherstellung, codeStimmt,
+    antwortStimmt, ohneGeheimnis, zuruecksetzenStand, zuruecksetzenAnfordern, zuruecksetzenAbbrechen, zuruecksetzenFaellig, ZURUECKSETZEN_TAGE,
     freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, aehnlich, passung, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, sortierungFuer, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, reihenfolgeFuer, vorgabeZeit, timerFuer, waehleTimer, zeitVorschlag,

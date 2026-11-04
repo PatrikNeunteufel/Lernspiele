@@ -255,6 +255,7 @@ LS.spiel({
         box.append(k);
       }
       ctx.flaeche.append(box);
+      LS.kurztasten(box);
     } else {
       const box = el("div", { class: "optionen" });
       for (const o of a.optionen) {
@@ -270,6 +271,7 @@ LS.spiel({
         box.append(k);
       }
       ctx.flaeche.append(box);
+      LS.kurztasten(box);
     }
     if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort.");
   },

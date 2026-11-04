@@ -159,6 +159,7 @@ const reimeVon = w => ALLE.filter(x => reimen(x, w)).map(x => x.wort).join(" –
 function paareSpielen(ctx, a) {
   const loesung = "Die Paare: " + [...new Set(a.karten.map(x => x.gruppe))].map(g => a.karten.filter(x => x.gruppe === g).map(x => x.wort).join(" – ")).join(", ");
   ctx.loesung(loesung);
+  ctx.schritte(a.karten.length); // je Paar zwei Karten antippen
   ctx.flaeche.append(el("div", { class: "auftrag", text: "Finde die Reim-Paare: Tipp zwei Bilder an, die sich reimen." }));
   const box = el("div", { class: "paare" });
   let gewaehlt = null;

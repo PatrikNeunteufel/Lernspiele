@@ -231,7 +231,9 @@ LS.spiel({
     const p = STUFE[ctx.stufe];
     const { t, f, optionen } = aufgabeErzeugen(ctx.stufe);
     if (new Set(p.arten).size > 1) ctx.serie("art", f.art === "abschnitt" ? "titel" : f.art);
-    ctx.flaeche.append(textEl(t, f));
+    const text = textEl(t, f);
+    ctx.flaeche.append(text);
+    LS.lesetext(text); // langer Text scrollt im eigenen Feld, Frage und Antworten bleiben im Bild (BH3 a)
     const hinweis = hinweisFuer(f, p);
     ctx.tipp(tippsFuer(f, p));
     if (f.art === "stimmt") {

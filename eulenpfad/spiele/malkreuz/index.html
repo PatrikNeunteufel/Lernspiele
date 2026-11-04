@@ -50,6 +50,23 @@
   .kreuz .links::after { content: ""; position: absolute; right: -11px; top: -4px; bottom: -4px; border-right: 3px solid #c5c9de; }
   .kreuz .zusammen { grid-column: 1 / -2; justify-content: flex-end; font-size: clamp(14px, 3.4vw, 20px); color: var(--text-leise); padding-right: 8px; }
   .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Zeilen, Rechnung und Anzeige richten sich nach der Bildhöhe. */
+  .kreuz > * { min-height: clamp(46px, min(11vw, 4.9vh), 64px); }
+  .rechnung { font-size: clamp(30px, min(7vw, 4.2vh), 52px); margin-bottom: 6px; }
+  .mk-anzeige { min-height: clamp(52px, 5.4vh, 76px); font-size: clamp(30px, min(7vw, 4.4vh), 52px); padding: 2px 16px; }
+  .kreuz { gap: 5px; margin-bottom: 6px; }
+  .kreuz .oben, .kreuz .ecke, .kreuz .kopf-summe { margin-bottom: 6px; }
+  .hinweis-klein { margin-bottom: 6px; }
+  @media (max-width: 560px) {
+    .kreuz > * { min-height: 44px; }
+    .kreuz { gap: 4px; }
+    .kreuz .oben, .kreuz .ecke, .kreuz .kopf-summe { margin-bottom: 4px; }
+    .rechnung { font-size: 28px; margin-bottom: 4px; }
+    .mk-anzeige { min-height: 48px; }
+    /* Hinweis links neben der Anzeige statt darüber */
+    .mk-eingabe { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 8px; align-items: center; }
+    .mk-eingabe .hinweis-klein { margin: 0; text-align: left; line-height: 1.25; }
+  }
 </style>
 </head>
 <body>
@@ -279,12 +296,11 @@ LS.spiel({
     }
 
     const rechnung = el("div", { class: "rechnung", text: raetsel ? "? × ? = ?" : `${zahlText(a)} × ${zahlText(b)} = ?` });
-    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Zahl für das gewählte Feld" });
+    const anzeige = el("div", { class: "anzeige leer mk-anzeige", "aria-label": "Zahl für das gewählte Feld" });
     ctx.flaeche.append(
       el("div", { class: "auftrag", text: raetsel ? "Malkreuz-Rätsel: Finde alle fehlenden Zahlen!" : `Rechne im Malkreuz: ${zahlText(a)} × ${zahlText(b)}` }),
       rechnung, kreuz,
-      el("div", { class: "hinweis-klein", text: "Tipp auf ein Feld mit ?, dann die Zahl eintippen." }),
-      anzeige);
+      el("div", { class: "mk-eingabe" }, el("div", { class: "hinweis-klein", text: "Tipp auf ein Feld mit ?, dann die Zahl eintippen." }), anzeige));
 
     const bekannt = k => !offen.has(k);
     /** Kann das Feld jetzt schon ausgerechnet werden? */

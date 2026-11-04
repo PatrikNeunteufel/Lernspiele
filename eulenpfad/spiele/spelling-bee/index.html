@@ -184,6 +184,8 @@ const SPIEL = {
       kacheln.append(k);
     }
     ctx.flaeche.append(felder, kacheln);
+    // Buchstaben sind selbst die Taste; gelegte Kacheln sind disabled, so nimmt das zweite p die zweite p-Kachel.
+    LS.kurztasten(kacheln);
     LS.sprich(ziel, "en", "", ctx.uhrWarten());
     if (ctx.nr === 0) ctx.sag("Tipp die Buchstaben der Reihe nach an. Mit 🔊 hörst du das Wort nochmal.");
   },

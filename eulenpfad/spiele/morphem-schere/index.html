@@ -263,6 +263,7 @@ function stammZeigen(ctx, a, p, loesung) {
     ctx.falsch(p.knapp ? "Welcher Teil trägt die Bedeutung?" : `„${a.teile[i]}“ ist ${i < a.stamm ? "eine Vorsilbe" : "eine Endung"}. ${REGEL_STAMM}`, loesung);
   });
   f.append(frage, box);
+  LS.kurztasten(box);
 }
 
 /** e oder ä (eu oder äu) über den Stamm; je nach Stufe mit Regelkarte oder mit Begründung. */
@@ -303,6 +304,7 @@ function knoepfe(ctx, optionen, richtig, klasse, hinweis, loesung, beiRichtig) {
     box.append(k);
   }
   ctx.flaeche.append(box);
+  LS.kurztasten(box); // e/ä: der Buchstabe selbst; verwandte Wörter: Grundreihe
 }
 
 /**

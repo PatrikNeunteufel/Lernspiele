@@ -98,6 +98,26 @@
   .faecher.falsch { animation: wackeln .4s; }
 
   .ergebnis { text-align: center; font-size: 22px; font-weight: 800; min-height: 32px; margin-top: 10px; }
+
+  /* Ganze Aufgabe im Bild (BH3 a): Auf niedrigen Bildschirmen werden Fächer und Karten niedriger (nicht schmaler),
+     die Abstände enger. */
+  @media (max-height: 820px) {
+    .vorgabe { padding: 8px 14px; margin-bottom: 10px; font-size: clamp(20px, 3.6vw, 22px); }
+    .platz { max-height: 12vh; }
+    .karten { min-height: 0; margin: 12px 0 4px; padding: 8px; gap: 8px; }
+    .karte-ziffer { max-height: 10.5vh; }
+    .ergebnis { margin-top: 6px; }
+  }
+  /* Sieben Karten brechen sonst schon auf dem Tablet in zwei Reihen um. */
+  .karten { gap: 8px; padding: 8px; }
+  /* Handy: Die Karten liegen in zwei Reihen, darum dort noch etwas niedriger. */
+  @media (max-width: 560px) and (max-height: 820px) {
+    .platz { max-height: 10vh; }
+    .karten { margin-top: 8px; }
+    .karte-ziffer { max-height: 8vh; font-size: 40px; }
+    .vorgabe { padding: 6px 12px; }
+    .fach-kopf { padding: 2px 0; }
+  }
 </style>
 </head>
 <body>
@@ -322,7 +342,7 @@ LS.spiel({
     const gelegt = () => Number(plaetze.map(p => p.firstChild.textContent).join(""));
 
     // Karte antippen: vom Stapel ins erste freie Fach, aus einem Fach zurück auf den Stapel.
-    karten.forEach((z, i) => {
+    const kartenKnoepfe = karten.map((z, i) => {
       const k = el("button", { type: "button", class: "karte-ziffer", text: String(z), style: `animation-delay:${i * 0.07}s` });
       k.addEventListener("click", () => {
         if (gesperrt) return;
@@ -334,9 +354,20 @@ LS.spiel({
           stapel.append(k);
         }
         aktualisiere();
+        tastenNeu();
       });
       stapel.append(k);
+      return k;
     });
+    // Kurztasten an den Karten selbst: Die Ziffer ist die Taste, auch doppelt. Die Taste nimmt den ersten Knopf der
+    // Liste — darum stehen die Karten auf dem Stapel vorne: Liegt eine 3 schon im Fach, legt die Taste 3 die nächste
+    // freie 3; erst wenn keine mehr frei ist, holt sie die zuletzt gelegte zurück. Nach jedem Zug neu (gleiche Box
+    // ersetzt die Gruppe).
+    function tastenNeu() {
+      const imFach = plaetze.map(p => p.firstChild).filter(Boolean).reverse();
+      LS.kurztasten(stapel, [...kartenKnoepfe.filter(k => k.parentElement === stapel), ...imFach]);
+    }
+    tastenNeu();
 
     ok.addEventListener("click", () => {
       if (gesperrt) return;

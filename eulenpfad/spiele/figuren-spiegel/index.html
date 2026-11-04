@@ -16,6 +16,19 @@
   .fs-erledigt { max-width: 680px; margin: 0 auto 10px; padding: 0; list-style: none; font-size: clamp(14px, 3.3vw, 17px); text-align: left; }
   .fs-erledigt li { padding: 5px 10px; margin: 0 0 4px; border-radius: 10px; background: var(--gut-hell); font-weight: 700; }
   .fs .wahl-knopf.fs-antwort { font-size: clamp(16px, 3.6vw, 20px); font-weight: 700; text-align: left; align-items: flex-start; padding: 10px 14px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Die Szene scrollt im eigenen Feld (LS.lesetext); quer steht sie links, die Fragen rechts. */
+  @media (max-height: 820px), (max-width: 560px) {
+    .fs .sachtext { padding: 10px 14px; margin-bottom: 8px; line-height: 1.45; }
+    .fs-figuren { margin-bottom: 6px; }
+    .fs .frage { margin-bottom: 8px; }
+    .fs .wahl { gap: 8px; }
+    .fs .wahl-knopf.fs-antwort { min-height: 54px; padding: 8px 12px; }
+  }
+  @media (min-width: 900px) and (orientation: landscape) {
+    .fs { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+    .fs .sachtext { margin-top: 0; }
+    .fs-fragen .wahl { grid-template-columns: minmax(0, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -215,9 +228,13 @@ LS.spiel({
   aufgabe(ctx) {
     if (ctx.nr === 0) ctx.sag("Lies zuerst die ganze Szene. Dann beantworte die Frage dazu.");
     const a = aufgabeErzeugen(ctx.stufe);
-    const fs = el("div", { class: "fs" });
-    ctx.flaeche.append(fs);
-    fs.append(szeneEl(a.szene), el("div", { class: "fs-figuren" }, el("b", { text: "Figuren: " }), ...a.szene.figuren.map(f => el("span", { text: f }))));
+    const huelle = el("div", { class: "fs" });
+    ctx.flaeche.append(huelle);
+    // Quer stehen Szene und Fragen nebeneinander (BH3 a); die Szene scrollt in ihrem eigenen Feld.
+    const szene = szeneEl(a.szene);
+    const fs = el("div", { class: "fs-fragen" });
+    huelle.append(el("div", { class: "fs-szene" }, szene, el("div", { class: "fs-figuren" }, el("b", { text: "Figuren: " }), ...a.szene.figuren.map(f => el("span", { text: f })))), fs);
+    LS.lesetext(szene);
     ctx.tipp(tippsFuer(a.fragen));
     const mehrere = a.fragen.length > 1;
     const loesung = "Richtig: " + a.fragen.map((f, i) => (mehrere ? `${i + 1}. ` : "") + f.richtig).join(" ");
@@ -259,6 +276,7 @@ LS.spiel({
             LS.ton("tipp");
             erledigt.append(el("li", { text: `✓ ${f.frage} — ${f.richtig}` }));
             stelle();
+            LS.lesetext(szene); // die Liste der gelösten Fragen wächst: Höhe der Szene neu rechnen
             return;
           }
           k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");

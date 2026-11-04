@@ -387,6 +387,7 @@ LS.spiel({
       let fertig = false;
       const loesung = `Zur Familie ${fam.wort} gehören: ${a.richtige.join(", ")}.`;
       ctx.loesung?.(loesung); // für die Testhilfe 🔑
+      ctx.schritte(offen.size); // Handgriffe: jedes Familienwort einmal antippen
       for (const w of a.karten) {
         const k = el("button", { type: "button", class: "wahl-knopf", text: w });
         k.addEventListener("click", () => {

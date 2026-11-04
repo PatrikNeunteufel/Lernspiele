@@ -209,6 +209,7 @@ function legen(ctx) {
   const zahl = wert(ziel);
   const loesung = `${zahlText(zahl)} = ${punkteText(ziel)}`;
   ctx.loesung(loesung);
+  ctx.schritte(summe(ziel) + 1); // je Punkt ein Tipp, dazu OK
   ctx.tipp(["Jede Ziffer der Zahl sagt, wie viele Punkte in ihre Spalte gehören.", "Eine 0 heisst: kein Punkt in diesem Feld."]);
   ctx.flaeche.append(el("div", { class: "auftrag", html: `Lege die Zahl <b>${zahlText(zahl)}</b> mit Punkten.` }));
   const t = punkteTabelle(ctx, Object.fromEntries(SPALTEN.map(st => [st.k, 0])), "legen");
@@ -228,6 +229,7 @@ function lesen(ctx) {
   const zahl = wert(start);
   const loesung = `${punkteText(start)} = ${zahlText(zahl)}`;
   ctx.loesung(loesung);
+  ctx.schritte(LS.tippSchritte(zahl));
   ctx.tipp(["Zähl die Punkte in jedem Feld: Das ist die Ziffer dieser Stelle.", "Ein leeres Feld ist eine 0 — vergiss sie nicht."]);
   ctx.flaeche.append(el("div", { class: "auftrag", text: "Welche Zahl zeigen die Punkte?" }));
   punkteTabelle(ctx, start, "fest");
@@ -258,6 +260,7 @@ function verschiebeNachVorgabe(ctx) {
     ziel[nach.k]++;
     const loesung = `Ein Punkt wandert von ${von.k} nach ${nach.k}: ${zahlText(wert(ziel))}.`;
     ctx.loesung(loesung);
+    ctx.schritte(3); // Punkt hochheben, im anderen Feld ablegen, OK
     ctx.tipp(["Such die beiden Spalten aus dem Auftrag oben in der Tabelle.", "Heb genau einen Punkt hoch und leg ihn im anderen Feld ab. Alle anderen Punkte bleiben liegen."]);
     ctx.flaeche.append(el("div", { class: "auftrag", html: `Die Punkte zeigen <b>${zahlText(wert(start))}</b>.<br>Verschiebe einen Punkt von den <span style="color:var(--st-${von.k})">${von.k}</span> zu den <span style="color:var(--st-${nach.k})">${nach.k}</span>.` }));
     const t = punkteTabelle(ctx, start, "schieben");
@@ -288,6 +291,7 @@ function verschiebeZumZiel(ctx) {
   const zielWert = wert(start) + diff;
   const loesung = `Ein Punkt von ${von.k} nach ${nach.k}: ${zahlText(zielWert)}.`;
   ctx.loesung(loesung);
+  ctx.schritte(3); // Punkt hochheben, im anderen Feld ablegen, OK
   ctx.tipp(["Wandert ein Punkt nach links, wird die Zahl grösser; nach rechts wird sie kleiner.",
     "Was ändert sich, wenn ein Punkt wandert? Wert der neuen Stelle minus Wert der alten Stelle. Probier das für Spalten nahe beieinander."]);
   ctx.flaeche.append(el("div", { class: "auftrag", html: `Die Punkte zeigen <b>${zahlText(wert(start))}</b>.<br>Verschiebe <u>genau einen</u> Punkt, sodass die Zahl um <b>${zahlText(Math.abs(diff))}</b> ${diff > 0 ? "grösser" : "kleiner"} wird.` }));
@@ -330,6 +334,7 @@ function mitAnzahlPunkten(ctx) {
   const v = vorgaben[art];
   const loesung = `Die Lösung ist ${zahlText(v.loesung)} (${punkteText(zerlege(v.loesung))}).`;
   ctx.loesung(loesung);
+  ctx.schritte(n + 1); // je Punkt ein Tipp, dazu OK
   ctx.tipp(art.startsWith("groesste")
     ? ["Grösste Zahl heisst: Die Punkte sollen möglichst viel wert sein.", "Welches erlaubte Feld zählt am meisten?",
       ...(v.ungerade ? ["Ungerade heisst: Bei den Einern liegt eine ungerade Anzahl Punkte."] : [])]

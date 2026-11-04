@@ -8,7 +8,7 @@
 <style>
   .frage { text-align: center; font-size: clamp(20px, 4.2vw, 28px); font-weight: 800; margin: 0 0 12px; }
   .frage b { color: var(--knopf); }
-  .raster-rahmen { position: relative; width: min(440px, 88vw); margin: 0 auto 14px; }
+  .raster-rahmen { position: relative; width: min(440px, 88vw, 49vh); margin: 0 auto 14px; }
   .raster { display: grid; gap: 2px; background: #c9cde0; border: 2px solid #c9cde0; border-radius: 8px; overflow: hidden; }
   .zelle { aspect-ratio: 1; border: none; padding: 0; background: #fff; cursor: pointer; }
   .zelle.fest { cursor: default; background: #f3f4f8; }
@@ -20,6 +20,15 @@
   .achse.diagonal { transform-origin: 0 0; }
   .legende { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-size: 15px; color: var(--text-leise); margin-bottom: 8px; }
   .legende i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; }
+  /* Ganze Aufgabe im Bild (BH3 a): breit und quer steht das Raster links, Frage, Legende und „Fertig“ rechts. */
+  @media (min-width: 900px) and (orientation: landscape) {
+    .sr-paar { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: 1fr auto auto auto 1fr; column-gap: 28px; }
+    .sr-paar > * { grid-column: 2; min-width: 0; }
+    .sr-paar > .frage { grid-row: 2; }
+    .sr-paar > .legende { grid-row: 3; }
+    .sr-paar > .knopfzeile { grid-row: 4; }
+    .sr-paar > .raster-rahmen { grid-column: 1; grid-row: 1 / 6; width: min(440px, 100vh - 250px); margin: 6px 0; }
+  }
 </style>
 </head>
 <body>
@@ -224,7 +233,11 @@ LS.spiel({
     for (const k of a.ziel) { const [r, c] = teile(k); (proZeile[r] ||= []).push(c + 1); }
     ctx.loesung("Färbe " + Object.keys(proZeile).map(r => `Zeile ${+r + 1}: Spalte ${proZeile[r].sort((x, y) => x - y).join(", ")}`).join(" · "));
     ctx.tipp(tippsFuer(a));
-    ctx.flaeche.append(el("div", { class: "frage", html: a.frage }),
+    // Handgriffe: jedes Bildfeld einmal antippen, dazu „Fertig ✓“
+    ctx.schritte(a.ziel.size + 1);
+    const paar = el("div", { class: "sr-paar" });
+    ctx.flaeche.append(paar);
+    paar.append(el("div", { class: "frage", html: a.frage }),
       el("div", { class: "legende", html: `<span><i style="background:var(--deko-6)"></i>Vorlage</span><span><i style="background:var(--deko-3)"></i>deine Felder</span>` }));
     const rahmen = el("div", { class: "raster-rahmen" });
     const raster = el("div", { class: "raster" });
@@ -260,7 +273,7 @@ LS.spiel({
       if (achse === "versetzt") rahmen.append(el("div", { class: "achse", style: `left:calc(${(a.achseBei / a.n) * 100}% - 3px);top:-6px;bottom:-6px;width:6px` }));
       if (achse === "gegendiagonal") rahmen.append(el("div", { class: "achse diagonal", style: "left:0;top:100%;width:141.4%;height:6px;transform:rotate(-45deg) translateY(-3px)" }));
     }
-    ctx.flaeche.append(rahmen);
+    paar.append(rahmen);
 
     const ok = el("button", { class: "knopf gruen", type: "button", text: "Fertig ✓" });
     ok.addEventListener("click", () => {
@@ -278,7 +291,7 @@ LS.spiel({
       }
       if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
     });
-    ctx.flaeche.append(el("div", { class: "knopfzeile" }, ok));
+    paar.append(el("div", { class: "knopfzeile" }, ok));
     if (ctx.nr === 0) ctx.sag("Tipp ein Feld an, um es zu färben. Nochmal tippen macht es wieder weiss.");
   },
 });

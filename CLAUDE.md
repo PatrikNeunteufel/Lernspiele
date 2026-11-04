@@ -79,7 +79,7 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 - **Changelog/Logbuch:** CHANGELOG.md
 - **Build:** — (kein Build; `eulenpfad/index.html` im Browser öffnen). Veröffentlichen: `.github/workflows/pages.yml` auf `https://patrikneunteufel.github.io/Lernspiele/`, von selbst bei jedem Push auf master, der `portal/` oder einen App-Ordner ändert (W1 a), sonst von Hand
 - **Entwickler-Modus:** `python tools/entwickler_server.py` (Repo ausliefern, Prüfstand und Bemerkungen schreiben), Schlüssel in `entwickler.key` (gitignored); docs/eulenpfad/rahmen.md Abschnitt 11
-- **Tests:** — (manuell im Browser: Desktop, Tablet 768 px, Handy 375 px; jede Kombination Spiel × Stufe lädt ohne Konsolenfehler; Aufgabengeneratoren je Stufe mit einigen tausend Zufallsaufgaben auf Zahlenraum und gültige Lösung prüfen)
+- **Tests:** — (manuell im Browser: Desktop, Tablet 768 px, Handy 375 px; jede Kombination Spiel × Stufe lädt ohne Konsolenfehler; Aufgabengeneratoren je Stufe mit einigen tausend Zufallsaufgaben auf Zahlenraum und gültige Lösung prüfen). Bildhöhe je Gerät: `node tools/bildhoehe.js` (Server nötig; docs/eulenpfad/rahmen.md Abschnitt 20)
 - **Sensible Daten:** Namen, Alter und Lernstand der Kinder nur im Browser (localStorage, Schlüssel `lernspiele:*`) und in selbst gesicherten JSON-Dateien — solche Dateien nie ins Repo; keine Namen, Fotos oder Handschrift von Kindern in Spielen/Commits; Lernzielblätter liegen nur als Material in material/
 - **Bewusste Vereinfachungen:** —
 - **Deliverables:** je Spiel eine lauffähige Seite; Lernziel-Abdeckung in docs/eulenpfad/lernziele/

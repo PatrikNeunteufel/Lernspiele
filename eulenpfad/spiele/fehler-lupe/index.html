@@ -191,6 +191,9 @@ LS.spiel({
     if (p.regeln.length > 1) ctx.serie("regel", a.regelId);
     const loesung =`Richtig ist «${a.richtig}»: ${ganz(a.woerter)}`;
     ctx.loesung?.(loesung); // für die Testhilfe 🔑
+    // Handgriffe: falsches Wort antippen, dann die Schreibweise wählen. LS.auswahl zählt sich erst nach dem Fund
+    // selbst — zu spät für die Uhr, die schon beim Stellen rechnet; deshalb hier beide.
+    ctx.schritte(2);
     // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): erst genau lesen, dann welche Regel — nie das Wort.
     ctx.tipp([p.zusatz ? "Nur ein einziges Wort in beiden Sätzen ist falsch. Lies langsam, Wort für Wort." : "Lies den Satz langsam, Wort für Wort.",
       p.hilfe === "regel" ? "Prüfe jedes Wort mit der Regel auf der Karte." : `Achte besonders auf: ${a.regel.name}.`]);

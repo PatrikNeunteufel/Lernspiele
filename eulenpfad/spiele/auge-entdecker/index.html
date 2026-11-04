@@ -37,6 +37,20 @@
   .ae .wahl-knopf { font-size: clamp(16px, 3.6vw, 22px); overflow-wrap: anywhere; }
   .ae .wahl-knopf small { font-size: 13px; }
   .ae .wahl-knopf svg { width: 100%; max-width: 220px; margin: 0 auto; display: block; }
+  /* Ganze Aufgabe im Bild (BH3 a): Breit und quer steht das grosse Bild links, Antworten und Ablage rechts daneben. */
+  @media (min-width: 900px) and (orientation: landscape) {
+    div:has(> .ae > .ae-bild) { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 18px; align-items: start; }
+    div:has(> .ae > .ae-bild) > .ae { grid-column: 1; grid-row: 1 / span 12; }
+    div:has(> .ae > .ae-bild) > :not(.ae) { grid-column: 2; width: 100%; min-width: 0; box-sizing: border-box; }
+    .ae > .ae-bild { margin-bottom: 0; }
+    .ae-satz + .ae-bild { max-height: calc(100vh - 420px); }
+  }
+  /* Handy, Weg des Lichts: Stationen zu dritt in einer Reihe, das Bild etwas niedriger. */
+  @media (max-width: 560px) and (max-height: 820px) {
+    .ae ~ .ablage ~ .wahl { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .ae ~ .ablage ~ .wahl .wahl-knopf { min-height: 52px; padding: 4px; font-size: 16px; }
+    .ae:has(~ .ablage) > .ae-bild { max-height: calc(100vh - 600px); margin-bottom: 6px; }
+  }
   .ae .korb-karte { padding: 10px 18px; }
   .ae .korb-karte b { font-size: clamp(17px, 4vw, 22px); line-height: 1.4; display: block; max-width: 560px; }
   .ae .korb-karte .bild { font-size: clamp(40px, 9vw, 56px); }

@@ -24,6 +24,35 @@
   .ez-uhr-text { font-size: clamp(15px, 3.6vw, 18px); }
   .wahl-knopf { font-size: clamp(16px, 3.8vw, 20px); font-weight: 800; }
   .wahl-knopf small { font-size: 14px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Karte kompakter, quer neben der Leiter. */
+  @media (max-width: 560px), (max-height: 820px) {
+    .ez-ereignis { padding: 8px 12px; margin-bottom: 8px; }
+    .ez-ereignis .ez-bild { display: inline-block; font-size: 34px; vertical-align: middle; margin-right: 6px; }
+    .frage { margin-bottom: 8px; }
+    /* Zeitalter-Körbe: Karte kleiner, Körbe zu zweit */
+    .korb-karte { margin: 4px auto 10px; padding: 8px 14px; }
+    .korb-karte .bild { font-size: 44px; }
+    .korb-karte b { font-size: clamp(18px, 4.6vw, 24px); }
+  }
+  @media (max-width: 560px) {
+    .ez-leiter { width: min(100%, 400px, calc((100vh - 490px) * 320 / 345)); } /* Abschnitte bleiben über 44 px hoch */
+    .wahl.ez-ordnen { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .ez-ordnen .wahl-knopf { font-size: 16px; padding: 6px; }
+    .ez-ordnen .wahl-knopf .bild { font-size: 30px; }
+    .ablage { min-height: 50px; margin-bottom: 8px; padding: 4px; }
+    .korb-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .korb-reihe .korb-knopf { min-height: 80px; padding: 8px 6px; }
+    .korb-reihe .korb-knopf .bild { font-size: 28px; }
+  }
+  @media (max-height: 820px) and (min-width: 561px) { /* Ordnen: zwei breite Karten je Zeile, Bild links */
+    .wahl.ez-ordnen { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .ez-ordnen .wahl-knopf { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center; justify-items: start; text-align: left; }
+    .ez-ordnen .wahl-knopf .bild { grid-row: span 2; font-size: 36px; }
+  }
+  @media (min-width: 700px) {
+    .ez-leiter-zeile { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; max-width: 900px; margin: 0 auto; }
+    .ez-leiter-zeile .ez-leiter { width: min(400px, calc((100vh - 250px) * 320 / 345)); margin: 0; }
+  }
 </style>
 </head>
 <body>
@@ -269,7 +298,7 @@ function zeigeOrdnen(ctx, a) {
     hinweis: a.zahlen ? TIPP_ZAHLEN : TIPP_ORDNEN,
     loesung: a.reihe.map(t => `${ereignis(t).bild} ${t}`).join(" → "),
     lob: `Richtig! ${a.reihe.map(t => `${ereignis(t).bild} ${vorText(ereignis(t))}`).join(" · ")}`,
-  });
+  }).box.classList.add("ez-ordnen"); // auf dem Handy zwei Karten nebeneinander (BH3 a)
 }
 
 /** Leiter mit gestauchter Skala; das Kind tippt den Abschnitt an. */
@@ -280,9 +309,11 @@ function zeigeLeiter(ctx, a) {
   ctx.kennung(`leiter|${a.text}|${a.zahl}`);
   ctx.loesung(loesung);
   ctx.schritte(1);
-  ctx.flaeche.append(el("div", { class: "frage", html: "Wo gehört das auf die <b>Erdzeit-Leiter</b>?" }), ereignisKarte(a.text, a.zahl),
-    el("div", { class: "ez-erklaerung", text: "Die Leiter ist gestaucht: Jede Sprosse liegt zehnmal so weit zurück wie die darunter." }));
   const svg = S("svg", { class: "ez-leiter", viewBox: "0 0 320 345", role: "img", "aria-label": "Erdzeit-Leiter" });
+  // Ab 700 px Breite stehen Karte und Erklärung neben der Leiter (BH3 a).
+  ctx.flaeche.append(el("div", { class: "frage", html: "Wo gehört das auf die <b>Erdzeit-Leiter</b>?" }),
+    el("div", { class: "ez-leiter-zeile" }, el("div", { class: "ez-leiter-text" }, ereignisKarte(a.text, a.zahl),
+      el("div", { class: "ez-erklaerung", text: "Die Leiter ist gestaucht: Jede Sprosse liegt zehnmal so weit zurück wie die darunter." })), svg));
   const baender = [];
   for (let i = 0; i < 6; i++) {
     const unten = yVon(SPROSSEN[i]), oben = i === 5 ? yVon(ERDALTER) : yVon(SPROSSEN[i + 1]);
@@ -298,7 +329,6 @@ function zeigeLeiter(ctx, a) {
     S("text", { class: "ez-zahl", x: 122, y: yVon(ERDALTER), text: `${sprossenText(ERDALTER)} 🌍` }),
     S("text", { class: "ez-heute", x: 205, y: 342, text: "⋮ heute" }),
   );
-  ctx.flaeche.append(svg);
   let fertig = false;
   baender.forEach((r, i) => r.addEventListener("click", () => {
     if (fertig || r.classList.contains("falsch")) return;

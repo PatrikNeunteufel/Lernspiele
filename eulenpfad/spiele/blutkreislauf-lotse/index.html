@@ -49,6 +49,22 @@
   .legende .l-reich { background: var(--blut-reich); }
   .legende .l-arm { background: var(--blut-arm); }
   .wahl-knopf { font-size: clamp(17px, 3.8vw, 21px); font-weight: 800; }
+  /* Ganze Aufgabe im Bild (BH3 a): Breit und quer steht das Schema links, Frage, Legende und Antworten rechts daneben.
+     Der Selektor trifft nur die Spielfläche, die das Schema direkt enthält. */
+  @media (min-width: 900px) and (orientation: landscape) {
+    div:has(> svg.kreislauf) { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: repeat(6, auto) 1fr;
+      column-gap: 24px; align-content: start; }
+    div:has(> svg.kreislauf) > * { grid-column: 2; min-width: 0; }
+    div:has(> svg.kreislauf) > .wahl { margin-inline: 0; }
+    div:has(> svg.kreislauf) > svg.kreislauf { grid-column: 1; grid-row: 1 / 8; width: min(420px, (100vh - 220px) * 420 / 460); margin: 0; }
+    div:has(> svg.kreislauf) > svg.kreislauf.koerperbild { width: min(300px, (100vh - 220px) * 300 / 420); }
+    div:has(> svg.kreislauf) > .frage { margin-top: 12px; }
+  }
+  /* Handy: zwei Antworten nebeneinander statt untereinander. */
+  @media (max-width: 560px) {
+    div:has(> svg.kreislauf) > .wahl:has(> :nth-child(2)):not(:has(> :nth-child(3))) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    div:has(> svg.kreislauf) > .wahl .wahl-knopf { padding: 8px 6px; }
+  }
 </style>
 </head>
 <body>

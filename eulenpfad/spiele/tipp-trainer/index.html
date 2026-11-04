@@ -51,6 +51,8 @@
 // Inhalte (Katalog: listen mit von): Nomen mit Bild aus dem ABC-Sortierer, Sätze aus der Satz-Reparatur.
 
 const { zufall, waehle, mische, el } = LS;
+// Eigene Tastenbedienung (jede Taste ist ein getipptes Zeichen): keine Kurztasten des Rahmens (TK1 a).
+LS.kurztastenAus();
 const SPIEL_ID = "tipp-trainer";
 
 const FREI = new Set(LS.freieListen(SPIEL_ID));

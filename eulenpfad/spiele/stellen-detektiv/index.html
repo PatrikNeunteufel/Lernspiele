@@ -212,7 +212,7 @@ function stelleBenennen(ctx, zahl, knapp = false) {
   let fertig = false;
   for (const st of angebot) {
     // Weiches Trennzeichen, damit „Hunderttausender“ auf schmalen Bildschirmen umbrechen kann.
-    const b = el("button", { type: "button", class: `antwort st st-${st.k}`, html: `${st.name.replace(/(.)tausender/, "$1&shy;tausender")}<small>${st.k}</small>` });
+    const b = el("button", { type: "button", class: `antwort st st-${st.k}`, "data-taste": st.k, html: `${st.name.replace(/(.)tausender/, "$1&shy;tausender")}<small>${st.k}</small>` });
     b.addEventListener("click", () => {
       if (fertig) return;
       if (st === ziel.st) {
@@ -229,6 +229,7 @@ function stelleBenennen(ctx, zahl, knapp = false) {
     antworten.append(b);
   }
   ctx.flaeche.append(antworten);
+  LS.kurztasten(antworten); // Stellen E Z H T M, ZT und HT mit ⇧ (data-taste, der Text ist der Name)
 }
 
 /** Stelle ist genannt → die passende Ziffer in der Zahl antippen. */
@@ -240,7 +241,7 @@ function zifferFinden(ctx, zahl, knapp = false) {
   ctx.tipp(tippsFuer(zahl, true, ziel.st, knapp));
   ctx.flaeche.append(el("div", { class: "auftrag", html: `Tipp die Ziffer an, die bei den <span style="color:var(--st-${ziel.st.k})">${LS.dativ(ziel.st)} (${ziel.st.k})</span> steht!` }));
   let fertig = false;
-  zahlZeichnen(ctx, liste, true, (d, knopf) => {
+  const ziffern = zahlZeichnen(ctx, liste, true, (d, knopf) => {
     if (fertig) return;
     if (d === ziel) {
       fertig = true;
@@ -255,6 +256,10 @@ function zifferFinden(ctx, zahl, knapp = false) {
       loesung);
     if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
   });
+  // Verschiedene Ziffern sind selbst die Taste. Kommen gleiche vor (Stufe 6), zählt hier der Platz: Die Taste 0 nähme
+  // immer die erste 0. Dann nennt data-taste den Platz, und es gilt die Grundreihe von links nach rechts.
+  // Doppelte Ziffern: gefragt ist eine bestimmte Stelle — dann die Grundreihe von links nach rechts, nicht die Ziffer.
+  LS.kurztasten(ziffern[0].parentNode, ziffern, { reihe: new Set(liste.map(d => d.z)).size < liste.length });
 }
 
 LS.spiel({

@@ -279,6 +279,7 @@ LS.spiel({
         wahl.append(k);
       }
       ctx.flaeche.append(gelegt, wahl);
+      LS.kurztasten(wahl);
       return;
     }
 
@@ -298,6 +299,7 @@ LS.spiel({
       wahl.append(k);
     });
     ctx.flaeche.append(wahl);
+    LS.kurztasten(wahl);
     if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort.");
   },
 });

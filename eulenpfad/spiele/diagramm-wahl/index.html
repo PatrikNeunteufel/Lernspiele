@@ -57,6 +57,28 @@
   .dw-wahl-gross svg { width: 100%; max-width: 300px; height: auto; display: block; }
   .dw-buchstabe { font-size: 20px; font-weight: 900; color: var(--deko-1); }
   .dw-wahl-text .wahl-knopf { font-size: clamp(15px, 3.4vw, 19px); text-align: center; }
+
+  /* Ganze Aufgabe im Bild (BH3 a): Die vier Antworten zu irreführenden Diagrammen stehen auf dem Handy zu zweit, breit
+     und quer in einer Reihe; die drei Diagramme der Stufe 5 breit und quer nebeneinander. */
+  @media (max-width: 560px) {
+    .dw-wahl-text:has(> :nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .dw-wahl-text:has(> :nth-child(3)):not(:has(> :nth-child(4))) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  }
+  @media (max-height: 820px) {
+    .dw > .dw-diagramm:not(.dw-kreis) { width: min(420px, 100%, 52vh); margin-bottom: 4px; }
+    .dw .frage { margin-bottom: 6px; }
+    .dw .frage .dw-zitat { margin-top: 2px; }
+  }
+  /* Tablet hoch: die drei Diagramme der Stufe 5 etwa so breit wie auf dem Handy, der Buchstabe links daneben statt
+     darüber, damit zwei Reihen ins Bild passen. */
+  @media (min-width: 561px) and (orientation: portrait) {
+    .dw-wahl-gross .wahl-knopf > span { display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .dw-wahl-gross svg { max-width: min(300px, 26vh); }
+  }
+  @media (min-width: 900px) and (orientation: landscape) {
+    .dw-wahl-text:has(> :nth-child(4)) { max-width: none; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .dw-wahl-gross { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
 </style>
 </head>
 <body>

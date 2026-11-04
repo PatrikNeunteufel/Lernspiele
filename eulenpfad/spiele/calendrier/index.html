@@ -35,6 +35,20 @@
   .cal-zelle.we { color: var(--deko-2); }
   button.cal-zelle.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   button.cal-zelle.richtig { background: var(--gut-hell); box-shadow: 0 2px 0 var(--gut); }
+
+  /* Ganze Aufgabe im Bild (BH3 a): Wochentage auf dem Handy zu dritt; quer 🔊 und Antworten neben dem Monatsblatt. */
+  @media (max-width: 560px) {
+    .cal-rechts .wahl { grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 8px; }
+    .cal-rechts .wahl-knopf { min-height: 54px; padding: 6px 4px; }
+    .cal-monat { margin-bottom: 8px; }
+    .cal-hoer { margin-bottom: 8px; }
+  }
+  @media (min-width: 900px) and (orientation: landscape) {
+    .cal-zeile { display: flex; justify-content: center; align-items: center; gap: 24px; }
+    .cal-zeile .cal-monat { flex: 0 1 400px; margin: 0; }
+    .cal-rechts { flex: 0 1 440px; min-width: 0; }
+    .cal-rechts .wahl { margin: 0; }
+  }
 </style>
 </head>
 <body>
@@ -463,6 +477,7 @@ const SPIEL = {
         if (ctx.vorbei()) { fertig = true; monat.zellen[a.t - 1].classList.add("richtig"); }
       });
       f.append(monat.element);
+      kalenderDaneben(f);
       return;
     }
     const box = LS.auswahl(ctx, {
@@ -473,8 +488,20 @@ const SPIEL = {
       beiRichtig: () => { if (!a.blaetter) sprich(a.richtig); },
     });
     if (a.blaetter) box.classList.add("cal-blaetter");
+    kalenderDaneben(f);
   },
 };
+
+/** Monatsblatt links, was darunter steht (🔊, Antworten) rechts daneben — quer nebeneinander (BH3 a). */
+function kalenderDaneben(f) {
+  const monat = f.querySelector(":scope > .cal-monat");
+  if (!monat) return;
+  const rechts = el("div", { class: "cal-rechts" });
+  const zeile = el("div", { class: "cal-zeile" });
+  monat.before(zeile);
+  while (monat.nextSibling) rechts.append(monat.nextSibling);
+  zeile.append(monat, rechts);
+}
 
 LS.spielMitStimme(SPIEL, "fr");
 </script>

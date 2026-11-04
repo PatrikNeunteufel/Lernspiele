@@ -33,6 +33,33 @@
   .kreislauf .nummer-text { font-size: 16px; font-weight: 900; fill: var(--text); stroke: none; }
   .legende { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; font-weight: 800; margin: 0 0 10px; font-size: 15px; }
   .legende span::before { content: ""; display: inline-block; width: 22px; height: 6px; border-radius: 3px; margin-right: 6px; vertical-align: middle; background: var(--f); }
+  /* Ganze Aufgabe im Bild (BH3 a): Bild oder Liste und Antworten auf breiten Bildschirmen nebeneinander,
+     auf niedrigen enger. Die Liste beim fehlenden Schritt ist Lesetext (LS.lesetext). */
+  @media (min-width: 900px) and (orientation: landscape) {
+    .kw-paar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: center; }
+    .kw-paar .weg-liste, .kw-paar .kreislauf, .kw-paar .legende { margin-bottom: 0; }
+    .kw-paar .korb-karte { margin: 0 auto; }
+    .kw-paar .legende { margin-top: 8px; }
+  }
+  .kw-wer .korb-karte { display: flex; align-items: center; gap: 12px; text-align: left; }
+  .kw-wer .korb-karte .bild { font-size: clamp(44px, 9vw, 64px); }
+  @media (min-width: 900px) and (orientation: landscape) {
+    .schritt-wahl:not([style*="grid-template-columns"]) { max-width: none; }
+  }
+  @media (max-height: 820px) {
+    .produkt .gross { display: inline; font-size: 36px; vertical-align: -6px; margin-right: 6px; }
+    .kreislauf, .legende, .frage { margin-bottom: 6px; }
+    .produkt { margin-bottom: 4px; }
+    .schritt-wahl { gap: 5px; }
+    .schritt-wahl .wahl-knopf { min-height: 46px; padding: 4px 8px; gap: 8px; line-height: 1.2; }
+    .schritt-wahl .wahl-knopf .bild { font-size: 24px; }
+    .kw-wer .korb-karte { margin: 2px auto 10px; padding: 6px 18px; }
+    .kw-wer .korb-karte .bild { font-size: 40px; }
+    .kw-wer .korb-karte b { font-size: clamp(18px, 4vw, 24px); }
+    .kw-wer .korb-reihe { gap: 8px; }
+    .kw-wer .korb-knopf { min-height: 72px; padding: 6px 6px; font-size: 17px; line-height: 1.15; }
+    .kw-wer .korb-knopf .bild { font-size: 28px; }
+  }
 </style>
 </head>
 <body>
@@ -287,6 +314,13 @@ const legende = () => el("div", { class: "legende" },
 const richtungText = (von) => (von === "haushalt" ? "von den Haushalten zu den Unternehmen" : "von den Unternehmen zu den Haushalten");
 const produktKopf = p => el("div", { class: "produkt" }, el("span", { class: "gross", text: p.bild }), `Weg: ${p.name}`);
 const schrittInhalt = s => ({ bild: s[2], text: s[0] });
+/** Zwei Spalten an der Stelle der ersten Teile (BH3 a): nebeneinander nur auf breiten Bildschirmen, sonst untereinander. */
+function paar(klasse, links, rechts) {
+  const h = el("div", { class: "kw-paar " + klasse });
+  links[0].before(h);
+  h.append(el("div", {}, ...links), el("div", {}, ...rechts));
+  return h;
+}
 const wegText = (p, idx) => idx.map(i => p.schritte[i][0]).join(" → ");
 
 // Für das Prüfskript im Scratchpad: die laufende Aufgabe.
@@ -358,14 +392,17 @@ LS.spiel({
         hinweis: "Lies den Schritt vor und nach der Lücke. Was muss dazwischen passieren — und gehört es zu diesem Produkt?",
       });
       box.classList.add("schritt-wahl");
+      paar("kw-fehlt", [liste], [box]);
+      LS.lesetext(liste); // langer Weg scrollt im eigenen Feld, Frage und Antworten bleiben im Bild (BH3 a)
     } else if (a.art === "wer") {
       const s = p.schritte[a.i];
       f.append(produktKopf(p), el("div", { class: "frage", text: "Wer macht das?" }));
-      LS.koerbe(ctx, {
+      const { karte, box } = LS.koerbe(ctx, {
         karte: { bild: s[2], text: s[0] }, koerbe: Object.keys(WER), richtig: s[1],
         korbInhalt: w => WER[w], loesung: `${WER[s[1]].text}: ${s[0]}`,
         hinweis: "Lies genau: Wo passiert das — auf dem Feld, in einem Betrieb, unterwegs, im Lager, im Laden oder zu Hause?",
       });
+      paar("kw-wer", [karte], [box]);
     } else if (a.art === "herkunft") {
       ctx.serie("antwort", p.herkunft);
       const loesung = `${HERKUNFT[p.herkunft].text}: ${p.grund}`;
@@ -400,23 +437,25 @@ LS.spiel({
       box.style.gridTemplateColumns = "1fr";
     } else if (a.art === "pfeil") {
       const loesung = `Der Pfeil heisst «${FLUSS[a.fluss].text}».`;
-      f.append(el("div", { class: "frage", text: "Was fliesst beim Pfeil mit dem Fragezeichen?" }),
-        kreislaufSvg({ links: a.links, frage: a.fluss }), legende());
-      LS.auswahl(ctx, {
+      const bild = [kreislaufSvg({ links: a.links, frage: a.fluss }), legende()];
+      f.append(el("div", { class: "frage", text: "Was fliesst beim Pfeil mit dem Fragezeichen?" }), ...bild);
+      const box = LS.auswahl(ctx, {
         optionen: FLUESSE, richtig: a.fluss, breite: 140, inhalt: x => ({ bild: FLUSS[x].bild, text: FLUSS[x].text }), loesung,
         hinweis: "Schau die Farbe an: Fliesst Geld? Und in welche Richtung zeigt der Pfeil?",
       });
+      paar("kw-kreis", bild, [box]);
     } else if (a.art === "richtung") {
       const fl = FLUSS[a.fluss];
       const loesung = `${fl.text} fliesst ${richtungText(fl.von)}.`;
       ctx.serie("antwort", fl.von);
-      f.append(el("div", { class: "frage", text: `In welche Richtung fliesst: ${fl.bild} ${fl.text}?` }),
-        kreislaufSvg({ links: a.links, beschriftet: false }), legende());
-      LS.auswahl(ctx, {
+      const bild = [kreislaufSvg({ links: a.links, beschriftet: false }), legende()];
+      f.append(el("div", { class: "frage", text: `In welche Richtung fliesst: ${fl.bild} ${fl.text}?` }), ...bild);
+      const box = LS.auswahl(ctx, {
         optionen: ["haushalt", "unternehmen"], richtig: fl.von, breite: 220, loesung,
         inhalt: v => ({ bild: v === "haushalt" ? "🏠 ➜ 🏭" : "🏭 ➜ 🏠", text: richtungText(v) }),
         hinweis: "Denk an eine Familie: Was gibt sie weg, und was bekommt sie?",
       });
+      paar("kw-kreis", bild, [box]);
     } else if (a.art === "szene") {
       const sz = SZENEN[a.szene];
       const [person, pron] = PERSONEN[a.person];
@@ -443,15 +482,16 @@ LS.spiel({
       // Königsstufe: alle vier Pfeile nach ihren Nummern beschriften
       const reihe = FLUESSE.map((x, i) => [a.nummern[i], x]).sort((u, v) => u[0] - v[0]).map(([, x]) => x);
       const loesung = reihe.map((x, i) => `${i + 1} ${FLUSS[x].text}`).join(" · ");
-      f.append(el("div", { class: "frage", text: "Was fliesst bei Pfeil 1, 2, 3 und 4? Tippe der Reihe nach." }),
-        kreislaufSvg({ links: a.links, nummern: a.nummern }), legende());
-      const { box } = LS.reihenfolge(ctx, {
+      const bild = [kreislaufSvg({ links: a.links, nummern: a.nummern }), legende()];
+      f.append(el("div", { class: "frage", text: "Was fliesst bei Pfeil 1, 2, 3 und 4? Tippe der Reihe nach." }), ...bild);
+      const { ablage, box } = LS.reihenfolge(ctx, {
         reihe, loesung, breite: 140,
         inhalt: x => ({ bild: FLUSS[x].bild, text: FLUSS[x].text }),
         ablage: x => FLUSS[x].text,
         hinweis: (x, erwartet) => `Schau Pfeil ${reihe.indexOf(erwartet) + 1} an: Welche Farbe hat er, und wohin zeigt er?`,
       });
       box.style.setProperty("--wahl-breite", "140px");
+      paar("kw-kreis", bild, [ablage, box]);
     }
   },
 });

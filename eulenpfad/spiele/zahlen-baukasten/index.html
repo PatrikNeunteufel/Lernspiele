@@ -53,6 +53,19 @@
 
   .mini-tabelle .k { background: var(--f); color: #fff; font-size: 16px; }
   .mini-tabelle .z { background: #f4f6fc; font-size: 26px; min-height: 42px; color: var(--f); }
+
+  /* Ganze Aufgabe im Bild (BH3 a): auf dem Handy und auf niedrigen Bildschirmen kleinere Bausteine, damit
+     auch fünf oder sechs in zwei, drei Reihen über der Tastatur Platz haben */
+  @media (max-width: 560px), (max-height: 820px) {
+    .bausteine { gap: 6px 4px; margin-bottom: 6px; }
+    .baustein { min-width: 0; min-height: 44px; padding: 6px 10px; font-size: clamp(22px, 6vw, 30px); border-radius: 14px; box-shadow: 0 4px 0 rgba(0, 0, 0, .18); }
+    .baustein.lang { font-size: 16px; }
+    .baustein small { font-size: 15px; margin-top: 2px; min-height: 0; }
+    .baustein small:empty { display: none; }
+    .baustein-plus { font-size: 24px; }
+    .mini-tabelle { margin-top: 6px; }
+    .mini-tabelle .z { min-height: 36px; font-size: 24px; padding: 2px 0; }
+  }
 </style>
 </head>
 <body>

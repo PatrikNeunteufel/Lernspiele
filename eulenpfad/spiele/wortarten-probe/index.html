@@ -22,6 +22,15 @@
   .wp-schritt { text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); margin: 0; }
   .wp-wahl .wahl-knopf { font-size: clamp(17px, 3.8vw, 22px); }
   .wp-wahl .wahl-knopf small { font-size: 14px; }
+  /* Ganze Aufgabe im Bild (BH3 a): auf dem Handy und auf niedrigen Bildschirmen engere Abstände, die fünf
+     Probe-Knöpfe niedriger (die langen Namen passen nur einspaltig) */
+  @media (max-width: 560px), (max-height: 820px) {
+    .wp .frage { margin-bottom: 4px; }
+    .wp .satz { padding: 8px 12px; margin-bottom: 8px; line-height: 1.4; }
+    .wp-liste { padding: 6px 12px; margin-bottom: 8px; line-height: 1.35; }
+    .wp-wahl { gap: 6px; }
+    .wp-wahl .wahl-knopf { min-height: 52px; padding: 4px 8px; gap: 0; }
+  }
 </style>
 </head>
 <body>
@@ -245,6 +254,7 @@ LS.spiel({
           fehler(k, "Verbindet das Wort zwei Sätze? Oder steht es vor einem Nomen und sagt, wo, wann oder wie? Sonst ist es eine andere.");
         });
       }
+      LS.kurztasten(wahl);
     };
 
     // Schritt 2: Welche Wortart zeigt die Probe?
@@ -260,6 +270,7 @@ LS.spiel({
           ctx.richtig(waehle(["Richtig geprüft!", "Die Probe hat es verraten!", "Sauber bestimmt!"]));
         });
       }
+      LS.kurztasten(wahl);
     };
 
     // Schritt 1: die Probe wählen.
@@ -277,6 +288,7 @@ LS.spiel({
           : "Diese Probe klappt hier nicht. Probier eine andere.");
       });
     }
+    LS.kurztasten(wahl); // je Schritt neu: die alten Knöpfe sind dann aus dem DOM
   },
 });
 </script>

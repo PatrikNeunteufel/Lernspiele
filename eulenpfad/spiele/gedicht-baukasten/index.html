@@ -298,6 +298,7 @@ LS.spiel({
       frage(`Tippe auf den ${ORDNUNG[a.vers]} Vers${mehrere ? ` der ${ORDNUNG[a.strophe]} Strophe` : ""}.`);
       const loesung = `Der ${ORDNUNG[a.vers].replace(/n$/, "")} Vers${mehrere ? ` der ${ORDNUNG[a.strophe]} Strophe` : ""} heisst: ${a.richtig}`;
       ctx.loesung(loesung);
+      ctx.schritte(1); // den Vers antippen
       f.append(gedichtKasten(a, {
         vers: (v, j, i) => el("button", { type: "button", class: "gedicht-vers", text: v, onclick: e => {
           if (ctx.vorbei()) return;

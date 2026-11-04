@@ -52,6 +52,7 @@ untereinander.
 | Angemeldet | `spieler-zeile` | „Du spielst als …“ im Startbild; angemeldet wird auf der Startseite |
 | Stufenwahl | `stufen`, `stufe`, `fuer`, `timer-zeile`, `timer-schalter`, `option-zeile`, `option-schalter`, `leise` |
 | Entwickler-Modus | `entwickler-leiste`, `entwickler-feld` | Leiste unten im Spiel (Abschnitt 11) | Startbild des Spiels |
+| Kurztasten | `mit-tasten` (am `html`), Attribut `data-marke` | Marke der Taste am Knopf (Abschnitt 19) |
 
 **Erlaubt:** reservierte Klassen eingeschachtelt in einer eigenen Klasse. `.uhr .mitte` trifft nur
 die Uhr. `.knopf` darf ein Spiel als Klasse an eigene Knöpfe hängen, aber nicht umgestalten.
@@ -130,7 +131,7 @@ LS.spiel({
 | `ctx.loesung(text)` | Lösung gleich beim Zeichnen nennen. Sie erscheint nur beim Testspieler hinter „🔑“. **Pflicht in jeder Aufgabe** ✔. Die Bausteine rufen sie selbst auf. Den Text in **eine** Konstante legen, die auch `ctx.falsch` bekommt. |
 | `ctx.vorbei()` | Ist die Aufgabe gelöst oder aufgelöst? Dann nimmt sie keine Antwort mehr an. |
 | `ctx.kennung(wert)` | Woran die Aufgabe zu erkennen ist, wenn man es nicht sieht (Hör-Aufgaben: die Melodie). Sonst nimmt der Rahmen Text, Bilder und Lösung. |
-| `ctx.schritte(n)` | Die Aufgabe braucht n Handgriffe mehr: Tipps, Ziffern samt OK, Züge, so viele wie mindestens nötig sind. Aufrufe zählen zusammen. Die Bausteine zählen ihre selbst (`auswahl` und `koerbe` 1, `reihenfolge` je Teil 1); für die Tastatur `LS.tippSchritte(wert)`. **Pflicht in Endlos-Stufen** ✔, daraus folgt der Boden der Endlos-Zeit (Abschnitt 7). |
+| `ctx.schritte(n)` | Die Aufgabe braucht n Handgriffe mehr: Tipps, Ziffern samt OK, Züge, so viele wie mindestens nötig sind. Aufrufe zählen zusammen. Die Bausteine zählen ihre selbst (`auswahl` und `koerbe` 1, `reihenfolge` je Teil 1); für die Tastatur `LS.tippSchritte(wert)`. **Pflicht in Endlos-Stufen** ✔, daraus folgt der Boden der Endlos-Zeit (Abschnitt 7). **Alle Handgriffe der Aufgabe beim Stellen nennen** (Entscheid HG1 a, LERN_Session13): Mit dem Stellen gilt die Zahl fest; was danach erscheint (ein zweiter Schritt, eine Auswahl nach dem ersten Tipp), rechnet das Spiel vorab ein. Ein Baustein, der erst danach entsteht, zählt nicht mehr; ein späteres `ctx.schritte` des Spiels meldet das Testskript als Fehler. |
 | `ctx.serie(name, wert)` | Ein zufällig gewähltes Merkmal, das das Kind als Muster erkennen kann: Richtung oder Aufgabenart, oder die richtige Antwort bei höchstens drei festen Antworten (ja/nein, <, =, >, auf/ab). **Serienbremse** (Vorgabe Patrik 2026-11-01): Der Rahmen zieht neu, statt dasselbe Merkmal öfter als `LS.SERIE_MAX` = 3-mal hintereinander zu stellen (bis zu 40 Versuche). Nicht für Zahlenwerte oder Knopfpositionen, und nur in Stufen, die wirklich mehrere Werte haben ✔. |
 | `ctx.vorgehen(art, wert)` | Wie das Kind die Aufgabe angegangen ist, vor `ctx.richtig()` gemeldet (LERN_Session7). Landet in `aufgabenZeiten[i].vorgehen` und in der Statistik, Karte „Vorgehen“ (Punkte der letzten 12 Aufgaben). Arten und Werte (vom besten zum schwächsten, Ton gut/mittel/schwach) stehen in `AUSWERTUNG.VORGEHEN`: `systematik` (Möglichkeiten-Finder: Zählwerk, geordnet, kreuz und quer, mit Hilfe), `teilerpaare` (Teiler-Spürnase: in Paaren, der Grösse nach, durcheinander), `ausgleichen` (Mittelwert-Türme: ohne Umweg, mit Umwegen). |
 | `ctx.wartezeit(s)` | Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne). Uhr und Zeitmessung beginnen so viel später (Entscheide F1 a, F2 a, LERN_Session9); wartet das Spiel mit `ctx.nachAnsage`, zählt die Wartezeit ab dann. |
@@ -167,6 +168,8 @@ auf. Die Optionen sind in `spiel.js` beschrieben.
 | `LS.losGehts(ctx, element, weiter, { uhr })` | Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): element bleibt verdeckt. Bei der ersten Aufgabe einer Runde, nach einer Aufgabe mit Fehler und im Mix darüber „▶ Los!“, nach dem Tippen 3-2-1; sonst nur 1 s 👀 (`ctx.losKnopf`, LERN-38). Dann sichtbar, und `weiter(uhrLos)` startet die Zeigezeit. Mit und ohne Timer gleich: Die Uhr startet nach `weiter()`, mit `{ uhr: false }` erst, wenn das Spiel `uhrLos()` ruft (Merk-Blick: mit dem veränderten Bild). Mit `{ antwortenNachBlitz: true }` bleiben die Antworten (`.wahl`, `.tastatur`, `.korb-reihe`) verdeckt, bis das Spiel `weiter(uhrLos, vorbei)` → `vorbei()` ruft; erst dann startet die Uhr (höchstens 8 s, Bemerkung 7, LERN_Session11: Blitzlesen, Punkte-Blitz, Finger-Zähler). Benutzt von Merk-Blick, Punkte-Blitz, Blitzlesen, Finger-Zähler (Wunsch Patrik, LERN_Session8) |
 | `LS.tastatur(opt)` | Zifferntastatur mit Anzeigefeld; das Spiel prüft selbst in `onOk`. Mit `dezimal: true` eine Taste für das eingestellte Dezimalzeichen (auch `.` und `,` auf der Tastatur), `nachkomma` begrenzt die Ziffern danach (Standard 3); `onOk(wert, text)` bekommt die Zahl und den getippten Text mit „.“, wenn die Stellenzahl zählt („3.0“ beim Runden) (LERN_Session8, LERN-36) |
 | `NOTEN.zeile`, `NOTEN.hoerKnopf` | Notenbild und Hörknopf (`noten.js`) |
+| `LS.lesetext(feld)` | Lesespiele (BH3 a): Der Text scrollt in seinem eigenen Feld, Auftrag, Frage und Antworten bleiben im Bild. Der Rahmen rechnet die Höhe aus dem übrigen Platz (mindestens 120 px), bei jeder Grössenänderung neu; ein Schatten unten zeigt, dass noch Text kommt. Gleich nach dem Einhängen des Texts aufrufen |
+| `LS.kurztasten(box, knoepfe?, { reihe })` | Kurztasten für eigene Antwortknöpfe (Abschnitt 19); `auswahl`, `reihenfolge` und `koerbe` rufen es selbst. `reihe: true` verlangt die Grundreihe, wo gleiche Zeichen verschiedene Plätze meinen (Stellen-Detektiv Stufe 6). `data-taste` am Knopf nennt sein Zeichen, wo der Text es nicht ist (Stellen-Detektiv „Hunderter“ → `H`). `LS.kurztastenAus()` schaltet sie für die Seite ab (Spiele mit eigener Tastenbedienung) |
 
 Hilfsfunktionen: `LS.el` (Element bauen), `LS.zahlText` (Schulschreibweise, „30 400“),
 `LS.zerlege`, `LS.zufall`, `LS.waehle`, `LS.mische`, `LS.tippSchritte(wert)` (Handgriffe, um eine Zahl
@@ -222,6 +225,31 @@ Entscheide Patrik L1 a bis L4 a, 2026-10-31.
   - spielt als Tester: Ihre Runden tragen `test: true`, und im Spiel gibt es die Testhilfen.
 
   Frühere Testspieler (`test: true`) werden beim Lesen zur Aufsicht.
+
+**Neue Kinder und Aufsichten** (Entscheide KR1 a, KR2 a mit Zusatz Patrik, LERN_Session13): Auf der Anmeldung steht
+immer „🐣 Ich bin neu“ und fragt „Ich bin ein Kind“ oder „Ich bin erwachsen (Aufsicht)“. Jeder Schritt steht im
+Verlauf (`#neu`, `#neu-kind`, `#neu-klasse`, `#neu-frage`, `#neu-bestaetigen`, `#neu-aufsicht`, `#pin`), „Zurück“ im
+Browser geht einen Schritt zurück; Namen stehen nie in der Adresse.
+- **Aufsicht:** zuerst eine Frage über dem Stoff der Primarschule (Wurzel, Potenz, Produkt zweier negativer Zahlen,
+  einfache Gleichung, Punkt-vor-Strich-Falle mit Potenz („5 + 3 · 4²“), Pythagoras mit ganzzahligen Seiten; falsch →
+  andere Frage) — eine Hürde gegen Kinder, kein Schutz. Gibt es schon eine Aufsicht mit
+  PIN, bestätigt eine von ihnen mit ihrer PIN (`LS.pinStimmt`, meldet nicht an); dann Name und PIN zweimal.
+- **PIN vergessen** (Entscheide PIN1 a, PIN1-R a mit Zusatz Patrik): Beim Anlegen einer Aufsicht wählt sie eine
+  Sicherheitsfrage mit Antwort und bekommt einmal einen Wiederherstellungscode (12 Zeichen, „K7QM-2XRA-9TPL“) zu sehen;
+  gespeichert sind nur Prüfwerte (`wiederherstellung`), nie in Sicherungen oder im Abgleich (`LS.ohneGeheimnis`).
+  Bei der PIN-Abfrage führt „PIN vergessen?“ über die Frage für Erwachsene zu den Stufen: (1) Hinweis auf eine zweite
+  Aufsicht (setzt die PIN in Verwaltung → Konten), (2) Code, (3) Sicherheitsfrage (Gross-/Kleinschreibung und
+  Leerzeichen zählen nicht), danach eine neue PIN und gleich ein neuer Code; (4) Zurücksetzen mit Frist von 3 Tagen
+  (`lernspiele:zuruecksetzen`, je Gerät): Die Anmeldung zeigt allen den Termin, PIN oder Code einer Aufsicht bricht ab;
+  nach Ablauf werden alle Aufsichten des Geräts zu Konten ohne PIN, und „Ich bin neu“ richtet ohne Erlaubnis eine neue
+  ein. **Achtung Abgleich:** Die Rolle reist mit, nach dem nächsten Abgleich gilt das Zurücksetzen auch auf den anderen
+  Geräten. Aufsichten von früher richten Code und Frage in Verwaltung → Konten ein („Falls Sie Ihre PIN vergessen“).
+- **Kind:** Vorname, dann
+die Klasse über grosse Knöpfe (Kindergarten, 1.–6., „Weiss nicht“), danach öffnet sich „Mein Bild“. Das geht
+auch ohne Aufsicht; das Kind spielt dann alle freigegebenen Spiele, und was nur die Aufsicht kann (Freigaben,
+Wochenziel, „fest“, Meldungen weitergeben), kommt, sobald eine eingerichtet ist. Gibt es eine Aufsicht, kann sie
+es mit der Einstellung „Kinder legen sich selbst an“ (`selbstAnlegen`, Standard ja) abschalten; dann legt nur
+sie Kinder an (Verwaltung → Konten).
 
 **Freigabe.** Der Prüfstand steht im Repo (`spiele/gemeinsam/pruefstand.js`, gesetzt im
 Entwickler-Modus, Abschnitt 11), die Freigabe gilt je Gerät. Standardmässig frei ist, was nichts mehr
@@ -615,9 +643,9 @@ Wunsch Patrik, Entscheide T1 a, T2 a, T3 a (LERN_Session9). **Hilfe** erklärt d
   darunter, was der Rahmen auf der Seite findet: Stufenwahl, Zifferntastatur, Antworten, Körbe,
   Reihenfolge, ▶ Los, 🔊, 💡 Tipp, Zeitbalken, „Falsch ist nicht schlimm“, 🗣️, 🙋 Melden. Ohne Folgen; die
   Runde notiert nur, wie oft (`bedienhilfe` im Protokoll).
-- **💡 Tipp** unter der Aufgabe (Klasse `tipp-zeile`), nur wenn das Spiel `ctx.tipp([...])` gibt, nie im
-  Endlos-Modus. Jedes Antippen zeigt den nächsten Tipp in der Eulenblase („💡 Noch ein Tipp“, zuletzt
-  „Keine Tipps mehr“). Die Uhr läuft weiter. Gezählt wird je Aufgabe (`aufgabenZeiten[i].tipps`) und je
+- **💡 Tipp** beim Antwortbereich ohne eigene Zeile (Klasse `tipp-zeile`; Ort seit BH2-T a, LERN_Session13: Abschnitt
+  20), nur wenn das Spiel `ctx.tipp([...])` gibt, nie im Endlos-Modus. Jedes Antippen zeigt den nächsten Tipp in der
+  Eulenblase; der Knopf sagt es als Beschriftung („Noch ein Tipp“, zuletzt „Keine Tipps mehr“, dann grau). Die Uhr läuft weiter. Gezählt wird je Aufgabe (`aufgabenZeiten[i].tipps`) und je
   Runde (`tipps`); die **Sterne** rechnen `sterneFuer(fehler + tipps / 2)` — fragen ist günstiger als
   raten, aber nicht gratis. „Auf Anhieb“ heisst ohne Fehler und ohne Tipp (Auswertung, Mix, Fazit); der
   Abschluss nennt die Tipps, Fazit und Statistik ebenso.
@@ -736,3 +764,58 @@ Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
 - **Statistik des Kindes:** „Das übe ich als Nächstes“ (Vorschläge, Fazit wenn freigegeben), „Meine Woche“, „Meine
   Runden“, „Meine Meldungen“. Alles andere nur für die Aufsicht. **Erfolge:** „🏆 Meine Podestplätze“ — Platz 1–3 der
   Endlos-Ranglisten dieses Geräts.
+
+## 19. Kurztasten für Antwortknöpfe
+
+Entscheid TK1 a mit Zusatz Patrik (LERN_Session13): Wer mit einer echten Tastatur spielt, wählt Antworten auch mit
+Tasten. Ausgelegt für die Schweizer Tastatur (QWERTZ); gleiche Zeichen liegen in jedem Spiel auf denselben,
+benachbarten Tasten. Code in `spiel.js`, Abschnitt „Kurztasten“; Spiele mit eigenen Knöpfen rufen `LS.kurztasten`.
+
+| Antworten | Tasten | gemessen an |
+|---|---|---|
+| < = > | Y X C | Ort (`code`), dazu die Zeichen selbst |
+| + − · : | V B N M | Ort, dazu `+ - * / :` |
+| Satzzeichen „ “ ! , . ? und ⌫ | B V N , . - und die Rücktaste (unten rechts wie auf der Schweizer Tastatur; : wie oben auf M) | Ort, dazu die Zeichen selbst |
+| Stellen E Z H T M, ZT, HT | E Z H T M, ⇧Z, ⇧H | Zeichen (`key`) |
+| je ein Buchstabe oder eine Ziffer | er selbst (Ziffern nur ohne offene Zifferntastatur); bei doppelten der erste freie Knopf mit dem Zeichen (Buchstabier-Kacheln: das Wort tippen) | Zeichen |
+| alles andere (Wörter, Zahlen, Bilder) | A S D F G H J K L, dann Q W E R T Z U I O P, in Bildschirm-Reihenfolge; nie Ziffern, damit die Taste 5 nie die Antwort „5“ meint | Ort |
+
+- **Belegung erkennen:** Chrome und Edge nennen die Belegung (`navigator.keyboard.getLayoutMap`); dann tragen die
+  Marken die Beschriftung der eigenen Tastatur (auf einer amerikanischen steht an derselben Stelle Z statt Y). Sonst
+  gilt die Schweizer Belegung. Die Tasten nach Ort bleiben am selben Platz, die nach Zeichen folgen der Beschriftung.
+- **Marke:** oben rechts am Knopf (Attribut `data-marke`, als `::after` gezeichnet, damit Text und Kennung des
+  Knopfs gleich bleiben). Sie erscheint am Computer mit Maus (`hover: hover` und `pointer: fine`) oder nach dem ersten
+  echten Tastendruck (gemerkt je Gerät in `lernspiele:tasten`); auf Tablet und Handy ohne Tastatur nie. Steht der
+  Buchstabe oder die Ziffer sichtbar auf dem Knopf, entfällt sie; nennt nur `data-taste` das Zeichen, bleibt sie.
+- **Gruppen:** Ruft ein Spiel `LS.kurztasten` erneut für dieselbe Box auf, ersetzt die neue Gruppe die alte. Schon
+  gewählte Knöpfe (`gewaehlt`, `disabled`, `aria-disabled`) überspringt die Taste.
+- **Vorrang:** Die Zifferntastatur hat die Ziffern, Enter und ⌫. Die jüngste sichtbare Gruppe gewinnt; verdeckte
+  Antworten (`antworten-warten`) und Eingabefelder bleiben aussen vor.
+- **Ohne Kurztasten** bleiben Spiele, die nur mit Zeigen, Ziehen, Raster, Brett oder Antippen im Text gehen, und Spiele
+  mit eigener Tastenbedienung (`LS.kurztastenAus()`).
+- **Annahmen bis zur Testrunde:** die Tasten für < = > und + − · :, die Grundreihe für alles andere.
+
+## 20. Ganze Aufgabe im Bild
+
+Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild passen — Handy 375×812, Tablet hoch
+768×1024, Tablet quer 1024×768, Laptop 1366×768.
+
+- **Rahmen** (`stil.css`, nach dem Handy-Block): (1) Unter 820 px Höhe verdichtet er wie unter 560 px Breite (Eule,
+  Tasten 52 px, Ränder). (2) Breit und quer (ab 900 px, Querformat) steht die Zifferntastatur rechts neben der Aufgabe
+  — nur, wenn sie direkt in der Spielfläche steht (`.karte > div > .tastatur`). (3) Sonst bleibt sie als Leiste unten im
+  Bild (`position: sticky`), und die Aufgabe scrollt darüber.
+- **Sprechblase und Tipp** (Entscheide BH2 a, BH2-T a; ersetzen den Ort aus T1 a): In der Runde zeigt die Blase
+  höchstens zwei Zeilen (`span.blase-text`); ist der Text länger, steht „…“ und ▾, Antippen klappt auf und zu. Ein
+  Hinweis nach einem Fehler steht immer ganz, 🗣️ liest immer alles. 💡 steht beim Antwortbereich ohne eigene Zeile:
+  mit Zifferntastatur als Taste in ihrer untersten Reihe (mit Dezimaltaste wird OK schmaler), sonst rund und rechts in
+  der letzten Zeile `auftrag` oder `frage` direkt in der Spielfläche (der Text fliesst herum), fehlen beide, rechts oben
+  in der Spielfläche. Steht die Frage in einer eigenen Hülle, nennt das Spiel die Zeile mit dem Attribut
+  `data-tipp-ziel`. Nie zwischen den Antworten.
+- **Je Spiel** (BH3 a): Was danach noch überläuft, passt das Spiel selbst an (Grafik nach der Bildhöhe, `min()` mit
+  `vh`, engere Abstände, Teile nebeneinander); Lesespiele nehmen `LS.lesetext`. Steht eine `.wahl` in einer Spalte eines
+  Rasters, braucht sie `margin-inline: 0` — mit `margin: 0 auto` wird sie so breit wie ihr Mindestinhalt, und die
+  Seite läuft seitlich über (Pflanzen-Bestimmer). Ein Spiel, das die Tastatur in einen
+  eigenen Behälter setzt, bekommt (2) und (3) nicht und ordnet selbst.
+- **Messen:** `node tools/bildhoehe.js [Basis-URL] [spiel-id …]` (Server nötig; Chrome ohne Fenster, Messkind mit allem
+  freigegeben). Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe selbst über dem Rand (ohne Tipp-Zeile), mit der
+  Zifferntastatur nicht ganz im Bild, und seitlich (Code 1). `--css=datei` probiert CSS aus, ohne den Code zu ändern.

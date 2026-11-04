@@ -170,6 +170,7 @@ LS.spiel({
       box.append(k);
     }
     ctx.flaeche.append(ablage, box);
+    LS.kurztasten(box);
     if (ctx.nr === 0) ctx.sag(a.extra ? "Achtung: Eine Karte ist zu viel!" : "Tipp die Karten der Reihe nach an.");
   },
 });

@@ -22,6 +22,22 @@
   .kette .pfeil-k { font-size: clamp(20px, 4.6vw, 28px); font-weight: 900; color: var(--text-leise); }
 
   .wahl-knopf { font-size: clamp(16px, 3.6vw, 20px); font-weight: 800; }
+  /* Ganze Aufgabe im Bild (BH3 a): auf dem Handy Kette enger, Energien und Wandler zu zweit nebeneinander. */
+  @media (max-width: 560px) {
+    .kette { gap: 4px 2px; margin-bottom: 10px; }
+    .kette .glied { min-width: 70px; padding: 6px 6px; }
+    .kette .glied .bild { font-size: 26px; }
+    .kette .pfeil-k { font-size: 18px; }
+    .frage { margin-bottom: 8px; }
+    .wahl.ew-kurz { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .ew-kurz .wahl-knopf { min-height: 54px; padding: 6px; font-size: 16px; }
+    .ew-kurz .wahl-knopf .bild { font-size: 28px; }
+  }
+  @media (max-height: 820px) and (min-width: 561px) { /* niedrig und breit: Bild links neben dem Namen */
+    .ew-kurz .wahl-knopf { flex-direction: row; gap: 8px; min-height: 56px; }
+    .ew-kurz .wahl-knopf .bild { font-size: 30px; }
+    .kette { margin-bottom: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -355,7 +371,7 @@ LS.spiel({
       const loesung = `${g.name}: ${formText(g.von)} → ${formText(g.zu.join("+"))}. ${g.text}`;
       f.append(zeile, el("div", { class: "frage", text: woher ? `${g.name}: Welche Energie ist vorher da?` : `${g.name}: Welche Energie kommt heraus?` }));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: formInhalt, breite: 190, loesung, lob: `Richtig! ${g.text}`,
-        hinweis: woher ? "Überleg: Was muss da sein, damit es arbeitet? Was wird dabei verbraucht?" : "Überleg: Was spürst, siehst oder nutzt du, wenn es arbeitet?" });
+        hinweis: woher ? "Überleg: Was muss da sein, damit es arbeitet? Was wird dabei verbraucht?" : "Überleg: Was spürst, siehst oder nutzt du, wenn es arbeitet?" }).classList.add("ew-kurz");
       return;
     }
 
@@ -376,7 +392,7 @@ LS.spiel({
         el("div", { class: "frage", text: a.art === "fehlt" ? "Welcher Wandler fehlt?" : "Welche Energie geht vom einen Wandler zum nächsten?" }));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: a.art === "fehlt" ? geraetInhalt : formInhalt, breite: 190, loesung,
         hinweis: a.art === "fehlt" ? "Der Wandler muss genau die Energie aufnehmen, die davor steht, und die Energie danach abgeben."
-          : "Was gibt der erste Wandler ab? Und was braucht der zweite, damit er arbeitet?" });
+          : "Was gibt der erste Wandler ab? Und was braucht der zweite, damit er arbeitet?" }).classList.add("ew-kurz");
       return;
     }
 
@@ -392,7 +408,7 @@ LS.spiel({
       const loesung = a.reihe.map(w => teilInhalt(w).text).join(" → ");
       f.append(el("div", { class: "frage", text: `Am Anfang: ${k.anfang}. Bau die Kette: Tipp der Reihe nach Energie, Wandler, Energie …` }));
       LS.reihenfolge(ctx, { reihe: a.reihe, inhalt: teilInhalt, ablage: w => `${teilInhalt(w).bild} ${teilInhalt(w).text}`, pfeile: true, breite: 160, loesung,
-        hinweis: "Das kommt noch nicht. Was kommt aus dem letzten Teil heraus, und welcher Wandler nimmt genau das auf?", lob: "Die ganze Kette stimmt! 🎉" });
+        hinweis: "Das kommt noch nicht. Was kommt aus dem letzten Teil heraus, und welcher Wandler nimmt genau das auf?", lob: "Die ganze Kette stimmt! 🎉" }).box.classList.add("ew-kurz");
       return;
     }
 
@@ -402,7 +418,7 @@ LS.spiel({
       f.append(el("div", { class: "anfang", text: `Am Anfang: ${k.anfang}` }), ketteEl(k, { geraete: a.geraete }),
         el("div", { class: "frage", text: "Ein Wandler passt nicht zu den Energien davor und danach. Welcher?" }));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: geraetInhalt, breite: 190, loesung,
-        hinweis: n => `${n} passt: ${formText(vor[a.geraete.indexOf(n)])} hinein, ${formText(a.geraete.indexOf(n) < a.geraete.length - 1 ? vor[a.geraete.indexOf(n) + 1] : ende)} heraus. Prüf die anderen.` });
+        hinweis: n => `${n} passt: ${formText(vor[a.geraete.indexOf(n)])} hinein, ${formText(a.geraete.indexOf(n) < a.geraete.length - 1 ? vor[a.geraete.indexOf(n) + 1] : ende)} heraus. Prüf die anderen.` }).classList.add("ew-kurz");
     }
   },
 });

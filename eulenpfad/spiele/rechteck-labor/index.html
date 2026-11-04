@@ -22,6 +22,14 @@
   .laborbuch { margin: 8px auto 0; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: clamp(14px, 3.4vw, 18px); }
   .laborbuch th, .laborbuch td { border: 2px solid var(--rand); padding: 4px 8px; text-align: center; }
   .laborbuch th { color: var(--text-leise); }
+  /* Ganze Aufgabe im Bild (BH3 a): Breit und quer steht das Raster links, Mass, Knöpfe und Laborbuch rechts daneben. */
+  @media (max-height: 820px) { .labor-mass { margin: 4px 0; } .labor-knoepfe { margin-top: 6px; } .laborbuch { margin-top: 6px; } }
+  @media (min-width: 900px) and (orientation: landscape) {
+    div:has(> .labor) { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); column-gap: 18px; align-items: start; align-content: start; }
+    div:has(> .labor) > .frage { grid-column: 1 / -1; }
+    div:has(> .labor) > .labor { grid-column: 1; grid-row: 2 / span 12; }
+    div:has(> .labor) > :not(.frage):not(.labor) { grid-column: 2; }
+  }
 </style>
 </head>
 <body>

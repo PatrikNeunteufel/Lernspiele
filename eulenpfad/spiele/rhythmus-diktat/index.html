@@ -29,6 +29,15 @@
   .rhythmus .balken, .rhythmus .faehnchen, .rhythmus .punkt { fill: var(--text); }
   .rhythmus .pause { stroke: var(--text); stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
   .rd-zeile { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy stehen die drei Knöpfe sonst je in einer eigenen Zeile. */
+  @media (max-width: 560px) {
+    .rd-zeile { gap: 8px; margin-bottom: 8px; }
+    .rd-zeile .knopf { font-size: 18px; padding: 8px 14px; min-height: 48px; }
+    .karten-wahl { grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 6px; }
+    .karte-knopf { min-height: 72px; padding: 2px 2px 4px; }
+    .karte-knopf svg { height: 42px; }
+    .diktat { min-height: 76px; margin-bottom: 8px; }
+  }
 </style>
 </head>
 <body>
@@ -322,6 +331,7 @@ LS.spiel({
       el("div", { class: "frage", text: s.takte > 1 ? "Hör zu und lege die zwei Takte nach." : "Hör zu und lege den Takt nach." }),
       el("div", { class: "rd-zeile" }, NOTEN.hoerKnopf(ctx, vorspiel, "🔊 Nochmal hören"), meine, zurueck),
       diktat, wahl);
+    LS.kurztasten(wahl); // nur die Notenkarten, nicht Hören, Meine Karten, Zurück
     zeichne();
     // Vorspielen, sobald die Eule fertig ist (Lob, Vorlesen); ctx.nachAnsage lässt eine neu gezogene Fassung weg.
     ctx.nachAnsage(() => { if (document.body.contains(diktat) && !ctx.vorbei()) NOTEN.spiele(vorspiel()); });

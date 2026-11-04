@@ -213,6 +213,9 @@ LS.spiel({
         type: "button", class: "zz-op" + (z === op ? " zz-an" : ""), text: z, "aria-label": { "+": "plus", "−": "minus", "×": "mal", ":": "geteilt durch" }[z],
         onclick: () => zeichen(z),
       }));
+      // Kurztasten je Zeichnen neu: Karten in der Grundreihe (A S D …), Rechenzeichen fest auf V B N M.
+      LS.kurztasten(kartenBox);
+      LS.kurztasten(zeichenBox);
     }
 
     function zeichen(z) {

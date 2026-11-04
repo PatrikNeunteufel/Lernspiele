@@ -29,6 +29,13 @@
   .go-luecke-satz { font-size: clamp(17px, 3.8vw, 22px); font-weight: 700; margin: 0 0 8px; line-height: 1.4; }
   .go-lueckenwort { display: inline-block; min-width: 3.4em; border-bottom: 3px solid var(--deko-7); text-align: center; color: var(--deko-7); font-weight: 900; }
   .go-luecke .wahl-knopf { min-height: 48px; font-size: clamp(15px, 3.4vw, 19px); }
+  /* Ganze Aufgabe im Bild (BH3 a): auf dem Handy engere Lückenkarten */
+  @media (max-width: 560px) {
+    .go-luecke { padding: 6px 10px; margin-bottom: 6px; }
+    .go-luecke-satz { margin-bottom: 6px; }
+    .go-luecke .wahl { gap: 6px; }
+    .go-luecke .wahl-knopf { padding: 4px 6px; line-height: 1.15; }
+  }
 </style>
 </head>
 <body>
@@ -306,7 +313,7 @@ LS.spiel({
         const wort = el("span", { class: "go-lueckenwort", text: "___" });
         const karte = el("div", { class: "go-luecke" }, el("p", { class: "go-luecke-satz" }, wort, " " + l.nach));
         const wahl = el("div", { class: "wahl" });
-        wahl.style.setProperty("--wahl-breite", "100px");
+        wahl.style.setProperty("--wahl-breite", "80px"); // die drei Zeitwörter auch auf dem Handy in einer Reihe (BH3 a)
         for (const z of LUECKEN) {
           const k = el("button", { type: "button", class: "wahl-knopf", text: z });
           k.addEventListener("click", () => {

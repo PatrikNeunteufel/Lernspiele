@@ -11,6 +11,18 @@
   .hoer-zeile .knopf { font-size: clamp(18px, 4vw, 22px); }
   .notenwahl .wahl-knopf { padding: 2px 4px; }
   .notenwahl .noten-zeile { max-width: 220px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Notenbilder auf dem Handy zu zweit nebeneinander, auf niedrigen Bildschirmen
+     Ohr und Notenbilder kleiner. */
+  @media (max-width: 560px) {
+    .notenwahl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .notenwahl .noten-zeile { max-height: 104px; }
+  }
+  @media (max-height: 820px) {
+    .ohr { font-size: 52px; }
+    .frage { margin-bottom: 6px; }
+    .hoer-zeile { margin-bottom: 10px; }
+    .notenwahl .noten-zeile { max-height: 100px; }
+  }
 </style>
 </head>
 <body>

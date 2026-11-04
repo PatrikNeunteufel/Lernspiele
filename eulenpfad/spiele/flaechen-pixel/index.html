@@ -12,6 +12,8 @@
   .raster .zelle { fill: var(--f, var(--deko-5)); stroke: #fff; stroke-width: 1.5; }
   .raster .rand { fill: none; stroke: var(--text); stroke-width: 3; stroke-linejoin: round; }
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy lässt das Raster über der Zifferntastatur Platz. */
+  @media (max-width: 560px) { .frage + .raster { max-height: calc(100vh - 600px); min-height: 200px; } }
 </style>
 </head>
 <body>
