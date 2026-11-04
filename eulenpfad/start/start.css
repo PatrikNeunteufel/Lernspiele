@@ -297,6 +297,19 @@ button.stufenknopf { border: none; border-bottom: 4px solid var(--sf); font-fami
   font: inherit; font-size: 18px; border: 3px solid var(--rand); border-radius: 12px; padding: 6px 10px; min-width: 110px; max-width: 100%; background: #fff;
 }
 .timer-details { margin: 6px 0 14px; }
+/* Profil der Aufsicht (LERN_Session14): Abschnitte Person, Vorgaben, Fokus; Speichern darunter; dann die Häkchen */
+.profil-abschnitt { border-top: 2px solid var(--rand); padding-top: 12px; margin-top: 12px; }
+.profil-abschnitt h3 { margin: 0 0 10px; font-size: 18px; }
+.profil-abschnitt p.leise-text { margin: 10px 0 6px; }
+.profil-person { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 20px; margin-bottom: 8px; }
+.profil-person label > .leise-text { font-weight: 700; font-size: 14px; }
+.profil-bild { display: inline-flex; }
+.klasse-wahl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.fokus-klapp > summary { font-size: 17px; }
+.fokus-gruppe { margin: 6px 0 0 16px; }
+.fokus-gruppe > summary { cursor: pointer; font-weight: 800; color: var(--text); }
+.profil-speichern { justify-content: flex-start; align-items: center; margin: 14px 0 4px; }
+.profil-ueber-mich { margin: -6px 0 12px; font-size: 18px; font-weight: 800; color: var(--text-leise); }
 .timer-details summary { cursor: pointer; font-weight: 700; color: var(--knopf); }
 .tabelle-rahmen { overflow-x: auto; }
 .timer-tabelle { display: grid; grid-template-columns: minmax(150px, 1.6fr) 110px repeat(6, 74px); gap: 6px 8px; align-items: center; margin-top: 10px; min-width: 720px; }

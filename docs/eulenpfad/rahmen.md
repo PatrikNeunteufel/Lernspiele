@@ -763,8 +763,12 @@ Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
   öffnet (`freiGesehen`). Die Abzeichen zeigen dieselben Symbole statt Emoji, auch im geteilten Bild.
   `LS.avatarBild(name, groesse)` gibt das Bild als Element, ohne Avatar den Anfangsbuchstaben. Es steht vor dem Namen:
   Anmeldung (Kachel), Kopfzeile, Spielerzeile im Spiel, Endlos-Ranglisten, Namens-Chips der Aufsicht, Abzeichen-Bild.
-- **Profil:** Ein Kind sieht nur „Mein Bild“. Die Aufsicht setzt Geburtsmonat, Klasse, Fokus und die Vorgaben für
-  Vorlesen, Reihenfolge und Timer, je Einstellung mit „🔒 fest“ und „↺ Auf Vorgabe zurück“.
+- **Profil:** Ein Kind sieht sein Alter und seine Klasse (nur zum Lesen) und wählt „Mein Bild“. Die Aufsicht (Aufbau
+  nach Hinweis Patrik, LERN_Session14): oben ein Formular — **👤 Person** (Bild des Kindes nur zum Ansehen, Geburtsmonat
+  mit Alter, Klasse mit dem Aufstieg gleich daneben), **🎮 Vorgaben fürs Spielen** (Vorlesen, Reihenfolge global und je
+  Spiel eingeklappt, Timer), **⭐ Fokus** (ganz und je Fach oder Lernzielblatt einklappbar, mit Zählern) — und gleich
+  darunter „Speichern“. Darunter **🔒 Was das Kind selbst umstellen darf**: „🔒 fest“ und „↺ Auf Vorgabe zurück“ je
+  Einstellung, die sofort wirken. Vor einem Aufstieg speichert das Formular, was geändert ist.
 - **Geburtsmonat** (Wunsch Patrik, LERN_Session14): Profilfeld `geboren: "JJJJ-MM"`, ohne Tag (Datensparsamkeit, Annahme
   GM1); `LS.alterVon(profil, jetzt)` rechnet das Alter, im Geburtsmonat selbst ab dem Ersten. Ältere Profile mit der Zahl
   `alter` gelten weiter, bis der Geburtsmonat gesetzt ist; das Profil bittet darum. Nur Jahr oder nur Monat wird nicht

@@ -7,6 +7,10 @@
 let profilVon = null; // nur für die Aufsicht: wessen Profil gerade offen ist
 let avatarSatz = null; // gewählter Reiter der Bildwahl (nur Anzeige)
 let avatarNeu = null;  // { name, neu }: was beim ersten Öffnen neu freigeschaltet war; 🆕 bleibt bis zum Neuladen
+/** Gruppe eines Lernziels für die Fokus-Liste: Lernzielblatt („4.2-G1“) oder Fach aus dem Lehrplan-Kürzel („MA.1.A.3“). */
+const FOKUS_FAECHER = { MA: "Mathe", D: "Deutsch", NMG: "NMG", FS1E: "Englisch", FS2F: "Französisch", MU: "Musik", MI: "Medien und Informatik",
+  BG: "Bildnerisches Gestalten", TTG: "Textiles und Technisches Gestalten", BS: "Bewegung und Sport" };
+const fokusGruppe = lz => (/^\d/.test(lz) ? `Lernzielblatt ${lz.split("-")[0]}` : FOKUS_FAECHER[lz.split(".")[0]] || lz.split(".")[0]);
 const MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
 /**
@@ -80,7 +84,12 @@ function zeichneProfil(box, neu) {
   const karte = el("section", { class: "karte profil" });
   box.append(karte);
   if (!aufsicht) {
-    karte.append(el("h2", { text: "🖼️ Mein Bild" }), avatarWahl(name, neu, true));
+    // Alter und Klasse sieht das Kind auch selbst (Hinweis Patrik, LERN_Session14); ändern kann sie nur die Aufsicht.
+    const alter = LS.alterVon(p), k = LS.klasseVon(p);
+    const ueberMich = [alter !== null ? `${alter} Jahre alt` : null, k !== null ? LS.klasseText(k) : null].filter(Boolean).join(" · ");
+    karte.append(el("h2", { text: `👤 ${LS.spielerName(name)}` }),
+      ueberMich ? el("p", { class: "profil-ueber-mich", text: ueberMich }) : "",
+      el("h3", { text: "🖼️ Mein Bild" }), avatarWahl(name, neu, true));
     return;
   }
   const wahl = el("select", { "aria-label": "Profil von" }, ...LS.spielerListe().map(n => el("option", { value: n, text: LS.spielerName(n) })));
@@ -115,8 +124,8 @@ function zeichneProfil(box, neu) {
   const alterText = el("span", { class: "leise-text", "aria-live": "polite" });
   const zeigeAlter = () => {
     const a = jahr.value && monat.value ? LS.alterVon({ geboren: `${jahr.value}-${monat.value}` }) : null;
-    alterText.textContent = a !== null ? `Heute ${a} Jahre alt.`
-      : typeof p.alter === "number" ? `Bisher nur „${p.alter} Jahre“ — bitte Geburtsmonat ergänzen.` : "";
+    alterText.textContent = a !== null ? `${a} Jahre alt`
+      : typeof p.alter === "number" ? `bisher „${p.alter} Jahre“ — bitte Geburtsmonat ergänzen` : "nur Monat und Jahr";
   };
   jahr.addEventListener("change", zeigeAlter);
   monat.addEventListener("change", zeigeAlter);
@@ -127,33 +136,63 @@ function zeichneProfil(box, neu) {
   klasse.value = LS.klasseVon(p) ?? "";
   // Aufsteigen lassen (Wunsch Patrik, LERN_Session14): zum neuen Schuljahr; das Kind bekommt eine Nachricht und das
   // Abzeichen „Aufgestiegen“. Die Klasse von Hand ändern bleibt die Korrektur eines Fehlers und zählt nicht als Aufstieg.
-  const aufstiegZeile = () => {
+  // Knopf gleich neben der Klasse (Hinweis Patrik, LERN_Session14); vor dem Aufstieg wird gespeichert, was im Formular
+  // geändert ist — sonst ginge es beim Neuzeichnen verloren.
+  const aufstiegKnopf = () => {
     if (!istKind) return null;
     const k = LS.klasseVon(p);
-    const letzter = (p.aufstiege || []).at(-1);
+    if (k === null) return el("span", { class: "leise-text", text: "Aufsteigen geht, sobald eine Klasse eingetragen ist." });
+    if (k >= LS.KLASSEN[LS.KLASSEN.length - 1]) return el("span", { class: "leise-text", text: "Nach der 6. Klasse geht es im Lernsteig weiter." });
+    return el("button", { type: "button", class: "knopf gruen klein", text: `⬆️ In die ${LS.klasseText(k + 1)}`,
+      title: `In die ${LS.klasseText(k + 1)} aufsteigen lassen`,
+      onclick: () => {
+        if (!confirm(`${LS.spielerName(name)} steigt in die ${LS.klasseText(k + 1)} auf. Beim nächsten Anmelden gibt es eine Nachricht und ein Abzeichen.`)) return;
+        if (speichern() === false) return;
+        LS.aufsteigen(name);
+        neu();
+      } });
+  };
+  const aufstiegVerlauf = () => {
+    const letzter = istKind ? (p.aufstiege || []).at(-1) : null;
+    if (!letzter) return null;
     const datum = z => new Date(z).toLocaleDateString("de-CH");
     return el("div", { class: "kind-wahl" },
-      k === null ? el("span", { class: "leise-text", text: "Aufsteigen geht, sobald eine Klasse eingetragen ist." })
-        : k >= LS.KLASSEN[LS.KLASSEN.length - 1] ? el("span", { class: "leise-text", text: "Nach der 6. Klasse geht es im Lernsteig weiter." })
-        : el("button", { type: "button", class: "knopf gruen klein", text: `⬆️ In die ${LS.klasseText(k + 1)} aufsteigen lassen`,
-          onclick: () => {
-            if (!confirm(`${LS.spielerName(name)} steigt in die ${LS.klasseText(k + 1)} auf. Beim nächsten Anmelden gibt es eine Nachricht und ein Abzeichen.`)) return;
-            LS.aufsteigen(name);
-            neu();
-          } }),
-      letzter ? el("span", { class: "leise-text", text: ` Zuletzt aufgestiegen: ${LS.klasseText(letzter.von)} → ${LS.klasseText(letzter.nach)} am ${datum(letzter.zeit)}. ` }) : null,
-      letzter ? el("button", { type: "button", class: "knopf hell klein", text: "↶ Zurücknehmen",
-        onclick: () => { if (confirm(`Den Aufstieg in die ${LS.klasseText(letzter.nach)} zurücknehmen?`)) { LS.aufstiegZuruecknehmen(name); neu(); } } }) : null);
+      el("span", { class: "leise-text", text: `Zuletzt aufgestiegen: ${LS.klasseText(letzter.von)} → ${LS.klasseText(letzter.nach)} am ${datum(letzter.zeit)}. ` }),
+      el("button", { type: "button", class: "knopf hell klein", text: "↶ Zurücknehmen",
+        onclick: () => { if (confirm(`Den Aufstieg in die ${LS.klasseText(letzter.nach)} zurücknehmen?`)) { LS.aufstiegZuruecknehmen(name); neu(); } } }));
   };
   const vorlesen = el("select", { "aria-label": "Vorlesen" },
     ...Object.entries(LS.VORLESEN_ARTEN).map(([k, t]) => el("option", { value: k, text: t })));
   vorlesen.value = p.vorlesen ?? "";
-  const fokus = el("div", { class: "fokus-liste" });
+  // Fokus (Hinweis Patrik, LERN_Session14): ganz und je Gruppe einklappbar; die Kopfzeilen zählen, was gewählt ist.
+  const fokus = el("details", { class: "timer-details fokus-klapp" });
+  const fokusKopf = el("summary", {});
+  fokus.append(fokusKopf);
+  const gruppen = new Map();
   for (const lz of LERNZIELE) {
-    const cb = el("input", { type: "checkbox", value: lz.lz });
-    cb.checked = p.fokus.includes(lz.lz);
-    fokus.append(el("label", {}, cb, el("span", { html: `<b>${lz.lz}</b> ${lz.text}` })));
+    const g = fokusGruppe(lz.lz);
+    if (!gruppen.has(g)) gruppen.set(g, []);
+    gruppen.get(g).push(lz);
   }
+  const zaehle = () => {
+    const n = fokus.querySelectorAll("input:checked").length;
+    fokusKopf.textContent = n ? `${n} Lernziel${n === 1 ? "" : "e"} gewählt` : "Kein Fokus gewählt — antippen zum Wählen";
+    for (const [s, liste] of fokusKoepfe) {
+      const m = liste.filter(c => c.checked).length;
+      s.textContent = `${s.dataset.titel} (${m ? `${m} von ` : ""}${liste.length})`;
+    }
+  };
+  const fokusKoepfe = [];
+  for (const [g, liste] of gruppen) {
+    const boxen = liste.map(lz => { const cb = el("input", { type: "checkbox", value: lz.lz }); cb.checked = p.fokus.includes(lz.lz); cb.addEventListener("change", zaehle); return [lz, cb]; });
+    const s = el("summary", { "data-titel": g });
+    const d = el("details", { class: "fokus-gruppe" }, s,
+      el("div", { class: "fokus-liste" }, ...boxen.map(([lz, cb]) => el("label", {}, cb, el("span", { html: `<b>${lz.lz}</b> ${lz.text}` })))));
+    d.open = boxen.some(([, cb]) => cb.checked);
+    fokusKoepfe.push([s, boxen.map(([, cb]) => cb)]);
+    fokus.append(d);
+  }
+  zaehle();
   // Reihenfolge der Teile (Bausteine, Rätselteile): global und je Spiel, das sie beachtet.
   const reihenfolgeWahl = (wert, ohneVorgabe) => {
     const s = el("select", {},
@@ -208,7 +247,7 @@ function zeichneProfil(box, neu) {
       else delete timerJeSpiel[s.id];
     }
     // Nur Jahr oder nur Monat: nicht speichern, sonst wäre das Alter falsch
-    if (!jahr.value !== !monat.value) { meldung.textContent = "Bitte Jahr und Monat wählen (oder beide leer lassen)."; return; }
+    if (!jahr.value !== !monat.value) { meldung.textContent = "Bitte Jahr und Monat wählen (oder beide leer lassen)."; return false; }
     const geboren = jahr.value ? `${jahr.value}-${monat.value}` : null;
     LS.speichereProfil(name, {
       geboren,
@@ -220,32 +259,39 @@ function zeichneProfil(box, neu) {
       timer: { an: timerGlobal.value === "an", faktor: Number(faktor.value), spiele: timerJeSpiel },
     });
     meldung.textContent = "✓ Gespeichert";
+    return true;
   };
+  // Aufbau (Hinweis Patrik, LERN_Session14): oben ein Formular mit allen Angaben und gleich darunter „Speichern“ —
+  // erst die Person, dann die Vorgaben fürs Spielen, der Fokus eingeklappt. Darunter, was das Kind selbst umstellen darf:
+  // diese Häkchen wirken sofort. Das Bild wählt das Kind; die Aufsicht sieht es nur (ihr eigenes wählt sie selbst).
+  const abschnitt = (titel, ...inhalt) => el("div", { class: "profil-abschnitt" }, el("h3", { text: titel }), ...inhalt);
+  const kindZeilen = ["vorlesen", "reihenfolge", "timer"].map(kindZeile).filter(Boolean);
   karte.append(
     el("h2", { text: `Profil von ${LS.spielerName(name)}` }),
-    el("details", { class: "timer-details" }, el("summary", {}, LS.avatarBild(name, 28), " Bild (wählt das Kind selbst)"), avatarWahl(name, neu)),
-    el("div", { class: "profil-felder" },
-      el("label", {}, "Geboren", el("span", { class: "geboren-wahl" }, monat, jahr)), el("label", {}, "Klasse", klasse)),
-    el("div", { class: "leise-text", style: "margin-top:-4px" }, alterText, " Nur Monat und Jahr — das Alter rechnet die App selbst."),
-    aufstiegZeile() || "",
-    el("div", { html: "<b>Vorlesen</b> — die Eule liest Aufträge und Tipps vor (🗣️ neben der Eule; das Kind stellt es auch auf der Stufenwahl jedes Spiels um). „Nach Klasse“: im Kindergarten und in der 1. Klasse automatisch, sonst auf 🗣️. 🔇 in der Kopfzeile schaltet auch die Stimme stumm. Nicht im Lese-Detektiv, in Englisch und Französisch." }),
-    el("div", { class: "profil-felder", style: "margin-top:8px" }, el("label", {}, "Vorlesen", vorlesen)),
-    kindZeile("vorlesen") || "",
-    el("div", { html: "<b>Fokus</b> — was soll vermehrt geübt werden?" }),
-    fokus,
-    el("div", { html: "<b>Reihenfolge der Teile</b> — stehen Bausteine wie 3 ZT + 4 H geordnet (grösste Stelle links) oder gemischt?" }),
-    // Global und je Spiel in eigenen Zeilen, sonst steht das erste Spiel neben „global“ (Hinweis Patrik, LERN_Session12).
-    el("div", { class: "profil-felder", style: "margin-top:8px" }, el("label", {}, "Global (alle Spiele)", reihenfolgeGlobal)),
-    el("div", { class: "profil-felder", style: "margin-top:8px" },
-      ...reihenfolgeSpiele.map(({ s, wahl }) => el("label", {}, `${s.bild} ${s.name}`, wahl))),
-    kindZeile("reihenfolge") || "",
-    el("div", { html: "<b>Timer</b> — jede Aufgabe hat eine Zeit; ist sie um, zählt es als Fehler. Hier steht die Vorgabe; das Kind kann den Timer auf der Spielkarte und im Spiel selbst ein- und ausschalten, ausser er ist fest." }),
-    el("div", { class: "profil-felder", style: "margin-top:8px" },
-      el("label", {}, "Global (alle Spiele)", timerGlobal), el("label", {}, "Zeit", faktor)),
-    kindZeile("timer") || "",
-    el("details", { class: "timer-details" },
-      el("summary", { text: "Je Spiel: Timer und Sekunden je Stufe (leer = Vorgabe; 💡 = Vorschlag aus den eigenen Zeiten)" }),
-      el("div", { class: "tabelle-rahmen" }, timerTabelle)),
-    el("div", { class: "knopfzeile", style: "justify-content:flex-start;align-items:center" },
-      el("button", { class: "knopf gruen klein", type: "button", text: "Speichern", onclick: speichern }), meldung));
+    abschnitt("👤 Person",
+      el("div", { class: "profil-person" },
+        istKind ? el("span", { class: "profil-bild", title: "Das Bild wählt das Kind selbst" }, LS.avatarBild(name, 64))
+          : el("details", { class: "timer-details" }, el("summary", {}, LS.avatarBild(name, 28), " Mein Bild"), avatarWahl(name, neu)),
+        el("label", {}, "Geboren", el("span", { class: "geboren-wahl" }, monat, jahr), alterText),
+        el("label", {}, "Klasse", el("span", { class: "klasse-wahl" }, klasse, aufstiegKnopf() || "")),
+      ),
+      aufstiegVerlauf() || ""),
+    abschnitt("🎮 Vorgaben fürs Spielen",
+      el("p", { class: "leise-text", html: "<b>Vorlesen</b> — die Eule liest Aufträge und Tipps vor (🗣️ neben der Eule). „Nach Klasse“: im Kindergarten und in der 1. Klasse automatisch, sonst auf 🗣️. 🔇 in der Kopfzeile schaltet auch die Stimme stumm. Nicht im Lese-Detektiv, in Englisch und Französisch." }),
+      el("div", { class: "profil-felder" }, el("label", {}, "Vorlesen", vorlesen)),
+      el("p", { class: "leise-text", html: "<b>Reihenfolge der Teile</b> — stehen Bausteine wie 3 ZT + 4 H geordnet (grösste Stelle links) oder gemischt?" }),
+      el("div", { class: "profil-felder" }, el("label", {}, "Global (alle Spiele)", reihenfolgeGlobal)),
+      el("details", { class: "timer-details" }, el("summary", { text: `Je Spiel (${reihenfolgeSpiele.length} Spiele)` }),
+        el("div", { class: "profil-felder", style: "margin-top:8px" }, ...reihenfolgeSpiele.map(({ s, wahl }) => el("label", {}, `${s.bild} ${s.name}`, wahl)))),
+      el("p", { class: "leise-text", html: "<b>Timer</b> — jede Aufgabe hat eine Zeit; ist sie um, zählt es als Fehler. Das Kind kann ihn auf der Spielkarte und im Spiel selbst ein- und ausschalten, ausser er ist fest." }),
+      el("div", { class: "profil-felder" }, el("label", {}, "Global (alle Spiele)", timerGlobal), el("label", {}, "Zeit", faktor)),
+      el("details", { class: "timer-details" },
+        el("summary", { text: "Je Spiel: Timer und Sekunden je Stufe (leer = Vorgabe; 💡 = Vorschlag aus den eigenen Zeiten)" }),
+        el("div", { class: "tabelle-rahmen" }, timerTabelle))),
+    abschnitt("⭐ Fokus — was soll vermehrt geübt werden?", fokus),
+    el("div", { class: "knopfzeile profil-speichern" },
+      el("button", { class: "knopf gruen", type: "button", text: "Speichern", onclick: speichern }), meldung),
+    kindZeilen.length ? abschnitt(`🔒 Was ${LS.spielerName(name)} selbst umstellen darf`,
+      el("p", { class: "leise-text", text: "Diese Häkchen wirken sofort, ohne Speichern." }),
+      ...["Vorlesen", "Reihenfolge der Teile", "Timer"].flatMap((titel, i) => (kindZeilen[i] ? [el("b", { text: titel }), kindZeilen[i]] : []))) : "");
 }
