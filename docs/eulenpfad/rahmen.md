@@ -131,7 +131,7 @@ LS.spiel({
 | `ctx.loesung(text)` | Lösung gleich beim Zeichnen nennen. Sie erscheint nur beim Testspieler hinter „🔑“. **Pflicht in jeder Aufgabe** ✔. Die Bausteine rufen sie selbst auf. Den Text in **eine** Konstante legen, die auch `ctx.falsch` bekommt. |
 | `ctx.vorbei()` | Ist die Aufgabe gelöst oder aufgelöst? Dann nimmt sie keine Antwort mehr an. |
 | `ctx.kennung(wert)` | Woran die Aufgabe zu erkennen ist, wenn man es nicht sieht (Hör-Aufgaben: die Melodie). Sonst nimmt der Rahmen Text, Bilder und Lösung. |
-| `ctx.sag(text)` beim Stellen | Was ein Spiel beim Stellen einer Aufgabe sagt, gilt als sein Auftrag. Sagt es bei einer späteren Aufgabe nichts, zeigt die Eule diesen Auftrag wieder (ohne erneut vorzulesen) — nie bleibt das Lob der vorigen Aufgabe („Richtig wäre …“) neben einer neuen stehen. Nach `ctx.richtig` wartet der Rahmen, bis die Rückmeldung gelesen sein kann: 1,3 s, dazu 45 ms je Zeichen über 20, höchstens 5 s, und bis die Stimme fertig ist (Hinweis Patrik, LERN_Session13). Überspringen (Entscheid WZ1 a): unter der Eule läuft ein Balken ab (Klassen `weiter-leiste`, `weiter-balken`, `weiter-knopf`); „Weiter ➜“, Antippen der Blase, Enter oder Leertaste führen sofort weiter und brechen die Stimme ab. Im Endlos-Modus fest 0,9 s ohne Balken |
+| `ctx.sag(text)` beim Stellen | Was ein Spiel beim Stellen einer Aufgabe sagt, gilt als sein Auftrag. Sagt es bei einer späteren Aufgabe nichts, zeigt die Eule den Auftrag dieser Aufgabe aus der Fläche (`.frage` oder `.auftrag`, ohne Knöpfe wie 💡), erst ohne solchen den zuletzt gesagten (ohne erneut vorzulesen; LERN_Session14, Pentomino-Puzzle zeigte nach „Formen finden“ beim Legen nur „Weiter geht's mit der nächsten Aufgabe.“) — nie bleibt das Lob der vorigen Aufgabe („Richtig wäre …“) neben einer neuen stehen. Nach `ctx.richtig` wartet der Rahmen, bis die Rückmeldung gelesen sein kann: 1,3 s, dazu 45 ms je Zeichen über 20, höchstens 5 s, und bis die Stimme fertig ist (Hinweis Patrik, LERN_Session13). Überspringen (Entscheid WZ1 a): unter der Eule läuft ein Balken ab (Klassen `weiter-leiste`, `weiter-balken`, `weiter-knopf`); „Weiter ➜“, Antippen der Blase, Enter oder Leertaste führen sofort weiter und brechen die Stimme ab. Im Endlos-Modus fest 0,9 s ohne Balken |
 | `ctx.schritte(n)` | Die Aufgabe braucht n Handgriffe mehr: Tipps, Ziffern samt OK, Züge, so viele wie mindestens nötig sind. Aufrufe zählen zusammen. Die Bausteine zählen ihre selbst (`auswahl` und `koerbe` 1, `reihenfolge` je Teil 1); für die Tastatur `LS.tippSchritte(wert)`. **Pflicht in Endlos-Stufen** ✔, daraus folgt der Boden der Endlos-Zeit (Abschnitt 7). **Alle Handgriffe der Aufgabe beim Stellen nennen** (Entscheid HG1 a, LERN_Session13): Mit dem Stellen gilt die Zahl fest; was danach erscheint (ein zweiter Schritt, eine Auswahl nach dem ersten Tipp), rechnet das Spiel vorab ein. Ein Baustein, der erst danach entsteht, zählt nicht mehr; ein späteres `ctx.schritte` des Spiels meldet das Testskript als Fehler. |
 | `ctx.serie(name, wert)` | Ein zufällig gewähltes Merkmal, das das Kind als Muster erkennen kann: Richtung oder Aufgabenart, oder die richtige Antwort bei höchstens drei festen Antworten (ja/nein, <, =, >, auf/ab). **Serienbremse** (Vorgabe Patrik 2026-11-01): Der Rahmen zieht neu, statt dasselbe Merkmal öfter als `LS.SERIE_MAX` = 3-mal hintereinander zu stellen (bis zu 40 Versuche). Nicht für Zahlenwerte oder Knopfpositionen, und nur in Stufen, die wirklich mehrere Werte haben ✔. |
 | `ctx.vorgehen(art, wert)` | Wie das Kind die Aufgabe angegangen ist, vor `ctx.richtig()` gemeldet (LERN_Session7). Landet in `aufgabenZeiten[i].vorgehen` und in der Statistik, Karte „Vorgehen“ (Punkte der letzten 12 Aufgaben). Arten und Werte (vom besten zum schwächsten, Ton gut/mittel/schwach) stehen in `AUSWERTUNG.VORGEHEN`: `systematik` (Möglichkeiten-Finder: Zählwerk, geordnet, kreuz und quer, mit Hilfe), `teilerpaare` (Teiler-Spürnase: in Paaren, der Grösse nach, durcheinander), `ausgleichen` (Mittelwert-Türme: ohne Umweg, mit Umwegen). |
@@ -169,7 +169,7 @@ auf. Die Optionen sind in `spiel.js` beschrieben.
 | `LS.losGehts(ctx, element, weiter, { uhr })` | Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): element bleibt verdeckt. Bei der ersten Aufgabe einer Runde, nach einer Aufgabe mit Fehler und im Mix darüber „▶ Los!“, nach dem Tippen 3-2-1; sonst nur 1 s 👀 (`ctx.losKnopf`, LERN-38). Dann sichtbar, und `weiter(uhrLos)` startet die Zeigezeit. Mit und ohne Timer gleich: Die Uhr startet nach `weiter()`, mit `{ uhr: false }` erst, wenn das Spiel `uhrLos()` ruft (Merk-Blick: mit dem veränderten Bild). Mit `{ antwortenNachBlitz: true }` bleiben die Antworten (`.wahl`, `.tastatur`, `.korb-reihe`) verdeckt, bis das Spiel `weiter(uhrLos, vorbei)` → `vorbei()` ruft; erst dann startet die Uhr (höchstens 8 s, Bemerkung 7, LERN_Session11: Blitzlesen, Punkte-Blitz, Finger-Zähler). Benutzt von Merk-Blick, Punkte-Blitz, Blitzlesen, Finger-Zähler (Wunsch Patrik, LERN_Session8) |
 | `LS.tastatur(opt)` | Zifferntastatur mit Anzeigefeld; das Spiel prüft selbst in `onOk`. Mit `dezimal: true` eine Taste für das eingestellte Dezimalzeichen (auch `.` und `,` auf der Tastatur), `nachkomma` begrenzt die Ziffern danach (Standard 3); `onOk(wert, text)` bekommt die Zahl und den getippten Text mit „.“, wenn die Stellenzahl zählt („3.0“ beim Runden) (LERN_Session8, LERN-36) |
 | `NOTEN.zeile`, `NOTEN.hoerKnopf` | Notenbild und Hörknopf (`noten.js`) |
-| `ctx.notizen(empfohlen)`, `LS.notizFeld({ breite, label })` | Notizen für Zwischenergebnisse (NZ1 a, `docs/eulenpfad/konzept_notizen.md`): `ctx.notizen(empfohlen)` sagt, ob das Spiel Notizfelder zeigt — `empfohlen` ist seine Regel für „nach Stufe“ (ab welcher Stufe oder Schrittzahl Kopfrechnen vor allem das Merken prüft); die Einstellung der Aufsicht `notizen` (nach Stufe · immer · nie, global und je Spiel, Katalog `einstellungen: ["notizen"]`) entscheidet. `LS.notizFeld()` gibt ein kleines Feld (Klasse `zw-notiz`), das das Spiel genau dorthin setzt, wo das Zwischenergebnis hingehört; nie bewertet. Der Rahmen hält fest, ob es benutzt wurde (Vorgehen `notiz`: im Kopf / mit Notizen; Abzeichen „Kopfrechner“) |
+| `ctx.notizen(empfohlen)`, `LS.notizFeld({ breite, label })` | Notizen für Zwischenergebnisse (NZ1 a, `docs/eulenpfad/konzept_notizen.md`): `ctx.notizen(empfohlen)` sagt, ob das Spiel Notizfelder zeigt — `empfohlen` ist seine Regel für „nach Stufe“ (ab welcher Stufe oder Schrittzahl Kopfrechnen vor allem das Merken prüft); die Einstellung der Aufsicht `notizen` (nach Stufe · immer · nie, global und je Spiel, Katalog `einstellungen: ["notizen"]`) entscheidet. `LS.notizFeld()` gibt ein kleines Feld (Klasse `zw-notiz`), das das Spiel genau dorthin setzt, wo das Zwischenergebnis hingehört; nie bewertet. Der Rahmen hält fest, ob es benutzt wurde (Vorgehen `notiz`: im Kopf / mit Notizen; Abzeichen „Kopfrechner“). **Mit der Bildschirmtastatur** (Meldung Patrik, LERN_Session14): Ist ein Notizfeld oder ein Häuschen des Notizblocks gewählt, schreiben Ziffern, Zeichen und ⌫ dort hinein, ✕ leert es, OK heisst „✓ Notiz fertig“ und führt zurück zur Antwort; die Tasten nehmen dem Feld den Fokus nicht, und die Tastatur des Geräts bleibt zu (`inputmode` none) |
 | `LS.lesetext(feld)` | Lesespiele (BH3 a): Der Text scrollt in seinem eigenen Feld, Auftrag, Frage und Antworten bleiben im Bild. Der Rahmen rechnet die Höhe aus dem übrigen Platz (mindestens 120 px), bei jeder Grössenänderung neu; ein Schatten unten zeigt, dass noch Text kommt. Gleich nach dem Einhängen des Texts aufrufen |
 | `LS.kurztasten(box, knoepfe?, { reihe })` | Kurztasten für eigene Antwortknöpfe (Abschnitt 19); `auswahl`, `reihenfolge` und `koerbe` rufen es selbst. `reihe: true` verlangt die Grundreihe, wo gleiche Zeichen verschiedene Plätze meinen (Stellen-Detektiv Stufe 6). `data-taste` am Knopf nennt sein Zeichen, wo der Text es nicht ist (Stellen-Detektiv „Hunderter“ → `H`). `LS.kurztastenAus()` schaltet sie für die Seite ab (Spiele mit eigener Tastenbedienung) |
 
@@ -318,11 +318,21 @@ Klasse im Profil nur Spiele, deren Basisklasse höchstens eine Klasse daneben li
 Stufe genau für seine Klasse haben. Er ist vorgegeben an, das Kind darf ihn ausschalten (Profil-Feld
 `meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Er steht mit „⭐ Mein Fokus“ und
 „🔍 Zu prüfen“ in einer eigenen Zeile **Nur** unter den Fächern, weil er kein Fach ist (Hinweis Patrik, LERN_Session10).
+**Klassen-Rand** (Entscheid G1 a, LERN_Session14): Ist „🎒 Meine Klasse“ aus, bekommt jede Karte eines Kindes mit Klasse
+einen Glow nach aussen und links oben ein Zeichen: ✓ Türkis (`--deko-5`) Basisklasse tiefer als die eigene, ● Gold
+(`--deko-4`) die eigene, ▲ Violett (`--deko-1`) höher, „Herausforderung“. Nie Stellenfarben; das Zeichen trägt die
+Bedeutung auch ohne Farbsehen, langes Drücken liest sie vor. Eine Legende steht über den Karten. Massgebend ist die
+Basisklasse; welche Stufe genau passt, zeigt weiter 👍 (`LS.empfohleneStufe`). Die Aufsicht sieht keinen Rand.
 **Sortierung** (Wunsch Patrik, Entscheide SO1 a, SO2 a, LERN_Session11; `LS.sortierungFuer`): Vorgabe „nach Fach und
 Thema“ (Einstellung `sortierung` der Aufsicht), sonst eine Liste ohne Gruppen „passt zu dir zuerst“ (`LS.passung`),
 „nach Alphabet“ oder „nach Klasse“, je auf- oder absteigend (Profilfeld `sortierung: { art, ab }`). Wählen darf die
 Aufsicht immer, ein Kind ab der 4. Klasse (Einstellung `sortierungWahl`: nie, ab 4., ab 5., alle); je Kind abweichend in
 Verwaltung → Konten, Spalte 🔀 (Art und `sortierungWahl` ja/nein). Eine Suche ordnet weiter nach Relevanz.
+**Einklappbar** (Wunsch Patrik, LERN_Session14): Der ganze Filter steht in einem `details` „🔎 Filter“; die Kopfzeile
+nennt auch zugeklappt, was gilt („Mathe · 4. Klasse · Stufe 3“ oder „alle Spiele“). Gemerkt je Person (Profilfeld
+`filterZu`); ohne Wahl auf dem Handy (bis 560 px) zu, sonst offen. **Anleitungen in der App** (LERN_Session14): 📖 in der
+Leiste führt das Kind zu `anleitung/kinder.html`, die Aufsicht zu `aufsicht.html`; unter der Anmeldung stehen beide.
+Mit `?von=app` führt „Zurück“ dort in die App statt ins Portal.
 **Thema, Stufe und Klasse sind Mehrfachwahl** (Wunsch Patrik, LERN_Session10): jeder Chip schaltet einzeln, leer heisst keine
 Einschränkung; „Alle“ wählt alle an und, nochmals angetippt, alle ab. Die Zeile **Klasse** filtert nach der Basisklasse
 des Spiels (1.–6. Klasse) und steht allen offen, gedacht vor allem für die Aufsicht; „🎒 Meine Klasse“ bleibt die
@@ -746,15 +756,26 @@ Entscheide AV1–AV3, ST1, ST2, ZG1, RF1, VR1 a (Patrik, LERN_Session12); Konzep
 Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
 
 - **Avatar** (`spiele/gemeinsam/avatare.js`, auf jeder Seite vor `spiel.js` geladen): gezeichnete Motive in Sätzen
-  (16 Tiere; je 6 Weltall und Technik, Fantasie, aus den Spielen; 19 Abzeichen-Symbole) auf 6 Hintergrundfarben
+  (16 Tiere; je 6 Weltall und Technik, Fantasie, aus den Spielen; 22 Abzeichen-Symbole) auf 6 Hintergrundfarben
   (Deko-Farben, nie Stellenfarben) und 4 Rahmen; Kennung `<motiv>-<farbe>[-<rahmen>]` im Profilfeld `avatar`; keine
   Fotos. Freigeschaltet (`ERFOLGE.freischaltungen`, AV5 a, AV6 a): das Symbol eines Abzeichens ab Gold, die Rahmen
   Gold, Platin, Diamant ab dem ersten Abzeichen in diesem Rang. Neues meldet der Tab Spiele, bis das Kind die Bildwahl
   öffnet (`freiGesehen`). Die Abzeichen zeigen dieselben Symbole statt Emoji, auch im geteilten Bild.
   `LS.avatarBild(name, groesse)` gibt das Bild als Element, ohne Avatar den Anfangsbuchstaben. Es steht vor dem Namen:
   Anmeldung (Kachel), Kopfzeile, Spielerzeile im Spiel, Endlos-Ranglisten, Namens-Chips der Aufsicht, Abzeichen-Bild.
-- **Profil:** Ein Kind sieht nur „Mein Bild“. Die Aufsicht setzt Alter, Klasse, Fokus und die Vorgaben für Vorlesen,
-  Reihenfolge und Timer, je Einstellung mit „🔒 fest“ und „↺ Auf Vorgabe zurück“.
+- **Profil:** Ein Kind sieht nur „Mein Bild“. Die Aufsicht setzt Geburtsmonat, Klasse, Fokus und die Vorgaben für
+  Vorlesen, Reihenfolge und Timer, je Einstellung mit „🔒 fest“ und „↺ Auf Vorgabe zurück“.
+- **Geburtsmonat** (Wunsch Patrik, LERN_Session14): Profilfeld `geboren: "JJJJ-MM"`, ohne Tag (Datensparsamkeit, Annahme
+  GM1); `LS.alterVon(profil, jetzt)` rechnet das Alter, im Geburtsmonat selbst ab dem Ersten. Ältere Profile mit der Zahl
+  `alter` gelten weiter, bis der Geburtsmonat gesetzt ist; das Profil bittet darum. Nur Jahr oder nur Monat wird nicht
+  gespeichert.
+- **Klassenaufstieg** (Wunsch Patrik, LERN_Session14): `LS.aufsteigen(name)` setzt die Klasse um eins höher und hängt
+  `{ von, nach, zeit }` an das Profilfeld `aufstiege`; nach der 6. Klasse nicht mehr (Lernsteig).
+  `LS.aufstiegZuruecknehmen(name)` nimmt den letzten zurück. Einzeln im Profil, für mehrere Kinder in Verwaltung →
+  Konten → „Neues Schuljahr“, nach Klasse geordnet und vorab angekreuzt — bis zu den Gruppen (LERN-48) die
+  Klassenorganisation der Lehrperson. Die Klasse von Hand ändern bleibt eine Korrektur. Beim nächsten Öffnen der
+  Startseite zeigt `aufstiegFeier` (start.js) dem Kind einmal „Du bist jetzt in der n. Klasse!“ mit Konfetti
+  (`LS.neuerAufstieg`, gesehen in `aufstiegGesehen`); das Abzeichen „Aufgestiegen“ 🏫 zählt die Aufstiege (1–5).
 - **Wahl des Kindes** (VR1 a): Was das Kind auf der Stufenwahl oder der Spielkarte umstellt, steht im Profilfeld `wahl`
   (`LS.waehle`, `LS.waehleTimer`) und gilt vor der Vorgabe (`timerFuer`, `reihenfolgeFuer`, `vorlesenArt`). Hat die
   Aufsicht festgelegt (`fest`, `LS.setzeFest`), gilt die Wahl nicht; Stufenwahl und Karte zeigen den Wert mit 🔒
@@ -779,6 +800,7 @@ benachbarten Tasten. Code in `spiel.js`, Abschnitt „Kurztasten“; Spiele mit 
 | + − · : | V B N M | Ort, dazu `+ - * / :` |
 | Satzzeichen „ “ ! , . ? und ⌫ | B V N , . - und die Rücktaste (unten rechts wie auf der Schweizer Tastatur; : wie oben auf M) | Ort, dazu die Zeichen selbst |
 | Stellen E Z H T M, ZT, HT | E Z H T M, ⇧Z, ⇧H | Zeichen (`key`) |
+| Ja und Nein, auch mit Bild davor („✅ Ja“) | J N (Meldung zum Netz-Falter, LERN_Session14) | Zeichen, erstes Wort ohne Bild |
 | je ein Buchstabe oder eine Ziffer | er selbst (Ziffern nur ohne offene Zifferntastatur); bei doppelten der erste freie Knopf mit dem Zeichen (Buchstabier-Kacheln: das Wort tippen) | Zeichen |
 | alles andere (Wörter, Zahlen, Bilder) | A S D F G H J K L, dann Q W E R T Z U I O P, in Bildschirm-Reihenfolge; nie Ziffern, damit die Taste 5 nie die Antwort „5“ meint | Ort |
 
@@ -821,3 +843,37 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
 - **Messen:** `node tools/bildhoehe.js [Basis-URL] [spiel-id …]` (Server nötig; Chrome ohne Fenster, Messkind mit allem
   freigegeben). Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe selbst über dem Rand (ohne Tipp-Zeile), mit der
   Zifferntastatur nicht ganz im Bild, und seitlich (Code 1). `--css=datei` probiert CSS aus, ohne den Code zu ändern.
+
+## 21. Notizblock für schriftliches Rechnen
+
+Entscheide NB1–NB4 a (Wunsch Patrik, LERN_Session14). Code in `spiele/gemeinsam/notizblock.js` (Objekt `SCHRIFTLICH`,
+nach `spiel.js` geladen in den 32 Spielen mit Notizen und in der Schriftlich-Werkstatt), Stil `.schriftlich` und
+`.notizblock` in `stil.css`.
+
+- **Wann:** in Aufgaben, die Notizfelder zeigen (`ctx.notizen`) oder nur den Block anbieten (`ctx.notizblock(empfohlen)`:
+  zusätzlich zu Notizfeldern oder wo sich eine Rechnung nicht sinnvoll zerlegen lässt; „Notizen: nie“ schaltet auch ihn
+  ab). Bietet ein Spiel Notizen erst in einem späteren Schritt an (Probe-Stempel, Kompass), kommt
+  der Knopf in diesem Moment (LERN_Session14). Dazu die Einstellung der Aufsicht
+  „Notizblock für schriftliches Rechnen“ (global und je Spiel, `spieleWie: "notizen"`): **ab Stufe 4** (Standard) ·
+  **immer, wo Notizen sind** · **nie**. Der Knopf „📝 Notizblock“ steht in der Zeile von „🙋 Melden“ (`nb-platz`), in
+  jedem Spiel an derselben Stelle — beim Notizfeld selbst zerriss er den Aufbau (Rechen-Maschine: Feld auf dem Pfeil).
+- **Vorlagen (NB1 a):** Plus (2–4 Zahlen), Minus, Mal (einstellig wie die Werkstatt; mehrstellig mit einer versetzten
+  Zeile je Ziffer, höchste zuerst, dann Übertrag und Summe), Geteilt („a : b =“ mit Ergebnis-Häuschen, darunter
+  2 × Stellenzahl Zeilen für die Schritte, links eine Zeichenspalte), Häuschen frei (10 × 8). Das Kind wählt die
+  Vorlage, tippt seine Zahlen ein (höchstens bis zur Million, `MAX_STELLEN`, und 3 Stellen nach Punkt oder Komma) und
+  „Untereinander schreiben ➜“. **Dezimalzahlen** (LERN_Session14): Plus und Minus richten am Komma aus; eine senkrechte
+  Kommalinie (`nach-komma`) steht links der Zehntel, die Spalten heissen z, h, t in neutraler Farbe (`st-nk`, nie
+  Stellenfarben). Bei Mal und Geteilt darf nur die erste Zahl ein Komma haben. **Eigenes Ziffernfeld** im Block
+  (`nb-tasten`, 0–9, Komma, ⌫): schreibt in das gewählte Zahlenfeld oder Häuschen, ohne ihm den Fokus zu nehmen; die
+  Felder des Blocks öffnen die Tastatur des Geräts nicht (`inputmode` none).
+  Häuschen nehmen eine Ziffer und springen in Schreibrichtung weiter (Ergebnis, Überträge, Teilprodukte nach links,
+  Häuschen und Division nach rechts); die Rücktaste im leeren Häuschen geht zurück.
+- **Nicht bewertet (NB3 a):** nichts geprüft, nichts übernommen, nichts gespeichert. Jede neue Aufgabe schliesst und
+  leert den Block. Vorgehen `notiz: "block"` („mit Notizblock“ in der Statistik), geht vor `benutzt`; das Abzeichen
+  „Kopfrechner“ zählt nur `ohne`. Tasten im Block lösen keine Kurztasten des Spiels aus.
+- **Platz:** oben rechts, über der Entwickler-Leiste (breit ab 1100 px rückt `.buehne` nach links), auf dem Handy unten wie ein Blatt, die Seite
+  bekommt unten Platz zum Hinaufscrollen; ▁ verkleinert und gibt den Platz frei, ✕ schliesst und leert.
+- **Gemeinsames Raster (NB4 a):** `SCHRIFTLICH.raster(n, { links, rechts })` mit `kopf()`, `zahl(z, { zeichen, rechts })`,
+  `reihe(mache, …)`, `strich()`; `SCHRIFTLICH.rechne(art, zahlen)` rechnet spaltenweise mit Überträgen (Subtraktion:
+  Übertrag unten dazu, wie beim Ergänzen — mit dem Lehrmittel abzugleichen). Die Schriftlich-Werkstatt baut ihre
+  Tabelle damit; ändert sich ein Verfahren, ändert es sich an einer Stelle.

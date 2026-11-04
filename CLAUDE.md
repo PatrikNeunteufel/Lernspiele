@@ -1,4 +1,4 @@
-# Eulenpfad — kleine Lernspiele für die 2. und 4. Klasse
+# Eulenpfad — kleine Lernspiele für die Primarschule (Kindergarten bis 6. Klasse)
 
 Name der Sammlung „Eulenpfad“ (Entscheid N1 a, 2026-11-01). Technische Namen bleiben: Ordner
 `Lernspiele/`, Speicherschlüssel `lernspiele:*`, gesicherte Dateien `lernspiele-*.json`.
@@ -10,7 +10,7 @@ LERN_Session6, Stand in `docs/lernsteig/` und `docs/gratwanderung/`). Doku je Ap
 `docs/<app>/`, Werkzeuge in `tools/`, Einstiegsseite der Reihe in `portal/`. Pfade in Code-Angaben
 (`spiele/…`, `start/…`) gelten relativ zum App-Ordner.
 
-Sammlung kleiner, in sich geschlossener Lernspiele für Primarschüler (2. und 4. Klasse).
+Sammlung kleiner, in sich geschlossener Lernspiele für Primarschüler (Kindergarten bis 6. Klasse; Übersicht der Reihe in `README.md`, Bedienung in `eulenpfad/README.md`).
 Jedes Spiel übt **genau ein Lernziel** aus dem jeweiligen Lernzielblatt der Klasse und ist
 kindgerecht gestaltet: grosse Bedienelemente (Tablet/Finger), wenig Text, sofortige freundliche
 Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation statt Punktedruck.
@@ -53,7 +53,8 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 - **Alter:** 2. Klasse (≈ 7–8 J.) fast ohne Lesetext, Symbole/Bilder; 4. Klasse (≈ 9–10 J.)
   kurze Sätze erlaubt.
 - **Offline lauffähig**, keine Anmeldung. **Daten über das Kind nur lokal im Browser**
-  (Entscheid LERN-5 b, 2026-10-31): Profil (Name, Alter, Klasse, Fokus-Lernziele) und je Runde
+  (Entscheid LERN-5 b, 2026-10-31): Profil (Name, Geburtsmonat als Jahr und Monat ohne Tag — Wunsch Patrik
+  LERN_Session14, das Alter wird daraus gerechnet —, Klasse mit Aufstiegen, Fokus-Lernziele) und je Runde
   ein Protokolleintrag (Spiel, Stufe, Sterne, Fehler, Dauer, falsch gelöste Aufgaben). Nichts
   wird an einen Server geschickt; Sichern/Einlesen als JSON-Datei nur auf Knopfdruck in der
   Statistik. Ausnahme Abgleich (Entscheid S1 a, 2026-11-01): Daten verlassen den Browser nur in
@@ -69,7 +70,7 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 
 ## Projekt-Steckbrief
 <!-- Kopplungsblock für die globalen ~/.claude-Skills. Format: ~/.claude/docs/steckbrief.template.md -->
-- **Projekt:** Eulenpfad (Ordner Lernspiele) — kleine Mathe-Lernspiele (später weitere Fächer) für die 2. und 4. Klasse
+- **Projekt:** Eulenpfad (Ordner Lernspiele) — kleine Lernspiele (Mathe, Deutsch, Fremdsprachen, NMG, MI, Musik) vom Kindergarten bis zur 6. Klasse
 - **Session-Prefix:** LERN
 - **Sprachen:** HTML/CSS/JavaScript ohne Build-Schritt und ohne externe Abhängigkeiten (Entscheid LERN-1, 2026-10-31). App-Ordner `eulenpfad/`: Jedes Spiel ist eine eigenständige Seite `eulenpfad/spiele/<name>/index.html`; Gemeinsames in `eulenpfad/spiele/gemeinsam/`; Startseite `eulenpfad/index.html` mit Anmeldung und Tabs Spiele, Profil, Statistik, Verwaltung (Code je Tab in `eulenpfad/start/`). Läuft offline per Doppelklick.
 - **Konventionen:** CLAUDE.md (Abschnitt Gestaltungsregeln)
@@ -80,7 +81,7 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 - **Build:** — (kein Build; `eulenpfad/index.html` im Browser öffnen). Veröffentlichen: `.github/workflows/pages.yml` auf `https://patrikneunteufel.github.io/Lernspiele/`, von selbst bei jedem Push auf master, der `portal/` oder einen App-Ordner ändert (W1 a), sonst von Hand
 - **Entwickler-Modus:** `python tools/entwickler_server.py` (Repo ausliefern, Prüfstand und Bemerkungen schreiben), Schlüssel in `entwickler.key` (gitignored); docs/eulenpfad/rahmen.md Abschnitt 11
 - **Tests:** — (manuell im Browser: Desktop, Tablet 768 px, Handy 375 px; jede Kombination Spiel × Stufe lädt ohne Konsolenfehler; Aufgabengeneratoren je Stufe mit einigen tausend Zufallsaufgaben auf Zahlenraum und gültige Lösung prüfen). Bildhöhe je Gerät: `node tools/bildhoehe.js` (Server nötig; docs/eulenpfad/rahmen.md Abschnitt 20)
-- **Sensible Daten:** Namen, Alter und Lernstand der Kinder nur im Browser (localStorage, Schlüssel `lernspiele:*`) und in selbst gesicherten JSON-Dateien — solche Dateien nie ins Repo; keine Namen, Fotos oder Handschrift von Kindern in Spielen/Commits; Lernzielblätter liegen nur als Material in material/
+- **Sensible Daten:** Namen, Geburtsmonat, Alter und Lernstand der Kinder nur im Browser (localStorage, Schlüssel `lernspiele:*`) und in selbst gesicherten JSON-Dateien — solche Dateien nie ins Repo; keine Namen, Fotos oder Handschrift von Kindern in Spielen/Commits; Lernzielblätter liegen nur als Material in material/
 - **Bewusste Vereinfachungen:** —
 - **Deliverables:** je Spiel eine lauffähige Seite; Lernziel-Abdeckung in docs/eulenpfad/lernziele/
 - **Domänen-Skills (lokal):** —

@@ -1,5 +1,5 @@
 /* Tab „Profil“. Ein Kind sieht nur „Mein Bild“ und wählt seinen Avatar (Entscheid AV1 a, LERN_Session12); Timer,
-   Vorlesen und Reihenfolge stellt es im Spiel um. Die Aufsicht wählt oben, wessen Profil, und setzt Alter, Klasse,
+   Vorlesen und Reihenfolge stellt es im Spiel um. Die Aufsicht wählt oben, wessen Profil, und setzt Geburtsmonat, Klasse (auch Aufsteigen),
    Fokus und die Vorgaben für Reihenfolge, Vorlesen und Timer — je Einstellung auch „fest“ (VR1 a). Rollen und PIN:
    Tab Verwaltung. */
 "use strict";
@@ -7,6 +7,7 @@
 let profilVon = null; // nur für die Aufsicht: wessen Profil gerade offen ist
 let avatarSatz = null; // gewählter Reiter der Bildwahl (nur Anzeige)
 let avatarNeu = null;  // { name, neu }: was beim ersten Öffnen neu freigeschaltet war; 🆕 bleibt bis zum Neuladen
+const MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
 /**
  * Avatar wählen (AV2 a, AV4 a–AV6 a): grosses Bild, Reiter je Satz (Tiere, Weltall und Technik, Fantasie, aus den
@@ -102,11 +103,48 @@ function zeichneProfil(box, neu) {
       !fest && n ? el("button", { type: "button", class: "knopf hell klein", text: "↺ Auf Vorgabe zurück", onclick: () => { LS.wahlZuruecksetzen(name, art); neu(); } }) : null);
   };
 
-  const alter = el("input", { type: "number", min: "4", max: "14", value: p.alter ?? "", "aria-label": "Alter" });
+  // Geburtsmonat statt Alter (Wunsch Patrik, LERN_Session14): Jahr und Monat, ohne Tag; das Alter rechnet LS.alterVon.
+  const heute = new Date();
+  const [gJahr, gMonat] = (p.geboren || "").split("-");
+  const jahr = el("select", { "aria-label": "Geburtsjahr" }, el("option", { value: "", text: "Jahr" }),
+    ...Array.from({ length: 15 }, (_, i) => heute.getFullYear() - 2 - i).map(j => el("option", { value: String(j), text: String(j) })));
+  jahr.value = gJahr || "";
+  const monat = el("select", { "aria-label": "Geburtsmonat" }, el("option", { value: "", text: "Monat" }),
+    ...MONATE.map((m, i) => el("option", { value: String(i + 1).padStart(2, "0"), text: m })));
+  monat.value = gMonat || "";
+  const alterText = el("span", { class: "leise-text", "aria-live": "polite" });
+  const zeigeAlter = () => {
+    const a = jahr.value && monat.value ? LS.alterVon({ geboren: `${jahr.value}-${monat.value}` }) : null;
+    alterText.textContent = a !== null ? `Heute ${a} Jahre alt.`
+      : typeof p.alter === "number" ? `Bisher nur „${p.alter} Jahre“ — bitte Geburtsmonat ergänzen.` : "";
+  };
+  jahr.addEventListener("change", zeigeAlter);
+  monat.addEventListener("change", zeigeAlter);
+  zeigeAlter();
   const klasse = el("select", { "aria-label": "Klasse" },
     el("option", { value: "", text: "—" }),
     ...LS.KLASSEN.map(k => el("option", { value: String(k), text: LS.klasseText(k) })));
   klasse.value = LS.klasseVon(p) ?? "";
+  // Aufsteigen lassen (Wunsch Patrik, LERN_Session14): zum neuen Schuljahr; das Kind bekommt eine Nachricht und das
+  // Abzeichen „Aufgestiegen“. Die Klasse von Hand ändern bleibt die Korrektur eines Fehlers und zählt nicht als Aufstieg.
+  const aufstiegZeile = () => {
+    if (!istKind) return null;
+    const k = LS.klasseVon(p);
+    const letzter = (p.aufstiege || []).at(-1);
+    const datum = z => new Date(z).toLocaleDateString("de-CH");
+    return el("div", { class: "kind-wahl" },
+      k === null ? el("span", { class: "leise-text", text: "Aufsteigen geht, sobald eine Klasse eingetragen ist." })
+        : k >= LS.KLASSEN[LS.KLASSEN.length - 1] ? el("span", { class: "leise-text", text: "Nach der 6. Klasse geht es im Lernsteig weiter." })
+        : el("button", { type: "button", class: "knopf gruen klein", text: `⬆️ In die ${LS.klasseText(k + 1)} aufsteigen lassen`,
+          onclick: () => {
+            if (!confirm(`${LS.spielerName(name)} steigt in die ${LS.klasseText(k + 1)} auf. Beim nächsten Anmelden gibt es eine Nachricht und ein Abzeichen.`)) return;
+            LS.aufsteigen(name);
+            neu();
+          } }),
+      letzter ? el("span", { class: "leise-text", text: ` Zuletzt aufgestiegen: ${LS.klasseText(letzter.von)} → ${LS.klasseText(letzter.nach)} am ${datum(letzter.zeit)}. ` }) : null,
+      letzter ? el("button", { type: "button", class: "knopf hell klein", text: "↶ Zurücknehmen",
+        onclick: () => { if (confirm(`Den Aufstieg in die ${LS.klasseText(letzter.nach)} zurücknehmen?`)) { LS.aufstiegZuruecknehmen(name); neu(); } } }) : null);
+  };
   const vorlesen = el("select", { "aria-label": "Vorlesen" },
     ...Object.entries(LS.VORLESEN_ARTEN).map(([k, t]) => el("option", { value: k, text: t })));
   vorlesen.value = p.vorlesen ?? "";
@@ -169,8 +207,12 @@ function zeichneProfil(box, neu) {
       if (an.value || Object.keys(sek).length) timerJeSpiel[s.id] = { an: an.value ? an.value === "an" : null, sekunden: sek };
       else delete timerJeSpiel[s.id];
     }
+    // Nur Jahr oder nur Monat: nicht speichern, sonst wäre das Alter falsch
+    if (!jahr.value !== !monat.value) { meldung.textContent = "Bitte Jahr und Monat wählen (oder beide leer lassen)."; return; }
+    const geboren = jahr.value ? `${jahr.value}-${monat.value}` : null;
     LS.speichereProfil(name, {
-      alter: alter.value ? Number(alter.value) : null,
+      geboren,
+      ...(geboren ? { alter: null } : {}),
       klasse: klasse.value !== "" ? Number(klasse.value) : null,
       vorlesen: vorlesen.value || null,
       fokus: [...fokus.querySelectorAll("input:checked")].map(c => c.value),
@@ -182,7 +224,10 @@ function zeichneProfil(box, neu) {
   karte.append(
     el("h2", { text: `Profil von ${LS.spielerName(name)}` }),
     el("details", { class: "timer-details" }, el("summary", {}, LS.avatarBild(name, 28), " Bild (wählt das Kind selbst)"), avatarWahl(name, neu)),
-    el("div", { class: "profil-felder" }, el("label", {}, "Alter", alter), el("label", {}, "Klasse", klasse)),
+    el("div", { class: "profil-felder" },
+      el("label", {}, "Geboren", el("span", { class: "geboren-wahl" }, monat, jahr)), el("label", {}, "Klasse", klasse)),
+    el("div", { class: "leise-text", style: "margin-top:-4px" }, alterText, " Nur Monat und Jahr — das Alter rechnet die App selbst."),
+    aufstiegZeile() || "",
     el("div", { html: "<b>Vorlesen</b> — die Eule liest Aufträge und Tipps vor (🗣️ neben der Eule; das Kind stellt es auch auf der Stufenwahl jedes Spiels um). „Nach Klasse“: im Kindergarten und in der 1. Klasse automatisch, sonst auf 🗣️. 🔇 in der Kopfzeile schaltet auch die Stimme stumm. Nicht im Lese-Detektiv, in Englisch und Französisch." }),
     el("div", { class: "profil-felder", style: "margin-top:8px" }, el("label", {}, "Vorlesen", vorlesen)),
     kindZeile("vorlesen") || "",

@@ -101,9 +101,14 @@
       <li><b>🎮 Spiele</b> — alle Spiele nach Fach und Thema, mit Suche, Filtern und dem Zufall (<a href="#finden">Abschnitt 5</a>).</li>
       <li><b>👤 Profil</b> — das Kind wählt hier nur sein Bild: ein Tier, etwas aus Weltall und Technik, eine Fantasiefigur oder ein Bild aus den
         Spielen, dazu Farbe und Rahmen. Ein Abzeichen in Gold schaltet sein Symbol als Bild frei, das erste Abzeichen in Gold,
-        Platin oder Diamant einen edleren Rahmen. Sie setzen Alter, Klasse und Fokus-Lernziele und die
+        Platin oder Diamant einen edleren Rahmen. Sie setzen Geburtsmonat (Monat und Jahr, das Alter rechnet die App), Klasse und
+        Fokus-Lernziele und die
         Vorgaben für Reihenfolge der Teile, Timer und Vorlesen. Das Kind kann diese im Spiel umstellen, ausser Sie setzen
-        <b>🔒 fest</b>; <b>↺ Auf Vorgabe zurück</b> löscht seine eigene Wahl. Aus der Klasse schlägt jedes Spiel eine passende Stufe vor.</li>
+        <b>🔒 fest</b>; <b>↺ Auf Vorgabe zurück</b> löscht seine eigene Wahl. Aus der Klasse schlägt jedes Spiel eine passende Stufe vor.
+        Zum neuen Schuljahr <b>⬆️ aufsteigen lassen</b>: einzeln hier, für mehrere Kinder auf einmal in Verwaltung → Konten →
+        „Neues Schuljahr“. Das Kind sieht beim nächsten Anmelden eine Nachricht und bekommt das Abzeichen „Aufgestiegen“;
+        <b>↶ Zurücknehmen</b> macht einen Aufstieg aus Versehen rückgängig. Die Klasse von Hand ändern ist eine Korrektur und
+        zählt nicht als Aufstieg.</li>
       <li><b>📊 Statistik</b> — was geübt wurde, was sitzt, ein Fazit in Worten, Empfehlungen (<a href="#statistik">Abschnitt 12</a>).</li>
       <li><b>🏅 Erfolge</b> — Wochenziel und Abzeichen (<a href="#erfolge">Abschnitt 13</a>).</li>
       <li><b>⚙️ Verwaltung</b> — nur für die Aufsicht: Konten, Freigabe, Abgleich, Einstellungen, Meldungen.</li>
@@ -363,6 +368,13 @@
 
   <p class="unter">Die Anleitung für Kinder: <a href="kinder.html">So spielst du</a>.</p>
 </main>
+<script>
+// Aus der App geöffnet (?von=app, LERN_Session14): „Zurück“ führt in die App statt ins Portal.
+if (new URLSearchParams(location.search).get("von") === "app") {
+  const z = document.querySelector(".zurueck");
+  if (z) { z.href = "../index.html"; z.textContent = "← Zurück zum Eulenpfad"; }
+}
+</script>
 <script src="../../portal/unterstuetzen.js"></script>
 <script>if (typeof unterstuetzenAktiv === "function" && unterstuetzenAktiv().length) document.getElementById("unterstuetzen").hidden = false;</script>
 </body>

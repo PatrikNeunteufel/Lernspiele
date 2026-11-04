@@ -250,6 +250,12 @@ const AVATARE = (() => {
       kreis(50, 50, 32, "#ffd9a8", ' stroke="#d9925a" stroke-width="2.5"') + schrift(38, 50, "+", 22, "#2f8fe0") + schrift(62, 50, "×", 22, "#e5484d")
       + schrift(38, 72, "−", 22, "#4cbf73") + schrift(62, 72, ":", 22, "#8e5bd6")
       + eck(70, 12, 20, 24, 3, "#fffbea", ' stroke="#c9b87a" stroke-width="2"') + linie("M70 36 L90 12", 3, "#e5484d") },
+    // Klassenaufstieg (LERN_Session14): Schulhaus mit Glocke, daneben ein Pfeil nach oben
+    { id: "abz-aufgestiegen", name: "Aufgestiegen", zeichne: () =>
+      pfad("M12 46 L40 24 L68 46 Z", "#e5484d", ' stroke="#a8401f" stroke-width="2" stroke-linejoin="round"')
+      + eck(18, 46, 44, 38, 2, "#f2c14e", ' stroke="#c98400" stroke-width="2"') + eck(34, 62, 12, 22, 2, "#8a5a32")
+      + eck(22, 52, 9, 9, 1, "#cfe6ff") + eck(49, 52, 9, 9, 1, "#cfe6ff") + kreis(40, 36, 4, "#ffd23f")
+      + linie("M82 80 V22", 6, "#14b8a6") + linie("M70 34 L82 20 L94 34", 6, "#14b8a6") },
   ];
 
   // Sätze im Profil; abzeichen: erst wählbar, wenn das Abzeichen Gold hat (AV5 a, freigeschaltet bestimmt erfolge.js).

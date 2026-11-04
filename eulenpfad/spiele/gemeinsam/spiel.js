@@ -110,6 +110,12 @@ const LS = (() => {
       werte: { stufe: "nach Stufe", immer: "immer", nie: "nie (Kopfrechnen)" },
       erklaerung: "In Aufgaben mit mehreren Rechenschritten gibt es kleine Felder für Zwischenergebnisse (✏️), etwa auf den Pfeilen der Rechen-Maschine. Sie werden nicht bewertet. „Nach Stufe“: in den unteren Stufen ohne, damit Kopfrechnen geübt wird; ab der Stufe, in der es vor allem ums Merken ginge, mit. Die Statistik zeigt, ob ein Kind sie braucht.",
     },
+    // Entscheide NB1–NB3 a (LERN_Session14): Notizblock für schriftliche Verfahren, nur wo Notizfelder stehen
+    notizblock: {
+      titel: "Notizblock für schriftliches Rechnen", standard: "stufe", spieleWie: "notizen",
+      werte: { stufe: "ab Stufe 4", immer: "immer, wo Notizen sind", nie: "nie" },
+      erklaerung: "Neben den Notizfeldern steht „📝 Notizblock“: Das Kind wählt eine Vorlage (Plus, Minus, Mal, Geteilt oder Häuschen), tippt seine Zahlen ein und rechnet darunter wie auf einem Blatt, mit Überträgen. Nichts wird geprüft; das Ergebnis schreibt das Kind selbst ab. Gibt es keine Notizen (Einstellung oben auf „nie“), gibt es auch keinen Block. Die Statistik zeigt „mit Notizblock“.",
+    },
     // Entscheid KR1 a (LERN_Session13): ein Kind fängt auch ohne Aufsicht an
     selbstAnlegen: {
       titel: "Kinder legen sich selbst an", standard: "ja",
@@ -174,7 +180,11 @@ const LS = (() => {
   }
 
   // ---------- Spieler, Profil und Protokoll (nur auf diesem Gerät) ----------
-  // Profil je Name: { alter, klasse, fokus: [Lernziel-Ids, z. B. "4.2-G3"],
+  // Profil je Name: { geboren, alter, klasse, fokus: [Lernziel-Ids, z. B. "4.2-G3"],
+  //   geboren: "JJJJ-MM" — Geburtsmonat, von der Aufsicht gesetzt (Wunsch Patrik, LERN_Session14); das Alter rechnet
+  //     alterVon daraus. alter: Zahl nur noch in älteren Profilen, gilt, solange geboren fehlt
+  //   aufstiege: [{ von, nach, zeit }] — Klassenaufstiege durch die Aufsicht (LERN_Session14); aufstiegGesehen: ISO des
+  //     zuletzt gefeierten Aufstiegs (das Kind hat die Nachricht gesehen)
   //   reihenfolge: { global, spiele: { <spiel-id>: … } } mit "stufe" | "geordnet" | "gemischt" }
   // Protokoll: je gespielte Runde ein Eintrag
   // { name, zeit (ISO), spiel, stufe, sterne, fehler, aufgaben, dauer (s), geordnet,
@@ -201,7 +211,7 @@ const LS = (() => {
   //   avatar: "<tier>-<farbe>" (avatare.js) — vom Kind selbst gewählt (AV1 a); fehlt = Anfangsbuchstabe
   //   geaendert: { <feld>: ISO, angelegt: ISO } — setzt speichereProfil; beim Abgleich gewinnt je Feld der jüngere Stand
   const LEERES_PROFIL = {
-    alter: null, klasse: null, fokus: [], rolle: "kind",
+    geboren: null, alter: null, klasse: null, fokus: [], rolle: "kind", aufstiege: [], aufstiegGesehen: null,
     reihenfolge: { global: "stufe", spiele: {} },
     timer: { an: false, faktor: 1, spiele: {} },
     favoriten: [], endlosAn: [], ansicht: "kacheln", zu: [], mix: null,
@@ -1113,6 +1123,45 @@ const LS = (() => {
     return k === null || k === undefined || k === "" || Number.isNaN(Number(k)) ? null : Number(k);
   }
 
+  /**
+   * Alter in ganzen Jahren aus dem Geburtsmonat (geboren "JJJJ-MM"); der Tag fehlt mit Absicht (Datensparsamkeit), im
+   * Geburtsmonat selbst zählt das neue Lebensjahr schon ab dem Ersten — höchstens einen Monat zu früh. Ältere Profile
+   * ohne Geburtsmonat: die gespeicherte Zahl alter. Sonst null.
+   */
+  function alterVon(p, jetzt = new Date()) {
+    const m = /^(\d{4})-(\d{2})$/.exec(p?.geboren || "");
+    if (!m) return typeof p?.alter === "number" ? p.alter : null;
+    const jahre = jetzt.getFullYear() - Number(m[1]) - (jetzt.getMonth() + 1 < Number(m[2]) ? 1 : 0);
+    return jahre >= 0 ? jahre : null;
+  }
+
+  /**
+   * Klassenaufstieg (Wunsch Patrik, LERN_Session14): Die Aufsicht lässt ein Kind in die nächste Klasse aufsteigen. Die
+   * Klasse steigt um eins, der Aufstieg steht in aufstiege (für die Nachricht ans Kind und das Abzeichen „Aufgestiegen“).
+   * Nach der 6. Klasse geht es im Lernsteig weiter, dort gibt es keinen Aufstieg mehr. Gibt die neue Klasse oder null.
+   */
+  function aufsteigen(name) {
+    const p = profil(name);
+    const k = klasseVon(p);
+    if (k === null || k >= KLASSEN[KLASSEN.length - 1]) return null;
+    speichereProfil(name, { klasse: k + 1, aufstiege: [...(p.aufstiege || []), { von: k, nach: k + 1, zeit: new Date().toISOString() }] });
+    return k + 1;
+  }
+  /** Den letzten Aufstieg zurücknehmen (aus Versehen ausgelöst): Klasse wieder wie davor, das Abzeichen fällt weg. */
+  function aufstiegZuruecknehmen(name) {
+    const liste = [...(profil(name).aufstiege || [])];
+    const letzter = liste.pop();
+    if (!letzter) return null;
+    speichereProfil(name, { klasse: letzter.von, aufstiege: liste });
+    return letzter.von;
+  }
+  /** Letzter Aufstieg, den das Kind noch nicht gefeiert hat, sonst null. */
+  function neuerAufstieg(name) {
+    const p = profil(name);
+    const letzter = (p.aufstiege || []).at(-1);
+    return letzter && (!p.aufstiegGesehen || p.aufstiegGesehen < letzter.zeit) ? letzter : null;
+  }
+
   /** Schulklasse, für die eine Stufe gedacht ist (Basisklasse + Abstand); die Königsstufe zählt wie Stufe 5. */
   function klasseDerStufe(spielId, stufeId) {
     const b = basisKlasse(spielId);
@@ -1567,6 +1616,40 @@ const LS = (() => {
 
   let aktiveTastatur = null;
 
+  // Notizfeld als Ziel der Bildschirmtastatur (Meldung Patrik, LERN_Session14: mit der Maus liess sich ein Notizfeld
+  // nicht füllen, die Tasten schrieben nur ins Antwortfeld). Ist ein Notizfeld (zw-notiz) oder ein Häuschen des
+  // Notizblocks (nb-feld) gewählt, schreiben Ziffern, Zeichen und ⌫ dort hinein, ✕ leert es, OK heisst „✓ Notiz fertig“
+  // und führt zurück zur Antwort. Die Tasten nehmen dem Feld den Fokus nicht (pointerdown); die Tastatur des Geräts
+  // bleibt zu, solange die Bildschirmtastatur da ist (inputmode none).
+  const NOTIZ_ZIEL = ".zw-notiz, .nb-feld";
+  const notizImFokus = () => (document.activeElement?.matches?.(NOTIZ_ZIEL) ? document.activeElement : null);
+  /** Zeichen ins Notizfeld f (an der Schreibmarke), höchstens maxlength; meldet es wie eine Eingabe von Hand. */
+  function inNotiz(f, was) {
+    const max = Number(f.getAttribute("maxlength")) || 99;
+    const a = f.selectionStart ?? f.value.length, b = f.selectionEnd ?? f.value.length;
+    if (was === "⌫") {
+      const von = a === b ? Math.max(0, a - 1) : a;
+      f.value = f.value.slice(0, von) + f.value.slice(b);
+      f.setSelectionRange?.(von, von);
+    } else if (was === "✕") f.value = "";
+    else {
+      if (f.value.length - (b - a) >= max) return;
+      f.value = f.value.slice(0, a) + was + f.value.slice(b);
+      f.setSelectionRange?.(a + was.length, a + was.length);
+      ton("tipp");
+    }
+    f.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  document.addEventListener("focusin", e => {
+    if (!e.target?.matches?.(NOTIZ_ZIEL)) return;
+    const mitTastatur = !!aktiveTastatur && document.body.contains(aktiveTastatur.element);
+    e.target.inputMode = mitTastatur ? "none" : "numeric";
+    if (mitTastatur) aktiveTastatur.notizModus(true);
+  });
+  document.addEventListener("focusout", e => {
+    if (e.target?.matches?.(NOTIZ_ZIEL) && aktiveTastatur) setTimeout(() => { if (!notizImFokus()) aktiveTastatur?.notizModus(false); }, 0);
+  });
+
   document.addEventListener("keydown", (e) => {
     if (!aktiveTastatur || !document.body.contains(aktiveTastatur.element)) return;
     if (e.target?.closest?.("input, textarea, select, [contenteditable]")) return; // Notizfeld u. ä.: dort wird getippt
@@ -1608,9 +1691,17 @@ const LS = (() => {
       if (opt.onAenderung) opt.onAenderung(ziffern === "" || ziffern.endsWith(".") ? null : Number(ziffern));
     }
 
+    // Taste: ins gewählte Notizfeld, sonst in die Antwort
+    const taste = (was, sonst) => () => { const f = notizImFokus(); if (f) inNotiz(f, was); else sonst(); };
     const api = {
       element: t,
       dezimal: !!opt.dezimal,
+      /** Schreibt die Tastatur gerade in ein Notizfeld? OK heisst dann „✓ Notiz fertig“. */
+      notizModus(an) {
+        t.classList.toggle("notiz-ziel", an);
+        okKnopf.textContent = an ? "✓ Notiz fertig" : "OK ✓";
+        if (an) okKnopf.disabled = false; else zeige();
+      },
       tippe(z) {
         if (api.gesperrt) return;
         const [ganz, rest] = ziffern.split(".");
@@ -1640,16 +1731,19 @@ const LS = (() => {
     };
 
     for (const z of ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]) {
-      t.append(el("button", { type: "button", text: z, onclick: () => api.tippe(z) }));
+      t.append(el("button", { type: "button", text: z, onclick: taste(z, () => api.tippe(z)) }));
     }
     if (api.dezimal) {
       const zeichen = einstellung("dezimal") === "komma" ? "," : ".";
-      t.append(el("button", { type: "button", class: "zeichen", text: zeichen, "aria-label": zeichen === "," ? "Komma" : "Punkt", onclick: () => api.zeichen() }));
+      t.append(el("button", { type: "button", class: "zeichen", text: zeichen, "aria-label": zeichen === "," ? "Komma" : "Punkt", onclick: taste(zeichen, () => api.zeichen()) }));
     }
-    t.append(el("button", { type: "button", class: "loeschen", text: "⌫", "aria-label": "Löschen", onclick: () => api.loesche() }));
-    t.append(el("button", { type: "button", class: "loeschen", text: "✕", "aria-label": "Alles löschen", onclick: () => api.leeren() }));
-    okKnopf = el("button", { type: "button", class: "ok", text: "OK ✓", onclick: () => api.ok() });
+    t.append(el("button", { type: "button", class: "loeschen", text: "⌫", "aria-label": "Löschen", onclick: taste("⌫", () => api.loesche()) }));
+    t.append(el("button", { type: "button", class: "loeschen", text: "✕", "aria-label": "Alles löschen", onclick: taste("✕", () => api.leeren()) }));
+    okKnopf = el("button", { type: "button", class: "ok", text: "OK ✓", onclick: () => { const f = notizImFokus(); if (f) f.blur(); else api.ok(); } });
     t.append(okKnopf);
+    // Tasten nehmen dem Notizfeld den Fokus nicht, sonst wüsste die Taste nicht mehr, wohin sie schreibt
+    t.addEventListener("pointerdown", e => { if (e.target.closest("button") && notizImFokus()) e.preventDefault(); });
+    t.addEventListener("mousedown", e => { if (e.target.closest("button") && notizImFokus()) e.preventDefault(); });
 
     aktiveTastatur = api;
     zeige();
@@ -1729,6 +1823,10 @@ const LS = (() => {
     "⌫": { code: "Backspace", zeichen: [] },
   };
   const KT_STELLEN = { E: ["e"], Z: ["z"], H: ["h"], T: ["t"], M: ["m"], ZT: ["z", true], HT: ["h", true] };
+  // Ja und Nein auf ihrem Anfangsbuchstaben, auch mit Bild davor („✅ Ja“; Meldung Patrik zum Netz-Falter, LERN_Session14)
+  const KT_WORT = { ja: "j", nein: "n" };
+  /** Erstes Wort eines Knopfs ohne Bild und Satzzeichen, klein: „✅ Ja“ → „ja“. */
+  const ktWort = k => ((k.dataset.taste ?? k.textContent).replace(/[^\p{L}\s]/gu, " ").trim().split(/\s+/)[0] || "").toLowerCase();
   // Schweizer Belegung, wo sie vom Namen des Codes abweicht
   const KT_CH = { KeyZ: "Y", KeyY: "Z", Comma: ",", Period: ".", Slash: "-", Backspace: "⌫" };
   let ktBelegung = null; // Map code → Zeichen der erkannten Belegung
@@ -1762,10 +1860,13 @@ const LS = (() => {
     if (!liste.length) return;
     const zeichen = liste.map(ktZeichen);
     const verschieden = new Set(zeichen.map(z => z.toLowerCase())).size === zeichen.length;
+    const woerter = liste.map(ktWort);
+    const jaNein = woerter.every(w => KT_WORT[w]) && new Set(woerter).size === woerter.length;
     let tasten;
     // reihe: das Spiel verlangt die Grundreihe (gleiche Zeichen meinen verschiedene Plätze, Stellen-Detektiv)
     if (reihe) tasten = liste.slice(0, KT_REIHE.length).map((knopf, i) => ({ knopf, code: KT_REIHE[i] }));
     else if (verschieden && zeichen.every(z => KT_FEST[z])) tasten = liste.map((knopf, i) => ({ knopf, code: KT_FEST[zeichen[i]].code, zeichen: KT_FEST[zeichen[i]].zeichen }));
+    else if (jaNein) tasten = liste.map((knopf, i) => ({ knopf, key: KT_WORT[woerter[i]] }));
     else if (verschieden && zeichen.every(z => KT_STELLEN[z])) tasten = liste.map((knopf, i) => ({ knopf, key: KT_STELLEN[zeichen[i]][0], shift: !!KT_STELLEN[zeichen[i]][1], stelle: true }));
     // Einzelne Buchstaben oder Ziffern sind selbst die Taste, auch doppelte (Buchstabier-Kacheln „apple“): dann wählt
     // die Taste den ersten noch freien Knopf mit diesem Zeichen (ktFinde).
@@ -2340,6 +2441,7 @@ const LS = (() => {
       // Notizen (NZ1 a): wurden in dieser Aufgabe Notizfelder angeboten, und hat das Kind eines benutzt?
       let notizAngeboten = false;
       let notizBenutzt = false;
+      let blockBenutzt = false; // Notizblock (NB3 a): hat das Kind darin geschrieben?
       // Auftrag statt altem Lob (Hinweis Patrik, LERN_Session13): sagt ein Spiel beim Stellen nichts, zeigt die Eule
       // den Auftrag, den es zuletzt beim Stellen gesagt hat — nie „Richtig wäre …“ der vorigen neben einer neuen Aufgabe.
       let letzterAuftrag = "";
@@ -2417,10 +2519,25 @@ const LS = (() => {
         if (was) eingaben = [...eingaben, was].slice(-6);
       };
       // Eigene kleine Zeile unter der Eule: neben der Blase würde das Wort sie auf dem Handy zu schmal machen.
+      // Davor der Platz für „📝 Notizblock“ (NB2 a): immer an derselben Stelle, nicht im Aufbau des Spiels.
+      const blockPlatz = el("span", { class: "nb-platz" });
+      const werkzeugZeile = el("div", { class: "melde-zeile" }, blockPlatz);
       if (meldenErlaubt(name)) {
-        karte.append(el("div", { class: "melde-zeile" }, el("button", { type: "button", class: "melden", text: "🙋 Melden", "aria-label": "Fehler melden", title: "Fehler im Spiel melden",
-          onclick: () => meldeFormular({ name, spiel: def.id, stufe: stufe.id, jetzt: laufendeAufgabe(), vorige: vorigeAufgabe }) })));
+        werkzeugZeile.append(el("button", { type: "button", class: "melden", text: "🙋 Melden", "aria-label": "Fehler melden", title: "Fehler im Spiel melden",
+          onclick: () => meldeFormular({ name, spiel: def.id, stufe: stufe.id, jetzt: laufendeAufgabe(), vorige: vorigeAufgabe }) }));
       }
+      karte.append(werkzeugZeile);
+      /**
+       * Knopf „📝 Notizblock“ zeigen (NB2 a), wenn die Einstellung ihn in dieser Stufe erlaubt (Standard ab Stufe 4) und
+       * notizblock.js geladen ist. Gerufen beim Stellen und, wenn ein Spiel Notizen oder den Block erst in einem späteren
+       * Schritt anbietet, in diesem Moment (Meldung Patrik, LERN_Session14: im Probe-Stempel fehlte er deshalb).
+       */
+      const blockKnopfZeigen = () => {
+        if (typeof SCHRIFTLICH === "undefined" || blockPlatz.childElementCount || einstellung("notizen") === "nie") return;
+        const e = einstellung("notizblock");
+        if (e === "immer" || (e === "stufe" && Number(stufe.id.slice(1)) >= 4))
+          blockPlatz.replaceChildren(SCHRIFTLICH.knopf(() => { blockBenutzt = true; }));
+      };
       if (test) karte.append(el("div", { class: "testhilfe" }, el("span", { text: "🧪 Test" }), loesungKnopf, weiterKnopf));
       if (timer.an) karte.append(zeitleiste);
       karte.append(flaeche);
@@ -2500,6 +2617,9 @@ const LS = (() => {
         let vorgehen = null; // wie das Kind vorging (ctx.vorgehen): Art → Wert, für die Statistik
         notizAngeboten = false;
         notizBenutzt = false;
+        blockBenutzt = false;
+        if (typeof SCHRIFTLICH !== "undefined") SCHRIFTLICH.schliessen(); // jede Aufgabe beginnt mit leerem Block
+        blockPlatz.replaceChildren();
         let ansagen = [];    // ctx.nachAnsage: Töne und Stimmen des Spiels, die auf Lob und Vorlesen warten
         let angesagt = false;
         const start = performance.now();
@@ -2551,7 +2671,8 @@ const LS = (() => {
           tippZeile.hidden = true;
           tippsRunde += tippsGenutzt;
           // Notizen (NZ1 a): nur wo sie angeboten waren — „ohne“ zählt für das Abzeichen „Kopfrechner“
-          if (notizAngeboten) vorgehen = { ...vorgehen, notiz: notizBenutzt ? "benutzt" : "ohne" };
+          // Notizblock (NB3 a): „block“ geht vor „benutzt“ und zählt so wenig wie dieses für den Kopfrechner
+          if (notizAngeboten) vorgehen = { ...vorgehen, notiz: blockBenutzt ? "block" : notizBenutzt ? "benutzt" : "ohne" };
           aufgabenZeiten.push({ ms: Math.round(Math.max(0, jetztMs - ab - pausiertMs)), versuche, zeitUm, geloest, ...(tippsGenutzt ? { tipps: tippsGenutzt } : {}),
             ...(uebersprungen ? { uebersprungen } : {}), ...(vorgehen ? { vorgehen } : {}) });
           // Für eine Fehlermeldung: wie die Aufgabe gewertet wurde, und sie als „vorige“ für die nächste merken.
@@ -2748,7 +2869,18 @@ const LS = (() => {
           notizen(empfohlen) {
             const e = einstellung("notizen");
             const an = e === "immer" || (e === "stufe" && !!empfohlen);
-            if (an) notizAngeboten = true;
+            if (an) { notizAngeboten = true; if (schritteFest) blockKnopfZeigen(); }
+            return an;
+          },
+          /**
+           * Nur den Notizblock anbieten, ohne Notizfelder (LERN_Session14): wo es kein Zwischenergebnis gibt, aber ein
+           * schriftliches Verfahren hilft (Probe-Stempel: 98 107 − 27 346). empfohlen wie bei notizen; „Notizen: nie“
+           * schaltet auch den Block ab. Zählt fürs Vorgehen wie Notizen (im Kopf / mit Notizblock).
+           */
+          notizblock(empfohlen) {
+            const e = einstellung("notizen");
+            const an = e !== "nie" && !!empfohlen;
+            if (an) { notizAngeboten = true; if (schritteFest) blockKnopfZeigen(); }
             return an;
           },
           /**
@@ -2906,7 +3038,17 @@ const LS = (() => {
             for (const [name, wert] of Object.entries(serien)) (serienVerlauf[name] ||= []).push(wert);
             pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: zuLang && (endlos ? versuch >= SERIE_VERSUCHE : stufeSuche >= 3) });
             schritteFest = true;
-            if (nr > 0 && !gesagtBeimZeichnen) eule.zeige(letzterAuftrag || "Weiter geht's mit der nächsten Aufgabe.");
+            // Notizblock (NB2 a): wenn die Aufgabe Notizen oder den Block anbietet. Der Knopf steht in der Zeile von „Melden“,
+            // nicht beim Feld — dort zerrisse er den Aufbau mancher Spiele (Rechen-Maschine: das Feld sitzt auf dem Pfeil).
+            if (notizAngeboten) blockKnopfZeigen();
+            // Sagt das Spiel beim Stellen nichts: der Auftrag dieser Aufgabe aus der Fläche (.frage, .auftrag — dieselben
+            // Elemente, die das Vorlesen nimmt), erst sonst der zuletzt gesagte; ein früherer Auftrag kann zu einer
+            // anderen Aufgabenart gehören (Pentomino-Puzzle: Formen finden, dann legen; Hinweis Patrik, LERN_Session14).
+            // Ohne Knöpfe darin: 💡 steht seit BH3 a oft in der Frage (data-tipp-ziel).
+            const auftragEl = flaeche.querySelector(".frage, .auftrag")?.cloneNode(true);
+            auftragEl?.querySelectorAll("button").forEach(b => b.remove());
+            const auftragHier = auftragEl?.textContent.replace(/\s+/g, " ").trim();
+            if (nr > 0 && !gesagtBeimZeichnen) eule.zeige(auftragHier || letzterAuftrag || "Weiter geht's mit der nächsten Aufgabe.");
             zeichnet = false;
             gezeigt = true;
             // Reihenfolge: Lob der vorigen Aufgabe ausreden lassen, dann vorlesen, dann die Töne des Spiels.
@@ -3148,7 +3290,8 @@ const LS = (() => {
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
       "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
-      "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "blase-text", "lesetext", "zw-notiz", "weiter-leiste", "weiter-balken", "weiter-knopf"],
+      "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "blase-text", "lesetext", "zw-notiz", "weiter-leiste", "weiter-balken", "weiter-knopf",
+      "notizblock", "nb-knopf", "nb-feld", "nb-kopf", "nb-inhalt", "nb-platz"],
     bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
@@ -3167,7 +3310,7 @@ const LS = (() => {
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinStimmt, pinGueltig, neuerCode, setzeWiederherstellung, wiederherstellung, codeStimmt,
     antwortStimmt, ohneGeheimnis, zuruecksetzenStand, zuruecksetzenAnfordern, zuruecksetzenAbbrechen, zuruecksetzenFaellig, ZURUECKSETZEN_TAGE,
     freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, aehnlich, passung, spielListen, listeFrei, setzeListeFrei, freieListen,
-    basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, sortierungFuer, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
+    basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, alterVon, aufsteigen, aufstiegZuruecknehmen, neuerAufstieg, sortierungFuer, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, reihenfolgeFuer, vorgabeZeit, timerFuer, waehleTimer, zeitVorschlag,
     WAHL_ARTEN, istFest, wahlFuer, setzeWahl, wahlZuruecksetzen, setzeFest, wahlAnzahl, FEST_TEXT, avatarBild,
     stimmeBereit, sprich, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen,

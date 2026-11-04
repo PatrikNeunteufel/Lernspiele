@@ -155,6 +155,10 @@ const ERFOLGE = (() => {
       text: n => `${n} Aufgaben mit mehreren Rechenschritten ganz im Kopf gelöst — die Notizen blieben leer.`,
       pruefe: (k, n) => zaehler(k.runden.flatMap(e => (e.aufgabenZeiten || [])
         .filter(a => a.vorgehen?.notiz === "ohne" && a.geloest && !a.versuche && !a.tipps && !a.zeitUm).map(() => ({ zeit: e.zeit }))), n) },
+    // Klassenaufstieg durch die Aufsicht (Wunsch Patrik, LERN_Session14): je Schuljahr eine Stufe, aus Profil aufstiege
+    { id: "aufgestiegen", bild: "🏫", titel: "Aufgestiegen", stufen: [1, 2, 3, 4, 5],
+      text: n => (n === 1 ? "In die nächste Klasse aufgestiegen." : `${n}-mal in die nächste Klasse aufgestiegen.`),
+      pruefe: (k, n) => zeiten((k.profil?.aufstiege || []).map(a => a.zeit).sort(), n) },
   ];
   // Frühere Abzeichen (LERN_Session10, ohne Stufen) → Abzeichen und Stufe heute, damit Gesehenes gesehen bleibt.
   const FRUEHER = { "erste-runde": "runden:1", "zehn-runden": "runden:2", "fuenfzig-runden": "runden:3", "hundert-runden": "runden:4",

@@ -18,6 +18,30 @@ const PRUEFSTAND = {
     "preis-tabelle/stueckware": {
       "am": "2026-11-01",
       "von": "Patrik"
+    },
+    "rechengeschichten/bilder-bis-10": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "rechengeschichten/bis-100": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "rechengeschichten/platzhalter": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "rechengeschichten/text-bis-20": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "rechengeschichten/unwichtige-angabe": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "rechengeschichten/verteilen": {
+      "am": "2026-11-04",
+      "von": "Patrik"
     }
   },
   "spiele": {
@@ -85,11 +109,23 @@ const PRUEFSTAND = {
       "am": "2026-11-02",
       "von": "Patrik"
     },
+    "netz-falter": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "pentomino-puzzle": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
     "preis-tabelle": {
       "am": "2026-11-01",
       "von": "Patrik"
     },
     "rechen-maschine": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "rechengeschichten": {
       "am": "2026-11-04",
       "von": "Patrik"
     },
@@ -99,6 +135,10 @@ const PRUEFSTAND = {
     },
     "rechentrick-detektiv": {
       "am": "2026-11-02",
+      "von": "Patrik"
+    },
+    "sachaufgaben-kompass": {
+      "am": "2026-11-04",
       "von": "Patrik"
     },
     "schaetz-waage": {
@@ -119,6 +159,14 @@ const PRUEFSTAND = {
     },
     "velo-tabelle": {
       "am": "2026-11-02",
+      "von": "Patrik"
+    },
+    "wuerfel-zaehler": {
+      "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "zielzahl-jagd": {
+      "am": "2026-11-04",
       "von": "Patrik"
     },
     "ziffernkarten": {

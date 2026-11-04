@@ -187,6 +187,34 @@ function zeichneVerwaltung(box, neu) {
       ausgabe);
   }
 
+  /**
+   * Neues Schuljahr (Wunsch Patrik, LERN_Session14): mehrere Kinder auf einmal aufsteigen lassen, nach Klasse geordnet.
+   * Bis die Gruppen gebaut sind (LERN-48), ist das die Klassenorganisation der Lehrperson; einzeln geht es im Profil.
+   */
+  function schuljahr() {
+    const letzte = LS.KLASSEN[LS.KLASSEN.length - 1];
+    const kinder = LS.kinderListe().map(n => ({ n, k: LS.klasseVon(LS.profil(n)) })).filter(x => x.k !== null && x.k < letzte)
+      .sort((a, b) => a.k - b.k || a.n.localeCompare(b.n, "de"));
+    if (!kinder.length) return "";
+    const wahl = kinder.map(x => {
+      const cb = el("input", { type: "checkbox" });
+      cb.checked = true;
+      return { ...x, cb };
+    });
+    const klassen = [...new Set(kinder.map(x => x.k))];
+    return el("details", { class: "timer-details" },
+      el("summary", { text: "⬆️ Neues Schuljahr: Kinder aufsteigen lassen" }),
+      el("p", { class: "leise-text", text: "Die angekreuzten Kinder kommen eine Klasse höher; jedes sieht beim nächsten Anmelden eine Nachricht und bekommt das Abzeichen „Aufgestiegen“. Wer die Klasse wiederholt: Haken weg. Zurücknehmen geht im Profil des Kindes." }),
+      ...klassen.map(k => el("div", { class: "fokus-liste" }, el("b", { text: `${LS.klasseText(k)} → ${LS.klasseText(k + 1)}` }),
+        ...wahl.filter(x => x.k === k).map(x => el("label", {}, x.cb, el("span", { text: LS.spielerName(x.n) }))))),
+      el("div", { class: "knopfzeile", style: "justify-content:flex-start" }, knopf("⬆️ Angekreuzte aufsteigen lassen", () => {
+        const los = wahl.filter(x => x.cb.checked);
+        if (!los.length || !confirm(`${los.length} Kind${los.length === 1 ? "" : "er"} eine Klasse höher setzen?`)) return;
+        for (const x of los) LS.aufsteigen(x.n);
+        neu();
+      }, "gruen")));
+  }
+
   function konten() {
     const meldung = el("div", { class: "meldung", style: "text-align:left", "aria-live": "polite" });
     const kontoZeilen = LS.spielerListe().map(n => {
@@ -226,6 +254,7 @@ function zeichneVerwaltung(box, neu) {
         el("thead", {}, el("tr", {}, ...["Name", "Rolle", "📅 Lernplan", "🔀 Sortierung", ""].map(t => el("th", { text: t })))),
         el("tbody", {}, ...kontoZeilen))),
       meineWiederherstellung(),
+      schuljahr(),
       el("h3", { text: "Neues Kind" }),
       el("div", { class: "pin-zeile", style: "justify-content:flex-start" }, neuName, neuKlasse, knopf("＋ Anlegen", anlegen, "gruen")),
       meldung));
@@ -286,7 +315,8 @@ function zeichneVerwaltung(box, neu) {
     const zeilen = Object.entries(LS.EINSTELLUNGEN).map(([name, e]) => {
       const global = LS.einstellung(name, null);
       // Spiele, die die Einstellung nutzen (Katalog, Feld einstellungen): je Spiel „wie global“ oder ein eigener Wert
-      const spiele = SPIELE.filter(s => s.einstellungen?.includes(name));
+      // spieleWie: gilt in denselben Spielen wie eine andere Einstellung (Notizblock wie Notizen, NB2 a)
+      const spiele = SPIELE.filter(s => s.einstellungen?.includes(e.spieleWie || name));
       return el("div", { class: "einstellung" },
         el("h3", { text: e.titel }),
         el("p", { class: "leise-text", style: "margin:0 0 6px", text: e.erklaerung }),

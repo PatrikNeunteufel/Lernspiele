@@ -10,7 +10,10 @@
     font-size: clamp(17px, 4vw, 22px); line-height: 1.7; }
   .frage { text-align: center; font-size: clamp(18px, 4.2vw, 24px); font-weight: 800; margin: 4px 0 10px; line-height: 1.6; }
   .angabe { display: inline-block; font: inherit; font-weight: 900; color: var(--text); background: var(--karte);
-    border: 2px solid var(--rand); border-radius: 10px; padding: 0 8px; margin: 2px 1px; line-height: 1.5; white-space: nowrap; }
+    border: 2px solid var(--rand); border-radius: 10px; padding: 0 8px; margin: 2px 1px; line-height: 1.5; text-align: left; }
+  /* Angaben mit Bedeutung (SK1 a) sind länger und dürfen umbrechen; Zahl und Einheit hält ein festes Leerzeichen zusammen (zeigeText) */
+  .angabe-mit-zeichen { white-space: nowrap; }
+  .angabe-mit-zeichen .angabe { white-space: normal; }
   button.angabe { cursor: pointer; min-height: 40px; border-color: var(--deko-4); }
   button.angabe.gewaehlt { background: var(--deko-4); color: #fff; }
   button.angabe.richtig { background: var(--gut-hell); border-color: var(--gut); color: var(--text); }
@@ -66,6 +69,7 @@
 
 <script src="../gemeinsam/avatare.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -100,34 +104,40 @@ const NAMEN = [["Mia", "Ihre"], ["Noah", "Sein"], ["Lea", "Ihre"], ["Luca", "Sei
 // ---------- Bausteine einer Aufgabe ----------
 
 function neu(vorlage) { return { vorlage, saetze: [], frage: [], angaben: [], tabelle: null, diagramm: null, konstanten: [] }; }
-/** Eine Angabe im Text: text wie gezeigt, wert wie im Term, noetig: wird für die Rechnung gebraucht. */
+/**
+ * Eine Angabe im Text: text wie gezeigt, wert wie im Term, noetig: wird für die Rechnung gebraucht.
+ * Eine Angabe ist die Zahl **mit dem, wofür sie steht** (Entscheid SK1 a, LERN_Session14, nach einer Meldung: „am
+ * letzten Tag gehört doch auch dazu“): Zahl, Einheit und die Wörter, die ihre Rolle tragen — je, pro, am letzten Tag,
+ * schon, dazu, für alle. Wer nur die Zahl antippt, weiss nicht, ob sie einmal oder je Tag gilt. In Tabelle und
+ * Diagramm nennen Zeile, Spalte und Säule die Bedeutung, dort bleibt die Zahl allein.
+ */
 function ang(a, text, wert, noetig = true) { a.angaben.push({ text, wert: String(wert), noetig }); return { a: a.angaben.length - 1 }; }
 
 // Überflüssige Angaben je Umfeld: Sätze mit Zahlen, die für die Frage nicht gebraucht werden.
 const EXTRA = {
-  dauer: a => { const d = 5 * zufall(7, 19); return ["Die Fahrt dauert ", ang(a, `${d} min`, d, false), "."]; },
-  abfahrt: a => { const h = zufall(7, 10); return ["Der Zug fährt um ", ang(a, `${h} Uhr`, h, false), " ab."]; },
-  hoehe: a => { const h = 50 * zufall(18, 32); return ["Das Lagerhaus liegt auf ", ang(a, `${zahlText(h)} m ü. M.`, h, false), "."]; },
-  car: a => { const d = 5 * zufall(9, 30); return ["Die Carfahrt dauert ", ang(a, `${d} min`, d, false), "."]; },
+  dauer: a => { const d = 5 * zufall(7, 19); return [ang(a, `Die Fahrt dauert ${d} min`, d, false), "."]; },
+  abfahrt: a => { const h = zufall(7, 10); return ["Der Zug ", ang(a, `fährt um ${h} Uhr ab`, h, false), "."]; },
+  hoehe: a => { const h = 50 * zufall(18, 32); return ["Das Lagerhaus ", ang(a, `liegt auf ${zahlText(h)} m ü. M.`, h, false), "."]; },
+  car: a => { const d = 5 * zufall(9, 30); return [ang(a, `Die Carfahrt dauert ${d} min`, d, false), "."]; },
   zimmer: a => { const z = zufall(4, 9); return ["Im Lagerhaus gibt es ", ang(a, `${z} Schlafräume`, z, false), "."]; },
-  start: a => { const h = zufall(8, 10); return ["Die Gruppe startet um ", ang(a, `${h} Uhr`, h, false), "."]; },
+  start: a => { const h = zufall(8, 10); return ["Die Gruppe ", ang(a, `startet um ${h} Uhr`, h, false), "."]; },
   gaenge: a => { const n = waehle([7, 21, 24, 27]); return ["Jedes Velo hat ", ang(a, `${n} Gänge`, n, false), "."]; },
-  pass: a => { const h = 50 * zufall(14, 30); return ["Der höchste Punkt liegt auf ", ang(a, `${zahlText(h)} m ü. M.`, h, false), "."]; },
-  laden: a => { const m = 50 * zufall(4, 18); return ["Der Laden ist ", ang(a, `${m} m`, m, false), " vom Lagerhaus entfernt."]; },
-  schluss: a => { const h = zufall(18, 20); return ["Der Laden schliesst um ", ang(a, `${h} Uhr`, h, false), "."]; },
-  einkaufen: a => { const d = 5 * zufall(3, 9); return ["Der Einkauf dauert ", ang(a, `${d} min`, d, false), "."]; },
-  beginn: a => { const h = zufall(8, 9); return ["Der Sporttag beginnt um ", ang(a, `${h} Uhr`, h, false), "."]; },
-  rundbahn: a => { const m = waehle([200, 250, 300, 400]); return ["Die Rundbahn ist ", ang(a, `${m} m`, m, false), " lang."]; },
-  wasser: a => { const p = 10 * zufall(12, 25); return ["Am Stand kostet ein Mineralwasser ", ang(a, fr(p), g(p), false), "."]; },
-  taxidauer: a => { const d = zufall(6, 25); return ["Die Fahrt dauert ", ang(a, `${d} min`, d, false), "."]; },
-  plaetze: a => { const n = waehle([4, 6, 8]); return ["Im Taxi haben ", ang(a, `${n} Personen`, n, false), " Platz."]; },
-  tour: a => { const d = zufall(18, 45); return ["Die Tour ist ", ang(a, `${d} km`, d, false), " lang."]; },
-  verleih: a => { const h = zufall(8, 10); return ["Der Verleih öffnet um ", ang(a, `${h} Uhr`, h, false), "."]; },
-  laenge: a => { const m = zufall(2, 4); return ["Das Becken ist ", ang(a, `${m} m`, m, false), " lang."]; },
-  waerme: a => { const t = zufall(24, 33); return ["Draussen ist es ", ang(a, `${t} °C`, t, false), " warm."]; },
-  kochen: a => { const d = zufall(8, 12); return ["Die Teigwaren kochen ", ang(a, `${d} min`, d, false), "."]; },
-  paket: a => { const kg = zufall(2, 9); return ["Das Paket wiegt ", ang(a, `${kg} kg`, kg, false), "."]; },
-  lauf: a => { const d = 5 * zufall(6, 12); return ["Der Lauf dauert ", ang(a, `${d} min`, d, false), "."]; },
+  pass: a => { const h = 50 * zufall(14, 30); return ["Der höchste Punkt ", ang(a, `liegt auf ${zahlText(h)} m ü. M.`, h, false), "."]; },
+  laden: a => { const m = 50 * zufall(4, 18); return ["Der Laden ist ", ang(a, `${m} m vom Lagerhaus entfernt`, m, false), "."]; },
+  schluss: a => { const h = zufall(18, 20); return ["Der Laden ", ang(a, `schliesst um ${h} Uhr`, h, false), "."]; },
+  einkaufen: a => { const d = 5 * zufall(3, 9); return [ang(a, `Der Einkauf dauert ${d} min`, d, false), "."]; },
+  beginn: a => { const h = zufall(8, 9); return ["Der Sporttag ", ang(a, `beginnt um ${h} Uhr`, h, false), "."]; },
+  rundbahn: a => { const m = waehle([200, 250, 300, 400]); return [ang(a, `Die Rundbahn ist ${m} m lang`, m, false), "."]; },
+  wasser: a => { const p = 10 * zufall(12, 25); return ["Am Stand ", ang(a, `kostet ein Mineralwasser ${fr(p)}`, g(p), false), "."]; },
+  taxidauer: a => { const d = zufall(6, 25); return [ang(a, `Die Fahrt dauert ${d} min`, d, false), "."]; },
+  plaetze: a => { const n = waehle([4, 6, 8]); return ["Im Taxi ", ang(a, `haben ${n} Personen Platz`, n, false), "."]; },
+  tour: a => { const d = zufall(18, 45); return [ang(a, `Die Tour ist ${d} km lang`, d, false), "."]; },
+  verleih: a => { const h = zufall(8, 10); return ["Der Verleih ", ang(a, `öffnet um ${h} Uhr`, h, false), "."]; },
+  laenge: a => { const m = zufall(2, 4); return [ang(a, `Das Becken ist ${m} m lang`, m, false), "."]; },
+  waerme: a => { const t = zufall(24, 33); return ["Draussen ist es ", ang(a, `${t} °C warm`, t, false), "."]; },
+  kochen: a => { const d = zufall(8, 12); return ["Die Teigwaren ", ang(a, `kochen ${d} min`, d, false), "."]; },
+  paket: a => { const kg = zufall(2, 9); return [ang(a, `Das Paket wiegt ${kg} kg`, kg, false), "."]; },
+  lauf: a => { const d = 5 * zufall(6, 12); return [ang(a, `Der Lauf dauert ${d} min`, d, false), "."]; },
 };
 
 /** n überflüssige Sätze aus den genannten Arten, an zufälligen Stellen nach dem ersten Satz. */
@@ -149,7 +159,7 @@ const VORLAGEN = {
   billette1(x) {
     const a = neu("billette1"), n = zufall(16, 26), p = zufall(6, 15) * 100;
     a.saetze = [["Die Klasse fährt mit dem Zug ins Klassenlager."], ["Es fahren ", ang(a, `${n} Kinder`, n), " mit."],
-      ["Ein Kinderbillett kostet ", ang(a, fr(p), g(p)), "."]];
+      [ang(a, `Ein Kinderbillett kostet ${fr(p)}`, g(p)), "."]];
     a.frage = ["Wie viel kosten alle Kinderbillette zusammen?"];
     a.term = `${n}*${g(p)}`;
     a.wege = [a.term, `${n}+${g(p)}`, `${n}-${g(p)}`];
@@ -158,7 +168,7 @@ const VORLAGEN = {
   velo1summe(x) {
     const a = neu("velo1summe"); let v = zufall(14, 32), n = zufall(10, 28);
     if (v === n) n++;
-    a.saetze = [["Die Klasse macht eine Velotour."], ["Am Vormittag fährt sie ", ang(a, `${v} km`, v), ", am Nachmittag ", ang(a, `${n} km`, n), "."]];
+    a.saetze = [["Die Klasse macht eine Velotour."], ["Sie fährt ", ang(a, `am Vormittag ${v} km`, v), " und ", ang(a, `am Nachmittag ${n} km`, n), "."]];
     a.frage = ["Wie weit fährt sie an diesem Tag?"];
     a.term = `${v}+${n}`;
     a.wege = [a.term, v > n ? `${v}-${n}` : `${n}-${v}`, `${v}*${n}`];
@@ -166,7 +176,7 @@ const VORLAGEN = {
   },
   velo1mal(x) {
     const a = neu("velo1mal"), t = zufall(3, 5), d = 2 * zufall(12, 24);
-    a.saetze = [["Die Klasse macht eine Velotour."], ["Sie fährt ", ang(a, `${t} Tage`, t), " lang jeden Tag ", ang(a, `${d} km`, d), "."]];
+    a.saetze = [["Die Klasse macht eine Velotour."], ["Sie fährt ", ang(a, `${t} Tage lang`, t), " ", ang(a, `jeden Tag ${d} km`, d), "."]];
     a.frage = ["Wie weit fährt sie insgesamt?"];
     a.term = `${t}*${d}`;
     a.wege = [a.term, `${t}+${d}`, `${d}-${t}`];
@@ -174,8 +184,8 @@ const VORLAGEN = {
   },
   rueckgeld1(x) {
     const a = neu("rueckgeld1"), s = waehle([50, 100]), k = zufall(12, s - 8);
-    a.saetze = [["Die Klasse kauft für den Wandertag ein."], ["Der Einkauf kostet ", ang(a, fr(k * 100), k), "."],
-      ["Die Lehrerin bezahlt mit ", ang(a, fr(s * 100), s), "."]];
+    a.saetze = [["Die Klasse kauft für den Wandertag ein."], [ang(a, `Der Einkauf kostet ${fr(k * 100)}`, k), "."],
+      ["Die Lehrerin ", ang(a, `bezahlt mit ${fr(s * 100)}`, s), "."]];
     a.frage = ["Wie viel Rückgeld bekommt sie?"];
     a.term = `${s}-${k}`;
     a.wege = [a.term, `${s}+${k}`, `${s}*${k}`];
@@ -183,8 +193,8 @@ const VORLAGEN = {
   },
   znueni1(x) {
     const a = neu("znueni1"), n = zufall(4, 9), p = 10 * zufall(18, 39);
-    a.saetze = [["Für das Znüni kauft die Klasse ein."], ["Sie nimmt ", ang(a, `${n} Packungen`, n), " Knäckebrot."],
-      ["Eine Packung kostet ", ang(a, fr(p), g(p)), "."]];
+    a.saetze = [["Für das Znüni kauft die Klasse ein."], ["Sie nimmt ", ang(a, `${n} Packungen Knäckebrot`, n), "."],
+      [ang(a, `Eine Packung kostet ${fr(p)}`, g(p)), "."]];
     a.frage = ["Wie viel kostet das Knäckebrot zusammen?"];
     a.term = `${n}*${g(p)}`;
     a.wege = [a.term, `${n}+${g(p)}`, `${g(p)}/${n}`];
@@ -192,7 +202,7 @@ const VORLAGEN = {
   },
   teams1(x) {
     const a = neu("teams1"), k = zufall(4, 8), t = zufall(6, 14), n = k * t;
-    a.saetze = [["Am Sporttag machen ", ang(a, `${n} Kinder`, n), " mit."], ["Sie bilden Teams mit je ", ang(a, `${k} Kindern`, k), "."]];
+    a.saetze = [["Am Sporttag machen ", ang(a, `${n} Kinder`, n), " mit."], ["Sie bilden ", ang(a, `Teams mit je ${k} Kindern`, k), "."]];
     a.frage = ["Wie viele Teams gibt es?"];
     a.term = `${n}/${k}`;
     a.wege = [a.term, `${n}*${k}`, `${n}-${k}`];
@@ -200,7 +210,7 @@ const VORLAGEN = {
   },
   staffel1(x) {
     const a = neu("staffel1"), k = zufall(4, 8), m = waehle([50, 60, 80, 100]);
-    a.saetze = [["Am Sporttag läuft jedes Team eine Staffel."], ["Im Team laufen ", ang(a, `${k} Kinder`, k), " nacheinander je ", ang(a, `${m} m`, m), "."]];
+    a.saetze = [["Am Sporttag läuft jedes Team eine Staffel."], ["Im Team laufen ", ang(a, `${k} Kinder nacheinander`, k), " ", ang(a, `je ${m} m`, m), "."]];
     a.frage = ["Wie lang ist die ganze Staffel?"];
     a.term = `${k}*${m}`;
     a.wege = [a.term, `${k}+${m}`, `${m}-${k}`];
@@ -211,7 +221,7 @@ const VORLAGEN = {
   billette2(x) {
     const a = neu("billette2"), n = zufall(16, 26), l = zufall(2, 3), p = 20 * zufall(32, 74), q = 2 * p;
     a.saetze = [["Die Klasse fährt mit dem Zug ins Klassenlager."], ["Es fahren ", ang(a, `${n} Kinder`, n), " und ", ang(a, `${l} Begleitpersonen`, l), " mit."],
-      ["Ein Kinderbillett kostet ", ang(a, fr(p), g(p)), ", ein Billett für Erwachsene ", ang(a, fr(q), g(q)), "."]];
+      [ang(a, `Ein Kinderbillett kostet ${fr(p)}`, g(p)), ", ", ang(a, `ein Billett für Erwachsene ${fr(q)}`, g(q)), "."]];
     a.frage = ["Wie viel kosten alle Billette zusammen?"];
     a.term = `${n}*${g(p)}+${l}*${g(q)}`;
     a.wege = [a.term, `(${n}+${l})*${g(p)}`, `(${n}+${l})*${g(q)}`, `${n}*${g(p)}+${g(q)}`];
@@ -221,9 +231,9 @@ const VORLAGEN = {
   lagerkosten(x) {
     const a = neu("lagerkosten"), n = zufall(18, 25), h = 5 * zufall(14, 28), c = 5 * zufall(4, 9);
     const haus = n * h, car = n * c;
-    a.saetze = [["Die Klasse plant ein Klassenlager."], ["Das Lagerhaus kostet für die ganze Woche ", ang(a, fr(haus * 100), haus), "."],
-      ["Der Car für die Hin- und Rückfahrt kostet ", ang(a, fr(car * 100), car), "."],
-      ["Die Kosten werden gleichmässig auf die ", ang(a, `${n} Kinder`, n), " verteilt."]];
+    a.saetze = [["Die Klasse plant ein Klassenlager."], [ang(a, `Das Lagerhaus kostet für die ganze Woche ${fr(haus * 100)}`, haus), "."],
+      [ang(a, `Der Car für Hin- und Rückfahrt kostet ${fr(car * 100)}`, car), "."],
+      ["Die Kosten werden ", ang(a, `gleichmässig auf die ${n} Kinder verteilt`, n), "."]];
     a.frage = ["Wie viel bezahlt jedes Kind?"];
     a.term = `(${haus}+${car})/${n}`;
     a.wege = [a.term, `${haus}+${car}/${n}`, `(${haus}+${car})*${n}`, `${haus}/${n}+${car}`];
@@ -233,8 +243,8 @@ const VORLAGEN = {
   velo2(x) {
     const a = neu("velo2"), t = zufall(2, 4), d = 2 * zufall(14, 24); let e = 2 * zufall(6, 14);
     if (e === d) e += 2;
-    a.saetze = [["Die Klasse macht eine Velotour."], ["An den ersten ", ang(a, `${t} Tagen`, t), " fährt sie je ", ang(a, `${d} km`, d), "."],
-      ["Am letzten Tag fährt sie noch ", ang(a, `${e} km`, e), " bis zum Bahnhof."]];
+    a.saetze = [["Die Klasse macht eine Velotour."], [ang(a, `An den ersten ${t} Tagen`, t), " fährt sie ", ang(a, `je ${d} km`, d), "."],
+      [ang(a, `Am letzten Tag fährt sie noch ${e} km`, e), " bis zum Bahnhof."]];
     a.frage = ["Wie lang ist die ganze Velotour?"];
     a.term = `${t}*${d}+${e}`;
     a.wege = [a.term, `(${t}+1)*${d}`, `${t}*(${d}+${e})`, `${t}+${d}+${e}`];
@@ -243,8 +253,8 @@ const VORLAGEN = {
   },
   einkauf2(x) {
     const a = neu("einkauf2"), n1 = zufall(4, 8), p1 = 10 * zufall(26, 42), n2 = zufall(6, 12), p2 = 5 * zufall(30, 39);
-    a.saetze = [["Für das Lagerfrühstück kauft die Köchin ein."], ["Sie nimmt ", ang(a, `${n1} Brote`, n1), " zu je ", ang(a, fr(p1), g(p1)),
-      " und ", ang(a, `${n2} Liter`, n2), " Milch zu je ", ang(a, fr(p2), g(p2)), "."]];
+    a.saetze = [["Für das Lagerfrühstück kauft die Köchin ein."], ["Sie nimmt ", ang(a, `${n1} Brote`, n1), " ", ang(a, `zu je ${fr(p1)}`, g(p1)),
+      " und ", ang(a, `${n2} Liter Milch`, n2), " ", ang(a, `zu je ${fr(p2)}`, g(p2)), "."]];
     a.frage = ["Wie viel bezahlt sie?"];
     a.term = `${n1}*${g(p1)}+${n2}*${g(p2)}`;
     a.wege = [a.term, `(${n1}+${n2})*${g(p1)}`, `${n1}*${g(p1)}+${g(p2)}`, `(${n1}+${n2})*(${g(p1)}+${g(p2)})`];
@@ -254,8 +264,8 @@ const VORLAGEN = {
   glace2(x) {
     const a = neu("glace2"); let n, p, s;
     do { n = zufall(3, 6); p = 10 * zufall(15, 35); s = waehle([20, 50]); } while (n * p >= s * 100 - 100);
-    a.saetze = [["Nach dem Sporttag kauft Frau Huber Glace für ihr Team."], ["Sie kauft ", ang(a, `${n} Glace`, n), " zu je ", ang(a, fr(p), g(p)), "."],
-      ["Sie bezahlt mit ", ang(a, fr(s * 100), s), "."]];
+    a.saetze = [["Nach dem Sporttag kauft Frau Huber Glace für ihr Team."], ["Sie kauft ", ang(a, `${n} Glace`, n), " ", ang(a, `zu je ${fr(p)}`, g(p)), "."],
+      ["Sie ", ang(a, `bezahlt mit ${fr(s * 100)}`, s), "."]];
     a.frage = ["Wie viel Rückgeld bekommt sie?"];
     a.term = `${s}-${n}*${g(p)}`;
     a.wege = [a.term, `${s}-${n}-${g(p)}`, `(${s}-${n})*${g(p)}`, `${s}-${g(p)}`];
@@ -264,8 +274,8 @@ const VORLAGEN = {
   },
   baelle2(x) {
     const a = neu("baelle2"), k = zufall(5, 6), t = zufall(4, 8), n = k * t, b = zufall(2, 4);
-    a.saetze = [["Am Sporttag spielen ", ang(a, `${n} Kinder`, n), " Unihockey."], ["Sie bilden Teams mit je ", ang(a, `${k} Kindern`, k), "."],
-      ["Zum Üben bekommt jedes Team ", ang(a, `${b} Bälle`, b), "."]];
+    a.saetze = [["Am Sporttag spielen ", ang(a, `${n} Kinder`, n), " Unihockey."], ["Sie bilden ", ang(a, `Teams mit je ${k} Kindern`, k), "."],
+      ["Zum Üben ", ang(a, `bekommt jedes Team ${b} Bälle`, b), "."]];
     a.frage = ["Wie viele Bälle braucht es?"];
     a.term = `${n}/${k}*${b}`;
     a.wege = [a.term, `${n}*${b}`, `${n}/${k}+${b}`, `${n}/${b}*${k}`];
@@ -276,7 +286,7 @@ const VORLAGEN = {
     const a = neu("sponsor2"), [wer, sein] = name(), r = zufall(8, 20), p = waehle([50, 100, 150, 200]);
     const q = waehle([50, 100, 150, 200, 250].filter(v => v !== p));
     a.saetze = [["Beim Sponsorenlauf läuft ", wer, " ", ang(a, `${r} Runden`, r), "."],
-      [`${sein}${sein === "Ihre" ? "" : "e"} Grossmutter gibt `, ang(a, fr(p), g(p)), " pro Runde, ", sein === "Ihre" ? "ihr" : "sein", " Onkel ", ang(a, fr(q), g(q)), " pro Runde."]];
+      [`${sein}${sein === "Ihre" ? "" : "e"} Grossmutter gibt `, ang(a, `${fr(p)} pro Runde`, g(p)), ", ", sein === "Ihre" ? "ihr" : "sein", " Onkel ", ang(a, `${fr(q)} pro Runde`, g(q)), "."]];
     a.frage = [`Wie viel Geld sammelt ${wer} für die Klassenkasse?`];
     a.term = `${r}*(${g(p)}+${g(q)})`;
     a.wege = [a.term, `${r}*${g(p)}+${g(q)}`, `${r}+${g(p)}+${g(q)}`, `(${r}+${g(p)})*${g(q)}`];
@@ -285,7 +295,7 @@ const VORLAGEN = {
   },
   dreisatz(x) {
     const a = neu("dreisatz"), k = zufall(3, 6), b = zufall(7, 12), p = 20 * zufall(32, 64), P = k * p;
-    a.saetze = [["Herr Brunner kauft Kinderbillette für den Schulausflug."], ["Für ", ang(a, `${k} Billette`, k), " bezahlt er ", ang(a, fr(P), g(P)), "."],
+    a.saetze = [["Herr Brunner kauft Kinderbillette für den Schulausflug."], [ang(a, `Für ${k} Billette`, k), " ", ang(a, `bezahlt er ${fr(P)}`, g(P)), "."],
       ["Alle Billette kosten gleich viel."]];
     a.frage = ["Wie viel kosten ", ang(a, `${b} Billette`, b), "?"];
     a.term = `${g(P)}/${k}*${b}`;
@@ -296,8 +306,8 @@ const VORLAGEN = {
   kaese(x) {
     const a = neu("kaese"), g1 = waehle([200, 300, 400, 500]); let g2 = 100 * zufall(6, 15);
     const c = 10 * zufall(18, 32), P = (g1 / 100) * c;
-    a.saetze = [["Die Klasse macht Sandwiches für den Wandertag."], ["Im Laden kosten ", ang(a, `${g1} g`, g1), " Käse ", ang(a, fr(P), g(P)), "."]];
-    a.frage = ["Wie viel kosten ", ang(a, `${g2} g`, g2), " Käse?"];
+    a.saetze = [["Die Klasse macht Sandwiches für den Wandertag."], [ang(a, `${g1} g Käse`, g1), " ", ang(a, `kosten im Laden ${fr(P)}`, g(P)), "."]];
+    a.frage = ["Wie viel kosten ", ang(a, `${g2} g Käse`, g2), "?"];
     a.term = `${g(P)}/${g1}*${g2}`;
     a.wege = [a.term, `${g(P)}*${g2}`, `${g(P)}+${g2}-${g1}`, `${g(P)}/${g2}*${g1}`];
     extras(a, ["laden", "einkaufen", "schluss"], x.extra);
@@ -311,7 +321,7 @@ const VORLAGEN = {
     const kp = 50 * zufall(ort.k[0] / 50, ort.k[1] / 50), jp = kp + 50 * zufall(2, 4), ep = jp + 50 * zufall(2, 6);
     const sp = 50 * zufall(kp / 50 + 1, ep / 50 - 1), ne = zufall(2, 3), nk = zufall(2, 4);
     if (sp === jp) return null;
-    a.saetze = [["Familie Keller geht ", ort.ort, ": ", ang(a, `${ne} Erwachsene`, ne), " und ", ang(a, `${nk} Kinder`, nk), " im Primarschulalter."]];
+    a.saetze = [["Familie Keller geht ", ort.ort, ": ", ang(a, `${ne} Erwachsene`, ne), " und ", ang(a, `${nk} Kinder im Primarschulalter`, nk), "."]];
     a.tabelle = { titel: `Eintritt ${ort.wo}`, kopf: ["", "Preis"], zeilen: [
       ["Kinder (6 bis 15 Jahre)", ang(a, fr(kp), g(kp))], ["Jugendliche (16 bis 19 Jahre)", ang(a, fr(jp), g(jp), false)],
       ["Erwachsene", ang(a, fr(ep), g(ep))], ["Seniorinnen und Senioren", ang(a, fr(sp), g(sp), false)]] };
@@ -358,7 +368,7 @@ const VORLAGEN = {
   lagerkasse(x) {
     const a = neu("lagerkasse"), tage = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
     const aus = tage.map(() => 5 * zufall(1708, 4816)), B = 50 * zufall(14, 24);
-    a.saetze = [["Im Klassenlager führt die Klasse eine Lagerkasse."], ["Am Anfang sind ", ang(a, fr(B * 100), B, false), " in der Kasse."]];
+    a.saetze = [["Im Klassenlager führt die Klasse eine Lagerkasse."], [ang(a, `Am Anfang sind ${fr(B * 100)} in der Kasse`, B, false), "."]];
     a.tabelle = { titel: "Ausgaben der Lagerkasse", kopf: ["", "Ausgaben"], zeilen: tage.map((t, i) => [t, ang(a, fr(aus[i]), g(aus[i]), false)]) };
     if (Math.random() < 0.5) {
       const k = zufall(2, 3);
@@ -397,8 +407,8 @@ const VORLAGEN = {
   // --- proportional oder linear (Stufe 5) ---
   taxi(x) {
     const a = neu("taxi"), gt = zufall(6, 8), k = 10 * zufall(32, 42), n = zufall(3, 15);
-    a.saetze = [["Ein Taxi verlangt ", ang(a, fr(gt * 100), gt), " Grundtaxe und ", ang(a, fr(k), g(k)), " pro Kilometer."]];
-    a.frage = ["Was kostet eine Fahrt von ", ang(a, `${n} km`, n), "?"];
+    a.saetze = [["Ein Taxi verlangt ", ang(a, `${fr(gt * 100)} Grundtaxe`, gt), " und ", ang(a, `${fr(k)} pro Kilometer`, g(k)), "."]];
+    a.frage = ["Was kostet ", ang(a, `eine Fahrt von ${n} km`, n), "?"];
     a.term = `${gt}+${n}*${g(k)}`;
     a.zusammenhang = "linear";
     extras(a, ["taxidauer", "plaetze"], x.extra);
@@ -406,8 +416,8 @@ const VORLAGEN = {
   },
   kurier(x) {
     const a = neu("kurier"), k = 10 * zufall(22, 36), n = zufall(3, 15);
-    a.saetze = [["Ein Velokurier bringt Pakete durch die Stadt."], ["Er verlangt ", ang(a, fr(k), g(k)), " für jeden Kilometer, sonst nichts."]];
-    a.frage = ["Was kostet eine Fahrt von ", ang(a, `${n} km`, n), "?"];
+    a.saetze = [["Ein Velokurier bringt Pakete durch die Stadt."], ["Er verlangt ", ang(a, `${fr(k)} für jeden Kilometer`, g(k)), ", sonst nichts."]];
+    a.frage = ["Was kostet ", ang(a, `eine Fahrt von ${n} km`, n), "?"];
     a.term = `${n}*${g(k)}`;
     a.zusammenhang = "proportional";
     extras(a, ["taxidauer", "paket"], x.extra);
@@ -415,8 +425,8 @@ const VORLAGEN = {
   },
   velomiete(x) {
     const a = neu("velomiete"), gt = zufall(5, 10), s = 50 * zufall(6, 12), h = zufall(2, 6);
-    a.saetze = [["Beim Veloverleih kostet die Miete ", ang(a, fr(gt * 100), gt), " Grundgebühr und ", ang(a, fr(s), g(s)), " pro Stunde."]];
-    a.frage = ["Was kostet die Miete für ", ang(a, `${h} Stunden`, h), "?"];
+    a.saetze = [["Beim Veloverleih kostet die Miete ", ang(a, `${fr(gt * 100)} Grundgebühr`, gt), " und ", ang(a, `${fr(s)} pro Stunde`, g(s)), "."]];
+    a.frage = ["Was kostet die Miete ", ang(a, `für ${h} Stunden`, h), "?"];
     a.term = `${gt}+${h}*${g(s)}`;
     a.zusammenhang = "linear";
     extras(a, ["tour", "verleih"], x.extra);
@@ -424,9 +434,9 @@ const VORLAGEN = {
   },
   becken(x) {
     const a = neu("becken"), b = zufall(12, 30), m = zufall(5, 20), s = 10 * zufall(5, 20);
-    a.saetze = [["Ein Planschbecken wird mit dem Schlauch gefüllt."], ["Es sind schon ", ang(a, `${s} Liter`, s), " Wasser darin."],
-      ["Jede Minute fliessen ", ang(a, `${b} Liter`, b), " dazu."]];
-    a.frage = ["Wie viel Wasser ist nach ", ang(a, `${m} min`, m), " im Becken?"];
+    a.saetze = [["Ein Planschbecken wird mit dem Schlauch gefüllt."], [ang(a, `Es sind schon ${s} Liter Wasser darin`, s), "."],
+      [ang(a, `Jede Minute fliessen ${b} Liter dazu`, b), "."]];
+    a.frage = ["Wie viel Wasser ist ", ang(a, `nach ${m} min`, m), " im Becken?"];
     a.term = `${s}+${m}*${b}`;
     a.zusammenhang = "linear";
     extras(a, ["laenge", "waerme"], x.extra);
@@ -434,8 +444,8 @@ const VORLAGEN = {
   },
   becken0(x) {
     const a = neu("becken0"), b = zufall(12, 30), m = zufall(5, 20);
-    a.saetze = [["Ein leeres Planschbecken wird mit dem Schlauch gefüllt."], ["Jede Minute fliessen ", ang(a, `${b} Liter`, b), " hinein."]];
-    a.frage = ["Wie viel Wasser ist nach ", ang(a, `${m} min`, m), " im Becken?"];
+    a.saetze = [["Ein leeres Planschbecken wird mit dem Schlauch gefüllt."], [ang(a, `Jede Minute fliessen ${b} Liter hinein`, b), "."]];
+    a.frage = ["Wie viel Wasser ist ", ang(a, `nach ${m} min`, m), " im Becken?"];
     a.term = `${m}*${b}`;
     a.zusammenhang = "proportional";
     extras(a, ["laenge", "waerme"], x.extra);
@@ -443,8 +453,8 @@ const VORLAGEN = {
   },
   gruppe(x) {
     const a = neu("gruppe"), r = 5 * zufall(4, 8), p = 20 * zufall(30, 60), n = zufall(18, 26);
-    a.saetze = [["Für eine Gruppenreise verlangt die Bahn ", ang(a, fr(r * 100), r), " für die Reservation."], ["Dazu kostet jedes Billett ", ang(a, fr(p), g(p)), "."]];
-    a.frage = ["Was kostet die Reise für ", ang(a, `${n} Kinder`, n), "?"];
+    a.saetze = [["Für eine Gruppenreise verlangt die Bahn ", ang(a, `${fr(r * 100)} für die Reservation`, r), "."], ["Dazu ", ang(a, `kostet jedes Billett ${fr(p)}`, g(p)), "."]];
+    a.frage = ["Was kostet die Reise ", ang(a, `für ${n} Kinder`, n), "?"];
     a.term = `${r}+${n}*${g(p)}`;
     a.zusammenhang = "linear";
     extras(a, ["dauer", "abfahrt"], x.extra);
@@ -452,8 +462,8 @@ const VORLAGEN = {
   },
   billettProp(x) {
     const a = neu("billettProp"), p = 20 * zufall(30, 60), n = zufall(18, 26);
-    a.saetze = [["Die Klasse fährt mit der Bahn ins Museum."], ["Jedes Kinderbillett kostet ", ang(a, fr(p), g(p)), ". Eine Reservation braucht es nicht."]];
-    a.frage = ["Was kostet die Reise für ", ang(a, `${n} Kinder`, n), "?"];
+    a.saetze = [["Die Klasse fährt mit der Bahn ins Museum."], [ang(a, `Jedes Kinderbillett kostet ${fr(p)}`, g(p)), ". Eine Reservation braucht es nicht."]];
+    a.frage = ["Was kostet die Reise ", ang(a, `für ${n} Kinder`, n), "?"];
     a.term = `${n}*${g(p)}`;
     a.zusammenhang = "proportional";
     extras(a, ["dauer", "abfahrt"], x.extra);
@@ -465,8 +475,8 @@ const VORLAGEN = {
     const a = neu("lager"), n = zufall(18, 24), l = zufall(2, 4), u = 2 * zufall(18, 29), t = zufall(3, 5);
     const z = 100 * zufall(4, 16);
     a.saetze = [["Ins Klassenlager fahren ", ang(a, `${n} Kinder`, n), " und ", ang(a, `${l} Begleitpersonen`, l), "."],
-      ["Eine Übernachtung mit Essen kostet ", ang(a, fr(u * 100), u), " pro Person."], ["Das Lager dauert ", ang(a, `${t} Nächte`, t), "."],
-      ["Die Gemeinde bezahlt ", ang(a, fr(z * 100), z), " an das Lager."]];
+      ["Eine Übernachtung mit Essen kostet ", ang(a, `${fr(u * 100)} pro Person`, u), "."], ["Das Lager ", ang(a, `dauert ${t} Nächte`, t), "."],
+      ["Die Gemeinde ", ang(a, `bezahlt ${fr(z * 100)} an das Lager`, z), "."]];
     a.frage = ["Wie viel muss die Lagerkasse noch bezahlen?"];
     a.term = `(${n}+${l})*${u}*${t}-${z}`;
     a.plan = "Wie viele Personen sind es? Was kostet eine Nacht für alle? Und alle Nächte?";
@@ -478,9 +488,9 @@ const VORLAGEN = {
     let n3; do { n3 = zufall(3, 15); } while (n3 === n1 || n3 === n2);
     const P1 = gt * 100 + n1 * k, P2 = gt * 100 + n2 * k, E = gt * 100 + n3 * k;
     a.saetze = [["Ein Taxi verlangt eine Grundtaxe und einen festen Preis pro Kilometer."],
-      ["Eine Fahrt von ", ang(a, `${n1} km`, n1), " kostet ", ang(a, fr(P1), g(P1)), "."],
-      ["Eine Fahrt von ", ang(a, `${n2} km`, n2), " kostet ", ang(a, fr(P2), g(P2)), "."]];
-    a.frage = ["Was kostet eine Fahrt von ", ang(a, `${n3} km`, n3), "?"];
+      [ang(a, `Eine Fahrt von ${n1} km`, n1), " ", ang(a, `kostet ${fr(P1)}`, g(P1)), "."],
+      [ang(a, `Eine Fahrt von ${n2} km`, n2), " ", ang(a, `kostet ${fr(P2)}`, g(P2)), "."]];
+    a.frage = ["Was kostet ", ang(a, `eine Fahrt von ${n3} km`, n3), "?"];
     a.term = `${g(P1)}+(${g(P2)}-${g(P1)})/(${n2}-${n1})*(${n3}-${n1})`;
     a.loesung = `Pro km: (${termText(g(P2))} − ${termText(g(P1))}) : ${n2 - n1} = ${fr(k)}; Grundtaxe: ${termText(g(P1))} − ${n1} × ${termText(g(k))} = ${fr(gt * 100)}; ${gt} + ${n3} × ${termText(g(k))} = ${fr(E)}`;
     a.plan = "Die längere Fahrt kostet mehr, weil sie mehr Kilometer hat. Was kostet also ein Kilometer?";
@@ -491,8 +501,8 @@ const VORLAGEN = {
     const a = neu("velozeit"), v = waehle([12, 15, 16, 18, 20]);
     const minuten = [...Array(13)].map((_, i) => 60 + 15 * i).filter(m => (v * m) % 60 === 0);
     const m = waehle(minuten), d = (v * m) / 60, k = zufall(2, 3), p = waehle([10, 15, 20]);
-    a.saetze = [["Die Klasse fährt mit dem Velo zum See."], ["Die Strecke ist ", ang(a, `${d} km`, d), " lang."],
-      ["Die Klasse fährt im Durchschnitt ", ang(a, `${v} km pro Stunde`, v), "."], ["Unterwegs macht sie ", ang(a, `${k} Pausen`, k), " von je ", ang(a, `${p} min`, p), "."]];
+    a.saetze = [["Die Klasse fährt mit dem Velo zum See."], [ang(a, `Die Strecke ist ${d} km lang`, d), "."],
+      ["Die Klasse fährt ", ang(a, `im Durchschnitt ${v} km pro Stunde`, v), "."], ["Unterwegs macht sie ", ang(a, `${k} Pausen`, k), " ", ang(a, `von je ${p} min`, p), "."]];
     a.frage = ["Wie lange ist die Klasse insgesamt unterwegs? Gib die Zeit in Minuten an."];
     a.term = `${d}/${v}*60+${k}*${p}`;
     a.konstanten = ["60"];
@@ -503,8 +513,8 @@ const VORLAGEN = {
   teigwaren(x) {
     const a = neu("teigwaren"), [pk, gr, schritt] = waehle([[500, 100, 5], [500, 125, 4], [500, 150, 10], [1000, 125, 8]]);
     const n = schritt * zufall(Math.ceil(16 / schritt), Math.floor(30 / schritt)), p = pk === 500 ? 10 * zufall(14, 26) : 10 * zufall(24, 42);
-    a.saetze = [["Im Klassenlager gibt es Teigwaren."], ["Die Köchin rechnet mit ", ang(a, `${gr} g`, gr), " pro Kind."],
-      ["Es essen ", ang(a, `${n} Kinder`, n), " mit."], ["Eine Packung mit ", ang(a, `${pk} g`, pk), " kostet ", ang(a, fr(p), g(p)), "."]];
+    a.saetze = [["Im Klassenlager gibt es Teigwaren."], ["Die Köchin rechnet mit ", ang(a, `${gr} g pro Kind`, gr), "."],
+      ["Es essen ", ang(a, `${n} Kinder`, n), " mit."], [ang(a, `Eine Packung mit ${pk} g`, pk), " ", ang(a, `kostet ${fr(p)}`, g(p)), "."]];
     a.frage = ["Wie viel kosten die Teigwaren für alle Kinder?"];
     a.term = `${n}*${gr}/${pk}*${g(p)}`;
     a.plan = "Wie viele Gramm braucht es für alle? Wie viele Packungen sind das?";
@@ -515,8 +525,8 @@ const VORLAGEN = {
     const a = neu("sponsor6"), [wer, sein] = name(), m = waehle([200, 250, 400, 500]);
     const runden = [...Array(23)].map((_, i) => 8 + i).filter(r => (r * m) % 1000 === 0);
     const r = waehle(runden), p = waehle([200, 250, 300, 400, 500]);
-    a.saetze = [["Beim Sponsorenlauf läuft ", wer, " ", ang(a, `${r} Runden`, r), "."], ["Eine Runde ist ", ang(a, `${m} m`, m), " lang."],
-      [`${sein === "Ihre" ? "Ihre" : "Seine"} Tante bezahlt `, ang(a, fr(p), g(p)), " pro Kilometer."]];
+    a.saetze = [["Beim Sponsorenlauf läuft ", wer, " ", ang(a, `${r} Runden`, r), "."], [ang(a, `Eine Runde ist ${m} m lang`, m), "."],
+      [`${sein === "Ihre" ? "Ihre" : "Seine"} Tante bezahlt `, ang(a, `${fr(p)} pro Kilometer`, g(p)), "."]];
     a.frage = [`Wie viel Geld gibt die Tante für den Lauf von ${wer}?`];
     a.term = `${r}*${m}/1000*${g(p)}`;
     a.konstanten = ["1000"];
@@ -528,8 +538,8 @@ const VORLAGEN = {
     const a = neu("einkauf6"); let n1, p1, n2, p2, s;
     do { n1 = zufall(2, 5); p1 = 10 * zufall(28, 48); n2 = zufall(2, 6); p2 = 10 * zufall(18, 32); s = waehle([50, 100]); }
     while (n1 * p1 + n2 * p2 >= s * 100 - 200);
-    a.saetze = [["Die Köchin kauft für das Lager ein."], ["Sie nimmt ", ang(a, `${n1} kg`, n1), " Äpfel zu ", ang(a, fr(p1), g(p1)), " pro Kilogramm",
-      " und ", ang(a, `${n2} Packungen`, n2), " Reis zu je ", ang(a, fr(p2), g(p2)), "."], ["Sie bezahlt mit ", ang(a, fr(s * 100), s), "."]];
+    a.saetze = [["Die Köchin kauft für das Lager ein."], ["Sie nimmt ", ang(a, `${n1} kg Äpfel`, n1), " ", ang(a, `zu ${fr(p1)} pro Kilogramm`, g(p1)),
+      " und ", ang(a, `${n2} Packungen Reis`, n2), " ", ang(a, `zu je ${fr(p2)}`, g(p2)), "."], ["Sie ", ang(a, `bezahlt mit ${fr(s * 100)}`, s), "."]];
     a.frage = ["Wie viel Rückgeld bekommt sie?"];
     a.term = `${s}-(${n1}*${g(p1)}+${n2}*${g(p2)})`;
     a.plan = "Was kosten die Äpfel? Was kostet der Reis? Was kostet alles zusammen?";
@@ -619,6 +629,8 @@ function pruefeAufgabe(a, stufe) {
   if (verweise.length !== a.angaben.length || new Set(verweise).size !== a.angaben.length) m.push("Angabe fehlt oder kommt doppelt vor");
   if (new Set(a.angaben.map(x => x.wert)).size !== a.angaben.length) m.push("zwei Angaben mit derselben Zahl");
   if (new Set(a.angaben.map(x => x.text)).size !== a.angaben.length) m.push("zwei Angaben mit demselben Text");
+  // SK1 a: Die Angabe zeigt ihre Zahl selbst (sonst tippte das Kind Wörter ohne Wert an)
+  for (const x of a.angaben) if (!/\d/.test(x.text)) m.push(`Angabe „${x.text}“ ohne Zahl`);
   const noetig = a.angaben.filter(x => x.noetig), unnoetig = a.angaben.filter(x => !x.noetig);
   if (noetig.length < 2) m.push("weniger als zwei wichtige Angaben");
   // Der Term braucht genau die wichtigen Angaben (und feste Umrechnungszahlen wie 60 oder 1000).
@@ -668,7 +680,21 @@ function pruefeAufgabe(a, stufe) {
 
 /** Text mit Angaben: als Knöpfe zum Antippen oder fest hervorgehoben. */
 function teileEl(a, teile, knoepfe) {
-  return teile.map(t => (typeof t === "string" ? t : knoepfe[t.a]));
+  const aus = [];
+  for (let i = 0; i < teile.length; i++) {
+    const t = teile[i];
+    if (typeof t === "string") { aus.push(t); continue; }
+    // Satzzeichen direkt nach der Angabe bleiben an ihr (kein „. Der Zug“ am Zeilenanfang); endet die Angabe schon
+    // mit einem Punkt („9.80 Fr.“, „ü. M.“), ist er zugleich das Satzende (SK1 a, LERN_Session14).
+    let nach = typeof teile[i + 1] === "string" ? teile[i + 1] : "";
+    const zeichen = /^[.,?!:]/.exec(nach)?.[0];
+    if (!zeichen) { aus.push(knoepfe[t.a]); continue; }
+    nach = nach.slice(1);
+    const doppelt = zeichen === "." && a.angaben[t.a].text.endsWith(".");
+    aus.push(el("span", { class: "angabe-mit-zeichen" }, knoepfe[t.a], doppelt ? "" : zeichen));
+    teile = [...teile.slice(0, i + 1), nach, ...teile.slice(i + 2)];
+  }
+  return aus;
 }
 
 function tabelleEl(a, knoepfe) {
@@ -701,7 +727,7 @@ const SCHRITT_TEXT = {
  */
 function tippsFuer(a, p) {
   const erst = p.phasen.includes("angaben")
-    ? "Lies zuerst die Frage. Tippe nur die Zahlen an, die du dafür brauchst — manche Sätze lenken nur ab."
+    ? "Lies zuerst die Frage. Tippe nur die Angaben an, die du dafür brauchst — manche Sätze lenken nur ab."
     : "Lies zuerst die Frage: Was ist gesucht, und in welcher Einheit?";
   if (p.phasen.includes("zusammenhang")) return [erst, "Mach die Probe mit dem Doppelten: Kostet oder ergibt die doppelte Menge genau das Doppelte? Oder kommt ein fester Teil immer dazu?"];
   return [erst, a.tipp, a.plan].filter(Boolean);
@@ -713,7 +739,7 @@ LS.spiel({
   hilfe: stufe => {
     const ph = STUFE[stufe]?.phasen || ["angaben", "weg", "zusammenhang", "ergebnis"];
     const t = ["Lies den Sachtext und die Frage. Die Aufgabe geht in Schritten, oben steht jeweils, was zu tun ist."];
-    if (ph.includes("angaben")) t.push("Tippe die Zahlen an, die du brauchst (nochmals antippen nimmt sie weg), dann „Prüfen ✓“.");
+    if (ph.includes("angaben")) t.push("Tippe die Angaben an, die du brauchst — immer die Zahl mit dem, wofür sie steht (nochmals antippen nimmt sie weg), dann „Prüfen ✓“.");
     if (ph.includes("weg")) t.push("Tippe den passenden Rechenweg an.");
     if (ph.includes("zusammenhang")) t.push("Tippe an, ob das Ergebnis proportional zur Menge wächst oder nicht.");
     t.push("Zum Schluss tippst du das Ergebnis ein, wählst die Einheit und drückst OK.");
@@ -723,7 +749,7 @@ LS.spiel({
   stufen: {
     s1: "Eine Rechnung: 24 Kinder, ein Billett kostet 12 Fr. — Rechenweg wählen, Ergebnis mit Einheit.",
     s2: "Zwei Schritte: Kinder und Erwachsene, Rückgeld nach dem Einkauf.",
-    s3: "Nur die wichtigen Zahlen antippen, auch Dreisatz: 3 Billette kosten 21.60 Fr. (Lehrplan 6. Klasse).",
+    s3: "Nur die wichtigen Angaben antippen, auch Dreisatz: 3 Billette kosten 21.60 Fr. (Lehrplan 6. Klasse).",
     s4: "Angaben aus Tabelle und Säulendiagramm: Eintrittspreise, Altpapier, Lagerkasse.",
     s5: "Proportional oder nicht? Taxi mit Grundtaxe und Preis pro km (7. Klasse).",
     s6: "Endgegner: viele Schritte — Lagerkosten, zwei Taxifahrten, Velozeit mit Pausen.",
@@ -741,9 +767,11 @@ LS.spiel({
     ctx.tipp(tippsFuer(a, p));
 
     const tippen = p.phasen.includes("angaben");
+    // Zahl und das Wort danach (Einheit) brechen nicht auseinander: „je 46 km“ nie als „je 46 / km“.
+    const zeigeText = t => t.replace(/(\d) (?=\S)/g, "$1\u00a0");
     const knoepfe = a.angaben.map(x => (tippen
-      ? el("button", { type: "button", class: "angabe", text: x.text, "aria-pressed": "false" })
-      : el("span", { class: "angabe", text: x.text })));
+      ? el("button", { type: "button", class: "angabe", text: zeigeText(x.text), "aria-pressed": "false" })
+      : el("span", { class: "angabe", text: zeigeText(x.text) })));
     f.append(el("div", { class: "kompass-text sachtext" }, ...a.saetze.flatMap((s, i) => [...(i ? [" "] : []), ...teileEl(a, s, knoepfe)])));
     if (a.tabelle) f.append(tabelleEl(a, knoepfe));
     if (a.diagramm) f.append(diagrammEl(a, knoepfe));
@@ -788,7 +816,7 @@ LS.spiel({
       const pruefen = el("button", { type: "button", class: "knopf", text: "Prüfen ✓", onclick() {
         if (ctx.vorbei()) return;
         const gewaehlt = knoepfe.map(k => k.classList.contains("gewaehlt"));
-        if (!gewaehlt.some(Boolean)) { ctx.sag("Tippe zuerst die Zahlen an, die du brauchst.", "hinweis"); return; }
+        if (!gewaehlt.some(Boolean)) { ctx.sag("Tippe zuerst die Angaben an, die du brauchst.", "hinweis"); return; }
         const fehlt = a.angaben.some((x, i) => x.noetig && !gewaehlt[i]), zuviel = a.angaben.some((x, i) => !x.noetig && gewaehlt[i]);
         if (!fehlt && !zuviel) {
           knoepfe.forEach((k, i) => { k.disabled = true; k.classList.remove("gewaehlt"); k.classList.add(a.angaben[i].noetig ? "richtig" : "unnoetig"); });
@@ -796,9 +824,9 @@ LS.spiel({
           weiter();
           return;
         }
-        ctx.falsch(fehlt && zuviel ? "Eine Zahl brauchst du nicht, und eine wichtige fehlt noch. Lies die Frage nochmal."
+        ctx.falsch(fehlt && zuviel ? "Eine Angabe brauchst du nicht, und eine wichtige fehlt noch. Lies die Frage nochmal."
           : fehlt ? "Es fehlt noch eine wichtige Angabe. Was brauchst du alles für die Frage?"
-          : "Du hast eine Zahl gewählt, die du für diese Frage nicht brauchst.", loesungText);
+          : "Du hast eine Angabe gewählt, die du für diese Frage nicht brauchst.", loesungText);
         if (ctx.vorbei()) knoepfe.forEach(k => { k.disabled = true; });
       } });
       bereich.append(el("div", { class: "kompass-pruefen" }, pruefen));
@@ -872,7 +900,7 @@ LS.spiel({
     }
 
     weiter();
-    if (ctx.nr === 0) ctx.sag(tippen ? "Tipp: Lies zuerst die Frage. Tippe dann nur die Zahlen an, die du dafür brauchst." : "Tipp: Lies zuerst die Frage. Was ist gesucht? Dann wähle den Rechenweg.");
+    if (ctx.nr === 0) ctx.sag(tippen ? "Tipp: Lies zuerst die Frage. Tippe dann nur die Angaben an, die du dafür brauchst." : "Tipp: Lies zuerst die Frage. Was ist gesucht? Dann wähle den Rechenweg.");
   },
 });
 </script>

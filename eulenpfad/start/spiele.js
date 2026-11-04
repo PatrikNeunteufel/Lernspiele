@@ -143,7 +143,23 @@ function zeichneSpiele(box, neu) {
   zeilen.push(el("div", { class: "filter-zeile" }, el("span", { text: "Stufe" }),
     alleChip("stufe", LS.SKALA.map(s => s.id)),
     ...LS.SKALA.map(s => chip(`${s.icon} ${s.nr} ${s.name}`, filter.stufe.includes(s.id), schalte("stufe", s.id), s.id === empfohlen ? "👍" : ""))));
-  box.append(el("div", { class: "filter" }, ...zeilen));
+  // Einklappbar (Wunsch Patrik, LERN_Session14: auf dem Handy wird der Filter schnell unübersichtlich). Zugeklappt nennt
+  // die Kopfzeile, was gerade gilt. Gemerkt je Person im Profil (filterZu); ohne Wahl auf dem Handy zu, sonst offen.
+  const aktiv = [
+    filter.fach !== "alle" ? filter.fach : null,
+    filter.thema.length ? `${filter.thema.length} Thema${filter.thema.length === 1 ? "" : "en"}` : null,
+    filter.klasse.length ? filter.klasse.map(LS.klasseText).join(", ") : null,
+    filter.stufe.length ? `Stufe ${filter.stufe.map(id => LS.SKALA.find(s => s.id === id)?.nr).join(", ")}` : null,
+    nurKlasse ? "🎒 Meine Klasse" : null, filter.fokus && fokus.length ? "⭐ Fokus" : null, nurZuPruefen ? "🔍 Zu prüfen" : null,
+  ].filter(Boolean);
+  const schmal = typeof matchMedia === "function" && matchMedia("(max-width: 560px)").matches;
+  const filterBox = el("details", { class: "filter-klapp" },
+    el("summary", {}, el("span", { class: "filter-titel", text: "🔎 Filter" }),
+      el("span", { class: "filter-aktiv", text: aktiv.length ? aktiv.join(" · ") : "alle Spiele" })),
+    el("div", { class: "filter" }, ...zeilen));
+  filterBox.open = typeof p.filterZu === "boolean" ? !p.filterZu : !schmal;
+  filterBox.addEventListener("toggle", () => LS.speichereProfil(name, { filterZu: !filterBox.open }));
+  box.append(filterBox);
 
   // ----- Spiele auswählen -----
   const passt = s => LS.spielSichtbar(s.id)
@@ -289,6 +305,21 @@ function zeichneSpiele(box, neu) {
 
   const gitter = spiele => el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") }, ...spiele.map(karte));
 
+  // Klassen-Rand (Entscheid G1 a, LERN_Session14): Ohne „🎒 Meine Klasse“ zeigt ein farbiger Rand mit Zeichen, wie die
+  // Basisklasse des Spiels zur Klasse des Kindes steht. Farben aus --deko-*, nicht aus den Stellenfarben; das Zeichen
+  // trägt die Bedeutung auch ohne Farbsehen. Welche Stufe genau passt, zeigt weiter 👍 auf dem Stufenknopf.
+  const KLASSEN_LAGE = {
+    tiefer: { zeichen: "✓", text: k => `Leichter als deine Klasse (Spiel für die ${LS.klasseText(k)}) — schaffst du!` },
+    gleich: { zeichen: "●", text: () => "Deine Klasse — da bist du gerade dran." },
+    hoeher: { zeichen: "▲", text: k => `Herausforderung: Spiel für die ${LS.klasseText(k)}.` },
+  };
+  const klassenRand = !aufsicht && klasse !== null && !nurKlasse;
+  const lageVon = s => (s.klasse < klasse ? "tiefer" : s.klasse === klasse ? "gleich" : "hoeher");
+  if (klassenRand && auswahl.length) box.append(el("div", { class: "klassen-legende", "aria-label": "Rand der Spielkarten" },
+    el("span", { text: "Rand:" }),
+    ...Object.entries({ tiefer: "leichter", gleich: "meine Klasse", hoeher: "Herausforderung" }).map(([lage, wort]) =>
+      el("span", { class: `klassen-legende-teil klasse-${lage}` }, el("span", { class: "klassen-marke", text: KLASSEN_LAGE[lage].zeichen }), ` ${wort}`))));
+
   function karte(s) {
     const favorit = p.favoriten.includes(s.id);
     const frei = LS.fuerKinderSichtbar(s.id);
@@ -297,8 +328,10 @@ function zeichneSpiele(box, neu) {
     const timerAn = s.stufen.some(st => LS.timerFuer(name, s.id, st).an);
     const endlosAn = !!s.endlos?.length && p.endlosAn.includes(s.id);
     // data-vorlesen: langes Drücken liest Name und Beschreibung vor (Kindergarten, 1. Klasse; LERN_Session8)
-    const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") + (endlosAn ? " endlos-an" : ""), title: "Antippen: Startbild des Spiels",
-      "data-vorlesen": `${s.name}. ${s.beschreibung}` });
+    const lage = klassenRand ? lageVon(s) : null;
+    const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") + (endlosAn ? " endlos-an" : "") + (lage ? ` klasse-${lage}` : ""),
+      title: "Antippen: Startbild des Spiels",
+      "data-vorlesen": `${s.name}. ${s.beschreibung}${lage ? ` ${KLASSEN_LAGE[lage].text(s.klasse)}` : ""}` });
     k.style.setProperty("--f", s.farbe);
     // Freie Stellen der Karte öffnen das Startbild des Spiels (dort Stufen, Endlos und Timer mit Erklärung).
     k.addEventListener("click", e => { if (!e.target.closest("a, button")) location.href = s.pfad; });
@@ -318,6 +351,8 @@ function zeichneSpiele(box, neu) {
     const reihenfolge = s.reihenfolge ? REIHENFOLGE_KARTE[LS.reihenfolgeFuer(name, s.id)] || REIHENFOLGE_KARTE.stufe : null;
     // Schalter in einer eigenen schmalen Leiste oben rechts; darunter hat der Name die volle Breite.
     const schalterZeile = el("div", { class: "karten-schalter-zeile" },
+        lage ? el("span", { class: "klassen-marke", role: "img", "aria-label": KLASSEN_LAGE[lage].text(s.klasse), title: KLASSEN_LAGE[lage].text(s.klasse),
+          text: KLASSEN_LAGE[lage].zeichen }) : null,
         reihenfolge && (LS.istFest(name, "reihenfolge") ? festSchalter(reihenfolge.an, reihenfolge.symbol, reihenfolge.text)
           : schalter(reihenfolge.an, reihenfolge.symbol, `${reihenfolge.text} — antippen wechselt`,
             () => { LS.setzeWahl(name, "reihenfolge", s.id, reihenfolge.naechste); neu(); })),

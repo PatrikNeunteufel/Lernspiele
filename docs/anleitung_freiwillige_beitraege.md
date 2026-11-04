@@ -1,6 +1,6 @@
 # Anleitung: Freiwillige Beiträge einrichten
 
-Stand: 03.11.2026 (LERN_Session11, Wunsch Patrik) · Für Patrik. Ziel: Erwachsene können die Reihe Eulenpfad →
+Stand: 04.11.2026 (LERN_Session11, Wunsch Patrik; Anbieter in Abschnitt 2 am 04.11.2026 nachgeprüft) · Für Patrik. Ziel: Erwachsene können die Reihe Eulenpfad →
 Lernsteig → Gratwanderung freiwillig unterstützen; die Links werden vorbereitet und erst aktiv, wenn eine Adresse
 eingetragen ist. **Vorbereitung gebaut** (Abschnitt 4); aktiv wird erst, was in `portal/unterstuetzen.js` eine `url` hat.
 
@@ -21,29 +21,42 @@ Bezahl, Unterstützen). Falls es Notizen gibt (Patrik: „schon irgendwo coffee�
 
 ## 2. Möglichkeiten im Vergleich
 
-**Nicht nachgeprüft:** Die Angaben zu Gebühren und Bedingungen stammen aus allgemeinem Wissen, nicht aus einem Abruf
-der Anbieterseiten; sie ändern sich. Vor dem Einrichten auf der Seite des Anbieters nachlesen und hier nachtragen
-(mit Datum und Quelle).
+**Nachgeprüft am 04.11.2026** auf den Seiten der Anbieter (LERN_Session13, Nebensitzung Recherche). „…“ = vom
+Abrufwerkzeug als Wortlaut ausgegeben; **nicht bestätigt** = nur aus Suchergebnissen oder Seite gesperrt. Bedingungen
+ändern sich — vor dem Einrichten noch einmal auf der Seite des Anbieters nachsehen.
 
-| Möglichkeit | wie | Gebühren (ungeprüft) | wiederkehrend | Hinweise |
-|---|---|---|---|---|
-| **Buy Me a Coffee** | Seite beim Anbieter, „einen Kaffee spendieren“ | Anteil des Anbieters plus Zahlungsgebühr | ja | bekanntes Bild „Kaffee“, Auszahlung über Zahlungsdienst |
-| **Ko-fi** | ähnlich, „Kaffee“-Seite | bei einmaligen Beiträgen meist ohne Anteil des Anbieters, Zahlungsgebühr bleibt | ja | Auszahlung über PayPal oder Stripe |
-| **GitHub Sponsors** | Knopf „Sponsor“ am GitHub-Konto bzw. Repo | für persönliche Konten meist ohne Anteil von GitHub | ja | passt zum Repo auf GitHub; Land und Bankkonto müssen unterstützt sein |
-| **Liberapay** | gemeinnützige Plattform für wiederkehrende Beiträge | kein Anteil der Plattform, Zahlungsgebühr bleibt | nur wiederkehrend | wenig bekannt bei Eltern |
-| **PayPal.me** | persönlicher Zahlungslink | Gebühr je nach Art der Zahlung | nein | viele haben PayPal |
-| **Banküberweisung mit QR-Rechnung** | Schweizer QR-Rechnung als Bild/PDF mit IBAN, ohne Betrag | keine (bei Schweizer Banken üblich) | nein | kein Dritter ausser der Bank; mit jeder Banking-App scanbar; IBAN und Name werden öffentlich |
-| **TWINT** | — | — | — | für Privatpersonen auf einer Website nach meinem Wissen nur über einen Geschäfts- oder Spendenanbieter; vor einer Wahl prüfen |
+| Möglichkeit | Gebühren | einmalig / wiederkehrend | Schweiz | Hinweise | Quelle |
+|---|---|---|---|---|---|
+| **GitHub Sponsors** | „GitHub Sponsors does not charge any fees for sponsorships from personal accounts.“ (Organisationen „up to 6%“) | „choose between one-time or monthly payment amounts“ | „Switzerland“ in der Liste der unterstützten Regionen | Auszahlung über Stripe Connect; „your region of residence and the region of your bank account must match“; Steuerformular W-8BEN für Personen ohne Wohnsitz in den USA; Auszahlung „for any month that your balance reaches $100 USD“, erste Zahlung „60 days after the first sponsorship is initiated“. Link `github.com/sponsors/<name>` (Form **nicht bestätigt**) | https://docs.github.com/en/sponsors/getting-started-with-github-sponsors/about-github-sponsors ; …/setting-up-github-sponsors-for-your-personal-account ; https://docs.github.com/en/site-policy/github-terms/github-sponsors-additional-terms |
+| **Ko-fi** | einmalig 0 %, monatlich 5 %; Ko-fi Gold für 0 % (Preis widersprüchlich) | beides | **nicht bestätigt** | Auszahlung über PayPal oder Stripe, deren Gebühren kommen dazu — alles **nicht bestätigt** (ko-fi.com und Hilfe lieferten HTTP 403) | help.ko-fi.com (nur Suche) |
+| **Buy Me a Coffee** | „We only take 5%“ | beides | **nicht bestätigt** (Länderliste nicht gelesen) | Auszahlung „transferred to your Stripe account every Wednesday“ über Stripe Express | https://help.buymeacoffee.com/en/articles/10182730-what-is-buy-me-a-coffee-and-how-does-it-work |
+| **Liberapay** | „Liberapay does not take a cut of payments“; Zahlungsdienste im Schnitt „3% for … Stripe and 5% for … PayPal“ | „One-time donations aren't properly supported yet.“ | unter den „Best supported territories“; „Swiss Franc (CHF) supported by PayPal“ | wenig bekannt bei Eltern | https://liberapay.com/about/faq ; https://liberapay.com/about/global |
+| **PayPal** | Spenden gelten als gewerblich: „eine Spende an eine gemeinnützige Organisation senden oder empfangen“; Satz Inland „3,4% + Festgebühr“ (0,55 CHF) | einmalig | ja | „Freunde und Familie“ ist kostenlos, ob ein öffentlicher Spendenlink so laufen darf: **nicht bestätigt** (Nutzungsbedingungen nicht gelesen); Gebührenseite Stand 31.05.2021 | https://www.paypal.com/ch/digital-wallet/paypal-consumer-fees ; https://www.paypal.com/ch/business/paypal-business-fees |
+| **TWINT** | Vereine: „einmalig und kostenlos“ registrieren, „beliebig viele QR-Codes und PayLinks, um Zahlungen und Spenden einzusammeln“, „ohne Fixkosten“ | einmalig | ja | **nur für Vereine/Organisationen** belegt; für Privatpersonen nur „Geld anfordern“ in der App (**nicht bestätigt** als Website-Link); der Händler-QR-Sticker „may not be used online“ | https://www.postfinance.ch/de/unternehmen/produkte/einkassieren/zahlungsloesungen/twint/twint-vereine.html ; https://www.twint.ch/en/business-customers/products/qr-code-sticker/ |
+| **QR-Rechnung ohne Betrag** | Gebühren für den Empfänger: **nicht bestätigt** | einmalig | ja | „Ja, es können Belege ohne Betragsvorgabe und ohne Adresse des Zahlungspflichtigen verwendet werden. Für solche Belege ist die QR-Rechnung mit IBAN und ohne Referenz zu verwenden.“ Seit 22.11.2025 gelten neue Vorgaben von SIX. IBAN und Name werden öffentlich | FAQ der Basellandschaftlichen Kantonalbank (PDF, 09/2022); https://www.six-group.com/de/products-services/banking-services/payment-standardization/standards/qr-bill.html |
 
-**Vorschlag:** ein „Kaffee“-Link (das Konto, das Patrik schon hat) und dazu die **QR-Rechnung** für alle, die keinen
-Zahlungsdienst wollen. GitHub Sponsors zusätzlich, wenn das Repo öffentlich auf GitHub liegt (tut es für Pages).
+**Vorschlag (nach der Nachprüfung):** **GitHub Sponsors** als Hauptweg — für die Schweiz belegt, ohne Gebühr, einmalig
+und monatlich, passt zum öffentlichen Repo; dazu die **QR-Rechnung** für alle ohne Zahlungsdienst. Den „Kaffee“-Link
+nur, wenn das bestehende Konto auf seiner Seite die Auszahlung in die Schweiz bestätigt (Ko-fi gesperrt, Buy Me a
+Coffee ohne Länderangabe). PayPal ist wegen 3,4 % + 0,55 CHF teurer. **TWINT erst mit einem Verein** — dann aber
+kostenlos und mit Links für die Website.
+
+Folgen von GitHub Sponsors, die vor dem Einrichten bekannt sein sollten: Konto bei Stripe mit Schweizer Bankkonto,
+Formular W-8BEN, Auszahlung erst ab 100 $ im Monat (darunter bleibt das Guthaben stehen) und frühestens 60 Tage nach
+der ersten Spende.
 
 ## 3. Vorher klären (nicht Teil dieser Anleitung)
 
 - **Steuern:** Freiwillige Beiträge an eine Privatperson können Einkommen sein; mit dem Steueramt klären, wie sie zu
-  deklarieren sind.
-- **Impressum:** Ob die Seite mit einem Beitrags-Link ein Impressum braucht, ist nicht geprüft; vor dem Aktivieren
-  klären (Schweizer Recht; GitHub Pages ist öffentlich).
+  deklarieren sind. Eine amtliche Aussage für St. Gallen wurde am 04.11.2026 nicht gefunden. Spenden an eine
+  Privatperson sind für die Spender nicht abziehbar (abziehbar nur an steuerbefreite juristische Personen, ab
+  „gesamthaft Fr. 100“; https://www.sg.ch/steuern-finanzen/steuern/zuwendungen-an-gemeinnuetzige-organisationen0.html).
+  Einzelheiten und die geplante Schullizenz: [monetarisierung_recherche.md](monetarisierung_recherche.md).
+- **Impressum:** Die Pflicht nach UWG Art. 3 Abs. 1 lit. s kennt laut einer Anwaltskanzlei „keine Beschränkung auf
+  gewerbliche bzw. entgeltliche Angebote“ und greift, wer „Waren, Werke oder Leistungen im elektronischen
+  Geschäftsverkehr anbietet“ (https://www.law.ch/lawinfo/ict-law-informations-und-kommunikationstechnologie/impressumspflicht-e-commerce/).
+  Ob Spendenlinks darunterfallen, sagt die Quelle nicht — **nicht bestätigt**; vor dem Aktivieren klären. Spätestens
+  mit der Schullizenz ist ein Impressum nötig.
 - **Name des Kontos:** Öffentlich sichtbar wird, was beim Anbieter steht (Name, bei der QR-Rechnung auch IBAN). Wenn
   nicht der eigene Name erscheinen soll: Konto auf den Namen der Reihe, soweit der Anbieter das erlaubt.
 

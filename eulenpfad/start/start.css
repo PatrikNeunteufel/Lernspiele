@@ -75,6 +75,16 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
 /* ---------- Spiele: Filter ---------- */
 
 .filter { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+/* Einklappbarer Filter (LERN_Session14): Kopfzeile mit dem, was gerade gilt */
+.filter-klapp { margin-bottom: 12px; }
+.filter-klapp > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; cursor: pointer; padding: 8px 12px;
+  border-radius: 14px; background: #fff; border: 2px solid var(--rand); list-style: none; }
+.filter-klapp > summary::-webkit-details-marker { display: none; }
+.filter-klapp > summary::before { content: "▸"; font-weight: 900; color: var(--knopf); }
+.filter-klapp[open] > summary::before { content: "▾"; }
+.filter-klapp[open] > summary { margin-bottom: 10px; }
+.filter-titel { font-weight: 900; }
+.filter-aktiv { color: var(--text-leise); font-weight: 700; font-size: 15px; min-width: 0; overflow-wrap: anywhere; }
 .filter-zeile { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .filter-zeile > span { font-weight: 900; min-width: 64px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
@@ -208,7 +218,28 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .symbol.mischen.an { fill: none; stroke: #e39a00; stroke-width: 2.8; }
 .karten-schalter.fest { position: relative; cursor: default; display: inline-block; }
 .karten-schalter.fest .schloss { position: absolute; right: 0; bottom: 0; font-size: 13px; line-height: 1; }
-.spielkarte.endlos-an { box-shadow: var(--schatten), 0 0 0 3px var(--knopf); }
+.spielkarte.endlos-an { box-shadow: var(--schatten), 0 0 0 3px var(--knopf), var(--glow, 0 0 #0000); }
+/* Klassen-Rand (G1 a, LERN_Session14): Glow nach aussen in --deko-Farben, nie in den Stellenfarben; Zeichen links oben */
+.spielkarte.klasse-tiefer { --kf: var(--deko-5); }
+.spielkarte.klasse-gleich { --kf: var(--deko-4); }
+.spielkarte.klasse-hoeher { --kf: var(--deko-1); }
+.spielkarte[class*="klasse-"] { --glow: 0 0 0 2px var(--kf), 0 0 18px 4px color-mix(in srgb, var(--kf) 55%, transparent); box-shadow: var(--schatten), var(--glow); }
+.spielkarte.endlos-an[class*="klasse-"] { box-shadow: var(--schatten), 0 0 0 3px var(--knopf), var(--glow); }
+.klassen-marke { margin-right: auto; align-self: center; display: inline-flex; align-items: center; justify-content: center;
+  min-width: 26px; height: 26px; border-radius: 999px; background: var(--kf, var(--deko-7)); color: #fff; font-size: 15px; font-weight: 900; line-height: 1; }
+.klasse-gleich .klassen-marke { color: #5a4300; }
+.klassen-legende { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0 0 10px; font-size: 14px; font-weight: 800; color: var(--text-leise); }
+.klassen-legende-teil { display: inline-flex; align-items: center; gap: 4px; }
+.klassen-legende-teil.klasse-tiefer { --kf: var(--deko-5); }
+.klassen-legende-teil.klasse-gleich { --kf: var(--deko-4); }
+.klassen-legende-teil.klasse-hoeher { --kf: var(--deko-1); }
+.klassen-legende .klassen-marke { margin: 0; min-width: 22px; height: 22px; font-size: 13px; }
+/* Aufstieg (LERN_Session14): Nachricht ans Kind über der Startseite */
+.aufstieg-feier { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: rgba(30, 32, 60, .45); }
+.aufstieg-karte { max-width: 420px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.aufstieg-bild { font-size: 72px; line-height: 1; }
+.geboren-wahl { display: flex; gap: 6px; }
 .marken { display: flex; gap: 6px; flex-wrap: wrap; }
 .marke { font-size: 13px; font-weight: 800; border-radius: 999px; padding: 2px 10px; background: #eef0fb; }
 .marke.fokus { background: #fff1c2; }
@@ -371,3 +402,12 @@ button.stufenknopf { border: none; border-bottom: 4px solid var(--sf); font-fami
   .tab { padding: 8px 12px; font-size: 16px; }
   .stufenknoepfe { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* Anleitungen in der App (LERN_Session14): 📖 in der Leiste, Links unter der Anmeldung */
+.anleitung-knopf { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px;
+  border-radius: 12px; background: #fff; border: 3px solid var(--rand); font-size: 22px; text-decoration: none; }
+.anleitung-knopf:hover, .anleitung-knopf:focus-visible { border-color: var(--knopf); }
+.anleitung-links { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 14px; margin: 14px 0 0;
+  font-weight: 800; color: var(--text-leise); }
+.anleitung-link { padding: 8px 14px; border-radius: 999px; background: #fff; border: 2px solid var(--rand); color: var(--text); text-decoration: none; }
+.anleitung-link:hover, .anleitung-link:focus-visible { border-color: var(--knopf); }

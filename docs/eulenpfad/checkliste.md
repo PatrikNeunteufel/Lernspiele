@@ -5,7 +5,7 @@ wird im Entwickler-Modus (Spiel angesehen, Inhaltsliste geprüft; schreibt `eule
 Annahmen in `docs/eulenpfad/lernziele/`, Ideen in
 `docs/eulenpfad/spielideen/lehrplan_sg_spielideen.md`. Danach die Liste neu erzeugen.
 
-**Stand:** 168 Spiele gebaut, 0 Ideen offen · für Kinder frei: 44 von 168 · 15 von 112 neuen Spielen angesehen · 4 von 217 Inhaltslisten geprüft.
+**Stand:** 169 Spiele gebaut, 0 Ideen offen · für Kinder frei: 55 von 169 · 26 von 113 neuen Spielen angesehen · 10 von 217 Inhaltslisten geprüft.
 
 Für Kinder frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Spiele mit
 Inhaltslisten, bis mindestens eine Liste geprüft ist. Die Aufsicht kann das je Gerät in der Verwaltung anders setzen.
@@ -49,8 +49,8 @@ Je gebautem Spiel:
 #### Rechnen
 
 - [x] **Doppel-Spiegel** (`doppel-spiegel`) — für Kinder frei
-- [x] **Gerecht-Teiler** (`gerecht-teiler`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Gerecht-Teiler** (`gerecht-teiler`) — für Kinder frei
+  - [x] angesehen 2026-11-04 · Patrik
 - [x] **Zahlen-Waage** (`zahlen-waage`) — für Kinder frei
 - [x] **Zahlenhaus** (`zahlenhaus`) — für Kinder frei
 
@@ -100,6 +100,12 @@ Je gebautem Spiel:
 
 ### Mathe
 
+#### Zahlen ordnen
+
+- [x] **Hundertertafel-Detektiv** (`hundertertafel`) — für Kinder 🔒 gesperrt, bis angesehen ist
+  - [ ] angesehen
+- [x] ~~Folgen-Fortsetzer~~ — ersetzt: Zahlenfolgen übt der Muster-Fortsetzer (Stufen 5–6), den OP 4. Klasse (MA.3.A.3.d) die Preis-Tabelle
+
 #### Rechnen
 
 - [x] **Zahlenmauer-Baumeister** (`zahlenmauer`) — für Kinder frei
@@ -121,12 +127,8 @@ Je gebautem Spiel:
 
 #### Sachrechnen
 
-- [x] **Rechengeschichten** (`rechengeschichten`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
-  - [ ] Inhalte geprüft: 0 von 6 Listen (offen: Bildgeschichten bis 10 (dazu, weg); Textgeschichten bis 20 (plus, minus); Geschichten bis 100, auch mit mal; Geschichten mit Platzhalter: Was fehlt noch?; Verteilen und Platzhalter mit mal und minus; Ausrechnen mit einer unwichtigen Angabe)
-
-#### Zahlen ordnen
-
-- [x] ~~Folgen-Fortsetzer~~ — ersetzt: Zahlenfolgen übt der Muster-Fortsetzer (Stufen 5–6), den OP 4. Klasse (MA.3.A.3.d) die Preis-Tabelle
+- [x] **Rechengeschichten** (`rechengeschichten`) — für Kinder frei
+  - [x] Inhalte geprüft: 6 von 6 Listen
 
 ### NMG
 
@@ -243,8 +245,8 @@ Je gebautem Spiel:
 #### Form und Raum
 
 - [x] **Koordinaten-Schatzsuche** (`koordinaten-schatz`) — für Kinder frei
-- [x] **Würfel-Zähler** (`wuerfel-zaehler`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Würfel-Zähler** (`wuerfel-zaehler`) — für Kinder frei
+  - [x] angesehen 2026-11-04 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session10.md`
 
 #### Sachrechnen
@@ -371,8 +373,8 @@ Je gebautem Spiel:
 - [x] **Malkreuz** (`malkreuz`) — für Kinder frei
   - [x] angesehen 2026-11-02 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
-- [x] **Rechen-Maschine** (`rechen-maschine`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Rechen-Maschine** (`rechen-maschine`) — für Kinder frei
+  - [x] angesehen 2026-11-04 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Rechen-Rakete** (`rechen-rakete`) — für Kinder frei
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`, `lehrplan_sg_session9.md`
@@ -382,8 +384,8 @@ Je gebautem Spiel:
 - [x] **Schriftlich-Werkstatt** (`schriftlich-werkstatt`) — für Kinder frei
   - [x] angesehen 2026-11-01 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
-- [x] **Zielzahl-Jagd** (`zielzahl-jagd`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Zielzahl-Jagd** (`zielzahl-jagd`) — für Kinder frei
+  - [x] angesehen 2026-11-04 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 
 #### Zahlen ordnen
@@ -411,11 +413,11 @@ Je gebautem Spiel:
 
 #### Form und Raum
 
-- [x] **Netz-Falter** (`netz-falter`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Netz-Falter** (`netz-falter`) — für Kinder frei
+  - [x] angesehen 2026-11-04 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
-- [x] **Pentomino-Puzzle** (`pentomino-puzzle`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Pentomino-Puzzle** (`pentomino-puzzle`) — für Kinder frei
+  - [x] angesehen 2026-11-04 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session3.md`
 - [x] **Würfelbau-Blick** (`wuerfelbau-blick`) — für Kinder 🔒 gesperrt, bis angesehen ist
   - [ ] angesehen
@@ -547,8 +549,8 @@ Je gebautem Spiel:
 
 #### Rechnen
 
-- [x] **Probe-Stempel** (`rechenprobe`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Probe-Stempel** (`rechenprobe`) — für Kinder frei
+  - [x] angesehen 2026-11-04 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session8.md`
 
 #### Form und Raum
@@ -587,15 +589,15 @@ Je gebautem Spiel:
 
 #### Strategie
 
-- [x] **König in der Falle** (`koenig-falle`) — für Kinder 🔒 gesperrt, bis angesehen und eine Liste geprüft ist
-  - [ ] angesehen
+- [x] **König in der Falle** (`koenig-falle`) — für Kinder 🔒 gesperrt, bis eine Liste geprüft ist
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Inhalte geprüft: 0 von 1 Listen (offen: Schachstellungen: Matt in 1 und Matt in 2)
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session11.md`
-- [x] **Stein-Duell** (`stein-duell`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Stein-Duell** (`stein-duell`) — für Kinder frei
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session11.md`
-- [x] **Steine fangen** (`steine-fangen`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Steine fangen** (`steine-fangen`) — für Kinder frei
+  - [x] angesehen 2026-11-03 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session11.md`
 
 ### NMG
@@ -782,8 +784,8 @@ Je gebautem Spiel:
 
 #### Sachrechnen
 
-- [x] **Sachaufgaben-Kompass** (`sachaufgaben-kompass`) — für Kinder 🔒 gesperrt, bis angesehen ist
-  - [ ] angesehen
+- [x] **Sachaufgaben-Kompass** (`sachaufgaben-kompass`) — für Kinder frei
+  - [x] angesehen 2026-11-04 · Patrik
   - [ ] Lehrmittel: Annahmen abgleichen in `lehrplan_sg_session9.md`
 
 #### Grössen

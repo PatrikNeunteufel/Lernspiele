@@ -65,9 +65,36 @@ function zeichneStart(mitAufsicht = null) {
     if (t.nurAufsicht && !LS.aufsichtAngemeldet()) continue;
     tabs.append(el("a", { class: "tab", role: "tab", href: "#" + t.id, "aria-selected": String(t === tab), text: t.text + (zeichen[t.id] || "") }));
   }
-  leiste.append(tabs, werWahl());
+  // Anleitung in der App (Wunsch Patrik, LERN_Session14): das Kind kommt zu seiner, die Aufsicht zu der für Erwachsene
+  const anleitung = LS.istAufsicht(ich) ? "aufsicht.html" : "kinder.html";
+  leiste.append(tabs, werWahl(), el("a", { class: "anleitung-knopf", href: `anleitung/${anleitung}?von=app`, title: "Anleitung",
+    "aria-label": "Anleitung", "data-vorlesen": "Anleitung", text: "📖" }));
   abgleichKnopf(leiste);
   tab.zeichne(inhalt, zeichneStart);
+  if (!LS.istAufsicht(ich) && LS.neuerAufstieg(ich)) aufstiegFeier(ich);
+}
+
+/**
+ * Nachricht zum Klassenaufstieg (Wunsch Patrik, LERN_Session14): einmal nach dem Anmelden, mit Konfetti, bis das Kind
+ * antippt. Das Abzeichen „Aufgestiegen“ steht danach wie jedes neue Abzeichen oben im Tab Spiele.
+ */
+function aufstiegFeier(name) {
+  const { el } = LS;
+  if (document.querySelector(".aufstieg-feier")) return; // zeichneStart läuft auch bei jedem Tabwechsel
+  const a = LS.neuerAufstieg(name);
+  const schliessen = () => { LS.speichereProfil(name, { aufstiegGesehen: a.zeit }); huelle.remove(); zeichneStart(); };
+  const knopf = el("button", { type: "button", class: "knopf gruen", text: "Juhu! ➜", onclick: schliessen });
+  const titel = `Du bist jetzt in der ${LS.klasseText(a.nach)}!`;
+  const huelle = el("div", { class: "aufstieg-feier", role: "dialog", "aria-modal": "true", "aria-labelledby": "aufstieg-titel" },
+    el("div", { class: "karte aufstieg-karte", "data-vorlesen": titel },
+      el("div", { class: "aufstieg-bild", text: "🎉" }),
+      el("h2", { id: "aufstieg-titel", text: titel }),
+      el("p", { text: `Bravo, ${LS.spielerName(name)}! Die Spiele für deine neue Klasse sind jetzt markiert.` }),
+      knopf));
+  document.body.append(huelle);
+  LS.konfetti(80);
+  LS.ton?.("fertig");
+  knopf.focus();
 }
 
 /**

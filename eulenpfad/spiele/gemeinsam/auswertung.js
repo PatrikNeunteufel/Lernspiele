@@ -270,6 +270,7 @@ const AUSWERTUNG = (() => {
       werte: [
         { id: "ohne", text: "im Kopf", ton: "gut" },
         { id: "benutzt", text: "mit Notizen", ton: "mittel" },
+        { id: "block", text: "mit Notizblock", ton: "mittel" }, // NB3 a, LERN_Session14
       ],
     },
     // Probe-Stempel (LERN_Session13): bei passender Endziffer

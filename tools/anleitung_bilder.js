@@ -165,9 +165,9 @@ async function einrichten() {
   await js(`localStorage.clear(); sessionStorage.clear();`);
   await gehe("/eulenpfad/index.html");
   await js(`await LS.setzePin("Muster Admin", "1111");
-    LS.neuerSpieler("Muster Kind", { rolle: "kind", alter: 10, klasse: 4 });
-    LS.neuerSpieler("Muster Kind 2", { rolle: "kind", alter: 9, klasse: 4 });
-    LS.neuerSpieler("Muster Kind 3", { rolle: "kind", alter: 11, klasse: 5 });
+    LS.neuerSpieler("Muster Kind", { rolle: "kind", geboren: "2016-05", klasse: 4 });
+    LS.neuerSpieler("Muster Kind 2", { rolle: "kind", geboren: "2017-02", klasse: 4 });
+    LS.neuerSpieler("Muster Kind 3", { rolle: "kind", geboren: "2015-09", klasse: 5 });
     LS.speichereProfil("Muster Kind", { lernplan: { tage: 3, minuten: 10 }, avatar: "fuchs-tuerkis" });
     LS.speichereProfil("Muster Kind 2", { avatar: "panda-gelb" });
     LS.speichereProfil("Muster Kind 3", { avatar: "frosch-lila" });

@@ -113,5 +113,12 @@
     <p>⏱ Mit dem Timer wird es spannender. Du kannst ihn ein- und ausschalten.</p>
   </section>
 </main>
+<script>
+// Aus der App geöffnet (?von=app, LERN_Session14): „Zurück“ führt in die App statt ins Portal.
+if (new URLSearchParams(location.search).get("von") === "app") {
+  const z = document.querySelector(".zurueck");
+  if (z) { z.href = "../index.html"; z.textContent = "← Zurück zum Eulenpfad"; }
+}
+</script>
 </body>
 </html>

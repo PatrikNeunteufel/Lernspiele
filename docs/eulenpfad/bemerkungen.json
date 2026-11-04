@@ -86,6 +86,7 @@
     "nr": 8,
     "zeit": "2026-11-03T21:20:05+01:00",
     "status": "erledigt 2026-11-03 (LERN_Session12)",
+    "antwort": "Danke! Du hattest recht: Die Regel mit der 0 kam erst nach dem Fehler. Jetzt steht sie gleich unter der Aufgabe: Vorne darf keine 0 stehen.",
     "text": "Meldung M-mw14ns1r-2gnv (Kind), 2026-11-03\nSpiel: Ziffernkarten (ziffernkarten), Stufe 3, Aufgabe 3\nArt: Etwas anderes\nAufgabe: Bilde die kleinste Zahl.\nErwartete Lösung: Eine richtige Lösung ist 1024.\nEingaben des Kindes: 0 → 1 → 2 → 4 → OK ✓\nGewertet: noch offen, 1 Fehlversuch als falsch gewertet\nBegründung: es wird reklamiert, dass eine zahl nicht mit 0 anfangen kann... das sollte aber auch klar genannt werden",
     "von": "Patrik",
     "spiel": "ziffernkarten",
@@ -94,5 +95,33 @@
     "aufgabe": "Aufgabe 3: Bilde die kleinste Zahl.",
     "seite": "/eulenpfad/index.html",
     "meldung": "M-mw14ns1r-2gnv"
+  },
+  {
+    "nr": 9,
+    "zeit": "2026-11-04T19:50:01+01:00",
+    "status": "erledigt 2026-11-04 (LERN_Session14)",
+    "antwort": "Danke für die gute Idee! Jetzt drückst du J für Ja und N für Nein — in allen Spielen mit Ja und Nein.",
+    "text": "Meldung M-mw2gvttt-8ezb (Kind), 2026-11-04\nSpiel: Netz-Falter (netz-falter), Stufe 3, Aufgabe 5\nArt: Etwas anderes\nAufgabe: 💡 Kann man aus diesem Netz einen Würfel falten?\nErwartete Lösung: Ja, daraus kann man einen Würfel falten.\nGewertet: noch nicht beantwortet\nBegründung: warum für ja /neun Antworten nicht j und n als tasten von der tastatur?",
+    "von": "Patrik",
+    "spiel": "netz-falter",
+    "stufe": "s3",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "aufgabe": "Aufgabe 5: 💡 Kann man aus diesem Netz einen Würfel falten?",
+    "seite": "/eulenpfad/index.html",
+    "meldung": "M-mw2gvttt-8ezb"
+  },
+  {
+    "nr": 10,
+    "zeit": "2026-11-04T19:50:03+01:00",
+    "status": "erledigt 2026-11-04 (LERN_Session14, Entscheid SK1 a)",
+    "antwort": "Danke! Du hattest recht: „am letzten Tag“ gehört dazu. Jetzt tippst du immer die ganze Angabe an, zum Beispiel „Am letzten Tag fährt sie noch 14 km“.",
+    "text": "Meldung M-mw2gli0w-1rw0 (Kind), 2026-11-04\nSpiel: Sachaufgaben-Kompass (sachaufgaben-kompass), Stufe 3, Aufgabe 4\nArt: Im Text, im Bild oder in der Lösung ist ein Fehler\nAufgabe: Die Klasse macht eine Velotour. An den ersten 2 Tagen fährt sie je 46 km. Die Gruppe startet um 8 Uhr. Am letzten Tag fährt sie noch 14 km bis zum Bahnhof. · 💡 Wie lang ist die ganze Velotour?\nErwartete Lösung: 2 × 46 + 14 = 106 km\nEingaben des Kindes: 14 km → 2 Tagen → 46 km\nGewertet: noch nicht beantwortet\nBegründung: am letzten Tag gehört doch auch dazu, um zu wissen, dass es noch 1 tag ist",
+    "von": "Patrik",
+    "spiel": "sachaufgaben-kompass",
+    "stufe": "s3",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "aufgabe": "Aufgabe 4: Die Klasse macht eine Velotour. An den ersten 2 Tagen fährt sie je 46 km. Die Gruppe startet um 8 Uhr. Am letzten Tag fährt sie noch 14 km bis zum Bahnhof. · 💡 Wie lang ist die ganze Velotour?",
+    "seite": "/eulenpfad/index.html",
+    "meldung": "M-mw2gli0w-1rw0"
   }
 ]

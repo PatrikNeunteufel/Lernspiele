@@ -6,59 +6,11 @@
 <title>Schriftlich-Werkstatt</title>
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  /* Stellenwerttabelle: eine Spalte je Stelle, dazu links eine Spalte für das Rechenzeichen
-     (bei × stehen Zeichen und Faktor rechts). --spalten setzt das Skript. */
-  .werkstatt {
-    --zelle: clamp(26px, calc((100vw - 84px) / var(--spalten) - 4px), 58px);
-    display: grid;
-    grid-template-columns: repeat(var(--spalten), var(--zelle));
-    gap: 4px;
-    justify-content: center;
-    margin: 0 auto 8px;
-  }
-  /* Handy (BH3 a): die Zelle auch nach der Bildhöhe, damit die Rechnung über der festen Tastatur Platz hat */
+  /* Stellenwerttabelle: gemeinsamer Baustein (notizblock.js, Stil .schriftlich in stil.css; NB4 a, LERN_Session14).
+     Handy (BH3 a): die Zelle auch nach der Bildhöhe, damit die Rechnung über der festen Tastatur Platz hat */
   @media (max-width: 560px) {
-    .werkstatt { --zelle: clamp(26px, min((100vw - 84px) / var(--spalten) - 4px, (100vh - 540px) / 5.8), 58px); }
+    .schriftlich { --zelle: clamp(26px, min((100vw - 84px) / var(--spalten) - 4px, (100vh - 540px) / 5.8), 58px); }
   }
-  .werkstatt > div {
-    height: var(--zelle);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(var(--zelle) * .62);
-    font-weight: 900;
-    font-variant-numeric: tabular-nums;
-  }
-  .werkstatt .kopfzelle {
-    height: calc(var(--zelle) * .62);
-    font-size: calc(var(--zelle) * .34);
-    border-radius: 10px;
-    background: var(--f);
-    color: #fff;
-    opacity: .55;
-  }
-  .werkstatt .kopfzelle.aktiv { opacity: 1; transform: scale(1.08); }
-  .werkstatt .ziffer { color: var(--f); }
-  .werkstatt .zeichen { color: var(--text); }
-  /* Übertrag: kleine Zahl im Bläschen, direkt über dem Strich */
-  .werkstatt .uebertrag { height: calc(var(--zelle) * .5); font-size: calc(var(--zelle) * .32); }
-  .werkstatt .uebertrag span {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 1.5em; height: 1.5em; border-radius: 999px;
-    background: var(--hinweis-hell); color: var(--text); border: 2px solid var(--hinweis);
-    animation: plopp .4s;
-  }
-  /* Übertrag selbst schreiben (Entscheid UE1 a): das Bläschen ist das Eingabefeld */
-  .werkstatt .uebertrag.aktiv { border: 3px solid var(--knopf); border-radius: 999px; background: #eef0ff; width: 1.8em; margin: 0 auto; }
-  .werkstatt .uebertrag.aktiv.leer::after { content: "?"; color: #9aa0c0; }
-  .werkstatt .uebertrag.falsch { border-color: var(--hinweis); background: var(--hinweis-hell); animation: wackeln .4s; }
-  .werkstatt .strich { grid-column: 1 / -1; height: 0; border-top: 4px solid var(--text); border-radius: 2px; }
-  .werkstatt .erg { border: 3px dashed var(--rand); border-radius: 10px; background: #fbfcff; }
-  .werkstatt .erg.aktiv { border: 4px solid var(--knopf); background: #eef0ff; }
-  .werkstatt .erg.aktiv.leer::after { content: "?"; color: #c5c9de; }
-  .werkstatt .erg.fertig { border: 3px solid var(--gut); background: var(--gut-hell); color: var(--f); }
-  .werkstatt .erg.falsch { border-color: var(--hinweis); background: var(--hinweis-hell); animation: wackeln .4s; }
-  @keyframes plopp { from { transform: scale(0); } 70% { transform: scale(1.3); } to { transform: scale(1); } }
   .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 4px; }
 </style>
 </head>
@@ -72,6 +24,7 @@
 
 <script src="../gemeinsam/avatare.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -84,11 +37,9 @@
 // Subtraktion: Übertrag wie beim Ergänzen (er kommt unten dazu) — Verfahren mit dem Lehrmittel
 // abgleichen (offene Frage im Handover).
 
-const { zahlText, zufall, waehle, el, dativ, STELLEN } = LS;
-const STELLEN_RECHTS = STELLEN.slice().reverse(); // E, Z, H, T, ZT, HT, M
-
-/** Ziffern einer Zahl, Einer zuerst: 347 → [7, 4, 3]. */
-const ziffern = n => String(n).split("").reverse().map(Number);
+const { zahlText, zufall, waehle, el, dativ } = LS;
+// Ziffern, spaltenweises Rechnen und das Raster teilt sich die Werkstatt mit dem Notizblock (NB4 a, notizblock.js).
+const { ziffern } = SCHRIFTLICH;
 
 /** Zahl mit 'stellen' Ziffern; jede Ziffer ausser der ersten ist mit Wahrscheinlichkeit 'p' eine Null. */
 function mitNullen(stellen, p) {
@@ -97,30 +48,8 @@ function mitNullen(stellen, p) {
   return Number(s);
 }
 
-/**
- * Rechnet spaltenweise wie auf Papier: Ziffern des Ergebnisses r (Einer zuerst) und Überträge
- * ueber[i] = Übertrag, der in Spalte i ankommt (ueber[0] = 0). Bei − kommt der Übertrag unten dazu.
- */
-function spaltenRechnen(art, zahlen) {
-  const ergebnis = art === "+" ? zahlen.reduce((s, z) => s + z, 0) : art === "−" ? zahlen[0] - zahlen[1] : zahlen[0] * zahlen[1];
-  const n = String(Math.max(ergebnis, 0)).length;
-  const r = [];
-  const ueber = [0];
-  for (let i = 0; i < n; i++) {
-    const c = ueber[i];
-    if (art === "+") {
-      const s = zahlen.reduce((t, z) => t + (ziffern(z)[i] || 0), 0) + c;
-      r.push(s % 10); ueber.push(Math.floor(s / 10));
-    } else if (art === "−") {
-      const s = (ziffern(zahlen[0])[i] || 0) - (ziffern(zahlen[1])[i] || 0) - c;
-      r.push((s + 10) % 10); ueber.push(s < 0 ? 1 : 0);
-    } else {
-      const s = (ziffern(zahlen[0])[i] || 0) * zahlen[1] + c;
-      r.push(s % 10); ueber.push(Math.floor(s / 10));
-    }
-  }
-  return { ergebnis, r, ueber };
-}
+/** Spaltenweise wie auf Papier (SCHRIFTLICH.rechne): Ergebnisziffern r, Überträge ueber; bei − kommt er unten dazu. */
+const spaltenRechnen = SCHRIFTLICH.rechne;
 
 // Je Stufe: Rechenarten, Zahlen je Rechenart, grösstes Ergebnis, Anzahl Überträge (min/max).
 // Basisklasse 4: Stufe 1 = 3. Klasse (bis 1000), Stufe 3 = vierstellig, Stufe 5 = × einstellig.
@@ -272,8 +201,7 @@ LS.spiel({
     if (STUFE[ctx.stufe].arten.length > 1) ctx.serie("rechenart", x.art);
     const n = x.r.length;
     const mal = x.art === "×";
-    // Spalten: [Zeichen] + n Stellen (+ "×" und Faktor rechts bei der Multiplikation)
-    const spalten = mal ? n + 2 : n + 1;
+    // Spalten: [Zeichen] + n Stellen, bei der Multiplikation stattdessen „×“ und Faktor rechts
     const links = mal ? 0 : 1;
     const rechnung = x.zahlen.map(zahlText).join(` ${x.art} `);
     ctx.loesung(`${rechnung} = ${zahlText(x.ergebnis)}`);
@@ -281,41 +209,17 @@ LS.spiel({
     const selbstUeber = ctx.option("uebertrag") === "selbst";
     // je Spalte eine Ziffer und OK; schreibt das Kind den Übertrag selbst, je Spalte ausser der letzten noch einmal
     ctx.schritte(2 * n + (selbstUeber ? 2 * (n - 1) : 0));
-    const raster = el("div", { class: "werkstatt", role: "group", "aria-label": "Stellenwerttabelle" });
-    raster.style.setProperty("--spalten", spalten);
-
-    const zelle = (klasse, text = "") => { const z = el("div", { class: klasse, text }); raster.append(z); return z; };
-    const stelle = i => STELLEN_RECHTS[i];
-    const leerZellen = k => { for (let j = 0; j < k; j++) zelle(""); };
-
-    // Kopfzeile mit den Stellen (Stellenfarben)
-    const koepfe = [];
-    leerZellen(links);
-    for (let i = n - 1; i >= 0; i--) koepfe[i] = zelle(`kopfzelle st st-${stelle(i).k}`, stelle(i).k);
-    if (mal) leerZellen(2);
-
-    // Zahlen untereinander, rechtsbündig; bei × eine Zeile mit „× Faktor“ rechts
-    const zahlZeile = (z, zeichen) => {
-      const zf = ziffern(z);
-      if (!mal) zelle("zeichen", zeichen);
-      for (let i = n - 1; i >= 0; i--) zelle(zf[i] === undefined ? "" : `ziffer st st-${stelle(i).k}`, zf[i] === undefined ? "" : String(zf[i]));
-      if (mal) { zelle("zeichen", "×"); zelle("zeichen", String(x.zahlen[1])); }
-    };
-    if (mal) zahlZeile(x.zahlen[0], "");
-    else x.zahlen.forEach((z, j) => zahlZeile(z, j === 0 ? "" : x.art));
-
-    // Übertragszeile direkt über dem Strich
-    const ueberZellen = [];
-    leerZellen(links);
-    for (let i = n - 1; i >= 0; i--) ueberZellen[i] = zelle("uebertrag");
-    if (mal) leerZellen(2);
-    zelle("strich");
-
-    // Ergebniszeile
-    const ergZellen = [];
-    leerZellen(links);
-    for (let i = n - 1; i >= 0; i--) ergZellen[i] = zelle(`erg st st-${stelle(i).k}`);
-    if (mal) leerZellen(2);
+    // Stellenwerttabelle aus dem gemeinsamen Baustein (NB4 a): Kopf mit den Stellen, die Zahlen rechtsbündig
+    // untereinander (bei × eine Zeile mit „× Faktor“ rechts), Übertragszeile direkt über dem Strich, Ergebniszeile.
+    const t = SCHRIFTLICH.raster(n, { links, rechts: mal ? 2 : 0 });
+    const raster = t.element;
+    const stelle = t.stelle;
+    const koepfe = t.kopf();
+    if (mal) t.zahl(x.zahlen[0], { rechts: ["×", String(x.zahlen[1])] });
+    else x.zahlen.forEach((z, j) => t.zahl(z, { zeichen: j === 0 ? "" : x.art }));
+    const ueberZellen = t.reihe(() => el("div", { class: "uebertrag" }));
+    t.strich();
+    const ergZellen = t.reihe(i => el("div", { class: `erg st st-${stelle(i).k}` }));
 
     ctx.flaeche.append(
       el("div", { class: "auftrag", text: `Rechne schriftlich: ${rechnung}` }),

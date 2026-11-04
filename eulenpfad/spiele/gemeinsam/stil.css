@@ -712,6 +712,86 @@ button.link, a.link {
 .zw-notiz::placeholder { color: #d6c68e; font-size: 16px; }
 .zw-notiz:focus { outline: 3px solid #f0d36a; border-style: solid; }
 
+/* Schriftlich rechnen (notizblock.js, NB4 a, LERN_Session14): Stellenwerttabelle der Schriftlich-Werkstatt und des
+   Notizblocks — eine Spalte je Stelle, links das Rechenzeichen, rechts bei × Zeichen und Faktor. --spalten setzt das Skript. */
+.schriftlich {
+  --zelle: clamp(26px, calc((100vw - 84px) / var(--spalten) - 4px), 58px);
+  display: grid; grid-template-columns: repeat(var(--spalten), var(--zelle)); gap: 4px; justify-content: center; margin: 0 auto 8px;
+}
+.schriftlich > div, .schriftlich > input {
+  height: var(--zelle); display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--zelle) * .62); font-weight: 900; font-variant-numeric: tabular-nums;
+}
+.schriftlich .kopfzelle { height: calc(var(--zelle) * .62); font-size: calc(var(--zelle) * .34); border-radius: 10px; background: var(--f); color: #fff; opacity: .55; }
+.schriftlich .kopfzelle.aktiv { opacity: 1; transform: scale(1.08); }
+.schriftlich .ziffer { color: var(--f); }
+.schriftlich .zeichen { color: var(--text); }
+/* Übertrag: kleine Zahl im Bläschen, direkt über dem Strich */
+.schriftlich .uebertrag { height: calc(var(--zelle) * .5); font-size: calc(var(--zelle) * .32); }
+.schriftlich .uebertrag span {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; border-radius: 999px;
+  background: var(--hinweis-hell); color: var(--text); border: 2px solid var(--hinweis); animation: plopp .4s;
+}
+.schriftlich .uebertrag.aktiv { border: 3px solid var(--knopf); border-radius: 999px; background: #eef0ff; width: 1.8em; margin: 0 auto; }
+.schriftlich .uebertrag.aktiv.leer::after { content: "?"; color: #9aa0c0; }
+.schriftlich .uebertrag.falsch { border-color: var(--hinweis); background: var(--hinweis-hell); animation: wackeln .4s; }
+.schriftlich .strich { grid-column: 1 / -1; height: 0; border-top: 4px solid var(--text); border-radius: 2px; }
+.schriftlich .erg { border: 3px dashed var(--rand); border-radius: 10px; background: #fbfcff; }
+.schriftlich .erg.aktiv { border: 4px solid var(--knopf); background: #eef0ff; }
+.schriftlich .erg.aktiv.leer::after { content: "?"; color: #c5c9de; }
+.schriftlich .erg.fertig { border: 3px solid var(--gut); background: var(--gut-hell); color: var(--f); }
+.schriftlich .erg.falsch { border-color: var(--hinweis); background: var(--hinweis-hell); animation: wackeln .4s; }
+@keyframes plopp { from { transform: scale(0); } 70% { transform: scale(1.3); } to { transform: scale(1); } }
+/* Nach dem Komma (LERN_Session14): z, h, t neutral, nie in den Stellenfarben; die Kommalinie steht links der Zehntel */
+.schriftlich .st-nk { --f: var(--deko-7); }
+.schriftlich .kopfzelle.st-nk { background: var(--deko-7); }
+.schriftlich .ziffer.st-nk { color: var(--text); }
+.schriftlich .nach-komma { position: relative; }
+.schriftlich .nach-komma::before { content: ""; position: absolute; left: -4px; top: -3px; bottom: -3px; border-left: 3px solid var(--deko-1); }
+
+/* Notizblock (NB1–NB3 a): Feld am Bildrand, die Aufgabe bleibt daneben sichtbar; Häuschen wie Notizen (Zettelfarben),
+   damit nichts wie ein Antwortfeld aussieht */
+/* Oben rechts neben der Aufgabe, über der Entwickler-Leiste (z-index 50): unten rechts verdeckte sie den Block (LERN_Session14) */
+.notizblock { position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 110px);
+  display: flex; flex-direction: column; background: #fffdf3; border: 3px solid #e6d38d; border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(40, 45, 80, .25); }
+.notizblock.klein .nb-inhalt { display: none; }
+.nb-kopf { display: flex; align-items: center; gap: 8px; padding: 8px 10px 6px 14px; border-bottom: 2px dashed #e6d38d; }
+.nb-kopf .leise-text { flex: 1; font-size: 13px; }
+.nb-zu { border: none; background: #f3ecd0; border-radius: 10px; min-width: 40px; min-height: 40px; font: inherit; font-weight: 900; cursor: pointer; }
+.nb-inhalt { overflow: auto; padding: 10px 12px 12px; overscroll-behavior: contain; }
+.nb-vorlagen { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.nb-zahlen-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.nb-zahl { width: 9ch; min-height: 44px; font-size: 20px; text-align: right; font-variant-numeric: tabular-nums; }
+.nb-op { font-size: 22px; font-weight: 900; }
+.nb-zahlen-knoepfe { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 2px; }
+.nb-hinweis { margin: 2px 0 8px; font-size: 13px; }
+/* Eigenes Ziffernfeld des Blocks (LERN_Session14): schreibt ins gewählte Zahlenfeld oder Häuschen */
+.nb-tasten { display: grid; grid-template-columns: repeat(6, minmax(36px, 52px)); gap: 6px; margin: 8px 0 4px; }
+.nb-tasten button { min-height: 40px; border: none; border-radius: 10px; background: #fff; box-shadow: 0 3px 0 #e6d38d, inset 0 0 0 2px #efe4b8;
+  font: inherit; font-size: 20px; font-weight: 900; color: var(--text); cursor: pointer; }
+.nb-tasten button:active { transform: translateY(2px); box-shadow: 0 1px 0 #e6d38d, inset 0 0 0 2px #efe4b8; }
+.nb-flaeche { overflow-x: auto; }
+.nb-flaeche .schriftlich { --zelle: clamp(26px, calc((min(460px, 100vw) - 70px) / var(--spalten) - 4px), 44px); justify-content: start; width: max-content; }
+.nb-feld { width: var(--zelle); box-sizing: border-box; padding: 0; text-align: center; color: #6b5a1e; caret-color: #c98400;
+  background: #fff; border: 2px dashed #d9c77f; border-radius: 8px; font-family: inherit; }
+.nb-feld:focus { outline: 3px solid #f0d36a; border-style: solid; }
+.schriftlich .nb-feld.uebertrag { height: calc(var(--zelle) * .62); font-size: calc(var(--zelle) * .4); border-radius: 999px; width: 80%; margin: 0 auto; }
+.nb-feld.karo { border-style: solid; border-color: #efe4b8; border-radius: 3px; }
+/* Knopf in der Zeile von „Melden“ (NB2 a): gleich hoch, in den Zettelfarben des Blocks */
+.melde-zeile { gap: 8px; }
+.melde-zeile:not(:has(button)) { display: none; }
+.melde-zeile .nb-knopf { height: 36px; min-height: 36px; padding: 0 12px; border-radius: 999px; background: #fffbea; color: #6b5a1e;
+  border: 2px dashed #c9b87a; box-shadow: none; font-size: 15px; }
+.notizblock .knopf { min-height: 40px; padding: 4px 14px; font-size: 16px; }
+/* Die Aufgabe bleibt sichtbar: breit rückt sie nach links, auf dem Handy lässt sie sich über den Block hinauf scrollen;
+   verkleinert (▁) gibt der Block den Platz zurück */
+@media (min-width: 1100px) { body.mit-notizblock:not(.notizblock-klein) .buehne { margin-right: 480px; } }
+@media (max-width: 560px) {
+  .notizblock { right: 0; left: 0; top: auto; bottom: 0; width: auto; max-height: 58vh; border-radius: 18px 18px 0 0; border-bottom: none; }
+  body.mit-notizblock:not(.notizblock-klein) { padding-bottom: 58vh; }
+}
+
 /* Lesetext (BH3 a): scrollt im eigenen Feld; ein Schatten unten zeigt, dass noch Text kommt */
 .lesetext { overflow-y: auto; overscroll-behavior: contain; }
 .lesetext.scrollt { box-shadow: inset 0 -14px 12px -12px rgba(40, 45, 80, .35); }

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hundertertafel-Detektiv</title>
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<style>
+  .frage { text-align: center; font-size: clamp(20px, 4.5vw, 28px); font-weight: 800; margin: 0 0 10px; }
+  /* Tafel: 10 Spalten wie die 100er-Tafel; Ausschnitte und Puzzleteile nutzen dasselbe Raster */
+  /* Feldgrösse nach Breite und Höhe (Ganze Aufgabe im Bild, rahmen.md 20): die volle Tafel hat 10 Zeilen */
+  .ht-tafel { --z: clamp(26px, min((100vw - 64px) / var(--spalten, 10) - 3px, (100vh - 300px) / var(--zeilen, 10) - 3px), 50px);
+    display: grid; grid-template-columns: repeat(var(--spalten, 10), var(--z)); gap: 3px; justify-content: center; margin: 0 auto 10px; }
+  .ht-feld { width: var(--z); height: var(--z); display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+    border-radius: 8px; font-weight: 900; font-size: calc(var(--z) * .4); font-variant-numeric: tabular-nums; color: var(--text);
+    background: #fff; border: 2px solid var(--rand); padding: 0; font-family: inherit; }
+  .ht-feld.leer { background: #f4f5fb; border-style: dashed; color: transparent; }
+  .ht-feld.aussen { visibility: hidden; }
+  .ht-feld.gesucht { border: 3px solid var(--knopf); background: #eef0ff; color: var(--knopf); }
+  .ht-feld.gesucht.fertig { border-color: var(--gut); background: var(--gut-hell); color: var(--text); }
+  /* Reihe einer Einmaleins-Zahl: Deko-Farbe, nie eine Stellenfarbe */
+  .ht-feld.markiert { background: var(--deko-4); border-color: var(--deko-4); color: #fff; }
+  button.ht-feld { cursor: pointer; }
+  button.ht-feld:hover { border-color: var(--knopf); }
+  button.ht-feld.richtig { background: var(--gut); border-color: var(--gut); color: #fff; }
+  button.ht-feld.falsch { background: var(--hinweis-hell); border-color: var(--hinweis); animation: wackeln .4s; }
+  .ht-seite { text-align: center; font-weight: 800; color: var(--text-leise); margin: -4px 0 6px; }
+  @media (max-width: 560px) { .ht-tafel { --z: clamp(26px, min((100vw - 48px) / var(--spalten, 10) - 3px, (100vh - 280px) / var(--zeilen, 10) - 3px), 44px); } }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔢 Hundertertafel-Detektiv</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/avatare.js"></script>
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script>
+"use strict";
+// Lehrplan SG MA.1.B.3.b: Punktefeld, 100er-Tafel und Zahlenstrahl beim Erforschen arithmetischer Muster nutzen
+// (z. B. die Positionen der 9er-Reihe auf der 100er-Tafel); MA.1.A.2 Zahlen bis 100 ordnen (Spielideen H2,
+// docs/eulenpfad/spielideen/hilfsmittel.md, Entscheid HM1 a, LERN_Session14).
+// Basisklasse 2: s1 1. Klasse (bis 20), s3 Klassenziel (bis 100, Muster der Reihen), s5 3. Klasse (Tausenderbuch).
+// Drei Arten: Lücke (Ausschnitt oder Puzzleteil, die fehlende Zahl eintippen), Reihe (Einmaleins-Muster auf der Tafel,
+// die nächste Zahl antippen) und Suchen (auf einer fast leeren Tafel das Feld einer Zahl antippen).
+
+const { zahlText, zufall, waehle, el } = LS;
+
+// Die Tafel beginnt bei 1 (1 … 100, Zeile 1 … 10). Annahme bis zum Abgleich mit dem Lehrmittel (Spielideen H2, offen):
+// Beginnt sie dort bei 0 (0 … 99), hier START = 0 setzen — alles andere rechnet damit.
+const START = 1;
+/** Zahl im Feld (zeile, spalte) einer Tafel, die bei basis beginnt (0 für die 100er-Tafel, 300 für die Seite 301–400). */
+const zahlIm = (basis, zeile, spalte) => basis + zeile * 10 + spalte + START;
+
+// Je Stufe: Arten, Zeilen der Tafel (Zahlenraum), Seiten des Tausenderbuchs, Ausschnitt, grösster Sprung, Reihen.
+const STUFE = {
+  s1: { arten: ["luecke"], zeilen: 2, seiten: [0], form: "rechteck", hoehe: 2, breite: 5, sprung: 1, sichtbar: "alle" },
+  s2: { arten: ["luecke", "suche"], zeilen: 5, seiten: [0], form: "rechteck", hoehe: 3, breite: 3, sprung: 1, sichtbar: "nachbarn",
+    sucheZeigt: "rand" },
+  s3: { arten: ["luecke", "reihe", "suche"], zeilen: 10, seiten: [0], form: "puzzle", hoehe: 3, breite: 3, sprung: 1,
+    reihen: [2, 5, 10], sucheZeigt: "rand" },
+  s4: { arten: ["luecke", "reihe", "suche"], zeilen: 10, seiten: [0], form: "puzzle", hoehe: 4, breite: 4, sprung: 2,
+    reihen: [3, 4, 6, 9], sucheZeigt: "ecken" },
+  // 3. Klasse: eine Seite des Tausenderbuchs (101–200 … 901–1000)
+  s5: { arten: ["luecke", "suche"], zeilen: 10, seiten: [1, 2, 3, 4, 5, 6, 7, 8, 9], form: "puzzle", hoehe: 3, breite: 3, sprung: 1,
+    sucheZeigt: "rand" },
+  // Königsstufe: grosse Sprünge im Tausenderbuch, die schwierigen Reihen auf der 100er-Tafel
+  s6: { arten: ["luecke", "reihe", "suche"], zeilen: 10, seiten: [0, 2, 4, 6, 9], form: "puzzle", hoehe: 4, breite: 4, sprung: 3,
+    reihen: [7, 8, 9, 11, 12], sucheZeigt: "ecken" },
+};
+const MAX = { s1: 20, s2: 50, s3: 100, s4: 100, s5: 1000, s6: 1000 };
+
+/** Zusammenhängendes Puzzleteil mit n Feldern in einem hoehe × breite-Kasten, ausgehend vom Feld start. */
+function puzzleteil(hoehe, breite, n, start) {
+  const teil = [start];
+  const key = ([z, s]) => `${z},${s}`;
+  const drin = new Set([key(start)]);
+  for (let versuch = 0; teil.length < n && versuch < 200; versuch++) {
+    const [z, s] = waehle(teil);
+    const [dz, ds] = waehle([[0, 1], [0, -1], [1, 0], [-1, 0]]);
+    const neu = [z + dz, s + ds];
+    if (neu[0] < 0 || neu[1] < 0 || neu[0] >= hoehe || neu[1] >= breite || drin.has(key(neu))) continue;
+    drin.add(key(neu)); teil.push(neu);
+  }
+  return teil;
+}
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const art = waehle(p.arten);
+  const seite = waehle(p.seiten);
+  const basis = seite * 100;
+  if (art === "reihe") {
+    // Einmaleins-Reihe auf der 100er-Tafel: einige Zahlen markiert, die nächste antippen
+    const n = waehle(p.reihen);
+    const glieder = Array.from({ length: Math.floor(100 / n) }, (_, i) => (i + 1) * n);
+    const k = zufall(3, Math.min(5, glieder.length - 1));
+    const ab = zufall(0, glieder.length - 1 - k);
+    const markiert = glieder.slice(ab, ab + k);
+    return { art, n, markiert, wert: glieder[ab + k], basis: 0 };
+  }
+  if (art === "suche") {
+    // Fast leere Tafel: nur Orientierungszahlen sichtbar (Rand: erste Spalte und erste Zeile; Ecken: die vier Ecken)
+    const zeilen = p.zeilen;
+    const orient = new Set();
+    for (let z = 0; z < zeilen; z++) for (let s = 0; s < 10; s++) {
+      const ecke = (z === 0 || z === zeilen - 1) && (s === 0 || s === 9);
+      if (p.sucheZeigt === "rand" ? z === 0 || s === 0 : ecke) orient.add(zahlIm(basis, z, s));
+    }
+    let wert;
+    do { wert = zahlIm(basis, zufall(0, zeilen - 1), zufall(0, 9)); } while (orient.has(wert));
+    return { art, zeilen, orient: [...orient], wert, basis };
+  }
+  // Lücke: Ausschnitt (Rechteck) oder Puzzleteil irgendwo auf der Tafel, ohne über den Rand zu gehen
+  const h = p.hoehe, b = p.breite;
+  const z0 = zufall(0, p.zeilen - h), s0 = zufall(0, 10 - b);
+  let felder, gegeben, gesucht;
+  if (p.form === "rechteck") {
+    felder = [];
+    for (let z = 0; z < h; z++) for (let s = 0; s < b; s++) felder.push([z, s]);
+    gesucht = waehle(felder);
+    // s1: alles sichtbar ausser der Lücke; s2: nur die Nachbarn oben, unten, links, rechts der Lücke
+    const nachbar = ([z, s]) => Math.abs(z - gesucht[0]) + Math.abs(s - gesucht[1]) === 1;
+    gegeben = felder.filter(f => f !== gesucht && (p.sichtbar === "alle" || nachbar(f)));
+  } else {
+    // Puzzleteil: ein einziges Feld gegeben, gesucht ein anderes höchstens p.sprung Zeilen und Spalten entfernt
+    const start = [zufall(0, h - 1), zufall(0, b - 1)];
+    felder = puzzleteil(h, b, zufall(4, Math.min(7, h * b - 1)), start);
+    const ziele = felder.filter(([z, s]) => (z !== start[0] || s !== start[1])
+      && Math.abs(z - start[0]) <= p.sprung && Math.abs(s - start[1]) <= p.sprung
+      && (p.sprung === 1 || Math.abs(z - start[0]) + Math.abs(s - start[1]) >= 2));
+    if (!ziele.length) return aufgabeErzeugen(stufe);
+    gegeben = [start];
+    gesucht = waehle(ziele);
+  }
+  // Kasten auf das Teil zuschneiden: leere Zeilen und Spalten fallen weg (sonst stünde unter einem flachen Teil Leerraum)
+  const mz = Math.min(...felder.map(f => f[0])), ms = Math.min(...felder.map(f => f[1]));
+  const schieb = ([z, s]) => [z - mz, s - ms];
+  felder = felder.map(schieb); gegeben = gegeben.map(schieb); gesucht = schieb(gesucht);
+  const hoehe = Math.max(...felder.map(f => f[0])) + 1, breite = Math.max(...felder.map(f => f[1])) + 1;
+  const oben = z0 + mz, links = s0 + ms;
+  const zahl = ([z, s]) => zahlIm(basis, oben + z, links + s);
+  return {
+    art: "luecke", basis, z0: oben, s0: links, h: hoehe, b: breite,
+    felder: felder.map(([z, s]) => ({ z, s, zahl: zahl([z, s]) })),
+    gegeben: gegeben.map(([z, s]) => ({ z, s, zahl: zahl([z, s]) })),
+    gesucht: { z: gesucht[0], s: gesucht[1] },
+    wert: zahl(gesucht),
+  };
+}
+
+/** Mängel: Zahlenraum, Lösung aus Zeile und Spalte nachgerechnet, Rand der Tafel, Reihe und Orientierung. */
+function pruefeAufgabe(x, stufe) {
+  const m = [];
+  const p = STUFE[stufe];
+  const max = MAX[stufe];
+  if (!p.arten.includes(x.art)) m.push("Art nicht in der Stufe");
+  if (!(x.wert >= START && x.wert <= max)) m.push("Lösung ausserhalb des Zahlenraums");
+  if (x.art === "reihe") {
+    if (!p.reihen.includes(x.n)) m.push("Reihe nicht aus der Stufe");
+    if (x.markiert.some(z => z % x.n)) m.push("markierte Zahl nicht in der Reihe");
+    if (x.markiert.some((z, i) => i && z - x.markiert[i - 1] !== x.n)) m.push("Lücke in den markierten Zahlen");
+    if (x.wert !== x.markiert[x.markiert.length - 1] + x.n) m.push("nächste Zahl falsch");
+    if (x.wert > 100) m.push("nächste Zahl nicht auf der Tafel");
+    if (x.markiert.length < 3) m.push("zu wenige markierte Zahlen für ein Muster");
+  } else if (x.art === "suche") {
+    if (x.orient.includes(x.wert)) m.push("gesuchte Zahl ist schon sichtbar");
+    if (x.wert - x.basis > x.zeilen * 10 - 1 + START) m.push("gesuchte Zahl nicht auf der Tafel");
+    if (x.orient.length < 4) m.push("zu wenig Orientierung");
+  } else {
+    // Die Lösung folgt aus dem gegebenen Feld und dem Abstand: je Zeile 10, je Spalte 1
+    const g = x.gegeben[0];
+    if (!g) m.push("kein Feld gegeben");
+    else if (x.wert !== g.zahl + 10 * (x.gesucht.z - g.z) + (x.gesucht.s - g.s)) m.push("Lösung passt nicht zu Zeile und Spalte");
+    if (x.s0 < 0 || x.s0 + x.b > 10) m.push("Ausschnitt über den Rand der Tafel");
+    if (x.z0 + x.h > p.zeilen) m.push("Ausschnitt unter der Tafel");
+    if (x.gegeben.some(f => f.z === x.gesucht.z && f.s === x.gesucht.s)) m.push("gesuchtes Feld ist sichtbar");
+    if (!x.felder.some(f => f.z === x.gesucht.z && f.s === x.gesucht.s)) m.push("gesuchtes Feld nicht im Ausschnitt");
+    if (x.felder.some(f => f.zahl < START + x.basis || f.zahl > max)) m.push("Feld ausserhalb des Zahlenraums");
+  }
+  return m;
+}
+
+/** Weg vom gegebenen Feld zum gesuchten in Worten, ohne Ergebnis: „1 Zeile tiefer und 2 nach rechts“. */
+function wegText(dz, ds) {
+  const teile = [];
+  if (dz) teile.push(`${Math.abs(dz)} Zeile${Math.abs(dz) === 1 ? "" : "n"} ${dz > 0 ? "tiefer" : "höher"}`);
+  if (ds) teile.push(`${Math.abs(ds)} nach ${ds > 0 ? "rechts" : "links"}`);
+  return teile.join(" und ");
+}
+
+/** Tipps (ctx.tipp): die Regeln der Tafel, dann der Weg — nie die Zahl selbst. */
+function tippsFuer(x) {
+  if (x.art === "reihe") return [`Die ${x.n}er-Reihe springt immer um ${x.n} weiter.`,
+    "Schau, wie die markierten Zahlen auf der Tafel liegen: Gibt es eine Linie oder ein Muster?",
+    `Zähle von der letzten gelben Zahl ${x.n} weiter.`];
+  if (x.art === "suche") return ["In jeder Zeile stehen die Zahlen mit gleich vielen Zehnern.",
+    "Suche zuerst die richtige Zeile, dann gehst du nach rechts bis zu den Einern."];
+  const g = x.gegeben.find(f => Math.abs(f.z - x.gesucht.z) + Math.abs(f.s - x.gesucht.s) === 1) || x.gegeben[0];
+  return ["Nach rechts wird die Zahl um 1 grösser, eine Zeile tiefer um 10.",
+    `Geh von der ${zahlText(g.zahl)} aus: ${wegText(x.gesucht.z - g.z, x.gesucht.s - g.s)}.`];
+}
+
+/** Lösungstext: der Weg vom gegebenen Feld und die Zahl. */
+function loesungFuer(x) {
+  if (x.art === "reihe") return `${zahlText(x.markiert[x.markiert.length - 1])} + ${x.n} = ${zahlText(x.wert)}: Die ${zahlText(x.wert)} gehört als Nächste zur ${x.n}er-Reihe.`;
+  if (x.art === "suche") return `Die ${zahlText(x.wert)} steht in der Zeile mit ${zahlText(Math.floor((x.wert - START) / 10) * 10 + START)} am Anfang.`;
+  const g = x.gegeben.find(f => Math.abs(f.z - x.gesucht.z) + Math.abs(f.s - x.gesucht.s) === 1) || x.gegeben[0];
+  const dz = x.gesucht.z - g.z, ds = x.gesucht.s - g.s;
+  return `Von der ${zahlText(g.zahl)} ${wegText(dz, ds)}: ${zahlText(g.zahl)} ${dz * 10 + ds < 0 ? "−" : "+"} ${Math.abs(dz * 10 + ds)} = ${zahlText(x.wert)}.`;
+}
+
+LS.spiel({
+  id: "hundertertafel",
+  einleitung: "Auf der Hundertertafel hat jede Zahl ihren Platz: nach rechts eins mehr, eine Zeile tiefer zehn mehr. Finde die fehlenden Zahlen und die Muster!",
+  hilfe: "Fehlt in einem Stück der Tafel eine Zahl, tippst du sie ein und drückst OK. Bei den gelben Reihen und beim Suchen tippst du direkt das richtige Feld auf der Tafel an.",
+  anzahl: 8,
+  stufen: {
+    s1: "Bis 20: Welche Zahl fehlt im Streifen?",
+    s2: "Bis 50: Lücken mit Nachbarn — und Zahlen auf der Tafel finden.",
+    s3: "Bis 100: Puzzleteile, Reihen 2, 5, 10 als Muster.",
+    s4: "Weite Sprünge im Puzzleteil, 3er-, 4er-, 6er- und 9er-Reihe.",
+    s5: "Tausenderbuch: Seiten von 101 bis 1000.",
+    s6: "Endgegner: grosse Sprünge im Tausenderbuch, 7er-, 8er-, 11er- und 12er-Reihe.",
+  },
+
+  aufgabe(ctx) {
+    const x = aufgabeErzeugen(ctx.stufe);
+    if (STUFE[ctx.stufe].arten.length > 1) ctx.serie("art", x.art);
+    const loesung = loesungFuer(x);
+    ctx.loesung(loesung);
+    ctx.tipp(tippsFuer(x));
+    const f = ctx.flaeche;
+
+    // Tafel zum Antippen: Reihe (ganze 100er-Tafel, einige gelb) oder Suche (fast leer)
+    if (x.art === "reihe" || x.art === "suche") {
+      const zeilen = x.art === "reihe" ? 10 : x.zeilen;
+      ctx.kennung(x.art === "reihe" ? `reihe|${x.n}|${x.markiert.join(",")}` : `suche|${x.basis}|${x.wert}`);
+      ctx.schritte(1);
+      const auftrag = x.art === "reihe" ? `Tippe die nächste Zahl der ${x.n}er-Reihe an.` : `Tippe das Feld der ${zahlText(x.wert)} an.`;
+      f.append(el("div", { class: "frage", text: auftrag }));
+      if (x.basis) f.append(el("div", { class: "ht-seite", text: `Seite ${zahlText(x.basis + START)} bis ${zahlText(x.basis + 99 + START)}` }));
+      const tafel = el("div", { class: "ht-tafel", role: "grid", "aria-label": "Hundertertafel" });
+      tafel.style.setProperty("--zeilen", zeilen);
+      const markiert = new Set(x.markiert || []);
+      const sichtbar = new Set(x.art === "reihe" ? [] : x.orient);
+      for (let z = 0; z < zeilen; z++) for (let s = 0; s < 10; s++) {
+        const zahl = zahlIm(x.basis, z, s);
+        const zeigen = x.art === "reihe" || sichtbar.has(zahl);
+        const k = el("button", { type: "button", class: "ht-feld" + (markiert.has(zahl) ? " markiert" : "") + (zeigen ? "" : " leer"),
+          text: zeigen ? zahlText(zahl) : "", "aria-label": zeigen ? zahlText(zahl) : `Feld Zeile ${z + 1}, Spalte ${s + 1}` });
+        k.addEventListener("click", () => {
+          if (ctx.vorbei()) return;
+          if (zahl === x.wert) {
+            k.classList.add("richtig"); k.textContent = zahlText(zahl);
+            ctx.richtig(x.art === "reihe" ? `Ja! Die ${zahlText(zahl)} gehört zur ${x.n}er-Reihe.` : `Gefunden: hier steht die ${zahlText(zahl)}!`);
+            return;
+          }
+          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+          if (x.art === "reihe") ctx.falsch(markiert.has(zahl) ? "Diese Zahl ist schon gelb. Welche kommt danach?"
+            : `Die ${x.n}er-Reihe springt immer um ${x.n}. Passt das zu deinem Feld?`, loesung);
+          else {
+            // Das falsche Feld zeigt seine Zahl: daran sieht das Kind, wie weit es daneben liegt
+            k.textContent = zahlText(zahl);
+            ctx.falsch(`Hier steht die ${zahlText(zahl)}. ${Math.abs(x.wert - zahl) >= 10 ? "Stimmt die Zeile?" : "Die Zeile stimmt — wie weit nach rechts oder links?"}`, loesung);
+          }
+        });
+        tafel.append(k);
+      }
+      f.append(tafel);
+      if (ctx.nr === 0) ctx.sag(x.art === "reihe" ? "Die gelben Zahlen gehören zu einer Reihe. Wo geht sie weiter?" : "Finde den Platz der Zahl auf der Tafel.");
+      return;
+    }
+
+    // Lücke: Ausschnitt oder Puzzleteil, die Zahl im blauen Feld eintippen
+    ctx.kennung(`luecke|${x.basis}|${x.z0},${x.s0}|${x.gegeben.map(g => g.zahl).join(",")}|${x.wert}`);
+    ctx.schritte(LS.tippSchritte(x.wert));
+    f.append(el("div", { class: "frage", text: x.gegeben.length > 1 ? "Welche Zahl fehlt?" : "Welche Zahl gehört ins blaue Feld?" }));
+    if (x.basis) f.append(el("div", { class: "ht-seite", text: `Seite ${zahlText(x.basis + START)} bis ${zahlText(x.basis + 99 + START)}` }));
+    const tafel = el("div", { class: "ht-tafel", "aria-label": "Stück der Hundertertafel" });
+    tafel.style.setProperty("--spalten", x.b);
+    tafel.style.setProperty("--zeilen", Math.max(x.h, 4)); // kleine Stücke nicht riesig, die Tastatur braucht Platz
+    const im = (z, s) => x.felder.find(e => e.z === z && e.s === s);
+    const gegeben = new Set(x.gegeben.map(g => `${g.z},${g.s}`));
+    let gesuchtEl = null;
+    for (let z = 0; z < x.h; z++) for (let s = 0; s < x.b; s++) {
+      const feld = im(z, s);
+      const istGesucht = z === x.gesucht.z && s === x.gesucht.s;
+      const k = el("div", { class: "ht-feld" + (!feld ? " aussen" : istGesucht ? " gesucht" : gegeben.has(`${z},${s}`) ? "" : " leer"),
+        text: feld && gegeben.has(`${z},${s}`) ? zahlText(feld.zahl) : istGesucht ? "?" : "" });
+      if (istGesucht) gesuchtEl = k;
+      tafel.append(k);
+    }
+    f.append(tafel);
+    const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Zahl" });
+    f.append(anzeige);
+    const tasten = LS.tastatur({
+      anzeige, maxStellen: String(MAX[ctx.stufe]).length,
+      onAenderung: w => { gesuchtEl.textContent = w === null ? "?" : zahlText(w); },
+      onOk(w) {
+        if (w === x.wert) {
+          tasten.gesperrt = true; anzeige.classList.add("richtig"); gesuchtEl.classList.add("fertig");
+          ctx.richtig(); return;
+        }
+        anzeige.classList.add("falsch");
+        ctx.falsch(w > x.wert ? "Das ist zu gross. Zähl die Zeilen und Spalten nochmals ab." : "Das ist zu klein. Zähl die Zeilen und Spalten nochmals ab.", loesung);
+        if (ctx.flaeche.querySelector(".knopfzeile")) tasten.gesperrt = true;
+      },
+    });
+    f.append(tasten.element);
+    if (ctx.nr === 0) ctx.sag("Nach rechts eins mehr, eine Zeile tiefer zehn mehr. Welche Zahl gehört ins blaue Feld?");
+  },
+});
+</script>
+</body>
+</html>

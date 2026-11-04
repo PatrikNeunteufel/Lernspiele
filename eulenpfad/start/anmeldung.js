@@ -51,11 +51,23 @@ function erwachsenenFrage() {
   return arten[z(0, arten.length - 1)]();
 }
 
+/**
+ * Links zu den Anleitungen (eulenpfad/anleitung/); ?von=app führt dort „Zurück“ in die App statt ins Portal.
+ * beide: Kinder- und Erwachsenen-Anleitung (Anmeldung, Aufsicht), sonst nur die für Kinder.
+ */
+function anleitungLinks(beide) {
+  const { el } = LS;
+  const link = (datei, bild, text) => el("a", { class: "anleitung-link", href: `anleitung/${datei}?von=app` }, `${bild} ${text}`);
+  return el("nav", { class: "anleitung-links", "aria-label": "Anleitungen" }, el("span", { text: "📖 Anleitung:" }),
+    link("kinder.html", "🧒", "So spielst du"), beide ? link("aufsicht.html", "🧑‍🏫", "Für Erwachsene") : null);
+}
+
 /** Zeichnet die Anmeldung in box; nachAnmeldung() wenn jemand angemeldet ist. */
 function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
   const { el } = LS;
   const karte = el("section", { class: "karte anmeldung" });
-  box.append(karte);
+  // Anleitungen auch in der App, nicht nur im Portal (Wunsch Patrik, LERN_Session14): unter der Anmeldung für alle
+  box.append(karte, anleitungLinks(true));
   const zurueckgesetzt = LS.zuruecksetzenFaellig(); // Frist (Stufe 4) abgelaufen: Aufsichten sind jetzt Kinder ohne PIN
   const kinder = LS.kinderListe();
   const aufsichten = LS.aufsichtListe();

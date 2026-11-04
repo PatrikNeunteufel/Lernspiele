@@ -14,7 +14,7 @@ Markiertes vor dem Bau ansehen. Skala: s1 eine Klasse tiefer · s2–s4 Basiskla
 | Spiel | Kl. | ab | Ort der Felder | Hinweis |
 |---|---|---|---|---|
 | rechen-maschine | 4 | s3 oder ≥ 3 Kästen | auf jedem Pfeil zwischen zwei Kästen; Weiche: je Runde | Pilot |
-| rechenprobe (Probe-Stempel) | 5 | s2 | unter „Rechne die Probe“, je Teilprodukt/Teilschritt | Pilot; Art „schnell“ ohne |
+| rechenprobe (Probe-Stempel) | 5 | s2 | unter „Rechne die Probe“: die halbschriftlichen Schritte beschriftet (`zerlegung`: + −  runder Teil, dann Rest; · und : zwei Teile und „zusammen“), dazu der Notizblock (LERN_Session14) | Pilot; Art „schnell“ ohne |
 | sachaufgaben-kompass | 6 | s2 | je Teilterm des Rechenwegs, dann Ergebnis | s1 nur ein Schritt |
 | kiosk-kasse | 2 | s5 | „zusammen“ und „bis zum Franken“ | s4 unsicher (Hochzählen ist Lernziel) |
 | preis-tabelle | 4 | s4 | Zusatzzeile „1 Stück“ / „100 g“ / „50 g“ | |
@@ -60,3 +60,9 @@ einmaleins-blitz, rechen-rakete, dezimal-rakete, doppel-spiegel, zehner-ergaenze
 zahlenstrahl-pfeil, zehntel-lupe, stellen-detektiv, ziffernkarten, punkte-schieber, zahlen-huepfer,
 ueberschlags-blitz (allenfalls s6), merk-blick, wuerfel-kipper, netz-falter, wuerfelbau-blick, pentomino-puzzle,
 rechengeschichten, zeitstrahl-sortierer, stein-duell, steine-fangen, koenig-falle; alle Spiele ohne Rechnen.
+
+## Notizblock (LERN_Session14)
+
+Wo Notizfelder stehen, gibt es ab Stufe 4 zusätzlich „📝 Notizblock“ für schriftliche Verfahren (Plus, Minus, Mal,
+Geteilt, Häuschen; Entscheide NB1–NB4 a). Vertrag: `rahmen.md` Abschnitt 21; Vorgehen „mit Notizblock“ zählt nicht
+für den Kopfrechner.

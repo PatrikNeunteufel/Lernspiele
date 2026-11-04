@@ -216,3 +216,4 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-57 | Neunerprobe im Probe-Stempel (PS2 a) mit Rückfrage Patrik: Erklärung, Regeln für 3/6/9, Gruppe für Neugierige | offen (vorzulegen) | Report LERN_Session13, Plan 3 |
 | LERN-58 | Weitere Erfolge: Abzeichen je Thema und für besondere Spiele (Zusatz Patrik zu NZ1) | offen | Report LERN_Session13, Plan 4 |
 | LERN-59 | Notizen für Zwischenergebnisse (NZ1 a) | erledigt 2026-11-04 (LERN_Session13, 32 Spiele) | konzept_notizen.md; rahmen.md 4.3 |
+| LERN-60 | Hilfsmittel als eigene Spiele (HM1 a): Zwanzigerfeld, Hundertertafel, Punktefeld, Rechenstrich, Folgen-Maschine; Rechenschieber für LERN-47 | in Arbeit seit 2026-11-04 (LERN_Session14, H2 Hundertertafel gebaut, H1, H3–H6 offen) | spielideen/hilfsmittel.md; lernziele/lehrplan_sg_session14.md |
