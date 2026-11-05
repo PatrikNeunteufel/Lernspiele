@@ -1,29 +1,21 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
-## HALTEPUNKT 2026-11-05 14:16 — LERN_Session15_2026-11-05 (aufgenommen 2026-11-05 15:31)
-Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
-
-- **Angehalten — beim Weitermachen neu starten:** nichts, was wieder anlaufen muss. Der Vorschau-Server
-  `lernspiele-2` (Port 8767) ist beendet und wird nur für Browser-Prüfungen neu gestartet (`preview_start`
-  `lernspiele-2`). Achtung: Auf Port 8765 läuft ein fremder Server mit einem anderen Stand, nicht benutzen. Die drei
-  Prüfagenten (Mathe, Code, Recherchen) sind fertig, ihre Berichte sind in den Plan eingeflossen.
-- **Stand:** Arbeitsbaum sauber, alles committet bis `d27d7cd` (Notizblock mischt; Lernsteig zurückgeholt und
-  gesperrt). Testskript Lernsteig `node docs/lernsteig/werkzeuge/pruefe_uebungen.js`: „0 Fehler, 0 Hinweise.“;
-  Eulenpfad-Stichprobe `zahlenhaus`: „Keine Fehler.“ Im Browser geprüft: 27 Übungen gesperrt, direkter Aufruf nur
-  Hinweis, Aufsicht sieht sie mit Vermerk.
-- **Weiter mit** [Plan zum Angleich der Reihe](../plan_angleich_reihe.md):
-  1. Paket B: `kern/` und `tools/kern_verteilen.py`; Testgerüst für alle drei Apps ohne Playwright (Ersatz-DOM wie
-     `tools/pruef_dom.js`, Chrome über DevTools wie `tools/bildhoehe.js`); erste Kern-Teile `zahl.js`, `bruch.js`, dann
-     Speicher, Zufall, `el`, Profil (Geburtsdatum B3), Rollen, Freigabe, Suche, Protokoll/Statistik, Daten.
-  2. Paket C: Grundgerüst Lernsteig wie Eulenpfad (Anmeldung zuerst mit Gast, Tabs Übungen · Profil · Statistik ·
-     Erfolge · Verwaltung, Kacheln, Suche, Prüfungsvorbereitung C1 a mit Filter, Aufsicht wie Eulenpfad, Lehrperson,
-     Prüfstand mit Entwickler-Modus, Profil-Übernahme zwischen den Apps C9), Gratwanderung mit demselben Gerüst.
-  3. D (Fehler D1–D13) mit B/C, danach E (Fachliches, u. a. Rationale Zahlen Stufe g neu schneiden), F (Recherchen
-     ordnen, Widersprüche an der Quelle klären), G (Doku-Drift), H (Portal).
-- **Offene Entscheidungen:** keine. Vor dem Bau von C9 vorzulegen: Annahme, dass Rolle und PIN-Prüfwerte mitreisen
-  und der Wiederherstellungscode neu ausgegeben wird.
-
 ## Stand
+**2026-11-05, nach LERN_Session15** ([Report](report/LERN_Session15_2026-11-05.md)):
+- **Reihe:** Der Lernsteig ist aus dem Cloud-Repo zurückgeholt (A1 a, A2 a) und gesperrt, bis er geprüft ist. Was als
+  Nächstes kommt, steht im [Plan zum Angleich der Reihe](../plan_angleich_reihe.md) (Pakete A–H, alle Entscheide).
+- **Gemeinsamer Kern 1.6.0** (`kern/`, [docs/kern/rahmen.md](../kern/rahmen.md)): Zahl, Bruch, Speicher, Zufall, `el`,
+  Geheimnis, Person, Freigabe, Suche, Runden; verteilt mit `tools/kern_verteilen.py`, geprüft mit
+  `node tools/pruefe_kern.js`. Beide Apps benutzen ihn.
+- **Eulenpfad:** Profile als Personen mit fester Kennung (P1 a, P2 a; Umzug beim Laden), Runden und Rekorde im
+  gemeinsamen Format (R1 a), Dateien `eulenpfad-daten` Version 3; Notizblock mischt Rechnungen; Anleitungen nachgeführt.
+  Aussehen unverändert.
+- **Tests:** Kern „5222 Fälle, 0 Fehler.“; Lernsteig „0 Fehler, 0 Hinweise.“; Eulenpfad voller Lauf nach Kern 1.1.0
+  „Keine Fehler.“, danach Stichproben (globale Regel „Testläufe während eines Umbaus“). **Vor dem nächsten Push, der
+  veröffentlicht:** voller Lauf und eine Sicherung je Gerät (der Umzug geht nur in eine Richtung).
+- **Weiter mit:** Bemerkung 11, dann Kern (Anmeldung, Entwickler-Modus, Einladung, Auswertung), Testgerüst B2 und das
+  Grundgerüst C.
+
 **2026-11-04, nach LERN_Session14** ([Report](report/LERN_Session14_2026-11-04.md)):
 - **Reihe:** README im Repo als Übersicht der drei Apps, Eulenpfad-README in `eulenpfad/`.
 - **Profil:** Geburtsmonat statt Alter (`LS.alterVon`), Klassenaufstieg einzeln und als „Neues Schuljahr“ mit Nachricht
@@ -250,4 +242,6 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-57 | Neunerprobe im Probe-Stempel (PS2 a) mit Rückfrage Patrik: Erklärung, Regeln für 3/6/9, Gruppe für Neugierige | offen (vorzulegen) | Report LERN_Session13, Plan 3 |
 | LERN-58 | Weitere Erfolge: Abzeichen je Thema und für besondere Spiele (Zusatz Patrik zu NZ1) | offen | Report LERN_Session13, Plan 4 |
 | LERN-59 | Notizen für Zwischenergebnisse (NZ1 a) | erledigt 2026-11-04 (LERN_Session13, 32 Spiele) | konzept_notizen.md; rahmen.md 4.3 |
+| LERN-60 | Angleich der Reihe: Kern, Grundgerüst Lernsteig und Gratwanderung wie Eulenpfad, Fehler, Fachliches, Recherchen, Portal | in Arbeit seit 2026-11-05 (LERN_Session15, Paket B); Kern 1.6.0 in beiden Apps | docs/plan_angleich_reihe.md; docs/kern/rahmen.md |
+| LERN-61 | Bemerkung 11: Fahrplan-Rechner Stufe 3 sagt nicht, ob „5 h 35 min“ oder „335 min“ gemeint ist | offen | docs/eulenpfad/bemerkungen.json |
 | LERN-60 | Hilfsmittel als eigene Spiele (HM1 a): Zwanzigerfeld, Hundertertafel, Punktefeld, Rechenstrich, Folgen-Maschine; Rechenschieber für LERN-47 | in Arbeit seit 2026-11-04 (LERN_Session14, H2 Hundertertafel gebaut, H1, H3–H6 offen) | spielideen/hilfsmittel.md; lernziele/lehrplan_sg_session14.md |

@@ -439,3 +439,19 @@
 - Hilfsmittel als eigene Spiele (HM1 a, `spielideen/hilfsmittel.md`); neu Hundertertafel-Detektiv (169 Spiele).
 - Bemerkungen 9 und 10 erledigt, Meldungsstand neu.
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session14_2026-11-04.md`.
+
+## 2026-11-05 — LERN_Session15
+- Notizblock mischt Rechnungen (Plus und Minus in einer Spalte, „Weiterrechnen“ bis sechs Rechnungen, Ziffernfeld fest
+  unten mit eingestelltem Dezimalzeichen, Platz für Tablet quer); Anleitungen mit Notizblock, Klassen-Rand, Filter.
+- Prüfung der Cloud-Sitzung LST_Session1 und der lokalen Recherchen; Plan zum Angleich der Reihe
+  (`docs/plan_angleich_reihe.md`, Pakete A–H); Entscheide A1, A2, C1 (mit Filter), C2, F1, P1, P2, R1 (alle a).
+- Lernsteig aus dem Cloud-Repo zurückgeholt (`8f55173`) und gesperrt bis zum Prüfstand; Cloud-Repo abgeschlossen;
+  `.gitignore` für Sicherungen von Lernsteig und Gratwanderung.
+- Gemeinsamer Kern 1.0.0 bis 1.6.0 (`kern/`, `tools/kern_verteilen.py`, `tools/pruefe_kern.js`, `docs/kern/rahmen.md`):
+  Zahl, Bruch, Speicher, Zufall, `el`, Geheimnis, Person, Freigabe, Suche, Runden; in Eulenpfad und Lernsteig benutzt.
+- Eulenpfad: Profile als Personen mit fester Kennung, Runden und Rekorde im gemeinsamen Format, Einlesen geprüft (D14).
+- Lernsteig: eine Personenliste, Aufsicht nur mit Bestätigung und Verbinden nur mit Zustimmung (D5), Einlesen geprüft und
+  alles oder nichts (D4), Einladung geprüft (D12), Runden im gemeinsamen Format, `pruefe_konten.js`.
+- CLAUDE.md: Geburtsdatum vollständig (B3), Datenschutz-Ausnahme Aufsicht im Lernsteig; globale Regel „Testläufe
+  während eines Umbaus“ in `~/.claude/CLAUDE.md`.
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session15_2026-11-05.md`.
