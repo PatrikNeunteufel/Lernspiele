@@ -27,7 +27,7 @@
   }
 
   function standJeUebung(k, r) {
-    const gespielt = new Set(r.map(x => x.uebung));
+    const gespielt = new Set(r.map(x => x.inhalt));
     const liste = KAT.UEBUNGEN.filter(u => gespielt.has(u.id));
     if (!liste.length) return el("p", { class: "leise", text: "Noch keine Übung gespielt." });
     return el("ul", { class: "stand-liste" }, liste.map(u => el("li", { "data-uebung": u.id },
@@ -42,7 +42,7 @@
     return el("table", { class: "runden-tabelle" },
       el("thead", {}, el("tr", {}, ["Datum", "Übung", "Stufe", "Aufgaben", "auf Anhieb", "Dauer"].map(t => el("th", { text: t })))),
       el("tbody", {}, r.slice(-10).reverse().map(x => el("tr", {},
-        el("td", { text: datumText(x.zeit) }), el("td", { text: titel(x.uebung) + (x.mitRechner ? " (Rechner)" : "") }),
+        el("td", { text: datumText(x.zeit) }), el("td", { text: titel(x.inhalt) + (x.mitRechner ? " (Rechner)" : "") }),
         el("td", { text: x.stufe === "challenge" ? "Challenge" : String(x.stufe) }), el("td", { text: String(x.aufgaben || 0) + (x.endlos ? " Serie" : "") }),
         el("td", { text: String(x.aufAnhieb || 0) }), el("td", { text: LST.dauerText(x.dauer || 0) })))));
   }
@@ -90,7 +90,7 @@
   function zeichne() {
     const { k, aufsicht } = kontoDerSeite();
     if (!k) { wurzel.replaceChildren(el("p", { class: "meldung", text: "Dieses Konto ist nicht mit der angemeldeten Aufsicht verbunden." }), el("a", { class: "knopf", href: "aufsicht.html", text: "Zur Aufsicht" })); return; }
-    const r = LST.runden(x => x.konto === k.id);
+    const r = LST.runden(x => x.person === k.id);
     wurzel.replaceChildren(
       el("p", { class: "konto-zeile" }, el("b", { text: k.id === "gast" ? "Gast" : k.name }),
         el("span", { class: "leise", text: aufsicht ? `Ansicht der Aufsicht ${aufsicht.name}` : k.id === "gast" ? "nicht angemeldet" : "angemeldet" })),

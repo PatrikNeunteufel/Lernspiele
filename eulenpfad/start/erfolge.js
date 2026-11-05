@@ -146,20 +146,20 @@ function zeichneErfolge(box, neu) {
   const modi = new Map();
   for (const e of LS.rekorde()) {
     if (e.name !== name || e.test) continue;
-    const k = `${e.spiel}|${e.stufe}|${e.timer ?? ""}`;
+    const k = `${e.inhalt}|${e.stufe}|${e.timer ?? ""}`;
     if (!modi.has(k) || e.punkte > modi.get(k).punkte) modi.set(k, e);
   }
   const MEDAILLE = ["🥇", "🥈", "🥉"];
-  const podest = [...modi.values()].map(e => ({ e, platz: LS.ranglisteFuer(e.spiel, e.stufe, e.timer ?? null).findIndex(r => r.name === name) + 1 }))
+  const podest = [...modi.values()].map(e => ({ e, platz: LS.ranglisteFuer(e.inhalt, e.stufe, e.timer ?? null).findIndex(r => r.name === name) + 1 }))
     .filter(x => x.platz >= 1 && x.platz <= 3).sort((a, b) => a.platz - b.platz || b.e.punkte - a.e.punkte);
   if (podest.length) seite.append(karte(el("h2", { text: `🏆 Meine Podestplätze: ${podest.length}` }),
     el("p", { class: "leise-text", text: "Im Endlos-Modus: so viele Aufgaben hintereinander ohne Fehler wie möglich. Verglichen wird bei gleicher Stufe und gleichem Timer." }),
     el("div", { class: "podest-liste" }, ...podest.map(({ e, platz }) => {
-      const s = SPIELE.find(x => x.id === e.spiel);
+      const s = SPIELE.find(x => x.id === e.inhalt);
       const st = LS.SKALA.find(x => x.id === e.stufe);
       return el("a", { class: "podest", href: s ? `${s.pfad}?stufe=${e.stufe}&endlos=1` : "mix.html" },
         el("span", { class: "podest-platz", text: MEDAILLE[platz - 1] }),
-        el("span", { class: "podest-spiel", text: s ? `${s.bild} ${s.name}` : `🎲 ${LS.mixName(e.spiel)}` }),
+        el("span", { class: "podest-spiel", text: s ? `${s.bild} ${s.name}` : `🎲 ${LS.mixName(e.inhalt)}` }),
         el("span", { class: "leise-text", text: `Stufe ${st ? `${st.icon} ${st.nr}` : e.stufe}${e.timer ? " · ⏱" : ""}` }),
         el("b", { text: `♾ ${e.punkte}` }));
     }))));

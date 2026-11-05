@@ -13,6 +13,9 @@ var LST = (function () {
   /** Speichern; true, wenn es gespeichert ist (false: Speicher voll oder gesperrt). */
   const schreibe = (schluessel, wert) => SPEICHER.schreibe(schluessel, wert);
 
+  /** Felder der Runden und Rekorde von vor LERN_Session15 und ihre Namen im gemeinsamen Format (R1 a, kern/runden.js). */
+  const ALTE_FELDER = { konto: "person", uebung: "inhalt" };
+
   // Zufall über die austauschbare Quelle des Kerns, damit das Testskript mit Seed laufen kann (LST.quelle.zufall = …).
   const { quelle, zufall, waehle, mische } = KERN.zufall;
 
@@ -97,7 +100,7 @@ var LST = (function () {
   }
 
   return {
-    PRAEFIX, lies, schreibe, quelle, zufall, waehle, mische, tagText, wochenSerie,
+    PRAEFIX, ALTE_FELDER, lies, schreibe, quelle, zufall, waehle, mische, tagText, wochenSerie,
     TAUSENDER, MINUS, zahlText, dezimalText, dezimalZeichen, leseZahl,
     NIVEAUS, niveauNr, stufenListe, stufeVon, zielstufe,
   };

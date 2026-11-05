@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.5.0: Zahl, Bruch, Speicher, Zufall, `el`, Geheimnis, Person, Freigabe, Suche in beiden Apps | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.6.0: Zahl, Bruch, Speicher, Zufall, `el`, Geheimnis, Person, Freigabe, Suche, Runden in beiden Apps | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | offen, nach B | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -171,7 +171,7 @@ Kindersprache.
 | D10 | `terme.js:63` | Exponent unbegrenzt friert den Tab ein | Grenze mit Meldung |
 | D11 | `rahmen.js:121`, `daten.js` | voller Speicher verliert Runden still | Rückgabe auswerten, Warnung wie Eulenpfad (80 %) |
 | D12 | `konten.js:243–258` | Einladung prüft Land/Kanton nicht, verwirft `JJJJ-MM` | gegen `LP.LAENDER`/`KANTONE` prüfen; B3 — erledigt 2026-11-05 (Land, Kanton, Klasse geprüft; Geburtsdatum mit oder ohne Tag) |
-| D14 | Eulenpfad `LS.zusammenfuehren` | Runden aus einer Datei werden nicht geprüft; eine Runde ohne `fehlerAufgaben` bricht die Statistik (`auswertung.js` `anhieb`) | Schema wie im Lernsteig (`rundeGueltig`), in den Kern-Teil Sichern und Einlesen |
+| D14 | Eulenpfad `LS.zusammenfuehren` | Runden aus einer Datei werden nicht geprüft; eine Runde ohne `fehlerAufgaben` bricht die Statistik (`auswertung.js` `anhieb`) | Schema wie im Lernsteig (`rundeGueltig`), in den Kern-Teil Sichern und Einlesen — erledigt 2026-11-05 (Kern 1.6.0 `KERN.runden`, `auswertung.js` verträgt fehlende `fehlerAufgaben`) |
 | D13 | `sachsituationen/aufgaben.js:66, 79` | ASCII-Minus | über `LST.zahlText` |
 
 ## E. Fachliche Korrekturen
@@ -266,5 +266,11 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   `lehrperson`) und das Merkmal Gruppenleitung (G2 a); Entwickler bleibt Freischaltung des Geräts, keine Rolle.
   Anmeldung, PIN, Code, Sicherheitsfrage, Zurücksetzen für alle Rollen gleich; PIN-Pflicht und Sicht der Aufsicht
   stellt jede App ein. Der Lernsteig führt `aufsichten` in die Liste über.
+- **R1 a:** Ein gemeinsames Format für Runden und Rekorde in allen Apps: Kernfelder `id`, `person`, `zeit`, `inhalt`
+  (Spiel oder Übung), `stufe`, `aufgaben`, `fehler`, `dauer`, `test`, bei Rekorden `punkte`, vom Kern geprüft;
+  App-Felder unter eigenem Namen daneben, ihr Schema meldet die App. Beide Apps ziehen ihre Daten einmal um
+  (`spiel`/`uebung` → `inhalt`, `konto` → `person`), der Eulenpfad bekommt Kennungen je Runde. Sicherungen und
+  Abgleich tragen `format` mit Version; ältere werden beim Einlesen umgedeutet. In der Oberfläche bleiben die Wörter
+  Spiel und Übung.
 - **F1 a:** Kleinklasse als drittes Schulniveau SG (Niveau `n1`, Ziel „so weit wie möglich“, Fremdsprachen
   ausgeblendet und einschaltbar, keine Prüfungsziele, keine eigenen Übungen); Praxis in F2 an der Quelle prüfen.

@@ -209,6 +209,9 @@ const TREIBER = `
     letzterText = jetzt;
   }
   for (const e of protokoll()) {
+    // gemeinsames Format der Reihe (R1 a, kern/runden.js): Kennung, Person, Zeit, Inhalt, Stufe …
+    const formatMaengel = KERN.runden.maengel(e, endlos ? "rekord" : "runde");
+    if (formatMaengel.length) melde("Format", formatMaengel.join(", ") + ": " + JSON.stringify(e).slice(0, 120));
     if (endlos) { if (!Number.isInteger(e.punkte) || e.punkte < 0 || !Number.isFinite(e.dauer)) melde("Rekord", JSON.stringify(e).slice(0, 160)); continue; }
     if (!(e.sterne >= 1 && e.sterne <= 3) || !Number.isFinite(e.fehler) || !Number.isFinite(e.dauer)) melde("Protokoll", JSON.stringify(e).slice(0, 160));
     for (const f of e.fehlerAufgaben || []) if (${VERDAECHTIG}.test(f.text + " " + f.loesung)) melde("Protokoll", "Fehleraufgabe: " + (f.text + " → " + f.loesung).slice(0, 160));

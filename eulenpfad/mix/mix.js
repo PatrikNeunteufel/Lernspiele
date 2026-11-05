@@ -262,7 +262,8 @@ function starte(name, e) {
   const summe = (f) => spiele.reduce((n, g) => n + f(g), 0);
   const hilfen = () => summe(g => g.hilfen);
   const rekordEintrag = abgebrochen => ({
-    name, zeit: new Date().toISOString(), spiel: kennung, stufe: e.stufe, timer: e.timer || null, punkte: geschafft,
+    id: zwischenstand?.id || KERN.runden.neueId(), // eine Kennung je Serie (R1 a)
+    name, zeit: new Date().toISOString(), inhalt: kennung, stufe: e.stufe, timer: e.timer || null, punkte: geschafft,
     dauer: Math.round((Date.now() - beginn) / 1000), spiele: spiele.filter(g => g.aufgaben.length).map(g => g.s.id),
     ...(test ? { test: true } : {}), ...(hilfen() ? { hilfe: hilfen() } : {}), ...(abgebrochen ? { abgebrochen: true } : {}),
   });
@@ -283,7 +284,7 @@ function starte(name, e) {
       const tipps = g.aufgaben.reduce((n, a) => n + (a.tipps || 0), 0);
       LS.protokolliere({
         ...(tipps ? { tipps } : {}),
-        name, zeit, spiel: g.s.id, stufe: g.stufe, sterne: null, mix: auswahlSchluessel(e),
+        name, zeit, inhalt: g.s.id, stufe: g.stufe, sterne: null, mix: auswahlSchluessel(e),
         fehler: g.fehler, aufgaben: g.aufgaben.length,
         dauer: Math.round(g.aufgaben.reduce((n, a) => n + a.ms, 0) / 1000),
         geordnet: LS.geordnet(name, g.s.id, g.stufe),

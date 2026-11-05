@@ -51,7 +51,7 @@
   // getrennt (RE1 a): zählt zuerst ohne Rechner, „sicher mit Rechner“ nur, wenn es ohne noch nicht reicht.
   const STAND = { minAufgaben: 10, fenster: 10, anhieb: 0.85 };
   function kompetenzstand(kontoId, uebungId, lp) {
-    const liste = runden(r => r.konto === kontoId && r.uebung === uebungId).flatMap(r => (r.liste || []).filter(x => x.lp === lp));
+    const liste = runden(r => r.person === kontoId && r.inhalt === uebungId).flatMap(r => (r.liste || []).filter(x => x.lp === lp));
     const bewerte = l => {
       const letzte = l.slice(-STAND.fenster);
       const anhieb = letzte.filter(x => x.versuche === 0 && !x.gezeigt).length;
@@ -67,7 +67,7 @@
   /** Serie über Tage (BF1 a) zum selbst gesetzten Wochenziel des Kontos; null ohne Ziel. */
   function wochenSerie(k) {
     if (!k.wochenziel) return null;
-    const tage = new Set(runden(r => r.konto === k.id).map(r => LST.tagText(new Date(r.zeit))));
+    const tage = new Set(runden(r => r.person === k.id).map(r => LST.tagText(new Date(r.zeit))));
     return LST.wochenSerie(tage, k.wochenziel);
   }
   const serieText = s => `diese Woche ${s.dieseWoche} von ${s.ziel} Tagen` + (s.wochenInFolge ? ` · ${s.wochenInFolge} ${s.wochenInFolge === 1 ? "Woche" : "Wochen"} in Folge erreicht` : "");
@@ -122,6 +122,12 @@
 
   // ---------- Protokoll und Rekorde ----------
   const kennungNeu = () => Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e9).toString(36);
+  // Runden und Rekorde im gemeinsamen Format der Reihe (R1 a, kern/runden.js): { id, person, zeit, inhalt, stufe, … };
+  // gespeicherte von vor LERN_Session15 (konto, uebung) werden beim Laden umgedeutet (LST.ALTE_FELDER, werkzeug.js).
+  for (const k of ["runden", "rekorde"]) {
+    const l = LST.lies(k, []);
+    if (Array.isArray(l) && l.some(e => e && ("konto" in e || "uebung" in e))) LST.schreibe(k, l.map(e => KERN.runden.umdeuten(e, LST.ALTE_FELDER)));
+  }
   function protokolliere(runde) { const r = LST.lies("runden", []); r.push(runde); LST.schreibe("runden", r); }
   function runden(filter) { return LST.lies("runden", []).filter(filter || (() => true)); }
 
@@ -136,11 +142,11 @@
   // Mit und ohne Rechner getrennt (RE1 a): mit = true/false wählt eine Seite, undefined nimmt beide.
   const passtRechner = (r, mit) => mit === undefined || !!r.mitRechner === mit;
   function bestwert(kontoId, uebung, stufe, mit) {
-    return LST.lies("rekorde", []).filter(r => r.konto === kontoId && r.uebung === uebung && r.stufe === stufe && passtRechner(r, mit))
+    return LST.lies("rekorde", []).filter(r => r.person === kontoId && r.inhalt === uebung && r.stufe === stufe && passtRechner(r, mit))
       .reduce((m, r) => Math.max(m, r.punkte), 0);
   }
   function bestzeit(kontoId, uebung, stufe, mit) {
-    const z = runden(r => r.konto === kontoId && r.uebung === uebung && r.stufe === stufe && !r.endlos && r.gezeigt === 0 && passtRechner(r, mit))
+    const z = runden(r => r.person === kontoId && r.inhalt === uebung && r.stufe === stufe && !r.endlos && r.gezeigt === 0 && passtRechner(r, mit))
       .map(r => r.dauer);
     return z.length ? Math.min(...z) : null;
   }
@@ -280,7 +286,7 @@
 
       // Serie mitten drin verlassen: Stand bis dahin zählt (abgeschaut vom Eulenpfad, Entscheid E1 a dort).
       const zwischenstand = () => {
-        if (endlos && !vorbei && punkte > 0) speichereRekord({ id: rundeId, konto: k.id, zeit: new Date(start).toISOString(), uebung: def.id, stufe: st, niveau, punkte, dauer: sekunden(Date.now() - start), mitRechner: ergebnis.mitRechner, abgebrochen: true });
+        if (endlos && !vorbei && punkte > 0) speichereRekord({ id: rundeId, person: k.id, zeit: new Date(start).toISOString(), inhalt: def.id, stufe: st, niveau, punkte, dauer: sekunden(Date.now() - start), mitRechner: ergebnis.mitRechner, abgebrochen: true });
       };
       const beiVerstecken = () => { if (document.visibilityState === "hidden") zwischenstand(); };
       addEventListener("pagehide", zwischenstand);
@@ -438,9 +444,9 @@
         if (vorbei) return;
         vorbei = true;
         aufraeumen();
-        if (endlos && punkte > 0) speichereRekord({ id: rundeId, konto: k.id, zeit: new Date(start).toISOString(), uebung: def.id, stufe: st, niveau, punkte, dauer: sekunden(Date.now() - start), mitRechner: ergebnis.mitRechner });
+        if (endlos && punkte > 0) speichereRekord({ id: rundeId, person: k.id, zeit: new Date(start).toISOString(), inhalt: def.id, stufe: st, niveau, punkte, dauer: sekunden(Date.now() - start), mitRechner: ergebnis.mitRechner });
         protokolliere({
-          id: rundeId, konto: k.id, zeit: new Date(start).toISOString(), uebung: def.id, fach: fach.id, stufe: st, niveau,
+          id: rundeId, person: k.id, zeit: new Date(start).toISOString(), inhalt: def.id, fach: fach.id, stufe: st, niveau,
           endlos, aufgaben: nr, aufAnhieb: ergebnis.aufAnhieb, fehler: ergebnis.fehler, gezeigt: ergebnis.gezeigt,
           dauer: sekunden(Date.now() - start), zeiten: ergebnis.zeiten, falsch: ergebnis.falsch, liste: ergebnis.liste, mitRechner: ergebnis.mitRechner, gruppe: null,
         });

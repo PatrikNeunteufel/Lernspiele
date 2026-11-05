@@ -12,7 +12,7 @@ const AUSWERTUNG = (() => {
   // „Auf Anhieb“ heisst ohne Fehler und ohne Tipp (Entscheid T1 a, LERN_Session9): Aufgaben mit Fehler stehen in
   // fehlerAufgaben, Aufgaben, die nur ein Tipp brauchte, zählen dazu.
   const mitTippOhneFehler = e => (e.aufgabenZeiten || []).filter(a => a.tipps && !a.versuche && !a.zeitUm).length;
-  const anhieb = e => (e.aufgaben - e.fehlerAufgaben.length - mitTippOhneFehler(e)) / e.aufgaben;
+  const anhieb = e => (e.aufgaben - (e.fehlerAufgaben || []).length - mitTippOhneFehler(e)) / e.aufgaben;
   const mittel = xs => xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null;
   const median = xs => { if (!xs.length) return null; const a = [...xs].sort((x, y) => x - y); return a[Math.floor(a.length / 2)]; };
   const spielVon = id => SPIELE.find(s => s.id === id);
@@ -21,7 +21,7 @@ const AUSWERTUNG = (() => {
   /** Runden zu einem Lernziel (Spiel + zugeordnete Stufen). */
   function rundenZuLernziel(runden, lz) {
     const zuordnung = SPIELE.flatMap(s => s.lernziele.filter(l => l.lz === lz).map(l => ({ spiel: s.id, stufen: l.stufen })));
-    return runden.filter(e => zuordnung.some(z => z.spiel === e.spiel && z.stufen.includes(e.stufe)));
+    return runden.filter(e => zuordnung.some(z => z.spiel === e.inhalt && z.stufen.includes(e.stufe)));
   }
 
   /** Runden zu Sitzungen gruppieren: Lücke > 20 min zwischen Ende und nächstem Ende = neue Sitzung. */
@@ -71,14 +71,14 @@ const AUSWERTUNG = (() => {
     const mitZeiten = runden.filter(e => Array.isArray(e.aufgabenZeiten) && e.aufgabenZeiten.length);
     const ueblich = {};
     for (const e of mitZeiten) {
-      const k = `${e.spiel}|${e.stufe}`;
+      const k = `${e.inhalt}|${e.stufe}`;
       (ueblich[k] = ueblich[k] || []).push(...e.aufgabenZeiten.map(a => a.ms));
     }
     for (const k of Object.keys(ueblich)) ueblich[k] = median(ueblich[k]);
 
     const nachPosition = [];
     for (const e of mitZeiten) {
-      const basis = ueblich[`${e.spiel}|${e.stufe}`] || 1;
+      const basis = ueblich[`${e.inhalt}|${e.stufe}`] || 1;
       e.aufgabenZeiten.forEach((a, i) => {
         const p = (nachPosition[i] = nachPosition[i] || { pos: i + 1, verhaeltnis: [], fehler: [] });
         p.verhaeltnis.push(a.ms / basis);
@@ -89,18 +89,18 @@ const AUSWERTUNG = (() => {
     // Eigener Schnitt „auf Anhieb“ je Spiel und Stufe: Der Befund vergleicht damit, nicht roh — sonst sähe
     // ein schwereres Spiel in der 2. Runde wie nachlassende Konzentration aus (LERN_Session9).
     const schnitt = {};
-    for (const e of mitZeiten) (schnitt[`${e.spiel}|${e.stufe}`] ||= []).push(anhieb(e));
+    for (const e of mitZeiten) (schnitt[`${e.inhalt}|${e.stufe}`] ||= []).push(anhieb(e));
     for (const kk of Object.keys(schnitt)) schnitt[kk] = mittel(schnitt[kk]);
 
     const nachRunde = [];
     for (const s of sitzungen(mitZeiten)) {
       s.forEach((e, i) => {
-        const basis = ueblich[`${e.spiel}|${e.stufe}`] || 1;
+        const basis = ueblich[`${e.inhalt}|${e.stufe}`] || 1;
         const idx = Math.min(i, 3); // 1., 2., 3., 4.+ Runde
         const r = (nachRunde[idx] = nachRunde[idx] || { runde: idx === 3 ? "4.+" : `${idx + 1}.`, verhaeltnis: [], anhieb: [], relativ: [] });
         r.verhaeltnis.push(median(e.aufgabenZeiten.map(a => a.ms)) / basis);
         r.anhieb.push(anhieb(e));
-        r.relativ.push(anhieb(e) - schnitt[`${e.spiel}|${e.stufe}`]);
+        r.relativ.push(anhieb(e) - schnitt[`${e.inhalt}|${e.stufe}`]);
       });
     }
 
@@ -142,7 +142,7 @@ const AUSWERTUNG = (() => {
    * runden: die Runden dieses Kindes (LS.protokoll(), nach Name gefiltert); fokus: seine Fokus-Lernziele.
    */
   function bedarf(spielId, stufe, runden, fokus = [], jetzt = Date.now()) {
-    const rs = runden.filter(e => e.spiel === spielId && e.stufe === stufe);
+    const rs = runden.filter(e => e.inhalt === spielId && e.stufe === stufe);
     let g = 2;
     if (rs.length) {
       const letzte = rs.slice(-3);
@@ -173,7 +173,7 @@ const AUSWERTUNG = (() => {
 
     // 1. Wiederholen: Spiel+Stufe mit schwacher Quote in den letzten Runden
     const gruppen = {};
-    for (const e of runden) (gruppen[`${e.spiel}|${e.stufe}`] = gruppen[`${e.spiel}|${e.stufe}`] || []).push(e);
+    for (const e of runden) (gruppen[`${e.inhalt}|${e.stufe}`] = gruppen[`${e.inhalt}|${e.stufe}`] || []).push(e);
     for (const [k, rs] of Object.entries(gruppen)) {
       const [spiel, stufe] = k.split("|");
       const letzte = rs.slice(-3);
@@ -206,7 +206,7 @@ const AUSWERTUNG = (() => {
       if (tage >= 7 && mittel(rs.slice(-3).map(anhieb)) >= QUOTE_UEBEN) {
         const e = rs[rs.length - 1];
         v.push({ art: "auffrischen", prio: 4, titel: `🌤 Auffrischen: ${lz.lz} ${lz.text}`,
-          text: `Sass gut, ist aber ${tage} Tage her. Eine kurze Runde hilft, es nicht zu vergessen.`, link: link(e.spiel, e.stufe) });
+          text: `Sass gut, ist aber ${tage} Tage her. Eine kurze Runde hilft, es nicht zu vergessen.`, link: link(e.inhalt, e.stufe) });
       }
     }
 
@@ -371,7 +371,7 @@ const AUSWERTUNG = (() => {
    * profil: für die Klasse des Kindes (Niveau der gespielten Stufen).
    */
   function fazit(runden, profil = {}, jetzt = Date.now(), meldungen = []) {
-    const rs = [...runden].filter(e => e.aufgaben > 0 && spielVon(e.spiel)).sort((a, b) => a.zeit.localeCompare(b.zeit));
+    const rs = [...runden].filter(e => e.aufgaben > 0 && spielVon(e.inhalt)).sort((a, b) => a.zeit.localeCompare(b.zeit));
     const gesamt = summiere(rs);
     if (gesamt.aufgaben < FAZIT.minAufgaben) {
       return { genug: false, kurz: `Für ein Fazit braucht es mindestens ${FAZIT.minAufgaben} gelöste Aufgaben — bisher ${gesamt.aufgaben}.`, abschnitte: [] };
@@ -380,14 +380,14 @@ const AUSWERTUNG = (() => {
     // Je Thema und je Fach
     const jeThema = new Map(), jeFach = new Map();
     for (const e of rs) {
-      const t = themaVon(e.spiel);
+      const t = themaVon(e.inhalt);
       if (!t) continue;
       (jeThema.get(t.id) || jeThema.set(t.id, { t, runden: [] }).get(t.id)).runden.push(e);
       (jeFach.get(t.fach) || jeFach.set(t.fach, { fach: t.fach, runden: [] }).get(t.fach)).runden.push(e);
     }
     const themen = [...jeThema.values()].map(x => ({ ...x, ...summiere(x.runden) }));
     const faecher = [...jeFach.values()].map(x => ({ ...x, ...summiere(x.runden) }));
-    const bereich = name => summiere(rs.filter(e => BEREICHE[name].includes(spielVon(e.spiel)?.thema)));
+    const bereich = name => summiere(rs.filter(e => BEREICHE[name].includes(spielVon(e.inhalt)?.thema)));
 
     // ----- Menge -----
     const menge = [];
@@ -421,7 +421,7 @@ const AUSWERTUNG = (() => {
     // verwechselte ein Wechsel zu schwereren Spielen sich mit einem Rückschritt.
     const fruehSpaet = { frueh: [], spaet: [] };
     const jeSpielStufe = {};
-    for (const e of rs) (jeSpielStufe[`${e.spiel}|${e.stufe}`] ||= []).push(e);
+    for (const e of rs) (jeSpielStufe[`${e.inhalt}|${e.stufe}`] ||= []).push(e);
     for (const g of Object.values(jeSpielStufe).filter(g => g.length >= 4)) {
       const h = Math.floor(g.length / 2);
       fruehSpaet.frueh.push(...g.slice(0, h));
@@ -445,7 +445,7 @@ const AUSWERTUNG = (() => {
     // Niveau: gespielte Stufen gegen die Klasse des Kindes (Stufe 1 = eine Klasse tiefer, 5 und 6 = höher)
     const klasse = LS.klasseVon(profil);
     if (klasse != null) {
-      const stufenKlasse = e => (spielVon(e.spiel).klasse || 0) + ({ s1: -1, s5: 1, s6: 1 }[e.stufe] || 0);
+      const stufenKlasse = e => (spielVon(e.inhalt).klasse || 0) + ({ s1: -1, s5: 1, s6: 1 }[e.stufe] || 0);
       const tiefer = rs.filter(e => stufenKlasse(e) < klasse).length, hoeher = rs.filter(e => stufenKlasse(e) > klasse).length;
       if (tiefer / rs.length >= 0.5) qualitaet.push(`Geübt wird meist unter der eigenen Klasse (${pz(tiefer / rs.length)} der Runden) — die Zahlen sind deshalb eher zu gut.`);
       else if (hoeher / rs.length >= 0.5) qualitaet.push(`Geübt wird meist über der eigenen Klasse (${pz(hoeher / rs.length)} der Runden) — tiefere Werte sind dort normal.`);
@@ -480,10 +480,10 @@ const AUSWERTUNG = (() => {
     // a) Ausreisser im eigenen Fach (beide Richtungen). „Sonst unsicher“ nur, wenn der Rest des Fachs aus
     //    mindestens zwei Themen besteht — sonst wäre es bloss das Spiegelbild von „X fällt ab“.
     for (const x of belastbar) {
-      const restRunden = rs.filter(e => themaVon(e.spiel)?.fach === x.t.fach && themaVon(e.spiel)?.id !== x.t.id);
+      const restRunden = rs.filter(e => themaVon(e.inhalt)?.fach === x.t.fach && themaVon(e.inhalt)?.id !== x.t.id);
       const rest = summiere(restRunden);
       if (!genugDaten(rest)) continue;
-      const restThemen = new Set(restRunden.map(e => themaVon(e.spiel).id)).size;
+      const restThemen = new Set(restRunden.map(e => themaVon(e.inhalt).id)).size;
       if (rest.quote >= FAZIT.stark - 0.05 && rest.quote - x.quote >= FAZIT.ausreisser) {
         auff.push(`In ${x.t.fach} sonst sicher (${pz(rest.quote)}), aber im Thema „${x.t.name}“ deutlich schwächer (${pz(x.quote)}) — hier gezielt üben.`);
       } else if (restThemen >= 2 && rest.quote <= FAZIT.schwach + 0.1 && x.quote - rest.quote >= FAZIT.ausreisser) {
@@ -507,8 +507,8 @@ const AUSWERTUNG = (() => {
     // c) Zusammenhänge über die Runden: Leistung gegenüber dem eigenen Schnitt im selben Spiel und derselben Stufe
     if (rs.length >= FAZIT.minRundenKorrelation) {
       const basis = {};
-      for (const e of rs) (basis[`${e.spiel}|${e.stufe}`] ||= []).push(anhieb(e));
-      const relVon = e => anhieb(e) - mittel(basis[`${e.spiel}|${e.stufe}`]);
+      for (const e of rs) (basis[`${e.inhalt}|${e.stufe}`] ||= []).push(anhieb(e));
+      const relVon = e => anhieb(e) - mittel(basis[`${e.inhalt}|${e.stufe}`]);
       const rel = rs.map(relVon);
       const sitz = sitzungen(rs); // sortiert wie rs
       const imSitzung = sitz.flatMap(s => s.map((_, i) => i + 1));

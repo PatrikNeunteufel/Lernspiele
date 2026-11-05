@@ -93,7 +93,7 @@ const ERFOLGE = (() => {
     const je = {};
     for (const e of runden) {
       if (e.mix || (nurDrei && !dreiSterne(e))) continue;
-      const s = (je[e.spiel] ||= {});
+      const s = (je[e.inhalt] ||= {});
       if (!s[e.stufe]) s[e.stufe] = e.zeit;
     }
     const fertig = Object.values(je).filter(s => Object.keys(s).length >= 6).map(s => Object.values(s).sort().pop()).sort();
@@ -119,17 +119,17 @@ const ERFOLGE = (() => {
     { id: "meister", bild: "🎓", titel: "Spiel-Meister", stufen: [1, 3, 5, 10, 25],
       text: n => `In ${mal(n, "einem Spiel", "Spielen")} alle sechs Stufen mit drei Sternen.`, pruefe: (k, n) => zeiten(alleStufen(k.runden, true), n) },
     { id: "entdecker", bild: "🧭", titel: "Entdecker", stufen: [10, 25, 50, 100, 150],
-      text: n => `${n} verschiedene Spiele gespielt.`, pruefe: (k, n) => verschiedene(k.runden, e => e.spiel, n) },
+      text: n => `${n} verschiedene Spiele gespielt.`, pruefe: (k, n) => verschiedene(k.runden, e => e.inhalt, n) },
     { id: "vielseitig", bild: "🎨", titel: "Vielseitig", stufen: [2, 3, 4, 5, 7],
-      text: n => `Spiele aus ${n} verschiedenen Fächern gespielt.`, pruefe: (k, n) => verschiedene(k.runden, e => k.fachVon(e.spiel), n) },
+      text: n => `Spiele aus ${n} verschiedenen Fächern gespielt.`, pruefe: (k, n) => verschiedene(k.runden, e => k.fachVon(e.inhalt), n) },
     { id: "mathe-ass", bild: "🔢", titel: "Mathe-Ass", stufen: [10, 25, 50, 100, 250],
-      text: n => `${n} Mathe-Runden mit drei Sternen.`, pruefe: (k, n) => zaehler(k.runden.filter(e => dreiSterne(e) && k.fachVon(e.spiel) === "Mathe"), n) },
+      text: n => `${n} Mathe-Runden mit drei Sternen.`, pruefe: (k, n) => zaehler(k.runden.filter(e => dreiSterne(e) && k.fachVon(e.inhalt) === "Mathe"), n) },
     { id: "deutsch-ass", bild: "📚", titel: "Deutsch-Ass", stufen: [10, 25, 50, 100, 250],
-      text: n => `${n} Deutsch-Runden mit drei Sternen.`, pruefe: (k, n) => zaehler(k.runden.filter(e => dreiSterne(e) && k.fachVon(e.spiel) === "Deutsch"), n) },
+      text: n => `${n} Deutsch-Runden mit drei Sternen.`, pruefe: (k, n) => zaehler(k.runden.filter(e => dreiSterne(e) && k.fachVon(e.inhalt) === "Deutsch"), n) },
     { id: "forscher", bild: "🔬", titel: "Forscherin, Forscher", stufen: [10, 25, 50, 100, 250],
-      text: n => `${n} NMG-Runden mit drei Sternen.`, pruefe: (k, n) => zaehler(k.runden.filter(e => dreiSterne(e) && k.fachVon(e.spiel) === "NMG"), n) },
+      text: n => `${n} NMG-Runden mit drei Sternen.`, pruefe: (k, n) => zaehler(k.runden.filter(e => dreiSterne(e) && k.fachVon(e.inhalt) === "NMG"), n) },
     { id: "sprachtalent", bild: "🗣️", titel: "Sprachtalent", stufen: [10, 25, 50, 100, 250],
-      text: n => `${n} Runden Englisch oder Französisch mit drei Sternen.`, pruefe: (k, n) => zaehler(k.runden.filter(e => dreiSterne(e) && ["Englisch", "Französisch"].includes(k.fachVon(e.spiel))), n) },
+      text: n => `${n} Runden Englisch oder Französisch mit drei Sternen.`, pruefe: (k, n) => zaehler(k.runden.filter(e => dreiSterne(e) && ["Englisch", "Französisch"].includes(k.fachVon(e.inhalt))), n) },
     { id: "endlos", bild: "♾️", titel: "Endlos-Läufer", stufen: [10, 20, 30, 50, 100],
       text: n => `${n} Aufgaben am Stück im Endlos-Modus.`, pruefe: (k, n) => endlosBis(k.rekorde, n) },
     { id: "mix", bild: "🎲", titel: "Mix-Meister", stufen: [5, 10, 25, 50, 100],

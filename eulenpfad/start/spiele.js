@@ -247,8 +247,8 @@ function zeichneSpiele(box, neu) {
   // Stufe (nach einer Endlos-Runde wieder endlos). Runden im Zufallsmix zählen nicht — dort hat der Mix gewählt.
   if (!spielSuche.trim()) {
     const zuletzt = [
-      ...protokoll.filter(e => !e.mix).map(e => ({ spiel: e.spiel, stufe: e.stufe, zeit: e.zeit, endlos: false })),
-      ...LS.rekorde().filter(e => e.name === name && !e.mix).map(e => ({ spiel: e.spiel, stufe: e.stufe, zeit: e.zeit, endlos: true })),
+      ...protokoll.filter(e => !e.mix).map(e => ({ spiel: e.inhalt, stufe: e.stufe, zeit: e.zeit, endlos: false })),
+      ...LS.rekorde().filter(e => e.name === name && !e.mix).map(e => ({ spiel: e.inhalt, stufe: e.stufe, zeit: e.zeit, endlos: true })),
     ].sort((a, b) => (a.zeit < b.zeit ? 1 : -1));
     const gesehen = new Set();
     const weiter = [];

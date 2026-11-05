@@ -166,9 +166,9 @@ const LS = (() => {
   //   aufstiege: [{ von, nach, zeit }] — Klassenaufstiege durch die Aufsicht (LERN_Session14); aufstiegGesehen: ISO des
   //     zuletzt gefeierten Aufstiegs (das Kind hat die Nachricht gesehen)
   //   reihenfolge: { global, spiele: { <spiel-id>: … } } mit "stufe" | "geordnet" | "gemischt" }
-  // Protokoll: je gespielte Runde ein Eintrag
-  // { name, zeit (ISO), spiel, stufe, sterne, fehler, aufgaben, dauer (s), geordnet,
-  //   fehlerAufgaben: [{ text, loesung, versuche, geloest }] }
+  // Protokoll: je gespielte Runde ein Eintrag im gemeinsamen Format (R1 a, kern/runden.js)
+  // { id, person, name (Anzeige), zeit (ISO), inhalt (Spiel), stufe, sterne, fehler, aufgaben, dauer (s), geordnet,
+  //   fehlerAufgaben: [{ text, loesung, versuche, geloest }] } — bis LERN_Session15 „spiel“ statt „inhalt“, ohne id
 
   //   timer: { an, faktor, spiele: { <spiel-id>: { an (null = wie global), sekunden: { s1: … } } } }
   //   rolle: "lernend" | "aufsicht" (Entscheid L2 a; bis LERN_Session15 „kind“, P2 a) — die Aufsicht meldet sich mit PIN an, verwaltet
@@ -244,7 +244,7 @@ const LS = (() => {
    */
   function zeitVorschlag(name, spiel, stufe) {
     const ms = protokoll()
-      .filter(e => e.name === name && e.spiel === spiel && e.stufe === stufe)
+      .filter(e => e.name === name && e.inhalt === spiel && e.stufe === stufe)
       .flatMap(e => (e.aufgabenZeiten || []).filter(a => a.geloest && a.versuche === 0 && !a.zeitUm).map(a => a.ms))
       .sort((a, b) => a - b);
     if (ms.length < 5) return null;
@@ -382,12 +382,23 @@ const LS = (() => {
         try { localStorage.removeItem("lernspiele:profile"); } catch { /* egal */ }
       }
     }
+    // Runden und Rekorde ins gemeinsame Format (R1 a, LERN_Session15): spiel → inhalt, Kennung je Eintrag
+    for (const k of ["protokoll", "rekorde"]) {
+      const l = lies(k, []);
+      if (Array.isArray(l) && l.some(e => e && (!e.id || "spiel" in e))) schreibe(k, l.map(e => KERN.runden.umdeuten(e, { spiel: "inhalt" })));
+    }
     for (const k of ["protokoll", "rekorde", "meldungen"]) {
       const l = lies(k, []);
       const neu = Array.isArray(l) ? kennungNachtragen(l) : null;
       if (neu) schreibe(k, neu);
     }
   })();
+  // Schema der Felder, die nur der Eulenpfad in Runden und Rekorden führt (KERN.runden.maengel, Befund D14)
+  const RUNDEN_PRUEFUNG = {
+    pflicht: ["aufgaben", "fehler", "dauer"],
+    zusatz: { name: "text", sterne: "zahlOderNull", fehlerAufgaben: "liste", aufgabenZeiten: "liste", optionen: "objekt", mix: "text" },
+  };
+  const REKORD_PRUEFUNG = { pflicht: ["dauer"], zusatz: { name: "text", spiele: "liste" } };
   const spielerListe = () => Object.keys(profile());
   function profil(name) { return { ...LEERES_PROFIL, ...(profile()[name] || {}) }; }
   const istAufsicht = name => !!name && profile()[name]?.rolle === "aufsicht";
@@ -676,7 +687,7 @@ const LS = (() => {
   const geloescht = () => ({ personen: {}, spieler: {}, runden: [], ...lies("geloescht", {}) });
   const vermerkZeit = (e, g) => [e.person && g.personen[e.person], g.spieler[e.name]].filter(Boolean).sort().pop() || "";
   const rundeGeloescht = (e, g) => (vermerkZeit(e, g) && e.zeit <= vermerkZeit(e, g))
-    || g.runden.some(r => (r.person && e.person ? r.person === e.person : r.name === e.name) && (!r.spiel || r.spiel === e.spiel) && e.zeit <= r.bis);
+    || g.runden.some(r => (r.person && e.person ? r.person === e.person : r.name === e.name) && (!r.spiel || r.spiel === e.inhalt) && e.zeit <= r.bis);
   /** Jüngster Zeitstempel eines Profils (leer bei Profilen von vor LERN_Session6). */
   const profilStand = p => Object.values(p?.geaendert || {}).reduce((a, b) => (b > a ? b : a), "");
 
@@ -702,7 +713,7 @@ const LS = (() => {
     const g = geloescht();
     g.runden.push({ person: p?.id, name, spiel: spielId, bis: new Date().toISOString() });
     schreibe("geloescht", g);
-    const bleibt = e => !(p ? gehoert(e, p) : e.name === name) || (spielId && e.spiel !== spielId);
+    const bleibt = e => !(p ? gehoert(e, p) : e.name === name) || (spielId && e.inhalt !== spielId);
     schreibe("protokoll", protokoll().filter(bleibt));
     schreibe("rekorde", rekorde().filter(bleibt));
   }
@@ -757,27 +768,17 @@ const LS = (() => {
     };
     const mitKennung = e => { const p = e && kennungVon(e); return p ? { ...e, person: p.id, name: p.name } : null; };
     schreibe("geloescht", g);
-    const lebt = e => e && e.person && e.zeit && !rundeGeloescht(e, g);
-    const schluessel = e => `${e.person}|${e.zeit}|${e.spiel}|${e.stufe}`;
-
-    const runden = protokoll().map(mitKennung).filter(lebt);
-    const bekannt = new Set(runden.map(schluessel));
-    const neu = [];
-    for (const roh of daten.protokoll || []) {
-      const e = roh && roh.zeit ? mitKennung(roh) : null;
-      if (lebt(e) && !bekannt.has(schluessel(e))) { neu.push(e); bekannt.add(schluessel(e)); }
-    }
-    schreibe("protokoll", [...runden, ...neu].sort((a, b) => (a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0)));
-
-    const rek = new Map(rekorde().map(mitKennung).filter(lebt).map(e => [schluessel(e), e]));
-    let neueRekorde = 0;
-    for (const roh of daten.rekorde || []) {
-      const e = roh && roh.zeit ? mitKennung(roh) : null;
-      if (!lebt(e)) continue;
-      const da = rek.get(schluessel(e));
-      if (!da || (e.punkte || 0) > (da.punkte || 0)) { rek.set(schluessel(e), e); neueRekorde++; }
-    }
-    schreibe("rekorde", [...rek.values()]);
+    // Runden und Rekorde über den Kern (R1 a): nach Kennung, fremde geprüft (D14); ältere Dateien (spiel, ohne
+    // Kennung) werden umgedeutet; ein Löschvermerk hält Gelöschtes fern.
+    const lebt = e => !rundeGeloescht(e, g);
+    const eigene = l => l.map(e => mitKennung(e) || e);
+    const fremdeEintraege = l => (Array.isArray(l) ? l : []).filter(e => e && typeof e === "object")
+      .map(e => mitKennung(KERN.runden.umdeuten(e, { spiel: "inhalt" }))).filter(Boolean);
+    const zr = KERN.runden.zusammenfuehren(eigene(protokoll()), fremdeEintraege(daten.protokoll), { art: "runde", pruefung: RUNDEN_PRUEFUNG, behalten: lebt });
+    schreibe("protokoll", zr.eintraege);
+    const zk = KERN.runden.zusammenfuehren(eigene(rekorde()), fremdeEintraege(daten.rekorde), { art: "rekord", pruefung: REKORD_PRUEFUNG, behalten: lebt });
+    schreibe("rekorde", zk.eintraege);
+    const neu = { length: zr.neu }, neueRekorde = zk.neu + zk.ersetzt;
     PERSONEN.speichere(personen);
 
     let neueFreigabe = false;
@@ -790,17 +791,20 @@ const LS = (() => {
     const eigeneMeldungen = meldungen().map(m => (m && m.person && z.kennungen[m.person] ? { ...m, person: umbiegen(m.person) } : m));
     if (eigeneMeldungen.some((m, i) => m !== meldungen()[i])) schreibe("meldungen", eigeneMeldungen);
     const neueMeldungen = meldungenZusammenfuehren((daten.meldungen || []).map(m => (m && !istAnregung(m) && (m.person || m.name) ? mitKennung(m) || m : m)));
-    return { runden: neu.length, kinder: z.neu + neueNurRunden, rekorde: neueRekorde, profile: z.geaendert, freigabe: neueFreigabe, meldungen: neueMeldungen };
+    return { runden: neu.length, kinder: z.neu + neueNurRunden, rekorde: neueRekorde, profile: z.geaendert, freigabe: neueFreigabe,
+      meldungen: neueMeldungen, abgewiesen: zr.abgewiesen + zk.abgewiesen };
   }
 
   /**
-   * Alles, was ein Gerät für den Abgleich weitergibt: wie Sichern, aber vollständig und ohne PIN. Version 3 bringt
-   * die Personen mit Kennung; profile (nach Namen) steht für Geräte mit älterem Stand weiter dabei (Übergang).
+   * Alles, was ein Gerät für den Abgleich weitergibt: wie Sichern, aber vollständig und ohne PIN. format
+   * „eulenpfad-daten“ Version 3 (LERN_Session15): Personen mit Kennung (P1 a), Runden und Rekorde im gemeinsamen Format
+   * (R1 a). Ältere Dateien (Version 1, 2: profile nach Namen, spiel) liest LS.zusammenfuehren weiter. Ein Gerät mit
+   * älterem Stand lädt beim nächsten Öffnen der Seite die neue Fassung; ein noch offener alter Tab gleicht erst nach
+   * dem Neuladen wieder richtig ab.
    */
   function abgleichDaten() {
     const personen = PERSONEN.alle().map(ohneGeheimnis);
-    const alsProfil = p => { const { id, name, angelegt, geaendert, frueher, ...rest } = p; return { ...rest, geaendert: { ...(geaendert || {}), angelegt } }; };
-    return { version: 3, gesichert: new Date().toISOString(), personen, profile: Object.fromEntries(personen.map(p => [p.name, alsProfil(p)])),
+    return { format: "eulenpfad-daten", version: 3, gesichert: new Date().toISOString(), personen,
       protokoll: protokoll(), rekorde: rekorde(), geloescht: geloescht(), freigabe: lies("freigabe", null),
       freigabeStand: lies("freigabeStand", null), meldungen: meldungen() };
   }
@@ -1182,7 +1186,12 @@ const LS = (() => {
 
   const protokoll = () => lies("protokoll", []);
   /** Runde ins Protokoll; mit der Kennung der Person (P1 a), der Name bleibt als Kopie für die Anzeige. */
-  const mitPerson = eintrag => { const p = person(eintrag?.name); return p ? { ...eintrag, person: p.id, name: p.name } : eintrag; };
+  // Kennung (R1 a) und Person (P1 a); der Name bleibt als Kopie für die Anzeige.
+  const mitPerson = eintrag => {
+    const p = person(eintrag?.name);
+    const e = { ...eintrag, id: eintrag?.id || KERN.runden.neueId() };
+    return p ? { ...e, person: p.id, name: p.name } : e;
+  };
   function protokolliere(eintrag) { schreibe("protokoll", [...protokoll(), mitPerson(eintrag)]); }
 
   // ---------- Endlos-Rekorde (Vorgabe Patrik 2026-10-31) ----------
@@ -1197,11 +1206,11 @@ const LS = (() => {
   /** Rekord anhängen; ersetzt: ein früher gespeicherter Zwischenstand derselben Runde, der wegfällt. */
   function speichereRekord(eintrag, ersetzt = null) {
     schreibe("rekorde", [...rekorde().filter(e => e !== ersetzt && !(ersetzt && e.name === ersetzt.name && e.zeit === ersetzt.zeit
-      && e.spiel === ersetzt.spiel && e.stufe === ersetzt.stufe)), mitPerson(eintrag)]);
+      && e.inhalt === ersetzt.inhalt && e.stufe === ersetzt.stufe) && (!eintrag.id || e.id !== eintrag.id)), mitPerson(eintrag)]);
   }
   /** Stufen, die den Endlos-Modus anbieten (Katalog: endlos). */
   const endlosStufen = spielId => katalogEintrag(spielId)?.endlos || [];
-  const gleicherModus = (e, spiel, stufe, mitTimer) => e.spiel === spiel && e.stufe === stufe && !!e.timer === !!mitTimer;
+  const gleicherModus = (e, spiel, stufe, mitTimer) => e.inhalt === spiel && e.stufe === stufe && !!e.timer === !!mitTimer;
   /**
    * Endlos mit Timer (Entscheide Patrik F1 a, F2 a, 2026-10-31): Die Zeit nähert sich einem Boden, der aus
    * den Handgriffen der Aufgabe folgt (ctx.schritte): grundzeit + schritte × jeSchritt. Wartezeit zählt nicht
@@ -1255,7 +1264,7 @@ const LS = (() => {
 
   function besteSterne(name, spiel, stufe) {
     return protokoll()
-      .filter(e => e.name === name && e.spiel === spiel && e.stufe === stufe)
+      .filter(e => e.name === name && e.inhalt === spiel && e.stufe === stufe)
       .reduce((m, e) => Math.max(m, e.sterne), 0);
   }
 
@@ -3123,7 +3132,7 @@ const LS = (() => {
         protokolliere({
           name,
           zeit: new Date().toISOString(),
-          spiel: def.id,
+          inhalt: def.id,
           stufe: stufe.id,
           sterne,
           fehler,
@@ -3176,7 +3185,9 @@ const LS = (() => {
         if (rundeGespeichert) return rekordVorher;
         if (rekordVorher === null) rekordVorher = besterRekord(name, def.id, stufe.id, mitTimer);
         const eintrag = {
-          name, zeit: new Date().toISOString(), spiel: def.id, stufe: stufe.id, timer: mitTimer, punkte: geschafft,
+          // eine Kennung je Serie: der Endstand ersetzt den Zwischenstand auch auf anderen Geräten (R1 a)
+          id: zwischenstand?.id || KERN.runden.neueId(),
+          name, zeit: new Date().toISOString(), inhalt: def.id, stufe: stufe.id, timer: mitTimer, punkte: geschafft,
           dauer: Math.round((Date.now() - beginn) / 1000),
           ...(allesGeschafft ? { alles: true } : {}), ...(test ? { test: true } : {}), ...(hilfen ? { hilfe: hilfen } : {}),
           ...(abgebrochen ? { abgebrochen: true } : {}),

@@ -194,8 +194,10 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 | `aufsichten` | Liste der Aufsichten (5d), PIN und Code nur als Hash |
 | `aktiv` | zuletzt gewähltes Konto (Id) |
 | `gast` | Gastkonto ohne Anmeldung: `{ id: "gast", name, niveau: { <fach>: n }, lehrplan: { land, kanton }, pruefungsziel }` |
-| `runden` | je Runde `{ id, konto, zeit, uebung, fach, stufe, niveau, endlos, aufgaben, aufAnhieb, fehler, gezeigt, dauer, zeiten, falsch, liste, gruppe }`; `liste` je Aufgabe `{ lp, versuche, gezeigt }` (Grundlage für den Kompetenzstand) |
-| `rekorde` | je Serie `{ id, konto, zeit, uebung, stufe, niveau, punkte, dauer, abgebrochen? }` |
+| `personen` | Jugendliche und Aufsichten (`KERN.person`, 5d); früher `konten` und `aufsichten`, beim Laden umgezogen |
+| `runden` | je Runde im gemeinsamen Format (R1 a, `KERN.runden`) `{ id, person, zeit, inhalt, fach, stufe, niveau, endlos, aufgaben, aufAnhieb, fehler, gezeigt, dauer, zeiten, falsch, liste, mitRechner, gruppe }` (bis LERN_Session15 `konto`, `uebung`; beim Laden umgedeutet); `liste` je Aufgabe `{ lp, versuche, gezeigt }` (Grundlage für den Kompetenzstand) |
+| `rekorde` | je Serie `{ id, person, zeit, inhalt, stufe, niveau, punkte, dauer, mitRechner, abgebrochen? }` |
+| `freigabe`, `freigabeStand` | Freigabe der Übungen auf diesem Gerät durch die Aufsicht (`KERN.freigabe`) |
 | `gestellt` | zuletzt gestellte Kennungen je `konto/uebung/stufe/niveau` (höchstens 30) |
 | `einstellungen` | `{ dezimal?, rechner? }`, nur von einer angemeldeten Aufsicht gesetzt (5d) |
 

@@ -91,9 +91,9 @@
   // ---------- angemeldet ----------
   function kontoZeile(a, k) {
     const grenze = new Date(Date.now() - (TAGE - 1) * 864e5).toISOString().slice(0, 10);
-    const r = LST.runden(x => x.konto === k.id);
+    const r = LST.runden(x => x.person === k.id);
     const tage = new Set(r.map(x => (x.zeit || "").slice(0, 10)).filter(t => t >= grenze)).size;
-    const gespielt = KAT.UEBUNGEN.filter(u => r.some(x => x.uebung === u.id));
+    const gespielt = KAT.UEBUNGEN.filter(u => r.some(x => x.inhalt === u.id));
     const sicher = gespielt.reduce((s, u) => s + u.stufen.filter(st => LST.kompetenzstand(k.id, u.id, st).stand.startsWith("sicher")).length, 0);
     const stufen = gespielt.reduce((s, u) => s + u.stufen.length, 0);
     const klasse = (KO.KLASSEN.find(x => x.id === String(k.klasse)) || {}).name;

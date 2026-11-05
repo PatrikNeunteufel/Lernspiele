@@ -80,9 +80,12 @@ const DA = require(path.join(APP, "gemeinsam", "daten.js"));
   gleich(KO.mitleser(mia.id).verbunden.map(a => a.art), ["lehrperson"], "Jugendliche sieht, wer mitliest");
 
   // Sichern und Einlesen (D4, D5)
-  LST.schreibe("runden", [{ id: "r1", konto: mia.id, zeit: "2026-11-05T08:00:00.000Z", uebung: "brueche", stufe: "g", aufgaben: 8, fehler: 1, dauer: 120, liste: [] }]);
+  LST.schreibe("runden", [{ id: "r1", person: mia.id, zeit: "2026-11-05T08:00:00.000Z", inhalt: "brueche", stufe: "g", aufgaben: 8, fehler: 1, dauer: 120, liste: [] }]);
   const sich = DA.sichern([mia.id]);
   gleich([sich.konten.length, "pin" in sich.konten[0], "aufsicht" in sich.konten[0], sich.runden.length], [1, false, false, 1], "Sicherung ohne PIN und Verbindungen");
+  gleich([sich.version, sich.runden[0].person === mia.id, sich.runden[0].inhalt], [2, true, "brueche"], "Sicherung Version 2 im gemeinsamen Format (R1 a)");
+  // gleiche Datei nochmals: nichts neu (Version 2 liest sich selbst)
+  gleich(DA.einlesen(JSON.parse(JSON.stringify(sich))).runden, 0, "eigene Sicherung zweimal: nichts doppelt");
   const stand = () => JSON.stringify([localStorage.getItem("lernsteig:personen"), localStorage.getItem("lernsteig:runden"), localStorage.getItem("lernsteig:rekorde")]);
   await wirft(() => DA.einlesen({ format: "etwas", version: 1 }), "fremde Datei", "keine Sicherung");
   await wirft(() => DA.einlesen({ format: DA.FORMAT, version: 1, runden: "abc" }), "beschädigte Liste", "beschädigt");
@@ -95,10 +98,11 @@ const DA = require(path.join(APP, "gemeinsam", "daten.js"));
   gleich(stand(), vorher, "kaputte Datei ändert den Speicher nicht");
   // danach geht ein gutes Einlesen weiter (früher vergiftete eine kaputte Runde jedes weitere Einlesen)
   const gut = DA.einlesen({ format: DA.FORMAT, version: 1, konten: [{ id: "k-ben", name: "Ben", geboren: "2011-02", klasse: "9", erstellt: T, geaendert: T }],
-    runden: [{ id: "r2", konto: "k-ben", zeit: "2026-11-05T10:00:00.000Z", uebung: "terme", stufe: "j", aufgaben: 8, liste: [] }] });
+    runden: [{ id: "r2", konto: "k-ben", zeit: "2026-11-05T10:00:00.000Z", uebung: "terme", stufe: "j", aufgaben: 8, dauer: 90, liste: [] }] });
   gleich([gut.konten, gut.runden, gut.neu], [1, 1, ["k-ben"]], "ältere Sicherung umgedeutet und eingelesen");
   gleich(KO.finde("k-ben").geboren, "2011-02", "Geburtsdatum ohne Tag bleibt (B3)");
-  const gast = DA.einlesen({ format: DA.FORMAT, version: 1, runden: [{ id: "r-gast", konto: "gast", zeit: "2026-11-05T11:00:00.000Z", uebung: "zufall", stufe: "f", aufgaben: 8, liste: [] }] });
+  const gast = DA.einlesen({ format: DA.FORMAT, version: 1, runden: [{ id: "r-gast", konto: "gast", zeit: "2026-11-05T11:00:00.000Z", uebung: "zufall", stufe: "f", aufgaben: 8, dauer: 60, liste: [] }] });
+  gleich(LST.lies("runden", []).find(r => r.id === "r-gast")?.inhalt, "zufall", "Version 1 umgedeutet: uebung → inhalt");
   gleich(gast.runden, 1, "Runden des Gastkontos werden eingelesen");
   // D5: eine Datei mit der Kennung eines Kontos, das schon auf dem Gerät ist, verbindet nicht
   KO.aufsichtAbmelden(); await KO.aufsichtAnmelden(vater.id, "5555");

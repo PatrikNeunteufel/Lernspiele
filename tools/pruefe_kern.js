@@ -15,6 +15,7 @@ require(path.join(WURZEL, "kern", "geheimnis.js"));
 require(path.join(WURZEL, "kern", "person.js"));
 require(path.join(WURZEL, "kern", "freigabe.js"));
 require(path.join(WURZEL, "kern", "suche.js"));
+require(path.join(WURZEL, "kern", "runden.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -377,6 +378,39 @@ console.log("el.js");
     gleich(mitP[0].wert, mitP[1].wert * 1.5, "Faktor 1 + 0.5 · Passung");
     const ae = S.aehnlich("a", E, { vergleich: (e, x) => (x.id === "c" ? null : { wert: x.id === "b" ? 2 : 0, grund: "gleich" }) });
     gleich(ae.map(x => `${x.id}:${x.wert}`).join(), "b:2", "aehnlich ohne sich selbst, ohne Unähnliche");
+  }
+
+  // ---------- Runden und Rekorde ----------
+  console.log("runden.js");
+  {
+    const RU = KERN.runden;
+    gleich(RU.fingerabdruck("abc"), RU.fingerabdruck("abc"), "Fingerabdruck fest");
+    gleich(RU.fingerabdruck({ a: 1 }) === RU.fingerabdruck({ a: 2 }), false, "Fingerabdruck verschieden");
+    gleich(/^r-[a-z0-9]+-[0-9a-f]{10}$/.test(RU.neueId()), true, "neue Kennung r-…");
+    const gut = { id: "r-1", person: "p-1", zeit: "2026-11-05T08:00:00.000Z", inhalt: "zahlenhaus", stufe: "s3", aufgaben: 8, fehler: 1, dauer: 60 };
+    gleich(RU.maengel(gut).length, 0, "gültige Runde");
+    gleich(RU.maengel({ ...gut, id: "", zeit: 5, inhalt: "" }).length, 3, "drei Mängel");
+    gleich(RU.maengel({ ...gut, aufgaben: -1 }).length, 1, "negative Zahl");
+    gleich(RU.maengel({ ...gut }, "rekord").join(), "Punkte fehlen", "Rekord braucht Punkte");
+    gleich(RU.maengel({ ...gut, fehlerAufgaben: "x" }, "runde", { zusatz: { fehlerAufgaben: "liste" } }).length, 1, "Schema der App");
+    gleich(RU.maengel({ ...gut, dauer: undefined }, "runde", { pflicht: ["dauer"] }).join(), "dauer fehlt", "Pflichtfeld der App");
+    gleich(RU.maengel({ ...gut, inhalt: "weg" }, "runde", { inhaltBekannt: id => id !== "weg" }).length, 1, "unbekannter Inhalt");
+    // Umdeuten älterer Einträge: gleiche alte Runde → gleiche Kennung, über den Namen (auf allen Geräten gleich)
+    const alt = { name: "Mia", person: "p-geraet-a", zeit: "2026-11-01T08:00:00.000Z", spiel: "zahlenhaus", stufe: "s1" };
+    const u1 = RU.umdeuten(alt, { spiel: "inhalt" }), u2 = RU.umdeuten({ ...alt, person: "p-geraet-b" }, { spiel: "inhalt" });
+    gleich([u1.inhalt, "spiel" in u1, u1.id === u2.id, /^r-alt-/.test(u1.id)].join(), "zahlenhaus,false,true,true", "umdeuten: Feld, feste Kennung");
+    gleich(alt.spiel, "zahlenhaus", "umdeuten ändert die Vorlage nicht");
+    gleich(RU.umdeuten({ ...gut, inhalt: "a", spiel: "b" }, { spiel: "inhalt" }).inhalt, "a", "vorhandenes Feld bleibt");
+    // Zusammenführen
+    const eig = [gut, { ...gut, id: "r-2", zeit: "2026-11-05T09:00:00.000Z" }, { kaputt: true }];
+    const fr = [{ ...gut }, { ...gut, id: "r-3", zeit: "2026-11-04T08:00:00.000Z" }, { ...gut, id: "r-4", zeit: "x" }];
+    const z = RU.zusammenfuehren(eig, fr);
+    gleich([z.neu, z.abgewiesen, z.eintraege.length, z.eintraege.filter(e => e.id).map(e => e.id).join(" ")].join(), "1,1,4,r-3 r-1 r-2", "Runden: nach Kennung, eigene bleiben (auch kaputte), nach Zeit");
+    const rek = { ...gut, id: "k-1", punkte: 5 };
+    const zk = RU.zusammenfuehren([rek], [{ ...rek, punkte: 9, abgebrochen: false }, { ...rek, punkte: 3 }], { art: "rekord" });
+    gleich([zk.ersetzt, zk.eintraege.length, zk.eintraege[0].punkte].join(), "1,1,9", "Rekord: höherer Stand gewinnt");
+    const zb = RU.zusammenfuehren([gut], [{ ...gut, id: "r-9" }], { behalten: e => e.id !== "r-9", umbiegen: p => (p === "p-1" ? "p-neu" : p) });
+    gleich([zb.eintraege.length, zb.eintraege[0].person].join(), "1,p-neu", "behalten und umbiegen");
   }
 
   // ---------- Kopien in den Apps ----------

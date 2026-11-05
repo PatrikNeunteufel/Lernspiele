@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.5.0, 2026-11-05 (LERN_Session15). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.6.0, 2026-11-05 (LERN_Session15). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.5.0)
+kern/VERSION          Version des Kerns (1.6.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -236,10 +236,39 @@ Eulenpfad: Felder Name 6, Lernziel-Kürzel 4, Beschreibung 3, Inhaltslisten 2, T
 aus Klasse und Bedarf; Ähnlich über Lernziel (4 je Code), Thema 3, Fach 1, Klassenabstand. Der Lernsteig bekommt mit
 dem Tab Übungen (C3) eigene Felder und eine Passung aus Niveau, Prüfungsziel und Kompetenzstand.
 
-### 4.10 Geplant (Plan B, Reihenfolge B4)
+### 4.10 `KERN.runden` (`kern/runden.js`) — Runden und Rekorde
 
-Anmeldung und Sitzung im Tab, Profil-Übernahme zwischen den Apps (C9), Entwickler-Modus, Protokoll und Statistik, Sichern und Einlesen (Schema der Runden und Rekorde, heute in `lernsteig/gemeinsam/daten.js`), Einladung,
-Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu, bevor er umzieht.
+Entscheid R1 a: ein Format in allen Apps; in der Oberfläche heisst `inhalt` weiter Spiel oder Übung.
+
+```
+Runde:  { id, person, zeit, inhalt, stufe, aufgaben?, fehler?, dauer?, test?, … Felder der App }
+Rekord: { id, person, zeit, inhalt, stufe, punkte, dauer?, test?, abgebrochen?, … Felder der App }
+```
+
+| Aufruf | Ergebnis |
+|---|---|
+| `neueId()` | „r-<Zeit>-<Zufall>“; eine Endlos-Serie behält ihre Kennung, damit der Endstand den Zwischenstand ersetzt |
+| `kennungAus(wer, zeit, inhalt, stufe)` | feste Kennung „r-alt-…“ für ältere Einträge ohne Kennung |
+| `maengel(e, art, opt)` | Mängel einer Runde oder eines Rekords; `opt = { zusatz: { feld: "zahl" \| "text" \| "bool" \| "liste" \| "objekt" \| "zahlOderNull" \| "textOderNull" }, pflicht: [Felder], inhaltBekannt, personBekannt }`; unbekannte Felder bleiben |
+| `umdeuten(e, { alt: neu })` | Felder umbenennen, fehlende Kennung aus Name (sonst Person), Zeit, Inhalt, Stufe — dieselbe alte Runde bekommt auf jedem Gerät dieselbe |
+| `zusammenfuehren(eigene, fremde, { art, pruefung, umbiegen, behalten })` | nach Kennung; Rekord: höherer Stand; fremde geprüft und abgewiesen, eigene bleiben (nur `behalten` entscheidet, etwa ein Löschvermerk); nach Zeit sortiert; `{ eintraege, neu, ersetzt, abgewiesen }` |
+| `fingerabdruck(wert)` | cyrb53 über JSON (auch `KERN.fingerabdruck`; Prüfung der Inhaltslisten im Eulenpfad) |
+
+Felder der Apps:
+
+| App | Pflicht (Runde) | weitere geprüfte Felder | ältere Namen (umgedeutet) |
+|---|---|---|---|
+| Eulenpfad | `aufgaben`, `fehler`, `dauer` | `name`, `sterne`, `fehlerAufgaben`, `aufgabenZeiten`, `optionen`, `mix`; Rekord `name`, `spiele` | `spiel` → `inhalt`; Kennung fehlte |
+| Lernsteig | `aufgaben`, `dauer` | `fach`, `niveau`, `endlos`, `aufAnhieb`, `gezeigt`, `zeiten`, `falsch`, `liste`, `mitRechner`, `gruppe`; Rekord `niveau`, `mitRechner`, `abgebrochen` | `konto` → `person`, `uebung` → `inhalt` |
+
+Dateien: Eulenpfad `format: "eulenpfad-daten"`, Version 3; Lernsteig `format: "lernsteig-sicherung"`, Version 2. Ältere
+Fassungen liest das Einlesen weiter.
+
+### 4.11 Geplant (Plan B, Reihenfolge B4)
+
+Anmeldung und Sitzung im Tab, Profil-Übernahme zwischen den Apps (C9), Entwickler-Modus, Auswertung (Fazit, Bedarf,
+Kompetenzstand) mit Regeln je App, Einladung, Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
+bevor er umzieht.
 
 ## 5. Ändern und verteilen
 

@@ -3,6 +3,17 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.6.0 — 2026-11-05 (LERN_Session15)
+- `runden.js` (`KERN.runden`, Entscheid R1 a): ein Format für Runden und Rekorde aller Apps — Kernfelder `id`,
+  `person`, `zeit`, `inhalt`, `stufe`, `aufgaben`, `fehler`, `dauer`, `test`, `punkte` (Rekord); `maengel` mit Schema der
+  App-Felder (`zusatz`), Pflichtfeldern (`pflicht`), bekannten Inhalten und Personen; `umdeuten` (Felder umbenennen,
+  feste Kennung `r-alt-…` aus Name, Zeit, Inhalt, Stufe für ältere Einträge, auf allen Geräten gleich);
+  `zusammenfuehren` nach Kennung (Rekord: höherer Stand; fremde geprüft, eigene bleiben); `neueId`; `fingerabdruck`
+  (cyrb53, auch `KERN.fingerabdruck`).
+- Eulenpfad: `spiel` → `inhalt`, Kennung je Runde und je Serie (Zwischen- und Endstand teilen sie), Umzug beim Laden,
+  Einlesen und Abgleich über den Kern mit Prüfung (D14), Dateien `format: "eulenpfad-daten"` Version 3.
+- Lernsteig: `konto` → `person`, `uebung` → `inhalt`, Umzug beim Laden, Sicherung Version 2, Einlesen über den Kern.
+
 ## 1.5.0 — 2026-11-05 (LERN_Session15)
 - `suche.js` (`KERN.suche`): Volltextsuche mit Rangfolge aus dem Eulenpfad (SU1 a) — `woerter`, `wortWert` (ganz,
   Wortanfang, ä = a, Wortteil, ein Tippfehler), `suche(text, eintraege, opt)` mit Feldern, Gewichten, sichtbaren

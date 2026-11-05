@@ -100,7 +100,7 @@ function zeichneStatistik(box, neu) {
     const verlauf = el("div");
     if (!letzte.length) verlauf.append(el("p", { class: "leise-text", text: "Noch keine Runde gespielt." }));
     for (const e of letzte) {
-      const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.spiel)} · Stufe ${stufeName(e.stufe)} · ${e.mix ? "🎲 im Zufallsmix" : "★".repeat(e.sterne)} · ${e.fehler} Fehler${e.tipps ? ` · 💡 ${e.tipps} Tipp${e.tipps === 1 ? "" : "s"}` : ""}${e.bedienhilfe ? " · ❓ Hilfe" : ""}${e.test ? " · 🧪 Test" : ""}${e.hilfe ? " · 🔑 mit Hilfe" : ""}` }));
+      const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.inhalt)} · Stufe ${stufeName(e.stufe)} · ${e.mix ? "🎲 im Zufallsmix" : "★".repeat(e.sterne)} · ${e.fehler} Fehler${e.tipps ? ` · 💡 ${e.tipps} Tipp${e.tipps === 1 ? "" : "s"}` : ""}${e.bedienhilfe ? " · ❓ Hilfe" : ""}${e.test ? " · 🧪 Test" : ""}${e.hilfe ? " · 🔑 mit Hilfe" : ""}` }));
       if (e.fehlerAufgaben.length) {
         d.append(el("ul", {}, ...e.fehlerAufgaben.map(f => el("li", {},
           el("div", { text: f.text || "(Aufgabe)" }),
@@ -241,11 +241,11 @@ function zeichneStatistik(box, neu) {
       el("tbody", {}, ...zeilen)))));
 
   // ----- Je Spiel und Stufe (gespielte Spiele) -----
-  const gespielteSpiele = SPIELE.filter(s => runden.some(e => e.spiel === s.id));
+  const gespielteSpiele = SPIELE.filter(s => runden.some(e => e.inhalt === s.id));
   const spielZeilen = gespielteSpiele.map(s => el("tr", {},
     el("td", { text: `${s.bild} ${s.name}` }),
     ...SKALA.map(st => {
-      const r = runden.filter(e => e.spiel === s.id && e.stufe === st.id);
+      const r = runden.filter(e => e.inhalt === s.id && e.stufe === st.id);
       const beste = r.reduce((m, e) => Math.max(m, e.sterne), 0);
       return el("td", { class: "sterne", title: `${r.length} Runde${r.length === 1 ? "" : "n"}`, html: beste ? "★".repeat(beste) : '<span class="leise-text">·</span>' });
     })));
@@ -260,16 +260,16 @@ function zeichneStatistik(box, neu) {
   const modi = new Map();
   for (const e of LS.rekorde()) {
     if (e.name !== gewaehlt || (!zeigeTest && e.test)) continue;
-    const k = `${e.spiel}|${e.stufe}|${e.timer ?? ""}`;
+    const k = `${e.inhalt}|${e.stufe}|${e.timer ?? ""}`;
     if (!modi.has(k) || e.punkte > modi.get(k).punkte) modi.set(k, e);
   }
   const rekordZeilen = [...modi.values()]
-    .sort((a, b) => spielName(a.spiel).localeCompare(spielName(b.spiel), "de") || a.stufe.localeCompare(b.stufe))
+    .sort((a, b) => spielName(a.inhalt).localeCompare(spielName(b.inhalt), "de") || a.stufe.localeCompare(b.stufe))
     .map(e => {
-      const rang = LS.ranglisteFuer(e.spiel, e.stufe, e.timer ?? null);
+      const rang = LS.ranglisteFuer(e.inhalt, e.stufe, e.timer ?? null);
       const platz = rang.findIndex(r => r.name === gewaehlt) + 1;
       return el("tr", {},
-        el("td", { text: spielName(e.spiel) }),
+        el("td", { text: spielName(e.inhalt) }),
         el("td", { text: stufeName(e.stufe) }),
         // Zufallsmix: timer true (Startzeiten je Spiel verschieden), sonst die Startzeit in Sekunden
         el("td", { text: typeof e.timer === "number" ? `⏱ ${e.timer} s` : e.timer ? "⏱ an" : "ohne" }),
@@ -326,7 +326,7 @@ function zeichneStatistik(box, neu) {
     alert(LS.abgleich.ergebnisText(r));
     neu();
   });
-  const gespielt = [...new Set(LS.protokoll().filter(e => e.name === gewaehlt).map(e => e.spiel))]
+  const gespielt = [...new Set(LS.protokoll().filter(e => e.name === gewaehlt).map(e => e.inhalt))]
     .map(id => SPIELE.find(s => s.id === id)).filter(Boolean);
   const welche = el("select", { "aria-label": "Welcher Spielstand" },
     el("option", { value: "", text: "alle Spiele" }),
@@ -355,7 +355,7 @@ function zeichneStatistik(box, neu) {
     const personen = wer.map(n => LS.person(n)).filter(Boolean).map(p => LS.ohneGeheimnis(p));
     const profile = Object.fromEntries(personen.map(p => [p.name, p]));
     const gehoert = e => personen.some(p => LS.gehoert(e, p));
-    const daten = { version: 3, gesichert: new Date().toISOString(), personen,
+    const daten = { format: "eulenpfad-daten", version: 3, gesichert: new Date().toISOString(), personen,
       protokoll: LS.protokoll().filter(e => sichtbareRunde(e) && gehoert(e)),
       rekorde: LS.rekorde().filter(e => sichtbareRunde(e) && gehoert(e)),
       meldungen: LS.meldungen().filter(gehoert) };

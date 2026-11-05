@@ -1,12 +1,14 @@
 /* Lernsteig — Sichern und Einlesen als Datei (nur auf Knopfdruck, wie im Eulenpfad: Entscheid LERN-5 b dort).
-   Format: { format: "lernsteig-sicherung", version: 1, erstellt, konten: [ohne PIN, Code, Verbindungen], runden, rekorde }
+   Format: { format: "lernsteig-sicherung", version: 2, erstellt, konten: [ohne PIN, Code, Verbindungen], runden, rekorde }
+   Runden und Rekorde im gemeinsamen Format der Reihe (R1 a, kern/runden.js: id, person, zeit, inhalt, stufe …);
+   Version 1 (bis LERN_Session15: konto, uebung) wird beim Einlesen umgedeutet.
    Einlesen (Befund D4): zuerst wird die ganze Datei geprüft — jedes Konto mit KERN.person.maengel, jede Runde und
-   jeder Rekord mit einem eigenen Schema; Ungültiges wird abgewiesen und gezählt, nie gespeichert. Dann wird im
-   Speicher zusammengeführt und erst am Ende geschrieben; scheitert ein Schreiben (Speicher voll), wird der alte Stand
-   zurückgeschrieben: alles oder nichts.
+   jeder Rekord mit KERN.runden.maengel und dem Schema des Lernsteigs; Ungültiges wird abgewiesen und gezählt, nie
+   gespeichert. Dann wird im Speicher zusammengeführt und erst am Ende geschrieben; scheitert ein Schreiben (Speicher
+   voll), wird der alte Stand zurückgeschrieben: alles oder nichts.
    Zusammenführen: Konten mit KERN.person.zusammenfuehren (P1 a: gleiche Kennung, sonst gleicher Name; je Feld der
-   jüngere Stand; PIN, Code und Verbindungen bleiben die des Geräts); Runden nach Kennung (gleiche zählt einmal),
-   Rekorde nach Kennung (der höhere Stand); Verweise auf eine zusammengeführte Kennung werden umgebogen.
+   jüngere Stand; PIN, Code und Verbindungen bleiben die des Geräts); Runden und Rekorde mit KERN.runden.zusammenfuehren
+   (nach Kennung, bei Rekorden der höhere Stand); Verweise auf eine zusammengeführte Kennung werden umgebogen.
    Abgeschaut vom Eulenpfad (LS.zusammenfuehren, docs/eulenpfad/rahmen.md 10), Zeile in docs/gemeinsame_mechaniken.md. */
 "use strict";
 
@@ -19,9 +21,9 @@ var LST_DATEN = (function () {
     const menge = new Set(ids);
     const konten = LST_KONTEN.alle().filter(k => menge.has(k.id)).map(LST_KONTEN.ohneGeheimnis);
     return {
-      format: FORMAT, version: 1, erstellt: new Date().toISOString(), konten,
-      runden: LST.lies("runden", []).filter(r => menge.has(r.konto)),
-      rekorde: LST.lies("rekorde", []).filter(r => menge.has(r.konto)),
+      format: FORMAT, version: 2, erstellt: new Date().toISOString(), konten,
+      runden: LST.lies("runden", []).filter(r => menge.has(r.person)),
+      rekorde: LST.lies("rekorde", []).filter(r => menge.has(r.person)),
     };
   }
 
@@ -31,22 +33,17 @@ var LST_DATEN = (function () {
     return `lernsteig-${n}-${new Date().toISOString().slice(0, 10)}.json`;
   }
 
-  // ---------- Schema der Runden und Rekorde ----------
-  const istText = x => typeof x === "string" && x.length > 0 && x.length <= 200;
-  const istZeit = x => typeof x === "string" && !Number.isNaN(Date.parse(x));
-  const istZahl = x => typeof x === "number" && Number.isFinite(x) && x >= 0;
+  // ---------- Schema der Runden und Rekorde (Kern: KERN.runden.maengel; hier die Felder des Lernsteigs) ----------
   const istUebung = id => typeof LST_KATALOG === "undefined" || !!LST_KATALOG.uebung(id);
-  /** Ist die Runde lesbar für Statistik, Kompetenzstand und Aufsicht? */
-  function rundeGueltig(r) {
-    return !!r && typeof r === "object" && istText(r.id) && istText(r.konto) && istZeit(r.zeit) && istText(r.uebung)
-      && istUebung(r.uebung) && istText(r.stufe) && ["aufgaben", "fehler", "dauer"].every(f => r[f] === undefined || istZahl(r[f]))
-      && (r.liste === undefined || (Array.isArray(r.liste) && r.liste.every(x => x && typeof x === "object")))
-      && (r.zeiten === undefined || Array.isArray(r.zeiten)) && (r.falsch === undefined || Array.isArray(r.falsch));
-  }
-  function rekordGueltig(r) {
-    return !!r && typeof r === "object" && istText(r.id) && istText(r.konto) && istZeit(r.zeit) && istText(r.uebung)
-      && istUebung(r.uebung) && istText(r.stufe) && istZahl(r.punkte) && (r.dauer === undefined || istZahl(r.dauer));
-  }
+  const RUNDE = {
+    pflicht: ["aufgaben", "dauer"], inhaltBekannt: istUebung,
+    zusatz: { fach: "text", niveau: "text", endlos: "bool", aufAnhieb: "zahl", gezeigt: "zahl", zeiten: "liste", falsch: "liste",
+      liste: "liste", mitRechner: "bool", gruppe: "textOderNull" },
+  };
+  const REKORD = { pflicht: ["dauer"], inhaltBekannt: istUebung, zusatz: { niveau: "text", mitRechner: "bool", abgebrochen: "bool" } };
+  /** Ist die Runde lesbar für Statistik, Kompetenzstand und Aufsicht? (auch jedes Element der Liste ein Objekt) */
+  const rundeGueltig = r => !KERN.runden.maengel(r, "runde", RUNDE).length && (r.liste || []).every(x => x && typeof x === "object");
+  const rekordGueltig = r => !KERN.runden.maengel(r, "rekord", REKORD).length;
 
   /**
    * Liest eine Sicherung ein und führt sie zusammen. Liefert { konten, runden, rekorde } (Anzahl neu oder geändert),
@@ -54,7 +51,7 @@ var LST_DATEN = (function () {
    * Datei nach dem Zusammenführen). Fehler, wenn die Datei keine Sicherung ist oder nicht gespeichert werden kann.
    */
   function einlesen(obj) {
-    if (!obj || typeof obj !== "object" || obj.format !== FORMAT || obj.version !== 1) throw new Error("Das ist keine Sicherung des Lernsteigs.");
+    if (!obj || typeof obj !== "object" || obj.format !== FORMAT || ![1, 2].includes(obj.version)) throw new Error("Das ist keine Sicherung des Lernsteigs.");
     for (const f of ["konten", "runden", "rekorde"]) if (obj[f] !== undefined && !Array.isArray(obj[f])) throw new Error("Die Sicherung ist beschädigt.");
     const erg = { konten: 0, runden: 0, rekorde: 0, abgewiesen: 0, neu: [], ids: [] };
 
@@ -76,24 +73,15 @@ var LST_DATEN = (function () {
       if (imErgebnis.has(id) && !erg.ids.includes(id)) { erg.ids.push(id); if (!bekannt.has(id)) erg.neu.push(id); }
     }
 
-    // 2. Runden und Rekorde: prüfen, Verweise umbiegen, nur zu Konten der Datei oder des Geräts
+    // 2. Runden und Rekorde (Kern): Version 1 umdeuten, prüfen, Verweise umbiegen, nur zu Konten der Datei oder des Geräts
     // „gast“: Runden des Gastkontos eines Geräts (rahmen.js) reisen mit, ohne Konto (bis Gast nach C2 a nichts speichert)
     const kontoDa = id => id === "gast" || imErgebnis.has(id);
-    const runden = vorher.runden.map(r => ({ ...r, konto: umbiegen(r.konto) }));
-    const da = new Set(runden.map(r => r.id));
-    for (const roh of obj.runden || []) {
-      if (!rundeGueltig(roh) || !kontoDa(umbiegen(roh.konto))) { erg.abgewiesen++; continue; }
-      if (da.has(roh.id)) continue;
-      runden.push({ ...roh, konto: umbiegen(roh.konto) }); da.add(roh.id); erg.runden++;
-    }
-    runden.sort((a, b) => String(a.zeit).localeCompare(String(b.zeit)));
-    const rekorde = vorher.rekorde.map(r => ({ ...r, konto: umbiegen(r.konto) }));
-    for (const roh of obj.rekorde || []) {
-      if (!rekordGueltig(roh) || !kontoDa(umbiegen(roh.konto))) { erg.abgewiesen++; continue; }
-      const r = { ...roh, konto: umbiegen(roh.konto) };
-      const i = rekorde.findIndex(x => x.id === r.id);
-      if (i < 0) { rekorde.push(r); erg.rekorde++; } else if (r.punkte > (rekorde[i].punkte || 0)) { rekorde[i] = r; erg.rekorde++; }
-    }
+    const fremde = l => (l || []).map(e => (e && typeof e === "object" ? KERN.runden.umdeuten(e, LST.ALTE_FELDER) : e));
+    const zuGeraet = (l, gueltig) => { const ok = []; for (const e of l) if (e && gueltig(e) && kontoDa(umbiegen(e.person))) ok.push(e); else erg.abgewiesen++; return ok; };
+    const zr = KERN.runden.zusammenfuehren(vorher.runden, zuGeraet(fremde(obj.runden), rundeGueltig), { art: "runde", umbiegen });
+    const zk = KERN.runden.zusammenfuehren(vorher.rekorde, zuGeraet(fremde(obj.rekorde), rekordGueltig), { art: "rekord", umbiegen });
+    const runden = zr.eintraege, rekorde = zk.eintraege;
+    erg.runden = zr.neu; erg.rekorde = zk.neu + zk.ersetzt;
 
     // 3. Schreiben: alles oder nichts; ist nichts neu oder geändert, bleibt der Speicher unberührt
     if (!erg.konten && !erg.runden && !erg.rekorde) return erg;
