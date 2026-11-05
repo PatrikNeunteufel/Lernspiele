@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.3.0, 2026-11-05 (LERN_Session15). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.5.0, 2026-11-05 (LERN_Session15). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.3.0)
+kern/VERSION          Version des Kerns (1.5.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -217,10 +217,28 @@ Jedes `setze…` schreibt zuerst `freigabeStand` (jetzt), dann `freigabe`: Beim 
 mit dem jüngsten Stand. Eulenpfad: `LS.spielFrei`, `LS.sperrGrund`, `LS.spielListen` … reichen weiter; Lernsteig:
 `LST.FREIGABE`, `LST.sperrGrund`, `LST.uebungSichtbar`.
 
-### 4.9 Geplant (Plan B, Reihenfolge B4)
+### 4.9 `KERN.suche` (`kern/suche.js`) — Suche mit Relevanz und Passung
 
-Anmeldung und Sitzung im Tab, Profil-Übernahme zwischen den Apps (C9), Entwickler-Modus, Suche, Protokoll und
-Statistik, Sichern und Einlesen (Schema der Runden und Rekorde, heute in `lernsteig/gemeinsam/daten.js`), Einladung,
+Entscheid SU1 a, Passung nach Wunsch Patrik (LERN_Session10). Je Suchwort zählt der beste Treffer über alle Felder,
+gewichtet nach Feld und Art des Treffers; jedes Suchwort muss passen; bei gleichem Wert bleibt die Reihenfolge der
+Einträge.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `woerter(text)` | Wörter klein, Kürzel mit Punkten ganz („ma.1.a.3“) |
+| `wortWert(q, w, tippfehler)` | 1 ganz · 0.8 Wortanfang · 0.7 / 0.6 dasselbe mit ä = a · 0.4 / 0.3 Wortteil ab 4 Zeichen · 0.25 ein Tippfehler (nur wenn erlaubt, ab 5 Zeichen, nie mit Ziffern; ein Buchstabendreher sind zwei) · sonst 0 |
+| `suche(text, eintraege, opt)` | `[{ id, wert, passung, grund }]`, leere Suche `null`; `opt = { felder: e → { feld: [Texte] }, gewicht, sichtbar, tippfehler, grund: (feld, text) → Satz, passung: e → 0–1 \| null, faktor }` |
+| `aehnlich(id, eintraege, opt)` | `[{ id, wert, passung, grund }]`; `opt.vergleich(e, x) → { wert, grund } \| null` |
+| `mitPassung(wert, p, faktor)` | `wert · (1 + faktor · p)` — die Passung hebt, der Text bleibt massgebend |
+| `naehe(a, b)` | 1 gleich · 0.6 eine daneben · 0.2 zwei · 0 · 0.5 unbekannt |
+
+Eulenpfad: Felder Name 6, Lernziel-Kürzel 4, Beschreibung 3, Inhaltslisten 2, Thema 1; Tippfehler nur im Namen; Passung
+aus Klasse und Bedarf; Ähnlich über Lernziel (4 je Code), Thema 3, Fach 1, Klassenabstand. Der Lernsteig bekommt mit
+dem Tab Übungen (C3) eigene Felder und eine Passung aus Niveau, Prüfungsziel und Kompetenzstand.
+
+### 4.10 Geplant (Plan B, Reihenfolge B4)
+
+Anmeldung und Sitzung im Tab, Profil-Übernahme zwischen den Apps (C9), Entwickler-Modus, Protokoll und Statistik, Sichern und Einlesen (Schema der Runden und Rekorde, heute in `lernsteig/gemeinsam/daten.js`), Einladung,
 Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu, bevor er umzieht.
 
 ## 5. Ändern und verteilen

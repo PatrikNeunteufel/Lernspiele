@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.5.0 — 2026-11-05 (LERN_Session15)
+- `suche.js` (`KERN.suche`): Volltextsuche mit Rangfolge aus dem Eulenpfad (SU1 a) — `woerter`, `wortWert` (ganz,
+  Wortanfang, ä = a, Wortteil, ein Tippfehler), `suche(text, eintraege, opt)` mit Feldern, Gewichten, sichtbaren
+  Feldern, Grund und Passung als Faktor; `aehnlich(id, eintraege, opt)` mit Vergleich der App; `naehe` für Klassen.
+- Der Eulenpfad (`LS.suche`, `LS.aehnlich`, `LS.passung`) gibt nur noch Felder, Gewichte und Vergleich an; die festen
+  Suchbeispiele des Testskripts geben dasselbe Ergebnis. Der Lernsteig nutzt die Suche mit dem Tab Übungen (C3).
+
 ## 1.4.0 — 2026-11-05 (LERN_Session15)
 - `freigabe.js` (`KERN.freigabe(opt)`): Freigabe nach Prüfstand aus dem Eulenpfad (L4 a, E1 a, FG1 a) — neu gesperrt
   bis angesehen, Inhaltslisten bis geprüft, Verweise `von` und Zusatzlisten, Gerätefreigabe der Aufsicht mit

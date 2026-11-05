@@ -14,6 +14,7 @@ require(path.join(WURZEL, "kern", "el.js"));
 require(path.join(WURZEL, "kern", "geheimnis.js"));
 require(path.join(WURZEL, "kern", "person.js"));
 require(path.join(WURZEL, "kern", "freigabe.js"));
+require(path.join(WURZEL, "kern", "suche.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -348,6 +349,34 @@ console.log("el.js");
     F.setzeFrei("neu", null); F.setzeListeFrei("wort", "a", null);
     gleich([F.frei("neu"), F.listeFrei("wort", "a")].join(), "true,true", "null: zurück auf den Prüfstand");
     gleich(JSON.stringify(F.geraet()), '{"uebungen":{},"listen":{}}', "Gerätefreigabe leer");
+  }
+
+  // ---------- Suche ----------
+  console.log("suche.js");
+  {
+    const S = KERN.suche;
+    gleich(S.woerter("Brüche: MA.1.A.3, Prozent!").join("|"), "brüche|ma.1.a.3|prozent", "Wörter, Kürzel mit Punkten ganz");
+    gleich([S.wortWert("bruch", "bruch"), S.wortWert("bru", "bruch"), S.wortWert("bruche", "brüche"), S.wortWert("bruc", "brüche"),
+      S.wortWert("rech", "kopfrechnen"), S.wortWert("ruch", "brüche"), S.wortWert("bruxhe", "bruche", true), S.wortWert("bruxhe", "bruche"),
+      S.wortWert("bruhce", "bruche", true)].join(),
+      "1,0.8,0.7,0.6,0.4,0.3,0.25,0,0", "Stufen der Wortpassung (Dreher = zwei Fehler)");
+    gleich(S.wortWert("ma.1a", "ma.1b", true), 0, "kein Tippfehler bei Kürzeln mit Ziffern");
+    gleich([S.einTippfehler("haus", "maus"), S.einTippfehler("haus", "hauss"), S.einTippfehler("haus", "hund")].join(), "true,true,false", "einTippfehler");
+    gleich([S.naehe(4, 4), S.naehe(4, 5), S.naehe(4, 2), S.naehe(4, 7), S.naehe(null, 4)].join(), "1,0.6,0.2,0,0.5", "Nähe");
+    const E = [{ id: "a", name: "Bruchrechnen", thema: "Zahlen" }, { id: "b", name: "Kopfrechnen", thema: "Brüche und mehr" }, { id: "c", name: "Uhr", thema: "Zeit" }];
+    const opt = { felder: e => ({ name: [e.name], thema: [e.thema] }), gewicht: { name: 6, thema: 1 }, sichtbar: ["name"], tippfehler: ["name"],
+      grund: (f, t) => `im Thema ${t}` };
+    const r = S.suche("bruch", E, opt);
+    gleich(r.map(x => x.id).join(), "a,b", "Name vor Thema, Uhr fällt weg");
+    gleich(r[1].grund, "im Thema Brüche und mehr", "Grund bei Treffer ausserhalb der Karte");
+    gleich(r[0].grund, null, "kein Grund bei Treffer auf der Karte");
+    gleich(S.suche("bruch uhr", E, opt).length, 0, "jedes Suchwort muss passen");
+    gleich(S.suche("  ", E, opt), null, "leere Suche");
+    const mitP = S.suche("rechnen", E, { ...opt, passung: e => (e.id === "b" ? 1 : 0), faktor: 0.5 });
+    gleich(mitP.map(x => x.id).join(), "b,a", "Passung entscheidet bei gleichem Text");
+    gleich(mitP[0].wert, mitP[1].wert * 1.5, "Faktor 1 + 0.5 · Passung");
+    const ae = S.aehnlich("a", E, { vergleich: (e, x) => (x.id === "c" ? null : { wert: x.id === "b" ? 2 : 0, grund: "gleich" }) });
+    gleich(ae.map(x => `${x.id}:${x.wert}`).join(), "b:2", "aehnlich ohne sich selbst, ohne Unähnliche");
   }
 
   // ---------- Kopien in den Apps ----------

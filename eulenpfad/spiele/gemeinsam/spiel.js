@@ -609,35 +609,9 @@ const LS = (() => {
   // Kleine Volltextsuche mit Rangfolge: je Suchwort der beste Treffer über alle Felder, gewichtet nach Feld
   // und Art des Treffers; jedes Suchwort muss passen. Passt ein Spiel nur über ein Feld, das auf der Karte
   // nicht steht (Thema, Inhaltsliste), nennt `grund` es.
+  // Rechnung im Kern (kern/suche.js, docs/kern/rahmen.md 4.9); hier, was der Eulenpfad durchsucht und wie er gewichtet.
   const SUCH_GEWICHT = { name: 6, lernziele: 4, beschreibung: 3, listen: 2, thema: 1 };
-  const SUCH_SICHTBAR = new Set(["name", "lernziele", "beschreibung"]);
-  const falte = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-  const suchWoerter = t => String(t || "").toLowerCase().split(/[^\p{L}\p{N}.]+/u)
-    .map(w => w.replace(/^\.+|\.+$/g, "")).filter(Boolean);
-  /** Höchstens ein Zeichen Unterschied (einfügen, löschen, ersetzen)? */
-  function einTippfehler(a, b) {
-    if (Math.abs(a.length - b.length) > 1) return false;
-    let i = 0, j = 0, fehler = 0;
-    while (i < a.length && j < b.length) {
-      if (a[i] === b[j]) { i++; j++; continue; }
-      if (++fehler > 1) return false;
-      if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; }
-    }
-    return fehler + (a.length - i) + (b.length - j) <= 1;
-  }
-  /** Wie gut passt das Suchwort q zum Wort w (0 bis 1)? Tippfehler nur im Namen, nie bei Kürzeln mit Ziffern. */
-  function wortWert(q, w, feld) {
-    if (w === q) return 1;
-    if (w.startsWith(q)) return 0.8;
-    const fq = falte(q), fw = falte(w);
-    if (fw === fq) return 0.7;
-    if (fw.startsWith(fq)) return 0.6;
-    if (q.length >= 4 && w.includes(q)) return 0.4;     // Teil eines zusammengesetzten Worts (Wortschatz)
-    if (q.length >= 4 && fw.includes(fq)) return 0.3;
-    if (feld === "name" && q.length >= 5 && !/\d/.test(q)
-      && (einTippfehler(fq, fw.slice(0, fq.length)) || einTippfehler(fq, fw.slice(0, fq.length + 1)))) return 0.25;
-    return 0;
-  }
+  const SUCH_SICHTBAR = ["name", "lernziele", "beschreibung"];
   /** Durchsuchbare Felder eines Spiels: je Feld eine Liste von Texten (Listen und Lernziele einzeln). */
   function suchFelder(e) {
     const thema = typeof THEMEN !== "undefined" ? THEMEN.find(t => t.id === e.thema) : null;
@@ -653,12 +627,9 @@ const LS = (() => {
   const PASSUNG_FAKTOR = 0.5; // höchstens das Anderthalbfache der Textrelevanz — der Text bleibt massgebend
   function passung(spielId, person) {
     if (!person) return null;
-    const b = basisKlasse(spielId);
-    const naehe = person.klasse == null || b == null ? 0.5 : ([1, 0.6, 0.2][Math.abs(person.klasse - b)] ?? 0);
     const bedarf = person.bedarf ? Math.min(Math.max(person.bedarf(spielId), 0) / 5, 1) : 0.5;
-    return (naehe + bedarf) / 2;
+    return (KERN.suche.naehe(person.klasse, basisKlasse(spielId)) + bedarf) / 2;
   }
-  const mitPassung = (wert, p) => (p === null ? wert : wert * (1 + PASSUNG_FAKTOR * p));
 
   /**
    * Spiele zur Suche, beste zuerst: [{ id, wert, grund, passung }]; grund z. B. „im Thema Wortschatz: …“ oder null,
@@ -666,27 +637,12 @@ const LS = (() => {
    * als Faktor auf die Textrelevanz; bei gleich gutem Text kommt zuerst, was zur Klasse passt und Bedarf hat.
    */
   function suche(text, person = null) {
-    const qs = suchWoerter(text);
-    if (!qs.length || typeof SPIELE === "undefined") return null;
-    const treffer = [];
-    SPIELE.forEach((e, rang) => {
-      const felder = suchFelder(e);
-      let wert = 0;
-      const gruende = [];
-      for (const q of qs) {
-        let best = 0, wo = null;
-        for (const [feld, texte] of Object.entries(felder)) for (const t of texte) for (const w of suchWoerter(t)) {
-          const x = wortWert(q, w, feld) * SUCH_GEWICHT[feld];
-          if (x > best) { best = x; wo = { feld, t }; }
-        }
-        if (!best) return;
-        wert += best;
-        if (!SUCH_SICHTBAR.has(wo.feld)) gruende.push(wo.feld === "thema" ? `im Thema ${wo.t}` : `in der Liste „${wo.t}“`);
-      }
-      const p = passung(e.id, person);
-      treffer.push({ id: e.id, wert: mitPassung(wert, p), passung: p, rang, grund: gruende.length ? [...new Set(gruende)].join("; ") : null });
+    if (typeof SPIELE === "undefined") return null;
+    return KERN.suche.suche(text, SPIELE, {
+      felder: suchFelder, gewicht: SUCH_GEWICHT, sichtbar: SUCH_SICHTBAR, tippfehler: ["name"], faktor: PASSUNG_FAKTOR,
+      grund: (feld, t) => (feld === "thema" ? `im Thema ${t}` : `in der Liste „${t}“`),
+      passung: e => passung(e.id, person),
     });
-    return treffer.sort((a, b) => b.wert - a.wert || a.rang - b.rang).map(({ rang, ...t }) => t);
   }
 
   /**
@@ -695,23 +651,19 @@ const LS = (() => {
    * dazu die Passung wie bei der Suche. grund nennt, was gleich ist.
    */
   function aehnlich(spielId, person = null) {
-    const e = katalogEintrag(spielId);
-    if (!e || typeof SPIELE === "undefined") return [];
+    if (!katalogEintrag(spielId) || typeof SPIELE === "undefined") return [];
     const fachVon = x => (typeof THEMEN !== "undefined" ? THEMEN.find(t => t.id === x.thema)?.fach : null);
-    const liste = [];
-    SPIELE.forEach((x, rang) => {
-      if (x.id === spielId) return;
-      const lz = x.lernziele.filter(l => e.lernziele.some(m => m.lz === l.lz)).map(l => l.lz);
-      const thema = x.thema === e.thema;
-      const fach = fachVon(x) === fachVon(e);
-      if (!lz.length && !thema) return; // nur das Fach gemeinsam: zu wenig für „ähnlich“
-      let wert = 4 * lz.length + (thema ? 3 : 0) + (fach ? 1 : 0);
-      wert -= Math.min(2, Math.abs((x.klasse || 0) - (e.klasse || 0))) * 0.5;
-      const gruende = [lz.length ? `gleiches Lernziel ${[...new Set(lz)].join(", ")}` : null, thema ? "gleiches Thema" : null].filter(Boolean);
-      const p = passung(x.id, person);
-      liste.push({ id: x.id, wert: mitPassung(wert, p), passung: p, rang, grund: gruende.join("; ") });
+    return KERN.suche.aehnlich(spielId, SPIELE, {
+      faktor: PASSUNG_FAKTOR, passung: x => passung(x.id, person),
+      vergleich: (e, x) => {
+        const lz = x.lernziele.filter(l => e.lernziele.some(m => m.lz === l.lz)).map(l => l.lz);
+        const thema = x.thema === e.thema;
+        if (!lz.length && !thema) return null; // nur das Fach gemeinsam: zu wenig für „ähnlich“
+        const wert = 4 * lz.length + (thema ? 3 : 0) + (fachVon(x) === fachVon(e) ? 1 : 0)
+          - Math.min(2, Math.abs((x.klasse || 0) - (e.klasse || 0))) * 0.5;
+        return { wert, grund: [lz.length ? `gleiches Lernziel ${[...new Set(lz)].join(", ")}` : null, thema ? "gleiches Thema" : null].filter(Boolean).join("; ") };
+      },
     });
-    return liste.sort((a, b) => b.wert - a.wert || a.rang - b.rang).map(({ rang, ...t }) => t);
   }
   /** Warum sehen Kinder das Spiel nicht? Kurzer Text oder null, wenn sie es sehen. */
   const sperrGrund = spielId => FREIGABE.sperrGrund(spielId);
