@@ -1,0 +1,241 @@
+# Plan: Angleich der Reihe (Eulenpfad, Lernsteig, Gratwanderung) und Rücknahme des Lernsteigs
+
+Stand: 2026-11-05 (LERN_Session15). Erfassung nach der Prüfung der Cloud-Sitzung LST_Session1 (Repo
+`PatrikNeunteufel/Lernsteig`, gemergt als `8f55173`) und der lokalen Recherchen (`3927603`, `9d20452`). Grundlage:
+Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale_Sitzung.md).
+
+**Grundsätze (Auftrag Patrik):**
+- **Lernspiele ist massgebend.** Was hier aktueller ist, gilt; im Zweifel wird nachgefragt.
+- **Erst das Grundgerüst angleichen**, dann Inhalte. Der Eulenpfad bleibt im Aussehen, wie er ist (höchstens kleine
+  Retuschen); der Lernsteig wird ihm im Aufbau ähnlich, nur erwachsener; die Gratwanderung bekommt dasselbe Gerüst.
+- **Doku folgt dem richtigen Soll, nicht dem fehlerhaften Ist:** Wo Code und Doku auseinanderlaufen, wird geprüft,
+  was richtig ist; ist der Code falsch, wird der Code korrigiert.
+- **Nichts Ungeprüftes online:** Im Lernsteig ist jede Übung gesperrt, bis sie im Entwickler-Modus geprüft ist (wie
+  im Eulenpfad). Damit ist ein Push auf master ungefährlich.
+
+## Übersicht
+
+| Nr. | Paket | Status | Einzelheiten |
+|---|---|---|---|
+| A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | offen | Abschnitt B |
+| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | offen, nach B | Abschnitt C |
+| D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
+| E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
+| F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
+| G | Doku-Drift beseitigen | offen, laufend | Abschnitt G |
+| H | Portal: Anleitungen und Listen je App | offen, nach C | Abschnitt H |
+
+---
+
+## A. Rücknahme des Lernsteigs
+
+1. Aus `Lernsteig@8f55173` **nur nach Pfadliste** kopieren, nie das Diff seit `b2276cf` anwenden (es würde hier
+   `docs/monetarisierung_recherche.md` löschen, `docs/anleitung_freiwillige_beitraege.md` zurücksetzen und den Kopf der
+   `CLAUDE.md` überschreiben):
+   - `lernsteig/**`, `docs/lernsteig/**` ohne `AUFTRAG_cloud.md` und `SYNC_lernspiele.md` (Cloud-Fassungen),
+   - `docs/commons_bibliothek.md`,
+   - `docs/gemeinsame_mechaniken.md` ganz (hier seit `382cdcc` unverändert, Blob `8013f97`).
+   - Nicht: `.claude/` (globale Sammlung, privat), `CLAUDE.md`-Kopf, `.gitignore` des Cloud-Repos.
+2. `.gitignore`: `lernsteig-*.json`, `gratwanderung-*.json`, `__pycache__/` (EP4).
+3. **Sperre im selben Commit** (A1 a): Jede Lernsteig-Übung trägt `neu` und ist gesperrt, solange sie nicht im
+   Prüfstand `lernsteig/gemeinsam/pruefstand.js` steht (mit Inhaltslisten: dazu eine geprüfte Liste). Startseite ohne
+   Verweis mit „noch nicht freigegeben“, Übungsseite bei direktem Aufruf nur der Hinweis; die angemeldete Aufsicht
+   sieht alles mit Vermerk (`LST.sperrGrund`, `LST.uebungSichtbar` in `rahmen.js`). Entwickler-Modus und Freigabe je
+   Gerät kommen mit C6. Das Feld `geprueft` in den `listen` des Katalogs ist damit überholt (zweite Quelle) und fällt
+   mit C6 weg.
+4. `docs/lernsteig/SYNC_lernspiele.md` aus dem Cloud-Repo **nicht** übernehmen; in Lernspiele eine eigene kurze Notiz
+   „Rücknahme 2026-11-05, Lernsteig-Commit `8f55173`, danach wird nur noch hier gearbeitet“. Das Cloud-Repo gilt als
+   abgeschlossen (Frage A2).
+5. Datenschutz-Abschnitt in `CLAUDE.md` nachführen (EP3, neu gefasst): Profil mit Geburtsdatum (Tag freiwillig, siehe
+   B3), im Lernsteig zusätzlich Land, Kanton, Niveau je Fach; Ausnahmen Sichern/Einlesen und Aufsicht mit Zustimmung.
+
+## B. Gemeinsamer Kern und Testgerüst
+
+Entscheide KB1 a (Ordner `kern/` als einzige Quelle, `tools/kern_verteilen.py` verteilt Kopien mit Version und
+Prüfsumme) und KB2 a. **Erweitert nach Auftrag Patrik:** Der Kern beginnt nicht nur mit `bruch.js` und Zahlschreibung,
+sondern umfasst gleich die Teile, die das gemeinsame Grundgerüst trägt (C):
+
+| Kern-Teil | Quelle heute | Ziel |
+|---|---|---|
+| `zahl.js` | `LS.zahlText`/`dezimalText`, `LST.zahlText`/`dezimalText` | Schreibweise als Einstellung `{ tausender, abStellen, minus, dezimal }`; nur ganze Zahlen gruppieren (K6) |
+| `bruch.js` | `lernsteig/gemeinsam/bruch.js` | unverändert, Kommentar richtig (K7), `zahl("abc")` mit eigener Meldung |
+| `speicher.js`, `zufall.js`, `el` | beide Apps | Präfix als Parameter, Zufallsquelle austauschbar |
+| `profil.js` | `spiel.js` Profil, `konten.js` | ein Format für alle Apps (B3), App-Felder daneben; Übernahme eines Profils in eine andere App (C9) |
+| `rollen.js` | `spiel.js` PIN/Code/Frage, Anmeldung, `konten.js` | Rollen Lernende, Aufsicht, Lehrperson/Gruppenleitung, Entwickler; PIN mit Salz und Hash, Code, Frage für Erwachsene, Bestätigung durch bestehende Aufsicht (KR2 a), Zurücksetzen mit Frist |
+| `freigabe.js` | `pruefstand.js`, `entwicklung.js`, Verwaltung → Freigabe | Prüfstand je App-Datei, Freigabe je Gerät, Listen je Eintrag |
+| `suche.js` | `LS.suche`, `LS.passung`, `LS.aehnlich` | Relevanz mit Feldgewichten, Passung als Faktor; App liefert Felder und Passung |
+| `protokoll.js`, `statistik.js` | Protokoll, `auswertung.js`, Lernsteig `rahmen.js` | ein Rundenformat mit `format`, Auswertung (Fazit, Bedarf) mit App-Regeln |
+| `daten.js` | `LS.zusammenfuehren`, `abgleich.js`, Lernsteig `daten.js` | Sichern, Einlesen **mit Schema-Prüfung und atomar** (D4), Zusammenführen |
+| `einladung.js` | Lernsteig `konten.js` | Format `{ format, v, name, geboren, klasse, … }`, von beiden Apps gelesen |
+| `terme.js`, Rechenkern `rechner.js` | Lernsteig | ohne verdeckte Globals (`LST.zahlText` übergeben) |
+
+**B1 Werkzeug:** `tools/kern_verteilen.py` (Kopie, Kopfzeile `kern <Version>, Prüfsumme …`, `--pruefe` ohne
+Schreiben). `kern/VERSION`, `kern/CHANGELOG.md`.
+
+**B2 Testgerüst für alle Apps:** Ein Testskript-Kern unter `tools/` mit Treiber je App, so dass ein Aufruf alle drei
+Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`). Er prüft auch, dass jede Kern-Kopie mit
+`kern/` übereinstimmt.
+- **Kein Playwright.** Der Eulenpfad prüft ohne Browser im Ersatz-DOM (`tools/pruef_dom.js`, `vm`), und wo echte
+  Darstellung nötig ist, steuert er Chrome direkt über das DevTools-Protokoll (`tools/bildhoehe.js`,
+  `tools/anleitung_bilder.js`). Der Lernsteig übernimmt beides; der Browser-Teil seines Testskripts
+  (`pruefe_uebungen.js --browser`, Playwright, lokal nicht installiert) wird darauf umgestellt.
+- Neue Prüfungen (Lücken aus der Prüfung):
+  - Annahme von Antworten: knapp falsch (abgeschnittene Ziffer, letzte Stelle ±1, relative Abweichung), gleichwertige
+    Schreibweisen (Terme, gemischte Zahlen, Malzeichen), Eingaben, die `bewerte` zum Absturz bringen (Ausnahmen
+    abfangen und melden).
+  - Text gegen Prüfdaten: Ereigniswortlaut in Kombinatorik/Zufall aus den Daten neu erzeugt und verglichen;
+    Prüffunktionen, die nur auf `daten` rechnen, lesen den angezeigten Text (flaechen-volumen, koerper-winkel,
+    prozent-funktionen, daten-rabatt, folgen, sachsituationen, Teile von zehnerpotenzen und binome-gleichungen).
+  - `konten`/`rollen` und `daten`: kaputte und fremde Dateien, Ids fremder Konten, voller Speicher, Zeitzone.
+  - Vielfalt: Mindestvorrat je Stufe auch ohne Endlos (Hinweis unter 50 verschiedenen Aufgaben).
+  - Rechner: NaN, Division durch 0, 10-stellige Anzeige.
+
+**B3 Geburtsdatum (Vorgabe Patrik 2026-11-05):** In allen Apps vollständig, gespeichert als ISO `JJJJ-MM-TT`, gezeigt
+als `TT.MM.JJJJ`. Fehlt der Tag (Eulenpfad-Profile seit LERN_Session14: `JJJJ-MM`), bricht nichts: Das Alter wird wie
+heute aus dem Monat gerechnet, das Profil bietet an, den Tag nachzutragen. Einladung und Einlesen nehmen beide Formen
+an. Ersetzt im Eulenpfad die Datensparsamkeit „Monat ohne Tag“ (CLAUDE.md und `rahmen.md` 18 nachführen).
+
+**B4 Reihenfolge des Umbaus:** Teil für Teil, je Teil beide Apps umstellen und das Testskript über alle grün halten;
+die Zeile in `gemeinsame_mechaniken.md` auf „im Kern seit <Version>“.
+
+## C. Grundgerüst Lernsteig wie Eulenpfad (und Gratwanderung)
+
+Ziel: gleicher Aufbau, gleiche Begriffe, gleiche Bedienwege; der Lernsteig sachlicher im Ton und Aussehen, ohne
+Kindersprache.
+
+1. **Anmeldung zuerst** (wie Eulenpfad L1 a): Konten zum Antippen, „Ich bin neu“ (Jugendliche, Erwachsene mit Frage und
+   Bestätigung), dazu **Gast**: nichts wird gespeichert, Profil ohne Wirkung, Freigaben des Geräts gelten (Frage C2).
+2. **Tabs in derselben Reihenfolge wie im Eulenpfad:** Übungen · Profil · Statistik · Erfolge · Verwaltung (nur
+   Aufsicht). Im Lernsteig zeigt „Erfolge“ nach BF1 a Kompetenzstand, Serie über Tage und Rekorde, keine Sterne.
+   Prüfungsvorbereitung: Frage C1.
+3. **Tab Übungen wie Tab Spiele:** gruppierte Kacheln nach Fach und Thema mit Symbolen, Sortierung (Fach/Thema, passt
+   zu dir, Alphabet, Stufe), einklappbarer Filter, Suche mit Relevanz und Passung (Kern `suche.js`), ähnliche Übungen,
+   Favoriten. **Mehr Personalisierung als im Eulenpfad:** Passung zusätzlich aus Niveau je Fach und Prüfungsziel
+   (Übungen mit geprüften Stufen des gewählten Ziels nach vorn), Wackel-Stufen aus dem Kompetenzstand.
+4. **Profil:** Person (Vorname, Geburtsdatum B3, Klasse 1.–3. Oberstufe, Land und Kanton), Niveau je Fach,
+   Prüfungsziel, Rechnermodell, Fokus; Aufbau wie das Eulenpfad-Profil (Formular, Speichern, sofort wirkende Häkchen).
+5. **Verwaltung (nur Aufsicht):** Konten, Freigabe, Abgleich, Einstellungen, Entwicklung — wie Eulenpfad.
+   **Aufsicht wie Eulenpfad** (D5): neue Aufsicht nur mit Frage und Bestätigung durch eine bestehende, PIN vergessen
+   mit denselben Stufen. Dazu im Lernsteig die Verbindung mit Zustimmung (AU1 a, AF1 a, AF2 a) und die Rolle
+   **Lehrperson/Gruppenleitung** nach [konzept_gruppen.md](konzept_gruppen.md) (G2 a: „Ich bin Lehrperson“), in
+   beiden Apps gleich.
+6. **Freigabe nach Prüfstand (FG1 a)** über den Kern: Prüfstand `lernsteig/gemeinsam/pruefstand.js`, Entwickler-Modus
+   mit `tools/entwickler_server.py` auch für den Lernsteig, Listen je Eintrag (`listenpruefung.js`).
+7. **Anleitungen:** `lernsteig/anleitung/jugendliche.html` und `aufsicht.html` im Muster des Eulenpfads, Bilder mit
+   `tools/anleitung_bilder.js` (Musterkonten je App).
+8. **Gratwanderung:** dasselbe Gerüst ohne Übungen (Anmeldung, Tabs, leerer Katalog, Anleitung als Gerüst), damit der
+   Kern von Anfang an drei Apps trägt und das Testskript sie mitprüft.
+9. **Profil in die anderen Apps übernehmen** (Wunsch Patrik, 2026-11-05): Eine Aufsicht des Eulenpfads legt aus
+   ihrem Eulenpfad-Profil mit dessen Daten ein Profil im Lernsteig und in der Gratwanderung an, wenn der Name dort
+   nicht schon belegt ist (belegt → Hinweis, nichts überschrieben). Alle Apps teilen den Ursprung und damit
+   localStorage; der Kern (`profil.js`, `rollen.js`) liest und schreibt dafür mit dem Präfix der Ziel-App, ohne dass
+   eine App die andere lädt. Gilt in jede Richtung zwischen den drei Apps. *Annahme, vor dem Bau vorzulegen:* Rolle
+   und PIN-Prüfwerte (Salz, Hash) reisen mit, die PIN bleibt also gleich; der Wiederherstellungscode wird in der
+   Ziel-App neu ausgegeben.
+10. **Eulenpfad:** übernimmt aus dem Angleich nur, was er neu braucht (Kern-Teile, Gast, Geburtstag mit Tag, Rolle
+   Lehrperson); Aussehen bleibt.
+
+## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
+
+| Nr. | Wo | Fehler | Behebung |
+|---|---|---|---|
+| D1 | `lernsteig/gemeinsam/rahmen.js:367` | absolute Toleranz: in `zehnerpotenzen` k gilt `0.000000076` für `7.62 · 10⁻⁸` | exakter Vergleich über Brüche, Toleranz nur wo gerundet wird, dann relativ |
+| D2 | `kombinatorik/aufgaben.js:97` | „mindestens eine Fünf“, „höchstens eine Zwei“ mehrdeutig | „eine Augenzahl von mindestens 5“; Challenge einheitlich als Anzahl |
+| D3 | `terme.js:123–125` | Absturz bei `(3)(2x+3)` | `lies` in `try`, Rückmeldung „nicht lesbar“ |
+| D4 | `daten.js:36–62` | Einlesen ohne Schema, halber Import, vergiftet spätere Importe | Schema je Datensatz, erst prüfen, dann schreiben (Kern `daten.js`) |
+| D5 | `aufsicht.js:135`, `konten.js:130` | Einlesen verbindet fremde Konten ohne Zustimmung; neue Aufsicht ohne Bestätigung | nur neu angelegte Konten verbinden; Aufsicht wie Eulenpfad (C5) |
+| D6 | `konten.js:24`, Eulenpfad `spiel.js:393` | fehlt `crypto.subtle` (http über LAN), technische Meldung | Prüfung und verständliche Meldung, im Kern |
+| D7 | `statistik.js:13`, `aufsicht.js:85` | Übungstage in UTC, Wochenziel in Ortszeit | überall Ortszeit (Kern) |
+| D8 | `werkzeug.js:41`, Eulenpfad `spiel.js:22` | `zahlText(1234.5678)` → `1'234.5'678` | nur ganze Zahlen gruppieren (Kern `zahl.js`) |
+| D9 | `rechner.js:112` | NaN als „zu gross“, 11 Stellen bei 9999999999.6 | „nicht definiert“, Anzeige auf 10 Stellen |
+| D10 | `terme.js:63` | Exponent unbegrenzt friert den Tab ein | Grenze mit Meldung |
+| D11 | `rahmen.js:121`, `daten.js` | voller Speicher verliert Runden still | Rückgabe auswerten, Warnung wie Eulenpfad (80 %) |
+| D12 | `konten.js:243–258` | Einladung prüft Land/Kanton nicht, verwirft `JJJJ-MM` | gegen `LP.LAENDER`/`KANTONE` prüfen; B3 |
+| D13 | `sachsituationen/aufgaben.js:66, 79` | ASCII-Minus | über `LST.zahlText` |
+
+## E. Fachliche Korrekturen
+
+1. **Rationale Zahlen, Stufe g** (Hinweis Patrik): Der Lehrplan MA.1.A.3.g verlangt Dezimalzahlen bis 5 Wertziffern
+   multiplizieren (308 · 52; 12 · 0.3), Brüche am Rechteckmodell multiplizieren, Brüche (Nenner bis 1000) als
+   Dezimalzahlen, Stammbruch in einer ganzen Zahl. Die Übung zieht ein Viertel reine Ganzzahl-Produkte (`mal-ganz`) und
+   kein Bruch-Produkt; der Name „Rationale Zahlen“ verspricht, was erst Stufe i bringt. Zudem decken `brueche` und
+   `rationale-zahlen` beide MA.1.A.3 g. Neu schneiden: eine Übung je Zahlart und Operation (Dezimalzahlen
+   multiplizieren und dividieren; Brüche; negative Zahlen), Ganzzahl-Produkte nur als Teil mit Dezimalstellen,
+   Bruch-Produkte am Rechteckmodell dazu. Gleicher Massstab für alle Übungen: Prüfen, ob die Aufgaben je Stufe den
+   **ganzen** Inhalt der Lehrplanstufe abdecken (Abdeckungstabelle je Übung).
+2. **Brutto/Netto** (`daten-rabatt`): Bruttopreis − Rabatt = Nettopreis als Hauptfall; Lesart mit Lehrmittel (mathbuch)
+   abgleichen.
+3. **Überschlagen** (`ueberschlagen-ordnen`): Ablenker aus falschem Runden (eine Stelle falsch gerundet, Ergebnis
+   ±10–30 %), nicht nur Zehnerpotenzen daneben.
+4. **Terme:** „Schreibe als Potenz“ nur mit derselben Basis; `a/2`, `×`, `⋅`, Grossbuchstaben annehmen; gemischte
+   Zahl `1 3/4` erkennen oder ausdrücklich abweisen; „vereinfacht“ verlangt zusammengefasste Faktoren.
+5. **Terme, Reihenfolge j/k:** Stufen bleiben nach Lehrplan (j Erweiterung, k GA); in der Stufenwahl sichtbar machen,
+   dass k ohne j erreichbar ist.
+6. **Atombau:** B³⁺ und Be²⁺ aus der Challenge; B und Si als Halbmetall oder aus der Frage „Metall/Nichtmetall“
+   nehmen; Hinweis zur Lage der Nichtmetalle mit Ausnahme H.
+7. **Kräfte:** Stufe a nach Seitentext (Diagramme erkennen und darstellen) statt nur v = s : t; Beispiele in
+   `maschinen.js` eindeutig (Kran, Handbohrer); realistische Grössen (Kraftmesser, Spannungen in `stromkreis`).
+8. **Französisch:** „C'est le vélo de moi“, „les clés d'elle“ idiomatisch ersetzen; Englisch „___ the table“ eindeutig.
+9. **Vielfalt:** `kombinatorik` f (23) mit drei Münzen, Glücksrad, Urne, Karten; `folgen` j (53) mit weiteren Figuren;
+   `zehnerpotenzen` Zahlwort „einhundertein Millionen“ prüfen (Duden).
+10. **Hinweise:** Wurzelaufgaben bekommen einen Wurzel-Hinweis; `folgen` nennt die Formel nicht in der Aufgabe.
+11. Danach: Patrik prüft die sieben Listen und die Annahmen je Übung im Entwickler-Modus (FG1 a).
+
+## F. Recherchen ordnen
+
+1. **Ordnung:** `docs/lernsteig/lehrplan/` bekommt eine `README.md` mit allen Recherchen (Datei, Inhalt, Quellen,
+   Stand, Reichweite, offene Punkte) und eine **eine** Liste offener Recherchen (heute verstreut über
+   `lehrplan_sg_sek1.md` §6, `rechnermodelle_sg.md` §6, `R6_auftrag_nt.md`, Handover). Erledigte Aufträge (R6 Teil NT,
+   R11) als erledigt markieren und mit dem Ergebnis verlinken.
+2. **Widersprüche und Zweifel klären** (mit Quelle, nicht durch Glätten):
+   - Lehrmittellisten: `rechnermodelle_sg.md` Z. 90 nennt Listen 2025/26 und 2026/27 ohne Quelle,
+     `sg_oberstufe_praxis.md` Z. 24 und `lehrplan_sg_sek1.md` Z. 22 sagen, es gebe keine neuere als 2023/24. Auf sg.ch
+     nachsehen; gibt es sie, Tabelle LM auf den neuen Stand, sonst die Zeile in `rechnermodelle_sg.md` belegen oder
+     streichen. Dazu „Schuljahr 2023/24, erstellt am 25.01.2022“ prüfen.
+   - WAH-Fussnote ⁷ gegen Kleinklasse 4/4/4: Sek (0+4+2) und Real (0+2+4) ergeben je 6; die Fussnote gilt also
+     vermutlich nur für Sek und Real. Am Original (LP-RB, Lektionentafeln) bestätigen und so vermerken.
+   - Lesart des OP („bis dahin bearbeitet“) in `nt_zyklus3.md` und `mathematik_zyklus3.md` als Lesart markieren;
+     im Browser an zwei, drei Seiten gegenprüfen (Darstellung der `hr op`).
+   - Quellen ohne Adresse (LM, BPU, PA „PDF auf sg.ch“): Adresse und Abrufdatum nachtragen.
+3. **Veraltete Stellen:** `lehrplan_sg_sek1.md` (R6 „dringend offen“; „nicht gelesen: Aufnahmeprüfung,
+   Lehrmittelliste“; „übrige Fächer nicht ausgelesen“), Handover „R1–R7“, `commons_bibliothek.md` („Einladung noch nicht
+   gebaut“), GW1 mit `n3`.
+4. **Kleinklasse:** Frage F1.
+5. Offene Recherchen danach in der Reihenfolge, die die Übungen brauchen: R8 (Schreibweisen im mathbuch, betrifft
+   Z1 a), R6-Rest (NT-Lehrmittel), R5, R9, R12–R19.
+
+## G. Doku-Drift
+
+Nach dem Grundsatz oben: zuerst entscheiden, was richtig ist.
+- `docs/lernsteig/rahmen.md`: Kopf („offen: Anmeldung“ — gebaut), Abschnitt 1 (`konten.js`, `daten.js` fehlen; „vier
+  gemeinsame Dateien“ — sieben), Abschnitt 5 Rekord „je Niveau“ gegen Code „je Stufe“ (richtig ist je Stufe: die
+  Aufgaben einer Stufe hängen heute nicht vom Niveau ab, das Niveau wählt nur das Ziel; also Doku angleichen — bekommt
+  ein Niveau eigene Aufgaben, dann Rekord je Stufe und Niveau),
+  Abschnitt 5a, Abschnitt 6 Speicherfelder (`rechnerModell`, `wochenziel`, `mitRechner`, `liste[].rechner`).
+- `STAND_und_PLAN.md`: „23 Übungen“ → 27, „fünf Listen“ → sieben.
+- Session-Report LST_Session1 deckt nur den 4.11. ab: Nachtrag 5.11. (Konten, Aufsicht, Statistik, NT, KB1/KB2, FG1).
+- `bruch.js:39` Kommentar, `werkzeug.js:47` doppelter Kommentar.
+- Nach C werden `rahmen.md` beider Apps auf den Kern verwiesen statt doppelt beschrieben.
+
+## H. Portal
+
+- Je App eine Spalte mit Karte und Anleitungen (P1 a): Lernsteig mit Anleitung für Jugendliche, für Erwachsene und
+  „Alle Übungen“ (Tabelle wie `eulenpfad-spiele.html`, Verfügbarkeit nach Prüfstand, gesperrte als „in Prüfung“).
+- Gratwanderung mit denselben Platzhaltern („noch keine Übungen“).
+- Die Tabelle je App aus einem gemeinsamen Baustein (Kern oder `portal/`), nicht dreimal.
+
+## Fragen
+
+Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
+- **A1 a:** Rücknahme und Sperre aller Lernsteig-Übungen im selben Commit; voller Prüfstand mit C.
+- **A2 a:** Cloud-Repo `Lernsteig` mit `8f55173` abgeschlossen; der Lernsteig lebt nur noch in Lernspiele, spätere
+  Cloud-Sitzungen auf einem Branch von Lernspiele.
+- **C1 a:** Prüfungsvorbereitung als Gruppe „🎯 Prüfungsvorbereitung“ oben im Tab Übungen (bei gewähltem Prüfungsziel:
+  geprüfte Stufen, Mischrunde, Stand je Kompetenz); Tab-Reihe wie im Eulenpfad. **Zusatz Patrik:** auch filterbar —
+  Chip „🎯 Prüfungsziel“ in der Filterzeile „Nur“ neben „⭐ Mein Fokus“, zeigt nur Übungen mit geprüften Stufen des
+  Ziels und auf den Karten nur diese Stufen.
+- **C2 a:** Gast in allen drei Apps als Teil des Kerns (nichts gespeichert, Profil ohne Wirkung, nur Freigegebenes, je
+  Gerät abschaltbar); im Eulenpfad „👀 Nur schauen“.
+- **F1 a:** Kleinklasse als drittes Schulniveau SG (Niveau `n1`, Ziel „so weit wie möglich“, Fremdsprachen
+  ausgeblendet und einschaltbar, keine Prüfungsziele, keine eigenen Übungen); Praxis in F2 an der Quelle prüfen.

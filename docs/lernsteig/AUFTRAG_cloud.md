@@ -1,5 +1,10 @@
 # Auftrag Cloud-Sitzung: Lernsteig
 
+> **Abgeschlossen 2026-11-05** (Entscheid A2 a, LERN_Session15): Die Cloud-Sitzung LST_Session1 ist ins Repo
+> Lernspiele zurückgeholt (Lernsteig-Commit `8f55173`). Das Repo `Lernsteig` wird nicht weitergeführt; der Lernsteig
+> lebt nur noch hier. Eine spätere Cloud-Sitzung arbeitet auf einem Branch von Lernspiele. Plan:
+> [../plan_angleich_reihe.md](../plan_angleich_reihe.md).
+
 Stand: 2026-11-04 (aus LERN_Session13). Diese Sitzung arbeitet **nur am Lernsteig**; am Eulenpfad arbeitet Patrik
 parallel lokal.
 

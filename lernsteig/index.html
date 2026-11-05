@@ -4,62 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lernsteig</title>
-<!-- Grundgerüst Lernsteig (Sekundarstufe I, Lehrplan 21 Zyklus 3), LERN_Session6. Konzept:
-     docs/konzept_reihe_eulenpfad.md. Noch ohne Spiele und ohne gespeicherte Daten; ob Lernsteig den
-     Rahmen von Eulenpfad mitbenutzt, entscheidet der gemeinsame Kern (Konzept Abschnitt 5, Schritt 2).
-     Gleiche Adresse wie Eulenpfad (github.io): Speicherschlüssel dürfen nicht lernspiele:* sein. -->
-<style>
-  :root {
-    --text: #1f2933; --leise: #616e7c; --flaeche: #f5f7fa; --karte: #fff; --rand: #d9e2ec;
-    --akzent: #2f6f5e; --akzent-hell: #e3f1ec;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; padding: 28px 16px 40px; font: 17px/1.5 system-ui, "Segoe UI", sans-serif; color: var(--text); background: var(--flaeche); }
-  main { max-width: 960px; margin: 0 auto; }
-  .zurueck { color: var(--leise); text-decoration: none; font-size: 15px; }
-  .zurueck:hover { color: var(--akzent); }
-  header { margin: 12px 0 24px; }
-  h1 { margin: 0; font-size: clamp(30px, 6vw, 40px); letter-spacing: -.01em; }
-  h1 span { color: var(--akzent); }
-  .unter { margin: 4px 0 0; color: var(--leise); }
-  .hinweis { background: var(--akzent-hell); border-radius: 10px; padding: 10px 14px; font-size: 15px; margin-bottom: 24px; }
-  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .06em; color: var(--leise); margin: 24px 0 10px; }
-  .niveaus { display: flex; flex-wrap: wrap; gap: 8px; }
-  .niveau { border: 2px solid var(--rand); background: var(--karte); border-radius: 999px; padding: 8px 16px; font: inherit; font-weight: 700; color: var(--leise); }
-  .faecher { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-  .fach { background: var(--karte); border: 1px solid var(--rand); border-radius: 12px; padding: 16px; }
-  .fach b { display: block; font-size: 18px; }
-  .fach small { color: var(--leise); }
-  .fach .stand { display: inline-block; margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--akzent); }
-  footer { margin-top: 32px; color: var(--leise); font-size: 14px; }
-</style>
+<!-- Startseite des Lernsteigs (Sekundarstufe I, Zyklus 3). Vertrag: docs/lernsteig/rahmen.md.
+     Eigener Speicher lernsteig:* (SP1 a); Anmeldung folgt (AU1 a), bis dahin ein Gastkonto je Gerät. -->
+<link rel="stylesheet" href="gemeinsam/stil.css">
+<link rel="stylesheet" href="start/start.css">
 </head>
 <body>
-<main>
+<header class="kopf">
   <a class="zurueck" href="../portal/index.html">← Alle Apps</a>
-  <header>
-    <h1>Lern<span>steig</span></h1>
-    <p class="unter">Üben und Prüfungen vorbereiten — Sekundarstufe I.</p>
-  </header>
-  <div class="hinweis">Im Aufbau. Hier entsteht die zweite App der Reihe; Übungen gibt es noch keine.</div>
-
-  <h2>Niveau</h2>
-  <div class="niveaus" aria-label="Niveau (noch nicht wählbar)">
-    <button class="niveau" type="button" disabled>Real</button>
-    <button class="niveau" type="button" disabled>Sek</button>
-    <button class="niveau" type="button" disabled>Pro-Gymi</button>
-  </div>
-
-  <h2>Fächer</h2>
-  <div class="faecher">
-    <div class="fach"><b>Mathematik</b><small>Zahl und Variable, Form und Raum, Grössen, Funktionen und Daten</small><span class="stand">erster Prototyp geplant</span></div>
-    <div class="fach"><b>Deutsch</b><small>Grammatik, Rechtschreibung, Lesen</small><span class="stand">später</span></div>
-    <div class="fach"><b>Englisch</b><small>Wortschatz und Grammatik</small><span class="stand">später</span></div>
-    <div class="fach"><b>Französisch</b><small>Wortschatz und Grammatik</small><span class="stand">später</span></div>
-    <div class="fach"><b>Natur und Technik</b><small>Begriffe und Zusammenhänge</small><span class="stand">später</span></div>
-  </div>
-
-  <footer>Alles bleibt im Browser auf deinem Gerät. Keine Anmeldung, keine Werbung.</footer>
-</main>
+  <h1>Lern<span class="akzent">steig</span></h1>
+  <span class="kopf-info">Üben und Prüfungen vorbereiten — Sekundarstufe I</span>
+</header>
+<main class="buehne" id="start"></main>
+<script src="gemeinsam/werkzeug.js"></script>
+<script src="gemeinsam/lehrplaene.js"></script>
+<script src="gemeinsam/katalog.js"></script>
+<script src="gemeinsam/rechner.js"></script>
+<script src="gemeinsam/konten.js"></script>
+<script src="gemeinsam/pruefstand.js"></script>
+<script src="gemeinsam/rahmen.js"></script>
+<script src="start/start.js"></script>
 </body>
 </html>

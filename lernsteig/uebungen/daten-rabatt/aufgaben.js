@@ -1,0 +1,152 @@
+/* Übung „Mittelwert, Häufigkeit, Rabatt“ — MA.3.A.1, Stufen j, k, l. Aufgaben als Daten, ohne DOM.
+   Geprüft an der Aufnahmeprüfung Gymnasium (i–k) und an der Einheitsaufnahmeprüfung (i–l), PA.
+   Inhalte sinngemäss nach docs/lernsteig/lehrplan/mathematik_zyklus3.md, MA.3.A.1 (Begriffe, hier angewendet):
+   j  arithmetisches Mittel; Währung (CHF, €, $)
+   k  (OP) absolute und relative Häufigkeit; Wahrscheinlichkeit
+   l  (GA) Rabatt, Brutto, Netto (Steigung und Zins übt „Prozent und Funktionswerte“)
+   Annahmen, mit Patrik abzustimmen: Wechselkurse sind erfunden und stehen in der Aufgabe; Frankenbeträge gehen auf
+   5 Rappen auf; Wahrscheinlichkeit als Dezimalzahl oder in Prozent, wie die Aufgabe verlangt. */
+"use strict";
+
+const UEBUNG = {
+  id: "daten-rabatt",
+  einleitung: "Rechne mit Daten, Häufigkeiten und Preisen.",
+  stufen: {
+    j: "Arithmetisches Mittel, Geld in andere Währungen umrechnen",
+    k: "Absolute und relative Häufigkeit, Wahrscheinlichkeit",
+    l: "Rabatt, Brutto und Netto",
+    challenge: "Fehlender Wert zum Mittelwert, Preis vor dem Rabatt",
+  },
+};
+
+const MAL = " · ";
+const z = (a, b) => LST.zufall(a, b);
+const rund = x => Math.round(x * 1e9) / 1e9;
+const dez = x => LST.dezimalText(rund(x));
+const fr = x => (Number.isInteger(rund(x)) ? dez(x) : LST.dezimalText(rund(x), 2));
+const auf5Rp = x => Math.abs(Math.round(x * 20) - x * 20) < 1e-6;
+
+function fertig(stufe, typ, text, antwort, einheit, weg, daten) {
+  const loes = einheit === "Fr." ? fr(antwort) : dez(antwort);
+  return { art: "zahl", stufe, typ, text, einheit, antwort: rund(antwort), loesung: `${loes}${einheit ? " " + einheit : ""}`, weg, kennung: text, daten };
+}
+
+// ---------- j ----------
+function stufeJ() {
+  const typ = LST.waehle(["mittelwert", "mittelwert", "waehrung"]);
+  if (typ === "mittelwert") {
+    for (;;) {
+      const n = z(4, 7), werte = Array.from({ length: n }, () => z(1, 60));
+      const s = werte.reduce((a, b) => a + b, 0), m = s / n;
+      if (!Number.isInteger(rund(m * 10))) continue; // höchstens eine Nachkommastelle
+      return fertig("j", typ, `Arithmetisches Mittel von ${werte.join(", ")} =`, m, "", `(${werte.join(" + ")}) : ${n} = ${s} : ${n} = ${dez(m)}`, { werte });
+    }
+  }
+  const [w, kurs] = LST.waehle([["€", LST.waehle([0.92, 0.94, 0.95, 0.96])], ["$", LST.waehle([0.8, 0.85, 0.88, 0.9])]]);
+  const betrag = z(1, 60) * 5;
+  if (LST.zufall(0, 1)) return fertig("j", typ, `Kurs: 1 ${w} = ${dez(kurs)} Fr. Wie viele Franken sind ${betrag} ${w}?`, betrag * kurs, "Fr.", `${betrag}${MAL}${dez(kurs)} = ${fr(betrag * kurs)}`, { betrag, kurs, richtung: "zu-fr" });
+  const fr0 = betrag * kurs;
+  return fertig("j", typ, `Kurs: 1 ${w} = ${dez(kurs)} Fr. Wie viele ${w} erhältst du für ${fr(fr0)} Fr.?`, betrag, w, `${fr(fr0)} : ${dez(kurs)} = ${betrag}`, { betrag, kurs, richtung: "von-fr", fr0 });
+}
+
+// ---------- k ----------
+function stufeK() {
+  const typ = LST.waehle(["relativ-prozent", "absolut", "wahrscheinlichkeit"]);
+  if (typ === "relativ-prozent") {
+    const n = LST.waehle([20, 25, 40, 50, 80, 100, 200, 250]), a = z(1, n - 1);
+    return fertig("k", typ, `Von ${n} befragten Jugendlichen fahren ${a} mit dem Velo zur Schule. Relative Häufigkeit in % =`, a / n * 100, "%", `${a} : ${n} = ${dez(a / n)} = ${dez(a / n * 100)} %`, { a, n });
+  }
+  if (typ === "absolut") {
+    const n = LST.waehle([20, 25, 40, 50, 80, 120, 200, 300, 400]), p = LST.waehle([5, 10, 15, 20, 25, 30, 40, 50, 60, 75]);
+    if (!Number.isInteger(n * p / 100)) return stufeK();
+    return fertig("k", typ, `Bei ${n} Würfen zeigt der Würfel in ${p} % der Fälle eine Sechs. Absolute Häufigkeit =`, n * p / 100, "", `${p} % von ${n} = ${dez(n * p / 100)}`, { n, p });
+  }
+  const r = z(1, 9), b = z(1, 9), g = z(0, 6), tot = r + b + g;
+  const p = r / tot;
+  if (!Number.isInteger(rund(p * 1000))) return stufeK(); // aufgehend, höchstens drei Nachkommastellen
+  return fertig("k", typ, `In einer Urne liegen ${r} rote, ${b} blaue${g ? ` und ${g} grüne` : ""} Kugeln. Wahrscheinlichkeit, blind eine rote zu ziehen (als Dezimalzahl) =`, p, "", `${r} : ${tot} = ${dez(p)}`, { r, b, g });
+}
+
+// ---------- l ----------
+function stufeL() {
+  const typ = LST.waehle(["rabatt", "rabatt-betrag", "brutto", "netto"]);
+  for (;;) {
+    const preis = z(4, 400) * 5, p = LST.waehle([5, 10, 15, 20, 25, 30, 40, 50]);
+    if (typ === "rabatt") { const w = preis * (100 - p) / 100; if (!auf5Rp(w)) continue; return fertig("l", typ, `Ein Velo kostet ${fr(preis)} Fr. Es gibt ${p} % Rabatt. Neuer Preis =`, w, "Fr.", `${fr(preis)}${MAL}${dez((100 - p) / 100)} = ${fr(w)}`, { preis, p }); }
+    if (typ === "rabatt-betrag") { const w = preis * p / 100; if (!auf5Rp(w)) continue; return fertig("l", typ, `${fr(preis)} Fr., davon ${p} % Rabatt. Wie viele Franken Rabatt?`, w, "Fr.", `${p} % von ${fr(preis)} = ${fr(w)}`, { preis, p }); }
+    if (typ === "brutto") { const zu = LST.waehle([2, 5, 8, 10, 20]); const w = preis * (100 + zu) / 100; if (!auf5Rp(w)) continue; return fertig("l", typ, `Nettopreis ${fr(preis)} Fr., dazu ${zu} % Zuschlag. Bruttopreis =`, w, "Fr.", `${fr(preis)}${MAL}${dez((100 + zu) / 100)} = ${fr(w)}`, { preis, p: zu }); }
+    const zu = LST.waehle([5, 10, 20, 25]); const brutto = preis * (100 + zu) / 100; if (!auf5Rp(brutto)) continue;
+    return fertig("l", "netto", `Bruttopreis ${fr(brutto)} Fr. mit ${zu} % Zuschlag. Nettopreis =`, preis, "Fr.", `${fr(brutto)} : ${dez((100 + zu) / 100)} = ${fr(preis)}`, { brutto, p: zu });
+  }
+}
+
+// ---------- Challenge ----------
+function challenge() {
+  if (LST.zufall(0, 1)) {
+    const n = z(4, 6), m = z(10, 40), werte = Array.from({ length: n - 1 }, () => z(1, 60));
+    const fehl = n * m - werte.reduce((a, b) => a + b, 0);
+    if (fehl < 1 || fehl > 99) return challenge();
+    return fertig("challenge", "fehlender-wert", `Das Mittel von ${n} Zahlen ist ${m}. ${n - 1} davon sind ${werte.join(", ")}. Die fehlende Zahl =`, fehl, "", `${n}${MAL}${m} = ${n * m}; ${n * m} − ${werte.reduce((a, b) => a + b, 0)} = ${fehl}`, { n, m, werte });
+  }
+  for (;;) {
+    const vorher = z(4, 300) * 5, p = LST.waehle([10, 20, 25, 30, 40, 50]);
+    const nachher = vorher * (100 - p) / 100;
+    if (!auf5Rp(nachher)) continue;
+    return fertig("challenge", "vor-rabatt", `Nach ${p} % Rabatt kostet eine Jacke ${fr(nachher)} Fr. Preis vor dem Rabatt =`, vorher, "Fr.", `${fr(nachher)} : ${dez((100 - p) / 100)} = ${fr(vorher)}`, { nachher, p });
+  }
+}
+
+function aufgabeErzeugen(stufe, niveau) {
+  if (stufe === "j") return stufeJ();
+  if (stufe === "k") return stufeK();
+  if (stufe === "l") return stufeL();
+  if (stufe === "challenge") return challenge();
+  throw new Error(`daten-rabatt: keine Stufe ${stufe}`);
+}
+
+function hinweis(a, eingabe) {
+  const h = {
+    mittelwert: "Alle Werte addieren und durch die Anzahl der Werte teilen.",
+    waehrung: "Der Kurs sagt, wie viele Franken eine Einheit der anderen Währung kostet. Mal oder geteilt?",
+    "relativ-prozent": "Relative Häufigkeit: Anteil durch Gesamtzahl, dann mal hundert für Prozent.",
+    absolut: "Absolute Häufigkeit: Wie viele Fälle sind das? Prozentsatz der Gesamtzahl.",
+    wahrscheinlichkeit: "Günstige Fälle durch alle möglichen Fälle.",
+    rabatt: "Vom Preis den Rabatt abziehen, oder gleich mit dem verbleibenden Anteil rechnen.",
+    "rabatt-betrag": "Der Rabatt ist der Prozentanteil des Preises.",
+    brutto: "Brutto ist Netto plus Zuschlag.",
+    netto: "Rückwärts: Der Bruttopreis entspricht mehr als hundert Prozent. Durch den Faktor teilen.",
+    "fehlender-wert": "Mittel mal Anzahl ergibt die Summe aller Zahlen. Was fehlt noch?",
+    "vor-rabatt": "Der neue Preis ist weniger als hundert Prozent des alten. Durch diesen Anteil teilen, nicht den Rabatt dazuzählen.",
+  };
+  return h[a.typ] || "Schritt für Schritt.";
+}
+
+function pruefeAufgabe(a, stufe, niveau) {
+  const m = [];
+  if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
+  const B = LST_BRUCH, Z = x => B.vonZahl(x), d = a.daten;
+  let soll;
+  switch (a.typ) {
+    case "mittelwert": soll = B.durch(Z(d.werte.reduce((x, y) => x + y, 0)), Z(d.werte.length)); break;
+    case "waehrung": soll = d.richtung === "zu-fr" ? B.mal(Z(d.betrag), Z(d.kurs)) : B.durch(Z(d.fr0), Z(d.kurs)); break;
+    case "relativ-prozent": soll = B.mal(B.durch(Z(d.a), Z(d.n)), Z(100)); break;
+    case "absolut": soll = B.durch(B.mal(Z(d.n), Z(d.p)), Z(100)); break;
+    case "wahrscheinlichkeit": soll = B.durch(Z(d.r), Z(d.r + d.b + d.g)); break;
+    case "rabatt": soll = B.durch(B.mal(Z(d.preis), Z(100 - d.p)), Z(100)); break;
+    case "rabatt-betrag": soll = B.durch(B.mal(Z(d.preis), Z(d.p)), Z(100)); break;
+    case "brutto": soll = B.durch(B.mal(Z(d.preis), Z(100 + d.p)), Z(100)); break;
+    case "netto": soll = B.durch(B.mal(Z(d.brutto), Z(100)), Z(100 + d.p)); break;
+    case "fehlender-wert": soll = B.minus(B.mal(Z(d.n), Z(d.m)), Z(d.werte.reduce((x, y) => x + y, 0))); break;
+    case "vor-rabatt": soll = B.durch(B.mal(Z(d.nachher), Z(100)), Z(100 - d.p)); break;
+    default: return [`unbekannter Typ ${a.typ}`];
+  }
+  if (!B.gleich(soll, Z(a.antwort))) m.push(`Lösung ${a.antwort}, nachgerechnet ${B.text(soll)}: ${a.text}`);
+  if (!B.endlich(soll)) m.push(`Ergebnis geht nicht auf: ${a.text}`);
+  if (a.einheit === "Fr." && !auf5Rp(a.antwort)) m.push(`Franken nicht auf 5 Rp.: ${a.loesung}`);
+  if (a.typ === "wahrscheinlichkeit" && !(a.antwort > 0 && a.antwort < 1)) m.push("Wahrscheinlichkeit nicht zwischen 0 und 1");
+  if (/\d{4}/.test(a.text.replace(/\.\d+/g, ""))) m.push(`Tausender ohne Apostroph: ${a.text}`);
+  if ((a.loesung.split(" ")[0].split(".")[1] || "").length > 3) m.push(`mehr als drei Nachkommastellen: ${a.loesung}`);
+  return m;
+}
+
+if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis };

@@ -53,8 +53,11 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 - **Alter:** 2. Klasse (≈ 7–8 J.) fast ohne Lesetext, Symbole/Bilder; 4. Klasse (≈ 9–10 J.)
   kurze Sätze erlaubt.
 - **Offline lauffähig**, keine Anmeldung. **Daten über das Kind nur lokal im Browser**
-  (Entscheid LERN-5 b, 2026-10-31): Profil (Name, Geburtsmonat als Jahr und Monat ohne Tag — Wunsch Patrik
-  LERN_Session14, das Alter wird daraus gerechnet —, Klasse mit Aufstiegen, Fokus-Lernziele) und je Runde
+  (Entscheid LERN-5 b, 2026-10-31): Profil (Name, Geburtsdatum — in allen Apps vollständig, gespeichert
+  `JJJJ-MM-TT`, gezeigt `TT.MM.JJJJ`; fehlt der Tag wie in Profilen seit LERN_Session14, gilt der Monat und der Tag
+  kann nachgetragen werden (Vorgabe Patrik LERN_Session15, ersetzt „Monat ohne Tag“; Umsetzung
+  `docs/plan_angleich_reihe.md` B3) —, Klasse mit Aufstiegen, Fokus-Lernziele; im Lernsteig dazu Land und Kanton,
+  Niveau je Fach und Prüfungsziel) und je Runde
   ein Protokolleintrag (Spiel, Stufe, Sterne, Fehler, Dauer, falsch gelöste Aufgaben). Nichts
   wird an einen Server geschickt; Sichern/Einlesen als JSON-Datei nur auf Knopfdruck in der
   Statistik. Ausnahme Abgleich (Entscheid S1 a, 2026-11-01): Daten verlassen den Browser nur in
@@ -66,6 +69,9 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
   Ausnahme Abzeichen (Entscheid L1 a, Annahme B1, 2026-11-03): Ein Abzeichen aus dem Tab Erfolge verlässt den
   Browser nur auf Knopfdruck des Kindes als Bild (Vorname, Titel, Datum) über den Teilen-Dialog des Geräts oder als
   gespeicherte Datei.
+  Ausnahme Lernsteig (Entscheide AU1 a, AF1 a, AF2 a, 2026-11-05): Eine Aufsicht (Eltern, Lehrperson) sieht am selben
+  Gerät nur Konten, die mit ihr verbunden sind — verbunden nur mit Zustimmung des Jugendlichen oder durch Einlesen
+  einer Sicherung, die er ihr gegeben hat; beide Seiten können die Verbindung lösen.
   Keine weiteren Angaben (Nachname, Schule, Foto) erfassen.
 
 ## Projekt-Steckbrief

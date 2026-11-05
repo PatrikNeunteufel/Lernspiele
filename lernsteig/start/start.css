@@ -1,0 +1,50 @@
+/* Startseite des Lernsteigs: nur Anordnung; Farben aus gemeinsam/stil.css. */
+.akzent { color: var(--akzent); }
+.abschnitt { margin: 20px 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--leise); }
+.einstellungen { display: grid; gap: 12px; background: var(--karte); border: 1px solid var(--rand); border-radius: var(--radius); padding: 14px 16px; }
+.einstellung { display: grid; gap: 4px; min-width: 0; }
+.einstellung > span { font-weight: 600; }
+.einstellung select { min-height: 44px; font: inherit; padding: 6px 10px; border: 2px solid var(--rand); border-radius: 10px; background: var(--karte); width: 100%; min-width: 0; }
+.faecher { display: grid; gap: 12px; }
+.fach { background: var(--karte); border: 1px solid var(--rand); border-radius: var(--radius); padding: 14px 16px; }
+.fach h3 { margin: 0; font-size: 18px; }
+.fach .bereich { margin: 2px 0 8px; font-size: 14px; color: var(--leise); }
+.fach.spaeter { opacity: .75; }
+.uebungen { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.uebung-link { display: block; padding: 10px 12px; border: 1px solid var(--rand); border-radius: 10px; text-decoration: none; color: var(--text); }
+.uebung-link:hover { border-color: var(--akzent); }
+.uebung-link b { display: block; }
+.uebung-link small { color: var(--leise); }
+.marke { display: inline-block; margin-left: 6px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--akzent-hell); color: var(--akzent); }
+.fuss { margin-top: 28px; color: var(--leise); font-size: 14px; }
+.thema { margin: 14px 0 6px; font-size: 14px; color: var(--leise); font-weight: 600; }
+.marke.pruefung { background: var(--hinweis-hell); color: var(--hinweis); }
+/* Noch nicht freigegeben (FG1 a): für Jugendliche ohne Verweis, für die Aufsicht mit Vermerk */
+.marke.gesperrt { background: var(--flaeche); color: var(--leise); border: 1px solid var(--rand); }
+.uebung-gesperrt { display: block; padding: 4px 0; opacity: .7; }
+.konto-zeile { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; margin: 0; font-size: 18px; }
+.knopf-zeile { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.konto-liste { display: flex; flex-wrap: wrap; gap: 8px; }
+.textfeld { min-height: 44px; font: inherit; padding: 6px 10px; border: 2px solid var(--rand); border-radius: 10px; background: var(--karte); width: 100%; }
+.fehlertext { color: #a33; margin: 0; min-height: 1em; }
+.code-anzeige { font-size: 26px; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; margin: 4px 0; }
+.konto h3 { margin: 0; font-size: 18px; }
+/* Statistik (statistik.html) */
+.kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.kachel { background: var(--karte); border: 1px solid var(--rand); border-radius: var(--radius); padding: 10px 12px; display: grid; }
+.kachel b { font-size: 24px; font-variant-numeric: tabular-nums; }
+.kachel small { color: var(--leise); }
+.stand-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.stand-liste li { background: var(--karte); border: 1px solid var(--rand); border-radius: 10px; padding: 10px 12px; }
+.stufen-stand { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; font-size: 14px; }
+.runden-tabelle { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--karte); display: block; overflow-x: auto; }
+.runden-tabelle th, .runden-tabelle td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rand); }
+.meldung { margin: 0; font-weight: 600; }
+/* Aufsicht (AU1 a) */
+.mitleser-liste { margin: 4px 0; padding-left: 18px; }
+.anfrage { border: 2px solid var(--hinweis); background: var(--hinweis-hell); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; }
+.anfrage p, .mitleser p { margin: 0; }
+.knopf.klein { min-height: 32px; padding: 2px 10px; font-size: 14px; }
+a.knopf { text-decoration: none; display: inline-flex; align-items: center; }
+a.knopf { color: var(--text); }
+.serie { margin: 0; font-weight: 600; }

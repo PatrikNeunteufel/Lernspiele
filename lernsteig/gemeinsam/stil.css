@@ -1,0 +1,126 @@
+/* Lernsteig — gemeinsamer Stil: sachlich, wenig Deko, keine Figuren (Auftrag, Ziel). Farben nur hier.
+   Vertrag: docs/lernsteig/rahmen.md, Abschnitt 3. */
+:root {
+  --text: #1f2933; --leise: #616e7c; --flaeche: #f5f7fa; --karte: #fff; --rand: #d9e2ec;
+  --akzent: #2f6f5e; --akzent-hell: #e3f1ec; --akzent-text: #fff;
+  --gut: #2f6f5e; --gut-hell: #e3f1ec; --hinweis: #8a5a00; --hinweis-hell: #fff4dc;
+  --fokus: #1c64f2;
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font: 17px/1.5 system-ui, "Segoe UI", sans-serif; color: var(--text); background: var(--flaeche); }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--fokus); outline-offset: 2px; }
+
+/* Kopfzeile */
+.kopf { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; max-width: 760px; margin: 0 auto; padding: 20px 16px 8px; }
+.kopf h1 { margin: 0; font-size: clamp(20px, 4.5vw, 26px); flex: 1 1 260px; }
+.kopf-info { color: var(--leise); font-size: 15px; }
+/* Gesperrte Übung, von der Aufsicht geöffnet (FG1 a) */
+.gesperrt-vermerk { max-width: 760px; margin: 0 auto 8px; padding: 6px 16px; background: var(--hinweis-hell); color: var(--hinweis); font-size: 14px; font-weight: 600; box-sizing: border-box; }
+.zurueck { color: var(--leise); text-decoration: none; font-size: 15px; flex-basis: 100%; }
+.zurueck:hover { color: var(--akzent); }
+
+/* Bühne */
+.buehne { max-width: 760px; margin: 0 auto; padding: 8px 16px 40px; }
+.einleitung { margin: 4px 0 16px; }
+.leise { color: var(--leise); }
+.klein { font-size: 14px; }
+
+/* Knöpfe */
+.knopf { min-height: 48px; padding: 8px 18px; border-radius: 10px; border: 2px solid var(--rand); background: var(--karte); cursor: pointer; font-weight: 600; }
+.knopf:hover { border-color: var(--akzent); }
+.knopf.haupt { background: var(--akzent); border-color: var(--akzent); color: var(--akzent-text); }
+.chip { border: 2px solid var(--rand); background: var(--karte); border-radius: 999px; padding: 6px 16px; font-weight: 700; color: var(--leise); cursor: pointer; min-height: 40px; }
+.chip.an { border-color: var(--akzent); background: var(--akzent-hell); color: var(--akzent); }
+.niveau-wahl { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+
+/* Stufenwahl */
+.stufen { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.stufe { display: flex; gap: 8px; align-items: stretch; }
+.stufe-knopf { flex: 1; display: flex; align-items: center; gap: 12px; text-align: left; padding: 10px 14px; border: 1px solid var(--rand); background: var(--karte); border-radius: var(--radius); cursor: pointer; min-height: 56px; }
+.stufe-knopf:hover { border-color: var(--akzent); }
+.stufe-nr { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--akzent-hell); color: var(--akzent); font-weight: 700; }
+.stufe-text { display: flex; flex-direction: column; min-width: 0; }
+.stufe-text small { color: var(--akzent); font-weight: 600; font-size: 14px; }
+.stufe-text .leise { font-size: 14px; }
+.bestwert { margin-left: auto; font-size: 13px; color: var(--leise); white-space: nowrap; }
+.endlos-knopf { flex: none; width: 104px; border: 1px solid var(--rand); background: var(--karte); border-radius: var(--radius); cursor: pointer; font-size: 14px; font-weight: 600; color: var(--leise); }
+.endlos-knopf:hover { border-color: var(--akzent); color: var(--akzent); }
+
+/* Runde */
+.fortschritt { color: var(--leise); font-size: 15px; margin: 8px 0; }
+.aufgabe { background: var(--karte); border: 1px solid var(--rand); border-radius: var(--radius); padding: 24px 16px; text-align: center; min-height: 88px; }
+.term { font-size: clamp(22px, 6vw, 34px); font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.antwort { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 16px 0; }
+.eingabe { width: min(220px, 100%); min-height: 48px; padding: 8px 12px; font-size: 22px; text-align: center; border: 2px solid var(--rand); border-radius: 10px; background: var(--karte); font-variant-numeric: tabular-nums; }
+.eingabe:focus { border-color: var(--akzent); }
+.rueckmeldung { border-radius: var(--radius); padding: 0 16px; min-height: 24px; }
+.rueckmeldung p { margin: 8px 0; }
+.rueckmeldung.gut { background: var(--gut-hell); color: var(--gut); padding: 8px 16px; }
+.rueckmeldung.hinweis { background: var(--hinweis-hell); color: var(--hinweis); padding: 8px 16px; }
+.weg { font-variant-numeric: tabular-nums; color: var(--text); overflow-wrap: anywhere; }
+.ergebnis { background: var(--karte); border: 1px solid var(--rand); border-radius: var(--radius); padding: 8px 16px; font-size: 19px; }
+
+@media (max-width: 480px) {
+  .stufe { flex-direction: column; }
+  .endlos-knopf { width: auto; min-height: 44px; }
+  .bestwert { display: none; }
+}
+
+/* Eingebauter Rechner (RE1 a), Ansicht „allgemein“ */
+.rechner { max-width: 360px; margin: 0 auto 16px; background: #26313b; border-radius: 16px; padding: 12px; color: #fff; }
+.rechner:focus { outline: 3px solid var(--fokus); outline-offset: 2px; }
+.rechner-anzeige { background: #dfe8e3; color: #1f2933; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; font-variant-numeric: tabular-nums; min-height: 64px; }
+.rechner-zeile { font-size: 16px; overflow-wrap: anywhere; }
+.rechner-ergebnis { font-size: 22px; font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+.rechner-ergebnis.fehler { font-size: 15px; font-weight: 600; color: #a33; text-align: left; }
+.rechner-tasten { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.rt { min-height: 44px; border: 0; border-radius: 8px; background: #3d4b57; color: #fff; font-size: 18px; font-weight: 600; cursor: pointer; }
+.rt.fn { background: #55636f; font-size: 16px; }
+.rt.op { background: #4a6b5f; }
+.rt.gleich { background: var(--akzent); }
+.rt.uebernehmen { grid-column: 1 / -1; order: 99; background: #6b7f8c; font-size: 15px; }
+.rt:active { filter: brightness(1.2); }
+.rechner-knopf[aria-pressed="true"] { border-color: var(--akzent); background: var(--akzent-hell); }
+.feld-gruppe { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; }
+.feld-vor, .feld-nach { font-size: 20px; font-weight: 600; white-space: nowrap; }
+.feld-gruppe .eingabe { width: min(180px, 50vw); }
+
+/* Darstellungen zu Aufgaben: Wertetabelle, Graph */
+.aufgabe .werte-tabelle { margin: 14px auto 0; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 18px; }
+.werte-tabelle th, .werte-tabelle td { border: 1px solid var(--rand); padding: 6px 12px; text-align: center; min-width: 44px; }
+.werte-tabelle th { background: var(--flaeche); }
+.aufgabe .graph { display: block; width: 100%; max-width: 340px; margin: 12px auto 0; }
+.graph .gitter { stroke: var(--rand); stroke-width: 1; }
+.graph .achse { stroke: var(--text); stroke-width: 1.5; }
+.graph .gerade { stroke: var(--akzent); stroke-width: 3; }
+.graph .beschriftung { fill: var(--leise); font-size: 11px; }
+.graph .achsname { fill: var(--text); font-weight: 700; }
+.term.lang { font-size: clamp(18px, 4.6vw, 22px); font-weight: 500; line-height: 1.4; }
+.term-tasten { flex-basis: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.klein-knopf { min-height: 44px; min-width: 44px; padding: 4px 10px; font-size: 18px; }
+.feld-gruppe .eingabe.term-eingabe, .eingabe.term-eingabe { width: min(300px, 80vw); text-align: left; }
+.rechner-modell { width: 100%; min-height: 40px; margin-bottom: 8px; border-radius: 8px; border: 0; padding: 4px 8px; font: inherit; font-size: 15px; background: #3d4b57; color: #fff; }
+.rechner-tipp { background: #fff4dc; color: #8a5a00; border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; font-size: 14px; }
+.rt.leer { visibility: hidden; }
+.rt.hilfe { background: #6b7f8c; }
+.rechner-hilfe { background: #34414c; border-radius: 8px; padding: 8px 12px; margin-top: 8px; font-size: 14px; }
+.rechner-hilfe ul { margin: 6px 0 0; padding-left: 18px; }
+.rechner-hilfe li { margin: 4px 0; }
+.rechner-vermerk { margin: 8px 0 0; font-size: 11px; color: #b8c4cc; }
+.wahl-liste { display: grid; gap: 8px; width: 100%; max-width: 520px; }
+.knopf.wahl { display: flex; align-items: center; gap: 12px; text-align: left; font-weight: 500; font-variant-numeric: tabular-nums; }
+.wahl-taste { flex: none; width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; background: var(--flaeche); color: var(--leise); font-size: 14px; font-weight: 700; }
+.knopf.wahl.falsch { opacity: .5; text-decoration: line-through; }
+.knopf.wahl.richtig { border-color: var(--gut); background: var(--gut-hell); }
+.graph .punkt { fill: var(--akzent); }
+.graph .punktname { fill: var(--text); font-size: 13px; font-weight: 700; }
+.graph .vieleck { fill: var(--akzent-hell); stroke: var(--akzent); stroke-width: 2; opacity: .9; }
+
+/* Kompetenzstand (BF1 a) */
+.stand { display: inline-block; margin-left: 8px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 700; vertical-align: middle; }
+.stand-offen { background: var(--flaeche); color: var(--leise); }
+.stand-ueben { background: var(--hinweis-hell); color: var(--hinweis); }
+.stand-sicher, .stand-sicher-rechner { background: var(--gut-hell); color: var(--gut); }

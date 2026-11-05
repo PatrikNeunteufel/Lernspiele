@@ -1,0 +1,422 @@
+	
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+  	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  	<title>Lehrplan Volksschule</title>
+	<meta name="description" content="Lehrplan 21">
+	<meta name="D-EDK" content="Projekt Lehrplan 21">
+    <meta name="programmer" content="h1z - Heinz Estermann">
+
+
+	<!-- Mobile Viewports
+  ================================================== -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	
+
+	<!-- CSS
+  ================================================== -->
+<link rel="stylesheet" type="text/css" href="https://sg.lehrplan.ch/css/base.css"> <!-- lokal vorhanden! -->
+	<link rel="stylesheet" type="text/css" href="https://stammdaten.lehrplan.ch/css/skeleton.css">
+	<link rel="stylesheet" type="text/css" href="https://stammdaten.lehrplan.ch/css/layout.css">
+	<link rel="stylesheet" type="text/css" href="https://stammdaten.lehrplan.ch/css/lp21.css">
+	<link rel="stylesheet" type="text/css" href="https://stammdaten.lehrplan.ch/css/lp21kompaufbau.css">
+	<link rel="stylesheet" type="text/css" href="https://stammdaten.lehrplan.ch/css/lpu.css">
+    <link rel="stylesheet" type="text/css" href="https://stammdaten.lehrplan.ch/css/lpu_rev2014.css">
+    <link rel="stylesheet" type="text/css" href="https://stammdaten.lehrplan.ch/css/tooltipster.css" />
+    <link rel="stylesheet" type="text/css" href="https://stammdaten.lehrplan.ch/css/colorbox.css" />
+    <link rel="stylesheet" type="text/css" href="https://stammdaten.lehrplan.ch/css/slidetabs.css" />
+    
+	<!--[if lt IE 9]>
+		<script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+
+	<!-- Favicons
+	================================================== -->
+	<link rel="SHORTCUT ICON" href="https://sg.lehrplan.ch/images/favicon.ico"><link rel="apple-touch-icon" href="https://sg.lehrplan.ch/images/apple-touch-icon.png"><link rel="apple-touch-icon" sizes="72x72" href="https://sg.lehrplan.ch/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="114x114" href="https://sg.lehrplan.ch/images/apple-touch-icon-114x114.png">    
+    
+    
+    <!-- Scripts
+	================================================== -->
+
+      	
+ 
+    <!-- jQuery von Google holen, wenn nicht erreichbar lokal laden -->
+	 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	 
+	<script>!window.jQuery && document.write('<script src="https://stammdaten.lehrplan.ch/js/jquery-1.4.2.min.js"><\/script>')</script>
+    
+    
+	
+
+<script type="text/javascript" src="https://stammdaten.lehrplan.ch/js/jquery.colorbox.js"></script>
+<!-- <script type="text/javascript" src="https://www.zebis.ch/scripts/ckeditor/ckeditor.js"></script> -->
+  	
+   <script type="text/javascript" src="https://stammdaten.lehrplan.ch/js/tipsy.js"></script>
+   
+<script type="text/javascript">
+   $(document).ready(function(){
+      $(function(){
+		 $(".sprachfolge").colorbox({iframe:true, width:"500px", height:"415px",overlayClose:false,onLoad:function(){ $('#cboxClose').remove();},onClosed:function(){ location.reload(true);} });
+ 		 $(".editieren").colorbox({iframe:true, width:"800px", height:"90%",overlayClose:false,onClosed:function(){ location.reload(true);} });
+		 $(".kleinebox").colorbox({iframe:true,inline:true,height:"300px",width:"400px" });
+		 $(".listenbox").colorbox({iframe:true,inline:true,height:"90%",width:"450px" });
+		 $("a.kapitelbild").colorbox({maxHeight:"95%",maxWidth:"90%" });
+		 $("#hinweis_R").colorbox({open:true,inline:true, height:"200px",width:"300px" });
+		 $("#hinweis_I").colorbox({open:true,inline:true, height:"200px",width:"300px" });
+         $(".tooltip").tipsy({gravity: 's'});
+         $(".tooltip_auto").tipsy({gravity: $.fn.tipsy.autoNS})});
+	     $("#cboxCloseMe").click(function(){
+			$.fn.colorbox.close();
+			return false;
+			});
+		 $(".side").sidecontent();	
+	              
+
+   });
+</script>
+<script type="text/javascript" src="https://stammdaten.lehrplan.ch/js/jquery.fallback.js"></script>
+<script type="text/javascript" src="https://stammdaten.lehrplan.ch/js/jquery.slidetabs.js"></script>
+<script type="text/javascript" src="https://stammdaten.lehrplan.ch/js/jquery.cross-slide.js"></script>	
+
+
+</head>
+<body>
+<div id="how">
+
+			
+</div> 
+
+	<div class="container sixteen columns">
+    
+    
+         <!-- Header
+================================================== -->
+
+      <div class="header container sixteen columns alpha omega">
+
+        <div class="header-logo seven columns alpha">
+          <a href="index.php" alt="Startseite"><img title="" src="https://stammdaten.lehrplan.ch/grafiken/logo_web/SG.png"></a>        </div>
+        
+        <div class="two columns alpha">
+        
+            <div style="margin-top:6px;height:18px; width:100%;"></div>
+                   
+	        </div>
+
+        <div class="header-right seven columns omega">
+
+          <div class="seven columns alpha omega " >
+
+  <div class="seven columns omega alpha kanton"><div class="five columns alpha">&nbsp;</div>
+	   <div class="two columns omega"><div class="right download"><a title="Hier können Sie die Inhalte des Lehrplans als PDF herunterladen." href="/downloads.php" class="tooltip_auto">Downloadbereich</a></div></div>
+
+
+</div>
+
+          <div class="two columns alpha ">
+            <!-- -->
+
+            <div class="alpha two columns zyklus ">
+<div class=" alpha two columns">
+
+		<!--	<p class="selectinfo">Ihre Zyklenauswahl:</p> -->
+        <form name="form_zyklusauswahl" id="form_zyklusauswahl" class="zyklusauswahl" action="set_sessions.php" method="get">
+        		<select id="selectList" name="zyklusauswahl" class="tooltip_auto" title="Wählen Sie einen Zyklus aus." onChange="document.form_zyklusauswahl.submit()">
+
+					<option value="0">Alle Zyklen</option>
+                    <option value="1" >1. Zyklus</option><option value="2" >2. Zyklus</option><option value="3" >3. Zyklus</option><input name="url_from" type="hidden" value="sg.lehrplan.ch/index.php?code=a|6|2|7|0|4">				</select>
+		</form>
+		</div>
+		</div>
+                  </div> <!-- search -->
+
+          <div class="five columns omega filter" style="text-align:right;margin-right: -15px;">
+            <!-- evtl. Logo Lehrplan21 -->
+                       
+
+          </div> <!-- search -->
+
+          <!-- Search - neu im Navibereich index.php /23.3.15aa
+        <div class="four columns omega suche">
+
+        	</div>  -->
+
+
+        </div><!-- header-right -->
+
+
+
+      </div> <!-- header -->
+    
+    
+    
+      
+		
+		       	<!-- Content
+	================================================== -->
+
+		<div class="main"> 
+        
+
+       <div class="four columns alpha navigation">
+
+              <!-- zweiter  Aufruf , stehen lassen -->         
+        
+        	
+        	
+        
+
+		<div id="navigation"><div id="breadcrumb" class="dd-header"><a id="breadcrumbnavigation_first"  href="index.php" >Startseite</a><a id="breadcrumbnavigation" href="index.php?code=b|6|0&la=yes" >Natur, Mensch, Gesellschaft</a><a id="breadcrumbnavigation" href="index.php?code=b|6|2" >Natur und Technik (mit Physik, Chemie, Biologie)</a><a id="breadcrumbnavigation" href="index.php?code=b|6|2|7" >7 Körperfunktionen verstehen</a></div><div id="navigation"><div id="breadcrumb" class="dd-header"><a id="breadcrumbnavigation" class="active_breadcrumb" style="padding:1px" href="index.php">Natur und Technik (mit Physik, Chemie, Biologie)</a></div></div><div class="grey">
+<ul id="menuliste">
+<li class="dreieck_ohne"><a class="parent_menu" href="index.php?code=e|6|1">Zum Fachbereich</a></li><li class="dreieck_ohne"><a class="parent_menu" href="index.php?code=e|6|2">Bedeutung und Zielsetzungen</a></li><li class="dreieck_ohne"><a class="parent_menu" href="index.php?code=e|6|3">Didaktische Hinweise</a></li><li class="dreieck_ohne"><a class="parent_menu" href="index.php?code=e|6|4">Strukturelle und inhaltliche Hinweise</a></li><li class="dreieck_mit"><a class="parent_menu" href="index.php?code=b|6|2|1">1 Wesen und Bedeutung von Naturwissenschaften und Technik verstehen</a></li><li class="dreieck_mit"><a class="parent_menu" href="index.php?code=b|6|2|2">2 Stoffe untersuchen und gewinnen </a></li><li class="dreieck_mit"><a class="parent_menu" href="index.php?code=b|6|2|3">3 Chemische Reaktionen erforschen</a></li><li class="dreieck_mit"><a class="parent_menu" href="index.php?code=b|6|2|4">4 Energieumwandlungen analysieren und reflektieren</a></li><li class="dreieck_mit"><a class="parent_menu" href="index.php?code=b|6|2|5">5 Mechanische und elektrische Phänomene untersuchen</a></li><li class="dreieck_mit"><a class="parent_menu" href="index.php?code=b|6|2|6">6 Sinne und Signale erforschen</a></li><li class="dreieck_mit"><a class="active_menu parent_menu" href="index.php?code=b|6|2|7">7 Körperfunktionen verstehen</a><ul id="menuliste2"></ul></li><li class="dreieck_mit"><a class="parent_menu" href="index.php?code=b|6|2|8">8 Fortpflanzung und Entwicklung analysieren </a></li><li class="dreieck_mit"><a class="parent_menu" href="index.php?code=b|6|2|9">9 Ökosysteme erkunden</a></li></ul>
+</div>
+
+</div>        
+        <div class="four columns alpha textblock"> <h3>Hinweis zum Download</h3>
+<p>Im Downloadbereich können Sie die Dokumente des Lehrplans als PDF herunterladen und ausdrucken.</p></div>
+         <div class="four columns alpha">
+           <form id="searchbox" action="index.php" method="get">
+    <input id="search" name="suchwort" type="text" placeholder="Suchbegriff eingeben">
+    <input id="submit" type="submit" value="Suchen">
+    <input name="code" type="hidden" value="s">
+</form>
+                 </div>
+       <!-- zwieter Auftruf fertig, stehen lassen -->
+       </div> <!-- / navigation -->
+        
+       
+
+        
+        <div class="twelve columns omega">
+        	
+                			
+  				<!--  <div class="kompetenznavigation kntop">
+                 	 </div> -->
+			
+
+   
+   
+        	
+        	<div class="kompetenzaufbau">
+        		
+        		<div class="kompetenzcode twelve columns alpha omega">
+        			<div class=" two columns kcode alpha"><p>NT.7</p></div>
+        			<div class="kompetenzbereich  columns"><p>Körperfunktionen verstehen</p></div><div class="rightmenu columns">
+					
+<nav >
+    <ul>
+        <li>
+            <a href="#">Herunterladen</a>
+            <ul class="fallback">
+            <li><a target="_blank" href="https://sg.lehrplan.ch/lehrplan_printout.php?k=1&fb_id=6&f_id=2&kb_id=7&ha_id=0&k_id=4">Diese Kompetenz herunterladen</a></li><li><a target="_blank" href="https://sg.lehrplan.ch/lehrplan_printout.php?k=1&fb_id=6&f_id=2&kb_id=7">Diesen Kompetenzbereich herunterladen</a></li><li><a target="_blank" href="https://sg.lehrplan.ch/lehrplan_printout.php?k=1&fb_id=6">Diesen Fachbereich herunterladen</a></li><li><a target="_blank" href="https://sg.lehrplan.ch/lehrplan_printout.php?e=1&fb_id=6">Die Einleitung des Fachbereichs herunterladen</a></li>            </ul>
+        </li>
+  
+    </ul>
+</nav></div>
+
+<!-- evtl. Spezifika -->
+<div class="kompetenzcode twelve columns alpha omega "><div class=" two columns htacode alpha"><p>&nbsp;</p></div><div class="kompetenzbereich columns"><p style="color:#CB3A27">&nbsp;</p></div>       		
+        		</div><!-- kompetenzcode -->
+
+        		     <!-- koresspondierende -->
+		      <div class="korrespondierende_top offset-by-two"><div class="eck"><div class="inset">&nbsp;Vorangehende Kompetenz:&nbsp;<a class="tooltip" title="NMG.1.2" href="https://sg.lehrplan.ch/101kkrG9fzJSggMEhyHScLDAU4TnCFYCK">NMG.1.2</a> </div></div></div>	   			<!-- / koresspondierende -->
+				
+				<!-- / kompetenz -->
+			
+        		<div class="komptitel twelve columns alpha omega">
+        		<div class="two columns kompetenz_nr alpha">
+                <a href="index.php?code=a|6|2|7|0|3"  class="tooltip left" original-title="Zur vorangehenden Kompetenz wechseln"><img src="css/images/arrow_left1.png"></a>
+		
+				
+				<nav class="menu">
+    <ul>
+        <li>
+        <a href="#"><p></p></a><ul class="fallback"><li><p>Weitere Kompetenzen im Kompetenzbereich <em>Körperfunktionen verstehen:</em></p></li><li><a title="1. {"DE":"Die Schu00fclerinnen und Schu00fcler ku00f6nnen Aspekte der Anatomie und Physiologie des Ku00f6rpers erklu00e4ren.","FR":"Die Schu00fclerinnen und Schu00fcler ku00f6nnen Aspekte der Anatomie und Physiologie des Ku00f6rpers erklu00e4ren.","IT":"Gli allievi sanno spiegare aspetti legati all'anatomia e alla fisiologia del corpo.","RM":"Las scolaras ed ils scolars san declerar aspects da l'anatomia e da la fisiologia dal corp.","EN":"Die Schu00fclerinnen und Schu00fcler ku00f6nnen Aspekte der Anatomie und Physiologie des Ku00f6rpers erklu00e4ren."}"  href="index.php?code=a|6|2|7|0|1">1. Die Schülerinnen und Schüler können Aspekte der Anatomie und Physiologie des Körpers erklären.</a></li><li><a title="2. {"DE":"Die Schu00fclerinnen und Schu00fcler ku00f6nnen Stoffwechselvorgu00e4nge analysieren und Verantwortung fu00fcr den eigenen Ku00f6rper u00fcbernehmen.","FR":"Die Schu00fclerinnen und Schu00fcler ku00f6nnen Stoffwechselvorgu00e4nge analysieren und Verantwortung fu00fcr den eigenen Ku00f6rper u00fcbernehmen.","IT":"Gli allievi sanno analizzare i processi del metabolismo e assumersi la responsabilitu00e0 per il proprio corpo.","RM":"Las scolaras ed ils scolars san analisar process metabolics e surpigliar responsabladad per l'agen corp.","EN":"Die Schu00fclerinnen und Schu00fcler ku00f6nnen Stoffwechselvorgu00e4nge analysieren und Verantwortung fu00fcr den eigenen Ku00f6rper u00fcbernehmen."}"  href="index.php?code=a|6|2|7|0|2">2. Die Schülerinnen und Schüler können Stoffwechselvorgänge analysieren und Verantwortung für den eigenen Körper übernehmen.</a></li><li><a title="3. {"DE":"Die Schu00fclerinnen und Schu00fcler verfu00fcgen u00fcber ein altersgemu00e4sses Grundwissen u00fcber die menschliche Fortpflanzung, sexuell u00fcbertragbare Krankheiten und Mu00f6glichkeiten zur Verhu00fctung.","FR":"Die Schu00fclerinnen und Schu00fcler verfu00fcgen u00fcber ein altersgemu00e4sses Grundwissen u00fcber die menschliche Fortpflanzung, sexuell u00fcbertragbare Krankheiten und Mu00f6glichkeiten zur Verhu00fctung.","IT":"Gli allievi dispongono di conoscenze di base adeguate all'etu00e0 in merito alla procreazione umana, a malattie sessualmente trasmissibili e a possibili contraccettivi.","RM":"Las scolaras ed ils scolars han - correspundentamain a lur vegliadetgna - ina savida da basa davart la reproducziun dals umans, malsognas transmissiblas sexualmain e pussaivladads da prevegnir ad ina concepziun.","EN":"Die Schu00fclerinnen und Schu00fcler verfu00fcgen u00fcber ein altersgemu00e4sses Grundwissen u00fcber die menschliche Fortpflanzung, sexuell u00fcbertragbare Krankheiten und Mu00f6glichkeiten zur Verhu00fctung."}"  href="index.php?code=a|6|2|7|0|3">3. Die Schülerinnen und Schüler verfügen über ein altersgemässes Grundwissen über die menschliche Fortpflanzung, sexuell übertragbare Krankheiten und Möglichkeiten zur Verhütung.</a></li><li><p class="eigener">4. Die Schülerinnen und Schüler können Massnahmen gegen häufige Erkrankungen beurteilen.</p></li></ul>				
+            
+        </li>
+  
+    </ul>
+</nav>
+<a href="index.php?code=a|6|2|8|0|1" class="tooltip right abstand" original-title="Zur nachfolgenden Kompetenz wechseln"><img src="css/images/arrow_right1.png"></a>        		
+        		</div> <!-- / kompetenz_nr -->
+					<div class="kompetenztitel eight columns
+                                        ">
+    
+        		<p class="komptitelnr">4</p><p>
+				Die Schülerinnen und Schüler können Massnahmen gegen häufige Erkrankungen beurteilen.</p>
+        		</div><!-- kompetenztitel -->
+				
+				
+        		
+        		<div class="querverweis_einleitung one column omega">
+        		<p class="querv">Querverweise</p>
+                <p class="querv">
+                <a class="tooltip" title="Gesundheit"  href="https://sg.lehrplan.ch/101e200US4HWdUt2yrdBwJYy2tn9wc">BNE</a><br>                
+                </p>
+        		</div> <!-- / querverweis_einleitung -->
+        		
+        		</div>
+
+
+
+
+        	
+
+<div id="101kkvDhsuYdvmasF7uxK4zp5We7pAzLX.u0" class="eight alpha offset-by-two columns aufbauten_zwischentitel_erster"><p>Biologie: Krankheit und Genese</p></div><div id="101kkvDhsuYdvmasF7uxK4zp5We7pAzLX.u0" class="twelve columns alpha omega"><div class="two columns alpha ganzercode"><p><span title="Codierung dieser Kompetenz" class="tooltip font_ganzercode">NT.7.4</span></p></div><div class="eight columns alpha kompetenzen_einleitung_titel"><p>Die Schülerinnen und Schüler ...</p></div></div>
+ <!-- evtl. leere Stufe mit Pfeil -->
+                                <!-- Ende leere Stufe mit Pfeil -->  
+   
+           
+	<div class="twelve columns komp_table">
+
+
+<!-- ###### AUSGABE EINER KOMPETENZSTUFE MIT VORANGESTELLTEM FARBFELD UND ZIFFER -->	        		
+			<div class="twelve columns komp_row ">        	
+        		<div title="Auftrag 3. Zyklus" class="tooltip one column komp_cell marker_z3 "><div class="one column komp_cell marker_z3"></div> 
+	        		  		<p class="zycode">
+	        		  		3</p>
+	        		  </div>	<!-- / marker_z1 -->	        		
+                     <div class="zyklus_3_start"></div><div class="tooltip one column komp_cell kompetenz_lit" title="NT.7.4.a"><p id="101Ny6UdV3pn85GnvPxXPkyF44dWGAAV8" class="lit">a</p>
+		        	 </div> <!-- / kompetenz_lit (Buchstabe) -->
+	
+		        	 
+		        	 <div class="eight columns komp_cell kompetenz_text">
+			        		  			<ul class="komp">
+                                        
+                                            <li>können verschiedene Verursacher von Erkrankungen unterscheiden und kennen prinzipielle Reaktionsweisen des Immunsystems (z.B. Antikörper blockieren Viren in der Blutbahn).&nbsp;&#x200b;<span title="Verbindliche Inhalte" class="tooltip begriffe">Krankheitsverursacher: Viren, Bakterien, Pilze; Immunsystem</span></li>				        		  			
+
+				        		  		</ul>
+		        		
+				   </div> <!-- / kompetenz_text -->
+				   
+				   	 <div class="komp_cell kompetenz_querverw one column">
+                     <div class="qspalte_links"><p>&nbsp;</p></div><div class="qspalte_rechts"></div>		        	 </div> <!-- / kompetenz_querverw -->
+                     <div title="Orientierungspunkt" class="tooltip one column  marker_z3_op"><img src="css/images/op.png" alt="orientierungspunkt" /></div><hr title="Orientierungspunkt" class="tooltip op" /><hr class="hr_komp" />		      </div> <!-- / komp_row -->
+				
+		      </div> <!-- / komp_table -->
+		      
+
+            
+ <!-- evtl. leere Stufe mit Pfeil -->
+                                <!-- Ende leere Stufe mit Pfeil -->  
+   
+           
+	<div class="twelve columns komp_table">
+
+
+<!-- ###### AUSGABE EINER KOMPETENZSTUFE MIT VORANGESTELLTEM FARBFELD UND ZIFFER -->	        		
+			<div class="twelve columns komp_row mindestanspruch ">        	
+        		<div title="Auftrag 3. Zyklus" class="tooltip one column komp_cell marker_z3 "><div class="one column komp_cell marker_z3"></div> 
+	        		  		<p class="zycode">
+	        		  		</p>
+	        		  </div>	<!-- / marker_z1 -->	        		
+                     <div class="tooltip one column komp_cell kompetenz_lit" title="NT.7.4.b"><p id="1019NB8yGH8scAXkzCTfePCenKWyVXaF2" class="lit">b</p>
+		        	 </div> <!-- / kompetenz_lit (Buchstabe) -->
+	
+		        	 
+		        	 <div class="eight columns komp_cell kompetenz_text">
+			        		  			<ul class="komp">
+                                        
+                                            <li>können präventiv (z.B. Hände waschen, Impfung) und kurativ (z.B. körperliche Ruhe bei einer Grippe) angemessen auf häufige Erkrankungen reagieren.&nbsp;&#x200b;<span title="Verbindliche Inhalte" class="tooltip begriffe">Prävention, Therapie</span></li>				        		  			
+
+				        		  		</ul>
+		        		
+				   </div> <!-- / kompetenz_text -->
+				   
+				   	 <div class="komp_cell kompetenz_querverw one column">
+                     <div class="qspalte_links"><p>&nbsp;</p></div><div class="qspalte_rechts"></div>		        	 </div> <!-- / kompetenz_querverw -->
+                     <hr class="hr_komp" />		      </div> <!-- / komp_row -->
+				
+		      </div> <!-- / komp_table -->
+		      
+
+            
+ <!-- evtl. leere Stufe mit Pfeil -->
+                                <!-- Ende leere Stufe mit Pfeil -->  
+   
+           
+	<div class="twelve columns komp_table">
+
+
+<!-- ###### AUSGABE EINER KOMPETENZSTUFE MIT VORANGESTELLTEM FARBFELD UND ZIFFER -->	        		
+			<div class="twelve columns komp_row ">        	
+        		<div title="Auftrag 3. Zyklus" class="tooltip one column komp_cell marker_z3 "><div class="one column komp_cell marker_z3"></div> 
+	        		  		<p class="zycode">
+	        		  		</p>
+	        		  </div>	<!-- / marker_z1 -->	        		
+                     <div class="tooltip one column komp_cell kompetenz_lit" title="NT.7.4.c"><p id="101zUXzhAE9RNamAfa55WbPNGH7DfGxKL" class="lit">c</p>
+		        	 </div> <!-- / kompetenz_lit (Buchstabe) -->
+	
+		        	 
+		        	 <div class="eight columns komp_cell kompetenz_text">
+			        		  			<ul class="komp">
+                                        
+                                            <li>können grundlegende Wirkungsweisen von Medikamenten verstehen (z.B. keine Wirkung ohne Nebenwirkung), unterscheiden und abgrenzen (z.B. gegenüber Placebo).&nbsp;&#x200b;<span title="Verbindliche Inhalte" class="tooltip begriffe">Wirkung, Nebenwirkung</span></li>				        		  			
+
+				        		  		</ul>
+		        		
+				   </div> <!-- / kompetenz_text -->
+				   
+				   	 <div class="komp_cell kompetenz_querverw one column">
+                     <div class="qspalte_links"><p>&nbsp;</p></div><div class="qspalte_rechts"></div>		        	 </div> <!-- / kompetenz_querverw -->
+                     <hr class="hr_komp kompetenz_ende_3" />		      </div> <!-- / komp_row -->
+				
+		      </div> <!-- / komp_table -->
+		      
+
+            		   
+		      </div> <!-- / kompetenzausgabe -->
+		      
+		      <!-- korrespondierende -->
+              					</div>
+	   			<!-- / koresspondierende -->
+	   
+        	<!-- / <div class="kompetenznavigation knbottom">
+        	        
+        		
+	
+
+
+
+        		
+        	</div><!-- twelve columns -->
+        </div> <!-- main -->
+
+        
+        		       	<!-- Fusszeile
+	================================================== -->
+
+  <div class="sixteen columns alpha omega fusszeile servicelinks">    <!-- Servicelinks -->
+    
+ 
+
+
+    
+        <ul class="mainmenu">
+	
+	
+    <li><a href="/impressum.php">Impressum</a></li><li><a href="/hilfe.php">Hilfe</a></li><li><a href="https://www.lehrplan.ch" target="_blank">Über den Lehrplan 21</a></li><li><a title="Modus für das Setzen externer Links einschalten" href="if_set_link.php?back=index.php%3Fcode%3Da%7C6%7C2%7C7%7C0%7C4"><img src="https://stammdaten.lehrplan.ch/grafiken/icons/clipboard.png"></a></li>	<li class="right">Lehrplan Volksschule August 2025</li>
+</ul>         
+                       
+        </div><!-- Fusszeile -->
+
+
+
+	</div><!-- container -->
+
+	<script src="js/selectnav.js"></script>
+	<script> selectnav('menuliste', {
+    activeclass: 'act',
+    nested: false,
+    label: false
+});
+</script>
+		
+   
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a55a4c85181cacc6',t:'MTc5Mzg2NTM1NQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a55a4c85181cacc6',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
