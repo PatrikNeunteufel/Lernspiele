@@ -1,4 +1,4 @@
-/* kern 1.2.0 · Prüfsumme sha256:5fd5e7a33ff0ff62f309fa83afef1ced240595e095df613d621ee0a4b6173921 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.3.0 · Prüfsumme sha256:105376d25f65999cac06f3ad90759fa396948e3968091d14f3fce1c75ee2a555 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -433,7 +433,9 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       const jetzt = new Date().toISOString();
       const p = { ...felder, ...daten, id: daten.id || neueId(), name, rolle: daten.rolle || "lernend", angelegt: jetzt, geaendert: {} };
       if (p.geboren !== undefined && p.geboren !== null) p.geboren = geburtsdatumLies(p.geboren);
-      for (const k of Object.keys(p)) if (!VERWALTUNG.has(k)) p.geaendert[k] = jetzt;
+      // Zeit nur für gesetzte Felder (und Name, Rolle), nicht für Vorgaben der App: sonst überschriebe eine leere
+      // Vorgabe beim Zusammenführen den echten Wert eines anderen Geräts.
+      for (const k of new Set([...Object.keys(daten), "name", "rolle"])) if (!VERWALTUNG.has(k)) p.geaendert[k] = jetzt;
       const fehler = maengel(p);
       if (fehler.length) throw new Error(fehler.join(", "));
       if (!speichere(alle().concat(p))) throw new Error("Der Speicher des Browsers ist voll oder gesperrt.");

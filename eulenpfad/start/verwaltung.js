@@ -232,7 +232,7 @@ function zeichneVerwaltung(box, neu) {
               meldung.textContent = (await LS.setzePin(n, pin.value)) ? `✓ PIN für ${n} gesetzt.` : "Die PIN hat 4 bis 6 Ziffern.";
             } })) : null,
           ich ? null : el("button", { type: "button", class: "schalter", text: p.rolle === "aufsicht" ? "→ Kind" : "→ Aufsicht", onclick: () => {
-            LS.speichereProfil(n, p.rolle === "aufsicht" ? { rolle: "kind", pin: null, wiederherstellung: null } : { rolle: "aufsicht" });
+            LS.speichereProfil(n, p.rolle === "aufsicht" ? { rolle: "lernend", pin: null, wiederherstellung: null } : { rolle: "aufsicht" });
             neu();
           } }),
           ich ? null : el("button", { type: "button", class: "schalter gesperrt", text: "🗑 löschen", onclick: () => {

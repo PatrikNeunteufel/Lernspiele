@@ -3,6 +3,12 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.3.0 — 2026-11-05 (LERN_Session15)
+- `person.js`: `anlegen` gibt nur gesetzten Feldern (und Name, Rolle) eine Zeit, nicht den Vorgaben der App — sonst
+  überschriebe beim Zusammenführen eine leere Vorgabe den echten Wert eines anderen Geräts.
+- Der Eulenpfad benutzt `KERN.person` (Profile als `lernspiele:personen`, Umzug aus `lernspiele:profile`) und
+  `KERN.geheimnis` (PIN, Code, Sicherheitsfrage).
+
 ## 1.2.0 — 2026-11-05 (LERN_Session15)
 - `geheimnis.js` (`KERN.geheimnis`): PIN, Wiederherstellungscode und Sicherheitsfrage als Prüfwerte, dieselbe Rechnung
   wie bisher in beiden Apps (SHA-256 von „salz:wert“); Format der Wiederherstellung wie im Eulenpfad

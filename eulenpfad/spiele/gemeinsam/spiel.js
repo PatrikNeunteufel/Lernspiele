@@ -159,7 +159,8 @@ const LS = (() => {
   }
 
   // ---------- Spieler, Profil und Protokoll (nur auf diesem Gerät) ----------
-  // Profil je Name: { geboren, alter, klasse, fokus: [Lernziel-Ids, z. B. "4.2-G3"],
+  // Profil einer Person (lernspiele:personen, KERN.person; Kennung id, Name je Gerät eindeutig; P1 a, LERN_Session15):
+  //   { id, name, geboren, alter, klasse, fokus: [Lernziel-Ids, z. B. "4.2-G3"],
   //   geboren: "JJJJ-MM" — Geburtsmonat, von der Aufsicht gesetzt (Wunsch Patrik, LERN_Session14); das Alter rechnet
   //     alterVon daraus. alter: Zahl nur noch in älteren Profilen, gilt, solange geboren fehlt
   //   aufstiege: [{ von, nach, zeit }] — Klassenaufstiege durch die Aufsicht (LERN_Session14); aufstiegGesehen: ISO des
@@ -170,7 +171,7 @@ const LS = (() => {
   //   fehlerAufgaben: [{ text, loesung, versuche, geloest }] }
 
   //   timer: { an, faktor, spiele: { <spiel-id>: { an (null = wie global), sekunden: { s1: … } } } }
-  //   rolle: "kind" | "aufsicht" (Entscheid L2 a) — die Aufsicht meldet sich mit PIN an, verwaltet
+  //   rolle: "lernend" | "aufsicht" (Entscheid L2 a; bis LERN_Session15 „kind“, P2 a) — die Aufsicht meldet sich mit PIN an, verwaltet
   //     Konten und Freigaben und spielt als Tester: Runden mit test: true, im Spiel Testhilfen
   //   pin: { salz, hash } nur bei der Aufsicht (SHA-256, nie die PIN selbst)
   //   wiederherstellung: { code: { salz, hash }, frage, antwort: { salz, hash } } nur bei der Aufsicht (PIN1 a)
@@ -190,7 +191,7 @@ const LS = (() => {
   //   avatar: "<tier>-<farbe>" (avatare.js) — vom Kind selbst gewählt (AV1 a); fehlt = Anfangsbuchstabe
   //   geaendert: { <feld>: ISO, angelegt: ISO } — setzt speichereProfil; beim Abgleich gewinnt je Feld der jüngere Stand
   const LEERES_PROFIL = {
-    geboren: null, alter: null, klasse: null, fokus: [], rolle: "kind", aufstiege: [], aufstiegGesehen: null,
+    geboren: null, alter: null, klasse: null, fokus: [], rolle: "lernend", aufstiege: [], aufstiegGesehen: null,
     reihenfolge: { global: "stufe", spiele: {} },
     timer: { an: false, faktor: 1, spiele: {} },
     favoriten: [], endlosAn: [], ansicht: "kacheln", zu: [], mix: null,
@@ -320,12 +321,73 @@ const LS = (() => {
     return w === "stufe" ? def.optionen[id].nachStufe(stufe) : w;
   }
 
-  /** Profile; frühere Testspieler (test: true, LERN_Session3) werden zur Aufsicht. */
-  const profile = () => {
-    const alle = lies("profile", {});
-    for (const p of Object.values(alle)) if (p.test && !p.rolle) { p.rolle = "aufsicht"; delete p.test; }
-    return alle;
-  };
+  // ---------- Personen (Kern: KERN.person, Entscheide P1 a, P2 a; LERN_Session15) ----------
+  // lernspiele:personen = Liste { id, name, rolle: "lernend" | "aufsicht", angelegt, geaendert: { feld: ISO }, … Profil }.
+  // Die Aufrufe des Eulenpfads gehen weiter über den Namen (je Gerät eindeutig, ohne Gross/Klein); massgebend ist die
+  // Kennung id. Runden, Rekorde, Meldungen und Löschvermerke tragen person (Kennung) und name (Kopie für die Anzeige,
+  // nachgeführt beim Umbenennen und Zusammenführen). Geschrieben wird über schreibe, damit der Abgleich es merkt.
+  const PERSONEN = KERN.person.liste({ lies, schreibe }, { schluessel: "personen" });
+  const ROLLE = r => (r === "kind" ? "lernend" : r);
+  /** Profil von vor LERN_Session15 ({ Name: Profil }) als Person; frühere Testspieler (test: true) sind Aufsicht. */
+  function personAusProfil(name, p) {
+    const { geaendert = {}, test, ...rest } = p || {};
+    const { angelegt = "", ...zeiten } = geaendert;
+    const rolle = rest.rolle === "aufsicht" || (test && !rest.rolle) ? "aufsicht" : "lernend";
+    // ein Geburtsdatum, das der Kern nicht liest, fällt weg (sonst gälte die ganze Person als ungültig)
+    const geboren = rest.geboren == null ? null : KERN.person.geburtsdatumLies(rest.geboren);
+    return { ...rest, geboren, id: rest.id || KERN.person.neueId(), name: KERN.person.nameRein(name), rolle, angelegt, geaendert: zeiten };
+  }
+  /** Personen nach Namen, mit den Vorgaben des leeren Profils — die Sicht, die der Eulenpfad überall liest. */
+  const profile = () => Object.fromEntries(PERSONEN.alle().map(p => [p.name, p]));
+  const person = name => (name ? PERSONEN.findeName(name) : null);
+  /** Gehört ein Eintrag (Runde, Rekord, Meldung) zu dieser Person? Über die Kennung, ältere Einträge über den Namen. */
+  const gehoert = (e, p) => !!e && !!p && (e.person ? e.person === p.id || (p.frueher || []).includes(e.person) : e.name === p.name);
+  /** Einträge ohne Kennung bekommen sie über den Namen; der Name wird auf den heutigen nachgeführt. */
+  function kennungNachtragen(liste) {
+    let anders = false;
+    const neu = liste.map(e => {
+      if (!e || typeof e !== "object") return e;
+      const p = e.person ? PERSONEN.finde(e.person) : person(e.name);
+      if (!p || (e.person === p.id && e.name === p.name)) return e;
+      anders = true;
+      return { ...e, person: p.id, name: p.name };
+    });
+    return anders ? neu : null;
+  }
+  // Umzug (einmal): lernspiele:profile in die Personenliste; danach Kennungen in Runden, Rekorden und Meldungen.
+  (function umzugPersonen() {
+    const alt = lies("profile", null);
+    if (alt && typeof alt === "object") {
+      const personen = PERSONEN.alle();
+      const nachSchluessel = {}; // alter Schlüssel (genauer Name) → Person
+      for (const [n, p] of Object.entries(alt)) {
+        if (!p || typeof p !== "object") continue;
+        const da = personen.find(x => x.name === KERN.person.nameRein(n));
+        if (da) { nachSchluessel[n] = da; continue; }
+        const neu = personAusProfil(n, p);
+        if (!neu.name) continue;
+        // früher erlaubt: „Mia“ und „mia“ als zwei Profile — das zweite bekommt eine Nummer, seine Runden bleiben seine
+        let name = neu.name, i = 2;
+        while (personen.some(x => KERN.person.nameGleich(x.name, name))) name = `${neu.name} (${i++})`;
+        const q = { ...neu, name };
+        personen.push(q); nachSchluessel[n] = q;
+      }
+      if (PERSONEN.speichere(personen)) {
+        for (const k of ["protokoll", "rekorde", "meldungen"]) {
+          const l = lies(k, []);
+          if (!Array.isArray(l)) continue;
+          const q = e => e && !e.person && nachSchluessel[e.name];
+          if (l.some(q)) schreibe(k, l.map(e => (q(e) ? { ...e, person: q(e).id, name: q(e).name } : e)));
+        }
+        try { localStorage.removeItem("lernspiele:profile"); } catch { /* egal */ }
+      }
+    }
+    for (const k of ["protokoll", "rekorde", "meldungen"]) {
+      const l = lies(k, []);
+      const neu = Array.isArray(l) ? kennungNachtragen(l) : null;
+      if (neu) schreibe(k, neu);
+    }
+  })();
   const spielerListe = () => Object.keys(profile());
   function profil(name) { return { ...LEERES_PROFIL, ...(profile()[name] || {}) }; }
   const istAufsicht = name => !!name && profile()[name]?.rolle === "aufsicht";
@@ -349,75 +411,65 @@ const LS = (() => {
 
   // Anmeldung (Entscheid L1 a): Kinder ohne PIN. Die Aufsicht gilt nur in diesem Browser-Tab
   // (sessionStorage) — schliesst man ihn, ist sie abgemeldet und kein Kind erbt ihre Rechte.
+  // Gespeichert wird die Kennung (lernspiele:spieler, sessionStorage lernspiele:aufsicht); ältere Stände mit dem Namen gelten.
   function sitzung() { try { return sessionStorage.getItem("lernspiele:aufsicht"); } catch { return null; } }
-  function setzeSitzung(name) { try { name ? sessionStorage.setItem("lernspiele:aufsicht", name) : sessionStorage.removeItem("lernspiele:aufsicht"); } catch { /* egal */ } }
+  function setzeSitzung(name) {
+    const id = person(name)?.id;
+    try { id ? sessionStorage.setItem("lernspiele:aufsicht", id) : sessionStorage.removeItem("lernspiele:aufsicht"); } catch { /* egal */ }
+  }
+  const gespeichertePerson = wert => (wert ? PERSONEN.finde(wert) || PERSONEN.findeName(wert) : null);
   const aktuellerSpieler = () => {
-    const n = lies("spieler", null);
-    if (!spielerListe().includes(n)) return null;
-    return istAufsicht(n) && sitzung() !== n ? null : n;
+    const p = gespeichertePerson(lies("spieler", null));
+    if (!p) return null;
+    const s = sitzung();
+    return p.rolle === "aufsicht" && s !== p.id && s !== p.name ? null : p.name;
   };
   /** Ist gerade eine Aufsicht angemeldet? */
   const aufsichtAngemeldet = () => istAufsicht(aktuellerSpieler());
   /** Kind anmelden; eine Aufsicht nur über meldeAufsichtAn mit PIN. */
   function setzeSpieler(name) {
-    if (istAufsicht(name)) return false;
-    schreibe("spieler", name);
+    if (istAufsicht(name) || !person(name)) return false;
+    schreibe("spieler", person(name).id);
     setzeSitzung(null);
     return true;
   }
   function abmelden() { schreibe("spieler", null); setzeSitzung(null); }
 
-  async function pinHash(pin, salz) {
-    const daten = new TextEncoder().encode(`${salz}:${pin}`);
-    return [...new Uint8Array(await crypto.subtle.digest("SHA-256", daten))].map(b => b.toString(16).padStart(2, "0")).join("");
-  }
-  const pinGueltig = pin => /^\d{4,6}$/.test(pin);
+  // Prüfwerte über den Kern (kern/geheimnis.js): dieselbe Rechnung SHA-256(„salz:wert“) wie bisher, alte PINs gelten.
+  const G = KERN.geheimnis;
+  const pinGueltig = pin => G.pinGueltig(pin);
   /** PIN einer Aufsicht setzen (4–6 Ziffern); gespeichert wird nur Salz und Hash. */
   async function setzePin(name, pin) {
     if (!pinGueltig(pin)) return false;
-    const salz = [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(16).padStart(2, "0")).join("");
-    speichereProfil(name, { rolle: "aufsicht", pin: { salz, hash: await pinHash(pin, salz) } });
+    speichereProfil(name, { rolle: "aufsicht", pin: await G.pin(pin) });
     return true;
   }
   /** Stimmt die PIN dieser Aufsicht? Meldet nicht an (Bestätigung einer neuen Aufsicht, KR2 a). */
   async function pinStimmt(name, pin) {
     const p = profil(name);
-    return p.rolle === "aufsicht" && !!p.pin && (await pinHash(pin, p.pin.salz)) === p.pin.hash;
+    return p.rolle === "aufsicht" && (await G.pinStimmt(pin, p.pin));
   }
   // ---------- PIN vergessen (Entscheide PIN1 a, PIN1-R a, LERN_Session13) ----------
   // Stufen: 1 eine zweite Aufsicht setzt die PIN in der Verwaltung · 2 Wiederherstellungscode (einmal angezeigt) ·
   // 3 Sicherheitsfrage (beim Anlegen selbst gewählt) · 4 Zurücksetzen mit Frist (3 Tage, auf der Anmeldung sichtbar,
   // abbrechbar mit PIN oder Code). Profil-Feld wiederherstellung: { code: { salz, hash }, frage, antwort: { salz, hash } }
   // — wie die PIN nur Prüfwerte, nie Code oder Antwort selbst; geht nie in Sicherungen oder den Abgleich (ohneGeheimnis).
-  const CODE_ZEICHEN = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // ohne 0/O und 1/I, die man verwechselt
   const ZURUECKSETZEN_TAGE = 3;
-  const salzNeu = () => [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(16).padStart(2, "0")).join("");
-  const codeRein = c => String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-  const antwortRein = a => String(a || "").trim().toLowerCase().replace(/ß/g, "ss").replace(/\s+/g, " ");
-  /** Ein neuer Wiederherstellungscode, 12 Zeichen in drei Gruppen („K7QM-2XRA-9TPL“). */
-  function neuerCode() {
-    const z = [...crypto.getRandomValues(new Uint8Array(12))].map(b => CODE_ZEICHEN[b % CODE_ZEICHEN.length]).join("");
-    return `${z.slice(0, 4)}-${z.slice(4, 8)}-${z.slice(8)}`;
-  }
+  /** Ein neuer Wiederherstellungscode, 12 Zeichen in drei Gruppen („K7QM-2XRA-9TPL“, ohne 0/O und 1/I). */
+  const neuerCode = () => G.neuerCode();
   /** Code und (falls angegeben) Sicherheitsfrage einer Aufsicht festlegen; ohne frage bleibt die bisherige. */
   async function setzeWiederherstellung(name, { code, frage, antwort } = {}) {
     const alt = profil(name).wiederherstellung || {};
     const neu = { ...alt };
-    if (code) { const salz = salzNeu(); neu.code = { salz, hash: await pinHash(codeRein(code), salz) }; }
-    if (frage && antwort) { const salz = salzNeu(); neu.frage = frage.trim().slice(0, 120); neu.antwort = { salz, hash: await pinHash(antwortRein(antwort), salz) }; }
+    if (code) neu.code = await G.pruefwert(G.codeRein(code));
+    if (frage && antwort) { neu.frage = frage.trim().slice(0, 120); neu.antwort = await G.pruefwert(G.antwortRein(antwort)); }
     speichereProfil(name, { wiederherstellung: neu });
   }
   const wiederherstellung = name => profil(name).wiederherstellung || {};
-  async function codeStimmt(name, code) {
-    const w = wiederherstellung(name).code;
-    return !!w && (await pinHash(codeRein(code), w.salz)) === w.hash;
-  }
-  async function antwortStimmt(name, antwort) {
-    const w = wiederherstellung(name).antwort;
-    return !!w && !!antwortRein(antwort) && (await pinHash(antwortRein(antwort), w.salz)) === w.hash;
-  }
+  const codeStimmt = (name, code) => G.codeStimmt(code, wiederherstellung(name));
+  const antwortStimmt = (name, antwort) => G.antwortStimmt(antwort, wiederherstellung(name));
   /** Profil ohne PIN und Wiederherstellung — für Sichern, Abgleich und Einlesen. */
-  const ohneGeheimnis = ({ pin, wiederherstellung: w, ...rest }) => rest;
+  const ohneGeheimnis = p => KERN.person.ohneGeheimnis(p || {});
   /** Frist zum Zurücksetzen (Stufe 4), je Gerät: lernspiele:zuruecksetzen = { angefordert, ab } (ISO-Zeiten). */
   const zuruecksetzenStand = () => lies("zuruecksetzen", null);
   function zuruecksetzenAnfordern() {
@@ -430,7 +482,7 @@ const LS = (() => {
   function zuruecksetzenFaellig() {
     const z = zuruecksetzenStand();
     if (!z || new Date(z.ab) > new Date()) return false;
-    for (const n of aufsichtListe()) speichereProfil(n, { rolle: "kind", pin: null, wiederherstellung: null });
+    for (const n of aufsichtListe()) speichereProfil(n, { rolle: "lernend", pin: null, wiederherstellung: null });
     zuruecksetzenAbbrechen();
     return true;
   }
@@ -438,7 +490,7 @@ const LS = (() => {
   /** Aufsicht mit PIN anmelden; true bei Erfolg. Ohne gesetzte PIN geht es nicht. */
   async function meldeAufsichtAn(name, pin) {
     if (!(await pinStimmt(name, pin))) return false;
-    schreibe("spieler", name);
+    schreibe("spieler", person(name).id);
     setzeSitzung(name);
     return true;
   }
@@ -448,18 +500,32 @@ const LS = (() => {
    * neues Profil dazu „angelegt“: Beim Abgleich zwischen Geräten gewinnt je Feld der jüngere Stand.
    */
   function speichereProfil(name, daten) {
-    const alle = profile();
-    const jetzt = new Date().toISOString();
-    const geaendert = { ...(alle[name]?.geaendert || {}), ...(alle[name] ? {} : { angelegt: jetzt }) };
-    for (const k of Object.keys(daten)) geaendert[k] = jetzt;
-    alle[name] = { ...profil(name), ...daten, geaendert };
-    schreibe("profile", alle);
+    const d = { ...daten };
+    if ("rolle" in d) d.rolle = ROLLE(d.rolle);
+    const p = person(name);
+    if (p) PERSONEN.aendere(p.id, d);
+    else PERSONEN.anlegen({ ...d, name, rolle: d.rolle || "lernend" });
+  }
+
+  /**
+   * Person umbenennen (P1 a: die Kennung bleibt). Die Namenskopie in Runden, Rekorden und Meldungen wird nachgeführt.
+   * Gibt den neuen Namen zurück; Fehler, wenn der Name fehlt oder vergeben ist.
+   */
+  function umbenennen(name, neuerName) {
+    const p = person(name);
+    if (!p) throw new Error("Unbekannte Person");
+    const n = PERSONEN.aendere(p.id, { name: String(neuerName || "").trim().slice(0, 20) }).name;
+    for (const k of ["protokoll", "rekorde", "meldungen"]) {
+      const l = lies(k, []);
+      if (Array.isArray(l) && l.some(e => gehoert(e, p))) schreibe(k, l.map(e => (gehoert(e, p) ? { ...e, person: p.id, name: n } : e)));
+    }
+    return n;
   }
 
   /** Neues Kind anlegen (ohne es anzumelden); gibt den Namen zurück oder null. */
   function neuerSpieler(name, daten = {}) {
-    name = name.trim().slice(0, 20);
-    if (!name || spielerListe().includes(name)) return null;
+    name = KERN.person.nameRein(name).slice(0, 20);
+    if (!name || !PERSONEN.nameFrei(name)) return null;
     speichereProfil(name, daten);
     return name;
   }
@@ -687,92 +753,114 @@ const LS = (() => {
   // Löschvermerke, damit der Abgleich Gelöschtes nicht von einem anderen Gerät zurückholt:
   // lernspiele:geloescht = { spieler: { <name>: ISO }, runden: [{ name, spiel (null = alle), bis: ISO }] }.
   // Ein Vermerk entfernt alles, was bis zu seinem Zeitpunkt entstand; Späteres (neu angelegt, neu gespielt) bleibt.
-  const geloescht = () => ({ spieler: {}, runden: [], ...lies("geloescht", {}) });
-  const rundeGeloescht = (e, g) => (g.spieler[e.name] && e.zeit <= g.spieler[e.name])
-    || g.runden.some(r => r.name === e.name && (!r.spiel || r.spiel === e.spiel) && e.zeit <= r.bis);
+  // lernspiele:geloescht = { personen: { <id>: ISO }, spieler: { <name>: ISO } (vor LERN_Session15),
+  //   runden: [{ person, name, spiel (null = alle), bis: ISO }] } — Vermerke nach Namen gelten weiter für diesen Namen.
+  const geloescht = () => ({ personen: {}, spieler: {}, runden: [], ...lies("geloescht", {}) });
+  const vermerkZeit = (e, g) => [e.person && g.personen[e.person], g.spieler[e.name]].filter(Boolean).sort().pop() || "";
+  const rundeGeloescht = (e, g) => (vermerkZeit(e, g) && e.zeit <= vermerkZeit(e, g))
+    || g.runden.some(r => (r.person && e.person ? r.person === e.person : r.name === e.name) && (!r.spiel || r.spiel === e.spiel) && e.zeit <= r.bis);
   /** Jüngster Zeitstempel eines Profils (leer bei Profilen von vor LERN_Session6). */
   const profilStand = p => Object.values(p?.geaendert || {}).reduce((a, b) => (b > a ? b : a), "");
 
   function loescheSpieler(name) {
+    const p = person(name);
+    if (!p) return;
     const g = geloescht();
-    g.spieler[name] = new Date().toISOString();
+    const jetzt = new Date().toISOString();
+    g.personen[p.id] = jetzt;
+    g.spieler[p.name] = jetzt; // für Geräte, die noch nach Namen abgleichen
     schreibe("geloescht", g);
-    const alle = profile();
-    delete alle[name];
-    schreibe("profile", alle);
-    schreibe("protokoll", protokoll().filter(e => e.name !== name));
-    schreibe("rekorde", rekorde().filter(e => e.name !== name));
-    if (lies("spieler", null) === name) schreibe("spieler", null);
+    PERSONEN.entferne(p.id);
+    schreibe("protokoll", protokoll().filter(e => !gehoert(e, p)));
+    schreibe("rekorde", rekorde().filter(e => !gehoert(e, p)));
+    const s = lies("spieler", null);
+    if (s === p.id || s === p.name) schreibe("spieler", null);
   }
 
   /** Spielstand zurücksetzen: die Runden eines Kindes löschen — alle oder nur die eines Spiels.
       Profil, Klasse, Fokus und Timer bleiben. */
   function loescheRunden(name, spielId = null) {
+    const p = person(name);
     const g = geloescht();
-    g.runden.push({ name, spiel: spielId, bis: new Date().toISOString() });
+    g.runden.push({ person: p?.id, name, spiel: spielId, bis: new Date().toISOString() });
     schreibe("geloescht", g);
-    const bleibt = e => e.name !== name || (spielId && e.spiel !== spielId);
+    const bleibt = e => !(p ? gehoert(e, p) : e.name === name) || (spielId && e.spiel !== spielId);
     schreibe("protokoll", protokoll().filter(bleibt));
     schreibe("rekorde", rekorde().filter(bleibt));
   }
 
   /**
    * Daten eines anderen Geräts dazunehmen (Sichern/Einlesen und Abgleich-Ordner, Entscheid S1 a):
-   * - Runden und Rekorde: gleiche Runde (Kind, Zeit, Spiel, Stufe) zählt einmal. Bei Rekorden gilt der
-   *   höhere Stand — ein Zwischenstand mitten in der Serie wird so vom Endstand ersetzt.
-   * - Profile: unbekannte kommen dazu; bei bekannten gewinnt je Feld der jüngere Zeitstempel. Ohne
-   *   Zeitstempel (ältere Dateien) bleibt das Profil auf diesem Gerät, wie es ist. Die PIN reist nie mit.
-   * - Löschvermerke beider Seiten gelten zusammen; die Freigabe kommt vom Gerät mit dem jüngsten Stand.
-   * Gibt zurück, wie viel neu kam: { runden, kinder, rekorde, profile, freigabe }.
+   * - Personen (P1 a, KERN.person.zusammenfuehren): gleiche Kennung, sonst gleicher Name → dieselbe Person, die
+   *   ältere Kennung bleibt; je Feld gewinnt der jüngere Zeitstempel; PIN und Wiederherstellung reisen nie mit.
+   *   Dateien von vor LERN_Session15 (version 2, profile nach Namen) werden umgedeutet.
+   * - Runden und Rekorde: gleiche Runde (Person, Zeit, Spiel, Stufe) zählt einmal; Verweise auf eine zusammengeführte
+   *   Kennung werden umgebogen. Bei Rekorden gilt der höhere Stand — ein Zwischenstand mitten in der Serie wird so vom
+   *   Endstand ersetzt.
+   * - Löschvermerke beider Seiten gelten zusammen (nach Kennung und, von älteren Geräten, nach Namen); die Freigabe
+   *   kommt vom Gerät mit dem jüngsten Stand.
+   * Gibt zurück, wie viel neu kam: { runden, kinder, rekorde, profile, freigabe, meldungen }.
    */
   function zusammenfuehren(daten) {
-    const schluessel = e => `${e.name}|${e.zeit}|${e.spiel}|${e.stufe}`;
+    const P = KERN.person;
+    // Löschvermerke beider Seiten gelten zusammen (Kennungen und, von älteren Geräten, Namen)
     const fremd = daten.geloescht || {};
     const g = geloescht();
-    for (const [n, t] of Object.entries(fremd.spieler || {})) if (!(g.spieler[n] >= t)) g.spieler[n] = t;
-    const vermerk = r => `${r.name}|${r.spiel}|${r.bis}`;
+    for (const feld of ["personen", "spieler"]) for (const [k, t] of Object.entries(fremd[feld] || {})) if (!(g[feld][k] >= t)) g[feld][k] = t;
+    const vermerk = r => `${r.person || r.name}|${r.spiel}|${r.bis}`;
     const bekannteVermerke = new Set(g.runden.map(vermerk));
-    g.runden.push(...(fremd.runden || []).filter(r => r && r.name && r.bis && !bekannteVermerke.has(vermerk(r))));
+    g.runden.push(...(fremd.runden || []).filter(r => r && (r.person || r.name) && r.bis && !bekannteVermerke.has(vermerk(r))));
+
+    // Personen: Kern-Regeln (P1 a). Dateien von vor LERN_Session15 bringen profile { Name: Profil }; ihre Personen
+    // bekommen eine Kennung und treffen die eigenen über den Namen. Gelöschte kommen nur zurück, wenn sie danach
+    // geändert wurden.
+    const fremdePersonen = Array.isArray(daten.personen) ? daten.personen
+      : Object.entries(daten.profile || {}).filter(([, p]) => p && typeof p === "object").map(([n, p]) => personAusProfil(n, p));
+    const geloeschtSeit = p => [g.personen[p.id], g.spieler[p.name]].filter(Boolean).sort().pop() || "";
+    const lebendig = fremdePersonen.filter(p => p && !(geloeschtSeit(p) && profilStand(p) <= geloeschtSeit(p)));
+    const z = P.zusammenfuehren(PERSONEN.alle(), lebendig.map(ohneGeheimnis), { geraetFelder: [] });
+    let personen = z.personen.filter(p => !(geloeschtSeit(p) && profilStand(p) <= geloeschtSeit(p)));
+    const umbiegen = id => z.kennungen[id] || id;
+    // Kennung eines Eintrags: seine eigene (umgebogen), sonst über den Namen; Kinder, die nur in Runden vorkommen,
+    // bekommen eine Person (wie bisher ein leeres Profil)
+    let neueNurRunden = 0;
+    const kennungVon = e => {
+      if (e.person && personen.some(p => p.id === umbiegen(e.person) || (p.frueher || []).includes(e.person))) {
+        const p = personen.find(q => q.id === umbiegen(e.person) || (q.frueher || []).includes(e.person));
+        return p;
+      }
+      let p = personen.find(q => P.nameGleich(q.name, e.name));
+      if (!p && e.name && !(g.spieler[e.name] && e.zeit <= g.spieler[e.name])) {
+        p = { id: e.person || P.neueId(), name: P.nameRein(e.name).slice(0, 20), rolle: "lernend", angelegt: e.zeit || "", geaendert: {} };
+        if (P.maengel(p).length) return null;
+        personen.push(p); neueNurRunden++;
+      }
+      return p || null;
+    };
+    const mitKennung = e => { const p = e && kennungVon(e); return p ? { ...e, person: p.id, name: p.name } : null; };
     schreibe("geloescht", g);
-    const lebt = e => e && e.name && e.zeit && !rundeGeloescht(e, g);
+    const lebt = e => e && e.person && e.zeit && !rundeGeloescht(e, g);
+    const schluessel = e => `${e.person}|${e.zeit}|${e.spiel}|${e.stufe}`;
 
-    const runden = protokoll();
+    const runden = protokoll().map(mitKennung).filter(lebt);
     const bekannt = new Set(runden.map(schluessel));
-    const neu = (daten.protokoll || []).filter(e => lebt(e) && !bekannt.has(schluessel(e)));
-    schreibe("protokoll", [...runden, ...neu].filter(lebt).sort((a, b) => (a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0)));
+    const neu = [];
+    for (const roh of daten.protokoll || []) {
+      const e = roh && roh.zeit ? mitKennung(roh) : null;
+      if (lebt(e) && !bekannt.has(schluessel(e))) { neu.push(e); bekannt.add(schluessel(e)); }
+    }
+    schreibe("protokoll", [...runden, ...neu].sort((a, b) => (a.zeit < b.zeit ? -1 : a.zeit > b.zeit ? 1 : 0)));
 
-    const rek = new Map(rekorde().filter(lebt).map(e => [schluessel(e), e]));
+    const rek = new Map(rekorde().map(mitKennung).filter(lebt).map(e => [schluessel(e), e]));
     let neueRekorde = 0;
-    for (const e of (daten.rekorde || []).filter(lebt)) {
+    for (const roh of daten.rekorde || []) {
+      const e = roh && roh.zeit ? mitKennung(roh) : null;
+      if (!lebt(e)) continue;
       const da = rek.get(schluessel(e));
       if (!da || (e.punkte || 0) > (da.punkte || 0)) { rek.set(schluessel(e), e); neueRekorde++; }
     }
     schreibe("rekorde", [...rek.values()]);
-
-    const alle = profile();
-    const neueKinder = [];
-    let geaenderteProfile = 0;
-    for (const [n, fp] of Object.entries(daten.profile || {})) {
-      if (!fp) continue;
-      const rein = ohneGeheimnis(fp); // PIN und Wiederherstellung bleiben auf dem Gerät
-      if (g.spieler[n] && profilStand(rein) <= g.spieler[n]) continue;
-      if (!(n in alle)) { alle[n] = { ...LEERES_PROFIL, ...rein }; neueKinder.push(n); continue; }
-      const da = alle[n];
-      const zeit = { ...(da.geaendert || {}) };
-      let anders = false;
-      for (const [k, t] of Object.entries(rein.geaendert || {})) {
-        if (!(t > (zeit[k] || ""))) continue;
-        if (k in rein) da[k] = rein[k];
-        zeit[k] = t;
-        anders = true;
-      }
-      if (anders) { da.geaendert = zeit; geaenderteProfile++; }
-    }
-    // Gelöschte Kinder auch hier entfernen, ausser sie wurden danach neu angelegt oder geändert.
-    for (const [n, t] of Object.entries(g.spieler)) if (n in alle && profilStand(alle[n]) <= t) delete alle[n];
-    // Kinder, die nur in Runden vorkommen, bekommen ein leeres Profil
-    for (const e of neu) if (!(e.name in alle)) { alle[e.name] = { ...LEERES_PROFIL }; neueKinder.push(e.name); }
-    schreibe("profile", alle);
+    PERSONEN.speichere(personen);
 
     let neueFreigabe = false;
     if (daten.freigabe && daten.freigabeStand && daten.freigabeStand > lies("freigabeStand", "")) {
@@ -780,15 +868,23 @@ const LS = (() => {
       schreibe("freigabe", daten.freigabe);
       neueFreigabe = true;
     }
-    const neueMeldungen = meldungenZusammenfuehren(daten.meldungen || []);
-    return { runden: neu.length, kinder: neueKinder.length, rekorde: neueRekorde, profile: geaenderteProfile, freigabe: neueFreigabe, meldungen: neueMeldungen };
+    // Meldungen: eigene auf die bleibende Kennung, fremde mit Kennung
+    const eigeneMeldungen = meldungen().map(m => (m && m.person && z.kennungen[m.person] ? { ...m, person: umbiegen(m.person) } : m));
+    if (eigeneMeldungen.some((m, i) => m !== meldungen()[i])) schreibe("meldungen", eigeneMeldungen);
+    const neueMeldungen = meldungenZusammenfuehren((daten.meldungen || []).map(m => (m && !istAnregung(m) && (m.person || m.name) ? mitKennung(m) || m : m)));
+    return { runden: neu.length, kinder: z.neu + neueNurRunden, rekorde: neueRekorde, profile: z.geaendert, freigabe: neueFreigabe, meldungen: neueMeldungen };
   }
 
-  /** Alles, was ein Gerät für den Abgleich weitergibt: wie Sichern, aber vollständig und ohne PIN. */
+  /**
+   * Alles, was ein Gerät für den Abgleich weitergibt: wie Sichern, aber vollständig und ohne PIN. Version 3 bringt
+   * die Personen mit Kennung; profile (nach Namen) steht für Geräte mit älterem Stand weiter dabei (Übergang).
+   */
   function abgleichDaten() {
-    const ohnePin = Object.fromEntries(Object.entries(profile()).map(([n, p]) => [n, ohneGeheimnis(p)]));
-    return { version: 2, gesichert: new Date().toISOString(), profile: ohnePin, protokoll: protokoll(), rekorde: rekorde(),
-      geloescht: geloescht(), freigabe: lies("freigabe", null), freigabeStand: lies("freigabeStand", null), meldungen: meldungen() };
+    const personen = PERSONEN.alle().map(ohneGeheimnis);
+    const alsProfil = p => { const { id, name, angelegt, geaendert, frueher, ...rest } = p; return { ...rest, geaendert: { ...(geaendert || {}), angelegt } }; };
+    return { version: 3, gesichert: new Date().toISOString(), personen, profile: Object.fromEntries(personen.map(p => [p.name, alsProfil(p)])),
+      protokoll: protokoll(), rekorde: rekorde(), geloescht: geloescht(), freigabe: lies("freigabe", null),
+      freigabeStand: lies("freigabeStand", null), meldungen: meldungen() };
   }
 
   // ---------- Fehler melden durch Kinder (Wunsch Patrik, LERN_Session9) ----------
@@ -861,7 +957,8 @@ const LS = (() => {
   function neueMeldung(daten) {
     const jetzt = new Date().toISOString();
     const id = `M-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-    const m = { id, zeit: jetzt, stand: jetzt, status: "neu", gelesen: true, ...daten, verlauf: [{ zeit: jetzt, status: "neu", von: daten.name }] };
+    const p = person(daten.name);
+    const m = { id, zeit: jetzt, stand: jetzt, status: "neu", gelesen: true, ...daten, ...(p ? { person: p.id } : {}), verlauf: [{ zeit: jetzt, status: "neu", von: daten.name }] };
     schreibe("meldungen", [...meldungen(), m]);
     return m;
   }
@@ -1166,7 +1263,9 @@ const LS = (() => {
   }
 
   const protokoll = () => lies("protokoll", []);
-  function protokolliere(eintrag) { schreibe("protokoll", [...protokoll(), eintrag]); }
+  /** Runde ins Protokoll; mit der Kennung der Person (P1 a), der Name bleibt als Kopie für die Anzeige. */
+  const mitPerson = eintrag => { const p = person(eintrag?.name); return p ? { ...eintrag, person: p.id, name: p.name } : eintrag; };
+  function protokolliere(eintrag) { schreibe("protokoll", [...protokoll(), mitPerson(eintrag)]); }
 
   // ---------- Endlos-Rekorde (Vorgabe Patrik 2026-10-31) ----------
   // lernspiele:rekorde = [{ name, zeit, spiel, stufe, timer (Startzeit in Sekunden oder null), punkte,
@@ -1180,7 +1279,7 @@ const LS = (() => {
   /** Rekord anhängen; ersetzt: ein früher gespeicherter Zwischenstand derselben Runde, der wegfällt. */
   function speichereRekord(eintrag, ersetzt = null) {
     schreibe("rekorde", [...rekorde().filter(e => e !== ersetzt && !(ersetzt && e.name === ersetzt.name && e.zeit === ersetzt.zeit
-      && e.spiel === ersetzt.spiel && e.stufe === ersetzt.stufe)), eintrag]);
+      && e.spiel === ersetzt.spiel && e.stufe === ersetzt.stufe)), mitPerson(eintrag)]);
   }
   /** Stufen, die den Endlos-Modus anbieten (Katalog: endlos). */
   const endlosStufen = spielId => katalogEintrag(spielId)?.endlos || [];
@@ -3283,6 +3382,7 @@ const LS = (() => {
     STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
+    person, umbenennen, gehoert, PERSONEN,
     beiAenderung, abgleichDaten, spielStand: () => spielStand,
     MELDUNG_ARTEN, MELDUNG_STATUS, ANREGUNG_ARTEN, ANREGUNG_STATUS, istAnregung, anregungen, neueAnregung,
     neueKorrektur, korrekturen, entferneMeldung, fingerabdruck, listenPruefung, pruefungDefinition, pruefungLokal, setzePruefungLokal,

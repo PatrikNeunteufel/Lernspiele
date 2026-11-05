@@ -267,15 +267,16 @@ console.log("el.js");
   gleich(mia.geboren, "2012-03-07", "Geburtsdatum gespeichert als JJJJ-MM-TT");
   gleich(mia.rolle, "lernend", "Rolle Standard lernend");
   gleich(typeof mia.geaendert.klasse, "string", "geaendert je Feld");
+  gleich(L.anlegen({ name: "Vorgabe" }).geaendert.klasse, undefined, "Vorgaben der App bekommen keine Zeit");
   faelle++; try { L.anlegen({ name: " mia " }); fehler++; console.log("    FEHLER  doppelter Name angenommen"); } catch (e) { /* erwartet */ }
   const leo = L.anlegen({ name: "Leo", rolle: "aufsicht", art: "eltern" });
   faelle++; try { L.aendere(leo.id, { name: "MIA" }); fehler++; console.log("    FEHLER  Umbenennen auf vergebenen Namen"); } catch (e) { /* erwartet */ }
   const mia2 = L.aendere(mia.id, { name: "Mia Sophie", klasse: 8 });
   gleich(mia2.id, mia.id, "Umbenennen behält die Kennung");
   gleich(L.findeName("mia sophie").id, mia.id, "findeName");
-  gleich(L.alle().length, 2, "zwei Personen");
+  gleich(L.alle().length, 3, "drei Personen");
   daten.set("lernsteig:personen", JSON.stringify(L.alle().concat([{ id: 7, name: "kaputt" }])));
-  gleich(L.alle().length, 2, "ungültige Einträge im Speicher werden nicht geliefert");
+  gleich(L.alle().length, 3, "ungültige Einträge im Speicher werden nicht geliefert");
   delete global.localStorage;
 
   // Zusammenführen (P1 a)

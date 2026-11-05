@@ -504,14 +504,25 @@ Seite lädt es direkt nach `spiel.js`.
   — fragen darf er nur nach einem Tippen.
 - **Ohne Ordner** (iPad, Android, Firefox): dieselben Daten als Datei sichern und auf dem anderen Gerät
   einlesen (Verwaltung oder Statistik).
+- **Personen** (seit LERN_Session15, Entscheide P1 a, P2 a; `KERN.person`, docs/kern/rahmen.md 4.7): Die Profile
+  stehen als Liste `lernspiele:personen` mit fester Kennung `id`; der Name ist je Gerät eindeutig (ohne Gross/Klein)
+  und nur Anzeige. Die Aufrufe des Eulenpfads (`LS.profil(name)`, `aktuellerSpieler()` …) gehen weiter über den
+  Namen. Runden, Rekorde und Meldungen tragen `person` und `name` (Kopie für die Anzeige, nachgeführt von
+  `LS.umbenennen` und beim Zusammenführen); `LS.gehoert(eintrag, person)` prüft die Zugehörigkeit.
+  `lernspiele:spieler` und die Sitzung der Aufsicht speichern die Kennung. Der frühere Speicher `lernspiele:profile`
+  (nach Namen) wird beim ersten Laden umgezogen; zwei Profile, die sich nur in Gross/Klein unterschieden, behalten ihre
+  Runden, das zweite bekommt eine Nummer („mia (2)“). Die Rolle heisst `lernend` (bisher `kind`).
 - **Zusammenführen** (`LS.zusammenfuehren`, auch beim Einlesen):
-  - Runden: gleiche Runde (Kind, Zeit, Spiel, Stufe) zählt einmal.
+  - Personen: gleiche Kennung, sonst gleicher Name → dieselbe Person, die ältere Kennung bleibt, die andere wird
+    frühere Kennung (`frueher`); je Feld der jüngere Zeitstempel (`geaendert`). Die PIN reist nie mit. Dateien
+    älterer Geräte (`version` 2 mit `profile` nach Namen) werden umgedeutet; `LS.abgleichDaten()` schreibt `version`
+    3 mit `personen` und für den Übergang weiter `profile`.
+  - Runden: gleiche Runde (Person, Zeit, Spiel, Stufe) zählt einmal; Verweise auf eine zusammengeführte Kennung
+    werden umgebogen.
   - Rekorde: ebenso, bei gleicher Runde gilt der höhere Stand (Zwischenstand → Endstand).
-  - Profile: je Feld der jüngere Zeitstempel (`geaendert`); ältere Profile ohne Zeitstempel bleiben,
-    wie sie sind. Die PIN reist nie mit.
-  - Löschen: `lernspiele:geloescht` hält Vermerke für gelöschte Kinder und zurückgesetzte Runden.
-    Ein Vermerk entfernt auf allen Geräten, was bis zu seinem Zeitpunkt entstand; danach neu Angelegtes
-    bleibt.
+  - Löschen: `lernspiele:geloescht` hält Vermerke für gelöschte Personen (`personen` nach Kennung; `spieler` nach
+    Namen für ältere Geräte) und zurückgesetzte Runden (`person`, `name`). Ein Vermerk entfernt auf allen Geräten,
+    was bis zu seinem Zeitpunkt entstand; danach neu Angelegtes bleibt.
   - Freigabe: die des Geräts mit dem jüngsten `lernspiele:freigabeStand`.
 - **Geprüft** am 2026-11-01 auf localhost mit dem Browser-eigenen Dateispeicher (OPFS) als Ordner:
   zwei bzw. drei Geräte, Zwischen- und Endstand, Löschen und neu Anlegen, Freigabe, Neuzeichnen der

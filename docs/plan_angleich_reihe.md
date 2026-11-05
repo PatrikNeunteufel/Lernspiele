@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.2.0: Zahl, Bruch, Speicher, Zufall, `el` in beiden Apps; Geheimnis und Person im Lernsteig | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.3.0: Zahl, Bruch, Speicher, Zufall, `el`, Geheimnis, Person in beiden Apps | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | offen, nach B | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -164,13 +164,14 @@ Kindersprache.
 | D3 | `terme.js:123–125` | Absturz bei `(3)(2x+3)` | `lies` in `try`, Rückmeldung „nicht lesbar“ |
 | D4 | `daten.js:36–62` | Einlesen ohne Schema, halber Import, vergiftet spätere Importe | Schema je Datensatz, erst prüfen, dann schreiben (Kern `daten.js`) — erledigt 2026-11-05 (LERN_Session15, `lernsteig/gemeinsam/daten.js`, Test `pruefe_konten.js`) |
 | D5 | `aufsicht.js:135`, `konten.js:130` | Einlesen verbindet fremde Konten ohne Zustimmung; neue Aufsicht ohne Bestätigung | nur neu angelegte Konten verbinden; Aufsicht wie Eulenpfad (C5) — erledigt 2026-11-05 im Lernsteig (Bestätigung durch bestehende Aufsicht, nur neue Konten verbinden; Test `pruefe_konten.js`) |
-| D6 | `konten.js:24`, Eulenpfad `spiel.js:393` | fehlt `crypto.subtle` (http über LAN), technische Meldung | Prüfung und verständliche Meldung, im Kern — im Kern seit 1.2.0 (`KERN.geheimnis`), Lernsteig benutzt ihn; Eulenpfad mit C |
+| D6 | `konten.js:24`, Eulenpfad `spiel.js:393` | fehlt `crypto.subtle` (http über LAN), technische Meldung | Prüfung und verständliche Meldung, im Kern — erledigt 2026-11-05 (Kern 1.2.0 `KERN.geheimnis`, beide Apps seit 1.3.0) |
 | D7 | `statistik.js:13`, `aufsicht.js:85` | Übungstage in UTC, Wochenziel in Ortszeit | überall Ortszeit (Kern) |
 | D8 | `werkzeug.js:41`, Eulenpfad `spiel.js:22` | `zahlText(1234.5678)` → `1'234.5'678` | nur ganze Zahlen gruppieren (Kern `zahl.js`) — erledigt 2026-11-05 (Kern 1.0.0) |
 | D9 | `rechner.js:112` | NaN als „zu gross“, 11 Stellen bei 9999999999.6 | „nicht definiert“, Anzeige auf 10 Stellen |
 | D10 | `terme.js:63` | Exponent unbegrenzt friert den Tab ein | Grenze mit Meldung |
 | D11 | `rahmen.js:121`, `daten.js` | voller Speicher verliert Runden still | Rückgabe auswerten, Warnung wie Eulenpfad (80 %) |
 | D12 | `konten.js:243–258` | Einladung prüft Land/Kanton nicht, verwirft `JJJJ-MM` | gegen `LP.LAENDER`/`KANTONE` prüfen; B3 — erledigt 2026-11-05 (Land, Kanton, Klasse geprüft; Geburtsdatum mit oder ohne Tag) |
+| D14 | Eulenpfad `LS.zusammenfuehren` | Runden aus einer Datei werden nicht geprüft; eine Runde ohne `fehlerAufgaben` bricht die Statistik (`auswertung.js` `anhieb`) | Schema wie im Lernsteig (`rundeGueltig`), in den Kern-Teil Sichern und Einlesen |
 | D13 | `sachsituationen/aufgaben.js:66, 79` | ASCII-Minus | über `LST.zahlText` |
 
 ## E. Fachliche Korrekturen

@@ -351,11 +351,14 @@ function zeichneStatistik(box, neu) {
 
   /** Profile und Runden der genannten Personen als JSON-Datei; PIN-Hashes bleiben auf dem Gerät. */
   function sichern(wer) {
-    const profile = Object.fromEntries(wer.map(n => [n, LS.ohneGeheimnis(LS.lies("profile", {})[n] || {})])); // ohne PIN und Wiederherstellung
-    const daten = { version: 1, gesichert: new Date().toISOString(), profile,
-      protokoll: LS.protokoll().filter(e => sichtbareRunde(e) && e.name in profile),
-      rekorde: LS.rekorde().filter(e => sichtbareRunde(e) && e.name in profile),
-      meldungen: LS.meldungen().filter(m => m.name in profile) };
+    // Version 3 (LERN_Session15): Personen mit Kennung, ohne PIN und Wiederherstellung; Einträge über die Kennung
+    const personen = wer.map(n => LS.person(n)).filter(Boolean).map(p => LS.ohneGeheimnis(p));
+    const profile = Object.fromEntries(personen.map(p => [p.name, p]));
+    const gehoert = e => personen.some(p => LS.gehoert(e, p));
+    const daten = { version: 3, gesichert: new Date().toISOString(), personen,
+      protokoll: LS.protokoll().filter(e => sichtbareRunde(e) && gehoert(e)),
+      rekorde: LS.rekorde().filter(e => sichtbareRunde(e) && gehoert(e)),
+      meldungen: LS.meldungen().filter(gehoert) };
     // Das Muster lernspiele-*.json hält .gitignore aus dem Repo heraus.
     const namen = Object.keys(profile).map(n => n.replace(/[^\p{L}\p{N}_-]+/gu, "_")).filter(Boolean).join("-");
     const dateiname = `lernspiele-${namen ? namen + "-" : ""}${new Date().toISOString().slice(0, 10)}.json`;

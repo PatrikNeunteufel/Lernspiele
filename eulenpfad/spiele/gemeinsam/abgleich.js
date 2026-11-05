@@ -11,7 +11,7 @@
 LS.abgleich = (() => {
   const PRAEFIX = "lernspiele-sync-";
   // Was abgeglichen wird; alles andere (Anmeldung, Filter, Gerät) bleibt auf dem Gerät.
-  const GETEILT = new Set(["profile", "protokoll", "rekorde", "freigabe", "geloescht", "meldungen"]);
+  const GETEILT = new Set(["personen", "protokoll", "rekorde", "freigabe", "geloescht", "meldungen"]); // personen seit LERN_Session15 (vorher profile)
   const kannOrdner = typeof window !== "undefined" && typeof window.showDirectoryPicker === "function"
     && typeof indexedDB !== "undefined";
   // Im Zufallsmix laufen die Spiele im iframe; dort gleicht nur die Mix-Seite selbst ab.

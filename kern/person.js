@@ -118,7 +118,9 @@
       const jetzt = new Date().toISOString();
       const p = { ...felder, ...daten, id: daten.id || neueId(), name, rolle: daten.rolle || "lernend", angelegt: jetzt, geaendert: {} };
       if (p.geboren !== undefined && p.geboren !== null) p.geboren = geburtsdatumLies(p.geboren);
-      for (const k of Object.keys(p)) if (!VERWALTUNG.has(k)) p.geaendert[k] = jetzt;
+      // Zeit nur für gesetzte Felder (und Name, Rolle), nicht für Vorgaben der App: sonst überschriebe eine leere
+      // Vorgabe beim Zusammenführen den echten Wert eines anderen Geräts.
+      for (const k of new Set([...Object.keys(daten), "name", "rolle"])) if (!VERWALTUNG.has(k)) p.geaendert[k] = jetzt;
       const fehler = maengel(p);
       if (fehler.length) throw new Error(fehler.join(", "));
       if (!speichere(alle().concat(p))) throw new Error("Der Speicher des Browsers ist voll oder gesperrt.");
