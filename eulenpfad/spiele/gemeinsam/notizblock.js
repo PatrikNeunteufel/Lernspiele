@@ -86,13 +86,18 @@ const SCHRIFTLICH = (() => {
   }
 
   // ---------- Notizblock ----------
+  // Plus und Minus lassen sich in einer Spalte mischen (Wunsch Patrik, LERN_Session15): jede Zahl trägt ihr Zeichen,
+  // Antippen wechselt es. Die Vorlage bestimmt nur, mit welchem Zeichen eine neue Zahl beginnt.
   const VORLAGEN = [
-    { id: "+", text: "+ Plus", zahlen: [2, 4], hinweis: "Zahlen untereinander, dann von rechts zusammenzählen." },
-    { id: "−", text: "− Minus", zahlen: [2, 2], hinweis: "Oben die grössere Zahl, unten die kleinere." },
+    { id: "+", text: "+ Plus", zahlen: [2, 4], hinweis: "Zahlen untereinander, dann von rechts rechnen. Tipp aufs Zeichen, dann wird aus + ein −." },
+    { id: "−", text: "− Minus", zahlen: [2, 4], hinweis: "Oben die grösste Zahl. Tipp aufs Zeichen, dann wird aus − ein +." },
     { id: "×", text: "× Mal", zahlen: [2, 2], hinweis: "Mit einer mehrstelligen Zahl: je Ziffer eine Zeile, dann zusammenzählen." },
     { id: ":", text: ": Geteilt", zahlen: [2, 2], hinweis: "Rechts das Ergebnis, darunter Platz für die Schritte." },
     { id: "frei", text: "▦ Häuschen", zahlen: [0, 0], hinweis: "Häuschenpapier: schreib hin, was dir hilft." },
   ];
+
+  const PLUS_MINUS = new Set(["+", "−"]);
+  const MAX_SCHRITTE = 6; // Rechnungen auf einem Blatt
 
   let offen = null; // { panel, beiEingabe }
 
@@ -118,15 +123,20 @@ const SCHRIFTLICH = (() => {
   /** Ganze Zahl mit k Nachkommastellen: 129.4 bei k = 2 → 12940 (so stehen alle Zahlen am Komma untereinander). */
   const mitStellen = (z, k) => Number(z.ganz + z.nach.padEnd(k, "0"));
   const MAX_NACHKOMMA = 3;
+  /** Das Dezimalzeichen, das die Aufsicht eingestellt hat (wie LS.dezimalText); zahlAus liest beide. */
+  const kommaZeichen = () => (LS.einstellung("dezimal") === "komma" ? "," : ".");
 
   /** Stellen, die das Raster einer Vorlage braucht (höchstens MAX_STELLEN, so weit reichen die Stellen E … M). */
   const spalten = (art, zahlen) => {
     const len = z => String(z).length;
-    return art === "+" ? Math.max(...zahlen.map(len)) + 1 : art === "×" ? len(zahlen[0]) + len(zahlen[1]) : len(zahlen[0]);
+    return PLUS_MINUS.has(art) ? Math.max(...zahlen.map(len)) + 1 : art === "×" ? len(zahlen[0]) + len(zahlen[1]) : len(zahlen[0]);
   };
 
-  /** Raster zur gewählten Vorlage mit den Zahlen des Kindes; Eingabefelder für Überträge, Zwischenzeilen, Ergebnis. */
-  function baueRaster(art, zahlen, komma = 0) {
+  /**
+   * Raster zur gewählten Vorlage mit den Zahlen des Kindes; Eingabefelder für Überträge, Zwischenzeilen, Ergebnis.
+   * vorzeichen: bei Plus und Minus das Zeichen jeder Zahl (die erste ohne), sonst ungenutzt.
+   */
+  function baueRaster(art, zahlen, komma = 0, vorzeichen = []) {
     let zeilenNr = 0;
     const reiheFelder = (r, klasse, label, { ab = 0, richtung = "links", zeichen = "" } = {}) => {
       const nr = zeilenNr++;
@@ -142,11 +152,11 @@ const SCHRIFTLICH = (() => {
       for (let z = 0; z < 8; z++) reiheFelder(r, "karo", `Häuschen Zeile ${z + 1}`, { richtung: "rechts" });
       return r.element;
     }
-    if (art === "+" || art === "−") {
+    if (PLUS_MINUS.has(art)) {
       const n = Math.max(spalten(art, zahlen), komma + 1);
       const r = raster(n, { komma });
       r.kopf();
-      zahlen.forEach((z, j) => r.zahl(z, { zeichen: j ? art : "" }));
+      zahlen.forEach((z, j) => r.zahl(z, { zeichen: j ? vorzeichen[j] || art : "" }));
       reiheFelder(r, "uebertrag", "Übertrag");
       r.strich();
       reiheFelder(r, "erg", "Ergebnis");
@@ -190,57 +200,133 @@ const SCHRIFTLICH = (() => {
     return r.element;
   }
 
-  /** Den Notizblock öffnen (oder nach vorn holen). beiEingabe: wird gerufen, sobald das Kind etwas hineinschreibt. */
+  /**
+   * Was das Kind ins Ergebnis einer Rechnung geschrieben hat, als Zahl zum Weiterrechnen ("" bei Lücken oder ohne
+   * Ergebnis). Plus, Minus, Mal: Felder rechtsbündig, die letzten komma stehen nach dem Komma. Geteilt: von links.
+   */
+  function geschrieben(element, art, komma) {
+    const t = [...element.querySelectorAll(".nb-feld.erg")].map(f => f.value.trim());
+    if (art === ":" && komma) return ""; // Komma im Ergebnis der Division steht nirgends fest
+    const erste = t.findIndex(Boolean);
+    if (erste < 0) return "";
+    let ende = t.length;
+    if (art === ":") while (ende > erste && !t[ende - 1]) ende--;
+    if (art !== ":" && komma && erste > t.length - komma - 1) return ""; // keine Ziffer vor dem Komma
+    const z = t.slice(erste, ende);
+    if (z.some(c => !/^\d$/.test(c))) return "";
+    const ganz = (art === ":" || !komma ? z : z.slice(0, z.length - komma)).join("").replace(/^0+(?=\d)/, "");
+    return art === ":" || !komma ? ganz : `${ganz}${kommaZeichen()}${z.slice(z.length - komma).join("")}`;
+  }
+
+  /**
+   * Den Notizblock öffnen (oder nach vorn holen). beiEingabe: wird gerufen, sobald das Kind etwas hineinschreibt.
+   * Ein Blatt mit bis zu MAX_SCHRITTE Rechnungen untereinander (Wunsch Patrik, LERN_Session15): Unter jede geschriebene
+   * Rechnung lässt sich eine neue hängen, ihre erste Zahl ist das, was das Kind als Ergebnis geschrieben hat.
+   */
   function oeffne({ beiEingabe } = {}) {
     if (offen) { offen.panel.classList.remove("klein"); document.body.classList.remove("notizblock-klein"); offen.panel.querySelector("button, input")?.focus(); return; }
-    const flaeche = el("div", { class: "nb-flaeche" });
-    const wahl = el("div", { class: "nb-vorlagen", role: "group", "aria-label": "Vorlage wählen" });
-    const zahlenBox = el("div", { class: "nb-zahlen" });
-    const zeigeVorlage = v => {
-      wahl.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.vorlage === v.id)));
-      zahlenBox.innerHTML = "";
-      flaeche.innerHTML = "";
-      if (v.id === "frei") { flaeche.append(baueRaster("frei", [])); return; }
+    const blatt = el("div", { class: "nb-blatt" });
+    const wahl = el("div", { class: "nb-vorlagen", role: "group", "aria-label": "Rechnung wählen" });
+    const wahlTitel = el("b", { class: "nb-wahl-titel", text: "Rechnung wählen:" });
+    const wahlBox = el("div", { class: "nb-wahl" }, wahlTitel, wahl);
+    const schritte = []; // { vorlage, box, fertig, ergebnis() }
+
+    const aktualisiereWahl = () => {
+      const letzter = schritte.at(-1);
+      wahlTitel.textContent = schritte.some(s => s.fertig) ? "Weiterrechnen:" : "Rechnung wählen:";
+      wahlBox.hidden = schritte.length >= MAX_SCHRITTE && !!letzter?.fertig;
+      wahl.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(!!letzter && !letzter.fertig && b.dataset.vorlage === letzter.vorlage.id)));
+      schritte.forEach((s, j) => { s.nr.textContent = `${j + 1}.`; });
+    };
+    const entferne = s => { s.box.remove(); schritte.splice(schritte.indexOf(s), 1); aktualisiereWahl(); };
+
+    const neuerSchritt = v => {
+      // Eine Rechnung, die noch nicht untereinander steht, wird durch die neue Wahl ersetzt
+      if (schritte.at(-1) && !schritte.at(-1).fertig) entferne(schritte.at(-1));
+      const vorher = schritte.at(-1);
+      const start = v.id !== "frei" && vorher ? vorher.ergebnis() : "";
+      const nr = el("b", { class: "nb-nr" });
+      const titel = el("span", { class: "nb-schritt-titel", text: v.text });
+      const s = { vorlage: v, fertig: false, nr, ergebnis: () => "" };
+      const weg = el("button", { type: "button", class: "nb-zu nb-weg", text: "✕", "aria-label": "Diese Rechnung wegnehmen", title: "Diese Rechnung wegnehmen", onclick: () => entferne(s) });
+      const flaeche = el("div", { class: "nb-flaeche" });
+      s.box = el("section", { class: "nb-schritt" }, el("div", { class: "nb-schritt-kopf" }, nr, titel, weg), flaeche);
+      schritte.push(s);
+      blatt.append(s.box);
+      if (v.id === "frei") {
+        flaeche.append(baueRaster("frei", []));
+        s.fertig = true;
+        aktualisiereWahl();
+        flaeche.querySelector(".nb-feld")?.focus();
+        return;
+      }
       const felder = [];
+      const zeichen = []; // je Zahl ihr Zeichen (die erste ohne)
       const zeile = el("div", { class: "nb-zahlen-zeile" });
       const neuesFeld = () => {
+        const j = felder.length;
         const f = el("input", { class: "feld nb-zahl", type: "text", inputmode: "none", maxlength: String(MAX_STELLEN + 1 + MAX_NACHKOMMA), autocomplete: "off",
-          "aria-label": `Zahl ${felder.length + 1}`, placeholder: "Zahl" });
+          "aria-label": `Zahl ${j + 1}`, placeholder: "Zahl" });
         felder.push(f);
-        if (felder.length > 1) zeile.append(el("span", { class: "nb-op", text: v.id }));
+        zeichen.push(j ? v.id : "");
+        if (j) {
+          zeile.append(PLUS_MINUS.has(v.id)
+            ? el("button", { type: "button", class: "nb-op nb-op-wechsel", text: v.id, "aria-label": `Zeichen vor Zahl ${j + 1}: ${v.id === "+" ? "Plus" : "Minus"}, antippen wechselt`,
+              onclick: e => {
+                zeichen[j] = zeichen[j] === "+" ? "−" : "+";
+                e.currentTarget.textContent = zeichen[j];
+                e.currentTarget.setAttribute("aria-label", `Zeichen vor Zahl ${j + 1}: ${zeichen[j] === "+" ? "Plus" : "Minus"}, antippen wechselt`);
+              } })
+            : el("span", { class: "nb-op", text: v.id }));
+        }
         zeile.append(f);
         return f;
       };
       for (let j = 0; j < v.zahlen[0]; j++) neuesFeld();
+      if (start) felder[0].value = start;
       const mehr = v.zahlen[1] > v.zahlen[0] ? el("button", { type: "button", class: "knopf hell klein", text: "＋ Zahl", onclick: () => {
         neuesFeld().focus();
         if (felder.length >= v.zahlen[1]) mehr.remove();
       } }) : null;
       const meldung = el("span", { class: "leise-text", "aria-live": "polite" });
+      const eingabe = el("div", { class: "nb-zahlen" });
       const los = el("button", { type: "button", class: "knopf klein", text: "Untereinander schreiben ➜", onclick: () => {
         const roh = felder.map(f => zahlAus(f.value));
         if (roh.some(z => z === null)) { meldung.textContent = "Bitte jede Zahl eintippen (höchstens 7 Ziffern, 3 nach dem Komma)."; return; }
         // Plus und Minus: alle Zahlen am Komma ausrichten. Mal und Geteilt: nur die erste Zahl darf ein Komma haben.
-        const mitKomma = v.id === "+" || v.id === "−";
+        const mitKomma = PLUS_MINUS.has(v.id);
         if (!mitKomma && roh.slice(1).some(z => z.nach)) { meldung.textContent = "Bei Mal und Geteilt darf nur die erste Zahl ein Komma haben."; return; }
         const komma = mitKomma ? Math.max(...roh.map(z => z.nach.length)) : roh[0].nach.length;
         const zahlen = roh.map((z, j) => (mitKomma || j === 0 ? mitStellen(z, komma) : Number(z.ganz)));
-        if (v.id === "−" && zahlen[1] > zahlen[0]) { meldung.textContent = "Oben muss die grössere Zahl stehen."; return; }
+        if (mitKomma && zahlen.reduce((t, z, j) => (j && zeichen[j] === "−" ? t - z : t + z), 0) < 0) {
+          meldung.textContent = "Das Ergebnis wäre kleiner als 0: Oben muss mehr stehen, als weggenommen wird."; return;
+        }
         if (v.id === ":" && zahlen[1] === 0) { meldung.textContent = "Durch 0 kann man nicht teilen."; return; }
         if (spalten(v.id, zahlen) - komma > MAX_STELLEN) { meldung.textContent = "Das wird zu breit: Der Notizblock geht bis zur Million."; return; }
-        meldung.textContent = "";
-        flaeche.innerHTML = "";
-        flaeche.append(baueRaster(v.id, zahlen, komma));
-        flaeche.querySelector(".nb-feld.erg, .nb-feld")?.focus();
-        if (v.id !== ":") [...flaeche.querySelectorAll(".nb-feld.erg")].pop()?.focus(); // Einer zuerst
+        const raster = baueRaster(v.id, zahlen, komma, zeichen);
+        eingabe.remove();
+        flaeche.append(raster);
+        titel.textContent = felder.map((f, j) => (j ? ` ${zeichen[j]} ` : "") + f.value.replace(/\s/g, "")).join("");
+        s.fertig = true;
+        s.ergebnis = () => geschrieben(raster, v.id, komma);
+        aktualisiereWahl();
+        if (v.id === ":") raster.querySelector(".nb-feld.erg")?.focus();
+        else [...raster.querySelectorAll(".nb-feld.erg")].pop()?.focus(); // Einer zuerst
+        s.box.scrollIntoView?.({ block: "nearest" });
         beiEingabe?.();
       } });
-      zahlenBox.append(zeile, tasten, el("div", { class: "nb-zahlen-knoepfe" }, mehr, los, meldung), el("p", { class: "leise-text nb-hinweis", text: v.hinweis }));
-      felder[0].focus();
+      eingabe.append(zeile, el("div", { class: "nb-zahlen-knoepfe" }, mehr, los, meldung), el("p", { class: "leise-text nb-hinweis", text: start
+        ? "Oben steht dein Ergebnis von eben. Du kannst es ändern." : v.hinweis }));
+      flaeche.before(eingabe);
+      aktualisiereWahl();
+      (start ? felder[1] : felder[0]).focus();
+      s.box.scrollIntoView?.({ block: "nearest" });
     };
+
     // Eigenes Ziffernfeld (Hinweis Patrik, LERN_Session14): Die Ziffern des Spiels sind neben dem Block teils verdeckt,
     // und in die Zahlenfelder schrieben sie nicht. Es schreibt in das gewählte Feld des Blocks — Zahl oder Häuschen —,
-    // ohne ihm den Fokus zu nehmen; ohne Wahl in das erste leere Zahlenfeld.
+    // ohne ihm den Fokus zu nehmen; ohne Wahl in das erste leere Zahlenfeld. Es steht fest unten im Block, damit es bei
+    // mehreren Rechnungen nicht wegscrollt (LERN_Session15).
     let zuletzt = null;
     const ziel = () => {
       const a = document.activeElement;
@@ -265,18 +351,19 @@ const SCHRIFTLICH = (() => {
       f.dispatchEvent(new Event("input", { bubbles: true }));
     };
     const tasten = el("div", { class: "nb-tasten", role: "group", "aria-label": "Ziffern für den Notizblock" },
-      ...["1", "2", "3", "4", "5", ".", "6", "7", "8", "9", "0", "⌫"].map(z => el("button", { type: "button", text: z,
-        "aria-label": z === "⌫" ? "Löschen" : z === "." ? "Komma" : z, onclick: () => tippe(z) })));
+      ...["1", "2", "3", "4", "5", kommaZeichen(), "6", "7", "8", "9", "0", "⌫"].map(z => el("button", { type: "button", text: z,
+        "aria-label": z === "⌫" ? "Löschen" : z === kommaZeichen() ? "Komma" : z, onclick: () => tippe(z) })));
     tasten.addEventListener("pointerdown", e => e.preventDefault()); // Fokus bleibt im gewählten Feld
     tasten.addEventListener("mousedown", e => e.preventDefault());
     for (const v of VORLAGEN) wahl.append(el("button", { type: "button", class: "chip", "data-vorlage": v.id, "aria-pressed": "false", text: v.text,
-      onclick: () => { zeigeVorlage(v); if (v.id === "frei") zahlenBox.append(tasten); } }));
+      onclick: () => neuerSchritt(v) }));
     const zu = el("button", { type: "button", class: "nb-zu", "aria-label": "Notizblock schliessen", title: "Schliessen (leert den Block)", text: "✕", onclick: schliessen });
     const klein = el("button", { type: "button", class: "nb-zu", "aria-label": "Notizblock verkleinern", title: "Verkleinern", text: "▁",
       onclick: () => document.body.classList.toggle("notizblock-klein", panel.classList.toggle("klein")) });
     const panel = el("aside", { class: "notizblock", role: "dialog", "aria-label": "Notizblock" },
       el("div", { class: "nb-kopf" }, el("b", { text: "📝 Notizblock" }), el("span", { class: "leise-text", text: "wird nicht bewertet" }), klein, zu),
-      el("div", { class: "nb-inhalt" }, wahl, zahlenBox, flaeche));
+      el("div", { class: "nb-inhalt" }, blatt, wahlBox),
+      el("div", { class: "nb-fuss" }, tasten));
     // Ziffer getippt: weiter in Schreibrichtung; Rücktaste im leeren Feld: zurück. Erstes Hineinschreiben meldet beiEingabe.
     panel.addEventListener("focusin", e => { if (e.target.matches?.("input")) { zuletzt = e.target; e.target.inputMode = "none"; } });
     panel.addEventListener("input", e => {

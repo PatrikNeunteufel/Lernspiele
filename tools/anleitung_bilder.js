@@ -95,7 +95,7 @@ async function rahmen(ziele) {
  * Bild aufnehmen: ganze Seite bis maxHoehe, nur der Bereich um ein Element (css), oder ab dem Element
  * mit dem Text 'ab' bis ans Ende seiner Karte.
  */
-async function bild(name, { css = null, ab = null, maxHoehe = 1300, rand = 16 } = {}) {
+async function bild(name, { css = null, ab = null, maxHoehe = 1300, rand = 16, imFenster = false } = {}) {
   await warte(250);
   if (ab) {
     await js(`const t = [...document.querySelectorAll("body *")].filter(x => x.offsetParent !== null && x.textContent.includes(${JSON.stringify(ab)}))
@@ -114,7 +114,9 @@ async function bild(name, { css = null, ab = null, maxHoehe = 1300, rand = 16 } 
     if (${JSON.stringify(css)} && !e) throw new Error("Bildbereich fehlt: " + ${JSON.stringify(css)});
     if (e) { const r = e.getBoundingClientRect(); return { x: Math.max(0, r.left + scrollX - ${rand}), y: Math.max(0, r.top + scrollY - ${rand}), w: r.width + 2 * ${rand}, h: r.height + 2 * ${rand} }; }
     return { x: 0, y: 0, w: document.documentElement.clientWidth, h: Math.min(document.documentElement.scrollHeight, ${maxHoehe}) };`);
-  const r = await send("Page.captureScreenshot", { format: "webp", quality: 82, captureBeyondViewport: true,
+  // imFenster: nur das Fenster aufnehmen — sonst vergrössert Chrome es auf die ganze Seite, und was unten am Fenster
+  // festsitzt (Notizblock), rutscht ans Seitenende (LERN_Session15)
+  const r = await send("Page.captureScreenshot", { format: "webp", quality: 82, captureBeyondViewport: !imFenster,
     clip: { x: b.x, y: b.y, width: b.w, height: b.h, scale: 1 } });
   fs.writeFileSync(path.join(ZIEL, `${name}.webp`), Buffer.from(r.data, "base64"));
   console.log(`✓ ${name}.webp`);
@@ -188,6 +190,26 @@ const RUTSCHE_RICHTIG = `
   const k = [...document.querySelectorAll(".ziel")].find(b => Number(b.lastChild.textContent.replace(/\\D/g, "")) === ziel);
   k.click();`;
 
+/**
+ * Hebel-Wippe Stufe 4 mit offenem Notizblock (LERN_Session15): 24 × 3 untereinander, das Kind hat 72 geschrieben,
+ * darunter „Weiterrechnen“ mit Plus — die 72 steht schon oben, dazu 45. Das Spiel ist für das Musterkind freigegeben.
+ */
+async function notizblockZeigen() {
+  await js(`const f = LS.lies("freigabe", {}); f.spiele = { ...(f.spiele || {}), "hebel-wippe": true }; LS.schreibe("freigabe", f);`);
+  await gehe("/eulenpfad/spiele/hebel-wippe/index.html?stufe=s4");
+  await js(`document.querySelector(".nb-knopf").click();
+    const p = document.querySelector(".notizblock"), k = t => [...p.querySelectorAll("button")].find(b => b.textContent.trim() === t);
+    p.querySelector('[data-vorlage="×"]').click();
+    let z = p.querySelectorAll(".nb-zahl"); z[0].value = "24"; z[1].value = "3"; k("Untereinander schreiben ➜").click();
+    const erg = [...p.querySelectorAll(".nb-feld.erg")], ue = [...p.querySelectorAll(".nb-feld.uebertrag")];
+    erg.at(-1).value = "2"; ue.at(-2).value = "1"; erg.at(-2).value = "7";
+    p.querySelector('[data-vorlage="+"]').click();
+    z = p.querySelectorAll(".nb-zahl"); z[1].value = "45"; k("Untereinander schreiben ➜").click();
+    document.activeElement.blur(); scrollTo(0, 0);
+    const inhalt = p.querySelector(".nb-inhalt"), neu = p.querySelector(".nb-schritt + .nb-schritt");
+    inhalt.scrollTop = neu.getBoundingClientRect().top - inhalt.getBoundingClientRect().top + inhalt.scrollTop - 8; /* die neue Rechnung oben im Block */`);
+}
+
 // ---------- Aufnahmen ----------
 
 async function aufsicht() {
@@ -240,8 +262,9 @@ async function aufsicht() {
   await js(`LS.waehleTimer("Muster Kind", "runden-rutsche", true);`);
   await gehe("/eulenpfad/index.html#profil");
   await js(`const s = document.querySelector('select[aria-label="Profil von"]'); s.value = "Muster Kind"; s.dispatchEvent(new Event("change")); await new Promise(r => setTimeout(r, 400));`);
-  await rahmen([{ css: ".profil summary" }, { css: ".kind-wahl" }, { text: "Auf Vorgabe zurück" }]);
-  await bild("a19-profil", { maxHoehe: 1300 });
+  // Profil neu geordnet (LERN_Session14): Bild, Klasse mit Aufstieg, Speichern, darunter die sofort wirkenden Häkchen
+  await rahmen([{ css: ".profil-bild" }, { css: ".klasse-wahl" }, { css: ".profil-speichern" }, { css: ".kind-wahl" }]);
+  await bild("a19-profil", { maxHoehe: 2000 });
 
   await js(`LS.setzeSpieler?.("Muster Kind");`);
   await alsAufsicht();
@@ -272,6 +295,10 @@ async function aufsicht() {
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html?stufe=s3");
   await rahmen([{ css: ".testhilfe" }]);
   await bild("a13-testhilfe", { maxHoehe: 760 });
+
+  await notizblockZeigen();
+  await rahmen([{ css: ".nb-knopf" }, { css: ".nb-schritt + .nb-schritt .nb-schritt-kopf" }, { css: ".nb-wahl" }]);
+  await bild("a20-notizblock", { maxHoehe: 760, imFenster: true });
 }
 
 async function kind() {
@@ -325,6 +352,10 @@ async function kind() {
   await gehe("/eulenpfad/index.html#erfolge");
   await rahmen([{ css: ".woche" }, { css: ".abzeichen" }]);
   await bild("k12-erfolge", { maxHoehe: 1300 });
+
+  await notizblockZeigen();
+  await rahmen([{ css: ".nb-knopf" }, { css: ".nb-schritt + .nb-schritt .nb-schritt-kopf" }]); // „Weiterrechnen“ liegt auf dem Handy weiter unten
+  await bild("k14-notizblock", { maxHoehe: 844, imFenster: true });
 
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html?stufe=s1&endlos=1");
   for (let geloest = 0; geloest < 3;) {

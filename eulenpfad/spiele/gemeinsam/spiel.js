@@ -114,7 +114,7 @@ const LS = (() => {
     notizblock: {
       titel: "Notizblock für schriftliches Rechnen", standard: "stufe", spieleWie: "notizen",
       werte: { stufe: "ab Stufe 4", immer: "immer, wo Notizen sind", nie: "nie" },
-      erklaerung: "Neben den Notizfeldern steht „📝 Notizblock“: Das Kind wählt eine Vorlage (Plus, Minus, Mal, Geteilt oder Häuschen), tippt seine Zahlen ein und rechnet darunter wie auf einem Blatt, mit Überträgen. Nichts wird geprüft; das Ergebnis schreibt das Kind selbst ab. Gibt es keine Notizen (Einstellung oben auf „nie“), gibt es auch keinen Block. Die Statistik zeigt „mit Notizblock“.",
+      erklaerung: "Neben den Notizfeldern steht „📝 Notizblock“: Das Kind wählt eine Vorlage (Plus, Minus, Mal, Geteilt oder Häuschen), tippt seine Zahlen ein und rechnet darunter wie auf einem Blatt, mit Überträgen. Plus und Minus lassen sich mischen, und mit „Weiterrechnen“ hängt es die nächste Rechnung an. Nichts wird geprüft; das Ergebnis schreibt das Kind selbst ab. Gibt es keine Notizen (Einstellung oben auf „nie“), gibt es auch keinen Block. Die Statistik zeigt „mit Notizblock“.",
     },
     // Entscheid KR1 a (LERN_Session13): ein Kind fängt auch ohne Aufsicht an
     selbstAnlegen: {

@@ -861,7 +861,15 @@ nach `spiel.js` geladen in den 32 Spielen mit Notizen und in der Schriftlich-Wer
   „Notizblock für schriftliches Rechnen“ (global und je Spiel, `spieleWie: "notizen"`): **ab Stufe 4** (Standard) ·
   **immer, wo Notizen sind** · **nie**. Der Knopf „📝 Notizblock“ steht in der Zeile von „🙋 Melden“ (`nb-platz`), in
   jedem Spiel an derselben Stelle — beim Notizfeld selbst zerriss er den Aufbau (Rechen-Maschine: Feld auf dem Pfeil).
-- **Vorlagen (NB1 a):** Plus (2–4 Zahlen), Minus, Mal (einstellig wie die Werkstatt; mehrstellig mit einer versetzten
+- **Ein Blatt mit mehreren Rechnungen** (Wunsch Patrik, LERN_Session15): Unter jede geschriebene Rechnung hängt
+  „Weiterrechnen:“ (dieselben Vorlagen) die nächste, bis `MAX_SCHRITTE` = 6; jede trägt Nummer, Rechnung als Titel und ✕.
+  Ihre erste Zahl ist, was das Kind ins Ergebnis der vorigen geschrieben hat (`geschrieben`: rechtsbündig, bei Komma die
+  letzten Felder nach dem Komma; Geteilt von links; Lücken oder ein Komma in der Division → leer), änderbar — nicht das
+  gerechnete Ergebnis, der Block prüft nichts. Eine Wahl, solange die letzte Rechnung noch nicht untereinander steht, ersetzt
+  sie. **Plus und Minus gemischt:** jede Zahl ab der zweiten trägt ihr Zeichen als Knopf (`nb-op-wechsel`), Antippen
+  wechselt + und −; die Vorlage gibt nur das Anfangszeichen, beide nehmen 2–4 Zahlen; abgewiesen wird nur ein Ergebnis
+  unter 0. Das Ziffernfeld steht fest unten im Block (`nb-fuss`) und schreibt das eingestellte Dezimalzeichen.
+- **Vorlagen (NB1 a):** Plus und Minus (2–4 Zahlen, Zeichen je Zahl), Mal (einstellig wie die Werkstatt; mehrstellig mit einer versetzten
   Zeile je Ziffer, höchste zuerst, dann Übertrag und Summe), Geteilt („a : b =“ mit Ergebnis-Häuschen, darunter
   2 × Stellenzahl Zeilen für die Schritte, links eine Zeichenspalte), Häuschen frei (10 × 8). Das Kind wählt die
   Vorlage, tippt seine Zahlen ein (höchstens bis zur Million, `MAX_STELLEN`, und 3 Stellen nach Punkt oder Komma) und
@@ -875,8 +883,11 @@ nach `spiel.js` geladen in den 32 Spielen mit Notizen und in der Schriftlich-Wer
 - **Nicht bewertet (NB3 a):** nichts geprüft, nichts übernommen, nichts gespeichert. Jede neue Aufgabe schliesst und
   leert den Block. Vorgehen `notiz: "block"` („mit Notizblock“ in der Statistik), geht vor `benutzt`; das Abzeichen
   „Kopfrechner“ zählt nur `ohne`. Tasten im Block lösen keine Kurztasten des Spiels aus.
-- **Platz:** oben rechts, über der Entwickler-Leiste (breit ab 1100 px rückt `.buehne` nach links), auf dem Handy unten wie ein Blatt, die Seite
-  bekommt unten Platz zum Hinaufscrollen; ▁ verkleinert und gibt den Platz frei, ✕ schliesst und leert.
+- **Platz:** ab 1100 px oben rechts, über der Entwickler-Leiste, `.buehne` rückt 480 px nach links; quer ab 980 px
+  ebenso, schmaler (360 px, `--nb-breite`), damit die Aufgabe rund 620 px behält; sonst (Handy, Tablet hochkant) unten
+  wie ein Blatt, die Seite bekommt unten Platz zum Hinaufscrollen (LERN_Session15: zwischen 561 und 1100 px deckte der
+  Block die Aufgabe zu). Rechts daneben unter 620 px ginge nicht: die `@media`-Regeln der Spiele rechnen mit der ganzen
+  Fensterbreite. ▁ verkleinert und gibt den Platz frei, ✕ schliesst und leert.
 - **Gemeinsames Raster (NB4 a):** `SCHRIFTLICH.raster(n, { links, rechts })` mit `kopf()`, `zahl(z, { zeichen, rechts })`,
   `reihe(mache, …)`, `strich()`; `SCHRIFTLICH.rechne(art, zahlen)` rechnet spaltenweise mit Überträgen (Subtraktion:
   Übertrag unten dazu, wie beim Ergänzen — mit dem Lehrmittel abzugleichen). Die Schriftlich-Werkstatt baut ihre

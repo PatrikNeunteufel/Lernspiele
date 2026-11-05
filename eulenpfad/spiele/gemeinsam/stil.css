@@ -772,8 +772,20 @@ button.link, a.link {
 .nb-tasten button { min-height: 40px; border: none; border-radius: 10px; background: #fff; box-shadow: 0 3px 0 #e6d38d, inset 0 0 0 2px #efe4b8;
   font: inherit; font-size: 20px; font-weight: 900; color: var(--text); cursor: pointer; }
 .nb-tasten button:active { transform: translateY(2px); box-shadow: 0 1px 0 #e6d38d, inset 0 0 0 2px #efe4b8; }
+/* Ein Blatt mit mehreren Rechnungen (LERN_Session15): je Rechnung ein Kopf mit Nummer und Rechnung, darunter „Weiterrechnen“;
+   das Ziffernfeld steht fest unten, die Rechnungen scrollen darüber */
+.nb-inhalt { flex: 1; min-height: 0; }
+.nb-fuss { padding: 0 12px 10px; border-top: 2px dashed #e6d38d; }
+.nb-schritt { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 2px dashed #efe4b8; }
+.nb-schritt-kopf { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.nb-schritt-titel { flex: 1; font-weight: 900; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.nb-nr { color: #6b5a1e; }
+.nb-weg { min-width: 32px; min-height: 32px; font-size: 14px; }
+.nb-wahl-titel { display: block; margin-bottom: 4px; font-size: 14px; color: #6b5a1e; }
+.nb-op-wechsel { min-width: 44px; min-height: 44px; border: 2px dashed #c9b87a; border-radius: 10px; background: #fffbea; color: var(--text);
+  font-family: inherit; cursor: pointer; }
 .nb-flaeche { overflow-x: auto; }
-.nb-flaeche .schriftlich { --zelle: clamp(26px, calc((min(460px, 100vw) - 70px) / var(--spalten) - 4px), 44px); justify-content: start; width: max-content; }
+.nb-flaeche .schriftlich { --zelle: clamp(26px, calc((min(var(--nb-breite, 460px), 100vw) - 70px) / var(--spalten) - 4px), 44px); justify-content: start; width: max-content; }
 .nb-feld { width: var(--zelle); box-sizing: border-box; padding: 0; text-align: center; color: #6b5a1e; caret-color: #c98400;
   background: #fff; border: 2px dashed #d9c77f; border-radius: 8px; font-family: inherit; }
 .nb-feld:focus { outline: 3px solid #f0d36a; border-style: solid; }
@@ -791,9 +803,19 @@ button.link, a.link {
 /* Die Aufgabe bleibt sichtbar: breit rückt sie nach links, auf dem Handy lässt sie sich über den Block hinauf scrollen;
    verkleinert (▁) gibt der Block den Platz zurück */
 @media (min-width: 1100px) { body.mit-notizblock:not(.notizblock-klein) .buehne { margin-right: 480px; } }
-@media (max-width: 560px) {
+/* Unter 1100 px unten wie ein Blatt (LERN_Session15): rechts daneben bliebe der Aufgabe zu wenig Breite, und ihre
+   Bildschirmregeln (@media) rechneten mit der ganzen — zwischen 561 und 1100 px deckte der Block die Aufgabe zu */
+@media (max-width: 1099px) {
   .notizblock { right: 0; left: 0; top: auto; bottom: 0; width: auto; max-height: 58vh; border-radius: 18px 18px 0 0; border-bottom: none; }
   body.mit-notizblock:not(.notizblock-klein) { padding-bottom: 58vh; }
+}
+/* Tablet quer (LERN_Session15): unten bliebe über dem Blatt kaum etwas von der Aufgabe; schmaler rechts daneben behält sie
+   rund 620 px — so viel wie ab 1100 px. Überschreibt die Regel davor (kein „not (…)“: ältere Safari verwerfen es) */
+@media (min-width: 980px) and (max-width: 1099px) and (orientation: landscape) {
+  .notizblock { --nb-breite: 360px; left: auto; right: 12px; top: 12px; bottom: auto; width: var(--nb-breite); max-height: calc(100vh - 24px);
+    border-radius: 18px; border-bottom: 3px solid #e6d38d; }
+  body.mit-notizblock:not(.notizblock-klein) { padding-bottom: 0; }
+  body.mit-notizblock:not(.notizblock-klein) .buehne { margin-right: 372px; }
 }
 
 /* Lesetext (BH3 a): scrollt im eigenen Feld; ein Schatten unten zeigt, dass noch Text kommt */
