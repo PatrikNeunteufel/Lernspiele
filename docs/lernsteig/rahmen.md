@@ -148,21 +148,30 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 - **Sichern** nur auf Knopfdruck (`gemeinsam/daten.js`, `LST_DATEN`): Datei `lernsteig-<vorname>-<datum>.json`,
   `{ format: "lernsteig-sicherung", version: 1, erstellt, konten, runden, rekorde }`, nur die Daten des Kontos, Konten
   ohne PIN und Code (`ohneGeheimnis`). Das Gastkonto selbst reist nicht mit, nur seine Runden und Rekorde.
-- **Einlesen** führt zusammen (abgeschaut vom Eulenpfad, `docs/eulenpfad/rahmen.md` 10, „Zusammenführen“):
-  Runden nach Kennung (gleiche zählt einmal, danach nach Zeit sortiert), Rekorde nach Kennung (höherer Stand),
-  Konten nach Kennung (jüngeres `geaendert` gewinnt je Konto, nicht je Feld; PIN und Code bleiben die des Geräts).
-  Vereinfacht gegenüber dem Eulenpfad: keine Löschvermerke. Andere Dateien werden mit Meldung abgewiesen.
+- **Einlesen** (Befund D4, seit LERN_Session15): zuerst wird die ganze Datei geprüft — Konten mit
+  `KERN.person.maengel`, Runden und Rekorde mit eigenem Schema (`LST_DATEN.rundeGueltig`, `rekordGueltig`: Kennung,
+  Konto, Zeit, bekannte Übung, Stufe, Zahlen); Ungültiges wird gezählt und nie gespeichert. Dann wird im Speicher
+  zusammengeführt und erst am Ende geschrieben, alles oder nichts (voller Speicher → alter Stand, Meldung).
+  Konten mit `KERN.person.zusammenfuehren` (P1 a: gleiche Kennung, sonst gleicher Name; je Feld der jüngere Stand;
+  PIN, Code und Verbindungen bleiben die des Geräts); Runden nach Kennung (gleiche zählt einmal, nach Zeit sortiert),
+  Rekorde nach Kennung (höherer Stand); Verweise auf zusammengeführte Kennungen werden umgebogen. Ältere Sicherungen
+  (Konto mit `erstellt` und einer Zeit `geaendert`) werden umgedeutet. Keine Löschvermerke. Andere Dateien werden mit
+  Meldung abgewiesen. Test: `docs/lernsteig/werkzeuge/pruefe_konten.js`.
 
 ## 5d. Aufsicht (AU1 a, TR1 a)
 
 - `aufsicht.html` (Code `start/aufsicht.js`), verlinkt von der Startseite. Freiwillig, für Eltern und Lehrpersonen.
-  Aufsicht `{ id, name, rolle: eltern | lehrperson, pin, wiederherstellung, erstellt }` in `lernsteig:aufsichten`;
-  PIN Pflicht (Salz und SHA-256 wie bei den Konten), Wiederherstellungscode, angemeldet nur im Tab
-  (sessionStorage `lernsteig:aufsicht`).
+  Seit LERN_Session15 (P2 a) stehen Jugendliche und Aufsichten in **einer** Liste `lernsteig:personen`
+  (`KERN.person`, docs/kern/rahmen.md 4.7): Aufsicht `{ id, name, rolle: "aufsicht", art: eltern | lehrperson, pin,
+  wiederherstellung, angelegt, geaendert }`; die früheren Listen `lernsteig:konten` und `lernsteig:aufsichten` zieht
+  `konten.js` beim ersten Laden um (Kennungen bleiben). PIN Pflicht (`KERN.geheimnis`), Wiederherstellungscode,
+  angemeldet nur im Tab (sessionStorage `lernsteig:aufsicht`). **Eine weitere Aufsicht** auf dem Gerät nur mit
+  Bestätigung durch eine bestehende mit deren PIN (wie Eulenpfad KR2 a; Befund D5).
 - **Verbindung** im Konto: `aufsicht` (Ids), offene Anfragen `anfragen` (Ids). Sie entsteht nur, wenn (1) die Aufsicht
   das Konto anlegt (ohne PIN; die setzt der Jugendliche selbst), (2) der Jugendliche eine Anfrage in seinem Konto
   zulässt — nur mit PIN, damit niemand sonst für ihn zustimmt —, oder (3) die Aufsicht eine Sicherung einliest, die
-  der Jugendliche ihr gegeben hat (AF2 a). Lösen kann der Jugendliche oder die Aufsicht selbst (AF1 a).
+  der Jugendliche ihr gegeben hat (AF2 a) — verbunden werden dabei nur Konten, die neu auf das Gerät kommen; ein
+  Konto, das schon da ist, braucht die Zustimmung nach (2) (Befund D5). Lösen kann der Jugendliche oder die Aufsicht selbst (AF1 a).
   `aendern` übernimmt die Verbindung nie aus einer älteren Kopie des Kontos; Sicherungen enthalten sie nicht
   (`LST_KONTEN.GERAET`).
 - **Der Jugendliche sieht**, wer mitliest (Startseite, Konto), und jede Anfrage mit Zulassen / Ablehnen.

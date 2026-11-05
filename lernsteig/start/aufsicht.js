@@ -30,7 +30,7 @@
     const liste = KO.aufsichten();
     karte.append(el("p", { text: "Eltern und Lehrpersonen können hier den Stand verbundener Konten sehen. Verbunden ist ein Konto nur, wenn die Aufsicht es angelegt oder der Jugendliche zugestimmt hat. Der Jugendliche sieht, wer mitliest." }));
     if (liste.length) karte.append(el("div", { class: "konto-liste" }, liste.map(a => el("button", { type: "button", class: "knopf konto-knopf", "data-aufsicht": a.id,
-      text: `${a.name} (${rolleName(a.rolle)})`, onclick: () => geh({ art: "pin", id: a.id }) }))));
+      text: `${a.name} (${rolleName(a.art)})`, onclick: () => geh({ art: "pin", id: a.id }) }))));
     karte.append(el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf haupt", text: "Neue Aufsicht", onclick: () => geh({ art: "neu" }) })));
     return karte;
   }
@@ -38,9 +38,17 @@
     const name = feld("Name", { type: "text", maxlength: "40", name: "name", autocomplete: "name" }, "So sehen die Jugendlichen, wer mitliest.");
     const rolle = auswahl("Rolle", KO.ROLLEN, "eltern", () => {}, { name: "rolle" });
     const pin = feld("PIN (4–6 Ziffern)", { type: "password", inputmode: "numeric", maxlength: "6", name: "pin", autocomplete: "new-password" }, "Pflicht für die Aufsicht.");
-    karte.append(el("h3", { text: "Neue Aufsicht" }), name, rolle, pin, fehlerText, el("div", { class: "knopf-zeile" },
+    // Gibt es schon eine Aufsicht, bestätigt eine von ihnen mit ihrer PIN (wie Eulenpfad KR2 a; Befund D5).
+    const bestehende = KO.aufsichten();
+    const wer = bestehende.length ? auswahl("Bestätigt von", bestehende.map(a => ({ id: a.id, name: a.name })), bestehende[0].id, () => {}, { name: "bestaetigt-von" }) : null;
+    const werPin = bestehende.length ? feld("Deren PIN", { type: "password", inputmode: "numeric", maxlength: "6", name: "bestaetigung-pin", autocomplete: "off" }, "Eine Aufsicht dieses Geräts bestätigt die neue.") : null;
+    karte.append(el("h3", { text: "Neue Aufsicht" }), name, rolle, pin, wer, werPin, fehlerText, el("div", { class: "knopf-zeile" },
       el("button", { type: "button", class: "knopf haupt", text: "Aufsicht anlegen", "data-aktion": "anlegen", onclick: async () => {
-        try { const r = await KO.aufsichtAnlegen({ name: wert(name, "input"), rolle: wert(rolle, "select"), pin: wert(pin, "input") }); geh({ art: "code", code: r.code }); }
+        try {
+          const bestaetigung = wer ? { id: wert(wer, "select"), pin: wert(werPin, "input") } : null;
+          const r = await KO.aufsichtAnlegen({ name: wert(name, "input"), art: wert(rolle, "select"), pin: wert(pin, "input"), bestaetigung });
+          geh({ art: "code", code: r.code });
+        }
         catch (e) { zeigeFehler(e.message); }
       } }),
       el("button", { type: "button", class: "knopf", text: "Abbrechen", onclick: () => geh({ art: "start" }) })));
@@ -103,7 +111,7 @@
     const andere = KO.alle().filter(k => !verbunden.some(v => v.id === k.id) && !offen.some(v => v.id === k.id));
     const teile = [];
     teile.push(el("section", { class: "einstellungen konto" },
-      el("p", { class: "konto-zeile" }, el("b", { text: a.name }), el("span", { class: "leise", text: rolleName(a.rolle) })),
+      el("p", { class: "konto-zeile" }, el("b", { text: a.name }), el("span", { class: "leise", text: rolleName(a.art) })),
       el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Abmelden", onclick: () => { KO.aufsichtAbmelden(); geh({ art: "start" }); } })),
       meldung ? el("p", { class: "meldung", role: "status", text: meldung }) : null));
 
@@ -133,7 +141,7 @@
       const f = e.target.files[0]; if (!f) return;
       try {
         const erg = LST_DATEN.einlesen(JSON.parse(await f.text()));
-        KO.verbindeEingelesene(erg.ids);
+        KO.verbindeEingelesene(erg.neu); // nur Konten, die neu auf das Gerät kamen (D5)
         meldung = `Eingelesen: ${erg.runden} Runden, ${erg.rekorde} Rekorde; verbunden: ${erg.ids.map(id => (KO.finde(id) || {}).name).filter(Boolean).join(", ") || "keine Konten"}.`;
       } catch (err) { meldung = err instanceof SyntaxError ? "Die Datei ist kein lesbares JSON." : err.message; }
       zeichne();

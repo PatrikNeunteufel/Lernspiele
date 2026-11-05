@@ -30,9 +30,9 @@
     const teil = el("div", { class: "mitleser" });
     if (!m.verbunden.length) teil.append(el("small", { class: "leise", text: "Deine Runden und Einstellungen gehören zu diesem Konto. Niemand sonst liest mit." }));
     else teil.append(el("p", { text: "Es lesen mit:" }), el("ul", { class: "mitleser-liste" }, m.verbunden.map(a => el("li", { "data-mitleser": a.id },
-      `${a.name} (${rolle(a.rolle)}) `, el("button", { type: "button", class: "knopf klein", text: "Lösen", onclick: () => { KO.loesen(k.id, a.id); zeichne(); } })))));
+      `${a.name} (${rolle(a.art)}) `, el("button", { type: "button", class: "knopf klein", text: "Lösen", onclick: () => { KO.loesen(k.id, a.id); zeichne(); } })))));
     for (const a of m.anfragen) teil.append(el("div", { class: "anfrage", "data-anfrage": a.id },
-      el("p", { text: `${a.name} (${rolle(a.rolle)}) möchte deinen Stand sehen: Runden und Kompetenzstand, keine PIN.` }),
+      el("p", { text: `${a.name} (${rolle(a.art)}) möchte deinen Stand sehen: Runden und Kompetenzstand, keine PIN.` }),
       el("div", { class: "knopf-zeile" },
         k.pin ? el("button", { type: "button", class: "knopf haupt", text: "Zulassen", "data-aktion": "zulassen", onclick: () => { KO.antworten(k.id, a.id, true); zeichne(); } })
           : el("button", { type: "button", class: "knopf", text: "Erst PIN festlegen", onclick: () => { ansicht = { art: "profil" }; zeichne(); } }),
@@ -52,13 +52,14 @@
     if (aktiv && ansicht.art === "profil") return profilForm(karte, aktiv);
     if (aktiv) {
       const alter = KO.alter(aktiv.geboren);
-      karte.append(el("p", { class: "konto-zeile" }, el("b", { text: aktiv.name }),
+      // null herausfiltern: das eingebaute append schreibt es sonst als Text „null“ (ohne Wochenziel)
+      karte.append(...[el("p", { class: "konto-zeile" }, el("b", { text: aktiv.name }),
         el("span", { class: "leise", text: [alter !== null ? `${alter} Jahre` : "", aktiv.klasse ? (KLASSEN.find(k => k.id === String(aktiv.klasse)) || {}).name : "", aktiv.pin ? "mit PIN" : "ohne PIN"].filter(Boolean).join(" · ") })),
         el("div", { class: "knopf-zeile" },
           el("button", { type: "button", class: "knopf", text: "Profil", onclick: () => { ansicht = { art: "profil" }; zeichne(); } }),
           el("button", { type: "button", class: "knopf", text: "Abmelden", onclick: () => { KO.abmelden(); ansicht = { art: "start" }; zeichne(); } })),
         LST.serie(aktiv) ? el("p", { class: "serie", text: "Wochenziel: " + LST.serieText(LST.serie(aktiv)) }) : null,
-        mitleserTeil(aktiv));
+        mitleserTeil(aktiv)].filter(Boolean));
       return karte;
     }
     const konten = KO.alle();

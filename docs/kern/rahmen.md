@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.1.0, 2026-11-05 (LERN_Session15). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.2.0, 2026-11-05 (LERN_Session15). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.1.0)
+kern/VERSION          Version des Kerns (1.2.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -139,11 +139,60 @@ gleichem Startwert dieselbe Folge wie vor dem Umzug.
 
 Greift erst beim Aufruf auf `document` zu (über den globalen Namen, damit auch der Ersatz-DOM greift).
 
-### 4.6 Geplant (Plan B, Reihenfolge B4)
+### 4.6 `KERN.geheimnis` (`kern/geheimnis.js`) — PIN, Code, Sicherheitsfrage
 
-Profil (Geburtsdatum B3, Übernahme zwischen den Apps
-C9), Rollen und PIN, Freigabe und Prüfstand, Suche, Protokoll und Statistik, Sichern und Einlesen mit Schema,
-Einladung, Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu, bevor er umzieht.
+Gespeichert werden nur Prüfwerte `{ salz, hash }` mit `hash = SHA-256("salz:wert")` — dieselbe Rechnung wie bisher in
+beiden Apps, eine PIN gilt also nach einer Übernahme (C9) weiter. Grenze (DS1 a): schützt vor Versehen und Neugier am
+Gerät, nicht vor Entwicklerwerkzeugen.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `verfuegbar()` | kann dieses Fenster rechnen? (`crypto.subtle` nur in einem sicheren Kontext: https, localhost, Datei) |
+| `pin(p)` | Prüfwert der PIN (4–6 Ziffern), sonst Fehler „Die PIN hat 4 bis 6 Ziffern.“ |
+| `pinStimmt(p, wert)` | stimmt die PIN? ohne Prüfwert nie |
+| `wiederherstellung({ code?, frage?, antwort? }, alt)` | `{ wiederherstellung: { code, frage?, antwort? }, code }` — ohne Code wird einer erzeugt, der nur jetzt sichtbar ist |
+| `codeStimmt(c, w)`, `antwortStimmt(a, w)` | Code ohne Gliederung und Gross/Klein; Antwort ohne Gross/Klein, ß/ss, mehrfache Leerzeichen |
+| `neuerCode()` | „K7QM-2XRA-9TPL“ (ohne 0/O, 1/I) |
+| `pruefwert`, `stimmt`, `hash`, `salz` | die Grundlagen |
+
+Fehlt `crypto.subtle` (etwa eine Seite über `http://<Adresse im Netz>`), werfen die Funktionen den Satz `OHNE_KRYPTO`
+statt eines Laufzeitfehlers (Befund D6).
+
+### 4.7 `KERN.person` (`kern/person.js`) — Personen
+
+Entscheide P1 a, P2 a, Vorgabe B3. Eine Liste von Personen je App:
+
+```
+{ id, name, rolle: "lernend" | "aufsicht", art?: "eltern" | "lehrperson", gruppenleitung?: true,
+  geboren: "JJJJ-MM-TT" | "JJJJ-MM" | null, klasse, frueher?: [Kennungen], angelegt, geaendert: { <feld>: ISO },
+  pin?, wiederherstellung?, … Felder der App }
+```
+
+- **Kennung** `p-<Zeit>-<Zufall>` entsteht beim Anlegen und ändert sich nie; sie reist bei einer Übernahme mit.
+  Ältere Kennungen (Lernsteig `k-…`, `a-…`) bleiben gültig.
+- **Name** je App und Gerät eindeutig, verglichen ohne Gross/Klein und Leerzeichen am Rand; nur Anzeige.
+- **geaendert** hält je Feld die Zeit der letzten Änderung.
+- **Geheimnisse** `pin`, `wiederherstellung` und die Gerätefelder der App bleiben auf dem Gerät.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `geburtsdatumLies(text)` | „TT.MM.JJJJ“, „JJJJ-MM-TT“ → „JJJJ-MM-TT“; „MM.JJJJ“, „JJJJ-MM“ → „JJJJ-MM“; sonst `null` |
+| `geburtsdatumText(g)` | „07.03.2014“, ohne Tag „März 2014“ |
+| `alter(g, heute)` | ganze Jahre; ohne Tag ab dem Ersten des Monats; `tagFehlt(g)` |
+| `nameRein`, `nameGleich` | Namen bereinigen und vergleichen |
+| `maengel(p)` | Liste von Mängeln (leer = gültig) — für Einlesen, Abgleich, Einladung |
+| `ohneGeheimnis(p, geraetFelder)` | Kopie für Sicherung, Abgleich, Einladung, Übernahme |
+| `liste(speicher, { schluessel, felder })` | `{ alle, finde (auch über frühere Kennungen), findeName, nameFrei, anlegen, aendere, entferne, speichere }`; `anlegen` und `aendere` prüfen Name und Mängel und melden einen vollen Speicher |
+| `zusammenfuehren(eigene, fremde, { geraetFelder })` | gleiche Kennung (auch frühere) → verbinden; sonst gleicher Name → verbinden, die ältere Kennung bleibt, die andere wird frühere; sonst neu; Ungültiges abgewiesen. Je Feld der jüngere Stand; ein jüngerer Name, den hier jemand anders trägt, gilt nicht. Ergebnis `{ personen, neu, geaendert, abgewiesen, kennungen: { alt: neu } }` — mit `kennungen` biegt die App Verweise (Runden, Rekorde) um |
+
+Rollen und Sicht je App (P2 a): Der Lernsteig verlangt von der Aufsicht eine PIN und zeigt ihr nur verbundene Konten,
+eine weitere Aufsicht braucht die Bestätigung einer bestehenden; der Eulenpfad zieht mit dem Grundgerüst (C) um.
+
+### 4.8 Geplant (Plan B, Reihenfolge B4)
+
+Anmeldung und Sitzung im Tab, Profil-Übernahme zwischen den Apps (C9), Freigabe und Prüfstand, Suche, Protokoll und
+Statistik, Sichern und Einlesen (Schema der Runden und Rekorde, heute in `lernsteig/gemeinsam/daten.js`), Einladung,
+Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu, bevor er umzieht.
 
 ## 5. Ändern und verteilen
 

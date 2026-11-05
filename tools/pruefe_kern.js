@@ -11,6 +11,15 @@ require(path.join(WURZEL, "kern", "bruch.js"));
 require(path.join(WURZEL, "kern", "speicher.js"));
 require(path.join(WURZEL, "kern", "zufall.js"));
 require(path.join(WURZEL, "kern", "el.js"));
+require(path.join(WURZEL, "kern", "geheimnis.js"));
+require(path.join(WURZEL, "kern", "person.js"));
+// Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
+{
+  const fs = require("fs");
+  const teile = fs.readFileSync(path.join(WURZEL, "kern", "TEILE"), "utf8").split(/\r?\n/).map(z => z.trim()).filter(z => z && !z.startsWith("#"));
+  const geladen = Object.keys(require.cache).map(p => path.basename(p));
+  for (const t of teile) if (!geladen.includes(t)) { console.log(`    FEHLER  kern/${t} wird in pruefe_kern.js nicht geprüft`); process.exitCode = 1; }
+}
 
 let fehler = 0, faelle = 0;
 function gleich(ist, soll, was) {
@@ -185,7 +194,124 @@ console.log("el.js");
   delete global.document;
 }
 
-// ---------- Kopien in den Apps ----------
+// ---------- Geheimnisse und Personen (asynchron) ----------
+(async () => {
+  console.log("geheimnis.js");
+  const G = KERN.geheimnis;
+  gleich(G.verfuegbar(), true, "crypto.subtle in Node vorhanden");
+  const p = await G.pin("4711");
+  gleich(await G.pinStimmt("4711", p), true, "PIN stimmt");
+  gleich(await G.pinStimmt("4712", p), false, "falsche PIN");
+  gleich(await G.pinStimmt("4711", null), false, "ohne Prüfwert");
+  for (const falsch of ["123", "1234567", "12a4", "", null]) {
+    faelle++;
+    try { await G.pin(falsch); fehler++; console.log(`    FEHLER  PIN ${falsch} angenommen`); } catch (e) { /* erwartet */ }
+  }
+  // gleiche Rechnung wie die bisherigen Apps: SHA-256 von „salz:wert“ (übernommene PINs gelten weiter)
+  const sha = require("crypto").createHash("sha256").update("abc:4711").digest("hex");
+  gleich(await G.hash("4711", "abc"), sha, "hash = SHA-256(salz:wert)");
+  const { wiederherstellung: w, code } = await G.wiederherstellung({ frage: "Erstes Kuscheltier?", antwort: "  Grosser  Bär " });
+  gleich(/^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/.test(code), true, "Code ohne 0/O/1/I in drei Gruppen");
+  gleich(await G.codeStimmt(code.toLowerCase().replace(/-/g, " "), w), true, "Code ohne Gliederung, klein");
+  gleich(await G.codeStimmt("AAAA-AAAA-AAAA", w), false, "falscher Code");
+  gleich(await G.antwortStimmt("grosser bär", w), true, "Antwort ohne Gross/Klein und Leerzeichen");
+  gleich(await G.antwortStimmt("Großer Bär", w), true, "ß wie ss");
+  gleich(await G.antwortStimmt("", w), false, "leere Antwort");
+  gleich(w.frage, "Erstes Kuscheltier?", "Frage im Klartext");
+  // ohne crypto.subtle: verständliche Meldung statt Laufzeitfehler (D6)
+  {
+    const echt = globalThis.crypto;
+    Object.defineProperty(globalThis, "crypto", { value: {}, configurable: true, writable: true });
+    faelle++;
+    try { await G.pin("4711"); fehler++; console.log("    FEHLER  ohne crypto keine Meldung"); }
+    catch (e) { if (e.message !== G.OHNE_KRYPTO) { fehler++; console.log(`    FEHLER  ohne crypto: ${e.message}`); } }
+    gleich(G.verfuegbar(), false, "verfuegbar ohne crypto");
+    Object.defineProperty(globalThis, "crypto", { value: echt, configurable: true, writable: true });
+  }
+
+  console.log("person.js");
+  const P = KERN.person;
+  // Geburtsdatum (B3)
+  for (const [ein, soll, text] of [["07.03.2014", "2014-03-07", "07.03.2014"], ["7.3.2014", "2014-03-07", "07.03.2014"],
+    ["2014-03-07", "2014-03-07", "07.03.2014"], ["03.2014", "2014-03", "März 2014"], ["2014-03", "2014-03", "März 2014"],
+    ["30.02.2014", null, ""], ["2014-13", null, ""], ["gestern", null, ""], [null, null, ""]]) {
+    gleich(P.geburtsdatumLies(ein), soll, `geburtsdatumLies(${ein})`);
+    gleich(P.geburtsdatumText(ein), text, `geburtsdatumText(${ein})`);
+  }
+  const am = (j, m, t) => new Date(j, m - 1, t);
+  gleich(P.alter("2014-03-07", am(2026, 3, 6)), 11, "Alter am Tag vor dem Geburtstag");
+  gleich(P.alter("2014-03-07", am(2026, 3, 7)), 12, "Alter am Geburtstag");
+  gleich(P.alter("2014-03", am(2026, 3, 1)), 12, "ohne Tag: ab dem Ersten des Monats");
+  gleich(P.alter("2014-03", am(2026, 2, 28)), 11, "ohne Tag: im Vormonat noch nicht");
+  gleich(P.alter("2030-01-01", am(2026, 1, 1)), null, "Geburt in der Zukunft");
+  gleich(P.tagFehlt("2014-03"), true, "tagFehlt");
+  gleich(P.tagFehlt("2014-03-07"), false, "Tag vorhanden");
+  // Namen
+  gleich(P.nameGleich(" Mia ", "mia"), true, "Name ohne Gross/Klein und Rand");
+  gleich(P.nameGleich("", ""), false, "leere Namen sind nie gleich");
+  gleich(P.nameRein("  Lea   Sophie "), "Lea Sophie", "nameRein");
+  // Prüfen
+  gleich(P.maengel({ id: "p-1a", name: "Mia", rolle: "lernend" }).length, 0, "gültige Person");
+  gleich(P.maengel({ id: "p-1a", name: "Mia", rolle: "chef" }).length, 1, "unbekannte Rolle");
+  gleich(P.maengel({ id: 5, name: "", rolle: "lernend", geboren: "irgendwann" }).length, 3, "drei Mängel");
+  gleich(P.maengel("Mia").length, 1, "keine Person");
+  gleich(JSON.stringify(Object.keys(P.ohneGeheimnis({ id: "p-x", name: "A", pin: 1, wiederherstellung: 2, aufsicht: [] }, ["aufsicht"]))), '["id","name"]', "ohneGeheimnis");
+
+  // Liste in einem Ersatz-Speicher
+  const daten = new Map();
+  global.localStorage = { getItem: k => (daten.has(k) ? daten.get(k) : null), setItem: (k, v) => daten.set(k, String(v)),
+    removeItem: k => daten.delete(k), key: i => [...daten.keys()][i] ?? null, get length() { return daten.size; } };
+  const L = P.liste(KERN.speicher("lernsteig:"), { felder: { klasse: null } });
+  const mia = L.anlegen({ name: "Mia", geboren: "07.03.2012", klasse: 7 });
+  gleich(/^p-[a-z0-9]+-[0-9a-f]{10}$/.test(mia.id), true, "Kennung „p-…“");
+  gleich(mia.geboren, "2012-03-07", "Geburtsdatum gespeichert als JJJJ-MM-TT");
+  gleich(mia.rolle, "lernend", "Rolle Standard lernend");
+  gleich(typeof mia.geaendert.klasse, "string", "geaendert je Feld");
+  faelle++; try { L.anlegen({ name: " mia " }); fehler++; console.log("    FEHLER  doppelter Name angenommen"); } catch (e) { /* erwartet */ }
+  const leo = L.anlegen({ name: "Leo", rolle: "aufsicht", art: "eltern" });
+  faelle++; try { L.aendere(leo.id, { name: "MIA" }); fehler++; console.log("    FEHLER  Umbenennen auf vergebenen Namen"); } catch (e) { /* erwartet */ }
+  const mia2 = L.aendere(mia.id, { name: "Mia Sophie", klasse: 8 });
+  gleich(mia2.id, mia.id, "Umbenennen behält die Kennung");
+  gleich(L.findeName("mia sophie").id, mia.id, "findeName");
+  gleich(L.alle().length, 2, "zwei Personen");
+  daten.set("lernsteig:personen", JSON.stringify(L.alle().concat([{ id: 7, name: "kaputt" }])));
+  gleich(L.alle().length, 2, "ungültige Einträge im Speicher werden nicht geliefert");
+  delete global.localStorage;
+
+  // Zusammenführen (P1 a)
+  const t0 = "2026-01-01T00:00:00.000Z", t1 = "2026-02-01T00:00:00.000Z", t2 = "2026-03-01T00:00:00.000Z";
+  const hier = [
+    { id: "p-hier-mia", name: "Mia", rolle: "lernend", klasse: 4, angelegt: t1, geaendert: { klasse: t1 }, pin: { salz: "s", hash: "h" } },
+    { id: "p-hier-ben", name: "Ben", rolle: "lernend", klasse: 3, angelegt: t0, geaendert: { klasse: t0 } },
+  ];
+  const dort = [
+    { id: "p-dort-mia", name: "mia", rolle: "lernend", klasse: 5, fokus: ["x"], angelegt: t0, geaendert: { klasse: t2, fokus: t2 }, pin: { salz: "fremd", hash: "fremd" } },
+    { id: "p-hier-ben", name: "Benjamin", rolle: "lernend", klasse: 3, angelegt: t0, geaendert: { name: t2 } },
+    { id: "p-neu-ida", name: "Ida", rolle: "lernend", angelegt: t2, geaendert: {} },
+    { id: "x", name: "", rolle: "lernend" },
+  ];
+  const z = P.zusammenfuehren(hier, dort);
+  const zm = z.personen.find(p => P.nameGleich(p.name, "mia"));
+  gleich(zm.id, "p-dort-mia", "gleicher Name: ältere Kennung bleibt");
+  gleich(JSON.stringify(zm.frueher), '["p-hier-mia"]', "andere Kennung als frühere");
+  gleich(z.kennungen["p-hier-mia"], "p-dort-mia", "Kennungen zum Umbiegen");
+  gleich(zm.klasse, 5, "je Feld der jüngere Stand");
+  gleich(zm.pin.salz, "s", "PIN bleibt die eigene, fremde reist nicht mit");
+  gleich(z.personen.find(p => p.id === "p-hier-ben").name, "Benjamin", "gleiche Kennung: jüngerer Name");
+  gleich(z.neu, 1, "eine neue Person");
+  gleich(z.abgewiesen, 1, "eine ungültige abgewiesen");
+  gleich(z.personen.length, 3, "drei Personen");
+  // frühere Kennung findet wieder dieselbe Person; Name, den hier jemand anders trägt, gilt nicht
+  const z2 = P.zusammenfuehren(z.personen, [{ id: "p-hier-mia", name: "Ida", rolle: "lernend", angelegt: t1, geaendert: { name: "2026-04-01T00:00:00.000Z" } }]);
+  gleich(z2.personen.length, 3, "frühere Kennung trifft dieselbe Person");
+  gleich(zm.name, "Mia", "Name ohne Zeit auf beiden Seiten: der eigene bleibt");
+  gleich(z2.personen.find(p => p.id === "p-dort-mia").name, "Mia", "vergebener Name wird nicht übernommen");
+  gleich(new Set(z2.personen.map(p => p.name.toLowerCase())).size, 3, "Namen bleiben eindeutig");
+  // nochmals dieselben Daten einlesen ändert nichts
+  const z3 = P.zusammenfuehren(z.personen, dort);
+  gleich(z3.neu + z3.geaendert, 0, "zweites Einlesen ändert nichts");
+
+  // ---------- Kopien in den Apps ----------
 console.log("Kopien (tools/kern_verteilen.py --pruefe)");
 faelle++;
 try {
@@ -195,4 +321,5 @@ try {
 }
 
 console.log(`\n${faelle} Fälle, ${fehler} Fehler.`);
-process.exit(fehler ? 1 : 0);
+process.exit(fehler || process.exitCode ? 1 : 0);
+})().catch(e => { console.log(`    FEHLER  ${e.stack}`); process.exit(1); });

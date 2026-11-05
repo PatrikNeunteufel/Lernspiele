@@ -41,6 +41,9 @@ const hinweisMelden = (wo, text) => { hinweise++; console.log(`  Hinweis ${wo}: 
   const { execFileSync } = require("child_process");
   try { execFileSync("python", [path.join(WURZEL, "tools", "kern_verteilen.py"), "--pruefe", "lernsteig"], { encoding: "utf8" }); }
   catch (e) { fehlerMelden("Kern", (e.stdout || e.message).trim()); }
+  // Konten, Aufsicht, Sichern und Einlesen ohne Browser (pruefe_konten.js)
+  try { process.stdout.write(execFileSync(process.execPath, [path.join(__dirname, "pruefe_konten.js")], { encoding: "utf8" })); }
+  catch (e) { process.stdout.write(e.stdout || ""); fehlerMelden("Konten", "pruefe_konten.js meldet Fehler"); }
 }
 require(path.join(APP, "kern", "kern.js"));
 global.LST = require(path.join(APP, "gemeinsam", "werkzeug.js"));
@@ -237,7 +240,7 @@ async function pruefeImBrowser(uebungen) {
       await s.click("[data-aktion=anlegen]");
       const code = await s.getAttribute(".code-anzeige", "data-code");
       if (!/^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(code || "")) throw new Error(`Wiederherstellungscode fehlt: ${code}`);
-      const k = await s.evaluate(() => JSON.parse(localStorage.getItem("lernsteig:konten"))[0]);
+      const k = await s.evaluate(() => JSON.parse(localStorage.getItem("lernsteig:personen")).find(p => p.rolle === "lernend"));
       if (!k.pin || k.pin.hash.length !== 64 || JSON.stringify(k).includes("4711") || JSON.stringify(k).includes(code)) throw new Error("PIN oder Code im Klartext gespeichert");
       await s.click("text=Aufgeschrieben");
       const s2 = await neu(); await s2.goto(url("index.html"));
@@ -295,7 +298,7 @@ async function pruefeImBrowser(uebungen) {
       await b.click("[data-aktion=anlegen]");
       if (!/^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(await b.getAttribute(".code-anzeige", "data-code") || "")) throw new Error("Aufsicht: Code fehlt");
       await b.click("text=Aufgeschrieben");
-      const auf = await b.evaluate(() => localStorage.getItem("lernsteig:aufsichten"));
+      const auf = await b.evaluate(() => JSON.stringify(JSON.parse(localStorage.getItem("lernsteig:personen") || "[]").filter(p => p.rolle === "aufsicht")));
       if (auf.includes("2580") || !/"hash":"[0-9a-f]{64}"/.test(auf)) throw new Error("Aufsicht-PIN im Klartext");
       if (await b.$(`[data-konto="${id}"]`)) throw new Error("Konto ohne Zustimmung verbunden");
       await b.goto(url(`statistik.html?konto=${id}`));

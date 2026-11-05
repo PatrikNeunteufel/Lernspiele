@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.1.0 mit Zahl, Bruch, Speicher, Zufall, `el` in beiden Apps | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.2.0: Zahl, Bruch, Speicher, Zufall, `el` in beiden Apps; Geheimnis und Person im Lernsteig | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | offen, nach B | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -103,6 +103,12 @@ Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`
   - `konten`/`rollen` und `daten`: kaputte und fremde Dateien, Ids fremder Konten, voller Speicher, Zeitzone.
   - Vielfalt: Mindestvorrat je Stufe auch ohne Endlos (Hinweis unter 50 verschiedenen Aufgaben).
   - Rechner: NaN, Division durch 0, 10-stellige Anzeige.
+  - Seiten des Lernsteigs (Start, Statistik, Aufsicht, jede Übung) im Ersatz-DOM wie im Eulenpfad, mit Suche nach
+    „null“, „undefined“, „NaN“ im sichtbaren Text. Anlass: Die Startseite zeigte ohne Wochenziel „null“ (natives
+    `append` mit `null`, behoben 2026-11-05); ohne laufenden Browserteil fiel es nicht auf.
+  - Stand 2026-11-05: `docs/lernsteig/werkzeuge/pruefe_konten.js` (Konten, Aufsicht, Sichern und Einlesen: Umzug,
+    PIN und Code, Bestätigung, Verbinden, kaputte und fremde Dateien, voller Speicher, Einladung; 33 Fälle), vom
+    Testskript des Lernsteigs mitgerufen.
 
 **B3 Geburtsdatum (Vorgabe Patrik 2026-11-05):** In allen Apps vollständig, gespeichert als ISO `JJJJ-MM-TT`, gezeigt
 als `TT.MM.JJJJ`. Fehlt der Tag (Eulenpfad-Profile seit LERN_Session14: `JJJJ-MM`), bricht nichts: Das Alter wird wie
@@ -156,15 +162,15 @@ Kindersprache.
 | D1 | `lernsteig/gemeinsam/rahmen.js:367` | absolute Toleranz: in `zehnerpotenzen` k gilt `0.000000076` für `7.62 · 10⁻⁸` | exakter Vergleich über Brüche, Toleranz nur wo gerundet wird, dann relativ |
 | D2 | `kombinatorik/aufgaben.js:97` | „mindestens eine Fünf“, „höchstens eine Zwei“ mehrdeutig | „eine Augenzahl von mindestens 5“; Challenge einheitlich als Anzahl |
 | D3 | `terme.js:123–125` | Absturz bei `(3)(2x+3)` | `lies` in `try`, Rückmeldung „nicht lesbar“ |
-| D4 | `daten.js:36–62` | Einlesen ohne Schema, halber Import, vergiftet spätere Importe | Schema je Datensatz, erst prüfen, dann schreiben (Kern `daten.js`) |
-| D5 | `aufsicht.js:135`, `konten.js:130` | Einlesen verbindet fremde Konten ohne Zustimmung; neue Aufsicht ohne Bestätigung | nur neu angelegte Konten verbinden; Aufsicht wie Eulenpfad (C5) |
-| D6 | `konten.js:24`, Eulenpfad `spiel.js:393` | fehlt `crypto.subtle` (http über LAN), technische Meldung | Prüfung und verständliche Meldung, im Kern |
+| D4 | `daten.js:36–62` | Einlesen ohne Schema, halber Import, vergiftet spätere Importe | Schema je Datensatz, erst prüfen, dann schreiben (Kern `daten.js`) — erledigt 2026-11-05 (LERN_Session15, `lernsteig/gemeinsam/daten.js`, Test `pruefe_konten.js`) |
+| D5 | `aufsicht.js:135`, `konten.js:130` | Einlesen verbindet fremde Konten ohne Zustimmung; neue Aufsicht ohne Bestätigung | nur neu angelegte Konten verbinden; Aufsicht wie Eulenpfad (C5) — erledigt 2026-11-05 im Lernsteig (Bestätigung durch bestehende Aufsicht, nur neue Konten verbinden; Test `pruefe_konten.js`) |
+| D6 | `konten.js:24`, Eulenpfad `spiel.js:393` | fehlt `crypto.subtle` (http über LAN), technische Meldung | Prüfung und verständliche Meldung, im Kern — im Kern seit 1.2.0 (`KERN.geheimnis`), Lernsteig benutzt ihn; Eulenpfad mit C |
 | D7 | `statistik.js:13`, `aufsicht.js:85` | Übungstage in UTC, Wochenziel in Ortszeit | überall Ortszeit (Kern) |
 | D8 | `werkzeug.js:41`, Eulenpfad `spiel.js:22` | `zahlText(1234.5678)` → `1'234.5'678` | nur ganze Zahlen gruppieren (Kern `zahl.js`) — erledigt 2026-11-05 (Kern 1.0.0) |
 | D9 | `rechner.js:112` | NaN als „zu gross“, 11 Stellen bei 9999999999.6 | „nicht definiert“, Anzeige auf 10 Stellen |
 | D10 | `terme.js:63` | Exponent unbegrenzt friert den Tab ein | Grenze mit Meldung |
 | D11 | `rahmen.js:121`, `daten.js` | voller Speicher verliert Runden still | Rückgabe auswerten, Warnung wie Eulenpfad (80 %) |
-| D12 | `konten.js:243–258` | Einladung prüft Land/Kanton nicht, verwirft `JJJJ-MM` | gegen `LP.LAENDER`/`KANTONE` prüfen; B3 |
+| D12 | `konten.js:243–258` | Einladung prüft Land/Kanton nicht, verwirft `JJJJ-MM` | gegen `LP.LAENDER`/`KANTONE` prüfen; B3 — erledigt 2026-11-05 (Land, Kanton, Klasse geprüft; Geburtsdatum mit oder ohne Tag) |
 | D13 | `sachsituationen/aufgaben.js:66, 79` | ASCII-Minus | über `LST.zahlText` |
 
 ## E. Fachliche Korrekturen
@@ -250,5 +256,14 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Ziels und auf den Karten nur diese Stufen.
 - **C2 a:** Gast in allen drei Apps als Teil des Kerns (nichts gespeichert, Profil ohne Wirkung, nur Freigegebenes, je
   Gerät abschaltbar); im Eulenpfad „👀 Nur schauen“.
+- **P1 a:** Jede Person hat in allen Apps eine feste Kennung `id` (beim Anlegen, reist bei einer Übernahme mit); der
+  Name ist je App und Gerät eindeutig und nur Anzeige. Der Eulenpfad zieht einmal um (Profil, Protokoll, Rekorde,
+  Löschvermerke bekommen `person`; ältere Sicherungen werden beim Einlesen umgedeutet). Abgleich: gleiche Kennung →
+  zusammenführen; gleicher Name, andere Kennung → zusammenführen wie heute, die ältere Kennung bleibt, die andere wird
+  als frühere Kennung vermerkt.
+- **P2 a:** Eine Liste von Personen je App, `rolle: "lernend" | "aufsicht"`, bei der Aufsicht die Art (`eltern`,
+  `lehrperson`) und das Merkmal Gruppenleitung (G2 a); Entwickler bleibt Freischaltung des Geräts, keine Rolle.
+  Anmeldung, PIN, Code, Sicherheitsfrage, Zurücksetzen für alle Rollen gleich; PIN-Pflicht und Sicht der Aufsicht
+  stellt jede App ein. Der Lernsteig führt `aufsichten` in die Liste über.
 - **F1 a:** Kleinklasse als drittes Schulniveau SG (Niveau `n1`, Ziel „so weit wie möglich“, Fremdsprachen
   ausgeblendet und einschaltbar, keine Prüfungsziele, keine eigenen Übungen); Praxis in F2 an der Quelle prüfen.
