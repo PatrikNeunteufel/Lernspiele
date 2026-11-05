@@ -1,4 +1,4 @@
-/* kern 1.0.0 · Prüfsumme sha256:6b87e9d7dc48c6c1f616a07c46d2bdb51a90b327b97fe9501479f8c3ac590cc3 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.1.0 · Prüfsumme sha256:f62a55b4a13239611abc9a5b5fa633a7e6794f1136878637951f2012209643c1 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -121,6 +121,123 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
   const alsZahl = a => Number(a.z) / Number(a.n);
 
   KERN.bruch = { bruch, plus, minus, mal, durch, neg, hoch, wurzel, wurzelGanz, zahl, vonZahl, gleich, vergleich, endlich, text, alsZahl };
+})(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
+
+if (typeof module !== "undefined") module.exports = globalThis.KERN;
+
+/* ---- kern/speicher.js ---- */
+/* Kern — Speicher im Browser mit Präfix der App (Plan docs/plan_angleich_reihe.md B; docs/kern/rahmen.md 4.3).
+   Alle Apps teilen den Ursprung patrikneunteufel.github.io und damit localStorage; darum schreibt jede App nur unter
+   ihrem Präfix („lernspiele:“, „lernsteig:“, „gratwanderung:“). Der Kern kennt keine Schlüssel der Apps.
+   Darf fehlen (privates Fenster, gesperrter Speicher, Node): dann gilt beim Lesen der Ersatz, Schreiben meldet false. */
+"use strict";
+
+(function (KERN) {
+  // Über den globalen Namen, nicht über globalThis: Ersatz-DOMs der Testskripte (tools/pruef_dom.js) legen
+  // localStorage als Variable an. Der Zugriff selbst kann werfen (gesperrte Cookies).
+  const ablage = () => { try { return typeof localStorage !== "undefined" ? localStorage : null; } catch (e) { return null; } };
+
+  /**
+   * Speicher für ein Präfix: { praefix, lies(schluessel, ersatz), schreibe(schluessel, wert) → true|false,
+   * entferne(schluessel), schluessel() → Liste der Schlüssel ohne Präfix }. Werte als JSON.
+   */
+  function speicher(praefix) {
+    if (typeof praefix !== "string" || !/^[a-z][a-z0-9-]*:$/.test(praefix)) throw new Error(`ungültiges Präfix: ${praefix}`);
+    function lies(schluessel, ersatz) {
+      try {
+        const v = ablage()?.getItem(praefix + schluessel);
+        return v === null || v === undefined ? ersatz : JSON.parse(v);
+      } catch (e) { return ersatz; }
+    }
+    function schreibe(schluessel, wert) {
+      try {
+        const a = ablage();
+        if (!a) return false;
+        a.setItem(praefix + schluessel, JSON.stringify(wert));
+        return true;
+      } catch (e) { return false; } // voll oder gesperrt: der Aufrufer entscheidet, ob er warnt
+    }
+    function entferne(schluessel) { try { ablage()?.removeItem(praefix + schluessel); } catch (e) { /* fehlt */ } }
+    function schluessel() {
+      const a = ablage(), liste = [];
+      try { for (let i = 0; a && i < a.length; i++) { const k = a.key(i); if (k && k.startsWith(praefix)) liste.push(k.slice(praefix.length)); } }
+      catch (e) { /* fehlt */ }
+      return liste;
+    }
+    return { praefix, lies, schreibe, entferne, schluessel };
+  }
+
+  KERN.speicher = speicher;
+})(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
+
+if (typeof module !== "undefined") module.exports = globalThis.KERN;
+
+/* ---- kern/zufall.js ---- */
+/* Kern — Zufall über eine austauschbare Quelle (Plan docs/plan_angleich_reihe.md B; docs/kern/rahmen.md 4.4).
+   Standard ist Math.random, erst beim Aufruf gelesen: So greift auch ein Testskript, das Math.random ersetzt
+   (Eulenpfad, tools/pruef_dom.js). Ein Testskript kann stattdessen KERN.zufall.quelle.zufall setzen (Lernsteig) oder
+   eine Quelle mit Startwert von KERN.zufall.mitStartwert(seed) nehmen. */
+"use strict";
+
+(function (KERN) {
+  const quelle = { zufall: () => Math.random() };
+  /** Ganze Zahl von min bis max (beide eingeschlossen). */
+  function zufall(min, max) { return min + Math.floor(quelle.zufall() * (max - min + 1)); }
+  /** Ein Element der Liste. */
+  function waehle(liste) { return liste[Math.floor(quelle.zufall() * liste.length)]; }
+  /** Gemischte Kopie der Liste (Fisher-Yates). */
+  function mische(liste) {
+    const a = liste.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(quelle.zufall() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  /** Wiederholbare Zahlenfolge in [0, 1) aus einem Startwert (mulberry32), für Testskripte. */
+  function mitStartwert(seed) {
+    let s = seed >>> 0;
+    return () => {
+      s = (s + 0x6D2B79F5) >>> 0;
+      let t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  KERN.zufall = { quelle, zufall, waehle, mische, mitStartwert };
+})(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
+
+if (typeof module !== "undefined") module.exports = globalThis.KERN;
+
+/* ---- kern/el.js ---- */
+/* Kern — Element bauen (Plan docs/plan_angleich_reihe.md B; docs/kern/rahmen.md 4.5).
+   Greift erst beim Aufruf auf document zu, nie beim Laden (in Node ladbar).
+   el("button", { class, text, onclick, "aria-label": …, … }, kinder…)
+   - text → textContent (immer für Daten: Namen, eingelesene Dateien, Eingaben)
+   - html → innerHTML, nur für festen Text aus dem Code, nie für Daten
+   - on… → addEventListener
+   - undefined, null, false → Attribut weglassen; true → leeres Attribut (disabled, hidden)
+   - Kinder: verschachtelte Listen werden flach gemacht; undefined, null, false fallen weg. */
+"use strict";
+
+(function (KERN) {
+  function el(tag, attr, ...kinder) {
+    const e = document.createElement(tag); // globaler Name (auch der Ersatz-DOM tools/pruef_dom.js)
+    for (const [k, v] of Object.entries(attr || {})) {
+      if (v === undefined || v === null || v === false) continue;
+      if (k === "text") e.textContent = v;
+      else if (k === "html") e.innerHTML = v;
+      else if (k === "class") e.className = v;
+      else if (k.startsWith("on") && typeof v === "function") e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? "" : v);
+    }
+    for (const kind of kinder.flat(Infinity)) if (kind !== undefined && kind !== null && kind !== false) e.append(kind);
+    return e;
+  }
+
+  KERN.el = el;
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 
 if (typeof module !== "undefined") module.exports = globalThis.KERN;

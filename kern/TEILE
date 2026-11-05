@@ -1,3 +1,6 @@
 # Teile des Kerns in Ladereihenfolge, je Zeile eine Datei aus kern/ (tools/kern_verteilen.py bündelt sie).
 zahl.js
 bruch.js
+speicher.js
+zufall.js
+el.js

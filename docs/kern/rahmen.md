@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.0.0, 2026-11-05 (LERN_Session15). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.1.0, 2026-11-05 (LERN_Session15). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.0.0)
+kern/VERSION          Version des Kerns (1.1.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -23,8 +23,10 @@ im App-Ordner. So bleibt jeder App-Ordner eigenständig (P1 a) und läuft offlin
 
 ## 2. Regeln für jeden Teil
 
-- **Ohne DOM, ohne Speicher, ohne App-Globals.** Ein Teil liest weder `LS`, `LST` noch `localStorage`. Braucht er
-  etwas aus der App (Schreibweise, Präfix), bekommt er es als Parameter.
+- **Ohne App-Globals, ohne Wirkung beim Laden.** Ein Teil liest weder `LS` noch `LST`. Braucht er etwas aus der App
+  (Schreibweise, Präfix), bekommt er es als Parameter. DOM und Speicher fasst nur an, wessen Aufgabe es ist (`el`,
+  `speicher`), und erst beim Aufruf, über die globalen Namen `document` und `localStorage` (nicht `globalThis.…`:
+  Ersatz-DOMs der Testskripte legen sie als Variablen an). So bleibt jeder Teil in Node ladbar.
 - **Rahmen der Datei:** Der Teil hängt sich an das globale Objekt `KERN` und exportiert es für Node:
   ```js
   "use strict";
@@ -96,9 +98,50 @@ vom Generator exakt nachgerechnet.
 | `text(a)` | „3/4“, „−1/4“ als „-1/4“, ganze als „5“ (technischer Text, nicht für die Anzeige) |
 | `alsZahl(a)` | Näherung als Zahl |
 
-### 4.3 Geplant (Plan B, Reihenfolge B4)
+### 4.3 `KERN.speicher` (`kern/speicher.js`) — Speicher mit Präfix
 
-Speicher mit Präfix, Zufall mit austauschbarer Quelle, `el`, Profil (Geburtsdatum B3, Übernahme zwischen den Apps
+Alle Apps teilen den Ursprung und damit `localStorage`. Jede schreibt nur unter ihrem Präfix.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `KERN.speicher("lernsteig:")` | `{ praefix, lies, schreibe, entferne, schluessel }`; Präfix aus Kleinbuchstaben, Ziffern, `-`, mit `:` am Ende, sonst Fehler |
+| `lies(schluessel, ersatz)` | gespeicherter Wert (JSON) oder `ersatz` — auch ohne Speicher, bei gesperrtem Speicher oder kaputtem JSON |
+| `schreibe(schluessel, wert)` | `true`, wenn gespeichert; `false`, wenn der Speicher fehlt, voll oder gesperrt ist — die App entscheidet, ob sie warnt |
+| `entferne(schluessel)` | Eintrag löschen |
+| `schluessel()` | alle Schlüssel dieses Präfixes, ohne Präfix |
+
+Präfixe: Eulenpfad `lernspiele:`, Lernsteig `lernsteig:`, Gratwanderung `gratwanderung:`. Ein Teil, der Daten einer
+anderen App liest oder schreibt (Profil-Übernahme C9), öffnet deren Speicher mit deren Präfix.
+
+### 4.4 `KERN.zufall` (`kern/zufall.js`) — Zufall mit austauschbarer Quelle
+
+| Aufruf | Ergebnis |
+|---|---|
+| `zufall(min, max)` | ganze Zahl von min bis max, beide eingeschlossen |
+| `waehle(liste)` | ein Element |
+| `mische(liste)` | gemischte Kopie (Fisher-Yates); die Vorlage bleibt |
+| `quelle.zufall` | die Quelle, Standard `() => Math.random()` — erst beim Aufruf gelesen |
+| `mitStartwert(seed)` | wiederholbare Folge in [0, 1) für Testskripte |
+
+Testskripte setzen den Zufall auf zwei Wegen: der Eulenpfad ersetzt `Math.random` im Ersatz-DOM
+(`tools/pruef_dom.js`), der Lernsteig setzt `KERN.zufall.quelle.zufall` (als `LST.quelle.zufall`). Beide geben mit
+gleichem Startwert dieselbe Folge wie vor dem Umzug.
+
+### 4.5 `KERN.el` (`kern/el.js`) — Element bauen
+
+`el(tag, attr, ...kinder)`:
+- `text` → `textContent` — **immer** für Daten (Namen, eingelesene Dateien, Eingaben);
+- `html` → `innerHTML` — nur für festen Text aus dem Code, nie für Daten;
+- `class` → `className`; `on…` mit Funktion → `addEventListener`;
+- Attribut `undefined`, `null`, `false` → weggelassen; `true` → leeres Attribut (`disabled`, `hidden`); sonst als Text
+  (`"false"` und `0` bleiben);
+- Kinder: verschachtelte Listen flach; `undefined`, `null`, `false` fallen weg.
+
+Greift erst beim Aufruf auf `document` zu (über den globalen Namen, damit auch der Ersatz-DOM greift).
+
+### 4.6 Geplant (Plan B, Reihenfolge B4)
+
+Profil (Geburtsdatum B3, Übernahme zwischen den Apps
 C9), Rollen und PIN, Freigabe und Prüfstand, Suche, Protokoll und Statistik, Sichern und Einlesen mit Schema,
 Einladung, Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu, bevor er umzieht.
 

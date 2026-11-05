@@ -6,29 +6,15 @@
 var LST = (function () {
   const PRAEFIX = "lernsteig:"; // eigener Speicher (Entscheid SP1 a)
 
+  // Speicher und Zufall aus dem Kern (kern/speicher.js, kern/zufall.js, kern 1.1.0).
+  const SPEICHER = KERN.speicher(PRAEFIX);
   /** Gespeicherten Wert lesen; ohne Speicher (privates Fenster, Node) gilt der Standard. */
-  function lies(schluessel, standard) {
-    try {
-      const v = localStorage.getItem(PRAEFIX + schluessel);
-      return v === null ? standard : JSON.parse(v);
-    } catch (e) { return standard; }
-  }
-  function schreibe(schluessel, wert) {
-    try { localStorage.setItem(PRAEFIX + schluessel, JSON.stringify(wert)); return true; } catch (e) { return false; }
-  }
+  const lies = (schluessel, standard) => SPEICHER.lies(schluessel, standard);
+  /** Speichern; true, wenn es gespeichert ist (false: Speicher voll oder gesperrt). */
+  const schreibe = (schluessel, wert) => SPEICHER.schreibe(schluessel, wert);
 
-  // Zufall über eine austauschbare Quelle, damit das Testskript mit Seed laufen kann.
-  const quelle = { zufall: Math.random };
-  function zufall(min, max) { return min + Math.floor(quelle.zufall() * (max - min + 1)); }
-  function waehle(liste) { return liste[Math.floor(quelle.zufall() * liste.length)]; }
-  function mische(liste) {
-    const a = liste.slice();
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(quelle.zufall() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
+  // Zufall über die austauschbare Quelle des Kerns, damit das Testskript mit Seed laufen kann (LST.quelle.zufall = …).
+  const { quelle, zufall, waehle, mische } = KERN.zufall;
 
   // Zahlschreibweise wie der Lehrplan SG (Entscheid Z1 a, docs/lernsteig/lehrplan/sg_oberstufe_praxis.md 5):
   // Tausender mit Apostroph ab vier Stellen („1'000“, „320'000“), Dezimalpunkt („0.725“). Zeichen wie im Lehrplantext

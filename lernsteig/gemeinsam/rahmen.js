@@ -8,19 +8,8 @@
   const KAT = LST_KATALOG;
 
   // ---------- Elemente ----------
-  /** Element bauen: el("button", { class, text, onclick, … }, kinder…) */
-  function el(tag, attr, ...kinder) {
-    const e = document.createElement(tag);
-    for (const [k, v] of Object.entries(attr || {})) {
-      if (v === undefined || v === null || v === false) continue;
-      if (k === "text") e.textContent = v;
-      else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
-      else if (k === "class") e.className = v;
-      else e.setAttribute(k, v === true ? "" : v);
-    }
-    for (const k of kinder.flat()) if (k !== null && k !== undefined && k !== false) e.append(k);
-    return e;
-  }
+  /** Element bauen (kern/el.js): el("button", { class, text, onclick, … }, kinder…) */
+  const el = KERN.el;
 
   // ---------- Freigabe nach Prüfstand (FG1 a, A1 a, LERN_Session15) ----------
   // Wie im Eulenpfad (docs/eulenpfad/rahmen.md 6): Eine Übung mit `neu` im Katalog ist gesperrt, bis sie im

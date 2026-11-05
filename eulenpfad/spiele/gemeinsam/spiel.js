@@ -31,16 +31,9 @@ const LS = (() => {
   /** „bei den Zehnern“, „bei den Millionen“ */
   function dativ(stelle) { return stelle.name.endsWith("n") ? stelle.name : stelle.name + "n"; }
 
-  function zufall(min, max) { return min + Math.floor(Math.random() * (max - min + 1)); }
-  function waehle(liste) { return liste[Math.floor(Math.random() * liste.length)]; }
-  function mische(liste) {
-    const a = liste.slice();
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
+  // Zufall aus dem Kern (kern/zufall.js, kern 1.1.0): Quelle Math.random, erst beim Aufruf gelesen — das Testskript
+  // ersetzt Math.random im Ersatz-DOM (tools/pruef_dom.js) und bekommt so dieselbe Folge wie bisher.
+  const { zufall, waehle, mische } = KERN.zufall;
 
   /** Ziffern einer Zahl je Stelle, z. B. 30400 → {M:0, HT:0, ZT:3, T:0, H:4, Z:0, E:0}. */
   function zerlege(n) {
@@ -49,35 +42,23 @@ const LS = (() => {
     return z;
   }
 
-  function el(tag, attr = {}, ...kinder) {
-    const e = document.createElement(tag);
-    for (const [k, v] of Object.entries(attr)) {
-      if (k === "class") e.className = v;
-      else if (k === "text") e.textContent = v;
-      else if (k === "html") e.innerHTML = v;
-      else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
-      else e.setAttribute(k, v);
-    }
-    for (const kind of kinder) if (kind != null) e.append(kind);
-    return e;
-  }
+  /** Element bauen (kern/el.js): text für Daten, html nur für festen Text; false/null-Attribute und -Kinder fallen weg. */
+  const el = KERN.el;
 
-  // ---------- Speicher (nur im Browser, darf fehlen) ----------
+  // ---------- Speicher (nur im Browser, darf fehlen; kern/speicher.js mit Präfix „lernspiele:“) ----------
+  const SPEICHER = KERN.speicher("lernspiele:");
 
   // Wer wissen will, dass etwas gespeichert wurde (der Abgleich zwischen Geräten, abgleich.js).
   const aenderungsHoerer = [];
   const beiAenderung = f => aenderungsHoerer.push(f);
 
-  function lies(schluessel, ersatz) {
-    try {
-      const v = localStorage.getItem("lernspiele:" + schluessel);
-      return v === null ? ersatz : JSON.parse(v);
-    } catch { return ersatz; }
-  }
+  function lies(schluessel, ersatz) { return SPEICHER.lies(schluessel, ersatz); }
 
+  /** Speichern und die Hörer benachrichtigen; true, wenn es gespeichert ist (false: Speicher voll oder gesperrt). */
   function schreibe(schluessel, wert) {
-    try { localStorage.setItem("lernspiele:" + schluessel, JSON.stringify(wert)); } catch { /* egal */ }
+    const ok = SPEICHER.schreibe(schluessel, wert);
     for (const f of aenderungsHoerer) try { f(schluessel); } catch { /* ein Hörer darf das Speichern nicht stören */ }
+    return ok;
   }
 
   // ---------- Einstellungen der Aufsicht, gelten für alle auf diesem Gerät (Wunsch Patrik, LERN_Session7) ----------

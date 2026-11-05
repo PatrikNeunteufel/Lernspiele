@@ -8,6 +8,9 @@ const { execFileSync } = require("child_process");
 const WURZEL = path.join(__dirname, "..");
 const KERN = require(path.join(WURZEL, "kern", "zahl.js"));
 require(path.join(WURZEL, "kern", "bruch.js"));
+require(path.join(WURZEL, "kern", "speicher.js"));
+require(path.join(WURZEL, "kern", "zufall.js"));
+require(path.join(WURZEL, "kern", "el.js"));
 
 let fehler = 0, faelle = 0;
 function gleich(ist, soll, was) {
@@ -91,6 +94,95 @@ for (let i = 0; i < 5000; i++) {
   if (!B.gleich(links, rechts) || Math.abs(B.alsZahl(B.plus(a, b)) - (B.alsZahl(a) + B.alsZahl(b))) > 1e-9) {
     fehler++; console.log(`    FEHLER  Rechenregeln mit ${t(a)}, ${t(b)}, ${t(c)}`); break;
   }
+}
+
+// ---------- Speicher ----------
+console.log("speicher.js");
+{
+  const S = KERN.speicher;
+  // ohne localStorage (Node): lesen gibt den Ersatz, schreiben false
+  gleich(S("lernspiele:").lies("x", 7), 7, "lies ohne Speicher");
+  gleich(S("lernspiele:").schreibe("x", 1), false, "schreibe ohne Speicher");
+  // mit einem Ersatz-Speicher
+  const daten = new Map();
+  let voll = false;
+  global.localStorage = {
+    getItem: k => (daten.has(k) ? daten.get(k) : null),
+    setItem: (k, v) => { if (voll) throw new Error("QuotaExceededError"); daten.set(k, String(v)); },
+    removeItem: k => daten.delete(k),
+    key: i => [...daten.keys()][i] ?? null,
+    get length() { return daten.size; },
+  };
+  const ep = S("lernspiele:"), lst = S("lernsteig:");
+  gleich(ep.schreibe("profile", { a: 1 }), true, "schreibe");
+  gleich(JSON.stringify(ep.lies("profile", null)), '{"a":1}', "lies");
+  gleich(lst.lies("profile", "leer"), "leer", "anderes Präfix liest nichts Fremdes");
+  lst.schreibe("konten", []);
+  gleich(JSON.stringify(ep.schluessel()), '["profile"]', "schluessel je Präfix");
+  daten.set("lernspiele:kaputt", "{nicht json");
+  gleich(ep.lies("kaputt", "ersatz"), "ersatz", "kaputtes JSON → Ersatz");
+  voll = true;
+  gleich(ep.schreibe("neu", 1), false, "voller Speicher → false");
+  voll = false;
+  ep.entferne("profile");
+  gleich(ep.lies("profile", null), null, "entferne");
+  wirft(() => S("lernspiele"), "Präfix ohne Doppelpunkt");
+  wirft(() => S(""), "leeres Präfix");
+  delete global.localStorage;
+}
+
+// ---------- Zufall ----------
+console.log("zufall.js");
+{
+  const Zf = KERN.zufall;
+  const alt = Zf.quelle.zufall;
+  Zf.quelle.zufall = Zf.mitStartwert(42);
+  const a = Array.from({ length: 50 }, () => Zf.zufall(1, 6));
+  Zf.quelle.zufall = Zf.mitStartwert(42);
+  const b = Array.from({ length: 50 }, () => Zf.zufall(1, 6));
+  gleich(a.join(), b.join(), "gleicher Startwert, gleiche Folge");
+  Zf.quelle.zufall = alt;
+  const zaehl = new Map();
+  for (let i = 0; i < 60000; i++) { const w = Zf.zufall(1, 6); zaehl.set(w, (zaehl.get(w) || 0) + 1); }
+  gleich([...zaehl.keys()].sort().join(), "1,2,3,4,5,6", "zufall(1, 6) trifft genau 1 bis 6");
+  faelle++;
+  if ([...zaehl.values()].some(n => Math.abs(n - 10000) > 600)) { fehler++; console.log("    FEHLER  zufall(1, 6) ungleich verteilt"); }
+  const liste = [1, 2, 3, 4, 5, 6, 7, 8];
+  const m = Zf.mische(liste);
+  gleich(m.slice().sort().join(), liste.join(), "mische behält alle Elemente");
+  gleich(liste.join(), "1,2,3,4,5,6,7,8", "mische ändert die Vorlage nicht");
+  // Math.random wird erst beim Aufruf gelesen (Ersatz-DOM des Eulenpfads ersetzt es)
+  const mr = Math.random;
+  Math.random = () => 0;
+  gleich(Zf.zufall(3, 9), 3, "Quelle liest Math.random beim Aufruf");
+  gleich(Zf.waehle(["a", "b"]), "a", "waehle über Math.random");
+  Math.random = mr;
+}
+
+// ---------- el ----------
+console.log("el.js");
+{
+  // kleiner Ersatz für document: genug für Attribute, Text und Kinder
+  const knoten = tag => ({
+    tag, attribute: {}, kinder: [], hoerer: {}, className: "", textContent: "", innerHTML: "",
+    setAttribute(k, v) { this.attribute[k] = String(v); },
+    addEventListener(t, f) { this.hoerer[t] = f; },
+    append(...k) { this.kinder.push(...k); },
+  });
+  global.document = { createElement: knoten };
+  const klick = () => {};
+  const e = KERN.el("button", { class: "knopf", text: "OK", onclick: klick, disabled: true, hidden: false, title: null,
+    "aria-pressed": "false", "data-n": 0 }, "a", null, false, ["b", ["c"]], undefined);
+  gleich(e.className, "knopf", "class");
+  gleich(e.textContent, "OK", "text");
+  gleich(e.hoerer.click, klick, "onclick");
+  gleich(e.attribute.disabled, "", "true → leeres Attribut");
+  gleich("hidden" in e.attribute || "title" in e.attribute, false, "false/null → kein Attribut");
+  gleich(e.attribute["aria-pressed"], "false", "Text „false“ bleibt");
+  gleich(e.attribute["data-n"], "0", "0 bleibt");
+  gleich(e.kinder.join(), "a,b,c", "Kinder flach, ohne null/false/undefined");
+  gleich(KERN.el("p", { html: "<b>x</b>" }).innerHTML, "<b>x</b>", "html");
+  delete global.document;
 }
 
 // ---------- Kopien in den Apps ----------
