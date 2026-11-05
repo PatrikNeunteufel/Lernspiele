@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | offen | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.0.0 mit `zahl.js` und `bruch.js` in beiden Apps | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | offen, nach B | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -70,8 +70,19 @@ sondern umfasst gleich die Teile, die das gemeinsame Grundgerüst trägt (C):
 | `einladung.js` | Lernsteig `konten.js` | Format `{ format, v, name, geboren, klasse, … }`, von beiden Apps gelesen |
 | `terme.js`, Rechenkern `rechner.js` | Lernsteig | ohne verdeckte Globals (`LST.zahlText` übergeben) |
 
-**B1 Werkzeug:** `tools/kern_verteilen.py` (Kopie, Kopfzeile `kern <Version>, Prüfsumme …`, `--pruefe` ohne
-Schreiben). `kern/VERSION`, `kern/CHANGELOG.md`.
+**Entwicklerdoku des Kerns:** [docs/kern/rahmen.md](kern/rahmen.md) (Teile, Schnittstellen, Einbinden, Verteilen,
+Prüfen); jeder neue Teil bekommt dort seinen Abschnitt, bevor er umzieht.
+
+**B1 Werkzeug:** `tools/kern_verteilen.py` bündelt die Teile aus `kern/TEILE` in **eine** Datei je App,
+`<app>/kern/kern.js`, Kopfzeile `kern <Version> · Prüfsumme sha256:…`; `--pruefe` schreibt nichts und meldet eine
+von Hand geänderte Kopie oder gleiche Version mit anderem Inhalt als Fehler, eine ältere Version als Hinweis.
+`kern/VERSION`, `kern/CHANGELOG.md`. Eine Datei je App statt einer Kopie je Teil, damit ein neuer Kern-Teil keine der
+rund 200 Seiten anfasst: Jede Seite lädt einmal `kern/kern.js` vor dem Rahmen ihrer App. Die Teile hängen sich an
+`KERN` (`KERN.zahl`, `KERN.bruch`, …). Tests: `node tools/pruefe_kern.js` (Teile gegen feste Beispiele und
+Nachrechnungen, dazu die Kopien); das Testskript jeder App prüft ihre Kopie.
+Stand 2026-11-05: Kern 1.0.0 mit `zahl.js` (Schreibweise als Einstellung) und `bruch.js`; Eulenpfad (`LS.zahlText`,
+`LS.dezimalText`) und Lernsteig (`LST.zahlText`, `dezimalText`, `leseZahl`, `KERN.bruch` statt `LST_BRUCH`) benutzen ihn,
+`lernsteig/gemeinsam/bruch.js` entfällt; die Gratwanderung hat die Kopie, lädt sie aber erst mit C8.
 
 **B2 Testgerüst für alle Apps:** Ein Testskript-Kern unter `tools/` mit Treiber je App, so dass ein Aufruf alle drei
 Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`). Er prüft auch, dass jede Kern-Kopie mit
@@ -147,7 +158,7 @@ Kindersprache.
 | D5 | `aufsicht.js:135`, `konten.js:130` | Einlesen verbindet fremde Konten ohne Zustimmung; neue Aufsicht ohne Bestätigung | nur neu angelegte Konten verbinden; Aufsicht wie Eulenpfad (C5) |
 | D6 | `konten.js:24`, Eulenpfad `spiel.js:393` | fehlt `crypto.subtle` (http über LAN), technische Meldung | Prüfung und verständliche Meldung, im Kern |
 | D7 | `statistik.js:13`, `aufsicht.js:85` | Übungstage in UTC, Wochenziel in Ortszeit | überall Ortszeit (Kern) |
-| D8 | `werkzeug.js:41`, Eulenpfad `spiel.js:22` | `zahlText(1234.5678)` → `1'234.5'678` | nur ganze Zahlen gruppieren (Kern `zahl.js`) |
+| D8 | `werkzeug.js:41`, Eulenpfad `spiel.js:22` | `zahlText(1234.5678)` → `1'234.5'678` | nur ganze Zahlen gruppieren (Kern `zahl.js`) — erledigt 2026-11-05 (Kern 1.0.0) |
 | D9 | `rechner.js:112` | NaN als „zu gross“, 11 Stellen bei 9999999999.6 | „nicht definiert“, Anzeige auf 10 Stellen |
 | D10 | `terme.js:63` | Exponent unbegrenzt friert den Tab ein | Grenze mit Meldung |
 | D11 | `rahmen.js:121`, `daten.js` | voller Speicher verliert Runden still | Rückgabe auswerten, Warnung wie Eulenpfad (80 %) |
@@ -215,7 +226,7 @@ Nach dem Grundsatz oben: zuerst entscheiden, was richtig ist.
   Abschnitt 5a, Abschnitt 6 Speicherfelder (`rechnerModell`, `wochenziel`, `mitRechner`, `liste[].rechner`).
 - `STAND_und_PLAN.md`: „23 Übungen“ → 27, „fünf Listen“ → sieben.
 - Session-Report LST_Session1 deckt nur den 4.11. ab: Nachtrag 5.11. (Konten, Aufsicht, Statistik, NT, KB1/KB2, FG1).
-- `bruch.js:39` Kommentar, `werkzeug.js:47` doppelter Kommentar.
+- ~~`bruch.js:39` Kommentar, `werkzeug.js:47` doppelter Kommentar~~ — erledigt 2026-11-05 mit Kern 1.0.0.
 - Nach C werden `rahmen.md` beider Apps auf den Kern verwiesen statt doppelt beschrieben.
 
 ## H. Portal

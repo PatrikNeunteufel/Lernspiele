@@ -21,7 +21,7 @@ const UEBUNG = {
 };
 
 const M = "−";
-const T = LST_TERME, B = LST_BRUCH;
+const T = LST_TERME, B = KERN.bruch;
 const nichtNull = (min, max) => { let x = 0; while (x === 0) x = LST.zufall(min, max); return x; };
 const VAR = ["a", "b", "x", "y"];
 const zwei = () => { const v = LST.mische(VAR); return [v[0], v[1]].sort(); };

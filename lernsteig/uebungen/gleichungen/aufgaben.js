@@ -147,7 +147,7 @@ function hinweis(a, eingabe) {
 }
 
 // ---------- Prüfung: beide Seiten als lineare Terme lesen und exakt lösen ----------
-const B = LST_BRUCH;
+const B = KERN.bruch;
 /** Liest einen Term mit x als { a, b } (a·x + b), exakt. Unterstützt + − · : ( ), „5x“, „3(x − 2)“, Vorzeichen. */
 function leseLinear(text) {
   const s = text.replace(/\s+/g, "");

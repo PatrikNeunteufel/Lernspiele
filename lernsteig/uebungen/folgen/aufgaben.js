@@ -77,7 +77,7 @@ function stufeJ() {
   const a = z(2, 7), b = z(-2, 6);
   const f = n => a * n + b;
   if (f(1) <= 0) return stufeJ();
-  const poly = LST_TERME.plus(LST_TERME.mal(LST_TERME.konst(LST_BRUCH.bruch(BigInt(a))), LST_TERME.variable("n")), LST_TERME.konst(LST_BRUCH.bruch(BigInt(b))));
+  const poly = LST_TERME.plus(LST_TERME.mal(LST_TERME.konst(KERN.bruch.bruch(BigInt(a))), LST_TERME.variable("n")), LST_TERME.konst(KERN.bruch.bruch(BigInt(b))));
   const term = LST_TERME.text(poly);
   return {
     art: "term", stufe: "j", typ: "term-linear", text: "Hölzchen je Figur (Tabelle). Term für die Anzahl Hölzchen bei Figur n:",
@@ -131,7 +131,7 @@ function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
   const d = a.daten;
-  const B = LST_BRUCH, Z = x => B.vonZahl(x);
+  const B = KERN.bruch, Z = x => B.vonZahl(x);
   if (a.art === "term") {
     // Term muss alle Tabellenwerte treffen
     for (const [n, w] of a.darstellung.zeilen) {

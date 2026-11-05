@@ -24,7 +24,9 @@ spiele/<id>/index.html     die Seite: <header class="kopf">, <main class="buehne
 spiele/<id>/woerter.js     Inhaltslisten (Wörter, Sätze, Orte …), falls es welche gibt
 ```
 
-Die Skripte werden in dieser Reihenfolge geladen: `../gemeinsam/spiel.js`, `../gemeinsam/katalog.js`,
+Die Skripte werden in dieser Reihenfolge geladen: `../../kern/kern.js` (gemeinsamer Kern der Reihe, vom Werkzeug
+`tools/kern_verteilen.py` aus `kern/` erzeugt, nie von Hand ändern; `docs/plan_angleich_reihe.md` B),
+`../gemeinsam/spiel.js`, `../gemeinsam/katalog.js`,
 bei Bedarf `../gemeinsam/noten.js`, dann die eigene Inhaltsdatei und das eigene Skript.
 Vorlage ist ein bestehendes Spiel, zum Beispiel `spiele/rest-raetsel/index.html`.
 

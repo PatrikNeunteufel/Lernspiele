@@ -33,41 +33,21 @@ var LST = (function () {
   // Zahlschreibweise wie der Lehrplan SG (Entscheid Z1 a, docs/lernsteig/lehrplan/sg_oberstufe_praxis.md 5):
   // Tausender mit Apostroph ab vier Stellen („1'000“, „320'000“), Dezimalpunkt („0.725“). Zeichen wie im Lehrplantext
   // (ASCII-Apostroph). Das Minuszeichen ist nicht Teil von Z1 a; bis zum Entscheid gilt „−“ (U+2212), Frage MZ1.
+  // Die Rechenarbeit macht der Kern (kern/zahl.js, kern 1.0.0, docs/plan_angleich_reihe.md B); hier steht nur die
+  // Schreibweise des Lernsteigs.
   const TAUSENDER = "'";
   const MINUS = "−";
 
-  /** Ganze Zahl in der Schreibweise des Lernsteigs: „1'000“, „−320'000“. */
-  function zahlText(n) {
-    const s = String(Math.abs(n));
-    const text = s.length < 4 ? s : s.replace(/\B(?=(\d{3})+(?!\d))/g, TAUSENDER);
-    return n < 0 ? MINUS + text : text;
-  }
-
   /** Dezimalzeichen: Punkt wie im Lehrplan (Z1 a). Eine Einstellung „komma“ bleibt für später möglich. */
   function dezimalZeichen() { return (lies("einstellungen", {}).dezimal === "komma") ? "," : "."; }
+  const schreibweise = () => ({ tausender: TAUSENDER, abStellen: 4, minus: MINUS, dezimal: dezimalZeichen() });
 
-  /** Dezimalzahl mit dem eingestellten Zeichen, vor dem Komma in Schulschreibweise. */
-  /** Zahl als Dezimaltext ohne Exponent („0.00000004485“), auf 15 gültige Ziffern (ohne Rundungsreste). */
-  function klartext(x) {
-    return Number(x.toPrecision(15)).toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: 20 });
-  }
-  function dezimalText(x, stellen) {
-    const roh = stellen === undefined ? klartext(Math.abs(x)) : Math.abs(x).toFixed(stellen);
-    const [ganz, rest] = roh.split(".");
-    const g = ganz.length < 4 ? ganz : ganz.replace(/\B(?=(\d{3})+(?!\d))/g, TAUSENDER);
-    const t = g + (rest ? dezimalZeichen() + rest : "");
-    return x < 0 && /[1-9]/.test(roh) ? MINUS + t : t;
-  }
-
-  /**
-   * Eingabe einer Zahl lesen: akzeptiert „−“, „-“, „–“, Punkt oder Komma, Leerzeichen als Gliederung.
-   * Liefert eine Zahl oder null, wenn die Eingabe keine Zahl ist.
-   */
-  function leseZahl(text) {
-    const t = String(text).trim().replace(/[\s\u202F\u00A0'\u2019]/g, "").replace(/[\u2212\u2013]/g, "-").replace(",", ".");
-    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(t)) return null;
-    return Number(t);
-  }
+  /** Zahl in der Schreibweise des Lernsteigs: „1'000“, „−320'000“, „1'234.5“ (nur der ganze Teil gegliedert). */
+  const zahlText = n => KERN.zahl.text(n, schreibweise());
+  /** Dezimalzahl mit dem eingestellten Zeichen, ohne Exponent und Rundungsreste; stellen: feste Nachkommastellen. */
+  const dezimalText = (x, stellen) => KERN.zahl.dezimalText(x, stellen, schreibweise());
+  /** Eingabe einer Zahl lesen („−“, „-“, „–“, Punkt oder Komma, Leerzeichen und Apostroph); Zahl oder null. */
+  const leseZahl = text => KERN.zahl.lies(text);
 
   /**
    * Niveaus (Entscheid NV1 a): intern kantonsunabhängig, gespeichert je Fach im Profil. Angezeigt wird der

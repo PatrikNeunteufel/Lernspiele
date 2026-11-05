@@ -5,7 +5,7 @@
 "use strict";
 
 var LST_TERME = (function () {
-  const B = LST_BRUCH;
+  const B = KERN.bruch;
   const HOCH = { "²": 2, "³": 3, "⁴": 4, "⁵": 5, "⁶": 6, "⁷": 7, "⁸": 8, "⁹": 9 };
 
   // ---------- Polynome ----------

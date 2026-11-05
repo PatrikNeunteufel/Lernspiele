@@ -77,7 +77,7 @@ function stufeI() {
 }
 
 // ---------- j: ordnen ----------
-const B = () => LST_BRUCH;
+const B = () => KERN.bruch;
 function rationaleZahl(nah) {
   // Dezimalzahl oder Bruch, positiv oder negativ; nah: Zahlen zwischen −1 und 1
   const vorz = LST.zufall(0, 1) ? -1 : 1;
@@ -166,7 +166,7 @@ function pruefeAufgabe(a, stufe, niveau) {
     if (abst(d.werte[a.richtig]) > Math.log(1.6)) m.push(`Überschlag ${a.loesung} weicht zu stark ab (genau ${genau})`);
   } else {
     // ordnen: Werte aus dem angezeigten Text exakt lesen
-    const br = LST_BRUCH;
+    const br = KERN.bruch;
     const lies = t => { const neg = t.startsWith(M); const s = neg ? t.slice(1) : t; const [zz, n] = s.split("/"); const b = n ? br.bruch(BigInt(zz), BigInt(n)) : br.zahl(s); return neg ? br.neg(b) : b; };
     const werte = a.optionen.map(lies);
     const vgl = (x, y) => { const d2 = br.minus(x, y); return d2.z > 0n ? 1 : d2.z < 0n ? -1 : 0; };

@@ -123,5 +123,18 @@
     "aufgabe": "Aufgabe 4: Die Klasse macht eine Velotour. An den ersten 2 Tagen fährt sie je 46 km. Die Gruppe startet um 8 Uhr. Am letzten Tag fährt sie noch 14 km bis zum Bahnhof. · 💡 Wie lang ist die ganze Velotour?",
     "seite": "/eulenpfad/index.html",
     "meldung": "M-mw2gli0w-1rw0"
+  },
+  {
+    "nr": 11,
+    "zeit": "2026-11-05T15:53:13+01:00",
+    "status": "offen",
+    "text": "Meldung M-mw3nw96m-7tz8 (Kind), 2026-11-05\nSpiel: Fahrplan-Rechner (fahrplan-rechner), Stufe 3, Aufgabe 1\nArt: Etwas anderes\nAufgabe: Eine Reise hat mehrere Teile. Wie lange dauert sie zusammen? · 🚆 1 h 30 min + 🚆 2 h 10 min + ⛴️ 1 h 55 min = ?\nErwartete Lösung: 1 h 30 min + 2 h 10 min + 1 h 55 min = 5 h 35 min\nEingaben des Kindes: Löschen → 3 → Löschen → 5 → 3 → 5\nGewertet: noch offen, 1 Fehlversuch als falsch gewertet\nBegründung: die aufgabe sagt nicht, ob das resultat 5h35min oder 335 min sein soll",
+    "von": "Patrik",
+    "spiel": "fahrplan-rechner",
+    "stufe": "s3",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "aufgabe": "Aufgabe 1: Eine Reise hat mehrere Teile. Wie lange dauert sie zusammen? · 🚆 1 h 30 min + 🚆 2 h 10 min + ⛴️ 1 h 55 min = ?",
+    "seite": "/eulenpfad/index.html",
+    "meldung": "M-mw3nw96m-7tz8"
   }
 ]

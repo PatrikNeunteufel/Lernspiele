@@ -165,8 +165,8 @@ function hinweis(a, eingabe) {
 }
 
 // ---------- Prüfung: exakt mit Brüchen (BigInt), unabhängig vom Generator ----------
-// Gemeinsame Bruchrechnung: lernsteig/gemeinsam/bruch.js
-const { bruch, plus: plusB, minus: minusB, mal: malB, durch: durchB, hoch: hochB, wurzel: wurzelB, zahl: zahlB, gleich: gleichB, vonZahl } = LST_BRUCH;
+// Gemeinsame Bruchrechnung: kern/bruch.js (im Lernsteig über lernsteig/kern/kern.js)
+const { bruch, plus: plusB, minus: minusB, mal: malB, durch: durchB, hoch: hochB, wurzel: wurzelB, zahl: zahlB, gleich: gleichB, vonZahl } = KERN.bruch;
 
 /** Wertet einen angezeigten Term exakt aus: + − · : ( ) √ ³√ ² ³ ⁴, Zahlen „1'234.5“, negative Zahlen „(−3)“. */
 function werteAus(text) {

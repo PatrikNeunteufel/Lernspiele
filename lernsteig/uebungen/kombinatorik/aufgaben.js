@@ -20,7 +20,7 @@ const UEBUNG = {
   },
 };
 
-const B = LST_BRUCH;
+const B = KERN.bruch;
 const z = (a, b) => LST.zufall(a, b);
 const zt = n => LST.zahlText(n);
 const bt = b => (b.n === 1n ? `${b.z}` : `${b.z}/${b.n}`);

@@ -9,17 +9,22 @@ Pfade gelten relativ zum App-Ordner `lernsteig/`.
 ## 1. Aufbau
 
 ```
-gemeinsam/werkzeug.js     reiner Teil (ohne DOM): Speicher lernsteig:*, Zufall, Zahlschreibung, Niveaus, Stufen
+kern/kern.js              gemeinsamer Kern der Reihe (KERN.zahl, KERN.bruch: exakte Bruchrechnung für Prüffunktionen),
+                          erzeugt von tools/kern_verteilen.py aus kern/ — nie von Hand ändern
+gemeinsam/werkzeug.js     reiner Teil (ohne DOM): Speicher lernsteig:*, Zufall, Schreibweise der Zahlen, Niveaus, Stufen
 gemeinsam/lehrplaene.js   Lehrplan-Profile: Länder, Kantone, Namen der Niveaus
 gemeinsam/katalog.js      Fächer und Übungen (einzige Quelle für Fach, Kompetenz, Basisklasse, Niveaus, Endlos-Stufen)
-gemeinsam/bruch.js        exakte Bruchrechnung (BigInt) für Prüffunktionen
+gemeinsam/pruefstand.js   was geprüft ist; Ungeprüftes ist für Jugendliche gesperrt (FG1 a, A1 a)
+gemeinsam/konten.js       Konten, PIN und Code, Aufsicht mit Verbindungen, Einladung
+gemeinsam/daten.js        Sichern und Einlesen
 gemeinsam/terme.js        Terme lesen, vergleichen, Form prüfen (Term-Antworten)
 gemeinsam/rechner.js      eingebauter Taschenrechner: Rechenkern (ohne DOM) und Tastenfeld
 gemeinsam/rahmen.js       Seitenteil: Konto, Stufenwahl, Runde, Serie, Protokoll, Rekorde
 gemeinsam/stil.css        Stil, Farben nur hier (:root)
 index.html, start/        Startseite: Land, Kanton, Prüfungsziel, Niveau je Fach, Übungen je Fach
 uebungen/<id>/aufgaben.js Aufgaben als Daten (ohne DOM), Prüffunktion, Hinweise
-uebungen/<id>/index.html  lädt die vier gemeinsamen Dateien und aufgaben.js, ruft LST.uebung(...)
+uebungen/<id>/index.html  lädt kern/kern.js, werkzeug, lehrplaene, katalog, terme, rechner, konten, pruefstand, rahmen,
+                          die Inhaltslisten und aufgaben.js, ruft LST.uebung(...)
 ```
 
 Eine Übungsseite läuft offline per Doppelklick (`file://`).

@@ -36,11 +36,17 @@ let fehler = 0, hinweise = 0;
 const fehlerMelden = (wo, text) => { fehler++; console.log(`  FEHLER ${wo}: ${text}`); };
 const hinweisMelden = (wo, text) => { hinweise++; console.log(`  Hinweis ${wo}: ${text}`); };
 
+// Kern zuerst (kern 1.0.0, docs/plan_angleich_reihe.md B): die Kopie der App muss mit kern/ übereinstimmen.
+{
+  const { execFileSync } = require("child_process");
+  try { execFileSync("python", [path.join(WURZEL, "tools", "kern_verteilen.py"), "--pruefe", "lernsteig"], { encoding: "utf8" }); }
+  catch (e) { fehlerMelden("Kern", (e.stdout || e.message).trim()); }
+}
+require(path.join(APP, "kern", "kern.js"));
 global.LST = require(path.join(APP, "gemeinsam", "werkzeug.js"));
 global.LST_LEHRPLAENE = require(path.join(APP, "gemeinsam", "lehrplaene.js"));
 const KAT = require(path.join(APP, "gemeinsam", "katalog.js"));
 const RECHNER = require(path.join(APP, "gemeinsam", "rechner.js"));
-global.LST_BRUCH = require(path.join(APP, "gemeinsam", "bruch.js"));
 global.LST_TERME = require(path.join(APP, "gemeinsam", "terme.js"));
 // Eingaben fürs Durchspielen: Zahl oder Term (art: "term")
 const klar = x => Number(x.toPrecision(15)).toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: 20 });
@@ -140,7 +146,7 @@ function pruefeOhneBrowser(eintrag) {
   if (!fs.existsSync(path.join(ordner, "index.html"))) return fehlerMelden(wo, "index.html fehlt");
   const html = fs.readFileSync(path.join(ordner, "index.html"), "utf8");
   if (/eulenpfad\//.test(html)) fehlerMelden(wo, "Seite lädt etwas aus eulenpfad/");
-  for (const s of ["werkzeug.js", "lehrplaene.js", "katalog.js", "bruch.js", "terme.js", "rechner.js", "rahmen.js", "aufgaben.js"]) {
+  for (const s of ["kern/kern.js", "werkzeug.js", "lehrplaene.js", "katalog.js", "terme.js", "rechner.js", "pruefstand.js", "rahmen.js", "aufgaben.js"]) {
     if (!html.includes(s)) fehlerMelden(wo, `Seite lädt ${s} nicht`);
   }
   for (const k of eintrag.stufen.map(s => `${eintrag.kompetenz}.${s}`).concat(eintrag.weitere || [])) {

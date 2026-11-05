@@ -160,7 +160,7 @@ function hinweis(a, eingabe) {
 }
 
 // ---------- Prüfung: über Grundeinheiten, eigene Tabelle (unabhängig von KETTEN) ----------
-const B = LST_BRUCH;
+const B = KERN.bruch;
 // Faktor jeder Einheit zur Grundeinheit ihrer Grösse
 const GRUND = {
   km: ["L", "1000"], m: ["L", "1"], dm: ["L", "0.1"], cm: ["L", "0.01"], mm: ["L", "0.001"],

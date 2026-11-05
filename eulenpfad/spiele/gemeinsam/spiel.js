@@ -18,12 +18,15 @@ const LS = (() => {
 
   const SCHMAL = " "; // schmales, nicht umbrechendes Leerzeichen
 
-  /** Zahl in Schulschreibweise: ab fünf Stellen in Dreiergruppen („30 400“), sonst ungegliedert. */
-  function zahlText(n) {
-    const s = String(Math.abs(n));
-    const text = s.length < 5 ? s : s.replace(/\B(?=(\d{3})+(?!\d))/g, SCHMAL);
-    return n < 0 ? "−" + text : text;
-  }
+  /**
+   * Schreibweise des Eulenpfads für den Kern (kern/zahl.js, kern 1.0.0, docs/plan_angleich_reihe.md B): ab fünf Stellen
+   * in Dreiergruppen mit schmalem Leerzeichen („30 400“), vierstellig ungegliedert („4500“), Dezimalzeichen nach
+   * Einstellung der Aufsicht.
+   */
+  const schreibweise = () => ({ tausender: SCHMAL, abStellen: 5, minus: "−", dezimal: einstellung("dezimal") === "komma" ? "," : "." });
+
+  /** Zahl in Schulschreibweise: „30 400“, „4500“; keine ganze Zahl wie dezimalText (nur der ganze Teil gegliedert). */
+  function zahlText(n) { return KERN.zahl.text(n, schreibweise()); }
 
   /** „bei den Zehnern“, „bei den Millionen“ */
   function dativ(stelle) { return stelle.name.endsWith("n") ? stelle.name : stelle.name + "n"; }
@@ -157,14 +160,9 @@ const LS = (() => {
 
   /**
    * Dezimalzahl mit dem eingestellten Zeichen, vor dem Komma in Schulschreibweise: 30 400.5 oder 30 400,5.
-   * stellen: feste Anzahl Nachkommastellen; ohne Angabe so viele wie nötig.
+   * stellen: feste Anzahl Nachkommastellen; ohne Angabe so viele wie nötig, ohne Exponent und Rundungsreste. Kern.
    */
-  function dezimalText(x, stellen) {
-    const roh = stellen === undefined ? String(Math.abs(x)) : Math.abs(x).toFixed(stellen);
-    const [ganz, rest] = roh.split(".");
-    const t = zahlText(Number(ganz)) + (rest ? (einstellung("dezimal") === "komma" ? "," : ".") + rest : "");
-    return x < 0 ? "−" + t : t;
-  }
+  function dezimalText(x, stellen) { return KERN.zahl.dezimalText(x, stellen, schreibweise()); }
 
   /**
    * Geldbetrag (in Rappen) so, wie die Klasse ihn schreibt (Entscheid C1 a, LERN_Session7): bis zur

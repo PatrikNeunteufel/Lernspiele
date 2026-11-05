@@ -114,7 +114,7 @@ function hinweis(a, eingabe) {
 function pruefeAufgabe(a, stufe, niveau) {
   const mg = [];
   if (a.stufe !== stufe) mg.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
-  const B = LST_BRUCH, Z = x => B.vonZahl(x), d = a.daten;
+  const B = KERN.bruch, Z = x => B.vonZahl(x), d = a.daten;
   // Gleichungen aus dem Text lesen (unabhängig von den Daten)
   const gls = [...a.text.matchAll(/y = ([^.]+?)(?= und|\.| \(|$)/g)].map(x => { const p = LST_TERME.lies(x[1].replace(/−/g, "-")).poly; return { m: p.get("x1") || B.bruch(0n), b: p.get("") || B.bruch(0n) }; });
   const pts = [...a.text.replace(/⁠/g, "").matchAll(/([A-Z])\((−?\d+)\|(−?\d+)\)/g)].map(x => [Z(Number(x[2].replace(M, "-"))), Z(Number(x[3].replace(M, "-")))]);

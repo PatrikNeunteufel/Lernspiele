@@ -167,7 +167,7 @@ function pruefeAufgabe(a, stufe, niveau) {
       if (a.antwort !== 10 ** d.e) mg.push("Zehnerpotenz falsch");
     } else if (/exponent|ausschreiben/.test(a.typ)) {
       // n = m · 10^e, exakt über Ziffernfolgen
-      const B = LST_BRUCH;
+      const B = KERN.bruch;
       const n = B.vonZahl(d.n), m = B.vonZahl(d.m);
       const p = d.e >= 0 ? B.bruch(10n ** BigInt(d.e)) : B.bruch(1n, 10n ** BigInt(-d.e));
       if (!B.gleich(n, B.mal(m, p))) mg.push(`${dez(d.n)} ≠ ${dez(d.m)} · 10^${d.e}`);
@@ -176,7 +176,7 @@ function pruefeAufgabe(a, stufe, niveau) {
       if (a.stufe === "j" && d.e < 0) mg.push("Stufe j mit negativem Exponenten");
       if (a.stufe === "k" && d.e >= 0) mg.push("Stufe k ohne negativen Exponenten");
     } else if (a.typ === "mal" || a.typ === "geteilt") {
-      const B = LST_BRUCH;
+      const B = KERN.bruch;
       const p = e => (e >= 0 ? B.bruch(10n ** BigInt(e)) : B.bruch(1n, 10n ** BigInt(-e)));
       const x = B.mal(B.vonZahl(d.a), p(d.e1)), y = B.mal(B.vonZahl(d.b), p(d.e2));
       const w = a.typ === "mal" ? B.mal(x, y) : B.durch(x, y);

@@ -74,6 +74,10 @@ const PRUEFSTAND = {
     "schaetz-waage/zeit": {
       "am": "2026-11-04",
       "von": "Patrik"
+    },
+    "zeit-schaetzer/taetigkeiten": {
+      "am": "2026-11-05",
+      "von": "Patrik"
     }
   },
   "spiele": {
@@ -125,6 +129,10 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "fahrplan-rechner": {
+      "am": "2026-11-05",
+      "von": "Patrik"
+    },
     "finger-zaehler": {
       "am": "2026-11-02",
       "von": "Patrik"
@@ -147,6 +155,10 @@ const PRUEFSTAND = {
     },
     "koenig-falle": {
       "am": "2026-11-03",
+      "von": "Patrik"
+    },
+    "komma-messband": {
+      "am": "2026-11-05",
       "von": "Patrik"
     },
     "malkreuz": {
@@ -231,6 +243,10 @@ const PRUEFSTAND = {
     },
     "wuerfelbau-blick": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "zeit-schaetzer": {
+      "am": "2026-11-05",
       "von": "Patrik"
     },
     "zielzahl-jagd": {

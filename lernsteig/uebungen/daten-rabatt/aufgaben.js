@@ -124,7 +124,7 @@ function hinweis(a, eingabe) {
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
-  const B = LST_BRUCH, Z = x => B.vonZahl(x), d = a.daten;
+  const B = KERN.bruch, Z = x => B.vonZahl(x), d = a.daten;
   let soll;
   switch (a.typ) {
     case "mittelwert": soll = B.durch(Z(d.werte.reduce((x, y) => x + y, 0)), Z(d.werte.length)); break;

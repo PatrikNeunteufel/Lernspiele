@@ -80,13 +80,13 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 - **Session-Prefix:** LERN
 - **Sprachen:** HTML/CSS/JavaScript ohne Build-Schritt und ohne externe Abhängigkeiten (Entscheid LERN-1, 2026-10-31). App-Ordner `eulenpfad/`: Jedes Spiel ist eine eigenständige Seite `eulenpfad/spiele/<name>/index.html`; Gemeinsames in `eulenpfad/spiele/gemeinsam/`; Startseite `eulenpfad/index.html` mit Anmeldung und Tabs Spiele, Profil, Statistik, Verwaltung (Code je Tab in `eulenpfad/start/`). Läuft offline per Doppelklick.
 - **Konventionen:** CLAUDE.md (Abschnitt Gestaltungsregeln)
-- **Architektur-Doku:** docs/eulenpfad/rahmen.md (Vertrag Rahmen ↔ Spiele: reservierte CSS-Klassen, Farben, ctx-API, Bausteine, Pflichtfunktionen)
+- **Architektur-Doku:** docs/eulenpfad/rahmen.md (Vertrag Rahmen ↔ Spiele: reservierte CSS-Klassen, Farben, ctx-API, Bausteine, Pflichtfunktionen); docs/lernsteig/rahmen.md (Lernsteig); docs/kern/rahmen.md (gemeinsamer Kern der Reihe: Teile, Schnittstellen, Einbinden, Verteilen, Prüfen)
 - **Handover:** docs/eulenpfad/HANDOVER.md
 - **Session-Reports:** docs/eulenpfad/report/ · LERN_Session<N>_<YYYY-MM-DD>.md
 - **Changelog/Logbuch:** CHANGELOG.md
 - **Build:** — (kein Build; `eulenpfad/index.html` im Browser öffnen). Veröffentlichen: `.github/workflows/pages.yml` auf `https://patrikneunteufel.github.io/Lernspiele/`, von selbst bei jedem Push auf master, der `portal/` oder einen App-Ordner ändert (W1 a), sonst von Hand
 - **Entwickler-Modus:** `python tools/entwickler_server.py` (Repo ausliefern, Prüfstand und Bemerkungen schreiben), Schlüssel in `entwickler.key` (gitignored); docs/eulenpfad/rahmen.md Abschnitt 11
-- **Tests:** — (manuell im Browser: Desktop, Tablet 768 px, Handy 375 px; jede Kombination Spiel × Stufe lädt ohne Konsolenfehler; Aufgabengeneratoren je Stufe mit einigen tausend Zufallsaufgaben auf Zahlenraum und gültige Lösung prüfen). Bildhöhe je Gerät: `node tools/bildhoehe.js` (Server nötig; docs/eulenpfad/rahmen.md Abschnitt 20)
+- **Tests:** `node tools/pruefe_spiele.js [spiel …]` (Eulenpfad), `node docs/lernsteig/werkzeuge/pruefe_uebungen.js [übung …]` (Lernsteig), `node tools/pruefe_kern.js` (gemeinsamer Kern `kern/`, verteilt mit `python tools/kern_verteilen.py`, Kopien `<app>/kern/kern.js` nie von Hand ändern); dazu manuell im Browser: Desktop, Tablet 768 px, Handy 375 px; jede Kombination Spiel × Stufe lädt ohne Konsolenfehler; Aufgabengeneratoren je Stufe mit einigen tausend Zufallsaufgaben auf Zahlenraum und gültige Lösung prüfen). Bildhöhe je Gerät: `node tools/bildhoehe.js` (Server nötig; docs/eulenpfad/rahmen.md Abschnitt 20)
 - **Sensible Daten:** Namen, Geburtsmonat, Alter und Lernstand der Kinder nur im Browser (localStorage, Schlüssel `lernspiele:*`) und in selbst gesicherten JSON-Dateien — solche Dateien nie ins Repo; keine Namen, Fotos oder Handschrift von Kindern in Spielen/Commits; Lernzielblätter liegen nur als Material in material/
 - **Bewusste Vereinfachungen:** —
 - **Deliverables:** je Spiel eine lauffähige Seite; Lernziel-Abdeckung in docs/eulenpfad/lernziele/

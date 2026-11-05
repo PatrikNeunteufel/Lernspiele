@@ -171,7 +171,7 @@ function hinweis(a, eingabe) {
 }
 
 // ---------- Prüfung: exakt aus den Daten, unabhängig vom Text des Lösungswegs ----------
-const B = LST_BRUCH;
+const B = KERN.bruch;
 const Z = x => B.vonZahl(x);
 function pruefeAufgabe(a, stufe, niveau) {
   const maengel = [];

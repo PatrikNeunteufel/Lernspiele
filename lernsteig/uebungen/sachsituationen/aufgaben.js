@@ -127,7 +127,7 @@ function hinweis(a, eingabe) {
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
-  const d = a.daten, B = LST_BRUCH, Z = x => B.vonZahl(x);
+  const d = a.daten, B = KERN.bruch, Z = x => B.vonZahl(x);
   if (a.art === "auswahl") {
     const zeilen = [0, 1, 2, 3].map(x => d.m * x + d.b);
     const passt = d.opt.map(([mm, bb]) => [0, 1, 2, 3].every(x => mm * x + bb === zeilen[x]));

@@ -34,7 +34,7 @@ function stufeL() {
   const typ = LST.waehle(["binom", "binom", "potenzregel", "quadratisch-differenz", "quadratisch-faktoren"]);
   if (typ === "binom") {
     const v = LST.waehle(["x", "a"]), b = nn(-9, 9), art = LST.zufall(0, 2);
-    const T = LST_TERME, B = LST_BRUCH;
+    const T = LST_TERME, B = KERN.bruch;
     const lin = (k) => T.plus(T.variable(v), T.konst(B.bruch(BigInt(k))));
     const poly = art === 2 ? T.mal(lin(Math.abs(b)), lin(-Math.abs(b))) : T.mal(lin(b), lin(b));
     const ausdruck = art === 2 ? `(${v} + ${Math.abs(b)})(${v} ${M} ${Math.abs(b)})` : `(${v} ${vz(b)})²`;
@@ -132,7 +132,7 @@ function hinweis(a, eingabe) {
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
-  const T = LST_TERME, B = LST_BRUCH, Z = x => B.vonZahl(x);
+  const T = LST_TERME, B = KERN.bruch, Z = x => B.vonZahl(x);
   if (a.art === "term") {
     if (!T.gleich(T.lies(a.ausdruck).poly, T.lies(a.antwortTerm).poly)) m.push(`Binom falsch: ${a.ausdruck} ≠ ${a.antwortTerm}`);
     if (!T.bewerte(a.antwortTerm, a).ok) m.push("Lösungsterm nicht vereinfacht");

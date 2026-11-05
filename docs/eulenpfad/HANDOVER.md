@@ -1,5 +1,28 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
+## HALTEPUNKT 2026-11-05 14:16 — LERN_Session15_2026-11-05 (aufgenommen 2026-11-05 15:31)
+Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
+
+- **Angehalten — beim Weitermachen neu starten:** nichts, was wieder anlaufen muss. Der Vorschau-Server
+  `lernspiele-2` (Port 8767) ist beendet und wird nur für Browser-Prüfungen neu gestartet (`preview_start`
+  `lernspiele-2`). Achtung: Auf Port 8765 läuft ein fremder Server mit einem anderen Stand, nicht benutzen. Die drei
+  Prüfagenten (Mathe, Code, Recherchen) sind fertig, ihre Berichte sind in den Plan eingeflossen.
+- **Stand:** Arbeitsbaum sauber, alles committet bis `d27d7cd` (Notizblock mischt; Lernsteig zurückgeholt und
+  gesperrt). Testskript Lernsteig `node docs/lernsteig/werkzeuge/pruefe_uebungen.js`: „0 Fehler, 0 Hinweise.“;
+  Eulenpfad-Stichprobe `zahlenhaus`: „Keine Fehler.“ Im Browser geprüft: 27 Übungen gesperrt, direkter Aufruf nur
+  Hinweis, Aufsicht sieht sie mit Vermerk.
+- **Weiter mit** [Plan zum Angleich der Reihe](../plan_angleich_reihe.md):
+  1. Paket B: `kern/` und `tools/kern_verteilen.py`; Testgerüst für alle drei Apps ohne Playwright (Ersatz-DOM wie
+     `tools/pruef_dom.js`, Chrome über DevTools wie `tools/bildhoehe.js`); erste Kern-Teile `zahl.js`, `bruch.js`, dann
+     Speicher, Zufall, `el`, Profil (Geburtsdatum B3), Rollen, Freigabe, Suche, Protokoll/Statistik, Daten.
+  2. Paket C: Grundgerüst Lernsteig wie Eulenpfad (Anmeldung zuerst mit Gast, Tabs Übungen · Profil · Statistik ·
+     Erfolge · Verwaltung, Kacheln, Suche, Prüfungsvorbereitung C1 a mit Filter, Aufsicht wie Eulenpfad, Lehrperson,
+     Prüfstand mit Entwickler-Modus, Profil-Übernahme zwischen den Apps C9), Gratwanderung mit demselben Gerüst.
+  3. D (Fehler D1–D13) mit B/C, danach E (Fachliches, u. a. Rationale Zahlen Stufe g neu schneiden), F (Recherchen
+     ordnen, Widersprüche an der Quelle klären), G (Doku-Drift), H (Portal).
+- **Offene Entscheidungen:** keine. Vor dem Bau von C9 vorzulegen: Annahme, dass Rolle und PIN-Prüfwerte mitreisen
+  und der Wiederherstellungscode neu ausgegeben wird.
+
 ## Stand
 **2026-11-04, nach LERN_Session14** ([Report](report/LERN_Session14_2026-11-04.md)):
 - **Reihe:** README im Repo als Übersicht der drei Apps, Eulenpfad-README in `eulenpfad/`.

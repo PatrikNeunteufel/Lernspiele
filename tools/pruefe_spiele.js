@@ -374,6 +374,10 @@ const ids = fs.readdirSync(SPIELE_DIR)
   .filter(d => !nurSpiele.length || nurSpiele.includes(d));
 
 let fehlerZahl = 0;
+// Kopie des gemeinsamen Kerns (docs/kern/rahmen.md 6): eulenpfad/kern/kern.js muss mit kern/ übereinstimmen.
+try {
+  require("child_process").execFileSync("python", [path.join(__dirname, "kern_verteilen.py"), "--pruefe", "eulenpfad"], { encoding: "utf8" });
+} catch (e) { console.log(`    FEHLER  Kern: ${(e.stdout || e.message).trim()}`); fehlerZahl++; }
 // Doppelte Namen im Rahmen (LERN_Session12): eine zweite Funktion waehle(name, art, …) verdeckte still die zufällige
 // Auswahl waehle(liste) — jedes LS.waehle in 167 Dateien lief in die falsche Funktion, das Konfetti legte die
 // Farbliste als Spieler an. Zwei Deklarationen gleichen Namens auf der obersten Ebene der IIFE oder zweimal derselbe
@@ -589,6 +593,7 @@ const SUCHFAELLE = [
 if (opt.suche !== 0 && (!nurSpiele.length || nurSpiele.includes("suche"))) {
   const k = vm.createContext({ __seite: { html: "", search: "", seed: opt.seed }, console, URL, URLSearchParams, structuredClone });
   vm.runInContext(DOM, k, { filename: "pruef_dom.js" });
+  vm.runInContext(fs.readFileSync(path.join(WURZEL, "eulenpfad", "kern", "kern.js"), "utf8"), k, { filename: "kern.js" });
   for (const d of ["spiel.js", "katalog.js", "pruefstand.js"]) vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", d), "utf8"), k, { filename: d });
   const suche = q => vm.runInContext(`LS.suche(${JSON.stringify(q)})`, k) || [];
   console.log("\nSuche (feste Beispiele):\n");

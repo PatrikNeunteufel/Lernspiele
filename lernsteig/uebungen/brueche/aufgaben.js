@@ -22,7 +22,7 @@ const UEBUNG = {
 };
 
 const M = "−", MAL = " · ";
-const B = LST_BRUCH;
+const B = KERN.bruch;
 const z = (a, b) => LST.zufall(a, b);
 const NENNER = [2, 3, 4, 5, 6, 8, 10, 12, 20, 25, 50, 100];
 // Zahlen mit Apostroph ab vier Stellen (Z1 a); terme.js liest den Apostroph beim Einlesen wieder heraus
