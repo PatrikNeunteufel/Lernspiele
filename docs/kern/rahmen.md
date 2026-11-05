@@ -189,9 +189,37 @@ Rollen und Sicht je App (P2 a): Der Lernsteig verlangt von der Aufsicht eine PIN
 eine weitere Aufsicht braucht die Bestätigung einer bestehenden. Der Eulenpfad (seit 1.3.0) zeigt der Aufsicht alle
 Personen des Geräts und kennt keine Verbindungen; seine Aufrufe gehen über den Namen, darunter gilt die Kennung.
 
-### 4.8 Geplant (Plan B, Reihenfolge B4)
+### 4.8 `KERN.freigabe` (`kern/freigabe.js`) — Freigabe nach Prüfstand
 
-Anmeldung und Sitzung im Tab, Profil-Übernahme zwischen den Apps (C9), Freigabe und Prüfstand, Suche, Protokoll und
+Entscheide L4 a, E1 a, FG1 a. Prüfstand im Repo (`<app>/…/pruefstand.js`, gesetzt im Entwickler-Modus), Freigabe je
+Gerät durch die Aufsicht. Die App erzeugt ihre Freigabe einmal:
+
+```js
+const FREIGABE = KERN.freigabe({
+  art: "spiele",                         // Eulenpfad; Lernsteig "uebungen" — Schlüssel in Prüfstand und Freigabe
+  eintrag: id => Katalogeintrag | null,  // neu, listen: { <liste>: { name, zusatz?, von? } }
+  pruefstand: () => ({ <art>: { <id>: { am, von } }, listen: { "<id>/<liste>": { am, von } } }),
+  speicher: { lies, schreibe },          // der App (Präfix); Schlüssel freigabe und freigabeStand
+  aufsicht: () => bool,                  // angemeldete Aufsicht sieht alles
+});
+```
+
+| Aufruf | Ergebnis |
+|---|---|
+| `frei(id)`, `setzeFrei(id, wert)` | Inhalt als Ganzes frei? Ohne Gerätefreigabe: nicht `neu` oder im Prüfstand. `wert: null` = zurück auf den Prüfstand |
+| `listen(id)` | `[{ id, quelle, name, geprueft, von, zusatz }]`, Name und Prüfstand von der Quelle eines Verweises |
+| `listeFrei(id, liste)`, `setzeListeFrei(…)`, `freieListen(id)` | Liste frei? Freigabe und Prüfstand gelten an der Quelle; `freieListen` liefert der Aufsicht alle |
+| `fuerLernendeSichtbar(id)`, `sichtbar(id)` | frei und mindestens eine eigenständige Liste frei (Zusatzlisten zählen nicht); `sichtbar` auch für die Aufsicht |
+| `sperrGrund(id)` | „auf diesem Gerät gesperrt“, „noch nicht angesehen“, „Inhaltslisten gesperrt“, „Inhaltsliste noch nicht geprüft“, „keine der n Inhaltslisten geprüft“, „unbekannt“ oder `null` |
+| `geraet()`, `pruefstand(bereich, schluessel)`, `zuPruefen(id)`, `geprueft(id)`, `listenQuelle(id, liste)` | Bausteine |
+
+Jedes `setze…` schreibt zuerst `freigabeStand` (jetzt), dann `freigabe`: Beim Abgleich gewinnt die Freigabe des Geräts
+mit dem jüngsten Stand. Eulenpfad: `LS.spielFrei`, `LS.sperrGrund`, `LS.spielListen` … reichen weiter; Lernsteig:
+`LST.FREIGABE`, `LST.sperrGrund`, `LST.uebungSichtbar`.
+
+### 4.9 Geplant (Plan B, Reihenfolge B4)
+
+Anmeldung und Sitzung im Tab, Profil-Übernahme zwischen den Apps (C9), Entwickler-Modus, Suche, Protokoll und
 Statistik, Sichern und Einlesen (Schema der Runden und Rekorde, heute in `lernsteig/gemeinsam/daten.js`), Einladung,
 Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu, bevor er umzieht.
 

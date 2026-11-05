@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.4.0 — 2026-11-05 (LERN_Session15)
+- `freigabe.js` (`KERN.freigabe(opt)`): Freigabe nach Prüfstand aus dem Eulenpfad (L4 a, E1 a, FG1 a) — neu gesperrt
+  bis angesehen, Inhaltslisten bis geprüft, Verweise `von` und Zusatzlisten, Gerätefreigabe der Aufsicht mit
+  `freigabeStand`, Sperrgrund; die App nennt `art` („spiele“, „uebungen“), Katalog, Prüfstand, Speicher und Aufsicht.
+- Eulenpfad (`LS.spielFrei`, `sperrGrund`, `spielListen` … unverändert nach aussen) und Lernsteig (`LST.FREIGABE`,
+  `sperrGrund`, `uebungSichtbar`) benutzen ihn; im Lernsteig-Katalog fällt `geprueft` (zweite Quelle) weg.
+
 ## 1.3.0 — 2026-11-05 (LERN_Session15)
 - `person.js`: `anlegen` gibt nur gesetzten Feldern (und Name, Rolle) eine Zeit, nicht den Vorgaben der App — sonst
   überschriebe beim Zusammenführen eine leere Vorgabe den echten Wert eines anderen Geräts.

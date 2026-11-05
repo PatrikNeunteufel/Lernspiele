@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.3.0: Zahl, Bruch, Speicher, Zufall, `el`, Geheimnis, Person in beiden Apps | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.4.0: Zahl, Bruch, Speicher, Zufall, `el`, Geheimnis, Person, Freigabe in beiden Apps | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | offen, nach B | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |

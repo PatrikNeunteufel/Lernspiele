@@ -13,6 +13,7 @@ require(path.join(WURZEL, "kern", "zufall.js"));
 require(path.join(WURZEL, "kern", "el.js"));
 require(path.join(WURZEL, "kern", "geheimnis.js"));
 require(path.join(WURZEL, "kern", "person.js"));
+require(path.join(WURZEL, "kern", "freigabe.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -311,6 +312,43 @@ console.log("el.js");
   // nochmals dieselben Daten einlesen ändert nichts
   const z3 = P.zusammenfuehren(z.personen, dort);
   gleich(z3.neu + z3.geaendert, 0, "zweites Einlesen ändert nichts");
+
+  // ---------- Freigabe ----------
+  console.log("freigabe.js");
+  {
+    const katalog = {
+      alt: { id: "alt" },                                                    // ohne neu, ohne Listen: frei
+      neu: { id: "neu", neu: "S1" },                                         // neu: gesperrt bis Prüfstand
+      wort: { id: "wort", listen: { a: { name: "A" }, z: { name: "Z", zusatz: true } } },
+      leih: { id: "leih", listen: { a: { von: "wort/a" } } },                // Verweis auf die Liste von wort
+      nurz: { id: "nurz", listen: { z: { name: "nur Zusatz", zusatz: true } } },
+    };
+    const daten = {};
+    const sp = { lies: (k, e) => (k in daten ? JSON.parse(daten[k]) : e), schreibe: (k, v) => { daten[k] = JSON.stringify(v); return true; } };
+    let pruef = { uebungen: {}, listen: {} }, aufsichtDa = false;
+    const F = KERN.freigabe({ art: "uebungen", eintrag: id => katalog[id] || null, speicher: sp, pruefstand: () => pruef, aufsicht: () => aufsichtDa });
+    gleich(F.fuerLernendeSichtbar("alt"), true, "ohne neu und Listen frei");
+    gleich(F.sperrGrund("neu"), "noch nicht angesehen", "neu gesperrt");
+    gleich(F.sperrGrund("wort"), "Inhaltsliste noch nicht geprüft", "Liste ungeprüft (Zusatz zählt nicht)");
+    gleich(F.sperrGrund("unbekannt"), "unbekannt", "unbekannter Inhalt");
+    gleich(F.sichtbar("neu"), false, "Lernende sehen Gesperrtes nicht");
+    aufsichtDa = true; gleich(F.sichtbar("neu"), true, "Aufsicht sieht alles"); gleich(F.freieListen("wort").join(), "a,z", "Aufsicht: alle Listen"); aufsichtDa = false;
+    pruef = { uebungen: { neu: { am: "2026-11-05", von: "P" } }, listen: { "wort/a": { am: "2026-11-05", von: "P" } } };
+    gleich(F.fuerLernendeSichtbar("neu"), true, "nach Prüfstand frei");
+    gleich(F.fuerLernendeSichtbar("wort"), true, "Liste geprüft → frei");
+    gleich(F.fuerLernendeSichtbar("leih"), true, "Verweis: geprüft an der Quelle");
+    gleich(F.listen("leih")[0].name, "A", "Verweis: Name der Quelle");
+    gleich(F.fuerLernendeSichtbar("nurz"), false, "nur Zusatzliste ergibt keine Aufgabe");
+    F.setzeFrei("neu", false);
+    gleich(F.sperrGrund("neu"), "auf diesem Gerät gesperrt", "Aufsicht sperrt auf dem Gerät");
+    gleich(typeof daten.freigabeStand, "string", "freigabeStand geschrieben");
+    F.setzeListeFrei("leih", "a", false);
+    gleich(F.listeFrei("wort", "a"), false, "Sperre über den Verweis gilt an der Quelle");
+    gleich(F.sperrGrund("wort"), "Inhaltslisten gesperrt", "gesperrte Liste");
+    F.setzeFrei("neu", null); F.setzeListeFrei("wort", "a", null);
+    gleich([F.frei("neu"), F.listeFrei("wort", "a")].join(), "true,true", "null: zurück auf den Prüfstand");
+    gleich(JSON.stringify(F.geraet()), '{"uebungen":{},"listen":{}}', "Gerätefreigabe leer");
+  }
 
   // ---------- Kopien in den Apps ----------
 console.log("Kopien (tools/kern_verteilen.py --pruefe)");

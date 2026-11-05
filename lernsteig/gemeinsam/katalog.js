@@ -214,7 +214,7 @@ var LST_KATALOG = (function () {
       niveaus: ["n1", "n2"],
       anzahl: 6,
       endlos: false,
-      listen: { pse: { name: "Elemente 1 bis 20", geprueft: false } },
+      listen: { pse: { name: "Elemente 1 bis 20" } },
       neu: "LST_Session1",
     },
     {
@@ -228,7 +228,7 @@ var LST_KATALOG = (function () {
       niveaus: ["n1", "n2"],
       anzahl: 6,
       endlos: ["a", "c", "e", "challenge"],
-      listen: { maschinen: { name: "Einfache Maschinen", geprueft: false } },
+      listen: { maschinen: { name: "Einfache Maschinen" } },
       neu: "LST_Session1",
     },
     {
@@ -256,7 +256,7 @@ var LST_KATALOG = (function () {
       niveaus: ["n1", "n2"],
       anzahl: 8,
       endlos: true,
-      listen: { aussagen: { name: "Aussagen", geprueft: false } }, // Inhaltsliste, ungeprüft bis Patrik sie durchsieht
+      listen: { aussagen: { name: "Aussagen" } }, // Inhaltsliste; gesperrt, bis sie im Prüfstand steht
       neu: "LST_Session1",
     },
     {
@@ -351,7 +351,7 @@ var LST_KATALOG = (function () {
       niveaus: ["n1", "n2"],
       anzahl: 8,
       endlos: false,                          // Inhaltsliste mit weniger als 100 Einträgen je Stufe
-      listen: { grammatik: { name: "Sätze", geprueft: false } },
+      listen: { grammatik: { name: "Sätze" } },
       neu: "LST_Session1",
     },
     {
@@ -364,7 +364,7 @@ var LST_KATALOG = (function () {
       niveaus: ["n1", "n2"],
       anzahl: 8,
       endlos: false,                          // Inhaltsliste mit weniger als 100 Einträgen je Stufe
-      listen: { rechtschreibung: { name: "Sätze", geprueft: false } },
+      listen: { rechtschreibung: { name: "Sätze" } },
       neu: "LST_Session1",
     },
     {
@@ -378,7 +378,7 @@ var LST_KATALOG = (function () {
       niveaus: ["n1", "n2"],
       anzahl: 8,
       endlos: false,                          // Inhaltsliste mit weniger als 100 Einträgen je Stufe
-      listen: { englisch: { name: "Sätze", geprueft: false } },
+      listen: { englisch: { name: "Sätze" } },
       neu: "LST_Session1",
     },
     {
@@ -392,7 +392,7 @@ var LST_KATALOG = (function () {
       niveaus: ["n1", "n2"],
       anzahl: 8,
       endlos: false,                          // Inhaltsliste mit weniger als 100 Einträgen je Stufe
-      listen: { franzoesisch: { name: "Sätze", geprueft: false } },
+      listen: { franzoesisch: { name: "Sätze" } },
       neu: "LST_Session1",
     },
   ];

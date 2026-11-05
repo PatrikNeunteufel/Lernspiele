@@ -11,24 +11,20 @@
   /** Element bauen (kern/el.js): el("button", { class, text, onclick, … }, kinder…) */
   const el = KERN.el;
 
-  // ---------- Freigabe nach Prüfstand (FG1 a, A1 a, LERN_Session15) ----------
+  // ---------- Freigabe nach Prüfstand (FG1 a, A1 a; Kern kern/freigabe.js seit 1.4.0) ----------
   // Wie im Eulenpfad (docs/eulenpfad/rahmen.md 6): Eine Übung mit `neu` im Katalog ist gesperrt, bis sie im
-  // Prüfstand steht; mit Inhaltslisten braucht sie dazu eine geprüfte Liste. Die angemeldete Aufsicht sieht alles
-  // (zum Ansehen und Prüfen). Freigabe je Gerät durch die Aufsicht folgt mit dem Grundgerüst
-  // (docs/plan_angleich_reihe.md C6).
-  const PS = typeof LST_PRUEFSTAND !== "undefined" ? LST_PRUEFSTAND : { uebungen: {}, listen: {} };
+  // Prüfstand (gemeinsam/pruefstand.js) steht; mit Inhaltslisten braucht sie dazu eine geprüfte Liste. Die angemeldete
+  // Aufsicht sieht alles (zum Ansehen und Prüfen). Freigabe je Gerät (lernsteig:freigabe) setzt später die Aufsicht in
+  // der Verwaltung (docs/plan_angleich_reihe.md C6).
+  const FREIGABE = KERN.freigabe({
+    art: "uebungen", eintrag: id => KAT.uebung(id), speicher: { lies: LST.lies, schreibe: LST.schreibe },
+    pruefstand: () => (typeof LST_PRUEFSTAND !== "undefined" ? LST_PRUEFSTAND : {}),
+    aufsicht: () => typeof LST_KONTEN !== "undefined" && !!LST_KONTEN.aufsichtAktiv(),
+  });
   /** Grund, warum Jugendliche die Übung nicht sehen, oder null, wenn sie frei ist. */
-  function sperrGrund(id) {
-    const u = KAT.uebung(id);
-    if (!u) return "unbekannt";
-    if (u.neu && !PS.uebungen[id]) return "noch nicht angesehen";
-    const listen = Object.keys(u.listen || {});
-    if (listen.length && !listen.some(l => PS.listen[`${id}/${l}`])) return listen.length === 1 ? "Inhaltsliste noch nicht geprüft" : "keine Inhaltsliste geprüft";
-    return null;
-  }
-  const aufsichtDa = () => typeof LST_KONTEN !== "undefined" && !!LST_KONTEN.aufsichtAktiv();
+  const sperrGrund = id => FREIGABE.sperrGrund(id);
   /** Darf die Übung auf diesem Tab geöffnet werden? Frei oder angemeldete Aufsicht. */
-  const uebungSichtbar = id => sperrGrund(id) === null || aufsichtDa();
+  const uebungSichtbar = id => FREIGABE.sichtbar(id);
 
   // ---------- Konto ----------
   // Bis zur Anmeldung (AU1 a, KT1 a, GE1 b) gibt es ein Gastkonto je Gerät. Das Format ist das spätere
@@ -529,5 +525,5 @@
   let aktuell = null;
   const pruefung = { aufgabe: () => aktuell };
 
-  Object.assign(LST, { el, sperrGrund, uebungSichtbar, konto, speichereKonto, kompetenzstand, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
+  Object.assign(LST, { el, FREIGABE, sperrGrund, uebungSichtbar, konto, speichereKonto, kompetenzstand, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
 })(LST);

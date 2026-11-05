@@ -538,43 +538,23 @@ const LS = (() => {
   // vom Katalog, damit der Entwickler-Server ihn schreiben kann. Die Aufsicht kann auf dem Gerät
   // anders entscheiden: lernspiele:freigabe = { spiele: { <id>: bool }, listen: { "<id>/<liste>": bool } };
   // fehlt ein Eintrag, entscheidet der Prüfstand.
-  const freigabe = () => ({ spiele: {}, listen: {}, ...lies("freigabe", {}) });
+  // Logik im Kern (kern/freigabe.js, docs/kern/rahmen.md 4.8); hier nur, wo Katalog und Prüfstand stehen.
   function katalogEintrag(spielId) { return typeof SPIELE !== "undefined" ? SPIELE.find(s => s.id === spielId) : null; }
-  function setzeFreigabe(art, schluessel, wert) {
-    const f = freigabe();
-    if (wert === null) delete f[art][schluessel]; else f[art][schluessel] = wert;
-    // Stand vor der Freigabe schreiben: Der Abgleich nimmt die Freigabe des Geräts mit dem jüngsten Stand.
-    schreibe("freigabeStand", new Date().toISOString());
-    schreibe("freigabe", f);
-  }
-  // Nutzt ein Spiel die Liste eines anderen (dieselben Wörter, dieselben Sätze), steht im Katalog
-  // nur ein Verweis { von: "<spiel>/<liste>" }: Prüfstand und Freigabe gelten dann einmal, an der Quelle.
-  /** Schlüssel "<spiel>/<liste>" der Quelle einer Liste (folgt dem Verweis von). */
-  function listenQuelle(spielId, listeId) {
-    const von = katalogEintrag(spielId)?.listen?.[listeId]?.von;
-    return von || `${spielId}/${listeId}`;
-  }
-  /** Katalog-Eintrag der Quelle: { name, zusatz }. */
-  function quellEintrag(schluessel) {
-    const [spiel, liste] = schluessel.split("/");
-    return katalogEintrag(spiel)?.listen?.[liste] || null;
-  }
-  /** Prüfstand aus pruefstand.js: { am, von } oder null; art "spiele" oder "listen". */
-  const pruefstand = (art, schluessel) => (typeof PRUEFSTAND !== "undefined" ? PRUEFSTAND[art]?.[schluessel] : null) || null;
-  /** Inhaltslisten eines Spiels aus dem Katalog: [{ id, quelle, name, geprueft, von }] — Name und Prüfstand von der Quelle. */
-  const spielListen = spielId => Object.entries(katalogEintrag(spielId)?.listen || {}).map(([id, l]) => {
-    const quelle = l.von || `${spielId}/${id}`;
-    const q = l.von ? quellEintrag(l.von) : l;
-    return { id, quelle, name: q?.name ?? l.name, geprueft: pruefstand("listen", quelle), von: l.von || null, zusatz: !!q?.zusatz };
+  const FREIGABE = KERN.freigabe({
+    art: "spiele", eintrag: katalogEintrag, speicher: { lies, schreibe }, aufsicht: () => aufsichtAngemeldet(),
+    pruefstand: () => (typeof PRUEFSTAND !== "undefined" ? PRUEFSTAND : {}),
   });
-  /** Liste für Kinder frei? null als wert in setzeListeFrei = zurück auf den Prüfstand. */
-  function listeFrei(spielId, listeId) {
-    const schluessel = listenQuelle(spielId, listeId);
-    return freigabe().listen[schluessel] ?? !!pruefstand("listen", schluessel);
-  }
-  const setzeListeFrei = (spielId, listeId, wert) => setzeFreigabe("listen", listenQuelle(spielId, listeId), wert);
+  /** Freigabe dieses Geräts: { spiele: { <id>: bool }, listen: { "<id>/<liste>": bool } }. */
+  const freigabe = () => FREIGABE.geraet();
+  const listenQuelle = FREIGABE.listenQuelle;
+  /** Prüfstand aus pruefstand.js: { am, von } oder null; art "spiele" oder "listen". */
+  const pruefstand = FREIGABE.pruefstand;
+  /** Inhaltslisten eines Spiels aus dem Katalog: [{ id, quelle, name, geprueft, von, zusatz }]. */
+  const spielListen = FREIGABE.listen;
+  const listeFrei = FREIGABE.listeFrei;
+  const setzeListeFrei = FREIGABE.setzeListeFrei;
   /** Listen, die der angemeldete Spieler üben darf (die Aufsicht alle) — Spiele filtern ihre Inhalte danach. */
-  const freieListen = spielId => spielListen(spielId).filter(l => aufsichtAngemeldet() || listeFrei(spielId, l.id)).map(l => l.id);
+  const freieListen = FREIGABE.freieListen;
   // ---------- Prüfung je Eintrag (Entscheide LP1 a–LP5 a, LERN_Session11; rahmen.md 17) ----------
   /** Kurzer Fingerabdruck eines Werts (cyrb53 über JSON): gleich bei gleichem Inhalt, sonst fast sicher verschieden. */
   function fingerabdruck(wert) {
@@ -616,22 +596,15 @@ const LS = (() => {
     return true;
   }
   /** Muss das Spiel als Ganzes noch angesehen werden (neu und nicht geprüft)? */
-  const spielZuPruefen = spielId => !!katalogEintrag(spielId)?.neu && !pruefstand("spiele", spielId);
+  const spielZuPruefen = FREIGABE.zuPruefen;
   /** Wann und von wem das Spiel angesehen wurde ({ am, von }) oder null. */
-  const spielGeprueft = spielId => pruefstand("spiele", spielId);
+  const spielGeprueft = FREIGABE.geprueft;
   /** Spiel als Ganzes für Kinder frei (ohne Blick auf die Listen)? */
-  function spielFrei(spielId) {
-    const f = freigabe().spiele[spielId];
-    return f ?? !spielZuPruefen(spielId);
-  }
-  const setzeSpielFrei = (spielId, wert) => setzeFreigabe("spiele", spielId, wert);
-  /**
-   * Darf der angemeldete Spieler das Spiel sehen? Kinder: frei und mindestens eine Liste frei — eine
-   * Zusatzliste (zusatz: true, z. B. fehlerfreie Sätze der Königsstufe) ergibt allein keine Aufgabe und zählt nicht.
-   */
-  const fuerKinderSichtbar = spielId => spielFrei(spielId) && (!spielListen(spielId).length
-    || spielListen(spielId).some(l => !l.zusatz && listeFrei(spielId, l.id)));
-  const spielSichtbar = spielId => aufsichtAngemeldet() || fuerKinderSichtbar(spielId);
+  const spielFrei = FREIGABE.frei;
+  const setzeSpielFrei = FREIGABE.setzeFrei;
+  /** Darf ein Kind das Spiel sehen? Frei und mindestens eine eigenständige Liste frei (Zusatzlisten zählen nicht). */
+  const fuerKinderSichtbar = FREIGABE.fuerLernendeSichtbar;
+  const spielSichtbar = FREIGABE.sichtbar;
   // ---------- Suche (Entscheid SU1 a, LERN_Session6) ----------
   // Kleine Volltextsuche mit Rangfolge: je Suchwort der beste Treffer über alle Felder, gewichtet nach Feld
   // und Art des Treffers; jedes Suchwort muss passen. Passt ein Spiel nur über ein Feld, das auf der Karte
@@ -741,14 +714,7 @@ const LS = (() => {
     return liste.sort((a, b) => b.wert - a.wert || a.rang - b.rang).map(({ rang, ...t }) => t);
   }
   /** Warum sehen Kinder das Spiel nicht? Kurzer Text oder null, wenn sie es sehen. */
-  function sperrGrund(spielId) {
-    if (fuerKinderSichtbar(spielId)) return null;
-    if (freigabe().spiele[spielId] === false) return "auf diesem Gerät gesperrt";
-    if (!spielFrei(spielId)) return "noch nicht angesehen";
-    const listen = spielListen(spielId).filter(l => !l.zusatz);
-    if (listen.some(l => freigabe().listen[l.quelle] === false)) return "Inhaltslisten gesperrt";
-    return listen.length === 1 ? "Inhaltsliste noch nicht geprüft" : `keine der ${listen.length} Inhaltslisten geprüft`;
-  }
+  const sperrGrund = spielId => FREIGABE.sperrGrund(spielId);
 
   // Löschvermerke, damit der Abgleich Gelöschtes nicht von einem anderen Gerät zurückholt:
   // lernspiele:geloescht = { spieler: { <name>: ISO }, runden: [{ name, spiel (null = alle), bis: ISO }] }.
