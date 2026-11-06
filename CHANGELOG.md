@@ -539,3 +539,4 @@
   Abstand zwischen den Knoten, sonst fand die Suche ein „undefined“ neben einem Nachbarn nicht (auch im Testskript
   des Eulenpfads). Kern 1.14.1: Die Anmeldung dieses Tabs geht vor der gewählten Person des Geräts — ein Jugendlicher
   mit PIN war abgemeldet, sobald sich in einem zweiten Tab eine Aufsicht anmeldete (von den Seitentests gefunden).
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session17_2026-11-06.md`, Handover Eulenpfad und Lernsteig.

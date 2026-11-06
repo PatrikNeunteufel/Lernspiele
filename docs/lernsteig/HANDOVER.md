@@ -1,6 +1,14 @@
 # Handover — Lernsteig
 
 ## Stand
+**2026-11-06, nach LERN_Session17** (Lernspiele, [Report](../eulenpfad/report/LERN_Session17_2026-11-06.md)): Kern 1.14.1
+mit Terme und Rechenkern (`LST_TERME`, `LST_RECHNER` reichen weiter; D3, D9, D10 behoben, Glieder wie im Lehrmittel,
+TO1 a). Tab-Leiste einzeilig mit Personen-Knopf wie im Eulenpfad (PA1 a). Prüfskripte in `tools/`
+(`pruefe_uebungen.js`, `pruefe_konten.js`); die Seiten laufen im Ersatz-DOM statt mit Playwright (`tools/lernsteig_seiten.js`:
+alle Rollen und Tabs, Konten über die Bedienung, 320 Runden) — „0 Fehler, 0 Hinweise.“ Dabei gefunden und behoben: Ein
+Jugendlicher mit PIN war abgemeldet, wenn sich in einem zweiten Tab eine Aufsicht anmeldete. Weiter mit:
+[Plan zum Angleich](../plan_angleich_reihe.md), offene Kern-Teile (AN2 a), B2 Schritt 3, C3–C8.
+
 **2026-11-06, nach LERN_Session16** (Lernspiele, [Report](../eulenpfad/report/LERN_Session16_2026-11-06.md)): Der Lernsteig
 lebt in Lernspiele (A1 a, A2 a) und nutzt den Kern 1.12.0. Anmeldung zuerst mit Jugendlichen, Aufsichten, „Ich bin neu“
 und Gast (C1, C2 a; keine Frage für Erwachsene, EF1 a), ein Platz für alle; Tabs Übungen · Profil · Statistik · Erfolge ·

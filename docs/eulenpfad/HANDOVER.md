@@ -1,6 +1,18 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-06, nach LERN_Session17** ([Report](report/LERN_Session17_2026-11-06.md)):
+- **Kern 1.14.1:** dazu Rollleiste und Personen-Knopf (PA1 a), Terme und Rechenkern; Anmeldung des Tabs geht vor der
+  gewählten Person. Noch nicht im Kern: Dateiformat mit Abgleich, Ablauf der Runde, Rest der Rollen.
+- **Eulenpfad:** Tab-Leiste einzeilig mit Personen-Knopf; 39 neue Zeichnungen (Geschichte, Urzeit, Dinge aus der Zeit ihrer
+  Kultur; ZA1 a, MF1 a, BZ1 a), Bemerkungen 23–32 erledigt; nach einer richtigen Antwort nur kurzes Lob, Erklärung nach
+  einem Fehlversuch (WZ2 a). Server starten im Portal (SV1 a).
+- **Tests:** Einstieg `node tools/pruefe.js`; Kern „5439 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“ mit 320
+  Runden im Ersatz-DOM; Eulenpfad voller Lauf „Keine Fehler.“ vor den letzten Änderungen, danach Stichproben. Ein voller
+  Lauf nur auf Patriks Entscheid; die Textsuche liest jetzt mit Abstand zwischen den Knoten und könnte Neues finden.
+- **Weiter mit:** offene Kern-Teile (AN2 a: Dateiformat mit Abgleich, Rollen, Ablauf der Runde), dann B2 Schritt 3, dann
+  C3–C8. Prüfen durch Patrik: neue Zeichnungen und geänderte Listen.
+
 **2026-11-06, nach LERN_Session16** ([Report](report/LERN_Session16_2026-11-06.md)):
 - **Bemerkungen 11–22 erledigt:** Fahrplan-Rechner fragt „? h ? min“; Bildersammlung `spiele/gemeinsam/bilder.js` (B1 a)
   mit 24 neu gezeichneten Lebewesen, Lebensraum in Stufe 1–4 mit allen; Nahrungsketten bis zur Prüfung der Bilder
