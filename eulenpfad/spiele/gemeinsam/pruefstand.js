@@ -341,8 +341,16 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "stromkreis-bauer": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
     "tageslauf-sonne": {
       "am": "2026-11-05",
+      "von": "Patrik"
+    },
+    "taschengeld-planer": {
+      "am": "2026-11-06",
       "von": "Patrik"
     },
     "tier-sortierer": {

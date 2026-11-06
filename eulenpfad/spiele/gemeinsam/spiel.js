@@ -1995,8 +1995,9 @@ const LS = (() => {
    * opt.inhalt(wert): Knopfinhalt (Text, Element oder { bild, text, klein }), Vorgabe der Wert selbst
    * opt.hinweis(wert): Hinweis nach falscher Wahl (Text oder Funktion des gewählten Werts)
    * opt.loesung: Lösungstext nach dem dritten Fehlversuch
-   * opt.lob: Text bei richtiger Antwort; opt.breite: Mindestbreite der Knöpfe (px)
-   * opt.erklaerung: Begründung (ein ganzer Satz), die nur nach einem Fehlversuch bei dieser Aufgabe ans Lob kommt (WZ2 a)
+   * opt.lob, opt.erklaerung: Rückmeldung bei richtiger Antwort nach einem Fehlversuch (Bestätigung, Begründung); auf
+   *   Anhieb zeigt der Rahmen nur ein Lob aus seiner Liste (LB1 a, WZ2 a) — siehe ctx.richtig
+   * opt.breite: Mindestbreite der Knöpfe (px)
    * opt.beiRichtig(knopf): zusätzlich bei richtiger Antwort, z. B. einen Ton vorspielen
    */
   /** Lösung für die Testhilfe: opt.loesung, sonst der richtige Wert, wenn er ein einfacher Wert ist. */
@@ -2144,6 +2145,7 @@ const LS = (() => {
   }
 
   const LOB = ["Super!", "Genau richtig!", "Toll gemacht!", "Prima!", "Stark!", "Richtig! 🎉", "Bravo!"];
+  const LOB_MAX = 20; // Länge eines eigenen Lobs (def.lob, LB2 a): länger ist es eine Erklärung
 
   function sterneFuer(fehler) {
     if (fehler <= 1) return 3;
@@ -2162,9 +2164,14 @@ const LS = (() => {
    * def.anzahl: Aufgaben je Runde
    * def.aufgabe(ctx): zeichnet Aufgabe ctx.nr in ctx.flaeche. Ruft ctx.richtig() oder
    *   ctx.falsch(hinweis, loesungText) auf. ctx.sag(text) lässt die Eule sprechen.
+   * def.lob: eigene Lobliste für richtig auf Anhieb statt LOB (LB2 a: Lob in der Fremdsprache, etwa ["Great!", "Yes!"]);
+   *   nur reines Lob, jedes höchstens LOB_MAX Zeichen — sonst gilt LOB (und die Konsole sagt es)
    */
   function spiel(def) {
     const buehne = document.querySelector(".buehne");
+    const eigenesLob = Array.isArray(def.lob) && def.lob.length && def.lob.every(t => typeof t === "string" && t.trim() && t.length <= LOB_MAX);
+    if (def.lob && !eigenesLob) console.warn(`${def.id}: def.lob ist keine Liste kurzer Lobe (höchstens ${LOB_MAX} Zeichen) — es gilt LOB`);
+    const lobListe = eigenesLob ? def.lob : LOB;
     const stufenListe = SKALA.filter(s => def.stufen[s.id]).map(s => ({ ...s, text: def.stufen[s.id] }));
     spielStand = { spiel: def.id };
     // Spiele mit Stimme starten erst, wenn sie geladen ist (spielMitStimme) — oft nach DOMContentLoaded. Die
@@ -2897,19 +2904,23 @@ const LS = (() => {
           /** Ist die Aufgabe gelöst oder nach drei Fehlversuchen aufgelöst? Dann nimmt sie keine Antwort mehr an. */
           vorbei: () => erledigt,
           /**
-           * Richtige Antwort. erklaerung (WZ2 a, LERN_Session17): die Begründung kommt nur nach einem Fehlversuch bei
-           * dieser Aufgabe ans Lob — wer es auf Anhieb wusste, muss sie nicht abwarten; wer sich geirrt (oder verklickt)
-           * hat, bekommt sie und kann mit „Weiter ➜“ überspringen.
+           * Richtige Antwort. Auf Anhieb steht nur ein Lob aus der Liste des Rahmens (LB1 a, LERN_Session18): Was das
+           * Spiel mitgibt — text (oft „Richtig: 7 + 4 = 11“) und erklaerung (WZ2 a) —, kommt nur nach einem Fehlversuch
+           * bei dieser Aufgabe; wer sich geirrt (oder verklickt) hat, bekommt es und kann mit „Weiter ➜“ überspringen.
+           * Vorher zeigte der Rahmen text immer, und 137 von 169 Spielen gaben darin Rechnungen oder Begründungen mit.
            */
           richtig(text, erklaerung) {
             if (erledigt) return;
             erledigt = true;
             if (eintrag) eintrag.geloest = true;
-            pruefung.haken?.("richtig", { nr, vorab: loesungVorab, erklaerung: !!erklaerung && versuche > 0 });
+            const mitErklaerung = versuche > 0 && !!(text || erklaerung);
+            pruefung.haken?.("richtig", { nr, vorab: loesungVorab, erklaerung: mitErklaerung });
             abschliessen(true);
             ton("richtig");
-            const lob = text || waehle(LOB);
-            eule.sag(erklaerung && versuche > 0 ? `${lob} ${erklaerung}` : lob, "gut");
+            const gesagtText = versuche > 0 ? [text || waehle(lobListe), erklaerung].filter(Boolean).join(" ") : waehle(lobListe);
+            eule.sag(gesagtText, "gut");
+            // für das Testskript: was nach der richtigen Antwort in der Blase steht (auf Anhieb nur ein Lob der Liste)
+            pruefung.haken?.("gelobt", { nr, text: eule.blase.textContent || "", aufAnhieb: versuche === 0, liste: lobListe });
             nr++;
             if (endlos) { geschafft++; punkte.textContent = `♾ ${geschafft}`; }
             // Die nächste Aufgabe erst, wenn die Stimme fertig ist (Lob, gesprochene Antwort des Spiels; höchstens 6 s):
@@ -3290,7 +3301,7 @@ const LS = (() => {
 
   return {
     STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
-    MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
+    LOB, MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     person, umbenennen, gehoert, PERSONEN,
     beiAenderung, abgleichDaten, sicherung, gesperrt, freischalten, spielStand: () => spielStand,

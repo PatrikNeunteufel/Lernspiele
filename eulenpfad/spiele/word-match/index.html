@@ -151,6 +151,8 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "word-match",
+  // Lob auf Anhieb in der Fremdsprache (LB2 a); Bestätigungen mit dem Lösungswort kommen nur nach einem Fehlversuch
+  lob: ["Great!", "Well done!", "Super!", "Yes!"],
   einleitung: "Hello! Let's play! Welches englische Wort passt zum Bild? Und was heisst das auf Deutsch?",
   hilfe: stufe => (stufe === "s5" || stufe === "s6"
     ? "Schau das Bild oder das Wort an und tipp die richtige Antwort. Beim Buchstabieren tippst du die Buchstaben der Reihe nach an — sie wandern in die Kästchen."

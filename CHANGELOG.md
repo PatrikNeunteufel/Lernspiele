@@ -577,3 +577,10 @@
   Ersatz-Ordner geprüft (drei Geräte, kaputte Datei, fremdes Präfix, Erlaubnis). Der Eulenpfad gibt in `abgleich.js` nur
   noch Präfix, Datenbank, Ereignis und den Ergebnissatz mit; Verhalten unverändert (gleiche Datei, gleicher gemerkter
   Ordner). docs/kern/rahmen.md 4.20, rahmen.md 10, Plan.
+- Lob nach einer richtigen Antwort (LB1 a, Vorgabe Patrik): Auf Anhieb steht in allen Spielen nur ein kurzes Lob aus
+  der Liste des Rahmens („Super!“, „Genau richtig!“ …); was ein Spiel dazu mitgibt (Rechnung, Begründung, „Richtig:
+  7 + 4 = 11“), kommt nur nach einem Fehlversuch. Vorher zeigten 137 von 169 Spielen ihren eigenen Text auch auf Anhieb.
+  Neuer Prüfer „Lob“ im Testskript (Haken `gelobt`, `LS.LOB`), Gegenprobe mit der alten Regel schlägt an. Die Folge der
+  Zufallsaufgaben verschiebt sich dadurch (das Lob zieht jetzt immer aus der Liste); Klickzahlen der Stichproben
+  weichen deshalb vom letzten vollen Lauf ab. Eigene Lobliste je Spiel `def.lob` (LB2 a, höchstens 20 Zeichen je Lob):
+  die 8 Sprachspiele loben auf Anhieb in der Fremdsprache („Oui !“, „Great!“). rahmen.md 4 (`ctx.richtig`), Plan.

@@ -336,3 +336,11 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   eine selbst gebaute Datei mit bekanntem Code eine Aufsicht ohne Bestätigung aufs Gerät (D5). Nicht b (Aufsichten
   reisen immer mit). Kipppunkt: der Abgleich über einen Ordner (DF3 a) läuft auch, wenn ein Jugendlicher angemeldet ist —
   dort gilt, was über den von der Aufsicht eingerichteten Ordner kommt, als von ihr gebracht (Zusatz bei DF3 vorlegen).
+- **LB1 a** (2026-11-06, LERN_Session18, Eulenpfad; Vorgabe Patrik: „generell bei allen spielen reicht bei der richtigen
+  antwort das lob, es braucht da keine erklärungen“): Auf Anhieb richtig zeigt der Rahmen nur ein Lob aus seiner Liste
+  (`LOB`); was das Spiel mitgibt (`ctx.richtig(text, erklaerung)`, `opt.lob`, `opt.erklaerung`), kommt nur nach einem
+  Fehlversuch. Grund: 137 von 169 Spielen gaben im Lob Rechnungen oder Begründungen mit, WZ2 a griff nur bei getrennter
+  Erklärung. Nicht b (jedes Spiel von Hand trennen). Prüfer „Lob“ im Testskript. Ausnahmen nur mit Vermerk (LB2).
+- **LB2 a** (2026-11-06, LERN_Session18): Ein Spiel kann eine eigene Lobliste angeben (`def.lob`, jedes Lob höchstens 20
+  Zeichen); auf Anhieb zieht der Rahmen daraus. Für das Lob in der Fremdsprache der 8 Sprachspiele. Bestätigungen mit dem
+  Lösungswort („Great! apple“) bleiben Text nach einem Fehlversuch. Nicht b (auch dort auf Deutsch loben).

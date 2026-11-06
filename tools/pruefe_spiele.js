@@ -116,6 +116,14 @@ const TREIBER = `
     // Der Klick, der löst, ist noch nicht gezählt (er läuft gerade).
     if (art === "richtig" && endlos && klicks - klicksBeiStart + 1 < schritte)
       melde("Handgriffe", "mit " + (klicks - klicksBeiStart + 1) + " Klicks gelöst, das Spiel nennt " + schritte, "zu viele");
+    // LB1 a (LERN_Session18): Auf Anhieb richtig steht in der Blase nur ein Lob aus der Liste des Rahmens — keine
+    // Rechnung, keine Begründung (die kommen nur nach einem Fehlversuch).
+    if (art === "gelobt") {
+      // Liste des Spiels (def.lob, LB2 a; der Rahmen nimmt sie nur mit Lobs bis 20 Zeichen) oder die des Rahmens
+      const liste = a.liste || LS.LOB;
+      if (a.aufAnhieb && !liste.includes(a.text.trim())) melde("Lob", "auf Anhieb richtig, in der Blase steht mehr als das Lob: «" + a.text.slice(0, 100) + "»", "lob");
+      return;
+    }
     // Neue Aufgabe: Hinweise einer übersprungenen Aufgabe mit derselben Nummer vergessen.
     if (art === "aufgabe") { hinweise.delete(a.nr); return; }
     if (art === "gestellt" && a.tipps) mitTipp = true;

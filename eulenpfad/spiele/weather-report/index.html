@@ -450,6 +450,8 @@ function zweiFragen(ctx, a) {
 
 const SPIEL = {
   id: ID,
+  // Lob auf Anhieb in der Fremdsprache (LB2 a); Bestätigungen mit dem Lösungswort kommen nur nach einem Fehlversuch
+  lob: ["Great!", "Well done!", "Brilliant!", "Super!", "Yes!"],
   hilfe: stufe => (stufe === "s5" ? "Hör die Wegbeschreibung, folge ihr auf dem Plan vom Stern ⭐ aus und tipp auf das Haus, zu dem sie führt."
     : "Hör die englische Durchsage und tippe auf die passende Antwort. Unter der englischen Frage steht sie auf Deutsch."
       + (stufe === "s6" ? " Es kommen zwei Fragen nacheinander; beide müssen stimmen." : "")),
