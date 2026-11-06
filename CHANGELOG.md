@@ -491,3 +491,4 @@
 - Lernsteig: Tabs wie im Eulenpfad (C2, TA1 a) — Übungen · Profil · Statistik · Erfolge · Verwaltung (nur Aufsicht), Tab in
   der Adresse; Leiste mit angemeldeter Person und Abmelden; Erfolge mit Wochenziel, Stand je Übung und Rekorden;
   Aufsicht sieht verbundene Konten unter #statistik/<id> und #erfolge/<id>; statistik.html und aufsicht.html leiten weiter.
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session16_2026-11-06.md`.

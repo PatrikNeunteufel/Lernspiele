@@ -1,6 +1,14 @@
 # Handover — Lernsteig
 
 ## Stand
+**2026-11-06, nach LERN_Session16** (Lernspiele, [Report](../eulenpfad/report/LERN_Session16_2026-11-06.md)): Der Lernsteig
+lebt in Lernspiele (A1 a, A2 a) und nutzt den Kern 1.12.0. Anmeldung zuerst mit Jugendlichen, Aufsichten, „Ich bin neu“
+und Gast (C1, C2 a; keine Frage für Erwachsene, EF1 a), ein Platz für alle; Tabs Übungen · Profil · Statistik · Erfolge ·
+Verwaltung (C2); Entwickler-Modus mit Leiste in den Übungen (C6 zum Teil); Einladung als Link oder Datei; Übernahme
+einer Aufsicht in den Eulenpfad (C9). Alle Übungen gesperrt, bis sie im Entwickler-Modus angesehen sind. Tests:
+`pruefe_uebungen.js` „0 Fehler, 0 Hinweise.“, `pruefe_konten.js` 48 Fälle; Browser-Teil (Playwright) veraltet, wird mit
+B2 neu. Was noch kommt: [Plan zum Angleich](../plan_angleich_reihe.md), Pakete B (Rest), C3–C8.
+
 **2026-11-04, LST_Session1 (Cloud):** Rahmen unter `lernsteig/gemeinsam/` (Vertrag [rahmen.md](rahmen.md)): Konto
 (Gast), Niveaus `n1`/`n2` und Prüfungsziel (NV2 a), Stufen nach dem Lehrplan mit Übergängen und Challenge (ST1/ST2 a),
 Runde, Serie, Protokoll je Aufgabe, Zahl-, Term- und Auswahl-Antworten, Tabellen und Graphen, eingebauter Rechner mit

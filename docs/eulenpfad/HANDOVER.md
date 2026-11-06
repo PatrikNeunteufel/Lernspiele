@@ -1,6 +1,21 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-06, nach LERN_Session16** ([Report](report/LERN_Session16_2026-11-06.md)):
+- **Bemerkungen 11–22 erledigt:** Fahrplan-Rechner fragt „? h ? min“; Bildersammlung `spiele/gemeinsam/bilder.js` (B1 a)
+  mit 24 neu gezeichneten Lebewesen, Lebensraum in Stufe 1–4 mit allen; Nahrungsketten bis zur Prüfung der Bilder
+  gesperrt (B2 a).
+- **Kern 1.12.0:** dazu Anmeldung mit Gast, Entwicklung (Server für alle Apps), Einladung, Auswertung (eine Stand-Regel,
+  AW2 a), Übernahme einer Aufsicht (C9). Es fehlen noch Terme und Rechenkern.
+- **Lernsteig:** Anmeldung zuerst mit Gast (C1), Tabs wie im Eulenpfad (C2), Entwickler-Leiste; Stand in
+  [docs/lernsteig/HANDOVER.md](../lernsteig/HANDOVER.md).
+- **Eulenpfad:** Einladung zum Lernsteig ab 6. Klasse, Übernahme der Aufsicht, „↑ Alle Apps“; Aussehen sonst unverändert.
+- **Tests:** Kern „5337 Fälle, 0 Fehler.“; Lernsteig „0 Fehler, 0 Hinweise.“, Konten 48 Fälle; Eulenpfad Stichproben
+  „Keine Fehler.“ mit gleichen Klickzahlen. **Voller Lauf erst, wenn der ganze Kern umgebaut ist** (Vorgabe Patrik), und
+  vor dem nächsten Push mit einer Sicherung je Gerät.
+- **Weiter mit:** Terme und Rechenkern in den Kern, dann Testgerüst B2 (Seitentests im Ersatz-DOM), dann voller Lauf;
+  Prüfen durch Patrik: neue Bilder, Lernsteig-Übungen im Entwickler-Modus freigeben.
+
 **2026-11-05, nach LERN_Session15** ([Report](report/LERN_Session15_2026-11-05.md)):
 - **Reihe:** Der Lernsteig ist aus dem Cloud-Repo zurückgeholt (A1 a, A2 a) und gesperrt, bis er geprüft ist. Was als
   Nächstes kommt, steht im [Plan zum Angleich der Reihe](../plan_angleich_reihe.md) (Pakete A–H, alle Entscheide).
