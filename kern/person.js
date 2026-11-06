@@ -7,8 +7,13 @@
    - Die Kennung entsteht beim Anlegen und ändert sich nie; sie reist bei einer Übernahme in eine andere App mit (C9).
    - Der Name ist je App und Gerät eindeutig (ohne Gross/Klein und Leerzeichen am Rand) und nur Anzeige.
    - geaendert hält je Feld die Zeit der letzten Änderung: Beim Zusammenführen gewinnt je Feld der jüngere Stand.
-   - pin und wiederherstellung (kern/geheimnis.js) bleiben auf dem Gerät: ohneGeheimnis nimmt sie aus Sicherungen,
-     Abgleich und Einladungen. Eine App kann weitere Gerätefelder nennen (geraetFelder). */
+   - pin und wiederherstellung (kern/geheimnis.js) bleiben auf dem Gerät: ohneGeheimnis nimmt sie aus Einladungen
+     und Übernahmen. Eine App kann weitere Gerätefelder nennen (geraetFelder).
+   - In Sicherung und Abgleich (fuerDatei, DF4 a) reist eine geschützte Person ohne PIN-Prüfwert, aber mit dem Vermerk
+     geschuetzt und dem Prüfwert ihres Wiederherstellungscodes (60 Bit; eine PIN mit 4–6 Ziffern wäre aus der Datei in
+     rund einer Sekunde durchprobiert). Auf einem Gerät ohne eigene PIN dieser Person ist sie gesperrt (gesperrt: true),
+     bis sie dort freigeschaltet wird (freischalten). Eine Aufsicht aus einer Datei gilt immer als geschützt. Einlesen
+     nimmt nie einen Schutz weg. */
 "use strict";
 
 (function (KERN) {
@@ -91,11 +96,68 @@
     if (p.geaendert !== undefined && (typeof p.geaendert !== "object" || p.geaendert === null || Array.isArray(p.geaendert))) m.push("Änderungszeiten ungültig");
     return m;
   }
-  /** Kopie ohne Geheimnisse und Gerätefelder (Sicherung, Abgleich, Einladung, Übernahme). */
+  /** Kopie ohne Geheimnisse und Gerätefelder (Einladung, Übernahme; für Dateien fuerDatei). */
   function ohneGeheimnis(p, geraetFelder = []) {
     const c = { ...p };
-    for (const f of GEHEIM.concat(geraetFelder)) delete c[f];
+    for (const f of GEHEIM.concat(geraetFelder, SCHUTZ)) delete c[f];
     return c;
+  }
+
+  // ---------- Schutz in Dateien (DF4 a) ----------
+  // gesperrt: auf diesem Gerät, geschuetzt: in einer Datei; beide nimmt nur der Kern an, nie aus einer fremden Fassung
+  const SCHUTZ = ["gesperrt", "geschuetzt"];
+  const istPruefwert = w => istObjekt(w) && typeof w.salz === "string" && /^[0-9a-f]{8,128}$/.test(w.salz)
+    && typeof w.hash === "string" && /^[0-9a-f]{64}$/.test(w.hash);
+  function istObjekt(x) { return !!x && typeof x === "object" && !Array.isArray(x); }
+  /** Auf einem anderen Gerät geschützt, hier noch ohne eigene PIN: keine Anmeldung, bis sie freigeschaltet ist. */
+  const gesperrt = p => !!p && p.gesperrt === true && !p.pin;
+  /**
+   * Kopie für eine Datei (Sicherung, Abgleich): ohne PIN, Sicherheitsfrage und Gerätefelder. Wer eine PIN hat oder hier
+   * gesperrt ist, bekommt den Vermerk geschuetzt und nur den Prüfwert seines Wiederherstellungscodes.
+   */
+  function fuerDatei(p, geraetFelder = []) {
+    const c = ohneGeheimnis(p, geraetFelder);
+    if (p.pin || gesperrt(p)) {
+      c.geschuetzt = true;
+      if (istPruefwert(p.wiederherstellung?.code)) c.wiederherstellung = { code: p.wiederherstellung.code };
+    }
+    return c;
+  }
+  /** Schutz einer fremden Fassung: { code: Prüfwert | null } oder null (ungeschützt). Eine Aufsicht ist immer geschützt. */
+  function schutzVon(roh) {
+    if (roh.geschuetzt !== true && roh.rolle !== "aufsicht") return null;
+    const code = roh.geschuetzt === true && istPruefwert(roh.wiederherstellung?.code) ? roh.wiederherstellung.code : null;
+    return { code };
+  }
+  /**
+   * Schutz auf die Person hier übertragen: Hat sie hier eine PIN, bleibt alles. Sonst wird sie gesperrt — ausser hier
+   * wurde die PIN später geändert (bewusst entfernt) als dort. Ein Code von dort gilt, wenn hier keiner ist oder er
+   * jünger ist.
+   */
+  function schutzUebertragen(neu, hier, roh, schutz) {
+    if (!schutz || neu.pin) return neu;
+    if (hier && zeit(hier, "pin") > zeit(roh, "pin")) return neu;
+    const p = { ...neu, gesperrt: true };
+    if (schutz.code && (!istPruefwert(hier?.wiederherstellung?.code) || zeit(roh, "wiederherstellung") > zeit(hier, "wiederherstellung"))) {
+      p.wiederherstellung = { ...(hier?.wiederherstellung || {}), code: schutz.code };
+      p.geaendert = { ...(p.geaendert || {}), wiederherstellung: zeit(roh, "wiederherstellung") };
+    }
+    return p;
+  }
+  /**
+   * Gesperrte Person freischalten (DF4 a): mit ihrem Wiederherstellungscode und einer neuen PIN — oder ohne Code mit
+   * { bestaetigt: true }, wenn die App eine andere Bestätigung verlangt hat (Eulenpfad: eine bestehende Aufsicht des
+   * Geräts). Der Code bleibt derselbe: er gilt auf allen Geräten. Gibt die Person zurück; Fehler mit Klartext.
+   */
+  async function freischalten(personen, id, pin, { code = null, bestaetigt = false } = {}) {
+    const p = personen.finde(id);
+    if (!gesperrt(p)) throw new Error("Diese Person ist hier nicht gesperrt.");
+    if (!bestaetigt) {
+      if (!istPruefwert(p.wiederherstellung?.code)) throw new Error("Für diese Person gibt es hier keinen Wiederherstellungscode.");
+      if (!(await KERN.geheimnis.codeStimmt(code, p.wiederherstellung))) throw new Error("Der Code stimmt nicht.");
+    }
+    const pw = await KERN.geheimnis.pin(pin);
+    return personen.aendere(p.id, { pin: pw, gesperrt: undefined });
   }
 
   // ---------- Liste im Speicher der App ----------
@@ -160,7 +222,7 @@
     const bleibt = aelter(hier, dort), andere = bleibt === hier ? dort : hier;
     const neu = { ...hier, id: bleibt.id, angelegt: bleibt.angelegt, geaendert: { ...(hier.geaendert || {}) } };
     for (const k of Object.keys(dort)) {
-      if (VERWALTUNG.has(k) || GEHEIM.includes(k) || geraetFelder.includes(k)) continue;
+      if (VERWALTUNG.has(k) || GEHEIM.includes(k) || SCHUTZ.includes(k) || geraetFelder.includes(k)) continue;
       if (!(k in hier) || zeit(dort, k) > zeit(hier, k)) { neu[k] = dort[k]; neu.geaendert[k] = zeit(dort, k); }
     }
     const frueher = new Set([...(hier.frueher || []), ...(dort.frueher || [])]);
@@ -175,18 +237,23 @@
    * abgewiesen. Gibt { personen, neu, geaendert, abgewiesen, kennungen: { <alt>: <neu> } } — mit kennungen biegt die
    * App Verweise (Protokoll, Rekorde) auf die bleibende Kennung um.
    */
-  function zusammenfuehren(eigene, fremde, { geraetFelder = [] } = {}) {
+  // schutz: true, wenn die fremden Personen aus einer Datei kommen (KERN.daten, DF4 a): dann werden geschützte und
+  // Aufsichten ohne eigene PIN hier gesperrt. Ohne die Option (Umzug am selben Gerät) bleibt alles wie vor kern 1.15.0.
+  function zusammenfuehren(eigene, fremde, { geraetFelder = [], schutz: mitSchutz = false } = {}) {
     const personen = eigene.map(p => ({ ...p }));
     const erg = { personen, neu: 0, geaendert: 0, abgewiesen: 0, kennungen: {} };
     for (const roh of Array.isArray(fremde) ? fremde : []) {
       if (maengel(roh).length) { erg.abgewiesen++; continue; }
       const f = ohneGeheimnis(roh, geraetFelder);
+      const schutz = mitSchutz ? schutzVon(roh) : null;
       const ids = new Set([f.id, ...(f.frueher || [])]);
       let i = personen.findIndex(p => ids.has(p.id) || (p.frueher || []).some(x => ids.has(x)));
       if (i < 0) i = personen.findIndex(p => nameGleich(p.name, f.name));
-      if (i < 0) { personen.push(f); erg.neu++; continue; }
+      if (i < 0) { personen.push(schutzUebertragen(f, null, roh, schutz)); erg.neu++; continue; }
       const vorher = JSON.stringify(personen[i]);
-      const { neu, alt } = verbinde(personen[i], f, geraetFelder);
+      const verbunden = verbinde(personen[i], f, geraetFelder);
+      const alt = verbunden.alt;
+      const neu = schutzUebertragen(verbunden.neu, personen[i], roh, schutz);
       // Ein jüngerer Name von dort, den hier schon jemand anders trägt, gilt nicht (Namen bleiben eindeutig).
       if (!nameGleich(neu.name, personen[i].name) && personen.some((p, j) => j !== i && nameGleich(p.name, neu.name))) {
         neu.name = personen[i].name; neu.geaendert.name = zeit(personen[i], "name");
@@ -226,6 +293,7 @@
   KERN.person = {
     ROLLEN, AUFSICHT_ARTEN, GEHEIM, NAME_MAX, neueId, nameRein, nameGleich,
     geburtsdatumLies, geburtsdatumText, tagFehlt, alter, maengel, ohneGeheimnis, liste, zusammenfuehren, uebernehmen,
+    SCHUTZ, gesperrt, fuerDatei, freischalten,
   };
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 

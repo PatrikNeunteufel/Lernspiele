@@ -18,6 +18,7 @@ require(path.join(WURZEL, "kern", "person.js"));
 require(path.join(WURZEL, "kern", "freigabe.js"));
 require(path.join(WURZEL, "kern", "suche.js"));
 require(path.join(WURZEL, "kern", "runden.js"));
+require(path.join(WURZEL, "kern", "daten.js"));
 require(path.join(WURZEL, "kern", "anmeldung.js"));
 require(path.join(WURZEL, "kern", "entwicklung.js"));
 require(path.join(WURZEL, "kern", "einladung.js"));
@@ -902,6 +903,275 @@ console.log("personenmenue.js");
       }
       gleich(abw, 0, "wochen = bisherige Wochenserie des Lernsteigs (500 Fälle)");
     }
+  }
+
+  // ---------- daten (Sichern, Einlesen, Abgleich; DF1 a, DF2 a, DF4 a) ----------
+  console.log("daten.js");
+  {
+    const D = KERN.daten;
+    // zwei Geräte = zwei Präfixe in einem Ersatz-Speicher; voll: nach so vielen Schreibvorgängen scheitert der nächste
+    const ablage = new Map();
+    let schreibeZaehler = 0, vollNach = Infinity;
+    global.localStorage = {
+      getItem: k => (ablage.has(k) ? ablage.get(k) : null),
+      setItem: (k, v) => { if (schreibeZaehler >= vollNach) throw new Error("QuotaExceededError"); schreibeZaehler++; ablage.set(k, String(v)); },
+      removeItem: k => ablage.delete(k),
+      key: i => [...ablage.keys()][i] ?? null,
+      get length() { return ablage.size; },
+    };
+    let nr = 0;
+    const PRUEF = { runde: { pflicht: ["aufgaben", "dauer"] }, rekord: { pflicht: ["dauer"] } };
+    const geraet = (app = "eulenpfad", extra = {}) => {
+      const sp = KERN.speicher(`geraet-${++nr}:`);
+      return { sp, P: P.liste(sp), D: D({ app, speicher: sp, pruefung: PRUEF, dateiPraefix: app === "eulenpfad" ? "lernspiele" : app, ...extra }) };
+    };
+    const runde = (person, zeit, inhalt = "zahlenhaus", extra = {}) => ({ id: KERN.runden.neueId(), person, zeit, inhalt, stufe: "s3", aufgaben: 5, fehler: 0, dauer: 60, ...extra });
+    const t = tag => `2026-11-${String(tag).padStart(2, "0")}T10:00:00.000Z`;
+
+    // 1. Sichern auf A, Einlesen auf B (leer)
+    const A = geraet(), B = geraet();
+    const mia = A.P.anlegen({ name: "Mia", klasse: 2 }), leo = A.P.anlegen({ name: "Leo" });
+    A.sp.schreibe("runden", [runde(mia.id, t(1)), runde(leo.id, t(2))]);
+    A.sp.schreibe("rekorde", [{ id: "r-rek-1", person: mia.id, zeit: t(1), inhalt: "zahlenhaus", stufe: "s6", punkte: 4, dauer: 30 }]);
+    const datei = JSON.stringify(A.D.sichern());
+    const s = JSON.parse(datei);
+    gleich([s.format, s.version, s.app, s.art, s.personen.length, s.runden.length].join(), "reihe-daten,1,eulenpfad,sicherung,2,2", "Sicherung: Kopf und Inhalt");
+    gleich(s.geloescht, undefined, "Sicherung ohne Löschvermerke");
+    const e1 = B.D.einlesen(datei);
+    gleich([e1.personen.neu, e1.runden, e1.rekorde, e1.abgewiesen, e1.neueIds.length].join(), "2,2,1,0,2", "Einlesen auf leerem Gerät");
+    gleich(B.sp.lies("runden", []).length, 2, "Runden gespeichert");
+    // zweites Mal: nichts neu, nichts geschrieben
+    const vorSchreiben = schreibeZaehler;
+    const e2 = B.D.einlesen(datei);
+    gleich([e2.personen.neu, e2.personen.geaendert, e2.runden, e2.rekorde, e2.geschrieben.length, schreibeZaehler - vorSchreiben].join(), "0,0,0,0,0,0", "zweites Einlesen ändert nichts");
+    // nur eine Person sichern
+    const nurMia = A.D.sichern({ ids: [mia.id] });
+    gleich([nurMia.personen.length, nurMia.runden.length, nurMia.rekorde.length].join(), "1,1,1", "Sicherung einer Person");
+    gleich(A.D.sichern({ filter: e => e.inhalt !== "zahlenhaus" }).runden.length, 0, "Filter der Runden");
+
+    // 2. Kopf: fremde App, neuere Fassung, kaputt
+    const meldung = f => { try { f(); return "kein Fehler"; } catch (e) { return e.message; } };
+    const L = geraet("lernsteig");
+    gleich(meldung(() => L.D.einlesen(datei)), "Das ist eine Datei des Eulenpfads; hier lässt sie sich nicht einlesen.", "Datei einer anderen App");
+    gleich(meldung(() => B.D.einlesen({ format: "lernsteig-sicherung", version: 2, konten: [] })), "Das ist eine Datei des Lernsteigs; hier lässt sie sich nicht einlesen.", "alte Sicherung des Lernsteigs im Eulenpfad");
+    gleich(/neueren Fassung/.test(meldung(() => B.D.einlesen({ ...s, version: 2 }))), true, "neuere Fassung");
+    gleich(meldung(() => B.D.einlesen("{kaputt")), "Diese Datei kann ich nicht lesen.", "kein JSON");
+    gleich(meldung(() => B.D.einlesen({ ...s, personen: {} })), "Die Datei ist beschädigt.", "personen keine Liste");
+    gleich(meldung(() => B.D.einlesen({ hallo: 1 })), "Das ist keine Sicherung und keine Abgleich-Datei.", "fremde JSON-Datei");
+
+    // 3. Prüfung je Eintrag: ungültige und solche ohne Person abgewiesen, gültige eingelesen
+    {
+      const C = geraet();
+      const kaputt = { ...s, runden: [...s.runden, { ...runde(mia.id, t(3)), zeit: "gestern" }, runde("p-unbekannt-1", t(3)), { ...runde(mia.id, t(4)), dauer: undefined }] };
+      const e = C.D.einlesen(kaputt);
+      gleich([e.runden, e.abgewiesen].join(), "2,3", "ungültige Runden und Runden ohne Person abgewiesen");
+      const mitGast = geraet("lernsteig", { ohnePerson: ["gast"] });
+      const e3 = mitGast.D.einlesen({ ...s, app: "lernsteig", runden: [runde("gast", t(3))] });
+      gleich(e3.runden, 1, "Runde ohne Person bei ohnePerson");
+    }
+
+    // 4. Alles oder nichts: Speicher voll beim dritten Schreiben
+    {
+      const C = geraet();
+      vollNach = schreibeZaehler + 2;
+      gleich(meldung(() => C.D.einlesen(datei)), "Der Speicher des Browsers ist voll oder gesperrt; nichts wurde eingelesen.", "voller Speicher: Meldung");
+      vollNach = Infinity;
+      gleich(C.sp.schluessel().length, 0, "voller Speicher: nichts geblieben");
+    }
+
+    // 5. Gleicher Name, andere Kennung: verbunden, Verweise umgebogen
+    {
+      const C = geraet();
+      const mia2 = C.P.anlegen({ name: "mia" });
+      C.sp.schreibe("runden", [runde(mia2.id, t(5))]);
+      const e = C.D.einlesen(datei);
+      const ps = C.P.alle();
+      const bleibt = ps.find(p => P.nameGleich(p.name, "Mia"));
+      gleich([ps.length, e.personen.neu].join(), "2,1", "gleicher Name: eine Person, Leo neu");
+      gleich(C.sp.lies("runden", []).filter(r => r.person === bleibt.id).length, 2, "alle Runden von Mia auf der bleibenden Kennung");
+      gleich(Object.keys(e.kennungen).length, 1, "eine umgebogene Kennung");
+    }
+
+    // 6. Rekord: höherer Stand ersetzt, niedrigerer nicht
+    {
+      const r = B.D.einlesen({ ...s, rekorde: [{ ...s.rekorde[0], punkte: 9 }] });
+      gleich([r.rekorde, B.sp.lies("rekorde", [])[0].punkte].join(), "1,9", "höherer Rekord ersetzt");
+      gleich(B.D.einlesen({ ...s, rekorde: [{ ...s.rekorde[0], punkte: 2 }] }).rekorde, 0, "niedrigerer Rekord nicht");
+    }
+
+    // 7. Löschvermerke (DF2 a): auf A gelöscht → beim Abgleich auch auf B weg; eine alte Datei holt nichts zurück;
+    //    später neu Angelegtes bleibt
+    {
+      const A2 = geraet(), B2 = geraet();
+      const ida = A2.P.anlegen({ name: "Ida" });
+      A2.sp.schreibe("runden", [runde(ida.id, t(1)), runde(ida.id, t(2), "uhr-werkstatt")]);
+      const alt = A2.D.sichern({ art: "abgleich" });
+      B2.D.einlesen(alt);
+      gleich(B2.P.alle().length, 1, "Vermerk: Ida auf B");
+      gleich(A2.D.loeschePerson(ida.id), true, "Person löschen");
+      gleich([A2.P.alle().length, A2.sp.lies("runden", []).length].join(), "0,0", "Person und Runden weg");
+      A2.D.einlesen(alt);
+      gleich(A2.P.alle().length, 0, "alte Datei holt die Gelöschte nicht zurück");
+      const e = B2.D.einlesen(A2.D.sichern({ art: "abgleich" }));
+      gleich([B2.P.alle().length, B2.sp.lies("runden", []).length, e.geschrieben.includes("geloescht")].join(), "0,0,true", "Abgleich löscht auf B");
+      // danach neu angelegt mit demselben Namen: bleibt (erst in der nächsten Millisekunde, sonst gleich alt wie der Vermerk)
+      for (const bis = Date.now() + 2; Date.now() < bis;);
+      const ida2 = B2.P.anlegen({ name: "Ida" });
+      B2.sp.schreibe("runden", [runde(ida2.id, new Date(Date.now() + 1000).toISOString())]);
+      A2.D.einlesen(B2.D.sichern({ art: "abgleich" }));
+      gleich([A2.P.alle().length, A2.sp.lies("runden", []).length].join(), "1,1", "später neu Angelegte bleibt");
+      // Runden eines Inhalts zurücksetzen
+      const ben = A2.P.anlegen({ name: "Ben" });
+      A2.sp.schreibe("runden", [...A2.sp.lies("runden", []), runde(ben.id, t(1)), runde(ben.id, t(2), "uhr-werkstatt")]);
+      B2.D.einlesen(A2.D.sichern({ art: "abgleich" }));
+      A2.D.loescheRunden(ben.id, "uhr-werkstatt");
+      B2.D.einlesen(A2.D.sichern({ art: "abgleich" }));
+      gleich(B2.sp.lies("runden", []).filter(r => r.person === ben.id).map(r => r.inhalt).join(), "zahlenhaus", "Runden eines Inhalts zurückgesetzt, auch auf B");
+      // Vermerke des Eulenpfads bis LERN_Session18 (spieler, spiel) werden gelesen
+      const v = D.vermerkeRein({ spieler: { Mia: t(3) }, runden: [{ name: "Mia", spiel: "uhr", bis: t(4) }] });
+      gleich([v.namen.Mia, v.runden[0].inhalt].join(), `${t(3)},uhr`, "alte Vermerke umgedeutet");
+    }
+
+    // 8. Freigabe (nur mit opt.freigabe, im Abgleich): jüngster Stand gewinnt
+    {
+      const F1 = geraet("eulenpfad", { freigabe: true }), F2 = geraet("eulenpfad", { freigabe: true });
+      F1.sp.schreibe("freigabe", { spiele: { a: true } }); F1.sp.schreibe("freigabeStand", t(5));
+      F2.sp.schreibe("freigabe", { spiele: { a: false } }); F2.sp.schreibe("freigabeStand", t(3));
+      gleich(F2.D.einlesen(F1.D.sichern({ art: "abgleich" })).freigabe, true, "jüngere Freigabe übernommen");
+      gleich(F1.D.einlesen(F2.D.sichern({ art: "abgleich" })).freigabe, false, "gleiche Freigabe: nichts");
+      gleich(JSON.stringify(F2.sp.lies("freigabe", null)), '{"spiele":{"a":true}}', "Freigabe von F1 auf F2");
+      gleich(B.D.sichern({ art: "abgleich" }).freigabe, undefined, "ohne opt.freigabe keine Freigabe in der Datei");
+    }
+
+    // 9. Teile der App (Meldungen): sichern je Person, zusammenführen, beim Löschen entfernt
+    {
+      const teil = { schluessel: "meldungen",
+        sichern: (ids, eigene) => (eigene || []).filter(m => !ids || ids.includes(m.person)),
+        zusammenfuehren: (eigene, fremde, h) => {
+          const l = (eigene || []).slice(); let neu = 0;
+          for (const m of fremde || []) if (!l.some(x => x.id === m.id)) { l.push({ ...m, person: h.umbiegen(m.person) }); neu++; }
+          return { wert: l, neu };
+        },
+        entferne: (eigene, ids) => (eigene || []).filter(m => !ids.includes(m.person)) };
+      const M1 = geraet("eulenpfad", { teile: { meldungen: teil } }), M2 = geraet("eulenpfad", { teile: { meldungen: teil } });
+      const ana = M1.P.anlegen({ name: "Ana" });
+      M1.sp.schreibe("meldungen", [{ id: "m-1", person: ana.id }]);
+      gleich(M2.D.einlesen(M1.D.sichern()).teile.meldungen, 1, "Teil der App eingelesen");
+      M2.D.loeschePerson(M2.P.alle()[0].id);
+      gleich(M2.sp.lies("meldungen", []).length, 0, "Teil beim Löschen entfernt");
+      wirft(() => D({ app: "eulenpfad", speicher: M1.sp, teile: { runden: teil } }), "Teil mit dem Namen eines Kernfelds");
+    }
+
+    // 10. Ältere Dateien
+    {
+      const E = geraet();
+      const v2 = { version: 2, gesichert: t(1), profile: { Ida: { klasse: 2, geaendert: { klasse: t(1) } } },
+        protokoll: [{ name: "Ida", zeit: t(1), spiel: "zahlenhaus", stufe: "s2", aufgaben: 5, fehler: 0, dauer: 60 },
+          { name: "Tom", zeit: t(2), spiel: "zahlenhaus", stufe: "s2", aufgaben: 5, fehler: 0, dauer: 60 }], rekorde: [],
+        geloescht: { spieler: { Alt: t(1) } }, meldungen: [] };
+      const e = E.D.einlesen(v2);
+      gleich([e.personen.neu, e.runden, E.P.alle().map(p => p.name).sort().join("+")].join(), "2,2,Ida+Tom", "Eulenpfad Version 2: Profile nach Namen, Kind nur in Runden");
+      gleich(E.sp.lies("runden", []).every(r => r.inhalt === "zahlenhaus" && /^r-alt-/.test(r.id)), true, "spiel → inhalt, feste Kennung");
+      gleich(E.D.einlesen(v2).runden, 0, "dieselbe alte Datei zählt beim zweiten Mal nicht");
+      gleich(E.D.vermerke().namen.Alt, t(1), "alte Löschvermerke nach Namen übernommen");
+      const v3 = { format: "eulenpfad-daten", version: 3, gesichert: t(3), personen: [{ id: "p-v3-ana", name: "Ana", rolle: "lernend", angelegt: t(1), geaendert: { name: t(1) } }],
+        protokoll: [{ id: "r-v3-1", person: "p-v3-ana", name: "Ana", zeit: t(3), inhalt: "zahlenhaus", stufe: "s3", aufgaben: 5, fehler: 1, dauer: 60 }], rekorde: [] };
+      gleich(E.D.einlesen(v3).runden, 1, "Eulenpfad Version 3");
+      gleich(meldung(() => E.D.einlesen({ ...v3, version: 7 })), "Die Datei ist beschädigt.", "Eulenpfad unbekannte Version");
+      const L2 = geraet("lernsteig");
+      const lv1 = { format: "lernsteig-sicherung", version: 1, erstellt: t(1),
+        konten: [{ id: "k-alt-1", name: "Noa", erstellt: t(1), geaendert: t(2), klasse: "7" }],
+        runden: [{ konto: "k-alt-1", zeit: t(2), uebung: "terme", stufe: "s1", aufgaben: 4, dauer: 50 }] };
+      const el = L2.D.einlesen(lv1);
+      gleich([el.personen.neu, el.runden, L2.P.alle()[0].rolle, L2.sp.lies("runden", [])[0].inhalt].join(), "1,1,lernend,terme", "Lernsteig Version 1");
+    }
+
+    // 11. Geschützte Personen (DF4 a)
+    {
+      const G1 = geraet("lernsteig", { geraetFelder: ["aufsicht", "anfragen"] }), G2 = geraet("lernsteig", { geraetFelder: ["aufsicht", "anfragen"] });
+      const w = await G.wiederherstellung({ frage: "Haustier?", antwort: "Bello" });
+      const noa = G1.P.anlegen({ name: "Noa", pin: await G.pin("2468"), wiederherstellung: w.wiederherstellung, aufsicht: ["a-1"] });
+      const d = G1.D.sichern();
+      const pd = d.personen[0];
+      gleich([pd.pin, pd.geschuetzt, Object.keys(pd.wiederherstellung).join(), pd.aufsicht].join("|"), "|true|code|", "Datei: ohne PIN, Frage und Gerätefelder, mit Vermerk und Code");
+      gleich(JSON.stringify(d).includes(noa.pin.hash), false, "PIN-Prüfwert nicht in der Datei");
+      G2.D.einlesen(d);
+      const da = G2.P.finde(noa.id);
+      gleich([P.gesperrt(da), !!da.pin].join(), "true,false", "auf dem anderen Gerät gesperrt");
+      const platz = KERN.anmeldung.platz({ speicher: G2.sp, gewaehlt: "aktiv", tab: "angemeldet", finde: id => G2.P.finde(id) });
+      gleich(await platz.anmelden(noa.id, ""), null, "gesperrt: keine Anmeldung ohne PIN");
+      gleich(platz.waehle(noa.id), false, "gesperrt: nicht wählbar");
+      G2.sp.schreibe("aktiv", noa.id);
+      gleich(platz.aktiv(), null, "gesperrt: frühere Wahl gilt nicht");
+      faelle++;
+      try { await P.freischalten(G2.P, noa.id, "1357", { code: "AAAA-AAAA-AAAA" }); fehler++; console.log("    FEHLER  falscher Code schaltet frei"); } catch (e) { /* erwartet */ }
+      await P.freischalten(G2.P, noa.id, "1357", { code: w.code });
+      const frei = G2.P.finde(noa.id);
+      gleich([P.gesperrt(frei), frei.gesperrt, await G.pinStimmt("1357", frei.pin)].join(), "false,,true", "mit dem Code freigeschaltet, neue PIN");
+      gleich((await platz.anmelden(noa.id, "1357"))?.id, noa.id, "danach Anmeldung mit der neuen PIN");
+      gleich(await G.codeStimmt(w.code, frei.wiederherstellung), true, "Code bleibt derselbe");
+      // eine lokale PIN bleibt, ein Schutz wird nie weggenommen
+      G2.D.einlesen(G1.D.sichern());
+      gleich(await G.pinStimmt("1357", G2.P.finde(noa.id).pin), true, "eigene PIN bleibt beim nächsten Einlesen");
+      const G3 = geraet("lernsteig");
+      G3.D.einlesen(d);
+      G3.D.einlesen({ ...d, personen: [{ ...pd, geschuetzt: false, gesperrt: false, geaendert: { ...pd.geaendert, gesperrt: t(30), pin: t(30) } }] });
+      gleich(P.gesperrt(G3.P.finde(noa.id)), true, "eine Datei hebt die Sperre nicht auf");
+      // hier bewusst ohne PIN (später geändert als dort): nicht wieder gesperrt
+      const G4 = geraet("lernsteig");
+      const noa4 = G4.P.anlegen({ id: noa.id, name: "Noa" });
+      G4.P.aendere(noa4.id, { pin: null });
+      G4.D.einlesen({ ...d, personen: [{ ...pd, geaendert: { ...pd.geaendert, pin: t(1) } }] });
+      gleich(P.gesperrt(G4.P.finde(noa.id)), false, "hier später ohne PIN: nicht gesperrt");
+      // eine Aufsicht ohne Vermerk ist trotzdem geschützt; ohne Code nur mit Bestätigung freizuschalten
+      const G5 = geraet();
+      G5.D.einlesen({ format: "reihe-daten", version: 1, app: "eulenpfad", art: "abgleich", personen: [{ id: "p-auf-1", name: "Mama", rolle: "aufsicht", angelegt: t(1), geaendert: { name: t(1) } }], runden: [], rekorde: [] });
+      gleich(P.gesperrt(G5.P.finde("p-auf-1")), true, "Aufsicht aus einer Datei gesperrt");
+      faelle++;
+      try { await P.freischalten(G5.P, "p-auf-1", "1111", { code: "X" }); fehler++; console.log("    FEHLER  ohne Code freigeschaltet"); } catch (e) { /* erwartet */ }
+      await P.freischalten(G5.P, "p-auf-1", "1111", { bestaetigt: true });
+      gleich(P.gesperrt(G5.P.finde("p-auf-1")), false, "Aufsicht mit Bestätigung freigeschaltet");
+      // fuerDatei einer gesperrten Person: weiter geschützt (über ein drittes Gerät)
+      gleich(P.fuerDatei(G3.P.finde(noa.id)).geschuetzt, true, "gesperrte Person reist geschützt weiter");
+      gleich(JSON.stringify(P.ohneGeheimnis({ id: "p-x", gesperrt: true, geschuetzt: true, pin: 1 })), '{"id":"p-x"}', "ohneGeheimnis nimmt den Schutz mit weg");
+      // ohne die Option schutz (Umzug am selben Gerät) sperrt zusammenfuehren nichts
+      const ohne = P.zusammenfuehren([], [{ id: "p-auf-2", name: "Papa", rolle: "aufsicht", geschuetzt: true }]);
+      gleich(ohne.personen[0].gesperrt, undefined, "zusammenfuehren ohne schutz: nicht gesperrt");
+    }
+
+    // 12. Nachrechnung: zwei Geräte mit zufälligen Runden und Löschungen gleichen in beide Richtungen ab →
+    //     danach dieselben Personen und Runden, und keine gelöschte Runde ist zurück
+    {
+      const zufallMit = s => () => { s |= 0; s = (s + 0x6D2B79F5) | 0; let u = Math.imul(s ^ (s >>> 15), 1 | s); u = (u + Math.imul(u ^ (u >>> 7), 61 | u)) ^ u; return ((u ^ (u >>> 14)) >>> 0) / 4294967296; };
+      const zuf = zufallMit(23);
+      let abw = 0;
+      for (let fall = 0; fall < 150; fall++) {
+        const X = geraet(), Y = geraet();
+        const namen = ["Ada", "Bo", "Cem"];
+        const pers = { X: {}, Y: {} };
+        for (const n of namen) { if (zuf() < 0.8) pers.X[n] = X.P.anlegen({ name: n }); if (zuf() < 0.8) pers.Y[n] = Y.P.anlegen({ name: n }); }
+        for (const [g, k] of [[X, "X"], [Y, "Y"]]) {
+          const l = [];
+          for (let i = 0; i < 6; i++) { const n = namen[Math.floor(zuf() * 3)]; if (pers[k][n]) l.push(runde(pers[k][n].id, t(1 + Math.floor(zuf() * 20)))); }
+          g.sp.schreibe("runden", l);
+        }
+        if (zuf() < 0.5) { const n = namen[Math.floor(zuf() * 3)]; if (pers.X[n]) X.D.loeschePerson(pers.X[n].id); }
+        if (zuf() < 0.5) { const n = namen[Math.floor(zuf() * 3)]; if (pers.Y[n]) Y.D.loescheRunden(pers.Y[n].id); }
+        Y.D.einlesen(X.D.sichern({ art: "abgleich" }));
+        X.D.einlesen(Y.D.sichern({ art: "abgleich" }));
+        Y.D.einlesen(X.D.sichern({ art: "abgleich" }));
+        const bild = g => [g.P.alle().map(p => p.name).sort().join(), g.sp.lies("runden", []).map(r => r.id).sort().join()].join("|");
+        const vg = X.D.vermerke();
+        const zurueck = X.sp.lies("runden", []).some(r => D.eintragWeg(r, X.P.finde(r.person), vg));
+        if (bild(X) !== bild(Y) || zurueck) abw++;
+      }
+      gleich(abw, 0, "Abgleich in beide Richtungen: gleicher Stand, nichts Gelöschtes zurück (150 Fälle)");
+    }
+
+    gleich(A.D.dateiname("Mia Lena", new Date("2026-11-06T12:00:00Z")), "lernspiele-Mia-Lena-2026-11-06.json", "Dateiname");
+    gleich(L.D.dateiname("", new Date("2026-11-06T12:00:00Z")), "lernsteig-2026-11-06.json", "Dateiname ohne Teil");
+    wirft(() => D({ speicher: A.sp }), "daten ohne app");
+    delete global.localStorage;
   }
 
   // ---------- Kopien in den Apps ----------

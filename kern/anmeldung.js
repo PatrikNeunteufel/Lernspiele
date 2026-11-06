@@ -28,10 +28,13 @@
    * Liefert { aktiv, waehle, anmelden, abmelden, alsGast, istGast, imTab }.
    */
   function platz(opt) {
-    const { speicher, gewaehlt = null, tab, finde, gast = null } = opt || {};
+    const { speicher, gewaehlt = null, tab, gast = null } = opt || {};
     if (!speicher || typeof speicher.lies !== "function") throw new Error("anmeldung: speicher fehlt");
     if (typeof tab !== "string" || !tab) throw new Error("anmeldung: tab fehlt");
-    if (typeof finde !== "function") throw new Error("anmeldung: finde fehlt");
+    if (typeof opt.finde !== "function") throw new Error("anmeldung: finde fehlt");
+    // Eine gesperrte Person (DF4 a: auf einem anderen Gerät mit PIN geschützt, hier noch nicht freigeschaltet) gibt es
+    // für die Anmeldung nicht: weder wählen noch anmelden, und eine frühere Anmeldung gilt nicht mehr.
+    const finde = w => { const p = opt.finde(w); return p && KERN.person && KERN.person.gesperrt(p) ? null : p; };
     if (gast && (typeof gast.tab !== "string" || !gast.tab || gast.tab === tab)) throw new Error("anmeldung: gast.tab fehlt oder ist der Tab der Person");
     const imTab = typeof opt.imTab === "function" ? opt.imTab : standardImTab;
     const tabSchluessel = speicher.praefix + tab;

@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.14.1, 2026-11-06 (LERN_Session17). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.15.0, 2026-11-06 (LERN_Session18). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.14.1)
+kern/VERSION          Version des Kerns (1.15.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -173,6 +173,14 @@ Entscheide P1 a, P2 a, Vorgabe B3. Eine Liste von Personen je App:
 - **Name** je App und Gerät eindeutig, verglichen ohne Gross/Klein und Leerzeichen am Rand; nur Anzeige.
 - **geaendert** hält je Feld die Zeit der letzten Änderung.
 - **Geheimnisse** `pin`, `wiederherstellung` und die Gerätefelder der App bleiben auf dem Gerät.
+- **Schutz in Dateien** (DF4 a, seit 1.15.0): In Sicherung und Abgleich reist eine Person mit PIN ohne PIN-Prüfwert,
+  aber mit `geschuetzt: true` und nur dem Prüfwert ihres Wiederherstellungscodes (`fuerDatei`). Grund: alle 1 110 000
+  PINs mit 4–6 Ziffern sind gegen den Prüfwert in rund 1,2 s durchprobiert, der Code (32¹² ≈ 1,2 · 10¹⁸) erst in rund
+  40 000 Jahren. Hat sie auf dem anderen Gerät keine eigene PIN, ist sie dort **gesperrt** (`gesperrt: true`), bis sie mit
+  dem Code und einer neuen PIN freigeschaltet ist; der Code bleibt derselbe. Eine Aufsicht aus einer Datei gilt immer
+  als geschützt (ohne Code: Freischalten nur über eine Bestätigung, die die App verlangt). Einlesen nimmt nie einen
+  Schutz weg: `gesperrt` und `geschuetzt` nimmt der Kern nie aus einer fremden Fassung, und eine eigene PIN bleibt.
+  Wurde die PIN hier später entfernt als dort gesetzt, wird nicht wieder gesperrt.
 
 | Aufruf | Ergebnis |
 |---|---|
@@ -181,9 +189,12 @@ Entscheide P1 a, P2 a, Vorgabe B3. Eine Liste von Personen je App:
 | `alter(g, heute)` | ganze Jahre; ohne Tag ab dem Ersten des Monats; `tagFehlt(g)` |
 | `nameRein`, `nameGleich` | Namen bereinigen und vergleichen |
 | `maengel(p)` | Liste von Mängeln (leer = gültig) — für Einlesen, Abgleich, Einladung |
-| `ohneGeheimnis(p, geraetFelder)` | Kopie für Sicherung, Abgleich, Einladung, Übernahme |
+| `ohneGeheimnis(p, geraetFelder)` | Kopie ohne `pin`, `wiederherstellung`, `gesperrt`, `geschuetzt` und Gerätefelder (Einladung, Übernahme) |
+| `fuerDatei(p, geraetFelder)` | Kopie für Sicherung und Abgleich: wie `ohneGeheimnis`, eine geschützte Person dazu mit `geschuetzt` und `wiederherstellung: { code }` |
+| `gesperrt(p)` | `gesperrt: true` und keine eigene PIN |
+| `freischalten(liste, id, pin, { code } \| { bestaetigt: true })` | gesperrte Person mit ihrem Code (oder nach einer Bestätigung der App) freischalten, neue PIN; Fehler mit Klartext („Der Code stimmt nicht.“) |
 | `liste(speicher, { schluessel, felder })` | `{ alle, finde (auch über frühere Kennungen), findeName, nameFrei, anlegen, aendere, entferne, speichere }`; `anlegen` und `aendere` prüfen Name und Mängel und melden einen vollen Speicher |
-| `zusammenfuehren(eigene, fremde, { geraetFelder })` | gleiche Kennung (auch frühere) → verbinden; sonst gleicher Name → verbinden, die ältere Kennung bleibt, die andere wird frühere; sonst neu; Ungültiges abgewiesen. Je Feld der jüngere Stand; ein jüngerer Name, den hier jemand anders trägt, gilt nicht. Ergebnis `{ personen, neu, geaendert, abgewiesen, kennungen: { alt: neu } }` — mit `kennungen` biegt die App Verweise (Runden, Rekorde) um |
+| `zusammenfuehren(eigene, fremde, { geraetFelder, schutz })` | `schutz: true` für Personen aus einer Datei (setzt `KERN.daten`): Schutz übertragen wie oben; gleiche Kennung (auch frühere) → verbinden; sonst gleicher Name → verbinden, die ältere Kennung bleibt, die andere wird frühere; sonst neu; Ungültiges abgewiesen. Je Feld der jüngere Stand; ein jüngerer Name, den hier jemand anders trägt, gilt nicht. Ergebnis `{ personen, neu, geaendert, abgewiesen, kennungen: { alt: neu } }` — mit `kennungen` biegt die App Verweise (Runden, Rekorde) um |
 | `uebernehmen(quelle, ziel, zusatz)` | Übernahme einer **Aufsicht** in eine andere App (C9, Ü1 a, Ü2 b; seit 1.12.0): `ziel` ist die Liste der Ziel-App (`liste(KERN.speicher("<präfix>"))`). Mit reisen Kennung, Name, Rolle, Art, PIN-Prüfwert, Sicherheitsfrage und Antwort-Prüfwert; der Wiederherstellungscode wird neu ausgegeben (`code`, nur jetzt sichtbar). Keine Bestätigung in der Ziel-App; nichts wird überschrieben: `status` „neu“, „schon“ (dieselbe Kennung ist dort) oder „name“ (Name dort vergeben). Fehler ohne PIN und für Lernende (die kommen über die Einladung) |
 
 Rollen und Sicht je App (P2 a): Der Lernsteig verlangt von der Aufsicht eine PIN und zeigt ihr nur verbundene Konten,
@@ -276,6 +287,8 @@ Aufsicht nur im Tab). Ein **Platz** hält, wer an diesem Gerät angemeldet ist:
   ist die Person abgemeldet; wer danach das Gerät nimmt, erbt ihre Rechte nicht. Ohne sessionStorage (gesperrt) gilt
   niemand im Tab als angemeldet.
 - Ein älterer Stand mit dem Namen im Tab gilt, wenn `finde` den Namen auflöst.
+- Eine **gesperrte** Person (`KERN.person.gesperrt`, DF4 a, seit 1.15.0) gibt es für den Platz nicht: Sie lässt sich weder
+  wählen noch anmelden, und eine frühere Wahl gilt nicht mehr, bis sie freigeschaltet ist.
 
 | Aufruf | Ergebnis |
 |---|---|
@@ -437,10 +450,48 @@ Benutzt von: Lernsteig (`gemeinsam/rechner.js`: `rechne` und `anzeige` mit der S
 Beispiele aus Lehrplan und Anleitungen, D9 und 2000 Zufallsrechnungen gegen JavaScript; alt gegen neu auf 20 000
 Zufallseingaben gleich.
 
-### 4.19 Geplant
+### 4.19 `KERN.daten` (`kern/daten.js`) — Sichern, Einlesen und Abgleich
 
-Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): Sichern, Einlesen und Abgleich als ein Dateiformat für alle Apps (`daten.js`; heute je App eigene Datei, nur die
-Prüfung und das Zusammenführen liegen im Kern), der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
+Entscheide DF1 a, DF2 a, DF4 a (LERN_Session18), dazu R1 a, P1 a und Befund D4. Herkunft: Eulenpfad (`LS.zusammenfuehren`,
+`LS.abgleichDaten`, Löschvermerke) und Lernsteig (`lernsteig/gemeinsam/daten.js`: erst prüfen, dann alles oder nichts).
+Seit 1.15.0 im Kern; die Apps stellen in eigenen Schritten um (Plan B).
+
+```
+{ format: "reihe-daten", version: 1, app, art: "sicherung" | "abgleich", gesichert, geraet?,
+  personen, runden, rekorde, geloescht?, freigabe?, freigabeStand?, … Teile der App unter eigenem Namen }
+```
+
+- **Sicherung:** gewählte Personen (`fuerDatei`, ohne PIN) und ihre Runden und Rekorde. **Abgleich:** alles, dazu die
+  Löschvermerke und, wenn die App sie teilt, die Freigabe.
+- **Löschvermerke** (DF2 a) `{ personen: { <id>: ISO }, namen: { <name>: ISO }, runden: [{ person, name?, inhalt | null, bis }] }`:
+  Eine Person fällt weg, wenn sie seit dem Vermerk weder geändert wurde noch gespielt hat (Runden beider Seiten); mit ihr
+  ihre Runden. Ein Runden-Vermerk entfernt die Runden der Person (eines Inhalts oder alle) bis zu seinem Zeitpunkt. Die
+  Vermerke beider Seiten gelten zusammen. Vermerke des Eulenpfads bis LERN_Session18 (`spieler`, `spiel`) werden gelesen.
+- **Ältere Dateien:** `eulenpfad-daten` 1–3 und Dateien ohne `format` mit `profile` oder `personen` und `protokoll`
+  (Eulenpfad; Profile nach Namen über `altePerson`, Einträge nur mit Namen bekommen die Person der Datei oder eine neue,
+  `spiel` → `inhalt`), `lernsteig-sicherung` 1–2 (`konten`, `konto` → `person`, `uebung` → `inhalt`).
+- **Einlesen:** erst lesen und jeden Eintrag prüfen — Personen mit `KERN.person.maengel`, Runden und Rekorde mit
+  `KERN.runden.maengel`, dem Schema der App und nur zu einer Person des Ergebnisses (oder `ohnePerson`); Ungültiges wird
+  gezählt (`abgewiesen`) und nie gespeichert. Dann im Speicher zusammenführen und **nur geänderte Schlüssel** schreiben;
+  scheitert ein Schreiben, wird alles zurückgeschrieben (alles oder nichts). Ein zweites Einlesen derselben Datei schreibt nichts.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `KERN.daten({ app, speicher, schluessel?, dateiPraefix?, geraetFelder?, pruefung?, ohnePerson?, freigabe?, teile?, altePerson? })` | Daten einer App; `schluessel` je Bereich (Standard gleichnamig, Eulenpfad `runden: "protokoll"`); `teile: { <name>: { schluessel, sichern(ids \| null, eigene), zusammenfuehren(eigene, fremde, { umbiegen, personVon }) → { wert, neu }, entferne?(eigene, ids) } }` |
+| `sichern({ ids, art, filter, geraet })` | Datei als Objekt; `ids: null` = alle Personen; `filter(e)` für Runden und Rekorde (etwa ohne Testrunden) |
+| `einlesen(text \| objekt)` | `{ personen: { neu, geaendert }, runden, rekorde, teile, freigabe, abgewiesen, kennungen, ids, neueIds, geschrieben, datei }`; Fehler mit Klartext |
+| `lesen(text \| objekt)` | nur lesen und umdeuten; Fehler: „Diese Datei kann ich nicht lesen.“, „Das ist keine Sicherung und keine Abgleich-Datei.“, „Das ist eine Datei des Lernsteigs; hier lässt sie sich nicht einlesen.“, neuere Fassung, „Die Datei ist beschädigt.“ |
+| `loeschePerson(id)`, `loescheRunden(id, inhalt)` | löschen mit Vermerk, alles oder nichts; Teile mit `entferne` werden mitgezogen |
+| `vermerke()`, `dateiname(teil, datum)` | Löschvermerke des Geräts; „lernspiele-Mia-Lena-2026-11-06.json“ (`.gitignore` hält `<präfix>-*.json` aus dem Repo) |
+| `KERN.daten.vermerkeRein`, `vermerkeVereinen`, `personWeg`, `eintragWeg`, `lesen(e, app)` | Bausteine |
+
+Geprüft in `tools/pruefe_kern.js`, darunter eine Nachrechnung: zwei Geräte mit zufälligen Personen, Runden und Löschungen
+gleichen in beide Richtungen ab und haben danach denselben Stand, ohne dass eine gelöschte Runde zurückkommt (150 Fälle).
+
+### 4.20 Geplant
+
+Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): der Abgleich
+über einen Ordner (`abgleich.js` über `KERN.daten`, DF3 a; heute nur im Eulenpfad), der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
 dritten, Serie/Endlos mit Rekord und Zwischenstand, Wiederholungsbremse, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`)
 und der Rest der Rollen (Gruppenleitung G2 a, Bestätigung durch eine bestehende Aufsicht, PIN zurücksetzen mit Frist). Ein neuer Teil bekommt hier seinen Abschnitt, bevor er umzieht.
 

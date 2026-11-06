@@ -3,6 +3,20 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.15.0 — 2026-11-06 (LERN_Session18)
+- `daten.js` (`KERN.daten`, DF1 a, DF2 a, DF4 a): Sichern, Einlesen und Abgleich in einem Dateiformat `reihe-daten`
+  für alle Apps — Prüfung jedes Eintrags vor dem Schreiben, nur geänderte Schlüssel, alles oder nichts; Löschvermerke
+  (Person nach Kennung und Name, Runden je Inhalt) und Freigabe nach dem jüngsten Stand; Teile der App (Eulenpfad:
+  Meldungen); ältere Dateien `eulenpfad-daten` 1–3 und `lernsteig-sicherung` 1–2 werden umgedeutet, Dateien einer
+  anderen App mit ihrem Namen abgewiesen. Eine gelöschte Person fällt nur weg, wenn sie seither weder geändert wurde
+  noch gespielt hat (gefunden mit der Nachrechnung: sonst blieben ihre Runden auf dem anderen Gerät ohne Person liegen).
+  Die Apps benutzen es noch nicht.
+- `person.js` (DF4 a): `fuerDatei` (geschützte Person ohne PIN-Prüfwert, mit `geschuetzt` und dem Prüfwert des Codes),
+  `gesperrt`, `freischalten` (Code und neue PIN, oder Bestätigung der App); `zusammenfuehren(…, { schutz: true })` sperrt
+  geschützte Personen und Aufsichten ohne eigene PIN — nur mit der Option, ohne sie bleibt alles wie bisher.
+  `ohneGeheimnis` und das Verbinden nehmen `gesperrt` und `geschuetzt` nie aus einer fremden Fassung.
+- `anmeldung.js`: Eine gesperrte Person lässt sich weder wählen noch anmelden.
+
 ## 1.14.1 — 2026-11-06 (LERN_Session17)
 - `anmeldung.js`: Die Anmeldung dieses Tabs geht vor der gewählten Person des Geräts. Vorher war ein Jugendlicher mit
   PIN in seinem Tab abgemeldet, sobald sich in einem zweiten Tab desselben Geräts eine Aufsicht anmeldete (gefunden mit den

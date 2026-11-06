@@ -550,3 +550,9 @@
   schlägt an. Der Abgleich über einen Ordner war nicht betroffen. rahmen.md 10 nachgeführt.
 - Entscheide DF1 a, DF2 a, DF3 a, DF4 a (ein Dateiformat `reihe-daten` im Kern, Löschvermerke und Freigabe im Kern,
   Abgleich über einen Ordner als Kern-Teil, Personen mit PIN reisen geschützt über den Wiederherstellungscode) im Plan.
+- Kern 1.15.0: `kern/daten.js` (`KERN.daten`) — ein Dateiformat `reihe-daten` für Sichern, Einlesen und Abgleich aller
+  Apps: jeder Eintrag geprüft, bevor etwas geschrieben wird, nur geänderte Schlüssel, alles oder nichts; Löschvermerke
+  und Freigabe im Kern (DF2 a); ältere Dateien beider Apps umgedeutet, Dateien einer anderen App mit ihrem Namen
+  abgewiesen. DF4 a in `person.js` (`fuerDatei`, `gesperrt`, `freischalten`) und `anmeldung.js` (gesperrt = keine
+  Anmeldung). Die Apps benutzen es noch nicht; ihr Verhalten ist unverändert. docs/kern/rahmen.md 4.7, 4.11, 4.19 (neu),
+  Kern-Changelog, Plan.
