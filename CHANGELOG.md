@@ -592,3 +592,8 @@
   Bestätigung, wenn es eine Aufsicht mit PIN gibt (eine gesperrte könnte nicht bestätigen). Eulenpfad: Frist und
   Bestätigung über den Kern, Verhalten gleich. Gruppenleitung mit LERN-48 (RL1 a). docs/kern/rahmen.md 4.21 (neu),
   lernsteig/rahmen.md 5d, rahmen.md 6, Plan (RL1 a, RL2 a).
+- Ablauf einer Runde (letzter offener Kern-Teil): Bestand beider Apps aufgenommen, Zuschnitt entschieden (AR1 a,
+  Kern-Teil `runde.js` ohne Oberfläche; die Unterschiede ohne Entscheid kommen einzeln zur Vorlage). Doku-Drift behoben:
+  lernsteig/rahmen.md 5 nannte den Rekord „je … Niveau“, der Code rechnet nach ST1 a je Stufe.
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session18_2026-11-06.md`, Handover Eulenpfad (dazu LERN-60 auf Kern 1.18.0,
+  LERN-61 als erledigt in LERN_Session16 nachgetragen) und Lernsteig.

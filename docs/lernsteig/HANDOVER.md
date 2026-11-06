@@ -1,6 +1,14 @@
 # Handover — Lernsteig
 
 ## Stand
+**2026-11-06, nach LERN_Session18** (Lernspiele, [Report](../eulenpfad/report/LERN_Session18_2026-11-06.md)): Kern 1.18.0.
+Sichern und Einlesen über `KERN.daten` (Format `reihe-daten`, ältere Sicherungen gelesen); ein Konto oder eine Aufsicht
+mit PIN ist auf einem anderen Gerät 🔒 gesperrt, bis sie mit Code (Aufsicht auch mit Bestätigung) freigeschaltet ist
+(DF4 a); Aufsichten in einer Datei nur mit angemeldeter Aufsicht (AS1 a). Aufsicht: Sicherheitsfrage beim Anlegen, PIN
+vergessen mit Code, Frage oder anderer Aufsicht, Zurücksetzen mit Frist von 3 Tagen (RL2 a, `KERN.rollen`). Tests: Konten
+„72 Fälle, 0 Fehler.“, `pruefe_uebungen.js` „0 Fehler, 0 Hinweise.“ Weiter mit: Abgleich über einen Ordner in der
+Verwaltung (Zusatz zu AS1 vorlegen), `runde.js` (AR1 a), C3–C8.
+
 **2026-11-06, nach LERN_Session17** (Lernspiele, [Report](../eulenpfad/report/LERN_Session17_2026-11-06.md)): Kern 1.14.1
 mit Terme und Rechenkern (`LST_TERME`, `LST_RECHNER` reichen weiter; D3, D9, D10 behoben, Glieder wie im Lehrmittel,
 TO1 a). Tab-Leiste einzeilig mit Personen-Knopf wie im Eulenpfad (PA1 a). Prüfskripte in `tools/`

@@ -1,6 +1,19 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-06, nach LERN_Session18** ([Report](report/LERN_Session18_2026-11-06.md)):
+- **Kern 1.18.0:** dazu `daten.js` (ein Dateiformat `reihe-daten` für Sichern, Einlesen, Abgleich; Löschvermerke,
+  Freigabe, geschützte Personen nach DF4 a), `abgleich.js` (Ordner-Abgleich) und `rollen.js` (Bestätigung, PIN vergessen,
+  Frist). Noch nicht im Kern: Ablauf einer Runde (Zuschnitt AR1 a entschieden), Gruppenleitung mit LERN-48 (RL1 a).
+- **Eulenpfad:** Einlesen einer Datei der Version 3 behoben (war seit LERN_Session15 online kaputt); alles über den Kern;
+  eine Aufsicht reist ohne PIN und ist auf einem anderen Gerät 🔒 gesperrt, bis sie freigeschaltet ist; auf Anhieb
+  richtig nur noch ein Lob (LB1 a), Sprachspiele in der Fremdsprache (LB2 a), Prüfer „Lob“.
+- **Tests:** Kern „5545 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 72 Fälle), Gratwanderung
+  „Keine Fehler.“; Eulenpfad nur Stichproben „Keine Fehler.“ — seit LB1 a weichen die Klickzahlen vom letzten vollen Lauf
+  ab (Zufallsfolge verschoben). Voller Lauf nach Patriks Entscheid, vor dem nächsten Push vorgeschlagen.
+- **Weiter mit:** `runde.js` — zuerst die Einzelentscheide (Report, Plan 1), dann die reinen Hilfen, dann der Ablauf;
+  Lernsteig-Abgleich mit Zusatz zu AS1. 15 Commits lokal, nach dem Push Geräte einmal neu laden (neues Dateiformat).
+
 **2026-11-06, nach LERN_Session17** ([Report](report/LERN_Session17_2026-11-06.md)):
 - **Kern 1.14.1:** dazu Rollleiste und Personen-Knopf (PA1 a), Terme und Rechenkern; Anmeldung des Tabs geht vor der
   gewählten Person. Noch nicht im Kern: Dateiformat mit Abgleich, Ablauf der Runde, Rest der Rollen.
@@ -269,6 +282,6 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-57 | Neunerprobe im Probe-Stempel (PS2 a) mit Rückfrage Patrik: Erklärung, Regeln für 3/6/9, Gruppe für Neugierige | offen (vorzulegen) | Report LERN_Session13, Plan 3 |
 | LERN-58 | Weitere Erfolge: Abzeichen je Thema und für besondere Spiele (Zusatz Patrik zu NZ1) | offen | Report LERN_Session13, Plan 4 |
 | LERN-59 | Notizen für Zwischenergebnisse (NZ1 a) | erledigt 2026-11-04 (LERN_Session13, 32 Spiele) | konzept_notizen.md; rahmen.md 4.3 |
-| LERN-60 | Angleich der Reihe: Kern, Grundgerüst Lernsteig und Gratwanderung wie Eulenpfad, Fehler, Fachliches, Recherchen, Portal | in Arbeit seit 2026-11-05 (LERN_Session15, Paket B); Kern 1.6.0 in beiden Apps | docs/plan_angleich_reihe.md; docs/kern/rahmen.md |
-| LERN-61 | Bemerkung 11: Fahrplan-Rechner Stufe 3 sagt nicht, ob „5 h 35 min“ oder „335 min“ gemeint ist | offen | docs/eulenpfad/bemerkungen.json |
+| LERN-60 | Angleich der Reihe: Kern, Grundgerüst Lernsteig und Gratwanderung wie Eulenpfad, Fehler, Fachliches, Recherchen, Portal | in Arbeit seit 2026-11-05 (LERN_Session15, Paket B); Kern 1.18.0 in beiden Apps, offen Ablauf der Runde (AR1 a) | docs/plan_angleich_reihe.md; docs/kern/rahmen.md |
+| LERN-61 | Bemerkung 11: Fahrplan-Rechner Stufe 3 sagt nicht, ob „5 h 35 min“ oder „335 min“ gemeint ist | erledigt 2026-11-06 (LERN_Session16, Bemerkung 11) | docs/eulenpfad/bemerkungen.json |
 | LERN-60 | Hilfsmittel als eigene Spiele (HM1 a): Zwanzigerfeld, Hundertertafel, Punktefeld, Rechenstrich, Folgen-Maschine; Rechenschieber für LERN-47 | in Arbeit seit 2026-11-04 (LERN_Session14, H2 Hundertertafel gebaut, H1, H3–H6 offen) | spielideen/hilfsmittel.md; lernziele/lehrplan_sg_session14.md |

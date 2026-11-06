@@ -94,7 +94,8 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 - `anzahl` Aufgaben. Fehlversuch: Hinweis, neuer Versuch, nach dem dritten die Lösung mit Weg und „Weiter“. Kein
   Punktabzug, kein Zeitdruck; die Zeit je Aufgabe wird gemessen.
 - Ergebnis: auf Anhieb richtig, Zeit, Bestzeit (nur Runden ohne gezeigte Lösung). Keine Sterne (BF1 a).
-- **Serie** (Endlos): Aufgaben, bis eine falsch ist; Rekord je Konto, Übung, Stufe und Niveau. Gespeichert, sobald die
+- **Serie** (Endlos): Aufgaben, bis eine falsch ist; Rekord je Konto, Übung und Stufe, getrennt mit und ohne Rechner (RE1 a; nicht je Niveau, weil die Aufgaben einer
+  Stufe nicht am Niveau hängen, ST1 a — bis LERN_Session18 stand hier „und Niveau“). Gespeichert, sobald die
   Serie vorbei ist; beim Verlassen mitten drin als Zwischenstand (`abgebrochen: true`).
 
 ## 5a. Taschenrechner (TR1 a, RE1 a, RM1 b)

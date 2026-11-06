@@ -354,3 +354,12 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Tagen (für alle sichtbar, mit PIN oder Code abzubrechen). Nach Ablauf im Eulenpfad Konten ohne PIN wie bisher, im
   Lernsteig Aufsichten auf dem Gerät entfernt samt Verbindungen, ohne Löschvermerk. Nicht b (Frist nur im Eulenpfad).
   Kipppunkt: Lernsteig-Geräte, die oft tagelang ohne Aufsicht laufen (dann längere Frist).
+- **AR1 a** (2026-11-06, LERN_Session18): Kern-Teil `runde.js` als Ablauf ohne Oberfläche — die App meldet je Aufgabe
+  gestellt, falsch, richtig, Lösung gezeigt, übersprungen, Zeit um; der Kern zählt Versuche und Fehler, entscheidet Lösung
+  nach dem dritten Fehlversuch, Ende von Runde und Serie, Zwischen- und Endstand des Rekords, führt die
+  Wiederholungsbremse (Gedächtnis mit Fenster, Serienbremse, Kürzen bei erschöpfter Stufe) und baut den Protokolleintrag
+  im gemeinsamen Format. Oberfläche, Prüfen der Antwort, Bewertung, Timer und Wartezeiten bleiben in der App. Erster
+  Schritt die reinen Hilfen (Fingerabdruck, Kennung, Gedächtnis, Rekord nach Kennung, Wächter des Zwischenstands,
+  Bestwert). Die Unterschiede ohne Entscheid (`zeit` Start oder Ende, `dauer` in s oder 0,1 s, Serie im Protokoll,
+  Fehlerliste je Aufgabe, Gedächtnis, Kürzen, Zeitmessung, Rückmeldung bei Richtig im Lernsteig) werden vor dem Bau je
+  einzeln vorgelegt. Nicht b (nur die Hilfen). Kipppunkt: Apps sollen im Ablauf absichtlich auseinanderlaufen.
