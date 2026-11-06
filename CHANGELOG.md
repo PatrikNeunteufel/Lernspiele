@@ -464,3 +464,5 @@
   neu gezeichnet (tiere.js, nahrung.js) — Lebensraum Stufe 1–4 jetzt mit allen Lebewesen. Testskript: fehlendes Bild
   und Bildname als Text sind Fehler. Bemerkungen 12–22 erledigt.
 - Prüfvermerk `lebensraum/nahrungsketten` aufgehoben (B2 a), bis die neuen Bilder darin geprüft sind.
+- Kern 1.7.0: `anmeldung.js` (`KERN.anmeldung.platz`) — Anmeldung und Sitzung im Tab für beide Apps (Eulenpfad:
+  Kind oder Aufsicht; Lernsteig: Jugendliche und Aufsicht), Schlüssel unverändert; docs/kern/rahmen.md 4.11.

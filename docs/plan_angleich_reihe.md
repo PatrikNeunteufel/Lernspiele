@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.6.0: Zahl, Bruch, Speicher, Zufall, `el`, Geheimnis, Person, Freigabe, Suche, Runden in beiden Apps | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.7.0, dazu Anmeldung; als Nächstes Entwickler-Modus | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | offen, nach B | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -80,11 +80,10 @@ von Hand geänderte Kopie oder gleiche Version mit anderem Inhalt als Fehler, ei
 rund 200 Seiten anfasst: Jede Seite lädt einmal `kern/kern.js` vor dem Rahmen ihrer App. Die Teile hängen sich an
 `KERN` (`KERN.zahl`, `KERN.bruch`, …). Tests: `node tools/pruefe_kern.js` (Teile gegen feste Beispiele und
 Nachrechnungen, dazu die Kopien); das Testskript jeder App prüft ihre Kopie.
-Stand 2026-11-05: Kern 1.0.0 mit `zahl.js` (Schreibweise als Einstellung) und `bruch.js`; Eulenpfad (`LS.zahlText`,
-`LS.dezimalText`) und Lernsteig (`LST.zahlText`, `dezimalText`, `leseZahl`, `KERN.bruch` statt `LST_BRUCH`) benutzen ihn,
-`lernsteig/gemeinsam/bruch.js` entfällt; die Gratwanderung hat die Kopie, lädt sie aber erst mit C8. Kern 1.1.0 dazu
-mit `speicher.js`, `zufall.js`, `el.js` (beide Apps umgestellt, gleiche Zufallsfolgen in den Testskripten). Nächste
-Teile: Profil (B3), Rollen und PIN, Freigabe, dann Suche, Protokoll/Statistik, Daten — sie tragen das Grundgerüst C.
+Stand 2026-11-06: Kern 1.7.0 mit Zahl, Bruch, Speicher, Zufall, `el`, Geheimnis, Person, Freigabe, Suche, Runden und
+Anmeldung (Sitzung im Tab); Eulenpfad und Lernsteig benutzen alle Teile, die Gratwanderung hat die Kopie und lädt sie
+mit C8. Nächste Teile: Entwickler-Modus, Einladung, Auswertung mit Regeln je App, Profil-Übernahme (C9), Terme und
+Rechenkern; dann das Testgerüst B2.
 
 **B2 Testgerüst für alle Apps:** Ein Testskript-Kern unter `tools/` mit Treiber je App, so dass ein Aufruf alle drei
 Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`). Er prüft auch, dass jede Kern-Kopie mit

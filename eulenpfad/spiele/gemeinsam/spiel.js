@@ -423,28 +423,16 @@ const LS = (() => {
   // Anmeldung (Entscheid L1 a): Kinder ohne PIN. Die Aufsicht gilt nur in diesem Browser-Tab
   // (sessionStorage) — schliesst man ihn, ist sie abgemeldet und kein Kind erbt ihre Rechte.
   // Gespeichert wird die Kennung (lernspiele:spieler, sessionStorage lernspiele:aufsicht); ältere Stände mit dem Namen gelten.
-  function sitzung() { try { return sessionStorage.getItem("lernspiele:aufsicht"); } catch { return null; } }
-  function setzeSitzung(name) {
-    const id = person(name)?.id;
-    try { id ? sessionStorage.setItem("lernspiele:aufsicht", id) : sessionStorage.removeItem("lernspiele:aufsicht"); } catch { /* egal */ }
-  }
+  // Rechnung im Kern (kern/anmeldung.js, docs/kern/rahmen.md 4.11): im Tab muss sein, wer Aufsicht ist oder eine PIN hat.
   const gespeichertePerson = wert => (wert ? PERSONEN.finde(wert) || PERSONEN.findeName(wert) : null);
-  const aktuellerSpieler = () => {
-    const p = gespeichertePerson(lies("spieler", null));
-    if (!p) return null;
-    const s = sitzung();
-    return p.rolle === "aufsicht" && s !== p.id && s !== p.name ? null : p.name;
-  };
+  const ANMELDUNG = KERN.anmeldung.platz({ speicher: { praefix: SPEICHER.praefix, lies, schreibe }, gewaehlt: "spieler",
+    tab: "aufsicht", finde: gespeichertePerson });
+  const aktuellerSpieler = () => ANMELDUNG.aktiv()?.name ?? null;
   /** Ist gerade eine Aufsicht angemeldet? */
   const aufsichtAngemeldet = () => istAufsicht(aktuellerSpieler());
   /** Kind anmelden; eine Aufsicht nur über meldeAufsichtAn mit PIN. */
-  function setzeSpieler(name) {
-    if (istAufsicht(name) || !person(name)) return false;
-    schreibe("spieler", person(name).id);
-    setzeSitzung(null);
-    return true;
-  }
-  function abmelden() { schreibe("spieler", null); setzeSitzung(null); }
+  const setzeSpieler = name => ANMELDUNG.waehle(person(name)?.id);
+  const abmelden = () => ANMELDUNG.abmelden();
 
   // Prüfwerte über den Kern (kern/geheimnis.js): dieselbe Rechnung SHA-256(„salz:wert“) wie bisher, alte PINs gelten.
   const G = KERN.geheimnis;
@@ -500,10 +488,8 @@ const LS = (() => {
 
   /** Aufsicht mit PIN anmelden; true bei Erfolg. Ohne gesetzte PIN geht es nicht. */
   async function meldeAufsichtAn(name, pin) {
-    if (!(await pinStimmt(name, pin))) return false;
-    schreibe("spieler", person(name).id);
-    setzeSitzung(name);
-    return true;
+    const p = person(name);
+    return !!p && p.rolle === "aufsicht" && !!(await ANMELDUNG.anmelden(p.id, pin));
   }
 
   /**

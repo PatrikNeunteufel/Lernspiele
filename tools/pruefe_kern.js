@@ -16,6 +16,7 @@ require(path.join(WURZEL, "kern", "person.js"));
 require(path.join(WURZEL, "kern", "freigabe.js"));
 require(path.join(WURZEL, "kern", "suche.js"));
 require(path.join(WURZEL, "kern", "runden.js"));
+require(path.join(WURZEL, "kern", "anmeldung.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -411,6 +412,84 @@ console.log("el.js");
     gleich([zk.ersetzt, zk.eintraege.length, zk.eintraege[0].punkte].join(), "1,1,9", "Rekord: höherer Stand gewinnt");
     const zb = RU.zusammenfuehren([gut], [{ ...gut, id: "r-9" }], { behalten: e => e.id !== "r-9", umbiegen: p => (p === "p-1" ? "p-neu" : p) });
     gleich([zb.eintraege.length, zb.eintraege[0].person].join(), "1,p-neu", "behalten und umbiegen");
+  }
+
+  // ---------- Anmeldung und Sitzung im Tab ----------
+  {
+    console.log("anmeldung.js");
+    const A = KERN.anmeldung, G = KERN.geheimnis;
+    const lokal = new Map(), tab = new Map();
+    const ablage = m => ({ getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)),
+      removeItem: k => m.delete(k), key: i => [...m.keys()][i] ?? null, get length() { return m.size; } });
+    global.localStorage = ablage(lokal);
+    global.sessionStorage = ablage(tab);
+    const pin = await G.pin("4711");
+    const leute = [
+      { id: "p-kind", name: "Mia", rolle: "lernend" },
+      { id: "p-auf", name: "Mama", rolle: "aufsicht", pin },
+      { id: "p-ohne", name: "Papa", rolle: "aufsicht" },
+      { id: "p-jug", name: "Lea", rolle: "lernend", pin },
+    ];
+    const finde = w => leute.find(p => p.id === w) || leute.find(p => p.name === w) || null;
+    const S = KERN.speicher("lernspiele:");
+    const ep = A.platz({ speicher: S, gewaehlt: "spieler", tab: "aufsicht", finde });
+    const wer = () => ep.aktiv()?.id ?? null;
+    gleich(wer(), null, "anfangs niemand");
+    gleich(ep.waehle("p-kind"), true, "Kind ohne PIN wählen");
+    gleich(wer(), "p-kind", "Kind angemeldet");
+    gleich(lokal.get("lernspiele:spieler"), '"p-kind"', "Kennung gemerkt (mit Präfix)");
+    gleich(ep.waehle("p-auf"), false, "Aufsicht nicht ohne PIN wählbar");
+    gleich(ep.waehle("niemand"), false, "Unbekannte nicht wählbar");
+    gleich(await ep.anmelden("p-auf", "1234"), null, "falsche PIN");
+    gleich(wer(), "p-kind", "nach falscher PIN bleibt das Kind");
+    gleich((await ep.anmelden("Mama", "4711"))?.id, "p-auf", "Aufsicht mit PIN (über den Namen gefunden)");
+    gleich([wer(), tab.get("lernspiele:aufsicht")].join(), "p-auf,p-auf", "Aufsicht im Tab angemeldet");
+    tab.clear(); // neuer Tab
+    gleich(wer(), null, "neuer Tab: Aufsicht abgemeldet, niemand erbt ihre Rechte");
+    tab.set("lernspiele:aufsicht", "Mama"); // älterer Stand mit dem Namen
+    gleich(wer(), "p-auf", "älterer Stand mit Namen im Tab gilt");
+    tab.set("lernspiele:aufsicht", "p-kind");
+    gleich(wer(), null, "anderer Eintrag im Tab gilt nicht");
+    gleich(await ep.anmelden("p-ohne", ""), null, "Aufsicht ohne gesetzte PIN kann sich nicht anmelden");
+    ep.waehle("p-kind");
+    gleich([wer(), tab.has("lernspiele:aufsicht")].join(), "p-kind,false", "Kind wählen leert den Tab");
+    ep.abmelden();
+    gleich([wer(), lokal.get("lernspiele:spieler")].join(), ",null", "abmelden");
+    // Jugendliche mit PIN (Lernsteig): gilt nur im Tab
+    const ls = A.platz({ speicher: KERN.speicher("lernsteig:"), gewaehlt: "aktiv", tab: "angemeldet", finde });
+    gleich(ls.waehle("p-jug"), false, "mit PIN nicht nur wählen");
+    gleich((await ls.anmelden("p-jug", "4711"))?.id, "p-jug", "Jugendliche mit PIN");
+    gleich(ls.aktiv()?.id, "p-jug", "im Tab angemeldet");
+    tab.delete("lernsteig:angemeldet");
+    gleich(ls.aktiv(), null, "neuer Tab: mit PIN abgemeldet");
+    gleich((await ls.anmelden("p-kind"))?.id, "p-kind", "ohne PIN anmelden geht ohne PIN");
+    gleich(tab.has("lernsteig:angemeldet"), false, "ohne PIN nichts im Tab");
+    // Platz nur im Tab (Aufsicht im Lernsteig bis zum Grundgerüst C)
+    const nurTab = A.platz({ speicher: KERN.speicher("lernsteig:"), tab: "aufsicht", finde: w => { const p = finde(w); return p?.rolle === "aufsicht" ? p : null; } });
+    gleich(nurTab.aktiv(), null, "nur Tab: anfangs niemand");
+    gleich(nurTab.waehle("p-auf"), false, "nur Tab: wählen geht nicht");
+    gleich((await nurTab.anmelden("p-auf", "4711"))?.id, "p-auf", "nur Tab: anmelden");
+    gleich(nurTab.aktiv()?.id, "p-auf", "nur Tab: aktiv");
+    gleich(await nurTab.anmelden("p-jug", "4711"), null, "nur Tab: finde der App entscheidet, wer hierher gehört");
+    nurTab.abmelden();
+    gleich(nurTab.aktiv(), null, "nur Tab: abgemeldet");
+    gleich(lokal.has("lernsteig:aufsicht"), false, "nur Tab: nichts im Speicher gemerkt");
+    // Ohne sessionStorage (gesperrt): niemand mit PIN gilt als angemeldet, nichts wirft
+    delete global.sessionStorage;
+    await ep.anmelden("p-auf", "4711");
+    gleich(ep.aktiv(), null, "ohne sessionStorage keine Aufsicht");
+    ep.waehle("p-kind");
+    gleich(ep.aktiv()?.id, "p-kind", "ohne sessionStorage: Kind geht");
+    // eigene Regel der App
+    global.sessionStorage = ablage(tab);
+    const eigen = A.platz({ speicher: S, gewaehlt: "x", tab: "y", finde, imTab: () => true });
+    gleich(eigen.waehle("p-kind"), false, "imTab der App: alle nur im Tab");
+    gleich(A.standardImTab({ rolle: "lernend" }), false, "Standard: lernend ohne PIN nicht im Tab");
+    wirft(() => A.platz({ speicher: S, tab: "", finde }), "Tab-Schlüssel fehlt");
+    wirft(() => A.platz({ tab: "a", finde }), "Speicher fehlt");
+    wirft(() => A.platz({ speicher: S, tab: "a" }), "finde fehlt");
+    delete global.localStorage;
+    delete global.sessionStorage;
   }
 
   // ---------- Kopien in den Apps ----------

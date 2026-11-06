@@ -97,29 +97,20 @@ var LST_KONTEN = (function () {
   }
 
   // ---------- Anmeldung ----------
-  const tab = schluessel => ({
-    lies() { try { return sessionStorage.getItem(schluessel); } catch (e) { return null; } },
-    setze(id) { try { if (id) sessionStorage.setItem(schluessel, id); else sessionStorage.removeItem(schluessel); } catch (e) { /* ohne sessionStorage */ } },
-  });
-  const sitzung = tab("lernsteig:angemeldet");
+  // Rechnung im Kern (kern/anmeldung.js, docs/kern/rahmen.md 4.11), Schlüssel wie bisher: lernsteig:aktiv,
+  // sessionStorage lernsteig:angemeldet (Jugendliche mit PIN) und lernsteig:aufsicht. Zwei Plätze, bis das Grundgerüst
+  // (Plan C1) die Anmeldung wie im Eulenpfad auf einen Platz bringt.
+  const PLATZ = KERN.anmeldung.platz({ speicher: SPEICHER, gewaehlt: "aktiv", tab: "angemeldet", finde });
   /** Das aktive Konto: zuletzt gewählt; mit PIN nur, wenn in diesem Tab angemeldet. Sonst null (Gast). */
-  function aktiv() {
-    const id = LST.lies("aktiv", null);
-    const k = id && finde(id);
-    if (!k) return null;
-    if (k.pin && sitzung.lies() !== k.id) return null;
-    return k;
-  }
+  const aktiv = () => PLATZ.aktiv();
   /** Wählt ein Konto. Mit PIN muss pin stimmen. */
   async function anmelden(id, pin) {
-    const k = finde(id);
-    if (!k) throw new Error("Konto nicht gefunden");
-    if (k.pin && !(await pinStimmt(k, pin))) throw new Error("Die PIN stimmt nicht.");
-    LST.schreibe("aktiv", k.id);
-    sitzung.setze(k.pin ? k.id : null);
+    if (!finde(id)) throw new Error("Konto nicht gefunden");
+    const k = await PLATZ.anmelden(id, pin);
+    if (!k) throw new Error("Die PIN stimmt nicht.");
     return k;
   }
-  function abmelden() { LST.schreibe("aktiv", null); sitzung.setze(null); }
+  const abmelden = () => PLATZ.abmelden();
 
   /** Alter in ganzen Jahren (B3: auch ohne Tag). */
   const alter = (geboren, heute = new Date()) => P.alter(geboren, heute);
@@ -132,7 +123,8 @@ var LST_KONTEN = (function () {
   // nicht vor jemandem, der die Entwicklerwerkzeuge des Browsers öffnet. Echter Schutz braucht den Server (DS1 a).
   const aufsichten = () => LISTE.alle().filter(p => p.rolle === "aufsicht");
   const aufsichtFinde = id => { const p = LISTE.finde(id); return p && p.rolle === "aufsicht" ? p : null; };
-  const aufsichtSitzung = tab("lernsteig:aufsicht");
+  // Nur im Tab angemeldet, nichts darüber hinaus gemerkt (Kern, Platz ohne gewaehlt)
+  const AUFSICHT = KERN.anmeldung.platz({ speicher: SPEICHER, tab: "aufsicht", finde: aufsichtFinde });
 
   /**
    * Legt eine Aufsicht an (PIN Pflicht) und meldet sie im Tab an. Gibt es schon eine Aufsicht auf diesem Gerät,
@@ -149,18 +141,17 @@ var LST_KONTEN = (function () {
     const pin = await G.pin(daten.pin);
     const w = await G.wiederherstellung();
     const a = LISTE.anlegen({ name: daten.name, rolle: "aufsicht", art: daten.art, pin, wiederherstellung: w.wiederherstellung });
-    aufsichtSitzung.setze(a.id);
+    await AUFSICHT.anmelden(a.id, daten.pin);
     return { aufsicht: a, code: w.code };
   }
   async function aufsichtAnmelden(id, pin) {
     const a = aufsichtFinde(id);
     if (!a) throw new Error("Aufsicht nicht gefunden");
-    if (!(await G.pinStimmt(pin, a.pin))) throw new Error("Die PIN stimmt nicht.");
-    aufsichtSitzung.setze(a.id);
+    if (!(await AUFSICHT.anmelden(a.id, pin))) throw new Error("Die PIN stimmt nicht.");
     return a;
   }
-  function aufsichtAbmelden() { aufsichtSitzung.setze(null); }
-  function aufsichtAktiv() { const id = aufsichtSitzung.lies(); return (id && aufsichtFinde(id)) || null; }
+  const aufsichtAbmelden = () => AUFSICHT.abmelden();
+  const aufsichtAktiv = () => AUFSICHT.aktiv();
   async function aufsichtNeuePinMitCode(id, code, neuePin) {
     const a = aufsichtFinde(id);
     if (!a || !(await G.codeStimmt(code, a.wiederherstellung))) throw new Error("Der Code stimmt nicht.");

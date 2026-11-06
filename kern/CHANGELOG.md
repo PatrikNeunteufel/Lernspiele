@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.7.0 — 2026-11-06 (LERN_Session16)
+- `anmeldung.js` (`KERN.anmeldung.platz`): Anmeldung und Sitzung im Tab für alle Apps. Ein Platz merkt die gewählte
+  Person (Kennung im Speicher der App); wer im Tab angemeldet sein muss (Standard `standardImTab`: Aufsicht oder mit
+  PIN), gilt nur im geöffneten Tab (sessionStorage, Präfix der App). `aktiv`, `waehle` (ohne PIN), `anmelden` (PIN über
+  `KERN.geheimnis`), `abmelden`; `gewaehlt: null` für einen Platz nur im Tab. Ältere Stände mit dem Namen im Tab gelten.
+  Eulenpfad (Kind oder Aufsicht) und Lernsteig (Jugendliche, Aufsicht) umgestellt, Schlüssel unverändert.
+
 ## 1.6.0 — 2026-11-05 (LERN_Session15)
 - `runden.js` (`KERN.runden`, Entscheid R1 a): ein Format für Runden und Rekorde aller Apps — Kernfelder `id`,
   `person`, `zeit`, `inhalt`, `stufe`, `aufgaben`, `fehler`, `dauer`, `test`, `punkte` (Rekord); `maengel` mit Schema der

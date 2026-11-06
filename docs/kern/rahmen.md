@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.6.0, 2026-11-05 (LERN_Session15). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.7.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.6.0)
+kern/VERSION          Version des Kerns (1.7.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -264,9 +264,34 @@ Felder der Apps:
 Dateien: Eulenpfad `format: "eulenpfad-daten"`, Version 3; Lernsteig `format: "lernsteig-sicherung"`, Version 2. Ältere
 Fassungen liest das Einlesen weiter.
 
-### 4.11 Geplant (Plan B, Reihenfolge B4)
+### 4.11 `KERN.anmeldung` (`kern/anmeldung.js`) — Anmeldung und Sitzung im Tab
 
-Anmeldung und Sitzung im Tab, Profil-Übernahme zwischen den Apps (C9), Entwickler-Modus, Auswertung (Fazit, Bedarf,
+Herkunft: Eulenpfad (L1 a: gewählte Person, Aufsicht nur im Tab) und Lernsteig (aktives Konto, mit PIN nur im Tab;
+Aufsicht nur im Tab). Ein **Platz** hält, wer an diesem Gerät angemeldet ist:
+
+- Gemerkt wird die **Kennung** der gewählten Person im Speicher der App (`gewaehlt`, localStorage).
+- Wer **im Tab** angemeldet sein muss, gilt nur, solange derselbe Browser-Tab offen ist (sessionStorage, Schlüssel
+  Präfix der App + `tab`). Standard `standardImTab(p)`: eine Aufsicht oder wer eine PIN hat. Schliesst man den Tab,
+  ist die Person abgemeldet; wer danach das Gerät nimmt, erbt ihre Rechte nicht. Ohne sessionStorage (gesperrt) gilt
+  niemand im Tab als angemeldet.
+- Ein älterer Stand mit dem Namen im Tab gilt, wenn `finde` den Namen auflöst.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `platz({ speicher, gewaehlt, tab, finde, imTab? })` | ein Platz; `gewaehlt: null` = nur im Tab, nichts darüber hinaus gemerkt; `finde(wert)` der App entscheidet, wer zu diesem Platz gehört (Kennung, ältere Stände auch Name) |
+| `aktiv()` | die angemeldete Person oder `null` |
+| `waehle(wert)` | Person ohne Tab-Pflicht wählen (Tab wird geleert); `false` für Unbekannte, für wen der Tab gilt, und bei einem Platz nur im Tab |
+| `anmelden(wert, pin)` | mit PIN muss sie stimmen (`KERN.geheimnis`); wer im Tab sein muss, braucht eine gesetzte PIN. Gibt die Person oder `null` |
+| `abmelden()` | nichts gewählt, Tab leer |
+
+Benutzt von: Eulenpfad (`lernspiele:spieler`, Tab `lernspiele:aufsicht`; `LS.aktuellerSpieler`, `setzeSpieler`,
+`meldeAufsichtAn`, `abmelden`) und Lernsteig (`lernsteig:aktiv`, Tab `lernsteig:angemeldet`; Aufsicht als Platz nur im
+Tab `lernsteig:aufsicht`). Der Lernsteig hat zwei Plätze, bis das Grundgerüst C1 die Anmeldung wie im Eulenpfad auf
+einen bringt; der **Gast** (C2 a) kommt mit C1 dazu.
+
+### 4.12 Geplant (Plan B, Reihenfolge B4)
+
+Profil-Übernahme zwischen den Apps (C9), Entwickler-Modus, Auswertung (Fazit, Bedarf,
 Kompetenzstand) mit Regeln je App, Einladung, Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
 bevor er umzieht.
 

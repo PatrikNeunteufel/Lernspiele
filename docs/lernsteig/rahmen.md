@@ -125,7 +125,7 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   nur einmal angezeigt, ebenfalls nur als Hash). „PIN vergessen?“ setzt mit dem Code eine neue PIN und gibt einen neuen
   Code. `ohneGeheimnis(k)` für Sicherungen und Abgleich.
 - Angemeldet: Konto ohne PIN bleibt gewählt (`lernsteig:aktiv`); mit PIN nur im geöffneten Tab
-  (`sessionStorage lernsteig:angemeldet`). Ohne Konto gilt das Gastkonto. `LST.konto()` liefert immer das aktive.
+  (`sessionStorage lernsteig:angemeldet`; Rechnung im Kern, `KERN.anmeldung`, docs/kern/rahmen.md 4.11). Ohne Konto gilt das Gastkonto. `LST.konto()` liefert immer das aktive.
 - Alter aus dem Geburtsdatum (`LST_KONTEN.alter`).
 - **Einladung** (EL1 a): `…/lernsteig/#einladung=<base64url(JSON)>` mit `{ v: 1, name, geboren, klasse, niveau,
   lehrplan }`; die Startseite füllt das Formular vor und löscht das Fragment. Erzeugt mit `einladungErstellen(daten)`

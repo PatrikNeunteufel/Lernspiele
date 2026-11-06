@@ -223,7 +223,7 @@ Entscheide Patrik L1 a bis L4 a, 2026-10-31.
   und nur die eigene Statistik, sichert nur die eigenen Daten.
 - **Aufsicht:** meldet sich mit einer PIN (4–6 Ziffern) an. Gespeichert werden nur Salz und
   SHA-256-Hash im Profil; beim Sichern wird beides weggelassen. Die Anmeldung gilt nur im
-  geöffneten Browser-Tab (`sessionStorage`). Die Aufsicht
+  geöffneten Browser-Tab (`sessionStorage`; Rechnung im Kern, `KERN.anmeldung`, docs/kern/rahmen.md 4.11). Die Aufsicht
   - verwaltet Konten und Freigaben,
   - sieht alle Statistiken,
   - sichert alle oder einzelne Kinder und liest Dateien ein,
