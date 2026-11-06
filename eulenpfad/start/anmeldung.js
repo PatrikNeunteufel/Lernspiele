@@ -98,7 +98,7 @@ function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
       // Kachel mit Avatar und Namen darunter (AV3 a)
       ...kinder.map(n => el("button", { type: "button", class: "name-knopf",
         onclick: () => { LS.setzeSpieler(n); nachAnmeldung(); } }, LS.avatarBild(n, 64), el("span", { text: n }))),
-      ...aufsichten.map(n => el("button", { type: "button", class: "name-knopf aufsicht", text: LS.spielerName(n),
+      ...aufsichten.map(n => el("button", { type: "button", class: "name-knopf aufsicht", text: (LS.gesperrt(n) ? "🔒 " : "") + LS.spielerName(n),
         onclick: () => { anmeldeMerk.pin = n; geheZu("pin"); } })));
     karte.append(namen,
       el("div", { class: "pin-zeile" }, el("button", { type: "button", class: "knopf gruen", text: "🐣 Ich bin neu", onclick: () => geheZu("neu") })));
@@ -121,6 +121,7 @@ function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
   /** PIN-Abfrage; eine Aufsicht ohne PIN (frühere Testspieler) legt sie hier zuerst fest. */
   function pinFrage(name) {
     karte.innerHTML = "";
+    if (LS.gesperrt(name)) return freischalten(name);
     const ohnePin = !LS.profil(name).pin;
     // Eine PIN festlegen darf hier nur, wer die erste Aufsicht einrichtet (frühere Testspieler);
     // gibt es schon eine Aufsicht mit PIN, setzt sie die PIN in der Verwaltung.
@@ -156,6 +157,59 @@ function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
         vorgewaehlt ? el("button", { type: "button", class: "knopf hell klein", text: "Zurück", onclick: uebersicht }) : zurueckKnopf()),
       meldung, vergessen);
     feld.focus();
+  }
+
+  /**
+   * Gesperrte Aufsicht (DF4 a): kam über den Abgleich oder eine Sicherung von einem Gerät, auf dem sie eine PIN hat; die
+   * PIN reist nicht mit. Freischalten mit ihrem Wiederherstellungscode oder mit der PIN einer anderen Aufsicht dieses
+   * Geräts, dazu eine neue PIN für dieses Gerät. Gibt es beides nicht, bleibt sie gesperrt.
+   */
+  function freischalten(name) {
+    const mitCode = !!LS.wiederherstellung(name).code;
+    const andere = mitPin.filter(n => n !== name);
+    karte.append(el("h2", { text: `🔒 ${LS.spielerName(name)}` }),
+      el("p", { style: "text-align:center", text: "Diese Aufsicht ist auf einem anderen Gerät mit einer PIN geschützt. Die PIN reist nicht mit — hier braucht sie zuerst eine eigene." }));
+    if (!mitCode && !andere.length) {
+      karte.append(el("p", { class: "leise-text", style: "text-align:center", text: "Freischalten geht mit dem Wiederherstellungscode dieser Aufsicht oder mit der PIN einer anderen Aufsicht dieses Geräts. Hier gibt es beides nicht: Richten Sie zuerst mit „🐣 Ich bin neu“ → „Ich bin erwachsen“ eine Aufsicht ein; sie kann diese dann freischalten." }),
+        el("div", { class: "pin-zeile" }, zurueckKnopf()));
+      return;
+    }
+    const code = el("input", { class: "feld", type: "text", maxlength: "16", autocomplete: "off", placeholder: "Code", "aria-label": "Wiederherstellungscode" });
+    let wer = andere.length === 1 ? andere[0] : null;
+    const vonPin = pinFeld("PIN", "PIN der anderen Aufsicht");
+    const wahl = el("div", { class: "namen" }, ...andere.map(n => {
+      const k = el("button", { type: "button", class: "name-knopf aufsicht" + (n === wer ? " an" : ""), "aria-pressed": String(n === wer), text: LS.spielerName(n),
+        onclick: () => { wer = n; wahl.querySelectorAll("button").forEach(b => { b.classList.toggle("an", b === k); b.setAttribute("aria-pressed", String(b === k)); }); vonPin.focus(); } });
+      return k;
+    }));
+    const pin = pinFeld("neue PIN", "Neue PIN");
+    const zweit = pinFeld("nochmal", "Neue PIN wiederholen");
+    const meldung = meldungFeld();
+    const los = async () => {
+      if (!code.value.trim() && !vonPin.value) return (meldung.textContent = mitCode && andere.length ? "Bitte den Code eingeben oder eine andere Aufsicht ihre PIN." : mitCode ? "Bitte den Wiederherstellungscode eingeben." : "Bitte die PIN der anderen Aufsicht eingeben.");
+      if (!code.value.trim() && !wer) return (meldung.textContent = "Tipp zuerst an, welche Aufsicht es erlaubt.");
+      if (!LS.pinGueltig(pin.value)) return (meldung.textContent = "Die neue PIN hat 4 bis 6 Ziffern.");
+      if (pin.value !== zweit.value) return (meldung.textContent = "Die beiden PINs sind nicht gleich.");
+      try {
+        await LS.freischalten(name, pin.value, code.value.trim() ? { code: code.value } : { von: wer, vonPin: vonPin.value });
+      } catch (e) { vonPin.value = ""; return (meldung.textContent = e.message); }
+      if (await LS.meldeAufsichtAn(name, pin.value)) return vorgewaehlt ? nachAnmeldung() : fertigAngemeldet();
+      meldung.textContent = "Freigeschaltet. Bitte jetzt mit der neuen PIN anmelden.";
+    };
+    beiEnter([code, vonPin, pin, zweit], los);
+    karte.append(
+      mitCode ? el("p", { class: "leise-text", style: "text-align:center;margin-bottom:0", text: "Mit dem Wiederherstellungscode dieser Aufsicht:" }) : "",
+      mitCode ? el("div", { class: "pin-zeile" }, code) : "",
+      andere.length ? el("p", { class: "leise-text", style: "text-align:center;margin-bottom:0", text: mitCode ? "Oder eine andere Aufsicht dieses Geräts erlaubt es mit ihrer PIN:" : "Eine andere Aufsicht dieses Geräts erlaubt es mit ihrer PIN:" }) : "",
+      andere.length > 1 ? wahl : "",
+      andere.length === 1 ? el("p", { style: "text-align:center;font-weight:800;margin:4px 0", text: `Erlaubt von: ${LS.spielerName(wer)}` }) : "",
+      andere.length ? el("div", { class: "pin-zeile" }, vonPin) : "",
+      el("p", { class: "leise-text", style: "text-align:center;margin-bottom:0", text: "Neue PIN für dieses Gerät (4 bis 6 Ziffern):" }),
+      el("div", { class: "pin-zeile" }, pin, zweit,
+        el("button", { type: "button", class: "knopf gruen klein", text: "Freischalten", onclick: los }),
+        vorgewaehlt ? el("button", { type: "button", class: "knopf hell klein", text: "Zurück", onclick: uebersicht }) : zurueckKnopf()),
+      meldung);
+    (mitCode ? code : vonPin).focus();
   }
 
   /** Erwachsene: eine Frage über dem Stoff der Primarschule. Falsch → eine andere Frage; richtig → Schritt weiter(). */

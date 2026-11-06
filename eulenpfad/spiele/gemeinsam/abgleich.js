@@ -27,7 +27,7 @@ LS.abgleich = (() => {
     return g;
   }
   const eigeneDatei = () => `${PRAEFIX}${geraet().id}.json`;
-  const dateiInhalt = () => JSON.stringify({ ...LS.abgleichDaten(), geraet: geraet() });
+  const dateiInhalt = () => JSON.stringify(LS.abgleichDaten(geraet()));
 
   // ----- Ordner merken (IndexedDB: der Browser kann den Zugriff nur dort aufbewahren) -----
   function speicher(art, wert) {
@@ -148,18 +148,14 @@ LS.abgleich = (() => {
   }
 
   /**
-   * Gelesene Sicherung oder Abgleich-Datei zusammenführen; wirft, wenn es keine Datei des Eulenpfads ist. Version 3
-   * (seit LERN_Session15) trägt personen, ältere profile nach Namen. Bis LERN_Session18 verlangte die Prüfung profile
-   * und wies damit jede Datei der Version 3 ab.
+   * Gelesene Sicherung oder Abgleich-Datei (Text oder Objekt) zusammenführen. Ob es eine Datei des Eulenpfads ist und
+   * welche Fassung, prüft der Kern (KERN.daten.lesen; bis LERN_Session18 wies die eigene Prüfung hier jede Datei der
+   * Version 3 ab). Fehler mit einem Satz für die Aufsicht.
    */
-  function datenEinlesen(daten) {
-    const personenDa = d => Array.isArray(d.personen) || (!!d.profile && typeof d.profile === "object");
-    if (!daten || typeof daten !== "object" || !personenDa(daten) || !Array.isArray(daten.protokoll)) throw new Error("Format");
-    return LS.zusammenfuehren(daten);
-  }
-  /** Gesicherte oder Abgleich-Datei einlesen und zusammenführen; wirft bei unlesbarer Datei. */
+  const datenEinlesen = daten => LS.zusammenfuehren(daten);
+  /** Gesicherte oder Abgleich-Datei einlesen und zusammenführen; wirft mit einem Satz bei unlesbarer Datei. */
   async function dateiEinlesen(datei) {
-    return datenEinlesen(JSON.parse(await datei.text()));
+    return datenEinlesen(await datei.text());
   }
 
   /** Was beim Zusammenführen dazukam, in einem Satz. */

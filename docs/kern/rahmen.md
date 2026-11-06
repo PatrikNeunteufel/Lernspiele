@@ -454,7 +454,9 @@ Zufallseingaben gleich.
 
 Entscheide DF1 a, DF2 a, DF4 a (LERN_Session18), dazu R1 a, P1 a und Befund D4. Herkunft: Eulenpfad (`LS.zusammenfuehren`,
 `LS.abgleichDaten`, Löschvermerke) und Lernsteig (`lernsteig/gemeinsam/daten.js`: erst prüfen, dann alles oder nichts).
-Seit 1.15.0 im Kern; die Apps stellen in eigenen Schritten um (Plan B).
+Seit 1.15.0 im Kern. Benutzt vom Eulenpfad seit LERN_Session18 (`LS.zusammenfuehren`, `LS.abgleichDaten`,
+`LS.sicherung`, `LS.loescheSpieler`, `LS.loescheRunden`; Schlüssel `runden: "protokoll"`, Teil `meldungen`, Freigabe);
+der Lernsteig stellt in einem eigenen Schritt um (Plan B).
 
 ```
 { format: "reihe-daten", version: 1, app, art: "sicherung" | "abgleich", gesichert, geraet?,

@@ -276,7 +276,7 @@ function zeichneVerwaltung(box, neu) {
       const f = abDatei.files[0];
       if (!f) return;
       try { abMeldung.textContent = `✓ Eingelesen. ${ab.ergebnisText(await ab.dateiEinlesen(f))}`; }
-      catch { abMeldung.textContent = "Diese Datei kann ich nicht lesen."; }
+      catch (e) { abMeldung.textContent = e?.message || "Diese Datei kann ich nicht lesen."; }
       finally { abDatei.value = ""; }
     });
     const st = ab.stand();

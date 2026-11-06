@@ -241,7 +241,8 @@ Browser geht einen Schritt zurück; Namen stehen nie in der Adresse.
   PIN, bestätigt eine von ihnen mit ihrer PIN (`LS.pinStimmt`, meldet nicht an); dann Name und PIN zweimal.
 - **PIN vergessen** (Entscheide PIN1 a, PIN1-R a mit Zusatz Patrik): Beim Anlegen einer Aufsicht wählt sie eine
   Sicherheitsfrage mit Antwort und bekommt einmal einen Wiederherstellungscode (12 Zeichen, „K7QM-2XRA-9TPL“) zu sehen;
-  gespeichert sind nur Prüfwerte (`wiederherstellung`), nie in Sicherungen oder im Abgleich (`LS.ohneGeheimnis`).
+  gespeichert sind nur Prüfwerte (`wiederherstellung`). In Sicherung und Abgleich reist davon nur der Prüfwert des Codes
+  (Abschnitt 10, „Geschützte Aufsicht“); PIN, Frage und Antwort bleiben auf dem Gerät.
   Bei der PIN-Abfrage führt „PIN vergessen?“ über die Frage für Erwachsene zu den Stufen: (1) Hinweis auf eine zweite
   Aufsicht (setzt die PIN in Verwaltung → Konten), (2) Code, (3) Sicherheitsfrage (Gross-/Kleinschreibung und
   Leerzeichen zählen nicht), danach eine neue PIN und gleich ein neuer Code; (4) Zurücksetzen mit Frist von 3 Tagen
@@ -514,20 +515,34 @@ Seite lädt es direkt nach `spiel.js`.
   `lernspiele:spieler` und die Sitzung der Aufsicht speichern die Kennung. Der frühere Speicher `lernspiele:profile`
   (nach Namen) wird beim ersten Laden umgezogen; zwei Profile, die sich nur in Gross/Klein unterschieden, behalten ihre
   Runden, das zweite bekommt eine Nummer („mia (2)“). Die Rolle heisst `lernend` (bisher `kind`).
-- **Zusammenführen** (`LS.zusammenfuehren`, auch beim Einlesen):
+- **Dateiformat** (seit LERN_Session18, Kern 1.15.0, Entscheide DF1 a, DF2 a, DF4 a; `KERN.daten`, docs/kern/rahmen.md
+  4.19): Sicherung (Statistik, `LS.sicherung(namen, filter)`: gewählte Kinder, Testrunden nur, wenn eingeblendet) und
+  Abgleich-Datei (`LS.abgleichDaten(geraet)`: alles mit Löschvermerken, Freigabe und Meldungen) im Format `reihe-daten`
+  der Reihe. Ältere Dateien (`eulenpfad-daten` 1–3, Version 1 und 2 ohne `format`) deutet der Kern um; eine Datei des
+  Lernsteigs wird mit einem Satz abgewiesen. Ein Gerät mit älterem Stand liest die neuen Dateien erst nach dem Neuladen.
+  Statistik und Verwaltung zeigen beim Einlesen den Satz des Kerns (keine Datei, andere App, neuere Fassung, beschädigt,
+  Speicher voll). Bis LERN_Session18 wies das Einlesen über die Datei jede Datei der Version 3 ab (verlangte `profile`).
+  Test „Sichern und Einlesen“ in `tools/pruefe_spiele.js`, einzeln `node tools/pruefe_spiele.js daten`.
+- **Zusammenführen** (`LS.zusammenfuehren(text | objekt)` über `KERN.daten.einlesen`, auch beim Einlesen): erst wird
+  jeder Eintrag geprüft (`RUNDEN_PRUEFUNG`, `REKORD_PRUEFUNG`), dann alles oder nichts geschrieben.
   - Personen: gleiche Kennung, sonst gleicher Name → dieselbe Person, die ältere Kennung bleibt, die andere wird
-    frühere Kennung (`frueher`); je Feld der jüngere Zeitstempel (`geaendert`). Die PIN reist nie mit. Dateien
-    älterer Geräte (`version` 2 mit `profile` nach Namen) werden umgedeutet; `LS.abgleichDaten()` schreibt `version`
-    3 mit `personen` (seit LERN_Session15 ohne `profile`). Eine Datei liest `LS.abgleich.datenEinlesen` mit `personen`
-    oder `profile`; bis LERN_Session18 verlangte es `profile` und wies jede Datei der Version 3 ab (Test „Sichern und
-    Einlesen“ in `tools/pruefe_spiele.js`, einzeln `node tools/pruefe_spiele.js daten`).
-  - Runden: gleiche Runde (Person, Zeit, Spiel, Stufe) zählt einmal; Verweise auf eine zusammengeführte Kennung
-    werden umgebogen.
-  - Rekorde: ebenso, bei gleicher Runde gilt der höhere Stand (Zwischenstand → Endstand).
-  - Löschen: `lernspiele:geloescht` hält Vermerke für gelöschte Personen (`personen` nach Kennung; `spieler` nach
-    Namen für ältere Geräte) und zurückgesetzte Runden (`person`, `name`). Ein Vermerk entfernt auf allen Geräten,
-    was bis zu seinem Zeitpunkt entstand; danach neu Angelegtes bleibt.
+    frühere Kennung (`frueher`); je Feld der jüngere Zeitstempel (`geaendert`). Die PIN reist nie mit.
+  - Runden: nach Kennung, Verweise auf eine zusammengeführte Kennung werden umgebogen und die Namenskopie nachgeführt;
+    Runden ohne Person der Datei oder des Geräts werden abgewiesen.
+  - Rekorde: ebenso, bei gleicher Kennung gilt der höhere Stand (Zwischenstand → Endstand).
+  - Löschen (`LS.loescheSpieler`, `LS.loescheRunden` über den Kern): `lernspiele:geloescht` hält Vermerke für gelöschte
+    Personen (`personen` nach Kennung, `namen`) und zurückgesetzte Runden (`person`, `name`, `inhalt`); die Form bis
+    LERN_Session18 (`spieler`, `spiel`) liest der Kern weiter. Ein Vermerk entfernt auf allen Geräten, was bis zu seinem
+    Zeitpunkt entstand; wer danach angelegt, geändert wurde oder gespielt hat, bleibt.
   - Freigabe: die des Geräts mit dem jüngsten `lernspiele:freigabeStand`.
+  - Meldungen: je Kennung der jüngere Stand (`stand`), Verweise auf die bleibende Person.
+- **Geschützte Aufsicht** (DF4 a): Eine Aufsicht reist ohne PIN, mit dem Vermerk `geschuetzt` und dem Prüfwert ihres
+  Wiederherstellungscodes. Auf einem Gerät, auf dem sie keine eigene PIN hat, ist sie **gesperrt** (🔒 auf der
+  Anmeldung, `LS.gesperrt(name)`): Tippt man sie an, schaltet man sie mit ihrem Code oder mit der PIN einer anderen
+  Aufsicht dieses Geräts frei und legt eine neue PIN fest (`LS.freischalten`); der Code bleibt derselbe. Setzt eine
+  andere Aufsicht ihre PIN in Verwaltung → Konten, ist sie ebenfalls freigeschaltet. Gibt es weder Code noch eine andere
+  Aufsicht, richtet man zuerst mit „🐣 Ich bin neu“ eine Aufsicht ein. Bis LERN_Session18 kam sie ohne PIN an, und wer
+  sie auf einem Gerät ohne andere Aufsicht antippte, konnte eine PIN festlegen.
 - **Geprüft** am 2026-11-01 auf localhost mit dem Browser-eigenen Dateispeicher (OPFS) als Ordner:
   zwei bzw. drei Geräte, Zwischen- und Endstand, Löschen und neu Anlegen, Freigabe, Neuzeichnen der
   Rangliste. Ungeprüft: `file://`, echte Netzwerk- und Cloud-Ordner, Uhren, die zwischen Geräten

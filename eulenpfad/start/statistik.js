@@ -322,7 +322,8 @@ function zeichneStatistik(box, neu) {
     if (!f) return;
     // Zusammenführen: Was auf diesem Gerät gespielt wurde, bleibt; dazu kommt, was nur in der Datei steht.
     let r;
-    try { r = await LS.abgleich.dateiEinlesen(f); } catch { alert("Diese Datei kann ich nicht lesen."); return; } finally { datei.value = ""; }
+    // Fehler mit einem Satz vom Kern (keine Datei, Datei einer anderen App, neuere Fassung, beschädigt, Speicher voll)
+    try { r = await LS.abgleich.dateiEinlesen(f); } catch (e) { alert(e?.message || "Diese Datei kann ich nicht lesen."); return; } finally { datei.value = ""; }
     alert(LS.abgleich.ergebnisText(r));
     neu();
   });
@@ -349,19 +350,13 @@ function zeichneStatistik(box, neu) {
     })),
     datei));
 
-  /** Profile und Runden der genannten Personen als JSON-Datei; PIN-Hashes bleiben auf dem Gerät. */
+  /**
+   * Profile, Runden, Rekorde und Meldungen der genannten Personen als Datei (Format des Kerns reihe-daten, LS.sicherung):
+   * ohne PIN; eine geschützte Aufsicht reist mit Vermerk und dem Prüfwert ihres Codes (DF4 a). Testrunden nur, wenn
+   * sie eingeblendet sind. Das Muster lernspiele-*.json hält .gitignore aus dem Repo heraus.
+   */
   function sichern(wer) {
-    // Version 3 (LERN_Session15): Personen mit Kennung, ohne PIN und Wiederherstellung; Einträge über die Kennung
-    const personen = wer.map(n => LS.person(n)).filter(Boolean).map(p => LS.ohneGeheimnis(p));
-    const profile = Object.fromEntries(personen.map(p => [p.name, p]));
-    const gehoert = e => personen.some(p => LS.gehoert(e, p));
-    const daten = { format: "eulenpfad-daten", version: 3, gesichert: new Date().toISOString(), personen,
-      protokoll: LS.protokoll().filter(e => sichtbareRunde(e) && gehoert(e)),
-      rekorde: LS.rekorde().filter(e => sichtbareRunde(e) && gehoert(e)),
-      meldungen: LS.meldungen().filter(gehoert) };
-    // Das Muster lernspiele-*.json hält .gitignore aus dem Repo heraus.
-    const namen = Object.keys(profile).map(n => n.replace(/[^\p{L}\p{N}_-]+/gu, "_")).filter(Boolean).join("-");
-    const dateiname = `lernspiele-${namen ? namen + "-" : ""}${new Date().toISOString().slice(0, 10)}.json`;
+    const { daten, dateiname } = LS.sicherung(wer, sichtbareRunde);
     const a = el("a", { href: URL.createObjectURL(new Blob([JSON.stringify(daten, null, 2)], { type: "application/json" })), download: dateiname });
     document.body.append(a);
     a.click();

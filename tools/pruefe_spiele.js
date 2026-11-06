@@ -633,11 +633,13 @@ if (opt.suche !== 0 && (!nurSpiele.length || nurSpiele.includes("suche"))) {
 
 // Sichern und Einlesen (LERN_Session18): Eine Datei eines Geräts muss sich auf einem anderen einlesen lassen. Bis dahin
 // wies LS.abgleich.dateiEinlesen jede Datei der Version 3 ab (prüfte das Feld profile, das sie seit LERN_Session15 nicht
-// mehr trägt), und kein Test merkte es. Je Fall ein frisches Gerät (eigener Kontext, leerer Speicher); --daten=0 schaltet
-// ab; nur dieser Teil: node tools/pruefe_spiele.js daten.
+// mehr trägt), und kein Test merkte es. Seit Kern 1.15.0 über KERN.daten (Format reihe-daten). Je Fall ein frisches Gerät
+// (eigener Kontext, leerer Speicher); --daten=0 schaltet ab; nur dieser Teil: node tools/pruefe_spiele.js daten.
+// Asynchrone Fälle (PIN, Freischalten) hängen sich an spaeter; die Zusammenfassung am Ende wartet auf sie.
+const spaeter = [];
 if (opt.daten !== 0 && (!nurSpiele.length || nurSpiele.includes("daten"))) {
   const geraet = () => {
-    const k = vm.createContext({ __seite: { html: "", search: "", seed: opt.seed }, console, URL, URLSearchParams, structuredClone });
+    const k = vm.createContext({ __seite: { html: "", search: "", seed: opt.seed }, console, URL, URLSearchParams, structuredClone, crypto: globalThis.crypto, TextEncoder });
     vm.runInContext(DOM, k, { filename: "pruef_dom.js" });
     vm.runInContext(fs.readFileSync(path.join(WURZEL, "eulenpfad", "kern", "kern.js"), "utf8"), k, { filename: "kern.js" });
     for (const d of ["spiel.js", "katalog.js", "pruefstand.js", "abgleich.js"]) vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", d), "utf8"), k, { filename: d });
@@ -648,9 +650,15 @@ if (opt.daten !== 0 && (!nurSpiele.length || nurSpiele.includes("daten"))) {
   const a = geraet();
   a.__runden = [runde("Mia", "2026-11-01T10:00:00.000Z"), runde("Leo", "2026-11-01T11:00:00.000Z")];
   vm.runInContext(`LS.neuerSpieler("Mia"); LS.neuerSpieler("Leo"); for (const r of __runden) LS.protokolliere(r);`, a);
-  const v3 = JSON.parse(vm.runInContext("JSON.stringify(LS.abgleichDaten())", a));
+  const heute = JSON.parse(vm.runInContext("JSON.stringify(LS.abgleichDaten())", a));
+  const sicherung = JSON.parse(vm.runInContext(`JSON.stringify(LS.sicherung(["Mia"]))`, a));
+  const v3 = { format: "eulenpfad-daten", version: 3, gesichert: "2026-11-02T09:00:00.000Z",
+    personen: [{ id: "p-v3-ana", name: "Ana", rolle: "lernend", angelegt: "2026-11-01T09:00:00.000Z", geaendert: { name: "2026-11-01T09:00:00.000Z" } }],
+    protokoll: [{ id: "r-v3-1", person: "p-v3-ana", name: "Ana", zeit: "2026-11-02T08:00:00.000Z", inhalt: "zahlenhaus", stufe: "s3", aufgaben: 5, fehler: 0, dauer: 60, sterne: 3 }], rekorde: [] };
   const faelle = [
-    { was: "Datei der Version 3 (heute)", daten: v3, runden: 2, kinder: 2 },
+    { was: "Abgleich-Datei von heute (reihe-daten)", daten: heute, runden: 2, kinder: 2 },
+    { was: `Sicherung einer Person (${sicherung.dateiname})`, daten: sicherung.daten, runden: 1, kinder: 1 },
+    { was: "Datei der Version 3 (eulenpfad-daten)", daten: v3, runden: 1, kinder: 1 },
     { was: "Datei der Version 2 (profile nach Namen)", runden: 1, kinder: 1,
       daten: { version: 2, gesichert: "2026-10-30T09:00:00.000Z", profile: { Ida: { klasse: 2, geaendert: { klasse: "2026-10-30T09:00:00.000Z" } } },
         protokoll: [{ name: "Ida", zeit: "2026-10-30T08:00:00.000Z", spiel: "zahlenhaus", stufe: "s2", aufgaben: 5, fehler: 0, dauer: 60, sterne: 3 }], rekorde: [] } },
@@ -674,6 +682,49 @@ if (opt.daten !== 0 && (!nurSpiele.length || nurSpiele.includes("daten"))) {
     fehlerZahl += maengel.length;
     console.log(`${maengel.length ? "✗" : "✓"} ${f.was}`);
   }
+  // Zweites Einlesen derselben Datei bringt nichts Neues; Löschen auf A wirkt beim Abgleich auch auf B
+  {
+    const b = geraet();
+    b.__daten = heute;
+    const zweimal = vm.runInContext("LS.zusammenfuehren(__daten); LS.zusammenfuehren(__daten).runden", b);
+    vm.runInContext(`LS.loescheSpieler("Leo")`, a);
+    b.__daten = JSON.parse(vm.runInContext("JSON.stringify(LS.abgleichDaten())", a));
+    vm.runInContext("LS.zusammenfuehren(__daten)", b);
+    const bleibt = vm.runInContext("LS.kinderListe().join() + '|' + LS.protokoll().length", b);
+    const maengel = [];
+    if (zweimal !== 0) maengel.push(`zweites Einlesen: ${zweimal} neue Runden statt 0`);
+    if (bleibt !== "Mia|1") maengel.push(`nach dem Löschen von Leo auf A: ${bleibt} statt Mia|1`);
+    for (const m of maengel) console.log(`    FEHLER  Löschen und zweites Einlesen: ${m}`);
+    fehlerZahl += maengel.length;
+    console.log(`${maengel.length ? "✗" : "✓"} Zweites Einlesen ohne Neues, Löschen wirkt auf dem anderen Gerät`);
+  }
+  // Geschützte Aufsicht (DF4 a): ohne PIN in der Datei, auf dem anderen Gerät gesperrt; Anmelden geht erst nach dem
+  // Freischalten mit dem Code (oder der PIN einer anderen Aufsicht dieses Geräts)
+  spaeter.push((async () => {
+    const c = geraet();
+    await vm.runInContext(`(async () => { LS.neuerSpieler("Mama"); await LS.setzePin("Mama", "2468"); await LS.setzeWiederherstellung("Mama", { code: "K7QM-2XRA-9TPL" }); })()`, c);
+    const datei = vm.runInContext("JSON.stringify(LS.abgleichDaten())", c);
+    const d = geraet();
+    d.__datei = datei;
+    const r = await vm.runInContext(`(async () => {
+      LS.abgleich.datenEinlesen(__datei);
+      const vorher = { gesperrt: LS.gesperrt("Mama"), an: await LS.meldeAufsichtAn("Mama", "2468") };
+      let falsch = "";
+      try { await LS.freischalten("Mama", "1357", { code: "AAAA-AAAA-AAAA" }); } catch (e) { falsch = e.message; }
+      await LS.freischalten("Mama", "1357", { code: "k7qm 2xra 9tpl" });
+      return { ...vorher, falsch, danach: LS.gesperrt("Mama"), an2: await LS.meldeAufsichtAn("Mama", "1357") };
+    })()`, d);
+    const maengel = [];
+    const mama = JSON.parse(datei).personen.find(p => p.name === "Mama");
+    if (!mama || mama.pin !== undefined || !mama.geschuetzt || Object.keys(mama.wiederherstellung || {}).join() !== "code") maengel.push("Mama nicht als geschützt ohne PIN in der Datei");
+    if (!r.gesperrt) maengel.push("nicht gesperrt");
+    if (r.an) maengel.push("Anmeldung mit der PIN des anderen Geräts ging");
+    if (r.falsch !== "Der Code stimmt nicht.") maengel.push(`falscher Code: „${r.falsch}“`);
+    if (r.danach || !r.an2) maengel.push("nach dem Freischalten nicht anmeldbar");
+    for (const m of maengel) console.log(`    FEHLER  Geschützte Aufsicht: ${m}`);
+    fehlerZahl += maengel.length;
+    console.log(`${maengel.length ? "✗" : "✓"} Geschützte Aufsicht: gesperrt, mit dem Code freigeschaltet`);
+  })().catch(e => { console.log(`    FEHLER  Geschützte Aufsicht: ${e.stack || e}`); fehlerZahl++; }));
 }
 
 // Namen der Spiele (Hinweis Patrik, LERN_Session7): kein Name doppelt (Fehler); dasselbe Grundwort
@@ -702,5 +753,7 @@ if (ohneTipp.size) {
   console.log(`\nOhne Tipps (ctx.tipp): ${ohneTipp.size} Spiel${ohneTipp.size === 1 ? "" : "e"}`);
   for (const [id, st] of ohneTipp) console.log(`    ${id.padEnd(22)} ${st.length === STUFEN.length ? "alle Stufen" : st.join(" ")}`);
 }
-console.log(`\n${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`);
-process.exitCode = fehlerZahl ? 1 : 0;
+Promise.all(spaeter).then(() => {
+  console.log(`\n${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`);
+  process.exitCode = fehlerZahl ? 1 : 0;
+});

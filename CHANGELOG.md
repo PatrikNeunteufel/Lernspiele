@@ -556,3 +556,12 @@
   abgewiesen. DF4 a in `person.js` (`fuerDatei`, `gesperrt`, `freischalten`) und `anmeldung.js` (gesperrt = keine
   Anmeldung). Die Apps benutzen es noch nicht; ihr Verhalten ist unverändert. docs/kern/rahmen.md 4.7, 4.11, 4.19 (neu),
   Kern-Changelog, Plan.
+- Eulenpfad auf `KERN.daten`: Sichern (Statistik), Abgleich-Datei, Einlesen, Löschen eines Kindes und Zurücksetzen des
+  Spielstands gehen über den Kern (Format `reihe-daten`; ältere Dateien werden gelesen). Neu dabei: jeder Eintrag wird
+  geprüft, bevor etwas geschrieben wird, und es wird alles oder nichts gespeichert; Statistik und Verwaltung zeigen beim
+  Einlesen den Grund in einem Satz („Das ist eine Datei des Lernsteigs; …“). Geschützte Aufsicht (DF4 a): Sie reist
+  ohne PIN und ist auf einem anderen Gerät 🔒 gesperrt, bis sie dort mit ihrem Wiederherstellungscode oder der PIN einer
+  anderen Aufsicht freigeschaltet ist und eine neue PIN hat — vorher konnte dort, wer sie antippte, ohne Frage eine PIN
+  festlegen. Entfernt: eigene Löschvermerke, `LS.ohneGeheimnis`, `meldungenZusammenfuehren`, die doppelte Sicherung in
+  der Statistik. rahmen.md 6 und 10. Test „Sichern und Einlesen“ um Sicherung einer Person, zweites Einlesen, Löschen auf
+  dem anderen Gerät und die geschützte Aufsicht erweitert.
