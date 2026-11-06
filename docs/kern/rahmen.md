@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.16.0, 2026-11-06 (LERN_Session18). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.17.0, 2026-11-06 (LERN_Session18). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.16.0)
+kern/VERSION          Version des Kerns (1.17.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -491,10 +491,28 @@ für die Elemente von `liste`; ohne angemeldete Aufsicht `rollen: ["lernend"]`, 
 Geprüft in `tools/pruefe_kern.js`, darunter eine Nachrechnung: zwei Geräte mit zufälligen Personen, Runden und Löschungen
 gleichen in beide Richtungen ab und haben danach denselben Stand, ohne dass eine gelöschte Runde zurückkommt (150 Fälle).
 
-### 4.20 Geplant
+### 4.20 `KERN.abgleich` (`kern/abgleich.js`) — Abgleich über einen Ordner
 
-Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): der Abgleich
-über einen Ordner (`abgleich.js` über `KERN.daten`, DF3 a; heute nur im Eulenpfad), der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
+Entscheide S1 a (Eulenpfad), DF3 a (LERN_Session18, seit 1.17.0). Jedes Gerät schreibt nur seine eigene Datei
+`<dateiPraefix><gerät>.json` in einen Ordner, den die Aufsicht wählt, und liest beim Abgleichen die der anderen; zwei
+Geräte überschreiben sich nie. Ordner nur mit File System Access (Chrome, Edge auf dem Computer), der Zugriff wird in
+IndexedDB gemerkt; sonst dieselben Daten als Datei. Browser-Schnittstellen erst beim Aufruf.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `KERN.abgleich({ speicher, dateiPraefix, datenbank, ordnerId?, sichern(geraet), einlesen(text, { quelle }), ereignis?, geteilt?, beiAenderung?, zaehltNicht?, schluessel? })` | Abgleich einer App; `sichern` liefert die eigene Datei (`KERN.daten` mit `art: "abgleich"`), `einlesen` führt eine fremde zusammen (`quelle`: „ordner“ oder „datei“); für Tests `ordnerWahl`, `ablage`, `kannOrdner` |
+| `jetzt(fragen)` | `{ status: "ok" \| "kein-ordner" \| "keine-erlaubnis" \| "fehler", neu, geraete }`; `neu` zählt die Ergebnisse zusammen (Zahlen addiert, Ja/Nein verbunden, `KERN.abgleich.summe`); kam etwas dazu, das Ereignis; eine kaputte Datei steht als `{ datei, fehler }` in `geraete`, die anderen werden gelesen |
+| `waehlen()`, `vergessen()`, `ordner()` | Ordner wählen (nach einem Tippen) und abgleichen; vergessen; den gemerkten Ordner |
+| `starte()` | selbsttätig: gleich, wenn die Seite wieder sichtbar wird, und 1,5 s nach Änderungen an `geteilt`; `false` ohne Ordner-Fähigkeit |
+| `dateiSichern()`, `dateiEinlesen(datei)`, `geraet()`, `benenne(name)`, `stand()` | Abgleich über eine Datei; Gerät mit Kennung und Namen (`geraet`); letzter Stand (`abgleichStand`) |
+
+Benutzt vom Eulenpfad (`LS.abgleich`, `lernspiele-sync-`, IndexedDB `lernspiele`, Ereignis `lernspiele:abgeglichen`).
+Der Lernsteig bekommt ihn mit der Verwaltung (Plan C; `lernsteig-sync-`, IndexedDB `lernsteig`, SP1 a). Geprüft in
+`tools/pruefe_kern.js` mit einem Ersatz-Ordner: drei Geräte, kaputte Datei, fremdes Präfix, Erlaubnis, Vergessen.
+
+### 4.21 Geplant
+
+Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
 dritten, Serie/Endlos mit Rekord und Zwischenstand, Wiederholungsbremse, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`)
 und der Rest der Rollen (Gruppenleitung G2 a, Bestätigung durch eine bestehende Aufsicht, PIN zurücksetzen mit Frist). Ein neuer Teil bekommt hier seinen Abschnitt, bevor er umzieht.
 

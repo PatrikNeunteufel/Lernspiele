@@ -19,6 +19,7 @@ require(path.join(WURZEL, "kern", "freigabe.js"));
 require(path.join(WURZEL, "kern", "suche.js"));
 require(path.join(WURZEL, "kern", "runden.js"));
 require(path.join(WURZEL, "kern", "daten.js"));
+require(path.join(WURZEL, "kern", "abgleich.js"));
 require(path.join(WURZEL, "kern", "anmeldung.js"));
 require(path.join(WURZEL, "kern", "entwicklung.js"));
 require(path.join(WURZEL, "kern", "einladung.js"));
@@ -1180,6 +1181,67 @@ console.log("personenmenue.js");
         if (bild(X) !== bild(Y) || zurueck) abw++;
       }
       gleich(abw, 0, "Abgleich in beide Richtungen: gleicher Stand, nichts Gelöschtes zurück (150 Fälle)");
+    }
+
+    // ---------- abgleich (Ordner zwischen Geräten, DF3 a) ----------
+    console.log("abgleich.js");
+    {
+      // Ersatz-Ordner mit File-System-Access-Schnittstelle: entries, getFileHandle, Erlaubnis
+      const ordnerErsatz = (name, erlaubnis = "granted") => {
+        const dateien = new Map();
+        return { name, dateien, erlaubnis,
+          async queryPermission() { return this.erlaubnis; },
+          async requestPermission() { return this.erlaubnis === "prompt" ? (this.erlaubnis = "granted") : this.erlaubnis; },
+          async *entries() { for (const [n, inhalt] of [...dateien]) yield [n, { kind: "file", getFile: async () => ({ text: async () => inhalt }) }]; },
+          async getFileHandle(n, { create } = {}) {
+            if (!dateien.has(n) && !create) throw new Error("nicht gefunden");
+            return { createWritable: async () => { let puffer = ""; return { write: async s => { puffer += s; }, close: async () => { dateien.set(n, puffer); } }; } };
+          } };
+      };
+      const ablageErsatz = () => { let h = null; return { lies: async () => h, schreibe: async x => { h = x; }, loesche: async () => { h = null; } }; };
+      const AB = KERN.abgleich;
+      const geraetMitOrdner = (h, extra = {}) => {
+        const g = geraet();
+        const ab = AB({ speicher: g.sp, dateiPraefix: "lernspiele-sync-", kannOrdner: true, ablage: ablageErsatz(), ordnerWahl: async () => h,
+          sichern: geraetInfo => g.D.sichern({ art: "abgleich", geraet: geraetInfo }),
+          einlesen: text => { const r = g.D.einlesen(text); return { runden: r.runden, personen: r.personen.neu, abgewiesen: r.abgewiesen }; }, ...extra });
+        return { ...g, ab };
+      };
+      const h = ordnerErsatz("Familie");
+      const X = geraetMitOrdner(h), Y = geraetMitOrdner(h), Z = geraetMitOrdner(h);
+      const ada = X.P.anlegen({ name: "Ada" });
+      X.sp.schreibe("runden", [runde(ada.id, t(1)), runde(ada.id, t(2))]);
+      const bo = Y.P.anlegen({ name: "Bo" });
+      Y.sp.schreibe("runden", [runde(bo.id, t(3))]);
+      X.ab.benenne("Laptop");
+      gleich((await X.ab.jetzt()).status, "kein-ordner", "ohne gewählten Ordner");
+      const rx = await X.ab.waehlen();
+      gleich([rx.status, rx.geraete.length, h.dateien.size].join(), "ok,0,1", "erstes Gerät: nur die eigene Datei");
+      gleich(JSON.parse(h.dateien.get(X.ab.eigeneDatei())).geraet.name, "Laptop", "Gerät mit Namen in der Datei");
+      const ry = await Y.ab.waehlen();
+      gleich([ry.status, ry.neu.runden, ry.neu.personen, ry.geraete[0].name].join(), "ok,2,1,Laptop", "zweites Gerät liest das erste");
+      const rx2 = await X.ab.jetzt();
+      gleich([rx2.neu.runden, rx2.neu.personen].join(), "1,1", "erstes Gerät liest das zweite");
+      gleich((await X.ab.jetzt()).neu.runden || 0, 0, "nochmals: nichts neu");
+      // ein drittes Gerät mit einer kaputten Datei im Ordner: die anderen werden trotzdem gelesen
+      h.dateien.set("lernspiele-sync-kaputt.json", "{kaputt");
+      h.dateien.set("lernsteig-sync-fremd.json", "{}");
+      const rz = await Z.ab.waehlen();
+      gleich([rz.neu.runden, rz.geraete.length, rz.geraete.filter(g => g.fehler).length].join(), "3,3,1", "kaputte Datei gemeldet, fremdes Präfix übergangen");
+      gleich(Z.ab.stand().ordner, "Familie", "Stand mit Ordnername");
+      const bild = g => [g.P.alle().map(p => p.name).sort().join(), g.sp.lies("runden", []).map(r => r.id).sort().join()].join("|");
+      await Y.ab.jetzt();
+      gleich(bild(X) === bild(Y) && bild(Y) === bild(Z), true, "drei Geräte mit demselben Stand");
+      // Erlaubnis: ohne Tippen darf der Browser nicht fragen
+      h.erlaubnis = "prompt";
+      gleich((await X.ab.jetzt(false)).status, "keine-erlaubnis", "ohne Erlaubnis und ohne Tippen");
+      gleich((await X.ab.jetzt(true)).status, "ok", "mit Tippen: der Browser fragt");
+      // Summe: Zahlen addiert, Ja/Nein verbunden
+      gleich(JSON.stringify(AB.summe({ a: 1, f: false }, { a: 2, f: true, x: "text" })), '{"a":3,"f":true}', "summe");
+      await X.ab.vergessen();
+      gleich([(await X.ab.jetzt()).status, X.ab.stand()].join(), "kein-ordner,", "Ordner vergessen");
+      wirft(() => AB({ speicher: X.sp, dateiPraefix: "x", sichern() {}, einlesen() {} }), "Präfix ohne Bindestrich");
+      gleich(AB({ speicher: X.sp, dateiPraefix: "lernspiele-sync-", kannOrdner: false, sichern() {}, einlesen() {} }).starte(), false, "ohne Ordner-Fähigkeit kein Selbststart");
     }
 
     gleich(A.D.dateiname("Mia Lena", new Date("2026-11-06T12:00:00Z")), "lernspiele-Mia-Lena-2026-11-06.json", "Dateiname");

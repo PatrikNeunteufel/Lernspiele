@@ -177,7 +177,7 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   nach Kennung (Rekord: höherer Stand), Verweise umgebogen. Ältere Sicherungen (`lernsteig-sicherung` 1, 2) deutet der
   Kern um; eine Datei des Eulenpfads wird mit „Das ist eine Datei des Eulenpfads; …“ abgewiesen. Löschvermerke führt der
   Kern (DF2 a); der Lernsteig löscht heute noch keine Konten. Test: `tools/pruefe_konten.js`.
-- **Aufsichten in einer Datei** (AS1 a, LERN_Session18, vorgeschlagen): liest nur eine angemeldete Aufsicht ein; liest
+- **Aufsichten in einer Datei** (Entscheid AS1 a, LERN_Session18): liest nur eine angemeldete Aufsicht ein; liest
   ein Jugendlicher ein, werden sie abgewiesen (gezählt). Sonst brächte eine selbst gebaute Datei mit einem bekannten
   Code eine Aufsicht ohne Bestätigung aufs Gerät (D5).
 - **Gesperrt** (DF4 a): Ein Konto oder eine Aufsicht mit PIN von einem anderen Gerät ist hier 🔒 gesperrt, bis es mit

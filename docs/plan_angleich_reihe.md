@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.16.0 mit `daten.js`, beide Apps umgestellt; offen: Ordner-Abgleich (DF3 a), Ablauf der Runde, Rest der Rollen; Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): Einstieg und Seiten des Lernsteigs im Ersatz-DOM gebaut, als Nächstes die offenen Kern-Teile (AN2 a), dann B2 Schritt 3 | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.17.0 mit `daten.js` (beide Apps) und `abgleich.js` (Eulenpfad); offen: Ablauf der Runde, Rest der Rollen; Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): Einstieg und Seiten des Lernsteigs im Ersatz-DOM gebaut, als Nächstes die offenen Kern-Teile (AN2 a), dann B2 Schritt 3 | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -80,11 +80,11 @@ von Hand geänderte Kopie oder gleiche Version mit anderem Inhalt als Fehler, ei
 rund 200 Seiten anfasst: Jede Seite lädt einmal `kern/kern.js` vor dem Rahmen ihrer App. Die Teile hängen sich an
 `KERN` (`KERN.zahl`, `KERN.bruch`, …). Tests: `node tools/pruefe_kern.js` (Teile gegen feste Beispiele und
 Nachrechnungen, dazu die Kopien); das Testskript jeder App prüft ihre Kopie.
-Stand 2026-11-06: Kern 1.16.0 mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
+Stand 2026-11-06: Kern 1.17.0 mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
 Freigabe, Suche, Runden, Daten (ein Dateiformat für Sichern, Einlesen und Abgleich mit Löschvermerken und Schutz nach
 DF4 a), Anmeldung (mit Gast), Entwicklung, Einladung, Auswertung, Übernahme einer Aufsicht, Rollleiste und
 Personen-Knopf; Eulenpfad und Lernsteig benutzen, was sie brauchen (`daten.js` beide), die Gratwanderung hat die
-Kopie und lädt sie mit C8. Noch nicht im Kern: der Abgleich über einen Ordner (DF3 a), der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
+Kopie und lädt sie mit C8. Seit 1.17.0 auch der Abgleich über einen Ordner (DF3 a; Lernsteig mit der Verwaltung, Plan C). Noch nicht im Kern: der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
 dritten, Serie/Endlos mit Rekord und Zwischenstand, Wiederholungsbremse, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`)
 und der Rest der Rollen (Gruppenleitung G2 a, Bestätigung durch eine bestehende Aufsicht, PIN zurücksetzen mit Frist).
 
@@ -331,3 +331,8 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   heute kommt eine Person mit PIN ungeschützt an (Eulenpfad: PIN der Aufsicht ohne Frage festlegbar; Lernsteig: Konto
   eines Jugendlichen offen). Nicht b (PIN-Prüfwert reist mit). Kipppunkt: die Grenze aus DS1 a auch für den Abgleich
   als genug ansehen, dann b mit PBKDF2.
+- **AS1 a** (2026-11-06, LERN_Session18, Lernsteig): Aufsichten in einer Datei liest nur eine angemeldete Aufsicht ein;
+  liest ein Jugendlicher ein, werden sie abgewiesen und gezählt (`KERN.daten` `einlesen(…, { rollen })`). Sonst brächte
+  eine selbst gebaute Datei mit bekanntem Code eine Aufsicht ohne Bestätigung aufs Gerät (D5). Nicht b (Aufsichten
+  reisen immer mit). Kipppunkt: der Abgleich über einen Ordner (DF3 a) läuft auch, wenn ein Jugendlicher angemeldet ist —
+  dort gilt, was über den von der Aufsicht eingerichteten Ordner kommt, als von ihr gebracht (Zusatz bei DF3 vorlegen).

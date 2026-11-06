@@ -490,8 +490,9 @@ das die Stufe anbietet; im Endlos-Mix nur Stufen mit `endlos` im Katalog.
 ## 10. Abgleich zwischen Geräten
 
 Entscheid Patrik S1 a, 2026-11-01 (LERN_Session6). Ziel: Endlos-Ranglisten und Statistik sind auf
-jedem Gerät im Haushalt vollständig. Code in `spiele/gemeinsam/abgleich.js` (`LS.abgleich`), jede
-Seite lädt es direkt nach `spiel.js`.
+jedem Gerät im Haushalt vollständig. Code im Kern (`KERN.abgleich`, docs/kern/rahmen.md 4.20, seit LERN_Session18);
+`spiele/gemeinsam/abgleich.js` (`LS.abgleich`) gibt nur mit, was der Eulenpfad anders hat, und den Satz über das
+Ergebnis. Jede Seite lädt es direkt nach `spiel.js`.
 
 - **Ordner:** Die Aufsicht wählt in der Verwaltung auf jedem Gerät denselben Ordner (Netzwerkordner
   oder Ordner eines Cloud-Dienstes). Der Browser merkt sich den Zugriff in IndexedDB (`lernspiele`,

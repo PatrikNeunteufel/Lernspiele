@@ -5,7 +5,7 @@
      und ist auf einem anderen Gerät gesperrt, bis es dort mit dem Code freigeschaltet ist (LST_KONTEN.freischalten).
    - Einlesen (Befund D4): erst wird jeder Eintrag geprüft — Konten mit KERN.person.maengel, Runden und Rekorde mit
      KERN.runden.maengel und dem Schema des Lernsteigs; Ungültiges wird gezählt, nie gespeichert; dann alles oder nichts.
-   - Aufsichten in einer Datei liest nur eine angemeldete Aufsicht ein (Vorschlag AS1 a, LERN_Session18); liest ein
+   - Aufsichten in einer Datei liest nur eine angemeldete Aufsicht ein (Entscheid AS1 a, LERN_Session18); liest ein
      Jugendlicher ein, werden sie abgewiesen — sonst könnte eine selbst gebaute Datei mit bekanntem Code eine Aufsicht
      ohne Bestätigung auf das Gerät bringen (Befund D5). */
 "use strict";

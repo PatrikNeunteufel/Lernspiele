@@ -570,6 +570,10 @@
   PIN reist geschützt und ist auf einem anderen Gerät 🔒 gesperrt (DF4 a) — vorher kam es ohne PIN an und war dort für
   jeden offen. Freischalten auf der Anmeldung und im Personen-Knopf mit dem Wiederherstellungscode und einer neuen
   PIN, eine Aufsicht auch mit der PIN einer anderen Aufsicht (`LST_KONTEN.freischalten`). Aufsichten in einer Datei
-  liest nur eine angemeldete Aufsicht ein (vorgeschlagen AS1 a). Kern 1.16.0: `einlesen(…, { rollen })`, Option
+  liest nur eine angemeldete Aufsicht ein (Entscheid AS1 a). Kern 1.16.0: `einlesen(…, { rollen })`, Option
   `gueltig`, eine eigene PIN nimmt den Vermerk `gesperrt` weg. `.claude/launch.json`: Startprofil `lernspiele-4`
   (Port 8771 fest). docs/lernsteig/rahmen.md 5c, docs/kern/rahmen.md 4.19, gemeinsame_mechaniken.md, Plan.
+- Kern 1.17.0: Abgleich über einen Ordner als Kern-Teil `kern/abgleich.js` (`KERN.abgleich`, DF3 a), in Node mit einem
+  Ersatz-Ordner geprüft (drei Geräte, kaputte Datei, fremdes Präfix, Erlaubnis). Der Eulenpfad gibt in `abgleich.js` nur
+  noch Präfix, Datenbank, Ereignis und den Ergebnissatz mit; Verhalten unverändert (gleiche Datei, gleicher gemerkter
+  Ordner). docs/kern/rahmen.md 4.20, rahmen.md 10, Plan.

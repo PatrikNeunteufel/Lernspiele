@@ -3,6 +3,12 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.17.0 — 2026-11-06 (LERN_Session18)
+- `abgleich.js` (`KERN.abgleich`, DF3 a): Abgleich zwischen Geräten über einen Ordner aus dem Eulenpfad — je Gerät eine
+  Datei, Ordner in IndexedDB gemerkt, Erlaubnis nur nach einem Tippen, selbsttätig beim Öffnen, beim Wiedersichtbarwerden
+  und nach Änderungen; Präfix, Datenbank, Ereignis und das Zusammenführen gibt die App mit. Ergebnisse mehrerer Dateien
+  werden zusammengezählt (`summe`). In Node mit einem Ersatz-Ordner geprüft. Eulenpfad benutzt es (`LS.abgleich`).
+
 ## 1.16.0 — 2026-11-06 (LERN_Session18)
 - `daten.js`: `einlesen(e, { rollen })` übernimmt nur Personen dieser Rollen (Lernsteig ohne angemeldete Aufsicht: nur
   Lernende, AS1 a), die anderen zählen als abgewiesen; Option `gueltig: { runde, rekord }` für eine weitere Prüfung der
