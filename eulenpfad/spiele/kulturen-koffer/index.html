@@ -46,6 +46,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="dinge.js"></script>
 <script>
 "use strict";
@@ -266,11 +267,11 @@ function tippsFuer(a) {
   ];
   if (a.art === "zuordnen") {
     const k = K[a.d.kultur];
-    return [a.koerbe.length > 3 ? TIPP_WO_FUENF : TIPP_WO, `Das ist ${a.d.umschreibung}.`, `Schau nach dem Korb mit ${k.bild}.`];
+    return [a.koerbe.length > 3 ? TIPP_WO_FUENF : TIPP_WO, `Das ist ${a.d.umschreibung}.`, `Schau nach dem Korb ${korbZeichen(k)}.`];
   }
   if (a.art === "erzaehl") {
     const k = K[a.s.kultur];
-    return [TIPP_WO, "Welche Wörter im Satz verraten, wo und wie diese Person lebt?", `Schau nach dem Korb mit ${k.bild}.`];
+    return [TIPP_WO, "Welche Wörter im Satz verraten, wo und wie diese Person lebt?", `Schau nach dem Korb ${korbZeichen(k)}.`];
   }
   if (a.art === "aussage") {
     const k = K[a.x.kultur];
@@ -295,12 +296,16 @@ function tippsFuer(a) {
     return ["Was ist das: etwas zum Anfassen, ein Gebäude, etwas Gemaltes oder etwas Geschriebenes?", was, `Schau nach dem Knopf mit ${art.bild}.`];
   }
   const k = K[a.r.kultur];
-  return ["Lies alle Hinweise, bevor du rätst: Tipp auf „Nächster Hinweis“.", TIPP_WO_FUENF, `Schau nach dem Knopf mit ${k.bild}.`];
+  return ["Lies alle Hinweise, bevor du rätst: Tipp auf „Nächster Hinweis“.", TIPP_WO_FUENF, `Schau nach dem Knopf ${korbZeichen(k)}.`];
 }
 
 /** Hinweis nach einem falschen Korb: was die gewählte Kultur ausmacht, ohne die richtige zu nennen. */
 const kulturHinweis = (id, name) => `${K[id].name}: ${K[id].kurz}. Passt „${name}“ dazu?`;
 const korbInhalt = id => ({ bild: K[id].bild, text: K[id].name });
+// Bilder: Emoji oder „svg:<name>“ aus der Bildersammlung (bilder.js, B1 a) — LS.bild zeichnet beides; im Text steht
+// vor einer Zeichnung nichts (LS.mitBildText), in Tipps heisst ein Korb mit Zeichnung nach der Kultur.
+const mitBild = (b, text) => LS.mitBildText(b, text);
+const korbZeichen = k => (LS.istZeichnung(k.bild) ? `„${k.name}“` : `mit ${k.bild}`);
 const korbFarbe = id => K[id].farbe;
 
 const HILFE = {
@@ -328,11 +333,11 @@ LS.spiel({
     const kk = el("div", { class: "kk" });
     ctx.flaeche.append(kk);
     // Name, Satz und Frage sind Sachkunde, kein Lesestoff: Die Eule liest sie mit vor (rahmen.md 12, V1 a).
-    const karteText = (bild, text) => el("div", { class: "kk-karte" }, bild ? el("span", { class: "kk-bild", text: bild }) : null, el("span", { class: "frage", text }));
+    const karteText = (bild, text) => el("div", { class: "kk-karte" }, bild ? LS.bild(bild, "kk-bild") : null, el("span", { class: "frage", text }));
 
     if (a.art === "altHeute") {
       const d = a.d;
-      const loesung = `${d.bild} ${d.name} → ${ZEIT[a.richtig].text}: ${d.umschreibung}`;
+      const loesung = `${mitBild(d.bild, d.name)} → ${ZEIT[a.richtig].text}: ${d.umschreibung}`;
       kk.append(el("div", { class: "auftrag", text: "Gab es das schon früher, oder gibt es das erst heute?" }));
       const { karte } = LS.koerbe(ctx, {
         karte: { bild: d.bild, text: d.name },
@@ -352,7 +357,7 @@ LS.spiel({
 
     if (a.art === "roemerWahl") {
       const d = a.d;
-      const loesung = `${d.bild} ${d.name}: ${d.umschreibung}`;
+      const loesung = `${mitBild(d.bild, d.name)}: ${d.umschreibung}`;
       kk.append(el("div", { class: "frage", text: "Was gehört zu den Römern?" }));
       const box = LS.auswahl(ctx, {
         optionen: a.optionen, richtig: d,
@@ -369,7 +374,7 @@ LS.spiel({
     if (a.art === "zuordnen") {
       const d = a.d;
       const k = K[d.kultur];
-      const loesung = `${d.bild} ${d.name} → ${k.bild} ${k.name}: ${k.kurz}`;
+      const loesung = `${mitBild(d.bild, d.name)} → ${mitBild(k.bild, k.name)}: ${k.kurz}`;
       kk.append(el("div", { class: "auftrag", text: "Zu wem gehört das?" }));
       const { karte } = LS.koerbe(ctx, {
         karte: { bild: d.bild, text: d.name },
@@ -387,7 +392,7 @@ LS.spiel({
 
     if (a.art === "erzaehl") {
       const k = K[a.s.kultur];
-      const loesung = `${k.bild} ${k.name}: ${k.kurz}`;
+      const loesung = `${mitBild(k.bild, k.name)}: ${k.kurz}`;
       kk.append(el("div", { class: "auftrag", text: "Wer erzählt hier?" }));
       const { karte } = LS.koerbe(ctx, {
         karte: { bild: "💬", text: a.s.satz },
@@ -461,7 +466,7 @@ LS.spiel({
     // Hinweis, und erst nach dem dritten Hinweis (drittem Fehlversuch) zeigt der Rahmen die Lösung.
     const r = a.r;
     const k = K[r.kultur];
-    const loesung = `${k.bild} ${k.name}: ${k.kurz}`;
+    const loesung = `${mitBild(k.bild, k.name)}: ${k.kurz}`;
     kk.append(el("div", { class: "frage", text: "Welche Kultur bin ich? Lies die Hinweise und tippe die Kultur an." }));
     const liste = el("ol", { class: "kk-hinweise", "aria-live": "polite" });
     const zeile = el("p", { class: "kk-weiter-zeile" });

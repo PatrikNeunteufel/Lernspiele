@@ -242,5 +242,175 @@ const BILDER = (() => {
         + `<circle cx="56" cy="22" r="4" fill="#f1c232"/><circle cx="56.6" cy="22" r="1.9" fill="#1b1b1f"/>`
         + `<path d="M61 22 Q70 21 69 30 L66 27 L62 28 Z" fill="#3a3f46"/><path d="M60.5 21 h3 v6 h-3 Z" fill="#f1c232"/>`
         + `<path d="M44 76 L44 80 M47 76 L46 81 M53 76 L54 81 M56 76 L56 80" stroke="#f1c232" stroke-width="2.4" stroke-linecap="round"/>` },
+
+    // ---------- Geschichte (zeitstrahl-sortierer, kulturen-koffer; Bemerkungen 23–25, 29–32) ----------
+    faustkeil: { name: "Faustkeil aus Feuerstein (Tropfenform, abgeschlagene Flächen)", box: "0 0 100 100",
+      svg: `<path d="M50 5 C67 22 77 48 73 72 C70 88 59 95 50 95 C41 95 30 88 27 72 C23 48 33 22 50 5 Z" fill="#9a8a78" stroke="#5e5246" stroke-width="2.5"/>`
+        + `<path d="M50 5 L43 31 L57 35 Z" fill="#b8a896"/><path d="M33 40 L50 45 L44 63 L29 58 Z" fill="#847462"/>`
+        + `<path d="M57 35 L71 47 L63 61 L50 45 Z" fill="#ab9b89"/><path d="M44 63 L63 61 L67 79 L50 87 L33 79 Z" fill="#8e7e6c"/>`
+        + `<path d="M43 31 L33 40 M50 45 L57 35 M44 63 L50 45 M63 61 L71 47" stroke="#5e5246" stroke-width="1.4"/>` },
+    pfahlbau: { name: "Pfahlbau (Holzhaus mit Schilfdach auf Pfählen im See, Einbaum)", box: "0 0 100 100",
+      svg: `<rect x="0" y="66" width="100" height="34" fill="#8cc8ee"/><path d="M4 76 q6 -3 12 0 M40 84 q6 -3 12 0 M70 74 q6 -3 12 0 M18 92 q6 -3 12 0" stroke="#5aa3d6" stroke-width="2" fill="none" stroke-linecap="round"/>`
+        + [20, 32, 44, 56, 68, 80].map(x => `<line x1="${x}" y1="56" x2="${x}" y2="97" stroke="#6b4a2b" stroke-width="4" stroke-linecap="round"/>`).join("")
+        + `<rect x="12" y="52" width="76" height="6" rx="1.5" fill="#8b5e34"/>`
+        + `<rect x="22" y="32" width="56" height="20" fill="#b98a55"/>`
+        + [30, 38, 62, 70].map(x => `<line x1="${x}" y1="33" x2="${x}" y2="51" stroke="#8b6238" stroke-width="1.6"/>`).join("")
+        + `<rect x="45" y="38" width="10" height="14" fill="#4a3420"/>`
+        + `<path d="M14 35 L50 8 L86 35 Z" fill="#cfa94e" stroke="#9a7a2c" stroke-width="1.6"/>`
+        + `<path d="M26 31 L50 13 M38 33 L52 15 M62 33 L50 13 M74 31 L52 15" stroke="#a8862f" stroke-width="1.4"/>`
+        + `<path d="M82 58 L88 58 L92 74 M86 63 L90 63 M87 68 L91 68" stroke="#6b4a2b" stroke-width="2" fill="none" stroke-linecap="round"/>`
+        + `<path d="M60 78 Q74 84 94 78 L92 82 Q74 88 62 82 Z" fill="#7a5230"/>` },
+    roemerstrasse: { name: "Römerstrasse (Steinplatten ohne Linien, Randsteine, Meilenstein, zu den Alpen)", box: "0 0 100 100",
+      svg: `<path d="M0 46 L16 22 L28 34 L45 12 L62 33 L76 20 L100 42 V46 Z" fill="#a9b4c2"/>`
+        + `<path d="M40 19 L45 12 L50 18 L47 17 L44 20 Z M12 28 L16 22 L20 26 L16 26 Z M72 24 L76 20 L81 25 L77 24 Z" fill="#fff"/>`
+        + `<rect x="0" y="44" width="100" height="56" fill="#8fbf6a"/>`
+        + `<path d="M41 44 L59 44 L97 100 L3 100 Z" fill="#bdb5a8" stroke="#7f776c" stroke-width="2.4"/>`
+        + `<path d="M35.4 52 H64.6 M28.6 62 H71.4 M20.1 74 H79.9 M10.4 88 H89.6" stroke="#7f776c" stroke-width="1.6"/>`
+        + `<path d="M46 44 V52 M54 44 V52 M41 52 L40 62 M50 52 V62 M60 52 L61 62 M35 62 L33 74 M46 62 L45 74 M56 62 L57 74 M66 62 L67 74`
+        + ` M27 74 L24 88 M40 74 L39 88 M52 74 V88 M64 74 L65 88 M75 74 L77 88 M18 88 L15 100 M33 88 L31 100 M50 88 V100 M67 88 L69 100 M83 88 L86 100" stroke="#7f776c" stroke-width="1.4"/>`
+        + `<rect x="82" y="48" width="10" height="28" rx="3" fill="#ded7c8" stroke="#8d857a" stroke-width="1.4"/><ellipse cx="87" cy="48" rx="5" ry="2" fill="#ece6d9" stroke="#8d857a" stroke-width="1.2"/>`
+        + `<path d="M84.5 56 h5 M84.5 60 h5 M84.5 64 h3.5" stroke="#8d857a" stroke-width="1.3"/>` },
+    pyramiden: { name: "Pyramiden am Nil (glatte Seiten, Palme, Fluss)", box: "0 0 100 100",
+      svg: `<circle cx="82" cy="16" r="8" fill="#f6c343"/>`
+        + `<rect x="0" y="78" width="100" height="22" fill="#e8cf8f"/>`
+        + `<path d="M58 80 L78 46 L98 80 Z" fill="#d9a958"/><path d="M78 46 L98 80 L84 80 Z" fill="#b8873b"/>`
+        + `<path d="M12 80 L46 22 L80 80 Z" fill="#e4bd6a"/><path d="M46 22 L80 80 L56 80 Z" fill="#c2913f"/>`
+        + `<path d="M24 60 H62 M18 70 H70 M30 50 H58 M36 40 H54" stroke="#c9a05a" stroke-width="1"/>`
+        + `<rect x="0" y="88" width="100" height="7" fill="#5aa3d6"/>`
+        + `<path d="M10 86 Q9 66 12 54" stroke="#8b6238" stroke-width="3" fill="none" stroke-linecap="round"/>`
+        + `<path d="M12 54 Q2 52 0 60 M12 54 Q4 46 2 44 M12 54 Q16 44 24 46 M12 54 Q22 52 26 60 M12 54 Q12 46 10 42" stroke="#4f8f3a" stroke-width="4" fill="none" stroke-linecap="round"/>` },
+    tempel: { name: "Griechischer Tempel (Säulen, Giebeldreieck, Stufen)", box: "0 0 100 100",
+      svg: `<path d="M12 27 L50 8 L88 27 Z" fill="#f1eee6" stroke="#a9a395" stroke-width="1.8"/><path d="M24 24 L50 13 L76 24 Z" fill="#e1dccf"/>`
+        + `<rect x="12" y="27" width="76" height="8" fill="#e8e4da" stroke="#a9a395" stroke-width="1.6"/>`
+        + [18, 30, 42, 54, 66, 78].map(x => `<rect x="${x - 1.5}" y="35" width="10" height="3.5" fill="#e8e4da" stroke="#a9a395" stroke-width="1"/>`
+          + `<rect x="${x}" y="38.5" width="7" height="38" fill="#f6f3ec" stroke="#a9a395" stroke-width="1"/>`
+          + `<path d="M${x + 2.3} 40 V75 M${x + 4.7} 40 V75" stroke="#cfc9bb" stroke-width="1"/>`).join("")
+        + `<rect x="13" y="76.5" width="74" height="6" fill="#e1dccf" stroke="#a9a395" stroke-width="1.4"/>`
+        + `<rect x="8" y="82.5" width="84" height="7" fill="#d4cebf" stroke="#a9a395" stroke-width="1.4"/>` },
+    webgewicht: { name: "Webgewichte aus Ton (mit Loch, an Fäden des Webstuhls)", box: "0 0 100 100",
+      svg: `<rect x="6" y="6" width="88" height="7" rx="3" fill="#8b5e34"/>`
+        + [24, 50, 76].map(x => `<line x1="${x}" y1="13" x2="${x}" y2="42" stroke="#c8b48a" stroke-width="2"/>`
+          + `<path d="M${x - 8} 44 Q${x} 36 ${x + 8} 44 L${x + 13} 90 Q${x} 95 ${x - 13} 90 Z" fill="#b07b52" stroke="#7d5232" stroke-width="1.6"/>`
+          + `<circle cx="${x}" cy="50" r="3.2" fill="#4a3420"/>`).join("") },
+    tonkrug: { name: "Tonkrug (gebrannter Ton, Henkel, eingeritzte Zickzacklinie)", box: "0 0 100 100",
+      svg: `<path d="M66 34 C86 34 86 60 64 60" stroke="#a8622f" stroke-width="7" fill="none" stroke-linecap="round"/>`
+        + `<path d="M38 14 H62 L60 26 C80 34 80 74 66 88 Q50 96 34 88 C20 74 20 34 40 26 Z" fill="#c47a45" stroke="#8d5229" stroke-width="2"/>`
+        + `<ellipse cx="50" cy="14" rx="13" ry="3.5" fill="#8d5229"/>`
+        + `<path d="M27 46 L33 40 L39 46 L45 40 L51 46 L57 40 L63 46 L69 40 L74 46" stroke="#7a4421" stroke-width="2" fill="none"/>`
+        + `<path d="M26 54 H74" stroke="#7a4421" stroke-width="1.6"/>` },
+    bronzebeil: { name: "Beil aus Bronze (goldbraune Metallklinge am Holzschaft)", box: "0 0 100 100",
+      svg: `<path d="M22 92 L62 18" stroke="#8b5e34" stroke-width="9" stroke-linecap="round"/>`
+        + `<path d="M48 26 L60 32 L58 40 L46 34 Z" fill="#6b4a2b"/>`
+        + `<path d="M52 30 L80 14 Q92 20 90 36 Q86 46 74 48 L56 40 Z" fill="#c08a3e" stroke="#7d5a22" stroke-width="2"/>`
+        + `<path d="M80 18 Q88 24 86 36" stroke="#e8c070" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+        + `<path d="M60 36 L76 28" stroke="#9c6e2c" stroke-width="1.6"/>` },
+    mahlstein: { name: "Mahlstein (flacher Unterstein, Läufer zum Reiben, Körner und Mehl)", box: "0 0 100 100",
+      svg: `<path d="M6 80 Q8 64 26 62 Q50 70 74 62 Q92 64 94 80 Q90 90 50 90 Q10 90 6 80 Z" fill="#9aa0a6" stroke="#636a71" stroke-width="2"/>`
+        + `<path d="M20 68 Q50 76 80 68" stroke="#7d848b" stroke-width="2" fill="none"/>`
+        + `<ellipse cx="54" cy="56" rx="20" ry="9" fill="#b3b8bd" stroke="#636a71" stroke-width="2"/>`
+        + `<path d="M40 53 Q54 49 68 53" stroke="#d2d6da" stroke-width="2" fill="none"/>`
+        + `<ellipse cx="26" cy="70" rx="9" ry="3" fill="#f3ead6"/>`
+        + [[16, 66], [20, 63], [12, 70], [78, 66], [84, 69], [74, 70], [30, 64]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2.2" ry="1.4" fill="#d9a93e"/>`).join("") },
+    latein: { name: "Lateinische Inschrift (Steintafel mit römischen Zahlen I V X)", box: "0 0 100 100",
+      svg: `<rect x="8" y="14" width="84" height="72" rx="3" fill="#ddd6c8" stroke="#8d857a" stroke-width="3"/>`
+        + `<rect x="14" y="20" width="72" height="60" fill="none" stroke="#b5ad9f" stroke-width="1.6"/>`
+        + `<path d="M24 30 V58 M20 30 H28 M20 58 H28" stroke="#5a5247" stroke-width="4"/>`
+        + `<path d="M38 30 L48 58 L58 30 M35 30 H41 M55 30 H61" stroke="#5a5247" stroke-width="4" fill="none"/>`
+        + `<path d="M66 30 L82 58 M82 30 L66 58 M63 30 H70 M78 30 H85 M63 58 H70 M78 58 H85" stroke="#5a5247" stroke-width="4"/>`
+        + `<path d="M22 68 H78 M30 74 H70" stroke="#8d857a" stroke-width="2.4" stroke-dasharray="6 3"/>` },
+    aventicum: { name: "Amphitheater von Aventicum (ovale Arena, Mauer mit Bögen)", box: "0 0 100 100",
+      svg: `<ellipse cx="50" cy="52" rx="45" ry="22" fill="#cdbfa6" stroke="#8d7f66" stroke-width="2"/>`
+        + `<ellipse cx="50" cy="52" rx="36" ry="16" fill="#b9aa8e"/><ellipse cx="50" cy="54" rx="26" ry="10" fill="#e8d9a8" stroke="#a8986f" stroke-width="1.6"/>`
+        + `<path d="M5 52 A45 22 0 0 0 95 52 L95 70 A45 22 0 0 1 5 70 Z" fill="#c2b398" stroke="#8d7f66" stroke-width="2"/>`
+        + [10, 18, 27, 36, 45, 55, 64, 73, 82, 90].map(x => { const y = 52 + 22 * Math.sqrt(Math.max(0, 1 - ((x - 50) / 45) ** 2)); return `<path d="M${x - 2.6} ${y + 14} v-5 a2.6 2.6 0 0 1 5.2 0 v5 Z" fill="#6f6250"/>`; }).join("") },
+    wachstafel: { name: "Wachstafel und Griffel (Holzrahmen, dunkles Wachs mit eingeritzter Schrift)", box: "0 0 100 100",
+      svg: `<rect x="10" y="16" width="70" height="70" rx="4" fill="#a8743f" stroke="#6b4a2b" stroke-width="2"/>`
+        + `<rect x="18" y="24" width="54" height="54" rx="2" fill="#5a4630"/>`
+        + `<path d="M24 34 h12 l4 -4 h10 M24 44 h22 l3 3 h12 M24 54 h8 l4 -3 h18 M24 64 h20" stroke="#c9b48c" stroke-width="2" fill="none" stroke-linecap="round"/>`
+        + `<path d="M62 92 L92 22" stroke="#d6cdb8" stroke-width="4.5" stroke-linecap="round"/><path d="M92 22 L95 14" stroke="#8d857a" stroke-width="2.4" stroke-linecap="round"/>`
+        + `<path d="M61 94 l2 -6 l4 2 Z" fill="#8d857a"/>` },
+    kaiser: { name: "Römischer Kaiser (Lorbeerkranz, Purpurmantel)", box: "0 0 100 100",
+      svg: `<path d="M18 100 Q22 72 50 68 Q78 72 82 100 Z" fill="#7a2a6e"/><path d="M50 68 Q40 80 34 100 H46 Q48 82 56 70 Z" fill="#f1ece0"/>`
+        + `<rect x="44" y="56" width="12" height="14" fill="#d9a77f"/>`
+        + `<ellipse cx="50" cy="40" rx="18" ry="21" fill="#e2b48c"/>`
+        + `<path d="M32 36 Q34 18 50 17 Q66 18 68 36 Q60 26 50 27 Q40 26 32 36 Z" fill="#6b4a2b"/>`
+        + [[33, 32, -60], [36, 25, -40], [41, 20, -20], [47, 18, 0], [53, 18, 0], [59, 20, 20], [64, 25, 40], [67, 32, 60]].map(([x, y, w]) => `<ellipse cx="${x}" cy="${y}" rx="5" ry="2.4" transform="rotate(${w} ${x} ${y})" fill="#4f8f3a" stroke="#356b25" stroke-width=".8"/>`).join("")
+        + `<circle cx="43" cy="40" r="1.8" fill="#3a2c22"/><circle cx="57" cy="40" r="1.8" fill="#3a2c22"/>`
+        + `<path d="M50 41 L47 50 H52" stroke="#b3835f" stroke-width="1.6" fill="none"/><path d="M44 54 Q50 57 56 54" stroke="#9a5a44" stroke-width="1.6" fill="none" stroke-linecap="round"/>`
+        + `<ellipse cx="32" cy="42" rx="3" ry="5" fill="#d9a77f"/><ellipse cx="68" cy="42" rx="3" ry="5" fill="#d9a77f"/>` },
+    hieroglyphen: { name: "Hieroglyphen (Bildzeichen auf Stein: Auge, Vogel, Wasser, Lebenszeichen)", box: "0 0 100 100",
+      svg: `<rect x="8" y="6" width="84" height="88" rx="3" fill="#e9d29b" stroke="#b39556" stroke-width="2"/>`
+        + `<path d="M50 8 V92" stroke="#c9ad6e" stroke-width="1.4"/>`
+        + `<path d="M16 26 Q29 14 42 26 Q29 34 16 26 Z" fill="none" stroke="#1f3b73" stroke-width="2.6"/><circle cx="29" cy="25" r="3.6" fill="#1f3b73"/>`
+        + `<path d="M22 31 L20 40 M30 32 Q34 40 40 38" stroke="#1f3b73" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+        + `<path d="M58 34 Q60 22 70 20 Q76 18 78 22 L84 22 L78 26 Q80 34 72 38 L64 40 L60 46 M70 38 L70 46 M66 40 L64 46" stroke="#1f3b73" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+        + `<circle cx="74" cy="23" r="1.4" fill="#1f3b73"/>`
+        + `<path d="M16 62 l4 -4 l4 4 l4 -4 l4 4 l4 -4 l4 4 M16 70 l4 -4 l4 4 l4 -4 l4 4 l4 -4 l4 4" stroke="#1f3b73" stroke-width="2.2" fill="none"/>`
+        + `<ellipse cx="71" cy="60" rx="6" ry="8" fill="none" stroke="#a8322a" stroke-width="3"/><path d="M71 68 V86 M62 70 H80" stroke="#a8322a" stroke-width="3.4" stroke-linecap="round"/>` },
+    mumie: { name: "Mumie (in Leinenbinden gewickelt, im bemalten Sarg)", box: "0 0 100 100",
+      svg: `<path d="M50 4 C70 4 76 18 74 34 C72 52 78 72 70 94 H30 C22 72 28 52 26 34 C24 18 30 4 50 4 Z" fill="#c9962f" stroke="#7d5a14" stroke-width="2"/>`
+        + `<path d="M50 10 C64 10 68 20 67 34 C66 52 70 70 64 90 H36 C30 70 34 52 33 34 C32 20 36 10 50 10 Z" fill="#efe6d0"/>`
+        + [22, 30, 38, 46, 54, 62, 70, 78].map((y, i) => `<path d="M${33 + (i % 2) * 2} ${y} L${67 - ((i + 1) % 2) * 2} ${y + 5}" stroke="#c8bb9a" stroke-width="2.4"/>`).join("")
+        + `<path d="M40 22 Q50 18 60 22" stroke="#3a2c22" stroke-width="2" fill="none"/><path d="M42 26 h5 M53 26 h5" stroke="#3a2c22" stroke-width="2.4" stroke-linecap="round"/>`
+        + `<path d="M26 34 Q50 42 74 34" stroke="#1f3b73" stroke-width="3" fill="none"/>` },
+    schriftzeichen: { name: "Chinesisches Schriftzeichen (山, „Berg“, mit dem Pinsel auf Papier, roter Stempel)", box: "0 0 100 100",
+      svg: `<rect x="12" y="6" width="76" height="88" fill="#f5efe0" stroke="#c9bb9a" stroke-width="2"/>`
+        + `<path d="M50 20 V70" stroke="#1b1b1f" stroke-width="8" stroke-linecap="round"/>`
+        + `<path d="M28 40 L29 72" stroke="#1b1b1f" stroke-width="7" stroke-linecap="round"/>`
+        + `<path d="M72 36 L71 72" stroke="#1b1b1f" stroke-width="7" stroke-linecap="round"/>`
+        + `<path d="M28 72 Q50 74 72 72" stroke="#1b1b1f" stroke-width="7" fill="none" stroke-linecap="round"/>`
+        + `<rect x="70" y="80" width="10" height="10" fill="#c8312a"/><path d="M73 83 h4 M73 86 h4 M75 82 v6" stroke="#f5efe0" stroke-width="1.2"/>` },
+
+    // ---------- Menschen der Urzeit (erdzeit-leiter; Bemerkung 28, Entscheid MF1 a) ----------
+    // Seitenansicht nach rechts. Kennzeichen: Vormensch behaart mit langen Armen und Affengesicht; Frühmensch weniger
+    // behaart mit Steinwerkzeug; früher Homo sapiens schlank in Fellkleidung mit Speer; Neandertaler gedrungen und
+    // kräftig, Überaugenwulst, grosse Nase, Fellkleidung.
+    vormensch: { name: "Vormensch (geht aufrecht, klein, ganz behaart, lange Arme, Affengesicht)", box: "0 0 100 100",
+      svg: GRAS + `<path d="M48 62 L42 88 M54 62 L60 88" stroke="#4a3322" stroke-width="7" stroke-linecap="round"/>`
+        + `<ellipse cx="40" cy="90" rx="5" ry="2.6" fill="#4a3322"/><ellipse cx="63" cy="90" rx="5" ry="2.6" fill="#4a3322"/>`
+        + `<path d="M46 40 L40 74" stroke="#4f3624" stroke-width="6" stroke-linecap="round"/>`
+        + `<ellipse cx="51" cy="50" rx="12" ry="17" fill="#5a3d27"/>`
+        + `<path d="M56 40 L64 74" stroke="#5a3d27" stroke-width="6" stroke-linecap="round"/>`
+        + `<ellipse cx="54" cy="25" rx="11" ry="10" fill="#5a3d27"/>`
+        + `<path d="M56 22 Q68 20 68 30 Q68 37 58 36 Q54 30 56 22 Z" fill="#a87d5c"/>`
+        + `<path d="M55 20 Q61 17 66 21" stroke="#3a281a" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+        + `<circle cx="61" cy="24" r="1.5" fill="#1b1b1f"/><path d="M62 33 Q65 34 67 32" stroke="#6e4a33" stroke-width="1.4" fill="none"/>`
+        + `<path d="M44 38 l-3 3 M46 50 l-3 2 M50 60 l-2 3 M58 44 l3 2" stroke="#3a281a" stroke-width="1.4" stroke-linecap="round"/>` },
+    fruehmensch: { name: "Frühmensch (aufrecht, weniger behaart, schlägt ein Steinwerkzeug)", box: "0 0 100 100",
+      svg: GRAS + `<path d="M47 60 L43 90 M53 60 L59 90" stroke="#6e4630" stroke-width="7" stroke-linecap="round"/>`
+        + `<ellipse cx="41" cy="91" rx="5" ry="2.6" fill="#5a3a26"/><ellipse cx="62" cy="91" rx="5" ry="2.6" fill="#5a3a26"/>`
+        + `<path d="M46 38 Q40 50 46 58" stroke="#7a4e35" stroke-width="5.5" fill="none" stroke-linecap="round"/>`
+        + `<ellipse cx="50" cy="47" rx="10" ry="16" fill="#8a5a3c"/>`
+        + `<path d="M45 40 l-2 3 M48 52 l-2 3 M53 44 l2 2" stroke="#5a3a26" stroke-width="1.3" stroke-linecap="round"/>`
+        + `<path d="M54 38 Q62 44 66 52" stroke="#8a5a3c" stroke-width="5.5" fill="none" stroke-linecap="round"/>`
+        + `<ellipse cx="68" cy="54" rx="5" ry="4" fill="#8d8478" stroke="#5e5246" stroke-width="1.2"/>`
+        + `<ellipse cx="48" cy="60" rx="5" ry="3.6" fill="#a39886" stroke="#5e5246" stroke-width="1.2"/>`
+        + `<circle cx="52" cy="24" r="10" fill="#8a5a3c"/><path d="M42 22 Q44 12 54 13 Q62 14 62 20 Q54 16 44 24 Z" fill="#3a281a"/>`
+        + `<path d="M55 21 Q59 19 62 21" stroke="#5a3a26" stroke-width="2.2" fill="none" stroke-linecap="round"/>`
+        + `<circle cx="58" cy="24" r="1.4" fill="#1b1b1f"/><path d="M61 25 L64 29 L60 29" fill="#7a4e35"/><path d="M57 31 Q60 32 62 31" stroke="#5a3a26" stroke-width="1.3" fill="none"/>` },
+    "homo-sapiens-frueh": { name: "Früher Homo sapiens (schlank, aufrecht, Kleidung aus Fell, Speer mit Steinspitze)", box: "0 0 100 100",
+      svg: GRAS + `<path d="M70 8 L70 92" stroke="#8b5e34" stroke-width="3.4" stroke-linecap="round"/><path d="M70 2 L74 10 L66 10 Z" fill="#8d8478"/>`
+        + `<path d="M47 62 L44 90 M53 62 L57 90" stroke="#6b4129" stroke-width="6" stroke-linecap="round"/>`
+        + `<ellipse cx="42" cy="91" rx="4.6" ry="2.4" fill="#4e2f1d"/><ellipse cx="60" cy="91" rx="4.6" ry="2.4" fill="#4e2f1d"/>`
+        + `<path d="M46 38 Q40 50 44 60" stroke="#6b4129" stroke-width="5" fill="none" stroke-linecap="round"/>`
+        + `<path d="M41 36 Q50 32 59 36 L62 66 Q50 70 38 66 Z" fill="#c19a6b" stroke="#8d6a40" stroke-width="1.6"/>`
+        + `<path d="M40 64 l3 4 l3 -4 l3 4 l3 -4 l3 4 l3 -4 l3 4" stroke="#8d6a40" stroke-width="1.4" fill="none"/>`
+        + `<path d="M56 40 Q64 42 68 46" stroke="#6b4129" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="69.5" cy="46" r="3" fill="#6b4129"/>`
+        + `<rect x="47" y="30" width="7" height="6" fill="#6b4129"/>`
+        + `<ellipse cx="51" cy="22" rx="8.5" ry="10" fill="#7a4b30"/><path d="M42 20 Q42 9 52 10 Q61 11 60 19 Q53 14 44 22 Z" fill="#1e1611"/>`
+        + `<circle cx="55" cy="21" r="1.4" fill="#1b1b1f"/><path d="M58 22 L60.5 26 L57.5 26" fill="#6b4129"/><path d="M54 29 Q57 30 59 28" stroke="#4e2f1d" stroke-width="1.3" fill="none"/>` },
+    neandertaler: { name: "Neandertaler (gedrungen und kräftig, Überaugenwulst, grosse Nase, Bart, Fellkleidung)", box: "0 0 100 100",
+      svg: FELS + `<path d="M44 66 L41 88 M56 66 L59 88" stroke="#a7795a" stroke-width="9" stroke-linecap="round"/>`
+        + `<ellipse cx="39" cy="90" rx="6" ry="3" fill="#6b4a2b"/><ellipse cx="62" cy="90" rx="6" ry="3" fill="#6b4a2b"/>`
+        + `<path d="M36 42 Q28 54 34 64" stroke="#a7795a" stroke-width="8" fill="none" stroke-linecap="round"/>`
+        + `<path d="M33 38 Q50 30 67 38 L70 68 Q50 74 30 68 Z" fill="#9c7448" stroke="#6b4a2b" stroke-width="1.8"/>`
+        + `<path d="M31 66 Q50 72 69 66" stroke="#d8c3a0" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+        + `<path d="M64 42 Q72 50 70 62" stroke="#a7795a" stroke-width="8" fill="none" stroke-linecap="round"/>`
+        + `<ellipse cx="51" cy="22" rx="14" ry="13" fill="#b5866a"/>`
+        + `<path d="M37 22 Q36 6 52 7 Q66 8 66 18 Q56 12 40 24 Z" fill="#7a4a2a"/>`
+        + `<path d="M50 17 Q58 13 66 17" stroke="#7d5640" stroke-width="4" fill="none" stroke-linecap="round"/>`
+        + `<circle cx="59" cy="20" r="1.6" fill="#1b1b1f"/>`
+        + `<path d="M63 20 Q70 24 67 29 L62 28 Z" fill="#9c6c52"/>`
+        + `<path d="M44 26 Q46 40 56 38 Q64 36 64 30 Q58 34 52 30 Q48 30 44 26 Z" fill="#7a4a2a"/>` },
   };
 })();

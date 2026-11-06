@@ -919,16 +919,21 @@ nach `spiel.js` geladen in den 32 Spielen mit Notizen und in der Schriftlich-Wer
 
 Entscheid B1 a (LERN_Session16, Bemerkungen 12–22). `spiele/gemeinsam/bilder.js` (Objekt `BILDER`) ist die **einzige
 Quelle** für Bilder, die es nicht als passendes Emoji gibt: Lebewesen (Luchs, Gämse, Feuersalamander …), Dinge von
-früher (Waschbrett), Schulinstrumente (Triangel). Ein Spiel zeichnet sie nicht selbst.
+früher (Waschbrett), Schulinstrumente (Triangel), Geschichte (Faustkeil, Pfahlbau, Römerstrasse, Pyramiden, Tempel,
+Funde wie Webgewicht und Wachstafel; LERN_Session17, Bemerkungen 23–32) und die Menschen der Urzeit (Vormensch,
+Frühmensch, früher Homo sapiens, Neandertaler; MF1 a). Ein Emoji, das etwas Heutiges zeigt (🪓 Axt für ein Steinwerkzeug,
+🧑 heutiger Mensch für einen Frühmenschen), gilt als unpassend. Ein Spiel zeichnet sie nicht selbst.
 
 - **In Inhaltslisten** steht ein solches Bild wie ein Emoji in der Bildzelle, als `svg:<name>`
   (`["Luchs", "svg:luchs", …]`). Der Name ist klein, ohne Umlaute (ä → ae).
 - **Zeichnen:** `LS.bild(b, klasse = "bild")` gibt ein `<span>` — ein Emoji als Text, `svg:<name>` als Zeichnung
   (Klasse `gezeichnet`, so gross wie ein Emoji derselben Schrift). `LS.auswahl`, `LS.reihenfolge` und `LS.koerbe`
-  benutzen es von selbst, ein Spiel gibt `bild` einfach weiter. In Fliesstext (Ablage, Lösungssatz)
+  benutzen es von selbst, ein Spiel gibt `bild` einfach weiter; die Ablage von `LS.reihenfolge` zeichnet ein
+  `svg:` aus `opt.ablage` ebenfalls. In Fliesstext (Lösungssatz, Lob, Tipp)
   `LS.mitBildText(b, text)`: Emoji davor, eine Zeichnung entfällt. `LS.istZeichnung(b)` unterscheidet.
 - **Laden:** Eine Seite, deren Inhalte `svg:` nennen, lädt `../gemeinsam/bilder.js` nach `entwicklung.js` (heute
-  Früher–heute, Instrumente, Tier-Sortierer, Lebensraum und die Startseite für die Listenansicht der Verwaltung).
+  Früher–heute, Instrumente, Tier-Sortierer, Lebensraum, Zeitstrahl-Sortierer, Kulturen-Koffer, Erdzeit-Leiter und die
+  Startseite für die Listenansicht der Verwaltung).
   Fehlt die Sammlung oder ein Name, zeigt `LS.bild` „❔“ und meldet `Bild svg:… fehlt` auf der Konsole; das
   Testskript zählt das als Fehler, ebenso ein `svg:` im Text der Fläche oder der Lösung.
 - **Prüfansichten:** Beide Listenansichten (Entwickler-Modus, Abschnitt 11, und Prüfung je Eintrag, Abschnitt 17)

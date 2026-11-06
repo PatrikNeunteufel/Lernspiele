@@ -33,13 +33,16 @@ const ZS_GENERATIONEN = [
   [3, "🧓", "die Urgrossmutter"], [3, "🧓", "der Urgrossvater"],
 ];
 
-// [Jahr zum Ordnen, Jahrzahl wie angezeigt, Bild, Ereignis, Zeitalter oder null] — Liste ereignisse.
-// Zeitalter nur, wo es eindeutig ist (nicht um 1450 und 1492: dort beginnt je nach Buch die Neuzeit).
+// [Jahr zum Ordnen, Jahrzahl wie angezeigt, Bild, Ereignis, Zeitalter] — Liste ereignisse.
+// Gefragt wird das Zeitalter nur, wo es eindeutig ist (eines aus ZS_EPOCHEN). Um 1450 und 1492 beginnt je nach
+// Buch die Neuzeit („ab 1500“ oder „mit der Entdeckung Amerikas“): dort steht ZS_UEBERGANG, und die Frage nach dem
+// Zeitalter lässt das Ereignis aus (Entscheid ZA1 a, Bemerkungen 26 und 27). Ordnen und Jahrhundert gelten weiter.
+const ZS_UEBERGANG = "Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt";
 const ZS_EREIGNISSE = [
   [612, "612", "⛪", "Der Mönch Gallus lässt sich an der Steinach nieder — so beginnt St. Gallen", "Mittelalter"],
   [1291, "1291", "📜", "Uri, Schwyz und Unterwalden schliessen den Bundesbrief", "Mittelalter"],
-  [1450, "um 1450", "📖", "Gutenberg druckt Bücher mit beweglichen Buchstaben", null],
-  [1492, "1492", "⛵", "Kolumbus erreicht Amerika", null],
+  [1450, "um 1450", "📖", "Gutenberg druckt Bücher mit beweglichen Buchstaben", ZS_UEBERGANG],
+  [1492, "1492", "⛵", "Kolumbus erreicht Amerika", ZS_UEBERGANG],
   [1803, "1803", "🏛️", "St. Gallen wird ein Kanton", "Neuzeit"],
   [1847, "1847", "🚂", "Die erste Eisenbahn der Schweiz fährt von Zürich nach Baden", "Neuzeit"],
   [1848, "1848", "🇨🇭", "Die Schweiz wird ein Bundesstaat", "Neuzeit"],
@@ -53,12 +56,13 @@ const ZS_EREIGNISSE = [
 // [Bild, Zeitalter] vom ältesten zum neusten — Liste epochen
 const ZS_EPOCHEN = [["🪨", "Steinzeit"], ["🏛️", "Römerzeit"], ["🏰", "Mittelalter"], ["🏭", "Neuzeit"]];
 
-// [Zeitalter, Bild, Merkmal] — Liste epochen
+// [Zeitalter, Bild, Merkmal] — Liste epochen. „svg:…“ aus der Bildersammlung (spiele/gemeinsam/bilder.js, B1 a):
+// Faustkeil, Pfahlbau und Römerstrasse statt heutiger Axt, Lehmhütte und Autostrasse (Bemerkungen 23–25).
 const ZS_MERKMALE = [
   ["Steinzeit", "🦣", "Menschen jagen Mammuts"],
-  ["Steinzeit", "🪓", "Werkzeuge aus Feuerstein"],
-  ["Steinzeit", "🛖", "Pfahlbauten am Seeufer"],
-  ["Römerzeit", "🛣️", "Soldaten bauen Strassen über die Alpenpässe"],
+  ["Steinzeit", "svg:faustkeil", "Werkzeuge aus Feuerstein"],
+  ["Steinzeit", "svg:pfahlbau", "Pfahlbauten am Seeufer"],
+  ["Römerzeit", "svg:roemerstrasse", "Soldaten bauen Strassen über die Alpenpässe"],
   ["Römerzeit", "🏺", "In Augusta Raurica wohnen Römer"],
   ["Mittelalter", "🏰", "Ritter wohnen auf Burgen"],
   ["Mittelalter", "📜", "Mönche schreiben Bücher von Hand ab"],

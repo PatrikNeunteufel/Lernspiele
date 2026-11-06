@@ -36,21 +36,21 @@
    Kulturen China und Griechen kommen erst ab Stufe 5 (Aussagen, Fragen und Quellen zu ihnen ebenso). */
 
 const KK_KULTUREN = [
-  { id: "pfahlbauer", name: "Pfahlbauer", bild: "🛖", bei: "bei den Pfahlbauern", leute: "Die Pfahlbauer", schweiz: true, farbe: "var(--deko-5)",
+  { id: "pfahlbauer", name: "Pfahlbauer", bild: "svg:pfahlbau", bei: "bei den Pfahlbauern", leute: "Die Pfahlbauer", schweiz: true, farbe: "var(--deko-5)",
     kurz: "lebten vor mehreren tausend Jahren an Seen in der Schweiz, in Häusern auf Pfählen" },
   { id: "roemer", name: "Römer", bild: "🛡️", bei: "bei den Römern", leute: "Die Römer", schweiz: true, farbe: "var(--deko-3)",
     kurz: "kamen vor über 2000 Jahren in die Schweiz und bauten Städte, Strassen und warme Bäder" },
-  { id: "aegypten", name: "Altes Ägypten", bild: "🏜️", bei: "im Alten Ägypten", leute: "Die alten Ägypter", schweiz: false, farbe: "var(--deko-6)",
+  { id: "aegypten", name: "Altes Ägypten", bild: "svg:pyramiden", bei: "im Alten Ägypten", leute: "Die alten Ägypter", schweiz: false, farbe: "var(--deko-6)",
     kurz: "lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König" },
   { id: "china", name: "Altes China", bild: "🐉", bei: "im Alten China", leute: "Die Menschen im Alten China", schweiz: false, farbe: "var(--deko-1)",
     kurz: "lebten vor über 2000 Jahren weit im Osten, bauten eine riesige Mauer und erfanden Papier und Kompass" },
-  { id: "griechen", name: "Alte Griechen", bild: "🎭", bei: "bei den alten Griechen", leute: "Die alten Griechen", schweiz: false, farbe: "var(--deko-2)",
+  { id: "griechen", name: "Alte Griechen", bild: "svg:tempel", bei: "bei den alten Griechen", leute: "Die alten Griechen", schweiz: false, farbe: "var(--deko-2)",
     kurz: "lebten vor über 2000 Jahren am Meer, bauten Tempel mit Säulen und erfanden die Olympischen Spiele" },
 ];
 
 const KK_DINGE = [
   // ---------- Pfahlbauer (Jungsteinzeit und Bronzezeit, Schweiz) ----------
-  { bild: "🛖", name: "Haus auf Pfählen", kultur: "pfahlbauer", art: "bau", ab: 1, alt: true,
+  { bild: "svg:pfahlbau", name: "Haus auf Pfählen", kultur: "pfahlbauer", art: "bau", ab: 1, alt: true,
     umschreibung: "ein Haus aus Holz, das auf langen Stangen über dem Wasser oder dem feuchten Ufer steht" },
   { bild: "🛶", name: "Einbaum", kultur: "pfahlbauer", art: "ding", ab: 1, alt: true,
     umschreibung: "ein Boot, das aus einem einzigen Baumstamm ausgehöhlt wurde" },
@@ -62,15 +62,15 @@ const KK_DINGE = [
     umschreibung: "eine Hauswand aus geflochtenen Ästen, mit Lehm verschmiert" }, // ZU PRÜFEN: Flechtwerkwände mit Lehm
   { bild: "🏞️", name: "Dorf am Seeufer", kultur: "pfahlbauer", art: "bau", ab: 2,
     umschreibung: "ein Dorf aus Holzhäusern, das direkt am Ufer eines Sees stand" },
-  { bild: "", name: "Webgewicht", kultur: "pfahlbauer", art: "ding", ab: 3,
+  { bild: "svg:webgewicht", name: "Webgewicht", kultur: "pfahlbauer", art: "ding", ab: 3,
     umschreibung: "ein Stück Ton mit einem Loch, das am Webstuhl die Fäden spannt" },
-  { bild: "", name: "Tonkrug", kultur: "pfahlbauer", art: "ding", ab: 3, auch: ["aegypten", "roemer", "griechen", "china"],
+  { bild: "svg:tonkrug", name: "Tonkrug", kultur: "pfahlbauer", art: "ding", ab: 3, auch: ["aegypten", "roemer", "griechen", "china"],
     umschreibung: "ein Gefäss aus gebranntem Ton für Körner und Wasser" },
   { bild: "🪨", name: "Steinzeit", kultur: "pfahlbauer", art: "wort", ab: 3,
     umschreibung: "die Zeit, in der Werkzeuge aus Stein gemacht wurden, lange bevor es Metall gab" },
-  { bild: "", name: "Bronzezeit", kultur: "pfahlbauer", art: "wort", ab: 4,
+  { bild: "svg:bronzebeil", name: "Bronzezeit", kultur: "pfahlbauer", art: "wort", ab: 4,
     umschreibung: "die Zeit, in der Beile und Schmuck aus dem Metall Bronze gegossen wurden" }, // ZU PRÜFEN: Pfahlbauer lebten auch in der Bronzezeit
-  { bild: "", name: "Mahlstein", kultur: "pfahlbauer", art: "ding", ab: 4, auch: ["aegypten", "roemer"],
+  { bild: "svg:mahlstein", name: "Mahlstein", kultur: "pfahlbauer", art: "ding", ab: 4, auch: ["aegypten", "roemer"],
     umschreibung: "ein flacher Stein, auf dem Körner mit einem zweiten Stein zu Mehl zerrieben wurden" },
 
   // ---------- Römer (in der Schweiz: Augusta Raurica, Aventicum) ----------
@@ -80,19 +80,19 @@ const KK_DINGE = [
     umschreibung: "ein Bild auf dem Boden, aus tausenden kleinen Steinchen gelegt" },
   { bild: "🌉", name: "Aquädukt", kultur: "roemer", art: "bau", ab: 1, alt: true,
     umschreibung: "eine Wasserleitung auf hohen Bögen, die frisches Wasser in die Stadt bringt" },
-  { bild: "🛣️", name: "Gepflasterte Strasse", kultur: "roemer", art: "bau", ab: 2,
+  { bild: "svg:roemerstrasse", name: "Gepflasterte Strasse", kultur: "roemer", art: "bau", ab: 2,
     umschreibung: "ein breiter Weg aus Steinplatten, schnurgerade durch das ganze Land" },
   { bild: "⚔️", name: "Legionär", kultur: "roemer", art: "beruf", ab: 1, alt: true,
     umschreibung: "ein Soldat mit Helm, Schild und kurzem Schwert, der in einer Legion marschiert" },
   { bild: "🛁", name: "Thermen", kultur: "roemer", art: "bau", ab: 2,
     umschreibung: "ein grosses Badehaus mit warmen und kalten Becken für alle Leute der Stadt" },
-  { bild: "", name: "Latein", kultur: "roemer", art: "wort", ab: 3,
+  { bild: "svg:latein", name: "Latein", kultur: "roemer", art: "wort", ab: 3,
     umschreibung: "die Sprache, aus der Wörter wie „Villa“ und „Fenster“ zu uns gekommen sind" }, // ZU PRÜFEN: Fenster von lat. fenestra
   { bild: "🪙", name: "Münze mit Kaiserkopf", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen", "china"],
     umschreibung: "Geld aus Metall mit dem Kopf des Herrschers darauf" },
   { bild: "🏛️", name: "Augusta Raurica", kultur: "roemer", art: "bau", ab: 3, alt: true,
     umschreibung: "eine alte Stadt in der Schweiz mit Theater und Tempelresten, die Soldaten und Händler gründeten" },
-  { bild: "", name: "Aventicum", kultur: "roemer", art: "bau", ab: 4,
+  { bild: "svg:aventicum", name: "Aventicum", kultur: "roemer", art: "bau", ab: 4,
     umschreibung: "eine alte Stadt in der Westschweiz; heute heisst der Ort Avenches" }, // ZU PRÜFEN
   { bild: "🔢", name: "Zahlen I, V, X", kultur: "roemer", art: "wort", ab: 3,
     umschreibung: "Zahlen, die mit Buchstaben geschrieben werden — heute noch auf manchen Uhren" },
@@ -100,23 +100,23 @@ const KK_DINGE = [
     umschreibung: "warme Luft von einem Feuer strömt unter dem Boden durch und heizt das Haus" }, // ZU PRÜFEN: Hypokaust
   { bild: "🪖", name: "Soldatenhelm", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen"],
     umschreibung: "ein Schutz aus Metall für den Kopf eines Soldaten" },
-  { bild: "", name: "Wachstafel", kultur: "roemer", art: "ding", ab: 4, auch: ["griechen"],
+  { bild: "svg:wachstafel", name: "Wachstafel", kultur: "roemer", art: "ding", ab: 4, auch: ["griechen"],
     umschreibung: "ein Brettchen mit Wachs, in das man mit einem Griffel schreibt und das Geschriebene wieder glattstreicht" },
-  { bild: "", name: "Kaiser", kultur: "roemer", art: "beruf", ab: 3, auch: ["china"],
+  { bild: "svg:kaiser", name: "Kaiser", kultur: "roemer", art: "beruf", ab: 3, auch: ["china"],
     umschreibung: "der Herrscher über ein riesiges Reich; sein Kopf war auf den Münzen" },
 
   // ---------- Altes Ägypten ----------
-  { bild: "🔺", name: "Pyramide", kultur: "aegypten", art: "bau", ab: 1, alt: true,
+  { bild: "svg:pyramiden", name: "Pyramide", kultur: "aegypten", art: "bau", ab: 1, alt: true,
     umschreibung: "ein riesiges Grab aus Stein mit vier schrägen Seiten und einer Spitze" },
   { bild: "👑", name: "Pharao", kultur: "aegypten", art: "beruf", ab: 1, alt: true,
     umschreibung: "der König, der wie ein Gott verehrt wurde und für den ein riesiges Grab gebaut wurde" },
-  { bild: "", name: "Hieroglyphen", kultur: "aegypten", art: "wort", ab: 3,
+  { bild: "svg:hieroglyphen", name: "Hieroglyphen", kultur: "aegypten", art: "wort", ab: 3,
     umschreibung: "eine Schrift aus kleinen Bildern: Vögel, Augen, Wellen" },
   { bild: "📜", name: "Papyrus", kultur: "aegypten", art: "ding", ab: 1, alt: true,
     umschreibung: "ein Blatt zum Schreiben, aus den Stängeln einer Pflanze am Fluss gemacht" },
   { bild: "🌊", name: "Der Nil", kultur: "aegypten", art: "wort", ab: 2,
     umschreibung: "ein sehr langer Fluss, der jedes Jahr über die Ufer trat und die Felder fruchtbar machte" },
-  { bild: "", name: "Mumie", kultur: "aegypten", art: "ding", ab: 3,
+  { bild: "svg:mumie", name: "Mumie", kultur: "aegypten", art: "ding", ab: 3,
     umschreibung: "ein toter Mensch, der in Tücher gewickelt wurde, damit er nicht verwest" },
   { bild: "🦁", name: "Sphinx", kultur: "aegypten", art: "bau", ab: 1, alt: true,
     umschreibung: "eine riesige Statue: ein Löwe mit dem Kopf eines Menschen" },
@@ -142,7 +142,7 @@ const KK_DINGE = [
     umschreibung: "ein heisses Getränk aus getrockneten Blättern" }, // ZU PRÜFEN: Tee schon im alten China
   { bild: "🍚", name: "Reis", kultur: "china", art: "ding", ab: 5,
     umschreibung: "kleine weisse Körner, die in überschwemmten Feldern wachsen" },
-  { bild: "", name: "Schriftzeichen", kultur: "china", art: "wort", ab: 5,
+  { bild: "svg:schriftzeichen", name: "Schriftzeichen", kultur: "china", art: "wort", ab: 5,
     umschreibung: "eine Schrift mit tausenden verschiedenen Zeichen, jedes für ein ganzes Wort" },
 
   // ---------- Alte Griechen (ab Stufe 5) ----------
@@ -263,7 +263,7 @@ const KK_GAB = [
   { ding: "Glühlampe", bild: "💡", kultur: "pfahlbauer", ja: false, grund: "Glühlampen gibt es erst seit etwa 150 Jahren. Licht gab nur das Feuer." },
   { ding: "Schrift", bild: "✍️", kultur: "aegypten", ja: true, grund: "Die Ägypter schrieben mit Hieroglyphen, kleinen Bildzeichen." },
   { ding: "Strom", bild: "⚡", kultur: "aegypten", ja: false, grund: "Strom aus der Steckdose gibt es erst seit gut 100 Jahren." },
-  { ding: "Pyramiden", bild: "🔺", kultur: "aegypten", ja: true, grund: "Die Pyramiden sind riesige Gräber aus Stein für die Pharaonen." },
+  { ding: "Pyramiden", bild: "svg:pyramiden", kultur: "aegypten", ja: true, grund: "Die Pyramiden sind riesige Gräber aus Stein für die Pharaonen." },
   { ding: "Computer", bild: "💻", kultur: "aegypten", ja: false, grund: "Computer gibt es erst seit kurzer Zeit." },
   { ding: "Boote", bild: "⛵", kultur: "aegypten", ja: true, grund: "Auf dem Nil fuhren Segelboote mit Steinen und Getreide." },
   { ding: "Katzen", bild: "🐈", kultur: "aegypten", ja: true, grund: "Katzen waren im Alten Ägypten heilige Tiere." }, // ZU PRÜFEN

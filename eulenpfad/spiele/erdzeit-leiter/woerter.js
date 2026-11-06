@@ -7,7 +7,7 @@
    Schreibweise je Eintrag:
      mio        vor wie vielen Millionen Jahren (ganze Zahl) — oder
      jahre      vor wie vielen Jahren, für alles unter 10 Millionen Jahren, das keine ganze Zahl Millionen ist
-     bild       Emoji
+     bild       Emoji, oder „svg:<name>“ aus der Bildersammlung (spiele/gemeinsam/bilder.js; die Menschen der Urzeit, MF1 a)
      text       das Ereignis, ein kurzer Satz
      zeitalter  Erdurzeit (vor 541 Mio.), Erdaltertum (541–252 Mio.), Erdmittelalter (252–66 Mio.),
                 Erdneuzeit (seit 66 Mio.)
@@ -45,12 +45,12 @@ const ERDZEIT_EREIGNISSE = [
   { mio: 50, bild: "🐋", text: "Die Vorfahren der Wale gehen ins Wasser.", zeitalter: "Erdneuzeit" },
   { mio: 30, bild: "🏔️", text: "Die Alpen falten sich auf.", zeitalter: "Erdneuzeit" },
   { mio: 10, bild: "⛰️", text: "Das Juragebirge faltet sich auf.", zeitalter: "Erdneuzeit" },
-  { mio: 6, bild: "🚶", text: "Erste Vormenschen gehen auf zwei Beinen.", zeitalter: "Erdneuzeit" },
+  { mio: 6, bild: "svg:vormensch", text: "Erste Vormenschen gehen auf zwei Beinen.", zeitalter: "Erdneuzeit" },
   { mio: 3, bild: "🦴", text: "Die Vormenschen-Frau „Lucy“ lebt in Afrika.", zeitalter: "Erdneuzeit" },
-  { jahre: 2500000, bild: "🪓", text: "Frühmenschen machen die ersten Steinwerkzeuge.", zeitalter: "Erdneuzeit" },
+  { jahre: 2500000, bild: "svg:fruehmensch", text: "Frühmenschen machen die ersten Steinwerkzeuge.", zeitalter: "Erdneuzeit" },
   { mio: 1, bild: "🔥", text: "Frühmenschen nutzen das Feuer.", zeitalter: "Erdneuzeit" },
-  { jahre: 300000, bild: "🧑", text: "Der heutige Mensch (Homo sapiens) entsteht in Afrika.", zeitalter: "Erdneuzeit" },
-  { jahre: 40000, bild: "🧔", text: "Die letzten Neandertaler sterben aus.", zeitalter: "Erdneuzeit" },
+  { jahre: 300000, bild: "svg:homo-sapiens-frueh", text: "Der heutige Mensch (Homo sapiens) entsteht in Afrika.", zeitalter: "Erdneuzeit" },
+  { jahre: 40000, bild: "svg:neandertaler", text: "Die letzten Neandertaler sterben aus.", zeitalter: "Erdneuzeit" },
   { jahre: 20000, bild: "🧊", text: "Höhepunkt der letzten Eiszeit: Gletscher bedecken fast die ganze Schweiz.", zeitalter: "Erdneuzeit" },
   { jahre: 12000, bild: "🌤️", text: "Die letzte Eiszeit geht zu Ende.", zeitalter: "Erdneuzeit" },
 ];

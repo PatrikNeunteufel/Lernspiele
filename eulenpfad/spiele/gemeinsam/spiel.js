@@ -2102,7 +2102,8 @@ const LS = (() => {
           k.classList.add("gewaehlt");
           ton("tipp");
           if (opt.pfeile && pos > 1) ablage.append(el("span", { class: "pfeil", text: "→" }));
-          ablage.append(el("span", { text: opt.ablage ? opt.ablage(wert) : String(wert) }));
+          const teil = opt.ablage ? opt.ablage(wert) : String(wert);
+          ablage.append(istZeichnung(teil) ? bild(teil) : el("span", { text: teil })); // Zeichnung aus der Bildersammlung (B1 a)
           if (pos === opt.reihe.length) { fertig = true; if (opt.beiRichtig) opt.beiRichtig(); ctx.richtig(opt.lob); }
           return;
         }

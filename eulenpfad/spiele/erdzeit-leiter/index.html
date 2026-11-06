@@ -70,6 +70,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="woerter.js"></script>
 <script>
 "use strict";
@@ -272,7 +273,7 @@ function pruefeAufgabe(a, stufe) {
 /** Karte eines Ereignisses; mit Zeit, wenn zahl. */
 function ereignisKarte(text, zahl) {
   const e = ereignis(text);
-  return el("div", { class: "ez-ereignis auftrag" }, el("span", { class: "ez-bild", "aria-hidden": "true", text: e.bild }), e.text,
+  return el("div", { class: "ez-ereignis auftrag" }, LS.bild(e.bild, "ez-bild"), e.text,
     zahl ? el("small", { text: vorText(e) }) : null);
 }
 
@@ -286,7 +287,7 @@ function zeigeFrueher(ctx, a) {
   LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 220,
     inhalt: t => { const e = ereignis(t); return { bild: e.bild, text: e.text }; },
     hinweis: TIPP_ORDNEN, loesung,
-    lob: `Richtig! ${a.optionen.map(t => `${ereignis(t).bild} ${vorText(ereignis(t))}`).join(", ")}.` });
+    lob: `Richtig! ${a.optionen.map(t => LS.mitBildText(ereignis(t).bild, vorText(ereignis(t)))).join(", ")}.` });
 }
 
 function zeigeOrdnen(ctx, a) {
@@ -295,10 +296,10 @@ function zeigeOrdnen(ctx, a) {
   LS.reihenfolge(ctx, {
     reihe: a.reihe, pfeile: true, breite: 180,
     inhalt: t => { const e = ereignis(t); return { bild: e.bild, text: e.text, klein: a.zahlen ? vorText(e) : null }; },
-    ablage: t => ereignis(t).bild,
+    ablage: t => ereignis(t).bild, // Emoji oder Zeichnung (die Ablage zeichnet beides, LS.reihenfolge)
     hinweis: a.zahlen ? TIPP_ZAHLEN : TIPP_ORDNEN,
-    loesung: a.reihe.map(t => `${ereignis(t).bild} ${t}`).join(" → "),
-    lob: `Richtig! ${a.reihe.map(t => `${ereignis(t).bild} ${vorText(ereignis(t))}`).join(" · ")}`,
+    loesung: a.reihe.map(t => LS.mitBildText(ereignis(t).bild, t)).join(" → "),
+    lob: `Richtig! ${a.reihe.map(t => LS.mitBildText(ereignis(t).bild, vorText(ereignis(t)))).join(" · ")}`,
   }).box.classList.add("ez-ordnen"); // auf dem Handy zwei Karten nebeneinander (BH3 a)
 }
 
@@ -336,7 +337,10 @@ function zeigeLeiter(ctx, a) {
     if (i === a.richtig) {
       fertig = true;
       r.classList.add("richtig");
-      svg.append(S("text", { x: 205, y: yVon(j) + 7, "text-anchor": "middle", "font-size": 20, text: e.bild }));
+      // Emoji als Text, eine Zeichnung als eingebettetes <svg> gleicher Grösse (Bildersammlung, B1 a)
+      const z = LS.istZeichnung(e.bild) ? BILDER[e.bild.slice(4)] : null;
+      if (z) { const g = S("svg", { x: 193, y: yVon(j) - 12, width: 24, height: 24, viewBox: z.box }); g.innerHTML = z.svg; svg.append(g); }
+      else svg.append(S("text", { x: 205, y: yVon(j) + 7, "text-anchor": "middle", "font-size": 20, text: e.bild }));
       ctx.richtig(`Richtig: ${vorText(e)}.`);
       return;
     }
@@ -370,7 +374,7 @@ function zeigeTag(ctx, a) {
   ctx.flaeche.append(el("div", { class: "ez-erklaerung", text: TAG_SATZ }), el("div", { class: "frage", html: "<b>Um wie viel Uhr</b> geschieht das?" }), ereignisKarte(a.text, true));
   LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 170, inhalt: t => ({ text: t }),
     hinweis: `Die ganze Erdgeschichte sind ${dauerText(ERDALTER)}. Welcher Teil davon ist ${dauerText(jahreVon(e))}? So viel fehlt bis Mitternacht.`,
-    loesung: `${e.bild} ${a.richtig}` });
+    loesung: LS.mitBildText(e.bild, a.richtig) });
 }
 
 function zeigeTagRueck(ctx, a) {

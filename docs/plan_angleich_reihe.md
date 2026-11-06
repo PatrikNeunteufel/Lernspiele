@@ -17,7 +17,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
-| A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
+| A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
 | B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.14.0 mit allen Teilen; als Nächstes Testgerüst B2 | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
@@ -265,6 +265,11 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Name, das Menü nennt die anderen Personen des Geräts und getrennt darunter „↩ Abmelden“ (beim Gast „Anmelden“); Kern-Teil
   `KERN.personenMenue` (docs/kern/rahmen.md 4.16). Nicht b (Auswahlliste in beiden: Pfeiltasten melden ab) und nicht c
   (nur Knopf „Abmelden“: Wechseln kostet einen Seitenwechsel).
+- **ZA1 a** (2026-11-06, LERN_Session17, Bemerkungen 26, 27): Ereignisse an der Grenze Mittelalter/Neuzeit (um 1450,
+  1492) bekommen kein Zeitalter, sondern „Übergang … — wird nicht gefragt“; mit fester Grenze aus dem Lehrmittel
+  neu zu entscheiden.
+- **MF1 a** (2026-11-06, LERN_Session17, Bemerkung 28): Menschen der Urzeit als eigene Zeichnungen an den
+  Kennzeichen (Bildersammlung), nicht als heutige Menschen.
 - **TO1 a** (2026-11-06, LERN_Session17): Glieder in Lösungen wie im Lehrmittel ordnen — bei gleichem Grad je Variable im
   Alphabet der höhere Exponent zuerst, (a + b)² = a² + 2ab + b² (`KERN.terme.text`, docs/kern/rahmen.md 4.17). Mit dem
   mathbuch abzugleichen, falls es bei mehreren Variablen anders ordnet.

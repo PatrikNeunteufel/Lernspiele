@@ -508,3 +508,9 @@
   a² + 2ab + b²); heute ändert das keine Aufgabe der Übungen.
 - Server (SV1 a): `server_starten.bat` und `entwickler_server_starten.bat` öffnen die Einstiegsseite `portal/` wie
   GitHub Pages; beide Server leiten die Wurzel dorthin und nennen Einstieg, Eulenpfad und Lernsteig in der Konsole.
+- Bemerkungen 23–32 erledigt: 20 neue Zeichnungen in der Bildersammlung (Faustkeil, Pfahlbau, Römerstrasse, Pyramiden,
+  Tempel, Webgewicht, Tonkrug, Bronzebeil, Mahlstein, Latein, Aventicum, Wachstafel, Kaiser, Hieroglyphen, Mumie,
+  Schriftzeichen; Vormensch, Frühmensch, früher Homo sapiens, Neandertaler — MF1 a) statt unpassender oder fehlender
+  Emojis im Zeitstrahl-Sortierer, Kulturen-Koffer und in der Erdzeit-Leiter; die drei Spiele zeichnen über `LS.bild`,
+  die Ablage von `LS.reihenfolge` auch. Zeitstrahl: Gutenberg und Kolumbus mit „Übergang vom Mittelalter zur Neuzeit
+  — wird nicht gefragt“ (ZA1 a). Listen und Bilder ungeprüft bis zur Prüfansicht (E1 a).

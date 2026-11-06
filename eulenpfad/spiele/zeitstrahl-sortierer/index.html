@@ -28,6 +28,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="zeitstrahl.js"></script>
 <script>
 "use strict";
@@ -154,7 +155,8 @@ const ARTEN = {
   /** Zu welchem Zeitalter gehört das Ereignis? (braucht Ereignisse und Zeitalter) */
   epocheJahr() {
     if (!hat("ereignisse") || !hat("epochen")) return null;
-    const [, jahrText, bild, text, epoche] = waehle(ZS_EREIGNISSE.filter(e => e[4]));
+    // nur Ereignisse mit eindeutigem Zeitalter (ZA1 a: nicht ZS_UEBERGANG)
+    const [, jahrText, bild, text, epoche] = waehle(ZS_EREIGNISSE.filter(e => ZS_EPOCHEN.some(p => p[1] === e[4])));
     return { art: "epocheJahr", jahrText, bild, text, richtig: epoche, optionen: ZS_EPOCHEN.map(e => e[1]) };
   },
   merkmal() {
@@ -354,7 +356,7 @@ LS.spiel({
         loesung: `Der Pfeil zeigt das Jahr ${a.jahr}.`,
       });
     } else if (a.art === "alter") {
-      f.append(el("div", { class: "zs-bild", text: a.bild }),
+      f.append(el("div", { class: "zs-bild" }, LS.bild(a.bild)),
         el("div", { class: "frage", text: `${a.name[0].toUpperCase() + a.name.slice(1)} ist ${a.geboren} geboren. Wie alt wird ${a.name.startsWith("die") ? "sie" : a.name.startsWith("der") ? "er" : "es"} im Jahr ${a.jahr}?` }));
       LS.auswahl(ctx, {
         optionen: a.optionen.map(v => `${v} Jahre`), richtig: `${a.richtig} Jahre`, breite: 120,
@@ -371,7 +373,7 @@ LS.spiel({
         loesung: `${a.jung.jahr} − ${a.alt.jahr} = ${a.richtig}. ${gross(a.alt.name)} ist ${a.richtig} Jahre älter.`,
       });
     } else if (a.art === "geburtstag") {
-      f.append(el("div", { class: "zs-bild", text: a.bild }),
+      f.append(el("div", { class: "zs-bild" }, LS.bild(a.bild)),
         el("div", { class: "frage", text: `Ein Kind ist ${a.geboren} geboren. Mit ${a.alter} Jahren: ${a.ereignis}. In welchem Jahr wird es ${a.alter}?` }));
       LS.auswahl(ctx, {
         optionen: a.optionen.map(String), richtig: String(a.richtig), breite: 110,
@@ -388,7 +390,7 @@ LS.spiel({
         loesung: `${z.jahrText} liegt bei ${a.richtig}.`,
       });
     } else if (a.art === "jahrhundert") {
-      f.append(el("div", { class: "zs-bild", text: a.bild }), el("div", { class: "frage", text: `${a.jahrText}: ${a.text}. In welchem Jahrhundert war das?` }));
+      f.append(el("div", { class: "zs-bild" }, LS.bild(a.bild)), el("div", { class: "frage", text: `${a.jahrText}: ${a.text}. In welchem Jahrhundert war das?` }));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 170,
         hinweis: "Das 1. Jahrhundert sind die Jahre 1 bis 100, das 2. Jahrhundert die Jahre 101 bis 200. Wie geht es weiter?",
@@ -396,7 +398,7 @@ LS.spiel({
       });
     } else {
       const frage = a.art === "epocheJahr" ? `${a.jahrText}: ${a.text}. In welchem Zeitalter war das?` : `${a.text}. In welchem Zeitalter war das?`;
-      f.append(el("div", { class: "zs-bild", text: a.bild }), el("div", { class: "frage", text: frage }));
+      f.append(el("div", { class: "zs-bild" }, LS.bild(a.bild)), el("div", { class: "frage", text: frage }));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 150, inhalt: e => ({ bild: ZS_EPOCHEN.find(x => x[1] === e)[0], text: e }),
         hinweis: a.art === "epocheJahr" ? "Burgen und Ritter gab es bis etwa zum Jahr 1500. Was liegt davor, was danach?" : "Denk an die Werkzeuge, Häuser und Wege der Menschen damals.",
