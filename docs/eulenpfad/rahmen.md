@@ -246,7 +246,9 @@ Browser geht einen Schritt zurück; Namen stehen nie in der Adresse.
   Bei der PIN-Abfrage führt „PIN vergessen?“ über die Frage für Erwachsene zu den Stufen: (1) Hinweis auf eine zweite
   Aufsicht (setzt die PIN in Verwaltung → Konten), (2) Code, (3) Sicherheitsfrage (Gross-/Kleinschreibung und
   Leerzeichen zählen nicht), danach eine neue PIN und gleich ein neuer Code; (4) Zurücksetzen mit Frist von 3 Tagen
-  (`lernspiele:zuruecksetzen`, je Gerät): Die Anmeldung zeigt allen den Termin, PIN oder Code einer Aufsicht bricht ab;
+  (`lernspiele:zuruecksetzen`, je Gerät; seit LERN_Session18 über den Kern `KERN.rollen`, docs/kern/rahmen.md 4.21, RL2 a,
+  im Lernsteig gleich): Die Anmeldung zeigt allen den Termin, PIN oder Code einer Aufsicht bricht ab
+  (`LS.zuruecksetzenAbbrechenMit`);
   nach Ablauf werden alle Aufsichten des Geräts zu Konten ohne PIN, und „Ich bin neu“ richtet ohne Erlaubnis eine neue
   ein. **Achtung Abgleich:** Die Rolle reist mit, nach dem nächsten Abgleich gilt das Zurücksetzen auch auf den anderen
   Geräten. Aufsichten von früher richten Code und Frage in Verwaltung → Konten ein („Falls Sie Ihre PIN vergessen“).

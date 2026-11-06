@@ -15,6 +15,7 @@ require(path.join(WURZEL, "kern", "zufall.js"));
 require(path.join(WURZEL, "kern", "el.js"));
 require(path.join(WURZEL, "kern", "geheimnis.js"));
 require(path.join(WURZEL, "kern", "person.js"));
+require(path.join(WURZEL, "kern", "rollen.js"));
 require(path.join(WURZEL, "kern", "freigabe.js"));
 require(path.join(WURZEL, "kern", "suche.js"));
 require(path.join(WURZEL, "kern", "runden.js"));
@@ -1242,6 +1243,53 @@ console.log("personenmenue.js");
       gleich([(await X.ab.jetzt()).status, X.ab.stand()].join(), "kein-ordner,", "Ordner vergessen");
       wirft(() => AB({ speicher: X.sp, dateiPraefix: "x", sichern() {}, einlesen() {} }), "Präfix ohne Bindestrich");
       gleich(AB({ speicher: X.sp, dateiPraefix: "lernspiele-sync-", kannOrdner: false, sichern() {}, einlesen() {} }).starte(), false, "ohne Ordner-Fähigkeit kein Selbststart");
+    }
+
+    // ---------- rollen (Bestätigung, PIN vergessen, Frist; KR2 a, PIN1 a, RL2 a) ----------
+    console.log("rollen.js");
+    {
+      const RO = KERN.rollen;
+      const g = geraet();
+      gleich(RO.brauchtBestaetigung(g.P), false, "ohne Aufsicht keine Bestätigung nötig");
+      const w = await G.wiederherstellung({ code: "K7QM-2XRA-9TPL", frage: "Haustier?", antwort: "Bello" });
+      const mama = g.P.anlegen({ name: "Mama", rolle: "aufsicht", pin: await G.pin("1111"), wiederherstellung: w.wiederherstellung });
+      const papa = g.P.anlegen({ name: "Papa", rolle: "aufsicht", pin: await G.pin("2222") });
+      const kind = g.P.anlegen({ name: "Kim", aufsicht: [mama.id, papa.id], anfragen: [papa.id] });
+      gleich(RO.brauchtBestaetigung(g.P), true, "mit Aufsicht: Bestätigung nötig");
+      gleich((await RO.bestaetige(g.P, { id: papa.id, pin: "2222" })).id, papa.id, "Bestätigung mit richtiger PIN");
+      const fehlt = async (f, was, text) => { faelle++; try { await f(); fehler++; console.log(`    FEHLER  ${was}: kein Fehler`); } catch (e) { if (text && !e.message.includes(text)) { fehler++; console.log(`    FEHLER  ${was}: ${e.message}`); } } };
+      await fehlt(() => RO.bestaetige(g.P, { id: papa.id, pin: "0000" }), "Bestätigung mit falscher PIN", "bestätigen");
+      await fehlt(() => RO.bestaetige(g.P, { id: kind.id, pin: "" }), "Bestätigung durch ein Kind", "bestätigen");
+      await fehlt(() => RO.neuePin(g.P, mama.id, "3333", { bestaetigung: { id: mama.id, pin: "1111" } }), "sich selbst bestätigen", "bestätigen");
+      // Stufe 1: andere Aufsicht; Stufe 2: Code; Stufe 3: Frage — jedes Mal ein neuer Code, Frage bleibt
+      const s1 = await RO.neuePin(g.P, mama.id, "3333", { bestaetigung: { id: papa.id, pin: "2222" } });
+      gleich([await G.pinStimmt("3333", s1.person.pin), /^[A-Z0-9]{4}-/.test(s1.code), s1.person.wiederherstellung.frage].join(), "true,true,Haustier?", "Stufe 1: andere Aufsicht, neuer Code, Frage bleibt");
+      await fehlt(() => RO.neuePin(g.P, mama.id, "4444", { code: "K7QM-2XRA-9TPL" }), "alter Code gilt nicht mehr", "Code stimmt nicht");
+      const s2 = await RO.neuePin(g.P, mama.id, "4444", { code: s1.code });
+      gleich(await G.pinStimmt("4444", s2.person.pin), true, "Stufe 2: Code");
+      await fehlt(() => RO.neuePin(g.P, mama.id, "5555", { antwort: "Katze" }), "falsche Antwort", "Antwort stimmt nicht");
+      const s3 = await RO.neuePin(g.P, mama.id, "5555", { antwort: " bello " });
+      gleich(await G.pinStimmt("5555", s3.person.pin), true, "Stufe 3: Sicherheitsfrage (Gross/Klein, Leerzeichen egal)");
+      await fehlt(() => RO.neuePin(g.P, papa.id, "5555", { antwort: "x" }), "ohne Sicherheitsfrage", "Antwort stimmt nicht");
+      // Stufe 4: Frist
+      let uhr = new Date("2026-11-06T10:00:00Z");
+      const F = RO.frist({ speicher: g.sp, jetzt: () => uhr });
+      gleich([F.stand(), F.abgelaufen()].join(), ",false", "ohne Frist nichts");
+      gleich(F.anfordern().ab, "2026-11-09T10:00:00.000Z", "Frist 3 Tage");
+      uhr = new Date("2026-11-09T09:59:00Z");
+      gleich(F.abgelaufen(), false, "vor Ablauf nicht");
+      gleich([await RO.abbrechbarMit(g.P, "0000"), await RO.abbrechbarMit(g.P, "5555"), await RO.abbrechbarMit(g.P, s3.code.toLowerCase())].join(), "false,true,true", "abbrechen mit PIN oder Code einer Aufsicht");
+      uhr = new Date("2026-11-09T10:00:00Z");
+      gleich([F.abgelaufen(), F.stand()].join(), "true,", "nach Ablauf: erledigt");
+      // Zurücksetzen: Eulenpfad (Konto ohne PIN) und Lernsteig (entfernt, Verweise gestrichen)
+      const g2 = geraet();
+      for (const p of g.P.alle()) g2.P.speichere([...g2.P.alle(), p]);
+      gleich(RO.zuruecksetzen(g.P, { art: "lernend" }).length, 2, "zwei Aufsichten zurückgesetzt");
+      gleich(g.P.alle().map(p => `${p.name}:${p.rolle}:${!!p.pin}`).join(), "Mama:lernend:false,Papa:lernend:false,Kim:lernend:false", "Eulenpfad: Konten ohne PIN");
+      RO.zuruecksetzen(g2.P, { art: "entfernen", verweise: ["aufsicht", "anfragen"] });
+      const k2 = g2.P.alle();
+      gleich([k2.length, k2[0].name, "aufsicht" in k2[0], "anfragen" in k2[0]].join(), "1,Kim,false,false", "Lernsteig: Aufsichten entfernt, Verbindungen gestrichen");
+      gleich(RO.zuruecksetzen(g2.P, { art: "entfernen" }).length, 0, "ohne Aufsicht nichts");
     }
 
     gleich(A.D.dateiname("Mia Lena", new Date("2026-11-06T12:00:00Z")), "lernspiele-Mia-Lena-2026-11-06.json", "Dateiname");

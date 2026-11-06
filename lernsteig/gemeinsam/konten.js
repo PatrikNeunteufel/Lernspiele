@@ -143,13 +143,13 @@ var LST_KONTEN = (function () {
    */
   async function aufsichtAnlegen(daten) {
     if (!ROLLEN.some(r => r.id === daten.art)) throw new Error("Rolle fehlt");
-    if (aufsichten().length) {
-      const b = daten.bestaetigung || {};
-      const bestehend = aufsichtFinde(b.id);
-      if (!bestehend || !(await G.pinStimmt(b.pin, bestehend.pin))) throw new Error("Eine Aufsicht dieses Geräts muss mit ihrer PIN bestätigen.");
-    }
+    // Bestätigung im Kern (KERN.rollen, KR2 a, D5): nötig, sobald es eine Aufsicht mit PIN gibt — eine gesperrte zählt
+    // nicht, sie könnte nicht bestätigen
+    if (KERN.rollen.brauchtBestaetigung(LISTE)) await KERN.rollen.bestaetige(LISTE, daten.bestaetigung || {});
+    // Sicherheitsfrage (Stufe 3 von „PIN vergessen“, RL2 a): wie im Eulenpfad Pflicht beim Anlegen
+    if (!String(daten.frage || "").trim() || !String(daten.antwort || "").trim()) throw new Error("Bitte eine Sicherheitsfrage und ihre Antwort eingeben.");
     const pin = await G.pin(daten.pin);
-    const w = await G.wiederherstellung();
+    const w = await G.wiederherstellung({ frage: daten.frage, antwort: daten.antwort });
     const a = LISTE.anlegen({ name: daten.name, rolle: "aufsicht", art: daten.art, pin, wiederherstellung: w.wiederherstellung });
     await PLATZ.anmelden(a.id, daten.pin);
     return { aufsicht: a, code: w.code };
@@ -173,19 +173,43 @@ var LST_KONTEN = (function () {
     const p = LISTE.finde(id);
     if (!p) throw new Error("Konto nicht gefunden");
     if (weg.bestaetigung) {
-      const b = aufsichtFinde(weg.bestaetigung.id);
-      if (p.rolle !== "aufsicht" || !b || b.id === p.id || !(await G.pinStimmt(weg.bestaetigung.pin, b.pin))) throw new Error("Eine Aufsicht dieses Geräts muss mit ihrer PIN bestätigen.");
+      if (p.rolle !== "aufsicht") throw new Error(KERN.rollen.BESTAETIGEN);
+      await KERN.rollen.bestaetige(LISTE, weg.bestaetigung, { ausser: p.id });
       await P.freischalten(LISTE, p.id, neuePin, { bestaetigt: true });
     } else await P.freischalten(LISTE, p.id, neuePin, { code: weg.code });
     return PLATZ.anmelden(p.id, neuePin);
   }
-  async function aufsichtNeuePinMitCode(id, code, neuePin) {
-    const a = aufsichtFinde(id);
-    if (!a || !(await G.codeStimmt(code, a.wiederherstellung))) throw new Error("Der Code stimmt nicht.");
-    const pin = await G.pin(neuePin);
-    const w = await G.wiederherstellung({}, a.wiederherstellung || {});
-    LISTE.aendere(id, { pin, wiederherstellung: w.wiederherstellung });
-    return w.code;
+  /**
+   * PIN vergessen für eine Aufsicht (Kern KERN.rollen.neuePin, RL2 a): weg = { code } | { antwort } | { bestaetigung:
+   * { id, pin } } (eine andere Aufsicht dieses Geräts). Setzt die neue PIN, gibt gleich einen neuen Code aus, bricht eine
+   * laufende Frist ab und meldet die Aufsicht an. Gibt den neuen Code zurück.
+   */
+  async function aufsichtPinVergessen(id, neuePin, weg) {
+    if (!aufsichtFinde(id)) throw new Error("Aufsicht nicht gefunden");
+    const { code } = await KERN.rollen.neuePin(LISTE, id, neuePin, weg);
+    FRIST.abbrechen();
+    await PLATZ.anmelden(id, neuePin);
+    return code;
+  }
+
+  // ---------- Zurücksetzen mit Frist (Stufe 4, RL2 a) ----------
+  // lernsteig:zuruecksetzen = { angefordert, ab }; auf der Anmeldung für alle sichtbar, mit PIN oder Code einer Aufsicht
+  // abzubrechen. Nach Ablauf werden die Aufsichten auf diesem Gerät entfernt samt ihren Verbindungen zu den Konten,
+  // ohne Löschvermerk; danach legt „Ich bin neu“ ohne Bestätigung eine neue an.
+  const FRIST = KERN.rollen.frist({ speicher: SPEICHER });
+  const fristStand = () => FRIST.stand();
+  const fristAnfordern = () => FRIST.anfordern();
+  /** Bricht die Eingabe (PIN oder Code einer Aufsicht) die Frist ab? Dann ist sie abgebrochen; true. */
+  async function fristAbbrechenMit(eingabe) {
+    if (!(await KERN.rollen.abbrechbarMit(LISTE, eingabe))) return false;
+    FRIST.abbrechen();
+    return true;
+  }
+  /** Ist die Frist abgelaufen, werden die Aufsichten entfernt; gibt dann true. */
+  function fristFaellig() {
+    if (!FRIST.abgelaufen()) return false;
+    KERN.rollen.zuruecksetzen(LISTE, { art: "entfernen", verweise: ["aufsicht", "anfragen"] });
+    return true;
   }
 
   // ---------- Verbindungen: im Konto aufsicht [Kennungen] und anfragen [Kennungen] ----------
@@ -276,8 +300,8 @@ var LST_KONTEN = (function () {
     KLASSEN, alle, finde, anlegen, aendern, pinStimmt, codeStimmt, neuePinMitCode, setzePin, aktiv, anmelden, abmelden, alter, GERAET, ohneGeheimnis,
     angemeldet, alsGast, istGast, gastErlaubt,
     einladungErstellen, einladungLesen, pinGueltig: G.pinGueltig,
-    ROLLEN, aufsichten, aufsichtFinde, aufsichtAnlegen, aufsichtAnmelden, aufsichtAbmelden, aufsichtAktiv, aufsichtNeuePinMitCode,
-    gesperrt, freischalten,
+    ROLLEN, aufsichten, aufsichtFinde, aufsichtAnlegen, aufsichtAnmelden, aufsichtAbmelden, aufsichtAktiv, aufsichtPinVergessen,
+    gesperrt, freischalten, fristStand, fristAnfordern, fristAbbrechenMit, fristFaellig, FRIST_TAGE: KERN.rollen.TAGE,
     verbundene, mitleser, angefragt, anfragen, antworten, loesen, kontoFuerAufsicht, verbindeEingelesene, setzeGeraeteEinstellung,
     LISTE,
   };

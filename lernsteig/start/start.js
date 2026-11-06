@@ -61,8 +61,15 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   const rolleName = id => (KO.ROLLEN.find(r => r.id === id) || {}).name || "";
   const zurueck = () => el("button", { type: "button", class: "knopf", text: "Zurück", onclick: () => { ansicht = { art: "start" }; zeichne(); } });
 
+  let meldungNachFrist = false;
   function anmeldung(karte) {
     const konten = KO.alle(), aufsichten = KO.aufsichten();
+    // Zurücksetzen mit Frist (RL2 a): für alle sichtbar, abbrechen mit PIN oder Code einer Aufsicht
+    const frist = KO.fristStand();
+    if (frist) dazu(karte, el("p", { class: "meldung", "data-frist": frist.ab },
+      `⚠️ Die Aufsichten dieses Geräts werden am ${new Date(frist.ab).toLocaleString("de-CH", { weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })} entfernt. Wer eine PIN oder einen Code einer Aufsicht kennt, kann es abbrechen. `,
+      el("button", { type: "button", class: "knopf klein", "data-aktion": "frist-abbrechen-oeffnen", text: "Abbrechen", onclick: () => { ansicht = { art: "frist" }; zeichne(); } })));
+    if (meldungNachFrist) dazu(karte, el("p", { class: "meldung", text: "Die Aufsichten wurden zurückgesetzt. Mit „Ich bin neu“ → „Ich bin erwachsen“ legen Sie eine neue an." }));
     dazu(karte,el("h3", { text: konten.length || aufsichten.length ? "Wer übt?" : "Willkommen im Lernsteig" }),
       el("p", { class: "leise", text: konten.length || aufsichten.length
         ? "Tippe auf deinen Namen. Mit 🔒 fragt der Lernsteig nach der PIN."
@@ -98,17 +105,21 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     const rolle = auswahl("Rolle", KO.ROLLEN, "eltern", () => {});
     rolle.querySelector("select").name = "rolle";
     const pin = feld("PIN (4–6 Ziffern)", { type: "password", inputmode: "numeric", maxlength: "6", name: "pin", autocomplete: "new-password" }, "Pflicht für die Aufsicht.");
-    // Gibt es schon eine Aufsicht, bestätigt eine von ihnen mit ihrer PIN (wie Eulenpfad KR2 a; Befund D5).
-    const bestehende = KO.aufsichten();
+    // Sicherheitsfrage (Stufe 3 von „PIN vergessen“, RL2 a), Pflicht wie im Eulenpfad
+    const frage = feld("Sicherheitsfrage", { type: "text", maxlength: "120", name: "frage", autocomplete: "off", placeholder: "z. B. Name des ersten Haustiers?" }, "Falls Sie PIN und Code vergessen. Wählen Sie eine Frage, deren Antwort die Jugendlichen nicht kennen.");
+    const antwort = feld("Antwort", { type: "text", maxlength: "60", name: "antwort", autocomplete: "off" }, "Gross/Klein und Leerzeichen zählen nicht.");
+    // Gibt es schon eine Aufsicht mit PIN, bestätigt eine von ihnen (Kern KERN.rollen, KR2 a; Befund D5).
+    const bestehende = KO.aufsichten().filter(a => a.pin);
     const wer = bestehende.length ? auswahl("Bestätigt von", bestehende.map(a => ({ id: a.id, name: a.name })), bestehende[0].id, () => {}) : null;
     if (wer) wer.querySelector("select").name = "bestaetigt-von";
     const werPin = bestehende.length ? feld("Deren PIN", { type: "password", inputmode: "numeric", maxlength: "6", name: "bestaetigung-pin", autocomplete: "off" }, "Eine Aufsicht dieses Geräts bestätigt die neue.") : null;
     const wert = (knoten, sel) => knoten.querySelector(sel).value.trim();
-    dazu(karte,el("h3", { text: "Neue Aufsicht" }), name, rolle, pin, wer, werPin, fehlerText, el("div", { class: "knopf-zeile" },
+    dazu(karte,el("h3", { text: "Neue Aufsicht" }), name, rolle, pin, frage, antwort, wer, werPin, fehlerText, el("div", { class: "knopf-zeile" },
       el("button", { type: "button", class: "knopf haupt", text: "Aufsicht anlegen", "data-aktion": "anlegen", onclick: async () => {
         try {
           const bestaetigung = wer ? { id: wert(wer, "select"), pin: wert(werPin, "input") } : null;
-          const r = await KO.aufsichtAnlegen({ name: wert(name, "input"), art: wert(rolle, "select"), pin: wert(pin, "input"), bestaetigung });
+          const r = await KO.aufsichtAnlegen({ name: wert(name, "input"), art: wert(rolle, "select"), pin: wert(pin, "input"), bestaetigung,
+            frage: wert(frage, "input"), antwort: wert(antwort, "input") });
           ansicht = { art: "code", code: r.code, aufsicht: true }; zeichne();
         } catch (e) { zeigeFehler(e.message); }
       } }), zurueck()));
@@ -202,22 +213,51 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     return karte;
   }
 
+  /**
+   * PIN vergessen. Jugendliche: mit dem Code. Aufsicht (RL2 a, Kern KERN.rollen): Code, Sicherheitsfrage oder die PIN
+   * einer anderen Aufsicht dieses Geräts — dazu die neue PIN; ohne alles das Zurücksetzen mit Frist.
+   */
   function vergessenForm(karte) {
     const aufsicht = KO.aufsichtFinde(ansicht.id);
     const k = aufsicht || KO.finde(ansicht.id);
-    const code = feld("Wiederherstellungscode", { type: "text", autocomplete: "off", maxlength: "14", name: "code", placeholder: "XXXX-XXXX-XXXX" }, "Den Code hast du beim Anlegen der PIN bekommen.");
+    const w = k.wiederherstellung || {};
+    const andere = aufsicht ? KO.aufsichten().filter(a => a.id !== k.id && a.pin) : [];
+    const code = feld("Wiederherstellungscode", { type: "text", autocomplete: "off", maxlength: "14", name: "code", placeholder: "XXXX-XXXX-XXXX" }, aufsicht ? "Den Code haben Sie beim Anlegen bekommen." : "Den Code hast du beim Anlegen der PIN bekommen.");
+    const antwort = aufsicht && w.frage ? feld(`Oder die Sicherheitsfrage: ${w.frage}`, { type: "text", autocomplete: "off", maxlength: "60", name: "antwort" }) : null;
+    const wer = andere.length ? auswahl("Oder: eine andere Aufsicht erlaubt es", andere.map(a => ({ id: a.id, name: a.name })), andere[0].id, () => {}) : null;
+    if (wer) wer.querySelector("select").name = "bestaetigt-von";
+    const werPin = andere.length ? feld("Deren PIN", { type: "password", inputmode: "numeric", maxlength: "6", name: "bestaetigung-pin", autocomplete: "off" }) : null;
     const pin = feld("Neue PIN (4–6 Ziffern)", { type: "password", inputmode: "numeric", maxlength: "6", name: "neuepin" });
-    dazu(karte,el("h3", { text: `PIN vergessen: ${k.name}` }), code, pin, fehlerText, el("div", { class: "knopf-zeile" },
+    const wert = (knoten, sel) => (knoten ? knoten.querySelector(sel).value.trim() : "");
+    const frist = KO.fristStand();
+    dazu(karte,el("h3", { text: `PIN vergessen: ${k.name}` }), code, antwort, wer, werPin, pin, fehlerText, el("div", { class: "knopf-zeile" },
       el("button", { type: "button", class: "knopf haupt", text: "Neue PIN setzen", "data-aktion": "zuruecksetzen", onclick: async () => {
         try {
-          const neuePin = pin.querySelector("input").value.trim();
-          const neu = await (aufsicht ? KO.aufsichtNeuePinMitCode : KO.neuePinMitCode)(k.id, code.querySelector("input").value, neuePin);
-          await (aufsicht ? KO.aufsichtAnmelden : KO.anmelden)(k.id, neuePin);
+          const neuePin = wert(pin, "input"), c = wert(code, "input"), a = wert(antwort, "input"), wp = wert(werPin, "input");
+          let neu;
+          if (!aufsicht) { neu = await KO.neuePinMitCode(k.id, c, neuePin); await KO.anmelden(k.id, neuePin); }
+          else {
+            if (!c && !a && !wp) throw new Error("Bitte den Code, die Antwort oder die PIN einer anderen Aufsicht eingeben.");
+            neu = await KO.aufsichtPinVergessen(k.id, neuePin, c ? { code: c } : a ? { antwort: a } : { bestaetigung: { id: wert(wer, "select"), pin: wp } });
+          }
           ansicht = { art: "code", code: neu, aufsicht: !!aufsicht }; zeichne();
         } catch (e) { zeigeFehler(e.message); }
       } }),
       el("button", { type: "button", class: "knopf", text: "Zurück", onclick: () => { ansicht = { art: "start" }; zeichne(); } })),
-      el("small", { class: "leise", text: "Ohne Code lässt sich die PIN nicht zurücksetzen. Später kann das eine Aufsicht tun." }));
+      aufsicht && !frist ? el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", "data-aktion": "frist", text: `⏳ Zurücksetzen (dauert ${KO.FRIST_TAGE} Tage)`,
+        onclick: () => { if (confirm(`Nach ${KO.FRIST_TAGE} Tagen werden alle Aufsichten auf diesem Gerät entfernt, samt ihren Verbindungen zu den Konten. Danach legt „Ich bin neu“ eine neue Aufsicht an. Die Konten der Jugendlichen bleiben. Bis dahin sehen alle den Termin auf der Anmeldung, und wer eine PIN oder einen Code einer Aufsicht kennt, bricht es ab.`)) { KO.fristAnfordern(); ansicht = { art: "start" }; zeichne(); } } })) : null,
+      el("small", { class: "leise", text: aufsicht ? "Ohne Code, Antwort und andere Aufsicht bleibt das Zurücksetzen mit Frist." : "Ohne Code lässt sich die PIN nicht zurücksetzen." }));
+    return karte;
+  }
+
+  /** Laufende Frist abbrechen (RL2 a): PIN oder Code einer Aufsicht dieses Geräts. */
+  function fristForm(karte) {
+    const feldPin = feld("PIN oder Wiederherstellungscode einer Aufsicht", { type: "password", autocomplete: "off", maxlength: "20", name: "frist-abbrechen" });
+    dazu(karte, el("h3", { text: "⏳ Zurücksetzen abbrechen" }), feldPin, fehlerText, el("div", { class: "knopf-zeile" },
+      el("button", { type: "button", class: "knopf haupt", text: "Abbrechen", "data-aktion": "frist-abbrechen", onclick: async () => {
+        if (await KO.fristAbbrechenMit(feldPin.querySelector("input").value.trim())) { ansicht = { art: "start" }; zeichne(); }
+        else zeigeFehler("Weder eine PIN noch ein Code stimmt.");
+      } }), zurueck()));
     return karte;
   }
 
@@ -296,7 +336,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   function zeichneAnmeldung() {
     const karte = el("section", { class: "einstellungen konto anmeldung" });
     zeigeFehler("");
-    const f = { "neu-wer": neuWer, neu: neuForm, "neu-aufsicht": neuAufsicht, pin: pinForm, vergessen: vergessenForm, code: codeAnzeige, freischalten: freischaltenForm }[ansicht.art] || anmeldung;
+    const f = { "neu-wer": neuWer, neu: neuForm, "neu-aufsicht": neuAufsicht, pin: pinForm, vergessen: vergessenForm, code: codeAnzeige, freischalten: freischaltenForm, frist: fristForm }[ansicht.art] || anmeldung;
     wurzel.replaceChildren(f(karte),
       el("p", { class: "fuss", text: "Alles bleibt im Browser auf diesem Gerät. Keine Anmeldung bei einem Server, keine Werbung." }));
   }
@@ -415,7 +455,9 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   }
 
   function zeichne() {
-    if (LST.werUebt() === "niemand" || ["neu-wer", "neu", "neu-aufsicht", "pin", "vergessen", "freischalten"].includes(ansicht.art)) return zeichneAnmeldung();
+    // Frist abgelaufen (RL2 a): die Aufsichten des Geräts sind entfernt, „Ich bin neu“ legt ohne Bestätigung eine an
+    if (KO.fristFaellig()) meldungNachFrist = true;
+    if (LST.werUebt() === "niemand" || ["neu-wer", "neu", "neu-aufsicht", "pin", "vergessen", "freischalten", "frist"].includes(ansicht.art)) return zeichneAnmeldung();
     // Ein neuer Wiederherstellungscode steht im Profil (nur jetzt sichtbar)
     if (ansicht.art === "code" && !location.hash.startsWith("#profil")) history.replaceState(null, "", "#profil");
     const { tab, teil } = aktuellerTab();

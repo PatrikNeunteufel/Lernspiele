@@ -187,6 +187,14 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 ## 5d. Aufsicht (AU1 a, TR1 a)
 
+- **Anlegen und PIN vergessen** (seit LERN_Session18, RL2 a, Kern `KERN.rollen`, docs/kern/rahmen.md 4.21): beim
+  Anlegen eine Sicherheitsfrage mit Antwort (Pflicht); eine weitere Aufsicht nur mit der Bestätigung einer Aufsicht mit
+  PIN. „PIN vergessen?“ einer Aufsicht: Code, Sicherheitsfrage oder die PIN einer anderen Aufsicht dieses Geräts, dazu
+  die neue PIN und gleich ein neuer Code; ohne alles „⏳ Zurücksetzen“ mit Frist von 3 Tagen
+  (`lernsteig:zuruecksetzen`). Die Anmeldung zeigt allen den Termin, PIN oder Code einer Aufsicht bricht ab (Ansicht
+  „frist“). Nach Ablauf werden die Aufsichten auf diesem Gerät entfernt samt ihren Verbindungen und Anfragen; danach
+  legt „Ich bin neu“ ohne Bestätigung eine an. Jugendliche setzen eine vergessene PIN weiter mit ihrem Code.
+
 - **In den Eulenpfad übernehmen** (Plan C9, Ü1 a, Ü2 b; `KERN.person.uebernehmen`): Abschnitt auf der Aufsichtsseite;
   legt die angemeldete Aufsicht im Eulenpfad an (gleiche Kennung, PIN, Sicherheitsfrage und Art, neuer Code).
 - **Tab Verwaltung** (`#verwaltung`, Code `start/aufsicht.js`; bis LERN_Session16 `aufsicht.html`, leitet weiter), nur für die

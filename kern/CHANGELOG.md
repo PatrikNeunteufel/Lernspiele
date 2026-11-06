@@ -3,6 +3,12 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.18.0 — 2026-11-06 (LERN_Session18)
+- `rollen.js` (`KERN.rollen`, RL2 a): Bestätigung durch eine bestehende Aufsicht (`bestaetige`, `brauchtBestaetigung` —
+  nur Aufsichten mit PIN zählen), PIN vergessen in den Stufen andere Aufsicht, Code, Sicherheitsfrage (`neuePin`, gleich
+  ein neuer Code), Zurücksetzen mit Frist (`frist`, `abbrechbarMit`, `zuruecksetzen` als „lernend“ oder „entfernen“
+  samt Verweisen). Aus dem Eulenpfad und dem Lernsteig; die Gruppenleitung kommt mit den Gruppen (RL1 a).
+
 ## 1.17.0 — 2026-11-06 (LERN_Session18)
 - `abgleich.js` (`KERN.abgleich`, DF3 a): Abgleich zwischen Geräten über einen Ordner aus dem Eulenpfad — je Gerät eine
   Datei, Ordner in IndexedDB gemerkt, Erlaubnis nur nach einem Tippen, selbsttätig beim Öffnen, beim Wiedersichtbarwerden

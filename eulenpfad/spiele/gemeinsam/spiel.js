@@ -470,20 +470,21 @@ const LS = (() => {
   const wiederherstellung = name => profil(name).wiederherstellung || {};
   const codeStimmt = (name, code) => G.codeStimmt(code, wiederherstellung(name));
   const antwortStimmt = (name, antwort) => G.antwortStimmt(antwort, wiederherstellung(name));
-  /** Frist zum Zurücksetzen (Stufe 4), je Gerät: lernspiele:zuruecksetzen = { angefordert, ab } (ISO-Zeiten). */
-  const zuruecksetzenStand = () => lies("zuruecksetzen", null);
-  function zuruecksetzenAnfordern() {
-    const jetzt = new Date();
-    const ab = new Date(jetzt.getTime() + ZURUECKSETZEN_TAGE * 24 * 3600 * 1000);
-    schreibe("zuruecksetzen", { angefordert: jetzt.toISOString(), ab: ab.toISOString() });
+  // Frist zum Zurücksetzen (Stufe 4) im Kern (KERN.rollen.frist, RL2 a), je Gerät: lernspiele:zuruecksetzen = { angefordert, ab }
+  const FRIST = KERN.rollen.frist({ speicher: { lies, schreibe, entferne: k => SPEICHER.entferne(k) }, tage: ZURUECKSETZEN_TAGE });
+  const zuruecksetzenStand = () => FRIST.stand();
+  const zuruecksetzenAnfordern = () => { FRIST.anfordern(); };
+  const zuruecksetzenAbbrechen = () => FRIST.abbrechen();
+  /** Bricht die Eingabe die Frist ab (PIN oder Code einer Aufsicht)? Dann ist sie abgebrochen; true. */
+  async function zuruecksetzenAbbrechenMit(eingabe) {
+    if (!(await KERN.rollen.abbrechbarMit(PERSONEN, eingabe))) return false;
+    FRIST.abbrechen();
+    return true;
   }
-  const zuruecksetzenAbbrechen = () => { try { localStorage.removeItem("lernspiele:zuruecksetzen"); } catch { /* egal */ } };
   /** Ist die Frist abgelaufen, verlieren alle Aufsichten dieses Geräts Rolle, PIN und Wiederherstellung; true dann. */
   function zuruecksetzenFaellig() {
-    const z = zuruecksetzenStand();
-    if (!z || new Date(z.ab) > new Date()) return false;
-    for (const n of aufsichtListe()) speichereProfil(n, { rolle: "lernend", pin: null, wiederherstellung: null, gesperrt: undefined });
-    zuruecksetzenAbbrechen();
+    if (!FRIST.abgelaufen()) return false;
+    KERN.rollen.zuruecksetzen(PERSONEN, { art: "lernend" });
     return true;
   }
 
@@ -756,7 +757,9 @@ const LS = (() => {
     const p = person(name);
     if (!p) throw new Error("Unbekannte Person");
     if (von) {
-      if (person(von)?.id === p.id || !(await pinStimmt(von, vonPin))) throw new Error("Diese PIN stimmt nicht.");
+      // Bestätigung durch eine andere Aufsicht dieses Geräts (Kern, KR2 a)
+      try { await KERN.rollen.bestaetige(PERSONEN, { id: person(von)?.id, pin: vonPin }, { ausser: p.id }); }
+      catch { throw new Error("Diese PIN stimmt nicht."); }
       return KERN.person.freischalten(PERSONEN, p.id, pin, { bestaetigt: true });
     }
     return KERN.person.freischalten(PERSONEN, p.id, pin, { code });
@@ -3313,7 +3316,7 @@ const LS = (() => {
     setzeMeldung, meldungenGelesen, meldungFuerEntwicklung, meldeFormular, meldungStandAnwenden, meldungStatusAusBemerkung,
     meldungAdresse, meldungMailLink, meldungAusText,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinStimmt, pinGueltig, neuerCode, setzeWiederherstellung, wiederherstellung, codeStimmt,
-    antwortStimmt, zuruecksetzenStand, zuruecksetzenAnfordern, zuruecksetzenAbbrechen, zuruecksetzenFaellig, ZURUECKSETZEN_TAGE,
+    antwortStimmt, zuruecksetzenStand, zuruecksetzenAnfordern, zuruecksetzenAbbrechen, zuruecksetzenAbbrechenMit, zuruecksetzenFaellig, ZURUECKSETZEN_TAGE,
     freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, aehnlich, passung, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, alterVon, aufsteigen, aufstiegZuruecknehmen, neuerAufstieg, sortierungFuer, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, reihenfolgeFuer, vorgabeZeit, timerFuer, waehleTimer, zeitVorschlag,

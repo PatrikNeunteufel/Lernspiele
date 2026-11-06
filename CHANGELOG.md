@@ -584,3 +584,11 @@
   Zufallsaufgaben verschiebt sich dadurch (das Lob zieht jetzt immer aus der Liste); Klickzahlen der Stichproben
   weichen deshalb vom letzten vollen Lauf ab. Eigene Lobliste je Spiel `def.lob` (LB2 a, höchstens 20 Zeichen je Lob):
   die 8 Sprachspiele loben auf Anhieb in der Fremdsprache („Oui !“, „Great!“). rahmen.md 4 (`ctx.richtig`), Plan.
+- Kern 1.18.0: `kern/rollen.js` (`KERN.rollen`, RL2 a) — Bestätigung durch eine bestehende Aufsicht, PIN vergessen in den
+  Stufen andere Aufsicht, Code, Sicherheitsfrage, Zurücksetzen mit Frist von 3 Tagen; beide Apps benutzen es. Lernsteig
+  neu: Sicherheitsfrage beim Anlegen einer Aufsicht (Pflicht), „PIN vergessen?“ der Aufsicht mit Code, Frage oder der PIN
+  einer anderen Aufsicht, „⏳ Zurücksetzen“ mit Hinweis auf der Anmeldung und Abbrechen mit PIN oder Code; nach Ablauf
+  werden die Aufsichten des Geräts entfernt samt Verbindungen. Eine weitere Aufsicht braucht nur noch dann eine
+  Bestätigung, wenn es eine Aufsicht mit PIN gibt (eine gesperrte könnte nicht bestätigen). Eulenpfad: Frist und
+  Bestätigung über den Kern, Verhalten gleich. Gruppenleitung mit LERN-48 (RL1 a). docs/kern/rahmen.md 4.21 (neu),
+  lernsteig/rahmen.md 5d, rahmen.md 6, Plan (RL1 a, RL2 a).

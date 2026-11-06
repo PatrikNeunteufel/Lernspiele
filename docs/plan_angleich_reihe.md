@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.17.0 mit `daten.js` (beide Apps) und `abgleich.js` (Eulenpfad); offen: Ablauf der Runde, Rest der Rollen; Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): Einstieg und Seiten des Lernsteigs im Ersatz-DOM gebaut, als Nächstes die offenen Kern-Teile (AN2 a), dann B2 Schritt 3 | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Ablauf der Runde, Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): Einstieg und Seiten des Lernsteigs im Ersatz-DOM gebaut, als Nächstes die offenen Kern-Teile (AN2 a), dann B2 Schritt 3 | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -80,13 +80,15 @@ von Hand geänderte Kopie oder gleiche Version mit anderem Inhalt als Fehler, ei
 rund 200 Seiten anfasst: Jede Seite lädt einmal `kern/kern.js` vor dem Rahmen ihrer App. Die Teile hängen sich an
 `KERN` (`KERN.zahl`, `KERN.bruch`, …). Tests: `node tools/pruefe_kern.js` (Teile gegen feste Beispiele und
 Nachrechnungen, dazu die Kopien); das Testskript jeder App prüft ihre Kopie.
-Stand 2026-11-06: Kern 1.17.0 mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
+Stand 2026-11-06: Kern 1.18.0 mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
 Freigabe, Suche, Runden, Daten (ein Dateiformat für Sichern, Einlesen und Abgleich mit Löschvermerken und Schutz nach
 DF4 a), Anmeldung (mit Gast), Entwicklung, Einladung, Auswertung, Übernahme einer Aufsicht, Rollleiste und
 Personen-Knopf; Eulenpfad und Lernsteig benutzen, was sie brauchen (`daten.js` beide), die Gratwanderung hat die
-Kopie und lädt sie mit C8. Seit 1.17.0 auch der Abgleich über einen Ordner (DF3 a; Lernsteig mit der Verwaltung, Plan C). Noch nicht im Kern: der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
-dritten, Serie/Endlos mit Rekord und Zwischenstand, Wiederholungsbremse, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`)
-und der Rest der Rollen (Gruppenleitung G2 a, Bestätigung durch eine bestehende Aufsicht, PIN zurücksetzen mit Frist).
+Kopie und lädt sie mit C8. Seit 1.17.0 auch der Abgleich über einen Ordner (DF3 a; Lernsteig mit der Verwaltung, Plan C),
+seit 1.18.0 die Rollen der Aufsicht (`rollen.js`: Bestätigung, PIN vergessen, Zurücksetzen mit Frist; RL2 a, beide Apps).
+Noch nicht im Kern: der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem dritten, Serie/Endlos mit Rekord
+und Zwischenstand, Wiederholungsbremse, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`) und die Gruppenleitung (G2 a), die mit
+den Gruppen kommt (RL1 a, LERN-48).
 
 **B2 Testgerüst für alle Apps:** Ein Testskript-Kern unter `tools/` mit Treiber je App, so dass ein Aufruf alle drei
 Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`). Er prüft auch, dass jede Kern-Kopie mit
@@ -344,3 +346,11 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
 - **LB2 a** (2026-11-06, LERN_Session18): Ein Spiel kann eine eigene Lobliste angeben (`def.lob`, jedes Lob höchstens 20
   Zeichen); auf Anhieb zieht der Rahmen daraus. Für das Lob in der Fremdsprache der 8 Sprachspiele. Bestätigungen mit dem
   Lösungswort („Great! apple“) bleiben Text nach einem Fehlversuch. Nicht b (auch dort auf Deutsch loben).
+- **RL1 a** (2026-11-06, LERN_Session18): Die Gruppenleitung („Ich bin Lehrperson“, G2 a) kommt mit dem Bau der Gruppen
+  (LERN-48) in den Kern, zusammen mit dem Untertab Klassen; ohne ihn hätte das Merkmal keine Wirkung. Nicht b (Merkmal
+  jetzt, ohne Wirkung). Kipppunkt: Lehrpersonen sollen das Merkmal schon vor den Gruppen setzen.
+- **RL2 a** (2026-11-06, LERN_Session18): PIN vergessen für Aufsichten in allen Apps mit denselben Stufen über den Kern
+  (`rollen.js`): andere Aufsicht, Code, Sicherheitsfrage (im Lernsteig beim Anlegen Pflicht), Zurücksetzen mit Frist von 3
+  Tagen (für alle sichtbar, mit PIN oder Code abzubrechen). Nach Ablauf im Eulenpfad Konten ohne PIN wie bisher, im
+  Lernsteig Aufsichten auf dem Gerät entfernt samt Verbindungen, ohne Löschvermerk. Nicht b (Frist nur im Eulenpfad).
+  Kipppunkt: Lernsteig-Geräte, die oft tagelang ohne Aufsicht laufen (dann längere Frist).

@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.17.0, 2026-11-06 (LERN_Session18). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.18.0, 2026-11-06 (LERN_Session18). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.17.0)
+kern/VERSION          Version des Kerns (1.18.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -510,11 +510,30 @@ Benutzt vom Eulenpfad (`LS.abgleich`, `lernspiele-sync-`, IndexedDB `lernspiele`
 Der Lernsteig bekommt ihn mit der Verwaltung (Plan C; `lernsteig-sync-`, IndexedDB `lernsteig`, SP1 a). Geprüft in
 `tools/pruefe_kern.js` mit einem Ersatz-Ordner: drei Geräte, kaputte Datei, fremdes Präfix, Erlaubnis, Vergessen.
 
-### 4.21 Geplant
+### 4.21 `KERN.rollen` (`kern/rollen.js`) — Bestätigung, PIN vergessen, Zurücksetzen mit Frist
+
+Entscheide KR2 a, PIN1 a, PIN1-R a, D5; RL1 a, RL2 a (LERN_Session18, seit 1.18.0). Für Aufsichten in allen Apps gleich;
+gearbeitet wird auf der Personenliste der App (`KERN.person.liste`). Die Gruppenleitung (G2 a) kommt mit den Gruppen
+(RL1 a, LERN-48).
+
+| Aufruf | Ergebnis |
+|---|---|
+| `brauchtBestaetigung(personen)` | gibt es eine Aufsicht mit PIN? (eine gesperrte zählt nicht, sie könnte nicht bestätigen) |
+| `bestaetige(personen, { id, pin }, { ausser })` | die bestätigende Aufsicht, sonst Fehler „Eine Aufsicht dieses Geräts muss mit ihrer PIN bestätigen.“ (`BESTAETIGEN`); nicht die Person selbst |
+| `neuePin(personen, id, pin, { code } \| { antwort } \| { bestaetigung })` | PIN vergessen, Stufen 1–3: Weg prüfen, neue PIN, gleich ein neuer Code (Frage und Antwort bleiben); `{ person, code }` |
+| `frist({ speicher, schluessel = "zuruecksetzen", tage = 3, jetzt })` | Stufe 4: `{ TAGE, stand, anfordern, abbrechen, abgelaufen }`; `abgelaufen()` erledigt die Frist und sagt der App, dass sie zurücksetzt |
+| `abbrechbarMit(personen, eingabe)` | ist die Eingabe die PIN oder der Code einer Aufsicht mit PIN? |
+| `zuruecksetzen(personen, { art: "lernend" \| "entfernen", verweise })` | nach Ablauf: Eulenpfad „lernend“ (Konto ohne PIN, Code, Frage); Lernsteig „entfernen“ (Aufsicht auf diesem Gerät entfernt, ihre Kennung aus `aufsicht` und `anfragen` der Konten gestrichen, ohne Löschvermerk — über den Abgleich kommt sie gesperrt zurück, DF4 a) |
+
+Benutzt vom Eulenpfad (`LS.zuruecksetzen…`, Bestätigung beim Freischalten) und vom Lernsteig (`aufsichtAnlegen`,
+`aufsichtPinVergessen`, `freischalten`, `frist…`; Sicherheitsfrage beim Anlegen Pflicht). Geprüft in `tools/pruefe_kern.js`
+(alle Stufen, falsche Wege, Frist mit fester Uhr, beide Arten des Zurücksetzens) und `tools/pruefe_konten.js`.
+
+### 4.22 Geplant
 
 Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
 dritten, Serie/Endlos mit Rekord und Zwischenstand, Wiederholungsbremse, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`)
-und der Rest der Rollen (Gruppenleitung G2 a, Bestätigung durch eine bestehende Aufsicht, PIN zurücksetzen mit Frist). Ein neuer Teil bekommt hier seinen Abschnitt, bevor er umzieht.
+und die Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Ein neuer Teil bekommt hier seinen Abschnitt, bevor er umzieht.
 
 ## 5. Ändern und verteilen
 

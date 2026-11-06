@@ -409,7 +409,7 @@ function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
     const feld = el("input", { class: "feld", type: "password", maxlength: "20", autocomplete: "off", placeholder: "PIN oder Code", "aria-label": "PIN oder Wiederherstellungscode" });
     const meldung = meldungFeld();
     const los = async () => {
-      for (const n of mitPin) if ((await LS.pinStimmt(n, feld.value)) || (await LS.codeStimmt(n, feld.value))) { LS.zuruecksetzenAbbrechen(); return fertigUebersicht(); }
+      if (await LS.zuruecksetzenAbbrechenMit(feld.value)) return fertigUebersicht();
       feld.value = "";
       meldung.textContent = "Weder eine PIN noch ein Code stimmt.";
     };

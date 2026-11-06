@@ -38,6 +38,7 @@ global.LST_KATALOG = require(path.join(APP, "gemeinsam", "katalog.js"));
 const KO = global.LST_KONTEN = require(path.join(APP, "gemeinsam", "konten.js"));
 const DA = require(path.join(APP, "gemeinsam", "daten.js"));
 
+const SF = { frage: "Erstes Haustier?", antwort: "Bello" }; // Sicherheitsfrage der Aufsichten (RL2 a)
 (async () => {
   console.log("Konten, Aufsicht, Sichern und Einlesen");
   // Umzug
@@ -62,14 +63,15 @@ const DA = require(path.join(APP, "gemeinsam", "daten.js"));
   await wirft(() => KO.neuePinMitCode(mia.id, code, "3333"), "alter Code gilt nicht mehr", "Code");
   gleich(typeof neuerCode, "string", "neuer Code ausgegeben");
 
-  // Aufsicht: die erste ohne, jede weitere mit Bestätigung (D5)
-  const { aufsicht: vater } = await KO.aufsichtAnlegen({ name: "Vater", art: "eltern", pin: "5555" });
+  // Aufsicht: die erste ohne, jede weitere mit Bestätigung (D5); Sicherheitsfrage Pflicht (RL2 a)
+  await wirft(() => KO.aufsichtAnlegen({ name: "Ohne", art: "eltern", pin: "5555" }), "Aufsicht ohne Sicherheitsfrage", "Sicherheitsfrage");
+  const { aufsicht: vater } = await KO.aufsichtAnlegen({ ...SF,name: "Vater", art: "eltern", pin: "5555" });
   gleich(KO.aufsichtAktiv() && KO.aufsichtAktiv().id, vater.id, "erste Aufsicht angemeldet");
-  await wirft(() => KO.aufsichtAnlegen({ name: "Fremd", art: "lehrperson", pin: "6666" }), "zweite Aufsicht ohne Bestätigung", "bestätigen");
-  await wirft(() => KO.aufsichtAnlegen({ name: "Fremd", art: "lehrperson", pin: "6666", bestaetigung: { id: vater.id, pin: "0000" } }), "zweite Aufsicht mit falscher PIN", "bestätigen");
-  const { aufsicht: lehrer } = await KO.aufsichtAnlegen({ name: "Lehrer", art: "lehrperson", pin: "6666", bestaetigung: { id: vater.id, pin: "5555" } });
+  await wirft(() => KO.aufsichtAnlegen({ ...SF,name: "Fremd", art: "lehrperson", pin: "6666" }), "zweite Aufsicht ohne Bestätigung", "bestätigen");
+  await wirft(() => KO.aufsichtAnlegen({ ...SF,name: "Fremd", art: "lehrperson", pin: "6666", bestaetigung: { id: vater.id, pin: "0000" } }), "zweite Aufsicht mit falscher PIN", "bestätigen");
+  const { aufsicht: lehrer } = await KO.aufsichtAnlegen({ ...SF,name: "Lehrer", art: "lehrperson", pin: "6666", bestaetigung: { id: vater.id, pin: "5555" } });
   gleich(lehrer.art, "lehrperson", "zweite Aufsicht mit Bestätigung");
-  await wirft(() => KO.aufsichtAnlegen({ name: "Mia", art: "eltern", pin: "7777", bestaetigung: { id: vater.id, pin: "5555" } }), "Aufsicht mit Namen eines Kontos", "gibt es schon");
+  await wirft(() => KO.aufsichtAnlegen({ ...SF,name: "Mia", art: "eltern", pin: "7777", bestaetigung: { id: vater.id, pin: "5555" } }), "Aufsicht mit Namen eines Kontos", "gibt es schon");
 
   // Ein Platz (Plan C1): die Aufsicht und ein Jugendlicher schliessen sich aus
   gleich([KO.angemeldet()?.id, KO.aktiv()], [lehrer.id, null], "angelegte Aufsicht ist angemeldet, kein Jugendlicher");
@@ -170,7 +172,7 @@ const DA = require(path.join(APP, "gemeinsam", "daten.js"));
     gleich(KO.gesperrt(mia.id), false, "PIN später entfernt: nicht wieder gesperrt");
     // mit angemeldeter Aufsicht kommt die Aufsicht der Datei mit, gesperrt; freischalten mit Bestätigung einer anderen
     localStorage.d.clear(); sessionStorage.d.clear();
-    const { aufsicht: hier } = await KO.aufsichtAnlegen({ name: "Hier", art: "eltern", pin: "8888" });
+    const { aufsicht: hier } = await KO.aufsichtAnlegen({ ...SF,name: "Hier", art: "eltern", pin: "8888" });
     const e2 = DA.einlesen(mitAufsicht);
     gleich([e2.abgewiesen, KO.gesperrt(vater.id)], [0, true], "mit angemeldeter Aufsicht: Aufsicht der Datei gesperrt übernommen");
     await wirft(() => KO.aufsichtAnmelden(vater.id, "5555"), "gesperrte Aufsicht: keine Anmeldung", "PIN");
@@ -178,6 +180,34 @@ const DA = require(path.join(APP, "gemeinsam", "daten.js"));
     await KO.freischalten(vater.id, "4321", { bestaetigung: { id: hier.id, pin: "8888" } });
     gleich([KO.gesperrt(vater.id), KO.aufsichtAktiv()?.id], [false, vater.id], "Aufsicht mit Bestätigung freigeschaltet und angemeldet");
     await wirft(() => KO.freischalten(mia.id, "1111", { bestaetigung: { id: vater.id, pin: "4321" } }), "Jugendlicher nicht über Bestätigung", "bestätigen");
+  }
+
+  // PIN vergessen der Aufsicht (RL2 a): Bestätigung, Code, Sicherheitsfrage; Zurücksetzen mit Frist
+  {
+    localStorage.d.clear(); sessionStorage.d.clear();
+    const { aufsicht: a1, code: c1 } = await KO.aufsichtAnlegen({ ...SF, name: "Erste", art: "eltern", pin: "1111" });
+    const { aufsicht: a2 } = await KO.aufsichtAnlegen({ ...SF, name: "Zweite", art: "lehrperson", pin: "2222", bestaetigung: { id: a1.id, pin: "1111" } });
+    const k = (await KO.anlegen({ name: "Lu", klasse: 7 })).konto;
+    KO.LISTE.aendere(k.id, { aufsicht: [a1.id], anfragen: [a2.id] }); // verbunden und angefragt
+    KO.abmelden();
+    await wirft(() => KO.aufsichtPinVergessen(a1.id, "3333", { bestaetigung: { id: a1.id, pin: "1111" } }), "sich selbst bestätigen", "bestätigen");
+    const n1 = await KO.aufsichtPinVergessen(a1.id, "3333", { bestaetigung: { id: a2.id, pin: "2222" } });
+    gleich([KO.aufsichtAktiv()?.id, typeof n1], [a1.id, "string"], "Stufe 1: andere Aufsicht, angemeldet, neuer Code");
+    await wirft(() => KO.aufsichtPinVergessen(a1.id, "4444", { code: c1 }), "alter Code gilt nicht mehr", "Code stimmt nicht");
+    await KO.aufsichtPinVergessen(a1.id, "4444", { code: n1 });
+    await wirft(() => KO.aufsichtPinVergessen(a1.id, "5555", { antwort: "Mimi" }), "falsche Antwort", "Antwort stimmt nicht");
+    await KO.aufsichtPinVergessen(a1.id, "5555", { antwort: "bello" });
+    gleich(await KO.pinStimmt(KO.aufsichtFinde(a1.id), "5555"), true, "Stufen 2 und 3: Code, Sicherheitsfrage");
+    // Frist: anfordern, mit falscher Eingabe nicht abbrechbar, mit PIN schon; danach ablaufen lassen
+    KO.abmelden();
+    const s = KO.fristAnfordern();
+    gleich([await KO.fristAbbrechenMit("0000"), !!KO.fristStand()], [false, true], "Frist: falsche Eingabe bricht nicht ab");
+    gleich([await KO.fristAbbrechenMit("2222"), KO.fristStand()], [true, null], "Frist: PIN einer Aufsicht bricht ab");
+    KO.fristAnfordern();
+    localStorage.setItem("lernsteig:zuruecksetzen", JSON.stringify({ ...s, ab: "2000-01-01T00:00:00.000Z" })); // abgelaufen
+    gleich([KO.fristFaellig(), KO.aufsichten().length, "aufsicht" in KO.finde(k.id), "anfragen" in KO.finde(k.id), KO.fristStand()], [true, 0, false, false, null], "Frist abgelaufen: Aufsichten entfernt samt Verbindungen und Anfragen");
+    const { aufsicht: neu } = await KO.aufsichtAnlegen({ ...SF, name: "Neu", art: "eltern", pin: "6666" });
+    gleich(KO.aufsichtAktiv()?.id, neu.id, "danach neue Aufsicht ohne Bestätigung");
   }
 
   console.log(`  ${faelle} Fälle, ${fehler} Fehler.`);

@@ -172,6 +172,10 @@ async function pruefeSeiten(uebungen, melde, LST) {
       s.klick('[data-aktion="neu"]'); await ruhe(s);
       s.klick('[data-aktion="neu-aufsicht"]'); await ruhe(s);
       s.fuelle('input[name="name"]', "Frau Muster"); s.fuelle('select[name="rolle"]', "lehrperson"); s.fuelle('input[name="pin"]', "2580");
+      // ohne Sicherheitsfrage nicht (RL2 a)
+      s.klick('[data-aktion="anlegen"]', "Aufsicht anlegen"); await ruhe(s);
+      if (!/Sicherheitsfrage/.test(s.lauf(`(document.querySelector(".fehlertext") || {}).textContent || ""`))) melde(ort, "Aufsicht ohne Sicherheitsfrage angelegt");
+      s.fuelle('input[name="frage"]', "Erstes Haustier?"); s.fuelle('input[name="antwort"]', "Bello");
       s.klick('[data-aktion="anlegen"]', "Aufsicht anlegen"); await ruhe(s);
       if (!CODE.test(s.attr(".code-anzeige", "data-code") || "")) melde(ort, "Code der Aufsicht fehlt");
       const auf = JSON.stringify((s.json("lernsteig:personen") || []).filter(p => p.rolle === "aufsicht"));
