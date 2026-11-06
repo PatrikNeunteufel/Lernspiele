@@ -455,10 +455,12 @@ Eine App darf hinter dem Kern zurückliegen; sie verteilt erst, wenn ihr Testskr
 
 ## 6. Prüfung
 
+- `node tools/pruefe.js` — Einstieg für alle Apps (Plan B2): ohne Angabe Kern, Lernsteig und Gratwanderung, den
+  Eulenpfad nur, wenn genannt (`node tools/pruefe.js eulenpfad [spiel …]`); Übersicht mit Dauer je App.
 - `node tools/pruefe_kern.js` — alle Teile und die Kopien; Ende mit Code 1 bei einem Fehler.
 - `python tools/kern_verteilen.py --pruefe [app …]` — nur die Kopien, schreibt nichts:
   - **Fehler:** Kopie fehlt, ist von Hand geändert (Prüfsumme im Kopf stimmt nicht mit dem Inhalt) oder trägt die
     Version des Kerns mit anderem Inhalt (Version vergessen).
   - **Hinweis:** Kopie liegt zurück (ältere Version).
-- Das Testskript jeder App prüft ihre Kopie mit (`tools/pruefe_spiele.js`, `docs/lernsteig/werkzeuge/pruefe_uebungen.js`)
+- Das Testskript jeder App prüft ihre Kopie mit (`tools/pruefe_spiele.js`, `tools/pruefe_uebungen.js`; Einstieg `tools/pruefe.js`)
   und lädt sie so, wie die Seiten sie laden.

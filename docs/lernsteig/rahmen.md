@@ -174,7 +174,7 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   PIN, Code und Verbindungen bleiben die des Geräts); Runden nach Kennung (gleiche zählt einmal, nach Zeit sortiert),
   Rekorde nach Kennung (höherer Stand); Verweise auf zusammengeführte Kennungen werden umgebogen. Ältere Sicherungen
   (Konto mit `erstellt` und einer Zeit `geaendert`) werden umgedeutet. Keine Löschvermerke. Andere Dateien werden mit
-  Meldung abgewiesen. Test: `docs/lernsteig/werkzeuge/pruefe_konten.js`.
+  Meldung abgewiesen. Test: `tools/pruefe_konten.js`.
 
 ## 5d. Aufsicht (AU1 a, TR1 a)
 
@@ -239,7 +239,7 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 ## 7. Prüfen
 
-`node docs/lernsteig/werkzeuge/pruefe_uebungen.js [übung …] [--aufgaben=3000] [--seed=1] [--browser]`:
+`node tools/pruefe_uebungen.js [übung …] [--aufgaben=3000] [--seed=1] [--browser]` (oder `node tools/pruefe.js lernsteig`):
 - ohne Browser: Seite lädt die gemeinsamen Dateien und nichts aus `eulenpfad/`; Kompetenz-Codes des Katalogs stehen in
   `lehrplan/mathematik_zyklus3.md`; je Niveau und Stufe Zufallsaufgaben gegen `pruefeAufgabe`, kein NaN/undefined/null,
   Hinweise zu typischen falschen Eingaben nennen die Lösung nicht; Endlos-Stufen haben mindestens 100 verschiedene

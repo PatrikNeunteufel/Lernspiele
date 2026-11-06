@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.14.0 mit allen Teilen; als Nächstes Testgerüst B2 | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.14.0 mit allen Teilen; Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): Einstieg `tools/pruefe.js` gebaut, als Nächstes Seiten des Lernsteigs im Ersatz-DOM | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -105,7 +105,7 @@ Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`
   - Seiten des Lernsteigs (Start, Statistik, Aufsicht, jede Übung) im Ersatz-DOM wie im Eulenpfad, mit Suche nach
     „null“, „undefined“, „NaN“ im sichtbaren Text. Anlass: Die Startseite zeigte ohne Wochenziel „null“ (natives
     `append` mit `null`, behoben 2026-11-05); ohne laufenden Browserteil fiel es nicht auf.
-  - Stand 2026-11-05: `docs/lernsteig/werkzeuge/pruefe_konten.js` (Konten, Aufsicht, Sichern und Einlesen: Umzug,
+  - Stand 2026-11-05: `tools/pruefe_konten.js` (bis LERN_Session17 unter `docs/lernsteig/werkzeuge/`) (Konten, Aufsicht, Sichern und Einlesen: Umzug,
     PIN und Code, Bestätigung, Verbinden, kaputte und fremde Dateien, voller Speicher, Einladung; 33 Fälle), vom
     Testskript des Lernsteigs mitgerufen.
 

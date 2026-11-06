@@ -7,6 +7,10 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "erdzeit-leiter/ereignisse": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
     "fledermaus-forscher/anpassungen": {
       "am": "2026-11-06",
       "von": "Patrik"
@@ -31,7 +35,15 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "kulturen-koffer/dinge": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
     "lebensraum/gebirge": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "lebensraum/nahrungsketten": {
       "am": "2026-11-06",
       "von": "Patrik"
     },
@@ -197,6 +209,10 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "erdzeit-leiter": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
     "fahrplan-rechner": {
       "am": "2026-11-05",
       "von": "Patrik"
@@ -327,6 +343,10 @@ const PRUEFSTAND = {
     },
     "tageslauf-sonne": {
       "am": "2026-11-05",
+      "von": "Patrik"
+    },
+    "tier-sortierer": {
+      "am": "2026-11-06",
       "von": "Patrik"
     },
     "velo-tabelle": {

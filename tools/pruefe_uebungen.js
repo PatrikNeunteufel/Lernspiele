@@ -1,5 +1,5 @@
 // Prüft die Übungen des Lernsteigs (Vertrag: docs/lernsteig/rahmen.md 7). Abgeschaut von tools/pruefe_spiele.js
-// (Eulenpfad), eigene Kopie: kein Laden aus eulenpfad/ oder tools/.
+// (Eulenpfad); seit LERN_Session17 (Plan B2) in tools/ wie alle Werkzeuge, Einstieg für alle Apps: tools/pruefe.js.
 //
 // Ohne Browser: je Übung, Niveau und Stufe viele Zufallsaufgaben gegen pruefeAufgabe, sichtbarer Text ohne NaN,
 // undefined, null; Hinweise verraten die Lösung nicht; Endlos-Stufen haben mindestens ENDLOS_MIN verschiedene
@@ -7,13 +7,13 @@
 // Mit --browser (Playwright, Chromium): Startseite und jede Stufe laden ohne Konsolenfehler, eine Runde lässt sich
 // durchspielen (mit einem Fehlversuch), das Protokoll stimmt, eine Serie speichert ihren Rekord vor „Zum Ergebnis“.
 //
-// Aufruf: node docs/lernsteig/werkzeuge/pruefe_uebungen.js [übung …] [--aufgaben=3000] [--seed=1] [--browser]
+// Aufruf: node tools/pruefe_uebungen.js [übung …] [--aufgaben=3000] [--seed=1] [--browser]
 // Ende mit Code 1, sobald ein Fehler gefunden wurde.
 "use strict";
 const fs = require("fs");
 const path = require("path");
 
-const WURZEL = path.join(__dirname, "..", "..", "..");
+const WURZEL = path.join(__dirname, "..");
 const APP = path.join(WURZEL, "lernsteig");
 const LEHRPLAN_MA = path.join(WURZEL, "docs", "lernsteig", "lehrplan", "mathematik_zyklus3.md");
 const ENDLOS_MIN = 100;

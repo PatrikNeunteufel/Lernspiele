@@ -4,7 +4,7 @@
 // Aufruf: node docs/lernsteig/werkzeuge/pruefe_konten.js — Ende mit Code 1 bei einem Fehler (auch von pruefe_uebungen.js gerufen).
 "use strict";
 const path = require("path");
-const WURZEL = path.join(__dirname, "..", "..", "..");
+const WURZEL = path.join(__dirname, "..");
 const APP = path.join(WURZEL, "lernsteig");
 
 let fehler = 0, faelle = 0;

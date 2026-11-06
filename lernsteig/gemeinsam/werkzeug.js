@@ -1,5 +1,5 @@
 /* Lernsteig — reiner Teil des Rahmens (ohne DOM). Wird von jeder Seite und vom Testskript
-   (docs/lernsteig/werkzeuge/pruefe_uebungen.js) geladen. Vertrag: docs/lernsteig/rahmen.md.
+   (tools/pruefe_uebungen.js) geladen. Vertrag: docs/lernsteig/rahmen.md.
    Keine Abhängigkeit zu eulenpfad/: Übernahmen stehen in docs/gemeinsame_mechaniken.md. */
 "use strict";
 

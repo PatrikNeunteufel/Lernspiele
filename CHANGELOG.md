@@ -525,3 +525,6 @@
   chinesischer Löffelkompass, Philosoph, α β, römische Zahlen, Vase mit Läufer; im Zeitstrahl Karavelle, Motorwagen
   von Benz und Flugzeug der Brüder Wright — statt 🪖 ⛵ 🏟️ 🛁 ♨️ 🌉 🪙 👑 ✍️ 🧭 🧔 🔤 🔢 🏃 🚗 ✈️; Latein neu als
   Inschrift „VILLA“. Prüfliste neu erzeugt.
+- Testgerüst B2, Schritt 1: Einstieg `tools/pruefe.js` für alle Apps (ohne Angabe Kern, Lernsteig, Gratwanderung; den
+  Eulenpfad nur, wenn genannt), Übersicht mit Dauer je App. Die Prüfskripte des Lernsteigs liegen jetzt in `tools/`
+  (`pruefe_uebungen.js`, `pruefe_konten.js`, vorher `docs/lernsteig/werkzeuge/`); CLAUDE.md (Tests), Rahmen nachgeführt.
