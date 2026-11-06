@@ -19,6 +19,7 @@ require(path.join(WURZEL, "kern", "runden.js"));
 require(path.join(WURZEL, "kern", "anmeldung.js"));
 require(path.join(WURZEL, "kern", "entwicklung.js"));
 require(path.join(WURZEL, "kern", "einladung.js"));
+require(path.join(WURZEL, "kern", "auswertung.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -594,6 +595,78 @@ console.log("el.js");
     gleich(JSON.stringify(EI.lesen({ v: 1, name: "B", klasse: 12, geboren: "gestern", lehrplan: { land: "XX" } }, pruefung)), JSON.stringify({ name: "B" }), "ungültige Felder fallen weg");
     wirft(() => EI.erstellen({ klasse: 7 }), "erstellen ohne Vornamen");
     gleich(EI.dateiname("lernsteig"), "lernsteig-einladung.json", "Dateiname");
+  }
+
+  // ---------- Auswertung ----------
+  {
+    console.log("auswertung.js");
+    const AW = KERN.auswertung;
+    // fester Startwert für die Nachrechnungen (mulberry32)
+    const zufallMit = s => () => { s |= 0; s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    gleich([AW.mittel([1, 2, 3]), AW.mittel([]), AW.median([5, 1, 3]), AW.median([])].join(), "2,,3,", "mittel, median");
+    gleich(AW.korrelation([1, 2, 3, 4], [2, 4, 6, 8]), 1, "Korrelation 1");
+    gleich(AW.korrelation([1, 2], [1, 2]), null, "zu wenig Werte");
+    gleich(AW.korrelation([1, 1, 1], [1, 2, 3]), null, "ohne Streuung");
+    // Sitzungen: 20 Minuten Pause plus Dauer
+    const r = (iso, dauer = 60) => ({ zeit: iso, dauer });
+    const s = AW.sitzungen([r("2026-11-02T10:00:00Z"), r("2026-11-02T10:15:00Z"), r("2026-11-02T11:00:00Z")]);
+    gleich(s.map(x => x.length).join(), "2,1", "Sitzungen getrennt nach Pause");
+    // Stand: Fenster, Schwelle, gezeigte Lösung
+    const a = (n, ja) => Array.from({ length: n }, (_, i) => ({ anhieb: i < ja }));
+    const st = AW.stand([...a(5, 0), ...a(10, 9)], { fenster: 10, mindestens: 10, schwelle: 0.85 });
+    gleich([st.n, st.imFenster, st.anhieb, st.quote, st.sicher].join(), "15,10,9,0.9,true", "Stand: nur das Fenster zählt");
+    gleich(AW.stand([...a(9, 9), { anhieb: true, gezeigt: true }], { fenster: 10, mindestens: 10, schwelle: 0.85 }).sicher, false, "gezeigte Lösung im Fenster: nicht sicher");
+    gleich(AW.stand(a(9, 9), { fenster: 10, mindestens: 10, schwelle: 0.85 }).sicher, false, "zu wenig Aufgaben");
+    gleich(AW.stand([]).quote, null, "ohne Aufgaben: keine Quote");
+    // Nachrechnung AW2 a: bei gleich langen Runden (8 Aufgaben) ist die Quote der letzten 24 Aufgaben genau das Mittel der
+    // Quoten der letzten drei Runden (die bisherige Regel im Eulenpfad)
+    {
+      let abweichung = 0;
+      const zuf = zufallMit(7);
+      for (let fall = 0; fall < 2000; fall++) {
+        const runden = Array.from({ length: 1 + Math.floor(zuf() * 6) }, () => Array.from({ length: 8 }, () => ({ anhieb: zuf() < 0.7 })));
+        const alt = AW.mittel(runden.slice(-3).map(rr => rr.filter(x => x.anhieb).length / 8));
+        const neu = AW.stand(runden.flat(), { fenster: 24 }).quote;
+        if (Math.abs(alt - neu) > 1e-12) abweichung++;
+      }
+      gleich(abweichung, 0, "Fenster 24 = Mittel der letzten drei Runden zu 8 Aufgaben (2000 Fälle)");
+    }
+    // Bedarf wie bisher im Eulenpfad
+    gleich([AW.bedarf(null, 0), AW.bedarf(0.5, 1), AW.bedarf(0.8, 1), AW.bedarf(0.8, 7)].join(), "2,3,0.5,2", "Bedarf: neu, wackelt, frisch, verteilt");
+    // Ziehen nach Gewicht
+    let z = 0; const folge = [0.1, 0.9]; const quelle = () => folge[z++ % 2];
+    gleich(AW.ziehe(["a", "b"], x => (x === "a" ? 1 : 1), undefined, quelle), "a", "ziehen: kleine Zufallszahl → erstes");
+    gleich(AW.ziehe(["a", "b", "c"], () => 1, 5).length, 3, "ziehen ohne Zurücklegen, höchstens alle");
+    gleich(AW.ziehe(["a", "b"], x => (x === "a" ? 0 : 1)), "b", "Gewicht 0 wird nie gezogen");
+    // Wochen: Ziel mit Minuten (Eulenpfad), Tage ohne Minuten (Lernsteig)
+    const heute = new Date(2026, 10, 6, 12); // Donnerstag
+    const runde = (tag, min) => ({ zeit: new Date(2026, 10, tag, 10).toISOString(), dauer: min * 60 });
+    const w = AW.wochen([runde(2, 12), runde(3, 5), runde(3, 6), runde(4, 3), runde(6, 15)], { tage: 3, minuten: 10 }, heute.getTime());
+    gleich([w.wochen.length, w.aktuelle.erfuellteTage, w.aktuelle.erfuellt, w.serie, w.aktuelle.laufend].join(), "1,3,true,1,true", "Wochenziel mit Minuten");
+    const ohne = AW.wochen([runde(4, 1)], null, heute.getTime());
+    gleich([ohne.aktuelle.erfuellteTage, ohne.aktuelle.erfuellt, ohne.serie].join(), "1,false,0", "ohne Ziel: Tage gezählt, keine Woche erfüllt");
+    gleich(AW.wochenStart(heute).getDay(), 1, "Woche beginnt am Montag");
+    // Nachrechnung: wochen ohne Minuten = die bisherige Wochenserie des Lernsteigs (werkzeug.js bis LERN_Session16)
+    {
+      const tagText = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const wb = d => { const m = new Date(d.getFullYear(), d.getMonth(), d.getDate()); m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); return m; };
+      function serieAlt(tage, ziel, h) {
+        const zaehle = b => { let n = 0; for (let i = 0; i < 7; i++) { const d = new Date(b); d.setDate(d.getDate() + i); if (tage.has(tagText(d))) n++; } return n; };
+        const j = wb(h); const diese = zaehle(j); let f = 0; const x = new Date(j);
+        for (let i = 0; i < 520; i++) { x.setDate(x.getDate() - 7); if (zaehle(x) >= ziel) f++; else break; }
+        return { dieseWoche: diese, erreicht: diese >= ziel, wochenInFolge: f + (diese >= ziel ? 1 : 0) };
+      }
+      let abw = 0;
+      const zuf = zufallMit(11);
+      for (let fall = 0; fall < 500; fall++) {
+        const rs = Array.from({ length: Math.floor(zuf() * 40) }, () => ({ zeit: new Date(2026, 9, 1 + Math.floor(zuf() * 37), Math.floor(zuf() * 22)).toISOString(), dauer: 60 }));
+        const ziel = 1 + Math.floor(zuf() * 4);
+        const alt = serieAlt(new Set(rs.map(e => tagText(new Date(e.zeit)))), ziel, heute);
+        const neu = AW.wochen(rs, { tage: ziel }, heute.getTime());
+        if (alt.dieseWoche !== neu.aktuelle.erfuellteTage || alt.erreicht !== neu.aktuelle.erfuellt || alt.wochenInFolge !== neu.serie) abw++;
+      }
+      gleich(abw, 0, "wochen = bisherige Wochenserie des Lernsteigs (500 Fälle)");
+    }
   }
 
   // ---------- Kopien in den Apps ----------

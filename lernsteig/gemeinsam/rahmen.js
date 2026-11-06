@@ -112,10 +112,11 @@
   const STAND = { minAufgaben: 10, fenster: 10, anhieb: 0.85 };
   function kompetenzstand(kontoId, uebungId, lp) {
     const liste = runden(r => r.person === kontoId && r.inhalt === uebungId).flatMap(r => (r.liste || []).filter(x => x.lp === lp));
+    // Regel im Kern (KERN.auswertung.stand, AW2 a: eine Regel für beide Apps, Schwellen je App)
     const bewerte = l => {
-      const letzte = l.slice(-STAND.fenster);
-      const anhieb = letzte.filter(x => x.versuche === 0 && !x.gezeigt).length;
-      return { n: l.length, anhieb, fenster: letzte.length, sicher: l.length >= STAND.minAufgaben && letzte.every(x => !x.gezeigt) && anhieb / letzte.length >= STAND.anhieb };
+      const s = KERN.auswertung.stand(l.map(x => ({ anhieb: x.versuche === 0, gezeigt: !!x.gezeigt })),
+        { fenster: STAND.fenster, mindestens: STAND.minAufgaben, schwelle: STAND.anhieb, ohneGezeigt: true });
+      return { n: s.n, anhieb: s.anhieb, fenster: s.imFenster, sicher: s.sicher };
     };
     const ohne = bewerte(liste.filter(x => !x.rechner)), mit = bewerte(liste.filter(x => x.rechner));
     if (ohne.sicher) return Object.assign({ stand: "sicher", text: "sicher" }, ohne);

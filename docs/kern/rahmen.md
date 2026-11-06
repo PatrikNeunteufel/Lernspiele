@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.10.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.11.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.10.0)
+kern/VERSION          Version des Kerns (1.11.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -344,10 +344,31 @@ Benutzt von: Eulenpfad (Profil eines Kindes in der 6. Klasse: „📨 Einladung 
 Geburtsdatum oder -monat, Klasse 7) und Lernsteig (`einladungLesen` beim Laden der Startseite und „Einladung öffnen“
 für die Datei; ein Geburtsmonat ohne Tag bleibt erhalten).
 
-### 4.14 Geplant (Plan B, Reihenfolge B4)
+### 4.14 `KERN.auswertung` (`kern/auswertung.js`) — Auswertung ohne App-Bezug
 
-Profil-Übernahme zwischen den Apps (C9), Auswertung (Fazit, Bedarf,
-Kompetenzstand) mit Regeln je App, Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
+Entscheide AW1 a, AW2 a (LERN_Session16), im Kern seit 1.11.0. Reine Rechnungen auf Runden (`zeit`, `dauer`) und auf
+Listen von Aufgaben; Fazit, Vorschläge, Konzentration, Vorgehen und Kompetenztexte bleiben in den Apps. Testrunden
+filtert die App vorher heraus.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `mittel`, `median`, `korrelation(xs, ys)` | Grundrechnungen; Korrelation null unter drei Werten oder ohne Streuung |
+| `sitzungen(runden, { pauseMin })` | Runden zu Sitzungen (Pause plus Dauer der Runde) |
+| `lernzeiten(runden, jetzt)` | Minuten und Runden je Wochentag, Tageszeit und Tag der letzten 14 Tage, `uebungstage14` |
+| `wochenStart(zeit)`, `wochen(runden, ziel, jetzt)` | Wochen ab Montag seit der ersten Runde: Tage erfüllt (mit `ziel.minuten` ab so vielen Minuten, sonst ab einer Runde), Woche erfüllt ab `ziel.tage`, `serie` (die laufende Woche bricht sie nicht), `erfuellt` (Zahl) |
+| `stand(aufgaben, { fenster, mindestens, schwelle, ohneGezeigt })` | **eine Regel für den Stand** (AW2 a): Quote auf Anhieb der letzten `fenster` Aufgaben; `sicher` ab `mindestens` Aufgaben, Quote ab `schwelle`, im Fenster keine gezeigte Lösung |
+| `bedarf(quote, tageSeit, { schwelle })` | Gewicht für Zufallswahlen: neu 2, unter der Schwelle 1 + 4 · (1 − Quote), sonst frisch 0.5, nach sieben Tagen 2 |
+| `ziehe(kandidaten, gewicht, n, zufall)` | nach Gewicht ziehen, ohne Zurücklegen |
+
+Schwellen je App: Eulenpfad `fenster` 24, `mindestens` 1, `schwelle` 0.7 (für eine höhere Stufe mit Timer 0.9) —
+bei Runden zu acht Aufgaben genau die bisherige Regel „letzte drei Runden“ (in `pruefe_kern.js` nachgerechnet, dazu
+alte gegen neue Auswertung auf 3000 Zufallsverläufen gleich); Lernsteig `fenster` 10, `mindestens` 10, `schwelle`
+0.85, ohne gezeigte Lösung, mit und ohne Rechner getrennt. `wochen` ohne Minuten ist die Wochenserie des Lernsteigs
+(500 Zufallsfälle nachgerechnet), mit Minuten der Lernplan des Eulenpfads.
+
+### 4.15 Geplant (Plan B, Reihenfolge B4)
+
+Profil-Übernahme zwischen den Apps (C9), Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
 bevor er umzieht.
 
 ## 5. Ändern und verteilen

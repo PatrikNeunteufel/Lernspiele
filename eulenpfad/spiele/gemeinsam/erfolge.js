@@ -13,12 +13,7 @@ const ERFOLGE = (() => {
   const LERNPLAN_MINUTEN = [5, 10, 15, 20, 30];
 
   /** Montag 0:00 der Woche, in der `zeit` liegt (lokale Zeit). */
-  function wochenStart(zeit) {
-    const d = new Date(zeit);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-    return d;
-  }
+  const wochenStart = zeit => KERN.auswertung.wochenStart(zeit);
   const tageSpaeter = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 
   /**
@@ -29,34 +24,12 @@ const ERFOLGE = (() => {
    * serie: erfüllte Wochen in Folge bis heute (die laufende Woche zählt, sobald sie erfüllt ist, und bricht
    * die Serie nicht, solange sie läuft). wochen: alle seit der ersten Runde, mindestens eine, älteste zuerst.
    */
+  // Wochen, erfüllte Tage und Serie rechnet der Kern (KERN.auswertung.wochen, AW1 a) — dieselbe Rechnung wie die
+  // Wochenserie des Lernsteigs; hier nur der Lernplan des Kindes und die Gefahr für die Serie.
   function lernplan(profil, runden, jetzt = Date.now()) {
     const plan = profil?.lernplan && profil.lernplan.tage > 0 ? { ...LERNPLAN_VORGABE, ...profil.lernplan } : null;
-    const echte = runden.filter(e => !e.test);
-    const start = wochenStart(jetzt);
-    const erste = echte.length ? wochenStart(Math.min(...echte.map(e => Date.parse(e.zeit)))) : start;
-    const wochen = [];
-    for (let von = erste; von <= start; von = tageSpaeter(von, 7)) {
-      const bis = tageSpaeter(von, 7);
-      const tage = WOCHENTAGE.map((name, i) => ({ name, datum: tageSpaeter(von, i), minuten: 0, runden: 0, heute: false, zukunft: false }));
-      for (const t of tage) { t.heute = t.datum.toDateString() === new Date(jetzt).toDateString(); t.zukunft = t.datum > jetzt && !t.heute; }
-      for (const e of echte) {
-        const z = new Date(e.zeit);
-        if (z < von || z >= bis) continue;
-        const t = tage[(z.getDay() + 6) % 7];
-        t.minuten += (e.dauer || 0) / 60;
-        t.runden++;
-      }
-      for (const t of tage) t.erfuellt = plan ? t.minuten >= plan.minuten : t.runden > 0;
-      const erfuellteTage = tage.filter(t => t.erfuellt).length;
-      wochen.push({ von, bis, tage, erfuellteTage, erfuellt: !!plan && erfuellteTage >= plan.tage, laufend: von.getTime() === start.getTime() });
-    }
-    let serie = 0;
-    for (let i = wochen.length - 1; i >= 0; i--) {
-      if (wochen[i].erfuellt) serie++;
-      else if (!wochen[i].laufend) break;
-    }
-    const aktuelle = wochen[wochen.length - 1];
-    return { plan, wochen, aktuelle, serie, sterne: wochen.filter(w => w.erfuellt).length, gefahr: gefahr(plan, aktuelle, serie) };
+    const w = KERN.auswertung.wochen(runden.filter(e => !e.test), plan, jetzt);
+    return { plan, wochen: w.wochen, aktuelle: w.aktuelle, serie: w.serie, sterne: w.erfuellt, gefahr: gefahr(plan, w.aktuelle, w.serie) };
   }
   /**
    * Droht die Serie zu brechen? (Wunsch Patrik, LERN_Session11.) Nur mit Plan, laufender Serie aus den Vorwochen und

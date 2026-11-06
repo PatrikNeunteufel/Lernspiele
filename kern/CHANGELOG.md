@@ -3,6 +3,14 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.11.0 — 2026-11-06 (LERN_Session16)
+- `auswertung.js` (`KERN.auswertung`, Entscheide AW1 a, AW2 a): Rechnungen ohne App-Bezug — `mittel`, `median`,
+  `korrelation`, `sitzungen` (Pause als Parameter), `lernzeiten`, `wochenStart`, `wochen` (Wochenziel mit Tagen und
+  Minuten, Serie, erfüllte Wochen; ohne Minuten = Wochenserie des Lernsteigs), `stand` (eine Regel: letzte n Aufgaben,
+  Mindestzahl, Schwelle, ohne gezeigte Lösung), `bedarf`, `ziehe`. Eulenpfad: Bedarf und Vorschläge mit dem Fenster der
+  letzten 24 Aufgaben (bei Runden zu acht gleich wie bisher, nachgerechnet), Lernplan über `wochen`; Lernsteig:
+  Kompetenzstand über `stand`, Wochenserie über `wochen`.
+
 ## 1.10.0 — 2026-11-06 (LERN_Session16)
 - `einladung.js` (`KERN.einladung`): Einladung in eine andere App (EL1 a, Notiz EP1) — `erstellen(daten, { ziel, von })`
   mit Format `{ format: "einladung", v: 1, ziel, von, name, geboren, klasse, niveau, lehrplan }`, `fragment` für den

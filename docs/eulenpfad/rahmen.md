@@ -310,7 +310,8 @@ Wortanfang vor Wortteil, genaue Umlaute vor ä = a; ein Tippfehler nur im Namen 
 Kürzeln mit Ziffern; jedes Suchwort muss passen. Während einer Suche steht statt der Gruppen eine Liste,
 beste Treffer zuerst; wer nur über Thema oder Inhaltsliste passt, trägt „🔍 gefunden …“. **Persönliche Passung**
 (Wunsch Patrik, LERN_Session10): Für ein angemeldetes Kind rechnet `LS.passung` aus der Nähe der Basisklasse zu
-seiner Klasse (gleich 1, eine daneben 0.6, zwei 0.2) und dem Bedarf aus dem Protokoll (`AUSWERTUNG.bedarf` in der
+seiner Klasse (gleich 1, eine daneben 0.6, zwei 0.2) und dem Bedarf aus dem Protokoll (`AUSWERTUNG.bedarf`: Quote der
+letzten 24 Aufgaben nach `KERN.auswertung.stand`, AW2 a, docs/kern/rahmen.md 4.14; in der
 empfohlenen Stufe, auf 5 gedeckelt) einen Wert 0–1; die Suche nimmt ihn als Faktor 1 + 0.5 · Passung auf die
 Textrelevanz, der Text bleibt also massgebend. Die Aufsicht und das Testskript suchen neutral. **Ähnliche Spiele:**
 `LS.aehnlich(id, person)` ordnet nach gleichem Lernziel (4 je Code) und gleichem Thema (3), gleiches Fach zählt 1 dazu (allein reicht es nicht), je Basisklasse

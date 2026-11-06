@@ -13,9 +13,37 @@ const AUSWERTUNG = (() => {
   // fehlerAufgaben, Aufgaben, die nur ein Tipp brauchte, zählen dazu.
   const mitTippOhneFehler = e => (e.aufgabenZeiten || []).filter(a => a.tipps && !a.versuche && !a.zeitUm).length;
   const anhieb = e => (e.aufgaben - (e.fehlerAufgaben || []).length - mitTippOhneFehler(e)) / e.aufgaben;
-  const mittel = xs => xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null;
-  const median = xs => { if (!xs.length) return null; const a = [...xs].sort((x, y) => x - y); return a[Math.floor(a.length / 2)]; };
+  // Rechnungen ohne App-Bezug im Kern (kern/auswertung.js, AW1 a): Mittel, Median, Korrelation, Sitzungen, Lernzeiten,
+  // Wochen, Stand, Bedarf, Ziehen. Hier bleibt, was an Spielen, Lernzielen und Texten des Eulenpfads hängt.
+  const K = KERN.auswertung;
+  const { mittel, median } = K;
   const spielVon = id => SPIELE.find(s => s.id === id);
+
+  // Stand „üben / sitzt“ (AW2 a, K.stand): die letzten 24 Aufgaben derselben Gruppe (Spiel und Stufe oder Lernziel).
+  // Bei Runden zu acht Aufgaben sind das genau die letzten drei Runden wie bisher (in pruefe_kern.js nachgerechnet);
+  // jede Aufgabe zählt gleich, auch in langen Endlos-Serien.
+  const STAND = { fenster: 24, mindestens: 1, schwelle: QUOTE_UEBEN };
+  /**
+   * Die Aufgaben einer Runde, in ihrer Reihenfolge: { anhieb } je Aufgabe aus aufgabenZeiten (ohne Fehler, Zeit, Tipp).
+   * Passen die Angaben je Aufgabe nicht zur Zählung der Runde (ältere Runden, übersprungene Aufgaben), zählt die Runde
+   * wie bisher (anhieb) und die Aufgaben ohne Anhieb stehen am Ende der Runde.
+   */
+  function aufgabenVon(e) {
+    const n = e.aufgaben || 0;
+    const ja = Math.max(0, Math.round(anhieb(e) * n));
+    const az = Array.isArray(e.aufgabenZeiten) ? e.aufgabenZeiten : [];
+    const einzeln = az.map(a => ({ anhieb: !!a.geloest && !a.versuche && !a.zeitUm && !a.tipps && !a.uebersprungen }));
+    if (az.length === n && einzeln.filter(a => a.anhieb).length === ja) return einzeln;
+    return Array.from({ length: n }, (_, i) => ({ anhieb: i < ja }));
+  }
+  /** Quote auf Anhieb der letzten 24 Aufgaben der Runden rs (älteste zuerst) mit Schwelle; null ohne Aufgaben. */
+  const standVon = (rs, schwelle = STAND.schwelle) => K.stand(rs.flatMap(aufgabenVon), { ...STAND, schwelle });
+  /** Die Runden, aus denen die letzten 24 Aufgaben stammen (für Texte wie „nicht gelöst“). */
+  function rundenImFenster(rs) {
+    const aus = [];
+    for (let i = rs.length - 1, n = 0; i >= 0 && n < STAND.fenster; i--) { aus.unshift(rs[i]); n += rs[i].aufgaben || 0; }
+    return aus;
+  }
   const stufeNr = id => Number(String(id).slice(1));
 
   /** Runden zu einem Lernziel (Spiel + zugeordnete Stufen). */
@@ -24,43 +52,10 @@ const AUSWERTUNG = (() => {
     return runden.filter(e => zuordnung.some(z => z.spiel === e.inhalt && z.stufen.includes(e.stufe)));
   }
 
-  /** Runden zu Sitzungen gruppieren: Lücke > 20 min zwischen Ende und nächstem Ende = neue Sitzung. */
-  function sitzungen(runden) {
-    const sortiert = [...runden].sort((a, b) => a.zeit.localeCompare(b.zeit));
-    const ergebnis = [];
-    let letzte = null;
-    for (const e of sortiert) {
-      const t = Date.parse(e.zeit);
-      if (!letzte || t - letzte > SITZUNGS_PAUSE_MIN * 60000 + (e.dauer || 0) * 1000) ergebnis.push([]);
-      ergebnis[ergebnis.length - 1].push(e);
-      letzte = t;
-    }
-    return ergebnis;
-  }
-
-  /** Wann wird gelernt: Minuten je Wochentag (Mo–So), je Tageszeit-Fenster und je Tag der letzten 14 Tage. */
-  function lernzeiten(runden, jetzt = Date.now()) {
-    const wochentage = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map(t => ({ name: t, minuten: 0, runden: 0 }));
-    const fenster = [
-      { name: "vor 9", von: 0, bis: 9 }, { name: "9–12", von: 9, bis: 12 }, { name: "12–14", von: 12, bis: 14 },
-      { name: "14–17", von: 14, bis: 17 }, { name: "17–20", von: 17, bis: 20 }, { name: "ab 20", von: 20, bis: 24 },
-    ].map(f => ({ ...f, minuten: 0, runden: 0 }));
-    const tage = Array.from({ length: 14 }, (_, i) => {
-      const d = new Date(jetzt - (13 - i) * TAG_MS);
-      return { datum: d.toDateString(), name: String(d.getDate()), lang: d.toLocaleDateString("de-CH", { weekday: "short", day: "numeric", month: "numeric" }), minuten: 0, runden: 0 };
-    });
-    for (const e of runden) {
-      const d = new Date(e.zeit);
-      const min = (e.dauer || 0) / 60;
-      const w = wochentage[(d.getDay() + 6) % 7];
-      w.minuten += min; w.runden++;
-      const f = fenster.find(x => d.getHours() >= x.von && d.getHours() < x.bis);
-      f.minuten += min; f.runden++;
-      const t = tage.find(x => x.datum === d.toDateString());
-      if (t) { t.minuten += min; t.runden++; }
-    }
-    return { wochentage, fenster, tage, uebungstage14: tage.filter(t => t.runden > 0).length };
-  }
+  /** Runden zu Sitzungen gruppieren: Lücke > 20 min zwischen Ende und nächstem Ende = neue Sitzung (Kern). */
+  const sitzungen = runden => K.sitzungen(runden, { pauseMin: SITZUNGS_PAUSE_MIN });
+  /** Wann wird gelernt: Minuten je Wochentag (Mo–So), je Tageszeit-Fenster und je Tag der letzten 14 Tage (Kern). */
+  const lernzeiten = K.lernzeiten;
 
   /**
    * Konzentration: Zeit je Aufgabe im Verhältnis zur eigenen üblichen Zeit für dasselbe Spiel und
@@ -143,29 +138,15 @@ const AUSWERTUNG = (() => {
    */
   function bedarf(spielId, stufe, runden, fokus = [], jetzt = Date.now()) {
     const rs = runden.filter(e => e.inhalt === spielId && e.stufe === stufe);
-    let g = 2;
-    if (rs.length) {
-      const letzte = rs.slice(-3);
-      const q = mittel(letzte.map(anhieb));
-      const tage = (jetzt - Date.parse(rs[rs.length - 1].zeit)) / TAG_MS;
-      g = q < QUOTE_UEBEN ? 1 + 4 * (1 - q) : tage >= 7 ? 2 : 0.5;
-    }
+    const q = rs.length ? standVon(rs).quote : null;
+    const tage = rs.length ? (jetzt - Date.parse(rs[rs.length - 1].zeit)) / TAG_MS : 0;
+    const g = K.bedarf(q, tage, { schwelle: QUOTE_UEBEN });
     const s = spielVon(spielId);
     return s && s.lernziele.some(l => fokus.includes(l.lz)) ? g * 2 : g;
   }
 
-  /** Zufällig nach Gewicht ziehen: ohne n ein Element, mit n eine Liste ohne Zurücklegen (höchstens n). */
-  function ziehe(kandidaten, gewicht, n) {
-    const rest = kandidaten.map(x => ({ x, g: Math.max(0, gewicht(x)) }));
-    const aus = [];
-    while (rest.length && aus.length < (n ?? 1)) {
-      let r = Math.random() * rest.reduce((a, e) => a + e.g, 0);
-      let i = rest.findIndex(e => (r -= e.g) < 0);
-      if (i < 0) i = rest.length - 1;
-      aus.push(rest.splice(i, 1)[0].x);
-    }
-    return n === undefined ? aus[0] : aus;
-  }
+  /** Zufällig nach Gewicht ziehen: ohne n ein Element, mit n eine Liste ohne Zurücklegen (höchstens n; Kern). */
+  const ziehe = (kandidaten, gewicht, n) => K.ziehe(kandidaten, gewicht, n);
 
   function vorschlaege(name, runden, profil, jetzt = Date.now()) {
     const v = [];
@@ -176,12 +157,11 @@ const AUSWERTUNG = (() => {
     for (const e of runden) (gruppen[`${e.inhalt}|${e.stufe}`] = gruppen[`${e.inhalt}|${e.stufe}`] || []).push(e);
     for (const [k, rs] of Object.entries(gruppen)) {
       const [spiel, stufe] = k.split("|");
-      const letzte = rs.slice(-3);
-      const q = mittel(letzte.map(anhieb));
-      if (q < QUOTE_UEBEN) {
-        const offen = letzte.flatMap(e => e.fehlerAufgaben.filter(f => !f.geloest)).length;
+      const st = standVon(rs), q = st.quote;
+      if (q !== null && q < QUOTE_UEBEN) {
+        const offen = rundenImFenster(rs).flatMap(e => (e.fehlerAufgaben || []).filter(f => !f.geloest)).length;
         v.push({ art: "wiederholen", prio: 1 + q, titel: `🔁 Wiederholen: ${spielVon(spiel)?.name} · Stufe ${stufeNr(stufe)}`,
-          text: `In den letzten ${letzte.length} Runden nur ${Math.round(q * 100)} % auf Anhieb richtig${offen ? `, ${offen} Aufgabe${offen === 1 ? "" : "n"} nicht gelöst` : ""}. Lieber 2–3 kurze Runden an verschiedenen Tagen als viele am Stück.`,
+          text: `In den letzten ${st.imFenster} Aufgaben nur ${Math.round(q * 100)} % auf Anhieb richtig${offen ? `, ${offen} Aufgabe${offen === 1 ? "" : "n"} nicht gelöst` : ""}. Lieber 2–3 kurze Runden an verschiedenen Tagen als viele am Stück.`,
           link: link(spiel, stufe) });
       }
     }
@@ -203,7 +183,7 @@ const AUSWERTUNG = (() => {
       if (!rs.length) continue;
       const zuletzt = Date.parse(rs[rs.length - 1].zeit);
       const tage = Math.floor((jetzt - zuletzt) / TAG_MS);
-      if (tage >= 7 && mittel(rs.slice(-3).map(anhieb)) >= QUOTE_UEBEN) {
+      if (tage >= 7 && standVon(rs).quote >= QUOTE_UEBEN) {
         const e = rs[rs.length - 1];
         v.push({ art: "auffrischen", prio: 4, titel: `🌤 Auffrischen: ${lz.lz} ${lz.text}`,
           text: `Sass gut, ist aber ${tage} Tage her. Eine kurze Runde hilft, es nicht zu vergessen.`, link: link(e.inhalt, e.stufe) });
@@ -246,7 +226,8 @@ const AUSWERTUNG = (() => {
     for (const [kk, rs] of Object.entries(gruppen)) {
       const [spiel, stufe] = kk.split("|");
       const letzte = rs.slice(-3);
-      if (letzte.length < 3 || letzte.some(e => e.timer) || mittel(letzte.map(anhieb)) < 0.9) continue;
+      // drei Runden ohne Timer (Runden, weil der Timer je Runde gilt), Quote der letzten 24 Aufgaben ab 90 % (AW2 a)
+      if (letzte.length < 3 || letzte.some(e => e.timer) || standVon(rs, 0.9).quote < 0.9) continue;
       const vor = LS.zeitVorschlag(name, spiel, stufe);
       if (!vor) continue;
       v.push({ art: "timer", prio: 6, titel: `⏱ Herausforderung: ${spielVon(spiel)?.name} mit Timer`,
@@ -355,15 +336,8 @@ const AUSWERTUNG = (() => {
   }
   const genugDaten = x => x.aufgaben >= FAZIT.minAufgaben && x.runden >= FAZIT.minRunden;
 
-  /** Pearson-Korrelation zweier gleich langer Reihen; null bei zu wenig Streuung. */
-  function korrelation(xs, ys) {
-    const n = xs.length;
-    if (n < 3) return null;
-    const mx = mittel(xs), my = mittel(ys);
-    let sxy = 0, sxx = 0, syy = 0;
-    for (let i = 0; i < n; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sxx += (xs[i] - mx) ** 2; syy += (ys[i] - my) ** 2; }
-    return sxx && syy ? sxy / Math.sqrt(sxx * syy) : null;
-  }
+  /** Pearson-Korrelation zweier gleich langer Reihen; null bei zu wenig Streuung (Kern). */
+  const korrelation = K.korrelation;
 
   /**
    * Fazit über die Runden eines Kindes: { genug, kurz, abschnitte: [{ titel, saetze }] }.

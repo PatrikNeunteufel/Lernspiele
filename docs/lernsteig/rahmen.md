@@ -144,7 +144,8 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   (der Eulenpfad erzeugt sie nach der 6. Klasse, Notiz EP1). Ein Geburtsmonat ohne Tag bleibt beim Anlegen erhalten.
 - **Kompetenzstand** (`LST.kompetenzstand(konto, uebung, lp)`): je Lehrplan-Stufe aus der Protokoll-`liste`:
   *sicher* ab 10 Aufgaben mit mindestens 85 % auf Anhieb in den letzten 10 und keiner gezeigten Lösung (ohne Rechner;
-  sonst *sicher mit Rechner*), *am Üben* ab einer Aufgabe, sonst *offen*. Schwellen in `STAND` (Annahme). Angezeigt als
+  sonst *sicher mit Rechner*), *am Üben* ab einer Aufgabe, sonst *offen*. Schwellen in `STAND` (Annahme); gerechnet mit
+  `KERN.auswertung.stand` (eine Regel für beide Apps, AW2 a), die Wochenserie mit `KERN.auswertung.wochen`. Angezeigt als
   Marke in der Stufenwahl (Tooltip mit Zahlen) und auf der Startseite („2 von 3 Stufen sicher“).
 - **Serie über Tage** (BF1 a, selbst gesetzt, ohne Stern): Wochenziel `wochenziel` (1–7 Tage je Woche) im Konto,
   gesetzt auf der Statistik-Seite. Übungstag = Kalendertag (Ortszeit) mit mindestens einer Runde, Wochen ab Montag.

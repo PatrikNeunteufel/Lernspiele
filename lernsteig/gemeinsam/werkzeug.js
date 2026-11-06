@@ -82,21 +82,16 @@ var LST = (function () {
   // ---------- Serie über Tage (BF1 a: selbst gesetzt, ohne Stern) ----------
   // Ein Übungstag ist ein Kalendertag (Ortszeit) mit mindestens einer Runde. Wochen beginnen am Montag.
   const tagText = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  function wochenbeginn(d) { const m = new Date(d.getFullYear(), d.getMonth(), d.getDate()); m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); return m; }
   /**
    * Wochenziel: tage = Menge der Übungstage („JJJJ-MM-TT“), ziel = Tage je Woche (1–7).
    * Liefert { dieseWoche, ziel, erreicht, wochenInFolge }: wochenInFolge zählt die Wochen direkt vor dieser, die das
    * Ziel erreichten, dazu diese, wenn sie es schon erreicht hat. Eine laufende Woche unterbricht die Serie nicht.
+   * Rechnung im Kern (KERN.auswertung.wochen, AW1 a; dieselbe wie das Wochenziel des Eulenpfads, ohne Minuten).
    */
   function wochenSerie(tage, ziel, heute = new Date()) {
-    const zaehle = beginn => { let n = 0; for (let i = 0; i < 7; i++) { const d = new Date(beginn); d.setDate(d.getDate() + i); if (tage.has(tagText(d))) n++; } return n; };
-    const jetzt = wochenbeginn(heute);
-    const dieseWoche = zaehle(jetzt);
-    let folge = 0;
-    const w = new Date(jetzt);
-    for (let i = 0; i < 520; i++) { w.setDate(w.getDate() - 7); if (zaehle(w) >= ziel) folge++; else break; }
-    const erreicht = dieseWoche >= ziel;
-    return { dieseWoche, ziel, erreicht, wochenInFolge: folge + (erreicht ? 1 : 0) };
+    const runden = [...tage].map(t => { const [j, m, d] = t.split("-").map(Number); return { zeit: new Date(j, m - 1, d, 12).toISOString(), dauer: 0 }; });
+    const w = KERN.auswertung.wochen(runden, { tage: ziel }, heute.getTime());
+    return { dieseWoche: w.aktuelle.erfuellteTage, ziel, erreicht: w.aktuelle.erfuellt, wochenInFolge: w.serie };
   }
 
   return {
