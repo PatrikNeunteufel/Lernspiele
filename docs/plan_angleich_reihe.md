@@ -19,7 +19,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
 | B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.12.0; als Nächstes Terme und Rechenkern | Abschnitt B |
-| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes C2 nach Plan B | Abschnitt C |
+| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes Terme und Rechenkern (B), dann B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
@@ -259,6 +259,8 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
 - **Ü1 a** (2026-11-06): Bei der Übernahme einer Aufsicht reisen Kennung, Name, Rolle, Art, PIN-Prüfwert, Sicherheitsfrage
   und Antwort-Prüfwert mit; der Wiederherstellungscode ist je App ein eigener und wird neu ausgegeben.
 - **Ü2 b** (2026-11-06): Keine Bestätigung durch eine Aufsicht der Ziel-App (in der Quell-App schon geprüft).
+- **TA1 a** (2026-11-06): C2 (Tabs des Lernsteigs) vor dem Rest von Plan B, damit das Testgerüst B2 die bleibenden
+  Seiten prüft.
 - **AW1 a** (2026-11-06): Kern-Teil Auswertung mit den Rechnungen ohne App-Bezug (Mittel, Median, Korrelation,
   Sitzungen, Lernzeiten, Wochen, Bedarf, Ziehen); Fazit, Vorschläge und Kompetenztexte bleiben in den Apps.
 - **AW2 a** (2026-11-06): eine Regel für den Stand aus den letzten n Aufgaben, Schwellen je App (Eulenpfad 24 / 70 %,

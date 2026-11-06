@@ -1,6 +1,10 @@
 /* Startseite des Lernsteigs: zuerst die Anmeldung (Plan C1: Jugendliche, Aufsicht, „Ich bin neu“, Gast C2 a), dann
-   Konto (AU1 a, KT1 a, GE1 b, EL1 a), Einstellungen, Übungen je Fach mit Kompetenzstand (BF1 a). */
+   eine Seite mit Tabs wie im Eulenpfad (Plan C2): Übungen je Fach mit Kompetenzstand (BF1 a), Profil mit Konto (AU1 a,
+   KT1 a, GE1 b, EL1 a) und Einstellungen, Statistik, Erfolge, Verwaltung (nur Aufsicht). */
 "use strict";
+
+/** Tab-Inhalte der anderen Dateien (start/statistik.js, start/aufsicht.js) und Neuzeichnen der Seite. */
+var LST_START = typeof LST_START === "object" ? LST_START : {};
 
 (function () {
   const LP = LST_LEHRPLAENE;
@@ -115,9 +119,8 @@
     if (ansicht.art === "code") return codeAnzeige(karte);
     const wer = LST.werUebt();
     if (wer === "gast") {
-      dazu(karte,el("p", { class: "konto-zeile" }, el("b", { text: "Gast" }), el("span", { class: "leise", text: "nichts wird gespeichert" })),
-        el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Anmelden", "data-aktion": "abmelden",
-          onclick: () => { KO.abmelden(); ansicht = { art: "start" }; zeichne(); } })));
+      // An- und Abmelden steht in der Leiste über den Tabs
+      dazu(karte,el("p", { class: "konto-zeile" }, el("b", { text: "Gast" }), el("span", { class: "leise", text: "nichts wird gespeichert" })));
       return karte;
     }
     if (wer === "aufsicht") {
@@ -125,8 +128,7 @@
       dazu(karte,el("p", { class: "konto-zeile" }, el("b", { text: `\u{1F511} ${a.name}` }), el("span", { class: "leise", text: `Aufsicht · ${rolleName(a.art)}` })),
         el("p", { class: "leise", text: "Du siehst alle Übungen, auch gesperrte zum Prüfen. Deine Runden zählen als Test." }),
         el("div", { class: "knopf-zeile" },
-          el("a", { class: "knopf haupt", href: "aufsicht.html", text: "Zur Aufsicht" }),
-          el("button", { type: "button", class: "knopf", text: "Abmelden", "data-aktion": "abmelden", onclick: () => { KO.abmelden(); ansicht = { art: "start" }; zeichne(); } })));
+          el("a", { class: "knopf haupt", href: "#verwaltung", text: "Zur Verwaltung" })));
       return karte;
     }
     const aktiv = KO.aktiv();
@@ -136,8 +138,7 @@
     dazu(karte,...[el("p", { class: "konto-zeile" }, el("b", { text: aktiv.name }),
       el("span", { class: "leise", text: [alter !== null ? `${alter} Jahre` : "", aktiv.klasse ? (KLASSEN.find(k => k.id === String(aktiv.klasse)) || {}).name : "", aktiv.pin ? "mit PIN" : "ohne PIN"].filter(Boolean).join(" · ") })),
       el("div", { class: "knopf-zeile" },
-        el("button", { type: "button", class: "knopf", text: "Profil", onclick: () => { ansicht = { art: "profil" }; zeichne(); } }),
-        el("button", { type: "button", class: "knopf", text: "Abmelden", "data-aktion": "abmelden", onclick: () => { KO.abmelden(); ansicht = { art: "start" }; zeichne(); } })),
+        el("button", { type: "button", class: "knopf", text: "Bearbeiten", "data-aktion": "bearbeiten", onclick: () => { ansicht = { art: "profil" }; zeichne(); } })),
       LST.serie(aktiv) ? el("p", { class: "serie", text: "Wochenziel: " + LST.serieText(LST.serie(aktiv)) }) : null,
       mitleserTeil(aktiv)].filter(Boolean));
     return karte;
@@ -262,26 +263,8 @@
       el("p", { class: "fuss", text: "Alles bleibt im Browser auf diesem Gerät. Keine Anmeldung bei einem Server, keine Werbung." }));
   }
 
-  function zeichne() {
-    if (LST.werUebt() === "niemand" || ["neu-wer", "neu", "neu-aufsicht", "pin", "vergessen"].includes(ansicht.art)) return zeichneAnmeldung();
+  function zeichneUebungen(box) {
     const k = LST.konto();
-    const lp = k.lehrplan;
-    const kantonWerte = [{ id: "", name: "— bitte wählen —" }].concat(LP.KANTONE);
-    const ziele = LP.pruefungszieleFuer(lp);
-    if (!ziele.some(z => z.id === k.pruefungsziel)) k.pruefungsziel = "keins";
-    const aendern = f => { const neu = LST.konto(); f(neu); LST.speichereKonto(neu); zeichne(); };
-
-    const einstellungen = el("div", { class: "einstellungen" },
-      auswahl("Land", LP.LAENDER, lp.land, v => aendern(x => { x.lehrplan = { land: v, kanton: v === "CH" ? x.lehrplan.kanton : null }; })),
-      lp.land === "CH" ? auswahl("Kanton", kantonWerte, lp.kanton || "", v => aendern(x => { x.lehrplan.kanton = v || null; }),
-        lp.kanton && !LP.KANTON[lp.kanton] ? "Für diesen Kanton sind noch keine Prüfungen hinterlegt." : null) : null,
-      auswahl("Prüfungsziel", ziele, k.pruefungsziel, v => aendern(x => { x.pruefungsziel = v; }),
-        (ziele.find(z => z.id === k.pruefungsziel) || {}).text),
-      // Bedienung des eingebauten Rechners wie das eigene Modell (RM1 b, R11)
-      auswahl("Mein Taschenrechner", Object.entries(LST_RECHNER.MODELLE).map(([id, m]) => ({ id, name: m.familie === "allgemein" ? "allgemein" : m.name })),
-        k.rechnerModell, v => aendern(x => { x.rechnerModell = v; }), "Der eingebaute Rechner bedient sich dann wie dein Modell, mit Tipps dazu."),
-      geraetHinweis());
-
     const faecher = el("div", { class: "faecher" });
     for (const f of KAT.FAECHER) {
       const uebungen = KAT.UEBUNGEN.filter(u => u.fach === f.id);
@@ -317,15 +300,70 @@
       }
       faecher.append(karte);
     }
-
-    // null herausfiltern: das eingebaute replaceChildren schreibt es sonst als Text „null“
-    wurzel.replaceChildren(...[
-      el("h2", { class: "abschnitt", text: "Konto" }), kontoKarte(),
-      el("h2", { class: "abschnitt", text: "Einstellungen" }), einstellungen,
-      el("h2", { class: "abschnitt", text: "Fächer" }), faecher,
-      LST.werUebt() === "lernend" ? el("p", { class: "knopf-zeile" }, el("a", { class: "knopf", href: "statistik.html", text: "Mein Stand: Statistik, Sichern und Einlesen" })) : null,
-      el("p", { class: "fuss", text: "Alles bleibt im Browser auf diesem Gerät. Keine Anmeldung bei einem Server, keine Werbung." })].filter(Boolean));
+    box.replaceChildren(faecher);
   }
+
+  function zeichneProfil(box) {
+    const k = LST.konto();
+    const lp = k.lehrplan;
+    const kantonWerte = [{ id: "", name: "— bitte wählen —" }].concat(LP.KANTONE);
+    const ziele = LP.pruefungszieleFuer(lp);
+    if (!ziele.some(z => z.id === k.pruefungsziel)) k.pruefungsziel = "keins";
+    const aendern = f => { const neu = LST.konto(); f(neu); LST.speichereKonto(neu); zeichne(); };
+    const einstellungen = el("div", { class: "einstellungen" },
+      auswahl("Land", LP.LAENDER, lp.land, v => aendern(x => { x.lehrplan = { land: v, kanton: v === "CH" ? x.lehrplan.kanton : null }; })),
+      lp.land === "CH" ? auswahl("Kanton", kantonWerte, lp.kanton || "", v => aendern(x => { x.lehrplan.kanton = v || null; }),
+        lp.kanton && !LP.KANTON[lp.kanton] ? "Für diesen Kanton sind noch keine Prüfungen hinterlegt." : null) : null,
+      auswahl("Prüfungsziel", ziele, k.pruefungsziel, v => aendern(x => { x.pruefungsziel = v; }),
+        (ziele.find(z => z.id === k.pruefungsziel) || {}).text),
+      // Bedienung des eingebauten Rechners wie das eigene Modell (RM1 b, R11)
+      auswahl("Mein Taschenrechner", Object.entries(LST_RECHNER.MODELLE).map(([id, m]) => ({ id, name: m.familie === "allgemein" ? "allgemein" : m.name })),
+        k.rechnerModell, v => aendern(x => { x.rechnerModell = v; }), "Der eingebaute Rechner bedient sich dann wie dein Modell, mit Tipps dazu."),
+      geraetHinweis(),
+      LST.werUebt() === "lernend" ? null : el("small", { class: "leise", text: "Diese Einstellungen gelten nur, bis du den Tab schliesst." }));
+    box.replaceChildren(el("h2", { class: "abschnitt", text: "Konto" }), kontoKarte(),
+      el("h2", { class: "abschnitt", text: "Einstellungen" }), einstellungen);
+  }
+
+  // ---------- Tabs (Plan C2, wie Eulenpfad L3 a) ----------
+  // Eine Seite mit Tabs in derselben Reihenfolge wie im Eulenpfad; der Tab steht in der Adresse (#uebungen, #profil,
+  // #statistik, #statistik/<Konto> für die Aufsicht, #erfolge, #verwaltung). Statistik, Erfolge und Verwaltung zeichnen
+  // start/statistik.js und start/aufsicht.js (LST_START).
+  const TABS = [
+    { id: "uebungen", text: "📚 Übungen", zeichne: zeichneUebungen },
+    { id: "profil", text: "👤 Profil", zeichne: zeichneProfil },
+    { id: "statistik", text: "📊 Statistik", zeichne: (box, teil) => LST_START.statistik(box, teil) },
+    { id: "erfolge", text: "🏅 Erfolge", zeichne: box => LST_START.erfolge(box) },
+    { id: "verwaltung", text: "⚙️ Verwaltung", zeichne: box => LST_START.verwaltung(box), nurAufsicht: true },
+  ];
+  function aktuellerTab() {
+    const [id, teil] = location.hash.slice(1).split("/");
+    const tab = TABS.find(t => t.id === id && (!t.nurAufsicht || LST.werUebt() === "aufsicht")) || TABS[0];
+    return { tab, teil: tab.id === id ? teil || null : null };
+  }
+  function leiste(tab) {
+    const wer = LST.werUebt();
+    const name = wer === "lernend" ? KO.aktiv().name : wer === "aufsicht" ? `🔑 ${KO.aufsichtAktiv().name}` : "Gast";
+    return el("div", { class: "leiste" },
+      el("nav", { class: "tabs", role: "tablist", "aria-label": "Bereiche" },
+        TABS.filter(t => !t.nurAufsicht || wer === "aufsicht").map(t => el("a", { class: "tab", role: "tab", href: "#" + t.id, "aria-selected": String(t === tab), text: t.text }))),
+      el("span", { class: "wer" }, el("span", { class: "leise", text: "Angemeldet: " }), el("b", { text: name }),
+        el("button", { type: "button", class: "knopf klein", "data-aktion": "abmelden", text: wer === "gast" ? "Anmelden" : "Abmelden",
+          onclick: () => { KO.abmelden(); ansicht = { art: "start" }; history.replaceState(null, "", location.pathname); zeichne(); } })));
+  }
+
+  function zeichne() {
+    if (LST.werUebt() === "niemand" || ["neu-wer", "neu", "neu-aufsicht", "pin", "vergessen"].includes(ansicht.art)) return zeichneAnmeldung();
+    // Ein neuer Wiederherstellungscode steht im Profil (nur jetzt sichtbar)
+    if (ansicht.art === "code" && !location.hash.startsWith("#profil")) history.replaceState(null, "", "#profil");
+    const { tab, teil } = aktuellerTab();
+    const inhalt = el("div", { class: "tab-inhalt", role: "tabpanel" });
+    wurzel.replaceChildren(leiste(tab), inhalt,
+      el("p", { class: "fuss", text: "Alles bleibt im Browser auf diesem Gerät. Keine Anmeldung bei einem Server, keine Werbung." }));
+    tab.zeichne(inhalt, teil);
+  }
+  LST_START.neu = zeichne;
+  addEventListener("hashchange", () => { if (!/einladung=/.test(location.hash)) zeichne(); });
 
   zeichne();
 })();

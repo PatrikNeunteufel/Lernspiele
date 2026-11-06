@@ -1,4 +1,12 @@
 /* Startseite des Lernsteigs: nur Anordnung; Farben aus gemeinsam/stil.css. */
+/* Tabs (Plan C2, Aufbau wie im Eulenpfad, Ton sachlich): Leiste mit Tabs und angemeldeter Person */
+.leiste { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; border: 1px solid var(--rand); border-radius: 10px; background: var(--karte); color: var(--text); font-weight: 600; text-decoration: none; }
+.tab:hover { border-color: var(--akzent); }
+.tab[aria-selected="true"] { background: var(--akzent); border-color: var(--akzent); color: var(--akzent-text); }
+.wer { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.knopf.klein { min-height: 40px; padding: 6px 12px; }
 .akzent { color: var(--akzent); }
 .abschnitt { margin: 20px 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--leise); }
 .einstellungen { display: grid; gap: 12px; background: var(--karte); border: 1px solid var(--rand); border-radius: var(--radius); padding: 14px 16px; }

@@ -51,7 +51,7 @@ Jede Seite lädt **einmal** die Kopie, **vor** dem Rahmen der App:
 | Eulenpfad | Spielseite `spiele/<id>/index.html` | `<script src="../../kern/kern.js"></script>` vor `../gemeinsam/spiel.js` |
 | Eulenpfad | `index.html`, `mix.html` | `<script src="kern/kern.js"></script>` vor `spiele/gemeinsam/spiel.js` |
 | Lernsteig | Übungsseite `uebungen/<id>/index.html` | `<script src="../../kern/kern.js"></script>` vor `../../gemeinsam/werkzeug.js` |
-| Lernsteig | `index.html`, `statistik.html`, `aufsicht.html` | `<script src="kern/kern.js"></script>` vor `gemeinsam/werkzeug.js` |
+| Lernsteig | `index.html` (Tabs; `statistik.html`, `aufsicht.html` leiten nur weiter) | `<script src="kern/kern.js"></script>` vor `gemeinsam/werkzeug.js` |
 | Gratwanderung | noch ohne Skripte | lädt die Kopie mit dem Grundgerüst (Plan C8) |
 
 Ein neuer Kern-Teil braucht keine Änderung an den Seiten: Er kommt in `kern/TEILE` und ist nach dem Verteilen in

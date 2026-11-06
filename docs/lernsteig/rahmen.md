@@ -21,7 +21,10 @@ gemeinsam/terme.js        Terme lesen, vergleichen, Form prüfen (Term-Antworten
 gemeinsam/rechner.js      eingebauter Taschenrechner: Rechenkern (ohne DOM) und Tastenfeld
 gemeinsam/rahmen.js       Seitenteil: Konto, Stufenwahl, Runde, Serie, Protokoll, Rekorde
 gemeinsam/stil.css        Stil, Farben nur hier (:root)
-index.html, start/        Startseite: Land, Kanton, Prüfungsziel, Niveau je Fach, Übungen je Fach
+index.html, start/        Startseite: Anmeldung, dann Tabs wie im Eulenpfad (Plan C2, Adresse #<tab>): Übungen (start.js:
+                          Fächer, Niveau, Übungen), Profil (start.js: Konto, Einstellungen), Statistik und Erfolge
+                          (start/statistik.js), Verwaltung nur für die Aufsicht (start/aufsicht.js); statistik.html und
+                          aufsicht.html leiten auf #statistik und #verwaltung weiter
 uebungen/<id>/aufgaben.js Aufgaben als Daten (ohne DOM), Prüffunktion, Hinweise
 uebungen/<id>/index.html  lädt kern/kern.js, werkzeug, lehrplaene, katalog, terme, rechner, konten, pruefstand, rahmen,
                           die Inhaltslisten und aufgaben.js, ruft LST.uebung(...)
@@ -155,8 +158,9 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 ## 5c. Statistik, Sichern und Einlesen (BF1 a, DS1 a)
 
-- `statistik.html` (Code `start/statistik.js`), verlinkt von der Startseite des Jugendlichen: für das aktive Konto; der
-  Gast hat keinen Stand (nichts gespeichert).
+- **Tab Statistik** (`#statistik`, Code `start/statistik.js`; bis LERN_Session16 `statistik.html`, leitet weiter): für das
+  aktive Konto; der Gast hat keinen Stand (nichts gespeichert). Wochenziel, Kompetenzstand je Übung und Rekorde stehen
+  seit Plan C2 im **Tab Erfolge** (`#erfolge`, BF1 a: keine Sterne); Testrunden der Aufsicht zählen nicht.
   Überblick (Runden, Aufgaben, Anteil auf Anhieb, Übungstage der letzten 14 Tage), Kompetenzstand je gespielter Übung
   und Lehrplan-Stufe (5b), die letzten 10 Runden.
 - **Sichern** nur auf Knopfdruck (`gemeinsam/daten.js`, `LST_DATEN`): Datei `lernsteig-<vorname>-<datum>.json`,
@@ -176,7 +180,8 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 - **In den Eulenpfad übernehmen** (Plan C9, Ü1 a, Ü2 b; `KERN.person.uebernehmen`): Abschnitt auf der Aufsichtsseite;
   legt die angemeldete Aufsicht im Eulenpfad an (gleiche Kennung, PIN, Sicherheitsfrage und Art, neuer Code).
-- `aufsicht.html` (Code `start/aufsicht.js`), verlinkt von der Startseite der angemeldeten Aufsicht („Zur Aufsicht“);
+- **Tab Verwaltung** (`#verwaltung`, Code `start/aufsicht.js`; bis LERN_Session16 `aufsicht.html`, leitet weiter), nur für die
+  angemeldete Aufsicht;
   anlegen und anmelden auf der Startseite (Plan C1). Freiwillig, für Eltern und Lehrpersonen.
   Seit LERN_Session15 (P2 a) stehen Jugendliche und Aufsichten in **einer** Liste `lernsteig:personen`
   (`KERN.person`, docs/kern/rahmen.md 4.7): Aufsicht `{ id, name, rolle: "aufsicht", art: eltern | lehrperson, pin,
@@ -194,7 +199,7 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   (`LST_KONTEN.GERAET`).
 - **Der Jugendliche sieht**, wer mitliest (Startseite, Konto), und jede Anfrage mit Zulassen / Ablehnen.
 - **Die Aufsicht sieht** je verbundenem Konto Runden, letzten Übungstag, Übungstage der letzten 14 Tage und sichere
-  Stufen, dazu die Statistik `statistik.html?konto=<id>` (nur für verbundene Konten, ohne Einlesen); sie kann anfragen,
+  Stufen, dazu Statistik und Erfolge `#statistik/<id>`, `#erfolge/<id>` (nur für verbundene Konten, ohne Einlesen); sie kann anfragen,
   Konten anlegen, die verbundenen Konten sichern und Sicherungen einlesen.
 - **Einstellungen des Geräts** (`lernsteig:einstellungen`) setzt nur eine angemeldete Aufsicht: `rechner` (uebung |
   ohne | erlaubt, TR1 a) und `dezimal` (punkt | komma). Eine Sperre des Rechners steht für alle sichtbar auf der

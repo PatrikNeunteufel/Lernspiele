@@ -1,13 +1,15 @@
-/* Aufsicht des Lernsteigs (AU1 a, TR1 a): verbundene Konten mit Stand, Mitlesen anfragen (der Jugendliche stimmt in
+/* Tab Verwaltung des Lernsteigs (Plan C2; nur für die angemeldete Aufsicht; AU1 a, TR1 a): verbundene Konten mit Stand, Mitlesen anfragen (der Jugendliche stimmt in
    seinem Konto zu), Konto für einen Jugendlichen anlegen, Sicherung der verbundenen Konten, Einstellungen des Geräts
    (Taschenrechner, Dezimalzeichen, Gast C2 a). Anlegen und Anmelden der Aufsicht auf der Startseite (Plan C1). */
 "use strict";
+
+var LST_START = typeof LST_START === "object" ? LST_START : {};
 
 (function () {
   const KAT = LST_KATALOG;
   const KO = LST_KONTEN;
   const el = LST.el;
-  const wurzel = document.getElementById("aufsicht");
+  let wurzel = null; // Inhalt des Tabs (start/start.js ruft LST_START.verwaltung)
   const TAGE = 14;
   let meldung = "";
 
@@ -36,7 +38,8 @@
       el("b", { text: k.name }), klasse ? el("small", { class: "leise", text: ` ${klasse}` }) : null,
       el("div", { class: "leise", text: [`${r.length} Runden`, `zuletzt ${r.length ? datumText(r[r.length - 1].zeit) : "–"}`, `${tage} von ${TAGE} Tagen geübt`, LST.serie(k) ? "Wochenziel: " + LST.serieText(LST.serie(k)) : "", stufen ? `${sicher} von ${stufen} Stufen sicher` : ""].filter(Boolean).join(" · ") }),
       el("div", { class: "knopf-zeile" },
-        el("a", { class: "knopf", href: `statistik.html?konto=${encodeURIComponent(k.id)}`, text: "Stand ansehen" }),
+        el("a", { class: "knopf", href: `#statistik/${encodeURIComponent(k.id)}`, text: "Stand ansehen" }),
+        el("a", { class: "knopf", href: `#erfolge/${encodeURIComponent(k.id)}`, text: "Erfolge" }),
         el("button", { type: "button", class: "knopf", text: "Verbindung lösen", onclick: () => { KO.loesen(k.id, a.id); meldung = `Verbindung mit ${k.name} gelöst.`; zeichne(); } })));
   }
 
@@ -47,7 +50,7 @@
     const teile = [];
     teile.push(el("section", { class: "einstellungen konto" },
       el("p", { class: "konto-zeile" }, el("b", { text: a.name }), el("span", { class: "leise", text: rolleName(a.art) })),
-      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Abmelden", onclick: () => { KO.aufsichtAbmelden(); location.href = "index.html"; } })),
+      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Abmelden", onclick: () => { KO.aufsichtAbmelden(); history.replaceState(null, "", location.pathname); LST_START.neu(); } })),
       meldung ? el("p", { class: "meldung", role: "status", text: meldung }) : null));
 
     teile.push(el("h2", { class: "abschnitt", text: "Verbundene Konten" }),
@@ -152,12 +155,11 @@
     zeigeFehler("");
     const a = KO.aufsichtAktiv();
     if (a) { wurzel.replaceChildren(...angemeldet(a).filter(Boolean), el("p", { class: "fuss", text: GRENZE })); return; }
-    // Anmelden und Anlegen auf der Startseite (Plan C1)
+    // Der Tab erscheint nur für die Aufsicht; kommt man trotzdem hierher (alte Adresse), der Weg zur Anmeldung
     wurzel.replaceChildren(el("section", { class: "einstellungen konto" },
-      el("p", { text: "Eltern und Lehrpersonen sehen hier den Stand verbundener Konten. Melde dich dafür auf der Startseite als Aufsicht an (🔑), oder lege dort mit „Ich bin neu“ eine Aufsicht an." }),
-      el("p", { class: "knopf-zeile" }, el("a", { class: "knopf haupt", href: "index.html", text: "Zur Anmeldung" }))),
+      el("p", { text: "Eltern und Lehrpersonen sehen hier den Stand verbundener Konten. Melde dich dafür als Aufsicht an (🔑), oder lege mit „Ich bin neu“ eine Aufsicht an." })),
       el("p", { class: "fuss", text: GRENZE }));
   }
 
-  zeichne();
+  LST_START.verwaltung = box => { wurzel = box; zeichne(); };
 })();

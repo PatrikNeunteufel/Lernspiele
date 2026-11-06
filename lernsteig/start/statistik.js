@@ -1,12 +1,15 @@
-/* Statistik des Lernsteigs (BF1 a): Überblick, Kompetenzstand je Übung und Lehrplan-Stufe, letzte Runden, Sichern
-   und Einlesen als Datei (LST_DATEN, nur auf Knopfdruck). Gilt für das angemeldete Konto; der Gast hat keinen Stand (C2 a).
-   Mit ?konto=<id> für eine angemeldete Aufsicht, wenn das Konto mit ihr verbunden ist (AU1 a); dann ohne Einlesen. */
+/* Tabs Statistik und Erfolge des Lernsteigs (Plan C2, BF1 a). Statistik: Überblick, letzte Runden, Sichern und Einlesen
+   als Datei (LST_DATEN, nur auf Knopfdruck). Erfolge: Wochenziel mit Serie über Tage, Kompetenzstand je Übung und
+   Lehrplan-Stufe, Rekorde — keine Sterne. Gilt für das angemeldete Konto; der Gast hat keinen Stand (C2 a). Mit
+   #statistik/<Konto> bzw. #erfolge/<Konto> für die angemeldete Aufsicht, wenn das Konto mit ihr verbunden ist (AU1 a);
+   dann ohne Einlesen. Testrunden der Aufsicht zählen nicht. */
 "use strict";
+
+var LST_START = typeof LST_START === "object" ? LST_START : {};
 
 (function () {
   const KAT = LST_KATALOG;
   const el = LST.el;
-  const wurzel = document.getElementById("statistik");
   const TAGE = 14;
   let meldung = "";
 
@@ -78,37 +81,78 @@
       meldung ? el("p", { class: "meldung", role: "status", text: meldung }) : null);
   }
 
-  // Konto der Seite: das eigene, oder für die Aufsicht ein verbundenes
-  function kontoDerSeite() {
-    const id = new URLSearchParams(location.search).get("konto");
-    if (!id) return { k: LST.konto(), aufsicht: null };
-    const a = LST_KONTEN.aufsichtAktiv();
-    const k = a && LST_KONTEN.verbundene(a.id).find(x => x.id === id);
-    return k ? { k, aufsicht: a } : { k: null, aufsicht: null };
+  // Rekorde (BF1 a): je Übung und Stufe die längste Serie, getrennt mit und ohne Rechner
+  function rekordKarte(k) {
+    const titel = id => (KAT.UEBUNGEN.find(u => u.id === id) || {}).titel || id;
+    const beste = new Map();
+    for (const r of LST.lies("rekorde", []).filter(x => x.person === k.id && !x.test)) {
+      const s = `${r.inhalt}|${r.stufe}|${r.mitRechner ? 1 : 0}`;
+      if (!beste.has(s) || r.punkte > beste.get(s).punkte) beste.set(s, r);
+    }
+    if (!beste.size) return el("p", { class: "leise", text: "Noch keine Serie. In jeder Übung lässt sich eine Stufe als Serie spielen: Aufgaben, bis eine falsch ist." });
+    return el("ul", { class: "stand-liste" }, [...beste.values()].sort((a, b) => b.punkte - a.punkte).map(r => el("li", {},
+      el("b", { text: `${r.punkte} richtig in Folge` }), ` · ${titel(r.inhalt)}, Stufe ${r.stufe === "challenge" ? "Challenge" : r.stufe}${r.mitRechner ? " (Rechner)" : ""}`,
+      el("small", { class: "leise", text: ` · ${datumText(r.zeit)}` }))));
   }
 
-  function zeichne() {
-    // Anmeldung zuerst (Plan C1); für den Gast wird nichts gespeichert (C2 a), also gibt es keinen Stand.
-    const wer = LST.werUebt();
-    if (wer === "niemand" || wer === "gast") {
-      wurzel.replaceChildren(el("p", { class: "meldung", text: wer === "gast" ? "Als Gast wird nichts gespeichert, darum gibt es hier keinen Stand. Melde dich an, damit der Lernsteig deinen Stand kennt." : "Melde dich zuerst auf der Startseite an." }),
-        el("a", { class: "knopf haupt", href: "index.html", text: wer === "gast" ? "Zur Startseite" : "Zur Anmeldung" }));
-      return;
+  // Konto des Tabs: das eigene, oder für die Aufsicht ein verbundenes (#statistik/<Konto>)
+  function kontoDerSeite(kontoId) {
+    const a = LST_KONTEN.aufsichtAktiv();
+    if (!kontoId) return { k: a ? null : LST.konto(), aufsicht: a };
+    const k = a && LST_KONTEN.verbundene(a.id).find(x => x.id === kontoId);
+    return { k: k || null, aufsicht: a };
+  }
+  /** Für Gast und Aufsicht ohne gewähltes Konto: ein Hinweis statt eines Stands. */
+  function ohneStand(wurzel, aufsicht) {
+    if (LST.werUebt() === "gast") {
+      wurzel.replaceChildren(el("p", { class: "meldung", text: "Als Gast wird nichts gespeichert, darum gibt es hier keinen Stand. Melde dich an, damit der Lernsteig deinen Stand kennt." }));
+      return true;
     }
-    const { k, aufsicht } = kontoDerSeite();
-    if (!k) { wurzel.replaceChildren(el("p", { class: "meldung", text: "Dieses Konto ist nicht mit der angemeldeten Aufsicht verbunden." }), el("a", { class: "knopf", href: "aufsicht.html", text: "Zur Aufsicht" })); return; }
-    const r = LST.runden(x => x.person === k.id);
-    wurzel.replaceChildren(
-      el("p", { class: "konto-zeile" }, el("b", { text: k.id === "gast" ? "Gast" : k.name }),
-        el("span", { class: "leise", text: aufsicht ? `Ansicht der Aufsicht ${aufsicht.name}` : k.id === "gast" ? "nicht angemeldet" : "angemeldet" })),
+    if (aufsicht) {
+      const verbunden = LST_KONTEN.verbundene(aufsicht.id);
+      wurzel.replaceChildren(el("p", { class: "meldung", text: verbunden.length ? "Wählen Sie ein verbundenes Konto:" : "Noch kein Konto mit Ihnen verbunden. Verbinden in der Verwaltung." }),
+        el("div", { class: "konto-liste" }, verbunden.map(k => el("a", { class: "knopf", href: `#statistik/${encodeURIComponent(k.id)}`, text: k.name }))));
+      return true;
+    }
+    return false;
+  }
+
+  /** Tab Statistik (Plan C2): Überblick, letzte Runden, Sichern und Einlesen; für die Aufsicht ein verbundenes Konto. */
+  function statistik(wurzel, kontoId) {
+    const { k, aufsicht } = kontoDerSeite(kontoId ? decodeURIComponent(kontoId) : null);
+    if (!k && ohneStand(wurzel, aufsicht && !kontoId ? aufsicht : null)) return;
+    if (!k) { wurzel.replaceChildren(el("p", { class: "meldung", text: "Dieses Konto ist nicht mit der angemeldeten Aufsicht verbunden." }), el("a", { class: "knopf", href: "#verwaltung", text: "Zur Verwaltung" })); return; }
+    if (LST.werUebt() === "gast") { ohneStand(wurzel, null); return; }
+    const r = LST.runden(x => x.person === k.id && !x.test);
+    neuZeichnen = () => statistik(wurzel, kontoId);
+    wurzel.replaceChildren(...[
+      el("p", { class: "konto-zeile" }, el("b", { text: k.name }),
+        el("span", { class: "leise", text: aufsicht ? `Ansicht der Aufsicht ${aufsicht.name}` : "angemeldet" })),
       el("h2", { class: "abschnitt", text: "Überblick" }), ueberblick(r),
+      el("h2", { class: "abschnitt", text: "Letzte Runden" }), letzteRunden(r),
+      aufsicht ? el("p", { class: "knopf-zeile" }, el("a", { class: "knopf", href: `#erfolge/${encodeURIComponent(k.id)}`, text: "Erfolge" }), el("a", { class: "knopf", href: "#verwaltung", text: "← Zur Verwaltung" }))
+        : el("h2", { class: "abschnitt", text: "Sichern und Einlesen" }),
+      aufsicht ? null : datenKarte(k)].filter(Boolean));
+  }
+
+  /** Tab Erfolge (Plan C2, BF1 a): Wochenziel mit Serie über Tage, Kompetenzstand je Übung, Rekorde — keine Sterne. */
+  function erfolge(wurzel, kontoId) {
+    const { k, aufsicht } = kontoDerSeite(kontoId ? decodeURIComponent(kontoId) : null);
+    if (!k && ohneStand(wurzel, aufsicht && !kontoId ? aufsicht : null)) return;
+    if (!k) { wurzel.replaceChildren(el("p", { class: "meldung", text: "Dieses Konto ist nicht mit der angemeldeten Aufsicht verbunden." })); return; }
+    if (LST.werUebt() === "gast") { ohneStand(wurzel, null); return; }
+    const r = LST.runden(x => x.person === k.id && !x.test);
+    neuZeichnen = () => erfolge(wurzel, kontoId);
+    wurzel.replaceChildren(...[
+      aufsicht ? el("p", { class: "konto-zeile" }, el("b", { text: k.name }), el("span", { class: "leise", text: `Ansicht der Aufsicht ${aufsicht.name}` })) : null,
       el("h2", { class: "abschnitt", text: "Wochenziel" }), zielKarte(k, !!aufsicht),
       el("h2", { class: "abschnitt", text: "Stand je Übung" }), standJeUebung(k, r),
-      el("h2", { class: "abschnitt", text: "Letzte Runden" }), letzteRunden(r),
-      aufsicht ? el("p", {}, el("a", { class: "knopf", href: "aufsicht.html", text: "← Zur Aufsicht" })) : el("h2", { class: "abschnitt", text: "Sichern und Einlesen" }),
-      aufsicht ? null : datenKarte(k),
-      el("p", { class: "fuss", text: "Alles bleibt im Browser auf diesem Gerät, ausser du sicherst es selbst als Datei." }));
+      el("h2", { class: "abschnitt", text: "Rekorde" }), rekordKarte(k)].filter(Boolean));
   }
 
-  zeichne();
+  // Neu zeichnen nach einer Änderung (Wochenziel, Einlesen): der Tab, der gerade offen ist
+  let neuZeichnen = () => {};
+  const zeichne = () => neuZeichnen();
+  LST_START.statistik = statistik;
+  LST_START.erfolge = erfolge;
 })();
