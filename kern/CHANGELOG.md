@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.12.0 — 2026-11-06 (LERN_Session16)
+- `person.js`: `uebernehmen(quelle, ziel, zusatz)` — Übernahme einer Aufsicht in eine andere App (Plan C9, Ü1 a, Ü2 b):
+  Kennung, Name, Rolle, Art, PIN-Prüfwert, Sicherheitsfrage und Antwort-Prüfwert reisen mit, der Wiederherstellungscode wird
+  neu ausgegeben; Felder der Ziel-App über `zusatz` (Lernsteig: `art`); keine Bestätigung in der Ziel-App; nichts wird
+  überschrieben (`status` „schon“ oder „name“). Eulenpfad → Lernsteig im Profil der Aufsicht, Lernsteig → Eulenpfad
+  auf der Aufsichtsseite.
+
 ## 1.11.0 — 2026-11-06 (LERN_Session16)
 - `auswertung.js` (`KERN.auswertung`, Entscheide AW1 a, AW2 a): Rechnungen ohne App-Bezug — `mittel`, `median`,
   `korrelation`, `sitzungen` (Pause als Parameter), `lernzeiten`, `wochenStart`, `wochen` (Wochenziel mit Tagen und

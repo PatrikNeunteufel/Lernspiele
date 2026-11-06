@@ -1,4 +1,4 @@
-/* kern 1.11.0 · Prüfsumme sha256:3eab66ea7e987d1a366122c7043fc39041bb344e257c6d91cd1d3da12a734f9c · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.12.0 · Prüfsumme sha256:675df77377b3ffe116878a85572e823e2cd8f25ba929bfb8b961d70aa7e370c4 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -514,9 +514,33 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     return erg;
   }
 
+  /**
+   * Übernahme einer Aufsicht in eine andere App (Plan C9; Entscheide Ü1 a, Ü2 b, LERN_Session16). Alle Apps teilen den
+   * Speicher des Browsers; ziel ist die Personenliste der Ziel-App (liste(KERN.speicher("<präfix>"), …)), keine App lädt
+   * die andere. Mit reisen Kennung, Name, Rolle, PIN-Prüfwert (gleiche PIN) sowie Sicherheitsfrage und Antwort-Prüfwert;
+   * der Wiederherstellungscode ist je App ein eigener Einmal-Schlüssel und wird neu ausgegeben. Verlauf, Verbindungen
+   * und Einstellungen reisen nicht. Keine Bestätigung in der Ziel-App (Ü2 b: in der Quell-App schon geprüft).
+   * zusatz: Felder, die die Ziel-App verlangt (Lernsteig: art). Nichts wird überschrieben.
+   * Liefert { status: "neu" | "schon" | "name", person, code }: „schon“ = dieselbe Kennung ist dort, „name“ = der Name ist
+   * dort an jemand anderen vergeben.
+   */
+  async function uebernehmen(quelle, ziel, zusatz = {}) {
+    if (!quelle || quelle.rolle !== "aufsicht") throw new Error("Übernommen wird nur eine Aufsicht.");
+    if (!quelle.pin) throw new Error("Die Aufsicht hat noch keine PIN.");
+    const da = [quelle.id, ...(quelle.frueher || [])].map(ziel.finde).find(Boolean);
+    if (da) return { status: "schon", person: da, code: null };
+    if (!ziel.nameFrei(quelle.name)) return { status: "name", person: ziel.findeName(quelle.name), code: null };
+    const alt = quelle.wiederherstellung || {};
+    const behalten = alt.frage && alt.antwort ? { frage: alt.frage, antwort: alt.antwort } : {};
+    const w = await KERN.geheimnis.wiederherstellung({}, behalten);
+    // Die Art (Eltern, Lehrperson) reist mit, wenn die Quelle sie kennt; die Ziel-App kann sie über zusatz setzen.
+    const person = ziel.anlegen({ ...(quelle.art ? { art: quelle.art } : {}), ...zusatz, id: quelle.id, name: quelle.name, rolle: "aufsicht", pin: quelle.pin, wiederherstellung: w.wiederherstellung });
+    return { status: "neu", person, code: w.code };
+  }
+
   KERN.person = {
     ROLLEN, AUFSICHT_ARTEN, GEHEIM, NAME_MAX, neueId, nameRein, nameGleich,
-    geburtsdatumLies, geburtsdatumText, tagFehlt, alter, maengel, ohneGeheimnis, liste, zusammenfuehren,
+    geburtsdatumLies, geburtsdatumText, tagFehlt, alter, maengel, ohneGeheimnis, liste, zusammenfuehren, uebernehmen,
   };
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 

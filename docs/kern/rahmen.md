@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.11.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.12.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.11.0)
+kern/VERSION          Version des Kerns (1.12.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -184,6 +184,7 @@ Entscheide P1 a, P2 a, Vorgabe B3. Eine Liste von Personen je App:
 | `ohneGeheimnis(p, geraetFelder)` | Kopie für Sicherung, Abgleich, Einladung, Übernahme |
 | `liste(speicher, { schluessel, felder })` | `{ alle, finde (auch über frühere Kennungen), findeName, nameFrei, anlegen, aendere, entferne, speichere }`; `anlegen` und `aendere` prüfen Name und Mängel und melden einen vollen Speicher |
 | `zusammenfuehren(eigene, fremde, { geraetFelder })` | gleiche Kennung (auch frühere) → verbinden; sonst gleicher Name → verbinden, die ältere Kennung bleibt, die andere wird frühere; sonst neu; Ungültiges abgewiesen. Je Feld der jüngere Stand; ein jüngerer Name, den hier jemand anders trägt, gilt nicht. Ergebnis `{ personen, neu, geaendert, abgewiesen, kennungen: { alt: neu } }` — mit `kennungen` biegt die App Verweise (Runden, Rekorde) um |
+| `uebernehmen(quelle, ziel, zusatz)` | Übernahme einer **Aufsicht** in eine andere App (C9, Ü1 a, Ü2 b; seit 1.12.0): `ziel` ist die Liste der Ziel-App (`liste(KERN.speicher("<präfix>"))`). Mit reisen Kennung, Name, Rolle, Art, PIN-Prüfwert, Sicherheitsfrage und Antwort-Prüfwert; der Wiederherstellungscode wird neu ausgegeben (`code`, nur jetzt sichtbar). Keine Bestätigung in der Ziel-App; nichts wird überschrieben: `status` „neu“, „schon“ (dieselbe Kennung ist dort) oder „name“ (Name dort vergeben). Fehler ohne PIN und für Lernende (die kommen über die Einladung) |
 
 Rollen und Sicht je App (P2 a): Der Lernsteig verlangt von der Aufsicht eine PIN und zeigt ihr nur verbundene Konten,
 eine weitere Aufsicht braucht die Bestätigung einer bestehenden. Der Eulenpfad (seit 1.3.0) zeigt der Aufsicht alle
@@ -368,7 +369,7 @@ alte gegen neue Auswertung auf 3000 Zufallsverläufen gleich); Lernsteig `fenste
 
 ### 4.15 Geplant (Plan B, Reihenfolge B4)
 
-Profil-Übernahme zwischen den Apps (C9), Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
+Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
 bevor er umzieht.
 
 ## 5. Ändern und verteilen

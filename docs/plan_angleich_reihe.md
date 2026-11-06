@@ -18,8 +18,8 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.11.0; als Nächstes Profil-Übernahme (C9) | Abschnitt B |
-| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes C2 nach Plan B | Abschnitt C |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.12.0; als Nächstes Terme und Rechenkern | Abschnitt B |
+| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes C2 nach Plan B | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
@@ -81,9 +81,9 @@ rund 200 Seiten anfasst: Jede Seite lädt einmal `kern/kern.js` vor dem Rahmen i
 `KERN` (`KERN.zahl`, `KERN.bruch`, …). Tests: `node tools/pruefe_kern.js` (Teile gegen feste Beispiele und
 Nachrechnungen, dazu die Kopien); das Testskript jeder App prüft ihre Kopie.
 Stand 2026-11-06: Kern 1.11.0 mit Zahl, Bruch, Speicher, Zufall, `el`, Geheimnis, Person, Freigabe, Suche, Runden,
-Anmeldung (mit Gast), Entwicklung, Einladung und Auswertung; Eulenpfad und Lernsteig benutzen alle Teile, die
-Gratwanderung hat die Kopie und lädt sie mit C8. Nächste Teile: Profil-Übernahme (C9), Terme und Rechenkern; dann das
-Testgerüst B2.
+Anmeldung (mit Gast), Entwicklung, Einladung, Auswertung und Übernahme einer Aufsicht; Eulenpfad und Lernsteig
+benutzen alle Teile, die Gratwanderung hat die Kopie und lädt sie mit C8. Nächste Teile: Terme und Rechenkern; dann
+das Testgerüst B2.
 
 **B2 Testgerüst für alle Apps:** Ein Testskript-Kern unter `tools/` mit Treiber je App, so dass ein Aufruf alle drei
 Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`). Er prüft auch, dass jede Kern-Kopie mit
@@ -149,9 +149,10 @@ Kindersprache.
    ihrem Eulenpfad-Profil mit dessen Daten ein Profil im Lernsteig und in der Gratwanderung an, wenn der Name dort
    nicht schon belegt ist (belegt → Hinweis, nichts überschrieben). Alle Apps teilen den Ursprung und damit
    localStorage; der Kern (`profil.js`, `rollen.js`) liest und schreibt dafür mit dem Präfix der Ziel-App, ohne dass
-   eine App die andere lädt. Gilt in jede Richtung zwischen den drei Apps. *Annahme, vor dem Bau vorzulegen:* Rolle
-   und PIN-Prüfwerte (Salz, Hash) reisen mit, die PIN bleibt also gleich; der Wiederherstellungscode wird in der
-   Ziel-App neu ausgegeben.
+   eine App die andere lädt. Gilt in jede Richtung zwischen den drei Apps. Entschieden (Ü1 a, Ü2 b, 2026-11-06):
+   Kennung, Name, Rolle, Art, PIN-Prüfwert sowie Sicherheitsfrage und Antwort-Prüfwert reisen mit, der
+   Wiederherstellungscode wird in der Ziel-App neu ausgegeben; keine Bestätigung in der Ziel-App. Gebaut in
+   LERN_Session16 (`KERN.person.uebernehmen`) für Eulenpfad ↔ Lernsteig; die Gratwanderung folgt mit C8.
 10. **Eulenpfad:** übernimmt aus dem Angleich nur, was er neu braucht (Kern-Teile, Gast, Geburtstag mit Tag, Rolle
    Lehrperson); Aussehen bleibt.
 
@@ -255,6 +256,9 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   geprüfte Stufen, Mischrunde, Stand je Kompetenz); Tab-Reihe wie im Eulenpfad. **Zusatz Patrik:** auch filterbar —
   Chip „🎯 Prüfungsziel“ in der Filterzeile „Nur“ neben „⭐ Mein Fokus“, zeigt nur Übungen mit geprüften Stufen des
   Ziels und auf den Karten nur diese Stufen.
+- **Ü1 a** (2026-11-06): Bei der Übernahme einer Aufsicht reisen Kennung, Name, Rolle, Art, PIN-Prüfwert, Sicherheitsfrage
+  und Antwort-Prüfwert mit; der Wiederherstellungscode ist je App ein eigener und wird neu ausgegeben.
+- **Ü2 b** (2026-11-06): Keine Bestätigung durch eine Aufsicht der Ziel-App (in der Quell-App schon geprüft).
 - **AW1 a** (2026-11-06): Kern-Teil Auswertung mit den Rechnungen ohne App-Bezug (Mittel, Median, Korrelation,
   Sitzungen, Lernzeiten, Wochen, Bedarf, Ziehen); Fazit, Vorschläge und Kompetenztexte bleiben in den Apps.
 - **AW2 a** (2026-11-06): eine Regel für den Stand aus den letzten n Aufgaben, Schwellen je App (Eulenpfad 24 / 70 %,

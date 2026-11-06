@@ -789,6 +789,10 @@ Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
   GM1); `LS.alterVon(profil, jetzt)` rechnet das Alter, im Geburtsmonat selbst ab dem Ersten. Ältere Profile mit der Zahl
   `alter` gelten weiter, bis der Geburtsmonat gesetzt ist; das Profil bittet darum. Nur Jahr oder nur Monat wird nicht
   gespeichert.
+- **Übernahme in den Lernsteig** (Plan C9, Ü1 a, Ü2 b): Im eigenen Profil der angemeldeten Aufsicht „🔑 In den
+  Lernsteig übernehmen“ mit der Rolle dort (Eltern oder Lehrperson; bleibt hier als Feld `art` ohne Wirkung) —
+  `KERN.person.uebernehmen`, docs/kern/rahmen.md 4.7. Gleiche Kennung, PIN und Sicherheitsfrage, neuer Code (einmal
+  angezeigt); Runden und Einstellungen bleiben hier.
 - **Klassenaufstieg** (Wunsch Patrik, LERN_Session14): `LS.aufsteigen(name)` setzt die Klasse um eins höher und hängt
   `{ von, nach, zeit }` an das Profilfeld `aufstiege`; nach der 6. Klasse nicht mehr (Lernsteig): Dort steht im Profil
   „📨 Einladung zum Lernsteig“ (EL1 a, `KERN.einladung`, docs/kern/rahmen.md 4.13) — Link zum Kopieren oder Datei

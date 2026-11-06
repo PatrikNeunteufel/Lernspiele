@@ -286,6 +286,38 @@ console.log("el.js");
   gleich(L.alle().length, 3, "ungültige Einträge im Speicher werden nicht geliefert");
   delete global.localStorage;
 
+  // Übernahme einer Aufsicht in eine andere App (C9, Ü1 a, Ü2 b)
+  {
+    const d2 = new Map();
+    global.localStorage = { getItem: k => (d2.has(k) ? d2.get(k) : null), setItem: (k, v) => d2.set(k, String(v)),
+      removeItem: k => d2.delete(k), key: i => [...d2.keys()][i] ?? null, get length() { return d2.size; } };
+    const EP = P.liste(KERN.speicher("lernspiele:")), LSZ = P.liste(KERN.speicher("lernsteig:"));
+    const w0 = await G.wiederherstellung({ frage: "Erstes Velo?", antwort: "Rot" });
+    const mama = EP.anlegen({ name: "Mama", rolle: "aufsicht", pin: await G.pin("2468"), wiederherstellung: w0.wiederherstellung });
+    const u = await P.uebernehmen(mama, LSZ, { art: "eltern" });
+    const dort = LSZ.finde(mama.id);
+    gleich([u.status, dort?.id, dort?.rolle, dort?.art].join(), `neu,${mama.id},aufsicht,eltern`, "Übernahme: gleiche Kennung, Rolle, Art der Ziel-App");
+    gleich(await G.pinStimmt("2468", dort.pin), true, "gleiche PIN in der Ziel-App");
+    gleich(await G.antwortStimmt("rot", dort.wiederherstellung), true, "gleiche Sicherheitsantwort");
+    gleich(dort.wiederherstellung.frage, "Erstes Velo?", "Frage reist mit");
+    gleich([await G.codeStimmt(u.code, dort.wiederherstellung), await G.codeStimmt(w0.code, dort.wiederherstellung)].join(), "true,false", "neuer Code je App, der alte gilt dort nicht");
+    gleich(d2.has("lernspiele:personen") && JSON.parse(d2.get("lernsteig:personen")).length, 1, "unter dem Präfix der Ziel-App gespeichert");
+    gleich((await P.uebernehmen(mama, LSZ, { art: "eltern" })).status, "schon", "zweite Übernahme: schon da");
+    LSZ.anlegen({ name: "Papa", rolle: "lernend" });
+    const papa = EP.anlegen({ name: "Papa", rolle: "aufsicht", pin: await G.pin("1357") });
+    const n = await P.uebernehmen(papa, LSZ, { art: "eltern" });
+    gleich([n.status, LSZ.finde(papa.id)].join(), "name,", "Name vergeben: nichts überschrieben");
+    const ohnePin = EP.anlegen({ name: "Oma", rolle: "aufsicht" });
+    faelle++; try { await P.uebernehmen(ohnePin, LSZ, { art: "eltern" }); fehler++; console.log("    FEHLER  Aufsicht ohne PIN übernommen"); } catch (e) { /* erwartet */ }
+    const kind = EP.anlegen({ name: "Mia" });
+    faelle++; try { await P.uebernehmen(kind, LSZ, {}); fehler++; console.log("    FEHLER  Kind übernommen"); } catch (e) { /* erwartet */ }
+    const ohneFrage = await P.uebernehmen(papa, P.liste(KERN.speicher("gratwanderung:")), {});
+    gleich([ohneFrage.status, "frage" in ohneFrage.person.wiederherstellung].join(), "neu,false", "ohne Sicherheitsfrage: nur ein neuer Code");
+    const lehrer = LSZ.anlegen({ name: "Herr K", rolle: "aufsicht", art: "lehrperson", pin: await G.pin("9999") });
+    gleich((await P.uebernehmen(lehrer, EP)).person.art, "lehrperson", "Art der Quelle reist mit");
+    delete global.localStorage;
+  }
+
   // Zusammenführen (P1 a)
   const t0 = "2026-01-01T00:00:00.000Z", t1 = "2026-02-01T00:00:00.000Z", t2 = "2026-03-01T00:00:00.000Z";
   const hier = [

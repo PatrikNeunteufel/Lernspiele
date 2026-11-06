@@ -308,6 +308,8 @@ button.stufenknopf { border: none; border-bottom: 4px solid var(--sf); font-fami
 .profil-person label > .leise-text { font-weight: 700; font-size: 14px; }
 .profil-bild { display: inline-flex; }
 .klasse-wahl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* Übernahme in den Lernsteig (C9): der neue Wiederherstellungscode gut lesbar zum Abschreiben */
+.uebernahme-code { display: block; font-size: 24px; letter-spacing: .08em; font-variant-numeric: tabular-nums; margin: 6px 0; color: var(--text); }
 /* Einladung zum Lernsteig (EL1 a): Link zum Kopieren, volle Breite auf dem Handy */
 .einladung { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .einladung-link { flex: 1 1 240px; min-width: 0; font: inherit; font-size: 14px; padding: 6px 8px; border: 2px solid var(--rand); border-radius: 10px; }

@@ -180,6 +180,34 @@ function zeichneProfil(box, neu) {
       } }));
     return box;
   }
+  // Übernahme in den Lernsteig (Plan C9, Ü1 a, Ü2 b; KERN.person.uebernehmen): nur das eigene Profil der angemeldeten
+  // Aufsicht. Kennung, Name, PIN und Sicherheitsfrage reisen mit, der Wiederherstellungscode ist dort ein neuer.
+  function uebernahmeTeil() {
+    const box = el("div", { class: "profil-felder" });
+    const art = el("select", { "aria-label": "Rolle im Lernsteig", name: "uebernahme-art" },
+      el("option", { value: "eltern", text: "Eltern" }), el("option", { value: "lehrperson", text: "Lehrperson" }));
+    if (p.art) art.value = p.art;
+    const meldung = el("p", { class: "leise-text", role: "status" });
+    box.append(el("p", { class: "leise-text", text: "Legt dich im Lernsteig (Oberstufe) als Aufsicht an: gleicher Name, gleiche PIN, gleiche Sicherheitsfrage. Den Wiederherstellungscode gibt es dort neu. Runden und Einstellungen bleiben hier." }),
+      el("label", {}, "Rolle im Lernsteig", art),
+      el("div", { class: "knopfzeile" }, el("button", { type: "button", class: "knopf hell klein", "data-aktion": "uebernehmen", text: "🔑 In den Lernsteig übernehmen",
+        onclick: async () => {
+          try {
+            const ziel = KERN.person.liste(KERN.speicher("lernsteig:"), { schluessel: "personen" });
+            const r = await KERN.person.uebernehmen(LS.person(name), ziel, { art: art.value });
+            // Ü1 a: die Art bleibt auch hier als Feld der Person stehen (im Eulenpfad ohne Wirkung)
+            if (r.status === "neu") LS.speichereProfil(name, { art: art.value });
+            if (r.status === "schon") meldung.textContent = "Du bist im Lernsteig schon als Aufsicht angelegt.";
+            else if (r.status === "name") meldung.textContent = `Im Lernsteig gibt es schon jemanden mit dem Namen „${name}“. Nichts wurde geändert.`;
+            else meldung.replaceChildren(
+              el("b", { text: "Übernommen. " }), "Dein Wiederherstellungscode für den Lernsteig — aufschreiben, er wird nur jetzt angezeigt: ",
+              el("b", { class: "uebernahme-code", text: r.code, "data-code": r.code }), " ",
+              el("a", { href: "../lernsteig/index.html", text: "Zum Lernsteig" }));
+          } catch (e) { meldung.textContent = e.message; }
+        } })),
+      meldung);
+    return box;
+  }
   const aufstiegVerlauf = () => {
     const letzter = istKind ? (p.aufstiege || []).at(-1) : null;
     if (!letzter) return null;
@@ -319,6 +347,7 @@ function zeichneProfil(box, neu) {
     abschnitt("⭐ Fokus — was soll vermehrt geübt werden?", fokus),
     el("div", { class: "knopfzeile profil-speichern" },
       el("button", { class: "knopf gruen", type: "button", text: "Speichern", onclick: speichern }), meldung),
+    !istKind && name === LS.aktuellerSpieler() ? abschnitt("🔁 In den Lernsteig übernehmen", uebernahmeTeil()) : "",
     kindZeilen.length ? abschnitt(`🔒 Was ${LS.spielerName(name)} selbst umstellen darf`,
       el("p", { class: "leise-text", text: "Diese Häkchen wirken sofort, ohne Speichern." }),
       ...["Vorlesen", "Reihenfolge der Teile", "Timer"].flatMap((titel, i) => (kindZeilen[i] ? [el("b", { text: titel }), kindZeilen[i]] : []))) : "");

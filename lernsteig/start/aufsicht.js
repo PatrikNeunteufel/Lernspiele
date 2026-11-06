@@ -97,8 +97,32 @@
       auswahl("Dezimalzeichen", [{ id: "punkt", name: "Punkt (3.5)" }, { id: "komma", name: "Komma (3,5)" }], e.dezimal || "punkt", w => setze("dezimal", w), { name: "dezimal" }),
       auswahl("Gast", [{ id: "an", name: "erlaubt (nichts wird gespeichert)" }, { id: "aus", name: "abgeschaltet" }], e.gast || "an", w => setze("gast", w), { name: "gast" }),
       el("small", { class: "leise", text: "Gilt für alle Konten auf diesem Gerät. Die Jugendlichen sehen die Einstellung in jeder Übung." })));
+    teile.push(el("h2", { class: "abschnitt", text: "In den Eulenpfad übernehmen" }), uebernahmeKarte(a));
     teile.push(el("h2", { class: "abschnitt", text: "Entwicklung" }), entwicklungKarte());
     return teile;
+  }
+
+  // Übernahme in den Eulenpfad (Plan C9, Ü1 a, Ü2 b; KERN.person.uebernehmen): legt die angemeldete Aufsicht im Eulenpfad
+  // (Primarschule) an — gleiche Kennung, gleicher Name, gleiche PIN und Sicherheitsfrage, neuer Wiederherstellungscode.
+  let uebernahme = null; // { text, code } nach dem Knopfdruck
+  function uebernahmeKarte(a) {
+    const karte = el("section", { class: "einstellungen" },
+      el("p", { text: "Für Familien mit Kindern in der Primarschule: Legt Sie im Eulenpfad als Aufsicht an, mit derselben PIN. Den Wiederherstellungscode gibt es dort neu. Konten, Runden und Einstellungen bleiben hier." }),
+      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", "data-aktion": "uebernehmen", text: "🔑 In den Eulenpfad übernehmen",
+        onclick: async () => {
+          try {
+            const ziel = KERN.person.liste(KERN.speicher("lernspiele:"), { schluessel: "personen" });
+            const r = await KERN.person.uebernehmen(KO.LISTE.finde(a.id), ziel);
+            uebernahme = r.status === "schon" ? { text: "Sie sind im Eulenpfad schon als Aufsicht angelegt." }
+              : r.status === "name" ? { text: `Im Eulenpfad gibt es schon jemanden mit dem Namen „${a.name}“. Nichts wurde geändert.` }
+              : { text: "Übernommen. Ihr Wiederherstellungscode für den Eulenpfad — aufschreiben, er wird nur jetzt angezeigt:", code: r.code };
+          } catch (e) { uebernahme = { text: e.message }; }
+          zeichne();
+        } })));
+    if (uebernahme) karte.append(el("p", { class: "meldung", role: "status", text: uebernahme.text }),
+      ...(uebernahme.code ? [el("p", { class: "code-anzeige", text: uebernahme.code, "data-code": uebernahme.code }),
+        el("p", {}, el("a", { class: "knopf", href: "../eulenpfad/index.html", text: "Zum Eulenpfad" }))] : []));
+    return karte;
   }
 
   // Entwickler-Modus (Plan C6, Kern kern/entwicklung.js): freischalten mit dem Entwickler-Schlüssel, dann ein Schalter

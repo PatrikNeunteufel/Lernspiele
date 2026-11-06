@@ -174,6 +174,8 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 ## 5d. Aufsicht (AU1 a, TR1 a)
 
+- **In den Eulenpfad übernehmen** (Plan C9, Ü1 a, Ü2 b; `KERN.person.uebernehmen`): Abschnitt auf der Aufsichtsseite;
+  legt die angemeldete Aufsicht im Eulenpfad an (gleiche Kennung, PIN, Sicherheitsfrage und Art, neuer Code).
 - `aufsicht.html` (Code `start/aufsicht.js`), verlinkt von der Startseite der angemeldeten Aufsicht („Zur Aufsicht“);
   anlegen und anmelden auf der Startseite (Plan C1). Freiwillig, für Eltern und Lehrpersonen.
   Seit LERN_Session15 (P2 a) stehen Jugendliche und Aufsichten in **einer** Liste `lernsteig:personen`

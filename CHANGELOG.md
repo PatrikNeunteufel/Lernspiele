@@ -485,3 +485,6 @@
 - Kern 1.11.0: `auswertung.js` (`KERN.auswertung`, AW1 a, AW2 a) — Sitzungen, Lernzeiten, Wochen, Stand, Bedarf, Ziehen
   für beide Apps; Eulenpfad: Bedarf und Vorschläge aus den letzten 24 Aufgaben (bei Runden zu acht gleich wie bisher,
   nachgerechnet), Lernplan über `wochen`; Lernsteig: Kompetenzstand und Wochenserie über den Kern.
+- Kern 1.12.0: `KERN.person.uebernehmen` — Übernahme einer Aufsicht zwischen den Apps (C9, Ü1 a, Ü2 b): Eulenpfad →
+  Lernsteig im Profil der Aufsicht (mit Rolle), Lernsteig → Eulenpfad auf der Aufsichtsseite; gleiche Kennung, PIN,
+  Sicherheitsfrage und Art, neuer Wiederherstellungscode, nichts überschrieben.
