@@ -518,7 +518,9 @@ Seite lädt es direkt nach `spiel.js`.
   - Personen: gleiche Kennung, sonst gleicher Name → dieselbe Person, die ältere Kennung bleibt, die andere wird
     frühere Kennung (`frueher`); je Feld der jüngere Zeitstempel (`geaendert`). Die PIN reist nie mit. Dateien
     älterer Geräte (`version` 2 mit `profile` nach Namen) werden umgedeutet; `LS.abgleichDaten()` schreibt `version`
-    3 mit `personen` und für den Übergang weiter `profile`.
+    3 mit `personen` (seit LERN_Session15 ohne `profile`). Eine Datei liest `LS.abgleich.datenEinlesen` mit `personen`
+    oder `profile`; bis LERN_Session18 verlangte es `profile` und wies jede Datei der Version 3 ab (Test „Sichern und
+    Einlesen“ in `tools/pruefe_spiele.js`, einzeln `node tools/pruefe_spiele.js daten`).
   - Runden: gleiche Runde (Person, Zeit, Spiel, Stufe) zählt einmal; Verweise auf eine zusammengeführte Kennung
     werden umgebogen.
   - Rekorde: ebenso, bei gleicher Runde gilt der höhere Stand (Zwischenstand → Endstand).

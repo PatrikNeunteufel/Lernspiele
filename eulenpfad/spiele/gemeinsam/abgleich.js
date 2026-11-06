@@ -147,11 +147,19 @@ LS.abgleich = (() => {
     a.remove();
   }
 
+  /**
+   * Gelesene Sicherung oder Abgleich-Datei zusammenführen; wirft, wenn es keine Datei des Eulenpfads ist. Version 3
+   * (seit LERN_Session15) trägt personen, ältere profile nach Namen. Bis LERN_Session18 verlangte die Prüfung profile
+   * und wies damit jede Datei der Version 3 ab.
+   */
+  function datenEinlesen(daten) {
+    const personenDa = d => Array.isArray(d.personen) || (!!d.profile && typeof d.profile === "object");
+    if (!daten || typeof daten !== "object" || !personenDa(daten) || !Array.isArray(daten.protokoll)) throw new Error("Format");
+    return LS.zusammenfuehren(daten);
+  }
   /** Gesicherte oder Abgleich-Datei einlesen und zusammenführen; wirft bei unlesbarer Datei. */
   async function dateiEinlesen(datei) {
-    const daten = JSON.parse(await datei.text());
-    if (!daten.profile || !Array.isArray(daten.protokoll)) throw new Error("Format");
-    return LS.zusammenfuehren(daten);
+    return datenEinlesen(JSON.parse(await datei.text()));
   }
 
   /** Was beim Zusammenführen dazukam, in einem Satz. */
@@ -170,5 +178,5 @@ LS.abgleich = (() => {
   const stand = () => LS.lies("abgleichStand", null);
   const benenne = name => LS.schreibe("geraet", { ...geraet(), name: String(name).trim().slice(0, 30) });
 
-  return { kannOrdner, ordner, jetzt, waehlen, vergessen, dateiSichern, dateiEinlesen, ergebnisText, stand, geraet, benenne };
+  return { kannOrdner, ordner, jetzt, waehlen, vergessen, dateiSichern, datenEinlesen, dateiEinlesen, ergebnisText, stand, geraet, benenne };
 })();

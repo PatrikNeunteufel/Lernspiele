@@ -631,6 +631,51 @@ if (opt.suche !== 0 && (!nurSpiele.length || nurSpiele.includes("suche"))) {
   }
 }
 
+// Sichern und Einlesen (LERN_Session18): Eine Datei eines Geräts muss sich auf einem anderen einlesen lassen. Bis dahin
+// wies LS.abgleich.dateiEinlesen jede Datei der Version 3 ab (prüfte das Feld profile, das sie seit LERN_Session15 nicht
+// mehr trägt), und kein Test merkte es. Je Fall ein frisches Gerät (eigener Kontext, leerer Speicher); --daten=0 schaltet
+// ab; nur dieser Teil: node tools/pruefe_spiele.js daten.
+if (opt.daten !== 0 && (!nurSpiele.length || nurSpiele.includes("daten"))) {
+  const geraet = () => {
+    const k = vm.createContext({ __seite: { html: "", search: "", seed: opt.seed }, console, URL, URLSearchParams, structuredClone });
+    vm.runInContext(DOM, k, { filename: "pruef_dom.js" });
+    vm.runInContext(fs.readFileSync(path.join(WURZEL, "eulenpfad", "kern", "kern.js"), "utf8"), k, { filename: "kern.js" });
+    for (const d of ["spiel.js", "katalog.js", "pruefstand.js", "abgleich.js"]) vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", d), "utf8"), k, { filename: d });
+    return k;
+  };
+  const runde = (name, zeit) => ({ name, zeit, inhalt: "zahlenhaus", stufe: "s3", aufgaben: 5, fehler: 1, dauer: 90, sterne: 2 });
+  // Gerät A: zwei Kinder mit je einer Runde; die Datei wie beim Abgleich-Knopf (LS.abgleichDaten)
+  const a = geraet();
+  a.__runden = [runde("Mia", "2026-11-01T10:00:00.000Z"), runde("Leo", "2026-11-01T11:00:00.000Z")];
+  vm.runInContext(`LS.neuerSpieler("Mia"); LS.neuerSpieler("Leo"); for (const r of __runden) LS.protokolliere(r);`, a);
+  const v3 = JSON.parse(vm.runInContext("JSON.stringify(LS.abgleichDaten())", a));
+  const faelle = [
+    { was: "Datei der Version 3 (heute)", daten: v3, runden: 2, kinder: 2 },
+    { was: "Datei der Version 2 (profile nach Namen)", runden: 1, kinder: 1,
+      daten: { version: 2, gesichert: "2026-10-30T09:00:00.000Z", profile: { Ida: { klasse: 2, geaendert: { klasse: "2026-10-30T09:00:00.000Z" } } },
+        protokoll: [{ name: "Ida", zeit: "2026-10-30T08:00:00.000Z", spiel: "zahlenhaus", stufe: "s2", aufgaben: 5, fehler: 0, dauer: 60, sterne: 3 }], rekorde: [] } },
+    { was: "Sicherung des Lernsteigs", wirft: true,
+      daten: { format: "lernsteig-sicherung", version: 2, erstellt: "2026-11-01T10:00:00.000Z", konten: [], runden: [], rekorde: [] } },
+  ];
+  console.log("\nSichern und Einlesen:\n");
+  for (const f of faelle) {
+    const b = geraet();
+    b.__daten = f.daten;
+    const maengel = [];
+    let r = null;
+    try { r = vm.runInContext("LS.abgleich.datenEinlesen(__daten)", b); } catch (e) { if (!f.wirft) maengel.push(`abgewiesen: ${e.message}`); }
+    if (f.wirft && r) maengel.push("eingelesen, sollte abgewiesen werden");
+    if (!f.wirft && r) {
+      const da = JSON.parse(vm.runInContext("JSON.stringify({ runden: LS.protokoll().length, kinder: LS.kinderListe().length })", b));
+      if (r.runden !== f.runden || da.runden !== f.runden) maengel.push(`${r.runden} neue / ${da.runden} gespeicherte Runden statt ${f.runden}`);
+      if (da.kinder !== f.kinder) maengel.push(`${da.kinder} Kinder statt ${f.kinder}`);
+    }
+    for (const m of maengel) console.log(`    FEHLER  ${f.was}: ${m}`);
+    fehlerZahl += maengel.length;
+    console.log(`${maengel.length ? "✗" : "✓"} ${f.was}`);
+  }
+}
+
 // Namen der Spiele (Hinweis Patrik, LERN_Session7): kein Name doppelt (Fehler); dasselbe Grundwort
 // am Ende („…-Werkstatt“, „…-Detektiv“) in mehr als NAMEN_GRUNDWORT_MAX Spielen ist ein Hinweis.
 const NAMEN_GRUNDWORT_MAX = 2;

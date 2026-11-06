@@ -311,3 +311,23 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Spiel und Übung.
 - **F1 a:** Kleinklasse als drittes Schulniveau SG (Niveau `n1`, Ziel „so weit wie möglich“, Fremdsprachen
   ausgeblendet und einschaltbar, keine Prüfungsziele, keine eigenen Übungen); Praxis in F2 an der Quelle prüfen.
+- **DF1 a** (2026-11-06, LERN_Session18): Ein Dateiformat für Sichern und Abgleich in allen Apps, `{ format: "reihe-daten",
+  version: 1, app, art: "sicherung" | "abgleich", gesichert, geraet?, personen, runden, rekorde, geloescht, freigabe?,
+  freigabeStand?, … Teile der App unter eigenem Namen }`, im Kern-Teil `daten.js`. Ältere Dateien (`eulenpfad-daten` 1–3,
+  `lernsteig-sicherung` 1–2) deutet der Kern beim Einlesen um; eine Datei einer anderen App wird mit ihrem Namen
+  abgewiesen. Kipppunkt: Geräte, die länger mit einer alten Offline-Kopie laufen.
+- **DF2 a** (2026-11-06, LERN_Session18): Löschvermerke (Person nach Kennung; Runden je Person, Inhalt oder alle, bis zu
+  einem Zeitpunkt) und die Freigabe nach dem jüngsten Stand führt der Kern für alle Apps; Vermerke nach Namen von
+  älteren Geräten des Eulenpfads werden beim Einlesen umgedeutet.
+- **DF3 a** (2026-11-06, LERN_Session18): Abgleich über einen Ordner als Kern-Teil `abgleich.js` über `daten.js`;
+  Dateipräfix, Name der IndexedDB und Ereignis gibt die App mit (Eulenpfad `lernspiele-sync-`, `lernspiele`; Lernsteig
+  `lernsteig-sync-`, `lernsteig` nach SP1 a). Browser-Schnittstellen erst beim Aufruf, in Node mit Ersatz-Ordner geprüft.
+- **DF4 a** (2026-11-06, LERN_Session18): Eine Person mit PIN reist in Sicherung und Abgleich ohne PIN-Prüfwert, aber
+  mit dem Prüfwert ihres Wiederherstellungscodes und dem Vermerk `geschuetzt`. Auf einem Gerät ohne eigene PIN dieser
+  Person ist sie gesperrt; freigeschaltet mit dem Wiederherstellungscode und einer neuen PIN, eine Aufsicht im
+  Eulenpfad auch mit der Bestätigung einer bestehenden Aufsicht des Geräts. Gilt in allen Apps für alle Rollen;
+  Aufsichten reisen auch im Lernsteig mit. Grund: Alle 1 110 000 PINs mit 4–6 Ziffern sind gegen SHA-256 mit Salz in
+  1,2 s durchprobiert (Node, ein Kern), der Code (32¹², rund 1,2 · 10¹⁸) im selben Tempo erst in rund 40 000 Jahren;
+  heute kommt eine Person mit PIN ungeschützt an (Eulenpfad: PIN der Aufsicht ohne Frage festlegbar; Lernsteig: Konto
+  eines Jugendlichen offen). Nicht b (PIN-Prüfwert reist mit). Kipppunkt: die Grenze aus DS1 a auch für den Abgleich
+  als genug ansehen, dann b mit PBKDF2.

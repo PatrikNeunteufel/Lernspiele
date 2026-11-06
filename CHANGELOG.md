@@ -540,3 +540,13 @@
   des Eulenpfads). Kern 1.14.1: Die Anmeldung dieses Tabs geht vor der gewählten Person des Geräts — ein Jugendlicher
   mit PIN war abgemeldet, sobald sich in einem zweiten Tab eine Aufsicht anmeldete (von den Seitentests gefunden).
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session17_2026-11-06.md`, Handover Eulenpfad und Lernsteig.
+
+## 2026-11-06 — LERN_Session18
+- Fehler behoben (Eulenpfad, online seit LERN_Session15): „📂 Einlesen“ in der Statistik und „📂 Abgleich-Datei
+  einlesen“ in der Verwaltung wiesen jede Datei der Version 3 ab („Diese Datei kann ich nicht lesen.“) — die Prüfung
+  verlangte das Feld `profile`, das seit `c8f7d9f` nicht mehr geschrieben wird. Neu `LS.abgleich.datenEinlesen`
+  (nimmt `personen` oder `profile`); Test „Sichern und Einlesen“ in `tools/pruefe_spiele.js` (Version 3, Version 2,
+  Sicherung des Lernsteigs abgewiesen; einzeln `node tools/pruefe_spiele.js daten`), Gegenprobe mit der alten Prüfung
+  schlägt an. Der Abgleich über einen Ordner war nicht betroffen. rahmen.md 10 nachgeführt.
+- Entscheide DF1 a, DF2 a, DF3 a, DF4 a (ein Dateiformat `reihe-daten` im Kern, Löschvermerke und Freigabe im Kern,
+  Abgleich über einen Ordner als Kern-Teil, Personen mit PIN reisen geschützt über den Wiederherstellungscode) im Plan.
