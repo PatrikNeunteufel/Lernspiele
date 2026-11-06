@@ -239,17 +239,22 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 ## 7. Prüfen
 
-`node tools/pruefe_uebungen.js [übung …] [--aufgaben=3000] [--seed=1] [--browser]` (oder `node tools/pruefe.js lernsteig`):
-- ohne Browser: Seite lädt die gemeinsamen Dateien und nichts aus `eulenpfad/`; Kompetenz-Codes des Katalogs stehen in
+`node tools/pruefe_uebungen.js [übung …] [--aufgaben=3000] [--seed=1] [--seiten=0]` (oder `node tools/pruefe.js lernsteig`):
+- Daten: Seite lädt die gemeinsamen Dateien und nichts aus `eulenpfad/`; Kompetenz-Codes des Katalogs stehen in
   `lehrplan/mathematik_zyklus3.md`; je Niveau und Stufe Zufallsaufgaben gegen `pruefeAufgabe`, kein NaN/undefined/null,
   Hinweise zu typischen falschen Eingaben nennen die Lösung nicht; Endlos-Stufen haben mindestens 100 verschiedene
   Aufgaben (Hinweis, wenn eine andere Stufe es auch hätte);
-- mit `--browser` (Chromium, 375 px): Startseite und jede Stufe ohne Konsolenfehler, eine Runde mit einem
-  Fehlversuch durchspielen, Protokoll plausibel, Serie speichert den Rekord vor „Zum Ergebnis“; Konten; Statistik
-  zeigt die gespielte Runde, Sichern lädt die Datei herunter, Einlesen in einem frischen Browser stellt sie her
-  (zweimal eingelesen zählt einmal), eine fremde Datei wird abgewiesen; Aufsicht: anlegen, Verbindung erst nach
-  Zustimmung (nicht ohne PIN), Statistik nur verbunden, Sperre des Rechners wirkt und ist sichtbar, Lösen. Das
-Skript liegt unter `docs/lernsteig/`, weil `lernsteig/` nur enthält, was online geht.
+- Seiten im Ersatz-DOM (`tools/lernsteig_seiten.js` über `tools/pruef_dom.js`, Plan B2; ersetzt seit LERN_Session17
+  den Browser-Teil mit Playwright, der lokal nicht lief): Startseite als niemand, Gast, Jugendlicher und Aufsicht mit
+  jedem Tab; Konto mit PIN anlegen (Code, PIN nur als Prüfwert), falsche PIN in einem neuen Tab, PIN vergessen mit
+  dem Code; Aufsicht anlegen (Rolle, Prüfwert), ohne Verbindung keine Statistik des Kontos, Rechner-Sperre des
+  Geräts wirkt in der Übung; Einladung über den Link füllt das Formular vor, das Fragment verschwindet; jede Übung in
+  jeder Stufe und jedem Niveau eine Runde mit einem Fehlversuch (Protokoll, danach Statistik und Erfolge), Rechner je
+  Lehrplan-Stufe (12 · 3 übernehmen, Nutzung im Protokoll), Serie speichert den Rekord vor „Zum Ergebnis“. Gemeldet
+  werden Ausnahmen, Konsolenfehler und sichtbarer Text mit NaN, undefined, null (Knoten mit Abstand gelesen). Die
+  Prüfung schaltet alle Übungen und Listen frei; die Sperre selbst prüfen `tools/pruefe_konten.js` und die Startseite.
+  Über die Bedienung nicht geprüft (über die Schnittstelle in `pruefe_konten.js` schon): Verbinden mit Zustimmung,
+  Lösen der Verbindung, Sichern und Einlesen als Datei.
 
 ## 8. Noch nicht gebaut
 

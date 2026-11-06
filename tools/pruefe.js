@@ -17,7 +17,7 @@ const node = (skript, args) => [process.execPath, [path.join(__dirname, skript),
 /** Je App: was geprüft wird und wie. */
 const TREIBER = {
   kern: { was: "gemeinsamer Kern (kern/) und alle Kopien", befehl: args => node("pruefe_kern.js", args) },
-  lernsteig: { was: "Übungen, Konten, Sichern und Einlesen", befehl: args => node("pruefe_uebungen.js", args) },
+  lernsteig: { was: "Übungen, Seiten im Ersatz-DOM, Konten, Sichern und Einlesen", befehl: args => node("pruefe_uebungen.js", args) },
   gratwanderung: { was: "Grundgerüst: Kern-Kopie und Startseite", befehl: () => null, selbst: pruefeGratwanderung },
   eulenpfad: { was: "Spiele im Ersatz-DOM", befehl: args => node("pruefe_spiele.js", args) },
 };

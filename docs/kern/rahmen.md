@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.14.0, 2026-11-06 (LERN_Session17). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.14.1, 2026-11-06 (LERN_Session17). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.14.0)
+kern/VERSION          Version des Kerns (1.14.1)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -280,7 +280,7 @@ Aufsicht nur im Tab). Ein **Platz** hält, wer an diesem Gerät angemeldet ist:
 | Aufruf | Ergebnis |
 |---|---|
 | `platz({ speicher, gewaehlt, tab, finde, imTab?, gast? })` | ein Platz; `gewaehlt: null` = nur im Tab, nichts darüber hinaus gemerkt; `finde(wert)` der App entscheidet, wer zu diesem Platz gehört (Kennung, ältere Stände auch Name) |
-| `aktiv()` | die angemeldete Person oder `null` |
+| `aktiv()` | die angemeldete Person oder `null`; die Anmeldung dieses Tabs geht vor der gewählten Person des Geräts (1.14.1) |
 | `waehle(wert)` | Person ohne Tab-Pflicht wählen (Tab wird geleert); `false` für Unbekannte, für wen der Tab gilt, und bei einem Platz nur im Tab |
 | `anmelden(wert, pin)` | mit PIN muss sie stimmen (`KERN.geheimnis`); wer im Tab sein muss, braucht eine gesetzte PIN. Gibt die Person oder `null` |
 | `abmelden()` | nichts gewählt, Tab leer, kein Gast |
@@ -439,8 +439,10 @@ Zufallseingaben gleich.
 
 ### 4.19 Geplant
 
-Plan B ist mit Terme und Rechenkern vollständig; als Nächstes das Testgerüst B2. Ein neuer Teil bekommt hier seinen
-Abschnitt, bevor er umzieht.
+Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): Sichern, Einlesen und Abgleich als ein Dateiformat für alle Apps (`daten.js`; heute je App eigene Datei, nur die
+Prüfung und das Zusammenführen liegen im Kern), der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
+dritten, Serie/Endlos mit Rekord und Zwischenstand, Wiederholungsbremse, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`)
+und der Rest der Rollen (Gruppenleitung G2 a, Bestätigung durch eine bestehende Aufsicht, PIN zurücksetzen mit Frist). Ein neuer Teil bekommt hier seinen Abschnitt, bevor er umzieht.
 
 ## 5. Ändern und verteilen
 

@@ -501,8 +501,7 @@
 - Kern 1.13.0: `personenmenue.js` (`KERN.personenMenue`, Entscheid PA1 a) — Person und Abmelden in beiden Apps gleich:
   Personen-Knopf mit Bild und Name, Menü mit den anderen Personen und getrennt darunter „↩ Abmelden“ (beim Gast
   „Anmelden“); ersetzt die Auswahlliste des Eulenpfads und Name mit Knopf im Lernsteig.
-- Kern 1.14.0: `terme.js` (`KERN.terme`) und `rechner.js` (`KERN.rechner`, Rechenkern) aus dem Lernsteig — Plan B
-  damit vollständig; der Lernsteig reicht weiter (`LST_TERME`, `LST_RECHNER` mit Modellen und Tastenfeld). Behoben: D3
+- Kern 1.14.0: `terme.js` (`KERN.terme`) und `rechner.js` (`KERN.rechner`, Rechenkern) aus dem Lernsteig; der Lernsteig reicht weiter (`LST_TERME`, `LST_RECHNER` mit Modellen und Tastenfeld). Behoben: D3
   (Absturz bei „(3)(2x+3)“), D9 (NaN „nicht definiert“, Anzeige auf 10 Stellen), D10 (Grenzen statt eingefrorenem Tab),
   Exponenten ab 10 in `text` und `lies` (x¹⁰, x²³). Glieder in Lösungen wie im Lehrmittel geordnet (TO1 a:
   a² + 2ab + b²); heute ändert das keine Aufgabe der Übungen.
@@ -533,3 +532,10 @@
   45 ms je Zeichen). 12 Spiele trennen Lob und Erklärung (Bionik-Paare, Blutkreislauf-Lotse, Energie-Wandler, Erdzeit-Leiter,
   Fledermaus-Forscher, Kakao-Weg, Kulturen-Koffer, Nombres-Rallye, Schulweg-Profi, Tier-Sortierer, Wetter-Jahreszeiten,
   Znüni-Teller). Auf Anhieb gelöst warten sie jetzt 1,3–1,8 s statt 2,8–3,6 s.
+- Testgerüst B2, Schritt 2 (AN2 a): Seiten des Lernsteigs im Ersatz-DOM (`tools/lernsteig_seiten.js`) statt Playwright —
+  alle Rollen und Tabs, Konten über die Bedienung, Rechner-Sperre, Einladung, 320 Runden über alle Übungen, Stufen und
+  Niveaus (11 s). Ersatz-DOM: Adresse mit `#` und `hashchange`, `history.replaceState`, eigener Speicher je Tab,
+  `select.value` aus der gewählten Option, `name`/`type`/`href` gespiegelt, `__textMitAbstand` — sichtbarer Text mit
+  Abstand zwischen den Knoten, sonst fand die Suche ein „undefined“ neben einem Nachbarn nicht (auch im Testskript
+  des Eulenpfads). Kern 1.14.1: Die Anmeldung dieses Tabs geht vor der gewählten Person des Geräts — ein Jugendlicher
+  mit PIN war abgemeldet, sobald sich in einem zweiten Tab eine Aufsicht anmeldete (von den Seitentests gefunden).

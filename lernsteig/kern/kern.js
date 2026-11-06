@@ -1,4 +1,4 @@
-/* kern 1.14.0 · Prüfsumme sha256:c8408f6672e68def335fbefc43f7a93f7584a891a17381f5451ccf8566f2e0d6 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.14.1 · Prüfsumme sha256:d1f9ace9049a29d4df9c55dba3d98de847bf3fe404a3317e8f415e36c6671957 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -1231,15 +1231,18 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     /** Steht diese Person im Tab? Auch ein älterer Stand mit ihrem Namen gilt (finde löst ihn auf). */
     const imTabAngemeldet = p => { const w = tabLies(); return !!w && (w === p.id || finde(w)?.id === p.id); };
 
-    /** Die angemeldete Person oder null. */
+    /**
+     * Die angemeldete Person oder null. Die Anmeldung dieses Tabs geht vor der gewählten Person des Geräts: Meldet sich
+     * in einem zweiten Tab eine Aufsicht an, bleibt der Jugendliche mit PIN im ersten Tab angemeldet (vor kern 1.14.1
+     * war er dort abgemeldet, gefunden mit den Seitentests im Ersatz-DOM, LERN_Session17).
+     */
     function aktiv() {
-      if (gewaehlt === null) {
-        const p = finde(tabLies());
-        return p && imTabAngemeldet(p) ? p : null;
-      }
+      const imDiesemTab = finde(tabLies());
+      if (imDiesemTab && (gewaehlt === null || imTab(imDiesemTab))) return imDiesemTab;
+      if (gewaehlt === null) return null;
       const p = finde(speicher.lies(gewaehlt, null));
       if (!p) return null;
-      return imTab(p) && !imTabAngemeldet(p) ? null : p;
+      return imTab(p) ? null : p; // im Tab angemeldet wäre sie oben schon gefunden
     }
     /** Person ohne PIN wählen (merken, Tab leeren); false, wenn sie im Tab angemeldet sein muss oder unbekannt ist. */
     function waehle(wert) {

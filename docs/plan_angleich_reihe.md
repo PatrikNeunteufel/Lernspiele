@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.14.0 mit allen Teilen; Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): Einstieg `tools/pruefe.js` gebaut, als Nächstes Seiten des Lernsteigs im Ersatz-DOM | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.14.0; offen: Dateiformat und Abgleich, Ablauf der Runde, Rest der Rollen; Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): Einstieg und Seiten des Lernsteigs im Ersatz-DOM gebaut, als Nächstes die offenen Kern-Teile (AN2 a), dann B2 Schritt 3 | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -83,7 +83,10 @@ Nachrechnungen, dazu die Kopien); das Testskript jeder App prüft ihre Kopie.
 Stand 2026-11-06: Kern 1.14.0 mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
 Freigabe, Suche, Runden, Anmeldung (mit Gast), Entwicklung, Einladung, Auswertung, Übernahme einer Aufsicht,
 Rollleiste und Personen-Knopf; Eulenpfad und Lernsteig benutzen, was sie brauchen, die Gratwanderung hat die Kopie und
-lädt sie mit C8. Als Nächstes das Testgerüst B2.
+lädt sie mit C8. Noch nicht im Kern: Sichern, Einlesen und Abgleich als ein Dateiformat für alle Apps (`daten.js`; heute je App eigene Datei, nur die
+Prüfung und das Zusammenführen liegen im Kern), der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
+dritten, Serie/Endlos mit Rekord und Zwischenstand, Wiederholungsbremse, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`)
+und der Rest der Rollen (Gruppenleitung G2 a, Bestätigung durch eine bestehende Aufsicht, PIN zurücksetzen mit Frist).
 
 **B2 Testgerüst für alle Apps:** Ein Testskript-Kern unter `tools/` mit Treiber je App, so dass ein Aufruf alle drei
 Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`). Er prüft auch, dass jede Kern-Kopie mit
@@ -276,6 +279,8 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
 - **WZ2 a** (2026-11-06, LERN_Session17, Eulenpfad): Nach einer richtigen Antwort nur das kurze Lob; die Erklärung
   (`ctx.richtig(lob, erklaerung)`, `opt.erklaerung`) nur nach einem Fehlversuch bei dieser Aufgabe (auch nach einem
   Verklicken, überspringbar) und in der Lösung; Lesezeit 1,3 s + 30 ms je Zeichen über 20, höchstens 3 s.
+- **AN2 a** (2026-11-06, LERN_Session17): Zuerst B2 Schritt 2 (Seiten des Lernsteigs im Ersatz-DOM), dann die offenen
+  Kern-Teile (Dateiformat mit Abgleich, Rest der Rollen, Ablauf der Runde), dann B2 Schritt 3, dann C3–C8.
 - **TO1 a** (2026-11-06, LERN_Session17): Glieder in Lösungen wie im Lehrmittel ordnen — bei gleichem Grad je Variable im
   Alphabet der höhere Exponent zuerst, (a + b)² = a² + 2ab + b² (`KERN.terme.text`, docs/kern/rahmen.md 4.17). Mit dem
   mathbuch abzugleichen, falls es bei mehreren Variablen anders ordnet.

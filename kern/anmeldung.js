@@ -48,15 +48,18 @@
     /** Steht diese Person im Tab? Auch ein älterer Stand mit ihrem Namen gilt (finde löst ihn auf). */
     const imTabAngemeldet = p => { const w = tabLies(); return !!w && (w === p.id || finde(w)?.id === p.id); };
 
-    /** Die angemeldete Person oder null. */
+    /**
+     * Die angemeldete Person oder null. Die Anmeldung dieses Tabs geht vor der gewählten Person des Geräts: Meldet sich
+     * in einem zweiten Tab eine Aufsicht an, bleibt der Jugendliche mit PIN im ersten Tab angemeldet (vor kern 1.14.1
+     * war er dort abgemeldet, gefunden mit den Seitentests im Ersatz-DOM, LERN_Session17).
+     */
     function aktiv() {
-      if (gewaehlt === null) {
-        const p = finde(tabLies());
-        return p && imTabAngemeldet(p) ? p : null;
-      }
+      const imDiesemTab = finde(tabLies());
+      if (imDiesemTab && (gewaehlt === null || imTab(imDiesemTab))) return imDiesemTab;
+      if (gewaehlt === null) return null;
       const p = finde(speicher.lies(gewaehlt, null));
       if (!p) return null;
-      return imTab(p) && !imTabAngemeldet(p) ? null : p;
+      return imTab(p) ? null : p; // im Tab angemeldet wäre sie oben schon gefunden
     }
     /** Person ohne PIN wählen (merken, Tab leeren); false, wenn sie im Tab angemeldet sein muss oder unbekannt ist. */
     function waehle(wert) {

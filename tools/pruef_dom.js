@@ -44,6 +44,17 @@ const __uhr = (() => {
   };
 })();
 
+/**
+ * Sichtbarer Text eines Elements, Knoten für Knoten mit Leerzeichen dazwischen (ohne script und style). textContent hängt
+ * benachbarte Elemente ohne Abstand aneinander („weiter undefined“ + „Als Gast“ = „undefinedAls“), und eine Suche nach
+ * \bundefined\b fände es dort nicht (LERN_Session17).
+ */
+function __textMitAbstand(wurzel) {
+  const teile = [];
+  (function lauf(k) { for (const c of k.childNodes) { if (c.nodeType === 3) teile.push(c.data); else if (c.localName !== "script" && c.localName !== "style") lauf(c); } })(wurzel);
+  return teile.join(" ");
+}
+
 const __fehler = [];
 function __fange(fn) {
   try { fn(); } catch (e) { __fehler.push(e && e.stack ? e.stack.split("\n").slice(0, 3).join(" | ") : String(e)); }
@@ -106,6 +117,19 @@ class Element extends Knoten {
     this.checked = false;
     this.offsetWidth = 0; this.offsetHeight = 0; this.offsetLeft = 0; this.offsetTop = 0;
     this.clientWidth = 0; this.clientHeight = 0; this.scrollTop = 0; this.scrollLeft = 0;
+    // <select>: ohne gesetzten Wert gilt wie im Browser die Option mit „selected“, sonst die erste (LERN_Session17)
+    if (this.localName === "select") {
+      let wert;
+      Object.defineProperty(this, "value", {
+        get() {
+          if (wert !== undefined) return wert;
+          const o = this.querySelectorAll("option");
+          const s = o.find(x => x.hasAttribute("selected")) || o[0];
+          return s ? s.getAttribute("value") ?? s.textContent : "";
+        },
+        set(v) { wert = String(v); },
+      });
+    }
   }
   get children() { return this.childNodes.filter(k => k instanceof Element); }
   get firstElementChild() { return this.children[0] || null; }
@@ -113,6 +137,13 @@ class Element extends Knoten {
   get childElementCount() { return this.children.length; }
   get id() { return this.attributes.id || ""; }
   set id(v) { this.attributes.id = String(v); }
+  // Wie im Browser spiegeln name, type und href ins Attribut (Lernsteig setzt select.name = "rolle", LERN_Session17)
+  get name() { return this.attributes.name || ""; }
+  set name(v) { this.attributes.name = String(v); }
+  get type() { return this.attributes.type || (this.localName === "input" ? "text" : ""); }
+  set type(v) { this.attributes.type = String(v); }
+  get href() { return this.attributes.href || ""; }
+  set href(v) { this.attributes.href = String(v); }
   get className() { return this.attributes.class || ""; }
   set className(v) { this.attributes.class = String(v); }
   get classList() {
@@ -361,18 +392,44 @@ return { Knoten, Text, Element, neuesEreignis, document };
 
 const window = globalThis;
 const self = globalThis;
-const __speicher = new Map();
-const localStorage = {
-  getItem: k => (__speicher.has(k) ? __speicher.get(k) : null),
-  setItem: (k, v) => { __speicher.set(k, String(v)); },
-  removeItem: k => { __speicher.delete(k); },
-  clear: () => __speicher.clear(),
-  key: i => [...__speicher.keys()][i] ?? null,
-  get length() { return __speicher.size; },
-};
-const sessionStorage = localStorage;
-const location = { search: __seite.search, href: "http://pruefung/" + __seite.search, pathname: "/", hash: "", reload() {}, assign() {}, replace() {} };
-const history = { pushState() {}, replaceState() {}, back() {} };
+/** Speicher über eine Map: __seite.speicher / __seite.sitzung (Map) übergeben heisst „derselbe Browser, neue Seite“. */
+const __alsSpeicher = karte => ({
+  getItem: k => (karte.has(k) ? karte.get(k) : null),
+  setItem: (k, v) => { karte.set(k, String(v)); },
+  removeItem: k => { karte.delete(k); },
+  clear: () => karte.clear(),
+  key: i => [...karte.keys()][i] ?? null,
+  get length() { return karte.size; },
+});
+const __speicher = __seite.speicher || new Map();
+const localStorage = __alsSpeicher(__speicher);
+// Ein eigener Speicher je Tab nur, wenn die Seite ihn braucht (Lernsteig: Anmeldung im Tab); sonst wie bisher derselbe.
+const sessionStorage = __seite.sitzung ? __alsSpeicher(__seite.sitzung) : localStorage;
+// Adresse (Lernsteig: Tabs in #…, LERN_Session17): hash setzen löst „hashchange“ aus; replaceState/pushState ändern sie.
+const location = (() => {
+  const a = { pathname: __seite.pfad || "/", search: __seite.search || "", hash: __seite.hash || "" };
+  const setzeUrl = url => {
+    const m = String(url).match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+    if (m[1]) a.pathname = m[1].startsWith("/") ? m[1] : a.pathname.replace(/[^/]*$/, "") + m[1];
+    a.search = m[2] || (m[1] ? "" : m[3] && !m[2] ? a.search : "");
+    a.hash = m[3] || "";
+  };
+  return {
+    get pathname() { return a.pathname; }, get search() { return a.search; },
+    get hash() { return a.hash; },
+    set hash(h) {
+      const neu = !h ? "" : String(h).startsWith("#") ? String(h) : "#" + h;
+      if (neu === a.hash) return;
+      a.hash = neu;
+      setTimeout(() => document.dispatchEvent(__ereignis("hashchange")), 0);
+    },
+    get href() { return "http://pruefung" + a.pathname + a.search + a.hash; },
+    set href(u) { setzeUrl(u); },
+    reload() {}, assign(u) { setzeUrl(u); }, replace(u) { setzeUrl(u); },
+    __setze: setzeUrl,
+  };
+})();
+const history = { pushState(_, __, u) { if (u !== undefined) location.__setze(u); }, replaceState(_, __, u) { if (u !== undefined) location.__setze(u); }, back() {} };
 const navigator = { userAgent: "pruefe_spiele", language: "de-CH", vibrate() {} };
 const performance = { now: () => __uhr.jetzt() };
 const setTimeout = (fn, ms) => __uhr.setze(fn, ms, false);

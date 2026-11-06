@@ -3,6 +3,11 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.14.1 — 2026-11-06 (LERN_Session17)
+- `anmeldung.js`: Die Anmeldung dieses Tabs geht vor der gewählten Person des Geräts. Vorher war ein Jugendlicher mit
+  PIN in seinem Tab abgemeldet, sobald sich in einem zweiten Tab desselben Geräts eine Aufsicht anmeldete (gefunden mit den
+  Seitentests des Lernsteigs im Ersatz-DOM, B2).
+
 ## 1.14.0 — 2026-11-06 (LERN_Session17)
 - `terme.js` (`KERN.terme`): Terme lesen, vergleichen, Form prüfen und schreiben, aus dem Lernsteig; `text(p, sw)` mit
   der Schreibweise der App statt `LST.zahlText`. Behoben: D3 (`(3)(2x+3)` bei „ausgeklammert“ stürzt nicht mehr ab),

@@ -690,6 +690,16 @@ console.log("personenmenue.js");
     gleich(ls.aktiv()?.id, "p-jug", "im Tab angemeldet");
     tab.delete("lernsteig:angemeldet");
     gleich(ls.aktiv(), null, "neuer Tab: mit PIN abgemeldet");
+    // Zwei Tabs (kern 1.14.1): Lea im Tab A, dann meldet sich in Tab B eine Aufsicht an — Tab A bleibt bei Lea
+    await ls.anmelden("p-jug", "4711");
+    const tabA = new Map(tab);
+    tab.clear();
+    gleich((await ls.anmelden("p-auf", "4711"))?.id, "p-auf", "Tab B: Aufsicht angemeldet");
+    tab.clear(); for (const [k, v] of tabA) tab.set(k, v);
+    gleich(ls.aktiv()?.id, "p-jug", "Tab A: bleibt beim Jugendlichen, obwohl das Gerät die Aufsicht gewählt hat");
+    tab.clear();
+    gleich(ls.aktiv(), null, "neuer Tab C: niemand (die Aufsicht gilt nur in Tab B)");
+    ls.abmelden();
     gleich((await ls.anmelden("p-kind"))?.id, "p-kind", "ohne PIN anmelden geht ohne PIN");
     gleich(tab.has("lernsteig:angemeldet"), false, "ohne PIN nichts im Tab");
     // Platz nur im Tab (Aufsicht im Lernsteig bis zum Grundgerüst C)

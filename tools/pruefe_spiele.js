@@ -56,9 +56,12 @@ const TREIBER = `
       const stelle = t.slice(Math.max(0, e.index - 50), e.index + 30).replace(/\\s+/g, " ");
       melde("Hinweis Einzahl?", "«" + stelle + "»", "einzahl:" + e[0]);
     }
-    const m = t.match(${VERDAECHTIG});
+    // Mit Leerzeichen zwischen den Knoten: textContent hängt Nachbarn aneinander („undefinedAls“), \\bundefined\\b
+    // fände es dort nicht (LERN_Session17, Gegenprobe der Lernsteig-Seiten).
+    const tA = __textMitAbstand(buehne);
+    const m = tA.match(${VERDAECHTIG});
     if (!m) return;
-    const stelle = t.slice(Math.max(0, m.index - 60), m.index + 40).replace(/\\s+/g, " ");
+    const stelle = tA.slice(Math.max(0, m.index - 60), m.index + 40).replace(/\\s+/g, " ");
     melde("Text", wo + ": «" + stelle + "»", stelle);
   };
   // Endlos-Runden landen als Rekord, nicht im Protokoll.
