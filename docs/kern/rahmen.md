@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.9.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.10.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.9.0)
+kern/VERSION          Version des Kerns (1.10.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -322,10 +322,32 @@ der App; Meldungen gehen an `opt.melde`.
 Benutzt von: Eulenpfad (`LS.entwicklung`, Bereiche `spiele`, `listen`; Schnittstelle unverändert) und Lernsteig
 (`LST.ENTWICKLUNG`, Bereiche `uebungen`, `listen`; Freischalten auf der Aufsichtsseite, Leiste in den Übungen).
 
-### 4.13 Geplant (Plan B, Reihenfolge B4)
+### 4.13 `KERN.einladung` (`kern/einladung.js`) — Einladung in eine andere App
+
+Entscheid EL1 a, Notiz EP1 (Lernsteig, LST_Session1), im Kern seit 1.10.0. Beim Übertritt gibt die Aufsicht der Person
+eine Einladung mit, nur Stammdaten, kein Verlauf, keine PIN. Zwei Wege mit demselben Inhalt: Link mit Fragment
+`…/<ziel>/#einladung=<base64url(JSON)>` (geht nicht an den Server; die Ziel-App löscht es aus der Adresse) oder Datei
+`<ziel>-einladung.json`.
+
+```
+{ format: "einladung", v: 1, ziel?, von?, name, geboren?, klasse?, niveau?, lehrplan? }
+```
+
+| Aufruf | Ergebnis |
+|---|---|
+| `erstellen(daten, { ziel, von })` | Inhalt der Einladung (leere Felder fallen weg); ohne Vornamen Fehler |
+| `fragment(einladung)` | „#einladung=…“ (base64url über UTF-8-Bytes) |
+| `dateiname(ziel)` | „lernsteig-einladung.json“ |
+| `lesen(fragment \| objekt, { ziel, klasse, niveau, lehrplan })` | bereinigte Stammdaten oder `null`: fremdes Format, andere Version, Einladung für eine andere App, ohne Vornamen. Vorname und Geburtsdatum (auch ohne Tag, B3) prüft der Kern, Klasse, Niveau und Lehrplan die Ziel-App; Ungültiges fällt weg (D12). Ältere Einladungen des Lernsteigs `{ v: 1, … }` ohne `format` gelten |
+
+Benutzt von: Eulenpfad (Profil eines Kindes in der 6. Klasse: „📨 Einladung zum Lernsteig“ mit Link oder Datei; Vorname,
+Geburtsdatum oder -monat, Klasse 7) und Lernsteig (`einladungLesen` beim Laden der Startseite und „Einladung öffnen“
+für die Datei; ein Geburtsmonat ohne Tag bleibt erhalten).
+
+### 4.14 Geplant (Plan B, Reihenfolge B4)
 
 Profil-Übernahme zwischen den Apps (C9), Auswertung (Fazit, Bedarf,
-Kompetenzstand) mit Regeln je App, Einladung, Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
+Kompetenzstand) mit Regeln je App, Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
 bevor er umzieht.
 
 ## 5. Ändern und verteilen

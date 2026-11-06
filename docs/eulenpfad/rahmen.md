@@ -789,7 +789,9 @@ Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
   `alter` gelten weiter, bis der Geburtsmonat gesetzt ist; das Profil bittet darum. Nur Jahr oder nur Monat wird nicht
   gespeichert.
 - **Klassenaufstieg** (Wunsch Patrik, LERN_Session14): `LS.aufsteigen(name)` setzt die Klasse um eins höher und hängt
-  `{ von, nach, zeit }` an das Profilfeld `aufstiege`; nach der 6. Klasse nicht mehr (Lernsteig).
+  `{ von, nach, zeit }` an das Profilfeld `aufstiege`; nach der 6. Klasse nicht mehr (Lernsteig): Dort steht im Profil
+  „📨 Einladung zum Lernsteig“ (EL1 a, `KERN.einladung`, docs/kern/rahmen.md 4.13) — Link zum Kopieren oder Datei
+  `lernsteig-einladung.json` mit Vorname, Geburtsdatum oder -monat und Klasse 7; der Lernsteig füllt damit „Neues Konto“ vor.
   `LS.aufstiegZuruecknehmen(name)` nimmt den letzten zurück. Einzeln im Profil, für mehrere Kinder in Verwaltung →
   Konten → „Neues Schuljahr“, nach Klasse geordnet und vorab angekreuzt — bis zu den Gruppen (LERN-48) die
   Klassenorganisation der Lehrperson. Die Klasse von Hand ändern bleibt eine Korrektur. Beim nächsten Öffnen der

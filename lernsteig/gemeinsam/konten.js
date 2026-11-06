@@ -232,34 +232,28 @@ var LST_KONTEN = (function () {
   }
 
   // ---------- Einladung (EL1 a) ----------
-  // Link „…/lernsteig/#einladung=<base64url(JSON)>“: nur Stammdaten { v: 1, name, geboren, klasse, niveau, lehrplan }.
-  // Das Fragment geht nicht an den Server; der Lernsteig liest es und löscht es aus der Adresse.
-  function b64url(text) { return btoa(unescape(encodeURIComponent(text))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
-  function vonB64url(s) { const t = s.replace(/-/g, "+").replace(/_/g, "/"); return decodeURIComponent(escape(atob(t + "===".slice((t.length + 3) % 4)))); }
-  const EINLADUNG_FELDER = ["name", "geboren", "klasse", "niveau", "lehrplan"];
-  function einladungErstellen(daten) {
-    const d = { v: 1 }; for (const f of EINLADUNG_FELDER) if (daten[f] !== undefined && daten[f] !== null) d[f] = daten[f];
-    return "#einladung=" + b64url(JSON.stringify(d));
-  }
-  /** Liest eine Einladung aus dem Fragment (oder null). Unbekannte und ungültige Felder werden verworfen (D12). */
-  function einladungLesen(fragment) {
-    const m = String(fragment || "").match(/einladung=([A-Za-z0-9_-]+)/);
-    if (!m) return null;
-    try {
-      const d = JSON.parse(vonB64url(m[1]));
-      if (d.v !== 1) return null;
-      const erg = {};
-      if (typeof d.name === "string" && P.nameRein(d.name)) erg.name = P.nameRein(d.name);
-      const g = P.geburtsdatumLies(d.geboren); if (g) erg.geboren = g; // auch ohne Tag (Eulenpfad: „JJJJ-MM“, B3)
-      if (KLASSEN.some(k => k.id === String(d.klasse))) erg.klasse = String(d.klasse);
-      if (d.niveau && typeof d.niveau === "object") erg.niveau = Object.fromEntries(Object.entries(d.niveau).filter(([, n]) => LST.NIVEAUS.some(x => x.id === n)));
+  // Format im Kern (kern/einladung.js, docs/kern/rahmen.md 4.13): Link „…/lernsteig/#einladung=<base64url(JSON)>“ oder
+  // Datei „lernsteig-einladung.json“, nur Stammdaten { name, geboren, klasse, niveau, lehrplan }. Das Fragment geht
+  // nicht an den Server; der Lernsteig liest es und löscht es aus der Adresse. Hier prüft der Lernsteig seine Felder.
+  const EINLADUNG_PRUEFUNG = {
+    ziel: "lernsteig",
+    klasse: k => (KLASSEN.some(x => x.id === String(k)) ? String(k) : null),
+    niveau: n => (n && typeof n === "object" && !Array.isArray(n)
+      ? Object.fromEntries(Object.entries(n).filter(([, w]) => LST.NIVEAUS.some(x => x.id === w))) : null),
+    lehrplan(l) {
       const LP = typeof LST_LEHRPLAENE !== "undefined" ? LST_LEHRPLAENE : null;
-      if (d.lehrplan && typeof d.lehrplan.land === "string" && (!LP || LP.LAENDER.some(l => l.id === d.lehrplan.land))) {
-        const kanton = typeof d.lehrplan.kanton === "string" && (!LP || (LP.KANTONE || []).some(k => k.id === d.lehrplan.kanton)) ? d.lehrplan.kanton : null;
-        erg.lehrplan = { land: d.lehrplan.land, kanton };
-      }
-      return erg;
-    } catch (e) { return null; }
+      if (!l || typeof l.land !== "string" || (LP && !LP.LAENDER.some(x => x.id === l.land))) return null;
+      const kanton = typeof l.kanton === "string" && (!LP || (LP.KANTONE || []).some(k => k.id === l.kanton)) ? l.kanton : null;
+      return { land: l.land, kanton };
+    },
+  };
+  /** Fragment „#einladung=…“ für eine Einladung in den Lernsteig. */
+  const einladungErstellen = (daten, von) => KERN.einladung.fragment(KERN.einladung.erstellen(daten, { ziel: "lernsteig", von }));
+  /** Liest eine Einladung aus Fragment oder Datei (Objekt), oder null. Unbekannte und ungültige Felder fallen weg (D12). */
+  function einladungLesen(eingabe) {
+    const e = KERN.einladung.lesen(eingabe, EINLADUNG_PRUEFUNG);
+    if (e) delete e.von; // Herkunft nur zur Anzeige, nicht ins Konto
+    return e;
   }
 
   return {

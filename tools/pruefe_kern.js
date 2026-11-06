@@ -18,6 +18,7 @@ require(path.join(WURZEL, "kern", "suche.js"));
 require(path.join(WURZEL, "kern", "runden.js"));
 require(path.join(WURZEL, "kern", "anmeldung.js"));
 require(path.join(WURZEL, "kern", "entwicklung.js"));
+require(path.join(WURZEL, "kern", "einladung.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -565,6 +566,34 @@ console.log("el.js");
     wirft(() => E({ speicher: KERN.speicher("lernsteig:"), aufsicht: () => true }), "app fehlt");
     wirft(() => E({ app: "x", aufsicht: () => true }), "speicher fehlt");
     delete global.fetch; delete global.localStorage;
+  }
+
+  // ---------- Einladung ----------
+  {
+    console.log("einladung.js");
+    const EI = KERN.einladung;
+    const pruefung = { ziel: "lernsteig", klasse: k => (["7", "8", "9"].includes(String(k)) ? String(k) : null),
+      niveau: n => (n && typeof n === "object" ? n : null), lehrplan: l => (l && l.land === "CH" ? { land: "CH", kanton: typeof l.kanton === "string" ? l.kanton : null } : null) };
+    const e = EI.erstellen({ name: " Zoë  Müller ", geboren: "2013-06", klasse: 7, niveau: { mathematik: "n2" }, lehrplan: { land: "CH", kanton: "SG" }, leer: "" }, { ziel: "lernsteig", von: "eulenpfad" });
+    gleich([e.format, e.v, e.ziel, e.von, "leer" in e].join(), "einladung,1,lernsteig,eulenpfad,false", "erstellen: Format, Ziel, Herkunft, nur bekannte Felder");
+    const f = EI.fragment(e);
+    gleich(/^#einladung=[A-Za-z0-9_-]+$/.test(f), true, "Fragment base64url");
+    gleich(JSON.stringify(EI.lesen("https://x/lernsteig/index.html" + f, pruefung)),
+      JSON.stringify({ name: "Zoë Müller", geboren: "2013-06", klasse: "7", niveau: { mathematik: "n2" }, lehrplan: { land: "CH", kanton: "SG" }, von: "eulenpfad" }), "Link lesen mit Umlauten");
+    gleich(EI.lesen(JSON.parse(JSON.stringify(e)), pruefung)?.name, "Zoë Müller", "Datei (Objekt) lesen");
+    // ältere Einladung des Lernsteigs: { v: 1 } ohne format, kodiert mit unescape(encodeURIComponent(…))
+    const alt = "#einladung=" + Buffer.from(JSON.stringify({ v: 1, name: "Jürg", klasse: "8" }), "utf8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    gleich(JSON.stringify(EI.lesen(alt, pruefung)), JSON.stringify({ name: "Jürg", klasse: "8" }), "ältere Einladung ohne format");
+    gleich(EI.lesen(EI.fragment(EI.erstellen({ name: "A" }, { ziel: "gratwanderung" })), pruefung), null, "Einladung für eine andere App");
+    gleich(EI.lesen({ format: "etwas", v: 1, name: "A" }, pruefung), null, "fremdes Format");
+    gleich(EI.lesen({ v: 2, name: "A" }, pruefung), null, "andere Version");
+    gleich(EI.lesen({ v: 1, name: "   " }, pruefung), null, "ohne Vornamen");
+    gleich(EI.lesen("#einladung=%%%", pruefung), null, "kaputter Link");
+    gleich(EI.lesen("#einladung=" + Buffer.from([0xff, 0xfe]).toString("base64"), pruefung), null, "kein UTF-8");
+    gleich(EI.lesen("#nichts", pruefung), null, "ohne Einladung");
+    gleich(JSON.stringify(EI.lesen({ v: 1, name: "B", klasse: 12, geboren: "gestern", lehrplan: { land: "XX" } }, pruefung)), JSON.stringify({ name: "B" }), "ungültige Felder fallen weg");
+    wirft(() => EI.erstellen({ klasse: 7 }), "erstellen ohne Vornamen");
+    gleich(EI.dateiname("lernsteig"), "lernsteig-einladung.json", "Dateiname");
   }
 
   // ---------- Kopien in den Apps ----------

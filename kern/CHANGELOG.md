@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.10.0 — 2026-11-06 (LERN_Session16)
+- `einladung.js` (`KERN.einladung`): Einladung in eine andere App (EL1 a, Notiz EP1) — `erstellen(daten, { ziel, von })`
+  mit Format `{ format: "einladung", v: 1, ziel, von, name, geboren, klasse, niveau, lehrplan }`, `fragment` für den
+  Link `#einladung=…` (base64url über UTF-8-Bytes), `dateiname`, `lesen(fragment | objekt, { ziel, klasse, niveau,
+  lehrplan })` mit den Prüfungen der Ziel-App; ältere Einladungen des Lernsteigs ohne `format` gelten. Lernsteig liest
+  über den Kern (auch als Datei), der Eulenpfad erzeugt sie nach der 6. Klasse.
+
 ## 1.9.0 — 2026-11-06 (LERN_Session16)
 - `entwicklung.js` (`KERN.entwicklung(opt)`): Entwickler-Modus für alle Apps (E1 a, E2 a, E3 a; Plan C6) — Schlüssel
   gegen den Hash (ein Schlüssel für das Repo, Rechnung wie bisher: `KERN.geheimnis.hash(s, "eulenpfad-entwickler")`),

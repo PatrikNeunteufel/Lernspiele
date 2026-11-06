@@ -72,6 +72,9 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
   Ausnahme Lernsteig (Entscheide AU1 a, AF1 a, AF2 a, 2026-11-05): Eine Aufsicht (Eltern, Lehrperson) sieht am selben
   Gerät nur Konten, die mit ihr verbunden sind — verbunden nur mit Zustimmung des Jugendlichen oder durch Einlesen
   einer Sicherung, die er ihr gegeben hat; beide Seiten können die Verbindung lösen.
+  Ausnahme Einladung (Entscheid EL1 a, 2026-11-04): Beim Übertritt in die nächste App verlässt eine Einladung den
+  Browser nur auf Knopfdruck der Aufsicht als Link (Fragment, geht nicht an einen Server) oder Datei — nur Vorname,
+  Geburtsdatum (oder -monat) und Klasse, im Lernsteig dazu Niveau und Lehrplan; kein Verlauf, keine PIN.
   Keine weiteren Angaben (Nachname, Schule, Foto) erfassen.
 
 ## Projekt-Steckbrief

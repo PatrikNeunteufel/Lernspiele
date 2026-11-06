@@ -308,6 +308,9 @@ button.stufenknopf { border: none; border-bottom: 4px solid var(--sf); font-fami
 .profil-person label > .leise-text { font-weight: 700; font-size: 14px; }
 .profil-bild { display: inline-flex; }
 .klasse-wahl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* Einladung zum Lernsteig (EL1 a): Link zum Kopieren, volle Breite auf dem Handy */
+.einladung { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.einladung-link { flex: 1 1 240px; min-width: 0; font: inherit; font-size: 14px; padding: 6px 8px; border: 2px solid var(--rand); border-radius: 10px; }
 .fokus-klapp > summary { font-size: 17px; }
 .fokus-gruppe { margin: 6px 0 0 16px; }
 .fokus-gruppe > summary { cursor: pointer; font-weight: 800; color: var(--text); }

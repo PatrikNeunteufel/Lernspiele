@@ -479,3 +479,6 @@
   und Bemerkungen je App); Entwickler-Server mit `APPS` (Eulenpfad, Lernsteig; Anfragen ohne `app` = Eulenpfad);
   Eulenpfad umgestellt (`LS.entwicklung` unverändert); Lernsteig: Freischalten auf der Aufsichtsseite, Leiste in den
   Übungen („Übung angesehen“, Bemerkung), Prüfstand im Format des Servers. docs/kern/rahmen.md 4.12, lernsteig/rahmen.md 5e.
+- Kern 1.10.0: `einladung.js` (`KERN.einladung`, EL1 a) — Einladung als Link oder Datei; Eulenpfad: „📨 Einladung zum
+  Lernsteig“ im Profil eines Kindes der 6. Klasse (EP1 erledigt); Lernsteig liest über den Kern, auch als Datei, und behält
+  einen Geburtsmonat ohne Tag. CLAUDE.md: Datenschutz-Ausnahme Einladung.

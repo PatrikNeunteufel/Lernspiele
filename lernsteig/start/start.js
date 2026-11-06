@@ -147,17 +147,31 @@
     const v = ansicht.vorlage || {};
     const gast = LST.konto(); // Einstellungen des Gasts übernehmen
     const name = feld("Vorname", { type: "text", maxlength: "40", autocomplete: "given-name", value: v.name || "", name: "vorname" });
-    const geboren = feld("Geburtsdatum", { type: "date", value: v.geboren || "", name: "geboren", max: new Date().toISOString().slice(0, 10) }, "Damit dein Alter stimmt. Bleibt auf diesem Gerät.");
+    // Eine Einladung aus dem Eulenpfad kann nur den Geburtsmonat tragen („JJJJ-MM“, B3): Das Datumsfeld zeigt ihn nicht,
+    // darum steht er als Hinweis da und bleibt, wenn der Tag leer bleibt.
+    const nurMonat = KERN.person.tagFehlt(v.geboren || "") ? v.geboren : null;
+    const geboren = feld("Geburtsdatum", { type: "date", value: nurMonat ? "" : v.geboren || "", name: "geboren", max: new Date().toISOString().slice(0, 10) },
+      nurMonat ? `Aus der Einladung: ${KERN.person.geburtsdatumText(nurMonat)}. Trag den Tag ein, wenn du willst.` : "Damit dein Alter stimmt. Bleibt auf diesem Gerät.");
     const klasse = auswahl("Klasse", KLASSEN, String(v.klasse || "7"), () => {});
     const pin = feld("PIN (freiwillig, 4–6 Ziffern)", { type: "password", inputmode: "numeric", autocomplete: "new-password", maxlength: "6", name: "pin" }, "Mit PIN kann niemand sonst auf diesem Gerät dein Konto öffnen.");
+    // Einladung als Datei (EL1 a): „lernsteig-einladung.json“ aus dem Eulenpfad füllt das Formular vor.
+    const datei = el("input", { type: "file", accept: "application/json,.json", hidden: true, "aria-label": "Einladung wählen", onchange: async e => {
+      const f = e.target.files[0]; if (!f) return;
+      let gelesen = null;
+      try { gelesen = KO.einladungLesen(JSON.parse(await f.text())); } catch (err) { gelesen = null; }
+      if (!gelesen) { zeigeFehler("Das ist keine Einladung zum Lernsteig."); return; }
+      ansicht = { art: "neu", vorlage: gelesen }; zeichne();
+    } });
     dazu(karte,el("h3", { text: v.name ? "Einladung zum Lernsteig" : "Neues Konto" }),
-      v.name ? el("p", { class: "leise", text: "Die Angaben aus der Einladung sind schon eingetragen. Prüfe sie und lege eine PIN fest, wenn du willst." }) : null,
+      v.name ? el("p", { class: "leise", text: "Die Angaben aus der Einladung sind schon eingetragen. Prüfe sie und lege eine PIN fest, wenn du willst." })
+        : el("p", { class: "leise" }, "Hast du eine Einladung als Datei bekommen? ",
+          el("button", { type: "button", class: "knopf klein", "data-aktion": "einladung-datei", text: "📨 Einladung öffnen", onclick: () => datei.click() }), datei),
       name, geboren, klasse, pin, fehlerText,
       el("div", { class: "knopf-zeile" },
         el("button", { type: "button", class: "knopf haupt", text: "Konto anlegen", "data-aktion": "anlegen", onclick: async () => {
           try {
             const p = pin.querySelector("input").value.trim();
-            const r = await KO.anlegen({ name: name.querySelector("input").value, geboren: geboren.querySelector("input").value || null,
+            const r = await KO.anlegen({ name: name.querySelector("input").value, geboren: geboren.querySelector("input").value || nurMonat || null,
               klasse: Number(klasse.querySelector("select").value), pin: p || null,
               lehrplan: v.lehrplan || gast.lehrplan, niveau: Object.assign({}, gast.niveau, v.niveau || {}), pruefungsziel: gast.pruefungsziel, rechnerModell: gast.rechnerModell });
             await KO.anmelden(r.konto.id, p || undefined);

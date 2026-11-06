@@ -142,7 +142,7 @@ function zeichneProfil(box, neu) {
     if (!istKind) return null;
     const k = LS.klasseVon(p);
     if (k === null) return el("span", { class: "leise-text", text: "Aufsteigen geht, sobald eine Klasse eingetragen ist." });
-    if (k >= LS.KLASSEN[LS.KLASSEN.length - 1]) return el("span", { class: "leise-text", text: "Nach der 6. Klasse geht es im Lernsteig weiter." });
+    if (k >= LS.KLASSEN[LS.KLASSEN.length - 1]) return einladungTeil();
     return el("button", { type: "button", class: "knopf gruen klein", text: `⬆️ In die ${LS.klasseText(k + 1)}`,
       title: `In die ${LS.klasseText(k + 1)} aufsteigen lassen`,
       onclick: () => {
@@ -152,6 +152,34 @@ function zeichneProfil(box, neu) {
         neu();
       } });
   };
+  // Einladung zum Lernsteig (Entscheid EL1 a, Notiz EP1; Kern kern/einladung.js): Nach der 6. Klasse gibt die Aufsicht dem
+  // Kind eine Einladung mit — Link oder Datei, nur Vorname, Geburtsdatum und Klasse 7; kein Verlauf, keine PIN. Die Daten
+  // verlassen den Browser nur auf diesen Knopfdruck (CLAUDE.md, Ausnahme Einladung).
+  function einladungTeil() {
+    const box = el("span", { class: "einladung" },
+      el("span", { class: "leise-text", text: "Nach der 6. Klasse geht es im Lernsteig weiter. " }),
+      el("button", { type: "button", class: "knopf hell klein", "data-aktion": "einladung", text: "📨 Einladung zum Lernsteig", onclick: () => {
+        const einladung = KERN.einladung.erstellen({ name, geboren: p.geboren || null, klasse: "7" }, { ziel: "lernsteig", von: "eulenpfad" });
+        const adresse = new URL("../lernsteig/index.html", location.href).href + KERN.einladung.fragment(einladung);
+        const feld = el("input", { type: "text", readonly: true, value: adresse, "aria-label": "Link der Einladung", class: "einladung-link" });
+        const meldung = el("span", { class: "leise-text", role: "status" });
+        box.replaceChildren(
+          el("span", { class: "leise-text", text: `Einladung für ${LS.spielerName(name)}: Vorname, ${p.geboren ? (KERN.person.tagFehlt(p.geboren) ? "Geburtsmonat, " : "Geburtsdatum, ") : ""}Klasse 7. Kein Verlauf, keine PIN. ` }),
+          feld,
+          el("button", { type: "button", class: "knopf hell klein", text: "🔗 Link kopieren", onclick: async () => {
+            try { await navigator.clipboard.writeText(adresse); meldung.textContent = "Kopiert."; }
+            catch { feld.select(); meldung.textContent = "Bitte mit Strg+C kopieren."; }
+          } }),
+          el("button", { type: "button", class: "knopf hell klein", text: "💾 Als Datei", onclick: () => {
+            const a = el("a", { href: URL.createObjectURL(new Blob([JSON.stringify(einladung, null, 2)], { type: "application/json" })), download: KERN.einladung.dateiname("lernsteig") });
+            document.body.append(a); a.click(); a.remove();
+            meldung.textContent = "Gespeichert. Im Lernsteig unter „Ich bin neu“ → „Einladung öffnen“.";
+          } }),
+          meldung);
+        feld.select();
+      } }));
+    return box;
+  }
   const aufstiegVerlauf = () => {
     const letzter = istKind ? (p.aufstiege || []).at(-1) : null;
     if (!letzter) return null;

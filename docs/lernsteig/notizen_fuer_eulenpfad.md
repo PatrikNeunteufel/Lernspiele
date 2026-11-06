@@ -8,7 +8,7 @@ Wunsch, was der Lernsteig dazu braucht, Status.
 
 | Nr. | Punkt | Herkunft | Status |
 |---|---|---|---|
-| EP1 | Klassenaufstieg und Wechsel zum Lernsteig per Knopf der Aufsicht | SP1 a mit Zusatz | offen |
+| EP1 | Klassenaufstieg und Wechsel zum Lernsteig per Knopf der Aufsicht | SP1 a mit Zusatz | erledigt 2026-11-06 (LERN_Session16, Einladung im Profil ab 6. Klasse) |
 | EP2 | Klassenaufstieg als Erfolg (Abzeichen) | SP1 Zusatz, AB1 a | offen |
 | EP3 | Geburtsdatum statt Alter im Profil, Datenschutz-Abschnitt in `CLAUDE.md` | SP1 Zusatz, GE1 b | offen |
 | EP4 | `.gitignore`: auch `lernsteig-*.json` und `__pycache__/` ausschliessen | LST_Session1 | offen (Repo-Datei, nicht im Auftrag) |

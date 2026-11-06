@@ -138,9 +138,10 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   und Rekorde mit `test: true` (wie im Eulenpfad). `LST.konto()` liefert das Konto des Jugendlichen, sonst die
   Einstellungen des Tabs.
 - Alter aus dem Geburtsdatum (`LST_KONTEN.alter`).
-- **Einladung** (EL1 a): `…/lernsteig/#einladung=<base64url(JSON)>` mit `{ v: 1, name, geboren, klasse, niveau,
+- **Einladung** (EL1 a, Format im Kern `KERN.einladung`, docs/kern/rahmen.md 4.13): Link `…/lernsteig/#einladung=…` oder Datei
+  `lernsteig-einladung.json` („Einladung öffnen“ in „Neues Konto“), Inhalt `{ format, v: 1, ziel, von, name, geboren, klasse, niveau,
   lehrplan }`; die Startseite füllt das Formular vor und löscht das Fragment. Erzeugt mit `einladungErstellen(daten)`
-  (für den Eulenpfad, Notiz EP1).
+  (der Eulenpfad erzeugt sie nach der 6. Klasse, Notiz EP1). Ein Geburtsmonat ohne Tag bleibt beim Anlegen erhalten.
 - **Kompetenzstand** (`LST.kompetenzstand(konto, uebung, lp)`): je Lehrplan-Stufe aus der Protokoll-`liste`:
   *sicher* ab 10 Aufgaben mit mindestens 85 % auf Anhieb in den letzten 10 und keiner gezeigten Lösung (ohne Rechner;
   sonst *sicher mit Rechner*), *am Üben* ab einer Aufgabe, sonst *offen*. Schwellen in `STAND` (Annahme). Angezeigt als
