@@ -466,3 +466,5 @@
 - Prüfvermerk `lebensraum/nahrungsketten` aufgehoben (B2 a), bis die neuen Bilder darin geprüft sind.
 - Kern 1.7.0: `anmeldung.js` (`KERN.anmeldung.platz`) — Anmeldung und Sitzung im Tab für beide Apps (Eulenpfad:
   Kind oder Aufsicht; Lernsteig: Jugendliche und Aufsicht), Schlüssel unverändert; docs/kern/rahmen.md 4.11.
+- Weg zum Portal (PL1 a): „↑ Alle Apps“ oben links auf der Startseite des Eulenpfads; Lernsteig und Gratwanderung
+  von „← Alle Apps“ auf „↑ Alle Apps“ (← führt innerhalb einer App zurück, ↑ eine Ebene hinauf zum Portal).
