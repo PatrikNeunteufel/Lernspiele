@@ -258,7 +258,7 @@ LS.spiel({
     }
 
     const p = P[a.richtig];
-    const opt = { optionen: a.optionen, richtig: a.richtig, lob: `Richtig! ${p.text}`, breite: 220 };
+    const opt = { optionen: a.optionen, richtig: a.richtig, lob: "Richtig!", erklaerung: p.text, breite: 220 };
     switch (a.art) {
       case "kann":
         f.append(el("div", { class: "bionik-zeile" }, teil(p.vbild, p.vorbild, "vorbild")),

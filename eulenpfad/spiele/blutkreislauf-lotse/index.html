@@ -505,7 +505,7 @@ LS.spiel({
       const bildZeichen = { herz: "❤️", blut: "🩸", lunge: "🫁", puls: "💓", bewegung: "🏃", kreislauf: "🔄" }[thema];
       f.append(el("div", { class: "frage-bild", "aria-hidden": "true", text: bildZeichen }), el("div", { class: "frage", text: frage }));
       LS.auswahl(ctx, { optionen: mische([richtig, f1, f2]), richtig, breite: 220,
-        hinweis: KREISLAUF_TIPPS[thema], loesung: `${richtig}. ${erklaerung}`, lob: `Richtig! ${erklaerung}` });
+        hinweis: KREISLAUF_TIPPS[thema], loesung: `${richtig}. ${erklaerung}`, lob: "Richtig!", erklaerung });
       return;
     }
 

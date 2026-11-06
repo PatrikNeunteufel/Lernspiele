@@ -183,7 +183,7 @@ LS.spiel({
         inhalt: w => ({ bild: w ? "👍" : "👎", text: w ? "Stimmt" : "Stimmt nicht" }),
         hinweis: "Denk noch einmal nach — was weisst du über Fledermäuse?",
         loesung: `${a.a.stimmt ? "Das stimmt." : "Das stimmt nicht."} ${a.a.erklaerung}`,
-        lob: `${a.a.stimmt ? "Stimmt!" : "Genau, das stimmt nicht!"} ${a.a.erklaerung}`,
+        lob: a.a.stimmt ? "Stimmt!" : "Genau, das stimmt nicht!", erklaerung: a.a.erklaerung,
       });
       box.children[0].classList.add("ja");
       box.children[1].classList.add("nein");
@@ -193,7 +193,7 @@ LS.spiel({
         optionen: a.optionen, richtig: a.f.richtig, breite: 200,
         hinweis: "Hm, das passt nicht zur Fledermaus. Versuch es nochmal.",
         loesung: `${a.f.richtig}. ${a.f.erklaerung}`,
-        lob: `Richtig: ${a.f.richtig}. ${a.f.erklaerung}`,
+        lob: `Richtig: ${a.f.richtig}.`, erklaerung: a.f.erklaerung,
       });
     } else if (a.art === "jahr") {
       kopf.append(el("div", { class: "aussage frage", text: "Das Jahr einer Fledermaus — fang beim Winter an." }));

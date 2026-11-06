@@ -419,7 +419,7 @@ LS.spiel({
         inhalt: id => ({ bild: WAHR[id].bild, text: WAHR[id].text }),
         hinweis: () => `Überleg nochmal. ${k.leute}: ${k.kurz}.`,
         loesung,
-        lob: `${WAHR[richtig].text}! ${x.grund}`,
+        lob: `${WAHR[richtig].text}!`, erklaerung: x.grund,
       });
       box.classList.add("kk-janein");
       if (ctx.nr === 0) ctx.sag("Lies den Satz. Stimmt das, oder stimmt das nicht?");
@@ -437,7 +437,7 @@ LS.spiel({
         inhalt: id => ({ bild: GAB[id].bild, text: GAB[id].text }),
         hinweis: () => `Überleg nochmal: Woraus ist das gemacht, und braucht man Strom dafür? ${k.leute}: ${k.kurz}.`,
         loesung,
-        lob: `${g.ja ? "Ja" : "Nein"} — ${g.grund}`,
+        lob: "Genau!", erklaerung: g.grund,
       });
       box.classList.add("kk-janein");
       if (ctx.nr === 0) ctx.sag("Gab es das damals schon? Tipp Ja oder Nein an.");
@@ -455,7 +455,7 @@ LS.spiel({
         inhalt: id => ({ bild: KK_QUELLENARTEN[id].bild, text: KK_QUELLENARTEN[id].name, klein: KK_QUELLENARTEN[id].erklaerung }),
         hinweis: id => `${KK_QUELLENARTEN[id].name} heisst: ${KK_QUELLENARTEN[id].erklaerung}. Ist das hier so etwas?`,
         loesung,
-        lob: `Genau: Das ist ein ${art.name} — ${art.erklaerung}.`,
+        lob: `Genau: Das ist ein ${art.name}.`, erklaerung: `Ein ${art.name} ist ${art.erklaerung}.`,
       });
       box.classList.add("kk-quellen");
       if (ctx.nr === 0) ctx.sag("Woher wissen wir das? Tipp die Art der Quelle an.");
@@ -486,7 +486,7 @@ LS.spiel({
       inhalt: korbInhalt,
       hinweis: id => { zeige(); return `${K[id].name}: ${K[id].kurz}. Das passt nicht zu allen Hinweisen. Lies den nächsten.`; },
       loesung,
-      lob: `Richtig geraten: ${k.name} — ${k.kurz}.`,
+      lob: `Richtig geraten: ${k.name}!`, erklaerung: `${k.leute} ${k.kurz}.`,
     });
     if (ctx.nr === 0) ctx.sag("Lies die Hinweise. Welche Kultur bin ich? Du darfst jederzeit raten.");
   },

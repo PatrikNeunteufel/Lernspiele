@@ -273,6 +273,9 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
 - **BZ1 a** (2026-11-06, LERN_Session17): Jeder Eintrag zeigt ein Bild aus seiner Zeit — ein Ding das seiner Hauptkultur,
   „Gab es das schon?“ und Funde je Kultur ihr eigenes; gezeichnet, wo ein Emoji die heutige Form zeigt. Nicht b (mehrere
   Bilder an einem Ding: ein Ding erscheint nie im Zusammenhang einer zweiten Kultur).
+- **WZ2 a** (2026-11-06, LERN_Session17, Eulenpfad): Nach einer richtigen Antwort nur das kurze Lob; die Erklärung
+  (`ctx.richtig(lob, erklaerung)`, `opt.erklaerung`) nur nach einem Fehlversuch bei dieser Aufgabe (auch nach einem
+  Verklicken, überspringbar) und in der Lösung; Lesezeit 1,3 s + 30 ms je Zeichen über 20, höchstens 3 s.
 - **TO1 a** (2026-11-06, LERN_Session17): Glieder in Lösungen wie im Lehrmittel ordnen — bei gleichem Grad je Variable im
   Alphabet der höhere Exponent zuerst, (a + b)² = a² + 2ab + b² (`KERN.terme.text`, docs/kern/rahmen.md 4.17). Mit dem
   mathbuch abzugleichen, falls es bei mehreren Variablen anders ordnet.

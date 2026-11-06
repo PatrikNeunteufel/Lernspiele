@@ -373,7 +373,7 @@ LS.spiel({
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 220,
         hinweis: "Denk an das, was du beim Wetter schon beobachtet hast.",
-        loesung: `${a.richtig.replace(/\.$/, "")}. ${a.erklaerung}`, lob: `Richtig! ${a.erklaerung}`,
+        loesung: `${a.richtig.replace(/\.$/, "")}. ${a.erklaerung}`, lob: "Richtig!", erklaerung: a.erklaerung,
       });
     }
     if (ctx.nr === 0) ctx.sag("Schau genau hin — wie beim Wetter draussen!");

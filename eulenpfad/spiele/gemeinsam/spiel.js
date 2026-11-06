@@ -2041,6 +2041,7 @@ const LS = (() => {
    * opt.hinweis(wert): Hinweis nach falscher Wahl (Text oder Funktion des gewählten Werts)
    * opt.loesung: Lösungstext nach dem dritten Fehlversuch
    * opt.lob: Text bei richtiger Antwort; opt.breite: Mindestbreite der Knöpfe (px)
+   * opt.erklaerung: Begründung (ein ganzer Satz), die nur nach einem Fehlversuch bei dieser Aufgabe ans Lob kommt (WZ2 a)
    * opt.beiRichtig(knopf): zusätzlich bei richtiger Antwort, z. B. einen Ton vorspielen
    */
   /** Lösung für die Testhilfe: opt.loesung, sonst der richtige Wert, wenn er ein einfacher Wert ist. */
@@ -2061,7 +2062,7 @@ const LS = (() => {
           fertig = true;
           k.classList.add("richtig");
           if (opt.beiRichtig) opt.beiRichtig(k);
-          ctx.richtig(opt.lob);
+          ctx.richtig(opt.lob, opt.erklaerung);
           return;
         }
         wackeln(k);
@@ -2104,7 +2105,7 @@ const LS = (() => {
           if (opt.pfeile && pos > 1) ablage.append(el("span", { class: "pfeil", text: "→" }));
           const teil = opt.ablage ? opt.ablage(wert) : String(wert);
           ablage.append(istZeichnung(teil) ? bild(teil) : el("span", { text: teil })); // Zeichnung aus der Bildersammlung (B1 a)
-          if (pos === opt.reihe.length) { fertig = true; if (opt.beiRichtig) opt.beiRichtig(); ctx.richtig(opt.lob); }
+          if (pos === opt.reihe.length) { fertig = true; if (opt.beiRichtig) opt.beiRichtig(); ctx.richtig(opt.lob, opt.erklaerung); }
           return;
         }
         wackeln(k);
@@ -2143,7 +2144,7 @@ const LS = (() => {
         if (wert === opt.richtig) {
           fertig = true;
           fliegen(karte, k);
-          ctx.richtig(opt.lob);
+          ctx.richtig(opt.lob, opt.erklaerung);
           return;
         }
         wackeln(k);
@@ -2940,22 +2941,29 @@ const LS = (() => {
           },
           /** Ist die Aufgabe gelöst oder nach drei Fehlversuchen aufgelöst? Dann nimmt sie keine Antwort mehr an. */
           vorbei: () => erledigt,
-          richtig(text) {
+          /**
+           * Richtige Antwort. erklaerung (WZ2 a, LERN_Session17): die Begründung kommt nur nach einem Fehlversuch bei
+           * dieser Aufgabe ans Lob — wer es auf Anhieb wusste, muss sie nicht abwarten; wer sich geirrt (oder verklickt)
+           * hat, bekommt sie und kann mit „Weiter ➜“ überspringen.
+           */
+          richtig(text, erklaerung) {
             if (erledigt) return;
             erledigt = true;
             if (eintrag) eintrag.geloest = true;
-            pruefung.haken?.("richtig", { nr, vorab: loesungVorab });
+            pruefung.haken?.("richtig", { nr, vorab: loesungVorab, erklaerung: !!erklaerung && versuche > 0 });
             abschliessen(true);
             ton("richtig");
-            eule.sag(text || waehle(LOB), "gut");
+            const lob = text || waehle(LOB);
+            eule.sag(erklaerung && versuche > 0 ? `${lob} ${erklaerung}` : lob, "gut");
             nr++;
             if (endlos) { geschafft++; punkte.textContent = `♾ ${geschafft}`; }
             // Die nächste Aufgabe erst, wenn die Stimme fertig ist (Lob, gesprochene Antwort des Spiels; höchstens 6 s):
             // sonst sprach in Au café der Satz der vorigen Antwort noch, als die neue Aufgabe schon stand (Meldung 6,
             // LERN_Session11). Und erst, wenn eine längere Rückmeldung gelesen sein kann („Gut aufgepasst! Richtig wäre
-            // 14 289.“; Hinweis Patrik, LERN_Session13): 1,3 s, dazu 45 ms je Zeichen über 20, höchstens 5 s.
+            // 14 289.“; Hinweis Patrik, LERN_Session13): 1,3 s, dazu 30 ms je Zeichen über 20, höchstens 3 s (WZ2 a,
+            // LERN_Session17; vorher 45 ms und 5 s — lange Erklärungen bremsten den Spielfluss).
             const gesagt = eule.blase.textContent || "";
-            const lesen = endlos ? 900 : Math.min(5000, 1300 + Math.max(0, gesagt.length - 20) * 45);
+            const lesen = endlos ? 900 : Math.min(3000, 1300 + Math.max(0, gesagt.length - 20) * 30);
             // Überspringen (Entscheid WZ1 a): ablaufender Balken mit „Weiter ➜“ unter der Eule; Antippen der Blase oder
             // des Knopfs, Enter oder Leertaste führt sofort weiter. Endlos bleibt bei 0,9 s ohne Balken.
             let weiterGegangen = false;

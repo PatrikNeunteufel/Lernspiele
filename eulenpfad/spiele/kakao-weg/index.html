@@ -411,7 +411,7 @@ LS.spiel({
         el("div", { class: "frage", text: "Woher kommt der Rohstoff?" }));
       LS.auswahl(ctx, {
         optionen: ["schweiz", "ausland"], richtig: p.herkunft, breite: 200, inhalt: h => HERKUNFT[h], loesung,
-        lob: `Richtig! ${p.grund}`,
+        lob: "Richtig!", erklaerung: p.grund,
         hinweis: "Denk an das Wetter bei uns: Kann das auf Schweizer Feldern, im Wald oder auf dem Bauernhof wachsen?",
       });
     } else if (a.art === "transport") {

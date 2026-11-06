@@ -287,7 +287,7 @@ function zeigeFrueher(ctx, a) {
   LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 220,
     inhalt: t => { const e = ereignis(t); return { bild: e.bild, text: e.text }; },
     hinweis: TIPP_ORDNEN, loesung,
-    lob: `Richtig! ${a.optionen.map(t => LS.mitBildText(ereignis(t).bild, vorText(ereignis(t)))).join(", ")}.` });
+    lob: "Richtig!", erklaerung: `${a.optionen.map(t => LS.mitBildText(ereignis(t).bild, vorText(ereignis(t)))).join(", ")}.` });
 }
 
 function zeigeOrdnen(ctx, a) {
@@ -299,7 +299,7 @@ function zeigeOrdnen(ctx, a) {
     ablage: t => ereignis(t).bild, // Emoji oder Zeichnung (die Ablage zeichnet beides, LS.reihenfolge)
     hinweis: a.zahlen ? TIPP_ZAHLEN : TIPP_ORDNEN,
     loesung: a.reihe.map(t => LS.mitBildText(ereignis(t).bild, t)).join(" → "),
-    lob: `Richtig! ${a.reihe.map(t => LS.mitBildText(ereignis(t).bild, vorText(ereignis(t)))).join(" · ")}`,
+    lob: "Richtig!", erklaerung: a.reihe.map(t => LS.mitBildText(ereignis(t).bild, vorText(ereignis(t)))).join(" · "),
   }).box.classList.add("ez-ordnen"); // auf dem Handy zwei Karten nebeneinander (BH3 a)
 }
 

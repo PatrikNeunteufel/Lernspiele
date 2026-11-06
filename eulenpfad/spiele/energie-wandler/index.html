@@ -359,7 +359,7 @@ LS.spiel({
         : `${g.name}: ${g.erneuerbar ? "erneuerbar" : "nicht erneuerbar"}. ${g.text}`;
       f.append(ketteEl({ geraete: [g.name] }, { ohneFormen: true }),
         el("div", { class: "frage", text: a.art === "strom" ? `${g.name}: Braucht es Strom aus der Steckdose oder aus einer Batterie?` : `${g.name}: Ist die Energiequelle erneuerbar?` }));
-      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: jaNein(a.art), breite: 200, loesung, lob: `Richtig! ${g.text}`,
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: jaNein(a.art), breite: 200, loesung, lob: "Richtig!", erklaerung: g.text,
         hinweis: a.art === "strom" ? "Überleg: Muss man es einstecken, oder hat es eine Batterie oder einen Akku?" : "Überleg: Wächst die Energiequelle nach, oder ist sie irgendwann aufgebraucht?" });
       return;
     }
@@ -371,7 +371,7 @@ LS.spiel({
         woher ? glied(formInhalt(g.zu.join("+")), "form") : offen());
       const loesung = `${g.name}: ${formText(g.von)} → ${formText(g.zu.join("+"))}. ${g.text}`;
       f.append(zeile, el("div", { class: "frage", text: woher ? `${g.name}: Welche Energie ist vorher da?` : `${g.name}: Welche Energie kommt heraus?` }));
-      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: formInhalt, breite: 190, loesung, lob: `Richtig! ${g.text}`,
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: formInhalt, breite: 190, loesung, lob: "Richtig!", erklaerung: g.text,
         hinweis: woher ? "Überleg: Was muss da sein, damit es arbeitet? Was wird dabei verbraucht?" : "Überleg: Was spürst, siehst oder nutzt du, wenn es arbeitet?" }).classList.add("ew-kurz");
       return;
     }
@@ -379,7 +379,7 @@ LS.spiel({
     if (a.art === "paar") {
       const loesung = `${g.name}: ${paarText(a.richtig)}. ${g.text}`;
       f.append(ketteEl({ geraete: [g.name] }, { ohneFormen: true }), el("div", { class: "frage", text: `${g.name}: Welche Umwandlung stimmt?` }));
-      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: o => ({ text: paarText(o) }), breite: 280, loesung, lob: `Richtig! ${g.text}`,
+      LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: o => ({ text: paarText(o) }), breite: 280, loesung, lob: "Richtig!", erklaerung: g.text,
         hinweis: "Achte auf die Richtung: Was ist vorher da, was kommt heraus?" });
       return;
     }
@@ -400,7 +400,7 @@ LS.spiel({
     if (a.art === "frage") {
       const [frage, richtig, , , erklaerung] = ENERGIE_FRAGEN[a.frage];
       f.append(el("div", { class: "frage", text: frage }));
-      LS.auswahl(ctx, { optionen: a.optionen, richtig, breite: 260, loesung: `${richtig}. ${erklaerung}`, lob: `Richtig! ${erklaerung}`,
+      LS.auswahl(ctx, { optionen: a.optionen, richtig, breite: 260, loesung: `${richtig}. ${erklaerung}`, lob: "Richtig!", erklaerung,
         hinweis: "Lies alle Antworten genau. Denk an die Berge, das Wasser, den Wind und die Sonne." });
       return;
     }

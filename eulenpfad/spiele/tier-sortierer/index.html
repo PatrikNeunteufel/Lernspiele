@@ -243,7 +243,7 @@ LS.spiel({
       korbInhalt: name => ({ bild: KOERBE[name].bild, text: name, klein: KOERBE[name].zusatz }),
       hinweis: name => (a.falle === name ? `Das denken viele! Aber: ${KOERBE[a.richtig].erklaerung}` : `${KOERBE[name].erklaerung} Passt das zu ${a.tier.name}?`),
       loesung: `${a.tier.name}: ${a.richtig}. ${KOERBE[a.richtig].erklaerung}`,
-      lob: `Richtig! ${KOERBE[a.richtig].erklaerung}`,
+      lob: "Richtig!", erklaerung: KOERBE[a.richtig].erklaerung,
     });
     if (ctx.nr === 0) ctx.sag("Schau das Tier an und tipp auf den richtigen Korb.");
   },

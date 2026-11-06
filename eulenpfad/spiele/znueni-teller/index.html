@@ -174,7 +174,7 @@ LS.spiel({
         karte: { bild: a.x.bild, text: a.x.name }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: korbInfo,
         // Der Hinweis erklärt den falsch gewählten Korb — die Erklärung des richtigen nennte die Lösung.
         hinweis: k => (ALLTAG[k] ? "Überleg: Viel Zucker, Fett oder Salz — nur ab und zu. Wasser, Früchte, Gemüse, Brot, Milch und Ei — jeden Tag." : `${GRUPPEN_ZNUENI[k].erklaerung} Passt ${a.x.name} dazu?`),
-        loesung: `${a.x.name}: ${korbInfo(a.richtig).text}. ${erkl}`, lob: `Richtig! ${erkl}`,
+        loesung: `${a.x.name}: ${korbInfo(a.richtig).text}. ${erkl}`, lob: "Richtig!", erklaerung: erkl,
       });
       karte.querySelector("b").classList.add("frage"); // Name des Lebensmittels vorlesen (rahmen.md Abschnitt 12)
     } else if (a.art === "znueni") {

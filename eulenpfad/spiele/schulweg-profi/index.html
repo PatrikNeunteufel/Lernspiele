@@ -269,7 +269,7 @@ LS.spiel({
       f.append(bildEl(a.bild), el("div", { class: "frage", text: a.frage }));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 220,
-        hinweis: HINWEIS[a.liste], loesung: `${ohnePunkt(a.richtig)}. ${a.erklaerung}`, lob: `Richtig! ${a.erklaerung}`,
+        hinweis: HINWEIS[a.liste], loesung: `${ohnePunkt(a.richtig)}. ${a.erklaerung}`, lob: "Richtig!", erklaerung: a.erklaerung,
       });
     }
     if (ctx.nr === 0) ctx.sag("Denk an deinen Schulweg. Was ist sicher?");
