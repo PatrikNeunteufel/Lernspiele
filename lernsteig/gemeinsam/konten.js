@@ -6,7 +6,8 @@
      pruefungsziel, rechnerModell, pin?, wiederherstellung?, aufsicht?: [Kennungen], anfragen?: [Kennungen],
      angelegt, geaendert: { <feld>: ISO } }
    Lernende: PIN freiwillig; mit PIN gilt die Anmeldung nur im geöffneten Tab (sessionStorage lernsteig:angemeldet).
-   Aufsicht: PIN Pflicht, angemeldet nur im Tab (sessionStorage lernsteig:aufsicht); eine weitere Aufsicht nur mit
+   Anmeldung (Plan C1): ein Platz für alle — Jugendlicher, Aufsicht oder Gast (C2 a, nur im Tab, nichts gespeichert).
+   Aufsicht: PIN Pflicht, angemeldet nur im Tab (sessionStorage lernsteig:angemeldet); eine weitere Aufsicht nur mit
    Bestätigung durch eine bestehende (wie Eulenpfad KR2 a; Befund D5). Sie sieht nur verbundene Konten; verbunden
    wird, wenn die Aufsicht das Konto anlegt, der Jugendliche angemeldet zustimmt oder die Aufsicht eine Sicherung mit
    einem neuen Konto einliest (AF2 a, nur neue Konten: D5).
@@ -97,20 +98,31 @@ var LST_KONTEN = (function () {
   }
 
   // ---------- Anmeldung ----------
-  // Rechnung im Kern (kern/anmeldung.js, docs/kern/rahmen.md 4.11), Schlüssel wie bisher: lernsteig:aktiv,
-  // sessionStorage lernsteig:angemeldet (Jugendliche mit PIN) und lernsteig:aufsicht. Zwei Plätze, bis das Grundgerüst
-  // (Plan C1) die Anmeldung wie im Eulenpfad auf einen Platz bringt.
-  const PLATZ = KERN.anmeldung.platz({ speicher: SPEICHER, gewaehlt: "aktiv", tab: "angemeldet", finde });
-  /** Das aktive Konto: zuletzt gewählt; mit PIN nur, wenn in diesem Tab angemeldet. Sonst null (Gast). */
-  const aktiv = () => PLATZ.aktiv();
-  /** Wählt ein Konto. Mit PIN muss pin stimmen. */
+  // Ein Platz wie im Eulenpfad (Plan C1, Kern kern/anmeldung.js, docs/kern/rahmen.md 4.11): angemeldet ist eine Person —
+  // ein Jugendlicher oder eine Aufsicht — oder der Gast. Gemerkt wird die Kennung in lernsteig:aktiv; wer eine PIN hat
+  // (jede Aufsicht), gilt nur im geöffneten Tab (sessionStorage lernsteig:angemeldet). Der Gast (C2 a) gilt nur im Tab
+  // (lernsteig:gast), für ihn wird nichts gespeichert; die Aufsicht schaltet ihn je Gerät ab (Einstellung gast „aus“).
+  // Bis LERN_Session16 hatte die Aufsicht einen eigenen Tab-Schlüssel lernsteig:aufsicht; wer dort angemeldet war, meldet
+  // sich einmal neu an.
+  const gastErlaubt = () => LST.lies("einstellungen", {}).gast !== "aus";
+  const PLATZ = KERN.anmeldung.platz({ speicher: SPEICHER, gewaehlt: "aktiv", tab: "angemeldet", finde: id => LISTE.finde(id),
+    gast: { tab: "gast", erlaubt: gastErlaubt } });
+  /** Wer angemeldet ist (Jugendlicher oder Aufsicht), sonst null. */
+  const angemeldet = () => PLATZ.aktiv();
+  /** Das aktive Konto eines Jugendlichen: zuletzt gewählt; mit PIN nur, wenn in diesem Tab angemeldet. Sonst null. */
+  const aktiv = () => { const p = angemeldet(); return p && p.rolle === "lernend" ? p : null; };
+  /** Meldet einen Jugendlichen an. Mit PIN muss pin stimmen. */
   async function anmelden(id, pin) {
     if (!finde(id)) throw new Error("Konto nicht gefunden");
     const k = await PLATZ.anmelden(id, pin);
     if (!k) throw new Error("Die PIN stimmt nicht.");
     return k;
   }
+  /** Abmelden, wer auch immer angemeldet ist (auch der Gast). */
   const abmelden = () => PLATZ.abmelden();
+  /** Als Gast weiter (nur in diesem Tab); false, wenn die Aufsicht den Gast auf diesem Gerät abgeschaltet hat. */
+  const alsGast = () => PLATZ.alsGast();
+  const istGast = () => PLATZ.istGast();
 
   /** Alter in ganzen Jahren (B3: auch ohne Tag). */
   const alter = (geboren, heute = new Date()) => P.alter(geboren, heute);
@@ -123,8 +135,6 @@ var LST_KONTEN = (function () {
   // nicht vor jemandem, der die Entwicklerwerkzeuge des Browsers öffnet. Echter Schutz braucht den Server (DS1 a).
   const aufsichten = () => LISTE.alle().filter(p => p.rolle === "aufsicht");
   const aufsichtFinde = id => { const p = LISTE.finde(id); return p && p.rolle === "aufsicht" ? p : null; };
-  // Nur im Tab angemeldet, nichts darüber hinaus gemerkt (Kern, Platz ohne gewaehlt)
-  const AUFSICHT = KERN.anmeldung.platz({ speicher: SPEICHER, tab: "aufsicht", finde: aufsichtFinde });
 
   /**
    * Legt eine Aufsicht an (PIN Pflicht) und meldet sie im Tab an. Gibt es schon eine Aufsicht auf diesem Gerät,
@@ -141,17 +151,18 @@ var LST_KONTEN = (function () {
     const pin = await G.pin(daten.pin);
     const w = await G.wiederherstellung();
     const a = LISTE.anlegen({ name: daten.name, rolle: "aufsicht", art: daten.art, pin, wiederherstellung: w.wiederherstellung });
-    await AUFSICHT.anmelden(a.id, daten.pin);
+    await PLATZ.anmelden(a.id, daten.pin);
     return { aufsicht: a, code: w.code };
   }
   async function aufsichtAnmelden(id, pin) {
     const a = aufsichtFinde(id);
     if (!a) throw new Error("Aufsicht nicht gefunden");
-    if (!(await AUFSICHT.anmelden(a.id, pin))) throw new Error("Die PIN stimmt nicht.");
+    if (!(await PLATZ.anmelden(a.id, pin))) throw new Error("Die PIN stimmt nicht.");
     return a;
   }
-  const aufsichtAbmelden = () => AUFSICHT.abmelden();
-  const aufsichtAktiv = () => AUFSICHT.aktiv();
+  const aufsichtAbmelden = () => PLATZ.abmelden();
+  /** Die angemeldete Aufsicht oder null (derselbe Platz wie die Jugendlichen). */
+  const aufsichtAktiv = () => { const p = angemeldet(); return p && p.rolle === "aufsicht" ? p : null; };
   async function aufsichtNeuePinMitCode(id, code, neuePin) {
     const a = aufsichtFinde(id);
     if (!a || !(await G.codeStimmt(code, a.wiederherstellung))) throw new Error("Der Code stimmt nicht.");
@@ -213,10 +224,10 @@ var LST_KONTEN = (function () {
     const a = brauchtAufsicht();
     for (const id of neueIds || []) if (finde(id)) setzeFeld(id, "aufsicht", l => l.includes(a.id) ? l : l.concat(a.id));
   }
-  /** Einstellungen des Geräts (TR1 a: Rechner; Dezimalzeichen) setzt nur eine angemeldete Aufsicht. */
+  /** Einstellungen des Geräts (TR1 a: Rechner; Dezimalzeichen; Gast C2 a) setzt nur eine angemeldete Aufsicht. */
   function setzeGeraeteEinstellung(feld, wert) {
     brauchtAufsicht();
-    if (!["rechner", "dezimal"].includes(feld)) throw new Error("Unbekannte Einstellung");
+    if (!["rechner", "dezimal", "gast"].includes(feld)) throw new Error("Unbekannte Einstellung");
     const e = LST.lies("einstellungen", {}); e[feld] = wert; LST.schreibe("einstellungen", e);
   }
 
@@ -253,6 +264,7 @@ var LST_KONTEN = (function () {
 
   return {
     KLASSEN, alle, finde, anlegen, aendern, pinStimmt, codeStimmt, neuePinMitCode, setzePin, aktiv, anmelden, abmelden, alter, GERAET, ohneGeheimnis,
+    angemeldet, alsGast, istGast, gastErlaubt,
     einladungErstellen, einladungLesen, pinGueltig: G.pinGueltig,
     ROLLEN, aufsichten, aufsichtFinde, aufsichtAnlegen, aufsichtAnmelden, aufsichtAbmelden, aufsichtAktiv, aufsichtNeuePinMitCode,
     verbundene, mitleser, angefragt, anfragen, antworten, loesen, kontoFuerAufsicht, verbindeEingelesene, setzeGeraeteEinstellung,

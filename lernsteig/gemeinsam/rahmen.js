@@ -27,21 +27,36 @@
   const uebungSichtbar = id => FREIGABE.sichtbar(id);
 
   // ---------- Konto ----------
-  // Bis zur Anmeldung (AU1 a, KT1 a, GE1 b) gibt es ein Gastkonto je Gerät. Das Format ist das spätere
-  // Profilformat: id, name, niveau je Fach, lehrplan { land, kanton }, pruefungsziel (NV2 a).
-  // Das aktive Konto aus konten.js (AU1 a), sonst das Gastkonto des Geräts.
+  // Wer übt (Plan C1): ein angemeldeter Jugendlicher mit seinem Konto (Profilformat: id, name, niveau je Fach,
+  // lehrplan { land, kanton }, pruefungsziel NV2 a, rechnerModell). Der Gast (C2 a) und die angemeldete Aufsicht haben
+  // Einstellungen nur in diesem Tab (sessionStorage lernsteig:tab-konto): Für den Gast wird nichts gespeichert, auch keine
+  // Runde; die Aufsicht übt zum Ansehen und Prüfen, ihre Runden tragen test (wie im Eulenpfad). Das frühere Gastkonto je
+  // Gerät (lernsteig:gast) gilt nicht mehr; seine Runden (person „gast“) bleiben im Speicher und reisen in Sicherungen mit.
+  /** "lernend" | "aufsicht" | "gast" | "niemand" */
+  function werUebt() {
+    if (typeof LST_KONTEN === "undefined") return "niemand";
+    if (LST_KONTEN.aktiv()) return "lernend";
+    if (LST_KONTEN.aufsichtAktiv()) return "aufsicht";
+    return LST_KONTEN.istGast() ? "gast" : "niemand";
+  }
+  const TAB_KONTO = LST.PRAEFIX + "tab-konto";
+  const TAB_FELDER = ["niveau", "lehrplan", "pruefungsziel", "rechnerModell"];
+  function tabKonto() { try { return JSON.parse(sessionStorage.getItem(TAB_KONTO)) || null; } catch (e) { return null; } }
   function konto() {
-    const aktiv = typeof LST_KONTEN !== "undefined" ? LST_KONTEN.aktiv() : null;
-    const k = aktiv || LST.lies("gast", null);
-    const standard = { id: "gast", name: "Gast", niveau: {}, lehrplan: { land: "CH", kanton: null }, pruefungsziel: "keins", rechnerModell: "allgemein" };
-    const erg = Object.assign(standard, k || {});
+    const wer = werUebt();
+    const a = wer === "aufsicht" ? LST_KONTEN.aufsichtAktiv() : null;
+    const standard = { id: a ? a.id : "gast", name: a ? a.name : "Gast", niveau: {}, lehrplan: { land: "CH", kanton: null }, pruefungsziel: "keins", rechnerModell: "allgemein" };
+    let erg;
+    if (wer === "lernend") erg = Object.assign(standard, LST_KONTEN.aktiv());
+    else { erg = standard; const t = tabKonto() || {}; for (const f of TAB_FELDER) if (t[f] !== undefined) erg[f] = t[f]; }
     erg.niveau = Object.assign({}, erg.niveau);
     for (const f of Object.keys(erg.niveau)) if (!LST.NIVEAUS.some(n => n.id === erg.niveau[f])) delete erg.niveau[f]; // n3 aus NV1 a
     return erg;
   }
   function speichereKonto(k) {
-    if (k.id !== "gast" && typeof LST_KONTEN !== "undefined" && LST_KONTEN.finde(k.id)) LST_KONTEN.aendern(k);
-    else LST.schreibe("gast", k);
+    if (werUebt() === "lernend" && LST_KONTEN.finde(k.id)) { LST_KONTEN.aendern(k); return; }
+    const t = {}; for (const f of TAB_FELDER) t[f] = k[f];
+    try { sessionStorage.setItem(TAB_KONTO, JSON.stringify(t)); } catch (e) { /* ohne sessionStorage: gilt nur auf dieser Seite */ }
   }
 
   // ---------- Kompetenzstand (BF1 a) ----------
@@ -128,11 +143,16 @@
     const l = LST.lies(k, []);
     if (Array.isArray(l) && l.some(e => e && ("konto" in e || "uebung" in e))) LST.schreibe(k, l.map(e => KERN.runden.umdeuten(e, LST.ALTE_FELDER)));
   }
-  function protokolliere(runde) { const r = LST.lies("runden", []); r.push(runde); LST.schreibe("runden", r); }
+  // Gast: nichts gespeichert (C2 a). Aufsicht: Runde und Rekord als Test (zählen nicht für einen Jugendlichen).
+  const merkt = () => werUebt() !== "gast";
+  const alsTest = e => (werUebt() === "aufsicht" ? Object.assign(e, { test: true }) : e);
+  function protokolliere(runde) { if (!merkt()) return; const r = LST.lies("runden", []); r.push(alsTest(runde)); LST.schreibe("runden", r); }
   function runden(filter) { return LST.lies("runden", []).filter(filter || (() => true)); }
 
   /** Rekord speichern oder ersetzen (gleiche Kennung = Zwischenstand derselben Serie). */
   function speichereRekord(rekord) {
+    if (!merkt()) return;
+    alsTest(rekord);
     const liste = LST.lies("rekorde", []);
     const i = liste.findIndex(r => r.id === rekord.id);
     if (i >= 0) liste[i] = rekord; else liste.push(rekord);
@@ -195,6 +215,14 @@
     const buehne = el("main", { class: "buehne" });
     document.body.append(kopf, buehne);
 
+    // Anmeldung zuerst (Plan C1): ohne Person und ohne Gast nur der Weg zur Anmeldung (wie im Eulenpfad).
+    if (werUebt() === "niemand") {
+      buehne.append(el("section", { class: "karte" },
+        el("h2", { text: "Zuerst anmelden" }),
+        el("p", { text: "Melde dich auf der Startseite an oder übe als Gast." }),
+        el("p", { class: "knopf-zeile" }, el("a", { class: "knopf haupt", href: "../../index.html", text: "Zur Anmeldung" }))));
+      return;
+    }
     // Gesperrt (FG1 a): Wer die Adresse direkt aufruft, sieht nur den Hinweis, keine Aufgabe.
     if (!uebungSichtbar(def.id)) {
       buehne.append(el("section", { class: "karte" },
@@ -531,5 +559,5 @@
   let aktuell = null;
   const pruefung = { aufgabe: () => aktuell };
 
-  Object.assign(LST, { el, FREIGABE, sperrGrund, uebungSichtbar, konto, speichereKonto, kompetenzstand, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
+  Object.assign(LST, { el, FREIGABE, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
 })(LST);

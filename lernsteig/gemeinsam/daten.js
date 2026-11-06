@@ -74,7 +74,7 @@ var LST_DATEN = (function () {
     }
 
     // 2. Runden und Rekorde (Kern): Version 1 umdeuten, prüfen, Verweise umbiegen, nur zu Konten der Datei oder des Geräts
-    // „gast“: Runden des Gastkontos eines Geräts (rahmen.js) reisen mit, ohne Konto (bis Gast nach C2 a nichts speichert)
+    // „gast“: Runden des früheren Gastkontos eines Geräts (bis LERN_Session16) reisen mit, ohne Konto; der Gast nach C2 a speichert nichts
     const kontoDa = id => id === "gast" || imErgebnis.has(id);
     const fremde = l => (l || []).map(e => (e && typeof e === "object" ? KERN.runden.umdeuten(e, LST.ALTE_FELDER) : e));
     const zuGeraet = (l, gueltig) => { const ok = []; for (const e of l) if (e && gueltig(e) && kontoDa(umbiegen(e.person))) ok.push(e); else erg.abgewiesen++; return ok; };

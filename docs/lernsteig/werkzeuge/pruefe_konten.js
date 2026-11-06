@@ -71,6 +71,29 @@ const DA = require(path.join(APP, "gemeinsam", "daten.js"));
   gleich(lehrer.art, "lehrperson", "zweite Aufsicht mit Bestätigung");
   await wirft(() => KO.aufsichtAnlegen({ name: "Mia", art: "eltern", pin: "7777", bestaetigung: { id: vater.id, pin: "5555" } }), "Aufsicht mit Namen eines Kontos", "gibt es schon");
 
+  // Ein Platz (Plan C1): die Aufsicht und ein Jugendlicher schliessen sich aus
+  gleich([KO.angemeldet()?.id, KO.aktiv()], [lehrer.id, null], "angelegte Aufsicht ist angemeldet, kein Jugendlicher");
+  gleich(sessionStorage.getItem("lernsteig:angemeldet"), lehrer.id, "Aufsicht im Tab (lernsteig:angemeldet)");
+  await KO.anmelden(mia.id, "2222");
+  gleich([KO.aktiv()?.id, KO.aufsichtAktiv()], [mia.id, null], "Jugendlicher meldet die Aufsicht ab");
+  await KO.aufsichtAnmelden(lehrer.id, "6666");
+  gleich([KO.aufsichtAktiv()?.id, KO.aktiv()], [lehrer.id, null], "Aufsicht meldet den Jugendlichen ab");
+  await wirft(() => KO.anmelden(lehrer.id, "6666"), "Aufsicht nicht als Jugendlicher", "nicht gefunden");
+  await wirft(() => KO.aufsichtAnmelden(mia.id, "2222"), "Jugendlicher nicht als Aufsicht", "nicht gefunden");
+  // Gast (C2 a): nur im Tab, nichts gespeichert, je Gerät abschaltbar
+  gleich([KO.gastErlaubt(), KO.alsGast(), KO.istGast(), KO.angemeldet()], [true, true, true, null], "als Gast: niemand angemeldet");
+  gleich(localStorage.getItem("lernsteig:aktiv"), "null", "Gast: keine Person gemerkt");
+  await KO.aufsichtAnmelden(lehrer.id, "6666");
+  gleich(KO.istGast(), false, "Anmelden beendet den Gast");
+  KO.setzeGeraeteEinstellung("gast", "aus");
+  KO.abmelden();
+  gleich([KO.gastErlaubt(), KO.alsGast(), KO.istGast()], [false, false, false], "Gast abgeschaltet");
+  await KO.aufsichtAnmelden(lehrer.id, "6666");
+  KO.setzeGeraeteEinstellung("gast", "an");
+  KO.abmelden();
+  await wirft(() => KO.setzeGeraeteEinstellung("gast", "aus"), "Einstellung nur mit Aufsicht", "Aufsicht");
+  await KO.aufsichtAnmelden(lehrer.id, "6666");
+
   // Verbinden nur mit Zustimmung
   KO.anfragen(mia.id);
   gleich(KO.verbundene(lehrer.id).length, 0, "Anfrage verbindet noch nicht");

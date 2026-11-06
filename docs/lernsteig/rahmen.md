@@ -124,8 +124,18 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   Konto vom Gast. Mit PIN: nur Salz und SHA-256-Hash gespeichert, dazu ein Wiederherstellungscode („K7QM-2XRA-9TPL“,
   nur einmal angezeigt, ebenfalls nur als Hash). „PIN vergessen?“ setzt mit dem Code eine neue PIN und gibt einen neuen
   Code. `ohneGeheimnis(k)` für Sicherungen und Abgleich.
-- Angemeldet: Konto ohne PIN bleibt gewählt (`lernsteig:aktiv`); mit PIN nur im geöffneten Tab
-  (`sessionStorage lernsteig:angemeldet`; Rechnung im Kern, `KERN.anmeldung`, docs/kern/rahmen.md 4.11). Ohne Konto gilt das Gastkonto. `LST.konto()` liefert immer das aktive.
+- **Anmeldung zuerst** (Plan C1, wie Eulenpfad L1 a): Die Startseite zeigt ohne Anmeldung nur die Anmeldung —
+  Jugendliche und Aufsichten (🔑) zum Antippen, „🐣 Ich bin neu“ (Jugendliche oder Erwachsene; eine weitere Aufsicht
+  nur mit Bestätigung, D5) und „👀 Als Gast weiter“. **Ein Platz** (`KERN.anmeldung`, docs/kern/rahmen.md 4.11):
+  angemeldet ist ein Jugendlicher, eine Aufsicht oder der Gast. Konto ohne PIN bleibt gewählt (`lernsteig:aktiv`);
+  mit PIN und jede Aufsicht nur im geöffneten Tab (`sessionStorage lernsteig:angemeldet`). `LST.werUebt()` sagt
+  „lernend“, „aufsicht“, „gast“ oder „niemand“; Übungs- und Statistikseiten zeigen bei „niemand“ nur den Weg zur
+  Anmeldung.
+- **Gast** (C2 a): nur im Tab (`lernsteig:gast`), nichts gespeichert — keine Runden, keine Rekorde; Land, Kanton,
+  Niveaus, Prüfungsziel und Rechnermodell gelten nur im Tab (`sessionStorage lernsteig:tab-konto`). Die Aufsicht schaltet
+  ihn je Gerät ab (Einstellung „Gast“). **Aufsicht übt** zum Ansehen und Prüfen: Einstellungen nur im Tab, Runden
+  und Rekorde mit `test: true` (wie im Eulenpfad). `LST.konto()` liefert das Konto des Jugendlichen, sonst die
+  Einstellungen des Tabs.
 - Alter aus dem Geburtsdatum (`LST_KONTEN.alter`).
 - **Einladung** (EL1 a): `…/lernsteig/#einladung=<base64url(JSON)>` mit `{ v: 1, name, geboren, klasse, niveau,
   lehrplan }`; die Startseite füllt das Formular vor und löscht das Fragment. Erzeugt mit `einladungErstellen(daten)`
@@ -142,7 +152,8 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 ## 5c. Statistik, Sichern und Einlesen (BF1 a, DS1 a)
 
-- `statistik.html` (Code `start/statistik.js`), verlinkt von der Startseite: für das aktive Konto, sonst den Gast.
+- `statistik.html` (Code `start/statistik.js`), verlinkt von der Startseite des Jugendlichen: für das aktive Konto; der
+  Gast hat keinen Stand (nichts gespeichert).
   Überblick (Runden, Aufgaben, Anteil auf Anhieb, Übungstage der letzten 14 Tage), Kompetenzstand je gespielter Übung
   und Lehrplan-Stufe (5b), die letzten 10 Runden.
 - **Sichern** nur auf Knopfdruck (`gemeinsam/daten.js`, `LST_DATEN`): Datei `lernsteig-<vorname>-<datum>.json`,
@@ -160,12 +171,14 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 ## 5d. Aufsicht (AU1 a, TR1 a)
 
-- `aufsicht.html` (Code `start/aufsicht.js`), verlinkt von der Startseite. Freiwillig, für Eltern und Lehrpersonen.
+- `aufsicht.html` (Code `start/aufsicht.js`), verlinkt von der Startseite der angemeldeten Aufsicht („Zur Aufsicht“);
+  anlegen und anmelden auf der Startseite (Plan C1). Freiwillig, für Eltern und Lehrpersonen.
   Seit LERN_Session15 (P2 a) stehen Jugendliche und Aufsichten in **einer** Liste `lernsteig:personen`
   (`KERN.person`, docs/kern/rahmen.md 4.7): Aufsicht `{ id, name, rolle: "aufsicht", art: eltern | lehrperson, pin,
   wiederherstellung, angelegt, geaendert }`; die früheren Listen `lernsteig:konten` und `lernsteig:aufsichten` zieht
   `konten.js` beim ersten Laden um (Kennungen bleiben). PIN Pflicht (`KERN.geheimnis`), Wiederherstellungscode,
-  angemeldet nur im Tab (sessionStorage `lernsteig:aufsicht`). **Eine weitere Aufsicht** auf dem Gerät nur mit
+  angemeldet nur im Tab (sessionStorage `lernsteig:angemeldet`, derselbe Platz wie die Jugendlichen; bis LERN_Session16
+  `lernsteig:aufsicht`). **Eine weitere Aufsicht** auf dem Gerät nur mit
   Bestätigung durch eine bestehende mit deren PIN (wie Eulenpfad KR2 a; Befund D5).
 - **Verbindung** im Konto: `aufsicht` (Ids), offene Anfragen `anfragen` (Ids). Sie entsteht nur, wenn (1) die Aufsicht
   das Konto anlegt (ohne PIN; die setzt der Jugendliche selbst), (2) der Jugendliche eine Anfrage in seinem Konto
@@ -193,7 +206,7 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 | `konten` | Liste der Konten (5b), PIN und Code nur als Hash; Verbindungen `aufsicht`, `anfragen` (5d) |
 | `aufsichten` | Liste der Aufsichten (5d), PIN und Code nur als Hash |
 | `aktiv` | zuletzt gewähltes Konto (Id) |
-| `gast` | Gastkonto ohne Anmeldung: `{ id: "gast", name, niveau: { <fach>: n }, lehrplan: { land, kanton }, pruefungsziel }` |
+| `gast` | bis LERN_Session16 das Gastkonto des Geräts; wird nicht mehr gelesen. Runden mit `person: "gast"` bleiben und reisen in Sicherungen mit |
 | `personen` | Jugendliche und Aufsichten (`KERN.person`, 5d); früher `konten` und `aufsichten`, beim Laden umgezogen |
 | `runden` | je Runde im gemeinsamen Format (R1 a, `KERN.runden`) `{ id, person, zeit, inhalt, fach, stufe, niveau, endlos, aufgaben, aufAnhieb, fehler, gezeigt, dauer, zeiten, falsch, liste, mitRechner, gruppe }` (bis LERN_Session15 `konto`, `uebung`; beim Laden umgedeutet); `liste` je Aufgabe `{ lp, versuche, gezeigt }` (Grundlage für den Kompetenzstand) |
 | `rekorde` | je Serie `{ id, person, zeit, inhalt, stufe, niveau, punkte, dauer, mitRechner, abgebrochen? }` |

@@ -468,3 +468,8 @@
   Kind oder Aufsicht; Lernsteig: Jugendliche und Aufsicht), Schlüssel unverändert; docs/kern/rahmen.md 4.11.
 - Weg zum Portal (PL1 a): „↑ Alle Apps“ oben links auf der Startseite des Eulenpfads; Lernsteig und Gratwanderung
   von „← Alle Apps“ auf „↑ Alle Apps“ (← führt innerhalb einer App zurück, ↑ eine Ebene hinauf zum Portal).
+- Lernsteig: Anmeldung zuerst (C1, vorgezogen nach AZ1 a) — Jugendliche und Aufsichten zum Antippen, „Ich bin neu“
+  (Jugendliche oder Aufsicht mit Bestätigung), „Als Gast weiter“; ein Platz für alle (Aufsicht anlegen und anmelden
+  auf der Startseite, aufsicht.html nur noch angemeldet); Gast (C2 a) nur im Tab, nichts gespeichert, je Gerät
+  abschaltbar; Runden der Aufsicht als Test; Übungen und Statistik ohne Anmeldung nur mit dem Weg dorthin. Kern 1.8.0:
+  Gast in `KERN.anmeldung`. Konten-Tests 48 Fälle.

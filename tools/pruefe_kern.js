@@ -480,8 +480,29 @@ console.log("el.js");
     gleich(ep.aktiv(), null, "ohne sessionStorage keine Aufsicht");
     ep.waehle("p-kind");
     gleich(ep.aktiv()?.id, "p-kind", "ohne sessionStorage: Kind geht");
-    // eigene Regel der App
+    // Gast (C2 a): nur im Tab, ohne Person, je Gerät abschaltbar
     global.sessionStorage = ablage(tab);
+    tab.clear();
+    let gastErlaubt = true;
+    const mitGast = A.platz({ speicher: KERN.speicher("lernsteig:"), gewaehlt: "aktiv", tab: "angemeldet", finde,
+      gast: { tab: "gast", erlaubt: () => gastErlaubt } });
+    gleich(mitGast.istGast(), false, "Gast: anfangs nicht");
+    gleich(ep.alsGast(), false, "ohne opt.gast kein Gast");
+    await mitGast.anmelden("p-jug", "4711");
+    gleich([mitGast.alsGast(), mitGast.istGast(), mitGast.aktiv()].join(), "true,true,", "als Gast: Person abgemeldet");
+    gleich([lokal.get("lernsteig:aktiv"), tab.get("lernsteig:gast")].join(), "null,ja", "Gast nur im Tab, nichts gewählt");
+    gleich(await mitGast.anmelden("p-jug", "0000"), null, "falsche PIN als Gast");
+    gleich(mitGast.istGast(), true, "falsche PIN: Gast bleibt");
+    mitGast.waehle("p-kind");
+    gleich([mitGast.istGast(), mitGast.aktiv()?.id].join(), "false,p-kind", "wählen beendet den Gast");
+    mitGast.alsGast(); tab.clear();
+    gleich(mitGast.istGast(), false, "neuer Tab: kein Gast mehr");
+    mitGast.alsGast(); gastErlaubt = false;
+    gleich([mitGast.istGast(), mitGast.alsGast()].join(), "false,false", "abgeschaltet: kein Gast, auch nicht mehr laufend");
+    gastErlaubt = true; mitGast.alsGast(); mitGast.abmelden();
+    gleich(mitGast.istGast(), false, "abmelden beendet den Gast");
+    wirft(() => A.platz({ speicher: S, tab: "a", finde, gast: { tab: "a" } }), "Gast im selben Tab-Schlüssel wie die Person");
+    // eigene Regel der App
     const eigen = A.platz({ speicher: S, gewaehlt: "x", tab: "y", finde, imTab: () => true });
     gleich(eigen.waehle("p-kind"), false, "imTab der App: alle nur im Tab");
     gleich(A.standardImTab({ rolle: "lernend" }), false, "Standard: lernend ohne PIN nicht im Tab");

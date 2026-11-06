@@ -23,21 +23,28 @@
    * opt.tab       Schlüssel im Tab (ohne Präfix), z. B. "aufsicht"
    * opt.finde     Wert → Person oder null (Kennung; ältere Stände der App auch über den Namen)
    * opt.imTab     Person → muss sie im Tab angemeldet sein? (Standard: Aufsicht oder mit PIN)
-   * Liefert { aktiv, waehle, anmelden, abmelden, imTab }.
+   * opt.gast      { tab: "gast", erlaubt: () → bool } — Gast (Entscheid C2 a): nur in diesem Tab, ohne Person; die App
+   *               speichert für ihn nichts. Ohne opt.gast gibt es keinen Gast.
+   * Liefert { aktiv, waehle, anmelden, abmelden, alsGast, istGast, imTab }.
    */
   function platz(opt) {
-    const { speicher, gewaehlt = null, tab, finde } = opt || {};
+    const { speicher, gewaehlt = null, tab, finde, gast = null } = opt || {};
     if (!speicher || typeof speicher.lies !== "function") throw new Error("anmeldung: speicher fehlt");
     if (typeof tab !== "string" || !tab) throw new Error("anmeldung: tab fehlt");
     if (typeof finde !== "function") throw new Error("anmeldung: finde fehlt");
+    if (gast && (typeof gast.tab !== "string" || !gast.tab || gast.tab === tab)) throw new Error("anmeldung: gast.tab fehlt oder ist der Tab der Person");
     const imTab = typeof opt.imTab === "function" ? opt.imTab : standardImTab;
     const tabSchluessel = speicher.praefix + tab;
+    const gastSchluessel = gast ? speicher.praefix + gast.tab : null;
+    const gastErlaubt = () => !!gast && (typeof gast.erlaubt !== "function" || !!gast.erlaubt());
 
-    function tabLies() { try { return tabAblage()?.getItem(tabSchluessel) ?? null; } catch (e) { return null; } }
-    function tabSetze(id) {
-      try { const a = tabAblage(); if (!a) return; if (id) a.setItem(tabSchluessel, id); else a.removeItem(tabSchluessel); }
-      catch (e) { /* ohne sessionStorage: niemand ist im Tab angemeldet */ }
+    const tabWert = s => { try { return tabAblage()?.getItem(s) ?? null; } catch (e) { return null; } };
+    function tabWertSetze(s, w) {
+      try { const a = tabAblage(); if (!a) return false; if (w) a.setItem(s, w); else a.removeItem(s); return true; }
+      catch (e) { return false; } // ohne sessionStorage: niemand ist im Tab angemeldet, auch kein Gast
     }
+    const tabLies = () => tabWert(tabSchluessel);
+    const tabSetze = id => { tabWertSetze(tabSchluessel, id); if (gastSchluessel) tabWertSetze(gastSchluessel, null); };
     /** Steht diese Person im Tab? Auch ein älterer Stand mit ihrem Namen gilt (finde löst ihn auf). */
     const imTabAngemeldet = p => { const w = tabLies(); return !!w && (w === p.id || finde(w)?.id === p.id); };
 
@@ -72,12 +79,20 @@
       tabSetze(imTab(p) ? p.id : null);
       return p;
     }
-    /** Abmelden: nichts mehr gewählt, Tab leer. */
+    /** Abmelden: nichts mehr gewählt, Tab leer, kein Gast. */
     function abmelden() {
       if (gewaehlt !== null) speicher.schreibe(gewaehlt, null);
       tabSetze(null);
     }
-    return { aktiv, waehle, anmelden, abmelden, imTab };
+    /** Als Gast weiter (nur in diesem Tab): meldet eine Person ab. false, wenn die App keinen Gast erlaubt. */
+    function alsGast() {
+      if (!gastErlaubt()) return false;
+      abmelden();
+      return tabWertSetze(gastSchluessel, "ja");
+    }
+    /** Ist in diesem Tab der Gast unterwegs (und noch erlaubt)? */
+    const istGast = () => gastErlaubt() && tabWert(gastSchluessel) === "ja" && !aktiv();
+    return { aktiv, waehle, anmelden, abmelden, alsGast, istGast, imTab };
   }
 
   KERN.anmeldung = { platz, standardImTab };

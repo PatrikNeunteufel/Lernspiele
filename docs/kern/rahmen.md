@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.7.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.8.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.7.0)
+kern/VERSION          Version des Kerns (1.8.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -278,16 +278,21 @@ Aufsicht nur im Tab). Ein **Platz** hält, wer an diesem Gerät angemeldet ist:
 
 | Aufruf | Ergebnis |
 |---|---|
-| `platz({ speicher, gewaehlt, tab, finde, imTab? })` | ein Platz; `gewaehlt: null` = nur im Tab, nichts darüber hinaus gemerkt; `finde(wert)` der App entscheidet, wer zu diesem Platz gehört (Kennung, ältere Stände auch Name) |
+| `platz({ speicher, gewaehlt, tab, finde, imTab?, gast? })` | ein Platz; `gewaehlt: null` = nur im Tab, nichts darüber hinaus gemerkt; `finde(wert)` der App entscheidet, wer zu diesem Platz gehört (Kennung, ältere Stände auch Name) |
 | `aktiv()` | die angemeldete Person oder `null` |
 | `waehle(wert)` | Person ohne Tab-Pflicht wählen (Tab wird geleert); `false` für Unbekannte, für wen der Tab gilt, und bei einem Platz nur im Tab |
 | `anmelden(wert, pin)` | mit PIN muss sie stimmen (`KERN.geheimnis`); wer im Tab sein muss, braucht eine gesetzte PIN. Gibt die Person oder `null` |
-| `abmelden()` | nichts gewählt, Tab leer |
+| `abmelden()` | nichts gewählt, Tab leer, kein Gast |
+| `alsGast()` | nur mit `gast: { tab, erlaubt? }`: meldet eine Person ab und gilt als Gast, nur in diesem Tab (Präfix + `gast.tab`); `false`, wenn `erlaubt()` nein sagt |
+| `istGast()` | Gast in diesem Tab und noch erlaubt (abschalten beendet auch einen laufenden Gast) |
 
-Benutzt von: Eulenpfad (`lernspiele:spieler`, Tab `lernspiele:aufsicht`; `LS.aktuellerSpieler`, `setzeSpieler`,
-`meldeAufsichtAn`, `abmelden`) und Lernsteig (`lernsteig:aktiv`, Tab `lernsteig:angemeldet`; Aufsicht als Platz nur im
-Tab `lernsteig:aufsicht`). Der Lernsteig hat zwei Plätze, bis das Grundgerüst C1 die Anmeldung wie im Eulenpfad auf
-einen bringt; der **Gast** (C2 a) kommt mit C1 dazu.
+**Gast** (Entscheid C2 a, seit 1.8.0): ohne Person, nur im Tab; die App speichert für ihn nichts (keine Runden, Profil
+ohne Wirkung) und schaltet ihn je Gerät ab (`erlaubt`). Wählen, anmelden und abmelden beenden ihn.
+
+Benutzt von: Eulenpfad (`lernspiele:spieler`, Tab `lernspiele:aufsicht`, ohne Gast bis „👀 Nur schauen“;
+`LS.aktuellerSpieler`, `setzeSpieler`, `meldeAufsichtAn`, `abmelden`) und Lernsteig (seit 1.8.0 ein Platz wie im
+Eulenpfad: `lernsteig:aktiv`, Tab `lernsteig:angemeldet` für Jugendliche mit PIN und jede Aufsicht, Gast `lernsteig:gast`,
+abschaltbar mit der Geräte-Einstellung `gast: "aus"`).
 
 ### 4.12 Geplant (Plan B, Reihenfolge B4)
 

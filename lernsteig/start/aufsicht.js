@@ -1,6 +1,6 @@
-/* Aufsicht des Lernsteigs (AU1 a, TR1 a): anlegen mit PIN und Wiederherstellungscode, anmelden nur im Tab, verbundene
-   Konten mit Stand, Mitlesen anfragen (der Jugendliche stimmt in seinem Konto zu), Konto für einen Jugendlichen anlegen,
-   Sicherung der verbundenen Konten, Einstellungen des Geräts (Taschenrechner, Dezimalzeichen). */
+/* Aufsicht des Lernsteigs (AU1 a, TR1 a): verbundene Konten mit Stand, Mitlesen anfragen (der Jugendliche stimmt in
+   seinem Konto zu), Konto für einen Jugendlichen anlegen, Sicherung der verbundenen Konten, Einstellungen des Geräts
+   (Taschenrechner, Dezimalzeichen, Gast C2 a). Anlegen und Anmelden der Aufsicht auf der Startseite (Plan C1). */
 "use strict";
 
 (function () {
@@ -9,12 +9,10 @@
   const el = LST.el;
   const wurzel = document.getElementById("aufsicht");
   const TAGE = 14;
-  let ansicht = { art: "start" }; // start | neu | pin | vergessen | code | (angemeldet)
   let meldung = "";
 
   const fehlerText = el("p", { class: "fehlertext", role: "alert" });
   const zeigeFehler = t => { fehlerText.textContent = t || ""; };
-  const geh = a => { ansicht = a; meldung = ""; zeichne(); };
   const feld = (titel, attr, hilfe) => el("label", { class: "einstellung" }, el("span", { text: titel }), el("input", Object.assign({ class: "textfeld" }, attr)), hilfe ? el("small", { class: "leise", text: hilfe }) : null);
   function auswahl(titel, werte, aktuell, beiWahl, attr) {
     const s = el("select", Object.assign({ "aria-label": titel, onchange: e => beiWahl(e.target.value) }, attr || {}),
@@ -24,69 +22,6 @@
   const wert = (knoten, sel) => knoten.querySelector(sel).value.trim();
   const rolleName = id => (KO.ROLLEN.find(r => r.id === id) || {}).name || "";
   const datumText = iso => { const d = new Date(iso); return isNaN(d) ? "–" : `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`; };
-
-  // ---------- ohne Anmeldung ----------
-  function startKarte(karte) {
-    const liste = KO.aufsichten();
-    karte.append(el("p", { text: "Eltern und Lehrpersonen können hier den Stand verbundener Konten sehen. Verbunden ist ein Konto nur, wenn die Aufsicht es angelegt oder der Jugendliche zugestimmt hat. Der Jugendliche sieht, wer mitliest." }));
-    if (liste.length) karte.append(el("div", { class: "konto-liste" }, liste.map(a => el("button", { type: "button", class: "knopf konto-knopf", "data-aufsicht": a.id,
-      text: `${a.name} (${rolleName(a.art)})`, onclick: () => geh({ art: "pin", id: a.id }) }))));
-    karte.append(el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf haupt", text: "Neue Aufsicht", onclick: () => geh({ art: "neu" }) })));
-    return karte;
-  }
-  function neuForm(karte) {
-    const name = feld("Name", { type: "text", maxlength: "40", name: "name", autocomplete: "name" }, "So sehen die Jugendlichen, wer mitliest.");
-    const rolle = auswahl("Rolle", KO.ROLLEN, "eltern", () => {}, { name: "rolle" });
-    const pin = feld("PIN (4–6 Ziffern)", { type: "password", inputmode: "numeric", maxlength: "6", name: "pin", autocomplete: "new-password" }, "Pflicht für die Aufsicht.");
-    // Gibt es schon eine Aufsicht, bestätigt eine von ihnen mit ihrer PIN (wie Eulenpfad KR2 a; Befund D5).
-    const bestehende = KO.aufsichten();
-    const wer = bestehende.length ? auswahl("Bestätigt von", bestehende.map(a => ({ id: a.id, name: a.name })), bestehende[0].id, () => {}, { name: "bestaetigt-von" }) : null;
-    const werPin = bestehende.length ? feld("Deren PIN", { type: "password", inputmode: "numeric", maxlength: "6", name: "bestaetigung-pin", autocomplete: "off" }, "Eine Aufsicht dieses Geräts bestätigt die neue.") : null;
-    karte.append(el("h3", { text: "Neue Aufsicht" }), name, rolle, pin, wer, werPin, fehlerText, el("div", { class: "knopf-zeile" },
-      el("button", { type: "button", class: "knopf haupt", text: "Aufsicht anlegen", "data-aktion": "anlegen", onclick: async () => {
-        try {
-          const bestaetigung = wer ? { id: wert(wer, "select"), pin: wert(werPin, "input") } : null;
-          const r = await KO.aufsichtAnlegen({ name: wert(name, "input"), art: wert(rolle, "select"), pin: wert(pin, "input"), bestaetigung });
-          geh({ art: "code", code: r.code });
-        }
-        catch (e) { zeigeFehler(e.message); }
-      } }),
-      el("button", { type: "button", class: "knopf", text: "Abbrechen", onclick: () => geh({ art: "start" }) })));
-    return karte;
-  }
-  function pinForm(karte) {
-    const a = KO.aufsichtFinde(ansicht.id);
-    const pin = feld(`PIN von ${a.name}`, { type: "password", inputmode: "numeric", maxlength: "6", name: "pin", autocomplete: "current-password" });
-    const los = async () => { try { await KO.aufsichtAnmelden(a.id, wert(pin, "input")); geh({ art: "start" }); } catch (e) { zeigeFehler(e.message); } };
-    pin.querySelector("input").addEventListener("keydown", e => { if (e.key === "Enter") los(); });
-    karte.append(pin, fehlerText, el("div", { class: "knopf-zeile" },
-      el("button", { type: "button", class: "knopf haupt", text: "Anmelden", "data-aktion": "anmelden", onclick: los }),
-      el("button", { type: "button", class: "knopf", text: "PIN vergessen?", onclick: () => geh({ art: "vergessen", id: a.id }) }),
-      el("button", { type: "button", class: "knopf", text: "Zurück", onclick: () => geh({ art: "start" }) })));
-    return karte;
-  }
-  function vergessenForm(karte) {
-    const a = KO.aufsichtFinde(ansicht.id);
-    const code = feld("Wiederherstellungscode", { type: "text", autocomplete: "off", maxlength: "14", name: "code", placeholder: "XXXX-XXXX-XXXX" });
-    const pin = feld("Neue PIN (4–6 Ziffern)", { type: "password", inputmode: "numeric", maxlength: "6", name: "neuepin" });
-    karte.append(el("h3", { text: `PIN vergessen: ${a.name}` }), code, pin, fehlerText, el("div", { class: "knopf-zeile" },
-      el("button", { type: "button", class: "knopf haupt", text: "Neue PIN setzen", "data-aktion": "zuruecksetzen", onclick: async () => {
-        try {
-          const neu = await KO.aufsichtNeuePinMitCode(a.id, wert(code, "input"), wert(pin, "input"));
-          await KO.aufsichtAnmelden(a.id, wert(pin, "input"));
-          geh({ art: "code", code: neu });
-        } catch (e) { zeigeFehler(e.message); }
-      } }),
-      el("button", { type: "button", class: "knopf", text: "Zurück", onclick: () => geh({ art: "start" }) })));
-    return karte;
-  }
-  function codeAnzeige(karte) {
-    karte.append(el("h3", { text: "Wiederherstellungscode der Aufsicht" }),
-      el("p", { class: "code-anzeige", text: ansicht.code, "data-code": ansicht.code }),
-      el("p", { text: "Aufschreiben und gut aufbewahren. Damit setzen Sie eine neue PIN, falls Sie sie vergessen. Er wird nur jetzt angezeigt." }),
-      el("button", { type: "button", class: "knopf haupt", text: "Aufgeschrieben", onclick: () => geh({ art: "start" }) }));
-    return karte;
-  }
 
   // ---------- angemeldet ----------
   function kontoZeile(a, k) {
@@ -112,7 +47,7 @@
     const teile = [];
     teile.push(el("section", { class: "einstellungen konto" },
       el("p", { class: "konto-zeile" }, el("b", { text: a.name }), el("span", { class: "leise", text: rolleName(a.art) })),
-      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Abmelden", onclick: () => { KO.aufsichtAbmelden(); geh({ art: "start" }); } })),
+      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Abmelden", onclick: () => { KO.aufsichtAbmelden(); location.href = "index.html"; } })),
       meldung ? el("p", { class: "meldung", role: "status", text: meldung }) : null));
 
     teile.push(el("h2", { class: "abschnitt", text: "Verbundene Konten" }),
@@ -160,18 +95,21 @@
         { id: "uebung", name: "wie die Übung es vorsieht" }, { id: "ohne", name: "überall gesperrt" }, { id: "erlaubt", name: "überall erlaubt" },
       ], e.rechner || "uebung", w => setze("rechner", w), { name: "rechner" }),
       auswahl("Dezimalzeichen", [{ id: "punkt", name: "Punkt (3.5)" }, { id: "komma", name: "Komma (3,5)" }], e.dezimal || "punkt", w => setze("dezimal", w), { name: "dezimal" }),
+      auswahl("Gast", [{ id: "an", name: "erlaubt (nichts wird gespeichert)" }, { id: "aus", name: "abgeschaltet" }], e.gast || "an", w => setze("gast", w), { name: "gast" }),
       el("small", { class: "leise", text: "Gilt für alle Konten auf diesem Gerät. Die Jugendlichen sehen die Einstellung in jeder Übung." })));
     return teile;
   }
 
+  const GRENZE = "Grenze: Alles liegt im Browser dieses Geräts. Die PIN schützt vor Versehen und Neugier, nicht vor jemandem, der die Entwicklerwerkzeuge des Browsers öffnet.";
   function zeichne() {
     zeigeFehler("");
     const a = KO.aufsichtAktiv();
-    if (a && !["code"].includes(ansicht.art)) { wurzel.replaceChildren(...angemeldet(a)); return; }
-    const karte = el("section", { class: "einstellungen konto" });
-    const f = { neu: neuForm, pin: pinForm, vergessen: vergessenForm, code: codeAnzeige }[ansicht.art] || startKarte;
-    wurzel.replaceChildren(f(karte),
-      el("p", { class: "fuss", text: "Grenze: Alles liegt im Browser dieses Geräts. Die PIN schützt vor Versehen und Neugier, nicht vor jemandem, der die Entwicklerwerkzeuge des Browsers öffnet." }));
+    if (a) { wurzel.replaceChildren(...angemeldet(a).filter(Boolean), el("p", { class: "fuss", text: GRENZE })); return; }
+    // Anmelden und Anlegen auf der Startseite (Plan C1)
+    wurzel.replaceChildren(el("section", { class: "einstellungen konto" },
+      el("p", { text: "Eltern und Lehrpersonen sehen hier den Stand verbundener Konten. Melde dich dafür auf der Startseite als Aufsicht an (🔑), oder lege dort mit „Ich bin neu“ eine Aufsicht an." }),
+      el("p", { class: "knopf-zeile" }, el("a", { class: "knopf haupt", href: "index.html", text: "Zur Anmeldung" }))),
+      el("p", { class: "fuss", text: GRENZE }));
   }
 
   zeichne();

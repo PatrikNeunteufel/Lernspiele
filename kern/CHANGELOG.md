@@ -3,6 +3,12 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.8.0 — 2026-11-06 (LERN_Session16)
+- `anmeldung.js`: Gast (Entscheid C2 a) — Option `gast: { tab, erlaubt }`, `alsGast()` (meldet eine Person ab, gilt nur im
+  Tab), `istGast()`; wählen, anmelden und abmelden beenden den Gast; `erlaubt()` schaltet ihn je Gerät ab, auch einen
+  laufenden. Ohne Option kein Gast (Eulenpfad bis „👀 Nur schauen“). Lernsteig: ein Platz für Jugendliche und Aufsicht
+  mit Gast (Plan C1).
+
 ## 1.7.0 — 2026-11-06 (LERN_Session16)
 - `anmeldung.js` (`KERN.anmeldung.platz`): Anmeldung und Sitzung im Tab für alle Apps. Ein Platz merkt die gewählte
   Person (Kennung im Speicher der App); wer im Tab angemeldet sein muss (Standard `standardImTab`: Aufsicht oder mit

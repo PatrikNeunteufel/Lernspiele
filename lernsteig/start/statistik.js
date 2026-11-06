@@ -1,5 +1,5 @@
 /* Statistik des Lernsteigs (BF1 a): Überblick, Kompetenzstand je Übung und Lehrplan-Stufe, letzte Runden, Sichern
-   und Einlesen als Datei (LST_DATEN, nur auf Knopfdruck). Gilt für das angemeldete Konto, sonst für das Gastkonto.
+   und Einlesen als Datei (LST_DATEN, nur auf Knopfdruck). Gilt für das angemeldete Konto; der Gast hat keinen Stand (C2 a).
    Mit ?konto=<id> für eine angemeldete Aufsicht, wenn das Konto mit ihr verbunden ist (AU1 a); dann ohne Einlesen. */
 "use strict";
 
@@ -88,6 +88,13 @@
   }
 
   function zeichne() {
+    // Anmeldung zuerst (Plan C1); für den Gast wird nichts gespeichert (C2 a), also gibt es keinen Stand.
+    const wer = LST.werUebt();
+    if (wer === "niemand" || wer === "gast") {
+      wurzel.replaceChildren(el("p", { class: "meldung", text: wer === "gast" ? "Als Gast wird nichts gespeichert, darum gibt es hier keinen Stand. Melde dich an, damit der Lernsteig deinen Stand kennt." : "Melde dich zuerst auf der Startseite an." }),
+        el("a", { class: "knopf haupt", href: "index.html", text: wer === "gast" ? "Zur Startseite" : "Zur Anmeldung" }));
+      return;
+    }
     const { k, aufsicht } = kontoDerSeite();
     if (!k) { wurzel.replaceChildren(el("p", { class: "meldung", text: "Dieses Konto ist nicht mit der angemeldeten Aufsicht verbunden." }), el("a", { class: "knopf", href: "aufsicht.html", text: "Zur Aufsicht" })); return; }
     const r = LST.runden(x => x.person === k.id);
