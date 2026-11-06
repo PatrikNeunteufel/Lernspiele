@@ -267,5 +267,123 @@
     "eintrag": "Schilf |  | Pflanze | Weiher",
     "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
     "seite": "/eulenpfad/spiele/lebensraum/index.html"
+  },
+  {
+    "nr": 23,
+    "zeit": "2026-11-06T18:25:09+01:00",
+    "status": "offen",
+    "text": "das könnte auch als normale axt angesehen werden",
+    "von": "Patrik",
+    "spiel": "zeitstrahl-sortierer",
+    "liste": "zeitstrahl-sortierer/epochen",
+    "eintrag": "Steinzeit | 🪓 | Werkzeuge aus Feuerstein",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "seite": "/eulenpfad/spiele/zeitstrahl-sortierer/index.html"
+  },
+  {
+    "nr": 24,
+    "zeit": "2026-11-06T18:26:05+01:00",
+    "status": "offen",
+    "text": "das ist mehr eine lehmhütte als pfalbau",
+    "von": "Patrik",
+    "spiel": "zeitstrahl-sortierer",
+    "liste": "zeitstrahl-sortierer/epochen",
+    "eintrag": "Steinzeit | 🛖 | Pfahlbauten am Seeufer",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "seite": "/eulenpfad/spiele/zeitstrahl-sortierer/index.html"
+  },
+  {
+    "nr": 25,
+    "zeit": "2026-11-06T18:26:57+01:00",
+    "status": "offen",
+    "text": "sieht wie Strassen der Neuzeit aus",
+    "von": "Patrik",
+    "spiel": "zeitstrahl-sortierer",
+    "liste": "zeitstrahl-sortierer/epochen",
+    "eintrag": "Römerzeit | 🛣️ | Soldaten bauen Strassen über die Alpenpässe",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "seite": "/eulenpfad/spiele/zeitstrahl-sortierer/index.html"
+  },
+  {
+    "nr": 26,
+    "zeit": "2026-11-06T18:29:20+01:00",
+    "status": "offen",
+    "text": "warum kein zeitalter?",
+    "von": "Patrik",
+    "spiel": "zeitstrahl-sortierer",
+    "liste": "zeitstrahl-sortierer/ereignisse",
+    "eintrag": "1450 | um 1450 | 📖 | Gutenberg druckt Bücher mit beweglichen Buchstaben | ",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "seite": "/eulenpfad/spiele/zeitstrahl-sortierer/index.html"
+  },
+  {
+    "nr": 27,
+    "zeit": "2026-11-06T18:29:33+01:00",
+    "status": "offen",
+    "text": "warum kein zeitalter",
+    "von": "Patrik",
+    "spiel": "zeitstrahl-sortierer",
+    "liste": "zeitstrahl-sortierer/ereignisse",
+    "eintrag": "1492 | 1492 | ⛵ | Kolumbus erreicht Amerika | ",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "seite": "/eulenpfad/spiele/zeitstrahl-sortierer/index.html"
+  },
+  {
+    "nr": 28,
+    "zeit": "2026-11-06T18:35:11+01:00",
+    "status": "offen",
+    "text": "sollen menschen von früher so wie heutige menschen gezeigt werden`\n\nmio: 6; bild: 🚶; text: Erste Vormenschen gehen auf zwei Beinen.; zeitalter: Erdneuzeit\n\njahre: 2500000; bild: 🪓; text: Frühmenschen machen die ersten Steinwerkzeuge.; zeitalter: Erdneuzeit\n\njahre: 300000; bild: 🧑; text: Der heutige Mensch (Homo sapiens) entsteht in Afrika.; zeitalter: Erdneuzeit\njahre: 40000; bild: 🧔; text: Die letzten Neandertaler sterben aus.; zeitalter: Erdneuzeit",
+    "von": "Patrik",
+    "spiel": "erdzeit-leiter",
+    "liste": "erdzeit-leiter/ereignisse",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "seite": "/eulenpfad/spiele/erdzeit-leiter/index.html"
+  },
+  {
+    "nr": 29,
+    "zeit": "2026-11-06T18:37:04+01:00",
+    "status": "offen",
+    "text": "eher lehmbau als pfahlbau",
+    "von": "Patrik",
+    "spiel": "kulturen-koffer",
+    "liste": "kulturen-koffer/dinge",
+    "eintrag": "🛖 | Pfahlbauer | true | lebten vor mehreren tausend Jahren an Seen in der Schweiz, in Häusern auf Pfählen",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "seite": "/eulenpfad/spiele/kulturen-koffer/index.html"
+  },
+  {
+    "nr": 30,
+    "zeit": "2026-11-06T18:37:23+01:00",
+    "status": "offen",
+    "text": "eher mexiko als ägypten",
+    "von": "Patrik",
+    "spiel": "kulturen-koffer",
+    "liste": "kulturen-koffer/dinge",
+    "eintrag": "🏜️ | Altes Ägypten | false | lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "seite": "/eulenpfad/spiele/kulturen-koffer/index.html"
+  },
+  {
+    "nr": 31,
+    "zeit": "2026-11-06T18:38:01+01:00",
+    "status": "offen",
+    "text": "eher strasse der moderne",
+    "von": "Patrik",
+    "spiel": "kulturen-koffer",
+    "liste": "kulturen-koffer/dinge",
+    "eintrag": "🛣️ | Gepflasterte Strasse | Römer | bau | 2 |  | ein breiter Weg aus Steinplatten, schnurgerade durch das ganze Land",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "seite": "/eulenpfad/spiele/kulturen-koffer/index.html"
+  },
+  {
+    "nr": 32,
+    "zeit": "2026-11-06T18:41:56+01:00",
+    "status": "offen",
+    "text": "🎭\tAlte Griechen passt nicht so\n\nes fehlen bilder für \n\nWebgewicht Tonkrug Bronzezeit Mahlstein Latein Aventicum Wachstafel Kaiser Hierog lyphen  Mumie   Schriftzeichen",
+    "von": "Patrik",
+    "spiel": "kulturen-koffer",
+    "liste": "kulturen-koffer/dinge",
+    "schluessel": "5499c6be0bdb3470eaddce7cd30b526f",
+    "seite": "/eulenpfad/spiele/kulturen-koffer/index.html"
   }
 ]

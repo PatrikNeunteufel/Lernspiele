@@ -17,8 +17,8 @@ gemeinsam/katalog.js      Fächer und Übungen (einzige Quelle für Fach, Kompet
 gemeinsam/pruefstand.js   was geprüft ist; Ungeprüftes ist für Jugendliche gesperrt (FG1 a, A1 a)
 gemeinsam/konten.js       Konten, PIN und Code, Aufsicht mit Verbindungen, Einladung
 gemeinsam/daten.js        Sichern und Einlesen
-gemeinsam/terme.js        Terme lesen, vergleichen, Form prüfen (Term-Antworten)
-gemeinsam/rechner.js      eingebauter Taschenrechner: Rechenkern (ohne DOM) und Tastenfeld
+gemeinsam/terme.js        Terme: reicht KERN.terme weiter (text in der Schreibweise des Lernsteigs)
+gemeinsam/rechner.js      eingebauter Taschenrechner: Modelle und Tastenfeld; Rechenkern KERN.rechner
 gemeinsam/rahmen.js       Seitenteil: Konto, Stufenwahl, Runde, Serie, Protokoll, Rekorde
 gemeinsam/stil.css        Stil, Farben nur hier (:root)
 index.html, start/        Startseite: Anmeldung, dann Tabs wie im Eulenpfad (Plan C2, Adresse #<tab>): Übungen (start.js:
@@ -68,8 +68,8 @@ Leerzeichen, Punkt und Komma sind erlaubt.
 - **Term-Antworten:** `art: "term"` mit `antwortTerm` (etwa „3a + 4b + 5/8“), `form` (`vereinfacht`, `potenz`,
   `ausgeklammert`, `frei`) und `tasten` (Hilfstasten). Der Rahmen prüft mit `LST_TERME.bewerte`: gleichwertig und in
   der Form → richtig; gleichwertig, aber Form falsch → Hinweis ohne Fehlversuch; nicht gleichwertig → Fehlversuch.
-  `lernsteig/gemeinsam/terme.js` liest Variablen a–z, Zahlen, Brüche „5/8“, `+ − · * : ( )`, implizites Mal und
-  Potenzen („^2“, „²“) exakt als Polynom.
+  `KERN.terme` (docs/kern/rahmen.md 4.17, über `gemeinsam/terme.js`) liest Variablen a–z, Zahlen, Brüche „5/8“,
+  `+ − · * : ( )`, implizites Mal und Potenzen („^2“, „²“, „x²³“ = x^23) exakt als Polynom; Exponent höchstens 100.
 - **Auswahl-Antworten:** `art: "auswahl"` mit `optionen` (Texte) und `richtig` (Index); der Rahmen zeigt Knöpfe mit
   Kurztasten 1 … n, eine falsche Wahl wird gesperrt (Fehlversuch), `kennung` soll die Antworten enthalten.
 - Optional `vor` („x =“) und `einheit` („m²“): Text vor und nach dem Eingabefeld.

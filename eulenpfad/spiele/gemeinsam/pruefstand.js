@@ -138,6 +138,14 @@ const PRUEFSTAND = {
     "zeit-schaetzer/taetigkeiten": {
       "am": "2026-11-05",
       "von": "Patrik"
+    },
+    "zeitstrahl-sortierer/generationen": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "zeitstrahl-sortierer/lebensabschnitte": {
+      "am": "2026-11-06",
+      "von": "Patrik"
     }
   },
   "spiele": {
@@ -225,12 +233,24 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "koerper-puzzle": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
     "komma-messband": {
       "am": "2026-11-05",
       "von": "Patrik"
     },
+    "kulturen-koffer": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
     "lebensraum": {
       "am": "2026-11-05",
+      "von": "Patrik"
+    },
+    "magnet-labor": {
+      "am": "2026-11-06",
       "von": "Patrik"
     },
     "malkreuz": {
@@ -247,6 +267,10 @@ const PRUEFSTAND = {
     },
     "pentomino-puzzle": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "pflanzen-bestimmer": {
+      "am": "2026-11-06",
       "von": "Patrik"
     },
     "platzhalter-geschichten": {
@@ -323,6 +347,10 @@ const PRUEFSTAND = {
     },
     "zeit-schaetzer": {
       "am": "2026-11-05",
+      "von": "Patrik"
+    },
+    "zeitstrahl-sortierer": {
+      "am": "2026-11-06",
       "von": "Patrik"
     },
     "zielzahl-jagd": {

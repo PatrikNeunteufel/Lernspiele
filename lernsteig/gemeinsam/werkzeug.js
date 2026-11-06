@@ -96,7 +96,7 @@ var LST = (function () {
 
   return {
     PRAEFIX, ALTE_FELDER, lies, schreibe, quelle, zufall, waehle, mische, tagText, wochenSerie,
-    TAUSENDER, MINUS, zahlText, dezimalText, dezimalZeichen, leseZahl,
+    TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl,
     NIVEAUS, niveauNr, stufenListe, stufeVon, zielstufe,
   };
 })();

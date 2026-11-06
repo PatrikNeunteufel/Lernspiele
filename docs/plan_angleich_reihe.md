@@ -18,8 +18,8 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.12.0; als Nächstes Terme und Rechenkern | Abschnitt B |
-| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes Terme und Rechenkern (B), dann B2 | Abschnitt C |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.14.0 mit allen Teilen; als Nächstes Testgerüst B2 | Abschnitt B |
+| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
@@ -80,10 +80,10 @@ von Hand geänderte Kopie oder gleiche Version mit anderem Inhalt als Fehler, ei
 rund 200 Seiten anfasst: Jede Seite lädt einmal `kern/kern.js` vor dem Rahmen ihrer App. Die Teile hängen sich an
 `KERN` (`KERN.zahl`, `KERN.bruch`, …). Tests: `node tools/pruefe_kern.js` (Teile gegen feste Beispiele und
 Nachrechnungen, dazu die Kopien); das Testskript jeder App prüft ihre Kopie.
-Stand 2026-11-06: Kern 1.11.0 mit Zahl, Bruch, Speicher, Zufall, `el`, Geheimnis, Person, Freigabe, Suche, Runden,
-Anmeldung (mit Gast), Entwicklung, Einladung, Auswertung und Übernahme einer Aufsicht; Eulenpfad und Lernsteig
-benutzen alle Teile, die Gratwanderung hat die Kopie und lädt sie mit C8. Nächste Teile: Terme und Rechenkern; dann
-das Testgerüst B2.
+Stand 2026-11-06: Kern 1.14.0 mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
+Freigabe, Suche, Runden, Anmeldung (mit Gast), Entwicklung, Einladung, Auswertung, Übernahme einer Aufsicht,
+Rollleiste und Personen-Knopf; Eulenpfad und Lernsteig benutzen, was sie brauchen, die Gratwanderung hat die Kopie und
+lädt sie mit C8. Als Nächstes das Testgerüst B2.
 
 **B2 Testgerüst für alle Apps:** Ein Testskript-Kern unter `tools/` mit Treiber je App, so dass ein Aufruf alle drei
 Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`). Er prüft auch, dass jede Kern-Kopie mit
@@ -162,14 +162,14 @@ Kindersprache.
 |---|---|---|---|
 | D1 | `lernsteig/gemeinsam/rahmen.js:367` | absolute Toleranz: in `zehnerpotenzen` k gilt `0.000000076` für `7.62 · 10⁻⁸` | exakter Vergleich über Brüche, Toleranz nur wo gerundet wird, dann relativ |
 | D2 | `kombinatorik/aufgaben.js:97` | „mindestens eine Fünf“, „höchstens eine Zwei“ mehrdeutig | „eine Augenzahl von mindestens 5“; Challenge einheitlich als Anzahl |
-| D3 | `terme.js:123–125` | Absturz bei `(3)(2x+3)` | `lies` in `try`, Rückmeldung „nicht lesbar“ |
+| D3 | `terme.js:123–125` | Absturz bei `(3)(2x+3)` | `lies` in `try`, Rückmeldung „nicht lesbar“ — erledigt 2026-11-06 (LERN_Session17, Kern 1.14.0 `KERN.terme`: Formfehler „Zahl mal Klammer“) |
 | D4 | `daten.js:36–62` | Einlesen ohne Schema, halber Import, vergiftet spätere Importe | Schema je Datensatz, erst prüfen, dann schreiben (Kern `daten.js`) — erledigt 2026-11-05 (LERN_Session15, `lernsteig/gemeinsam/daten.js`, Test `pruefe_konten.js`) |
 | D5 | `aufsicht.js:135`, `konten.js:130` | Einlesen verbindet fremde Konten ohne Zustimmung; neue Aufsicht ohne Bestätigung | nur neu angelegte Konten verbinden; Aufsicht wie Eulenpfad (C5) — erledigt 2026-11-05 im Lernsteig (Bestätigung durch bestehende Aufsicht, nur neue Konten verbinden; Test `pruefe_konten.js`) |
 | D6 | `konten.js:24`, Eulenpfad `spiel.js:393` | fehlt `crypto.subtle` (http über LAN), technische Meldung | Prüfung und verständliche Meldung, im Kern — erledigt 2026-11-05 (Kern 1.2.0 `KERN.geheimnis`, beide Apps seit 1.3.0) |
 | D7 | `statistik.js:13`, `aufsicht.js:85` | Übungstage in UTC, Wochenziel in Ortszeit | überall Ortszeit (Kern) |
 | D8 | `werkzeug.js:41`, Eulenpfad `spiel.js:22` | `zahlText(1234.5678)` → `1'234.5'678` | nur ganze Zahlen gruppieren (Kern `zahl.js`) — erledigt 2026-11-05 (Kern 1.0.0) |
-| D9 | `rechner.js:112` | NaN als „zu gross“, 11 Stellen bei 9999999999.6 | „nicht definiert“, Anzeige auf 10 Stellen |
-| D10 | `terme.js:63` | Exponent unbegrenzt friert den Tab ein | Grenze mit Meldung |
+| D9 | `rechner.js:112` | NaN als „zu gross“, 11 Stellen bei 9999999999.6 | „nicht definiert“, Anzeige auf 10 Stellen — erledigt 2026-11-06 (LERN_Session17, Kern 1.14.0 `KERN.rechner`) |
+| D10 | `terme.js:63` | Exponent unbegrenzt friert den Tab ein | Grenze mit Meldung — erledigt 2026-11-06 (LERN_Session17, Kern 1.14.0: Exponent ≤ 100, ≤ 2000 Glieder) |
 | D11 | `rahmen.js:121`, `daten.js` | voller Speicher verliert Runden still | Rückgabe auswerten, Warnung wie Eulenpfad (80 %) |
 | D12 | `konten.js:243–258` | Einladung prüft Land/Kanton nicht, verwirft `JJJJ-MM` | gegen `LP.LAENDER`/`KANTONE` prüfen; B3 — erledigt 2026-11-05 (Land, Kanton, Klasse geprüft; Geburtsdatum mit oder ohne Tag) |
 | D14 | Eulenpfad `LS.zusammenfuehren` | Runden aus einer Datei werden nicht geprüft; eine Runde ohne `fehlerAufgaben` bricht die Statistik (`auswertung.js` `anhieb`) | Schema wie im Lernsteig (`rundeGueltig`), in den Kern-Teil Sichern und Einlesen — erledigt 2026-11-05 (Kern 1.6.0 `KERN.runden`, `auswertung.js` verträgt fehlende `fehlerAufgaben`) |
@@ -265,6 +265,9 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Name, das Menü nennt die anderen Personen des Geräts und getrennt darunter „↩ Abmelden“ (beim Gast „Anmelden“); Kern-Teil
   `KERN.personenMenue` (docs/kern/rahmen.md 4.16). Nicht b (Auswahlliste in beiden: Pfeiltasten melden ab) und nicht c
   (nur Knopf „Abmelden“: Wechseln kostet einen Seitenwechsel).
+- **TO1 a** (2026-11-06, LERN_Session17): Glieder in Lösungen wie im Lehrmittel ordnen — bei gleichem Grad je Variable im
+  Alphabet der höhere Exponent zuerst, (a + b)² = a² + 2ab + b² (`KERN.terme.text`, docs/kern/rahmen.md 4.17). Mit dem
+  mathbuch abzugleichen, falls es bei mehreren Variablen anders ordnet.
 - **AW1 a** (2026-11-06): Kern-Teil Auswertung mit den Rechnungen ohne App-Bezug (Mittel, Median, Korrelation,
   Sitzungen, Lernzeiten, Wochen, Bedarf, Ziehen); Fazit, Vorschläge und Kompetenztexte bleiben in den Apps.
 - **AW2 a** (2026-11-06): eine Regel für den Stand aus den letzten n Aufgaben, Schwellen je App (Eulenpfad 24 / 70 %,

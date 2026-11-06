@@ -6,9 +6,9 @@ Geschrieben wird nur mit dem Schlüssel aus `entwickler.key` (Repo-Wurzel, von G
 steht nur sein Hash (kern/entwicklung.js, verteilt in die Kopien <app>/kern/kern.js).
 
 Aufruf (aus beliebigem Ordner):
-    python tools/entwickler_server.py              Server auf http://localhost:8765/eulenpfad/
+    python tools/entwickler_server.py              Server auf http://localhost:8765/ (Wurzel → portal/)
     python tools/entwickler_server.py 8770         anderer Port
-    python tools/entwickler_server.py --oeffnen    zusätzlich Eulenpfad im Browser öffnen
+    python tools/entwickler_server.py --oeffnen    zusätzlich die Einstiegsseite im Browser öffnen (SV1 a)
     python tools/entwickler_server.py --neuer-schluessel   Schlüssel neu erzeugen, Hash eintragen
 """
 import datetime
@@ -248,15 +248,17 @@ def main() -> None:
     except OSError:
         sys.exit(f"Port {port} ist schon belegt — läuft noch ein anderer Server (z. B. python -m http.server)?\n"
                  f"Den beenden oder einen anderen Port nehmen: python tools/entwickler_server.py 8770")
-    eulenpfad = f"http://localhost:{port}/eulenpfad/"
+    basis = f"http://localhost:{port}"
+    # Einstieg wie online (GitHub Pages) über die Einstiegsseite (Entscheid SV1 a, LERN_Session17)
     print(f"Entwickler-Server läuft (Repo {WURZEL}).\n\n"
-          f"  Eulenpfad:        {eulenpfad}\n"
-          f"  Lernsteig:        http://localhost:{port}/lernsteig/\n"
-          f"  Einstiegsseite:   http://localhost:{port}/portal/index.html\n"
-          f"  Entwicklung:      {eulenpfad}index.html#verwaltung/entwicklung\n\n"
+          f"  Einstiegsseite:   {basis}/portal/index.html\n"
+          f"  Eulenpfad:        {basis}/eulenpfad/\n"
+          f"  Lernsteig:        {basis}/lernsteig/\n"
+          f"  Entwicklung:      {basis}/eulenpfad/index.html#verwaltung/entwicklung (Eulenpfad), "
+          f"{basis}/lernsteig/index.html#verwaltung (Lernsteig)\n\n"
           "Link mit Strg+Klick öffnen (Windows Terminal, VS Code). Beenden mit Strg+C.", flush=True)
     if "--oeffnen" in sys.argv:
-        webbrowser.open(eulenpfad)
+        webbrowser.open(f"{basis}/portal/index.html")
     server.serve_forever()
 
 

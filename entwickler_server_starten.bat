@@ -1,6 +1,6 @@
 @echo off
-rem Eulenpfad: Entwickler-Server (Pruefstand und Bemerkungen schreiben, docs/eulenpfad/rahmen.md Abschnitt 11)
-rem Oeffnet Eulenpfad im Browser (--oeffnen). Belegt Port 8765 exklusiv - nicht gleichzeitig mit dem normalen Server.
+rem Lernspiele: Entwickler-Server (Pruefstand und Bemerkungen schreiben fuer Eulenpfad und Lernsteig,
+rem docs/kern/rahmen.md 4.12) - oeffnet die Einstiegsseite portal/ im Browser (--oeffnen, Entscheid SV1 a). Belegt Port 8765 exklusiv - nicht gleichzeitig mit dem normalen Server.
 rem Anderer Port: entwickler_server_starten.bat 8770
 rem Beenden: dieses Fenster schliessen oder Strg+C.
 cd /d "%~dp0"

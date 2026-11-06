@@ -1,4 +1,4 @@
-/* kern 1.13.0 · Prüfsumme sha256:33048d52ba464c6c9b0f7ceeb342b033767c285e5c505d060f87471b6bd873ef · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.14.0 · Prüfsumme sha256:c8408f6672e68def335fbefc43f7a93f7584a891a17381f5451ccf8566f2e0d6 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -121,6 +121,352 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
   const alsZahl = a => Number(a.z) / Number(a.n);
 
   KERN.bruch = { bruch, plus, minus, mal, durch, neg, hoch, wurzel, wurzelGanz, zahl, vonZahl, gleich, vergleich, endlich, text, alsZahl };
+})(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
+
+if (typeof module !== "undefined") module.exports = globalThis.KERN;
+
+/* ---- kern/terme.js ---- */
+/* Kern — Terme lesen, vergleichen, ihre Form prüfen und schreiben (docs/kern/rahmen.md 4.17; aus dem Lernsteig,
+   Plan docs/plan_angleich_reihe.md B, Befunde D3, D10).
+   Ohne DOM. Ein Term wird exakt als Polynom gelesen: Variablen a–z (ein Buchstabe), Zahlen „1'234.5“, Brüche „5/8“,
+   + − - · * : ( ), implizites Mal („3a“, „2(x + 1)“, „ab“), Potenzen „^2“ oder „²³⁴“. Baut auf KERN.bruch auf.
+   Ein Polynom ist eine Map „Monom → Bruch“, das Monom als Schlüssel „a2b1“ (Variablen sortiert, mit Exponent).
+   Die Schreibweise der Zahlen in text() gibt die App mit (wie KERN.zahl.text), der Kern kennt keine App. */
+"use strict";
+
+(function (KERN) {
+  const B = KERN.bruch;
+  // Hochgestellte Ziffern; eine Folge ist ein Exponent („x²³“ = x^23, „x¹⁰“ = x^10), wie text() sie schreibt.
+  const HOCH = { "⁰": 0, "¹": 1, "²": 2, "³": 3, "⁴": 4, "⁵": 5, "⁶": 6, "⁷": 7, "⁸": 8, "⁹": 9 };
+  // D10: Ohne Grenze fror „x^99999999“ oder „(a+b+c)^200“ den Tab ein. Sek I braucht kleine Exponenten.
+  const GRENZE_EXPONENT = 100;
+  const GRENZE_GLIEDER = 2000; // so viele Monome höchstens in einem Zwischenergebnis
+
+  // ---------- Polynome ----------
+  const konst = b => new Map([["", b]]);
+  const variable = v => new Map([[`${v}1`, B.bruch(1n)]]);
+  function aufraeumen(p) {
+    for (const [k, w] of p) if (w.z === 0n) p.delete(k);
+    if (p.size > GRENZE_GLIEDER) throw new Error("Term zu gross");
+    return p;
+  }
+  function plus(p, q) { const r = new Map(p); for (const [k, w] of q) r.set(k, r.has(k) ? B.plus(r.get(k), w) : w); return aufraeumen(r); }
+  const neg = p => new Map([...p].map(([k, w]) => [k, B.neg(w)]));
+  function monomMal(k1, k2) {
+    const e = {};
+    for (const k of [k1, k2]) for (const [, v, n] of k.matchAll(/([a-z])(\d+)/g)) e[v] = (e[v] || 0) + Number(n);
+    return Object.keys(e).sort().map(v => `${v}${e[v]}`).join("");
+  }
+  function mal(p, q) {
+    if (p.size * q.size > GRENZE_GLIEDER * 50) throw new Error("Term zu gross");
+    const r = new Map();
+    for (const [k1, w1] of p) for (const [k2, w2] of q) { const k = monomMal(k1, k2); r.set(k, r.has(k) ? B.plus(r.get(k), B.mal(w1, w2)) : B.mal(w1, w2)); }
+    return aufraeumen(r);
+  }
+  function hoch(p, n) {
+    if (!Number.isInteger(n) || n < 0) throw new Error("Exponent muss eine natürliche Zahl sein");
+    if (n > GRENZE_EXPONENT) throw new Error(`Exponent zu gross (höchstens ${GRENZE_EXPONENT})`);
+    let r = konst(B.bruch(1n));
+    for (let i = 0; i < n; i++) r = mal(r, p);
+    return r;
+  }
+  function durch(p, q) {
+    if (q.size !== 1 || !q.has("")) throw new Error("nur durch Zahlen teilen");
+    const d = q.get("");
+    if (d.z === 0n) throw new Error("Division durch 0");
+    return new Map([...p].map(([k, w]) => [k, B.durch(w, d)]));
+  }
+  const gleich = (p, q) => plus(p, neg(q)).size === 0;
+
+  // ---------- Lesen ----------
+  /** Liest einen Term; liefert { poly, info, roh } oder wirft. info: Zählungen für die Formprüfung. */
+  function lies(text) {
+    const s = String(text).replace(/\s+/g, "").replace(/[−–]/g, "-").replace(/\*/g, "·").replace(/'/g, "").replace(/,/g, ".");
+    let i = 0;
+    const info = { klammern: 0, potenzen: 0, mal: 0 };
+    if (!s) throw new Error("leer");
+    function ausdruck() {
+      let w = (s[i] === "-") ? (i++, neg(glied())) : (s[i] === "+" ? (i++, glied()) : glied());
+      while (s[i] === "+" || s[i] === "-") { const op = s[i++]; const g = glied(); w = op === "+" ? plus(w, g) : plus(w, neg(g)); }
+      return w;
+    }
+    function glied() {
+      let w = potenz();
+      for (;;) {
+        if (s[i] === "·" || s[i] === ":") { const op = s[i++]; info.mal++; const f = potenz(); w = op === ":" ? durch(w, f) : mal(w, f); continue; }
+        if (s[i] && (/[a-z(]/.test(s[i]))) { w = mal(w, potenz()); continue; } // implizites Mal
+        return w;
+      }
+    }
+    function potenz() {
+      let w = einfach();
+      for (;;) {
+        if (s[i] in HOCH) {
+          let n = 0;
+          while (s[i] in HOCH) n = n * 10 + HOCH[s[i++]];
+          info.potenzen++; w = hoch(w, n); continue;
+        }
+        if (s[i] === "^") { i++; const m = s.slice(i).match(/^\d+/); if (!m) throw new Error("Exponent fehlt"); i += m[0].length; info.potenzen++; w = hoch(w, Number(m[0])); continue; }
+        return w;
+      }
+    }
+    function einfach() {
+      if (s[i] === "(") { i++; info.klammern++; const w = ausdruck(); if (s[i] !== ")") throw new Error("„)“ fehlt"); i++; return w; }
+      if (s[i] && /[a-z]/.test(s[i])) return variable(s[i++]);
+      const m = s.slice(i).match(/^(\d+(?:\.\d+)?)(?:\/(\d+))?/);
+      if (!m) throw new Error(`unerwartet „${s.slice(i, i + 4) || "Ende"}“`);
+      i += m[0].length;
+      return konst(m[2] ? B.durch(B.zahl(m[1]), B.zahl(m[2])) : B.zahl(m[1]));
+    }
+    const poly = ausdruck();
+    if (i !== s.length) throw new Error(`unerwartet „${s.slice(i, i + 4)}“`);
+    return { poly, info, roh: s };
+  }
+
+  /** Anzahl Glieder auf oberster Ebene (ohne Klammern) eines gelesenen Texts (roh aus lies). */
+  function glieder(roh) {
+    let tiefe = 0, n = 1;
+    for (let i = 0; i < roh.length; i++) {
+      const c = roh[i];
+      if (c === "(") tiefe++; else if (c === ")") tiefe--;
+      else if ((c === "+" || c === "-") && tiefe === 0 && i > 0 && roh[i - 1] !== "^") n++;
+    }
+    return n;
+  }
+
+  const ggtGanz = (x, y) => (y ? ggtGanz(y, x % y) : (x < 0n ? -x : x));
+  const formFehler = meldung => ({ ok: false, gleichwertig: true, lesbar: true, meldung });
+
+  /**
+   * Bewertet eine Eingabe gegen eine Aufgabe { antwortTerm, form }.
+   * form: "vereinfacht" (keine Klammern, jedes Monom einmal, Zahlen ausgerechnet), "bruch" (ganze Zahl oder gekürzter
+   *       Bruch), "potenz" (als eine Potenz geschrieben), "ausgeklammert" (Zahl mal Klammer, ggT ausgeklammert), "frei".
+   * Liefert { ok, gleichwertig, lesbar, meldung }. Eine unlesbare Eingabe wirft nie (D3); ein unlesbarer antwortTerm
+   * ist ein Fehler der Aufgabe und wirft.
+   */
+  function bewerte(eingabe, a) {
+    let e;
+    try { e = lies(eingabe); } catch (err) {
+      const meldung = /zu gross/.test(err.message) ? `Der Term ist zu gross: ${err.message}.` : "Den Term kann ich nicht lesen. Beispiel: 3a + 4b oder 2(x + 5).";
+      return { ok: false, gleichwertig: false, lesbar: false, meldung };
+    }
+    const ziel = lies(a.antwortTerm).poly;
+    if (!gleich(e.poly, ziel)) return { ok: false, gleichwertig: false, lesbar: true };
+    const form = a.form || "frei";
+    if (form === "vereinfacht") {
+      if (e.info.klammern > 0) return formFehler("Der Wert stimmt. Löse noch die Klammern auf.");
+      if (glieder(e.roh) > ziel.size) return formFehler("Der Wert stimmt. Fasse gleichartige Glieder noch zusammen.");
+      if (/\d[·:]\d|:/.test(e.roh) || e.info.potenzen > 0 && /\d\^|\d[²-³⁴-⁹]/.test(e.roh)) return formFehler("Der Wert stimmt. Rechne die Zahlen noch aus.");
+    }
+    if (form === "bruch") {
+      // eine ganze Zahl oder ein vollständig gekürzter Bruch „z/n“ (auch negativ), kein Dezimalbruch
+      const m = e.roh.match(/^(-?)(\d+)(?:\/(\d+))?$/);
+      if (!m) return formFehler("Der Wert stimmt. Schreibe als Bruch, zum Beispiel 3/4.");
+      if (m[3]) {
+        if (ggtGanz(BigInt(m[2]), BigInt(m[3])) !== 1n) return formFehler("Der Wert stimmt. Kürze den Bruch noch vollständig.");
+        if (m[3] === "1") return formFehler("Der Wert stimmt. Schreibe die ganze Zahl ohne Nenner.");
+      }
+    }
+    if (form === "potenz" && !(e.info.potenzen === 1 && e.info.mal === 0 && glieder(e.roh) === 1)) {
+      return formFehler("Der Wert stimmt. Schreibe als eine Potenz, zum Beispiel 5^3.");
+    }
+    if (form === "ausgeklammert") {
+      const m = e.roh.match(/^(-?\d*)(?:·)?\((.*)\)$/);
+      const zahlMalKlammer = "Der Wert stimmt. Schreibe als Zahl mal Klammer: 3(…).";
+      if (!m) return formFehler(zahlMalKlammer);
+      // D3: „(3)(2x+3)“ passt auf das Muster, das Innere „3)(2x+3“ ist aber kein Term — keine Zahl mal eine Klammer.
+      let innen;
+      try { innen = lies(m[2]).poly; } catch (err) { return formFehler(zahlMalKlammer); }
+      let g = 0n;
+      for (const [, w] of innen) {
+        if (w.n !== 1n) return formFehler("Klammere so aus, dass in der Klammer ganze Zahlen stehen.");
+        g = ggtGanz(g, w.z);
+      }
+      if (g !== 1n) return formFehler("Der Wert stimmt. In der Klammer steckt noch ein gemeinsamer Faktor.");
+    }
+    return { ok: true, gleichwertig: true, lesbar: true };
+  }
+
+  // ---------- Schreiben (für Lösungen) ----------
+  const ZIFFER_HOCH = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
+  const hochText = n => String(n).split("").map(c => ZIFFER_HOCH[c]).join("");
+  /** Betrag eines Bruchs: ganze Zahlen in der Schreibweise der App, sonst „z/n“ (wie im Lehrplanbeispiel ¼ + ⅜). */
+  const betragText = (b, sw) => (b.n === 1n ? KERN.zahl.text(Number(b.z), sw) : `${b.z}/${b.n}`);
+  /** Exponenten eines Monom-Schlüssels: „a2b1“ → { a: 2, b: 1 }. */
+  const exponenten = k => Object.fromEntries([...k.matchAll(/([a-z])(\d+)/g)].map(([, v, n]) => [v, Number(n)]));
+  /**
+   * Ordnung der Glieder wie im Lehrmittel (Entscheid TO1 a): höchster Grad zuerst; bei gleichem Grad nach den Variablen
+   * im Alphabet, je mit dem höheren Exponenten zuerst — a² vor ab vor b², also (a + b)² = a² + 2ab + b².
+   * Die Konstante steht zuletzt. Negativ: x vor y.
+   */
+  function ordnung(x, y) {
+    const ex = exponenten(x), ey = exponenten(y);
+    const grad = e => Object.values(e).reduce((s, n) => s + n, 0);
+    if (grad(ex) !== grad(ey)) return grad(ey) - grad(ex);
+    for (const v of [...new Set([...Object.keys(ex), ...Object.keys(ey)])].sort()) {
+      const d = (ey[v] || 0) - (ex[v] || 0);
+      if (d) return d;
+    }
+    return 0;
+  }
+  /**
+   * Polynom als Text in fester Ordnung (siehe ordnung).
+   * sw: Schreibweise der App wie bei KERN.zahl.text (ohne Angabe die Standard-Schreibweise des Kerns).
+   */
+  function text(p, sw) {
+    const minus = Object.assign({}, KERN.zahl.STANDARD, sw || {}).minus;
+    const schluessel = [...p.keys()].sort(ordnung);
+    if (!schluessel.length) return "0";
+    return schluessel.map((k, i) => {
+      const w = p.get(k);
+      const negativ = w.z < 0n;
+      const betrag = negativ ? B.neg(w) : w;
+      const vars = [...k.matchAll(/([a-z])(\d+)/g)].map(([, v, n]) => v + (n === "1" ? "" : hochText(n))).join("");
+      const t = vars && betrag.z === 1n && betrag.n === 1n ? vars : `${betragText(betrag, sw)}${vars}`;
+      if (i === 0) return (negativ ? minus : "") + t;
+      return ` ${negativ ? minus : "+"} ${t}`;
+    }).join("");
+  }
+
+  KERN.terme = { GRENZE_EXPONENT, lies, bewerte, gleich, text, plus, mal, neg, hoch, konst, variable, glieder };
+})(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
+
+if (typeof module !== "undefined") module.exports = globalThis.KERN;
+
+/* ---- kern/rechner.js ---- */
+/* Kern — Rechenkern des eingebauten Taschenrechners (docs/kern/rahmen.md 4.18; aus dem Lernsteig, Entscheide TR1 a,
+   RE1 a; Befund D9). Ohne DOM: Eingabe als Liste von Tasten-Kennungen, Auswertung, Anzeige.
+   Modelle, Beschriftungen, Bedienhilfe und Tastenfeld gibt die App (Lernsteig: gemeinsam/rechner.js); die Kennungen
+   unten sind der Vertrag zwischen beiden.
+   Kennungen: Ziffern „0“–„9“, „.“, „+“, „−“ (U+2212), „·“, „:“, „^“, „(“, „)“, „√“ (vor der Zahl), „x²“, „π“, „Ans“,
+   dazu VORZ, VORZ_NACH, WURZEL_NACH, NTE_INDEX, NTE_RADIKAND. */
+"use strict";
+
+(function (KERN) {
+  const MINUS = "−";
+  const VORZ = "(−)";        // Vorzeichen vor der Zahl (TI-30X Plus, Casio)
+  const VORZ_NACH = "+⇔−"; // Vorzeichen nach der Zahl (TI-30 eco RS)
+  const WURZEL_NACH = "√x";   // Quadratwurzel nach der Zahl (eco RS)
+  const NTE_INDEX = "ⁿ√"; // n-te Wurzel, Index zuerst: 3 ⁿ√ 8000
+  const NTE_RADIKAND = "ˣ√y"; // n-te Wurzel, Radikand zuerst: 8000 ˣ√y 3 (eco RS)
+  const STELLEN = 10; // gültige Ziffern der Anzeige
+
+  /** Zerlegt die Eingabe in Bausteine für den Parser. */
+  function bausteine(eingabe) {
+    const b = [];
+    let zahl = "";
+    const zahlFertig = () => { if (zahl) { b.push({ t: "zahl", w: Number(zahl), roh: zahl }); zahl = ""; } };
+    for (const z of eingabe) {
+      if (/^[0-9.]$/.test(z)) { zahl += z; continue; }
+      zahlFertig();
+      if (z === "x²") b.push({ t: "quadrat" });
+      else if (z === VORZ) b.push({ t: "vorz" });
+      else if (z === VORZ_NACH) b.push({ t: "vorzNach" });
+      else if (z === WURZEL_NACH) b.push({ t: "wurzelNach" });
+      else if (z === "Ans") b.push({ t: "ans" });
+      else if (z === "π") b.push({ t: "pi" });
+      else b.push({ t: "op", w: z });
+    }
+    zahlFertig();
+    return b;
+  }
+
+  /**
+   * Wertet die Eingabe aus. Rangfolge: Klammern, Wurzel und Potenz, Vorzeichen, Punkt vor Strich.
+   * „a ⁿ√ b“: a-te Wurzel aus b (Index zuerst); „b ˣ√y a“: a-te Wurzel aus b (Radikand zuerst);
+   * „√ b“ Quadratwurzel vor der Zahl, „b √x“ nach der Zahl; „a ^ b“ rechtsassoziativ; „x²“ hinter einer Zahl;
+   * „(−)“ vor der Zahl, „+⇔−“ nach der Zahl. Vorzeichen bindet schwächer als die Potenz: (−)2² = −4
+   * (wie in den Anleitungen, R11 Abschnitt 2). Liefert { wert } oder { fehler } (Klartext, nie eine Ausnahme).
+   */
+  function rechne(eingabe, ans) {
+    const b = bausteine(eingabe);
+    let i = 0;
+    const ist = (t, w) => b[i] && b[i].t === t && (w === undefined || b[i].w === w);
+    function ausdruck() {
+      let w = glied();
+      while (ist("op", "+") || ist("op", MINUS)) { const op = b[i++].w; const g = glied(); w = op === "+" ? w + g : w - g; }
+      return w;
+    }
+    function glied() {
+      let w = vorzeichen();
+      while (ist("op", "·") || ist("op", ":")) {
+        const op = b[i++].w; const g = vorzeichen();
+        if (op === ":" && g === 0) throw new Error("Division durch 0");
+        w = op === ":" ? w / g : w * g;
+      }
+      return w;
+    }
+    function vorzeichen() { if (ist("vorz")) { i++; return -vorzeichen(); } return potenz(); }
+    function potenz() {
+      let w = nachgestellt();
+      if (ist("op", "^")) { i++; w = Math.pow(w, vorzeichen()); }
+      else if (ist("op", NTE_INDEX)) { i++; w = wurzel(vorzeichen(), w); }
+      else if (ist("op", NTE_RADIKAND)) { i++; w = wurzel(w, vorzeichen()); }
+      return w;
+    }
+    function wurzel(x, n) {
+      if (!Number.isInteger(n) || n < 1) throw new Error("Wurzelexponent muss eine natürliche Zahl sein");
+      if (x < 0 && n % 2 === 0) throw new Error("gerade Wurzel aus negativer Zahl");
+      const r = Math.sign(x) * Math.pow(Math.abs(x), 1 / n);
+      const g = Math.round(r);
+      return Math.abs(g ** n - x) < 1e-9 * Math.max(1, Math.abs(x)) ? g : r; // exakte Wurzeln ganz lassen
+    }
+    function nachgestellt() {
+      let w = einfach();
+      for (;;) {
+        if (ist("quadrat")) { i++; w = w * w; continue; }
+        if (ist("wurzelNach")) { i++; w = wurzel(w, 2); continue; }
+        if (ist("vorzNach")) { i++; w = -w; continue; }
+        return w;
+      }
+    }
+    function einfach() {
+      if (ist("zahl")) {
+        const z = b[i++];
+        if (!/^(\d+\.?\d*|\.\d+)$/.test(z.roh)) throw new Error("Zahl falsch eingegeben");
+        return z.w;
+      }
+      if (ist("ans")) { i++; if (ans === undefined || ans === null) throw new Error("noch kein Ergebnis"); return ans; }
+      if (ist("pi")) { i++; return Math.PI; }
+      if (ist("op", "√")) { i++; return wurzel(ist("vorz") ? (i++, -nachgestellt()) : nachgestellt(), 2); }
+      if (ist("op", "(")) {
+        i++; const w = ausdruck();
+        if (ist("op", ")")) i++; // fehlende schliessende Klammern am Ende sind erlaubt, wie bei vielen Rechnern
+        else if (i < b.length) throw new Error("„)“ fehlt");
+        return w;
+      }
+      throw new Error(i < b.length ? "Eingabe unvollständig" : "Eingabe fehlt");
+    }
+    try {
+      if (!b.length) return { fehler: "Eingabe fehlt" };
+      const w = ausdruck();
+      if (i !== b.length) return { fehler: "Eingabe nicht verständlich" };
+      // D9: NaN (etwa (−8)^0.5) ist nicht „zu gross“, sondern nicht definiert.
+      if (Number.isNaN(w)) return { fehler: "nicht definiert" };
+      if (!Number.isFinite(w)) return { fehler: "Ergebnis zu gross" };
+      return { wert: w };
+    } catch (e) { return { fehler: e.message }; }
+  }
+
+  const HOCH = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹", "-": "⁻" };
+
+  /**
+   * Ergebnis mit höchstens 10 gültigen Ziffern in der Schreibweise sw der App (wie KERN.zahl.dezimalText); ab 10¹⁰
+   * und unter 10⁻⁶ wissenschaftlich „1.5 · 10¹²“. D9: erst runden, dann entscheiden — 9999999999.6 wird 1 · 10¹⁰,
+   * nicht die elfstellige 10000000000.
+   */
+  function anzeige(w, sw) {
+    if (w === 0) return "0";
+    const gerundet = Number(w.toPrecision(STELLEN));
+    const b = Math.abs(gerundet);
+    if (b >= 1e10 || b < 1e-6) {
+      const [m, e] = gerundet.toExponential(STELLEN - 1).split("e");
+      return `${KERN.zahl.dezimalText(Number(m), undefined, sw)} · 10${String(Number(e)).replace(/[-0-9]/g, c => HOCH[c])}`;
+    }
+    return KERN.zahl.dezimalText(gerundet, undefined, sw);
+  }
+
+  KERN.rechner = { MINUS, VORZ, VORZ_NACH, WURZEL_NACH, NTE_INDEX, NTE_RADIKAND, STELLEN, bausteine, rechne, anzeige };
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 
 if (typeof module !== "undefined") module.exports = globalThis.KERN;

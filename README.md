@@ -19,7 +19,8 @@ doppelklicken. Wie Eulenpfad bedient wird — Anmeldung, Aufsicht, Endlos, Zufal
 steht in der [README von Eulenpfad](eulenpfad/README.md).
 
 Wer einen lokalen Server braucht (Firefox, Entwickler-Modus): `server_starten.bat` oder
-`entwickler_server_starten.bat` im Hauptordner, beide auf Port 8765.
+`entwickler_server_starten.bat` im Hauptordner, beide auf Port 8765. Beide öffnen die Einstiegsseite
+<http://localhost:8765/portal/index.html> wie online; die Wurzel <http://localhost:8765/> leitet dorthin.
 
 ## Ordner
 

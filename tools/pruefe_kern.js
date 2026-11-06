@@ -8,6 +8,8 @@ const { execFileSync } = require("child_process");
 const WURZEL = path.join(__dirname, "..");
 const KERN = require(path.join(WURZEL, "kern", "zahl.js"));
 require(path.join(WURZEL, "kern", "bruch.js"));
+require(path.join(WURZEL, "kern", "terme.js"));
+require(path.join(WURZEL, "kern", "rechner.js"));
 require(path.join(WURZEL, "kern", "speicher.js"));
 require(path.join(WURZEL, "kern", "zufall.js"));
 require(path.join(WURZEL, "kern", "el.js"));
@@ -201,6 +203,149 @@ console.log("el.js");
   gleich(e.kinder.join(), "a,b,c", "Kinder flach, ohne null/false/undefined");
   gleich(KERN.el("p", { html: "<b>x</b>" }).innerHTML, "<b>x</b>", "html");
   delete global.document;
+}
+
+// ---------- terme ----------
+console.log("terme.js");
+{
+  const T = KERN.terme, B = KERN.bruch;
+  const SW = { tausender: "'", abStellen: 4, minus: "\u2212", dezimal: "." }; // Schreibweise des Lernsteigs
+  const tx = s => T.text(T.lies(s).poly, SW);
+  gleich(tx("2(x+1)"), "2x + 2", "Klammer auflösen");
+  // Ordnung wie im Lehrmittel (TO1 a): Grad, dann je Variable im Alphabet der höhere Exponent zuerst
+  gleich(tx("(a+b)^2"), "a\u00B2 + 2ab + b\u00B2", "Binom");
+  gleich(tx("(a-b)^2"), "a\u00B2 \u2212 2ab + b\u00B2", "Binom mit Minus");
+  gleich(tx("(x+y)(x-y)"), "x\u00B2 \u2212 y\u00B2", "dritte binomische Formel");
+  gleich(tx("ab^2+a^2b"), "a\u00B2b + ab\u00B2", "Grad 3: a²b vor ab²");
+  gleich(tx("ac+ab+b+a+1"), "ab + ac + a + b + 1", "gleicher Grad ohne Quadrat, dann Grad 1, Konstante");
+  gleich(tx("y+x^2+x"), "x\u00B2 + x + y", "höherer Grad zuerst, auch bei späterer Variable");
+  gleich(tx("3a\u00B74a"), "12a\u00B2", "Produkt");
+  gleich(tx("-3+a"), "a \u2212 3", "Konstante zuletzt, Minus der Schreibweise");
+  gleich(tx("1000a"), "1'000a", "Zahl in der Schreibweise der App");
+  gleich(tx("x^10"), "x\u00B9\u2070", "Exponent 10 hochgestellt (war „x1⁰“)");
+  gleich(tx("x:2"), "1/2x", "Bruch als Faktor");
+  gleich(tx("a-a"), "0", "null");
+  gleich(T.text(T.lies("-5").poly), "\u22125", "ohne Schreibweise: Standard des Kerns");
+  gleich(T.gleich(T.lies("2(x+3)").poly, T.lies("2x+6").poly), true, "gleichwertig");
+  gleich(T.gleich(T.lies("(x+1)\u00B2").poly, T.lies("x^2+2x+1").poly), true, "hochgestellte Potenz");
+  gleich(T.gleich(T.lies("2x").poly, T.lies("2y").poly), false, "verschiedene Variablen");
+  gleich(T.gleich(T.lies("x\u00B2\u00B3").poly, T.lies("x^23").poly), true, "x²³ ist x^23 (war (x²)³)");
+  gleich(T.gleich(T.lies("x\u00B9\u2070").poly, T.lies("x^10").poly), true, "x¹⁰ wird gelesen (⁰ und ¹ fehlten)");
+  gleich(T.gleich(T.lies("1'000,5a").poly, T.lies("1000.5a").poly), true, "Apostroph und Komma");
+  wirft(() => T.lies("2x+"), "unvollständig wirft");
+  wirft(() => T.lies("x:y"), "durch Variable wirft");
+  wirft(() => T.lies(""), "leer wirft");
+  // D10: grosse Exponenten und Termriesen werfen sofort, statt den Tab einzufrieren
+  const t0 = Date.now();
+  wirft(() => T.lies("x^99999999"), "Exponent über der Grenze");
+  wirft(() => T.lies("(a+b+c+d+e)^60"), "Term zu gross");
+  gleich(Date.now() - t0 < 2000, true, "Grenzen greifen schnell");
+  gleich(T.text(T.lies("x^100").poly), "x\u00B9\u2070\u2070", "Exponent an der Grenze geht");
+
+  const bw = (e, ziel, form) => { const r = T.bewerte(e, { antwortTerm: ziel, form }); return r.ok ? "ok" : !r.lesbar ? "unlesbar" : !r.gleichwertig ? "falsch" : "form"; };
+  gleich(bw("2x+6", "2(x+3)", "vereinfacht"), "ok", "vereinfacht richtig");
+  gleich(bw("2(x+3)", "2x+6", "vereinfacht"), "form", "vereinfacht mit Klammer");
+  gleich(bw("x+x+6", "2x+6", "vereinfacht"), "form", "vereinfacht nicht zusammengefasst");
+  gleich(bw("2\u00B73x", "6x", "vereinfacht"), "form", "vereinfacht nicht ausgerechnet");
+  gleich(bw("2x+7", "2x+6", "vereinfacht"), "falsch", "falscher Wert");
+  gleich(bw("5^3", "125", "potenz"), "ok", "Potenz");
+  gleich(bw("125", "5^3", "potenz"), "form", "Potenz verlangt");
+  gleich(bw("3(2x+1)", "6x+3", "ausgeklammert"), "ok", "ausgeklammert");
+  gleich(bw("(3)(2x+1)", "6x+3", "ausgeklammert"), "form", "D3: (3)(2x+1) ohne Absturz");
+  gleich(bw("(3)(2x+3)", "6x+9", "ausgeklammert"), "form", "D3: Beispiel aus dem Befund");
+  gleich(bw("6(x+0.5)", "6x+3", "ausgeklammert"), "form", "ausgeklammert mit Bruch in der Klammer");
+  gleich(bw("1(6x+3)", "6x+3", "ausgeklammert"), "form", "ggT nicht ausgeklammert");
+  gleich(bw("3/4", "0.75", "bruch"), "ok", "Bruch");
+  gleich(bw("6/8", "3/4", "bruch"), "form", "Bruch nicht gekürzt");
+  gleich(bw("0.75", "3/4", "bruch"), "form", "Dezimalbruch statt Bruch");
+  gleich(bw("4/1", "4", "bruch"), "form", "ganze Zahl mit Nenner");
+  gleich(bw("2x+", "2x", "frei"), "unlesbar", "unlesbar");
+  gleich(bw("x^99999999", "x", "frei"), "unlesbar", "D10: zu gross ist unlesbar, ohne Hänger");
+  gleich(/zu gross/.test(T.bewerte("x^99999999", { antwortTerm: "x" }).meldung), true, "D10: Meldung nennt die Grenze");
+  wirft(() => T.bewerte("x", { antwortTerm: "x+" }), "unlesbarer antwortTerm ist ein Fehler der Aufgabe");
+
+  // Nachrechnung: zufällige Terme als Polynom gelesen und an zufälligen Stellen mit JavaScript-Zahlen ausgewertet
+  const zuf = (() => { let s = 5; return () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; }; })();
+  const ganz = n => Math.floor(zuf() * n);
+  function erzeuge(tiefe) {
+    if (tiefe <= 0 || zuf() < 0.3) {
+      const r = ganz(4);
+      if (r === 0) { const k = String(1 + ganz(9)); return { t: k, j: k }; }
+      const v = "xy"[ganz(2)];
+      return { t: v, j: v };
+    }
+    const a = erzeuge(tiefe - 1), b = erzeuge(tiefe - 1), op = ganz(5);
+    if (op === 0) return { t: `${a.t}+${b.t}`, j: `${a.j}+${b.j}` };
+    if (op === 1) return { t: `${a.t}-(${b.t})`, j: `${a.j}-(${b.j})` };
+    if (op === 2) return { t: `(${a.t})(${b.t})`, j: `(${a.j})*(${b.j})` };
+    if (op === 3) return { t: `(${a.t})^2`, j: `(${a.j})**2` };
+    const k = 2 + ganz(5);
+    return { t: `(${a.t}):${k}`, j: `(${a.j})/${k}` };
+  }
+  const wert = (p, x, y) => [...p].reduce((s, [k, w]) => {
+    let f = Number(w.z) / Number(w.n);
+    for (const [, v, n] of k.matchAll(/([a-z])(\d+)/g)) f *= (v === "x" ? x : y) ** Number(n);
+    return s + f;
+  }, 0);
+  let abw = 0, rund = 0;
+  for (let fall = 0; fall < 2000; fall++) {
+    const e = erzeuge(4), p = T.lies(e.t).poly;
+    const x = ganz(7) - 3, y = ganz(7) - 3;
+    const soll = Function("x", "y", `return ${e.j};`)(x, y), ist = wert(p, x, y);
+    if (Math.abs(soll - ist) > 1e-9 * Math.max(1, Math.abs(soll))) abw++;
+    // text → lies ergibt dasselbe Polynom (Schreibweise des Lernsteigs mit Apostroph und Minuszeichen)
+    if (!T.gleich(T.lies(T.text(p, SW)).poly, p)) rund++;
+  }
+  gleich(abw, 0, "Polynom = Zahlwert (2000 Zufallsterme)");
+  gleich(rund, 0, "text und lies umkehrbar (2000 Zufallsterme)");
+}
+
+// ---------- rechner ----------
+console.log("rechner.js");
+{
+  const RK = KERN.rechner;
+  const SW = { tausender: "'", abStellen: 4, minus: "\u2212", dezimal: "." };
+  const M = RK.MINUS, V = RK.VORZ, W = "\u221A", N = RK.NTE_INDEX, Q = "x\u00B2", P = "\u00B7";
+  const z = s => s.split("");
+  const zeig = e => { const r = RK.rechne(e); return r.fehler ? "Fehler: " + r.fehler : RK.anzeige(r.wert, SW); };
+  // Beispiele aus dem Lehrplan (MA.1.A.3.i) und aus den Anleitungen (R11 Abschnitt 2), wie im Testskript des Lernsteigs
+  const faelle = [
+    [[...z("4"), "^", "3", P, "4", "^", "3"], "4'096"], [[...z("4"), "^", "3", "+", "4", "^", "3"], "128"],
+    [["3", N, ...z("8000")], "20"], [[W, ...z("196")], "14"], [[V, "2", Q], M + "4"], [["(", V, "2", ")", Q], "4"],
+    [[...z("4+8"), M, "2", P, "3"], "6"], [["1", ":", "3"], "0.3333333333"], [[...z("1.32"), P, "1", "0", "^", "8"], "132'000'000"],
+    [["2", N, ...z("16")], "4"], [["(", "2", "+", "3"], "5"],
+    [[...z("256"), RK.WURZEL_NACH, "+", "4", RK.WURZEL_NACH], "18"], [["8", RK.NTE_RADIKAND, "3"], "2"],
+    [["5", "^", "3"], "125"], [["6", N, "6", "4"], "2"], [["3", RK.VORZ_NACH], M + "3"],
+    [["1", ":", "0"], "Fehler: Division durch 0"], [[W, V, "4"], "Fehler: gerade Wurzel aus negativer Zahl"],
+    [["+"], "Fehler: Eingabe unvollständig"], [[], "Fehler: Eingabe fehlt"], [["Ans"], "Fehler: noch kein Ergebnis"],
+    // D9: NaN heisst „nicht definiert“, nicht „zu gross“; unendlich bleibt „zu gross“
+    [["(", V, "8", ")", "^", "0", ".", "5"], "Fehler: nicht definiert"], [["1", "0", "^", "4", "0", "0"], "Fehler: Ergebnis zu gross"],
+  ];
+  for (const [e, soll] of faelle) gleich(zeig(e), soll, `rechne ${e.join(" ")}`);
+  gleich(RK.rechne(["Ans", "+", "1"], 2).wert, 3, "Ans");
+  // D9: höchstens 10 gültige Ziffern, erst gerundet, dann über wissenschaftlich entschieden
+  gleich(RK.anzeige(9999999999.6, SW), "1 \u00B7 10\u00B9\u2070", "9999999999.6 → 1 · 10¹⁰ (war elfstellig)");
+  gleich(RK.anzeige(1234567890.4, SW), "1'234'567'890", "zehn Stellen bleiben ausgeschrieben");
+  gleich(RK.anzeige(0.0000001234, SW), "1.234 \u00B7 10\u207B\u2077", "klein wissenschaftlich");
+  gleich(RK.anzeige(-2.5e12, SW), "\u22122.5 \u00B7 10\u00B9\u00B2", "negativ gross");
+  gleich(RK.anzeige(0, SW), "0", "null");
+  gleich(RK.anzeige(1234.5), "1234.5", "ohne Schreibweise: Standard des Kerns");
+  // Nachrechnung: zufällige Rechnungen gegen JavaScript, Anzeige nie mit mehr als 10 Ziffern
+  let abw = 0, lang = 0;
+  const zuf = (() => { let s = 9; return () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; }; })();
+  const zahlText = () => String(Math.floor(zuf() * 100000) / (zuf() < 0.5 ? 1 : 100));
+  const OPS = [["+", (a, b) => a + b], [M, (a, b) => a - b], [P, (a, b) => a * b], [":", (a, b) => a / b], ["^", (a, b) => a ** (b % 4)]];
+  for (let fall = 0; fall < 2000; fall++) {
+    const a = zahlText(), b = zahlText(), [op, f] = OPS[Math.floor(zuf() * OPS.length)];
+    const bb = op === "^" ? String(Number(b) % 4) : b;
+    const r = RK.rechne([...z(a), op, ...z(bb)]);
+    const soll = f(Number(a), Number(bb));
+    if (op === ":" && Number(bb) === 0) { if (!r.fehler) abw++; continue; }
+    if (r.fehler || Math.abs(r.wert - soll) > 1e-12 * Math.max(1, Math.abs(soll))) abw++;
+    else if (RK.anzeige(r.wert, SW).split(" ")[0].replace(/\D/g, "").replace(/^0+/, "").length > 10) lang++;
+  }
+  gleich(abw, 0, "rechne = JavaScript (2000 Zufallsrechnungen)");
+  gleich(lang, 0, "Anzeige höchstens 10 Ziffern (2000 Zufallsrechnungen)");
 }
 
 // ---------- rolleiste ----------

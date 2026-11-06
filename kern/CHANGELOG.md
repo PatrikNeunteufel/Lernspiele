@@ -3,6 +3,18 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.14.0 — 2026-11-06 (LERN_Session17)
+- `terme.js` (`KERN.terme`): Terme lesen, vergleichen, Form prüfen und schreiben, aus dem Lernsteig; `text(p, sw)` mit
+  der Schreibweise der App statt `LST.zahlText`. Behoben: D3 (`(3)(2x+3)` bei „ausgeklammert“ stürzt nicht mehr ab),
+  D10 (Exponent höchstens 100, Zwischenergebnis höchstens 2000 Glieder, sonst Meldung statt eingefrorenem Tab),
+  Exponenten ab 10: `text` schreibt sie hochgestellt (vorher „x1⁰“), `lies` liest eine Folge hochgestellter Ziffern als
+  einen Exponenten („x²³“ = x^23, vorher (x²)³; ⁰ und ¹ fehlten). Ordnung der Glieder wie im Lehrmittel (TO1 a):
+  bei gleichem Grad je Variable im Alphabet der höhere Exponent zuerst — (a + b)² = a² + 2ab + b² (vorher
+  „2ab + a² + b²“); in den Übungen des Lernsteigs ändert das heute keine Aufgabe (6000 Aufgaben alt gegen neu).
+- `rechner.js` (`KERN.rechner`): Rechenkern des Taschenrechners (Tasten-Kennungen, `rechne`, `anzeige(w, sw)`), aus dem
+  Lernsteig; Modelle und Tastenfeld bleiben dort. Behoben: D9 (NaN heisst „nicht definiert“; erst auf 10 Ziffern
+  runden, dann über wissenschaftliche Schreibweise entscheiden: 9999999999.6 → 1 · 10¹⁰).
+
 ## 1.13.0 — 2026-11-06 (LERN_Session17)
 - `rolleiste.js` (`KERN.rolleiste`): einzeilige Leiste, die seitlich rollt, mit Pfeilen nur bei Bedarf; `zustand` als
   reine Rechnung getestet; das aktive Element rollt erst ins Bild, wenn die Pfeile stehen. Tab-Leiste von Eulenpfad

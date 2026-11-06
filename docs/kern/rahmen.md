@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.13.0, 2026-11-06 (LERN_Session17). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.14.0, 2026-11-06 (LERN_Session17). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.13.0)
+kern/VERSION          Version des Kerns (1.14.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -406,10 +406,41 @@ Anmeldung mit vorgewähltem Namen, „↩ Abmelden“) und Lernsteig (`start/sta
 Aufsichten mit 🔑; mit PIN über die PIN-Abfrage, „Zurück“ dort lässt die Person angemeldet; „↩ Abmelden“, beim Gast
 „Anmelden“).
 
-### 4.17 Geplant (Plan B, Reihenfolge B4)
+### 4.17 `KERN.terme` (`kern/terme.js`) — Terme lesen, vergleichen, Form prüfen
 
-Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
-bevor er umzieht.
+Im Kern seit 1.14.0 (LERN_Session17), aus `lernsteig/gemeinsam/terme.js`; Plan B, Befunde D3, D10. Ein Term wird exakt
+als Polynom gelesen (Map „Monom → Bruch“ über `KERN.bruch`, Monom als Schlüssel „a2b1“).
+
+| Aufruf | Ergebnis |
+|---|---|
+| `lies(text)` | `{ poly, info, roh }` oder wirft mit Klartext. Liest Variablen a–z, Zahlen „1'234.5“ und „1234,5“, Brüche „5/8“, `+ − - · * : ( )`, implizites Mal („3a“, „2(x + 1)“), Potenzen „^12“ und hochgestellt — eine Folge hochgestellter Ziffern ist **ein** Exponent („x²³“ = x^23). Grenzen (D10): Exponent höchstens `GRENZE_EXPONENT` (100), höchstens 2000 Glieder je Zwischenergebnis |
+| `bewerte(eingabe, { antwortTerm, form })` | `{ ok, gleichwertig, lesbar, meldung }`; `form`: `vereinfacht`, `bruch`, `potenz`, `ausgeklammert`, `frei`. Eine unlesbare Eingabe wirft nie (D3: „(3)(2x+3)“ bei `ausgeklammert` ist ein Formfehler), ein unlesbarer `antwortTerm` schon (Fehler der Aufgabe) |
+| `text(poly, sw)` | Text in der Ordnung des Lehrmittels (TO1 a): höchster Grad zuerst, bei gleichem Grad je Variable im Alphabet der höhere Exponent zuerst, Konstante zuletzt („a² + 2ab + b²“, „a²b + ab²“); Zahlen in der Schreibweise `sw` der App wie `KERN.zahl.text`, Brüche „z/n“; `lies(text(p))` ergibt wieder `p` |
+| `gleich`, `plus`, `mal`, `neg`, `hoch`, `konst`, `variable`, `glieder` | Rechnen mit Polynomen für Aufgabengeneratoren |
+
+Benutzt von: Lernsteig über `gemeinsam/terme.js`, das `LST_TERME` mit `text` in der Schreibweise des Lernsteigs
+weiterreicht (Übungen behalten ihre Aufrufe). Tests: feste Beispiele, alle Formen, D3, D10 und 2000 Zufallsterme
+(Polynom gegen Zahlwert, `text` gegen `lies`); alt gegen neu auf 5000 Zufallsfällen gleich ausser den behobenen Fällen.
+
+### 4.18 `KERN.rechner` (`kern/rechner.js`) — Rechenkern des Taschenrechners
+
+Im Kern seit 1.14.0 (LERN_Session17), Teil 1 aus `lernsteig/gemeinsam/rechner.js` (TR1 a, RE1 a); Befund D9. Ohne DOM.
+Modelle, Beschriftungen, Bedienhilfe, Tipps zu Bedienfehlern und das Tastenfeld bleiben in der App.
+
+| Aufruf | Ergebnis |
+|---|---|
+| Kennungen | Ziffern, „.“, `+ − · : ^ ( )`, „√“ (vor der Zahl), „x²“, „π“, „Ans“, dazu `VORZ` „(−)“, `VORZ_NACH` „+⇔−“, `WURZEL_NACH` „√x“, `NTE_INDEX` „ⁿ√“, `NTE_RADIKAND` „ˣ√y“ — der Vertrag mit den Modellen der App |
+| `rechne(eingabe, ans)` | `{ wert }` oder `{ fehler }` mit Klartext, nie eine Ausnahme. Rangfolge Klammern, Wurzel und Potenz, Vorzeichen, Punkt vor Strich ((−)2² = −4); exakte Wurzeln ganz. D9: NaN „nicht definiert“, unendlich „Ergebnis zu gross“ |
+| `anzeige(wert, sw)` | höchstens `STELLEN` (10) gültige Ziffern in der Schreibweise `sw`; erst gerundet, dann ab 10¹⁰ und unter 10⁻⁶ wissenschaftlich („1 · 10¹⁰“ für 9999999999.6, D9) |
+
+Benutzt von: Lernsteig (`gemeinsam/rechner.js`: `rechne` und `anzeige` mit der Schreibweise des Lernsteigs). Tests: die
+Beispiele aus Lehrplan und Anleitungen, D9 und 2000 Zufallsrechnungen gegen JavaScript; alt gegen neu auf 20 000
+Zufallseingaben gleich.
+
+### 4.19 Geplant
+
+Plan B ist mit Terme und Rechenkern vollständig; als Nächstes das Testgerüst B2. Ein neuer Teil bekommt hier seinen
+Abschnitt, bevor er umzieht.
 
 ## 5. Ändern und verteilen
 

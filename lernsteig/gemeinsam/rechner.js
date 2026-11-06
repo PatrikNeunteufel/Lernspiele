@@ -6,126 +6,16 @@
    Ansichten: „allgemein“ und je Modell die **Bedienlogik** (Tastenfolgen, Vorzeichen, Wurzel vor oder nach der Zahl,
    Index vor oder nach dem Radikanden, Ans) mit eigenem, sachlichem Aussehen, Modellname, Markenvermerk und Hinweis
    „nicht verbunden mit …“ (R11 Abschnitt 3 und F3: kein getreues Abbild, keine Fotos oder Logos).
-   Teil 1 (ohne DOM, auch fürs Testskript): Eingabe als Liste von Tasten-Kennungen, Auswertung, Anzeige.
-   Teil 2 (Seite): Tastenfeld mit Modellwahl und Bedienhilfe. */
+   Teil 1, der Rechenkern (Tasten-Kennungen, Auswertung, Anzeige), steht im Kern (KERN.rechner); hier stehen die Modelle,
+   die Eingabezeile mit ihren Beschriftungen, die Tipps zu Bedienfehlern und das Tastenfeld der Seite. */
 "use strict";
 
 var LST_RECHNER = (function () {
-  const M = "−";
-  // Kennungen der Tasten (stehen so in der Eingabe). Beschriftungen liefert das Modell.
-  const VORZ = "(−)";        // Vorzeichen vor der Zahl (TI-30X Plus, Casio)
-  const VORZ_NACH = "+⇔−"; // Vorzeichen nach der Zahl (TI-30 eco RS)
-  const WURZEL_NACH = "√x";   // Quadratwurzel nach der Zahl (eco RS)
-  const NTE_INDEX = "ⁿ√"; // n-te Wurzel, Index zuerst: 3 ⁿ√ 8000
-  const NTE_RADIKAND = "ˣ√y"; // n-te Wurzel, Radikand zuerst: 8000 ˣ√y 3 (eco RS)
-
-  /** Zerlegt die Eingabe in Bausteine für den Parser. */
-  function bausteine(eingabe) {
-    const b = [];
-    let zahl = "";
-    const zahlFertig = () => { if (zahl) { b.push({ t: "zahl", w: Number(zahl), roh: zahl }); zahl = ""; } };
-    for (const z of eingabe) {
-      if (/^[0-9.]$/.test(z)) { zahl += z; continue; }
-      zahlFertig();
-      if (z === "x²") b.push({ t: "quadrat" });
-      else if (z === VORZ) b.push({ t: "vorz" });
-      else if (z === VORZ_NACH) b.push({ t: "vorzNach" });
-      else if (z === WURZEL_NACH) b.push({ t: "wurzelNach" });
-      else if (z === "Ans") b.push({ t: "ans" });
-      else if (z === "π") b.push({ t: "pi" });
-      else b.push({ t: "op", w: z });
-    }
-    zahlFertig();
-    return b;
-  }
-
-  /**
-   * Wertet die Eingabe aus. Rangfolge: Klammern, Wurzel und Potenz, Vorzeichen, Punkt vor Strich.
-   * „a ⁿ√ b“: a-te Wurzel aus b (Index zuerst); „b ˣ√y a“: a-te Wurzel aus b (Radikand zuerst);
-   * „√ b“ Quadratwurzel vor der Zahl, „b √x“ nach der Zahl; „a ^ b“ rechtsassoziativ; „x²“ hinter einer Zahl;
-   * „(−)“ vor der Zahl, „+⇔−“ nach der Zahl. Vorzeichen bindet schwächer als die Potenz: (−)2² = −4
-   * (wie in den Anleitungen, R11 Abschnitt 2). Liefert { wert } oder { fehler }.
-   */
-  function rechne(eingabe, ans) {
-    const b = bausteine(eingabe);
-    let i = 0;
-    const ist = (t, w) => b[i] && b[i].t === t && (w === undefined || b[i].w === w);
-    function ausdruck() {
-      let w = glied();
-      while (ist("op", "+") || ist("op", M)) { const op = b[i++].w; const g = glied(); w = op === "+" ? w + g : w - g; }
-      return w;
-    }
-    function glied() {
-      let w = vorzeichen();
-      while (ist("op", "·") || ist("op", ":")) {
-        const op = b[i++].w; const g = vorzeichen();
-        if (op === ":" && g === 0) throw new Error("Division durch 0");
-        w = op === ":" ? w / g : w * g;
-      }
-      return w;
-    }
-    function vorzeichen() { if (ist("vorz")) { i++; return -vorzeichen(); } return potenz(); }
-    function potenz() {
-      let w = nachgestellt();
-      if (ist("op", "^")) { i++; w = Math.pow(w, vorzeichen()); }
-      else if (ist("op", NTE_INDEX)) { i++; w = wurzel(vorzeichen(), w); }
-      else if (ist("op", NTE_RADIKAND)) { i++; w = wurzel(w, vorzeichen()); }
-      return w;
-    }
-    function wurzel(x, n) {
-      if (!Number.isInteger(n) || n < 1) throw new Error("Wurzelexponent muss eine natürliche Zahl sein");
-      if (x < 0 && n % 2 === 0) throw new Error("gerade Wurzel aus negativer Zahl");
-      const r = Math.sign(x) * Math.pow(Math.abs(x), 1 / n);
-      const g = Math.round(r);
-      return Math.abs(g ** n - x) < 1e-9 * Math.max(1, Math.abs(x)) ? g : r; // exakte Wurzeln ganz lassen
-    }
-    function nachgestellt() {
-      let w = einfach();
-      for (;;) {
-        if (ist("quadrat")) { i++; w = w * w; continue; }
-        if (ist("wurzelNach")) { i++; w = wurzel(w, 2); continue; }
-        if (ist("vorzNach")) { i++; w = -w; continue; }
-        return w;
-      }
-    }
-    function einfach() {
-      if (ist("zahl")) {
-        const z = b[i++];
-        if (!/^(\d+\.?\d*|\.\d+)$/.test(z.roh)) throw new Error("Zahl falsch eingegeben");
-        return z.w;
-      }
-      if (ist("ans")) { i++; if (ans === undefined || ans === null) throw new Error("noch kein Ergebnis"); return ans; }
-      if (ist("pi")) { i++; return Math.PI; }
-      if (ist("op", "√")) { i++; return wurzel(ist("vorz") ? (i++, -nachgestellt()) : nachgestellt(), 2); }
-      if (ist("op", "(")) {
-        i++; const w = ausdruck();
-        if (ist("op", ")")) i++; // fehlende schliessende Klammern am Ende sind erlaubt, wie bei vielen Rechnern
-        else if (i < b.length) throw new Error("„)“ fehlt");
-        return w;
-      }
-      throw new Error(i < b.length ? "Eingabe unvollständig" : "Eingabe fehlt");
-    }
-    try {
-      if (!b.length) return { fehler: "Eingabe fehlt" };
-      const w = ausdruck();
-      if (i !== b.length) return { fehler: "Eingabe nicht verständlich" };
-      if (!Number.isFinite(w)) return { fehler: "Ergebnis zu gross" };
-      return { wert: w };
-    } catch (e) { return { fehler: e.message }; }
-  }
-
-  const HOCH = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹", "-": "⁻" };
-
+  // Rechenkern im Kern (KERN.rechner, docs/kern/rahmen.md 4.18, seit kern 1.14.0): Kennungen, rechne, anzeige.
+  const RK = KERN.rechner;
+  const { MINUS: M, VORZ, VORZ_NACH, WURZEL_NACH, NTE_INDEX, NTE_RADIKAND, rechne } = RK;
   /** Ergebnis in der Schreibweise des Lernsteigs, höchstens 10 gültige Ziffern; sehr gross oder klein wissenschaftlich. */
-  function anzeige(w) {
-    if (w === 0) return "0";
-    const b = Math.abs(w);
-    if (b >= 1e10 || b < 1e-6) {
-      const [m, e] = w.toExponential(9).split("e");
-      return `${LST.dezimalText(Number(m))} · 10${String(Number(e)).replace(/[-0-9]/g, c => HOCH[c])}`;
-    }
-    return LST.dezimalText(Number(w.toPrecision(10)));
-  }
+  const anzeige = w => RK.anzeige(w, LST.schreibweise());
 
   // ---------- Modelle (R11 Abschnitt 1, 2, 5) ----------
   // Je Modell: Name, Familie, Tasten (Beschriftung → Kennung), Tipps zur Bedienung mit Beleg aus der Anleitung.
