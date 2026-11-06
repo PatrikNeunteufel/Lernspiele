@@ -473,3 +473,5 @@
   auf der Startseite, aufsicht.html nur noch angemeldet); Gast (C2 a) nur im Tab, nichts gespeichert, je Gerät
   abschaltbar; Runden der Aufsicht als Test; Übungen und Statistik ohne Anmeldung nur mit dem Weg dorthin. Kern 1.8.0:
   Gast in `KERN.anmeldung`. Konten-Tests 48 Fälle.
+- Lernsteig: keine Frage für Erwachsene (EF1 a, Stoff der Oberstufe trennt nicht); im Konto jedes Jugendlichen die
+  Aufsichten des Geräts mit Datum und ob sie mitlesen.

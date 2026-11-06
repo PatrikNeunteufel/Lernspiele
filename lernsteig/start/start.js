@@ -40,6 +40,14 @@
           : el("button", { type: "button", class: "knopf", text: "Erst PIN festlegen", onclick: () => { ansicht = { art: "profil" }; zeichne(); } }),
         el("button", { type: "button", class: "knopf", text: "Ablehnen", onclick: () => { KO.antworten(k.id, a.id, false); zeichne(); } })),
       k.pin ? null : el("small", { class: "leise", text: "Zustimmen geht nur mit PIN, damit niemand sonst für dich zustimmt." })));
+    // Alle Aufsichten des Geräts (EF1 a): Eine Aufsicht legt man ohne Frage an — wer sie angelegt hat, sieht man hier.
+    const alle = KO.aufsichten();
+    if (alle.length) teil.append(el("details", { class: "aufsichten-geraet" },
+      el("summary", { text: `Aufsichten auf diesem Gerät (${alle.length})` }),
+      el("ul", { class: "mitleser-liste" }, alle.map(a => el("li", { "data-geraet-aufsicht": a.id, text: [`${a.name} (${rolle(a.art)})`,
+        /^\d{4}-\d{2}-\d{2}/.test(a.angelegt || "") ? `angelegt am ${a.angelegt.slice(0, 10).split("-").reverse().join(".")}` : "",
+        m.verbunden.some(v => v.id === a.id) ? "liest bei dir mit" : "liest bei dir nicht mit"].filter(Boolean).join(" · ") }))),
+      el("small", { class: "leise", text: "Eine Aufsicht kann den Taschenrechner und den Gast auf diesem Gerät einstellen. Deinen Stand sieht sie nur, wenn du zustimmst. Kennst du eine nicht, sag es deinen Eltern oder deiner Lehrperson." })));
     return teil;
   }
 

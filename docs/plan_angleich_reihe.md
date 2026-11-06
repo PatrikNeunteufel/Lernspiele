@@ -19,7 +19,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | in Arbeit seit 2026-11-05 (LERN_Session15, A): kopiert und gesperrt, Commit ausstehend | Abschnitt A |
 | B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.8.0; als Nächstes Entwickler-Modus | Abschnitt B |
-| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): Anmeldung zuerst mit Gast gebaut, Frage für Erwachsene offen | Abschnitt C |
+| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1 gebaut, als Nächstes C2 nach Plan B | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
@@ -122,8 +122,9 @@ die Zeile in `gemeinsame_mechaniken.md` auf „im Kern seit <Version>“.
 Ziel: gleicher Aufbau, gleiche Begriffe, gleiche Bedienwege; der Lernsteig sachlicher im Ton und Aussehen, ohne
 Kindersprache.
 
-1. **Anmeldung zuerst** (wie Eulenpfad L1 a): Konten zum Antippen, „Ich bin neu“ (Jugendliche, Erwachsene mit Frage und
-   Bestätigung), dazu **Gast**: nichts wird gespeichert, Profil ohne Wirkung, Freigaben des Geräts gelten (Frage C2).
+1. **Anmeldung zuerst** (wie Eulenpfad L1 a): Konten zum Antippen, „Ich bin neu“ (Jugendliche, Erwachsene mit
+   Bestätigung; eine Frage gibt es im Lernsteig nicht, weil kein Stoff Jugendliche der Oberstufe sicher von Erwachsenen
+   trennt, EF1 a), dazu **Gast**: nichts wird gespeichert, Profil ohne Wirkung, Freigaben des Geräts gelten (Frage C2).
 2. **Tabs in derselben Reihenfolge wie im Eulenpfad:** Übungen · Profil · Statistik · Erfolge · Verwaltung (nur
    Aufsicht). Im Lernsteig zeigt „Erfolge“ nach BF1 a Kompetenzstand, Serie über Tage und Rekorde, keine Sterne.
    Prüfungsvorbereitung: Frage C1.
@@ -254,6 +255,10 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   geprüfte Stufen, Mischrunde, Stand je Kompetenz); Tab-Reihe wie im Eulenpfad. **Zusatz Patrik:** auch filterbar —
   Chip „🎯 Prüfungsziel“ in der Filterzeile „Nur“ neben „⭐ Mein Fokus“, zeigt nur Übungen mit geprüften Stufen des
   Ziels und auf den Karten nur diese Stufen.
+- **EF1 a** (2026-11-06): Im Lernsteig keine Frage für Erwachsene — die Frage des Eulenpfads (Wurzeln, Potenzen,
+  negative Zahlen, Gleichungen, Pythagoras) ist Stoff der Oberstufe, und keine Wissensfrage trennt Jugendliche sicher von
+  Erwachsenen. Schutz: erste Aufsicht ohne Frage, jede weitere mit Bestätigung (D5), Mitlesen nur mit Zustimmung
+  (AU1 a); jeder Jugendliche sieht in seinem Konto alle Aufsichten des Geräts.
 - **C2 a:** Gast in allen drei Apps als Teil des Kerns (nichts gespeichert, Profil ohne Wirkung, nur Freigegebenes, je
   Gerät abschaltbar); im Eulenpfad „👀 Nur schauen“.
 - **P1 a:** Jede Person hat in allen Apps eine feste Kennung `id` (beim Anlegen, reist bei einer Übernahme mit); der

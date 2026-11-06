@@ -126,7 +126,8 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   Code. `ohneGeheimnis(k)` für Sicherungen und Abgleich.
 - **Anmeldung zuerst** (Plan C1, wie Eulenpfad L1 a): Die Startseite zeigt ohne Anmeldung nur die Anmeldung —
   Jugendliche und Aufsichten (🔑) zum Antippen, „🐣 Ich bin neu“ (Jugendliche oder Erwachsene; eine weitere Aufsicht
-  nur mit Bestätigung, D5) und „👀 Als Gast weiter“. **Ein Platz** (`KERN.anmeldung`, docs/kern/rahmen.md 4.11):
+  nur mit Bestätigung, D5; keine Frage für Erwachsene, EF1 a) und „👀 Als Gast weiter“. Im Konto sieht jeder
+  Jugendliche alle Aufsichten des Geräts mit Datum und ob sie bei ihm mitlesen (EF1 a). **Ein Platz** (`KERN.anmeldung`, docs/kern/rahmen.md 4.11):
   angemeldet ist ein Jugendlicher, eine Aufsicht oder der Gast. Konto ohne PIN bleibt gewählt (`lernsteig:aktiv`);
   mit PIN und jede Aufsicht nur im geöffneten Tab (`sessionStorage lernsteig:angemeldet`). `LST.werUebt()` sagt
   „lernend“, „aufsicht“, „gast“ oder „niemand“; Übungs- und Statistikseiten zeigen bei „niemand“ nur den Weg zur
