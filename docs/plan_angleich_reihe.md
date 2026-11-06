@@ -86,9 +86,11 @@ DF4 a), Anmeldung (mit Gast), Entwicklung, Einladung, Auswertung, Übernahme ein
 Personen-Knopf; Eulenpfad und Lernsteig benutzen, was sie brauchen (`daten.js` beide), die Gratwanderung hat die
 Kopie und lädt sie mit C8. Seit 1.17.0 auch der Abgleich über einen Ordner (DF3 a; Lernsteig mit der Verwaltung, Plan C),
 seit 1.18.0 die Rollen der Aufsicht (`rollen.js`: Bestätigung, PIN vergessen, Zurücksetzen mit Frist; RL2 a, beide Apps).
-Noch nicht im Kern: der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem dritten, Serie/Endlos mit Rekord
-und Zwischenstand, Wiederholungsbremse, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`) und die Gruppenleitung (G2 a), die mit
-den Gruppen kommt (RL1 a, LERN-48).
+Seit 1.19.0 die reinen Hilfen des Ablaufs einer Runde (`runde.js`: Gedächtnis als Durchgang, Auswahl mit Serienbremse und
+Kürzen, Rekord nach Kennung, Bestwert, Bestzeit, Wächter des Zwischenstands; RA5 a, RA6 a; beide Apps, dazu RA8 a im
+Lernsteig). Noch nicht im Kern: der Ablauf selbst (Fehlversuch mit Hinweis und Lösung nach dem dritten, Ende von Runde und
+Serie, Zeit je Aufgabe nach RA7 a, Protokolleintrag nach RA1–RA4 a, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`) und die
+Gruppenleitung (G2 a), die mit den Gruppen kommt (RL1 a, LERN-48).
 
 **B2 Testgerüst für alle Apps:** Ein Testskript-Kern unter `tools/` mit Treiber je App, so dass ein Aufruf alle drei
 Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`). Er prüft auch, dass jede Kern-Kopie mit
@@ -363,3 +365,31 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Bestwert). Die Unterschiede ohne Entscheid (`zeit` Start oder Ende, `dauer` in s oder 0,1 s, Serie im Protokoll,
   Fehlerliste je Aufgabe, Gedächtnis, Kürzen, Zeitmessung, Rückmeldung bei Richtig im Lernsteig) werden vor dem Bau je
   einzeln vorgelegt. Nicht b (nur die Hilfen). Kipppunkt: Apps sollen im Ablauf absichtlich auseinanderlaufen.
+- **RA1 a** (2026-11-06, LERN_Session19): `zeit` einer Runde ist ihr Ende (beim Rekord der Stand beim Speichern), der
+  Beginn `zeit − dauer`; der Lernsteig deutet seine Runden (bisher Beginn) beim Laden um. Nicht b (Beginn; die Runden des
+  Eulenpfads mit Ende-Zeit sind online, ein Gerät mit altem Stand schriebe in der Übergangszeit ohne Vermerk weiter Enden).
+  Kipppunkt: echte Lernsteig-Runden oder ein Formatvermerk.
+- **RA2 a** (2026-11-06, LERN_Session19): `dauer` in Sekunden mit einer Nachkommastelle (0,1 s; Bestzeit im Lernsteig);
+  ganze Sekunden älterer Runden bleiben gültig. Nicht b (ganze s), nicht c (ms in einem neuen Feld).
+- **RA3 a** (2026-11-06, LERN_Session19): Eine Serie ist eine Runde — Protokolleintrag mit `endlos: true` und `sterne:
+  null` und dazu ein Rekord; beim Verlassen beide als Zwischenstand (`abgebrochen: true`), ein späterer Stand derselben
+  Kennung ersetzt ihn, auch beim Zusammenführen. Nicht b (nur Rekord; im Eulenpfad fehlten Serien in Lernzeiten und Stand).
+- **RA4 a** (2026-11-06, LERN_Session19): Eine Liste je Aufgabe im Kern (`liste`: `{ ms, versuche, geloest, gezeigt?,
+  uebersprungen?, zeitUm? }`, mit Fehlversuch dazu `text`, `loesung`, `eingaben`; Felder der App je Aufgabe nach Schema)
+  statt `aufgabenZeiten`/`fehlerAufgaben` (Eulenpfad) und `zeiten`/`liste`/`falsch` (Lernsteig); ältere Einträge beim
+  Laden umgedeutet, die Zuordnung mit einer Zufallsnachrechnung belegt. Nicht b (Eulenpfad-Listen), nicht c (je App).
+  Kipppunkt: Zuordnung nicht eindeutig — dann alte Einträge mit alten Feldern lesen.
+- **RA5 a** (2026-11-06, LERN_Session19): Gedächtnis über Runden als Durchgang (eine Aufgabe erst wieder, wenn alle dran
+  waren; bis 400 Fingerabdrücke) in allen Apps, für Runden und Serien, je Person, Inhalt und Stufe ohne Niveau; in einer
+  Runde oder Serie keine Aufgabe zweimal, solange die Stufe neue hergibt. Nicht b (Fenster der letzten 30; bei Stufen
+  unter 31 Aufgaben nie erfüllbar). Kipppunkt: Serien sollen absichtlich auch Geübtes bringen.
+- **RA6 a** (2026-11-06, LERN_Session19): Höchstens eine Wiederholung je Runde, nie direkt hintereinander; danach endet
+  die Runde früher mit `gekuerzt` (geplante Zahl); gekürzte Runden zählen nicht für die Bestzeit. Nicht b (Runde immer
+  voll mit Wiederholungen).
+- **RA7 a** (2026-11-06, LERN_Session19): Zeit je Aufgabe ab der Meldung `bereit` der App (ohne Meldung ab `gestellt`)
+  bis zur Antwort, ohne die Zeit zwischen `pause` und `weiter`. Nicht b (ab `gestellt`; zählte im Eulenpfad Töne und
+  3-2-1 mit).
+- **RA8 a** (2026-11-06, LERN_Session19): Lernsteig wie LB1 a — auf Anhieb nur „Richtig.“, weiter nach 1,2 s (Serie
+  0,7 s); richtig nach einem Fehlversuch „Jetzt stimmt es.“ mit dem Weg und „Weiter“ ohne Selbstlauf. Nicht b (Knopf
+  „Weg ansehen“), nicht c (heute: Weg 1,2 s sichtbar, nicht lesbar). Kipppunkt: Jugendliche sollen ihren Weg auch nach
+  einer richtigen Antwort prüfen.

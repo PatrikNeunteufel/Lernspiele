@@ -230,14 +230,29 @@ async function pruefeSeiten(uebungen, melde, LST) {
         const s = oeffne(`uebungen/${e.id}/index.html`, { search: `?niveau=${niveau}&stufe=${stufe}`, ...alsJugendlicher() });
         await ruhe(s);
         try {
+          const kennungen = new Set();
+          const rueck = () => s.lauf(`document.querySelector(".rueckmeldung").textContent`).trim();
           for (let i = 0; i < e.anzahl; i++) {
             const a = s.lauf("LST.pruefung.aufgabe()");
             if (!a) throw new Error(`keine Aufgabe bei Nummer ${i + 1}: ${s.text().replace(/\s+/g, " ").trim().slice(0, 160)}`);
+            kennungen.add(a.kennung);
             textPruefen(ort, s);
             if (i === 0) await antworte(s, a, false);
             await antworte(s, a, true);
+            // RA8 a: auf Anhieb nur „Richtig.“; nach einem Fehlversuch der Weg (falls die Aufgabe einen hat)
+            const t = rueck();
+            if (i > 0 && t !== "Richtig.") melde(ort, `auf Anhieb richtig steht mehr als „Richtig.“: «${t.slice(0, 100)}»`);
+            if (i === 0 && a.weg && !t.includes(a.weg)) melde(ort, "richtig nach einem Fehlversuch: der Weg fehlt");
             s.klick(".knopf.weiter"); await ruhe(s, 20, 3);
           }
+          // RA5 a: keine Aufgabe zweimal in der Runde (jede Stufe hat mindestens so viele verschiedene wie eine Runde),
+          // das Gedächtnis je Konto, Übung und Stufe (ohne Niveau) kennt alle gestellten (dazu, was frühere Teile dieses
+          // Tests im selben Browser gestellt haben)
+          if (kennungen.size !== e.anzahl) melde(ort, `${e.anzahl - kennungen.size} Wiederholung(en) in einer Runde`);
+          const gd = Object.entries(s.json("lernsteig:gestellt") || {}).find(([k]) => k.endsWith(`|${e.id}/${stufe}`));
+          const fps = s.lauf(`${JSON.stringify([...kennungen])}.map(k => KERN.runden.fingerabdruck(k))`);
+          const fehlt = fps.filter(f => !(gd && gd[1].includes(f))).length;
+          if (fehlt) melde(ort, `Gedächtnis: ${fehlt} von ${fps.length} gestellten Aufgaben fehlen`);
           textPruefen(ort + " Ergebnis", s);
           const r = s.json("lernsteig:runden") || [];
           if (r.length !== 1) throw new Error(`${r.length} Runden im Protokoll statt 1`);

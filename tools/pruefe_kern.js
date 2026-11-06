@@ -19,6 +19,7 @@ require(path.join(WURZEL, "kern", "rollen.js"));
 require(path.join(WURZEL, "kern", "freigabe.js"));
 require(path.join(WURZEL, "kern", "suche.js"));
 require(path.join(WURZEL, "kern", "runden.js"));
+require(path.join(WURZEL, "kern", "runde.js"));
 require(path.join(WURZEL, "kern", "daten.js"));
 require(path.join(WURZEL, "kern", "abgleich.js"));
 require(path.join(WURZEL, "kern", "anmeldung.js"));
@@ -643,6 +644,135 @@ console.log("personenmenue.js");
     gleich([zk.ersetzt, zk.eintraege.length, zk.eintraege[0].punkte].join(), "1,1,9", "Rekord: höherer Stand gewinnt");
     const zb = RU.zusammenfuehren([gut], [{ ...gut, id: "r-9" }], { behalten: e => e.id !== "r-9", umbiegen: p => (p === "p-1" ? "p-neu" : p) });
     gleich([zb.eintraege.length, zb.eintraege[0].person].join(), "1,p-neu", "behalten und umbiegen");
+  }
+
+  // ---------- Ablauf einer Runde: reine Hilfen (AR1 a, RA5 a, RA6 a) ----------
+  console.log("runde.js");
+  {
+    const R = KERN.runde, FP = KERN.runden.fingerabdruck;
+    const ersatzSpeicher = () => { const d = {}; return { d, lies: (k, s) => (k in d ? JSON.parse(d[k]) : s), schreibe: (k, v) => { d[k] = JSON.stringify(v); } }; };
+    // Gedächtnis: merken, Höchstzahl, alte Schlüssel übernehmen und entfernen
+    {
+      const sp = ersatzSpeicher();
+      sp.schreibe("gestellt", { "Mia|zahlenhaus/s1": ["a", "b"], anderes: ["x"] });
+      const g = R.gedaechtnis({ speicher: sp, schluessel: "p-1|zahlenhaus/s1", alt: ["Mia|zahlenhaus/s1"], max: 3 });
+      gleich([g.hat("a"), g.hat("x"), g.groesse].join(), "true,false,2", "Gedächtnis: alter Schlüssel gelesen");
+      g.merke("c"); g.merke("d");
+      const s = sp.lies("gestellt", {});
+      gleich([Object.keys(s).sort().join(" "), s["p-1|zahlenhaus/s1"].join("")].join(), "anderes p-1|zahlenhaus/s1,bcd", "Gedächtnis: neuer Schlüssel, alter weg, höchstens max");
+      g.beginneNeu(["z"]);
+      gleich([g.hat("b"), g.hat("z")].join(), "false,true", "Gedächtnis: neuer Durchgang");
+      wirft(() => R.gedaechtnis({ schluessel: "x" }), "Gedächtnis ohne Speicher");
+    }
+    // Nachrechnung: die Auswahl des Kerns wählt in normalen Runden genau wie die bisherige Schleife des Eulenpfads
+    // (spiel.js bis LERN_Session18, unabhängig hier nachgebaut) — gleiche Züge, gleiche Aufgaben, gleiche Kürzung.
+    function alteRunde(zuege, anzahl, gd, verlaufSerie) {
+      const gestellt = new Map(); let wiederholt = false, letzte = null; const serienVerlauf = {}; const erg = [];
+      const V = R.VERSUCHE;
+      for (let nr = 0, z = 0; nr < anzahl; nr++) {
+        let sahUngestellt = false, gewaehlt = null;
+        for (let versuch = 0; ; versuch++) {
+          const { k, serien } = zuege(z++);
+          const n = k ? gestellt.get(k) || 0 : 0;
+          const zuLang = Object.entries(serien).some(([name, wert]) => { const b = serienVerlauf[name] || []; return b.length >= R.SERIE_MAX && b.slice(-R.SERIE_MAX).every(w => w === wert); });
+          const fp = k ? FP(k) : null;
+          const ungestellt = n === 0 && (!fp || !gd.has(fp));
+          if (ungestellt) sahUngestellt = true;
+          const st = versuch < V.serie ? 1 : versuch < V.gedaechtnis ? 2 : versuch < V.erzwingen ? 3 : versuch < V.durchgang ? 4 : 5;
+          const passt = st === 1 ? ungestellt && !zuLang : st === 2 ? n === 0 && !zuLang : st === 3 ? ungestellt : st === 4 ? n === 0 : n === 1 && !wiederholt && k !== letzte;
+          if (passt) {
+            if (fp) { if (gd.has(fp) && (st === 4 || (st === 2 && !sahUngestellt))) { gd.clear(); for (const x of gestellt.keys()) gd.add(FP(x)); } gd.add(fp); }
+            if (n) wiederholt = true;
+            if (k) gestellt.set(k, n + 1);
+            letzte = k;
+            for (const [name, wert] of Object.entries(serien)) (serienVerlauf[name] ||= []).push(wert);
+            gewaehlt = `${k}@${z}`;
+            break;
+          }
+          if (versuch >= V.ende) return { erg, gekuerzt: nr };
+        }
+        erg.push(gewaehlt);
+      }
+      return { erg, gekuerzt: null };
+    }
+    function neueRunde(zuege, anzahl, gd, endlos = false) {
+      const w = R.auswahl({ gedaechtnis: gd, endlos }); const erg = [];
+      for (let nr = 0, z = 0; nr < anzahl; nr++) {
+        w.neueSuche();
+        for (let versuch = 0; ; versuch++) {
+          const { k, serien } = zuege(z++);
+          const r = w.pruefe(k, serien, versuch);
+          if (r.nehmen) { erg.push(`${k}@${z}`); break; }
+          if (r.erschoepft) return { erg, gekuerzt: nr };
+        }
+      }
+      return { erg, gekuerzt: null };
+    }
+    let abweichung = 0, gekuerzt = 0, faelleN = 0;
+    for (let fall = 0; fall < 300; fall++) {
+      const zz = KERN.zufall.mitStartwert(1000 + fall);
+      const N = 1 + Math.floor(zz() * 25), anzahl = 4 + Math.floor(zz() * 10), merkmale = zz() < 0.5;
+      const folge = Array.from({ length: 6000 }, () => { const i = Math.floor(zz() * N); return { k: i === 0 && zz() < 0.1 ? null : `a${i}`, serien: merkmale ? { art: String(i % 2) } : {} }; });
+      const altG = new Set(), sp = ersatzSpeicher(), neuG = R.gedaechtnis({ speicher: sp, schluessel: "x" });
+      let pos = 0, posN = 0;
+      for (let runde = 0; runde < 4; runde++) {
+        const start = pos;
+        const a = alteRunde(i => folge[(start + i) % folge.length], anzahl, altG);
+        const b = neueRunde(i => folge[(start + i) % folge.length], anzahl, neuG);
+        faelleN++;
+        if (a.erg.join() !== b.erg.join() || a.gekuerzt !== b.gekuerzt) abweichung++;
+        if (a.gekuerzt !== null) gekuerzt++;
+        pos = start + 997; posN = posN + 1;
+      }
+    }
+    gleich(abweichung, 0, `Auswahl wie bisher im Eulenpfad (${faelleN} Runden aus 300 Zufallsfällen, davon ${gekuerzt} gekürzt)`);
+    gleich(gekuerzt > 0, true, "Nachrechnung trifft auch gekürzte Runden");
+    // Durchgang (RA5 a): bei 20 verschiedenen und Runden zu 8 kommt in den ersten 20 Aufgaben keine doppelt
+    {
+      const zz = KERN.zufall.mitStartwert(7), sp = ersatzSpeicher(), g = R.gedaechtnis({ speicher: sp, schluessel: "s" });
+      const alle = [];
+      for (let runde = 0; runde < 3; runde++) alle.push(...neueRunde(() => ({ k: `a${Math.floor(zz() * 20)}`, serien: {} }), runde < 2 ? 8 : 4, g).erg.map(x => x.split("@")[0]));
+      gleich(new Set(alle).size, 20, "Durchgang: 20 verschiedene in drei Runden (8 + 8 + 4)");
+    }
+    // Serie (RA5 a): keine Aufgabe zweimal; ist die Stufe erschöpft, endet sie (alles geschafft), ohne Wiederholung
+    {
+      const zz = KERN.zufall.mitStartwert(11), sp = ersatzSpeicher(), g = R.gedaechtnis({ speicher: sp, schluessel: "s" });
+      const s = neueRunde(() => ({ k: `a${Math.floor(zz() * 12)}`, serien: {} }), Infinity, g, true);
+      const ks = s.erg.map(x => x.split("@")[0]);
+      gleich([new Set(ks).size === ks.length, ks.length, s.gekuerzt].join(), "true,12,12", "Serie: 12 verschiedene, dann erschöpft");
+    }
+    // Serienbremse: höchstens SERIE_MAX gleiche Merkmale hintereinander, wenn die Stufe andere hergibt
+    {
+      const zz = KERN.zufall.mitStartwert(3), w = R.auswahl({});
+      let lauf = 0, max = 0, vorher = null;
+      for (let nr = 0; nr < 40; nr++) {
+        w.neueSuche();
+        for (let v = 0; ; v++) {
+          const i = Math.floor(zz() * 1000), wert = zz() < 0.9 ? "a" : "b";
+          if (w.pruefe(`k${i}`, { art: wert }, v).nehmen) { lauf = wert === vorher ? lauf + 1 : 1; vorher = wert; max = Math.max(max, lauf); break; }
+        }
+      }
+      gleich(max, R.SERIE_MAX, "Serienbremse: höchstens 3 gleiche hintereinander");
+    }
+    // Rekord, Bestwert, Bestzeit, Dauer
+    const rk = R.rekordEintragen([{ id: "k1", punkte: 3 }, { id: "k2", punkte: 5 }], { id: "k1", punkte: 7 });
+    gleich(rk.map(r => `${r.id}:${r.punkte}`).join(), "k2:5,k1:7", "Rekord: gleiche Kennung ersetzt");
+    gleich(R.bestwert(rk, r => r.id === "k2"), 5, "Bestwert gefiltert");
+    gleich(R.bestwert([], () => true), 0, "Bestwert ohne Rekord");
+    const ru = [{ dauer: 40 }, { dauer: 30, gezeigt: 1 }, { dauer: 20, endlos: true }, { dauer: 25, gekuerzt: 8 }, { dauer: 35.5 }];
+    gleich(R.bestzeit(ru), 35.5, "Bestzeit: nur volle Runden ohne gezeigte Lösung, keine Serie");
+    gleich(R.bestzeit([]), null, "Bestzeit ohne Runde");
+    gleich([R.sekunden(12345), R.sekunden(49), R.sekunden(-5)].join(), "12.3,0,0", "Dauer auf 0,1 s");
+    // Wächter
+    {
+      const h = {}, f = { addEventListener: (t, fn) => { h[t] = fn; }, removeEventListener: t => { delete h[t]; } };
+      const d = { visibilityState: "visible", addEventListener: (t, fn) => { h[t] = fn; }, removeEventListener: t => { delete h[t]; } };
+      let n = 0;
+      const w = R.waechter(() => n++, { fenster: f, dokument: d });
+      h.pagehide(); h.visibilitychange(); d.visibilityState = "hidden"; h.visibilitychange();
+      w.aus();
+      gleich([n, Object.keys(h).length, w.an].join(), "2,0,false", "Wächter: Verlassen und Verstecken, dann aus");
+    }
   }
 
   // ---------- Anmeldung und Sitzung im Tab ----------

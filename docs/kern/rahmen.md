@@ -529,11 +529,33 @@ Benutzt vom Eulenpfad (`LS.zuruecksetzen…`, Bestätigung beim Freischalten) un
 `aufsichtPinVergessen`, `freischalten`, `frist…`; Sicherheitsfrage beim Anlegen Pflicht). Geprüft in `tools/pruefe_kern.js`
 (alle Stufen, falsche Wege, Frist mit fester Uhr, beide Arten des Zurücksetzens) und `tools/pruefe_konten.js`.
 
-### 4.22 Geplant
+### 4.22 `KERN.runde` (`kern/runde.js`) — Ablauf einer Runde
 
-Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): der Ablauf einer Runde (Fehlversuch mit Hinweis und Lösung nach dem
-dritten, Serie/Endlos mit Rekord und Zwischenstand, Wiederholungsbremse, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`)
-und die Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Ein neuer Teil bekommt hier seinen Abschnitt, bevor er umzieht.
+Zuschnitt AR1 a (ohne Oberfläche: Prüfen der Antwort, Bewertung, Timer und Wartezeiten bleiben in der App), Einzelentscheide
+RA1–RA8 a (Plan B). Seit 1.19.0 die reinen Hilfen; der Ablauf selbst (Versuche, Lösung nach dem dritten Fehlversuch, Ende
+von Runde und Serie, Zeit je Aufgabe ab `bereit` ohne Pausen, Protokolleintrag mit `zeit` am Ende, `dauer` auf 0,1 s und
+einer Liste je Aufgabe) folgt.
+
+| Teil | Zweck |
+|---|---|
+| `gedaechtnis({ speicher, schluessel, feld = "gestellt", alt, max = 400 })` | Durchgang über Runden und Serien (RA5 a): `hat(fp)`, `merke(fp)`, `beginneNeu(fps)`; Schlüssel „Person\|Inhalt/Stufe“ (ohne Niveau); `alt` übernimmt frühere Schlüssel (Eulenpfad: nach Name) und entfernt sie |
+| `auswahl({ gedaechtnis, endlos, serieMax = 3 })` | je Aufgabe `neueSuche()`, je Zug `pruefe(kennung, serien, versuch)` → `{ nehmen, serieErzwungen, wiederholung }`, `{ erschoepft }` oder `{ weiter }`. Suche in fünf Stufen (`VERSUCHE`): neu und ohne Muster → aus früheren Runden → Serie erzwungen → neuer Durchgang → eine Wiederholung der Runde, nie direkt hintereinander (nicht in Serien). Erschöpft: Runde endet früher mit `gekuerzt`, Serie mit „alles geschafft“ (RA6 a) |
+| `rekordEintragen(liste, eintrag)` | gleiche Kennung ersetzt (Zwischenstand → Endstand), neue Liste |
+| `bestwert(rekorde, passt)`, `bestzeit(runden, passt)` | höchster Stand; kürzeste Dauer nur voller Runden ohne gezeigte Lösung, keine Serie, keine gekürzte |
+| `sekunden(ms)` | Dauer auf 0,1 s (RA2 a) |
+| `waechter(beimVerlassen, { fenster, dokument })` | Zwischenstand bei `pagehide` und `visibilitychange` (hidden); `aus()` |
+
+Die Kennung einer Aufgabe bildet die App (Eulenpfad aus der Fläche, Lernsteig aus dem Generator), der Kern vergleicht nur
+ihre Fingerabdrücke. Benutzt vom Eulenpfad (Auswahl, Gedächtnis, Rekorde, Wächter) und vom Lernsteig (dazu Bestzeit und
+Dauer). Geprüft in `tools/pruefe_kern.js`: Nachrechnung gegen die bisherige Schleife des Eulenpfads (1200 Runden aus 300
+Zufallsfällen, gleiche Züge und Kürzungen), Durchgang, Serie bis erschöpft, Serienbremse, Rekord, Bestzeit, Wächter.
+
+### 4.23 Geplant
+
+Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): der Ablauf
+einer Runde in `runde.js` (4.22; Fehlversuch mit Hinweis und Lösung nach dem dritten, Serie/Endlos, Eintrag im Protokoll,
+Vertrag `aufgabeErzeugen`/`pruefeAufgabe`) und die Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Ein neuer Teil
+bekommt hier seinen Abschnitt, bevor er umzieht.
 
 ## 5. Ändern und verteilen
 

@@ -146,10 +146,11 @@ LS.spiel({
 | `ctx.sag(text, art?)` | Die Eule spricht (`art`: `"gut"` oder `"hinweis"`). |
 
 **Wiederholungen** (Vorgabe Patrik 2026-10-31, verschärft LERN_Session11): Eine Aufgabe kommt erst wieder, wenn alle
-verschiedenen Aufgaben der Stufe einmal dran waren — auch über Runden hinweg. Der Rahmen merkt sich dafür je Kind, Spiel
-und Stufe die Fingerabdrücke der gestellten Aufgaben (`lernspiele:gestellt`, nur dieses Gerät, höchstens 400 je Stufe)
-und zieht eine nicht erlaubte Aufgabe neu (das Spiel zieht in `aufgabe()` zufällig). Suchstufen (`VERSUCHE` in
-`spiel.js`): 1. ungestellt und ohne zu lange Serie; 2. aus einer früheren Runde, wenn sonst ein Muster entstünde (die
+verschiedenen Aufgaben der Stufe einmal dran waren — auch über Runden und Serien hinweg (RA5 a). Der Rahmen merkt sich
+dafür je Person, Spiel und Stufe die Fingerabdrücke der gestellten Aufgaben (`lernspiele:gestellt`, Schlüssel
+„Kennung der Person|Spiel/Stufe“, bis LERN_Session18 nach dem Namen; nur dieses Gerät, höchstens 400 je Stufe) und zieht
+eine nicht erlaubte Aufgabe neu (das Spiel zieht in `aufgabe()` zufällig). Entscheiden tut der Kern
+(`KERN.runde.auswahl`, docs/kern/rahmen.md 4.22). Suchstufen (`KERN.runde.VERSUCHE`): 1. ungestellt und ohne zu lange Serie; 2. aus einer früheren Runde, wenn sonst ein Muster entstünde (die
 Serienbremse geht vor); 3. ungestellt, Serie erzwungen; 4. ist keine ungestellte mehr zu finden, beginnt ein neuer
 Durchgang; 5. höchstens eine Aufgabe ein zweites Mal je Runde, nie direkt hintereinander — sonst endet die Runde früher. Weil der Rahmen den Vorrat nicht kennt, ist „alle“ eine
 Suche mit vielen Zügen, kein Abzählen. Gibt eine Stufe nicht genug verschiedene Aufgaben her, endet die Runde früher; das
@@ -366,8 +367,9 @@ Vorgabe Patrik 2026-10-31.
   der Kennung des Rahmens, die auch Wiederholungen erkennt (`LS.pruefung.zaehle`): Das Testskript misst je Stufe und
   meldet einen Hinweis, wenn der Katalog davon abweicht (`ENDLOS_MIN` in `tools/pruefe_spiele.js`). Ist bei einer
   Liste alles gestellt, endet die Runde mit „alles geschafft“; es zählen nur freie Listen (LP3 a).
-- **Wiederholungen:** keine der letzten 30 Aufgaben nochmal. Findet sich keine neue mehr, ist die
-  Stufe „alles geschafft“.
+- **Wiederholungen** (RA5 a, LERN_Session19): in einer Serie keine Aufgabe zweimal, und wie in Runden zuerst, was im
+  Gedächtnis noch nicht steht (Durchgang über Runden und Serien, `KERN.runde`). Findet sich keine neue mehr, ist die
+  Stufe „alles geschafft“. Bis LERN_Session18: keine der letzten 30 der Serie, ohne Gedächtnis.
 - **Timer im Endlos-Modus** (Wunsch Patrik 2026-10-31; Boden und Verlauf: Entscheide F1 a und F2 a,
   LERN_Session4): Alle starten mit der Vorgabezeit der Stufe aus dem Katalog, ohne den persönlichen
   Faktor aus dem Profil. Die Zeit nähert sich einem **Boden je Aufgabe**: 1,2 s Grundzeit + 0,5 s je

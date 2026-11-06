@@ -555,19 +555,8 @@ const LS = (() => {
   /** Listen, die der angemeldete Spieler üben darf (die Aufsicht alle) — Spiele filtern ihre Inhalte danach. */
   const freieListen = FREIGABE.freieListen;
   // ---------- Prüfung je Eintrag (Entscheide LP1 a–LP5 a, LERN_Session11; rahmen.md 17) ----------
-  /** Kurzer Fingerabdruck eines Werts (cyrb53 über JSON): gleich bei gleichem Inhalt, sonst fast sicher verschieden. */
-  function fingerabdruck(wert) {
-    const s = typeof wert === "string" ? wert : JSON.stringify(wert);
-    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-    for (let i = 0; i < s.length; i++) {
-      const c = s.charCodeAt(i);
-      h1 = Math.imul(h1 ^ c, 2654435761);
-      h2 = Math.imul(h2 ^ c, 1597334677);
-    }
-    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
-  }
+  /** Kurzer Fingerabdruck eines Werts (cyrb53 über JSON, KERN.runden.fingerabdruck — dieselbe Rechnung wie bisher hier). */
+  function fingerabdruck(wert) { return KERN.runden.fingerabdruck(wert); }
   const PRUEFUNGEN = {};
   /** Ein Spiel meldet in spiele/<id>/pruefung.js, wie seine Listen geprüft werden (listenpruefung.js). */
   const listenPruefung = (spielId, defs) => { PRUEFUNGEN[spielId] = { ...(PRUEFUNGEN[spielId] || {}), ...defs }; };
@@ -1147,11 +1136,8 @@ const LS = (() => {
   // so gewählt, dass es später auch an einen Server gehen könnte (Rangliste nach Alter, Klasse, Region
   // — noch Idee); heute bleibt alles im Browser.
   const rekorde = () => lies("rekorde", []);
-  /** Rekord anhängen; ersetzt: ein früher gespeicherter Zwischenstand derselben Runde, der wegfällt. */
-  function speichereRekord(eintrag, ersetzt = null) {
-    schreibe("rekorde", [...rekorde().filter(e => e !== ersetzt && !(ersetzt && e.name === ersetzt.name && e.zeit === ersetzt.zeit
-      && e.inhalt === ersetzt.inhalt && e.stufe === ersetzt.stufe) && (!eintrag.id || e.id !== eintrag.id)), mitPerson(eintrag)]);
-  }
+  /** Rekord speichern; ein Zwischenstand derselben Serie (gleiche Kennung) wird ersetzt (KERN.runde). */
+  function speichereRekord(eintrag) { schreibe("rekorde", KERN.runde.rekordEintragen(rekorde(), mitPerson(eintrag))); }
   /** Stufen, die den Endlos-Modus anbieten (Katalog: endlos). */
   const endlosStufen = spielId => katalogEintrag(spielId)?.endlos || [];
   const gleicherModus = (e, spiel, stufe, mitTimer) => e.inhalt === spiel && e.stufe === stufe && !!e.timer === !!mitTimer;
@@ -1165,13 +1151,10 @@ const LS = (() => {
    */
   /**
    * Serienbremse (Vorgabe Patrik 2026-11-01): Ein zufällig gewähltes Merkmal (ctx.serie) kommt höchstens
-   * SERIE_MAX-mal hintereinander; der Rahmen zieht dafür bis zu SERIE_VERSUCHE-mal neu.
+   * SERIE_MAX-mal hintereinander. Die Suche nach einer neuen Aufgabe (Stufen, Gedächtnis, Kürzen) führt der Kern
+   * (KERN.runde.auswahl, RA5 a, RA6 a; docs/kern/rahmen.md 4.22).
    */
-  const SERIE_MAX = 3;
-  const SERIE_VERSUCHE = 40;
-  // Suche nach einer neuen Aufgabe (LERN_Session11): so viele Züge nur Ungestelltes, dann auch Gestelltes aus früheren
-  // Runden, dann Wiederholungen der Runde; danach ist die Stufe erschöpft.
-  const VERSUCHE = { serie: 40, gedaechtnis: 70, erzwingen: 90, durchgang: 105, ende: 120 };
+  const SERIE_MAX = KERN.runde.SERIE_MAX;
 
   const ENDLOS_TEMPO = { annaeherung: 0.92, grundzeit: 1.2, jeSchritt: 0.5, ersatzBoden: 0.4 };
   const endlosBoden = (start, schritte) => Math.min(start,
@@ -1184,7 +1167,7 @@ const LS = (() => {
   /** Anzeige der Zeit: unter 10 s mit einer Nachkommastelle (Komma), sonst ganze Sekunden. */
   const sekundenText = s => (s < 10 ? s.toFixed(1).replace(".", ",") : String(Math.round(s))) + " s";
   function besterRekord(name, spiel, stufe, timer) {
-    return rekorde().filter(e => e.name === name && gleicherModus(e, spiel, stufe, timer)).reduce((m, e) => Math.max(m, e.punkte), 0);
+    return KERN.runde.bestwert(rekorde(), e => e.name === name && gleicherModus(e, spiel, stufe, timer));
   }
   /** Rangliste: bester Wert je Spieler, ohne Testrunden und ohne Aufsicht, absteigend. */
   function ranglisteFuer(spiel, stufe, timer) {
@@ -2399,23 +2382,19 @@ const LS = (() => {
       const aufgabenZeiten = []; // je Aufgabe: { ms, versuche, zeitUm, geloest }
       let uhr = null;            // laufender Timer der aktuellen Aufgabe
       let aufgabeLauf = 0;       // zählt die gestellten Aufgaben; ein später Uhrstart der vorigen (ctx.uhrWarten) bleibt wirkungslos
-      // Wiederholungen (Vorgabe Patrik 2026-10-31): In einer Runde kommt höchstens eine Aufgabe ein
-      // zweites Mal, nie direkt hintereinander. Gibt die Stufe nicht genug verschiedene Aufgaben her,
-      // endet die Runde früher (anzahl wird kleiner). Endlos: keine der letzten 30 Aufgaben nochmal;
-      // findet sich keine neue mehr, ist alles geschafft.
+      // Wiederholungen (Vorgabe Patrik 2026-10-31; RA5 a, RA6 a, KERN.runde.auswahl): In einer Runde kommt höchstens eine
+      // Aufgabe ein zweites Mal, nie direkt hintereinander. Gibt die Stufe nicht genug verschiedene Aufgaben her, endet
+      // die Runde früher (anzahl wird kleiner). Endlos: keine Aufgabe zweimal; findet sich keine neue mehr, ist alles
+      // geschafft (bis LERN_Session18: keine der letzten 30).
       let anzahl = endlos || mix ? Infinity : def.anzahl;
-      const gestellt = new Map(); // Kennung → wie oft gestellt (diese Runde)
-      let wiederholt = false;     // schon eine Aufgabe ein zweites Mal in dieser Runde?
-      let letzte = null;
-      // Gedächtnis über Runden (Wunsch Patrik, LERN_Session11): je Kind, Spiel und Stufe die Fingerabdrücke der schon
-      // gestellten Aufgaben. Eine Aufgabe kommt erst wieder, wenn (fast) alle verschiedenen einmal dran waren; dann
-      // beginnt ein neuer Durchgang. Nur dieses Gerät, höchstens 400 je Stufe.
-      const gedaechtnisSchluessel = `${name}|${def.id}/${stufe.id}`;
-      const gedaechtnis = new Set(lies("gestellt", {})[gedaechtnisSchluessel] || []);
-      const merkeGestellt = () => schreibe("gestellt", { ...lies("gestellt", {}), [gedaechtnisSchluessel]: [...gedaechtnis].slice(-400) });
-      const zuletzt = []; // Endlos: die letzten Kennungen
+      // Gedächtnis über Runden (Wunsch Patrik, LERN_Session11; RA5 a): je Person, Spiel und Stufe die Fingerabdrücke der
+      // schon gestellten Aufgaben, auch für Serien. Eine Aufgabe kommt erst wieder, wenn (fast) alle verschiedenen einmal
+      // dran waren; dann beginnt ein neuer Durchgang. Nur dieses Gerät, höchstens 400 je Stufe. Bis LERN_Session18 nach
+      // dem Namen statt der Kennung der Person — der alte Schlüssel wird übernommen.
+      const wer = person(name);
+      const wahl = KERN.runde.auswahl({ endlos, gedaechtnis: KERN.runde.gedaechtnis({ speicher: { lies, schreibe },
+        schluessel: `${wer ? wer.id : name}|${def.id}/${stufe.id}`, alt: wer ? [`${name}|${def.id}/${stufe.id}`] : [] }) });
       let allesGeschafft = false;
-      const serienVerlauf = {}; // je Merkmal (ctx.serie) die Werte der gestellten Aufgaben dieser Runde
       const mitTimer = timer.an ? startSekunden : null; // Endlos: Startzeit des Rekords oder null
       let rekordVorher = null; // Endlos: bisheriger Rekord, sobald diese Runde gespeichert ist
       let zwischenstand = null; // Endlos: beim Verlassen gespeicherter Eintrag, den das Ende ersetzt
@@ -2991,56 +2970,22 @@ const LS = (() => {
             }
           },
         };
-        // Aufgabe zeichnen; ist sie in dieser Runde nicht mehr erlaubt, neu ziehen (die Spiele ziehen
-        // in aufgabe() zufällig). Findet sich nach vielen Versuchen keine erlaubte, ist die Stufe erschöpft.
-        // Serienbremse (Vorgabe Patrik 2026-11-01): Merkmale aus ctx.serie höchstens SERIE_MAX-mal
-        // hintereinander. Findet sich nach SERIE_VERSUCHE Zügen keine passende Aufgabe, gilt die Aufgabe
-        // trotzdem (die Stufe hat dann wohl nur diesen Wert) — das Testskript meldet es.
-        const serieZuLang = () => Object.entries(serien).some(([name, wert]) => {
-          const bisher = serienVerlauf[name] || [];
-          return bisher.length >= SERIE_MAX && bisher.slice(-SERIE_MAX).every(w => w === wert);
-        });
+        // Aufgabe zeichnen; ist sie in dieser Runde nicht mehr erlaubt, neu ziehen (die Spiele ziehen in aufgabe()
+        // zufällig, die Menge der möglichen Aufgaben kennt der Rahmen nicht). Ob sie passt, entscheidet der Kern
+        // (KERN.runde.auswahl: Suche in fünf Stufen mit Gedächtnis und Serienbremse, RA5 a, RA6 a). Findet sich nach vielen
+        // Zügen keine, ist die Stufe erschöpft. Gilt eine Aufgabe trotz zu langer Serie (die Stufe hat dann wohl nur diesen
+        // Wert), meldet es das Testskript.
         zeichnet = true;
         blaseNeu = false;
-        let sahUngestellt = false; // hat die Suche überhaupt eine ungestellte Aufgabe gefunden (nur durch ein Muster gesperrt)?
+        wahl.neueSuche();
         for (let versuch = 0; ; versuch++) {
           gesagtBeimZeichnen = false;
           def.aufgabe(ctx);
           const k = kennung(flaeche, loesungVorab, eigeneKennung);
           const messen = !!pruefung.zaehle?.(k); // nur das Testskript: weiter ziehen, nichts stellen
-          const n = k ? gestellt.get(k) || 0 : 0;
-          const zuLang = serieZuLang();
-          // Stufen der Suche (das Spiel zieht zufällig; die Menge der möglichen Aufgaben kennt der Rahmen nicht):
-          //   1. weder in dieser Runde noch im Gedächtnis, ohne zu lange Serie (ctx.serie);
-          //   2. aus einer früheren Runde, wenn sonst ein Muster entstünde — die Serienbremse geht vor, der Durchgang bleibt;
-          //   3. ungestellt, Serie notfalls erzwungen;
-          //   4. aus früheren Runden: (fast) alle waren dran → neuer Durchgang, das Gedächtnis beginnt neu;
-          //   5. Wiederholung dieser Runde, nie zweimal hintereinander (die Stufe hat weniger Aufgaben als die Runde).
-          const fp = k ? fingerabdruck(k) : null;
-          const ungestellt = n === 0 && (!fp || !gedaechtnis.has(fp));
-          if (ungestellt) sahUngestellt = true;
-          const stufeSuche = versuch < VERSUCHE.serie ? 1 : versuch < VERSUCHE.gedaechtnis ? 2 : versuch < VERSUCHE.erzwingen ? 3 : versuch < VERSUCHE.durchgang ? 4 : 5;
-          const passt = messen ? false : endlos ? (!k || !zuletzt.includes(k)) && (!zuLang || versuch >= SERIE_VERSUCHE)
-            : stufeSuche === 1 ? ungestellt && !zuLang
-            : stufeSuche === 2 ? n === 0 && !zuLang
-            : stufeSuche === 3 ? ungestellt
-            : stufeSuche === 4 ? n === 0
-            : n === 1 && !wiederholt && k !== letzte; // höchstens eine Wiederholung je Runde (Vorgabe 2026-10-31)
-          if (passt) {
-            if (endlos && k) { zuletzt.push(k); if (zuletzt.length > 30) zuletzt.shift(); }
-            if (!endlos && fp) {
-              // Neuer Durchgang, wenn keine ungestellte Aufgabe mehr zu finden war (Stufe 4, oder Stufe 2 ohne eine
-              // einzige ungestellte); in Stufe 2 mit gesperrten ungestellten ist es nur eine Ausnahme gegen ein Muster.
-              const erschoepft = gedaechtnis.has(fp) && (stufeSuche === 4 || (stufeSuche === 2 && !sahUngestellt));
-              if (erschoepft) { gedaechtnis.clear(); for (const x of gestellt.keys()) gedaechtnis.add(fingerabdruck(x)); }
-              gedaechtnis.add(fp);
-              merkeGestellt();
-            }
-            if (n) wiederholt = true;
-            if (k) gestellt.set(k, n + 1);
-            letzte = k;
-            for (const [name, wert] of Object.entries(serien)) (serienVerlauf[name] ||= []).push(wert);
-            pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: zuLang && (endlos ? versuch >= SERIE_VERSUCHE : stufeSuche >= 3) });
+          const wahlErg = messen ? { weiter: true } : wahl.pruefe(k, serien, versuch);
+          if (wahlErg.nehmen) {
+            pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: wahlErg.serieErzwungen });
             schritteFest = true;
             // Notizblock (NB2 a): wenn die Aufgabe Notizen oder den Block anbietet. Der Knopf steht in der Zeile von „Melden“,
             // nicht beim Feld — dort zerrisse er den Aufbau mancher Spiele (Rechen-Maschine: das Feld sitzt auf dem Pfeil).
@@ -3070,7 +3015,7 @@ const LS = (() => {
             }), 300);
             break;
           }
-          if (versuch >= VERSUCHE.ende && !messen) {
+          if (wahlErg.erschoepft) {
             clearTimeout(uhr);
             // Mix: Das Spiel hat keine neue Aufgabe mehr; der Mix nimmt dann die anderen.
             if (mix) { flaeche.innerHTML = ""; return anMix({ typ: "erschoepft" }); }
@@ -3187,23 +3132,17 @@ const LS = (() => {
           ...(allesGeschafft ? { alles: true } : {}), ...(test ? { test: true } : {}), ...(hilfen ? { hilfe: hilfen } : {}),
           ...(abgebrochen ? { abgebrochen: true } : {}),
         };
-        speichereRekord(eintrag, zwischenstand);
+        speichereRekord(eintrag);
         zwischenstand = eintrag;
         if (!abgebrochen) {
           rundeGespeichert = true;
-          removeEventListener("pagehide", beimVerlassen);
-          document.removeEventListener("visibilitychange", beimVerstecken);
+          waechter?.aus();
         }
         return rekordVorher;
       }
       // Verlassen: Tab zu, Zurück-Pfeil (pagehide); Tablet aus oder App gewechselt (visibilitychange, auf
-      // Tablets zuverlässiger als pagehide). Eine Serie ohne richtige Aufgabe gibt keinen Eintrag.
-      function beimVerlassen() { if (geschafft > 0) speichereEndlos(true); }
-      function beimVerstecken() { if (document.visibilityState === "hidden") beimVerlassen(); }
-      if (endlos && !mix) {
-        addEventListener("pagehide", beimVerlassen);
-        document.addEventListener("visibilitychange", beimVerstecken);
-      }
+      // Tablets zuverlässiger als pagehide) — KERN.runde.waechter. Eine Serie ohne richtige Aufgabe gibt keinen Eintrag.
+      const waechter = endlos && !mix ? KERN.runde.waechter(() => { if (geschafft > 0) speichereEndlos(true); }) : null;
       // Mix: Aufgaben nur auf Verlangen des Mix (mix.html), Nachrichten nur von ihm.
       if (mix) addEventListener("message", e => {
         if (e.source !== parent || e.data?.lern !== "mix") return;

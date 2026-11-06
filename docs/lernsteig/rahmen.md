@@ -93,7 +93,14 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 - `anzahl` Aufgaben. Fehlversuch: Hinweis, neuer Versuch, nach dem dritten die Lösung mit Weg und „Weiter“. Kein
   Punktabzug, kein Zeitdruck; die Zeit je Aufgabe wird gemessen.
-- Ergebnis: auf Anhieb richtig, Zeit, Bestzeit (nur Runden ohne gezeigte Lösung). Keine Sterne (BF1 a).
+- Richtig (RA8 a, wie LB1 a im Eulenpfad): auf Anhieb nur „Richtig.“, weiter nach 1,2 s (Serie 0,7 s); nach einem
+  Fehlversuch „Jetzt stimmt es.“ mit dem Weg und „Weiter“, ohne Selbstlauf.
+- Wiederholungen (RA5 a, RA6 a; `KERN.runde`, docs/kern/rahmen.md 4.22): in einer Runde oder Serie keine Aufgabe zweimal,
+  solange die Stufe neue hergibt; über Runden ein Durchgang je Konto, Übung und Stufe (`lernsteig:gestellt`, Schlüssel
+  „Konto|Übung/Stufe“, ohne Niveau; der Gast nur in der Seite). Höchstens eine Wiederholung je Runde, nie direkt
+  hintereinander; danach endet die Runde früher (`gekuerzt`), die Serie mit „Alle Aufgaben dieser Stufe geschafft“
+  (Rekord `alles: true`). Bis LERN_Session18: nur in Serien keine der letzten 30, Schlüssel mit Niveau.
+- Ergebnis: auf Anhieb richtig, Zeit, Bestzeit (nur volle Runden ohne gezeigte Lösung). Keine Sterne (BF1 a).
 - **Serie** (Endlos): Aufgaben, bis eine falsch ist; Rekord je Konto, Übung und Stufe, getrennt mit und ohne Rechner (RE1 a; nicht je Niveau, weil die Aufgaben einer
   Stufe nicht am Niveau hängen, ST1 a — bis LERN_Session18 stand hier „und Niveau“). Gespeichert, sobald die
   Serie vorbei ist; beim Verlassen mitten drin als Zwischenstand (`abgebrochen: true`).

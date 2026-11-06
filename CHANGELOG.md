@@ -597,3 +597,23 @@
   lernsteig/rahmen.md 5 nannte den Rekord „je … Niveau“, der Code rechnet nach ST1 a je Stufe.
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session18_2026-11-06.md`, Handover Eulenpfad (dazu LERN-60 auf Kern 1.18.0,
   LERN-61 als erledigt in LERN_Session16 nachgetragen) und Lernsteig.
+
+## 2026-11-06 — LERN_Session19
+- Ablauf einer Runde, Einzelentscheide RA1–RA8 a (Plan B): `zeit` = Ende der Runde, `dauer` auf 0,1 s, eine Serie ist
+  auch eine Runde im Protokoll, eine Liste je Aufgabe, Gedächtnis als Durchgang auch in Serien, Kürzen bei erschöpfter
+  Stufe, Zeit je Aufgabe ab `bereit` ohne Pausen, im Lernsteig auf Anhieb nur „Richtig.“.
+- Kern 1.19.0: `kern/runde.js` (`KERN.runde`) mit den reinen Hilfen — Gedächtnis, Auswahl der Aufgaben (Suche in fünf
+  Stufen, Serienbremse, Kürzen), Rekord nach Kennung, Bestwert, Bestzeit, Dauer, Wächter des Zwischenstands. Nachrechnung
+  im Testskript: wählt in 1200 Runden aus 300 Zufallsfällen genau wie die bisherige Schleife des Eulenpfads.
+- Eulenpfad: Auswahl, Gedächtnis, Rekorde und Wächter über den Kern; normale Runden unverändert (Stichprobe mit gleichen
+  Klickzahlen). Neu: in einer Serie keine Aufgabe zweimal, und das Gedächtnis gilt auch dort (RA5 a; vorher keine der
+  letzten 30). Gedächtnis je Person statt je Name (alter Schlüssel übernommen). Eigener Fingerabdruck durch den des Kerns
+  ersetzt (gleiche Rechnung). Testskript: Wiederholung in einer Serie ist ein Fund.
+- Lernsteig: Durchgang über Runden für alle Stufen (vorher nur Serien, letzte 30, mit Niveau im Schlüssel), Runde endet
+  bei erschöpfter Stufe früher (`gekuerzt`), Serie mit „Alle Aufgaben dieser Stufe geschafft“; der Gast merkt sich nichts
+  mehr im Speicher (vorher schrieb er sein Gedächtnis). Richtig auf Anhieb nur „Richtig.“, nach einem Fehlversuch der Weg
+  mit „Weiter“ (RA8 a; vorher stand der Weg 1,2 s da). Seitentest prüft RA8, Wiederholungen und Gedächtnis; Gegenprobe
+  mit dem alten Verhalten schlägt an (84 Funde).
+- Ersatz-DOM (`tools/pruef_dom.js`): `addEventListener` auch als Eigenschaft des Fensters, wie im Browser.
+- Doku: docs/kern/rahmen.md 4.22 (neu), 4.23; rahmen.md 4.2 und 7 (Wiederholungen); lernsteig/rahmen.md 5;
+  gemeinsame_mechaniken.md; Plan (RA1–RA8 a, Stand B).

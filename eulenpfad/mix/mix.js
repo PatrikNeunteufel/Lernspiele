@@ -276,7 +276,7 @@ function starte(name, e) {
   function speichere(abgebrochen) {
     if (endlos) {
       if (abgebrochen && !geschafft) return;
-      LS.speichereRekord(rekordEintrag(abgebrochen), zwischenstand);
+      LS.speichereRekord(rekordEintrag(abgebrochen));
       return;
     }
     const zeit = new Date().toISOString();
@@ -300,7 +300,7 @@ function starte(name, e) {
   function beimVerstecken() {
     if (document.visibilityState !== "hidden" || vorbei || !endlos || !geschafft) return;
     const r = rekordEintrag(true);
-    LS.speichereRekord(r, zwischenstand);
+    LS.speichereRekord(r);
     zwischenstand = r;
   }
   function beimVerlassen() { if (!vorbei && gestellt) { vorbei = true; speichere(true); } }

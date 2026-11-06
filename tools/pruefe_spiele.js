@@ -136,7 +136,13 @@ const TREIBER = `
     }
     // Ab hier nur Aufgaben und Antworten; andere Haken (etwa „uhr“, ctx.uhrWarten) sind keine Antwort.
     if (art !== "gestellt" && art !== "falsch" && art !== "richtig") return;
-    if (art === "gestellt" && endlos) return; // Endlos: eigene Regel (keine der letzten 30)
+    if (art === "gestellt" && endlos) {
+      // Endlos (RA5 a, LERN_Session19): in einer Serie keine Aufgabe zweimal (bis LERN_Session18: keine der letzten 30)
+      if (a.nr === 0) gestellt = new Map();
+      if (a.kennung && gestellt.has(a.kennung)) melde("Wiederholung", "«" + a.kennung.slice(0, 80) + "» zweimal in einer Serie", a.kennung);
+      if (a.kennung) gestellt.set(a.kennung, 1);
+      return;
+    }
     if (art === "gestellt") {
       if (a.nr === 0) { gestellt = new Map(); letzte = null; }
       if (!a.kennung) return;

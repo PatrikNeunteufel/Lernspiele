@@ -455,6 +455,10 @@ const __nachrichten = [];
 const parent = { postMessage: d => __nachrichten.push(structuredClone(d)) };
 const addEventListener = (t, fn) => document.addEventListener(t, fn);
 const removeEventListener = (t, fn) => document.removeEventListener(t, fn);
+// Wie im Browser auch als Eigenschaft des Fensters (globalThis.addEventListener): der Kern ruft sie so auf
+// (KERN.runde.waechter), ein const allein wäre dort nicht zu sehen.
+globalThis.addEventListener = addEventListener;
+globalThis.removeEventListener = removeEventListener;
 const Node = __Knoten;
 const HTMLElement = Element;
 const SVGElement = Element;

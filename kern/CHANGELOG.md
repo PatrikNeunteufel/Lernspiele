@@ -3,6 +3,15 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.19.0 — 2026-11-06 (LERN_Session19)
+- `runde.js` (`KERN.runde`, AR1 a, erster Schritt): reine Hilfen des Ablaufs einer Runde — `gedaechtnis` (Durchgang über
+  Runden und Serien je Person, Inhalt und Stufe, höchstens 400; alte Schlüssel übernommen, RA5 a), `auswahl` (Suche in fünf
+  Stufen mit Serienbremse, höchstens eine Wiederholung je Runde, nie direkt hintereinander, in Serien keine; erschöpft =
+  Runde gekürzt bzw. Serie „alles geschafft“, RA6 a), `rekordEintragen` (gleiche Kennung ersetzt), `bestwert`, `bestzeit`
+  (nur volle Runden ohne gezeigte Lösung), `sekunden` (0,1 s, RA2 a), `waechter` (Zwischenstand bei `pagehide` und
+  `visibilitychange`). Aus dem Eulenpfad (Auswahl, Gedächtnis) und dem Lernsteig (Rekord, Bestzeit). Eulenpfad und
+  Lernsteig benutzen es.
+
 ## 1.18.0 — 2026-11-06 (LERN_Session18)
 - `rollen.js` (`KERN.rollen`, RL2 a): Bestätigung durch eine bestehende Aufsicht (`bestaetige`, `brauchtBestaetigung` —
   nur Aufsichten mit PIN zählen), PIN vergessen in den Stufen andere Aufsicht, Code, Sicherheitsfrage (`neuePin`, gleich
