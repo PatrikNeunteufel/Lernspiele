@@ -8,9 +8,6 @@
 <style>
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
   .bild-gross { text-align: center; font-size: clamp(64px, 15vw, 96px); line-height: 1.1; margin-bottom: 8px; }
-  .instr-svg { width: 1.2em; height: 1.2em; vertical-align: middle; }
-  .instr-svg .metall { fill: none; stroke: #8a8fa8; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
-  .instr-svg .holz { fill: #c58b52; stroke: #7a4f26; stroke-width: 3; }
 </style>
 </head>
 <body>
@@ -28,6 +25,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="instrumente.js"></script>
 <script>
 "use strict";
@@ -37,7 +35,6 @@
 // Instrumentengruppen und Formationen (Quartett, Orchester). Inhalte in instrumente.js.
 
 const { waehle, mische, el } = LS;
-const SVG = "http://www.w3.org/2000/svg";
 const ID = "instrumente";
 
 // Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
@@ -47,22 +44,7 @@ const I = INSTRUMENTE.map(([bild, name, gruppe, spielart, genauer]) => ({ bild, 
   .filter(i => FREI.has(INSTRUMENT_LISTE_JE_GRUPPE[i.gruppe]));
 const FRAGEN = INSTRUMENT_FRAGEN.filter(f => FREI.has(f[4]));
 
-// Schulinstrumente ohne Emoji, als kleine Zeichnungen
-const ZEICHNUNG = {
-  triangel: '<path class="metall" d="M50,12 L88,82 L16,82 L46,26"/><line class="metall" x1="62" y1="40" x2="92" y2="20" style="stroke-width:4"/>',
-  klangstab: '<rect class="holz" x="10" y="58" width="80" height="22" rx="4"/><rect x="18" y="40" width="64" height="14" rx="4" fill="#b9bfd6" stroke="#6b6f8a" stroke-width="3"/><line class="metall" x1="70" y1="10" x2="52" y2="36" style="stroke-width:4"/><circle cx="72" cy="10" r="6" fill="#e0569a"/>',
-  schlagholz: '<rect class="holz" x="8" y="30" width="62" height="14" rx="7" transform="rotate(-20 39 37)"/><rect class="holz" x="30" y="58" width="62" height="14" rx="7" transform="rotate(15 61 65)"/>',
-};
-function bildVon(x) {
-  if (!x.bild) return null;
-  if (!x.bild.startsWith("svg:")) return x.bild;
-  const s = document.createElementNS(SVG, "svg");
-  s.setAttribute("viewBox", "0 0 100 100");
-  s.setAttribute("class", "instr-svg");
-  s.setAttribute("aria-hidden", "true");
-  s.innerHTML = ZEICHNUNG[x.bild.slice(4)];
-  return s;
-}
+// Schulinstrumente ohne Emoji (Triangel, Klangstab, Schlagholz) stehen in der Bildersammlung (bilder.js, B1 a).
 
 const GRUPPEN = {
   Schlaginstrument: "🥁", Saiteninstrument: "🎸", Blasinstrument: "🎺", Tasteninstrument: "🎹",
@@ -203,14 +185,13 @@ LS.spiel({
     if (a.nach === "genauer" && a.koerbe.length === 2) ctx.serie("antwort", a.richtig);
     ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "name") {
-      ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst dieses Instrument?" }), el("div", { class: "bild-gross" }, bildVon(a.x)));
+      ctx.flaeche.append(el("div", { class: "frage", text: "Wie heisst dieses Instrument?" }), el("div", { class: "bild-gross" }, LS.bild(a.x.bild)));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 130, hinweis: "Schau genau: Hat es Saiten, Tasten, ein Mundstück — oder schlägt man darauf?", loesung: `Das ist: ${a.x.name}.` });
     } else if (a.art === "korb") {
       const frage = a.info === SPIELARTEN ? "Wie spielt man dieses Instrument?" : "Zu welcher Gruppe gehört das Instrument?";
       ctx.flaeche.append(el("div", { class: "frage", text: frage }));
-      const bild = bildVon(a.x);
       const { karte } = LS.koerbe(ctx, {
-        karte: { bild: typeof bild === "string" ? bild : "", text: a.x.name }, koerbe: a.koerbe, richtig: a.richtig,
+        karte: { bild: a.x.bild, text: a.x.name }, koerbe: a.koerbe, richtig: a.richtig,
         korbInhalt: k => ({ bild: a.info[k], text: k }),
         // Der Hinweis nennt die Gruppe nicht — sonst stünde die Lösung darin.
         hinweis: FALLEN.test(a.x.name) && a.info === GRUPPEN && a.koerbe.includes("Holzblasinstrument")
@@ -218,7 +199,6 @@ LS.spiel({
           : "Wie entsteht der Ton? Schlägt man, zupft man, streicht man oder bläst man?",
         loesung: `${a.x.name}: ${a.richtig}.`,
       });
-      if (bild && typeof bild !== "string") karte.prepend(el("span", { class: "bild" }, bild));
       // Hier ist die Spielweise oder Gruppe gefragt, nicht der Name: Die Eule liest ihn mit vor (rahmen.md Abschnitt 12).
       karte.querySelector("b").classList.add("frage");
     } else {

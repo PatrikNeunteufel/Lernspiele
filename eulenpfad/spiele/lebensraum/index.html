@@ -24,6 +24,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="../tier-sortierer/tiere.js"></script>
 <script src="nahrung.js"></script>
 <script>
@@ -108,7 +109,7 @@ const STUFEN_TEXT = {
   s3: "Vier Lebensräume: dazu das Gebirge.",
   s4: "Vier Lebensräume und kurze Nahrungsketten: Gras → Feldmaus → Fuchs.",
   s5: "Nahrungsketten mit vier Gliedern — und: Was frisst …?",
-  s6: "Endgegner: alles gemischt, auch Tiere ohne Bild.",
+  s6: "Endgegner: alles gemischt — Lebensräume, Nahrungsketten und: Was frisst …?",
 };
 // Angeboten werden nur Stufen, für die die freien Listen etwas hergeben.
 const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
@@ -155,7 +156,7 @@ function pruefeAufgabe(a, stufe) {
   return m;
 }
 
-const mitBild = g => (g.bild ? `${g.bild} ${g.name}` : g.name);
+const mitBild = g => LS.mitBildText(g.bild, g.name);
 
 /**
  * Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Futter, Schutz, Reihenfolge der Kette. Bei „Was

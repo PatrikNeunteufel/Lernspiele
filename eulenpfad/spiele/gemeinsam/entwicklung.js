@@ -133,7 +133,8 @@ LS.entwicklung = (() => {
           t.hinweis ? el("p", { class: "leise", text: t.hinweis }) : null,
           el("table", {},
             el("thead", {}, el("tr", {}, ...t.kopf.map(k => el("th", { text: k })), el("th"))),
-            el("tbody", {}, ...t.zeilen.map(z => el("tr", {}, ...z.map(w => el("td", { text: w })),
+            // Eine Zelle „svg:<name>“ zeigt die Zeichnung aus der Bildersammlung (B1 a; Bemerkungen 12, 13)
+            el("tbody", {}, ...t.zeilen.map(z => el("tr", {}, ...z.map(w => LS.zelleMitBildern(w)),
               el("td", {}, el("button", { type: "button", class: "knopf hell klein", text: "📝", title: "Bemerkung zu diesem Eintrag",
                 onclick: () => bemerken({ eintrag: z.join(" | ") }) }))))))));
     dialog.append(el("h2", { text: `${spiel.bild} ${spiel.name} — ${liste.name}` }), kopf, feld, ...inhalt);

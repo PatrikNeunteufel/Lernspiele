@@ -136,6 +136,9 @@ const TREIBER = `
       letzte = a.kennung;
       return;
     }
+    // Bildersammlung (B1 a, LERN_Session16): „svg:<name>“ ist ein Bildname und darf nie als Text erscheinen
+    if (/svg:/.test((a.flaeche?.textContent || "") + " " + (a.vorab || "")))
+      melde("Bildname als Text", "«svg:…» steht als Text auf der Fläche oder in der Lösung — LS.bild oder LS.mitBildText benutzen", "svg-text");
     if (!a.vorab) ohneVorab++;
     if (art === "falsch") {
       if (a.aufgeloest) { hinweise.delete(a.nr); return; }
@@ -318,8 +321,14 @@ function pruefe(id, stufe, liste = null, endlos = false, mix = false) {
   const html = fs.readFileSync(seitenPfad, "utf8");
   const body = (html.match(/<body[^>]*>([\s\S]*)<\/body>/) || [, html])[1].replace(/<script[\s\S]*?<\/script>/g, "");
   const search = "?stufe=" + stufe + (endlos ? "&endlos=1" : "") + (mix ? "&mix=1&timer=1" : "");
-  const kontext = vm.createContext({ __seite: { html: body, search, seed: opt.seed }, console, URL, URLSearchParams, structuredClone });
   const ergebnis = { id, stufe, fehler: [], hinweise: [], angeboten: true };
+  // Fehlt ein Bild der Bildersammlung (LS.bild meldet es auf der Konsole), ist das ein Fehler des Spiels
+  const bildFehlt = new Set();
+  const konsole = { ...console, error(...a) {
+    const t = a.join(" ");
+    if (/^Bild svg:/.test(t)) { if (!bildFehlt.has(t)) { bildFehlt.add(t); ergebnis.fehler.push(t); } } else console.error(...a);
+  } };
+  const kontext = vm.createContext({ __seite: { html: body, search, seed: opt.seed }, console: konsole, URL, URLSearchParams, structuredClone });
   const lauf = (code, name, ms) => vm.runInContext(code, kontext, { filename: name, timeout: ms });
   /** Ausnahmen, die im Spiel aufgefangen wurden (pruef_dom sammelt sie in __fehler), als Fehler dazunehmen. */
   const mitAusnahmen = () => {

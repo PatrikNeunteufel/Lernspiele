@@ -7,6 +7,10 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "frueher-heute/grosseltern": {
+      "am": "2026-11-05",
+      "von": "Patrik"
+    },
     "gegenteil-wippe/gegenteile": {
       "am": "2026-11-04",
       "von": "Patrik"
@@ -75,6 +79,10 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "tageslauf-sonne/taetigkeiten": {
+      "am": "2026-11-05",
+      "von": "Patrik"
+    },
     "zeit-schaetzer/taetigkeiten": {
       "am": "2026-11-05",
       "von": "Patrik"
@@ -141,6 +149,10 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "frueher-heute": {
+      "am": "2026-11-05",
+      "von": "Patrik"
+    },
     "gegenteil-wippe": {
       "am": "2026-11-04",
       "von": "Patrik"
@@ -158,6 +170,10 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "komma-messband": {
+      "am": "2026-11-05",
+      "von": "Patrik"
+    },
+    "lebensraum": {
       "am": "2026-11-05",
       "von": "Patrik"
     },
@@ -227,6 +243,10 @@ const PRUEFSTAND = {
     },
     "steine-fangen": {
       "am": "2026-11-03",
+      "von": "Patrik"
+    },
+    "tageslauf-sonne": {
+      "am": "2026-11-05",
       "von": "Patrik"
     },
     "velo-tabelle": {

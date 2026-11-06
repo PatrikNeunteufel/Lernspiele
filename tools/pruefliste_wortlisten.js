@@ -147,7 +147,7 @@ z("");
 z("## 8. Tier-Sortierer und Lebensraum-Zuordnung (Lehrplan SG NMG.2.1, NMG.2.4)");
 z("");
 z("Leer = bewusst nicht zugeordnet, weil nicht eindeutig (Haltung) oder in mehreren Lebensräumen typisch.");
-z("Ohne Bild = kein passendes Emoji; das Tier kommt erst ab Stufe 3 vor.");
+z("Bild „svg:…“ = gezeichnet (Bildersammlung spiele/gemeinsam/bilder.js); ohne Bild käme das Tier erst ab Stufe 3 vor.");
 z("");
 z("| Name | Bild | Klasse | Gruppe (Säugetiere) | Haltung | Lebensraum | ☐ |");
 z("|---|---|---|---|---|---|---|");

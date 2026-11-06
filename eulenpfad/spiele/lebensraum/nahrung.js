@@ -14,16 +14,16 @@ const LEBENSRAUM_LISTEN = ["wald", "wiese", "weiher", "gebirge", "nahrungsketten
 const LEBENSRAUM_LISTE_JE_RAUM = { Wald: "wald", Wiese: "wiese", Weiher: "weiher", Gebirge: "gebirge" };
 
 const NAHRUNGSKETTEN = [
-  [["Gras", "🌱", true], ["Heuschrecke", "🦗"], ["Grasfrosch", "🐸"], ["Graureiher", null]],
+  [["Gras", "🌱", true], ["Heuschrecke", "🦗"], ["Grasfrosch", "🐸"], ["Graureiher", "svg:graureiher"]],
   [["Gras", "🌱", true], ["Feldmaus", "🐁"], ["Fuchs", "🦊"]],
-  [["Blätter", "🍃", true], ["Raupe", "🐛"], ["Kohlmeise", "🐦"], ["Sperber", null]],
+  [["Blätter", "🍃", true], ["Raupe", "🐛"], ["Kohlmeise", "🐦"], ["Sperber", "svg:sperber"]],
   [["Salat", "🥬", true], ["Schnecke", "🐌"], ["Igel", "🦔"]],
-  [["Algen", "🌿", true], ["Mückenlarve", null], ["Forelle", "🐟"], ["Graureiher", null]],
-  [["Eicheln", "🌰", true], ["Eichhörnchen", "🐿️"], ["Baummarder", null]],
+  [["Algen", "🌿", true], ["Mückenlarve", "svg:mueckenlarve"], ["Forelle", "🐟"], ["Graureiher", "svg:graureiher"]],
+  [["Eicheln", "🌰", true], ["Eichhörnchen", "🐿️"], ["Baummarder", "svg:baummarder"]],
   [["Laub", "🍂", true], ["Regenwurm", "🪱"], ["Amsel", "🐦‍⬛"]],
-  [["Blütennektar", "🌸", true], ["Nachtfalter", null], ["Fledermaus", "🦇"]],
-  [["Gras", "🌱", true], ["Reh", "🦌"], ["Luchs", null]],
-  [["Gräser", "🌱", true], ["Murmeltier", null], ["Steinadler", "🦅"]],
+  [["Blütennektar", "🌸", true], ["Nachtfalter", "svg:nachtfalter"], ["Fledermaus", "🦇"]],
+  [["Gras", "🌱", true], ["Reh", "🦌"], ["Luchs", "svg:luchs"]],
+  [["Gräser", "🌱", true], ["Murmeltier", "svg:murmeltier"], ["Steinadler", "🦅"]],
   // UNGEPRÜFT, neu LERN_Session2 (mehr kurze Ketten mit Bildern für Stufe 4):
   [["Löwenzahn", "🌼", true], ["Feldhase", "🐇"], ["Fuchs", "🦊"]],
   [["Körner", "🌾", true], ["Feldmaus", "🐁"], ["Waldkauz", "🦉"]],

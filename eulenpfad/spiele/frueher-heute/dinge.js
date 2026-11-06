@@ -1,6 +1,6 @@
 // Inhalte für „Früher und heute“ (Lehrplan SG NMG.9.2.b/c/e).
 // UNGEPRÜFT — bitte von Eltern oder Lehrperson prüfen lassen (Prüfliste docs/pruefung/).
-// Bilder: „svg:…“ zeichnet das Spiel selbst (für Waschbrett und Waschmaschine gibt es kein Emoji).
+// Bilder: „svg:…“ steht in der Bildersammlung spiele/gemeinsam/bilder.js (für Waschbrett und Waschmaschine gibt es kein Emoji).
 //
 // Inhaltslisten (Entscheid L4 a), einzeln freizugeben. Der Prüfstand steht im Katalog
 // (spiele/gemeinsam/katalog.js, Spiel „frueher-heute“, Feld listen); Kinder sehen nur Inhalte aus

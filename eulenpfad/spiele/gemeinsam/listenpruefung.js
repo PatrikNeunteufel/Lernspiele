@@ -107,7 +107,8 @@ const LISTENPRUEFUNG = (() => {
       const zeile = el("tr", { class: bemerkungZu(e).length ? "mit-bemerkung" : "" },
         el("td", { class: "pruef-haken" }, box, !entwickler && entw[e.schluessel] ? el("span", { class: "pruef-e", title: "von der Entwicklung geprüft", text: "✓E" }) : null),
         // Kurze Zellen so breit wie ihr Inhalt, lange (Sätze) umbrechen
-        bild, ...e.zellen.map(z => el("td", { class: z.length > 24 ? "lang" : "", text: z })),
+        // Eine Zelle „svg:<name>“ zeigt die Zeichnung aus der Bildersammlung (B1 a), dahinter den Namen fürs Abgleichen
+        bild, ...e.zellen.map(z => LS.zelleMitBildern(z, z.length > 24 ? "lang" : "")),
         el("td", {}, el("button", { type: "button", class: "knopf hell klein", text: entwickler ? "📝" : "✏️", title: entwickler ? "Bemerkung zu diesem Eintrag" : "Korrektur vorschlagen",
           onclick: () => bemerkeEintrag(e, zeile) })));
       const zeilen = [zeile];

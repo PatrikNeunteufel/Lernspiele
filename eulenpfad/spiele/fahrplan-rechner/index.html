@@ -22,6 +22,7 @@
   .fp-legende { text-align: center; font-size: 14px; color: var(--text-leise); font-weight: 700; margin: -6px 0 8px; }
   .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
   .ergebnis-zeile .anzeige { flex: 1; }
+  .anzeige.fr-dauer.leer::after { content: "? h ? min"; }
   .ergebnis-zeile .einheit { font-size: clamp(26px, 6vw, 38px); font-weight: 900; color: var(--knopf); min-width: 1.6em; }
   .fr-beispiel { text-align: center; font-size: 15px; color: var(--text-leise); font-weight: 700; margin: 4px 0 8px; }
   .wahl-knopf { font-variant-numeric: tabular-nums; }
@@ -439,10 +440,10 @@ function aufgabeZeigen(a, f, teilzeit = false) {
       f.append(...fahrplanEl(a, teilzeit)); break;
     case "addieren":
       frage("Eine Reise hat mehrere Teile. Wie lange dauert sie zusammen?");
-      rechnung(a.teile.map((d, i) => `${MITTEL[a.mittel[i]].bild} ${dauerText(d)}`).join(" + ") + ' = <span class="gesucht">?</span>'); break;
+      rechnung(a.teile.map((d, i) => `${MITTEL[a.mittel[i]].bild} ${dauerText(d)}`).join(" + ") + ' = <span class="gesucht">? h ? min</span>'); break;
     case "mischSumme":
       frage("Wie lange dauert alles zusammen?");
-      rechnung(a.teile.map(teilText).join(" + ") + ' = <span class="gesucht">?</span>'); break;
+      rechnung(a.teile.map(teilText).join(" + ") + ' = <span class="gesucht">? h ? min</span>'); break;
     case "dezZuMin":
       frage("Wie viele Minuten sind das?");
       rechnung(`${stdText(a.k)} = <span class="gesucht">? min</span>`); break;
@@ -560,7 +561,9 @@ function tippBeispiel(a) {
 function eingabe(ctx, a, loesung, notiz = null) {
   const typ = a.typ;
   const einheit = typ === "minuten" ? "min" : typ === "dezimal" ? "h" : "";
-  const anzeige = el("div", { class: "anzeige leer", "aria-label": typ === "uhrzeit" ? "Uhrzeit" : "Zeitdauer" });
+  // Bemerkung 11 (LERN_Session16): Bei einer Dauer zeigt die leere Anzeige „? h ? min“, damit klar ist, in welcher Form
+  // die Antwort verlangt ist (zweifach benannt, MA.3.A.2.h) — nicht als Minuten allein
+  const anzeige = el("div", { class: `anzeige leer${typ === "dauer" ? " fr-dauer" : ""}`, "aria-label": typ === "uhrzeit" ? "Uhrzeit" : typ === "dauer" ? "Zeitdauer in Stunden und Minuten" : "Zeitdauer" });
   // Eine Dauer („2 h 47 min“) braucht die ganze Breite: auf dem Handy stehen die Notizen dann darüber
   ctx.flaeche.append(el("div", { class: `ergebnis-zeile${notiz && typ === "dauer" ? " nz-umbruch" : ""}` }, ...(notiz ? [notiz] : []), anzeige, ...(einheit ? [el("span", { class: "einheit", text: einheit })] : [])));
   const tipp = tippBeispiel(a);

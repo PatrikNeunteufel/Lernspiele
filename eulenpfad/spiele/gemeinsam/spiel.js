@@ -2007,10 +2007,41 @@ const LS = (() => {
 
   // ---------- Auswahlknöpfe und Reihenfolge (für Spiele mit Antwort per Antippen) ----------
 
+  // ---------- Bilder (Entscheid B1 a, LERN_Session16; rahmen.md Abschnitt 22) ----------
+  /** Ist das Bild eine Zeichnung aus der Bildersammlung („svg:<name>“) statt eines Emojis? */
+  const istZeichnung = b => typeof b === "string" && b.startsWith("svg:");
+  /**
+   * Bild als Element: ein Emoji als Text, „svg:<name>“ gezeichnet aus spiele/gemeinsam/bilder.js (die Seite lädt sie).
+   * Fehlt die Sammlung oder der Name, steht „❔“ und die Konsole meldet es (das Testskript wertet das als Fehler).
+   */
+  function bild(b, klasse = "bild") {
+    if (!istZeichnung(b)) return el("span", { class: klasse, text: b || "" });
+    const z = typeof BILDER !== "undefined" ? BILDER[b.slice(4)] : null;
+    if (!z) {
+      console.error(`Bild ${b} fehlt${typeof BILDER === "undefined" ? " (bilder.js nicht geladen)" : " in bilder.js"}`);
+      return el("span", { class: klasse, text: "❔" });
+    }
+    return el("span", { class: `${klasse} gezeichnet`, html: `<svg viewBox="${z.box}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${z.svg}</svg>` });
+  }
+  /**
+   * Zelle einer Prüfansicht: Text, in dem jedes „svg:<name>“ als Zeichnung erscheint (z. B. „svg:waschbrett / Waschbrett“).
+   * Gibt ein <td> zurück; title nennt den Rohtext, damit sich Bild und Name abgleichen lassen.
+   */
+  function zelleMitBildern(text, klasse = "") {
+    const teile = String(text ?? "").split(/(svg:[a-z0-9-]+)/);
+    if (teile.length === 1) return el("td", { class: klasse, text: teile[0] });
+    // Nur ein Bild: gross (Bildspalte); Bilder im Text: so gross wie die Emojis daneben
+    const allein = teile.length === 3 && !teile[0].trim() && !teile[2].trim();
+    return el("td", { class: `${klasse} ${allein ? "pruef-bild" : "pruef-text-bild"}`.trim(), title: text },
+      ...teile.map((t, i) => (i % 2 ? bild(t) : t)).filter(t => t !== ""));
+  }
+  /** Bild vor einem Text in Fliesstext (Lösungssatz, Ablage): Emoji davor, eine Zeichnung entfällt. */
+  const mitBildText = (b, text) => (b && !istZeichnung(b) ? `${b} ${text}` : text);
+
   /** Knopfinhalt: Text, Element oder { bild, text, klein }. */
   function wahlInhalt(knopf, inhalt) {
     if (inhalt instanceof Node || typeof inhalt !== "object") { knopf.append(inhalt); return; }
-    if (inhalt.bild) knopf.append(el("span", { class: "bild", text: inhalt.bild }));
+    if (inhalt.bild) knopf.append(bild(inhalt.bild));
     if (inhalt.text) knopf.append(el("span", { text: inhalt.text }));
     if (inhalt.klein) knopf.append(el("small", { text: inhalt.klein }));
   }
@@ -2113,7 +2144,7 @@ const LS = (() => {
     ctx.loesung(opt.loesung || opt.korbInhalt?.(opt.richtig)?.text || loesungFuer(opt, opt.richtig));
     ctx.schritte(1, true);
     const karte = el("div", { class: "korb-karte" },
-      opt.karte.bild ? el("span", { class: "bild", text: opt.karte.bild }) : null, el("b", { text: opt.karte.text }));
+      opt.karte.bild ? bild(opt.karte.bild) : null, el("b", { text: opt.karte.text }));
     const box = el("div", { class: "korb-reihe" });
     let fertig = false;
     opt.koerbe.forEach((wert, i) => {
@@ -3303,7 +3334,7 @@ const LS = (() => {
       "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
       "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "blase-text", "lesetext", "zw-notiz", "weiter-leiste", "weiter-balken", "weiter-knopf",
       "notizblock", "nb-knopf", "nb-feld", "nb-kopf", "nb-inhalt", "nb-platz"],
-    bausteine: ["wahl", "wahl-knopf", "bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
+    bausteine: ["wahl", "wahl-knopf", "bild", "gezeichnet", "pruef-bild", "pruef-text-bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
 
@@ -3314,6 +3345,7 @@ const LS = (() => {
     person, umbenennen, gehoert, PERSONEN,
     beiAenderung, abgleichDaten, spielStand: () => spielStand,
     MELDUNG_ARTEN, MELDUNG_STATUS, ANREGUNG_ARTEN, ANREGUNG_STATUS, istAnregung, anregungen, neueAnregung,
+    bild, istZeichnung, mitBildText, zelleMitBildern,
     neueKorrektur, korrekturen, entferneMeldung, fingerabdruck, listenPruefung, pruefungDefinition, pruefungLokal, setzePruefungLokal,
     listenPruefen, katalogEintrag,
     meldungen, meldungenVon, gefundeneFehler, ungeleseneMeldungen, meldenErlaubt, neueMeldung,

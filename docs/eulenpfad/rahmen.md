@@ -67,6 +67,7 @@ zum Beispiel grössere Wahlknöpfe. Die Liste steht in `LS.RAHMEN_KLASSEN.bauste
 | Baustein | Klassen |
 |---|---|
 | `LS.auswahl`, `LS.reihenfolge` | `wahl`, `wahl-knopf`, `bild`, `ablage`, `pfeil` |
+| `LS.bild` (Bildersammlung, Abschnitt 22) | `gezeichnet`, `pruef-bild`, `pruef-text-bild` |
 | `LS.koerbe` | `korb-karte`, `korb-reihe`, `korb-knopf` |
 | `LS.tastatur` | `tastatur`, `anzeige`, `ok`, `loeschen`, `zeichen` (Dezimalzeichen) |
 | Noten (`noten.js`) | `hoer-zeile`, `hoer-knopf`, `notenblatt`, `noten-zeile` |
@@ -905,3 +906,28 @@ nach `spiel.js` geladen in den 32 Spielen mit Notizen und in der Schriftlich-Wer
   `reihe(mache, …)`, `strich()`; `SCHRIFTLICH.rechne(art, zahlen)` rechnet spaltenweise mit Überträgen (Subtraktion:
   Übertrag unten dazu, wie beim Ergänzen — mit dem Lehrmittel abzugleichen). Die Schriftlich-Werkstatt baut ihre
   Tabelle damit; ändert sich ein Verfahren, ändert es sich an einer Stelle.
+
+## 22. Bildersammlung
+
+Entscheid B1 a (LERN_Session16, Bemerkungen 12–22). `spiele/gemeinsam/bilder.js` (Objekt `BILDER`) ist die **einzige
+Quelle** für Bilder, die es nicht als passendes Emoji gibt: Lebewesen (Luchs, Gämse, Feuersalamander …), Dinge von
+früher (Waschbrett), Schulinstrumente (Triangel). Ein Spiel zeichnet sie nicht selbst.
+
+- **In Inhaltslisten** steht ein solches Bild wie ein Emoji in der Bildzelle, als `svg:<name>`
+  (`["Luchs", "svg:luchs", …]`). Der Name ist klein, ohne Umlaute (ä → ae).
+- **Zeichnen:** `LS.bild(b, klasse = "bild")` gibt ein `<span>` — ein Emoji als Text, `svg:<name>` als Zeichnung
+  (Klasse `gezeichnet`, so gross wie ein Emoji derselben Schrift). `LS.auswahl`, `LS.reihenfolge` und `LS.koerbe`
+  benutzen es von selbst, ein Spiel gibt `bild` einfach weiter. In Fliesstext (Ablage, Lösungssatz)
+  `LS.mitBildText(b, text)`: Emoji davor, eine Zeichnung entfällt. `LS.istZeichnung(b)` unterscheidet.
+- **Laden:** Eine Seite, deren Inhalte `svg:` nennen, lädt `../gemeinsam/bilder.js` nach `entwicklung.js` (heute
+  Früher–heute, Instrumente, Tier-Sortierer, Lebensraum und die Startseite für die Listenansicht der Verwaltung).
+  Fehlt die Sammlung oder ein Name, zeigt `LS.bild` „❔“ und meldet `Bild svg:… fehlt` auf der Konsole; das
+  Testskript zählt das als Fehler, ebenso ein `svg:` im Text der Fläche oder der Lösung.
+- **Prüfansichten:** Beide Listenansichten (Entwickler-Modus, Abschnitt 11, und Prüfung je Eintrag, Abschnitt 17)
+  zeichnen jedes `svg:<name>` einer Zelle mit `LS.zelleMitBildern` — allein in der Zelle gross, im Text so gross wie
+  die Emojis daneben; der Rohtext steht im Tooltip.
+- **Ein Bild je Eintrag:** `name` (wofür es steht, mit den Kennzeichen, an denen man die Art erkennt), `box`
+  (viewBox), `svg` (nur Formen mit eigenen Farben, keine Klassen, keine Skripte). Ein neues oder geändertes Bild gilt
+  wie ein Listeneintrag als ungeprüft (E1 a).
+- **Nicht in der Sammlung:** Zeichnungen, die ein Spiel aus Werten baut (Gegenteil-Wippe: Grösse je Stufe, Pakete;
+  Geometrie, Uhren, Zahlenbilder).

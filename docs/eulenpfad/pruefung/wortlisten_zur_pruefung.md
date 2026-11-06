@@ -673,7 +673,7 @@ Wörter ohne Bild kommen erst ab Stufe 4 vor.
 ## 8. Tier-Sortierer und Lebensraum-Zuordnung (Lehrplan SG NMG.2.1, NMG.2.4)
 
 Leer = bewusst nicht zugeordnet, weil nicht eindeutig (Haltung) oder in mehreren Lebensräumen typisch.
-Ohne Bild = kein passendes Emoji; das Tier kommt erst ab Stufe 3 vor.
+Bild „svg:…“ = gezeichnet (Bildersammlung spiele/gemeinsam/bilder.js); ohne Bild käme das Tier erst ab Stufe 3 vor.
 
 | Name | Bild | Klasse | Gruppe (Säugetiere) | Haltung | Lebensraum | ☐ |
 |---|---|---|---|---|---|---|
@@ -682,20 +682,20 @@ Ohne Bild = kein passendes Emoji; das Tier kommt erst ab Stufe 3 vor.
 | Wildschwein | 🐗 | Säugetier | Paarhufer | Wildtier | Wald | ☐ |
 | Fuchs | 🦊 | Säugetier | Raubtier | Wildtier | Wald | ☐ |
 | Dachs | 🦡 | Säugetier | Raubtier | Wildtier | Wald | ☐ |
-| Luchs |  | Säugetier | Raubtier | Wildtier | Wald | ☐ |
+| Luchs | svg:luchs | Säugetier | Raubtier | Wildtier | Wald | ☐ |
 | Wolf | 🐺 | Säugetier | Raubtier | Wildtier |  | ☐ |
 | Braunbär | 🐻 | Säugetier | Raubtier | Wildtier |  | ☐ |
 | Eichhörnchen | 🐿️ | Säugetier | Nagetier | Wildtier | Wald | ☐ |
 | Feldmaus | 🐁 | Säugetier | Nagetier | Wildtier | Wiese | ☐ |
 | Feldhase | 🐇 | Säugetier | Hasenartige | Wildtier | Wiese | ☐ |
-| Maulwurf |  | Säugetier | Insektenfresser | Wildtier | Wiese | ☐ |
+| Maulwurf | svg:maulwurf | Säugetier | Insektenfresser | Wildtier | Wiese | ☐ |
 | Igel | 🦔 | Säugetier | Insektenfresser | Wildtier |  | ☐ |
-| Spitzmaus |  | Säugetier | Insektenfresser | Wildtier |  | ☐ |
+| Spitzmaus | svg:spitzmaus | Säugetier | Insektenfresser | Wildtier |  | ☐ |
 | Fledermaus | 🦇 | Säugetier | Fledertier | Wildtier |  | ☐ |
 | Biber | 🦫 | Säugetier | Nagetier | Wildtier | Weiher | ☐ |
-| Murmeltier |  | Säugetier | Nagetier | Wildtier | Gebirge | ☐ |
-| Steinbock |  | Säugetier | Paarhufer | Wildtier | Gebirge | ☐ |
-| Gämse |  | Säugetier | Paarhufer | Wildtier | Gebirge | ☐ |
+| Murmeltier | svg:murmeltier | Säugetier | Nagetier | Wildtier | Gebirge | ☐ |
+| Steinbock | svg:steinbock | Säugetier | Paarhufer | Wildtier | Gebirge | ☐ |
+| Gämse | svg:gaemse | Säugetier | Paarhufer | Wildtier | Gebirge | ☐ |
 | Kuh | 🐄 | Säugetier | Paarhufer | Nutztier |  | ☐ |
 | Schaf | 🐑 | Säugetier | Paarhufer | Nutztier |  | ☐ |
 | Ziege | 🐐 | Säugetier | Paarhufer | Nutztier |  | ☐ |
@@ -707,42 +707,42 @@ Ohne Bild = kein passendes Emoji; das Tier kommt erst ab Stufe 3 vor.
 | Katze | 🐈 | Säugetier | Raubtier | Heimtier |  | ☐ |
 | Kaninchen | 🐰 | Säugetier | Hasenartige |  |  | ☐ |
 | Hamster | 🐹 | Säugetier | Nagetier | Heimtier |  | ☐ |
-| Meerschweinchen |  | Säugetier | Nagetier | Heimtier |  | ☐ |
+| Meerschweinchen | svg:meerschweinchen | Säugetier | Nagetier | Heimtier |  | ☐ |
 | Ratte | 🐀 | Säugetier | Nagetier |  |  | ☐ |
 | Wal | 🐋 | Säugetier | Wal | Wildtier |  | ☐ |
 | Delfin | 🐬 | Säugetier | Wal | Wildtier |  | ☐ |
-| Specht |  | Vogel |  | Wildtier | Wald | ☐ |
+| Specht | svg:specht | Vogel |  | Wildtier | Wald | ☐ |
 | Waldkauz | 🦉 | Vogel |  | Wildtier | Wald | ☐ |
 | Stockente | 🦆 | Vogel |  | Wildtier | Weiher | ☐ |
-| Graureiher |  | Vogel |  | Wildtier | Weiher | ☐ |
+| Graureiher | svg:graureiher | Vogel |  | Wildtier | Weiher | ☐ |
 | Höckerschwan | 🦢 | Vogel |  | Wildtier | Weiher | ☐ |
 | Steinadler | 🦅 | Vogel |  | Wildtier | Gebirge | ☐ |
 | Alpendohle | 🐦‍⬛ | Vogel |  | Wildtier | Gebirge | ☐ |
-| Feldlerche |  | Vogel |  | Wildtier | Wiese | ☐ |
+| Feldlerche | svg:feldlerche | Vogel |  | Wildtier | Wiese | ☐ |
 | Huhn | 🐔 | Vogel |  | Nutztier |  | ☐ |
 | Wellensittich | 🦜 | Vogel |  | Heimtier |  | ☐ |
 | Pinguin | 🐧 | Vogel |  | Wildtier |  | ☐ |
 | Forelle | 🐟 | Fisch |  | Wildtier |  | ☐ |
-| Hecht |  | Fisch |  | Wildtier | Weiher | ☐ |
+| Hecht | svg:hecht | Fisch |  | Wildtier | Weiher | ☐ |
 | Goldfisch | 🐠 | Fisch |  | Heimtier |  | ☐ |
 | Hai | 🦈 | Fisch |  | Wildtier |  | ☐ |
 | Zauneidechse | 🦎 | Reptil |  | Wildtier |  | ☐ |
 | Ringelnatter | 🐍 | Reptil |  | Wildtier | Weiher | ☐ |
-| Blindschleiche |  | Reptil |  | Wildtier |  | ☐ |
+| Blindschleiche | svg:blindschleiche | Reptil |  | Wildtier |  | ☐ |
 | Schildkröte | 🐢 | Reptil |  |  |  | ☐ |
 | Krokodil | 🐊 | Reptil |  | Wildtier |  | ☐ |
 | Grasfrosch | 🐸 | Amphibie |  | Wildtier | Weiher | ☐ |
-| Erdkröte |  | Amphibie |  | Wildtier |  | ☐ |
-| Bergmolch |  | Amphibie |  | Wildtier | Weiher | ☐ |
-| Feuersalamander |  | Amphibie |  | Wildtier | Wald | ☐ |
-| Alpensalamander |  | Amphibie |  | Wildtier | Gebirge | ☐ |
+| Erdkröte | svg:erdkroete | Amphibie |  | Wildtier |  | ☐ |
+| Bergmolch | svg:bergmolch | Amphibie |  | Wildtier | Weiher | ☐ |
+| Feuersalamander | svg:feuersalamander | Amphibie |  | Wildtier | Wald | ☐ |
+| Alpensalamander | svg:alpensalamander | Amphibie |  | Wildtier | Gebirge | ☐ |
 | Waldameise | 🐜 | Insekt |  | Wildtier | Wald | ☐ |
 | Hirschkäfer | 🪲 | Insekt |  | Wildtier | Wald | ☐ |
 | Heuschrecke | 🦗 | Insekt |  | Wildtier | Wiese | ☐ |
 | Schmetterling | 🦋 | Insekt |  | Wildtier | Wiese | ☐ |
 | Marienkäfer | 🐞 | Insekt |  | Wildtier |  | ☐ |
 | Honigbiene | 🐝 | Insekt |  |  | Wiese | ☐ |
-| Libelle |  | Insekt |  | Wildtier | Weiher | ☐ |
+| Libelle | svg:libelle | Insekt |  | Wildtier | Weiher | ☐ |
 | Stubenfliege | 🪰 | Insekt |  | Wildtier |  | ☐ |
 | Mücke | 🦟 | Insekt |  | Wildtier |  | ☐ |
 | Kreuzspinne | 🕷️ | Spinnentier |  | Wildtier |  | ☐ |
@@ -754,9 +754,9 @@ Ohne Bild = kein passendes Emoji; das Tier kommt erst ab Stufe 3 vor.
 | Löwenzahn | 🌼 | Pflanze |  |  | Wiese | ☐ |
 | Klee | 🍀 | Pflanze |  |  | Wiese | ☐ |
 | Seerose | 🪷 | Pflanze |  |  | Weiher | ☐ |
-| Schilf |  | Pflanze |  |  | Weiher | ☐ |
-| Edelweiss |  | Pflanze |  |  | Gebirge | ☐ |
-| Enzian |  | Pflanze |  |  | Gebirge | ☐ |
+| Schilf | svg:schilf | Pflanze |  |  | Weiher | ☐ |
+| Edelweiss | svg:edelweiss | Pflanze |  |  | Gebirge | ☐ |
+| Enzian | svg:enzian | Pflanze |  |  | Gebirge | ☐ |
 
 ### Nahrungsketten (Stufe 4–5) — lies: … wird gefressen von …
 

@@ -8,8 +8,6 @@
 <style>
   /* nur die Fragezeile; Namen auf Karten tragen „frage“ nur fürs Vorlesen */
   div.frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
-  .fh-svg svg { width: 1.25em; height: 1.25em; display: block; margin: 0 auto; }
-  .fh-inhalt { display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .fh-zeile { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
   .fh-ding { background: #fff; border: 4px solid var(--rand); border-radius: 18px; padding: 6px 14px; text-align: center; font-weight: 900; font-size: clamp(16px, 3.6vw, 22px); }
   .fh-ding .bild { font-size: clamp(40px, 9vw, 56px); line-height: 1.1; display: block; }
@@ -32,6 +30,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="dinge.js"></script>
 <script>
 "use strict";
@@ -198,26 +197,15 @@ function pruefeAufgabe(a, stufe) {
 
 // ---------- Zeichnen ----------
 
-// Für Waschbrett und Waschmaschine gibt es kein Emoji.
-const SVG = {
-  waschbrett: `<svg viewBox="0 0 60 80" aria-hidden="true"><rect x="8" y="2" width="44" height="76" rx="5" fill="#b7814f"/><rect x="14" y="18" width="32" height="52" rx="2" fill="#d4d9e0"/>${
-    Array.from({ length: 9 }, (_, i) => `<line x1="15" y1="${22 + i * 5.5}" x2="45" y2="${22 + i * 5.5}" stroke="#8d96a3" stroke-width="2.4"/>`).join("")}</svg>`,
-  waschmaschine: `<svg viewBox="0 0 64 72" aria-hidden="true"><rect x="4" y="4" width="56" height="64" rx="7" fill="#f4f6f9" stroke="#8a94a6" stroke-width="3"/><line x1="4" y1="18" x2="60" y2="18" stroke="#8a94a6" stroke-width="2"/><circle cx="14" cy="11" r="3.5" fill="#8a94a6"/><rect x="34" y="8" width="20" height="6" rx="2" fill="#cfd5de"/><circle cx="32" cy="43" r="17" fill="#cfe6ff" stroke="#8a94a6" stroke-width="4"/><path d="M19 47 q6.5 -6 13 0 q6.5 6 13 0" stroke="#4d93dc" fill="none" stroke-width="3"/></svg>`,
-};
+// Bilder: Emoji oder „svg:<name>“ aus der Bildersammlung (Waschbrett, Waschmaschine; bilder.js, B1 a) — LS.bild zeichnet beides.
+/** Knopfinhalt für LS.auswahl / LS.reihenfolge. */
+const inhalt = (bild, text) => ({ bild, text });
+const ablageText = ([bild, text]) => LS.mitBildText(bild, text);
+const ding = (bild, text, extra = "") => el("div", { class: "fh-ding" + extra }, bild ? LS.bild(bild) : null, el("span", { text }));
 
-const istSvg = bild => bild.startsWith("svg:");
-function bildEl(bild) {
-  return istSvg(bild) ? el("span", { class: "bild fh-svg", html: SVG[bild.slice(4)] }) : el("span", { class: "bild", text: bild });
-}
-/** Knopfinhalt für LS.auswahl / LS.reihenfolge: Emoji als Text, eigene Bilder als Element. */
-const inhalt = (bild, text) => (istSvg(bild) ? el("span", { class: "fh-inhalt" }, bildEl(bild), el("span", { text })) : { bild, text });
-const ablageText = ([bild, text]) => (istSvg(bild) ? text : `${bild} ${text}`);
-const ding = (bild, text, extra = "") => el("div", { class: "fh-ding" + extra }, bild ? bildEl(bild) : null, el("span", { text }));
-
-/** Karte mit Körben; eigene Bilder kommen nach dem Bauen in die Karte. */
+/** Karte mit Körben. */
 function karteInKorb(ctx, a, opt) {
-  const { karte } = LS.koerbe(ctx, { karte: { bild: istSvg(a.bild) ? "" : a.bild, text: a.name }, ...opt });
-  if (istSvg(a.bild)) karte.prepend(bildEl(a.bild));
+  const { karte } = LS.koerbe(ctx, { karte: { bild: a.bild, text: a.name }, ...opt });
   // Der Name des Dings ist Sachkunde, kein Lesestoff: Die Eule liest ihn mit vor (rahmen.md Abschnitt 12).
   karte.querySelector("b").classList.add("frage");
 }

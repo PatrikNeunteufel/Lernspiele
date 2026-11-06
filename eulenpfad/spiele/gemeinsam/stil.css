@@ -461,6 +461,8 @@ body:has(.entwickler-leiste) { padding-bottom: 90px; }
 .listen-dialog table { border-collapse: separate; border-spacing: 0 4px; width: 100%; font-size: 15px; }
 .listen-dialog th { text-align: left; font-size: 13px; color: var(--text-leise); padding: 4px 8px; }
 .listen-dialog td { padding: 6px 8px; background: #f8f9fe; }
+td.pruef-bild .bild.gezeichnet { font-size: 30px; }
+td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-block; }
 .listen-dialog .knopf.klein { min-height: 34px; padding: 2px 10px; font-size: 15px; }
 .listen-dialog textarea { font: inherit; width: 100%; border-radius: 10px; border: 2px solid var(--rand); padding: 8px; }
 /* Prüfansicht je Eintrag (listenpruefung.js, LERN_Session11): Linien zwischen den Zeilen, Spalten so breit wie ihr
@@ -574,6 +576,9 @@ button.link, a.link {
 
 .wahl-knopf:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--rand); }
 .wahl-knopf .bild { font-size: clamp(34px, 8vw, 46px); line-height: 1.1; }
+/* Zeichnung aus der Bildersammlung (bilder.js, B1 a): so gross wie ein Emoji derselben Schrift */
+.bild.gezeichnet { display: inline-flex; align-items: center; justify-content: center; }
+.bild.gezeichnet svg { width: 1.15em; height: 1.15em; display: block; margin: 0 auto; }
 .wahl-knopf small { font-size: 14px; font-weight: 700; color: var(--text-leise); }
 .wahl-knopf.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
 .wahl-knopf.richtig { background: var(--gut-hell); box-shadow: 0 5px 0 var(--gut); }

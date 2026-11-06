@@ -455,3 +455,12 @@
 - CLAUDE.md: Geburtsdatum vollständig (B3), Datenschutz-Ausnahme Aufsicht im Lernsteig; globale Regel „Testläufe
   während eines Umbaus“ in `~/.claude/CLAUDE.md`.
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session15_2026-11-05.md`.
+
+## 2026-11-06 — LERN_Session16
+- Fahrplan-Rechner: Bei einer Zeitdauer zeigen leere Anzeige und Rechnung „? h ? min“ (Bemerkung 11, Antwort ans Kind).
+- Bildersammlung `spiele/gemeinsam/bilder.js` (B1 a, rahmen.md 22): einzige Quelle für Bilder ohne Emoji (`svg:<name>`);
+  `LS.bild`, `LS.mitBildText`, `LS.zelleMitBildern`; Knöpfe, Karten, Körbe und beide Listenansichten zeichnen sie.
+  Waschbrett, Waschmaschine (Früher–heute) und Triangel, Klangstab, Schlagholz (Instrumente) umgezogen; 24 Lebewesen
+  neu gezeichnet (tiere.js, nahrung.js) — Lebensraum Stufe 1–4 jetzt mit allen Lebewesen. Testskript: fehlendes Bild
+  und Bildname als Text sind Fehler. Bemerkungen 12–22 erledigt.
+- Prüfvermerk `lebensraum/nahrungsketten` aufgehoben (B2 a), bis die neuen Bilder darin geprüft sind.
