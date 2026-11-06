@@ -1,37 +1,17 @@
 /* Lernsteig — Sichern und Einlesen als Datei (nur auf Knopfdruck, wie im Eulenpfad: Entscheid LERN-5 b dort).
-   Format: { format: "lernsteig-sicherung", version: 2, erstellt, konten: [ohne PIN, Code, Verbindungen], runden, rekorde }
-   Runden und Rekorde im gemeinsamen Format der Reihe (R1 a, kern/runden.js: id, person, zeit, inhalt, stufe …);
-   Version 1 (bis LERN_Session15: konto, uebung) wird beim Einlesen umgedeutet.
-   Einlesen (Befund D4): zuerst wird die ganze Datei geprüft — jedes Konto mit KERN.person.maengel, jede Runde und
-   jeder Rekord mit KERN.runden.maengel und dem Schema des Lernsteigs; Ungültiges wird abgewiesen und gezählt, nie
-   gespeichert. Dann wird im Speicher zusammengeführt und erst am Ende geschrieben; scheitert ein Schreiben (Speicher
-   voll), wird der alte Stand zurückgeschrieben: alles oder nichts.
-   Zusammenführen: Konten mit KERN.person.zusammenfuehren (P1 a: gleiche Kennung, sonst gleicher Name; je Feld der
-   jüngere Stand; PIN, Code und Verbindungen bleiben die des Geräts); Runden und Rekorde mit KERN.runden.zusammenfuehren
-   (nach Kennung, bei Rekorden der höhere Stand); Verweise auf eine zusammengeführte Kennung werden umgebogen.
-   Abgeschaut vom Eulenpfad (LS.zusammenfuehren, docs/eulenpfad/rahmen.md 10), Zeile in docs/gemeinsame_mechaniken.md. */
+   Seit LERN_Session18 über den Kern (KERN.daten, docs/kern/rahmen.md 4.19; Entscheide DF1 a, DF2 a, DF4 a): ein
+   Dateiformat reihe-daten für alle Apps; ältere Sicherungen des Lernsteigs (lernsteig-sicherung 1, 2) deutet der Kern um.
+   - Konten ohne PIN und Verbindungen; ein Konto mit PIN reist geschützt (nur der Prüfwert seines Wiederherstellungscodes)
+     und ist auf einem anderen Gerät gesperrt, bis es dort mit dem Code freigeschaltet ist (LST_KONTEN.freischalten).
+   - Einlesen (Befund D4): erst wird jeder Eintrag geprüft — Konten mit KERN.person.maengel, Runden und Rekorde mit
+     KERN.runden.maengel und dem Schema des Lernsteigs; Ungültiges wird gezählt, nie gespeichert; dann alles oder nichts.
+   - Aufsichten in einer Datei liest nur eine angemeldete Aufsicht ein (Vorschlag AS1 a, LERN_Session18); liest ein
+     Jugendlicher ein, werden sie abgewiesen — sonst könnte eine selbst gebaute Datei mit bekanntem Code eine Aufsicht
+     ohne Bestätigung auf das Gerät bringen (Befund D5). */
 "use strict";
 
 var LST_DATEN = (function () {
-  const FORMAT = "lernsteig-sicherung";
-  const P = KERN.person;
-
-  /** Sicherung für die Konten mit den Kennungen ids. */
-  function sichern(ids) {
-    const menge = new Set(ids);
-    const konten = LST_KONTEN.alle().filter(k => menge.has(k.id)).map(LST_KONTEN.ohneGeheimnis);
-    return {
-      format: FORMAT, version: 2, erstellt: new Date().toISOString(), konten,
-      runden: LST.lies("runden", []).filter(r => menge.has(r.person)),
-      rekorde: LST.lies("rekorde", []).filter(r => menge.has(r.person)),
-    };
-  }
-
-  /** Dateiname: lernsteig-<vorname>-<datum>.json (in .gitignore, EP4). */
-  function dateiname(name) {
-    const n = String(name || "sicherung").toLowerCase().replace(/[^a-z0-9äöü]+/g, "-").replace(/^-|-$/g, "") || "sicherung";
-    return `lernsteig-${n}-${new Date().toISOString().slice(0, 10)}.json`;
-  }
+  const FORMAT = KERN.daten.FORMAT;
 
   // ---------- Schema der Runden und Rekorde (Kern: KERN.runden.maengel; hier die Felder des Lernsteigs) ----------
   const istUebung = id => typeof LST_KATALOG === "undefined" || !!LST_KATALOG.uebung(id);
@@ -45,69 +25,33 @@ var LST_DATEN = (function () {
   const rundeGueltig = r => !KERN.runden.maengel(r, "runde", RUNDE).length && (r.liste || []).every(x => x && typeof x === "object");
   const rekordGueltig = r => !KERN.runden.maengel(r, "rekord", REKORD).length;
 
+  // Speicher und Gerätefelder wie in den Konten; „gast“: Runden des früheren Gastkontos (bis LERN_Session16) reisen
+  // ohne Konto mit, der Gast nach C2 a speichert nichts
+  const DATEN = KERN.daten({
+    app: "lernsteig", speicher: { praefix: LST.PRAEFIX, lies: LST.lies, schreibe: LST.schreibe, entferne: k => KERN.speicher(LST.PRAEFIX).entferne(k) },
+    dateiPraefix: "lernsteig", geraetFelder: ["aufsicht", "anfragen"], ohnePerson: ["gast"],
+    pruefung: { runde: RUNDE, rekord: REKORD },
+    // eine liste, die keine Liste ist, weist schon das Schema ab
+    gueltig: { runde: r => !Array.isArray(r.liste) || r.liste.every(x => x && typeof x === "object") },
+  });
+
+  /** Sicherung für die Konten mit den Kennungen ids. */
+  const sichern = ids => DATEN.sichern({ ids });
+
+  /** Dateiname: lernsteig-<name>-<datum>.json (in .gitignore, EP4). */
+  const dateiname = name => DATEN.dateiname(name || "sicherung");
+
   /**
-   * Liest eine Sicherung ein und führt sie zusammen. Liefert { konten, runden, rekorde } (Anzahl neu oder geändert),
-   * abgewiesen (ungültige Einträge), neu (Kennungen der Konten, die neu auf das Gerät kamen) und ids (alle Konten der
-   * Datei nach dem Zusammenführen). Fehler, wenn die Datei keine Sicherung ist oder nicht gespeichert werden kann.
+   * Liest eine Sicherung ein (Objekt oder Text) und führt sie zusammen. Liefert { konten, runden, rekorde } (Anzahl neu
+   * oder geändert), abgewiesen (ungültige Einträge), neu (Kennungen der Konten, die neu auf das Gerät kamen) und ids (alle
+   * Konten der Datei nach dem Zusammenführen). Fehler mit Klartext, wenn die Datei keine Sicherung des Lernsteigs ist
+   * oder nicht gespeichert werden kann.
    */
   function einlesen(obj) {
-    if (!obj || typeof obj !== "object" || obj.format !== FORMAT || ![1, 2].includes(obj.version)) throw new Error("Das ist keine Sicherung des Lernsteigs.");
-    for (const f of ["konten", "runden", "rekorde"]) if (obj[f] !== undefined && !Array.isArray(obj[f])) throw new Error("Die Sicherung ist beschädigt.");
-    const erg = { konten: 0, runden: 0, rekorde: 0, abgewiesen: 0, neu: [], ids: [] };
-
-    // 1. Konten: nur Lernende (eine Sicherung trägt keine Aufsichten), im Speicher zusammenführen
-    const LISTE = LST_KONTEN.LISTE;
-    const vorher = { personen: roheListe("personen"), runden: roheListe("runden"), rekorde: roheListe("rekorde") };
-    const fremd = [];
-    for (const k of obj.konten || []) {
-      if (k && typeof k === "object" && (k.rolle === undefined || k.rolle === "lernend")) fremd.push(umdeuten(k));
-      else erg.abgewiesen++;
-    }
-    const bekannt = new Set(LISTE.alle().map(p => p.id));
-    const z = P.zusammenfuehren(LISTE.alle(), fremd, { geraetFelder: LST_KONTEN.GERAET });
-    erg.konten = z.neu + z.geaendert; erg.abgewiesen += z.abgewiesen;
-    const umbiegen = id => z.kennungen[id] || id;
-    const imErgebnis = new Set(z.personen.map(p => p.id));
-    for (const k of fremd) {
-      const id = umbiegen(k && k.id);
-      if (imErgebnis.has(id) && !erg.ids.includes(id)) { erg.ids.push(id); if (!bekannt.has(id)) erg.neu.push(id); }
-    }
-
-    // 2. Runden und Rekorde (Kern): Version 1 umdeuten, prüfen, Verweise umbiegen, nur zu Konten der Datei oder des Geräts
-    // „gast“: Runden des früheren Gastkontos eines Geräts (bis LERN_Session16) reisen mit, ohne Konto; der Gast nach C2 a speichert nichts
-    const kontoDa = id => id === "gast" || imErgebnis.has(id);
-    const fremde = l => (l || []).map(e => (e && typeof e === "object" ? KERN.runden.umdeuten(e, LST.ALTE_FELDER) : e));
-    const zuGeraet = (l, gueltig) => { const ok = []; for (const e of l) if (e && gueltig(e) && kontoDa(umbiegen(e.person))) ok.push(e); else erg.abgewiesen++; return ok; };
-    const zr = KERN.runden.zusammenfuehren(vorher.runden, zuGeraet(fremde(obj.runden), rundeGueltig), { art: "runde", umbiegen });
-    const zk = KERN.runden.zusammenfuehren(vorher.rekorde, zuGeraet(fremde(obj.rekorde), rekordGueltig), { art: "rekord", umbiegen });
-    const runden = zr.eintraege, rekorde = zk.eintraege;
-    erg.runden = zr.neu; erg.rekorde = zk.neu + zk.ersetzt;
-
-    // 3. Schreiben: alles oder nichts; ist nichts neu oder geändert, bleibt der Speicher unberührt
-    if (!erg.konten && !erg.runden && !erg.rekorde) return erg;
-    const ok = LST.schreibe("personen", z.personen) && LST.schreibe("runden", runden) && LST.schreibe("rekorde", rekorde);
-    if (!ok) {
-      LST.schreibe("personen", vorher.personen); LST.schreibe("runden", vorher.runden); LST.schreibe("rekorde", vorher.rekorde);
-      throw new Error("Der Speicher des Browsers ist voll oder gesperrt; nichts wurde eingelesen.");
-    }
-    return erg;
-  }
-  // Rohe Liste aus dem Speicher (auch Einträge, die ältere Fassungen geschrieben haben), immer eine Liste.
-  function roheListe(schluessel) { const v = LST.lies(schluessel, []); return Array.isArray(v) ? v : []; }
-  /**
-   * Konto einer älteren Sicherung (bis LERN_Session15: erstellt, geaendert als eine Zeit, ohne Rolle) in die Form des
-   * Kerns: angelegt, geaendert je Feld, rolle „lernend“. Neuere Konten bleiben, wie sie sind.
-   */
-  function umdeuten(k) {
-    const { erstellt, ...rest } = k;
-    const p = { ...rest, rolle: "lernend" };
-    if (!p.angelegt && erstellt) p.angelegt = erstellt;
-    if (typeof p.geaendert === "string" || p.geaendert === undefined) {
-      const t = typeof k.geaendert === "string" ? k.geaendert : (p.angelegt || "");
-      p.geaendert = {};
-      for (const f of Object.keys(p)) if (!["id", "angelegt", "geaendert", "frueher"].includes(f)) p.geaendert[f] = t;
-    }
-    return p;
+    const mitAufsichten = typeof LST_KONTEN !== "undefined" && !!LST_KONTEN.aufsichtAktiv();
+    const erg = DATEN.einlesen(obj, { rollen: mitAufsichten ? null : ["lernend"] });
+    return { konten: erg.personen.neu + erg.personen.geaendert, runden: erg.runden, rekorde: erg.rekorde, abgewiesen: erg.abgewiesen,
+      neu: erg.neueIds, ids: erg.ids };
   }
 
   /** Datei im Browser speichern (Download). */

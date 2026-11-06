@@ -105,40 +105,43 @@ const DA = require(path.join(APP, "gemeinsam", "daten.js"));
   // Sichern und Einlesen (D4, D5)
   LST.schreibe("runden", [{ id: "r1", person: mia.id, zeit: "2026-11-05T08:00:00.000Z", inhalt: "brueche", stufe: "g", aufgaben: 8, fehler: 1, dauer: 120, liste: [] }]);
   const sich = DA.sichern([mia.id]);
-  gleich([sich.konten.length, "pin" in sich.konten[0], "aufsicht" in sich.konten[0], sich.runden.length], [1, false, false, 1], "Sicherung ohne PIN und Verbindungen");
-  gleich([sich.version, sich.runden[0].person === mia.id, sich.runden[0].inhalt], [2, true, "brueche"], "Sicherung Version 2 im gemeinsamen Format (R1 a)");
+  gleich([sich.personen.length, "pin" in sich.personen[0], "aufsicht" in sich.personen[0], sich.runden.length], [1, false, false, 1], "Sicherung ohne PIN und Verbindungen");
+  gleich([sich.format, sich.version, sich.app, sich.runden[0].person === mia.id, sich.runden[0].inhalt], ["reihe-daten", 1, "lernsteig", true, "brueche"], "Sicherung im Format der Reihe (DF1 a, R1 a)");
+  gleich([sich.personen[0].geschuetzt, Object.keys(sich.personen[0].wiederherstellung || {})], [true, ["code"]], "Konto mit PIN reist geschützt, nur mit dem Prüfwert des Codes (DF4 a)");
   // gleiche Datei nochmals: nichts neu (Version 2 liest sich selbst)
   gleich(DA.einlesen(JSON.parse(JSON.stringify(sich))).runden, 0, "eigene Sicherung zweimal: nichts doppelt");
   const stand = () => JSON.stringify([localStorage.getItem("lernsteig:personen"), localStorage.getItem("lernsteig:runden"), localStorage.getItem("lernsteig:rekorde")]);
   await wirft(() => DA.einlesen({ format: "etwas", version: 1 }), "fremde Datei", "keine Sicherung");
-  await wirft(() => DA.einlesen({ format: DA.FORMAT, version: 1, runden: "abc" }), "beschädigte Liste", "beschädigt");
+  await wirft(() => DA.einlesen({ format: "lernsteig-sicherung", version: 1, runden: "abc" }), "beschädigte Liste", "beschädigt");
+  await wirft(() => DA.einlesen({ format: "reihe-daten", version: 1, app: "lernsteig", runden: "abc" }), "beschädigte Liste (heutiges Format)", "beschädigt");
+  await wirft(() => DA.einlesen({ format: "reihe-daten", version: 1, app: "eulenpfad", personen: [], runden: [], rekorde: [] }), "Datei des Eulenpfads", "des Eulenpfads");
   const vorher = stand();
-  const kaputt = DA.einlesen({ format: DA.FORMAT, version: 1,
+  const kaputt = DA.einlesen({ format: "lernsteig-sicherung", version: 1,
     konten: [{ id: 5, name: "" }, { id: "p-neu-x", name: "Neu", rolle: "aufsicht" }],
     runden: [{ id: "r-k", konto: mia.id, zeit: 5, liste: "abc" }, { id: "r-f", konto: "p-gibts-nicht", zeit: "2026-11-05T09:00:00.000Z", uebung: "brueche", stufe: "g" }],
     rekorde: [{ id: "x", konto: mia.id, zeit: "2026-11-05T09:00:00.000Z", uebung: "nichts", stufe: "g", punkte: 3 }] });
   gleich([kaputt.konten, kaputt.runden, kaputt.rekorde, kaputt.abgewiesen], [0, 0, 0, 5], "kaputte Einträge abgewiesen, nichts übernommen");
   gleich(stand(), vorher, "kaputte Datei ändert den Speicher nicht");
   // danach geht ein gutes Einlesen weiter (früher vergiftete eine kaputte Runde jedes weitere Einlesen)
-  const gut = DA.einlesen({ format: DA.FORMAT, version: 1, konten: [{ id: "k-ben", name: "Ben", geboren: "2011-02", klasse: "9", erstellt: T, geaendert: T }],
+  const gut = DA.einlesen({ format: "lernsteig-sicherung", version: 1, konten: [{ id: "k-ben", name: "Ben", geboren: "2011-02", klasse: "9", erstellt: T, geaendert: T }],
     runden: [{ id: "r2", konto: "k-ben", zeit: "2026-11-05T10:00:00.000Z", uebung: "terme", stufe: "j", aufgaben: 8, dauer: 90, liste: [] }] });
   gleich([gut.konten, gut.runden, gut.neu], [1, 1, ["k-ben"]], "ältere Sicherung umgedeutet und eingelesen");
   gleich(KO.finde("k-ben").geboren, "2011-02", "Geburtsdatum ohne Tag bleibt (B3)");
-  const gast = DA.einlesen({ format: DA.FORMAT, version: 1, runden: [{ id: "r-gast", konto: "gast", zeit: "2026-11-05T11:00:00.000Z", uebung: "zufall", stufe: "f", aufgaben: 8, dauer: 60, liste: [] }] });
+  const gast = DA.einlesen({ format: "lernsteig-sicherung", version: 1, runden: [{ id: "r-gast", konto: "gast", zeit: "2026-11-05T11:00:00.000Z", uebung: "zufall", stufe: "f", aufgaben: 8, dauer: 60, liste: [] }] });
   gleich(LST.lies("runden", []).find(r => r.id === "r-gast")?.inhalt, "zufall", "Version 1 umgedeutet: uebung → inhalt");
   gleich(gast.runden, 1, "Runden des Gastkontos werden eingelesen");
   // D5: eine Datei mit der Kennung eines Kontos, das schon auf dem Gerät ist, verbindet nicht
   KO.aufsichtAbmelden(); await KO.aufsichtAnmelden(vater.id, "5555");
-  const fremd = DA.einlesen({ format: DA.FORMAT, version: 1, konten: [{ ...sich.konten[0] }] });
+  const fremd = DA.einlesen({ format: "lernsteig-sicherung", version: 1, konten: [{ ...sich.personen[0] }] });
   KO.verbindeEingelesene(fremd.neu);
   gleich(KO.verbundene(vater.id).map(k => k.id), [], "bestehendes Konto aus einer Datei wird nicht verbunden");
-  const neuKonto = DA.einlesen({ format: DA.FORMAT, version: 1, konten: [{ id: "k-ida", name: "Ida", geaendert: T, erstellt: T }] });
+  const neuKonto = DA.einlesen({ format: "lernsteig-sicherung", version: 1, konten: [{ id: "k-ida", name: "Ida", geaendert: T, erstellt: T }] });
   KO.verbindeEingelesene(neuKonto.neu);
   gleich(KO.verbundene(vater.id).map(k => k.id), ["k-ida"], "neues Konto aus der Datei wird verbunden (AF2 a)");
   // voller Speicher: alles oder nichts
   const vorVoll = stand();
   localStorage.voll = true;
-  await wirft(() => DA.einlesen({ format: DA.FORMAT, version: 1, konten: [{ id: "k-zoe", name: "Zoe", erstellt: T, geaendert: T }] }), "voller Speicher", "voll");
+  await wirft(() => DA.einlesen({ format: "lernsteig-sicherung", version: 1, konten: [{ id: "k-zoe", name: "Zoe", erstellt: T, geaendert: T }] }), "voller Speicher", "voll");
   localStorage.voll = false;
   gleich(stand(), vorVoll, "voller Speicher: nichts eingelesen");
 
@@ -147,6 +150,35 @@ const DA = require(path.join(APP, "gemeinsam", "daten.js"));
   gleich(KO.einladungLesen(e), { name: "Lea", geboren: "2013-06", klasse: "7", niveau: { mathematik: "n2" }, lehrplan: { land: "CH", kanton: "SG" } }, "Einladung mit Geburtsmonat aus dem Eulenpfad");
   const schlecht = KO.einladungErstellen({ name: "X", lehrplan: { land: "CH", kanton: { boese: 1 } }, klasse: 12 });
   gleich(KO.einladungLesen(schlecht), { name: "X", lehrplan: { land: "CH", kanton: null } }, "ungültiger Kanton und Klasse verworfen");
+
+  // Gesperrte Personen auf einem anderen Gerät (DF4 a) und Aufsichten in einer Datei (AS1 a)
+  {
+    await KO.aufsichtAnmelden(vater.id, "5555");
+    const miaCode = await KO.setzePin(mia.id, "2222"); // neuer Code, den der Test kennt
+    const vonHier = DA.sichern([mia.id]);
+    const mitAufsicht = { ...vonHier, personen: [...vonHier.personen, KERN.person.fuerDatei(KO.aufsichtFinde(vater.id), KO.GERAET)] };
+    // „anderes Gerät“: leerer Speicher
+    localStorage.d.clear(); sessionStorage.d.clear();
+    const e1 = DA.einlesen(mitAufsicht);
+    gleich([e1.konten, e1.abgewiesen, KO.aufsichten().length], [1, 1, 0], "ohne angemeldete Aufsicht: Aufsicht in der Datei abgewiesen (AS1 a)");
+    gleich(KO.gesperrt(mia.id), true, "Konto mit PIN auf dem anderen Gerät gesperrt");
+    await wirft(() => KO.anmelden(mia.id, "2222"), "gesperrt: keine Anmeldung mit der alten PIN", "PIN");
+    await wirft(() => KO.freischalten(mia.id, "1357", { code: "AAAA-AAAA-AAAA" }), "falscher Code", "Code stimmt nicht");
+    await KO.freischalten(mia.id, "1357", { code: miaCode });
+    gleich([KO.gesperrt(mia.id), KO.aktiv()?.id, await KO.codeStimmt(KO.finde(mia.id), miaCode)], [false, mia.id, true], "mit dem Code freigeschaltet und angemeldet, Code bleibt");
+    await KO.setzePin(mia.id, null);
+    gleich(KO.gesperrt(mia.id), false, "PIN später entfernt: nicht wieder gesperrt");
+    // mit angemeldeter Aufsicht kommt die Aufsicht der Datei mit, gesperrt; freischalten mit Bestätigung einer anderen
+    localStorage.d.clear(); sessionStorage.d.clear();
+    const { aufsicht: hier } = await KO.aufsichtAnlegen({ name: "Hier", art: "eltern", pin: "8888" });
+    const e2 = DA.einlesen(mitAufsicht);
+    gleich([e2.abgewiesen, KO.gesperrt(vater.id)], [0, true], "mit angemeldeter Aufsicht: Aufsicht der Datei gesperrt übernommen");
+    await wirft(() => KO.aufsichtAnmelden(vater.id, "5555"), "gesperrte Aufsicht: keine Anmeldung", "PIN");
+    await wirft(() => KO.freischalten(vater.id, "4321", { bestaetigung: { id: hier.id, pin: "0000" } }), "Bestätigung mit falscher PIN", "bestätigen");
+    await KO.freischalten(vater.id, "4321", { bestaetigung: { id: hier.id, pin: "8888" } });
+    gleich([KO.gesperrt(vater.id), KO.aufsichtAktiv()?.id], [false, vater.id], "Aufsicht mit Bestätigung freigeschaltet und angemeldet");
+    await wirft(() => KO.freischalten(mia.id, "1111", { bestaetigung: { id: vater.id, pin: "4321" } }), "Jugendlicher nicht über Bestätigung", "bestätigen");
+  }
 
   console.log(`  ${faelle} Fälle, ${fehler} Fehler.`);
   process.exit(fehler ? 1 : 0);

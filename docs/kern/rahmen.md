@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.15.0, 2026-11-06 (LERN_Session18). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.16.0, 2026-11-06 (LERN_Session18). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.15.0)
+kern/VERSION          Version des Kerns (1.16.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -456,7 +456,8 @@ Entscheide DF1 a, DF2 a, DF4 a (LERN_Session18), dazu R1 a, P1 a und Befund D4. 
 `LS.abgleichDaten`, Löschvermerke) und Lernsteig (`lernsteig/gemeinsam/daten.js`: erst prüfen, dann alles oder nichts).
 Seit 1.15.0 im Kern. Benutzt vom Eulenpfad seit LERN_Session18 (`LS.zusammenfuehren`, `LS.abgleichDaten`,
 `LS.sicherung`, `LS.loescheSpieler`, `LS.loescheRunden`; Schlüssel `runden: "protokoll"`, Teil `meldungen`, Freigabe);
-der Lernsteig stellt in einem eigenen Schritt um (Plan B).
+vom Lernsteig seit LERN_Session18 (`LST_DATEN`; Gerätefelder `aufsicht`, `anfragen`, `ohnePerson: ["gast"]`, `gueltig`
+für die Elemente von `liste`; ohne angemeldete Aufsicht `rollen: ["lernend"]`, AS1 a).
 
 ```
 { format: "reihe-daten", version: 1, app, art: "sicherung" | "abgleich", gesichert, geraet?,
@@ -479,9 +480,9 @@ der Lernsteig stellt in einem eigenen Schritt um (Plan B).
 
 | Aufruf | Ergebnis |
 |---|---|
-| `KERN.daten({ app, speicher, schluessel?, dateiPraefix?, geraetFelder?, pruefung?, ohnePerson?, freigabe?, teile?, altePerson? })` | Daten einer App; `schluessel` je Bereich (Standard gleichnamig, Eulenpfad `runden: "protokoll"`); `teile: { <name>: { schluessel, sichern(ids \| null, eigene), zusammenfuehren(eigene, fremde, { umbiegen, personVon }) → { wert, neu }, entferne?(eigene, ids) } }` |
+| `KERN.daten({ app, speicher, schluessel?, dateiPraefix?, geraetFelder?, pruefung?, gueltig?, ohnePerson?, freigabe?, teile?, altePerson? })` | Daten einer App; `gueltig: { runde, rekord }` weitere Prüfung der App je fremdem Eintrag; `schluessel` je Bereich (Standard gleichnamig, Eulenpfad `runden: "protokoll"`); `teile: { <name>: { schluessel, sichern(ids \| null, eigene), zusammenfuehren(eigene, fremde, { umbiegen, personVon }) → { wert, neu }, entferne?(eigene, ids) } }` |
 | `sichern({ ids, art, filter, geraet })` | Datei als Objekt; `ids: null` = alle Personen; `filter(e)` für Runden und Rekorde (etwa ohne Testrunden) |
-| `einlesen(text \| objekt)` | `{ personen: { neu, geaendert }, runden, rekorde, teile, freigabe, abgewiesen, kennungen, ids, neueIds, geschrieben, datei }`; Fehler mit Klartext |
+| `einlesen(text \| objekt, { rollen })` | `rollen`: nur Personen dieser Rollen, die anderen abgewiesen (null = alle); `{ personen: { neu, geaendert }, runden, rekorde, teile, freigabe, abgewiesen, kennungen, ids, neueIds, geschrieben, datei }`; Fehler mit Klartext |
 | `lesen(text \| objekt)` | nur lesen und umdeuten; Fehler: „Diese Datei kann ich nicht lesen.“, „Das ist keine Sicherung und keine Abgleich-Datei.“, „Das ist eine Datei des Lernsteigs; hier lässt sie sich nicht einlesen.“, neuere Fassung, „Die Datei ist beschädigt.“ |
 | `loeschePerson(id)`, `loescheRunden(id, inhalt)` | löschen mit Vermerk, alles oder nichts; Teile mit `entferne` werden mitgezogen |
 | `vermerke()`, `dateiname(teil, datum)` | Löschvermerke des Geräts; „lernspiele-Mia-Lena-2026-11-06.json“ (`.gitignore` hält `<präfix>-*.json` aus dem Repo) |

@@ -1,4 +1,4 @@
-/* kern 1.15.0 · Prüfsumme sha256:19a9f7d973cb4a17d309352c526d393640d236a74c939fbfbc37d7f1fcc8821d · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.16.0 · Prüfsumme sha256:dc72ef039af3d611d0891525f61f415bb77016b7f5e71e8fcbcdee1a9ab5cbbf · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -818,7 +818,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       if (!(await KERN.geheimnis.codeStimmt(code, p.wiederherstellung))) throw new Error("Der Code stimmt nicht.");
     }
     const pw = await KERN.geheimnis.pin(pin);
-    return personen.aendere(p.id, { pin: pw, gesperrt: undefined });
+    return personen.aendere(p.id, { pin: pw });
   }
 
   // ---------- Liste im Speicher der App ----------
@@ -864,6 +864,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
         } else p[k] = k === "geboren" && v !== null ? geburtsdatumLies(v) : v;
         p.geaendert[k] = jetzt;
       }
+      // Wer hier eine eigene PIN bekommt, ist nicht mehr gesperrt (DF4 a) — auch nicht, wenn er sie später entfernt
+      if (daten.pin && p.gesperrt !== undefined) delete p.gesperrt;
       const fehler = maengel(p);
       if (fehler.length) throw new Error(fehler.join(", "));
       l[i] = p;
@@ -1413,6 +1415,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
    *   dateiPraefix  Anfang der Dateinamen („lernspiele“, „lernsteig“: .gitignore hält <präfix>-*.json aus dem Repo)
    *   geraetFelder  Felder der Personen, die auf dem Gerät bleiben (Lernsteig: Verbindungen)
    *   pruefung      { runde, rekord } — Schema der App wie bei KERN.runden.maengel (zusatz, pflicht, inhaltBekannt)
+   *   gueltig       { runde?, rekord? } — weitere Prüfung der App je fremdem Eintrag (e → bool), etwa die Elemente einer Liste
    *   ohnePerson    Kennungen, denen Runden ohne Person gehören dürfen (Lernsteig: „gast“ bis LERN_Session16)
    *   freigabe      true: die Freigabe des Geräts reist im Abgleich mit (KERN.freigabe, jüngster Stand gewinnt)
    *   teile         { <name>: { schluessel, sichern(ids | null, eigene) → wert, zusammenfuehren(eigene, fremde, hilfe)
@@ -1429,6 +1432,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     const dateiPraefix = opt.dateiPraefix || app;
     const geraetFelder = opt.geraetFelder || [];
     const pruefung = { runde: {}, rekord: {}, ...(opt.pruefung || {}) };
+    const gueltig = { runde: () => true, rekord: () => true, ...(opt.gueltig || {}) };
     const ohnePerson = new Set(opt.ohnePerson || []);
     const teile = opt.teile || {};
     const altePerson = opt.altePerson || altePersonStandard;
@@ -1484,8 +1488,10 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
      * Datei einlesen und zusammenführen (Text oder Objekt). Ergebnis: { personen: { neu, geaendert }, runden, rekorde,
      * teile: { <name>: neu }, freigabe, abgewiesen, kennungen, ids (Personen der Datei nach dem Zusammenführen), neueIds
      * (davon neu auf dem Gerät), geschrieben (Schlüssel), datei: { art, gesichert, geraet } }. Fehler mit Klartext.
+     * rollen: nur Personen dieser Rollen übernehmen, die anderen zählen als abgewiesen (Lernsteig: ohne angemeldete
+     * Aufsicht keine Aufsichten, AS1 a); null = alle.
      */
-    function einlesen(eingabe) {
+    function einlesen(eingabe, { rollen = null } = {}) {
       const d = lesen(eingabe, app, { altePerson });
       const erg = { personen: { neu: 0, geaendert: 0 }, runden: 0, rekorde: 0, teile: {}, freigabe: false, abgewiesen: 0,
         kennungen: {}, ids: [], neueIds: [], geschrieben: [], datei: { art: d.art, gesichert: d.gesichert || "", geraet: d.geraet || null } };
@@ -1497,7 +1503,9 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       //    noch gespielt hat (Runden beider Seiten); mit ihr ihre Runden
       const eigene = personenAlle();
       const bekannt = new Set(eigene.flatMap(kennungen));
-      const fremde = liste(d.personen);
+      const alleFremden = liste(d.personen);
+      const fremde = rollen ? alleFremden.filter(p => istObjekt(p) && rollen.includes(p.rolle)) : alleFremden;
+      erg.abgewiesen += alleFremden.length - fremde.length;
       const z = KERN.person.zusammenfuehren(eigene, fremde, { geraetFelder, schutz: true });
       erg.abgewiesen += z.abgewiesen;
       erg.kennungen = z.kennungen;
@@ -1523,9 +1531,13 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       // Einträge einer jetzt entfallenen Person gehen mit ihr; Einträge ohne bekannte Person (ältere Fassungen) bleiben,
       // wie sie sind, soweit kein Vermerk sie trifft
       const behalten = e => !findeIn(entfallen, e.person) && !eintragWeg(e, personVon(e.person), g);
-      const zr = KERN.runden.zusammenfuehren(rohListe(S.runden), liste(d.runden),
+      // die weitere Prüfung der App vorab: was sie verwirft, zählt als abgewiesen
+      // (eine Prüfung, die an einem kaputten Eintrag selbst scheitert, weist ihn ab)
+      const pruefe = (g, e) => { try { return !!g(e); } catch (x) { return false; } };
+      const vorab = (l, g) => { const ok = liste(l).filter(e => !istObjekt(e) || pruefe(g, e)); erg.abgewiesen += liste(l).length - ok.length; return ok; };
+      const zr = KERN.runden.zusammenfuehren(rohListe(S.runden), vorab(d.runden, gueltig.runde),
         { art: "runde", pruefung: { ...pruefung.runde, personBekannt: personDa }, umbiegen, behalten });
-      const zk = KERN.runden.zusammenfuehren(rohListe(S.rekorde), liste(d.rekorde),
+      const zk = KERN.runden.zusammenfuehren(rohListe(S.rekorde), vorab(d.rekorde, gueltig.rekord),
         { art: "rekord", pruefung: { ...pruefung.rekord, personBekannt: personDa }, umbiegen, behalten });
       erg.runden = zr.neu; erg.rekorde = zk.neu + zk.ersetzt; erg.abgewiesen += zr.abgewiesen + zk.abgewiesen;
 

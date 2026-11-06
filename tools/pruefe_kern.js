@@ -1134,6 +1134,20 @@ console.log("personenmenue.js");
       // fuerDatei einer gesperrten Person: weiter geschützt (über ein drittes Gerät)
       gleich(P.fuerDatei(G3.P.finde(noa.id)).geschuetzt, true, "gesperrte Person reist geschützt weiter");
       gleich(JSON.stringify(P.ohneGeheimnis({ id: "p-x", gesperrt: true, geschuetzt: true, pin: 1 })), '{"id":"p-x"}', "ohneGeheimnis nimmt den Schutz mit weg");
+      // eine eigene PIN nimmt den Vermerk weg: später ohne PIN nicht wieder gesperrt
+      const G6 = geraet("lernsteig");
+      G6.D.einlesen(d);
+      G6.P.aendere(noa.id, { pin: await G.pin("1212") });
+      G6.P.aendere(noa.id, { pin: null });
+      gleich([P.gesperrt(G6.P.finde(noa.id)), G6.P.finde(noa.id).gesperrt].join(), "false,", "eigene PIN gesetzt und entfernt: nicht wieder gesperrt");
+      // Rollen beim Einlesen: ohne „aufsicht“ werden Aufsichten abgewiesen
+      const G7 = geraet();
+      const nurLernende = G7.D.einlesen({ format: "reihe-daten", version: 1, app: "eulenpfad", personen: [{ id: "p-auf-3", name: "Oma", rolle: "aufsicht", angelegt: t(1), geaendert: {} }, { id: "p-kind-3", name: "Kim", rolle: "lernend", angelegt: t(1), geaendert: {} }], runden: [], rekorde: [] }, { rollen: ["lernend"] });
+      gleich([nurLernende.personen.neu, nurLernende.abgewiesen, G7.P.alle().map(p => p.name).join()].join(), "1,1,Kim", "rollen: Aufsicht abgewiesen");
+      // weitere Prüfung der App (gueltig)
+      const G8 = D({ app: "lernsteig", speicher: KERN.speicher("geraet-g8:"), pruefung: PRUEF, gueltig: { runde: e => (e.liste || []).every(x => x && typeof x === "object") } });
+      const gk = G8.einlesen({ format: "reihe-daten", version: 1, app: "lernsteig", personen: [pd], runden: [runde(noa.id, t(2), "terme", { liste: [1] }), runde(noa.id, t(3), "terme", { liste: [{}] })], rekorde: [] });
+      gleich([gk.runden, gk.abgewiesen].join(), "1,1", "gueltig der App: Runde mit falscher Liste abgewiesen");
       // ohne die Option schutz (Umzug am selben Gerät) sperrt zusammenfuehren nichts
       const ohne = P.zusammenfuehren([], [{ id: "p-auf-2", name: "Papa", rolle: "aufsicht", geschuetzt: true }]);
       gleich(ohne.personen[0].gesperrt, undefined, "zusammenfuehren ohne schutz: nicht gesperrt");

@@ -67,12 +67,15 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       el("p", { class: "leise", text: konten.length || aufsichten.length
         ? "Tippe auf deinen Namen. Mit 🔒 fragt der Lernsteig nach der PIN."
         : "Lege ein Konto an, damit der Lernsteig deinen Stand kennt. Oder übe als Gast: Dann wird nichts gespeichert." }));
+    // Gesperrt (DF4 a): kam mit PIN von einem anderen Gerät, hier noch ohne eigene — erst freischalten
+    const zuPin = k => (KO.gesperrt(k.id) ? "freischalten" : "pin");
     if (konten.length) dazu(karte,el("div", { class: "konto-liste" }, konten.map(k => el("button", { type: "button", class: "knopf konto-knopf", "data-konto": k.id,
-      text: k.pin ? `${k.name} \u{1F512}` : k.name, "aria-label": k.pin ? `${k.name}, mit PIN` : k.name,
-      onclick: async () => { if (k.pin) { ansicht = { art: "pin", id: k.id }; zeichne(); } else { await KO.anmelden(k.id); ansicht = { art: "start" }; zeichne(); } } }))));
+      text: k.pin || KO.gesperrt(k.id) ? `${k.name} \u{1F512}` : k.name, "aria-label": KO.gesperrt(k.id) ? `${k.name}, gesperrt` : k.pin ? `${k.name}, mit PIN` : k.name,
+      onclick: async () => { if (k.pin || KO.gesperrt(k.id)) { ansicht = { art: zuPin(k), id: k.id }; zeichne(); } else { await KO.anmelden(k.id); ansicht = { art: "start" }; zeichne(); } } }))));
     if (aufsichten.length) dazu(karte,el("p", { class: "leise", text: "Aufsicht (Eltern, Lehrpersonen):" }),
       el("div", { class: "konto-liste" }, aufsichten.map(a => el("button", { type: "button", class: "knopf konto-knopf", "data-aufsicht": a.id,
-        text: `\u{1F511} ${a.name}`, "aria-label": `${a.name}, Aufsicht, mit PIN`, onclick: () => { ansicht = { art: "pin", id: a.id }; zeichne(); } }))));
+        text: `${KO.gesperrt(a.id) ? "\u{1F512} " : ""}\u{1F511} ${a.name}`, "aria-label": KO.gesperrt(a.id) ? `${a.name}, Aufsicht, gesperrt` : `${a.name}, Aufsicht, mit PIN`,
+        onclick: () => { ansicht = { art: zuPin(a), id: a.id }; zeichne(); } }))));
     dazu(karte,el("div", { class: "knopf-zeile" },
       el("button", { type: "button", class: "knopf haupt", text: "\u{1F423} Ich bin neu", "data-aktion": "neu", onclick: () => { ansicht = { art: "neu-wer" }; zeichne(); } }),
       KO.gastErlaubt() ? el("button", { type: "button", class: "knopf", text: "\u{1F440} Als Gast weiter", "data-aktion": "gast",
@@ -218,6 +221,41 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     return karte;
   }
 
+  /**
+   * Gesperrte Person freischalten (DF4 a): mit dem Wiederherstellungscode und einer neuen PIN; eine Aufsicht auch mit der
+   * PIN einer anderen Aufsicht dieses Geräts. Der Code bleibt derselbe.
+   */
+  function freischaltenForm(karte) {
+    const aufsicht = KO.aufsichtFinde(ansicht.id);
+    const k = aufsicht || KO.finde(ansicht.id);
+    const andere = aufsicht ? KO.aufsichten().filter(a => a.id !== k.id && !KO.gesperrt(a.id)) : [];
+    const mitCode = !!(k.wiederherstellung && k.wiederherstellung.code);
+    dazu(karte, el("h3", { text: `\u{1F512} ${aufsicht ? "\u{1F511} " : ""}${k.name}` }),
+      el("p", { text: aufsicht ? "Diese Aufsicht ist auf einem anderen Gerät mit einer PIN geschützt. Die PIN reist nicht mit — hier braucht sie zuerst eine eigene."
+        : "Dein Konto ist auf einem anderen Gerät mit einer PIN geschützt. Die PIN reist nicht mit — hier legst du zuerst eine neue fest." }));
+    if (!mitCode && !andere.length) {
+      dazu(karte, el("p", { class: "leise", text: aufsicht ? "Freischalten geht mit dem Wiederherstellungscode oder mit der PIN einer anderen Aufsicht dieses Geräts. Hier gibt es beides nicht." : "Ohne Wiederherstellungscode lässt sich das Konto hier nicht freischalten." }),
+        el("div", { class: "knopf-zeile" }, zurueck()));
+      return karte;
+    }
+    const code = mitCode ? feld("Wiederherstellungscode", { type: "text", autocomplete: "off", maxlength: "14", name: "code", placeholder: "XXXX-XXXX-XXXX" }, aufsicht ? "Den Code hat die Aufsicht beim Anlegen bekommen." : "Den Code hast du beim Anlegen der PIN bekommen.") : null;
+    const wer = andere.length ? auswahl("Oder: bestätigt von", andere.map(a => ({ id: a.id, name: a.name })), andere[0].id, () => {}) : null;
+    if (wer) wer.querySelector("select").name = "bestaetigt-von";
+    const werPin = andere.length ? feld("Deren PIN", { type: "password", inputmode: "numeric", maxlength: "6", name: "bestaetigung-pin", autocomplete: "off" }) : null;
+    const pin = feld("Neue PIN für dieses Gerät (4–6 Ziffern)", { type: "password", inputmode: "numeric", maxlength: "6", name: "neuepin", autocomplete: "new-password" });
+    const wert = (knoten, sel) => (knoten ? knoten.querySelector(sel).value.trim() : "");
+    dazu(karte, code, wer, werPin, pin, fehlerText, el("div", { class: "knopf-zeile" },
+      el("button", { type: "button", class: "knopf haupt", text: "Freischalten", "data-aktion": "freischalten", onclick: async () => {
+        try {
+          const c = wert(code, "input"), wp = wert(werPin, "input");
+          if (!c && !wp) throw new Error(andere.length && mitCode ? "Bitte den Code eingeben oder eine andere Aufsicht ihre PIN." : mitCode ? "Bitte den Wiederherstellungscode eingeben." : "Bitte die PIN der anderen Aufsicht eingeben.");
+          await KO.freischalten(k.id, wert(pin, "input"), c ? { code: c } : { bestaetigung: { id: wert(wer, "select"), pin: wp } });
+          ansicht = { art: "start" }; zeichne();
+        } catch (e) { zeigeFehler(e.message); }
+      } }), zurueck()));
+    return karte;
+  }
+
   function codeAnzeige(karte) {
     dazu(karte,el("h3", { text: ansicht.aufsicht ? "Wiederherstellungscode der Aufsicht" : "Dein Wiederherstellungscode" }),
       el("p", { class: "code-anzeige", text: ansicht.code, "data-code": ansicht.code }),
@@ -258,7 +296,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   function zeichneAnmeldung() {
     const karte = el("section", { class: "einstellungen konto anmeldung" });
     zeigeFehler("");
-    const f = { "neu-wer": neuWer, neu: neuForm, "neu-aufsicht": neuAufsicht, pin: pinForm, vergessen: vergessenForm, code: codeAnzeige }[ansicht.art] || anmeldung;
+    const f = { "neu-wer": neuWer, neu: neuForm, "neu-aufsicht": neuAufsicht, pin: pinForm, vergessen: vergessenForm, code: codeAnzeige, freischalten: freischaltenForm }[ansicht.art] || anmeldung;
     wurzel.replaceChildren(f(karte),
       el("p", { class: "fuss", text: "Alles bleibt im Browser auf diesem Gerät. Keine Anmeldung bei einem Server, keine Werbung." }));
   }
@@ -350,15 +388,15 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     const ich = wer === "lernend" ? KO.aktiv() : wer === "aufsicht" ? KO.aufsichtAktiv() : null;
     const name = ich ? (wer === "aufsicht" ? `\u{1F511} ${ich.name}` : ich.name) : "\u{1F440} Gast";
     const personen = [
-      ...KO.alle().map(k => ({ id: k.id, name: k.name, zusatz: k.pin ? "\u{1F512}" : "", aria: k.pin ? `${k.name}, mit PIN` : k.name, pin: !!k.pin })),
-      ...KO.aufsichten().map(a => ({ id: a.id, name: `\u{1F511} ${a.name}`, aria: `${a.name}, Aufsicht, mit PIN`, pin: true })),
+      ...KO.alle().map(k => ({ id: k.id, name: k.name, zusatz: k.pin || KO.gesperrt(k.id) ? "\u{1F512}" : "", aria: KO.gesperrt(k.id) ? `${k.name}, gesperrt` : k.pin ? `${k.name}, mit PIN` : k.name, pin: !!k.pin || KO.gesperrt(k.id) })),
+      ...KO.aufsichten().map(a => ({ id: a.id, name: `${KO.gesperrt(a.id) ? "\u{1F512} " : ""}\u{1F511} ${a.name}`, aria: KO.gesperrt(a.id) ? `${a.name}, Aufsicht, gesperrt` : `${a.name}, Aufsicht, mit PIN`, pin: true })),
     ].filter(p => !ich || p.id !== ich.id);
     return KERN.personenMenue({
       titel: "Angemeldet als",
       ich: { name, bild: null },
       personen,
       waehle: async id => {
-        if (personen.find(p => p.id === id).pin) { ansicht = { art: "pin", id }; return zeichne(); }
+        if (personen.find(p => p.id === id).pin) { ansicht = { art: KO.gesperrt(id) ? "freischalten" : "pin", id }; return zeichne(); }
         await KO.anmelden(id);
         ansicht = { art: "start" };
         zeichne();
@@ -377,7 +415,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   }
 
   function zeichne() {
-    if (LST.werUebt() === "niemand" || ["neu-wer", "neu", "neu-aufsicht", "pin", "vergessen"].includes(ansicht.art)) return zeichneAnmeldung();
+    if (LST.werUebt() === "niemand" || ["neu-wer", "neu", "neu-aufsicht", "pin", "vergessen", "freischalten"].includes(ansicht.art)) return zeichneAnmeldung();
     // Ein neuer Wiederherstellungscode steht im Profil (nur jetzt sichtbar)
     if (ansicht.art === "code" && !location.hash.startsWith("#profil")) history.replaceState(null, "", "#profil");
     const { tab, teil } = aktuellerTab();

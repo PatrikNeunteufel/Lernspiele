@@ -163,18 +163,27 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   seit Plan C2 im **Tab Erfolge** (`#erfolge`, BF1 a: keine Sterne); Testrunden der Aufsicht zählen nicht.
   Überblick (Runden, Aufgaben, Anteil auf Anhieb, Übungstage der letzten 14 Tage), Kompetenzstand je gespielter Übung
   und Lehrplan-Stufe (5b), die letzten 10 Runden.
-- **Sichern** nur auf Knopfdruck (`gemeinsam/daten.js`, `LST_DATEN`): Datei `lernsteig-<vorname>-<datum>.json`,
-  `{ format: "lernsteig-sicherung", version: 1, erstellt, konten, runden, rekorde }`, nur die Daten des Kontos, Konten
-  ohne PIN und Code (`ohneGeheimnis`). Das Gastkonto selbst reist nicht mit, nur seine Runden und Rekorde.
-- **Einlesen** (Befund D4, seit LERN_Session15): zuerst wird die ganze Datei geprüft — Konten mit
-  `KERN.person.maengel`, Runden und Rekorde mit eigenem Schema (`LST_DATEN.rundeGueltig`, `rekordGueltig`: Kennung,
-  Konto, Zeit, bekannte Übung, Stufe, Zahlen); Ungültiges wird gezählt und nie gespeichert. Dann wird im Speicher
-  zusammengeführt und erst am Ende geschrieben, alles oder nichts (voller Speicher → alter Stand, Meldung).
-  Konten mit `KERN.person.zusammenfuehren` (P1 a: gleiche Kennung, sonst gleicher Name; je Feld der jüngere Stand;
-  PIN, Code und Verbindungen bleiben die des Geräts); Runden nach Kennung (gleiche zählt einmal, nach Zeit sortiert),
-  Rekorde nach Kennung (höherer Stand); Verweise auf zusammengeführte Kennungen werden umgebogen. Ältere Sicherungen
-  (Konto mit `erstellt` und einer Zeit `geaendert`) werden umgedeutet. Keine Löschvermerke. Andere Dateien werden mit
-  Meldung abgewiesen. Test: `tools/pruefe_konten.js`.
+- **Sichern** nur auf Knopfdruck (`gemeinsam/daten.js`, `LST_DATEN`, seit LERN_Session18 über `KERN.daten`,
+  docs/kern/rahmen.md 4.19; DF1 a): Datei `lernsteig-<vorname>-<datum>.json` im Format der Reihe
+  `{ format: "reihe-daten", version: 1, app: "lernsteig", art: "sicherung", gesichert, personen, runden, rekorde }`, nur
+  die Daten der gewählten Konten, ohne PIN und Verbindungen. Ein Konto mit PIN reist **geschützt** (DF4 a): mit dem
+  Vermerk `geschuetzt` und nur dem Prüfwert seines Wiederherstellungscodes. Das Gastkonto selbst reist nicht mit, nur
+  seine Runden und Rekorde.
+- **Einlesen** (Befund D4): zuerst wird die ganze Datei geprüft — Konten mit `KERN.person.maengel`, Runden und Rekorde
+  mit `KERN.runden.maengel` und dem Schema des Lernsteigs (`RUNDE`, `REKORD`, dazu jedes Element von `liste` ein
+  Objekt); Ungültiges wird gezählt und nie gespeichert. Dann wird im Speicher zusammengeführt und nur Geändertes
+  geschrieben, alles oder nichts (voller Speicher → alter Stand, Meldung). Konten nach P1 a (gleiche Kennung, sonst
+  gleicher Name; je Feld der jüngere Stand; PIN, Code und Verbindungen bleiben die des Geräts); Runden und Rekorde
+  nach Kennung (Rekord: höherer Stand), Verweise umgebogen. Ältere Sicherungen (`lernsteig-sicherung` 1, 2) deutet der
+  Kern um; eine Datei des Eulenpfads wird mit „Das ist eine Datei des Eulenpfads; …“ abgewiesen. Löschvermerke führt der
+  Kern (DF2 a); der Lernsteig löscht heute noch keine Konten. Test: `tools/pruefe_konten.js`.
+- **Aufsichten in einer Datei** (AS1 a, LERN_Session18, vorgeschlagen): liest nur eine angemeldete Aufsicht ein; liest
+  ein Jugendlicher ein, werden sie abgewiesen (gezählt). Sonst brächte eine selbst gebaute Datei mit einem bekannten
+  Code eine Aufsicht ohne Bestätigung aufs Gerät (D5).
+- **Gesperrt** (DF4 a): Ein Konto oder eine Aufsicht mit PIN von einem anderen Gerät ist hier 🔒 gesperrt, bis es mit
+  dem Wiederherstellungscode und einer neuen PIN freigeschaltet ist (`LST_KONTEN.freischalten`, Ansicht „freischalten“
+  auf der Anmeldung und im Personen-Knopf); eine Aufsicht auch mit der PIN einer anderen Aufsicht dieses Geräts. Der
+  Code bleibt derselbe. Wer hier eine eigene PIN setzt (auch über „PIN vergessen“), ist nicht mehr gesperrt.
 
 ## 5d. Aufsicht (AU1 a, TR1 a)
 

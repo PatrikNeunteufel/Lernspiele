@@ -3,6 +3,14 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.16.0 — 2026-11-06 (LERN_Session18)
+- `daten.js`: `einlesen(e, { rollen })` übernimmt nur Personen dieser Rollen (Lernsteig ohne angemeldete Aufsicht: nur
+  Lernende, AS1 a), die anderen zählen als abgewiesen; Option `gueltig: { runde, rekord }` für eine weitere Prüfung der
+  App je fremdem Eintrag (Lernsteig: jedes Element von `liste` ein Objekt); scheitert sie an einem Eintrag, wird er
+  abgewiesen.
+- `person.js`: Wer über `liste.aendere` eine eigene PIN bekommt, verliert den Vermerk `gesperrt` — sonst wäre eine
+  Person, die über „PIN vergessen“ eine PIN setzt und sie später entfernt, wieder gesperrt.
+
 ## 1.15.0 — 2026-11-06 (LERN_Session18)
 - `daten.js` (`KERN.daten`, DF1 a, DF2 a, DF4 a): Sichern, Einlesen und Abgleich in einem Dateiformat `reihe-daten`
   für alle Apps — Prüfung jedes Eintrags vor dem Schreiben, nur geänderte Schlüssel, alles oder nichts; Löschvermerke

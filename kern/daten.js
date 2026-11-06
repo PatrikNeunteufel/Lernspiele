@@ -162,6 +162,7 @@
    *   dateiPraefix  Anfang der Dateinamen („lernspiele“, „lernsteig“: .gitignore hält <präfix>-*.json aus dem Repo)
    *   geraetFelder  Felder der Personen, die auf dem Gerät bleiben (Lernsteig: Verbindungen)
    *   pruefung      { runde, rekord } — Schema der App wie bei KERN.runden.maengel (zusatz, pflicht, inhaltBekannt)
+   *   gueltig       { runde?, rekord? } — weitere Prüfung der App je fremdem Eintrag (e → bool), etwa die Elemente einer Liste
    *   ohnePerson    Kennungen, denen Runden ohne Person gehören dürfen (Lernsteig: „gast“ bis LERN_Session16)
    *   freigabe      true: die Freigabe des Geräts reist im Abgleich mit (KERN.freigabe, jüngster Stand gewinnt)
    *   teile         { <name>: { schluessel, sichern(ids | null, eigene) → wert, zusammenfuehren(eigene, fremde, hilfe)
@@ -178,6 +179,7 @@
     const dateiPraefix = opt.dateiPraefix || app;
     const geraetFelder = opt.geraetFelder || [];
     const pruefung = { runde: {}, rekord: {}, ...(opt.pruefung || {}) };
+    const gueltig = { runde: () => true, rekord: () => true, ...(opt.gueltig || {}) };
     const ohnePerson = new Set(opt.ohnePerson || []);
     const teile = opt.teile || {};
     const altePerson = opt.altePerson || altePersonStandard;
@@ -233,8 +235,10 @@
      * Datei einlesen und zusammenführen (Text oder Objekt). Ergebnis: { personen: { neu, geaendert }, runden, rekorde,
      * teile: { <name>: neu }, freigabe, abgewiesen, kennungen, ids (Personen der Datei nach dem Zusammenführen), neueIds
      * (davon neu auf dem Gerät), geschrieben (Schlüssel), datei: { art, gesichert, geraet } }. Fehler mit Klartext.
+     * rollen: nur Personen dieser Rollen übernehmen, die anderen zählen als abgewiesen (Lernsteig: ohne angemeldete
+     * Aufsicht keine Aufsichten, AS1 a); null = alle.
      */
-    function einlesen(eingabe) {
+    function einlesen(eingabe, { rollen = null } = {}) {
       const d = lesen(eingabe, app, { altePerson });
       const erg = { personen: { neu: 0, geaendert: 0 }, runden: 0, rekorde: 0, teile: {}, freigabe: false, abgewiesen: 0,
         kennungen: {}, ids: [], neueIds: [], geschrieben: [], datei: { art: d.art, gesichert: d.gesichert || "", geraet: d.geraet || null } };
@@ -246,7 +250,9 @@
       //    noch gespielt hat (Runden beider Seiten); mit ihr ihre Runden
       const eigene = personenAlle();
       const bekannt = new Set(eigene.flatMap(kennungen));
-      const fremde = liste(d.personen);
+      const alleFremden = liste(d.personen);
+      const fremde = rollen ? alleFremden.filter(p => istObjekt(p) && rollen.includes(p.rolle)) : alleFremden;
+      erg.abgewiesen += alleFremden.length - fremde.length;
       const z = KERN.person.zusammenfuehren(eigene, fremde, { geraetFelder, schutz: true });
       erg.abgewiesen += z.abgewiesen;
       erg.kennungen = z.kennungen;
@@ -272,9 +278,13 @@
       // Einträge einer jetzt entfallenen Person gehen mit ihr; Einträge ohne bekannte Person (ältere Fassungen) bleiben,
       // wie sie sind, soweit kein Vermerk sie trifft
       const behalten = e => !findeIn(entfallen, e.person) && !eintragWeg(e, personVon(e.person), g);
-      const zr = KERN.runden.zusammenfuehren(rohListe(S.runden), liste(d.runden),
+      // die weitere Prüfung der App vorab: was sie verwirft, zählt als abgewiesen
+      // (eine Prüfung, die an einem kaputten Eintrag selbst scheitert, weist ihn ab)
+      const pruefe = (g, e) => { try { return !!g(e); } catch (x) { return false; } };
+      const vorab = (l, g) => { const ok = liste(l).filter(e => !istObjekt(e) || pruefe(g, e)); erg.abgewiesen += liste(l).length - ok.length; return ok; };
+      const zr = KERN.runden.zusammenfuehren(rohListe(S.runden), vorab(d.runden, gueltig.runde),
         { art: "runde", pruefung: { ...pruefung.runde, personBekannt: personDa }, umbiegen, behalten });
-      const zk = KERN.runden.zusammenfuehren(rohListe(S.rekorde), liste(d.rekorde),
+      const zk = KERN.runden.zusammenfuehren(rohListe(S.rekorde), vorab(d.rekorde, gueltig.rekord),
         { art: "rekord", pruefung: { ...pruefung.rekord, personBekannt: personDa }, umbiegen, behalten });
       erg.runden = zr.neu; erg.rekorde = zk.neu + zk.ersetzt; erg.abgewiesen += zr.abgewiesen + zk.abgewiesen;
 

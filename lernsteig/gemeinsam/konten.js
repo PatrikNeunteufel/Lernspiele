@@ -163,6 +163,22 @@ var LST_KONTEN = (function () {
   const aufsichtAbmelden = () => PLATZ.abmelden();
   /** Die angemeldete Aufsicht oder null (derselbe Platz wie die Jugendlichen). */
   const aufsichtAktiv = () => { const p = angemeldet(); return p && p.rolle === "aufsicht" ? p : null; };
+  // ---------- Gesperrte Personen (DF4 a, LERN_Session18) ----------
+  // Kam ein Konto oder eine Aufsicht mit PIN über eine Sicherung von einem anderen Gerät, reist die PIN nicht mit: hier
+  // ist die Person gesperrt (KERN.person.gesperrt), bis sie mit ihrem Wiederherstellungscode und einer neuen PIN
+  // freigeschaltet ist — eine Aufsicht auch mit der Bestätigung einer anderen Aufsicht dieses Geräts. Der Code bleibt.
+  const gesperrt = id => P.gesperrt(LISTE.finde(id));
+  /** Gesperrte Person freischalten und anmelden. weg: { code } oder (nur Aufsicht) { bestaetigung: { id, pin } }. */
+  async function freischalten(id, neuePin, weg = {}) {
+    const p = LISTE.finde(id);
+    if (!p) throw new Error("Konto nicht gefunden");
+    if (weg.bestaetigung) {
+      const b = aufsichtFinde(weg.bestaetigung.id);
+      if (p.rolle !== "aufsicht" || !b || b.id === p.id || !(await G.pinStimmt(weg.bestaetigung.pin, b.pin))) throw new Error("Eine Aufsicht dieses Geräts muss mit ihrer PIN bestätigen.");
+      await P.freischalten(LISTE, p.id, neuePin, { bestaetigt: true });
+    } else await P.freischalten(LISTE, p.id, neuePin, { code: weg.code });
+    return PLATZ.anmelden(p.id, neuePin);
+  }
   async function aufsichtNeuePinMitCode(id, code, neuePin) {
     const a = aufsichtFinde(id);
     if (!a || !(await G.codeStimmt(code, a.wiederherstellung))) throw new Error("Der Code stimmt nicht.");
@@ -261,6 +277,7 @@ var LST_KONTEN = (function () {
     angemeldet, alsGast, istGast, gastErlaubt,
     einladungErstellen, einladungLesen, pinGueltig: G.pinGueltig,
     ROLLEN, aufsichten, aufsichtFinde, aufsichtAnlegen, aufsichtAnmelden, aufsichtAbmelden, aufsichtAktiv, aufsichtNeuePinMitCode,
+    gesperrt, freischalten,
     verbundene, mitleser, angefragt, anfragen, antworten, loesen, kontoFuerAufsicht, verbindeEingelesene, setzeGeraeteEinstellung,
     LISTE,
   };

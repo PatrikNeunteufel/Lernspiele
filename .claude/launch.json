@@ -21,6 +21,13 @@
       "autoPort": false
     },
     {
+      "name": "lernspiele-4",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["tools/server.py", "8771"],
+      "port": 8771,
+      "autoPort": false
+    },
+    {
       "name": "entwicklung",
       "runtimeExecutable": "python",
       "runtimeArgs": ["tools/entwickler_server.py", "8766"],

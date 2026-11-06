@@ -440,8 +440,9 @@ const LS = (() => {
   /** PIN einer Aufsicht setzen (4–6 Ziffern); gespeichert wird nur Salz und Hash. */
   async function setzePin(name, pin) {
     if (!pinGueltig(pin)) return false;
-    // Eine PIN, die eine Aufsicht dieses Geräts setzt, schaltet eine gesperrte Aufsicht auch frei (DF4 a: Bestätigung)
-    speichereProfil(name, { rolle: "aufsicht", pin: await G.pin(pin), ...(person(name)?.gesperrt ? { gesperrt: undefined } : {}) });
+    // Eine PIN, die eine Aufsicht dieses Geräts setzt, schaltet eine gesperrte Aufsicht auch frei (DF4 a: Bestätigung;
+    // der Kern nimmt den Vermerk gesperrt weg, sobald eine eigene PIN gesetzt ist)
+    speichereProfil(name, { rolle: "aufsicht", pin: await G.pin(pin) });
     return true;
   }
   /** Stimmt die PIN dieser Aufsicht? Meldet nicht an (Bestätigung einer neuen Aufsicht, KR2 a). */

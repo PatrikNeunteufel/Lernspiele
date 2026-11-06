@@ -157,7 +157,7 @@
       if (!(await KERN.geheimnis.codeStimmt(code, p.wiederherstellung))) throw new Error("Der Code stimmt nicht.");
     }
     const pw = await KERN.geheimnis.pin(pin);
-    return personen.aendere(p.id, { pin: pw, gesperrt: undefined });
+    return personen.aendere(p.id, { pin: pw });
   }
 
   // ---------- Liste im Speicher der App ----------
@@ -203,6 +203,8 @@
         } else p[k] = k === "geboren" && v !== null ? geburtsdatumLies(v) : v;
         p.geaendert[k] = jetzt;
       }
+      // Wer hier eine eigene PIN bekommt, ist nicht mehr gesperrt (DF4 a) — auch nicht, wenn er sie später entfernt
+      if (daten.pin && p.gesperrt !== undefined) delete p.gesperrt;
       const fehler = maengel(p);
       if (fehler.length) throw new Error(fehler.join(", "));
       l[i] = p;
