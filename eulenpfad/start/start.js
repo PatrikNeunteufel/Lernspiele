@@ -22,24 +22,26 @@ function aktuellerTab() {
   return tab || START_TABS[0];
 }
 
-/** Auswahl oben rechts: angemeldet als … — wechseln oder abmelden. */
+/**
+ * Personen-Knopf oben rechts (KERN.personenMenue, Entscheid PA1 a, LERN_Session17): Bild und Name der angemeldeten
+ * Person; das Menü nennt die anderen Kinder und Aufsichten und, getrennt darunter, „↩ Abmelden“.
+ */
 function werWahl() {
-  const { el } = LS;
   const jetzt = LS.aktuellerSpieler();
-  const wahl = el("select", { "aria-label": "Angemeldet als" },
-    ...LS.kinderListe().map(n => el("option", { value: n, text: n })),
-    ...LS.aufsichtListe().map(n => el("option", { value: "aufsicht:" + n, text: LS.spielerName(n) })),
-    el("option", { value: "abmelden", text: "↩ Abmelden" }));
-  wahl.value = LS.istAufsicht(jetzt) ? "aufsicht:" + jetzt : jetzt;
-  wahl.addEventListener("change", () => {
-    const v = wahl.value;
-    if (v === "abmelden") { LS.abmelden(); return zeichneStart(); }
-    // Die Aufsicht braucht die PIN: über die Anmeldung, dort gleich mit dem gewählten Namen.
-    if (v.startsWith("aufsicht:")) { LS.abmelden(); return zeichneStart(v.slice(9)); }
-    LS.setzeSpieler(v);
-    zeichneStart();
+  const andere = [...LS.kinderListe(), ...LS.aufsichtListe()].filter(n => n !== jetzt);
+  return KERN.personenMenue({
+    titel: "Angemeldet als",
+    ich: { name: LS.spielerName(jetzt), bild: LS.avatarBild(jetzt, 34) },
+    personen: andere.map(n => ({ id: n, name: LS.spielerName(n), bild: LS.avatarBild(n, 28),
+      aria: LS.istAufsicht(n) ? `${n}, Aufsicht, mit PIN` : n })),
+    waehle: n => {
+      // Die Aufsicht braucht die PIN: über die Anmeldung, dort gleich mit dem gewählten Namen.
+      if (LS.istAufsicht(n)) { LS.abmelden(); return zeichneStart(n); }
+      LS.setzeSpieler(n);
+      zeichneStart();
+    },
+    schluss: { text: "↩ Abmelden", aktion: () => { LS.abmelden(); zeichneStart(); } },
   });
-  return el("label", { class: "wer" }, el("span", { text: "Angemeldet:" }), jetzt ? LS.avatarBild(jetzt, 34) : "", wahl);
 }
 
 /** Ganze Seite neu zeichnen; mitAufsicht: in der Anmeldung gleich die PIN dieser Aufsicht abfragen. */
@@ -67,7 +69,8 @@ function zeichneStart(mitAufsicht = null) {
   }
   // Anleitung in der App (Wunsch Patrik, LERN_Session14): das Kind kommt zu seiner, die Aufsicht zu der für Erwachsene
   const anleitung = LS.istAufsicht(ich) ? "aufsicht.html" : "kinder.html";
-  leiste.append(tabs, werWahl(), el("a", { class: "anleitung-knopf", href: `anleitung/${anleitung}?von=app`, title: "Anleitung",
+  // Tabs in einer Zeile, Pfeile nur wenn nicht alle Platz haben (KERN.rolleiste, LERN_Session17)
+  leiste.append(KERN.rolleiste(tabs), werWahl(), el("a", { class: "anleitung-knopf", href: `anleitung/${anleitung}?von=app`, title: "Anleitung",
     "aria-label": "Anleitung", "data-vorlesen": "Anleitung", text: "📖" }));
   abgleichKnopf(leiste);
   tab.zeichne(inhalt, zeichneStart);

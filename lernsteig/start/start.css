@@ -1,11 +1,45 @@
 /* Startseite des Lernsteigs: nur Anordnung; Farben aus gemeinsam/stil.css. */
 /* Tabs (Plan C2, Aufbau wie im Eulenpfad, Ton sachlich): Leiste mit Tabs und angemeldeter Person */
-.leiste { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
-.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Eine Zeile (LERN_Session17): die Tabs rollen seitlich (KERN.rolleiste), Pfeile nur bei Bedarf; die Person behält ihre
+   Breite. Unter 600 px stehen die Tabs auf eigener Zeile über der Person. */
+.leiste { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+.leiste > * { flex: none; }
+.leiste > .rolleiste { flex: 1 1 auto; min-width: 0; margin-right: auto; }
+.tabs { display: flex; flex-wrap: nowrap; gap: 6px; }
+.rolleiste { position: relative; display: flex; }
+.rolle-inhalt { overflow-x: auto; scrollbar-width: none; }
+.rolle-inhalt::-webkit-scrollbar { display: none; }
+.rolle-inhalt > * { flex: none; }
+/* Pfeile neben der Rollfläche, nicht darüber: sie verdecken keinen Tab (Rückmeldung Patrik, LERN_Session17) */
+.rolle-pfeil { flex: none; align-self: center; width: 36px; min-height: 44px; border: 1px solid var(--rand); border-radius: 10px;
+  background: var(--karte); cursor: pointer; font: inherit; font-size: 13px; color: var(--akzent); display: flex; align-items: center;
+  justify-content: center; }
+.rolle-pfeil:hover { border-color: var(--akzent); }
+.rolle-pfeil[hidden] { display: none; }
+.rolle-pfeil.links { margin-right: 6px; }
+.rolle-pfeil.rechts { margin-left: 6px; }
+@media (max-width: 600px) { .leiste { flex-wrap: wrap; } .leiste > .rolleiste { flex-basis: 100%; } }
 .tab { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; border: 1px solid var(--rand); border-radius: 10px; background: var(--karte); color: var(--text); font-weight: 600; text-decoration: none; }
 .tab:hover { border-color: var(--akzent); }
 .tab[aria-selected="true"] { background: var(--akzent); border-color: var(--akzent); color: var(--akzent-text); }
-.wer { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+/* Personen-Knopf mit Menü (KERN.personenMenue, Entscheid PA1 a): wechseln und abmelden an einem Ort */
+.personen-menue { position: relative; }
+.personen-knopf { display: flex; align-items: center; gap: 6px; min-height: 44px; max-width: 240px; padding: 6px 12px; border: 1px solid var(--rand);
+  border-radius: 10px; background: var(--karte); color: var(--text); font: inherit; font-weight: 600; cursor: pointer; }
+.personen-knopf:hover, .personen-knopf[aria-expanded="true"] { border-color: var(--akzent); }
+.personen-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.personen-pfeil { color: var(--leise); font-size: 12px; }
+.personen-zusatz { color: var(--leise); }
+.personen-liste { position: absolute; right: 0; top: calc(100% + 4px); z-index: 20; min-width: 200px; max-width: 300px; max-height: 60vh; overflow-y: auto;
+  padding: 4px; background: var(--karte); border: 1px solid var(--rand); border-radius: var(--radius); box-shadow: 0 6px 20px rgba(31, 41, 51, .15);
+  display: flex; flex-direction: column; gap: 2px; }
+.personen-liste[hidden] { display: none; }
+.personen-liste.nach-rechts { right: auto; left: 0; }
+.personen-eintrag, .personen-schluss { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 10px; border: none; border-radius: 8px;
+  background: none; color: var(--text); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.personen-eintrag:hover, .personen-schluss:hover, .personen-eintrag:focus-visible, .personen-schluss:focus-visible { background: var(--akzent-hell); outline: none; }
+.personen-schluss { color: var(--akzent); }
+.personen-trenner { height: 1px; margin: 4px 6px; background: var(--rand); }
 .knopf.klein { min-height: 40px; padding: 6px 12px; }
 .akzent { color: var(--akzent); }
 .abschnitt { margin: 20px 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--leise); }

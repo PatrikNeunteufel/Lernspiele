@@ -261,6 +261,10 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
 - **Ü2 b** (2026-11-06): Keine Bestätigung durch eine Aufsicht der Ziel-App (in der Quell-App schon geprüft).
 - **TA1 a** (2026-11-06): C2 (Tabs des Lernsteigs) vor dem Rest von Plan B, damit das Testgerüst B2 die bleibenden
   Seiten prüft.
+- **PA1 a** (2026-11-06, LERN_Session17): Person und Abmelden in beiden Apps gleich — ein Personen-Knopf mit Bild und
+  Name, das Menü nennt die anderen Personen des Geräts und getrennt darunter „↩ Abmelden“ (beim Gast „Anmelden“); Kern-Teil
+  `KERN.personenMenue` (docs/kern/rahmen.md 4.16). Nicht b (Auswahlliste in beiden: Pfeiltasten melden ab) und nicht c
+  (nur Knopf „Abmelden“: Wechseln kostet einen Seitenwechsel).
 - **AW1 a** (2026-11-06): Kern-Teil Auswertung mit den Rechnungen ohne App-Bezug (Mittel, Median, Korrelation,
   Sitzungen, Lernzeiten, Wochen, Bedarf, Ziehen); Fazit, Vorschläge und Kompetenztexte bleiben in den Apps.
 - **AW2 a** (2026-11-06): eine Regel für den Stand aus den letzten n Aufgaben, Schwellen je App (Eulenpfad 24 / 70 %,

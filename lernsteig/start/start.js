@@ -341,15 +341,39 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     const tab = TABS.find(t => t.id === id && (!t.nurAufsicht || LST.werUebt() === "aufsicht")) || TABS[0];
     return { tab, teil: tab.id === id ? teil || null : null };
   }
+  /**
+   * Personen-Knopf wie im Eulenpfad (KERN.personenMenue, Entscheid PA1 a, LERN_Session17): das Menü nennt die anderen
+   * Konten und Aufsichten des Geräts (mit PIN über die PIN-Abfrage; „Zurück“ dort lässt die Person angemeldet) und,
+   * getrennt darunter, „↩ Abmelden“ — beim Gast „Anmelden“.
+   */
+  function personenKnopf(wer) {
+    const ich = wer === "lernend" ? KO.aktiv() : wer === "aufsicht" ? KO.aufsichtAktiv() : null;
+    const name = ich ? (wer === "aufsicht" ? `\u{1F511} ${ich.name}` : ich.name) : "\u{1F440} Gast";
+    const personen = [
+      ...KO.alle().map(k => ({ id: k.id, name: k.name, zusatz: k.pin ? "\u{1F512}" : "", aria: k.pin ? `${k.name}, mit PIN` : k.name, pin: !!k.pin })),
+      ...KO.aufsichten().map(a => ({ id: a.id, name: `\u{1F511} ${a.name}`, aria: `${a.name}, Aufsicht, mit PIN`, pin: true })),
+    ].filter(p => !ich || p.id !== ich.id);
+    return KERN.personenMenue({
+      titel: "Angemeldet als",
+      ich: { name, bild: null },
+      personen,
+      waehle: async id => {
+        if (personen.find(p => p.id === id).pin) { ansicht = { art: "pin", id }; return zeichne(); }
+        await KO.anmelden(id);
+        ansicht = { art: "start" };
+        zeichne();
+      },
+      schluss: { text: wer === "gast" ? "Anmelden" : "\u21A9 Abmelden",
+        aktion: () => { KO.abmelden(); ansicht = { art: "start" }; history.replaceState(null, "", location.pathname); zeichne(); } },
+    });
+  }
   function leiste(tab) {
     const wer = LST.werUebt();
-    const name = wer === "lernend" ? KO.aktiv().name : wer === "aufsicht" ? `🔑 ${KO.aufsichtAktiv().name}` : "Gast";
+    // Tabs in einer Zeile mit Pfeilen bei Bedarf (KERN.rolleiste, LERN_Session17), rechts der Personen-Knopf
     return el("div", { class: "leiste" },
-      el("nav", { class: "tabs", role: "tablist", "aria-label": "Bereiche" },
-        TABS.filter(t => !t.nurAufsicht || wer === "aufsicht").map(t => el("a", { class: "tab", role: "tab", href: "#" + t.id, "aria-selected": String(t === tab), text: t.text }))),
-      el("span", { class: "wer" }, el("span", { class: "leise", text: "Angemeldet: " }), el("b", { text: name }),
-        el("button", { type: "button", class: "knopf klein", "data-aktion": "abmelden", text: wer === "gast" ? "Anmelden" : "Abmelden",
-          onclick: () => { KO.abmelden(); ansicht = { art: "start" }; history.replaceState(null, "", location.pathname); zeichne(); } })));
+      KERN.rolleiste(el("nav", { class: "tabs", role: "tablist", "aria-label": "Bereiche" },
+        TABS.filter(t => !t.nurAufsicht || wer === "aufsicht").map(t => el("a", { class: "tab", role: "tab", href: "#" + t.id, "aria-selected": String(t === tab), text: t.text })))),
+      personenKnopf(wer));
   }
 
   function zeichne() {

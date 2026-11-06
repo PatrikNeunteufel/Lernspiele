@@ -20,6 +20,8 @@ require(path.join(WURZEL, "kern", "anmeldung.js"));
 require(path.join(WURZEL, "kern", "entwicklung.js"));
 require(path.join(WURZEL, "kern", "einladung.js"));
 require(path.join(WURZEL, "kern", "auswertung.js"));
+require(path.join(WURZEL, "kern", "rolleiste.js"));
+require(path.join(WURZEL, "kern", "personenmenue.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -199,6 +201,52 @@ console.log("el.js");
   gleich(e.kinder.join(), "a,b,c", "Kinder flach, ohne null/false/undefined");
   gleich(KERN.el("p", { html: "<b>x</b>" }).innerHTML, "<b>x</b>", "html");
   delete global.document;
+}
+
+// ---------- rolleiste ----------
+console.log("rolleiste.js");
+{
+  const z = KERN.rolleiste.zustand;
+  const txt = o => (o.links ? "L" : "-") + (o.rechts ? "R" : "-");
+  gleich(txt(z(0, 300, 300)), "--", "passt ganz: keine Pfeile");
+  gleich(txt(z(0, 300, 400)), "--", "breiter als nötig: keine Pfeile");
+  gleich(txt(z(0, 600, 300)), "-R", "am Anfang: nur rechts");
+  gleich(txt(z(150, 600, 300)), "LR", "in der Mitte: beide");
+  gleich(txt(z(300, 600, 300)), "L-", "am Ende: nur links");
+  gleich(txt(z(299.5, 600, 300)), "L-", "gebrochener Rollwert am Ende (Zoom) zählt als Ende");
+  gleich(txt(z(0.5, 600, 300)), "-R", "gebrochener Rollwert am Anfang zählt als Anfang");
+  // Nachrechnung: rechts genau dann, wenn links + sichtbar das Ende um mehr als 1 px verfehlt
+  let abw = 0;
+  for (let i = 0; i < 2000; i++) {
+    const breite = Math.floor(Math.random() * 1000), sichtbar = Math.floor(Math.random() * 1000);
+    const links = Math.random() * Math.max(0, breite - sichtbar);
+    const o = z(links, breite, sichtbar);
+    if (o.links !== links > 1 || o.rechts !== breite - (links + sichtbar) > 1) abw++;
+  }
+  gleich(abw, 0, "Zufallsfälle (2000)");
+}
+
+// ---------- personenmenue ----------
+console.log("personenmenue.js");
+{
+  const nx = KERN.personenMenue.naechster;
+  gleich(nx(-1, 3, "ArrowDown"), 0, "ab ohne Fokus: erster");
+  gleich(nx(-1, 3, "ArrowUp"), 2, "auf ohne Fokus: letzter");
+  gleich(nx(2, 3, "ArrowDown"), 0, "ab am Ende: zurück zum ersten");
+  gleich(nx(0, 3, "ArrowUp"), 2, "auf am Anfang: zum letzten");
+  gleich(nx(1, 3, "Home"), 0, "Pos1");
+  gleich(nx(1, 3, "End"), 2, "Ende");
+  gleich(nx(1, 3, "a"), 1, "andere Taste: unverändert");
+  gleich(nx(-1, 0, "ArrowDown"), -1, "leeres Menü");
+  gleich(nx(0, 1, "ArrowDown"), 0, "ein Eintrag bleibt");
+  // Nachrechnung: n-mal ab führt zum Ausgang zurück, ab und auf heben sich auf
+  let abw = 0;
+  for (let n = 1; n <= 12; n++) for (let i = 0; i < n; i++) {
+    let j = i;
+    for (let k = 0; k < n; k++) j = nx(j, n, "ArrowDown");
+    if (j !== i || nx(nx(i, n, "ArrowDown"), n, "ArrowUp") !== i) abw++;
+  }
+  gleich(abw, 0, "Umläufe für 1–12 Einträge");
 }
 
 // ---------- Geheimnisse und Personen (asynchron) ----------

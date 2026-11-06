@@ -492,3 +492,12 @@
   der Adresse; Leiste mit angemeldeter Person und Abmelden; Erfolge mit Wochenziel, Stand je Übung und Rekorden;
   Aufsicht sieht verbundene Konten unter #statistik/<id> und #erfolge/<id>; statistik.html und aufsicht.html leiten weiter.
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session16_2026-11-06.md`.
+
+## 2026-11-06 — LERN_Session17
+- Kern 1.13.0: `rolleiste.js` (`KERN.rolleiste`) — Tab-Leiste in Eulenpfad und Lernsteig bleibt einzeilig, die Tabs rollen
+  seitlich mit Pfeilen nur bei Bedarf, der gewählte Tab rollt ins Bild; „Angemeldet:“ nicht mehr sichtbar (Tooltip);
+  unter 600 px Tabs auf eigener Zeile über der Person (Wunsch Patrik); Pfeile neben den Tabs statt darüber, der gewählte
+  Tab rollt ganz ins Bild (Rückmeldung Patrik).
+- Kern 1.13.0: `personenmenue.js` (`KERN.personenMenue`, Entscheid PA1 a) — Person und Abmelden in beiden Apps gleich:
+  Personen-Knopf mit Bild und Name, Menü mit den anderen Personen und getrennt darunter „↩ Abmelden“ (beim Gast
+  „Anmelden“); ersetzt die Auswahlliste des Eulenpfads und Name mit Knopf im Lernsteig.

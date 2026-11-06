@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.12.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.13.0, 2026-11-06 (LERN_Session17). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.12.0)
+kern/VERSION          Version des Kerns (1.13.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -367,7 +367,46 @@ alte gegen neue Auswertung auf 3000 Zufallsverläufen gleich); Lernsteig `fenste
 0.85, ohne gezeigte Lösung, mit und ohne Rechner getrennt. `wochen` ohne Minuten ist die Wochenserie des Lernsteigs
 (500 Zufallsfälle nachgerechnet), mit Minuten der Lernplan des Eulenpfads.
 
-### 4.15 Geplant (Plan B, Reihenfolge B4)
+### 4.15 `KERN.rolleiste` (`kern/rolleiste.js`) — einzeilige Leiste mit Pfeilen
+
+Im Kern seit 1.13.0 (Wunsch Patrik, LERN_Session17: die Tab-Leiste bricht nicht mehr in zwei Zeilen um). Eine Zeile, die
+seitlich rollt; ein Pfeil steht nur da, wo noch etwas verborgen ist.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `rolleiste(inhalt, { aktiv, schritt, links, rechts })` | Hülle `div.rolleiste` mit `button.rolle-pfeil.links`, `inhalt` (bekommt `rolle-inhalt`) und `button.rolle-pfeil.rechts`. Pfeile mit `hidden`, nachgeführt beim Rollen und bei jeder Grössenänderung (`ResizeObserver`); ein Tippen rollt um `schritt` (0.7) der sichtbaren Breite. Nach dem Einhängen rollt das Element zu `aktiv` (`[aria-selected="true"]`) ins Bild, nur seitlich und erst, wenn die Pfeile stehen. Die Pfeile sind nicht fokussierbar: mit der Tastatur rollt der Fokus die Leiste selbst |
+| `rolleiste.zustand(links, breite, sichtbar)` | `{ links, rechts }`: welche Pfeile nötig sind (1 px Toleranz für gebrochene Rollwerte beim Zoomen) |
+
+Das Aussehen gibt die App; nötig sind `.rolle-inhalt { overflow-x: auto }` ohne Umbruch der Kinder, `.rolleiste {
+position: relative }` für die Pfeile und `.rolle-pfeil[hidden] { display: none }`; die Pfeile dürfen neben der Rollfläche (Flex-Kinder der Hülle) oder darüber
+stehen — beide Apps stellen sie daneben, damit sie keinen Tab verdecken. Benutzt von: Tab-Leiste des
+Eulenpfads (`start/start.js`) und des Lernsteigs (`start/start.js`); beide zeigen „Angemeldet“ nur noch als Tooltip, unter
+600 px stehen die Tabs auf eigener Zeile über der Person.
+
+### 4.16 `KERN.personenMenue` (`kern/personenmenue.js`) — Personen-Knopf mit Menü
+
+Im Kern seit 1.13.0, Entscheid PA1 a (LERN_Session17): Wer angemeldet ist, wechseln und abmelden steht in beiden Apps an
+einem Ort und sieht gleich aus. Ersetzt die Auswahlliste des Eulenpfads (Personen und „Abmelden“ in einer Liste — mit
+den Pfeiltasten meldete die Tastatur ohne Absicht ab) und im Lernsteig Name mit Knopf „Abmelden“.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `personenMenue({ ich, personen, waehle, schluss, titel })` | Hülle `div.personen-menue` mit `button.personen-knopf` (Bild, Name, ▾; `aria-haspopup="menu"`, `aria-expanded`) und `div.personen-liste[role=menu]`: je Person `button.personen-eintrag` (Bild, Name, `zusatz` wie 🔒), Trenner, `button.personen-schluss`. `ich` = `{ name, bild }`, `personen` ohne die angemeldete Person `[{ id, name, bild, zusatz, aria }]`, `waehle(id)` meldet an oder fragt die PIN (die App), `schluss` = `{ text, aktion }`, `titel` für Bildschirmleser („Angemeldet als“) |
+| `personenMenue.naechster(i, n, taste)` | Index nach Pfeil ab/auf (im Kreis), Pos1, Ende; −1 ohne Einträge |
+
+Bedienung: Tippen auf den Knopf öffnet und schliesst; Pfeil ab/auf auf dem Knopf öffnet mit dem ersten/letzten Eintrag;
+im Menü wählt eine Pfeiltaste nichts aus, erst Enter oder ein Tippen; Esc schliesst und gibt den Fokus dem Knopf zurück,
+Tab oder ein Tippen daneben schliesst. Die Liste steht bündig rechts am Knopf; reicht der Platz links nicht (Knopf am
+linken Rand, auf dem Handy), setzt der Kern `nach-rechts`. Das Aussehen gibt die App; nötig sind `.personen-menue {
+position: relative }`, die Liste absolut darunter, `.personen-liste[hidden] { display: none }` und `.personen-liste.nach-rechts
+{ right: auto; left: 0 }`.
+
+Benutzt von: Eulenpfad (`start/start.js`, `werWahl`: andere Kinder und Aufsichten mit Bild, eine Aufsicht über die
+Anmeldung mit vorgewähltem Namen, „↩ Abmelden“) und Lernsteig (`start/start.js`, `personenKnopf`: Konten mit 🔒 und
+Aufsichten mit 🔑; mit PIN über die PIN-Abfrage, „Zurück“ dort lässt die Person angemeldet; „↩ Abmelden“, beim Gast
+„Anmelden“).
+
+### 4.17 Geplant (Plan B, Reihenfolge B4)
 
 Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
 bevor er umzieht.

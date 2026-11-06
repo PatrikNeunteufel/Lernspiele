@@ -3,6 +3,14 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.13.0 — 2026-11-06 (LERN_Session17)
+- `rolleiste.js` (`KERN.rolleiste`): einzeilige Leiste, die seitlich rollt, mit Pfeilen nur bei Bedarf; `zustand` als
+  reine Rechnung getestet; das aktive Element rollt erst ins Bild, wenn die Pfeile stehen. Tab-Leiste von Eulenpfad
+  und Lernsteig, Pfeile dort neben den Tabs.
+- `personenmenue.js` (`KERN.personenMenue`, Entscheid PA1 a): Personen-Knopf mit Bild und Name, Menü mit den anderen
+  Personen und getrennt darunter Abmelden (beim Gast Anmelden); Tastatur ohne Auswahl beim Pfeilen; `naechster` als
+  reine Rechnung getestet. Ersetzt die Auswahlliste des Eulenpfads und Name mit Knopf im Lernsteig.
+
 ## 1.12.0 — 2026-11-06 (LERN_Session16)
 - `person.js`: `uebernehmen(quelle, ziel, zusatz)` — Übernahme einer Aufsicht in eine andere App (Plan C9, Ü1 a, Ü2 b):
   Kennung, Name, Rolle, Art, PIN-Prüfwert, Sicherheitsfrage und Antwort-Prüfwert reisen mit, der Wiederherstellungscode wird
