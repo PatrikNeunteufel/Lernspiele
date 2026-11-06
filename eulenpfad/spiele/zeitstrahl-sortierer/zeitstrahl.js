@@ -33,7 +33,8 @@ const ZS_GENERATIONEN = [
   [3, "🧓", "die Urgrossmutter"], [3, "🧓", "der Urgrossvater"],
 ];
 
-// [Jahr zum Ordnen, Jahrzahl wie angezeigt, Bild, Ereignis, Zeitalter] — Liste ereignisse.
+// [Jahr zum Ordnen, Jahrzahl wie angezeigt, Bild, Ereignis, Zeitalter] — Liste ereignisse. Bild aus der Zeit des
+// Ereignisses (BZ1 a): Karavelle, Motorwagen und Doppeldecker aus der Bildersammlung statt heutiger Boote, Autos, Flugzeuge.
 // Gefragt wird das Zeitalter nur, wo es eindeutig ist (eines aus ZS_EPOCHEN). Um 1450 und 1492 beginnt je nach
 // Buch die Neuzeit („ab 1500“ oder „mit der Entdeckung Amerikas“): dort steht ZS_UEBERGANG, und die Frage nach dem
 // Zeitalter lässt das Ereignis aus (Entscheid ZA1 a, Bemerkungen 26 und 27). Ordnen und Jahrhundert gelten weiter.
@@ -42,12 +43,12 @@ const ZS_EREIGNISSE = [
   [612, "612", "⛪", "Der Mönch Gallus lässt sich an der Steinach nieder — so beginnt St. Gallen", "Mittelalter"],
   [1291, "1291", "📜", "Uri, Schwyz und Unterwalden schliessen den Bundesbrief", "Mittelalter"],
   [1450, "um 1450", "📖", "Gutenberg druckt Bücher mit beweglichen Buchstaben", ZS_UEBERGANG],
-  [1492, "1492", "⛵", "Kolumbus erreicht Amerika", ZS_UEBERGANG],
+  [1492, "1492", "svg:karavelle", "Kolumbus erreicht Amerika", ZS_UEBERGANG],
   [1803, "1803", "🏛️", "St. Gallen wird ein Kanton", "Neuzeit"],
   [1847, "1847", "🚂", "Die erste Eisenbahn der Schweiz fährt von Zürich nach Baden", "Neuzeit"],
   [1848, "1848", "🇨🇭", "Die Schweiz wird ein Bundesstaat", "Neuzeit"],
-  [1886, "1886", "🚗", "Carl Benz baut das erste Auto mit Benzinmotor", "Neuzeit"],
-  [1903, "1903", "✈️", "Die Brüder Wright fliegen mit dem ersten Motorflugzeug", "Neuzeit"],
+  [1886, "1886", "svg:motorwagen", "Carl Benz baut das erste Auto mit Benzinmotor", "Neuzeit"],
+  [1903, "1903", "svg:wright-flyer", "Die Brüder Wright fliegen mit dem ersten Motorflugzeug", "Neuzeit"],
   [1969, "1969", "🌕", "Die ersten Menschen landen auf dem Mond", "Neuzeit"],
   [1971, "1971", "🗳️", "Die Frauen dürfen in der Schweiz eidgenössisch abstimmen und wählen", "Neuzeit"],
   [2016, "2016", "🚄", "Der Gotthard-Basistunnel wird eröffnet", "Neuzeit"],

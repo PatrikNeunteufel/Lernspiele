@@ -6,6 +6,8 @@
      d (2. Zyklus) „sich aus Geschichten, Erzählungen, Bildern ein Bild über eine vergangene Kultur machen
        (z.B. China, Altes Ägypten, Römisches Imperium)“;
      e (GA/OP) „aus Sachtexten, Karten, Quellen ein differenziertes Bild einer historischen Epoche erarbeiten“.
+   Bilder aus der Zeit der Kultur (Entscheid BZ1 a): ein Ding zeigt das Bild seiner Hauptkultur, „Gab es das schon?“ und
+   Funde je Kultur ihr eigenes; wo ein Emoji die heutige Form zeigt, „svg:…“ aus spiele/gemeinsam/bilder.js.
    Alles selbst geschrieben, Schweizer Schreibweise (ss). Nur allgemein bekannte Fakten, stark vereinfacht;
    keine Jahreszahlen ausser grob („vor über 2000 Jahren“). Einzelne Orte nur Augusta Raurica und Aventicum
    als Römerstädte in der Schweiz. Jede Angabe ist ZU PRÜFEN — Anmerkungen mit „ZU PRÜFEN:“ stehen bei den
@@ -78,27 +80,27 @@ const KK_DINGE = [
     umschreibung: "ein grosser Tonkrug mit zwei Henkeln und spitzem Boden für Wein und Öl" },
   { bild: "🧩", name: "Mosaik", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen"],
     umschreibung: "ein Bild auf dem Boden, aus tausenden kleinen Steinchen gelegt" },
-  { bild: "🌉", name: "Aquädukt", kultur: "roemer", art: "bau", ab: 1, alt: true,
+  { bild: "svg:aquaedukt", name: "Aquädukt", kultur: "roemer", art: "bau", ab: 1, alt: true,
     umschreibung: "eine Wasserleitung auf hohen Bögen, die frisches Wasser in die Stadt bringt" },
   { bild: "svg:roemerstrasse", name: "Gepflasterte Strasse", kultur: "roemer", art: "bau", ab: 2,
     umschreibung: "ein breiter Weg aus Steinplatten, schnurgerade durch das ganze Land" },
   { bild: "⚔️", name: "Legionär", kultur: "roemer", art: "beruf", ab: 1, alt: true,
     umschreibung: "ein Soldat mit Helm, Schild und kurzem Schwert, der in einer Legion marschiert" },
-  { bild: "🛁", name: "Thermen", kultur: "roemer", art: "bau", ab: 2,
+  { bild: "svg:thermen", name: "Thermen", kultur: "roemer", art: "bau", ab: 2,
     umschreibung: "ein grosses Badehaus mit warmen und kalten Becken für alle Leute der Stadt" },
   { bild: "svg:latein", name: "Latein", kultur: "roemer", art: "wort", ab: 3,
     umschreibung: "die Sprache, aus der Wörter wie „Villa“ und „Fenster“ zu uns gekommen sind" }, // ZU PRÜFEN: Fenster von lat. fenestra
-  { bild: "🪙", name: "Münze mit Kaiserkopf", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen", "china"],
+  { bild: "svg:muenze-roemisch", name: "Münze mit Kaiserkopf", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen", "china"],
     umschreibung: "Geld aus Metall mit dem Kopf des Herrschers darauf" },
   { bild: "🏛️", name: "Augusta Raurica", kultur: "roemer", art: "bau", ab: 3, alt: true,
     umschreibung: "eine alte Stadt in der Schweiz mit Theater und Tempelresten, die Soldaten und Händler gründeten" },
   { bild: "svg:aventicum", name: "Aventicum", kultur: "roemer", art: "bau", ab: 4,
     umschreibung: "eine alte Stadt in der Westschweiz; heute heisst der Ort Avenches" }, // ZU PRÜFEN
-  { bild: "🔢", name: "Zahlen I, V, X", kultur: "roemer", art: "wort", ab: 3,
+  { bild: "svg:zahlen-roemisch", name: "Zahlen I, V, X", kultur: "roemer", art: "wort", ab: 3,
     umschreibung: "Zahlen, die mit Buchstaben geschrieben werden — heute noch auf manchen Uhren" },
-  { bild: "♨️", name: "Bodenheizung", kultur: "roemer", art: "bau", ab: 3,
+  { bild: "svg:hypokaust", name: "Bodenheizung", kultur: "roemer", art: "bau", ab: 3,
     umschreibung: "warme Luft von einem Feuer strömt unter dem Boden durch und heizt das Haus" }, // ZU PRÜFEN: Hypokaust
-  { bild: "🪖", name: "Soldatenhelm", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen"],
+  { bild: "svg:helm-roemisch", name: "Soldatenhelm", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen"],
     umschreibung: "ein Schutz aus Metall für den Kopf eines Soldaten" },
   { bild: "svg:wachstafel", name: "Wachstafel", kultur: "roemer", art: "ding", ab: 4, auch: ["griechen"],
     umschreibung: "ein Brettchen mit Wachs, in das man mit einem Griffel schreibt und das Geschriebene wieder glattstreicht" },
@@ -108,7 +110,7 @@ const KK_DINGE = [
   // ---------- Altes Ägypten ----------
   { bild: "svg:pyramiden", name: "Pyramide", kultur: "aegypten", art: "bau", ab: 1, alt: true,
     umschreibung: "ein riesiges Grab aus Stein mit vier schrägen Seiten und einer Spitze" },
-  { bild: "👑", name: "Pharao", kultur: "aegypten", art: "beruf", ab: 1, alt: true,
+  { bild: "svg:pharao", name: "Pharao", kultur: "aegypten", art: "beruf", ab: 1, alt: true,
     umschreibung: "der König, der wie ein Gott verehrt wurde und für den ein riesiges Grab gebaut wurde" },
   { bild: "svg:hieroglyphen", name: "Hieroglyphen", kultur: "aegypten", art: "wort", ab: 3,
     umschreibung: "eine Schrift aus kleinen Bildern: Vögel, Augen, Wellen" },
@@ -122,11 +124,11 @@ const KK_DINGE = [
     umschreibung: "eine riesige Statue: ein Löwe mit dem Kopf eines Menschen" },
   { bild: "🪲", name: "Skarabäus", kultur: "aegypten", art: "ding", ab: 2, alt: true,
     umschreibung: "ein Glücksbringer in der Form eines Käfers" },
-  { bild: "✍️", name: "Schreiber", kultur: "aegypten", art: "beruf", ab: 3, auch: ["roemer", "china"],
+  { bild: "svg:schreiber-aegypten", name: "Schreiber", kultur: "aegypten", art: "beruf", ab: 3, auch: ["roemer", "china"],
     umschreibung: "ein Mann, der lesen und schreiben konnte und alles aufschrieb, was der König wollte" },
   { bild: "🐈", name: "Heilige Katze", kultur: "aegypten", art: "wort", ab: 3,
     umschreibung: "ein Haustier, das verehrt wurde und dem niemand etwas tun durfte" }, // ZU PRÜFEN: Katzen als heilige Tiere
-  { bild: "⛵", name: "Segelboot auf dem Fluss", kultur: "aegypten", art: "ding", ab: 3, auch: ["roemer", "griechen"],
+  { bild: "svg:nilboot", name: "Segelboot auf dem Fluss", kultur: "aegypten", art: "ding", ab: 3, auch: ["roemer", "griechen"],
     umschreibung: "ein Boot mit Segel, das Steine und Getreide über den grossen Fluss brachte" },
 
   // ---------- Altes China (ab Stufe 5) ----------
@@ -136,7 +138,7 @@ const KK_DINGE = [
     umschreibung: "ein glänzender, weicher Stoff aus den Fäden von Raupen" },
   { bild: "📄", name: "Papier", kultur: "china", art: "ding", ab: 5,
     umschreibung: "ein dünnes Blatt zum Schreiben, aus zerstampften Pflanzenfasern gemacht — eine Erfindung aus dem Osten" },
-  { bild: "🧭", name: "Kompass", kultur: "china", art: "ding", ab: 5,
+  { bild: "svg:kompass-china", name: "Kompass", kultur: "china", art: "ding", ab: 5,
     umschreibung: "ein Gerät mit einer Nadel, die immer nach Norden zeigt" },
   { bild: "🍵", name: "Tee", kultur: "china", art: "ding", ab: 5,
     umschreibung: "ein heisses Getränk aus getrockneten Blättern" }, // ZU PRÜFEN: Tee schon im alten China
@@ -152,13 +154,13 @@ const KK_DINGE = [
     umschreibung: "Wettkämpfe im Laufen, Werfen und Ringen, die alle vier Jahre stattfanden" },
   { bild: "🎭", name: "Theater unter freiem Himmel", kultur: "griechen", art: "bau", ab: 5, auch: ["roemer"],
     umschreibung: "Sitzreihen im Halbkreis an einem Hang, unten spielen Schauspieler mit Masken" },
-  { bild: "🧔", name: "Philosoph", kultur: "griechen", art: "beruf", ab: 5,
+  { bild: "svg:philosoph", name: "Philosoph", kultur: "griechen", art: "beruf", ab: 5,
     umschreibung: "ein Denker, der mit seinen Schülern über das Leben und die Welt nachdachte" },
-  { bild: "🔤", name: "Buchstaben Alpha, Beta", kultur: "griechen", art: "wort", ab: 5,
+  { bild: "svg:alpha-beta", name: "Buchstaben Alpha, Beta", kultur: "griechen", art: "wort", ab: 5,
     umschreibung: "ein Alphabet, dessen erste zwei Buchstaben dem Wort „Alphabet“ den Namen gaben" },
   { bild: "⚡", name: "Göttervater Zeus", kultur: "griechen", art: "wort", ab: 5,
     umschreibung: "der oberste Gott in alten Geschichten, der Blitze schleudert" },
-  { bild: "🏟️", name: "Stadion", kultur: "griechen", art: "bau", ab: 5, auch: ["roemer"],
+  { bild: "svg:stadion-antik", name: "Stadion", kultur: "griechen", art: "bau", ab: 5, auch: ["roemer"],
     umschreibung: "eine lange Laufbahn mit Rängen für die Zuschauer der Wettkämpfe" },
 ];
 
@@ -242,13 +244,13 @@ const KK_AUSSAGEN = [
 /** Gab es das damals schon? (Stufe 4) — nur eindeutige Fälle. grund erklärt die Lösung. */
 const KK_GAB = [
   { ding: "Rad", bild: "🛞", kultur: "roemer", ja: true, grund: "Die Römer fuhren mit Wagen auf ihren Strassen." },
-  { ding: "Schrift", bild: "✍️", kultur: "roemer", ja: true, grund: "Die Römer schrieben Latein, auf Wachstafeln und auf Stein." },
+  { ding: "Schrift", bild: "svg:latein", kultur: "roemer", ja: true, grund: "Die Römer schrieben Latein, auf Wachstafeln und auf Stein." },
   { ding: "Glas", bild: "🥛", kultur: "roemer", ja: true, grund: "Die Römer stellten Gläser, Flaschen und Fensterglas her." }, // ZU PRÜFEN
   { ding: "Strom", bild: "⚡", kultur: "roemer", ja: false, grund: "Strom aus der Steckdose gibt es erst seit gut 100 Jahren." },
-  { ding: "Münzen", bild: "🪙", kultur: "roemer", ja: true, grund: "Römische Münzen findet man bis heute in der Erde." },
+  { ding: "Münzen", bild: "svg:muenze-roemisch", kultur: "roemer", ja: true, grund: "Römische Münzen findet man bis heute in der Erde." },
   { ding: "Handy", bild: "📱", kultur: "roemer", ja: false, grund: "Handys gibt es erst seit kurzer Zeit." },
   { ding: "Pferde", bild: "🐎", kultur: "roemer", ja: true, grund: "Die Römer ritten und spannten Pferde vor ihre Wagen." },
-  { ding: "Warmes Bad", bild: "🛁", kultur: "roemer", ja: true, grund: "In den Thermen gab es warme Becken mit Bodenheizung." },
+  { ding: "Warmes Bad", bild: "svg:thermen", kultur: "roemer", ja: true, grund: "In den Thermen gab es warme Becken mit Bodenheizung." },
   { ding: "Flugzeug", bild: "✈️", kultur: "roemer", ja: false, grund: "Flugzeuge gibt es erst seit gut 100 Jahren." },
   { ding: "Fernseher", bild: "📺", kultur: "roemer", ja: false, grund: "Fernseher gibt es erst seit etwa 100 Jahren." },
   { ding: "Schrift", bild: "✍️", kultur: "pfahlbauer", ja: false, grund: "Die Pfahlbauer hatten noch keine Schrift. Wir kennen sie nur durch Funde." },
@@ -261,16 +263,16 @@ const KK_GAB = [
   { ding: "Töpfe aus Ton", bild: "svg:tonkrug", kultur: "pfahlbauer", ja: true, grund: "Tonkrüge und Töpfe aus gebranntem Ton wurden in vielen Pfahlbau-Dörfern gefunden." }, // ZU PRÜFEN
   { ding: "Getreide", bild: "🌾", kultur: "pfahlbauer", ja: true, grund: "Die Pfahlbauer waren Bauern und bauten Getreide an." }, // ZU PRÜFEN
   { ding: "Glühlampe", bild: "💡", kultur: "pfahlbauer", ja: false, grund: "Glühlampen gibt es erst seit etwa 150 Jahren. Licht gab nur das Feuer." },
-  { ding: "Schrift", bild: "✍️", kultur: "aegypten", ja: true, grund: "Die Ägypter schrieben mit Hieroglyphen, kleinen Bildzeichen." },
+  { ding: "Schrift", bild: "svg:hieroglyphen", kultur: "aegypten", ja: true, grund: "Die Ägypter schrieben mit Hieroglyphen, kleinen Bildzeichen." },
   { ding: "Strom", bild: "⚡", kultur: "aegypten", ja: false, grund: "Strom aus der Steckdose gibt es erst seit gut 100 Jahren." },
   { ding: "Pyramiden", bild: "svg:pyramiden", kultur: "aegypten", ja: true, grund: "Die Pyramiden sind riesige Gräber aus Stein für die Pharaonen." },
   { ding: "Computer", bild: "💻", kultur: "aegypten", ja: false, grund: "Computer gibt es erst seit kurzer Zeit." },
-  { ding: "Boote", bild: "⛵", kultur: "aegypten", ja: true, grund: "Auf dem Nil fuhren Segelboote mit Steinen und Getreide." },
+  { ding: "Boote", bild: "svg:nilboot", kultur: "aegypten", ja: true, grund: "Auf dem Nil fuhren Segelboote mit Steinen und Getreide." },
   { ding: "Katzen", bild: "🐈", kultur: "aegypten", ja: true, grund: "Katzen waren im Alten Ägypten heilige Tiere." }, // ZU PRÜFEN
   { ding: "Zug", bild: "🚆", kultur: "aegypten", ja: false, grund: "Züge gibt es erst seit etwa 200 Jahren." },
   // ab Stufe 5
   { ding: "Papier", bild: "📄", kultur: "china", ja: true, grund: "Das Papier wurde im Alten China erfunden." }, // ZU PRÜFEN
-  { ding: "Kompass", bild: "🧭", kultur: "china", ja: true, grund: "Der Kompass ist eine Erfindung aus China." }, // ZU PRÜFEN
+  { ding: "Kompass", bild: "svg:kompass-china", kultur: "china", ja: true, grund: "Der Kompass ist eine Erfindung aus China." }, // ZU PRÜFEN
   { ding: "Seide", bild: "🧵", kultur: "china", ja: true, grund: "Seide aus den Fäden von Raupen kommt aus China." },
   { ding: "Fernseher", bild: "📺", kultur: "china", ja: false, grund: "Fernseher gibt es erst seit etwa 100 Jahren." },
   { ding: "Theater", bild: "🎭", kultur: "griechen", ja: true, grund: "Die Griechen spielten Theaterstücke mit Masken unter freiem Himmel." },
@@ -291,10 +293,10 @@ const KK_QUELLEN = [
   { text: "Ein Steinbeil aus dem Schlamm am Grund eines Sees.", bild: "svg:steinbeil", art: "fund", kultur: "pfahlbauer" },
   { text: "Ein Webgewicht aus Ton, das Taucher im See gefunden haben.", bild: "svg:webgewicht", art: "fund", kultur: "pfahlbauer" },
   { text: "Ein Tonkrug mit Resten von Körnern darin.", bild: "svg:tonkrug", art: "fund", kultur: "pfahlbauer" },
-  { text: "Die Reste eines Aquädukts, die noch auf einer Wiese stehen.", bild: "🌉", art: "bau", kultur: "roemer" },
+  { text: "Die Reste eines Aquädukts, die noch auf einer Wiese stehen.", bild: "svg:aquaedukt", art: "bau", kultur: "roemer" },
   { text: "Die Ruinen des Theaters von Augusta Raurica.", bild: "🏛️", art: "bau", kultur: "roemer" },
-  { text: "Ein Helm eines Legionärs, der beim Pflügen aus der Erde kam.", bild: "🪖", art: "fund", kultur: "roemer" },
-  { text: "Eine Münze mit dem Kopf eines Kaisers.", bild: "🪙", art: "fund", kultur: "roemer" },
+  { text: "Ein Helm eines Legionärs, der beim Pflügen aus der Erde kam.", bild: "svg:helm-roemisch", art: "fund", kultur: "roemer" },
+  { text: "Eine Münze mit dem Kopf eines Kaisers.", bild: "svg:muenze-roemisch", art: "fund", kultur: "roemer" },
   { text: "Der Bericht des Feldherrn Cäsar über die Menschen in der Schweiz.", bild: "📜", art: "text", kultur: "roemer" }, // ZU PRÜFEN: Cäsar schrieb über die Helvetier
   { text: "Eine Malerei an einer Hauswand: ein Festmahl mit Wein.", bild: "🎨", art: "bild", kultur: "roemer" },
   { text: "Ein Brief auf Papyrus, mit Tinte geschrieben.", bild: "📜", art: "text", kultur: "aegypten" },
@@ -303,16 +305,16 @@ const KK_QUELLEN = [
   { text: "Eine Geschichte, in Hieroglyphen aufgeschrieben.", bild: "svg:hieroglyphen", art: "text", kultur: "aegypten" },
   { text: "Ein Glücksbringer in Käferform aus einem Grab.", bild: "🪲", art: "fund", kultur: "aegypten" },
   { text: "Die Sphinx, ein Löwe mit Menschenkopf aus Stein.", bild: "🦁", art: "bau", kultur: "aegypten" },
-  { text: "Eine Zeichnung eines Pharaos auf seinem Wagen.", bild: "👑", art: "bild", kultur: "aegypten" },
+  { text: "Eine Zeichnung eines Pharaos auf seinem Wagen.", bild: "svg:pharao", art: "bild", kultur: "aegypten" },
   // ab Stufe 5 (China und Griechen)
   { text: "Ein Stück der Grossen Mauer, das über die Berge läuft.", bild: "🧱", art: "bau", kultur: "china" },
   { text: "Ein Stück Seidenstoff aus einem alten Grab.", bild: "🧵", art: "fund", kultur: "china" },
   { text: "Schriftzeichen auf dünnen Streifen aus Bambus.", bild: "🎋", art: "text", kultur: "china" }, // ZU PRÜFEN: Bambusstreifen als Schriftträger
   { text: "Eine Malerei auf Seide: ein Kaiser mit seinen Dienern.", bild: "🎨", art: "bild", kultur: "china" },
   { text: "Die Säulen eines Tempels, die noch auf einem Hügel stehen.", bild: "🏛️", art: "bau", kultur: "griechen" },
-  { text: "Eine Zeichnung auf einer Vase: Läufer bei den Wettkämpfen.", bild: "🏃", art: "bild", kultur: "griechen" },
+  { text: "Eine Zeichnung auf einer Vase: Läufer bei den Wettkämpfen.", bild: "svg:vase-laeufer", art: "bild", kultur: "griechen" },
   { text: "Ein Theaterstück, das vor über 2000 Jahren aufgeschrieben wurde und das wir heute noch lesen.", bild: "📜", art: "text", kultur: "griechen" },
-  { text: "Ein Helm aus Bronze, den ein Taucher im Meer gefunden hat.", bild: "🪖", art: "fund", kultur: "griechen" },
+  { text: "Ein Helm aus Bronze, den ein Taucher im Meer gefunden hat.", bild: "svg:helm-griechisch", art: "fund", kultur: "griechen" },
 ];
 
 /** Rätsel (Stufe 6): Welche Kultur bin ich? Drei Hinweise, vom Allgemeinen zum Konkreten, ohne den Namen. */

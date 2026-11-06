@@ -12979,7 +12979,7 @@
           [
             "1492",
             "1492",
-            "⛵",
+            "svg:karavelle",
             "Kolumbus erreicht Amerika",
             "Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt"
           ],
@@ -13007,14 +13007,14 @@
           [
             "1886",
             "1886",
-            "🚗",
+            "svg:motorwagen",
             "Carl Benz baut das erste Auto mit Benzinmotor",
             "Neuzeit"
           ],
           [
             "1903",
             "1903",
-            "✈️",
+            "svg:wright-flyer",
             "Die Brüder Wright fliegen mit dem ersten Motorflugzeug",
             "Neuzeit"
           ],
@@ -31568,7 +31568,7 @@
             "ein Bild auf dem Boden, aus tausenden kleinen Steinchen gelegt"
           ],
           [
-            "🌉",
+            "svg:aquaedukt",
             "Aquädukt",
             "Römer",
             "bau",
@@ -31595,7 +31595,7 @@
             "ein Soldat mit Helm, Schild und kurzem Schwert, der in einer Legion marschiert"
           ],
           [
-            "🛁",
+            "svg:thermen",
             "Thermen",
             "Römer",
             "bau",
@@ -31613,7 +31613,7 @@
             "die Sprache, aus der Wörter wie „Villa“ und „Fenster“ zu uns gekommen sind"
           ],
           [
-            "🪙",
+            "svg:muenze-roemisch",
             "Münze mit Kaiserkopf",
             "Römer",
             "ding",
@@ -31640,7 +31640,7 @@
             "eine alte Stadt in der Westschweiz; heute heisst der Ort Avenches"
           ],
           [
-            "🔢",
+            "svg:zahlen-roemisch",
             "Zahlen I, V, X",
             "Römer",
             "wort",
@@ -31649,7 +31649,7 @@
             "Zahlen, die mit Buchstaben geschrieben werden — heute noch auf manchen Uhren"
           ],
           [
-            "♨️",
+            "svg:hypokaust",
             "Bodenheizung",
             "Römer",
             "bau",
@@ -31658,7 +31658,7 @@
             "warme Luft von einem Feuer strömt unter dem Boden durch und heizt das Haus"
           ],
           [
-            "🪖",
+            "svg:helm-roemisch",
             "Soldatenhelm",
             "Römer",
             "ding",
@@ -31694,7 +31694,7 @@
             "ein riesiges Grab aus Stein mit vier schrägen Seiten und einer Spitze"
           ],
           [
-            "👑",
+            "svg:pharao",
             "Pharao",
             "Altes Ägypten",
             "beruf",
@@ -31757,7 +31757,7 @@
             "ein Glücksbringer in der Form eines Käfers"
           ],
           [
-            "✍️",
+            "svg:schreiber-aegypten",
             "Schreiber",
             "Altes Ägypten",
             "beruf",
@@ -31775,7 +31775,7 @@
             "ein Haustier, das verehrt wurde und dem niemand etwas tun durfte"
           ],
           [
-            "⛵",
+            "svg:nilboot",
             "Segelboot auf dem Fluss",
             "Altes Ägypten",
             "ding",
@@ -31811,7 +31811,7 @@
             "ein dünnes Blatt zum Schreiben, aus zerstampften Pflanzenfasern gemacht — eine Erfindung aus dem Osten"
           ],
           [
-            "🧭",
+            "svg:kompass-china",
             "Kompass",
             "Altes China",
             "ding",
@@ -31874,7 +31874,7 @@
             "Sitzreihen im Halbkreis an einem Hang, unten spielen Schauspieler mit Masken"
           ],
           [
-            "🧔",
+            "svg:philosoph",
             "Philosoph",
             "Alte Griechen",
             "beruf",
@@ -31883,7 +31883,7 @@
             "ein Denker, der mit seinen Schülern über das Leben und die Welt nachdachte"
           ],
           [
-            "🔤",
+            "svg:alpha-beta",
             "Buchstaben Alpha, Beta",
             "Alte Griechen",
             "wort",
@@ -31901,7 +31901,7 @@
             "der oberste Gott in alten Geschichten, der Blitze schleudert"
           ],
           [
-            "🏟️",
+            "svg:stadion-antik",
             "Stadion",
             "Alte Griechen",
             "bau",
@@ -32301,7 +32301,7 @@
             "Die Römer fuhren mit Wagen auf ihren Strassen."
           ],
           [
-            "✍️",
+            "svg:latein",
             "Schrift",
             "Römer",
             "true",
@@ -32322,7 +32322,7 @@
             "Strom aus der Steckdose gibt es erst seit gut 100 Jahren."
           ],
           [
-            "🪙",
+            "svg:muenze-roemisch",
             "Münzen",
             "Römer",
             "true",
@@ -32343,7 +32343,7 @@
             "Die Römer ritten und spannten Pferde vor ihre Wagen."
           ],
           [
-            "🛁",
+            "svg:thermen",
             "Warmes Bad",
             "Römer",
             "true",
@@ -32434,7 +32434,7 @@
             "Glühlampen gibt es erst seit etwa 150 Jahren. Licht gab nur das Feuer."
           ],
           [
-            "✍️",
+            "svg:hieroglyphen",
             "Schrift",
             "Altes Ägypten",
             "true",
@@ -32462,7 +32462,7 @@
             "Computer gibt es erst seit kurzer Zeit."
           ],
           [
-            "⛵",
+            "svg:nilboot",
             "Boote",
             "Altes Ägypten",
             "true",
@@ -32490,7 +32490,7 @@
             "Das Papier wurde im Alten China erfunden."
           ],
           [
-            "🧭",
+            "svg:kompass-china",
             "Kompass",
             "Altes China",
             "true",
@@ -32562,7 +32562,7 @@
             "Pfahlbauer"
           ],
           [
-            "🌉",
+            "svg:aquaedukt",
             "Die Reste eines Aquädukts, die noch auf einer Wiese stehen.",
             "Bauwerk",
             "Römer"
@@ -32574,13 +32574,13 @@
             "Römer"
           ],
           [
-            "🪖",
+            "svg:helm-roemisch",
             "Ein Helm eines Legionärs, der beim Pflügen aus der Erde kam.",
             "Fundstück",
             "Römer"
           ],
           [
-            "🪙",
+            "svg:muenze-roemisch",
             "Eine Münze mit dem Kopf eines Kaisers.",
             "Fundstück",
             "Römer"
@@ -32634,7 +32634,7 @@
             "Altes Ägypten"
           ],
           [
-            "👑",
+            "svg:pharao",
             "Eine Zeichnung eines Pharaos auf seinem Wagen.",
             "Bild",
             "Altes Ägypten"
@@ -32670,7 +32670,7 @@
             "Alte Griechen"
           ],
           [
-            "🏃",
+            "svg:vase-laeufer",
             "Eine Zeichnung auf einer Vase: Läufer bei den Wettkämpfen.",
             "Bild",
             "Alte Griechen"
@@ -32682,7 +32682,7 @@
             "Alte Griechen"
           ],
           [
-            "🪖",
+            "svg:helm-griechisch",
             "Ein Helm aus Bronze, den ein Taucher im Meer gefunden hat.",
             "Fundstück",
             "Alte Griechen"

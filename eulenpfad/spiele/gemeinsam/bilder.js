@@ -318,13 +318,11 @@ const BILDER = (() => {
         + `<path d="M40 53 Q54 49 68 53" stroke="#d2d6da" stroke-width="2" fill="none"/>`
         + `<ellipse cx="26" cy="70" rx="9" ry="3" fill="#f3ead6"/>`
         + [[16, 66], [20, 63], [12, 70], [78, 66], [84, 69], [74, 70], [30, 64]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2.2" ry="1.4" fill="#d9a93e"/>`).join("") },
-    latein: { name: "Lateinische Inschrift (Steintafel mit römischen Zahlen I V X)", box: "0 0 100 100",
+    latein: { name: "Lateinische Inschrift (Steintafel mit dem Wort VILLA)", box: "0 0 100 100",
       svg: `<rect x="8" y="14" width="84" height="72" rx="3" fill="#ddd6c8" stroke="#8d857a" stroke-width="3"/>`
         + `<rect x="14" y="20" width="72" height="60" fill="none" stroke="#b5ad9f" stroke-width="1.6"/>`
-        + `<path d="M24 30 V58 M20 30 H28 M20 58 H28" stroke="#5a5247" stroke-width="4"/>`
-        + `<path d="M38 30 L48 58 L58 30 M35 30 H41 M55 30 H61" stroke="#5a5247" stroke-width="4" fill="none"/>`
-        + `<path d="M66 30 L82 58 M82 30 L66 58 M63 30 H70 M78 30 H85 M63 58 H70 M78 58 H85" stroke="#5a5247" stroke-width="4"/>`
-        + `<path d="M22 68 H78 M30 74 H70" stroke="#8d857a" stroke-width="2.4" stroke-dasharray="6 3"/>` },
+        + `<path d="M17 30 L23 56 L29 30 M37 30 V56 M45 30 V56 H55 M60 30 V56 H70 M74 56 L80 30 L86 56 M76.4 47 H83.6" stroke="#5a5247" stroke-width="3.6" fill="none" stroke-linejoin="round"/>`
+        + `<path d="M22 66 H78 M30 73 H70" stroke="#8d857a" stroke-width="2.4" stroke-dasharray="6 3"/>` },
     aventicum: { name: "Amphitheater von Aventicum (ovale Arena, Mauer mit Bögen)", box: "0 0 100 100",
       svg: `<ellipse cx="50" cy="52" rx="45" ry="22" fill="#cdbfa6" stroke="#8d7f66" stroke-width="2"/>`
         + `<ellipse cx="50" cy="52" rx="36" ry="16" fill="#b9aa8e"/><ellipse cx="50" cy="54" rx="26" ry="10" fill="#e8d9a8" stroke="#a8986f" stroke-width="1.6"/>`
@@ -419,5 +417,150 @@ const BILDER = (() => {
         + `<circle cx="59" cy="20" r="1.6" fill="#1b1b1f"/>`
         + `<path d="M63 20 Q70 24 67 29 L62 28 Z" fill="#9c6c52"/>`
         + `<path d="M44 26 Q46 40 56 38 Q64 36 64 30 Q58 34 52 30 Q48 30 44 26 Z" fill="#7a4a2a"/>` },
+
+    // ---------- Aus der Zeit der Kultur statt in heutiger Form (Entscheid BZ1 a) ----------
+    "zahlen-roemisch": { name: "Römische Zahlen (Steintafel mit I V X)", box: "0 0 100 100",
+      svg: `<rect x="8" y="14" width="84" height="72" rx="3" fill="#ddd6c8" stroke="#8d857a" stroke-width="3"/>`
+        + `<rect x="14" y="20" width="72" height="60" fill="none" stroke="#b5ad9f" stroke-width="1.6"/>`
+        + `<path d="M24 30 V58 M20 30 H28 M20 58 H28" stroke="#5a5247" stroke-width="4"/>`
+        + `<path d="M38 30 L48 58 L58 30 M35 30 H41 M55 30 H61" stroke="#5a5247" stroke-width="4" fill="none"/>`
+        + `<path d="M66 30 L82 58 M82 30 L66 58 M63 30 H70 M78 30 H85 M63 58 H70 M78 58 H85" stroke="#5a5247" stroke-width="4"/>`
+        + `<path d="M22 68 H78 M30 74 H70" stroke="#8d857a" stroke-width="2.4" stroke-dasharray="6 3"/>` },
+    "helm-roemisch": { name: "Helm eines römischen Legionärs (Wangenklappen, Nackenschutz, roter Busch)", box: "0 0 100 100",
+      svg: `<path d="M30 21 Q50 3 70 21 Q50 13 30 21 Z" fill="#c8312a"/><rect x="47" y="14" width="6" height="8" fill="#8d857a"/>`
+        + `<path d="M74 50 Q92 56 95 68 Q82 66 72 61 Z" fill="#a3a8af" stroke="#5f656d" stroke-width="2"/>`
+        + `<path d="M22 57 Q20 22 50 19 Q80 22 78 57 Z" fill="#b8bcc2" stroke="#5f656d" stroke-width="2"/>`
+        + `<path d="M34 30 Q50 24 66 30" stroke="#d7dade" stroke-width="3" fill="none" stroke-linecap="round"/>`
+        + `<path d="M20 53 Q50 45 80 53" stroke="#c99a3c" stroke-width="5" fill="none"/>`
+        + `<path d="M25 56 Q21 76 34 87 Q41 74 41 59 Z" fill="#c99a3c" stroke="#8a6a24" stroke-width="2"/>`
+        + `<path d="M75 56 Q79 76 66 87 Q59 74 59 59 Z" fill="#c99a3c" stroke="#8a6a24" stroke-width="2"/>`
+        + `<circle cx="32" cy="70" r="1.8" fill="#8a6a24"/><circle cx="68" cy="70" r="1.8" fill="#8a6a24"/>` },
+    "helm-griechisch": { name: "Griechischer Helm aus Bronze (Gesicht bedeckt, Nasenschutz, hoher Busch)", box: "0 0 100 100",
+      svg: `<path d="M18 32 Q50 -6 84 30 Q50 15 18 32 Z" fill="#b02a2a"/><path d="M30 26 Q50 10 72 24" stroke="#8a1f1f" stroke-width="1.6" fill="none"/>`
+        + `<path d="M24 60 Q22 27 50 23 Q78 27 76 60 L72 86 Q64 92 58 90 L56 67 L44 67 L42 90 Q36 92 28 86 Z" fill="#c8913a" stroke="#7d5a22" stroke-width="2"/>`
+        + `<path d="M30 50 Q38 43 47 49 L47 55 Q38 53 30 57 Z" fill="#2a1d10"/><path d="M70 50 Q62 43 53 49 L53 55 Q62 53 70 57 Z" fill="#2a1d10"/>`
+        + `<rect x="47" y="42" width="6" height="27" rx="2" fill="#c8913a" stroke="#7d5a22" stroke-width="1.4"/>`
+        + `<path d="M32 34 Q50 28 68 34" stroke="#e2b45e" stroke-width="2.6" fill="none" stroke-linecap="round"/>` },
+    nilboot: { name: "Boot auf dem Nil (aus Papyrus gebunden, viereckiges Segel)", box: "0 0 100 100",
+      svg: `<rect x="0" y="78" width="100" height="22" fill="#5aa3d6"/><path d="M6 86 q6 -3 12 0 M46 92 q6 -3 12 0 M76 86 q6 -3 12 0" stroke="#8cc8ee" stroke-width="2" fill="none" stroke-linecap="round"/>`
+        + `<line x1="50" y1="76" x2="50" y2="10" stroke="#6b4a2b" stroke-width="3"/>`
+        + `<path d="M30 16 H70 V56 H30 Z" fill="#f1e8d0" stroke="#a8986f" stroke-width="2"/>`
+        + `<path d="M27 15 H73 M27 57 H73" stroke="#6b4a2b" stroke-width="3" stroke-linecap="round"/>`
+        + `<path d="M8 64 Q50 90 92 64 Q86 76 50 81 Q14 76 8 64 Z" fill="#c9a64a" stroke="#8a6f26" stroke-width="2"/>`
+        + `<path d="M8 64 Q1 54 8 46 M92 64 Q99 54 92 46" stroke="#8a6f26" stroke-width="3.4" fill="none" stroke-linecap="round"/>`
+        + [22, 34, 46, 58, 70, 80].map(x => `<line x1="${x}" y1="${70 + Math.abs(50 - x) / 8}" x2="${x}" y2="${77 - Math.abs(50 - x) / 10}" stroke="#8a6f26" stroke-width="1.6"/>`).join("") },
+    "stadion-antik": { name: "Stadion der Griechen (lange Laufbahn zwischen Erdwällen mit Steinsitzen)", box: "0 0 100 100",
+      svg: `<path d="M0 32 Q20 22 40 30 L60 30 Q80 22 100 32 Z" fill="#a9b4a0"/>`
+        + `<path d="M0 30 L40 30 L22 100 L0 100 Z" fill="#9ec27a"/><path d="M100 30 L60 30 L78 100 L100 100 Z" fill="#9ec27a"/>`
+        + `<path d="M40 30 L60 30 L78 100 L22 100 Z" fill="#d9b98a"/>`
+        + `<path d="M2 44 L36 44 M2 58 L33 58 M2 72 L29 72 M2 86 L26 86 M98 44 L64 44 M98 58 L67 58 M98 72 L71 72 M98 86 L74 86" stroke="#d6d0c2" stroke-width="3.4"/>`
+        + [30, 40, 50, 60, 70].map(x => `<rect x="${x - 1.8}" y="84" width="3.6" height="9" fill="#e9e4d8" stroke="#8d857a" stroke-width="1"/>`).join("")
+        + `<path d="M26 92 H74" stroke="#f3efe6" stroke-width="2"/><rect x="48.5" y="28" width="3" height="7" fill="#e9e4d8" stroke="#8d857a" stroke-width=".8"/>` },
+    thermen: { name: "Römisches Bad (Becken mit warmem Wasser, Säulen, Dampf)", box: "0 0 100 100",
+      svg: `<rect x="20" y="18" width="60" height="52" fill="#e9d9c0"/><path d="M40 50 V34 a10 10 0 0 1 20 0 V50 Z" fill="#a8c8e0"/>`
+        + `<rect x="6" y="9" width="88" height="10" fill="#d8cfbd" stroke="#a9a395" stroke-width="1.4"/>`
+        + `<rect x="12" y="19" width="9" height="52" fill="#f3eee4" stroke="#a9a395" stroke-width="1.2"/><rect x="79" y="19" width="9" height="52" fill="#f3eee4" stroke="#a9a395" stroke-width="1.2"/>`
+        + `<path d="M4 70 H96 L99 94 H1 Z" fill="#c7bfae"/><path d="M14 74 H86 L90 90 H10 Z" fill="#6fb6e0"/><path d="M18 80 H82" stroke="#a9dbf3" stroke-width="2"/>`
+        + `<path d="M34 68 q-4 -6 0 -12 q4 -6 0 -12 M50 68 q-4 -6 0 -12 q4 -6 0 -12 M66 68 q-4 -6 0 -12 q4 -6 0 -12" stroke="#b9c7d3" stroke-width="2.4" fill="none" stroke-linecap="round"/>` },
+    hypokaust: { name: "Römische Bodenheizung (Boden auf kleinen Pfeilern, darunter warme Luft vom Feuer)", box: "0 0 100 100",
+      svg: `<rect x="4" y="20" width="92" height="7" fill="#d9c8a8"/><path d="M16 20 v7 M30 20 v7 M44 20 v7 M58 20 v7 M72 20 v7 M86 20 v7" stroke="#b9a684" stroke-width="1.2"/>`
+        + `<rect x="4" y="27" width="92" height="9" fill="#b5694a"/>`
+        + [24, 40, 56, 72, 88].map(x => [0, 1, 2, 3].map(i => `<rect x="${x - 5}" y="${36 + i * 11}" width="10" height="11" fill="#c27b55" stroke="#8d4e30" stroke-width="1.2"/>`).join("")).join("")
+        + `<rect x="0" y="80" width="100" height="10" fill="#8b6a4a"/>`
+        + `<path d="M3 80 Q2 70 7 64 Q8 72 11 68 Q14 74 12 80 Z" fill="#f08a2a"/><path d="M5 80 Q5 74 8 71 Q10 76 10 80 Z" fill="#ffd34a"/>`
+        + `<path d="M12 58 q6 -5 12 0 t16 0 t16 0 t16 0 t12 0" stroke="#e0503a" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M82 54 L88 58 L82 62" stroke="#e0503a" stroke-width="2.4" fill="none" stroke-linecap="round"/>` },
+    aquaedukt: { name: "Aquädukt (Wasserleitung auf Bögen aus Stein)", box: "0 0 100 100",
+      svg: GRAS + `<path fill="#cdb894" stroke="#9a8664" stroke-width="1.4" fill-rule="evenodd" d="M4 46 H96 V92 H4 Z`
+        + [0, 1, 2, 3].map(i => ` M${9 + i * 22} 92 V62 a8 8 0 0 1 16 0 V92 Z`).join("") + `"/>`
+        + `<path fill="#d8c5a1" stroke="#9a8664" stroke-width="1.4" fill-rule="evenodd" d="M4 24 H96 V46 H4 Z`
+        + [0, 1, 2, 3, 4, 5, 6].map(i => ` M${7 + i * 13} 46 V36 a4.5 4.5 0 0 1 9 0 V46 Z`).join("") + `"/>`
+        + `<rect x="4" y="17" width="92" height="7" fill="#c2ad88" stroke="#9a8664" stroke-width="1.4"/><rect x="4" y="18" width="92" height="2.4" fill="#5aa3d6"/>` },
+    "muenze-roemisch": { name: "Römische Münze (Kopf des Kaisers im Profil mit Lorbeerkranz)", box: "0 0 100 100",
+      svg: `<circle cx="50" cy="50" r="42" fill="#c9a24a" stroke="#8a6a24" stroke-width="3"/>`
+        + `<circle cx="50" cy="50" r="34" fill="none" stroke="#a8842f" stroke-width="1.6" stroke-dasharray="2 3"/>`
+        + rund(20, 50, 50, `<rect x="49" y="11" width="2.2" height="5" fill="#8a6a24"/>`)
+        + `<path d="M44 26 Q58 24 62 36 L67 44 L62 46 Q64 52 60 54 Q62 60 56 62 L55 70 Q46 75 39 70 Q33 60 36 46 Q34 32 44 26 Z" fill="#b18a36" stroke="#7d5a22" stroke-width="1.8"/>`
+        + [[40, 30, -50], [46, 26, -20], [53, 25, 10], [36, 37, -80], [35, 45, -95]].map(([x, y, w]) => `<ellipse cx="${x}" cy="${y}" rx="4" ry="1.8" transform="rotate(${w} ${x} ${y})" fill="#7d5a22"/>`).join("")
+        + `<circle cx="56" cy="40" r="1.4" fill="#5a3e14"/>` },
+    pharao: { name: "Pharao (gestreiftes Kopftuch, Kobra an der Stirn, Bart, breiter Halskragen)", box: "0 0 100 100",
+      svg: `<path d="M18 94 L24 44 Q26 13 50 11 Q74 13 76 44 L82 94 L66 94 L62 56 L38 56 L34 94 Z" fill="#e8b830" stroke="#a87e14" stroke-width="1.6"/>`
+        + [62, 70, 78, 86].map(y => `<path d="M${21 - (y - 60) / 10} ${y} L35 ${y} M${79 + (y - 60) / 10} ${y} L65 ${y}" stroke="#2b4fa0" stroke-width="3.2"/>`).join("")
+        + `<path d="M28 26 Q50 14 72 26 M25 36 Q50 26 75 36" stroke="#2b4fa0" stroke-width="3" fill="none"/>`
+        + `<ellipse cx="50" cy="45" rx="13" ry="16" fill="#c98e5f"/>`
+        + `<path d="M36 34 Q50 27 64 34" stroke="#c79a1f" stroke-width="4" fill="none"/>`
+        + `<path d="M50 32 q-3.5 -6 0 -11 q3.5 5 0 11 Z" fill="#d9a21a" stroke="#8a6a24" stroke-width="1"/>`
+        + `<path d="M40 43 h7 M53 43 h7" stroke="#1b1b1f" stroke-width="2.4" stroke-linecap="round"/><path d="M38 43 l-3 1 M62 43 l3 1" stroke="#1b1b1f" stroke-width="1.6"/>`
+        + `<path d="M50 45 v6 h2" stroke="#a8724a" stroke-width="1.4" fill="none"/>`
+        + `<path d="M30 74 Q50 90 70 74 L73 84 Q50 101 27 84 Z" fill="#2f8f8a" stroke="#e8b830" stroke-width="2"/>`
+        + `<rect x="46" y="59" width="8" height="19" rx="3" fill="#3b2a1a"/><path d="M46 64 h8 M46 69 h8 M46 74 h8" stroke="#6b4a2b" stroke-width="1.2"/>` },
+    "schreiber-aegypten": { name: "Ägyptischer Schreiber (sitzt mit gekreuzten Beinen, Papyrusrolle auf dem Schoss)", box: "0 0 100 100",
+      svg: `<ellipse cx="50" cy="84" rx="34" ry="11" fill="#f1ece0" stroke="#b9b09c" stroke-width="1.6"/>`
+        + `<path d="M36 46 Q50 40 64 46 L66 76 H34 Z" fill="#b07a4f"/>`
+        + `<rect x="24" y="68" width="52" height="9" rx="2" fill="#efe2b8" stroke="#b39556" stroke-width="1.4"/>`
+        + `<circle cx="24" cy="72.5" r="5" fill="#e2d29e" stroke="#b39556" stroke-width="1.4"/><path d="M32 72 h10 M46 72 h8" stroke="#1f3b73" stroke-width="1.6"/>`
+        + `<path d="M36 50 Q30 62 40 68 M64 50 Q70 60 62 66" stroke="#b07a4f" stroke-width="6" fill="none" stroke-linecap="round"/>`
+        + `<path d="M62 66 L72 56" stroke="#6b4a2b" stroke-width="2" stroke-linecap="round"/>`
+        + `<circle cx="50" cy="30" r="12" fill="#b07a4f"/><path d="M37 32 Q36 16 50 16 Q64 16 63 32 Q60 24 50 24 Q40 24 37 32 Z" fill="#1e1611"/>`
+        + `<path d="M44 31 h4 M52 31 h4" stroke="#1b1b1f" stroke-width="2" stroke-linecap="round"/><path d="M46 37 Q50 39 54 37" stroke="#7a4e30" stroke-width="1.4" fill="none"/>` },
+    "kompass-china": { name: "Chinesischer Kompass (Löffel aus Magnetstein auf einer Bronzeplatte)", box: "0 0 100 100",
+      svg: `<rect x="8" y="16" width="84" height="74" rx="3" fill="#b9863e" stroke="#6b4a20" stroke-width="2"/>`
+        + `<rect x="14" y="22" width="72" height="62" fill="none" stroke="#8a6228" stroke-width="1.4"/>`
+        + `<circle cx="50" cy="53" r="25" fill="#d4a95a" stroke="#6b4a20" stroke-width="2"/>`
+        + rund(24, 50, 53, `<rect x="49.2" y="22" width="1.6" height="5" fill="#6b4a20"/>`)
+        + `<path d="M46 56 L76 36" stroke="#2e2b2a" stroke-width="4.5" stroke-linecap="round"/>`
+        + `<ellipse cx="42" cy="58" rx="12" ry="9" transform="rotate(-30 42 58)" fill="#2e2b2a"/><ellipse cx="39" cy="57" rx="4" ry="2.4" transform="rotate(-30 39 57)" fill="#6d6a68"/>` },
+    philosoph: { name: "Griechischer Philosoph (Bart, langes Gewand über der Schulter, Schriftrolle)", box: "0 0 100 100",
+      svg: `<path d="M30 40 Q50 32 70 40 L76 94 H24 Z" fill="#f1ece0" stroke="#b9b09c" stroke-width="1.6"/>`
+        + `<path d="M34 42 Q56 60 72 92 M30 56 Q40 70 36 92" stroke="#cfc6b2" stroke-width="3" fill="none"/>`
+        + `<path d="M66 44 Q70 54 62 60" stroke="#d9a77f" stroke-width="6" fill="none" stroke-linecap="round"/>`
+        + `<rect x="54" y="56" width="16" height="7" rx="2" transform="rotate(-20 62 59)" fill="#efe2b8" stroke="#b39556" stroke-width="1.2"/>`
+        + `<circle cx="50" cy="23" r="11" fill="#d9a77f"/><path d="M39 22 Q40 10 50 10 Q60 10 61 22 Q56 15 50 15 Q44 15 39 22 Z" fill="#a8a39a"/>`
+        + `<path d="M39 25 Q41 45 50 47 Q59 45 61 25 Q57 33 50 33 Q43 33 39 25 Z" fill="#a8a39a"/>`
+        + `<circle cx="45.5" cy="22" r="1.4" fill="#1b1b1f"/><circle cx="54.5" cy="22" r="1.4" fill="#1b1b1f"/>` },
+    // Kleinbuchstaben α β: die grossen Α Β sähen aus wie die lateinischen A B
+    "alpha-beta": { name: "Griechische Buchstaben Alpha und Beta auf Stein (α β)", box: "0 0 100 100",
+      svg: `<rect x="8" y="14" width="84" height="72" rx="3" fill="#ece8de" stroke="#a9a395" stroke-width="3"/>`
+        + `<path d="M44 40 Q38 62 30 64 Q19 66 19 54 Q19 41 30 41 Q38 41 42 56 Q45 65 49 64" stroke="#3b4a6b" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+        + `<path d="M60 80 V36 Q60 24 70 25 Q79 26 78 35 Q77 43 68 45 Q81 46 81 56 Q81 66 70 66 Q63 66 60 61" stroke="#3b4a6b" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>` },
+    "vase-laeufer": { name: "Griechische Vase (schwarze Figuren auf rotem Ton: ein Läufer)", box: "0 0 100 100",
+      svg: `<path d="M40 22 Q24 22 27 42 M60 22 Q76 22 73 42" stroke="#5a2e14" stroke-width="4" fill="none"/>`
+        + `<path d="M38 8 H62 L60 20 Q80 30 78 56 Q76 80 60 90 L62 96 H38 L40 90 Q24 80 22 56 Q20 30 40 20 Z" fill="#d9823a" stroke="#5a2e14" stroke-width="2"/>`
+        + `<path d="M28 28 H72 M23 72 H77" stroke="#1b1b1f" stroke-width="4"/>`
+        + `<path d="M25 78 h6 v-4 h6 v4 h6 v-4 h6 v4 h6 v-4 h6 v4 h6 v-4 h5" stroke="#1b1b1f" stroke-width="1.6" fill="none"/>`
+        + `<circle cx="46" cy="38" r="4" fill="#1b1b1f"/>`
+        + `<path d="M47 42 L53 54 M53 54 L45 64 M53 54 L61 62 L66 60 M49 46 L40 43 M49 46 L59 44" stroke="#1b1b1f" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>` },
+    karavelle: { name: "Segelschiff von Kolumbus (Holzschiff mit hohem Heck, drei Masten, Segel mit rotem Kreuz)", box: "0 0 100 100",
+      svg: `<rect x="0" y="78" width="100" height="22" fill="#5aa3d6"/><path d="M4 88 q6 -3 12 0 M70 90 q6 -3 12 0" stroke="#8cc8ee" stroke-width="2" fill="none" stroke-linecap="round"/>`
+        + `<line x1="30" y1="64" x2="30" y2="20" stroke="#5a3a1e" stroke-width="2.4"/><line x1="52" y1="64" x2="52" y2="8" stroke="#5a3a1e" stroke-width="2.6"/><line x1="76" y1="56" x2="76" y2="24" stroke="#5a3a1e" stroke-width="2.2"/>`
+        + `<path d="M22 28 Q30 26 38 28 L37 50 Q30 52 23 50 Z" fill="#f3ecd8" stroke="#b9ad8e" stroke-width="1.6"/>`
+        + `<path d="M38 16 Q52 13 66 16 L64 50 Q52 53 40 50 Z" fill="#f3ecd8" stroke="#b9ad8e" stroke-width="1.6"/>`
+        + `<path d="M52 21 V45 M43 32 H61" stroke="#c8312a" stroke-width="4"/>`
+        + `<path d="M76 26 L90 52 L76 52 Z" fill="#f3ecd8" stroke="#b9ad8e" stroke-width="1.6"/>`
+        + `<path d="M52 8 l8 2 l-8 2 Z" fill="#c8312a"/>`
+        + `<path d="M6 60 L94 60 L84 80 Q50 86 16 80 Z" fill="#7a4a2a" stroke="#4e2f1d" stroke-width="2"/>`
+        + `<path d="M70 50 H94 L94 60 H70 Z M6 54 H22 V60 H6 Z" fill="#8b5a34" stroke="#4e2f1d" stroke-width="1.6"/>`
+        + `<path d="M14 68 H86" stroke="#4e2f1d" stroke-width="1.4"/><circle cx="30" cy="72" r="1.6" fill="#2a1a10"/><circle cx="50" cy="73" r="1.6" fill="#2a1a10"/><circle cx="70" cy="72" r="1.6" fill="#2a1a10"/>` },
+    motorwagen: { name: "Erstes Auto von Carl Benz (drei Räder mit Speichen, Sitzbank, Lenkstange, ohne Dach)", box: "0 0 100 100",
+      svg: `<rect x="0" y="88" width="100" height="6" fill="#c9b99a"/>`
+        + `<circle cx="66" cy="68" r="20" fill="none" stroke="#2a2a2a" stroke-width="3.4"/>`
+        + rund(12, 66, 68, `<line x1="66" y1="68" x2="66" y2="49" stroke="#6b6b6b" stroke-width="1.4"/>`)
+        + `<circle cx="18" cy="76" r="12" fill="none" stroke="#2a2a2a" stroke-width="3"/>`
+        + rund(8, 18, 76, `<line x1="18" y1="76" x2="18" y2="65" stroke="#6b6b6b" stroke-width="1.2"/>`)
+        + `<path d="M18 76 Q28 58 46 58 L84 58" stroke="#2a2a2a" stroke-width="3.2" fill="none" stroke-linecap="round"/>`
+        + `<rect x="44" y="47" width="24" height="9" rx="2" fill="#3b2a1a"/><path d="M66 47 V32" stroke="#3b2a1a" stroke-width="4" stroke-linecap="round"/>`
+        + `<path d="M36 58 L30 38 M25 38 H35" stroke="#2a2a2a" stroke-width="2.6" stroke-linecap="round"/>`
+        + `<ellipse cx="82" cy="54" rx="9" ry="3" fill="#8d857a" stroke="#4e4a44" stroke-width="1.4"/><rect x="74" y="56" width="10" height="8" fill="#6b6b6b"/>`
+        + `<circle cx="66" cy="68" r="3" fill="#2a2a2a"/><circle cx="18" cy="76" r="2.4" fill="#2a2a2a"/>` },
+    "wright-flyer": { name: "Flugzeug der Brüder Wright (zwei lange Flügel übereinander, aus Holz und Stoff, Pilot liegt)", box: "0 0 100 100",
+      svg: `<path d="M0 86 Q30 78 60 84 Q80 88 100 82 V100 H0 Z" fill="#e8d6a0"/>`
+        + `<rect x="18" y="24" width="70" height="8" rx="2" fill="#efe6cc" stroke="#9c8a68" stroke-width="1.6"/>`
+        + `<rect x="18" y="56" width="70" height="8" rx="2" fill="#efe6cc" stroke="#9c8a68" stroke-width="1.6"/>`
+        + [22, 33, 44, 55, 66, 77, 86].map(x => `<line x1="${x}" y1="32" x2="${x}" y2="56" stroke="#6b4a2b" stroke-width="1.8"/>`).join("")
+        + `<path d="M22 32 L33 56 M33 32 L22 56 M77 32 L86 56 M86 32 L77 56" stroke="#9c8a68" stroke-width="1"/>`
+        + `<rect x="1" y="36" width="13" height="4" fill="#efe6cc" stroke="#9c8a68" stroke-width="1.2"/><rect x="1" y="48" width="13" height="4" fill="#efe6cc" stroke="#9c8a68" stroke-width="1.2"/>`
+        + `<path d="M14 38 L20 33 M14 50 L20 57 M7 40 V48" stroke="#6b4a2b" stroke-width="1.4"/>`
+        + `<path d="M88 38 L95 38 M88 52 L95 52" stroke="#6b4a2b" stroke-width="1.4"/><rect x="94" y="30" width="4" height="28" fill="#efe6cc" stroke="#9c8a68" stroke-width="1.2"/>`
+        + `<ellipse cx="42" cy="44" rx="2.6" ry="10" fill="#b9a684"/><ellipse cx="64" cy="44" rx="2.6" ry="10" fill="#b9a684"/>`
+        + `<ellipse cx="53" cy="53" rx="8" ry="2.8" fill="#3b3b3b"/><circle cx="45" cy="52" r="2.8" fill="#3b3b3b"/>` },
   };
 })();

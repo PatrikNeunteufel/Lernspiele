@@ -2376,12 +2376,12 @@ Jahrzahlen bitte nachprüfen.
 | 612 | 612 | ⛪ | Der Mönch Gallus lässt sich an der Steinach nieder — so beginnt St. Gallen | Mittelalter | ☐ |
 | 1291 | 1291 | 📜 | Uri, Schwyz und Unterwalden schliessen den Bundesbrief | Mittelalter | ☐ |
 | 1450 | um 1450 | 📖 | Gutenberg druckt Bücher mit beweglichen Buchstaben | Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt | ☐ |
-| 1492 | 1492 | ⛵ | Kolumbus erreicht Amerika | Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt | ☐ |
+| 1492 | 1492 | svg:karavelle | Kolumbus erreicht Amerika | Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt | ☐ |
 | 1803 | 1803 | 🏛️ | St. Gallen wird ein Kanton | Neuzeit | ☐ |
 | 1847 | 1847 | 🚂 | Die erste Eisenbahn der Schweiz fährt von Zürich nach Baden | Neuzeit | ☐ |
 | 1848 | 1848 | 🇨🇭 | Die Schweiz wird ein Bundesstaat | Neuzeit | ☐ |
-| 1886 | 1886 | 🚗 | Carl Benz baut das erste Auto mit Benzinmotor | Neuzeit | ☐ |
-| 1903 | 1903 | ✈️ | Die Brüder Wright fliegen mit dem ersten Motorflugzeug | Neuzeit | ☐ |
+| 1886 | 1886 | svg:motorwagen | Carl Benz baut das erste Auto mit Benzinmotor | Neuzeit | ☐ |
+| 1903 | 1903 | svg:wright-flyer | Die Brüder Wright fliegen mit dem ersten Motorflugzeug | Neuzeit | ☐ |
 | 1969 | 1969 | 🌕 | Die ersten Menschen landen auf dem Mond | Neuzeit | ☐ |
 | 1971 | 1971 | 🗳️ | Die Frauen dürfen in der Schweiz eidgenössisch abstimmen und wählen | Neuzeit | ☐ |
 | 2016 | 2016 | 🚄 | Der Gotthard-Basistunnel wird eröffnet | Neuzeit | ☐ |
@@ -6386,44 +6386,44 @@ Fakten bitte nachprüfen.
 | svg:mahlstein | Mahlstein | Pfahlbauer | ding | 4 | Altes Ägypten, Römer | ein flacher Stein, auf dem Körner mit einem zweiten Stein zu Mehl zerrieben wurden | ☐ |
 | 🏺 | Amphore | Römer | ding | 1 | Alte Griechen | ein grosser Tonkrug mit zwei Henkeln und spitzem Boden für Wein und Öl | ☐ |
 | 🧩 | Mosaik | Römer | ding | 2 | Alte Griechen | ein Bild auf dem Boden, aus tausenden kleinen Steinchen gelegt | ☐ |
-| 🌉 | Aquädukt | Römer | bau | 1 |  | eine Wasserleitung auf hohen Bögen, die frisches Wasser in die Stadt bringt | ☐ |
+| svg:aquaedukt | Aquädukt | Römer | bau | 1 |  | eine Wasserleitung auf hohen Bögen, die frisches Wasser in die Stadt bringt | ☐ |
 | svg:roemerstrasse | Gepflasterte Strasse | Römer | bau | 2 |  | ein breiter Weg aus Steinplatten, schnurgerade durch das ganze Land | ☐ |
 | ⚔️ | Legionär | Römer | beruf | 1 |  | ein Soldat mit Helm, Schild und kurzem Schwert, der in einer Legion marschiert | ☐ |
-| 🛁 | Thermen | Römer | bau | 2 |  | ein grosses Badehaus mit warmen und kalten Becken für alle Leute der Stadt | ☐ |
+| svg:thermen | Thermen | Römer | bau | 2 |  | ein grosses Badehaus mit warmen und kalten Becken für alle Leute der Stadt | ☐ |
 | svg:latein | Latein | Römer | wort | 3 |  | die Sprache, aus der Wörter wie „Villa“ und „Fenster“ zu uns gekommen sind | ☐ |
-| 🪙 | Münze mit Kaiserkopf | Römer | ding | 2 | Alte Griechen, Altes China | Geld aus Metall mit dem Kopf des Herrschers darauf | ☐ |
+| svg:muenze-roemisch | Münze mit Kaiserkopf | Römer | ding | 2 | Alte Griechen, Altes China | Geld aus Metall mit dem Kopf des Herrschers darauf | ☐ |
 | 🏛️ | Augusta Raurica | Römer | bau | 3 |  | eine alte Stadt in der Schweiz mit Theater und Tempelresten, die Soldaten und Händler gründeten | ☐ |
 | svg:aventicum | Aventicum | Römer | bau | 4 |  | eine alte Stadt in der Westschweiz; heute heisst der Ort Avenches | ☐ |
-| 🔢 | Zahlen I, V, X | Römer | wort | 3 |  | Zahlen, die mit Buchstaben geschrieben werden — heute noch auf manchen Uhren | ☐ |
-| ♨️ | Bodenheizung | Römer | bau | 3 |  | warme Luft von einem Feuer strömt unter dem Boden durch und heizt das Haus | ☐ |
-| 🪖 | Soldatenhelm | Römer | ding | 2 | Alte Griechen | ein Schutz aus Metall für den Kopf eines Soldaten | ☐ |
+| svg:zahlen-roemisch | Zahlen I, V, X | Römer | wort | 3 |  | Zahlen, die mit Buchstaben geschrieben werden — heute noch auf manchen Uhren | ☐ |
+| svg:hypokaust | Bodenheizung | Römer | bau | 3 |  | warme Luft von einem Feuer strömt unter dem Boden durch und heizt das Haus | ☐ |
+| svg:helm-roemisch | Soldatenhelm | Römer | ding | 2 | Alte Griechen | ein Schutz aus Metall für den Kopf eines Soldaten | ☐ |
 | svg:wachstafel | Wachstafel | Römer | ding | 4 | Alte Griechen | ein Brettchen mit Wachs, in das man mit einem Griffel schreibt und das Geschriebene wieder glattstreicht | ☐ |
 | svg:kaiser | Kaiser | Römer | beruf | 3 | Altes China | der Herrscher über ein riesiges Reich; sein Kopf war auf den Münzen | ☐ |
 | svg:pyramiden | Pyramide | Altes Ägypten | bau | 1 |  | ein riesiges Grab aus Stein mit vier schrägen Seiten und einer Spitze | ☐ |
-| 👑 | Pharao | Altes Ägypten | beruf | 1 |  | der König, der wie ein Gott verehrt wurde und für den ein riesiges Grab gebaut wurde | ☐ |
+| svg:pharao | Pharao | Altes Ägypten | beruf | 1 |  | der König, der wie ein Gott verehrt wurde und für den ein riesiges Grab gebaut wurde | ☐ |
 | svg:hieroglyphen | Hieroglyphen | Altes Ägypten | wort | 3 |  | eine Schrift aus kleinen Bildern: Vögel, Augen, Wellen | ☐ |
 | 📜 | Papyrus | Altes Ägypten | ding | 1 |  | ein Blatt zum Schreiben, aus den Stängeln einer Pflanze am Fluss gemacht | ☐ |
 | 🌊 | Der Nil | Altes Ägypten | wort | 2 |  | ein sehr langer Fluss, der jedes Jahr über die Ufer trat und die Felder fruchtbar machte | ☐ |
 | svg:mumie | Mumie | Altes Ägypten | ding | 3 |  | ein toter Mensch, der in Tücher gewickelt wurde, damit er nicht verwest | ☐ |
 | 🦁 | Sphinx | Altes Ägypten | bau | 1 |  | eine riesige Statue: ein Löwe mit dem Kopf eines Menschen | ☐ |
 | 🪲 | Skarabäus | Altes Ägypten | ding | 2 |  | ein Glücksbringer in der Form eines Käfers | ☐ |
-| ✍️ | Schreiber | Altes Ägypten | beruf | 3 | Römer, Altes China | ein Mann, der lesen und schreiben konnte und alles aufschrieb, was der König wollte | ☐ |
+| svg:schreiber-aegypten | Schreiber | Altes Ägypten | beruf | 3 | Römer, Altes China | ein Mann, der lesen und schreiben konnte und alles aufschrieb, was der König wollte | ☐ |
 | 🐈 | Heilige Katze | Altes Ägypten | wort | 3 |  | ein Haustier, das verehrt wurde und dem niemand etwas tun durfte | ☐ |
-| ⛵ | Segelboot auf dem Fluss | Altes Ägypten | ding | 3 | Römer, Alte Griechen | ein Boot mit Segel, das Steine und Getreide über den grossen Fluss brachte | ☐ |
+| svg:nilboot | Segelboot auf dem Fluss | Altes Ägypten | ding | 3 | Römer, Alte Griechen | ein Boot mit Segel, das Steine und Getreide über den grossen Fluss brachte | ☐ |
 | 🧱 | Grosse Mauer | Altes China | bau | 5 |  | eine Mauer, die tausende Kilometer lang über Berge läuft | ☐ |
 | 🧵 | Seide | Altes China | ding | 5 |  | ein glänzender, weicher Stoff aus den Fäden von Raupen | ☐ |
 | 📄 | Papier | Altes China | ding | 5 |  | ein dünnes Blatt zum Schreiben, aus zerstampften Pflanzenfasern gemacht — eine Erfindung aus dem Osten | ☐ |
-| 🧭 | Kompass | Altes China | ding | 5 |  | ein Gerät mit einer Nadel, die immer nach Norden zeigt | ☐ |
+| svg:kompass-china | Kompass | Altes China | ding | 5 |  | ein Gerät mit einer Nadel, die immer nach Norden zeigt | ☐ |
 | 🍵 | Tee | Altes China | ding | 5 |  | ein heisses Getränk aus getrockneten Blättern | ☐ |
 | 🍚 | Reis | Altes China | ding | 5 |  | kleine weisse Körner, die in überschwemmten Feldern wachsen | ☐ |
 | svg:schriftzeichen | Schriftzeichen | Altes China | wort | 5 |  | eine Schrift mit tausenden verschiedenen Zeichen, jedes für ein ganzes Wort | ☐ |
 | 🏛️ | Tempel mit Säulen | Alte Griechen | bau | 5 | Römer, Altes Ägypten | ein Haus für einen Gott, mit vielen hohen Säulen rundherum | ☐ |
 | 🏅 | Olympische Spiele | Alte Griechen | wort | 5 |  | Wettkämpfe im Laufen, Werfen und Ringen, die alle vier Jahre stattfanden | ☐ |
 | 🎭 | Theater unter freiem Himmel | Alte Griechen | bau | 5 | Römer | Sitzreihen im Halbkreis an einem Hang, unten spielen Schauspieler mit Masken | ☐ |
-| 🧔 | Philosoph | Alte Griechen | beruf | 5 |  | ein Denker, der mit seinen Schülern über das Leben und die Welt nachdachte | ☐ |
-| 🔤 | Buchstaben Alpha, Beta | Alte Griechen | wort | 5 |  | ein Alphabet, dessen erste zwei Buchstaben dem Wort „Alphabet“ den Namen gaben | ☐ |
+| svg:philosoph | Philosoph | Alte Griechen | beruf | 5 |  | ein Denker, der mit seinen Schülern über das Leben und die Welt nachdachte | ☐ |
+| svg:alpha-beta | Buchstaben Alpha, Beta | Alte Griechen | wort | 5 |  | ein Alphabet, dessen erste zwei Buchstaben dem Wort „Alphabet“ den Namen gaben | ☐ |
 | ⚡ | Göttervater Zeus | Alte Griechen | wort | 5 |  | der oberste Gott in alten Geschichten, der Blitze schleudert | ☐ |
-| 🏟️ | Stadion | Alte Griechen | bau | 5 | Römer | eine lange Laufbahn mit Rängen für die Zuschauer der Wettkämpfe | ☐ |
+| svg:stadion-antik | Stadion | Alte Griechen | bau | 5 | Römer | eine lange Laufbahn mit Rängen für die Zuschauer der Wettkämpfe | ☐ |
 
 ### Dinge von heute (Stufe 1)
 
@@ -6513,13 +6513,13 @@ Fakten bitte nachprüfen.
 | Bild | Ding | Kultur | gab es | Begründung | ☐ |
 |---|---|---|---|---|---|
 | 🛞 | Rad | Römer | true | Die Römer fuhren mit Wagen auf ihren Strassen. | ☐ |
-| ✍️ | Schrift | Römer | true | Die Römer schrieben Latein, auf Wachstafeln und auf Stein. | ☐ |
+| svg:latein | Schrift | Römer | true | Die Römer schrieben Latein, auf Wachstafeln und auf Stein. | ☐ |
 | 🥛 | Glas | Römer | true | Die Römer stellten Gläser, Flaschen und Fensterglas her. | ☐ |
 | ⚡ | Strom | Römer | false | Strom aus der Steckdose gibt es erst seit gut 100 Jahren. | ☐ |
-| 🪙 | Münzen | Römer | true | Römische Münzen findet man bis heute in der Erde. | ☐ |
+| svg:muenze-roemisch | Münzen | Römer | true | Römische Münzen findet man bis heute in der Erde. | ☐ |
 | 📱 | Handy | Römer | false | Handys gibt es erst seit kurzer Zeit. | ☐ |
 | 🐎 | Pferde | Römer | true | Die Römer ritten und spannten Pferde vor ihre Wagen. | ☐ |
-| 🛁 | Warmes Bad | Römer | true | In den Thermen gab es warme Becken mit Bodenheizung. | ☐ |
+| svg:thermen | Warmes Bad | Römer | true | In den Thermen gab es warme Becken mit Bodenheizung. | ☐ |
 | ✈️ | Flugzeug | Römer | false | Flugzeuge gibt es erst seit gut 100 Jahren. | ☐ |
 | 📺 | Fernseher | Römer | false | Fernseher gibt es erst seit etwa 100 Jahren. | ☐ |
 | ✍️ | Schrift | Pfahlbauer | false | Die Pfahlbauer hatten noch keine Schrift. Wir kennen sie nur durch Funde. | ☐ |
@@ -6532,15 +6532,15 @@ Fakten bitte nachprüfen.
 | svg:tonkrug | Töpfe aus Ton | Pfahlbauer | true | Tonkrüge und Töpfe aus gebranntem Ton wurden in vielen Pfahlbau-Dörfern gefunden. | ☐ |
 | 🌾 | Getreide | Pfahlbauer | true | Die Pfahlbauer waren Bauern und bauten Getreide an. | ☐ |
 | 💡 | Glühlampe | Pfahlbauer | false | Glühlampen gibt es erst seit etwa 150 Jahren. Licht gab nur das Feuer. | ☐ |
-| ✍️ | Schrift | Altes Ägypten | true | Die Ägypter schrieben mit Hieroglyphen, kleinen Bildzeichen. | ☐ |
+| svg:hieroglyphen | Schrift | Altes Ägypten | true | Die Ägypter schrieben mit Hieroglyphen, kleinen Bildzeichen. | ☐ |
 | ⚡ | Strom | Altes Ägypten | false | Strom aus der Steckdose gibt es erst seit gut 100 Jahren. | ☐ |
 | svg:pyramiden | Pyramiden | Altes Ägypten | true | Die Pyramiden sind riesige Gräber aus Stein für die Pharaonen. | ☐ |
 | 💻 | Computer | Altes Ägypten | false | Computer gibt es erst seit kurzer Zeit. | ☐ |
-| ⛵ | Boote | Altes Ägypten | true | Auf dem Nil fuhren Segelboote mit Steinen und Getreide. | ☐ |
+| svg:nilboot | Boote | Altes Ägypten | true | Auf dem Nil fuhren Segelboote mit Steinen und Getreide. | ☐ |
 | 🐈 | Katzen | Altes Ägypten | true | Katzen waren im Alten Ägypten heilige Tiere. | ☐ |
 | 🚆 | Zug | Altes Ägypten | false | Züge gibt es erst seit etwa 200 Jahren. | ☐ |
 | 📄 | Papier | Altes China | true | Das Papier wurde im Alten China erfunden. | ☐ |
-| 🧭 | Kompass | Altes China | true | Der Kompass ist eine Erfindung aus China. | ☐ |
+| svg:kompass-china | Kompass | Altes China | true | Der Kompass ist eine Erfindung aus China. | ☐ |
 | 🧵 | Seide | Altes China | true | Seide aus den Fäden von Raupen kommt aus China. | ☐ |
 | 📺 | Fernseher | Altes China | false | Fernseher gibt es erst seit etwa 100 Jahren. | ☐ |
 | 🎭 | Theater | Alte Griechen | true | Die Griechen spielten Theaterstücke mit Masken unter freiem Himmel. | ☐ |
@@ -6556,10 +6556,10 @@ Quellenart: Fundstück, Bauwerk, Bild, Text.
 | svg:steinbeil | Ein Steinbeil aus dem Schlamm am Grund eines Sees. | Fundstück | Pfahlbauer | ☐ |
 | svg:webgewicht | Ein Webgewicht aus Ton, das Taucher im See gefunden haben. | Fundstück | Pfahlbauer | ☐ |
 | svg:tonkrug | Ein Tonkrug mit Resten von Körnern darin. | Fundstück | Pfahlbauer | ☐ |
-| 🌉 | Die Reste eines Aquädukts, die noch auf einer Wiese stehen. | Bauwerk | Römer | ☐ |
+| svg:aquaedukt | Die Reste eines Aquädukts, die noch auf einer Wiese stehen. | Bauwerk | Römer | ☐ |
 | 🏛️ | Die Ruinen des Theaters von Augusta Raurica. | Bauwerk | Römer | ☐ |
-| 🪖 | Ein Helm eines Legionärs, der beim Pflügen aus der Erde kam. | Fundstück | Römer | ☐ |
-| 🪙 | Eine Münze mit dem Kopf eines Kaisers. | Fundstück | Römer | ☐ |
+| svg:helm-roemisch | Ein Helm eines Legionärs, der beim Pflügen aus der Erde kam. | Fundstück | Römer | ☐ |
+| svg:muenze-roemisch | Eine Münze mit dem Kopf eines Kaisers. | Fundstück | Römer | ☐ |
 | 📜 | Der Bericht des Feldherrn Cäsar über die Menschen in der Schweiz. | Text | Römer | ☐ |
 | 🎨 | Eine Malerei an einer Hauswand: ein Festmahl mit Wein. | Bild | Römer | ☐ |
 | 📜 | Ein Brief auf Papyrus, mit Tinte geschrieben. | Text | Altes Ägypten | ☐ |
@@ -6568,15 +6568,15 @@ Quellenart: Fundstück, Bauwerk, Bild, Text.
 | svg:hieroglyphen | Eine Geschichte, in Hieroglyphen aufgeschrieben. | Text | Altes Ägypten | ☐ |
 | 🪲 | Ein Glücksbringer in Käferform aus einem Grab. | Fundstück | Altes Ägypten | ☐ |
 | 🦁 | Die Sphinx, ein Löwe mit Menschenkopf aus Stein. | Bauwerk | Altes Ägypten | ☐ |
-| 👑 | Eine Zeichnung eines Pharaos auf seinem Wagen. | Bild | Altes Ägypten | ☐ |
+| svg:pharao | Eine Zeichnung eines Pharaos auf seinem Wagen. | Bild | Altes Ägypten | ☐ |
 | 🧱 | Ein Stück der Grossen Mauer, das über die Berge läuft. | Bauwerk | Altes China | ☐ |
 | 🧵 | Ein Stück Seidenstoff aus einem alten Grab. | Fundstück | Altes China | ☐ |
 | 🎋 | Schriftzeichen auf dünnen Streifen aus Bambus. | Text | Altes China | ☐ |
 | 🎨 | Eine Malerei auf Seide: ein Kaiser mit seinen Dienern. | Bild | Altes China | ☐ |
 | 🏛️ | Die Säulen eines Tempels, die noch auf einem Hügel stehen. | Bauwerk | Alte Griechen | ☐ |
-| 🏃 | Eine Zeichnung auf einer Vase: Läufer bei den Wettkämpfen. | Bild | Alte Griechen | ☐ |
+| svg:vase-laeufer | Eine Zeichnung auf einer Vase: Läufer bei den Wettkämpfen. | Bild | Alte Griechen | ☐ |
 | 📜 | Ein Theaterstück, das vor über 2000 Jahren aufgeschrieben wurde und das wir heute noch lesen. | Text | Alte Griechen | ☐ |
-| 🪖 | Ein Helm aus Bronze, den ein Taucher im Meer gefunden hat. | Fundstück | Alte Griechen | ☐ |
+| svg:helm-griechisch | Ein Helm aus Bronze, den ein Taucher im Meer gefunden hat. | Fundstück | Alte Griechen | ☐ |
 
 ### Rätsel (Königsstufe)
 

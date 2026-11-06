@@ -520,3 +520,8 @@
   und endet mit Code 1, wenn sie veraltet ist; `tools/pruefe_spiele.js` ruft das bei jedem Lauf auf. Kulturen-Koffer:
   vorhandene Zeichnungen auch bei „Gab es das schon?“ (Holzhaus, Töpfe aus Ton) und bei den Funden (Webgewicht,
   Tonkrug, Pyramide, Hieroglyphen).
+- Bilder aus der Zeit der Kultur (BZ1 a): 18 neue Zeichnungen — Helm des Legionärs und griechischer Bronzehelm,
+  Nilboot, antikes Stadion, römisches Bad, Bodenheizung, Aquädukt, römische Münze, Pharao, ägyptischer Schreiber,
+  chinesischer Löffelkompass, Philosoph, α β, römische Zahlen, Vase mit Läufer; im Zeitstrahl Karavelle, Motorwagen
+  von Benz und Flugzeug der Brüder Wright — statt 🪖 ⛵ 🏟️ 🛁 ♨️ 🌉 🪙 👑 ✍️ 🧭 🧔 🔤 🔢 🏃 🚗 ✈️; Latein neu als
+  Inschrift „VILLA“. Prüfliste neu erzeugt.

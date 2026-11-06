@@ -923,7 +923,9 @@ Quelle** für Bilder, die es nicht als passendes Emoji gibt: Lebewesen (Luchs, G
 früher (Waschbrett), Schulinstrumente (Triangel), Geschichte (Faustkeil, Pfahlbau, Römerstrasse, Pyramiden, Tempel,
 Funde wie Webgewicht und Wachstafel; LERN_Session17, Bemerkungen 23–32) und die Menschen der Urzeit (Vormensch,
 Frühmensch, früher Homo sapiens, Neandertaler; MF1 a). Ein Emoji, das etwas Heutiges zeigt (🪓 Axt für ein Steinwerkzeug,
-🧑 heutiger Mensch für einen Frühmenschen), gilt als unpassend. Ein Spiel zeichnet sie nicht selbst.
+🧑 heutiger Mensch für einen Frühmenschen), gilt als unpassend. Bilder stammen aus der Zeit, um die es geht (Entscheid
+BZ1 a): ein Ding zeigt das Bild seiner Hauptkultur, Einträge je Kultur (etwa „Gab es das schon?“, Funde) je ihr eigenes
+— der Helm des Legionärs ist ein anderer als der griechische aus Bronze. Ein Spiel zeichnet sie nicht selbst.
 
 - **In Inhaltslisten** steht ein solches Bild wie ein Emoji in der Bildzelle, als `svg:<name>`
   (`["Luchs", "svg:luchs", …]`). Der Name ist klein, ohne Umlaute (ä → ae).
