@@ -54,7 +54,7 @@ const KK_DINGE = [
     umschreibung: "ein Haus aus Holz, das auf langen Stangen über dem Wasser oder dem feuchten Ufer steht" },
   { bild: "🛶", name: "Einbaum", kultur: "pfahlbauer", art: "ding", ab: 1, alt: true,
     umschreibung: "ein Boot, das aus einem einzigen Baumstamm ausgehöhlt wurde" },
-  { bild: "🪓", name: "Steinbeil", kultur: "pfahlbauer", art: "ding", ab: 1, alt: true,
+  { bild: "svg:steinbeil", name: "Steinbeil", kultur: "pfahlbauer", art: "ding", ab: 1, alt: true,
     umschreibung: "ein Werkzeug zum Holzhacken mit einer geschliffenen Klinge aus Stein" },
   { bild: "🪵", name: "Holzpfahl", kultur: "pfahlbauer", art: "ding", ab: 2,
     umschreibung: "ein langer Stamm, der in den Seeboden geschlagen wurde und ein Haus trägt" },
@@ -255,10 +255,10 @@ const KK_GAB = [
   { ding: "Strom", bild: "⚡", kultur: "pfahlbauer", ja: false, grund: "Strom aus der Steckdose gibt es erst seit gut 100 Jahren." },
   { ding: "Münzen", bild: "🪙", kultur: "pfahlbauer", ja: false, grund: "Die Pfahlbauer kannten kein Geld. Sie tauschten Sachen." }, // ZU PRÜFEN
   { ding: "Auto", bild: "🚗", kultur: "pfahlbauer", ja: false, grund: "Autos gibt es erst seit etwa 150 Jahren." },
-  { ding: "Steinbeil", bild: "🪓", kultur: "pfahlbauer", ja: true, grund: "Beile mit Klingen aus geschliffenem Stein waren ihre wichtigsten Werkzeuge." },
+  { ding: "Steinbeil", bild: "svg:steinbeil", kultur: "pfahlbauer", ja: true, grund: "Beile mit Klingen aus geschliffenem Stein waren ihre wichtigsten Werkzeuge." },
   { ding: "Boot", bild: "🛶", kultur: "pfahlbauer", ja: true, grund: "Ihre Boote waren Einbäume aus einem Baumstamm." },
-  { ding: "Holzhaus", bild: "🛖", kultur: "pfahlbauer", ja: true, grund: "Ihre Häuser aus Holz standen auf Pfählen." },
-  { ding: "Töpfe aus Ton", bild: "🍲", kultur: "pfahlbauer", ja: true, grund: "Tonkrüge und Töpfe aus gebranntem Ton wurden in vielen Pfahlbau-Dörfern gefunden." }, // ZU PRÜFEN
+  { ding: "Holzhaus", bild: "svg:pfahlbau", kultur: "pfahlbauer", ja: true, grund: "Ihre Häuser aus Holz standen auf Pfählen." },
+  { ding: "Töpfe aus Ton", bild: "svg:tonkrug", kultur: "pfahlbauer", ja: true, grund: "Tonkrüge und Töpfe aus gebranntem Ton wurden in vielen Pfahlbau-Dörfern gefunden." }, // ZU PRÜFEN
   { ding: "Getreide", bild: "🌾", kultur: "pfahlbauer", ja: true, grund: "Die Pfahlbauer waren Bauern und bauten Getreide an." }, // ZU PRÜFEN
   { ding: "Glühlampe", bild: "💡", kultur: "pfahlbauer", ja: false, grund: "Glühlampen gibt es erst seit etwa 150 Jahren. Licht gab nur das Feuer." },
   { ding: "Schrift", bild: "✍️", kultur: "aegypten", ja: true, grund: "Die Ägypter schrieben mit Hieroglyphen, kleinen Bildzeichen." },
@@ -288,9 +288,9 @@ const KK_QUELLENARTEN = {
 
 /** Quellen (Stufe 5): Beispiel → Quellenart. Der Text nennt die Art nicht beim Namen. */
 const KK_QUELLEN = [
-  { text: "Ein Steinbeil aus dem Schlamm am Grund eines Sees.", bild: "🪓", art: "fund", kultur: "pfahlbauer" },
-  { text: "Ein Webgewicht aus Ton, das Taucher im See gefunden haben.", bild: "🧵", art: "fund", kultur: "pfahlbauer" },
-  { text: "Ein Tonkrug mit Resten von Körnern darin.", bild: "🌾", art: "fund", kultur: "pfahlbauer" },
+  { text: "Ein Steinbeil aus dem Schlamm am Grund eines Sees.", bild: "svg:steinbeil", art: "fund", kultur: "pfahlbauer" },
+  { text: "Ein Webgewicht aus Ton, das Taucher im See gefunden haben.", bild: "svg:webgewicht", art: "fund", kultur: "pfahlbauer" },
+  { text: "Ein Tonkrug mit Resten von Körnern darin.", bild: "svg:tonkrug", art: "fund", kultur: "pfahlbauer" },
   { text: "Die Reste eines Aquädukts, die noch auf einer Wiese stehen.", bild: "🌉", art: "bau", kultur: "roemer" },
   { text: "Die Ruinen des Theaters von Augusta Raurica.", bild: "🏛️", art: "bau", kultur: "roemer" },
   { text: "Ein Helm eines Legionärs, der beim Pflügen aus der Erde kam.", bild: "🪖", art: "fund", kultur: "roemer" },
@@ -298,9 +298,9 @@ const KK_QUELLEN = [
   { text: "Der Bericht des Feldherrn Cäsar über die Menschen in der Schweiz.", bild: "📜", art: "text", kultur: "roemer" }, // ZU PRÜFEN: Cäsar schrieb über die Helvetier
   { text: "Eine Malerei an einer Hauswand: ein Festmahl mit Wein.", bild: "🎨", art: "bild", kultur: "roemer" },
   { text: "Ein Brief auf Papyrus, mit Tinte geschrieben.", bild: "📜", art: "text", kultur: "aegypten" },
-  { text: "Eine Pyramide in der Wüste, die noch heute steht.", bild: "🔺", art: "bau", kultur: "aegypten" },
+  { text: "Eine Pyramide in der Wüste, die noch heute steht.", bild: "svg:pyramiden", art: "bau", kultur: "aegypten" },
   { text: "Eine Malerei an der Wand eines Grabes: Bauern bei der Ernte.", bild: "🎨", art: "bild", kultur: "aegypten" },
-  { text: "Eine Geschichte, in Hieroglyphen aufgeschrieben.", bild: "✍️", art: "text", kultur: "aegypten" },
+  { text: "Eine Geschichte, in Hieroglyphen aufgeschrieben.", bild: "svg:hieroglyphen", art: "text", kultur: "aegypten" },
   { text: "Ein Glücksbringer in Käferform aus einem Grab.", bild: "🪲", art: "fund", kultur: "aegypten" },
   { text: "Die Sphinx, ein Löwe mit Menschenkopf aus Stein.", bild: "🦁", art: "bau", kultur: "aegypten" },
   { text: "Eine Zeichnung eines Pharaos auf seinem Wagen.", bild: "👑", art: "bild", kultur: "aegypten" },

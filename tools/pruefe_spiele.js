@@ -390,6 +390,11 @@ let fehlerZahl = 0;
 try {
   require("child_process").execFileSync("python", [path.join(__dirname, "kern_verteilen.py"), "--pruefe", "eulenpfad"], { encoding: "utf8" });
 } catch (e) { console.log(`    FEHLER  Kern: ${(e.stdout || e.message).trim()}`); fehlerZahl++; }
+// Prüfliste (docs/eulenpfad/pruefung/listen.json und die Markdown-Fassung) muss zu den Inhaltslisten passen, sonst zeigt
+// die Prüfansicht des Entwickler-Modus alte Einträge und Bilder (LERN_Session17).
+try {
+  require("child_process").execFileSync(process.execPath, [path.join(__dirname, "pruefliste_wortlisten.js"), "--pruefe"], { encoding: "utf8" });
+} catch (e) { console.log(`    FEHLER  ${(e.stdout || e.message).trim()}`); fehlerZahl++; }
 // Doppelte Namen im Rahmen (LERN_Session12): eine zweite Funktion waehle(name, art, …) verdeckte still die zufällige
 // Auswahl waehle(liste) — jedes LS.waehle in 167 Dateien lief in die falsche Funktion, das Konfetti legte die
 // Farbliste als Spieler an. Zwei Deklarationen gleichen Namens auf der obersten Ebene der IIFE oder zweimal derselbe

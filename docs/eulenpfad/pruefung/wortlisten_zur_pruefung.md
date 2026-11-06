@@ -2375,8 +2375,8 @@ Jahrzahlen bitte nachprüfen.
 |---|---|---|---|---|---|
 | 612 | 612 | ⛪ | Der Mönch Gallus lässt sich an der Steinach nieder — so beginnt St. Gallen | Mittelalter | ☐ |
 | 1291 | 1291 | 📜 | Uri, Schwyz und Unterwalden schliessen den Bundesbrief | Mittelalter | ☐ |
-| 1450 | um 1450 | 📖 | Gutenberg druckt Bücher mit beweglichen Buchstaben |  | ☐ |
-| 1492 | 1492 | ⛵ | Kolumbus erreicht Amerika |  | ☐ |
+| 1450 | um 1450 | 📖 | Gutenberg druckt Bücher mit beweglichen Buchstaben | Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt | ☐ |
+| 1492 | 1492 | ⛵ | Kolumbus erreicht Amerika | Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt | ☐ |
 | 1803 | 1803 | 🏛️ | St. Gallen wird ein Kanton | Neuzeit | ☐ |
 | 1847 | 1847 | 🚂 | Die erste Eisenbahn der Schweiz fährt von Zürich nach Baden | Neuzeit | ☐ |
 | 1848 | 1848 | 🇨🇭 | Die Schweiz wird ein Bundesstaat | Neuzeit | ☐ |
@@ -2400,9 +2400,9 @@ Jahrzahlen bitte nachprüfen.
 | Zeitalter | Bild | Merkmal | ☐ |
 |---|---|---|---|
 | Steinzeit | 🦣 | Menschen jagen Mammuts | ☐ |
-| Steinzeit | 🪓 | Werkzeuge aus Feuerstein | ☐ |
-| Steinzeit | 🛖 | Pfahlbauten am Seeufer | ☐ |
-| Römerzeit | 🛣️ | Soldaten bauen Strassen über die Alpenpässe | ☐ |
+| Steinzeit | svg:faustkeil | Werkzeuge aus Feuerstein | ☐ |
+| Steinzeit | svg:pfahlbau | Pfahlbauten am Seeufer | ☐ |
+| Römerzeit | svg:roemerstrasse | Soldaten bauen Strassen über die Alpenpässe | ☐ |
 | Römerzeit | 🏺 | In Augusta Raurica wohnen Römer | ☐ |
 | Mittelalter | 🏰 | Ritter wohnen auf Burgen | ☐ |
 | Mittelalter | 📜 | Mönche schreiben Bücher von Hand ab | ☐ |
@@ -3977,12 +3977,12 @@ Zeit in Millionen Jahren, gerundet — bitte nachprüfen.
 | mio: 50; bild: 🐋; text: Die Vorfahren der Wale gehen ins Wasser.; zeitalter: Erdneuzeit | ☐ |
 | mio: 30; bild: 🏔️; text: Die Alpen falten sich auf.; zeitalter: Erdneuzeit | ☐ |
 | mio: 10; bild: ⛰️; text: Das Juragebirge faltet sich auf.; zeitalter: Erdneuzeit | ☐ |
-| mio: 6; bild: 🚶; text: Erste Vormenschen gehen auf zwei Beinen.; zeitalter: Erdneuzeit | ☐ |
+| mio: 6; bild: svg:vormensch; text: Erste Vormenschen gehen auf zwei Beinen.; zeitalter: Erdneuzeit | ☐ |
 | mio: 3; bild: 🦴; text: Die Vormenschen-Frau „Lucy“ lebt in Afrika.; zeitalter: Erdneuzeit | ☐ |
-| jahre: 2500000; bild: 🪓; text: Frühmenschen machen die ersten Steinwerkzeuge.; zeitalter: Erdneuzeit | ☐ |
+| jahre: 2500000; bild: svg:fruehmensch; text: Frühmenschen machen die ersten Steinwerkzeuge.; zeitalter: Erdneuzeit | ☐ |
 | mio: 1; bild: 🔥; text: Frühmenschen nutzen das Feuer.; zeitalter: Erdneuzeit | ☐ |
-| jahre: 300000; bild: 🧑; text: Der heutige Mensch (Homo sapiens) entsteht in Afrika.; zeitalter: Erdneuzeit | ☐ |
-| jahre: 40000; bild: 🧔; text: Die letzten Neandertaler sterben aus.; zeitalter: Erdneuzeit | ☐ |
+| jahre: 300000; bild: svg:homo-sapiens-frueh; text: Der heutige Mensch (Homo sapiens) entsteht in Afrika.; zeitalter: Erdneuzeit | ☐ |
+| jahre: 40000; bild: svg:neandertaler; text: Die letzten Neandertaler sterben aus.; zeitalter: Erdneuzeit | ☐ |
 | jahre: 20000; bild: 🧊; text: Höhepunkt der letzten Eiszeit: Gletscher bedecken fast die ganze Schweiz.; zeitalter: Erdneuzeit | ☐ |
 | jahre: 12000; bild: 🌤️; text: Die letzte Eiszeit geht zu Ende.; zeitalter: Erdneuzeit | ☐ |
 
@@ -6361,11 +6361,11 @@ Fakten bitte nachprüfen.
 
 | Bild | Name | Schweiz | Kurztext | ☐ |
 |---|---|---|---|---|
-| 🛖 | Pfahlbauer | true | lebten vor mehreren tausend Jahren an Seen in der Schweiz, in Häusern auf Pfählen | ☐ |
+| svg:pfahlbau | Pfahlbauer | true | lebten vor mehreren tausend Jahren an Seen in der Schweiz, in Häusern auf Pfählen | ☐ |
 | 🛡️ | Römer | true | kamen vor über 2000 Jahren in die Schweiz und bauten Städte, Strassen und warme Bäder | ☐ |
-| 🏜️ | Altes Ägypten | false | lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König | ☐ |
+| svg:pyramiden | Altes Ägypten | false | lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König | ☐ |
 | 🐉 | Altes China | false | lebten vor über 2000 Jahren weit im Osten, bauten eine riesige Mauer und erfanden Papier und Kompass | ☐ |
-| 🎭 | Alte Griechen | false | lebten vor über 2000 Jahren am Meer, bauten Tempel mit Säulen und erfanden die Olympischen Spiele | ☐ |
+| svg:tempel | Alte Griechen | false | lebten vor über 2000 Jahren am Meer, bauten Tempel mit Säulen und erfanden die Olympischen Spiele | ☐ |
 
 ### Dinge, Bauten, Berufe
 
@@ -6373,38 +6373,38 @@ Fakten bitte nachprüfen.
 
 | Bild | Name | Kultur | Art | ab | auch | Umschreibung | ☐ |
 |---|---|---|---|---|---|---|---|
-| 🛖 | Haus auf Pfählen | Pfahlbauer | bau | 1 |  | ein Haus aus Holz, das auf langen Stangen über dem Wasser oder dem feuchten Ufer steht | ☐ |
+| svg:pfahlbau | Haus auf Pfählen | Pfahlbauer | bau | 1 |  | ein Haus aus Holz, das auf langen Stangen über dem Wasser oder dem feuchten Ufer steht | ☐ |
 | 🛶 | Einbaum | Pfahlbauer | ding | 1 |  | ein Boot, das aus einem einzigen Baumstamm ausgehöhlt wurde | ☐ |
-| 🪓 | Steinbeil | Pfahlbauer | ding | 1 |  | ein Werkzeug zum Holzhacken mit einer geschliffenen Klinge aus Stein | ☐ |
+| svg:steinbeil | Steinbeil | Pfahlbauer | ding | 1 |  | ein Werkzeug zum Holzhacken mit einer geschliffenen Klinge aus Stein | ☐ |
 | 🪵 | Holzpfahl | Pfahlbauer | ding | 2 |  | ein langer Stamm, der in den Seeboden geschlagen wurde und ein Haus trägt | ☐ |
 | 🧺 | Wand aus Flechtwerk | Pfahlbauer | bau | 2 |  | eine Hauswand aus geflochtenen Ästen, mit Lehm verschmiert | ☐ |
 | 🏞️ | Dorf am Seeufer | Pfahlbauer | bau | 2 |  | ein Dorf aus Holzhäusern, das direkt am Ufer eines Sees stand | ☐ |
-|  | Webgewicht | Pfahlbauer | ding | 3 |  | ein Stück Ton mit einem Loch, das am Webstuhl die Fäden spannt | ☐ |
-|  | Tonkrug | Pfahlbauer | ding | 3 | Altes Ägypten, Römer, Alte Griechen, Altes China | ein Gefäss aus gebranntem Ton für Körner und Wasser | ☐ |
+| svg:webgewicht | Webgewicht | Pfahlbauer | ding | 3 |  | ein Stück Ton mit einem Loch, das am Webstuhl die Fäden spannt | ☐ |
+| svg:tonkrug | Tonkrug | Pfahlbauer | ding | 3 | Altes Ägypten, Römer, Alte Griechen, Altes China | ein Gefäss aus gebranntem Ton für Körner und Wasser | ☐ |
 | 🪨 | Steinzeit | Pfahlbauer | wort | 3 |  | die Zeit, in der Werkzeuge aus Stein gemacht wurden, lange bevor es Metall gab | ☐ |
-|  | Bronzezeit | Pfahlbauer | wort | 4 |  | die Zeit, in der Beile und Schmuck aus dem Metall Bronze gegossen wurden | ☐ |
-|  | Mahlstein | Pfahlbauer | ding | 4 | Altes Ägypten, Römer | ein flacher Stein, auf dem Körner mit einem zweiten Stein zu Mehl zerrieben wurden | ☐ |
+| svg:bronzebeil | Bronzezeit | Pfahlbauer | wort | 4 |  | die Zeit, in der Beile und Schmuck aus dem Metall Bronze gegossen wurden | ☐ |
+| svg:mahlstein | Mahlstein | Pfahlbauer | ding | 4 | Altes Ägypten, Römer | ein flacher Stein, auf dem Körner mit einem zweiten Stein zu Mehl zerrieben wurden | ☐ |
 | 🏺 | Amphore | Römer | ding | 1 | Alte Griechen | ein grosser Tonkrug mit zwei Henkeln und spitzem Boden für Wein und Öl | ☐ |
 | 🧩 | Mosaik | Römer | ding | 2 | Alte Griechen | ein Bild auf dem Boden, aus tausenden kleinen Steinchen gelegt | ☐ |
 | 🌉 | Aquädukt | Römer | bau | 1 |  | eine Wasserleitung auf hohen Bögen, die frisches Wasser in die Stadt bringt | ☐ |
-| 🛣️ | Gepflasterte Strasse | Römer | bau | 2 |  | ein breiter Weg aus Steinplatten, schnurgerade durch das ganze Land | ☐ |
+| svg:roemerstrasse | Gepflasterte Strasse | Römer | bau | 2 |  | ein breiter Weg aus Steinplatten, schnurgerade durch das ganze Land | ☐ |
 | ⚔️ | Legionär | Römer | beruf | 1 |  | ein Soldat mit Helm, Schild und kurzem Schwert, der in einer Legion marschiert | ☐ |
 | 🛁 | Thermen | Römer | bau | 2 |  | ein grosses Badehaus mit warmen und kalten Becken für alle Leute der Stadt | ☐ |
-|  | Latein | Römer | wort | 3 |  | die Sprache, aus der Wörter wie „Villa“ und „Fenster“ zu uns gekommen sind | ☐ |
+| svg:latein | Latein | Römer | wort | 3 |  | die Sprache, aus der Wörter wie „Villa“ und „Fenster“ zu uns gekommen sind | ☐ |
 | 🪙 | Münze mit Kaiserkopf | Römer | ding | 2 | Alte Griechen, Altes China | Geld aus Metall mit dem Kopf des Herrschers darauf | ☐ |
 | 🏛️ | Augusta Raurica | Römer | bau | 3 |  | eine alte Stadt in der Schweiz mit Theater und Tempelresten, die Soldaten und Händler gründeten | ☐ |
-|  | Aventicum | Römer | bau | 4 |  | eine alte Stadt in der Westschweiz; heute heisst der Ort Avenches | ☐ |
+| svg:aventicum | Aventicum | Römer | bau | 4 |  | eine alte Stadt in der Westschweiz; heute heisst der Ort Avenches | ☐ |
 | 🔢 | Zahlen I, V, X | Römer | wort | 3 |  | Zahlen, die mit Buchstaben geschrieben werden — heute noch auf manchen Uhren | ☐ |
 | ♨️ | Bodenheizung | Römer | bau | 3 |  | warme Luft von einem Feuer strömt unter dem Boden durch und heizt das Haus | ☐ |
 | 🪖 | Soldatenhelm | Römer | ding | 2 | Alte Griechen | ein Schutz aus Metall für den Kopf eines Soldaten | ☐ |
-|  | Wachstafel | Römer | ding | 4 | Alte Griechen | ein Brettchen mit Wachs, in das man mit einem Griffel schreibt und das Geschriebene wieder glattstreicht | ☐ |
-|  | Kaiser | Römer | beruf | 3 | Altes China | der Herrscher über ein riesiges Reich; sein Kopf war auf den Münzen | ☐ |
-| 🔺 | Pyramide | Altes Ägypten | bau | 1 |  | ein riesiges Grab aus Stein mit vier schrägen Seiten und einer Spitze | ☐ |
+| svg:wachstafel | Wachstafel | Römer | ding | 4 | Alte Griechen | ein Brettchen mit Wachs, in das man mit einem Griffel schreibt und das Geschriebene wieder glattstreicht | ☐ |
+| svg:kaiser | Kaiser | Römer | beruf | 3 | Altes China | der Herrscher über ein riesiges Reich; sein Kopf war auf den Münzen | ☐ |
+| svg:pyramiden | Pyramide | Altes Ägypten | bau | 1 |  | ein riesiges Grab aus Stein mit vier schrägen Seiten und einer Spitze | ☐ |
 | 👑 | Pharao | Altes Ägypten | beruf | 1 |  | der König, der wie ein Gott verehrt wurde und für den ein riesiges Grab gebaut wurde | ☐ |
-|  | Hieroglyphen | Altes Ägypten | wort | 3 |  | eine Schrift aus kleinen Bildern: Vögel, Augen, Wellen | ☐ |
+| svg:hieroglyphen | Hieroglyphen | Altes Ägypten | wort | 3 |  | eine Schrift aus kleinen Bildern: Vögel, Augen, Wellen | ☐ |
 | 📜 | Papyrus | Altes Ägypten | ding | 1 |  | ein Blatt zum Schreiben, aus den Stängeln einer Pflanze am Fluss gemacht | ☐ |
 | 🌊 | Der Nil | Altes Ägypten | wort | 2 |  | ein sehr langer Fluss, der jedes Jahr über die Ufer trat und die Felder fruchtbar machte | ☐ |
-|  | Mumie | Altes Ägypten | ding | 3 |  | ein toter Mensch, der in Tücher gewickelt wurde, damit er nicht verwest | ☐ |
+| svg:mumie | Mumie | Altes Ägypten | ding | 3 |  | ein toter Mensch, der in Tücher gewickelt wurde, damit er nicht verwest | ☐ |
 | 🦁 | Sphinx | Altes Ägypten | bau | 1 |  | eine riesige Statue: ein Löwe mit dem Kopf eines Menschen | ☐ |
 | 🪲 | Skarabäus | Altes Ägypten | ding | 2 |  | ein Glücksbringer in der Form eines Käfers | ☐ |
 | ✍️ | Schreiber | Altes Ägypten | beruf | 3 | Römer, Altes China | ein Mann, der lesen und schreiben konnte und alles aufschrieb, was der König wollte | ☐ |
@@ -6416,7 +6416,7 @@ Fakten bitte nachprüfen.
 | 🧭 | Kompass | Altes China | ding | 5 |  | ein Gerät mit einer Nadel, die immer nach Norden zeigt | ☐ |
 | 🍵 | Tee | Altes China | ding | 5 |  | ein heisses Getränk aus getrockneten Blättern | ☐ |
 | 🍚 | Reis | Altes China | ding | 5 |  | kleine weisse Körner, die in überschwemmten Feldern wachsen | ☐ |
-|  | Schriftzeichen | Altes China | wort | 5 |  | eine Schrift mit tausenden verschiedenen Zeichen, jedes für ein ganzes Wort | ☐ |
+| svg:schriftzeichen | Schriftzeichen | Altes China | wort | 5 |  | eine Schrift mit tausenden verschiedenen Zeichen, jedes für ein ganzes Wort | ☐ |
 | 🏛️ | Tempel mit Säulen | Alte Griechen | bau | 5 | Römer, Altes Ägypten | ein Haus für einen Gott, mit vielen hohen Säulen rundherum | ☐ |
 | 🏅 | Olympische Spiele | Alte Griechen | wort | 5 |  | Wettkämpfe im Laufen, Werfen und Ringen, die alle vier Jahre stattfanden | ☐ |
 | 🎭 | Theater unter freiem Himmel | Alte Griechen | bau | 5 | Römer | Sitzreihen im Halbkreis an einem Hang, unten spielen Schauspieler mit Masken | ☐ |
@@ -6526,15 +6526,15 @@ Fakten bitte nachprüfen.
 | ⚡ | Strom | Pfahlbauer | false | Strom aus der Steckdose gibt es erst seit gut 100 Jahren. | ☐ |
 | 🪙 | Münzen | Pfahlbauer | false | Die Pfahlbauer kannten kein Geld. Sie tauschten Sachen. | ☐ |
 | 🚗 | Auto | Pfahlbauer | false | Autos gibt es erst seit etwa 150 Jahren. | ☐ |
-| 🪓 | Steinbeil | Pfahlbauer | true | Beile mit Klingen aus geschliffenem Stein waren ihre wichtigsten Werkzeuge. | ☐ |
+| svg:steinbeil | Steinbeil | Pfahlbauer | true | Beile mit Klingen aus geschliffenem Stein waren ihre wichtigsten Werkzeuge. | ☐ |
 | 🛶 | Boot | Pfahlbauer | true | Ihre Boote waren Einbäume aus einem Baumstamm. | ☐ |
-| 🛖 | Holzhaus | Pfahlbauer | true | Ihre Häuser aus Holz standen auf Pfählen. | ☐ |
-| 🍲 | Töpfe aus Ton | Pfahlbauer | true | Tonkrüge und Töpfe aus gebranntem Ton wurden in vielen Pfahlbau-Dörfern gefunden. | ☐ |
+| svg:pfahlbau | Holzhaus | Pfahlbauer | true | Ihre Häuser aus Holz standen auf Pfählen. | ☐ |
+| svg:tonkrug | Töpfe aus Ton | Pfahlbauer | true | Tonkrüge und Töpfe aus gebranntem Ton wurden in vielen Pfahlbau-Dörfern gefunden. | ☐ |
 | 🌾 | Getreide | Pfahlbauer | true | Die Pfahlbauer waren Bauern und bauten Getreide an. | ☐ |
 | 💡 | Glühlampe | Pfahlbauer | false | Glühlampen gibt es erst seit etwa 150 Jahren. Licht gab nur das Feuer. | ☐ |
 | ✍️ | Schrift | Altes Ägypten | true | Die Ägypter schrieben mit Hieroglyphen, kleinen Bildzeichen. | ☐ |
 | ⚡ | Strom | Altes Ägypten | false | Strom aus der Steckdose gibt es erst seit gut 100 Jahren. | ☐ |
-| 🔺 | Pyramiden | Altes Ägypten | true | Die Pyramiden sind riesige Gräber aus Stein für die Pharaonen. | ☐ |
+| svg:pyramiden | Pyramiden | Altes Ägypten | true | Die Pyramiden sind riesige Gräber aus Stein für die Pharaonen. | ☐ |
 | 💻 | Computer | Altes Ägypten | false | Computer gibt es erst seit kurzer Zeit. | ☐ |
 | ⛵ | Boote | Altes Ägypten | true | Auf dem Nil fuhren Segelboote mit Steinen und Getreide. | ☐ |
 | 🐈 | Katzen | Altes Ägypten | true | Katzen waren im Alten Ägypten heilige Tiere. | ☐ |
@@ -6553,9 +6553,9 @@ Quellenart: Fundstück, Bauwerk, Bild, Text.
 
 | Bild | Quelle | Art | Kultur | ☐ |
 |---|---|---|---|---|
-| 🪓 | Ein Steinbeil aus dem Schlamm am Grund eines Sees. | Fundstück | Pfahlbauer | ☐ |
-| 🧵 | Ein Webgewicht aus Ton, das Taucher im See gefunden haben. | Fundstück | Pfahlbauer | ☐ |
-| 🌾 | Ein Tonkrug mit Resten von Körnern darin. | Fundstück | Pfahlbauer | ☐ |
+| svg:steinbeil | Ein Steinbeil aus dem Schlamm am Grund eines Sees. | Fundstück | Pfahlbauer | ☐ |
+| svg:webgewicht | Ein Webgewicht aus Ton, das Taucher im See gefunden haben. | Fundstück | Pfahlbauer | ☐ |
+| svg:tonkrug | Ein Tonkrug mit Resten von Körnern darin. | Fundstück | Pfahlbauer | ☐ |
 | 🌉 | Die Reste eines Aquädukts, die noch auf einer Wiese stehen. | Bauwerk | Römer | ☐ |
 | 🏛️ | Die Ruinen des Theaters von Augusta Raurica. | Bauwerk | Römer | ☐ |
 | 🪖 | Ein Helm eines Legionärs, der beim Pflügen aus der Erde kam. | Fundstück | Römer | ☐ |
@@ -6563,9 +6563,9 @@ Quellenart: Fundstück, Bauwerk, Bild, Text.
 | 📜 | Der Bericht des Feldherrn Cäsar über die Menschen in der Schweiz. | Text | Römer | ☐ |
 | 🎨 | Eine Malerei an einer Hauswand: ein Festmahl mit Wein. | Bild | Römer | ☐ |
 | 📜 | Ein Brief auf Papyrus, mit Tinte geschrieben. | Text | Altes Ägypten | ☐ |
-| 🔺 | Eine Pyramide in der Wüste, die noch heute steht. | Bauwerk | Altes Ägypten | ☐ |
+| svg:pyramiden | Eine Pyramide in der Wüste, die noch heute steht. | Bauwerk | Altes Ägypten | ☐ |
 | 🎨 | Eine Malerei an der Wand eines Grabes: Bauern bei der Ernte. | Bild | Altes Ägypten | ☐ |
-| ✍️ | Eine Geschichte, in Hieroglyphen aufgeschrieben. | Text | Altes Ägypten | ☐ |
+| svg:hieroglyphen | Eine Geschichte, in Hieroglyphen aufgeschrieben. | Text | Altes Ägypten | ☐ |
 | 🪲 | Ein Glücksbringer in Käferform aus einem Grab. | Fundstück | Altes Ägypten | ☐ |
 | 🦁 | Die Sphinx, ein Löwe mit Menschenkopf aus Stein. | Bauwerk | Altes Ägypten | ☐ |
 | 👑 | Eine Zeichnung eines Pharaos auf seinem Wagen. | Bild | Altes Ägypten | ☐ |

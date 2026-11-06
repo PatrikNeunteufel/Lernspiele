@@ -12974,14 +12974,14 @@
             "um 1450",
             "📖",
             "Gutenberg druckt Bücher mit beweglichen Buchstaben",
-            ""
+            "Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt"
           ],
           [
             "1492",
             "1492",
             "⛵",
             "Kolumbus erreicht Amerika",
-            ""
+            "Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt"
           ],
           [
             "1803",
@@ -13088,17 +13088,17 @@
           ],
           [
             "Steinzeit",
-            "🪓",
+            "svg:faustkeil",
             "Werkzeuge aus Feuerstein"
           ],
           [
             "Steinzeit",
-            "🛖",
+            "svg:pfahlbau",
             "Pfahlbauten am Seeufer"
           ],
           [
             "Römerzeit",
-            "🛣️",
+            "svg:roemerstrasse",
             "Soldaten bauen Strassen über die Alpenpässe"
           ],
           [
@@ -19296,22 +19296,22 @@
             "mio: 10; bild: ⛰️; text: Das Juragebirge faltet sich auf.; zeitalter: Erdneuzeit"
           ],
           [
-            "mio: 6; bild: 🚶; text: Erste Vormenschen gehen auf zwei Beinen.; zeitalter: Erdneuzeit"
+            "mio: 6; bild: svg:vormensch; text: Erste Vormenschen gehen auf zwei Beinen.; zeitalter: Erdneuzeit"
           ],
           [
             "mio: 3; bild: 🦴; text: Die Vormenschen-Frau „Lucy“ lebt in Afrika.; zeitalter: Erdneuzeit"
           ],
           [
-            "jahre: 2500000; bild: 🪓; text: Frühmenschen machen die ersten Steinwerkzeuge.; zeitalter: Erdneuzeit"
+            "jahre: 2500000; bild: svg:fruehmensch; text: Frühmenschen machen die ersten Steinwerkzeuge.; zeitalter: Erdneuzeit"
           ],
           [
             "mio: 1; bild: 🔥; text: Frühmenschen nutzen das Feuer.; zeitalter: Erdneuzeit"
           ],
           [
-            "jahre: 300000; bild: 🧑; text: Der heutige Mensch (Homo sapiens) entsteht in Afrika.; zeitalter: Erdneuzeit"
+            "jahre: 300000; bild: svg:homo-sapiens-frueh; text: Der heutige Mensch (Homo sapiens) entsteht in Afrika.; zeitalter: Erdneuzeit"
           ],
           [
-            "jahre: 40000; bild: 🧔; text: Die letzten Neandertaler sterben aus.; zeitalter: Erdneuzeit"
+            "jahre: 40000; bild: svg:neandertaler; text: Die letzten Neandertaler sterben aus.; zeitalter: Erdneuzeit"
           ],
           [
             "jahre: 20000; bild: 🧊; text: Höhepunkt der letzten Eiszeit: Gletscher bedecken fast die ganze Schweiz.; zeitalter: Erdneuzeit"
@@ -31406,7 +31406,7 @@
         ],
         "zeilen": [
           [
-            "🛖",
+            "svg:pfahlbau",
             "Pfahlbauer",
             "true",
             "lebten vor mehreren tausend Jahren an Seen in der Schweiz, in Häusern auf Pfählen"
@@ -31418,7 +31418,7 @@
             "kamen vor über 2000 Jahren in die Schweiz und bauten Städte, Strassen und warme Bäder"
           ],
           [
-            "🏜️",
+            "svg:pyramiden",
             "Altes Ägypten",
             "false",
             "lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König"
@@ -31430,7 +31430,7 @@
             "lebten vor über 2000 Jahren weit im Osten, bauten eine riesige Mauer und erfanden Papier und Kompass"
           ],
           [
-            "🎭",
+            "svg:tempel",
             "Alte Griechen",
             "false",
             "lebten vor über 2000 Jahren am Meer, bauten Tempel mit Säulen und erfanden die Olympischen Spiele"
@@ -31451,7 +31451,7 @@
         ],
         "zeilen": [
           [
-            "🛖",
+            "svg:pfahlbau",
             "Haus auf Pfählen",
             "Pfahlbauer",
             "bau",
@@ -31469,7 +31469,7 @@
             "ein Boot, das aus einem einzigen Baumstamm ausgehöhlt wurde"
           ],
           [
-            "🪓",
+            "svg:steinbeil",
             "Steinbeil",
             "Pfahlbauer",
             "ding",
@@ -31505,7 +31505,7 @@
             "ein Dorf aus Holzhäusern, das direkt am Ufer eines Sees stand"
           ],
           [
-            "",
+            "svg:webgewicht",
             "Webgewicht",
             "Pfahlbauer",
             "ding",
@@ -31514,7 +31514,7 @@
             "ein Stück Ton mit einem Loch, das am Webstuhl die Fäden spannt"
           ],
           [
-            "",
+            "svg:tonkrug",
             "Tonkrug",
             "Pfahlbauer",
             "ding",
@@ -31532,7 +31532,7 @@
             "die Zeit, in der Werkzeuge aus Stein gemacht wurden, lange bevor es Metall gab"
           ],
           [
-            "",
+            "svg:bronzebeil",
             "Bronzezeit",
             "Pfahlbauer",
             "wort",
@@ -31541,7 +31541,7 @@
             "die Zeit, in der Beile und Schmuck aus dem Metall Bronze gegossen wurden"
           ],
           [
-            "",
+            "svg:mahlstein",
             "Mahlstein",
             "Pfahlbauer",
             "ding",
@@ -31577,7 +31577,7 @@
             "eine Wasserleitung auf hohen Bögen, die frisches Wasser in die Stadt bringt"
           ],
           [
-            "🛣️",
+            "svg:roemerstrasse",
             "Gepflasterte Strasse",
             "Römer",
             "bau",
@@ -31604,7 +31604,7 @@
             "ein grosses Badehaus mit warmen und kalten Becken für alle Leute der Stadt"
           ],
           [
-            "",
+            "svg:latein",
             "Latein",
             "Römer",
             "wort",
@@ -31631,7 +31631,7 @@
             "eine alte Stadt in der Schweiz mit Theater und Tempelresten, die Soldaten und Händler gründeten"
           ],
           [
-            "",
+            "svg:aventicum",
             "Aventicum",
             "Römer",
             "bau",
@@ -31667,7 +31667,7 @@
             "ein Schutz aus Metall für den Kopf eines Soldaten"
           ],
           [
-            "",
+            "svg:wachstafel",
             "Wachstafel",
             "Römer",
             "ding",
@@ -31676,7 +31676,7 @@
             "ein Brettchen mit Wachs, in das man mit einem Griffel schreibt und das Geschriebene wieder glattstreicht"
           ],
           [
-            "",
+            "svg:kaiser",
             "Kaiser",
             "Römer",
             "beruf",
@@ -31685,7 +31685,7 @@
             "der Herrscher über ein riesiges Reich; sein Kopf war auf den Münzen"
           ],
           [
-            "🔺",
+            "svg:pyramiden",
             "Pyramide",
             "Altes Ägypten",
             "bau",
@@ -31703,7 +31703,7 @@
             "der König, der wie ein Gott verehrt wurde und für den ein riesiges Grab gebaut wurde"
           ],
           [
-            "",
+            "svg:hieroglyphen",
             "Hieroglyphen",
             "Altes Ägypten",
             "wort",
@@ -31730,7 +31730,7 @@
             "ein sehr langer Fluss, der jedes Jahr über die Ufer trat und die Felder fruchtbar machte"
           ],
           [
-            "",
+            "svg:mumie",
             "Mumie",
             "Altes Ägypten",
             "ding",
@@ -31838,7 +31838,7 @@
             "kleine weisse Körner, die in überschwemmten Feldern wachsen"
           ],
           [
-            "",
+            "svg:schriftzeichen",
             "Schriftzeichen",
             "Altes China",
             "wort",
@@ -32392,7 +32392,7 @@
             "Autos gibt es erst seit etwa 150 Jahren."
           ],
           [
-            "🪓",
+            "svg:steinbeil",
             "Steinbeil",
             "Pfahlbauer",
             "true",
@@ -32406,14 +32406,14 @@
             "Ihre Boote waren Einbäume aus einem Baumstamm."
           ],
           [
-            "🛖",
+            "svg:pfahlbau",
             "Holzhaus",
             "Pfahlbauer",
             "true",
             "Ihre Häuser aus Holz standen auf Pfählen."
           ],
           [
-            "🍲",
+            "svg:tonkrug",
             "Töpfe aus Ton",
             "Pfahlbauer",
             "true",
@@ -32448,7 +32448,7 @@
             "Strom aus der Steckdose gibt es erst seit gut 100 Jahren."
           ],
           [
-            "🔺",
+            "svg:pyramiden",
             "Pyramiden",
             "Altes Ägypten",
             "true",
@@ -32544,19 +32544,19 @@
         ],
         "zeilen": [
           [
-            "🪓",
+            "svg:steinbeil",
             "Ein Steinbeil aus dem Schlamm am Grund eines Sees.",
             "Fundstück",
             "Pfahlbauer"
           ],
           [
-            "🧵",
+            "svg:webgewicht",
             "Ein Webgewicht aus Ton, das Taucher im See gefunden haben.",
             "Fundstück",
             "Pfahlbauer"
           ],
           [
-            "🌾",
+            "svg:tonkrug",
             "Ein Tonkrug mit Resten von Körnern darin.",
             "Fundstück",
             "Pfahlbauer"
@@ -32604,7 +32604,7 @@
             "Altes Ägypten"
           ],
           [
-            "🔺",
+            "svg:pyramiden",
             "Eine Pyramide in der Wüste, die noch heute steht.",
             "Bauwerk",
             "Altes Ägypten"
@@ -32616,7 +32616,7 @@
             "Altes Ägypten"
           ],
           [
-            "✍️",
+            "svg:hieroglyphen",
             "Eine Geschichte, in Hieroglyphen aufgeschrieben.",
             "Text",
             "Altes Ägypten"

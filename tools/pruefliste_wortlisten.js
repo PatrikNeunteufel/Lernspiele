@@ -1,6 +1,11 @@
 // Erzeugt aus den Inhaltslisten der Spiele (Wörter, Sätze, Tiere, Fakten) eine lesbare Prüfliste (Markdown) für Eltern
 // oder Lehrperson. Aufruf: node tools/pruefliste_wortlisten.js > docs/eulenpfad/pruefung/wortlisten_zur_pruefung.md
+// Schreibt dazu docs/eulenpfad/pruefung/listen.json (Prüfansicht je Liste im Entwickler-Modus).
+//   --pruefe   nichts schreiben, nur vergleichen: Ende mit Code 1, wenn listen.json oder die Markdown-Prüfliste nicht
+//              zu den Inhaltslisten passt (LERN_Session17: nach dem Ändern von Listen nicht neu erzeugt, die
+//              Prüfansicht zeigte die alten Bilder). Vom Testskript tools/pruefe_spiele.js aufgerufen.
 "use strict";
+const PRUEFE = process.argv.includes("--pruefe");
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
@@ -651,7 +656,8 @@ for (const [teilTitel, , titel, hinweis, kopf, zeilenListe] of RUNDE8) {
   tabelle(`### ${titel}`, hinweis, kopf, zeilenListe);
 }
 
-process.stdout.write(zeilen.join("\n"));
+const MARKDOWN = zeilen.join("\n");
+if (!PRUEFE) process.stdout.write(MARKDOWN);
 
 // ---------- Inhalte je Liste: docs/eulenpfad/pruefung/listen.json ----------
 // Je Quell-Liste des Katalogs („<spiel>/<liste>“) die Einträge, die das Spiel zeigt, wenn nur diese
@@ -902,4 +908,16 @@ for (const [, schluessel, titel, hinweis, kopf, zeilenListe] of RUNDE8) inListe(
 const fehlend = Object.keys(QUELL_LISTEN).filter(k => !listen[k] || listen[k].tabellen.every(t => !t.zeilen.length));
 if (fehlend.length) throw new Error(`Listen ohne Einträge: ${fehlend.join(", ")}`);
 const geordnet = Object.fromEntries(Object.keys(QUELL_LISTEN).map(k => [k, listen[k]]));
-fs.writeFileSync(path.join(__dirname, "..", "docs", "eulenpfad", "pruefung", "listen.json"), `${JSON.stringify(geordnet, null, 2)}\n`, "utf8");
+const PRUEF_ORDNER = path.join(__dirname, "..", "docs", "eulenpfad", "pruefung");
+const JSON_TEXT = `${JSON.stringify(geordnet, null, 2)}\n`;
+if (PRUEFE) {
+  // Zeilenende der Arbeitskopie zählt nicht (Git kann LF als CRLF auschecken)
+  const gleich = (datei, soll) => {
+    try { return fs.readFileSync(path.join(PRUEF_ORDNER, datei), "utf8").replace(/\r\n/g, "\n") === soll; } catch { return false; }
+  };
+  const veraltet = [["listen.json", JSON_TEXT], ["wortlisten_zur_pruefung.md", MARKDOWN]].filter(([d, s]) => !gleich(d, s)).map(([d]) => d);
+  if (veraltet.length) {
+    console.log(`Prüfliste veraltet (${veraltet.join(", ")}): node tools/pruefliste_wortlisten.js > docs/eulenpfad/pruefung/wortlisten_zur_pruefung.md`);
+    process.exit(1);
+  }
+} else fs.writeFileSync(path.join(PRUEF_ORDNER, "listen.json"), JSON_TEXT, "utf8");

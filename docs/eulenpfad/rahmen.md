@@ -550,7 +550,8 @@ Zustand, Server) und `tools/entwickler_server.py` (für alle Apps, jede Anfrage 
     Spiel, Stufe und laufender Aufgabe (`LS.spielStand()`), ob Kinder das Spiel sehen (`LS.sperrGrund`), und
     aufklappbar die Inhaltslisten des Spiels, je mit „ansehen“ und „✓ geprüft“ (`entwickler-listen`);
   - in der Freigabe je Spiel „✓ angesehen“, je Liste „✓ geprüft“ und „ansehen“: die Einträge der Liste
-    aus `docs/eulenpfad/pruefung/listen.json` (vom Prüflisten-Generator), je Eintrag eine Bemerkung;
+    aus `docs/eulenpfad/pruefung/listen.json` (vom Prüflisten-Generator; nach jeder Änderung einer Liste neu erzeugen —
+    `node tools/pruefe_spiele.js` meldet eine veraltete Prüfliste über `pruefliste_wortlisten.js --pruefe`), je Eintrag eine Bemerkung;
   - unter Verwaltung → Entwicklung alle Bemerkungen, offene zuerst.
 - **Ohne Server** bleiben die Knöpfe sichtbar und melden „Entwickler-Server nicht gefunden“ samt Startbefehl.
   Antwortet auf der Adresse ein anderer Server (etwa ein altes `python -m http.server`), melden sie das.

@@ -513,4 +513,10 @@
   Schriftzeichen; Vormensch, Frühmensch, früher Homo sapiens, Neandertaler — MF1 a) statt unpassender oder fehlender
   Emojis im Zeitstrahl-Sortierer, Kulturen-Koffer und in der Erdzeit-Leiter; die drei Spiele zeichnen über `LS.bild`,
   die Ablage von `LS.reihenfolge` auch. Zeitstrahl: Gutenberg und Kolumbus mit „Übergang vom Mittelalter zur Neuzeit
-  — wird nicht gefragt“ (ZA1 a). Listen und Bilder ungeprüft bis zur Prüfansicht (E1 a).
+  — wird nicht gefragt“ (ZA1 a). Listen und Bilder ungeprüft bis zur Prüfansicht (E1 a). Dazu das Steinbeil der
+  Pfahlbauer (geschliffene Steinklinge in Hirschgeweih am Holzschaft) statt 🪓.
+- Prüfliste neu erzeugt (`docs/eulenpfad/pruefung/listen.json`, `wortlisten_zur_pruefung.md`): Die Prüfansicht zeigte
+  noch die alten Bilder, weil sie aus der erzeugten Prüfliste liest. `pruefliste_wortlisten.js --pruefe` vergleicht nur
+  und endet mit Code 1, wenn sie veraltet ist; `tools/pruefe_spiele.js` ruft das bei jedem Lauf auf. Kulturen-Koffer:
+  vorhandene Zeichnungen auch bei „Gab es das schon?“ (Holzhaus, Töpfe aus Ton) und bei den Funden (Webgewicht,
+  Tonkrug, Pyramide, Hieroglyphen).

@@ -298,6 +298,13 @@ const BILDER = (() => {
         + `<ellipse cx="50" cy="14" rx="13" ry="3.5" fill="#8d5229"/>`
         + `<path d="M27 46 L33 40 L39 46 L45 40 L51 46 L57 40 L63 46 L69 40 L74 46" stroke="#7a4421" stroke-width="2" fill="none"/>`
         + `<path d="M26 54 H74" stroke="#7a4421" stroke-width="1.6"/>` },
+    steinbeil: { name: "Steinbeil der Pfahlbauer (geschliffene Steinklinge in Hirschgeweih, Holzschaft)", box: "0 0 100 100",
+      svg: `<path d="M24 94 Q30 60 52 30" stroke="#8b5e34" stroke-width="10" fill="none" stroke-linecap="round"/>`
+        + `<path d="M28 84 Q33 64 46 44" stroke="#a8743f" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+        + `<path d="M40 28 Q52 18 66 22 L70 34 Q56 36 46 42 Z" fill="#e3d6bc" stroke="#9c8a68" stroke-width="2"/>`
+        + `<path d="M48 28 l3 6 M56 25 l2 7" stroke="#b7a684" stroke-width="1.6" stroke-linecap="round"/>`
+        + `<path d="M64 22 L88 10 Q96 22 88 36 L70 34 Z" fill="#6f8a78" stroke="#435a4b" stroke-width="2"/>`
+        + `<path d="M76 18 Q86 16 90 26" stroke="#9fb7a6" stroke-width="2.4" fill="none" stroke-linecap="round"/>` },
     bronzebeil: { name: "Beil aus Bronze (goldbraune Metallklinge am Holzschaft)", box: "0 0 100 100",
       svg: `<path d="M22 92 L62 18" stroke="#8b5e34" stroke-width="9" stroke-linecap="round"/>`
         + `<path d="M48 26 L60 32 L58 40 L46 34 Z" fill="#6b4a2b"/>`
