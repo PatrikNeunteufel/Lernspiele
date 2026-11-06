@@ -97,7 +97,30 @@
       auswahl("Dezimalzeichen", [{ id: "punkt", name: "Punkt (3.5)" }, { id: "komma", name: "Komma (3,5)" }], e.dezimal || "punkt", w => setze("dezimal", w), { name: "dezimal" }),
       auswahl("Gast", [{ id: "an", name: "erlaubt (nichts wird gespeichert)" }, { id: "aus", name: "abgeschaltet" }], e.gast || "an", w => setze("gast", w), { name: "gast" }),
       el("small", { class: "leise", text: "Gilt für alle Konten auf diesem Gerät. Die Jugendlichen sehen die Einstellung in jeder Übung." })));
+    teile.push(el("h2", { class: "abschnitt", text: "Entwicklung" }), entwicklungKarte());
     return teile;
+  }
+
+  // Entwickler-Modus (Plan C6, Kern kern/entwicklung.js): freischalten mit dem Entwickler-Schlüssel, dann ein Schalter
+  // für die Leiste in den Übungen. Geschrieben wird nur über den Entwickler-Server im lokalen Repo.
+  function entwicklungKarte() {
+    const E = LST.ENTWICKLUNG;
+    const karte = el("section", { class: "einstellungen" });
+    if (!E.freigeschaltet()) {
+      const s = feld("Entwickler-Schlüssel", { type: "password", name: "entwickler-schluessel", autocomplete: "off" }, "Nur für die Entwicklung der App. Steht in entwickler.key im Repo.");
+      karte.append(s, el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", "data-aktion": "freischalten", text: "Freischalten",
+        onclick: async () => { meldung = (await E.freischalten(wert(s, "input"))) ? "Entwickler-Modus freigeschaltet." : "Der Schlüssel stimmt nicht."; zeichne(); } })));
+      return karte;
+    }
+    const z = E.zustand();
+    const name = feld("Name für Vermerke", { type: "text", name: "entwickler-name", maxlength: "40", value: z.name || "" }, "Steht bei „angesehen“ und bei Bemerkungen.");
+    name.querySelector("input").addEventListener("change", e => E.benenne(e.target.value));
+    karte.append(el("label", { class: "einstellung" }, el("span", { text: "Leiste in den Übungen" }),
+        el("input", { type: "checkbox", name: "entwickler-an", checked: !!z.an, onchange: e => { E.setzeAn(e.target.checked); meldung = e.target.checked ? "Leiste eingeschaltet." : "Leiste ausgeschaltet."; zeichne(); } })),
+      name,
+      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Sperren", onclick: () => { E.sperren(); meldung = "Entwickler-Modus gesperrt."; zeichne(); } })),
+      el("small", { class: "leise", text: "„Übung angesehen“ und Bemerkungen schreibt der Entwickler-Server (python tools/entwickler_server.py) ins Repo." }));
+    return karte;
   }
 
   const GRENZE = "Grenze: Alles liegt im Browser dieses Geräts. Die PIN schützt vor Versehen und Neugier, nicht vor jemandem, der die Entwicklerwerkzeuge des Browsers öffnet.";

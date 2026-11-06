@@ -21,6 +21,51 @@
     pruefstand: () => (typeof LST_PRUEFSTAND !== "undefined" ? LST_PRUEFSTAND : {}),
     aufsicht: () => typeof LST_KONTEN !== "undefined" && !!LST_KONTEN.aufsichtAktiv(),
   });
+  // ---------- Entwickler-Modus (Kern kern/entwicklung.js seit 1.9.0; Plan C6, E1 a) ----------
+  // Wie im Eulenpfad: die angemeldete Aufsicht schaltet ihn mit dem Entwickler-Schlüssel frei (Aufsichtsseite →
+  // Entwicklung); in den Übungen dann eine Leiste mit „Übung angesehen“ und „Bemerkung“. Geschrieben wird nur über den
+  // Entwickler-Server: Prüfstand nach gemeinsam/pruefstand.js, Bemerkungen nach docs/lernsteig/bemerkungen.json.
+  const aufsichtDa = () => (typeof LST_KONTEN !== "undefined" ? LST_KONTEN.aufsichtAktiv() : null);
+  const ENTWICKLUNG = KERN.entwicklung({
+    app: "lernsteig", speicher: { praefix: LST.PRAEFIX, lies: LST.lies, schreibe: LST.schreibe },
+    aufsicht: () => !!aufsichtDa(), name: () => (aufsichtDa() || {}).name || "",
+    pruefstand: typeof LST_PRUEFSTAND !== "undefined" ? LST_PRUEFSTAND : null, arten: ["uebungen", "listen"],
+    melde: text => alert(text), start: "lernsteig/",
+  });
+  /** Leiste der Entwicklung unten in einer Übung (nur wenn der Modus an ist). stufe() liefert die gewählte Stufe. */
+  function entwicklerLeiste(id, stufe) {
+    if (!ENTWICKLUNG.aktiv()) return;
+    const leiste = el("aside", { class: "entwickler-leiste", "aria-label": "Entwicklung" });
+    document.body.append(leiste);
+    let feld = null;
+    async function zeichne() {
+      const da = await ENTWICKLUNG.server();
+      const g = FREIGABE.geprueft(id), grund = sperrGrund(id);
+      // null weglassen (ohne Bemerkungsfeld): das eingebaute replaceChildren schriebe es als Text „null“
+      leiste.replaceChildren(...[el("b", { text: "🛠 Entwicklung" }),
+        el("span", { class: "leise", text: da ? "Server verbunden" : ENTWICKLUNG.fremd() ? "⚠ falscher Server auf diesem Port" : "⚠ Server nicht gefunden" }),
+        el("span", { text: g ? `✓ angesehen ${g.am}${g.von ? " · " + g.von : ""}` : "noch nicht angesehen" }),
+        el("span", { class: "leise", text: grund ? `Jugendliche sehen sie nicht: ${grund}` : "für Jugendliche frei" }),
+        el("button", { type: "button", class: "knopf", "data-aktion": "angesehen", text: g ? "Markierung aufheben" : "✓ Übung angesehen",
+          onclick: async () => { if (await ENTWICKLUNG.setzeGeprueft("uebungen", id, !g)) zeichne(); } }),
+        el("button", { type: "button", class: "knopf", "data-aktion": "bemerkung", text: "📝 Bemerkung", onclick: () => { feld = feld ? null : bemerkungsFeld(); zeichne(); } }),
+        feld].filter(Boolean));
+    }
+    function bemerkungsFeld() {
+      const text = el("textarea", { rows: "3", class: "textfeld", placeholder: "Was stimmt nicht oder soll anders werden?", "aria-label": "Bemerkung" });
+      const meldung = el("span", { class: "leise", role: "status" });
+      setTimeout(() => text.focus(), 0);
+      return el("div", { class: "entwickler-feld" }, text, el("div", { class: "knopf-zeile" },
+        el("button", { type: "button", class: "knopf haupt", "data-aktion": "senden", text: "Senden", onclick: async () => {
+          if (!text.value.trim()) { meldung.textContent = "Bitte etwas eintragen."; return; }
+          const b = await ENTWICKLUNG.bemerkung({ text: text.value, inhalt: id, stufe: stufe() || undefined });
+          if (b) { meldung.textContent = `✓ Bemerkung Nr. ${b.nr} gespeichert.`; text.value = ""; setTimeout(() => { feld = null; zeichne(); }, 900); }
+        } }),
+        el("button", { type: "button", class: "knopf", text: "Abbrechen", onclick: () => { feld = null; zeichne(); } }), meldung));
+    }
+    zeichne();
+  }
+
   /** Grund, warum Jugendliche die Übung nicht sehen, oder null, wenn sie frei ist. */
   const sperrGrund = id => FREIGABE.sperrGrund(id);
   /** Darf die Übung auf diesem Tab geöffnet werden? Frei oder angemeldete Aufsicht. */
@@ -237,6 +282,7 @@
     const p = new URLSearchParams(location.search);
     let niveau = eintrag.niveaus.includes(p.get("niveau")) ? p.get("niveau") : niveauFuer(fach.id, eintrag.niveaus);
     const stufe = LST.stufeVon(eintrag, p.get("stufe"));
+    entwicklerLeiste(def.id, () => new URLSearchParams(location.search).get("stufe"));
     if (stufe) runde(stufe.id, p.get("endlos") === "1" && endlosStufe(eintrag, stufe.id)); else stufenwahl();
 
     function adresse(st, endlos) {
@@ -559,5 +605,5 @@
   let aktuell = null;
   const pruefung = { aufgabe: () => aktuell };
 
-  Object.assign(LST, { el, FREIGABE, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
+  Object.assign(LST, { el, FREIGABE, ENTWICKLUNG, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
 })(LST);

@@ -3,6 +3,14 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.9.0 — 2026-11-06 (LERN_Session16)
+- `entwicklung.js` (`KERN.entwicklung(opt)`): Entwickler-Modus für alle Apps (E1 a, E2 a, E3 a; Plan C6) — Schlüssel
+  gegen den Hash (ein Schlüssel für das Repo, Rechnung wie bisher: `KERN.geheimnis.hash(s, "eulenpfad-entwickler")`),
+  Zustand je App (`entwickler`), `aktiv` nur für die angemeldete Aufsicht, Entwickler-Server (`server`, `fremd`),
+  `setzeGeprueft` je Bereich der App, `setzeEintraege`, Bemerkungen je App; jede Anfrage nennt `app`, der Prüfstand
+  der App wird auf den Stand des Servers gebracht. Meldungen über `opt.melde`. Eulenpfad umgestellt (`LS.entwicklung`
+  unverändert), Lernsteig neu (Freischalten auf der Aufsichtsseite, Leiste in den Übungen).
+
 ## 1.8.0 — 2026-11-06 (LERN_Session16)
 - `anmeldung.js`: Gast (Entscheid C2 a) — Option `gast: { tab, erlaubt }`, `alsGast()` (meldet eine Person ab, gilt nur im
   Tab), `istGast()`; wählen, anmelden und abmelden beenden den Gast; `erlaubt()` schaltet ihn je Gerät ab, auch einen

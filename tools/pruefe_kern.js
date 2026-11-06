@@ -17,6 +17,7 @@ require(path.join(WURZEL, "kern", "freigabe.js"));
 require(path.join(WURZEL, "kern", "suche.js"));
 require(path.join(WURZEL, "kern", "runden.js"));
 require(path.join(WURZEL, "kern", "anmeldung.js"));
+require(path.join(WURZEL, "kern", "entwicklung.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -511,6 +512,59 @@ console.log("el.js");
     wirft(() => A.platz({ speicher: S, tab: "a" }), "finde fehlt");
     delete global.localStorage;
     delete global.sessionStorage;
+  }
+
+  // ---------- Entwickler-Modus ----------
+  {
+    console.log("entwicklung.js");
+    const E = KERN.entwicklung;
+    // dieselbe Rechnung wie bisher im Eulenpfad: SHA-256 von „eulenpfad-entwickler:<Schlüssel>“
+    const sha = require("crypto").createHash("sha256").update("eulenpfad-entwickler:probe").digest("hex");
+    gleich(await KERN.geheimnis.hash("probe", E.SALZ), sha, "Hash wie bisher (bestehender Schlüssel gilt)");
+    gleich(/^[0-9a-f]{64}$/.test(E.SCHLUESSEL_HASH), true, "Hash des Schlüssels eingetragen");
+    const lokal = new Map();
+    global.localStorage = { getItem: k => (lokal.has(k) ? lokal.get(k) : null), setItem: (k, v) => lokal.set(k, String(v)),
+      removeItem: k => lokal.delete(k), key: i => [...lokal.keys()][i] ?? null, get length() { return lokal.size; } };
+    let aufsicht = true;
+    const meldungen = [], anfragen = [];
+    const PS = { uebungen: { alt: { am: "x" } }, listen: {} };
+    const D = E({ app: "lernsteig", speicher: KERN.speicher("lernsteig:"), aufsicht: () => aufsicht, name: () => "Mama",
+      pruefstand: PS, arten: ["uebungen", "listen"], melde: t => meldungen.push(t), start: "lernsteig/" });
+    gleich([D.freigeschaltet(), D.aktiv()].join(), "false,false", "anfangs gesperrt");
+    gleich(await D.freischalten("falsch"), false, "falscher Schlüssel");
+    gleich(await D.freischalten(""), false, "leerer Schlüssel");
+    // freigeschaltet wie nach einem richtigen Schlüssel (der Klartext steht nur in entwickler.key)
+    lokal.set("lernsteig:entwickler", JSON.stringify({ schluessel: "s", an: true }));
+    gleich(D.aktiv(), true, "freigeschaltet, an, Aufsicht");
+    aufsicht = false; gleich(D.aktiv(), false, "nur für die angemeldete Aufsicht"); aufsicht = true;
+    D.setzeAn(false); gleich(D.aktiv(), false, "Schalter aus"); D.setzeAn(true);
+    gleich(D.name(), "Mama", "Name: die Aufsicht"); D.benenne("  Patrik  "); gleich(D.name(), "Patrik", "eigener Name");
+    // ohne Server: Meldung statt Ausnahme
+    global.fetch = async () => { throw new Error("kein Netz"); };
+    gleich(await D.setzeGeprueft("uebungen", "brueche", true), false, "ohne Server: false");
+    gleich(/nicht gefunden[\s\S]*lernsteig\//.test(meldungen.pop() || ""), true, "Meldung nennt den Server und die App");
+    faelle++; try { await D.setzeGeprueft("spiele", "x", true); fehler++; console.log("    FEHLER  fremde Art angenommen"); } catch (e) { /* erwartet */ }
+    // mit Server: App und Schlüssel gehen mit, der Prüfstand übernimmt den Stand des Servers
+    const D2 = E({ app: "lernsteig", speicher: KERN.speicher("lernsteig:"), aufsicht: () => true, pruefstand: PS, arten: ["uebungen", "listen"], melde: t => meldungen.push(t) });
+    global.fetch = async (url, o2) => {
+      anfragen.push({ url, body: o2 && o2.body ? JSON.parse(o2.body) : null });
+      if (url === "/entwicklung/status") return { ok: true, json: async () => ({ ok: true, schluessel: true }) };
+      if (url.startsWith("/entwicklung/bemerkungen")) return { ok: true, json: async () => [{ nr: 1 }] };
+      if (url === "/entwicklung/pruefstand") return { ok: true, json: async () => ({ uebungen: { brueche: { am: "2026-11-06", von: "Patrik" } }, listen: {} }) };
+      return { ok: false, status: 403, json: async () => ({ fehler: "Schlüssel passt nicht" }) };
+    };
+    gleich(await D2.setzeGeprueft("uebungen", "brueche", true), true, "mit Server: gesetzt");
+    const b = anfragen.find(a => a.url === "/entwicklung/pruefstand").body;
+    gleich([b.app, b.schluessel, b.art, b.id, b.geprueft, b.von].join(), "lernsteig,s,uebungen,brueche,true,Patrik", "Anfrage mit App, Schlüssel, von");
+    gleich([Object.keys(PS.uebungen).join(), "alt" in PS.uebungen].join(), "brueche,false", "Prüfstand vom Server übernommen (dasselbe Objekt)");
+    gleich((await D2.bemerkungen()).length, 1, "Bemerkungen gelesen");
+    gleich(anfragen.some(a => a.url === "/entwicklung/bemerkungen?app=lernsteig"), true, "Bemerkungen je App");
+    gleich(await D2.bemerkungStatus(1, "erledigt"), false, "Fehler des Servers: false");
+    gleich(meldungen.pop(), "Entwickler-Server: Schlüssel passt nicht", "Fehler des Servers gemeldet");
+    D.sperren(); gleich(D.freigeschaltet(), false, "sperren");
+    wirft(() => E({ speicher: KERN.speicher("lernsteig:"), aufsicht: () => true }), "app fehlt");
+    wirft(() => E({ app: "x", aufsicht: () => true }), "speicher fehlt");
+    delete global.fetch; delete global.localStorage;
   }
 
   // ---------- Kopien in den Apps ----------

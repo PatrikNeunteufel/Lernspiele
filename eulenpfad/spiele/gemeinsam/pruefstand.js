@@ -7,12 +7,64 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "fledermaus-forscher/anpassungen": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "fledermaus-forscher/aussagen": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "fledermaus-forscher/fragen": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "fledermaus-forscher/jahr": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
     "frueher-heute/grosseltern": {
       "am": "2026-11-05",
       "von": "Patrik"
     },
     "gegenteil-wippe/gegenteile": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "lebensraum/gebirge": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "lebensraum/wald": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "lebensraum/weiher": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "lebensraum/wiese": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "lebenszyklus/fragen": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "lebenszyklus/geburt": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "lebenszyklus/zyklen-pflanzen": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "lebenszyklus/zyklen-tiere": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "lebenszyklus/zyklus-mensch": {
+      "am": "2026-11-06",
       "von": "Patrik"
     },
     "platzhalter-geschichten/geschichten": {
@@ -147,6 +199,10 @@ const PRUEFSTAND = {
     },
     "flaechenmass-treppe": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "fledermaus-forscher": {
+      "am": "2026-11-06",
       "von": "Patrik"
     },
     "frueher-heute": {

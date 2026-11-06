@@ -2,103 +2,22 @@
    Die Aufsicht schaltet ihn mit dem Entwickler-Schlüssel frei (Verwaltung → Entwicklung); danach blendet
    ein eigener Schalter die Zusätze ein: in den Spielen eine Leiste mit „Spiel angesehen“ und „Bemerkung“,
    in der Freigabe „geprüft“ je Spiel und Liste und die Prüfliste je Liste.
-   Dauerhaft geschrieben wird nur über den Entwickler-Server (tools/entwickler_server.py) im lokalen Repo:
-   Prüfstand nach pruefstand.js, Bemerkungen nach docs/eulenpfad/bemerkungen.json. Ohne Server bleiben die
-   Knöpfe sichtbar, melden aber, dass er fehlt.
-   Der Schlüssel steht im Klartext nur in entwickler.key (von Git ausgeschlossen); hier steht sein Hash. */
+   Rechnung im Kern (kern/entwicklung.js, docs/kern/rahmen.md 4.12): Schlüssel, Zustand, Server; dauerhaft geschrieben
+   wird nur über den Entwickler-Server (tools/entwickler_server.py) im lokalen Repo: Prüfstand nach pruefstand.js,
+   Bemerkungen nach docs/eulenpfad/bemerkungen.json. Ohne Server bleiben die Knöpfe sichtbar, melden aber, dass er fehlt.
+   Hier bleibt, was nur der Eulenpfad zeigt: Listenansicht und Leiste in den Spielen. */
 "use strict";
 
 LS.entwicklung = (() => {
-  // SHA-256 von SALZ + Schlüssel; neu gesetzt von: python tools/entwickler_server.py --neuer-schluessel
-  const SCHLUESSEL_HASH = "a1fb5dbb5d54c6de3acc1d372cdef564fedf87e2e349aa1bc4bbddf3be702035";
-  const SALZ = "eulenpfad-entwickler:";
-  const SERVER_FEHLT = "Entwickler-Server nicht gefunden.\n\nDer Entwickler-Modus funktioniert nur im lokalen Repo mit laufendem Server:\n"
-    + "python tools/entwickler_server.py\ndanach http://localhost:8765/eulenpfad/ öffnen.";
-  const FREMDER_SERVER = "Hier antwortet ein anderer Server ohne Entwickler-Funktionen (z. B. ein noch laufendes "
-    + "python -m http.server auf demselben Port).\n\nDiesen beenden, dann python tools/entwickler_server.py starten "
-    + "und die Seite mit Strg+F5 neu laden.";
-  let fremd = false; // Auf der Adresse läuft ein Server, aber nicht der Entwickler-Server
-  const serverMeldung = () => (fremd ? FREMDER_SERVER : SERVER_FEHLT);
-
   // lernspiele:entwickler = { schluessel, an, name } — nur auf diesem Gerät, wird nicht abgeglichen.
-  const zustand = () => ({ schluessel: null, an: false, name: "", ...(LS.lies("entwickler", null) || {}) });
-  const speichere = daten => LS.schreibe("entwickler", { ...zustand(), ...daten });
-  const freigeschaltet = () => !!zustand().schluessel;
-  /** Sind die Entwickler-Zusätze sichtbar? Nur für die angemeldete Aufsicht, freigeschaltet und eingeschaltet. */
-  const aktiv = () => LS.aufsichtAngemeldet() && freigeschaltet() && zustand().an;
-  const name = () => zustand().name || LS.aktuellerSpieler() || "";
-
-  async function hash(text) {
-    const roh = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-    return [...new Uint8Array(roh)].map(b => b.toString(16).padStart(2, "0")).join("");
-  }
-  /** Schlüssel prüfen (gegen den Hash) und auf diesem Gerät merken; true bei Erfolg. */
-  async function freischalten(schluessel) {
-    const s = String(schluessel).trim();
-    if (!s || !SCHLUESSEL_HASH || (await hash(SALZ + s)) !== SCHLUESSEL_HASH) return false;
-    speichere({ schluessel: s, an: true });
-    return true;
-  }
-  const sperren = () => LS.schreibe("entwickler", null);
-  const setzeAn = an => speichere({ an: !!an });
-  const benenne = n => speichere({ name: String(n).trim().slice(0, 40) });
-
-  // ----- Entwickler-Server -----
-  let serverDa = null;
-  /** Läuft die Seite über den Entwickler-Server? { ok, schluessel } oder null. Erfolg wird gemerkt. */
-  async function server() {
-    if (serverDa) return serverDa;
-    try {
-      const r = await fetch("/entwicklung/status", { cache: "no-store" });
-      fremd = !r.ok && location.protocol.startsWith("http") && ["localhost", "127.0.0.1"].includes(location.hostname);
-      if (r.ok) serverDa = await r.json();
-    } catch { /* kein Server */ }
-    return serverDa;
-  }
-  /** An den Server schicken; meldet selbst, was schiefging, und gibt dann null zurück. */
-  async function sende(pfad, daten) {
-    if (!(await server())) { alert(serverMeldung()); return null; }
-    try {
-      const r = await fetch(pfad, { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...daten, schluessel: zustand().schluessel }) });
-      const antwort = await r.json();
-      if (!r.ok) { alert(`Entwickler-Server: ${antwort.fehler || r.status}`); return null; }
-      return antwort;
-    } catch {
-      serverDa = null;
-      alert(serverMeldung());
-      return null;
-    }
-  }
-
-  /** Spiel als angesehen bzw. Liste als geprüft setzen (geprueft false: aufheben). art "spiele" | "listen". */
-  async function setzeGeprueft(art, id, geprueft) {
-    const stand = await sende("/entwicklung/pruefstand", { art, id, geprueft, von: name() });
-    if (!stand) return false;
-    if (typeof PRUEFSTAND !== "undefined") { PRUEFSTAND.spiele = stand.spiele || {}; PRUEFSTAND.listen = stand.listen || {}; }
-    return true;
-  }
-  /**
-   * Haken je Eintrag einer Liste (Prüfansicht, LP2 a): { liste, setzen: [schlüssel], entfernen: [schlüssel], komplett, hash }.
-   * Der Server schreibt pruefstand-eintraege.json und bei komplett die Liste in pruefstand.js (mit hash), sonst entfernt
-   * er sie dort.
-   */
-  async function setzeEintraege(daten) {
-    const stand = await sende("/entwicklung/eintraege", { ...daten, von: name() });
-    if (!stand) return false;
-    if (typeof PRUEFSTAND !== "undefined") PRUEFSTAND.listen = stand.listen || {};
-    return true;
-  }
-  /** Status einer Bemerkung setzen (Prüfansicht: „✕ entfernen“ → erledigt). */
-  const bemerkungStatus = async (nr, status) => !!(await sende("/entwicklung/bemerkung-status", { nr, status }));
-  /** Bemerkung für die Entwicklung: { text, spiel?, stufe?, liste?, eintrag?, schluessel?, aufgabe? }. */
-  const bemerkung = daten => sende("/entwicklung/bemerkung", { von: name(), seite: location.pathname, ...daten });
-  /** Alle Bemerkungen (über den Server) oder null. */
-  async function bemerkungen() {
-    if (!(await server())) return null;
-    try { return await (await fetch("/entwicklung/bemerkungen", { cache: "no-store" })).json(); } catch { return null; }
-  }
-
+  const K = KERN.entwicklung({
+    app: "eulenpfad", speicher: { praefix: "lernspiele:", lies: LS.lies, schreibe: LS.schreibe },
+    aufsicht: () => LS.aufsichtAngemeldet(), name: () => LS.aktuellerSpieler() || "",
+    pruefstand: typeof PRUEFSTAND !== "undefined" ? PRUEFSTAND : null, arten: ["spiele", "listen"],
+    melde: text => alert(text), start: "eulenpfad/",
+  });
+  const { freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung,
+    setzeGeprueft, setzeEintraege, bemerkung, bemerkungen, bemerkungStatus } = K;
   // ----- Inhaltsliste ansehen (Entscheid E3 a): Einträge aus der Prüfliste, über den Entwickler-Server -----
   let listenDaten = null;
   /**
@@ -181,7 +100,7 @@ LS.entwicklung = (() => {
       const grund = LS.sperrGrund(stand.spiel);
       leiste.append(
         el("b", { text: "🛠 Entwickler" }),
-        el("span", { class: "leise", text: da ? "Server verbunden" : fremd ? "⚠ falscher Server auf diesem Port" : "⚠ Server nicht gefunden" }),
+        el("span", { class: "leise", text: da ? "Server verbunden" : K.fremd() ? "⚠ falscher Server auf diesem Port" : "⚠ Server nicht gefunden" }),
         el("span", { text: g ? `✓ angesehen ${g.am}${g.von ? " · " + g.von : ""}` : "noch nicht angesehen" }),
         el("span", { class: "leise", text: grund ? `Kinder sehen es nicht: ${grund}` : "für Kinder sichtbar" }),
         el("button", { type: "button", class: "knopf hell klein", text: g ? "Markierung aufheben" : "✓ Spiel angesehen",

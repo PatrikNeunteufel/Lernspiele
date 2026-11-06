@@ -1,9 +1,9 @@
-"""Entwickler-Server für Eulenpfad (Entscheide E1 a, E2 a, LERN_Session6).
+"""Entwickler-Server der Reihe (Entscheide E1 a, E2 a, LERN_Session6; für alle Apps seit LERN_Session16, Plan C6).
 
-Liefert das Repo aus wie `python -m http.server` und nimmt zusätzlich genau zwei Änderungen an:
-den Prüfstand (eulenpfad/spiele/gemeinsam/pruefstand.js) und Entwickler-Bemerkungen
-(docs/eulenpfad/bemerkungen.json). Geschrieben wird nur mit dem Schlüssel aus `entwickler.key`
-(Repo-Wurzel, von Git ausgeschlossen); im Repo steht nur sein Hash (entwicklung.js).
+Liefert das Repo aus wie `python -m http.server` und nimmt zusätzlich Änderungen am Prüfstand und an den
+Entwickler-Bemerkungen der App an, die die Anfrage nennt (`app`, Standard eulenpfad; Dateien in APPS).
+Geschrieben wird nur mit dem Schlüssel aus `entwickler.key` (Repo-Wurzel, von Git ausgeschlossen); im Repo
+steht nur sein Hash (kern/entwicklung.js, verteilt in die Kopien <app>/kern/kern.js).
 
 Aufruf (aus beliebigem Ordner):
     python tools/entwickler_server.py              Server auf http://localhost:8765/eulenpfad/
@@ -29,18 +29,39 @@ from pathlib import Path
 
 WURZEL = Path(__file__).resolve().parent.parent
 SCHLUESSEL_DATEI = WURZEL / "entwickler.key"
-PRUEFSTAND = WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "pruefstand.js"
-ENTWICKLUNG_JS = WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "entwicklung.js"
-BEMERKUNGEN = WURZEL / "docs" / "eulenpfad" / "bemerkungen.json"
-EINTRAEGE = WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "pruefstand-eintraege.json"
-SALZ = "eulenpfad-entwickler:"  # wie in entwicklung.js
+ENTWICKLUNG_JS = WURZEL / "kern" / "entwicklung.js"
+SALZ = "eulenpfad-entwickler:"  # wie in kern/entwicklung.js (SALZ + ":")
 
-PRUEFSTAND_KOPF = (
-    "/* Prüfstand (Entscheid E1 a, LERN_Session6): welche Spiele angesehen und welche Inhaltslisten geprüft\n"
-    "   sind, je { am, von }. Schlüssel: Spiel-Id bzw. \"<spiel>/<liste>\" der Quelle einer Liste.\n"
-    "   Geschrieben vom Entwickler-Server (tools/entwickler_server.py) — nicht von Hand ändern. */\n"
-    "const PRUEFSTAND = "
-)
+# Je App: Prüfstand (Datei, Name der Konstante, Kopf und Fuss beim Schreiben, Bereiche), Bemerkungen, Haken je Eintrag.
+APPS = {
+    "eulenpfad": {
+        "pruefstand": WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "pruefstand.js",
+        "name": "PRUEFSTAND",
+        "kopf": ("/* Prüfstand (Entscheid E1 a, LERN_Session6): welche Spiele angesehen und welche Inhaltslisten geprüft\n"
+                 "   sind, je { am, von }. Schlüssel: Spiel-Id bzw. \"<spiel>/<liste>\" der Quelle einer Liste.\n"
+                 "   Geschrieben vom Entwickler-Server (tools/entwickler_server.py) — nicht von Hand ändern. */\n"),
+        "fuss": "",
+        "arten": ("spiele", "listen"),
+        "bemerkungen": WURZEL / "docs" / "eulenpfad" / "bemerkungen.json",
+        "eintraege": WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "pruefstand-eintraege.json",
+        "start": "eulenpfad/",
+    },
+    "lernsteig": {
+        "pruefstand": WURZEL / "lernsteig" / "gemeinsam" / "pruefstand.js",
+        "name": "LST_PRUEFSTAND",
+        "kopf": ("/* Prüfstand des Lernsteigs (Entscheide FG1 a, A1 a, LERN_Session15): was im Repo angesehen bzw. geprüft ist.\n"
+                 "   Eine Übung mit `neu` im Katalog ist gesperrt, bis sie hier unter `uebungen` steht (auf Desktop, Tablet und Handy\n"
+                 "   durchgespielt); eine Übung mit Inhaltslisten braucht dazu mindestens eine geprüfte Liste unter `listen`\n"
+                 "   (\"<übung>/<liste>\"). Einträge: { am: \"JJJJ-MM-TT\", von: \"<Name>\" }. Gleiches Prinzip wie im Eulenpfad\n"
+                 "   (docs/eulenpfad/rahmen.md 6). Geschrieben vom Entwickler-Server (tools/entwickler_server.py) — nicht von Hand\n"
+                 "   ändern. */\n\"use strict\";\n\n"),
+        "fuss": "\nif (typeof module !== \"undefined\") module.exports = LST_PRUEFSTAND;\n",
+        "arten": ("uebungen", "listen"),
+        "bemerkungen": WURZEL / "docs" / "lernsteig" / "bemerkungen.json",
+        "eintraege": WURZEL / "lernsteig" / "gemeinsam" / "pruefstand-eintraege.json",
+        "start": "lernsteig/",
+    },
+}
 
 
 def schluessel_hash(schluessel: str) -> str:
@@ -56,25 +77,31 @@ def neuer_schluessel() -> None:
     if n != 1:
         sys.exit("SCHLUESSEL_HASH in entwicklung.js nicht genau einmal gefunden.")
     ENTWICKLUNG_JS.write_bytes(neu.encode("utf-8"))
-    print(f"Neuer Schlüssel in {SCHLUESSEL_DATEI.name}, Hash in entwicklung.js eingetragen.")
+    print(f"Neuer Schlüssel in {SCHLUESSEL_DATEI.name}, Hash in kern/entwicklung.js eingetragen.\n"
+          "Jetzt die Version in kern/VERSION erhöhen und verteilen: python tools/kern_verteilen.py")
 
 
-def lies_pruefstand() -> dict:
-    text = PRUEFSTAND.read_text(encoding="utf-8")
-    return json.loads(text[text.index("const PRUEFSTAND = ") + len("const PRUEFSTAND = "):].rstrip().rstrip(";"))
+def lies_pruefstand(a: dict) -> dict:
+    """Prüfstand als JSON nach „const <name> = “ (der Server schreibt ihn so)."""
+    text = a["pruefstand"].read_text(encoding="utf-8")
+    marke = f"const {a['name']} = "
+    stand, _ = json.JSONDecoder().raw_decode(text, text.index(marke) + len(marke))
+    for art in a["arten"]:
+        stand.setdefault(art, {})
+    return stand
 
 
-def schreibe_pruefstand(stand: dict) -> None:
-    inhalt = PRUEFSTAND_KOPF + json.dumps(stand, ensure_ascii=False, indent=2, sort_keys=True) + ";\n"
-    PRUEFSTAND.write_bytes(inhalt.encode("utf-8"))
+def schreibe_pruefstand(a: dict, stand: dict) -> None:
+    inhalt = a["kopf"] + f"const {a['name']} = " + json.dumps(stand, ensure_ascii=False, indent=2, sort_keys=True) + ";\n" + a["fuss"]
+    a["pruefstand"].write_bytes(inhalt.encode("utf-8"))
 
 
-def lies_eintraege() -> dict:
-    return json.loads(EINTRAEGE.read_text(encoding="utf-8")) if EINTRAEGE.exists() else {}
+def lies_eintraege(a: dict) -> dict:
+    return json.loads(a["eintraege"].read_text(encoding="utf-8")) if a["eintraege"].exists() else {}
 
 
-def lies_bemerkungen() -> list:
-    return json.loads(BEMERKUNGEN.read_text(encoding="utf-8")) if BEMERKUNGEN.exists() else []
+def lies_bemerkungen(a: dict) -> list:
+    return json.loads(a["bemerkungen"].read_text(encoding="utf-8")) if a["bemerkungen"].exists() else []
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -97,8 +124,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/entwicklung/status":
             return self.antwort(200, {"ok": True, "schluessel": SCHLUESSEL_DATEI.exists()})
-        if self.path == "/entwicklung/bemerkungen":
-            return self.antwort(200, lies_bemerkungen())
+        if self.path.split("?")[0] == "/entwicklung/bemerkungen":
+            app = (re.search(r"[?&]app=([a-z]+)", self.path) or [None, "eulenpfad"])[1]
+            if app not in APPS:
+                return self.antwort(400, {"fehler": "app unbekannt"})
+            return self.antwort(200, lies_bemerkungen(APPS[app]))
         pfad = self.path.split("?")[0].lstrip("/").lower()
         if not pfad:  # Wurzel: zur Einstiegsseite statt Verzeichnisliste
             self.send_response(302)
@@ -121,17 +151,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not hmac.compare_digest(str(daten.get("schluessel", "")), richtig):
             return self.antwort(403, {"fehler": "Schlüssel passt nicht"})
         jetzt = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
+        # Ältere Seiten (vor LERN_Session16) schicken keine App: dann der Eulenpfad
+        a = APPS.get(str(daten.get("app") or "eulenpfad"))
+        if not a:
+            return self.antwort(400, {"fehler": "app unbekannt"})
 
         if self.path == "/entwicklung/pruefstand":
             art, schluessel = daten.get("art"), str(daten.get("id", ""))
-            if art not in ("spiele", "listen") or not re.fullmatch(r"[a-z0-9-]+(/[a-z0-9-]+)?", schluessel):
+            if art not in a["arten"] or not re.fullmatch(r"[a-z0-9-]+(/[a-z0-9-]+)?", schluessel):
                 return self.antwort(400, {"fehler": "art oder id ungültig"})
-            stand = lies_pruefstand()
+            stand = lies_pruefstand(a)
             if daten.get("geprueft"):
                 stand.setdefault(art, {})[schluessel] = {"am": jetzt[:10], "von": str(daten.get("von", ""))[:40]}
             else:
                 stand.get(art, {}).pop(schluessel, None)
-            schreibe_pruefstand(stand)
+            schreibe_pruefstand(a, stand)
             return self.antwort(200, stand)
 
         if self.path == "/entwicklung/eintraege":
@@ -140,7 +174,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if not re.fullmatch(r"[a-z0-9-]+/[a-z0-9-]+", liste):
                 return self.antwort(400, {"fehler": "liste ungültig"})
             schluessel_ok = lambda s: isinstance(s, str) and re.fullmatch(r"[a-z0-9-]+:[a-z0-9]+", s)
-            alle = lies_eintraege()
+            alle = lies_eintraege(a)
             haken = alle.setdefault(liste, {})
             von = str(daten.get("von", ""))[:40]
             for s in daten.get("setzen", []):
@@ -151,39 +185,40 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     haken.pop(s, None)
             if not haken:
                 alle.pop(liste, None)
-            EINTRAEGE.write_bytes((json.dumps(alle, ensure_ascii=False, indent=1, sort_keys=True) + "\n").encode("utf-8"))
-            stand = lies_pruefstand()
+            a["eintraege"].write_bytes((json.dumps(alle, ensure_ascii=False, indent=1, sort_keys=True) + "\n").encode("utf-8"))
+            stand = lies_pruefstand(a)
             if daten.get("komplett"):
                 stand.setdefault("listen", {})[liste] = {"am": jetzt[:10], "von": von, "hash": str(daten.get("hash", ""))[:20]}
             else:
                 stand.get("listen", {}).pop(liste, None)
-            schreibe_pruefstand(stand)
+            schreibe_pruefstand(a, stand)
             return self.antwort(200, stand)
 
         if self.path == "/entwicklung/bemerkung-status":
-            liste = lies_bemerkungen()
+            liste = lies_bemerkungen(a)
             b = next((x for x in liste if x.get("nr") == daten.get("nr")), None)
             if not b:
                 return self.antwort(404, {"fehler": "Bemerkung nicht gefunden"})
             b["status"] = str(daten.get("status", ""))[:300]
-            BEMERKUNGEN.write_bytes((json.dumps(liste, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+            a["bemerkungen"].write_bytes((json.dumps(liste, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
             return self.antwort(200, b)
 
         if self.path == "/entwicklung/bemerkung":
             text = str(daten.get("text", "")).strip()
             if not text:
                 return self.antwort(400, {"fehler": "Bemerkung ist leer"})
-            liste = lies_bemerkungen()
+            liste = lies_bemerkungen(a)
             # Fehlermeldung eines Kindes (Kennung „meldung“, LERN_Session9): nur einmal aufnehmen.
             schon = next((b for b in liste if daten.get("meldung") and b.get("meldung") == daten.get("meldung")), None)
             if schon:
                 return self.antwort(200, schon)
             eintrag = {"nr": max((b["nr"] for b in liste), default=0) + 1, "zeit": jetzt, "status": "offen", "text": text[:2000]}
-            for feld in ("von", "spiel", "stufe", "liste", "eintrag", "schluessel", "aufgabe", "seite", "meldung"):
+            for feld in ("von", "spiel", "inhalt", "stufe", "liste", "eintrag", "schluessel", "aufgabe", "seite", "meldung"):
                 if daten.get(feld):
                     eintrag[feld] = str(daten[feld])[:500]
             liste.append(eintrag)
-            BEMERKUNGEN.write_bytes((json.dumps(liste, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+            a["bemerkungen"].parent.mkdir(parents=True, exist_ok=True)
+            a["bemerkungen"].write_bytes((json.dumps(liste, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
             return self.antwort(200, eintrag)
 
         return self.antwort(404, {"fehler": "unbekannt"})
@@ -216,6 +251,7 @@ def main() -> None:
     eulenpfad = f"http://localhost:{port}/eulenpfad/"
     print(f"Entwickler-Server läuft (Repo {WURZEL}).\n\n"
           f"  Eulenpfad:        {eulenpfad}\n"
+          f"  Lernsteig:        http://localhost:{port}/lernsteig/\n"
           f"  Einstiegsseite:   http://localhost:{port}/portal/index.html\n"
           f"  Entwicklung:      {eulenpfad}index.html#verwaltung/entwicklung\n\n"
           "Link mit Strg+Klick öffnen (Windows Terminal, VS Code). Beenden mit Strg+C.", flush=True)

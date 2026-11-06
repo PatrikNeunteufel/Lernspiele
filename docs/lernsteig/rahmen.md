@@ -200,6 +200,19 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 - Noch nicht: Freigabe der Inhaltslisten nach Prüfstand und Sperren durch die Aufsicht (AU1 a), PIN eines verbundenen
   Kontos zurücksetzen, Aufsicht auf einem anderen Gerät (braucht Abgleich oder Server).
 
+## 5e. Entwickler-Modus (E1 a, Plan C6)
+
+- Wie im Eulenpfad (docs/eulenpfad/rahmen.md 11) über den Kern (`KERN.entwicklung`, docs/kern/rahmen.md 4.12),
+  `LST.ENTWICKLUNG`. Die angemeldete Aufsicht schaltet ihn auf der Aufsichtsseite unter „Entwicklung“ mit dem
+  Entwickler-Schlüssel frei (`lernsteig:entwickler`, nur dieses Gerät) und schaltet die Leiste ein.
+- **Leiste** unten in jeder Übung (`entwickler-leiste`): Stand (angesehen am …, Sperrgrund), „✓ Übung angesehen“ bzw.
+  „Markierung aufheben“, „📝 Bemerkung“ (mit Übung und Stufe).
+- **Geschrieben** nur über den Entwickler-Server (`python tools/entwickler_server.py`, dann
+  `http://localhost:8765/lernsteig/`): Prüfstand nach `gemeinsam/pruefstand.js` (`uebungen`, `listen`; Datei vom Server
+  im JSON-Format geschrieben, nicht von Hand ändern), Bemerkungen nach `docs/lernsteig/bemerkungen.json`.
+- Noch nicht: Prüfansicht der Inhaltslisten je Eintrag (der Lernsteig hat noch keine Listen), Freigabe je Gerät in
+  der Verwaltung (C5, C6).
+
 ## 6. Speicher (`lernsteig:*`, SP1 a)
 
 | Schlüssel | Inhalt |

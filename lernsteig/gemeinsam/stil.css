@@ -124,3 +124,7 @@ button, input { font: inherit; color: inherit; }
 .stand-offen { background: var(--flaeche); color: var(--leise); }
 .stand-ueben { background: var(--hinweis-hell); color: var(--hinweis); }
 .stand-sicher, .stand-sicher-rechner { background: var(--gut-hell); color: var(--gut); }
+/* Entwickler-Modus (Plan C6): Leiste unten in den Übungen, nur für die freigeschaltete Aufsicht */
+.entwickler-leiste { max-width: 760px; margin: 16px auto; padding: 10px 16px; border: 2px dashed var(--rand); border-radius: var(--radius); background: var(--karte); display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 15px; }
+.entwickler-feld { flex-basis: 100%; display: grid; gap: 8px; }
+.entwickler-feld textarea { width: 100%; font: inherit; }

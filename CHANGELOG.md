@@ -475,3 +475,7 @@
   Gast in `KERN.anmeldung`. Konten-Tests 48 Fälle.
 - Lernsteig: keine Frage für Erwachsene (EF1 a, Stoff der Oberstufe trennt nicht); im Konto jedes Jugendlichen die
   Aufsichten des Geräts mit Datum und ob sie mitlesen.
+- Kern 1.9.0: `entwicklung.js` (`KERN.entwicklung`) — Entwickler-Modus für alle Apps (Schlüssel, Zustand, Server, Prüfstand
+  und Bemerkungen je App); Entwickler-Server mit `APPS` (Eulenpfad, Lernsteig; Anfragen ohne `app` = Eulenpfad);
+  Eulenpfad umgestellt (`LS.entwicklung` unverändert); Lernsteig: Freischalten auf der Aufsichtsseite, Leiste in den
+  Übungen („Übung angesehen“, Bemerkung), Prüfstand im Format des Servers. docs/kern/rahmen.md 4.12, lernsteig/rahmen.md 5e.

@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.8.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.9.0, 2026-11-06 (LERN_Session16). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.8.0)
+kern/VERSION          Version des Kerns (1.9.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -294,9 +294,37 @@ Benutzt von: Eulenpfad (`lernspiele:spieler`, Tab `lernspiele:aufsicht`, ohne Ga
 Eulenpfad: `lernsteig:aktiv`, Tab `lernsteig:angemeldet` für Jugendliche mit PIN und jede Aufsicht, Gast `lernsteig:gast`,
 abschaltbar mit der Geräte-Einstellung `gast: "aus"`).
 
-### 4.12 Geplant (Plan B, Reihenfolge B4)
+### 4.12 `KERN.entwicklung` (`kern/entwicklung.js`) — Entwickler-Modus
 
-Profil-Übernahme zwischen den Apps (C9), Entwickler-Modus, Auswertung (Fazit, Bedarf,
+Entscheide E1 a, E2 a, E3 a (LERN_Session6), für alle Apps seit 1.9.0 (Plan C6). Herkunft: Eulenpfad
+`spiele/gemeinsam/entwicklung.js`. Der Teil kennt keine Oberfläche: Was die App zeigt (Leiste, Listenansicht), bleibt in
+der App; Meldungen gehen an `opt.melde`.
+
+- **Ein Schlüssel für das Repo:** im Klartext nur in `entwickler.key` (gitignored), im Kern sein Hash
+  `SHA-256(„eulenpfad-entwickler:<Schlüssel>“)` = `KERN.geheimnis.hash(s, SALZ)` — dieselbe Rechnung wie bisher, der
+  bestehende Schlüssel gilt. `python tools/entwickler_server.py --neuer-schluessel` trägt einen neuen Hash in
+  `kern/entwicklung.js` ein; danach Version erhöhen und verteilen.
+- **Zustand je App und Gerät** unter `entwickler` im Speicher der App (`{ schluessel, an, name }`, nicht abgeglichen).
+- **Server:** `tools/entwickler_server.py` (`APPS`): jede Anfrage nennt `app`; der Server schreibt Prüfstand
+  (`<app>`-Datei, nur die Bereiche der App) und Bemerkungen der App. Ältere Seiten ohne `app` gelten als Eulenpfad.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `entwicklung({ app, speicher, aufsicht, name?, pruefstand?, arten, melde?, start? })` | Entwickler-Modus der App; `pruefstand` ist das Objekt der App (wird nach jeder Änderung auf den Stand des Servers gebracht, dasselbe Objekt) |
+| `freischalten(s)`, `sperren()`, `freigeschaltet()` | Schlüssel gegen den Hash prüfen und merken |
+| `aktiv()` | Zusätze sichtbar: angemeldete Aufsicht, freigeschaltet und eingeschaltet (`setzeAn`) |
+| `name()`, `benenne(n)`, `zustand()` | Name für „von“ (sonst `opt.name()`), Zustand |
+| `server()`, `fremd()`, `serverMeldung()` | läuft der Entwickler-Server? antwortet ein anderer auf dem Port? Text für die Meldung |
+| `setzeGeprueft(art, id, ja)` | Inhalt angesehen bzw. Liste geprüft setzen oder aufheben; `art` aus `opt.arten`, sonst Fehler |
+| `setzeEintraege(daten)` | Haken je Eintrag (Prüfansicht, LP2 a) |
+| `bemerkung(daten)`, `bemerkungen()`, `bemerkungStatus(nr, status)` | Bemerkungen der App schreiben, lesen, Status setzen |
+
+Benutzt von: Eulenpfad (`LS.entwicklung`, Bereiche `spiele`, `listen`; Schnittstelle unverändert) und Lernsteig
+(`LST.ENTWICKLUNG`, Bereiche `uebungen`, `listen`; Freischalten auf der Aufsichtsseite, Leiste in den Übungen).
+
+### 4.13 Geplant (Plan B, Reihenfolge B4)
+
+Profil-Übernahme zwischen den Apps (C9), Auswertung (Fazit, Bedarf,
 Kompetenzstand) mit Regeln je App, Einladung, Terme, Rechenkern des Rechners. Je Teil kommt hier ein Abschnitt dazu,
 bevor er umzieht.
 

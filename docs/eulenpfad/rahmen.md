@@ -533,14 +533,15 @@ Seite lädt es direkt nach `spiel.js`.
 ## 11. Entwickler-Modus
 
 Entscheide Patrik E1 a, E2 a, E3 a, 2026-11-01 (LERN_Session6). Code in `spiele/gemeinsam/entwicklung.js`
-(`LS.entwicklung`) und `tools/entwickler_server.py`.
+(`LS.entwicklung`: Listenansicht und Leiste) über dem Kern (`KERN.entwicklung`, docs/kern/rahmen.md 4.12: Schlüssel,
+Zustand, Server) und `tools/entwickler_server.py` (für alle Apps, jede Anfrage nennt `app`).
 
 - **Nur lokal:** Er funktioniert nur im lokalen Repo mit laufendem Entwickler-Server
   (`python tools/entwickler_server.py`, dann `http://localhost:8765/eulenpfad/`). Der Server liefert das
   Repo aus wie `http.server` (ohne Zwischenspeicher, ohne `entwickler.key` und `.git`) und schreibt nur
   zwei Dateien: `spiele/gemeinsam/pruefstand.js` und `docs/eulenpfad/bemerkungen.json`.
 - **Schlüssel:** Im Klartext nur in `entwickler.key` in der Repo-Wurzel (von Git ausgeschlossen); in
-  `entwicklung.js` steht nur `SCHLUESSEL_HASH` (SHA-256 mit Salz). Die Aufsicht schaltet unter Verwaltung →
+  `kern/entwicklung.js` steht nur `SCHLUESSEL_HASH` (SHA-256 mit Salz; ein Schlüssel für das ganze Repo). Die Aufsicht schaltet unter Verwaltung →
   Entwicklung je Gerät frei (`lernspiele:entwickler`, nicht abgeglichen); der Server prüft den Schlüssel
   bei jedem Schreiben noch einmal. Neuer Schlüssel: `python tools/entwickler_server.py --neuer-schluessel`.
 - **Zusätze**, eingeschaltet über einen eigenen Schalter, nur für die angemeldete Aufsicht:
