@@ -80,7 +80,13 @@ for (let i = 0; i < 20000; i++) {
 }
 faelle++;
 for (const [e, soll] of [["−12.5", -12.5], ["-3", -3], ["–4", -4], ["1'000", 1000], ["30 400", 30400], ["0,75", 0.75],
-  [".5", 0.5], ["abc", null], ["1.2.3", null], ["", null], ["--1", null]]) gleich(Z.lies(e), soll, `lies(${JSON.stringify(e)})`);
+  [".5", 0.5], ["abc", null], ["1.2.3", null], ["", null], ["--1", null],
+  // ZL1 a: Gliederung nur in Dreiergruppen vor dem Komma
+  ["1'080.5", 1080.5], ["12'345'678", 12345678], [`30${SCHMAL}400`, 30400], ["1 000,25", 1000.25], ["1’000", 1000],
+  ["- 3", -3], ["3.", 3], ["+7", 7], ["1'''", null], ["12'34", null], ["1 2 3", null], ["1'0000", null], ["'100", null],
+  ["100'", null], ["0.123'456", null], ["1''000", null], [".", null], ["-", null], ["1e5", null]]) gleich(Z.lies(e), soll, `lies(${JSON.stringify(e)})`);
+for (const [e, soll] of [["12'34", true], ["1 2 3", true], ["1'''", false], ["1'000", false], ["abc", false], ["1 a", false]])
+  gleich(Z.gliederungFalsch(e), soll, `gliederungFalsch(${JSON.stringify(e)})`);
 
 // ---------- Brüche ----------
 const B = KERN.bruch;
@@ -268,6 +274,12 @@ console.log("terme.js");
   gleich(bw("2x+", "2x", "frei"), "unlesbar", "unlesbar");
   gleich(bw("x^99999999", "x", "frei"), "unlesbar", "D10: zu gross ist unlesbar, ohne Hänger");
   gleich(/zu gross/.test(T.bewerte("x^99999999", { antwortTerm: "x" }).meldung), true, "D10: Meldung nennt die Grenze");
+  // ZL1 a: Gliederung nur in Dreiergruppen vor dem Komma, wie KERN.zahl.lies
+  for (const [e, ziel, soll] of [["1'000a − 3", "1000a - 3", "ok"], ["12'345'678", "12345678", "ok"], ["1'080.5", "1080.5", "ok"],
+    [`30${SCHMAL}400`, "30400", "ok"], ["3a + 4b", "3a+4b", "ok"], ["2 (x + 5)", "2x+10", "ok"], ["1'''", "1", "unlesbar"],
+    ["12'34", "1234", "unlesbar"], ["1 2 3", "123", "unlesbar"], ["2 3a", "23a", "unlesbar"], ["'5", "5", "unlesbar"],
+    ["0.12 34", "0.1234", "unlesbar"], ["1'0000", "10000", "unlesbar"]]) gleich(bw(e, ziel), soll, `ZL1 a: bewerte(${JSON.stringify(e)})`);
+  gleich(/Dreiergruppen/.test(T.bewerte("12'34", { antwortTerm: "1234" }).meldung), true, "ZL1 a: Meldung nennt die Dreiergruppen");
   wirft(() => T.bewerte("x", { antwortTerm: "x+" }), "unlesbarer antwortTerm ist ein Fehler der Aufgabe");
 
   // Nachrechnung: zufällige Terme als Polynom gelesen und an zufälligen Stellen mit JavaScript-Zahlen ausgewertet

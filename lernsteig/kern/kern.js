@@ -1,4 +1,4 @@
-/* kern 1.24.0 · Prüfsumme sha256:a943376edef7f4656e02c087840f16894d102fec6600c381d6b58f281bdadc04 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.25.0 · Prüfsumme sha256:037118c5893e80e9d2bc637a27388e64bf2edf84ecf7e5db5c818d5e440d10f6 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -42,17 +42,26 @@
     return dezimalText(n, undefined, sw);
   }
 
+  // Gliederung: Leerzeichen (auch geschützt und schmal) und Apostroph — nur zwischen Dreiergruppen vor dem Komma (ZL1 a)
+  const TRENN = "[ \\u00A0\\u202F'\\u2019]";
+  const ZAHL = new RegExp(`^([+-]?)\\s*(\\d{1,3}(?:${TRENN}\\d{3})+|\\d*)(?:[.,](\\d*))?$`);
+  const norm = eingabe => String(eingabe).trim().replace(/[−–]/g, "-");
+
   /**
-   * Eingabe einer Zahl lesen: „−“, „-“, „–“ als Minus, Punkt oder Komma als Dezimalzeichen, Leerzeichen und Apostroph
-   * als Gliederung. Eine Zahl oder null, wenn die Eingabe keine Zahl ist.
+   * Eingabe einer Zahl lesen: „−“, „-“, „–“ als Minus, Punkt oder Komma als Dezimalzeichen; Leerzeichen und Apostroph
+   * nur als Gliederung in Dreiergruppen vor dem Komma („1'080“, „30 400“, „1'080.5“; seit 1.25.0, ZL1 a — vorher galten sie
+   * überall, „12'34“ als 1234). Eine Zahl oder null, wenn die Eingabe keine Zahl ist.
    */
   function lies(eingabe) {
-    const t = String(eingabe).trim().replace(/[\s  '’]/g, "").replace(/[−–]/g, "-").replace(",", ".");
-    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(t)) return null;
-    return Number(t);
+    const m = norm(eingabe).match(ZAHL);
+    if (!m || (!m[2] && !m[3])) return null;
+    return Number(`${m[1]}${m[2].replace(new RegExp(TRENN, "g"), "") || "0"}.${m[3] || "0"}`);
   }
+  /** Wäre die Eingabe ohne Gliederung eine Zahl? Dann stehen nur die Trennzeichen falsch (für einen Hinweis). */
+  const gliederungFalsch = eingabe => lies(eingabe) === null && new RegExp(`\\d${TRENN}+\\d`).test(norm(eingabe))
+    && lies(norm(eingabe).replace(new RegExp(TRENN, "g"), "")) !== null;
 
-  KERN.zahl = { STANDARD, text, dezimalText, lies, klartext };
+  KERN.zahl = { STANDARD, text, dezimalText, lies, gliederungFalsch, klartext };
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 
 if (typeof module !== "undefined") module.exports = globalThis.KERN;
@@ -180,8 +189,19 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
   // ---------- Lesen ----------
   /** Liest einen Term; liefert { poly, info, roh } oder wirft. info: Zählungen für die Formprüfung. */
+  // ZL1 a (1.25.0): Gliederung einer Zahl (Apostroph, Leerzeichen) nur in Dreiergruppen vor dem Komma, wie KERN.zahl.lies;
+  // sonst Fehler GLIEDERUNG (bewerte meldet die Dreiergruppen). Vorher fiel jeder Apostroph weg („1'''“ galt als 1).
+  const GLIEDERUNG = "Gliederung";
+  function ohneGliederung(t) {
+    const r = t.replace(/(^|[^\d.,])(\d+(?:[   '’]+\d+)+)/g, (all, vor, z) => {
+      if (!/^\d{1,3}(?:[   '’]\d{3})+$/.test(z)) throw new Error(GLIEDERUNG);
+      return vor + z.replace(/[   '’]/g, "");
+    });
+    if (/['’]/.test(r) || /[.,]\d+[   ]+\d/.test(r)) throw new Error(GLIEDERUNG);
+    return r;
+  }
   function lies(text) {
-    const s = String(text).replace(/\s+/g, "").replace(/[−–]/g, "-").replace(/\*/g, "·").replace(/'/g, "").replace(/,/g, ".");
+    const s = ohneGliederung(String(text)).replace(/\s+/g, "").replace(/[−–]/g, "-").replace(/\*/g, "·").replace(/,/g, ".");
     let i = 0;
     const info = { klammern: 0, potenzen: 0, mal: 0 };
     if (!s) throw new Error("leer");
@@ -247,7 +267,9 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
   function bewerte(eingabe, a) {
     let e;
     try { e = lies(eingabe); } catch (err) {
-      const meldung = /zu gross/.test(err.message) ? `Der Term ist zu gross: ${err.message}.` : "Den Term kann ich nicht lesen. Beispiel: 3a + 4b oder 2(x + 5).";
+      const meldung = /zu gross/.test(err.message) ? `Der Term ist zu gross: ${err.message}.`
+        : err.message === GLIEDERUNG ? "Den Apostroph nur zwischen Dreiergruppen, zum Beispiel 12'340."
+        : "Den Term kann ich nicht lesen. Beispiel: 3a + 4b oder 2(x + 5).";
       return { ok: false, gleichwertig: false, lesbar: false, meldung };
     }
     const ziel = lies(a.antwortTerm).poly;

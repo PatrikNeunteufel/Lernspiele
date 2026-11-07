@@ -334,7 +334,13 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 `node tools/pruefe_uebungen.js [übung …] [--aufgaben=3000] [--seed=1] [--seiten=0]` (oder `node tools/pruefe.js lernsteig`):
 - Daten: Seite lädt die gemeinsamen Dateien und nichts aus `eulenpfad/`; Kompetenz-Codes des Katalogs stehen in
   `lehrplan/mathematik_zyklus3.md`; je Niveau und Stufe Zufallsaufgaben gegen `pruefeAufgabe`, kein NaN/undefined/null,
-  Hinweise zu typischen falschen Eingaben nennen die Lösung nicht; Endlos-Stufen haben mindestens 100 verschiedene
+  Hinweise zu typischen falschen Eingaben nennen die Lösung nicht; Annahme von Antworten (Plan B2 Schritt 3, seit
+  LERN_Session20) je Stufe an 300 Aufgaben über `LST.antwortPruefen`, dieselbe Prüfung wie die Seite: angenommen werden
+  die Lösung und gleichwertige Schreibweisen (Zahl: Komma, wie angezeigt, „+“, „−“, Null am Ende, Leerzeichen; Term:
+  ohne Leerzeichen, `*` und `-`, Summanden vertauscht), abgewiesen knapp falsche (letzte Stelle ±1, letzte Ziffer
+  weggelassen, ein Millionstel daneben, „+ 1“ am Term, letzte Ziffer verändert), 30 kaputte Eingaben werfen nie und
+  gelten nie als richtig, falsch gegliederte Zahlen sind unlesbar mit dem Hinweis auf die Dreiergruppen (ZL1 a);
+  Endlos-Stufen haben mindestens 100 verschiedene
   Aufgaben (Hinweis, wenn eine andere Stufe es auch hätte);
 - Seiten im Ersatz-DOM (`tools/lernsteig_seiten.js` über `tools/pruef_dom.js`, Plan B2; ersetzt seit LERN_Session17
   den Browser-Teil mit Playwright, der lokal nicht lief): Startseite als niemand, Gast, Jugendlicher und Aufsicht mit

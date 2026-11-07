@@ -134,6 +134,66 @@ function lehrplanStufen() {
 }
 const LP_STUFEN = lehrplanStufen();
 
+// ---------- Annahme von Antworten (Plan B2 Schritt 3) ----------
+// Je Aufgabe über LST.antwortPruefen (dieselbe Prüfung wie in der Seite): gleichwertige Schreibweisen der Lösung werden
+// angenommen, knapp falsche abgewiesen, und keine Eingabe bringt die Prüfung zum Absturz.
+const ANNAHME_JE_STUFE = 300;
+const klarZahl = x => Number(x.toPrecision(15)).toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: 20 });
+const KAPUTT = ["", "   ", "abc", "1..2", "--3", "+-1", "1e5", "∞", "NaN", "Infinity", "1/0", "0/0", "(", ")(", "x+", "+", "·", "^2",
+  "((((((((((x))))))))))", "2^2^2^2^2^2", "x^999", "x/0", "9".repeat(400), "a".repeat(300), "1'''", "12'34", "1 2 3", "١٢", "=5", "x = 3"];
+/** Summanden auf oberster Ebene umdrehen („3a + 4b − 5“ → „−5 + 4b + 3a“); null, wenn es nichts umzudrehen gibt. */
+function umgedreht(t) {
+  if (/[()]/.test(t)) return null;
+  const teile = t.trim().split(/\s+(?=[+−-]\s)/);
+  if (teile.length < 2) return null;
+  const mitVz = teile.map((s, i) => (i === 0 ? (/^[−-]/.test(s) ? s : "+ " + s) : s)).map(s => s.replace(/^([+−-])\s*/, "$1 "));
+  const r = mitVz.reverse().join(" ");
+  return r.replace(/^\+ /, "").replace(/^([−-]) /, "−");
+}
+/** Fundstellen einer Aufgabe: Text je Mangel (leer = alles gut). */
+function annahmeMaengel(a) {
+  const m = [];
+  const pruefe = e => { try { return LST.antwortPruefen(a, e); } catch (err) { m.push(`„${String(e).slice(0, 30)}“ wirft: ${err.message}`); return null; } };
+  for (const e of KAPUTT) {
+    const r = pruefe(e);
+    if (r && r.art === "richtig") m.push(`„${e.slice(0, 30)}“ als richtig angenommen`);
+  }
+  const soll = (e, arten, was) => { const r = pruefe(e); if (r && !arten.includes(r.art)) m.push(`${was} „${e}“: ${r.art}${r.meldung ? " (" + r.meldung + ")" : ""}`); };
+  if (a.art === "term") {
+    const t = a.antwortTerm;
+    soll(t, ["richtig"], "Lösung");
+    soll(` ${t.replace(/\s+/g, "")} `, ["richtig"], "ohne Leerzeichen");
+    soll(t.replace(/·/g, "*").replace(/−/g, "-"), ["richtig"], "mit * und -");
+    const u = umgedreht(t);
+    if (u && ["frei", "vereinfacht", undefined].includes(a.form)) soll(u, ["richtig"], "Summanden vertauscht");
+    soll(`${t} + 1`, ["falsch"], "knapp falsch");
+    const z = t.match(/\d(?!.*\d)/);
+    if (z) soll(t.slice(0, z.index) + ((Number(z[0]) + 1) % 10) + t.slice(z.index + 1), ["falsch", "unlesbar"], "letzte Ziffer verändert");
+    return m;
+  }
+  if (typeof a.antwort !== "number") return m;
+  const v = a.antwort, tol = a.toleranz || 0;
+  const k = klarZahl(v);
+  soll(k, ["richtig"], "Lösung");
+  // ZL1 a: falsch gegliedert ist unlesbar (kein Fehlversuch), mit Hinweis auf die Dreiergruppen
+  const gl = pruefe("12'34");
+  if (gl && (gl.art !== "unlesbar" || !/Dreiergruppen/.test(gl.meldung || ""))) m.push(`„12'34“: ${gl.art} (${gl.meldung || ""})`);
+  soll(k.replace(".", ","), ["richtig"], "mit Komma");
+  soll(LST.dezimalText(v), ["richtig"], "wie angezeigt");
+  soll(` ${k.replace("-", "−")} `, ["richtig"], "mit Leerzeichen und −");
+  if (v > 0) soll(`+${k}`, ["richtig"], "mit +");
+  if (k.includes(".")) soll(`${k}0`, ["richtig"], "mit Null am Ende");
+  // knapp falsch: letzte Stelle ±1, letzte Ziffer weggelassen — wo das mehr als die Toleranz ausmacht
+  const stellen = (k.split(".")[1] || "").length;
+  const schritt = 10 ** -stellen;
+  for (const d of [schritt, -schritt]) if (Math.abs(d) > tol + 1e-9) soll(klarZahl(v + d), ["falsch"], "letzte Stelle ±1");
+  const kurz = k.replace(/\.?\d$/, "");
+  if (kurz && kurz !== "-" && Math.abs(Number(kurz) - v) > tol + 1e-9) soll(kurz, ["falsch"], "letzte Ziffer weggelassen");
+  if (!tol && Math.abs(v) * 1e-6 > 1e-8) soll(klarZahl(v * (1 + 1e-6)), ["falsch"], "um ein Millionstel daneben");
+  if (tol) soll(klarZahl(v + tol * 0.9), ["richtig"], "innerhalb der Toleranz");
+  return m;
+}
+
 function pruefeOhneBrowser(eintrag) {
   const ordner = path.join(APP, "uebungen", eintrag.id);
   const wo = eintrag.id;
@@ -168,7 +228,7 @@ function pruefeOhneBrowser(eintrag) {
       const ort = `${wo} ${niveau}/${stufe}`;
       if (!U.UEBUNG.stufen[stufe]) { fehlerMelden(ort, "Stufenbeschreibung fehlt"); continue; }
       const kennungen = new Set();
-      let maengel = 0;
+      let maengel = 0, annahme = 0;
       for (let i = 0; i < opt.aufgaben; i++) {
         let a;
         try { a = U.aufgabeErzeugen(stufe, niveau); } catch (e) { fehlerMelden(ort, `aufgabeErzeugen: ${e.message}`); break; }
@@ -181,6 +241,10 @@ function pruefeOhneBrowser(eintrag) {
         if (eintrag.fach === "mathematik" && /(^|[^\d'.,])\d{4,}/.test(sichtbar.replace(/[.,]\d+/g, ""))) { fehlerMelden(ort, `Tausender ohne Apostroph: ${sichtbar}`); break; }
         const m = U.pruefeAufgabe(a, stufe, niveau);
         if (m.length && maengel++ < 3) fehlerMelden(ort, m.join("; "));
+        if (i < ANNAHME_JE_STUFE && a.art !== "auswahl") {
+          const am = annahmeMaengel(a);
+          if (am.length && annahme++ < 3) fehlerMelden(ort, `Annahme (${a.text}): ${am.join("; ")}`);
+        }
         // TF1 a: jedes Zeichen der Lösung hat eine Taste (die Tastatur des Geräts bleibt zu; Meldung Patrik LERN_Session20)
         if (a.art === "term") {
           const tasten = LST.antwortTasten(a).map(t => (typeof t === "string" ? t : t.text));
@@ -199,6 +263,7 @@ function pruefeOhneBrowser(eintrag) {
         }
       }
       if (maengel > 3) fehlerMelden(ort, `… insgesamt ${maengel} Aufgaben mit Mängeln`);
+      if (annahme > 3) fehlerMelden(ort, `… insgesamt ${annahme} von ${Math.min(opt.aufgaben, ANNAHME_JE_STUFE)} Aufgaben mit Mängeln bei der Annahme`);
       const endlos = eintrag.endlos === true || (eintrag.endlos || []).includes(stufe);
       if (endlos && kennungen.size < ENDLOS_MIN) fehlerMelden(ort, `Endlos-Stufe mit nur ${kennungen.size} verschiedenen Aufgaben`);
       if (!endlos && kennungen.size >= ENDLOS_MIN) hinweisMelden(ort, `${kennungen.size} verschiedene Aufgaben, Endlos wäre möglich`);

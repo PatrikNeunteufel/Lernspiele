@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Ablauf der Runde, Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): Einstieg und Seiten des Lernsteigs im Ersatz-DOM gebaut, als Nächstes die offenen Kern-Teile (AN2 a), dann B2 Schritt 3 | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): B2 Schritt 3 in Arbeit (LERN_Session20, Annahme von Antworten gebaut), als Nächstes Text gegen Prüfdaten | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -80,11 +80,12 @@ von Hand geänderte Kopie oder gleiche Version mit anderem Inhalt als Fehler, ei
 rund 200 Seiten anfasst: Jede Seite lädt einmal `kern/kern.js` vor dem Rahmen ihrer App. Die Teile hängen sich an
 `KERN` (`KERN.zahl`, `KERN.bruch`, …). Tests: `node tools/pruefe_kern.js` (Teile gegen feste Beispiele und
 Nachrechnungen, dazu die Kopien); das Testskript jeder App prüft ihre Kopie.
-Stand 2026-11-07: Kern 1.22.0 (seit 1.22.0 auch der Notizblock, NB1 a) mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
+Stand 2026-11-07: Kern 1.25.0 (seit 1.22.0 auch der Notizblock, NB1 a) mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
 Freigabe, Suche, Runden, Daten (ein Dateiformat für Sichern, Einlesen und Abgleich mit Löschvermerken und Schutz nach
 DF4 a), Anmeldung (mit Gast), Entwicklung, Einladung, Auswertung, Übernahme einer Aufsicht, Rollleiste und
 Personen-Knopf; Eulenpfad und Lernsteig benutzen, was sie brauchen (`daten.js` beide), die Gratwanderung hat die
-Kopie und lädt sie mit C8. Seit 1.17.0 auch der Abgleich über einen Ordner (DF3 a; Lernsteig mit der Verwaltung, Plan C),
+Kopie und lädt sie mit C8. Seit 1.23.0 das Tastenfeld, seit 1.24.0 das Ausblenden je Gerät, seit 1.25.0 die Gliederung
+nur in Dreiergruppen beim Lesen (ZL1 a). Seit 1.17.0 auch der Abgleich über einen Ordner (DF3 a; Lernsteig mit der Verwaltung, Plan C),
 seit 1.18.0 die Rollen der Aufsicht (`rollen.js`: Bestätigung, PIN vergessen, Zurücksetzen mit Frist; RL2 a, beide Apps).
 Seit 1.19.0/1.20.0 der Ablauf einer Runde (`runde.js`, AR1 a, RA1–RA8 a): Gedächtnis als Durchgang, Auswahl mit
 Serienbremse und Kürzen, Rekord nach Kennung, Bestwert, Bestzeit, Wächter des Zwischenstands, dazu der Ablauf `lauf()`
@@ -103,13 +104,15 @@ Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`
 - Neue Prüfungen (Lücken aus der Prüfung):
   - Annahme von Antworten: knapp falsch (abgeschnittene Ziffer, letzte Stelle ±1, relative Abweichung), gleichwertige
     Schreibweisen (Terme, gemischte Zahlen, Malzeichen), Eingaben, die `bewerte` zum Absturz bringen (Ausnahmen
-    abfangen und melden).
+    abfangen und melden). **Gebaut LERN_Session20:** `LST.antwortPruefen` (dieselbe Prüfung wie die Seite), in
+    `pruefe_uebungen.js` je Stufe 300 Aufgaben; Fund: Apostroph und Leerzeichen galten überall als Gliederung (ZL1 a).
+    Gemischte Zahlen: der Lernsteig fragt sie heute nicht als Antwort ab.
   - Text gegen Prüfdaten: Ereigniswortlaut in Kombinatorik/Zufall aus den Daten neu erzeugt und verglichen;
     Prüffunktionen, die nur auf `daten` rechnen, lesen den angezeigten Text (flaechen-volumen, koerper-winkel,
     prozent-funktionen, daten-rabatt, folgen, sachsituationen, Teile von zehnerpotenzen und binome-gleichungen).
   - `konten`/`rollen` und `daten`: kaputte und fremde Dateien, Ids fremder Konten, voller Speicher, Zeitzone.
   - Vielfalt: Mindestvorrat je Stufe auch ohne Endlos (Hinweis unter 50 verschiedenen Aufgaben).
-  - Rechner: NaN, Division durch 0, 10-stellige Anzeige.
+  - Rechner: NaN, Division durch 0, 10-stellige Anzeige. (Im Kern-Test, `pruefe_kern.js` Rechenkern.)
   - Seiten des Lernsteigs (Start, Statistik, Aufsicht, jede Übung) im Ersatz-DOM wie im Eulenpfad, mit Suche nach
     „null“, „undefined“, „NaN“ im sichtbaren Text. Anlass: Die Startseite zeigte ohne Wochenziel „null“ (natives
     `append` mit `null`, behoben 2026-11-05); ohne laufenden Browserteil fiel es nicht auf.
@@ -468,3 +471,9 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Geräten des Abgleichs; vorher „Zuerst sichern“. Ein nicht verbundenes Konto kann die Aufsicht nur auf diesem Gerät
   ausblenden (wie KE1 a). Nicht b (wie im Eulenpfad: jede Aufsicht jedes Konto), nicht c (nur der Jugendliche). Kipppunkt:
   die Verbindung soll nur Mitlesen heissen, ohne jedes Löschrecht — dann c.
+- **ZL1 a** (2026-11-07, LERN_Session20, Fund der Annahme-Prüfung B2 Schritt 3): Apostroph und Leerzeichen gelten beim
+  Lesen einer Zahl oder eines Terms nur als Gliederung in Dreiergruppen vor dem Komma („1'080“, „30 400“, „1'080.5“);
+  sonst ist die Eingabe unlesbar, zählt nicht als Fehlversuch und bekommt den Hinweis „Den Apostroph nur zwischen
+  Dreiergruppen, zum Beispiel 12'340.“ (Kern 1.25.0, `KERN.zahl.lies`, `KERN.terme.lies`). Vorher galten „1'''“ als 1
+  und „12'34“ als 1234. Nicht b (wie bisher, überall überlesen), nicht c (streng, als Fehlversuch). Kipppunkt:
+  Lehrmittel oder Lehrperson lassen andere Gruppierungen zu (etwa Viererblöcke bei langen Dezimalzahlen) — dann b.

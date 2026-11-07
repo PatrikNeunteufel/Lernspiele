@@ -723,3 +723,14 @@
   zahlenhaus, preis-tabelle, quader-volumen) mit denselben Klickzahlen wie mit Kern 1.23.0; im Browser beide Apps.
   docs/kern/rahmen.md 4.7, lernsteig/rahmen.md 5c, 5d, 6, 7, 8, eulenpfad/rahmen.md (Abgleich), Plan (KE1 a, KE2 a, C5),
   Kern-Changelog.
+- Plan B2 Schritt 3, Annahme von Antworten: Die Prüfung einer Zahl- oder Term-Antwort steht als `LST.antwortPruefen` in
+  `werkzeug.js` (die Seite benutzt sie, Verhalten gleich); `tools/pruefe_uebungen.js` prüft damit je Stufe 300 Aufgaben —
+  gleichwertige Schreibweisen angenommen, knapp falsche abgewiesen, kaputte Eingaben ohne Absturz (Gegenprobe mit
+  gelockerter Rundungsgrenze: 32 Stufen schlagen an). Fund und Kern 1.25.0 (ZL1 a): Apostroph und Leerzeichen galten
+  beim Lesen von Zahlen und Termen überall als Gliederung („1'''“ = 1, „12'34“ = 1234); jetzt nur in Dreiergruppen vor
+  dem Komma, sonst unlesbar mit dem Hinweis „Den Apostroph nur zwischen Dreiergruppen, zum Beispiel 12'340.“ (kein
+  Fehlversuch). Bestandsaufnahme Plan B: von den Kern-Teilen fehlt nur die Gruppenleitung (mit LERN-48), Zeile B
+  nachgeführt. Tests: Kern 5658 Fälle 0 Fehler, Konten 101 Fälle 0 Fehler, Lernsteig „0 Fehler, 0 Hinweise.“,
+  Gratwanderung „Keine Fehler.“, Eulenpfad-Stichprobe (6 Spiele, 36 Stufen) mit denselben Klickzahlen wie mit Kern
+  1.24.0 (der Eulenpfad liest keine Zahlen über den Kern). docs/kern/rahmen.md (zahl, terme), lernsteig/rahmen.md 7,
+  Plan (B, B2, ZL1 a), Kern-Changelog.

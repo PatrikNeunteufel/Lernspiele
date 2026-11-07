@@ -3,6 +3,12 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.25.0 — 2026-11-07 (LERN_Session20)
+- `zahl.js`, `terme.js` (ZL1 a): Apostroph und Leerzeichen gelten nur als Gliederung in Dreiergruppen vor dem Komma
+  („1'080.5“, „30 400“); sonst ist die Eingabe unlesbar. Vorher fielen sie überall weg („1'''“ galt als 1, „12'34“ als
+  1234). Neu `KERN.zahl.gliederungFalsch` für den Hinweis; `KERN.terme.bewerte` meldet die Dreiergruppen selbst. Was
+  `text` schreibt, wird weiter gelesen (Rücklese-Test).
+
 ## 1.24.0 — 2026-11-07 (LERN_Session20)
 - `person.js`: `KERN.person.ausgeblendet(liste, speicher)` (KE1 a, KE2 a) — Personen auf diesem Gerät nicht zeigen, ohne
   sie zu löschen: eine Liste von Kennungen im Speicher „ausgeblendet“ (nur dieses Gerät, nicht abgeglichen), mit `ist`,

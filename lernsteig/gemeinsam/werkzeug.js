@@ -68,6 +68,25 @@ var LST = (function () {
   const leseZahl = text => KERN.zahl.lies(text);
 
   /**
+   * Antwort einer Zahl- oder Term-Aufgabe prüfen, ohne Seite (rahmen.js ruft es; tools/pruefe_uebungen.js prüft damit die
+   * Annahme von Antworten, Plan B2 Schritt 3). Ergebnis { art, wert?, meldung? }: art „richtig“, „falsch“, „unlesbar“ oder
+   * „form“ (Term gleichwertig, aber nicht in der verlangten Form) — die beiden letzten zählen nicht als Fehlversuch.
+   * Zahl: richtig bis auf a.toleranz (gerundete Ergebnisse wie bei π), sonst bis auf Rundungsreste.
+   */
+  function antwortPruefen(a, eingabe) {
+    if (a.art === "term") {
+      const r = LST_TERME.bewerte(eingabe, a);
+      if (!r.lesbar) return { art: "unlesbar", meldung: r.meldung };
+      if (r.gleichwertig && !r.ok) return { art: "form", meldung: r.meldung };
+      return { art: r.ok ? "richtig" : "falsch", wert: String(eingabe).trim() };
+    }
+    const wert = leseZahl(eingabe);
+    // ZL1 a: Apostroph nur zwischen Dreiergruppen; steht er falsch, ein Hinweis und kein Fehlversuch
+    if (wert === null) return { art: "unlesbar", meldung: KERN.zahl.gliederungFalsch(eingabe) ? "Den Apostroph nur zwischen Dreiergruppen, zum Beispiel 12'340." : "Bitte eine Zahl eingeben." };
+    return { art: Math.abs(wert - a.antwort) <= (a.toleranz || 0) + 1e-9 ? "richtig" : "falsch", wert };
+  }
+
+  /**
    * Tasten für die Antwort einer Aufgabe (TF1 a, für KERN.tastenfeld). Zahl: Ziffern, Komma, ⌫, ± (Vorzeichen wechseln).
    * Term: Ziffern; die Variablen des Terms der Aufgabe (a.ausdruck, sonst a.text: einzelne Buchstaben, nicht Teil eines
    * Worts) und „/“ und „²“, wenn er sie hat; die Zeichen der Übung (a.tasten, etwa „^“, „(“); + − ·; ⌫. Seit die Tastatur
@@ -148,7 +167,7 @@ var LST = (function () {
 
   return {
     PRAEFIX, ALTE_FELDER, alteEintraegeUmdeuten, lies, schreibe, beiAenderung, quelle, zufall, waehle, mische, tagText, wochenSerie,
-    TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl, antwortTasten,
+    TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl, antwortTasten, antwortPruefen,
     NIVEAUS, niveauNr, stufenListe, stufeVon, zielstufe,
   };
 })();

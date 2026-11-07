@@ -40,17 +40,26 @@
     return dezimalText(n, undefined, sw);
   }
 
+  // Gliederung: Leerzeichen (auch geschützt und schmal) und Apostroph — nur zwischen Dreiergruppen vor dem Komma (ZL1 a)
+  const TRENN = "[ \\u00A0\\u202F'\\u2019]";
+  const ZAHL = new RegExp(`^([+-]?)\\s*(\\d{1,3}(?:${TRENN}\\d{3})+|\\d*)(?:[.,](\\d*))?$`);
+  const norm = eingabe => String(eingabe).trim().replace(/[−–]/g, "-");
+
   /**
-   * Eingabe einer Zahl lesen: „−“, „-“, „–“ als Minus, Punkt oder Komma als Dezimalzeichen, Leerzeichen und Apostroph
-   * als Gliederung. Eine Zahl oder null, wenn die Eingabe keine Zahl ist.
+   * Eingabe einer Zahl lesen: „−“, „-“, „–“ als Minus, Punkt oder Komma als Dezimalzeichen; Leerzeichen und Apostroph
+   * nur als Gliederung in Dreiergruppen vor dem Komma („1'080“, „30 400“, „1'080.5“; seit 1.25.0, ZL1 a — vorher galten sie
+   * überall, „12'34“ als 1234). Eine Zahl oder null, wenn die Eingabe keine Zahl ist.
    */
   function lies(eingabe) {
-    const t = String(eingabe).trim().replace(/[\s  '’]/g, "").replace(/[−–]/g, "-").replace(",", ".");
-    if (!/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(t)) return null;
-    return Number(t);
+    const m = norm(eingabe).match(ZAHL);
+    if (!m || (!m[2] && !m[3])) return null;
+    return Number(`${m[1]}${m[2].replace(new RegExp(TRENN, "g"), "") || "0"}.${m[3] || "0"}`);
   }
+  /** Wäre die Eingabe ohne Gliederung eine Zahl? Dann stehen nur die Trennzeichen falsch (für einen Hinweis). */
+  const gliederungFalsch = eingabe => lies(eingabe) === null && new RegExp(`\\d${TRENN}+\\d`).test(norm(eingabe))
+    && lies(norm(eingabe).replace(new RegExp(TRENN, "g"), "")) !== null;
 
-  KERN.zahl = { STANDARD, text, dezimalText, lies, klartext };
+  KERN.zahl = { STANDARD, text, dezimalText, lies, gliederungFalsch, klartext };
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 
 if (typeof module !== "undefined") module.exports = globalThis.KERN;

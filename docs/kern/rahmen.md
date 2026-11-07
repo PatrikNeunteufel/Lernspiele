@@ -69,7 +69,8 @@ Schreibweise `sw = { tausender, abStellen, minus, dezimal }`, ohne Angabe `KERN.
 |---|---|
 | `text(n, sw)` | Zahl in der Schreibweise: ganze Zahlen exakt bis 2^53, andere wie `dezimalText`; nur der ganze Teil gegliedert |
 | `dezimalText(x, stellen, sw)` | Dezimalzahl, `stellen` feste Nachkommastellen (gerundet), ohne Angabe so viele wie nötig — ohne Exponent und Rundungsreste (`0.1 + 0.2` → „0.3“, `4.485e-8` → „0.00000004485“); kein „−0“; `NaN`, `Infinity` als Text |
-| `lies(eingabe)` | Zahl oder `null`; nimmt „−“, „-“, „–“, Punkt oder Komma, Leerzeichen, schmales Leerzeichen und Apostroph als Gliederung |
+| `lies(eingabe)` | Zahl oder `null`; nimmt „−“, „-“, „–“, Punkt oder Komma; Leerzeichen, schmales Leerzeichen und Apostroph nur als Gliederung in Dreiergruppen vor dem Komma („1'080.5“, „30 400“; seit 1.25.0, ZL1 a — vorher überall, „12'34“ galt als 1234) |
+| `gliederungFalsch(eingabe)` | `true`, wenn nur die Gliederung falsch steht (ohne Trennzeichen wäre es eine Zahl) — für den Hinweis „Den Apostroph nur zwischen Dreiergruppen …“ (1.25.0) |
 | `klartext(x)` | Betrag als Dezimaltext mit 15 gültigen Ziffern (Hilfsfunktion) |
 
 Schreibweisen der Apps:
@@ -428,7 +429,7 @@ als Polynom gelesen (Map „Monom → Bruch“ über `KERN.bruch`, Monom als Sch
 
 | Aufruf | Ergebnis |
 |---|---|
-| `lies(text)` | `{ poly, info, roh }` oder wirft mit Klartext. Liest Variablen a–z, Zahlen „1'234.5“ und „1234,5“, Brüche „5/8“, `+ − - · * : ( )`, implizites Mal („3a“, „2(x + 1)“), Potenzen „^12“ und hochgestellt — eine Folge hochgestellter Ziffern ist **ein** Exponent („x²³“ = x^23). Grenzen (D10): Exponent höchstens `GRENZE_EXPONENT` (100), höchstens 2000 Glieder je Zwischenergebnis |
+| `lies(text)` | `{ poly, info, roh }` oder wirft mit Klartext. Liest Variablen a–z, Zahlen „1'234.5“ und „1234,5“ (Gliederung nur in Dreiergruppen wie `KERN.zahl.lies`, sonst unlesbar mit dem Hinweis auf die Dreiergruppen; ZL1 a, 1.25.0), Brüche „5/8“, `+ − - · * : ( )`, implizites Mal („3a“, „2(x + 1)“), Potenzen „^12“ und hochgestellt — eine Folge hochgestellter Ziffern ist **ein** Exponent („x²³“ = x^23). Grenzen (D10): Exponent höchstens `GRENZE_EXPONENT` (100), höchstens 2000 Glieder je Zwischenergebnis |
 | `bewerte(eingabe, { antwortTerm, form })` | `{ ok, gleichwertig, lesbar, meldung }`; `form`: `vereinfacht`, `bruch`, `potenz`, `ausgeklammert`, `frei`. Eine unlesbare Eingabe wirft nie (D3: „(3)(2x+3)“ bei `ausgeklammert` ist ein Formfehler), ein unlesbarer `antwortTerm` schon (Fehler der Aufgabe) |
 | `text(poly, sw)` | Text in der Ordnung des Lehrmittels (TO1 a): höchster Grad zuerst, bei gleichem Grad je Variable im Alphabet der höhere Exponent zuerst, Konstante zuletzt („a² + 2ab + b²“, „a²b + ab²“); Zahlen in der Schreibweise `sw` der App wie `KERN.zahl.text`, Brüche „z/n“; `lies(text(p))` ergibt wieder `p` |
 | `gleich`, `plus`, `mal`, `neg`, `hoch`, `konst`, `variable`, `glieder` | Rechnen mit Polynomen für Aufgabengeneratoren |

@@ -460,17 +460,13 @@
             richtig = wahlIndex === a.richtig;
             if (!richtig) { auswahlKnoepfe[wahlIndex].disabled = true; auswahlKnoepfe[wahlIndex].classList.add("falsch"); }
             else auswahlKnoepfe[wahlIndex].classList.add("richtig");
-          } else if (termAntwort) {
-            // Term: gleichwertig und in der verlangten Form (LST_TERME.bewerte). Stimmt nur die Form nicht,
-            // zählt das nicht als Fehlversuch.
-            const r = LST_TERME.bewerte(feld.value, a);
-            if (!r.lesbar || (r.gleichwertig && !r.ok)) { zeige("hinweis", r.meldung); feld.focus(); return; }
-            wert = feld.value.trim();
-            richtig = r.ok;
           } else {
-            wert = LST.leseZahl(feld.value);
-            if (wert === null) { zeige("hinweis", "Bitte eine Zahl eingeben."); feld.focus(); return; }
-            richtig = Math.abs(wert - a.antwort) <= (a.toleranz || 0) + 1e-9; // toleranz: gerundete Ergebnisse (π)
+            // Zahl oder Term (LST.antwortPruefen): unlesbar oder nur die Form falsch (Term gleichwertig) zählt nicht als
+            // Fehlversuch
+            const r = LST.antwortPruefen(a, feld.value);
+            if (r.art === "unlesbar" || r.art === "form") { zeige("hinweis", r.meldung); feld.focus(); return; }
+            wert = r.wert;
+            richtig = r.art === "richtig";
           }
           // Felder des Lernsteigs je Aufgabe: Lehrplan-Stufe und ob der Rechner offen war (RE1 a)
           // dazu, wo der Notizblock angeboten war, ob er benutzt wurde (wie im Eulenpfad: notiz „block“ oder „ohne“)

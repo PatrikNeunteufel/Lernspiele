@@ -52,8 +52,19 @@
 
   // ---------- Lesen ----------
   /** Liest einen Term; liefert { poly, info, roh } oder wirft. info: Zählungen für die Formprüfung. */
+  // ZL1 a (1.25.0): Gliederung einer Zahl (Apostroph, Leerzeichen) nur in Dreiergruppen vor dem Komma, wie KERN.zahl.lies;
+  // sonst Fehler GLIEDERUNG (bewerte meldet die Dreiergruppen). Vorher fiel jeder Apostroph weg („1'''“ galt als 1).
+  const GLIEDERUNG = "Gliederung";
+  function ohneGliederung(t) {
+    const r = t.replace(/(^|[^\d.,])(\d+(?:[   '’]+\d+)+)/g, (all, vor, z) => {
+      if (!/^\d{1,3}(?:[   '’]\d{3})+$/.test(z)) throw new Error(GLIEDERUNG);
+      return vor + z.replace(/[   '’]/g, "");
+    });
+    if (/['’]/.test(r) || /[.,]\d+[   ]+\d/.test(r)) throw new Error(GLIEDERUNG);
+    return r;
+  }
   function lies(text) {
-    const s = String(text).replace(/\s+/g, "").replace(/[−–]/g, "-").replace(/\*/g, "·").replace(/'/g, "").replace(/,/g, ".");
+    const s = ohneGliederung(String(text)).replace(/\s+/g, "").replace(/[−–]/g, "-").replace(/\*/g, "·").replace(/,/g, ".");
     let i = 0;
     const info = { klammern: 0, potenzen: 0, mal: 0 };
     if (!s) throw new Error("leer");
@@ -119,7 +130,9 @@
   function bewerte(eingabe, a) {
     let e;
     try { e = lies(eingabe); } catch (err) {
-      const meldung = /zu gross/.test(err.message) ? `Der Term ist zu gross: ${err.message}.` : "Den Term kann ich nicht lesen. Beispiel: 3a + 4b oder 2(x + 5).";
+      const meldung = /zu gross/.test(err.message) ? `Der Term ist zu gross: ${err.message}.`
+        : err.message === GLIEDERUNG ? "Den Apostroph nur zwischen Dreiergruppen, zum Beispiel 12'340."
+        : "Den Term kann ich nicht lesen. Beispiel: 3a + 4b oder 2(x + 5).";
       return { ok: false, gleichwertig: false, lesbar: false, meldung };
     }
     const ziel = lies(a.antwortTerm).poly;
