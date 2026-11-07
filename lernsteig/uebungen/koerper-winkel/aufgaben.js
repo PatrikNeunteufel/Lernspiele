@@ -152,21 +152,69 @@ function hinweis(a, eingabe) {
 }
 
 /** Prüfung aus den Daten; Winkel über die Summe, Körper über Math.PI, Ähnlichkeit über den Faktor. */
+/**
+ * Den angezeigten Text lesen (Plan B2 Schritt 3, TD1 a): je Typ der Satz als Muster (LST.zahlenImText, „#“ Zahl,
+ * „~“ Einheit), unabhängig vom Erzeuger geschrieben. Liefert die Werte in der Form von a.daten oder null. Zurückgerechnet:
+ * die Winkelsumme aus der Figur (Dreieck 180°, Viereck 360°), der Ähnlichkeitsfaktor aus den beiden Längen.
+ */
+const LESER = {
+  pyramide: [["Pyramide mit quadratischer Grundfläche: Seite # ~, Höhe # ~. Volumen =", ([a, h]) => ({ a, h })]],
+  kegel: [["Kegel mit Radius # ~ und Höhe # ~. Volumen (auf eine Nachkommastelle) =", ([r, h]) => ({ r, h })]],
+  "kugel-volumen": [["Kugel mit Radius # ~. Volumen (auf eine Nachkommastelle) =", ([r]) => ({ r })]],
+  "kugel-oberflaeche": [["Kugel mit Radius # ~. Oberfläche (auf eine Nachkommastelle) =", ([r]) => ({ r })]],
+  dreieck: [["In einem Dreieck ist α = #° und β = #°. γ =", ([a, b]) => ({ winkel: [a, b], summe: 180 })]],
+  viereck: [["In einem Viereck sind drei Winkel #°, #° und #°. Der vierte Winkel =", ([a, b, c]) => ({ winkel: [a, b, c], summe: 360 })]],
+  summe: [["Wie gross ist die Summe der Innenwinkel in einem #-Eck?", ([n]) => ({ n })]],
+  regelmaessig: [["Wie gross ist ein Innenwinkel in einem regelmässigen #-Eck?", ([n]) => ({ n })]],
+  thales: [["Der Punkt C liegt auf dem Halbkreis über der Strecke AB (Thaleskreis). Im Dreieck ABC ist α = #°. β =", ([a]) => ({ a })]],
+  gleichschenklig: [["In einem gleichschenkligen Dreieck ist jeder Basiswinkel #°. Wie gross ist der Winkel an der Spitze?", ([basis]) => ({ basis })]],
+  seite: [["Zwei Dreiecke sind ähnlich. Im ersten sind a = # cm und b = # cm, im zweiten ist a = # cm. Wie lang ist b im zweiten?", ([a, b, a2]) => ({ a, b, k: a2 / a })]],
+  flaeche: [["Eine Figur hat # cm² Fläche. Alle Längen werden mit # multipliziert. Neue Fläche =", ([A, k]) => ({ A, k })]],
+  volumen: [["Ein Körper hat # cm³ Volumen. Alle Längen werden mit # multipliziert. Neues Volumen =", ([V, k]) => ({ V, k })]],
+  "faktor-flaeche": [["Eine Figur wird so vergrössert, dass ihre Fläche #-mal so gross wird. Mit welchem Faktor wurden die Längen multipliziert?", ([quadrat]) => ({ quadrat })]],
+  "faktor-volumen": [["Ein Würfel wird so vergrössert, dass sein Volumen #-mal so gross wird. Mit welchem Faktor wurden die Kanten multipliziert?", ([kubik]) => ({ kubik })]],
+  "pyramide-hoehe": [["Eine Pyramide mit quadratischer Grundfläche (Seite # cm) hat # cm³ Volumen. Wie hoch ist sie?", ([a, v]) => ({ a, v })]],
+  ecken: [["In einem regelmässigen Vieleck ist jeder Innenwinkel #°. Wie viele Ecken hat es?", ([w]) => ({ w })]],
+  gewicht: [["Eine Figur aus Holz ist # cm hoch und wiegt # g. Eine ähnliche Figur aus demselben Holz ist # cm hoch. Wie schwer ist sie?", ([l, g, l2]) => ({ g, k: l2 / l, l })]],
+};
+function liesText(a) {
+  for (const [muster, werte] of LESER[a.typ] || []) {
+    const z = LST.zahlenImText(a.text, muster);
+    if (z) return werte(z);
+  }
+  return null;
+}
+
+/** Nachrechnen aus Werten in der Form von a.daten (aus den Daten oder aus dem Text). */
+const P = Math.PI;
+const SOLL = {
+  pyramide: d => d.a * d.a * d.h / 3, kegel: d => P * d.r * d.r * d.h / 3, "kugel-volumen": d => 4 * P * d.r ** 3 / 3, "kugel-oberflaeche": d => 4 * P * d.r * d.r,
+  dreieck: d => d.summe - d.winkel.reduce((x, y) => x + y), viereck: d => d.summe - d.winkel.reduce((x, y) => x + y),
+  summe: d => 180 * d.n - 360, regelmaessig: d => 180 - 360 / d.n, thales: d => 180 - 90 - d.a, gleichschenklig: d => 180 - 2 * d.basis,
+  seite: d => d.b * d.k, flaeche: d => d.A * d.k * d.k, volumen: d => d.V * d.k * d.k * d.k,
+  "faktor-flaeche": d => Math.sqrt(d.quadrat), "faktor-volumen": d => Math.cbrt(d.kubik),
+  "pyramide-hoehe": d => 3 * d.v / (d.a * d.a), ecken: d => 360 / (180 - d.w), gewicht: d => d.g * d.k ** 3,
+};
+/** Gleiche Werte (auch Listen wie die Winkel), auf Rundungsreste genau. */
+const gleichWert = (x, y) => (Array.isArray(x) ? Array.isArray(y) && x.length === y.length && x.every((v, i) => gleichWert(v, y[i])) : Math.abs(x - y) < 1e-9);
+
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
-  const d = a.daten, P = Math.PI;
-  const soll = {
-    pyramide: () => d.a * d.a * d.h / 3, kegel: () => P * d.r * d.r * d.h / 3, "kugel-volumen": () => 4 * P * d.r ** 3 / 3, "kugel-oberflaeche": () => 4 * P * d.r * d.r,
-    dreieck: () => d.summe - d.winkel.reduce((x, y) => x + y), viereck: () => d.summe - d.winkel.reduce((x, y) => x + y),
-    summe: () => 180 * d.n - 360, regelmaessig: () => 180 - 360 / d.n, thales: () => 180 - 90 - d.a, gleichschenklig: () => 180 - 2 * d.basis,
-    seite: () => d.b * d.k, flaeche: () => d.A * d.k * d.k, volumen: () => d.V * d.k * d.k * d.k,
-    "faktor-flaeche": () => Math.sqrt(d.quadrat), "faktor-volumen": () => Math.cbrt(d.kubik),
-    "pyramide-hoehe": () => 3 * d.v / (d.a * d.a), ecken: () => 360 / (180 - d.w), gewicht: () => d.g * d.k ** 3,
-  }[a.typ];
+  const d = a.daten;
+  const soll = SOLL[a.typ];
   if (!soll) return [`unbekannter Typ ${a.typ}`];
-  const w = soll(), tol = a.toleranz || 0;
-  if (Math.abs(w - a.antwort) > (tol ? 0.05 + 1e-9 : 1e-6)) m.push(`Lösung ${a.antwort}, nachgerechnet ${w}: ${a.text}`);
+  const w = soll(d), tol = a.toleranz || 0;
+  const passt = x => Math.abs(x - a.antwort) <= (tol ? 0.05 + 1e-9 : 1e-6);
+  if (!passt(w)) m.push(`Lösung ${a.antwort}, nachgerechnet ${w}: ${a.text}`);
+  // Text gegen Prüfdaten (TD1 a): was der Jugendliche liest, sind dieselben Werte, und aus ihnen folgt dieselbe Lösung
+  const t = liesText(a);
+  if (!t) m.push(`Text folgt keinem Muster des Typs ${a.typ}: ${a.text}`);
+  else {
+    const anders = Object.keys(d).filter(k => !gleichWert(t[k], d[k]));
+    if (anders.length) m.push(`Text zeigt ${anders.map(k => `${k} = ${t[k]}`).join(", ")}, Prüfdaten ${anders.map(k => `${k} = ${d[k]}`).join(", ")}: ${a.text}`);
+    if (!passt(soll(t))) m.push(`aus dem Text nachgerechnet ${soll(t)}, Lösung ${a.antwort}: ${a.text}`);
+  }
   if (!tol && !Number.isInteger(rund(a.antwort * 10))) m.push(`exakte Lösung mit mehr als einer Nachkommastelle: ${a.text}`);
   if (tol && !/Nachkommastelle/.test(a.text)) m.push(`gerundete Lösung ohne Angabe im Text: ${a.text}`);
   if (a.antwort <= 0) m.push(`Ergebnis nicht positiv: ${a.text}`);
@@ -177,4 +225,4 @@ function pruefeAufgabe(a, stufe, niveau) {
   return m;
 }
 
-if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis };
+if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis, liesText };

@@ -742,3 +742,7 @@
   Messung vorab: bei 60 von 128 Typen der zehn Übungen zeigt der Text andere Grössen als die Daten — ein Vergleich ohne
   Typ trägt nicht. Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. lernsteig/rahmen.md 4, Plan
   (TD1 a, B, B2).
+- Text gegen Prüfdaten (TD1 a), zweite Übung `koerper-winkel`: `liesText` für alle 18 Typen (Winkelsumme aus der Figur,
+  Ähnlichkeitsfaktor aus den beiden Längen zurückgerechnet), `pruefeAufgabe` vergleicht auch Listen (Winkel). Kein Fund.
+  Gegenprobe mit vertauschter Rolle (im zweiten Dreieck b statt a gezeigt): gemeldet. Tests: Lernsteig „0 Fehler,
+  0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).
