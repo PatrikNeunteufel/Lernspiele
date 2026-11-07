@@ -561,11 +561,24 @@
     return null;
   }
 
+  /**
+   * Höhe der Zeichenfläche eines Graphen (Breite GRAPH.breite): d.hoehe, sonst gleicher Massstab auf beiden Achsen, aber
+   * höchstens quadratisch und mindestens halb so hoch wie breit — dann hat die y-Achse ihren eigenen Massstab, wie bei
+   * Sachgraphen üblich. Bis LERN_Session19 ohne Grenze: Weg-Zeit-Diagramme (kraefte) wurden bis 2900 px hoch, Graphen in
+   * prozent-funktionen bis 900 px, und die Aufgabe passte nicht mehr ins Bild.
+   */
+  const GRAPH = { breite: 300, rand: 28, minVerhaeltnis: 0.5, maxVerhaeltnis: 1 };
+  function graphHoehe(d) {
+    if (d.hoehe) return d.hoehe;
+    const gleich = GRAPH.breite * (d.y[1] - d.y[0]) / (d.x[1] - d.x[0]);
+    return Math.round(Math.min(GRAPH.breite * GRAPH.maxVerhaeltnis, Math.max(GRAPH.breite * GRAPH.minVerhaeltnis, gleich)));
+  }
+
   function graph(d) {
     const NS = "http://www.w3.org/2000/svg";
     const s = (tag, attr, text) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); if (text !== undefined) e.textContent = text; return e; };
     const [x0, x1] = d.x, [y0, y1] = d.y, schritt = d.schritt || 1, schrittY = d.schrittY || schritt; // schrittY, hoehe: eigener Massstab der y-Achse
-    const rand = 28, breite = 300, hoehe = d.hoehe || Math.round(breite * (y1 - y0) / (x1 - x0));
+    const rand = GRAPH.rand, breite = GRAPH.breite, hoehe = graphHoehe(d);
     const px = x => rand + (x - x0) / (x1 - x0) * breite, py = y => rand + (y1 - y) / (y1 - y0) * hoehe;
     const svg = s("svg", { viewBox: `0 0 ${breite + 2 * rand} ${hoehe + 2 * rand}`, class: "graph", role: "img", "aria-label": "Graph einer Geraden im Koordinatensystem" });
     for (let x = x0; x <= x1; x += schritt) svg.append(s("line", { x1: px(x), y1: py(y0), x2: px(x), y2: py(y1), class: "gitter" }));
@@ -598,5 +611,5 @@
   let aktuell = null;
   const pruefung = { aufgabe: () => aktuell };
 
-  Object.assign(LST, { el, FREIGABE, ENTWICKLUNG, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
+  Object.assign(LST, { GRAPH, graphHoehe, el, FREIGABE, ENTWICKLUNG, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
 })(LST);

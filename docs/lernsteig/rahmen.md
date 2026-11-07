@@ -78,7 +78,10 @@ Leerzeichen, Punkt und Komma sind erlaubt.
 - Optional `darstellung`: `{ art: "tabelle", kopf, zeilen }` (Wertetabelle) oder `{ art: "graph", m, b, x: [min, max],
   y: [min, max] }` (Gerade im Gitter); der Rahmen zeichnet sie unter den Aufgabentext. Zusätze zum Graphen:
   `schrittY`, `beschrY`, `hoehe` (eigener Massstab der y-Achse), `xName`, `yName` (Achsennamen), `punkte: [{ x, y, name }]`
-  und `vieleck: true` (Punkte verbunden); ohne `m` keine Gerade.
+  und `vieleck: true` (Punkte verbunden); ohne `m` keine Gerade. Ohne `hoehe` gilt der gleiche Massstab auf beiden
+  Achsen, aber die Fläche ist höchstens quadratisch und mindestens halb so hoch wie breit (`LST.graphHoehe`, LERN_Session19;
+  vorher bis 2900 px hoch in `kraefte`); angezeigt höchstens 340 px breit und halb so hoch wie das Fenster, damit die
+  ganze Aufgabe im Bild bleibt. Der Seitentest meldet eine Grafik, die höher als breit ist.
 - Hinweise ohne Ziffern formulieren, wo eine Zahl zufällig die Lösung sein kann („ein Prozent“ statt „1 %“) — das
   Testskript meldet jeden Hinweis, der die Lösung enthält.
 - `pruefeAufgabe(aufgabe, stufe, niveau)` → Liste von Mängeln. Unabhängig vom Generator nachrechnen (Rationale

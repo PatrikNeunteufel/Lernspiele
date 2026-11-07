@@ -92,7 +92,8 @@ button, input { font: inherit; color: inherit; }
 .aufgabe .werte-tabelle { margin: 14px auto 0; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 18px; }
 .werte-tabelle th, .werte-tabelle td { border: 1px solid var(--rand); padding: 6px 12px; text-align: center; min-width: 44px; }
 .werte-tabelle th { background: var(--flaeche); }
-.aufgabe .graph { display: block; width: 100%; max-width: 340px; margin: 12px auto 0; }
+/* höchstens halb so hoch wie das Fenster, damit die ganze Aufgabe im Bild bleibt; das Seitenverhältnis bleibt (viewBox) */
+.aufgabe .graph { display: block; width: 100%; max-width: 340px; max-height: 50vh; margin: 12px auto 0; }
 .graph .gitter { stroke: var(--rand); stroke-width: 1; }
 .graph .achse { stroke: var(--text); stroke-width: 1.5; }
 .graph .gerade { stroke: var(--akzent); stroke-width: 3; }

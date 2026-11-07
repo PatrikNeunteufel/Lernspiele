@@ -646,3 +646,9 @@
   allen drei an. Im Browser: Abschnitt „Abgleich zwischen Geräten“ und Freischalten ohne Codefeld.
 - Doku: docs/kern/rahmen.md 4.7, 4.19, 4.20; lernsteig/rahmen.md 5b, 5c, 6; rahmen.md 10; Plan (OA1 a, OA2 a, C5),
   Kern-Changelog.
+- Lernsteig, Meldung Patrik (Grafiken passen nicht ins Bild): Graphen ohne eigene Höhe wurden im gleichen Massstab auf
+  beiden Achsen gezeichnet — in `kraefte` (Weg gegen Zeit) bis 2900 px hoch, in `prozent-funktionen` 440–910 px (gemessen
+  über 2000 Aufgaben je Stufe). Jetzt höchstens quadratisch, mindestens halb so hoch wie breit (`LST.graphHoehe`), dazu
+  höchstens die halbe Fensterhöhe; Koordinaten und Geraden mit gleichen Spannen bleiben, wie sie waren. Seitentest meldet
+  Grafiken höher als breit (Gegenprobe mit der alten Rechnung: 30 Funde). Im Browser auf 375 px: Graph 310 × 310 px, die
+  ganze Aufgabe mit „Prüfen“ im Fenster. lernsteig/rahmen.md 4.

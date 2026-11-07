@@ -237,6 +237,11 @@ async function pruefeSeiten(uebungen, melde, LST) {
             if (!a) throw new Error(`keine Aufgabe bei Nummer ${i + 1}: ${s.text().replace(/\s+/g, " ").trim().slice(0, 160)}`);
             kennungen.add(a.kennung);
             textPruefen(ort, s);
+            // Grafik im Bild (LERN_Session19): höchstens so hoch wie breit — vorher bis 2900 px (kraefte)
+            if (a.darstellung && a.darstellung.art === "graph") {
+              const vb = (s.lauf(`(document.querySelector(".aufgabe svg.graph") || { getAttribute: () => "" }).getAttribute("viewBox")`) || "").split(" ").map(Number);
+              if (vb.length !== 4 || !(vb[3] <= vb[2])) melde(ort, `Grafik höher als breit (viewBox ${vb.join(" ")})`);
+            }
             if (i === 0) await antworte(s, a, false);
             await antworte(s, a, true);
             // RA8 a: auf Anhieb nur „Richtig.“; nach einem Fehlversuch der Weg (falls die Aufgabe einen hat)
