@@ -1,6 +1,17 @@
 # Handover — Lernsteig
 
 ## Stand
+**2026-11-07, nach LERN_Session20** (Lernspiele, [Report](../eulenpfad/report/LERN_Session20_2026-11-07.md)): Kern 1.26.0.
+Tastenfeld unter jeder Zahl- und Term-Antwort, Tastatur des Geräts zu (TF1 a); `LST.antwortTasten` gibt jedem Zeichen der
+Lösung eine Taste. Notizblock mit „= Gleichung“ in gleichungen und binome-gleichungen (GL1 a). Verwaltung mit Untertabs:
+Konten (löschen: der Jugendliche selbst oder die verbundene Aufsicht; ausblenden: nicht verbundene Konten und gesperrte
+Aufsichten, KE1 a, KE2 a), Freigabe je Gerät (reist im Abgleich mit), Abgleich, Einstellungen, Entwicklung. Zahlen und
+Terme nur mit Gliederung in Dreiergruppen (ZL1 a). Prüfung: Annahme von Antworten, Text gegen Prüfdaten in zehn Übungen
+(`liesText`, TD1 a), Vorrat in Runden (VF1 a, Katalogfeld `vorrat`), Übungstage in Ortszeit. Tests: Konten „101 Fälle,
+0 Fehler.“, `pruefe_uebungen.js` „0 Fehler, 21 Hinweise.“ (die 21 Stufen mit kleinem Vorrat, Plan E 9). Weiter mit: C3
+(Tab Übungen wie Tab Spiele), Vorrat der 21 Stufen, Prüfen durch Patrik (Tastenfeld, Gleichung im Block, Verwaltung), C4,
+C6–C8; zurückgestellt: periodische Dezimalzahlen.
+
 **2026-11-07, nach LERN_Session19** (Lernspiele, [Report](../eulenpfad/report/LERN_Session19_2026-11-07.md)): Kern 1.22.0.
 Runden über `KERN.runde.lauf` (Eintrag mit `zeit` am Ende, `dauer` auf 0,1 s, `liste` je Aufgabe; alte Runden umgedeutet,
 auch `zeit` vom Beginn ans Ende); Durchgang über Runden für alle Stufen, Kürzen bei erschöpfter Stufe; auf Anhieb nur

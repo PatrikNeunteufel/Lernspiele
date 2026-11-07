@@ -811,3 +811,5 @@
   Fälle 0 Fehler, Konten 101 Fälle 0 Fehler, Lernsteig „0 Fehler, 21 Hinweise.“, Gratwanderung „Keine Fehler.“,
   Eulenpfad Daten „Keine Fehler.“, Eulenpfad-Stichprobe (6 Spiele, 36 Stufen) mit denselben Klickzahlen wie mit Kern
   1.25.0. docs/kern/rahmen.md 4.25 (neu), 4.26; Kern-Changelog; Plan (B, B2).
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session20_2026-11-07.md`, Handover Eulenpfad und Lernsteig nachgeführt.
+  Offen: voller Eulenpfad-Lauf vor dem Push von Kern 1.26.0 (auf Patriks Entscheid), C3, Vorrat der 21 Stufen (E 9).
