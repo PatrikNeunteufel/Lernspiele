@@ -80,17 +80,18 @@ von Hand geänderte Kopie oder gleiche Version mit anderem Inhalt als Fehler, ei
 rund 200 Seiten anfasst: Jede Seite lädt einmal `kern/kern.js` vor dem Rahmen ihrer App. Die Teile hängen sich an
 `KERN` (`KERN.zahl`, `KERN.bruch`, …). Tests: `node tools/pruefe_kern.js` (Teile gegen feste Beispiele und
 Nachrechnungen, dazu die Kopien); das Testskript jeder App prüft ihre Kopie.
-Stand 2026-11-06: Kern 1.18.0 mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
+Stand 2026-11-07: Kern 1.20.0 mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
 Freigabe, Suche, Runden, Daten (ein Dateiformat für Sichern, Einlesen und Abgleich mit Löschvermerken und Schutz nach
 DF4 a), Anmeldung (mit Gast), Entwicklung, Einladung, Auswertung, Übernahme einer Aufsicht, Rollleiste und
 Personen-Knopf; Eulenpfad und Lernsteig benutzen, was sie brauchen (`daten.js` beide), die Gratwanderung hat die
 Kopie und lädt sie mit C8. Seit 1.17.0 auch der Abgleich über einen Ordner (DF3 a; Lernsteig mit der Verwaltung, Plan C),
 seit 1.18.0 die Rollen der Aufsicht (`rollen.js`: Bestätigung, PIN vergessen, Zurücksetzen mit Frist; RL2 a, beide Apps).
-Seit 1.19.0 die reinen Hilfen des Ablaufs einer Runde (`runde.js`: Gedächtnis als Durchgang, Auswahl mit Serienbremse und
-Kürzen, Rekord nach Kennung, Bestwert, Bestzeit, Wächter des Zwischenstands; RA5 a, RA6 a; beide Apps, dazu RA8 a im
-Lernsteig). Noch nicht im Kern: der Ablauf selbst (Fehlversuch mit Hinweis und Lösung nach dem dritten, Ende von Runde und
-Serie, Zeit je Aufgabe nach RA7 a, Protokolleintrag nach RA1–RA4 a, Vertrag `aufgabeErzeugen`/`pruefeAufgabe`) und die
-Gruppenleitung (G2 a), die mit den Gruppen kommt (RL1 a, LERN-48).
+Seit 1.19.0/1.20.0 der Ablauf einer Runde (`runde.js`, AR1 a, RA1–RA8 a): Gedächtnis als Durchgang, Auswahl mit
+Serienbremse und Kürzen, Rekord nach Kennung, Bestwert, Bestzeit, Wächter des Zwischenstands, dazu der Ablauf `lauf()`
+(Versuche, Lösung nach dem dritten Fehlversuch, Ende von Runde und Serie, Zeit je Aufgabe ab `bereit`, Eintrag mit `zeit`
+am Ende, `dauer` auf 0,1 s, einer Liste je Aufgabe; Serie auch im Protokoll) und die Umdeutung älterer Runden; beide Apps,
+dazu RA8 a im Lernsteig. Prüfen der Antwort und der Vertrag `aufgabeErzeugen`/`pruefeAufgabe` bleiben nach AR1 a in den
+Apps. Noch nicht im Kern: die Gruppenleitung (G2 a), die mit den Gruppen kommt (RL1 a, LERN-48).
 
 **B2 Testgerüst für alle Apps:** Ein Testskript-Kern unter `tools/` mit Treiber je App, so dass ein Aufruf alle drei
 Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`). Er prüft auch, dass jede Kern-Kopie mit

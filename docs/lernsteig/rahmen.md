@@ -103,7 +103,10 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 - Ergebnis: auf Anhieb richtig, Zeit, Bestzeit (nur volle Runden ohne gezeigte Lösung). Keine Sterne (BF1 a).
 - **Serie** (Endlos): Aufgaben, bis eine falsch ist; Rekord je Konto, Übung und Stufe, getrennt mit und ohne Rechner (RE1 a; nicht je Niveau, weil die Aufgaben einer
   Stufe nicht am Niveau hängen, ST1 a — bis LERN_Session18 stand hier „und Niveau“). Gespeichert, sobald die
-  Serie vorbei ist; beim Verlassen mitten drin als Zwischenstand (`abgebrochen: true`).
+  Serie vorbei ist; beim Verlassen mitten drin als Zwischenstand (`abgebrochen: true`), Rekord und Runde (RA3 a); das Ende
+  ersetzt beide (gleiche Kennung).
+- Den Ablauf führt der Kern (`KERN.runde.lauf`, docs/kern/rahmen.md 4.22): Versuche, Fehler, Lösung nach dem dritten
+  Fehlversuch, Ende der Serie, Zeit je Aufgabe, Eintrag und Rekord. Hier bleiben Oberfläche, Prüfen der Antwort und Rechner.
 
 ## 5a. Taschenrechner (TR1 a, RE1 a, RM1 b)
 
@@ -256,7 +259,7 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 | `aktiv` | zuletzt gewähltes Konto (Id) |
 | `gast` | bis LERN_Session16 das Gastkonto des Geräts; wird nicht mehr gelesen. Runden mit `person: "gast"` bleiben und reisen in Sicherungen mit |
 | `personen` | Jugendliche und Aufsichten (`KERN.person`, 5d); früher `konten` und `aufsichten`, beim Laden umgezogen |
-| `runden` | je Runde im gemeinsamen Format (R1 a, `KERN.runden`) `{ id, person, zeit, inhalt, fach, stufe, niveau, endlos, aufgaben, aufAnhieb, fehler, gezeigt, dauer, zeiten, falsch, liste, mitRechner, gruppe }` (bis LERN_Session15 `konto`, `uebung`; beim Laden umgedeutet); `liste` je Aufgabe `{ lp, versuche, gezeigt }` (Grundlage für den Kompetenzstand) |
+| `runden` | je Runde im gemeinsamen Format (R1 a, `KERN.runden`; gebaut von `KERN.runde.lauf`) `{ id, person, zeit (Ende, RA1 a), inhalt, fach, stufe, niveau, endlos?, gekuerzt?, abgebrochen?, aufgaben, aufAnhieb, fehler, gezeigt, dauer (s, auf 0,1), liste, mitRechner, gruppe }`; `liste` je Aufgabe `{ ms, versuche, geloest, gezeigt?, lp, rechner }`, mit Fehlversuch dazu `text`, `loesung`, `eingaben` (RA4 a; Grundlage für den Kompetenzstand). Beim Laden und Einlesen umgedeutet (`LST.alteEintraegeUmdeuten`): bis LERN_Session15 `konto`, `uebung`; bis LERN_Session18 `zeit` = Beginn (jetzt + `dauer`, auch beim Rekord einer Serie) und `zeiten`, `falsch` getrennt |
 | `rekorde` | je Serie `{ id, person, zeit, inhalt, stufe, niveau, punkte, dauer, mitRechner, abgebrochen? }` |
 | `freigabe`, `freigabeStand` | Freigabe der Übungen auf diesem Gerät durch die Aufsicht (`KERN.freigabe`) |
 | `gestellt` | zuletzt gestellte Kennungen je `konto/uebung/stufe/niveau` (höchstens 30) |

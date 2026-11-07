@@ -100,11 +100,15 @@ function zeichneStatistik(box, neu) {
     const verlauf = el("div");
     if (!letzte.length) verlauf.append(el("p", { class: "leise-text", text: "Noch keine Runde gespielt." }));
     for (const e of letzte) {
-      const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.inhalt)} · Stufe ${stufeName(e.stufe)} · ${e.mix ? "🎲 im Zufallsmix" : "★".repeat(e.sterne)} · ${e.fehler} Fehler${e.tipps ? ` · 💡 ${e.tipps} Tipp${e.tipps === 1 ? "" : "s"}` : ""}${e.bedienhilfe ? " · ❓ Hilfe" : ""}${e.test ? " · 🧪 Test" : ""}${e.hilfe ? " · 🔑 mit Hilfe" : ""}` }));
-      if (e.fehlerAufgaben.length) {
-        d.append(el("ul", {}, ...e.fehlerAufgaben.map(f => el("li", {},
+      // Serie (RA3 a, seit LERN_Session19 im Protokoll): richtig in Folge statt Sterne
+      const art = e.mix ? "🎲 im Zufallsmix" : e.endlos ? `♾ ${(e.liste || []).filter(a => a.geloest).length} in Folge` : "★".repeat(e.sterne || 0);
+      const d = el("details", {}, el("summary", { text: `${datum(e.zeit)} · ${spielName(e.inhalt)} · Stufe ${stufeName(e.stufe)} · ${art} · ${e.fehler} Fehler${e.tipps ? ` · 💡 ${e.tipps} Tipp${e.tipps === 1 ? "" : "s"}` : ""}${e.bedienhilfe ? " · ❓ Hilfe" : ""}${e.test ? " · 🧪 Test" : ""}${e.hilfe ? " · 🔑 mit Hilfe" : ""}` }));
+      const mitFehler = KERN.runde.mitFehler(e);
+      const wie = f => (f.geloest ? "dann gelöst" : f.gezeigt ? "Lösung gezeigt" : f.uebersprungen ? "übersprungen" : "nicht gelöst");
+      if (mitFehler.length) {
+        d.append(el("ul", {}, ...mitFehler.map(f => el("li", {},
           el("div", { text: f.text || "(Aufgabe)" }),
-          el("div", { class: "leise-text", text: `${f.versuche} Fehlversuch${f.versuche === 1 ? "" : "e"} · ${f.geloest ? "dann gelöst" : "Lösung gezeigt"}${f.loesung ? " · " + f.loesung : ""}` })))));
+          el("div", { class: "leise-text", text: `${f.versuche ? `${f.versuche} Fehlversuch${f.versuche === 1 ? "" : "e"}` : "Zeit um"} · ${wie(f)}${f.loesung ? " · " + f.loesung : ""}` })))));
       } else {
         d.append(el("p", { class: "gut", text: "Alles auf Anhieb richtig!" }));
       }
@@ -134,7 +138,7 @@ function zeichneStatistik(box, neu) {
       kachel(String(runden.length), "Runden gespielt"),
       kachel(`${minuten} min`, "Spielzeit"),
       kachel(prozent(mittel(runden.map(anhieb))), "Aufgaben auf Anhieb richtig"),
-      kachel(String(runden.reduce((s, e) => s + e.fehlerAufgaben.filter(f => !f.geloest).length, 0)), "Aufgaben mit Lösung gezeigt"))));
+      kachel(String(runden.reduce((s, e) => s + (e.liste || []).filter(a => a.gezeigt).length, 0)), "Aufgaben mit Lösung gezeigt"))));
 
   // ----- Fazit in Worten (AUSWERTUNG.fazit, LERN_Session9) -----
   // Die Aufsicht sieht das ganze Fazit; dem Kind gibt sie eine freundliche Fassung frei (Entscheid G3,

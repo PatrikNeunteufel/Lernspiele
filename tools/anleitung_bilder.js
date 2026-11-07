@@ -150,10 +150,11 @@ const BEISPIELRUNDEN = `
     const fehler = z(4) === 0 ? 2 : z(3) === 0 ? 1 : 0;
     const tage = 13 - Math.floor(i / 2);
     const zeit = new Date(jetzt - tage * 864e5 - (17 - z(3)) * 36e5 + i * 6e5).toISOString();
-    const aufgabenZeiten = Array.from({ length: 8 }, (_, k) => ({ ms: 6000 + z(9000) + k * 300, versuche: k < fehler ? 1 : 0, zeitUm: false, geloest: true,
+    // je Aufgabe ein Eintrag wie von KERN.runde.lauf (RA4 a): mit Fehlversuch dazu text, loesung, eingaben
+    const liste = Array.from({ length: 8 }, (_, k) => ({ ms: 6000 + z(9000) + k * 300, versuche: k < fehler ? 1 : 0, geloest: true,
+      ...(k < fehler ? { text: "Beispielaufgabe", loesung: "", eingaben: [] } : {}),
       ...(spiel === "glace-kombinator" ? { vorgehen: { systematik: ["durcheinander", "geordnet", "streng", "streng"][Math.min(3, Math.floor(i / 6) + z(2))] } } : {}) }));
-    const fehlerAufgaben = Array.from({ length: fehler }, () => ({ text: "Beispielaufgabe", loesung: "", versuche: 1, geloest: true }));
-    LS.protokolliere({ name: "Muster Kind", zeit, spiel, stufe, sterne: LS.sterneFuer(fehler), fehler, aufgaben: 8, dauer: 90 + z(120), geordnet: true, timer: null, aufgabenZeiten, fehlerAufgaben });
+    LS.protokolliere({ name: "Muster Kind", zeit, inhalt: spiel, stufe, sterne: LS.sterneFuer(fehler), fehler, aufgaben: 8, gezeigt: 0, dauer: 90 + z(120), geordnet: true, timer: null, liste });
   }`;
 
 /** Erfundene Endlos-Rekorde der drei Musterkinder (Runden-Rutsche), für die Ranglisten. */

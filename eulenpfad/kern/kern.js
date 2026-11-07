@@ -1,4 +1,4 @@
-/* kern 1.19.0 · Prüfsumme sha256:83d5fd1287c87f3f33ede1811d15e3cc3cd1487c0d85e3f7977b3ba3d4ec8890 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.20.0 · Prüfsumme sha256:8a0cc8a082d117a4cefc11cec35375225056dde22d8637624618c657c4b628a0 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -1329,7 +1329,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
   /**
    * Einträge zusammenführen (Sicherung einlesen, Abgleich): nach Kennung; bei Rekorden gilt der höhere Stand
-   * (Zwischenstand → Endstand). Fremde, ungültige werden abgewiesen; eigene bleiben, wie sie sind (nur `behalten`
+   * (Zwischenstand → Endstand), bei Runden ersetzt der spätere Stand einen Zwischenstand (abgebrochen, RA3 a). Fremde, ungültige werden abgewiesen; eigene bleiben, wie sie sind (nur `behalten`
    * entscheidet, etwa nach einem Löschvermerk). Ergebnis nach Zeit sortiert: { eintraege, neu, ersetzt, abgewiesen }.
    * opt: { art: "runde" | "rekord", pruefung (wie maengel), umbiegen: person → bleibende Kennung, behalten: e → bool }
    */
@@ -1348,6 +1348,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       const da = nach.get(e.id);
       if (!da) { nach.set(e.id, e); erg.neu++; }
       else if (art === "rekord" && e.punkte > (da.punkte || 0)) { nach.set(e.id, e); erg.ersetzt++; }
+      // Runde (RA3 a): ein Zwischenstand beim Verlassen weicht dem späteren Stand derselben Runde
+      else if (art === "runde" && da.abgebrochen && (!e.abgebrochen || (e.aufgaben || 0) > (da.aufgaben || 0))) { nach.set(e.id, e); erg.ersetzt++; }
     }
     erg.eintraege = [...nach.values()].sort((a, b) => String(a.zeit || "").localeCompare(String(b.zeit || "")));
     return erg;
@@ -1462,8 +1464,11 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     };
   }
 
-  /** Rekord in die Liste eintragen: gleiche Kennung = Zwischenstand derselben Serie, wird ersetzt. Neue Liste. */
-  function rekordEintragen(liste, eintrag) {
+  /**
+   * Runde oder Rekord in die Liste eintragen: gleiche Kennung = Zwischenstand derselben Runde oder Serie, wird ersetzt
+   * (RA3 a). Neue Liste. (rekordEintragen: derselbe Teil unter seinem Namen aus 1.19.0.)
+   */
+  function eintragen(liste, eintrag) {
     const l = (Array.isArray(liste) ? liste : []).filter(r => !(r && eintrag.id && r.id === eintrag.id));
     l.push(eintrag);
     return l;
@@ -1499,7 +1504,198 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     };
   }
 
-  KERN.runde = { SERIE_MAX, VERSUCHE, GEDAECHTNIS_MAX, gedaechtnis, auswahl, rekordEintragen, bestwert, bestzeit, sekunden, waechter };
+  // ---------- Ablauf einer Runde (AR1 a; RA1–RA4 a, RA7 a) ----------
+  /** So viele Fehlversuche, dann zeigt die App die Lösung (wenn sie eine nennt). */
+  const LOESUNG_NACH = 3;
+  /** Höchstens so viele Eingaben je Aufgabe im Eintrag (die letzten). */
+  const EINGABEN_MAX = 6;
+  const messuhrStandard = () => (typeof performance !== "undefined" && performance.now ? performance.now() : Date.now());
+
+  /**
+   * Ablauf einer Runde oder Serie ohne Oberfläche. Die App meldet je Aufgabe: gestellt(), bereit() (das Kind kann
+   * antworten; ohne Meldung zählt die Zeit ab gestellt, RA7 a), pause()/weiter() (Hilfe, Melden: zählt nicht), eingabe(),
+   * falsch(), zeitUm(), richtig(), uebersprungen(); zusatz() hängt Felder der App an die Aufgabe (tipps, vorgehen, lp,
+   * rechner). Der Kern zählt Versuche und Fehler (Zeit um ist ein Fehler, die Aufgabe bleibt offen), sagt, wann die
+   * Lösung zu zeigen ist (nach dem dritten Fehlversuch, wenn die App eine Lösung nennt), wann die Serie vorbei ist (erste
+   * falsche Antwort oder Zeit um) und die Runde (anzahl Aufgaben oder erschoepft()), und baut Eintrag und Rekord.
+   * opt: { endlos, anzahl, loesungNach, id, uhr: () => Date (Zeit des Eintrags), messuhr: () => ms (Dauer, Zeiten) }
+   */
+  function lauf({ endlos = false, anzahl = Infinity, loesungNach = LOESUNG_NACH, id = null,
+    uhr = () => new Date(), messuhr = messuhrStandard } = {}) {
+    const beginn = messuhr();
+    // Kennung erst, wenn ein Eintrag oder Rekord sie braucht (dann fest für Zwischen- und Endstand): wie bisher beim
+    // Speichern gezogen, damit die Zufallsfolge eines Testlaufs mit Startwert gleich bleibt
+    let kennung = id;
+    const kennungJetzt = () => (kennung ||= KERN.runden.neueId());
+    const liste = [];
+    let a = null; // offene Aufgabe
+    let fehler = 0, geschafft = 0, gezeigt = 0, verloren = false, erschoepft = false;
+    const offen = () => { if (!a) throw new Error("runde: keine Aufgabe offen"); return a; };
+
+    function abschliessen(geloest, art = {}) {
+      const x = offen(), jetzt = messuhr();
+      if (x.pauseSeit !== null) { x.pausiert += jetzt - x.pauseSeit; x.pauseSeit = null; }
+      // ab bereit; wer schon vorher antwortet (während Töne laufen), ab gestellt (RA7 a)
+      const ab = x.bereit !== null && x.bereit <= jetzt ? x.bereit : x.gestellt;
+      const e = { ms: Math.round(Math.max(0, jetzt - ab - x.pausiert)), versuche: x.versuche, geloest,
+        ...(art.gezeigt ? { gezeigt: true } : {}), ...(art.uebersprungen ? { uebersprungen: true } : {}), ...(x.zeitUm ? { zeitUm: true } : {}) };
+      // Angaben zur Aufgabe nur, wenn sie einen Fehler hatte (RA4 a)
+      if (x.versuche > 0 || x.zeitUm) Object.assign(e, { text: x.text || "", loesung: x.loesung || "", eingaben: x.eingaben.slice(-EINGABEN_MAX) });
+      Object.assign(e, x.zusatz);
+      liste.push(e);
+      a = null;
+      return e;
+    }
+    const merke = ({ text, loesung, eingabe } = {}) => {
+      const x = offen();
+      if (text && !x.text) x.text = String(text);
+      if (loesung && !x.loesung) x.loesung = String(loesung);
+      if (eingabe !== undefined && eingabe !== null && eingabe !== "") x.eingaben.push(String(eingabe));
+    };
+
+    const r = {
+      get id() { return kennungJetzt(); },
+      /** Neue Aufgabe; text und loesung (Text) für den Eintrag, falls sie einen Fehler bekommt. */
+      gestellt({ text = "", loesung = "" } = {}) {
+        if (a) throw new Error("runde: vorige Aufgabe noch offen");
+        if (r.vorbei) throw new Error("runde: vorbei");
+        a = { gestellt: messuhr(), bereit: null, pauseSeit: null, pausiert: 0, versuche: 0, zeitUm: false,
+          text: text ? String(text) : "", loesung: loesung ? String(loesung) : "", eingaben: [], zusatz: {} };
+      },
+      /** Ab jetzt kann das Kind antworten (Töne, „▶ Los!“, Vorlesen fertig); wirkt einmal. */
+      bereit() { const x = offen(); if (x.bereit === null) x.bereit = messuhr(); },
+      pause() { const x = offen(); if (x.pauseSeit === null) x.pauseSeit = messuhr(); },
+      weiter() { const x = offen(); if (x.pauseSeit !== null) { x.pausiert += messuhr() - x.pauseSeit; x.pauseSeit = null; } },
+      eingabe(t) { merke({ eingabe: t }); },
+      zusatz(felder) { Object.assign(offen().zusatz, felder); },
+      /**
+       * Falsche Antwort ({ text, loesung, eingabe } für den Eintrag). Ergebnis: { versuche, loesungZeigen, vorbei }
+       * — loesungZeigen nach dem dritten Fehlversuch mit Lösung (die Aufgabe ist dann abgeschlossen), vorbei in einer Serie.
+       */
+      falsch(angaben = {}) {
+        const x = offen();
+        merke(angaben);
+        x.versuche++; fehler++;
+        if (endlos) { verloren = true; abschliessen(false); return { versuche: x.versuche, loesungZeigen: false, vorbei: true }; }
+        const zeigen = x.versuche >= loesungNach && !!x.loesung;
+        if (zeigen) { gezeigt++; abschliessen(false, { gezeigt: true }); }
+        return { versuche: x.versuche, loesungZeigen: zeigen, vorbei: false };
+      },
+      /** Zeit um: ein Fehler, die Aufgabe bleibt offen; in einer Serie ist sie vorbei. */
+      zeitUm(angaben = {}) {
+        const x = offen();
+        merke(angaben);
+        if (x.zeitUm) return { vorbei: false };
+        x.zeitUm = true; fehler++;
+        if (endlos) { verloren = true; abschliessen(false); return { vorbei: true }; }
+        return { vorbei: false };
+      },
+      /** Richtige Antwort: { aufAnhieb } (ohne Fehlversuch; Zeit um zählt nicht dagegen). */
+      richtig(angaben = {}) {
+        merke(angaben);
+        const e = abschliessen(true);
+        geschafft++;
+        return { aufAnhieb: e.versuche === 0 };
+      },
+      /** Übersprungen (Testhilfe): abgeschlossen, nicht gelöst. */
+      uebersprungen() { abschliessen(false, { uebersprungen: true }); },
+      /** Die Stufe gibt keine neue Aufgabe mehr her (KERN.runde.auswahl): die Runde ist gekürzt, die Serie geschafft. */
+      erschoepft() { erschoepft = true; },
+      get offen() { return !!a; },
+      get versuche() { return a ? a.versuche : 0; },
+      get aufgaben() { return liste.length; },
+      get fehler() { return fehler; },
+      get geschafft() { return geschafft; },
+      get gezeigt() { return gezeigt; },
+      get liste() { return liste.slice(); },
+      get erschoepftIst() { return erschoepft; },
+      get vorbei() { return erschoepft || verloren || (!endlos && liste.length >= anzahl); },
+      /**
+       * Protokolleintrag (R1 a, RA1–RA4 a): zeit = jetzt (Ende), dauer in s auf 0,1 s, aufgaben, fehler, gezeigt, liste;
+       * endlos, gekuerzt (geplante Zahl), abgebrochen (Zwischenstand beim Verlassen; eine offene Aufgabe zählt nicht).
+       * felder: person, inhalt, stufe und die Felder der App.
+       */
+      eintrag(felder = {}, { abgebrochen = false } = {}) {
+        const e = { id: kennungJetzt(), zeit: uhr().toISOString(), ...felder, aufgaben: liste.length, fehler, gezeigt,
+          dauer: sekunden(messuhr() - beginn), liste: liste.slice() };
+        if (endlos) e.endlos = true;
+        if (!endlos && erschoepft && Number.isFinite(anzahl) && liste.length < anzahl) e.gekuerzt = anzahl;
+        if (abgebrochen) e.abgebrochen = true;
+        return e;
+      },
+      /** Rekord einer Serie (gleiche Kennung wie der Eintrag): punkte = richtig in Folge; alles = Stufe erschöpft. */
+      rekord(felder = {}, { abgebrochen = false } = {}) {
+        return { id: kennungJetzt(), zeit: uhr().toISOString(), ...felder, punkte: geschafft, dauer: sekunden(messuhr() - beginn),
+          ...(erschoepft ? { alles: true } : {}), ...(abgebrochen ? { abgebrochen: true } : {}) };
+      },
+    };
+    return r;
+  }
+
+  /** Aufgaben eines Eintrags mit Fehler (Fehlversuch oder Zeit um) — was früher fehlerAufgaben (Eulenpfad) hiess. */
+  const mitFehler = e => (Array.isArray(e && e.liste) ? e.liste : []).filter(x => x && (x.versuche > 0 || x.zeitUm));
+  /** Auf Anhieb gelöst: ohne Fehlversuch, ohne Zeit um, ohne Tipp. */
+  const aufAnhieb = x => !!x && x.geloest === true && !(x.versuche > 0) && !x.zeitUm && !x.tipps;
+
+  // ---------- Ältere Einträge umdeuten (RA4 a; RA1 a im Lernsteig) ----------
+  /**
+   * Runde des Eulenpfads bis LERN_Session18: aufgabenZeiten (je Aufgabe) und fehlerAufgaben (nur mit Fehler, in derselben
+   * Reihenfolge: angelegt beim ersten Fehlversuch oder bei Zeit um) → liste. Ohne aufgabenZeiten (Runden der ersten
+   * Sitzungen): je Aufgabe mit Fehler ein Eintrag aus fehlerAufgaben, die übrigen ohne Zeit als auf Anhieb gelöst.
+   * Andere Einträge bleiben, wie sie sind.
+   */
+  function ausEulenpfad(e) {
+    if (!e || typeof e !== "object" || !("aufgabenZeiten" in e || "fehlerAufgaben" in e)) return e;
+    const { aufgabenZeiten, fehlerAufgaben, ...rest } = e;
+    const zeiten = Array.isArray(aufgabenZeiten) ? aufgabenZeiten : null;
+    const fa = (Array.isArray(fehlerAufgaben) ? fehlerAufgaben : []).filter(f => f && typeof f === "object");
+    const angaben = f => ({ text: String(f.text || ""), loesung: String(f.loesung || ""), eingaben: [] });
+    let liste;
+    if (zeiten) {
+      let k = 0;
+      liste = zeiten.map(z => {
+        const x = { ...z };
+        if (x.versuche > 0 || x.zeitUm) { const f = fa[k++]; Object.assign(x, angaben(f || {})); }
+        if (!x.geloest && !x.uebersprungen && x.versuche > 0) x.gezeigt = true;
+        return x;
+      });
+    } else {
+      liste = fa.map(f => ({ versuche: Number(f.versuche) || 0, geloest: !!f.geloest, ...(f.zeitUm ? { zeitUm: true } : {}),
+        ...(!f.geloest && f.versuche > 0 ? { gezeigt: true } : {}), ...angaben(f) }));
+      const n = Math.max(0, (Number(e.aufgaben) || 0) - liste.length);
+      for (let i = 0; i < n; i++) liste.push({ versuche: 0, geloest: true });
+    }
+    return { ...rest, liste, gezeigt: liste.filter(x => x.gezeigt).length };
+  }
+  /**
+   * Runde des Lernsteigs bis LERN_Session18: zeit war der Beginn (RA1 a: jetzt das Ende, zeit + dauer), zeiten (ms der
+   * gelösten oder aufgelösten Aufgaben), liste ({ lp, versuche, gezeigt, rechner }), falsch ([{ text, eingaben }] in der
+   * Reihenfolge der Aufgaben mit Fehlversuch, gleiche Texte zusammen) → eine liste. Andere bleiben.
+   */
+  function ausLernsteig(e) {
+    if (!e || typeof e !== "object" || !("zeiten" in e || "falsch" in e)) return e;
+    const { zeiten, falsch, ...rest } = e;
+    const ms = Array.isArray(zeiten) ? zeiten : [];
+    const fa = (Array.isArray(falsch) ? falsch : []).filter(f => f && typeof f === "object");
+    const alt = Array.isArray(e.liste) ? e.liste : [];
+    let j = 0, k = 0;
+    const liste = alt.map((x, i) => {
+      // die letzte Aufgabe einer Serie, falsch beantwortet: ohne Zeit, nicht gelöst
+      const serieVerloren = e.endlos && i === alt.length - 1 && x.versuche > 0 && !x.gezeigt;
+      const n = { ...x, geloest: !x.gezeigt && !serieVerloren };
+      if (!x.gezeigt) delete n.gezeigt;
+      if (!serieVerloren && j < ms.length) n.ms = ms[j++];
+      if (x.versuche > 0) { const f = fa[k++] || {}; Object.assign(n, { text: String(f.text || ""), loesung: "", eingaben: Array.isArray(f.eingaben) ? f.eingaben.map(String).slice(-EINGABEN_MAX) : [] }); }
+      return n;
+    });
+    const n = { ...rest, liste };
+    const beginn = Date.parse(e.zeit);
+    if (!Number.isNaN(beginn) && typeof e.dauer === "number") n.zeit = new Date(beginn + Math.round(e.dauer * 1000)).toISOString();
+    return n;
+  }
+
+  KERN.runde = { SERIE_MAX, VERSUCHE, GEDAECHTNIS_MAX, LOESUNG_NACH, gedaechtnis, auswahl, eintragen, rekordEintragen: eintragen,
+    bestwert, bestzeit, sekunden, waechter, lauf, mitFehler, aufAnhieb, ausEulenpfad, ausLernsteig };
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 
 if (typeof module !== "undefined") module.exports = globalThis.KERN;
@@ -1676,6 +1872,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
    *                 → { wert, neu }, entferne?(eigene, ids) → wert } } — Daten nur dieser App (Eulenpfad: meldungen);
    *                 hilfe = { umbiegen, personVon }
    *   altePerson    (name, profil) → Person — Profile nach Namen älterer Dateien des Eulenpfads
+   *   umdeuten      ({ runden, rekorde }) → { runden, rekorde } — Einträge älterer Fassungen der App in die heutige Form,
+   *                 vor der Prüfung (Eulenpfad, Lernsteig: KERN.runde.ausEulenpfad, ausLernsteig; RA4 a)
    */
   function daten(opt = {}) {
     const { app, speicher } = opt;
@@ -1746,7 +1944,10 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
      * Aufsicht keine Aufsichten, AS1 a); null = alle.
      */
     function einlesen(eingabe, { rollen = null } = {}) {
-      const d = lesen(eingabe, app, { altePerson });
+      const gelesen = lesen(eingabe, app, { altePerson });
+      // umgedeutet in eine Kopie: die eingegebene Datei bleibt, wie sie ist
+      const u = opt.umdeuten ? opt.umdeuten({ runden: liste(gelesen.runden), rekorde: liste(gelesen.rekorde) }) : null;
+      const d = u ? { ...gelesen, runden: liste(u.runden), rekorde: liste(u.rekorde) } : gelesen;
       const erg = { personen: { neu: 0, geaendert: 0 }, runden: 0, rekorde: 0, teile: {}, freigabe: false, abgewiesen: 0,
         kennungen: {}, ids: [], neueIds: [], geschrieben: [], datei: { art: d.art, gesichert: d.gesichert || "", geraet: d.geraet || null } };
 

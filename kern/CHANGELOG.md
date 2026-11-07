@@ -3,6 +3,17 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.20.0 — 2026-11-07 (LERN_Session19)
+- `runde.js`: Ablauf einer Runde `lauf()` (AR1 a; RA1–RA4 a, RA7 a) — die App meldet gestellt, bereit, Pause, Eingabe,
+  falsch, Zeit um, richtig, übersprungen, erschöpft; der Kern zählt Versuche und Fehler (Zeit um ist einer), sagt, wann die
+  Lösung kommt (nach dem dritten Fehlversuch mit Lösung) und wann die Serie vorbei ist, misst die Zeit je Aufgabe ab
+  `bereit` ohne Pausen und baut Eintrag (`zeit` am Ende, `dauer` auf 0,1 s, `liste` je Aufgabe, `gezeigt`, `gekuerzt`,
+  `endlos`, `abgebrochen`) und Rekord mit derselben Kennung (erst beim ersten Eintrag gezogen). Dazu `eintragen` (für Runden
+  und Rekorde; `rekordEintragen` bleibt als Name), `mitFehler`, `aufAnhieb`, `ausEulenpfad`, `ausLernsteig` (Umdeutung
+  älterer Runden, gegen die alte Aufzeichnung nachgerechnet).
+- `runden.js`: `zusammenfuehren` ersetzt bei Runden einen Zwischenstand (`abgebrochen`) durch den späteren Stand (RA3 a).
+- `daten.js`: Option `umdeuten({ runden, rekorde })` für Einträge älterer Fassungen beim Einlesen (in eine Kopie).
+
 ## 1.19.0 — 2026-11-06 (LERN_Session19)
 - `runde.js` (`KERN.runde`, AR1 a, erster Schritt): reine Hilfen des Ablaufs einer Runde — `gedaechtnis` (Durchgang über
   Runden und Serien je Person, Inhalt und Stufe, höchstens 400; alte Schlüssel übernommen, RA5 a), `auswahl` (Suche in fünf

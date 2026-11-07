@@ -182,16 +182,21 @@
   const endlosStufe = (eintrag, id) => eintrag.endlos === true || (Array.isArray(eintrag.endlos) && eintrag.endlos.includes(id));
 
   // ---------- Protokoll und Rekorde ----------
-  // Runden und Rekorde im gemeinsamen Format der Reihe (R1 a, kern/runden.js): { id, person, zeit, inhalt, stufe, … };
-  // gespeicherte von vor LERN_Session15 (konto, uebung) werden beim Laden umgedeutet (LST.ALTE_FELDER, werkzeug.js).
-  for (const k of ["runden", "rekorde"]) {
-    const l = LST.lies(k, []);
-    if (Array.isArray(l) && l.some(e => e && ("konto" in e || "uebung" in e))) LST.schreibe(k, l.map(e => KERN.runden.umdeuten(e, LST.ALTE_FELDER)));
+  // Runden und Rekorde im gemeinsamen Format der Reihe (R1 a, kern/runden.js; Ablauf KERN.runde): { id, person, zeit (Ende,
+  // RA1 a), inhalt, stufe, dauer (0,1 s), liste (je Aufgabe, RA4 a), … }; gespeicherte älterer Fassungen (konto/uebung bis
+  // LERN_Session15; zeit = Beginn, zeiten/falsch bis LERN_Session18) werden beim Laden umgedeutet (LST.alteEintraegeUmdeuten).
+  {
+    const runden = LST.lies("runden", []), rekorde = LST.lies("rekorde", []);
+    if (Array.isArray(runden) && Array.isArray(rekorde)) {
+      const u = LST.alteEintraegeUmdeuten({ runden, rekorde });
+      if (u.geaendert) { LST.schreibe("runden", u.runden); LST.schreibe("rekorde", u.rekorde); }
+    }
   }
   // Gast: nichts gespeichert (C2 a). Aufsicht: Runde und Rekord als Test (zählen nicht für einen Jugendlichen).
   const merkt = () => werUebt() !== "gast";
   const alsTest = e => (werUebt() === "aufsicht" ? Object.assign(e, { test: true }) : e);
-  function protokolliere(runde) { if (!merkt()) return; const r = LST.lies("runden", []); r.push(alsTest(runde)); LST.schreibe("runden", r); }
+  /** Runde speichern; gleiche Kennung ersetzt einen Zwischenstand derselben Serie (RA3 a). */
+  function protokolliere(runde) { if (!merkt()) return; LST.schreibe("runden", KERN.runde.eintragen(LST.lies("runden", []), alsTest(runde))); }
   function runden(filter) { return LST.lies("runden", []).filter(filter || (() => true)); }
 
   /** Rekord speichern oder ersetzen (gleiche Kennung = Zwischenstand derselben Serie; KERN.runde). */
@@ -232,7 +237,6 @@
   const gedaechtnisFuer = (kontoId, uebung, stufe) => KERN.runde.gedaechtnis({
     speicher: merkt() ? { lies: LST.lies, schreibe: LST.schreibe } : nurHier, schluessel: `${kontoId}|${uebung}/${stufe}` });
 
-  const sekunden = KERN.runde.sekunden;
   const dauerText = s => (s < 60 ? `${LST.dezimalText(s, 1)} s` : `${Math.floor(s / 60)} min ${Math.round(s % 60)} s`);
 
   // ---------- Übungsseite ----------
@@ -323,18 +327,19 @@
     function runde(st, endlos) {
       adresse(st, endlos);
       const k = konto();
-      const start = Date.now();
       const anzahl = endlos ? Infinity : eintrag.anzahl;
-      const ergebnis = { aufAnhieb: 0, fehler: 0, gezeigt: 0, zeiten: [], falsch: [], liste: [], mitRechner: false };
-      const rundeId = KERN.runden.neueId();
+      // Ablauf im Kern (KERN.runde.lauf, AR1 a): Versuche, Fehler, Lösung nach dem dritten Fehlversuch, Ende der Serie,
+      // Zeit je Aufgabe, Eintrag und Rekord. Hier bleiben Oberfläche, Prüfen der Antwort und Rechner.
+      const L = KERN.runde.lauf({ endlos, anzahl });
       // Auswahl der Aufgaben (RA5 a, RA6 a): keine zweimal, solange die Stufe neue hergibt; über Runden ein Durchgang.
       // Ist die Stufe erschöpft, endet die Runde früher (gekuerzt) bzw. die Serie mit „alles geschafft“.
       const wahl = KERN.runde.auswahl({ gedaechtnis: gedaechtnisFuer(k.id, def.id, st), endlos });
-      let erschoepft = false;
       // Bestwerte vor dieser Runde, für den Vergleich im Ergebnis
       const rekordVorher = { true: bestwert(k.id, def.id, st, true), false: bestwert(k.id, def.id, st, false) };
       const bestzeitVorher = { true: bestzeit(k.id, def.id, st, true), false: bestzeit(k.id, def.id, st, false) };
-      let nr = 0, punkte = 0, vorbei = false;
+      let nr = 0, vorbei = false;
+      const mitRechner = () => L.liste.some(x => x.rechner);
+      const felder = () => ({ person: k.id, inhalt: def.id, stufe: st, niveau, mitRechner: mitRechner() });
       const stufeObj = LST.stufeVon(eintrag, st);
       const stName = stufeObj.name;
       // Welche Lehrplan-Stufe die nächste Aufgabe stellt: Übergang mischt beide, Challenge hat eigene Aufgaben.
@@ -354,9 +359,12 @@
       rechnerEl.hidden = true;
       buehne.replaceChildren(fortschritt, aufgabeFeld, antwort, rechnerEl, rueck);
 
-      // Serie mitten drin verlassen: Stand bis dahin zählt (abgeschaut vom Eulenpfad, Entscheid E1 a dort).
+      // Serie mitten drin verlassen: Stand bis dahin zählt (abgeschaut vom Eulenpfad, Entscheid E1 a dort), als Rekord und
+      // Runde (RA3 a); das Ende ersetzt beide (gleiche Kennung).
       const zwischenstand = () => {
-        if (endlos && !vorbei && punkte > 0) speichereRekord({ id: rundeId, person: k.id, zeit: new Date(start).toISOString(), inhalt: def.id, stufe: st, niveau, punkte, dauer: sekunden(Date.now() - start), mitRechner: ergebnis.mitRechner, abgebrochen: true });
+        if (!endlos || vorbei || L.geschafft === 0) return;
+        speichereRekord(L.rekord(felder(), { abgebrochen: true }));
+        protokolliere(L.eintrag({ ...felder(), fach: fach.id, aufAnhieb: L.liste.filter(KERN.runde.aufAnhieb).length, gruppe: null }, { abgebrochen: true }));
       };
       const waechter = KERN.runde.waechter(zwischenstand);
       const aufraeumen = () => waechter.aus();
@@ -375,17 +383,17 @@
       let auswahlAufraeumen = null;
       function naechste() {
         if (auswahlAufraeumen) { auswahlAufraeumen(); auswahlAufraeumen = null; }
-        if (nr >= anzahl) return schluss();
+        if (L.vorbei) return schluss();
         const a = ziehe();
-        if (!a) { erschoepft = true; return schluss(); }
+        if (!a) { L.erschoepft(); return schluss(); }
         nr++;
         aktuell = a;
-        let versuche = 0, gelost = false;
-        const t0 = Date.now();
+        let gelost = false;
+        L.gestellt({ text: a.text, loesung: a.loesung });
         const rechner = rechnerFuer(eintrag, a.stufe);
         rechnerBenutzt = false;
         if (!rechner || rechner === "ohne") rechnerEl.hidden = true;
-        fortschritt.textContent = (endlos ? `Serie: ${punkte} richtig` : `Aufgabe ${nr} von ${anzahl}`) + (rechner ? ` · ${RECHNER_TEXT[rechner]}` : "");
+        fortschritt.textContent = (endlos ? `Serie: ${L.geschafft} richtig` : `Aufgabe ${nr} von ${anzahl}`) + (rechner ? ` · ${RECHNER_TEXT[rechner]}` : "");
         aufgabeFeld.replaceChildren(...[el("span", { class: a.text.length > 36 ? "term lang" : "term", text: a.text, lang: eintrag.sprache }), a.darstellung ? darstellung(a.darstellung) : null].filter(Boolean));
         rueck.replaceChildren();
         rueck.className = "rueckmeldung";
@@ -455,28 +463,21 @@
             if (wert === null) { zeige("hinweis", "Bitte eine Zahl eingeben."); feld.focus(); return; }
             richtig = Math.abs(wert - a.antwort) <= (a.toleranz || 0) + 1e-9; // toleranz: gerundete Ergebnisse (π)
           }
+          // Felder des Lernsteigs je Aufgabe: Lehrplan-Stufe und ob der Rechner offen war (RE1 a)
+          L.zusatz({ lp: a.stufe, rechner: rechnerBenutzt });
+          const eingabe = typeof wert === "number" ? LST.dezimalText(wert) : wert;
           if (richtig) {
             gelost = true;
-            ergebnis.zeiten.push(Date.now() - t0);
-            if (versuche === 0) ergebnis.aufAnhieb++;
-            if (endlos) punkte++;
-            notiere(false);
             // RA8 a (wie LB1 a im Eulenpfad): auf Anhieb nur die Bestätigung, es geht von selbst weiter; nach einem
             // Fehlversuch der Weg mit „Weiter“, ohne Selbstlauf — vorher stand er auch dort nur 1,2 s da.
-            if (versuche === 0) { zeige("gut", "Richtig."); weiterKnopf(endlos ? 700 : 1200); }
+            if (L.richtig({ eingabe }).aufAnhieb) { zeige("gut", "Richtig."); weiterKnopf(endlos ? 700 : 1200); }
             else { zeige("gut", "Jetzt stimmt es.", a.weg); weiterKnopf(null); }
             return;
           }
-          versuche++;
-          ergebnis.fehler++;
-          const eintragFalsch = ergebnis.falsch.find(f => f.text === a.text) || (ergebnis.falsch.push({ text: a.text, eingaben: [] }), ergebnis.falsch[ergebnis.falsch.length - 1]);
-          eintragFalsch.eingaben.push(typeof wert === "number" ? LST.dezimalText(wert) : wert);
-          if (endlos) { gelost = true; notiere(false); zeige("hinweis", `Nicht ganz. Richtig wäre ${a.loesung}.`, a.weg); weiterKnopf(null, true); return; }
-          if (versuche >= 3) {
+          const f = L.falsch({ eingabe });
+          if (f.vorbei) { gelost = true; zeige("hinweis", `Nicht ganz. Richtig wäre ${a.loesung}.`, a.weg); weiterKnopf(null, true); return; }
+          if (f.loesungZeigen) {
             gelost = true;
-            ergebnis.gezeigt++;
-            ergebnis.zeiten.push(Date.now() - t0);
-            notiere(true);
             zeige("hinweis", `Die Lösung ist ${a.loesung}.`, a.weg);
             weiterKnopf(null);
             return;
@@ -484,10 +485,6 @@
           zeige("hinweis", fn.hinweis(a, wert));
           if (!auswahl) feld.select();
         };
-        function notiere(gezeigt) {
-          ergebnis.liste.push({ lp: a.stufe, versuche, gezeigt, rechner: rechnerBenutzt });
-          if (rechnerBenutzt) ergebnis.mitRechner = true;
-        }
         ok.onclick = () => pruefe();
         feld.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); pruefe(); } });
       }
@@ -510,35 +507,34 @@
         if (ende) speichereSerie();
       }
 
+      let gespeichert = null; // der Eintrag dieser Runde, sobald sie gespeichert ist
       function speichereSerie() {
         if (vorbei) return;
         vorbei = true;
         aufraeumen();
-        if (endlos && punkte > 0) speichereRekord({ id: rundeId, person: k.id, zeit: new Date(start).toISOString(), inhalt: def.id, stufe: st, niveau, punkte, dauer: sekunden(Date.now() - start), mitRechner: ergebnis.mitRechner, ...(erschoepft ? { alles: true } : {}) });
-        protokolliere({
-          id: rundeId, person: k.id, zeit: new Date(start).toISOString(), inhalt: def.id, fach: fach.id, stufe: st, niveau,
-          endlos, aufgaben: nr, ...(!endlos && erschoepft ? { gekuerzt: eintrag.anzahl } : {}), aufAnhieb: ergebnis.aufAnhieb, fehler: ergebnis.fehler, gezeigt: ergebnis.gezeigt,
-          dauer: sekunden(Date.now() - start), zeiten: ergebnis.zeiten, falsch: ergebnis.falsch, liste: ergebnis.liste, mitRechner: ergebnis.mitRechner, gruppe: null,
-        });
+        if (endlos && L.geschafft > 0) speichereRekord(L.rekord(felder()));
+        gespeichert = L.eintrag({ ...felder(), fach: fach.id, aufAnhieb: L.liste.filter(KERN.runde.aufAnhieb).length, gruppe: null });
+        protokolliere(gespeichert);
       }
 
       function schluss() {
         if (auswahlAufraeumen) { auswahlAufraeumen(); auswahlAufraeumen = null; }
         speichereSerie();
         aktuell = null;
-        const dauer = sekunden(Date.now() - start);
+        const { dauer, aufAnhieb, gezeigt, gekuerzt } = gespeichert;
+        const punkte = L.geschafft;
         fortschritt.textContent = "Ergebnis";
         aufgabeFeld.replaceChildren();
         rueck.className = "rueckmeldung";
         // Bestzeit zählt nur Runden ohne gezeigte Lösung; Rekord ist die längste Serie.
         // Verglichen wird mit derselben Seite: mit oder ohne Rechner (RE1 a).
-        const mit = ergebnis.mitRechner, seite = mit ? " mit Rechner" : "";
+        const mit = gespeichert.mitRechner, seite = mit ? " mit Rechner" : "";
         const bz = bestzeitVorher[mit], rk = rekordVorher[mit];
         // Eine gekürzte Runde (RA6 a) zählt nicht für die Bestzeit.
-        const neueBestzeit = ergebnis.gezeigt === 0 && !erschoepft && (bz === null || dauer < bz);
+        const neueBestzeit = gezeigt === 0 && !gekuerzt && (bz === null || dauer < bz);
         const zeilen = endlos
-          ? [`${punkte} richtig in Folge${seite}`, erschoepft ? "Alle Aufgaben dieser Stufe geschafft." : "", punkte > rk ? "Neuer Rekord." : `Rekord${seite}: ${rk}`]
-          : [`${ergebnis.aufAnhieb} von ${nr} auf Anhieb richtig`, `Zeit${seite}: ${dauerText(dauer)}`,
+          ? [`${punkte} richtig in Folge${seite}`, L.erschoepftIst ? "Alle Aufgaben dieser Stufe geschafft." : "", punkte > rk ? "Neuer Rekord." : `Rekord${seite}: ${rk}`]
+          : [`${aufAnhieb} von ${nr} auf Anhieb richtig`, `Zeit${seite}: ${dauerText(dauer)}`,
             neueBestzeit ? "Neue Bestzeit." : (bz !== null ? `Bestzeit${seite}: ${dauerText(bz)}` : "")];
         rueck.replaceChildren(el("div", { class: "ergebnis" }, zeilen.filter(Boolean).map(t => el("p", { text: t }))));
         antwort.replaceChildren(

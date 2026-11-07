@@ -59,7 +59,7 @@ const ERFOLGE = (() => {
   ];
   const nte = (liste, n) => (liste.length >= n ? liste[n - 1].zeit : null);
   const zaehler = (liste, soll) => ({ ist: Math.min(liste.length, soll), soll, wann: nte(liste, soll) });
-  const anhieb = e => e.aufgaben > 0 && !e.fehlerAufgaben?.length && !e.tipps;
+  const anhieb = e => e.aufgaben > 0 && !KERN.runde.mitFehler(e).length && !e.tipps;
   const dreiSterne = e => e.sterne === 3;
   /** Spiele, in denen alle sechs Stufen gespielt (bzw. mit 3 Sternen) sind: Zeit der Runde, die das Set vollendet. */
   function alleStufen(runden, nurDrei) {
@@ -121,13 +121,13 @@ const ERFOLGE = (() => {
     // sicher stempelt, bekommt dafür ein Abzeichen statt mehr Sterne
     { id: "nachgerechnet", bild: "🔎", titel: "Ganz sicher", stufen: [5, 10, 25, 50, 100],
       text: n => `${n}-mal bei passender Endziffer nachgerechnet und sicher gestempelt.`,
-      pruefe: (k, n) => zaehler(k.runden.flatMap(e => (e.aufgabenZeiten || []).filter(a => a.vorgehen?.endprobe === "nachgerechnet" && !a.versuche)
+      pruefe: (k, n) => zaehler(k.runden.flatMap(e => (e.liste || []).filter(a => a.vorgehen?.endprobe === "nachgerechnet" && !a.versuche)
         .map(() => ({ zeit: e.zeit }))), n) },
     // NZ1 a mit Zusatz Patrik (LERN_Session13): Aufgaben mit Notizfeldern im Kopf und auf Anhieb gelöst
     { id: "kopfrechner", bild: "🧠", titel: "Kopfrechner", stufen: [10, 25, 50, 100, 250],
       text: n => `${n} Aufgaben mit mehreren Rechenschritten ganz im Kopf gelöst — die Notizen blieben leer.`,
-      pruefe: (k, n) => zaehler(k.runden.flatMap(e => (e.aufgabenZeiten || [])
-        .filter(a => a.vorgehen?.notiz === "ohne" && a.geloest && !a.versuche && !a.tipps && !a.zeitUm).map(() => ({ zeit: e.zeit }))), n) },
+      pruefe: (k, n) => zaehler(k.runden.flatMap(e => (e.liste || [])
+        .filter(a => a.vorgehen?.notiz === "ohne" && KERN.runde.aufAnhieb(a)).map(() => ({ zeit: e.zeit }))), n) },
     // Klassenaufstieg durch die Aufsicht (Wunsch Patrik, LERN_Session14): je Schuljahr eine Stufe, aus Profil aufstiege
     { id: "aufgestiegen", bild: "🏫", titel: "Aufgestiegen", stufen: [1, 2, 3, 4, 5],
       text: n => (n === 1 ? "In die nächste Klasse aufgestiegen." : `${n}-mal in die nächste Klasse aufgestiegen.`),

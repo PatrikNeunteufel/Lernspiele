@@ -361,6 +361,10 @@ const PRUEFSTAND = {
       "am": "2026-11-02",
       "von": "Patrik"
     },
+    "vergleichs-krokodil": {
+      "am": "2026-11-06",
+      "von": "Patrik"
+    },
     "wuerfel-kipper": {
       "am": "2026-11-04",
       "von": "Patrik"

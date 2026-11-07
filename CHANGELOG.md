@@ -617,3 +617,17 @@
 - Ersatz-DOM (`tools/pruef_dom.js`): `addEventListener` auch als Eigenschaft des Fensters, wie im Browser.
 - Doku: docs/kern/rahmen.md 4.22 (neu), 4.23; rahmen.md 4.2 und 7 (Wiederholungen); lernsteig/rahmen.md 5;
   gemeinsame_mechaniken.md; Plan (RA1–RA8 a, Stand B).
+- Kern 1.20.0: Ablauf einer Runde `KERN.runde.lauf()` — Versuche, Fehler, Lösung nach dem dritten Fehlversuch, Ende der
+  Serie, Zeit je Aufgabe ab `bereit` ohne Pausen (RA7 a), Eintrag mit `zeit` am Ende, `dauer` auf 0,1 s und einer Liste je
+  Aufgabe (RA1, RA2, RA4 a), Rekord mit derselben Kennung; Umdeutung älterer Runden (`ausEulenpfad`, `ausLernsteig`,
+  gegen die alte Aufzeichnung nachgerechnet); beim Zusammenführen ersetzt der spätere Stand einen Zwischenstand einer
+  Runde; `KERN.daten` deutet beim Einlesen um.
+- Eulenpfad und Lernsteig auf dem Ablauf des Kerns: Protokoll mit `liste` statt `aufgabenZeiten`/`fehlerAufgaben`
+  (Eulenpfad) bzw. `zeiten`/`falsch` (Lernsteig); alte Runden beim Laden und Einlesen umgedeutet (Lernsteig dazu `zeit`
+  vom Beginn ans Ende, RA1 a). Eine Serie steht auch im Protokoll (RA3 a): ihre Zeit und Aufgaben zählen in Statistik,
+  Stand, Fazit und Wochenziel; in Sterne-Auswertungen und Konzentration nicht. Zufallsmix meldet je Aufgabe den Eintrag
+  des Kerns und schreibt `liste`; im Endlos-Mix auch Protokoll. Statistik des Eulenpfads zeigt Serien („♾ n in Folge“)
+  und je Aufgabe mit Fehler „Lösung gezeigt“, „übersprungen“ oder „nicht gelöst“. Klickzahlen der Stichprobe gleich wie
+  vor dem Umbau (die Kennung einer Runde entsteht erst beim Speichern).
+- Testskript: Liste je Aufgabe passt zur Runde (Aufgaben, Fehler, gezeigt), Serie im Protokoll mit derselben Kennung
+  (Gegenprobe schlägt an), Mix-Meldung trägt ihre Fehler selbst; Musterrunden der Anleitungsbilder im neuen Format.

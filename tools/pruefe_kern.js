@@ -649,7 +649,7 @@ console.log("personenmenue.js");
   // ---------- Ablauf einer Runde: reine Hilfen (AR1 a, RA5 a, RA6 a) ----------
   console.log("runde.js");
   {
-    const R = KERN.runde, FP = KERN.runden.fingerabdruck;
+    const R = KERN.runde, RU = KERN.runden, FP = KERN.runden.fingerabdruck;
     const ersatzSpeicher = () => { const d = {}; return { d, lies: (k, s) => (k in d ? JSON.parse(d[k]) : s), schreibe: (k, v) => { d[k] = JSON.stringify(v); } }; };
     // Gedächtnis: merken, Höchstzahl, alte Schlüssel übernehmen und entfernen
     {
@@ -772,6 +772,130 @@ console.log("personenmenue.js");
       h.pagehide(); h.visibilitychange(); d.visibilityState = "hidden"; h.visibilitychange();
       w.aus();
       gleich([n, Object.keys(h).length, w.an].join(), "2,0,false", "Wächter: Verlassen und Verstecken, dann aus");
+    }
+
+    // ---------- Ablauf (RA1–RA4 a, RA7 a) ----------
+    {
+      let t = 0; const messuhr = () => t, uhr = () => new Date(Date.UTC(2026, 10, 6, 10, 0, 0) + t);
+      const l = R.lauf({ anzahl: 3, messuhr, uhr, id: "r-test" });
+      // 1: ab bereit gemessen, Pause zählt nicht, auf Anhieb
+      l.gestellt({ text: "3 + 4", loesung: "7" }); t += 2000; l.bereit(); t += 1000; l.pause(); t += 5000; l.weiter(); t += 500;
+      gleich(l.richtig().aufAnhieb, true, "Ablauf: auf Anhieb");
+      // 2: zwei Fehlversuche, Zeit um, dann richtig (Zeit um ist ein Fehler, die Aufgabe bleibt offen)
+      l.gestellt({ text: "5 · 6" }); t += 700;
+      l.falsch({ eingabe: "35", loesung: "30" }); l.falsch({ eingabe: "36" }); gleich(l.zeitUm().vorbei, false, "Zeit um: Aufgabe bleibt offen");
+      gleich(l.richtig({ eingabe: "30" }).aufAnhieb, false, "nach Fehlversuch nicht auf Anhieb");
+      // 3: dreimal falsch mit Lösung → zeigen
+      l.gestellt({ text: "9 − 2", loesung: "7" }); t += 300;
+      const f3 = [l.falsch(), l.falsch(), l.falsch()];
+      gleich(f3.map(f => f.loesungZeigen).join(), "false,false,true", "Lösung nach dem dritten Fehlversuch");
+      gleich([l.vorbei, l.offen].join(), "true,false", "Runde nach anzahl Aufgaben vorbei");
+      wirft(() => l.gestellt(), "nach dem Ende keine Aufgabe mehr");
+      const e = l.eintrag({ person: "p-1", inhalt: "x", stufe: "s3" });
+      gleich([e.id, e.zeit, e.dauer, e.aufgaben, e.fehler, e.gezeigt, "endlos" in e, "gekuerzt" in e].join(),
+        "r-test,2026-11-06T10:00:09.500Z,9.5,3,6,1,false,false", "Eintrag: Ende als zeit, Dauer auf 0,1 s, Zähler");
+      gleich(JSON.stringify(e.liste[0]), '{"ms":1500,"versuche":0,"geloest":true}', "Aufgabe 1: ab bereit, ohne Pause");
+      gleich(JSON.stringify(e.liste[1]), '{"ms":700,"versuche":2,"geloest":true,"zeitUm":true,"text":"5 · 6","loesung":"30","eingaben":["35","36","30"]}', "Aufgabe 2: mit Angaben, ohne bereit ab gestellt");
+      gleich([e.liste[2].gezeigt, e.liste[2].geloest, e.liste[2].loesung].join(), "true,false,7", "Aufgabe 3: gezeigt");
+      gleich(R.mitFehler(e).length, 2, "mitFehler");
+      gleich(e.liste.filter(R.aufAnhieb).length, 1, "aufAnhieb");
+      gleich(RU.maengel(e).length, 0, "Eintrag erfüllt das Format der Runden");
+      // ohne Lösung bleibt die Aufgabe offen; Zusatz der App; übersprungen
+      const l2 = R.lauf({ anzahl: 5, messuhr, uhr });
+      l2.gestellt(); l2.falsch(); l2.falsch(); l2.falsch();
+      gleich([l2.falsch().loesungZeigen, l2.offen].join(), "false,true", "ohne Lösung kein Zeigen, Aufgabe offen");
+      l2.zusatz({ tipps: 1, lp: "h" }); l2.richtig();
+      l2.gestellt(); l2.uebersprungen(); l2.erschoepft();
+      const e2 = l2.eintrag({}, { abgebrochen: true });
+      gleich([e2.liste[0].tipps, e2.liste[0].lp, e2.liste[1].uebersprungen, e2.gekuerzt, e2.abgebrochen, l2.vorbei].join(), "1,h,true,5,true,true", "Zusatz, übersprungen, gekürzt, abgebrochen");
+      // Serie: erste falsche Antwort beendet sie; Rekord mit gleicher Kennung
+      const s = R.lauf({ endlos: true, messuhr, uhr, id: "r-s" });
+      for (let i = 0; i < 3; i++) { s.gestellt(); s.richtig(); }
+      s.gestellt(); gleich(s.falsch().vorbei, true, "Serie: falsch beendet sie");
+      const rk = s.rekord({ person: "p-1", inhalt: "x", stufe: "s3" }), es = s.eintrag({ person: "p-1", inhalt: "x", stufe: "s3", sterne: null });
+      gleich([rk.id, rk.punkte, "alles" in rk, es.endlos, es.aufgaben, es.fehler, s.vorbei].join(), "r-s,3,false,true,4,1,true", "Serie: Rekord und Eintrag");
+      const s2 = R.lauf({ endlos: true, messuhr, uhr }); s2.gestellt(); gleich(s2.zeitUm().vorbei, true, "Serie: Zeit um beendet sie");
+      // Zusammenführen (RA3 a): der spätere Stand ersetzt den Zwischenstand
+      const zw = { ...es, abgebrochen: true, aufgaben: 2 };
+      const z1 = RU.zusammenfuehren([zw], [es]), z2 = RU.zusammenfuehren([es], [zw]);
+      gleich([z1.ersetzt, z1.eintraege[0].aufgaben, z2.ersetzt, z2.eintraege[0].aufgaben].join(), "1,4,0,4", "Runde: Zwischenstand weicht dem späteren Stand");
+      gleich(R.eintragen([zw], es).length, 1, "eintragen: gleiche Kennung ersetzt");
+    }
+
+    // ---------- Umdeuten älterer Einträge: Nachrechnung gegen die bisherige Aufzeichnung (RA4 a, RA1 a) ----------
+    {
+      // Zufällige Runden: je Aufgabe eine Folge aus f (falsch), z (Zeit um), r (richtig), u (übersprungen); dieselbe
+      // Folge einmal durch die alte Aufzeichnung (unabhängig nachgebaut) und einmal durch KERN.runde.lauf.
+      const vergleiche = (x, felder) => JSON.stringify(felder.map(f => [f, x[f] === undefined || x[f] === false ? null : x[f]]));
+      const FELDER = ["ms", "versuche", "geloest", "gezeigt", "uebersprungen", "zeitUm", "text", "loesung"];
+      let abw = 0, abwL = 0, n = 0;
+      for (let fall = 0; fall < 300; fall++) {
+        const zz = KERN.zufall.mitStartwert(5000 + fall);
+        const aufg = 1 + Math.floor(zz() * 8);
+        // --- Eulenpfad ---
+        let t = 0; const l = R.lauf({ anzahl: aufg, messuhr: () => t });
+        const aufgabenZeiten = [], fehlerAufgaben = [];
+        for (let i = 0; i < aufg; i++) {
+          const text = `A${i}`, loesung = zz() < 0.8 ? `L${i}` : "";
+          l.gestellt({ text }); t += 1;
+          let versuche = 0, zeitUm = false, eintrag = null, ende = null;
+          const fe = lt => { if (!eintrag) { eintrag = { text, loesung: lt || "", versuche: 0, geloest: false, zeitUm: false }; fehlerAufgaben.push(eintrag); } if (lt && !eintrag.loesung) eintrag.loesung = lt; return eintrag; };
+          while (!ende) {
+            const w = zz(), ms = 100 + Math.floor(zz() * 900);
+            if (w < 0.35) { versuche++; fe(loesung).versuche = versuche; t += ms; const r = l.falsch({ loesung }); if (versuche >= 3 && loesung) { ende = { geloest: false }; if (!r.loesungZeigen) abw++; } }
+            else if (w < 0.45 && !zeitUm) { zeitUm = true; fe("").zeitUm = true; t += ms; l.zeitUm(); }
+            else if (w < 0.5) { t += ms; ende = { geloest: false, uebersprungen: true }; l.uebersprungen(); }
+            else { t += ms; ende = { geloest: true }; if (eintrag) eintrag.geloest = true; l.richtig(); }
+          }
+          aufgabenZeiten.push({ ms: l.liste.at(-1).ms, versuche, zeitUm, geloest: ende.geloest, ...(ende.uebersprungen ? { uebersprungen: true } : {}) });
+        }
+        const alt = R.ausEulenpfad({ id: "r", aufgaben: aufg, aufgabenZeiten, fehlerAufgaben });
+        const neu = l.liste;
+        n++;
+        if (alt.liste.length !== neu.length || alt.liste.some((x, i) => vergleiche(x, FELDER) !== vergleiche(neu[i], FELDER))) abw++;
+        if ("aufgabenZeiten" in alt || "fehlerAufgaben" in alt || alt.gezeigt !== l.gezeigt) abw++;
+        // --- Lernsteig (bis LERN_Session18: zeit = Beginn; ohne Zeit um) ---
+        const endlos = zz() < 0.3;
+        let u = 0; const ls = R.lauf({ endlos, anzahl: endlos ? Infinity : aufg, messuhr: () => u });
+        const alteListe = [], zeiten = [], falsch = [];
+        for (let i = 0; i < (endlos ? 20 : aufg) && !ls.vorbei; i++) {
+          const text = `T${i}`, loesung = `${i}`;
+          ls.gestellt({ text, loesung }); const t0 = u;
+          let versuche = 0, fertig = false;
+          while (!fertig) {
+            u += 50 + Math.floor(zz() * 500);
+            if (zz() < (endlos ? 0.15 : 0.4)) {
+              versuche++;
+              const eing = `E${versuche}`;
+              const f = falsch.find(x => x.text === text) || (falsch.push({ text, eingaben: [] }), falsch.at(-1)); f.eingaben.push(eing);
+              const r = ls.falsch({ eingabe: eing });
+              if (endlos) { alteListe.push({ lp: "h", versuche, gezeigt: false, rechner: false }); fertig = true; }
+              else if (versuche >= 3) { zeiten.push(u - t0); alteListe.push({ lp: "h", versuche, gezeigt: true, rechner: false }); fertig = true; if (!r.loesungZeigen) abwL++; }
+            } else { zeiten.push(u - t0); alteListe.push({ lp: "h", versuche, gezeigt: false, rechner: false }); ls.richtig(); fertig = true; }
+            if (fertig && ls.offen) abwL++;
+          }
+        }
+        const beginn = "2026-11-06T09:00:00.000Z";
+        const altL = R.ausLernsteig({ id: "r", zeit: beginn, dauer: 61.25, endlos, liste: alteListe, zeiten, falsch });
+        const neuL = ls.liste;
+        // ms nur, wo die alte Aufzeichnung eine Zeit hatte: die letzte, falsch beantwortete Aufgabe einer Serie bekam keine
+        const FL = ["versuche", "geloest", "gezeigt", "text"];
+        if (altL.liste.length !== neuL.length || altL.liste.some((x, i) => vergleiche(x, FL) !== vergleiche(neuL[i], FL) || x.lp !== "h"
+          || ("ms" in x ? x.ms !== neuL[i].ms : !(endlos && i === altL.liste.length - 1))
+          || (x.versuche > 0 && JSON.stringify(x.eingaben) !== JSON.stringify(neuL[i].eingaben)))) abwL++;
+        if (altL.zeit !== "2026-11-06T09:01:01.250Z" || "zeiten" in altL || "falsch" in altL) abwL++;
+      }
+      gleich(abw, 0, `Umdeuten Eulenpfad: alte Aufzeichnung = Liste des Kerns (${n} Runden)`);
+      gleich(abwL, 0, `Umdeuten Lernsteig: alte Aufzeichnung = Liste des Kerns, zeit am Ende (${n} Runden)`);
+      // Gegenprobe: eine vertauschte Fehlerliste fällt auf
+      const za = [{ ms: 1, versuche: 1, zeitUm: false, geloest: true }, { ms: 2, versuche: 2, zeitUm: false, geloest: true }];
+      const umg = R.ausEulenpfad({ aufgaben: 2, aufgabenZeiten: za, fehlerAufgaben: [{ text: "B" }, { text: "A" }] });
+      gleich(umg.liste.map(x => x.text).join(), "B,A", "Zuordnung nach Reihenfolge (Gegenprobe: vertauscht bleibt vertauscht)");
+      // Runden der ersten Sitzungen ohne aufgabenZeiten
+      const fr = R.ausEulenpfad({ aufgaben: 4, fehlerAufgaben: [{ text: "X", loesung: "1", versuche: 3, geloest: false }] });
+      gleich([fr.liste.length, fr.liste[0].gezeigt, fr.liste[1].geloest, "ms" in fr.liste[1], fr.gezeigt].join(), "4,true,true,false,1", "ohne aufgabenZeiten: Rest ohne Zeit");
+      const neuer = { id: "r", liste: [], zeit: "2026-11-06T09:00:00.000Z", dauer: 3 };
+      gleich([R.ausEulenpfad(neuer) === neuer, R.ausLernsteig(neuer) === neuer].join(), "true,true", "heutige Einträge bleiben");
     }
   }
 

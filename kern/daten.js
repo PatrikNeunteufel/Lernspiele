@@ -169,6 +169,8 @@
    *                 → { wert, neu }, entferne?(eigene, ids) → wert } } — Daten nur dieser App (Eulenpfad: meldungen);
    *                 hilfe = { umbiegen, personVon }
    *   altePerson    (name, profil) → Person — Profile nach Namen älterer Dateien des Eulenpfads
+   *   umdeuten      ({ runden, rekorde }) → { runden, rekorde } — Einträge älterer Fassungen der App in die heutige Form,
+   *                 vor der Prüfung (Eulenpfad, Lernsteig: KERN.runde.ausEulenpfad, ausLernsteig; RA4 a)
    */
   function daten(opt = {}) {
     const { app, speicher } = opt;
@@ -239,7 +241,10 @@
      * Aufsicht keine Aufsichten, AS1 a); null = alle.
      */
     function einlesen(eingabe, { rollen = null } = {}) {
-      const d = lesen(eingabe, app, { altePerson });
+      const gelesen = lesen(eingabe, app, { altePerson });
+      // umgedeutet in eine Kopie: die eingegebene Datei bleibt, wie sie ist
+      const u = opt.umdeuten ? opt.umdeuten({ runden: liste(gelesen.runden), rekorde: liste(gelesen.rekorde) }) : null;
+      const d = u ? { ...gelesen, runden: liste(u.runden), rekorde: liste(u.rekorde) } : gelesen;
       const erg = { personen: { neu: 0, geaendert: 0 }, runden: 0, rekorde: 0, teile: {}, freigabe: false, abgewiesen: 0,
         kennungen: {}, ids: [], neueIds: [], geschrieben: [], datei: { art: d.art, gesichert: d.gesichert || "", geraet: d.geraet || null } };
 

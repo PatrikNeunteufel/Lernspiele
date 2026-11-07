@@ -167,8 +167,10 @@ const LS = (() => {
   //     zuletzt gefeierten Aufstiegs (das Kind hat die Nachricht gesehen)
   //   reihenfolge: { global, spiele: { <spiel-id>: … } } mit "stufe" | "geordnet" | "gemischt" }
   // Protokoll: je gespielte Runde ein Eintrag im gemeinsamen Format (R1 a, kern/runden.js)
-  // { id, person, name (Anzeige), zeit (ISO), inhalt (Spiel), stufe, sterne, fehler, aufgaben, dauer (s), geordnet,
-  //   fehlerAufgaben: [{ text, loesung, versuche, geloest }] } — bis LERN_Session15 „spiel“ statt „inhalt“, ohne id
+  // { id, person, name (Anzeige), zeit (ISO, Ende), inhalt (Spiel), stufe, sterne (null: Serie, Mix), fehler, aufgaben,
+  //   gezeigt, dauer (s, auf 0,1), geordnet, endlos?, gekuerzt?, abgebrochen?, liste: [{ ms, versuche, geloest, gezeigt?,
+  //   uebersprungen?, zeitUm?, text?, loesung?, eingaben?, tipps?, vorgehen? }] } (KERN.runde, RA1–RA4 a) — bis
+  //   LERN_Session15 „spiel“ statt „inhalt“, ohne id; bis LERN_Session18 aufgabenZeiten und fehlerAufgaben statt liste
 
   //   timer: { an, faktor, spiele: { <spiel-id>: { an (null = wie global), sekunden: { s1: … } } } }
   //   rolle: "lernend" | "aufsicht" (Entscheid L2 a; bis LERN_Session15 „kind“, P2 a) — die Aufsicht meldet sich mit PIN an, verwaltet
@@ -243,9 +245,10 @@ const LS = (() => {
    * erst ab 5 Messungen; sonst null.
    */
   function zeitVorschlag(name, spiel, stufe) {
+    // ohne Serien: dort wird die Zeit je Aufgabe knapper (ENDLOS_TEMPO), der Vorschlag gälte für gewöhnliche Runden
     const ms = protokoll()
-      .filter(e => e.name === name && e.inhalt === spiel && e.stufe === stufe)
-      .flatMap(e => (e.aufgabenZeiten || []).filter(a => a.geloest && a.versuche === 0 && !a.zeitUm).map(a => a.ms))
+      .filter(e => e.name === name && e.inhalt === spiel && e.stufe === stufe && !e.endlos)
+      .flatMap(e => (e.liste || []).filter(a => a.geloest && a.versuche === 0 && !a.zeitUm && typeof a.ms === "number").map(a => a.ms))
       .sort((a, b) => a - b);
     if (ms.length < 5) return null;
     return { sekunden: Math.max(5, Math.round(ms[Math.floor(ms.length / 2)] * 1.5 / 1000)), n: ms.length };
@@ -387,6 +390,11 @@ const LS = (() => {
       const l = lies(k, []);
       if (Array.isArray(l) && l.some(e => e && (!e.id || "spiel" in e))) schreibe(k, l.map(e => KERN.runden.umdeuten(e, { spiel: "inhalt" })));
     }
+    // Liste je Aufgabe (RA4 a, LERN_Session19): aufgabenZeiten und fehlerAufgaben → liste (KERN.runde.ausEulenpfad)
+    {
+      const l = lies("protokoll", []);
+      if (Array.isArray(l) && l.some(e => e && ("aufgabenZeiten" in e || "fehlerAufgaben" in e))) schreibe("protokoll", l.map(KERN.runde.ausEulenpfad));
+    }
     for (const k of ["protokoll", "rekorde", "meldungen"]) {
       const l = lies(k, []);
       const neu = Array.isArray(l) ? kennungNachtragen(l) : null;
@@ -396,9 +404,11 @@ const LS = (() => {
   // Schema der Felder, die nur der Eulenpfad in Runden und Rekorden führt (KERN.runden.maengel, Befund D14)
   const RUNDEN_PRUEFUNG = {
     pflicht: ["aufgaben", "fehler", "dauer"],
-    zusatz: { name: "text", sterne: "zahlOderNull", fehlerAufgaben: "liste", aufgabenZeiten: "liste", optionen: "objekt", mix: "text" },
+    // liste: je Aufgabe (KERN.runde, RA4 a); aufgabenZeiten und fehlerAufgaben bis LERN_Session18, beim Einlesen umgedeutet
+    zusatz: { name: "text", sterne: "zahlOderNull", liste: "liste", optionen: "objekt", mix: "text", endlos: "bool",
+      gekuerzt: "zahl", abgebrochen: "bool", gezeigt: "zahl" },
   };
-  const REKORD_PRUEFUNG = { pflicht: ["dauer"], zusatz: { name: "text", spiele: "liste" } };
+  const REKORD_PRUEFUNG = { pflicht: ["dauer"], zusatz: { name: "text", spiele: "liste", alles: "bool", abgebrochen: "bool" } };
   const spielerListe = () => Object.keys(profile());
   function profil(name) { return { ...LEERES_PROFIL, ...(profile()[name] || {}) }; }
   const istAufsicht = name => !!name && profile()[name]?.rolle === "aufsicht";
@@ -688,6 +698,8 @@ const LS = (() => {
     schluessel: { runden: "protokoll" }, dateiPraefix: "lernspiele",
     pruefung: { runde: RUNDEN_PRUEFUNG, rekord: REKORD_PRUEFUNG }, freigabe: true,
     teile: { meldungen: MELDUNGEN_TEIL }, altePerson: personAusProfil,
+    // Runden älterer Fassungen (aufgabenZeiten, fehlerAufgaben bis LERN_Session18) vor der Prüfung umdeuten (RA4 a)
+    umdeuten: ({ runden, rekorde }) => ({ runden: runden.map(KERN.runde.ausEulenpfad), rekorde }),
   });
 
   function loescheSpieler(name) {
@@ -1125,7 +1137,8 @@ const LS = (() => {
     const e = { ...eintrag, id: eintrag?.id || KERN.runden.neueId() };
     return p ? { ...e, person: p.id, name: p.name } : e;
   };
-  function protokolliere(eintrag) { schreibe("protokoll", [...protokoll(), mitPerson(eintrag)]); }
+  /** Runde speichern; gleiche Kennung ersetzt einen Zwischenstand derselben Serie (RA3 a, KERN.runde.eintragen). */
+  function protokolliere(eintrag) { schreibe("protokoll", KERN.runde.eintragen(protokoll(), mitPerson(eintrag))); }
 
   // ---------- Endlos-Rekorde (Vorgabe Patrik 2026-10-31) ----------
   // lernspiele:rekorde = [{ name, zeit, spiel, stufe, timer (Startzeit in Sekunden oder null), punkte,
@@ -2366,7 +2379,7 @@ const LS = (() => {
       const name = aktuellerSpieler();
       const timer = mix ? { ...timerFuer(name, def.id, stufe.id), an: mix.timer } : timerFuer(name, def.id, stufe.id);
       let nr = 0;
-      let geschafft = 0; // Endlos: richtig gelöste Aufgaben
+      // Endlos: richtig gelöste Aufgaben zählt der Kern (L.geschafft)
       const startSekunden = endlos ? vorgabeZeit(def.id, stufe.id) : timer.sekunden; // Endlos: für alle gleich
       // Mix: Die Aufgabe darf erst gezeichnet werden, wenn der Mix sie verlangt (freigabe). Im Endlos-Mix
       // zählt für die knapper werdende Zeit die Serie über alle Spiele (mixGeschafft).
@@ -2374,12 +2387,13 @@ const LS = (() => {
       let mixGeschafft = 0;
       let mixGemeldet = 0;      // Aufgaben, deren Ergebnis schon an den Mix ging
       let mixBereit = false;
-      let mixVorher = null;     // Stand von fehler, hilfen und fehlerAufgaben vor der Aufgabe
+      let mixVorher = null;     // Stand von Fehlern und Hilfen vor der Aufgabe
       const anMix = daten => parent.postMessage({ lern: "mix", spiel: def.id, ...daten }, "*");
-      let fehler = 0;
-      const beginn = Date.now();
-      const fehlerAufgaben = [];
-      const aufgabenZeiten = []; // je Aufgabe: { ms, versuche, zeitUm, geloest }
+      // Ablauf im Kern (KERN.runde.lauf, AR1 a; RA1–RA4 a, RA7 a): zählt Versuche und Fehler (Zeit um ist einer), misst die
+      // Zeit je Aufgabe ab „bereit“ ohne Pausen, sagt, wann die Lösung kommt und die Serie vorbei ist, und baut Eintrag und
+      // Rekord mit einer Liste je Aufgabe (bis LERN_Session18: aufgabenZeiten und fehlerAufgaben). Oberfläche, Uhr, Lob
+      // und Sterne bleiben hier.
+      const L = KERN.runde.lauf({ endlos, anzahl: endlos || mix ? Infinity : def.anzahl });
       let uhr = null;            // laufender Timer der aktuellen Aufgabe
       let aufgabeLauf = 0;       // zählt die gestellten Aufgaben; ein später Uhrstart der vorigen (ctx.uhrWarten) bleibt wirkungslos
       // Wiederholungen (Vorgabe Patrik 2026-10-31; RA5 a, RA6 a, KERN.runde.auswahl): In einer Runde kommt höchstens eine
@@ -2397,7 +2411,6 @@ const LS = (() => {
       let allesGeschafft = false;
       const mitTimer = timer.an ? startSekunden : null; // Endlos: Startzeit des Rekords oder null
       let rekordVorher = null; // Endlos: bisheriger Rekord, sobald diese Runde gespeichert ist
-      let zwischenstand = null; // Endlos: beim Verlassen gespeicherter Eintrag, den das Ende ersetzt
       let rundeGespeichert = false;
       buehne.innerHTML = "";
 
@@ -2484,7 +2497,7 @@ const LS = (() => {
         // OK der Zifferntastatur: das Getippte zählt, nicht das „OK“
         const anzeige = /^\s*(OK|✓)/.test(k.textContent || "") ? flaeche.querySelector(".anzeige")?.textContent?.trim() : "";
         const was = (anzeige || k.getAttribute("aria-label") || k.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60);
-        if (was) eingaben = [...eingaben, was].slice(-6);
+        if (was) { eingaben = [...eingaben, was].slice(-6); if (L.offen) L.eingabe(was); }
       };
       // Eigene kleine Zeile unter der Eule: neben der Blase würde das Wort sie auf dem Handy zu schmal machen.
       // Davor der Platz für „📝 Notizblock“ (NB2 a): immer an derselben Stelle, nicht im Aufbau des Spiels.
@@ -2550,23 +2563,23 @@ const LS = (() => {
 
       /** Mix: Ergebnis der letzten Aufgabe melden — oder, vor der ersten, dass das Spiel bereit ist. */
       function meldeMix() {
-        const zeit = aufgabenZeiten[mixGemeldet];
+        // zeit: der Eintrag der Aufgabe aus der Liste des Kerns (RA4 a; mit Fehler auch text, loesung, eingaben)
+        const zeit = L.liste[mixGemeldet];
         if (!zeit) {
           if (!mixBereit) { mixBereit = true; anMix({ typ: "bereit" }); }
           return;
         }
         mixGemeldet++;
-        anMix({ typ: "ergebnis", zeit, fehler: fehler - mixVorher.fehler, hilfen: hilfen - mixVorher.hilfen,
-          fehlerAufgabe: fehlerAufgaben[mixVorher.fehlerAufgaben] || null });
+        anMix({ typ: "ergebnis", zeit, fehler: L.fehler - mixVorher.fehler, hilfen: hilfen - mixVorher.hilfen });
       }
 
       function naechste() {
         clearTimeout(uhr);
         if (mix && !mixFreigabe) return meldeMix();
         mixFreigabe = false;
-        mixVorher = { fehler, hilfen, fehlerAufgaben: fehlerAufgaben.length };
+        mixVorher = { fehler: L.fehler, hilfen };
         if (nr >= anzahl) return endlos ? schlussEndlos() : schluss();
-        if (endlos) punkte.textContent = `♾ ${geschafft}`;
+        if (endlos) punkte.textContent = `♾ ${L.geschafft}`;
         else [...punkte.children].forEach((p, i) => {
           p.classList.toggle("fertig", i < nr);
           p.classList.toggle("aktiv", i === nr);
@@ -2576,7 +2589,7 @@ const LS = (() => {
         let versuche = 0;
         let erledigt = false;
         let zeitUm = false;
-        let eintrag = null; // Protokolleintrag, sobald die Aufgabe einen Fehler hatte
+        let loesungGemerkt = ""; // Lösung, die das Spiel bei einem Fehlversuch nannte (für eine Fehlermeldung)
         let loesungVorab = null; // vom Spiel mit ctx.loesung() genannt, für die Testhilfe
         let eigeneKennung = null; // vom Spiel mit ctx.kennung() genannt, gegen Wiederholungen
         let schritte = 0; // Handgriffe der Aufgabe (ctx.schritte), für den Boden der Endlos-Zeit
@@ -2593,12 +2606,10 @@ const LS = (() => {
         blockPlatz.replaceChildren();
         let ansagen = [];    // ctx.nachAnsage: Töne und Stimmen des Spiels, die auf Lob und Vorlesen warten
         let angesagt = false;
-        const start = performance.now();
-        let bereit = null; // ab wann das Kind antworten kann (performance.now()); ab da laufen Uhr und Zeitmessung
+        let bereit = null; // ab wann das Kind antworten kann (performance.now()); ab da laufen Uhr und Zeitmessung (L.bereit)
         let uhrEnde = null;   // wann die Zeit um ist, solange die Uhr läuft (performance.now())
-        let pauseSeit = null; // Hilfe oder Melden offen: seit wann
+        let pauseSeit = null; // Hilfe oder Melden offen: seit wann (die Zeit der Aufgabe hält der Kern an: L.pause)
         let restMs = null;    // Restzeit der Uhr während einer Pause
-        let pausiertMs = 0;   // Pausen zählen nicht zur Zeit der Aufgabe
         let tipps = [];       // gestufte Tipps dieser Aufgabe (ctx.tipp); nie die Lösung
         let tippsGenutzt = 0; // geholte Tipps dieser Aufgabe (zählen für die Sterne)
         let tippRueckruf = null; // ctx.tipp(texte, beiTipp)
@@ -2609,43 +2620,36 @@ const LS = (() => {
         let ergebnisText = "noch nicht beantwortet";
         vorigeAufgabe = abgeschlossen;
         eingaben = [];
-        const aufgabeJetzt = () => ({ nr: meineNr, text: aufgabenText(flaeche), loesung: loesungVorab || eintrag?.loesung || "",
+        const aufgabeJetzt = () => ({ nr: meineNr, text: aufgabenText(flaeche), loesung: loesungVorab || loesungGemerkt || "",
           eingabe: eingaben.join(" → "),
           ergebnis: erledigt || !versuche ? ergebnisText : `noch offen, ${versuche} Fehlversuch${versuche === 1 ? "" : "e"} als falsch gewertet` });
         laufendeAufgabe = aufgabeJetzt;
         // „▶ Los!“ (LS.losGehts) bei der ersten Aufgabe, nach einer Aufgabe mit Fehler und im Mix (dort kommt
         // dazwischen meist ein anderes Spiel); sonst nur kurz 👀 (LERN-38).
-        const vorige = aufgabenZeiten.at(-1);
+        const vorige = L.liste.at(-1);
         const losKnopf = mix || !vorige || !vorige.geloest || vorige.versuche > 0 || vorige.zeitUm;
         pruefung.haken?.("aufgabe", { nr });
 
-        const fehlerEintrag = (loesungText) => {
-          if (!eintrag) {
-            eintrag = { text: aufgabenText(flaeche), loesung: loesungText || "", versuche: 0, geloest: false, zeitUm: false };
-            fehlerAufgaben.push(eintrag);
-          }
-          if (loesungText && !eintrag.loesung) eintrag.loesung = loesungText;
-          return eintrag;
+        /**
+         * Felder des Eulenpfads je Aufgabe an den Kern, vor jeder Meldung, die die Aufgabe abschliessen kann: geholte Tipps,
+         * Vorgehen (ctx.vorgehen) mit Notizen (NZ1 a: nur wo sie angeboten waren — „ohne“ zählt für das Abzeichen
+         * „Kopfrechner“; NB3 a: „block“ geht vor „benutzt“).
+         */
+        const zusatzJetzt = () => {
+          const v = notizAngeboten ? { ...vorgehen, notiz: blockBenutzt ? "block" : notizBenutzt ? "benutzt" : "ohne" } : vorgehen;
+          L.zusatz({ ...(tippsGenutzt ? { tipps: tippsGenutzt } : {}), ...(v ? { vorgehen: v } : {}) });
         };
 
+        /** Oberfläche nach dem Abschluss einer Aufgabe (gemessen und eingetragen hat der Kern). */
         const abschliessen = (geloest, uebersprungen = false) => {
           clearTimeout(uhr);
           // Balken dort anhalten, wo er gerade steht.
           const balken = zeitleiste.firstChild;
           balken.style.width = getComputedStyle(balken).width;
           balken.style.transition = "none";
-          // Gemessen ab dem Moment, in dem das Kind antworten kann; wer schon vorher antwortet (während Töne
-          // laufen), ab dem Zeichnen.
-          const jetztMs = performance.now();
-          const ab = bereit !== null && bereit <= jetztMs ? bereit : start;
           uhrEnde = null;
           tippZeile.hidden = true;
           tippsRunde += tippsGenutzt;
-          // Notizen (NZ1 a): nur wo sie angeboten waren — „ohne“ zählt für das Abzeichen „Kopfrechner“
-          // Notizblock (NB3 a): „block“ geht vor „benutzt“ und zählt so wenig wie dieses für den Kopfrechner
-          if (notizAngeboten) vorgehen = { ...vorgehen, notiz: blockBenutzt ? "block" : notizBenutzt ? "benutzt" : "ohne" };
-          aufgabenZeiten.push({ ms: Math.round(Math.max(0, jetztMs - ab - pausiertMs)), versuche, zeitUm, geloest, ...(tippsGenutzt ? { tipps: tippsGenutzt } : {}),
-            ...(uebersprungen ? { uebersprungen } : {}), ...(vorgehen ? { vorgehen } : {}) });
           // Für eine Fehlermeldung: wie die Aufgabe gewertet wurde, und sie als „vorige“ für die nächste merken.
           ergebnisText = uebersprungen ? "übersprungen" : geloest
             ? (versuche ? `richtig nach ${versuche} Fehlversuch${versuche === 1 ? "" : "en"}` : "richtig") + (zeitUm ? ", Zeit um" : "")
@@ -2659,6 +2663,8 @@ const LS = (() => {
             // Gelöst oder aufgelöst: es geht ohnehin gleich bzw. mit „Weiter“ weiter.
             if (erledigt) return;
             erledigt = true;
+            zusatzJetzt();
+            L.uebersprungen();
             abschliessen(false, true);
             nr++;
             naechste();
@@ -2692,9 +2698,10 @@ const LS = (() => {
         function starteUhr() {
           if (erledigt || bereit !== null || lauf !== aufgabeLauf) return;
           bereit = performance.now();
+          if (L.offen) L.bereit(); // ab hier zählt die Zeit der Aufgabe (RA7 a)
           pruefung.haken?.("uhr", { nr });
           if (!timer.an) return;
-          const sekunden = endlos ? endlosSekunden(startSekunden, mix ? mixGeschafft : geschafft, schritte) : timer.sekunden;
+          const sekunden = endlos ? endlosSekunden(startSekunden, mix ? mixGeschafft : L.geschafft, schritte) : timer.sekunden;
           // Balken läuft per CSS-Übergang von voll auf leer; der Fehler zählt einmal, die Aufgabe bleibt offen.
           const balken = balkenVoll();
           void balken.offsetWidth;
@@ -2702,17 +2709,17 @@ const LS = (() => {
           balken.style.width = "0%";
           uhrEnde = performance.now() + sekunden * 1000;
           uhr = setTimeout(zeitIstUm, sekunden * 1000);
-          if (endlos) punkte.textContent = `♾ ${geschafft} · ⏱ ${sekundenText(sekunden)}`;
+          if (endlos) punkte.textContent = `♾ ${L.geschafft} · ⏱ ${sekundenText(sekunden)}`;
         }
         function zeitIstUm() {
           if (erledigt) return;
           uhrEnde = null;
           zeitUm = true;
-          fehler++;
-          fehlerEintrag("").zeitUm = true;
+          zusatzJetzt();
+          const z = L.zeitUm({ text: aufgabenText(flaeche) }); // ein Fehler; in einer Serie ist sie vorbei
           zeitleiste.classList.add("um");
           ton("falsch");
-          if (endlos) return endlosVorbei("⏰ Die Zeit ist um!");
+          if (z.vorbei) return endlosVorbei("⏰ Die Zeit ist um!");
           eule.sag("⏰ Die Zeit ist um! Mach die Aufgabe trotzdem fertig.", "hinweis");
         }
 
@@ -2722,6 +2729,7 @@ const LS = (() => {
         function pausiere() {
           if (pauseSeit !== null) return;
           pauseSeit = performance.now();
+          if (L.offen) L.pause();
           flaeche.classList.add("pause-verdeckt");
           if (uhrEnde !== null && !erledigt) {
             clearTimeout(uhr);
@@ -2734,7 +2742,7 @@ const LS = (() => {
         function fortsetzen() {
           if (pauseSeit === null) return;
           const jetztMs = performance.now();
-          pausiertMs += jetztMs - pauseSeit;
+          if (L.offen) L.weiter();
           pauseSeit = null;
           flaeche.classList.remove("pause-verdeckt");
           if (restMs !== null && !erledigt) {
@@ -2829,7 +2837,7 @@ const LS = (() => {
           serie(name, wert) { serien[name] = String(wert); },
           /**
            * Wie das Kind die Aufgabe angegangen ist (systematisch, in Paaren, mit Umwegen …). Vor
-           * ctx.richtig() melden; landet in aufgabenZeiten und in der Statistik („Vorgehen“). Die Arten
+           * ctx.richtig() melden; landet in der Liste je Aufgabe (liste) und in der Statistik („Vorgehen“). Die Arten
            * und ihre Werte stehen in AUSWERTUNG.VORGEHEN (auswertung.js).
            */
           vorgehen(art, wert) { vorgehen = { ...vorgehen, [art]: String(wert) }; },
@@ -2894,9 +2902,10 @@ const LS = (() => {
           richtig(text, erklaerung) {
             if (erledigt) return;
             erledigt = true;
-            if (eintrag) eintrag.geloest = true;
             const mitErklaerung = versuche > 0 && !!(text || erklaerung);
             pruefung.haken?.("richtig", { nr, vorab: loesungVorab, erklaerung: mitErklaerung });
+            zusatzJetzt();
+            L.richtig();
             abschliessen(true);
             ton("richtig");
             const gesagtText = versuche > 0 ? [text || waehle(lobListe), erklaerung].filter(Boolean).join(" ") : waehle(lobListe);
@@ -2904,7 +2913,7 @@ const LS = (() => {
             // für das Testskript: was nach der richtigen Antwort in der Blase steht (auf Anhieb nur ein Lob der Liste)
             pruefung.haken?.("gelobt", { nr, text: eule.blase.textContent || "", aufAnhieb: versuche === 0, liste: lobListe });
             nr++;
-            if (endlos) { geschafft++; punkte.textContent = `♾ ${geschafft}`; }
+            if (endlos) punkte.textContent = `♾ ${L.geschafft}`;
             // Die nächste Aufgabe erst, wenn die Stimme fertig ist (Lob, gesprochene Antwort des Spiels; höchstens 6 s):
             // sonst sprach in Au café der Satz der vorigen Antwort noch, als die neue Aufgabe schon stand (Meldung 6,
             // LERN_Session11). Und erst, wenn eine längere Rückmeldung gelesen sein kann („Gut aufgepasst! Richtig wäre
@@ -2949,10 +2958,13 @@ const LS = (() => {
           falsch(hinweis, loesungText) {
             if (erledigt) return;
             versuche++;
-            fehler++;
-            fehlerEintrag(loesungText).versuche = versuche;
+            if (loesungText && !loesungGemerkt) loesungGemerkt = loesungText;
+            // Der Kern zählt den Fehler und sagt, ob die Lösung kommt (nach dem dritten Fehlversuch mit Lösung) oder
+            // die Serie vorbei ist; dann ist die Aufgabe dort abgeschlossen.
+            zusatzJetzt();
+            const f = L.falsch({ text: aufgabenText(flaeche), loesung: loesungText || "" });
             ton("falsch");
-            const aufgeloest = endlos || (versuche >= 3 && !!loesungText);
+            const aufgeloest = f.vorbei || f.loesungZeigen;
             pruefung.haken?.("falsch", { nr, hinweis: hinweis || "", loesung: loesungText || "", aufgeloest, flaeche, vorab: loesungVorab });
             if (endlos) {
               if (loesungText && !loesungVorab) loesungVorab = loesungText;
@@ -2985,6 +2997,7 @@ const LS = (() => {
           const messen = !!pruefung.zaehle?.(k); // nur das Testskript: weiter ziehen, nichts stellen
           const wahlErg = messen ? { weiter: true } : wahl.pruefe(k, serien, versuch);
           if (wahlErg.nehmen) {
+            L.gestellt();
             pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: wahlErg.serieErzwungen });
             schritteFest = true;
             // Notizblock (NB2 a): wenn die Aufgabe Notizen oder den Block anbietet. Der Knopf steht in der Zeile von „Melden“,
@@ -3017,6 +3030,7 @@ const LS = (() => {
           }
           if (wahlErg.erschoepft) {
             clearTimeout(uhr);
+            L.erschoepft(); // Runde gekürzt, Serie „alles geschafft“ (RA6 a)
             // Mix: Das Spiel hat keine neue Aufgabe mehr; der Mix nimmt dann die anderen.
             if (mix) { flaeche.innerHTML = ""; return anMix({ typ: "erschoepft" }); }
             anzahl = nr;
@@ -3066,30 +3080,27 @@ const LS = (() => {
         return text || loesung ? `${text}|${loesung || ""}` : null;
       }
 
+      /**
+       * Felder des Eulenpfads im Eintrag einer Runde oder Serie; den Rest (zeit am Ende, dauer auf 0,1 s, aufgaben, fehler,
+       * gezeigt, liste je Aufgabe, gekuerzt, endlos) setzt der Kern (L.eintrag, RA1–RA4 a).
+       */
+      const eintragFelder = sterne => ({
+        name, inhalt: def.id, stufe: stufe.id, sterne,
+        geordnet: geordnet(name, def.id, stufe.id),
+        ...(def.optionen ? { optionen: Object.fromEntries(Object.keys(def.optionen).map(id => [id, optionWert(name, def, id, stufe.id)])) } : {}),
+        timer: endlos ? mitTimer : timer.an ? timer.sekunden : null,
+        // Testrunden zählen nicht in der Statistik (Entscheid T1 a); hilfe = Testhilfen benutzt.
+        ...(test ? { test: true } : {}),
+        ...(hilfen ? { hilfe: hilfen } : {}),
+        ...(tippsRunde ? { tipps: tippsRunde } : {}),
+        ...(bedienhilfe ? { bedienhilfe } : {}), // ❓ Hilfe geöffnet: nur notiert, ohne Folgen
+      });
+
       function schluss() {
         // Ein Tipp zählt wie ein halber Fehler (Entscheid T1 a): fragen ist günstiger als raten, aber nicht gratis.
+        const fehler = L.fehler;
         const sterne = sterneFuer(fehler + tippsRunde / 2);
-        protokolliere({
-          name,
-          zeit: new Date().toISOString(),
-          inhalt: def.id,
-          stufe: stufe.id,
-          sterne,
-          fehler,
-          aufgaben: anzahl,
-          ...(anzahl < def.anzahl ? { gekuerzt: def.anzahl } : {}), // geplant waren mehr, die Stufe gab nicht genug her
-          dauer: Math.round((Date.now() - beginn) / 1000),
-          geordnet: geordnet(name, def.id, stufe.id),
-          ...(def.optionen ? { optionen: Object.fromEntries(Object.keys(def.optionen).map(id => [id, optionWert(name, def, id, stufe.id)])) } : {}),
-          timer: timer.an ? timer.sekunden : null,
-          aufgabenZeiten,
-          fehlerAufgaben,
-          // Testrunden zählen nicht in der Statistik (Entscheid T1 a); hilfe = Testhilfen benutzt.
-          ...(test ? { test: true } : {}),
-          ...(hilfen ? { hilfe: hilfen } : {}),
-          ...(tippsRunde ? { tipps: tippsRunde } : {}),
-          ...(bedienhilfe ? { bedienhilfe } : {}), // ❓ Hilfe geöffnet: nur notiert, ohne Folgen
-        });
+        protokolliere(L.eintrag(eintragFelder(sterne)));
         ton("fertig");
         konfetti();
         buehne.innerHTML = "";
@@ -3116,24 +3127,18 @@ const LS = (() => {
       }
 
       /**
-       * Endlos: Rekord speichern, sobald die Runde vorbei ist (Fehler, Zeit um, alles geschafft) — nicht erst
-       * beim Ergebnisbild. Endgültig nur einmal je Runde; gibt den bisherigen Rekord zurück.
-       * abgebrochen (Entscheid Patrik E1 a): Das Kind verlässt die Seite mitten in der Serie, sie zählt bis
-       * dahin. Kommt es zurück und spielt weiter, ersetzt der nächste Stand diesen Zwischenstand.
+       * Endlos: Rekord und Eintrag im Protokoll speichern (eine Serie ist eine Runde, RA3 a), sobald sie vorbei ist
+       * (Fehler, Zeit um, alles geschafft) — nicht erst beim Ergebnisbild. Endgültig nur einmal je Runde; gibt den
+       * bisherigen Rekord zurück. abgebrochen (Entscheid Patrik E1 a): Das Kind verlässt die Seite mitten in der Serie,
+       * sie zählt bis dahin. Kommt es zurück und spielt weiter, ersetzt der nächste Stand diesen Zwischenstand — eine
+       * Kennung je Serie (L.id), auch auf anderen Geräten (R1 a).
        */
       function speichereEndlos(abgebrochen = false) {
         if (rundeGespeichert) return rekordVorher;
         if (rekordVorher === null) rekordVorher = besterRekord(name, def.id, stufe.id, mitTimer);
-        const eintrag = {
-          // eine Kennung je Serie: der Endstand ersetzt den Zwischenstand auch auf anderen Geräten (R1 a)
-          id: zwischenstand?.id || KERN.runden.neueId(),
-          name, zeit: new Date().toISOString(), inhalt: def.id, stufe: stufe.id, timer: mitTimer, punkte: geschafft,
-          dauer: Math.round((Date.now() - beginn) / 1000),
-          ...(allesGeschafft ? { alles: true } : {}), ...(test ? { test: true } : {}), ...(hilfen ? { hilfe: hilfen } : {}),
-          ...(abgebrochen ? { abgebrochen: true } : {}),
-        };
-        speichereRekord(eintrag);
-        zwischenstand = eintrag;
+        speichereRekord(L.rekord({ name, inhalt: def.id, stufe: stufe.id, timer: mitTimer,
+          ...(test ? { test: true } : {}), ...(hilfen ? { hilfe: hilfen } : {}) }, { abgebrochen }));
+        protokolliere(L.eintrag(eintragFelder(null), { abgebrochen }));
         if (!abgebrochen) {
           rundeGespeichert = true;
           waechter?.aus();
@@ -3142,7 +3147,7 @@ const LS = (() => {
       }
       // Verlassen: Tab zu, Zurück-Pfeil (pagehide); Tablet aus oder App gewechselt (visibilitychange, auf
       // Tablets zuverlässiger als pagehide) — KERN.runde.waechter. Eine Serie ohne richtige Aufgabe gibt keinen Eintrag.
-      const waechter = endlos && !mix ? KERN.runde.waechter(() => { if (geschafft > 0) speichereEndlos(true); }) : null;
+      const waechter = endlos && !mix ? KERN.runde.waechter(() => { if (L.geschafft > 0) speichereEndlos(true); }) : null;
       // Mix: Aufgaben nur auf Verlangen des Mix (mix.html), Nachrichten nur von ihm.
       if (mix) addEventListener("message", e => {
         if (e.source !== parent || e.data?.lern !== "mix") return;
@@ -3158,14 +3163,14 @@ const LS = (() => {
       function schlussEndlos() {
         clearTimeout(uhr);
         const vorher = speichereEndlos();
-        const neuerRekord = geschafft > 0 && geschafft > vorher;
+        const neuerRekord = L.geschafft > 0 && L.geschafft > vorher;
         ton("fertig");
         if (neuerRekord) konfetti();
         buehne.innerHTML = "";
         const karte = el("div", { class: "karte schluss mitte" });
         const eule = euleZeile();
         karte.append(
-          el("div", { class: "auftrag", text: `♾ ${geschafft} richtig in Folge!` }),
+          el("div", { class: "auftrag", text: `♾ ${L.geschafft} richtig in Folge!` }),
           eule.element,
           rangliste(def.id, stufe.id, mitTimer, name),
           el("div", { class: "knopfzeile" },

@@ -232,9 +232,23 @@ const TREIBER = `
     // gemeinsames Format der Reihe (R1 a, kern/runden.js): Kennung, Person, Zeit, Inhalt, Stufe …
     const formatMaengel = KERN.runden.maengel(e, endlos ? "rekord" : "runde");
     if (formatMaengel.length) melde("Format", formatMaengel.join(", ") + ": " + JSON.stringify(e).slice(0, 120));
-    if (endlos) { if (!Number.isInteger(e.punkte) || e.punkte < 0 || !Number.isFinite(e.dauer)) melde("Rekord", JSON.stringify(e).slice(0, 160)); continue; }
+    if (endlos) {
+      if (!Number.isInteger(e.punkte) || e.punkte < 0 || !Number.isFinite(e.dauer)) melde("Rekord", JSON.stringify(e).slice(0, 160));
+      // RA3 a: die Serie steht auch im Protokoll, mit derselben Kennung; richtig gelöst so viele wie Punkte
+      const r = JSON.parse(localStorage.getItem("lernspiele:protokoll") || "[]").find(x => x.id === e.id);
+      if (!r || !r.endlos || r.sterne !== null || (r.liste || []).filter(a => a.geloest).length !== e.punkte || !!r.abgebrochen !== !!e.abgebrochen)
+        melde("Protokoll", "Serie nicht passend im Protokoll: Rekord " + JSON.stringify(e).slice(0, 80) + " · Runde " + JSON.stringify(r || null).slice(0, 80), "serie-protokoll");
+      continue;
+    }
     if (!(e.sterne >= 1 && e.sterne <= 3) || !Number.isFinite(e.fehler) || !Number.isFinite(e.dauer)) melde("Protokoll", JSON.stringify(e).slice(0, 160));
-    for (const f of e.fehlerAufgaben || []) if (${VERDAECHTIG}.test(f.text + " " + f.loesung)) melde("Protokoll", "Fehleraufgabe: " + (f.text + " → " + f.loesung).slice(0, 160));
+    // RA4 a: je Aufgabe ein Eintrag in liste; Fehler und gezeigte Lösungen stimmen mit der Zählung der Runde
+    const liste = Array.isArray(e.liste) ? e.liste : [];
+    const fehlerJe = liste.reduce((s, a) => s + (a.versuche || 0) + (a.zeitUm ? 1 : 0), 0);
+    if (liste.length !== e.aufgaben || fehlerJe !== e.fehler || liste.filter(a => a.gezeigt).length !== e.gezeigt
+      || liste.some(a => !Number.isFinite(a.ms) || typeof a.geloest !== "boolean" || !Number.isInteger(a.versuche)))
+      melde("Protokoll", "Liste je Aufgabe passt nicht zur Runde: " + JSON.stringify({ aufgaben: e.aufgaben, fehler: e.fehler, gezeigt: e.gezeigt, liste: liste.slice(0, 3) }).slice(0, 200), "liste");
+    if ("aufgabenZeiten" in e || "fehlerAufgaben" in e) melde("Protokoll", "Felder bis LERN_Session18 (aufgabenZeiten, fehlerAufgaben) in einer neuen Runde", "alt");
+    for (const f of KERN.runde.mitFehler(e)) if (${VERDAECHTIG}.test(f.text + " " + f.loesung)) melde("Protokoll", "Fehleraufgabe: " + (f.text + " → " + f.loesung).slice(0, 160));
   }
   const gekuerzt = protokoll().filter(e => e.gekuerzt).map(e => e.aufgaben + "/" + e.gekuerzt);
   return { runden: protokoll().length, klicks, funde, ohneVorab, gekuerzt, handgriffe, mitTipp };
@@ -283,7 +297,9 @@ const MIX_TREIBER = `
     const z = m.zeit || {};
     if (!Number.isFinite(z.ms) || typeof z.geloest !== "boolean" || !(m.fehler >= 0) || !(m.hilfen >= 0))
       melde("Mix", "Ergebnis unvollständig: " + JSON.stringify(m).slice(0, 160));
-    if ((m.fehler > 0) !== !!m.fehlerAufgabe && !(z.zeitUm && m.fehlerAufgabe)) melde("Mix", "Fehler und Fehleraufgabe passen nicht: " + JSON.stringify(m).slice(0, 160));
+    // RA4 a: der Eintrag der Aufgabe trägt ihre Fehler selbst (Fehlversuche, Zeit um) und dann auch ihren Text
+    if (m.fehler !== (z.versuche || 0) + (z.zeitUm ? 1 : 0) || ((z.versuche > 0 || z.zeitUm) && typeof z.text !== "string"))
+      melde("Mix", "Fehler und Eintrag der Aufgabe passen nicht: " + JSON.stringify(m).slice(0, 160));
     // Bis zur nächsten Verlangung bleibt das Spiel still.
     __uhr.weiter(3000);
     if (neue().length) melde("Mix", "meldet ohne neue Aufgabe weiter");

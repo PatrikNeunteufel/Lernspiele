@@ -17,10 +17,11 @@ var LST_DATEN = (function () {
   const istUebung = id => typeof LST_KATALOG === "undefined" || !!LST_KATALOG.uebung(id);
   const RUNDE = {
     pflicht: ["aufgaben", "dauer"], inhaltBekannt: istUebung,
-    zusatz: { fach: "text", niveau: "text", endlos: "bool", aufAnhieb: "zahl", gezeigt: "zahl", zeiten: "liste", falsch: "liste",
-      liste: "liste", mitRechner: "bool", gruppe: "textOderNull" },
+    // liste: je Aufgabe (KERN.runde, RA4 a); zeiten und falsch bis LERN_Session18, beim Einlesen umgedeutet
+    zusatz: { fach: "text", niveau: "text", endlos: "bool", aufAnhieb: "zahl", gezeigt: "zahl", liste: "liste", mitRechner: "bool",
+      gruppe: "textOderNull", gekuerzt: "zahl", abgebrochen: "bool" },
   };
-  const REKORD = { pflicht: ["dauer"], inhaltBekannt: istUebung, zusatz: { niveau: "text", mitRechner: "bool", abgebrochen: "bool" } };
+  const REKORD = { pflicht: ["dauer"], inhaltBekannt: istUebung, zusatz: { niveau: "text", mitRechner: "bool", abgebrochen: "bool", alles: "bool" } };
   /** Ist die Runde lesbar für Statistik, Kompetenzstand und Aufsicht? (auch jedes Element der Liste ein Objekt) */
   const rundeGueltig = r => !KERN.runden.maengel(r, "runde", RUNDE).length && (r.liste || []).every(x => x && typeof x === "object");
   const rekordGueltig = r => !KERN.runden.maengel(r, "rekord", REKORD).length;
@@ -33,6 +34,8 @@ var LST_DATEN = (function () {
     pruefung: { runde: RUNDE, rekord: REKORD },
     // eine liste, die keine Liste ist, weist schon das Schema ab
     gueltig: { runde: r => !Array.isArray(r.liste) || r.liste.every(x => x && typeof x === "object") },
+    // Einträge älterer Fassungen (RA1 a, RA4 a) vor der Prüfung in die heutige Form
+    umdeuten: d => LST.alteEintraegeUmdeuten(d),
   });
 
   /** Sicherung für die Konten mit den Kennungen ids. */

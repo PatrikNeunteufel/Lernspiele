@@ -137,7 +137,7 @@ LS.spiel({
 | `ctx.sag(text)` beim Stellen | Was ein Spiel beim Stellen einer Aufgabe sagt, gilt als sein Auftrag. Sagt es bei einer späteren Aufgabe nichts, zeigt die Eule den Auftrag dieser Aufgabe aus der Fläche (`.frage` oder `.auftrag`, ohne Knöpfe wie 💡), erst ohne solchen den zuletzt gesagten (ohne erneut vorzulesen; LERN_Session14, Pentomino-Puzzle zeigte nach „Formen finden“ beim Legen nur „Weiter geht's mit der nächsten Aufgabe.“) — nie bleibt das Lob der vorigen Aufgabe („Richtig wäre …“) neben einer neuen stehen. Nach `ctx.richtig` wartet der Rahmen, bis die Rückmeldung gelesen sein kann: 1,3 s, dazu 30 ms je Zeichen über 20, höchstens 3 s (WZ2 a; bis LERN_Session17 45 ms und 5 s), und bis die Stimme fertig ist (Hinweis Patrik, LERN_Session13). Überspringen (Entscheid WZ1 a): ein Balken läuft ab (Klassen `weiter-leiste`, `weiter-balken`, `weiter-knopf`), auf einem festen Platz links in der Zeile von „🙋 Melden“ unter der Eule, die immer gleich hoch ist — die Aufgabe rutscht nicht mehr (Hinweis Patrik, LERN_Session14; auf dem Handy sind Melden und Notizblock während der Rückmeldung ausgeblendet, damit die Zeile nicht umbricht); „Weiter ➜“, Antippen der Blase, Enter oder Leertaste führen sofort weiter und brechen die Stimme ab. Im Endlos-Modus fest 0,9 s ohne Balken |
 | `ctx.schritte(n)` | Die Aufgabe braucht n Handgriffe mehr: Tipps, Ziffern samt OK, Züge, so viele wie mindestens nötig sind. Aufrufe zählen zusammen. Die Bausteine zählen ihre selbst (`auswahl` und `koerbe` 1, `reihenfolge` je Teil 1); für die Tastatur `LS.tippSchritte(wert)`. **Pflicht in Endlos-Stufen** ✔, daraus folgt der Boden der Endlos-Zeit (Abschnitt 7). **Alle Handgriffe der Aufgabe beim Stellen nennen** (Entscheid HG1 a, LERN_Session13): Mit dem Stellen gilt die Zahl fest; was danach erscheint (ein zweiter Schritt, eine Auswahl nach dem ersten Tipp), rechnet das Spiel vorab ein. Ein Baustein, der erst danach entsteht, zählt nicht mehr; ein späteres `ctx.schritte` des Spiels meldet das Testskript als Fehler. |
 | `ctx.serie(name, wert)` | Ein zufällig gewähltes Merkmal, das das Kind als Muster erkennen kann: Richtung oder Aufgabenart, oder die richtige Antwort bei höchstens drei festen Antworten (ja/nein, <, =, >, auf/ab). **Serienbremse** (Vorgabe Patrik 2026-11-01): Der Rahmen zieht neu, statt dasselbe Merkmal öfter als `LS.SERIE_MAX` = 3-mal hintereinander zu stellen (bis zu 40 Versuche). Nicht für Zahlenwerte oder Knopfpositionen, und nur in Stufen, die wirklich mehrere Werte haben ✔. |
-| `ctx.vorgehen(art, wert)` | Wie das Kind die Aufgabe angegangen ist, vor `ctx.richtig()` gemeldet (LERN_Session7). Landet in `aufgabenZeiten[i].vorgehen` und in der Statistik, Karte „Vorgehen“ (Punkte der letzten 12 Aufgaben). Arten und Werte (vom besten zum schwächsten, Ton gut/mittel/schwach) stehen in `AUSWERTUNG.VORGEHEN`: `systematik` (Möglichkeiten-Finder: Zählwerk, geordnet, kreuz und quer, mit Hilfe), `teilerpaare` (Teiler-Spürnase: in Paaren, der Grösse nach, durcheinander), `ausgleichen` (Mittelwert-Türme: ohne Umweg, mit Umwegen). |
+| `ctx.vorgehen(art, wert)` | Wie das Kind die Aufgabe angegangen ist, vor `ctx.richtig()` gemeldet (LERN_Session7). Landet in `liste[i].vorgehen` (bis LERN_Session18 `aufgabenZeiten[i]`) und in der Statistik, Karte „Vorgehen“ (Punkte der letzten 12 Aufgaben). Arten und Werte (vom besten zum schwächsten, Ton gut/mittel/schwach) stehen in `AUSWERTUNG.VORGEHEN`: `systematik` (Möglichkeiten-Finder: Zählwerk, geordnet, kreuz und quer, mit Hilfe), `teilerpaare` (Teiler-Spürnase: in Paaren, der Grösse nach, durcheinander), `ausgleichen` (Mittelwert-Türme: ohne Umweg, mit Umwegen). |
 | `ctx.wartezeit(s)` | Die Aufgabe hält das Kind s Sekunden auf, ohne dass es etwas tun kann (gleich vorgespielte Töne). Uhr und Zeitmessung beginnen so viel später (Entscheide F1 a, F2 a, LERN_Session9); wartet das Spiel mit `ctx.nachAnsage`, zählt die Wartezeit ab dann. |
 | `ctx.nachAnsage(fn)` | `fn` erst rufen, wenn die Eule fertig ist: Lob der vorigen Aufgabe ausgesprochen, Auftrag vorgelesen (falls automatisch). **Pflicht für alles, was ein Spiel beim Zeichnen vorspielt oder vorspricht** (Melodie, Rhythmus, Hörtext, Satz) — sonst überlagern sich Stimme und Ton, oder die Eule bricht den Hörtext ab (Meldung Patrik zum Hoch-Tief-Ohr, LERN_Session11). Ohne Stimme 300 ms nach dem Zeichnen; eine neu gezogene Fassung der Aufgabe ruft nie. Ersetzt die früheren Verzögerungen von 250/450 ms in sechs Spielen. |
 | `ctx.tipp(texte, beiTipp?)` | Gestufte Tipps zur Aufgabe (Text oder Liste), vom Anstoss zum Konkreten; nie die Lösung (das Testskript prüft es wie Hinweise). Beim Zeichnen rufen. `beiTipp(i, letzter)` wird gerufen, nachdem Tipp i gezeigt ist — für Tipps mit Bild (LERN_Session11, Steine fangen); kein eigener Klick-Hörer am Tipp-Knopf. Das Kind holt sie mit „💡 Tipp“ einzeln; ein Tipp zählt für die Sterne wie ein halber Fehler, „auf Anhieb“ heisst ohne Tipp; im Endlos-Modus keine Tipps (Abschnitt 14). |
@@ -384,15 +384,17 @@ Vorgabe Patrik 2026-10-31.
   13 / 7,7 / 4,0 · Zahlenmauer s6, 188 s, 33 Handgriffe: 92 / 50 / 20.
   In gewöhnlichen Runden bleibt die Zeit gleich, damit die Zeiten je Aufgabe in der Statistik
   vergleichbar bleiben (Entscheid Patrik Z1 a).
-- **Speicher:** `lernspiele:rekorde` = `[{ name, zeit, spiel, stufe, timer, punkte, dauer, alles?,
-  test?, hilfe?, abgebrochen? }]`, eine Zeile je Endlos-Runde, getrennt vom Protokoll. `timer` ist die Startzeit in
-  Sekunden oder `null`. Je Stufe gibt es zwei Ranglisten: ohne und mit Timer.
+- **Speicher:** `lernspiele:rekorde` = `[{ id, name, zeit, inhalt, stufe, timer, punkte, dauer, alles?,
+  test?, hilfe?, abgebrochen? }]`, eine Zeile je Endlos-Runde. `timer` ist die Startzeit in Sekunden oder `null`. Je
+  Stufe gibt es zwei Ranglisten: ohne und mit Timer. Seit LERN_Session19 steht die Serie dazu im Protokoll (RA3 a: eine
+  Serie ist eine Runde) — mit derselben Kennung, `endlos: true`, `sterne: null` und der Liste je Aufgabe; so zählen ihre
+  Zeit und ihre Aufgaben in Statistik, Stand und Wochenziel. Rekord und Eintrag baut der Kern (`KERN.runde.lauf`).
   Gespeichert wird, sobald die Runde vorbei ist (Fehler, Zeit um, alles geschafft), nicht erst beim
   Antippen von „Zum Ergebnis“ (Meldung Patrik, LERN_Session4). Verlässt das Kind die Seite mitten in
   der Serie (Zurück-Pfeil, Tab zu: `pagehide`; Tablet aus, App gewechselt: `visibilitychange`), zählt
   die Serie bis dahin mit `abgebrochen: true` (Entscheid Patrik E1 a). Kommt es zurück und spielt
-  weiter, ersetzt der nächste Stand diesen Zwischenstand. Eine Serie ohne richtige Aufgabe gibt keinen
-  Eintrag.
+  weiter, ersetzt der nächste Stand diesen Zwischenstand (Rekord und Eintrag im Protokoll). Eine Serie ohne richtige
+  Aufgabe gibt keinen Eintrag.
   Sichern, Einlesen und Löschen behandeln die Rekorde wie das Protokoll.
 - **Rangliste:** bester Wert je Kind, ohne Testrunden und ohne Aufsicht. Am Ende einer Endlos-Runde
   die ersten zehn, im Startbild des Spiels unter den Stufen die vollständigen Ranglisten beider
@@ -470,7 +472,7 @@ das die Stufe anbietet; im Endlos-Mix nur Stufen mit `endlos` im Katalog.
   | Richtung | typ | Inhalt |
   |---|---|---|
   | Spiel → Mix | `bereit` | geladen, wartet auf die erste Aufgabe |
-  | Spiel → Mix | `ergebnis` | `zeit` (Eintrag wie `aufgabenZeiten`), `fehler`, `hilfen`, `fehlerAufgabe` oder null |
+  | Spiel → Mix | `ergebnis` | `zeit` (Eintrag der Aufgabe aus `KERN.runde`, mit Fehler auch `text`, `loesung`, `eingaben`; bis LERN_Session18 dazu `fehlerAufgabe`), `fehler`, `hilfen` |
   | Spiel → Mix | `erschoepft` | keine neue Aufgabe mehr (Wiederholungsregel) |
   | Spiel → Mix | `geht-nicht` | Stufe nicht angeboten, nicht frei oder keine Stimme |
   | Mix → Spiel | `aufgabe` | `geschafft`: Serie über alle Spiele, für die knapper werdende Endlos-Zeit |
@@ -696,7 +698,7 @@ Wunsch Patrik, Entscheide T1 a, T2 a, T3 a (LERN_Session9). **Hilfe** erklärt d
   Runde notiert nur, wie oft (`bedienhilfe` im Protokoll).
 - **💡 Tipp** beim Antwortbereich ohne eigene Zeile (Klasse `tipp-zeile`; Ort seit BH2-T a, LERN_Session13: Abschnitt
   20), nur wenn das Spiel `ctx.tipp([...])` gibt, nie im Endlos-Modus. Jedes Antippen zeigt den nächsten Tipp in der
-  Eulenblase; der Knopf sagt es als Beschriftung („Noch ein Tipp“, zuletzt „Keine Tipps mehr“, dann grau). Die Uhr läuft weiter. Gezählt wird je Aufgabe (`aufgabenZeiten[i].tipps`) und je
+  Eulenblase; der Knopf sagt es als Beschriftung („Noch ein Tipp“, zuletzt „Keine Tipps mehr“, dann grau). Die Uhr läuft weiter. Gezählt wird je Aufgabe (`liste[i].tipps`) und je
   Runde (`tipps`); die **Sterne** rechnen `sterneFuer(fehler + tipps / 2)` — fragen ist günstiger als
   raten, aber nicht gratis. „Auf Anhieb“ heisst ohne Fehler und ohne Tipp (Auswertung, Mix, Fazit); der
   Abschluss nennt die Tipps, Fazit und Statistik ebenso.

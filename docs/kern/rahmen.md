@@ -263,7 +263,7 @@ Rekord: { id, person, zeit, inhalt, stufe, punkte, dauer?, test?, abgebrochen?, 
 | `kennungAus(wer, zeit, inhalt, stufe)` | feste Kennung „r-alt-…“ für ältere Einträge ohne Kennung |
 | `maengel(e, art, opt)` | Mängel einer Runde oder eines Rekords; `opt = { zusatz: { feld: "zahl" \| "text" \| "bool" \| "liste" \| "objekt" \| "zahlOderNull" \| "textOderNull" }, pflicht: [Felder], inhaltBekannt, personBekannt }`; unbekannte Felder bleiben |
 | `umdeuten(e, { alt: neu })` | Felder umbenennen, fehlende Kennung aus Name (sonst Person), Zeit, Inhalt, Stufe — dieselbe alte Runde bekommt auf jedem Gerät dieselbe |
-| `zusammenfuehren(eigene, fremde, { art, pruefung, umbiegen, behalten })` | nach Kennung; Rekord: höherer Stand; fremde geprüft und abgewiesen, eigene bleiben (nur `behalten` entscheidet, etwa ein Löschvermerk); nach Zeit sortiert; `{ eintraege, neu, ersetzt, abgewiesen }` |
+| `zusammenfuehren(eigene, fremde, { art, pruefung, umbiegen, behalten })` | nach Kennung; Rekord: höherer Stand; Runde: ein Zwischenstand (`abgebrochen`) weicht dem späteren Stand (RA3 a, 1.20.0); fremde geprüft und abgewiesen, eigene bleiben (nur `behalten` entscheidet, etwa ein Löschvermerk); nach Zeit sortiert; `{ eintraege, neu, ersetzt, abgewiesen }` |
 | `fingerabdruck(wert)` | cyrb53 über JSON (auch `KERN.fingerabdruck`; Prüfung der Inhaltslisten im Eulenpfad) |
 
 Felder der Apps:
@@ -480,7 +480,7 @@ für die Elemente von `liste`; ohne angemeldete Aufsicht `rollen: ["lernend"]`, 
 
 | Aufruf | Ergebnis |
 |---|---|
-| `KERN.daten({ app, speicher, schluessel?, dateiPraefix?, geraetFelder?, pruefung?, gueltig?, ohnePerson?, freigabe?, teile?, altePerson? })` | Daten einer App; `gueltig: { runde, rekord }` weitere Prüfung der App je fremdem Eintrag; `schluessel` je Bereich (Standard gleichnamig, Eulenpfad `runden: "protokoll"`); `teile: { <name>: { schluessel, sichern(ids \| null, eigene), zusammenfuehren(eigene, fremde, { umbiegen, personVon }) → { wert, neu }, entferne?(eigene, ids) } }` |
+| `KERN.daten({ app, speicher, schluessel?, dateiPraefix?, geraetFelder?, pruefung?, gueltig?, ohnePerson?, freigabe?, teile?, altePerson?, umdeuten? })` | Daten einer App; `gueltig: { runde, rekord }` weitere Prüfung der App je fremdem Eintrag; `umdeuten({ runden, rekorde })` bringt fremde Einträge älterer Fassungen vor der Prüfung in die heutige Form (1.20.0; beide Apps mit `KERN.runde.ausEulenpfad` bzw. `ausLernsteig`); `schluessel` je Bereich (Standard gleichnamig, Eulenpfad `runden: "protokoll"`); `teile: { <name>: { schluessel, sichern(ids \| null, eigene), zusammenfuehren(eigene, fremde, { umbiegen, personVon }) → { wert, neu }, entferne?(eigene, ids) } }` |
 | `sichern({ ids, art, filter, geraet })` | Datei als Objekt; `ids: null` = alle Personen; `filter(e)` für Runden und Rekorde (etwa ohne Testrunden) |
 | `einlesen(text \| objekt, { rollen })` | `rollen`: nur Personen dieser Rollen, die anderen abgewiesen (null = alle); `{ personen: { neu, geaendert }, runden, rekorde, teile, freigabe, abgewiesen, kennungen, ids, neueIds, geschrieben, datei }`; Fehler mit Klartext |
 | `lesen(text \| objekt)` | nur lesen und umdeuten; Fehler: „Diese Datei kann ich nicht lesen.“, „Das ist keine Sicherung und keine Abgleich-Datei.“, „Das ist eine Datei des Lernsteigs; hier lässt sie sich nicht einlesen.“, neuere Fassung, „Die Datei ist beschädigt.“ |
@@ -531,31 +531,41 @@ Benutzt vom Eulenpfad (`LS.zuruecksetzen…`, Bestätigung beim Freischalten) un
 
 ### 4.22 `KERN.runde` (`kern/runde.js`) — Ablauf einer Runde
 
-Zuschnitt AR1 a (ohne Oberfläche: Prüfen der Antwort, Bewertung, Timer und Wartezeiten bleiben in der App), Einzelentscheide
-RA1–RA8 a (Plan B). Seit 1.19.0 die reinen Hilfen; der Ablauf selbst (Versuche, Lösung nach dem dritten Fehlversuch, Ende
-von Runde und Serie, Zeit je Aufgabe ab `bereit` ohne Pausen, Protokolleintrag mit `zeit` am Ende, `dauer` auf 0,1 s und
-einer Liste je Aufgabe) folgt.
+Zuschnitt AR1 a (ohne Oberfläche: Prüfen der Antwort, Bewertung, Lob, Sterne, Timer und Wartezeiten bleiben in der App),
+Einzelentscheide RA1–RA8 a (Plan B). Seit 1.19.0 die reinen Hilfen, seit 1.20.0 der Ablauf selbst.
+
+**Eintrag einer Runde** (`lauf().eintrag`, RA1–RA4 a): `{ id, zeit (Ende), …Felder der App, aufgaben, fehler, gezeigt,
+dauer (s, auf 0,1), liste, endlos?, gekuerzt?, abgebrochen? }`; `liste` je Aufgabe `{ ms, versuche, geloest, gezeigt?,
+uebersprungen?, zeitUm?, … Felder der App }`, mit Fehlversuch oder „Zeit um“ dazu `text`, `loesung`, `eingaben` (die letzten
+6). `ms` ab `bereit` (sonst ab `gestellt`) ohne Pausen (RA7 a). Eine Serie ist eine Runde (RA3 a): Eintrag mit `endlos` und
+dazu ein Rekord `{ id (dieselbe), zeit, punkte, dauer, alles?, abgebrochen? }`.
 
 | Teil | Zweck |
 |---|---|
+| `lauf({ endlos, anzahl, loesungNach = 3, id?, uhr?, messuhr? })` | Ablauf: je Aufgabe `gestellt({ text, loesung })`, `bereit()`, `pause()`/`weiter()`, `eingabe(t)`, `zusatz(felder)`, dann `falsch({ text, loesung, eingabe })` → `{ versuche, loesungZeigen, vorbei }` (Lösung nach dem dritten Fehlversuch, wenn eine Lösung genannt ist; in einer Serie vorbei), `zeitUm()` (ein Fehler, die Aufgabe bleibt offen; Serie vorbei), `richtig()` → `{ aufAnhieb }`, `uebersprungen()`; `erschoepft()`; Stand `offen`, `versuche`, `aufgaben`, `fehler`, `geschafft`, `gezeigt`, `liste`, `vorbei`; `eintrag(felder, { abgebrochen })`, `rekord(felder, { abgebrochen })`. Die Kennung entsteht erst beim ersten Eintrag (so bleibt die Zufallsfolge eines Testlaufs gleich) |
+| `eintragen(liste, eintrag)` (auch `rekordEintragen`) | gleiche Kennung ersetzt (Zwischenstand → Endstand), für Runden und Rekorde; neue Liste |
+| `mitFehler(eintrag)`, `aufAnhieb(aufgabe)` | Aufgaben mit Fehlversuch oder „Zeit um“ (früher `fehlerAufgaben`); gelöst ohne Fehlversuch, „Zeit um“ und Tipp (T1 a) |
+| `ausEulenpfad(e)`, `ausLernsteig(e)` | Runden bis LERN_Session18 in die heutige Form: Eulenpfad `aufgabenZeiten` + `fehlerAufgaben` (in der Reihenfolge der Aufgaben mit Fehler; ohne `aufgabenZeiten` die übrigen Aufgaben ohne Zeit), Lernsteig `zeiten` + `liste` + `falsch` und `zeit` vom Beginn ans Ende (RA1 a). Heutige Einträge bleiben, wie sie sind |
 | `gedaechtnis({ speicher, schluessel, feld = "gestellt", alt, max = 400 })` | Durchgang über Runden und Serien (RA5 a): `hat(fp)`, `merke(fp)`, `beginneNeu(fps)`; Schlüssel „Person\|Inhalt/Stufe“ (ohne Niveau); `alt` übernimmt frühere Schlüssel (Eulenpfad: nach Name) und entfernt sie |
 | `auswahl({ gedaechtnis, endlos, serieMax = 3 })` | je Aufgabe `neueSuche()`, je Zug `pruefe(kennung, serien, versuch)` → `{ nehmen, serieErzwungen, wiederholung }`, `{ erschoepft }` oder `{ weiter }`. Suche in fünf Stufen (`VERSUCHE`): neu und ohne Muster → aus früheren Runden → Serie erzwungen → neuer Durchgang → eine Wiederholung der Runde, nie direkt hintereinander (nicht in Serien). Erschöpft: Runde endet früher mit `gekuerzt`, Serie mit „alles geschafft“ (RA6 a) |
-| `rekordEintragen(liste, eintrag)` | gleiche Kennung ersetzt (Zwischenstand → Endstand), neue Liste |
 | `bestwert(rekorde, passt)`, `bestzeit(runden, passt)` | höchster Stand; kürzeste Dauer nur voller Runden ohne gezeigte Lösung, keine Serie, keine gekürzte |
 | `sekunden(ms)` | Dauer auf 0,1 s (RA2 a) |
 | `waechter(beimVerlassen, { fenster, dokument })` | Zwischenstand bei `pagehide` und `visibilitychange` (hidden); `aus()` |
 
 Die Kennung einer Aufgabe bildet die App (Eulenpfad aus der Fläche, Lernsteig aus dem Generator), der Kern vergleicht nur
-ihre Fingerabdrücke. Benutzt vom Eulenpfad (Auswahl, Gedächtnis, Rekorde, Wächter) und vom Lernsteig (dazu Bestzeit und
-Dauer). Geprüft in `tools/pruefe_kern.js`: Nachrechnung gegen die bisherige Schleife des Eulenpfads (1200 Runden aus 300
-Zufallsfällen, gleiche Züge und Kürzungen), Durchgang, Serie bis erschöpft, Serienbremse, Rekord, Bestzeit, Wächter.
+ihre Fingerabdrücke. Benutzt von beiden Apps (Eulenpfad: Ablauf, Auswahl, Gedächtnis, Rekorde, Wächter, Mix mit den
+Einträgen je Aufgabe; Lernsteig: dazu Bestzeit). Geprüft in `tools/pruefe_kern.js`: Nachrechnung gegen die bisherige
+Schleife des Eulenpfads (1200 Runden aus 300 Zufallsfällen, gleiche Züge und Kürzungen), Durchgang, Serie bis erschöpft,
+Serienbremse, Rekord, Bestzeit, Wächter; Ablauf mit fester Uhr (Zeit ab bereit, Pause, Zeit um, Lösung nach dem dritten
+Fehlversuch, Serie); Umdeutung gegen die alte Aufzeichnung beider Apps (je 300 Zufallsrunden; Gegenprobe mit falscher
+Zuordnung schlägt an). Die letzte, falsch beantwortete Aufgabe einer alten Lernsteig-Serie hat keine Zeit: Sie wurde nie
+gemessen.
 
 ### 4.23 Geplant
 
-Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): der Ablauf
-einer Runde in `runde.js` (4.22; Fehlversuch mit Hinweis und Lösung nach dem dritten, Serie/Endlos, Eintrag im Protokoll,
-Vertrag `aufgabeErzeugen`/`pruefeAufgabe`) und die Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Ein neuer Teil
-bekommt hier seinen Abschnitt, bevor er umzieht.
+Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): die
+Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Prüfen der Antwort und der Vertrag `aufgabeErzeugen`/`pruefeAufgabe`
+bleiben nach AR1 a in den Apps. Ein neuer Teil bekommt hier seinen Abschnitt, bevor er umzieht.
 
 ## 5. Ändern und verteilen
 

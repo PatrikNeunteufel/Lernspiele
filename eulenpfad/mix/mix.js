@@ -3,8 +3,9 @@
    wenn diese Seite sie verlangt; jedes Ergebnis melden sie zurück. Einstellungen, Wechsel zwischen den
    Spielen, Ende, Protokoll (je Spiel ein Eintrag mit mix) und Rekord (spiel "mix:<Auswahl>") führt allein
    diese Seite.
-   Nachrichten { lern: "mix", typ, … } — Spiel → Mix: bereit, ergebnis { zeit, fehler, hilfen,
-   fehlerAufgabe }, erschoepft, geht-nicht; Mix → Spiel: aufgabe { geschafft }, ton { an }. */
+   Nachrichten { lern: "mix", typ, … } — Spiel → Mix: bereit, ergebnis { zeit (Eintrag der Aufgabe aus KERN.runde, mit
+   Fehler auch text, loesung, eingaben; bis LERN_Session18 dazu fehlerAufgabe), fehler, hilfen }, erschoepft, geht-nicht;
+   Mix → Spiel: aufgabe { geschafft }, ton { an }. */
 "use strict";
 
 const MIX = {
@@ -137,8 +138,8 @@ function zeichneEinstellungen() {
 
 // ---------- Bericht des Übertritts-Checks ----------
 
-// Auf Anhieb heisst: ohne Fehlversuch, ohne „Zeit um“ und ohne Tipp (Entscheid T1 a).
-const anhiebRichtig = a => a.geloest && !a.versuche && !a.zeitUm && !a.tipps;
+// Auf Anhieb heisst: ohne Fehlversuch, ohne „Zeit um“ und ohne Tipp (Entscheid T1 a; eine Regel im Kern).
+const anhiebRichtig = KERN.runde.aufAnhieb;
 
 /**
  * Je Thema (Fach und Thema aus dem Katalog): wie viele Aufgaben auf Anhieb richtig waren, eingeteilt in
@@ -182,7 +183,7 @@ function starte(name, e) {
   const test = LS.istAufsicht(name);
   const kennung = rekordKennung(e);
   const beginn = Date.now();
-  const spiele = auswahl.map(({ s, stufe }) => ({ s, stufe, bereit: false, weg: false, aufgaben: [], fehler: 0, hilfen: 0, fehlerAufgaben: [] }));
+  const spiele = auswahl.map(({ s, stufe }) => ({ s, stufe, bereit: false, weg: false, aufgaben: [], fehler: 0, hilfen: 0 }));
   let aktuell = null;
   let imStueck = 0;   // Aufgaben am Stück aus dem aktuellen Spiel
   let gestellt = 0;
@@ -241,7 +242,6 @@ function starte(name, e) {
     g.aufgaben.push(d.zeit);
     g.fehler += d.fehler;
     g.hilfen += d.hilfen;
-    if (d.fehlerAufgabe) g.fehlerAufgaben.push(d.fehlerAufgabe);
     gestellt++;
     if (d.zeit.geloest) geschafft++;
     // Endlos: Ende beim ersten Fehler oder „Zeit um“; Überspringen (Testhilfe) beendet die Serie nicht.
@@ -264,20 +264,20 @@ function starte(name, e) {
   const rekordEintrag = abgebrochen => ({
     id: zwischenstand?.id || KERN.runden.neueId(), // eine Kennung je Serie (R1 a)
     name, zeit: new Date().toISOString(), inhalt: kennung, stufe: e.stufe, timer: e.timer || null, punkte: geschafft,
-    dauer: Math.round((Date.now() - beginn) / 1000), spiele: spiele.filter(g => g.aufgaben.length).map(g => g.s.id),
+    dauer: KERN.runde.sekunden(Date.now() - beginn), spiele: spiele.filter(g => g.aufgaben.length).map(g => g.s.id),
     ...(test ? { test: true } : {}), ...(hilfen() ? { hilfe: hilfen() } : {}), ...(abgebrochen ? { abgebrochen: true } : {}),
   });
 
   /**
-   * Runde: je gespieltes Spiel ein Protokolleintrag mit mix (ohne Sterne, die gelten für ganze Runden).
-   * Endlos: ein Rekord wie im Endlos-Modus der Spiele, nicht im Protokoll; verlassen ohne richtige
-   * Aufgabe gibt keinen Eintrag (Entscheid E1 a).
+   * Je gespieltes Spiel ein Protokolleintrag mit mix (ohne Sterne, die gelten für ganze Runden); liste: die Einträge je
+   * Aufgabe, wie das Spiel sie gemeldet hat (KERN.runde, RA4 a); dauer: die Zeiten der Aufgaben, auf 0,1 s (RA2 a).
+   * Endlos dazu ein Rekord wie im Endlos-Modus der Spiele, und auch die Serie steht im Protokoll (endlos, RA3 a);
+   * verlassen ohne richtige Aufgabe gibt keinen Eintrag (Entscheid E1 a).
    */
   function speichere(abgebrochen) {
     if (endlos) {
       if (abgebrochen && !geschafft) return;
       LS.speichereRekord(rekordEintrag(abgebrochen));
-      return;
     }
     const zeit = new Date().toISOString();
     for (const g of spiele.filter(x => x.aufgaben.length)) {
@@ -285,11 +285,11 @@ function starte(name, e) {
       LS.protokolliere({
         ...(tipps ? { tipps } : {}),
         name, zeit, inhalt: g.s.id, stufe: g.stufe, sterne: null, mix: auswahlSchluessel(e),
-        fehler: g.fehler, aufgaben: g.aufgaben.length,
-        dauer: Math.round(g.aufgaben.reduce((n, a) => n + a.ms, 0) / 1000),
+        fehler: g.fehler, aufgaben: g.aufgaben.length, gezeigt: g.aufgaben.filter(a => a.gezeigt).length,
+        dauer: KERN.runde.sekunden(g.aufgaben.reduce((n, a) => n + (a.ms || 0), 0)),
         geordnet: LS.geordnet(name, g.s.id, g.stufe),
         timer: e.timer ? LS.timerFuer(name, g.s.id, g.stufe).sekunden : null,
-        aufgabenZeiten: g.aufgaben, fehlerAufgaben: g.fehlerAufgaben,
+        liste: g.aufgaben, ...(endlos ? { endlos: true } : {}),
         ...(abgebrochen ? { abgebrochen: true } : {}), ...(test ? { test: true } : {}), ...(g.hilfen ? { hilfe: g.hilfen } : {}),
       });
     }

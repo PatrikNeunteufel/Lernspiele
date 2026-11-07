@@ -15,6 +15,27 @@ var LST = (function () {
 
   /** Felder der Runden und Rekorde von vor LERN_Session15 und ihre Namen im gemeinsamen Format (R1 a, kern/runden.js). */
   const ALTE_FELDER = { konto: "person", uebung: "inhalt" };
+  /**
+   * Runden und Rekorde älterer Fassungen in die heutige Form (beim Laden und beim Einlesen): Felder von vor LERN_Session15,
+   * und bis LERN_Session18 zeit = Beginn sowie zeiten/falsch/liste getrennt (RA1 a, RA4 a; KERN.runde.ausLernsteig). Der
+   * Rekord einer solchen Runde (gleiche Kennung) trug ebenfalls den Beginn: zeit + dauer. Gibt { runden, rekorde, geaendert }.
+   */
+  function alteEintraegeUmdeuten({ runden = [], rekorde = [] } = {}) {
+    let geaendert = false;
+    const felder = e => (e && typeof e === "object" && ("konto" in e || "uebung" in e) ? (geaendert = true, KERN.runden.umdeuten(e, ALTE_FELDER)) : e);
+    const verschoben = new Set();
+    const r = runden.map(felder).map(e => {
+      const n = KERN.runde.ausLernsteig(e);
+      if (n !== e) { geaendert = true; if (n.endlos) verschoben.add(n.id); }
+      return n;
+    });
+    const k = rekorde.map(felder).map(e => {
+      if (!e || !verschoben.has(e.id) || typeof e.dauer !== "number" || Number.isNaN(Date.parse(e.zeit))) return e;
+      geaendert = true;
+      return { ...e, zeit: new Date(Date.parse(e.zeit) + Math.round(e.dauer * 1000)).toISOString() };
+    });
+    return { runden: r, rekorde: k, geaendert };
+  }
 
   // Zufall über die austauschbare Quelle des Kerns, damit das Testskript mit Seed laufen kann (LST.quelle.zufall = …).
   const { quelle, zufall, waehle, mische } = KERN.zufall;
@@ -95,7 +116,7 @@ var LST = (function () {
   }
 
   return {
-    PRAEFIX, ALTE_FELDER, lies, schreibe, quelle, zufall, waehle, mische, tagText, wochenSerie,
+    PRAEFIX, ALTE_FELDER, alteEintraegeUmdeuten, lies, schreibe, quelle, zufall, waehle, mische, tagText, wochenSerie,
     TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl,
     NIVEAUS, niveauNr, stufenListe, stufeVon, zielstufe,
   };

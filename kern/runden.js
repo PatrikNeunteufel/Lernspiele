@@ -81,7 +81,7 @@
 
   /**
    * Einträge zusammenführen (Sicherung einlesen, Abgleich): nach Kennung; bei Rekorden gilt der höhere Stand
-   * (Zwischenstand → Endstand). Fremde, ungültige werden abgewiesen; eigene bleiben, wie sie sind (nur `behalten`
+   * (Zwischenstand → Endstand), bei Runden ersetzt der spätere Stand einen Zwischenstand (abgebrochen, RA3 a). Fremde, ungültige werden abgewiesen; eigene bleiben, wie sie sind (nur `behalten`
    * entscheidet, etwa nach einem Löschvermerk). Ergebnis nach Zeit sortiert: { eintraege, neu, ersetzt, abgewiesen }.
    * opt: { art: "runde" | "rekord", pruefung (wie maengel), umbiegen: person → bleibende Kennung, behalten: e → bool }
    */
@@ -100,6 +100,8 @@
       const da = nach.get(e.id);
       if (!da) { nach.set(e.id, e); erg.neu++; }
       else if (art === "rekord" && e.punkte > (da.punkte || 0)) { nach.set(e.id, e); erg.ersetzt++; }
+      // Runde (RA3 a): ein Zwischenstand beim Verlassen weicht dem späteren Stand derselben Runde
+      else if (art === "runde" && da.abgebrochen && (!e.abgebrochen || (e.aufgaben || 0) > (da.aufgaben || 0))) { nach.set(e.id, e); erg.ersetzt++; }
     }
     erg.eintraege = [...nach.values()].sort((a, b) => String(a.zeit || "").localeCompare(String(b.zeit || "")));
     return erg;

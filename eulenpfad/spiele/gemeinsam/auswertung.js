@@ -9,10 +9,14 @@ const AUSWERTUNG = (() => {
   const SITZUNGS_PAUSE_MIN = 20;   // mehr Pause zwischen zwei Runden = neue Sitzung
   const QUOTE_UEBEN = 0.7;         // unter diesem Anteil „auf Anhieb richtig“ gilt ein Lernziel als „üben“
 
-  // „Auf Anhieb“ heisst ohne Fehler und ohne Tipp (Entscheid T1 a, LERN_Session9): Aufgaben mit Fehler stehen in
-  // fehlerAufgaben, Aufgaben, die nur ein Tipp brauchte, zählen dazu.
-  const mitTippOhneFehler = e => (e.aufgabenZeiten || []).filter(a => a.tipps && !a.versuche && !a.zeitUm).length;
-  const anhieb = e => (e.aufgaben - (e.fehlerAufgaben || []).length - mitTippOhneFehler(e)) / e.aufgaben;
+  // „Auf Anhieb“ heisst gelöst ohne Fehler, ohne „Zeit um“ und ohne Tipp (Entscheid T1 a, LERN_Session9; eine Regel im
+  // Kern: KERN.runde.aufAnhieb). Je Aufgabe steht ein Eintrag in liste (RA4 a; bis LERN_Session18 aufgabenZeiten und
+  // fehlerAufgaben, beim Laden umgedeutet).
+  const listeVon = e => (Array.isArray(e.liste) ? e.liste : []);
+  const anhiebZahl = e => listeVon(e).filter(KERN.runde.aufAnhieb).length;
+  const anhieb = e => (e.aufgaben ? anhiebZahl(e) / e.aufgaben : 0);
+  /** Aufgaben mit gemessener Zeit (ältere Runden ohne Zeiten je Aufgabe haben keine). */
+  const gemessen = e => listeVon(e).filter(a => typeof a.ms === "number");
   // Rechnungen ohne App-Bezug im Kern (kern/auswertung.js, AW1 a): Mittel, Median, Korrelation, Sitzungen, Lernzeiten,
   // Wochen, Stand, Bedarf, Ziehen. Hier bleibt, was an Spielen, Lernzielen und Texten des Eulenpfads hängt.
   const K = KERN.auswertung;
@@ -24,17 +28,13 @@ const AUSWERTUNG = (() => {
   // jede Aufgabe zählt gleich, auch in langen Endlos-Serien.
   const STAND = { fenster: 24, mindestens: 1, schwelle: QUOTE_UEBEN };
   /**
-   * Die Aufgaben einer Runde, in ihrer Reihenfolge: { anhieb } je Aufgabe aus aufgabenZeiten (ohne Fehler, Zeit, Tipp).
-   * Passen die Angaben je Aufgabe nicht zur Zählung der Runde (ältere Runden, übersprungene Aufgaben), zählt die Runde
-   * wie bisher (anhieb) und die Aufgaben ohne Anhieb stehen am Ende der Runde.
+   * Die Aufgaben einer Runde, in ihrer Reihenfolge: { anhieb } je Aufgabe aus liste. Fehlen Einträge (die Runde zählt
+   * mehr Aufgaben, als ihre Liste hat), gelten die fehlenden als nicht auf Anhieb.
    */
   function aufgabenVon(e) {
-    const n = e.aufgaben || 0;
-    const ja = Math.max(0, Math.round(anhieb(e) * n));
-    const az = Array.isArray(e.aufgabenZeiten) ? e.aufgabenZeiten : [];
-    const einzeln = az.map(a => ({ anhieb: !!a.geloest && !a.versuche && !a.zeitUm && !a.tipps && !a.uebersprungen }));
-    if (az.length === n && einzeln.filter(a => a.anhieb).length === ja) return einzeln;
-    return Array.from({ length: n }, (_, i) => ({ anhieb: i < ja }));
+    const einzeln = listeVon(e).map(a => ({ anhieb: KERN.runde.aufAnhieb(a) }));
+    while (einzeln.length < (e.aufgaben || 0)) einzeln.push({ anhieb: false });
+    return einzeln;
   }
   /** Quote auf Anhieb der letzten 24 Aufgaben der Runden rs (älteste zuerst) mit Schwelle; null ohne Aufgaben. */
   const standVon = (rs, schwelle = STAND.schwelle) => K.stand(rs.flatMap(aufgabenVon), { ...STAND, schwelle });
@@ -63,18 +63,20 @@ const AUSWERTUNG = (() => {
    * a) nach Position der Aufgabe in der Runde, b) nach Nummer der Runde in der Sitzung.
    */
   function konzentration(runden) {
-    const mitZeiten = runden.filter(e => Array.isArray(e.aufgabenZeiten) && e.aufgabenZeiten.length);
+    // Serien nicht (seit RA3 a im Protokoll): ihre Zeit wird je Aufgabe knapper, und sie enden mit einem Fehler —
+    // Position und Tempo wären mit gewöhnlichen Runden nicht vergleichbar.
+    const mitZeiten = runden.filter(e => !e.endlos && gemessen(e).length && gemessen(e).length === listeVon(e).length);
     const ueblich = {};
     for (const e of mitZeiten) {
       const k = `${e.inhalt}|${e.stufe}`;
-      (ueblich[k] = ueblich[k] || []).push(...e.aufgabenZeiten.map(a => a.ms));
+      (ueblich[k] = ueblich[k] || []).push(...listeVon(e).map(a => a.ms));
     }
     for (const k of Object.keys(ueblich)) ueblich[k] = median(ueblich[k]);
 
     const nachPosition = [];
     for (const e of mitZeiten) {
       const basis = ueblich[`${e.inhalt}|${e.stufe}`] || 1;
-      e.aufgabenZeiten.forEach((a, i) => {
+      listeVon(e).forEach((a, i) => {
         const p = (nachPosition[i] = nachPosition[i] || { pos: i + 1, verhaeltnis: [], fehler: [] });
         p.verhaeltnis.push(a.ms / basis);
         p.fehler.push(a.versuche > 0 || a.zeitUm ? 1 : 0);
@@ -93,7 +95,7 @@ const AUSWERTUNG = (() => {
         const basis = ueblich[`${e.inhalt}|${e.stufe}`] || 1;
         const idx = Math.min(i, 3); // 1., 2., 3., 4.+ Runde
         const r = (nachRunde[idx] = nachRunde[idx] || { runde: idx === 3 ? "4.+" : `${idx + 1}.`, verhaeltnis: [], anhieb: [], relativ: [] });
-        r.verhaeltnis.push(median(e.aufgabenZeiten.map(a => a.ms)) / basis);
+        r.verhaeltnis.push(median(listeVon(e).map(a => a.ms)) / basis);
         r.anhieb.push(anhieb(e));
         r.relativ.push(anhieb(e) - schnitt[`${e.inhalt}|${e.stufe}`]);
       });
@@ -159,16 +161,18 @@ const AUSWERTUNG = (() => {
       const [spiel, stufe] = k.split("|");
       const st = standVon(rs), q = st.quote;
       if (q !== null && q < QUOTE_UEBEN) {
-        const offen = rundenImFenster(rs).flatMap(e => (e.fehlerAufgaben || []).filter(f => !f.geloest)).length;
+        const offen = rundenImFenster(rs).flatMap(e => KERN.runde.mitFehler(e).filter(f => !f.geloest)).length;
         v.push({ art: "wiederholen", prio: 1 + q, titel: `🔁 Wiederholen: ${spielVon(spiel)?.name} · Stufe ${stufeNr(stufe)}`,
           text: `In den letzten ${st.imFenster} Aufgaben nur ${Math.round(q * 100)} % auf Anhieb richtig${offen ? `, ${offen} Aufgabe${offen === 1 ? "" : "n"} nicht gelöst` : ""}. Lieber 2–3 kurze Runden an verschiedenen Tagen als viele am Stück.`,
           link: link(spiel, stufe) });
       }
     }
 
-    // 2. Nächste Stufe: zweimal in Folge 3 Sterne, nächste Stufe noch nicht gemeistert
-    for (const [k, rs] of Object.entries(gruppen)) {
+    // 2. Nächste Stufe: zweimal in Folge 3 Sterne, nächste Stufe noch nicht gemeistert. Nur Runden mit Sternen: Serien
+    // (RA3 a) und Runden im Zufallsmix haben keine und unterbrechen die Folge nicht.
+    for (const [k, alle] of Object.entries(gruppen)) {
       const [spiel, stufe] = k.split("|");
+      const rs = alle.filter(e => typeof e.sterne === "number");
       const n = stufeNr(stufe);
       if (n >= LS.SKALA.length || rs.length < 2 || !rs.slice(-2).every(e => e.sterne === 3)) continue;
       const naechste = `s${n + 1}`;
@@ -297,7 +301,7 @@ const AUSWERTUNG = (() => {
   function vorgehen(runden) {
     const sortiert = [...runden].sort((a, b) => a.zeit.localeCompare(b.zeit));
     return Object.entries(VORGEHEN).map(([art, d]) => {
-      const folge = sortiert.flatMap(e => (e.aufgabenZeiten || []).filter(a => a.vorgehen?.[art]).map(a => a.vorgehen[art]));
+      const folge = sortiert.flatMap(e => listeVon(e).filter(a => a.vorgehen?.[art]).map(a => a.vorgehen[art]));
       return { art, ...d, folge, anzahl: Object.fromEntries(d.werte.map(w => [w.id, folge.filter(x => x === w.id).length])) };
     }).filter(v => v.folge.length);
   }
@@ -324,7 +328,9 @@ const AUSWERTUNG = (() => {
   };
 
   const themaVon = id => THEMEN.find(t => t.id === spielVon(id)?.thema);
-  const anhiebAufgaben = e => e.aufgaben - e.fehlerAufgaben.length - mitTippOhneFehler(e);
+  const anhiebAufgaben = anhiebZahl;
+  /** Aufgaben, die ein Tipp ohne Fehler lösen liess (T1 a). */
+  const mitTippOhneFehler = e => listeVon(e).filter(a => a.tipps && !a.versuche && !a.zeitUm).length;
   const pz = x => `${Math.round(x * 100)} %`;
   const aufgabenText = n => `${n} Aufgabe${n === 1 ? "" : "n"}`;
 
@@ -383,7 +389,7 @@ const AUSWERTUNG = (() => {
     // ----- Qualität -----
     const qualitaet = [];
     qualitaet.push(`Insgesamt ${pz(gesamt.quote)} der Aufgaben auf Anhieb richtig.`);
-    const gezeigt = rs.reduce((s, e) => s + e.fehlerAufgaben.filter(f => !f.geloest).length, 0);
+    const gezeigt = rs.reduce((s, e) => s + listeVon(e).filter(a => a.gezeigt).length, 0);
     if (gezeigt) qualitaet.push(`Bei ${aufgabenText(gezeigt)} (${pz(gezeigt / gesamt.aufgaben)}) zeigte das Spiel nach drei Versuchen die Lösung.`);
     // Tipps (Entscheid T1 a): wie oft geholt, und wie viele Aufgaben dank Tipp ohne Fehler gelöst wurden
     const tippsGesamt = rs.reduce((s, e) => s + (e.tipps || 0), 0);

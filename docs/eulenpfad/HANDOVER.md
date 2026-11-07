@@ -1,5 +1,53 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
+## HALTEPUNKT 2026-11-06 23:45 — LERN_Session19_2026-11-06_runde-js (aufgenommen 2026-11-07)
+Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
+
+- **Angehalten — beim Weitermachen neu starten:** nichts. Es lief kein Hintergrundbefehl, kein Agent, kein Workflow und kein
+  Monitor. Der Vorschau-Server `lernspiele-4` (Port 8771) war schon gestoppt und wird nur gebraucht, wenn im Browser
+  geprüft wird.
+- **Stand:**
+  - Commit `72a1a0e` (Kern 1.19.0, Hilfen von `runde.js`).
+  - Uncommittet, fertig und geprüft — Kern 1.20.0, verteilt:
+    - `runde.js`: Ablauf `lauf()` (gestellt, bereit, Pause, falsch, Zeit um, richtig, übersprungen; Lösung nach dem dritten
+      Fehlversuch; `eintrag()` mit `zeit` am Ende und `dauer` auf 0,1 s; `liste` je Aufgabe; `rekord()`), dazu `eintragen`,
+      `mitFehler`, `aufAnhieb`, `ausEulenpfad`, `ausLernsteig`.
+    - `runden.js`: Ein Zwischenstand einer Runde weicht dem späteren Stand (RA3 a).
+    - `daten.js`: Option `umdeuten`.
+  - Uncommittet im Lernsteig, ganz umgestellt:
+    - `rahmen.js`: Runde über `KERN.runde.lauf`, Serie auch als Zwischenstand im Protokoll.
+    - `werkzeug.js`: `LST.alteEintraegeUmdeuten` beim Laden und Einlesen; Lernsteig-Runden bekommen `zeit` + `dauer`, ihre
+      Rekorde ebenso.
+    - `daten.js`: Schema ohne `zeiten`/`falsch`, mit `gekuerzt`, `abgebrochen`, `alles`.
+  - Tests:
+    - Kern „5586 Fälle, 0 Fehler.“, mit Nachrechnung der Umdeutung gegen die alte Aufzeichnung (je 300 Runden Eulenpfad und
+      Lernsteig; Gegenprobe mit falscher Zuordnung: 66 Funde).
+    - Lernsteig „0 Fehler, 0 Hinweise.“, Konten „72 Fälle, 0 Fehler.“; Gratwanderung „Keine Fehler.“
+  - **Eulenpfad noch nicht auf `lauf()` umgestellt:** Er nutzt weiter `aufgabenZeiten`/`fehlerAufgaben`, keine
+    Eulenpfad-Stichprobe seit 1.20.0. `eulenpfad/spiele/gemeinsam/pruefstand.js` ist geändert, nicht von Claude
+    (Entwickler-Modus), nicht anfassen.
+- **Weiter mit:**
+  1. Eulenpfad auf `KERN.runde.lauf` umstellen (`spiele/gemeinsam/spiel.js`, Funktion der Runde):
+     - Melden: `ctx.falsch` → `L.falsch`, `zeitIstUm` → `L.zeitUm`, `ctx.richtig` → `L.richtig`, `ueberspringen` →
+       `L.uebersprungen`, `starteUhr` → `L.bereit`, `pausiere`/`fortsetzen` → `L.pause`/`L.weiter`, Tipps und Vorgehen
+       über `L.zusatz`, Eingaben (`eingabeHoerer`) über `L.eingabe`.
+     - Speichern: `schluss` über `L.eintrag` (RA2: dauer 0,1 s); Serie auch ins Protokoll (RA3 a: `endlos: true`,
+       `sterne: null`, Zwischenstand beim Verlassen beider Einträge).
+     - Mix: `meldeMix` sendet den Listeneintrag; `mix/mix.js` schreibt `liste` statt `aufgabenZeiten`/`fehlerAufgaben`.
+     - Umdeuten: beim Laden (`spiel.js` ~388, bei `!e.id || "spiel" in e`) zusätzlich `KERN.runde.ausEulenpfad`; in
+       `KERN.daten({ … umdeuten })` dieselbe Umdeutung.
+     - Schema `RUNDEN_PRUEFUNG`: `liste` statt `aufgabenZeiten`/`fehlerAufgaben`.
+  2. Leser nachziehen (`fehlerAufgaben` 24 Zeilen, `aufgabenZeiten` 21 Zeilen in `eulenpfad/` und `tools/`): `auswertung.js`
+     (anhieb mit `KERN.runde.mitFehler`/`aufAnhieb`), `start/statistik.js`, `start/erfolge.js`,
+     `spiele/gemeinsam/erfolge.js`, `spiel.js:248`, `tools/pruefe_spiele.js`. Serien in Leser der Sterne auslassen
+     (`sterne: null`, 8 Zeilen in 4 Dateien).
+  3. Testskript: Prüfung der Liste je Aufgabe; Stichprobe Eulenpfad (zahlenhaus, anlaut-angel, preis-tabelle,
+     kulturen-koffer, daten, au-cafe) — Vergleich mit Scratchpad `vorher.txt` geht nicht mehr 1:1 (Serie im Protokoll).
+  4. Doku: `docs/kern/rahmen.md` 4.22 (Ablauf, `lauf`, Umdeutung), Kern-Changelog 1.20.0 (fehlt noch), CHANGELOG,
+     `rahmen.md` 7 (Protokoll, Serie), `lernsteig/rahmen.md` 5, Plan B (Stand). Dann Commit-Pause.
+- **Offen beim Nutzer:** nichts (RA1–RA8 a entschieden). Ein voller Eulenpfad-Lauf nur auf Patriks Entscheid, vor dem
+  nächsten Push vorschlagen.
+
 ## Stand
 **2026-11-06, nach LERN_Session18** ([Report](report/LERN_Session18_2026-11-06.md)):
 - **Kern 1.18.0:** dazu `daten.js` (ein Dateiformat `reihe-daten` für Sichern, Einlesen, Abgleich; Löschvermerke,
