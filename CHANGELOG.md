@@ -778,3 +778,10 @@
   Lösung) und beim Binom den Ausdruck; `sollAus` rechnet die gefragte Lösung aus dem Gelesenen. Kein Fund. Gegenprobe
   (das System fragt nach der anderen Variablen): gemeldet — die bisherige Prüfung nahm die Frage aus den Daten und hätte
   es nicht bemerkt. Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).
+- Text gegen Prüfdaten (TD1 a), neunte Übung `kombinatorik`: Wortlaut je Ereignis im Prüfteil eigens festgehalten
+  (`WORTLAUT`); `liesText` (alle 19 Typen) findet ihn im Satz und gibt die Kennung, mit der abgezählt wird, dazu Wurf
+  (zwei Münzen, zwei Würfel, Münze und Würfel), Augensumme, Ziffern 1 bis n, Buchstaben mit Beispielwort, Anzahlen
+  der Kleider (die Frage nennt so viele Teile, wie aufgezählt sind), n bei Handshakes und Vielecken. Das Nachzählen ist
+  `zaehle(a, d)` und läuft mit den Daten und mit dem Gelesenen; die frühere Suche „Ziffern / n im Text“ ersetzt es.
+  Kein Fund. Gegenprobe (Ereignis „mindestens einmal Kopf“ als „zweimal Kopf“ gezeigt): gemeldet. Tests: Lernsteig
+  „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).

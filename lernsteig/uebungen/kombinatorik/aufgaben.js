@@ -192,39 +192,128 @@ const EREIGNIS = {
 };
 function produkt(stufen) { return stufen.reduce((acc, s) => acc.flatMap(f => ERGEBNISSE[s].map(x => f.concat(x))), [[]]); }
 
+// ---------- Text gegen Prüfdaten (Plan B2 Schritt 3, TD1 a) ----------
+// Wortlaut je Ereignis, hier im Prüfteil eigens festgehalten (nicht aus dem Erzeuger übernommen): liesText findet im
+// gezeigten Satz den Wortlaut und gibt die Kennung, mit der EREIGNIS abzählt. Steht im Text ein anderes Ereignis, als
+// gezählt wird, fällt es so auf.
+const WORTLAUT = {
+  kk: "zweimal Kopf", zz: "zweimal Zahl", "kz-beliebig": "einmal Kopf und einmal Zahl (Reihenfolge egal)", "k-min1": "mindestens einmal Kopf",
+  pasch: "zweimal dieselbe Augenzahl", "sechs-sechs": "zweimal eine Sechs", verschieden: "zwei verschiedene Augenzahlen",
+  "k-gerade": "Kopf und eine gerade Augenzahl", "k-sechs": "Kopf und eine Sechs", "z-min5": "Zahl und mindestens eine Fünf",
+  "z-max2": "Zahl und höchstens eine Zwei", "k-ungerade": "Kopf und eine ungerade Augenzahl",
+  "sechs-min1": "mindestens eine Sechs", "ungerade-min1": "mindestens eine ungerade Augenzahl",
+};
+const WURF = { "Du wirfst zwei Münzen.": ["muenze", "muenze"], "Du wirfst zwei Würfel.": ["wuerfel", "wuerfel"], "Du wirfst eine Münze und einen Würfel.": ["muenze", "wuerfel"] };
+const muster = (text, mu) => LST.zahlenImText(text, mu);
+const BRUCH = " (als gekürzter Bruch)";
+/** Wahrscheinlichkeitsaufgabe: Wurf, dann das Ereignis als Wortlaut, als Augensumme oder als Mindestsumme. */
+function liesWahrscheinlichkeit(text) {
+  if (!text.endsWith(BRUCH)) return null;
+  const satz = text.slice(0, -BRUCH.length);
+  const wurf = Object.keys(WURF).find(w => satz.startsWith(w + " "));
+  if (!wurf) return null;
+  const rest = satz.slice(wurf.length + 1), stufen = WURF[wurf];
+  const s = muster(rest, "Wie gross ist die Wahrscheinlichkeit, dass die Augensumme # ist?");
+  if (s) return { stufen, ereignis: "summe", wert: s[0] };
+  const smin = muster(rest, "Wie gross ist die Wahrscheinlichkeit, dass die Augensumme mindestens # ist?");
+  if (smin) return { stufen, ereignis: "summe-min", wert: smin[0] };
+  const e = Object.keys(WORTLAUT).find(k => rest === `Wie gross ist die Wahrscheinlichkeit für ${WORTLAUT[k]}?`);
+  return e ? { stufen, ereignis: e } : null;
+}
+/** Ziffern „1, 2, …, n“ → n, sonst null. */
+const zifferMenge = l => (l && l.every((x, i) => x === i + 1) ? l.length : null);
+function liesZiffern(text, ende, extra) {
+  const z = muster(text, `Wie viele #-stellige Zahlen kannst du aus den Ziffern #* bilden, ${ende}`);
+  const n = z && zifferMenge(z[1]);
+  return n ? { menge: n, laenge: z[0], ...extra } : null;
+}
+const PAARE = {
+  handshake: ["# Personen treffen sich. Jede gibt jeder anderen genau einmal die Hand. Wie viele Handshakes sind das?", "paare"],
+  "turnier-hin": ["An einem Turnier spielen # Teams, jedes genau einmal gegen jedes andere. Wie viele Spiele gibt es?", "paare"],
+  "turnier-rueck": ["In einer Liga spielen # Teams, jedes gegen jedes andere einmal zu Hause und einmal auswärts. Wie viele Spiele gibt es?", "geordnet"],
+  strecken: ["# Punkte liegen so, dass nie drei auf einer Geraden liegen. Wie viele Strecken verbinden je zwei Punkte?", "paare"],
+  teams: ["Aus # Personen soll ein Zweierteam gebildet werden. Wie viele verschiedene Zweierteams sind möglich?", "paare"],
+  diagonalen: ["Wie viele Diagonalen hat ein #-Eck?", "diagonalen"],
+};
+const LESER = {
+  "ziffern-ohne": a => liesZiffern(a.text, "wenn jede Ziffer höchstens einmal vorkommt?", { wiederholung: false }),
+  "ziffern-mit": a => liesZiffern(a.text, "wenn sich Ziffern wiederholen dürfen?", { wiederholung: true }),
+  schloss: a => { const z = muster(a.text, "Ein Veloschloss hat # Rädchen mit den Ziffern 0 bis 9. Wie viele verschiedene Codes gibt es?"); return z && { menge: 10, laenge: z[0], wiederholung: true }; },
+  wort: a => {
+    const r = a.text.match(/^Wie viele verschiedene Anordnungen der Buchstaben ([A-ZÄÖÜ](?:, [A-ZÄÖÜ])*) gibt es \(zum Beispiel ([A-ZÄÖÜ]+)\)\?$/);
+    const b = r && r[1].split(", ");
+    return b && b.join("") === r[2] ? { buchstaben: b } : null;
+  },
+  kleider: a => {
+    const i = a.text.indexOf(". ");
+    const mengen = i > 0 ? [...a.text.slice(0, i).matchAll(/(\d+) [A-ZÄÖÜ][^\s,.]*/g)].map(x => Number(x[1])) : [];
+    // die Frage nennt so viele Teile, wie aufgezählt sind („aus einer Hose und einem T-Shirt“ / „…, einem … und einer …“)
+    const teile = i > 0 ? (a.text.slice(i + 2).match(/\b(einer|einem) /g) || []).length : 0;
+    return mengen.length >= 2 && teile === mengen.length ? { mengen } : null;
+  },
+  muenzen: a => liesWahrscheinlichkeit(a.text),
+  "wuerfel-summe": a => liesWahrscheinlichkeit(a.text),
+  "wuerfel-gleich": a => liesWahrscheinlichkeit(a.text),
+  "muenze-wuerfel": a => liesWahrscheinlichkeit(a.text),
+  gegen: a => liesWahrscheinlichkeit(a.text),
+  "summe-min": a => liesWahrscheinlichkeit(a.text),
+  gerade: a => {
+    const z = muster(a.text, "Wie viele dreistellige gerade Zahlen kannst du aus den Ziffern #* bilden, wenn jede Ziffer höchstens einmal vorkommt?");
+    const n = z && zifferMenge(z[0]);
+    return n ? { menge: n, laenge: 3, wiederholung: false, bedingung: "gerade" } : null;
+  },
+  rueckwaerts: a => { const z = muster(a.text, "Bei einem Treffen gibt jede Person jeder anderen genau einmal die Hand. Es sind # Handshakes. Wie viele Personen sind es?"); return z && { handshakes: z[0], art: "rueckwaerts" }; },
+};
+for (const [typ, [mu, art]] of Object.entries(PAARE)) LESER[typ] = a => { const z = muster(a.text, mu); return z && { n: z[0], art }; };
+function liesText(a) {
+  const l = LESER[a.typ];
+  return (l && l(a)) || null;
+}
+const gleichWert = (x, y) => (Array.isArray(x) ? Array.isArray(y) && x.length === y.length && x.every((v, i) => gleichWert(v, y[i])) : x === y);
+
+/** Nachzählen aus Werten in der Form von a.daten (aus den Daten oder aus dem Text): Zahl oder Bruch als Text; Fehler mit Text. */
+function zaehle(a, d) {
+  if (a.art === "term") {
+    const p = EREIGNIS[d.ereignis];
+    if (!p) throw new Error(`unbekanntes Ereignis ${d.ereignis}`);
+    const alle = produkt(d.stufen);
+    return bt(B.bruch(BigInt(alle.filter(f => p(f, d.wert)).length), BigInt(alle.length)));
+  }
+  if (d.buchstaben) return new Set(folgen(d.buchstaben, d.buchstaben.length, false).map(f => f.join(""))).size;
+  if (d.mengen) return d.mengen.reduce((acc, k) => acc.flatMap(f => Array.from({ length: k }, (_, i) => f.concat(i))), [[]]).length;
+  if (d.menge) {
+    const menge = d.menge === 10 ? Array.from({ length: 10 }, (_, i) => i) : ZIFFERN(d.menge);
+    let f = folgen(menge, d.laenge, d.wiederholung);
+    if (d.bedingung === "gerade") f = f.filter(x => x[x.length - 1] % 2 === 0);
+    return f.length;
+  }
+  if (d.art === "rueckwaerts") { for (let n = 2; n < 100; n++) if (folgen(ZIFFERN(n), 2, false).length / 2 === d.handshakes) return n; return null; }
+  const paare = folgen(ZIFFERN(d.n), 2, false); // geordnete Paare verschiedener Elemente
+  if (d.art === "paare") return paare.length / 2;
+  if (d.art === "geordnet") return paare.length;
+  return paare.filter(([i, j]) => { const ab = Math.abs(i - j); return ab !== 1 && ab !== d.n - 1; }).length / 2;
+}
+
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
   const d = a.daten;
+  // Text gegen Prüfdaten (TD1 a): was der Jugendliche liest — auch das Ereignis im Wortlaut —, ist, was gezählt wird
+  const t = liesText(a);
+  const loesung = a.art === "term" ? a.antwortTerm : a.antwort;
+  if (!t) m.push(`Text folgt keinem Muster des Typs ${a.typ}: ${a.text}`);
+  else {
+    const anders = Object.keys(d).filter(k => !gleichWert(t[k], d[k]));
+    if (anders.length) m.push(`Text zeigt ${anders.map(k => `${k} = ${JSON.stringify(t[k])}`).join(", ")}, Prüfdaten ${anders.map(k => `${k} = ${JSON.stringify(d[k])}`).join(", ")}: ${a.text}`);
+    try { const w = zaehle(a, t); if (w !== loesung) m.push(`aus dem Text gezählt ${w}, Lösung ${loesung}: ${a.text}`); } catch (e) { m.push(`aus dem Text nicht zählbar: ${e.message}`); }
+  }
+  // Nachzählen aus den Daten (die frühere Suche „Ziffern / n / Handshakes im Text“ ersetzt liesText oben)
   let soll;
+  try { soll = zaehle(a, d); } catch (e) { return m.concat(e.message); }
   if (a.art === "term") {
-    const alle = produkt(d.stufen);
-    const p = EREIGNIS[d.ereignis];
-    if (!p) return [`unbekanntes Ereignis ${d.ereignis}`];
-    const g = alle.filter(f => p(f, d.wert)).length;
-    const b = B.bruch(BigInt(g), BigInt(alle.length));
-    if (bt(b) !== a.antwortTerm) m.push(`Wahrscheinlichkeit ${a.antwortTerm} statt ${bt(b)}: ${a.text}`);
+    if (soll !== a.antwortTerm) m.push(`Wahrscheinlichkeit ${a.antwortTerm} statt ${soll}: ${a.text}`);
     if (!LST_TERME.bewerte(a.antwortTerm, a).ok) m.push(`Lösung nicht in der Form: ${a.antwortTerm}`);
     return m;
-  }
-  if (d.buchstaben) soll = new Set(folgen(d.buchstaben, d.buchstaben.length, false).map(f => f.join(""))).size;
-  else if (d.mengen) soll = d.mengen.reduce((acc, k) => acc.flatMap(f => Array.from({ length: k }, (_, i) => f.concat(i))), [[]]).length;
-  else if (d.menge) {
-    const menge = d.menge === 10 ? Array.from({ length: 10 }, (_, i) => i) : ZIFFERN(d.menge);
-    let f = folgen(menge, d.laenge, d.wiederholung);
-    if (d.bedingung === "gerade") f = f.filter(x => x[x.length - 1] % 2 === 0);
-    soll = f.length;
-    if (!a.text.includes(d.menge === 10 ? "0 bis 9" : menge.join(", "))) m.push("Ziffern nicht im Text");
-  } else if (d.art === "rueckwaerts") {
-    soll = null;
-    for (let n = 2; n < 100 && soll === null; n++) if (folgen(ZIFFERN(n), 2, false).length / 2 === d.handshakes) soll = n;
-    if (!a.text.includes(`${d.handshakes} Handshakes`)) m.push("Handshakes nicht im Text");
-  } else {
-    const paare = folgen(ZIFFERN(d.n), 2, false); // geordnete Paare verschiedener Elemente
-    if (d.art === "paare") soll = paare.length / 2;
-    else if (d.art === "geordnet") soll = paare.length;
-    else soll = paare.filter(([i, j]) => { const ab = Math.abs(i - j); return ab !== 1 && ab !== d.n - 1; }).length / 2;
-    if (!a.text.includes(`${d.n}`)) m.push("n nicht im Text");
   }
   if (soll !== a.antwort) m.push(`Antwort ${a.antwort} statt ${soll}: ${a.text}`);
   if (a.loesung !== LST.zahlText(a.antwort)) m.push(`Schreibweise der Lösung: ${a.loesung}`);
@@ -232,4 +321,4 @@ function pruefeAufgabe(a, stufe, niveau) {
   return m;
 }
 
-if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis };
+if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis, liesText };
