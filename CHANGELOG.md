@@ -825,3 +825,13 @@
   der Kacheln, Favorit, Zuklappen und Ansicht im Konto und das Zurücknehmen; Gegenprobe (Stern speichert nicht):
   zwei Fehler gemeldet. lernsteig/rahmen.md 1, 6; Plan C3. Tests: Kern, Lernsteig „0 Fehler, 21 Hinweise.“ (Konten
   101 Fälle), Gratwanderung „Keine Fehler.“; Browser Desktop und 375 px ohne Konsolenfehler, ohne seitliches Rollen.
+- Lernsteig — Piktogramme der Übungen (Entscheid SY1 a: eigene einfarbige Strichzeichnungen statt Emoji, weil der
+  Lernsteig sachlich aussieht und Emoji je Gerät verschieden und bunt gezeichnet werden): neu
+  `lernsteig/gemeinsam/symbole.js` mit 26 Zeichnungen (24 × 24, Strich 1.8, ohne Text; Farbe aus `stil.css`,
+  `.piktogramm`), im Katalog je Übung das Feld `symbol` (Pflicht; English grammar und Français : grammaire teilen
+  die Sprechblasen). Sechs zuerst als Vorschau, Stil von Patrik bestätigt (SY2 a), dann die übrigen. Die Kachel
+  zeigt das Kürzel des Fachs nur noch, wenn ein Piktogramm fehlt. `tools/pruefe_uebungen.js` verlangt je Übung ein
+  vorhandenes Piktogramm, `tools/lernsteig_seiten.js` eines auf jeder Kachel; Gegenprobe (unbekanntes Piktogramm
+  bei brueche): beide gemeldet. lernsteig/rahmen.md 1, Plan C3. Tests: Kern 5671 Fälle 0 Fehler, Lernsteig
+  „0 Fehler, 21 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“; Browser Desktop und 375 px ohne
+  Konsolenfehler, ohne seitliches Rollen.

@@ -146,7 +146,7 @@ Kindersprache.
 3. **Tab Übungen wie Tab Spiele:** gruppierte Kacheln nach Fach und Thema mit Symbolen, Sortierung (Fach/Thema, passt
    zu dir, Alphabet, Stufe), einklappbarer Filter, Suche mit Relevanz und Passung (Kern `suche.js`), ähnliche Übungen,
    Favoriten. Drei Schritte: (1) Kacheln nach Fach und Thema mit Symbolen und Favoriten — gebaut in LERN_Session21
-   (`lernsteig/start/uebungen.js`; Favoriten, Zuklappen und Ansicht im Konto; Symbole offen, Frage SY1); (2) Filter,
+   (`lernsteig/start/uebungen.js`; Favoriten, Zuklappen und Ansicht im Konto; Piktogramme nach SY1 a in `lernsteig/gemeinsam/symbole.js`); (2) Filter,
    Sortierung, Suche (`KERN.suche`); (3) Passung, Wackel-Stufen, ähnliche Übungen. **Mehr Personalisierung als im Eulenpfad:** Passung zusätzlich aus Niveau je Fach und Prüfungsziel
    (Übungen mit geprüften Stufen des gewählten Ziels nach vorn), Wackel-Stufen aus dem Kompetenzstand.
 4. **Profil:** Person (Vorname, Geburtsdatum B3, Klasse 1.–3. Oberstufe, Land und Kanton), Niveau je Fach,

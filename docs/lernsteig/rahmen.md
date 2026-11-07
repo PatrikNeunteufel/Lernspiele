@@ -13,7 +13,10 @@ kern/kern.js              gemeinsamer Kern der Reihe (KERN.zahl, KERN.bruch: exa
                           erzeugt von tools/kern_verteilen.py aus kern/ — nie von Hand ändern
 gemeinsam/werkzeug.js     reiner Teil (ohne DOM): Speicher lernsteig:*, Zufall, Schreibweise der Zahlen, Niveaus, Stufen
 gemeinsam/lehrplaene.js   Lehrplan-Profile: Länder, Kantone, Namen der Niveaus
-gemeinsam/katalog.js      Fächer und Übungen (einzige Quelle für Fach, Kompetenz, Basisklasse, Niveaus, Endlos-Stufen)
+gemeinsam/katalog.js      Fächer und Übungen (einzige Quelle für Fach, Kompetenz, Basisklasse, Niveaus, Endlos-Stufen,
+                          Piktogramm: Feld symbol, Pflicht)
+gemeinsam/symbole.js      Piktogramme der Übungen (SY1 a): einfarbige Strichzeichnungen 24 × 24 ohne Text, Farbe aus
+                          stil.css (.piktogramm; Klassen voll und flaeche); LST_SYMBOLE.svg(id, grösse)
 gemeinsam/pruefstand.js   was geprüft ist; Ungeprüftes ist für Jugendliche gesperrt (FG1 a, A1 a)
 gemeinsam/konten.js       Konten, PIN und Code, Aufsicht mit Verbindungen, Einladung
 gemeinsam/daten.js        Sichern und Einlesen

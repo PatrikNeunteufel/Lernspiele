@@ -145,6 +145,8 @@ async function pruefeSeiten(uebungen, melde, LST) {
       const kachelZahl = () => s.lauf(`document.querySelectorAll(".uebung-karte").length`);
       const alleZahl = s.lauf(`LST_KATALOG.UEBUNGEN.length`);
       if (kachelZahl() !== alleZahl) melde("Tab Übungen", `${kachelZahl()} Kacheln statt ${alleZahl}`);
+      const ohneBild = s.lauf(`[...document.querySelectorAll(".uebung-karte")].filter(k => !k.querySelector(".uebung-symbol svg")).map(k => k.dataset.uebung).join(", ")`);
+      if (ohneBild) melde("Tab Übungen", `Kachel ohne Piktogramm (SY1 a): ${ohneBild}`);
       const ersteId = uebungen[0].id;
       s.klick(`[data-favorit="${ersteId}"]`); await ruhe(s);
       const gespeichert = () => (s.json("lernsteig:personen") || []).find(p => p.id === konto.id) || {};

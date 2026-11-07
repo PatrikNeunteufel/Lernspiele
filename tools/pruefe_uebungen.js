@@ -51,6 +51,7 @@ require(path.join(APP, "kern", "kern.js"));
 global.LST = require(path.join(APP, "gemeinsam", "werkzeug.js"));
 global.LST_LEHRPLAENE = require(path.join(APP, "gemeinsam", "lehrplaene.js"));
 const KAT = require(path.join(APP, "gemeinsam", "katalog.js"));
+const SYMBOLE = require(path.join(APP, "gemeinsam", "symbole.js"));
 const RECHNER = require(path.join(APP, "gemeinsam", "rechner.js"));
 global.LST_TERME = require(path.join(APP, "gemeinsam", "terme.js"));
 // Rechenkern des eingebauten Rechners (RE1 a): Beispiele aus dem Lehrplan (MA.1.A.3.i) und Grenzfälle.
@@ -218,6 +219,8 @@ function pruefeOhneBrowser(eintrag) {
     if (!LP_STUFEN.has(k)) fehlerMelden(wo, `Kompetenzstufe ${k} steht nicht in der Lehrplan-Recherche`);
   }
   if (!LST_LEHRPLAENE.MARKEN[eintrag.kompetenz]) fehlerMelden(wo, `keine Marken für ${eintrag.kompetenz} in lehrplaene.js`);
+  // Piktogramm der Kachel im Tab Übungen (SY1 a): Pflicht und in gemeinsam/symbole.js gezeichnet
+  if (!SYMBOLE.gibt(eintrag.symbol)) fehlerMelden(wo, eintrag.symbol ? `Piktogramm „${eintrag.symbol}“ fehlt in symbole.js` : "kein Piktogramm (Feld symbol)");
   for (const s of eintrag.stufen.concat("challenge")) {
     if (eintrag.rechner && !["ohne", "mit", "frei"].includes(eintrag.rechner[s])) fehlerMelden(wo, `rechner für Stufe ${s} fehlt oder falsch`);
   }

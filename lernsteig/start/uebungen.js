@@ -21,9 +21,11 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     return box.firstChild;
   }
 
-  /** Symbol einer Übung (Katalog-Feld `symbol`); fehlt es, das Kürzel des Fachs. */
+  /** Piktogramm einer Übung (Katalog-Feld `symbol`, gemeinsam/symbole.js, SY1 a); fehlt es, das Kürzel des Fachs. */
   const FACH_KURZ = { mathematik: "M", deutsch: "D", englisch: "E", franzoesisch: "F", nt: "NT" };
-  const symbolVon = u => el("span", { class: "uebung-symbol" + (u.symbol ? "" : " kuerzel"), "aria-hidden": "true", text: u.symbol || FACH_KURZ[u.fach] || "" });
+  const symbolVon = u => (LST_SYMBOLE.gibt(u.symbol)
+    ? el("span", { class: "uebung-symbol", "aria-hidden": "true", html: LST_SYMBOLE.svg(u.symbol, 30) })
+    : el("span", { class: "uebung-symbol kuerzel", "aria-hidden": "true", text: FACH_KURZ[u.fach] || "" }));
 
   function zeichneUebungen(box) {
     const k = LST.konto();

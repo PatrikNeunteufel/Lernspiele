@@ -2,7 +2,8 @@
    Vertrag: docs/lernsteig/rahmen.md, Abschnitt 4.
    stufen: Lehrplan-Stufen der Kompetenz (Buchstaben, aufsteigend); daraus entstehen Übergänge und die Challenge
    (ST1 a, ST2 a). rechner: je Lehrplan-Stufe und „challenge“: "ohne" | "mit" | "frei" (TR1 a). endlos: true = jede
-   Stufe als Serie (das Testskript verlangt dann je Stufe mindestens 100 verschiedene Aufgaben).
+   Stufe als Serie (das Testskript verlangt dann je Stufe mindestens 100 verschiedene Aufgaben). symbol: Piktogramm aus
+   gemeinsam/symbole.js (SY1 a), Pflicht; das Testskript prüft, dass es dort steht.
 
    kompetenz: Code der Kompetenz im Lehrplan Volksschule SG, mit Stufe (docs/lernsteig/lehrplan/mathematik_zyklus3.md).
    Nur Codes aus der Recherche, nie aus dem Gedächtnis. */
@@ -20,6 +21,7 @@ var LST_KATALOG = (function () {
   const UEBUNGEN = [
     {
       id: "rationale-zahlen",
+      symbol: "zahlengerade",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Rationale Zahlen rechnen",
       fach: "mathematik",
       thema: "Zahl und Variable",
@@ -37,6 +39,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "gleichungen",
+      symbol: "waage",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Gleichungen lösen",
       fach: "mathematik",
       thema: "Zahl und Variable",
@@ -53,6 +56,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "groessen",
+      symbol: "massstab",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Grössen umwandeln",
       fach: "mathematik",
       thema: "Grössen, Funktionen, Daten und Zufall",
@@ -67,6 +71,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "prozent-funktionen",
+      symbol: "prozent",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Prozent und Funktionswerte",
       fach: "mathematik",
       thema: "Grössen, Funktionen, Daten und Zufall",
@@ -81,6 +86,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "terme",
+      symbol: "klammern",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Terme vereinfachen",
       fach: "mathematik",
       thema: "Zahl und Variable",
@@ -95,6 +101,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "flaechen-volumen",
+      symbol: "wuerfel",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Längen, Flächen, Volumen berechnen",
       fach: "mathematik",
       thema: "Form und Raum",
@@ -109,6 +116,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "zehnerpotenzen",
+      symbol: "potenz",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Grosse Zahlen und Zehnerpotenzen",
       fach: "mathematik",
       thema: "Zahl und Variable",
@@ -125,6 +133,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "ueberschlagen-ordnen",
+      symbol: "ordnen",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Überschlagen und Ordnen",
       fach: "mathematik",
       thema: "Zahl und Variable",
@@ -138,6 +147,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "daten-rabatt",
+      symbol: "mittelwert",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Mittelwert, Häufigkeit, Rabatt",
       fach: "mathematik",
       thema: "Grössen, Funktionen, Daten und Zufall",
@@ -153,6 +163,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "kombinatorik",
+      symbol: "baum",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Möglichkeiten zählen",
       fach: "mathematik",
       thema: "Grössen, Funktionen, Daten und Zufall",
@@ -167,6 +178,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "zufall",
+      symbol: "wuerfelaugen",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Daten und Zufall",
       fach: "mathematik",
       thema: "Grössen, Funktionen, Daten und Zufall",
@@ -180,6 +192,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "koerper-winkel",
+      symbol: "winkel",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Körper, Winkel, Ähnlichkeit",
       fach: "mathematik",
       thema: "Form und Raum",
@@ -194,6 +207,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "stoffwechsel",
+      symbol: "herz",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Stoffwechsel: Organe und Vorgänge",
       fach: "nt",
       thema: "Biologie: Körper, Entwicklung, Ökosysteme",
@@ -206,6 +220,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "atombau",
+      symbol: "atom",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Atombau und Periodensystem",
       fach: "nt",
       thema: "Chemie: Stoffe und Reaktionen",
@@ -220,6 +235,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "kraefte",
+      symbol: "hebel",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Kräfte und einfache Maschinen",
       fach: "nt",
       thema: "Physik: Mechanische und elektrische Phänomene",
@@ -234,6 +250,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "stromkreis",
+      symbol: "stromkreis",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Stromkreis und Ohmsches Gesetz",
       fach: "nt",
       thema: "Physik: Mechanische und elektrische Phänomene",
@@ -248,6 +265,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "aussagen",
+      symbol: "haken",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Aussagen prüfen",
       fach: "mathematik",
       thema: "Zahl und Variable",
@@ -262,6 +280,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "folgen",
+      symbol: "muster",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Folgen und Muster",
       fach: "mathematik",
       thema: "Zahl und Variable",
@@ -276,6 +295,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "sachsituationen",
+      symbol: "sachaufgabe",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Sachsituationen",
       fach: "mathematik",
       thema: "Grössen, Funktionen, Daten und Zufall",
@@ -290,6 +310,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "koordinaten",
+      symbol: "koordinaten",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Koordinaten",
       fach: "mathematik",
       thema: "Form und Raum",
@@ -303,6 +324,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "brueche",
+      symbol: "bruch",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Brüche rechnen",
       fach: "mathematik",
       thema: "Zahl und Variable",
@@ -318,6 +340,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "lineare-funktionen",
+      symbol: "gerade",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Lineare Funktionen",
       fach: "mathematik",
       thema: "Grössen, Funktionen, Daten und Zufall",
@@ -331,6 +354,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "binome-gleichungen",
+      symbol: "binom",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Binome und Gleichungen",
       fach: "mathematik",
       thema: "Zahl und Variable",
@@ -345,6 +369,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "grammatik",
+      symbol: "satzbau",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Grammatik: Fälle, Wortarten, Formen",
       fach: "deutsch",
       thema: "Sprache(n) im Fokus",
@@ -358,6 +383,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "rechtschreibung",
+      symbol: "stift",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Rechtschreibung",
       fach: "deutsch",
       thema: "Sprache(n) im Fokus",
@@ -371,6 +397,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "englisch-grammatik",
+      symbol: "gespraech",                 // Piktogramm (symbole.js, SY1 a)
       titel: "English grammar",
       fach: "englisch",
       thema: "Sprache(n) im Fokus",
@@ -385,6 +412,7 @@ var LST_KATALOG = (function () {
     },
     {
       id: "franzoesisch-grammatik",
+      symbol: "gespraech",                 // Piktogramm (symbole.js, SY1 a)
       titel: "Français : grammaire",
       fach: "franzoesisch",
       thema: "Sprache(n) im Fokus",
