@@ -73,11 +73,12 @@ Kern von 1.22.0 auf 1.26.0. 17 Commits von `f60d46b` bis `2d64b4a`, dazu dieser 
 - Browser: gleichungen j mit Tastenfeld und Gleichung im Block (Desktop, 375 px); Lernsteig-Verwaltung mit Freigabe
   (Desktop, 375 px), Ausblenden und Löschen; Eulenpfad-Verwaltung mit Ausblenden einer gesperrten Aufsicht.
 - **Nicht geprüft:** Term-Tastenfeld im Browser (terme für den Gast gesperrt; im Seitentest geprüft); Zeitzonen-Fälle auf
-  einem Rechner in UTC; voller Eulenpfad-Lauf mit Kern 1.23–1.26 (bis 1.25 schon gepusht).
+  einem Rechner in UTC; voller Eulenpfad-Lauf mit Kern 1.23–1.26 — bewusst ausgelassen (Patrik: „ohne Volllauf“).
 
 ## Offene Punkte / Plan für die nächste Session
-1. **Voller Eulenpfad-Lauf** auf Patriks Entscheid, vor dem Push von `2d64b4a` (Kern 1.26.0) — seit dem letzten vollen
-   Lauf kamen 1.22–1.26 nur mit Stichproben.
+1. **Push ohne vollen Eulenpfad-Lauf** (Entscheid Patrik beim Abschluss, „ohne Volllauf“): Kern 1.26.0 geht mit den
+   Stichproben hinaus; seit dem letzten vollen Lauf (Stand nach `141cc53`) kamen 1.22–1.26 nur mit Stichproben. Ein
+   voller Lauf bleibt auf Patriks Entscheid; fällt online etwas auf, zuerst er.
 2. **C3** (Plan C): Tab Übungen wie der Tab Spiele — zuerst `eulenpfad/start/spiele.js` lesen, dann in drei Schritten:
    Kacheln nach Fach und Thema mit Symbolen und Favoriten; Filter, Sortierung, Suche (`KERN.suche`); Passung aus Niveau
    und Prüfungsziel, Wackel-Stufen, ähnliche Übungen.

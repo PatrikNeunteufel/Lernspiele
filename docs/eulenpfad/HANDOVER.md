@@ -11,8 +11,8 @@
   [docs/lernsteig/HANDOVER.md](../lernsteig/HANDOVER.md).
 - **Tests:** Kern „5671 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 21 Hinweise.“ (gewollte Vorrats-Hinweise, Plan E 9; Konten
   101 Fälle), Gratwanderung „Keine Fehler.“; Eulenpfad nur Stichproben — letzter voller Lauf auf dem Stand nach `141cc53`.
-- **Weiter mit:** Gepusht bis `631f625`; vor dem Push von `2d64b4a` (Kern 1.26.0) einen vollen Lauf auf Patriks Entscheid
-  vorschlagen. Dann C3 (Tab Übungen wie Tab Spiele, drei Schritte), Vorrat der 21 Stufen (E 9), C4, C6–C8, C10.
+- **Weiter mit:** Kern 1.26.0 geht ohne vollen Lauf hinaus (Entscheid Patrik, „ohne Volllauf“); ein voller Lauf bleibt
+  auf seinen Entscheid. Dann C3 (Tab Übungen wie Tab Spiele, drei Schritte), Vorrat der 21 Stufen (E 9), C4, C6–C8, C10.
 
 **2026-11-07, nach LERN_Session19** ([Report](report/LERN_Session19_2026-11-07.md)):
 - **Kern 1.22.0:** dazu `runde.js` (Ablauf einer Runde: Auswahl mit Gedächtnis und Kürzen, Versuche, Lösung nach dem
