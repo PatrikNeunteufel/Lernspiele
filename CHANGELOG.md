@@ -852,3 +852,14 @@
   zahlenhaus „Keine Fehler.“ (für das Ersatz-DOM); Browser Desktop und 375 px ohne Konsolenfehler.
 - Eulenpfad — Filter im Tab Spiele wie im Lernsteig (Hinweis Patrik): Kopfzeile und Filterzeilen in einem umrahmten
   Block statt nur der umrahmten Kopfzeile (`eulenpfad/start/start.css`).
+- Lernsteig — Tab Übungen, Plan C3 Schritt 3 (damit C3 fertig): Passung nach P1 a (Mittel aus Nähe zur Zielstufe des
+  Niveaus, Bedarf aus dem Kompetenzstand und Prüfung; ohne Prüfungsziel und in Fächern ohne hinterlegte Prüfungsstufen
+  neutral, weil keine Angabe kein Befund ist) als Faktor auf die Suche, für die ähnlichen Übungen und als Sortierung
+  „passt zu dir“ (nicht für die Aufsicht); Wackel-Stufen nach W1 a (`LST.wackelt`: mindestens 5 Aufgaben, unter 70 %
+  auf Anhieb in den letzten 10) als Marke am Stufen-Buchstaben und Filter „Nur: Wackelt“; `LST.stufenBedarf` nach der
+  Kern-Regel; ähnliche Übungen über „Ähnliche Übungen →“ auf der Seite der Übung (`?aehnlich=<id>`, Liste mit Grund,
+  „✕ Alle Übungen“). `tools/lernsteig_seiten.js` prüft die Prüfungsteile der Passung, die Sortierung passt zu dir,
+  Wackeln nach 6 Fehlversuchen, kein Wackeln nach 10 auf Anhieb und nach 4 Aufgaben, den Filter Wackelt, die Liste der
+  ähnlichen Übungen und den Knopf; Gegenproben (Mindestzahl 4, fehlende Prüfungsangabe als 0): drei Fehler gemeldet.
+  lernsteig/rahmen.md 5b, Plan C3. Tests: Kern 0 Fehler, Lernsteig „0 Fehler, 21 Hinweise.“ (Konten 101 Fälle),
+  Gratwanderung „Keine Fehler.“; Browser Desktop und 375 px ohne Konsolenfehler.

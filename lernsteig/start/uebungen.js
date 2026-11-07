@@ -3,7 +3,8 @@
    kompakt. Jugendliche sehen gesperrte Übungen ohne Verweis (FG1 a), die Aufsicht öffnet sie zum Prüfen. Favoriten,
    Zuklappen, Ansicht, Sortierung und das Zuklappen des Filters stehen im Konto (Gast und Aufsicht: nur im Tab, rahmen.js
    TAB_FELDER); die Filterwahl merkt sich der Browser (lernsteig:filter, nur Bequemlichkeit, wie im Eulenpfad).
-   Schritt 3 (Passung aus Niveau und Prüfungsziel, Wackel-Stufen, ähnliche Übungen) folgt. */
+   Schritt 3: Passung aus Niveau, Kompetenzstand und Prüfungsziel (P1 a) für Suche, Ähnliche und „passt zu dir“;
+   Wackel-Stufen (W1 a) als Marke und Filter; ähnliche Übungen über „?aehnlich=<id>“. */
 "use strict";
 
 var LST_START = typeof LST_START === "object" ? LST_START : {};
@@ -38,11 +39,54 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     titel: [u.titel], kompetenz: [u.kompetenz].concat(u.weitere || []), fach: [(KAT.fach(u.fach) || {}).name],
     listen: LST.FREIGABE.listen(u.id).map(l => l.name), thema: [u.thema],
   });
-  /** Übungen zur Suche, beste zuerst: [{ id, wert, grund, passung }]; leere Suche null. Passung folgt in Schritt 3. */
-  const sucheUebungen = text => KERN.suche.suche(text, KAT.UEBUNGEN, {
-    felder: suchFelder, gewicht: SUCH_GEWICHT, sichtbar: SUCH_SICHTBAR, tippfehler: ["titel"],
+  // ---------- Passung (Entscheid P1 a, LERN_Session21) ----------
+  // Mittel aus drei Teilen, je 0 bis 1:
+  //   Ziel — Nähe der Lehrplan-Stufen zur Zielstufe des eigenen Niveaus im Fach (LST.zielstufe; gleich 1, eine daneben
+  //          0.6, zwei 0.2; die nächste Stufe zählt; ohne Marken 0.5),
+  //   Bedarf — der höchste Bedarf der Stufen aus dem Kompetenzstand (Kern-Regel, auf 5 gedeckelt; ohne Runden 0.4),
+  //   Prüfung — 1 mit einer geprüften Stufe im Prüfungsziel, 0 ohne; neutral 0.5 ohne Prüfungsziel und in Fächern, für
+  //          die keine geprüften Stufen hinterlegt sind (heute alles ausser Mathematik): keine Angabe ist kein Befund.
+  // person: { konto, mitRunden } oder null (Aufsicht: neutral wie im Eulenpfad). Faktor wie im Eulenpfad: höchstens das
+  // Anderthalbfache der Textrelevanz.
+  const PASSUNG_FAKTOR = 0.5;
+  const abstand = (a, b) => Math.abs(a.charCodeAt(0) - b.charCodeAt(0));
+  function pruefungBekannt(fach, ziel, lehrplan) {
+    return KAT.UEBUNGEN.some(x => x.fach === fach && x.stufen.some(s => LP.geprueft(`${x.kompetenz}.${s}`, ziel, lehrplan).geprueft));
+  }
+  function passungTeile(u, person) {
+    const k = person.konto;
+    const zs = LST.zielstufe(LP.MARKEN[u.kompetenz], LST.niveauFuer(u.fach, u.niveaus));
+    const ziel = zs ? Math.max(...u.stufen.map(s => KERN.suche.naehe(0, abstand(s, zs)))) : 0.5;
+    const bedarf = Math.min(1, Math.max(...u.stufen.map(s => (person.mitRunden ? LST.stufenBedarf(k.id, u.id, s) : KERN.auswertung.bedarf(null, 0)))) / 5);
+    const bekannt = k.pruefungsziel !== "keins" && pruefungBekannt(u.fach, k.pruefungsziel, k.lehrplan);
+    const pruefung = !bekannt ? 0.5 : u.stufen.some(s => LP.geprueft(`${u.kompetenz}.${s}`, k.pruefungsziel, k.lehrplan).geprueft) ? 1 : 0;
+    return { ziel, bedarf, pruefung };
+  }
+  const passung = (u, person) => { if (!person) return null; const t = passungTeile(u, person); return (t.ziel + t.bedarf + t.pruefung) / 3; };
+
+  /** Übungen zur Suche, beste zuerst: [{ id, wert, grund, passung }]; leere Suche null. */
+  const sucheUebungen = (text, person = null) => KERN.suche.suche(text, KAT.UEBUNGEN, {
+    felder: suchFelder, gewicht: SUCH_GEWICHT, sichtbar: SUCH_SICHTBAR, tippfehler: ["titel"], faktor: PASSUNG_FAKTOR,
     grund: (feld, t) => (feld === "thema" ? `im Thema ${t}` : `in der Liste „${t}“`),
+    passung: u => passung(u, person),
   });
+
+  /**
+   * Ähnliche Übungen (wie „Ähnliche Spiele“ im Eulenpfad): gleiche Kompetenz 4, gleiches Thema 3, gleiches Fach 1, je
+   * Abstand der Stufenlage 0.5 Abzug (höchstens 1); nur das Fach gemeinsam ist nicht ähnlich. Dazu die Passung.
+   */
+  const aehnlicheUebungen = (id, person = null) => KERN.suche.aehnlich(id, KAT.UEBUNGEN, {
+    faktor: PASSUNG_FAKTOR, passung: x => passung(x, person),
+    vergleich: (e, x) => {
+      const kompetenz = x.kompetenz === e.kompetenz, thema = x.fach === e.fach && x.thema === e.thema;
+      if (!kompetenz && !thema) return null;
+      const wert = (kompetenz ? 4 : 0) + (thema ? 3 : 0) + 1 - Math.min(2, Math.abs(stufenLage(x) - stufenLage(e))) * 0.5;
+      return { wert, grund: [kompetenz ? `gleiche Kompetenz ${x.kompetenz}` : null, thema ? "gleiches Thema" : null].filter(Boolean).join("; ") };
+    },
+  });
+  /** Übungs-Id aus „?aehnlich=<id>“ (Knopf auf der Seite der Übung), oder null; Verlassen nimmt den Parameter weg. */
+  const aehnlichId = () => new URLSearchParams(location.search).get("aehnlich");
+  function aehnlichSchliessen() { if (aehnlichId()) history.replaceState(null, "", location.pathname + location.hash); }
 
   // ---------- Sortierung ----------
   // „Stufe“ (Entscheid SS1 a, LERN_Session21; persönlich ordnet erst „passt zu dir“ in Schritt 3): Lage der Übung zum Grundanspruch Zyklus 3 ihrer Kompetenz — Mittel der
@@ -57,6 +101,8 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   const nachTitel = (a, b) => a.titel.localeCompare(b.titel, "de");
   const SORTIERUNG = {
     thema: { text: "nach Fach und Thema", pfeil: ["Katalog", "rückwärts"] },
+    // nur mit Person (nicht für die Aufsicht); der Vergleich bekommt die Passung von aussen (zeichneUebungen)
+    passung: { text: "passt zu dir", pfeil: ["beste zuerst", "beste zuletzt"], mitPerson: true },
     titel: { text: "nach Titel", pfeil: ["A → Z", "Z → A"], vergleich: nachTitel },
     stufe: { text: "nach Stufe", pfeil: ["Anschluss zuerst", "Erweiterung zuerst"], vergleich: (a, b) => stufenLage(a) - stufenLage(b) || nachTitel(a, b) },
   };
@@ -82,6 +128,10 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     const mitSerie = u => u.endlos === true || (Array.isArray(u.endlos) && u.endlos.length > 0);
     // Für die Aufsicht: noch anzusehen — die Übung selbst oder eine eigene Inhaltsliste (wie im Eulenpfad)
     const zuPruefen = u => LST.FREIGABE.zuPruefen(u.id) || LST.FREIGABE.listen(u.id).some(l => !l.von && !l.geprueft);
+    // Passung für Jugendliche und Gast (P1 a); die Aufsicht sucht und sortiert neutral (wie im Eulenpfad)
+    const person = aufsicht ? null : { konto: k, mitRunden: mitStand };
+    // Wackel-Stufen (W1 a) je Übung, einmal je Zeichnen
+    const wackelnd = new Map(KAT.UEBUNGEN.map(u => [u.id, mitStand ? u.stufen.filter(s => LST.wackelt(k.id, u.id, s)) : []]));
 
     // ----- Filter: Fach, Themen des Fachs, Nur (Mehrfachwahl) -----
     const gespeichert = LST.lies("filter", {});
@@ -93,6 +143,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       { id: "favoriten", text: "★ Favoriten", gilt: u => favoriten.includes(u.id), da: favoriten.length > 0 },
       { id: "pruefung", text: "Wird geprüft", gilt: geprueft, da: k.pruefungsziel !== "keins" },
       { id: "serie", text: "Mit Serie", gilt: mitSerie, da: true },
+      { id: "wackelt", text: "Wackelt", gilt: u => wackelnd.get(u.id).length > 0, da: mitStand },
       { id: "zuPruefen", text: "🔍 Zu prüfen", gilt: zuPruefen, da: aufsicht },
     ].filter(n => n.da);
     const nurAktiv = NUR.filter(n => filter.nur.includes(n.id));
@@ -133,24 +184,31 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     filterBox.addEventListener("toggle", () => LST.speichereKonto(Object.assign(LST.konto(), { filterZu: !filterBox.open })));
 
     // ----- Auswahl: Filter und Suche -----
-    const treffer = suchText.trim() ? new Map((sucheUebungen(suchText) || []).map((t, i) => [t.id, { ...t, i }])) : null;
+    // Suche mit Passung; ohne Suche, aber mit „?aehnlich=<id>“: die ähnlichen Übungen, ähnlichste zuerst
+    const aehnlichZu = !suchText.trim() && aehnlichId() ? KAT.uebung(aehnlichId()) : null;
+    const treffer = suchText.trim() ? new Map((sucheUebungen(suchText, person) || []).map((t, i) => [t.id, { ...t, i }]))
+      : aehnlichZu ? new Map(aehnlicheUebungen(aehnlichZu.id, person).map((t, i) => [t.id, { ...t, i }])) : null;
     const passt = u => (filter.fach === "alle" || u.fach === filter.fach)
       && (!filter.thema.length || filter.thema.includes(u.thema))
       && nurAktiv.every(n => n.gilt(u))
       && (!treffer || treffer.has(u.id));
     const auswahl = KAT.UEBUNGEN.filter(passt);
-    const sort = SORTIERUNG[(k.sortierung || {}).art] ? k.sortierung : { art: "thema", ab: false };
+    const sortierbar = Object.entries(SORTIERUNG).filter(([, s]) => !s.mitPerson || person);
+    const sort = sortierbar.some(([w]) => w === (k.sortierung || {}).art) ? k.sortierung : { art: "thema", ab: false };
+    const vergleich = sort.art === "passung"
+      ? (() => { const p = new Map(auswahl.map(u => [u.id, passung(u, person)])); return (a, b) => p.get(b.id) - p.get(a.id) || nachTitel(a, b); })()
+      : (SORTIERUNG[sort.art] || {}).vergleich;
     const flach = !treffer && sort.art !== "thema";
     if (treffer) auswahl.sort((a, b) => treffer.get(a.id).i - treffer.get(b.id).i);
-    else if (flach) { auswahl.sort(SORTIERUNG[sort.art].vergleich); if (sort.ab) auswahl.reverse(); }
+    else if (flach) { auswahl.sort(vergleich); if (sort.ab) auswahl.reverse(); }
 
     // ----- Werkzeuge: Suche, Sortierung, Ansicht, alle auf/zu -----
     const feld = el("input", { class: "textfeld suche", type: "search", name: "suche", placeholder: "Übung suchen", "aria-label": "Übung suchen", value: suchText });
-    feld.addEventListener("input", () => { suchText = feld.value; sucheTippt = true; neu(); });
+    feld.addEventListener("input", () => { suchText = feld.value; sucheTippt = true; aehnlichSchliessen(); neu(); });
     if (sucheTippt) { sucheTippt = false; requestAnimationFrame(() => { feld.focus(); feld.setSelectionRange(feld.value.length, feld.value.length); }); }
     const sortWahl = el("label", { class: "sortier-wahl" }, el("span", { class: "leise klein", text: "Sortieren" }),
       el("select", { class: "klein", name: "sortierung", "aria-label": "Übungen sortieren", onchange: e => speichere({ sortierung: { art: e.target.value, ab: false } }) },
-        ...Object.entries(SORTIERUNG).map(([w, s]) => el("option", { value: w, text: s.text, selected: w === sort.art }))),
+        ...sortierbar.map(([w, s]) => el("option", { value: w, text: s.text, selected: w === sort.art }))),
       chip((sort.ab ? "↓ " : "↑ ") + SORTIERUNG[sort.art].pfeil[sort.ab ? 1 : 0], sort.ab,
         () => speichere({ sortierung: { art: sort.art, ab: !sort.ab } }), { "data-aktion": "sortierung-richtung" }));
     const gruppenIds = ["favoriten", ...KAT.FAECHER.map(f => "fach:" + f.id),
@@ -190,13 +248,14 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       const marken = [
         geprueft(u) ? el("span", { class: "marke pruefung", text: "wird geprüft" }) : null,
         LST.sperrGrund(u.id) ? el("span", { class: "marke gesperrt", text: sichtbar ? "für Jugendliche gesperrt" : "noch nicht freigegeben" }) : null,
-        grund ? el("span", { class: "marke such-grund", text: `gefunden ${grund}` }) : null,
+        grund ? el("span", { class: "marke such-grund", text: aehnlichZu ? grund : `gefunden ${grund}` }) : null,
       ].filter(Boolean);
       // Kompetenzstand je Lehrplan-Stufe (BF1 a): Buchstabe mit Farbe des Stands, Zahlen im Titel
       const stufen = el("div", { class: "stufen-marken", "aria-label": "Stufen" }, ...u.stufen.map(s => {
         const ks = mitStand ? LST.kompetenzstand(k.id, u.id, s) : { stand: "offen", text: "offen", n: 0 };
-        const titel = `Stufe ${s}: ${ks.text}` + (ks.n ? ` (${ks.anhieb} von ${ks.fenster} zuletzt auf Anhieb, ${ks.n} Aufgaben)` : "");
-        return el("span", { class: `stufe-marke stand-${ks.stand}`, title: titel, "aria-label": titel, text: s });
+        const wackel = wackelnd.get(u.id).includes(s);
+        const titel = `Stufe ${s}: ${ks.text}${wackel ? ", wackelt" : ""}` + (ks.n ? ` (${ks.anhieb} von ${ks.fenster} zuletzt auf Anhieb, ${ks.n} Aufgaben)` : "");
+        return el("span", { class: `stufe-marke stand-${ks.stand}${wackel ? " wackelt" : ""}`, title: titel, "aria-label": titel, "data-wackelt": wackel ? s : null, text: s });
       }));
       const name = sichtbar ? el("a", { class: "uebung-link name", href, lang: u.sprache || null }, u.titel)
         : el("span", { class: "uebung-link uebung-gesperrt name", lang: u.sprache || null }, u.titel);
@@ -213,7 +272,11 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     const titel = text => el("h2", { class: "treffer-titel", text });
 
     // ----- Suche: eine Liste, beste zuerst; andere Sortierung: eine Liste; sonst Favoriten, dann Fach → Thema -----
-    if (treffer) {
+    if (aehnlichZu) {
+      box.append(el("h2", { class: "treffer-titel" }, el("span", { text: `Ähnlich wie ${aehnlichZu.titel}: ${auswahl.length} ${auswahl.length === 1 ? "Übung" : "Übungen"} ` }),
+        chip("✕ Alle Übungen", false, () => { aehnlichSchliessen(); neu(); }, { "data-aktion": "aehnlich-schliessen" })));
+      if (auswahl.length) box.append(gitter(auswahl));
+    } else if (treffer) {
       if (auswahl.length) box.append(titel(`${auswahl.length} Treffer, beste zuerst`), gitter(auswahl));
     } else if (flach) {
       if (auswahl.length) box.append(titel(`${auswahl.length} ${auswahl.length === 1 ? "Übung" : "Übungen"} · ${SORTIERUNG[sort.art].text}`), gitter(auswahl));
@@ -242,10 +305,13 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
           ...themen.map(t => { const l = uebungen.filter(u => u.thema === t); return gruppe(`thema:${f.id}:${t}`, el("span", { text: t }), l.length, gitter(l)); })));
       }
     }
-    if (!auswahl.length) box.append(el("p", { class: "leer-hinweis", "data-leer": "", text: treffer ? "Keine Übung passt zu dieser Suche." : "Keine Übung passt zu diesem Filter." }));
+    if (!auswahl.length) box.append(el("p", { class: "leer-hinweis", "data-leer": "", text: aehnlichZu ? "Keine ähnliche Übung in dieser Auswahl." : treffer ? "Keine Übung passt zu dieser Suche." : "Keine Übung passt zu diesem Filter." }));
   }
 
   LST_START.uebungen = zeichneUebungen;
   LST_START.sucheUebungen = sucheUebungen;
+  LST_START.aehnlicheUebungen = aehnlicheUebungen;
+  LST_START.passung = passung;
+  LST_START.passungTeile = passungTeile;
   LST_START.stufenLage = stufenLage;
 })();

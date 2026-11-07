@@ -110,8 +110,26 @@
   // Anhieb und keine gezeigte Lösung; am Üben = mindestens eine Aufgabe; offen = noch keine. Mit und ohne Rechner
   // getrennt (RE1 a): zählt zuerst ohne Rechner, „sicher mit Rechner“ nur, wenn es ohne noch nicht reicht.
   const STAND = { minAufgaben: 10, fenster: 10, anhieb: 0.85 };
+  /** Aufgaben einer Lehrplan-Stufe aus dem Protokoll, älteste zuerst, je mit der Zeit ihrer Runde. */
+  const stufenAufgaben = (kontoId, uebungId, lp) => runden(r => r.person === kontoId && r.inhalt === uebungId)
+    .flatMap(r => (r.liste || []).filter(x => x.lp === lp).map(x => Object.assign({ zeit: r.zeit }, x)));
+  const alsStand = l => l.map(x => ({ anhieb: x.versuche === 0, gezeigt: !!x.gezeigt }));
+  // Wackel-Stufe (Entscheid W1 a, LERN_Session21): mindestens 5 Aufgaben, von den letzten (höchstens 10) weniger als 70 %
+  // auf Anhieb — mit und ohne Rechner zusammen, auch wenn die Stufe früher sicher war. Misst Unsicherheit, nicht Neuheit.
+  const WACKEL = { mindestens: 5, fenster: 10, schwelle: 0.7 };
+  function wackelt(kontoId, uebungId, lp) {
+    const s = KERN.auswertung.stand(alsStand(stufenAufgaben(kontoId, uebungId, lp)), { fenster: WACKEL.fenster });
+    return s.n >= WACKEL.mindestens && s.quote < WACKEL.schwelle;
+  }
+  /** Bedarf einer Stufe (Kern-Regel wie im Eulenpfad): wackelnd hoch, nie geübt 2, sicher kürzlich 0.5, nach 7 Tagen 2. */
+  function stufenBedarf(kontoId, uebungId, lp, jetzt = Date.now()) {
+    const l = stufenAufgaben(kontoId, uebungId, lp);
+    if (!l.length) return KERN.auswertung.bedarf(null, 0);
+    const s = KERN.auswertung.stand(alsStand(l), { fenster: WACKEL.fenster });
+    return KERN.auswertung.bedarf(s.quote, (jetzt - Date.parse(l[l.length - 1].zeit)) / KERN.auswertung.TAG_MS, { schwelle: WACKEL.schwelle });
+  }
   function kompetenzstand(kontoId, uebungId, lp) {
-    const liste = runden(r => r.person === kontoId && r.inhalt === uebungId).flatMap(r => (r.liste || []).filter(x => x.lp === lp));
+    const liste = stufenAufgaben(kontoId, uebungId, lp);
     // Regel im Kern (KERN.auswertung.stand, AW2 a: eine Regel für beide Apps, Schwellen je App)
     const bewerte = l => {
       const s = KERN.auswertung.stand(l.map(x => ({ anhieb: x.versuche === 0, gezeigt: !!x.gezeigt })),
@@ -257,7 +275,9 @@
     const titel = el("h1", { text: eintrag.titel });
     const info = el("span", { class: "kopf-info" });
     const kopf = el("header", { class: "kopf" },
-      el("a", { class: "zurueck", href: "../../index.html", text: "← Übersicht" }), titel, info);
+      el("a", { class: "zurueck", href: "../../index.html", text: "← Übersicht" }), titel, info,
+      // Ähnliche Übungen (Plan C3 Schritt 3, wie „🔗 Ähnliche Spiele“ im Eulenpfad): die Liste im Tab Übungen
+      el("a", { class: "zurueck aehnlich-link", href: `../../index.html?aehnlich=${encodeURIComponent(eintrag.id)}#uebungen`, text: "Ähnliche Übungen →" }));
     const buehne = el("main", { class: "buehne" });
     document.body.append(kopf, buehne);
 
@@ -618,5 +638,5 @@
   let aktuell = null;
   const pruefung = { aufgabe: () => aktuell };
 
-  Object.assign(LST, { GRAPH, graphHoehe, el, FREIGABE, ENTWICKLUNG, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
+  Object.assign(LST, { GRAPH, graphHoehe, el, FREIGABE, ENTWICKLUNG, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, wackelt, stufenBedarf, WACKEL, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
 })(LST);

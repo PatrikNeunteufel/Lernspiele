@@ -197,11 +197,60 @@ async function pruefeSeiten(uebungen, melde, LST) {
       s.fuelle('select[name="sortierung"]', "stufe"); await ruhe(s);
       const lagen = s.lauf(`[...document.querySelectorAll(".uebung-karte")].map(k => LST_START.stufenLage(LST_KATALOG.uebung(k.dataset.uebung)))`);
       if (lagen.some((x, i) => i && x < lagen[i - 1])) melde("Tab Übungen", "Sortierung nach Stufe nicht aufsteigend");
+      // Schritt 3: Passung (P1 a) — Prüfung neutral ohne Ziel und in Fächern ohne hinterlegte Prüfungsstufen
+      const teile = (ziel, id) => s.lauf(`(() => { const k = LST.konto(); k.pruefungsziel = ${JSON.stringify(ziel)}; k.lehrplan = { land: "CH", kanton: "SG" };
+        return LST_START.passungTeile(LST_KATALOG.uebung(${JSON.stringify(id)}), { konto: k, mitRunden: true }); })()`);
+      if (teile("keins", "gleichungen").pruefung !== 0.5) melde("Tab Übungen", "Passung: Prüfung ohne Ziel nicht neutral");
+      if (teile("gymnasium", "gleichungen").pruefung !== 1) melde("Tab Übungen", "Passung: gleichungen im Gymnasium nicht geprüft");
+      if (teile("gymnasium", "grammatik").pruefung !== 0.5) melde("Tab Übungen", "Passung: Deutsch ohne Prüfungsstufen nicht neutral (P1 a)");
+      if (teile("gymnasium", "kombinatorik").pruefung !== 0) melde("Tab Übungen", "Passung: ungeprüfte Mathe-Übung nicht 0");
+      s.fuelle('select[name="sortierung"]', "passung"); await ruhe(s);
+      const pw = s.lauf(`[...document.querySelectorAll(".uebung-karte")].map(k => LST_START.passung(LST_KATALOG.uebung(k.dataset.uebung), { konto: LST.konto(), mitRunden: true }))`);
+      if (pw.length !== alleZahl || pw.some((x, i) => i && x > pw[i - 1] + 1e-12)) melde("Tab Übungen", "Sortierung passt zu dir nicht absteigend");
+      // Wackel-Stufe (W1 a): 6 Aufgaben mit Fehlversuch → wackelt; 10 auf Anhieb → wackelt nicht mehr; 4 Fehler → zu wenige
+      const runden0 = s.json("lernsteig:runden") || [];
+      const wu = katalog[0].id, wlp = s.lauf(`LST_KATALOG.uebung(${JSON.stringify(wu)}).stufen[0]`);
+      const setzeRunde = (zahl, versuche) => s.lauf(`LST.schreibe("runden", ${JSON.stringify(runden0)}.concat([{ id: "w", person: ${JSON.stringify(konto.id)}, inhalt: ${JSON.stringify(wu)},
+        zeit: new Date().toISOString(), stufe: ${JSON.stringify(wlp)}, liste: Array.from({ length: ${zahl} }, () => ({ lp: ${JSON.stringify(wlp)}, versuche: ${versuche}, geloest: true })) }])); LST_START.neu();`);
+      const wackelAn = () => s.gibt(`[data-uebung="${wu}"] [data-wackelt="${wlp}"]`);
+      setzeRunde(6, 1); await ruhe(s);
+      if (!wackelAn()) melde("Tab Übungen", `Wackel-Stufe ${wu} ${wlp} nach 6 Fehlversuchen nicht markiert`);
+      s.klick('[data-filter-nur="wackelt"]'); await ruhe(s);
+      if (JSON.stringify(ids()) !== JSON.stringify([wu])) melde("Tab Übungen", `Filter Wackelt: ${ids().join(", ")}`);
+      s.klick('[data-filter-nur="wackelt"]'); await ruhe(s);
+      setzeRunde(10, 0); await ruhe(s);
+      if (wackelAn()) melde("Tab Übungen", "Wackel-Stufe trotz 10 Aufgaben auf Anhieb markiert");
+      setzeRunde(4, 1); await ruhe(s);
+      if (wackelAn()) melde("Tab Übungen", "Wackel-Stufe schon nach 4 Aufgaben markiert (W1 a: mindestens 5)");
+      s.lauf(`LST.schreibe("runden", ${JSON.stringify(runden0)}); LST_START.neu();`); await ruhe(s);
       s.fuelle('select[name="sortierung"]', "thema"); await ruhe(s);
       if (!s.gibt('[data-gruppe^="fach:"]')) melde("Tab Übungen", "zurück nach Fach und Thema ohne Gruppen");
       jugendTab = s.sitzung;
     } catch (e) { melde(ort, e.message); }
     fehlerVon(ort, s);
+  }
+
+  // ---------- Tab Übungen: ähnliche Übungen über „?aehnlich=<id>“ (Plan C3 Schritt 3) ----------
+  if (jugendTab) {
+    const ort = "Tab Übungen (ähnliche)";
+    const s = oeffne("index.html", { search: "?aehnlich=gleichungen", hash: "#uebungen", speicher: browser, sitzung: new Map(jugendTab) });
+    await ruhe(s);
+    try {
+      const ids = s.lauf(`[...document.querySelectorAll(".uebung-karte")].map(k => k.dataset.uebung)`);
+      const erwartet = s.lauf(`LST_START.aehnlicheUebungen("gleichungen", { konto: LST.konto(), mitRunden: true }).map(t => t.id)`);
+      if (!/Ähnlich wie Gleichungen lösen/.test(s.text()) || !ids.length || JSON.stringify(ids) !== JSON.stringify(erwartet)) melde(ort, `Liste ${ids.join(", ")} statt ${erwartet.join(", ")}`);
+      if (ids.includes("gleichungen")) melde(ort, "die Übung selbst steht in ihrer Liste");
+      if (ids[0] !== "binome-gleichungen" && ids[0] !== "terme") melde(ort, `zuerst ${ids[0]} statt einer Übung derselben Kompetenz`);
+      if (s.lauf(`LST_START.aehnlicheUebungen("gleichungen", null).some(t => LST_KATALOG.uebung(t.id).fach !== "mathematik")`)) melde(ort, "ähnlich über das Fach hinaus");
+      s.klick('[data-aktion="aehnlich-schliessen"]'); await ruhe(s);
+      if (/Ähnlich wie/.test(s.text()) || !s.gibt('[data-gruppe^="fach:"]')) melde(ort, "„✕ Alle Übungen“ führt nicht zurück");
+    } catch (e) { melde(ort, e.message); }
+    fehlerVon(ort, s);
+    // Der Knopf auf der Seite der Übung führt dorthin
+    const u = oeffne("uebungen/gleichungen/index.html", { search: "?niveau=n1", speicher: browser, sitzung: new Map(jugendTab) });
+    await ruhe(u);
+    if (u.attr(".aehnlich-link", "href") !== "../../index.html?aehnlich=gleichungen#uebungen") melde(ort, `Knopf auf der Übungsseite: ${u.attr(".aehnlich-link", "href")}`);
+    fehlerVon(ort + " (Übungsseite)", u);
   }
 
   // ---------- Neuer Tab: falsche PIN, PIN vergessen ----------

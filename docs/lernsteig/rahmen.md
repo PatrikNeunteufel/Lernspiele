@@ -204,6 +204,17 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
   sonst *sicher mit Rechner*), *am Üben* ab einer Aufgabe, sonst *offen*. Schwellen in `STAND` (Annahme); gerechnet mit
   `KERN.auswertung.stand` (eine Regel für beide Apps, AW2 a), die Wochenserie mit `KERN.auswertung.wochen`. Angezeigt als
   Marke in der Stufenwahl (Tooltip mit Zahlen) und auf der Startseite („2 von 3 Stufen sicher“).
+- **Wackel-Stufe** (W1 a, `LST.wackelt(konto, uebung, lp)`, Schwellen in `LST.WACKEL`): mindestens 5 Aufgaben und von
+  den letzten (höchstens 10) weniger als 70 % auf Anhieb, mit und ohne Rechner zusammen, auch nach früherem „sicher“.
+  Im Tab Übungen als Rahmen mit „!“ am Stufen-Buchstaben und als Filter „Nur: Wackelt“. **Bedarf** einer Stufe
+  (`LST.stufenBedarf`) nach der Kern-Regel `KERN.auswertung.bedarf` wie im Eulenpfad.
+- **Passung** im Tab Übungen (P1 a, `LST_START.passung`, Teile `LST_START.passungTeile`): Mittel aus Nähe der Stufen
+  zur Zielstufe des eigenen Niveaus, höchstem Bedarf der Stufen (auf 5 gedeckelt) und Prüfung (1 geprüft, 0 nicht;
+  neutral 0.5 ohne Prüfungsziel und in Fächern ohne hinterlegte Prüfungsstufen). Wirkt als Faktor auf Suche und
+  ähnliche Übungen (höchstens das Anderthalbfache) und als Sortierung „passt zu dir“; die Aufsicht sucht neutral.
+  **Ähnliche Übungen** (`LST_START.aehnlicheUebungen`): gleiche Kompetenz 4, gleiches Thema im Fach 3, Fach 1, Abzug
+  0.5 je Abstand der Stufenlage (höchstens 1); aufgerufen über „Ähnliche Übungen →“ auf der Seite der Übung
+  (`index.html?aehnlich=<id>#uebungen`).
 - **Serie über Tage** (BF1 a, selbst gesetzt, ohne Stern): Wochenziel `wochenziel` (1–7 Tage je Woche) im Konto,
   gesetzt auf der Statistik-Seite. Übungstag = Kalendertag (Ortszeit) mit mindestens einer Runde, Wochen ab Montag.
   `LST.wochenSerie(tage, ziel)` (werkzeug.js) zählt die Tage dieser Woche und die Wochen in Folge mit erreichtem Ziel;

@@ -160,6 +160,9 @@ a.knopf { color: var(--text); }
 .uebung-symbol.kuerzel { font-size: 15px; font-weight: 800; letter-spacing: .02em; }
 .stufen-marken { display: flex; flex-wrap: wrap; gap: 4px; }
 .stufe-marke { min-width: 28px; padding: 1px 8px; border-radius: 999px; font-size: 13px; font-weight: 700; text-align: center; }
+/* Wackel-Stufe (W1 a): Rahmen in der Hinweisfarbe und ein Ausrufezeichen, damit es auch ohne Farbsehen erkennbar ist */
+.stufe-marke.wackelt { box-shadow: inset 0 0 0 2px var(--hinweis); }
+.stufe-marke.wackelt::after { content: " !"; }
 /* Favoriten-Stern oben rechts: Umriss aus, gefüllt an (Akzentfarbe statt Gold) */
 .karten-schalter { position: absolute; top: 4px; right: 4px; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px;
   padding: 0; border: none; border-radius: 10px; background: none; cursor: pointer; }
