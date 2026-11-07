@@ -75,7 +75,7 @@ var LST = (function () {
    */
   function zahlenImText(text, muster) {
     const ZAHL = "([−-]?(?:\\d{1,3}(?:'\\d{3})+|\\d+)(?:[.,]\\d+)?)";
-    const EINHEIT = "(?:[A-Za-zÄÖÜäöü€]+)";
+    const EINHEIT = "(?:[A-Za-zÄÖÜäöü€$]+)";
     const woertlich = t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const re = new RegExp(`^${muster.split("#").map(t => t.split("~").map(woertlich).join(EINHEIT)).join(ZAHL)}$`);
     const m = String(text).match(re);

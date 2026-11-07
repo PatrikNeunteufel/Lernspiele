@@ -121,26 +121,92 @@ function hinweis(a, eingabe) {
   return h[a.typ] || "Schritt für Schritt.";
 }
 
+const B = KERN.bruch, Z = x => B.vonZahl(x);
+const summe = l => l.reduce((x, y) => x + y, 0);
+/** Exakt nachrechnen aus Werten in der Form von a.daten (aus den Daten oder aus dem Text); null bei unbekanntem Typ. */
+function sollAus(typ, d) {
+  switch (typ) {
+    case "mittelwert": return B.durch(Z(summe(d.werte)), Z(d.werte.length));
+    case "waehrung": return d.richtung === "zu-fr" ? B.mal(Z(d.betrag), Z(d.kurs)) : B.durch(Z(d.fr0), Z(d.kurs));
+    case "relativ-prozent": return B.mal(B.durch(Z(d.a), Z(d.n)), Z(100));
+    case "absolut": return B.durch(B.mal(Z(d.n), Z(d.p)), Z(100));
+    case "wahrscheinlichkeit": return B.durch(Z(d.r), Z(d.r + d.b + d.g));
+    case "rabatt": return B.durch(B.mal(Z(d.preis), Z(100 - d.p)), Z(100));
+    case "rabatt-betrag": return B.durch(B.mal(Z(d.preis), Z(d.p)), Z(100));
+    case "brutto": return B.durch(B.mal(Z(d.preis), Z(100 + d.p)), Z(100));
+    case "netto": return B.durch(B.mal(Z(d.brutto), Z(100)), Z(100 + d.p));
+    case "fehlender-wert": return B.minus(B.mal(Z(d.n), Z(d.m)), Z(summe(d.werte)));
+    case "vor-rabatt": return B.durch(B.mal(Z(d.nachher), Z(100)), Z(100 - d.p));
+    default: return null;
+  }
+}
+
+/**
+ * Den angezeigten Text lesen (Plan B2 Schritt 3, TD1 a), unabhängig vom Erzeuger: je Typ der Satz als Muster
+ * (LST.zahlenImText, „#“ Zahl, „~“ Einheit). Listen („12, 7, 30“) mit 1 bis 12 Zahlen. Die Richtung der Umrechnung folgt
+ * aus der Frage; beim Umrechnen in die fremde Währung ist der Betrag der Frankenbetrag durch den Kurs. Liefert die Werte
+ * in der Form von a.daten oder null.
+ */
+const muster = (text, m) => LST.zahlenImText(text, m);
+/** Muster mit einer Liste „#, #, …“ an der Stelle „LISTE“: { liste, rest } oder null. */
+function mitListe(text, m) {
+  for (let n = 1; n <= 12; n++) {
+    const z = muster(text, m.replace("LISTE", Array(n).fill("#").join(", ")));
+    if (z) { const i = m.split("LISTE")[0].split("#").length - 1; return { liste: z.slice(i, i + n), vor: z.slice(0, i), nach: z.slice(i + n) }; }
+  }
+  return null;
+}
+const LESER = {
+  mittelwert: a => { const l = mitListe(a.text, "Arithmetisches Mittel von LISTE ="); return l && { werte: l.liste }; },
+  waehrung: a => {
+    const zu = muster(a.text, "Kurs: 1 ~ = # Fr. Wie viele Franken sind # ~?");
+    if (zu) return { betrag: zu[1], kurs: zu[0], richtung: "zu-fr" };
+    const von = muster(a.text, "Kurs: 1 ~ = # Fr. Wie viele ~ erhältst du für # Fr.?");
+    return von && { betrag: von[1] / von[0], kurs: von[0], richtung: "von-fr", fr0: von[1] };
+  },
+  "relativ-prozent": a => { const z = muster(a.text, "Von # befragten Jugendlichen fahren # mit dem Velo zur Schule. Relative Häufigkeit in % ="); return z && { a: z[1], n: z[0] }; },
+  absolut: a => { const z = muster(a.text, "Bei # Würfen zeigt der Würfel in # % der Fälle eine Sechs. Absolute Häufigkeit ="); return z && { n: z[0], p: z[1] }; },
+  wahrscheinlichkeit: a => {
+    const ende = " Kugeln. Wahrscheinlichkeit, blind eine rote zu ziehen (als Dezimalzahl) =";
+    const drei = muster(a.text, `In einer Urne liegen # rote, # blaue und # grüne${ende}`);
+    if (drei) return { r: drei[0], b: drei[1], g: drei[2] };
+    const zwei = muster(a.text, `In einer Urne liegen # rote, # blaue${ende}`);
+    return zwei && { r: zwei[0], b: zwei[1], g: 0 };
+  },
+  rabatt: a => { const z = muster(a.text, "Ein Velo kostet # Fr. Es gibt # % Rabatt. Neuer Preis ="); return z && { preis: z[0], p: z[1] }; },
+  "rabatt-betrag": a => { const z = muster(a.text, "# Fr., davon # % Rabatt. Wie viele Franken Rabatt?"); return z && { preis: z[0], p: z[1] }; },
+  brutto: a => { const z = muster(a.text, "Nettopreis # Fr., dazu # % Zuschlag. Bruttopreis ="); return z && { preis: z[0], p: z[1] }; },
+  netto: a => { const z = muster(a.text, "Bruttopreis # Fr. mit # % Zuschlag. Nettopreis ="); return z && { brutto: z[0], p: z[1] }; },
+  "fehlender-wert": a => {
+    const l = mitListe(a.text, "Das Mittel von # Zahlen ist #. # davon sind LISTE. Die fehlende Zahl =");
+    // „n − 1 davon“: die genannte Anzahl muss zur Liste passen
+    return l && l.vor[2] === l.liste.length ? { n: l.vor[0], m: l.vor[1], werte: l.liste } : null;
+  },
+  "vor-rabatt": a => { const z = muster(a.text, "Nach # % Rabatt kostet eine Jacke # Fr. Preis vor dem Rabatt ="); return z && { nachher: z[1], p: z[0] }; },
+};
+function liesText(a) {
+  const l = LESER[a.typ];
+  return (l && l(a)) || null;
+}
+/** Gleiche Werte: Zahlen auf Rundungsreste genau, Listen elementweise, Texte wörtlich. */
+const gleichWert = (x, y) => (Array.isArray(x) ? Array.isArray(y) && x.length === y.length && x.every((v, i) => gleichWert(v, y[i]))
+  : typeof x === "number" && typeof y === "number" ? Math.abs(x - y) < 1e-9 : x === y);
+
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
-  const B = KERN.bruch, Z = x => B.vonZahl(x), d = a.daten;
-  let soll;
-  switch (a.typ) {
-    case "mittelwert": soll = B.durch(Z(d.werte.reduce((x, y) => x + y, 0)), Z(d.werte.length)); break;
-    case "waehrung": soll = d.richtung === "zu-fr" ? B.mal(Z(d.betrag), Z(d.kurs)) : B.durch(Z(d.fr0), Z(d.kurs)); break;
-    case "relativ-prozent": soll = B.mal(B.durch(Z(d.a), Z(d.n)), Z(100)); break;
-    case "absolut": soll = B.durch(B.mal(Z(d.n), Z(d.p)), Z(100)); break;
-    case "wahrscheinlichkeit": soll = B.durch(Z(d.r), Z(d.r + d.b + d.g)); break;
-    case "rabatt": soll = B.durch(B.mal(Z(d.preis), Z(100 - d.p)), Z(100)); break;
-    case "rabatt-betrag": soll = B.durch(B.mal(Z(d.preis), Z(d.p)), Z(100)); break;
-    case "brutto": soll = B.durch(B.mal(Z(d.preis), Z(100 + d.p)), Z(100)); break;
-    case "netto": soll = B.durch(B.mal(Z(d.brutto), Z(100)), Z(100 + d.p)); break;
-    case "fehlender-wert": soll = B.minus(B.mal(Z(d.n), Z(d.m)), Z(d.werte.reduce((x, y) => x + y, 0))); break;
-    case "vor-rabatt": soll = B.durch(B.mal(Z(d.nachher), Z(100)), Z(100 - d.p)); break;
-    default: return [`unbekannter Typ ${a.typ}`];
-  }
+  const d = a.daten;
+  const soll = sollAus(a.typ, d);
+  if (!soll) return [`unbekannter Typ ${a.typ}`];
   if (!B.gleich(soll, Z(a.antwort))) m.push(`Lösung ${a.antwort}, nachgerechnet ${B.text(soll)}: ${a.text}`);
+  // Text gegen Prüfdaten (TD1 a): was der Jugendliche liest, sind dieselben Werte, und aus ihnen folgt dieselbe Lösung
+  const t = liesText(a);
+  if (!t) m.push(`Text folgt keinem Muster des Typs ${a.typ}: ${a.text}`);
+  else {
+    const anders = Object.keys(d).filter(k => !gleichWert(t[k], d[k]));
+    if (anders.length) m.push(`Text zeigt ${anders.map(k => `${k} = ${t[k]}`).join(", ")}, Prüfdaten ${anders.map(k => `${k} = ${d[k]}`).join(", ")}: ${a.text}`);
+    if (!B.gleich(sollAus(a.typ, t), Z(a.antwort))) m.push(`aus dem Text nachgerechnet ${B.text(sollAus(a.typ, t))}, Lösung ${a.antwort}: ${a.text}`);
+  }
   if (!B.endlich(soll)) m.push(`Ergebnis geht nicht auf: ${a.text}`);
   if (a.einheit === "Fr." && !auf5Rp(a.antwort)) m.push(`Franken nicht auf 5 Rp.: ${a.loesung}`);
   if (a.typ === "wahrscheinlichkeit" && !(a.antwort > 0 && a.antwort < 1)) m.push("Wahrscheinlichkeit nicht zwischen 0 und 1");
@@ -149,4 +215,4 @@ function pruefeAufgabe(a, stufe, niveau) {
   return m;
 }
 
-if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis };
+if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis, liesText };

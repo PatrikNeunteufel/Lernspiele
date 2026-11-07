@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): B2 Schritt 3 in Arbeit (LERN_Session20, Annahme gebaut; Text gegen Prüfdaten nach TD1 a: 3 von 10 Übungen) | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): B2 Schritt 3 in Arbeit (LERN_Session20, Annahme gebaut; Text gegen Prüfdaten nach TD1 a: 4 von 10 Übungen) | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -110,7 +110,7 @@ Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`
   - Text gegen Prüfdaten: Ereigniswortlaut in Kombinatorik/Zufall aus den Daten neu erzeugt und verglichen;
     Prüffunktionen, die nur auf `daten` rechnen, lesen den angezeigten Text (flaechen-volumen, koerper-winkel,
     prozent-funktionen, daten-rabatt, folgen, sachsituationen, Teile von zehnerpotenzen und binome-gleichungen).
-    Vorgehen TD1 a; fertig: flaechen-volumen, koerper-winkel, prozent-funktionen (LERN_Session20).
+    Vorgehen TD1 a; fertig: flaechen-volumen, koerper-winkel, prozent-funktionen, daten-rabatt (LERN_Session20).
   - `konten`/`rollen` und `daten`: kaputte und fremde Dateien, Ids fremder Konten, voller Speicher, Zeitzone.
   - Vielfalt: Mindestvorrat je Stufe auch ohne Endlos (Hinweis unter 50 verschiedenen Aufgaben).
   - Rechner: NaN, Division durch 0, 10-stellige Anzeige. (Im Kern-Test, `pruefe_kern.js` Rechenkern.)
