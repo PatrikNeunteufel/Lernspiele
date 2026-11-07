@@ -762,3 +762,8 @@
   Daten verglichen (die Lösung prüfte schon gegen die Tabelle). `LST.zahlenImText`: „#*“ für eine Zahlenliste;
   `daten-rabatt` benutzt es statt eines eigenen Listen-Lesers. Kein Fund. Gegenprobe (viertes Glied bricht die Regel):
   gemeldet. Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).
+- Text gegen Prüfdaten (TD1 a), sechste Übung `sachsituationen`: `liesText` für alle 7 Typen — Sätze, beim Weg-Zeit-
+  Diagramm die gezeichnete Gerade, bei der Tabelle Zuwachs und y bei x = 0, bei den Auswahlaufgaben auch die vier
+  Antworten („y = 3x − 2“). Die Prüfung bestimmt aus dem Gezeigten, welche Antwort passt, und vergleicht mit der
+  markierten; Nachrechnung als `sollAus`. Kein Fund. Gegenprobe (Tabelle um 1 verschoben): gemeldet, mit der Antwort,
+  die dann passen würde. Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).
