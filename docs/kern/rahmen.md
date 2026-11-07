@@ -575,7 +575,8 @@ Eulenpfad, LERN_Session14, docs/eulenpfad/rahmen.md 21). Verhalten im Kern, Auss
 
 | Aufruf | Ergebnis |
 |---|---|
-| `KERN.notizblock({ stellen, dezimal, ton })` | Notizblock einer App: `stellen` von gross nach klein `[{ k, name }]` (Standard M … E), `dezimal()` → „.“ oder „,“, `ton(art)` (Standard still) |
+| `KERN.notizblock({ stellen, dezimal, ton, vorn })` | Notizblock einer App: `stellen` von gross nach klein `[{ k, name }]` (Standard M … E), `dezimal()` → „.“ oder „,“, `ton(art)` (Standard still), `vorn()` gerufen, wenn der Block gross erscheint (seit 1.27.0; Lernsteig RP1 a) |
+| `verkleinern()`, `istKlein()` | Auf die Kopfzeile verkleinern, Inhalt bleibt (wie der Knopf ▁); seit 1.27.0 |
 | `oeffne({ beiEingabe, vorlagen, gleichung })`, `schliessen()`, `istOffen()`, `knopf(beiEingabe, { klasse, vorlagen, gleichung })` | Block am Bildrand öffnen (Vorlagen +, −, ×, :, Häuschen; bis 6 Rechnungen auf einem Blatt, Weiterrechnen mit dem geschriebenen Ergebnis; Ziffern über `KERN.tastenfeld`, 4.24); nichts geprüft, nichts übernommen, nichts gespeichert. `vorlagen`: Kennungen der angebotenen Vorlagen in ihrer Reihenfolge (Standard `+ − × : frei`); `gleichung`: Text oder Liste für die Vorlage „=“ |
 | `raster(n, { links, rechts, komma })`, `rechne(art, zahlen)` | Stellenwerttabelle und Rechnen spaltenweise wie auf Papier (für die Schriftlich-Werkstatt) |
 | `KERN.notizblock.zahlAus(t)`, `kommaregel(ka, kb)`, `loesungAus(t)`, `VORLAGEN`, `GLEICHUNG`, `STELLEN` | Zahl aus einem Feld lesen (7 Ziffern, 3 nach dem Komma); Kommaregel als Satz; Lösung „x = 2.5“ einer Gleichungszeile zum Weiterrechnen |

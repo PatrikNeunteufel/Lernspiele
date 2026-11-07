@@ -508,6 +508,22 @@ async function pruefeSeiten(uebungen, melde, LST) {
           s.klick(".rechner .rt.uebernehmen");
           const wert = s.lauf(`document.querySelector(".eingabe").value`);
           if (wert !== "36") throw new Error(`Übernahme ergab „${wert}“ statt 36`);
+          // Rechner am Bildrand wie der Notizblock; beide teilen den Platz (RP1 a): gross ist nur einer, der andere klein
+          const zustand = () => s.lauf(`(() => { const r = document.querySelector(".rechner-fenster"), n = document.querySelector(".notizblock");
+            return (r && !r.hidden ? (r.classList.contains("klein") ? "R-klein" : "R-gross") : "R-zu") + " " + (n ? (n.classList.contains("klein") ? "N-klein" : "N-gross") : "N-zu"); })()`);
+          if (zustand() !== "R-gross N-zu" || s.gibt(".buehne .rechner")) throw new Error(`Rechner nicht am Bildrand: ${zustand()}`);
+          if (s.gibt(".nb-knopf")) {
+            s.klick(".nb-knopf"); await ruhe(s, 20, 2);
+            if (zustand() !== "R-klein N-gross") throw new Error(`Notizblock geöffnet: ${zustand()} statt R-klein N-gross`);
+            s.klick('[data-aktion="rechner-klein"]'); await ruhe(s, 20, 2);
+            if (zustand() !== "R-gross N-klein") throw new Error(`Rechner zurückgeholt: ${zustand()} statt R-gross N-klein`);
+            if (s.lauf(`document.querySelector(".rechner-anzeige").textContent`).indexOf("36") < 0) throw new Error("Ans des Rechners nach dem Verkleinern verloren");
+            s.klick(".nb-knopf"); await ruhe(s, 20, 2);
+            if (zustand() !== "R-klein N-gross") throw new Error(`Notizblock zurückgeholt: ${zustand()}`);
+          }
+          s.klick('[data-aktion="rechner-zu"]'); await ruhe(s, 20, 2);
+          if (!zustand().startsWith("R-zu") || s.lauf(`document.querySelector(".rechner-knopf").getAttribute("aria-pressed")`) !== "false") throw new Error(`Rechner schliessen: ${zustand()}`);
+          s.klick(".rechner-knopf"); await ruhe(s, 20, 2);
           for (let i = 0; i < e.anzahl; i++) {
             await antworte(s, s.lauf("LST.pruefung.aufgabe()"), true);
             s.klick(".knopf.weiter"); await ruhe(s, 20, 3);

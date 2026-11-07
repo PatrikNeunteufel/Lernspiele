@@ -208,3 +208,40 @@ button, input { font: inherit; color: inherit; }
   body.mit-notizblock:not(.notizblock-klein) { padding-bottom: 0; }
   body.mit-notizblock:not(.notizblock-klein) .buehne { margin-right: 372px; }
 }
+
+/* Rechner am Bildrand wie der Notizblock (Hinweis Patrik, LERN_Session21): derselbe Platz, dieselben Breiten. Beide teilen
+   ihn (RP1 a): gross ist immer nur einer, der andere liegt als Kopfzeile darunter (breit) oder über dem Blatt (schmal). */
+.rechner-fenster { position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 24px);
+  display: flex; flex-direction: column; background: #26313b; border-radius: var(--radius); box-shadow: 0 8px 24px rgba(31, 41, 51, .25); }
+.rechner-fenster[hidden] { display: none; }
+.rf-kopf { display: flex; align-items: center; gap: 8px; padding: 8px 10px 6px 14px; color: #fff; }
+.rf-kopf b { flex: 1; }
+.rf-zu { border: 1px solid #3d4b57; background: #34414c; color: #fff; border-radius: 8px; min-width: 40px; min-height: 40px; font: inherit; font-weight: 700; cursor: pointer; }
+.rf-inhalt { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.rechner-fenster .rechner { max-width: none; margin: 0; border-radius: 0 0 var(--radius) var(--radius); padding-top: 4px; }
+.rechner-fenster.klein .rf-inhalt, .notizblock.klein .nb-fuss { display: none; }
+@media (min-width: 1100px) {
+  body.mit-rechner:not(.rechner-klein) .buehne { margin-right: 480px; }
+  /* verkleinert: unten rechts; sind beide klein, liegt der Rechner über dem Notizblock */
+  .rechner-fenster.klein, .notizblock.klein { top: auto; bottom: 12px; }
+  body.notizblock-klein .rechner-fenster.klein { bottom: 76px; }
+}
+@media (max-width: 1099px) {
+  .rechner-fenster { right: 0; left: 0; top: auto; bottom: 0; width: auto; max-height: 58vh; border-radius: var(--radius) var(--radius) 0 0; }
+  body.mit-rechner:not(.rechner-klein) { padding-bottom: 58vh; }
+  /* verkleinert über dem grossen Blatt des anderen, sonst unten */
+  body.mit-notizblock:not(.notizblock-klein) .rechner-fenster.klein, body.mit-rechner:not(.rechner-klein) .notizblock.klein { bottom: 58vh; }
+  body.notizblock-klein .rechner-fenster.klein { bottom: 64px; }
+}
+@media (min-width: 980px) and (max-width: 1099px) and (orientation: landscape) {
+  .rechner-fenster { left: auto; right: 12px; top: 12px; bottom: auto; width: 360px; max-height: calc(100vh - 24px); border-radius: var(--radius); }
+  body.mit-rechner:not(.rechner-klein) { padding-bottom: 0; }
+  body.mit-rechner:not(.rechner-klein) .buehne { margin-right: 372px; }
+  .rechner-fenster.klein, .notizblock.klein,
+  body.mit-notizblock:not(.notizblock-klein) .rechner-fenster.klein, body.mit-rechner:not(.rechner-klein) .notizblock.klein { top: auto; bottom: 12px; }
+  body.notizblock-klein .rechner-fenster.klein { bottom: 76px; }
+}
+/* Seitlich: das grosse Fenster lässt unten Platz für die Kopfzeile des verkleinerten */
+@media (min-width: 1100px), (min-width: 980px) and (orientation: landscape) {
+  body.notizblock-klein .rechner-fenster:not(.klein), body.rechner-klein .notizblock:not(.klein) { max-height: calc(100vh - 88px); }
+}

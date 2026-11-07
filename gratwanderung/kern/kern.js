@@ -1,4 +1,4 @@
-/* kern 1.26.0 · Prüfsumme sha256:ee872aef00cb81564917ad2bbddf206cbc84db03a49edd02cf9a23d47826d02d · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.27.0 · Prüfsumme sha256:ceec6ba76025c0b91b0a91209f3c079716bced92df071ee9ca87dfa73bff370b · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -3057,8 +3057,12 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 /* ---- kern/notizblock.js ---- */
 /* Kern — Notizblock für schriftliches Rechnen (Entscheide NB1–NB4 a im Eulenpfad, LERN_Session14; NB1 a–NB4 a für die
    Reihe, LERN_Session19; docs/kern/rahmen.md 4.23). Herkunft: eulenpfad/spiele/gemeinsam/notizblock.js (SCHRIFTLICH).
-   KERN.notizblock({ stellen, dezimal, ton }) → { ziffern, rechne, raster, oeffne, schliessen, knopf, VORLAGEN, GLEICHUNG, istOffen }
-     stellen  Stellen von gross nach klein [{ k, name }] (Standard M … E); dezimal() → "." oder ","; ton(art) (Standard still)
+   KERN.notizblock({ stellen, dezimal, ton, vorn }) → { ziffern, rechne, raster, oeffne, schliessen, verkleinern, knopf, VORLAGEN,
+     GLEICHUNG, istOffen, istKlein }
+     stellen  Stellen von gross nach klein [{ k, name }] (Standard M … E); dezimal() → "." oder ","; ton(art) (Standard still);
+     vorn()  wird gerufen, wenn der Block gross erscheint (geöffnet oder aus „klein“ zurückgeholt) — damit eine App ein
+     anderes Feld am selben Platz verkleinern kann (Lernsteig RP1 a: Rechner und Notizblock teilen sich den Platz)
+   • verkleinern() — auf die Kopfzeile verkleinern, Inhalt bleibt (wie der Knopf ▁); istKlein() fragt es ab.
    • raster(n, { links, rechts, komma }) — Stellenwerttabelle mit n Stellen (Einer = Spalte 0), links eine Spalte
      für das Rechenzeichen, rechts weitere (× und Faktor). Zeilen: kopf(), zahl(z), reihe(mache), strich().
    • rechne(art, zahlen) — spaltenweise wie auf Papier: Ergebnisziffern und Überträge (+, −, × einstellig). Subtraktion:
@@ -3145,7 +3149,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     return m && zahlAus(m[1]) ? m[1].replace(/\s/g, "") : "";
   };
 
-  function notizblock({ stellen = STELLEN_STANDARD, dezimal = () => ".", ton = () => {} } = {}) {
+  function notizblock({ stellen = STELLEN_STANDARD, dezimal = () => ".", ton = () => {}, vorn = () => {} } = {}) {
     const el = KERN.el;
     const STELLEN_RECHTS = stellen.slice().reverse(); // E, Z, H, T, ZT, HT, M
     const kommaZeichen = () => (dezimal() === "," ? "," : ".");
@@ -3303,7 +3307,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
      * Rechnung lässt sich eine neue hängen, ihre erste Zahl ist das, was als Ergebnis geschrieben wurde.
      */
     function oeffne({ beiEingabe, vorlagen = null, gleichung = "" } = {}) {
-      if (offen) { offen.panel.classList.remove("klein"); document.body.classList.remove("notizblock-klein"); offen.panel.querySelector("button, input")?.focus(); return; }
+      if (offen) { gross(true); offen.panel.querySelector("button, input")?.focus(); return; }
       const ALLE = [...VORLAGEN, GLEICHUNG];
       const startZeilen = [].concat(gleichung || []); // eine Gleichung oder ein System (je Gleichung eine Zeile)
       const angeboten = vorlagen ? vorlagen.map(id => ALLE.find(v => v.id === id)).filter(Boolean) : VORLAGEN;
@@ -3472,7 +3476,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
         onclick: () => neuerSchritt(v) }));
       const zu = el("button", { type: "button", class: "nb-zu", "aria-label": "Notizblock schliessen", title: "Schliessen (leert den Block)", text: "✕", onclick: schliessen });
       const klein = el("button", { type: "button", class: "nb-zu", "aria-label": "Notizblock verkleinern", title: "Verkleinern", text: "▁",
-        onclick: () => document.body.classList.toggle("notizblock-klein", panel.classList.toggle("klein")) });
+        onclick: () => gross(panel.classList.contains("klein")) });
       const panel = el("aside", { class: "notizblock", role: "dialog", "aria-label": "Notizblock" },
         el("div", { class: "nb-kopf" }, el("b", { text: "📝 Notizblock" }), el("span", { class: "leise-text", text: "wird nicht bewertet" }), klein, zu),
         el("div", { class: "nb-inhalt" }, blatt, wahlBox),
@@ -3492,8 +3496,18 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       document.body.append(panel);
       document.body.classList.add("mit-notizblock");
       offen = { panel, beiEingabe };
+      vorn();
       wahl.querySelector("button").focus();
     }
+
+    /** Gross (true) oder auf die Kopfzeile verkleinert (false); gross meldet vorn(). */
+    function gross(an) {
+      if (!offen) return;
+      offen.panel.classList.toggle("klein", !an);
+      document.body.classList.toggle("notizblock-klein", !an);
+      if (an) vorn();
+    }
+    const verkleinern = () => gross(false);
 
     /** Schliessen und leeren (Knopf ✕ oder neue Aufgabe). */
     function schliessen() {
@@ -3506,7 +3520,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     const knopf = (beiEingabe, { klasse = "knopf hell klein", vorlagen = null, gleichung = "" } = {}) => el("button", { type: "button", class: `${klasse} nb-knopf`, text: "📝 Notizblock",
       title: "Schriftlich rechnen wie auf einem Blatt — wird nicht bewertet", onclick: () => oeffne({ beiEingabe, vorlagen, gleichung }) });
 
-    return { ziffern, rechne, raster, oeffne, schliessen, knopf, VORLAGEN, GLEICHUNG, istOffen: () => !!offen };
+    return { ziffern, rechne, raster, oeffne, schliessen, verkleinern, knopf, VORLAGEN, GLEICHUNG, istOffen: () => !!offen,
+      istKlein: () => !!offen && offen.panel.classList.contains("klein") };
   }
 
   KERN.notizblock = Object.assign(notizblock, { rechne, ziffern, zahlAus, kommaregel, loesungAus, VORLAGEN, GLEICHUNG, STELLEN: STELLEN_STANDARD, MAX_STELLEN, MAX_NACHKOMMA, MAX_ZEILEN });

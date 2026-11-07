@@ -161,7 +161,10 @@
   const niveauName = n => LP.niveauName(n, konto().lehrplan);
 
   // Notizblock für eigene Rechenwege (NB1 a, NB2 a; Kern kern/notizblock.js): Dezimalzeichen wie in der Übung, ohne Ton
-  const NOTIZBLOCK = KERN.notizblock({ dezimal: LST.dezimalZeichen });
+  // Rechner und Notizblock teilen sich den Platz am Bildrand (RP1 a): erscheint der eine gross, wird der andere auf seine
+  // Kopfzeile verkleinert, nicht geschlossen — Inhalt und Ans bleiben.
+  let rechnerFenster = null; // { verkleinern } der laufenden Runde
+  const NOTIZBLOCK = KERN.notizblock({ dezimal: LST.dezimalZeichen, vorn: () => { if (rechnerFenster) rechnerFenster.verkleinern(); } });
 
   const RECHNER_TEXT = { ohne: "ohne Taschenrechner", mit: "mit Taschenrechner", frei: "Taschenrechner erlaubt" };
 
@@ -379,8 +382,30 @@
         ? LST_RECHNER.feld({ modell: konto().rechnerModell, modellGewaehlt: id => { const kk = konto(); kk.rechnerModell = id; speichereKonto(kk); }, uebernehmen: t => { if (aktuellesFeld) { aktuellesFeld.value = t; aktuellesFeld.focus(); } }, zu: () => aktuellesFeld && aktuellesFeld.focus() })
         : null;
       const rechnerEl = rechnerFeld ? rechnerFeld.element : el("div");
-      rechnerEl.hidden = true;
-      buehne.replaceChildren(fortschritt, aufgabeFeld, antwort, rechnerEl, rueck);
+      // Der Rechner steht wie der Notizblock am Bildrand (Hinweis Patrik, LERN_Session21; Platz NB4 a in stil.css): ab
+      // 1100 px rechts neben der Aufgabe, auf dem Tablet quer schmaler rechts, sonst unten. Kopfzeile wie beim Block.
+      const fenster = rechnerFenster = (() => {
+        const panel = el("aside", { class: "rechner-fenster", role: "dialog", "aria-label": "Rechner", hidden: true });
+        let knopf = null; // Knopf „Rechner“ der aktuellen Aufgabe
+        const melde = () => { if (knopf) knopf.setAttribute("aria-pressed", String(!panel.hidden && !panel.classList.contains("klein"))); };
+        const klasse = () => { document.body.classList.toggle("mit-rechner", !panel.hidden); document.body.classList.toggle("rechner-klein", !panel.hidden && panel.classList.contains("klein")); melde(); };
+        const gross = () => {
+          panel.hidden = false; panel.classList.remove("klein"); klasse(); rechnerBenutzt = true;
+          if (NOTIZBLOCK.istOffen() && !NOTIZBLOCK.istKlein()) NOTIZBLOCK.verkleinern();
+          rechnerEl.focus();
+        };
+        const verkleinern = () => { if (!panel.hidden) { panel.classList.add("klein"); klasse(); } };
+        const schliessen = () => { panel.hidden = true; panel.classList.remove("klein"); klasse(); };
+        panel.append(el("div", { class: "rf-kopf" }, el("b", { text: "🧮 Rechner" }),
+          el("button", { type: "button", class: "rf-zu", "aria-label": "Rechner verkleinern", title: "Verkleinern", text: "▁", "data-aktion": "rechner-klein",
+            onclick: () => (panel.classList.contains("klein") ? gross() : verkleinern()) }),
+          el("button", { type: "button", class: "rf-zu", "aria-label": "Rechner schliessen", title: "Schliessen", text: "✕", "data-aktion": "rechner-zu", onclick: schliessen })),
+          el("div", { class: "rf-inhalt" }, rechnerEl));
+        document.body.append(panel);
+        return { panel, gross, verkleinern, schliessen, offen: () => !panel.hidden, istGross: () => !panel.hidden && !panel.classList.contains("klein"),
+          knopf: k => { knopf = k; melde(); }, weg: () => { panel.remove(); document.body.classList.remove("mit-rechner", "rechner-klein"); if (rechnerFenster === fenster) rechnerFenster = null; } };
+      })();
+      buehne.replaceChildren(fortschritt, aufgabeFeld, antwort, rueck);
 
       // Serie mitten drin verlassen: Stand bis dahin zählt (abgeschaut vom Eulenpfad, Entscheid E1 a dort), als Rekord und
       // Runde (RA3 a); das Ende ersetzt beide (gleiche Kennung).
@@ -415,7 +440,7 @@
         L.gestellt({ text: a.text, loesung: a.loesung });
         const rechner = rechnerFuer(eintrag, a.stufe);
         rechnerBenutzt = false;
-        if (!rechner || rechner === "ohne") rechnerEl.hidden = true;
+        if (!rechner || rechner === "ohne") fenster.schliessen();
         fortschritt.textContent = (endlos ? `Serie: ${L.geschafft} richtig` : `Aufgabe ${nr} von ${anzahl}`) + (rechner ? ` · ${RECHNER_TEXT[rechner]}` : "");
         aufgabeFeld.replaceChildren(...[el("span", { class: a.text.length > 36 ? "term lang" : "term", text: a.text, lang: eintrag.sprache }), a.darstellung ? darstellung(a.darstellung) : null].filter(Boolean));
         rueck.replaceChildren();
@@ -431,13 +456,10 @@
         tastenfeld.append(ok);
         aktuellesFeld = feld;
         const rechnerKnopf = rechnerFeld && rechner && rechner !== "ohne"
-          ? el("button", { type: "button", class: "knopf rechner-knopf", text: "Rechner", "aria-pressed": String(!rechnerEl.hidden), onclick: () => {
-              rechnerEl.hidden = !rechnerEl.hidden;
-              rechnerKnopf.setAttribute("aria-pressed", String(!rechnerEl.hidden));
-              if (!rechnerEl.hidden) { rechnerBenutzt = true; rechnerEl.focus(); }
-            } })
+          ? el("button", { type: "button", class: "knopf rechner-knopf", text: "Rechner", onclick: () => (fenster.istGross() ? fenster.schliessen() : fenster.gross()) })
           : null;
-        if (!rechnerEl.hidden) rechnerBenutzt = true;
+        fenster.knopf(rechnerKnopf);
+        if (fenster.istGross()) rechnerBenutzt = true;
         // Optional vor und nach dem Feld: „x =“, Einheit „m²“ (a.vor, a.einheit)
         const feldGruppe = el("span", { class: "feld-gruppe" },
           a.vor ? el("span", { class: "feld-vor", text: a.vor }) : null, feld, a.einheit ? el("span", { class: "feld-nach", text: a.einheit }) : null);
@@ -546,6 +568,7 @@
       function schluss() {
         if (auswahlAufraeumen) { auswahlAufraeumen(); auswahlAufraeumen = null; }
         NOTIZBLOCK.schliessen();
+        fenster.weg();
         speichereSerie();
         aktuell = null;
         const { dauer, aufAnhieb, gezeigt, gekuerzt } = gespeichert;

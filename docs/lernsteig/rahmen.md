@@ -158,6 +158,11 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
   dafür kommt mit der Anmeldung der Aufsicht.
 - Bei `mit` und `frei` gibt es den Knopf „Rechner“; das Feld bleibt über die Runde offen, `Ans` merkt sich das letzte
   Ergebnis. Bei `ohne` ist es weg (in einem Übergang je Aufgabe).
+- **Platz** (Hinweis Patrik, LERN_Session21): Der Rechner steht wie der Notizblock am Bildrand (`.rechner-fenster`,
+  `stil.css`): ab 1100 px rechts neben der Aufgabe, auf dem Tablet quer schmaler rechts, sonst unten wie ein Blatt;
+  Kopfzeile mit ▁ (verkleinern) und ✕ (schliessen). **RP1 a:** Rechner und Notizblock teilen sich den Platz — gross
+  ist immer nur einer, der andere liegt als Kopfzeile darunter (seitlich unten rechts, schmal über dem Blatt); Inhalt
+  des Blocks und `Ans` bleiben. Der Notizblock meldet sich dafür über `vorn` des Kerns (1.27.0, docs/kern/rahmen.md 4.23).
 - Funktionen nach RE1 a: Ziffern, Punkt, `+ − · :`, Klammern, `x²`, `xʸ`, `√`, `ⁿ√` (zuerst n, dann die Taste, dann die
   Zahl), Vorzeichen `(−)` getrennt vom Minus, `Ans`, Löschen, AC, „→ Antwort“. Rangfolge: Klammern, Wurzel und
   Potenz, Vorzeichen, Punkt vor Strich ((−)2² = −4). Ergebnis mit höchstens 10 gültigen Ziffern in der Schreibweise

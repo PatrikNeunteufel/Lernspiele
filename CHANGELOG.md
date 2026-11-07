@@ -863,3 +863,14 @@
   ähnlichen Übungen und den Knopf; Gegenproben (Mindestzahl 4, fehlende Prüfungsangabe als 0): drei Fehler gemeldet.
   lernsteig/rahmen.md 5b, Plan C3. Tests: Kern 0 Fehler, Lernsteig „0 Fehler, 21 Hinweise.“ (Konten 101 Fälle),
   Gratwanderung „Keine Fehler.“; Browser Desktop und 375 px ohne Konsolenfehler.
+- Kern 1.27.0 und Lernsteig — Rechner am Bildrand wie der Notizblock (Hinweis Patrik; Entscheid RP1 a): der Rechner
+  steht nicht mehr unter dem Tastenfeld, sondern als Fenster `.rechner-fenster` am Platz des Notizblocks (ab 1100 px
+  rechts, Tablet quer schmaler rechts, sonst unten), mit ▁ und ✕. Beide teilen den Platz: wird einer gross, wird der
+  andere auf seine Kopfzeile verkleinert, nicht geschlossen (Inhalt und Ans bleiben). Dafür im Kern
+  `KERN.notizblock({ vorn })`, `verkleinern()`, `istKlein()` (neu, alte Aufrufe unverändert). `tools/lernsteig_seiten.js`
+  prüft je Übung mit Rechner: am Bildrand, Notizblock auf → Rechner klein, Rechner zurück → Notizblock klein, Ans
+  bleibt, Schliessen; Gegenprobe (Rechner verkleinert den Block nicht): 27 Fehler gemeldet. Docs kern/rahmen.md 4.23,
+  lernsteig/rahmen.md 5a, Kern-Changelog. Tests: Kern 5671 Fälle 0 Fehler, Lernsteig „0 Fehler, 21 Hinweise.“
+  (Konten 101 Fälle), Gratwanderung „Keine Fehler.“; Eulenpfad-Stichprobe (schriftlich-werkstatt, rechenprobe,
+  malkreuz, zahlenhaus, preis-tabelle, quader-volumen) mit denselben Klickzahlen wie mit Kern 1.26.0; Browser
+  1024 × 600 (Tablet quer), 1400 × 900 und 375 px ohne Konsolenfehler.

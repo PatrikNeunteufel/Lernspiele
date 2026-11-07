@@ -3,6 +3,11 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.27.0 — 2026-11-07 (LERN_Session21)
+- `notizblock.js`: `verkleinern()` und `istKlein()`, dazu die Option `vorn()` der Fabrik — gerufen, wenn der Block gross
+  erscheint (geöffnet oder aus „klein“ zurückgeholt). Damit teilt eine App den Platz am Bildrand mit einem anderen Feld
+  (Lernsteig RP1 a: Rechner und Notizblock, der jeweils andere wird verkleinert). Ohne `vorn` bleibt alles wie bisher.
+
 ## 1.26.0 — 2026-11-07 (LERN_Session20)
 - `zeit.js` (`KERN.zeit`, neu, Plan B2 Schritt 3: Zeitzone): `tag`, `vorTagen`, `tagAnzeige` — Kalendertage in Ortszeit
   statt aus der UTC-Zeit. `daten.js`: der Dateiname einer Sicherung trägt den Tag des Geräts.
