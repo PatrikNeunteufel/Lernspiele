@@ -652,3 +652,10 @@
   höchstens die halbe Fensterhöhe; Koordinaten und Geraden mit gleichen Spannen bleiben, wie sie waren. Seitentest meldet
   Grafiken höher als breit (Gegenprobe mit der alten Rechnung: 30 Funde). Im Browser auf 375 px: Graph 310 × 310 px, die
   ganze Aufgabe mit „Prüfen“ im Fenster. lernsteig/rahmen.md 4.
+- Lernsteig, Meldung Patrik (rationale-zahlen Stufe g ohne Rechner zum Teil zu schwer), Entscheide RZ1 a, RZ2 a: Brüche
+  als Dezimalzahl nur mit den Nennern des Lehrplans (2, 4, 5, 8, 10, 20, 50, 100, 1000; 3 und 6 folgen mit periodischen
+  Dezimalzahlen), Dezimal-Multiplikationen mit höchstens 5 Wertziffern in beiden Faktoren zusammen. Der Wortlaut auf
+  sg.lehrplan.ch nennt eine feste Nennerliste; unsere Fassung in `mathematik_zyklus3.md` hatte „Nenner bis 1000“
+  (berichtigt). Gemessen über 20 000 Aufgaben: schwere Aufgaben je Runde zu 8 von 1,3 auf 0,4, Runden mit drei und mehr
+  schweren von 13 % auf 1 %; Stufe g mit 1855 verschiedenen Aufgaben. Prüfer in `pruefeAufgabe` (Gegenprobe am alten
+  Generator: 1438 bzw. 2113 Funde in 20 000 Aufgaben). Plan (RZ1 a, RZ2 a).

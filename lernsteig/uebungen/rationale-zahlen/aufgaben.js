@@ -1,8 +1,9 @@
 /* Übung „Rationale Zahlen rechnen“ — MA.1.A.3, Stufen g, h, i (Entscheid UE1 a; Grenzen nach PA: h und i ohne
    Erweiterung). Aufgaben als Daten, ohne DOM (Vertrag: docs/lernsteig/rahmen.md 4).
    Inhalte je Stufe sinngemäss nach docs/lernsteig/lehrplan/mathematik_zyklus3.md, MA.1.A.3:
-   g  Dezimalzahlen bis 5 Wertziffern multiplizieren (308 · 52; 12 · 0.3); Brüche (Nenner bis 1000) als Dezimalzahlen;
-      wie oft ein Stammbruch in einer ganzen Zahl steckt (2 : ⅕)
+   g  Dezimalzahlen bis 5 Wertziffern multiplizieren (308 · 52; 12 · 0.3; Faktoren zusammen, RZ2 a); Brüche mit den
+      Nennern 2, 4, 5, 8, 10, 20, 50, 100, 1000 als Dezimalzahlen (RZ1 a; 3 und 6 des Lehrplans folgen mit periodischen
+      Dezimalzahlen); wie oft ein Stammbruch in einer ganzen Zahl steckt (2 : ⅕)
    h  Prozentrechnungen mit dem Rechner (ohne die Erweiterung Primfaktoren)
    i  Grundoperationen mit rationalen Zahlen; Wurzeln und Potenzen mit dem Rechner (4³ · 4³; 4³ + 4³; ³√8000)
       (ohne die Erweiterung Bruchterme mit Variablen); dazu Klammerregeln aus MA.1.A.4.h
@@ -35,6 +36,16 @@ function fertig(stufe, typ, text, antwort, weg, daten) {
 }
 
 // ---------- Stufe g ----------
+// Lehrplan MA.1.A.3.g (Wortlaut sg.lehrplan.ch, Stand August 2025): „können Dezimalzahlen bis 5 Wertziffern
+// multiplizieren … (z.B. 308 · 52; 12 · 0,3)“ und „können Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000
+// als Dezimalzahlen schreiben“. RZ2 a: die Faktoren zusammen höchstens 5 Wertziffern, wie beide Beispiele. RZ1 a: genau
+// die Nenner des Lehrplans; 3 und 6 (periodisch) erst, wenn die Übung periodische Dezimalzahlen annehmen kann.
+// Bis LERN_Session19: je Faktor bis 5 Wertziffern (23.56 · 4.4) und alle Teiler von 1000 dazu 16 (bis 0.4375).
+const WERTZIFFERN_MAX = 5;
+const NENNER_G = [2, 4, 5, 8, 10, 20, 50, 100, 1000];
+/** Wertziffern einer Zahl: alle Ziffern ohne Komma und ohne führende Nullen (0.3 → 1, 308 → 3, 23.56 → 4). */
+const wertziffern = z => String(z).replace(".", "").replace(/^0+/, "").length;
+
 function stufeG() {
   const typ = LST.waehle(["mal-ganz", "mal-dezimal", "bruch-dezimal", "stammbruch"]);
   if (typ === "mal-ganz") {
@@ -42,11 +53,14 @@ function stufeG() {
     return fertig("g", typ, `${dez(a)}${MAL}${dez(b)} =`, a * b, `${dez(a)}${MAL}${dez(b)} = ${dez(a * b)}`, { a, b });
   }
   if (typ === "mal-dezimal") {
-    const a = zufallDez(0.1, 99, LST.waehle([1, 2])), b = LST.waehle([LST.zufall(2, 19), zufallDez(0.1, 9.9, 1)]);
+    // neu ziehen, bis die Faktoren zusammen höchstens 5 Wertziffern haben (RZ2 a)
+    let a, b;
+    do { a = zufallDez(0.1, 99, LST.waehle([1, 2])); b = LST.waehle([LST.zufall(2, 19), zufallDez(0.1, 9.9, 1)]); }
+    while (wertziffern(a) + wertziffern(b) > WERTZIFFERN_MAX);
     return fertig("g", typ, `${dez(a)}${MAL}${dez(b)} =`, a * b, `${dez(a)}${MAL}${dez(b)} = ${dez(a * b)}`, { a, b });
   }
   if (typ === "bruch-dezimal") {
-    const n = LST.waehle([2, 4, 5, 8, 10, 16, 20, 25, 40, 50, 100, 125, 200, 250, 500, 1000]);
+    const n = LST.waehle(NENNER_G);
     const z = LST.zufall(1, n - 1);
     return fertig("g", typ, `${z}/${dez(n)} als Dezimalzahl =`, z / n, `${z}/${dez(n)} = ${z} : ${dez(n)} = ${dez(z / n)}`, { z, n });
   }
@@ -234,11 +248,12 @@ function pruefeAufgabe(a, stufe, niveau) {
   if (/(^|[+−·:] )−\d/.test(a.kennung)) maengel.push(`negative Zahl ohne Klammer: ${a.kennung}`);
   if (/\d{4}/.test(a.kennung.replace(/\.\d+/g, ""))) maengel.push(`Tausender ohne Apostroph: ${a.kennung}`);
   // Grenzen der Stufen nach Lehrplan
+  // RZ2 a: beide Faktoren zusammen höchstens 5 Wertziffern (wie 308 · 52 und 12 · 0,3)
   if (a.typ === "mal-ganz" || a.typ === "mal-dezimal") {
-    const wertziffern = z => String(z).replace(".", "").replace(/^0+/, "").length;
-    if (wertziffern(a.daten.a) > 5 || wertziffern(a.daten.b) > 5) maengel.push(`mehr als 5 Wertziffern: ${a.kennung}`);
+    if (wertziffern(a.daten.a) + wertziffern(a.daten.b) > WERTZIFFERN_MAX) maengel.push(`Faktoren zusammen mehr als ${WERTZIFFERN_MAX} Wertziffern: ${a.kennung}`);
   }
-  if (a.typ === "bruch-dezimal" && a.daten.n > 1000) maengel.push(`Nenner über 1000: ${a.kennung}`);
+  // RZ1 a: nur die Nenner, die der Lehrplan nennt
+  if (a.typ === "bruch-dezimal" && !NENNER_G.includes(a.daten.n)) maengel.push(`Nenner ${a.daten.n} nicht in der Liste des Lehrplans: ${a.kennung}`);
   if (a.stufe === "i" && a.typ === "plus-minus" && /\d\.\d/.test(a.kennung)) maengel.push("Stufe i plus/minus mit Dezimalzahl");
   if (a.weg && a.weg.split(" = ").pop() !== a.loesung) maengel.push(`Lösungsweg endet nicht bei der Lösung: ${a.weg}`);
   return maengel;

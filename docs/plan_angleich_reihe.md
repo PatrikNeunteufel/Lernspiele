@@ -407,3 +407,14 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   geschützt wird beim Freischalten (OA1 a). Der Filter `rollen` von `KERN.daten.einlesen` bleibt im Kern, der Lernsteig
   benutzt ihn nicht mehr. Nicht b (AS1 a bleibt für Dateien). Kipppunkt: gesperrte fremde Aufsichten auf der Anmeldung
   sind selbst ein Schaden — dann b und ein Entfernen gesperrter Aufsichten in der Verwaltung.
+- **RZ1 a** (2026-11-07, LERN_Session19, Lernsteig, Meldung Patrik „Stufe g ohne Rechner zum Teil noch etwas heftig“):
+  „Bruch als Dezimalzahl“ in rationale-zahlen g nur mit den Nennern des Lehrplans (Wortlaut MA.1.A.3.g: 2, 3, 4, 5, 6, 8,
+  10, 20, 50, 100, 1'000), ohne 3 und 6, bis die Übung periodische Dezimalzahlen annehmen kann (offener Punkt, zurückgestellt:
+  die Eingabe fehlt). Vorher alle Teiler von 1000 und 16 — 43 % der Bruch-Aufgaben mit Nennern ausserhalb der Liste, aus
+  einer geglätteten Fassung des Lehrplans („Nenner bis 1000“). Nicht b (3, 6 gerundet), nicht c (wie bisher). Kipppunkt:
+  das Lehrmittel übt in g Nenner wie 25, 125, 250.
+- **RZ2 a** (2026-11-07, LERN_Session19, Lernsteig): „bis 5 Wertziffern“ heisst in rationale-zahlen g: beide Faktoren
+  zusammen höchstens 5, wie 308 · 52 und 12 · 0,3. Gemessen über 40 000 Aufgaben: keine Aufgabe mehr mit mehr
+  Einmaleins-Schritten als 308 · 52 (vorher 11 %), Dezimal-Multiplikationen mit drei Nachkommastellen 5 % (vorher 19 %).
+  Nicht b (Ergebnis höchstens 5), nicht c (je Faktor, bisher). Kipppunkt: das Lehrmittel übt in g Aufgaben wie
+  23,56 · 4,4 ohne Rechner.
