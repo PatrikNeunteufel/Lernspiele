@@ -772,3 +772,9 @@
   (muss ganz sein), die ausgeschriebene Zahl aus Mantisse und Exponent. Die Prüfung der Werte steht in `pruefeMit(a, d)`
   und läuft mit den Daten und mit dem Gelesenen. Kein Fund. Gegenprobe (Exponent im Text um 1 zu gross): gemeldet.
   Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).
+- Text gegen Prüfdaten (TD1 a), achte Übung `binome-gleichungen`: Die Gleichungen las die Prüfung schon (Lösung in die
+  gezeigte Gleichung eingesetzt); neu liest `liesText` alle 10 Typen ganz — Potenzen (gleiche Basis verlangt),
+  Gleichungen mit Vorzeichen „+ 3“ / „− 3“, Systeme, Bruchgleichungen, dazu die Frage (x oder y, grössere oder kleinere
+  Lösung) und beim Binom den Ausdruck; `sollAus` rechnet die gefragte Lösung aus dem Gelesenen. Kein Fund. Gegenprobe
+  (das System fragt nach der anderen Variablen): gemeldet — die bisherige Prüfung nahm die Frage aus den Daten und hätte
+  es nicht bemerkt. Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).

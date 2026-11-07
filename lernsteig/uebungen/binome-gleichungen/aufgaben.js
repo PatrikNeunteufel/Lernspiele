@@ -133,10 +133,99 @@ function hinweis(a, eingabe) {
   return h[a.typ] || "Schritt für Schritt.";
 }
 
+/**
+ * Den angezeigten Text lesen (Plan B2 Schritt 3, TD1 a), unabhängig vom Erzeuger: Hochzahlen werden zu „^…“, Vorzeichen
+ * stehen als „+ 3“ / „− 3“; je Typ ein Muster. Gelesen werden auch die Frage (x oder y, grössere oder kleinere Lösung)
+ * und beim Binom der Ausdruck. Liefert die Werte in der Form von a.daten oder null.
+ */
+const AUS_HOCH = { "⁻": "-", "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9" };
+const ohneHoch = t => String(t).replace(/[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, s => "^" + [...s].map(c => AUS_HOCH[c]).join(""));
+const muster = (text, mu) => LST.zahlenImText(ohneHoch(text), mu);
+const vzw = (s, w) => (s === "+" ? 1 : -1) * w;
+const zahlW = s => (s === "" ? 1 : s === "−" || s === "-" ? -1 : LST.leseZahl(s));
+/** „2x − 3y = 4“, „x + y = −4“, „−x − 4y = 20“ → [a, b, c] oder null. */
+function liesLinear(s) {
+  const r = s.match(/^([−-]?\d*)x ([+−]) (\d*)y = ([−-]?\d+(?:[.,]\d+)?)$/);
+  return r ? [zahlW(r[1]), vzw(r[2], r[3] === "" ? 1 : Number(r[3])), LST.leseZahl(r[4])] : null;
+}
+const groesserAus = w => (/^(Grössere|Positive)$/.test(w) ? 1 : /^(Kleinere|Negative)$/.test(w) ? 0 : null);
+const LESER = {
+  binom: a => (a.text.startsWith("Multipliziere aus: ") ? { ausdruck: a.text.slice(19) } : null),
+  potenzregel: a => { const z = muster(a.text, "#^# · #^# = # hoch"); return z && z[0] === z[2] && z[0] === z[4] ? { a: z[0], x: z[1], y: z[3] } : null; },
+  potenzgesetz: a => {
+    const p = muster(a.text, "(#^#)^# = # hoch");
+    if (p) return p[0] === p[3] ? { a: p[0], x: p[1], y: p[2], art: 1 } : null;
+    const q = muster(a.text, "#^# : #^# = # hoch");
+    return q && q[0] === q[2] && q[0] === q[4] ? { a: q[0], x: q[1] - q[3], y: q[3], art: 0 } : null;
+  },
+  "quadratisch-differenz": a => {
+    const r = ohneHoch(a.text).match(/^x\^2 − (\S+) = 0\. (Positive|Negative) Lösung x =$/);
+    const q = r && LST.leseZahl(r[1]), w = q !== null && q !== undefined ? Math.sqrt(q) : NaN;
+    return r && Number.isInteger(w) ? { r: w, groesser: groesserAus(r[2]) } : null;
+  },
+  "quadratisch-faktoren": a => {
+    const r = a.text.match(/^\(x ([+−]) (\d+)\)\(x ([+−]) (\d+)\) = 0\. (Grössere|Kleinere) Lösung x =$/);
+    return r && { p: vzw(r[1], Number(r[2])), q: vzw(r[3], Number(r[4])), groesser: groesserAus(r[5]) };
+  },
+  "quadratisch-faktorisieren": a => {
+    const r = ohneHoch(a.text).match(/^x\^2(?: ([+−]) (\d*)x)? ([+−]) (\d+) = 0\. (Grössere|Kleinere) Lösung x =$/);
+    return r && { p: r[1] ? vzw(r[1], r[2] === "" ? 1 : Number(r[2])) : 0, q: vzw(r[3], Number(r[4])), groesser: groesserAus(r[5]) };
+  },
+  system: a => {
+    const r = a.text.match(/^(.+) und (.+)\. ([xy]) =$/), g1 = r && liesLinear(r[1]), g2 = r && liesLinear(r[2]);
+    return g1 && g2 ? { a1: g1[0], b1: g1[1], c1: g1[2], a2: g2[0], b2: g2[1], c2: g2[2], frageX: r[3] === "x" } : null;
+  },
+  "system-bruch": a => LESER.system(a),
+  bruchgleichung: a => {
+    const r = a.text.match(/^(\d+)\/x(?: ([+−]) (\d+))? = (\d+)\/x(?: ([+−]) (\d+))?\. x =$/);
+    return r && { a: Number(r[1]), b: r[2] ? vzw(r[2], Number(r[3])) : 0, c: Number(r[4]), d: r[5] ? vzw(r[5], Number(r[6])) : 0 };
+  },
+};
+function liesText(a) {
+  const l = LESER[a.typ];
+  return (l && l(a)) || null;
+}
+/** Die gefragte Lösung aus Werten in der Form von a.daten (aus den Daten oder aus dem Text), exakt; null bei unbekanntem Typ. */
+function sollAus(typ, d) {
+  const B = KERN.bruch, Z = x => B.vonZahl(x);
+  const wahl = (l, g) => Z(g ? Math.max(...l) : Math.min(...l));
+  switch (typ) {
+    case "potenzregel": return Z(d.x + d.y);
+    case "potenzgesetz": return Z(d.art ? d.x * d.y : d.x);
+    case "quadratisch-differenz": return Z(d.groesser ? d.r : -d.r);
+    case "quadratisch-faktoren": return wahl([-d.p, -d.q], d.groesser);
+    case "quadratisch-faktorisieren": {
+      const l = []; for (let x = -20; x <= 20; x++) if (x * x + d.p * x + d.q === 0) l.push(x);
+      return l.length ? wahl(l, d.groesser) : null;
+    }
+    case "system": case "system-bruch": {
+      const det = d.a1 * d.b2 - d.a2 * d.b1;
+      if (!det) return null;
+      return d.frageX ? B.durch(Z(d.c1 * d.b2 - d.c2 * d.b1), Z(det)) : B.durch(Z(d.a1 * d.c2 - d.a2 * d.c1), Z(det));
+    }
+    case "bruchgleichung": return d.d === d.b ? null : B.durch(Z(d.a - d.c), Z(d.d - d.b));
+    default: return null;
+  }
+}
+/** Gleiche Werte: Zahlen genau, Wahrheitswerte als ja/nein (die Daten führen 0/1 oder true/false). */
+const gleichWert = (x, y) => (typeof x === "boolean" || typeof y === "boolean" ? !!x === !!y : typeof x === "number" && typeof y === "number" ? Math.abs(x - y) < 1e-9 : x === y);
+
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
   const T = LST_TERME, B = KERN.bruch, Z = x => B.vonZahl(x);
+  // Text gegen Prüfdaten (TD1 a): was der Jugendliche liest, sind dieselben Werte, und aus ihnen folgt dieselbe Lösung
+  const t = liesText(a);
+  if (!t) m.push(`Text folgt keinem Muster des Typs ${a.typ}: ${a.text}`);
+  else {
+    const vergleich = a.art === "term" ? { ausdruck: a.ausdruck } : a.daten;
+    const anders = Object.keys(vergleich).filter(k => !gleichWert(t[k], vergleich[k]));
+    if (anders.length) m.push(`Text zeigt ${anders.map(k => `${k} = ${t[k]}`).join(", ")}, Prüfdaten ${anders.map(k => `${k} = ${vergleich[k]}`).join(", ")}: ${a.text}`);
+    if (a.art !== "term") {
+      const s = sollAus(a.typ, t);
+      if (!s || !B.gleich(s, Z(a.antwort))) m.push(`aus dem Text nachgerechnet ${s ? B.text(s) : "nichts"}, Lösung ${a.antwort}: ${a.text}`);
+    }
+  }
   if (a.art === "term") {
     if (!T.gleich(T.lies(a.ausdruck).poly, T.lies(a.antwortTerm).poly)) m.push(`Binom falsch: ${a.ausdruck} ≠ ${a.antwortTerm}`);
     if (!T.bewerte(a.antwortTerm, a).ok) m.push("Lösungsterm nicht vereinfacht");
@@ -191,4 +280,4 @@ function pruefeAufgabe(a, stufe, niveau) {
   return m;
 }
 
-if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis };
+if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis, liesText };
