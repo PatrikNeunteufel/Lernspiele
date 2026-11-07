@@ -28,6 +28,7 @@ require(path.join(WURZEL, "kern", "einladung.js"));
 require(path.join(WURZEL, "kern", "auswertung.js"));
 require(path.join(WURZEL, "kern", "rolleiste.js"));
 require(path.join(WURZEL, "kern", "personenmenue.js"));
+require(path.join(WURZEL, "kern", "notizblock.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -396,6 +397,32 @@ console.log("personenmenue.js");
     if (j !== i || nx(nx(i, n, "ArrowDown"), n, "ArrowUp") !== i) abw++;
   }
   gleich(abw, 0, "Umläufe für 1–12 Einträge");
+}
+
+// ---------- notizblock (NB1 a, NB3 a; ohne DOM: Rechnen, Zahlen lesen, Kommaregel) ----------
+console.log("notizblock.js");
+{
+  const NB = KERN.notizblock;
+  // Nachrechnung: die Ziffern und Überträge ergeben das Ergebnis, wie auf dem Blatt
+  const zz = KERN.zufall.mitStartwert(77);
+  let abw = 0;
+  for (let i = 0; i < 3000; i++) {
+    const art = ["+", "−", "×"][i % 3];
+    const a = Math.floor(zz() * 99999), b = art === "×" ? 1 + Math.floor(zz() * 9) : Math.floor(zz() * (art === "−" ? a + 1 : 99999));
+    const zahlen = art === "+" ? [a, b, Math.floor(zz() * 999)] : [a, b];
+    const r = NB.rechne(art, zahlen);
+    const soll = art === "+" ? zahlen.reduce((s, z) => s + z, 0) : art === "−" ? a - b : a * b;
+    const ausZiffern = Number(r.r.slice().reverse().join("") || "0");
+    if (r.ergebnis !== soll || ausZiffern !== soll || r.ueber[0] !== 0) abw++;
+  }
+  gleich(abw, 0, "rechne: Ziffern und Ergebnis wie nachgerechnet (3000 Fälle +, −, × einstellig)");
+  gleich(JSON.stringify(NB.rechne("−", [503, 178])), JSON.stringify({ ergebnis: 325, r: [5, 2, 3], ueber: [0, 1, 1, 0] }), "Minus mit Übertrag wie beim Ergänzen");
+  gleich(JSON.stringify([NB.zahlAus("0,47"), NB.zahlAus(" 1 234.5"), NB.zahlAus("12345678"), NB.zahlAus("1.2345"), NB.zahlAus("−3")]),
+    JSON.stringify([{ ganz: "0", nach: "47" }, { ganz: "1234", nach: "5" }, null, null, null]), "zahlAus: Komma oder Punkt, Grenzen 7 und 3");
+  gleich([NB.kommaregel(2, 1), NB.kommaregel(1, 0), NB.kommaregel(0, 1)].join(" | "), "2 + 1 = 3 Stellen nach dem Komma | 1 + 0 = 1 Stelle nach dem Komma | 0 + 1 = 1 Stelle nach dem Komma", "Kommaregel als Satz");
+  gleich(NB.STELLEN.map(s => s.k).join(), "M,HT,ZT,T,H,Z,E", "Stellen von gross nach klein");
+  const a = NB({ dezimal: () => "," });
+  gleich(["oeffne", "schliessen", "knopf", "raster", "rechne"].every(f => typeof a[f] === "function") && a.istOffen() === false, true, "Notizblock einer App: Teile da, ohne DOM ladbar und zu");
 }
 
 // ---------- Geheimnisse und Personen (asynchron) ----------

@@ -142,6 +142,9 @@
   function setzeNiveau(fach, n) { const k = konto(); k.niveau[fach] = n; speichereKonto(k); }
   const niveauName = n => LP.niveauName(n, konto().lehrplan);
 
+  // Notizblock für eigene Rechenwege (NB1 a, NB2 a; Kern kern/notizblock.js): Dezimalzeichen wie in der Übung, ohne Ton
+  const NOTIZBLOCK = KERN.notizblock({ dezimal: LST.dezimalZeichen });
+
   const RECHNER_TEXT = { ohne: "ohne Taschenrechner", mit: "mit Taschenrechner", frei: "Taschenrechner erlaubt" };
 
   /**
@@ -422,6 +425,12 @@
           a.vor ? el("span", { class: "feld-vor", text: a.vor }) : null, feld, a.einheit ? el("span", { class: "feld-nach", text: a.einheit }) : null);
         // Auswahl (a.art === "auswahl"): Knöpfe statt Eingabefeld, Kurztasten 1 … n
         const auswahl = a.art === "auswahl";
+        // Notizblock für eigene Rechenwege (NB2 a, KERN.notizblock): bei jeder Zahl-Antwort, mit und ohne Rechner, ausser
+        // die Übung schaltet ihn im Katalog ab; jede Aufgabe beginnt mit leerem Block; nichts wird bewertet
+        NOTIZBLOCK.schliessen();
+        const mitBlock = !auswahl && !termAntwort && eintrag.notizblock !== false;
+        let blockBenutzt = false;
+        const blockKnopf = mitBlock ? NOTIZBLOCK.knopf(() => { blockBenutzt = true; }, { klasse: "knopf" }) : null;
         let auswahlKnoepfe = [];
         if (auswahl) {
           aktuellesFeld = null;
@@ -437,7 +446,7 @@
           const weg = () => document.removeEventListener("keydown", taste);
           auswahlAufraeumen = weg;
         } else {
-          antwort.replaceChildren(...[minus, feldGruppe, ok, rechnerKnopf, hilfe].filter(Boolean));
+          antwort.replaceChildren(...[minus, feldGruppe, ok, rechnerKnopf, blockKnopf, hilfe].filter(Boolean));
         }
         if (termAntwort) feld.classList.add("term-eingabe");
         if (!auswahl) feld.focus();
@@ -464,7 +473,8 @@
             richtig = Math.abs(wert - a.antwort) <= (a.toleranz || 0) + 1e-9; // toleranz: gerundete Ergebnisse (π)
           }
           // Felder des Lernsteigs je Aufgabe: Lehrplan-Stufe und ob der Rechner offen war (RE1 a)
-          L.zusatz({ lp: a.stufe, rechner: rechnerBenutzt });
+          // dazu, wo der Notizblock angeboten war, ob er benutzt wurde (wie im Eulenpfad: notiz „block“ oder „ohne“)
+          L.zusatz({ lp: a.stufe, rechner: rechnerBenutzt, ...(mitBlock ? { vorgehen: { notiz: blockBenutzt ? "block" : "ohne" } } : {}) });
           const eingabe = typeof wert === "number" ? LST.dezimalText(wert) : wert;
           if (richtig) {
             gelost = true;
@@ -519,6 +529,7 @@
 
       function schluss() {
         if (auswahlAufraeumen) { auswahlAufraeumen(); auswahlAufraeumen = null; }
+        NOTIZBLOCK.schliessen();
         speichereSerie();
         aktuell = null;
         const { dauer, aufAnhieb, gezeigt, gekuerzt } = gespeichert;

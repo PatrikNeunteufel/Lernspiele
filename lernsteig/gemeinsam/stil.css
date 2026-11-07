@@ -129,3 +129,64 @@ button, input { font: inherit; color: inherit; }
 .entwickler-leiste { max-width: 760px; margin: 16px auto; padding: 10px 16px; border: 2px dashed var(--rand); border-radius: var(--radius); background: var(--karte); display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 15px; }
 .entwickler-feld { flex-basis: 100%; display: grid; gap: 8px; }
 .entwickler-feld textarea { width: 100%; font: inherit; }
+
+/* Notizblock für eigene Rechenwege (KERN.notizblock, NB1–NB4 a, LERN_Session19): sachlich — Stellen mit ihren Buchstaben
+   in neutraler Farbe (keine Stellenfarben wie im Eulenpfad), Farben des Lernsteigs; Platz wie im Eulenpfad: ab 1100 px
+   rechts neben der Aufgabe, sonst unten wie ein Blatt. Die Klassen des Kerns (knopf hell klein, leise-text, feld, chip
+   mit aria-pressed) gelten hier nur im Block. */
+.schriftlich { --zelle: clamp(26px, calc((100vw - 84px) / var(--spalten) - 4px), 44px);
+  display: grid; grid-template-columns: repeat(var(--spalten), var(--zelle)); gap: 4px; justify-content: start; margin: 0 0 8px; width: max-content; }
+.schriftlich > div, .schriftlich > input { height: var(--zelle); display: flex; align-items: center; justify-content: center;
+  font-size: calc(var(--zelle) * .55); font-weight: 600; font-variant-numeric: tabular-nums; }
+.schriftlich .kopfzelle { height: calc(var(--zelle) * .6); font-size: calc(var(--zelle) * .32); border-radius: 6px; background: var(--flaeche); color: var(--leise); border: 1px solid var(--rand); }
+.schriftlich .ziffer, .schriftlich .zeichen { color: var(--text); }
+.schriftlich .strich { grid-column: 1 / -1; height: 0; border-top: 2px solid var(--text); }
+.schriftlich .nach-komma { position: relative; }
+.schriftlich .nach-komma::before { content: ""; position: absolute; left: -4px; top: -3px; bottom: -3px; border-left: 2px solid var(--akzent); }
+.notizblock { position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 110px);
+  display: flex; flex-direction: column; background: var(--karte); border: 2px solid var(--rand); border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(31, 41, 51, .18); }
+.notizblock.klein .nb-inhalt { display: none; }
+.notizblock .leise-text { color: var(--leise); }
+.notizblock .knopf { min-height: 40px; padding: 4px 14px; font-size: 15px; }
+.notizblock .chip[aria-pressed="true"] { border-color: var(--akzent); background: var(--akzent-hell); color: var(--akzent); }
+.notizblock .feld { border: 2px solid var(--rand); border-radius: 8px; padding: 4px 8px; background: var(--karte); }
+.nb-kopf { display: flex; align-items: center; gap: 8px; padding: 8px 10px 6px 14px; border-bottom: 1px solid var(--rand); }
+.nb-kopf .leise-text { flex: 1; font-size: 13px; }
+.nb-zu { border: 1px solid var(--rand); background: var(--flaeche); border-radius: 8px; min-width: 40px; min-height: 40px; font: inherit; font-weight: 700; cursor: pointer; }
+.nb-inhalt { flex: 1; min-height: 0; overflow: auto; padding: 10px 12px 12px; overscroll-behavior: contain; }
+.nb-vorlagen { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.nb-wahl-titel { display: block; margin-bottom: 4px; font-size: 14px; color: var(--leise); }
+.nb-zahlen-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.nb-zahl { width: 9ch; min-height: 44px; font-size: 19px; text-align: right; font-variant-numeric: tabular-nums; }
+.nb-op { font-size: 20px; font-weight: 700; }
+.nb-op-wechsel { min-width: 44px; min-height: 44px; border: 2px solid var(--rand); border-radius: 8px; background: var(--flaeche); color: var(--text); font-family: inherit; cursor: pointer; }
+.nb-zahlen-knoepfe { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 2px; }
+.nb-hinweis { margin: 2px 0 8px; font-size: 13px; }
+.nb-schritt { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--rand); }
+.nb-schritt-kopf { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.nb-schritt-titel { flex: 1; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.nb-nr { color: var(--leise); }
+.nb-weg { min-width: 32px; min-height: 32px; font-size: 14px; }
+.nb-flaeche { overflow-x: auto; }
+.nb-flaeche .schriftlich { --zelle: clamp(26px, calc((min(var(--nb-breite, 460px), 100vw) - 70px) / var(--spalten) - 4px), 40px); }
+.nb-feld { width: var(--zelle); box-sizing: border-box; padding: 0; text-align: center; color: var(--text); background: var(--karte);
+  border: 1px dashed var(--leise); border-radius: 6px; font-family: inherit; }
+.nb-feld:focus { outline: 2px solid var(--fokus); border-style: solid; }
+.schriftlich .nb-feld.uebertrag { height: calc(var(--zelle) * .6); font-size: calc(var(--zelle) * .38); border-radius: 999px; width: 80%; margin: 0 auto; }
+.nb-feld.karo { border-style: solid; border-color: var(--rand); border-radius: 2px; }
+.nb-kommaregel { margin: 2px 0 6px; font-size: 14px; color: var(--akzent); font-weight: 600; }
+.nb-fuss { padding: 0 12px 10px; border-top: 1px solid var(--rand); }
+.nb-tasten { display: grid; grid-template-columns: repeat(6, minmax(36px, 52px)); gap: 6px; margin: 8px 0 4px; }
+.nb-tasten button { min-height: 40px; border: 1px solid var(--rand); border-radius: 8px; background: var(--karte); font: inherit; font-size: 19px; font-weight: 600; color: var(--text); cursor: pointer; }
+.nb-tasten button:active { background: var(--flaeche); }
+@media (min-width: 1100px) { body.mit-notizblock:not(.notizblock-klein) .buehne { margin-right: 480px; } }
+@media (max-width: 1099px) {
+  .notizblock { right: 0; left: 0; top: auto; bottom: 0; width: auto; max-height: 58vh; border-radius: var(--radius) var(--radius) 0 0; border-bottom: none; }
+  body.mit-notizblock:not(.notizblock-klein) { padding-bottom: 58vh; }
+}
+@media (min-width: 980px) and (max-width: 1099px) and (orientation: landscape) {
+  .notizblock { --nb-breite: 360px; left: auto; right: 12px; top: 12px; bottom: auto; width: var(--nb-breite); max-height: calc(100vh - 24px); border-radius: var(--radius); border-bottom: 2px solid var(--rand); }
+  body.mit-notizblock:not(.notizblock-klein) { padding-bottom: 0; }
+  body.mit-notizblock:not(.notizblock-klein) .buehne { margin-right: 372px; }
+}

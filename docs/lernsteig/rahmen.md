@@ -111,6 +111,18 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 - Den Ablauf führt der Kern (`KERN.runde.lauf`, docs/kern/rahmen.md 4.22): Versuche, Fehler, Lösung nach dem dritten
   Fehlversuch, Ende der Serie, Zeit je Aufgabe, Eintrag und Rekord. Hier bleiben Oberfläche, Prüfen der Antwort und Rechner.
 
+## 5a0. Notizblock für eigene Rechenwege (NB1 a–NB4 a, LERN_Session19)
+
+- Lehrplan MA.1.A.3.g: „im Kopf oder mit Notieren eigener Rechenwege“. Knopf „📝 Notizblock“ in jeder Aufgabe mit
+  Zahl-Antwort, mit und ohne Rechner (NB2 a); nicht bei Auswahl- und Term-Antworten. Eine Übung schaltet ihn mit
+  `notizblock: false` im Katalog ab (heute keine; Kipppunkt: Übungen, die Kopfrechnen prüfen).
+- Block aus dem Kern (`KERN.notizblock`, docs/kern/rahmen.md 4.23): Plus, Minus, Mal, Geteilt, Häuschen; Mal auch mit Komma
+  in beiden Zahlen, darunter die Kommaregel (NB3 a). Dezimalzeichen wie die Einstellung des Geräts. Nichts wird bewertet;
+  jede neue Aufgabe beginnt mit leerem Block. Im Eintrag je Aufgabe `vorgehen.notiz`: „block“, wenn hineingeschrieben
+  wurde, sonst „ohne“.
+- Aussehen sachlich (NB4 a, `stil.css`): Stellen mit ihren Buchstaben in neutraler Farbe, keine Stellenfarben; ab 1100 px
+  rechts neben der Aufgabe (die Bühne rückt nach links), auf Tablet quer schmaler rechts, sonst unten wie ein Blatt.
+
 ## 5a. Taschenrechner (TR1 a, RE1 a, RM1 b)
 
 - Je Lehrplan-Stufe und Challenge nennt der Katalog `rechner`: `ohne`, `mit`, `frei`. Die Aufsicht überstimmt mit

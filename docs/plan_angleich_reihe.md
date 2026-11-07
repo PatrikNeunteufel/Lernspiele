@@ -80,7 +80,7 @@ von Hand geänderte Kopie oder gleiche Version mit anderem Inhalt als Fehler, ei
 rund 200 Seiten anfasst: Jede Seite lädt einmal `kern/kern.js` vor dem Rahmen ihrer App. Die Teile hängen sich an
 `KERN` (`KERN.zahl`, `KERN.bruch`, …). Tests: `node tools/pruefe_kern.js` (Teile gegen feste Beispiele und
 Nachrechnungen, dazu die Kopien); das Testskript jeder App prüft ihre Kopie.
-Stand 2026-11-07: Kern 1.20.0 mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
+Stand 2026-11-07: Kern 1.22.0 (seit 1.22.0 auch der Notizblock, NB1 a) mit Zahl, Bruch, Terme, Rechenkern, Speicher, Zufall, `el`, Geheimnis, Person,
 Freigabe, Suche, Runden, Daten (ein Dateiformat für Sichern, Einlesen und Abgleich mit Löschvermerken und Schutz nach
 DF4 a), Anmeldung (mit Gast), Entwicklung, Einladung, Auswertung, Übernahme einer Aufsicht, Rollleiste und
 Personen-Knopf; Eulenpfad und Lernsteig benutzen, was sie brauchen (`daten.js` beide), die Gratwanderung hat die
@@ -424,3 +424,19 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   12 %. Nicht b (nur 4 und 5), nicht c (wie bisher). Kipppunkt: Stufe g soll in der Oberstufe vor allem die Grenze
   festigen. Dazu Wunsch Patrik: ein Notizblock für eigene Rechenwege im Lernsteig („im Kopf oder mit Notieren eigener
   Rechenwege“, MA.1.A.3.g), aus dem Eulenpfad.
+- **NB1 a** (2026-11-07, LERN_Session19): Der Notizblock wird Kern-Teil `kern/notizblock.js` (`KERN.notizblock`):
+  Vorlagen, Rechenwege, Ziffernfeld, Öffnen und Schliessen; Dezimalzeichen, Ton und Namen der Stellen gibt die App mit,
+  das Aussehen steht im CSS jeder App (wie Rollleiste, Personen-Knopf). Der Eulenpfad behält `SCHRIFTLICH` als Hülle,
+  sein Aussehen bleibt. Nicht b (Kopie im Lernsteig). Kipppunkt: der Block soll im Lernsteig grundsätzlich anders arbeiten
+  (Terme, Variablen).
+- **NB2 a** (2026-11-07, LERN_Session19): Im Lernsteig ein Knopf „📝 Notizblock“ in jeder Aufgabe mit Zahl-Antwort, mit
+  und ohne Rechner; eine Übung kann ihn im Katalog abschalten (`notizblock: false`, heute keine); im Eintrag je Aufgabe
+  `vorgehen.notiz`, nichts bewertet. Nicht b (nur ohne Rechner, 43 Stufen), nicht c (nur rationale-zahlen g). Kipppunkt:
+  eine Übung soll ausdrücklich Kopfrechnen prüfen (etwa Überschlagen) — dann dort `notizblock: false`.
+- **NB3 a** (2026-11-07, LERN_Session19): Mal im Notizblock nimmt Komma in beiden Zahlen — gerechnet wird ohne Komma,
+  darunter steht die Kommaregel als Zeile („2 + 1 = 3 Stellen nach dem Komma“); Geteilt weiter nur mit Komma in der
+  ersten Zahl; keine negativen Zahlen (Beträge rechnen, Vorzeichen getrennt). Gilt in beiden Apps. Nicht b (wie bisher nur
+  die erste Zahl). Kipppunkt: das Lehrmittel zeigt die Kommaregel anders (Erweitern auf ganze Zahlen).
+- **NB4 a** (2026-11-07, LERN_Session19): Im Lernsteig sieht der Block sachlich aus — Stellen mit ihren Buchstaben in
+  neutraler Farbe, Farben und Formen des Lernsteigs, Platz wie im Eulenpfad. Nicht b (Calcularis-Farben). Kipppunkt: der
+  Lernsteig übernimmt die Stellenfarben ohnehin.

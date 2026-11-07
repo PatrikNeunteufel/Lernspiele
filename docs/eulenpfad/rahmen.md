@@ -902,7 +902,9 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
 
 Entscheide NB1–NB4 a (Wunsch Patrik, LERN_Session14). Code in `spiele/gemeinsam/notizblock.js` (Objekt `SCHRIFTLICH`,
 nach `spiel.js` geladen in den 32 Spielen mit Notizen und in der Schriftlich-Werkstatt), Stil `.schriftlich` und
-`.notizblock` in `stil.css`.
+`.notizblock` in `stil.css`. Seit LERN_Session19 ist der Block ein Kern-Teil (`KERN.notizblock`, docs/kern/rahmen.md 4.23,
+NB1 a der Reihe); `notizblock.js` gibt nur noch die Stellen, das Dezimalzeichen und den Ton mit, Verhalten und Aussehen
+sind gleich geblieben. Der Lernsteig benutzt ihn ebenfalls.
 
 - **Wann:** in Aufgaben, die Notizfelder zeigen (`ctx.notizen`) oder nur den Block anbieten (`ctx.notizblock(empfohlen)`:
   zusätzlich zu Notizfeldern oder wo sich eine Rechnung nicht sinnvoll zerlegen lässt; „Notizen: nie“ schaltet auch ihn
@@ -925,7 +927,9 @@ nach `spiel.js` geladen in den 32 Spielen mit Notizen und in der Schriftlich-Wer
   Vorlage, tippt seine Zahlen ein (höchstens bis zur Million, `MAX_STELLEN`, und 3 Stellen nach Punkt oder Komma) und
   „Untereinander schreiben ➜“. **Dezimalzahlen** (LERN_Session14): Plus und Minus richten am Komma aus; eine senkrechte
   Kommalinie (`nach-komma`) steht links der Zehntel, die Spalten heissen z, h, t in neutraler Farbe (`st-nk`, nie
-  Stellenfarben). Bei Mal und Geteilt darf nur die erste Zahl ein Komma haben. **Eigenes Ziffernfeld** im Block
+  Stellenfarben). Bei Geteilt darf nur die erste Zahl ein Komma haben. Bei Mal auch die zweite (NB3 a, LERN_Session19):
+  dann rechnet der Block ohne Komma, darunter steht die Kommaregel („2 + 1 = 3 Stellen nach dem Komma“, `nb-kommaregel`),
+  das Ergebnis hat eine Spalte für die Null vor dem Komma (bis LERN_Session19: nur die erste Zahl). **Eigenes Ziffernfeld** im Block
   (`nb-tasten`, 0–9, Komma, ⌫): schreibt in das gewählte Zahlenfeld oder Häuschen, ohne ihm den Fokus zu nehmen; die
   Felder des Blocks öffnen die Tastatur des Geräts nicht (`inputmode` none).
   Häuschen nehmen eine Ziffer und springen in Schreibrichtung weiter (Ergebnis, Überträge, Teilprodukte nach links,

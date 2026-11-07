@@ -231,11 +231,13 @@ async function pruefeSeiten(uebungen, melde, LST) {
         await ruhe(s);
         try {
           const kennungen = new Set();
+          const arten = []; // Art der Antwort je Aufgabe (zahl, term, auswahl): bei zahl wird der Notizblock angeboten
           const rueck = () => s.lauf(`document.querySelector(".rueckmeldung").textContent`).trim();
           for (let i = 0; i < e.anzahl; i++) {
             const a = s.lauf("LST.pruefung.aufgabe()");
             if (!a) throw new Error(`keine Aufgabe bei Nummer ${i + 1}: ${s.text().replace(/\s+/g, " ").trim().slice(0, 160)}`);
             kennungen.add(a.kennung);
+            arten.push(a.art);
             textPruefen(ort, s);
             // Grafik im Bild (LERN_Session19): höchstens so hoch wie breit — vorher bis 2900 px (kraefte)
             if (a.darstellung && a.darstellung.art === "graph") {
@@ -263,6 +265,10 @@ async function pruefeSeiten(uebungen, melde, LST) {
           if (r.length !== 1) throw new Error(`${r.length} Runden im Protokoll statt 1`);
           const x = r[0];
           if (x.aufgaben !== e.anzahl || x.aufAnhieb !== e.anzahl - 1 || x.fehler !== 1 || x.niveau !== niveau || x.stufe !== stufe) throw new Error(`Protokoll unplausibel: ${JSON.stringify(x).slice(0, 200)}`);
+          // NB2 a: bei Zahl-Antworten bot die Aufgabe den Notizblock an (hier unbenutzt: „ohne“), sonst nicht
+          const notiz = (x.liste || []).map(l => (l.vorgehen || {}).notiz || null);
+          const soll = arten.map(art => (art !== "auswahl" && art !== "term" && e.notizblock !== false ? "ohne" : null));
+          if (JSON.stringify(notiz) !== JSON.stringify(soll)) melde(ort, `Notizblock im Eintrag je Aufgabe: ${JSON.stringify(notiz)} statt ${JSON.stringify(soll)}`);
           gespielt++;
           // Nach der ersten Runde einer Übung: Statistik und Erfolge zeigen sie (derselbe Browser, derselbe Tab)
           if (niveau === e.niveaus[0] && stufe === e.stufen[0]) {
@@ -323,6 +329,44 @@ async function pruefeSeiten(uebungen, melde, LST) {
       } catch (err) { melde(ort, err.message); }
       fehlerVon(ort, s);
     }
+  }
+  // ---------- Notizblock (NB1–NB4 a, KERN.notizblock): bei Zahl-Antworten, Mal mit Komma in beiden Zahlen ----------
+  {
+    const ort = "Notizblock (rationale-zahlen g)";
+    const s = oeffne("uebungen/rationale-zahlen/index.html", { search: "?niveau=n1&stufe=g", ...alsJugendlicher() });
+    await ruhe(s);
+    try {
+      if (!s.gibt(".nb-knopf")) throw new Error("kein Knopf „Notizblock“ bei einer Zahl-Antwort");
+      s.klick(".nb-knopf");
+      if (!s.gibt(".notizblock")) throw new Error("Notizblock öffnet nicht");
+      s.klick('.notizblock .chip[data-vorlage="×"]');
+      const zahlen = s.lauf(`[...document.querySelectorAll(".notizblock .nb-zahl")].length`);
+      if (zahlen !== 2) throw new Error(`Mal: ${zahlen} Zahlenfelder statt 2`);
+      s.lauf(`(() => { const f = [...document.querySelectorAll(".notizblock .nb-zahl")]; f[0].value = "0.47"; f[1].value = "0.8"; })()`);
+      s.klick(".notizblock button", "Untereinander schreiben");
+      const regel = s.lauf(`(document.querySelector(".notizblock .nb-kommaregel") || {}).textContent || ""`);
+      if (regel !== "2 + 1 = 3 Stellen nach dem Komma") throw new Error(`Kommaregel „${regel}“`);
+      const erg = s.lauf(`document.querySelectorAll(".notizblock .nb-feld.erg").length`);
+      if (erg !== 4) throw new Error(`Ergebnis mit ${erg} Häuschen statt 4 (0.376)`);
+      s.lauf(`[...document.querySelectorAll(".notizblock .nb-feld.erg")].forEach((f, i) => { f.value = "0376"[i]; })`);
+      s.klick('.notizblock .chip[data-vorlage="+"]');
+      const start = s.lauf(`document.querySelector(".notizblock .nb-zahl").value`);
+      if (start !== "0.376") throw new Error(`Weiterrechnen beginnt mit „${start}“ statt 0.376`);
+      // Gegenstück: Komma nur in der ersten Zahl bleibt wie im Eulenpfad (Kommalinie, keine Kommaregel). Die neue Wahl
+      // ersetzt die angefangene Plus-Rechnung; geprüft wird die letzte Rechnung auf dem Blatt.
+      s.klick('.notizblock .chip[data-vorlage="×"]');
+      s.lauf(`(() => { const f = [...document.querySelectorAll(".notizblock .nb-zahl")]; f[0].value = "4.7"; f[1].value = "8"; })()`);
+      s.klick(".notizblock button", "Untereinander schreiben");
+      const letzte = s.lauf(`(() => { const l = [...document.querySelectorAll(".notizblock .nb-schritt")].pop(); return { linie: !!l.querySelector(".nach-komma"), regel: !!l.querySelector(".nb-kommaregel"), schritte: document.querySelectorAll(".notizblock .nb-schritt").length }; })()`);
+      if (!letzte.linie || letzte.regel || letzte.schritte !== 2) throw new Error(`Komma nur in der ersten Zahl: ${JSON.stringify(letzte)} (erwartet Kommalinie, keine Kommaregel, 2 Rechnungen)`);
+      textPruefen(ort, s);
+      // neue Aufgabe: der Block ist zu und leer; Vorgehen „block“ steht im Eintrag der Aufgabe
+      await antworte(s, s.lauf("LST.pruefung.aufgabe()"), true);
+      if (s.gibt(".notizblock")) { /* noch dieselbe Aufgabe bis „Weiter“ */ }
+      s.klick(".knopf.weiter"); await ruhe(s, 20, 3);
+      if (s.gibt(".notizblock")) throw new Error("bei der nächsten Aufgabe ist der Block noch offen");
+    } catch (err) { melde(ort, err.message); }
+    fehlerVon(ort, s);
   }
   return { gespielt };
 }

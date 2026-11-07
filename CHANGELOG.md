@@ -664,3 +664,14 @@
   mehr als 4 Einmaleins-Schritten von 73 % auf 12 %, dezimal von 40 % auf 14 %; dezimale Ergebnisse mit drei
   Nachkommastellen von 5 % auf 27 % (kleine Faktoren wie 0.47 · 0.8 = 0.376, zwei Einmaleins-Schritte, übt die
   Kommaregel). Stufe g mit 1830 verschiedenen Aufgaben. Plan (RZ3 a).
+- Voller Eulenpfad-Lauf auf dem Stand nach `141cc53`: „Keine Fehler.“ (169 Spiele × 6 Stufen, 1178 s; Hinweise bekannter
+  Arten: gekürzte Runden in kleinen Stufen, „Hinweis verrät“ in kulturen-koffer s3, „Einzahl?“ in quader-volumen s6,
+  Grundwörter in Spielnamen).
+- Notizblock für eigene Rechenwege im Lernsteig (Wunsch Patrik, Entscheide NB1 a–NB4 a): Kern 1.22.0 mit `kern/notizblock.js`
+  (`KERN.notizblock`) aus dem Eulenpfad; dort `SCHRIFTLICH` als Hülle, Verhalten gleich (Stichprobe mit sechs Spielen, 36
+  Stufen mit gleichen Klickzahlen wie im vollen Lauf). Neu in beiden Apps: Mal mit Komma in beiden Zahlen — ohne Komma
+  gerechnet, darunter die Kommaregel, Platz für die Null vor dem Komma (NB3 a). Lernsteig: Knopf bei jeder Zahl-Antwort
+  (NB2 a), `vorgehen.notiz` im Eintrag je Aufgabe, sachliches Aussehen ohne Stellenfarben (NB4 a). Tests: Kern (rechne gegen
+  3000 Nachrechnungen, zahlAus, Kommaregel), Seitentest des Lernsteigs (0.47 × 0.8 mit Kommaregel und Weiterrechnen mit
+  0.376; Vorgehen je Aufgabe in allen Übungen). Im Browser: Block am Desktop rechts, auf 375 px unten.
+  docs/kern/rahmen.md 4.23 (neu), 4.24; rahmen.md 21; lernsteig/rahmen.md 5a0 (neu); Plan (NB1–NB4 a); Kern-Changelog.

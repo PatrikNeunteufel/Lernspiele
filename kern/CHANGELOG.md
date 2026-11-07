@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.22.0 — 2026-11-07 (LERN_Session19)
+- `notizblock.js` (`KERN.notizblock`, NB1 a): Notizblock für schriftliches Rechnen aus dem Eulenpfad als Kern-Teil —
+  Vorlagen, Rechenwege, Ziffernfeld, Weiterrechnen, Raster und `rechne` für die Werkstatt; Stellen, Dezimalzeichen und Ton
+  gibt die App mit, das Aussehen ihr CSS. Neu (NB3 a): Mal mit Komma in beiden Zahlen, ohne Komma gerechnet, darunter
+  die Kommaregel, Ergebnis mit Platz für die Null vor dem Komma. Eulenpfad (`SCHRIFTLICH` als Hülle) und Lernsteig
+  benutzen ihn.
+
 ## 1.21.0 — 2026-11-07 (LERN_Session19)
 - `person.js`: `codeReicht(liste, id)` und `aufsichtenMitPin(liste)`; `freischalten` mit Code schaltet eine Aufsicht nur
   frei, wenn das Gerät keine Aufsicht mit PIN hat — sonst Fehler `NUR_BESTAETIGUNG`, eine Aufsicht des Geräts bestätigt

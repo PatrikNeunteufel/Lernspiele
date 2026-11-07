@@ -565,7 +565,31 @@ Fehlversuch, Serie); Umdeutung gegen die alte Aufzeichnung beider Apps (je 300 Z
 Zuordnung schlägt an). Die letzte, falsch beantwortete Aufgabe einer alten Lernsteig-Serie hat keine Zeit: Sie wurde nie
 gemessen.
 
-### 4.23 Geplant
+### 4.23 `KERN.notizblock` (`kern/notizblock.js`) — Notizblock für schriftliches Rechnen
+
+Entscheide NB1 a–NB4 a (LERN_Session19, seit 1.22.0); Herkunft `eulenpfad/spiele/gemeinsam/notizblock.js` (NB1–NB4 a im
+Eulenpfad, LERN_Session14, docs/eulenpfad/rahmen.md 21). Verhalten im Kern, Aussehen im CSS der App (Klassen
+`.schriftlich`, `.notizblock`, `.nb-*`; im Block auch `knopf hell klein`, `leise-text`, `feld`, `chip` mit `aria-pressed`).
+
+| Aufruf | Ergebnis |
+|---|---|
+| `KERN.notizblock({ stellen, dezimal, ton })` | Notizblock einer App: `stellen` von gross nach klein `[{ k, name }]` (Standard M … E), `dezimal()` → „.“ oder „,“, `ton(art)` (Standard still) |
+| `oeffne({ beiEingabe })`, `schliessen()`, `istOffen()`, `knopf(beiEingabe, { klasse })` | Block am Bildrand öffnen (Vorlagen +, −, ×, :, Häuschen; bis 6 Rechnungen auf einem Blatt, Weiterrechnen mit dem geschriebenen Ergebnis; eigenes Ziffernfeld); nichts geprüft, nichts übernommen, nichts gespeichert |
+| `raster(n, { links, rechts, komma })`, `rechne(art, zahlen)` | Stellenwerttabelle und Rechnen spaltenweise wie auf Papier (für die Schriftlich-Werkstatt) |
+| `KERN.notizblock.zahlAus(t)`, `kommaregel(ka, kb)`, `VORLAGEN`, `STELLEN` | Zahl aus einem Feld lesen (7 Ziffern, 3 nach dem Komma); Kommaregel als Satz |
+
+**Mal mit Komma in beiden Zahlen** (NB3 a): Hat die zweite Zahl ein Komma, rechnet der Block ohne Komma (beide Zahlen als
+ganze Zahlen), darunter steht die Kommaregel („2 + 1 = 3 Stellen nach dem Komma“), das Ergebnis bekommt eine Spalte für
+die Null vor dem Komma; Weiterrechnen nimmt es mit ka + kb Stellen nach dem Komma. Komma nur in der ersten Zahl wie
+bisher (Kommalinie). Geteilt nur mit Komma in der ersten Zahl; keine negativen Zahlen.
+
+Benutzt vom Eulenpfad (`SCHRIFTLICH` als Hülle: `LS.STELLEN`, Dezimalzeichen der Einstellungen, `LS.ton`; 41 Spiele und
+die Schriftlich-Werkstatt) und vom Lernsteig (`rahmen.js`: Knopf bei jeder Zahl-Antwort, NB2 a; Aussehen sachlich, NB4 a).
+Geprüft in `tools/pruefe_kern.js` (rechne gegen 3000 Nachrechnungen, zahlAus, Kommaregel, ohne DOM ladbar) und im
+Seitentest des Lernsteigs (öffnen, 0.47 × 0.8 mit Kommaregel und Häuschen für 0.376, Weiterrechnen mit 0.376, Komma nur
+in der ersten Zahl, Block zu bei der nächsten Aufgabe); Eulenpfad-Stichprobe mit gleichen Klickzahlen wie vorher.
+
+### 4.24 Geplant
 
 Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): die
 Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Prüfen der Antwort und der Vertrag `aufgabeErzeugen`/`pruefeAufgabe`
