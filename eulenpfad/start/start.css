@@ -119,15 +119,16 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
 
 /* ---------- Spiele: Filter ---------- */
 
-.filter { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
-/* Einklappbarer Filter (LERN_Session14): Kopfzeile mit dem, was gerade gilt */
-.filter-klapp { margin-bottom: 12px; }
+.filter { display: flex; flex-direction: column; gap: 10px; padding: 0 12px 12px; }
+/* Einklappbarer Filter (LERN_Session14): Kopfzeile mit dem, was gerade gilt; Kopfzeile und Filterzeilen in einem
+   umrahmten Block wie im Lernsteig (Hinweis Patrik, LERN_Session21) */
+.filter-klapp { margin-bottom: 12px; border-radius: 14px; background: #fff; border: 2px solid var(--rand); }
 .filter-klapp > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; cursor: pointer; padding: 8px 12px;
-  border-radius: 14px; background: #fff; border: 2px solid var(--rand); list-style: none; }
+  list-style: none; }
 .filter-klapp > summary::-webkit-details-marker { display: none; }
 .filter-klapp > summary::before { content: "▸"; font-weight: 900; color: var(--knopf); }
 .filter-klapp[open] > summary::before { content: "▾"; }
-.filter-klapp[open] > summary { margin-bottom: 10px; }
+.filter-klapp[open] > summary { margin-bottom: 2px; }
 .filter-titel { font-weight: 900; }
 .filter-aktiv { color: var(--text-leise); font-weight: 700; font-size: 15px; min-width: 0; overflow-wrap: anywhere; }
 .filter-zeile { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }

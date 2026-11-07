@@ -850,3 +850,5 @@
   Gegenprobe (Richtung der Sortierung wirkungslos): gemeldet. lernsteig/rahmen.md 1, 6; Plan C3. Tests: Kern 0 Fehler,
   Lernsteig „0 Fehler, 21 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“, Eulenpfad-Stichprobe
   zahlenhaus „Keine Fehler.“ (für das Ersatz-DOM); Browser Desktop und 375 px ohne Konsolenfehler.
+- Eulenpfad — Filter im Tab Spiele wie im Lernsteig (Hinweis Patrik): Kopfzeile und Filterzeilen in einem umrahmten
+  Block statt nur der umrahmten Kopfzeile (`eulenpfad/start/start.css`).
