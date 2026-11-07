@@ -746,3 +746,8 @@
   Ähnlichkeitsfaktor aus den beiden Längen zurückgerechnet), `pruefeAufgabe` vergleicht auch Listen (Winkel). Kein Fund.
   Gegenprobe mit vertauschter Rolle (im zweiten Dreieck b statt a gezeigt): gemeldet. Tests: Lernsteig „0 Fehler,
   0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).
+- Text gegen Prüfdaten (TD1 a), dritte Übung `prozent-funktionen`: `liesText` für alle 15 Typen liest Satz und
+  Darstellung — beim Graphen die gezeichnete Gerade, bei der Tabelle die Zeilen (Steigung, y bei x = 0), Gleichungen
+  „y = −0.5x + 3“ mit eigenem Leser, Kartenzahl aus Personen mal Karten. Die Nachrechnung ist `sollAus(typ, werte)`
+  (exakt mit Brüchen) für Daten und Gelesenes. Kein Fund. Gegenprobe (Graph mit umgekehrter Steigung gezeichnet):
+  gemeldet. Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).

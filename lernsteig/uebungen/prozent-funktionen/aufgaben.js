@@ -173,27 +173,89 @@ function hinweis(a, eingabe) {
 // ---------- Prüfung: exakt aus den Daten, unabhängig vom Text des Lösungswegs ----------
 const B = KERN.bruch;
 const Z = x => B.vonZahl(x);
+/** Exakt nachrechnen aus Werten in der Form von a.daten (aus den Daten oder aus dem Text); null bei unbekanntem Typ. */
+function sollAus(typ, d) {
+  switch (typ) {
+    case "graph-proportional": case "graph": case "wertepaar": case "tabelle": case "gleichung": return B.plus(B.mal(Z(d.m), Z(d.x)), Z(d.b));
+    case "indirekt": return B.durch(Z(d.n), Z(d.p2));
+    case "prozent-von": return B.durch(B.mal(Z(d.p), Z(d.g)), Z(100));
+    case "prozentsatz": return B.mal(B.durch(Z(d.w), Z(d.g)), Z(100));
+    case "massstab-karte": return B.durch(B.mal(Z(d.km), Z(100000)), Z(d.mass));
+    case "massstab-wirklich": return B.durch(B.mal(Z(d.cm), Z(d.mass)), Z(100000));
+    case "zins": return B.durch(B.mal(Z(d.k), Z(d.p)), Z(100));
+    case "steigung": return B.durch(B.mal(Z(d.s), Z(d.p)), Z(100));
+    case "zinseszins": { const f = B.plus(Z(1), B.durch(Z(d.p), Z(100))); return B.mal(Z(d.k), B.mal(f, f)); }
+    case "massstab-flaeche": return B.mal(B.durch(B.mal(Z(d.a), Z(d.mass)), Z(100)), B.durch(B.mal(Z(d.b), Z(d.mass)), Z(100)));
+    case "umkehr": return B.durch(B.minus(Z(d.y), Z(d.b)), Z(d.m));
+    default: return null;
+  }
+}
+
+/**
+ * Den angezeigten Text lesen (Plan B2 Schritt 3, TD1 a), unabhängig vom Erzeuger: je Typ der Satz als Muster
+ * (LST.zahlenImText) und, wo der Jugendliche mehr sieht, die Darstellung — beim Graphen die gezeichnete Gerade, bei der
+ * Tabelle die Zeilen (Steigung und y bei x = 0). Liefert die Werte in der Form von a.daten oder null.
+ */
+const ZAHL_G = "(\\d+(?:[.,]\\d+)?)";
+/** „y = −0.5x + 3“, „y = x“, „y = −x − 9“ → { m, b } oder null. */
+function liesGerade(s) {
+  const r = String(s).match(new RegExp(`^y = ([−-]?)${ZAHL_G}?x(?: ([+−-]) ${ZAHL_G})?$`));
+  if (!r) return null;
+  const m = (r[1] ? -1 : 1) * (r[2] ? LST.leseZahl(r[2]) : 1);
+  const b = r[3] ? (r[3] === "+" ? 1 : -1) * LST.leseZahl(r[4]) : 0;
+  return { m, b };
+}
+const muster = (text, m) => LST.zahlenImText(text, m);
+/** Gleichung vor dem ersten „. “, Rest nach dem Muster; liefert { m, b, zahlen } oder null. */
+function mitGerade(text, rest) {
+  const i = text.indexOf(". ");
+  const g = i > 0 ? liesGerade(text.slice(0, i)) : null;
+  const z = g ? muster(text.slice(i + 2), rest) : null;
+  return z ? { ...g, zahlen: z } : null;
+}
+const LESER = {
+  "graph-proportional": a => { const z = muster(a.text, "Lies ab: y bei x = #"); return z && a.darstellung ? { m: a.darstellung.m, b: a.darstellung.b, x: z[0] } : null; },
+  graph: a => LESER["graph-proportional"](a),
+  indirekt: a => { const z = muster(a.text, "Karten werden gleichmässig verteilt. Bei # Personen erhält jede # Karten. Wie viele bei # Personen?"); return z && { n: z[0] * z[1], p1: z[0], p2: z[2] }; },
+  "prozent-von": a => { const z = muster(a.text, "# % von # ="); return z && { p: z[0], g: z[1] }; },
+  prozentsatz: a => { const z = muster(a.text, "# von # sind wie viel %?"); return z && { w: z[0], g: z[1] }; },
+  wertepaar: a => { const g = mitGerade(a.text, "Für x = # ist y ="); return g && { m: g.m, b: g.b, x: g.zahlen[0] }; },
+  gleichung: a => LESER.wertepaar(a),
+  "massstab-karte": a => { const z = muster(a.text, "Massstab 1 : #. # km in der Wirklichkeit sind auf der Karte"); return z && { mass: z[0], km: z[1] }; },
+  "massstab-wirklich": a => { const z = muster(a.text, "Massstab 1 : #. # cm auf der Karte sind in der Wirklichkeit"); return z && { mass: z[0], cm: z[1] }; },
+  tabelle: a => {
+    const z = muster(a.text, "Die Tabelle gehört zu einer linearen Funktion. y bei x = #?");
+    const zeilen = a.darstellung && a.darstellung.zeilen;
+    const y = x => (zeilen.find(r => r[0] === x) || [])[1];
+    return z && zeilen && y(0) !== undefined && y(1) !== undefined ? { m: y(1) - y(0), b: y(0), x: z[0] } : null;
+  },
+  zins: a => { const z = muster(a.text, "# Fr. zu # % Zins. Zins nach einem Jahr ="); return z && { k: z[0], p: z[1] }; },
+  steigung: a => { const z = muster(a.text, "Eine Strasse steigt # %. Höhenunterschied auf # m waagrechter Strecke ="); return z && { p: z[0], s: z[1] }; },
+  zinseszins: a => { const z = muster(a.text, "# Fr. zu # % Zins, der Zins bleibt stehen. Betrag nach zwei Jahren ="); return z && { k: z[0], p: z[1] }; },
+  "massstab-flaeche": a => { const z = muster(a.text, "Plan 1 : #. Ein Rechteck misst # cm × # cm. Fläche in Wirklichkeit ="); return z && { mass: z[0], a: z[1], b: z[2] }; },
+  umkehr: a => { const g = mitGerade(a.text, "Für welches x ist y = #?"); return g && { m: g.m, b: g.b, y: g.zahlen[0] }; },
+};
+function liesText(a) {
+  const l = LESER[a.typ];
+  return (l && l(a)) || null;
+}
+
 function pruefeAufgabe(a, stufe, niveau) {
   const maengel = [];
   if (a.stufe !== stufe) maengel.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
   const d = a.daten;
-  let soll;
-  const lin = () => B.plus(B.mal(Z(d.m), Z(d.x)), Z(d.b));
-  switch (a.typ) {
-    case "graph-proportional": case "graph": case "wertepaar": case "tabelle": case "gleichung": soll = lin(); break;
-    case "indirekt": soll = B.durch(Z(d.n), Z(d.p2)); if (d.n % d.p1 !== 0) maengel.push("Karten gehen nicht auf"); break;
-    case "prozent-von": soll = B.durch(B.mal(Z(d.p), Z(d.g)), Z(100)); break;
-    case "prozentsatz": soll = B.mal(B.durch(Z(d.w), Z(d.g)), Z(100)); break;
-    case "massstab-karte": soll = B.durch(B.mal(Z(d.km), Z(100000)), Z(d.mass)); break;
-    case "massstab-wirklich": soll = B.durch(B.mal(Z(d.cm), Z(d.mass)), Z(100000)); break;
-    case "zins": soll = B.durch(B.mal(Z(d.k), Z(d.p)), Z(100)); break;
-    case "steigung": soll = B.durch(B.mal(Z(d.s), Z(d.p)), Z(100)); break;
-    case "zinseszins": { const f = B.plus(Z(1), B.durch(Z(d.p), Z(100))); soll = B.mal(Z(d.k), B.mal(f, f)); break; }
-    case "massstab-flaeche": soll = B.mal(B.durch(B.mal(Z(d.a), Z(d.mass)), Z(100)), B.durch(B.mal(Z(d.b), Z(d.mass)), Z(100))); break;
-    case "umkehr": soll = B.durch(B.minus(Z(d.y), Z(d.b)), Z(d.m)); break;
-    default: return [`unbekannter Typ ${a.typ}`];
-  }
+  const soll = sollAus(a.typ, d);
+  if (!soll) return [`unbekannter Typ ${a.typ}`];
+  if (a.typ === "indirekt" && d.n % d.p1 !== 0) maengel.push("Karten gehen nicht auf");
   if (!B.gleich(soll, Z(a.antwort))) maengel.push(`Lösung ${a.antwort}, nachgerechnet ${B.text(soll)}: ${a.text}`);
+  // Text gegen Prüfdaten (TD1 a): was der Jugendliche liest und sieht, sind dieselben Werte, und aus ihnen folgt dieselbe Lösung
+  const t = liesText(a);
+  if (!t) maengel.push(`Text folgt keinem Muster des Typs ${a.typ}: ${a.text}`);
+  else {
+    const anders = Object.keys(d).filter(k => !(Math.abs(t[k] - d[k]) < 1e-9));
+    if (anders.length) maengel.push(`Angezeigt (Text und Darstellung) ${anders.map(k => `${k} = ${t[k]}`).join(", ")}, Prüfdaten ${anders.map(k => `${k} = ${d[k]}`).join(", ")}: ${a.text}`);
+    if (!B.gleich(sollAus(a.typ, t), Z(a.antwort))) maengel.push(`aus dem Text nachgerechnet ${B.text(sollAus(a.typ, t))}, Lösung ${a.antwort}: ${a.text}`);
+  }
   if (!B.endlich(soll) || (a.loesung.split(" ")[0].split(".")[1] || "").length > 2) maengel.push(`mehr als 2 Nachkommastellen: ${a.text} ${a.loesung}`);
   if (/\d{4}/.test(a.text.replace(/\.\d+/g, ""))) maengel.push(`Tausender ohne Apostroph: ${a.text}`);
   if (a.einheit === "Fr." && !B.gleich(B.vonZahl(Math.round(a.antwort * 20) / 20), soll)) maengel.push(`Franken nicht auf 5 Rp.: ${a.loesung}`);
@@ -209,4 +271,4 @@ function pruefeAufgabe(a, stufe, niveau) {
   return maengel;
 }
 
-if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis };
+if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis, liesText };
