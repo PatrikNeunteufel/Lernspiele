@@ -377,7 +377,7 @@ var LST_KATALOG = (function () {
       stufen: ["e", "f", "g"],                // e Grundanspruch und OP; kein Rechner (Feld rechner fehlt)
       niveaus: ["n1", "n2"],
       anzahl: 8,
-      endlos: false,                          // Inhaltsliste mit weniger als 100 Einträgen je Stufe
+      endlos: ["challenge"],                  // e, f, g unter 100 Sätzen; die Challenge mischt alle (seit E 9 über 100)
       listen: { grammatik: { name: "Sätze" } },
       neu: "LST_Session1",
     },

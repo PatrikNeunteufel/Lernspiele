@@ -899,3 +899,9 @@
   Wellräder und Keile. Bleibt ungeprüft, bis Patrik sie durchsieht. Gegenprobe (eine Maschine ausserhalb der vier):
   gemeldet; ob ein Beispiel fachlich passt, kann der Test nicht prüfen. Plan E 9. Tests: Kern 0 Fehler, Lernsteig
   „0 Fehler, 15 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“.
+- Lernsteig — Vorrat `grammatik` (Plan E 9, Entscheid SP1 a: Satzlisten erweitern, Übung für Übung, Deutsch zuerst):
+  `grammatik.js` e 20 → 50 (Fälle, auch mit Präposition und Wechselpräposition), f 25 → 48 (Wortarten nach den fünf
+  Wortarten, Zeitformen), g 20 → 48 (Aktiv/Passiv, Modus, Subjekt und Objekte); die Challenge mischt alle (146) und
+  gibt es deshalb auch als Serie. Liste bleibt ungeprüft. Gegenprobe (Fall ausserhalb der vier; markiertes Wort
+  doppelt): gemeldet. Plan E 9. Tests: Kern 0 Fehler, Lernsteig „0 Fehler, 12 Hinweise.“ (Konten 101 Fälle),
+  Gratwanderung „Keine Fehler.“.
