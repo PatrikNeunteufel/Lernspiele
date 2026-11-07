@@ -19,7 +19,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
 | B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.26.0; offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 Schritte 1–3 gebaut (LERN_Session17–20) | Abschnitt B |
-| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 zum Teil (Entwickler-Modus), C3 Schritt 1 gebaut (LERN_Session21) | Abschnitt C |
+| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 zum Teil (Entwickler-Modus), C3 Schritte 1 und 2 gebaut (LERN_Session21) | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
@@ -147,7 +147,8 @@ Kindersprache.
    zu dir, Alphabet, Stufe), einklappbarer Filter, Suche mit Relevanz und Passung (Kern `suche.js`), ähnliche Übungen,
    Favoriten. Drei Schritte: (1) Kacheln nach Fach und Thema mit Symbolen und Favoriten — gebaut in LERN_Session21
    (`lernsteig/start/uebungen.js`; Favoriten, Zuklappen und Ansicht im Konto; Piktogramme nach SY1 a in `lernsteig/gemeinsam/symbole.js`); (2) Filter,
-   Sortierung, Suche (`KERN.suche`); (3) Passung, Wackel-Stufen, ähnliche Übungen. **Mehr Personalisierung als im Eulenpfad:** Passung zusätzlich aus Niveau je Fach und Prüfungsziel
+   Sortierung, Suche (`KERN.suche`) — gebaut in LERN_Session21; Sortierung „nach Stufe“ nach SS1 a: Lage der
+   Lehrplan-Stufen zum Grundanspruch Zyklus 3 der Kompetenz (`LST_START.stufenLage`), Anschluss zuerst; (3) Passung, Wackel-Stufen, ähnliche Übungen. **Mehr Personalisierung als im Eulenpfad:** Passung zusätzlich aus Niveau je Fach und Prüfungsziel
    (Übungen mit geprüften Stufen des gewählten Ziels nach vorn), Wackel-Stufen aus dem Kompetenzstand.
 4. **Profil:** Person (Vorname, Geburtsdatum B3, Klasse 1.–3. Oberstufe, Land und Kanton), Niveau je Fach,
    Prüfungsziel, Rechnermodell, Fokus; Aufbau wie das Eulenpfad-Profil (Formular, Speichern, sofort wirkende Häkchen).

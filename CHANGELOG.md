@@ -835,3 +835,18 @@
   bei brueche): beide gemeldet. lernsteig/rahmen.md 1, Plan C3. Tests: Kern 5671 Fälle 0 Fehler, Lernsteig
   „0 Fehler, 21 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“; Browser Desktop und 375 px ohne
   Konsolenfehler, ohne seitliches Rollen.
+- Lernsteig — Tab Übungen, Plan C3 Schritt 2: Suche über `KERN.suche` (Titel mit einem Tippfehler, Kompetenz-Code
+  — „MA.1.A“ findet alle darunter —, Fach; Thema und Inhaltslisten mit Grund auf der Kachel), Treffer als eine Liste,
+  beste zuerst; einklappbarer Filter (Fach, Themen des Fachs, Nur: Favoriten, Wird geprüft, Mit Serie, für die
+  Aufsicht Zu prüfen), zugeklappt mit dem, was gilt; Sortierung nach Fach und Thema (gegliedert), nach Titel, nach
+  Stufe (Entscheid SS1 a: Lage der Stufen zum Grundanspruch Zyklus 3, Anschluss zuerst, für alle gleich), je auf-
+  oder absteigend; Hinweis,
+  wenn nichts passt. Sortierung und Zuklappen des Filters im Konto, die Filterwahl je Browser (`lernsteig:filter`).
+  `tools/lernsteig_seiten.js` prüft Suche nach Titel und Thema (mit Grund), Suche ohne Treffer, Filter Fach und Mit
+  Serie, Sortierung nach Titel in beiden Richtungen und nach Stufe; `tools/pruef_dom.js` kennt `setSelectionRange`.
+  Dazu im Filter die Zeile Niveau (Wunsch Patrik): Real oder Sek für alle Fächer auf einmal; das Niveau bleibt je Fach
+  gespeichert und in der Gruppe des Fachs änderbar, sind sie verschieden, sagt der Filter es; geprüft im Seitentest
+  (Gegenprobe: nur ein Fach gesetzt → vier Fehler gemeldet).
+  Gegenprobe (Richtung der Sortierung wirkungslos): gemeldet. lernsteig/rahmen.md 1, 6; Plan C3. Tests: Kern 0 Fehler,
+  Lernsteig „0 Fehler, 21 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“, Eulenpfad-Stichprobe
+  zahlenhaus „Keine Fehler.“ (für das Ersatz-DOM); Browser Desktop und 375 px ohne Konsolenfehler.

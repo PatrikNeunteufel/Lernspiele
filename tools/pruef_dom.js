@@ -223,6 +223,7 @@ class Element extends Knoten {
   click() { if (!this.disabled) this.dispatchEvent(neuesEreignis("click", { bubbles: true })); }
   focus() { document.activeElement = this; }
   blur() {}
+  setSelectionRange(von, bis) { this.selectionStart = von; this.selectionEnd = bis; } // Suchfeld nach dem Neuzeichnen
   select() {}
   scrollIntoView() {}
   getBoundingClientRect() { return { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0 }; }

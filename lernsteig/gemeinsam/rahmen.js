@@ -85,7 +85,7 @@
     return LST_KONTEN.istGast() ? "gast" : "niemand";
   }
   const TAB_KONTO = LST.PRAEFIX + "tab-konto";
-  const TAB_FELDER = ["niveau", "lehrplan", "pruefungsziel", "rechnerModell", "favoriten", "zu", "ansicht"]; // zu bis ansicht: Tab Übungen (Plan C3)
+  const TAB_FELDER = ["niveau", "lehrplan", "pruefungsziel", "rechnerModell", "favoriten", "zu", "ansicht", "sortierung", "filterZu"]; // ab favoriten: Tab Übungen (Plan C3)
   function tabKonto() { try { return JSON.parse(sessionStorage.getItem(TAB_KONTO)) || null; } catch (e) { return null; } }
   function konto() {
     const wer = werUebt();

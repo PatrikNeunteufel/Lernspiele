@@ -158,6 +158,47 @@ async function pruefeSeiten(uebungen, melde, LST) {
       if (gespeichert().ansicht !== "kompakt" || !s.gibt(".uebung-gitter.kompakt")) melde("Tab Übungen", "Ansicht kompakt nicht übernommen");
       s.klick('[data-aktion="alle-auf"]'); s.klick('[data-ansicht="kacheln"]'); s.klick(`[data-favorit="${ersteId}"]`); await ruhe(s);
       if ((gespeichert().favoriten || []).length || (gespeichert().zu || []).length) melde("Tab Übungen", "Favorit oder Zuklappen nicht zurückgenommen");
+      // Schritt 2: Suche (eine Liste, beste zuerst; Grund bei Feldern, die nicht auf der Kachel stehen), Filter, Sortierung
+      const ids = () => s.lauf(`[...document.querySelectorAll(".uebung-karte")].map(k => k.dataset.uebung)`);
+      const katalog = s.lauf(`LST_KATALOG.UEBUNGEN.map(u => ({ id: u.id, titel: u.titel, fach: u.fach, thema: u.thema, listen: Object.keys(u.listen || {}).length }))`);
+      const ziel = katalog[katalog.length - 1];
+      s.fuelle('input[name="suche"]', ziel.titel); await ruhe(s);
+      if (ids()[0] !== ziel.id || !s.gibt(".treffer-titel")) melde("Tab Übungen", `Suche nach „${ziel.titel}“: zuerst ${ids()[0]}`);
+      s.fuelle('input[name="suche"]', ziel.thema); await ruhe(s);
+      if (!ids().length || ids().some(id => katalog.find(u => u.id === id).thema !== ziel.thema) || !s.gibt(".marke.such-grund")) melde("Tab Übungen", `Suche nach dem Thema „${ziel.thema}“: ${ids().join(", ")} (Grund ${s.gibt(".marke.such-grund") ? "da" : "fehlt"})`);
+      s.fuelle('input[name="suche"]', "qqqxyz"); await ruhe(s);
+      if (ids().length || !s.gibt("[data-leer]")) melde("Tab Übungen", "Suche ohne Treffer zeigt trotzdem Übungen oder keinen Hinweis");
+      s.fuelle('input[name="suche"]', ""); await ruhe(s);
+      // Niveau für alle Fächer im Filter: setzt jedes Fach, die Verweise öffnen die Übungen im neuen Niveau
+      const faecherMit = [...new Set(katalog.map(u => u.fach))];
+      s.klick('[data-niveau-alle="n2"]'); await ruhe(s);
+      const niveauJe = () => gespeichert().niveau || {};
+      const hrefs = () => s.lauf(`[...document.querySelectorAll("a.uebung-link")].map(a => a.getAttribute("href"))`);
+      if (faecherMit.some(f => niveauJe()[f] !== "n2") || hrefs().some(h => !h.includes("niveau=n2"))) melde("Tab Übungen", `Niveau für alle: ${JSON.stringify(niveauJe())}`);
+      if (s.lauf(`(document.querySelector('[data-niveau-alle="n2"]') || {}).getAttribute?.("aria-pressed")`) !== "true") melde("Tab Übungen", "Niveau für alle nicht angewählt");
+      s.klick(`[data-niveau-fach="${faecherMit[0]}:n1"]`); await ruhe(s);
+      if (!/je Fach verschieden/.test(s.text())) melde("Tab Übungen", "verschiedene Niveaus ohne Hinweis im Filter");
+      s.klick('[data-niveau-alle="n1"]'); await ruhe(s);
+      if (faecherMit.some(f => niveauJe()[f] !== "n1")) melde("Tab Übungen", "Niveau für alle zurück auf n1 nicht übernommen");
+      const fach = ziel.fach;
+      s.klick(`[data-filter-fach="${fach}"]`); await ruhe(s);
+      const imFach = katalog.filter(u => u.fach === fach).map(u => u.id);
+      if (ids().length !== imFach.length || ids().some(id => !imFach.includes(id))) melde("Tab Übungen", `Filter Fach ${fach}: ${ids().join(", ")}`);
+      s.klick('[data-filter-nur="serie"]'); await ruhe(s);
+      const mitSerie = s.lauf(`LST_KATALOG.UEBUNGEN.filter(u => u.fach === ${JSON.stringify(fach)} && (u.endlos === true || (Array.isArray(u.endlos) && u.endlos.length))).map(u => u.id)`);
+      if (ids().length !== mitSerie.length) melde("Tab Übungen", `Filter Mit Serie: ${ids().length} statt ${mitSerie.length}`);
+      s.klick('[data-filter-nur="serie"]'); s.klick('[data-filter-fach="alle"]'); await ruhe(s);
+      if (ids().length !== alleZahl) melde("Tab Übungen", `Filter zurück: ${ids().length} statt ${alleZahl} Kacheln`);
+      s.fuelle('select[name="sortierung"]', "titel"); await ruhe(s);
+      const nachTitel = [...katalog].sort((a, b) => a.titel.localeCompare(b.titel, "de")).map(u => u.id);
+      if (JSON.stringify(ids()) !== JSON.stringify(nachTitel) || (gespeichert().sortierung || {}).art !== "titel") melde("Tab Übungen", `Sortierung nach Titel: ${ids().slice(0, 4).join(", ")} …`);
+      s.klick('[data-aktion="sortierung-richtung"]'); await ruhe(s);
+      if (JSON.stringify(ids()) !== JSON.stringify([...nachTitel].reverse())) melde("Tab Übungen", "Sortierung Z → A stimmt nicht");
+      s.fuelle('select[name="sortierung"]', "stufe"); await ruhe(s);
+      const lagen = s.lauf(`[...document.querySelectorAll(".uebung-karte")].map(k => LST_START.stufenLage(LST_KATALOG.uebung(k.dataset.uebung)))`);
+      if (lagen.some((x, i) => i && x < lagen[i - 1])) melde("Tab Übungen", "Sortierung nach Stufe nicht aufsteigend");
+      s.fuelle('select[name="sortierung"]', "thema"); await ruhe(s);
+      if (!s.gibt('[data-gruppe^="fach:"]')) melde("Tab Übungen", "zurück nach Fach und Thema ohne Gruppen");
       jugendTab = s.sitzung;
     } catch (e) { melde(ort, e.message); }
     fehlerVon(ort, s);

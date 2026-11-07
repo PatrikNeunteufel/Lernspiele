@@ -25,8 +25,8 @@ gemeinsam/rechner.js      eingebauter Taschenrechner: Modelle und Tastenfeld; Re
 gemeinsam/rahmen.js       Seitenteil: Konto, Stufenwahl, Runde, Serie, Protokoll, Rekorde
 gemeinsam/stil.css        Stil, Farben nur hier (:root)
 index.html, start/        Startseite: Anmeldung, dann Tabs wie im Eulenpfad (Plan C2, Adresse #<tab>): Übungen
-                          (start/uebungen.js, Plan C3: Favoriten, Fach → Thema mit Kacheln, Niveau je Fach,
-                          Kompetenzstand je Stufe), Profil (start.js: Konto, Einstellungen), Statistik und Erfolge
+                          (start/uebungen.js, Plan C3: Suche mit KERN.suche, einklappbarer Filter, Sortierung,
+                          Favoriten, Fach → Thema mit Kacheln, Niveau je Fach, Kompetenzstand je Stufe), Profil (start.js: Konto, Einstellungen), Statistik und Erfolge
                           (start/statistik.js), Verwaltung nur für die Aufsicht (start/aufsicht.js); statistik.html und
                           aufsicht.html leiten auf #statistik und #verwaltung weiter
 uebungen/<id>/aufgaben.js Aufgaben als Daten (ohne DOM), Prüffunktion, Hinweise
@@ -44,7 +44,8 @@ Leerzeichen, Punkt und Komma sind erlaubt.
 
 ## 3. Niveaus und Stufen (Entwurf)
 
-- **Niveaus** (NV2 a): `n1` = bis Grundanspruch Z3, `n2` = GA plus Auftrag Z3, je Fach im Konto. Name aus
+- **Niveaus** (NV2 a): `n1` = bis Grundanspruch Z3, `n2` = GA plus Auftrag Z3, je Fach im Konto; gewählt im Tab Übungen je Fach in
+  seiner Gruppe oder für alle Fächer auf einmal im Filter (Wunsch Patrik, LERN_Session21). Name aus
   `LST_LEHRPLAENE.niveauName(niveau, lehrplan)`: Schweiz „Real“, „Sek“, sonst „Grundlegend“, „Erweitert“.
   Schulniveaus g/m/e je Kanton in `LST_LEHRPLAENE.KANTON` (bisher SG; g → `n1`, e → `n2`, m ohne Zuordnung).
 - **Prüfungsziel** (NV2 a): `keins`, `stellwerk8`, `gymnasium`, `eap`; wählbar je nach Kanton
@@ -331,7 +332,8 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
 | `aufsichten` | Liste der Aufsichten (5d), PIN und Code nur als Hash |
 | `aktiv` | zuletzt gewähltes Konto (Id) |
 | `gast` | bis LERN_Session16 das Gastkonto des Geräts; wird nicht mehr gelesen. Runden mit `person: "gast"` bleiben und reisen in Sicherungen mit |
-| `personen` | Jugendliche und Aufsichten (`KERN.person`, 5d); früher `konten` und `aufsichten`, beim Laden umgezogen. Ein Konto trägt für den Tab Übungen (Plan C3) `favoriten` (Übungs-Ids), `zu` (zugeklappte Gruppen `favoriten`, `fach:<fach>`, `thema:<fach>:<thema>`) und `ansicht` (`kacheln` \| `kompakt`); Gast und Aufsicht halten sie nur im Tab (`tab-konto`, sessionStorage) |
+| `personen` | Jugendliche und Aufsichten (`KERN.person`, 5d); früher `konten` und `aufsichten`, beim Laden umgezogen. Ein Konto trägt für den Tab Übungen (Plan C3) `favoriten` (Übungs-Ids), `zu` (zugeklappte Gruppen `favoriten`, `fach:<fach>`, `thema:<fach>:<thema>`) `ansicht` (`kacheln` \| `kompakt`), `sortierung` (`{ art: thema \| titel \| stufe, ab }`) und `filterZu`; Gast und Aufsicht halten sie nur im Tab (`tab-konto`, sessionStorage) |
+| `filter` | Filterwahl im Tab Übungen `{ fach, thema: [], nur: [favoriten, pruefung, serie, zuPruefen] }`, je Browser (nur Bequemlichkeit, wie im Eulenpfad) |
 | `runden` | je Runde im gemeinsamen Format (R1 a, `KERN.runden`; gebaut von `KERN.runde.lauf`) `{ id, person, zeit (Ende, RA1 a), inhalt, fach, stufe, niveau, endlos?, gekuerzt?, abgebrochen?, aufgaben, aufAnhieb, fehler, gezeigt, dauer (s, auf 0,1), liste, mitRechner, gruppe }`; `liste` je Aufgabe `{ ms, versuche, geloest, gezeigt?, lp, rechner }`, mit Fehlversuch dazu `text`, `loesung`, `eingaben` (RA4 a; Grundlage für den Kompetenzstand). Beim Laden und Einlesen umgedeutet (`LST.alteEintraegeUmdeuten`): bis LERN_Session15 `konto`, `uebung`; bis LERN_Session18 `zeit` = Beginn (jetzt + `dauer`, auch beim Rekord einer Serie) und `zeiten`, `falsch` getrennt |
 | `rekorde` | je Serie `{ id, person, zeit, inhalt, stufe, niveau, punkte, dauer, mitRechner, abgebrochen? }` |
 | `freigabe`, `freigabeStand` | Freigabe der Übungen auf diesem Gerät durch die Aufsicht (`KERN.freigabe`, 5d); reist im Abgleich mit |

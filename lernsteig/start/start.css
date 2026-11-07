@@ -114,7 +114,24 @@ a.knopf { color: var(--text); }
 .schalter.frei { border-color: var(--gut); background: var(--gut-hell); color: var(--gut); font-weight: 600; }
 .schalter.gesperrt { background: var(--flaeche); color: var(--leise); font-weight: 600; }
 /* Tab Übungen (Plan C3, Aufbau wie der Tab Spiele des Eulenpfads, Aussehen sachlich) */
-.werkzeuge { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.werkzeuge { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 12px; }
+/* Suche, Sortierung, Filter (Plan C3 Schritt 2) */
+.textfeld.suche { flex: 1 1 220px; width: auto; min-width: 0; }
+.sortier-wahl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.sortier-wahl select { min-height: 40px; font: inherit; font-size: 15px; padding: 4px 8px; border: 2px solid var(--rand); border-radius: 10px; background: var(--karte); }
+.filter-klapp { margin-bottom: 12px; background: var(--karte); border: 1px solid var(--rand); border-radius: var(--radius); }
+.filter-klapp > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-height: 44px; padding: 10px 14px; cursor: pointer; list-style: none; }
+.filter-klapp > summary::-webkit-details-marker { display: none; }
+.filter-klapp > summary::before { content: "▸"; color: var(--akzent); transition: transform .15s; }
+.filter-klapp[open] > summary::before { transform: rotate(90deg); }
+.filter-titel { font-weight: 700; }
+.filter-aktiv { color: var(--leise); font-size: 14px; min-width: 0; overflow-wrap: anywhere; }
+.filter { display: grid; gap: 8px; padding: 0 14px 12px; }
+.filter-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.filter-zeile > span { min-width: 52px; color: var(--leise); font-size: 14px; font-weight: 600; }
+.treffer-titel { margin: 8px 0 6px; font-size: 17px; }
+.marke.such-grund { background: var(--flaeche); color: var(--leise); border: 1px solid var(--rand); }
+.leer-hinweis { padding: 14px 16px; background: var(--karte); border: 1px dashed var(--rand); border-radius: var(--radius); color: var(--leise); }
 .chip.klein { min-height: 36px; padding: 4px 12px; font-size: 14px; }
 .gruppe { margin-bottom: 12px; }
 .gruppe > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; cursor: pointer; list-style: none; min-height: 44px;

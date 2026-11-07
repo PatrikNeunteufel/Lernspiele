@@ -1,7 +1,9 @@
-/* Tab „Übungen“ des Lernsteigs (Plan C3 Schritt 1, wie der Tab Spiele des Eulenpfads): Favoriten, dann je Fach und
-   Thema auf- und zuklappbar; Kacheln oder kompakt. Jugendliche sehen gesperrte Übungen ohne Verweis (FG1 a), die
-   Aufsicht öffnet sie zum Prüfen. Favoriten, Zuklappen und Ansicht stehen im Konto (Gast und Aufsicht: nur im Tab,
-   rahmen.js TAB_FELDER). Filter, Sortierung und Suche folgen in Schritt 2, Passung in Schritt 3. */
+/* Tab „Übungen“ des Lernsteigs (Plan C3, wie der Tab Spiele des Eulenpfads): Suche, einklappbarer Filter, Sortierung;
+   ohne Suche und nach Fach und Thema sortiert Favoriten, dann je Fach und Thema auf- und zuklappbar; Kacheln oder
+   kompakt. Jugendliche sehen gesperrte Übungen ohne Verweis (FG1 a), die Aufsicht öffnet sie zum Prüfen. Favoriten,
+   Zuklappen, Ansicht, Sortierung und das Zuklappen des Filters stehen im Konto (Gast und Aufsicht: nur im Tab, rahmen.js
+   TAB_FELDER); die Filterwahl merkt sich der Browser (lernsteig:filter, nur Bequemlichkeit, wie im Eulenpfad).
+   Schritt 3 (Passung aus Niveau und Prüfungsziel, Wackel-Stufen, ähnliche Übungen) folgt. */
 "use strict";
 
 var LST_START = typeof LST_START === "object" ? LST_START : {};
@@ -27,8 +29,45 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     ? el("span", { class: "uebung-symbol", "aria-hidden": "true", html: LST_SYMBOLE.svg(u.symbol, 30) })
     : el("span", { class: "uebung-symbol kuerzel", "aria-hidden": "true", text: FACH_KURZ[u.fach] || "" }));
 
+  // ---------- Suche (Kern kern/suche.js, wie im Eulenpfad SU1 a) ----------
+  // Titel zählt am meisten (mit einem Tippfehler), dann der Kompetenz-Code („MA.1.A“ findet alle Übungen darunter),
+  // dann das Fach; Thema und Inhaltslisten stehen nicht auf der Kachel, deshalb nennt die Kachel den Grund.
+  const SUCH_GEWICHT = { titel: 6, kompetenz: 4, fach: 2, listen: 2, thema: 1 };
+  const SUCH_SICHTBAR = ["titel", "kompetenz", "fach"];
+  const suchFelder = u => ({
+    titel: [u.titel], kompetenz: [u.kompetenz].concat(u.weitere || []), fach: [(KAT.fach(u.fach) || {}).name],
+    listen: LST.FREIGABE.listen(u.id).map(l => l.name), thema: [u.thema],
+  });
+  /** Übungen zur Suche, beste zuerst: [{ id, wert, grund, passung }]; leere Suche null. Passung folgt in Schritt 3. */
+  const sucheUebungen = text => KERN.suche.suche(text, KAT.UEBUNGEN, {
+    felder: suchFelder, gewicht: SUCH_GEWICHT, sichtbar: SUCH_SICHTBAR, tippfehler: ["titel"],
+    grund: (feld, t) => (feld === "thema" ? `im Thema ${t}` : `in der Liste „${t}“`),
+  });
+
+  // ---------- Sortierung ----------
+  // „Stufe“ (Entscheid SS1 a, LERN_Session21; persönlich ordnet erst „passt zu dir“ in Schritt 3): Lage der Übung zum Grundanspruch Zyklus 3 ihrer Kompetenz — Mittel der
+  // Abstände ihrer Lehrplan-Stufen zum Grundanspruch in Buchstaben (ohne Grundanspruch der Orientierungspunkt, sonst
+  // die mittlere Stufe des Zyklus). Lehrplan-Buchstaben verschiedener Kompetenzen sind sonst nicht vergleichbar.
+  function stufenLage(u) {
+    const m = LP.MARKEN[u.kompetenz];
+    const bezug = m ? (m.ga || m.op || m.stufen[Math.floor(m.stufen.length / 2)]) : null;
+    if (!bezug) return 0;
+    return u.stufen.reduce((s, x) => s + x.charCodeAt(0) - bezug.charCodeAt(0), 0) / u.stufen.length;
+  }
+  const nachTitel = (a, b) => a.titel.localeCompare(b.titel, "de");
+  const SORTIERUNG = {
+    thema: { text: "nach Fach und Thema", pfeil: ["Katalog", "rückwärts"] },
+    titel: { text: "nach Titel", pfeil: ["A → Z", "Z → A"], vergleich: nachTitel },
+    stufe: { text: "nach Stufe", pfeil: ["Anschluss zuerst", "Erweiterung zuerst"], vergleich: (a, b) => stufenLage(a) - stufenLage(b) || nachTitel(a, b) },
+  };
+
+  // Suchtext: bleibt beim Neuzeichnen erhalten, nicht gespeichert (wie im Eulenpfad)
+  let suchText = "";
+  let sucheTippt = false; // nach dem Neuzeichnen das Suchfeld wieder fokussieren
+
   function zeichneUebungen(box) {
     const k = LST.konto();
+    const aufsicht = LST.werUebt() === "aufsicht";
     const neu = () => LST_START.neu();
     const speichere = daten => { LST.speichereKonto(Object.assign(LST.konto(), daten)); neu(); };
     const favoriten = k.favoriten || [];
@@ -40,15 +79,90 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     const geprueft = u => k.pruefungsziel !== "keins" && u.stufen.some(s => LP.geprueft(`${u.kompetenz}.${s}`, k.pruefungsziel, k.lehrplan).geprueft);
     // Gast und Aufsicht haben keine Runden im Konto; ihr Stand bleibt leer
     const mitStand = LST.werUebt() === "lernend";
+    const mitSerie = u => u.endlos === true || (Array.isArray(u.endlos) && u.endlos.length > 0);
+    // Für die Aufsicht: noch anzusehen — die Übung selbst oder eine eigene Inhaltsliste (wie im Eulenpfad)
+    const zuPruefen = u => LST.FREIGABE.zuPruefen(u.id) || LST.FREIGABE.listen(u.id).some(l => !l.von && !l.geprueft);
 
-    // ----- Werkzeuge: Ansicht und alle auf/zu -----
+    // ----- Filter: Fach, Themen des Fachs, Nur (Mehrfachwahl) -----
+    const gespeichert = LST.lies("filter", {});
+    const liste = v => (Array.isArray(v) ? v : []);
+    const filter = { fach: KAT.fach(gespeichert.fach) ? gespeichert.fach : "alle", thema: liste(gespeichert.thema), nur: liste(gespeichert.nur) };
+    const setze = (f, v) => () => { filter[f] = v; if (f === "fach") filter.thema = []; LST.schreibe("filter", filter); neu(); };
+    const schalte = (f, id) => () => { const s = new Set(filter[f]); s.has(id) ? s.delete(id) : s.add(id); setze(f, [...s])(); };
+    const NUR = [
+      { id: "favoriten", text: "★ Favoriten", gilt: u => favoriten.includes(u.id), da: favoriten.length > 0 },
+      { id: "pruefung", text: "Wird geprüft", gilt: geprueft, da: k.pruefungsziel !== "keins" },
+      { id: "serie", text: "Mit Serie", gilt: mitSerie, da: true },
+      { id: "zuPruefen", text: "🔍 Zu prüfen", gilt: zuPruefen, da: aufsicht },
+    ].filter(n => n.da);
+    const nurAktiv = NUR.filter(n => filter.nur.includes(n.id));
+    const faecherMit = KAT.FAECHER.filter(f => KAT.UEBUNGEN.some(u => u.fach === f.id));
+    const faecherMitNiveau = () => faecherMit.map(f => LST.niveauFuer(f.id));
+    // Niveau für alle Fächer auf einmal (Wunsch Patrik, LERN_Session21): setzt das Niveau jedes Fachs (NV1 a bleibt, je
+    // Fach änderbar in seiner Gruppe); angewählt nur, wenn alle Fächer dasselbe haben. Kein Filter, aber hier erreichbar,
+    // auch in der Suche und den Listen ohne Gruppen.
+    const niveaus = faecherMitNiveau();
+    const gemeinsam = niveaus.every(n => n === niveaus[0]) ? niveaus[0] : null;
+    const zeilen = [el("div", { class: "filter-zeile", role: "group", "aria-label": "Niveau für alle Fächer" }, el("span", { text: "Niveau" }),
+      ...LST.NIVEAUS.map(n => chip(LST.niveauName(n.id), n.id === gemeinsam,
+        () => { for (const f of KAT.FAECHER) LST.setzeNiveau(f.id, n.id); neu(); }, { "data-niveau-alle": n.id, title: `${n.kurz} — in allen Fächern` })),
+      gemeinsam ? null : el("small", { class: "leise", text: "je Fach verschieden" })),
+    el("div", { class: "filter-zeile" }, el("span", { text: "Fach" }),
+      chip("Alle", filter.fach === "alle", setze("fach", "alle"), { "data-filter-fach": "alle" }),
+      ...faecherMit.map(f => chip(f.name, filter.fach === f.id, setze("fach", f.id), { "data-filter-fach": f.id })))];
+    if (filter.fach !== "alle") {
+      const themen = [...new Set(KAT.UEBUNGEN.filter(u => u.fach === filter.fach).map(u => u.thema))];
+      zeilen.push(el("div", { class: "filter-zeile" }, el("span", { text: "Thema" }),
+        ...themen.map(t => chip(t, filter.thema.includes(t), schalte("thema", t), { "data-filter-thema": t }))));
+    }
+    zeilen.push(el("div", { class: "filter-zeile" }, el("span", { text: "Nur" }),
+      ...NUR.map(n => chip(n.text, filter.nur.includes(n.id), schalte("nur", n.id), { "data-filter-nur": n.id }))));
+    // Zugeklappt nennt die Kopfzeile, was gilt; gemerkt im Konto (filterZu), ohne Wahl auf dem Handy zu
+    const aktiv = [
+      gemeinsam ? LST.niveauName(gemeinsam) : "Niveau je Fach",
+      filter.fach !== "alle" ? KAT.fach(filter.fach).name : null,
+      filter.thema.length ? `${filter.thema.length} ${filter.thema.length === 1 ? "Thema" : "Themen"}` : null,
+      ...nurAktiv.map(n => n.text),
+    ].filter(Boolean);
+    const schmal = typeof matchMedia === "function" && matchMedia("(max-width: 560px)").matches;
+    const filterBox = el("details", { class: "filter-klapp" },
+      el("summary", {}, el("span", { class: "filter-titel", text: "Filter" }),
+        el("span", { class: "filter-aktiv", text: aktiv.length ? aktiv.join(" · ") : "alle Übungen" })),
+      el("div", { class: "filter" }, ...zeilen));
+    filterBox.open = typeof k.filterZu === "boolean" ? !k.filterZu : !schmal;
+    filterBox.addEventListener("toggle", () => LST.speichereKonto(Object.assign(LST.konto(), { filterZu: !filterBox.open })));
+
+    // ----- Auswahl: Filter und Suche -----
+    const treffer = suchText.trim() ? new Map((sucheUebungen(suchText) || []).map((t, i) => [t.id, { ...t, i }])) : null;
+    const passt = u => (filter.fach === "alle" || u.fach === filter.fach)
+      && (!filter.thema.length || filter.thema.includes(u.thema))
+      && nurAktiv.every(n => n.gilt(u))
+      && (!treffer || treffer.has(u.id));
+    const auswahl = KAT.UEBUNGEN.filter(passt);
+    const sort = SORTIERUNG[(k.sortierung || {}).art] ? k.sortierung : { art: "thema", ab: false };
+    const flach = !treffer && sort.art !== "thema";
+    if (treffer) auswahl.sort((a, b) => treffer.get(a.id).i - treffer.get(b.id).i);
+    else if (flach) { auswahl.sort(SORTIERUNG[sort.art].vergleich); if (sort.ab) auswahl.reverse(); }
+
+    // ----- Werkzeuge: Suche, Sortierung, Ansicht, alle auf/zu -----
+    const feld = el("input", { class: "textfeld suche", type: "search", name: "suche", placeholder: "Übung suchen", "aria-label": "Übung suchen", value: suchText });
+    feld.addEventListener("input", () => { suchText = feld.value; sucheTippt = true; neu(); });
+    if (sucheTippt) { sucheTippt = false; requestAnimationFrame(() => { feld.focus(); feld.setSelectionRange(feld.value.length, feld.value.length); }); }
+    const sortWahl = el("label", { class: "sortier-wahl" }, el("span", { class: "leise klein", text: "Sortieren" }),
+      el("select", { class: "klein", name: "sortierung", "aria-label": "Übungen sortieren", onchange: e => speichere({ sortierung: { art: e.target.value, ab: false } }) },
+        ...Object.entries(SORTIERUNG).map(([w, s]) => el("option", { value: w, text: s.text, selected: w === sort.art }))),
+      chip((sort.ab ? "↓ " : "↑ ") + SORTIERUNG[sort.art].pfeil[sort.ab ? 1 : 0], sort.ab,
+        () => speichere({ sortierung: { art: sort.art, ab: !sort.ab } }), { "data-aktion": "sortierung-richtung" }));
     const gruppenIds = ["favoriten", ...KAT.FAECHER.map(f => "fach:" + f.id),
       ...KAT.FAECHER.flatMap(f => [...new Set(KAT.UEBUNGEN.filter(u => u.fach === f.id).map(u => u.thema))].map(t => `thema:${f.id}:${t}`))];
-    box.replaceChildren(el("div", { class: "werkzeuge" },
-      chip("▦ Kacheln", !kompakt, () => speichere({ ansicht: "kacheln" }), { "data-ansicht": "kacheln" }),
-      chip("☰ Kompakt", kompakt, () => speichere({ ansicht: "kompakt" }), { "data-ansicht": "kompakt" }),
-      chip("Alle auf", false, () => speichere({ zu: [] }), { "data-aktion": "alle-auf" }),
-      chip("Alle zu", false, () => speichere({ zu: gruppenIds }), { "data-aktion": "alle-zu" })));
+    const gegliedert = !treffer && !flach;
+    box.replaceChildren(el("div", { class: "werkzeuge" }, feld, sortWahl),
+      filterBox,
+      el("div", { class: "werkzeuge" },
+        chip("▦ Kacheln", !kompakt, () => speichere({ ansicht: "kacheln" }), { "data-ansicht": "kacheln" }),
+        chip("☰ Kompakt", kompakt, () => speichere({ ansicht: "kompakt" }), { "data-ansicht": "kompakt" }),
+        gegliedert ? chip("Alle auf", false, () => speichere({ zu: [] }), { "data-aktion": "alle-auf" }) : null,
+        gegliedert ? chip("Alle zu", false, () => speichere({ zu: gruppenIds }), { "data-aktion": "alle-zu" }) : null));
 
     /** Auf- und zuklappbare Gruppe; der Zustand landet im Konto. */
     function gruppe(id, kopf, anzahl, ...inhalt) {
@@ -71,9 +185,12 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       const karte = el("div", { class: "uebung-karte" + (sichtbar ? "" : " gesperrt"), "data-uebung": u.id,
         title: sichtbar ? `${u.titel} öffnen` : "noch nicht freigegeben" });
       if (sichtbar) karte.addEventListener("click", e => { if (!e.target.closest("a, button")) location.href = href; });
+      // Treffer über ein Feld, das nicht auf der Kachel steht: sagen, wo (wie im Eulenpfad)
+      const grund = treffer && treffer.get(u.id) ? treffer.get(u.id).grund : null;
       const marken = [
         geprueft(u) ? el("span", { class: "marke pruefung", text: "wird geprüft" }) : null,
         LST.sperrGrund(u.id) ? el("span", { class: "marke gesperrt", text: sichtbar ? "für Jugendliche gesperrt" : "noch nicht freigegeben" }) : null,
+        grund ? el("span", { class: "marke such-grund", text: `gefunden ${grund}` }) : null,
       ].filter(Boolean);
       // Kompetenzstand je Lehrplan-Stufe (BF1 a): Buchstabe mit Farbe des Stands, Zahlen im Titel
       const stufen = el("div", { class: "stufen-marken", "aria-label": "Stufen" }, ...u.stufen.map(s => {
@@ -92,28 +209,43 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
         marken.length ? el("div", { class: "marken" }, ...marken) : null,
         stufen);
     }
-    const gitter = liste => el("div", { class: "uebung-gitter" + (kompakt ? " kompakt" : "") }, ...liste.map(kachel));
+    const gitter = l => el("div", { class: "uebung-gitter" + (kompakt ? " kompakt" : "") }, ...l.map(kachel));
+    const titel = text => el("h2", { class: "treffer-titel", text });
 
-    // ----- Favoriten, dann Fach → Thema -----
-    const favUebungen = KAT.UEBUNGEN.filter(u => favoriten.includes(u.id));
-    if (favUebungen.length) box.append(gruppe("favoriten", "★ Favoriten", favUebungen.length, gitter(favUebungen)));
-    for (const f of KAT.FAECHER) {
-      const uebungen = KAT.UEBUNGEN.filter(u => u.fach === f.id);
-      if (!uebungen.length) { box.append(el("section", { class: "fach spaeter", "aria-label": f.name }, el("h3", { text: f.name }), el("small", { class: "leise", text: "später" }))); continue; }
-      const niveau = LST.niveauFuer(f.id);
-      // Niveau je Fach (NV1 a) im Kopf der Gruppe: gilt für alle Übungen des Fachs
-      const niveauWahl = el("div", { class: "niveau-wahl", role: "group", "aria-label": `Niveau ${f.name}` },
-        el("span", { class: "leise klein", text: "Niveau" }),
-        ...LST.NIVEAUS.map(n => el("button", {
-          type: "button", class: "chip klein" + (n.id === niveau ? " an" : ""), "aria-pressed": String(n.id === niveau),
-          text: LST.niveauName(n.id), title: n.kurz, onclick: () => { LST.setzeNiveau(f.id, n.id); neu(); },
-        })));
-      const themen = [...new Set(uebungen.map(u => u.thema))];
-      box.append(gruppe("fach:" + f.id, [el("span", { text: f.name }), el("span", { class: "bereich", text: f.bereich })], uebungen.length,
-        niveauWahl,
-        ...themen.map(t => { const liste = uebungen.filter(u => u.thema === t); return gruppe(`thema:${f.id}:${t}`, el("span", { text: t }), liste.length, gitter(liste)); })));
+    // ----- Suche: eine Liste, beste zuerst; andere Sortierung: eine Liste; sonst Favoriten, dann Fach → Thema -----
+    if (treffer) {
+      if (auswahl.length) box.append(titel(`${auswahl.length} Treffer, beste zuerst`), gitter(auswahl));
+    } else if (flach) {
+      if (auswahl.length) box.append(titel(`${auswahl.length} ${auswahl.length === 1 ? "Übung" : "Übungen"} · ${SORTIERUNG[sort.art].text}`), gitter(auswahl));
+    } else {
+      const favUebungen = auswahl.filter(u => favoriten.includes(u.id));
+      if (favUebungen.length) box.append(gruppe("favoriten", "★ Favoriten", favUebungen.length, gitter(favUebungen)));
+      for (const f of sort.ab ? [...KAT.FAECHER].reverse() : KAT.FAECHER) {
+        const uebungen = auswahl.filter(u => u.fach === f.id);
+        if (!KAT.UEBUNGEN.some(u => u.fach === f.id)) {
+          if (filter.fach === "alle" && !nurAktiv.length) box.append(el("section", { class: "fach spaeter", "aria-label": f.name }, el("h3", { text: f.name }), el("small", { class: "leise", text: "später" })));
+          continue;
+        }
+        if (!uebungen.length) continue;
+        const niveau = LST.niveauFuer(f.id);
+        // Niveau je Fach (NV1 a) im Kopf der Gruppe: gilt für alle Übungen des Fachs
+        const niveauWahl = el("div", { class: "niveau-wahl", role: "group", "aria-label": `Niveau ${f.name}` },
+          el("span", { class: "leise klein", text: "Niveau" }),
+          ...LST.NIVEAUS.map(n => el("button", {
+            type: "button", class: "chip klein" + (n.id === niveau ? " an" : ""), "aria-pressed": String(n.id === niveau),
+            text: LST.niveauName(n.id), title: n.kurz, "data-niveau-fach": `${f.id}:${n.id}`, onclick: () => { LST.setzeNiveau(f.id, n.id); neu(); },
+          })));
+        const themen = [...new Set(uebungen.map(u => u.thema))];
+        if (sort.ab) themen.reverse();
+        box.append(gruppe("fach:" + f.id, [el("span", { text: f.name }), el("span", { class: "bereich", text: f.bereich })], uebungen.length,
+          niveauWahl,
+          ...themen.map(t => { const l = uebungen.filter(u => u.thema === t); return gruppe(`thema:${f.id}:${t}`, el("span", { text: t }), l.length, gitter(l)); })));
+      }
     }
+    if (!auswahl.length) box.append(el("p", { class: "leer-hinweis", "data-leer": "", text: treffer ? "Keine Übung passt zu dieser Suche." : "Keine Übung passt zu diesem Filter." }));
   }
 
   LST_START.uebungen = zeichneUebungen;
+  LST_START.sucheUebungen = sucheUebungen;
+  LST_START.stufenLage = stufenLage;
 })();
