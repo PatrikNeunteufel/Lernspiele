@@ -25,8 +25,12 @@ const dez = x => LST.dezimalText(Math.round(x * 1e9) / 1e9);
 const HOCH = n => String(n).replace(/[-0-9]/g, c => ({ "-": "⁻", 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" }[c]));
 const vz = (b, x = "") => `${b < 0 ? M : "+"} ${Math.abs(b) === 1 && x ? "" : dez(Math.abs(b))}${x}`;
 
+// gleichung: die Gleichung vor der Frage („x² − 36 = 0. Negative Lösung x =“), für den Notizblock (GL1 a); bei einem
+// System („… und …“) die Liste der Gleichungen; ohne Frage (Potenzen) keine
 function zahl(stufe, typ, text, antwort, weg, daten, extra) {
-  return Object.assign({ art: "zahl", stufe, typ, text, antwort, loesung: dez(antwort), weg, kennung: text, daten }, extra || {});
+  const teil = text.split(". ")[0];
+  const gleichung = !text.includes(". ") || !teil.includes("=") ? undefined : teil.includes(" und ") ? teil.split(" und ") : teil;
+  return Object.assign({ art: "zahl", stufe, typ, text, gleichung, antwort, loesung: dez(antwort), weg, kennung: text, daten }, extra || {});
 }
 
 // ---------- l ----------
@@ -138,6 +142,11 @@ function pruefeAufgabe(a, stufe, niveau) {
     if (!T.bewerte(a.antwortTerm, a).ok) m.push("Lösungsterm nicht vereinfacht");
     return m;
   }
+  // GL1 a: Gleichung(en) für den Notizblock genau bei quadratischen, Bruchgleichungen und Systemen (zwei), vor der Frage
+  const soll = /^quadratisch|^bruchgleichung$/.test(a.typ) ? 1 : /^system/.test(a.typ) ? 2 : 0;
+  const zeilen = [].concat(a.gleichung || []);
+  if (zeilen.length !== soll) m.push(`${zeilen.length} Gleichung(en) für den Notizblock statt ${soll} bei ${a.typ}: ${a.text}`);
+  if (zeilen.length && !(a.text.startsWith(zeilen.join(" und ") + ". ") && zeilen.every(z => z.includes(" = ")))) m.push(`Gleichung(en) ${JSON.stringify(zeilen)} passen nicht zu „${a.text}“`);
   const d = a.daten;
   // Gleichungen aus dem Text: einsetzen und prüfen
   const setzeEin = (gleichung, werte) => {

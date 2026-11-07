@@ -3,6 +3,15 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.23.0 — 2026-11-07 (LERN_Session20)
+- `tastenfeld.js` (`KERN.tastenfeld`, TF1 a): Tasten, die in ein gewähltes Feld schreiben, ohne ihm den Fokus zu nehmen —
+  an der Schreibmarke, Häuschen ersetzt, ⌫, eigene Tasten mit `tue`; `einfuegen` als Regel ohne DOM. Aus dem Ziffernfeld
+  des Notizblocks.
+- `notizblock.js`: Ziffernfeld über `KERN.tastenfeld` (gleiche Tasten, gleiches Verhalten); Vorlage „= Gleichung“ (GL1 a,
+  `GLEICHUNG`, nicht unter den Standard-Vorlagen) mit Zeilen „Gleichung | Umformung“, Gleichung der Aufgabe oben (Text oder
+  Liste), „＋ Zeile“, Zeichen-Tasten; `oeffne` und `knopf` nehmen `vorlagen` und `gleichung`; `loesungAus` für
+  Weiterrechnen nach „x = Zahl“.
+
 ## 1.22.0 — 2026-11-07 (LERN_Session19)
 - `notizblock.js` (`KERN.notizblock`, NB1 a): Notizblock für schriftliches Rechnen aus dem Eulenpfad als Kern-Teil —
   Vorlagen, Rechenwege, Ziffernfeld, Weiterrechnen, Raster und `rechne` für die Werkstatt; Stellen, Dezimalzeichen und Ton

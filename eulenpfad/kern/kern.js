@@ -1,4 +1,4 @@
-/* kern 1.22.0 · Prüfsumme sha256:ddbb56e50c4e80b8f446ce6b7e27a477baa1a536e4c895fbbf670d8337ff6b19 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.23.0 · Prüfsumme sha256:891eafacca237eac010d8003b40b0bca28346573ffeebe9933a75fa3bffde399 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -2896,18 +2896,98 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
 if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
+/* ---- kern/tastenfeld.js ---- */
+/* Kern — Tastenfeld: Tasten, die in ein gewähltes Eingabefeld schreiben, ohne ihm den Fokus zu nehmen (Entscheid TF1 a,
+   LERN_Session20; docs/kern/rahmen.md 4.24). Herkunft: das Ziffernfeld des Notizblocks (kern/notizblock.js, LERN_Session14).
+   KERN.tastenfeld({ tasten, ziel, klasse, label, ton, leer }) → { element, tippe(taste), ziel() }
+     tasten  Liste: eine Zeichenkette ist eine Taste, die sich selbst schreibt („7“, „x“, „·“); „⌫“ löscht vor der
+             Schreibmarke. Ein Objekt { text, label, klasse, wert, tue(feld) } schreibt wert (Standard text) oder tut
+             selbst etwas (tue, etwa das Vorzeichen wechseln).
+     ziel()  das Feld, in das geschrieben wird (die App entscheidet; null = nichts tun)
+     klasse  Klassen des Felds (Standard „tastenfeld“), label die Beschriftung für Vorleser
+     ton(art) Ton beim Tippen (Standard still); leer(feld) ruft ⌫ in einem leeren Feld (Notizblock: ein Häuschen zurück)
+   Ein Feld mit maxlength 1 (Häuschen) wird ersetzt, sonst wird an der Schreibmarke eingefügt, höchstens bis maxlength.
+   Nach jedem Tippen meldet das Feld „input“ wie beim Schreiben mit der Tastatur. Aussehen gibt jede App in ihrem CSS.
+   einfuegen() ist die Regel ohne DOM (für die Prüfung). Greift erst beim Aufruf auf document zu. */
+"use strict";
+
+(function (KERN) {
+  const LOESCHEN = "⌫";
+
+  /**
+   * Was nach einem Tipp im Feld steht: { wert, pos } oder null (nichts geändert).
+   * wert, von, bis: Inhalt und Auswahl; was: das Zeichen oder LOESCHEN; max: maxlength (0 = ohne Grenze).
+   */
+  function einfuegen(wert, von, bis, was, max = 0) {
+    wert = String(wert ?? "");
+    von = Math.max(0, Math.min(von ?? wert.length, wert.length));
+    bis = Math.max(von, Math.min(bis ?? von, wert.length));
+    if (was === LOESCHEN) {
+      if (von !== bis) return { wert: wert.slice(0, von) + wert.slice(bis), pos: von };
+      if (!von) return null;
+      return { wert: wert.slice(0, von - 1) + wert.slice(von), pos: von - 1 };
+    }
+    if (max === 1) return { wert: was, pos: was.length }; // ein Häuschen, ein Zeichen
+    const neu = wert.slice(0, von) + was + wert.slice(bis);
+    if (max && neu.length > max) return null;
+    return { wert: neu, pos: von + was.length };
+  }
+
+  function tastenfeld({ tasten, ziel, klasse = "tastenfeld", label = "Tasten", ton = () => {}, leer = null }) {
+    const el = KERN.el;
+    const tippe = taste => {
+      const f = ziel();
+      if (!f) return;
+      const t = typeof taste === "string" ? { text: taste } : taste;
+      f.focus();
+      if (t.tue) { t.tue(f); f.dispatchEvent(new Event("input", { bubbles: true })); return; }
+      const was = t.wert ?? t.text;
+      if (was === LOESCHEN && !f.value && leer) { leer(f); return; }
+      const max = Number(f.getAttribute("maxlength")) || 0;
+      // Ohne Schreibmarke (Ersatz-DOM, nie gewählt) wird hinten angefügt
+      const von = typeof f.selectionStart === "number" ? f.selectionStart : f.value.length;
+      const bis = typeof f.selectionEnd === "number" ? f.selectionEnd : von;
+      const r = einfuegen(f.value, von, bis, was, max);
+      if (!r) return;
+      f.value = r.wert;
+      try { f.setSelectionRange?.(r.pos, r.pos); } catch { /* Felder ohne Schreibmarke */ }
+      if (was !== LOESCHEN) ton("tipp");
+      f.dispatchEvent(new Event("input", { bubbles: true }));
+    };
+    const knopf = taste => {
+      const t = typeof taste === "string" ? { text: taste } : taste;
+      const name = t.label || (t.text === LOESCHEN ? "Löschen" : t.text);
+      return el("button", { type: "button", text: t.text, class: t.klasse || null, "aria-label": name, onclick: () => tippe(taste) });
+    };
+    const element = el("div", { class: klasse, role: "group", "aria-label": label }, ...tasten.map(knopf));
+    // Fokus bleibt im gewählten Feld (sonst ginge die Schreibmarke verloren und die Tastatur des Geräts käme)
+    element.addEventListener("pointerdown", e => e.preventDefault());
+    element.addEventListener("mousedown", e => e.preventDefault());
+    return { element, tippe, ziel };
+  }
+
+  KERN.tastenfeld = Object.assign(tastenfeld, { einfuegen, LOESCHEN });
+})(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
+
+if (typeof module !== "undefined") module.exports = globalThis.KERN;
+
 /* ---- kern/notizblock.js ---- */
 /* Kern — Notizblock für schriftliches Rechnen (Entscheide NB1–NB4 a im Eulenpfad, LERN_Session14; NB1 a–NB4 a für die
    Reihe, LERN_Session19; docs/kern/rahmen.md 4.23). Herkunft: eulenpfad/spiele/gemeinsam/notizblock.js (SCHRIFTLICH).
-   KERN.notizblock({ stellen, dezimal, ton }) → { ziffern, rechne, raster, oeffne, schliessen, knopf, VORLAGEN, istOffen }
+   KERN.notizblock({ stellen, dezimal, ton }) → { ziffern, rechne, raster, oeffne, schliessen, knopf, VORLAGEN, GLEICHUNG, istOffen }
      stellen  Stellen von gross nach klein [{ k, name }] (Standard M … E); dezimal() → "." oder ","; ton(art) (Standard still)
    • raster(n, { links, rechts, komma }) — Stellenwerttabelle mit n Stellen (Einer = Spalte 0), links eine Spalte
      für das Rechenzeichen, rechts weitere (× und Faktor). Zeilen: kopf(), zahl(z), reihe(mache), strich().
    • rechne(art, zahlen) — spaltenweise wie auf Papier: Ergebnisziffern und Überträge (+, −, × einstellig). Subtraktion:
      Übertrag wie beim Ergänzen, er kommt unten dazu (mit dem Lehrmittel abzugleichen).
-   • oeffne({ beiEingabe }) — Notizblock als Feld am Bildrand: Vorlage wählen (+, −, ×, :, Häuschen), Zahlen eintippen,
-     darunter rechnen. Nichts wird geprüft, nichts übernommen, nichts gespeichert (NB3 a Eulenpfad); schliessen() leert ihn.
+   • oeffne({ beiEingabe, vorlagen, gleichung }) — Notizblock als Feld am Bildrand: Vorlage wählen (+, −, ×, :, Häuschen),
+     Zahlen eintippen, darunter rechnen. Nichts wird geprüft, nichts übernommen, nichts gespeichert (NB3 a Eulenpfad);
+     schliessen() leert ihn. vorlagen: Kennungen der angebotenen Vorlagen in ihrer Reihenfolge (Standard + − × : frei).
    Mal mit Komma in der zweiten Zahl (NB3 a, LERN_Session19): gerechnet wird ohne Komma, darunter die Kommaregel als Zeile.
+   Vorlage „=“ Gleichung (GL1 a, LERN_Session20): Zeilen untereinander, je Zeile die Gleichung und rechts vom Strich die
+   Umformung („−3“, „:5“); oben steht gleichung (die der Aufgabe; eine Liste bei einem System, je Gleichung eine Zeile),
+   „＋ Zeile“ schreibt die letzte Zeile ab. Nur wer sie in
+   vorlagen nennt, bietet sie an. Die Ziffern tippt das Tastenfeld (KERN.tastenfeld), bei einer Gleichung dazu die Zeichen.
    Aussehen (Klassen .schriftlich, .notizblock, .nb-*) gibt jede App in ihrem CSS. Greift erst beim Aufruf auf document zu. */
 "use strict";
 
@@ -2972,6 +3052,15 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     { id: ":", text: ": Geteilt", zahlen: [2, 2], hinweis: "Rechts das Ergebnis, darunter Platz für die Schritte." },
     { id: "frei", text: "▦ Häuschen", zahlen: [0, 0], hinweis: "Häuschenpapier: schreib hin, was dir hilft." },
   ];
+  // Gleichung umformen (GL1 a): nicht unter den Standard-Vorlagen, die App nennt sie (Lernsteig je Übung im Katalog)
+  const GLEICHUNG = { id: "=", text: "= Gleichung", zahlen: [0, 0],
+    hinweis: "Rechts vom Strich, was du auf beiden Seiten tust (−3, :5). „＋ Zeile“ schreibt die letzte Zeile ab." };
+  const MAX_ZEILEN = 10; // Zeilen einer Gleichung
+  /** Lösung in der letzten Zeile einer Gleichung („x = 2.5“) als Zahl zum Weiterrechnen, sonst "". */
+  const loesungAus = t => {
+    const m = /^\s*[a-z]\s*=\s*(\d[\d\s]*(?:[.,]\d+)?)\s*$/.exec(String(t));
+    return m && zahlAus(m[1]) ? m[1].replace(/\s/g, "") : "";
+  };
 
   function notizblock({ stellen = STELLEN_STANDARD, dezimal = () => ".", ton = () => {} } = {}) {
     const el = KERN.el;
@@ -3130,8 +3219,11 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
      * Ein Blatt mit bis zu MAX_SCHRITTE Rechnungen untereinander (Wunsch Patrik, LERN_Session15): Unter jede geschriebene
      * Rechnung lässt sich eine neue hängen, ihre erste Zahl ist das, was als Ergebnis geschrieben wurde.
      */
-    function oeffne({ beiEingabe } = {}) {
+    function oeffne({ beiEingabe, vorlagen = null, gleichung = "" } = {}) {
       if (offen) { offen.panel.classList.remove("klein"); document.body.classList.remove("notizblock-klein"); offen.panel.querySelector("button, input")?.focus(); return; }
+      const ALLE = [...VORLAGEN, GLEICHUNG];
+      const startZeilen = [].concat(gleichung || []); // eine Gleichung oder ein System (je Gleichung eine Zeile)
+      const angeboten = vorlagen ? vorlagen.map(id => ALLE.find(v => v.id === id)).filter(Boolean) : VORLAGEN;
       const blatt = el("div", { class: "nb-blatt" });
       const wahl = el("div", { class: "nb-vorlagen", role: "group", "aria-label": "Rechnung wählen" });
       const wahlTitel = el("b", { class: "nb-wahl-titel", text: "Rechnung wählen:" });
@@ -3146,6 +3238,31 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
         schritte.forEach((s, j) => { s.nr.textContent = `${j + 1}.`; });
       };
       const entferne = s => { s.box.remove(); schritte.splice(schritte.indexOf(s), 1); aktualisiereWahl(); };
+
+      /** Gleichung umformen (GL1 a): Zeilen „Gleichung | Umformung“, oben die Gleichung der Aufgabe. */
+      const baueGleichung = v => {
+        const liste = el("div", { class: "nb-gleichung", role: "group", "aria-label": "Gleichung umformen" });
+        const eingabe = (klasse, label, platz) => el("input", { class: `feld ${klasse}`, type: "text", inputmode: "none", autocomplete: "off",
+          spellcheck: "false", "aria-label": label, placeholder: platz });
+        const zeile = text => {
+          const n = liste.children.length + 1;
+          const gl = eingabe("nb-gl", `Gleichung Zeile ${n}`, "… = …");
+          gl.value = text || "";
+          liste.append(el("div", { class: "nb-gl-zeile" }, gl, el("span", { class: "nb-strich", text: "|", "aria-hidden": "true" }),
+            eingabe("nb-umf", `Umformung nach Zeile ${n}`, "−3")));
+          return gl;
+        };
+        if (startZeilen.length) startZeilen.forEach(zeile); else zeile("");
+        const mehr = el("button", { type: "button", class: "knopf hell klein", text: "＋ Zeile", onclick: () => {
+          const f = zeile([...liste.querySelectorAll(".nb-gl")].pop().value);
+          f.focus();
+          zeigeZeichen();
+          try { f.setSelectionRange?.(f.value.length, f.value.length); } catch { /* ohne Schreibmarke */ }
+          if (liste.children.length >= MAX_ZEILEN) mehr.disabled = true;
+          beiEingabe?.();
+        } });
+        return el("div", {}, liste, el("div", { class: "nb-zahlen-knoepfe" }, mehr), el("p", { class: "leise-text nb-hinweis", text: v.hinweis }));
+      };
 
       const neuerSchritt = v => {
         // Eine Rechnung, die noch nicht untereinander steht, wird durch die neue Wahl ersetzt
@@ -3165,6 +3282,17 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
           s.fertig = true;
           aktualisiereWahl();
           flaeche.querySelector(".nb-feld")?.focus();
+          return;
+        }
+        if (v.id === "=") {
+          flaeche.append(baueGleichung(v));
+          s.fertig = true;
+          s.ergebnis = () => loesungAus([...flaeche.querySelectorAll(".nb-gl")].pop()?.value);
+          aktualisiereWahl();
+          const erste = flaeche.querySelector(".nb-gl");
+          if (erste.value) flaeche.querySelector(".nb-umf").focus(); else erste.focus();
+          zeigeZeichen(); // auch ohne focusin (Ersatz-DOM)
+          s.box.scrollIntoView?.({ block: "nearest" });
           return;
         }
         const felder = [];
@@ -3242,30 +3370,22 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
         const a = document.activeElement;
         if (a && panel.contains(a) && a.matches("input")) return a;
         if (zuletzt?.isConnected) return zuletzt;
-        return [...panel.querySelectorAll(".nb-zahl")].find(f => !f.value) || panel.querySelector(".nb-zahl, .nb-feld");
+        return [...panel.querySelectorAll(".nb-zahl")].find(f => !f.value) || panel.querySelector(".nb-zahl, .nb-feld, .nb-gl");
       };
-      const tippe = was => {
-        const f = ziel();
-        if (!f) return;
-        f.focus();
-        if (was === "⌫") {
-          if (!f.value && f.classList.contains("nb-feld")) { weiter(f, false); return; }
-          f.value = f.value.slice(0, -1);
-        } else {
-          const max = Number(f.getAttribute("maxlength")) || 99;
-          if (f.classList.contains("nb-feld")) f.value = was; // ein Häuschen, eine Ziffer
-          else if (f.value.length < max) f.value += was;
-          else return;
-          ton("tipp");
-        }
-        f.dispatchEvent(new Event("input", { bubbles: true }));
-      };
-      const tasten = el("div", { class: "nb-tasten", role: "group", "aria-label": "Ziffern für den Notizblock" },
-        ...["1", "2", "3", "4", "5", kommaZeichen(), "6", "7", "8", "9", "0", "⌫"].map(z => el("button", { type: "button", text: z,
-          "aria-label": z === "⌫" ? "Löschen" : z === kommaZeichen() ? "Komma" : z, onclick: () => tippe(z) })));
-      tasten.addEventListener("pointerdown", e => e.preventDefault()); // Fokus bleibt im gewählten Feld
-      tasten.addEventListener("mousedown", e => e.preventDefault());
-      for (const v of VORLAGEN) wahl.append(el("button", { type: "button", class: "chip", "data-vorlage": v.id, "aria-pressed": "false", text: v.text,
+      // Das Tastenfeld des Kerns (TF1 a): Ziffern wie bisher; ⌫ im leeren Häuschen geht eines zurück
+      const tasten = KERN.tastenfeld({ klasse: "nb-tasten", label: "Ziffern für den Notizblock", ziel, ton,
+        leer: f => { if (f.classList.contains("nb-feld")) weiter(f, false); },
+        tasten: ["1", "2", "3", "4", "5", { text: kommaZeichen(), label: "Komma" }, "6", "7", "8", "9", "0", "⌫"] }).element;
+      // Bei einer Gleichung dazu die Zeichen, nur solange ein Feld der Gleichung gewählt ist (GL1 a): ihre Variablen
+      // (ohne Gleichung x), Rechenzeichen, Klammern, =; ² und / nur, wenn die Gleichung sie hat (x², 3/x)
+      const text = startZeilen.join(" ");
+      const variablen = [...new Set(text.match(/[a-z]/g) || ["x"])];
+      const zeichenFeld = angeboten.includes(GLEICHUNG) ? KERN.tastenfeld({ klasse: "nb-tasten nb-zeichen", label: "Zeichen für die Gleichung", ziel, ton,
+        tasten: [...variablen, "+", { text: "−", label: "Minus" }, { text: "·", label: "Mal" }, { text: ":", label: "Geteilt" }, "(", ")", "=",
+          ...(/²/.test(text) ? ["²"] : []), ...(/\//.test(text) ? [{ text: "/", label: "Bruchstrich" }] : [])] }).element : null;
+      if (zeichenFeld) zeichenFeld.hidden = true;
+      const zeigeZeichen = () => { if (zeichenFeld) zeichenFeld.hidden = !ziel()?.matches?.(".nb-gl, .nb-umf"); };
+      for (const v of angeboten) wahl.append(el("button", { type: "button", class: "chip", "data-vorlage": v.id, "aria-pressed": "false", text: v.text,
         onclick: () => neuerSchritt(v) }));
       const zu = el("button", { type: "button", class: "nb-zu", "aria-label": "Notizblock schliessen", title: "Schliessen (leert den Block)", text: "✕", onclick: schliessen });
       const klein = el("button", { type: "button", class: "nb-zu", "aria-label": "Notizblock verkleinern", title: "Verkleinern", text: "▁",
@@ -3273,9 +3393,9 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       const panel = el("aside", { class: "notizblock", role: "dialog", "aria-label": "Notizblock" },
         el("div", { class: "nb-kopf" }, el("b", { text: "📝 Notizblock" }), el("span", { class: "leise-text", text: "wird nicht bewertet" }), klein, zu),
         el("div", { class: "nb-inhalt" }, blatt, wahlBox),
-        el("div", { class: "nb-fuss" }, tasten));
+        el("div", { class: "nb-fuss" }, zeichenFeld, tasten));
       // Ziffer getippt: weiter in Schreibrichtung; Rücktaste im leeren Feld: zurück. Erstes Hineinschreiben meldet beiEingabe.
-      panel.addEventListener("focusin", e => { if (e.target.matches?.("input")) { zuletzt = e.target; e.target.inputMode = "none"; } });
+      panel.addEventListener("focusin", e => { if (e.target.matches?.("input")) { zuletzt = e.target; e.target.inputMode = "none"; zeigeZeichen(); } });
       panel.addEventListener("input", e => {
         const f = e.target;
         if (f.classList?.contains("nb-feld") && f.value) weiter(f, true);
@@ -3300,13 +3420,13 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     }
 
     /** Knopf „📝 Notizblock“; beiEingabe wie bei oeffne. klasse: Klassen des Knopfs in der App. */
-    const knopf = (beiEingabe, { klasse = "knopf hell klein" } = {}) => el("button", { type: "button", class: `${klasse} nb-knopf`, text: "📝 Notizblock",
-      title: "Schriftlich rechnen wie auf einem Blatt — wird nicht bewertet", onclick: () => oeffne({ beiEingabe }) });
+    const knopf = (beiEingabe, { klasse = "knopf hell klein", vorlagen = null, gleichung = "" } = {}) => el("button", { type: "button", class: `${klasse} nb-knopf`, text: "📝 Notizblock",
+      title: "Schriftlich rechnen wie auf einem Blatt — wird nicht bewertet", onclick: () => oeffne({ beiEingabe, vorlagen, gleichung }) });
 
-    return { ziffern, rechne, raster, oeffne, schliessen, knopf, VORLAGEN, istOffen: () => !!offen };
+    return { ziffern, rechne, raster, oeffne, schliessen, knopf, VORLAGEN, GLEICHUNG, istOffen: () => !!offen };
   }
 
-  KERN.notizblock = Object.assign(notizblock, { rechne, ziffern, zahlAus, kommaregel, VORLAGEN, STELLEN: STELLEN_STANDARD, MAX_STELLEN, MAX_NACHKOMMA });
+  KERN.notizblock = Object.assign(notizblock, { rechne, ziffern, zahlAus, kommaregel, loesungAus, VORLAGEN, GLEICHUNG, STELLEN: STELLEN_STANDARD, MAX_STELLEN, MAX_NACHKOMMA, MAX_ZEILEN });
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 
 if (typeof module !== "undefined") module.exports = globalThis.KERN;

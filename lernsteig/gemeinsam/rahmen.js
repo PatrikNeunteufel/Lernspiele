@@ -400,17 +400,24 @@
         aufgabeFeld.replaceChildren(...[el("span", { class: a.text.length > 36 ? "term lang" : "term", text: a.text, lang: eintrag.sprache }), a.darstellung ? darstellung(a.darstellung) : null].filter(Boolean));
         rueck.replaceChildren();
         rueck.className = "rueckmeldung";
-        const feld = el("input", { class: "eingabe", type: "text", inputmode: "text", autocomplete: "off", spellcheck: "false", "aria-label": "Ergebnis" });
-        const ok = el("button", { type: "button", class: "knopf haupt", text: "Prüfen" });
+        // Die Tastatur des Geräts bleibt zu (inputmode none), getippt wird mit dem Tastenfeld darunter (TF1 a, KERN.tastenfeld);
+        // eine echte Tastatur schreibt weiter ins Feld
+        const feld = el("input", { class: "eingabe", type: "text", inputmode: "none", autocomplete: "off", spellcheck: "false", "aria-label": "Ergebnis" });
+        const ok = el("button", { type: "button", class: "knopf haupt tf-pruefen", text: "Prüfen" });
         const termAntwort = a.art === "term";
-        const minus = termAntwort ? null : el("button", { type: "button", class: "knopf", text: "±", "aria-label": "Vorzeichen wechseln", title: "Vorzeichen wechseln" });
-        // Hilfstasten für Term-Antworten (a.tasten, etwa ["a", "b", "²", "(", ")"]): fügen an der Schreibmarke ein
-        const hilfe = termAntwort && a.tasten ? el("div", { class: "term-tasten", role: "group", "aria-label": "Zeichen einfügen" },
-          a.tasten.map(t => el("button", { type: "button", class: "knopf klein-knopf", text: t, onclick: () => {
-            const p = feld.selectionStart ?? feld.value.length, q = feld.selectionEnd ?? p;
-            feld.value = feld.value.slice(0, p) + t + feld.value.slice(q);
-            feld.focus(); feld.setSelectionRange(p + t.length, p + t.length);
-          } }))) : null;
+        // Zahl: Ziffern, Komma, ± (Vorzeichen wechseln), ⌫. Term: Ziffern, die Zeichen der Aufgabe (a.tasten, etwa
+        // ["a", "b", "²", "(", ")"]) und + − ·, ⌫ — eingefügt an der Schreibmarke.
+        const vorzeichen = { text: "±", label: "Vorzeichen wechseln", tue: f => {
+          const v = f.value.trim();
+          f.value = /^[-−]/.test(v) ? v.replace(/^[-−]\s*/, "") : LST.MINUS + v;
+        } };
+        const ZIFFERN = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+        const tasten = termAntwort
+          ? [...ZIFFERN, ...new Set([...(a.tasten || []), "+", LST.MINUS, "·"]), "⌫"]
+              .map(t => (t === LST.MINUS ? { text: t, label: "Minus" } : t === "·" ? { text: t, label: "Mal" } : t))
+          : ["1", "2", "3", "4", "5", { text: LST.dezimalZeichen(), label: "Komma" }, "6", "7", "8", "9", "0", "⌫", vorzeichen];
+        const tastenfeld = KERN.tastenfeld({ tasten, ziel: () => feld, klasse: `tastenfeld antwort-tasten${termAntwort ? " term-tasten" : ""}`, label: "Tasten für die Antwort" }).element;
+        tastenfeld.append(ok);
         aktuellesFeld = feld;
         const rechnerKnopf = rechnerFeld && rechner && rechner !== "ohne"
           ? el("button", { type: "button", class: "knopf rechner-knopf", text: "Rechner", "aria-pressed": String(!rechnerEl.hidden), onclick: () => {
@@ -430,7 +437,10 @@
         NOTIZBLOCK.schliessen();
         const mitBlock = !auswahl && !termAntwort && eintrag.notizblock !== false;
         let blockBenutzt = false;
-        const blockKnopf = mitBlock ? NOTIZBLOCK.knopf(() => { blockBenutzt = true; }, { klasse: "knopf" }) : null;
+        // Vorlagen je Übung (Katalog notizblock: […], GL1 a); die Gleichung der Aufgabe steht dann oben im Block
+        const vorlagen = Array.isArray(eintrag.notizblock) ? eintrag.notizblock : null;
+        const gleichung = vorlagen && vorlagen.includes("=") ? a.gleichung || "" : "";
+        const blockKnopf = mitBlock ? NOTIZBLOCK.knopf(() => { blockBenutzt = true; }, { klasse: "knopf", vorlagen, gleichung }) : null;
         let auswahlKnoepfe = [];
         if (auswahl) {
           aktuellesFeld = null;
@@ -446,11 +456,10 @@
           const weg = () => document.removeEventListener("keydown", taste);
           auswahlAufraeumen = weg;
         } else {
-          antwort.replaceChildren(...[minus, feldGruppe, ok, rechnerKnopf, blockKnopf, hilfe].filter(Boolean));
+          antwort.replaceChildren(...[feldGruppe, rechnerKnopf, blockKnopf, tastenfeld].filter(Boolean));
         }
         if (termAntwort) feld.classList.add("term-eingabe");
         if (!auswahl) feld.focus();
-        if (minus) minus.onclick = () => { const v = feld.value.trim(); feld.value = /^[-−]/.test(v) ? v.replace(/^[-−]\s*/, "") : LST.MINUS + v; feld.focus(); };
         const pruefe = (wahlIndex) => {
           if (gelost) return;
           let wert, richtig;

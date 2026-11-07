@@ -37,7 +37,8 @@ const klammer = (a, b) => `${a === 1 ? "" : a === -1 ? M : dez(a)}(x ${b > 0 ? "
 function fertig(stufe, typ, gleichung, x, schritte) {
   const loes = `x = ${dez(x)}`;
   if (schritte[schritte.length - 1] === loes) schritte = schritte.slice(0, -1);
-  return { art: "zahl", stufe, typ, text: gleichung, vor: "x =", antwort: rund(x), loesung: loes, weg: schritte.concat(loes).join(" → "), kennung: gleichung };
+  // gleichung: steht im Notizblock oben, wenn er die Vorlage „= Gleichung“ anbietet (GL1 a)
+  return { art: "zahl", stufe, typ, text: gleichung, gleichung, vor: "x =", antwort: rund(x), loesung: loes, weg: schritte.concat(loes).join(" → "), kennung: gleichung };
 }
 
 // ---------- Stufe h: Umkehroperation ----------
@@ -189,6 +190,7 @@ function leseLinear(text) {
 function pruefeAufgabe(a, stufe, niveau) {
   const maengel = [];
   if (a.stufe !== stufe) maengel.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
+  if (a.gleichung !== a.text) maengel.push(`Gleichung für den Notizblock „${a.gleichung}“ statt „${a.text}“ (GL1 a)`);
   const teile = a.kennung.split(" = ");
   if (teile.length !== 2) return [`keine Gleichung: ${a.kennung}`];
   let L, R;

@@ -574,9 +574,16 @@ Eulenpfad, LERN_Session14, docs/eulenpfad/rahmen.md 21). Verhalten im Kern, Auss
 | Aufruf | Ergebnis |
 |---|---|
 | `KERN.notizblock({ stellen, dezimal, ton })` | Notizblock einer App: `stellen` von gross nach klein `[{ k, name }]` (Standard M … E), `dezimal()` → „.“ oder „,“, `ton(art)` (Standard still) |
-| `oeffne({ beiEingabe })`, `schliessen()`, `istOffen()`, `knopf(beiEingabe, { klasse })` | Block am Bildrand öffnen (Vorlagen +, −, ×, :, Häuschen; bis 6 Rechnungen auf einem Blatt, Weiterrechnen mit dem geschriebenen Ergebnis; eigenes Ziffernfeld); nichts geprüft, nichts übernommen, nichts gespeichert |
+| `oeffne({ beiEingabe, vorlagen, gleichung })`, `schliessen()`, `istOffen()`, `knopf(beiEingabe, { klasse, vorlagen, gleichung })` | Block am Bildrand öffnen (Vorlagen +, −, ×, :, Häuschen; bis 6 Rechnungen auf einem Blatt, Weiterrechnen mit dem geschriebenen Ergebnis; Ziffern über `KERN.tastenfeld`, 4.24); nichts geprüft, nichts übernommen, nichts gespeichert. `vorlagen`: Kennungen der angebotenen Vorlagen in ihrer Reihenfolge (Standard `+ − × : frei`); `gleichung`: Text oder Liste für die Vorlage „=“ |
 | `raster(n, { links, rechts, komma })`, `rechne(art, zahlen)` | Stellenwerttabelle und Rechnen spaltenweise wie auf Papier (für die Schriftlich-Werkstatt) |
-| `KERN.notizblock.zahlAus(t)`, `kommaregel(ka, kb)`, `VORLAGEN`, `STELLEN` | Zahl aus einem Feld lesen (7 Ziffern, 3 nach dem Komma); Kommaregel als Satz |
+| `KERN.notizblock.zahlAus(t)`, `kommaregel(ka, kb)`, `loesungAus(t)`, `VORLAGEN`, `GLEICHUNG`, `STELLEN` | Zahl aus einem Feld lesen (7 Ziffern, 3 nach dem Komma); Kommaregel als Satz; Lösung „x = 2.5“ einer Gleichungszeile zum Weiterrechnen |
+
+**Gleichung umformen** (GL1 a, seit 1.23.0): Vorlage „=“, nur wer sie in `vorlagen` nennt. Zeilen untereinander, je Zeile
+die Gleichung (`.nb-gl`) und rechts vom Strich die Umformung (`.nb-umf`, „−3“, „:5“); oben die `gleichung` (bei einer
+Liste je Gleichung eine Zeile, für Systeme), „＋ Zeile“ schreibt die letzte Zeile ab (höchstens 10). Über den Ziffern ein
+zweites Tastenfeld (`.nb-zeichen`) mit den Variablen der Gleichung (ohne Gleichung x), + − · : ( ) = und ² und /, wenn die
+Gleichung sie hat — sichtbar, solange ein Feld der Gleichung gewählt ist. Nichts wird nachgerechnet. Steht in der letzten
+Zeile „x = Zahl“, beginnt die nächste Rechnung mit dieser Zahl.
 
 **Mal mit Komma in beiden Zahlen** (NB3 a): Hat die zweite Zahl ein Komma, rechnet der Block ohne Komma (beide Zahlen als
 ganze Zahlen), darunter steht die Kommaregel („2 + 1 = 3 Stellen nach dem Komma“), das Ergebnis bekommt eine Spalte für
@@ -587,9 +594,32 @@ Benutzt vom Eulenpfad (`SCHRIFTLICH` als Hülle: `LS.STELLEN`, Dezimalzeichen de
 die Schriftlich-Werkstatt) und vom Lernsteig (`rahmen.js`: Knopf bei jeder Zahl-Antwort, NB2 a; Aussehen sachlich, NB4 a).
 Geprüft in `tools/pruefe_kern.js` (rechne gegen 3000 Nachrechnungen, zahlAus, Kommaregel, ohne DOM ladbar) und im
 Seitentest des Lernsteigs (öffnen, 0.47 × 0.8 mit Kommaregel und Häuschen für 0.376, Weiterrechnen mit 0.376, Komma nur
-in der ersten Zahl, Block zu bei der nächsten Aufgabe); Eulenpfad-Stichprobe mit gleichen Klickzahlen wie vorher.
+in der ersten Zahl, Block zu bei der nächsten Aufgabe; seit 1.23.0 Standard-Vorlagen ohne Gleichung, in `gleichungen` j die
+Gleichung der Aufgabe oben, Umformung „−3“ mit den Tasten, „＋ Zeile“, Weiterrechnen mit x = 5); Eulenpfad-Stichprobe mit
+gleichen Klickzahlen wie vorher.
 
-### 4.24 Geplant
+### 4.24 `KERN.tastenfeld` (`kern/tastenfeld.js`) — Tasten für ein Eingabefeld
+
+Entscheid TF1 a (LERN_Session20, seit 1.23.0); Herkunft: das Ziffernfeld des Notizblocks (4.23). Tasten, die in ein
+gewähltes Feld schreiben, ohne ihm den Fokus zu nehmen — die Tastatur des Geräts bleibt zu, die Schreibmarke bleibt.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `KERN.tastenfeld({ tasten, ziel, klasse, label, ton, leer })` | `{ element, tippe(taste), ziel }`: je Taste ein Knopf in `element` (Klassen `klasse`, Standard `tastenfeld`; Rolle `group` mit `label`) |
+| `tasten` | Zeichenkette = Taste, die sich selbst schreibt („7“, „x“, „·“); „⌫“ löscht vor der Schreibmarke; Objekt `{ text, label, klasse, wert, tue(feld) }` schreibt `wert` (Standard `text`) oder tut selbst etwas (Vorzeichen wechseln) |
+| `ziel()` | das Feld, in das geschrieben wird (die App entscheidet; `null` = nichts) |
+| `ton(art)`, `leer(feld)` | Ton beim Tippen (Standard still); ⌫ in einem leeren Feld (Notizblock: ein Häuschen zurück) |
+| `KERN.tastenfeld.einfuegen(wert, von, bis, was, max)` | die Regel ohne DOM: `{ wert, pos }` oder `null` (nichts geändert) |
+
+Ein Feld mit `maxlength` 1 (Häuschen) wird ersetzt, sonst wird an der Schreibmarke eingefügt (eine Auswahl ersetzt),
+höchstens bis `maxlength`; ohne Schreibmarke hinten. Nach jedem Tippen meldet das Feld `input` wie beim Schreiben mit der
+Tastatur. Aussehen im CSS der App. Benutzt vom Notizblock (Ziffern und Zeichen der Gleichung) und vom Lernsteig (Antwort,
+lernsteig/rahmen.md 5); `LS.tastatur` des Eulenpfads bleibt eigen (schreibt in eine Anzeige, Kurztasten, Klickzahlen des
+Testskripts). Geprüft in `tools/pruefe_kern.js` (11 Fälle der Einfügeregel) und im Seitentest des Lernsteigs (1 2 , 5 ±
+⌫ ergibt die erwarteten Werte, die Antwort nur mit Tasten getippt und geprüft, Taste eines Terms an der Schreibmarke; je
+Aufgabe Tastenfeld mit allen Tasten und `inputmode` none).
+
+### 4.25 Geplant
 
 Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): die
 Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Prüfen der Antwort und der Vertrag `aufgabeErzeugen`/`pruefeAufgabe`

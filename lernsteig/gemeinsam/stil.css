@@ -100,8 +100,14 @@ button, input { font: inherit; color: inherit; }
 .graph .beschriftung { fill: var(--leise); font-size: 11px; }
 .graph .achsname { fill: var(--text); font-weight: 700; }
 .term.lang { font-size: clamp(18px, 4.6vw, 22px); font-weight: 500; line-height: 1.4; }
-.term-tasten { flex-basis: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-.klein-knopf { min-height: 44px; min-width: 44px; padding: 4px 10px; font-size: 18px; }
+/* Tastenfeld unter der Antwort (TF1 a, KERN.tastenfeld): sechs Spalten; bei Zahlen steht „Prüfen“ neben ±, bei Termen
+   in einer eigenen Zeile */
+.antwort-tasten { flex-basis: 100%; display: grid; grid-template-columns: repeat(6, minmax(40px, 56px)); justify-content: center; gap: 6px; }
+.antwort-tasten button:not(.knopf) { min-height: 44px; border: 1px solid var(--rand); border-radius: 8px; background: var(--karte); font: inherit;
+  font-size: 19px; font-weight: 600; color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums; }
+.antwort-tasten button:not(.knopf):active { background: var(--flaeche); }
+.antwort-tasten .tf-pruefen { grid-column: span 5; }
+.antwort-tasten.term-tasten .tf-pruefen { grid-column: 1 / -1; }
 .feld-gruppe .eingabe.term-eingabe, .eingabe.term-eingabe { width: min(300px, 80vw); text-align: left; }
 .rechner-modell { width: 100%; min-height: 40px; margin-bottom: 8px; border-radius: 8px; border: 0; padding: 4px 8px; font: inherit; font-size: 15px; background: #3d4b57; color: #fff; }
 .rechner-tipp { background: #fff4dc; color: #8a5a00; border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; font-size: 14px; }
@@ -180,6 +186,14 @@ button, input { font: inherit; color: inherit; }
 .nb-tasten { display: grid; grid-template-columns: repeat(6, minmax(36px, 52px)); gap: 6px; margin: 8px 0 4px; }
 .nb-tasten button { min-height: 40px; border: 1px solid var(--rand); border-radius: 8px; background: var(--karte); font: inherit; font-size: 19px; font-weight: 600; color: var(--text); cursor: pointer; }
 .nb-tasten button:active { background: var(--flaeche); }
+.nb-tasten[hidden] { display: none; }
+.nb-zeichen { margin-bottom: 0; grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); }
+/* Gleichung umformen im Notizblock (GL1 a): je Zeile Gleichung | Umformung */
+.nb-gleichung { display: grid; gap: 6px; }
+.nb-gl-zeile { display: flex; align-items: center; gap: 6px; }
+.notizblock .nb-gl { flex: 1; min-width: 0; min-height: 44px; font-size: 18px; font-variant-numeric: tabular-nums; }
+.nb-strich { font-size: 22px; color: var(--leise); }
+.notizblock .nb-umf { width: 7ch; min-height: 44px; font-size: 18px; font-variant-numeric: tabular-nums; }
 @media (min-width: 1100px) { body.mit-notizblock:not(.notizblock-klein) .buehne { margin-right: 480px; } }
 @media (max-width: 1099px) {
   .notizblock { right: 0; left: 0; top: auto; bottom: 0; width: auto; max-height: 58vh; border-radius: var(--radius) var(--radius) 0 0; border-bottom: none; }

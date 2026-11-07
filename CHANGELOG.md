@@ -677,3 +677,21 @@
   docs/kern/rahmen.md 4.23 (neu), 4.24; rahmen.md 21; lernsteig/rahmen.md 5a0 (neu); Plan (NB1–NB4 a); Kern-Changelog.
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session19_2026-11-07.md`, Handover Eulenpfad (Haltepunkt aufgelöst, LERN-60 auf
   Kern 1.22.0) und Lernsteig.
+
+## 2026-11-07 — LERN_Session20
+- Kern 1.23.0 (Meldung Patrik: im Lernsteig hatte nur der Notizblock Tasten, die Aufgabe nicht; Gleichungen sollen sich im
+  Block auflösen lassen; Entscheide TF1 a, GL1 a im Plan): `kern/tastenfeld.js` (`KERN.tastenfeld`) — Tasten, die in ein
+  gewähltes Feld schreiben, ohne ihm den Fokus zu nehmen, aus dem Ziffernfeld des Notizblocks; der Notizblock benutzt es
+  mit denselben Tasten. Neu im Notizblock die Vorlage „= Gleichung“: Zeilen „Gleichung | Umformung“, oben die Gleichung der
+  Aufgabe (bei einem System beide), „＋ Zeile“ schreibt die letzte ab, Zeichen der Gleichung im Tastenfeld, nichts
+  bewertet; die App wählt die Vorlagen.
+- Lernsteig: unter jeder Zahl- und Term-Antwort ein Tastenfeld (Zahl: Ziffern, Komma, ⌫, ±, Prüfen; Term: dazu die Zeichen
+  der Aufgabe und + − ·, ersetzt die Zeichenzeile und den Knopf ±), Tastatur des Geräts zu; Vorlagen je Übung im Katalog
+  (`notizblock: […]`), „= Gleichung“ zuerst in `gleichungen` und `binome-gleichungen`; Aufgaben tragen `gleichung`
+  (`pruefeAufgabe` prüft, dass sie zur Aufgabe passt; Gegenprobe ohne sie schlägt an).
+- Eulenpfad: unverändert (Kern-Kopie 1.23.0; Stichprobe schriftlich-werkstatt, rechenprobe, malkreuz, zahlenhaus,
+  preis-tabelle, quader-volumen mit denselben Klickzahlen wie mit Kern 1.22.0, 36 Stufen).
+- Tests: Kern „5612 Fälle, 0 Fehler.“ (Einfügeregel, Vorlagen, Lösung zum Weiterrechnen), Lernsteig „0 Fehler, 0 Hinweise.“
+  (Tastenfeld je Aufgabe, Antwort nur mit Tasten getippt und geprüft, Gleichung im Block mit Umformung, ＋ Zeile und
+  Weiterrechnen), Konten 83 Fälle, Gratwanderung „Keine Fehler.“ Im Browser: gleichungen j am Desktop und auf 375 px.
+  docs/kern/rahmen.md 4.23, 4.24 (neu), 4.25; lernsteig/rahmen.md 4, 5a0; Plan (TF1 a, GL1 a); Kern-Changelog.

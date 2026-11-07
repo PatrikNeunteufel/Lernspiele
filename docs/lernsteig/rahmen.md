@@ -66,13 +66,19 @@ Leerzeichen, Punkt und Komma sind erlaubt.
   → `{ art: "zahl", stufe, typ, text, antwort, loesung, weg, kennung, daten }`. `stufe` nennt die Lehrplan-Stufe der
   Aufgabe (fürs Protokoll und den Kompetenzstand), `kennung` erkennt Wiederholungen, `weg` ist der Lösungsweg.
 - **Term-Antworten:** `art: "term"` mit `antwortTerm` (etwa „3a + 4b + 5/8“), `form` (`vereinfacht`, `potenz`,
-  `ausgeklammert`, `frei`) und `tasten` (Hilfstasten). Der Rahmen prüft mit `LST_TERME.bewerte`: gleichwertig und in
+  `ausgeklammert`, `frei`) und `tasten` (Zeichen, die das Tastenfeld der Antwort dazu zeigt, etwa `["a", "²", "(", ")"]`;
+  Ziffern und + − · hat es immer). Der Rahmen prüft mit `LST_TERME.bewerte`: gleichwertig und in
   der Form → richtig; gleichwertig, aber Form falsch → Hinweis ohne Fehlversuch; nicht gleichwertig → Fehlversuch.
   `KERN.terme` (docs/kern/rahmen.md 4.17, über `gemeinsam/terme.js`) liest Variablen a–z, Zahlen, Brüche „5/8“,
   `+ − · * : ( )`, implizites Mal und Potenzen („^2“, „²“, „x²³“ = x^23) exakt als Polynom; Exponent höchstens 100.
 - **Auswahl-Antworten:** `art: "auswahl"` mit `optionen` (Texte) und `richtig` (Index); der Rahmen zeigt Knöpfe mit
   Kurztasten 1 … n, eine falsche Wahl wird gesperrt (Fehlversuch), `kennung` soll die Antworten enthalten.
 - Optional `vor` („x =“) und `einheit` („m²“): Text vor und nach dem Eingabefeld.
+- **Tastenfeld der Antwort** (TF1 a, `KERN.tastenfeld`, docs/kern/rahmen.md 4.24): unter jeder Zahl- und Term-Antwort;
+  Zahl mit Ziffern, Komma (Zeichen der Einstellung), ⌫, ± und „Prüfen“, Term mit Ziffern, `tasten` und + − ·, ⌫ und
+  „Prüfen“. Die Tastatur des Geräts bleibt zu (`inputmode` none), eine echte Tastatur schreibt weiter ins Feld.
+- Optional `gleichung` (Text oder Liste bei einem System): steht im Notizblock oben, wenn die Übung die Vorlage
+  „= Gleichung“ anbietet (5a0).
 - Katalogfeld `sprache` („en“, „fr“): Aufgabentext und Antworten tragen dieses `lang`, damit Vorlesefunktionen und
   Silbentrennung die Fremdsprache erkennen; die Seite bleibt `de-CH`.
 - Optional `darstellung`: `{ art: "tabelle", kopf, zeilen }` (Wertetabelle) oder `{ art: "graph", m, b, x: [min, max],
@@ -122,6 +128,11 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   wurde, sonst „ohne“.
 - Aussehen sachlich (NB4 a, `stil.css`): Stellen mit ihren Buchstaben in neutraler Farbe, keine Stellenfarben; ab 1100 px
   rechts neben der Aufgabe (die Bühne rückt nach links), auf Tablet quer schmaler rechts, sonst unten wie ein Blatt.
+- **Gleichung umformen** (GL1 a, LERN_Session20): Eine Übung nennt im Katalog die Vorlagen ihres Blocks in ihrer
+  Reihenfolge (`notizblock: ["=", "+", "−", "×", ":", "frei"]`, heute `gleichungen` und `binome-gleichungen`); ohne Liste
+  die Standard-Vorlagen. Bei „= Gleichung“ steht die `gleichung` der Aufgabe oben (bei einem System je Gleichung eine
+  Zeile), darunter Zeilen mit der Umformung rechts vom Strich; Zeichen der Gleichung im Tastenfeld des Blocks. Nichts wird
+  nachgerechnet. `pruefeAufgabe` beider Übungen prüft, dass `gleichung` zur Aufgabe passt.
 
 ## 5a. Taschenrechner (TR1 a, RE1 a, RM1 b)
 

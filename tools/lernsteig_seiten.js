@@ -239,6 +239,17 @@ async function pruefeSeiten(uebungen, melde, LST) {
             kennungen.add(a.kennung);
             arten.push(a.art);
             textPruefen(ort, s);
+            // TF1 a: bei Zahl- und Term-Antworten ein Tastenfeld, die Tastatur des Geräts bleibt zu; bei Termen mit den
+            // Zeichen der Aufgabe
+            if (a.art !== "auswahl") {
+              const tf = s.lauf(`(() => { const t = document.querySelector(".antwort .antwort-tasten"); return t ? { tasten: [...t.querySelectorAll("button")].map(b => b.textContent), modus: document.querySelector(".eingabe").getAttribute("inputmode") } : null; })()`);
+              if (!tf) melde(ort, "kein Tastenfeld bei einer Eingabe");
+              else {
+                const fehlt = [..."0123456789", "⌫", "Prüfen", ...(a.art === "term" ? a.tasten || [] : ["±"])].filter(t => !tf.tasten.includes(t));
+                if (fehlt.length) melde(ort, `Tastenfeld ohne ${fehlt.join(" ")}`);
+                if (tf.modus !== "none") melde(ort, `Eingabe mit inputmode „${tf.modus}“ statt none`);
+              }
+            }
             // Grafik im Bild (LERN_Session19): höchstens so hoch wie breit — vorher bis 2900 px (kraefte)
             if (a.darstellung && a.darstellung.art === "graph") {
               const vb = (s.lauf(`(document.querySelector(".aufgabe svg.graph") || { getAttribute: () => "" }).getAttribute("viewBox")`) || "").split(" ").map(Number);
@@ -339,6 +350,9 @@ async function pruefeSeiten(uebungen, melde, LST) {
       if (!s.gibt(".nb-knopf")) throw new Error("kein Knopf „Notizblock“ bei einer Zahl-Antwort");
       s.klick(".nb-knopf");
       if (!s.gibt(".notizblock")) throw new Error("Notizblock öffnet nicht");
+      // ohne Eintrag im Katalog die Standard-Vorlagen, ohne Gleichung und ohne ihre Zeichen (GL1 a)
+      const chips = s.lauf(`[...document.querySelectorAll(".notizblock .chip")].map(c => c.dataset.vorlage).join(" ")`);
+      if (chips !== "+ − × : frei" || s.gibt(".notizblock .nb-zeichen")) throw new Error(`Vorlagen „${chips}“, Zeichen ${s.gibt(".notizblock .nb-zeichen")}`);
       s.klick('.notizblock .chip[data-vorlage="×"]');
       const zahlen = s.lauf(`[...document.querySelectorAll(".notizblock .nb-zahl")].length`);
       if (zahlen !== 2) throw new Error(`Mal: ${zahlen} Zahlenfelder statt 2`);
@@ -365,6 +379,79 @@ async function pruefeSeiten(uebungen, melde, LST) {
       if (s.gibt(".notizblock")) { /* noch dieselbe Aufgabe bis „Weiter“ */ }
       s.klick(".knopf.weiter"); await ruhe(s, 20, 3);
       if (s.gibt(".notizblock")) throw new Error("bei der nächsten Aufgabe ist der Block noch offen");
+    } catch (err) { melde(ort, err.message); }
+    fehlerVon(ort, s);
+  }
+  // ---------- Tastenfeld der Antwort (TF1 a, KERN.tastenfeld): mit den Tasten tippen und prüfen ----------
+  {
+    const ort = "Tastenfeld (rationale-zahlen g, terme)";
+    const s = oeffne("uebungen/rationale-zahlen/index.html", { search: "?niveau=n1&stufe=g", ...alsJugendlicher() });
+    await ruhe(s);
+    try {
+      // nach der Beschriftung (der Ersatz-DOM liest keine Attributwerte mit Leerzeichen)
+      const BESCHRIFTUNG = { Komma: ".", "Vorzeichen wechseln": "±", "Löschen": "⌫" };
+      const taste = name => s.klick(".antwort-tasten button", BESCHRIFTUNG[name] || name);
+      const wert = () => s.lauf(`document.querySelector(".eingabe").value`);
+      for (const t of ["1", "2", "Komma", "5"]) taste(t);
+      if (wert() !== "12.5") throw new Error(`1 2 , 5 ergab „${wert()}“`);
+      taste("Vorzeichen wechseln");
+      if (wert() !== "−12.5") throw new Error(`± ergab „${wert()}“`);
+      taste("Vorzeichen wechseln"); taste("Löschen");
+      if (wert() !== "12.") throw new Error(`± ⌫ ergab „${wert()}“`);
+      for (let i = 0; i < 3; i++) taste("Löschen");
+      if (wert() !== "") throw new Error(`nach viermal ⌫ steht „${wert()}“`);
+      // die richtige Antwort nur mit den Tasten, dann „Prüfen“ im Tastenfeld
+      const a = s.lauf("LST.pruefung.aufgabe()");
+      const z = klar(a.antwort);
+      for (const c of z.replace("-", "")) taste(c === "." ? "Komma" : c);
+      if (z.startsWith("-")) taste("Vorzeichen wechseln");
+      s.klick(".antwort-tasten .tf-pruefen");
+      await ruhe(s, 20, 3);
+      const t = s.lauf(`document.querySelector(".rueckmeldung").textContent`).trim();
+      if (t !== "Richtig.") throw new Error(`${z} mit den Tasten getippt: «${t.slice(0, 80)}»`);
+    } catch (err) { melde(ort, err.message); }
+    fehlerVon(ort, s);
+    const st = oeffne("uebungen/terme/index.html", { search: `?niveau=n1&stufe=${uebungen.find(e => e.id === "terme").stufen[0]}`, ...alsJugendlicher() });
+    await ruhe(st);
+    try {
+      const a = st.lauf("LST.pruefung.aufgabe()");
+      st.fuelle(".eingabe", "2");
+      st.lauf(`document.querySelector(".eingabe").setSelectionRange?.(1, 1)`);
+      st.klick(`.antwort-tasten button[aria-label="${a.tasten[0]}"]`);
+      const w = st.lauf(`document.querySelector(".eingabe").value`);
+      if (w !== "2" + a.tasten[0]) throw new Error(`Term: „2“ und Taste ${a.tasten[0]} ergab „${w}“`);
+    } catch (err) { melde(ort, err.message); }
+    fehlerVon(ort, st);
+  }
+  // ---------- Gleichung im Notizblock (GL1 a): Vorlage „=“ mit der Gleichung der Aufgabe, Zeilen, Zeichen ----------
+  {
+    const ort = "Notizblock Gleichung (gleichungen j)";
+    const s = oeffne("uebungen/gleichungen/index.html", { search: "?niveau=n2&stufe=j", ...alsJugendlicher() });
+    await ruhe(s);
+    try {
+      const a = s.lauf("LST.pruefung.aufgabe()");
+      s.klick(".nb-knopf");
+      const chips = s.lauf(`[...document.querySelectorAll(".notizblock .chip")].map(c => c.dataset.vorlage).join(" ")`);
+      if (chips !== "= + − × : frei") throw new Error(`Vorlagen „${chips}“ statt „= + − × : frei“`);
+      s.klick('.notizblock .chip[data-vorlage="="]');
+      const zeilen = () => s.lauf(`[...document.querySelectorAll(".notizblock .nb-gl")].map(f => f.value)`);
+      if (JSON.stringify(zeilen()) !== JSON.stringify([a.text])) throw new Error(`erste Zeile ${JSON.stringify(zeilen())} statt „${a.text}“`);
+      if (s.lauf(`document.querySelector(".notizblock .nb-zeichen").hidden`)) throw new Error("Zeichen der Gleichung nicht sichtbar");
+      // die Umformung neben der ersten Zeile ist gewählt: „−3“ mit den Tasten
+      s.klick('.notizblock .nb-zeichen button[aria-label="Minus"]');
+      s.klick('.notizblock .nb-tasten button[aria-label="3"]');
+      const umf = s.lauf(`document.querySelector(".notizblock .nb-umf").value`);
+      if (umf !== "−3") throw new Error(`Umformung „${umf}“ statt −3`);
+      s.klick(".notizblock button", "＋ Zeile");
+      if (JSON.stringify(zeilen()) !== JSON.stringify([a.text, a.text])) throw new Error(`＋ Zeile: ${JSON.stringify(zeilen())}`);
+      s.lauf(`(() => { const f = [...document.querySelectorAll(".notizblock .nb-gl")].pop(); f.value = ""; f.focus(); })()`);
+      for (const t of ["x", "=", "5"]) s.klick(`.notizblock .nb-tasten button[aria-label="${t}"]`);
+      if (zeilen()[1] !== "x=5") throw new Error(`zweite Zeile „${zeilen()[1]}“ statt x=5`);
+      // Weiterrechnen: die Lösung der letzten Zeile ist die erste Zahl der nächsten Rechnung
+      s.klick('.notizblock .chip[data-vorlage="+"]');
+      const start = s.lauf(`document.querySelector(".notizblock .nb-zahl").value`);
+      if (start !== "5") throw new Error(`Weiterrechnen nach x=5 beginnt mit „${start}“`);
+      textPruefen(ort, s);
     } catch (err) { melde(ort, err.message); }
     fehlerVon(ort, s);
   }

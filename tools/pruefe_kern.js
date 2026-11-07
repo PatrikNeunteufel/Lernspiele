@@ -28,6 +28,7 @@ require(path.join(WURZEL, "kern", "einladung.js"));
 require(path.join(WURZEL, "kern", "auswertung.js"));
 require(path.join(WURZEL, "kern", "rolleiste.js"));
 require(path.join(WURZEL, "kern", "personenmenue.js"));
+require(path.join(WURZEL, "kern", "tastenfeld.js"));
 require(path.join(WURZEL, "kern", "notizblock.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
@@ -423,6 +424,32 @@ console.log("notizblock.js");
   gleich(NB.STELLEN.map(s => s.k).join(), "M,HT,ZT,T,H,Z,E", "Stellen von gross nach klein");
   const a = NB({ dezimal: () => "," });
   gleich(["oeffne", "schliessen", "knopf", "raster", "rechne"].every(f => typeof a[f] === "function") && a.istOffen() === false, true, "Notizblock einer App: Teile da, ohne DOM ladbar und zu");
+  // Gleichung (GL1 a): nicht unter den Standard-Vorlagen (der Eulenpfad bietet sie nicht an), Lösung zum Weiterrechnen
+  gleich(NB.VORLAGEN.map(v => v.id).join(" "), "+ − × : frei", "Standard-Vorlagen ohne Gleichung");
+  gleich(NB.GLEICHUNG.id, "=", "Vorlage Gleichung");
+  gleich(JSON.stringify(["x = 2.5", "x=12", " y = 1 234 ", "x = −3", "2x = 6", "x = 3 + 1", "x = 0,25", ""].map(NB.loesungAus)),
+    JSON.stringify(["2.5", "12", "1234", "", "", "", "0,25", ""]), "loesungAus: nur „Variable = Zahl“ (nicht negativ, wie zahlAus)");
+}
+
+// ---------- tastenfeld (TF1 a; ohne DOM: die Regel des Einfügens) ----------
+console.log("tastenfeld.js");
+{
+  const E = KERN.tastenfeld.einfuegen, L = KERN.tastenfeld.LOESCHEN;
+  const f = r => (r ? `${r.wert}@${r.pos}` : "null");
+  for (const [args, soll, text] of [
+    [["12", 2, 2, "3"], "123@3", "hinten anfügen"],
+    [["12", 1, 1, "x"], "1x2@2", "an der Schreibmarke einfügen"],
+    [["12345", 1, 4, "0"], "105@2", "Auswahl ersetzen"],
+    [["12", 2, 2, L], "1@1", "⌫ vor der Schreibmarke"],
+    [["12", 0, 0, L], "null", "⌫ am Anfang: nichts"],
+    [["", 0, 0, L], "null", "⌫ im leeren Feld: nichts (der Notizblock geht dann ein Häuschen zurück)"],
+    [["12345", 1, 4, L], "15@1", "⌫ löscht die Auswahl"],
+    [["5", 1, 1, "7", 1], "7@1", "Häuschen (maxlength 1): ersetzen"],
+    [["1234", 4, 4, "5", 4], "null", "maxlength erreicht: nichts"],
+    [["123", undefined, undefined, "4"], "1234@4", "ohne Schreibmarke: hinten"],
+    [["123", 9, 9, "4"], "1234@4", "Schreibmarke hinter dem Ende: hinten"],
+  ]) gleich(f(E(...args)), soll, `einfuegen: ${text}`);
+  gleich(typeof KERN.tastenfeld, "function", "KERN.tastenfeld ohne DOM ladbar");
 }
 
 // ---------- Geheimnisse und Personen (asynchron) ----------

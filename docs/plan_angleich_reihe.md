@@ -440,3 +440,18 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
 - **NB4 a** (2026-11-07, LERN_Session19): Im Lernsteig sieht der Block sachlich aus — Stellen mit ihren Buchstaben in
   neutraler Farbe, Farben und Formen des Lernsteigs, Platz wie im Eulenpfad. Nicht b (Calcularis-Farben). Kipppunkt: der
   Lernsteig übernimmt die Stellenfarben ohnehin.
+- Meldung Patrik (LERN_Session20): Im Lernsteig hat der Notizblock Tasten, die Aufgabe nicht (im Eulenpfad beide); Gleichungen
+  sollen sich im Block auflösen lassen.
+- **TF1 a** (2026-11-07, LERN_Session20): Kern-Teil `kern/tastenfeld.js` (`KERN.tastenfeld`) — Tasten, die in ein gewähltes
+  Feld schreiben, ohne ihm den Fokus zu nehmen (aus dem Ziffernfeld des Notizblocks); der Notizblock benutzt ihn mit
+  denselben Tasten. Im Lernsteig unter jeder Zahl- und Term-Antwort: Zahl mit Ziffern, Komma, ⌫, ± und „Prüfen“, Term mit
+  Ziffern, den Zeichen der Aufgabe (`a.tasten`) und + − · (ersetzt die Zeichenzeile); die Tastatur des Geräts bleibt zu
+  (`inputmode` none), eine echte Tastatur schreibt weiter. `LS.tastatur` des Eulenpfads bleibt (eigene Anzeige, Kurztasten,
+  Klickzahlen). Nicht b (eigene Tasten im Lernsteig neben denen des Blocks). Kipppunkt: das Tastenfeld stört am Desktop —
+  dann einklappbar.
+- **GL1 a** (2026-11-07, LERN_Session20): Vorlage „= Gleichung“ im Notizblock des Kerns — Zeilen „Gleichung | Umformung“,
+  oben die Gleichung der Aufgabe (bei einem System je Gleichung eine Zeile), „＋ Zeile“ schreibt die letzte ab; Zeichen
+  (Variablen, + − · : ( ) =, ² und / wenn die Gleichung sie hat) im Tastenfeld, solange ein Feld der Gleichung gewählt ist;
+  nichts bewertet. Die App wählt die Vorlagen (`oeffne({ vorlagen, gleichung })`); im Lernsteig je Übung im Katalog
+  (`notizblock: […]`, heute `gleichungen` und `binome-gleichungen`), der Eulenpfad ohne. Nicht b (jede Zeile still
+  nachrechnen). Kipppunkt: der Block soll in diesen Übungen Lernhilfe sein statt Papier — dann b, etwa nur in Stufe h.

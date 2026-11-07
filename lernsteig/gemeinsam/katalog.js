@@ -45,6 +45,7 @@ var LST_KATALOG = (function () {
       ohneE: ["h"],                           // Erweiterung von h (Teilbarkeitsregeln) gehört nicht zu dieser Übung
       // Annahme: h ohne Rechner (Umkehroperation im Kopf), j und Challenge frei.
       rechner: { h: "ohne", j: "frei", challenge: "frei" },
+      notizblock: ["=", "+", "−", "×", ":", "frei"], // Gleichung umformen zuerst (GL1 a)
       niveaus: ["n1", "n2"],
       anzahl: 8,
       endlos: true,
@@ -336,6 +337,7 @@ var LST_KATALOG = (function () {
       kompetenz: "MA.1.A.4",
       stufen: ["l", "m"],                     // EAP prüft l und m (PA); weiterführend nach dem Grundanspruch k
       rechner: { l: "ohne", m: "frei", challenge: "frei" },
+      notizblock: ["=", "+", "−", "×", ":", "frei"], // quadratische, Bruchgleichungen und Systeme umformen (GL1 a)
       niveaus: ["n1", "n2"],
       anzahl: 8,
       endlos: true,
