@@ -90,3 +90,29 @@
 a.knopf { text-decoration: none; display: inline-flex; align-items: center; }
 a.knopf { color: var(--text); }
 .serie { margin: 0; font-weight: 600; }
+/* Verwaltung: Untertabs wie im Eulenpfad (Plan C5), umbrechend statt rollend */
+.untertabs { flex-wrap: wrap; margin: 14px 0 4px; }
+.untertabs .tab { min-height: 40px; padding: 6px 12px; font-size: 15px; }
+/* Freigabe je Gerät: je Fach eine zuklappbare Gruppe mit Tabelle */
+/* min-width 0: sonst macht die Tabelle die Spalte der Karte breiter als den Bildschirm; sie rollt in ihrem Rahmen */
+.freigabe-gruppe { min-width: 0; border: 1px solid var(--rand); border-radius: 10px; padding: 8px 12px; }
+.freigabe-gruppe > summary { cursor: pointer; font-weight: 600; min-height: 32px; display: list-item; }
+.tabelle-rahmen { overflow-x: auto; }
+.freigabe-tabelle { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 6px; }
+.freigabe-tabelle th, .freigabe-tabelle td { text-align: left; vertical-align: top; padding: 6px 8px; border-top: 1px solid var(--rand); }
+.freigabe-tabelle .liste-zeile td:first-child { padding-left: 24px; }
+/* Handy: je Zeile oben die Übung, darunter Prüfstand und Schalter nebeneinander (nichts rollt seitlich) */
+@media (max-width: 600px) {
+  .freigabe-tabelle thead { display: none; }
+  .freigabe-tabelle tr { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--rand); }
+  .freigabe-tabelle td { padding: 0; border: 0; }
+  .freigabe-tabelle td:first-child { grid-column: 1 / -1; }
+  .freigabe-tabelle .liste-zeile td:first-child { padding-left: 16px; }
+}
+.leise.block { display: block; }
+.marke.ok { margin-left: 0; background: var(--gut-hell); color: var(--gut); }
+.schalter-zeile { gap: 6px; }
+.schalter { min-height: 36px; padding: 4px 10px; border: 1px solid var(--rand); border-radius: 8px; background: var(--karte); font: inherit; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.schalter:hover { border-color: var(--akzent); }
+.schalter.frei { border-color: var(--gut); background: var(--gut-hell); color: var(--gut); font-weight: 600; }
+.schalter.gesperrt { background: var(--flaeche); color: var(--leise); font-weight: 600; }

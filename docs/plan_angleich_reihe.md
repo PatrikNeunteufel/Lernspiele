@@ -143,8 +143,8 @@ Kindersprache.
 4. **Profil:** Person (Vorname, Geburtsdatum B3, Klasse 1.–3. Oberstufe, Land und Kanton), Niveau je Fach,
    Prüfungsziel, Rechnermodell, Fokus; Aufbau wie das Eulenpfad-Profil (Formular, Speichern, sofort wirkende Häkchen).
 5. **Verwaltung (nur Aufsicht):** Konten, Freigabe, Abgleich, Einstellungen, Entwicklung — wie Eulenpfad. Abgleich über
-   einen Ordner seit LERN_Session19 (`lernsteig/gemeinsam/abgleich.js`; Aufsichten nach OA1 a, OA2 a); offen: Konten
-   (Entfernen, auch gesperrter Aufsichten), Freigabe je Gerät.
+   einen Ordner seit LERN_Session19 (`lernsteig/gemeinsam/abgleich.js`; Aufsichten nach OA1 a, OA2 a); Untertabs und
+   Freigabe je Gerät (mit Abgleich) seit LERN_Session20; offen: Konten entfernen, auch gesperrte Aufsichten.
    **Aufsicht wie Eulenpfad** (D5): neue Aufsicht nur mit Frage und Bestätigung durch eine bestehende, PIN vergessen
    mit denselben Stufen. Dazu im Lernsteig die Verbindung mit Zustimmung (AU1 a, AF1 a, AF2 a) und die Rolle
    **Lehrperson/Gruppenleitung** nach [konzept_gruppen.md](konzept_gruppen.md) (G2 a: „Ich bin Lehrperson“), in

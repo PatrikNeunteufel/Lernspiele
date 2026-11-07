@@ -190,7 +190,7 @@ async function pruefeSeiten(uebungen, melde, LST) {
       // Gerät ohne Rechner (Einstellung der Aufsicht): in einer Übung mit Rechner fehlt dann der Knopf
       const mitRechner = uebungen.find(x => x.rechner && x.stufen.some(lp => x.rechner[lp] && x.rechner[lp] !== "ohne"));
       if (mitRechner && konto) {
-        s.hash("#verwaltung"); await ruhe(s);
+        s.hash("#verwaltung/einstellungen"); await ruhe(s);
         s.fuelle('select[name="rechner"]', "ohne"); await ruhe(s);
         const lp = mitRechner.stufen.find(x => mitRechner.rechner[x] && mitRechner.rechner[x] !== "ohne");
         const u = oeffne(`uebungen/${mitRechner.id}/index.html`, { search: `?niveau=${mitRechner.niveaus[0]}&stufe=${lp}`, speicher: browser, sitzung: new Map(jugendTab), pruefstand: frei });
@@ -200,6 +200,49 @@ async function pruefeSeiten(uebungen, melde, LST) {
         fehlerVon(ort + " (Übung)", u);
         s.fuelle('select[name="rechner"]', "uebung"); await ruhe(s);
       }
+      // Untertabs der Verwaltung (Plan C5, wie im Eulenpfad): ohne Angabe Konten, jeder über die Adresse
+      s.hash("#verwaltung"); await ruhe(s);
+      const unterGewaehlt = () => s.lauf(`(document.querySelector('.untertabs .tab[aria-selected="true"]') || {}).getAttribute?.("href") || ""`);
+      if (unterGewaehlt() !== "#verwaltung/konten" || !/Verbundene Konten/.test(s.text())) melde(ort, `#verwaltung zeigt nicht die Konten (gewählt „${unterGewaehlt()}“)`);
+      for (const u of ["konten", "freigabe", "abgleich", "einstellungen", "entwicklung"]) {
+        s.hash(`#verwaltung/${u}`); await ruhe(s);
+        if (unterGewaehlt() !== `#verwaltung/${u}`) melde(ort, `Untertab ${u}: gewählt „${unterGewaehlt()}“`);
+        textPruefen(`${ort} #verwaltung/${u}`, s);
+      }
+      // Freigabe je Gerät mit dem echten Prüfstand: eine gesperrte Übung freigeben, dann zurück; eine Liste; alles
+      s.hash("#verwaltung/freigabe"); await ruhe(s);
+      const sichtbar = () => Number(s.attr("[data-sichtbar]", "data-sichtbar"));
+      const fg = () => s.json("lernsteig:freigabe") || { uebungen: {}, listen: {} };
+      const vorher = sichtbar();
+      const zu = s.lauf(`(LST_KATALOG.UEBUNGEN.find(u => LST.FREIGABE.zuPruefen(u.id) && !LST.FREIGABE.listen(u.id).length) || {}).id || ""`);
+      if (vorher !== s.lauf(`LST_KATALOG.UEBUNGEN.filter(u => LST.FREIGABE.fuerLernendeSichtbar(u.id)).length`)) melde(ort, "Freigabe: Zahl der sichtbaren Übungen stimmt nicht");
+      if (!zu) melde(ort, "Freigabe: keine gesperrte Übung ohne Listen zum Prüfen");
+      else {
+        s.klick(`[data-freigabe="${zu}"]`); await ruhe(s);
+        if (fg().uebungen[zu] !== true || sichtbar() !== vorher + 1 || !s.json("lernsteig:freigabeStand")) melde(ort, `Freigabe: ${zu} nicht freigegeben (${JSON.stringify(fg())})`);
+        // der Jugendliche sieht die Übung jetzt als Verweis
+        const j = oeffne("index.html", { speicher: browser, sitzung: new Map(jugendTab) });
+        await ruhe(j);
+        if (konto && !j.lauf(`[...document.querySelectorAll(".uebung-link")].some(a => (a.getAttribute("href") || "").startsWith("uebungen/${zu}/"))`)) melde(ort, `Freigabe: Jugendlicher sieht ${zu} nicht`);
+        fehlerVon(ort + " (Jugendlicher)", j);
+        s.klick("button.schalter", "↺ wie Prüfstand"); await ruhe(s);
+        if (zu in fg().uebungen || sichtbar() !== vorher) melde(ort, "Freigabe: „wie Prüfstand“ hebt die eigene Einstellung nicht auf");
+      }
+      const mitListe = s.lauf(`(LST_KATALOG.UEBUNGEN.find(u => LST.FREIGABE.listen(u.id).some(l => !l.von)) || {}).id || ""`);
+      if (mitListe) {
+        const l = s.lauf(`LST.FREIGABE.listen(${JSON.stringify(mitListe)}).find(l => !l.von).quelle`);
+        const war = s.lauf(`LST.FREIGABE.listeFrei(${JSON.stringify(mitListe)}, ${JSON.stringify(l.split("/")[1])})`);
+        s.klick(`[data-freigabe="${l}"]`); await ruhe(s);
+        if (fg().listen[l] !== !war) melde(ort, `Freigabe: Liste ${l} nicht umgeschaltet (${JSON.stringify(fg().listen)})`);
+      }
+      s.klick('[data-aktion="alles-gesperrt"]'); await ruhe(s);
+      if (sichtbar() !== 0) melde(ort, `Freigabe: nach „Alles sperren“ noch ${sichtbar()} sichtbar`);
+      s.klick('[data-aktion="alles-frei"]'); await ruhe(s);
+      const alleUebungen = s.lauf("LST_KATALOG.UEBUNGEN.length");
+      if (sichtbar() !== alleUebungen) melde(ort, `Freigabe: nach „Alles freigeben“ ${sichtbar()} von ${alleUebungen} sichtbar`);
+      s.klick('[data-aktion="alles-pruefstand"]'); await ruhe(s);
+      if (sichtbar() !== vorher || Object.keys(fg().uebungen).length || Object.keys(fg().listen).length) melde(ort, `Freigabe: „Alles wie Prüfstand“ lässt ${JSON.stringify(fg())}`);
+      textPruefen(`${ort} Freigabe`, s);
     } catch (e) { melde(ort, e.message); }
     fehlerVon(ort, s);
   }

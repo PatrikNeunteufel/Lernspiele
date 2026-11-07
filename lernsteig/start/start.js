@@ -414,7 +414,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     { id: "profil", text: "👤 Profil", zeichne: zeichneProfil },
     { id: "statistik", text: "📊 Statistik", zeichne: (box, teil) => LST_START.statistik(box, teil) },
     { id: "erfolge", text: "🏅 Erfolge", zeichne: box => LST_START.erfolge(box) },
-    { id: "verwaltung", text: "⚙️ Verwaltung", zeichne: box => LST_START.verwaltung(box), nurAufsicht: true },
+    { id: "verwaltung", text: "⚙️ Verwaltung", zeichne: (box, teil) => LST_START.verwaltung(box, teil), nurAufsicht: true },
   ];
   function aktuellerTab() {
     const [id, teil] = location.hash.slice(1).split("/");

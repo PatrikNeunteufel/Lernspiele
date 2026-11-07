@@ -201,6 +201,9 @@ const SF = { frage: "Erstes Haustier?", antwort: "Bello" }; // Sicherheitsfrage 
     const { konto: ben } = await KO.anlegen({ name: "Ben", geboren: "2011-02-03", klasse: "9" });
     LST.schreibe("runden", [{ id: "r-ab-1", person: ben.id, zeit: "2026-11-07T08:00:00.000Z", inhalt: "brueche", stufe: "g", aufgaben: 8, fehler: 0, gezeigt: 0, dauer: 60, liste: [] }]);
     AB.benenne("Laptop");
+    // Freigabe je Gerät (Plan C5): reist im Abgleich mit, die jüngste gewinnt (wie im Eulenpfad; KERN.freigabe)
+    const FG = KERN.freigabe({ art: "uebungen", eintrag: id => LST_KATALOG.uebung(id), speicher: { lies: LST.lies, schreibe: LST.schreibe }, pruefstand: () => ({}) });
+    FG.setzeFrei("terme", true);
     const text = AB.dateiInhalt();
     const kopf = JSON.parse(text);
     gleich([kopf.format, kopf.art, kopf.geraet.name, kopf.personen.length, kopf.runden.length], ["reihe-daten", "abgleich", "Laptop", 2, 1], "eigene Abgleich-Datei: Format, Art, Gerät, Konten, Runden");
@@ -209,8 +212,15 @@ const SF = { frage: "Erstes Haustier?", antwort: "Bello" }; // Sicherheitsfrage 
     localStorage.d.clear(); sessionStorage.d.clear();
     const { aufsicht: papa } = await KO.aufsichtAnlegen({ ...SF, name: "Papa", art: "eltern", pin: "5656" });
     KO.aufsichtAbmelden();
+    gleich([kopf.freigabe, typeof kopf.freigabeStand], [{ uebungen: { terme: true }, listen: {} }, "string"], "Abgleich-Datei mit der Freigabe des Geräts");
+    LST.schreibe("freigabeStand", "2000-01-01T00:00:00.000Z"); LST.schreibe("freigabe", { uebungen: { brueche: false }, listen: {} });
     const r = AB.datenEinlesen(text);
     gleich([r.konten, r.runden, r.abgewiesen], [2, 1, 0], "Abgleich ohne angemeldete Aufsicht: Konten und Runde dazu, nichts abgewiesen");
+    gleich([r.freigabe, FG.frei("terme"), "brueche" in FG.geraet().uebungen], [true, true, false], "jüngere Freigabe des anderen Geräts übernommen, ganz");
+    gleich(AB.datenEinlesen(text).freigabe, false, "dieselbe Freigabe ein zweites Mal: nichts Neues");
+    FG.setzeFrei("terme", false);
+    gleich([AB.datenEinlesen(text).freigabe, FG.frei("terme")], [false, false], "ältere Freigabe ersetzt die jüngere des Geräts nicht");
+    gleich(AB.ergebnisText({ freigabe: true }), "Dazugekommen: die Freigabe.", "Ergebnis nennt die Freigabe");
     gleich([KO.gesperrt(mama.id), KO.codeReicht(mama.id), KO.verbundene(papa.id).length], [true, false, 0], "Mama gesperrt, Code reicht nicht (Papa ist Aufsicht), Ben mit niemandem verbunden");
     await KO.freischalten(mama.id, "4545", { bestaetigung: { id: papa.id, pin: "5656" } });
     gleich(KO.gesperrt(mama.id), false, "Mama mit Papas Bestätigung freigeschaltet");

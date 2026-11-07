@@ -198,7 +198,7 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 - **Abgleich über einen Ordner** (Plan C5, seit LERN_Session19; `gemeinsam/abgleich.js` über `KERN.abgleich`,
   docs/kern/rahmen.md 4.20): Die Aufsicht wählt in der Verwaltung einen Ordner (Netzwerk- oder Cloud-Ordner); jedes Gerät
   schreibt dort `lernsteig-sync-<gerät>.json` und liest die der anderen — Konten, Aufsichten, Runden, Rekorde,
-  Löschvermerke —, selbsttätig beim Öffnen der Startseite, beim Wiedersichtbarwerden und nach Änderungen
+  Löschvermerke und die Freigabe (seit LERN_Session20; die jüngste gewinnt, 5d) —, selbsttätig beim Öffnen der Startseite, beim Wiedersichtbarwerden und nach Änderungen
   (`LST.beiAenderung`). Ohne Ordner-Fähigkeit des Browsers dieselbe Datei zum Sichern und Einlesen. PIN, Code und
   Verbindungen bleiben auf dem Gerät; neue Konten werden beim Abgleich mit niemandem verbunden (das tut nur das Einlesen
   durch die Aufsicht, AF2 a). Kam etwas dazu, zeichnet die Startseite neu (Ereignis `lernsteig:abgeglichen`), ausser
@@ -249,7 +249,9 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 - **In den Eulenpfad übernehmen** (Plan C9, Ü1 a, Ü2 b; `KERN.person.uebernehmen`): Abschnitt auf der Aufsichtsseite;
   legt die angemeldete Aufsicht im Eulenpfad an (gleiche Kennung, PIN, Sicherheitsfrage und Art, neuer Code).
 - **Tab Verwaltung** (`#verwaltung`, Code `start/aufsicht.js`; bis LERN_Session16 `aufsicht.html`, leitet weiter), nur für die
-  angemeldete Aufsicht;
+  angemeldete Aufsicht; seit LERN_Session20 mit Untertabs wie im Eulenpfad, in der Adresse `#verwaltung/<teil>`:
+  Konten (ohne Angabe), Freigabe, Abgleich, Einstellungen, Entwicklung (`aufsicht.html?konto=<id>` führt seither zu
+  `#statistik/<id>`);
   anlegen und anmelden auf der Startseite (Plan C1). Freiwillig, für Eltern und Lehrpersonen.
   Seit LERN_Session15 (P2 a) stehen Jugendliche und Aufsichten in **einer** Liste `lernsteig:personen`
   (`KERN.person`, docs/kern/rahmen.md 4.7): Aufsicht `{ id, name, rolle: "aufsicht", art: eltern | lehrperson, pin,
@@ -272,10 +274,18 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 - **Einstellungen des Geräts** (`lernsteig:einstellungen`) setzt nur eine angemeldete Aufsicht: `rechner` (uebung |
   ohne | erlaubt, TR1 a) und `dezimal` (punkt | komma). Eine Sperre des Rechners steht für alle sichtbar auf der
   Startseite.
+- **Freigabe je Gerät** (Plan C5, seit LERN_Session20; Kern `KERN.freigabe`, docs/kern/rahmen.md 4.8; `LST.FREIGABE`),
+  Untertab Freigabe, wie im Eulenpfad (docs/eulenpfad/rahmen.md 6): je Fach eine zuklappbare Gruppe (offen gemerkt in
+  `lernsteig:verwaltungOffen`, nur dieses Gerät), darin je Übung Prüfstand („✓ <Datum> · <Name>“, „nicht angesehen“
+  oder „nichts zu prüfen“ ohne `neu`) und ein Schalter „✓ frei“ / „🔒 gesperrt“, mit eigenem Eintrag dazu „↺ wie
+  Prüfstand“; darunter die Inhaltslisten (ein Verweis `von` zeigt den Stand der Quelle). Dazu „Alles freigeben“, „Alles
+  sperren“, „Alles wie Prüfstand“ und die Zahl der Übungen, die Jugendliche sehen. Mit dem Entwickler-Modus je Übung
+  „✓ angesehen“ (schreibt den Prüfstand über den Server). Die Freigabe reist im Abgleich mit (`freigabe: true` in
+  `KERN.daten`, `geteilt` in `abgleich.js`): die des Geräts mit dem jüngsten `freigabeStand` gewinnt, als Ganzes. Auf
+  dem Handy (unter 600 px) steht je Zeile die Übung oben, Prüfstand und Schalter darunter.
 - **Grenze:** Alles liegt im Browser. Die PIN schützt vor Versehen und Neugier am selben Gerät, nicht vor jemandem, der
   die Entwicklerwerkzeuge öffnet; echter Schutz braucht den Server (DS1 a). Die Seite sagt das.
-- Noch nicht: Freigabe der Inhaltslisten nach Prüfstand und Sperren durch die Aufsicht (AU1 a), PIN eines verbundenen
-  Kontos zurücksetzen, Aufsicht auf einem anderen Gerät (braucht Abgleich oder Server).
+- Noch nicht: Konten entfernen (auch gesperrte Aufsichten, C5), PIN eines verbundenen Kontos zurücksetzen.
 
 ## 5e. Entwickler-Modus (E1 a, Plan C6)
 
@@ -287,8 +297,8 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 - **Geschrieben** nur über den Entwickler-Server (`python tools/entwickler_server.py`, dann
   `http://localhost:8765/lernsteig/`): Prüfstand nach `gemeinsam/pruefstand.js` (`uebungen`, `listen`; Datei vom Server
   im JSON-Format geschrieben, nicht von Hand ändern), Bemerkungen nach `docs/lernsteig/bemerkungen.json`.
-- Noch nicht: Prüfansicht der Inhaltslisten je Eintrag (der Lernsteig hat noch keine Listen), Freigabe je Gerät in
-  der Verwaltung (C5, C6).
+- Noch nicht: Prüfansicht der Inhaltslisten je Eintrag (C6). Die Freigabe je Gerät steht seit LERN_Session20 in der
+  Verwaltung (5d).
 
 ## 6. Speicher (`lernsteig:*`, SP1 a)
 
@@ -301,7 +311,8 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 | `personen` | Jugendliche und Aufsichten (`KERN.person`, 5d); früher `konten` und `aufsichten`, beim Laden umgezogen |
 | `runden` | je Runde im gemeinsamen Format (R1 a, `KERN.runden`; gebaut von `KERN.runde.lauf`) `{ id, person, zeit (Ende, RA1 a), inhalt, fach, stufe, niveau, endlos?, gekuerzt?, abgebrochen?, aufgaben, aufAnhieb, fehler, gezeigt, dauer (s, auf 0,1), liste, mitRechner, gruppe }`; `liste` je Aufgabe `{ ms, versuche, geloest, gezeigt?, lp, rechner }`, mit Fehlversuch dazu `text`, `loesung`, `eingaben` (RA4 a; Grundlage für den Kompetenzstand). Beim Laden und Einlesen umgedeutet (`LST.alteEintraegeUmdeuten`): bis LERN_Session15 `konto`, `uebung`; bis LERN_Session18 `zeit` = Beginn (jetzt + `dauer`, auch beim Rekord einer Serie) und `zeiten`, `falsch` getrennt |
 | `rekorde` | je Serie `{ id, person, zeit, inhalt, stufe, niveau, punkte, dauer, mitRechner, abgebrochen? }` |
-| `freigabe`, `freigabeStand` | Freigabe der Übungen auf diesem Gerät durch die Aufsicht (`KERN.freigabe`) |
+| `freigabe`, `freigabeStand` | Freigabe der Übungen auf diesem Gerät durch die Aufsicht (`KERN.freigabe`, 5d); reist im Abgleich mit |
+| `verwaltungOffen` | Fächer, deren Gruppe in der Freigabe offen ist (nur dieses Gerät) |
 | `gestellt` | Gedächtnis gegen Wiederholungen (RA5 a): Fingerabdrücke je `konto\|uebung/stufe` (höchstens 400; bis LERN_Session18 die Kennungen je `konto/uebung/stufe/niveau`, höchstens 30) |
 | `geraet`, `abgleichStand` | Abgleich über einen Ordner (5b, `KERN.abgleich`): Kennung und Name dieses Geräts; Ordner, letzter Abgleich, andere Geräte. Den gewählten Ordner merkt der Browser in IndexedDB `lernsteig` |
 | `einstellungen` | `{ dezimal?, rechner? }`, nur von einer angemeldeten Aufsicht gesetzt (5d) |
@@ -317,7 +328,9 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   den Browser-Teil mit Playwright, der lokal nicht lief): Startseite als niemand, Gast, Jugendlicher und Aufsicht mit
   jedem Tab; Konto mit PIN anlegen (Code, PIN nur als Prüfwert), falsche PIN in einem neuen Tab, PIN vergessen mit
   dem Code; Aufsicht anlegen (Rolle, Prüfwert), ohne Verbindung keine Statistik des Kontos, Rechner-Sperre des
-  Geräts wirkt in der Übung; Einladung über den Link füllt das Formular vor, das Fragment verschwindet; jede Übung in
+  Geräts wirkt in der Übung; Untertabs der Verwaltung über die Adresse; Freigabe mit dem echten Prüfstand (eine
+  gesperrte Übung freigeben, der Jugendliche sieht sie, „wie Prüfstand“ hebt es auf; eine Liste umschalten; alles
+  sperren, freigeben, wie Prüfstand); Einladung über den Link füllt das Formular vor, das Fragment verschwindet; jede Übung in
   jeder Stufe und jedem Niveau eine Runde mit einem Fehlversuch (Protokoll, danach Statistik und Erfolge), Rechner je
   Lehrplan-Stufe (12 · 3 übernehmen, Nutzung im Protokoll), Serie speichert den Rekord vor „Zum Ergebnis“. Gemeldet
   werden Ausnahmen, Konsolenfehler und sichtbarer Text mit NaN, undefined, null (Knoten mit Abstand gelesen). Die
@@ -327,5 +340,5 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 ## 8. Noch nicht gebaut
 
-Freigabe der Listen durch die Aufsicht (AU1 a) (BF1 a), Abgleich über einen Ordner, Timer als Zusatz, Gruppen am selben
+Konten entfernen (C5), Timer als Zusatz, Gruppen am selben
 Gerät (GR1 a), Übungen Natur und Technik (wartet auf R6).

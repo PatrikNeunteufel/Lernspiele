@@ -701,3 +701,11 @@
   jetzt die Variablen, „/“ und „²“ aus dem Term der Aufgabe dazu; `tools/pruefe_uebungen.js` prüft für jede erzeugte
   Term-Aufgabe, dass jedes Zeichen der Lösung eine Taste hat (Gegenprobe mit der alten Wahl: 1144 Funde, neu 0; übrige
   Term-Übungen nie betroffen), der Seitentest dasselbe in der Seite. lernsteig/rahmen.md 4.
+- Lernsteig, Plan C5: Verwaltung mit Untertabs wie im Eulenpfad (`#verwaltung/<teil>`: Konten, Freigabe, Abgleich,
+  Einstellungen, Entwicklung; `aufsicht.html?konto=<id>` führt zu `#statistik/<id>`). Neu der Untertab **Freigabe je
+  Gerät** über `KERN.freigabe`: je Fach eine zuklappbare Gruppe mit Prüfstand und Schalter je Übung und Inhaltsliste,
+  „↺ wie Prüfstand“, alles freigeben, sperren, wie Prüfstand; auf dem Handy Übung oben, Prüfstand und Schalter darunter.
+  Die Freigabe reist im Abgleich mit, die jüngste gewinnt (wie im Eulenpfad). Tests: Konten 88 Fälle, 0 Fehler (Freigabe
+  in der Abgleich-Datei, jüngere übernommen, ältere nicht), Lernsteig „0 Fehler, 0 Hinweise.“ (Untertabs, Freigabe mit
+  dem echten Prüfstand bis zum Verweis beim Jugendlichen); im Browser am Desktop und auf 375 px. lernsteig/rahmen.md 5b,
+  5d, 5e, 6, 7, 8; Plan C5.

@@ -7,9 +7,10 @@
 <!-- Seit LERN_Session16 (Plan C2) ein Tab der Startseite: diese Adresse leitet dorthin weiter. -->
 <meta http-equiv="refresh" content="0; url=index.html#verwaltung">
 <script>
-  // ?konto=<id> (Ansicht der Aufsicht) wird zu #verwaltung/<id>
+  // ?konto=<id> (Ansicht der Aufsicht) wird zum Stand des Kontos #statistik/<id>; #verwaltung/<teil> nennt seit
+  // LERN_Session20 die Untertabs der Verwaltung
   (function () { var k = new URLSearchParams(location.search).get("konto");
-    location.replace("index.html#verwaltung" + (k ? "/" + encodeURIComponent(k) : "")); })();
+    location.replace("index.html#" + (k ? "statistik/" + encodeURIComponent(k) : "verwaltung")); })();
 </script>
 </head>
 <body>

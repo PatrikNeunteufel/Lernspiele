@@ -32,6 +32,8 @@ var LST_DATEN = (function () {
   const DATEN = KERN.daten({
     app: "lernsteig", speicher: { praefix: LST.PRAEFIX, lies: LST.lies, schreibe: LST.schreibe, entferne: k => KERN.speicher(LST.PRAEFIX).entferne(k) },
     dateiPraefix: "lernsteig", geraetFelder: ["aufsicht", "anfragen"], ohnePerson: ["gast"],
+    // die Freigabe je Gerät reist im Abgleich mit, die jüngste gewinnt (Plan C5, wie im Eulenpfad)
+    freigabe: true,
     pruefung: { runde: RUNDE, rekord: REKORD },
     // eine liste, die keine Liste ist, weist schon das Schema ab
     gueltig: { runde: r => !Array.isArray(r.liste) || r.liste.every(x => x && typeof x === "object") },
@@ -43,7 +45,7 @@ var LST_DATEN = (function () {
   const sichern = ids => DATEN.sichern({ ids });
   /**
    * Eigene Datei für den Abgleich über einen Ordner (gemeinsam/abgleich.js, KERN.abgleich): alle Konten und Aufsichten
-   * (geschützt nach DF4 a, ohne Verbindungen), Runden, Rekorde und Löschvermerke dieses Geräts.
+   * (geschützt nach DF4 a, ohne Verbindungen), Runden, Rekorde, Löschvermerke und Freigabe dieses Geräts.
    */
   const abgleichDaten = (geraet = null) => DATEN.sichern({ art: "abgleich", geraet });
 
@@ -58,7 +60,7 @@ var LST_DATEN = (function () {
    */
   function einlesen(obj) {
     const erg = DATEN.einlesen(obj);
-    return { konten: erg.personen.neu + erg.personen.geaendert, runden: erg.runden, rekorde: erg.rekorde, abgewiesen: erg.abgewiesen,
+    return { konten: erg.personen.neu + erg.personen.geaendert, runden: erg.runden, rekorde: erg.rekorde, freigabe: erg.freigabe, abgewiesen: erg.abgewiesen,
       neu: erg.neueIds, ids: erg.ids };
   }
 

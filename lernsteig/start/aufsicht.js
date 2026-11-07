@@ -10,6 +10,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   const KO = LST_KONTEN;
   const el = LST.el;
   let wurzel = null; // Inhalt des Tabs (start/start.js ruft LST_START.verwaltung)
+  let teil = null; // Untertab aus der Adresse (#verwaltung/<teil>)
   const TAGE = 14;
   let meldung = "";
 
@@ -43,16 +44,30 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
         el("button", { type: "button", class: "knopf", text: "Verbindung lösen", onclick: () => { KO.loesen(k.id, a.id); meldung = `Verbindung mit ${k.name} gelöst.`; zeichne(); } })));
   }
 
+  // Untertabs wie im Eulenpfad (Plan C5), in der Adresse #verwaltung/<id>; ohne Angabe Konten.
+  const UNTER = [
+    { id: "konten", text: "👥 Konten", zeichne: kontenTeil },
+    { id: "freigabe", text: "✓ Freigabe", zeichne: () => [el("h2", { class: "abschnitt", text: "Übungen freigeben" }), freigabeKarte()] },
+    { id: "abgleich", text: "🔄 Abgleich", zeichne: () => [el("h2", { class: "abschnitt", text: "Abgleich zwischen Geräten" }), abgleichKarte()] },
+    { id: "einstellungen", text: "⚙️ Einstellungen", zeichne: einstellungenTeil },
+    { id: "entwicklung", text: "🛠 Entwicklung", zeichne: () => [el("h2", { class: "abschnitt", text: "Entwicklung" }), entwicklungKarte()] },
+  ];
   function angemeldet(a) {
+    const unter = UNTER.find(u => u.id === teil) || UNTER[0];
+    return [el("section", { class: "einstellungen konto" },
+      el("p", { class: "konto-zeile" }, el("b", { text: a.name }), el("span", { class: "leise", text: rolleName(a.art) })),
+      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Abmelden", onclick: () => { KO.aufsichtAbmelden(); history.replaceState(null, "", location.pathname); LST_START.neu(); } })),
+      meldung ? el("p", { class: "meldung", role: "status", text: meldung }) : null),
+      el("nav", { class: "tabs untertabs", role: "tablist", "aria-label": "Verwaltung" }, UNTER.map(u =>
+        el("a", { class: "tab", role: "tab", href: `#verwaltung/${u.id}`, "aria-selected": String(u === unter), text: u.text }))),
+      ...unter.zeichne(a)];
+  }
+
+  function kontenTeil(a) {
     const verbunden = KO.verbundene(a.id);
     const offen = KO.angefragt(a.id);
     const andere = KO.alle().filter(k => !verbunden.some(v => v.id === k.id) && !offen.some(v => v.id === k.id));
     const teile = [];
-    teile.push(el("section", { class: "einstellungen konto" },
-      el("p", { class: "konto-zeile" }, el("b", { text: a.name }), el("span", { class: "leise", text: rolleName(a.art) })),
-      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Abmelden", onclick: () => { KO.aufsichtAbmelden(); history.replaceState(null, "", location.pathname); LST_START.neu(); } })),
-      meldung ? el("p", { class: "meldung", role: "status", text: meldung }) : null));
-
     teile.push(el("h2", { class: "abschnitt", text: "Verbundene Konten" }),
       verbunden.length ? el("ul", { class: "stand-liste" }, verbunden.map(k => kontoZeile(a, k))) : el("p", { class: "leise", text: "Noch kein Konto verbunden." }));
     if (offen.length) teile.push(el("p", { class: "leise", text: `Wartet auf Zustimmung: ${offen.map(k => k.name).join(", ")}` }));
@@ -90,21 +105,91 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
         el("button", { type: "button", class: "knopf haupt", text: "Sichern", disabled: !verbunden.length,
           onclick: () => LST_DATEN.herunterladen(LST_DATEN.sichern(verbunden.map(k => k.id)), LST_DATEN.dateiname(`aufsicht-${a.name}`)) }),
         el("button", { type: "button", class: "knopf", text: "Einlesen", onclick: () => datei.click() }), datei)));
+    teile.push(el("h2", { class: "abschnitt", text: "In den Eulenpfad übernehmen" }), uebernahmeKarte(a));
+    return teile;
+  }
 
-    teile.push(el("h2", { class: "abschnitt", text: "Abgleich zwischen Geräten" }), abgleichKarte());
-
+  function einstellungenTeil() {
     const e = LST.lies("einstellungen", {});
     const setze = (f, w) => { KO.setzeGeraeteEinstellung(f, w); meldung = "Einstellung gespeichert."; zeichne(); };
-    teile.push(el("h2", { class: "abschnitt", text: "Einstellungen für dieses Gerät" }), el("section", { class: "einstellungen" },
+    return [el("h2", { class: "abschnitt", text: "Einstellungen für dieses Gerät" }), el("section", { class: "einstellungen" },
       auswahl("Taschenrechner", [
         { id: "uebung", name: "wie die Übung es vorsieht" }, { id: "ohne", name: "überall gesperrt" }, { id: "erlaubt", name: "überall erlaubt" },
       ], e.rechner || "uebung", w => setze("rechner", w), { name: "rechner" }),
       auswahl("Dezimalzeichen", [{ id: "punkt", name: "Punkt (3.5)" }, { id: "komma", name: "Komma (3,5)" }], e.dezimal || "punkt", w => setze("dezimal", w), { name: "dezimal" }),
       auswahl("Gast", [{ id: "an", name: "erlaubt (nichts wird gespeichert)" }, { id: "aus", name: "abgeschaltet" }], e.gast || "an", w => setze("gast", w), { name: "gast" }),
-      el("small", { class: "leise", text: "Gilt für alle Konten auf diesem Gerät. Die Jugendlichen sehen die Einstellung in jeder Übung." })));
-    teile.push(el("h2", { class: "abschnitt", text: "In den Eulenpfad übernehmen" }), uebernahmeKarte(a));
-    teile.push(el("h2", { class: "abschnitt", text: "Entwicklung" }), entwicklungKarte());
-    return teile;
+      el("small", { class: "leise", text: "Gilt für alle Konten auf diesem Gerät. Die Jugendlichen sehen die Einstellung in jeder Übung." }))];
+  }
+
+  // Freigabe je Gerät (Plan C5; Kern KERN.freigabe, docs/kern/rahmen.md 4.8), wie im Eulenpfad: Frei ist, was nichts mehr
+  // zu prüfen hat (Prüfstand im Repo, FG1 a); die Aufsicht setzt es je Übung und Inhaltsliste anders. Mit Abgleich gilt
+  // die Freigabe für alle Geräte (die jüngste gewinnt). Je Fach eine zuklappbare Gruppe; welche offen sind, merkt sich
+  // das Gerät (lernsteig:verwaltungOffen, nicht abgeglichen).
+  function freigabeKarte() {
+    const F = LST.FREIGABE, E = LST.ENTWICKLUNG;
+    const dev = E.aktiv();
+    const eigen = F.geraet();
+    const neuMit = text => { meldung = text; zeichne(); };
+    const stand = (g, offenText) => g
+      ? el("span", { class: "marke ok", text: `✓ ${g.am}${g.von ? " · " + g.von : ""}` })
+      : el("span", { class: "marke gesperrt", text: offenText });
+    /** Schalter frei/gesperrt, dazu „wie Prüfstand“, wenn das Gerät einen eigenen Eintrag hat. */
+    const schalter = (frei, hatEigen, setze, name, attr) => el("div", { class: "knopf-zeile schalter-zeile" },
+      el("button", Object.assign({ type: "button", class: "schalter " + (frei ? "frei" : "gesperrt"), text: frei ? "✓ frei" : "🔒 gesperrt",
+        "aria-label": `${name}: ${frei ? "frei, sperren" : "gesperrt, freigeben"}`,
+        onclick: () => { setze(!frei); neuMit(`${name} ${frei ? "gesperrt" : "freigegeben"}.`); } }, attr)),
+      hatEigen ? el("button", { type: "button", class: "schalter", text: "↺ wie Prüfstand", title: "Eigene Einstellung entfernen",
+        onclick: () => { setze(null); neuMit(`${name}: wieder nach Prüfstand.`); } }) : null);
+    const zeilen = u => {
+      const g = F.geprueft(u.id);
+      const z = [el("tr", { "data-uebung": u.id },
+        el("td", {}, el("b", { text: u.titel }), el("small", { class: "leise block", text: u.thema })),
+        el("td", {}, u.neu || g ? stand(g, "nicht angesehen") : el("span", { class: "leise", text: "nichts zu prüfen" }),
+          dev ? el("button", { type: "button", class: "schalter", text: g ? "aufheben" : "✓ angesehen",
+            onclick: async () => { if (await E.setzeGeprueft("uebungen", u.id, !g)) zeichne(); } }) : null),
+        el("td", {}, schalter(F.frei(u.id), u.id in eigen.uebungen, w => F.setzeFrei(u.id, w), u.titel, { "data-freigabe": u.id })))];
+      for (const l of F.listen(u.id)) z.push(el("tr", { class: "liste-zeile", "data-liste": `${u.id}/${l.id}` },
+        el("td", {}, `↳ ${l.name}`),
+        el("td", {}, stand(l.geprueft, "ungeprüft")),
+        el("td", {}, l.von
+          ? el("span", { class: "leise", text: `${F.listeFrei(u.id, l.id) ? "✓ frei" : "🔒 gesperrt"} — wie bei ${(KAT.uebung(l.von.split("/")[0]) || {}).titel || l.von}` })
+          : schalter(F.listeFrei(u.id, l.id), l.quelle in eigen.listen, w => F.setzeListeFrei(u.id, l.id, w), `${u.titel}, ${l.name}`, { "data-freigabe": `${u.id}/${l.id}` }))));
+      return z;
+    };
+    const tabelle = uebungen => el("div", { class: "tabelle-rahmen" }, el("table", { class: "freigabe-tabelle" },
+      el("thead", {}, el("tr", {}, ["Übung / Liste", "Prüfstand", "für Jugendliche"].map(t => el("th", { text: t })))),
+      el("tbody", {}, uebungen.flatMap(zeilen))));
+    const offen = new Set(LST.lies("verwaltungOffen", []));
+    const gruppen = KAT.FAECHER.map(f => {
+      const uebungen = KAT.UEBUNGEN.filter(u => u.fach === f.id);
+      if (!uebungen.length) return null;
+      const frei = uebungen.filter(u => F.fuerLernendeSichtbar(u.id)).length;
+      const zuPruefen = uebungen.filter(u => F.zuPruefen(u.id) || F.listen(u.id).some(l => !l.von && !l.geprueft)).length;
+      const gruppe = el("details", { class: "freigabe-gruppe", "data-fach": f.id },
+        el("summary", {}, el("span", { text: f.name }),
+          el("span", { class: "leise", text: ` ${frei} von ${uebungen.length} frei${zuPruefen ? ` · ${zuPruefen} zu prüfen` : ""}` })),
+        tabelle(uebungen));
+      gruppe.open = offen.has(f.id);
+      gruppe.addEventListener("toggle", () => { gruppe.open ? offen.add(f.id) : offen.delete(f.id); LST.schreibe("verwaltungOffen", [...offen]); });
+      return gruppe;
+    }).filter(Boolean);
+    /** Alle Übungen und ihre eigenen Listen auf einmal setzen (Verweise gelten über ihre Quelle). */
+    const alle = (wert, text) => {
+      for (const u of KAT.UEBUNGEN) {
+        F.setzeFrei(u.id, wert);
+        for (const l of F.listen(u.id)) if (!l.von) F.setzeListeFrei(u.id, l.id, wert);
+      }
+      neuMit(text);
+    };
+    const sichtbar = KAT.UEBUNGEN.filter(u => F.fuerLernendeSichtbar(u.id)).length;
+    return el("section", { class: "einstellungen" },
+      el("p", { "data-sichtbar": String(sichtbar), text: `Jugendliche sehen ${sichtbar} von ${KAT.UEBUNGEN.length} Übungen. Frei ist, was nichts mehr zu prüfen hat: Neue Übungen sind gesperrt, bis sie angesehen sind, Inhaltslisten, bis sie geprüft sind (Prüfstand im Repo, gesetzt im Entwickler-Modus). Hier lässt sich das für dieses Gerät anders setzen; mit Abgleich gilt es für alle Geräte. Eine Übung mit Inhaltslisten braucht mindestens eine freie Liste.` }),
+      el("div", { class: "knopf-zeile" },
+        el("button", { type: "button", class: "knopf", "data-aktion": "alles-frei", text: "✓ Alles freigeben", onclick: () => alle(true, "Alle Übungen freigegeben.") }),
+        el("button", { type: "button", class: "knopf", "data-aktion": "alles-gesperrt", text: "🔒 Alles sperren", onclick: () => alle(false, "Alle Übungen gesperrt.") }),
+        el("button", { type: "button", class: "knopf", "data-aktion": "alles-pruefstand", text: "↺ Alles wie Prüfstand", onclick: () => alle(null, "Alles wieder nach Prüfstand.") })),
+      ...gruppen,
+      el("small", { class: "leise", text: "Sie sehen als Aufsicht jede Übung, auch gesperrte — zum Ansehen und Prüfen." }));
   }
 
   // Abgleich über einen Ordner (Plan C5, DF3 a; gemeinsam/abgleich.js über KERN.abgleich), wie im Eulenpfad: den Ordner
@@ -142,7 +227,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
           st && st.ordner ? el("button", { type: "button", class: "knopf", text: "Ordner vergessen", onclick: async () => { await ab.vergessen(); abgleichMeldung = "Ordner vergessen."; zeichne(); } }) : null)]
       : [el("p", { class: "leise", text: "Dieser Browser kann keinen Ordner verwenden — das geht heute in Chrome und Edge auf dem Computer. Abgleichen geht hier über eine Datei: unten sichern, auf dem anderen Gerät einlesen, und umgekehrt." })];
     return el("section", { class: "einstellungen" },
-      el("p", { text: "Üben Jugendliche auf mehreren Geräten, wählt man auf jedem denselben Ordner — einen Netzwerkordner oder den Ordner eines Cloud-Dienstes. Jedes Gerät schreibt dort seine eigene Datei und liest die der anderen: Konten, Aufsichten, Runden und Rekorde. PIN, Code und Verbindungen bleiben auf dem Gerät." }),
+      el("p", { text: "Üben Jugendliche auf mehreren Geräten, wählt man auf jedem denselben Ordner — einen Netzwerkordner oder den Ordner eines Cloud-Dienstes. Jedes Gerät schreibt dort seine eigene Datei und liest die der anderen: Konten, Aufsichten, Runden, Rekorde und die Freigabe der Übungen. PIN, Code und Verbindungen bleiben auf dem Gerät." }),
       el("p", { class: "leise", text: "Ein Konto mit PIN ist auf einem anderen Gerät gesperrt, bis es dort mit dem Wiederherstellungscode freigeschaltet ist. Für eine Aufsicht reicht der Code nur auf einem Gerät ohne Aufsicht; sonst bestätigt eine Aufsicht des Geräts mit ihrer PIN." }),
       name, ...ordnerTeil,
       el("div", { class: "knopf-zeile" },
@@ -207,5 +292,5 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       el("p", { class: "fuss", text: GRENZE }));
   }
 
-  LST_START.verwaltung = box => { wurzel = box; zeichne(); };
+  LST_START.verwaltung = (box, unter) => { wurzel = box; teil = unter || null; zeichne(); };
 })();

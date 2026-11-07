@@ -16,6 +16,10 @@ const LST_PRUEFSTAND = {
     "rationale-zahlen": {
       "am": "2026-11-07",
       "von": "Patrik"
+    },
+    "terme": {
+      "am": "2026-11-07",
+      "von": "Patrik"
     }
   }
 };
