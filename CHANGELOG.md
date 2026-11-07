@@ -675,3 +675,5 @@
   3000 Nachrechnungen, zahlAus, Kommaregel), Seitentest des Lernsteigs (0.47 × 0.8 mit Kommaregel und Weiterrechnen mit
   0.376; Vorgehen je Aufgabe in allen Übungen). Im Browser: Block am Desktop rechts, auf 375 px unten.
   docs/kern/rahmen.md 4.23 (neu), 4.24; rahmen.md 21; lernsteig/rahmen.md 5a0 (neu); Plan (NB1–NB4 a); Kern-Changelog.
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session19_2026-11-07.md`, Handover Eulenpfad (Haltepunkt aufgelöst, LERN-60 auf
+  Kern 1.22.0) und Lernsteig.

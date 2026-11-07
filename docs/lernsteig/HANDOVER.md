@@ -1,6 +1,17 @@
 # Handover — Lernsteig
 
 ## Stand
+**2026-11-07, nach LERN_Session19** (Lernspiele, [Report](../eulenpfad/report/LERN_Session19_2026-11-07.md)): Kern 1.22.0.
+Runden über `KERN.runde.lauf` (Eintrag mit `zeit` am Ende, `dauer` auf 0,1 s, `liste` je Aufgabe; alte Runden umgedeutet,
+auch `zeit` vom Beginn ans Ende); Durchgang über Runden für alle Stufen, Kürzen bei erschöpfter Stufe; auf Anhieb nur
+„Richtig.“, nach einem Fehlversuch der Weg mit „Weiter“ (RA8 a). Abgleich über einen Ordner in der Verwaltung
+(`gemeinsam/abgleich.js`, Plan C5); Aufsichten reisen in Datei und Abgleich mit und kommen gesperrt an, ihr Code reicht nur
+auf einem Gerät ohne Aufsicht mit PIN (OA1 a, OA2 a; AS1 a aufgehoben). Notizblock bei jeder Zahl-Antwort (NB1–NB4 a).
+Grafiken höchstens quadratisch und halb so hoch wie das Fenster. rationale-zahlen g nach dem Wortlaut des Lehrplans
+(RZ1–RZ3 a). Tests: Konten „83 Fälle, 0 Fehler.“, `pruefe_uebungen.js` „0 Fehler, 0 Hinweise.“ Weiter mit: Prüfen durch
+Patrik (Notizblock, rationale-zahlen g), C5 Rest (Konten entfernen, Freigabe je Gerät), periodische Dezimalzahlen
+(zurückgestellt), C3–C8.
+
 **2026-11-06, nach LERN_Session18** (Lernspiele, [Report](../eulenpfad/report/LERN_Session18_2026-11-06.md)): Kern 1.18.0.
 Sichern und Einlesen über `KERN.daten` (Format `reihe-daten`, ältere Sicherungen gelesen); ein Konto oder eine Aufsicht
 mit PIN ist auf einem anderen Gerät 🔒 gesperrt, bis sie mit Code (Aufsicht auch mit Bestätigung) freigeschaltet ist

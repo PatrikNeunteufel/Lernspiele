@@ -8,7 +8,16 @@
 
 const LST_PRUEFSTAND = {
   "listen": {},
-  "uebungen": {}
+  "uebungen": {
+    "gleichungen": {
+      "am": "2026-11-07",
+      "von": "Patrik"
+    },
+    "rationale-zahlen": {
+      "am": "2026-11-07",
+      "von": "Patrik"
+    }
+  }
 };
 
 if (typeof module !== "undefined") module.exports = LST_PRUEFSTAND;
