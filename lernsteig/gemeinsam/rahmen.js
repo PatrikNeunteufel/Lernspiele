@@ -405,17 +405,8 @@
         const feld = el("input", { class: "eingabe", type: "text", inputmode: "none", autocomplete: "off", spellcheck: "false", "aria-label": "Ergebnis" });
         const ok = el("button", { type: "button", class: "knopf haupt tf-pruefen", text: "Prüfen" });
         const termAntwort = a.art === "term";
-        // Zahl: Ziffern, Komma, ± (Vorzeichen wechseln), ⌫. Term: Ziffern, die Zeichen der Aufgabe (a.tasten, etwa
-        // ["a", "b", "²", "(", ")"]) und + − ·, ⌫ — eingefügt an der Schreibmarke.
-        const vorzeichen = { text: "±", label: "Vorzeichen wechseln", tue: f => {
-          const v = f.value.trim();
-          f.value = /^[-−]/.test(v) ? v.replace(/^[-−]\s*/, "") : LST.MINUS + v;
-        } };
-        const ZIFFERN = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
-        const tasten = termAntwort
-          ? [...ZIFFERN, ...new Set([...(a.tasten || []), "+", LST.MINUS, "·"]), "⌫"]
-              .map(t => (t === LST.MINUS ? { text: t, label: "Minus" } : t === "·" ? { text: t, label: "Mal" } : t))
-          : ["1", "2", "3", "4", "5", { text: LST.dezimalZeichen(), label: "Komma" }, "6", "7", "8", "9", "0", "⌫", vorzeichen];
+        // Welche Tasten: LST.antwortTasten (Zahl: Ziffern, Komma, ⌫, ±; Term: dazu Variablen und Zeichen der Aufgabe)
+        const tasten = LST.antwortTasten(a);
         const tastenfeld = KERN.tastenfeld({ tasten, ziel: () => feld, klasse: `tastenfeld antwort-tasten${termAntwort ? " term-tasten" : ""}`, label: "Tasten für die Antwort" }).element;
         tastenfeld.append(ok);
         aktuellesFeld = feld;

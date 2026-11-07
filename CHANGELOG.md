@@ -695,3 +695,9 @@
   (Tastenfeld je Aufgabe, Antwort nur mit Tasten getippt und geprüft, Gleichung im Block mit Umformung, ＋ Zeile und
   Weiterrechnen), Konten 83 Fälle, Gratwanderung „Keine Fehler.“ Im Browser: gleichungen j am Desktop und auf 375 px.
   docs/kern/rahmen.md 4.23, 4.24 (neu), 4.25; lernsteig/rahmen.md 4, 5a0; Plan (TF1 a, GL1 a); Kern-Changelog.
+- Lernsteig, Meldung Patrik (Screenshot „Schreibe als Potenz: b · b · b · b · b“ ohne Taste b): Seit die Tastatur des
+  Geräts zu bleibt, fehlten in `terme` Tasten für die Lösung — die Variable bei „Schreibe als Potenz“ (die Übung gab nur
+  ^ ² ³ mit) und „/“ bei „Fasse zusammen“ mit Brüchen; über 8000 Aufgaben 1144 nicht tippbar. `LST.antwortTasten` nimmt
+  jetzt die Variablen, „/“ und „²“ aus dem Term der Aufgabe dazu; `tools/pruefe_uebungen.js` prüft für jede erzeugte
+  Term-Aufgabe, dass jedes Zeichen der Lösung eine Taste hat (Gegenprobe mit der alten Wahl: 1144 Funde, neu 0; übrige
+  Term-Übungen nie betroffen), der Seitentest dasselbe in der Seite. lernsteig/rahmen.md 4.

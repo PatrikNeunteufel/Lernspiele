@@ -68,6 +68,29 @@ var LST = (function () {
   const leseZahl = text => KERN.zahl.lies(text);
 
   /**
+   * Tasten für die Antwort einer Aufgabe (TF1 a, für KERN.tastenfeld). Zahl: Ziffern, Komma, ⌫, ± (Vorzeichen wechseln).
+   * Term: Ziffern; die Variablen des Terms der Aufgabe (a.ausdruck, sonst a.text: einzelne Buchstaben, nicht Teil eines
+   * Worts) und „/“ und „²“, wenn er sie hat; die Zeichen der Übung (a.tasten, etwa „^“, „(“); + − ·; ⌫. Seit die Tastatur
+   * des Geräts zu bleibt, muss jedes Zeichen der Lösung hier eine Taste haben (Meldung Patrik, LERN_Session20: „b · b · b“
+   * als Potenz ohne Taste b, „Fasse zusammen“ mit Brüchen ohne „/“) — tools/pruefe_uebungen.js prüft das je Aufgabe.
+   */
+  function antwortTasten(a) {
+    const ZIFFERN = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+    if (a.art !== "term") {
+      const vorzeichen = { text: "±", label: "Vorzeichen wechseln", tue: f => {
+        const v = f.value.trim();
+        f.value = /^[-−]/.test(v) ? v.replace(/^[-−]\s*/, "") : MINUS + v;
+      } };
+      return ["1", "2", "3", "4", "5", { text: dezimalZeichen(), label: "Komma" }, "6", "7", "8", "9", "0", "⌫", vorzeichen];
+    }
+    const quelle = String(a.ausdruck || a.text);
+    const variablen = [...new Set(quelle.match(/(?<![A-Za-zÄÖÜäöüß])[a-z](?![A-Za-zÄÖÜäöüß])/g) || [])].sort();
+    const zeichen = [...variablen, ...(quelle.includes("/") ? ["/"] : []), ...(quelle.includes("²") ? ["²"] : []), ...(a.tasten || []), "+", MINUS, "·"];
+    const NAME = { [MINUS]: "Minus", "·": "Mal", "/": "Bruchstrich" };
+    return [...ZIFFERN, ...[...new Set(zeichen)].map(t => (NAME[t] ? { text: t, label: NAME[t] } : t)), "⌫"];
+  }
+
+  /**
    * Niveaus (Entscheid NV1 a): intern kantonsunabhängig, gespeichert je Fach im Profil. Angezeigt wird der
    * Name aus dem Lehrplan-Profil (lehrplaene.js).
    */
@@ -125,7 +148,7 @@ var LST = (function () {
 
   return {
     PRAEFIX, ALTE_FELDER, alteEintraegeUmdeuten, lies, schreibe, beiAenderung, quelle, zufall, waehle, mische, tagText, wochenSerie,
-    TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl,
+    TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl, antwortTasten,
     NIVEAUS, niveauNr, stufenListe, stufeVon, zielstufe,
   };
 })();

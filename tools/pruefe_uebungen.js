@@ -181,6 +181,13 @@ function pruefeOhneBrowser(eintrag) {
         if (eintrag.fach === "mathematik" && /(^|[^\d'.,])\d{4,}/.test(sichtbar.replace(/[.,]\d+/g, ""))) { fehlerMelden(ort, `Tausender ohne Apostroph: ${sichtbar}`); break; }
         const m = U.pruefeAufgabe(a, stufe, niveau);
         if (m.length && maengel++ < 3) fehlerMelden(ort, m.join("; "));
+        // TF1 a: jedes Zeichen der Lösung hat eine Taste (die Tastatur des Geräts bleibt zu; Meldung Patrik LERN_Session20)
+        if (a.art === "term") {
+          const tasten = LST.antwortTasten(a).map(t => (typeof t === "string" ? t : t.text));
+          // ohne Tausender-Apostroph („1'080“ gilt auch als „1080“)
+          const ohne = [...new Set([...a.antwortTerm.replace(/[\s']/g, "")].map(c => (c === "-" ? "−" : c === "*" ? "·" : c)))].filter(c => !tasten.includes(c));
+          if (ohne.length && maengel++ < 3) fehlerMelden(ort, `Lösung „${a.antwortTerm}“ nicht tippbar: keine Taste ${ohne.join(" ")} (${a.text})`);
+        }
         // Hinweise zu typischen falschen Eingaben dürfen die Lösung nicht nennen
         for (const falsch of (a.art === "term" ? ["x", "a + 1", a.antwortTerm + " + 1", null] : [a.antwort + 1, a.antwort - 1, -a.antwort, 0, null])) {
           if (falsch === a.antwort) continue;

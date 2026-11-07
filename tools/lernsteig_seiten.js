@@ -247,6 +247,12 @@ async function pruefeSeiten(uebungen, melde, LST) {
               else {
                 const fehlt = [..."0123456789", "⌫", "Prüfen", ...(a.art === "term" ? a.tasten || [] : ["±"])].filter(t => !tf.tasten.includes(t));
                 if (fehlt.length) melde(ort, `Tastenfeld ohne ${fehlt.join(" ")}`);
+                // jedes Zeichen der Lösung lässt sich mit den Tasten tippen (Meldung Patrik: „b · b · b“ ohne Taste b)
+                if (a.art === "term") {
+                  const noetig = [...new Set([...a.antwortTerm.replace(/[\s']/g, "")].map(c => (c === "-" ? "−" : c === "*" ? "·" : c)))];
+                  const ohne = noetig.filter(c => !tf.tasten.includes(c));
+                  if (ohne.length) melde(ort, `Lösung „${a.antwortTerm}“ nicht tippbar: keine Taste ${ohne.join(" ")} (${a.text})`);
+                }
                 if (tf.modus !== "none") melde(ort, `Eingabe mit inputmode „${tf.modus}“ statt none`);
               }
             }

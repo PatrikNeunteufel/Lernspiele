@@ -75,8 +75,12 @@ Leerzeichen, Punkt und Komma sind erlaubt.
   Kurztasten 1 … n, eine falsche Wahl wird gesperrt (Fehlversuch), `kennung` soll die Antworten enthalten.
 - Optional `vor` („x =“) und `einheit` („m²“): Text vor und nach dem Eingabefeld.
 - **Tastenfeld der Antwort** (TF1 a, `KERN.tastenfeld`, docs/kern/rahmen.md 4.24): unter jeder Zahl- und Term-Antwort;
-  Zahl mit Ziffern, Komma (Zeichen der Einstellung), ⌫, ± und „Prüfen“, Term mit Ziffern, `tasten` und + − ·, ⌫ und
-  „Prüfen“. Die Tastatur des Geräts bleibt zu (`inputmode` none), eine echte Tastatur schreibt weiter ins Feld.
+  Zahl mit Ziffern, Komma (Zeichen der Einstellung), ⌫, ± und „Prüfen“, Term mit Ziffern, den Variablen des Terms der
+  Aufgabe (`ausdruck`, sonst `text`) und „/“ und „²“, wenn er sie hat, dazu `tasten` und + − ·, ⌫ und „Prüfen“
+  (`LST.antwortTasten`). Die Tastatur des Geräts bleibt zu (`inputmode` none), eine echte Tastatur schreibt weiter ins
+  Feld. Deshalb muss jedes Zeichen der Lösung eine Taste haben; `tools/pruefe_uebungen.js` prüft das für jede erzeugte
+  Aufgabe (Meldung Patrik LERN_Session20: in `terme` waren 1144 von 8000 Lösungen nicht tippbar, Potenz ohne Variable,
+  Brüche ohne „/“).
 - Optional `gleichung` (Text oder Liste bei einem System): steht im Notizblock oben, wenn die Übung die Vorlage
   „= Gleichung“ anbietet (5a0).
 - Katalogfeld `sprache` („en“, „fr“): Aufgabentext und Antworten tragen dieses `lang`, damit Vorlesefunktionen und
