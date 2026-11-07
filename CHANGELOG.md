@@ -756,3 +756,9 @@
   mit und ohne grüne Kugeln, beim fehlenden Wert passt die genannte Anzahl zur Liste. Nachrechnung als `sollAus`, Vergleich
   auch von Listen und Texten. `LST.zahlenImText`: „~“ nimmt auch „$“ an. Kein Fund. Gegenprobe (ein Wert im Mittelwert-
   Text weggelassen): gemeldet. Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).
+- Text gegen Prüfdaten (TD1 a), fünfte Übung `folgen`: Gezeigt werden Glieder oder eine Tabelle, nicht die Regel —
+  `liesText` (alle 12 Typen) liest die Zahlen und leitet die Regel selbst ab (gleicher Abstand, Quadratzahl plus c,
+  n · n); folgen sie keiner Regel des Typs, meldet die Prüfung das. Beim Term zur Figurenfolge wird die Tabelle mit den
+  Daten verglichen (die Lösung prüfte schon gegen die Tabelle). `LST.zahlenImText`: „#*“ für eine Zahlenliste;
+  `daten-rabatt` benutzt es statt eines eigenen Listen-Lesers. Kein Fund. Gegenprobe (viertes Glied bricht die Regel):
+  gemeldet. Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).

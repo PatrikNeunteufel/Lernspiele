@@ -137,8 +137,8 @@ const LP_STUFEN = lehrplanStufen();
 // ---------- Text gegen Prüfdaten (Plan B2 Schritt 3, TD1 a) ----------
 // Übungen, deren Prüfung nur auf a.daten rechnete: Sie lesen den angezeigten Text (liesText) und prüfen ihn in
 // pruefeAufgabe gegen die Daten. Fertige stehen in TEXT_GELESEN (dann ist liesText Pflicht), die übrigen in TEXT_OFFEN.
-const TEXT_GELESEN = ["flaechen-volumen", "koerper-winkel", "prozent-funktionen", "daten-rabatt"];
-const TEXT_OFFEN = ["folgen", "sachsituationen", "zehnerpotenzen",
+const TEXT_GELESEN = ["flaechen-volumen", "koerper-winkel", "prozent-funktionen", "daten-rabatt", "folgen"];
+const TEXT_OFFEN = ["sachsituationen", "zehnerpotenzen",
   "binome-gleichungen", "kombinatorik", "zufall"];
 
 // ---------- Annahme von Antworten (Plan B2 Schritt 3) ----------

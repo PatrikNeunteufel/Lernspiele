@@ -70,10 +70,20 @@ var LST = (function () {
   /**
    * Zahlen aus einem Aufgabentext lesen (Plan B2 Schritt 3, TD1 a: liesText der Übungen liest, was das Kind sieht, und
    * prüft es gegen die Prüfdaten). muster: der ganze Text, „#“ steht für eine Zahl in der Schreibweise des Lernsteigs
-   * (Apostroph in Dreiergruppen, „−“, Punkt oder Komma), „~“ für eine Einheit (Buchstaben, ohne Ziffern); alles andere gilt
+   * (Apostroph in Dreiergruppen, „−“, Punkt oder Komma), „~“ für eine Einheit (Buchstaben, ohne Ziffern), „#*“ (einmal je
+   * Muster) für eine Liste „#, #, …“ mit 1 bis 20 Zahlen, die als ein Element (Array) zurückkommt; alles andere gilt
    * wörtlich. Liefert die Zahlen in ihrer Reihenfolge oder null, wenn der Text nicht so lautet.
    */
   function zahlenImText(text, muster) {
+    const stern = muster.indexOf("#*");
+    if (stern >= 0) {
+      const vor = muster.slice(0, stern), nach = muster.slice(stern + 2), i = vor.split("#").length - 1;
+      for (let n = 1; n <= 20; n++) {
+        const z = zahlenImText(text, vor + Array(n).fill("#").join(", ") + nach);
+        if (z) return [...z.slice(0, i), z.slice(i, i + n), ...z.slice(i + n)];
+      }
+      return null;
+    }
     const ZAHL = "([−-]?(?:\\d{1,3}(?:'\\d{3})+|\\d+)(?:[.,]\\d+)?)";
     const EINHEIT = "(?:[A-Za-zÄÖÜäöü€$]+)";
     const woertlich = t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

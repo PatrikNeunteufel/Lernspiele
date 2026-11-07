@@ -143,21 +143,13 @@ function sollAus(typ, d) {
 
 /**
  * Den angezeigten Text lesen (Plan B2 Schritt 3, TD1 a), unabhängig vom Erzeuger: je Typ der Satz als Muster
- * (LST.zahlenImText, „#“ Zahl, „~“ Einheit). Listen („12, 7, 30“) mit 1 bis 12 Zahlen. Die Richtung der Umrechnung folgt
- * aus der Frage; beim Umrechnen in die fremde Währung ist der Betrag der Frankenbetrag durch den Kurs. Liefert die Werte
- * in der Form von a.daten oder null.
+ * (LST.zahlenImText, „#“ Zahl, „~“ Einheit, „#*“ Liste „12, 7, 30“). Die Richtung der Umrechnung folgt aus der Frage;
+ * beim Umrechnen in die fremde Währung ist der Betrag der Frankenbetrag durch den Kurs. Liefert die Werte in der Form von
+ * a.daten oder null.
  */
 const muster = (text, m) => LST.zahlenImText(text, m);
-/** Muster mit einer Liste „#, #, …“ an der Stelle „LISTE“: { liste, rest } oder null. */
-function mitListe(text, m) {
-  for (let n = 1; n <= 12; n++) {
-    const z = muster(text, m.replace("LISTE", Array(n).fill("#").join(", ")));
-    if (z) { const i = m.split("LISTE")[0].split("#").length - 1; return { liste: z.slice(i, i + n), vor: z.slice(0, i), nach: z.slice(i + n) }; }
-  }
-  return null;
-}
 const LESER = {
-  mittelwert: a => { const l = mitListe(a.text, "Arithmetisches Mittel von LISTE ="); return l && { werte: l.liste }; },
+  mittelwert: a => { const z = muster(a.text, "Arithmetisches Mittel von #* ="); return z && { werte: z[0] }; },
   waehrung: a => {
     const zu = muster(a.text, "Kurs: 1 ~ = # Fr. Wie viele Franken sind # ~?");
     if (zu) return { betrag: zu[1], kurs: zu[0], richtung: "zu-fr" };
@@ -178,9 +170,9 @@ const LESER = {
   brutto: a => { const z = muster(a.text, "Nettopreis # Fr., dazu # % Zuschlag. Bruttopreis ="); return z && { preis: z[0], p: z[1] }; },
   netto: a => { const z = muster(a.text, "Bruttopreis # Fr. mit # % Zuschlag. Nettopreis ="); return z && { brutto: z[0], p: z[1] }; },
   "fehlender-wert": a => {
-    const l = mitListe(a.text, "Das Mittel von # Zahlen ist #. # davon sind LISTE. Die fehlende Zahl =");
+    const z = muster(a.text, "Das Mittel von # Zahlen ist #. # davon sind #*. Die fehlende Zahl =");
     // „n − 1 davon“: die genannte Anzahl muss zur Liste passen
-    return l && l.vor[2] === l.liste.length ? { n: l.vor[0], m: l.vor[1], werte: l.liste } : null;
+    return z && z[2] === z[3].length ? { n: z[0], m: z[1], werte: z[3] } : null;
   },
   "vor-rabatt": a => { const z = muster(a.text, "Nach # % Rabatt kostet eine Jacke # Fr. Preis vor dem Rabatt ="); return z && { nachher: z[1], p: z[0] }; },
 };
