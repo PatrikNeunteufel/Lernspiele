@@ -767,3 +767,8 @@
   Antworten („y = 3x − 2“). Die Prüfung bestimmt aus dem Gezeigten, welche Antwort passt, und vergleicht mit der
   markierten; Nachrechnung als `sollAus`. Kein Fund. Gegenprobe (Tabelle um 1 verschoben): gemeldet, mit der Antwort,
   die dann passen würde. Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).
+- Text gegen Prüfdaten (TD1 a), siebte Übung `zehnerpotenzen`: `liesText` für alle 9 Typen — Hochzahlen („10⁻⁸“) vor
+  dem Lesen zu „^-8“, Zahlwörter über das schon vorhandene `liesWort`, der gefragte Exponent aus Zahl und Mantisse
+  (muss ganz sein), die ausgeschriebene Zahl aus Mantisse und Exponent. Die Prüfung der Werte steht in `pruefeMit(a, d)`
+  und läuft mit den Daten und mit dem Gelesenen. Kein Fund. Gegenprobe (Exponent im Text um 1 zu gross): gemeldet.
+  Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).

@@ -150,14 +150,69 @@ function liesWort(t) {
   return (m[1] ? liesU1000(m[1] === "eine" ? "eins" : m[1]) * 1e6 : 0) + (m[2] ? liesUMio(m[2]) : 0);
 }
 
+/**
+ * Den angezeigten Text lesen (Plan B2 Schritt 3, TD1 a), unabhängig vom Erzeuger: Hochzahlen („10⁻⁸“) werden zu „^-8“,
+ * dann je Typ der Satz als Muster (LST.zahlenImText); Zahlwörter über liesWort. Der Exponent, nach dem gefragt ist, folgt
+ * aus Zahl und Mantisse (und muss eine ganze Zahl sein), die ausgeschriebene Zahl aus Mantisse und Exponent. Liefert die
+ * Werte in der Form von a.daten oder null.
+ */
+const AUS_HOCH = Object.fromEntries(Object.entries(HOCH).map(([k, v]) => [v, k]));
+const ohneHoch = t => String(t).replace(/[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, s => "^" + [...s].map(c => AUS_HOCH[c]).join(""));
+const muster = (text, mu) => LST.zahlenImText(ohneHoch(text), mu);
+const STELLE = { Hunderttausender: 1e5, Zehntausender: 1e4, Tausender: 1e3 };
+/** Exponent e mit n = m · 10^e, oder null, wenn es keinen ganzen gibt. */
+function exponentAus(n, m) {
+  const e = Math.round(Math.log10(n / m));
+  return Math.abs(m * 10 ** e - n) <= 1e-9 * Math.abs(n) ? e : null;
+}
+const LESER = {
+  "wort-zahl": a => { const w = a.text.startsWith("Schreibe als Zahl: ") && a.text.slice(19); return w ? { n: liesWort(w) } : null; },
+  "zahl-stellen": a => {
+    const g = muster(a.text, "#: Wie viele ganze Millionen sind das?");
+    if (g) return { n: g[0], f: 1e6, ganz: true };
+    const name = (a.text.match(/: Welche Ziffer steht bei den (\S+)\?$/) || [])[1];
+    const z = name && STELLE[name] && muster(a.text, `#: Welche Ziffer steht bei den ${name}?`);
+    return z ? { n: z[0], f: STELLE[name] } : null;
+  },
+  zehnerpotenz: a => { const z = muster(a.text, "10^# ="); return z && { e: z[0] }; },
+  "exponent-positiv": a => { const z = muster(a.text, "# = # · 10 hoch"), e = z && exponentAus(z[0], z[1]); return e === null || !z ? null : { m: z[1], e, n: z[0] }; },
+  "exponent-negativ": a => LESER["exponent-positiv"](a),
+  "ausschreiben-positiv": a => { const z = muster(a.text, "# · 10^# ="); return z && { m: z[0], e: z[1], n: Number((z[0] * 10 ** z[1]).toPrecision(15)) }; },
+  "ausschreiben-negativ": a => LESER["ausschreiben-positiv"](a),
+  mal: a => { const z = muster(a.text, "(# · 10^#) · (# · 10^#) = # · 10 hoch"); return z && { a: z[0], b: z[2], e1: z[1], e2: z[3], m: z[4] }; },
+  geteilt: a => { const z = muster(a.text, "(# · 10^#) : (# · 10^#) = # · 10 hoch"); return z && { a: z[0], b: z[2], e1: z[1], e2: z[3], m: z[4] }; },
+};
+function liesText(a) {
+  const l = LESER[a.typ];
+  try { return (l && l(a)) || null; } catch (e) { return null; }
+}
+/** Gleiche Werte, Zahlen relativ auf Rundungsreste genau (die Zahlen reichen bis 10¹²). */
+const gleichWert = (x, y) => (typeof x === "number" && typeof y === "number" ? Math.abs(x - y) <= 1e-9 * Math.max(1, Math.abs(y)) : x === y);
+
 function pruefeAufgabe(a, stufe, niveau) {
   const mg = [];
   if (a.stufe !== stufe) mg.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
-  const d = a.daten;
+  mg.push(...pruefeMit(a, a.daten));
+  // Text gegen Prüfdaten (TD1 a): was der Jugendliche liest, sind dieselben Werte, und mit ihnen hält dieselbe Prüfung
+  const t = liesText(a);
+  if (!t) mg.push(`Text folgt keinem Muster des Typs ${a.typ}: ${a.text}`);
+  else {
+    const anders = Object.keys(a.daten).filter(k => !gleichWert(t[k], a.daten[k]));
+    if (anders.length) mg.push(`Text zeigt ${anders.map(k => `${k} = ${t[k]}`).join(", ")}, Prüfdaten ${anders.map(k => `${k} = ${a.daten[k]}`).join(", ")}: ${a.text}`);
+    mg.push(...pruefeMit(a, t).map(x => `aus dem Text: ${x}`));
+  }
+  if (/\d{4}/.test(a.text.replace(/\.\d+/g, ""))) mg.push(`Tausender ohne Apostroph: ${a.text}`);
+  return mg;
+}
+
+/** Prüfung der Lösung aus Werten in der Form von a.daten (aus den Daten oder aus dem Text). */
+function pruefeMit(a, d) {
+  const mg = [];
   try {
     if (a.typ === "wort-zahl") {
       const w = a.text.replace("Schreibe als Zahl: ", "");
       if (liesWort(w) !== a.antwort) mg.push(`Zahlwort „${w}“ gelesen als ${liesWort(w)}, Lösung ${a.antwort}`);
+      if (d.n !== a.antwort) mg.push(`Zahl ${d.n}, Lösung ${a.antwort}`);
       if (/ß/.test(w)) mg.push("ß im Zahlwort");
       if (a.antwort > 1e9) mg.push("über einer Milliarde");
     } else if (a.typ === "zahl-stellen") {
@@ -184,8 +239,7 @@ function pruefeAufgabe(a, stufe, niveau) {
       if (!(d.m >= 1 && d.m < 10)) mg.push("Ergebnis nicht normiert");
     } else mg.push(`unbekannter Typ ${a.typ}`);
   } catch (e) { mg.push(`nicht prüfbar: ${e.message}`); }
-  if (/\d{4}/.test(a.text.replace(/\.\d+/g, ""))) mg.push(`Tausender ohne Apostroph: ${a.text}`);
   return mg;
 }
 
-if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis, zahlWort, liesWort };
+if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis, zahlWort, liesWort, liesText };
