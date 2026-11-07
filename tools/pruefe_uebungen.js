@@ -134,6 +134,11 @@ function lehrplanStufen() {
 }
 const LP_STUFEN = lehrplanStufen();
 
+// ---------- Vorrat je Stufe (Plan B2 Schritt 3, VF1 a) ----------
+// Gemessen in Runden: Hinweis, wenn sich die Aufgaben einer Stufe ohne Endlos vor der sechsten Runde wiederholen.
+const VORRAT_RUNDEN = 6;
+const begruendet = []; // Stufen mit begründet kleinem Vorrat (Katalog vorrat), am Ende aufgeführt
+
 // ---------- Text gegen Prüfdaten (Plan B2 Schritt 3, TD1 a) ----------
 // Übungen, deren Prüfung nur auf a.daten rechnete: Sie lesen den angezeigten Text (liesText) und prüfen ihn in
 // pruefeAufgabe gegen die Daten. Fertige stehen in TEXT_GELESEN (dann ist liesText Pflicht), die übrigen in TEXT_OFFEN.
@@ -225,6 +230,10 @@ function pruefeOhneBrowser(eintrag) {
   if (!U.UEBUNG || U.UEBUNG.id !== eintrag.id) fehlerMelden(wo, "UEBUNG.id passt nicht zum Katalog");
   for (const f of ["aufgabeErzeugen", "pruefeAufgabe", "hinweis"]) if (typeof U[f] !== "function") fehlerMelden(wo, `${f} fehlt`);
   if (TEXT_GELESEN.includes(eintrag.id) && typeof U.liesText !== "function") fehlerMelden(wo, "liesText fehlt (Text gegen Prüfdaten, TD1 a)");
+  for (const [s, grund] of Object.entries(eintrag.vorrat || {})) {
+    if (!eintrag.stufen.concat("challenge").includes(s)) fehlerMelden(wo, `vorrat für unbekannte Stufe ${s}`);
+    if (typeof grund !== "string" || !grund.trim()) fehlerMelden(wo, `vorrat.${s} ohne Begründung`);
+  }
   if (fehler) return;
 
   const uebersicht = [];
@@ -274,6 +283,17 @@ function pruefeOhneBrowser(eintrag) {
       const endlos = eintrag.endlos === true || (eintrag.endlos || []).includes(stufe);
       if (endlos && kennungen.size < ENDLOS_MIN) fehlerMelden(ort, `Endlos-Stufe mit nur ${kennungen.size} verschiedenen Aufgaben`);
       if (!endlos && kennungen.size >= ENDLOS_MIN) hinweisMelden(ort, `${kennungen.size} verschiedene Aufgaben, Endlos wäre möglich`);
+      // Vorrat in Runden (VF1 a): weniger verschiedene Aufgaben als eine Runde lang ist → Wiederholung in der Runde
+      // (Fehler); Wiederholung vor der VORRAT_RUNDEN-ten Runde → Hinweis, ausser der Katalog begründet den Vorrat
+      // (vorrat: { <stufe>: "<Grund>" }). Die Aufgaben hängen nicht am Niveau: gemeldet einmal je Stufe.
+      if (!endlos && niveau === eintrag.niveaus[0]) {
+        const runden = kennungen.size / eintrag.anzahl, grund = (eintrag.vorrat || {})[stufe];
+        if (kennungen.size < eintrag.anzahl) fehlerMelden(`${wo}/${stufe}`, `nur ${kennungen.size} verschiedene Aufgaben bei ${eintrag.anzahl} je Runde: Wiederholung in derselben Runde`);
+        else if (runden < VORRAT_RUNDEN) {
+          if (grund) begruendet.push(`${wo}/${stufe}: ${kennungen.size} Aufgaben (${runden.toFixed(1)} Runden) — ${grund}`);
+          else hinweisMelden(`${wo}/${stufe}`, `${kennungen.size} verschiedene Aufgaben: Wiederholung nach ${runden.toFixed(1)} Runden (unter ${VORRAT_RUNDEN}; Vorrat vergrössern oder im Katalog begründen, VF1 a)`);
+        } else if (grund) hinweisMelden(`${wo}/${stufe}`, `Begründung für kleinen Vorrat, aber ${runden.toFixed(1)} Runden: Eintrag vorrat.${stufe} kann weg`);
+      }
       vorrat[stufe] = kennungen.size;
       if (niveau === eintrag.niveaus[0]) uebersicht.push(`${stufe}:${kennungen.size}`);
     }
@@ -302,6 +322,7 @@ function pruefeOhneBrowser(eintrag) {
     console.log(`Seiten im Ersatz-DOM: ${gespielt} Runden durchgespielt (${Math.round((Date.now() - t0) / 1000)} s)`);
   }
   if (TEXT_OFFEN.length) console.log(`Text gegen Prüfdaten (TD1 a) noch offen: ${TEXT_OFFEN.join(", ")}`);
+  if (begruendet.length) console.log(`Begründet kleiner Vorrat (Katalog vorrat, VF1 a):\n  ${begruendet.join("\n  ")}`);
   console.log(`\n${fehler} Fehler, ${hinweise} Hinweise.`);
   process.exit(fehler ? 1 : 0);
 })();

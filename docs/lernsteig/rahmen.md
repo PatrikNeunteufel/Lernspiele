@@ -105,8 +105,10 @@ Leerzeichen, Punkt und Komma sind erlaubt.
 - `hinweis(aufgabe, eingabe)` → Text bei einem Fehlversuch. Nennt die Lösung nie.
 
 Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `weitere` (Nebenkompetenzen), `ohneE`,
-`rechner` (je Stufe und Challenge `ohne`/`mit`/`frei`, TR1 a), `niveaus`, `anzahl`, `endlos` (`true` oder Liste) und
-`neu` (Sitzung, bis geprüft). Codes nur aus `docs/lernsteig/lehrplan/`.
+`rechner` (je Stufe und Challenge `ohne`/`mit`/`frei`, TR1 a), `niveaus`, `anzahl`, `endlos` (`true` oder Liste),
+`vorrat` (VF1 a, freiwillig: `{ <stufe>: "<Grund>" }` für eine Stufe ohne Endlos, deren Aufgaben sich bewusst vor der
+sechsten Runde wiederholen; das Testskript nennt den Grund statt eines Hinweises) und `neu` (Sitzung, bis geprüft).
+Codes nur aus `docs/lernsteig/lehrplan/`.
 
 ## 5. Ablauf einer Runde
 
@@ -348,6 +350,8 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   ohne Leerzeichen, `*` und `-`, Summanden vertauscht), abgewiesen knapp falsche (letzte Stelle ±1, letzte Ziffer
   weggelassen, ein Millionstel daneben, „+ 1“ am Term, letzte Ziffer verändert), 30 kaputte Eingaben werfen nie und
   gelten nie als richtig, falsch gegliederte Zahlen sind unlesbar mit dem Hinweis auf die Dreiergruppen (ZL1 a);
+  Stufen ohne Endlos (VF1 a): Fehler, wenn sich eine Aufgabe in derselben Runde wiederholen müsste, Hinweis bei
+  Wiederholung vor der sechsten Runde, ausser der Katalog begründet den Vorrat (`vorrat`);
   Endlos-Stufen haben mindestens 100 verschiedene
   Aufgaben (Hinweis, wenn eine andere Stufe es auch hätte);
 - Seiten im Ersatz-DOM (`tools/lernsteig_seiten.js` über `tools/pruef_dom.js`, Plan B2; ersetzt seit LERN_Session17

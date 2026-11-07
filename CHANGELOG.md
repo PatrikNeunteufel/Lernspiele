@@ -794,3 +794,10 @@
   mit dem Satz für „mit Zurücklegen“ gezeigt): gemeldet. Damit lesen alle zehn Übungen ihren Text; `TEXT_OFFEN` ist
   leer. Tests: Kern, Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler, Gratwanderung „Keine Fehler.“
   lernsteig/rahmen.md 7, Plan (B, B2).
+- Plan B2 Schritt 3, Vorrat je Stufe (Entscheid VF1 a): `tools/pruefe_uebungen.js` misst den Vorrat einer Stufe ohne
+  Endlos in Runden — Fehler, wenn sie weniger verschiedene Aufgaben hat, als eine Runde lang ist; Hinweis, wenn sich die
+  Aufgaben vor der sechsten Runde wiederholen; Ausnahmen nur mit Begründung im Katalog (`vorrat`, neu, vom Testskript
+  geprüft und am Ende aufgeführt). Heute 21 Hinweise (kombinatorik, atombau, kraefte, stromkreis — b wiederholt sich
+  nach 1.3 Runden — und die vier Sprachübungen), als Liste in Plan E 9; keine Begründung eingetragen. Gegenprobe:
+  Rundenlänge über dem Vorrat → Fehler, Begründung im Katalog → statt des Hinweises aufgeführt. Tests: Lernsteig
+  „0 Fehler, 21 Hinweise.“, Konten 101 Fälle 0 Fehler. lernsteig/rahmen.md 4, 7; Plan (VF1 a, B, B2, E 9).

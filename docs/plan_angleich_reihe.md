@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): B2 Schritt 3 in Arbeit (LERN_Session20, Annahme und Text gegen Prüfdaten gebaut), als Nächstes Vielfalt ohne Endlos und Zeitzone | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): B2 Schritt 3 in Arbeit (LERN_Session20, Annahme, Text gegen Prüfdaten und Vorrat gebaut), als Nächstes Zeitzone | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -112,7 +112,8 @@ Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`
     prozent-funktionen, daten-rabatt, folgen, sachsituationen, Teile von zehnerpotenzen und binome-gleichungen).
     Vorgehen TD1 a; **gebaut LERN_Session20** für alle zehn Übungen und alle ihre Aufgabentypen, je mit Gegenprobe; kein Fund.
   - `konten`/`rollen` und `daten`: kaputte und fremde Dateien, Ids fremder Konten, voller Speicher, Zeitzone.
-  - Vielfalt: Mindestvorrat je Stufe auch ohne Endlos (Hinweis unter 50 verschiedenen Aufgaben).
+  - Vielfalt: Mindestvorrat je Stufe auch ohne Endlos (Hinweis unter 50 verschiedenen Aufgaben). **Gebaut
+    LERN_Session20 nach VF1 a**, gemessen in Runden statt an 50; die 21 gemeldeten Stufen stehen in E 9.
   - Rechner: NaN, Division durch 0, 10-stellige Anzeige. (Im Kern-Test, `pruefe_kern.js` Rechenkern.)
   - Seiten des Lernsteigs (Start, Statistik, Aufsicht, jede Übung) im Ersatz-DOM wie im Eulenpfad, mit Suche nach
     „null“, „undefined“, „NaN“ im sichtbaren Text. Anlass: Die Startseite zeigte ohne Wochenziel „null“ (natives
@@ -214,7 +215,12 @@ Kindersprache.
    `maschinen.js` eindeutig (Kran, Handbohrer); realistische Grössen (Kraftmesser, Spannungen in `stromkreis`).
 8. **Französisch:** „C'est le vélo de moi“, „les clés d'elle“ idiomatisch ersetzen; Englisch „___ the table“ eindeutig.
 9. **Vielfalt:** `kombinatorik` f (23) mit drei Münzen, Glücksrad, Urne, Karten; `folgen` j (53) mit weiteren Figuren;
-   `zehnerpotenzen` Zahlwort „einhundertein Millionen“ prüfen (Duden).
+   `zehnerpotenzen` Zahlwort „einhundertein Millionen“ prüfen (Duden). Seit VF1 a (LERN_Session20) meldet das
+   Testskript jede Stufe ohne Endlos, deren Aufgaben sich vor der sechsten Runde wiederholen — heute 21, je Übung
+   vergrössern oder im Katalog begründen (`vorrat`): kombinatorik f, challenge; atombau a, challenge; kraefte d;
+   stromkreis b (8 Aufgaben, Wiederholung nach 1.3 Runden); grammatik e, f, g; rechtschreibung d, e, f, g;
+   englisch-grammatik b, c, d, challenge; franzoesisch-grammatik b, c, d, challenge (die Sprachübungen begrenzt durch
+   ihre Inhaltslisten).
 10. **Hinweise:** Wurzelaufgaben bekommen einen Wurzel-Hinweis; `folgen` nennt die Formel nicht in der Aufgabe.
 11. Danach: Patrik prüft die sieben Listen und die Annahmen je Übung im Entwickler-Modus (FG1 a).
 
@@ -488,3 +494,9 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Typen zeigt der Text andere Grössen als die Daten (Durchmesser statt Radius, Zahlwörter, Hochzahlen). Nicht b
   (Zahlenmenge je Typ: übersieht vertauschte Rollen), nicht c (Text ein zweites Mal bauen: verdoppelt den Erzeuger).
   Kipppunkt: die Texte ändern sich bald stark (E) — dann zuerst E oder vorerst b.
+- **VF1 a** (2026-11-07, LERN_Session20, B2 Schritt 3): Der Vorrat einer Stufe ohne Endlos wird in Runden gemessen —
+  Fehler, wenn sie weniger verschiedene Aufgaben hat, als eine Runde lang ist (Wiederholung in derselben Runde);
+  Hinweis, wenn sie sich vor der sechsten Runde wiederholt (bei 8 Aufgaben je Runde unter 48, bei 6 unter 36), mit der
+  Zahl der Runden. Ausnahmen nur mit Begründung im Katalog (`vorrat: { <stufe>: "<Grund>" }`), die in der Ausgabe steht;
+  heute keine eingetragen, die 21 gemeldeten Stufen in E 9. Nicht b (fester Hinweis unter 50), nicht c (nur die
+  Wiederholung in der Runde). Kipppunkt: das Gedächtnis mischt bald über Stufen hinweg — dann b.
