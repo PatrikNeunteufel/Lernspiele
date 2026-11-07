@@ -734,3 +734,11 @@
   Gratwanderung „Keine Fehler.“, Eulenpfad-Stichprobe (6 Spiele, 36 Stufen) mit denselben Klickzahlen wie mit Kern
   1.24.0 (der Eulenpfad liest keine Zahlen über den Kern). docs/kern/rahmen.md (zahl, terme), lernsteig/rahmen.md 7,
   Plan (B, B2, ZL1 a), Kern-Changelog.
+- Plan B2 Schritt 3, Text gegen Prüfdaten (Entscheid TD1 a), erste Übung `flaechen-volumen`: `liesText` liest je Typ
+  (18 Typen) die Werte aus dem angezeigten Satz (`LST.zahlenImText`, neu in `werkzeug.js`; Durchmesser → Radius, Basis →
+  halbe Basis); `pruefeAufgabe` vergleicht sie mit den Daten und rechnet die Lösung ein zweites Mal aus dem Gelesenen.
+  Kein Fund. Gegenprobe: Durchmesser gleich dem Radius gesetzt → 384 Aufgaben gemeldet, Schenkel um 1 verschoben → jede
+  Aufgabe des Typs. `tools/pruefe_uebungen.js` verlangt `liesText` für die fertigen Übungen und nennt die offenen.
+  Messung vorab: bei 60 von 128 Typen der zehn Übungen zeigt der Text andere Grössen als die Daten — ein Vergleich ohne
+  Typ trägt nicht. Tests: Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. lernsteig/rahmen.md 4, Plan
+  (TD1 a, B, B2).

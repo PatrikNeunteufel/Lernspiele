@@ -143,25 +143,71 @@ function hinweis(a, eingabe) {
   return h[a.typ] || "Welche Formel passt zur Figur?";
 }
 
-/** Prüfung aus den Daten, unabhängig vom Text; mit π über Math.PI, sonst exakt. */
+/**
+ * Den angezeigten Text lesen (Plan B2 Schritt 3, TD1 a): je Typ der Satz als Muster (LST.zahlenImText, „#“ Zahl,
+ * „~“ Einheit), unabhängig vom Erzeuger geschrieben. Liefert die Werte in der Form von a.daten oder null, wenn der Text
+ * keinem Muster des Typs folgt. Der Kreis mit Durchmesser liefert den Radius.
+ */
+const LESER = {
+  "quader-volumen": [["Quader # ~ × # ~ × # ~. Volumen =", ([a, b, c]) => ({ a, b, c })]],
+  "quader-hoehe": [["Quader mit Volumen # ~³, Länge # ~, Breite # ~. Höhe =", ([v, a, b]) => ({ a, b, v })]],
+  dreieck: [["Dreieck: Grundseite # ~, Höhe # ~. Fläche =", ([g, h]) => ({ g, h })]],
+  parallelogramm: [["Parallelogramm: Grundseite # ~, Höhe # ~. Fläche =", ([g, h]) => ({ g, h })]],
+  trapez: [["Trapez: parallele Seiten # ~ und # ~, Höhe # ~. Fläche =", ([a, c, h]) => ({ a, c, h })]],
+  "quader-oberflaeche": [["Quader # ~ × # ~ × # ~. Oberfläche =", ([a, b, c]) => ({ a, b, c })]],
+  "quader-kanten": [["Quader # ~ × # ~ × # ~. Länge aller Kanten zusammen =", ([a, b, c]) => ({ a, b, c })]],
+  hypotenuse: [["Rechtwinkliges Dreieck: Katheten # ~ und # ~. Hypotenuse =", ([a, b]) => ({ a, b })]],
+  "hypotenuse-gerundet": [["Rechtwinkliges Dreieck: Katheten # ~ und # ~. Hypotenuse (auf eine Nachkommastelle) =", ([a, b]) => ({ a, b })]],
+  kathete: [["Rechtwinkliges Dreieck: Hypotenuse # ~, eine Kathete # ~. Andere Kathete =", ([c, a]) => ({ c, a })]],
+  diagonale: [["Rechteck # ~ × # ~. Länge der Diagonale =", ([a, b]) => ({ a, b })]],
+  "kreis-umfang": [["Kreis mit Radius # ~. Umfang (auf eine Nachkommastelle) =", ([r]) => ({ r })],
+    ["Kreis mit Durchmesser # ~. Umfang (auf eine Nachkommastelle) =", ([d]) => ({ r: d / 2 })]],
+  "kreis-flaeche": [["Kreis mit Radius # ~. Fläche (auf eine Nachkommastelle) =", ([r]) => ({ r })]],
+  "prisma-volumen": [["Prisma mit dreieckiger Grundfläche (Grundseite # ~, Höhe # ~), Körperhöhe # ~. Volumen =", ([g, h, l]) => ({ g, h, l })]],
+  "zylinder-volumen": [["Zylinder mit Radius # ~ und Höhe # ~. Volumen (auf eine Nachkommastelle) =", ([r, h]) => ({ r, h })]],
+  "rechteck-ohne-kreis": [["Aus einem Rechteck # cm × # cm wird ein Kreis mit Radius # cm ausgeschnitten. Restfläche (auf eine Nachkommastelle) =", ([a, b, r]) => ({ a, b, r })]],
+  gleichschenklig: [["Gleichschenkliges Dreieck: Basis # ~, Schenkel je # ~. Fläche =", ([basis, s]) => ({ halb: basis / 2, s })]],
+  "zylinder-oberflaeche": [["Zylinder mit Radius # cm und Höhe # cm. Oberfläche (auf eine Nachkommastelle) =", ([r, h]) => ({ r, h })]],
+};
+function liesText(a) {
+  for (const [muster, werte] of LESER[a.typ] || []) {
+    const z = LST.zahlenImText(a.text, muster);
+    if (z) return werte(z);
+  }
+  return null;
+}
+
+/** Nachrechnen aus Werten in der Form von a.daten (aus den Daten oder aus dem Text); mit π über Math.PI, sonst exakt. */
+const P = Math.PI;
+const SOLL = {
+  "quader-volumen": d => d.a * d.b * d.c, "quader-hoehe": d => d.v / (d.a * d.b),
+  dreieck: d => d.g * d.h / 2, parallelogramm: d => d.g * d.h, trapez: d => (d.a + d.c) / 2 * d.h,
+  "quader-oberflaeche": d => 2 * (d.a * d.b + d.b * d.c + d.a * d.c), "quader-kanten": d => 4 * (d.a + d.b + d.c),
+  hypotenuse: d => Math.hypot(d.a, d.b), "hypotenuse-gerundet": d => Math.hypot(d.a, d.b), kathete: d => Math.sqrt(d.c * d.c - d.a * d.a),
+  diagonale: d => Math.hypot(d.a, d.b), "kreis-umfang": d => 2 * P * d.r, "kreis-flaeche": d => P * d.r * d.r,
+  "prisma-volumen": d => d.g * d.h / 2 * d.l, "zylinder-volumen": d => P * d.r * d.r * d.h,
+  "rechteck-ohne-kreis": d => d.a * d.b - P * d.r * d.r, gleichschenklig: d => d.halb * Math.sqrt(d.s * d.s - d.halb * d.halb),
+  "zylinder-oberflaeche": d => 2 * P * d.r * d.r + 2 * P * d.r * d.h,
+};
+
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
-  const d = a.daten, P = Math.PI;
-  const soll = {
-    "quader-volumen": () => d.a * d.b * d.c, "quader-hoehe": () => d.v / (d.a * d.b),
-    dreieck: () => d.g * d.h / 2, parallelogramm: () => d.g * d.h, trapez: () => (d.a + d.c) / 2 * d.h,
-    "quader-oberflaeche": () => 2 * (d.a * d.b + d.b * d.c + d.a * d.c), "quader-kanten": () => 4 * (d.a + d.b + d.c),
-    hypotenuse: () => Math.hypot(d.a, d.b), "hypotenuse-gerundet": () => Math.hypot(d.a, d.b), kathete: () => Math.sqrt(d.c * d.c - d.a * d.a),
-    diagonale: () => Math.hypot(d.a, d.b), "kreis-umfang": () => 2 * P * d.r, "kreis-flaeche": () => P * d.r * d.r,
-    "prisma-volumen": () => d.g * d.h / 2 * d.l, "zylinder-volumen": () => P * d.r * d.r * d.h,
-    "rechteck-ohne-kreis": () => d.a * d.b - P * d.r * d.r, gleichschenklig: () => d.halb * Math.sqrt(d.s * d.s - d.halb * d.halb),
-    "zylinder-oberflaeche": () => 2 * P * d.r * d.r + 2 * P * d.r * d.h,
-  }[a.typ];
+  const d = a.daten;
+  const soll = SOLL[a.typ];
   if (!soll) return [`unbekannter Typ ${a.typ}`];
-  const w = soll();
+  const w = soll(d);
   const tol = a.toleranz || 0;
-  if (Math.abs(w - a.antwort) > (tol ? 0.05 + 1e-9 : 1e-9)) m.push(`Lösung ${a.antwort}, nachgerechnet ${w}: ${a.text}`);
+  const passt = x => Math.abs(x - a.antwort) <= (tol ? 0.05 + 1e-9 : 1e-9);
+  if (!passt(w)) m.push(`Lösung ${a.antwort}, nachgerechnet ${w}: ${a.text}`);
+  // Text gegen Prüfdaten (TD1 a): was das Kind liest, sind dieselben Werte, und aus ihnen folgt dieselbe Lösung
+  const t = liesText(a);
+  if (!t) m.push(`Text folgt keinem Muster des Typs ${a.typ}: ${a.text}`);
+  else {
+    const anders = Object.keys(d).filter(k => !(Math.abs(t[k] - d[k]) < 1e-9));
+    if (anders.length) m.push(`Text zeigt ${anders.map(k => `${k} = ${t[k]}`).join(", ")}, Prüfdaten ${anders.map(k => `${k} = ${d[k]}`).join(", ")}: ${a.text}`);
+    if (!passt(soll(t))) m.push(`aus dem Text nachgerechnet ${soll(t)}, Lösung ${a.antwort}: ${a.text}`);
+  }
   if (!tol && !Number.isInteger(rund(a.antwort * 10))) m.push(`exakte Lösung mit mehr als einer Nachkommastelle: ${a.text}`);
   if (tol && !/Nachkommastelle/.test(a.text)) m.push(`gerundete Lösung ohne Angabe im Text: ${a.text}`);
   if (/\d{4}/.test(a.text.replace(/\.\d+/g, ""))) m.push(`Tausender ohne Apostroph: ${a.text}`);
@@ -171,4 +217,4 @@ function pruefeAufgabe(a, stufe, niveau) {
   return m;
 }
 
-if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis };
+if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis, liesText };

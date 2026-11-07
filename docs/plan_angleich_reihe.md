@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): B2 Schritt 3 in Arbeit (LERN_Session20, Annahme von Antworten gebaut), als Nächstes Text gegen Prüfdaten | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): B2 Schritt 3 in Arbeit (LERN_Session20, Annahme gebaut; Text gegen Prüfdaten nach TD1 a: 1 von 10 Übungen) | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -110,6 +110,7 @@ Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`
   - Text gegen Prüfdaten: Ereigniswortlaut in Kombinatorik/Zufall aus den Daten neu erzeugt und verglichen;
     Prüffunktionen, die nur auf `daten` rechnen, lesen den angezeigten Text (flaechen-volumen, koerper-winkel,
     prozent-funktionen, daten-rabatt, folgen, sachsituationen, Teile von zehnerpotenzen und binome-gleichungen).
+    Vorgehen TD1 a; fertig: flaechen-volumen (LERN_Session20).
   - `konten`/`rollen` und `daten`: kaputte und fremde Dateien, Ids fremder Konten, voller Speicher, Zeitzone.
   - Vielfalt: Mindestvorrat je Stufe auch ohne Endlos (Hinweis unter 50 verschiedenen Aufgaben).
   - Rechner: NaN, Division durch 0, 10-stellige Anzeige. (Im Kern-Test, `pruefe_kern.js` Rechenkern.)
@@ -477,3 +478,13 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Dreiergruppen, zum Beispiel 12'340.“ (Kern 1.25.0, `KERN.zahl.lies`, `KERN.terme.lies`). Vorher galten „1'''“ als 1
   und „12'34“ als 1234. Nicht b (wie bisher, überall überlesen), nicht c (streng, als Fehlversuch). Kipppunkt:
   Lehrmittel oder Lehrperson lassen andere Gruppierungen zu (etwa Viererblöcke bei langen Dezimalzahlen) — dann b.
+- **TD1 a** (2026-11-07, LERN_Session20, B2 Schritt 3): Text gegen Prüfdaten — jede der zehn Übungen, deren Prüfung nur
+  auf `a.daten` rechnete (flaechen-volumen, koerper-winkel, prozent-funktionen, daten-rabatt, folgen, sachsituationen,
+  zehnerpotenzen, binome-gleichungen, kombinatorik, zufall), bekommt `liesText(a)`: je Typ liest es die Werte aus dem
+  angezeigten Text, unabhängig vom Erzeuger (Satzmuster über `LST.zahlenImText`); `pruefeAufgabe` vergleicht sie mit den
+  Daten und rechnet die Lösung ein zweites Mal aus dem Gelesenen. Kombinatorik und Zufall: Ereigniswortlaut aus den Daten
+  neu gebaut und verglichen. Übung für Übung, ein Commit je Übung, alle 128 Typen; das Testskript verlangt `liesText`
+  für die fertigen (`TEXT_GELESEN`). Anlass der Messung: Ein Vergleich ohne Wissen um den Typ trägt nicht — bei 60 von 128
+  Typen zeigt der Text andere Grössen als die Daten (Durchmesser statt Radius, Zahlwörter, Hochzahlen). Nicht b
+  (Zahlenmenge je Typ: übersieht vertauschte Rollen), nicht c (Text ein zweites Mal bauen: verdoppelt den Erzeuger).
+  Kipppunkt: die Texte ändern sich bald stark (E) — dann zuerst E oder vorerst b.

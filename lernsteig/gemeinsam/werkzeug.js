@@ -68,6 +68,21 @@ var LST = (function () {
   const leseZahl = text => KERN.zahl.lies(text);
 
   /**
+   * Zahlen aus einem Aufgabentext lesen (Plan B2 Schritt 3, TD1 a: liesText der Übungen liest, was das Kind sieht, und
+   * prüft es gegen die Prüfdaten). muster: der ganze Text, „#“ steht für eine Zahl in der Schreibweise des Lernsteigs
+   * (Apostroph in Dreiergruppen, „−“, Punkt oder Komma), „~“ für eine Einheit (Buchstaben, ohne Ziffern); alles andere gilt
+   * wörtlich. Liefert die Zahlen in ihrer Reihenfolge oder null, wenn der Text nicht so lautet.
+   */
+  function zahlenImText(text, muster) {
+    const ZAHL = "([−-]?(?:\\d{1,3}(?:'\\d{3})+|\\d+)(?:[.,]\\d+)?)";
+    const EINHEIT = "(?:[A-Za-zÄÖÜäöü€]+)";
+    const woertlich = t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`^${muster.split("#").map(t => t.split("~").map(woertlich).join(EINHEIT)).join(ZAHL)}$`);
+    const m = String(text).match(re);
+    return m ? m.slice(1).map(leseZahl) : null;
+  }
+
+  /**
    * Antwort einer Zahl- oder Term-Aufgabe prüfen, ohne Seite (rahmen.js ruft es; tools/pruefe_uebungen.js prüft damit die
    * Annahme von Antworten, Plan B2 Schritt 3). Ergebnis { art, wert?, meldung? }: art „richtig“, „falsch“, „unlesbar“ oder
    * „form“ (Term gleichwertig, aber nicht in der verlangten Form) — die beiden letzten zählen nicht als Fehlversuch.
@@ -167,7 +182,7 @@ var LST = (function () {
 
   return {
     PRAEFIX, ALTE_FELDER, alteEintraegeUmdeuten, lies, schreibe, beiAenderung, quelle, zufall, waehle, mische, tagText, wochenSerie,
-    TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl, antwortTasten, antwortPruefen,
+    TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl, antwortTasten, antwortPruefen, zahlenImText,
     NIVEAUS, niveauNr, stufenListe, stufeVon, zielstufe,
   };
 })();

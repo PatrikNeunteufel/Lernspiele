@@ -96,6 +96,12 @@ Leerzeichen, Punkt und Komma sind erlaubt.
   Testskript meldet jeden Hinweis, der die Lösung enthält.
 - `pruefeAufgabe(aufgabe, stufe, niveau)` → Liste von Mängeln. Unabhängig vom Generator nachrechnen (Rationale
   Zahlen: exakter Bruch-Parser über den angezeigten Term), Grenzen der Lehrplan-Stufe, Schreibweise.
+- `liesText(aufgabe)` (TD1 a, seit LERN_Session20; Pflicht für die Übungen in `TEXT_GELESEN` von
+  `tools/pruefe_uebungen.js`) → die Werte, die der angezeigte Text nennt, in der Form von `a.daten`, oder null. Je Typ der
+  ganze Satz als Muster für `LST.zahlenImText(text, muster)` („#“ eine Zahl in der Schreibweise des Lernsteigs, „~“ eine
+  Einheit), unabhängig vom Erzeuger geschrieben; abgeleitete Angaben zurückgerechnet (Durchmesser → Radius, Basis →
+  halbe Basis). `pruefeAufgabe` vergleicht sie mit `a.daten` und rechnet die Lösung ein zweites Mal aus dem Gelesenen —
+  so fällt auch ein Text auf, der andere oder vertauschte Werte zeigt, als die Prüfung nachrechnet.
 - `hinweis(aufgabe, eingabe)` → Text bei einem Fehlversuch. Nennt die Lösung nie.
 
 Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `weitere` (Nebenkompetenzen), `ohneE`,

@@ -134,6 +134,13 @@ function lehrplanStufen() {
 }
 const LP_STUFEN = lehrplanStufen();
 
+// ---------- Text gegen Prüfdaten (Plan B2 Schritt 3, TD1 a) ----------
+// Übungen, deren Prüfung nur auf a.daten rechnete: Sie lesen den angezeigten Text (liesText) und prüfen ihn in
+// pruefeAufgabe gegen die Daten. Fertige stehen in TEXT_GELESEN (dann ist liesText Pflicht), die übrigen in TEXT_OFFEN.
+const TEXT_GELESEN = ["flaechen-volumen"];
+const TEXT_OFFEN = ["koerper-winkel", "prozent-funktionen", "daten-rabatt", "folgen", "sachsituationen", "zehnerpotenzen",
+  "binome-gleichungen", "kombinatorik", "zufall"];
+
 // ---------- Annahme von Antworten (Plan B2 Schritt 3) ----------
 // Je Aufgabe über LST.antwortPruefen (dieselbe Prüfung wie in der Seite): gleichwertige Schreibweisen der Lösung werden
 // angenommen, knapp falsche abgewiesen, und keine Eingabe bringt die Prüfung zum Absturz.
@@ -218,6 +225,7 @@ function pruefeOhneBrowser(eintrag) {
   const U = require(path.join(ordner, "aufgaben.js"));
   if (!U.UEBUNG || U.UEBUNG.id !== eintrag.id) fehlerMelden(wo, "UEBUNG.id passt nicht zum Katalog");
   for (const f of ["aufgabeErzeugen", "pruefeAufgabe", "hinweis"]) if (typeof U[f] !== "function") fehlerMelden(wo, `${f} fehlt`);
+  if (TEXT_GELESEN.includes(eintrag.id) && typeof U.liesText !== "function") fehlerMelden(wo, "liesText fehlt (Text gegen Prüfdaten, TD1 a)");
   if (fehler) return;
 
   const uebersicht = [];
@@ -294,6 +302,7 @@ function pruefeOhneBrowser(eintrag) {
     const { gespielt } = await require(path.join(__dirname, "lernsteig_seiten.js")).pruefeSeiten(uebungen, fehlerMelden, LST);
     console.log(`Seiten im Ersatz-DOM: ${gespielt} Runden durchgespielt (${Math.round((Date.now() - t0) / 1000)} s)`);
   }
+  if (TEXT_OFFEN.length) console.log(`Text gegen Prüfdaten (TD1 a) noch offen: ${TEXT_OFFEN.join(", ")}`);
   console.log(`\n${fehler} Fehler, ${hinweise} Hinweise.`);
   process.exit(fehler ? 1 : 0);
 })();
