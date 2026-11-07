@@ -1,6 +1,16 @@
 # Handover — Lernsteig
 
 ## Stand
+**2026-11-07, nach LERN_Session21** (Lernspiele, [Report](../eulenpfad/report/LERN_Session21_2026-11-07.md)): Kern 1.27.0.
+Tab Übungen wie der Tab Spiele (C3 fertig, `start/uebungen.js`): Kacheln nach Fach und Thema mit Piktogrammen
+(`gemeinsam/symbole.js`, SY1 a), Favoriten, Suche, Filter (Niveau für alle Fächer), Sortierung (SS1 a), Passung (P1 a),
+Wackel-Stufen (W1 a, `LST.wackelt`), ähnliche Übungen über den Knopf auf der Übungsseite. Rechner am Bildrand wie der
+Notizblock, beide teilen den Platz (RP1 a). Vorrat E 9: stromkreis b, kombinatorik f und challenge, atombau a und
+challenge, kraefte d (KR1 a), grammatik e, f, g (SP1 a); neu als Serie kombinatorik f, atombau a, grammatik challenge.
+Tests: Konten „101 Fälle, 0 Fehler.“, `pruefe_uebungen.js` „0 Fehler, 12 Hinweise.“ (die Stufen von rechtschreibung,
+englisch- und franzoesisch-grammatik). Weiter mit: E 9 nach SP1 a für diese drei Übungen, Prüfen durch Patrik (neue Listen,
+Piktogramme, Tab Übungen, Rechner), C4, C6–C8.
+
 **2026-11-07, nach LERN_Session20** (Lernspiele, [Report](../eulenpfad/report/LERN_Session20_2026-11-07.md)): Kern 1.26.0.
 Tastenfeld unter jeder Zahl- und Term-Antwort, Tastatur des Geräts zu (TF1 a); `LST.antwortTasten` gibt jedem Zeichen der
 Lösung eine Taste. Notizblock mit „= Gleichung“ in gleichungen und binome-gleichungen (GL1 a). Verwaltung mit Untertabs:

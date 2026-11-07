@@ -1,6 +1,19 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-07, nach LERN_Session21** ([Report](report/LERN_Session21_2026-11-07.md)):
+- **Kern 1.27.0:** Notizblock mit `vorn`, `verkleinern`, `istKlein` (Lernsteig RP1 a: Rechner und Block teilen den Platz).
+- **Eulenpfad:** Filter im Tab Spiele als umrahmter Block wie im Lernsteig; sonst nur die Kern-Kopie (Stichprobe mit
+  gleichen Klickzahlen wie mit 1.26.0).
+- **Lernsteig:** C3 fertig (Tab Übungen mit Piktogrammen, Suche, Filter, Sortierung, Passung, Wackel-Stufen, ähnlichen
+  Übungen), Rechner am Bildrand, Vorrat E 9 für stromkreis b, kombinatorik, atombau, kraefte d, grammatik; Stand in
+  [docs/lernsteig/HANDOVER.md](../lernsteig/HANDOVER.md).
+- **Tests:** Kern „5671 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 12 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine
+  Fehler.“; Eulenpfad nur Stichproben — letzter voller Lauf auf dem Stand nach `141cc53`. Alles gepusht bis `1bb6c19`.
+- **Weiter mit:** E 9 nach SP1 a (rechtschreibung, englisch-grammatik, franzoesisch-grammatik), Prüfen durch Patrik
+  (neue Listen, Piktogramme, Tab Übungen, Rechner), gemeinsamer Kern-Teil für Gruppen und Favoriten zur Absegnung, voller
+  Eulenpfad-Lauf auf Patriks Entscheid, dann C4, C6–C8, C10.
+
 **2026-11-07, nach LERN_Session20** ([Report](report/LERN_Session20_2026-11-07.md)):
 - **Kern 1.26.0:** dazu `tastenfeld.js` (TF1 a), Vorlage „= Gleichung“ im Notizblock (GL1 a), `KERN.person.ausgeblendet`
   (KE1 a, KE2 a), Gliederung nur in Dreiergruppen beim Lesen (ZL1 a) und `zeit.js` (Kalendertage in Ortszeit).

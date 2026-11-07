@@ -905,3 +905,6 @@
   gibt es deshalb auch als Serie. Liste bleibt ungeprüft. Gegenprobe (Fall ausserhalb der vier; markiertes Wort
   doppelt): gemeldet. Plan E 9. Tests: Kern 0 Fehler, Lernsteig „0 Fehler, 12 Hinweise.“ (Konten 101 Fälle),
   Gratwanderung „Keine Fehler.“.
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session21_2026-11-07.md`, Handover Eulenpfad und Lernsteig nachgeführt.
+  13 Commits, gepusht bis `1bb6c19`. Offen: E 9 für rechtschreibung, englisch- und franzoesisch-grammatik (SP1 a),
+  Prüfen durch Patrik, voller Eulenpfad-Lauf auf seinen Entscheid.
