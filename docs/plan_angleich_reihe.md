@@ -418,3 +418,9 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Einmaleins-Schritten als 308 · 52 (vorher 11 %), Dezimal-Multiplikationen mit drei Nachkommastellen 5 % (vorher 19 %).
   Nicht b (Ergebnis höchstens 5), nicht c (je Faktor, bisher). Kipppunkt: das Lehrmittel übt in g Aufgaben wie
   23,56 · 4,4 ohne Rechner.
+- **RZ3 a** (2026-11-07, LERN_Session19, Lernsteig, Meldung Patrik zu 847 · 81): Die Multiplikationen in rationale-zahlen g
+  haben zusammen gleich oft 3, 4 oder 5 Wertziffern (Aufteilung 2 + 1 / 1 + 2, 3 + 1 / 2 + 2, 3 + 2 / 4 + 1), die ganze
+  Spanne bis zur Grenze. Vorher ganzzahlig immer dreistellig · zweistellig, in 73 % mit 6 Einmaleins-Schritten; jetzt rund
+  12 %. Nicht b (nur 4 und 5), nicht c (wie bisher). Kipppunkt: Stufe g soll in der Oberstufe vor allem die Grenze
+  festigen. Dazu Wunsch Patrik: ein Notizblock für eigene Rechenwege im Lernsteig („im Kopf oder mit Notieren eigener
+  Rechenwege“, MA.1.A.3.g), aus dem Eulenpfad.

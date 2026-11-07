@@ -659,3 +659,8 @@
   (berichtigt). Gemessen über 20 000 Aufgaben: schwere Aufgaben je Runde zu 8 von 1,3 auf 0,4, Runden mit drei und mehr
   schweren von 13 % auf 1 %; Stufe g mit 1855 verschiedenen Aufgaben. Prüfer in `pruefeAufgabe` (Gegenprobe am alten
   Generator: 1438 bzw. 2113 Funde in 20 000 Aufgaben). Plan (RZ1 a, RZ2 a).
+- Lernsteig, Meldung Patrik zu 847 · 81 (Entscheid RZ3 a): Multiplikationen in rationale-zahlen g über die ganze Spanne
+  bis zur Grenze — Faktoren zusammen gleich oft 3, 4 oder 5 Wertziffern. Gemessen über 20 000 Aufgaben: ganzzahlig mit
+  mehr als 4 Einmaleins-Schritten von 73 % auf 12 %, dezimal von 40 % auf 14 %; dezimale Ergebnisse mit drei
+  Nachkommastellen von 5 % auf 27 % (kleine Faktoren wie 0.47 · 0.8 = 0.376, zwei Einmaleins-Schritte, übt die
+  Kommaregel). Stufe g mit 1830 verschiedenen Aufgaben. Plan (RZ3 a).
