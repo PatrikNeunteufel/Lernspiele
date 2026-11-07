@@ -62,8 +62,11 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   const zurueck = () => el("button", { type: "button", class: "knopf", text: "Zurück", onclick: () => { ansicht = { art: "start" }; zeichne(); } });
 
   let meldungNachFrist = false;
+  let meldungNachLoeschen = "";
   function anmeldung(karte) {
-    const konten = KO.alle(), aufsichten = KO.aufsichten();
+    // Ausgeblendete (KE1 a, KE2 a) zeigt dieses Gerät nicht; die Aufsicht zeigt sie in der Verwaltung wieder
+    const konten = KO.alleGezeigt(), aufsichten = KO.aufsichtenGezeigt();
+    if (meldungNachLoeschen) { dazu(karte, el("p", { class: "meldung", role: "status", text: meldungNachLoeschen })); meldungNachLoeschen = ""; }
     // Zurücksetzen mit Frist (RL2 a): für alle sichtbar, abbrechen mit PIN oder Code einer Aufsicht
     const frist = KO.fristStand();
     if (frist) dazu(karte, el("p", { class: "meldung", "data-frist": frist.ab },
@@ -401,8 +404,31 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
         k.rechnerModell, v => aendern(x => { x.rechnerModell = v; }), "Der eingebaute Rechner bedient sich dann wie dein Modell, mit Tipps dazu."),
       geraetHinweis(),
       LST.werUebt() === "lernend" ? null : el("small", { class: "leise", text: "Diese Einstellungen gelten nur, bis du den Tab schliesst." }));
-    box.replaceChildren(el("h2", { class: "abschnitt", text: "Konto" }), kontoKarte(),
-      el("h2", { class: "abschnitt", text: "Einstellungen" }), einstellungen);
+    const eigenes = LST.werUebt() === "lernend" && ansicht.art !== "code" && ansicht.art !== "profil" ? KO.aktiv() : null;
+    box.replaceChildren(...[el("h2", { class: "abschnitt", text: "Konto" }), kontoKarte(),
+      el("h2", { class: "abschnitt", text: "Einstellungen" }), einstellungen,
+      eigenes ? el("h2", { class: "abschnitt", text: "Konto löschen" }) : null, eigenes ? loeschKarte(eigenes) : null].filter(Boolean));
+  }
+
+  // Konto löschen (KE2 a): der Jugendliche selbst, mit seinem Vornamen und der PIN, wenn er eine hat; mit Löschvermerk,
+  // also auch auf den anderen Geräten des Abgleichs. Vorher sichern lässt sich hier.
+  function loeschKarte(k) {
+    const name = feld("Zur Bestätigung dein Vorname", { type: "text", maxlength: "40", name: "loeschen-name", autocomplete: "off" });
+    const pin = k.pin ? feld("Deine PIN", { type: "password", inputmode: "numeric", maxlength: "6", name: "loeschen-pin", autocomplete: "current-password" }) : null;
+    const fehler = el("p", { class: "fehlertext", role: "alert" });
+    return el("section", { class: "einstellungen" },
+      el("p", { text: "Löscht dein Konto mit allen Runden und Rekorden — auf diesem Gerät und, wenn es mit anderen Geräten abgleicht, auch dort. Das lässt sich nicht rückgängig machen. Willst du deinen Stand behalten, sichere ihn zuerst als Datei." }),
+      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", "data-aktion": "zuerst-sichern", text: "Zuerst sichern",
+        onclick: () => LST_DATEN.herunterladen(LST_DATEN.sichern([k.id]), LST_DATEN.dateiname(k.name)) })),
+      name, pin, fehler,
+      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf gefahr", "data-aktion": "konto-loeschen", text: "Konto löschen",
+        onclick: async () => {
+          try {
+            await KO.loeschen(k.id, { name: name.querySelector("input").value, pin: pin ? pin.querySelector("input").value : "" });
+            meldungNachLoeschen = `Das Konto ${k.name} ist gelöscht.`;
+            ansicht = { art: "start" }; history.replaceState(null, "", location.pathname); zeichne();
+          } catch (e) { fehler.textContent = e.message; }
+        } })));
   }
 
   // ---------- Tabs (Plan C2, wie Eulenpfad L3 a) ----------
@@ -430,8 +456,8 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     const ich = wer === "lernend" ? KO.aktiv() : wer === "aufsicht" ? KO.aufsichtAktiv() : null;
     const name = ich ? (wer === "aufsicht" ? `\u{1F511} ${ich.name}` : ich.name) : "\u{1F440} Gast";
     const personen = [
-      ...KO.alle().map(k => ({ id: k.id, name: k.name, zusatz: k.pin || KO.gesperrt(k.id) ? "\u{1F512}" : "", aria: KO.gesperrt(k.id) ? `${k.name}, gesperrt` : k.pin ? `${k.name}, mit PIN` : k.name, pin: !!k.pin || KO.gesperrt(k.id) })),
-      ...KO.aufsichten().map(a => ({ id: a.id, name: `${KO.gesperrt(a.id) ? "\u{1F512} " : ""}\u{1F511} ${a.name}`, aria: KO.gesperrt(a.id) ? `${a.name}, Aufsicht, gesperrt` : `${a.name}, Aufsicht, mit PIN`, pin: true })),
+      ...KO.alleGezeigt().map(k => ({ id: k.id, name: k.name, zusatz: k.pin || KO.gesperrt(k.id) ? "\u{1F512}" : "", aria: KO.gesperrt(k.id) ? `${k.name}, gesperrt` : k.pin ? `${k.name}, mit PIN` : k.name, pin: !!k.pin || KO.gesperrt(k.id) })),
+      ...KO.aufsichtenGezeigt().map(a => ({ id: a.id, name: `${KO.gesperrt(a.id) ? "\u{1F512} " : ""}\u{1F511} ${a.name}`, aria: KO.gesperrt(a.id) ? `${a.name}, Aufsicht, gesperrt` : `${a.name}, Aufsicht, mit PIN`, pin: true })),
     ].filter(p => !ich || p.id !== ich.id);
     return KERN.personenMenue({
       titel: "Angemeldet als",

@@ -709,3 +709,17 @@
   in der Abgleich-Datei, jüngere übernommen, ältere nicht), Lernsteig „0 Fehler, 0 Hinweise.“ (Untertabs, Freigabe mit
   dem echten Prüfstand bis zum Verweis beim Jugendlichen); im Browser am Desktop und auf 375 px. lernsteig/rahmen.md 5b,
   5d, 5e, 6, 7, 8; Plan C5.
+- Kern 1.24.0, Entscheide KE1 a, KE2 a (Plan C5 Rest): `KERN.person.ausgeblendet` — Personen auf diesem Gerät nicht
+  zeigen, ohne sie zu löschen (Liste nur auf dem Gerät, die Person reist im Abgleich weiter). Lernsteig: Der Jugendliche
+  löscht sein Konto im Profil (Vorname, PIN), die Aufsicht ein verbundenes Konto nach Rückfrage, beide mit Löschvermerk
+  und „Zuerst sichern“; ein nicht verbundenes Konto und eine gesperrte Aufsicht blendet die Aufsicht auf diesem Gerät aus
+  (Anmeldung, Personen-Knopf, Anfragen), „Wieder zeigen“ in der Verwaltung, dort auch die anderen Aufsichten. Eulenpfad:
+  bei einer gesperrten Aufsicht „🙈 auf diesem Gerät ausblenden“ statt „🗑 löschen“ (ein Löschvermerk nahm sie im Abgleich
+  auch auf ihrem eigenen Gerät mit), Rolle „Aufsicht (🔒 von einem anderen Gerät)“. Beim Prüfen im Browser gefunden und
+  behoben: nach dem Ausblenden stand die Person noch im Personen-Knopf (die Verwaltung zeichnete nur ihren Inhalt neu);
+  der Seitentest prüft das jetzt (Gegenprobe schlägt an). Tests: Kern 5619 Fälle 0 Fehler, Konten 101 Fälle 0 Fehler,
+  Lernsteig „0 Fehler, 0 Hinweise.“, Gratwanderung „Keine Fehler.“, Eulenpfad Daten „Keine Fehler.“ (gesperrte Mama
+  ausblenden, Papa nicht; Gegenprobe schlägt an), Eulenpfad-Stichprobe (schriftlich-werkstatt, rechenprobe, malkreuz,
+  zahlenhaus, preis-tabelle, quader-volumen) mit denselben Klickzahlen wie mit Kern 1.23.0; im Browser beide Apps.
+  docs/kern/rahmen.md 4.7, lernsteig/rahmen.md 5c, 5d, 6, 7, 8, eulenpfad/rahmen.md (Abgleich), Plan (KE1 a, KE2 a, C5),
+  Kern-Changelog.

@@ -69,8 +69,11 @@ function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
   // Anleitungen auch in der App, nicht nur im Portal (Wunsch Patrik, LERN_Session14): unter der Anmeldung für alle
   box.append(karte, anleitungLinks(true));
   const zurueckgesetzt = LS.zuruecksetzenFaellig(); // Frist (Stufe 4) abgelaufen: Aufsichten sind jetzt Kinder ohne PIN
-  const kinder = LS.kinderListe();
+  // Ausgeblendete (KE1 a: gesperrte Aufsichten von anderen Geräten) stehen nicht auf der Anmeldung; die Regeln zum
+  // Anlegen zählen weiter alle
+  const kinder = LS.kinderListe().filter(LS.angezeigt);
   const aufsichten = LS.aufsichtListe();
+  const aufsichtenGezeigt = aufsichten.filter(LS.angezeigt);
   const mitPin = aufsichten.filter(n => LS.profil(n).pin);
   const selbst = !aufsichten.length || LS.einstellung("selbstAnlegen", null) === "ja";
   const geheZu = schritt => { location.hash = schritt; }; // hashchange zeichnet die Startseite neu
@@ -98,11 +101,11 @@ function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
       // Kachel mit Avatar und Namen darunter (AV3 a)
       ...kinder.map(n => el("button", { type: "button", class: "name-knopf",
         onclick: () => { LS.setzeSpieler(n); nachAnmeldung(); } }, LS.avatarBild(n, 64), el("span", { text: n }))),
-      ...aufsichten.map(n => el("button", { type: "button", class: "name-knopf aufsicht", text: (LS.gesperrt(n) ? "🔒 " : "") + LS.spielerName(n),
+      ...aufsichtenGezeigt.map(n => el("button", { type: "button", class: "name-knopf aufsicht", text: (LS.gesperrt(n) ? "🔒 " : "") + LS.spielerName(n),
         onclick: () => { anmeldeMerk.pin = n; geheZu("pin"); } })));
     karte.append(namen,
       el("div", { class: "pin-zeile" }, el("button", { type: "button", class: "knopf gruen", text: "🐣 Ich bin neu", onclick: () => geheZu("neu") })));
-    if (!kinder.length && !aufsichten.length) karte.append(el("p", { class: "leise-text", style: "text-align:center", text: "Neu hier? Tipp auf 🐣 Ich bin neu." }));
+    if (!kinder.length && !aufsichtenGezeigt.length) karte.append(el("p", { class: "leise-text", style: "text-align:center", text: "Neu hier? Tipp auf 🐣 Ich bin neu." }));
   }
 
   /** Kind oder erwachsen? Ohne Erlaubnis zum Selbstanlegen nur der Weg für Erwachsene. */

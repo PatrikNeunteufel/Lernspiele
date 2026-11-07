@@ -224,7 +224,7 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   gleicher Name; je Feld der jüngere Stand; PIN, Code und Verbindungen bleiben die des Geräts); Runden und Rekorde
   nach Kennung (Rekord: höherer Stand), Verweise umgebogen. Ältere Sicherungen (`lernsteig-sicherung` 1, 2) deutet der
   Kern um; eine Datei des Eulenpfads wird mit „Das ist eine Datei des Eulenpfads; …“ abgewiesen. Löschvermerke führt der
-  Kern (DF2 a); der Lernsteig löscht heute noch keine Konten. Test: `tools/pruefe_konten.js`.
+  Kern (DF2 a); gelöscht wird ein Konto seit LERN_Session20 nach KE2 a (5d). Test: `tools/pruefe_konten.js`.
 - **Aufsichten in Datei und Abgleich** (Entscheide OA1 a, OA2 a, LERN_Session19; ersetzen AS1 a): Aufsichten reisen
   immer mit und kommen gesperrt an, auch wenn ein Jugendlicher einliest oder beim Abgleich übt. Geschützt wird beim
   Freischalten: Für eine Aufsicht reicht ihr Code nur auf einem Gerät ohne Aufsicht mit PIN, sonst bestätigt eine
@@ -285,7 +285,18 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   dem Handy (unter 600 px) steht je Zeile die Übung oben, Prüfstand und Schalter darunter.
 - **Grenze:** Alles liegt im Browser. Die PIN schützt vor Versehen und Neugier am selben Gerät, nicht vor jemandem, der
   die Entwicklerwerkzeuge öffnet; echter Schutz braucht den Server (DS1 a). Die Seite sagt das.
-- Noch nicht: Konten entfernen (auch gesperrte Aufsichten, C5), PIN eines verbundenen Kontos zurücksetzen.
+- **Löschen und Ausblenden** (Entscheide KE1 a, KE2 a, LERN_Session20; `LST_KONTEN.loeschen`, `ausblenden`, `zeigen`,
+  `darfLoeschen`, `darfAusblenden`):
+  - **Löschen** mit Löschvermerk (`LST_DATEN.loeschePerson` über `KERN.daten`): Konto, Runden und Rekorde, auf allen
+    Geräten des Abgleichs. Der Jugendliche selbst im Profil („Konto löschen“, mit seinem Vornamen und der PIN, wenn er eine
+    hat; danach abgemeldet, die Anmeldung meldet es) oder eine Aufsicht, mit der das Konto verbunden ist (Untertab
+    Konten, „Konto löschen“ mit Rückfrage). Beide mit „Zuerst sichern“.
+  - **Ausblenden** (`KERN.person.ausgeblendet`, `lernsteig:ausgeblendet`, nur dieses Gerät): Die Aufsicht blendet ein
+    Konto aus, das nicht mit ihr verbunden ist (KE2 a: ohne Verbindung kein Recht an seinen Daten), und eine gesperrte
+    Aufsicht (KE1 a: auf ihrem eigenen Gerät echt). Ausgeblendete stehen nicht auf der Anmeldung, nicht im
+    Personen-Knopf und nicht unter „Mitlesen anfragen“, bleiben aber in den Daten und reisen im Abgleich weiter; unter
+    „Ausgeblendet auf diesem Gerät“ mit „Wieder zeigen“. Im Untertab Konten stehen dafür auch die anderen Aufsichten.
+- Noch nicht: PIN eines verbundenen Kontos zurücksetzen.
 
 ## 5e. Entwickler-Modus (E1 a, Plan C6)
 
@@ -313,6 +324,7 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 | `rekorde` | je Serie `{ id, person, zeit, inhalt, stufe, niveau, punkte, dauer, mitRechner, abgebrochen? }` |
 | `freigabe`, `freigabeStand` | Freigabe der Übungen auf diesem Gerät durch die Aufsicht (`KERN.freigabe`, 5d); reist im Abgleich mit |
 | `verwaltungOffen` | Fächer, deren Gruppe in der Freigabe offen ist (nur dieses Gerät) |
+| `ausgeblendet` | Kennungen der Personen, die dieses Gerät nicht zeigt (KE1 a, KE2 a, 5d; nicht abgeglichen) |
 | `gestellt` | Gedächtnis gegen Wiederholungen (RA5 a): Fingerabdrücke je `konto\|uebung/stufe` (höchstens 400; bis LERN_Session18 die Kennungen je `konto/uebung/stufe/niveau`, höchstens 30) |
 | `geraet`, `abgleichStand` | Abgleich über einen Ordner (5b, `KERN.abgleich`): Kennung und Name dieses Geräts; Ordner, letzter Abgleich, andere Geräte. Den gewählten Ordner merkt der Browser in IndexedDB `lernsteig` |
 | `einstellungen` | `{ dezimal?, rechner? }`, nur von einer angemeldeten Aufsicht gesetzt (5d) |
@@ -330,7 +342,9 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   dem Code; Aufsicht anlegen (Rolle, Prüfwert), ohne Verbindung keine Statistik des Kontos, Rechner-Sperre des
   Geräts wirkt in der Übung; Untertabs der Verwaltung über die Adresse; Freigabe mit dem echten Prüfstand (eine
   gesperrte Übung freigeben, der Jugendliche sieht sie, „wie Prüfstand“ hebt es auf; eine Liste umschalten; alles
-  sperren, freigeben, wie Prüfstand); Einladung über den Link füllt das Formular vor, das Fragment verschwindet; jede Übung in
+  sperren, freigeben, wie Prüfstand); Ausblenden eines nicht verbundenen Kontos (weg von Anmeldung und Personen-Knopf,
+  wieder zeigen), Löschen eines verbundenen Kontos nach Rückfrage, der Jugendliche löscht sein Konto im Profil (falsche
+  PIN abgewiesen); Einladung über den Link füllt das Formular vor, das Fragment verschwindet; jede Übung in
   jeder Stufe und jedem Niveau eine Runde mit einem Fehlversuch (Protokoll, danach Statistik und Erfolge), Rechner je
   Lehrplan-Stufe (12 · 3 übernehmen, Nutzung im Protokoll), Serie speichert den Rekord vor „Zum Ergebnis“. Gemeldet
   werden Ausnahmen, Konsolenfehler und sichtbarer Text mit NaN, undefined, null (Knoten mit Abstand gelesen). Die
@@ -340,5 +354,5 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 
 ## 8. Noch nicht gebaut
 
-Konten entfernen (C5), Timer als Zusatz, Gruppen am selben
+Timer als Zusatz, Gruppen am selben
 Gerät (GR1 a), Übungen Natur und Technik (wartet auf R6).

@@ -3,6 +3,12 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.24.0 — 2026-11-07 (LERN_Session20)
+- `person.js`: `KERN.person.ausgeblendet(liste, speicher)` (KE1 a, KE2 a) — Personen auf diesem Gerät nicht zeigen, ohne
+  sie zu löschen: eine Liste von Kennungen im Speicher „ausgeblendet“ (nur dieses Gerät, nicht abgeglichen), mit `ist`,
+  `gezeigt`, `personen`, `ausblenden`, `zeigen`; eine Person mit früheren Kennungen bleibt ausgeblendet. Wen eine App
+  ausblenden lässt, entscheidet sie.
+
 ## 1.23.0 — 2026-11-07 (LERN_Session20)
 - `tastenfeld.js` (`KERN.tastenfeld`, TF1 a): Tasten, die in ein gewähltes Feld schreiben, ohne ihm den Fokus zu nehmen —
   an der Schreibmarke, Häuschen ersetzt, ⌫, eigene Tasten mit `tue`; `einfuegen` als Regel ohne DOM. Aus dem Ziffernfeld

@@ -227,6 +227,45 @@ const SF = { frage: "Erstes Haustier?", antwort: "Bello" }; // Sicherheitsfrage 
     gleich(AB.ergebnisText({ konten: 1, runden: 2, abgewiesen: 1 }), "Dazugekommen: 1 neues oder geändertes Konto, 2 neue Runden. 1 ungültiger Eintrag nicht übernommen.", "Ergebnis in einem Satz");
   }
 
+  // Ausblenden und Löschen (KE1 a, KE2 a): ausblenden eine gesperrte Aufsicht oder ein nicht verbundenes Konto (bleibt in
+  // den Daten und im Abgleich), löschen der Jugendliche selbst (Name, PIN) oder die verbundene Aufsicht (Löschvermerk)
+  {
+    global.LST_DATEN = DA;
+    localStorage.d.clear(); sessionStorage.d.clear();
+    const { aufsicht: vera } = await KO.aufsichtAnlegen({ ...SF, name: "Vera", art: "lehrperson", pin: "1111" });
+    const { aufsicht: zweite } = await KO.aufsichtAnlegen({ ...SF, name: "Zweite", art: "eltern", pin: "2222", bestaetigung: { id: vera.id, pin: "1111" } });
+    const fern = KO.LISTE.anlegen({ name: "Fern", rolle: "aufsicht", art: "eltern" });
+    KO.LISTE.speichere(KO.LISTE.alle().map(p => (p.id === fern.id ? { ...p, gesperrt: true } : p))); // wie aus dem Abgleich
+    const { konto: max } = await KO.anlegen({ name: "Max", klasse: 8, pin: "1234" });
+    const { konto: tim } = await KO.anlegen({ name: "Tim", klasse: 8 });
+    await KO.aufsichtAnmelden(vera.id, "1111");
+    const lu = await KO.kontoFuerAufsicht({ name: "Lu", klasse: 7 });
+    LST.schreibe("runden", [{ id: "r-lu", person: lu.id, zeit: "2026-11-07T08:00:00.000Z", inhalt: "brueche", stufe: "g", aufgaben: 8, fehler: 0, gezeigt: 0, dauer: 60, liste: [] }]);
+    gleich([KO.darfAusblenden(fern.id), KO.darfAusblenden(zweite.id), KO.darfAusblenden(vera.id), KO.darfAusblenden(lu.id), KO.darfAusblenden(max.id)],
+      [true, false, false, false, true], "ausblenden: gesperrte Aufsicht und nicht verbundenes Konto ja; Aufsicht mit PIN, sich selbst, verbundenes Konto nein");
+    await wirft(() => KO.ausblenden(lu.id), "verbundenes Konto ausblenden", "nicht mit Ihnen verbunden");
+    KO.ausblenden(max.id); KO.ausblenden(fern.id);
+    gleich([KO.alleGezeigt().map(k => k.name).sort().join(), KO.aufsichtenGezeigt().map(a => a.name).sort().join(), KO.ausgeblendete().map(p => p.name).sort().join()],
+      ["Lu,Tim", "Vera,Zweite", "Fern,Max"], "ausgeblendet: nicht auf der Anmeldung, in der Liste der Verwaltung");
+    gleich([KO.finde(max.id) !== null, DA.abgleichDaten().personen.map(p => p.name).sort().join()], [true, "Fern,Lu,Max,Tim,Vera,Zweite"], "ausgeblendete bleiben in den Daten und reisen im Abgleich mit");
+    gleich("ausgeblendet" in DA.abgleichDaten(), false, "die Liste selbst reist nicht mit");
+    KO.zeigen(max.id);
+    gleich(KO.alleGezeigt().length, 3, "wieder zeigen");
+    // Löschen durch die Aufsicht: nur ein verbundenes Konto
+    await wirft(() => KO.loeschen(tim.id), "nicht verbundenes Konto löschen", "verbunden ist");
+    await KO.loeschen(lu.id);
+    gleich([KO.finde(lu.id), (LST.lies("runden", []) || []).length, !!(LST.lies("geloescht", {}).personen || {})[lu.id]], [null, 0, true], "verbundenes Konto gelöscht, Runden weg, Löschvermerk");
+    // Löschen durch den Jugendlichen: sein eigenes, mit Name und PIN
+    await KO.anmelden(max.id, "1234");
+    await wirft(() => KO.loeschen(tim.id, { name: "Tim" }), "fremdes Konto löschen", "verbunden ist");
+    await wirft(() => KO.loeschen(max.id, { name: "Moritz", pin: "1234" }), "falscher Name", "Vornamen");
+    await wirft(() => KO.loeschen(max.id, { name: "Max", pin: "0000" }), "falsche PIN", "PIN stimmt nicht");
+    await KO.loeschen(max.id, { name: " max ", pin: "1234" });
+    gleich([KO.finde(max.id), KO.aktiv(), KO.ausgeblendete().length], [null, null, 1], "eigenes Konto gelöscht und abgemeldet");
+    await KO.anmelden(tim.id);
+    await wirft(() => KO.ausblenden(fern.id), "ausblenden ohne Aufsicht", "Keine Aufsicht");
+  }
+
   // PIN vergessen der Aufsicht (RL2 a): Bestätigung, Code, Sicherheitsfrage; Zurücksetzen mit Frist
   {
     localStorage.d.clear(); sessionStorage.d.clear();

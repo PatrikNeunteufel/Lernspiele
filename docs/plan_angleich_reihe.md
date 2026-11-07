@@ -19,7 +19,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
 | B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Ablauf der Runde, Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): Einstieg und Seiten des Lernsteigs im Ersatz-DOM gebaut, als Nächstes die offenen Kern-Teile (AN2 a), dann B2 Schritt 3 | Abschnitt B |
-| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 zum Teil (Abgleich, Aufsicht), C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
+| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
@@ -144,7 +144,8 @@ Kindersprache.
    Prüfungsziel, Rechnermodell, Fokus; Aufbau wie das Eulenpfad-Profil (Formular, Speichern, sofort wirkende Häkchen).
 5. **Verwaltung (nur Aufsicht):** Konten, Freigabe, Abgleich, Einstellungen, Entwicklung — wie Eulenpfad. Abgleich über
    einen Ordner seit LERN_Session19 (`lernsteig/gemeinsam/abgleich.js`; Aufsichten nach OA1 a, OA2 a); Untertabs und
-   Freigabe je Gerät (mit Abgleich) seit LERN_Session20; offen: Konten entfernen, auch gesperrte Aufsichten.
+   Freigabe je Gerät (mit Abgleich) seit LERN_Session20, ebenso Konten löschen und ausblenden, auch gesperrte
+   Aufsichten (KE1 a, KE2 a).
    **Aufsicht wie Eulenpfad** (D5): neue Aufsicht nur mit Frage und Bestätigung durch eine bestehende, PIN vergessen
    mit denselben Stufen. Dazu im Lernsteig die Verbindung mit Zustimmung (AU1 a, AF1 a, AF2 a) und die Rolle
    **Lehrperson/Gruppenleitung** nach [konzept_gruppen.md](konzept_gruppen.md) (G2 a: „Ich bin Lehrperson“), in
@@ -455,3 +456,15 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   nichts bewertet. Die App wählt die Vorlagen (`oeffne({ vorlagen, gleichung })`); im Lernsteig je Übung im Katalog
   (`notizblock: […]`, heute `gleichungen` und `binome-gleichungen`), der Eulenpfad ohne. Nicht b (jede Zeile still
   nachrechnen). Kipppunkt: der Block soll in diesen Übungen Lernhilfe sein statt Papier — dann b, etwa nur in Stufe h.
+- **KE1 a** (2026-11-07, LERN_Session20): Eine gesperrte Aufsicht (über den Abgleich auf dem Gerät, OA1 a) lässt sich in
+  der Verwaltung **auf diesem Gerät ausblenden**: nicht auf der Anmeldung, nicht im Personen-Knopf, in den Daten und im
+  Abgleich unverändert, „wieder zeigen“; die Liste gilt nur für das Gerät. Regel im Kern (`KERN.person.ausgeblendet`),
+  beide Apps; im Eulenpfad statt „löschen“ bei einer gesperrten Aufsicht. Nicht b (löschen mit Vermerk: nähme sie auf
+  ihrem eigenen Gerät samt Verbindungen mit), nicht c (entfernen ohne Vermerk: kommt mit dem Abgleich wieder).
+  Kipppunkt: eine ausgeblendete Aufsicht kostet Platz oder Daten, die nicht auf dem Gerät bleiben dürfen — dann b mit
+  Bestätigung durch sie selbst.
+- **KE2 a** (2026-11-07, LERN_Session20, Lernsteig): Ein Konto löscht der Jugendliche selbst (Profil, mit Vornamen und
+  PIN, wenn er eine hat) oder eine Aufsicht, mit der es verbunden ist (mit Rückfrage), beide mit Löschvermerk — auf allen
+  Geräten des Abgleichs; vorher „Zuerst sichern“. Ein nicht verbundenes Konto kann die Aufsicht nur auf diesem Gerät
+  ausblenden (wie KE1 a). Nicht b (wie im Eulenpfad: jede Aufsicht jedes Konto), nicht c (nur der Jugendliche). Kipppunkt:
+  die Verbindung soll nur Mitlesen heissen, ohne jedes Löschrecht — dann c.

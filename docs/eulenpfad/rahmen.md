@@ -553,6 +553,12 @@ Ergebnis. Jede Seite lädt es direkt nach `spiel.js`.
   andere Aufsicht ihre PIN in Verwaltung → Konten, ist sie ebenfalls freigeschaltet. Gibt es weder Code noch eine andere
   Aufsicht, richtet man zuerst mit „🐣 Ich bin neu“ eine Aufsicht ein. Bis LERN_Session18 kam sie ohne PIN an, und wer
   sie auf einem Gerät ohne andere Aufsicht antippte, konnte eine PIN festlegen.
+- **Gesperrte Aufsicht ausblenden** (KE1 a, LERN_Session20; `KERN.person.ausgeblendet`): In Verwaltung → Konten steht bei
+  einer gesperrten Aufsicht „🙈 auf diesem Gerät ausblenden“ statt „🗑 löschen“ — sie ist auf ihrem eigenen Gerät echt,
+  und ein Löschvermerk nähme sie im Abgleich dort mit (samt Verbindungen). Ausgeblendet steht sie nicht auf der
+  Anmeldung und nicht im Personen-Knopf, bleibt aber in den Daten und reist im Abgleich weiter; „👁 wieder zeigen“ holt
+  sie zurück. Die Liste `lernspiele:ausgeblendet` gilt nur für dieses Gerät (`LS.angezeigt`, `LS.ausblenden`,
+  `LS.zeigen`, `LS.darfAusblenden`). Andere Personen löscht die Aufsicht wie bisher.
 - **Geprüft** am 2026-11-01 auf localhost mit dem Browser-eigenen Dateispeicher (OPFS) als Ordner:
   zwei bzw. drei Geräte, Zwischen- und Endstand, Löschen und neu Anlegen, Freigabe, Neuzeichnen der
   Rangliste. Ungeprüft: `file://`, echte Netzwerk- und Cloud-Ordner, Uhren, die zwischen Geräten

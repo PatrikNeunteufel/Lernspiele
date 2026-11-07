@@ -28,7 +28,7 @@ function aktuellerTab() {
  */
 function werWahl() {
   const jetzt = LS.aktuellerSpieler();
-  const andere = [...LS.kinderListe(), ...LS.aufsichtListe()].filter(n => n !== jetzt);
+  const andere = [...LS.kinderListe(), ...LS.aufsichtListe()].filter(n => n !== jetzt && LS.angezeigt(n)); // ohne Ausgeblendete (KE1 a)
   return KERN.personenMenue({
     titel: "Angemeldet als",
     ich: { name: LS.spielerName(jetzt), bild: LS.avatarBild(jetzt, 34) },

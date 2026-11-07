@@ -1,4 +1,4 @@
-/* kern 1.23.0 · Prüfsumme sha256:891eafacca237eac010d8003b40b0bca28346573ffeebe9933a75fa3bffde399 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.24.0 · Prüfsumme sha256:a943376edef7f4656e02c087840f16894d102fec6600c381d6b58f281bdadc04 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -968,8 +968,38 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     return { status: "neu", person, code: w.code };
   }
 
+  // ---------- Auf diesem Gerät ausblenden (KE1 a, KE2 a, LERN_Session20) ----------
+  /**
+   * Personen, die dieses Gerät nicht zeigt (Anmeldung, Personen-Knopf, Anfragen), ohne sie zu löschen: Sie bleiben in den
+   * Daten und reisen in Sicherung und Abgleich weiter; auf den anderen Geräten ändert sich nichts. Die Liste der
+   * Kennungen liegt nur auf diesem Gerät (Speicher „ausgeblendet“, nicht abgeglichen). Wen eine App ausblenden lässt,
+   * entscheidet sie (eine gesperrte Aufsicht in beiden Apps, KE1 a; im Lernsteig dazu ein nicht verbundenes Konto, KE2 a).
+   * liste: KERN.person.liste der App (eine Person mit früheren Kennungen bleibt ausgeblendet).
+   */
+  function ausgeblendet(liste, speicher, { schluessel = "ausgeblendet" } = {}) {
+    const ids = () => (speicher.lies(schluessel, []) || []).filter(x => typeof x === "string");
+    const kennungen = p => [p.id, ...(p.frueher || [])];
+    const ist = p => !!p && kennungen(p).some(id => ids().includes(id));
+    /** Alle ausgeblendeten Personen, die es noch gibt. */
+    const personen = () => liste.alle().filter(ist);
+    /** Nur die gezeigten Personen einer Liste. */
+    const gezeigt = l => l.filter(p => !ist(p));
+    function ausblenden(id) {
+      const p = liste.finde(id);
+      if (!p) return false;
+      if (!ist(p)) speicher.schreibe(schluessel, ids().concat(p.id));
+      return true;
+    }
+    function zeigen(id) {
+      const p = liste.finde(id);
+      const weg = new Set(p ? kennungen(p) : [id]);
+      speicher.schreibe(schluessel, ids().filter(x => !weg.has(x)));
+    }
+    return { schluessel, ids, ist, personen, gezeigt, ausblenden, zeigen };
+  }
+
   KERN.person = {
-    ROLLEN, AUFSICHT_ARTEN, GEHEIM, NAME_MAX, neueId, nameRein, nameGleich,
+    ROLLEN, AUFSICHT_ARTEN, GEHEIM, NAME_MAX, neueId, nameRein, nameGleich, ausgeblendet,
     geburtsdatumLies, geburtsdatumText, tagFehlt, alter, maengel, ohneGeheimnis, liste, zusammenfuehren, uebernehmen,
     SCHUTZ, gesperrt, fuerDatei, freischalten, codeReicht, aufsichtenMitPin, NUR_BESTAETIGUNG,
   };

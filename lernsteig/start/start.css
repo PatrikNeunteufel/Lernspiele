@@ -90,6 +90,9 @@
 a.knopf { text-decoration: none; display: inline-flex; align-items: center; }
 a.knopf { color: var(--text); }
 .serie { margin: 0; font-weight: 600; }
+/* Löschen (KE2 a): deutlich, aber ohne Alarm */
+.knopf.gefahr { border-color: #a33; color: #a33; }
+.knopf.gefahr:hover { background: #a33; color: #fff; }
 /* Verwaltung: Untertabs wie im Eulenpfad (Plan C5), umbrechend statt rollend */
 .untertabs { flex-wrap: wrap; margin: 14px 0 4px; }
 .untertabs .tab { min-height: 40px; padding: 6px 12px; font-size: 15px; }

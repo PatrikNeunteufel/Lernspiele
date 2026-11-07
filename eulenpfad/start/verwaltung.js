@@ -223,7 +223,8 @@ function zeichneVerwaltung(box, neu) {
       const ich = n === LS.aktuellerSpieler();
       return el("tr", {},
         el("td", {}, el("b", { text: LS.spielerName(n) }), LS.klasseVon(p) !== null ? el("span", { class: "leise-text", text: ` · ${LS.klasseText(LS.klasseVon(p))}` }) : null),
-        el("td", { text: p.rolle === "aufsicht" ? (p.pin ? "Aufsicht" : "Aufsicht (ohne PIN)") : "Kind" }),
+        el("td", { text: (p.rolle === "aufsicht" ? (p.pin ? "Aufsicht" : LS.gesperrt(n) ? "Aufsicht (🔒 von einem anderen Gerät)" : "Aufsicht (ohne PIN)") : "Kind")
+          + (LS.istAusgeblendet(n) ? " · ausgeblendet" : "") }),
         el("td", {}, p.rolle === "aufsicht" ? null : lernplanWahl(n, p)),
         el("td", {}, p.rolle === "aufsicht" ? null : sortierungWahl(n, p)),
         el("td", {}, el("div", { class: "zeile-knoepfe" },
@@ -235,9 +236,16 @@ function zeichneVerwaltung(box, neu) {
             LS.speichereProfil(n, p.rolle === "aufsicht" ? { rolle: "lernend", pin: null, wiederherstellung: null } : { rolle: "aufsicht" });
             neu();
           } }),
-          ich ? null : el("button", { type: "button", class: "schalter gesperrt", text: "🗑 löschen", onclick: () => {
-            if (confirm(`${n} mit Profil und allen Runden löschen? Vorher in der Statistik sichern.`)) { LS.loescheSpieler(n); neu(); }
-          } }))));
+          // Eine gesperrte Aufsicht (von einem anderen Gerät) wird nicht gelöscht, sondern hier ausgeblendet (KE1 a): ein
+          // Löschvermerk nähme sie im Abgleich auch auf ihrem eigenen Gerät mit
+          ich ? null : LS.istAusgeblendet(n)
+            ? el("button", { type: "button", class: "schalter", "data-zeigen": n, text: "👁 wieder zeigen", onclick: () => { LS.zeigen(n); neu(); } })
+            : LS.darfAusblenden(n)
+              ? el("button", { type: "button", class: "schalter", "data-ausblenden": n, text: "🙈 auf diesem Gerät ausblenden",
+                title: "Nicht mehr auf der Anmeldung; auf ihrem eigenen Gerät bleibt sie", onclick: () => { LS.ausblenden(n); neu(); } })
+              : el("button", { type: "button", class: "schalter gesperrt", text: "🗑 löschen", onclick: () => {
+                if (confirm(`${n} mit Profil und allen Runden löschen? Vorher in der Statistik sichern.`)) { LS.loescheSpieler(n); neu(); }
+              } }))));
     });
     const neuName = el("input", { class: "feld", type: "text", maxlength: "20", placeholder: "Name", "aria-label": "Name des neuen Kindes" });
     const neuKlasse = el("select", { "aria-label": "Klasse" }, el("option", { value: "", text: "Klasse —" }),

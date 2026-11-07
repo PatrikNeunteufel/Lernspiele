@@ -757,12 +757,21 @@ if (opt.daten !== 0 && (!nurSpiele.length || nurSpiele.includes("daten"))) {
     const r2 = await vm.runInContext(`(async () => {
       LS.neuerSpieler("Papa"); await LS.setzePin("Papa", "1122");
       LS.abgleich.datenEinlesen(__datei);
+      // KE1 a: die gesperrte Mama lässt sich hier ausblenden (nicht löschen), Papa nicht; sie bleibt in den Daten
+      const aus = { darf: [LS.darfAusblenden("Mama"), LS.darfAusblenden("Papa")].join() };
+      LS.ausblenden("Mama");
+      aus.weg = [LS.angezeigt("Mama"), LS.spielerListe().includes("Mama"), LS.abgleichDaten().personen.some(p => p.name === "Mama"), "ausgeblendet" in LS.abgleichDaten()].join();
+      LS.zeigen("Mama");
+      aus.wieder = LS.angezeigt("Mama");
       let mitCode = "";
       try { await LS.freischalten("Mama", "1357", { code: "K7QM-2XRA-9TPL" }); } catch (e) { mitCode = e.message; }
       const nachCode = LS.gesperrt("Mama");
       if (nachCode) await LS.freischalten("Mama", "1357", { von: "Papa", vonPin: "1122" });
-      return { mitCode, nachCode, danach: LS.gesperrt("Mama"), soll: KERN.person.NUR_BESTAETIGUNG };
+      return { aus, mitCode, nachCode, danach: LS.gesperrt("Mama"), soll: KERN.person.NUR_BESTAETIGUNG };
     })()`, e);
+    if (r2.aus.darf !== "true,false") maengel.push(`ausblenden erlaubt (Mama, Papa): ${r2.aus.darf} statt true,false`);
+    if (r2.aus.weg !== "false,true,true,false") maengel.push(`ausgeblendet (angezeigt, in der Liste, im Abgleich, Liste im Abgleich): ${r2.aus.weg} statt false,true,true,false`);
+    if (!r2.aus.wieder) maengel.push("nach „wieder zeigen“ nicht angezeigt");
     if (r2.mitCode !== r2.soll || !r2.nachCode) maengel.push(`Gerät mit Aufsicht: Code allein ${r2.mitCode ? "abgewiesen mit „" + r2.mitCode + "“" : "hat freigeschaltet"}`);
     if (r2.danach) maengel.push("Gerät mit Aufsicht: mit Bestätigung nicht freigeschaltet");
     for (const m of maengel) console.log(`    FEHLER  Geschützte Aufsicht: ${m}`);

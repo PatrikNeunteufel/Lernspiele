@@ -243,6 +243,43 @@ async function pruefeSeiten(uebungen, melde, LST) {
       s.klick('[data-aktion="alles-pruefstand"]'); await ruhe(s);
       if (sichtbar() !== vorher || Object.keys(fg().uebungen).length || Object.keys(fg().listen).length) melde(ort, `Freigabe: „Alles wie Prüfstand“ lässt ${JSON.stringify(fg())}`);
       textPruefen(`${ort} Freigabe`, s);
+      // Ausblenden und Löschen (KE1 a, KE2 a): das nicht verbundene Konto ausblenden und wieder zeigen; ein eigenes
+      // angelegtes (verbundenes) Konto nach Rückfrage löschen
+      if (konto) {
+        s.hash("#verwaltung/konten"); await ruhe(s);
+        if (s.gibt(`[data-loeschen="${konto.id}"]`)) melde(ort, "Löschen für ein nicht verbundenes Konto angeboten");
+        s.klick(`[data-ausblenden="${konto.id}"]`); await ruhe(s);
+        if (s.lauf(`[...document.querySelectorAll(".personen-eintrag")].some(e => e.textContent.includes(${JSON.stringify(konto.name)}))`)) melde(ort, "ausgeblendetes Konto steht noch im Personen-Knopf");
+        const n = oeffne("index.html", { speicher: new Map(browser) });
+        await ruhe(n);
+        if (n.gibt(`[data-konto="${konto.id}"]`)) melde(ort, "ausgeblendetes Konto steht auf der Anmeldung");
+        fehlerVon(ort + " (Anmeldung)", n);
+        if (!s.gibt(`[data-ausgeblendet="${konto.id}"]`)) melde(ort, "ausgeblendetes Konto fehlt unter „Ausgeblendet“");
+        s.klick(`[data-zeigen="${konto.id}"]`); await ruhe(s);
+        if ((s.json("lernsteig:ausgeblendet") || []).length || !s.gibt(`[data-ausblenden="${konto.id}"]`)) melde(ort, "„Wieder zeigen“ wirkt nicht");
+        s.fuelle('input[name="vorname"]', "Lea"); s.klick('[data-aktion="konto-anlegen"]'); await ruhe(s);
+        const lea = (s.json("lernsteig:personen") || []).find(p => p.name === "Lea");
+        if (!lea) melde(ort, "Konto Lea nicht angelegt");
+        else {
+          if (s.gibt(`[data-ausblenden="${lea.id}"]`)) melde(ort, "Ausblenden für ein verbundenes Konto angeboten");
+          s.klick(`[data-loeschen="${lea.id}"]`); await ruhe(s);
+          if (!s.gibt(`[data-loeschfrage="${lea.id}"]`)) melde(ort, "keine Rückfrage vor dem Löschen");
+          s.klick('[data-aktion="loeschen-ja"]'); await ruhe(s);
+          if ((s.json("lernsteig:personen") || []).some(p => p.id === lea.id) || !((s.json("lernsteig:geloescht") || {}).personen || {})[lea.id]) melde(ort, "Lea nicht mit Löschvermerk gelöscht");
+          if (!/Konto Lea gelöscht/.test(s.text())) melde(ort, "keine Meldung nach dem Löschen");
+        }
+        // der Jugendliche löscht sein eigenes Konto (auf einer Kopie des Geräts): Name und PIN (nach „PIN vergessen“ 1234)
+        const j = oeffne("index.html", { speicher: new Map(browser), sitzung: new Map(jugendTab), hash: "#profil" });
+        await ruhe(j);
+        j.fuelle('input[name="loeschen-name"]', "Test"); j.fuelle('input[name="loeschen-pin"]', "0000");
+        j.klick('[data-aktion="konto-loeschen"]'); await ruhe(j);
+        if (!(j.json("lernsteig:personen") || []).some(p => p.id === konto.id)) melde(ort, "Konto mit falscher PIN gelöscht");
+        j.fuelle('input[name="loeschen-pin"]', "1234");
+        j.klick('[data-aktion="konto-loeschen"]'); await ruhe(j);
+        if ((j.json("lernsteig:personen") || []).some(p => p.id === konto.id) || j.gibt(".tab")) melde(ort, "eigenes Konto nicht gelöscht oder noch angemeldet");
+        if (!/ist gelöscht/.test(j.text())) melde(ort, "keine Meldung auf der Anmeldung nach dem Löschen");
+        fehlerVon(ort + " (Jugendlicher löscht)", j);
+      }
     } catch (e) { melde(ort, e.message); }
     fehlerVon(ort, s);
   }

@@ -41,8 +41,24 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       el("div", { class: "knopf-zeile" },
         el("a", { class: "knopf", href: `#statistik/${encodeURIComponent(k.id)}`, text: "Stand ansehen" }),
         el("a", { class: "knopf", href: `#erfolge/${encodeURIComponent(k.id)}`, text: "Erfolge" }),
-        el("button", { type: "button", class: "knopf", text: "Verbindung lösen", onclick: () => { KO.loesen(k.id, a.id); meldung = `Verbindung mit ${k.name} gelöst.`; zeichne(); } })));
+        el("button", { type: "button", class: "knopf", text: "Verbindung lösen", onclick: () => { KO.loesen(k.id, a.id); meldung = `Verbindung mit ${k.name} gelöst.`; zeichne(); } }),
+        el("button", { type: "button", class: "knopf", "data-loeschen": k.id, text: "Konto löschen", onclick: () => { loeschFrage = k.id; zeichne(); } })),
+      loeschFrage === k.id ? el("div", { class: "anfrage", "data-loeschfrage": k.id },
+        el("p", { text: `${k.name} mit allen Runden und Rekorden löschen? Das gilt auch auf den anderen Geräten des Abgleichs und lässt sich nicht rückgängig machen.` }),
+        el("div", { class: "knopf-zeile" },
+          el("button", { type: "button", class: "knopf", text: "Zuerst sichern", onclick: () => LST_DATEN.herunterladen(LST_DATEN.sichern([k.id]), LST_DATEN.dateiname(k.name)) }),
+          el("button", { type: "button", class: "knopf gefahr", "data-aktion": "loeschen-ja", text: "Ja, löschen", onclick: async () => {
+            try { await KO.loeschen(k.id); meldung = `Konto ${k.name} gelöscht.`; } catch (e) { meldung = e.message; }
+            loeschFrage = null; LST_START.neu();
+          } }),
+          el("button", { type: "button", class: "knopf", text: "Abbrechen", onclick: () => { loeschFrage = null; zeichne(); } }))) : null);
   }
+  let loeschFrage = null; // Kennung des Kontos, dessen Löschen gerade gefragt wird
+
+  /** Auf diesem Gerät ausblenden (KE1 a, KE2 a): Knopf für eine Person, die die Aufsicht ausblenden darf. */
+  const ausblendKnopf = p => (KO.darfAusblenden(p.id) ? el("button", { type: "button", class: "knopf klein", "data-ausblenden": p.id, text: "Auf diesem Gerät ausblenden",
+    onclick: () => { KO.ausblenden(p.id); meldung = `${p.name} ist auf diesem Gerät ausgeblendet.`; LST_START.neu(); } }) : null);
+  // Ausblenden, Zeigen und Löschen ändern auch den Personen-Knopf in der Leiste: darum LST_START.neu (ganze Seite)
 
   // Untertabs wie im Eulenpfad (Plan C5), in der Adresse #verwaltung/<id>; ohne Angabe Konten.
   const UNTER = [
@@ -66,7 +82,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   function kontenTeil(a) {
     const verbunden = KO.verbundene(a.id);
     const offen = KO.angefragt(a.id);
-    const andere = KO.alle().filter(k => !verbunden.some(v => v.id === k.id) && !offen.some(v => v.id === k.id));
+    const andere = KO.alleGezeigt().filter(k => !verbunden.some(v => v.id === k.id) && !offen.some(v => v.id === k.id));
     const teile = [];
     teile.push(el("h2", { class: "abschnitt", text: "Verbundene Konten" }),
       verbunden.length ? el("ul", { class: "stand-liste" }, verbunden.map(k => kontoZeile(a, k))) : el("p", { class: "leise", text: "Noch kein Konto verbunden." }));
@@ -74,8 +90,26 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
 
     if (andere.length) teile.push(el("h2", { class: "abschnitt", text: "Mitlesen anfragen" }), el("section", { class: "einstellungen" },
       el("p", { text: "Der Jugendliche sieht die Anfrage nach dem Anmelden und stimmt zu oder lehnt ab." }),
-      el("div", { class: "konto-liste" }, andere.map(k => el("button", { type: "button", class: "knopf", "data-anfrage": k.id, text: `${k.name} anfragen`,
-        onclick: () => { KO.anfragen(k.id); meldung = `Anfrage an ${k.name} gestellt.`; zeichne(); } })))));
+      el("ul", { class: "stand-liste" }, andere.map(k => el("li", {}, el("b", { text: k.name }), el("div", { class: "knopf-zeile" },
+        el("button", { type: "button", class: "knopf", "data-anfrage": k.id, text: `${k.name} anfragen`,
+          onclick: () => { KO.anfragen(k.id); meldung = `Anfrage an ${k.name} gestellt.`; zeichne(); } }),
+        ausblendKnopf(k))))),
+      el("small", { class: "leise", text: "Ein Konto, das nicht mit Ihnen verbunden ist, können Sie nicht löschen — nur auf diesem Gerät ausblenden. Es bleibt in den Daten und erscheint auf den anderen Geräten weiter." })));
+
+    // Andere Aufsichten des Geräts; eine gesperrte (kam über den Abgleich, OA1 a) lässt sich ausblenden (KE1 a)
+    const aufsichten = KO.aufsichtenGezeigt().filter(x => x.id !== a.id);
+    if (aufsichten.length) teile.push(el("h2", { class: "abschnitt", text: "Andere Aufsichten" }), el("section", { class: "einstellungen" },
+      el("ul", { class: "stand-liste" }, aufsichten.map(x => el("li", { "data-aufsicht": x.id },
+        el("b", { text: x.name }), el("span", { class: "leise", text: ` ${rolleName(x.art)}${KO.gesperrt(x.id) ? " · 🔒 gesperrt, von einem anderen Gerät" : ""}` }),
+        ausblendKnopf(x) ? el("div", { class: "knopf-zeile" }, ausblendKnopf(x)) : null))),
+      el("small", { class: "leise", text: "Eine gesperrte Aufsicht ist auf ihrem eigenen Gerät echt. Ausblenden nimmt sie nur hier von der Anmeldung; auf den anderen Geräten bleibt sie, wie sie ist." })));
+
+    const weg = KO.ausgeblendete();
+    if (weg.length) teile.push(el("h2", { class: "abschnitt", text: "Ausgeblendet auf diesem Gerät" }), el("section", { class: "einstellungen" },
+      el("ul", { class: "stand-liste" }, weg.map(x => el("li", { "data-ausgeblendet": x.id },
+        el("b", { text: x.name }), el("span", { class: "leise", text: x.rolle === "aufsicht" ? ` Aufsicht · ${rolleName(x.art)}` : " Konto" }),
+        el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf klein", "data-zeigen": x.id, text: "Wieder zeigen",
+          onclick: () => { KO.zeigen(x.id); meldung = `${x.name} wird wieder gezeigt.`; LST_START.neu(); } })))))));
 
     const name = feld("Vorname", { type: "text", maxlength: "40", name: "vorname" });
     const geboren = feld("Geburtsdatum", { type: "date", name: "geboren", max: new Date().toISOString().slice(0, 10) });

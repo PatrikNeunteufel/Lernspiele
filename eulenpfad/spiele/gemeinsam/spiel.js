@@ -750,6 +750,20 @@ const LS = (() => {
   }
   /** Auf einem anderen Gerät mit PIN geschützt und hier noch ohne eigene PIN (DF4 a)? */
   const gesperrt = name => KERN.person.gesperrt(person(name));
+  // Auf diesem Gerät ausblenden (KE1 a, LERN_Session20; KERN.person.ausgeblendet): eine gesperrte Aufsicht ist auf ihrem
+  // eigenen Gerät echt — ein Löschvermerk nähme sie dort im Abgleich mit. Ausgeblendet steht sie nicht auf der Anmeldung
+  // und nicht im Personen-Knopf, bleibt aber in den Daten (lernspiele:ausgeblendet, nur dieses Gerät).
+  const AUSGEBLENDET = KERN.person.ausgeblendet(PERSONEN, { lies, schreibe });
+  /** Zeigt dieses Gerät die Person (Anmeldung, Personen-Knopf)? */
+  const angezeigt = name => !AUSGEBLENDET.ist(person(name));
+  const istAusgeblendet = name => AUSGEBLENDET.ist(person(name));
+  /** Ausblenden lässt sich nur eine gesperrte Aufsicht (KE1 a). */
+  const darfAusblenden = name => istAufsicht(name) && gesperrt(name);
+  function ausblenden(name) {
+    if (!darfAusblenden(name)) return false;
+    return AUSGEBLENDET.ausblenden(person(name).id);
+  }
+  const zeigen = name => { const p = person(name); if (p) AUSGEBLENDET.zeigen(p.id); };
   /**
    * Gesperrte Person freischalten und ihr eine PIN geben: mit ihrem Wiederherstellungscode ({ code }) oder mit der PIN
    * einer anderen Aufsicht dieses Geräts ({ von, vonPin }). Fehler mit Klartext.
@@ -3252,6 +3266,7 @@ const LS = (() => {
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     person, umbenennen, gehoert, PERSONEN,
     beiAenderung, abgleichDaten, sicherung, gesperrt, freischalten, spielStand: () => spielStand,
+    angezeigt, istAusgeblendet, darfAusblenden, ausblenden, zeigen,
     MELDUNG_ARTEN, MELDUNG_STATUS, ANREGUNG_ARTEN, ANREGUNG_STATUS, istAnregung, anregungen, neueAnregung,
     bild, istZeichnung, mitBildText, zelleMitBildern,
     neueKorrektur, korrekturen, entferneMeldung, fingerabdruck, listenPruefung, pruefungDefinition, pruefungLokal, setzePruefungLokal,

@@ -267,6 +267,53 @@ var LST_KONTEN = (function () {
     const a = brauchtAufsicht();
     for (const id of neueIds || []) if (finde(id)) setzeFeld(id, "aufsicht", l => l.includes(a.id) ? l : l.concat(a.id));
   }
+  // ---------- Ausblenden und Löschen (KE1 a, KE2 a, LERN_Session20) ----------
+  // Ausblenden (KERN.person.ausgeblendet): nur auf diesem Gerät nicht zeigen, die Person bleibt in den Daten und reist im
+  // Abgleich weiter. Die angemeldete Aufsicht blendet eine gesperrte Aufsicht aus (KE1 a: sie ist auf ihrem eigenen Gerät
+  // echt, ein Löschvermerk nähme sie dort mit) und ein Konto, das nicht mit ihr verbunden ist (KE2 a: ohne Verbindung
+  // kein Recht an seinen Daten). Löschen mit Löschvermerk (auf allen Geräten des Abgleichs): der Jugendliche selbst
+  // (mit PIN, wenn er eine hat, und seinem Namen) oder eine Aufsicht, mit der das Konto verbunden ist.
+  const AUSGEBLENDET = P.ausgeblendet(LISTE, SPEICHER);
+  /** Konten und Aufsichten, die dieses Gerät zeigt (Anmeldung, Personen-Knopf, Anfragen). */
+  const alleGezeigt = () => AUSGEBLENDET.gezeigt(alle());
+  const aufsichtenGezeigt = () => AUSGEBLENDET.gezeigt(aufsichten());
+  const ausgeblendete = () => AUSGEBLENDET.personen();
+  /** Darf die angemeldete Aufsicht diese Person auf dem Gerät ausblenden? */
+  function darfAusblenden(id) {
+    const a = aufsichtAktiv(), p = LISTE.finde(id);
+    if (!a || !p || p.id === a.id) return false;
+    return p.rolle === "aufsicht" ? gesperrt(p.id) : !hat(p, "aufsicht", a.id);
+  }
+  function ausblenden(id) {
+    brauchtAufsicht();
+    if (!darfAusblenden(id)) throw new Error("Ausblenden lässt sich nur eine gesperrte Aufsicht oder ein Konto, das nicht mit Ihnen verbunden ist.");
+    AUSGEBLENDET.ausblenden(id);
+  }
+  function zeigen(id) { brauchtAufsicht(); AUSGEBLENDET.zeigen(id); }
+  /** Darf, wer angemeldet ist, dieses Konto löschen? Der Jugendliche sein eigenes, die Aufsicht ein verbundenes. */
+  function darfLoeschen(id) {
+    const k = finde(id); if (!k) return false;
+    const a = aufsichtAktiv(), selbst = aktiv();
+    return (selbst && selbst.id === k.id) || (!!a && hat(k, "aufsicht", a.id));
+  }
+  /**
+   * Konto löschen mit Löschvermerk (KERN.daten, DF2 a): Konto, Runden und Rekorde, auf allen Geräten des Abgleichs.
+   * Der Jugendliche bestätigt mit seinem Namen und, wenn er eine hat, seiner PIN: bestaetigung = { name, pin }.
+   */
+  async function loeschen(id, bestaetigung = {}) {
+    const k = finde(id);
+    if (!k) throw new Error("Konto nicht gefunden");
+    if (!darfLoeschen(id)) throw new Error("Löschen kann nur der Jugendliche selbst oder eine Aufsicht, mit der das Konto verbunden ist.");
+    const selbst = aktiv() && aktiv().id === id;
+    if (selbst) {
+      if (!P.nameGleich(bestaetigung.name || "", k.name)) throw new Error("Bitte deinen Vornamen genau so eintragen, wie er im Konto steht.");
+      if (k.pin && !(await pinStimmt(k, bestaetigung.pin))) throw new Error("Die PIN stimmt nicht.");
+    }
+    LST_DATEN.loeschePerson(id);
+    AUSGEBLENDET.zeigen(id);
+    if (selbst) abmelden();
+  }
+
   /** Einstellungen des Geräts (TR1 a: Rechner; Dezimalzeichen; Gast C2 a) setzt nur eine angemeldete Aufsicht. */
   function setzeGeraeteEinstellung(feld, wert) {
     brauchtAufsicht();
@@ -306,6 +353,7 @@ var LST_KONTEN = (function () {
     ROLLEN, aufsichten, aufsichtFinde, aufsichtAnlegen, aufsichtAnmelden, aufsichtAbmelden, aufsichtAktiv, aufsichtPinVergessen,
     gesperrt, codeReicht, freischalten, fristStand, fristAnfordern, fristAbbrechenMit, fristFaellig, FRIST_TAGE: KERN.rollen.TAGE,
     verbundene, mitleser, angefragt, anfragen, antworten, loesen, kontoFuerAufsicht, verbindeEingelesene, setzeGeraeteEinstellung,
+    alleGezeigt, aufsichtenGezeigt, ausgeblendete, darfAusblenden, ausblenden, zeigen, darfLoeschen, loeschen,
     LISTE,
   };
 })();

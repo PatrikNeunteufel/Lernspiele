@@ -569,6 +569,25 @@ console.log("tastenfeld.js");
     delete global.localStorage;
   }
 
+  // Auf diesem Gerät ausblenden (KE1 a, KE2 a): nur eine Liste von Kennungen, die Personen bleiben
+  {
+    const m = new Map();
+    const sp = { lies: (k, v) => (m.has(k) ? JSON.parse(m.get(k)) : v), schreibe: (k, v) => { m.set(k, JSON.stringify(v)); return true; } };
+    const L = P.liste(sp);
+    const a = L.anlegen({ name: "Fremd", rolle: "aufsicht", art: "eltern" }), b = L.anlegen({ name: "Ben" });
+    const A = P.ausgeblendet(L, sp);
+    gleich([A.ausblenden(a.id), A.ausblenden(a.id), A.ausblenden("gibt-es-nicht")].join(), "true,true,false", "ausblenden: nur wen es gibt, doppelt nur einmal");
+    gleich([A.ids().length, A.ist(L.finde(a.id)), A.ist(L.finde(b.id))].join(), "1,true,false", "ausgeblendet ist nur Fremd");
+    gleich(A.gezeigt(L.alle()).map(p => p.name).join(), "Ben", "gezeigt ohne die Ausgeblendeten");
+    gleich([L.alle().length, A.personen().map(p => p.name).join()].join(), "2,Fremd", "die Person bleibt in der Liste");
+    // nach dem Zusammenführen unter einer anderen Kennung (frueher) bleibt sie ausgeblendet
+    L.speichere(L.alle().map(p => (p.id === a.id ? { ...p, id: "p-neu", frueher: [a.id] } : p)));
+    gleich(A.ist(L.finde("p-neu")), true, "ausgeblendet auch mit früherer Kennung");
+    A.zeigen("p-neu");
+    gleich([A.ids().length, A.gezeigt(L.alle()).length].join(), "0,2", "wieder zeigen nimmt alle Kennungen weg");
+    gleich(JSON.stringify(m.get("ausgeblendet")), JSON.stringify("[]"), "Speicher „ausgeblendet“");
+  }
+
   // Zusammenführen (P1 a)
   const t0 = "2026-01-01T00:00:00.000Z", t1 = "2026-02-01T00:00:00.000Z", t2 = "2026-03-01T00:00:00.000Z";
   const hier = [

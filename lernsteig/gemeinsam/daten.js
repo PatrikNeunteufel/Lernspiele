@@ -73,7 +73,10 @@ var LST_DATEN = (function () {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
-  return { FORMAT, sichern, abgleichDaten, dateiname, einlesen, herunterladen, rundeGueltig, rekordGueltig };
+  /** Konto löschen mit Löschvermerk (DF2 a), samt Runden und Rekorden; die Regeln, wer darf, stehen in konten.js. */
+  const loeschePerson = id => DATEN.loeschePerson(id);
+
+  return { FORMAT, sichern, abgleichDaten, dateiname, einlesen, herunterladen, rundeGueltig, rekordGueltig, loeschePerson };
 })();
 
 if (typeof module !== "undefined") module.exports = LST_DATEN;

@@ -307,8 +307,38 @@
     return { status: "neu", person, code: w.code };
   }
 
+  // ---------- Auf diesem Gerät ausblenden (KE1 a, KE2 a, LERN_Session20) ----------
+  /**
+   * Personen, die dieses Gerät nicht zeigt (Anmeldung, Personen-Knopf, Anfragen), ohne sie zu löschen: Sie bleiben in den
+   * Daten und reisen in Sicherung und Abgleich weiter; auf den anderen Geräten ändert sich nichts. Die Liste der
+   * Kennungen liegt nur auf diesem Gerät (Speicher „ausgeblendet“, nicht abgeglichen). Wen eine App ausblenden lässt,
+   * entscheidet sie (eine gesperrte Aufsicht in beiden Apps, KE1 a; im Lernsteig dazu ein nicht verbundenes Konto, KE2 a).
+   * liste: KERN.person.liste der App (eine Person mit früheren Kennungen bleibt ausgeblendet).
+   */
+  function ausgeblendet(liste, speicher, { schluessel = "ausgeblendet" } = {}) {
+    const ids = () => (speicher.lies(schluessel, []) || []).filter(x => typeof x === "string");
+    const kennungen = p => [p.id, ...(p.frueher || [])];
+    const ist = p => !!p && kennungen(p).some(id => ids().includes(id));
+    /** Alle ausgeblendeten Personen, die es noch gibt. */
+    const personen = () => liste.alle().filter(ist);
+    /** Nur die gezeigten Personen einer Liste. */
+    const gezeigt = l => l.filter(p => !ist(p));
+    function ausblenden(id) {
+      const p = liste.finde(id);
+      if (!p) return false;
+      if (!ist(p)) speicher.schreibe(schluessel, ids().concat(p.id));
+      return true;
+    }
+    function zeigen(id) {
+      const p = liste.finde(id);
+      const weg = new Set(p ? kennungen(p) : [id]);
+      speicher.schreibe(schluessel, ids().filter(x => !weg.has(x)));
+    }
+    return { schluessel, ids, ist, personen, gezeigt, ausblenden, zeigen };
+  }
+
   KERN.person = {
-    ROLLEN, AUFSICHT_ARTEN, GEHEIM, NAME_MAX, neueId, nameRein, nameGleich,
+    ROLLEN, AUFSICHT_ARTEN, GEHEIM, NAME_MAX, neueId, nameRein, nameGleich, ausgeblendet,
     geburtsdatumLies, geburtsdatumText, tagFehlt, alter, maengel, ohneGeheimnis, liste, zusammenfuehren, uebernehmen,
     SCHUTZ, gesperrt, fuerDatei, freischalten, codeReicht, aufsichtenMitPin, NUR_BESTAETIGUNG,
   };
