@@ -874,3 +874,11 @@
   (Konten 101 Fälle), Gratwanderung „Keine Fehler.“; Eulenpfad-Stichprobe (schriftlich-werkstatt, rechenprobe,
   malkreuz, zahlenhaus, preis-tabelle, quader-volumen) mit denselben Klickzahlen wie mit Kern 1.26.0; Browser
   1024 × 600 (Tablet quer), 1400 × 900 und 375 px ohne Konsolenfehler.
+- Lernsteig — Vorrat `stromkreis` b (Plan E 9, VF1 a): statt acht fester Fragen (Wiederholung nach 1,3 Runden) je
+  Aufbau mit 1 bis 4 gleichen Lämpchen in Serie oder parallel eine Veränderung (eines dazu, durch ein Kabel ersetzt,
+  herausgeschraubt) und die Frage nach der Helligkeit oder der Anzeige des Strommessers, dazu Zweig- gegen
+  Batteriestrom: 37 verschiedene Aufgaben, nur Lämpchen und Schaltungsart wie im Lehrplan NT.5.2.b. Die Antworten
+  kommen aus einer Tabelle der einfachen Regeln; die Prüfung liest den gezeigten Satz mit eigenen Mustern (`liesB`)
+  und rechnet mit dem Schaltungsmodell nach. Gegenproben (eine falsche Regel; ein veränderter Wortlaut): gemeldet.
+  Plan E 9 (heute 20 Hinweise). Tests: Kern 0 Fehler, Lernsteig „0 Fehler, 20 Hinweise.“ (Konten 101 Fälle),
+  Gratwanderung „Keine Fehler.“. Die neuen Wortlaute sind noch von Patrik zu prüfen (die Übung ist ohnehin gesperrt).

@@ -31,34 +31,71 @@ function zahl(stufe, typ, text, antwort, einheit, weg, daten) {
 }
 
 // ---------- b: Regeln, als Auswahl ----------
-// Jede Frage: Aufbau vorher/nachher; die Antwort wählt die Prüfung über ein Schaltungsmodell nach.
+// Lehrplan NT.5.2.b: „Veränderungen in Stromkreisen mit Messgeräten untersuchen, einfache Regeln aufstellen (mehr/weniger
+// Lämpchen, Serie-/Parallelschaltung)“. Darum nur Lämpchen und Schaltungsart, keine weiteren Batterien. Vorrat nach VF1 a
+// (E 9, LERN_Session21): statt acht fester Fragen je Aufbau (1 bis 4 gleiche Lämpchen, Serie oder parallel) eine
+// Veränderung — eines dazu, eines durch ein Kabel ersetzt, eines herausgeschraubt — und die Frage nach der Helligkeit
+// oder nach der Anzeige des Strommessers; dazu der Vergleich Zweig- und Batteriestrom. 37 verschiedene Aufgaben.
 const HELL = ["heller", "gleich hell", "dunkler", "gar nicht mehr"];
 const STROM = ["grösser", "gleich", "kleiner", "kein Strom mehr"];
-const FRAGEN = [
-  { id: "serie-dazu", text: "Zu einem Lämpchen an einer Batterie wird ein gleiches Lämpchen in Serie geschaltet. Wie leuchtet das erste Lämpchen jetzt?", optionen: HELL, richtig: "dunkler", modell: { vorher: ["serie", 1], nachher: ["serie", 2], was: "hell" } },
-  { id: "parallel-dazu", text: "Zu einem Lämpchen an einer Batterie wird ein gleiches Lämpchen parallel geschaltet. Wie leuchtet das erste Lämpchen jetzt?", optionen: HELL, richtig: "gleich hell", modell: { vorher: ["parallel", 1], nachher: ["parallel", 2], was: "hell" } },
-  { id: "serie-weg", text: "Drei gleiche Lämpchen sind in Serie geschaltet. Eines wird herausgeschraubt. Wie leuchten die anderen?", optionen: HELL, richtig: "gar nicht mehr", modell: { vorher: ["serie", 3], nachher: ["serie-offen", 3], was: "hell" } },
-  { id: "parallel-weg", text: "Drei gleiche Lämpchen sind parallel geschaltet. Eines wird herausgeschraubt. Wie leuchten die anderen?", optionen: HELL, richtig: "gleich hell", modell: { vorher: ["parallel", 3], nachher: ["parallel", 2], was: "hell" } },
-  { id: "serie-strom", text: "Zu zwei gleichen Lämpchen in Serie kommt ein drittes in Serie dazu. Wie ändert sich die Stromstärke im Stromkreis?", optionen: STROM, richtig: "kleiner", modell: { vorher: ["serie", 2], nachher: ["serie", 3], was: "strom" } },
-  { id: "parallel-strom", text: "Zu zwei gleichen Lämpchen parallel kommt ein drittes parallel dazu. Wie ändert sich die Stromstärke, die aus der Batterie fliesst?", optionen: STROM, richtig: "grösser", modell: { vorher: ["parallel", 2], nachher: ["parallel", 3], was: "strom" } },
-  { id: "serie-weniger", text: "Von drei gleichen Lämpchen in Serie wird eines durch ein Kabel ersetzt. Wie leuchten die beiden anderen?", optionen: HELL, richtig: "heller", modell: { vorher: ["serie", 3], nachher: ["serie", 2], was: "hell" } },
-  { id: "parallel-zweig", text: "Zwei gleiche Lämpchen sind parallel geschaltet. Wie gross ist die Stromstärke durch ein Lämpchen im Vergleich zur Stromstärke aus der Batterie?", optionen: STROM, richtig: "kleiner", modell: { vorher: ["parallel", 2], nachher: ["parallel-zweig", 2], was: "strom" } },
-];
-function stufeB() {
-  const f = LST.waehle(FRAGEN);
-  const optionen = f.optionen.slice();
-  return { art: "auswahl", stufe: "b", typ: f.id, text: f.text, optionen, richtig: optionen.indexOf(f.richtig), loesung: f.richtig, weg: WEG_B[f.id], kennung: f.text + optionen.join("|"), daten: f.modell };
-}
-const WEG_B = {
-  "serie-dazu": "In Serie teilen sich die Lämpchen die Spannung; der Strom wird kleiner, jedes leuchtet dunkler",
-  "parallel-dazu": "Parallel liegt an jedem Lämpchen die ganze Spannung; es leuchtet gleich hell",
-  "serie-weg": "In Serie gibt es nur einen Weg; ist er unterbrochen, fliesst kein Strom",
-  "parallel-weg": "Jeder Zweig hat die ganze Spannung; die anderen Zweige bleiben geschlossen",
-  "serie-strom": "Mehr Lämpchen in Serie heisst mehr Widerstand, also weniger Strom",
-  "parallel-strom": "Jeder Zweig braucht Strom; aus der Batterie fliesst die Summe",
-  "serie-weniger": "Weniger Widerstand in Serie, mehr Spannung je Lämpchen: heller",
-  "parallel-zweig": "Knotenregel: Der Strom aus der Batterie teilt sich auf die Zweige auf",
+const ZAHLWORT = { 2: "Zwei", 3: "Drei", 4: "Vier" };
+/** Aufbau als Satz: n gleiche Lämpchen in Serie oder parallel an einer Batterie (eines: ohne Schaltungsart). */
+const aufbauText = (art, n) => (n === 1 ? "Ein Lämpchen hängt an einer Batterie."
+  : `${ZAHLWORT[n]} gleiche Lämpchen sind ${art === "serie" ? "in Serie" : "parallel"} an eine Batterie geschaltet.`);
+// Veränderungen: Satz, Aufbau nachher, erlaubte Anzahl vorher
+const VERAENDERUNG = {
+  "serie-dazu": { art: "serie", satz: "Ein gleiches Lämpchen kommt in Serie dazu.", nachher: n => ["serie", n + 1], von: 1, bis: 4 },
+  "serie-kabel": { art: "serie", satz: "Eines wird durch ein Kabel ersetzt.", nachher: n => ["serie", n - 1], von: 2, bis: 4 },
+  "serie-weg": { art: "serie", satz: "Eines wird herausgeschraubt.", nachher: n => ["serie-offen", n - 1], von: 2, bis: 4 },
+  "parallel-dazu": { art: "parallel", satz: "Ein gleiches Lämpchen kommt parallel dazu.", nachher: n => ["parallel", n + 1], von: 1, bis: 4 },
+  "parallel-weg": { art: "parallel", satz: "Eines wird herausgeschraubt.", nachher: n => ["parallel", n - 1], von: 2, bis: 4 },
 };
+// Die einfachen Regeln (Antworten des Erzeugers); die Prüfung rechnet sie unabhängig mit dem Schaltungsmodell nach
+const REGEL = {
+  "serie-dazu": { hell: "dunkler", strom: "kleiner" }, "serie-kabel": { hell: "heller", strom: "grösser" },
+  "serie-weg": { hell: "gar nicht mehr", strom: "kein Strom mehr" }, "parallel-dazu": { hell: "gleich hell", strom: "grösser" },
+  "parallel-weg": { hell: "gleich hell", strom: "kleiner" }, "parallel-zweig": { strom: "kleiner" },
+};
+// Helligkeit: kommt eines dazu, nach denen, die schon da waren; fällt eines weg, nach dem oder den übrigen
+const FRAGE_HELL = (n, dazu) => (dazu ? (n === 1 ? "Wie leuchtet das erste Lämpchen jetzt?" : "Wie leuchten die Lämpchen, die schon da waren?")
+  : n - 1 === 1 ? "Wie leuchtet das übrige Lämpchen jetzt?" : "Wie leuchten die übrigen Lämpchen jetzt?");
+const FRAGE_STROM = "Wie ändert sich die Anzeige des Strommessers an der Batterie?";
+const FRAGE_ZWEIG = "Ein Strommesser misst den Strom durch ein Lämpchen, ein zweiter den Strom aus der Batterie. Was zeigt der erste im Vergleich zum zweiten?";
+const WEG_B = {
+  "serie-dazu": { hell: "In Serie teilen sich die Lämpchen die Spannung; mehr Lämpchen heisst weniger Strom, jedes leuchtet dunkler",
+    strom: "Mehr Lämpchen in Serie heisst mehr Widerstand, also weniger Strom" },
+  "serie-kabel": { hell: "Weniger Lämpchen in Serie: mehr Spannung je Lämpchen und mehr Strom, heller",
+    strom: "Weniger Widerstand in Serie, also mehr Strom" },
+  "serie-weg": { hell: "In Serie gibt es nur einen Weg; ist er unterbrochen, fliesst kein Strom",
+    strom: "In Serie gibt es nur einen Weg; ist er unterbrochen, fliesst kein Strom" },
+  "parallel-dazu": { hell: "Parallel liegt an jedem Lämpchen die ganze Spannung; es leuchtet gleich hell",
+    strom: "Jeder Zweig braucht Strom; aus der Batterie fliesst die Summe, sie wird grösser" },
+  "parallel-weg": { hell: "Jeder Zweig hat die ganze Spannung; die anderen Zweige bleiben geschlossen",
+    strom: "Ein Zweig weniger: Die Summe der Zweigströme aus der Batterie wird kleiner" },
+  "parallel-zweig": { strom: "Knotenregel: Der Strom aus der Batterie teilt sich auf die Zweige auf" },
+};
+/** Alle Aufgaben der Stufe b als Liste (für die Auswahl und fürs Testskript). */
+function alleB() {
+  const liste = [];
+  for (const [id, v] of Object.entries(VERAENDERUNG)) {
+    for (let n = v.von; n <= v.bis; n++) {
+      for (const was of ["hell", "strom"]) {
+        liste.push({ id, text: `${aufbauText(v.art, n)} ${v.satz} ${was === "hell" ? FRAGE_HELL(n, id.endsWith("-dazu")) : FRAGE_STROM}`,
+          optionen: was === "hell" ? HELL : STROM, richtig: REGEL[id][was], modell: { vorher: [v.art, n], nachher: v.nachher(n), was }, weg: WEG_B[id][was] });
+      }
+    }
+  }
+  for (let n = 2; n <= 4; n++) liste.push({ id: "parallel-zweig", text: `${aufbauText("parallel", n)} ${FRAGE_ZWEIG}`, optionen: STROM, richtig: REGEL["parallel-zweig"].strom,
+    modell: { vorher: ["parallel", n], nachher: ["parallel-zweig", n], was: "strom" }, weg: WEG_B["parallel-zweig"].strom });
+  return liste;
+}
+const FRAGEN_B = alleB();
+function stufeB() {
+  const f = LST.waehle(FRAGEN_B);
+  const optionen = f.optionen.slice();
+  return { art: "auswahl", stufe: "b", typ: f.id, text: f.text, optionen, richtig: optionen.indexOf(f.richtig), loesung: f.richtig, weg: f.weg,
+    kennung: f.text + optionen.join("|"), daten: f.modell };
+}
 
 // ---------- c: Ohmsches Gesetz ----------
 function stufeC() {
@@ -155,12 +192,38 @@ function hinweis(a, eingabe) {
 
 // ---------- Prüfung ----------
 // Schaltungsmodell für b: n gleiche Lämpchen (Widerstand 1) an der Spannung 1. Helligkeit = Leistung eines Lämpchens.
+// serie-offen: der Kreis ist unterbrochen; parallel-zweig: Strom durch einen von n Zweigen.
 function modell([art, n]) {
   if (art === "serie") return { hell: 1 / (n * n), strom: 1 / n };
   if (art === "serie-offen") return { hell: 0, strom: 0 };
   if (art === "parallel") return { hell: 1, strom: n };
   if (art === "parallel-zweig") return { hell: 1, strom: 1 };
   throw new Error(art);
+}
+// Gezeigten Satz lesen (Wortlaute hier im Prüfteil eigens festgehalten, wie bei TD1 a): Aufbau, Veränderung, Frage
+// → Daten im Format des Modells, oder null, wenn der Satz keinem Muster folgt.
+const ZAHL_LESEN = { Ein: 1, Zwei: 2, Drei: 3, Vier: 4 };
+function liesB(text) {
+  const auf = /^(?:Ein Lämpchen hängt an einer Batterie\.|(Zwei|Drei|Vier) gleiche Lämpchen sind (in Serie|parallel) an eine Batterie geschaltet\.) /.exec(text);
+  if (!auf) return null;
+  const n = auf[1] ? ZAHL_LESEN[auf[1]] : 1, rest = text.slice(auf[0].length);
+  const artAuf = auf[2] === "in Serie" ? "serie" : auf[2] === "parallel" ? "parallel" : null;
+  if (rest === "Ein Strommesser misst den Strom durch ein Lämpchen, ein zweiter den Strom aus der Batterie. Was zeigt der erste im Vergleich zum zweiten?")
+    return artAuf === "parallel" ? { vorher: ["parallel", n], nachher: ["parallel-zweig", n], was: "strom" } : null;
+  const ver = /^(Ein gleiches Lämpchen kommt (in Serie|parallel) dazu|Eines wird durch ein Kabel ersetzt|Eines wird herausgeschraubt)\. (.*)$/.exec(rest);
+  if (!ver) return null;
+  const dazu = !!ver[2];
+  const frageHell = dazu ? (n === 1 ? "Wie leuchtet das erste Lämpchen jetzt?" : "Wie leuchten die Lämpchen, die schon da waren?")
+    : n === 2 ? "Wie leuchtet das übrige Lämpchen jetzt?" : "Wie leuchten die übrigen Lämpchen jetzt?";
+  const was = ver[3] === "Wie ändert sich die Anzeige des Strommessers an der Batterie?" ? "strom" : ver[3] === frageHell ? "hell" : null;
+  if (!was) return null;
+  // ein einzelnes Lämpchen hat keine Schaltungsart; sie kommt mit dem dazugeschalteten
+  const art = artAuf || (ver[2] === "in Serie" ? "serie" : ver[2] === "parallel" ? "parallel" : null);
+  if (!art || (artAuf && ver[2] && (ver[2] === "in Serie") !== (artAuf === "serie"))) return null;
+  if (ver[2]) return { vorher: [art, n], nachher: [art, n + 1], was };
+  if (n < 2) return null;
+  if (ver[1] === "Eines wird durch ein Kabel ersetzt") return art === "serie" ? { vorher: [art, n], nachher: [art, n - 1], was } : null;
+  return { vorher: [art, n], nachher: art === "serie" ? ["serie-offen", n - 1] : ["parallel", n - 1], was };
 }
 function vergleich(vorher, nachher, ist) {
   if (nachher === 0 && vorher > 0) return ist === HELL ? "gar nicht mehr" : "kein Strom mehr";
@@ -174,9 +237,14 @@ function pruefeAufgabe(a, stufe, niveau) {
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
   const d = a.daten;
   if (a.art === "auswahl") {
-    const v = modell(d.vorher)[d.was], n = modell(d.nachher)[d.was];
-    const soll = vergleich(v, n, d.was === "hell" ? HELL : STROM);
+    // aus dem gezeigten Satz, nicht aus den Daten des Erzeugers; beide müssen übereinstimmen
+    const t = liesB(a.text);
+    if (!t) { m.push(`Satz folgt keinem Muster: ${a.text}`); return m; }
+    if (JSON.stringify(t) !== JSON.stringify(d)) m.push(`Text sagt ${JSON.stringify(t)}, Daten ${JSON.stringify(d)}: ${a.text}`);
+    const v = modell(t.vorher)[t.was], n = modell(t.nachher)[t.was];
+    const soll = vergleich(v, n, t.was === "hell" ? HELL : STROM);
     if (a.optionen[a.richtig] !== soll) m.push(`Auswahl „${a.optionen[a.richtig]}“, Modell sagt „${soll}“: ${a.text}`);
+    if (JSON.stringify(a.optionen) !== JSON.stringify(t.was === "hell" ? HELL : STROM)) m.push(`Optionen passen nicht zur Frage: ${a.text}`);
     if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Optionen");
     return m;
   }
@@ -197,4 +265,4 @@ function pruefeAufgabe(a, stufe, niveau) {
   return m;
 }
 
-if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis };
+if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis, FRAGEN_B };

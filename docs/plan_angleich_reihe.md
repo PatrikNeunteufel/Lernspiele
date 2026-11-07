@@ -224,9 +224,9 @@ Kindersprache.
    `zehnerpotenzen` Zahlwort „einhundertein Millionen“ prüfen (Duden). Seit VF1 a (LERN_Session20) meldet das
    Testskript jede Stufe ohne Endlos, deren Aufgaben sich vor der sechsten Runde wiederholen — heute 21, je Übung
    vergrössern oder im Katalog begründen (`vorrat`): kombinatorik f, challenge; atombau a, challenge; kraefte d;
-   stromkreis b (8 Aufgaben, Wiederholung nach 1.3 Runden); grammatik e, f, g; rechtschreibung d, e, f, g;
+   grammatik e, f, g; rechtschreibung d, e, f, g;
    englisch-grammatik b, c, d, challenge; franzoesisch-grammatik b, c, d, challenge (die Sprachübungen begrenzt durch
-   ihre Inhaltslisten).
+   ihre Inhaltslisten). Erledigt: stromkreis b (LERN_Session21, von 8 festen Fragen auf 37 erzeugte; heute 20).
 10. **Hinweise:** Wurzelaufgaben bekommen einen Wurzel-Hinweis; `folgen` nennt die Formel nicht in der Aufgabe.
 11. Danach: Patrik prüft die sieben Listen und die Annahmen je Übung im Entwickler-Modus (FG1 a).
 
