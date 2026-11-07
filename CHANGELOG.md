@@ -814,3 +814,14 @@
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session20_2026-11-07.md`, Handover Eulenpfad und Lernsteig nachgeführt.
   Push ohne vollen Eulenpfad-Lauf (Entscheid Patrik, „ohne Volllauf“; Stichproben nach jedem Kern-Schritt gleich).
   Offen: C3, Vorrat der 21 Stufen (E 9).
+
+## 2026-11-07 — LERN_Session21
+- Lernsteig — Tab Übungen wie der Tab Spiele (Plan C3 Schritt 1): neu `lernsteig/start/uebungen.js` (aus `start.js`
+  gelöst). Favoriten oben, dann je Fach (mit Bereich und Niveau-Wahl) und Thema auf- und zuklappbar, „Alle auf“, „Alle
+  zu“, Ansicht Kacheln oder kompakt. Kachel: Symbol (bis zum Entscheid SY1 das Kürzel des Fachs), Titel, Kompetenz,
+  „wird geprüft“, Sperrvermerk, je Lehrplan-Stufe der Kompetenzstand als Buchstabe in seiner Farbe, Stern für die
+  Favoriten; Antippen öffnet die Übung, gesperrt für Jugendliche ohne Verweis. Favoriten, Zuklappen und Ansicht stehen
+  im Konto (`favoriten`, `zu`, `ansicht`), bei Gast und Aufsicht nur im Tab. `tools/lernsteig_seiten.js` prüft Zahl
+  der Kacheln, Favorit, Zuklappen und Ansicht im Konto und das Zurücknehmen; Gegenprobe (Stern speichert nicht):
+  zwei Fehler gemeldet. lernsteig/rahmen.md 1, 6; Plan C3. Tests: Kern, Lernsteig „0 Fehler, 21 Hinweise.“ (Konten
+  101 Fälle), Gratwanderung „Keine Fehler.“; Browser Desktop und 375 px ohne Konsolenfehler, ohne seitliches Rollen.

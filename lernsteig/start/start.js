@@ -1,5 +1,5 @@
 /* Startseite des Lernsteigs: zuerst die Anmeldung (Plan C1: Jugendliche, Aufsicht, „Ich bin neu“, Gast C2 a), dann
-   eine Seite mit Tabs wie im Eulenpfad (Plan C2): Übungen je Fach mit Kompetenzstand (BF1 a), Profil mit Konto (AU1 a,
+   eine Seite mit Tabs wie im Eulenpfad (Plan C2): Übungen (start/uebungen.js, Plan C3), Profil mit Konto (AU1 a,
    KT1 a, GE1 b, EL1 a) und Einstellungen, Statistik, Erfolge, Verwaltung (nur Aufsicht). */
 "use strict";
 
@@ -8,7 +8,6 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
 
 (function () {
   const LP = LST_LEHRPLAENE;
-  const KAT = LST_KATALOG;
   const KO = LST_KONTEN;
   const el = LST.el;
   const wurzel = document.getElementById("start");
@@ -346,46 +345,6 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       el("p", { class: "fuss", text: "Alles bleibt im Browser auf diesem Gerät. Keine Anmeldung bei einem Server, keine Werbung." }));
   }
 
-  function zeichneUebungen(box) {
-    const k = LST.konto();
-    const faecher = el("div", { class: "faecher" });
-    for (const f of KAT.FAECHER) {
-      const uebungen = KAT.UEBUNGEN.filter(u => u.fach === f.id);
-      const karte = el("section", { class: "fach" + (uebungen.length ? "" : " spaeter"), "aria-label": f.name },
-        el("h3", { text: f.name }), el("p", { class: "bereich", text: f.bereich }));
-      if (uebungen.length) {
-        const niveau = LST.niveauFuer(f.id);
-        dazu(karte,el("div", { class: "niveau-wahl", role: "group", "aria-label": `Niveau ${f.name}` },
-          LST.NIVEAUS.map(n => el("button", {
-            type: "button", class: "chip" + (n.id === niveau ? " an" : ""), "aria-pressed": String(n.id === niveau),
-            text: LST.niveauName(n.id), title: n.kurz, onclick: () => { LST.setzeNiveau(f.id, n.id); zeichne(); },
-          }))));
-        // nach Themenbereich gegliedert; „wird geprüft“, wenn eine Stufe im gewählten Prüfungsziel vorkommt (NV2 a);
-        // Kompetenzstand: wie viele Lehrplan-Stufen sicher sind (BF1 a)
-        const geprueft = u => k.pruefungsziel !== "keins" && u.stufen.some(s => LP.geprueft(`${u.kompetenz}.${s}`, k.pruefungsziel, k.lehrplan).geprueft);
-        const stand = u => { const st = u.stufen.map(s => LST.kompetenzstand(k.id, u.id, s).stand); const sicher = st.filter(s => s.startsWith("sicher")).length; return st.every(s => s === "offen") ? "" : `${sicher} von ${u.stufen.length} Stufen sicher`; };
-        const themen = [...new Set(uebungen.map(u => u.thema))];
-        for (const th of themen) {
-          // Gesperrt (FG1 a): Jugendliche sehen die Übung ohne Verweis mit „noch nicht freigegeben“, die angemeldete
-          // Aufsicht öffnet sie zum Prüfen.
-          const inhalt = u => [
-            el("b", {}, u.titel, geprueft(u) ? el("span", { class: "marke pruefung", text: "wird geprüft" }) : null,
-              LST.sperrGrund(u.id) ? el("span", { class: "marke gesperrt", text: LST.uebungSichtbar(u.id) ? "für Jugendliche gesperrt" : "noch nicht freigegeben" }) : null),
-            el("small", { text: [`${u.kompetenz}, Stufen ${u.stufen.join(", ")}`, stand(u)].filter(Boolean).join(" · ") })];
-          const eintrag = u => LST.uebungSichtbar(u.id)
-            ? el("a", { class: "uebung-link", href: `uebungen/${u.id}/index.html?niveau=${LST.niveauFuer(f.id, u.niveaus)}` }, inhalt(u))
-            : el("span", { class: "uebung-link uebung-gesperrt" }, inhalt(u));
-          dazu(karte,el("h4", { class: "thema", text: th }),
-            el("ul", { class: "uebungen" }, uebungen.filter(u => u.thema === th).map(u => el("li", {}, eintrag(u)))));
-        }
-      } else {
-        dazu(karte,el("small", { class: "leise", text: "später" }));
-      }
-      faecher.append(karte);
-    }
-    box.replaceChildren(faecher);
-  }
-
   function zeichneProfil(box) {
     const k = LST.konto();
     const lp = k.lehrplan;
@@ -433,10 +392,10 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
 
   // ---------- Tabs (Plan C2, wie Eulenpfad L3 a) ----------
   // Eine Seite mit Tabs in derselben Reihenfolge wie im Eulenpfad; der Tab steht in der Adresse (#uebungen, #profil,
-  // #statistik, #statistik/<Konto> für die Aufsicht, #erfolge, #verwaltung). Statistik, Erfolge und Verwaltung zeichnen
-  // start/statistik.js und start/aufsicht.js (LST_START).
+  // #statistik, #statistik/<Konto> für die Aufsicht, #erfolge, #verwaltung). Übungen, Statistik, Erfolge und Verwaltung
+  // zeichnen start/uebungen.js, start/statistik.js und start/aufsicht.js (LST_START).
   const TABS = [
-    { id: "uebungen", text: "📚 Übungen", zeichne: zeichneUebungen },
+    { id: "uebungen", text: "📚 Übungen", zeichne: box => LST_START.uebungen(box) },
     { id: "profil", text: "👤 Profil", zeichne: zeichneProfil },
     { id: "statistik", text: "📊 Statistik", zeichne: (box, teil) => LST_START.statistik(box, teil) },
     { id: "erfolge", text: "🏅 Erfolge", zeichne: box => LST_START.erfolge(box) },

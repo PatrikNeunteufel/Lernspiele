@@ -85,12 +85,12 @@
     return LST_KONTEN.istGast() ? "gast" : "niemand";
   }
   const TAB_KONTO = LST.PRAEFIX + "tab-konto";
-  const TAB_FELDER = ["niveau", "lehrplan", "pruefungsziel", "rechnerModell"];
+  const TAB_FELDER = ["niveau", "lehrplan", "pruefungsziel", "rechnerModell", "favoriten", "zu", "ansicht"]; // zu bis ansicht: Tab Übungen (Plan C3)
   function tabKonto() { try { return JSON.parse(sessionStorage.getItem(TAB_KONTO)) || null; } catch (e) { return null; } }
   function konto() {
     const wer = werUebt();
     const a = wer === "aufsicht" ? LST_KONTEN.aufsichtAktiv() : null;
-    const standard = { id: a ? a.id : "gast", name: a ? a.name : "Gast", niveau: {}, lehrplan: { land: "CH", kanton: null }, pruefungsziel: "keins", rechnerModell: "allgemein" };
+    const standard = { id: a ? a.id : "gast", name: a ? a.name : "Gast", niveau: {}, lehrplan: { land: "CH", kanton: null }, pruefungsziel: "keins", rechnerModell: "allgemein", favoriten: [], zu: [], ansicht: "kacheln" };
     let erg;
     if (wer === "lernend") erg = Object.assign(standard, LST_KONTEN.aktiv());
     else { erg = standard; const t = tabKonto() || {}; for (const f of TAB_FELDER) if (t[f] !== undefined) erg[f] = t[f]; }

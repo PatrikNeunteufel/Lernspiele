@@ -140,6 +140,22 @@ async function pruefeSeiten(uebungen, melde, LST) {
       s.klick("button", "Aufgeschrieben"); await ruhe(s);
       if (!s.lauf(`(document.querySelector(".personen-knopf") || {}).textContent || ""`).includes("Test")) melde(ort, "Personen-Knopf zeigt nicht „Test“");
       await tabsPruefen("Start (Jugendlicher)", s, false);
+      // Tab Übungen (Plan C3): Favorit, Zuklappen und Ansicht landen im Konto, eine Kachel je Übung (Favoriten doppelt)
+      s.hash("#uebungen"); await ruhe(s);
+      const kachelZahl = () => s.lauf(`document.querySelectorAll(".uebung-karte").length`);
+      const alleZahl = s.lauf(`LST_KATALOG.UEBUNGEN.length`);
+      if (kachelZahl() !== alleZahl) melde("Tab Übungen", `${kachelZahl()} Kacheln statt ${alleZahl}`);
+      const ersteId = uebungen[0].id;
+      s.klick(`[data-favorit="${ersteId}"]`); await ruhe(s);
+      const gespeichert = () => (s.json("lernsteig:personen") || []).find(p => p.id === konto.id) || {};
+      if (!(gespeichert().favoriten || []).includes(ersteId)) melde("Tab Übungen", `Favorit ${ersteId} nicht im Konto`);
+      if (!s.gibt(`[data-gruppe="favoriten"] [data-uebung="${ersteId}"]`) || kachelZahl() !== alleZahl + 1) melde("Tab Übungen", "Favorit fehlt in der Gruppe Favoriten");
+      s.lauf(`(() => { const d = document.querySelector('[data-gruppe="fach:${uebungen[0].fach}"]'); d.open = false; d.dispatchEvent(new Event("toggle")); })()`);
+      if (!(gespeichert().zu || []).includes(`fach:${uebungen[0].fach}`)) melde("Tab Übungen", "Zuklappen nicht im Konto");
+      s.klick('[data-ansicht="kompakt"]'); await ruhe(s);
+      if (gespeichert().ansicht !== "kompakt" || !s.gibt(".uebung-gitter.kompakt")) melde("Tab Übungen", "Ansicht kompakt nicht übernommen");
+      s.klick('[data-aktion="alle-auf"]'); s.klick('[data-ansicht="kacheln"]'); s.klick(`[data-favorit="${ersteId}"]`); await ruhe(s);
+      if ((gespeichert().favoriten || []).length || (gespeichert().zu || []).length) melde("Tab Übungen", "Favorit oder Zuklappen nicht zurückgenommen");
       jugendTab = s.sitzung;
     } catch (e) { melde(ort, e.message); }
     fehlerVon(ort, s);
