@@ -177,7 +177,7 @@ var LST = (function () {
 
   // ---------- Serie über Tage (BF1 a: selbst gesetzt, ohne Stern) ----------
   // Ein Übungstag ist ein Kalendertag (Ortszeit) mit mindestens einer Runde. Wochen beginnen am Montag.
-  const tagText = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const tagText = d => KERN.zeit.tag(d);
   /**
    * Wochenziel: tage = Menge der Übungstage („JJJJ-MM-TT“), ziel = Tage je Woche (1–7).
    * Liefert { dieseWoche, ziel, erreicht, wochenInFolge }: wochenInFolge zählt die Wochen direkt vor dieser, die das

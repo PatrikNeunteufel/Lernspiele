@@ -18,7 +18,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | Nr. | Paket | Status | Einzelheiten |
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
-| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): B2 Schritt 3 in Arbeit (LERN_Session20, Annahme, Text gegen Prüfdaten und Vorrat gebaut), als Nächstes Zeitzone | Abschnitt B |
+| B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.26.0; offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 Schritte 1–3 gebaut (LERN_Session17–20) | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
@@ -111,7 +111,9 @@ Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`
     Prüffunktionen, die nur auf `daten` rechnen, lesen den angezeigten Text (flaechen-volumen, koerper-winkel,
     prozent-funktionen, daten-rabatt, folgen, sachsituationen, Teile von zehnerpotenzen und binome-gleichungen).
     Vorgehen TD1 a; **gebaut LERN_Session20** für alle zehn Übungen und alle ihre Aufgabentypen, je mit Gegenprobe; kein Fund.
-  - `konten`/`rollen` und `daten`: kaputte und fremde Dateien, Ids fremder Konten, voller Speicher, Zeitzone.
+  - `konten`/`rollen` und `daten`: kaputte und fremde Dateien, Ids fremder Konten, voller Speicher, Zeitzone. **Zeitzone
+    gebaut LERN_Session20:** Kern 1.26.0 `KERN.zeit` (Kalendertage in Ortszeit) für Übungstage, Geburtsdatum-Grenze,
+    „angelegt am“, Dateinamen, Meldungen und Prüfvermerke; `pruefe_kern.js` sucht Tage aus UTC-Zeiten im Code.
   - Vielfalt: Mindestvorrat je Stufe auch ohne Endlos (Hinweis unter 50 verschiedenen Aufgaben). **Gebaut
     LERN_Session20 nach VF1 a**, gemessen in Runden statt an 50; die 21 gemeldeten Stufen stehen in E 9.
   - Rechner: NaN, Division durch 0, 10-stellige Anzeige. (Im Kern-Test, `pruefe_kern.js` Rechenkern.)

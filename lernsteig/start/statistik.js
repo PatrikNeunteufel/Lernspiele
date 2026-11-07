@@ -13,8 +13,9 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   const TAGE = 14;
   let meldung = "";
 
-  const tag = iso => (iso || "").slice(0, 10);
-  const datumText = iso => { const d = new Date(iso); return isNaN(d) ? "" : `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`; };
+  // Tage in Ortszeit (KERN.zeit), wie das Wochenziel: eine Runde um 00:30 Uhr gehört zu diesem Tag
+  const tag = iso => KERN.zeit.tag(iso || NaN);
+  const datumText = iso => KERN.zeit.tagAnzeige(iso);
   const prozent = (a, b) => (b ? `${Math.round(100 * a / b)} %` : "–");
 
   function kachel(wert, titel) { return el("div", { class: "kachel" }, el("b", { text: String(wert) }), el("small", { text: titel })); }
@@ -22,8 +23,8 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   function ueberblick(r) {
     const aufgaben = r.reduce((s, x) => s + (x.aufgaben || 0), 0);
     const anhieb = r.reduce((s, x) => s + (x.aufAnhieb || 0), 0);
-    const grenze = new Date(Date.now() - (TAGE - 1) * 864e5).toISOString().slice(0, 10);
-    const tage = new Set(r.map(x => tag(x.zeit)).filter(t => t >= grenze)).size;
+    const grenze = KERN.zeit.vorTagen(TAGE - 1);
+    const tage = new Set(r.map(x => tag(x.zeit)).filter(t => t && t >= grenze)).size;
     return el("div", { class: "kacheln" },
       kachel(r.length, "Runden"), kachel(aufgaben, "Aufgaben"), kachel(prozent(anhieb, aufgaben), "auf Anhieb"),
       kachel(`${tage} von ${TAGE}`, "Übungstage zuletzt"));

@@ -621,7 +621,26 @@ Testskripts). Geprüft in `tools/pruefe_kern.js` (11 Fälle der Einfügeregel) u
 ⌫ ergibt die erwarteten Werte, die Antwort nur mit Tasten getippt und geprüft, Taste eines Terms an der Schreibmarke; je
 Aufgabe Tastenfeld mit allen Tasten und `inputmode` none).
 
-### 4.25 Geplant
+### 4.25 `KERN.zeit` (`kern/zeit.js`) — Kalendertage in Ortszeit
+
+Seit 1.26.0 (Plan B2 Schritt 3, Zeitzone). Zeiten werden als ISO in UTC gespeichert; ein Kalendertag ist aber der Tag
+des Geräts: Eine Runde um 00:30 Uhr in der Schweiz liegt in UTC noch am Vortag. Bis 1.25.0 bildeten Statistik und
+Verwaltung des Lernsteigs die Übungstage, Dateinamen von Sicherungen und Daten in Meldungen und Prüfvermerken des
+Eulenpfads den Tag mit `….slice(0, 10)` aus der UTC-Zeit, das Wochenziel dagegen in Ortszeit — dieselbe Runde zählte so
+an zwei Tagen.
+
+| Funktion | Zweck |
+|---|---|
+| `tag(d)` | „JJJJ-MM-TT“ in Ortszeit; `d` Date, ISO-Text oder Zeitwert, ohne Angabe jetzt; "" bei ungültiger Zeit |
+| `vorTagen(n, heute)` | der Kalendertag vor `n` Tagen, über Kalendertage gezählt (hält über die Umstellung der Sommerzeit) |
+| `tagAnzeige(d)` | „T.M.JJJJ“ in Ortszeit, "" bei ungültiger Zeit |
+
+Geprüft in `tools/pruefe_kern.js`: Zeiten kurz vor und nach Mitternacht und über die Sommerzeit (Node nimmt hier `TZ`
+nicht an, die Fälle beissen, wenn der Rechner nicht in UTC läuft), dazu eine Suche im Code aller Apps und des Kerns nach
+einem Tag aus einer UTC-Zeit (`toISOString().slice(0, 10)`, `.zeit.slice(0, 10)` und Ähnliches) — sie fand beim Bau zwei
+Stellen, die die erste Suche übersehen hatte.
+
+### 4.26 Geplant
 
 Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): die
 Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Prüfen der Antwort und der Vertrag `aufgabeErzeugen`/`pruefeAufgabe`

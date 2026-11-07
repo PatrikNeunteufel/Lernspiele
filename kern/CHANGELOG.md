@@ -3,6 +3,10 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.26.0 — 2026-11-07 (LERN_Session20)
+- `zeit.js` (`KERN.zeit`, neu, Plan B2 Schritt 3: Zeitzone): `tag`, `vorTagen`, `tagAnzeige` — Kalendertage in Ortszeit
+  statt aus der UTC-Zeit. `daten.js`: der Dateiname einer Sicherung trägt den Tag des Geräts.
+
 ## 1.25.0 — 2026-11-07 (LERN_Session20)
 - `zahl.js`, `terme.js` (ZL1 a): Apostroph und Leerzeichen gelten nur als Gliederung in Dreiergruppen vor dem Komma
   („1'080.5“, „30 400“); sonst ist die Eingabe unlesbar. Vorher fielen sie überall weg („1'''“ galt als 1, „12'34“ als

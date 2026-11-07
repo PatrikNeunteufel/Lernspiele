@@ -801,3 +801,13 @@
   nach 1.3 Runden — und die vier Sprachübungen), als Liste in Plan E 9; keine Begründung eingetragen. Gegenprobe:
   Rundenlänge über dem Vorrat → Fehler, Begründung im Katalog → statt des Hinweises aufgeführt. Tests: Lernsteig
   „0 Fehler, 21 Hinweise.“, Konten 101 Fälle 0 Fehler. lernsteig/rahmen.md 4, 7; Plan (VF1 a, B, B2, E 9).
+- Kern 1.26.0, Plan B2 Schritt 3, Zeitzone: neu `kern/zeit.js` (`KERN.zeit.tag`, `vorTagen`, `tagAnzeige`) — Kalendertage
+  in Ortszeit. Bisher bildeten Statistik und Verwaltung des Lernsteigs die Übungstage aus der UTC-Zeit (eine Runde um
+  00:30 Uhr zählte zum Vortag, das Wochenziel dagegen in Ortszeit), ebenso die Grenze des Geburtsdatums, „angelegt am“,
+  der Dateiname von Sicherungen (Kern) und im Eulenpfad das Datum in Meldungen und Prüfvermerken der Listenprüfung.
+  `LST.tagText` benutzt den Kern. `tools/pruefe_kern.js` prüft Zeiten um Mitternacht und über die Sommerzeit und sucht
+  im Code aller Apps nach einem Tag aus einer UTC-Zeit (fand beim Bau zwei Stellen, die die erste Suche übersehen hatte).
+  Node nimmt hier `TZ` nicht an; die Fälle greifen auf einem Rechner ausserhalb von UTC (Schweiz). Tests: Kern 5671
+  Fälle 0 Fehler, Konten 101 Fälle 0 Fehler, Lernsteig „0 Fehler, 21 Hinweise.“, Gratwanderung „Keine Fehler.“,
+  Eulenpfad Daten „Keine Fehler.“, Eulenpfad-Stichprobe (6 Spiele, 36 Stufen) mit denselben Klickzahlen wie mit Kern
+  1.25.0. docs/kern/rahmen.md 4.25 (neu), 4.26; Kern-Changelog; Plan (B, B2).

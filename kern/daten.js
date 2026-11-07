@@ -342,7 +342,7 @@
     /** Dateiname: <präfix>-<teil>-<JJJJ-MM-TT>.json; teil aus Buchstaben und Ziffern (Namen mit „-“ verbunden). */
     function dateiname(teil = "", datum = new Date()) {
       const t = String(teil).replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "");
-      return `${dateiPraefix}-${t ? t + "-" : ""}${datum.toISOString().slice(0, 10)}.json`;
+      return `${dateiPraefix}-${t ? t + "-" : ""}${KERN.zeit.tag(datum)}.json`; // Tag des Geräts, nicht UTC
     }
 
     return { app, schluessel: S, sichern, einlesen, lesen: e => lesen(e, app, { altePerson }), loeschePerson, loescheRunden,

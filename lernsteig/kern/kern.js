@@ -1,4 +1,4 @@
-/* kern 1.25.0 · Prüfsumme sha256:037118c5893e80e9d2bc637a27388e64bf2edf84ecf7e5db5c818d5e440d10f6 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.26.0 · Prüfsumme sha256:ee872aef00cb81564917ad2bbddf206cbc84db03a49edd02cf9a23d47826d02d · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -606,6 +606,37 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
   }
 
   KERN.el = el;
+})(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
+
+if (typeof module !== "undefined") module.exports = globalThis.KERN;
+
+/* ---- kern/zeit.js ---- */
+/* Kern — Kalendertage in Ortszeit (Plan docs/plan_angleich_reihe.md B2 Schritt 3, Zeitzone; docs/kern/rahmen.md 4.25).
+   Zeiten werden als ISO in UTC gespeichert (toISOString). Ein Kalendertag — Übungstag, „angelegt am“, Datum in einer
+   Meldung oder einem Dateinamen — ist aber der Tag des Geräts: Eine Runde um 00:30 Uhr in der Schweiz liegt in UTC noch
+   am Vortag. Darum nie „iso.slice(0, 10)“ oder „toISOString().slice(0, 10)“ für einen Tag, sondern diese Funktionen.
+   tools/pruefe_kern.js sucht solche Stellen im Code der Apps. */
+"use strict";
+
+(function (KERN) {
+  const zwei = n => String(n).padStart(2, "0");
+  /** Kalendertag „JJJJ-MM-TT“ in Ortszeit; d: Date, ISO-Text oder Zeitwert (ohne Angabe jetzt). "" bei ungültiger Zeit. */
+  function tag(d = new Date()) {
+    const x = d instanceof Date ? d : new Date(d);
+    return isNaN(x) ? "" : `${x.getFullYear()}-${zwei(x.getMonth() + 1)}-${zwei(x.getDate())}`;
+  }
+  /** Kalendertag vor n Tagen (Ortszeit; über Kalendertage gezählt, nicht über 24-Stunden-Schritte: hält bei Sommerzeit). */
+  function vorTagen(n, heute = new Date()) {
+    const x = new Date(heute.getFullYear(), heute.getMonth(), heute.getDate() - n, 12);
+    return tag(x);
+  }
+  /** Kalendertag als „T.M.JJJJ“ (Ortszeit), "" bei ungültiger Zeit. */
+  function tagAnzeige(d) {
+    const x = d instanceof Date ? d : new Date(d);
+    return isNaN(x) ? "" : `${x.getDate()}.${x.getMonth() + 1}.${x.getFullYear()}`;
+  }
+
+  KERN.zeit = { tag, vorTagen, tagAnzeige };
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 
 if (typeof module !== "undefined") module.exports = globalThis.KERN;
@@ -2112,7 +2143,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     /** Dateiname: <präfix>-<teil>-<JJJJ-MM-TT>.json; teil aus Buchstaben und Ziffern (Namen mit „-“ verbunden). */
     function dateiname(teil = "", datum = new Date()) {
       const t = String(teil).replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "");
-      return `${dateiPraefix}-${t ? t + "-" : ""}${datum.toISOString().slice(0, 10)}.json`;
+      return `${dateiPraefix}-${t ? t + "-" : ""}${KERN.zeit.tag(datum)}.json`; // Tag des Geräts, nicht UTC
     }
 
     return { app, schluessel: S, sichern, einlesen, lesen: e => lesen(e, app, { altePerson }), loeschePerson, loescheRunden,

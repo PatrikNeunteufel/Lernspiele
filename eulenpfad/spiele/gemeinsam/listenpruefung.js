@@ -55,7 +55,7 @@ const LISTENPRUEFUNG = (() => {
     let bemerkungen = [];
     if (entwickler && (await LS.entwicklung.server())) {
       bemerkungen = ((await LS.entwicklung.bemerkungen()) || []).filter(b => b.liste === quelle && !String(b.status || "").startsWith("erledigt"))
-        .map(b => ({ text: b.text, schluessel: b.schluessel || null, eintrag: b.eintrag || null, entfernen: async () => LS.entwicklung.bemerkungStatus(b.nr, `erledigt ${new Date().toISOString().slice(0, 10)} (in der Prüfansicht entfernt)`) }));
+        .map(b => ({ text: b.text, schluessel: b.schluessel || null, eintrag: b.eintrag || null, entfernen: async () => LS.entwicklung.bemerkungStatus(b.nr, `erledigt ${KERN.zeit.tag()} (in der Prüfansicht entfernt)`) }));
     } else if (!entwickler) {
       bemerkungen = LS.korrekturen().filter(k => k.liste === quelle).map(k => ({ text: k.text, schluessel: k.schluessel, eintrag: k.eintrag,
         status: k.status, entfernen: k.status === "neu" ? async () => { LS.entferneMeldung(k.id); return true; } : null }));
@@ -92,7 +92,7 @@ const LISTENPRUEFUNG = (() => {
     };
     const merke = () => { clearTimeout(timer); timer = setTimeout(sichern, entwickler ? 500 : 0); };
     function setze(e, an) {
-      if (an) { meine[e.schluessel] = { am: new Date().toISOString().slice(0, 10), von: ich }; offen.setzen.add(e.schluessel); offen.entfernen.delete(e.schluessel); }
+      if (an) { meine[e.schluessel] = { am: KERN.zeit.tag(), von: ich }; // Tag des Geräts, nicht UTC offen.setzen.add(e.schluessel); offen.entfernen.delete(e.schluessel); }
       else { delete meine[e.schluessel]; offen.entfernen.add(e.schluessel); offen.setzen.delete(e.schluessel); }
     }
 
@@ -140,7 +140,7 @@ const LISTENPRUEFUNG = (() => {
           if (entwickler) {
             const r = await LS.entwicklung.bemerkung({ spiel: spielId, ...daten });
             if (!r) return;
-            b = { text, schluessel: e.schluessel, entfernen: async () => LS.entwicklung.bemerkungStatus(r.nr, `erledigt ${new Date().toISOString().slice(0, 10)} (in der Prüfansicht entfernt)`) };
+            b = { text, schluessel: e.schluessel, entfernen: async () => LS.entwicklung.bemerkungStatus(r.nr, `erledigt ${KERN.zeit.tag()} (in der Prüfansicht entfernt)`) };
           } else {
             const k = LS.neueKorrektur({ name: LS.aktuellerSpieler(), spiel: spielId, ...daten });
             b = { text, schluessel: e.schluessel, status: "neu", entfernen: async () => { LS.entferneMeldung(k.id); return true; } };

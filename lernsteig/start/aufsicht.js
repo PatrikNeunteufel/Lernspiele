@@ -24,13 +24,14 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   }
   const wert = (knoten, sel) => knoten.querySelector(sel).value.trim();
   const rolleName = id => (KO.ROLLEN.find(r => r.id === id) || {}).name || "";
-  const datumText = iso => { const d = new Date(iso); return isNaN(d) ? "–" : `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`; };
+  const datumText = iso => KERN.zeit.tagAnzeige(iso) || "–";
 
   // ---------- angemeldet ----------
   function kontoZeile(a, k) {
-    const grenze = new Date(Date.now() - (TAGE - 1) * 864e5).toISOString().slice(0, 10);
+    // Übungstage in Ortszeit (KERN.zeit): eine Runde um 00:30 Uhr zählt zu diesem Tag, nicht zum Vortag in UTC
+    const grenze = KERN.zeit.vorTagen(TAGE - 1);
     const r = LST.runden(x => x.person === k.id);
-    const tage = new Set(r.map(x => (x.zeit || "").slice(0, 10)).filter(t => t >= grenze)).size;
+    const tage = new Set(r.map(x => KERN.zeit.tag(x.zeit)).filter(t => t && t >= grenze)).size;
     const gespielt = KAT.UEBUNGEN.filter(u => r.some(x => x.inhalt === u.id));
     const sicher = gespielt.reduce((s, u) => s + u.stufen.filter(st => LST.kompetenzstand(k.id, u.id, st).stand.startsWith("sicher")).length, 0);
     const stufen = gespielt.reduce((s, u) => s + u.stufen.length, 0);
@@ -112,7 +113,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
           onclick: () => { KO.zeigen(x.id); meldung = `${x.name} wird wieder gezeigt.`; LST_START.neu(); } })))))));
 
     const name = feld("Vorname", { type: "text", maxlength: "40", name: "vorname" });
-    const geboren = feld("Geburtsdatum", { type: "date", name: "geboren", max: new Date().toISOString().slice(0, 10) });
+    const geboren = feld("Geburtsdatum", { type: "date", name: "geboren", max: KERN.zeit.tag() });
     const klasse = auswahl("Klasse", KO.KLASSEN, "7", () => {}, { name: "klasse" });
     teile.push(el("h2", { class: "abschnitt", text: "Konto anlegen" }), el("section", { class: "einstellungen" },
       el("p", { text: "Das Konto ist gleich mit Ihnen verbunden. Eine PIN legt der Jugendliche selbst im Profil fest." }),

@@ -49,7 +49,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     if (alle.length) teil.append(el("details", { class: "aufsichten-geraet" },
       el("summary", { text: `Aufsichten auf diesem Gerät (${alle.length})` }),
       el("ul", { class: "mitleser-liste" }, alle.map(a => el("li", { "data-geraet-aufsicht": a.id, text: [`${a.name} (${rolle(a.art)})`,
-        /^\d{4}-\d{2}-\d{2}/.test(a.angelegt || "") ? `angelegt am ${a.angelegt.slice(0, 10).split("-").reverse().join(".")}` : "",
+        KERN.zeit.tagAnzeige(a.angelegt || NaN) ? `angelegt am ${KERN.zeit.tagAnzeige(a.angelegt)}` : "", // Tag des Geräts, nicht UTC
         m.verbunden.some(v => v.id === a.id) ? "liest bei dir mit" : "liest bei dir nicht mit"].filter(Boolean).join(" · ") }))),
       el("small", { class: "leise", text: "Eine Aufsicht kann den Taschenrechner und den Gast auf diesem Gerät einstellen. Deinen Stand sieht sie nur, wenn du zustimmst. Kennst du eine nicht, sag es deinen Eltern oder deiner Lehrperson." })));
     return teil;
@@ -168,7 +168,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     // Eine Einladung aus dem Eulenpfad kann nur den Geburtsmonat tragen („JJJJ-MM“, B3): Das Datumsfeld zeigt ihn nicht,
     // darum steht er als Hinweis da und bleibt, wenn der Tag leer bleibt.
     const nurMonat = KERN.person.tagFehlt(v.geboren || "") ? v.geboren : null;
-    const geboren = feld("Geburtsdatum", { type: "date", value: nurMonat ? "" : v.geboren || "", name: "geboren", max: new Date().toISOString().slice(0, 10) },
+    const geboren = feld("Geburtsdatum", { type: "date", value: nurMonat ? "" : v.geboren || "", name: "geboren", max: KERN.zeit.tag() },
       nurMonat ? `Aus der Einladung: ${KERN.person.geburtsdatumText(nurMonat)}. Trag den Tag ein, wenn du willst.` : "Damit dein Alter stimmt. Bleibt auf diesem Gerät.");
     const klasse = auswahl("Klasse", KLASSEN, String(v.klasse || "7"), () => {});
     const pin = feld("PIN (freiwillig, 4–6 Ziffern)", { type: "password", inputmode: "numeric", autocomplete: "new-password", maxlength: "6", name: "pin" }, "Mit PIN kann niemand sonst auf diesem Gerät dein Konto öffnen.");

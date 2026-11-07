@@ -13,6 +13,7 @@ require(path.join(WURZEL, "kern", "rechner.js"));
 require(path.join(WURZEL, "kern", "speicher.js"));
 require(path.join(WURZEL, "kern", "zufall.js"));
 require(path.join(WURZEL, "kern", "el.js"));
+require(path.join(WURZEL, "kern", "zeit.js"));
 require(path.join(WURZEL, "kern", "geheimnis.js"));
 require(path.join(WURZEL, "kern", "person.js"));
 require(path.join(WURZEL, "kern", "rollen.js"));
@@ -497,6 +498,38 @@ console.log("tastenfeld.js");
     catch (e) { if (e.message !== G.OHNE_KRYPTO) { fehler++; console.log(`    FEHLER  ohne crypto: ${e.message}`); } }
     gleich(G.verfuegbar(), false, "verfuegbar ohne crypto");
     Object.defineProperty(globalThis, "crypto", { value: echt, configurable: true, writable: true });
+  }
+
+  // ---------- Kalendertage in Ortszeit (zeit.js, Plan B2 Schritt 3: Zeitzone) ----------
+  console.log("zeit.js");
+  {
+    const ZT = KERN.zeit;
+    // Kurz nach Mitternacht und kurz davor (Ortszeit): der Tag des Geräts, auch wo UTC schon/noch einen anderen hat.
+    // Node nimmt hier TZ nicht an (Windows); die Fälle beissen, wenn der Rechner nicht in UTC läuft (Schweiz: UTC+1/+2).
+    for (const [d, soll] of [[new Date(2026, 0, 1, 0, 30), "2026-01-01"], [new Date(2025, 11, 31, 23, 30), "2025-12-31"],
+      [new Date(2026, 2, 29, 1, 30), "2026-03-29"], [new Date(2026, 9, 25, 23, 59), "2026-10-25"]]) {
+      gleich(ZT.tag(d), soll, `tag(${d.toString().slice(0, 21)})`);
+      gleich(ZT.tag(d.toISOString()), soll, `tag(ISO ${d.toISOString()})`);
+    }
+    gleich([ZT.tag("unsinn"), ZT.tagAnzeige(NaN)].join("|"), "|", "ungültige Zeit: leer");
+    gleich(ZT.tagAnzeige(new Date(2026, 0, 1, 0, 30).toISOString()), "1.1.2026", "tagAnzeige in Ortszeit");
+    // vorTagen zählt Kalendertage: über die Umstellung auf Sommerzeit (29.3.2026) hinweg
+    gleich(ZT.vorTagen(13, new Date(2026, 3, 5, 0, 15)), "2026-03-23", "vorTagen über die Sommerzeit");
+    gleich(ZT.vorTagen(0, new Date(2026, 0, 1, 0, 30)), "2026-01-01", "vorTagen(0) ist heute");
+    // Im Code der Apps und des Kerns keinen Tag aus UTC ableiten („….slice(0, 10)“ auf einer ISO-Zeit)
+    const fs = require("fs");
+    const DATEIEN = [];
+    const geh = o => { for (const n of fs.readdirSync(o, { withFileTypes: true })) {
+      const p = path.join(o, n.name);
+      if (n.isDirectory()) { if (!["kern", "node_modules"].includes(n.name) || o === WURZEL) geh(p); } else if (n.name.endsWith(".js")) DATEIEN.push(p);
+    } };
+    for (const a of ["kern", "eulenpfad", "lernsteig", "gratwanderung", "portal"]) if (fs.existsSync(path.join(WURZEL, a))) geh(path.join(WURZEL, a));
+    const UTC_TAG = /toISOString\(\)\.(slice|substring|substr)\(0, ?10\)|\.(zeit|angelegt|gesichert|am|bis)\.(slice|substring)\(0, ?10\)|toISOString\(\)\.split\("T"\)/;
+    const funde = [];
+    // zeit.js selbst beschreibt das Muster im Kommentar
+    for (const p of DATEIEN.filter(p => path.relative(WURZEL, p) !== path.join("kern", "zeit.js")))
+      fs.readFileSync(p, "utf8").split(/\r?\n/).forEach((z, i) => { if (UTC_TAG.test(z)) funde.push(`${path.relative(WURZEL, p)}:${i + 1}`); });
+    gleich(funde.join(", "), "", "kein Kalendertag aus einer UTC-Zeit im Code (KERN.zeit.tag benutzen)");
   }
 
   console.log("person.js");

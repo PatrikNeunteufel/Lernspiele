@@ -901,7 +901,7 @@ const LS = (() => {
   function meldungFuerEntwicklung(m) {
     const spielName = (typeof SPIELE !== "undefined" && SPIELE.find(s => s.id === m.spiel)?.name) || m.spiel;
     if (istAnregung(m)) return [
-      `Anregung ${m.id} (Aufsicht), ${m.zeit.slice(0, 10)}`,
+      `Anregung ${m.id} (Aufsicht), ${KERN.zeit.tag(m.zeit)}`,
       `Art: ${ANREGUNG_ARTEN[m.art] || m.art}`,
       m.spiel ? `Spiel: ${spielName} (${m.spiel})` : null,
       m.liste ? `Liste: ${m.liste}` : null,
@@ -909,7 +909,7 @@ const LS = (() => {
       `Anregung: ${m.text}`,
     ].filter(Boolean).join("\n");
     return [
-      `Meldung ${m.id} (Kind${m.klasse != null ? `, ${klasseText(m.klasse)}` : ""}), ${m.zeit.slice(0, 10)}`,
+      `Meldung ${m.id} (Kind${m.klasse != null ? `, ${klasseText(m.klasse)}` : ""}), ${KERN.zeit.tag(m.zeit)}`,
       `Spiel: ${spielName} (${m.spiel}), Stufe ${String(m.stufe).slice(1)}, Aufgabe ${m.aufgabeNr ?? "?"}`,
       `Art: ${MELDUNG_ARTEN[m.art] || m.art}`,
       `Aufgabe: ${m.aufgabe || "—"}`,
