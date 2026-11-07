@@ -882,3 +882,15 @@
   und rechnet mit dem Schaltungsmodell nach. Gegenproben (eine falsche Regel; ein veränderter Wortlaut): gemeldet.
   Plan E 9 (heute 20 Hinweise). Tests: Kern 0 Fehler, Lernsteig „0 Fehler, 20 Hinweise.“ (Konten 101 Fälle),
   Gratwanderung „Keine Fehler.“. Die neuen Wortlaute sind noch von Patrik zu prüfen (die Übung ist ohnehin gesperrt).
+- Lernsteig — Vorrat `kombinatorik` (Plan E 9, VF1 a): f mit drei Münzen, Glücksrad (gleich grosse Felder 1 bis n:
+  gerade, ungerade, grösser oder kleiner als k) und Urne (rote und blaue Kugeln), 23 → 236 Aufgaben, f deshalb auch als
+  Serie (Katalog `endlos`); Challenge mit Gegenereignis bei drei Münzen, Augensumme höchstens s und Glücksrad zweimal
+  (dieselbe Zahl, mindestens einmal die Eins), 26 → 50. Prüfung zählt alle Fälle auf (`ergebnisse` für Rad und Urne)
+  und liest die neuen Sätze (TD1 a). Gegenprobe (Urne nennt die andere Farbe; Rad zählt bei „kleiner als“ eins zu viel):
+  beides gemeldet. Plan E 9. Tests: Kern 0 Fehler, Lernsteig „0 Fehler, 18 Hinweise.“ (Konten 101 Fälle),
+  Gratwanderung „Keine Fehler.“.
+- Lernsteig — Vorrat `atombau` (Plan E 9, VF1 a), ohne neue Elemente oder Angaben: a mit der Umkehrfrage „Welches
+  dieser Elemente ist ein Metall / Nichtmetall / Edelgas?“ (drei Elemente aus der Liste, genau eines passt), 20 → über
+  1000 Aufgaben, a deshalb auch als Serie; Challenge mit „Welches Edelgas hat gleich viele Elektronen wie das Ion?“
+  (Helium, Neon, Argon), 28 → 42. Prüfung liest die Sätze und rechnet Art und Elektronenzahl aus der Stellung im PSE.
+  Gegenprobe (falscher Treffer; Edelgas verschoben): beides gemeldet. Plan E 9 (heute 16 Hinweise).

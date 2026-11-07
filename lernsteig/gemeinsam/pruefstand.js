@@ -13,6 +13,10 @@ const LST_PRUEFSTAND = {
       "am": "2026-11-07",
       "von": "Patrik"
     },
+    "koerper-winkel": {
+      "am": "2026-11-07",
+      "von": "Patrik"
+    },
     "rationale-zahlen": {
       "am": "2026-11-07",
       "von": "Patrik"

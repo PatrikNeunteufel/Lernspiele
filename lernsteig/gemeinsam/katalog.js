@@ -173,7 +173,7 @@ var LST_KATALOG = (function () {
       rechner: { d: "frei", f: "frei", g: "frei", challenge: "frei" },
       niveaus: ["n1", "n2"],
       anzahl: 8,
-      endlos: ["d", "g"],
+      endlos: ["d", "f", "g"],                // f seit E 9 (LERN_Session21) mit über 200 Aufgaben
       neu: "LST_Session1",
     },
     {
@@ -229,7 +229,7 @@ var LST_KATALOG = (function () {
       rechner: { a: "ohne", c: "ohne", d: "ohne", challenge: "ohne" },
       niveaus: ["n1", "n2"],
       anzahl: 6,
-      endlos: false,
+      endlos: ["a"],                          // a seit E 9 (LERN_Session21) mit der Umkehrfrage über 1000 Aufgaben
       listen: { pse: { name: "Elemente 1 bis 20" } },
       neu: "LST_Session1",
     },

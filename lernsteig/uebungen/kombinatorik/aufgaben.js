@@ -1,7 +1,7 @@
 /* Übung „Möglichkeiten zählen“ — MA.3.B.2, Stufen d, f, g. Aufgaben als Daten, ohne DOM.
    Inhalte sinngemäss nach docs/lernsteig/lehrplan/mathematik_zyklus3.md, MA.3.B.2:
    d  alle Möglichkeiten systematisch aufschreiben, mit und ohne Wiederholung (Ziffern 1, 2, 3)
-   f  (GA) Wahrscheinlichkeiten prüfen und begründen (zweimal Kopf = 0.25)
+   f  (GA) Wahrscheinlichkeiten prüfen und begründen (zweimal Kopf = 0.25); Münzen, Würfel, Glücksrad, Urne
    g  kombinatorische Probleme vergleichen, Analogien finden (Handshakes bei 5 Personen)
    Stufe e (OP, Häufigkeiten experimentell bestimmen) passt nicht in eine kurze Aufgabe mit eindeutiger Lösung.
    Annahmen, mit Patrik abzustimmen: Wahrscheinlichkeit als vollständig gekürzter Bruch („1/4“); Münzen und Würfel
@@ -14,7 +14,7 @@ const UEBUNG = {
   einleitung: "Zähle alle Möglichkeiten. Wahrscheinlichkeiten gibst du als gekürzten Bruch an, etwa 1/4.",
   stufen: {
     d: "Alle Möglichkeiten zählen, mit und ohne Wiederholung",
-    f: "Wahrscheinlichkeit bei zwei Münzen oder Würfeln",
+    f: "Wahrscheinlichkeit bei Münzen, Würfeln, Glücksrad und Urne",
     g: "Probleme vergleichen: Handshakes, Turniere, Strecken",
     challenge: "Mit Bedingung zählen, Gegenereignis, rückwärts rechnen",
   },
@@ -80,8 +80,30 @@ function stufeD() {
 
 // ---------- f ----------
 // Ereignisse: Name, Text, günstige Fälle, alle Fälle (für den Lösungsweg)
+// Vorrat nach VF1 a (Plan E 9, LERN_Session21): dazu drei Münzen, ein Glücksrad mit gleich grossen Feldern und eine Urne
+// mit roten und blauen Kugeln (Laplace, je Fall gleich wahrscheinlich). Karten nicht: Jass- oder französisches Spiel?
+const RAD = [4, 5, 6, 8, 10, 12];
+const radText = (n, mal) => `Ein Glücksrad hat ${n} gleich grosse Felder mit den Zahlen 1 bis ${n}. Du drehst ${mal}.`;
 function stufeF() {
-  const typ = LST.waehle(["muenzen", "wuerfel-summe", "wuerfel-summe", "wuerfel-gleich", "muenze-wuerfel"]);
+  const typ = LST.waehle(["muenzen", "muenzen3", "wuerfel-summe", "wuerfel-summe", "wuerfel-gleich", "muenze-wuerfel", "rad", "rad", "urne", "urne"]);
+  if (typ === "muenzen3") {
+    const [e, t, g] = LST.waehle([["k3", "dreimal Kopf", 1], ["k2", "genau zweimal Kopf", 3], ["k1", "genau einmal Kopf", 3], ["z-min1", "mindestens einmal Zahl", 7], ["k-max1", "höchstens einmal Kopf", 4]]);
+    return bruchAufgabe("f", typ, `Du wirfst drei Münzen. Wie gross ist die Wahrscheinlichkeit für ${t}?`, g, 8, `günstig: ${g} von 2 · 2 · 2 = 8 Fällen: ${g}/8`, { stufen: ["muenze", "muenze", "muenze"], ereignis: e });
+  }
+  if (typ === "rad") {
+    const n = LST.waehle(RAD), art = LST.waehle(["rad-gerade", "rad-ungerade", "rad-groesser", "rad-kleiner"]);
+    const k = art === "rad-groesser" ? z(1, n - 1) : art === "rad-kleiner" ? z(2, n) : null;
+    const t = { "rad-gerade": "eine gerade Zahl", "rad-ungerade": "eine ungerade Zahl", "rad-groesser": `eine Zahl grösser als ${k}`, "rad-kleiner": `eine Zahl kleiner als ${k}` }[art];
+    const g = { "rad-gerade": Math.floor(n / 2), "rad-ungerade": Math.ceil(n / 2), "rad-groesser": n - k, "rad-kleiner": k - 1 }[art];
+    return bruchAufgabe("f", typ, `${radText(n, "einmal")} Wie gross ist die Wahrscheinlichkeit für ${t}?`, g, n, `günstig: ${g} von ${n} gleich grossen Feldern: ${g}/${n}`,
+      { stufen: [`rad${n}`], ereignis: art, ...(k === null ? {} : { wert: k }) });
+  }
+  if (typ === "urne") {
+    let r, b; do { r = z(1, 9); b = z(1, 9); } while (r + b > 12);
+    const farbe = LST.waehle(["rot", "blau"]), g = farbe === "rot" ? r : b;
+    return bruchAufgabe("f", typ, `In einer Urne liegen ${r} rote und ${b} blaue Kugeln. Du ziehst eine Kugel. Wie gross ist die Wahrscheinlichkeit für eine ${farbe === "rot" ? "rote" : "blaue"} Kugel?`,
+      g, r + b, `günstig: ${g} von ${r + b} Kugeln: ${g}/${r + b}`, { stufen: [`urne${r}-${b}`], ereignis: farbe });
+  }
   if (typ === "muenzen") {
     const [e, t, g] = LST.waehle([["kk", "zweimal Kopf", 1], ["kz-beliebig", "einmal Kopf und einmal Zahl (Reihenfolge egal)", 2], ["k-min1", "mindestens einmal Kopf", 3], ["zz", "zweimal Zahl", 1]]);
     return bruchAufgabe("f", typ, `Du wirfst zwei Münzen. Wie gross ist die Wahrscheinlichkeit für ${t}?`, g, 4, `günstig: ${g} von 4 gleich wahrscheinlichen Fällen: ${g}/4`, { stufen: ["muenze", "muenze"], ereignis: e });
@@ -113,7 +135,26 @@ function stufeG() {
 
 // ---------- Challenge ----------
 function challenge() {
-  const typ = LST.waehle(["gerade", "gegen", "summe-min", "rueckwaerts"]);
+  const typ = LST.waehle(["gerade", "gegen", "gegen-muenzen", "summe-min", "summe-max", "rad-zweimal", "rueckwaerts"]);
+  if (typ === "gegen-muenzen") {
+    const [e, t, weg] = LST.waehle([["k-min1", "mindestens einmal Kopf", "Gegenereignis dreimal Zahl: 1/8, also 1 − 1/8 = 7/8"],
+      ["z-min1", "mindestens einmal Zahl", "Gegenereignis dreimal Kopf: 1/8, also 1 − 1/8 = 7/8"]]);
+    return bruchAufgabe("challenge", typ, `Du wirfst drei Münzen. Wie gross ist die Wahrscheinlichkeit für ${t}?`, 7, 8, weg, { stufen: ["muenze", "muenze", "muenze"], ereignis: e });
+  }
+  if (typ === "summe-max") {
+    const s = z(3, 6);
+    let g = 0; for (let t = 2; t <= s; t++) g += 6 - Math.abs(t - 7);
+    return bruchAufgabe("challenge", typ, `Du wirfst zwei Würfel. Wie gross ist die Wahrscheinlichkeit, dass die Augensumme höchstens ${s} ist?`, g, 36,
+      `Summen 2 bis ${s} zusammen: ${g} von 36 Fällen: ${g}/36`, { stufen: ["wuerfel", "wuerfel"], ereignis: "summe-max", wert: s });
+  }
+  if (typ === "rad-zweimal") {
+    const n = z(4, 12), gleich = LST.zufall(0, 1) === 1;
+    if (gleich) return bruchAufgabe("challenge", typ, `${radText(n, "zweimal")} Wie gross ist die Wahrscheinlichkeit für zweimal dieselbe Zahl?`, n, n * n,
+      `günstig: ${n} von ${n} · ${n} = ${n * n} Fällen: ${n}/${n * n}`, { stufen: [`rad${n}`, `rad${n}`], ereignis: "rad-gleich" });
+    const g = n * n - (n - 1) * (n - 1);
+    return bruchAufgabe("challenge", typ, `${radText(n, "zweimal")} Wie gross ist die Wahrscheinlichkeit für mindestens einmal die Eins?`, g, n * n,
+      `Gegenereignis nie die Eins: ${(n - 1) * (n - 1)}/${n * n}, also 1 − ${(n - 1) * (n - 1)}/${n * n} = ${g}/${n * n}`, { stufen: [`rad${n}`, `rad${n}`], ereignis: "eins-min1" });
+  }
   if (typ === "gerade") {
     const n = z(4, 6), gerade = Math.floor(n / 2), w = gerade * (n - 1) * (n - 2);
     return zahlAufgabe("challenge", typ, `Wie viele dreistellige gerade Zahlen kannst du aus den Ziffern ${ZIFFERN(n).join(", ")} bilden, wenn jede Ziffer höchstens einmal vorkommt?`,
@@ -157,6 +198,12 @@ function hinweis(a, eingabe) {
     "wuerfel-summe": "Zwei Würfel geben sechs mal sechs gleich wahrscheinliche Fälle. Zähle die Paare mit dieser Summe.",
     "wuerfel-gleich": "Zwei Würfel geben sechs mal sechs gleich wahrscheinliche Fälle. Zähle die passenden Paare.",
     "muenze-wuerfel": "Münze und Würfel geben zwei mal sechs Fälle. Zähle die passenden.",
+    muenzen3: "Drei Münzen geben zwei mal zwei mal zwei gleich wahrscheinliche Fälle. Schreibe sie auf: KKK, KKZ, …",
+    rad: "Jedes Feld ist gleich wahrscheinlich. Zähle die passenden Felder und teile durch die Anzahl aller Felder.",
+    urne: "Jede Kugel ist gleich wahrscheinlich. Teile die Anzahl der passenden Kugeln durch alle Kugeln.",
+    "gegen-muenzen": "Rechne mit dem Gegenereignis: Welcher Fall erfüllt die Bedingung nicht?",
+    "summe-max": "Zähle die Paare für jede Summe von zwei bis zu dieser Zahl und addiere.",
+    "rad-zweimal": "Zweimal drehen gibt so viele Fälle wie Felder mal Felder. Zähle die passenden, oder rechne mit dem Gegenereignis.",
     handshake: "Jede Person gibt allen anderen die Hand. So zählst du jeden Handshake doppelt.",
     "turnier-hin": "Jedes Team spielt gegen alle anderen. So zählst du jedes Spiel doppelt.",
     "turnier-rueck": "Jedes Team spielt gegen jedes andere zweimal: Hier zählt jede Paarung doppelt.",
@@ -182,6 +229,16 @@ function folgen(menge, laenge, wiederholung) {
   return erg;
 }
 const ERGEBNISSE = { muenze: ["K", "Z"], wuerfel: [1, 2, 3, 4, 5, 6] };
+/** Gleich wahrscheinliche Ergebnisse einer Stufe: Münze, Würfel, „rad<n>“ (Felder 1 bis n), „urne<r>-<b>“ (Kugeln einzeln). */
+function ergebnisse(s) {
+  if (ERGEBNISSE[s]) return ERGEBNISSE[s];
+  let m = /^rad(\d+)$/.exec(s);
+  if (m) return ZIFFERN(Number(m[1]));
+  m = /^urne(\d+)-(\d+)$/.exec(s);
+  if (m) return Array(Number(m[1])).fill("rot").concat(Array(Number(m[2])).fill("blau"));
+  throw new Error(`unbekannte Stufe ${s}`);
+}
+const kopf = f => f.filter(x => x === "K").length;
 const EREIGNIS = {
   kk: f => f[0] === "K" && f[1] === "K", zz: f => f[0] === "Z" && f[1] === "Z", "kz-beliebig": f => f[0] !== f[1], "k-min1": f => f.includes("K"),
   summe: (f, w) => f[0] + f[1] === w, "summe-min": (f, w) => f[0] + f[1] >= w,
@@ -189,8 +246,14 @@ const EREIGNIS = {
   "k-gerade": f => f[0] === "K" && f[1] % 2 === 0, "k-sechs": f => f[0] === "K" && f[1] === 6, "z-min5": f => f[0] === "Z" && f[1] >= 5,
   "z-max2": f => f[0] === "Z" && f[1] <= 2, "k-ungerade": f => f[0] === "K" && f[1] % 2 === 1,
   "sechs-min1": f => f.includes(6), "ungerade-min1": f => f.some(x => x % 2 === 1),
+  // drei Münzen (k-min1 oben gilt auch hier)
+  k3: f => kopf(f) === 3, k2: f => kopf(f) === 2, k1: f => kopf(f) === 1, "z-min1": f => f.includes("Z"), "k-max1": f => kopf(f) <= 1,
+  // Glücksrad und Urne
+  "rad-gerade": f => f[0] % 2 === 0, "rad-ungerade": f => f[0] % 2 === 1, "rad-groesser": (f, w) => f[0] > w, "rad-kleiner": (f, w) => f[0] < w,
+  "rad-gleich": f => f[0] === f[1], "eins-min1": f => f.includes(1), rot: f => f[0] === "rot", blau: f => f[0] === "blau",
+  "summe-max": (f, w) => f[0] + f[1] <= w,
 };
-function produkt(stufen) { return stufen.reduce((acc, s) => acc.flatMap(f => ERGEBNISSE[s].map(x => f.concat(x))), [[]]); }
+function produkt(stufen) { return stufen.reduce((acc, s) => acc.flatMap(f => ergebnisse(s).map(x => f.concat(x))), [[]]); }
 
 // ---------- Text gegen Prüfdaten (Plan B2 Schritt 3, TD1 a) ----------
 // Wortlaut je Ereignis, hier im Prüfteil eigens festgehalten (nicht aus dem Erzeuger übernommen): liesText findet im
@@ -202,21 +265,42 @@ const WORTLAUT = {
   "k-gerade": "Kopf und eine gerade Augenzahl", "k-sechs": "Kopf und eine Sechs", "z-min5": "Zahl und mindestens eine Fünf",
   "z-max2": "Zahl und höchstens eine Zwei", "k-ungerade": "Kopf und eine ungerade Augenzahl",
   "sechs-min1": "mindestens eine Sechs", "ungerade-min1": "mindestens eine ungerade Augenzahl",
+  k3: "dreimal Kopf", k2: "genau zweimal Kopf", k1: "genau einmal Kopf", "z-min1": "mindestens einmal Zahl", "k-max1": "höchstens einmal Kopf",
+  "rad-gerade": "eine gerade Zahl", "rad-ungerade": "eine ungerade Zahl", "rad-gleich": "zweimal dieselbe Zahl", "eins-min1": "mindestens einmal die Eins",
+  rot: "eine rote Kugel", blau: "eine blaue Kugel",
 };
-const WURF = { "Du wirfst zwei Münzen.": ["muenze", "muenze"], "Du wirfst zwei Würfel.": ["wuerfel", "wuerfel"], "Du wirfst eine Münze und einen Würfel.": ["muenze", "wuerfel"] };
+const WURF = { "Du wirfst zwei Münzen.": ["muenze", "muenze"], "Du wirfst drei Münzen.": ["muenze", "muenze", "muenze"],
+  "Du wirfst zwei Würfel.": ["wuerfel", "wuerfel"], "Du wirfst eine Münze und einen Würfel.": ["muenze", "wuerfel"] };
 const muster = (text, mu) => LST.zahlenImText(text, mu);
 const BRUCH = " (als gekürzter Bruch)";
 /** Wahrscheinlichkeitsaufgabe: Wurf, dann das Ereignis als Wortlaut, als Augensumme oder als Mindestsumme. */
 function liesWahrscheinlichkeit(text) {
   if (!text.endsWith(BRUCH)) return null;
   const satz = text.slice(0, -BRUCH.length);
-  const wurf = Object.keys(WURF).find(w => satz.startsWith(w + " "));
-  if (!wurf) return null;
-  const rest = satz.slice(wurf.length + 1), stufen = WURF[wurf];
+  // Glücksrad und Urne: der Aufbau nennt Felder oder Kugeln
+  let rest, stufen;
+  const rad = /^Ein Glücksrad hat (\d+) gleich grosse Felder mit den Zahlen 1 bis (\d+)\. Du drehst (einmal|zweimal)\. (.*)$/.exec(satz);
+  const urne = /^In einer Urne liegen (\d+) rote und (\d+) blaue Kugeln\. Du ziehst eine Kugel\. (.*)$/.exec(satz);
+  if (rad) {
+    if (rad[1] !== rad[2]) return null;
+    stufen = rad[3] === "einmal" ? [`rad${rad[1]}`] : [`rad${rad[1]}`, `rad${rad[1]}`];
+    rest = rad[4];
+    const g = muster(rest, "Wie gross ist die Wahrscheinlichkeit für eine Zahl grösser als #?");
+    if (g && stufen.length === 1) return { stufen, ereignis: "rad-groesser", wert: g[0] };
+    const k = muster(rest, "Wie gross ist die Wahrscheinlichkeit für eine Zahl kleiner als #?");
+    if (k && stufen.length === 1) return { stufen, ereignis: "rad-kleiner", wert: k[0] };
+  } else if (urne) { stufen = [`urne${urne[1]}-${urne[2]}`]; rest = urne[3]; }
+  else {
+    const wurf = Object.keys(WURF).find(w => satz.startsWith(w + " "));
+    if (!wurf) return null;
+    rest = satz.slice(wurf.length + 1); stufen = WURF[wurf];
+  }
   const s = muster(rest, "Wie gross ist die Wahrscheinlichkeit, dass die Augensumme # ist?");
   if (s) return { stufen, ereignis: "summe", wert: s[0] };
   const smin = muster(rest, "Wie gross ist die Wahrscheinlichkeit, dass die Augensumme mindestens # ist?");
   if (smin) return { stufen, ereignis: "summe-min", wert: smin[0] };
+  const smax = muster(rest, "Wie gross ist die Wahrscheinlichkeit, dass die Augensumme höchstens # ist?");
+  if (smax) return { stufen, ereignis: "summe-max", wert: smax[0] };
   const e = Object.keys(WORTLAUT).find(k => rest === `Wie gross ist die Wahrscheinlichkeit für ${WORTLAUT[k]}?`);
   return e ? { stufen, ereignis: e } : null;
 }
@@ -257,6 +341,8 @@ const LESER = {
   "muenze-wuerfel": a => liesWahrscheinlichkeit(a.text),
   gegen: a => liesWahrscheinlichkeit(a.text),
   "summe-min": a => liesWahrscheinlichkeit(a.text),
+  muenzen3: a => liesWahrscheinlichkeit(a.text), rad: a => liesWahrscheinlichkeit(a.text), urne: a => liesWahrscheinlichkeit(a.text),
+  "gegen-muenzen": a => liesWahrscheinlichkeit(a.text), "summe-max": a => liesWahrscheinlichkeit(a.text), "rad-zweimal": a => liesWahrscheinlichkeit(a.text),
   gerade: a => {
     const z = muster(a.text, "Wie viele dreistellige gerade Zahlen kannst du aus den Ziffern #* bilden, wenn jede Ziffer höchstens einmal vorkommt?");
     const n = z && zifferMenge(z[0]);
