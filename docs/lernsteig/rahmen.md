@@ -340,7 +340,9 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 `node tools/pruefe_uebungen.js [übung …] [--aufgaben=3000] [--seed=1] [--seiten=0]` (oder `node tools/pruefe.js lernsteig`):
 - Daten: Seite lädt die gemeinsamen Dateien und nichts aus `eulenpfad/`; Kompetenz-Codes des Katalogs stehen in
   `lehrplan/mathematik_zyklus3.md`; je Niveau und Stufe Zufallsaufgaben gegen `pruefeAufgabe`, kein NaN/undefined/null,
-  Hinweise zu typischen falschen Eingaben nennen die Lösung nicht; Annahme von Antworten (Plan B2 Schritt 3, seit
+  Hinweise zu typischen falschen Eingaben nennen die Lösung nicht; Text gegen Prüfdaten (TD1 a, seit LERN_Session20):
+  `liesText` Pflicht für die zehn Übungen in `TEXT_GELESEN`, `pruefeAufgabe` meldet einen Text, der keinem Muster folgt
+  oder andere Werte zeigt, als nachgerechnet wird; Annahme von Antworten (Plan B2 Schritt 3, seit
   LERN_Session20) je Stufe an 300 Aufgaben über `LST.antwortPruefen`, dieselbe Prüfung wie die Seite: angenommen werden
   die Lösung und gleichwertige Schreibweisen (Zahl: Komma, wie angezeigt, „+“, „−“, Null am Ende, Leerzeichen; Term:
   ohne Leerzeichen, `*` und `-`, Summanden vertauscht), abgewiesen knapp falsche (letzte Stelle ±1, letzte Ziffer

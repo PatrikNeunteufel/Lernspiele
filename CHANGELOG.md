@@ -785,3 +785,12 @@
   `zaehle(a, d)` und läuft mit den Daten und mit dem Gelesenen; die frühere Suche „Ziffern / n im Text“ ersetzt es.
   Kein Fund. Gegenprobe (Ereignis „mindestens einmal Kopf“ als „zweimal Kopf“ gezeigt): gemeldet. Tests: Lernsteig
   „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler. Plan (B, B2).
+- Text gegen Prüfdaten (TD1 a), zehnte und letzte Übung `zufall`: Wortlaute im Prüfteil eigens festgehalten — Ereignisse
+  bei drei Münzen und drei Würfeln, bei der Urne mit den Farben aus dem Text („zweimal rot“, „zuerst gelb, dann grün“),
+  die Sätze zum Ziehen (mit oder ohne Zurücklegen, zwei oder drei Züge), die Mehrfachversuche der Pfade („dreimal
+  würfeln“), die erwarteten Ereignisse („eine gerade Zahl“ → jede zweite) und die Sätze zur relativen Häufigkeit;
+  `liesText` liest damit alle 11 Typen, Datenreihen auch mit Ziffern in der Bezeichnung („um 7 Uhr“). Die Prüfung der
+  Werte ist `pruefeMit(a, d)` und läuft mit den Daten und mit dem Gelesenen. Kein Fund. Gegenprobe („ohne Zurücklegen“
+  mit dem Satz für „mit Zurücklegen“ gezeigt): gemeldet. Damit lesen alle zehn Übungen ihren Text; `TEXT_OFFEN` ist
+  leer. Tests: Kern, Lernsteig „0 Fehler, 0 Hinweise.“, Konten 101 Fälle 0 Fehler, Gratwanderung „Keine Fehler.“
+  lernsteig/rahmen.md 7, Plan (B, B2).

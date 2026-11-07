@@ -194,10 +194,98 @@ const KUGEL = {
   verschieden: f => f[0][0] !== f[1][0], gleich: f => f[0][0] === f[1][0],
 };
 
+// ---------- Text gegen Prüfdaten (Plan B2 Schritt 3, TD1 a) ----------
+// Wortlaute hier im Prüfteil eigens festgehalten (nicht aus dem Erzeuger übernommen): liesText findet sie im gezeigten
+// Satz und gibt die Kennung, mit der EREIGNIS und KUGEL abzählen. Bei der Urne kommen die Farben aus dem Text („rote“ →
+// „rot“). Steht im Text ein anderes Ereignis, andere Kugeln oder ein anderes Ziehen, als gezählt wird, fällt es auf.
+const MUENZEN3 = { "keinmal Kopf": ["k0", 0], "genau einmal Kopf": ["k1", 1], "genau zweimal Kopf": ["k2", 2], "dreimal Kopf": ["k3", 3],
+  "mindestens zweimal Kopf": ["kmin2", 2], "mindestens einmal Zahl": ["zmin1", 1] };
+const WUERFEL3 = { "mindestens eine Sechs": "sechs-min1", "keine Sechs": "sechs-keine", "dreimal dieselbe Augenzahl": "drei-gleich" };
+const VERSUCHE = {
+  "zweimal würfeln": ["wuerfel", "wuerfel"], "eine Münze und einen Würfel werfen": ["muenze", "wuerfel"],
+  "dreimal würfeln": ["wuerfel", "wuerfel", "wuerfel"], "viermal eine Münze werfen": Array(4).fill("muenze"),
+  "fünfmal eine Münze werfen": Array(5).fill("muenze"), "zweimal würfeln und eine Münze werfen": ["wuerfel", "wuerfel", "muenze"],
+};
+// erwartete Anzahl: Gerät und Ereignis → jeder q-te Wurf
+const ERWARTET = { "einen Würfel|eine Sechs": 6, "eine Münze|Kopf": 2, "einen Würfel|eine gerade Zahl": 2, "einen Würfel|eine Eins oder eine Zwei": 3 };
+const ZIEHEN = {
+  "Du ziehst eine Kugel, legst sie zurück und ziehst noch einmal.": { zuruecklegen: true, zuege: 2 },
+  "Du ziehst nacheinander zwei Kugeln, ohne die erste zurückzulegen.": { zuruecklegen: false, zuege: 2 },
+  "Du ziehst drei Kugeln nacheinander ohne Zurücklegen.": { zuruecklegen: false, zuege: 3 },
+};
+const HAEUFIG_TEXT = [
+  "Von # Zügen waren # verspätet. Schätze die Wahrscheinlichkeit, dass ein Zug verspätet ist. Angabe in %",
+  "Ein Reissnagel wurde #-mal geworfen und landete #-mal auf dem Rücken. Schätze die Wahrscheinlichkeit für „Rücken“. Angabe in %",
+  "Von # geprüften Lampen waren # defekt. Schätze die Wahrscheinlichkeit, dass eine Lampe defekt ist. Angabe in %",
+];
+const BRUCH = " (als gekürzter Bruch)";
+const muster = (text, mu) => LST.zahlenImText(text, mu);
+/** „Wie gross ist die Wahrscheinlichkeit für X?“ → X, oder null. */
+const fuer = s => { const r = s.match(/^Wie gross ist die Wahrscheinlichkeit für (.+)\?$/); return r && r[1]; };
+const ohneBruch = t => (t.endsWith(BRUCH) ? t.slice(0, -BRUCH.length) : null);
+function liesUrne(a) {
+  const t = ohneBruch(a.text);
+  const r = t && t.match(/^In einer Urne liegen (\d+) ([a-zäöü]+e) und (\d+) ([a-zäöü]+e) Kugeln\. (Du ziehst [^.]+\.) (.+)$/);
+  const z = r && ZIEHEN[r[5]];
+  if (!z) return null;
+  const A = r[2].slice(0, -1), Bf = r[4].slice(0, -1), frage = r[6];
+  const woerter = { [`zweimal ${A}`]: "aa", [`zweimal ${Bf}`]: "bb", "zweimal dieselbe Farbe": "gleich" };
+  if (z.zuruecklegen) { woerter[`zuerst ${A}, dann ${Bf}`] = "ab"; woerter["zwei verschiedene Farben (Reihenfolge egal)"] = "verschieden"; }
+  else woerter["zwei verschiedene Farben"] = "verschieden";
+  const e = z.zuege === 3 ? (frage === `Wie gross ist die Wahrscheinlichkeit, dass alle drei ${A} sind?` ? "aaa" : null) : woerter[fuer(frage)];
+  return e ? { kugeln: [Number(r[1]), Number(r[3])], zuruecklegen: z.zuruecklegen, zuege: z.zuege, ereignis: e } : null;
+}
+/** Datenreihe „<was>: 3, −2, 7. <Frage>“ → Werte; die Bezeichnung (sie kann Ziffern tragen, „um 7 Uhr“) bis zum ersten „: “. */
+function liesReihe(text, frage) {
+  const i = text.indexOf(": ");
+  const z = i > 0 && muster(text.slice(i + 2), `#*. ${frage}`);
+  return z ? z[0] : null;
+}
+const LESER = {
+  mittelwert: a => { const w = liesReihe(a.text, "Wie gross ist der Mittelwert?"); return w && { werte: w }; },
+  spanne: a => { const w = liesReihe(a.text, "Wie gross ist der Unterschied zwischen dem grössten und dem kleinsten Wert?"); return w && { werte: w, spanne: true }; },
+  "drei-muenzen": a => {
+    const t = ohneBruch(a.text), x = t && t.startsWith("Du wirfst dreimal eine Münze. ") && MUENZEN3[fuer(t.slice(30))];
+    return x ? { stufen: ["muenze", "muenze", "muenze"], ereignis: x[0], wert: x[1] } : null;
+  },
+  pfade: a => { const r = a.text.match(/^Du willst (.+)\. Wie viele Pfade \(Ergebnisse\) hat das vollständige Baumdiagramm\?$/); return r && VERSUCHE[r[1]] ? { stufen: VERSUCHE[r[1]], pfade: true } : null; },
+  "urne-mit": liesUrne, "urne-ohne": liesUrne, "drei-ohne": liesUrne,
+  relativ: a => { for (const mu of HAEUFIG_TEXT) { const z = muster(a.text, mu); if (z) return { N: z[0], a: z[1] }; } return null; },
+  erwartet: a => {
+    const r = a.text.match(/^Du wirfst (einen Würfel|eine Münze) (.+)-mal\. Wie oft erwartest du ungefähr (.+)\?$/);
+    const q = r && ERWARTET[`${r[1]}|${r[3]}`], N = r && LST.leseZahl(r[2]);
+    return q && N !== null ? { N, q } : null;
+  },
+  "drei-wuerfel": a => {
+    const t = ohneBruch(a.text), e = t && t.startsWith("Du wirfst dreimal einen Würfel. ") && WUERFEL3[fuer(t.slice(32))];
+    return e ? { stufen: ["wuerfel", "wuerfel", "wuerfel"], ereignis: e } : null;
+  },
+  fehlend: a => { const z = muster(a.text, "Ein Datensatz hat # Werte, ihr Mittelwert ist #. Bekannt sind #*. Wie gross ist der fehlende Wert?"); return z && { bekannt: z[2], mittel: z[1], n: z[0] }; },
+};
+function liesText(a) {
+  const l = LESER[a.typ];
+  return (l && l(a)) || null;
+}
+const gleichWert = (x, y) => (Array.isArray(x) ? Array.isArray(y) && x.length === y.length && x.every((v, i) => gleichWert(v, y[i])) : x === y);
+
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
-  const d = a.daten;
+  m.push(...pruefeMit(a, a.daten));
+  // Text gegen Prüfdaten (TD1 a): was der Jugendliche liest — auch Ereignis, Kugeln und Ziehen im Wortlaut —, ist, was gezählt wird
+  const t = liesText(a);
+  if (!t) m.push(`Text folgt keinem Muster des Typs ${a.typ}: ${a.text}`);
+  else {
+    const anders = Object.keys(a.daten).filter(k => !gleichWert(t[k], a.daten[k]));
+    if (anders.length) m.push(`Text zeigt ${anders.map(k => `${k} = ${JSON.stringify(t[k])}`).join(", ")}, Prüfdaten ${anders.map(k => `${k} = ${JSON.stringify(a.daten[k])}`).join(", ")}: ${a.text}`);
+    m.push(...pruefeMit(a, t).map(x => `aus dem Text: ${x}`));
+  }
+  return m;
+}
+
+/** Nachzählen aus Werten in der Form von a.daten (aus den Daten oder aus dem Text); Liste der Mängel. */
+function pruefeMit(a, d) {
+  const m = [];
   if (a.art === "term") {
     let alle, g;
     if (d.kugeln) {
@@ -227,4 +315,4 @@ function pruefeAufgabe(a, stufe, niveau) {
   return m;
 }
 
-if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis };
+if (typeof module !== "undefined") module.exports = { UEBUNG, aufgabeErzeugen, pruefeAufgabe, hinweis, liesText };
