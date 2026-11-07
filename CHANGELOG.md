@@ -894,3 +894,8 @@
   1000 Aufgaben, a deshalb auch als Serie; Challenge mit „Welches Edelgas hat gleich viele Elektronen wie das Ion?“
   (Helium, Neon, Argon), 28 → 42. Prüfung liest die Sätze und rechnet Art und Elektronenzahl aus der Stellung im PSE.
   Gegenprobe (falscher Treffer; Edelgas verschoben): beides gemeldet. Plan E 9 (heute 16 Hinweise).
+- Lernsteig — Vorrat `kraefte` d (Plan E 9, Entscheid KR1 a): Inhaltsliste `maschinen.js` von 11 auf 36 Beispiele, je
+  Maschine des Lehrplans (Hebel, schiefe Ebene, Flaschenzug, Ketten-/Zahnradgetriebe) neun; nur eindeutige Fälle, keine
+  Wellräder und Keile. Bleibt ungeprüft, bis Patrik sie durchsieht. Gegenprobe (eine Maschine ausserhalb der vier):
+  gemeldet; ob ein Beispiel fachlich passt, kann der Test nicht prüfen. Plan E 9. Tests: Kern 0 Fehler, Lernsteig
+  „0 Fehler, 15 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“.

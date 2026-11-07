@@ -223,13 +223,13 @@ Kindersprache.
 9. **Vielfalt:** `kombinatorik` f (23) mit drei Münzen, Glücksrad, Urne, Karten; `folgen` j (53) mit weiteren Figuren;
    `zehnerpotenzen` Zahlwort „einhundertein Millionen“ prüfen (Duden). Seit VF1 a (LERN_Session20) meldet das
    Testskript jede Stufe ohne Endlos, deren Aufgaben sich vor der sechsten Runde wiederholen — heute 21, je Übung
-   vergrössern oder im Katalog begründen (`vorrat`): kraefte d;
-   grammatik e, f, g; rechtschreibung d, e, f, g;
+   vergrössern oder im Katalog begründen (`vorrat`): grammatik e, f, g; rechtschreibung d, e, f, g;
    englisch-grammatik b, c, d, challenge; franzoesisch-grammatik b, c, d, challenge (die Sprachübungen begrenzt durch
    ihre Inhaltslisten). Erledigt in LERN_Session21: stromkreis b (8 feste Fragen → 37 erzeugte), kombinatorik f (23 → 236, mit drei Münzen,
    Glücksrad, Urne; f jetzt auch als Serie) und challenge (26 → 50), atombau a (20 → über 1000 mit der Umkehrfrage
    „Welches der drei ist …?“, a jetzt auch als Serie) und challenge (28 → 42, Edelgas mit gleicher Elektronenzahl);
-   heute 16. Karten nicht (Jass oder französisch?).
+   kraefte d (KR1 a: Liste der einfachen Maschinen 11 → 36, je Maschine neun, ohne Wellrad und Keil, ungeprüft);
+   heute 15. Karten nicht (Jass oder französisch?).
 10. **Hinweise:** Wurzelaufgaben bekommen einen Wurzel-Hinweis; `folgen` nennt die Formel nicht in der Aufgabe.
 11. Danach: Patrik prüft die sieben Listen und die Annahmen je Übung im Entwickler-Modus (FG1 a).
 

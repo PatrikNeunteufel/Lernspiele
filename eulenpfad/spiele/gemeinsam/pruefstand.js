@@ -7,6 +7,10 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "diagramm-wahl/daten": {
+      "am": "2026-11-07",
+      "von": "Patrik"
+    },
     "erdzeit-leiter/ereignisse": {
       "am": "2026-11-06",
       "von": "Patrik"
@@ -209,6 +213,14 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "diagramm-wahl": {
+      "am": "2026-11-07",
+      "von": "Patrik"
+    },
+    "echt-oder-erfunden": {
+      "am": "2026-11-07",
+      "von": "Patrik"
+    },
     "erdzeit-leiter": {
       "am": "2026-11-06",
       "von": "Patrik"
@@ -239,6 +251,10 @@ const PRUEFSTAND = {
     },
     "gerecht-teiler": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "hello-dialog": {
+      "am": "2026-11-07",
       "von": "Patrik"
     },
     "hundertertafel": {
@@ -331,6 +347,10 @@ const PRUEFSTAND = {
     },
     "schriftlich-werkstatt": {
       "am": "2026-11-01",
+      "von": "Patrik"
+    },
+    "speicher-leiter": {
+      "am": "2026-11-07",
       "von": "Patrik"
     },
     "stein-duell": {
