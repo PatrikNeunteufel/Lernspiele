@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.21.0 — 2026-11-07 (LERN_Session19)
+- `person.js`: `codeReicht(liste, id)` und `aufsichtenMitPin(liste)`; `freischalten` mit Code schaltet eine Aufsicht nur
+  frei, wenn das Gerät keine Aufsicht mit PIN hat — sonst Fehler `NUR_BESTAETIGUNG`, eine Aufsicht des Geräts bestätigt
+  (OA1 a). Vorher brachte in beiden Apps eine selbst gebaute Datei mit bekanntem Code eine Aufsicht ohne Bestätigung
+  aufs Gerät.
+- `rollen.js`: zählt die Aufsichten mit PIN über `KERN.person.aufsichtenMitPin` (eine Regel).
+
 ## 1.20.0 — 2026-11-07 (LERN_Session19)
 - `runde.js`: Ablauf einer Runde `lauf()` (AR1 a; RA1–RA4 a, RA7 a) — die App meldet gestellt, bereit, Pause, Eingabe,
   falsch, Zeit um, richtig, übersprungen, erschöpft; der Kern zählt Versuche und Fehler (Zeit um ist einer), sagt, wann die

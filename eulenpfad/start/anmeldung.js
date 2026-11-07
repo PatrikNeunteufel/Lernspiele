@@ -165,7 +165,9 @@ function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
    * Geräts, dazu eine neue PIN für dieses Gerät. Gibt es beides nicht, bleibt sie gesperrt.
    */
   function freischalten(name) {
-    const mitCode = !!LS.wiederherstellung(name).code;
+    // Der Code reicht nur, solange das Gerät keine Aufsicht mit PIN hat; sonst bestätigt eine von ihnen (OA1 a, Kern)
+    const codeReicht = KERN.person.codeReicht(LS.PERSONEN, LS.person(name)?.id);
+    const mitCode = !!LS.wiederherstellung(name).code && codeReicht;
     const andere = mitPin.filter(n => n !== name);
     karte.append(el("h2", { text: `🔒 ${LS.spielerName(name)}` }),
       el("p", { style: "text-align:center", text: "Diese Aufsicht ist auf einem anderen Gerät mit einer PIN geschützt. Die PIN reist nicht mit — hier braucht sie zuerst eine eigene." }));
@@ -200,7 +202,8 @@ function zeichneAnmeldung(box, vorgewaehlt, nachAnmeldung) {
     karte.append(
       mitCode ? el("p", { class: "leise-text", style: "text-align:center;margin-bottom:0", text: "Mit dem Wiederherstellungscode dieser Aufsicht:" }) : "",
       mitCode ? el("div", { class: "pin-zeile" }, code) : "",
-      andere.length ? el("p", { class: "leise-text", style: "text-align:center;margin-bottom:0", text: mitCode ? "Oder eine andere Aufsicht dieses Geräts erlaubt es mit ihrer PIN:" : "Eine andere Aufsicht dieses Geräts erlaubt es mit ihrer PIN:" }) : "",
+      andere.length ? el("p", { class: "leise-text", style: "text-align:center;margin-bottom:0", text: mitCode ? "Oder eine andere Aufsicht dieses Geräts erlaubt es mit ihrer PIN:"
+        : "Hier gibt es schon eine Aufsicht. Eine von ihnen erlaubt es mit ihrer PIN (der Code allein reicht dafür nicht):" }) : "",
       andere.length > 1 ? wahl : "",
       andere.length === 1 ? el("p", { style: "text-align:center;font-weight:800;margin:4px 0", text: `Erlaubt von: ${LS.spielerName(wer)}` }) : "",
       andere.length ? el("div", { class: "pin-zeile" }, vonPin) : "",

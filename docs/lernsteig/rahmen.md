@@ -165,7 +165,14 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   gesetzt auf der Statistik-Seite. Übungstag = Kalendertag (Ortszeit) mit mindestens einer Runde, Wochen ab Montag.
   `LST.wochenSerie(tage, ziel)` (werkzeug.js) zählt die Tage dieser Woche und die Wochen in Folge mit erreichtem Ziel;
   die laufende Woche unterbricht die Serie nicht. Angezeigt auf Startseite, Statistik und bei der Aufsicht (nur lesen).
-- Noch nicht: Abgleich über einen Ordner.
+- **Abgleich über einen Ordner** (Plan C5, seit LERN_Session19; `gemeinsam/abgleich.js` über `KERN.abgleich`,
+  docs/kern/rahmen.md 4.20): Die Aufsicht wählt in der Verwaltung einen Ordner (Netzwerk- oder Cloud-Ordner); jedes Gerät
+  schreibt dort `lernsteig-sync-<gerät>.json` und liest die der anderen — Konten, Aufsichten, Runden, Rekorde,
+  Löschvermerke —, selbsttätig beim Öffnen der Startseite, beim Wiedersichtbarwerden und nach Änderungen
+  (`LST.beiAenderung`). Ohne Ordner-Fähigkeit des Browsers dieselbe Datei zum Sichern und Einlesen. PIN, Code und
+  Verbindungen bleiben auf dem Gerät; neue Konten werden beim Abgleich mit niemandem verbunden (das tut nur das Einlesen
+  durch die Aufsicht, AF2 a). Kam etwas dazu, zeichnet die Startseite neu (Ereignis `lernsteig:abgeglichen`), ausser
+  jemand tippt gerade.
 
 ## 5c. Statistik, Sichern und Einlesen (BF1 a, DS1 a)
 
@@ -188,9 +195,12 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
   nach Kennung (Rekord: höherer Stand), Verweise umgebogen. Ältere Sicherungen (`lernsteig-sicherung` 1, 2) deutet der
   Kern um; eine Datei des Eulenpfads wird mit „Das ist eine Datei des Eulenpfads; …“ abgewiesen. Löschvermerke führt der
   Kern (DF2 a); der Lernsteig löscht heute noch keine Konten. Test: `tools/pruefe_konten.js`.
-- **Aufsichten in einer Datei** (Entscheid AS1 a, LERN_Session18): liest nur eine angemeldete Aufsicht ein; liest
-  ein Jugendlicher ein, werden sie abgewiesen (gezählt). Sonst brächte eine selbst gebaute Datei mit einem bekannten
-  Code eine Aufsicht ohne Bestätigung aufs Gerät (D5).
+- **Aufsichten in Datei und Abgleich** (Entscheide OA1 a, OA2 a, LERN_Session19; ersetzen AS1 a): Aufsichten reisen
+  immer mit und kommen gesperrt an, auch wenn ein Jugendlicher einliest oder beim Abgleich übt. Geschützt wird beim
+  Freischalten: Für eine Aufsicht reicht ihr Code nur auf einem Gerät ohne Aufsicht mit PIN, sonst bestätigt eine
+  Aufsicht des Geräts mit ihrer PIN (`KERN.person.codeReicht`, `LST_KONTEN.codeReicht`; die Anmeldung zeigt dann kein
+  Codefeld). Sonst brächte eine selbst gebaute Datei mit einem bekannten Code eine Aufsicht ohne Bestätigung aufs Gerät
+  (D5). Bis LERN_Session19 (AS1 a): Aufsichten nur, wenn eine Aufsicht einlas.
 - **Gesperrt** (DF4 a): Ein Konto oder eine Aufsicht mit PIN von einem anderen Gerät ist hier 🔒 gesperrt, bis es mit
   dem Wiederherstellungscode und einer neuen PIN freigeschaltet ist (`LST_KONTEN.freischalten`, Ansicht „freischalten“
   auf der Anmeldung und im Personen-Knopf); eine Aufsicht auch mit der PIN einer anderen Aufsicht dieses Geräts. Der
@@ -262,7 +272,8 @@ Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `
 | `runden` | je Runde im gemeinsamen Format (R1 a, `KERN.runden`; gebaut von `KERN.runde.lauf`) `{ id, person, zeit (Ende, RA1 a), inhalt, fach, stufe, niveau, endlos?, gekuerzt?, abgebrochen?, aufgaben, aufAnhieb, fehler, gezeigt, dauer (s, auf 0,1), liste, mitRechner, gruppe }`; `liste` je Aufgabe `{ ms, versuche, geloest, gezeigt?, lp, rechner }`, mit Fehlversuch dazu `text`, `loesung`, `eingaben` (RA4 a; Grundlage für den Kompetenzstand). Beim Laden und Einlesen umgedeutet (`LST.alteEintraegeUmdeuten`): bis LERN_Session15 `konto`, `uebung`; bis LERN_Session18 `zeit` = Beginn (jetzt + `dauer`, auch beim Rekord einer Serie) und `zeiten`, `falsch` getrennt |
 | `rekorde` | je Serie `{ id, person, zeit, inhalt, stufe, niveau, punkte, dauer, mitRechner, abgebrochen? }` |
 | `freigabe`, `freigabeStand` | Freigabe der Übungen auf diesem Gerät durch die Aufsicht (`KERN.freigabe`) |
-| `gestellt` | zuletzt gestellte Kennungen je `konto/uebung/stufe/niveau` (höchstens 30) |
+| `gestellt` | Gedächtnis gegen Wiederholungen (RA5 a): Fingerabdrücke je `konto\|uebung/stufe` (höchstens 400; bis LERN_Session18 die Kennungen je `konto/uebung/stufe/niveau`, höchstens 30) |
+| `geraet`, `abgleichStand` | Abgleich über einen Ordner (5b, `KERN.abgleich`): Kennung und Name dieses Geräts; Ordner, letzter Abgleich, andere Geräte. Den gewählten Ordner merkt der Browser in IndexedDB `lernsteig` |
 | `einstellungen` | `{ dezimal?, rechner? }`, nur von einer angemeldeten Aufsicht gesetzt (5d) |
 
 ## 7. Prüfen

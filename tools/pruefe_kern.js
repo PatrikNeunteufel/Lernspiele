@@ -1387,6 +1387,25 @@ console.log("personenmenue.js");
       try { await P.freischalten(G5.P, "p-auf-1", "1111", { code: "X" }); fehler++; console.log("    FEHLER  ohne Code freigeschaltet"); } catch (e) { /* erwartet */ }
       await P.freischalten(G5.P, "p-auf-1", "1111", { bestaetigt: true });
       gleich(P.gesperrt(G5.P.finde("p-auf-1")), false, "Aufsicht mit Bestätigung freigeschaltet");
+      // OA1 a: Auf einem Gerät mit einer Aufsicht mit PIN (Mama) reicht der richtige Code einer weiteren Aufsicht nicht —
+      // sonst brächte eine selbst gebaute Datei mit bekanntem Code eine Aufsicht ohne Bestätigung aufs Gerät
+      {
+        const w = await G.wiederherstellung({});
+        const papa = { id: "p-auf-2", name: "Papa", rolle: "aufsicht", geschuetzt: true, wiederherstellung: { code: w.wiederherstellung.code }, angelegt: t(1), geaendert: { name: t(1), wiederherstellung: t(1) } };
+        const datei = { format: "reihe-daten", version: 1, app: "eulenpfad", art: "abgleich", personen: [papa], runden: [], rekorde: [] };
+        G5.D.einlesen(datei);
+        gleich([P.gesperrt(G5.P.finde("p-auf-2")), P.codeReicht(G5.P, "p-auf-2")].join(), "true,false", "weitere Aufsicht aus der Datei: gesperrt, Code reicht nicht");
+        let meldung = "";
+        try { await P.freischalten(G5.P, "p-auf-2", "2222", { code: w.code }); } catch (e) { meldung = e.message; }
+        gleich([meldung, P.gesperrt(G5.P.finde("p-auf-2"))].join("|"), `${P.NUR_BESTAETIGUNG}|true`, "richtiger Code allein schaltet keine weitere Aufsicht frei");
+        // ohne Aufsicht mit PIN auf dem Gerät reicht derselbe Code (die erste Aufsicht braucht keine Bestätigung, D5)
+        const G7 = geraet();
+        G7.D.einlesen(datei);
+        gleich(P.codeReicht(G7.P, "p-auf-2"), true, "Gerät ohne Aufsicht mit PIN: Code reicht");
+        await P.freischalten(G7.P, "p-auf-2", "2222", { code: w.code });
+        gleich(P.gesperrt(G7.P.finde("p-auf-2")), false, "dort mit dem Code freigeschaltet");
+        gleich(P.codeReicht(G5.P, "p-gibt-es-nicht"), false, "unbekannte Person: kein Code");
+      }
       // fuerDatei einer gesperrten Person: weiter geschützt (über ein drittes Gerät)
       gleich(P.fuerDatei(G3.P.finde(noa.id)).geschuetzt, true, "gesperrte Person reist geschützt weiter");
       gleich(JSON.stringify(P.ohneGeheimnis({ id: "p-x", gesperrt: true, geschuetzt: true, pin: 1 })), '{"id":"p-x"}', "ohneGeheimnis nimmt den Schutz mit weg");

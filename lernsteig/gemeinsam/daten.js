@@ -5,9 +5,10 @@
      und ist auf einem anderen Gerät gesperrt, bis es dort mit dem Code freigeschaltet ist (LST_KONTEN.freischalten).
    - Einlesen (Befund D4): erst wird jeder Eintrag geprüft — Konten mit KERN.person.maengel, Runden und Rekorde mit
      KERN.runden.maengel und dem Schema des Lernsteigs; Ungültiges wird gezählt, nie gespeichert; dann alles oder nichts.
-   - Aufsichten in einer Datei liest nur eine angemeldete Aufsicht ein (Entscheid AS1 a, LERN_Session18); liest ein
-     Jugendlicher ein, werden sie abgewiesen — sonst könnte eine selbst gebaute Datei mit bekanntem Code eine Aufsicht
-     ohne Bestätigung auf das Gerät bringen (Befund D5). */
+   - Aufsichten reisen in Datei und Abgleich mit und kommen gesperrt an (Entscheid OA2 a, LERN_Session19; bis dahin AS1 a:
+     nur eine angemeldete Aufsicht las sie ein). Geschützt wird beim Freischalten: Auf einem Gerät mit einer Aufsicht mit
+     PIN reicht der Code nicht, eine von ihnen bestätigt (OA1 a, KERN.person.codeReicht) — sonst brächte eine selbst
+     gebaute Datei mit bekanntem Code eine Aufsicht ohne Bestätigung auf das Gerät (Befund D5). */
 "use strict";
 
 var LST_DATEN = (function () {
@@ -40,6 +41,11 @@ var LST_DATEN = (function () {
 
   /** Sicherung für die Konten mit den Kennungen ids. */
   const sichern = ids => DATEN.sichern({ ids });
+  /**
+   * Eigene Datei für den Abgleich über einen Ordner (gemeinsam/abgleich.js, KERN.abgleich): alle Konten und Aufsichten
+   * (geschützt nach DF4 a, ohne Verbindungen), Runden, Rekorde und Löschvermerke dieses Geräts.
+   */
+  const abgleichDaten = (geraet = null) => DATEN.sichern({ art: "abgleich", geraet });
 
   /** Dateiname: lernsteig-<name>-<datum>.json (in .gitignore, EP4). */
   const dateiname = name => DATEN.dateiname(name || "sicherung");
@@ -51,8 +57,7 @@ var LST_DATEN = (function () {
    * oder nicht gespeichert werden kann.
    */
   function einlesen(obj) {
-    const mitAufsichten = typeof LST_KONTEN !== "undefined" && !!LST_KONTEN.aufsichtAktiv();
-    const erg = DATEN.einlesen(obj, { rollen: mitAufsichten ? null : ["lernend"] });
+    const erg = DATEN.einlesen(obj);
     return { konten: erg.personen.neu + erg.personen.geaendert, runden: erg.runden, rekorde: erg.rekorde, abgewiesen: erg.abgewiesen,
       neu: erg.neueIds, ids: erg.ids };
   }
@@ -66,7 +71,7 @@ var LST_DATEN = (function () {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
-  return { FORMAT, sichern, dateiname, einlesen, herunterladen, rundeGueltig, rekordGueltig };
+  return { FORMAT, sichern, abgleichDaten, dateiname, einlesen, herunterladen, rundeGueltig, rekordGueltig };
 })();
 
 if (typeof module !== "undefined") module.exports = LST_DATEN;

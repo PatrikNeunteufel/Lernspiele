@@ -1,4 +1,4 @@
-/* kern 1.20.0 · Prüfsumme sha256:8a0cc8a082d117a4cefc11cec35375225056dde22d8637624618c657c4b628a0 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.21.0 · Prüfsumme sha256:590f721d816a47ddcc4e48750fac64e7509974eebd1e5d9f77451f9f65a8da49 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -805,15 +805,30 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     }
     return p;
   }
+  /** Aufsichten mit eigener PIN auf diesem Gerät (nur sie können bestätigen; eine gesperrte hat hier keine PIN). */
+  const aufsichtenMitPin = personen => personen.alle().filter(p => p.rolle === "aufsicht" && p.pin);
+  /**
+   * Reicht für diese gesperrte Person ihr Wiederherstellungscode (OA1 a, LERN_Session19)? Für Lernende ja; für eine
+   * Aufsicht nur, solange das Gerät keine Aufsicht mit PIN hat — sonst bestätigt eine von ihnen, wie beim Anlegen einer
+   * weiteren Aufsicht (D5, KR2 a). Sonst brächte eine selbst gebaute Datei mit bekanntem Code eine Aufsicht ohne
+   * Bestätigung aufs Gerät.
+   */
+  const codeReicht = (personen, id) => {
+    const p = personen.finde(id);
+    return !!p && (p.rolle !== "aufsicht" || !aufsichtenMitPin(personen).some(q => q.id !== p.id));
+  };
+  const NUR_BESTAETIGUNG = "Hier gibt es schon eine Aufsicht: Eine von ihnen muss mit ihrer PIN bestätigen.";
   /**
    * Gesperrte Person freischalten (DF4 a): mit ihrem Wiederherstellungscode und einer neuen PIN — oder ohne Code mit
-   * { bestaetigt: true }, wenn die App eine andere Bestätigung verlangt hat (Eulenpfad: eine bestehende Aufsicht des
-   * Geräts). Der Code bleibt derselbe: er gilt auf allen Geräten. Gibt die Person zurück; Fehler mit Klartext.
+   * { bestaetigt: true }, wenn die App die Bestätigung einer bestehenden Aufsicht des Geräts geprüft hat (KERN.rollen).
+   * Eine Aufsicht auf einem Gerät mit Aufsicht nur so (OA1 a, codeReicht). Der Code bleibt derselbe: er gilt auf allen
+   * Geräten. Gibt die Person zurück; Fehler mit Klartext.
    */
   async function freischalten(personen, id, pin, { code = null, bestaetigt = false } = {}) {
     const p = personen.finde(id);
     if (!gesperrt(p)) throw new Error("Diese Person ist hier nicht gesperrt.");
     if (!bestaetigt) {
+      if (!codeReicht(personen, p.id)) throw new Error(NUR_BESTAETIGUNG);
       if (!istPruefwert(p.wiederherstellung?.code)) throw new Error("Für diese Person gibt es hier keinen Wiederherstellungscode.");
       if (!(await KERN.geheimnis.codeStimmt(code, p.wiederherstellung))) throw new Error("Der Code stimmt nicht.");
     }
@@ -956,7 +971,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
   KERN.person = {
     ROLLEN, AUFSICHT_ARTEN, GEHEIM, NAME_MAX, neueId, nameRein, nameGleich,
     geburtsdatumLies, geburtsdatumText, tagFehlt, alter, maengel, ohneGeheimnis, liste, zusammenfuehren, uebernehmen,
-    SCHUTZ, gesperrt, fuerDatei, freischalten,
+    SCHUTZ, gesperrt, fuerDatei, freischalten, codeReicht, aufsichtenMitPin, NUR_BESTAETIGUNG,
   };
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 
@@ -977,7 +992,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 (function (KERN) {
   const TAGE = 3;
   const BESTAETIGEN = "Eine Aufsicht dieses Geräts muss mit ihrer PIN bestätigen.";
-  const aufsichtenMitPin = personen => personen.alle().filter(p => p.rolle === "aufsicht" && p.pin);
+  const aufsichtenMitPin = personen => KERN.person.aufsichtenMitPin(personen);
 
   /**
    * Bestätigung durch eine bestehende Aufsicht (KR2 a, D5): { id, pin } einer Aufsicht dieses Geräts mit PIN, nicht die

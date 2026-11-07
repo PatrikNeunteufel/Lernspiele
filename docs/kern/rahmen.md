@@ -192,7 +192,8 @@ Entscheide P1 a, P2 a, Vorgabe B3. Eine Liste von Personen je App:
 | `ohneGeheimnis(p, geraetFelder)` | Kopie ohne `pin`, `wiederherstellung`, `gesperrt`, `geschuetzt` und Gerätefelder (Einladung, Übernahme) |
 | `fuerDatei(p, geraetFelder)` | Kopie für Sicherung und Abgleich: wie `ohneGeheimnis`, eine geschützte Person dazu mit `geschuetzt` und `wiederherstellung: { code }` |
 | `gesperrt(p)` | `gesperrt: true` und keine eigene PIN |
-| `freischalten(liste, id, pin, { code } \| { bestaetigt: true })` | gesperrte Person mit ihrem Code (oder nach einer Bestätigung der App) freischalten, neue PIN; Fehler mit Klartext („Der Code stimmt nicht.“) |
+| `freischalten(liste, id, pin, { code } \| { bestaetigt: true })` | gesperrte Person mit ihrem Code (oder nach einer Bestätigung der App) freischalten, neue PIN; Fehler mit Klartext („Der Code stimmt nicht.“). Eine Aufsicht mit Code nur, wenn `codeReicht` (OA1 a, 1.21.0), sonst `NUR_BESTAETIGUNG` |
+| `codeReicht(liste, id)`, `aufsichtenMitPin(liste)` | reicht für diese gesperrte Person ihr Code? Lernende immer; eine Aufsicht nur, solange das Gerät keine Aufsicht mit PIN hat — sonst bestätigt eine von ihnen (wie beim Anlegen, D5, KR2 a). Gegen selbst gebaute Dateien mit bekanntem Code (Datei und Ordner, alle Apps) |
 | `liste(speicher, { schluessel, felder })` | `{ alle, finde (auch über frühere Kennungen), findeName, nameFrei, anlegen, aendere, entferne, speichere }`; `anlegen` und `aendere` prüfen Name und Mängel und melden einen vollen Speicher |
 | `zusammenfuehren(eigene, fremde, { geraetFelder, schutz })` | `schutz: true` für Personen aus einer Datei (setzt `KERN.daten`): Schutz übertragen wie oben; gleiche Kennung (auch frühere) → verbinden; sonst gleicher Name → verbinden, die ältere Kennung bleibt, die andere wird frühere; sonst neu; Ungültiges abgewiesen. Je Feld der jüngere Stand; ein jüngerer Name, den hier jemand anders trägt, gilt nicht. Ergebnis `{ personen, neu, geaendert, abgewiesen, kennungen: { alt: neu } }` — mit `kennungen` biegt die App Verweise (Runden, Rekorde) um |
 | `uebernehmen(quelle, ziel, zusatz)` | Übernahme einer **Aufsicht** in eine andere App (C9, Ü1 a, Ü2 b; seit 1.12.0): `ziel` ist die Liste der Ziel-App (`liste(KERN.speicher("<präfix>"))`). Mit reisen Kennung, Name, Rolle, Art, PIN-Prüfwert, Sicherheitsfrage und Antwort-Prüfwert; der Wiederherstellungscode wird neu ausgegeben (`code`, nur jetzt sichtbar). Keine Bestätigung in der Ziel-App; nichts wird überschrieben: `status` „neu“, „schon“ (dieselbe Kennung ist dort) oder „name“ (Name dort vergeben). Fehler ohne PIN und für Lernende (die kommen über die Einladung) |
@@ -457,7 +458,8 @@ Entscheide DF1 a, DF2 a, DF4 a (LERN_Session18), dazu R1 a, P1 a und Befund D4. 
 Seit 1.15.0 im Kern. Benutzt vom Eulenpfad seit LERN_Session18 (`LS.zusammenfuehren`, `LS.abgleichDaten`,
 `LS.sicherung`, `LS.loescheSpieler`, `LS.loescheRunden`; Schlüssel `runden: "protokoll"`, Teil `meldungen`, Freigabe);
 vom Lernsteig seit LERN_Session18 (`LST_DATEN`; Gerätefelder `aufsicht`, `anfragen`, `ohnePerson: ["gast"]`, `gueltig`
-für die Elemente von `liste`; ohne angemeldete Aufsicht `rollen: ["lernend"]`, AS1 a).
+für die Elemente von `liste`; bis LERN_Session19 ohne angemeldete Aufsicht `rollen: ["lernend"]` nach AS1 a, seit OA2 a
+ohne Filter — Aufsichten kommen gesperrt an, geschützt wird beim Freischalten, 4.7 `codeReicht`).
 
 ```
 { format: "reihe-daten", version: 1, app, art: "sicherung" | "abgleich", gesichert, geraet?,
@@ -506,8 +508,10 @@ IndexedDB gemerkt; sonst dieselben Daten als Datei. Browser-Schnittstellen erst 
 | `starte()` | selbsttätig: gleich, wenn die Seite wieder sichtbar wird, und 1,5 s nach Änderungen an `geteilt`; `false` ohne Ordner-Fähigkeit |
 | `dateiSichern()`, `dateiEinlesen(datei)`, `geraet()`, `benenne(name)`, `stand()` | Abgleich über eine Datei; Gerät mit Kennung und Namen (`geraet`); letzter Stand (`abgleichStand`) |
 
-Benutzt vom Eulenpfad (`LS.abgleich`, `lernspiele-sync-`, IndexedDB `lernspiele`, Ereignis `lernspiele:abgeglichen`).
-Der Lernsteig bekommt ihn mit der Verwaltung (Plan C; `lernsteig-sync-`, IndexedDB `lernsteig`, SP1 a). Geprüft in
+Benutzt vom Eulenpfad (`LS.abgleich`, `lernspiele-sync-`, IndexedDB `lernspiele`, Ereignis `lernspiele:abgeglichen`) und
+seit LERN_Session19 vom Lernsteig (`LST_ABGLEICH` in `lernsteig/gemeinsam/abgleich.js`, `lernsteig-sync-`, IndexedDB
+`lernsteig`, Ereignis `lernsteig:abgeglichen`, SP1 a; Ordner in der Verwaltung, Plan C5). Aufsichten reisen mit und kommen
+gesperrt an; eine Aufsicht schaltet ihr Code nur auf einem Gerät ohne Aufsicht mit PIN frei (OA1 a, OA2 a). Geprüft in
 `tools/pruefe_kern.js` mit einem Ersatz-Ordner: drei Geräte, kaputte Datei, fremdes Präfix, Erlaubnis, Vergessen.
 
 ### 4.21 `KERN.rollen` (`kern/rollen.js`) — Bestätigung, PIN vergessen, Zurücksetzen mit Frist

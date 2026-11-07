@@ -269,7 +269,8 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     const aufsicht = KO.aufsichtFinde(ansicht.id);
     const k = aufsicht || KO.finde(ansicht.id);
     const andere = aufsicht ? KO.aufsichten().filter(a => a.id !== k.id && !KO.gesperrt(a.id)) : [];
-    const mitCode = !!(k.wiederherstellung && k.wiederherstellung.code);
+    // Der Code reicht für eine Aufsicht nur, solange das Gerät keine Aufsicht mit PIN hat (OA1 a, Kern)
+    const mitCode = !!(k.wiederherstellung && k.wiederherstellung.code) && KO.codeReicht(k.id);
     dazu(karte, el("h3", { text: `\u{1F512} ${aufsicht ? "\u{1F511} " : ""}${k.name}` }),
       el("p", { text: aufsicht ? "Diese Aufsicht ist auf einem anderen Gerät mit einer PIN geschützt. Die PIN reist nicht mit — hier braucht sie zuerst eine eigene."
         : "Dein Konto ist auf einem anderen Gerät mit einer PIN geschützt. Die PIN reist nicht mit — hier legst du zuerst eine neue fest." }));
@@ -279,7 +280,8 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       return karte;
     }
     const code = mitCode ? feld("Wiederherstellungscode", { type: "text", autocomplete: "off", maxlength: "14", name: "code", placeholder: "XXXX-XXXX-XXXX" }, aufsicht ? "Den Code hat die Aufsicht beim Anlegen bekommen." : "Den Code hast du beim Anlegen der PIN bekommen.") : null;
-    const wer = andere.length ? auswahl("Oder: bestätigt von", andere.map(a => ({ id: a.id, name: a.name })), andere[0].id, () => {}) : null;
+    if (aufsicht && !mitCode && andere.length) dazu(karte, el("p", { class: "leise", text: "Hier gibt es schon eine Aufsicht. Eine von ihnen bestätigt mit ihrer PIN — der Code allein reicht dafür nicht." }));
+    const wer = andere.length ? auswahl(mitCode ? "Oder: bestätigt von" : "Bestätigt von", andere.map(a => ({ id: a.id, name: a.name })), andere[0].id, () => {}) : null;
     if (wer) wer.querySelector("select").name = "bestaetigt-von";
     const werPin = andere.length ? feld("Deren PIN", { type: "password", inputmode: "numeric", maxlength: "6", name: "bestaetigung-pin", autocomplete: "off" }) : null;
     const pin = feld("Neue PIN für dieses Gerät (4–6 Ziffern)", { type: "password", inputmode: "numeric", maxlength: "6", name: "neuepin", autocomplete: "new-password" });
@@ -468,6 +470,11 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   }
   LST_START.neu = zeichne;
   addEventListener("hashchange", () => { if (!/einladung=/.test(location.hash)) zeichne(); });
+  // Kam beim Abgleich über den Ordner etwas dazu (Konten, Runden): neu zeichnen, ausser jemand tippt gerade etwas ein
+  // (wie im Eulenpfad)
+  addEventListener("lernsteig:abgeglichen", () => {
+    if (!document.activeElement || !document.activeElement.matches || !document.activeElement.matches("input, select, textarea")) zeichne();
+  });
 
   zeichne();
 })();

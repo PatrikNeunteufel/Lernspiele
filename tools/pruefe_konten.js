@@ -65,7 +65,7 @@ const SF = { frage: "Erstes Haustier?", antwort: "Bello" }; // Sicherheitsfrage 
 
   // Aufsicht: die erste ohne, jede weitere mit Bestätigung (D5); Sicherheitsfrage Pflicht (RL2 a)
   await wirft(() => KO.aufsichtAnlegen({ name: "Ohne", art: "eltern", pin: "5555" }), "Aufsicht ohne Sicherheitsfrage", "Sicherheitsfrage");
-  const { aufsicht: vater } = await KO.aufsichtAnlegen({ ...SF,name: "Vater", art: "eltern", pin: "5555" });
+  const { aufsicht: vater, code: vaterCode } = await KO.aufsichtAnlegen({ ...SF,name: "Vater", art: "eltern", pin: "5555" });
   gleich(KO.aufsichtAktiv() && KO.aufsichtAktiv().id, vater.id, "erste Aufsicht angemeldet");
   await wirft(() => KO.aufsichtAnlegen({ ...SF,name: "Fremd", art: "lehrperson", pin: "6666" }), "zweite Aufsicht ohne Bestätigung", "bestätigen");
   await wirft(() => KO.aufsichtAnlegen({ ...SF,name: "Fremd", art: "lehrperson", pin: "6666", bestaetigung: { id: vater.id, pin: "0000" } }), "zweite Aufsicht mit falscher PIN", "bestätigen");
@@ -119,7 +119,8 @@ const SF = { frage: "Erstes Haustier?", antwort: "Bello" }; // Sicherheitsfrage 
   await wirft(() => DA.einlesen({ format: "reihe-daten", version: 1, app: "eulenpfad", personen: [], runden: [], rekorde: [] }), "Datei des Eulenpfads", "des Eulenpfads");
   const vorher = stand();
   const kaputt = DA.einlesen({ format: "lernsteig-sicherung", version: 1,
-    konten: [{ id: 5, name: "" }, { id: "p-neu-x", name: "Neu", rolle: "aufsicht" }],
+    // bis LERN_Session19 stand hier eine gültige Aufsicht, die nur AS1 a abwies; nach OA2 a kommt eine solche mit (unten)
+    konten: [{ id: 5, name: "" }, { id: "p-neu-x", name: "Neu", rolle: "chef" }],
     runden: [{ id: "r-k", konto: mia.id, zeit: 5, liste: "abc" }, { id: "r-f", konto: "p-gibts-nicht", zeit: "2026-11-05T09:00:00.000Z", uebung: "brueche", stufe: "g" }],
     rekorde: [{ id: "x", konto: mia.id, zeit: "2026-11-05T09:00:00.000Z", uebung: "nichts", stufe: "g", punkte: 3 }] });
   gleich([kaputt.konten, kaputt.runden, kaputt.rekorde, kaputt.abgewiesen], [0, 0, 0, 5], "kaputte Einträge abgewiesen, nichts übernommen");
@@ -153,16 +154,18 @@ const SF = { frage: "Erstes Haustier?", antwort: "Bello" }; // Sicherheitsfrage 
   const schlecht = KO.einladungErstellen({ name: "X", lehrplan: { land: "CH", kanton: { boese: 1 } }, klasse: 12 });
   gleich(KO.einladungLesen(schlecht), { name: "X", lehrplan: { land: "CH", kanton: null } }, "ungültiger Kanton und Klasse verworfen");
 
-  // Gesperrte Personen auf einem anderen Gerät (DF4 a) und Aufsichten in einer Datei (AS1 a)
+  // Gesperrte Personen auf einem anderen Gerät (DF4 a) und Aufsichten in einer Datei (OA1 a, OA2 a; bis LERN_Session19 AS1 a)
   {
     await KO.aufsichtAnmelden(vater.id, "5555");
     const miaCode = await KO.setzePin(mia.id, "2222"); // neuer Code, den der Test kennt
     const vonHier = DA.sichern([mia.id]);
     const mitAufsicht = { ...vonHier, personen: [...vonHier.personen, KERN.person.fuerDatei(KO.aufsichtFinde(vater.id), KO.GERAET)] };
-    // „anderes Gerät“: leerer Speicher
+    // „anderes Gerät“: leerer Speicher; ein Jugendlicher liest ein — die Aufsicht kommt mit, gesperrt (OA2 a)
     localStorage.d.clear(); sessionStorage.d.clear();
     const e1 = DA.einlesen(mitAufsicht);
-    gleich([e1.konten, e1.abgewiesen, KO.aufsichten().length], [1, 1, 0], "ohne angemeldete Aufsicht: Aufsicht in der Datei abgewiesen (AS1 a)");
+    gleich([e1.konten, e1.abgewiesen, KO.aufsichten().length, KO.gesperrt(vater.id)], [2, 0, 1, true], "ohne angemeldete Aufsicht: Aufsicht der Datei gesperrt übernommen (OA2 a)");
+    // Gerät ohne Aufsicht mit PIN: ihr Code reicht (OA1 a) — wie die erste Aufsicht ohne Bestätigung angelegt wird (D5)
+    gleich(KO.codeReicht(vater.id), true, "Gerät ohne Aufsicht mit PIN: Code reicht");
     gleich(KO.gesperrt(mia.id), true, "Konto mit PIN auf dem anderen Gerät gesperrt");
     await wirft(() => KO.anmelden(mia.id, "2222"), "gesperrt: keine Anmeldung mit der alten PIN", "PIN");
     await wirft(() => KO.freischalten(mia.id, "1357", { code: "AAAA-AAAA-AAAA" }), "falscher Code", "Code stimmt nicht");
@@ -176,10 +179,42 @@ const SF = { frage: "Erstes Haustier?", antwort: "Bello" }; // Sicherheitsfrage 
     const e2 = DA.einlesen(mitAufsicht);
     gleich([e2.abgewiesen, KO.gesperrt(vater.id)], [0, true], "mit angemeldeter Aufsicht: Aufsicht der Datei gesperrt übernommen");
     await wirft(() => KO.aufsichtAnmelden(vater.id, "5555"), "gesperrte Aufsicht: keine Anmeldung", "PIN");
+    // OA1 a: Hier gibt es schon eine Aufsicht mit PIN — der (richtige) Code der Aufsicht aus der Datei reicht nicht
+    gleich(KO.codeReicht(vater.id), false, "Gerät mit Aufsicht mit PIN: Code reicht nicht");
+    await wirft(() => KO.freischalten(vater.id, "4321", { code: vaterCode }), "Aufsicht nur mit Code auf einem Gerät mit Aufsicht", "bestätigen");
+    gleich(KO.gesperrt(vater.id), true, "nach dem abgewiesenen Code weiter gesperrt");
+    // Gegenstück: der Code eines Jugendlichen reicht auch auf einem Gerät mit Aufsicht
+    gleich(KO.codeReicht(mia.id), true, "Jugendlicher: Code reicht immer");
     await wirft(() => KO.freischalten(vater.id, "4321", { bestaetigung: { id: hier.id, pin: "0000" } }), "Bestätigung mit falscher PIN", "bestätigen");
     await KO.freischalten(vater.id, "4321", { bestaetigung: { id: hier.id, pin: "8888" } });
     gleich([KO.gesperrt(vater.id), KO.aufsichtAktiv()?.id], [false, vater.id], "Aufsicht mit Bestätigung freigeschaltet und angemeldet");
     await wirft(() => KO.freischalten(mia.id, "1111", { bestaetigung: { id: vater.id, pin: "4321" } }), "Jugendlicher nicht über Bestätigung", "bestätigen");
+  }
+
+  // Abgleich über einen Ordner (Plan C5, gemeinsam/abgleich.js über KERN.abgleich; OA1 a, OA2 a): die Datei eines Geräts
+  // auf einem anderen einlesen, während dort niemand als Aufsicht angemeldet ist
+  {
+    global.LST_DATEN = DA;
+    const AB = require(path.join(APP, "gemeinsam", "abgleich.js"));
+    localStorage.d.clear(); sessionStorage.d.clear();
+    const { aufsicht: mama } = await KO.aufsichtAnlegen({ ...SF, name: "Mama", art: "eltern", pin: "4444" });
+    const { konto: ben } = await KO.anlegen({ name: "Ben", geboren: "2011-02-03", klasse: "9" });
+    LST.schreibe("runden", [{ id: "r-ab-1", person: ben.id, zeit: "2026-11-07T08:00:00.000Z", inhalt: "brueche", stufe: "g", aufgaben: 8, fehler: 0, gezeigt: 0, dauer: 60, liste: [] }]);
+    AB.benenne("Laptop");
+    const text = AB.dateiInhalt();
+    const kopf = JSON.parse(text);
+    gleich([kopf.format, kopf.art, kopf.geraet.name, kopf.personen.length, kopf.runden.length], ["reihe-daten", "abgleich", "Laptop", 2, 1], "eigene Abgleich-Datei: Format, Art, Gerät, Konten, Runden");
+    gleich(kopf.personen.some(p => "pin" in p || "aufsicht" in p), false, "Abgleich-Datei ohne PIN und Verbindungen");
+    // anderes Gerät mit einer eigenen Aufsicht; angemeldet ist niemand
+    localStorage.d.clear(); sessionStorage.d.clear();
+    const { aufsicht: papa } = await KO.aufsichtAnlegen({ ...SF, name: "Papa", art: "eltern", pin: "5656" });
+    KO.aufsichtAbmelden();
+    const r = AB.datenEinlesen(text);
+    gleich([r.konten, r.runden, r.abgewiesen], [2, 1, 0], "Abgleich ohne angemeldete Aufsicht: Konten und Runde dazu, nichts abgewiesen");
+    gleich([KO.gesperrt(mama.id), KO.codeReicht(mama.id), KO.verbundene(papa.id).length], [true, false, 0], "Mama gesperrt, Code reicht nicht (Papa ist Aufsicht), Ben mit niemandem verbunden");
+    await KO.freischalten(mama.id, "4545", { bestaetigung: { id: papa.id, pin: "5656" } });
+    gleich(KO.gesperrt(mama.id), false, "Mama mit Papas Bestätigung freigeschaltet");
+    gleich(AB.ergebnisText({ konten: 1, runden: 2, abgewiesen: 1 }), "Dazugekommen: 1 neues oder geändertes Konto, 2 neue Runden. 1 ungültiger Eintrag nicht übernommen.", "Ergebnis in einem Satz");
   }
 
   // PIN vergessen der Aufsicht (RL2 a): Bestätigung, Code, Sicherheitsfrage; Zurücksetzen mit Frist

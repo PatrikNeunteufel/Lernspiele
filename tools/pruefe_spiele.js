@@ -751,6 +751,20 @@ if (opt.daten !== 0 && (!nurSpiele.length || nurSpiele.includes("daten"))) {
     if (r.an) maengel.push("Anmeldung mit der PIN des anderen Geräts ging");
     if (r.falsch !== "Der Code stimmt nicht.") maengel.push(`falscher Code: „${r.falsch}“`);
     if (r.danach || !r.an2) maengel.push("nach dem Freischalten nicht anmeldbar");
+    // OA1 a: Auf einem Gerät, auf dem Papa schon Aufsicht mit PIN ist, reicht Mamas richtiger Code nicht; Papa bestätigt
+    const e = geraet();
+    e.__datei = datei;
+    const r2 = await vm.runInContext(`(async () => {
+      LS.neuerSpieler("Papa"); await LS.setzePin("Papa", "1122");
+      LS.abgleich.datenEinlesen(__datei);
+      let mitCode = "";
+      try { await LS.freischalten("Mama", "1357", { code: "K7QM-2XRA-9TPL" }); } catch (e) { mitCode = e.message; }
+      const nachCode = LS.gesperrt("Mama");
+      if (nachCode) await LS.freischalten("Mama", "1357", { von: "Papa", vonPin: "1122" });
+      return { mitCode, nachCode, danach: LS.gesperrt("Mama"), soll: KERN.person.NUR_BESTAETIGUNG };
+    })()`, e);
+    if (r2.mitCode !== r2.soll || !r2.nachCode) maengel.push(`Gerät mit Aufsicht: Code allein ${r2.mitCode ? "abgewiesen mit „" + r2.mitCode + "“" : "hat freigeschaltet"}`);
+    if (r2.danach) maengel.push("Gerät mit Aufsicht: mit Bestätigung nicht freigeschaltet");
     for (const m of maengel) console.log(`    FEHLER  Geschützte Aufsicht: ${m}`);
     fehlerZahl += maengel.length;
     console.log(`${maengel.length ? "✗" : "✓"} Geschützte Aufsicht: gesperrt, mit dem Code freigeschaltet`);

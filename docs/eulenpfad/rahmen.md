@@ -546,7 +546,10 @@ Ergebnis. Jede Seite lädt es direkt nach `spiel.js`.
 - **Geschützte Aufsicht** (DF4 a): Eine Aufsicht reist ohne PIN, mit dem Vermerk `geschuetzt` und dem Prüfwert ihres
   Wiederherstellungscodes. Auf einem Gerät, auf dem sie keine eigene PIN hat, ist sie **gesperrt** (🔒 auf der
   Anmeldung, `LS.gesperrt(name)`): Tippt man sie an, schaltet man sie mit ihrem Code oder mit der PIN einer anderen
-  Aufsicht dieses Geräts frei und legt eine neue PIN fest (`LS.freischalten`); der Code bleibt derselbe. Setzt eine
+  Aufsicht dieses Geräts frei und legt eine neue PIN fest (`LS.freischalten`); der Code bleibt derselbe. Der Code reicht
+  nur auf einem Gerät ohne Aufsicht mit PIN; gibt es eine, bestätigt sie (OA1 a, LERN_Session19, `KERN.person.codeReicht`;
+  die Anmeldung zeigt dann kein Codefeld). Vorher brachte eine selbst gebaute Datei mit bekanntem Code eine Aufsicht
+  ohne Bestätigung aufs Gerät. Setzt eine
   andere Aufsicht ihre PIN in Verwaltung → Konten, ist sie ebenfalls freigeschaltet. Gibt es weder Code noch eine andere
   Aufsicht, richtet man zuerst mit „🐣 Ich bin neu“ eine Aufsicht ein. Bis LERN_Session18 kam sie ohne PIN an, und wer
   sie auf einem Gerät ohne andere Aufsicht antippte, konnte eine PIN festlegen.

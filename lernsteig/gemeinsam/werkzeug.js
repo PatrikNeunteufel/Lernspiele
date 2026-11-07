@@ -10,8 +10,16 @@ var LST = (function () {
   const SPEICHER = KERN.speicher(PRAEFIX);
   /** Gespeicherten Wert lesen; ohne Speicher (privates Fenster, Node) gilt der Standard. */
   const lies = (schluessel, standard) => SPEICHER.lies(schluessel, standard);
-  /** Speichern; true, wenn es gespeichert ist (false: Speicher voll oder gesperrt). */
-  const schreibe = (schluessel, wert) => SPEICHER.schreibe(schluessel, wert);
+  // Wer wissen will, dass etwas gespeichert wurde (der Abgleich über einen Ordner zieht danach die eigene Datei nach,
+  // gemeinsam/abgleich.js; wie im Eulenpfad).
+  const aenderungsHoerer = [];
+  const beiAenderung = f => aenderungsHoerer.push(f);
+  /** Speichern und die Hörer benachrichtigen; true, wenn es gespeichert ist (false: Speicher voll oder gesperrt). */
+  function schreibe(schluessel, wert) {
+    const ok = SPEICHER.schreibe(schluessel, wert);
+    for (const f of aenderungsHoerer) try { f(schluessel); } catch (e) { /* ein Hörer darf das Speichern nicht stören */ }
+    return ok;
+  }
 
   /** Felder der Runden und Rekorde von vor LERN_Session15 und ihre Namen im gemeinsamen Format (R1 a, kern/runden.js). */
   const ALTE_FELDER = { konto: "person", uebung: "inhalt" };
@@ -116,7 +124,7 @@ var LST = (function () {
   }
 
   return {
-    PRAEFIX, ALTE_FELDER, alteEintraegeUmdeuten, lies, schreibe, quelle, zufall, waehle, mische, tagText, wochenSerie,
+    PRAEFIX, ALTE_FELDER, alteEintraegeUmdeuten, lies, schreibe, beiAenderung, quelle, zufall, waehle, mische, tagText, wochenSerie,
     TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl,
     NIVEAUS, niveauNr, stufenListe, stufeVon, zielstufe,
   };

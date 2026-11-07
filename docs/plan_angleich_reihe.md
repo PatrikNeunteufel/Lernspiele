@@ -19,7 +19,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
 | B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.18.0 mit `daten.js` (beide Apps), `abgleich.js` (Eulenpfad) und `rollen.js` (beide Apps); offen: Ablauf der Runde, Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 in Arbeit seit 2026-11-06 (LERN_Session17): Einstieg und Seiten des Lernsteigs im Ersatz-DOM gebaut, als Nächstes die offenen Kern-Teile (AN2 a), dann B2 Schritt 3 | Abschnitt B |
-| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
+| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 zum Teil (Abgleich, Aufsicht), C6 zum Teil (Entwickler-Modus); als Nächstes B2 | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
@@ -142,7 +142,9 @@ Kindersprache.
    (Übungen mit geprüften Stufen des gewählten Ziels nach vorn), Wackel-Stufen aus dem Kompetenzstand.
 4. **Profil:** Person (Vorname, Geburtsdatum B3, Klasse 1.–3. Oberstufe, Land und Kanton), Niveau je Fach,
    Prüfungsziel, Rechnermodell, Fokus; Aufbau wie das Eulenpfad-Profil (Formular, Speichern, sofort wirkende Häkchen).
-5. **Verwaltung (nur Aufsicht):** Konten, Freigabe, Abgleich, Einstellungen, Entwicklung — wie Eulenpfad.
+5. **Verwaltung (nur Aufsicht):** Konten, Freigabe, Abgleich, Einstellungen, Entwicklung — wie Eulenpfad. Abgleich über
+   einen Ordner seit LERN_Session19 (`lernsteig/gemeinsam/abgleich.js`; Aufsichten nach OA1 a, OA2 a); offen: Konten
+   (Entfernen, auch gesperrter Aufsichten), Freigabe je Gerät.
    **Aufsicht wie Eulenpfad** (D5): neue Aufsicht nur mit Frage und Bestätigung durch eine bestehende, PIN vergessen
    mit denselben Stufen. Dazu im Lernsteig die Verbindung mit Zustimmung (AU1 a, AF1 a, AF2 a) und die Rolle
    **Lehrperson/Gruppenleitung** nach [konzept_gruppen.md](konzept_gruppen.md) (G2 a: „Ich bin Lehrperson“), in
@@ -394,3 +396,14 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   0,7 s); richtig nach einem Fehlversuch „Jetzt stimmt es.“ mit dem Weg und „Weiter“ ohne Selbstlauf. Nicht b (Knopf
   „Weg ansehen“), nicht c (heute: Weg 1,2 s sichtbar, nicht lesbar). Kipppunkt: Jugendliche sollen ihren Weg auch nach
   einer richtigen Antwort prüfen.
+- **OA1 a** (2026-11-07, LERN_Session19): Aufsichten reisen im Abgleich (Ordner und Datei) immer mit und kommen gesperrt
+  an; eine gesperrte Aufsicht schaltet ihr Wiederherstellungscode nur frei, wenn das Gerät noch keine Aufsicht mit PIN
+  hat, sonst braucht es die Bestätigung einer Aufsicht des Geräts mit deren PIN (wie beim Anlegen, D5, KR2 a). Regel im
+  Kern (`KERN.person.freischalten`), für alle Apps. Befund dazu: Im Eulenpfad brachte bis dahin jede selbst gebaute Datei
+  mit bekanntem Code eine Aufsicht ohne Bestätigung aufs Gerät (Datei und Ordner). Nicht b (Ordner gilt als von der
+  Aufsicht gebracht, Code reicht), nicht c (AS1 a auch im Ordner). Kipppunkt: Aufsichten müssen oft auf Geräte, deren
+  andere Aufsicht nicht greifbar ist.
+- **OA2 a** (2026-11-07, LERN_Session19): AS1 a ist aufgehoben — Aufsichten reisen in Datei und Ordner gleich mit,
+  geschützt wird beim Freischalten (OA1 a). Der Filter `rollen` von `KERN.daten.einlesen` bleibt im Kern, der Lernsteig
+  benutzt ihn nicht mehr. Nicht b (AS1 a bleibt für Dateien). Kipppunkt: gesperrte fremde Aufsichten auf der Anmeldung
+  sind selbst ein Schaden — dann b und ein Entfernen gesperrter Aufsichten in der Verwaltung.

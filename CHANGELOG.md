@@ -631,3 +631,18 @@
   vor dem Umbau (die Kennung einer Runde entsteht erst beim Speichern).
 - Testskript: Liste je Aufgabe passt zur Runde (Aufgaben, Fehler, gezeigt), Serie im Protokoll mit derselben Kennung
   (Gegenprobe schlägt an), Mix-Meldung trägt ihre Fehler selbst; Musterrunden der Anleitungsbilder im neuen Format.
+- Entscheide OA1 a, OA2 a (Aufsichten im Abgleich). Befund: In beiden Apps brachte eine selbst gebaute Datei mit
+  bekanntem Wiederherstellungscode eine Aufsicht ohne Bestätigung aufs Gerät — im Eulenpfad über Datei und Ordner, im
+  Lernsteig wäre es mit dem Ordner gekommen. Kern 1.21.0: Eine gesperrte Aufsicht schaltet ihr Code nur auf einem Gerät
+  ohne Aufsicht mit PIN frei, sonst bestätigt eine Aufsicht des Geräts (`KERN.person.codeReicht`); die Anmeldung beider
+  Apps zeigt dann kein Codefeld und sagt in einem Satz, warum. AS1 a aufgehoben: Im Lernsteig reisen Aufsichten in Datei
+  und Abgleich immer mit und kommen gesperrt an.
+- Lernsteig: Abgleich über einen Ordner in der Verwaltung (Plan C5; `lernsteig/gemeinsam/abgleich.js` über
+  `KERN.abgleich`, `lernsteig-sync-`, IndexedDB `lernsteig`), selbsttätig auf der Startseite, ohne Ordner-Fähigkeit über
+  eine Datei; Änderungshaken `LST.beiAenderung` (auch für Konten); Startseite zeichnet nach einem Abgleich neu.
+- Tests: Kern (weitere Aufsicht aus einer Datei: Code reicht nicht, auf einem leeren Gerät schon), Konten (Aufsicht aus
+  einer Datei ohne angemeldete Aufsicht gesperrt übernommen, Code reicht nicht neben einer anderen Aufsicht, Abgleich
+  zwischen zwei Geräten), Eulenpfad (Mama neben Papa nur mit Bestätigung); Gegenprobe ohne die neue Prüfung schlägt in
+  allen drei an. Im Browser: Abschnitt „Abgleich zwischen Geräten“ und Freischalten ohne Codefeld.
+- Doku: docs/kern/rahmen.md 4.7, 4.19, 4.20; lernsteig/rahmen.md 5b, 5c, 6; rahmen.md 10; Plan (OA1 a, OA2 a, C5),
+  Kern-Changelog.

@@ -12,7 +12,7 @@
 (function (KERN) {
   const TAGE = 3;
   const BESTAETIGEN = "Eine Aufsicht dieses Geräts muss mit ihrer PIN bestätigen.";
-  const aufsichtenMitPin = personen => personen.alle().filter(p => p.rolle === "aufsicht" && p.pin);
+  const aufsichtenMitPin = personen => KERN.person.aufsichtenMitPin(personen);
 
   /**
    * Bestätigung durch eine bestehende Aufsicht (KR2 a, D5): { id, pin } einer Aufsicht dieses Geräts mit PIN, nicht die

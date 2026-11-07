@@ -22,7 +22,8 @@ var LST_KONTEN = (function () {
   const ROLLEN = [{ id: "eltern", name: "Eltern" }, { id: "lehrperson", name: "Lehrperson" }];
   /** Felder, die nur auf diesem Gerät gelten: Geheimnisse und Verbindungen zu Aufsichten des Geräts. */
   const GERAET = ["pin", "wiederherstellung", "aufsicht", "anfragen"];
-  const SPEICHER = KERN.speicher(LST.PRAEFIX);
+  // Geschrieben über LST.schreibe, damit der Abgleich über einen Ordner Änderungen an Konten sieht (LST.beiAenderung)
+  const SPEICHER = { ...KERN.speicher(LST.PRAEFIX), schreibe: LST.schreibe };
   const LISTE = P.liste(SPEICHER, { schluessel: "personen" });
 
   // ---------- Umzug der alten Listen (einmal) ----------
@@ -168,6 +169,8 @@ var LST_KONTEN = (function () {
   // ist die Person gesperrt (KERN.person.gesperrt), bis sie mit ihrem Wiederherstellungscode und einer neuen PIN
   // freigeschaltet ist — eine Aufsicht auch mit der Bestätigung einer anderen Aufsicht dieses Geräts. Der Code bleibt.
   const gesperrt = id => P.gesperrt(LISTE.finde(id));
+  /** Reicht für diese gesperrte Person ihr Code? Eine Aufsicht nur, solange das Gerät keine Aufsicht mit PIN hat (OA1 a). */
+  const codeReicht = id => P.codeReicht(LISTE, id);
   /** Gesperrte Person freischalten und anmelden. weg: { code } oder (nur Aufsicht) { bestaetigung: { id, pin } }. */
   async function freischalten(id, neuePin, weg = {}) {
     const p = LISTE.finde(id);
@@ -301,7 +304,7 @@ var LST_KONTEN = (function () {
     angemeldet, alsGast, istGast, gastErlaubt,
     einladungErstellen, einladungLesen, pinGueltig: G.pinGueltig,
     ROLLEN, aufsichten, aufsichtFinde, aufsichtAnlegen, aufsichtAnmelden, aufsichtAbmelden, aufsichtAktiv, aufsichtPinVergessen,
-    gesperrt, freischalten, fristStand, fristAnfordern, fristAbbrechenMit, fristFaellig, FRIST_TAGE: KERN.rollen.TAGE,
+    gesperrt, codeReicht, freischalten, fristStand, fristAnfordern, fristAbbrechenMit, fristFaellig, FRIST_TAGE: KERN.rollen.TAGE,
     verbundene, mitleser, angefragt, anfragen, antworten, loesen, kontoFuerAufsicht, verbindeEingelesene, setzeGeraeteEinstellung,
     LISTE,
   };

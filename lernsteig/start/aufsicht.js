@@ -91,6 +91,8 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
           onclick: () => LST_DATEN.herunterladen(LST_DATEN.sichern(verbunden.map(k => k.id)), LST_DATEN.dateiname(`aufsicht-${a.name}`)) }),
         el("button", { type: "button", class: "knopf", text: "Einlesen", onclick: () => datei.click() }), datei)));
 
+    teile.push(el("h2", { class: "abschnitt", text: "Abgleich zwischen Geräten" }), abgleichKarte());
+
     const e = LST.lies("einstellungen", {});
     const setze = (f, w) => { KO.setzeGeraeteEinstellung(f, w); meldung = "Einstellung gespeichert."; zeichne(); };
     teile.push(el("h2", { class: "abschnitt", text: "Einstellungen für dieses Gerät" }), el("section", { class: "einstellungen" },
@@ -103,6 +105,50 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     teile.push(el("h2", { class: "abschnitt", text: "In den Eulenpfad übernehmen" }), uebernahmeKarte(a));
     teile.push(el("h2", { class: "abschnitt", text: "Entwicklung" }), entwicklungKarte());
     return teile;
+  }
+
+  // Abgleich über einen Ordner (Plan C5, DF3 a; gemeinsam/abgleich.js über KERN.abgleich), wie im Eulenpfad: den Ordner
+  // wählt die Aufsicht, danach gleicht jedes Gerät selbsttätig ab. Aufsichten kommen gesperrt an (OA1 a, OA2 a).
+  let abgleichMeldung = "";
+  function abgleichKarte() {
+    const ab = LST_ABGLEICH;
+    const melde = r => {
+      abgleichMeldung = r.status === "ok" ? `Abgeglichen. ${ab.ergebnisText(r.neu)}`
+        : r.status === "keine-erlaubnis" ? "Der Browser hat den Zugriff auf den Ordner nicht erlaubt."
+        : r.status === "kein-ordner" ? "Noch kein Ordner gewählt."
+        : `Das ging nicht: ${r.fehler}`;
+      zeichne();
+    };
+    const zeit = iso => new Date(iso).toLocaleString("de-CH", { dateStyle: "short", timeStyle: "short" });
+    const st = ab.stand();
+    const name = feld("Name dieses Geräts", { type: "text", name: "geraet-name", maxlength: "30", value: ab.geraet().name, placeholder: "z. B. Laptop Wohnzimmer" }, "Steht bei den anderen Geräten unter „Andere Geräte“.");
+    name.querySelector("input").addEventListener("change", ev => { ab.benenne(ev.target.value); abgleichMeldung = "Name gespeichert."; zeichne(); });
+    const datei = el("input", { type: "file", accept: "application/json", hidden: true, onchange: async ev => {
+      const f = ev.target.files[0];
+      if (!f) return;
+      try { abgleichMeldung = `Eingelesen. ${ab.ergebnisText(await ab.dateiEinlesen(f))}`; }
+      catch (err) { abgleichMeldung = err instanceof SyntaxError ? "Die Datei ist kein lesbares JSON." : err.message; }
+      zeichne();
+    } });
+    const ordnerTeil = ab.kannOrdner
+      ? [st && st.ordner
+          ? el("p", {}, "Ordner ", el("b", { text: st.ordner }), `, zuletzt abgeglichen ${zeit(st.zuletzt)}. Andere Geräte: ${st.geraete.length
+            ? st.geraete.map(g => (g.fehler ? `${g.datei} (unlesbar)` : `${g.name || g.id} (Stand ${zeit(g.gesichert)})`)).join(", ") : "noch keine"}.`)
+          : el("p", { text: "Noch kein Ordner gewählt." }),
+        el("div", { class: "knopf-zeile" },
+          el("button", { type: "button", class: st && st.ordner ? "knopf" : "knopf haupt", "data-aktion": "ordner-waehlen", text: st && st.ordner ? "Anderer Ordner" : "Ordner wählen",
+            onclick: async () => { try { melde(await ab.waehlen()); } catch (err) { abgleichMeldung = "Kein Ordner gewählt."; zeichne(); } } }),
+          st && st.ordner ? el("button", { type: "button", class: "knopf", "data-aktion": "abgleichen", text: "Jetzt abgleichen", onclick: async () => melde(await ab.jetzt(true)) }) : null,
+          st && st.ordner ? el("button", { type: "button", class: "knopf", text: "Ordner vergessen", onclick: async () => { await ab.vergessen(); abgleichMeldung = "Ordner vergessen."; zeichne(); } }) : null)]
+      : [el("p", { class: "leise", text: "Dieser Browser kann keinen Ordner verwenden — das geht heute in Chrome und Edge auf dem Computer. Abgleichen geht hier über eine Datei: unten sichern, auf dem anderen Gerät einlesen, und umgekehrt." })];
+    return el("section", { class: "einstellungen" },
+      el("p", { text: "Üben Jugendliche auf mehreren Geräten, wählt man auf jedem denselben Ordner — einen Netzwerkordner oder den Ordner eines Cloud-Dienstes. Jedes Gerät schreibt dort seine eigene Datei und liest die der anderen: Konten, Aufsichten, Runden und Rekorde. PIN, Code und Verbindungen bleiben auf dem Gerät." }),
+      el("p", { class: "leise", text: "Ein Konto mit PIN ist auf einem anderen Gerät gesperrt, bis es dort mit dem Wiederherstellungscode freigeschaltet ist. Für eine Aufsicht reicht der Code nur auf einem Gerät ohne Aufsicht; sonst bestätigt eine Aufsicht des Geräts mit ihrer PIN." }),
+      name, ...ordnerTeil,
+      el("div", { class: "knopf-zeile" },
+        el("button", { type: "button", class: "knopf", text: "Abgleich-Datei sichern", onclick: () => ab.dateiSichern() }),
+        el("button", { type: "button", class: "knopf", text: "Abgleich-Datei einlesen", onclick: () => datei.click() }), datei),
+      abgleichMeldung ? el("p", { class: "meldung", role: "status", text: abgleichMeldung }) : null);
   }
 
   // Übernahme in den Eulenpfad (Plan C9, Ü1 a, Ü2 b; KERN.person.uebernehmen): legt die angemeldete Aufsicht im Eulenpfad
