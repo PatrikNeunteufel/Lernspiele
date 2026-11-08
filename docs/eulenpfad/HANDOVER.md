@@ -1,6 +1,23 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-08, nach LERN_Session23** ([Report](report/LERN_Session23_2026-11-08.md)):
+- **Kern 1.29.0:** `KERN.uebersicht` (1.28.0, KT1 a; Tab Spiele und Tab Übungen darauf), `KERN.terme` mit den Formen
+  `primfaktoren` und `bruchterm` und „/“ als Division durch eine Zahl (1.29.0).
+- **Eulenpfad:** Tab Spiele auf `KERN.uebersicht` mit neuem Seitentest (`tools/eulenpfad_seiten.js`), Zufalls-Skala
+  ohne Überlauf der Knöpfe; Hooks: Testzahlen aus `.temp/pruefung` (Stop-Hook), Übung oder Spiel in der Commit-Message
+  (git-Hook, HK1 a, HK2 a).
+- **Lernsteig:** Abdeckungstabelle aller 27 Übungen am Wortlaut (AT1 a; 215 Teile: 67 abgedeckt, 62 teilweise, 77
+  offen, 9 in anderer Übung); MA.1.A.3 nach Plan E 1 bis aufs Zurückgestellte (E1-1 a bis E1-6 a: Nenner der Liste,
+  Umschreiben in sechs Richtungen, Überprüfen, Rechner je Aufgabe, Primfaktoren, Brüche mit Variablen,
+  Rechteckmodell); Stand in [docs/lernsteig/HANDOVER.md](../lernsteig/HANDOVER.md).
+- **Tests:** Kern „5752 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 140 Hinweise.“ (Konten 101 Fälle), Gratwanderung
+  „Keine Fehler.“; Eulenpfad nur Teil `tab` und `zufalls-skala` — letzter voller Lauf auf dem Stand nach `141cc53`,
+  gepusht bis `e7ceb90` ohne vollen Lauf.
+- **Weiter mit:** voller Eulenpfad-Lauf auf Patriks Entscheid, dann Push von `73386cb` und diesem Abschluss; Freigabe
+  von brueche und rationale-zahlen im Prüfstand; Plan E 2 bis E 10 mit der Abdeckungstabelle; Prüfer-Kandidat
+  (Abbruch von `pruefe_uebungen.js` je Übung); dann C4, C6–C8, C10.
+
 **2026-11-08, nach LERN_Session22** ([Report](report/LERN_Session22_2026-11-08.md)):
 - **Kern:** unverändert 1.27.0. **Eulenpfad:** nur Prüfvermerke von Patrik (magnet-labor, taschengeld-planer).
 - **Lernsteig:** Plan E 9 vollständig erledigt — Vorrat von rechtschreibung, englisch- und franzoesisch-grammatik (je

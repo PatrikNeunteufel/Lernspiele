@@ -1,6 +1,18 @@
 # Handover — Lernsteig
 
 ## Stand
+**2026-11-08, nach LERN_Session23** (Lernspiele, [Report](../eulenpfad/report/LERN_Session23_2026-11-08.md)): Kern 1.29.0.
+Tab Übungen auf `KERN.uebersicht` (KT1 a). Abdeckungstabelle (AT1 a): `docs/lernsteig/abdeckung.json`, Übersicht
+`abdeckung.md` (erzeugt mit `node tools/abdeckung.js`), alle 80 Stufen am Wortlaut, geprüft gegen die gesicherten
+Seiten (`docs/lernsteig/lehrplan/quellen_*`, `tools/lehrplan_wortlaut.js`); 215 Teile, 67 abgedeckt, 62 teilweise, 77
+offen, 9 in anderer Übung. MA.1.A.3 nach E 1: `rationale-zahlen` heisst „Dezimalzahlen und rationale Zahlen“, g mit
+„Welches Ergebnis stimmt?“, h mit Primfaktoren; `brueche` mit Nennern der Liste, Umschreiben in sechs Richtungen,
+Dezimalzahlen plus/minus und Rechner-Aufgaben in f (Rechner je Aufgabe, E1-4 a), Brüche mit Variablen in i,
+Rechteckmodell zu jeder Bruch-Aufgabe in f und g (Darstellung `rechteck`, E1-6 a); Erweiterungen in ihrer Stufe für
+alle Niveaus (E1-5 a). Offen in MA.1.A.3: Nenner 3 und 6, Variablen im Nenner. Tests: Konten „101 Fälle, 0 Fehler.“,
+`pruefe_uebungen.js` „0 Fehler, 140 Hinweise.“ (offene und teilweise Teile der Abdeckung). Weiter mit: Freigabe im
+Prüfstand durch Patrik, Plan E 2 bis E 10, C4, C6–C8.
+
 **2026-11-08, nach LERN_Session22** (Lernspiele, [Report](../eulenpfad/report/LERN_Session22_2026-11-08.md)): Kern 1.27.0.
 Plan E 9 vollständig: rechtschreibung d–g (51/49/48/48), englisch-grammatik b–d (49/49/54), franzoesisch-grammatik b–d
 (51/48/52) nach SP1 a, die drei Challenges (196/152/151) auch als Serie; Satzvarianten in beiden Fremdsprachen nur noch
