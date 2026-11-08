@@ -22,7 +22,7 @@ var LST_KATALOG = (function () {
     {
       id: "rationale-zahlen",
       symbol: "zahlengerade",                 // Piktogramm (symbole.js, SY1 a)
-      titel: "Rationale Zahlen rechnen",
+      titel: "Dezimalzahlen und rationale Zahlen",
       fach: "mathematik",
       thema: "Zahl und Variable",
       kompetenz: "MA.1.A.3",

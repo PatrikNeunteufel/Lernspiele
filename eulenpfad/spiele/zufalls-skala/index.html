@@ -22,7 +22,11 @@
   .zufall-bild .karte-rand { fill: #fff; stroke: var(--deko-7); stroke-width: 3; }
   .zufall-bild .karte-zahl { font-size: 26px; font-weight: 900; fill: var(--text); text-anchor: middle; }
   .zufall-bild .frage-zeichen { font-size: 44px; font-weight: 900; fill: var(--deko-7); text-anchor: middle; }
-  .skala .wahl-knopf { min-width: 0; padding-left: 8px; padding-right: 8px; }
+  /* Fünf Knöpfe in einer Reihe: breiter als die übliche Auswahl, Schrift mit der Breite kleiner; die langen Wörter
+     tragen weiche Trennstellen (TRENNUNG), falls sie trotzdem nicht passen (Bemerkung Patrik LERN_Session23). */
+  .wahl.skala { max-width: 980px; }
+  .skala .wahl-knopf { min-width: 0; padding-left: 8px; padding-right: 8px; font-size: clamp(16px, 1.8vw, 18px); }
+  .skala .wahl-knopf > span { max-width: 100%; }
   .skala .wahl-knopf small { display: block; }
   .wahl-knopf { font-size: clamp(18px, 4.4vw, 24px); font-weight: 900; }
   .zahl-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: clamp(22px, 5vw, 30px); font-weight: 900; margin: 4px 0 8px; }
@@ -80,6 +84,8 @@ const STUFEN_TEXT = {
   sicher: { bild: "✅", text: "sicher", klein: "immer" },
 };
 const STUFEN_TEXT_FUENF = { ...STUFEN_TEXT, moeglich: { bild: "🤷", text: "möglich", klein: "etwa halb-halb" } };
+// Weiche Trennstellen nur auf den Knöpfen der Skala (nicht im Lösungssatz): ein schmaler Knopf trennt nach Silben.
+const TRENNUNG = { unwahrscheinlich: "un­wahr­scheinlich", wahrscheinlich: "wahr­scheinlich" };
 
 // Je Stufe: Aufgabenarten und Dinge
 const STUFE = {
@@ -483,7 +489,7 @@ LS.spiel({
         el("div", { class: "frage" }, ...(a.s.ding === "summe" ? ["Du würfelst mit zwei Würfeln. ", ...ereignisTeile(a.s, a.e)] : ereignisTeile(a.s, a.e))));
       const box = LS.auswahl(ctx, {
         optionen: fuenf ? FUENF : DREI, richtig: a.loesung, loesung: loesungText, lob: `Genau: ${loesungText}`, breite: fuenf ? 110 : 140,
-        inhalt: w => (fuenf ? STUFEN_TEXT_FUENF : STUFEN_TEXT)[w],
+        inhalt: w => (fuenf ? { ...STUFEN_TEXT_FUENF[w], text: TRENNUNG[w] || STUFEN_TEXT_FUENF[w].text } : STUFEN_TEXT[w]),
         hinweis: a.art === "summeSkala" ? HINWEIS_SUMME : fuenf ? HINWEIS_FUENF : HINWEIS_DREI,
       });
       if (fuenf) box.classList.add("skala");

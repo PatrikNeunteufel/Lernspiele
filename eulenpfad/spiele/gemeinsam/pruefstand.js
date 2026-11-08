@@ -317,6 +317,10 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "mittelwert-waage": {
+      "am": "2026-11-08",
+      "von": "Patrik"
+    },
     "netz-falter": {
       "am": "2026-11-04",
       "von": "Patrik"
@@ -335,6 +339,10 @@ const PRUEFSTAND = {
     },
     "preis-tabelle": {
       "am": "2026-11-01",
+      "von": "Patrik"
+    },
+    "prozent-bruecke": {
+      "am": "2026-11-08",
       "von": "Patrik"
     },
     "quader-volumen": {
@@ -395,6 +403,10 @@ const PRUEFSTAND = {
     },
     "taschengeld-planer": {
       "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "teiler-detektiv": {
+      "am": "2026-11-08",
       "von": "Patrik"
     },
     "tier-sortierer": {

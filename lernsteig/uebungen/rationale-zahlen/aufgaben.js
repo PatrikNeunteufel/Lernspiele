@@ -1,4 +1,4 @@
-/* Übung „Rationale Zahlen rechnen“ — MA.1.A.3, Stufen g, h, i (Entscheid UE1 a; Grenzen nach PA: h und i ohne
+/* Übung „Dezimalzahlen und rationale Zahlen“ — MA.1.A.3, Stufen g, h, i (Entscheid UE1 a; Grenzen nach PA: h und i ohne
    Erweiterung). Aufgaben als Daten, ohne DOM (Vertrag: docs/lernsteig/rahmen.md 4).
    Inhalte je Stufe sinngemäss nach docs/lernsteig/lehrplan/mathematik_zyklus3.md, MA.1.A.3:
    g  Dezimalzahlen bis 5 Wertziffern multiplizieren (308 · 52; 12 · 0.3; Faktoren zusammen, RZ2 a); Brüche mit den

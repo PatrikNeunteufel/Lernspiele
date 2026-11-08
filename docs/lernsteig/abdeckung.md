@@ -5,7 +5,7 @@ Hand ändern** (Plan E 1, Entscheid AT1 a). Geprüft von `tools/pruefe_uebungen.
 
 Erfasst: 27 von 27 Übungen, 80 von 80 Stufen.
 
-## Rationale Zahlen rechnen (`rationale-zahlen`, MA.1.A.3)
+## Dezimalzahlen und rationale Zahlen (`rationale-zahlen`, MA.1.A.3)
 
 ### MA.1.A.3.g — am Wortlaut nachgelesen
 

@@ -1071,3 +1071,15 @@
   nachgesehen. Gegenproben (Zeichen geändert, Beispiel weggelassen, Teil gekürzt, Marke „Erweiterung“
   entfernt, `aus` auf ungesicherte Stufe): alle gemeldet. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig
   „0 Fehler, 147 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 1 am Wortlaut neu gefasst (Entscheide E1-1 a, E1-2 a, E1-3 a): Ganzzahl-Produkte bleiben (Beispiel
+  308 · 52 in MA.1.A.3.g), der Schnitt nach Lehrplan-Stufen bleibt, die Erweiterungen von MA.1.A.3 h und i
+  werden auf Niveau Sek geübt; Umbau in acht Schritten (Nenner der Liste, Nenner 20/50/100, Umschreiben in alle
+  Richtungen, Dezimalzahlen plus/minus, Überprüfen, Rechner, Erweiterungen, Rechteckmodell als Bild), Nenner 3 und
+  6 weiter zurückgestellt (RZ1 a). Übung `rationale-zahlen` heisst „Dezimalzahlen und rationale Zahlen“.
+- Eulenpfad, Zufalls-Skala (Bemerkung Patrik): Auf der Skala mit fünf Knöpfen liefen „unwahrscheinlich“ und
+  „wahrscheinlich“ über den Knopf hinaus (Raster 720 px, Knopf 136 px, Wort 205 bzw. 175 px). Neu: Raster bis
+  980 px, Schrift 16–18 px mit der Breite, weiche Trennstellen nur auf den Knöpfen (un-wahr-scheinlich,
+  wahr-scheinlich; die automatische Trennung greift in Chromium nicht). Nachgemessen in einer Probeseite mit dem
+  Stil der Seite: bei 1024 und 1600 px eine Zeile, bei 768 px zwei Zeilen, bei 375 px wie bisher zwei Knöpfe je
+  Reihe, nirgends Überlauf. Tests: Eulenpfad zufalls-skala „Keine Fehler.“, Kern „5709 Fälle, 0 Fehler.“,
+  Lernsteig „0 Fehler, 147 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

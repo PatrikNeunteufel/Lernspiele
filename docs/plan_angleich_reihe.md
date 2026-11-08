@@ -199,15 +199,18 @@ Kindersprache.
 
 ## E. Fachliche Korrekturen
 
-1. **Rationale Zahlen, Stufe g** (Hinweis Patrik): Der Lehrplan MA.1.A.3.g verlangt Dezimalzahlen bis 5 Wertziffern
-   multiplizieren (308 · 52; 12 · 0.3), Brüche am Rechteckmodell multiplizieren, Brüche (Nenner bis 1000) als
-   Dezimalzahlen, Stammbruch in einer ganzen Zahl. Die Übung zieht ein Viertel reine Ganzzahl-Produkte (`mal-ganz`) und
-   kein Bruch-Produkt; der Name „Rationale Zahlen“ verspricht, was erst Stufe i bringt. Zudem decken `brueche` und
-   `rationale-zahlen` beide MA.1.A.3 g. Neu schneiden: eine Übung je Zahlart und Operation (Dezimalzahlen
-   multiplizieren und dividieren; Brüche; negative Zahlen), Ganzzahl-Produkte nur als Teil mit Dezimalstellen,
-   Bruch-Produkte am Rechteckmodell dazu. Gleicher Massstab für alle Übungen: Prüfen, ob die Aufgaben je Stufe den
-   **ganzen** Inhalt der Lehrplanstufe abdecken (Abdeckungstabelle je Übung).
-   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise. Erledigt (RZ1–RZ3 a, LERN_Session19): Dezimal-Multiplikation in den Grenzen des Lehrplans, Bruch → Dezimalzahl (ohne die Nenner 3 und 6), Stammbruch in einer ganzen Zahl. Offen: `mal-ganz` weiter ein Viertel der Aufgaben von g (`rationale-zahlen/aufgaben.js` `stufeG`); kein Bruch-Produkt in `rationale-zahlen`, in `brueche` nur als Rechnung, das Rechteckmodell nirgends als Bild; Neuschnitt und Name; MA.1.A.3 g weiter doppelt (`brueche` f, g, i und `rationale-zahlen` g, h, i). Abdeckungstabelle nach AT1 a gebaut (Daten `docs/lernsteig/abdeckung.json`, Prüfung in `pruefe_uebungen.js`, Übersicht `docs/lernsteig/abdeckung.md`), erfasst sind alle 27 Übungen, alle 80 Stufen am Wortlaut (geprüft gegen die gesicherten Seiten, `tools/lehrplan_wortlaut.js`): 215 Inhaltsteile — 61 abgedeckt, 64 teilweise, 81 offen, 9 in einer anderen Übung. „Nenner bis 1000“ oben ist überholt: Der Lehrplan nennt für das Rechteckmodell 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, für Dezimalzahlen dazu 1'000 (`docs/lernsteig/lehrplan/mathematik_zyklus3.md`, nachgelesen LERN_Session19).
+1. **MA.1.A.3 am Wortlaut** (Hinweis Patrik; neu gefasst LERN_Session23 nach E1-1 a bis E1-3 a): Massstab ist der
+   Wortlaut der Stufen, geprüft in der Abdeckungstabelle (`docs/lernsteig/abdeckung.md`). Der Schnitt nach
+   Lehrplan-Stufen bleibt; die Zahlarten sind innerhalb der Stufen verteilt (g: Dezimalzahlen in
+   `rationale-zahlen`, Brüche in `brueche`). Ganzzahl-Produkte gehören zum Wortlaut (Beispiel 308 · 52) und bleiben.
+   `rationale-zahlen` heisst „Dezimalzahlen und rationale Zahlen“. Die Erweiterungen von h und i werden auf Niveau
+   Sek geübt (A2). Umbau in dieser Reihenfolge: (1) Nenner ausserhalb der Liste aus `brueche` entfernen (12, 25);
+   (2) Nenner 20, 50, 100 bei plus, minus, mal; (3) Umschreiben in alle sechs Richtungen (MA.1.A.1.h); (4)
+   Dezimalzahlen addieren und subtrahieren (`brueche` f); (5) Ergebnisse überprüfen (`rationale-zahlen` g); (6)
+   Aufgaben mit dem Rechner (`brueche` f); (7) Erweiterungen: Primfaktoren (`rationale-zahlen` h), Brüche mit
+   Variablen (`brueche` i); (8) Rechteckmodell als Bild (`brueche` f, g). Zurückgestellt bleibt: Nenner 3 und 6
+   (periodische Dezimalzahlen, RZ1 a). Gleicher Massstab für alle Übungen: die Abdeckungstabelle.
+   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise. Erledigt (RZ1–RZ3 a, LERN_Session19): Dezimal-Multiplikation in den Grenzen des Lehrplans, Bruch → Dezimalzahl (ohne die Nenner 3 und 6), Stammbruch in einer ganzen Zahl. Offen: die Schritte (1) bis (8) oben; Name umgestellt (LERN_Session23). Abdeckungstabelle nach AT1 a gebaut (Daten `docs/lernsteig/abdeckung.json`, Prüfung in `pruefe_uebungen.js`, Übersicht `docs/lernsteig/abdeckung.md`), erfasst sind alle 27 Übungen, alle 80 Stufen am Wortlaut (geprüft gegen die gesicherten Seiten, `tools/lehrplan_wortlaut.js`): 215 Inhaltsteile — 61 abgedeckt, 64 teilweise, 81 offen, 9 in einer anderen Übung.
 2. **Brutto/Netto** (`daten-rabatt`): Bruttopreis − Rabatt = Nettopreis als Hauptfall; Lesart mit Lehrmittel (mathbuch)
    abgleichen.
    *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen. Stufe l zieht `rabatt`, `rabatt-betrag`, `brutto`, `netto` gleich oft; Brutto und Netto hängen am Zuschlag („Brutto ist Netto plus Zuschlag“), das Ergebnis nach Rabatt heisst „Neuer Preis“; kein Abgleich mit dem mathbuch dokumentiert.
@@ -523,3 +526,15 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
   Zahl der Runden. Ausnahmen nur mit Begründung im Katalog (`vorrat: { <stufe>: "<Grund>" }`), die in der Ausgabe steht;
   heute keine eingetragen, die 21 gemeldeten Stufen in E 9. Nicht b (fester Hinweis unter 50), nicht c (nur die
   Wiederholung in der Runde). Kipppunkt: das Gedächtnis mischt bald über Stufen hinweg — dann b.
+- **E1-1 a** (2026-11-08, LERN_Session23, E 1): Ganzzahl-Produkte gehören zum Wortlaut von MA.1.A.3.g (Beispiel
+  308 · 52) und bleiben, wie heute die Hälfte der Multiplikationen in g (`mal-ganz` 25 %, `mal-dezimal` 25 % der
+  Aufgaben); die Forderung „nur mit Dezimalstellen“ entfällt. Nicht b (`mal-ganz` streichen: das erste Beispiel des
+  Lehrplans würde nicht geübt). Kipppunkt: das Lehrmittel (mathbuch) übt in g keine reinen Ganzzahl-Produkte.
+- **E1-2 a** (2026-11-08, LERN_Session23, E 1): Der Schnitt nach Lehrplan-Stufen bleibt (UE1 a); die Zahlarten sind
+  innerhalb der Stufen auf die Übungen verteilt und in der Abdeckungstabelle mit `in` verwiesen. `rationale-zahlen`
+  heisst „Dezimalzahlen und rationale Zahlen“ (Kennung bleibt). Nicht b (drei Übungen je Zahlart). Kipppunkt: die
+  Übungsauswahl soll nach Zahlart statt nach Lehrplan-Stufe gehen.
+- **E1-3 a** (2026-11-08, LERN_Session23, E 1): Die Erweiterungen von MA.1.A.3 h (Primfaktoren, in
+  `rationale-zahlen`) und i (Brüche mit Variablen, in `brueche`) werden geübt, nur auf Niveau Sek (A2); `ohneE`
+  entfällt bei beiden. Nicht b (ausgenommen „wie PA Gymnasium“: der Umfang einer Prüfung, nicht des Lehrplans).
+  Kipppunkt: der Lernsteig soll ausdrücklich auf die Gymnasium-Prüfung zugeschnitten sein.
