@@ -954,3 +954,33 @@
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session22_2026-11-08.md`, Handover Eulenpfad und Lernsteig nachgeführt.
   5 Commits `7b34e24` … `13199a7`, nicht gepusht. Offen: Push, Prüfen durch Patrik, Kern-Teil für Gruppen und Favoriten
   zur Absegnung, Hook-Kandidaten (Testzahlen aus Datei; Commit-Message gegen geänderte Pfade).
+- Lernsteig — Durchsicht der sieben Listen aus LERN_Session21 und 22 (Auftrag Patrik: „du kannst die listen
+  durchziehen“; vier unabhängige Prüfer, jeder Befund nachgeprüft; ersetzt nicht die Freigabe im Prüfstand):
+  - rechtschreibung: „Wir helfen dir“ (Stammregel führt über „half“ zu „hälfen“) → „Zelt“; „Die Übung macht den
+    Meister“ → „Am Klavier mache ich jeden Tag eine Übung“; zwei „sie“-Sätze mit Mehrzahl, die auch als Höflichkeitsform
+    gehen, in die Einzahl; „Mein Bruder lernt kochen“ → „will heute kochen“; Regel „verb-klein“ war falsch allgemein
+    („Schwimmen ist gesund“) und nennt jetzt die Verben davor.
+  - grammatik: „gern“ (steigerbar: lieber) → „manchmal“; „Der Richter beschuldigt“ → „Die Nachbarin beschuldigt“.
+    Bewusst gelassen: „sehr“ als Partikel (der Ersatz „ziemlich“ wäre auch Adjektiv).
+  - englisch-grammatik: Reflexiv-Ablenker, die als Objektpronomen auch richtig sind (her, it, them, him), ersetzt;
+    Fragen nur über die Satzmelodie („He plays the guitar?“) als Ablenker durch klar falsche ersetzt; „This is my pen
+    here“ → „This pen here is mine“; Regeln zu Fragewörtern (What … like?), Wortstellung, Mehrzahl, Verneinung ergänzt.
+  - franzoesisch-grammatik: „parce que elle“ im Lösungsweg (fehlende Elision) → „… son équipe a gagné“; „beaucoup de
+    livres“ → „Elle prend toujours le bus“; „Vous voulez un café“ → „… venir avec nous“; „ta professeure de français“;
+    Regeln zu ce/cet (stummes h), Wortstellung, vouloir, Possessiv berichtigt.
+  - kraefte d: Kurbeln und Winde (Wellräder, gegen KR1 a) durch reine Ketten- und Zahnradbeispiele ersetzt, Kette am
+    Flaschenzug durch Seil, Beisszange hebelt statt schneidet, Kran beim Flaschenzug; Lösungsweg mit Begründung je
+    Maschine, Hinweis nennt die Kette; Prüfung weist Kurbel, Winde, Keil im Beispiel ab. Bewusst gelassen: Schere als
+    Hebel (so in den Lehrmitteln).
+  - stromkreis b: alle 37 Antworten im Modell richtig; Einleitung nennt die feste Spannung der Batterie; Strommesser
+    „direkt hinter der Batterie eingebaut“, Option „zeigt 0“ statt „kein Strom mehr“; der Vergleich Zweig gegen Batterie
+    ohne „zeigt 0“ (eigene Optionen); Lösungswege klarer, bei fünf Lämpchen in Serie mit „es fliesst weiter Strom“.
+  - englisch-grammatik, Namen der Zeitformen nach dem Lehrmittel Open World (Entscheid ZF1 a): present simple,
+    present continuous, past simple, past continuous, present perfect statt simple present, present progressive,
+    simple past, past progressive (24 Optionen und die Regel); die Prüfung lässt nur diese Namen zu. Beleg (Reichweite:
+    eine Seite, die Verlagsseite klett.ch/lehrwerke/open_world gab 404): Arbeitsblatt zu Open World auf
+    unterrichtsmaterial.ch, Inhaltsangabe „C) Present simple D) Present continuous E) Present simple or present
+    continuous F) Past simple“ (Kick-off-Check „Grammatikalische Strukturen der Primarstufe“); „past continuous“ dort
+    nicht genannt, nach demselben Muster gebildet.
+  Gegenproben (Kurbel im Beispiel; Zweigvergleich mit „zeigt 0“; Zeitform „simple past“): gemeldet. Tests: Kern „5671 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 101 Fälle), Gratwanderung
+  „Keine Fehler.“.

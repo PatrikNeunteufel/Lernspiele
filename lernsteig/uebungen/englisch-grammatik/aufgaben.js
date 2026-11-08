@@ -18,23 +18,24 @@ const UEBUNG = {
   },
 };
 
+// Namen der Zeitformen wie im Lehrmittel Open World (Entscheid ZF1 a, LERN_Session22; Beleg im CHANGELOG)
 const REGEL = {
   be: "to be: I am, you/we/they are, he/she/it is.",
   have: "to have: he/she/it has, sonst have.",
   "pronomen-subjekt": "Subjektpronomen: I, you, he, she, it, we, they.",
-  fragewort: "Fragewörter: who (wer), what (was), where (wo), when (wann), why (warum), how (wie).",
+  fragewort: "Fragewörter: who (wer), what (was), where (wo), when (wann), why (warum), how (wie); «Wie ist …?» = What is … like?",
   "wortfolge-frage": "Frage mit do/does: Fragewort + do/does + Subjekt + Verb.",
-  "wortfolge-aussage": "Aussage: Subjekt + Verb + Objekt; often steht vor dem Verb, Zeitangaben meist am Ende.",
+  "wortfolge-aussage": "Aussage: Subjekt + Verb + Objekt; Häufigkeitswörter (always, usually, often, sometimes, never) stehen vor dem Verb; Art und Weise (well) und Zeitangaben meist am Ende.",
   "zwei-objekte": "Zwei Objekte ohne «to»: Person zuerst, dann die Sache (give someone something).",
-  plural: "Unregelmässige Mehrzahl: child → children, foot → feet, woman → women, mouse → mice.",
+  plural: "Unregelmässige Mehrzahl: child → children, man → men, woman → women, foot → feet, tooth → teeth, goose → geese, mouse → mice; sheep bleibt sheep; knife → knives, leaf → leaves.",
   praeposition: "on mit Tagen, in mit Monaten, at mit Uhrzeiten; on = auf.",
   modal: "Modalverben (must, can) haben kein -s und stehen ohne «to» vor dem Verb.",
-  negation: "Verneinung: doesn't (he/she/it), didn't (Vergangenheit), aren't/isn't bei -ing-Formen.",
+  negation: "Verneinung: don't (I/you/we/they), doesn't (he/she/it), didn't (Vergangenheit), aren't/isn't bei -ing-Formen.",
   reflexiv: "Reflexivpronomen: myself, yourself, himself, herself, itself, ourselves, themselves.",
   demonstrativ: "this/these = hier (nah), that/those = dort (fern); these/those in der Mehrzahl.",
   possessiv: "my, your, their vor dem Nomen; mine, yours, theirs allein.",
   konjunktion: "because = weil (Grund), so = deshalb (Folge).",
-  zeitform: "am/is/are + -ing = present progressive; Grundform (he/she/it mit -s) = simple present; has/have + 3. Form = present perfect; was/were + -ing = past progressive; 2. Form = simple past.",
+  zeitform: "am/is/are + -ing = present continuous; Grundform (he/she/it mit -s) = present simple; has/have + 3. Form = present perfect; was/were + -ing = past continuous; 2. Form = past simple.",
 };
 
 function aufgabe(stufe, e) {
@@ -75,6 +76,9 @@ function pruefeAufgabe(a, stufe, niveau) {
   if (new Set(e.optionen).size !== e.optionen.length) m.push(`doppelte Antworten: ${e.optionen.join(" | ")}`);
   if (a.optionen[a.richtig] !== e.optionen[0]) m.push("richtige Antwort falsch markiert");
   if (e.art !== "satz" && (e.satz.match(/___/g) || []).length !== 1) m.push(`nicht genau eine Lücke: ${e.satz}`);
+  // Zeitformen nur mit den Namen des Lehrmittels (ZF1 a)
+  const ZEITEN = ["present simple", "present continuous", "past simple", "past continuous", "present perfect"];
+  if (e.thema === "zeitform" && e.optionen.some(o => !ZEITEN.includes(o))) m.push(`Zeitform-Name nicht wie im Lehrmittel: ${e.optionen.join(" | ")}`);
   if (e.art === "satz") {
     // Satzvarianten: dieselben Wörter (bis auf Hilfswörter to, do/does und die Endung -s/-es), damit nur Form und
     // Stellung geprüft werden. Bis LERN_Session22 genügte eine ähnliche Länge, das liess ein anderes Wort durch.

@@ -57,11 +57,18 @@ function stufeC() {
 }
 
 // ---------- d ----------
+// Woran man die Maschine erkennt (Lösungsweg, Durchsicht LERN_Session22)
+const BEGRUENDUNG = {
+  Hebel: "Eine Stange oder ein Griff dreht sich um einen Drehpunkt.",
+  "schiefe Ebene": "Die Last wird auf einem längeren, schrägen Weg nach oben gebracht.",
+  Flaschenzug: "Ein Seil läuft über mehrere Rollen.",
+  "Ketten-/Zahnradgetriebe": "Zahnräder oder eine Kette übertragen eine Drehung.",
+};
 function stufeD() {
   const e = LST.waehle(MASCHINEN.beispiele);
   const optionen = MASCHINEN.namen.slice();
   return { art: "auswahl", stufe: "d", typ: "maschine", text: `${e.beispiel} Welche einfache Maschine ist das?`, optionen, richtig: optionen.indexOf(e.maschine), loesung: e.maschine,
-    weg: `Das ist ein Beispiel für: ${e.maschine}`, kennung: e.beispiel, daten: { beispiel: e.beispiel } };
+    weg: `${BEGRUENDUNG[e.maschine]} Das ist ein Beispiel für: ${e.maschine}`, kennung: e.beispiel, daten: { beispiel: e.beispiel } };
 }
 
 // ---------- e ----------
@@ -120,7 +127,7 @@ function hinweis(a, eingabe) {
     "kraft-kg": "Gewichtskraft ist Masse mal zehn Newton pro Kilogramm.",
     "kraft-g": "Gramm zuerst in Kilogramm umrechnen, dann mal zehn Newton pro Kilogramm.",
     masse: "Masse ist Gewichtskraft geteilt durch zehn Newton pro Kilogramm.",
-    maschine: "Wird etwas um einen Drehpunkt bewegt, über eine Rampe, mit Seil und Rollen oder mit Zahnrädern?",
+    maschine: "Wird etwas wie eine Wippe um einen Drehpunkt gekippt, über eine Rampe bewegt, mit Seil und Rollen gehoben oder über Zahnräder oder eine Kette angetrieben?",
     hebel: "Hebelgesetz: Kraft mal Kraftarm ist gleich Last mal Lastarm.",
     "flaschenzug-kraft": "Die Last verteilt sich auf alle tragenden Seilstücke.",
     "flaschenzug-weg": "Jedes tragende Seilstück wird um die Hubhöhe kürzer. Diese Länge ziehst du.",
@@ -140,6 +147,8 @@ function pruefeAufgabe(a, stufe, niveau) {
     const e = MASCHINEN.beispiele.find(x => x.beispiel === d.beispiel);
     if (!e || a.optionen[a.richtig] !== e.maschine) m.push(`Zuordnung falsch: ${a.text}`);
     if (!MASCHINEN.namen.includes(e && e.maschine)) m.push(`unbekannte Maschine: ${e && e.maschine}`);
+    if (e && !BEGRUENDUNG[e.maschine]) m.push(`keine Begründung für ${e.maschine}`);
+    if (e && /Kurbel|Winde|Keil/.test(e.beispiel)) m.push(`Wellrad oder Keil im Beispiel (KR1 a): ${e.beispiel}`);
     return m;
   }
   const soll = {
