@@ -34,13 +34,16 @@ const ZEHNER = ["", "", "zwanzig", "dreissig", "vierzig", "fünfzig", "sechzig",
 function unter100(n) { if (n < 20) return EINER[n]; const e = n % 10, t = Math.floor(n / 10); return (e ? EINER[e] + "und" : "") + ZEHNER[t]; }
 function unter1000(n) { const h = Math.floor(n / 100), r = n % 100; return (h ? EINER[h] + "hundert" : "") + unter100(r); }
 function unterMio(n) { const t = Math.floor(n / 1000), r = n % 1000; return (t ? unter1000(t) + "tausend" : "") + unter1000(r); }
-/** Zahlwort bis 1 Milliarde: „drei Millionen vierhunderttausendzwölf“. */
+/** Zahlwort bis 1 Milliarde: „drei Millionen vierhunderttausendzwölf“. Endet die Millionenzahl auf „ein“ (101, 201 …
+ *  901), wird es vor dem weiblichen „Million“ zu „eine“, und es bleibt bei der Einzahl: „einhunderteine Million“
+ *  (Entscheid ZW1 a, LERN_Session22; Beleg im CHANGELOG). */
+const millionEinzahl = mio => mio % 100 === 1;
 function zahlWort(n) {
   if (n === 0) return "null";
   if (n === 1e9) return "eine Milliarde";
   const mio = Math.floor(n / 1e6), rest = n % 1e6;
   const teile = [];
-  if (mio) teile.push(mio === 1 ? "eine Million" : `${unter1000(mio)} Millionen`);
+  if (mio) teile.push(mio === 1 ? "eine Million" : millionEinzahl(mio) ? `${unter1000(mio)}e Million` : `${unter1000(mio)} Millionen`);
   if (rest) teile.push(rest === 1 ? "eins" : unterMio(rest).replace(/ein$/, "eins"));
   return teile.join(" ");
 }
@@ -57,7 +60,8 @@ function stufeI() {
   const typ = LST.waehle(["wort-zahl", "wort-zahl", "zahl-stellen", "zehnerpotenz"]);
   if (typ === "wort-zahl") {
     const n = LST.waehle([z(1, 999) * 1e6 + z(0, 999) * 1000 + z(0, 999), z(1, 999) * 1e6 + z(0, 99) * 1000, z(1000, 999999), z(1, 999) * 1e6]);
-    return fertig("i", typ, `Schreibe als Zahl: ${zahlWort(n)}`, n, `${zahlWort(n)} = ${dez(n)}`, { n });
+    const mio = Math.floor(n / 1e6), einzahl = mio > 1 && millionEinzahl(mio) ? " (nach „…eine“ bleibt es bei der Einzahl: Million)" : "";
+    return fertig("i", typ, `Schreibe als Zahl: ${zahlWort(n)}`, n, `${zahlWort(n)} = ${dez(n)}${einzahl}`, { n });
   }
   if (typ === "zahl-stellen") {
     const n = z(1, 999) * 1e6 + z(0, 999999);
@@ -214,6 +218,13 @@ function pruefeMit(a, d) {
       if (liesWort(w) !== a.antwort) mg.push(`Zahlwort „${w}“ gelesen als ${liesWort(w)}, Lösung ${a.antwort}`);
       if (d.n !== a.antwort) mg.push(`Zahl ${d.n}, Lösung ${a.antwort}`);
       if (/ß/.test(w)) mg.push("ß im Zahlwort");
+      // Einzahl und Mehrzahl von Million aus der Zahl selbst (ZW1 a): eine Million; …eine Million bei 101, 201 … 901;
+      // sonst ab zwei Millionen
+      const mio = Math.floor(a.antwort / 1e6);
+      if (mio && mio < 1000) {
+        const soll = mio === 1 ? /^eine Million\b/ : mio % 100 === 1 ? /^\S+eine Million\b/ : /^\S+ Millionen\b/;
+        if (!soll.test(w)) mg.push(`Million in falscher Form für ${mio} Millionen: „${w}“`);
+      }
       if (a.antwort > 1e9) mg.push("über einer Milliarde");
     } else if (a.typ === "zahl-stellen") {
       const soll = d.ganz ? Math.floor(d.n / 1e6) : Math.floor(d.n / d.f) % 10;

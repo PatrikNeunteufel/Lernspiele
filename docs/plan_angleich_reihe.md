@@ -222,7 +222,8 @@ Kindersprache.
 8. **Französisch:** „C'est le vélo de moi“, „les clés d'elle“ idiomatisch ersetzen (erledigt in LERN_Session22: „Ce vélo
    est à moi“, „Ces clés sont à elle“); Englisch „___ the table“ eindeutig (Englisch erledigt in LERN_Session22: ohne „at“).
 9. **Vielfalt:** `kombinatorik` f (23) mit drei Münzen, Glücksrad, Urne, Karten; `folgen` j (53) mit weiteren Figuren (erledigt in LERN_Session22: acht beschriebene Figuren, 61);
-   `zehnerpotenzen` Zahlwort „einhundertein Millionen“ prüfen (Duden). Seit VF1 a (LERN_Session20) meldet das
+   `zehnerpotenzen` Zahlwort „einhundertein Millionen“ prüfen (Duden; erledigt in LERN_Session22, ZW1 a:
+   „einhunderteine Million“). Seit VF1 a (LERN_Session20) meldet das
    Testskript jede Stufe ohne Endlos, deren Aufgaben sich vor der sechsten Runde wiederholen — heute 21, je Übung
    vergrössern oder im Katalog begründen (`vorrat`): rechtschreibung d, e, f, g;
    englisch-grammatik b, c, d, challenge; franzoesisch-grammatik b, c, d, challenge (die Sprachübungen begrenzt durch

@@ -942,3 +942,12 @@
   Bauplan nach (`ZAEHLUNG`) und verlangt den Bauplan im Text. Gegenprobe (Tische mit 3n + 1): gemeldet. Plan E 9.
   Tests: Kern „5671 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine
   Fehler.“.
+- Lernsteig — `zehnerpotenzen` i: Zahlwort für 101, 201 … 901 Millionen (Plan E 9, Entscheid ZW1 a): „einhunderteine
+  Million“ statt „einhundertein Millionen“ — „ein“ vor dem weiblichen „Million“ gebeugt, danach Einzahl; der Lösungsweg
+  sagt es dazu. Belege (Reichweite: diese drei Quellen, Duden-Grammatik nicht gelesen): Duden „hundertein“ (Beispiele
+  „hundertundeinen Wunsch äußern“, „hundertein/(auch:) hunderteins Tage vergingen“, nichts zu Million);
+  deutschland-rechner.de „Zahl in Worten“ (nicht amtlich: „endet die Zahl davor auf eins, bleibt es bei der Einzahl:
+  einhunderteine Million.“); Amtliches Regelwerk 2024, gedruckt S. 314, nur „tausend[und]ein: ein Märchen aus
+  Tausendundeiner Nacht“ (regelt die Schreibung, nicht die Einzahl). Prüfung: Form von Million aus der Zahl selbst
+  (eine Million; …eine Million; sonst Millionen). Gegenprobe (alte Form): gemeldet. Plan E 9. Tests: Kern „5671 Fälle,
+  0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“.
