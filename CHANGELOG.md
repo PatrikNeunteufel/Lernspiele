@@ -951,3 +951,6 @@
   Tausendundeiner Nacht“ (regelt die Schreibung, nicht die Einzahl). Prüfung: Form von Million aus der Zahl selbst
   (eine Million; …eine Million; sonst Millionen). Gegenprobe (alte Form): gemeldet. Plan E 9. Tests: Kern „5671 Fälle,
   0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“.
+- Abschluss: Report `docs/eulenpfad/report/LERN_Session22_2026-11-08.md`, Handover Eulenpfad und Lernsteig nachgeführt.
+  5 Commits `7b34e24` … `13199a7`, nicht gepusht. Offen: Push, Prüfen durch Patrik, Kern-Teil für Gruppen und Favoriten
+  zur Absegnung, Hook-Kandidaten (Testzahlen aus Datei; Commit-Message gegen geänderte Pfade).

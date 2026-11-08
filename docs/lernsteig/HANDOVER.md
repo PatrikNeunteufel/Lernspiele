@@ -1,6 +1,14 @@
 # Handover — Lernsteig
 
 ## Stand
+**2026-11-08, nach LERN_Session22** (Lernspiele, [Report](../eulenpfad/report/LERN_Session22_2026-11-08.md)): Kern 1.27.0.
+Plan E 9 vollständig: rechtschreibung d–g (51/49/48/48), englisch-grammatik b–d (49/49/54), franzoesisch-grammatik b–d
+(51/48/52) nach SP1 a, die drei Challenges (196/152/151) auch als Serie; Satzvarianten in beiden Fremdsprachen nur noch
+mit denselben Wörtern; folgen j mit acht beschriebenen Figuren und Zählung nach dem Bauplan (53 → 61); zehnerpotenzen
+„einhunderteine Million“ für 101 … 901 Millionen (ZW1 a). Plan E 8 für Englisch und Französisch erledigt. Alle Listen
+weiter ungeprüft. Tests: Konten „101 Fälle, 0 Fehler.“, `pruefe_uebungen.js` „0 Fehler, 0 Hinweise.“ Weiter mit: Prüfen
+durch Patrik (Listen aus LERN_Session21 und 22), übrige Punkte von Plan E, C4, C6–C8.
+
 **2026-11-07, nach LERN_Session21** (Lernspiele, [Report](../eulenpfad/report/LERN_Session21_2026-11-07.md)): Kern 1.27.0.
 Tab Übungen wie der Tab Spiele (C3 fertig, `start/uebungen.js`): Kacheln nach Fach und Thema mit Piktogrammen
 (`gemeinsam/symbole.js`, SY1 a), Favoriten, Suche, Filter (Niveau für alle Fächer), Sortierung (SS1 a), Passung (P1 a),
