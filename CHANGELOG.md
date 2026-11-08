@@ -1097,3 +1097,10 @@
   `pruefe_uebungen.js` erzeugt nach dem ersten Fehler keine Aufgaben der folgenden Übungen mehr (`if (fehler)
   return;` zählt über alle Übungen), deren Abdeckung meldet dann Folgefehler. Tests: Kern „5709 Fälle, 0 Fehler.“,
   Lernsteig „0 Fehler, 146 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 1 Schritt 5 (`rationale-zahlen` g, „… multiplizieren und die Ergebnisse überprüfen“): neuer Typ
+  `ueberpruefen` als Auswahl — welches von vier Ergebnissen stimmt; falsch sind das Ergebnis mal 10 und durch 10
+  (Überschlag) und eines mit falscher letzter Ziffer; Faktoren wie `mal-dezimal`, Lösungsweg mit Überschlag. Die
+  Prüfung rechnet das Produkt exakt nach und verlangt vier verschiedene Ergebnisse mit genau einem richtigen. Über
+  20 000 Aufgaben der Stufe g: keine Fehler, fünf Typen je rund 20 %, die richtige Wahl an jeder Stelle gleich oft.
+  Abdeckung: der Teil Multiplizieren und Überprüfen ganz abgedeckt. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig
+  „0 Fehler, 145 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

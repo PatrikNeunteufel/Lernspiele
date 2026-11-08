@@ -1,7 +1,8 @@
 /* Übung „Dezimalzahlen und rationale Zahlen“ — MA.1.A.3, Stufen g, h, i (Entscheid UE1 a; Grenzen nach PA: h und i ohne
    Erweiterung). Aufgaben als Daten, ohne DOM (Vertrag: docs/lernsteig/rahmen.md 4).
    Inhalte je Stufe sinngemäss nach docs/lernsteig/lehrplan/mathematik_zyklus3.md, MA.1.A.3:
-   g  Dezimalzahlen bis 5 Wertziffern multiplizieren (308 · 52; 12 · 0.3; Faktoren zusammen, RZ2 a); Brüche mit den
+   g  Dezimalzahlen bis 5 Wertziffern multiplizieren (308 · 52; 12 · 0.3; Faktoren zusammen, RZ2 a) und die Ergebnisse
+      überprüfen (Auswahl aus vier Ergebnissen, Plan E 1 Schritt 5); Brüche mit den
       Nennern 2, 4, 5, 8, 10, 20, 50, 100, 1000 als Dezimalzahlen (RZ1 a; 3 und 6 des Lehrplans folgen mit periodischen
       Dezimalzahlen); wie oft ein Stammbruch in einer ganzen Zahl steckt (2 : ⅕)
    h  Prozentrechnungen mit dem Rechner (ohne die Erweiterung Primfaktoren)
@@ -15,7 +16,7 @@ const UEBUNG = {
   id: "rationale-zahlen",
   einleitung: "Rechne genau. Negative Zahlen stehen in Klammern.",
   stufen: {
-    g: "Dezimalzahlen multiplizieren, Brüche als Dezimalzahl, Stammbrüche",
+    g: "Dezimalzahlen multiplizieren und Ergebnisse prüfen, Brüche als Dezimalzahl, Stammbrüche",
     h: "Prozentwert, Prozentsatz und Grundwert",
     i: "Mit negativen Zahlen rechnen, Potenzen und Wurzeln",
     challenge: "Mehrere Schritte: Klammern, Vorzeichen, Potenzen, Prozent nacheinander",
@@ -49,8 +50,30 @@ const NENNER_G = [2, 4, 5, 8, 10, 20, 50, 100, 1000];
 const { wertziffern, ganzeZahl, dezimalZahl } = LST;
 const aufteilung = () => LST.aufteilung(WERTZIFFERN_MAX);
 
+/** Überschlag: auf die erste Ziffer gerundet (3.08 → 3, 52 → 50, 0.47 → 0.5). */
+const ueberschlag = x => Number(x.toPrecision(1));
+/**
+ * MA.1.A.3.g „… multiplizieren und die Ergebnisse überprüfen“ (Plan E 1 Schritt 5): Welches von vier Ergebnissen stimmt?
+ * Falsch sind das Ergebnis mal 10 und durch 10 (Komma verrutscht, der Überschlag deckt es auf) und eines mit falscher
+ * letzter Ziffer (die Endziffer der Faktoren deckt es auf). Faktoren wie mal-dezimal (RZ2 a, RZ3 a).
+ */
+function ueberpruefen() {
+  const [x, y] = aufteilung();
+  const a = dezimalZahl(x), b = LST.zufall(0, 1) ? dezimalZahl(y) : ganzeZahl(y), p = rund(a * b);
+  const stellen = (String(p).split(".")[1] || "").length, f = 10 ** stellen;
+  let endziffer;
+  do endziffer = rund((Math.round(p * f) + LST.waehle([-3, -2, -1, 1, 2, 3])) / f); while (endziffer <= 0 || Math.round(endziffer * f) % 10 === 0);
+  const werte = LST.mische([p, rund(p * 10), rund(p / 10), endziffer]);
+  const optionen = werte.map(dez), richtig = werte.indexOf(p);
+  const t = `${dez(a)}${MAL}${dez(b)}`;
+  return { art: "auswahl", stufe: "g", typ: "ueberpruefen", text: `Welches Ergebnis stimmt? ${t}`, optionen, richtig, loesung: optionen[richtig],
+    weg: `Überschlag ${dez(ueberschlag(a))}${MAL}${dez(ueberschlag(b))} ≈ ${dez(rund(ueberschlag(a) * ueberschlag(b)))}; ${t} = ${dez(p)}`,
+    kennung: `${t} ? ${optionen.join(" | ")}`, daten: { a, b, werte } };
+}
+
 function stufeG() {
-  const typ = LST.waehle(["mal-ganz", "mal-dezimal", "bruch-dezimal", "stammbruch"]);
+  const typ = LST.waehle(["mal-ganz", "mal-dezimal", "ueberpruefen", "bruch-dezimal", "stammbruch"]);
+  if (typ === "ueberpruefen") return ueberpruefen();
   if (typ === "mal-ganz") {
     const [x, y] = aufteilung();
     const a = ganzeZahl(x), b = ganzeZahl(y);
@@ -165,6 +188,7 @@ function hinweis(a, eingabe) {
   const h = {
     "mal-ganz": "Zerlege einen Faktor, zum Beispiel in Zehner und Einer, und addiere die Teilprodukte.",
     "mal-dezimal": "Rechne zuerst ohne Komma. Das Ergebnis hat so viele Nachkommastellen wie beide Faktoren zusammen.",
+    ueberpruefen: "Runde beide Faktoren und überschlage. Dann prüfe die letzte Ziffer: Welche Ziffer ergeben die letzten Ziffern der Faktoren?",
     "bruch-dezimal": "Ein Bruch ist eine Division: Zähler geteilt durch Nenner. Oder erweitere auf 10, 100 oder 1000.",
     "stammbruch": "Wie oft passt der Stammbruch in 1? Dann mal die ganze Zahl.",
     "prozentwert": "Ein Prozent ist der hundertste Teil. Rechne zuerst ein Prozent.",
@@ -231,6 +255,16 @@ function pruefeAufgabe(a, stufe, niveau) {
   const maengel = [];
   if (!["g", "h", "i", "challenge"].includes(a.stufe)) return [`unbekannte Stufe ${a.stufe}`];
   if (a.stufe !== stufe) maengel.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
+  if (a.typ === "ueberpruefen") {
+    const { a: x, b: y, werte } = a.daten;
+    const soll = malB(vonZahl(x), vonZahl(y));
+    if (!gleichB(soll, vonZahl(werte[a.richtig]))) maengel.push(`richtige Wahl ${werte[a.richtig]} ist nicht ${x} · ${y}`);
+    if (new Set(a.optionen).size !== 4) maengel.push(`Ergebnisse nicht verschieden: ${a.optionen.join(" | ")}`);
+    if (werte.filter(w => gleichB(soll, vonZahl(w))).length !== 1) maengel.push("mehr als ein richtiges Ergebnis");
+    if (wertziffern(x) + wertziffern(y) > WERTZIFFERN_MAX) maengel.push(`Faktoren zusammen mehr als ${WERTZIFFERN_MAX} Wertziffern: ${a.text}`);
+    if (a.optionen[a.richtig] !== a.loesung) maengel.push("loesung ist nicht die richtige Wahl");
+    return maengel;
+  }
   let soll;
   try {
     const d = a.daten;

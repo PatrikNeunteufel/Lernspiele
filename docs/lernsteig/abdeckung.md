@@ -11,23 +11,23 @@ Erfasst: 27 von 27 Übungen, 80 von 80 Stufen.
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| Dezimalzahlen bis 5 Wertziffern multiplizieren und die Ergebnisse überprüfen (im Kopf oder mit Notieren eigener Rechenwege, z.B. 308 · 52; 12 · 0,3) — *Das Beispiel 308 · 52 des Lehrplans ist ein Ganzzahl-Produkt und deckt mal-ganz; Plan E 1 will Ganzzahl-Produkte nur als Teil mit Dezimalstellen — zu klären* | `mal-dezimal` 25 %, `mal-ganz` 26 % | das Überprüfen der Ergebnisse (kein eigener Aufgabentyp) |
+| Dezimalzahlen bis 5 Wertziffern multiplizieren und die Ergebnisse überprüfen (im Kopf oder mit Notieren eigener Rechenwege, z.B. 308 · 52; 12 · 0,3) — *Das Beispiel 308 · 52 ist ein Ganzzahl-Produkt und deckt mal-ganz (E1-1 a); ueberpruefen: welches von vier Ergebnissen stimmt (Komma verrutscht, falsche letzte Ziffer)* | `mal-dezimal` 21 %, `mal-ganz` 20 %, `ueberpruefen` 20 % | — |
 | Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren | in `brueche` | das Rechteckmodell als Bild (auch in brueche) |
-| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000 als Dezimalzahlen schreiben | `bruch-dezimal` 26 % | die Nenner 3 und 6 (periodische Dezimalzahlen, nach RZ1 a zurückgestellt) |
-| bestimmen, wie oft Stammbrüche in ganzen Zahlen enthalten sind (z.B. Wie viele Male ist ⅕ in 2 enthalten? → 2 : ⅕) | `stammbruch` 24 % | — |
+| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000 als Dezimalzahlen schreiben | `bruch-dezimal` 19 % | die Nenner 3 und 6 (periodische Dezimalzahlen, nach RZ1 a zurückgestellt) |
+| bestimmen, wie oft Stammbrüche in ganzen Zahlen enthalten sind (z.B. Wie viele Male ist ⅕ in 2 enthalten? → 2 : ⅕) | `stammbruch` 19 % | — |
 
 ### MA.1.A.3.h — am Wortlaut nachgelesen
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| Prozentrechnungen mit dem Rechner ausführen | `grundwert` 33 %, `prozentwert` 32 %, `prozentsatz` 35 % | — |
+| Prozentrechnungen mit dem Rechner ausführen | `grundwert` 31 %, `prozentwert` 34 %, `prozentsatz` 35 % | — |
 | Erweiterung: natürliche Zahlen in Primfaktoren zerlegen | **offen** | alles |
 
 ### MA.1.A.3.i — am Wortlaut nachgelesen
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| die Grundoperationen mit rationalen Zahlen ausführen | `plus-minus` 26 %, `mal-geteilt` 25 %, `dezimal-negativ` 24 % | — |
+| die Grundoperationen mit rationalen Zahlen ausführen | `plus-minus` 25 %, `mal-geteilt` 26 %, `dezimal-negativ` 24 % | — |
 | Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000) | `potenz-wurzel` 25 % | — |
 | Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png] — *aufgaben.js nimmt die Erweiterung als Annahme aus, mit Patrik abzustimmen. Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d* | **offen** | alles |
 

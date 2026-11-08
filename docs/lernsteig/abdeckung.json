@@ -5,7 +5,7 @@
       "g": {
         "quelle": "wortlaut",
         "teile": [
-          {"text":"Dezimalzahlen bis 5 Wertziffern multiplizieren und die Ergebnisse überprüfen (im Kopf oder mit Notieren eigener Rechenwege, z.B. 308 · 52; 12 · 0,3)","typen":["mal-dezimal","mal-ganz"],"fehlt":"das Überprüfen der Ergebnisse (kein eigener Aufgabentyp)","notiz":"Das Beispiel 308 · 52 des Lehrplans ist ein Ganzzahl-Produkt und deckt mal-ganz; Plan E 1 will Ganzzahl-Produkte nur als Teil mit Dezimalstellen — zu klären"},
+          {"text":"Dezimalzahlen bis 5 Wertziffern multiplizieren und die Ergebnisse überprüfen (im Kopf oder mit Notieren eigener Rechenwege, z.B. 308 · 52; 12 · 0,3)","typen":["mal-dezimal","mal-ganz","ueberpruefen"],"notiz":"Das Beispiel 308 · 52 ist ein Ganzzahl-Produkt und deckt mal-ganz (E1-1 a); ueberpruefen: welches von vier Ergebnissen stimmt (Komma verrutscht, falsche letzte Ziffer)"},
           {"text":"Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren","in":"brueche","fehlt":"das Rechteckmodell als Bild (auch in brueche)"},
           {"text":"Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000 als Dezimalzahlen schreiben","typen":["bruch-dezimal"],"fehlt":"die Nenner 3 und 6 (periodische Dezimalzahlen, nach RZ1 a zurückgestellt)"},
           {"text":"bestimmen, wie oft Stammbrüche in ganzen Zahlen enthalten sind (z.B. Wie viele Male ist ⅕ in 2 enthalten? → 2 : ⅕)","typen":["stammbruch"]}
