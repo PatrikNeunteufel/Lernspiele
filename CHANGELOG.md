@@ -1050,3 +1050,11 @@
   klären. Gegenproben (Typ ohne Teil, Typ ohne Aufgaben, zwei Zuordnungen, falscher Verweis, fehlende Stufe,
   Übersicht von Hand geändert): alle gemeldet. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
   9 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Abdeckung aller Übungen erfasst (Plan E 1, AT1 a): die übrigen 25 Übungen in `docs/lernsteig/abdeckung.json`,
+  entworfen von drei Prüfern (Mathematik zweimal, NT und Sprachen) nach den Regeln von `tools/abdeckung.js`,
+  zusammengeführt mit einem Abgleich jedes Teiltexts gegen `docs/lernsteig/lehrplan/` (zwei Texte mit herausgelöster
+  Erweiterung, mit Notiz), Stichproben gelesen (kraefte, grammatik, koordinaten). Stand: 80 Stufen, 186
+  Inhaltsteile — 51 abgedeckt, 66 teilweise, 60 offen, 9 in einer anderen Übung, keine Stufe am Wortlaut. Fehlender
+  Lehrplan-Text: FS1E.5.D.1.b (Englisch hat dort den GA Z2, Typen über FS2F.5.D.1.b zugeordnet). Die offenen und
+  teilweisen Teile stehen als Hinweise im Testlauf. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  128 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
