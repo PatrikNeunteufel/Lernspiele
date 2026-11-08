@@ -926,3 +926,12 @@
   ähnliche Länge, das liess ein anderes Wort durch. Liste bleibt ungeprüft. Gegenprobe (Variante mit anderem Verb,
   mit anderem Nomen): gemeldet. Plan E 9. Tests: Kern „5671 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 4 Hinweise.“
   (Konten 101 Fälle), Gratwanderung „Keine Fehler.“.
+- Lernsteig — Vorrat `franzoesisch-grammatik` (Plan E 9, Entscheid SP1 a): `franzoesisch.js` b 13 → 51 (être, avoir,
+  aller, faire, Verben auf -er, Subjektpronomen, Fragewörter), c 13 → 48 (Wortstellung in Frage und Aussage, zwei
+  Objekte, unregelmässige Mehrzahl auch -eu → -eux, Präpositionen bei Ländern und Städten), d 16 → 52 (devoir und
+  vouloir, Verneinung, ce/cet/cette/ces, Reflexivverben, Possessiv, Zeitformen auch présent, parce que/donc); die
+  Challenge mischt alle (151) und gibt es deshalb auch als Serie. „de moi“, „d'elle“ idiomatisch ersetzt („Ce vélo est
+  à moi“, „Ces clés sont à elle“, Plan E 8). Prüfung: Satzvarianten müssen dieselben Wörter haben (bis auf que, à, ne/n'), wie in
+  englisch-grammatik. Liste bleibt ungeprüft. Gegenprobe (Variante mit anderem Nomen, mit anderer Verneinung; fehlendes
+  geschütztes Leerzeichen): gemeldet. Plan E 8, E 9 (für alle 21 Stufen erledigt). Tests: Kern „5671 Fälle, 0 Fehler.“,
+  Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“.

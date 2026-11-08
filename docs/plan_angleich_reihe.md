@@ -219,7 +219,8 @@ Kindersprache.
    nehmen; Hinweis zur Lage der Nichtmetalle mit Ausnahme H.
 7. **Kräfte:** Stufe a nach Seitentext (Diagramme erkennen und darstellen) statt nur v = s : t; Beispiele in
    `maschinen.js` eindeutig (Kran, Handbohrer); realistische Grössen (Kraftmesser, Spannungen in `stromkreis`).
-8. **Französisch:** „C'est le vélo de moi“, „les clés d'elle“ idiomatisch ersetzen; Englisch „___ the table“ eindeutig (Englisch erledigt in LERN_Session22: ohne „at“).
+8. **Französisch:** „C'est le vélo de moi“, „les clés d'elle“ idiomatisch ersetzen (erledigt in LERN_Session22: „Ce vélo
+   est à moi“, „Ces clés sont à elle“); Englisch „___ the table“ eindeutig (Englisch erledigt in LERN_Session22: ohne „at“).
 9. **Vielfalt:** `kombinatorik` f (23) mit drei Münzen, Glücksrad, Urne, Karten; `folgen` j (53) mit weiteren Figuren;
    `zehnerpotenzen` Zahlwort „einhundertein Millionen“ prüfen (Duden). Seit VF1 a (LERN_Session20) meldet das
    Testskript jede Stufe ohne Endlos, deren Aufgaben sich vor der sechsten Runde wiederholen — heute 21, je Übung
@@ -231,8 +232,9 @@ Kindersprache.
    kraefte d (KR1 a: Liste der einfachen Maschinen 11 → 36, je Maschine neun, ohne Wellrad und Keil, ungeprüft);
    grammatik e, f, g (SP1 a: 20/25/20 → 50/48/48 Sätze, Challenge auch als Serie). Erledigt in LERN_Session22:
    rechtschreibung d, e, f, g (SP1 a: 20/14/13/11 → 51/49/48/48 Sätze, Challenge mit 196 auch als Serie);
-   englisch-grammatik b, c, d (SP1 a: 11/14/16 → 49/49/54, Challenge mit 152 auch als Serie); heute 4. Weiter nach
-   SP1 a: franzoesisch-grammatik. Karten nicht (Jass oder französisch?).
+   englisch-grammatik b, c, d (SP1 a: 11/14/16 → 49/49/54, Challenge mit 152 auch als Serie);
+   franzoesisch-grammatik b, c, d (SP1 a: 13/13/16 → 51/48/52, Challenge mit 151 auch als Serie). Heute 0 Hinweise:
+   E 9 ist damit für alle 21 Stufen erledigt. Karten nicht (Jass oder französisch?).
 10. **Hinweise:** Wurzelaufgaben bekommen einen Wurzel-Hinweis; `folgen` nennt die Formel nicht in der Aufgabe.
 11. Danach: Patrik prüft die sieben Listen und die Annahmen je Übung im Entwickler-Modus (FG1 a).
 

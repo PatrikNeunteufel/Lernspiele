@@ -421,7 +421,7 @@ var LST_KATALOG = (function () {
       stufen: ["b", "c", "d"],                // c Grundanspruch und OP
       niveaus: ["n1", "n2"],
       anzahl: 8,
-      endlos: false,                          // Inhaltsliste mit weniger als 100 Einträgen je Stufe
+      endlos: ["challenge"],                  // b–d unter 100 Sätzen; die Challenge mischt alle (seit E 9 über 100)
       listen: { franzoesisch: { name: "Sätze" } },
       neu: "LST_Session1",
     },

@@ -30,14 +30,14 @@ const REGEL = {
   "ordre-question": "Frage mit «est-ce que»: (Fragewort) + est-ce que + Subjekt + Verb.",
   "ordre-phrase": "Aussage: Subjekt + Verb; souvent steht nach dem Verb.",
   "deux-objets": "Zwei Objekte: zuerst die Sache, dann «à» + Person (donner quelque chose à quelqu'un).",
-  pluriel: "Unregelmässige Mehrzahl: -al → -aux, -eau → -eaux, œil → yeux.",
+  pluriel: "Unregelmässige Mehrzahl: -al → -aux, -eau → -eaux, -eu → -eux, œil → yeux.",
   preposition: "en mit weiblichen Ländern, au mit männlichen, à mit Städten; sur = auf.",
   modal: "devoir: je dois, tu dois, il doit, nous devons, vous devez, ils doivent; vouloir: je veux, nous voulons, vous voulez, ils veulent.",
   negation: "Verneinung umschliesst das konjugierte Verb: ne … pas, ne … jamais (n' vor Vokal).",
   demonstratif: "ce vor männlich, cet vor männlich mit Vokal, cette vor weiblich, ces in der Mehrzahl.",
   reflexif: "Reflexivpronomen: me, te, se, nous, vous, se.",
   possessif: "mon/ma/mes, ton/ta/tes, son/sa/ses — nach dem Besitz, nicht nach dem Besitzer.",
-  temps: "avoir/être + Partizip = passé composé; aller + Infinitiv = futur proche; -ais, -ait = imparfait.",
+  temps: "avoir/être + Partizip = passé composé; aller + Infinitiv = futur proche; -ais, -ait = imparfait; Verb allein in der Gegenwart = présent.",
   conjonction: "parce que = weil (Grund), donc = deshalb (Folge).",
 };
 
@@ -84,6 +84,14 @@ function pruefeAufgabe(a, stufe, niveau) {
   // Französische Typografie: vor ? ! : ein geschütztes Leerzeichen, nie ein normales oder keines
   for (const t of [e.satz || "", ...e.optionen]) if (/[^ ][?!:]/.test(t.replace(/« | »/g, ""))) m.push(`Leerzeichen vor ? ! : fehlt oder ist nicht geschützt: ${t}`);
   if (/ß/.test(JSON.stringify(e))) m.push("ß in der Liste");
+  if (e.art === "satz") {
+    // Satzvarianten: dieselben Wörter (bis auf que, à und ne/n'), damit nur die Stellung geprüft wird (LERN_Session22,
+    // wie in englisch-grammatik)
+    const woerter = s => s.toLowerCase().replace(/[?.!,\u00a0]/g, " ").split(/[\s']+/).filter(Boolean)
+      .map(w => (w === "n" ? "ne" : w)).filter(w => !["que", "à", "ne"].includes(w)).sort().join(" ");
+    const basis = woerter(e.optionen[0]);
+    if (e.optionen.some(o => woerter(o) !== basis)) m.push(`Satzvarianten mit anderen Wörtern: ${e.optionen.join(" | ")}`);
+  }
   return m;
 }
 
