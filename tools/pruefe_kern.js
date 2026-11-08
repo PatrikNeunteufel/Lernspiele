@@ -1810,5 +1810,6 @@ try {
 }
 
 console.log(`\n${faelle} Fälle, ${fehler} Fehler.`);
+require("./testausgabe.js").merke("pruefe_kern", `${faelle} Fälle, ${fehler} Fehler.`); // HK1 a
 process.exit(fehler || process.exitCode ? 1 : 0);
 })().catch(e => { console.log(`    FEHLER  ${e.stack}`); process.exit(1); });

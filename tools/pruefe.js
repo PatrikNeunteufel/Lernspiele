@@ -32,6 +32,7 @@ function pruefeGratwanderung() {
   if (!fs.existsSync(seite)) fehler.push("gratwanderung/index.html fehlt");
   for (const f of fehler) console.log(`    FEHLER  ${f}`);
   if (!fehler.length) console.log("Keine Fehler.");
+  require("./testausgabe.js").merke("pruefe_gratwanderung", fehler.length ? `${fehler.length} Fehler.` : "Keine Fehler.", ""); // HK1 a
   return fehler.length ? 1 : 0;
 }
 

@@ -821,5 +821,6 @@ if (ohneTipp.size) {
 }
 Promise.all(spaeter).then(() => {
   console.log(`\n${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`);
+  require("./testausgabe.js").merke("pruefe_spiele", `${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`); // HK1 a
   process.exitCode = fehlerZahl ? 1 : 0;
 });

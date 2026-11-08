@@ -327,5 +327,6 @@ function pruefeOhneBrowser(eintrag) {
   if (TEXT_OFFEN.length) console.log(`Text gegen Prüfdaten (TD1 a) noch offen: ${TEXT_OFFEN.join(", ")}`);
   if (begruendet.length) console.log(`Begründet kleiner Vorrat (Katalog vorrat, VF1 a):\n  ${begruendet.join("\n  ")}`);
   console.log(`\n${fehler} Fehler, ${hinweise} Hinweise.`);
+  require("./testausgabe.js").merke("pruefe_uebungen", `${fehler} Fehler, ${hinweise} Hinweise.`); // HK1 a
   process.exit(fehler ? 1 : 0);
 })();

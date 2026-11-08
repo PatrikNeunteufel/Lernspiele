@@ -1016,3 +1016,21 @@
   Tippen schliesst Ähnliche nicht, Richtung): alle gemeldet. Tests: Eulenpfad `suche daten tab` „Keine Fehler.“
   (Spielseiten unverändert, Kern unverändert 1.28.0: keine Stichprobe der Spiele nötig). Browser: Tab Spiele als Kind
   (Tippen mit Fokus, Favorit gold, Zuklappen), Freigabe-Suche als Aufsicht, keine Konsolenfehler.
+- Hook-Kandidaten aus LERN_Session22 (Entscheide HK1 a, HK2 a):
+  - HK1 a: Die Testskripte (`pruefe_kern.js`, `pruefe_uebungen.js`, `pruefe_konten.js`, `pruefe_spiele.js`, Gratwanderung
+    in `pruefe.js`) merken ihre Schlusszeile mit Tag, Zeit und Aufruf in `.temp/pruefung/<skript>.json`
+    (`tools/testausgabe.js`; `.temp/` in `.gitignore`). Projektlokaler Stop-Hook `.claude/hooks/testzahlen.py`
+    (`.claude/settings.json`): Eine Commit-Message im Chat (Codeblock ab „LERN_Session“) mit Testzahlen („n Fälle, m
+    Fehler“, „n Fehler, m Hinweise“, „Keine Fehler“), die in keinem heutigen Lauf stehen, wird abgewiesen, mit den
+    gespeicherten Zeilen; Ausnahme `TESTZAHLEN_OK`. Gegenproben mit nachgebauten Transkripten (10 Fälle): falsche
+    Hinweiszahl wie in LERN_Session22 und falsche Fallzahl abgewiesen; richtige Zahlen, Text ohne Message, anderer
+    Codeblock, Ausnahme, zweiter Stopp, alte Message vor der Nutzernachricht, fehlendes Transkript durchgelassen.
+  - HK2 a: git-Hook `tools/git-hooks/commit-msg` (`commit_msg.py`): Ändert ein Commit Übungen oder Spiele, muss die
+    Message mindestens eine davon nennen (Id oder Anzeigename, Umlaute ausgeschrieben, Bindestrich auch als
+    Leerzeichen); über zehn Ids (Sammel-Commits) ungeprüft; Merge, Revert, fixup!, squash! ungeprüft. Gemessen am
+    Verlauf: zuerst 22 von 145 Commits gemeldet (Anzeigenamen, Sammel-Commits), nach dem Namensabgleich und der Grenze
+    0 von 145. Gegenprobe: Dateien von `4d1916a` (franzoesisch-grammatik) mit der Message von `20150cc`
+    (englisch-grammatik) abgewiesen. `.gitattributes`: der Shell-Hook immer mit LF. Eingeschaltet wird er von Patrik
+    (`git config core.hooksPath tools/git-hooks`), noch nicht gesetzt.
+  - Steckbrief in CLAUDE.md nachgeführt. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“
+    (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Eulenpfad `tab` „Keine Fehler.“.

@@ -295,5 +295,6 @@ const SF = { frage: "Erstes Haustier?", antwort: "Bello" }; // Sicherheitsfrage 
   }
 
   console.log(`  ${faelle} Fälle, ${fehler} Fehler.`);
+  require("./testausgabe.js").merke("pruefe_konten", `${faelle} Fälle, ${fehler} Fehler.`); // HK1 a
   process.exit(fehler ? 1 : 0);
 })().catch(e => { console.log(`    FEHLER  ${e.stack}`); process.exit(1); });

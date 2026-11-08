@@ -22,3 +22,5 @@ entwickler.key
 
 # secret keys
 .secrets/
+# Testausgaben und Zwischenstände der Werkzeuge (HK1 a: .temp/pruefung/<skript>.json), nur lokal
+.temp/

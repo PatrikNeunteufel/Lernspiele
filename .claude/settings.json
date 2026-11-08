@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/testzahlen.py\"",
+            "timeout": 10,
+            "statusMessage": "Testzahlen-Pruefung (HK1 a)"
+          }
+        ]
+      }
+    ]
+  }
+}
