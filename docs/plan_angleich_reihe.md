@@ -229,8 +229,9 @@ Kindersprache.
    Glücksrad, Urne; f jetzt auch als Serie) und challenge (26 → 50), atombau a (20 → über 1000 mit der Umkehrfrage
    „Welches der drei ist …?“, a jetzt auch als Serie) und challenge (28 → 42, Edelgas mit gleicher Elektronenzahl);
    kraefte d (KR1 a: Liste der einfachen Maschinen 11 → 36, je Maschine neun, ohne Wellrad und Keil, ungeprüft);
-   grammatik e, f, g (SP1 a: 20/25/20 → 50/48/48 Sätze, Challenge auch als Serie); heute 12. Weiter nach SP1 a
-   Übung für Übung: rechtschreibung, englisch-grammatik, franzoesisch-grammatik. Karten nicht (Jass oder französisch?).
+   grammatik e, f, g (SP1 a: 20/25/20 → 50/48/48 Sätze, Challenge auch als Serie). Erledigt in LERN_Session22:
+   rechtschreibung d, e, f, g (SP1 a: 20/14/13/11 → 51/49/48/48 Sätze, Challenge mit 196 auch als Serie); heute 8.
+   Weiter nach SP1 a Übung für Übung: englisch-grammatik, franzoesisch-grammatik. Karten nicht (Jass oder französisch?).
 10. **Hinweise:** Wurzelaufgaben bekommen einen Wurzel-Hinweis; `folgen` nennt die Formel nicht in der Aufgabe.
 11. Danach: Patrik prüft die sieben Listen und die Annahmen je Übung im Entwickler-Modus (FG1 a).
 

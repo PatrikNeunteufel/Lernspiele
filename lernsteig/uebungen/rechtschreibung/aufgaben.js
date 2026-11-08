@@ -12,7 +12,7 @@ const UEBUNG = {
   einleitung: "Wähle die richtige Schreibweise.",
   stufen: {
     d: "ie, f/v, e/ä, ck/tz, Nomen gross, Komma bei Aufzählungen",
-    e: "Gross oder klein? Die Nachsilbe hilft (-heit, -ung, -keit, -nis, -schaft, -ig, -lich)",
+    e: "Gross oder klein? Die Nachsilbe hilft (-heit, -ung, -keit, -nis, -schaft, -ig, -lich, -isch)",
     f: "Verben als Nomen (beim Essen), Höflichkeitsform Sie/Ihnen",
     g: "Adjektive als Nomen (alles Gute), Komma bei Relativsatz, Einschub und Infinitivgruppe",
     challenge: "Alles gemischt",
@@ -28,7 +28,7 @@ const REGEL = {
   "komma-aufzaehlung": "Bei Aufzählungen steht ein Komma, aber nicht vor «und».",
   "nachmorphem-gross": "Wörter mit -heit, -keit, -ung, -nis, -schaft sind Nomen und werden gross geschrieben.",
   "nachmorphem-klein": "Wörter mit -ig, -lich, -isch sind Adjektive und werden klein geschrieben.",
-  "verb-nominalisiert": "Nach Präposition mit Artikel (beim, zum, aufs, vom) wird das Verb zum Nomen: gross.",
+  "verb-nominalisiert": "Nach Präposition mit Artikel (beim, zum, aufs, vom, nach dem) wird das Verb zum Nomen: gross.",
   "verb-klein": "Ohne Artikel oder Präposition bleibt das Verb ein Verb: klein.",
   hoeflich: "Die Höflichkeitsform Sie, Ihnen, Ihr schreibt man gross.",
   "nicht-hoeflich": "Sie ist hier nicht die Anrede, sondern meint andere Personen: klein.",
@@ -63,7 +63,7 @@ function hinweis(a, gewaehlt) {
     "komma-aufzaehlung": "Wo stehen die Glieder der Aufzählung, und was gilt vor «und»?",
     "nachmorphem-gross": "Welche Nachsilbe hat das Wort, und welche Wortart macht sie daraus?",
     "nachmorphem-klein": "Welche Nachsilbe hat das Wort, und welche Wortart macht sie daraus?",
-    "verb-nominalisiert": "Steht davor eine Präposition mit Artikel (beim, zum, aufs, vom)?",
+    "verb-nominalisiert": "Steht davor eine Präposition mit Artikel (beim, zum, aufs, vom, nach dem)?",
     "verb-klein": "Steht davor ein Artikel oder eine Präposition mit Artikel?",
     hoeflich: "Wird hier jemand höflich angesprochen?", "nicht-hoeflich": "Wird hier jemand höflich angesprochen?",
     "adjektiv-nominalisiert": "Steht davor ein Wort wie alles, etwas, nichts oder viel?",
@@ -87,7 +87,7 @@ function pruefeAufgabe(a, stufe, niveau) {
   } else {
     if ((e.satz.match(/___/g) || []).length !== 1) m.push(`nicht genau eine Lücke: ${e.satz}`);
     if (/gross|klein|nominalisiert|hoeflich/.test(e.regel) && new Set(e.optionen.map(o => o.toLowerCase())).size !== 1) m.push(`Gross/klein-Varianten verschieden: ${e.optionen.join(" | ")}`);
-    if (e.regel === "verb-nominalisiert" && !/\b(beim|zum|aufs|vom|im|ins|am|vielen)\s+___/i.test(e.satz)) m.push(`kein Artikel vor der Lücke: ${e.satz}`);
+    if (e.regel === "verb-nominalisiert" && !/\b(beim|zum|aufs|vom|im|ins|am|dem|vielen)\s+___/i.test(e.satz)) m.push(`kein Artikel vor der Lücke: ${e.satz}`);
     if (e.regel === "adjektiv-nominalisiert" && !/\b(alles|etwas|nichts|viel|das)\s+___/i.test(e.satz)) m.push(`kein Pronomen vor der Lücke: ${e.satz}`);
   }
   return m;

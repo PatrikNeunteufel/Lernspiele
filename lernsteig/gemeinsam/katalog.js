@@ -391,7 +391,7 @@ var LST_KATALOG = (function () {
       stufen: ["d", "e", "f", "g"],           // d Grundanspruch Zyklus 2 (Anschluss), f Grundanspruch und OP
       niveaus: ["n1", "n2"],
       anzahl: 8,
-      endlos: false,                          // Inhaltsliste mit weniger als 100 Einträgen je Stufe
+      endlos: ["challenge"],                  // d–g unter 100 Sätzen; die Challenge mischt alle (seit E 9 über 100)
       listen: { rechtschreibung: { name: "Sätze" } },
       neu: "LST_Session1",
     },

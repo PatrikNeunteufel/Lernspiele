@@ -908,3 +908,12 @@
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session21_2026-11-07.md`, Handover Eulenpfad und Lernsteig nachgeführt.
   13 Commits, gepusht bis `1bb6c19`. Offen: E 9 für rechtschreibung, englisch- und franzoesisch-grammatik (SP1 a),
   Prüfen durch Patrik, voller Eulenpfad-Lauf auf seinen Entscheid.
+
+## 2026-11-08 — LERN_Session22
+- Lernsteig — Vorrat `rechtschreibung` (Plan E 9, Entscheid SP1 a): `rechtschreibung.js` d 20 → 51 (ie, f/v, e/ä,
+  ck/tz, Nomen gross, Komma bei Aufzählungen), e 14 → 49 (Nachsilben, dazu -isch), f 13 → 48 (Verben als Nomen auch
+  nach „nach dem“ und „vor dem“, Höflichkeitsform), g 11 → 48 (Adjektive als Nomen, Komma bei Relativsatz, Einschub und
+  Infinitivgruppe); die Challenge mischt alle (196) und gibt es deshalb auch als Serie. Prüfung nimmt „dem“ vor der
+  Lücke als Artikel. Liste bleibt ungeprüft. Gegenprobe (Verb als Nomen ohne Artikel; Satzvariante mit anderem Wort;
+  Gross/klein-Variante mit anderer Schreibung): gemeldet. Plan E 9. Tests: Kern „5671 Fälle, 0 Fehler.“, Lernsteig
+  „0 Fehler, 8 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“.
