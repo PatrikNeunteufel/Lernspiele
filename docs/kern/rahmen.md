@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.18.0, 2026-11-06 (LERN_Session18). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.28.0, 2026-11-08 (LERN_Session23). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.18.0)
+kern/VERSION          Version des Kerns (1.28.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -641,7 +641,34 @@ nicht an, die Fälle beissen, wenn der Rechner nicht in UTC läuft), dazu eine S
 einem Tag aus einer UTC-Zeit (`toISOString().slice(0, 10)`, `.zeit.slice(0, 10)` und Ähnliches) — sie fand beim Bau zwei
 Stellen, die die erste Suche übersehen hatte.
 
-### 4.26 Geplant
+### 4.26 `KERN.uebersicht` (`kern/uebersicht.js`) — Bausteine einer Übersicht mit Kacheln
+
+Entscheid KT1 a (LERN_Session23, seit 1.28.0). Herkunft: Tab Spiele des Eulenpfads (`eulenpfad/start/spiele.js`) und
+Tab Übungen des Lernsteigs (`lernsteig/start/uebungen.js`). Dieselbe Bedienung stand dort zweimal und lief schon
+auseinander (im Eulenpfad „Alle auf/zu“ auch während einer Suche, Zuklappen bei einem Suchfeld mit nur Leerzeichen
+nicht gemerkt). Bausteine, kein ganzer Ablauf: Kacheln, Filterzeilen und Sortierarten sind je App verschieden und bleiben
+dort. Gespeichert wird über Rückrufe der App (Profil, Konto, Tab); die Felder `favoriten`, `zu`, `filterZu`, `ansicht`
+und `sortierung` bleiben, wie sie sind — Sichern, Einlesen und Abgleich ändern sich nicht.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `gruppen({ zu, merke })` | `{ gruppe({ id, kopf, anzahl }, …inhalt), zu() }` für ein Zeichnen: `details.gruppe[data-gruppe=id]`, offen, wenn `id` nicht in `zu` steht; `kopf` Text, Element oder Liste, `anzahl` als `span.anzahl` (null: keine). Umschalten führt die Menge nach und ruft `merke(liste)` nur bei einer Änderung (der Browser meldet `toggle` auch, wenn das Zeichnen `open` setzt) |
+| `filterBlock({ titel, aktiv, leer, zeilen, zu, merke, schmal })` | `details.filter-klapp` mit `summary` (`span.filter-titel`, `span.filter-aktiv`: `aktiv` mit „ · “ verbunden, sonst `leer`) und `div.filter` mit den Zeilen der App; offen nach `filterOffen`, `merke(zuBool)` beim Umschalten |
+| `filterOffen(zu, schmal)` | gemerkte Wahl der Person gilt; ohne Wahl auf dem Handy zu, sonst offen |
+| `schmal()` | Bildschirm höchstens 560 px breit (`matchMedia`); ohne `matchMedia` nein |
+| `suche()` | `{ text, feld({ neu, attr, beiEingabe }) }`: Suchtext, der das Neuzeichnen überlebt (nicht gespeichert); jede Eingabe setzt ihn, ruft `beiEingabe` und `neu`; das neue Feld bekommt danach den Fokus mit der Schreibmarke am Ende |
+| `aehnlich.id(search)`, `aehnlich.schliessen()` | Id aus „?aehnlich=<id>“ (Standard `location.search`); verlassen nimmt den Parameter aus der Adresse, der Tab bleibt |
+| `sortWahl({ arten, wahl, pfeile, setze, knopf, beschriftung, feld })` | `label.sortier-wahl`: `beschriftung`, Auswahlliste der `arten` (`[{ wert, text }]`, Attribute `feld`), Richtungsknopf `knopf(text, an, onclick)` der App mit „↑ “/„↓ “ und `pfeile[art]`; `setze({ art, ab })` — eine neue Art beginnt aufsteigend |
+| `umschalten(liste, id)` | neue Liste mit `id` hinten dazu oder ohne `id` (Favoriten); die Eingabe bleibt |
+| `stern(an)`, `STERN` | Favoriten-Stern `svg.symbol.stern(.an)`, die Form als Pfad (der Eulenpfad setzt sie in seine Karten-Schalter) |
+
+„Alle auf“ und „Alle zu“ bleiben in den Apps (ein Knopf, der `zu` leert oder mit allen Gruppen-Ids füllt; die Ids
+kennt nur die App). Das Aussehen gibt die App; der Kern setzt nur die Klassen oben. Geprüft in `tools/pruefe_kern.js`
+mit einem Ersatz-DOM (Umschalten mit 2000 Zufallsfällen, Gruppen und Filter-Block mit `toggle` ohne Änderung, Suche mit
+Fokus, Sortierwahl); Gegenproben (Wächter gegen `toggle` ohne Änderung entfernt, Handy offen, kein Fokus): gemeldet.
+Benutzt von: noch keiner App (Umbau Lernsteig, dann Eulenpfad mit Seitentest des Tabs Spiele).
+
+### 4.27 Geplant
 
 Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): die
 Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Prüfen der Antwort und der Vertrag `aufgabeErzeugen`/`pruefeAufgabe`

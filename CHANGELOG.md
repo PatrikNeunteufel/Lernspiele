@@ -986,3 +986,15 @@
   „Keine Fehler.“.
 - Nachtrag zum Abschluss: Report um „Nachtrag nach dem Abschluss: Durchsicht der Listen“ ergänzt, Handover Eulenpfad
   und Lernsteig nachgeführt. 7 Commits `7b34e24` … `b636a14`, nicht gepusht.
+
+## 2026-11-08 — LERN_Session23
+- Kern 1.28.0: `kern/uebersicht.js` (`KERN.uebersicht`, Entscheid KT1 a) — Bausteine einer Übersicht mit Kacheln aus dem
+  Tab Spiele des Eulenpfads und dem Tab Übungen des Lernsteigs: Gruppen mit gemerktem Zuklappen (gespeichert nur bei
+  einer Änderung), einklappbarer Filter-Block, Suchfeld mit Fokus nach dem Neuzeichnen, „?aehnlich=“, Sortierwahl,
+  Favoriten umschalten, Stern. Speichern und Aussehen bleiben bei den Apps, die Datenfelder unverändert; noch von keiner
+  App benutzt (Umbau Lernsteig, dann Eulenpfad mit Seitentest des Tabs Spiele). Abschnitt 4.26 in docs/kern/rahmen.md,
+  Zeile in docs/gemeinsame_mechaniken.md. Tests in `pruefe_kern.js` mit Ersatz-DOM; Gegenproben (Wächter gegen `toggle`
+  ohne Änderung entfernt, Handy offen, kein Fokus): gemeldet. Tests: Kern „5709 Fälle, 0 Fehler.“ (Kopien gleich),
+  Lernsteig „0 Fehler, 0 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe (schriftlich-werkstatt,
+  rechenprobe, malkreuz, zahlenhaus, preis-tabelle, quader-volumen) mit Kern 1.27.0 und 1.28.0: gleiche Ausgabe und
+  Klickzahlen, „Keine Fehler.“.

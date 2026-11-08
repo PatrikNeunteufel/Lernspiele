@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.28.0 — 2026-11-08 (LERN_Session23)
+- `uebersicht.js` (`KERN.uebersicht`, neu, Entscheid KT1 a): Bausteine einer Übersicht mit Kacheln aus dem Tab Spiele
+  des Eulenpfads und dem Tab Übungen des Lernsteigs — `gruppen` (aufklappbar, Zuklappen über `merke`, nur bei einer
+  Änderung), `filterBlock` und `filterOffen`, `schmal`, `suche` (Text überlebt das Neuzeichnen, Fokus zurück),
+  `aehnlich`, `sortWahl`, `umschalten`, `stern`. Speichern und Aussehen gibt die App; die Datenfelder bleiben. Noch von
+  keiner App benutzt.
+
 ## 1.27.0 — 2026-11-07 (LERN_Session21)
 - `notizblock.js`: `verkleinern()` und `istKlein()`, dazu die Option `vorn()` der Fabrik — gerufen, wenn der Block gross
   erscheint (geöffnet oder aus „klein“ zurückgeholt). Damit teilt eine App den Platz am Bildrand mit einem anderen Feld

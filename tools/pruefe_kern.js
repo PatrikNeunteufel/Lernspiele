@@ -31,6 +31,7 @@ require(path.join(WURZEL, "kern", "rolleiste.js"));
 require(path.join(WURZEL, "kern", "personenmenue.js"));
 require(path.join(WURZEL, "kern", "tastenfeld.js"));
 require(path.join(WURZEL, "kern", "notizblock.js"));
+require(path.join(WURZEL, "kern", "uebersicht.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -463,6 +464,116 @@ console.log("tastenfeld.js");
     [["123", 9, 9, "4"], "1234@4", "Schreibmarke hinter dem Ende: hinten"],
   ]) gleich(f(E(...args)), soll, `einfuegen: ${text}`);
   gleich(typeof KERN.tastenfeld, "function", "KERN.tastenfeld ohne DOM ladbar");
+}
+
+// ---------- uebersicht (KT1 a: Gruppen, Filter-Block, Suche, Ähnliche, Sortierwahl, Favoriten) ----------
+console.log("uebersicht.js");
+{
+  const U = KERN.uebersicht;
+  // Favoriten umschalten: dazu hinten, weg, Eingabe unverändert; Nachrechnung: zweimal umschalten gibt dieselbe Menge
+  const fav = ["a", "b"];
+  gleich(U.umschalten(fav, "c").join(), "a,b,c", "umschalten: dazu hinten");
+  gleich(U.umschalten(fav, "a").join(), "b", "umschalten: weg");
+  gleich(fav.join(), "a,b", "umschalten: Eingabe bleibt");
+  gleich(U.umschalten(undefined, "x").join(), "x", "umschalten: ohne Liste");
+  {
+    const zz = KERN.zufall.mitStartwert(23);
+    let abw = 0;
+    for (let i = 0; i < 2000; i++) {
+      const l = [...new Set(Array.from({ length: Math.floor(zz() * 6) }, () => "s" + Math.floor(zz() * 8)))];
+      const id = "s" + Math.floor(zz() * 8);
+      const einmal = U.umschalten(l, id), zweimal = U.umschalten(einmal, id);
+      if (einmal.includes(id) === l.includes(id) || [...zweimal].sort().join() !== [...l].sort().join()) abw++;
+    }
+    gleich(abw, 0, "umschalten: Zufallsfälle (2000), zweimal = unverändert");
+  }
+  // Filter offen? Gemerkte Wahl gilt, sonst Handy zu
+  gleich([U.filterOffen(true, false), U.filterOffen(false, true), U.filterOffen(undefined, true), U.filterOffen(undefined, false)].join(),
+    "false,true,false,true", "filterOffen: Wahl gilt, ohne Wahl Handy zu");
+  gleich(U.aehnlich.id("?aehnlich=uhr&stufe=s2"), "uhr", "aehnlich.id aus search");
+  gleich(U.aehnlich.id(""), null, "aehnlich.id ohne Parameter");
+  gleich(U.schmal(), false, "schmal ohne matchMedia (Node): nein");
+
+  // Kleiner Ersatz für document: Attribute, Kinder, mehrere Hörer, details.open, Fokus
+  const knoten = tag => ({
+    tag, attribute: {}, kinder: [], hoerer: {}, className: "", textContent: "", innerHTML: "", open: false,
+    get firstChild() { return { svg: this.innerHTML }; },
+    setAttribute(k, v) { this.attribute[k] = String(v); },
+    addEventListener(t, f) { (this.hoerer[t] = this.hoerer[t] || []).push(f); },
+    feuere(t, ev = {}) { for (const f of this.hoerer[t] || []) f(Object.assign({ target: this }, ev)); },
+    append(...k) { this.kinder.push(...k); },
+    focus() { global.__fokus = this; }, setSelectionRange(a, b) { this.auswahl = [a, b]; },
+  });
+  const raf = [];
+  Object.assign(global, { document: { createElement: knoten }, requestAnimationFrame: f => raf.push(f) });
+  const text = n => (typeof n === "string" ? n : n.textContent + n.kinder.map(text).join(""));
+
+  // Gruppen: offen nach zu, merke nur bei Änderung, Menge über mehrere Gruppen
+  const gemerkt = [];
+  const g = U.gruppen({ zu: ["fach:Deutsch"], merke: l => gemerkt.push(l.slice().sort().join()) });
+  const m = g.gruppe({ id: "fach:Mathe", kopf: "Mathe", anzahl: 3 }, "inhalt");
+  const d = g.gruppe({ id: "fach:Deutsch", kopf: [knoten("span"), knoten("span")], anzahl: null });
+  gleich(m.tag + "." + m.className + "[" + m.attribute["data-gruppe"] + "]", "details.gruppe[fach:Mathe]", "gruppe: details.gruppe mit data-gruppe");
+  gleich([m.open, d.open].join(), "true,false", "gruppe: offen nach zu");
+  gleich(text(m.kinder[0]), "Mathe3", "gruppe: Kopf aus Text und Anzahl");
+  gleich(m.kinder[0].kinder.length + "/" + d.kinder[0].kinder.length, "2/2", "gruppe: ohne Anzahl kein span.anzahl");
+  gleich(m.kinder[1], "inhalt", "gruppe: Inhalt nach dem Kopf");
+  m.feuere("toggle");
+  gleich(gemerkt.length, 0, "gruppe: toggle ohne Änderung (Zeichnen setzt open) speichert nicht");
+  m.open = false; m.feuere("toggle");
+  d.open = true; d.feuere("toggle");
+  gleich(gemerkt.join(" | "), "fach:Deutsch,fach:Mathe | fach:Mathe", "gruppe: Zuklappen und Aufklappen merken die ganze Menge");
+  gleich(g.zu().join(), "fach:Mathe", "gruppen.zu");
+  wirft(() => U.gruppen({}), "gruppen ohne merke");
+  wirft(() => g.gruppe({ kopf: "x" }), "gruppe ohne id");
+
+  // Filter-Block: Kopfzeile, offen nach Wahl und Breite, merke mit zu
+  const zuGemerkt = [];
+  const f1 = U.filterBlock({ titel: "🔎 Filter", aktiv: ["Mathe", null, "Stufe 2"], leer: "alle Spiele", zeilen: ["z1", "z2"], merke: z => zuGemerkt.push(z), schmal: true });
+  gleich(f1.className + " " + f1.open, "filter-klapp false", "filterBlock: ohne Wahl auf dem Handy zu");
+  gleich(text(f1.kinder[0]), "🔎 FilterMathe · Stufe 2", "filterBlock: Kopfzeile nennt, was gilt");
+  gleich(f1.kinder[1].kinder.join(), "z1,z2", "filterBlock: Zeilen im Block");
+  f1.open = true; f1.feuere("toggle"); f1.feuere("toggle");
+  gleich(zuGemerkt.join(), "false", "filterBlock: Aufklappen merkt zu = false, einmal");
+  const f2 = U.filterBlock({ aktiv: [], leer: "alle Übungen", zu: false, merke: () => {}, schmal: true });
+  gleich(text(f2.kinder[0]) + " " + f2.open, "Filteralle Übungen true", "filterBlock: gemerkte Wahl schlägt das Handy; leer");
+  wirft(() => U.filterBlock({}), "filterBlock ohne merke");
+
+  // Suche: Text überlebt das Neuzeichnen, Fokus mit Schreibmarke am Ende, beiEingabe vor neu
+  const s = U.suche();
+  const ablauf = [];
+  const neu = () => ablauf.push("neu");
+  const e1 = s.feld({ neu, attr: { class: "feld suche", placeholder: "suchen" }, beiEingabe: () => ablauf.push("bei") });
+  gleich(e1.attribute.type + " " + e1.className + " " + e1.attribute.value, "search feld suche ", "suche: Feld mit Attributen der App");
+  e1.value = "uhr"; e1.feuere("input");
+  gleich(s.text + " " + ablauf.join(), "uhr bei,neu", "suche: Eingabe setzt Text, dann beiEingabe und neu");
+  const e2 = s.feld({ neu });
+  gleich(e2.attribute.value + " " + raf.length, "uhr 1", "suche: neues Feld trägt den Text, Fokus vorgemerkt");
+  e2.value = "uhr"; raf.shift()();
+  gleich(global.__fokus === e2 && e2.auswahl.join(), "3,3", "suche: Fokus und Schreibmarke am Ende");
+  s.feld({ neu });
+  gleich(raf.length, 0, "suche: ohne Eingabe kein Fokus");
+  s.text = "";
+  gleich(s.text, "", "suche: Text zurücksetzen");
+  wirft(() => s.feld({}), "suche ohne neu");
+
+  // Sortierwahl: Auswahl, Richtung, setze
+  const gesetzt = [];
+  const knopf = (t, an, onclick) => Object.assign(knoten("button"), { textContent: t, an, onclick });
+  const sw = U.sortWahl({ arten: [{ wert: "thema", text: "nach Thema" }, { wert: "name", text: "A–Z" }], wahl: { art: "name", ab: true },
+    pfeile: { name: ["A → Z", "Z → A"] }, setze: w => gesetzt.push(JSON.stringify(w)), knopf, beschriftung: "Sortieren", feld: { class: "klein" } });
+  const [, sel, kn] = sw.kinder;
+  gleich(sw.className + " " + sel.className + " " + sel.kinder.map(o => o.attribute.value + ("selected" in o.attribute ? "*" : "")).join(), "sortier-wahl klein thema,name*", "sortWahl: Liste mit gewählter Art");
+  gleich(kn.textContent + " " + kn.an, "↓ Z → A true", "sortWahl: Richtungsknopf absteigend");
+  sel.feuere("change", { target: { value: "thema" } }); kn.onclick();
+  gleich(gesetzt.join(" "), '{"art":"thema","ab":false} {"art":"name","ab":false}', "sortWahl: neue Art aufsteigend, Knopf kehrt um");
+  const sw2 = U.sortWahl({ arten: [], wahl: { art: "x", ab: false }, setze: () => {}, knopf });
+  gleich(sw2.kinder.length + " " + sw2.kinder[1].textContent, "2 ↑ ↑", "sortWahl: ohne Beschriftung, ohne Pfeiltext nur der Pfeil");
+  wirft(() => U.sortWahl({ arten: [], wahl: {}, setze: () => {} }), "sortWahl ohne knopf");
+
+  // Stern
+  gleich(U.stern(true).svg.includes('class="symbol stern an"') && U.stern(false).svg.includes('class="symbol stern"') && U.stern(false).svg.includes(U.STERN), true, "stern: an/aus mit der Form");
+  delete global.document; delete global.requestAnimationFrame; delete global.__fokus;
 }
 
 // ---------- Geheimnisse und Personen (asynchron) ----------
