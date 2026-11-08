@@ -377,6 +377,12 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
   Wiederholung vor der sechsten Runde, ausser der Katalog begründet den Vorrat (`vorrat`);
   Endlos-Stufen haben mindestens 100 verschiedene
   Aufgaben (Hinweis, wenn eine andere Stufe es auch hätte);
+- Abdeckung der Lehrplan-Stufen (Plan E 1, AT1 a, seit LERN_Session23; `tools/abdeckung.js`): für jede Übung in
+  `docs/lernsteig/abdeckung.json` je Stufe die Inhaltsteile des Lehrplans mit genau einer Zuordnung (`typen`, `in`,
+  `bewusst`, `offen`; dazu `fehlt`, `aus`, `notiz`; `quelle` wortlaut oder sinngemaess). Fehler: ein erzeugter Typ
+  ohne Inhaltsteil, ein zugeordneter Typ, der nicht vorkommt, eine fehlende Stufe, eine falsche Zuordnung; Hinweis:
+  jeder offene oder teilweise abgedeckte Teil. Ohne Auswahl von Übungen auch: `docs/lernsteig/abdeckung.md` ist
+  aktuell (erzeugt mit `node tools/abdeckung.js`, nie von Hand; `--pruefe` prüft nur);
 - Seiten im Ersatz-DOM (`tools/lernsteig_seiten.js` über `tools/pruef_dom.js`, Plan B2; ersetzt seit LERN_Session17
   den Browser-Teil mit Playwright, der lokal nicht lief): Startseite als niemand, Gast, Jugendlicher und Aufsicht mit
   jedem Tab; Konto mit PIN anlegen (Code, PIN nur als Prüfwert), falsche PIN in einem neuen Tab, PIN vergessen mit

@@ -35,6 +35,8 @@ function zufallMitSeed(seed) {
 }
 
 let fehler = 0, hinweise = 0;
+// Aufgabentypen je Übung und Lehrplan-Stufe (alle Niveaus), für die Abdeckung (Plan E 1, AT1 a, tools/abdeckung.js)
+const TYPEN = new Map();
 const fehlerMelden = (wo, text) => { fehler++; console.log(`  FEHLER ${wo}: ${text}`); };
 const hinweisMelden = (wo, text) => { hinweise++; console.log(`  Hinweis ${wo}: ${text}`); };
 
@@ -252,6 +254,12 @@ function pruefeOhneBrowser(eintrag) {
         let a;
         try { a = U.aufgabeErzeugen(stufe, niveau); } catch (e) { fehlerMelden(ort, `aufgabeErzeugen: ${e.message}`); break; }
         kennungen.add(a.kennung);
+        if (stufe !== "challenge") {
+          if (!TYPEN.has(eintrag.id)) TYPEN.set(eintrag.id, new Map());
+          const je = TYPEN.get(eintrag.id);
+          if (!je.has(stufe)) je.set(stufe, new Set());
+          je.get(stufe).add(a.typ || "(ohne typ)");
+        }
         if (a.stufe !== stufe) { fehlerMelden(ort, `Aufgabe trägt Stufe ${a.stufe}`); break; }
         for (const feld of ["text", "loesung", "kennung"]) if (typeof a[feld] !== "string" || !a[feld]) { fehlerMelden(ort, `Feld ${feld} fehlt`); break; }
         const sichtbar = [a.text, a.loesung, a.weg].join(" ");
@@ -319,6 +327,16 @@ function pruefeOhneBrowser(eintrag) {
     }
   }
   for (const e of uebungen) { console.log(`${e.id}`); pruefeOhneBrowser(e); }
+  // Abdeckung der Lehrplan-Stufen (Plan E 1, AT1 a): Daten gegen die erzeugten Typen; Übersicht aktuell?
+  {
+    const AB = require("./abdeckung.js");
+    const daten = AB.lies();
+    for (const id of Object.keys(daten.uebungen)) if (!KAT.UEBUNGEN.some(u => u.id === id)) fehlerMelden("abdeckung.json", `Übung „${id}“ gibt es nicht`);
+    for (const e of uebungen) for (const m of AB.pruefeUebung(daten, e, TYPEN.get(e.id) || new Map(), KAT)) (m.art === "fehler" ? fehlerMelden : hinweisMelden)(m.wo, m.text);
+    const erfasst = KAT.UEBUNGEN.filter(u => daten.uebungen[u.id]).length;
+    console.log(`Abdeckung der Lehrplan-Stufen erfasst: ${erfasst} von ${KAT.UEBUNGEN.length} Übungen (docs/lernsteig/abdeckung.md)`);
+    if (!nur.length) { const grund = AB.veraltet(); if (grund) fehlerMelden("Abdeckung", grund); }
+  }
   if (opt.seiten) {
     const t0 = Date.now();
     const { gespielt } = await require(path.join(__dirname, "lernsteig_seiten.js")).pruefeSeiten(uebungen, fehlerMelden, LST);

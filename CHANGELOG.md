@@ -1038,3 +1038,15 @@
   `KERN.terme.bewerte` nachgerechnet) und je Punkt in `docs/plan_angleich_reihe.md` eingetragen; Übersicht E „in
   Arbeit“. Ergebnis: E 1, E 4, E 5, E 10 teilweise; E 2, E 3, E 6, E 7 offen (E 7: Kran eindeutig, stromkreis d und
   Challenge realistisch). E 1 „Nenner bis 1000“ als überholt vermerkt.
+- Abdeckungstabelle (Plan E 1, Entscheid AT1 a): `docs/lernsteig/abdeckung.json` hält je Übung und Lehrplan-Stufe die
+  Inhaltsteile des Lehrplans mit genau einer Zuordnung (Aufgabentypen `typ`, andere Übung, bewusst nicht, offen;
+  dazu was fehlt). `tools/abdeckung.js` misst die Anteile der Typen (fester Startwert) und erzeugt
+  `docs/lernsteig/abdeckung.md`; `pruefe_uebungen.js` meldet Typen ohne Inhaltsteil, zugeordnete Typen, die nicht
+  vorkommen, fehlende Stufen und eine veraltete Übersicht als Fehler, offene und teilweise Teile als Hinweis.
+  Gemessen: alle 27 Übungen geben `typ` mit (80 Stufen, 281 Typen). Erfasst: `rationale-zahlen` und `brueche`
+  (MA.1.A.3 f–i, sinngemäss) — neun Hinweise: Rechteckmodell als Bild, Prüfen des Produkts, Nenner 3 und 6,
+  Primfaktoren, Bruchterme mit Variablen, Dezimalzahlen addieren, Rechner in f. Befund: Das Lehrplan-Beispiel
+  308 · 52 ist ein Ganzzahl-Produkt — die Forderung von E 1, Ganzzahl-Produkte nur mit Dezimalstellen, ist zu
+  klären. Gegenproben (Typ ohne Teil, Typ ohne Aufgaben, zwei Zuordnungen, falscher Verweis, fehlende Stufe,
+  Übersicht von Hand geändert): alle gemeldet. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  9 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

@@ -1,0 +1,68 @@
+{
+  "_lies_mich": "Abdeckung der Lehrplan-Stufen je Übung (Plan E 1, Entscheid AT1 a). Je Inhaltsteil genau eine Zuordnung: typen (Aufgabentypen der Übung), in (andere Übung), bewusst (Grund) oder offen (true); dazu optional fehlt, aus (andere Kompetenz-Stufe), notiz. quelle je Stufe: wortlaut oder sinngemaess. Geprüft von tools/pruefe_uebungen.js, Übersicht docs/lernsteig/abdeckung.md erzeugt von node tools/abdeckung.js.",
+  "uebungen": {
+    "rationale-zahlen": {
+      "g": {
+        "quelle": "sinngemaess",
+        "notiz": "Die Nennerlisten sind am Wortlaut nachgelesen (LERN_Session19), der übrige Text nicht.",
+        "teile": [
+          { "text": "Dezimalzahlen bis 5 Wertziffern multiplizieren und prüfen (308 · 52; 12 · 0,3)", "typen": ["mal-dezimal", "mal-ganz"],
+            "fehlt": "das Prüfen des Ergebnisses (kein eigener Aufgabentyp)",
+            "notiz": "Das Beispiel 308 · 52 des Lehrplans ist ein Ganzzahl-Produkt und deckt mal-ganz; Plan E 1 will Ganzzahl-Produkte nur als Teil mit Dezimalstellen — zu klären" },
+          { "text": "Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren", "in": "brueche",
+            "fehlt": "das Rechteckmodell als Bild (auch in brueche)" },
+          { "text": "Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000 als Dezimalzahlen schreiben", "typen": ["bruch-dezimal"],
+            "fehlt": "die Nenner 3 und 6 (periodische Dezimalzahlen, nach RZ1 a zurückgestellt)" },
+          { "text": "wie oft ein Stammbruch in einer ganzen Zahl steckt (2 : ⅕)", "typen": ["stammbruch"] }
+        ]
+      },
+      "h": {
+        "quelle": "sinngemaess",
+        "teile": [
+          { "text": "Prozentrechnungen mit dem Rechner", "typen": ["grundwert", "prozentwert", "prozentsatz"] },
+          { "text": "Erweiterung: natürliche Zahlen in Primfaktoren zerlegen", "offen": true }
+        ]
+      },
+      "i": {
+        "quelle": "sinngemaess",
+        "teile": [
+          { "text": "Grundoperationen mit rationalen Zahlen", "typen": ["plus-minus", "mal-geteilt", "dezimal-negativ"] },
+          { "text": "Wurzeln und Potenzen mit dem Rechner (4³ · 4³ = 4096; 4³ + 4³ = 128; ³√8000)", "typen": ["potenz-wurzel"] },
+          { "text": "Erweiterung: Grundoperationen mit gewöhnlichen Brüchen mit Variablen, mit Zahlen belegen (a/b + c/d; a/b − c/d; a/b · c/d; a : c/b : d = a/c · b/d)", "offen": true,
+            "notiz": "aufgaben.js nimmt die Erweiterung als Annahme aus, mit Patrik abzustimmen" }
+        ]
+      }
+    },
+    "brueche": {
+      "f": {
+        "quelle": "sinngemaess",
+        "teile": [
+          { "text": "Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (Kopf oder eigener Rechenweg)", "offen": true },
+          { "text": "Brüche (Nenner bis 100) am Rechteckmodell kürzen, erweitern, addieren, subtrahieren", "typen": ["kuerzen", "erweitern", "plus", "minus"],
+            "fehlt": "das Rechteckmodell als Bild" },
+          { "text": "Grundoperationen mit dem Rechner", "offen": true },
+          { "aus": "MA.1.A.1.h", "text": "Brüche (Nenner 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1000), Dezimal- und Prozentzahlen ineinander umschreiben", "typen": ["umschreiben"] }
+        ]
+      },
+      "g": {
+        "quelle": "sinngemaess",
+        "notiz": "Die Nennerlisten sind am Wortlaut nachgelesen (LERN_Session19), der übrige Text nicht.",
+        "teile": [
+          { "text": "Dezimalzahlen bis 5 Wertziffern multiplizieren und prüfen (308 · 52; 12 · 0,3)", "in": "rationale-zahlen" },
+          { "text": "Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren", "typen": ["mal", "ganz-mal"],
+            "fehlt": "das Rechteckmodell als Bild" },
+          { "text": "Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000 als Dezimalzahlen schreiben", "in": "rationale-zahlen" },
+          { "text": "wie oft ein Stammbruch in einer ganzen Zahl steckt (2 : ⅕)", "typen": ["stammbruch"] }
+        ]
+      },
+      "i": {
+        "quelle": "sinngemaess",
+        "teile": [
+          { "text": "Grundoperationen mit rationalen Zahlen", "typen": ["plus-minus-negativ", "mal-negativ", "geteilt"] },
+          { "text": "Wurzeln und Potenzen mit dem Rechner (4³ · 4³ = 4096; 4³ + 4³ = 128; ³√8000)", "in": "rationale-zahlen" },
+          { "text": "Erweiterung: Grundoperationen mit gewöhnlichen Brüchen mit Variablen, mit Zahlen belegen (a/b + c/d; a/b − c/d; a/b · c/d; a : c/b : d = a/c · b/d)", "in": "rationale-zahlen" }
+        ]
+      }
+    }
+  }
+}
