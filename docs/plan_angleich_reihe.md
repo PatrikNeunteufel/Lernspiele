@@ -21,7 +21,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.26.0; offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 Schritte 1–3 gebaut (LERN_Session17–20) | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 zum Teil (Entwickler-Modus), C3 gebaut (LERN_Session21) | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
-| E | Fachliche Korrekturen der Übungen | offen, nach C | Abschnitt E |
+| E | Fachliche Korrekturen der Übungen | in Arbeit seit 2026-11-07 (LERN_Session21, E 9): E 8 und E 9 erledigt, übrige offen oder teilweise | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
 | G | Doku-Drift beseitigen | offen, laufend | Abschnitt G |
 | H | Portal: Anleitungen und Listen je App | offen, nach C | Abschnitt H |
@@ -207,18 +207,25 @@ Kindersprache.
    multiplizieren und dividieren; Brüche; negative Zahlen), Ganzzahl-Produkte nur als Teil mit Dezimalstellen,
    Bruch-Produkte am Rechteckmodell dazu. Gleicher Massstab für alle Übungen: Prüfen, ob die Aufgaben je Stufe den
    **ganzen** Inhalt der Lehrplanstufe abdecken (Abdeckungstabelle je Übung).
+   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise. Erledigt (RZ1–RZ3 a, LERN_Session19): Dezimal-Multiplikation in den Grenzen des Lehrplans, Bruch → Dezimalzahl (ohne die Nenner 3 und 6), Stammbruch in einer ganzen Zahl. Offen: `mal-ganz` weiter ein Viertel der Aufgaben von g (`rationale-zahlen/aufgaben.js` `stufeG`); kein Bruch-Produkt in `rationale-zahlen`, in `brueche` nur als Rechnung, das Rechteckmodell nirgends als Bild; Neuschnitt und Name; MA.1.A.3 g weiter doppelt (`brueche` f, g, i und `rationale-zahlen` g, h, i); keine Abdeckungstabelle für eine Übung. „Nenner bis 1000“ oben ist überholt: Der Lehrplan nennt für das Rechteckmodell 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, für Dezimalzahlen dazu 1'000 (`docs/lernsteig/lehrplan/mathematik_zyklus3.md`, nachgelesen LERN_Session19).
 2. **Brutto/Netto** (`daten-rabatt`): Bruttopreis − Rabatt = Nettopreis als Hauptfall; Lesart mit Lehrmittel (mathbuch)
    abgleichen.
+   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen. Stufe l zieht `rabatt`, `rabatt-betrag`, `brutto`, `netto` gleich oft; Brutto und Netto hängen am Zuschlag („Brutto ist Netto plus Zuschlag“), das Ergebnis nach Rabatt heisst „Neuer Preis“; kein Abgleich mit dem mathbuch dokumentiert.
 3. **Überschlagen** (`ueberschlagen-ordnen`): Ablenker aus falschem Runden (eine Stelle falsch gerundet, Ergebnis
    ±10–30 %), nicht nur Zehnerpotenzen daneben.
+   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen. Ablenker nur um Zehnerpotenzen (Faktoren 10, 0.1, 100 oder 0.01; bei `prozent` andere Sätze). Die Prüfung der Übung verlangt Abstand ab Faktor 1.8 und würde Ablenker ±10–30 % abweisen — sie muss mitgeändert werden.
 4. **Terme:** „Schreibe als Potenz“ nur mit derselben Basis; `a/2`, `×`, `⋅`, Grossbuchstaben annehmen; gemischte
    Zahl `1 3/4` erkennen oder ausdrücklich abweisen; „vereinfacht“ verlangt zusammengefasste Faktoren.
+   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise, nachgerechnet mit `KERN.terme.bewerte`. Die Aufgaben haben dieselbe Basis, die Form „potenz“ nimmt aber „2^6“ für 4³ und „8^1“ für 2³ an; „a/2“, „2×a“, „2⋅a“, „2A“ sind unlesbar; „1 3/4“ wird abgewiesen, mit der unpassenden Meldung zu Dreiergruppen; „vereinfacht“ nimmt „2a·3“ und „a·a“ an.
 5. **Terme, Reihenfolge j/k:** Stufen bleiben nach Lehrplan (j Erweiterung, k GA); in der Stufenwahl sichtbar machen,
    dass k ohne j erreichbar ist.
+   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise. Stufen i, j, k nach Lehrplan, die Stufenwahl zeigt „Grundanspruch“ und „mit Erweiterung“; kein Hinweis, dass k ohne j erreichbar ist, und der „Übergang j → k“ (`lernsteig/gemeinsam/werkzeug.js`) legt eine Reihenfolge nahe.
 6. **Atombau:** B³⁺ und Be²⁺ aus der Challenge; B und Si als Halbmetall oder aus der Frage „Metall/Nichtmetall“
    nehmen; Hinweis zur Lage der Nichtmetalle mit Ausnahme H.
+   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen. Be²⁺ und B³⁺ in allen drei Typen der Challenge (ausgenommen sind nur H, He, Edelgase und Gruppe IV); B und Si als `nichtmetall` in `pse.js`; der Hinweis nennt H nicht als Ausnahme.
 7. **Kräfte:** Stufe a nach Seitentext (Diagramme erkennen und darstellen) statt nur v = s : t; Beispiele in
    `maschinen.js` eindeutig (Kran, Handbohrer); realistische Grössen (Kraftmesser, Spannungen in `stromkreis`).
+   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen bis auf zwei Teile. Stufe a fragt nur Geschwindigkeit und Weg aus einer Ursprungsgeraden ab, nichts zu „gleichförmige Bewegungen in Diagrammen erkennen und darstellen“ (`nt_zyklus3.md`). Kran eindeutig (Flaschenzug am Haken), einen Handbohrer gibt es nicht (Wellrad, nach KR1 a ausgeschlossen). Kraftmesser bis 1500 N und Massen bis 100 kg in Stufe c; `stromkreis` c bis 400 V, d und Challenge 3–24 V (realistisch).
 8. **Französisch:** „C'est le vélo de moi“, „les clés d'elle“ idiomatisch ersetzen (erledigt in LERN_Session22: „Ce vélo
    est à moi“, „Ces clés sont à elle“); Englisch „___ the table“ eindeutig (Englisch erledigt in LERN_Session22: ohne „at“).
 9. **Vielfalt:** `kombinatorik` f (23) mit drei Münzen, Glücksrad, Urne, Karten; `folgen` j (53) mit weiteren Figuren (erledigt in LERN_Session22: acht beschriebene Figuren, 61);
@@ -237,6 +244,7 @@ Kindersprache.
    franzoesisch-grammatik b, c, d (SP1 a: 13/13/16 → 51/48/52, Challenge mit 151 auch als Serie). Heute 0 Hinweise:
    E 9 ist damit für alle 21 Stufen erledigt. Karten nicht (Jass oder französisch?).
 10. **Hinweise:** Wurzelaufgaben bekommen einen Wurzel-Hinweis; `folgen` nennt die Formel nicht in der Aufgabe.
+   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise. Wurzel-Hinweis in `koerper-winkel`; in `flaechen-volumen` und `koordinaten` (Pythagoras) lückenhaft; `rationale-zahlen` i (√x, ³√x) hat nur den Potenz-Hinweis. `folgen` i nennt die Formel im Aufgabentext (Rechteckzahlen „n · (n + 1)“), die übrigen Stufen nur im Lösungsweg.
 11. Danach: Patrik prüft die sieben Listen und die Annahmen je Übung im Entwickler-Modus (FG1 a).
 
 ## F. Recherchen ordnen

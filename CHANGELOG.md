@@ -1034,3 +1034,7 @@
     (`git config core.hooksPath tools/git-hooks`), noch nicht gesetzt.
   - Steckbrief in CLAUDE.md nachgeführt. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“
     (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Eulenpfad `tab` „Keine Fehler.“.
+- Plan E (NX1 a): Stand der Punkte E 1–E 7 und E 10 im Code nachgelesen (drei Prüfer, Befunde nachgeprüft, E 4 mit
+  `KERN.terme.bewerte` nachgerechnet) und je Punkt in `docs/plan_angleich_reihe.md` eingetragen; Übersicht E „in
+  Arbeit“. Ergebnis: E 1, E 4, E 5, E 10 teilweise; E 2, E 3, E 6, E 7 offen (E 7: Kran eindeutig, stromkreis d und
+  Challenge realistisch). E 1 „Nenner bis 1000“ als überholt vermerkt.
