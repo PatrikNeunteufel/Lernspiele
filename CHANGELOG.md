@@ -917,3 +917,12 @@
   Lücke als Artikel. Liste bleibt ungeprüft. Gegenprobe (Verb als Nomen ohne Artikel; Satzvariante mit anderem Wort;
   Gross/klein-Variante mit anderer Schreibung): gemeldet. Plan E 9. Tests: Kern „5671 Fälle, 0 Fehler.“, Lernsteig
   „0 Fehler, 8 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“.
+- Lernsteig — Vorrat `englisch-grammatik` (Plan E 9, Entscheid SP1 a): `englisch.js` b 11 → 49 (to be, to have,
+  Subjektpronomen, Fragewörter), c 14 → 49 (Wortstellung in Frage und Aussage, zwei Objekte, unregelmässige Mehrzahl,
+  Präpositionen), d 16 → 54 (Modalverben, Verneinung, Reflexiv-, Demonstrativ- und Possessivpronomen, because/so,
+  Zeitformen auch present progressive und simple present); die Challenge mischt alle (152) und gibt es deshalb auch als
+  Serie. „The keys are ___ the table“ ohne „at“ (Plan E 8), Ablenker „I play tennis often play.“ → „I tennis often
+  play.“ Prüfung: Satzvarianten müssen dieselben Wörter haben (bis auf to, do/does, -s/-es); bisher genügte eine
+  ähnliche Länge, das liess ein anderes Wort durch. Liste bleibt ungeprüft. Gegenprobe (Variante mit anderem Verb,
+  mit anderem Nomen): gemeldet. Plan E 9. Tests: Kern „5671 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 4 Hinweise.“
+  (Konten 101 Fälle), Gratwanderung „Keine Fehler.“.

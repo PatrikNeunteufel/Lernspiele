@@ -34,7 +34,7 @@ const REGEL = {
   demonstrativ: "this/these = hier (nah), that/those = dort (fern); these/those in der Mehrzahl.",
   possessiv: "my, your, their vor dem Nomen; mine, yours, theirs allein.",
   konjunktion: "because = weil (Grund), so = deshalb (Folge).",
-  zeitform: "has/have + 3. Form = present perfect; was/were + -ing = past progressive; 2. Form = simple past.",
+  zeitform: "am/is/are + -ing = present progressive; Grundform (he/she/it mit -s) = simple present; has/have + 3. Form = present perfect; was/were + -ing = past progressive; 2. Form = simple past.",
 };
 
 function aufgabe(stufe, e) {
@@ -76,11 +76,12 @@ function pruefeAufgabe(a, stufe, niveau) {
   if (a.optionen[a.richtig] !== e.optionen[0]) m.push("richtige Antwort falsch markiert");
   if (e.art !== "satz" && (e.satz.match(/___/g) || []).length !== 1) m.push(`nicht genau eine Lücke: ${e.satz}`);
   if (e.art === "satz") {
-    // Satzvarianten: dieselben Wörter (bis auf Hilfswörter), damit nur Form und Stellung geprüft werden
-    const woerter = s => s.toLowerCase().replace(/[?.!]/g, "").split(" ").filter(w => !["to", "do", "does", "play"].includes(w)).sort().join(" ");
+    // Satzvarianten: dieselben Wörter (bis auf Hilfswörter to, do/does und die Endung -s/-es), damit nur Form und
+    // Stellung geprüft werden. Bis LERN_Session22 genügte eine ähnliche Länge, das liess ein anderes Wort durch.
+    const stamm = w => w.replace(/s$/, "").replace(/e$/, "");
+    const woerter = s => s.toLowerCase().replace(/[?.!,]/g, "").split(" ").map(stamm).filter(w => !["to", "do"].includes(w)).sort().join(" ");
     const basis = woerter(e.optionen[0]);
-    const nah = e.optionen.filter(o => woerter(o) === basis || Math.abs(woerter(o).length - basis.length) <= 6).length;
-    if (nah !== e.optionen.length) m.push(`Satzvarianten zu verschieden: ${e.optionen.join(" | ")}`);
+    if (e.optionen.some(o => woerter(o) !== basis)) m.push(`Satzvarianten mit anderen Wörtern: ${e.optionen.join(" | ")}`);
   }
   return m;
 }
