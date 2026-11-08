@@ -667,8 +667,10 @@ kennt nur die App). Das Aussehen gibt die App; der Kern setzt nur die Klassen ob
 mit einem Ersatz-DOM (Umschalten mit 2000 Zufallsfällen, Gruppen und Filter-Block mit `toggle` ohne Änderung, Suche mit
 Fokus, Sortierwahl); Gegenproben (Wächter gegen `toggle` ohne Änderung entfernt, Handy offen, kein Fokus): gemeldet.
 Benutzt von: Lernsteig (`start/uebungen.js`, seit LERN_Session23; Seitentest `tools/lernsteig_seiten.js` meldet ein
-nicht gemerktes Zuklappen und einen nicht gemerkten Favoriten, Gegenproben). Der Eulenpfad folgt mit einem Seitentest
-des Tabs Spiele.
+nicht gemerktes Zuklappen und einen nicht gemerkten Favoriten, Gegenproben) und Eulenpfad (`start/spiele.js`, Suchfeld
+der Freigabe in `start/verwaltung.js`, seit LERN_Session23; Seitentest `tools/eulenpfad_seiten.js`, Teil `tab` von
+`pruefe_spiele.js`). Mit dem Umbau fielen im Eulenpfad zwei Fehler weg: „Alle auf/zu“ während einer Suche, und bei
+einem Suchfeld mit nur Leerzeichen waren alle Gruppen offen und Zuklappen wurde nicht gemerkt.
 
 ### 4.27 Geplant
 

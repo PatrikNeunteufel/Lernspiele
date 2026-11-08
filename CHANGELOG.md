@@ -1004,3 +1004,15 @@
   Favorit nicht gemerkt): gemeldet. Browser (Gast): Favorit, Zuklappen über das Neuzeichnen, Richtung der Sortierung,
   Tippen im Suchfeld mit Fokus über jede Neuzeichnung, Filter auf 375 px ohne Wahl zu; keine Konsolenfehler. Tests:
   Lernsteig „0 Fehler, 0 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“).
+- Eulenpfad, Tab Spiele auf `KERN.uebersicht` umgestellt (KT1 a, `eulenpfad/start/spiele.js`): Gruppen, Filter-Block,
+  Suchfeld, „?aehnlich=“, Sortierwahl, Favoriten und die Form des Sterns aus dem Kern; die Freigabe-Suche in
+  `start/verwaltung.js` mit eigenem `KERN.uebersicht.suche()` statt des gemeinsamen `suchFeld`. Zwei Fehler behoben:
+  „Alle auf“ / „Alle zu“ standen auch während einer Suche und bei den Ähnlichen da (jetzt nur mit Gruppen), und bei
+  einem Suchfeld mit nur Leerzeichen waren alle Gruppen offen und Zuklappen wurde nicht gemerkt. Karten tragen
+  `data-spiel`, der Stern `data-favorit`.
+- Neuer Seitentest des Tabs Spiele (`tools/eulenpfad_seiten.js`, Teil `tab` von `pruefe_spiele.js`, 33 Prüfschritte):
+  Favorit, Zuklappen (auch ohne Änderung), Alle auf/zu, Ansicht, Filter-Block, Sortierung und Richtung, Suche mit Fokus,
+  nur Leerzeichen, Ähnliche. Bisher prüfte kein Test den Tab. Gegenproben (beide alten Fehler, Favorit, `filterZu`,
+  Tippen schliesst Ähnliche nicht, Richtung): alle gemeldet. Tests: Eulenpfad `suche daten tab` „Keine Fehler.“
+  (Spielseiten unverändert, Kern unverändert 1.28.0: keine Stichprobe der Spiele nötig). Browser: Tab Spiele als Kind
+  (Tippen mit Fokus, Favorit gold, Zuklappen), Freigabe-Suche als Aufsicht, keine Konsolenfehler.

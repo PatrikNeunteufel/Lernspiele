@@ -2,8 +2,9 @@
    Konten anlegen, Rollen und PIN (Entscheid L1 a, L2 a). Alles gilt für dieses Gerät. */
 "use strict";
 
-// Suche in der Freigabe (wie im Tab Spiele, suchFeld aus start/spiele.js); bleibt beim Neuzeichnen erhalten.
-let freigabeSuche = "";
+// Suche in der Freigabe (wie im Tab Spiele, KERN.uebersicht.suche, Aussehen suchAttr aus start/spiele.js); bleibt beim
+// Neuzeichnen erhalten.
+const FREIGABE_SUCHE = KERN.uebersicht.suche();
 
 function zeichneVerwaltung(box, neu) {
   const { el } = LS;
@@ -86,6 +87,7 @@ function zeichneVerwaltung(box, neu) {
       el("thead", {}, el("tr", {}, ...["Spiel / Liste", "Prüfstand", "für Kinder"].map(t => el("th", { text: t })))),
       el("tbody", {}, ...zeilen)));
     const gruppen = [];
+    const freigabeSuche = FREIGABE_SUCHE.text;
     const treffer = freigabeSuche.trim() ? LS.suche(freigabeSuche) || [] : null;
     if (treffer) {
       // Suche (Entscheid SU1 a): eine Liste, beste Treffer zuerst, je mit Grund, wenn er nicht sichtbar ist.
@@ -115,7 +117,7 @@ function zeichneVerwaltung(box, neu) {
       el("h2", { text: "Spiele und Inhalte freigeben" }),
       el("p", { class: "leise-text", style: "margin-top:0", text: `Kinder sehen ${sichtbar} von ${SPIELE.length} Spielen. Frei ist, was nichts mehr zu prüfen hat: Neue Spiele sind gesperrt, bis sie angesehen sind, Inhaltslisten, bis sie geprüft sind (Prüfstand im Repo, gesetzt im Entwickler-Modus). Hier lässt sich das anders setzen; mit Abgleich gilt es für alle Geräte. Ein Spiel mit Inhaltslisten braucht mindestens eine freie Liste; die Kinder üben nur die freien Listen.` }),
       zeile(knopf("✓ Alles freigeben", () => alleSetzen(true)), knopf("🔒 Alles sperren", () => alleSetzen(false)), knopf("↺ Alles wie Prüfstand", () => alleSetzen(null))),
-      zeile(suchFeld(freigabeSuche, v => { freigabeSuche = v; }, neu, "🔍 Spiel oder Inhaltsliste suchen")),
+      zeile(FREIGABE_SUCHE.feld({ neu, attr: suchAttr("🔍 Spiel oder Inhaltsliste suchen") })),
       ...gruppen,
       gruppen.length ? null : el("p", { class: "leise-text", text: "Kein Spiel passt zur Suche." })));
   }

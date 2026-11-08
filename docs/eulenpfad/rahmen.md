@@ -308,7 +308,9 @@ Grenzen in `AUSWERTUNG.FAZIT` (Annahmen bis zu Erfahrungen mit Kindern). Abschni
 die Tabs Spiele, Profil, Statistik und, nur für die Aufsicht, Verwaltung mit den Untertabs Konten,
 Freigabe, Abgleich, Einstellungen (für alle auf diesem Gerät, „↺ Alles auf Standard“) und Entwicklung. Der Tab steht in der Adresse (`#statistik`, Untertab `#verwaltung/abgleich`;
 ohne Untertab Konten). `#anmelden` meldet ab und führt zur Anmeldung; dorthin verweist auch
-„wechseln“ im Spiel. Die **Suche** im Tab Spiele und in der Freigabe (Entscheid SU1 a, `LS.suche`) ordnet
+„wechseln“ im Spiel. Gruppen, Filter-Block, Suchfeld, Sortierwahl und Favoriten des Tabs Spiele (und das Suchfeld der
+Freigabe) kommen aus `KERN.uebersicht` (KT1 a, docs/kern/rahmen.md 4.26). Die **Suche** im Tab Spiele und in der
+Freigabe (Entscheid SU1 a, `LS.suche`) ordnet
 nach Relevanz: Feldgewichte Name 6, Lernziel-Kürzel 4, Beschreibung 3, Inhaltslisten 2, Thema 1;
 Wortanfang vor Wortteil, genaue Umlaute vor ä = a; ein Tippfehler nur im Namen ab 5 Buchstaben und nie bei
 Kürzeln mit Ziffern; jedes Suchwort muss passen. Während einer Suche steht statt der Gruppen eine Liste,
@@ -407,6 +409,11 @@ Vorgabe Patrik 2026-10-31.
 
 `node tools/pruefe_spiele.js [ids] [--seed=N]` prüft:
 - zehn feste Beispielsuchen mit erwarteten Treffern, Reihenfolge und Grund (`suche` als id: nur diese);
+- den Tab Spiele der Startseite im Ersatz-DOM (`tools/eulenpfad_seiten.js`, KT1 a; `tab` als id: nur dieser,
+  `--tab=0` schaltet ab): Favorit setzen und zurücknehmen (Profil, Gruppe Favoriten, Stern an), Zuklappen gemerkt
+  und nach dem Neuzeichnen zu (ein `toggle` ohne Änderung speichert nicht), „Alle zu“ / „Alle auf“, Ansicht,
+  Filter-Block (`filterZu`), Sortierung nach Name und umgekehrt, Suche als Liste ohne Gruppen und ohne
+  „Alle auf/zu“ mit Fokus im Feld, nur Leerzeichen wie ohne Suche, Ähnliche mit „✕ Alle Spiele“ und Tippen;
 - Hinweis „Einzahl?“, wenn im sichtbaren Text die Zahl 1 bei einem Verb in der Mehrzahl steht („1 werden
   gegessen“, „Es kommen 1 dazu“, „1 Stück kosten“) — zum Nachsehen, kein Fehler;
 - jede Stufe lädt und lässt sich durchspielen;

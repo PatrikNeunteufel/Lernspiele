@@ -661,6 +661,19 @@ if (opt.suche !== 0 && (!nurSpiele.length || nurSpiele.includes("suche"))) {
   }
 }
 
+// Tab Spiele der Startseite (KT1 a, LERN_Session23): Favoriten, Zuklappen, Alle auf/zu, Filter-Block, Suche, Ähnliche,
+// Sortierung im Ersatz-DOM (tools/eulenpfad_seiten.js); --tab=0 schaltet ab; nur dieser Teil: node tools/pruefe_spiele.js tab.
+if (opt.tab !== 0 && (!nurSpiele.length || nurSpiele.includes("tab"))) {
+  console.log("\nTab Spiele (Startseite):\n");
+  let gemeldet = 0;
+  let schritte = 0;
+  try {
+    schritte = require("./eulenpfad_seiten.js").pruefeTabSpiele((ort, text) => { console.log(`    FEHLER  ${ort}: ${text}`); gemeldet++; });
+  } catch (e) { console.log(`    FEHLER  Tab Spiele: Abbruch: ${String(e.stack || e).split("\n").slice(0, 3).join(" | ")}`); gemeldet++; }
+  fehlerZahl += gemeldet;
+  console.log(`${gemeldet ? "✗" : "✓"} Tab Spiele: ${schritte} Prüfschritte${gemeldet ? `, ${gemeldet} Fehler` : ""}`);
+}
+
 // Sichern und Einlesen (LERN_Session18): Eine Datei eines Geräts muss sich auf einem anderen einlesen lassen. Bis dahin
 // wies LS.abgleich.dateiEinlesen jede Datei der Version 3 ab (prüfte das Feld profile, das sie seit LERN_Session15 nicht
 // mehr trägt), und kein Test merkte es. Seit Kern 1.15.0 über KERN.daten (Format reihe-daten). Je Fall ein frisches Gerät

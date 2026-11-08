@@ -2,10 +2,14 @@
    Kinder sehen nur freigegebene Spiele (Entscheid L4 a); die Aufsicht sieht alle mit Prüfstand. */
 "use strict";
 
+// Bausteine der Übersicht aus dem Kern (KT1 a, kern/uebersicht.js): Gruppen, Filter-Block, Suche, Ähnliche,
+// Sortierwahl, Favoriten — gleich wie im Tab Übungen des Lernsteigs; Speichern und Aussehen hier.
+const UE = KERN.uebersicht;
+
 // Symbole der Karten-Schalter: aus = grauer Umriss, an = gold mit Verlauf wie der Favoriten-Stern.
-// Der Verlauf steht einmal im Dokument (#gold-verlauf).
+// Der Verlauf steht einmal im Dokument (#gold-verlauf). Die Form des Sterns kommt aus dem Kern.
 const SCHALTER_SYMBOL = {
-  stern: '<path d="M12 2.6l2.85 6 6.55.82-4.85 4.55 1.27 6.5L12 17.3l-5.82 3.17 1.27-6.5L2.6 9.42l6.55-.82z"/>',
+  stern: UE.STERN,
   endlos: '<path class="linie" d="M7.6 8.2C5.3 8.2 3.5 9.9 3.5 12s1.8 3.8 4.1 3.8c3.6 0 5.2-7.6 8.8-7.6 2.3 0 4.1 1.7 4.1 3.8s-1.8 3.8-4.1 3.8c-3.6 0-5.2-7.6-8.8-7.6z"/>',
   uhr: '<rect x="10.2" y="1.8" width="3.6" height="2.6" rx="1"/><circle cx="12" cy="13.6" r="7.6"/><path class="zeiger" d="M12 13.6V9.2M12 13.6l3 2"/>',
   // Reihenfolge der Teile (RF1 a, Satz B): drei absteigende Balken (grösste Stelle links), gemischt ein Mischpfeil
@@ -31,24 +35,10 @@ function schalterSymbol(art, an) {
 }
 
 // Suche im Tab Spiele (Wunsch Patrik, LERN_Session6): bleibt beim Neuzeichnen erhalten, nicht gespeichert.
-let spielSuche = "";
-let spielSucheTippt = false; // nach dem Neuzeichnen das Suchfeld wieder fokussieren
-
-/** Suchfeld, das bei jeder Eingabe neu zeichnet und danach den Fokus zurückholt. */
-function suchFeld(wert, setze, neu, platzhalter) {
-  const feld = LS.el("input", { class: "feld suche", type: "search", placeholder: platzhalter, "aria-label": platzhalter, value: wert });
-  feld.addEventListener("input", () => { setze(feld.value); spielSucheTippt = true; aehnlichSchliessen(); neu(); });
-  if (spielSucheTippt) {
-    spielSucheTippt = false;
-    requestAnimationFrame(() => { feld.focus(); feld.setSelectionRange(feld.value.length, feld.value.length); });
-  }
-  return feld;
-}
-
-/** Spiel-Id aus „?aehnlich=<id>“ in der Adresse (Knopf „🔗 Ähnliche Spiele“ im Spiel), oder null. */
-const aehnlichId = () => new URLSearchParams(location.search).get("aehnlich");
-/** Die Liste der ähnlichen Spiele verlassen: Parameter aus der Adresse nehmen (Tab bleibt). */
-function aehnlichSchliessen() { if (aehnlichId()) history.replaceState(null, "", location.pathname + location.hash); }
+const SPIEL_SUCHE = UE.suche();
+/** Suchfeld im Aussehen des Eulenpfads (auch die Freigabe in der Verwaltung). */
+const suchAttr = platzhalter => ({ class: "feld suche", placeholder: platzhalter, "aria-label": platzhalter });
+// Spiel-Id aus „?aehnlich=<id>“ (Knopf „🔗 Ähnliche Spiele“ im Spiel): UE.aehnlich.id(); verlassen UE.aehnlich.schliessen()
 
 function zeichneSpiele(box, neu) {
   const { el } = LS;
@@ -66,7 +56,7 @@ function zeichneSpiele(box, neu) {
   /** Einen Chip der Mehrfachwahl an- oder abwählen. */
   const schalte = (k, id) => () => { const s = new Set(filter[k]); if (s.has(id)) s.delete(id); else s.add(id); setze(k, [...s])(); };
   const speichere = daten => { LS.speichereProfil(name, daten); neu(); };
-  const zu = new Set(p.zu);
+  const spielSuche = SPIEL_SUCHE.text;
   const chip = (text, aktiv, onclick, tipp, klasse = "") =>
     el("button", { type: "button", class: "chip " + klasse, "aria-pressed": String(aktiv), onclick }, text, tipp ? el("span", { class: "tipp", text: tipp }) : null);
   /** „Alle“ der Mehrfachwahl: wählt alle an; sind schon alle an, wählt es alle ab. */
@@ -152,14 +142,8 @@ function zeichneSpiele(box, neu) {
     filter.stufe.length ? `Stufe ${filter.stufe.map(id => LS.SKALA.find(s => s.id === id)?.nr).join(", ")}` : null,
     nurKlasse ? "🎒 Meine Klasse" : null, filter.fokus && fokus.length ? "⭐ Fokus" : null, nurZuPruefen ? "🔍 Zu prüfen" : null,
   ].filter(Boolean);
-  const schmal = typeof matchMedia === "function" && matchMedia("(max-width: 560px)").matches;
-  const filterBox = el("details", { class: "filter-klapp" },
-    el("summary", {}, el("span", { class: "filter-titel", text: "🔎 Filter" }),
-      el("span", { class: "filter-aktiv", text: aktiv.length ? aktiv.join(" · ") : "alle Spiele" })),
-    el("div", { class: "filter" }, ...zeilen));
-  filterBox.open = typeof p.filterZu === "boolean" ? !p.filterZu : !schmal;
-  filterBox.addEventListener("toggle", () => LS.speichereProfil(name, { filterZu: !filterBox.open }));
-  box.append(filterBox);
+  box.append(UE.filterBlock({ titel: "🔎 Filter", aktiv, leer: "alle Spiele", zeilen, zu: p.filterZu,
+    merke: filterZu => LS.speichereProfil(name, { filterZu }) }));
 
   // ----- Spiele auswählen -----
   const passt = s => LS.spielSichtbar(s.id)
@@ -173,7 +157,7 @@ function zeichneSpiele(box, neu) {
     && (!treffer || treffer.has(s.id));
   // Suche (Entscheid SU1 a): Treffer nach Relevanz, sonst Fokus-Spiele zuerst und Katalog-Reihenfolge.
   // Ohne Suche, aber mit „?aehnlich=<id>“: die ähnlichen Spiele als Liste, ähnlichste zuerst (LERN_Session10).
-  const aehnlichZu = !spielSuche.trim() && aehnlichId() ? SPIELE.find(s => s.id === aehnlichId()) : null;
+  const aehnlichZu = !spielSuche.trim() && UE.aehnlich.id() ? SPIELE.find(s => s.id === UE.aehnlich.id()) : null;
   const treffer = spielSuche.trim() ? new Map((LS.suche(spielSuche, person) || []).map((t, i) => [t.id, { ...t, i }]))
     : aehnlichZu ? new Map(LS.aehnlich(aehnlichZu.id, person).map((t, i) => [t.id, { ...t, i }])) : null;
   const imFokus = s => s.lernziele.some(l => fokus.includes(l.lz));
@@ -197,20 +181,22 @@ function zeichneSpiele(box, neu) {
     if (sort.ab) auswahl.reverse();
   }
   const SORT_PFEIL = { thema: ["Katalog", "rückwärts"], passung: ["beste zuerst", "beste zuletzt"], name: ["A → Z", "Z → A"], klasse: ["tiefe zuerst", "hohe zuerst"] };
-  const sortWahl = sort.waehlbar ? el("label", { class: "sortier-wahl" }, el("span", { text: "Sortieren:" }),
-    el("select", { class: "feld klein", "aria-label": "Spiele sortieren", onchange: e => speichere({ sortierung: { art: e.target.value, ab: false } }) },
-      ...Object.entries(LS.EINSTELLUNGEN.sortierung.werte).map(([w, t]) => el("option", { value: w, text: t, ...(w === sort.art ? { selected: "" } : {}) }))),
-    chip(sort.ab ? "↓ " + SORT_PFEIL[sort.art][1] : "↑ " + SORT_PFEIL[sort.art][0], sort.ab, () => speichere({ sortierung: { art: sort.art, ab: !sort.ab } }), null, "klein")) : null;
+  const sortWahl = sort.waehlbar ? UE.sortWahl({
+    arten: Object.entries(LS.EINSTELLUNGEN.sortierung.werte).map(([wert, text]) => ({ wert, text })), wahl: sort, pfeile: SORT_PFEIL,
+    setze: sortierung => speichere({ sortierung }), knopf: (text, an, onclick) => chip(text, an, onclick, null, "klein"),
+    beschriftung: el("span", { text: "Sortieren:" }), feld: { class: "feld klein", "aria-label": "Spiele sortieren" },
+  }) : null;
 
-  // ----- Werkzeuge: Ansicht und alle auf/zu -----
+  // ----- Werkzeuge: Ansicht und alle auf/zu (nur mit Gruppen: nicht bei Suche, Ähnlichen oder flacher Liste) -----
   const gruppenIds = ["favoriten", ...FAECHER.map(f => "fach:" + f), ...THEMEN.map(t => "thema:" + t.id)];
+  const gegliedert = !treffer && !flach;
   box.append(el("div", { class: "werkzeuge" },
-    suchFeld(spielSuche, v => { spielSuche = v; }, neu, "🔍 Spiel suchen"),
+    SPIEL_SUCHE.feld({ neu, beiEingabe: UE.aehnlich.schliessen, attr: suchAttr("🔍 Spiel suchen") }),
     sortWahl,
     chip("▦ Kacheln", p.ansicht !== "kompakt", () => speichere({ ansicht: "kacheln" }), null, "klein"),
     chip("☰ Kompakt", p.ansicht === "kompakt", () => speichere({ ansicht: "kompakt" }), null, "klein"),
-    flach ? null : chip("Alle auf", false, () => speichere({ zu: [] }), null, "klein"),
-    flach ? null : chip("Alle zu", false, () => speichere({ zu: gruppenIds }), null, "klein")));
+    gegliedert ? chip("Alle auf", false, () => speichere({ zu: [] }), null, "klein") : null,
+    gegliedert ? chip("Alle zu", false, () => speichere({ zu: gruppenIds }), null, "klein") : null));
 
   // ----- Zufallsmix und Zufälliges Spiel: Karten wie die Spiele, ohne Thema (Wunsch Patrik, LERN_Session10) -----
   // Zufallsmix (Entscheid M1 a): Aufgaben aus mehreren Spielen, Einstellungen auf der Mix-Seite.
@@ -291,18 +277,9 @@ function zeichneSpiele(box, neu) {
     } }));
   if (zufallsKarten.length) box.append(el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") }, ...zufallsKarten));
 
-  /** Auf- und zuklappbare Gruppe; der Zustand landet im Profil. */
-  function gruppe(id, titel, anzahl, ...inhalt) {
-    const d = el("details", { class: "gruppe" }, el("summary", {}, el("span", { text: titel }), el("span", { class: "anzahl", text: `${anzahl}` })), ...inhalt);
-    // Während einer Suche sind alle Gruppen mit Treffern offen; das ändert das gespeicherte Zuklappen nicht.
-    d.open = spielSuche ? true : !zu.has(id);
-    d.addEventListener("toggle", () => {
-      if (spielSuche) return;
-      d.open ? zu.delete(id) : zu.add(id);
-      LS.speichereProfil(name, { zu: [...zu] });
-    });
-    return d;
-  }
+  // Auf- und zuklappbare Gruppen; der Zustand landet im Profil. Gruppen gibt es nur ohne Suche (dann eine Liste).
+  const G = UE.gruppen({ zu: p.zu, merke: zu => LS.speichereProfil(name, { zu }) });
+  const gruppe = (id, titel, anzahl, ...inhalt) => G.gruppe({ id, kopf: titel, anzahl }, ...inhalt);
 
   const gitter = spiele => el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") }, ...spiele.map(karte));
 
@@ -330,7 +307,7 @@ function zeichneSpiele(box, neu) {
     const endlosAn = !!s.endlos?.length && p.endlosAn.includes(s.id);
     // data-vorlesen: langes Drücken liest Name und Beschreibung vor (Kindergarten, 1. Klasse; LERN_Session8)
     const lage = klassenRand ? lageVon(s) : null;
-    const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") + (endlosAn ? " endlos-an" : "") + (lage ? ` klasse-${lage}` : ""),
+    const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") + (endlosAn ? " endlos-an" : "") + (lage ? ` klasse-${lage}` : ""), "data-spiel": s.id,
       title: "Antippen: Startbild des Spiels",
       "data-vorlesen": `${s.name}. ${s.beschreibung}${lage ? ` ${KLASSEN_LAGE[lage].text(s.klasse)}` : ""}` });
     k.style.setProperty("--f", s.farbe);
@@ -344,8 +321,8 @@ function zeichneSpiele(box, neu) {
     // Treffer über ein Feld, das nicht auf der Karte steht: sagen, wo (Entscheid SU1 a).
     const grund = treffer?.get(s.id)?.grund;
     if (grund) marken.push(el("span", { class: "marke such-grund", text: aehnlichZu ? `🔗 ${grund}` : `🔍 gefunden ${grund}` }));
-    const schalter = (an, art, text, onclick) => el("button", { type: "button", class: "karten-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
-      "aria-label": text, title: text, onclick }, schalterSymbol(art, an));
+    const schalter = (an, art, text, onclick, attr = {}) => el("button", { type: "button", class: "karten-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
+      "aria-label": text, title: text, onclick, ...attr }, schalterSymbol(art, an));
     // Von der Aufsicht festgelegt (VR1 a): Symbol mit 🔒, Antippen ändert nichts.
     const festSchalter = (an, art, text) => el("span", { class: "karten-schalter fest", role: "img", "aria-label": `${text} — ${LS.FEST_TEXT}`,
       title: `${text} — ${LS.FEST_TEXT}` }, schalterSymbol(art, an), el("span", { class: "schloss", text: "🔒" }));
@@ -362,7 +339,7 @@ function zeichneSpiele(box, neu) {
         s.endlos?.length ? schalter(endlosAn, "endlos", endlosAn ? "Endlos aus" : "Endlos ein: so viele wie möglich ohne Fehler",
           () => speichere({ endlosAn: endlosAn ? p.endlosAn.filter(x => x !== s.id) : [...p.endlosAn, s.id] })) : null,
         schalter(favorit, "stern", favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten",
-          () => speichere({ favoriten: favorit ? p.favoriten.filter(x => x !== s.id) : [...p.favoriten, s.id] })));
+          () => speichere({ favoriten: UE.umschalten(p.favoriten, s.id) }), { "data-favorit": s.id }));
     k.append(
       schalterZeile,
       el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: s.bild }), el("b", { class: "name", text: s.name })),
@@ -393,7 +370,7 @@ function zeichneSpiele(box, neu) {
   // ----- Bei einer Suche: eine Liste, beste Treffer zuerst; sonst Favoriten, dann Fach → Thema -----
   if (treffer && aehnlichZu) box.append(el("h2", { class: "treffer-titel" },
     el("span", { text: `🔗 Ähnlich wie ${aehnlichZu.name}: ${auswahl.length} Spiel${auswahl.length === 1 ? "" : "e"} ` }),
-    chip("✕ Alle Spiele", false, () => { aehnlichSchliessen(); neu(); }, null, "klein")));
+    chip("✕ Alle Spiele", false, () => { UE.aehnlich.schliessen(); neu(); }, null, "klein")));
   if (treffer && auswahl.length) box.append(aehnlichZu ? gitter(auswahl) : el("h2", { class: "treffer-titel", text: `🔍 ${auswahl.length} Treffer, beste zuerst` }), aehnlichZu ? "" : gitter(auswahl));
   const favoriten = treffer ? [] : auswahl.filter(s => p.favoriten.includes(s.id));
   if (favoriten.length) box.append(gruppe("favoriten", "⭐ Favoriten", favoriten.length, gitter(favoriten)));
