@@ -1058,3 +1058,16 @@
   Lehrplan-Text: FS1E.5.D.1.b (Englisch hat dort den GA Z2, Typen über FS2F.5.D.1.b zugeordnet). Die offenen und
   teilweisen Teile stehen als Hinweise im Testlauf. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
   128 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Abdeckung am Wortlaut (Plan E 1): Roh-HTML der 18 übrigen Kompetenzen der Lernsteig-Übungen gesichert
+  (`docs/lernsteig/lehrplan/quellen_ma/`, `quellen_sprachen/`, sg.lehrplan.ch am 2026-11-08, Fassung August 2025),
+  neuer Leser `tools/lehrplan_wortlaut.js` (Stufen mit Zyklus, GA, OP und Punkten; GA/OP der 14
+  Mathematik-Kompetenzen stimmen mit `mathematik_zyklus3.md` überein). `tools/abdeckung.js` prüft bei
+  `quelle: wortlaut` jeden Teil auf wörtliches Vorkommen und jeden Punkt der Stufe auf lückenlose Bedeckung
+  (Beispiele eingeschlossen). Alle 80 Stufen von drei Prüfern auf den Wortlaut umgeschrieben, zusammengeführt
+  und geprüft: 215 Inhaltsteile — 61 abgedeckt, 64 teilweise, 81 offen, 9 in einer anderen Übung (vorher 186
+  sinngemäss). Neu sichtbar u. a.: fehlende Handlungen (darstellen, zeichnen, einzeichnen, durchführen),
+  Grammatik f/g (Infinitiv und Personalform, Morpheme, Verbenfächer), Beispiele, die die Stufe festlegen.
+  FS1E.5.D.1.b steht auf der Seite (gleich wie FS2F.5.D.1.b). Formeln formel1 und formel6d am Bild
+  nachgesehen. Gegenproben (Zeichen geändert, Beispiel weggelassen, Teil gekürzt, Marke „Erweiterung“
+  entfernt, `aus` auf ungesicherte Stufe): alle gemeldet. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig
+  „0 Fehler, 147 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

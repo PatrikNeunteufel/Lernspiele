@@ -2,7 +2,9 @@
 
 Quelle: sg.lehrplan.ch, alle Kompetenzseiten Deutsch (`code=a|1|11|…`), Englisch (`a|1|21|…`), Französisch
 (`a|1|32|…`), Italienisch (`a|1|41|…`) und Latein (`a|1|45|…`) sowie *Strukturelle und inhaltliche Hinweise* des
-Fachbereichs Sprachen (`code=e|1|4`). Fassung „Lehrplan Volksschule August 2025“, abgerufen am 2026-11-04. Rahmen,
+Fachbereichs Sprachen (`code=e|1|4`). Fassung „Lehrplan Volksschule August 2025“, abgerufen am 2026-11-04. Roh-HTML
+von D.5.D.1, D.5.E.1, FS1E.5.D.1 und FS2F.5.D.1 (die Kompetenzen der Lernsteig-Übungen) in
+[quellen_sprachen/](quellen_sprachen/), abgerufen am 2026-11-08, gelesen mit `node tools/lehrplan_wortlaut.js`. Rahmen,
 Reichweite und die Bedeutung von GA und OP für Real und Sek: [lehrplan_sg_sek1.md](lehrplan_sg_sek1.md). Mathematik:
 [mathematik_zyklus3.md](mathematik_zyklus3.md).
 
@@ -201,6 +203,9 @@ derselbe.
 | — / b | | (nur FR) einige einfache Strukturen verwenden, noch mit Fehlern (Konjugation wichtiger Verben, Personalpronomen als Subjekt, Frage mit Fragewort); Zeit- und Ortsangaben erkennen. In EN ist das der GA Z2 |
 | c / c | GA, OP | einfache Strukturen verwenden, teils noch Fehler (Wortfolge in Aussage und Frage, Verben mit zwei Objekten, unregelmässiger Plural, häufige Präpositionen); einfache Strukturen im Text erkennen (Wortfolge, Frage, Konjugationsformen) |
 | d / d | | auch komplexere Strukturen ausreichend korrekt (Hilfs- und Modalverben, Formen der Negation, Demonstrativ- und Reflexivpronomen); im Text erkennen (Zeitformen, Modalverben, begründende Konjunktionen, Possessiv- und Reflexivpronomen) |
+
+Im Wortlaut (`quellen_sprachen/`, 2026-11-08) sind die Stufen b, c und d in FS1E.5.D.1 und FS2F.5.D.1 Wort für Wort
+gleich; EN b steht also auf der Seite (Zyklus 2, GA), nur hier in der Tabelle nicht.
 
 Wortschatz (5.B.1) beschreibt nur den Umfang: GA = genügend für Texte zu allgemeineren Themen und routinemässige
 Gespräche; Stufe d = ausreichend für Themen der eigenen Lebenswelt und Alltagsgespräche. **Welche Wörter** dazu

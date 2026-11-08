@@ -381,8 +381,13 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
   `docs/lernsteig/abdeckung.json` je Stufe die Inhaltsteile des Lehrplans mit genau einer Zuordnung (`typen`, `in`,
   `bewusst`, `offen`; dazu `fehlt`, `aus`, `notiz`; `quelle` wortlaut oder sinngemaess). Fehler: ein erzeugter Typ
   ohne Inhaltsteil, ein zugeordneter Typ, der nicht vorkommt, eine fehlende Stufe, eine falsche Zuordnung; Hinweis:
-  jeder offene oder teilweise abgedeckte Teil. Ohne Auswahl von Übungen auch: `docs/lernsteig/abdeckung.md` ist
-  aktuell (erzeugt mit `node tools/abdeckung.js`, nie von Hand; `--pruefe` prüft nur);
+  jeder offene oder teilweise abgedeckte Teil. Bei `quelle: wortlaut` dazu (Fehler): jeder Teil steht wörtlich in
+  einem Punkt der Stufe auf der gesicherten Lehrplan-Seite (`tools/lehrplan_wortlaut.js`, Roh-HTML in
+  `docs/lernsteig/lehrplan/quellen_*/`; mit `aus` in jener Stufe), „Erweiterung: “ vorn genau bei Punkten, die
+  eine Erweiterung sind, und jeder Punkt der Stufe ist bis auf Füllwörter („können“, „und“, „oder“, „sowie“,
+  „bzw.“, Satzzeichen) von Teilen bedeckt, Beispiele eingeschlossen. Ohne Auswahl von Übungen auch:
+  `docs/lernsteig/abdeckung.md` ist aktuell (erzeugt mit `node tools/abdeckung.js`, nie von Hand; `--pruefe`
+  prüft nur);
 - Seiten im Ersatz-DOM (`tools/lernsteig_seiten.js` über `tools/pruef_dom.js`, Plan B2; ersetzt seit LERN_Session17
   den Browser-Teil mit Playwright, der lokal nicht lief): Startseite als niemand, Gast, Jugendlicher und Aufsicht mit
   jedem Tab; Konto mit PIN anlegen (Code, PIN nur als Prüfwert), falsche PIN in einem neuen Tab, PIN vergessen mit

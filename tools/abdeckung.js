@@ -4,7 +4,8 @@
 // einer Zuordnung: typen (Aufgabentypen `typ` der Übung), in (eine andere Übung), bewusst (nicht geübt, mit Grund)
 // oder offen (true). Dazu optional fehlt (was am Teil noch fehlt), aus (Inhalt einer anderen Kompetenz-Stufe, etwa
 // MA.1.A.1.h) und notiz. Je Stufe quelle: "wortlaut" (am Lehrplan nachgelesen) oder "sinngemaess" (aus der
-// Zusammenfassung in docs/lernsteig/lehrplan/).
+// Zusammenfassung in docs/lernsteig/lehrplan/). Bei "wortlaut" prüft pruefeWortlaut die Teile gegen die gesicherte
+// Lehrplan-Seite (tools/lehrplan_wortlaut.js): wörtlich und lückenlos.
 //
 // Geprüft von tools/pruefe_uebungen.js gegen die erzeugten Aufgaben: ein Typ ohne Inhaltsteil ist ein Fehler (die Übung
 // übt, was nicht in der Stufe steht), ein zugeordneter Typ, der nicht vorkommt, ebenso; offene und teilweise
@@ -65,6 +66,44 @@ function messe(eintrag, U, { aufgaben = MESSUNG.aufgaben, seed = MESSUNG.seed } 
   } finally { q.zufall = vorher; }
 }
 
+// Was im Wortlaut zwischen den Inhaltsteilen stehen darf: Modalverb, Bindewörter, Satzzeichen, die Marke „Erweiterung:“.
+const FUELLWORT = /\b(?:können|und|oder|sowie|bzw\.)(?=\s|$|[.,;:])|Erweiterung:|[\s.,;:()]+/g;
+const ERWEITERUNG = "Erweiterung: ";
+
+/**
+ * Prüft Inhaltsteile einer Stufe mit quelle „wortlaut“ gegen die gesicherte Lehrplan-Seite (tools/lehrplan_wortlaut.js):
+ * jeder Teil steht wörtlich in einem Punkt der Stufe (mit `aus` in einem Punkt jener Stufe; „Erweiterung: “ vorn nur
+ * bei einem Punkt, der eine Erweiterung ist), und jeder Punkt der Stufe ist bis auf Füllwörter von Teilen bedeckt.
+ * → [[ort, text]] (Fehler)
+ */
+function pruefeWortlaut(kompetenz, s, teile) {
+  const WL = require("./lehrplan_wortlaut.js");
+  const m = [];
+  const w = WL.stufe(kompetenz, s);
+  if (!w) return [["", `Wortlaut von ${kompetenz}.${s} nicht gesichert (docs/lernsteig/lehrplan/quellen_*/)`]];
+  const rest = w.punkte.slice();
+  teile.forEach((t, i) => {
+    if (typeof t.text !== "string") return;
+    const erw = t.text.startsWith(ERWEITERUNG);
+    const text = erw ? t.text.slice(ERWEITERUNG.length) : t.text;
+    let quelle = w, wer = `${kompetenz}.${s}`;
+    if (t.aus) {
+      const a = t.aus.match(/^(.+)\.([a-z])$/);
+      quelle = a && WL.stufe(a[1], a[2]);
+      wer = t.aus;
+      if (!quelle) { m.push([`, Teil ${i + 1}`, `aus „${t.aus}“: Wortlaut nicht gesichert`]); return; }
+    }
+    const k = quelle.punkte.findIndex(p => p.includes(text) && p.startsWith("Erweiterung:") === erw);
+    if (k < 0) { m.push([`, Teil ${i + 1}`, `steht nicht wörtlich in ${wer}${erw ? " (als Erweiterung)" : ""}: ${t.text}`]); return; }
+    if (!t.aus) rest[k] = rest[k].replace(text, " ");
+  });
+  rest.forEach((r, k) => {
+    const uebrig = r.replace(FUELLWORT, " ").trim();
+    if (uebrig) m.push(["", `Wortlaut ohne Inhaltsteil (Punkt ${k + 1}): „${r.replace(/\s+/g, " ").trim()}“`]);
+  });
+  return m;
+}
+
 /** Prüft die Daten einer Übung gegen Katalog und gemessene Typen (Set je Stufe). → [{ art: "fehler"|"hinweis", wo, text }] */
 function pruefeUebung(daten, eintrag, typenJeStufe, katalog) {
   const m = [];
@@ -95,6 +134,7 @@ function pruefeUebung(daten, eintrag, typenJeStufe, katalog) {
       if (t.offen) h(wo, `offen: ${t.text}`);
       if (t.fehlt) h(wo, `teilweise — ${t.text}: fehlt ${t.fehlt}`);
     });
+    if (st.quelle === "wortlaut") for (const [ort, text] of pruefeWortlaut(eintrag.kompetenz, s, st.teile)) f(`${wo}${ort}`, text);
     const gemessen = typenJeStufe.get(s) || new Set();
     for (const ty of gemessen) if (!zugeordnet.has(ty)) f(wo, `Typ „${ty}“ ist keinem Inhaltsteil zugeordnet (übt die Stufe etwas, das nicht im Lehrplan steht?)`);
     for (const ty of zugeordnet) if (!gemessen.has(ty)) f(wo, `Typ „${ty}“ zugeordnet, kommt aber in den Aufgaben nicht vor`);
@@ -153,7 +193,7 @@ function veraltet() {
   return ist === soll ? null : "docs/lernsteig/abdeckung.md ist nicht aktuell — neu erzeugen mit: node tools/abdeckung.js";
 }
 
-module.exports = { lies, messe, pruefeUebung, markdown, erzeuge, veraltet, ladeUebung, DATEN, UEBERSICHT };
+module.exports = { lies, messe, pruefeUebung, pruefeWortlaut, markdown, erzeuge, veraltet, ladeLernsteig, ladeUebung, DATEN, UEBERSICHT };
 
 if (require.main === module) {
   if (process.argv.includes("--pruefe")) {

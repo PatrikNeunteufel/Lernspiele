@@ -3,226 +3,227 @@
   "uebungen": {
     "rationale-zahlen": {
       "g": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Nennerlisten sind am Wortlaut nachgelesen (LERN_Session19), der übrige Text nicht.",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Dezimalzahlen bis 5 Wertziffern multiplizieren und prüfen (308 · 52; 12 · 0,3)","typen":["mal-dezimal","mal-ganz"],"fehlt":"das Prüfen des Ergebnisses (kein eigener Aufgabentyp)","notiz":"Das Beispiel 308 · 52 des Lehrplans ist ein Ganzzahl-Produkt und deckt mal-ganz; Plan E 1 will Ganzzahl-Produkte nur als Teil mit Dezimalstellen — zu klären"},
+          {"text":"Dezimalzahlen bis 5 Wertziffern multiplizieren und die Ergebnisse überprüfen (im Kopf oder mit Notieren eigener Rechenwege, z.B. 308 · 52; 12 · 0,3)","typen":["mal-dezimal","mal-ganz"],"fehlt":"das Überprüfen der Ergebnisse (kein eigener Aufgabentyp)","notiz":"Das Beispiel 308 · 52 des Lehrplans ist ein Ganzzahl-Produkt und deckt mal-ganz; Plan E 1 will Ganzzahl-Produkte nur als Teil mit Dezimalstellen — zu klären"},
           {"text":"Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren","in":"brueche","fehlt":"das Rechteckmodell als Bild (auch in brueche)"},
           {"text":"Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000 als Dezimalzahlen schreiben","typen":["bruch-dezimal"],"fehlt":"die Nenner 3 und 6 (periodische Dezimalzahlen, nach RZ1 a zurückgestellt)"},
-          {"text":"wie oft ein Stammbruch in einer ganzen Zahl steckt (2 : ⅕)","typen":["stammbruch"]}
+          {"text":"bestimmen, wie oft Stammbrüche in ganzen Zahlen enthalten sind (z.B. Wie viele Male ist ⅕ in 2 enthalten? → 2 : ⅕)","typen":["stammbruch"]}
         ]
       },
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Prozentrechnungen mit dem Rechner","typen":["grundwert","prozentwert","prozentsatz"]},
+          {"text":"Prozentrechnungen mit dem Rechner ausführen","typen":["grundwert","prozentwert","prozentsatz"]},
           {"text":"Erweiterung: natürliche Zahlen in Primfaktoren zerlegen","offen":true}
         ]
       },
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Grundoperationen mit rationalen Zahlen","typen":["plus-minus","mal-geteilt","dezimal-negativ"]},
-          {"text":"Wurzeln und Potenzen mit dem Rechner (4³ · 4³ = 4096; 4³ + 4³ = 128; ³√8000)","typen":["potenz-wurzel"]},
-          {"text":"Erweiterung: Grundoperationen mit gewöhnlichen Brüchen mit Variablen, mit Zahlen belegen (a/b + c/d; a/b − c/d; a/b · c/d; a : c/b : d = a/c · b/d)","offen":true,"notiz":"aufgaben.js nimmt die Erweiterung als Annahme aus, mit Patrik abzustimmen"}
+          {"text":"die Grundoperationen mit rationalen Zahlen ausführen","typen":["plus-minus","mal-geteilt","dezimal-negativ"]},
+          {"text":"Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000)","typen":["potenz-wurzel"]},
+          {"text":"Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png]","offen":true,"notiz":"aufgaben.js nimmt die Erweiterung als Annahme aus, mit Patrik abzustimmen. Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d"}
         ]
       }
     },
     "brueche": {
       "f": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (Kopf oder eigener Rechenweg)","offen":true},
-          {"text":"Brüche (Nenner bis 100) am Rechteckmodell kürzen, erweitern, addieren, subtrahieren","typen":["kuerzen","erweitern","plus","minus"],"fehlt":"das Rechteckmodell als Bild"},
-          {"text":"Grundoperationen mit dem Rechner","offen":true},
-          {"aus":"MA.1.A.1.h","text":"Brüche (Nenner 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1000), Dezimal- und Prozentzahlen ineinander umschreiben","typen":["umschreiben"]}
+          {"text":"Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (im Kopf oder mit Notieren eigener Rechenwege, z.B. 30.8 + 5.6)","offen":true},
+          {"text":"Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell kürzen, erweitern, addieren und subtrahieren","typen":["kuerzen","erweitern","plus","minus"],"fehlt":"das Rechteckmodell als Bild; bei plus und minus die Nenner 20, 50, 100 (Nenner der Summanden nur 2 bis 12)","notiz":"Die Übung nimmt auch Nenner ausserhalb der Liste: 12 und 25 beim Kürzen (NENNER), 12 bei plus/minus; beim Kürzen ist der Ausgangsbruch ein beliebiges Vielfaches bis Nenner 100"},
+          {"text":"Grundoperationen mit dem Rechner ausführen","offen":true},
+          {"text":"Brüche (Nenner 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000), Dezimalzahlen und Prozentzahlen je in die beiden anderen Schreibweisen übertragen","aus":"MA.1.A.1.h","typen":["umschreiben"],"fehlt":"die Richtungen Bruch → Dezimal-/Prozentzahl und zwischen Dezimal- und Prozentzahl (umschreiben fragt nur Dezimal- oder Prozentzahl → Bruch); die Nenner 3, 6, 8, 1'000","notiz":"umschreiben nimmt auch den Nenner 25, der nicht in der Liste steht; Bruch → Dezimalzahl übt rationale-zahlen in MA.1.A.3.g (bruch-dezimal)"}
         ]
       },
       "g": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Nennerlisten sind am Wortlaut nachgelesen (LERN_Session19), der übrige Text nicht.",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Dezimalzahlen bis 5 Wertziffern multiplizieren und prüfen (308 · 52; 12 · 0,3)","in":"rationale-zahlen"},
-          {"text":"Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren","typen":["mal","ganz-mal"],"fehlt":"das Rechteckmodell als Bild"},
+          {"text":"Dezimalzahlen bis 5 Wertziffern multiplizieren und die Ergebnisse überprüfen (im Kopf oder mit Notieren eigener Rechenwege, z.B. 308 · 52; 12 · 0,3)","in":"rationale-zahlen"},
+          {"text":"Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren","typen":["mal","ganz-mal"],"fehlt":"das Rechteckmodell als Bild; die Nenner 20, 50, 100 (mal nur 2 bis 10)","notiz":"ganz-mal nimmt auch den Nenner 12, der nicht in der Liste steht"},
           {"text":"Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000 als Dezimalzahlen schreiben","in":"rationale-zahlen"},
-          {"text":"wie oft ein Stammbruch in einer ganzen Zahl steckt (2 : ⅕)","typen":["stammbruch"]}
+          {"text":"bestimmen, wie oft Stammbrüche in ganzen Zahlen enthalten sind (z.B. Wie viele Male ist ⅕ in 2 enthalten? → 2 : ⅕)","typen":["stammbruch"]}
         ]
       },
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Grundoperationen mit rationalen Zahlen","typen":["plus-minus-negativ","mal-negativ","geteilt"]},
-          {"text":"Wurzeln und Potenzen mit dem Rechner (4³ · 4³ = 4096; 4³ + 4³ = 128; ³√8000)","in":"rationale-zahlen"},
-          {"text":"Erweiterung: Grundoperationen mit gewöhnlichen Brüchen mit Variablen, mit Zahlen belegen (a/b + c/d; a/b − c/d; a/b · c/d; a : c/b : d = a/c · b/d)","in":"rationale-zahlen"}
+          {"text":"die Grundoperationen mit rationalen Zahlen ausführen","typen":["plus-minus-negativ","mal-negativ","geteilt"]},
+          {"text":"Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000)","in":"rationale-zahlen"},
+          {"text":"Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png]","in":"rationale-zahlen","notiz":"Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d"}
         ]
       }
     },
     "gleichungen": {
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Gleichungen mit Variablen durch Einsetzen oder Umkehroperation lösen","typen":["plus","minus","mal","geteilt","zwei"],"notiz":"nur natürliche Zahlen, ein oder zwei Schritte; Einsetzen nur im Hinweis (bei „Zahl − x“)"},
-          {"text":"Punkt vor Strich und Klammerregeln (4 + 8 − 2 · 3 = 6)","offen":true,"notiz":"rationale-zahlen führt MA.1.A.4.h im Katalog unter weitere (Klammerregeln), übt in Stufe i aber nur Vorzeichenklammern ohne Punkt vor Strich; die Klammer-Aufgaben dort stehen nur in der Challenge — darum nicht „in“"},
-          {"text":"Erweiterung: Teilbarkeitsregeln für 3, 4, 6, 8, 9, 25, 50, Teiler bestimmen","offen":true,"notiz":"Teiler zählen übt folgen (Typ teiler), aber in MA.1.C.2.g, nicht in dieser Kompetenz-Stufe"}
+          {"text":"Gleichungen mit Variablen durch Einsetzen oder Umkehroperationen lösen","typen":["plus","minus","mal","geteilt","zwei"],"notiz":"nur natürliche Zahlen, ein oder zwei Schritte; Einsetzen nur im Hinweis (bei „Zahl − x“)"},
+          {"text":"die Rechenregeln Punkt vor Strich und die Klammerregeln befolgen (z.B. 4 + 8 - 2 · 3 = 6; (4 + 8 - 2) · 3 = 30; 4 + (8 - 2) · 3 = 22)","offen":true,"notiz":"rationale-zahlen führt MA.1.A.4.h im Katalog unter weitere (Klammerregeln), übt in Stufe i aber nur Vorzeichenklammern ohne Punkt vor Strich; die Klammer-Aufgaben dort stehen nur in der Challenge — darum nicht „in“"},
+          {"text":"Erweiterung: Teilbarkeitsregeln durch 3, 4, 6, 8, 9, 25, 50 nutzen und Teiler natürlicher Zahlen bestimmen","offen":true,"notiz":"Teiler zählen übt folgen (Typ teiler), aber in MA.1.C.2.g, nicht in dieser Kompetenz-Stufe"}
         ]
       },
       "j": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Stufe besteht nur aus Erweiterungen (Doku: „nur Erweiterungen“); jeder Teil darum mit „Erweiterung: “.",
+        "quelle": "wortlaut",
+        "notiz": "Die Stufe besteht nur aus Erweiterungen; jeder Teil darum mit „Erweiterung: “.",
         "teile": [
-          {"text":"Erweiterung: lineare Gleichungen mit einer Variablen durch Äquivalenzumformung (5x + 3 = 7)","typen":["einseitig","beidseitig","klammer"]},
-          {"text":"Erweiterung: Polynome addieren/subtrahieren (3(a² + 2b) − 2(a² + b) = a² + 4b)","in":"terme"},
-          {"text":"Erweiterung: ausmultiplizieren und ausklammern","in":"terme","notiz":"Ausmultiplizieren von Klammern in Gleichungen auch im Typ klammer dieser Übung"},
-          {"text":"Erweiterung: Gleichungen sprachlich deuten und Textgleichungen umsetzen","offen":true,"notiz":"Kopfkommentar: „Textgleichungen folgen“ (ohne Entscheid-Kürzel)"},
-          {"text":"Erweiterung: Terme vereinfachen (ausklammern, ausmultiplizieren, kürzen, Vorzeichenregeln)","in":"terme","fehlt":"kürzen (auch in terme nicht)"}
+          {"text":"Erweiterung: lineare Gleichungen mit einer Variablen mit Äquivalenzumformungen lösen (z.B. 5x + 3 = 7)","typen":["einseitig","beidseitig","klammer"]},
+          {"text":"Erweiterung: Polynome addieren und subtrahieren (z.B. 3(a² + 2b) - 2(a² + b) = a² + 4b)","in":"terme"},
+          {"text":"Erweiterung: Terme ausmultiplizieren und ausklammern (Faktorzerlegung)","in":"terme","notiz":"Ausmultiplizieren von Klammern in Gleichungen auch im Typ klammer dieser Übung"},
+          {"text":"Erweiterung: Gleichungen sprachlich deuten (z.B. x = y + 1 → x ist um 1 grösser als y) und Textgleichungen umsetzen","offen":true,"notiz":"Kopfkommentar: „Textgleichungen folgen“ (ohne Entscheid-Kürzel)"},
+          {"text":"Erweiterung: Terme mit Variablen umformen bzw. sinnvoll vereinfachen (ausklammern, ausmultiplizieren, kürzen und Vorzeichenregeln)","in":"terme","fehlt":"kürzen (auch in terme nicht)"}
         ]
       }
     },
     "terme": {
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Produkt gleicher Faktoren als Potenz und umgekehrt (15 · 15 · 15 = 15³)","typen":["potenz"],"fehlt":"„und umgekehrt“: Potenz als Produkt schreiben (Kopfkommentar: folgt)"},
-          {"text":"Distributivgesetz (a(b + c) = ab + ac)","typen":["distributiv"],"notiz":"nur ausmultiplizieren mit einem Faktor vor einer Klammer mit zwei Gliedern"},
-          {"text":"Ergebnisse sinnvoll runden","offen":true},
-          {"text":"Erweiterung: Notation algebraischer Terme (abc = a · b · c, aber 789 ≠ 7 · 8 · 9)","offen":true,"notiz":"Kopfkommentar: die Notation „folgt“ (ohne Entscheid-Kürzel)"}
+          {"text":"ein Produkt mit gleichen Faktoren als Potenz schreiben und umgekehrt (z.B. 15 · 15 · 15 = 15³ ; a · a · a · a = a⁴)","typen":["potenz"],"fehlt":"„und umgekehrt“: Potenz als Produkt schreiben (Kopfkommentar: folgt)"},
+          {"text":"das Distributivgesetz bei Termumformungen anwenden (z.B. a · (b + c) = a · b + a · c = ab + ac)","typen":["distributiv"],"notiz":"nur ausmultiplizieren mit einem Faktor vor einer Klammer mit zwei Gliedern"},
+          {"text":"Rechenergebnisse sinnvoll runden","offen":true},
+          {"text":"Erweiterung: verstehen die Konventionen über die Notation algebraischer Terme (z.B. abc = a · b · c aber 789 ≠ 7 · 8 · 9)","offen":true,"notiz":"Kopfkommentar: die Notation „folgt“ (ohne Entscheid-Kürzel)"}
         ]
       },
       "j": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Stufe besteht nur aus Erweiterungen (Doku: „nur Erweiterungen“); jeder Teil darum mit „Erweiterung: “.",
+        "quelle": "wortlaut",
+        "notiz": "Die Stufe besteht nur aus Erweiterungen; jeder Teil darum mit „Erweiterung: “.",
         "teile": [
-          {"text":"Erweiterung: lineare Gleichungen mit einer Variablen durch Äquivalenzumformung (5x + 3 = 7)","in":"gleichungen"},
-          {"text":"Erweiterung: Polynome addieren/subtrahieren (3(a² + 2b) − 2(a² + b) = a² + 4b)","typen":["polynome"]},
-          {"text":"Erweiterung: ausmultiplizieren und ausklammern","typen":["ausklammern"],"notiz":"ausklammern nur einer Zahl aus zwei Gliedern (6a + 9 = 3(2a + 3)); ausmultiplizieren steckt in polynome und vorzeichen"},
-          {"text":"Erweiterung: Gleichungen sprachlich deuten und Textgleichungen umsetzen","offen":true},
-          {"text":"Erweiterung: Terme vereinfachen (ausklammern, ausmultiplizieren, kürzen, Vorzeichenregeln)","typen":["vorzeichen"],"fehlt":"kürzen"}
+          {"text":"Erweiterung: lineare Gleichungen mit einer Variablen mit Äquivalenzumformungen lösen (z.B. 5x + 3 = 7)","in":"gleichungen"},
+          {"text":"Erweiterung: Polynome addieren und subtrahieren (z.B. 3(a² + 2b) - 2(a² + b) = a² + 4b)","typen":["polynome"]},
+          {"text":"Erweiterung: Terme ausmultiplizieren und ausklammern (Faktorzerlegung)","typen":["ausklammern"],"fehlt":"die Faktorzerlegung über eine Zahl hinaus (Variable oder Term ausklammern, etwa a² + ab = a(a + b)): ausklammern nimmt nur eine Zahl aus zwei Gliedern","notiz":"ausklammern nur einer Zahl aus zwei Gliedern (6a + 9 = 3(2a + 3)); ausmultiplizieren steckt in polynome und vorzeichen"},
+          {"text":"Erweiterung: Gleichungen sprachlich deuten (z.B. x = y + 1 → x ist um 1 grösser als y) und Textgleichungen umsetzen","offen":true},
+          {"text":"Erweiterung: Terme mit Variablen umformen bzw. sinnvoll vereinfachen (ausklammern, ausmultiplizieren, kürzen und Vorzeichenregeln)","typen":["vorzeichen"],"fehlt":"kürzen"}
         ]
       },
       "k": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Terme mit Variablen addieren und subtrahieren (a + 2a + b + 3b + ¼ + ⅜ = 3a + 4b + ⅝)","typen":["zusammenfassen","zusammenfassen-bruch"]}
+          {"text":"Terme mit Variablen addieren und subtrahieren (z.B. a + 2a + b + 3b + ¼ + ⅜ = 3a + 4b + ⅝)","typen":["zusammenfassen","zusammenfassen-bruch"]}
         ]
       }
     },
     "binome-gleichungen": {
       "l": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"quadratische Gleichungen durch Faktorzerlegung (x² − 4 = 0)","typen":["quadratisch-differenz","quadratisch-faktoren"],"fehlt":"Faktorzerlegung eines Trinoms (x² + px + q = 0): quadratisch-faktoren gibt die Faktoren schon vor, das Zerlegen steht nur in der Challenge"},
-          {"text":"binomische Formeln (4a² + 12ab² + 9b⁴ = (2a + 3b²)², formel4)","typen":["binom"],"fehlt":"die Richtung des Beispiels (Summe als Quadrat eines Binoms schreiben) und Binome mit Koeffizienten oder Potenzen (2a + 3b²); binom multipliziert nur (x ± b)² und (x + b)(x − b) aus"},
-          {"text":"Potenzregel aˣ · aʸ = a⁽ˣ⁺ʸ⁾ (formel1) und Potenz vor Punkt vor Strich","typen":["potenzregel"],"fehlt":"Potenz vor Punkt vor Strich"}
+          {"text":"quadratische Gleichungen durch Faktorzerlegung lösen (z.B. x² - 4 = 0)","typen":["quadratisch-differenz","quadratisch-faktoren"],"fehlt":"Faktorzerlegung eines Trinoms (x² + px + q = 0): quadratisch-faktoren gibt die Faktoren schon vor, das Zerlegen steht nur in der Challenge"},
+          {"text":"Terme mit Binomen umformen und dabei die binomischen Formeln anwenden (z.B. [Bild formel4.png])","typen":["binom"],"fehlt":"die Richtung des Beispiels (Summe als Quadrat eines Binoms schreiben) und Binome mit Koeffizienten oder Potenzen (2a + 3b²); binom multipliziert nur (x ± b)² und (x + b)(x − b) aus","notiz":"Abschrift des Formelbilds formel4: 4a² + 12ab² + 9b⁴ = (2a + 3b²)²"},
+          {"text":"die Rechenregeln [Bild formel1.png]","typen":["potenzregel"],"notiz":"Abschrift des Formelbilds formel1: aˣ · aʸ = a⁽ˣ⁺ʸ⁾; potenzregel nur mit Zahlbasis"},
+          {"text":"Potenz vor Punkt vor Strich anwenden","offen":true}
         ]
       },
       "m": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
           {"text":"Bruchterme mit Binomen umformen","offen":true,"notiz":"Kopfkommentar: „Nicht in dieser Übung“ (ohne Entscheid-Kürzel)"},
-          {"text":"Rechengesetze für Potenzen, Wurzeln, wissenschaftliche Schreibweise","typen":["potenzgesetz"],"fehlt":"Wurzeln und wissenschaftliche Schreibweise; von den Potenzgesetzen nur (aˣ)ʸ und aˣ : aʸ"},
-          {"text":"Bruchgleichungen mit der Unbekannten im Nenner (3/x + 2 = 4/x + 3, formel2) und Gleichungen mit Parameter (ax + a = 7)","typen":["bruchgleichung"],"fehlt":"Gleichungen mit Parameter (ax + a = 7; Kopfkommentar: „Nicht in dieser Übung“, ohne Entscheid-Kürzel)"},
-          {"text":"lineare Gleichungssysteme mit 2 Unbekannten","typen":["system"]}
+          {"text":"Rechengesetze bei Termen mit Potenzen und Wurzeln","typen":["potenzgesetz"],"fehlt":"Wurzeln und Terme mit Variablen: potenzgesetz rechnet nur (aˣ)ʸ und aˣ : aʸ mit Zahlbasis"},
+          {"text":"bei Zahlen in wissenschaftlicher Schreibweise befolgen","offen":true,"notiz":"Rechnen in wissenschaftlicher Schreibweise übt zehnerpotenzen nur in der Challenge (MA.1.A.3.j)"},
+          {"text":"Bruchgleichungen mit der Unbekannten im Nenner (z.B. [Bild formel2.png])","typen":["bruchgleichung"],"notiz":"Abschrift des Formelbilds formel2: 3/x + 2 = 4/x + 3"},
+          {"text":"Gleichungen mit einem Parameter lösen (z.B. ax + a = 7)","offen":true,"notiz":"Kopfkommentar: „Nicht in dieser Übung“ (ohne Entscheid-Kürzel)"},
+          {"text":"lineare Gleichungssysteme mit 2 Unbekannten lösen","typen":["system"]}
         ]
       }
     },
     "aussagen": {
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Aussagen zu arithmetischen Gesetzmässigkeiten begründen oder widerlegen (gerade + ungerade = ungerade; Produkt vier aufeinanderfolgender Zahlen durch 24 teilbar)","typen":["wahr","falsch"],"fehlt":"das Begründen oder Widerlegen selbst: gewählt wird die eine wahre (wahr) oder die eine falsche Aussage (falsch)","notiz":"Die Typen sind nach der Frageform geschnitten, nicht nach Inhalt"},
-          {"text":"Nachkommastellen bei Produkten und Quotienten erforschen","offen":true,"notiz":"Kopfkommentar: „Nicht in dieser Übung“ (ohne Entscheid-Kürzel)"}
+          {"text":"Aussagen zu arithmetischen Gesetzmässigkeiten erforschen, begründen oder widerlegen (z.B. eine ungerade Summe entsteht durch Addition einer geraden und einer ungeraden Zahl; die Produkte vier aufeinanderfolgender Zahlen sind durch 24 teilbar)","typen":["wahr","falsch"],"fehlt":"das Erforschen, Begründen oder Widerlegen selbst: gewählt wird die eine wahre (wahr) oder die eine falsche Aussage (falsch)","notiz":"Die Typen sind nach der Frageform geschnitten, nicht nach Inhalt"},
+          {"text":"die Anzahl Nachkommastellen bei Produkten und Quotienten von Dezimalzahlen erforschen und begründen (z.B. mit Rechner)","offen":true,"notiz":"Kopfkommentar: „Nicht in dieser Übung“ (ohne Entscheid-Kürzel)"}
         ]
       },
       "j": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"algebraische Aussagen durch Einsetzen prüfen (a³ + 5a durch 6 teilbar; a²ᵇ = (a²)ᵇ, formel8; 2⁶ = (2²)³ = 4³)","typen":["wahr","falsch"],"notiz":"Auswahl unter vier Aussagen; die Typen sind nach der Frageform geschnitten, nicht nach Inhalt"}
+          {"text":"algebraische Aussagen durch Einsetzen von Zahlen überprüfen (z.B. a³ + 5a ist durch 6 teilbar: 4³ + 5⋅4 = 84 → 84 : 6 = 14; [Bild formel8.png]; 2⁶ = (2²)³ = 2²˙³ = 4³; 2⁸ = 4⁴; 3⁴ = 9²)","typen":["wahr","falsch"],"notiz":"Auswahl unter vier Aussagen; die Typen sind nach der Frageform geschnitten, nicht nach Inhalt. Abschrift des Formelbilds formel8: a²ᵇ = (a²)ᵇ"}
         ]
       },
       "k": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"durch Verallgemeinern begründen (a² − 1 = (a − 1)(a + 1))","offen":true,"notiz":"Aussagen wie a² − 1 = (a − 1)(a + 1) stehen in der Liste der Stufe k und kommen in wahr/falsch vor (Teil 2), verlangt wird aber nur das Auswählen, kein Begründen"},
-          {"text":"Term- und Äquivalenzumformungen prüfen","typen":["wahr","falsch"],"fehlt":"Äquivalenzumformungen (Gleichungen): die Liste enthält nur Termumformungen und Teilbarkeitsaussagen"}
+          {"text":"Ergebnisse durch Verallgemeinern begründen (z.B. das Quadrat einer Zahl ist um 1 grösser als das Produkt der beiden Nachbarzahlen: 4 · 4 -1 = 3 · 5 → a² - 1 = (a - 1)(a + 1))","offen":true,"notiz":"Aussagen wie a² − 1 = (a − 1)(a + 1) stehen in der Liste der Stufe k und kommen in wahr/falsch vor (Teil 2), verlangt wird aber nur das Auswählen, kein Begründen"},
+          {"text":"Term- und Äquivalenzumformungen überprüfen","typen":["wahr","falsch"],"fehlt":"Äquivalenzumformungen (Gleichungen): die Liste enthält nur Termumformungen und Teilbarkeitsaussagen"}
         ]
       }
     },
     "folgen": {
       "g": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Gesetzmässigkeiten natürlicher Zahlen an Beispielen (Quadratzahlen haben ungerade viele Teiler)","typen":["teiler"],"fehlt":"die Gesetzmässigkeit selbst: teiler fragt nur die Anzahl Teiler einer Zahl (Quadratzahl oder beliebig)"},
-          {"text":"Brüche (Nenner bis 10) darstellen und vergleichen","offen":true},
-          {"text":"Zahlenfolgen mit positiven rationalen Zahlen","typen":["folge-dezimal"],"fehlt":"Folgen mit Brüchen und andere als arithmetische Folgen (nur gleicher Abstand, Dezimalzahlen)"}
+          {"text":"Gesetzmässigkeiten im Bereich der natürlichen Zahlen mit Beispielen konkretisieren (z.B. Quadratzahlen haben eine ungerade Anzahl Teiler → 16: 1, 2, 4, 8, 16)","typen":["teiler"],"fehlt":"die Gesetzmässigkeit selbst: teiler fragt nur die Anzahl Teiler einer Zahl (Quadratzahl oder beliebig)"},
+          {"text":"Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10 darstellen und vergleichen sowie Darstellungen interpretieren (z.B. Kreis-, Rechteckmodell, Zahlenstrahl)","offen":true},
+          {"text":"Zahlenfolgen mit positiven rationalen Zahlen beschreiben (z.B. ½, ¼, ⅛, ...; 0.7, 0.77, 0.777, ...)","typen":["folge-dezimal"],"fehlt":"beide Beispielarten des Lehrplans: Folgen mit Brüchen (½, ¼, ⅛, …) und Folgen ohne gleichen Abstand (0.7, 0.77, 0.777, …); folge-dezimal hat nur gleiche Abstände mit Dezimalzahlen und fragt die nächste Zahl, kein Beschreiben"}
         ]
       },
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Zahlenrätsel mathematisieren und erfinden","typen":["raetsel"],"fehlt":"Zahlenrätsel erfinden"},
-          {"text":"Figurenfolgen numerisch beschreiben (Würfeltürme)","typen":["figuren-linear","figuren-quadrat"],"fehlt":"die Figuren als Bild (nur Wertetabelle, Kopfkommentar: Bilder folgen)"}
+          {"text":"Zahlenrätsel mathematisieren und erfinden (z.B. wenn man eine Zahl verdreifacht und um 3 vergrössert gibt es 33)","typen":["raetsel"],"fehlt":"Zahlenrätsel erfinden"},
+          {"text":"Figurenfolgen numerisch beschreiben (z.B. die Anzahl sichtbarer Seiten bei Würfeltürmen mit 1, 2, 3, 4, ... Würfeln)","typen":["figuren-linear","figuren-quadrat"],"fehlt":"die Figuren als Bild (nur Wertetabelle, Kopfkommentar: Bilder folgen)"}
         ]
       },
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Terme und Figuren verbinden (n(n + 1) als Rechteck; 1 + 3 + 5 + 7 = 4 · 4)","typen":["gerade-summe","ungerade-summe","rechteckzahl"],"fehlt":"die Figur (Rechteck, Quadrat) als Bild; rechteckzahl nennt die Regel n · (n + 1) im Aufgabentext, gerechnet wird nur ein Wert"},
-          {"text":"Terme zu Längen, Flächen, Volumen bilden und deuten","offen":true},
-          {"text":"Terme mit Text, Symbolen, Skizzen veranschaulichen","offen":true},
-          {"text":"Gesetzmässigkeiten mit Buchstabentermen verallgemeinern","offen":true,"notiz":"Die Summen-Typen (Teil 1) wenden eine Verallgemeinerung an, verlangen sie aber nicht als Buchstabenterm"},
-          {"text":"Erweiterung: Strukturen algebraisch formulieren (a(a + 1)(a + 2) · ⅙ ganzzahlig)","offen":true,"notiz":"Katalog ohneE: [\"i\"] (wie PA), ohne Entscheid-Kürzel im Kopfkommentar"}
+          {"text":"Zusammenhänge zwischen Termen und Figuren beschreiben (z.B. n(n+1) als Rechteck interpretieren; Die Summe der ersten n ungeraden Zahlen als Quadrat darstellen: 1 + 3 + 5 + 7 = 4 · 4)","typen":["gerade-summe","ungerade-summe","rechteckzahl"],"fehlt":"die Figur (Rechteck, Quadrat) als Bild; rechteckzahl nennt die Regel n · (n + 1) im Aufgabentext, gerechnet wird nur ein Wert"},
+          {"text":"Terme zu Streckenlängen, Flächeninhalten und Volumen bilden und entsprechende Terme deuten","offen":true},
+          {"text":"arithmetische und algebraische Terme veranschaulichen, insbesondere mit Text, Symbolen und Skizzen (z.B. das Produkt zweier Binome, die Summe dreier aufeinanderfolgender Zahlen)","offen":true},
+          {"text":"arithmetische Gesetzmässigkeiten mit Buchstabentermen verallgemeinern (z.B. 3(4 + 5) = 3 · 4 + 3 · 5 → a(b + c) = ab + ac)","offen":true,"notiz":"Die Summen-Typen (Teil 1) wenden eine Verallgemeinerung an, verlangen sie aber nicht als Buchstabenterm"},
+          {"text":"Erweiterung: arithmetische Strukturen algebraisch formulieren (z.B. die Produkte 2 · 3 · 4 / 3 · 4 · 5 / 5 · 6 · 7, ... sind durch 6 teilbar → a(a + 1) · (a + 2) · ⅙ ist ganzzahlig)","offen":true,"notiz":"Katalog ohneE: [„i“] (wie PA), ohne Entscheid-Kürzel im Kopfkommentar"}
         ]
       },
       "j": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Terme geometrisch deuten (a² · b als Quader, a · b als Rechteck)","offen":true},
-          {"text":"lineare Figurenfolgen als Term (n Dreiecke aus Hölzchen: 2n + 1)","typen":["term-linear"],"fehlt":"die Figuren als Bild (beschrieben in Worten und als Wertetabelle)"}
+          {"text":"Terme geometrisch interpretieren (z.B. a² · b als Quader mit quadratischer Grundfläche, a · b als Rechteck mit den Seitenlängen a und b und a + b als Summe zweier Strecken)","offen":true},
+          {"text":"lineare Figurenfolgen in einen Term übertragen (z.B. die Anzahl benötigte Hölzchen, um eine Reihe von n gleichseitigen Dreiecken zu legen, als 2n + 1)","typen":["term-linear"],"fehlt":"die Figuren als Bild (beschrieben in Worten und als Wertetabelle)"}
         ]
       }
     },
     "zehnerpotenzen": {
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Begriffe Term, Variable, Unbekannte, hoch, Potenz, Zehnerpotenz, Vorzeichen, positive/negative Zahlen, (Quadrat-)Wurzel","typen":["zehnerpotenz"],"fehlt":"die Begriffe selbst und alle ausser hoch/Zehnerpotenz: zehnerpotenz rechnet nur 10ⁿ aus (n = 2 bis 9)","notiz":"passt nur ungefähr: der Typ übt die Zehnerpotenz als Zahl, keinen Begriff"},
-          {"text":"Erweiterung: Basis, Exponent","offen":true,"notiz":"Katalog ohneE: [\"i\"] (Begriffe Basis, Exponent nicht abgefragt), ohne Entscheid-Kürzel"},
-          {"text":"Symbole √, ≤, ≥ auch am Rechner","offen":true},
+          {"text":"verstehen und verwenden die Begriffe Term, Variable, Unbekannte, hoch, Potenz, Zehnerpotenz, Vorzeichen, positive Zahlen, negative Zahlen, (Quadrat-) Wurzel","typen":["zehnerpotenz"],"fehlt":"die Begriffe selbst und alle ausser hoch/Zehnerpotenz: zehnerpotenz rechnet nur 10ⁿ aus (n = 2 bis 9)","notiz":"passt nur ungefähr: der Typ übt die Zehnerpotenz als Zahl, keinen Begriff"},
+          {"text":"Erweiterung: verstehen und verwenden die Begriffe Basis, Exponent","offen":true,"notiz":"Katalog ohneE: [„i“] (Begriffe Basis, Exponent nicht abgefragt), ohne Entscheid-Kürzel"},
+          {"text":"die Symbole √, ≤, ≥ verwenden und Rechner entsprechend nutzen","offen":true},
           {"text":"Zahlen bis 1 Milliarde lesen und schreiben","typen":["wort-zahl","zahl-stellen"],"fehlt":"Zahlen in Worten schreiben (Richtung Zahl → Zahlwort)"}
         ]
       },
       "j": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"wissenschaftliche Schreibweise mit positiven Exponenten lesen/schreiben (1.32 · 10⁸ = 132 000 000)","typen":["exponent-positiv","ausschreiben-positiv"]},
-          {"text":"Potenzen mit rationaler Basis und natürlichem Exponenten lesen/schreiben","offen":true}
+          {"text":"Zahlen in wissenschaftlicher Schreibweise mit positiven Exponenten lesen und schreiben (z.B. 1.32 · 10⁸ = 132 000 000)","typen":["exponent-positiv","ausschreiben-positiv"]},
+          {"text":"Potenzen mit rationaler Basis und natürlichem Exponenten lesen und schreiben","offen":true}
         ]
       },
       "k": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Begriffe natürliche, ganze, rationale Zahlen, Kehrwert, 3. Wurzel","offen":true},
-          {"text":"wissenschaftliche Schreibweise auch mit negativen Exponenten","typen":["exponent-negativ","ausschreiben-negativ"]}
+          {"text":"verstehen und verwenden die Begriffe natürliche Zahlen, ganze Zahlen, rationale Zahlen, Kehrwert, 3. Wurzel","offen":true},
+          {"text":"Zahlen in wissenschaftlicher Schreibweise, auch mit negativen Exponenten, lesen und schreiben","typen":["exponent-negativ","ausschreiben-negativ"]}
         ]
       }
     },
     "ueberschlagen-ordnen": {
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Summen und Differenzen mit Dezimalzahlen überschlagen","typen":["summe","differenz"],"fehlt":"den Überschlag selbst bilden: gewählt wird unter vier Antworten, die sich um Zehnerpotenzen unterscheiden (nur die Grössenordnung)"},
-          {"text":"Ergebnisse von Prozentrechnungen überschlagen (263 von 830 ≈ 30 %)","typen":["prozent"]}
+          {"text":"Summen und Differenzen mit Dezimalzahlen überschlagen (z.B. 0.723 - 0.04 ≈ 0.7; 23'268 + 4'785 ≈ 28'000)","typen":["summe","differenz"],"fehlt":"den Überschlag selbst bilden: gewählt wird unter vier Antworten, die sich um Zehnerpotenzen unterscheiden (nur die Grössenordnung); die Zahlbereiche der Beispiele (Dezimalzahlen unter 1 wie 0.723 − 0.04, Zahlen über 1'000 wie 23'268 + 4'785): die Summanden liegen zwischen 1 und 999"},
+          {"text":"in Prozentrechnungen Ergebnisse überschlagen (z.B. 263 von 830 sind etwa 30%; 45% von 13'000 sind mehr als 5'000)","typen":["prozent"],"fehlt":"das zweite Beispiel: einen Prozentwert überschlagen (45% von 13'000 sind mehr als 5'000); prozent überschlägt nur den Prozentsatz („… von … sind etwa … %“)"}
         ]
       },
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "notiz": "Die Stufe besteht nur aus der Erweiterung.",
         "teile": [
-          {"text":"Erweiterung: Produkte und Quotienten von Dezimalzahlen überschlagen (0.382 : 42.8 → 0.4 : 40 = 0.01)","typen":["produkt","quotient"],"fehlt":"den Überschlag selbst bilden: gewählt wird unter vier Antworten, die sich um Zehnerpotenzen unterscheiden (nur die Grössenordnung)"}
+          {"text":"Erweiterung: Produkte und Quotienten von Dezimalzahlen überschlagen. (z.B. 0.382 : 42.8 → 0.4 : 40 = 0.4 : 4 : 10 = 0.01; 32.7 : 0.085 → 30 : 0.1 = 300 : 1 = 300)","typen":["produkt","quotient"],"fehlt":"den Überschlag selbst bilden: gewählt wird unter vier Antworten, die sich um Zehnerpotenzen unterscheiden (nur die Grössenordnung)"}
         ]
       },
       "j": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
           {"text":"positive und negative rationale Zahlen auf dem Zahlenstrahl ordnen","typen":["groesste","kleinste","naechste-null"],"fehlt":"der Zahlenstrahl als Bild und das Ordnen aller Zahlen (gewählt wird nur die grösste, kleinste oder nächste bei 0)"}
         ]
@@ -230,430 +231,445 @@
     },
     "koordinaten": {
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Lagebeziehungen massstabgetreu im Koordinatensystem (Pausenplatz)","typen":["massstab"],"fehlt":"Lagebeziehungen eintragen oder zeichnen; massstab liest nur einen achsenparallelen Abstand ab und rechnet ihn mit dem Massstab um"}
+          {"text":"Lagebeziehungen von Objekten massstabgetreu in einem Koordinatensystem darstellen (z.B. den Pausenplatz)","typen":["massstab"],"fehlt":"Lagebeziehungen darstellen (eintragen oder zeichnen); massstab liest nur einen achsenparallelen Abstand ab und rechnet ihn mit dem Massstab um"}
         ]
       },
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Figuren im kartesischen Koordinatensystem, auch negativ und nicht ganzzahlig","typen":["rechteck","dreieck"],"fehlt":"nicht ganzzahlige Koordinaten (Kopfkommentar: folgen); Figuren zeichnen"},
-          {"text":"Abstände und Flächen berechnen","typen":["abstand","abstand-schraeg"],"notiz":"Flächen berechnen die Typen rechteck und dreieck (Teil 1); jeder Typ steht nur bei einem Teil"}
+          {"text":"Figuren im kartesischen Koordinatensystem darstellen (auch mit negativen und nicht ganzzahligen Koordinaten)","offen":true,"notiz":"Die Figuren werden gezeigt, nicht dargestellt; negative Koordinaten kommen in allen Typen der Stufe vor, nicht ganzzahlige nicht (Kopfkommentar: folgen)"},
+          {"text":"in einem Koordinatensystem Abstände und Flächeninhalte berechnen","typen":["abstand","abstand-schraeg","rechteck","dreieck"],"notiz":"Abstände: abstand, abstand-schraeg; Flächeninhalte: rechteck, dreieck (nur rechtwinklig mit Katheten auf Gitterlinien; beliebige Dreiecke nur in der Challenge)"}
         ]
       },
       "j": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"geometrische Abbildungen im Koordinatensystem (Spiegelung an x = 2)","typen":["spiegel-x","spiegel-y","ursprung"],"fehlt":"andere Abbildungen (Verschieben, Drehen) und das Abbilden ganzer Figuren; gefragt ist eine Koordinate eines gespiegelten Punkts"}
+          {"text":"geometrische Abbildungen im Koordinatensystem darstellen (z.B. Spiegelung eines Dreiecks an der Geraden x = 2)","typen":["spiegel-x","spiegel-y","ursprung"],"fehlt":"andere Abbildungen (Verschieben, Drehen); das Abbilden ganzer Figuren (das Beispiel spiegelt ein Dreieck) und das Darstellen — gefragt ist eine Koordinate eines gespiegelten Punkts"}
         ]
       }
     },
     "groessen": {
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Geld, Längen, Gewicht/Masse, Zeit, Volumen [l] schätzen, vergleichen, runden, rechnen, in benachbarte Einheiten umwandeln, zweifach benannt schreiben","typen":["laenge-hoch","laenge-runter","masse-hoch","masse-runter","zeit-hoch","zeit-runter","liter-hoch","liter-runter","zweifach"],"fehlt":"schätzen, vergleichen, runden und rechnen (nur Umwandeln); Geld nur zweifach benannt (Fr. Rp. → Rp.), nicht benachbart umgewandelt; zweifach benannt nur in Richtung „3 m 45 cm = … cm“, nie zweifach benannt schreiben"}
+          {"text":"Grössen (Geld, Längen, Gewicht bzw. Masse, Zeit, Volumen [l]) schätzen, bestimmen, vergleichen, runden, mit ihnen rechnen","offen":true,"notiz":"aufgaben.js nimmt „Grössen schätzen und messen“ aus, ohne Entscheid-Kürzel; Vergleichen, Runden und Rechnen kommen in der Stufe nicht vor (gemischte Einheiten addieren nur in der Challenge)"},
+          {"text":"in benachbarte Masseinheiten umwandeln","typen":["laenge-hoch","laenge-runter","masse-hoch","masse-runter","zeit-hoch","zeit-runter","liter-hoch","liter-runter"],"fehlt":"Geld (Fr. ↔ Rp. nur zweifach benannt im Typ zweifach)"},
+          {"text":"in zweifach benannten Einheiten schreiben","typen":["zweifach"],"fehlt":"das Schreiben in zweifach benannten Einheiten: geübt wird nur die Richtung „3 m 45 cm = … cm“"}
         ]
       },
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Flächen und Volumen [m³] schätzen und in benachbarte Einheiten umwandeln","typen":["flaeche-hoch","flaeche-runter","volumen-hoch","volumen-runter"],"fehlt":"das Schätzen"},
-          {"text":"Grössen absolut und relativ vergleichen (120 Stück, 60 %, ⅗)","offen":true,"notiz":"aufgaben.js: „Nicht in dieser Übung (eigene Übungen später)“, ohne Entscheid-Kürzel; Ähnliches übt daten-rabatt in MA.3.A.1.k (andere Kompetenz)"},
-          {"text":"Distanzen und Zeiten für Geschwindigkeit messen","offen":true,"notiz":"Messen passt nicht in eine Zahlaufgabe; aufgaben.js nimmt „Grössen schätzen und messen“ aus, ohne Entscheid-Kürzel"}
+          {"text":"Flächeninhalte und Volumen [m³] in einer geeigneten Masseinheit schätzen","offen":true,"notiz":"aufgaben.js nimmt „Grössen schätzen und messen“ aus, ohne Entscheid-Kürzel"},
+          {"text":"in benachbarte Masseinheiten umwandeln","typen":["flaeche-hoch","flaeche-runter","volumen-hoch","volumen-runter"]},
+          {"text":"Grössen absolut und relativ vergleichen (z.B. 120 Stück oder 60% bzw. ⅗ einer Menge)","offen":true,"notiz":"aufgaben.js: „Nicht in dieser Übung (eigene Übungen später)“, ohne Entscheid-Kürzel; Ähnliches übt daten-rabatt in MA.3.A.1.k (andere Kompetenz)"},
+          {"text":"Distanzen und Zeitdauern für Geschwindigkeitsberechnungen messen","offen":true,"notiz":"Messen passt nicht in eine Zahlaufgabe; aufgaben.js nimmt „Grössen schätzen und messen“ aus, ohne Entscheid-Kürzel"}
         ]
       },
       "j": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"SI-System nutzen","typen":["vorsatz-umrechnen"],"fehlt":"das SI-System selbst (Basiseinheiten und Grössen); geübt wird nur das Umrechnen mit Vorsätzen bei m, g, l, W, J, Hz","notiz":"vorsatz-umrechnen passt nur ungefähr: es ist Umrechnen zwischen Vorsätzen, l ist keine SI-Einheit"},
-          {"text":"Vorsätze Mega, Kilo, Dezi, Centi, Milli den Zehnerpotenzen zuordnen","typen":["vorsatz"]}
+          {"text":"das System der dezimalen Masseinheiten (SI-System) nutzen","typen":["vorsatz-umrechnen"],"notiz":"vorsatz-umrechnen rechnet zwischen Vorsätzen bei m, g, l, W, J, Hz um; der Wortlaut meint das System der dezimalen Masseinheiten, dazu gehört auch l"},
+          {"text":"die Vorsätze Mega, Kilo, Dezi, Centi und Milli den Zehnerpotenzen zuordnen","typen":["vorsatz"]}
         ]
       },
       "k": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"mit zusammengesetzten Masszahlen rechnen, Einheiten umrechnen","typen":["dichte"],"fehlt":"das Rechnen mit zusammengesetzten Masszahlen (dichte rechnet nur g/cm³ ↔ kg/m³ um); weitere zusammengesetzte Einheiten"},
-          {"text":"Geschwindigkeiten umwandeln (200 m/10 s = 72 km/h)","typen":["kmh-ms","ms-kmh","weg-zeit"]}
+          {"text":"Berechnungen mit zusammengesetzten Masszahlen durchführen","offen":true,"notiz":"Rechnen mit gemischten Einheiten nur in der Challenge (flaeche-summe, zeit-summe, volumen-liter); weg-zeit rechnet v = s : t, eingetragen bei „Geschwindigkeiten umwandeln“ (Beispiel 200m/10s)"},
+          {"text":"Grössenangaben von einer Einheit in eine andere umrechnen","typen":["dichte"],"fehlt":"weitere Einheiten (dichte rechnet nur g/cm³ ↔ kg/m³ um; km/h ↔ m/s beim nächsten Teil)"},
+          {"text":"Geschwindigkeiten umwandeln (z.B. von 200m/10s in 72 km/h)","typen":["kmh-ms","ms-kmh","weg-zeit"]}
         ]
       }
     },
     "prozent-funktionen": {
       "g": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Funktionswerte aus Graphen","typen":["graph-proportional"],"fehlt":"nicht proportionale Graphen (in g nur Ursprungsgeraden)"},
-          {"text":"indirekte Proportionalität (72 Karten auf x Personen)","typen":["indirekt"]},
-          {"text":"Prozent als proportionale Zuordnung (7 von 35; 7 % von 35)","typen":["prozent-von","prozentsatz"]}
+          {"text":"Funktionswerte aufgrund von Funktionsgraphen bestimmen","typen":["graph-proportional"],"fehlt":"nicht proportionale Graphen (in g nur Ursprungsgeraden)"},
+          {"text":"mit indirekt proportionalen Beziehungen rechnen (z.B. Anzahl Karten je Person bei 72 Karten und x Mitspielenden)","typen":["indirekt"]},
+          {"text":"verstehen Prozentangaben als proportionale Zuordnungen und führen Prozentrechnungen aus (z.B. Wie viele Prozente sind 7 von 35 sowie wie viel sind 7% von 35?)","typen":["prozent-von","prozentsatz"]}
         ]
       },
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"zu einer Funktionsgleichung Wertepaare bestimmen und einzeichnen","typen":["wertepaar"],"fehlt":"das Einzeichnen der Wertepaare"},
-          {"text":"Massstab (12-km-Wanderung auf der Karte)","typen":["massstab-karte","massstab-wirklich"]}
+          {"text":"zu einer Funktionsgleichung Wertepaare bestimmen","typen":["wertepaar"]},
+          {"text":"in einem Koordinatensystem einzeichnen","offen":true,"notiz":"je Aufgabe wird eine Zahl verlangt, nichts eingezeichnet"},
+          {"text":"Streckenlängen aufgrund von Massstabangaben bestimmen und umgekehrt (z.B. auf einer Karte geeignete Routen für eine 12 km-Wanderung eintragen)","typen":["massstab-karte","massstab-wirklich"],"fehlt":"Routen auf einer Karte eintragen (das Beispiel); gefragt ist nur die umgerechnete Länge"}
         ]
       },
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Funktionswert aus Tabelle, Graph und Gleichung (y = 2x + 1, x = 7 → y = 15), Wertepaare einzeichnen","typen":["tabelle","graph","gleichung"],"fehlt":"das Einzeichnen der Wertepaare"},
-          {"text":"Rechner/Tabellenkalkulation","offen":true,"notiz":"der Rechner ist in Stufe i zugelassen (Katalog rechner i: mit), die Tabellenkalkulation wird nicht geübt"},
-          {"text":"Sachaufgaben mit Prozent (Steigung, Zins)","typen":["zins","steigung"]}
+          {"text":"den Funktionswert zu einer gegebenen Zahl aus einer Wertetabelle, einer graphischen Darstellung und mit der Funktionsgleichung bestimmen","typen":["tabelle","graph","gleichung"]},
+          {"text":"Wertepaare im Koordinatensystem einzeichnen (z.B. y = 2x + 1. Für x = 7 → y = 15)","offen":true,"notiz":"Das Beispiel steht im Wortlaut am Satzende und gilt auch für den Funktionswert (Typ gleichung, Teil 1); eingezeichnet wird nichts"},
+          {"text":"Rechner oder geeignete Software (z.B. Tabellenkalkulation) zur Berechnung von Funktionswerten und Masszahlen benutzen","offen":true,"notiz":"der Rechner ist in Stufe i zugelassen (Katalog rechner i: mit), die Tabellenkalkulation wird nicht geübt"},
+          {"text":"Sachaufgaben mit Prozentangaben lösen (z.B. zu Steigung und Zins)","typen":["zins","steigung"]}
         ]
       }
     },
     "lineare-funktionen": {
       "j": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Schnittpunkt zweier Geraden algebraisch und graphisch","typen":["schnittpunkt"],"fehlt":"graphisch (die Aufgabe gibt nur die Gleichungen, kein Graph)"}
+          {"text":"den Schnittpunkt zweier Geraden algebraisch und graphisch bestimmen","typen":["schnittpunkt"],"fehlt":"graphisch (die Aufgabe gibt nur die Gleichungen, kein Graph)"}
         ]
       },
       "k": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"lineare Funktionen: Graph zeichnen, Steigung, y-Achsenabschnitt, Nullstelle","typen":["steigung-graph","abschnitt-graph","steigung-punkte","nullstelle"],"fehlt":"den Graphen zeichnen (aufgaben.js: „Zeichnen folgt“)"}
+          {"text":"zu linearen Funktionen den Funktionsgraphen zeichnen","offen":true,"notiz":"aufgaben.js: „Zeichnen folgt“, ohne Entscheid-Kürzel"},
+          {"text":"die Steigung, den y-Achsenabschnitt und die Nullstelle bestimmen","typen":["steigung-graph","abschnitt-graph","steigung-punkte","nullstelle"]}
         ]
       }
     },
     "flaechen-volumen": {
       "f": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Volumen von Quadern","typen":["quader-volumen","quader-hoehe"]},
-          {"text":"Fläche nicht rechteckiger Figuren im Raster annähern","offen":true,"notiz":"aufgaben.js: „Nicht in dieser Übung“, ohne Entscheid-Kürzel"}
+          {"text":"Volumen von Quadern berechnen","typen":["quader-volumen","quader-hoehe"]},
+          {"text":"den Flächeninhalt von nicht rechteckigen Figuren in Rastern annähernd bestimmen (z.B. die Anzahl Einheitsquadrate in einem Kreis auszählen)","offen":true,"notiz":"aufgaben.js: „Nicht in dieser Übung“, ohne Entscheid-Kürzel"}
         ]
       },
       "g": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Vielecke und gerade Prismen zerlegen","offen":true},
-          {"text":"Flächeninhalt von Drei- und Vierecken","typen":["dreieck","parallelogramm","trapez"],"fehlt":"weitere Vierecke (Raute, Drachenviereck); Grundseite und Höhe sind immer gegeben"},
-          {"text":"Kanten, Flächen, Volumen von Quadern","typen":["quader-kanten","quader-oberflaeche"],"fehlt":"das Volumen (in Stufe g kein Aufgabentyp; geübt in Stufe f mit quader-volumen)"}
+          {"text":"Vielecke und gerade Prismen zur Berechnung von Flächeninhalten und Volumen zerlegen","offen":true},
+          {"text":"den Flächeninhalt von Drei- und Vierecken berechnen","typen":["dreieck","parallelogramm","trapez"],"fehlt":"weitere Vierecke (Raute, Drachenviereck); Grundseite und Höhe sind immer gegeben"},
+          {"text":"Kantenlängen, Seitenflächen und Volumen von Quadern berechnen","typen":["quader-kanten","quader-oberflaeche"],"fehlt":"das Volumen (in Stufe g kein Aufgabentyp; geübt in Stufe f mit quader-volumen); einzelne Seitenflächen (gefragt sind die Summe aller Kanten und die ganze Oberfläche)"}
         ]
       },
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Satz des Pythagoras für Längen und Flächen","typen":["hypotenuse","kathete","diagonale","hypotenuse-gerundet"],"fehlt":"Flächen (gefragt sind nur Längen)"},
-          {"text":"Formeln und Tabellenkalkulation","offen":true,"notiz":"aufgaben.js nimmt die Tabellenkalkulation aus („Nicht in dieser Übung“), ohne Entscheid-Kürzel"}
+          {"text":"Längen und Flächeninhalte mithilfe des Satzes von Pythagoras berechnen","typen":["hypotenuse","kathete","diagonale","hypotenuse-gerundet"],"fehlt":"Flächeninhalte (gefragt sind nur Längen)"},
+          {"text":"bei geometrischen Berechnungen Formeln und Tabellenkalkulation verwenden","offen":true,"notiz":"aufgaben.js nimmt die Tabellenkalkulation aus („Nicht in dieser Übung“), ohne Entscheid-Kürzel"}
         ]
       },
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Umfang und Fläche des Kreises","typen":["kreis-umfang","kreis-flaeche"]},
-          {"text":"Kanten, Flächen, Volumen von geraden Prismen und Zylindern","typen":["prisma-volumen","zylinder-volumen"],"fehlt":"Kanten und Oberflächen von Prismen und Zylindern (Zylinder-Oberfläche nur in der Challenge); Prismen nur mit dreieckiger Grundfläche"},
-          {"text":"Volumen beliebiger Körper schätzen","offen":true,"notiz":"aufgaben.js: „Nicht in dieser Übung“, ohne Entscheid-Kürzel"}
+          {"text":"Umfang und Flächeninhalt von Kreisen berechnen","typen":["kreis-umfang","kreis-flaeche"]},
+          {"text":"Kantenlängen, Flächen und Volumen an geraden Prismen und Zylindern berechnen","typen":["prisma-volumen","zylinder-volumen"],"fehlt":"Kantenlängen und Flächen an Prismen und Zylindern (Zylinder-Oberfläche nur in der Challenge); Prismen nur mit dreieckiger Grundfläche"},
+          {"text":"Volumen beliebiger Körper schätzen durch Zerlegen oder Vergleichen mit bekannten Körpern","offen":true,"notiz":"aufgaben.js: „Nicht in dieser Übung“, ohne Entscheid-Kürzel"}
         ]
       }
     },
     "koerper-winkel": {
       "j": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Pyramide, Kegel, Kugel","typen":["pyramide","kegel","kugel-volumen","kugel-oberflaeche"],"fehlt":"Oberflächen von Pyramide und Kegel (nur Volumen); Pyramiden nur mit quadratischer Grundfläche (Annahme in aufgaben.js)"},
-          {"text":"Winkel über Winkelsummen, Satz des Thales, Ähnlichkeit, Kongruenz","typen":["dreieck","viereck","summe","regelmaessig","thales","gleichschenklig"],"fehlt":"Ähnlichkeit und Kongruenz (in j keine Aufgabe; ähnliche Figuren übt Stufe k)"}
+          {"text":"Strecken, Flächen und Volumen an Pyramiden, Kegeln und Kugeln berechnen","typen":["pyramide","kegel","kugel-volumen","kugel-oberflaeche"],"fehlt":"Strecken (Höhe, Mantellinie; Pyramidenhöhe nur in der Challenge); Flächen an Pyramide und Kegel (nur Volumen); Pyramiden nur mit quadratischer Grundfläche (Annahme in aufgaben.js)"},
+          {"text":"Winkel aufgrund von Winkelsummen, Satz von Thales, Ähnlichkeit und Kongruenz bestimmen","typen":["dreieck","viereck","summe","regelmaessig","thales","gleichschenklig"],"fehlt":"Ähnlichkeit und Kongruenz (in j keine Aufgabe; ähnliche Figuren übt Stufe k)"}
         ]
       },
       "k": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"ähnliche Figuren und Körper: Längen, Flächen, Volumen","typen":["seite","flaeche","volumen","faktor-flaeche","faktor-volumen"]}
+          {"text":"Ähnlichkeiten erkennen","offen":true,"notiz":"die Ähnlichkeit ist in jeder Aufgabe vorgegeben („Zwei Dreiecke sind ähnlich“, „Alle Längen werden mit … multipliziert“)"},
+          {"text":"bei ähnlichen Figuren und Körpern Längen, Flächeninhalte und Volumen berechnen","typen":["seite","flaeche","volumen","faktor-flaeche","faktor-volumen"]}
         ]
       }
     },
     "daten-rabatt": {
       "j": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Koordinatensystem, Währung, arithmetisches Mittel","typen":["mittelwert"],"fehlt":"das Koordinatensystem","notiz":"Währung übt der Typ waehrung, eingetragen beim Teil „Geld CHF, €, $“"},
-          {"text":"Erweiterung: indirekte Proportionalität","offen":true,"notiz":"Katalog ohneE j: „übt Prozent und Funktionswerte“ (prozent-funktionen, Typ indirekt) — dort aber MA.3.A.3.g, nicht dieselbe Kompetenz-Stufe, daher nicht als in eingetragen"},
-          {"text":"Flächenmasse km², ha, a, m² … mm²","offen":true,"notiz":"Umwandeln der Flächenmasse übt groessen in MA.3.A.2.i (andere Kompetenz)"},
-          {"text":"Raummasse km³ … mm³","offen":true,"notiz":"groessen übt in MA.3.A.2.i m³ … mm³ (ohne km³), andere Kompetenz"},
-          {"text":"Geld CHF, €, $","typen":["waehrung"],"notiz":"Wechselkurse erfunden und in der Aufgabe angegeben (Annahme in aufgaben.js)"}
+          {"text":"verstehen und verwenden die Begriffe Koordinatensystem, Währung, arithmetisches Mittel","typen":["mittelwert"],"fehlt":"das Koordinatensystem","notiz":"Währung übt der Typ waehrung, eingetragen beim Teil „Geld (CHF, €, $)“"},
+          {"text":"(Erweiterung: indirekte Proportionalität)","offen":true,"notiz":"Erweiterung in Klammern innerhalb eines Punkts (darum ohne „Erweiterung: “ vorn). Katalog ohneE j: „übt Prozent und Funktionswerte“ (prozent-funktionen, Typ indirekt) — dort aber MA.3.A.3.g, nicht dieselbe Kompetenz-Stufe, daher nicht als in eingetragen"},
+          {"text":"Masseinheiten und deren Abkürzungen verwenden sowie sich an Referenzgrössen orientieren: Flächenmasse (km², ha, a, m², dm², cm², mm²)","offen":true,"notiz":"Der Satzanfang gilt auch für Raummasse und Geld (nächste Teile). Umwandeln der Flächenmasse übt groessen in MA.3.A.2.i (andere Kompetenz)"},
+          {"text":"Raummasse (km³, m³, dm³, cm³, mm³)","offen":true,"notiz":"groessen übt in MA.3.A.2.i m³ … mm³ (ohne km³), andere Kompetenz"},
+          {"text":"Geld (CHF, €, $)","typen":["waehrung"],"fehlt":"die Abkürzung CHF (die Aufgaben schreiben Fr.) und Referenzgrössen","notiz":"Wechselkurse erfunden und in der Aufgabe angegeben (Annahme in aufgaben.js)"}
         ]
       },
       "k": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"absolute und relative Häufigkeit, x-/y-Koordinate, x-/y-Achse, Einheitsstrecke, Wahrscheinlichkeit","typen":["relativ-prozent","absolut","wahrscheinlichkeit"],"fehlt":"x-/y-Koordinate, x-/y-Achse, Einheitsstrecke"},
-          {"text":"Geschwindigkeit km/h, m/s, kB/s, dpi","offen":true,"notiz":"km/h und m/s übt groessen in MA.3.A.2.k (andere Kompetenz); kB/s und dpi nirgends"}
+          {"text":"verstehen und verwenden die Begriffe absolute und relative Häufigkeit","typen":["relativ-prozent","absolut"]},
+          {"text":"x-Koordinate, y-Koordinate, x-Achse, y-Achse, Einheitsstrecke","offen":true,"notiz":"die Wörter x- und y-Koordinate stehen in Aufgaben von koordinaten und lineare-funktionen (andere Kompetenzen)"},
+          {"text":"Wahrscheinlichkeit","typen":["wahrscheinlichkeit"]},
+          {"text":"Masseinheiten und deren Abkürzungen verwenden: Geschwindigkeit (km/h, m/s, kB/s, dpi)","offen":true,"notiz":"km/h und m/s übt groessen in MA.3.A.2.k (andere Kompetenz); kB/s und dpi nirgends"}
         ]
       },
       "l": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Steigung in %, Zins, Zinssatz, Kapital, Rabatt, Brutto, Netto","typen":["rabatt","rabatt-betrag","brutto","netto"],"fehlt":"Steigung in %, Zins, Zinssatz, Kapital (aufgaben.js: übt „Prozent und Funktionswerte“, dort MA.3.A.3.i, andere Kompetenz)","notiz":"brutto und netto rechnen über einen Zuschlag auf den Nettopreis („Nettopreis … dazu 5 % Zuschlag“), nicht über einen Rabatt (Brutto vor, Netto nach Abzug); welche Lesart der Lehrplan meint, ist am Wortlaut zu klären"}
+          {"text":"verstehen und verwenden die Begriffe Steigung in %, Zins, Zinssatz, Kapital","offen":true,"notiz":"aufgaben.js: Steigung und Zins übt „Prozent und Funktionswerte“ (prozent-funktionen, Typen zins und steigung), dort MA.3.A.3.i, andere Kompetenz"},
+          {"text":"Rabatt, Brutto, Netto","typen":["rabatt","rabatt-betrag","brutto","netto"],"notiz":"brutto und netto rechnen über einen Zuschlag auf den Nettopreis („Nettopreis … dazu 5 % Zuschlag“), nicht über einen Rabatt (Brutto vor, Netto nach Abzug); der Wortlaut nennt nur die Begriffe und klärt die Lesart nicht"}
         ]
       }
     },
     "kombinatorik": {
       "d": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"alle Möglichkeiten systematisch aufschreiben, mit und ohne Wiederholung (Ziffern 1, 2, 3)","typen":["ziffern-ohne","ziffern-mit","wort","kleider","schloss"],"fehlt":"das systematische Aufschreiben (gefragt ist nur die Anzahl)"}
+          {"text":"in auszählbaren Variationen und Kombinationen alle Möglichkeiten systematisch aufschreiben (z.B. Zahlen mit den Ziffern 1, 2, 3 mit und ohne Wiederholung: 123, 132, 213, 231, 312, 321, 112, 121, 211, ...)","typen":["ziffern-ohne","ziffern-mit","wort","kleider","schloss"],"fehlt":"das systematische Aufschreiben (gefragt ist nur die Anzahl)"}
         ]
       },
       "f": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Wahrscheinlichkeiten und statistische Angaben prüfen und begründen (zweimal Kopf = 0.25)","typen":["muenzen","muenzen3","wuerfel-summe","wuerfel-gleich","muenze-wuerfel","rad","urne"],"fehlt":"prüfen und begründen (die Wahrscheinlichkeit wird berechnet, keine gegebene Angabe geprüft); statistische Angaben"}
+          {"text":"Wahrscheinlichkeiten und statistische Angaben überprüfen und begründen (z.B. die Wahrscheinlichkeit, mit einer Münze zwei mal hintereinander Kopf zu werfen, ist 0.25; In den Voralpen besitzen relativ mehr Jugendliche einen Roller als im Mittelland)","typen":["muenzen","muenzen3","wuerfel-summe","wuerfel-gleich","muenze-wuerfel","rad","urne"],"fehlt":"überprüfen und begründen (die Wahrscheinlichkeit wird berechnet, keine gegebene Angabe geprüft); statistische Angaben (das Beispiel mit dem relativen Vergleich Voralpen–Mittelland)"}
         ]
       },
       "g": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"kombinatorische Probleme vergleichen, Analogien finden (Handshakes bei 5 Personen)","typen":["handshake","turnier-hin","turnier-rueck","strecken","diagonalen","teams"],"fehlt":"das Vergleichen (je Aufgabe ein Problem; die Analogie liegt nur zwischen den Aufgaben, sie wird nicht verlangt)"}
+          {"text":"vergleichen kombinatorische Probleme, erkennen und erfinden Analogien (z.B. Handshakes bei 5 Personen ist analog zu von 5 Personen erhalten 2 einen Fünfliber)","typen":["handshake","turnier-hin","turnier-rueck","strecken","diagonalen","teams"],"fehlt":"das Vergleichen, Erkennen und Erfinden von Analogien (je Aufgabe ein Problem; die Analogie liegt nur zwischen den Aufgaben, sie wird nicht verlangt)"}
         ]
       }
     },
     "zufall": {
       "f": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Datensätze auswerten, Mittelwert, Maximum, Minimum","typen":["mittelwert","spanne"],"fehlt":"Maximum und Minimum einzeln (nur ihr Unterschied, spanne)"}
+          {"text":"Datensätze nach Kriterien auswerten","offen":true,"notiz":"die Aufgaben geben eine Werteliste; nach Kriterien ausgewählt oder gruppiert wird nicht"},
+          {"text":"in Datensätzen Mittelwert, Maximum und Minimum bestimmen","typen":["mittelwert","spanne"],"fehlt":"Maximum und Minimum einzeln (nur ihr Unterschied, spanne)"}
         ]
       },
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"mehrstufige Zufallsexperimente, Baumdiagramm (dreimal Münze)","typen":["drei-muenzen","urne-mit","pfade"],"fehlt":"das Baumdiagramm als Bild (gefragt sind nur Anzahl Pfade und Wahrscheinlichkeiten)"}
+          {"text":"mehrstufige Zufallsexperimente mit Würfeln, Münzen oder Karten durchführen und mögliche Ereignisse darstellen (z.B. ein Baumdiagramm zum dreimaligen Werfen einer Münze zeichnen)","typen":["drei-muenzen","urne-mit","pfade"],"fehlt":"das Durchführen; das Darstellen der Ereignisse, das Baumdiagramm als Bild (gefragt sind nur Anzahl Pfade und Wahrscheinlichkeiten); Karten (nur Münzen, Würfel und Kugeln)"}
         ]
       },
       "i": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Erweiterung: Wahrscheinlichkeiten ermitteln (zweimal gleiche Farbe ziehen)","typen":["urne-ohne"]},
-          {"text":"Wahrscheinlichkeit aus relativer Häufigkeit (88 von 2750 Zügen verspätet)","typen":["relativ","erwartet"],"notiz":"steht in der Doku noch im kursiven Erweiterungs-Abschnitt; ob auch dieser Teil Erweiterung ist, am Wortlaut zu prüfen. erwartet passt nur ungefähr: es rechnet umgekehrt aus der Wahrscheinlichkeit die erwartete Häufigkeit („Wie oft erwartest du …“), ein eigener Lehrplantext dafür fehlt"}
+          {"text":"Erweiterung: Zufallsexperimente durchführen","offen":true,"notiz":"Durchführen passt nicht in eine Zahlaufgabe"},
+          {"text":"Erweiterung: die Wahrscheinlichkeiten ermitteln (z.B. die Wahrscheinlichkeit bestimmen, aus einem Kartenspiel 2x hintereinander die gleiche Farbe zu ziehen)","typen":["urne-ohne"],"notiz":"gezogen werden Kugeln aus einer Urne ohne Zurücklegen, kein Kartenspiel"},
+          {"text":"Erweiterung: Aussagen zur Wahrscheinlichkeit aus der relativen Häufigkeit eines Ereignisses ableiten (z.B. in einem Monat verspäten sich 88 von 2'750 Zügen mehr als 5 min, 57 davon mehr als 10 min)","typen":["relativ","erwartet"],"notiz":"erwartet passt nur ungefähr: es rechnet umgekehrt aus der Wahrscheinlichkeit die erwartete Häufigkeit („Wie oft erwartest du …“), ein eigener Lehrplantext dafür fehlt"}
         ]
       }
     },
     "sachsituationen": {
       "f": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"proportionale und lineare Zusammenhänge erkennen, Taxipreis","typen":["dreisatz","taxi"],"notiz":"Die Erweiterung in Klammern (indirekt proportionale) steht als eigener Teil","fehlt":"das Erkennen (die Art des Zusammenhangs ist in der Aufgabe vorgegeben)"},
-          {"text":"Erweiterung: indirekt proportionale","offen":true,"notiz":"Katalog ohneE f: „noch nicht in der Übung“"},
-          {"text":"Wertepaare und Graphen darstellen","offen":true},
-          {"text":"Alltagssituationen in mathematische Sprache übersetzen, Grössen und Einheiten wählen","offen":true,"notiz":"dreisatz und taxi übersetzen Text in eine Rechnung (eingetragen beim ersten Teil); Grössen und Einheiten wählen wird nicht geübt, die Einheit steht hinter dem Feld"}
+          {"text":"erkennen proportionale und lineare (Erweiterung: indirekt proportionale) Zusammenhänge in Sachsituationen (z.B. Taxipreis bei Grundtaxe und festem Preis/km)","typen":["dreisatz","taxi"],"fehlt":"das Erkennen (die Art des Zusammenhangs ist in der Aufgabe vorgegeben)","notiz":"Die Erweiterung in Klammern (indirekt proportionale) steht zusätzlich als eigener Teil und ist hier nicht mitgemeint"},
+          {"text":"(Erweiterung: indirekt proportionale)","offen":true,"notiz":"Erweiterung in Klammern innerhalb eines Punkts (darum ohne „Erweiterung: “ vorn). Katalog ohneE f: „noch nicht in der Übung“"},
+          {"text":"Wertepaare sowie Funktionsgraphen im Koordinatensystem darstellen (z.B. Zwischenzeiten in 10'000 m - Läufen; Gewicht bzw. Masse und Preis von Lebensmitteln)","offen":true},
+          {"text":"Alltagssituationen (z.B. Flächeninhalt eines Zimmers; Geschwindigkeit eines Autos; Benzinverbrauch) in mathematische Sprache übersetzen, die richtigen Grössen identifizieren und geeignete Masseinheiten wählen","offen":true,"notiz":"dreisatz und taxi übersetzen Text in eine Rechnung (eingetragen beim ersten Teil); Grössen identifizieren und Einheiten wählen wird nicht geübt, die Einheit steht hinter dem Feld"}
         ]
       },
       "g": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Abhängigkeit zweier Grössen als Graph, Graphen deuten (Weg-Zeit-Diagramm 400-m-Lauf)","typen":["weg-zeit"],"fehlt":"die Abhängigkeit selbst als Graph darstellen (nur Ablesen aus einem gegebenen Graphen)"},
-          {"text":"Erweiterung: passende Skalierung wählen","offen":true,"notiz":"Katalog ohneE g: „noch nicht in der Übung“"},
-          {"text":"lineare Zusammenhänge als Term (Wechselkurse)","offen":true,"notiz":"steht in der Doku im kursiven Erweiterungs-Abschnitt; aufgaben.js: „hier nur in der Challenge“"},
-          {"aus":"MA.3.C.2.f","text":"proportionale und lineare Zusammenhänge erkennen, Taxipreis","typen":["taxi-rueckwaerts"],"notiz":"Taxitarif rückwärts (Kilometer aus dem Preis) gehört zum Taxipreis der Stufe f; das Rückwärtsrechnen steht dort nicht ausdrücklich. Die Erweiterung in Klammern (indirekt proportionale) steht als eigener Teil der Stufe f"}
+          {"text":"die Abhängigkeit zweier Grössen mit einem Funktionsgraphen darstellen","offen":true,"notiz":"der Graph ist gegeben, dargestellt wird nichts"},
+          {"text":"Graphenverläufe interpretieren (z.B. Weg - Zeit - Diagramm zu einem 400 m - Lauf)","typen":["weg-zeit"],"fehlt":"den Verlauf deuten (die Gerade ist gleichförmig; gefragt ist ein abgelesener Wert)"},
+          {"text":"Erweiterung: zu Wertetabellen eine geeignete Skalierung im Koordinatensystem wählen","offen":true,"notiz":"Katalog ohneE g: „noch nicht in der Übung“"},
+          {"text":"Erweiterung: lineare funktionale Zusammenhänge mit einem Term beschreiben (z.B. Wechselkurse)","offen":true,"notiz":"Katalog ohneE g: „noch nicht in der Übung“; aufgaben.js: „hier nur in der Challenge“"},
+          {"aus":"MA.3.C.2.f","text":"erkennen proportionale und lineare (Erweiterung: indirekt proportionale) Zusammenhänge in Sachsituationen (z.B. Taxipreis bei Grundtaxe und festem Preis/km)","typen":["taxi-rueckwaerts"],"notiz":"Taxitarif rückwärts (Kilometer aus dem Preis) gehört zum Taxipreis der Stufe f; das Rückwärtsrechnen steht dort nicht ausdrücklich. Die Erweiterung in Klammern ist nicht mitgemeint"}
         ]
       },
       "h": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Wertetabellen, Diagramme, Texte, Terme, Graphen einander zuordnen","typen":["tabelle-term","text-term"],"fehlt":"Diagramme und Graphen (nur Tabelle → Term und Text → Term)"},
-          {"text":"Sachsituationen funktional, statistisch, probabilistisch bearbeiten und entscheiden","offen":true}
+          {"text":"Wertetabellen, Diagramme, Sachtexte, Terme und Graphen einander zuordnen und interpretieren","typen":["tabelle-term","text-term"],"fehlt":"Diagramme und Graphen (nur Tabelle → Term und Text → Term); das Interpretieren"},
+          {"text":"Sachsituationen nach funktionalen, statistischen und probabilistischen Gesichtspunkten bearbeiten, angemessene Entscheidungen treffen und Lösungswege mit Wertetabellen, Diagrammen, Texten, Termen und Graphen darstellen","offen":true}
         ]
       }
     },
     "stoffwechsel": {
       "a": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Verbindlichen Inhalte sind wörtlich übernommen (nt_zyklus3.md:22; aufgaben.js nennt quellen_nt/NT7.2.html), der übrige Text sinngemäss (nt_zyklus3.md:23).",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Organe als Teile eines Systems mit den vier zentralen Stoffwechselvorgängen Aufnahme, Transport, Umwandlung und Abgabe erkennen. VI: Aufnahme: Lunge, Verdauungsorgane; Transport: Blut, Blutkreislauf, Herz; Umwandlung: Leber, Fettgewebe, Knochen, Muskeln, Hirn; Abgabe: Niere, Lunge Verdauungsorgane, Haut","typen":["organ","vorgang"],"notiz":"Die VI-Liste nicht an „;“ zerlegt: Ihre vier Glieder sind die eine Zuordnung Organ ↔ Vorgang, die beide Typen über alle vier Vorgänge abfragen"}
+          {"text":"die Organe als Komponenten eines Systems erkennen, das die vier zentralen Stoffwechselvorgänge Aufnahme, Transport, Umwandlung und Abgabe umschliesst. Aufnahme: Lunge, Verdauungsorgane; Transport: Blut, Blutkreislauf, Herz; Umwandlung: Leber, Fettgewebe, Knochen, Muskeln, Hirn; Abgabe: Niere, Lunge Verdauungsorgane, Haut","typen":["organ","vorgang"],"notiz":"Ein Teil mit den Verbindlichen Inhalten: Ihre vier Glieder sind die eine Zuordnung Organ ↔ Vorgang, die beide Typen über alle vier Vorgänge abfragen"}
         ]
       }
     },
     "atombau": {
       "a": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Verbindlichen Inhalte sind wörtlich übernommen (nt_zyklus3.md:22), der übrige Text sinngemäss.",
+        "quelle": "wortlaut",
         "teile": [
           {"text":"in der Entstehungsgeschichte des Periodensystems der Elemente PSE die Bedeutung des systematischen Beschreibens und Ordnens erkennen","offen":true},
-          {"text":"Informationen zu den Elementen aus dem PSE herauslesen. VI: Element Metalle, Nichtmetalle, Edelgase","typen":["art","welches"],"fehlt":"andere Informationen aus dem PSE als die Art (Metall, Nichtmetall, Edelgas); nur die Elemente 1 bis 20"}
+          {"text":"Element Metalle, Nichtmetalle, Edelgase","typen":["art"],"fehlt":"nur die Elemente 1 bis 20","notiz":"Verbindliche Inhalte der Stufe (auf der Seite am ersten Punkt); art fragt je Element Metall, Nichtmetall oder Edelgas"},
+          {"text":"aus dem Periodensystem Informationen zu den Elementen herauslesen","typen":["welches"],"fehlt":"andere Informationen aus dem PSE als die Art (Metall, Nichtmetall, Edelgas); nur die Elemente 1 bis 20","notiz":"welches lässt drei Elemente im PSE nachsehen; art liest dieselbe Angabe und ist beim Teil der Verbindlichen Inhalte gezählt"}
         ]
       },
       "c": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Verbindlichen Inhalte sind wörtlich übernommen (nt_zyklus3.md:22), der übrige Text sinngemäss.",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"an der Geschichte des Kern-Hülle-Modells die Grenzen von Modellen erkennen","offen":true},
-          {"text":"Atome mit dem Kern-Hülle-Modell darstellen, Protonen und Neutronen als Kernbausteine benennen. VI: Masse-Ladungsmodell nach Thomson, Kern-Hülle-Modell nach Rutherford","typen":["neutronen","elektronen"],"fehlt":"das Darstellen im Modell (die Übung fragt nur Anzahlen ab); Masse-Ladungsmodell nach Thomson und Kern-Hülle-Modell nach Rutherford","notiz":"VI an „.“ angehängt, weil die Zerlegung nur an „;“ trennt; elektronen fragt die Hülle eines ungeladenen Atoms"},
+          {"text":"am Beispiel der Entwicklungsgeschichte des Kern-Hülle-Modells die Bedeutung der Grenzen von Modellen erkennen. Masse-Ladungsmodell nach Thomson, Kern-Hülle-Modell nach Rutherford","offen":true},
+          {"text":"Atome mit dem Kern-Hülle-Modell darstellen","typen":["elektronen"],"fehlt":"das Darstellen im Modell (elektronen fragt nur die Anzahl Elektronen in der Hülle eines ungeladenen Atoms)"},
+          {"text":"Protonen und Neutronen als Kernbausteine benennen","typen":["neutronen"],"notiz":"die Protonen fragt protonen, gezählt bei der Ordnungszahl"},
           {"text":"PSE: Ordnungszahl, Atommasse, Hauptgruppen","typen":["protonen"],"fehlt":"die Atommasse (die Übung nimmt nach ihrer Annahme die ganzzahlige Massenzahl und nennt sie in der Aufgabe) und die Hauptgruppen (in c nicht gefragt, erst in d)","notiz":"protonen: die Ordnungszahl steht nicht in der Aufgabe, sie ist aus dem PSE zu lesen"},
           {"text":"Isotop","typen":["isotop"]}
         ]
       },
       "d": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Verbindlichen Inhalte sind wörtlich übernommen (nt_zyklus3.md:22), der übrige Text sinngemäss.",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Zusammenhänge zwischen Schalenmodell und PSE aufzeigen","typen":["aussen","schalen","gruppe"],"notiz":"Schalenbesetzung nur nach der Annahme 2, 8, 8, 2 für die Elemente 1 bis 20"},
-          {"text":"Stoffumwandlungen als Veränderung der Anordnung von Teilchen und der chemischen Bindungen erklären. VI: Schalenmodell","offen":true,"notiz":"Die VI „Schalenmodell“ hängt nur durch die Zerlegung an „;“ an diesem Teil; inhaltlich gehört sie zum ersten Teil und ist dort geübt"},
-          {"text":"Wertigkeit, Donator-Akzeptor-Konzept bei Redoxreaktionen, Bindungstypen, Edelgasregel","offen":true,"notiz":"VI. Die Edelgasregel (Ionenladung, Elektronen des Ions) übt nur die Challenge (ladung, ionen-elektronen, edelgas-gleich), obwohl der Stufentitel von d sie nennt"}
+          {"text":"Zusammenhänge zwischen Schalenmodell und PSE aufzeigen Schalenmodell","typen":["aussen","schalen","gruppe"],"notiz":"Mit den Verbindlichen Inhalten (die Seite setzt keinen Punkt davor). Schalenbesetzung nur nach der Annahme 2, 8, 8, 2 für die Elemente 1 bis 20"},
+          {"text":"Stoffumwandlungen als Veränderung in der Anordnung von Teilchen und als Veränderung chemischer Bindungen erklären","offen":true},
+          {"text":"Wertigkeit, Donator-Akzeptor-Konzept bei Redoxreaktionen, Bindungstypen, Edelgasregel","offen":true,"notiz":"Verbindliche Inhalte. Die Edelgasregel (Ionenladung, Elektronen des Ions) übt nur die Challenge (ladung, ionen-elektronen, edelgas-gleich), obwohl der Stufentitel von d sie nennt"}
         ]
       }
     },
     "kraefte": {
       "a": {
-        "quelle": "sinngemaess",
-        "notiz": "Die „Lesart“ zu NT.5.1 (nt_zyklus3.md:268) ist eine Einschätzung, kein Wortlaut (nt_zyklus3.md:28–29).",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"gleichförmige Bewegungen in Diagrammen erkennen und darstellen","typen":["v-diagramm","weg-nach"],"fehlt":"gleichförmige Bewegungen in Diagrammen erkennen und darstellen: Das Diagramm ist immer eine Ursprungsgerade und die Aufgabe sagt selbst, dass die Bewegung gleichförmig ist; gefragt sind nur Geschwindigkeit und Weg, nichts wird erkannt oder gezeichnet","notiz":"Geschwindigkeit als Rechengrösse nennt die Lehrplanseite nicht (nt_zyklus3.md:272); v = s : t ist Annahme der Übung"}
+          {"text":"gleichförmige Bewegungen von Körpern in Diagrammen erkennen und darstellen","typen":["v-diagramm","weg-nach"],"fehlt":"das Erkennen und das Darstellen: Das Diagramm ist immer eine Ursprungsgerade und die Aufgabe sagt selbst, dass die Bewegung gleichförmig ist; gefragt sind nur Geschwindigkeit und Weg, nichts wird erkannt oder gezeichnet","notiz":"Geschwindigkeit als Rechengrösse nennt die Lehrplanseite nicht; v = s : t ist Annahme der Übung"}
         ]
       },
       "c": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Verbindlichen Inhalte sind wörtlich übernommen (nt_zyklus3.md:22), der übrige Text sinngemäss.",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"experimentell zeigen und in Diagrammen darstellen, dass die Gewichtskraft proportional zur Masse ist. VI: Umgang mit einem Kraftmesser","typen":["kraft-kg","kraft-g","masse"],"fehlt":"das Experiment, das Diagramm und der Umgang mit dem Kraftmesser (kraft-g und masse nennen ihn nur im Text); geübt wird das Rechnen mit F = m · g, g = 10 N/kg (Annahme)"}
+          {"text":"experimentell zeigen und in Diagrammen darstellen, dass die Gewichtskraft proportional zur Masse ist","typen":["kraft-kg","kraft-g","masse"],"fehlt":"das Experiment und das Diagramm; geübt wird das Rechnen mit F = m · g, g = 10 N/kg (Annahme)"},
+          {"text":"Umgang mit einem Kraftmesser","offen":true,"notiz":"Verbindlicher Inhalt; kraft-g und masse nennen den Kraftmesser nur im Aufgabentext"}
         ]
       },
       "d": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Verbindlichen Inhalte sind wörtlich übernommen (nt_zyklus3.md:22), der übrige Text sinngemäss.",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Kräfte einordnen und darstellen","offen":true},
-          {"text":"experimentell zeigen, dass einfache Maschinen die benötigten Kräfte verringern (Hebel, schiefe Ebene, Flaschenzug, Ketten-/Zahnradgetriebe). VI: Kräftediagramm","typen":["maschine"],"fehlt":"dass die Maschinen die Kraft verringern (gefragt ist nur, welche Maschine ein Beispiel zeigt), das Experiment und das Kräftediagramm","notiz":"VI an „.“ angehängt, weil die Zerlegung nur an „;“ trennt. Beispiele ohne Wellräder und Keile nach KR1 a — beide nennt der Lehrplan nicht"}
+          {"text":"Kräfte einordnen und darstellen. Kräftediagramm","offen":true},
+          {"text":"experimentell zeigen, dass bei einfachen Maschinen die benötigten Kräfte verringert werden können (z.B. Hebel, schiefe Ebene, Flaschenzug, Ketten-/Zahnradgetriebe)","typen":["maschine"],"fehlt":"dass die Maschinen die Kraft verringern (gefragt ist nur, welche Maschine ein Beispiel zeigt) und das Experiment","notiz":"Beispiele ohne Wellräder und Keile nach KR1 a — beide nennt der Lehrplan nicht"}
         ]
       },
       "e": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Verbindlichen Inhalte sind wörtlich übernommen (nt_zyklus3.md:22), der übrige Text sinngemäss.",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"begründen, dass einfache Maschinen die Kraft verringern, die Strecke aber verlängern (Hebel, schiefe Ebene, Flaschenzug). VI: Goldene Regel der Mechanik","typen":["hebel","flaschenzug-kraft","flaschenzug-weg","schiefe-ebene"],"fehlt":"das Begründen (die Übung rechnet nur Kraft oder Seilweg aus); die längere Strecke rechnet nur flaschenzug-weg","notiz":"Formeln (Hebelgesetz, Kraft · Weg bleibt gleich) sind Annahme der Übung, die Lehrplanseite nennt keine (nt_zyklus3.md:25–27)"}
+          {"text":"begründen, dass bei einfachen Maschinen die benötigten Kräfte verringert werden können, sich gleichzeitig aber die Strecke, entlang der die Kräfte wirken, verlängert (z.B. Hebel, schiefe Ebene, Flaschenzug). Goldene Regel der Mechanik","typen":["hebel","flaschenzug-kraft","flaschenzug-weg","schiefe-ebene"],"fehlt":"das Begründen (die Übung rechnet nur Kraft oder Seilweg aus); die längere Strecke rechnet nur flaschenzug-weg","notiz":"Mit dem Verbindlichen Inhalt: Die Goldene Regel ist der Satz davor. Formeln (Hebelgesetz, Kraft · Weg bleibt gleich) sind Annahme der Übung, die Lehrplanseite nennt keine"}
         ]
       }
     },
     "stromkreis": {
       "b": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Veränderungen in Stromkreisen mit Messgeräten untersuchen, einfache Regeln aufstellen (mehr/weniger Lämpchen, Serie-/Parallelschaltung)","typen":["parallel-dazu","serie-dazu","serie-kabel","serie-weg","parallel-weg","parallel-zweig"],"fehlt":"das Untersuchen mit Messgeräten und das Aufstellen der Regeln (die Übung fragt die Regeln ab; der Strommesser steht nur im Text)","notiz":"parallel-zweig vergleicht Zweig- und Batteriestrom und begründet im Lösungsweg mit der Knotenregel (NT.5.2.d); als Regel zur Parallelschaltung hier gezählt"}
+          {"text":"Veränderungen in Stromkreisen mithilfe geeigneter Messgeräte untersuchen und einfache Regeln aufstellen (z.B. mehr/weniger Lämpchen, Serie-/Parallelschaltung)","typen":["parallel-dazu","serie-dazu","serie-kabel","serie-weg","parallel-weg","parallel-zweig"],"fehlt":"das Untersuchen mit Messgeräten und das Aufstellen der Regeln (die Übung fragt die Regeln ab; der Strommesser steht nur im Text)","notiz":"parallel-zweig vergleicht Zweig- und Batteriestrom und begründet im Lösungsweg mit der Knotenregel (NT.5.2.d); als Regel zur Parallelschaltung hier gezählt"}
         ]
       },
       "c": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Verbindlichen Inhalte sind wörtlich übernommen (nt_zyklus3.md:22), der übrige Text sinngemäss.",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"die massgeblichen Grössen eines einfachen Stromkreises in Beziehung setzen, Gesetzmässigkeiten experimentell herleiten. VI: Stromstärke, Spannung, Widerstand, Ohm'sches Gesetz","typen":["ohm-U","ohm-I","ohm-R"],"fehlt":"das experimentelle Herleiten der Gesetzmässigkeiten","notiz":"Formel U = R · I und Einheiten sind Annahme der Übung, die Lehrplanseite nennt keine (nt_zyklus3.md:25–27)"}
+          {"text":"die massgeblichen Grössen eines einfachen Stromkreises miteinander in Beziehung setzen und Gesetzmässigkeiten experimentell herleiten. Stromstärke, Spannung, Widerstand, Ohm'sches Gesetz","typen":["ohm-U","ohm-I","ohm-R"],"fehlt":"das experimentelle Herleiten der Gesetzmässigkeiten","notiz":"Ein Teil mit den Verbindlichen Inhalten: Sie nennen die Grössen und das Gesetz, die der Satz in Beziehung setzt. Formel U = R · I und Einheiten sind Annahme der Übung, die Lehrplanseite nennt keine"}
         ]
       },
       "d": {
-        "quelle": "sinngemaess",
-        "notiz": "Die Verbindlichen Inhalte sind wörtlich übernommen (nt_zyklus3.md:22), der übrige Text sinngemäss.",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"die Grössen eines verzweigten Stromkreises in Beziehung setzen, Gesetzmässigkeiten herleiten, Versuchsprotokolle anfertigen. VI: Knoten- und Maschenregel","typen":["knoten","masche","knoten-fehlt","parallel-ohm","serie-ohm"],"fehlt":"das Herleiten der Gesetzmässigkeiten und das Anfertigen von Versuchsprotokollen","notiz":"masche und serie-ohm rechnen an einer unverzweigten Serienschaltung; serie-ohm (Ohm'sches Gesetz mit R1 + R2) passt nur ungefähr: Die Summe der Widerstände folgt aus der Maschenregel, ein verzweigter Stromkreis ist es nicht"}
+          {"text":"die massgeblichen Grössen eines verzweigten Stromkreises miteinander in Beziehung setzen, Gesetzmässigkeiten experimentell herleiten sowie entsprechende Versuchsprotokolle anfertigen. Knoten- und Maschenregel","typen":["knoten","masche","knoten-fehlt","parallel-ohm","serie-ohm"],"fehlt":"das experimentelle Herleiten der Gesetzmässigkeiten und das Anfertigen von Versuchsprotokollen","notiz":"Ein Teil mit den Verbindlichen Inhalten (Knoten- und Maschenregel sind die Gesetzmässigkeiten des Satzes). masche und serie-ohm rechnen an einer unverzweigten Serienschaltung; serie-ohm (Ohm'sches Gesetz mit R1 + R2) passt nur ungefähr: Die Summe der Widerstände folgt aus der Maschenregel, ein verzweigter Stromkreis ist es nicht"}
         ]
       }
     },
     "grammatik": {
       "e": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Präpositionen (reduzierte Liste)","offen":true,"notiz":"Die Sätze enthalten Fälle nach Präpositionen, die Präposition selbst wird nicht benannt"},
-          {"text":"vier Fälle in typischen Fällen mit der Ersatzprobe","typen":["fall"]},
-          {"text":"Morpheme zerlegen","offen":true},
-          {"text":"Verbenfächer, Nominal- und Präpositionalgruppe","offen":true}
+          {"text":"Präpositionen mithilfe einer reduzierten Liste benennen","offen":true,"notiz":"Die Sätze enthalten Fälle nach Präpositionen, die Präposition selbst wird nicht benannt"},
+          {"text":"in typischen Fällen Nominativ, Akkusativ, Dativ und Genitiv mithilfe der Ersatzprobe bestimmen","typen":["fall"]},
+          {"text":"Wörter in Stamm-, Vor- und Nachmorphem zerlegen","offen":true},
+          {"text":"einen Verbenfächer bilden und die Satzglieder Nominal- und Präpositionalgruppe unterscheiden","offen":true}
         ]
       },
       "f": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Wortarten: Nomen, Verb, Adjektiv formal, Pronomen mit der umfassenden Liste, Rest als Partikel","typen":["wortart"]},
-          {"text":"Präposition und Konjunktion","offen":true,"notiz":"grammatik.js zählt Präpositionen und Konjunktionen zu den Partikeln (grammatik.js:8); als eigene Begriffe nicht gefragt"},
-          {"text":"Präsens, Präteritum, Perfekt, Futur","typen":["zeitform"],"notiz":"zeitform bietet dazu Plusquamperfekt an (D.5.D.1.d: erste Erfahrungen mit Futur, Plusquamperfekt), „Futur“ meint Futur I"},
-          {"text":"Satzglieder mit dem Verbenfächer","offen":true},
-          {"text":"Begriffe Subjekt und Objekt","offen":true,"notiz":"Subjekt und Objekte bestimmt erst Stufe g (satzglied)"}
+          {"text":"Nomen, Verb und Adjektiv mithilfe formaler Kriterien sowie Pronomen mithilfe der umfassenden Pronomenliste bestimmen sowie den Rest als Partikel benennen","typen":["wortart"]},
+          {"text":"die Partikeln Präposition und Konjunktion in typischen Fällen bestimmen","offen":true,"notiz":"grammatik.js zählt Präpositionen und Konjunktionen zu den Partikeln (grammatik.js:8); als eigene Begriffe nicht gefragt"},
+          {"text":"Präsens, Präteritum, Perfekt und Futur","typen":["zeitform"],"notiz":"zeitform bietet dazu Plusquamperfekt an (D.5.D.1.d: Erfahrungen mit Futur und Plusquamperfekt), „Futur“ meint Futur I"},
+          {"text":"Infinitiv und Personalform bestimmen","offen":true,"notiz":"zeitform fragt nur die Zeitform (Optionen aufgaben.js:24)"},
+          {"text":"Stamm-, Vor- und Nachmorphem bestimmen","offen":true},
+          {"text":"mithilfe eines Verbenfächers Satzglieder bestimmen","offen":true},
+          {"text":"kennen die Begriffe Subjekt und Objekt","offen":true,"notiz":"Subjekt und Objekte bestimmt erst Stufe g (satzglied)"}
         ]
       },
       "g": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Indikativ, Imperativ, Konjunktiv I und II, Aktiv und Passiv","typen":["modus","genus"]},
-          {"text":"Subjekt und Objekt unterscheiden","typen":["satzglied"]},
-          {"text":"einfache und zusammengesetzte Sätze","offen":true}
+          {"text":"kennen die Begriffe Indikativ, Imperativ, Konjunktiv I und II sowie Aktiv und Passiv","typen":["modus","genus"]},
+          {"text":"einen Verbenfächer bilden und formal die Satzglieder Nominal- und Präpositionalgruppe unterscheiden","offen":true},
+          {"text":"bei klaren Beispielen zwischen Subjekt und Objekt unterscheiden","typen":["satzglied"]},
+          {"text":"einfache und zusammengesetzte Sätze unterscheiden","offen":true}
         ]
       }
     },
     "rechtschreibung": {
       "d": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Morpheme für die Stammregel","offen":true,"notiz":"Die Stammregel bei e/ä übt eae (im dritten Teil); Morpheme als solche nicht"},
-          {"text":"Wörterbuch bei regelmässiger Laut-Buchstaben-Zuordnung","offen":true,"notiz":"Kopfkommentar aufgaben.js:7 nimmt das Wörterbuch aus, ohne Entscheid-Kürzel"},
-          {"text":"ie-Regel, f/v, e/ä (Stammregel), Doppelkonsonanten (ck, tz), Grossschreibung konkreter und gebräuchlicher abstrakter Nomen, Trennregel, Komma bei Aufzählungen und zwischen übersichtlichen Verbgruppen","typen":["cktz","ie","eae","gross","fv","komma-aufzaehlung"],"fehlt":"die Trennregel (Kopfkommentar aufgaben.js:7, ohne Entscheid-Kürzel) und das Komma zwischen übersichtlichen Verbgruppen"}
+          {"text":"Wörter in ihre Morpheme zerlegen. Sie nutzen dies für die Stammregel","offen":true,"notiz":"Die Stammregel bei e/ä übt eae; Morpheme als solche nicht"},
+          {"text":"Wörter mit regulärer Laut-Buchstaben-Zuordnung im gedruckten und elektronischen Schul-Wörterbuch mit Sicherheit auffinden","offen":true,"notiz":"Kopfkommentar aufgaben.js:7 nimmt das Wörterbuch aus, ohne Entscheid-Kürzel"},
+          {"text":"folgende Rechtschreibregeln in dafür konstruierten Übungen anwenden, wobei die Regel inklusive relevanter Ausnahmen jeweils vorliegt: ie-Regel","typen":["ie"]},
+          {"text":"f-/v-Regel","typen":["fv"]},
+          {"text":"e-/ä-Schreibung (Stammregel)","typen":["eae"]},
+          {"text":"Doppelkonsonantenregel (inkl. ck-/tz-Regel)","typen":["cktz"],"fehlt":"Doppelkonsonanten ausser ck und tz (etwa ll, mm, nn, ss): cktz übt nur ck und tz (rechtschreibung.js:22–26, 49–54)"},
+          {"text":"Grossschreibung für konkrete und gebräuchliche abstrakte Nomen (z.B. Liebe, Wut, Glück)","typen":["gross"]},
+          {"text":"Trennregel","offen":true,"notiz":"Kopfkommentar aufgaben.js:7 nimmt die Trennregel aus, ohne Entscheid-Kürzel"},
+          {"text":"Komma bei Aufzählungen","typen":["komma-aufzaehlung"]},
+          {"text":"Komma zwischen übersichtlichen Verbgruppen","offen":true}
         ]
       },
       "e": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Morpheme für die Gross- und Kleinschreibung nutzen (Frei-heit)","typen":["nachmorphem-gross","nachmorphem-klein"]}
+          {"text":"Wörter in ihre Morpheme zerlegen. Sie können dies für die Gross-Klein-Schreibung nutzen (z.B. Frei-heit, Entdeck-ung)","typen":["nachmorphem-gross","nachmorphem-klein"],"fehlt":"das Zerlegen als eigener Schritt (die Aufgabe zeigt das ganze Wort, gefragt ist nur gross oder klein; rechtschreibung.js:67–76 und folgende)"}
         ]
       },
       "f": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"nominalisierte Verben nach Präposition + Artikel (beim Essen)","typen":["verb-nominalisiert","verb-klein"],"notiz":"verb-klein ist das Gegenstück (Infinitiv nach Modalverb oder „gehen“ bleibt klein)"},
-          {"text":"Höflichkeitspronomen „Sie“ in Briefen","typen":["hoeflich","nicht-hoeflich"],"notiz":"hoeflich in Briefanreden („Sehr geehrte …“), nicht-hoeflich als Gegenstück ausserhalb von Briefen"}
+          {"text":"folgende Rechtschreibregeln in dafür konstruierten Übungen anwenden: Nomen aus Verben mit vorhergehender Präposition plus Artikel in typischen Fällen (z.B. beim Essen, nach dem Essen)","typen":["verb-nominalisiert","verb-klein"],"notiz":"verb-klein ist das Gegenstück (Infinitiv nach Modalverb oder „gehen“ bleibt klein)"},
+          {"text":"Höflichkeitspronomen \"Sie\" in Briefen","typen":["hoeflich","nicht-hoeflich"],"notiz":"hoeflich in Briefanreden („Sehr geehrte …“), nicht-hoeflich als Gegenstück ausserhalb von Briefen"}
         ]
       },
       "g": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Wörterbuch auch bei nicht eindeutiger Laut-Buchstaben-Zuordnung","offen":true,"notiz":"Kopfkommentar aufgaben.js:7 nimmt das Wörterbuch aus, ohne Entscheid-Kürzel"},
-          {"text":"nominalisierte Adjektive nach Pronomen (alles Gute, etwas Schönes)","typen":["adjektiv-nominalisiert"]},
-          {"text":"Komma bei Infinitivgruppen, Einschüben, Relativsätzen","typen":["komma-relativ","komma-infinitiv","komma-einschub"],"notiz":"komma-infinitiv nur mit um, ohne, statt, anstatt"}
+          {"text":"Strategien nutzen, um auch Wörter mit nicht-eindeutiger Laut-Buchstaben-Zuordnung im gedruckten und elektronischen Wörterbuch aufzufinden","offen":true,"notiz":"Kopfkommentar aufgaben.js:7 nimmt das Wörterbuch aus, ohne Entscheid-Kürzel"},
+          {"text":"folgende Rechtschreibregel in dafür konstruierten Übungen anwenden: Nomen aus Adjektiven mit vorhergehendem Pronomen in typischen Fällen (z.B. alles Gute, etwas Schönes, viel Schlechtes)","typen":["adjektiv-nominalisiert"]},
+          {"text":"Komma bei infinitivischen Verbgruppen, bei Einschüben und Relativsätzen","typen":["komma-relativ","komma-infinitiv","komma-einschub"],"notiz":"komma-infinitiv nur mit um, ohne, statt, anstatt"}
         ]
       }
     },
     "englisch-grammatik": {
       "b": {
-        "quelle": "sinngemaess",
-        "notiz": "sprachen_zyklus3.md:201 führt Stufe b nur für Französisch („— / b“) und sagt dazu „In EN ist das der GA Z2“; einen Text für FS1E.5.D.1.b gibt die Doku nicht. Die Teile unten sind der Text von FS2F.5.D.1.b.",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"Lehrplan-Text dieser Stufe fehlt in docs/lernsteig/lehrplan/","offen":true},
-          {"aus":"FS2F.5.D.1.b","text":"einige einfache Strukturen verwenden, noch mit Fehlern (Konjugation wichtiger Verben, Personalpronomen als Subjekt, Frage mit Fragewort)","typen":["fragewort","be","pronomen-subjekt","have"],"notiz":"Ersatz für den fehlenden englischen Text; der Kopfkommentar aufgaben.js:3 legt b ebenso aus"},
-          {"aus":"FS2F.5.D.1.b","text":"Zeit- und Ortsangaben erkennen","offen":true}
+          {"text":"beim Sprechen und Schreiben einige einfache grammatische Strukturen verwenden, machen dabei aber noch Fehler (z.B. Konjugationsformen wichtiger Verben, Personalpronomen in Subjektstellung, einfache Frage mit Fragewort)","typen":["fragewort","be","pronomen-subjekt","have"]},
+          {"text":"auf bestimmte Situationen bezogene grammatische Strukturen mit Unterstützung erkennen und für das Verständnis nutzen (z.B. Zeitangaben, Ortsangaben)","offen":true}
         ]
       },
       "c": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"einfache Strukturen verwenden, teils noch Fehler (Wortfolge in Aussage und Frage, Verben mit zwei Objekten, unregelmässiger Plural, häufige Präpositionen)","typen":["praeposition","plural","wortfolge-frage","wortfolge-aussage","zwei-objekte"]},
-          {"text":"einfache Strukturen im Text erkennen (Wortfolge, Frage, Konjugationsformen)","offen":true,"notiz":"wortfolge-frage und wortfolge-aussage lassen den richtigen Satz wählen, das kommt dem Erkennen nahe; Konjugationsformen im Text nicht"}
+          {"text":"beim Sprechen und Schreiben einfache grammatische Strukturen verwenden, machen dabei aber teilweise noch Fehler (z.B. Wortfolge in einfachen Aussagesätzen und Fragen, Verben mit zwei Objekten, unregelmässige Pluralformen, häufige Präpositionen)","typen":["praeposition","plural","wortfolge-frage","wortfolge-aussage","zwei-objekte"]},
+          {"text":"in Texten mit Unterstützung einfache grammatische Strukturen erkennen und für das Verständnis nutzen (z.B. Wortfolge im Satz, Frage mit Fragewort oder Intonation, Konjugationsformen)","offen":true,"notiz":"wortfolge-frage und wortfolge-aussage lassen den richtigen Satz wählen, das kommt dem Erkennen nahe; Konjugationsformen und Intonation im Text nicht"}
         ]
       },
       "d": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"auch komplexere Strukturen ausreichend korrekt (Hilfs- und Modalverben, Formen der Negation, Demonstrativ- und Reflexivpronomen)","typen":["negation","modal","demonstrativ","reflexiv"],"fehlt":"Hilfsverben als eigenes Thema (sie kommen nur in negation und zeitform vor)"},
-          {"text":"im Text erkennen (Zeitformen, Modalverben, begründende Konjunktionen, Possessiv- und Reflexivpronomen)","typen":["konjunktion","possessiv","zeitform"],"notiz":"Modalverben und Reflexivpronomen im ersten Teil gezählt; konjunktion übt neben because auch so (Folge, nicht begründend); Zeitformen mit den Namen nach ZF1 a"}
+          {"text":"beim Sprechen und Schreiben auch einige komplexere grammatische Strukturen ausreichend korrekt verwenden (z.B. Hilfs- und Modalverben, verschiedene Formen der Negation, Demonstrativ- und Reflexivpronomen)","typen":["negation","modal","demonstrativ","reflexiv"],"fehlt":"Hilfsverben als eigenes Thema (sie kommen nur in negation und zeitform vor)"},
+          {"text":"in Texten auch komplexere Strukturen erkennen und für das Verständnis nutzen (z.B. Zeitform der Verben, häufige Modalverben, Konjunktionen zur Begründung, Possessiv- und Reflexivpronomen)","typen":["konjunktion","possessiv","zeitform"],"notiz":"Modalverben und Reflexivpronomen im ersten Teil gezählt; konjunktion übt neben because auch so (Folge, nicht begründend); Zeitformen mit den Namen nach ZF1 a"}
         ]
       }
     },
     "franzoesisch-grammatik": {
       "b": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"einige einfache Strukturen verwenden, noch mit Fehlern (Konjugation wichtiger Verben, Personalpronomen als Subjekt, Frage mit Fragewort)","typen":["interrogatif","etre","verbe-er","avoir","faire","pronom-sujet","aller"]},
-          {"text":"Zeit- und Ortsangaben erkennen","offen":true}
+          {"text":"beim Sprechen und Schreiben einige einfache grammatische Strukturen verwenden, machen dabei aber noch Fehler (z.B. Konjugationsformen wichtiger Verben, Personalpronomen in Subjektstellung, einfache Frage mit Fragewort)","typen":["interrogatif","etre","verbe-er","avoir","faire","pronom-sujet","aller"]},
+          {"text":"auf bestimmte Situationen bezogene grammatische Strukturen mit Unterstützung erkennen und für das Verständnis nutzen (z.B. Zeitangaben, Ortsangaben)","offen":true}
         ]
       },
       "c": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"einfache Strukturen verwenden, teils noch Fehler (Wortfolge in Aussage und Frage, Verben mit zwei Objekten, unregelmässiger Plural, häufige Präpositionen)","typen":["preposition","pluriel","ordre-question","deux-objets","ordre-phrase"]},
-          {"text":"einfache Strukturen im Text erkennen (Wortfolge, Frage, Konjugationsformen)","offen":true,"notiz":"ordre-question und ordre-phrase lassen den richtigen Satz wählen, das kommt dem Erkennen nahe; Konjugationsformen im Text nicht"}
+          {"text":"beim Sprechen und Schreiben einfache grammatische Strukturen verwenden, machen dabei aber teilweise noch Fehler (z.B. Wortfolge in einfachen Aussagesätzen und Fragen, Verben mit zwei Objekten, unregelmässige Pluralformen, häufige Präpositionen)","typen":["preposition","pluriel","ordre-question","deux-objets","ordre-phrase"]},
+          {"text":"in Texten mit Unterstützung einfache grammatische Strukturen erkennen und für das Verständnis nutzen (z.B. Wortfolge im Satz, Frage mit Fragewort oder Intonation, Konjugationsformen)","offen":true,"notiz":"ordre-question und ordre-phrase lassen den richtigen Satz wählen, das kommt dem Erkennen nahe; Konjugationsformen und Intonation im Text nicht"}
         ]
       },
       "d": {
-        "quelle": "sinngemaess",
+        "quelle": "wortlaut",
         "teile": [
-          {"text":"auch komplexere Strukturen ausreichend korrekt (Hilfs- und Modalverben, Formen der Negation, Demonstrativ- und Reflexivpronomen)","typen":["negation","modal","demonstratif","reflexif"],"fehlt":"Hilfsverben als eigenes Thema (sie kommen nur in negation und temps vor)"},
-          {"text":"im Text erkennen (Zeitformen, Modalverben, begründende Konjunktionen, Possessiv- und Reflexivpronomen)","typen":["conjonction","possessif","temps"],"notiz":"Modalverben und Reflexivpronomen im ersten Teil gezählt; conjonction übt neben parce que auch donc (Folge, nicht begründend)"}
+          {"text":"beim Sprechen und Schreiben auch einige komplexere grammatische Strukturen ausreichend korrekt verwenden (z.B. Hilfs- und Modalverben, verschiedene Formen der Negation, Demonstrativ- und Reflexivpronomen)","typen":["negation","modal","demonstratif","reflexif"],"fehlt":"Hilfsverben als eigenes Thema (sie kommen nur in negation und temps vor)"},
+          {"text":"in Texten auch komplexere Strukturen erkennen und für das Verständnis nutzen (z.B. Zeitform der Verben, häufige Modalverben, Konjunktionen zur Begründung, Possessiv- und Reflexivpronomen)","typen":["conjonction","possessif","temps"],"notiz":"Modalverben und Reflexivpronomen im ersten Teil gezählt; conjonction übt neben parce que auch donc (Folge, nicht begründend)"}
         ]
       }
     }

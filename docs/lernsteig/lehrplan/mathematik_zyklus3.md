@@ -1,7 +1,9 @@
 # Mathematik Zyklus 3 — Kompetenzstufen nach Lehrplan Volksschule SG
 
 Quelle: sg.lehrplan.ch, alle 26 Kompetenzseiten Mathematik (`index.php?code=a|5|0|<Bereich>|<Aspekt>|<Nr>`),
-Fassung „Lehrplan Volksschule August 2025“, abgerufen am 2026-11-04. Rahmen, Reichweite und die Bedeutung von
+Fassung „Lehrplan Volksschule August 2025“, abgerufen am 2026-11-04. Roh-HTML der 14 Kompetenzen, die eine
+Übung des Lernsteigs trägt, in [quellen_ma/](quellen_ma/) (`MA1.A.3.html` …, abgerufen am 2026-11-08, gelesen mit
+`node tools/lehrplan_wortlaut.js <Kompetenz> [Stufe]`; GA und OP dort stimmen mit der Tabelle unten überein). Rahmen, Reichweite und die Bedeutung von
 GA, OP und Erweiterung für Real und Sek: [lehrplan_sg_sek1.md](lehrplan_sg_sek1.md).
 
 **Lesart der Tabellen**
