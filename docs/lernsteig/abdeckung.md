@@ -505,25 +505,25 @@ Die Stufe besteht nur aus der Erweiterung.
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (im Kopf oder mit Notieren eigener Rechenwege, z.B. 30.8 + 5.6) | **offen** | alles |
-| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell kürzen, erweitern, addieren und subtrahieren — *Die Übung nimmt auch Nenner ausserhalb der Liste: 12 und 25 beim Kürzen (NENNER), 12 bei plus/minus; beim Kürzen ist der Ausgangsbruch ein beliebiges Vielfaches bis Nenner 100* | `kuerzen` 19 %, `erweitern` 24 %, `plus` 25 %, `minus` 11 % | das Rechteckmodell als Bild; bei plus und minus die Nenner 20, 50, 100 (Nenner der Summanden nur 2 bis 12) |
+| Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (im Kopf oder mit Notieren eigener Rechenwege, z.B. 30.8 + 5.6) — *„bis 5 Wertziffern“ wie RZ2 a: beide Zahlen zusammen, wie 30.8 + 5.6* | `dezimal-plus-minus` 16 % | — |
+| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell kürzen, erweitern, addieren und subtrahieren — *Nenner nur aus der Liste, auch der ungekürzte beim Kürzen und der Zielnenner beim Erweitern; bei plus und minus der gemeinsame Nenner höchstens 100 (Annahme)* | `kuerzen` 16 %, `erweitern` 16 %, `plus` 19 %, `minus` 17 % | das Rechteckmodell als Bild |
 | Grundoperationen mit dem Rechner ausführen | **offen** | alles |
-| (MA.1.A.1.h) Brüche (Nenner 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000), Dezimalzahlen und Prozentzahlen je in die beiden anderen Schreibweisen übertragen — *umschreiben nimmt auch den Nenner 25, der nicht in der Liste steht; Bruch → Dezimalzahl übt rationale-zahlen in MA.1.A.3.g (bruch-dezimal)* | `umschreiben` 22 % | die Richtungen Bruch → Dezimal-/Prozentzahl und zwischen Dezimal- und Prozentzahl (umschreiben fragt nur Dezimal- oder Prozentzahl → Bruch); die Nenner 3, 6, 8, 1'000 |
+| (MA.1.A.1.h) Brüche (Nenner 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000), Dezimalzahlen und Prozentzahlen je in die beiden anderen Schreibweisen übertragen — *alle sechs Richtungen gleich oft; Bruch → Dezimalzahl übt auch rationale-zahlen in MA.1.A.3.g (bruch-dezimal)* | `umschreiben` 16 % | die Nenner 3 und 6 (periodische Dezimalzahlen, RZ1 a) |
 
 ### MA.1.A.3.g — am Wortlaut nachgelesen
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
 | Dezimalzahlen bis 5 Wertziffern multiplizieren und die Ergebnisse überprüfen (im Kopf oder mit Notieren eigener Rechenwege, z.B. 308 · 52; 12 · 0,3) | in `rationale-zahlen` | — |
-| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren — *ganz-mal nimmt auch den Nenner 12, der nicht in der Liste steht* | `mal` 51 %, `ganz-mal` 25 % | das Rechteckmodell als Bild; die Nenner 20, 50, 100 (mal nur 2 bis 10) |
+| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren — *Nenner nur aus der Liste; bei mal das Produkt der Nenner höchstens 100 (Annahme)* | `mal` 49 %, `ganz-mal` 28 % | das Rechteckmodell als Bild |
 | Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000 als Dezimalzahlen schreiben | in `rationale-zahlen` | — |
-| bestimmen, wie oft Stammbrüche in ganzen Zahlen enthalten sind (z.B. Wie viele Male ist ⅕ in 2 enthalten? → 2 : ⅕) | `stammbruch` 24 % | — |
+| bestimmen, wie oft Stammbrüche in ganzen Zahlen enthalten sind (z.B. Wie viele Male ist ⅕ in 2 enthalten? → 2 : ⅕) | `stammbruch` 23 % | — |
 
 ### MA.1.A.3.i — am Wortlaut nachgelesen
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| die Grundoperationen mit rationalen Zahlen ausführen | `plus-minus-negativ` 34 %, `mal-negativ` 32 %, `geteilt` 35 % | — |
+| die Grundoperationen mit rationalen Zahlen ausführen | `plus-minus-negativ` 34 %, `mal-negativ` 32 %, `geteilt` 34 % | — |
 | Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000) | in `rationale-zahlen` | — |
 | Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png] — *Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d* | in `rationale-zahlen` | — |
 

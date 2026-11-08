@@ -393,6 +393,10 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "stimmt-immer": {
+      "am": "2026-11-08",
+      "von": "Patrik"
+    },
     "stromkreis-bauer": {
       "am": "2026-11-06",
       "von": "Patrik"
@@ -447,6 +451,10 @@ const PRUEFSTAND = {
     },
     "ziffernkarten": {
       "am": "2026-11-03",
+      "von": "Patrik"
+    },
+    "zufalls-skala": {
+      "am": "2026-11-08",
       "von": "Patrik"
     }
   }

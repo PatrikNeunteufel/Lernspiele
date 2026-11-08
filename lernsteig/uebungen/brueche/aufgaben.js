@@ -1,20 +1,24 @@
 /* Übung „Brüche rechnen“ — MA.1.A.3, Stufen f, g, i; dazu MA.1.A.1.h (umschreiben). Aufgaben als Daten, ohne DOM.
-   Geprüft an der Aufnahmeprüfung Gymnasium: MA.1.A.3 g, h, i (PA, h und i ohne Erweiterung).
-   Inhalte sinngemäss nach docs/lernsteig/lehrplan/mathematik_zyklus3.md:
-   MA.1.A.3.f  (GA Z2) Brüche (Nenner bis 100) kürzen, erweitern, addieren, subtrahieren (am Rechteckmodell)
-   MA.1.A.3.g  Brüche multiplizieren (am Rechteckmodell); wie oft ein Stammbruch in einer ganzen Zahl steckt
-   MA.1.A.3.i  (OP) Grundoperationen mit rationalen Zahlen (ohne die Erweiterung mit Variablen)
-   MA.1.A.1.h  Brüche, Dezimal- und Prozentzahlen ineinander umschreiben
-   Antwort ist ein vollständig gekürzter Bruch oder eine ganze Zahl (art: "term", form: "bruch"). Annahmen, mit Patrik
-   abzustimmen: Brüche als „3/4“ geschrieben, unechte Brüche erlaubt (keine gemischten Zahlen); das Rechteckmodell
-   als Bild folgt. */
+   Inhalte am Wortlaut (docs/lernsteig/abdeckung.md, Plan E 1):
+   MA.1.A.3.f  (GA Z2) Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (30.8 + 5.6); Brüche mit den Nennern
+               2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell kürzen, erweitern, addieren und subtrahieren
+   MA.1.A.3.g  Brüche mit denselben Nennern am Rechteckmodell multiplizieren; wie oft ein Stammbruch in einer ganzen
+               Zahl enthalten ist (2 : ⅕)
+   MA.1.A.3.i  (OP) Grundoperationen mit rationalen Zahlen (die Erweiterung mit Variablen folgt, E1-3 a)
+   MA.1.A.1.h  Brüche (Nenner der Liste und 1'000), Dezimalzahlen und Prozentzahlen je in die beiden anderen
+               Schreibweisen übertragen — alle sechs Richtungen; 3 und 6 erst mit periodischen Dezimalzahlen (RZ1 a)
+   Antwort: ein vollständig gekürzter Bruch oder eine ganze Zahl (art: "term", form: "bruch"), beim Erweitern der Zähler,
+   bei Dezimal- und Prozentzahlen eine Zahl (art: "zahl"). Annahmen, mit Patrik abzustimmen: Brüche als „3/4“
+   geschrieben, unechte Brüche erlaubt (keine gemischten Zahlen); „Dezimalzahlen bis 5 Wertziffern“ wie RZ2 a (beide
+   Zahlen zusammen); beim Addieren und Subtrahieren der gemeinsame Nenner höchstens 100, beim Multiplizieren das
+   Produkt der Nenner höchstens 100 (am Rechteckmodell darstellbar). Das Rechteckmodell als Bild folgt (E 1 Schritt 8). */
 "use strict";
 
 const UEBUNG = {
   id: "brueche",
-  einleitung: "Gib das Ergebnis als vollständig gekürzten Bruch ein, zum Beispiel 3/4.",
+  einleitung: "Gib Brüche vollständig gekürzt ein, zum Beispiel 3/4.",
   stufen: {
-    f: "Kürzen, erweitern, addieren und subtrahieren; Dezimalzahl und Prozent als Bruch",
+    f: "Kürzen, erweitern, addieren und subtrahieren; Dezimalzahlen addieren; Bruch, Dezimalzahl und Prozent umschreiben",
     g: "Brüche multiplizieren, mit ganzen Zahlen und Stammbrüchen",
     i: "Alle Grundoperationen, auch dividieren und mit negativen Brüchen",
     challenge: "Mehrere Rechenschritte mit Klammern",
@@ -24,7 +28,19 @@ const UEBUNG = {
 const M = "−", MAL = " · ";
 const B = KERN.bruch;
 const z = (a, b) => LST.zufall(a, b);
-const NENNER = [2, 3, 4, 5, 6, 8, 10, 12, 20, 25, 50, 100];
+// Nenner nach dem Wortlaut von MA.1.A.3 f und g; beim Umschreiben (MA.1.A.1.h) dazu 1'000, ohne 3 und 6 (RZ1 a).
+// Bis LERN_Session23 dazu 12 und 25 (aus einer Zusammenfassung „Nenner bis 100“).
+const NENNER = [2, 3, 4, 5, 6, 8, 10, 20, 50, 100];
+const NENNER_UMSCHREIBEN = [2, 4, 5, 8, 10, 20, 50, 100, 1000];
+const NENNER_MAX = 100; // gemeinsamer Nenner (plus, minus) und Produkt der Nenner (mal), Annahme oben
+const ggt = (a, b) => (b ? ggt(b, a % b) : a);
+const kgv = (a, b) => a / ggt(a, b) * b;
+/** Paare (Nenner, Faktor), deren erweiterter Nenner wieder in der Liste steht: 1/2 → 50/100, 3/4 → 15/20. */
+const ERWEITERBAR = NENNER.flatMap(n => NENNER.filter(m => m > n && m % n === 0).map(m => [n, m / n]));
+/** Echter Bruch mit Nenner n, schon gekürzt (Zähler teilerfremd zu n). */
+function teilerfremd(n) { let zz; do zz = z(1, n - 1); while (ggt(zz, n) !== 1); return B.bruch(BigInt(zz), BigInt(n)); }
+const rund9 = x => Math.round(x * 1e9) / 1e9;
+const dez = x => LST.dezimalText(rund9(x));
 // Zahlen mit Apostroph ab vier Stellen (Z1 a); terme.js liest den Apostroph beim Einlesen wieder heraus
 const zt = x => LST.zahlText(Number(x));
 const bt = b => (b.n === 1n ? `${b.z < 0n ? M : ""}${zt(b.z < 0n ? -b.z : b.z)}` : `${b.z < 0n ? M : ""}${zt(b.z < 0n ? -b.z : b.z)}/${zt(b.n)}`);
@@ -38,29 +54,60 @@ function fertig(stufe, typ, text, wert, weg, extra) {
 }
 
 // ---------- f ----------
+/** Zahl-Aufgabe (Dezimal- oder Prozentzahl, Zähler beim Erweitern). */
+const zahlAufgabe = (stufe, typ, text, antwort, weg, kennung, daten) =>
+  ({ art: "zahl", stufe, typ, text, antwort: rund9(antwort), loesung: dez(antwort), weg, kennung, daten });
+
+/**
+ * MA.1.A.1.h: Bruch, Dezimalzahl und Prozentzahl je in die beiden anderen Schreibweisen — sechs Richtungen gleich oft.
+ * Der Bruch ist gekürzt und hat einen Nenner der Liste.
+ */
+const RICHTUNGEN = [["bruch", "dezimal"], ["bruch", "prozent"], ["dezimal", "bruch"], ["prozent", "bruch"], ["dezimal", "prozent"], ["prozent", "dezimal"]];
+function umschreiben() {
+  const [von, nach] = LST.waehle(RICHTUNGEN), b = teilerfremd(LST.waehle(NENNER_UMSCHREIBEN));
+  const wert = Number(b.z) / Number(b.n);
+  const zeige = { bruch: bt(b), dezimal: dez(wert), prozent: `${dez(wert * 100)} %` }[von];
+  const daten = { von, nach, z: Number(b.z), n: Number(b.n) };
+  if (nach === "bruch") return fertig("f", "umschreiben", `Schreibe als Bruch: ${zeige}`, b, `${zeige} = ${bt(b)}`, { aufgabeTerm: von === "prozent" ? `${dez(wert * 100)}/100` : dez(wert), daten });
+  if (nach === "dezimal") return zahlAufgabe("f", "umschreiben", `Schreibe als Dezimalzahl: ${zeige} =`, wert, `${zeige} = ${dez(wert)}`, `${zeige} dezimal`, daten);
+  return zahlAufgabe("f", "umschreiben", `Schreibe in Prozent: ${zeige} = □ %`, wert * 100, `${zeige} = ${dez(wert * 100)} %`, `${zeige} prozent`, daten);
+}
+
+/** MA.1.A.3.f: Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (30.8 + 5.6), beide zusammen wie RZ2 a. */
+function dezimalPlusMinus() {
+  const [x, y] = LST.aufteilung(5);
+  let a = LST.dezimalZahl(x), b = LST.zufall(0, 1) ? LST.dezimalZahl(y) : LST.ganzeZahl(y);
+  const plus = LST.zufall(0, 1) === 1;
+  if (!plus && a < b) [a, b] = [b, a];
+  if (!plus && a === b) return dezimalPlusMinus();
+  const w = plus ? a + b : a - b;
+  const t = `${dez(a)} ${plus ? "+" : M} ${dez(b)}`;
+  return zahlAufgabe("f", "dezimal-plus-minus", `${t} =`, w, `${t} = ${dez(w)}`, t, { a, b, plus });
+}
+
 function stufeF() {
-  const typ = LST.waehle(["kuerzen", "erweitern", "plus", "minus", "umschreiben"]);
+  const typ = LST.waehle(["kuerzen", "erweitern", "plus", "minus", "umschreiben", "dezimal-plus-minus"]);
+  if (typ === "umschreiben") return umschreiben();
+  if (typ === "dezimal-plus-minus") return dezimalPlusMinus();
   if (typ === "kuerzen") {
-    const b = echt(LST.waehle(NENNER)), f = z(2, 9);
-    if (b.n * BigInt(f) > 100n) return stufeF();
+    const [n, f] = LST.waehle(ERWEITERBAR), b = teilerfremd(n);
     const t = `${b.z * BigInt(f)}/${b.n * BigInt(f)}`;
     return fertig("f", typ, `Kürze vollständig: ${t}`, b, `${t} = ${b.z * BigInt(f)} : ${f} / ${b.n * BigInt(f)} : ${f}`, { aufgabeTerm: t });
   }
   if (typ === "erweitern") {
-    const b = echt(LST.waehle([2, 3, 4, 5, 10])), f = z(2, 10), ziel = b.n * BigInt(f);
-    return { art: "zahl", stufe: "f", typ, text: `${bt(b)} = □/${ziel}. Zähler =`, antwort: Number(b.z) * f, loesung: String(Number(b.z) * f),
-      weg: `mit ${f} erweitern: ${b.z} · ${f} = ${Number(b.z) * f}`, kennung: `${bt(b)} ${ziel}`, daten: { z: Number(b.z), n: Number(b.n), ziel: Number(ziel) } };
+    const [n, f] = LST.waehle(ERWEITERBAR), b = teilerfremd(n), ziel = n * f, zz = Number(b.z) * f;
+    return zahlAufgabe("f", typ, `${bt(b)} = □/${ziel}. Zähler =`, zz, `mit ${f} erweitern: ${b.z} · ${f} = ${zz}`, `${bt(b)} ${ziel}`,
+      { z: Number(b.z), n, ziel });
   }
-  if (typ === "umschreiben") {
-    const n = LST.waehle([2, 4, 5, 10, 20, 25, 50, 100]), zz = z(1, n - 1), b = B.bruch(BigInt(zz), BigInt(n));
-    if (LST.zufall(0, 1)) return fertig("f", typ, `Schreibe als Bruch: ${LST.dezimalText(zz / n)}`, b, `${LST.dezimalText(zz / n)} = ${Math.round(zz / n * 100)}/100`, { aufgabeTerm: String(zz / n) });
-    if (!Number.isInteger(zz / n * 100)) return stufeF();
-    return fertig("f", typ, `Schreibe als Bruch: ${zz / n * 100} %`, b, `${zz / n * 100} % = ${zz / n * 100}/100`, { aufgabeTerm: `${zz / n * 100}/100` });
-  }
-  const n1 = LST.waehle([2, 3, 4, 5, 6, 8, 10]), n2 = LST.waehle([2, 3, 4, 5, 6, 8, 10, 12]);
-  const a = echt(n1), b = echt(n2);
-  let w = typ === "plus" ? B.plus(a, b) : B.minus(a, b);
-  if (w.z <= 0n) return stufeF(); // f: positive Ergebnisse
+  // neu ziehen innerhalb des Typs, damit jeder Typ gleich oft vorkommt (ein neuer Typ bevorzugte die anderen)
+  // (bei minus nie zweimal derselbe Bruch: 1/2 − 1/2 hat nichts zu rechnen)
+  let n1, n2, a, b;
+  do {
+    do { n1 = LST.waehle(NENNER); n2 = LST.waehle(NENNER); } while (kgv(n1, n2) > NENNER_MAX);
+    a = teilerfremd(n1); b = teilerfremd(n2);
+  } while (typ === "minus" && B.minus(a, b).z === 0n);
+  if (typ === "minus" && B.minus(a, b).z < 0n) [a, b] = [b, a]; // f: positive Ergebnisse
+  const w = typ === "plus" ? B.plus(a, b) : B.minus(a, b);
   return fertig("f", typ, `${bt(a)} ${typ === "plus" ? "+" : M} ${bt(b)} =`, w, `gleichnamig machen`, { aufgabeTerm: `${bt(a)} ${typ === "plus" ? "+" : "-"} ${bt(b)}` });
 }
 
@@ -68,12 +115,14 @@ function stufeF() {
 function stufeG() {
   const typ = LST.waehle(["mal", "mal", "ganz-mal", "stammbruch"]);
   if (typ === "mal") {
-    const a = echt(LST.waehle([2, 3, 4, 5, 6, 8, 10])), b = echt(LST.waehle([2, 3, 4, 5, 6, 8, 10]));
+    let n1, n2;
+    do { n1 = LST.waehle(NENNER); n2 = LST.waehle(NENNER); } while (n1 * n2 > NENNER_MAX);
+    const a = teilerfremd(n1), b = teilerfremd(n2);
     return fertig("g", typ, `${bt(a)}${MAL}${bt(b)} =`, B.mal(a, b), `Zähler mal Zähler, Nenner mal Nenner`, { aufgabeTerm: `${bt(a)} * ${bt(b)}` });
   }
   if (typ === "ganz-mal") {
-    const g = z(2, 12), b = echt(LST.waehle([2, 3, 4, 5, 6, 8, 10, 12]));
-    return fertig("g", typ, `${g}${MAL}${bt(b)} =`, B.mal(B.bruch(BigInt(g)), b), `${g} · ${b.z} = ${g * Number(b.z)}, Nenner ${b.n}`, { aufgabeTerm: `${g} * ${bt(b)}` });
+    const g = z(2, 12), b = teilerfremd(LST.waehle(NENNER));
+    return fertig("g", typ, `${g}${MAL}${bt(b)} =`, B.mal(B.bruch(BigInt(g)), b), `${g} · ${b.z} = ${zt(g * Number(b.z))}, Nenner ${zt(b.n)}`, { aufgabeTerm: `${g} * ${bt(b)}` });
   }
   const g = z(1, 12), n = z(2, 10);
   return fertig("g", typ, `${g} : 1/${n} =`, B.bruch(BigInt(g * n)), `1/${n} passt ${n}-mal in 1, also ${g} · ${n}`, { aufgabeTerm: `${g} * ${n}` });
@@ -118,7 +167,8 @@ function hinweis(a, eingabe) {
     erweitern: "Mit welcher Zahl wurde der Nenner multipliziert? Mit derselben Zahl den Zähler multiplizieren.",
     plus: "Bringe beide Brüche auf denselben Nenner, dann die Zähler addieren.",
     minus: "Bringe beide Brüche auf denselben Nenner, dann die Zähler subtrahieren.",
-    umschreiben: "Dezimalzahl oder Prozent als Hundertstel schreiben, dann kürzen.",
+    umschreiben: "Prozent heisst Hundertstel. Vom Bruch zur Dezimalzahl: Zähler durch Nenner teilen.",
+    "dezimal-plus-minus": "Schreibe die Zahlen so untereinander, dass die Kommas genau untereinander stehen.",
     mal: "Zähler mal Zähler, Nenner mal Nenner. Vorher kürzen spart Arbeit.",
     "ganz-mal": "Die ganze Zahl nur mit dem Zähler multiplizieren.",
     stammbruch: "Wie oft passt der Stammbruch in eins? So oft mal die ganze Zahl.",
@@ -135,16 +185,39 @@ function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
   const T = LST_TERME;
+  const d = a.daten || {};
+  // Nenner nach dem Wortlaut (MA.1.A.3 f, g; beim Umschreiben MA.1.A.1.h)
+  if (a.typ === "umschreiben") {
+    if (!NENNER_UMSCHREIBEN.includes(d.n)) m.push(`Nenner ${d.n} nicht in der Liste (MA.1.A.1.h): ${a.text}`);
+    if (ggt(d.z, d.n) !== 1) m.push(`Bruch nicht gekürzt: ${d.z}/${d.n}`);
+  } else if (a.typ !== "stammbruch" && a.typ !== "dezimal-plus-minus" && ["f", "g"].includes(a.stufe)) {
+    const nenner = [...a.text.matchAll(/\/(\d+)/g)].map(x => Number(x[1]));
+    const fremd = nenner.filter(n => !NENNER.includes(n));
+    if (fremd.length) m.push(`Nenner ${fremd.join(", ")} nicht in der Liste des Lehrplans: ${a.text}`);
+    if ((a.typ === "plus" || a.typ === "minus") && nenner.length === 2 && kgv(nenner[0], nenner[1]) > NENNER_MAX) m.push(`gemeinsamer Nenner über ${NENNER_MAX}: ${a.text}`);
+    if (a.typ === "mal" && nenner.length === 2 && nenner[0] * nenner[1] > NENNER_MAX) m.push(`Produkt der Nenner über ${NENNER_MAX}: ${a.text}`);
+  }
   if (a.art === "zahl") {
-    const d = a.daten;
-    if (d.z * d.ziel / d.n !== a.antwort) m.push(`Erweitern falsch: ${a.text}`);
-    if (d.ziel % d.n !== 0) m.push("Zielnenner kein Vielfaches");
+    // exakt in Hundertsteln eines Tausendstels nachrechnen (höchstens 3 Nachkommastellen in Aufgabe und Ergebnis)
+    const ganz = x => Math.round(x * 1e5);
+    let soll;
+    if (a.typ === "erweitern") {
+      soll = d.z * d.ziel / d.n;
+      if (d.ziel % d.n !== 0) m.push("Zielnenner kein Vielfaches");
+    } else if (a.typ === "umschreiben") soll = d.z / d.n * (d.nach === "prozent" ? 100 : 1);
+    else if (a.typ === "dezimal-plus-minus") {
+      soll = (ganz(d.a) + (d.plus ? 1 : -1) * ganz(d.b)) / 1e5;
+      if (LST.wertziffern(d.a) + LST.wertziffern(d.b) > 5) m.push(`zusammen mehr als 5 Wertziffern: ${a.text}`);
+      if (soll <= 0) m.push(`Ergebnis nicht positiv: ${a.text}`);
+    } else return [...m, `unbekannter Zahl-Typ ${a.typ}`];
+    if (ganz(soll) !== ganz(a.antwort)) m.push(`Lösung ${a.antwort}, nachgerechnet ${soll}: ${a.text}`);
+    if (LST.leseZahl(a.loesung) !== a.antwort) m.push(`Lösungstext ${a.loesung} passt nicht zu ${a.antwort}`);
     return m;
   }
   // Aufgabe unabhängig aus dem angezeigten Text lesen (Zeichen übersetzt) und mit der Lösung vergleichen
   let ausText;
   try {
-    let t = a.text.replace(/^(Kürze vollständig|Schreibe als Bruch): /, "").replace(/ =$/, "").replace(/·/g, "*").replace(/−/g, "-").replace(/ %$/, "/100");
+    let t = a.text.replace(/^(Kürze vollständig|Schreibe als Bruch): /, "").replace(/ =$/, "").replace(/·/g, "*").replace(/−/g, "-").replace(/^(.*) %$/, "$1 * 1/100");
     // „a : b/c“ → mal Kehrwert (terme.js teilt nur durch Zahlen)
     t = t.replace(/:\s*\(?(-?)(\d+)\/(\d+)\)?/g, (_, s, zz, n) => `* (${s}${n}/${zz})`).replace(/:\s*(\d+)$/, (_, n) => `* 1/${n}`);
     ausText = T.lies(t).poly;

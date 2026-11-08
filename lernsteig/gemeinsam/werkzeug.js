@@ -64,6 +64,27 @@ var LST = (function () {
   const zahlText = n => KERN.zahl.text(n, schreibweise());
   /** Dezimalzahl mit dem eingestellten Zeichen, ohne Exponent und Rundungsreste; stellen: feste Nachkommastellen. */
   const dezimalText = (x, stellen) => KERN.zahl.dezimalText(x, stellen, schreibweise());
+  // Zahlen nach Wertziffern (MA.1.A.3 f, g: „Dezimalzahlen bis 5 Wertziffern“; RZ2 a, RZ3 a, LERN_Session19). Bis
+  // LERN_Session23 in rationale-zahlen/aufgaben.js, seither auch für brueche f (Dezimalzahlen addieren, subtrahieren).
+  const rund9 = x => Math.round(x * 1e9) / 1e9;
+  /** Wertziffern einer Zahl: alle Ziffern ohne Komma und ohne führende Nullen (0.3 → 1, 308 → 3, 23.56 → 4). */
+  const wertziffern = z => String(z).replace(".", "").replace(/^0+/, "").length;
+  /**
+   * RZ3 a: Zwei Zahlen haben zusammen gleich oft 3, 4 oder 5 Wertziffern — die ganze Spanne bis zur Grenze, vom kleinen
+   * Beispiel (12 · 0,3) bis zum grossen (308 · 52). Je Summe die Aufteilungen gleich oft.
+   */
+  const AUFTEILUNG = { 3: [[2, 1], [1, 2]], 4: [[3, 1], [2, 2]], 5: [[3, 2], [4, 1]] };
+  const aufteilung = (max = 5) => waehle(AUFTEILUNG[zufall(3, max)]);
+  /** Ganze Zahl mit n Stellen; einstellig 2 bis 9 (mal 1 übt nichts). */
+  const ganzeZahl = n => (n === 1 ? zufall(2, 9) : zufall(10 ** (n - 1), 10 ** n - 1));
+  /** Dezimalzahl mit n Wertziffern und 1 oder 2 Nachkommastellen (höchstens n), letzte Ziffer nicht 0: 0.3, 4.7, 0.47, 23.56. */
+  function dezimalZahl(n) {
+    const k = zufall(1, Math.min(2, n));
+    let m;
+    do m = ganzeZahl(n); while (m % 10 === 0);
+    return rund9(m / 10 ** k);
+  }
+
   /** Eingabe einer Zahl lesen („−“, „-“, „–“, Punkt oder Komma, Leerzeichen und Apostroph); Zahl oder null. */
   const leseZahl = text => KERN.zahl.lies(text);
 
@@ -193,6 +214,7 @@ var LST = (function () {
   return {
     PRAEFIX, ALTE_FELDER, alteEintraegeUmdeuten, lies, schreibe, beiAenderung, quelle, zufall, waehle, mische, tagText, wochenSerie,
     TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl, antwortTasten, antwortPruefen, zahlenImText,
+    wertziffern, aufteilung, ganzeZahl, dezimalZahl,
     NIVEAUS, niveauNr, stufenListe, stufeVon, zielstufe,
   };
 })();

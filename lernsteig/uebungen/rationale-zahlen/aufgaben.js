@@ -43,25 +43,11 @@ function fertig(stufe, typ, text, antwort, weg, daten) {
 // Bis LERN_Session19: je Faktor bis 5 Wertziffern (23.56 · 4.4) und alle Teiler von 1000 dazu 16 (bis 0.4375).
 const WERTZIFFERN_MAX = 5;
 const NENNER_G = [2, 4, 5, 8, 10, 20, 50, 100, 1000];
-/** Wertziffern einer Zahl: alle Ziffern ohne Komma und ohne führende Nullen (0.3 → 1, 308 → 3, 23.56 → 4). */
-const wertziffern = z => String(z).replace(".", "").replace(/^0+/, "").length;
-/**
- * RZ3 a: Die Faktoren einer Multiplikation haben zusammen gleich oft 3, 4 oder 5 Wertziffern — die ganze Spanne bis zur
- * Grenze, vom kleinen Beispiel (12 · 0,3) bis zum grossen (308 · 52). Je Summe die Aufteilungen gleich oft. Bis
- * LERN_Session19 stand fast jede Aufgabe an der Grenze: ganzzahlig immer dreistellig · zweistellig, in 73 % mit 6
- * Einmaleins-Schritten (847 · 81; 308 · 52 hat 4); jetzt rund ein Achtel.
- */
-const AUFTEILUNG = { 3: [[2, 1], [1, 2]], 4: [[3, 1], [2, 2]], 5: [[3, 2], [4, 1]] };
-const aufteilung = () => LST.waehle(AUFTEILUNG[LST.zufall(3, WERTZIFFERN_MAX)]);
-/** Ganze Zahl mit n Stellen; einstellig 2 bis 9 (mal 1 übt nichts). */
-const ganzeZahl = n => (n === 1 ? LST.zufall(2, 9) : LST.zufall(10 ** (n - 1), 10 ** n - 1));
-/** Dezimalzahl mit n Wertziffern und 1 oder 2 Nachkommastellen (höchstens n), letzte Ziffer nicht 0: 0.3, 4.7, 0.47, 23.56. */
-function dezimalZahl(n) {
-  const k = LST.zufall(1, Math.min(2, n));
-  let m;
-  do m = ganzeZahl(n); while (m % 10 === 0);
-  return rund(m / 10 ** k);
-}
+// RZ3 a: die Faktoren zusammen gleich oft 3, 4 oder 5 Wertziffern (bis LERN_Session19 fast jede Aufgabe an der Grenze:
+// ganzzahlig immer dreistellig · zweistellig, in 73 % mit 6 Einmaleins-Schritten, 847 · 81; jetzt rund ein Achtel).
+// Die Helfer stehen seit LERN_Session23 im Werkzeug (auch für brueche f).
+const { wertziffern, ganzeZahl, dezimalZahl } = LST;
+const aufteilung = () => LST.aufteilung(WERTZIFFERN_MAX);
 
 function stufeG() {
   const typ = LST.waehle(["mal-ganz", "mal-dezimal", "bruch-dezimal", "stammbruch"]);

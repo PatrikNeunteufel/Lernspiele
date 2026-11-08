@@ -1083,3 +1083,17 @@
   Stil der Seite: bei 1024 und 1600 px eine Zeile, bei 768 px zwei Zeilen, bei 375 px wie bisher zwei Knöpfe je
   Reihe, nirgends Überlauf. Tests: Eulenpfad zufalls-skala „Keine Fehler.“, Kern „5709 Fälle, 0 Fehler.“,
   Lernsteig „0 Fehler, 147 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 1 Schritte 1–4 (`brueche`, MA.1.A.3 f, g und MA.1.A.1.h): Nenner nur aus der Liste des Lehrplans (2, 3, 4,
+  5, 6, 8, 10, 20, 50, 100; vorher dazu 12 und 25), auch beim Kürzen der ungekürzte Bruch und beim Erweitern der
+  Zielnenner; die Nenner 20, 50, 100 jetzt bei plus, minus und mal (gemeinsamer Nenner bzw. Produkt der Nenner
+  höchstens 100, Annahme). Umschreiben in alle sechs Richtungen (Bruch, Dezimalzahl, Prozentzahl; Nenner der Liste
+  und 1'000, ohne 3 und 6 nach RZ1 a), vorher nur Dezimal- oder Prozentzahl → Bruch. Neuer Typ `dezimal-plus-minus`
+  in f (bis 5 Wertziffern wie RZ2 a). Die Helfer nach Wertziffern stehen jetzt in `LST` (werkzeug.js), gemeinsam
+  mit `rationale-zahlen` (gleiche Aufgaben vorher und nachher: 2000 von 2000 mit Startwert 11). Neue Prüfungen in
+  `pruefeAufgabe` (Nenner der Liste, gemeinsamer Nenner, Produkt der Nenner, Zahl-Lösungen exakt nachgerechnet,
+  Wertziffern); Gegenproben (10 falsche Aufgaben, eine richtige): wie erwartet. Gemessen über 20 000 Aufgaben je
+  Stufe: keine Fehler, f sechs Typen je 16–17 %, die sechs Richtungen je rund 1/6, g `mal` 50 %. Abdeckung: f
+  Dezimalzahlen abgedeckt, Umschreiben nur noch ohne 3 und 6, f und g nur noch ohne Rechteckmodell als Bild. Befund:
+  `pruefe_uebungen.js` erzeugt nach dem ersten Fehler keine Aufgaben der folgenden Übungen mehr (`if (fehler)
+  return;` zählt über alle Übungen), deren Abdeckung meldet dann Folgefehler. Tests: Kern „5709 Fälle, 0 Fehler.“,
+  Lernsteig „0 Fehler, 146 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
