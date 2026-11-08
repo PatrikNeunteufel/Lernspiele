@@ -68,12 +68,34 @@ in `zehnerpotenzen`, Entscheid ZW1 a). Dazu der Englisch- und der Französisch-T
 - Eulenpfad: nicht gelaufen (kein Eulenpfad-Code geändert, nur Prüfvermerke). Browser: nicht geprüft — die Übungen sind
   für den Gast gesperrt; die neuen Sätze stehen in den Listen zum Durchsehen.
 
+## Nachtrag nach dem Abschluss: Durchsicht der Listen
+Auftrag Patrik („du kannst die listen durchziehen“): die sieben Listen aus LERN_Session21 und 22 (rechtschreibung,
+grammatik, englisch-grammatik, franzoesisch-grammatik, kraefte/maschinen, stromkreis b) von vier unabhängigen Prüfern
+gelesen (je Sprache bzw. Physik ein Agent, nur mit den Dateien, ohne Einschätzung), jeder Befund gegen die Datei
+nachgeprüft. Ein Commit `b636a14`.
+- **Echte Fehler:** „parce que elle“ im französischen Lösungsweg; Regel „verb-klein“ allgemein falsch („Schwimmen ist
+  gesund“); „Wir helfen dir“ führt über die Stammregel („half“) zu „hälfen“.
+- **Zwei richtige Antworten:** englische Reflexiv-Ablenker, die als Objektpronomen auch gehen („The machine turns it
+  off“); Fragen nur über die Satzmelodie („He plays the guitar?“); zwei „sie“-Sätze in der Mehrzahl, die auch als
+  Höflichkeitsform gehen; „gern“ ist steigerbar (lieber).
+- **Gegen KR1 a:** sechs Maschinenbeispiele mit Kurbel oder Winde (Wellräder) durch Ketten- und Zahnradbeispiele
+  ersetzt; Prüfung weist Kurbel, Winde, Keil im Beispiel ab; Lösungsweg begründet je Maschine.
+- **stromkreis b:** alle 37 Antworten im Modell richtig; feste Spannung in der Einleitung, Strommesser hinter der
+  Batterie, „zeigt 0“, eigene Optionen für den Zweigvergleich.
+- **ZF1 a:** englische Zeitformen wie im Lehrmittel Open World (present simple, present/past continuous, past simple);
+  Prüfung nur mit diesen Namen. Beleg: ein Arbeitsblatt zu Open World, die Verlagsseite gab 404.
+- **Bewusst gelassen:** „sehr“ als Partikel, Schere als Hebel, fünf Lämpchen in Serie (mit Satz im Lösungsweg).
+- **Stolperfalle:** „zeigt null“ löste die Prüfung auf Programmwerte im Text aus (`\bnull\b`); die erste
+  Stromkreis-Gegenprobe war davon überdeckt und wurde wiederholt. Bei einer Gegenprobe zuerst den Lauf ohne Fehler
+  ansehen.
+- Tests nach dem Nachtrag: Kern „5671 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 101 Fälle),
+  Gratwanderung „Keine Fehler.“; Gegenproben (Kurbel, Zweigvergleich, „simple past“) gemeldet.
+
 ## Offene Punkte / Plan für die nächste Session
-1. **Push** der fünf Commits und dieses Abschlusses (Pages veröffentlicht; kein Eulenpfad-Code geändert, voller Lauf
-   nur auf Patriks Entscheid).
-2. **Prüfen durch Patrik:** die neuen Sätze in rechtschreibung.js, englisch.js, franzoesisch.js (ab „Erweitert in
-   LERN_Session22“), die Figuren in folgen j, das Zahlwort; dazu die Listen aus LERN_Session21 (grammatik.js,
-   maschinen.js, stromkreis b), Piktogramme, Tab Übungen, Rechner am Rand.
+1. **Push** der sieben Commits bis `b636a14` und dieses Nachtrags (Pages veröffentlicht; kein Eulenpfad-Code geändert,
+   voller Lauf nur auf Patriks Entscheid).
+2. **Freigabe im Prüfstand durch Patrik:** Die sieben Listen sind durchgesehen (Nachtrag), die Vermerke setzt weiter
+   nur der Entwickler-Modus; dazu die Figuren in folgen j, Piktogramme, Tab Übungen, Rechner am Rand.
 3. **Zur Absegnung:** gemeinsamer Kern-Teil für Gruppen und Favoriten (aus LERN_Session21, braucht einen vollen
    Eulenpfad-Lauf).
 4. Übrige Punkte von Plan E, soweit offen (etwa E 7 Kräfte: Stufe a nach Seitentext; E 10 Hinweise), dann laut Plan

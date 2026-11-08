@@ -984,3 +984,5 @@
     nicht genannt, nach demselben Muster gebildet.
   Gegenproben (Kurbel im Beispiel; Zweigvergleich mit „zeigt 0“; Zeitform „simple past“): gemeldet. Tests: Kern „5671 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 101 Fälle), Gratwanderung
   „Keine Fehler.“.
+- Nachtrag zum Abschluss: Report um „Nachtrag nach dem Abschluss: Durchsicht der Listen“ ergänzt, Handover Eulenpfad
+  und Lernsteig nachgeführt. 7 Commits `7b34e24` … `b636a14`, nicht gepusht.

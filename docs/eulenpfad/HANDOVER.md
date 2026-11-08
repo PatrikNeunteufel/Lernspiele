@@ -5,11 +5,12 @@
 - **Kern:** unverändert 1.27.0. **Eulenpfad:** nur Prüfvermerke von Patrik (magnet-labor, taschengeld-planer).
 - **Lernsteig:** Plan E 9 vollständig erledigt — Vorrat von rechtschreibung, englisch- und franzoesisch-grammatik (je
   Stufe ab 48 Sätzen, Challenges als Serie), folgen j mit acht beschriebenen Figuren, Zahlwort „einhunderteine Million“
-  (ZW1 a); Englisch- und Französisch-Teil von Plan E 8; Stand in [docs/lernsteig/HANDOVER.md](../lernsteig/HANDOVER.md).
+  (ZW1 a); Englisch- und Französisch-Teil von Plan E 8; die sieben Listen aus LERN_Session21 und 22 durchgesehen und
+  berichtigt, Zeitformen wie Open World (ZF1 a); Stand in [docs/lernsteig/HANDOVER.md](../lernsteig/HANDOVER.md).
 - **Tests:** Kern „5671 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine
   Fehler.“; Eulenpfad nicht gelaufen (kein Code geändert) — letzter voller Lauf auf dem Stand nach `141cc53`.
-- **Weiter mit:** Push von `7b34e24` … `13199a7` und dem Abschluss; Prüfen durch Patrik (neue Listen aus LERN_Session21
-  und 22), gemeinsamer Kern-Teil für Gruppen und Favoriten zur Absegnung, Hook-Kandidaten aus dem Report; dann übrige
+- **Weiter mit:** Push von `7b34e24` … `b636a14` und dem Nachtrag; Freigabe der durchgesehenen Listen im Prüfstand durch
+  Patrik, gemeinsamer Kern-Teil für Gruppen und Favoriten zur Absegnung, Hook-Kandidaten aus dem Report; dann übrige
   Punkte von Plan E, C4, C6–C8, C10.
 
 **2026-11-07, nach LERN_Session21** ([Report](report/LERN_Session21_2026-11-07.md)):
