@@ -4,7 +4,7 @@
       positiven rationalen Zahlen
    h  Zahlenrätsel mathematisieren; Figurenfolgen numerisch beschreiben (Würfeltürme)
    i  Gesetzmässigkeiten mit Buchstabentermen verallgemeinern (1 + 3 + 5 + 7 = 4 · 4; n(n + 1) als Rechteck)
-   j  (GA) lineare Figurenfolgen als Term (n Dreiecke aus Hölzchen: 2n + 1)
+   j  (GA) lineare Figurenfolgen als Term (n Dreiecke aus Hölzchen: 2n + 1); dazu beschriebene Figuren (FIGUREN)
    Figurenfolgen erscheinen als Wertetabelle (Bilder folgen). Annahme: in Stufe j wird der Term mit der Variablen n
    verlangt (Term-Antwort, vereinfacht). */
 "use strict";
@@ -73,17 +73,34 @@ function stufeI() {
 }
 
 // ---------- j: Term zur Figurenfolge ----------
+// Beschriebene Figuren (Plan E 9, LERN_Session22): je Figur der Bauplan in Worten, a und b daraus abgeleitet. Die
+// Prüfung zählt unabhängig davon nach dem Bauplan (ZAEHLUNG unten).
+const FIGUREN = {
+  dreiecke: { a: 2, b: 1, einheit: "Hölzchen", text: "n Dreiecke aus Hölzchen in einer Reihe, zwei Nachbarn teilen ein Hölzchen" },
+  quadrate: { a: 3, b: 1, einheit: "Hölzchen", text: "n Quadrate aus Hölzchen in einer Reihe, zwei Nachbarn teilen ein Hölzchen" },
+  fuenfecke: { a: 4, b: 1, einheit: "Hölzchen", text: "n Fünfecke aus Hölzchen in einer Reihe, zwei Nachbarn teilen ein Hölzchen" },
+  sechsecke: { a: 5, b: 1, einheit: "Hölzchen", text: "n Sechsecke aus Hölzchen in einer Reihe, zwei Nachbarn teilen ein Hölzchen" },
+  doppelreihe: { a: 5, b: 2, einheit: "Hölzchen", text: "zwei Reihen mit je n Quadraten aus Hölzchen übereinander, ein Rechteck aus 2 mal n Quadraten" },
+  tische: { a: 2, b: 2, einheit: "Stühle", text: "n quadratische Tische in einer Reihe, an jeder freien Tischseite ein Stuhl" },
+  kreuz: { a: 4, b: 1, einheit: "Plättchen", text: "ein Kreuz aus Plättchen, eines in der Mitte und vier Arme mit je n Plättchen" },
+  winkel: { a: 2, b: 1, einheit: "Plättchen", text: "ein Winkel aus Plättchen, eines in der Ecke und zwei Arme mit je n Plättchen" },
+};
 function stufeJ() {
-  const a = z(2, 7), b = z(-2, 6);
+  const figur = LST.zufall(0, 2) === 0 ? LST.waehle(Object.keys(FIGUREN)) : null;
+  const a = figur ? FIGUREN[figur].a : z(2, 7), b = figur ? FIGUREN[figur].b : z(-2, 6);
+  const einheit = figur ? FIGUREN[figur].einheit : "Hölzchen";
   const f = n => a * n + b;
   if (f(1) <= 0) return stufeJ();
   const poly = LST_TERME.plus(LST_TERME.mal(LST_TERME.konst(KERN.bruch.bruch(BigInt(a))), LST_TERME.variable("n")), LST_TERME.konst(KERN.bruch.bruch(BigInt(b))));
   const term = LST_TERME.text(poly);
+  const text = figur ? `Figur n: ${FIGUREN[figur].text} (Tabelle). Term für die Anzahl ${einheit} bei Figur n:`
+    : "Hölzchen je Figur (Tabelle). Term für die Anzahl Hölzchen bei Figur n:";
   return {
-    art: "term", stufe: "j", typ: "term-linear", text: "Hölzchen je Figur (Tabelle). Term für die Anzahl Hölzchen bei Figur n:",
+    art: "term", stufe: "j", typ: "term-linear", text,
     antwortTerm: term, form: "vereinfacht", loesung: term, tasten: ["n", "+", "(", ")"],
-    weg: `Je Figur ${a} Hölzchen mehr, Figur 1 hat ${f(1)}: ${term}`, kennung: `term ${a} ${b}`, daten: { a, b },
-    darstellung: { art: "tabelle", kopf: ["Figur", "Hölzchen"], zeilen: [1, 2, 3, 4].map(n => [n, f(n)]) },
+    weg: `Je Figur ${a} ${einheit} mehr, Figur 1 hat ${f(1)}: ${term}`, kennung: figur ? `term ${figur}` : `term ${a} ${b}`,
+    daten: figur ? { a, b, figur } : { a, b },
+    darstellung: { art: "tabelle", kopf: ["Figur", einheit], zeilen: [1, 2, 3, 4].map(n => [n, f(n)]) },
   };
 }
 
@@ -208,6 +225,18 @@ function textMaengel(a, nachrechnen) {
   return m;
 }
 
+/** Anzahl Teile von Figur n, gezählt nach dem Bauplan in FIGUREN (Prüfung von Stufe j). */
+const ZAEHLUNG = {
+  dreiecke: n => 3 * n - (n - 1),          // je Dreieck 3, je Nachbarpaar 1 geteilt
+  quadrate: n => 4 * n - (n - 1),
+  fuenfecke: n => 5 * n - (n - 1),
+  sechsecke: n => 6 * n - (n - 1),
+  doppelreihe: n => 3 * n + 2 * (n + 1),   // 3 waagrechte Reihen mit je n, n + 1 senkrechte Spalten mit je 2
+  tische: n => 4 * n - 2 * (n - 1),        // je Tisch 4 Seiten, je Nachbarpaar 2 Seiten aneinander
+  kreuz: n => 1 + 4 * n,
+  winkel: n => 1 + 2 * n,
+};
+
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
@@ -219,6 +248,13 @@ function pruefeAufgabe(a, stufe, niveau) {
       if (!(p.size <= 1 && B.gleich(p.get("") || B.bruch(0n), Z(w)))) m.push(`Term ${a.antwortTerm} trifft Figur ${n} nicht`);
     }
     if (!LST_TERME.bewerte(a.antwortTerm, a).ok) m.push("Lösungsterm nicht vereinfacht");
+    if (d.figur) {
+      // Nach dem Bauplan gezählt, nicht aus a und b: Teile je Figur mal n, minus geteilte Hölzchen oder Tischseiten
+      const zaehle = ZAEHLUNG[d.figur];
+      if (!zaehle) m.push(`unbekannte Figur ${d.figur}`);
+      else for (const [n, w] of a.darstellung.zeilen) if (zaehle(n) !== w) m.push(`${d.figur}: Figur ${n} hat nach dem Bauplan ${zaehle(n)}, Tabelle ${w}`);
+      if (!a.text.includes(FIGUREN[d.figur].text) || !a.text.endsWith(`Anzahl ${a.darstellung.kopf[1]} bei Figur n:`)) m.push(`Text passt nicht zur Figur ${d.figur}: ${a.text}`);
+    }
     return m.concat(textMaengel(a, false));
   }
   const soll = sollAus(a.typ, d);

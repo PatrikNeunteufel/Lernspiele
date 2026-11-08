@@ -935,3 +935,10 @@
   englisch-grammatik. Liste bleibt ungeprüft. Gegenprobe (Variante mit anderem Nomen, mit anderer Verneinung; fehlendes
   geschütztes Leerzeichen): gemeldet. Plan E 8, E 9 (für alle 21 Stufen erledigt). Tests: Kern „5671 Fälle, 0 Fehler.“,
   Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine Fehler.“.
+- Lernsteig — `folgen` j mit beschriebenen Figuren (Plan E 9): Neben „Hölzchen je Figur“ mit reiner Tabelle kommt in
+  einem Drittel der Aufgaben der Bauplan in Worten: Dreiecke, Quadrate, Fünfecke, Sechsecke aus Hölzchen in einer Reihe,
+  eine Doppelreihe Quadrate, Tische mit Stühlen, Kreuz und Winkel aus Plättchen (2n + 1 bis 5n + 2), Tabellenkopf mit
+  der passenden Einheit; 53 → 61 verschiedene Aufgaben. Die Prüfung zählt jede Figur unabhängig von a und b nach dem
+  Bauplan nach (`ZAEHLUNG`) und verlangt den Bauplan im Text. Gegenprobe (Tische mit 3n + 1): gemeldet. Plan E 9.
+  Tests: Kern „5671 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 0 Hinweise.“ (Konten 101 Fälle), Gratwanderung „Keine
+  Fehler.“.

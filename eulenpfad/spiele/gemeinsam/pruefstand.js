@@ -83,6 +83,22 @@ const PRUEFSTAND = {
       "am": "2026-11-06",
       "von": "Patrik"
     },
+    "magnet-labor/dinge": {
+      "am": "2026-11-08",
+      "von": "Patrik"
+    },
+    "magnet-labor/kompass-pole": {
+      "am": "2026-11-08",
+      "von": "Patrik"
+    },
+    "magnet-labor/strom": {
+      "am": "2026-11-08",
+      "von": "Patrik"
+    },
+    "magnet-labor/wirkung": {
+      "am": "2026-11-08",
+      "von": "Patrik"
+    },
     "platzhalter-geschichten/geschichten": {
       "am": "2026-11-04",
       "von": "Patrik"
@@ -149,6 +165,10 @@ const PRUEFSTAND = {
     },
     "tageslauf-sonne/taetigkeiten": {
       "am": "2026-11-05",
+      "von": "Patrik"
+    },
+    "taschengeld-planer/waren": {
+      "am": "2026-11-08",
       "von": "Patrik"
     },
     "zeit-schaetzer/taetigkeiten": {
@@ -271,6 +291,10 @@ const PRUEFSTAND = {
     },
     "komma-messband": {
       "am": "2026-11-05",
+      "von": "Patrik"
+    },
+    "korrektur-stift": {
+      "am": "2026-11-08",
       "von": "Patrik"
     },
     "kulturen-koffer": {
