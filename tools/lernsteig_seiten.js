@@ -449,6 +449,15 @@ async function pruefeSeiten(uebungen, melde, LST) {
               const vb = (s.lauf(`(document.querySelector(".aufgabe svg.graph") || { getAttribute: () => "" }).getAttribute("viewBox")`) || "").split(" ").map(Number);
               if (vb.length !== 4 || !(vb[3] <= vb[2])) melde(ort, `Grafik höher als breit (viewBox ${vb.join(" ")})`);
             }
+            // Rechteckmodell (E1-6 a): so viele Felder gezeichnet, wie die Modelle der Aufgabe haben, und gefärbt wie verlangt
+            if (a.darstellung && a.darstellung.art === "rechteck") {
+              const modelle = a.darstellung.teile.filter(t => typeof t !== "string");
+              const felder = s.lauf(`document.querySelectorAll(".aufgabe .rechteckmodell rect.rm-feld").length`);
+              const soll = modelle.reduce((n, t) => n + t.spalten * t.zeilen, 0);
+              if (felder !== soll) melde(ort, `Rechteckmodell mit ${felder} Feldern statt ${soll} (${a.text})`);
+              const gefaerbt = s.lauf(`document.querySelectorAll(".aufgabe .rechteckmodell rect.rm-f1, .aufgabe .rechteckmodell rect.rm-f2, .aufgabe .rechteckmodell rect.rm-f12").length`);
+              if (!gefaerbt) melde(ort, `Rechteckmodell ohne gefärbte Felder (${a.text})`);
+            }
             if (i === 0) await antworte(s, a, false);
             await antworte(s, a, true);
             // RA8 a: auf Anhieb nur „Richtig.“; nach einem Fehlversuch der Weg (falls die Aufgabe einen hat)

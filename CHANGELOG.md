@@ -1125,3 +1125,14 @@
   Offen bleibt: Variablen im Nenner. Gegenproben (11): wie erwartet; je 20 000 Aufgaben von rationale-zahlen h und
   brueche i ohne Fehler. Abdeckung nachgeführt (rationale-zahlen i verweist auf brueche). Tests: Kern „5752 Fälle,
   0 Fehler.“, Lernsteig „0 Fehler, 143 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 1 Schritt 8 (E1-6 a), Rechteckmodell: neue Darstellung `rechteck` im Rahmen (`lernsteig/gemeinsam/rahmen.js`,
+  SVG; Raster mit gefärbten Spalten, Zeilen oder Feldern, Überlappung in einer dritten Farbe; Stil in `stil.css`,
+  Vertrag in docs/lernsteig/rahmen.md 4). In `brueche` zeigt jede Bruch-Aufgabe in f und g ihr Modell: kürzen und
+  erweitern als n Spalten zu f Feldern, plus und minus beide Brüche im Raster des gemeinsamen Nenners (wenn möglich
+  Spalten und Zeilen), mal als Überlappungsmodell, ganz mal so viele Modelle wie die ganze Zahl. `pruefeAufgabe` rechnet
+  die gefärbten Anteile gegen die Lösung nach, der Seitentest zählt die gezeichneten und gefärbten Felder. Gegenproben:
+  ein Feld zu viel, Modell fehlt (je Typ) — gemeldet; Rahmen zeichnet ein Feld weniger — Seitentest meldet 42 Stellen.
+  Je 20 000 Aufgaben ohne Fehler; im Browser angesehen (Desktop und 375 px: erweitern, plus, mal, ganz mal, kein
+  Überlauf). Abdeckung MA.1.A.3: offen nur noch Nenner 3 und 6 (RZ1 a) und Variablen im Nenner. Plan E 1 Stand
+  ersetzt. Tests: Kern „5752 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 140 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“),
+  Gratwanderung „Keine Fehler.“.

@@ -93,6 +93,10 @@ Leerzeichen, Punkt und Komma sind erlaubt.
   „= Gleichung“ anbietet (5a0).
 - Katalogfeld `sprache` („en“, „fr“): Aufgabentext und Antworten tragen dieses `lang`, damit Vorlesefunktionen und
   Silbentrennung die Fremdsprache erkennen; die Seite bleibt `de-CH`.
+- Optional `darstellung` als Rechteckmodell (E1-6 a): `{ art: "rechteck", teile, klein }` — `teile` sind Modelle
+  `{ spalten, zeilen, faerben: [{ art: "spalten" | "zeilen" | "felder", anzahl, farbe: 1 | 2 }] }` und Zeichen („+“,
+  „−“) dazwischen; gefärbt werden die ersten Spalten, Zeilen oder Felder (spaltenweise von links oben), ein Feld in
+  beiden Farben bekommt die dritte (Überlappung beim Multiplizieren). Der Seitentest zählt die gezeichneten Felder.
 - Optional `darstellung`: `{ art: "tabelle", kopf, zeilen }` (Wertetabelle) oder `{ art: "graph", m, b, x: [min, max],
   y: [min, max] }` (Gerade im Gitter); der Rahmen zeichnet sie unter den Aufgabentext. Zusätze zum Graphen:
   `schrittY`, `beschrY`, `hoehe` (eigener Massstab der y-Achse), `xName`, `yName` (Achsennamen), `punkte: [{ x, y, name }]`

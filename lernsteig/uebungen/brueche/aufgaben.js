@@ -12,10 +12,11 @@
    MA.1.A.1.h  Brüche (Nenner der Liste und 1'000), Dezimalzahlen und Prozentzahlen je in die beiden anderen
                Schreibweisen übertragen — alle sechs Richtungen; 3 und 6 erst mit periodischen Dezimalzahlen (RZ1 a)
    Antwort: ein vollständig gekürzter Bruch oder eine ganze Zahl (art: "term", form: "bruch"), beim Erweitern der Zähler,
-   bei Dezimal- und Prozentzahlen eine Zahl (art: "zahl"). Annahmen, mit Patrik abzustimmen: Brüche als „3/4“
+   bei Dezimal- und Prozentzahlen eine Zahl (art: "zahl"). Jede Bruch-Aufgabe in f und g zeigt ihr Rechteckmodell
+   (darstellung "rechteck", E1-6 a, Plan E 1 Schritt 8). Annahmen, mit Patrik abzustimmen: Brüche als „3/4“
    geschrieben, unechte Brüche erlaubt (keine gemischten Zahlen); „Dezimalzahlen bis 5 Wertziffern“ wie RZ2 a (beide
    Zahlen zusammen); beim Addieren und Subtrahieren der gemeinsame Nenner höchstens 100, beim Multiplizieren das
-   Produkt der Nenner höchstens 100 (am Rechteckmodell darstellbar). Das Rechteckmodell als Bild folgt (E 1 Schritt 8). */
+   Produkt der Nenner höchstens 100 (am Rechteckmodell darstellbar). */
 "use strict";
 
 const UEBUNG = {
@@ -43,6 +44,31 @@ const kgv = (a, b) => a / ggt(a, b) * b;
 const ERWEITERBAR = NENNER.flatMap(n => NENNER.filter(m => m > n && m % n === 0).map(m => [n, m / n]));
 /** Echter Bruch mit Nenner n, schon gekürzt (Zähler teilerfremd zu n). */
 function teilerfremd(n) { let zz; do zz = z(1, n - 1); while (ggt(zz, n) !== 1); return B.bruch(BigInt(zz), BigInt(n)); }
+/**
+ * Rechteckmodell (E1-6 a): Raster mit höchstens 100 Feldern. Ein Bruch z/n mit n·f Feldern (n, f bis 10) als n Spalten
+ * zu f Feldern, z Spalten gefärbt — so steht das Kürzen und Erweitern im Bild; sonst ein fast quadratisches Raster mit
+ * den ersten Feldern gefärbt (spaltenweise).
+ */
+const raster = K => { let r = Math.floor(Math.sqrt(K)); while (K % r) r--; return [K / r, r]; }; // [spalten, zeilen]
+const felderModell = (K, anzahl, farbe) => { const [spalten, zeilen] = raster(K); return { spalten, zeilen, faerben: [{ art: "felder", anzahl, farbe }] }; };
+const bandModell = (n, f, zz, farbe) => (n <= 10 && f <= 10
+  ? { spalten: n, zeilen: f, faerben: [{ art: "spalten", anzahl: zz, farbe }] } : felderModell(n * f, zz * f, farbe));
+/** plus, minus: beide Brüche im Raster des gemeinsamen Nenners — wenn möglich der erste als Spalten, der zweite als Zeilen. */
+function summenModell(a, b, op) {
+  const n1 = Number(a.n), n2 = Number(b.n), K = kgv(n1, n2);
+  const [m1, m2] = n1 * n2 === K && n1 <= 10 && n2 <= 10
+    ? [{ spalten: n1, zeilen: n2, faerben: [{ art: "spalten", anzahl: Number(a.z), farbe: 1 }] },
+       { spalten: n1, zeilen: n2, faerben: [{ art: "zeilen", anzahl: Number(b.z), farbe: 2 }] }]
+    : [felderModell(K, Number(a.z) * K / n1, 1), felderModell(K, Number(b.z) * K / n2, 2)];
+  return { art: "rechteck", teile: [m1, op, m2] };
+}
+/** mal: Überlappungsmodell — Spalten für den ersten Bruch, Zeilen für den zweiten, das Produkt in beiden Farben. */
+const malModell = (a, b) => ({ art: "rechteck", teile: [{ spalten: Number(a.n), zeilen: Number(b.n),
+  faerben: [{ art: "spalten", anzahl: Number(a.z), farbe: 1 }, { art: "zeilen", anzahl: Number(b.z), farbe: 2 }] }] });
+/** ganze Zahl mal Bruch: so viele Modelle des Bruchs, wie die ganze Zahl sagt, mit „+“ dazwischen (klein). */
+const ganzMalModell = (g, b) => ({ art: "rechteck", klein: true,
+  teile: Array.from({ length: g }, () => felderModell(Number(b.n), Number(b.z), 1)).flatMap((m, i) => (i ? ["+", m] : [m])) });
+
 const rund9 = x => Number(x.toFixed(9)); // über den Text: x · 1e9 verliert ab Millionen Stellen (4337840.860000001)
 const dez = x => LST.dezimalText(rund9(x));
 // Zahlen mit Apostroph ab vier Stellen (Z1 a); terme.js liest den Apostroph beim Einlesen wieder heraus
@@ -114,12 +140,13 @@ function stufeF() {
   if (typ === "kuerzen") {
     const [n, f] = LST.waehle(ERWEITERBAR), b = teilerfremd(n);
     const t = `${b.z * BigInt(f)}/${b.n * BigInt(f)}`;
-    return fertig("f", typ, `Kürze vollständig: ${t}`, b, `${t} = ${b.z * BigInt(f)} : ${f} / ${b.n * BigInt(f)} : ${f}`, { aufgabeTerm: t });
+    return fertig("f", typ, `Kürze vollständig: ${t}`, b, `${t} = ${b.z * BigInt(f)} : ${f} / ${b.n * BigInt(f)} : ${f}`,
+      { aufgabeTerm: t, darstellung: { art: "rechteck", teile: [bandModell(n, f, Number(b.z), 1)] } });
   }
   if (typ === "erweitern") {
     const [n, f] = LST.waehle(ERWEITERBAR), b = teilerfremd(n), ziel = n * f, zz = Number(b.z) * f;
-    return zahlAufgabe("f", typ, `${bt(b)} = □/${ziel}. Zähler =`, zz, `mit ${f} erweitern: ${b.z} · ${f} = ${zz}`, `${bt(b)} ${ziel}`,
-      { z: Number(b.z), n, ziel });
+    return Object.assign(zahlAufgabe("f", typ, `${bt(b)} = □/${ziel}. Zähler =`, zz, `mit ${f} erweitern: ${b.z} · ${f} = ${zz}`, `${bt(b)} ${ziel}`,
+      { z: Number(b.z), n, ziel }), { darstellung: { art: "rechteck", teile: [bandModell(n, f, Number(b.z), 1)] } });
   }
   // neu ziehen innerhalb des Typs, damit jeder Typ gleich oft vorkommt (ein neuer Typ bevorzugte die anderen)
   // (bei minus nie zweimal derselbe Bruch: 1/2 − 1/2 hat nichts zu rechnen)
@@ -130,7 +157,8 @@ function stufeF() {
   } while (typ === "minus" && B.minus(a, b).z === 0n);
   if (typ === "minus" && B.minus(a, b).z < 0n) [a, b] = [b, a]; // f: positive Ergebnisse
   const w = typ === "plus" ? B.plus(a, b) : B.minus(a, b);
-  return fertig("f", typ, `${bt(a)} ${typ === "plus" ? "+" : M} ${bt(b)} =`, w, `gleichnamig machen`, { aufgabeTerm: `${bt(a)} ${typ === "plus" ? "+" : "-"} ${bt(b)}` });
+  return fertig("f", typ, `${bt(a)} ${typ === "plus" ? "+" : M} ${bt(b)} =`, w, `gleichnamig machen`,
+    { aufgabeTerm: `${bt(a)} ${typ === "plus" ? "+" : "-"} ${bt(b)}`, darstellung: summenModell(a, b, typ === "plus" ? "+" : M) });
 }
 
 // ---------- g ----------
@@ -140,11 +168,12 @@ function stufeG() {
     let n1, n2;
     do { n1 = LST.waehle(NENNER); n2 = LST.waehle(NENNER); } while (n1 * n2 > NENNER_MAX);
     const a = teilerfremd(n1), b = teilerfremd(n2);
-    return fertig("g", typ, `${bt(a)}${MAL}${bt(b)} =`, B.mal(a, b), `Zähler mal Zähler, Nenner mal Nenner`, { aufgabeTerm: `${bt(a)} * ${bt(b)}` });
+    return fertig("g", typ, `${bt(a)}${MAL}${bt(b)} =`, B.mal(a, b), `Zähler mal Zähler, Nenner mal Nenner`,
+      { aufgabeTerm: `${bt(a)} * ${bt(b)}`, darstellung: malModell(a, b) });
   }
   if (typ === "ganz-mal") {
     const g = z(2, 12), b = teilerfremd(LST.waehle(NENNER));
-    return fertig("g", typ, `${g}${MAL}${bt(b)} =`, B.mal(B.bruch(BigInt(g)), b), `${g} · ${b.z} = ${zt(g * Number(b.z))}, Nenner ${zt(b.n)}`, { aufgabeTerm: `${g} * ${bt(b)}` });
+    return fertig("g", typ, `${g}${MAL}${bt(b)} =`, B.mal(B.bruch(BigInt(g)), b), `${g} · ${b.z} = ${zt(g * Number(b.z))}, Nenner ${zt(b.n)}`, { aufgabeTerm: `${g} * ${bt(b)}`, darstellung: ganzMalModell(g, b) });
   }
   const g = z(1, 12), n = z(2, 10);
   return fertig("g", typ, `${g} : 1/${n} =`, B.bruch(BigInt(g * n)), `1/${n} passt ${n}-mal in 1, also ${g} · ${n}`, { aufgabeTerm: `${g} * ${n}` });
@@ -243,11 +272,39 @@ function hinweis(a, eingabe) {
   return h[a.typ] || "Schritt für Schritt.";
 }
 
+/** Rechteckmodell gegen die Aufgabe: gefärbte Anteile ergeben die Brüche und die Lösung (E1-6 a). */
+const MIT_MODELL = ["kuerzen", "erweitern", "plus", "minus", "mal", "ganz-mal"];
+function anteil(m, farbe) {
+  let n = 0;
+  for (let sp = 0; sp < m.spalten; sp++) for (let ze = 0; ze < m.zeilen; ze++) {
+    const k = sp * m.zeilen + ze, an = f => (f.art === "spalten" ? sp < f.anzahl : f.art === "zeilen" ? ze < f.anzahl : k < f.anzahl);
+    const fs = new Set(m.faerben.filter(an).map(f => f.farbe));
+    if (farbe === 12 ? fs.size === 2 : fs.has(farbe)) n++;
+  }
+  return B.bruch(BigInt(n), BigInt(m.spalten * m.zeilen));
+}
+function pruefeModell(a) {
+  const m = [], dar = a.darstellung;
+  if (!MIT_MODELL.includes(a.typ)) return dar ? [`Rechteckmodell bei ${a.typ}`] : [];
+  if (!dar || dar.art !== "rechteck") return [`Rechteckmodell fehlt: ${a.text}`];
+  const modelle = dar.teile.filter(t => typeof t !== "string");
+  for (const t of modelle) if (t.spalten * t.zeilen > NENNER_MAX || t.spalten < 1 || t.zeilen < 1) m.push(`Raster ${t.spalten} × ${t.zeilen}`);
+  const soll = a.art === "zahl" ? B.bruch(BigInt(a.daten.z), BigInt(a.daten.n)) : LST_TERME.lies(a.antwortTerm).poly.get("") || B.bruch(0n);
+  const ist = a.typ === "mal" ? anteil(modelle[0], 12)
+    : a.typ === "minus" ? B.minus(anteil(modelle[0], 1), anteil(modelle[1], 2))
+    : a.typ === "plus" ? B.plus(anteil(modelle[0], 1), anteil(modelle[1], 2))
+    : modelle.reduce((s, t) => B.plus(s, anteil(t, 1)), B.bruch(0n));
+  if (!B.gleich(ist, soll)) m.push(`Rechteckmodell zeigt ${B.text(ist)}, Lösung ${B.text(soll)}: ${a.text}`);
+  if ((a.typ === "plus" || a.typ === "minus") && modelle[0].spalten * modelle[0].zeilen !== modelle[1].spalten * modelle[1].zeilen) m.push(`Modelle nicht im selben Raster: ${a.text}`);
+  return m;
+}
+
 function pruefeAufgabe(a, stufe, niveau) {
   const m = [];
   if (a.stufe !== stufe) m.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
   const T = LST_TERME;
   const d = a.daten || {};
+  m.push(...pruefeModell(a));
   // Nenner nach dem Wortlaut (MA.1.A.3 f, g; beim Umschreiben MA.1.A.1.h)
   if (a.typ === "umschreiben") {
     if (!NENNER_UMSCHREIBEN.includes(d.n)) m.push(`Nenner ${d.n} nicht in der Liste (MA.1.A.1.h): ${a.text}`);

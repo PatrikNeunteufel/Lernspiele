@@ -601,8 +601,10 @@
   /**
    * a.darstellung = { art: "tabelle", kopf: ["x", "y"], zeilen: [[0, 1], …] } (Werte als Zahlen, null = leer „?“)
    *               | { art: "graph", m, b, x: [min, max], y: [min, max], schritt?: 1 } — Gerade y = m·x + b im Gitter.
+   *               | { art: "rechteck", teile: [modell | "+" | …], klein?: true } — Rechteckmodell (E1-6 a), siehe rechteck.
    */
   function darstellung(d) {
+    if (d.art === "rechteck") return rechteck(d);
     if (d.art === "tabelle") {
       const zelle = (w, kopf) => el(kopf ? "th" : "td", { text: w === null ? "?" : (typeof w === "number" ? LST.dezimalText(w) : w) });
       return el("table", { class: "werte-tabelle" },
@@ -610,6 +612,36 @@
     }
     if (d.art === "graph") return graph(d);
     return null;
+  }
+
+  /**
+   * Rechteckmodell für Brüche (E1-6 a, Plan E 1 Schritt 8): je Modell ein Raster { spalten, zeilen, faerben: [{ art:
+   * "spalten" | "zeilen" | "felder", anzahl, farbe: 1 | 2 }] }. Gefärbt werden die ersten Spalten von links, die ersten
+   * Zeilen von oben oder die ersten Felder spaltenweise von links oben; ein Feld in beiden Farben (Überlappung beim
+   * Multiplizieren) bekommt die dritte. Zwischen den Modellen stehen Zeichen („+“, „−“). klein: kleinere Modelle (viele).
+   */
+  const RECHTECK = { breite: 240, hoehe: 160, klein: 0.4 };
+  function farbeVon(m, sp, ze) {
+    const k = sp * m.zeilen + ze;
+    const an = f => f.art === "spalten" ? sp < f.anzahl : f.art === "zeilen" ? ze < f.anzahl : k < f.anzahl;
+    const farben = new Set((m.faerben || []).filter(an).map(f => f.farbe));
+    return farben.size === 2 ? "rm-f12" : farben.has(1) ? "rm-f1" : farben.has(2) ? "rm-f2" : "";
+  }
+  function rechteck(d) {
+    const NS = "http://www.w3.org/2000/svg";
+    const s = (tag, attr) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); return e; };
+    const f = d.klein ? RECHTECK.klein : 1, B = RECHTECK.breite, H = RECHTECK.hoehe;
+    const box = el("div", { class: "rechteckmodell", role: "img", "aria-label": "Rechteckmodell" });
+    for (const t of d.teile) {
+      if (typeof t === "string") { box.append(el("span", { class: "rm-zeichen", text: t })); continue; }
+      const svg = s("svg", { viewBox: `-2 -2 ${B + 4} ${H + 4}`, class: "rm", style: `width: ${Math.round(B * f)}px` });
+      const w = B / t.spalten, h = H / t.zeilen;
+      for (let sp = 0; sp < t.spalten; sp++) for (let ze = 0; ze < t.zeilen; ze++)
+        svg.append(s("rect", { x: sp * w, y: ze * h, width: w, height: h, class: `rm-feld ${farbeVon(t, sp, ze)}`.trim() }));
+      svg.append(s("rect", { x: 0, y: 0, width: B, height: H, class: "rm-rahmen" }));
+      box.append(svg);
+    }
+    return box;
   }
 
   /**

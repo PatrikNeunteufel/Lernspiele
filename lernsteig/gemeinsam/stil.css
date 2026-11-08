@@ -94,6 +94,13 @@ button, input { font: inherit; color: inherit; }
 .werte-tabelle th { background: var(--flaeche); }
 /* höchstens halb so hoch wie das Fenster, damit die ganze Aufgabe im Bild bleibt; das Seitenverhältnis bleibt (viewBox) */
 .aufgabe .graph { display: block; width: 100%; max-width: 340px; max-height: 50vh; margin: 12px auto 0; }
+/* Rechteckmodell für Brüche (E1-6 a): erste Farbe grün, zweite gelb, beide zusammen dunkelgrün */
+.aufgabe .rechteckmodell { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 10px; margin: 12px auto 0; }
+.rechteckmodell .rm { display: block; max-width: 70vw; height: auto; }
+.rm-feld { fill: var(--karte); stroke: #9aa5b1; stroke-width: 1; }
+.rm-feld.rm-f1 { fill: #9fd5c4; } .rm-feld.rm-f2 { fill: #f7d68a; } .rm-feld.rm-f12 { fill: #3f8a73; }
+.rm-rahmen { fill: none; stroke: var(--text); stroke-width: 2.5; }
+.rm-zeichen { font-size: 26px; font-weight: 700; }
 .graph .gitter { stroke: var(--rand); stroke-width: 1; }
 .graph .achse { stroke: var(--text); stroke-width: 1.5; }
 .graph .gerade { stroke: var(--akzent); stroke-width: 3; }

@@ -12,7 +12,7 @@ Erfasst: 27 von 27 Übungen, 80 von 80 Stufen.
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
 | Dezimalzahlen bis 5 Wertziffern multiplizieren und die Ergebnisse überprüfen (im Kopf oder mit Notieren eigener Rechenwege, z.B. 308 · 52; 12 · 0,3) — *Das Beispiel 308 · 52 ist ein Ganzzahl-Produkt und deckt mal-ganz (E1-1 a); ueberpruefen: welches von vier Ergebnissen stimmt (Komma verrutscht, falsche letzte Ziffer)* | `mal-dezimal` 21 %, `mal-ganz` 20 %, `ueberpruefen` 20 % | — |
-| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren | in `brueche` | das Rechteckmodell als Bild (auch in brueche) |
+| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren | in `brueche` | — |
 | Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000 als Dezimalzahlen schreiben | `bruch-dezimal` 19 % | die Nenner 3 und 6 (periodische Dezimalzahlen, nach RZ1 a zurückgestellt) |
 | bestimmen, wie oft Stammbrüche in ganzen Zahlen enthalten sind (z.B. Wie viele Male ist ⅕ in 2 enthalten? → 2 : ⅕) | `stammbruch` 19 % | — |
 
@@ -506,7 +506,7 @@ Die Stufe besteht nur aus der Erweiterung.
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
 | Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (im Kopf oder mit Notieren eigener Rechenwege, z.B. 30.8 + 5.6) — *„bis 5 Wertziffern“ wie RZ2 a: beide Zahlen zusammen, wie 30.8 + 5.6* | `dezimal-plus-minus` 14 % | — |
-| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell kürzen, erweitern, addieren und subtrahieren — *Nenner nur aus der Liste, auch der ungekürzte beim Kürzen und der Zielnenner beim Erweitern; bei plus und minus der gemeinsame Nenner höchstens 100 (Annahme)* | `kuerzen` 14 %, `erweitern` 14 %, `plus` 14 %, `minus` 17 % | das Rechteckmodell als Bild |
+| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell kürzen, erweitern, addieren und subtrahieren — *jede Aufgabe mit ihrem Rechteckmodell (E1-6 a); Nenner nur aus der Liste, auch der ungekürzte beim Kürzen und der Zielnenner beim Erweitern; bei plus und minus der gemeinsame Nenner höchstens 100 (Annahme)* | `kuerzen` 14 %, `erweitern` 14 %, `plus` 14 %, `minus` 17 % | — |
 | Grundoperationen mit dem Rechner ausführen — *die einzige Aufgabe der Stufe mit Rechner (rechner an der Aufgabe, E1-4 a); mal und geteilt auf zwei Nachkommastellen gerundet* | `rechner` 13 % | — |
 | (MA.1.A.1.h) Brüche (Nenner 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000), Dezimalzahlen und Prozentzahlen je in die beiden anderen Schreibweisen übertragen — *alle sechs Richtungen gleich oft; Bruch → Dezimalzahl übt auch rationale-zahlen in MA.1.A.3.g (bruch-dezimal)* | `umschreiben` 14 % | die Nenner 3 und 6 (periodische Dezimalzahlen, RZ1 a) |
 
@@ -515,7 +515,7 @@ Die Stufe besteht nur aus der Erweiterung.
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
 | Dezimalzahlen bis 5 Wertziffern multiplizieren und die Ergebnisse überprüfen (im Kopf oder mit Notieren eigener Rechenwege, z.B. 308 · 52; 12 · 0,3) | in `rationale-zahlen` | — |
-| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren — *Nenner nur aus der Liste; bei mal das Produkt der Nenner höchstens 100 (Annahme)* | `mal` 49 %, `ganz-mal` 28 % | das Rechteckmodell als Bild |
+| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell multiplizieren — *jede Aufgabe mit ihrem Rechteckmodell (mal: Überlappung, ganz mal: so viele Modelle wie die ganze Zahl; E1-6 a); Nenner nur aus der Liste; bei mal das Produkt der Nenner höchstens 100 (Annahme)* | `mal` 49 %, `ganz-mal` 28 % | — |
 | Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000 als Dezimalzahlen schreiben | in `rationale-zahlen` | — |
 | bestimmen, wie oft Stammbrüche in ganzen Zahlen enthalten sind (z.B. Wie viele Male ist ⅕ in 2 enthalten? → 2 : ⅕) | `stammbruch` 23 % | — |
 
