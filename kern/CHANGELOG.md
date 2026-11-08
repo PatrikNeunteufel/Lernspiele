@@ -3,6 +3,14 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.29.0 — 2026-11-08 (LERN_Session23)
+- `terme.js`: neue Form `primfaktoren` für `bewerte` — gleichwertig und nur Primzahlen als Faktoren, mit oder ohne
+  Exponent („2³ · 3² · 5“, „2^3*3*3*5“); sonst Formfehler „Zerlege, bis nur noch Primzahlen dastehen“. Für die
+  Erweiterung „natürliche Zahlen in Primfaktoren zerlegen“ (MA.1.A.3.h, Plan E 1 Schritt 7). Alte Formen unverändert.
+- `terme.js`: „/“ nach einem Faktor teilt durch eine Zahl wie „:“ („2a/3“, „11a/12“, „(2a)/3“); „5/8“ bleibt eine Zahl,
+  „a/b“ bleibt unlesbar. Vorher war jeder Term mit „/“ ausser einer Zahl „z/n“ unlesbar. Neue Form `bruchterm` (wie
+  `vereinfacht`, dazu jeder Bruch gekürzt: „3a/4“, „11/12a“) für Brüche mit Variablen (MA.1.A.3.i, Erweiterung).
+
 ## 1.28.0 — 2026-11-08 (LERN_Session23)
 - `uebersicht.js` (`KERN.uebersicht`, neu, Entscheid KT1 a): Bausteine einer Übersicht mit Kacheln aus dem Tab Spiele
   des Eulenpfads und dem Tab Übungen des Lernsteigs — `gruppen` (aufklappbar, Zuklappen über `merke`, nur bei einer

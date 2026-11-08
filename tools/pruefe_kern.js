@@ -283,6 +283,24 @@ console.log("terme.js");
     ["0.12 34", "0.1234", "unlesbar"], ["1'0000", "10000", "unlesbar"]]) gleich(bw(e, ziel), soll, `ZL1 a: bewerte(${JSON.stringify(e)})`);
   gleich(/Dreiergruppen/.test(T.bewerte("12'34", { antwortTerm: "1234" }).meldung), true, "ZL1 a: Meldung nennt die Dreiergruppen");
   wirft(() => T.bewerte("x", { antwortTerm: "x+" }), "unlesbarer antwortTerm ist ein Fehler der Aufgabe");
+  // 1.29.0: Form primfaktoren — nur Primzahlen als Faktoren, mit oder ohne Exponent (MA.1.A.3.h, Plan E 1 Schritt 7)
+  for (const [e, soll] of [["2³ · 3² · 5", "ok"], ["2^3*3^2*5", "ok"], ["5 · 3 · 3 · 2 · 2 · 2", "ok"], ["2·2·2·9·5", "form"],
+    ["360", "form"], ["8 · 45", "form"], ["2³ · 45", "form"], ["1 · 2³ · 3² · 5", "form"], ["2³ · 3² · 5 · 1", "form"],
+    ["2⁰ · 2³ · 3² · 5", "form"], ["(2 · 3)² · 10", "form"], ["2³ + 352", "form"], ["2³ · 3² · 7", "falsch"], ["2³ · 3²", "falsch"]])
+    gleich(bw(e, "360", "primfaktoren"), soll, `primfaktoren: bewerte(${JSON.stringify(e)})`);
+  gleich(bw("13", "13", "primfaktoren"), "ok", "primfaktoren: eine Primzahl allein");
+  gleich(/Primzahlen/.test(T.bewerte("8 · 45", { antwortTerm: "360", form: "primfaktoren" }).meldung), true, "primfaktoren: Meldung nennt Primzahlen");
+  // 1.29.0: „/“ nach einem Faktor teilt durch eine Zahl; Form bruchterm (MA.1.A.3.i, Brüche mit Variablen)
+  for (const [t, soll] of [["2a/3 + a/4", "11/12a"], ["11a/12", "11/12a"], ["(2a)/3", "2/3a"], ["2a/3 · 4/5", "8/15a"],
+    ["2a/3 : 4/5", "5/6a"], ["5x/6 - x/4", "7/12x"], ["1/2a", "1/2a"], ["5/8", "5/8"], ["a²/4", "1/4a²"], ["(a + b)/2", "1/2a + 1/2b"]])
+    gleich(T.text(T.lies(t).poly), soll, `lies „/“: ${t}`);
+  wirft(() => T.lies("a/b"), "„a/b“ bleibt unlesbar (nur durch Zahlen teilen)");
+  wirft(() => T.lies("2a/"), "„2a/“ ohne Nenner unlesbar");
+  for (const [e, soll] of [["11a/12", "ok"], ["11/12a", "ok"], ["11/12 · a", "form"], ["22a/24", "form"], ["22/24a", "form"],
+    ["2a/3 + a/4", "form"], ["(11a)/12", "form"], ["11a/12/1", "form"], ["a/12 · 11", "form"], ["11a/13", "falsch"], ["a/b", "unlesbar"]])
+    gleich(bw(e, "11/12a", "bruchterm"), soll, `bruchterm: bewerte(${JSON.stringify(e)})`);
+  for (const [e, soll] of [["3a/4 + 1/2", "ok"], ["6a/8 + 1/2", "form"], ["3a/4 + 2/4", "form"], ["a + 1", "ok"]])
+    gleich(bw(e, e === "a + 1" ? "a + 1" : "3/4a + 1/2", "bruchterm"), soll, `bruchterm: bewerte(${JSON.stringify(e)})`);
 
   // Nachrechnung: zufällige Terme als Polynom gelesen und an zufälligen Stellen mit JavaScript-Zahlen ausgewertet
   const zuf = (() => { let s = 5; return () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; }; })();

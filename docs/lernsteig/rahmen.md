@@ -71,8 +71,8 @@ Leerzeichen, Punkt und Komma sind erlaubt.
 - `aufgabeErzeugen(stufe, niveau)` mit `stufe` = Lehrplan-Buchstabe oder `"challenge"` (Übergänge mischt der Rahmen)
   → `{ art: "zahl", stufe, typ, text, antwort, loesung, weg, kennung, daten }`. `stufe` nennt die Lehrplan-Stufe der
   Aufgabe (fürs Protokoll und den Kompetenzstand), `kennung` erkennt Wiederholungen, `weg` ist der Lösungsweg.
-- **Term-Antworten:** `art: "term"` mit `antwortTerm` (etwa „3a + 4b + 5/8“), `form` (`vereinfacht`, `potenz`,
-  `ausgeklammert`, `frei`) und `tasten` (Zeichen, die das Tastenfeld der Antwort dazu zeigt, etwa `["a", "²", "(", ")"]`;
+- **Term-Antworten:** `art: "term"` mit `antwortTerm` (etwa „3a + 4b + 5/8“), `form` (`vereinfacht`, `bruch`,
+  `potenz`, `ausgeklammert`, `primfaktoren`, `bruchterm`, `frei`; die beiden letzten seit kern 1.29.0) und `tasten` (Zeichen, die das Tastenfeld der Antwort dazu zeigt, etwa `["a", "²", "(", ")"]`;
   Ziffern und + − · hat es immer). Der Rahmen prüft mit `LST_TERME.bewerte`: gleichwertig und in
   der Form → richtig; gleichwertig, aber Form falsch → Hinweis ohne Fehlversuch; nicht gleichwertig → Fehlversuch.
   `KERN.terme` (docs/kern/rahmen.md 4.17, über `gemeinsam/terme.js`) liest Variablen a–z, Zahlen, Brüche „5/8“,

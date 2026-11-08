@@ -1,6 +1,6 @@
 # Kern der Reihe — Vertrag Kern ↔ Apps
 
-Stand: kern 1.28.0, 2026-11-08 (LERN_Session23). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
+Stand: kern 1.29.0, 2026-11-08 (LERN_Session23). Entscheide KB1 a, KB2 a; Plan [plan_angleich_reihe.md](../plan_angleich_reihe.md)
 Abschnitt B. Gegenstücke: [Eulenpfad](../eulenpfad/rahmen.md), [Lernsteig](../lernsteig/rahmen.md).
 
 Der Kern enthält, was Eulenpfad, Lernsteig und Gratwanderung **gleich** brauchen. Er kennt keine App: Alles, was je
@@ -10,7 +10,7 @@ App anders ist (Schreibweise, Speicher-Präfix, Rollen-Namen), gibt die App als 
 
 ```
 kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
-kern/VERSION          Version des Kerns (1.28.0)
+kern/VERSION          Version des Kerns (1.29.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
 tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
@@ -430,7 +430,7 @@ als Polynom gelesen (Map „Monom → Bruch“ über `KERN.bruch`, Monom als Sch
 | Aufruf | Ergebnis |
 |---|---|
 | `lies(text)` | `{ poly, info, roh }` oder wirft mit Klartext. Liest Variablen a–z, Zahlen „1'234.5“ und „1234,5“ (Gliederung nur in Dreiergruppen wie `KERN.zahl.lies`, sonst unlesbar mit dem Hinweis auf die Dreiergruppen; ZL1 a, 1.25.0), Brüche „5/8“, `+ − - · * : ( )`, implizites Mal („3a“, „2(x + 1)“), Potenzen „^12“ und hochgestellt — eine Folge hochgestellter Ziffern ist **ein** Exponent („x²³“ = x^23). Grenzen (D10): Exponent höchstens `GRENZE_EXPONENT` (100), höchstens 2000 Glieder je Zwischenergebnis |
-| `bewerte(eingabe, { antwortTerm, form })` | `{ ok, gleichwertig, lesbar, meldung }`; `form`: `vereinfacht`, `bruch`, `potenz`, `ausgeklammert`, `frei`. Eine unlesbare Eingabe wirft nie (D3: „(3)(2x+3)“ bei `ausgeklammert` ist ein Formfehler), ein unlesbarer `antwortTerm` schon (Fehler der Aufgabe) |
+| `bewerte(eingabe, { antwortTerm, form })` | `{ ok, gleichwertig, lesbar, meldung }`; `form`: `vereinfacht`, `bruch`, `potenz`, `ausgeklammert`, `primfaktoren` (seit 1.29.0: nur Primzahlen als Faktoren, mit oder ohne Exponent), `bruchterm` (seit 1.29.0: wie `vereinfacht`, jeder Bruch gekürzt), `frei`. Seit 1.29.0 teilt „/“ nach einem Faktor durch eine Zahl („2a/3“); „a/b“ bleibt unlesbar. Eine unlesbare Eingabe wirft nie (D3: „(3)(2x+3)“ bei `ausgeklammert` ist ein Formfehler), ein unlesbarer `antwortTerm` schon (Fehler der Aufgabe) |
 | `text(poly, sw)` | Text in der Ordnung des Lehrmittels (TO1 a): höchster Grad zuerst, bei gleichem Grad je Variable im Alphabet der höhere Exponent zuerst, Konstante zuletzt („a² + 2ab + b²“, „a²b + ab²“); Zahlen in der Schreibweise `sw` der App wie `KERN.zahl.text`, Brüche „z/n“; `lies(text(p))` ergibt wieder `p` |
 | `gleich`, `plus`, `mal`, `neg`, `hoch`, `konst`, `variable`, `glieder` | Rechnen mit Polynomen für Aufgabengeneratoren |
 

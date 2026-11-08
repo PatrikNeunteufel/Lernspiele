@@ -1115,3 +1115,13 @@
   Rechenreste beim Runden grosser Ergebnisse). Plan: E1-4 a, E1-5 a eingetragen, „nur auf Niveau Sek“ aus E1-3 a
   ersetzt. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 144 Hinweise.“ (Konten „101 Fälle,
   0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 1 Schritt 7 (E1-3 a, E1-5 a), Erweiterungen von MA.1.A.3 h und i in ihrer Stufe für alle Niveaus: Kern
+  1.29.0 (`kern/terme.js`): neue Formen `primfaktoren` (nur Primzahlen als Faktoren, mit oder ohne Exponent) und
+  `bruchterm` (wie `vereinfacht`, jeder Bruch gekürzt); „/“ nach einem Faktor teilt durch eine Zahl („2a/3“, „11a/12“),
+  „a/b“ bleibt unlesbar; 43 neue Kern-Fälle, verteilt an alle Apps (Eulenpfad und Gratwanderung benutzen den
+  Term-Leser nicht). `rationale-zahlen` h: Typ `primfaktoren` (Zahlen 12 bis 1'000 aus Primzahlen bis 13, ein
+  Viertel der Stufe), `ohneE` nur noch i. `brueche` i: ein Viertel der Aufgaben die Erweiterung — `variablen-bruch`
+  (Variable im Zähler, alle vier Operationen) und `belegen` (die Formeln formel6a–6d mit Zahlen), `ohneE` entfällt.
+  Offen bleibt: Variablen im Nenner. Gegenproben (11): wie erwartet; je 20 000 Aufgaben von rationale-zahlen h und
+  brueche i ohne Fehler. Abdeckung nachgeführt (rationale-zahlen i verweist auf brueche). Tests: Kern „5752 Fälle,
+  0 Fehler.“, Lernsteig „0 Fehler, 143 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

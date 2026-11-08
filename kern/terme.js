@@ -66,7 +66,7 @@
   function lies(text) {
     const s = ohneGliederung(String(text)).replace(/\s+/g, "").replace(/[−–]/g, "-").replace(/\*/g, "·").replace(/,/g, ".");
     let i = 0;
-    const info = { klammern: 0, potenzen: 0, mal: 0 };
+    const info = { klammern: 0, potenzen: 0, mal: 0, teilen: 0 };
     if (!s) throw new Error("leer");
     function ausdruck() {
       let w = (s[i] === "-") ? (i++, neg(glied())) : (s[i] === "+" ? (i++, glied()) : glied());
@@ -77,6 +77,9 @@
       let w = potenz();
       for (;;) {
         if (s[i] === "·" || s[i] === ":") { const op = s[i++]; info.mal++; const f = potenz(); w = op === ":" ? durch(w, f) : mal(w, f); continue; }
+        // „/“ nach einem Faktor teilt durch eine Zahl wie „:“ (1.29.0): „2a/3“, „11a/12“, „(2a)/3“; „5/8“ bleibt eine Zahl
+        // (einfach), „a/b“ bleibt unlesbar (nur durch Zahlen teilen)
+        if (s[i] === "/") { i++; info.teilen++; w = durch(w, potenz()); continue; }
         if (s[i] && (/[a-z(]/.test(s[i]))) { w = mal(w, potenz()); continue; } // implizites Mal
         return w;
       }
@@ -119,11 +122,22 @@
 
   const ggtGanz = (x, y) => (y ? ggtGanz(y, x % y) : (x < 0n ? -x : x));
   const formFehler = meldung => ({ ok: false, gleichwertig: true, lesbar: true, meldung });
+  const istPrim = n => { if (n < 2) return false; for (let t = 2; t * t <= n; t++) if (n % t === 0) return false; return true; };
+  const HOCHZIFFER = { "⁰": 0, "¹": 1, "²": 2, "³": 3, "⁴": 4, "⁵": 5, "⁶": 6, "⁷": 7, "⁸": 8, "⁹": 9 };
+  /** Primfaktor mit Exponent ab 1: „2“, „2^3“, „2³“ (1.29.0). */
+  function primFaktor(t) {
+    const m = t.match(/^(\d+)(?:\^(\d+)|([⁰¹²³⁴⁵⁶⁷⁸⁹]+))?$/);
+    if (!m || !istPrim(Number(m[1]))) return false;
+    const exp = m[2] !== undefined ? Number(m[2]) : m[3] !== undefined ? Number([...m[3]].map(c => HOCHZIFFER[c]).join("")) : 1;
+    return exp >= 1;
+  }
 
   /**
    * Bewertet eine Eingabe gegen eine Aufgabe { antwortTerm, form }.
    * form: "vereinfacht" (keine Klammern, jedes Monom einmal, Zahlen ausgerechnet), "bruch" (ganze Zahl oder gekürzter
-   *       Bruch), "potenz" (als eine Potenz geschrieben), "ausgeklammert" (Zahl mal Klammer, ggT ausgeklammert), "frei".
+   *       Bruch), "potenz" (als eine Potenz geschrieben), "ausgeklammert" (Zahl mal Klammer, ggT ausgeklammert),
+   *       "primfaktoren" (nur Primzahlen als Faktoren, mit oder ohne Exponent: 2³ · 3² · 5, seit 1.29.0), "bruchterm"
+   *       (wie vereinfacht, dazu jeder Bruch gekürzt: 3a/4, 11/12a, seit 1.29.0), "frei".
    * Liefert { ok, gleichwertig, lesbar, meldung }. Eine unlesbare Eingabe wirft nie (D3); ein unlesbarer antwortTerm
    * ist ein Fehler der Aufgabe und wirft.
    */
@@ -154,6 +168,19 @@
     }
     if (form === "potenz" && !(e.info.potenzen === 1 && e.info.mal === 0 && glieder(e.roh) === 1)) {
       return formFehler("Der Wert stimmt. Schreibe als eine Potenz, zum Beispiel 5^3.");
+    }
+    if (form === "bruchterm") {
+      if (e.info.klammern > 0) return formFehler("Der Wert stimmt. Löse noch die Klammern auf.");
+      if (glieder(e.roh) > ziel.size) return formFehler("Der Wert stimmt. Fasse gleichartige Glieder noch zusammen.");
+      if (/[·:]/.test(e.roh)) return formFehler("Der Wert stimmt. Rechne die Zahlen noch aus.");
+      // jeder Bruch gekürzt: Zähler (Zahl vor den Variablen, sonst 1) und Nenner teilerfremd, Nenner nicht 1
+      for (const m of e.roh.matchAll(/(\d*)([a-z²-³¹⁴-⁹^\d]*?)\/(\d+)/g)) {
+        const z = BigInt(m[1] || "1"), n = BigInt(m[3]);
+        if (n === 1n || ggtGanz(z, n) !== 1n) return formFehler("Der Wert stimmt. Kürze den Bruch noch vollständig.");
+      }
+    }
+    if (form === "primfaktoren" && !e.roh.split("·").every(primFaktor)) {
+      return formFehler("Der Wert stimmt. Zerlege, bis nur noch Primzahlen dastehen, zum Beispiel 2³ · 3 · 5.");
     }
     if (form === "ausgeklammert") {
       const m = e.roh.match(/^(-?\d*)(?:·)?\((.*)\)$/);

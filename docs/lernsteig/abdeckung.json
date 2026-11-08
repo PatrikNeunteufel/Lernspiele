@@ -15,7 +15,7 @@
         "quelle": "wortlaut",
         "teile": [
           {"text":"Prozentrechnungen mit dem Rechner ausführen","typen":["grundwert","prozentwert","prozentsatz"]},
-          {"text":"Erweiterung: natürliche Zahlen in Primfaktoren zerlegen","offen":true}
+          {"text":"Erweiterung: natürliche Zahlen in Primfaktoren zerlegen","typen":["primfaktoren"],"notiz":"Zahlen 12 bis 1'000 aus Primzahlen bis 13; Antwort nur als Produkt von Primzahlen (Form primfaktoren, kern 1.29.0)"}
         ]
       },
       "i": {
@@ -23,7 +23,7 @@
         "teile": [
           {"text":"die Grundoperationen mit rationalen Zahlen ausführen","typen":["plus-minus","mal-geteilt","dezimal-negativ"]},
           {"text":"Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000)","typen":["potenz-wurzel"]},
-          {"text":"Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png]","offen":true,"notiz":"aufgaben.js nimmt die Erweiterung als Annahme aus, mit Patrik abzustimmen. Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d"}
+          {"text":"Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png]","in":"brueche","notiz":"Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md, formel1 und formel6d am Bild nachgesehen): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d"}
         ]
       }
     },
@@ -51,7 +51,7 @@
         "teile": [
           {"text":"die Grundoperationen mit rationalen Zahlen ausführen","typen":["plus-minus-negativ","mal-negativ","geteilt"]},
           {"text":"Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000)","in":"rationale-zahlen"},
-          {"text":"Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png]","in":"rationale-zahlen","notiz":"Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d"}
+          {"text":"Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png]","typen":["variablen-bruch","belegen"],"fehlt":"Variablen im Nenner (a/b + c/d mit Variablen: der Term-Leser teilt nur durch Zahlen)","notiz":"variablen-bruch: Variable im Zähler (2a/3 + a/4, 2a/3 : 4/5), Antwort gekürzt (Form bruchterm, kern 1.29.0); belegen: die vier Formeln mit Zahlen. Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md, formel1 und formel6d am Bild nachgesehen): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d"}
         ]
       }
     },

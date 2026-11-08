@@ -20,16 +20,16 @@ Erfasst: 27 von 27 Übungen, 80 von 80 Stufen.
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| Prozentrechnungen mit dem Rechner ausführen | `grundwert` 31 %, `prozentwert` 34 %, `prozentsatz` 35 % | — |
-| Erweiterung: natürliche Zahlen in Primfaktoren zerlegen | **offen** | alles |
+| Prozentrechnungen mit dem Rechner ausführen | `grundwert` 27 %, `prozentwert` 24 %, `prozentsatz` 25 % | — |
+| Erweiterung: natürliche Zahlen in Primfaktoren zerlegen — *Zahlen 12 bis 1'000 aus Primzahlen bis 13; Antwort nur als Produkt von Primzahlen (Form primfaktoren, kern 1.29.0)* | `primfaktoren` 24 % | — |
 
 ### MA.1.A.3.i — am Wortlaut nachgelesen
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| die Grundoperationen mit rationalen Zahlen ausführen | `plus-minus` 25 %, `mal-geteilt` 26 %, `dezimal-negativ` 24 % | — |
+| die Grundoperationen mit rationalen Zahlen ausführen | `plus-minus` 25 %, `mal-geteilt` 26 %, `dezimal-negativ` 25 % | — |
 | Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000) | `potenz-wurzel` 25 % | — |
-| Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png] — *aufgaben.js nimmt die Erweiterung als Annahme aus, mit Patrik abzustimmen. Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d* | **offen** | alles |
+| Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png] — *Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md, formel1 und formel6d am Bild nachgesehen): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d* | in `brueche` | — |
 
 ## Gleichungen lösen (`gleichungen`, MA.1.A.4)
 
@@ -523,9 +523,9 @@ Die Stufe besteht nur aus der Erweiterung.
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| die Grundoperationen mit rationalen Zahlen ausführen | `plus-minus-negativ` 34 %, `mal-negativ` 32 %, `geteilt` 34 % | — |
+| die Grundoperationen mit rationalen Zahlen ausführen | `plus-minus-negativ` 26 %, `mal-negativ` 25 %, `geteilt` 26 % | — |
 | Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000) | in `rationale-zahlen` | — |
-| Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png] — *Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d* | in `rationale-zahlen` | — |
+| Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png] — *variablen-bruch: Variable im Zähler (2a/3 + a/4, 2a/3 : 4/5), Antwort gekürzt (Form bruchterm, kern 1.29.0); belegen: die vier Formeln mit Zahlen. Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md, formel1 und formel6d am Bild nachgesehen): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d* | `variablen-bruch` 12 %, `belegen` 12 % | Variablen im Nenner (a/b + c/d mit Variablen: der Term-Leser teilt nur durch Zahlen) |
 
 ## Lineare Funktionen (`lineare-funktionen`, MA.3.A.3)
 

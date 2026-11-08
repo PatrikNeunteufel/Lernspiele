@@ -27,7 +27,7 @@ var LST_KATALOG = (function () {
       thema: "Zahl und Variable",
       kompetenz: "MA.1.A.3",
       stufen: ["g", "h", "i"],                // UE1 a
-      ohneE: ["h", "i"],                      // Erweiterungen dieser Stufen nicht in der Übung (wie PA Gymnasium)
+      ohneE: ["i"],                           // Erweiterung von i (Brüche mit Variablen) übt brueche (E1-3 a)
       weitere: ["MA.1.A.4.h"],                // Klammerregeln, Punkt vor Strich
       // Annahme nach dem Lehrplantext: g ohne Rechner (Kopf oder eigener Rechenweg), h „mit dem Rechner“,
       // i Grundoperationen frei, Potenzen und Wurzeln „mit dem Rechner“; Challenge mit Rechner.
@@ -331,7 +331,6 @@ var LST_KATALOG = (function () {
       kompetenz: "MA.1.A.3",
       stufen: ["f", "g", "i"],                // f Grundanspruch Zyklus 2; Gymnasium prüft g, h, i (PA)
       weitere: ["MA.1.A.1.h"],                // Brüche, Dezimal- und Prozentzahlen umschreiben
-      ohneE: ["i"],
       rechner: { f: "ohne", g: "ohne", i: "ohne", challenge: "ohne" }, // Annahme: Bruchrechnen im Kopf (Mathematik I)
       niveaus: ["n1", "n2"],
       anzahl: 8,

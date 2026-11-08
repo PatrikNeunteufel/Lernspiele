@@ -5,9 +5,9 @@
       überprüfen (Auswahl aus vier Ergebnissen, Plan E 1 Schritt 5); Brüche mit den
       Nennern 2, 4, 5, 8, 10, 20, 50, 100, 1000 als Dezimalzahlen (RZ1 a; 3 und 6 des Lehrplans folgen mit periodischen
       Dezimalzahlen); wie oft ein Stammbruch in einer ganzen Zahl steckt (2 : ⅕)
-   h  Prozentrechnungen mit dem Rechner (ohne die Erweiterung Primfaktoren)
+   h  Prozentrechnungen mit dem Rechner; Erweiterung: natürliche Zahlen in Primfaktoren zerlegen (E1-3 a, E1-5 a)
    i  Grundoperationen mit rationalen Zahlen; Wurzeln und Potenzen mit dem Rechner (4³ · 4³; 4³ + 4³; ³√8000)
-      (ohne die Erweiterung Bruchterme mit Variablen); dazu Klammerregeln aus MA.1.A.4.h
+      (die Erweiterung Bruchterme mit Variablen übt brueche i); dazu Klammerregeln aus MA.1.A.4.h
    Annahmen, mit Patrik abzustimmen: negative Zahlen in Termen immer in Klammern; Brüche als „3/8“ geschrieben;
    Brüche im Teil „Stammbruch“ (Rechteckmodell) folgen mit einer Bruch-Eingabe. */
 "use strict";
@@ -17,7 +17,7 @@ const UEBUNG = {
   einleitung: "Rechne genau. Negative Zahlen stehen in Klammern.",
   stufen: {
     g: "Dezimalzahlen multiplizieren und Ergebnisse prüfen, Brüche als Dezimalzahl, Stammbrüche",
-    h: "Prozentwert, Prozentsatz und Grundwert",
+    h: "Prozentwert, Prozentsatz und Grundwert; Zahlen in Primfaktoren zerlegen",
     i: "Mit negativen Zahlen rechnen, Potenzen und Wurzeln",
     challenge: "Mehrere Schritte: Klammern, Vorzeichen, Potenzen, Prozent nacheinander",
   },
@@ -95,8 +95,26 @@ function stufeG() {
 }
 
 // ---------- Stufe h (mit Rechner) ----------
+// Erweiterung MA.1.A.3.h „natürliche Zahlen in Primfaktoren zerlegen“ (E1-3 a, E1-5 a): Zahlen 12 bis 1'000 aus zwei bis
+// vier Primzahlen bis 13 (keine Primzahl), Antwort als Produkt von Primzahlen (Form primfaktoren, kern 1.29.0).
+const PRIM = [2, 3, 5, 7, 11, 13];
+const HOCH_TEXT = n => (n === 1 ? "" : String(n).split("").map(c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c]).join(""));
+function primfaktoren() {
+  let faktoren, n;
+  do {
+    const auswahl = LST.mische(PRIM).slice(0, LST.zufall(2, 4)).sort((x, y) => x - y);
+    faktoren = auswahl.map(p => [p, LST.zufall(1, p === 2 ? 4 : p === 3 ? 3 : 2)]);
+    n = faktoren.reduce((w, [p, e]) => w * p ** e, 1);
+  } while (n < 12 || n > 1000);
+  const loes = faktoren.map(([p, e]) => `${p}${HOCH_TEXT(e)}`);
+  const tasten = [...new Set(loes.join("").replace(/\d/g, ""))];
+  return { art: "term", stufe: "h", typ: "primfaktoren", text: `Zerlege in Primfaktoren: ${dez(n)} =`, antwortTerm: loes.join("·"),
+    form: "primfaktoren", tasten, loesung: loes.join(" · "), weg: `${dez(n)} = ${loes.join(" · ")}`, kennung: `primfaktoren ${n}`, daten: { n, faktoren } };
+}
+
 function stufeH() {
-  const typ = LST.waehle(["prozentwert", "prozentsatz", "grundwert"]);
+  const typ = LST.waehle(["prozentwert", "prozentsatz", "grundwert", "primfaktoren"]);
+  if (typ === "primfaktoren") return primfaktoren();
   if (typ === "prozentwert") {
     const p = LST.zufall(1, 99), G = LST.zufall(20, 2000);
     return fertig("h", typ, `${p} % von ${dez(G)} =`, p * G / 100, `${dez(G)} : 100${MAL}${p} = ${dez(p * G / 100)}`, { p, G });
@@ -188,6 +206,7 @@ function hinweis(a, eingabe) {
   const h = {
     "mal-ganz": "Zerlege einen Faktor, zum Beispiel in Zehner und Einer, und addiere die Teilprodukte.",
     "mal-dezimal": "Rechne zuerst ohne Komma. Das Ergebnis hat so viele Nachkommastellen wie beide Faktoren zusammen.",
+    primfaktoren: "Teile so lange durch die kleinste Primzahl, die aufgeht, bis 1 übrig bleibt.",
     ueberpruefen: "Runde beide Faktoren und überschlage. Dann prüfe die letzte Ziffer: Welche Ziffer ergeben die letzten Ziffern der Faktoren?",
     "bruch-dezimal": "Ein Bruch ist eine Division: Zähler geteilt durch Nenner. Oder erweitere auf 10, 100 oder 1000.",
     "stammbruch": "Wie oft passt der Stammbruch in 1? Dann mal die ganze Zahl.",
@@ -255,6 +274,17 @@ function pruefeAufgabe(a, stufe, niveau) {
   const maengel = [];
   if (!["g", "h", "i", "challenge"].includes(a.stufe)) return [`unbekannte Stufe ${a.stufe}`];
   if (a.stufe !== stufe) maengel.push(`Aufgabe aus Stufe ${a.stufe}, verlangt ${stufe}`);
+  if (a.typ === "primfaktoren") {
+    const { n, faktoren } = a.daten;
+    const istPrim = p => p > 1 && [...Array(Math.floor(Math.sqrt(p)) + 1).keys()].slice(2).every(t => p % t !== 0);
+    if (faktoren.reduce((w, [p, e]) => w * p ** e, 1) !== n) maengel.push(`Faktoren ergeben nicht ${n}`);
+    if (!faktoren.every(([p, e]) => istPrim(p) && e >= 1)) maengel.push(`kein Primfaktor: ${a.loesung}`);
+    if (istPrim(n)) maengel.push(`${n} ist selbst eine Primzahl`);
+    const b = LST_TERME.bewerte(a.antwortTerm, a);
+    if (!b.ok) maengel.push(`Lösung ${a.antwortTerm} besteht die eigene Form nicht`);
+    if (LST_TERME.bewerte(String(n), a).ok) maengel.push(`die Zahl ${n} selbst gilt als Zerlegung`);
+    return maengel;
+  }
   if (a.typ === "ueberpruefen") {
     const { a: x, b: y, werte } = a.daten;
     const soll = malB(vonZahl(x), vonZahl(y));

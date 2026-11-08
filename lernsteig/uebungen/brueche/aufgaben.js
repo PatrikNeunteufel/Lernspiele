@@ -5,7 +5,10 @@
                Grundoperationen mit dem Rechner (Typ rechner, die einzige Aufgabe der Stufe mit Rechner, E1-4 a)
    MA.1.A.3.g  Brüche mit denselben Nennern am Rechteckmodell multiplizieren; wie oft ein Stammbruch in einer ganzen
                Zahl enthalten ist (2 : ⅕)
-   MA.1.A.3.i  (OP) Grundoperationen mit rationalen Zahlen (die Erweiterung mit Variablen folgt, E1-3 a)
+   MA.1.A.3.i  (OP) Grundoperationen mit rationalen Zahlen; Erweiterung: Grundoperationen mit gewöhnlichen Brüchen mit
+               Variablen ausführen (2a/3 + a/4) und mit Zahlen belegen (a/b + c/d mit a = 2, b = 3, …), ein Viertel der
+               Aufgaben der Stufe, für alle Niveaus (E1-3 a, E1-5 a); Variablen nur im Zähler (der Term-Leser teilt nur
+               durch Zahlen, kern 1.29.0)
    MA.1.A.1.h  Brüche (Nenner der Liste und 1'000), Dezimalzahlen und Prozentzahlen je in die beiden anderen
                Schreibweisen übertragen — alle sechs Richtungen; 3 und 6 erst mit periodischen Dezimalzahlen (RZ1 a)
    Antwort: ein vollständig gekürzter Bruch oder eine ganze Zahl (art: "term", form: "bruch"), beim Erweitern der Zähler,
@@ -21,7 +24,7 @@ const UEBUNG = {
   stufen: {
     f: "Kürzen, erweitern, addieren und subtrahieren; Dezimalzahlen addieren; Bruch, Dezimalzahl und Prozent umschreiben",
     g: "Brüche multiplizieren, mit ganzen Zahlen und Stammbrüchen",
-    i: "Alle Grundoperationen, auch dividieren und mit negativen Brüchen",
+    i: "Alle Grundoperationen, auch dividieren und mit negativen Brüchen; Brüche mit Variablen",
     challenge: "Mehrere Rechenschritte mit Klammern",
   },
 };
@@ -152,8 +155,45 @@ function zufallsBruch(neg) {
   const b = echt(LST.waehle([2, 3, 4, 5, 6, 8, 9, 10, 12]));
   return neg && LST.zufall(0, 1) ? B.neg(b) : b;
 }
+/** Bruch mit Variable im Zähler in der Schreibweise des Lehrplans: „2a/3“, „a/4“, „−5x/6“, „3a“. */
+function bv(k, v) {
+  const s = k.z < 0n ? M : "", z = k.z < 0n ? -k.z : k.z;
+  return `${s}${z === 1n ? "" : z}${v}${k.n === 1n ? "" : `/${k.n}`}`;
+}
+const NENNER_I = [2, 3, 4, 5, 6, 8, 10];
+const koeff = () => echt(LST.waehle(NENNER_I));
+/** Erweiterung MA.1.A.3.i: Grundoperationen mit Brüchen mit Variablen (2a/3 + a/4; 2a/3 · 4/5; 2a/3 : 4/5). */
+function variablenBruch() {
+  const v = LST.waehle(["a", "b", "x", "y"]), op = LST.waehle(["+", M, "·", ":"]);
+  const a = koeff(), b = koeff();
+  const w = op === "+" ? B.plus(a, b) : op === M ? B.minus(a, b) : op === "·" ? B.mal(a, b) : B.durch(a, b);
+  if (w.z === 0n) return variablenBruch();
+  const zweiter = op === "+" || op === M ? bv(b, v) : bt(b);
+  const loes = bv(w, v);
+  return { art: "term", stufe: "i", typ: "variablen-bruch", text: `${bv(a, v)} ${op} ${zweiter} =`, antwortTerm: loes.replace(M, "-"),
+    form: "bruchterm", tasten: ["/"], loesung: loes, weg: `${op === ":" ? "mit dem Kehrwert malnehmen" : op === "·" ? "Zähler mal Zähler, Nenner mal Nenner" : "gleichnamig machen"} = ${loes}`,
+    kennung: `${bv(a, v)} ${op} ${zweiter}` };
+}
+/** Erweiterung MA.1.A.3.i: die Formeln des Lehrplans (formel6a–6d) mit Zahlen belegen. */
+const FORMELN = [
+  { text: "a/b + c/d", wert: (a, b, c, d) => B.plus(B.bruch(a, b), B.bruch(c, d)) },
+  { text: "a/b − c/d", wert: (a, b, c, d) => B.minus(B.bruch(a, b), B.bruch(c, d)) },
+  { text: "a/b · c/d", wert: (a, b, c, d) => B.mal(B.bruch(a, b), B.bruch(c, d)) },
+  { text: "a : c/b : d", wert: (a, b, c, d) => B.mal(B.bruch(a, c), B.bruch(b, d)) }, // formel6d: = a/c · b/d
+];
+function belegen() {
+  const f = LST.waehle(FORMELN), [a, b, c, d] = [z(1, 9), z(2, 9), z(1, 9), z(2, 9)].map(BigInt);
+  const w = f.wert(a, b, c, d);
+  const t = `a = ${a}, b = ${b}, c = ${c}, d = ${d}: ${f.text} =`;
+  const eingesetzt = f.text.replace(/[abcd]/g, x => ({ a, b, c, d })[x]);
+  // ausdruck: das Tastenfeld nimmt seine Variablen daraus, nicht aus dem Text mit a, b, c, d
+  return fertig("i", "belegen", t, w, eingesetzt, { ausdruck: eingesetzt, daten: { formel: f.text, a: Number(a), b: Number(b), c: Number(c), d: Number(d) } });
+}
+
 function stufeI() {
-  const typ = LST.waehle(["geteilt", "plus-minus-negativ", "mal-negativ"]);
+  // ein Viertel der Aufgaben die Erweiterung (Brüche mit Variablen, mit Zahlen belegen)
+  const typ = LST.waehle(["geteilt", "plus-minus-negativ", "mal-negativ", "erweiterung"]);
+  if (typ === "erweiterung") return LST.zufall(0, 1) ? variablenBruch() : belegen();
   const a = zufallsBruch(typ !== "geteilt"), b = zufallsBruch(typ !== "geteilt");
   if (typ === "geteilt") return fertig("i", typ, `${bt(a)} : ${bt(b)} =`, B.durch(a, b), `${bt(a)} · ${b.n}/${b.z} (Kehrwert)`, { aufgabeTerm: `${bt(a)} * ${b.n}/${b.z}` });
   if (typ === "mal-negativ") return fertig("i", typ, `${bt(a)}${MAL}${kl(b)} =`, B.mal(a, b), `Vorzeichen, dann Zähler mal Zähler, Nenner mal Nenner`, { aufgabeTerm: `${bt(a).replace(M, "-")} * (${bt(b).replace(M, "-")})` });
@@ -195,6 +235,8 @@ function hinweis(a, eingabe) {
     geteilt: "Durch einen Bruch teilen heisst: mit dem Kehrwert multiplizieren.",
     "plus-minus-negativ": "Gleichnamig machen. Minus eine negative Zahl ist plus ihre Gegenzahl.",
     "mal-negativ": "Zuerst das Vorzeichen: gleiche Vorzeichen geben plus, verschiedene minus.",
+    "variablen-bruch": "Rechne mit den Zahlen vor der Variable wie mit gewöhnlichen Brüchen; die Variable bleibt stehen.",
+    belegen: "Setze die Zahlen für die Buchstaben ein und rechne dann wie mit gewöhnlichen Brüchen.",
     "klammer-mal": "Zuerst die Klammer ausrechnen, dann multiplizieren.",
     "klammer-geteilt": "Zuerst die Klammer, dann mit dem Kehrwert multiplizieren.",
   };
@@ -236,6 +278,16 @@ function pruefeAufgabe(a, stufe, niveau) {
     } else return [...m, `unbekannter Zahl-Typ ${a.typ}`];
     if (ganz(soll) !== ganz(a.antwort)) m.push(`Lösung ${a.antwort}, nachgerechnet ${soll}: ${a.text}`);
     if (LST.leseZahl(a.loesung) !== a.antwort) m.push(`Lösungstext ${a.loesung} passt nicht zu ${a.antwort}`);
+    return m;
+  }
+  if (a.typ === "belegen") {
+    const F = FORMELN.find(f => f.text === d.formel);
+    if (!F) return [...m, `unbekannte Formel ${d.formel}`];
+    const soll = F.wert(...[d.a, d.b, d.c, d.d].map(BigInt));
+    if (!T.gleich(T.lies(a.antwortTerm).poly, T.lies(B.text(soll)).poly)) m.push(`Lösung ${a.antwortTerm}, nachgerechnet ${B.text(soll)}: ${a.text}`);
+    // die Formel steht wörtlich im Text, die eingesetzten Zahlen ebenso
+    if (!a.text.includes(d.formel) || !a.text.startsWith(`a = ${d.a}, b = ${d.b}, c = ${d.c}, d = ${d.d}:`)) m.push(`Text passt nicht zu den Daten: ${a.text}`);
+    if (!T.bewerte(a.antwortTerm, a).ok) m.push(`Lösung nicht gekürzt: ${a.antwortTerm}`);
     return m;
   }
   // Aufgabe unabhängig aus dem angezeigten Text lesen (Zeichen übersetzt) und mit der Lösung vergleichen
