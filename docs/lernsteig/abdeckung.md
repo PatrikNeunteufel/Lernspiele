@@ -505,10 +505,10 @@ Die Stufe besteht nur aus der Erweiterung.
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (im Kopf oder mit Notieren eigener Rechenwege, z.B. 30.8 + 5.6) — *„bis 5 Wertziffern“ wie RZ2 a: beide Zahlen zusammen, wie 30.8 + 5.6* | `dezimal-plus-minus` 16 % | — |
-| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell kürzen, erweitern, addieren und subtrahieren — *Nenner nur aus der Liste, auch der ungekürzte beim Kürzen und der Zielnenner beim Erweitern; bei plus und minus der gemeinsame Nenner höchstens 100 (Annahme)* | `kuerzen` 16 %, `erweitern` 16 %, `plus` 19 %, `minus` 17 % | das Rechteckmodell als Bild |
-| Grundoperationen mit dem Rechner ausführen | **offen** | alles |
-| (MA.1.A.1.h) Brüche (Nenner 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000), Dezimalzahlen und Prozentzahlen je in die beiden anderen Schreibweisen übertragen — *alle sechs Richtungen gleich oft; Bruch → Dezimalzahl übt auch rationale-zahlen in MA.1.A.3.g (bruch-dezimal)* | `umschreiben` 16 % | die Nenner 3 und 6 (periodische Dezimalzahlen, RZ1 a) |
+| Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (im Kopf oder mit Notieren eigener Rechenwege, z.B. 30.8 + 5.6) — *„bis 5 Wertziffern“ wie RZ2 a: beide Zahlen zusammen, wie 30.8 + 5.6* | `dezimal-plus-minus` 14 % | — |
+| Brüche mit den Nennern 2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell kürzen, erweitern, addieren und subtrahieren — *Nenner nur aus der Liste, auch der ungekürzte beim Kürzen und der Zielnenner beim Erweitern; bei plus und minus der gemeinsame Nenner höchstens 100 (Annahme)* | `kuerzen` 14 %, `erweitern` 14 %, `plus` 14 %, `minus` 17 % | das Rechteckmodell als Bild |
+| Grundoperationen mit dem Rechner ausführen — *die einzige Aufgabe der Stufe mit Rechner (rechner an der Aufgabe, E1-4 a); mal und geteilt auf zwei Nachkommastellen gerundet* | `rechner` 13 % | — |
+| (MA.1.A.1.h) Brüche (Nenner 2, 3, 4, 5, 6, 8, 10, 20, 50, 100, 1'000), Dezimalzahlen und Prozentzahlen je in die beiden anderen Schreibweisen übertragen — *alle sechs Richtungen gleich oft; Bruch → Dezimalzahl übt auch rationale-zahlen in MA.1.A.3.g (bruch-dezimal)* | `umschreiben` 14 % | die Nenner 3 und 6 (periodische Dezimalzahlen, RZ1 a) |
 
 ### MA.1.A.3.g — am Wortlaut nachgelesen
 

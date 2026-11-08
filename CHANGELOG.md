@@ -1104,3 +1104,14 @@
   20 000 Aufgaben der Stufe g: keine Fehler, fünf Typen je rund 20 %, die richtige Wahl an jeder Stelle gleich oft.
   Abdeckung: der Teil Multiplizieren und Überprüfen ganz abgedeckt. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig
   „0 Fehler, 145 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 1 Schritt 6 (E1-4 a, E1-5 a): Eine Aufgabe darf `rechner: "mit"` tragen und überstimmt damit die Vorgabe
+  ihrer Stufe (`rechnerFuer` in `lernsteig/gemeinsam/rahmen.js`; die Sperre der Aufsicht gilt weiter; Vertrag in
+  docs/lernsteig/rahmen.md 4 und 5a). `brueche` f hat den Typ `rechner` (MA.1.A.3.f „Grundoperationen mit dem Rechner
+  ausführen“: 1'000.00–9'999.99 mit 10.00–999.99, mal und geteilt exakt auf zwei Nachkommastellen gerundet); das
+  Bruchrechnen der Stufe bleibt ohne Rechner. `pruefe_uebungen.js` prüft das Feld, der Seitentest prüft in Stufen
+  „ohne“ jetzt jede Aufgabe der Runde (vorher nur die erste) auf den Rechner-Knopf. Gegenproben: Aufgabe ohne
+  `rechner`, falsch gerundet, abgeschnitten statt gerundet — gemeldet; Rahmen ohne Überstimmen — Seitentest meldet
+  „kein Rechner-Knopf“. Über 20 000 Aufgaben der Stufe f keine Fehler, sieben Typen je 14–15 % (behoben unterwegs:
+  Rechenreste beim Runden grosser Ergebnisse). Plan: E1-4 a, E1-5 a eingetragen, „nur auf Niveau Sek“ aus E1-3 a
+  ersetzt. Tests: Kern „5709 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 144 Hinweise.“ (Konten „101 Fälle,
+  0 Fehler.“), Gratwanderung „Keine Fehler.“.

@@ -203,14 +203,14 @@ Kindersprache.
    Wortlaut der Stufen, geprüft in der Abdeckungstabelle (`docs/lernsteig/abdeckung.md`). Der Schnitt nach
    Lehrplan-Stufen bleibt; die Zahlarten sind innerhalb der Stufen verteilt (g: Dezimalzahlen in
    `rationale-zahlen`, Brüche in `brueche`). Ganzzahl-Produkte gehören zum Wortlaut (Beispiel 308 · 52) und bleiben.
-   `rationale-zahlen` heisst „Dezimalzahlen und rationale Zahlen“. Die Erweiterungen von h und i werden auf Niveau
-   Sek geübt (A2). Umbau in dieser Reihenfolge: (1) Nenner ausserhalb der Liste aus `brueche` entfernen (12, 25);
+   `rationale-zahlen` heisst „Dezimalzahlen und rationale Zahlen“. Die Erweiterungen von h und i werden in ihrer Stufe
+   geübt, für alle Niveaus (E1-5 a). Umbau in dieser Reihenfolge: (1) Nenner ausserhalb der Liste aus `brueche` entfernen (12, 25);
    (2) Nenner 20, 50, 100 bei plus, minus, mal; (3) Umschreiben in alle sechs Richtungen (MA.1.A.1.h); (4)
    Dezimalzahlen addieren und subtrahieren (`brueche` f); (5) Ergebnisse überprüfen (`rationale-zahlen` g); (6)
    Aufgaben mit dem Rechner (`brueche` f); (7) Erweiterungen: Primfaktoren (`rationale-zahlen` h), Brüche mit
    Variablen (`brueche` i); (8) Rechteckmodell als Bild (`brueche` f, g). Zurückgestellt bleibt: Nenner 3 und 6
    (periodische Dezimalzahlen, RZ1 a). Gleicher Massstab für alle Übungen: die Abdeckungstabelle.
-   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise. Erledigt (RZ1–RZ3 a, LERN_Session19): Dezimal-Multiplikation in den Grenzen des Lehrplans, Bruch → Dezimalzahl (ohne die Nenner 3 und 6), Stammbruch in einer ganzen Zahl. Name umgestellt, Schritte (1) bis (5) erledigt (LERN_Session23); offen (6) bis (8). Abdeckungstabelle nach AT1 a gebaut (Daten `docs/lernsteig/abdeckung.json`, Prüfung in `pruefe_uebungen.js`, Übersicht `docs/lernsteig/abdeckung.md`), erfasst sind alle 27 Übungen, alle 80 Stufen am Wortlaut (geprüft gegen die gesicherten Seiten, `tools/lehrplan_wortlaut.js`): 215 Inhaltsteile — 61 abgedeckt, 64 teilweise, 81 offen, 9 in einer anderen Übung.
+   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise. Erledigt (RZ1–RZ3 a, LERN_Session19): Dezimal-Multiplikation in den Grenzen des Lehrplans, Bruch → Dezimalzahl (ohne die Nenner 3 und 6), Stammbruch in einer ganzen Zahl. Name umgestellt, Schritte (1) bis (6) erledigt (LERN_Session23); offen (7) und (8). Abdeckungstabelle nach AT1 a gebaut (Daten `docs/lernsteig/abdeckung.json`, Prüfung in `pruefe_uebungen.js`, Übersicht `docs/lernsteig/abdeckung.md`), erfasst sind alle 27 Übungen, alle 80 Stufen am Wortlaut (geprüft gegen die gesicherten Seiten, `tools/lehrplan_wortlaut.js`): 215 Inhaltsteile — 61 abgedeckt, 64 teilweise, 81 offen, 9 in einer anderen Übung.
 2. **Brutto/Netto** (`daten-rabatt`): Bruttopreis − Rabatt = Nettopreis als Hauptfall; Lesart mit Lehrmittel (mathbuch)
    abgleichen.
    *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen. Stufe l zieht `rabatt`, `rabatt-betrag`, `brutto`, `netto` gleich oft; Brutto und Netto hängen am Zuschlag („Brutto ist Netto plus Zuschlag“), das Ergebnis nach Rabatt heisst „Neuer Preis“; kein Abgleich mit dem mathbuch dokumentiert.
@@ -537,4 +537,14 @@ Entschieden 2026-11-05 (Patrik, LERN_Session15), alle nach Empfehlung:
 - **E1-3 a** (2026-11-08, LERN_Session23, E 1): Die Erweiterungen von MA.1.A.3 h (Primfaktoren, in
   `rationale-zahlen`) und i (Brüche mit Variablen, in `brueche`) werden geübt, nur auf Niveau Sek (A2); `ohneE`
   entfällt bei beiden. Nicht b (ausgenommen „wie PA Gymnasium“: der Umfang einer Prüfung, nicht des Lehrplans).
-  Kipppunkt: der Lernsteig soll ausdrücklich auf die Gymnasium-Prüfung zugeschnitten sein.
+  Kipppunkt: der Lernsteig soll ausdrücklich auf die Gymnasium-Prüfung zugeschnitten sein. „Nur auf Niveau Sek“
+  ersetzt durch E1-5 a.
+- **E1-4 a** (2026-11-08, LERN_Session23, E 1 Schritt 6): Eine Aufgabe darf `rechner: "mit"` tragen; das überstimmt
+  die Vorgabe ihrer Stufe (die Sperre der Aufsicht gilt weiter). `brueche` f bekommt einen Typ `rechner`
+  (Grundoperationen mit Zahlen, die man nicht im Kopf rechnet); Bruchrechnen bleibt ohne Rechner. Nicht b (Stufe f
+  „frei“: hebt „Bruchrechnen im Kopf“ auf), nicht c (bewusst nicht). Kipppunkt: das Lehrmittel übt in f keine
+  Rechner-Aufgaben.
+- **E1-5 a** (2026-11-08, LERN_Session23, E 1 Schritt 7): Die Erweiterungen von MA.1.A.3 h und i gehören zu ihrer
+  Stufe wie in den anderen Übungen, für alle Niveaus (ST1 a: die Aufgaben einer Stufe hängen nicht am Niveau); die
+  Stufenwahl zeigt „mit Erweiterung“. „Nur auf Niveau Sek“ aus E1-3 a entfällt. Nicht b (Aufgaben am Niveau, ST1 a
+  ändern). Kipppunkt: A2 soll für alle Übungen gelten — dann b als eigener Umbau.

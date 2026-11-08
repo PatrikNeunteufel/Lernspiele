@@ -80,6 +80,8 @@ Leerzeichen, Punkt und Komma sind erlaubt.
 - **Auswahl-Antworten:** `art: "auswahl"` mit `optionen` (Texte) und `richtig` (Index); der Rahmen zeigt Knöpfe mit
   Kurztasten 1 … n, eine falsche Wahl wird gesperrt (Fehlversuch), `kennung` soll die Antworten enthalten.
 - Optional `vor` („x =“) und `einheit` („m²“): Text vor und nach dem Eingabefeld.
+- Optional `rechner` ("mit" oder "frei"): überstimmt für diese Aufgabe die Vorgabe der Stufe aus dem Katalog
+  (E1-4 a, etwa Rechner-Aufgaben in einer Stufe „ohne“); die Sperre der Aufsicht gilt weiter (5a).
 - **Tastenfeld der Antwort** (TF1 a, `KERN.tastenfeld`, docs/kern/rahmen.md 4.24): unter jeder Zahl- und Term-Antwort;
   Zahl mit Ziffern, Komma (Zeichen der Einstellung), ⌫, ± und „Prüfen“, Term mit Ziffern, den Variablen des Terms der
   Aufgabe (`ausdruck`, sonst `text`) und „/“ und „²“, wenn er sie hat, dazu `tasten` und + − ·, ⌫ und „Prüfen“
@@ -157,6 +159,8 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
 - Je Lehrplan-Stufe und Challenge nennt der Katalog `rechner`: `ohne`, `mit`, `frei`. Die Aufsicht überstimmt mit
   `einstellungen.rechner`: `uebung` (Standard), `ohne` (überall gesperrt), `erlaubt` (auch bei `ohne`). Die Oberfläche
   dafür kommt mit der Anmeldung der Aufsicht.
+- Eine Aufgabe mit `rechner` überstimmt die Vorgabe ihrer Stufe (E1-4 a); die Stufenwahl zeigt weiter die Vorgabe
+  der Stufe, die Zeile über der Aufgabe den Rechner dieser Aufgabe.
 - Bei `mit` und `frei` gibt es den Knopf „Rechner“; das Feld bleibt über die Runde offen, `Ans` merkt sich das letzte
   Ergebnis. Bei `ohne` ist es weg (in einem Übergang je Aufgabe).
 - **Platz** (Hinweis Patrik, LERN_Session21): Der Rechner steht wie der Notizblock am Bildrand (`.rechner-fenster`,

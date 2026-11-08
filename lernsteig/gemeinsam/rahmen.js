@@ -239,10 +239,11 @@
   /**
    * Rechner einer Lehrplan-Stufe (TR1 a): Vorgabe der Übung, überstimmt von der Einstellung der Aufsicht
    * `einstellungen.rechner`: "uebung" (Standard), "ohne" (Rechner überall gesperrt), "erlaubt" (überall erlaubt).
+   * Eine Aufgabe mit `rechner` ("mit") überstimmt die Vorgabe ihrer Stufe (E1-4 a), nicht aber die Sperre der Aufsicht.
    */
-  function rechnerFuer(eintrag, lp) {
+  function rechnerFuer(eintrag, lp, aufgabe) {
     if (!eintrag.rechner) return null; // Übung ohne Rechner-Angabe (etwa Deutsch): kein Rechner, kein Hinweis
-    const vorgabe = eintrag.rechner[lp] || "frei";
+    const vorgabe = (aufgabe && aufgabe.rechner) || eintrag.rechner[lp] || "frei";
     const aufsicht = LST.lies("einstellungen", {}).rechner || "uebung";
     if (aufsicht === "ohne") return "ohne";
     if (aufsicht === "erlaubt" && vorgabe === "ohne") return "frei";
@@ -438,7 +439,7 @@
         aktuell = a;
         let gelost = false;
         L.gestellt({ text: a.text, loesung: a.loesung });
-        const rechner = rechnerFuer(eintrag, a.stufe);
+        const rechner = rechnerFuer(eintrag, a.stufe, a);
         rechnerBenutzt = false;
         if (!rechner || rechner === "ohne") fenster.schliessen();
         fortschritt.textContent = (endlos ? `Serie: ${L.geschafft} richtig` : `Aufgabe ${nr} von ${anzahl}`) + (rechner ? ` · ${RECHNER_TEXT[rechner]}` : "");

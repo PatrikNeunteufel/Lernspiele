@@ -1,7 +1,8 @@
 /* Übung „Brüche rechnen“ — MA.1.A.3, Stufen f, g, i; dazu MA.1.A.1.h (umschreiben). Aufgaben als Daten, ohne DOM.
    Inhalte am Wortlaut (docs/lernsteig/abdeckung.md, Plan E 1):
    MA.1.A.3.f  (GA Z2) Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (30.8 + 5.6); Brüche mit den Nennern
-               2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell kürzen, erweitern, addieren und subtrahieren
+               2, 3, 4, 5, 6, 8, 10, 20, 50, 100 am Rechteckmodell kürzen, erweitern, addieren und subtrahieren;
+               Grundoperationen mit dem Rechner (Typ rechner, die einzige Aufgabe der Stufe mit Rechner, E1-4 a)
    MA.1.A.3.g  Brüche mit denselben Nennern am Rechteckmodell multiplizieren; wie oft ein Stammbruch in einer ganzen
                Zahl enthalten ist (2 : ⅕)
    MA.1.A.3.i  (OP) Grundoperationen mit rationalen Zahlen (die Erweiterung mit Variablen folgt, E1-3 a)
@@ -39,7 +40,7 @@ const kgv = (a, b) => a / ggt(a, b) * b;
 const ERWEITERBAR = NENNER.flatMap(n => NENNER.filter(m => m > n && m % n === 0).map(m => [n, m / n]));
 /** Echter Bruch mit Nenner n, schon gekürzt (Zähler teilerfremd zu n). */
 function teilerfremd(n) { let zz; do zz = z(1, n - 1); while (ggt(zz, n) !== 1); return B.bruch(BigInt(zz), BigInt(n)); }
-const rund9 = x => Math.round(x * 1e9) / 1e9;
+const rund9 = x => Number(x.toFixed(9)); // über den Text: x · 1e9 verliert ab Millionen Stellen (4337840.860000001)
 const dez = x => LST.dezimalText(rund9(x));
 // Zahlen mit Apostroph ab vier Stellen (Z1 a); terme.js liest den Apostroph beim Einlesen wieder heraus
 const zt = x => LST.zahlText(Number(x));
@@ -73,6 +74,23 @@ function umschreiben() {
   return zahlAufgabe("f", "umschreiben", `Schreibe in Prozent: ${zeige} = □ %`, wert * 100, `${zeige} = ${dez(wert * 100)} %`, `${zeige} prozent`, daten);
 }
 
+/**
+ * MA.1.A.3.f „Grundoperationen mit dem Rechner ausführen“ (E1-4 a): Zahlen, die man nicht im Kopf rechnet (1'000.00 bis
+ * 9'999.99 und 10.00 bis 999.99); mal und geteilt auf zwei Nachkommastellen gerundet. Die Aufgabe trägt rechner: "mit",
+ * die übrige Stufe bleibt ohne Rechner. Gerundet wird exakt (Bruch), halbe Hundertstel auf.
+ */
+const RECHNER_OP = { "+": B.plus, [M]: B.minus, "·": B.mal, ":": B.durch };
+function aufHundertstel(w) { const h = (2n * w.z * 100n + w.n) / (2n * w.n); return Number(h) / 100; } // w positiv
+function mitRechner() {
+  const op = LST.waehle(Object.keys(RECHNER_OP));
+  const a = z(100000, 999999) / 100, b = z(1000, 99999) / 100;
+  const w = RECHNER_OP[op](B.vonZahl(a), B.vonZahl(b)), runden = op === "·" || op === ":";
+  const antwort = runden ? aufHundertstel(w) : Number(w.z) / Number(w.n);
+  const t = `${dez(a)} ${op} ${dez(b)}`;
+  return Object.assign(zahlAufgabe("f", "rechner", `Mit dem Rechner${runden ? ", auf zwei Nachkommastellen gerundet" : ""}: ${t} =`,
+    antwort, `${t} ${runden ? "≈" : "="} ${dez(antwort)}`, t, { a, b, op }), { rechner: "mit" });
+}
+
 /** MA.1.A.3.f: Dezimalzahlen bis 5 Wertziffern addieren und subtrahieren (30.8 + 5.6), beide zusammen wie RZ2 a. */
 function dezimalPlusMinus() {
   const [x, y] = LST.aufteilung(5);
@@ -86,8 +104,9 @@ function dezimalPlusMinus() {
 }
 
 function stufeF() {
-  const typ = LST.waehle(["kuerzen", "erweitern", "plus", "minus", "umschreiben", "dezimal-plus-minus"]);
+  const typ = LST.waehle(["kuerzen", "erweitern", "plus", "minus", "umschreiben", "dezimal-plus-minus", "rechner"]);
   if (typ === "umschreiben") return umschreiben();
+  if (typ === "rechner") return mitRechner();
   if (typ === "dezimal-plus-minus") return dezimalPlusMinus();
   if (typ === "kuerzen") {
     const [n, f] = LST.waehle(ERWEITERBAR), b = teilerfremd(n);
@@ -169,6 +188,7 @@ function hinweis(a, eingabe) {
     minus: "Bringe beide Brüche auf denselben Nenner, dann die Zähler subtrahieren.",
     umschreiben: "Prozent heisst Hundertstel. Vom Bruch zur Dezimalzahl: Zähler durch Nenner teilen.",
     "dezimal-plus-minus": "Schreibe die Zahlen so untereinander, dass die Kommas genau untereinander stehen.",
+    rechner: "Tippe die Rechnung genau ab. Runden: Ist die dritte Nachkommastelle 5 oder mehr, wird aufgerundet.",
     mal: "Zähler mal Zähler, Nenner mal Nenner. Vorher kürzen spart Arbeit.",
     "ganz-mal": "Die ganze Zahl nur mit dem Zähler multiplizieren.",
     stammbruch: "Wie oft passt der Stammbruch in eins? So oft mal die ganze Zahl.",
@@ -190,7 +210,7 @@ function pruefeAufgabe(a, stufe, niveau) {
   if (a.typ === "umschreiben") {
     if (!NENNER_UMSCHREIBEN.includes(d.n)) m.push(`Nenner ${d.n} nicht in der Liste (MA.1.A.1.h): ${a.text}`);
     if (ggt(d.z, d.n) !== 1) m.push(`Bruch nicht gekürzt: ${d.z}/${d.n}`);
-  } else if (a.typ !== "stammbruch" && a.typ !== "dezimal-plus-minus" && ["f", "g"].includes(a.stufe)) {
+  } else if (!["stammbruch", "dezimal-plus-minus", "rechner"].includes(a.typ) && ["f", "g"].includes(a.stufe)) {
     const nenner = [...a.text.matchAll(/\/(\d+)/g)].map(x => Number(x[1]));
     const fremd = nenner.filter(n => !NENNER.includes(n));
     if (fremd.length) m.push(`Nenner ${fremd.join(", ")} nicht in der Liste des Lehrplans: ${a.text}`);
@@ -209,6 +229,10 @@ function pruefeAufgabe(a, stufe, niveau) {
       soll = (ganz(d.a) + (d.plus ? 1 : -1) * ganz(d.b)) / 1e5;
       if (LST.wertziffern(d.a) + LST.wertziffern(d.b) > 5) m.push(`zusammen mehr als 5 Wertziffern: ${a.text}`);
       if (soll <= 0) m.push(`Ergebnis nicht positiv: ${a.text}`);
+    } else if (a.typ === "rechner") {
+      const w = RECHNER_OP[d.op](B.vonZahl(d.a), B.vonZahl(d.b));
+      soll = d.op === "·" || d.op === ":" ? Math.round(Number(w.z) * 100 / Number(w.n) + 1e-9) / 100 : Number(w.z) / Number(w.n);
+      if (a.rechner !== "mit") m.push("Rechner-Aufgabe ohne rechner: mit");
     } else return [...m, `unbekannter Zahl-Typ ${a.typ}`];
     if (ganz(soll) !== ganz(a.antwort)) m.push(`Lösung ${a.antwort}, nachgerechnet ${soll}: ${a.text}`);
     if (LST.leseZahl(a.loesung) !== a.antwort) m.push(`Lösungstext ${a.loesung} passt nicht zu ${a.antwort}`);

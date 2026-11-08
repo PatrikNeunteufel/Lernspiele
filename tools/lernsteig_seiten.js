@@ -500,7 +500,15 @@ async function pruefeSeiten(uebungen, melde, LST) {
       await ruhe(s);
       try {
         const knopf = s.gibt(".rechner-knopf");
-        if (art === "ohne") { if (knopf) throw new Error("Rechner-Knopf trotz „ohne“"); }
+        if (art === "ohne") {
+          // je Aufgabe: Knopf nur bei einer Aufgabe, die den Rechner selbst verlangt (rechner an der Aufgabe, E1-4 a)
+          for (let i = 0; i < e.anzahl; i++) {
+            const a = s.lauf("LST.pruefung.aufgabe()"), soll = !!(a && a.rechner && a.rechner !== "ohne");
+            if (!!s.gibt(".rechner-knopf") !== soll) throw new Error(soll ? `kein Rechner-Knopf bei einer Aufgabe mit rechner „${a.rechner}“` : "Rechner-Knopf trotz „ohne“");
+            await antworte(s, a, true);
+            s.klick(".knopf.weiter"); await ruhe(s, 20, 3);
+          }
+        }
         else {
           if (!knopf) throw new Error(`kein Rechner-Knopf bei „${art}“`);
           s.klick(".rechner-knopf");

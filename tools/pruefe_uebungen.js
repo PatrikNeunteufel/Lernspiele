@@ -262,6 +262,8 @@ function pruefeOhneBrowser(eintrag) {
         }
         if (a.stufe !== stufe) { fehlerMelden(ort, `Aufgabe trägt Stufe ${a.stufe}`); break; }
         for (const feld of ["text", "loesung", "kennung"]) if (typeof a[feld] !== "string" || !a[feld]) { fehlerMelden(ort, `Feld ${feld} fehlt`); break; }
+        // Rechner je Aufgabe (E1-4 a): nur "mit" oder "frei", nur in einer Übung mit Rechner-Angabe im Katalog
+        if (a.rechner !== undefined && (!["mit", "frei"].includes(a.rechner) || !eintrag.rechner)) { fehlerMelden(ort, `rechner „${a.rechner}“ an der Aufgabe (erlaubt: mit, frei; Übung braucht rechner im Katalog)`); break; }
         const sichtbar = [a.text, a.loesung, a.weg].join(" ");
         if (VERDAECHTIG.test(sichtbar)) { fehlerMelden(ort, `verdächtiger Text: ${sichtbar}`); break; }
         // Zahlschreibung (Z1 a): ab vier Stellen mit Apostroph, auch im Lösungsweg (Jahreszahlen und Codes ausgenommen)
