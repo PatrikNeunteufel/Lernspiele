@@ -25,7 +25,8 @@ gemeinsam/rechner.js      eingebauter Taschenrechner: Modelle und Tastenfeld; Re
 gemeinsam/rahmen.js       Seitenteil: Konto, Stufenwahl, Runde, Serie, Protokoll, Rekorde
 gemeinsam/stil.css        Stil, Farben nur hier (:root)
 index.html, start/        Startseite: Anmeldung, dann Tabs wie im Eulenpfad (Plan C2, Adresse #<tab>): Übungen
-                          (start/uebungen.js, Plan C3: Suche mit KERN.suche, einklappbarer Filter, Sortierung,
+                          (start/uebungen.js, Plan C3: Suche mit KERN.suche, einklappbarer Filter, Sortierung —
+                          Gruppen, Filter-Block, Suchfeld, Sortierwahl, Favoriten über KERN.uebersicht, KT1 a —
                           Favoriten, Fach → Thema mit Kacheln, Niveau je Fach, Kompetenzstand je Stufe), Profil (start.js: Konto, Einstellungen), Statistik und Erfolge
                           (start/statistik.js), Verwaltung nur für die Aufsicht (start/aufsicht.js); statistik.html und
                           aufsicht.html leiten auf #statistik und #verwaltung weiter

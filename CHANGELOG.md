@@ -998,3 +998,9 @@
   Lernsteig „0 Fehler, 0 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe (schriftlich-werkstatt,
   rechenprobe, malkreuz, zahlenhaus, preis-tabelle, quader-volumen) mit Kern 1.27.0 und 1.28.0: gleiche Ausgabe und
   Klickzahlen, „Keine Fehler.“.
+- Lernsteig, Tab Übungen auf `KERN.uebersicht` umgestellt (KT1 a, `lernsteig/start/uebungen.js`, 43 Zeilen weniger):
+  Gruppen, Filter-Block, Suchfeld, „?aehnlich=“, Sortierwahl, Favoriten und Stern aus dem Kern; Verhalten und Datenfelder
+  gleich, das Zuklappen wird nur noch bei einer Änderung gespeichert. Gegenproben im Seitentest (Zuklappen nicht gemerkt;
+  Favorit nicht gemerkt): gemeldet. Browser (Gast): Favorit, Zuklappen über das Neuzeichnen, Richtung der Sortierung,
+  Tippen im Suchfeld mit Fokus über jede Neuzeichnung, Filter auf 375 px ohne Wahl zu; keine Konsolenfehler. Tests:
+  Lernsteig „0 Fehler, 0 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“).

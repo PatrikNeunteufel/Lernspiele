@@ -13,16 +13,11 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   const LP = LST_LEHRPLAENE;
   const KAT = LST_KATALOG;
   const el = LST.el;
+  // Bausteine der Übersicht aus dem Kern (KT1 a, kern/uebersicht.js): Gruppen, Filter-Block, Suche, Ähnliche,
+  // Sortierwahl, Favoriten und Stern — gleich wie im Tab Spiele des Eulenpfads; Speichern und Aussehen hier.
+  const UE = KERN.uebersicht;
   /** Kinder anhängen ohne null, undefined und false. */
   const dazu = (knoten, ...kinder) => { knoten.append(...kinder.filter(k => k !== null && k !== undefined && k !== false)); return knoten; };
-
-  // Favoriten-Stern wie im Eulenpfad (Umriss aus, gefüllt an), im sachlichen Aussehen in der Akzentfarbe
-  const STERN = '<path d="M12 2.6l2.85 6 6.55.82-4.85 4.55 1.27 6.5L12 17.3l-5.82 3.17 1.27-6.5L2.6 9.42l6.55-.82z"/>';
-  function stern(an) {
-    const box = document.createElement("span");
-    box.innerHTML = `<svg class="symbol stern${an ? " an" : ""}" viewBox="0 0 24 24" aria-hidden="true">${STERN}</svg>`;
-    return box.firstChild;
-  }
 
   /** Piktogramm einer Übung (Katalog-Feld `symbol`, gemeinsam/symbole.js, SY1 a); fehlt es, das Kürzel des Fachs. */
   const FACH_KURZ = { mathematik: "M", deutsch: "D", englisch: "E", franzoesisch: "F", nt: "NT" };
@@ -84,9 +79,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       return { wert, grund: [kompetenz ? `gleiche Kompetenz ${x.kompetenz}` : null, thema ? "gleiches Thema" : null].filter(Boolean).join("; ") };
     },
   });
-  /** Übungs-Id aus „?aehnlich=<id>“ (Knopf auf der Seite der Übung), oder null; Verlassen nimmt den Parameter weg. */
-  const aehnlichId = () => new URLSearchParams(location.search).get("aehnlich");
-  function aehnlichSchliessen() { if (aehnlichId()) history.replaceState(null, "", location.pathname + location.hash); }
+  // Übungs-Id aus „?aehnlich=<id>“ (Knopf auf der Seite der Übung): UE.aehnlich.id(), Verlassen UE.aehnlich.schliessen()
 
   // ---------- Sortierung ----------
   // „Stufe“ (Entscheid SS1 a, LERN_Session21; persönlich ordnet erst „passt zu dir“ in Schritt 3): Lage der Übung zum Grundanspruch Zyklus 3 ihrer Kompetenz — Mittel der
@@ -108,8 +101,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   };
 
   // Suchtext: bleibt beim Neuzeichnen erhalten, nicht gespeichert (wie im Eulenpfad)
-  let suchText = "";
-  let sucheTippt = false; // nach dem Neuzeichnen das Suchfeld wieder fokussieren
+  const SUCHE = UE.suche();
 
   function zeichneUebungen(box) {
     const k = LST.konto();
@@ -117,7 +109,6 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     const neu = () => LST_START.neu();
     const speichere = daten => { LST.speichereKonto(Object.assign(LST.konto(), daten)); neu(); };
     const favoriten = k.favoriten || [];
-    const zu = new Set(k.zu || []);
     const kompakt = k.ansicht === "kompakt";
     const chip = (text, aktiv, onclick, attr = {}) => el("button", Object.assign({ type: "button", class: "chip klein" + (aktiv ? " an" : ""), "aria-pressed": String(aktiv), onclick, text }, attr));
 
@@ -175,17 +166,13 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       filter.thema.length ? `${filter.thema.length} ${filter.thema.length === 1 ? "Thema" : "Themen"}` : null,
       ...nurAktiv.map(n => n.text),
     ].filter(Boolean);
-    const schmal = typeof matchMedia === "function" && matchMedia("(max-width: 560px)").matches;
-    const filterBox = el("details", { class: "filter-klapp" },
-      el("summary", {}, el("span", { class: "filter-titel", text: "Filter" }),
-        el("span", { class: "filter-aktiv", text: aktiv.length ? aktiv.join(" · ") : "alle Übungen" })),
-      el("div", { class: "filter" }, ...zeilen));
-    filterBox.open = typeof k.filterZu === "boolean" ? !k.filterZu : !schmal;
-    filterBox.addEventListener("toggle", () => LST.speichereKonto(Object.assign(LST.konto(), { filterZu: !filterBox.open })));
+    const filterBox = UE.filterBlock({ titel: "Filter", aktiv, leer: "alle Übungen", zeilen, zu: k.filterZu,
+      merke: filterZu => LST.speichereKonto(Object.assign(LST.konto(), { filterZu })) });
 
     // ----- Auswahl: Filter und Suche -----
     // Suche mit Passung; ohne Suche, aber mit „?aehnlich=<id>“: die ähnlichen Übungen, ähnlichste zuerst
-    const aehnlichZu = !suchText.trim() && aehnlichId() ? KAT.uebung(aehnlichId()) : null;
+    const suchText = SUCHE.text;
+    const aehnlichZu = !suchText.trim() && UE.aehnlich.id() ? KAT.uebung(UE.aehnlich.id()) : null;
     const treffer = suchText.trim() ? new Map((sucheUebungen(suchText, person) || []).map((t, i) => [t.id, { ...t, i }]))
       : aehnlichZu ? new Map(aehnlicheUebungen(aehnlichZu.id, person).map((t, i) => [t.id, { ...t, i }])) : null;
     const passt = u => (filter.fach === "alle" || u.fach === filter.fach)
@@ -203,14 +190,16 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     else if (flach) { auswahl.sort(vergleich); if (sort.ab) auswahl.reverse(); }
 
     // ----- Werkzeuge: Suche, Sortierung, Ansicht, alle auf/zu -----
-    const feld = el("input", { class: "textfeld suche", type: "search", name: "suche", placeholder: "Übung suchen", "aria-label": "Übung suchen", value: suchText });
-    feld.addEventListener("input", () => { suchText = feld.value; sucheTippt = true; aehnlichSchliessen(); neu(); });
-    if (sucheTippt) { sucheTippt = false; requestAnimationFrame(() => { feld.focus(); feld.setSelectionRange(feld.value.length, feld.value.length); }); }
-    const sortWahl = el("label", { class: "sortier-wahl" }, el("span", { class: "leise klein", text: "Sortieren" }),
-      el("select", { class: "klein", name: "sortierung", "aria-label": "Übungen sortieren", onchange: e => speichere({ sortierung: { art: e.target.value, ab: false } }) },
-        ...sortierbar.map(([w, s]) => el("option", { value: w, text: s.text, selected: w === sort.art }))),
-      chip((sort.ab ? "↓ " : "↑ ") + SORTIERUNG[sort.art].pfeil[sort.ab ? 1 : 0], sort.ab,
-        () => speichere({ sortierung: { art: sort.art, ab: !sort.ab } }), { "data-aktion": "sortierung-richtung" }));
+    const feld = SUCHE.feld({ neu, beiEingabe: UE.aehnlich.schliessen,
+      attr: { class: "textfeld suche", name: "suche", placeholder: "Übung suchen", "aria-label": "Übung suchen" } });
+    const sortWahl = UE.sortWahl({
+      arten: sortierbar.map(([wert, s]) => ({ wert, text: s.text })), wahl: sort,
+      pfeile: Object.fromEntries(Object.entries(SORTIERUNG).map(([w, s]) => [w, s.pfeil])),
+      setze: sortierung => speichere({ sortierung }),
+      knopf: (text, an, onclick) => chip(text, an, onclick, { "data-aktion": "sortierung-richtung" }),
+      beschriftung: el("span", { class: "leise klein", text: "Sortieren" }),
+      feld: { class: "klein", name: "sortierung", "aria-label": "Übungen sortieren" },
+    });
     const gruppenIds = ["favoriten", ...KAT.FAECHER.map(f => "fach:" + f.id),
       ...KAT.FAECHER.flatMap(f => [...new Set(KAT.UEBUNGEN.filter(u => u.fach === f.id).map(u => u.thema))].map(t => `thema:${f.id}:${t}`))];
     const gegliedert = !treffer && !flach;
@@ -222,17 +211,9 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
         gegliedert ? chip("Alle auf", false, () => speichere({ zu: [] }), { "data-aktion": "alle-auf" }) : null,
         gegliedert ? chip("Alle zu", false, () => speichere({ zu: gruppenIds }), { "data-aktion": "alle-zu" }) : null));
 
-    /** Auf- und zuklappbare Gruppe; der Zustand landet im Konto. */
-    function gruppe(id, kopf, anzahl, ...inhalt) {
-      const d = dazu(el("details", { class: "gruppe", "data-gruppe": id },
-        el("summary", {}, ...[].concat(kopf), anzahl === null ? null : el("span", { class: "anzahl", text: `${anzahl}` }))), ...inhalt);
-      d.open = !zu.has(id);
-      d.addEventListener("toggle", () => {
-        d.open ? zu.delete(id) : zu.add(id);
-        LST.speichereKonto(Object.assign(LST.konto(), { zu: [...zu] }));
-      });
-      return d;
-    }
+    // Auf- und zuklappbare Gruppen; der Zustand landet im Konto
+    const G = UE.gruppen({ zu: k.zu, merke: zu => LST.speichereKonto(Object.assign(LST.konto(), { zu })) });
+    const gruppe = (id, kopf, anzahl, ...inhalt) => G.gruppe({ id, kopf, anzahl }, ...inhalt);
 
     function kachel(u) {
       const f = KAT.fach(u.fach);
@@ -262,7 +243,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       return dazu(karte,
         el("button", { type: "button", class: "karten-schalter" + (favorit ? " an" : ""), "aria-pressed": String(favorit),
           "aria-label": favorit ? `${u.titel} aus den Favoriten nehmen` : `${u.titel} zu den Favoriten`, title: favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten",
-          "data-favorit": u.id, onclick: () => speichere({ favoriten: favorit ? favoriten.filter(x => x !== u.id) : favoriten.concat(u.id) }) }, stern(favorit)),
+          "data-favorit": u.id, onclick: () => speichere({ favoriten: UE.umschalten(favoriten, u.id) }) }, UE.stern(favorit)),
         el("div", { class: "kopfzeile" }, symbolVon(u), name),
         el("small", { class: "kompetenz", text: `${u.kompetenz} · ${f ? f.name : ""}` }),
         marken.length ? el("div", { class: "marken" }, ...marken) : null,
@@ -274,7 +255,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     // ----- Suche: eine Liste, beste zuerst; andere Sortierung: eine Liste; sonst Favoriten, dann Fach → Thema -----
     if (aehnlichZu) {
       box.append(el("h2", { class: "treffer-titel" }, el("span", { text: `Ähnlich wie ${aehnlichZu.titel}: ${auswahl.length} ${auswahl.length === 1 ? "Übung" : "Übungen"} ` }),
-        chip("✕ Alle Übungen", false, () => { aehnlichSchliessen(); neu(); }, { "data-aktion": "aehnlich-schliessen" })));
+        chip("✕ Alle Übungen", false, () => { UE.aehnlich.schliessen(); neu(); }, { "data-aktion": "aehnlich-schliessen" })));
       if (auswahl.length) box.append(gitter(auswahl));
     } else if (treffer) {
       if (auswahl.length) box.append(titel(`${auswahl.length} Treffer, beste zuerst`), gitter(auswahl));

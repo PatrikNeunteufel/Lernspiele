@@ -666,7 +666,9 @@ und `sortierung` bleiben, wie sie sind — Sichern, Einlesen und Abgleich änder
 kennt nur die App). Das Aussehen gibt die App; der Kern setzt nur die Klassen oben. Geprüft in `tools/pruefe_kern.js`
 mit einem Ersatz-DOM (Umschalten mit 2000 Zufallsfällen, Gruppen und Filter-Block mit `toggle` ohne Änderung, Suche mit
 Fokus, Sortierwahl); Gegenproben (Wächter gegen `toggle` ohne Änderung entfernt, Handy offen, kein Fokus): gemeldet.
-Benutzt von: noch keiner App (Umbau Lernsteig, dann Eulenpfad mit Seitentest des Tabs Spiele).
+Benutzt von: Lernsteig (`start/uebungen.js`, seit LERN_Session23; Seitentest `tools/lernsteig_seiten.js` meldet ein
+nicht gemerktes Zuklappen und einen nicht gemerkten Favoriten, Gegenproben). Der Eulenpfad folgt mit einem Seitentest
+des Tabs Spiele.
 
 ### 4.27 Geplant
 
