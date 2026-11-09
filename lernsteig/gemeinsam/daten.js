@@ -30,7 +30,7 @@ var LST_DATEN = (function () {
   // Speicher und Gerätefelder wie in den Konten; „gast“: Runden des früheren Gastkontos (bis LERN_Session16) reisen
   // ohne Konto mit, der Gast nach C2 a speichert nichts
   const DATEN = KERN.daten({
-    app: "lernsteig", speicher: { praefix: LST.PRAEFIX, lies: LST.lies, schreibe: LST.schreibe, entferne: k => KERN.speicher(LST.PRAEFIX).entferne(k) },
+    app: "lernsteig", speicher: { praefix: LST.PRAEFIX, lies: LST.lies, schreibe: LST.schreibe, entferne: LST.entferne },
     dateiPraefix: "lernsteig", geraetFelder: ["aufsicht", "anfragen"], ohnePerson: ["gast"],
     // die Freigabe je Gerät reist im Abgleich mit, die jüngste gewinnt (Plan C5, wie im Eulenpfad)
     freigabe: true,
@@ -72,8 +72,9 @@ var LST_DATEN = (function () {
       meldungen: (erg.teile && erg.teile.meldungen) || 0, neu: erg.neueIds, ids: erg.ids };
   }
 
-  /** Datei im Browser speichern (Download). */
+  /** Datei im Browser speichern (Download). Merkt den Tag (Erinnerung ans Sichern ohne Abgleich-Ort, konzept_gruppen.md 5a). */
   function herunterladen(obj, name) {
+    LST.schreibe("letzteSicherung", new Date().toISOString());
     const blob = new Blob([JSON.stringify(obj, null, 1)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob); a.download = name;

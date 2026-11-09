@@ -1873,6 +1873,82 @@ console.log("listenpruefung.js");
     delete global.localStorage;
   }
 
+  // ---------- speicher mit IndexedDB (konzept_gruppen.md 5a, D11 a, D11-W a; Ersatz tools/ersatz_idb.js) ----------
+  console.log("speicher.js (IndexedDB)");
+  {
+    const { ersatzIdb } = require("./ersatz_idb.js");
+    const S = KERN.speicher;
+    const lokal = new Map();
+    global.localStorage = { getItem: k => (lokal.has(k) ? lokal.get(k) : null), setItem: (k, v) => lokal.set(k, String(v)),
+      removeItem: k => lokal.delete(k), key: i => [...lokal.keys()][i] ?? null, get length() { return lokal.size; } };
+    wirft(() => S("t:", { gross: ["runden"] }), "grosse Schlüssel ohne Datenbank");
+    // ohne IndexedDB: wie bis 1.33 in localStorage, bereit() sofort
+    const ohne = S("t:", { gross: ["runden"], datenbank: "t-ablage" });
+    gleich(ohne.modus(), "lokal", "ohne IndexedDB: Modus lokal");
+    ohne.schreibe("runden", [1]);
+    gleich(lokal.get("t:runden"), "[1]", "ohne IndexedDB: grosser Schlüssel in localStorage");
+    // mit IndexedDB: Umzug, Lesen, Schreiben, zweite Seite, Löschen
+    const idbDaten = new Map();
+    global.indexedDB = ersatzIdb(idbDaten);
+    lokal.set("t:runden", "[1,2]"); lokal.set("t:profil", '{"a":1}');
+    const s1 = S("t:", { gross: ["runden", "rekorde"], datenbank: "t-ablage" });
+    gleich(s1.modus(), "warten", "mit IndexedDB: wartet auf bereit()");
+    wirft(() => s1.lies("runden", []), "grosser Schlüssel vor bereit() gelesen");
+    gleich(s1.lies("profil", null).a, 1, "kleiner Schlüssel vor bereit() lesbar");
+    await s1.bereit();
+    gleich([s1.modus(), JSON.stringify(s1.lies("runden", [])), lokal.has("t:runden")].join("|"), "idb|[1,2]|false", "Umzug: Wert aus localStorage in IndexedDB, dort gelöscht");
+    const kopie = s1.lies("runden", []); kopie.push(99);
+    gleich(JSON.stringify(s1.lies("runden", [])), "[1,2]", "lies gibt eine Kopie (wie localStorage)");
+    gleich(s1.schreibe("rekorde", [{ p: 5 }]), true, "schreibe grosser Schlüssel");
+    gleich(lokal.has("t:rekorde"), false, "grosser Schlüssel nicht in localStorage");
+    s1.schreibe("profil", { a: 2 });
+    gleich(lokal.get("t:profil"), '{"a":2}', "kleiner Schlüssel bleibt in localStorage");
+    gleich(s1.schluessel().sort().join(), "profil,rekorde,runden", "schluessel mit den grossen");
+    await s1.geschrieben();
+    const s2 = S("t:", { gross: ["runden", "rekorde"], datenbank: "t-ablage" });
+    await s2.bereit();
+    gleich(JSON.stringify(s2.lies("rekorde", null)), '[{"p":5}]', "zweite Seite liest aus IndexedDB");
+    s2.entferne("rekorde"); await s2.geschrieben();
+    const s3 = S("t:", { gross: ["runden", "rekorde"], datenbank: "t-ablage" });
+    await s3.bereit();
+    gleich(s3.lies("rekorde", "weg"), "weg", "entferne in IndexedDB");
+    // Schlüssel in beiden Speichern (ein Tab der alten Fassung schrieb nach dem Umzug): vereinigt, localStorage geleert
+    lokal.set("t:runden", JSON.stringify([{ id: "a", alt: true }, { id: "neu-im-alten-tab" }]));
+    lokal.set("t:rekorde", JSON.stringify({ kein: "Array" }));
+    const sb = S("t:", { gross: ["runden", "rekorde"], datenbank: "t-ablage" });
+    idbDaten.get("t-ablage").get("werte").set("runden", JSON.stringify([{ id: "a" }, { id: "b" }]));
+    idbDaten.get("t-ablage").get("werte").set("rekorde", JSON.stringify({ auch: "kein Array" }));
+    await sb.bereit();
+    gleich([sb.lies("runden", []).map(r => r.id).join(), lokal.has("t:runden")].join("|"), "a,b,neu-im-alten-tab|false", "beide Speicher: Listen nach Kennung vereinigt, IndexedDB gewinnt, localStorage geleert");
+    gleich([JSON.stringify(sb.lies("rekorde", null)), lokal.has("t:rekorde")].join("|"), '{"auch":"kein Array"}|true', "beide Speicher, nicht vereinbar: beide bleiben, nichts verloren");
+    lokal.set("t:runden", JSON.stringify([{ id: "x" }]));
+    const sv = S("t:", { gross: ["runden"], datenbank: "t-ablage", vereinen: (s, a, b) => (s === "runden" ? [...b, ...a].map(r => ({ ...r, v: 1 })) : undefined) });
+    await sv.bereit();
+    gleich(sv.lies("runden", []).map(r => r.id + r.v).join(), "x1,a1,b1,neu-im-alten-tab1", "beide Speicher: eigene Regel der App (vereinen)");
+    lokal.delete("t:rekorde");
+    // voll: schreiben sagt true (Zwischenspeicher), beiFehler meldet es (D11 a: die Seite sagt es sichtbar)
+    global.indexedDB = ersatzIdb(idbDaten, { voll: true });
+    const s4 = S("t:", { gross: ["runden"], datenbank: "t-ablage" });
+    await s4.bereit();
+    const gemeldet = [];
+    s4.beiFehler((k, e) => gemeldet.push(`${k}:${e.name}`));
+    s4.schreibe("runden", [1, 2, 3]); await s4.geschrieben();
+    gleich(gemeldet.join(), "runden:QuotaExceededError", "voller Speicher: beiFehler mit Schlüssel und Grund");
+    // IndexedDB lässt sich nicht öffnen: zurück auf localStorage
+    global.indexedDB = ersatzIdb(new Map(), { kaputt: true });
+    lokal.set("u:runden", "[7]");
+    const s5 = S("u:", { gross: ["runden"], datenbank: "u-ablage" });
+    await s5.bereit();
+    gleich([s5.modus(), JSON.stringify(s5.lies("runden", []))].join("|"), "lokal|[7]", "IndexedDB kaputt: localStorage wie bisher");
+    // Belegung (ohne navigator.storage: nur localStorage)
+    const b = await S.belegung();
+    const zeichen = [...lokal].reduce((n, [k, v]) => n + k.length + v.length, 0);
+    gleich([b.lokal.zeichen, b.lokal.byte, b.ablage, b.warnen].join("|"), `${zeichen}|${zeichen * 2}||false`, "belegung: Zeichen, Byte (UTF-16), ohne Schätzung, keine Warnung");
+    lokal.set("gross", "x".repeat(Math.ceil(S.LOKAL_GRENZE_BYTE * 0.8 / 2)));
+    gleich((await S.belegung()).warnen, true, "belegung: Warnung ab 80 % von 5 MiB");
+    delete global.indexedDB; delete global.localStorage;
+  }
+
   // ---------- meldungen (C11-1 a: besserer Stand gewinnt, Text ohne Namen, Weg zur Entwicklung) ----------
   console.log("meldungen.js");
   {

@@ -123,6 +123,9 @@ Gruppe = {
 
 ## 5a. Speicher im Browser
 
+*Stand 2026-11-09 (LERN_Session25):* Speicherschicht vorgezogen (Plan D11) — Kern 1.34.0 (`KERN.speicher` mit grossen
+Schlüsseln) und Lernsteig gebaut, Eulenpfad offen; Grenzen nach MDN in docs/kern/rahmen.md 4.3.
+
 **Gemessen** am 03.11.2026 (LERN_Session11) im eingebauten Browser der Entwicklungsumgebung (Chromium 152):
 
 | Speicher | Grenze | dauerhaft? |

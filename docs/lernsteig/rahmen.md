@@ -403,6 +403,14 @@ Logik im Kern (`KERN.meldungen`, docs/kern/rahmen.md 4.28); `gemeinsam/rahmen.js
 
 ## 6. Speicher (`lernsteig:*`, SP1 a)
 
+Seit LERN_Session25 (Kern 1.34.0, docs/konzept_gruppen.md 5a, D11-W a) liegen `runden`, `rekorde`, `meldungen` und
+`geloescht` in IndexedDB `lernsteig-ablage` (`LST.GROSS`), der Rest in `localStorage`. Jede Seite wartet beim Start auf
+`LST.bereit()` (`LST.uebung`, `start/start.js`; danach `LST.beiBereit`: Umdeuten alter Einträge, Abgleich starten).
+Scheitert das Speichern einer Runde oder eines Rekords, steht oben auf der Seite „Nicht gespeichert: Der Speicher dieses
+Browsers ist voll …“ (D11 a). Verwaltung → Einstellungen → „Speicher dieses Geräts“ zeigt die Belegung, warnt ab 80 % und
+bittet den Browser auf Knopfdruck, nichts von selbst zu löschen (`persist()`); ohne Abgleich-Ordner erinnert die
+Verwaltung nach 14 Tagen ohne Sicherung (`letzteSicherung`, ab der ältesten Runde, wenn nie gesichert).
+
 | Schlüssel | Inhalt |
 |---|---|
 | `konten` | Liste der Konten (5b), PIN und Code nur als Hash; Verbindungen `aufsicht`, `anfragen` (5d) |
@@ -419,6 +427,7 @@ Logik im Kern (`KERN.meldungen`, docs/kern/rahmen.md 4.28); `gemeinsam/rahmen.js
 | `gestellt` | Gedächtnis gegen Wiederholungen (RA5 a): Fingerabdrücke je `konto\|uebung/stufe` (höchstens 400; bis LERN_Session18 die Kennungen je `konto/uebung/stufe/niveau`, höchstens 30) |
 | `geraet`, `abgleichStand` | Abgleich über einen Ordner (5b, `KERN.abgleich`): Kennung und Name dieses Geräts; Ordner, letzter Abgleich, andere Geräte. Den gewählten Ordner merkt der Browser in IndexedDB `lernsteig` |
 | `einstellungen` | `{ dezimal?, rechner? }`, nur von einer angemeldeten Aufsicht gesetzt (5d) |
+| `letzteSicherung` | Zeit der letzten Sicherung als Datei (Erinnerung ans Sichern, nur dieses Gerät) |
 | `meldeweg` | Weg der Meldungen und Adresse des Entwickler-Servers `{ weg, server? }` (5f, C11-3 a; nur dieses Gerät) |
 | `meldungen` | Fehlermeldungen (5f, `KERN.meldungen`) `{ id, person, name, rolle, zeit, stand, status, verlauf, uebung, stufe, lp, niveau, lehrplan, klasse, aufgabeNr, aufgabe, loesung, eingabe, ergebnis, art, text, antwort?, gelesen }`; reist in Sicherung und Abgleich mit |
 

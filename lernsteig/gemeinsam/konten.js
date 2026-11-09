@@ -23,7 +23,8 @@ var LST_KONTEN = (function () {
   /** Felder, die nur auf diesem Gerät gelten: Geheimnisse und Verbindungen zu Aufsichten des Geräts. */
   const GERAET = ["pin", "wiederherstellung", "aufsicht", "anfragen"];
   // Geschrieben über LST.schreibe, damit der Abgleich über einen Ordner Änderungen an Konten sieht (LST.beiAenderung)
-  const SPEICHER = { ...KERN.speicher(LST.PRAEFIX), schreibe: LST.schreibe };
+  // Derselbe Speicher wie LST (grosse Schlüssel in IndexedDB, Kern 1.34.0), nicht eine zweite Instanz
+  const SPEICHER = { ...LST.SPEICHER, lies: LST.lies, schreibe: LST.schreibe, entferne: LST.entferne };
   const LISTE = P.liste(SPEICHER, { schluessel: "personen" });
 
   // ---------- Umzug der alten Listen (einmal) ----------

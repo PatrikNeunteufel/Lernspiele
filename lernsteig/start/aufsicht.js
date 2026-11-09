@@ -75,10 +75,49 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     return [el("section", { class: "einstellungen konto" },
       el("p", { class: "konto-zeile" }, el("b", { text: a.name }), el("span", { class: "leise", text: rolleName(a.art) })),
       el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Abmelden", onclick: () => { KO.aufsichtAbmelden(); history.replaceState(null, "", location.pathname); LST_START.neu(); } })),
-      meldung ? el("p", { class: "meldung", role: "status", text: meldung }) : null),
+      meldung ? el("p", { class: "meldung", role: "status", text: meldung }) : null, sichernErinnerung()),
       el("nav", { class: "tabs untertabs", role: "tablist", "aria-label": "Verwaltung" }, UNTER.map(u =>
         el("a", { class: "tab", role: "tab", href: `#verwaltung/${u.id}`, "aria-selected": String(u === unter), text: u.text }))),
       ...unter.zeichne(a)];
+  }
+
+  // ---------- Speicher (docs/konzept_gruppen.md 5a, D11 a, Kern 1.34.0) ----------
+  const ERINNERUNG_TAGE = 14;
+  /** Ohne Abgleich-Ort erinnert die Seite ans Sichern, wenn es Runden gibt und seit 14 Tagen keine Sicherung war. */
+  function sichernErinnerung() {
+    if (typeof LST_ABGLEICH !== "undefined" && (LST_ABGLEICH.stand() || {}).ordner) return null;
+    const runden = LST.lies("runden", []) || [];
+    if (!runden.length) return null;
+    // Gezählt ab der letzten Sicherung, ohne Sicherung ab der ältesten Runde (erst nach 14 Tagen Übung erinnern)
+    const letzte = LST.lies("letzteSicherung", null);
+    const seit = letzte || runden.map(r => r && r.zeit).filter(Boolean).sort()[0];
+    const tage = seit ? Math.floor((Date.now() - Date.parse(seit)) / 864e5) : 0;
+    if (tage < ERINNERUNG_TAGE) return null;
+    return el("p", { class: "meldung warnung", role: "status", "data-erinnerung": "sichern",
+      text: `${letzte ? `Die letzte Sicherung ist ${tage} Tage alt` : `Seit ${tage} Tagen wird hier geübt und noch nie gesichert`}, und es ist kein Abgleich-Ordner gewählt. `
+        + "Bitte unter 👥 Konten → „Sichern und Einlesen“ eine Sicherung anlegen oder unter 🔄 Abgleich einen Ordner wählen. "
+        + "Safari löscht die Daten einer Seite, die sieben Tage lang nicht geöffnet wurde." });
+  }
+  const mb = byte => `${(byte / 1048576).toFixed(byte < 10485760 ? 1 : 0)} MB`;
+  /** Belegung und „dauerhaft“ (KERN.speicher.belegung), mit Warnung ab 80 %; gemessen nach dem Zeichnen. */
+  function speicherKarte() {
+    const ausgabe = el("div", { "data-speicher": "", text: "Wird gemessen …" });
+    const karte = el("section", { class: "einstellungen" }, ausgabe);
+    KERN.speicher.belegung().then(b => {
+      const zeilen = [
+        `Kleiner Speicher (localStorage, alle Apps unter dieser Adresse): ${mb(b.lokal.byte)} von 5 MB (${Math.round(b.lokal.anteil * 100)} %)`,
+        b.ablage ? `Ablage für Runden, Rekorde und Meldungen (IndexedDB): ${mb(b.ablage.belegt)} belegt, ${mb(b.ablage.verfuegbar)} verfügbar` : "Ablage (IndexedDB): keine Angabe des Browsers",
+        LST.SPEICHER.modus() === "idb" ? "Runden und Rekorde liegen in der Ablage." : "Runden und Rekorde liegen im kleinen Speicher (dieser Browser hat keine Ablage).",
+        b.dauerhaft === true ? "Der Browser hält die Daten dauerhaft (löscht nicht von selbst)." : "Der Browser darf die Daten bei Platzmangel von selbst löschen.",
+      ];
+      ausgabe.replaceChildren(...[
+        b.warnen ? el("p", { class: "meldung warnung", role: "alert", text: "Der Speicher ist fast voll (über 80 %). Bitte sichern und alte Runden löschen." }) : null,
+        ...zeilen.map(t => el("p", { text: t })),
+        b.dauerhaft === true ? null : el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", "data-aktion": "dauerhaft", text: "Browser bitten, nichts von selbst zu löschen",
+          onclick: async () => { const ok = await KERN.speicher.dauerhaftBitten(); meldung = ok ? "Der Browser hält die Daten jetzt dauerhaft." : "Der Browser hat abgelehnt oder fragt später; regelmässig sichern bleibt der Schutz."; zeichne(); } })),
+      ].filter(Boolean));
+    });
+    return karte;
   }
 
   // Meldungen (Plan C11, C11-2 a): die der verbundenen Konten (die Aufsicht kann sie ebenfalls senden, ohne Namen) und die
@@ -174,7 +213,8 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       auswahl("Dezimalzeichen", [{ id: "punkt", name: "Punkt (3.5)" }, { id: "komma", name: "Komma (3,5)" }], e.dezimal || "punkt", w => setze("dezimal", w), { name: "dezimal" }),
       auswahl("Gast", [{ id: "an", name: "erlaubt (nichts wird gespeichert)" }, { id: "aus", name: "abgeschaltet" }], e.gast || "an", w => setze("gast", w), { name: "gast" }),
       el("small", { class: "leise", text: "Gilt für alle Konten auf diesem Gerät. Die Jugendlichen sehen die Einstellung in jeder Übung." })),
-      el("h2", { class: "abschnitt", text: "Meldungen an die Entwicklung" }), meldewegKarte()];
+      el("h2", { class: "abschnitt", text: "Meldungen an die Entwicklung" }), meldewegKarte(),
+      el("h2", { class: "abschnitt", text: "Speicher dieses Geräts" }), speicherKarte()];
   }
 
   // Weg der Meldungen und Adresse des Entwickler-Servers (Plan C11, C11-3 a; KERN.meldungen.meldeweg): nur auf diesem

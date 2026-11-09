@@ -22,7 +22,7 @@ var LST_ABGLEICH = (function () {
     einlesen: text => LST_DATEN.einlesen(text),
   });
   // Selbsttätig, sobald ein Ordner gewählt ist (ohne Ordner-Fähigkeit des Browsers tut starte nichts)
-  AB.starte();
+  LST.beiBereit(() => AB.starte()); // erst nach dem Laden der Runden (Kern 1.34.0), sonst schriebe er eine leere Datei
 
   /** Was beim Zusammenführen dazukam, in einem Satz. */
   function ergebnisText(r) {

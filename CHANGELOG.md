@@ -1339,7 +1339,25 @@
   **D13** sachsituationen h Weg „y = −3“ statt „-3“; `pruefe_uebungen.js` meldet jedes ASCII-Minus vor einer Zahl
   (Gegenprobe gemeldet). **D7** war seit LERN_Session20 erledigt (Kern `zeit.js`), im Plan nachgetragen. **D11** Befund:
   die geplante „Warnung wie Eulenpfad“ gibt es im Eulenpfad nicht, beide Apps verlieren eine Runde bei vollem Speicher
-  still — als Entscheid vorgelegt. Stolperfalle beim Bau: ein Kommentar am Zeilenende schluckte in sachsituationen die
+  still — als Entscheid vorgelegt (danach D11 a, D11-W a; siehe nächster Eintrag). Stolperfalle beim Bau: ein Kommentar am Zeilenende schluckte in sachsituationen die
   Felder kennung und daten (gültiges JavaScript, gefunden vom Übungstest). Tests: Skripte „Keine Fehler.“, Kern
   „5867 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine
   Fehler.“.
+- Speicherschicht nach docs/konzept_gruppen.md 5a (entschieden LERN_Session11, nie in den Plan übernommen — jetzt Plan D11
+  mit Verweis; D11 a, D11-W a), Schritt 1: Kern 1.34.0 — `KERN.speicher` mit grossen Schlüsseln in IndexedDB
+  (Zwischenspeicher, `bereit()`, Umzug bei jedem Start mit Vereinigen, wenn ein Schlüssel in beiden Speichern liegt,
+  BroadcastChannel für andere Tabs, `beiFehler`), `belegung()`, `dauerhaftBitten()`; Grenzen nach MDN (localStorage 5 MiB je
+  Ursprung, IndexedDB bis rund 60 % der Festplatte) in docs/kern/rahmen.md 4.3. Lernsteig: `runden`, `rekorde`, `meldungen`,
+  `geloescht` in IndexedDB `lernsteig-ablage`; Übungen und Startseite warten auf `LST.bereit()`, Abgleich startet danach;
+  `daten.js` und `konten.js` über denselben Speicher (vorher je eigene Instanz, `entferne` hätte IndexedDB verfehlt);
+  „Nicht gespeichert: Der Speicher dieses Browsers ist voll …“ oben auf der Seite (D11 a); Verwaltung → Einstellungen →
+  „Speicher dieses Geräts“ mit Belegung, Warnung ab 80 % und „Browser bitten, nichts von selbst zu löschen“; ohne
+  Abgleich-Ordner Erinnerung ans Sichern nach 14 Tagen (ab der letzten Sicherung, sonst ab der ältesten Runde).
+  `tools/ersatz_idb.js` (IndexedDB-Ersatz ohne Abhängigkeit) für Kern-Fälle (21: Umzug, Kopie, zweite Seite, Löschen,
+  beide Speicher, eigene Regel, voll, kaputt, Belegung) und Seitentest (Umzug, Statistik, neue Runde in IndexedDB).
+  Gegenproben: Startseite ohne Warten (Fehler „vor bereit() gelesen“), Umzug ohne Vereinigen (Runde aus altem Tab fehlt) —
+  gemeldet. Im Browser (Chromium, echte IndexedDB): Runde in der Ablage, nicht in localStorage, Statistik, Speicheranzeige
+  (5185 MB verfügbar), Erinnerung erst nach 14 Tagen; danach Testkonto und Datenbank gelöscht. **Eulenpfad noch nicht
+  umgestellt** (nächster Schritt). Doku Kern 4.3, Lernsteig 6, Konzept 5a, Plan D11. Tests: Skripte „Keine Fehler.“, Kern
+  „5888 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine
+  Fehler.“; Eulenpfad-Stichprobe tab, anlaut-angel „Keine Fehler.“.

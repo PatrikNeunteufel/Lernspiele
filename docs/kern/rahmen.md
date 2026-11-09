@@ -114,6 +114,28 @@ Alle Apps teilen den Ursprung und damit `localStorage`. Jede schreibt nur unter 
 Präfixe: Eulenpfad `lernspiele:`, Lernsteig `lernsteig:`, Gratwanderung `gratwanderung:`. Ein Teil, der Daten einer
 anderen App liest oder schreibt (Profil-Übernahme C9), öffnet deren Speicher mit deren Präfix.
 
+**Grosse Schlüssel in IndexedDB** (seit 1.34.0; docs/konzept_gruppen.md 5a, entschieden LERN_Session11; D11 a, D11-W a):
+`KERN.speicher(praefix, { gross: [schlüssel …], datenbank })` legt diese Schlüssel in IndexedDB (Store `werte`) statt in
+`localStorage`. Grund: `localStorage` hat je Ursprung 5 MiB für alle Apps zusammen (MDN, „Storage quotas and eviction
+criteria“, Stand 5.1.2026: „Browsers can store up to 5 MiB of local storage, and 5 MiB of session storage per origin.“),
+IndexedDB in Chrome, Edge und Safari bis rund 60 % der Festplatte, in Firefox 10 % oder 10 GiB.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `bereit()` | Versprechen; einmal je Seite vor dem ersten Lesen eines grossen Schlüssels abwarten. Öffnet die Datenbank, lädt die Werte in einen Zwischenspeicher (JSON-Text) und zieht bei **jedem** Start um, was noch in `localStorage` liegt (dort gelöscht erst nach dem Schreiben in IndexedDB). Liegt ein Schlüssel in beiden (ein Tab der alten Fassung schrieb nach dem Umzug), werden die Fassungen vereinigt: `opt.vereinen(schluessel, wertIndexedDB, wertLocalStorage)` der App, sonst Listen nach Kennung `id` (IndexedDB gewinnt, Einträge nur im alten Speicher kommen dazu); nicht vereinbar → beide bleiben, nichts geht verloren. Ob noch etwas umzuziehen ist, zeigt die Belegung des kleinen Speichers |
+| `lies`, `schreibe`, `entferne` | für grosse Schlüssel sofort aus bzw. in den Zwischenspeicher, geschrieben wird im Hintergrund der Reihe nach; `lies` gibt wie bisher eine Kopie. Vor `bereit()` wirft ein grosser Schlüssel („lieber laut als still leer“) |
+| `modus()` | `"warten"`, `"idb"` oder `"lokal"` (ohne IndexedDB oder wenn sie sich nicht öffnen lässt: wie bis 1.33 in `localStorage`; so laufen Node und die Ersatz-DOMs) |
+| `beiFehler(f)` | `f(schluessel, fehler)`, wenn IndexedDB das Schreiben ablehnt (voll) — die App sagt es sichtbar (D11 a) |
+| `beiFremdAenderung(f)` | ein anderer Tab derselben App hat geschrieben (BroadcastChannel); der Zwischenspeicher ist schon neu gelesen |
+| `geschrieben()` | Versprechen, bis alles Geschriebene angekommen ist |
+| `KERN.speicher.belegung()` | `{ lokal: { zeichen, byte, anteil } (localStorage aller Apps gegen 5 MiB, 2 Byte je Zeichen), ablage: { belegt, verfuegbar, anteil } (navigator.storage.estimate) \| null, dauerhaft, warnen (ab 80 %) }` |
+| `KERN.speicher.dauerhaftBitten()` | `navigator.storage.persist()`: schützt vor dem Löschen bei Platzmangel (in Chrome dasselbe Kontingent) |
+
+Offen bleibt die Sieben-Tage-Regel von Safari (MDN: Daten einer Seite ohne Klick oder Tippen in sieben Tagen werden
+gelöscht) — sie trifft beide Speicher; Schutz ist der Abgleich oder das Sichern. Tests: `pruefe_kern.js` mit
+`tools/ersatz_idb.js` (Umzug, Kopie, zweite Seite, Löschen, voll, kaputt, Belegung); Seitentest Lernsteig mit
+Ersatz-IndexedDB (Umzug, Statistik, neue Runde).
+
 ### 4.4 `KERN.zufall` (`kern/zufall.js`) — Zufall mit austauschbarer Quelle
 
 | Aufruf | Ergebnis |

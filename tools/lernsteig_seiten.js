@@ -24,7 +24,7 @@ globalThis.__text = () => __textMitAbstand(document.body); // mit Abstand zwisch
 `;
 
 /** Eine Seite öffnen. speicher/sitzung (Map): derselbe Browser bzw. derselbe Tab wie eine frühere Seite. */
-function oeffne(rel, { search = "", hash = "", speicher = new Map(), sitzung = new Map(), seed = 1, pruefstand = null } = {}) {
+function oeffne(rel, { search = "", hash = "", speicher = new Map(), sitzung = new Map(), seed = 1, pruefstand = null, idb = null } = {}) {
   const datei = path.join(APP, rel);
   const html = fs.readFileSync(datei, "utf8");
   const body = (html.match(/<body[^>]*>([\s\S]*)<\/body>/) || [, html])[1].replace(/<script[\s\S]*?<\/script>/g, "");
@@ -36,6 +36,8 @@ function oeffne(rel, { search = "", hash = "", speicher = new Map(), sitzung = n
   const lauf = (code, name = "prüfung") => vm.runInContext(code, k, { filename: name, timeout: 20000 });
   lauf(DOM, "pruef_dom.js");
   lauf(HILFEN, "hilfen");
+  // Mit idb (Map, über Seiten teilbar): IndexedDB-Ersatz vor den Skripten, damit der Speicher grosse Schlüssel dort ablegt
+  if (idb) { k.__idbDaten = idb; lauf(require("./ersatz_idb.js").ERSATZ_IDB_CODE, "ersatz_idb.js"); }
   for (const m of html.matchAll(/<script(?:\s+src="([^"]+)")?[^>]*>([\s\S]*?)<\/script>/g)) {
     if (!m[1]) { lauf(m[2], rel + " (inline)"); continue; }
     const p = path.join(path.dirname(datei), m[1]);
@@ -730,6 +732,42 @@ async function pruefeSeiten(uebungen, melde, LST, katalog = uebungen) {
       textPruefen(ort, s);
     } catch (err) { melde(ort, err.message); }
     fehlerVon(ort, s);
+  }
+  // ---------- Speicher in IndexedDB (Kern 1.34.0, konzept_gruppen.md 5a, D11-W a): Umzug, neue Runde, Statistik ----------
+  if (jugendTab) {
+    const ort = "Speicher in IndexedDB (rationale-zahlen g)";
+    const geraet = alsJugendlicher();
+    const spiele = async s => {
+      for (let i = 0; i < 12; i++) {
+        const a = s.lauf("LST.pruefung.aufgabe()");
+        if (!a) break;
+        await antworte(s, a, true);
+        if (s.gibt(".knopf.weiter")) { s.klick(".knopf.weiter"); await ruhe(s, 20, 3); }
+      }
+    };
+    const idb = new Map();
+    const inIdb = schluessel => { const w = idb.get("lernsteig-ablage")?.get("werte")?.get(schluessel); return w ? JSON.parse(w) : null; };
+    try {
+      // 1. eine Runde wie bisher (ohne IndexedDB, in localStorage)
+      const s1 = oeffne("uebungen/rationale-zahlen/index.html", { search: "?niveau=n1&stufe=g", ...geraet });
+      await ruhe(s1); await spiele(s1); fehlerVon(ort, s1);
+      const vorher = (s1.json("lernsteig:runden") || []).length;
+      if (!vorher) throw new Error("ohne IndexedDB keine Runde in localStorage");
+      // 2. Startseite mit IndexedDB: zieht um, Statistik zeigt die Runde
+      const s2 = oeffne("index.html", { hash: "#statistik", speicher: geraet.speicher, sitzung: new Map(jugendTab), idb });
+      await ruhe(s2);
+      if (geraet.speicher.has("lernsteig:runden")) throw new Error("Runden nach dem Umzug noch in localStorage");
+      if ((inIdb("runden") || []).length !== vorher) throw new Error(`in IndexedDB ${(inIdb("runden") || []).length} statt ${vorher} Runden`);
+      const kachel = s2.lauf(`(document.querySelector(".kachel b") || {}).textContent || ""`);
+      if (kachel !== String(vorher)) throw new Error(`Statistik zeigt ${kachel} Runden statt ${vorher}`);
+      fehlerVon(ort, s2);
+      // 3. noch eine Runde, jetzt mit IndexedDB: landet dort, nicht in localStorage
+      const s3 = oeffne("uebungen/rationale-zahlen/index.html", { search: "?niveau=n1&stufe=g", speicher: geraet.speicher, sitzung: new Map(jugendTab), pruefstand: frei, idb });
+      await ruhe(s3); await spiele(s3); await ruhe(s3);
+      if ((inIdb("runden") || []).length !== vorher + 1) throw new Error(`nach einer Runde mit IndexedDB ${(inIdb("runden") || []).length} statt ${vorher + 1}`);
+      if (geraet.speicher.has("lernsteig:runden")) throw new Error("neue Runde in localStorage statt in IndexedDB");
+      textPruefen(ort, s3); fehlerVon(ort, s3);
+    } catch (err) { melde(ort, err.message); }
   }
   // ---------- Fehler melden (Plan C11, C11-2 a): in der Übung speichern, in der Statistik selbst senden ----------
   if (jugendTab) {

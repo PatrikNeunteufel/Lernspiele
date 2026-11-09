@@ -372,24 +372,38 @@
   // Runden und Rekorde im gemeinsamen Format der Reihe (R1 a, kern/runden.js; Ablauf KERN.runde): { id, person, zeit (Ende,
   // RA1 a), inhalt, stufe, dauer (0,1 s), liste (je Aufgabe, RA4 a), … }; gespeicherte älterer Fassungen (konto/uebung bis
   // LERN_Session15; zeit = Beginn, zeiten/falsch bis LERN_Session18) werden beim Laden umgedeutet (LST.alteEintraegeUmdeuten).
-  {
+  // Nach dem Laden der grossen Schlüssel (Kern 1.34.0: Runden und Rekorde liegen in IndexedDB)
+  LST.beiBereit(() => {
     const runden = LST.lies("runden", []), rekorde = LST.lies("rekorde", []);
     if (Array.isArray(runden) && Array.isArray(rekorde)) {
       const u = LST.alteEintraegeUmdeuten({ runden, rekorde });
       if (u.geaendert) { LST.schreibe("runden", u.runden); LST.schreibe("rekorde", u.rekorde); }
     }
-  }
+  });
   // Gast: nichts gespeichert (C2 a). Aufsicht: Runde und Rekord als Test (zählen nicht für einen Jugendlichen).
   const merkt = () => werUebt() !== "gast";
   const alsTest = e => (werUebt() === "aufsicht" ? Object.assign(e, { test: true }) : e);
   /** Runde speichern; gleiche Kennung ersetzt einen Zwischenstand derselben Serie (RA3 a). */
-  function protokolliere(runde) { if (!merkt()) return; LST.schreibe("runden", KERN.runde.eintragen(LST.lies("runden", []), alsTest(runde))); }
+  function protokolliere(runde) {
+    if (!merkt()) return;
+    if (!LST.schreibe("runden", KERN.runde.eintragen(LST.lies("runden", []), alsTest(runde)))) speicherVoll();
+  }
+  // Scheitert das Speichern, sagt die Seite es sichtbar (D11 a; konzept_gruppen.md 5a) — bis LERN_Session25 ging die Runde
+  // still verloren. In IndexedDB scheitert es erst nach dem Schreiben; das meldet der Speicher über beiFehler.
+  let speicherVollGezeigt = false;
+  function speicherVoll() {
+    if (speicherVollGezeigt || typeof document === "undefined") return;
+    speicherVollGezeigt = true;
+    document.body.prepend(el("p", { class: "speicher-voll", role: "alert", text: "Nicht gespeichert: Der Speicher dieses Browsers ist voll. "
+      + "Sichere den Stand (Statistik → Sichern) und lösche alte Runden, sonst geht die nächste Runde ebenfalls verloren." }));
+  }
+  LST.SPEICHER.beiFehler(() => speicherVoll());
   function runden(filter) { return LST.lies("runden", []).filter(filter || (() => true)); }
 
   /** Rekord speichern oder ersetzen (gleiche Kennung = Zwischenstand derselben Serie; KERN.runde). */
   function speichereRekord(rekord) {
     if (!merkt()) return;
-    LST.schreibe("rekorde", KERN.runde.rekordEintragen(LST.lies("rekorde", []), alsTest(rekord)));
+    if (!LST.schreibe("rekorde", KERN.runde.rekordEintragen(LST.lies("rekorde", []), alsTest(rekord)))) speicherVoll();
   }
   // Die Aufgaben einer Stufe hängen nicht am Niveau (ST1 a); Rekord und Bestzeit gelten darum je Stufe.
   // Mit und ohne Rechner getrennt (RE1 a): mit = true/false wählt eine Seite, undefined nimmt beide.
@@ -433,7 +447,9 @@
    * Adresse: ?niveau=n1&stufe=h[&endlos=1] startet direkt (Stufe „h“, Übergang „h-i“, „challenge“); ohne stufe
    * zeigt die Seite die Stufenwahl.
    */
-  function uebung(def, fn) {
+  /** Eine Übung starten: erst nach dem Laden der grossen Schlüssel (Kern 1.34.0), dann wie bisher. */
+  function uebung(def, fn) { return LST.bereit().then(() => uebungJetzt(def, fn)); }
+  function uebungJetzt(def, fn) {
     const eintrag = KAT.uebung(def.id);
     if (!eintrag) throw new Error(`Übung ${def.id} fehlt im Katalog`);
     const fach = KAT.fach(eintrag.fach);

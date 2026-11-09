@@ -461,5 +461,10 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     if (!document.activeElement || !document.activeElement.matches || !document.activeElement.matches("input, select, textarea")) zeichne();
   });
 
-  zeichne();
+  // Hat ein anderer Tab Runden oder Meldungen gespeichert (IndexedDB, Kern 1.34.0): neu zeichnen, ausser jemand tippt
+  LST.SPEICHER.beiFremdAenderung(() => {
+    if (!document.activeElement || !document.activeElement.matches || !document.activeElement.matches("input, select, textarea")) zeichne();
+  });
+  // Erst zeichnen, wenn Runden, Rekorde, Meldungen und Löschvermerke geladen sind (Kern 1.34.0, IndexedDB)
+  LST.bereit().then(zeichne);
 })();

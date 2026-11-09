@@ -7,9 +7,26 @@ var LST = (function () {
   const PRAEFIX = "lernsteig:"; // eigener Speicher (Entscheid SP1 a)
 
   // Speicher und Zufall aus dem Kern (kern/speicher.js, kern/zufall.js, kern 1.1.0).
-  const SPEICHER = KERN.speicher(PRAEFIX);
+  // Was wächst (Runden, Rekorde, Meldungen, Löschvermerke), liegt in IndexedDB (Kern 1.34.0, docs/konzept_gruppen.md 5a,
+  // D11-W a); jede Seite wartet beim Start einmal auf LST.bereit(). Ohne IndexedDB (Node, Ersatz-DOM) wie bisher.
+  const GROSS = ["runden", "rekorde", "meldungen", "geloescht"];
+  // Liegt ein Schlüssel beim Start in beiden Speichern (ein Tab der alten Fassung schrieb nach dem Umzug), werden Löschvermerke
+  // und Meldungen nach ihren Regeln vereinigt; Runden und Rekorde nach Kennung (Standard des Kerns)
+  const SPEICHER = KERN.speicher(PRAEFIX, { gross: GROSS, datenbank: "lernsteig-ablage",
+    vereinen: (s, a, b) => (s === "geloescht" ? KERN.daten.vermerkeVereinen(a, b) : s === "meldungen" ? KERN.meldungen.zusammenfuehren(a, b).wert : undefined) });
   /** Gespeicherten Wert lesen; ohne Speicher (privates Fenster, Node) gilt der Standard. */
   const lies = (schluessel, standard) => SPEICHER.lies(schluessel, standard);
+  const entferne = schluessel => SPEICHER.entferne(schluessel);
+  // Was nach dem Laden der grossen Schlüssel einmal laufen soll (Umdeuten alter Einträge, Abgleich starten)
+  const nachLaden = [];
+  let bereitVersprechen = null;
+  /** Einmal je Seite abwarten, bevor Runden, Rekorde, Meldungen oder Löschvermerke gelesen werden. */
+  function bereit() {
+    if (!bereitVersprechen) bereitVersprechen = SPEICHER.bereit().then(() => { for (const f of nachLaden) try { f(); } catch (e) { console.error(e); } });
+    return bereitVersprechen;
+  }
+  /** f nach dem Laden ausführen (sofort, wenn schon geladen). */
+  const beiBereit = f => { nachLaden.push(f); if (bereitVersprechen) bereitVersprechen.then(() => f()); };
   // Wer wissen will, dass etwas gespeichert wurde (der Abgleich über einen Ordner zieht danach die eigene Datei nach,
   // gemeinsam/abgleich.js; wie im Eulenpfad).
   const aenderungsHoerer = [];
@@ -219,7 +236,7 @@ var LST = (function () {
   }
 
   return {
-    PRAEFIX, ALTE_FELDER, alteEintraegeUmdeuten, lies, schreibe, beiAenderung, quelle, zufall, waehle, mische, tagText, wochenSerie,
+    PRAEFIX, ALTE_FELDER, alteEintraegeUmdeuten, lies, schreibe, entferne, beiAenderung, bereit, beiBereit, SPEICHER, GROSS, quelle, zufall, waehle, mische, tagText, wochenSerie,
     TAUSENDER, MINUS, schreibweise, zahlText, dezimalText, dezimalZeichen, leseZahl, antwortTasten, antwortPruefen, zahlenImText,
     wertziffern, aufteilung, ganzeZahl, dezimalZahl,
     NIVEAUS, niveauNr, stufenListe, stufeVon, zielstufe,

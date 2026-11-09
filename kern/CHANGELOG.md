@@ -3,6 +3,18 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.34.0 — 2026-11-09 (LERN_Session25)
+- `speicher.js` (docs/konzept_gruppen.md 5a, entschieden LERN_Session11; D11 a, D11-W a): Option `gross` mit `datenbank` —
+  diese Schlüssel liegen in IndexedDB statt in localStorage (localStorage: 5 MiB je Ursprung für alle Apps zusammen).
+  Lesen und Schreiben bleiben sofort (Zwischenspeicher als JSON-Text, `lies` gibt wie bisher eine Kopie); `bereit()` wird
+  beim Start einmal abgewartet, ein grosser Schlüssel davor wirft (lieber laut als still leer). Umzug aus localStorage beim
+  Start (bei jedem Start, was noch dort liegt), dort erst nach dem Schreiben gelöscht; liegt ein Schlüssel in beiden
+  Speichern (ein Tab der alten Fassung schrieb nach dem Umzug), werden die Fassungen vereinigt (`opt.vereinen` der App,
+  sonst Listen nach Kennung; nicht vereinbar: beide bleiben). Andere Tabs lesen nach einer Änderung neu (BroadcastChannel,
+  `beiFremdAenderung`). Scheitert das Schreiben (voll), meldet `beiFehler` es. Ohne IndexedDB wie bis 1.33.
+  `KERN.speicher.belegung()` (localStorage aller Apps gegen 5 MiB, `navigator.storage.estimate()`, Warnung ab 80 %) und
+  `KERN.speicher.dauerhaftBitten()` (`navigator.storage.persist()`). Ohne `gross` unverändert.
+
 ## 1.33.1 — 2026-11-09 (LERN_Session25)
 - `listenpruefung.js`: nur der Kopfkommentar — der Lernsteig bietet Korrekturvorschläge (✏️) jetzt auch an (Plan C11
   Schritt 4). Keine Änderung am Verhalten.
