@@ -208,6 +208,37 @@ function annahmeMaengel(a) {
   return m;
 }
 
+// Prüfansicht der Inhaltslisten (LK1 a, LERN_Session24; kern/listenpruefung.js): Jede eigene Liste hat in
+// uebungen/<id>/pruefung.js eine Prüfdefinition, die lädt; jeder Eintrag einen Schlüssel im Format des Entwickler-Servers
+// und keinen doppelten; eine geprüfte Liste ist seit der Prüfung unverändert (Fingerabdruck im Prüfstand, wie
+// tools/pruefe_spiele.js im Eulenpfad). Ein Fehler hier hält die Übung nicht an (die Listen sind Daten, keine Aufgaben).
+const PRUEFSTAND = require(path.join(APP, "gemeinsam", "pruefstand.js"));
+function pruefeListenPruefung(eintrag, ordner, U) {
+  const wo = `${eintrag.id} Prüfansicht`;
+  const eigene = Object.entries(eintrag.listen || {}).filter(([, l]) => !l.von).map(([id]) => id);
+  const pfad = path.join(ordner, "pruefung.js");
+  if (!eigene.length) { if (fs.existsSync(pfad)) fehlerMelden(wo, "pruefung.js ohne eigene Liste im Katalog"); return; }
+  if (!fs.existsSync(pfad)) return fehlerMelden(wo, "pruefung.js fehlt");
+  const defs = {}, alt = LST.listenPruefung;
+  LST.listenPruefung = (id, d) => { if (id !== eintrag.id) fehlerMelden(wo, `meldet die Übung ${id}`); Object.assign(defs, d); };
+  for (const [k, v] of Object.entries(U)) global[k] = v; // in der Seite sind UEBUNG und die Funktionen aus aufgaben.js global
+  try { delete require.cache[require.resolve(pfad)]; require(pfad); } catch (e) { fehlerMelden(wo, `lädt nicht: ${e.message}`); }
+  LST.listenPruefung = alt;
+  for (const l of eigene) {
+    if (!defs[l]) { fehlerMelden(wo, `keine Prüfdefinition für die Liste ${l}`); continue; }
+    let e;
+    try { e = KERN.listenpruefung.eintraegeVon(defs[l]); } catch (err) { fehlerMelden(`${wo} ${l}`, `Einträge nicht lesbar: ${err.message}`); continue; }
+    if (!e.length) fehlerMelden(`${wo} ${l}`, "keine Einträge");
+    const falsch = e.filter(x => !/^[a-z0-9-]+:[a-z0-9]+$/.test(x.schluessel));
+    if (falsch.length) fehlerMelden(`${wo} ${l}`, `Schlüssel nicht im Format des Entwickler-Servers: ${falsch[0].schluessel}`);
+    const doppelt = e.filter((x, i) => e.findIndex(y => y.schluessel === x.schluessel) !== i);
+    if (doppelt.length) fehlerMelden(`${wo} ${l}`, `doppelte Einträge (gleicher Haken): ${doppelt.map(x => x.zellen.join(" | ")).slice(0, 3).join("; ")}`);
+    const stand = (PRUEFSTAND.listen || {})[`${eintrag.id}/${l}`];
+    if (stand && stand.hash && stand.hash !== KERN.listenpruefung.listenHash(e)) fehlerMelden(`${wo} ${l}`, "Liste nach der Prüfung geändert — in der Prüfansicht die neuen Einträge abhaken");
+    else if (stand && !stand.hash) hinweisMelden(`${wo} ${l}`, "geprüft vor der Prüfung je Eintrag (ohne Fingerabdruck) — einmal in der Prüfansicht bestätigen");
+  }
+}
+
 // Gibt true zurück, wenn die Aufgaben der Übung erzeugt wurden. Mängel im Aufbau zählen je Übung: sie halten nur diese
 // Übung an, nicht die folgenden (vorher zählte `if (fehler) return` über alle Übungen und den Kern; LERN_Session23 machte
 // so aus 2 echten Fehlern 81 gemeldete).
@@ -231,11 +262,13 @@ function pruefeOhneBrowser(eintrag) {
     if (eintrag.rechner && !["ohne", "mit", "frei"].includes(eintrag.rechner[s])) fehlerMelden(wo, `rechner für Stufe ${s} fehlt oder falsch`);
   }
   // Inhaltslisten im Übungsordner (etwa aussagen.js → global AUSSAGEN): vor aufgaben.js laden, Seite muss sie laden
-  for (const datei of fs.readdirSync(ordner).filter(d => d.endsWith(".js") && d !== "aufgaben.js")) {
+  // pruefung.js ist die Prüfansicht der Listen (LK1 a), keine Inhaltsliste; die Seite lädt sie erst beim Prüfen
+  for (const datei of fs.readdirSync(ordner).filter(d => d.endsWith(".js") && d !== "aufgaben.js" && d !== "pruefung.js")) {
     global[path.basename(datei, ".js").toUpperCase().replace(/-/g, "_")] = require(path.join(ordner, datei));
     if (!html.includes(`src="${datei}"`)) fehlerMelden(wo, `Seite lädt die Inhaltsliste ${datei} nicht`);
   }
   const U = require(path.join(ordner, "aufgaben.js"));
+  pruefeListenPruefung(eintrag, ordner, U);
   if (!U.UEBUNG || U.UEBUNG.id !== eintrag.id) fehlerMelden(wo, "UEBUNG.id passt nicht zum Katalog");
   for (const f of ["aufgabeErzeugen", "pruefeAufgabe", "hinweis"]) if (typeof U[f] !== "function") fehlerMelden(wo, `${f} fehlt`);
   if (TEXT_GELESEN.includes(eintrag.id) && typeof U.liesText !== "function") fehlerMelden(wo, "liesText fehlt (Text gegen Prüfdaten, TD1 a)");

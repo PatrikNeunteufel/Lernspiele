@@ -32,6 +32,7 @@ require(path.join(WURZEL, "kern", "personenmenue.js"));
 require(path.join(WURZEL, "kern", "tastenfeld.js"));
 require(path.join(WURZEL, "kern", "notizblock.js"));
 require(path.join(WURZEL, "kern", "uebersicht.js"));
+require(path.join(WURZEL, "kern", "listenpruefung.js"));
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -612,6 +613,29 @@ console.log("uebersicht.js");
   // Stern
   gleich(U.stern(true).svg.includes('class="symbol stern an"') && U.stern(false).svg.includes('class="symbol stern"') && U.stern(false).svg.includes(U.STERN), true, "stern: an/aus mit der Form");
   delete global.document; delete global.requestAnimationFrame; delete global.__fokus;
+}
+
+// ---------- listenpruefung (LK1 a: Schlüssel je Eintrag, Fingerabdruck der Liste; ohne DOM) ----------
+console.log("listenpruefung.js");
+{
+  const LP = KERN.listenpruefung;
+  const def = { abschnitte: [
+    { id: "woerter", titel: "Wörter", spalten: ["Wort"], eintraege: () => [{ w: "Haus" }, { w: "Maus" }], zeile: e => [e.w], gruppe: e => e.w[0] },
+    { id: "saetze", titel: "Sätze", spalten: ["Satz", "Lösung"], eintraege: () => [["Ich gehe.", null]], zeile: e => e } ] };
+  const e = LP.eintraegeVon(def);
+  gleich(e.length, 3, "eintraegeVon: alle Abschnitte");
+  gleich(e.every(x => /^[a-z0-9-]+:[a-z0-9]+$/.test(x.schluessel)), true, "Schlüssel im Format des Entwickler-Servers");
+  gleich(e[0].schluessel.startsWith("woerter:") && e[2].schluessel.startsWith("saetze:"), true, "Schlüssel mit der Id des Abschnitts");
+  gleich(JSON.stringify(e[2].zellen), JSON.stringify(["Ich gehe.", ""]), "Zellen als Text, null leer");
+  gleich(e[0].gruppe + e[2].gruppe, "Hnull", "Gruppe nur, wo der Abschnitt sie hat");
+  gleich(e[0].schluessel, LP.eintraegeVon(def)[0].schluessel, "Schlüssel bleibt gleich bei gleichen Rohdaten");
+  const h = LP.listenHash(e);
+  gleich(LP.listenHash(e.slice().reverse()), h, "listenHash unabhängig von der Reihenfolge");
+  const geaendert = { abschnitte: [{ ...def.abschnitte[0], eintraege: () => [{ w: "Haus" }, { w: "Laus" }] }, def.abschnitte[1]] };
+  const e2 = LP.eintraegeVon(geaendert);
+  gleich(e2[0].schluessel === e[0].schluessel && e2[1].schluessel !== e[1].schluessel, true, "geänderter Eintrag: neuer Schlüssel, die anderen bleiben");
+  gleich(LP.listenHash(e2) !== h, true, "geänderter Eintrag: neuer Fingerabdruck der Liste");
+  gleich(typeof LP.ansicht({ eintraegeUrl: "x", lokal: { lies: () => ({}), schreibe() {} }, setzeFrei() {} }).oeffne, "function", "ansicht: oeffne");
 }
 
 // ---------- Geheimnisse und Personen (asynchron) ----------

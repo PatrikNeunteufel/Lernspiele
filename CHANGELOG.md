@@ -1224,3 +1224,22 @@
   Gegenproben (14): gemeldet. Im Browser angesehen (375 px, kraefte a mit vier Linien). Abdeckung (Kraftmesser jetzt
   teilweise), Plan E 7 Stand ersetzt. Tests: Kern „5798 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“
   (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan C6 (LK1 a, LK2 a), Prüfansicht der Inhaltslisten im Lernsteig: Kern 1.31.0 mit `kern/listenpruefung.js`
+  (`KERN.listenpruefung`, aus dem Eulenpfad; docs/kern/rahmen.md 4.27), verteilt. Eulenpfad: `listenpruefung.js` nur noch
+  Anbindung (mit Korrekturen über die Meldungen). **Befund:** Die Prüfansicht des Eulenpfads lud seit LERN_Session20
+  (`2d64b4a`) nicht — ein Kommentar verschluckte eine schliessende Klammer; kein Test merkte es, weil die Datei erst beim
+  Öffnen lädt. Jetzt lädt `pruefe_spiele.js` jede Prüfdefinition (Gegenprobe mit der alten Datei: „Prüfansicht lädt
+  nicht“). Lernsteig: `LST.listenPruefung`, `LST.listenPruefen`, Knöpfe „🔍 Inhalte prüfen“ unter der Stufenwahl
+  (Aufsicht, Entwicklung), „🔍 prüfen“ in Verwaltung → Freigabe (`?pruefen=<liste>`), `pruefung.js` für die sieben
+  Listen (atombau pse, kraefte maschinen, aussagen, grammatik, rechtschreibung, englisch, franzoesisch; Abschnitte je
+  Stufe, Gruppen je Thema oder Regel, aussagen mit Spalte „stimmt“), leeres `gemeinsam/pruefstand-eintraege.json`,
+  Stile in `stil.css`; ohne Korrekturvorschläge bis zu den Meldungen (LK2 a, neuer Plan-Punkt C11: Meldungswesen und
+  Entwickler-Server einstellbar, Vorgabe Patrik). `pruefe_uebungen.js`: jede eigene Liste hat eine Prüfdefinition, die
+  lädt, Schlüssel im Format des Servers, keine doppelten Einträge, geprüfte Liste unverändert (`pruefung.js` gilt nicht
+  als Inhaltsliste); Seitentest: Weg zur Prüfansicht für jede eigene Liste. Kern-Fälle (10) zu Schlüssel und
+  Fingerabdruck; Fingerabdrücke der fünf Eulenpfad-Listen alt = neu. Gegenproben (3, Lernsteig): falscher
+  Fingerabdruck im Prüfstand, doppelter Eintrag, Prüfansicht wirft beim Laden — gemeldet. Im Browser: Lernsteig
+  englisch (152 Sätze, 19 Gruppen, Haken lokal, „Ganze Liste geprüft“ gibt auf dem Gerät frei; 375 px) und Eulenpfad
+  anlaut-angel (73 Einträge, mit ✏️). Eulenpfad-Stichprobe: anlaut-angel, auge-entdecker „Keine Fehler.“, kein voller
+  Lauf. Doku: Kern 4.27, Eulenpfad 17, Lernsteig 5e, Plan C6 und C11. Tests: Kern „5808 Fälle, 0 Fehler.“, Lernsteig
+  „0 Fehler, 139 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

@@ -340,6 +340,12 @@ async function pruefeSeiten(uebungen, melde, LST, katalog = uebungen) {
         if (zu in fg().uebungen || sichtbar() !== vorher) melde(ort, "Freigabe: „wie Prüfstand“ hebt die eigene Einstellung nicht auf");
       }
       const mitListe = s.lauf(`(LST_KATALOG.UEBUNGEN.find(u => LST.FREIGABE.listen(u.id).some(l => !l.von)) || {}).id || ""`);
+      // Prüfansicht (LK1 a): jede eigene Liste hat in der Freigabe einen Weg zur Prüfansicht auf der Seite der Übung
+      {
+        const eigene = s.lauf(`LST_KATALOG.UEBUNGEN.flatMap(u => LST.FREIGABE.listen(u.id).filter(l => !l.von).map(l => u.id + "/" + l.id))`);
+        const ohne = eigene.filter(q => s.attr(`a[data-pruefen="${q}"]`, "href") !== `uebungen/${q.split("/")[0]}/index.html?pruefen=${q.split("/")[1]}`);
+        if (!eigene.length || ohne.length) melde(ort, `Freigabe: kein Weg zur Prüfansicht für ${ohne.join(", ") || "(keine Listen)"}`);
+      }
       if (mitListe) {
         const l = s.lauf(`LST.FREIGABE.listen(${JSON.stringify(mitListe)}).find(l => !l.von).quelle`);
         const war = s.lauf(`LST.FREIGABE.listeFrei(${JSON.stringify(mitListe)}, ${JSON.stringify(l.split("/")[1])})`);

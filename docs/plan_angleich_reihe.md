@@ -19,7 +19,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
 | B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.26.0; offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 Schritte 1–3 gebaut (LERN_Session17–20) | Abschnitt B |
-| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 zum Teil (Entwickler-Modus), C3 gebaut (LERN_Session21) | Abschnitt C |
+| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 bis auf Korrekturvorschläge (C11), C3 gebaut (LERN_Session21) | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | in Arbeit seit 2026-11-07 (LERN_Session21, E 9): E 8 und E 9 erledigt, übrige offen oder teilweise | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
@@ -163,6 +163,8 @@ Kindersprache.
    beiden Apps gleich.
 6. **Freigabe nach Prüfstand (FG1 a)** über den Kern: Prüfstand `lernsteig/gemeinsam/pruefstand.js`, Entwickler-Modus
    mit `tools/entwickler_server.py` auch für den Lernsteig, Listen je Eintrag (`listenpruefung.js`).
+   *Stand 2026-11-09 (LERN_Session24):* erledigt bis auf die Korrekturvorschläge der Aufsicht (C11) — Prüfansicht im
+   Kern 1.31.0 (`KERN.listenpruefung`, LK1 a), Lernsteig mit Prüfdefinitionen für alle sieben Listen.
 7. **Anleitungen:** `lernsteig/anleitung/jugendliche.html` und `aufsicht.html` im Muster des Eulenpfads, Bilder mit
    `tools/anleitung_bilder.js` (Musterkonten je App).
 8. **Gratwanderung:** dasselbe Gerüst ohne Übungen (Anmeldung, Tabs, leerer Katalog, Anleitung als Gerüst), damit der
@@ -177,6 +179,12 @@ Kindersprache.
    LERN_Session16 (`KERN.person.uebernehmen`) für Eulenpfad ↔ Lernsteig; die Gratwanderung folgt mit C8.
 10. **Eulenpfad:** übernimmt aus dem Angleich nur, was er neu braucht (Kern-Teile, Gast, Geburtstag mit Tag, Rolle
    Lehrperson); Aussehen bleibt.
+11. **Meldungen im Lernsteig, Meldungswesen und Entwickler-Server einstellbar** (LK2 a, LERN_Session24; Vorgabe
+   Patrik: „Meldungswesen wie Entwicklung (Entwicklerserver) müssen sowieso erweitert werden, dass dies entsprechend
+   eingestellt werden kann“): Meldungen wie im Eulenpfad (M1 a) für den Lernsteig, dazu einstellbar, wohin Meldungen
+   und Bemerkungen gehen; danach Korrekturvorschläge (✏️) der Aufsicht in der Prüfansicht der Listen
+   (`KERN.listenpruefung`, Option `korrektur`). Zuschnitt (Kern oder je App, was einstellbar ist) vor dem Bau als
+   Entscheid vorlegen.
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 

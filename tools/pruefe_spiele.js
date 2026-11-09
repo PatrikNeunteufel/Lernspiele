@@ -36,7 +36,7 @@ for (const a of process.argv.slice(2)) {
   if (m) opt[m[1]] = Number(m[2]); else nurSpiele.push(a);
 }
 
-const { skripte, abweichungen } = require("./listen_fingerabdruck");
+const { skripte, abweichungen, fingerabdrueckeVon } = require("./listen_fingerabdruck");
 
 // Treiber im Kontext: Runden spielen, bis opt.runden protokolliert sind oder die Klicks ausgehen.
 const TREIBER = `
@@ -535,6 +535,14 @@ if (opt.endlosMessen !== 0) {
   for (const a of abweichungen(kat.PRUEFSTAND, ids)) {
     if (a.stand) { console.log(`    FEHLER  ${a.schluessel}: Liste nach der Prüfung geändert — in der Prüfansicht die neuen Einträge abhaken`); fehlerZahl++; }
     else console.log(`    hinweis ${a.schluessel}: geprüft vor der Prüfung je Eintrag (ohne Fingerabdruck) — einmal in der Prüfansicht bestätigen`);
+  }
+  // Jede Prüfansicht lädt (LERN_Session24): Die Prüfansicht lud seit LERN_Session20 nicht mehr (ein Kommentar verschluckte
+  // eine Klammer), und niemand merkte es, weil oben nur Listen mit Eintrag im Prüfstand gerechnet werden.
+  for (const id of ids.filter(i => fs.existsSync(path.join(SPIELE_DIR, i, "pruefung.js")))) {
+    try {
+      const fp = fingerabdrueckeVon(id);
+      if (!fp || !Object.keys(fp).length) { console.log(`    FEHLER  ${id}: pruefung.js meldet keine Liste`); fehlerZahl++; }
+    } catch (e) { console.log(`    FEHLER  ${id}: Prüfansicht lädt nicht — ${String(e.message).split("\n")[0]}`); fehlerZahl++; }
   }
 }
 // Freiwillige Beiträge (LERN-50): Kinder sollen nie um Geld gebeten werden. Im App-Ordner darf die Beitragsseite nur

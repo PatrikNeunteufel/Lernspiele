@@ -352,8 +352,16 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
 - **Geschrieben** nur über den Entwickler-Server (`python tools/entwickler_server.py`, dann
   `http://localhost:8765/lernsteig/`): Prüfstand nach `gemeinsam/pruefstand.js` (`uebungen`, `listen`; Datei vom Server
   im JSON-Format geschrieben, nicht von Hand ändern), Bemerkungen nach `docs/lernsteig/bemerkungen.json`.
-- Noch nicht: Prüfansicht der Inhaltslisten je Eintrag (C6). Die Freigabe je Gerät steht seit LERN_Session20 in der
-  Verwaltung (5d).
+- **Prüfansicht der Inhaltslisten je Eintrag** (C6, LK1 a, seit LERN_Session24; `KERN.listenpruefung`, docs/kern/rahmen.md
+  4.27): Jede Übung mit eigener Liste meldet in `uebungen/<id>/pruefung.js` mit `LST.listenPruefung(id, { <liste>:
+  { beschreibung, abschnitte } })`, wie sie geprüft wird (Abschnitte meist je Stufe, Gruppen je Thema oder Regel).
+  `LST.listenPruefen(id, liste)` lädt sie nach und öffnet die Ansicht; Knöpfe „🔍 Inhalte prüfen“ unter der Stufenwahl
+  für Aufsicht und Entwicklung, `?pruefen=<liste>` aus der Verwaltung → Freigabe („🔍 prüfen“). Die Entwicklung hakt über
+  den Server ab (`gemeinsam/pruefstand-eintraege.json`, ganz geprüft in `pruefstand.js` mit Fingerabdruck), eine
+  Aufsicht für ihr Gerät (`lernsteig:pruefungLokal`) und gibt die Liste dort frei. Ohne Korrekturvorschläge (✏️), bis
+  der Lernsteig Meldungen hat (LK2 a). `pruefe_uebungen.js`: jede eigene Liste hat eine Prüfdefinition, die lädt, keine
+  doppelten Einträge, und eine geprüfte Liste ist seit der Prüfung unverändert. Die Freigabe je Gerät steht seit
+  LERN_Session20 in der Verwaltung (5d).
 
 ## 6. Speicher (`lernsteig:*`, SP1 a)
 

@@ -185,7 +185,8 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
         el("td", {}, schalter(F.frei(u.id), u.id in eigen.uebungen, w => F.setzeFrei(u.id, w), u.titel, { "data-freigabe": u.id })))];
       for (const l of F.listen(u.id)) z.push(el("tr", { class: "liste-zeile", "data-liste": `${u.id}/${l.id}` },
         el("td", {}, `↳ ${l.name}`),
-        el("td", {}, stand(l.geprueft, "ungeprüft")),
+        // Prüfansicht je Eintrag auf der Seite der Übung (LK1 a): nur für eigene Listen, nicht für Verweise (von)
+        el("td", {}, stand(l.geprueft, "ungeprüft"), l.von ? null : el("a", { class: "schalter", href: `uebungen/${u.id}/index.html?pruefen=${l.id}`, "data-pruefen": `${u.id}/${l.id}`, text: "🔍 prüfen" })),
         el("td", {}, l.von
           ? el("span", { class: "leise", text: `${F.listeFrei(u.id, l.id) ? "✓ frei" : "🔒 gesperrt"} — wie bei ${(KAT.uebung(l.von.split("/")[0]) || {}).titel || l.von}` })
           : schalter(F.listeFrei(u.id, l.id), l.quelle in eigen.listen, w => F.setzeListeFrei(u.id, l.id, w), `${u.titel}, ${l.name}`, { "data-freigabe": `${u.id}/${l.id}` }))));

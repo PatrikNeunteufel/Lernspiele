@@ -66,6 +66,48 @@
     zeichne();
   }
 
+  // ---------- Prüfansicht der Inhaltslisten (Kern KERN.listenpruefung seit 1.31.0, LK1 a; Plan C6) ----------
+  // Wie im Eulenpfad: Eine Übung meldet in uebungen/<id>/pruefung.js mit LST.listenPruefung(id, { <liste>: … }), wie ihre
+  // Listen geprüft werden (Aufbau in kern/listenpruefung.js). Die Entwicklung hakt über den Entwickler-Server ab
+  // (pruefstand-eintraege.json, ganz geprüft in pruefstand.js mit Fingerabdruck), eine Aufsicht für ihr Gerät und gibt die
+  // Liste dort frei. Korrekturvorschläge der Aufsicht kommen mit den Meldungen (LK2 a).
+  const PRUEFUNGEN = {};
+  const listenPruefung = (id, defs) => { PRUEFUNGEN[id] = { ...(PRUEFUNGEN[id] || {}), ...defs }; };
+  const pruefungDefinition = id => PRUEFUNGEN[id] || null;
+  const ladeSkript = src => new Promise((ok, fehler) => {
+    if ([...document.scripts].some(s => s.getAttribute("src") === src)) return ok();
+    const s = document.createElement("script");
+    s.src = src; s.onload = ok; s.onerror = fehler;
+    document.head.append(s);
+  });
+  let pruefAnsicht = null;
+  const ansicht = () => pruefAnsicht || (pruefAnsicht = KERN.listenpruefung.ansicht({
+    el, eintraegeUrl: "../../gemeinsam/pruefstand-eintraege.json", entwicklung: () => ENTWICKLUNG,
+    ich: () => (aufsichtDa() || {}).name || "Aufsicht",
+    lokal: { lies: q => ({ ...(LST.lies("pruefungLokal", {})[q] || {}) }), schreibe: (q, h) => LST.schreibe("pruefungLokal", { ...LST.lies("pruefungLokal", {}), [q]: h }) },
+    setzeFrei: FREIGABE.setzeListeFrei, liste: (id, listeId) => FREIGABE.listen(id).find(l => l.id === listeId) || null,
+    feld: "inhalt", wer: "Jugendliche", korrektur: null,
+  }));
+  /** Prüfansicht einer Liste öffnen (auf der Seite der Übung, die sie besitzt); false ohne Prüfdefinition. */
+  async function listenPruefen(id, listeId) {
+    try { await ladeSkript("pruefung.js"); } catch (e) { return false; }
+    return ansicht().oeffne(pruefungDefinition(id), id, listeId);
+  }
+  /** Knöpfe „Inhalte prüfen“ für Aufsicht und Entwicklung unter der Stufenwahl; ?pruefen=<liste> öffnet gleich. */
+  function pruefKnoepfe(id, ort) {
+    const eigene = FREIGABE.listen(id).filter(l => !l.von);
+    if (!eigene.length || !(aufsichtDa() || ENTWICKLUNG.aktiv())) return;
+    ladeSkript("pruefung.js").then(() => {
+      const defs = pruefungDefinition(id);
+      if (!defs || !document.body.contains(ort)) return;
+      const mit = eigene.filter(l => defs[l.id]);
+      if (mit.length) ort.append(el("div", { class: "knopf-zeile pruef-zeile" }, el("span", { class: "leise", text: "🔍 Inhalte prüfen:" }),
+        ...mit.map(l => el("button", { type: "button", class: "knopf", "data-pruefen": l.id, text: `${l.geprueft ? "✓" : "○"} ${l.name}`, onclick: () => listenPruefen(id, l.id) }))));
+      const gefragt = new URLSearchParams(location.search).get("pruefen");
+      if (gefragt && mit.some(l => l.id === gefragt)) listenPruefen(id, gefragt);
+    }).catch(() => { /* noch keine Prüfansicht für diese Übung */ });
+  }
+
   /** Grund, warum Jugendliche die Übung nicht sehen, oder null, wenn sie frei ist. */
   const sperrGrund = id => FREIGABE.sperrGrund(id);
   /** Darf die Übung auf diesem Tab geöffnet werden? Frei oder angemeldete Aufsicht. */
@@ -353,6 +395,7 @@
       }
       buehne.append(liste,
         el("p", { class: "leise klein", text: "Serie: Aufgaben, bis eine falsch ist. Gezählt werden die richtigen." }));
+      pruefKnoepfe(def.id, buehne);
     }
 
     function runde(st, endlos) {
@@ -705,5 +748,5 @@
   let aktuell = null;
   const pruefung = { aufgabe: () => aktuell };
 
-  Object.assign(LST, { GRAPH, graphHoehe, el, FREIGABE, ENTWICKLUNG, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, wackelt, stufenBedarf, WACKEL, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
+  Object.assign(LST, { GRAPH, graphHoehe, el, FREIGABE, ENTWICKLUNG, listenPruefung, pruefungDefinition, listenPruefen, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, wackelt, stufenBedarf, WACKEL, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
 })(LST);

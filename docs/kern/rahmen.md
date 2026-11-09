@@ -672,7 +672,27 @@ der Freigabe in `start/verwaltung.js`, seit LERN_Session23; Seitentest `tools/eu
 `pruefe_spiele.js`). Mit dem Umbau fielen im Eulenpfad zwei Fehler weg: „Alle auf/zu“ während einer Suche, und bei
 einem Suchfeld mit nur Leerzeichen waren alle Gruppen offen und Zuklappen wurde nicht gemerkt.
 
-### 4.27 Geplant
+### 4.27 `KERN.listenpruefung` (`kern/listenpruefung.js`) — Prüfansicht der Inhaltslisten
+
+Im Kern seit 1.31.0 (LERN_Session24, Entscheid LK1 a), aus `eulenpfad/spiele/gemeinsam/listenpruefung.js` (LP1 a–LP5 a,
+Eulenpfad rahmen.md 17). Eine Inhalts-Id (Spiel, Übung) meldet ihre Listen mit einer Prüfdefinition `{ <liste>:
+{ beschreibung, abschnitte: [{ id, titel, hinweis?, spalten, eintraege(), zeile(e), gruppe?(e), bild?(e) }] } }`.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `eintraegeVon(def)` | `[{ roh, abschnitt, schluessel, zellen, gruppe }]`; Schlüssel `<abschnitt>:<Fingerabdruck der Rohdaten>` (`KERN.runden.fingerabdruck`), im Format des Entwickler-Servers |
+| `listenHash(eintraege)` | Fingerabdruck der ganzen Liste (alle Schlüssel, sortiert) — steht beim Prüfstand einer ganz geprüften Liste |
+| `ansicht(opt).oeffne(defs, id, liste)` | Dialog `listen-dialog pruef-dialog`; `false` ohne Definition. `opt`: `eintraegeUrl`, `entwicklung()`, `ich()`, `lokal { lies, schreibe }`, `setzeFrei(id, liste, wert)`, `liste(id, liste)` → `{ name, geprueft }`, `titel(id)`, `zelle(text, klasse)`, `feld` (Name der Id in Bemerkungen), `wer` („Kinder“, „Jugendliche“), `korrektur` (oder `null`: ohne ✏️) |
+
+Die Entwicklung hakt über den Entwickler-Server ab (`/entwicklung/eintraege`), eine Aufsicht für ihr Gerät und gibt die
+Liste dort frei. Aussehen gibt die App (Klassen `listen-dialog`, `pruef-*`). Tests in `pruefe_kern.js` (Schlüssel,
+Format, Fingerabdruck bei Reihenfolge und Änderung); die Apps prüfen, dass jede Prüfdefinition lädt und eine geprüfte
+Liste seit der Prüfung unverändert ist (`pruefe_spiele.js`, `pruefe_uebungen.js`). Beim Umzug fiel ein Fehler im
+Eulenpfad weg: Seit LERN_Session20 lud die Prüfansicht nicht mehr (ein Kommentar verschluckte eine Klammer).
+Benutzt von: Eulenpfad (`spiele/gemeinsam/listenpruefung.js` als Anbindung, mit Korrekturen über die Meldungen) und
+Lernsteig (`gemeinsam/rahmen.js`, `uebungen/<id>/pruefung.js`, ohne Korrekturen bis zu den Meldungen, LK2 a).
+
+### 4.28 Geplant
 
 Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): die
 Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Prüfen der Antwort und der Vertrag `aufgabeErzeugen`/`pruefeAufgabe`

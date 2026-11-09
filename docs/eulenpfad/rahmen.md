@@ -774,8 +774,8 @@ Go, Nim), erklären sie auf einer eigenen Seite statt in Stufen. Die Stufen blei
 
 ## 17. Prüfung der Inhaltslisten je Eintrag
 
-Entscheide LP1 a, LP2 a, LP4 a, LP5 a (Patrik, LERN_Session11), LP3 a (Patrik, LERN_Session12). Code: `spiele/gemeinsam/listenpruefung.js`
-(Ansicht), `spiel.js` (`LS.listenPruefung`, `LS.listenPruefen`, `LS.fingerabdruck`, lokale Haken), Entwickler-Server
+Entscheide LP1 a, LP2 a, LP4 a, LP5 a (Patrik, LERN_Session11), LP3 a (Patrik, LERN_Session12). Code: Ansicht seit
+Kern 1.31.0 in `kern/listenpruefung.js` (LK1 a, docs/kern/rahmen.md 4.27), `spiele/gemeinsam/listenpruefung.js` (Anbindung), `spiel.js` (`LS.listenPruefung`, `LS.listenPruefen`, `LS.fingerabdruck`, lokale Haken), Entwickler-Server
 (`/entwicklung/eintraege`, `/entwicklung/bemerkung-status`).
 
 - **pruefung.js je Spiel** neben den Inhalten meldet mit `LS.listenPruefung(spielId, { <liste>: { beschreibung,

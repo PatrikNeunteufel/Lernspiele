@@ -3,6 +3,14 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.31.0 — 2026-11-09 (LERN_Session24)
+- `listenpruefung.js` (`KERN.listenpruefung`, neu, Entscheid LK1 a): Prüfansicht der Inhaltslisten aus dem Eulenpfad —
+  `eintraegeVon`, `listenHash` (Schlüssel und Fingerabdruck wie bisher, gleich nachgerechnet für alle fünf Listen mit
+  Prüfdefinition) und `ansicht(opt).oeffne(defs, id, liste)`; was je App verschieden ist (Entwickler-Modus, lokale
+  Haken, Freigabe je Gerät, Zellen mit Bildern, Korrekturen, Name der Id in Bemerkungen) gibt die App. Benutzt vom
+  Eulenpfad (Anbindung `spiele/gemeinsam/listenpruefung.js`) und vom Lernsteig. Behoben: Die Eulenpfad-Fassung lud seit
+  1.26.0 (LERN_Session20) nicht mehr — ein Kommentar verschluckte eine schliessende Klammer.
+
 ## 1.30.0 — 2026-11-09 (LERN_Session24)
 - `terme.js` (Plan E 4): Form `potenz` verlangt dieselbe Basis wie die Lösung, wenn diese selbst eine Potenz ist
   („2^6“ und „64^1“ für 4³ sind Formfehler „Schreibe als Potenz mit der Basis 4“; „−2^3“ ist −(2³), keine Potenz von −2).
