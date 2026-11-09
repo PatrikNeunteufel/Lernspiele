@@ -1,25 +1,25 @@
-"""Veröffentlicht die Antworten der Entwicklung auf Fehlermeldungen von Kindern (LERN_Session9).
+"""Veröffentlicht die Antworten der Entwicklung auf Fehlermeldungen (LERN_Session9; je App seit LERN_Session25, Plan C11).
 
-Liest docs/eulenpfad/bemerkungen.json und schreibt eulenpfad/meldungen-stand.json: je Kennung einer Meldung
-(Feld „meldung“ der Bemerkung) Status und Antwort — sonst nichts, keine Daten über das Kind. Die App liest
-die Datei, wenn die Aufsicht „Antworten abfragen“ tippt, und gibt die Antwort ans Kind weiter.
+Liest docs/<app>/bemerkungen.json und schreibt <app>/meldungen-stand.json: je Kennung einer Meldung (Feld „meldung“
+der Bemerkung) Status und Antwort — sonst nichts, keine Daten über die Person. Die App liest die Datei mit „Antworten
+abfragen“ (KERN.meldungen.abfragen) und gibt die Antwort weiter.
 
-Status der Bemerkung → Status der Meldung (wie LS.meldungStatusAusBemerkung):
+Status der Bemerkung → Status der Meldung (wie KERN.meldungen.statusAusBemerkung):
     „erledigt …“            → behoben
     „kein Fehler …“         → kein-fehler
     „geplant …“, „in Arbeit …“ → geplant
     sonst (offen)           → nicht aufgenommen
-Die Antwort fürs Kind steht im Feld „antwort“ der Bemerkung (von Hand, kindgerecht, ohne Namen).
+Die Antwort steht im Feld „antwort“ der Bemerkung (von Hand, ohne Namen; im Eulenpfad kindgerecht).
 
-Aufruf: python tools/meldungen_stand.py   (danach mit committen; Pages veröffentlicht die Datei)
+Aufruf: python tools/meldungen_stand.py [app …]   (ohne Angabe alle Apps mit Meldungen; danach mit committen, Pages
+veröffentlicht die Dateien)
 """
 import json
 import sys
 from pathlib import Path
 
 WURZEL = Path(__file__).resolve().parent.parent
-BEMERKUNGEN = WURZEL / "docs" / "eulenpfad" / "bemerkungen.json"
-ZIEL = WURZEL / "eulenpfad" / "meldungen-stand.json"
+APPS = ("eulenpfad", "lernsteig")
 
 
 def status_aus(text: str):
@@ -33,17 +33,32 @@ def status_aus(text: str):
     return None
 
 
-def main() -> None:
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    liste = json.loads(BEMERKUNGEN.read_text(encoding="utf-8")) if BEMERKUNGEN.exists() else []
+def stand_von(bemerkungen: list) -> dict:
     stand = {}
-    for b in liste:
+    for b in bemerkungen:
         kennung, status = b.get("meldung"), status_aus(b.get("status", ""))
         if not kennung or not status:
             continue
         stand[kennung] = {"status": status, **({"antwort": b["antwort"]} if b.get("antwort") else {})}
-    ZIEL.write_bytes((json.dumps(stand, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8"))
-    print(f"{len(stand)} Antwort(en) nach {ZIEL.relative_to(WURZEL)} geschrieben.")
+    return stand
+
+
+def schreibe(app: str) -> None:
+    quelle = WURZEL / "docs" / app / "bemerkungen.json"
+    ziel = WURZEL / app / "meldungen-stand.json"
+    liste = json.loads(quelle.read_text(encoding="utf-8")) if quelle.exists() else []
+    stand = stand_von(liste)
+    ziel.write_bytes((json.dumps(stand, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8"))
+    print(f"{app}: {len(stand)} Antwort(en) nach {ziel.relative_to(WURZEL).as_posix()} geschrieben.")
+
+
+def main() -> None:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    apps = sys.argv[1:] or list(APPS)
+    for app in apps:
+        if app not in APPS:
+            sys.exit(f"Unbekannte App {app!r} — erlaubt: {', '.join(APPS)}")
+        schreibe(app)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ var LST_ABGLEICH = (function () {
     dateiPraefix: "lernsteig-sync-", datenbank: "lernsteig", ordnerId: "lernsteig-abgleich",
     ereignis: "lernsteig:abgeglichen",
     // Was abgeglichen wird; alles andere (Anmeldung, Einstellungen des Geräts, Gedächtnis, Gerät) bleibt hier
-    geteilt: ["personen", "runden", "rekorde", "geloescht", "freigabe"],
+    geteilt: ["personen", "runden", "rekorde", "geloescht", "freigabe", "meldungen"],
     beiAenderung: LST.beiAenderung,
     sichern: geraet => LST_DATEN.abgleichDaten(geraet),
     einlesen: text => LST_DATEN.einlesen(text),
@@ -31,6 +31,7 @@ var LST_ABGLEICH = (function () {
       r.runden && `${r.runden} neue Runde${r.runden === 1 ? "" : "n"}`,
       r.rekorde && `${r.rekorde} Rekord${r.rekorde === 1 ? "" : "e"}`,
       r.freigabe && "die Freigabe",
+      r.meldungen && `${r.meldungen} neue oder geänderte Meldung${r.meldungen === 1 ? "" : "en"}`,
     ].filter(Boolean);
     const weg = r.abgewiesen ? ` ${r.abgewiesen} ungültige${r.abgewiesen === 1 ? "r Eintrag" : " Einträge"} nicht übernommen.` : "";
     return (teile.length ? `Dazugekommen: ${teile.join(", ")}.` : "Nichts Neues — alles war schon da.") + weg;

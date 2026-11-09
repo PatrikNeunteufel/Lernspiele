@@ -66,6 +66,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     { id: "konten", text: "👥 Konten", zeichne: kontenTeil },
     { id: "freigabe", text: "✓ Freigabe", zeichne: () => [el("h2", { class: "abschnitt", text: "Übungen freigeben" }), freigabeKarte()] },
     { id: "abgleich", text: "🔄 Abgleich", zeichne: () => [el("h2", { class: "abschnitt", text: "Abgleich zwischen Geräten" }), abgleichKarte()] },
+    { id: "meldungen", text: "🙋 Meldungen", zeichne: meldungenTeil },
     { id: "einstellungen", text: "⚙️ Einstellungen", zeichne: einstellungenTeil },
     { id: "entwicklung", text: "🛠 Entwicklung", zeichne: () => [el("h2", { class: "abschnitt", text: "Entwicklung" }), entwicklungKarte()] },
   ];
@@ -78,6 +79,21 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       el("nav", { class: "tabs untertabs", role: "tablist", "aria-label": "Verwaltung" }, UNTER.map(u =>
         el("a", { class: "tab", role: "tab", href: `#verwaltung/${u.id}`, "aria-selected": String(u === unter), text: u.text }))),
       ...unter.zeichne(a)];
+  }
+
+  // Meldungen (Plan C11, C11-2 a): die der verbundenen Konten (die Aufsicht kann sie ebenfalls senden, ohne Namen) und die
+  // eigenen, gespeichert beim Ansehen und Prüfen einer Übung. Ansicht und Senden: LST_START.meldungenKarte (statistik.js).
+  function meldungenTeil(a) {
+    const verbunden = KO.verbundene(a.id);
+    const ihre = verbunden.flatMap(k => LST.meldungenVon(k.id));
+    const eigene = LST.meldungenVon(a.id);
+    return [
+      el("h2", { class: "abschnitt", text: "Meldungen verbundener Konten" }),
+      verbunden.length ? LST_START.meldungenKarte(ihre, { ich: a.name, loeschen: false, mitPerson: true, neu: zeichne })
+        : el("p", { class: "leise", text: "Noch kein Konto verbunden." }),
+      el("h2", { class: "abschnitt", text: "Eigene Meldungen" }),
+      LST_START.meldungenKarte(eigene, { ich: a.name, loeschen: true, neu: zeichne }),
+    ];
   }
 
   function kontenTeil(a) {

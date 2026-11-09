@@ -96,6 +96,60 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       el("small", { class: "leise", text: ` · ${datumText(r.zeit)}` }))));
   }
 
+  // ---------- Meldungen (Plan C11, C11-2 a) ----------
+  // Gespeichert in der Übung („Fehler melden“), gesendet von hier: von der Person selbst oder von einer verbundenen
+  // Aufsicht (Verwaltung → Meldungen) — über den Entwickler-Server, per E-Mail aus dem eigenen Mailprogramm oder als Text,
+  // immer ohne Namen. Die Antwort holt „Antworten abfragen“ (lernsteig/meldungen-stand.json, Bemerkungen).
+  const M = () => LST.MELDUNGEN;
+  /**
+   * Liste von Meldungen mit Senden, Löschen und Antworten. opt: { ich (Name für den Verlauf), loeschen (eigene, noch nicht
+   * gesendete dürfen weg), ungelesen (Kennungen, die hervorgehoben werden), neu() (neu zeichnen), mitPerson (Name zeigen) }.
+   */
+  function meldungenKarte(liste, opt) {
+    const titel = id => (KAT.uebung(id) || {}).titel || id;
+    const status = m => (LST.MELDUNG_STATUS[m.status] || { text: m.status }).text;
+    const hinweis = el("p", { class: "meldung", role: "status" });
+    async function senden(m) {
+      const weg = await M().weitergeben(m, {
+        von: opt.ich,
+        bestaetigen: () => confirm("Das Mailprogramm öffnet sich mit der Meldung — ohne Namen. Bitte ansehen und senden."),
+        oeffne: url => { location.href = url; },
+        kopiere: async text => { try { await navigator.clipboard.writeText(text); } catch (e) { prompt("Diesen Text an die Entwicklung schicken:", text); } },
+      });
+      if (weg) { opt.neu(); }
+    }
+    const eintrag = m => {
+      const zeilen = [["Art", LST.MELDUNG_ARTEN[m.art] || m.art], ["Aufgabe", m.aufgabe], ["Erwartete Lösung", m.loesung], ["Eingaben", m.eingabe],
+        ["Gewertet", m.ergebnis], ["Begründung", m.text], ["Antwort", m.antwort]].filter(([, w]) => w);
+      const knoepfe = [];
+      if (m.status === "neu") {
+        knoepfe.push(el("button", { type: "button", class: "knopf haupt", "data-aktion": "meldung-senden", text: "Senden", onclick: () => senden(m) }));
+        if (opt.loeschen) knoepfe.push(el("button", { type: "button", class: "knopf", "data-aktion": "meldung-loeschen", text: "Löschen", onclick: () => { M().entferne(m.id); opt.neu(); } }));
+      }
+      knoepfe.push(el("button", { type: "button", class: "knopf", text: "Text kopieren", onclick: async () => {
+        try { await navigator.clipboard.writeText(M().alsText(m)); hinweis.textContent = "Kopiert."; } catch (e) { prompt("Text:", M().alsText(m)); }
+      } }));
+      return el("details", { class: `meldung-eintrag status-${m.status}${(opt.ungelesen || []).includes(m.id) ? " ungelesen" : ""}`, "data-meldung": m.id,
+        ...(m.status === "neu" || (opt.ungelesen || []).includes(m.id) ? { open: "" } : {}) },
+        el("summary", {}, el("b", { text: `${opt.mitPerson ? `${m.name} · ` : ""}${titel(m.uebung)} · Stufe ${m.stufe === "challenge" ? "Challenge" : m.stufe}` }),
+          el("span", { class: "leise", text: ` · ${datumText(m.zeit)} · ${status(m)}` })),
+        el("dl", {}, ...zeilen.flatMap(([k, w]) => [el("dt", { text: k }), el("dd", { text: w })])),
+        el("div", { class: "knopf-zeile" }, ...knoepfe));
+    };
+    const offen = liste.filter(m => m.status === "neu").length;
+    return el("section", { class: "einstellungen meldungen" },
+      el("p", { class: "leise", text: "Mit „Fehler melden“ in einer Übung gespeichert. Senden geht ohne Namen an die Entwicklung; die Antwort kommt mit „Antworten abfragen“." }),
+      el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", "data-aktion": "meldungen-abfragen", text: "Antworten abfragen", onclick: async () => {
+        const n = await M().abfragen();
+        opt.neu();
+        setTimeout(() => alert(n ? `${n} Antwort${n === 1 ? "" : "en"} der Entwicklung übernommen.` : "Keine neuen Antworten der Entwicklung."), 0);
+      } })),
+      hinweis,
+      liste.length ? el("div", {}, [...liste].sort((a, b) => (a.zeit < b.zeit ? 1 : -1)).map(eintrag)) : el("p", { class: "leise", text: "Noch keine Meldung." }),
+      liste.length ? el("small", { class: "leise", text: `${offen} noch nicht gesendet, ${liste.length - offen} gesendet oder beantwortet.` }) : null);
+  }
+  LST_START.meldungenKarte = meldungenKarte;
+
   // Konto des Tabs: das eigene, oder für die Aufsicht ein verbundenes (#statistik/<Konto>)
   function kontoDerSeite(kontoId) {
     const a = LST_KONTEN.aufsichtAktiv();
@@ -126,11 +180,18 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     if (LST.werUebt() === "gast") { ohneStand(wurzel, null); return; }
     const r = LST.runden(x => x.person === k.id && !x.test);
     neuZeichnen = () => statistik(wurzel, kontoId);
+    // Meldungen: neue Antworten hervorheben und für die Person selbst als gesehen merken (die Aufsicht liest nur mit)
+    const meldungen = LST.meldungenVon(k.id);
+    const ungelesen = LST.ungeleseneMeldungen(k.id).map(m => m.id);
+    if (!aufsicht) LST.meldungenGelesen(k.id);
+    const ich = aufsicht ? aufsicht.name : k.name;
     wurzel.replaceChildren(...[
       el("p", { class: "konto-zeile" }, el("b", { text: k.name }),
         el("span", { class: "leise", text: aufsicht ? `Ansicht der Aufsicht ${aufsicht.name}` : "angemeldet" })),
       el("h2", { class: "abschnitt", text: "Überblick" }), ueberblick(r),
       el("h2", { class: "abschnitt", text: "Letzte Runden" }), letzteRunden(r),
+      meldungen.length ? el("h2", { class: "abschnitt", id: "meldungen", text: "Meldungen" }) : null,
+      meldungen.length ? meldungenKarte(meldungen, { ich, loeschen: !aufsicht, ungelesen, neu: zeichne }) : null,
       aufsicht ? el("p", { class: "knopf-zeile" }, el("a", { class: "knopf", href: `#erfolge/${encodeURIComponent(k.id)}`, text: "Erfolge" }), el("a", { class: "knopf", href: "#verwaltung", text: "← Zur Verwaltung" }))
         : el("h2", { class: "abschnitt", text: "Sichern und Einlesen" }),
       aufsicht ? null : datenKarte(k)].filter(Boolean));

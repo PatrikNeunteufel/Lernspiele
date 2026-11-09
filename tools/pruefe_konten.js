@@ -294,6 +294,32 @@ const SF = { frage: "Erstes Haustier?", antwort: "Bello" }; // Sicherheitsfrage 
     gleich(KO.aufsichtAktiv()?.id, neu.id, "danach neue Aufsicht ohne Bestätigung");
   }
 
+  // Meldungen (Plan C11): reisen in Sicherung und Abgleich mit, je Konto; der bessere Stand gewinnt; Löschen nimmt sie mit
+  {
+    localStorage.d.clear(); sessionStorage.d.clear();
+    const jo = (await KO.anlegen({ name: "Jo", klasse: 8 })).konto;
+    const ru = (await KO.anlegen({ name: "Ru", klasse: 9 })).konto;
+    const m = (id, person, status, stand, verlauf) => ({ id, person, name: person === jo.id ? "Jo" : "Ru", zeit: T, stand, status, uebung: "terme", stufe: "h", art: "inhalt", text: "stimmt nicht", gelesen: true, verlauf });
+    const v = (zeit, status) => ({ zeit, status, von: "Jo" });
+    const gesendet = m("M-a-1", jo.id, "weitergeleitet", "2026-11-05T10:00:00.000Z", [v(T, "neu"), v("2026-11-05T10:00:00.000Z", "weitergeleitet")]);
+    LST.schreibe("meldungen", [gesendet, m("M-b-2", ru.id, "neu", T, [v(T, "neu")])]);
+    const datei = DA.sichern([jo.id]);
+    gleich(datei.meldungen.map(x => x.id), ["M-a-1"], "Sicherung: nur Meldungen der gewählten Konten");
+    gleich(DA.abgleichDaten().meldungen.length, 2, "Abgleich: alle Meldungen");
+    // ein anderes Gerät mit einer jüngeren, aber weniger weiten Fassung derselben Meldung
+    const juenger = { ...m("M-a-1", jo.id, "neu", "2026-11-06T10:00:00.000Z", [v(T, "neu")]), text: "stimmt nicht" };
+    const erg = DA.einlesen({ ...datei, meldungen: [juenger] });
+    const nachher = LST.lies("meldungen", []).find(x => x.id === "M-a-1");
+    gleich([erg.meldungen, nachher.status, nachher.verlauf.length], [0, "weitergeleitet", 2], "Einlesen: besserer Stand bleibt, nichts Neues");
+    // Konto löschen: seine Meldungen gehen mit, eine alte Datei bringt sie nicht zurück
+    await KO.aufsichtAnlegen({ ...SF, name: "Lehrerin", art: "lehrperson", pin: "9999" });
+    KO.LISTE.aendere(jo.id, { aufsicht: [KO.aufsichtAktiv().id] });
+    await KO.loeschen(jo.id);
+    gleich(LST.lies("meldungen", []).map(x => x.id), ["M-b-2"], "Konto gelöscht: seine Meldungen weg, andere bleiben");
+    DA.einlesen(datei);
+    gleich(LST.lies("meldungen", []).map(x => x.id), ["M-b-2"], "alte Sicherung bringt die Meldung des gelöschten Kontos nicht zurück");
+  }
+
   console.log(`  ${faelle} Fälle, ${fehler} Fehler.`);
   require("./testausgabe.js").merke("pruefe_konten", `${faelle} Fälle, ${fehler} Fehler.`); // HK1 a
   process.exit(fehler ? 1 : 0);

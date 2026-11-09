@@ -43,8 +43,8 @@
     // Antwort derselben Stufe nicht verlieren; gesehen ist sie, wenn eine Seite sie gesehen hat
     if (schwach.status === gut.status && (schwach.antwort || "") === (gut.antwort || "")) n.gelesen = !!(gut.gelesen || schwach.gelesen);
     else if (schwach.status === gut.status && !gut.antwort && schwach.antwort) n.antwort = schwach.antwort;
-    const stand = [gut.stand, schwach.stand].filter(Boolean).sort().pop();
-    if (stand) n.stand = stand;
+    // Stand bleibt der der besseren Fassung: Eine jüngere, aber schwächere Fassung ändert sonst nichts Sichtbares und
+    // zählte trotzdem als geändert. Beide Geräte kommen so zum selben Ergebnis (gleiche Grundlage, gleicher Verlauf).
     return n;
   }
 

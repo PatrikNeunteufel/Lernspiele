@@ -302,11 +302,14 @@
         neu[S.freigabe] = d.freigabe; neu[S.freigabeStand] = d.freigabeStand; erg.freigabe = true;
       }
 
-      // 5. Teile der App
+      // 5. Teile der App; Einträge gelöschter oder entfallener Personen nimmt entferne() heraus (seit 1.32.1: sonst
+      //    brachte ein Abgleich die Meldungen eines gelöschten Kontos zurück)
+      const bleiben = new Set(personen.flatMap(kennungen)); // wer nach dem Vermerk noch aktiv war, bleibt mit seinen Einträgen
+      const wegIds = [...new Set([...entfallen.flatMap(kennungen), ...Object.keys(g.personen)])].filter(id => !bleiben.has(id));
       for (const [name, t] of Object.entries(teile)) {
         if (d[name] === undefined) continue;
         const r = t.zusammenfuehren(speicher.lies(t.schluessel, null), d[name], { umbiegen, personVon });
-        neu[t.schluessel] = r.wert; erg.teile[name] = r.neu || 0;
+        neu[t.schluessel] = t.entferne && wegIds.length ? t.entferne(r.wert, wegIds) : r.wert; erg.teile[name] = r.neu || 0;
       }
 
       // 6. Schreiben: alles oder nichts

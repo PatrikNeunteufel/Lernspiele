@@ -1279,3 +1279,19 @@
   tab, anlaut-angel, einmaleins-blitz „Keine Fehler.“, kein voller Lauf. Doku Kern 4.28, Eulenpfad 13,
   `gemeinsame_mechaniken.md`. Tests: Kern „5849 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „101
   Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan C11 Schritt 2, Lernsteig (C11-2 a): „Fehler melden“ in jeder Übung (Jugendliche und Aufsicht, nicht der Gast) mit
+  Formular über der Seite (diese Aufgabe oder die davor, Art, Begründung ab drei Wörtern; Zeit ruht), gespeichert mit
+  Aufgabe, Lösung, allen Eingaben, Wertung, Klasse, Niveau, Lehrplan (`gemeinsam/rahmen.js`, `LST.MELDUNGEN` über
+  `KERN.meldungen`); Senden im Tab Statistik von der Person selbst, oder von einer verbundenen Aufsicht (Statistik des
+  Kontos, neu Verwaltung → 🙋 Meldungen), über Entwickler-Server, E-Mail (`lernsteig/kontakt.js`, neu, leer) oder Text,
+  ohne Namen; Antworten aus `lernsteig/meldungen-stand.json`; Meldungen in Sicherung und Abgleich (`daten.js`,
+  `abgleich.js`). `tools/meldungen_stand.py` je App (ohne Angabe beide; Eulenpfad-Datei bytegleich). Kern 1.32.1: Ein
+  gelöschtes Konto nimmt seine Meldungen auch beim Einlesen und im Abgleich mit (vorher brachte eine alte Sicherung sie
+  zurück; Gegenprobe: 3 gemeldet), Eulenpfad mit `entferne` ebenso; beim Zusammenführen bleibt der Stand der besseren
+  Fassung (sonst zählte eine schwächere, jüngere als geändert — gefunden von `pruefe_konten.js`). Tests: Kern-Fälle (4),
+  Konten (5: Sichern, besserer Stand, Löschen, alte Sicherung), Seitentest „Fehler melden“ (Formular, Pflichtangaben,
+  Felder, Statistik, Senden als Text, kein Name im Text); Gegenproben (2: Name im Text, Knopf fehlt) gemeldet. Im Browser
+  (375 px): Knopf, Formular, Speichern, Statistik; Testkonto danach entfernt. Eulenpfad-Stichprobe tab, anlaut-angel,
+  einmaleins-blitz „Keine Fehler.“, kein voller Lauf. Doku Lernsteig 5f und 6, Kern 4.28, Eulenpfad 13, Plan C11,
+  `gemeinsame_mechaniken.md`. Tests: Kern „5853 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „106
+  Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

@@ -1607,6 +1607,16 @@ console.log("listenpruefung.js");
       gleich(M2.D.einlesen(M1.D.sichern()).teile.meldungen, 1, "Teil der App eingelesen");
       M2.D.loeschePerson(M2.P.alle()[0].id);
       gleich(M2.sp.lies("meldungen", []).length, 0, "Teil beim Löschen entfernt");
+      // seit 1.32.1: eine alte Datei bzw. ein Abgleich mit einem Gerät, das noch nichts weiss, bringt sie nicht zurück
+      M2.D.einlesen(M1.D.sichern());
+      gleich([M2.P.alle().length, M2.sp.lies("meldungen", []).length].join(), "0,0", "Teil einer gelöschten Person kommt nicht zurück");
+      M1.D.einlesen(M2.D.sichern({ art: "abgleich" }));
+      gleich([M1.P.alle().length, M1.sp.lies("meldungen", []).length].join(), "0,0", "Abgleich löscht den Teil auch auf dem anderen Gerät");
+      // wer nach dem Vermerk wieder aktiv war, bleibt mit seinem Teil
+      const neue = M1.P.anlegen({ name: "Neu" });
+      M1.sp.schreibe("meldungen", [{ id: "m-2", person: neue.id }]);
+      M2.D.einlesen(M1.D.sichern({ art: "abgleich" }));
+      gleich(M2.sp.lies("meldungen", []).map(m => m.id).join(), "m-2", "Teil einer anderen Person bleibt");
       wirft(() => D({ app: "eulenpfad", speicher: M1.sp, teile: { runden: teil } }), "Teil mit dem Namen eines Kernfelds");
     }
 
@@ -1879,7 +1889,8 @@ console.log("listenpruefung.js");
     const r = M.zusammenfuehren([weiter], [jungAberZurueck]);
     gleich(r.wert[0].status, "weitergeleitet", "zusammenführen: Status des besseren Stands");
     gleich(r.wert[0].verlauf.map(x => `${x.status}/${x.von}`).join(","), "neu/Mia,bestaetigt/Papa,weitergeleitet/Papa,bestaetigt/Mama", "zusammenführen: Verläufe vereinigt, nach Zeit");
-    gleich(r.wert[0].stand, "2026-11-03T08:00:00Z", "zusammenführen: Stand der jüngeren Seite");
+    gleich(r.wert[0].stand, "2026-11-02T08:00:00Z", "zusammenführen: Stand der besseren Fassung");
+    gleich(M.zusammenfuehren([weiter], [{ ...jungAberZurueck, verlauf: neuM.verlauf }]).neu, 0, "zusammenführen: jüngere, schwächere Fassung ohne Neues zählt nicht");
     gleich(r.neu, 1, "zusammenführen: Verlauf dazugekommen zählt als geändert");
     gleich(JSON.stringify(M.zusammenfuehren([jungAberZurueck], [weiter]).wert), JSON.stringify(r.wert), "zusammenführen: Reihenfolge der Seiten gleichgültig");
     gleich(M.zusammenfuehren([weiter], [weiter]).neu, 0, "zusammenführen: gleiche Meldung zählt nicht");

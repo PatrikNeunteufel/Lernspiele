@@ -369,6 +369,30 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
   doppelten Einträge, und eine geprüfte Liste ist seit der Prüfung unverändert. Die Freigabe je Gerät steht seit
   LERN_Session20 in der Verwaltung (5d).
 
+## 5f. Fehler melden (Plan C11, C11-1 a, C11-2 a, LERN_Session25)
+
+Logik im Kern (`KERN.meldungen`, docs/kern/rahmen.md 4.28); `gemeinsam/rahmen.js` bindet sie an (`LST.MELDUNGEN`, Feld
+`uebung`, Stufe als Kennung, Zusatzzeilen Niveau und Lehrplan-Stufe der Aufgabe).
+
+- **Melden:** in jeder Übung der Knopf „Fehler melden“ unter der Aufgabe (`melde-zeile`, `data-aktion="melden"`), für
+  angemeldete Jugendliche und die Aufsicht; der Gast meldet nicht (für ihn wird nichts gespeichert). Das Formular
+  (`melde-hintergrund`, ein div, kein dialog-Element) bietet „Diese Aufgabe“ und „Die Aufgabe davor“, die Art
+  (`LST.MELDUNG_ARTEN`) und eine Begründung (mindestens drei Wörter, „keine Namen“); die Zeit der Aufgabe ruht derweil
+  (`KERN.runde.lauf` `pause`/`weiter`). Mit gespeichert: Aufgabe, erwartete Lösung, alle Eingaben, Wertung („richtig“,
+  „richtig nach Fehlversuch“, „falsch“, „falsch, Lösung gezeigt“), Klasse, Niveau, Lehrplan.
+- **Senden** (C11-2 a): im Tab Statistik unter „Meldungen“ von der Person selbst, oder von einer verbundenen Aufsicht
+  (Statistik des Kontos oder Verwaltung → 🙋 Meldungen); Weg wie im Eulenpfad: Entwickler-Server, sonst E-Mail aus dem
+  eigenen Mailprogramm (Adresse in `lernsteig/kontakt.js`, nur die Startseite lädt sie; leer: kein E-Mail-Weg), sonst
+  Text kopieren. Der Text trägt keinen Namen („Jugendliche/r, 2. Oberstufe …“). Ungesendete eigene Meldungen lassen sich
+  löschen.
+- **Antworten:** „Antworten abfragen“ liest `lernsteig/meldungen-stand.json` (`python tools/meldungen_stand.py lernsteig`)
+  und mit Entwickler-Server die Bemerkungen (`docs/lernsteig/bemerkungen.json`). Neue Antworten sind hervorgehoben, bis
+  die Person die Statistik geöffnet hat; die Aufsicht liest nur mit.
+- **Daten:** `lernsteig:meldungen` reist in Sicherung (Meldungen der gewählten Konten) und Abgleich mit; je Kennung
+  gewinnt der bessere Stand (C11-1 a). Ein gelöschtes Konto nimmt seine Meldungen mit, auch auf anderen Geräten und gegen
+  alte Sicherungen (Kern 1.32.1). Tests: `pruefe_konten.js` (Sichern, Einlesen, Löschen), Seitentest „Fehler melden“
+  (Formular, Pflichtangaben, Felder, Statistik, Senden als Text, kein Name im Text).
+
 ## 6. Speicher (`lernsteig:*`, SP1 a)
 
 | Schlüssel | Inhalt |
@@ -387,6 +411,7 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
 | `gestellt` | Gedächtnis gegen Wiederholungen (RA5 a): Fingerabdrücke je `konto\|uebung/stufe` (höchstens 400; bis LERN_Session18 die Kennungen je `konto/uebung/stufe/niveau`, höchstens 30) |
 | `geraet`, `abgleichStand` | Abgleich über einen Ordner (5b, `KERN.abgleich`): Kennung und Name dieses Geräts; Ordner, letzter Abgleich, andere Geräte. Den gewählten Ordner merkt der Browser in IndexedDB `lernsteig` |
 | `einstellungen` | `{ dezimal?, rechner? }`, nur von einer angemeldeten Aufsicht gesetzt (5d) |
+| `meldungen` | Fehlermeldungen (5f, `KERN.meldungen`) `{ id, person, name, rolle, zeit, stand, status, verlauf, uebung, stufe, lp, niveau, lehrplan, klasse, aufgabeNr, aufgabe, loesung, eingabe, ergebnis, art, text, antwort?, gelesen }`; reist in Sicherung und Abgleich mit |
 
 ## 7. Prüfen
 

@@ -719,7 +719,9 @@ Meldung später nur bestätigte, ein „weitergeleitet“ des anderen überschre
 
 Der Weg ist austauschbar gebaut, damit später ein Server der Entwicklung (nur verschlüsselt und mit geheimer Kennung,
 C11-3 a) dazukommen kann. Tests in `pruefe_kern.js` (Zusammenführen in beide Richtungen, Text wie im Eulenpfad, Lesen aus
-dem Text, Wege). Benutzt von: Eulenpfad (`spiele/gemeinsam/spiel.js`, Namen unter `LS` unverändert).
+dem Text, Wege). Benutzt von: Eulenpfad (`spiele/gemeinsam/spiel.js`, Namen unter `LS` unverändert) und Lernsteig
+(`gemeinsam/rahmen.js`, `LST.MELDUNGEN`; lernsteig rahmen.md 5f). Ein Teil für `KERN.daten` mit `entferne` nimmt die
+Meldungen gelöschter Personen auch beim Einlesen und im Abgleich heraus (seit 1.32.1, 4.19).
 
 ### 4.29 Geplant
 

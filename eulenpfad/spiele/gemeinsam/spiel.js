@@ -678,6 +678,8 @@ const LS = (() => {
     schluessel: "meldungen",
     sichern: (ids, eigene) => (Array.isArray(eigene) ? eigene : []).filter(m => m && (!ids || ids.includes(m.person))),
     zusammenfuehren: (eigene, fremde, ctx) => KERN.meldungen.zusammenfuehren(eigene, fremde, ctx),
+    // ein gelöschtes Kind nimmt seine Meldungen mit (sie tragen den Namen); Anregungen der Aufsicht bleiben
+    entferne: (eigene, ids) => (Array.isArray(eigene) ? eigene : []).filter(m => !m || istAnregung(m) || !ids.includes(m.person)),
   };
   const DATEN = KERN.daten({
     app: "eulenpfad", speicher: { praefix: SPEICHER.praefix, lies, schreibe, entferne: k => SPEICHER.entferne(k) },

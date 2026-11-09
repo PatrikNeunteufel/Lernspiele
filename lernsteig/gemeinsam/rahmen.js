@@ -32,6 +32,105 @@
     pruefstand: typeof LST_PRUEFSTAND !== "undefined" ? LST_PRUEFSTAND : null, arten: ["uebungen", "listen"],
     melde: text => alert(text), start: "lernsteig/",
   });
+  // ---------- Fehlermeldungen (Plan C11, Entscheide C11-1 a, C11-2 a; KERN.meldungen, docs/kern/rahmen.md 4.28) ----------
+  // In der Übung meldet die angemeldete Person einen Fehler in der Aufgabe oder der davor; gesendet wird im Tab Statistik
+  // von ihr selbst (C11-2 a) oder von einer verbundenen Aufsicht (Verwaltung → Meldungen), ohne Namen. Der Gast meldet nicht
+  // (für ihn wird nichts gespeichert). Die Adresse der Entwicklung steht in lernsteig/kontakt.js (lädt nur die Startseite).
+  const MELDUNG_ARTEN = {
+    wertung: "Meine Antwort war richtig, wurde aber als falsch gewertet",
+    inhalt: "Fehler in der Aufgabe, der Darstellung oder der Lösung",
+    unloesbar: "Die Aufgabe lässt sich nicht lösen",
+    anderes: "Etwas anderes",
+  };
+  const MELDUNG_STATUS = {
+    neu: { text: "gespeichert, noch nicht gesendet" },
+    weitergeleitet: { text: "an die Entwicklung gesendet" },
+    geplant: { text: "Entwicklung: wird behoben" },
+    behoben: { text: "Entwicklung: behoben — danke für den Hinweis" },
+    "kein-fehler": { text: "Entwicklung: kein Fehler (siehe Antwort)" },
+  };
+  const klasseName = k => ((typeof LST_KONTEN !== "undefined" && LST_KONTEN.KLASSEN.find(x => x.id === String(k))) || {}).name || null;
+  const MELDUNGEN = KERN.meldungen({
+    app: "lernsteig", titel: "Lernsteig", speicher: { lies: LST.lies, schreibe: LST.schreibe },
+    inhalt: { feld: "uebung", wort: "Übung", name: id => (KAT.uebung(id) || {}).titel || null },
+    wer: m => (m.rolle === "aufsicht" ? "Aufsicht" : `Jugendliche/r${klasseName(m.klasse) ? `, ${klasseName(m.klasse)}` : ""}`),
+    zusatz: m => [m.niveau ? `Niveau: ${LP.niveauName(m.niveau, m.lehrplan || { land: "CH" })}` : null,
+      m.lp && m.lp !== m.stufe ? `Lehrplan-Stufe der Aufgabe: ${m.lp}` : null].filter(Boolean),
+    arten: MELDUNG_ARTEN, status: MELDUNG_STATUS,
+    kontakt: () => (typeof LERNSTEIG_KONTAKT !== "undefined" ? LERNSTEIG_KONTAKT : {}),
+    entwicklung: () => ENTWICKLUNG,
+  });
+  /** Meldungen (ohne Anregungen) eines Kontos, nach Kennung der Person. */
+  const meldungenVon = personId => MELDUNGEN.alle().filter(m => !MELDUNGEN.istAnregung(m) && m.person === personId);
+  /** Neue Antworten der Entwicklung, die die Person noch nicht gesehen hat. */
+  const ungeleseneMeldungen = personId => meldungenVon(personId).filter(m => !m.gelesen);
+  /** Die Person hat ihre Rückmeldungen gesehen (nur sie selbst, nicht die Aufsicht beim Mitlesen). */
+  function meldungenGelesen(personId) {
+    if (!ungeleseneMeldungen(personId).length) return;
+    LST.schreibe("meldungen", MELDUNGEN.alle().map(m => (m.person === personId ? { ...m, gelesen: true } : m)));
+  }
+  /** Darf die angemeldete Person melden? Jugendliche und Aufsicht; der Gast nicht. */
+  const meldenErlaubt = () => ["lernend", "aufsicht"].includes(werUebt());
+
+  /**
+   * Formular „Fehler melden“ über der Seite. kontext: { jetzt, vorige } — je { nr, text, loesung, eingaben, ergebnis, lp }
+   * oder null —, dazu uebung, stufe, niveau; pause/weiter halten die Zeit der Aufgabe an.
+   */
+  function meldeFormular(kontext, { pause = () => {}, weiter = () => {} } = {}) {
+    document.querySelector(".melde-hintergrund")?.remove();
+    const aufgaben = [["jetzt", "Diese Aufgabe", kontext.jetzt], ["vorige", "Die Aufgabe davor", kontext.vorige]].filter(([, , a]) => a);
+    if (!aufgaben.length) return;
+    let welche = aufgaben[0][0], art = null;
+    pause();
+    const hintergrund = el("div", { class: "melde-hintergrund" });
+    const schliessen = () => { hintergrund.remove(); removeEventListener("keydown", taste); weiter(); };
+    const taste = e => { if (e.key === "Escape") schliessen(); };
+    const wahl = (liste, aktiv, setze, name) => {
+      const zeile = el("div", { class: "melde-wahl", role: "group", "aria-label": name });
+      for (const [w, text, zusatz] of liste) {
+        const k = el("button", { type: "button", "data-wahl": w, "aria-pressed": String(w === aktiv()), onclick: () => {
+          setze(w);
+          [...zeile.children].forEach(c => c.setAttribute("aria-pressed", String(c === k)));
+        } }, el("b", { text }), zusatz ? el("span", { class: "melde-zusatz", text: zusatz }) : null);
+        zeile.append(k);
+      }
+      return zeile;
+    };
+    const kurz = a => (a.text || "(ohne Text)").slice(0, 90) + ((a.text || "").length > 90 ? " …" : "");
+    const begruendung = el("textarea", { rows: "4", name: "begruendung", "aria-label": "Begründung",
+      placeholder: "Was stimmt nicht, und warum? Zum Beispiel: 2a + 3a = 5a, eingegeben habe ich 5a." });
+    const hinweis = el("p", { class: "melde-hinweis", role: "status" });
+    const fenster = el("div", { class: "karte melde-fenster", role: "dialog", "aria-modal": "true", "aria-label": "Fehler melden" },
+      el("h2", { text: "Fehler melden" }),
+      el("p", { class: "leise", text: "Stimmt etwas an einer Aufgabe nicht? Die Meldung wird gespeichert; senden kannst du sie im Tab Statistik. Dein Name geht nicht mit." }),
+      el("h3", { text: "Welche Aufgabe?" }),
+      wahl(aufgaben.map(([w, t, a]) => [w, t, kurz(a)]), () => welche, w => { welche = w; }, "Welche Aufgabe"),
+      el("h3", { text: "Was stimmt nicht?" }),
+      wahl(Object.entries(MELDUNG_ARTEN), () => art, w => { art = w; }, "Art des Fehlers"),
+      el("h3", { text: "Begründung" }), begruendung,
+      el("p", { class: "leise klein", text: "Bitte keine Namen schreiben." }),
+      hinweis,
+      el("div", { class: "knopf-zeile" },
+        el("button", { type: "button", class: "knopf haupt", "data-aktion": "melden-speichern", text: "Speichern", onclick: () => {
+          if (!art) { hinweis.textContent = "Wähle zuerst, was nicht stimmt."; return; }
+          if (begruendung.value.trim().split(/\s+/).length < 3) { hinweis.textContent = "Schreib in ein paar Worten, was nicht stimmt."; begruendung.focus(); return; }
+          const a = aufgaben.find(([w]) => w === welche)[2];
+          const k = konto(), aufsicht = werUebt() === "aufsicht";
+          MELDUNGEN.neu({ name: k.name, person: k.id, rolle: aufsicht ? "aufsicht" : "lernend", klasse: aufsicht ? null : (k.klasse || null),
+            uebung: kontext.uebung, stufe: kontext.stufe, lp: a.lp || null, niveau: kontext.niveau, lehrplan: k.lehrplan || null,
+            aufgabeNr: a.nr, aufgabe: a.text, loesung: a.loesung, eingabe: (a.eingaben || []).join(" · ") || null, ergebnis: a.ergebnis || null,
+            art, text: begruendung.value.trim().slice(0, 1000) });
+          fenster.replaceChildren(el("h2", { text: "Gespeichert" }),
+            el("p", { text: "Danke. Senden kannst du die Meldung im Tab Statistik unter „Meldungen“; dort siehst du später auch die Antwort." }),
+            el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf haupt", text: "Weiter üben", onclick: schliessen })));
+        } }),
+        el("button", { type: "button", class: "knopf", "data-aktion": "melden-abbrechen", text: "Abbrechen", onclick: schliessen })));
+    hintergrund.append(fenster);
+    hintergrund.addEventListener("click", e => { if (e.target === hintergrund) schliessen(); });
+    addEventListener("keydown", taste);
+    document.body.append(hintergrund);
+  }
+
   /** Leiste der Entwicklung unten in einer Übung (nur wenn der Modus an ist). stufe() liefert die gewählte Stufe. */
   function entwicklerLeiste(id, stufe) {
     if (!ENTWICKLUNG.aktiv()) return;
@@ -453,7 +552,12 @@
         return { panel, gross, verkleinern, schliessen, offen: () => !panel.hidden, istGross: () => !panel.hidden && !panel.classList.contains("klein"),
           knopf: k => { knopf = k; melde(); }, weg: () => { panel.remove(); document.body.classList.remove("mit-rechner", "rechner-klein"); if (rechnerFenster === fenster) rechnerFenster = null; } };
       })();
-      buehne.replaceChildren(fortschritt, aufgabeFeld, antwort, rueck);
+      // Fehler melden (Plan C11): die laufende Aufgabe und die davor, je mit Eingaben und Wertung
+      let meldeJetzt = null, meldeVorige = null;
+      const meldeZeile = meldenErlaubt() ? el("p", { class: "melde-zeile" }, el("button", { type: "button", class: "knopf klein melden", "data-aktion": "melden", text: "Fehler melden",
+        onclick: () => meldeFormular({ jetzt: meldeJetzt, vorige: meldeVorige, uebung: def.id, stufe: st, niveau },
+          { pause: () => { try { L.pause(); } catch (e) { /* keine offene Aufgabe */ } }, weiter: () => { try { L.weiter(); } catch (e) { /* dito */ } } }) })) : null;
+      buehne.replaceChildren(...[fortschritt, aufgabeFeld, antwort, rueck, meldeZeile].filter(Boolean));
 
       // Serie mitten drin verlassen: Stand bis dahin zählt (abgeschaut vom Eulenpfad, Entscheid E1 a dort), als Rekord und
       // Runde (RA3 a); das Ende ersetzt beide (gleiche Kennung).
@@ -485,6 +589,8 @@
         nr++;
         aktuell = a;
         let gelost = false;
+        if (meldeJetzt) meldeVorige = meldeJetzt;
+        const meldeInfo = meldeJetzt = { nr, text: a.text, loesung: a.loesung, lp: a.stufe, eingaben: [], ergebnis: null };
         L.gestellt({ text: a.text, loesung: a.loesung });
         const rechner = rechnerFuer(eintrag, a.stufe, a);
         rechnerBenutzt = false;
@@ -562,6 +668,8 @@
           // dazu, wo der Notizblock angeboten war, ob er benutzt wurde (wie im Eulenpfad: notiz „block“ oder „ohne“)
           L.zusatz({ lp: a.stufe, rechner: rechnerBenutzt, ...(mitBlock ? { vorgehen: { notiz: blockBenutzt ? "block" : "ohne" } } : {}) });
           const eingabe = typeof wert === "number" ? LST.dezimalText(wert) : wert;
+          meldeInfo.eingaben.push(String(eingabe));
+          meldeInfo.ergebnis = richtig ? (meldeInfo.eingaben.length > 1 ? "richtig nach Fehlversuch" : "richtig") : "falsch";
           if (richtig) {
             gelost = true;
             // RA8 a (wie LB1 a im Eulenpfad): auf Anhieb nur die Bestätigung, es geht von selbst weiter; nach einem
@@ -574,6 +682,7 @@
           if (f.vorbei) { gelost = true; zeige("hinweis", `Nicht ganz. Richtig wäre ${a.loesung}.`, a.weg); weiterKnopf(null, true); return; }
           if (f.loesungZeigen) {
             gelost = true;
+            meldeInfo.ergebnis = "falsch, Lösung gezeigt";
             zeige("hinweis", `Die Lösung ist ${a.loesung}.`, a.weg);
             weiterKnopf(null);
             return;
@@ -752,5 +861,6 @@
   let aktuell = null;
   const pruefung = { aufgabe: () => aktuell };
 
-  Object.assign(LST, { GRAPH, graphHoehe, el, FREIGABE, ENTWICKLUNG, listenPruefung, pruefungDefinition, listenPruefen, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, wackelt, stufenBedarf, WACKEL, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
+  Object.assign(LST, { MELDUNGEN, MELDUNG_ARTEN, MELDUNG_STATUS, meldungenVon, ungeleseneMeldungen, meldungenGelesen, meldenErlaubt, meldeFormular,
+    GRAPH, graphHoehe, el, FREIGABE, ENTWICKLUNG, listenPruefung, pruefungDefinition, listenPruefen, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, wackelt, stufenBedarf, WACKEL, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
 })(LST);

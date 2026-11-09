@@ -3,6 +3,14 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.32.1 — 2026-11-09 (LERN_Session25)
+- `daten.js`: Beim Einlesen und im Abgleich nimmt `entferne` eines Teils der App jetzt auch die Einträge gelöschter
+  Personen heraus (Löschvermerk), nicht nur beim Löschen auf dem eigenen Gerät. Bisher brachte eine alte Sicherung oder ein
+  Gerät, das vom Löschen noch nichts wusste, die Meldungen eines gelöschten Kontos zurück. Wer nach dem Vermerk wieder
+  aktiv war und darum bleibt, behält seine Einträge. Teile ohne `entferne` sind unverändert.
+- `meldungen.js`: Beim Zusammenführen bleibt der Stand (`stand`) der der besseren Fassung, nicht der jüngere beider Seiten;
+  sonst zählte eine jüngere, aber schwächere Fassung ohne sichtbare Änderung als „geändert“.
+
 ## 1.32.0 — 2026-11-09 (LERN_Session25)
 - `meldungen.js` (`KERN.meldungen`, neu, Plan C11, Entscheid C11-1 a): Fehlermeldungen und Anregungen an die
   Entwicklung aus dem Eulenpfad — Speicher, Status mit Verlauf, Text ohne Namen (`alsText`, `ausText`), E-Mail-Link,

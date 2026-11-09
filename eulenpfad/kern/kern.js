@@ -1,4 +1,4 @@
-/* kern 1.32.0 · Prüfsumme sha256:97a66214bc32d2bb31d64296b76b4e2ff4d5e1c31fb833f19580a8a5872d8b2a · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.32.1 · Prüfsumme sha256:33ec1b914cc14c14c854ba2796c455ea22f30d8055cd0e05169e0f99756e95ca · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -2177,11 +2177,14 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
         neu[S.freigabe] = d.freigabe; neu[S.freigabeStand] = d.freigabeStand; erg.freigabe = true;
       }
 
-      // 5. Teile der App
+      // 5. Teile der App; Einträge gelöschter oder entfallener Personen nimmt entferne() heraus (seit 1.32.1: sonst
+      //    brachte ein Abgleich die Meldungen eines gelöschten Kontos zurück)
+      const bleiben = new Set(personen.flatMap(kennungen)); // wer nach dem Vermerk noch aktiv war, bleibt mit seinen Einträgen
+      const wegIds = [...new Set([...entfallen.flatMap(kennungen), ...Object.keys(g.personen)])].filter(id => !bleiben.has(id));
       for (const [name, t] of Object.entries(teile)) {
         if (d[name] === undefined) continue;
         const r = t.zusammenfuehren(speicher.lies(t.schluessel, null), d[name], { umbiegen, personVon });
-        neu[t.schluessel] = r.wert; erg.teile[name] = r.neu || 0;
+        neu[t.schluessel] = t.entferne && wegIds.length ? t.entferne(r.wert, wegIds) : r.wert; erg.teile[name] = r.neu || 0;
       }
 
       // 6. Schreiben: alles oder nichts
@@ -2711,8 +2714,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     // Antwort derselben Stufe nicht verlieren; gesehen ist sie, wenn eine Seite sie gesehen hat
     if (schwach.status === gut.status && (schwach.antwort || "") === (gut.antwort || "")) n.gelesen = !!(gut.gelesen || schwach.gelesen);
     else if (schwach.status === gut.status && !gut.antwort && schwach.antwort) n.antwort = schwach.antwort;
-    const stand = [gut.stand, schwach.stand].filter(Boolean).sort().pop();
-    if (stand) n.stand = stand;
+    // Stand bleibt der der besseren Fassung: Eine jüngere, aber schwächere Fassung ändert sonst nichts Sichtbares und
+    // zählte trotzdem als geändert. Beide Geräte kommen so zum selben Ergebnis (gleiche Grundlage, gleicher Verlauf).
     return n;
   }
 

@@ -39,6 +39,14 @@ var LST_DATEN = (function () {
     gueltig: { runde: r => !Array.isArray(r.liste) || r.liste.every(x => x && typeof x === "object") },
     // Einträge älterer Fassungen (RA1 a, RA4 a) vor der Prüfung in die heutige Form
     umdeuten: d => LST.alteEintraegeUmdeuten(d),
+    // Fehlermeldungen (Plan C11) reisen mit; je Kennung gewinnt der bessere Stand, die Verläufe werden vereinigt (C11-1 a)
+    teile: { meldungen: {
+      schluessel: "meldungen",
+      sichern: (ids, eigene) => (Array.isArray(eigene) ? eigene : []).filter(m => m && (!ids || ids.includes(m.person))),
+      zusammenfuehren: (eigene, fremde, ctx) => KERN.meldungen.zusammenfuehren(eigene, fremde, ctx),
+      // ein gelöschtes Konto nimmt seine Meldungen mit (sie tragen den Namen)
+      entferne: (eigene, ids) => (Array.isArray(eigene) ? eigene : []).filter(m => !m || !ids.includes(m.person)),
+    } },
   });
 
   /** Sicherung für die Konten mit den Kennungen ids. */
@@ -61,7 +69,7 @@ var LST_DATEN = (function () {
   function einlesen(obj) {
     const erg = DATEN.einlesen(obj);
     return { konten: erg.personen.neu + erg.personen.geaendert, runden: erg.runden, rekorde: erg.rekorde, freigabe: erg.freigabe, abgewiesen: erg.abgewiesen,
-      neu: erg.neueIds, ids: erg.ids };
+      meldungen: (erg.teile && erg.teile.meldungen) || 0, neu: erg.neueIds, ids: erg.ids };
   }
 
   /** Datei im Browser speichern (Download). */

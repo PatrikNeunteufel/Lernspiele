@@ -713,6 +713,57 @@ async function pruefeSeiten(uebungen, melde, LST, katalog = uebungen) {
     } catch (err) { melde(ort, err.message); }
     fehlerVon(ort, s);
   }
+  // ---------- Fehler melden (Plan C11, C11-2 a): in der Übung speichern, in der Statistik selbst senden ----------
+  if (jugendTab) {
+    const ort = "Fehler melden (rationale-zahlen g)";
+    const geraet = alsJugendlicher();
+    const s = oeffne("uebungen/rationale-zahlen/index.html", { search: "?niveau=n1&stufe=g", ...geraet });
+    await ruhe(s);
+    try {
+      // erste Aufgabe: ein Fehlversuch, dann richtig; zweite Aufgabe gestellt — gemeldet wird „die Aufgabe davor“
+      const a1 = s.lauf("LST.pruefung.aufgabe()");
+      await antworte(s, a1, false);
+      await antworte(s, a1, true);
+      s.klick(".knopf.weiter"); await ruhe(s, 20, 3);
+      if (!s.gibt('[data-aktion="melden"]')) throw new Error("kein Knopf „Fehler melden“ für Jugendliche");
+      s.klick('[data-aktion="melden"]'); await ruhe(s, 20, 2);
+      if (!s.gibt(".melde-fenster")) throw new Error("Formular öffnet nicht");
+      if (s.gibt('.melde-fenster [data-wahl="vorige"]') !== 1) throw new Error("keine Wahl „Die Aufgabe davor“");
+      s.klick('.melde-fenster [data-wahl="vorige"]');
+      s.klick('[data-aktion="melden-speichern"]');
+      const gespeichert = () => (s.json("lernsteig:meldungen") || []).length; // eine leere Liste kann vom Einlesen weiter oben stammen
+      if (gespeichert()) throw new Error("ohne Art gespeichert");
+      s.klick('.melde-fenster [data-wahl="wertung"]');
+      s.fuelle('.melde-fenster textarea[name="begruendung"]', "falsch");
+      s.klick('[data-aktion="melden-speichern"]');
+      if (gespeichert()) throw new Error("mit einem Wort Begründung gespeichert");
+      s.fuelle('.melde-fenster textarea[name="begruendung"]', "Das Ergebnis stimmt doch so");
+      s.klick('[data-aktion="melden-speichern"]');
+      const m = (s.json("lernsteig:meldungen") || [])[0];
+      if (!m) throw new Error("Meldung nicht gespeichert");
+      const soll = { uebung: "rationale-zahlen", stufe: "g", aufgabeNr: 1, aufgabe: a1.text, person: konto.id, rolle: "lernend", art: "wertung", status: "neu", ergebnis: "richtig nach Fehlversuch" };
+      for (const [f, w] of Object.entries(soll)) if (m[f] !== w) throw new Error(`Feld ${f}: ${JSON.stringify(m[f])} statt ${JSON.stringify(w)}`);
+      if ((m.eingabe || "").split(" · ").length !== 2) throw new Error(`Eingaben „${m.eingabe}“ (erwartet zwei)`);
+      s.klick(".melde-fenster button", "Weiter üben"); await ruhe(s, 20, 2);
+      if (s.gibt(".melde-hintergrund")) throw new Error("Formular bleibt offen");
+      textPruefen(ort, s);
+      fehlerVon(ort, s);
+      // Statistik: die Meldung steht dort; ohne Adresse und Server geht sie als Text (kopiert), Status „gesendet“
+      const st = oeffne("index.html", { speicher: geraet.speicher, sitzung: new Map(jugendTab), hash: "#statistik" });
+      await ruhe(st);
+      const t = st.text();
+      if (!/Meldungen/.test(t) || !/noch nicht gesendet/.test(t)) throw new Error("Statistik zeigt die Meldung nicht");
+      if (/Test/.test(st.lauf(`LST.MELDUNGEN.alsText(LST.MELDUNGEN.alle()[0])`))) throw new Error("Text für die Entwicklung enthält den Namen");
+      st.lauf(`globalThis.__kopiert = null; navigator.clipboard = { writeText: async t => { globalThis.__kopiert = t; } }; globalThis.confirm = () => true; globalThis.prompt = () => null;`);
+      st.klick('[data-aktion="meldung-senden"]'); await ruhe(st);
+      const kopiert = st.lauf("globalThis.__kopiert") || "";
+      if (!kopiert.startsWith(`Meldung ${m.id} (Jugendliche/r`)) throw new Error(`kopierter Text: „${kopiert.slice(0, 60)}“`);
+      const nach = (st.json("lernsteig:meldungen") || [])[0];
+      if (!nach || nach.status !== "weitergeleitet" || !/als Text kopiert/.test(JSON.stringify(nach.verlauf))) throw new Error(`nach dem Senden: ${nach && nach.status}`);
+      textPruefen(`${ort}: Statistik`, st);
+      fehlerVon(`${ort}: Statistik`, st);
+    } catch (err) { melde(ort, err.message); fehlerVon(ort, s); }
+  }
   return { gespielt };
 }
 
