@@ -1,6 +1,17 @@
 # Handover — Lernsteig
 
 ## Stand
+**2026-11-09, nach LERN_Session25** (Lernspiele, [Report](../eulenpfad/report/LERN_Session25_2026-11-09.md)): Kern 1.34.0.
+Plan E 10 (Wurzel-Hinweise, folgen i mit Rechtecken) — Plan E bis auf E 11 erledigt. Plan C11: Fehler melden in jeder
+Übung, Senden durch die Jugendlichen selbst (Statistik) oder eine verbundene Aufsicht (Verwaltung → Meldungen), ohne
+Namen; `lernsteig/kontakt.js`; Weg und Server-Adresse je Gerät (Verwaltung → Einstellungen); ✏️ Korrekturvorschläge in
+der Prüfansicht; behoben: `?pruefen=` öffnete die Prüfansicht nicht. Plan D1 (Rundungsrest relativ zur Lösung), D2
+(kombinatorik f), D13 (ASCII-Minus). Speicherschicht nach docs/konzept_gruppen.md 5a: `runden`, `rekorde`, `meldungen`,
+`geloescht` in IndexedDB `lernsteig-ablage`, Start wartet auf `LST.bereit()`, Meldung bei vollem Speicher,
+Speicheranzeige mit Warnung und `persist()`, Erinnerung ans Sichern nach 14 Tagen. Tests: Konten „106 Fälle, 0 Fehler.“,
+`pruefe_uebungen.js` „0 Fehler, 139 Hinweise.“ Weiter mit: Freigabe im Prüfstand durch Patrik (E 11, jetzt mit ✏️),
+Prüfen auf echten Geräten (iPad, Sieben-Tage-Regel), mathbuch-Abgleich, weitere NT-Kompetenzen, C4, C7, C8.
+
 **2026-11-09, nach LERN_Session24** (Lernspiele, [Report](../eulenpfad/report/LERN_Session24_2026-11-09.md)): Kern 1.31.0.
 Plan E 2 bis E 7 erledigt: daten-rabatt l Brutto/Netto beim Preis und beim Gewicht (E2-1 a); ueberschlagen-ordnen mit
 Überschlag aus gerundeten Zahlen, Ablenkern aus falschem Runden, Zahlen unter 1 und über 1'000, Typ prozentwert (E3-1 a,

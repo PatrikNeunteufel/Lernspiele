@@ -1361,3 +1361,6 @@
   umgestellt** (nächster Schritt). Doku Kern 4.3, Lernsteig 6, Konzept 5a, Plan D11. Tests: Skripte „Keine Fehler.“, Kern
   „5888 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine
   Fehler.“; Eulenpfad-Stichprobe tab, anlaut-angel „Keine Fehler.“.
+- Abschluss: Report [LERN_Session25](docs/eulenpfad/report/LERN_Session25_2026-11-09.md), Handover Eulenpfad (Haltepunkt
+  16:42 aufgelöst) und Lernsteig nachgeführt. Befund: Commit `6f52459` enthält C11 Schritt 4, trägt aber die Message von
+  Schritt 3. Kein voller Eulenpfad-Lauf in dieser Sitzung (letzter auf `51686cd`).

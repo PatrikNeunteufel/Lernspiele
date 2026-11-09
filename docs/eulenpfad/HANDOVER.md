@@ -1,37 +1,22 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
-## HALTEPUNKT 2026-11-09 16:42 — LERN_Session25_2026-11-09_plan-e10 (aufgenommen 2026-11-09 18:39)
-Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
-
-- **Angehalten — beim Weitermachen neu starten:** nur die Vorschau `lernspiele-2` (Port 8767, `.claude/launch.json`),
-  beendet; neu starten, wenn der Lernsteig im Browser angesehen wird. Sonst lief nichts (keine Agenten,
-  Hintergrundläufe fertig).
-- **Stand:** alles committet bis `865bed2` (Arbeitsbaum sauber), `7c10b92` … `865bed2` nicht gepusht.
-  - `55ea8b9` Plan E 10 (E10-1 a, E10-2 a): Wurzel-Hinweise, folgen i mit Rechtecken — Plan E bis auf E 11 erledigt.
-  - `865bed2` C11 Schritt 1: Kern 1.32.0 `KERN.meldungen` (docs/kern/rahmen.md 4.28), Eulenpfad umgestellt; alt =
-    neu (50 Vergleiche), Eulenpfad-Stichprobe tab, anlaut-angel, einmaleins-blitz, kein voller Lauf.
-  - Tests zuletzt: Kern „5849 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“, Konten „101 Fälle, 0 Fehler.“,
-    Gratwanderung „Keine Fehler.“
-- **Weiter mit** (Plan C11 in `docs/plan_angleich_reihe.md`, Entscheide C11-1 a, C11-2 a, C11-3 a):
-  1. C11 Schritt 2, Lernsteig: `lernsteig/kontakt.js` (wie `eulenpfad/kontakt.js`), Anbindung `KERN.meldungen` im
-     Rahmen (`inhalt.feld: "uebung"`, Stufe als Kennung, `zusatz`: Niveau, `wer`: Jugendliche/r mit Klasse), Knopf
-     „Melden“ in der Übung mit Formular (diese Aufgabe / die davor, Art, Begründung), Meldungen im Tab Statistik
-     (Status, Antwort) mit Selbst-Weiterleiten (C11-2 a, ohne Namen), verbundene Aufsicht sieht sie in der Verwaltung
-     und kann weiterleiten; Meldungen im Abgleich und Sichern (`teile` in `KERN.daten`); `tools/meldungen_stand.py`
-     mit Angabe der App (`lernsteig/meldungen-stand.json`); Seitentest und `pruefe_konten.js` erweitern.
-  2. C11 Schritt 3 (C11-3 a): Weg und Server-Adresse je Gerät in Verwaltung → Einstellungen beider Apps, Vorgabe aus
-     `<app>/kontakt.js` (Feld `server`), nur `localhost`/`127.0.0.1`; `kern/entwicklung.js` mit Adresse statt fester
-     eigener Seite; `tools/entwickler_server.py` mit CORS (und Private-Network-Kopfzeile) — im Browser nachweisen, ob
-     die veröffentlichte Seite an localhost melden darf; sonst nur „dieselbe Seite“.
-  3. C11 Schritt 4: ✏️ Korrekturvorschläge in der Prüfansicht des Lernsteigs (`KERN.listenpruefung`, Option
-     `korrektur`).
-  4. Danach: Prüfer-Kandidat „jede JS-Datei parsen“ zur Absegnung, Abgleich mit dem mathbuch, C4, C7, C8, C10.
-- **Offen beim Nutzer:** Push; Freigabe im Prüfstand (sieben Listen, geänderte Übungen, E 11); Bestätigung der Lesart
-  „besserer Stand gewinnt“ (Fortschritt, dann Antwort, dann Verlauf, zuletzt Zeit) — angesagt, noch ohne Antwort.
-- Zum Abschluss der Sitzung: Report LERN_Session25, Handover beider Apps, CHANGELOG (Einträge E 10 und C11 Schritt 1
-  stehen schon).
-
 ## Stand
+**2026-11-09, nach LERN_Session25** ([Report](report/LERN_Session25_2026-11-09.md)):
+- **Kern 1.34.0:** `meldungen.js` (`KERN.meldungen`, 1.32.0; besserer Stand gewinnt), Löschvermerk trifft Teile der App
+  auch beim Einlesen (1.32.1), Server-Adresse und Weg der Meldungen je Gerät (1.33.0), `speicher.js` mit grossen
+  Schlüsseln in IndexedDB (1.34.0, docs/konzept_gruppen.md 5a).
+- **Eulenpfad:** Meldungen über den Kern (Namen unter `LS` gleich, alt = neu), Einstellung „Meldungen an die
+  Entwicklung“ in der Verwaltung; **Speicherschicht noch nicht umgestellt** (Runden weiter in localStorage).
+- **Lernsteig:** Plan E 10, C11 (Melden, Senden, ✏️), D1/D2/D13, Speicherschicht gebaut; Stand in
+  [docs/lernsteig/HANDOVER.md](../lernsteig/HANDOVER.md).
+- **Werkzeuge:** `tools/pruefe_skripte.js` (PK1 a) in den kurzen Prüfungen, `tools/ersatz_idb.js`.
+- **Tests:** Skripte „Keine Fehler.“, Kern „5888 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten
+  „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad nur Stichproben — letzter voller Lauf auf `51686cd`.
+  Commits `55ea8b9` … `1577860` und dieser Abschluss nicht gepusht.
+- **Weiter mit:** Speicherschicht im Eulenpfad (Plan D11, Report Punkt 1), dann voller Eulenpfad-Lauf auf Patriks
+  Entscheid, Push, Nachweis C11 (veröffentlichte Seite → localhost); Freigabe im Prüfstand (E 11); Hook-Kandidaten aus
+  dem Report; Prüfen auf echten Geräten (Konzept 5a); dann mathbuch, C4, C7, C8, C10.
+
 **2026-11-09, nach LERN_Session24** ([Report](report/LERN_Session24_2026-11-09.md)):
 - **Kern 1.31.0:** `terme.js` nach Plan E 4 (1.30.0: Potenz mit derselben Basis, „×“, „⋅“, Grossbuchstaben,
   zusammengefasste Faktoren, gemischte Zahlen als Formhinweis), neu `listenpruefung.js` (`KERN.listenpruefung`, LK1 a).
