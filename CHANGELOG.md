@@ -1322,3 +1322,11 @@
   dass die veröffentlichte Seite an localhost melden darf. Eulenpfad-Stichprobe tab, anlaut-angel „Keine Fehler.“, kein
   voller Lauf. Doku Lernsteig 5e, Kern 4.27, Plan C6, C11. Tests: Kern „5867 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
   139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Prüfer-Kandidat aus LERN_Session24 umgesetzt (PK1 a): `tools/pruefe_skripte.js` liest jede `.js`-Datei und jedes Skript
+  in einer Seite unter `eulenpfad/`, `lernsteig/`, `gratwanderung/`, `portal/` und `kern/` ohne Ausführen (`vm.Script`),
+  prüft jede `<script src>` auf eine vorhandene Datei und dass kein Skript von aussen kommt (LERN-1); läuft als „skripte“
+  mit den kurzen Prüfungen in `tools/pruefe.js` (200 Dateien, 205 Skripte in Seiten, 1652 Verweise, unter 1 s; heute
+  keine Funde). Gegenproben in einem Wegwerf-Ordner: Syntaxfehler in Datei und Seite, fehlendes und externes Skript und
+  die echte kaputte Prüfansicht aus `2d64b4a` (Zeile 96) — alle 5 gemeldet, Daten-Blöcke und Auskommentiertes nicht.
+  Steckbrief (CLAUDE.md, Tests) und Kern 6 nachgeführt. Tests: Skripte „Keine Fehler.“, Kern „5867 Fälle, 0 Fehler.“,
+  Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

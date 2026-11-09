@@ -1,7 +1,8 @@
 // Einstieg in die Prüfungen der Reihe (Plan docs/plan_angleich_reihe.md B2): ein Aufruf für alle Apps, je App ein Treiber.
 //
-// Aufruf: node tools/pruefe.js [kern] [lernsteig] [gratwanderung] [eulenpfad] [-- weitere Angaben]
-//   ohne App   die kurzen Prüfungen: Kern, Lernsteig, Gratwanderung (je Sekunden bis wenige Minuten)
+// Aufruf: node tools/pruefe.js [skripte] [kern] [lernsteig] [gratwanderung] [eulenpfad] [-- weitere Angaben]
+//   ohne App   die kurzen Prüfungen: Skripte, Kern, Lernsteig, Gratwanderung (je Sekunden bis wenige Minuten)
+//   skripte    jedes Skript aller Apps lesbar, jede <script src> vorhanden, keins von aussen (PK1 a, pruefe_skripte.js)
 //   eulenpfad  nur, wenn genannt: ohne Spielnamen läuft er über alle Spiele (rund 25 min, der volle Lauf — ob er
 //              läuft, entscheidet Patrik); mit Namen nur diese: node tools/pruefe.js eulenpfad zahlenhaus anlaut-angel
 //   Was nach einer App steht und keine App ist, geht an deren Treiber (Spiel- oder Übungsnamen, --seed=…, --aufgaben=…).
@@ -16,12 +17,13 @@ const node = (skript, args) => [process.execPath, [path.join(__dirname, skript),
 
 /** Je App: was geprüft wird und wie. */
 const TREIBER = {
+  skripte: { was: "jedes Skript lesbar, Verweise vorhanden, keins von aussen", befehl: args => node("pruefe_skripte.js", args) },
   kern: { was: "gemeinsamer Kern (kern/) und alle Kopien", befehl: args => node("pruefe_kern.js", args) },
   lernsteig: { was: "Übungen, Seiten im Ersatz-DOM, Konten, Sichern und Einlesen", befehl: args => node("pruefe_uebungen.js", args) },
   gratwanderung: { was: "Grundgerüst: Kern-Kopie und Startseite", befehl: () => null, selbst: pruefeGratwanderung },
   eulenpfad: { was: "Spiele im Ersatz-DOM", befehl: args => node("pruefe_spiele.js", args) },
 };
-const KURZ = ["kern", "lernsteig", "gratwanderung"];
+const KURZ = ["skripte", "kern", "lernsteig", "gratwanderung"];
 
 /** Gratwanderung hat noch kein Gerüst (Plan C8): die Kopie des Kerns stimmt, die Startseite ist da. Mit C8 ein eigener Treiber. */
 function pruefeGratwanderung() {
