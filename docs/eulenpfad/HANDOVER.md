@@ -1,6 +1,20 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-09, nach LERN_Session26** ([Report](report/LERN_Session26_2026-11-09.md)):
+- **Kern:** unverändert 1.34.0.
+- **Eulenpfad:** Speicherschicht umgestellt (Plan D11 erledigt): Runden, Rekorde, Meldungen, Löschvermerke in IndexedDB
+  `lernspiele-ablage`; Seiten starten über `LS.nachBereit`, ohne IndexedDB synchron wie bisher; Band bei vollem Speicher,
+  Speicheranzeige und Erinnerung ans Sichern in der Verwaltung ([rahmen.md](rahmen.md) 23).
+- **Werkzeuge:** Teil `speicher` in `tools/pruefe_spiele.js` (21 Prüfschritte), `tools/ersatz_idb.js` mit `__idbOpt`.
+- **Tests:** Skripte „Keine Fehler.“, Kern „5888 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten
+  „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Teil speicher und Stichprobe (8 Teile, gleiche
+  Klickzahlen wie `c119a50`) „Keine Fehler.“ — letzter voller Lauf auf `51686cd`. Commit `7357cde`;
+  Commits seit `55ea8b9` nicht gepusht.
+- **Weiter mit:** voller Eulenpfad-Lauf auf Patriks Entscheid, Push, Nachweis C11 und Ablage auf der
+  veröffentlichten Seite; Freigabe im Prüfstand (E 11); Hook-Kandidaten; Prüfen auf echten Geräten (Konzept 5a); dann
+  mathbuch, C4, C7, C8, C10.
+
 **2026-11-09, nach LERN_Session25** ([Report](report/LERN_Session25_2026-11-09.md)):
 - **Kern 1.34.0:** `meldungen.js` (`KERN.meldungen`, 1.32.0; besserer Stand gewinnt), Löschvermerk trifft Teile der App
   auch beim Einlesen (1.32.1), Server-Adresse und Weg der Meldungen je Gerät (1.33.0), `speicher.js` mit grossen

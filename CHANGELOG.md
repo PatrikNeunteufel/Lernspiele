@@ -1384,3 +1384,6 @@
   „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad-Stichprobe tab, daten, suche, zahlenhaus,
   einmaleins-blitz, anlaut-angel, hoer-geschichte, kiosk-kasse mit gleichen Klickzahlen wie auf `c119a50`, Teil speicher
   „Keine Fehler.“; kein voller Lauf (letzter auf `51686cd`).
+- Abschluss: Report [LERN_Session26](docs/eulenpfad/report/LERN_Session26_2026-11-09.md), Handover Eulenpfad nachgeführt.
+  Stolperfalle: Die Vorschau auf `eulenpfad/README.md` öffnete einen Speichern-unter-Dialog (`.md` ohne Typ aus
+  `tools/server.py`); zum Verlassen einer Seite künftig nur HTML.
