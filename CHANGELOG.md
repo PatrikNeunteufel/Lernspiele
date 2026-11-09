@@ -1211,3 +1211,16 @@
   art und welches, Halbmetall als Nichtmetall, Antworten vertauscht): gemeldet. Im Browser angesehen (375 px, Challenge
   mit Hinweis). Abdeckung nachgeführt, Plan E 6 Stand ersetzt. Tests: Kern „5798 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
   139 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 7 (E7-1 a, E7-2 a, E7-3 a), Lernsteig `kraefte`, `stromkreis`: Rahmen zeichnet im Graphen mehrere benannte
+  Linien (`linien`, Geraden oder Streckenzüge, Name am Ende; `rahmen.js`, `stil.css`, docs/lernsteig/rahmen.md 4).
+  `kraefte` a mit drei neuen Typen im Weg-Zeit-Diagramm: `gleichfoermig` (welche von vier Linien — daneben Pause,
+  schneller und langsamer werdend), `schneller` (drei Körper), `darstellen` (Linie zur Geschwindigkeit wählen); je 20 %
+  mit den beiden bisherigen Typen. `kraefte` c: Kraftmesser mit Messbereich (Annahme 1, 2, 5, 10, 20, 50 N), Anzeige
+  darin, Masse unter 1 kg in Gramm; neue Typen `fm-kraft` und `fm-masse` (Diagramm Gewichtskraft–Masse mit Messpunkten
+  bis 5 kg); Gewichtskraft von Alltagsmassen bis 100 kg ohne Kraftmesser. `stromkreis` c: je die Hälfte Schulversuch
+  1.5–24 V („Im Versuch …“) und Haushaltgerät am Netz 230 V (`netz-R`, `netz-I`; Glühlampe, Bügeleisen, Toaster, Föhn,
+  Wasserkocher, Heizlüfter mit üblichen Strömen, Annahme). Prüfungen rechnen Linien, Messbereich, Diagramm und
+  Zusammenhang nach; Seitentest: Rechner-Übernahme beantwortet vorher Auswahl-Aufgaben. Je 20 000 Aufgaben ohne Mängel;
+  Gegenproben (14): gemeldet. Im Browser angesehen (375 px, kraefte a mit vier Linien). Abdeckung (Kraftmesser jetzt
+  teilweise), Plan E 7 Stand ersetzt. Tests: Kern „5798 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“
+  (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

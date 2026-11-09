@@ -513,14 +513,14 @@
       "a": {
         "quelle": "wortlaut",
         "teile": [
-          {"text":"gleichförmige Bewegungen von Körpern in Diagrammen erkennen und darstellen","typen":["v-diagramm","weg-nach"],"fehlt":"das Erkennen und das Darstellen: Das Diagramm ist immer eine Ursprungsgerade und die Aufgabe sagt selbst, dass die Bewegung gleichförmig ist; gefragt sind nur Geschwindigkeit und Weg, nichts wird erkannt oder gezeichnet","notiz":"Geschwindigkeit als Rechengrösse nennt die Lehrplanseite nicht; v = s : t ist Annahme der Übung"}
+          {"text":"gleichförmige Bewegungen von Körpern in Diagrammen erkennen und darstellen","typen":["v-diagramm","weg-nach","gleichfoermig","schneller","darstellen"],"fehlt":"das Darstellen von Hand: die passende Linie wird gewählt, nicht gezeichnet (E7-1 a); Erkennen unter Linien mit Pause, schneller und langsamer werdend (gleichfoermig), Vergleichen (schneller)","notiz":"Geschwindigkeit als Rechengrösse nennt die Lehrplanseite nicht; v = s : t ist Annahme der Übung"}
         ]
       },
       "c": {
         "quelle": "wortlaut",
         "teile": [
-          {"text":"experimentell zeigen und in Diagrammen darstellen, dass die Gewichtskraft proportional zur Masse ist","typen":["kraft-kg","kraft-g","masse"],"fehlt":"das Experiment und das Diagramm; geübt wird das Rechnen mit F = m · g, g = 10 N/kg (Annahme)"},
-          {"text":"Umgang mit einem Kraftmesser","offen":true,"notiz":"Verbindlicher Inhalt; kraft-g und masse nennen den Kraftmesser nur im Aufgabentext"}
+          {"text":"experimentell zeigen und in Diagrammen darstellen, dass die Gewichtskraft proportional zur Masse ist","typen":["kraft-kg","fm-kraft","fm-masse"],"fehlt":"das Experiment und das Zeichnen des Diagramms; abgelesen wird das Diagramm Gewichtskraft–Masse mit Messpunkten (E7-2 a), gerechnet mit F = m · g, g = 10 N/kg (Annahme)"},
+          {"text":"Umgang mit einem Kraftmesser","typen":["kraft-g","masse"],"fehlt":"der Umgang selbst (Nullpunkt, Ablesen an der Skala, Messbereich wählen); geübt wird mit Anzeige und Messbereich bis 50 N (E7-2 a, Messbereiche Annahme)","notiz":"Verbindlicher Inhalt"}
         ]
       },
       "d": {
@@ -547,7 +547,7 @@
       "c": {
         "quelle": "wortlaut",
         "teile": [
-          {"text":"die massgeblichen Grössen eines einfachen Stromkreises miteinander in Beziehung setzen und Gesetzmässigkeiten experimentell herleiten. Stromstärke, Spannung, Widerstand, Ohm'sches Gesetz","typen":["ohm-U","ohm-I","ohm-R"],"fehlt":"das experimentelle Herleiten der Gesetzmässigkeiten","notiz":"Ein Teil mit den Verbindlichen Inhalten: Sie nennen die Grössen und das Gesetz, die der Satz in Beziehung setzt. Formel U = R · I und Einheiten sind Annahme der Übung, die Lehrplanseite nennt keine"}
+          {"text":"die massgeblichen Grössen eines einfachen Stromkreises miteinander in Beziehung setzen und Gesetzmässigkeiten experimentell herleiten. Stromstärke, Spannung, Widerstand, Ohm'sches Gesetz","typen":["ohm-U","ohm-I","ohm-R","netz-R","netz-I"],"fehlt":"das experimentelle Herleiten der Gesetzmässigkeiten","notiz":"Ein Teil mit den Verbindlichen Inhalten: Sie nennen die Grössen und das Gesetz, die der Satz in Beziehung setzt. Formel U = R · I und Einheiten sind Annahme der Übung, die Lehrplanseite nennt keine"}
         ]
       },
       "d": {

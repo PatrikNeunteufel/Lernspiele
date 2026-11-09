@@ -352,14 +352,14 @@ Die Stufe besteht nur aus der Erweiterung.
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| gleichförmige Bewegungen von Körpern in Diagrammen erkennen und darstellen — *Geschwindigkeit als Rechengrösse nennt die Lehrplanseite nicht; v = s : t ist Annahme der Übung* | `v-diagramm` 68 %, `weg-nach` 32 % | das Erkennen und das Darstellen: Das Diagramm ist immer eine Ursprungsgerade und die Aufgabe sagt selbst, dass die Bewegung gleichförmig ist; gefragt sind nur Geschwindigkeit und Weg, nichts wird erkannt oder gezeichnet |
+| gleichförmige Bewegungen von Körpern in Diagrammen erkennen und darstellen — *Geschwindigkeit als Rechengrösse nennt die Lehrplanseite nicht; v = s : t ist Annahme der Übung* | `v-diagramm` 19 %, `weg-nach` 20 %, `gleichfoermig` 21 %, `schneller` 19 %, `darstellen` 20 % | das Darstellen von Hand: die passende Linie wird gewählt, nicht gezeichnet (E7-1 a); Erkennen unter Linien mit Pause, schneller und langsamer werdend (gleichfoermig), Vergleichen (schneller) |
 
 ### NT.5.1.c — am Wortlaut nachgelesen
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| experimentell zeigen und in Diagrammen darstellen, dass die Gewichtskraft proportional zur Masse ist | `kraft-kg` 34 %, `kraft-g` 33 %, `masse` 33 % | das Experiment und das Diagramm; geübt wird das Rechnen mit F = m · g, g = 10 N/kg (Annahme) |
-| Umgang mit einem Kraftmesser — *Verbindlicher Inhalt; kraft-g und masse nennen den Kraftmesser nur im Aufgabentext* | **offen** | alles |
+| experimentell zeigen und in Diagrammen darstellen, dass die Gewichtskraft proportional zur Masse ist | `kraft-kg` 20 %, `fm-kraft` 20 %, `fm-masse` 19 % | das Experiment und das Zeichnen des Diagramms; abgelesen wird das Diagramm Gewichtskraft–Masse mit Messpunkten (E7-2 a), gerechnet mit F = m · g, g = 10 N/kg (Annahme) |
+| Umgang mit einem Kraftmesser — *Verbindlicher Inhalt* | `kraft-g` 21 %, `masse` 21 % | der Umgang selbst (Nullpunkt, Ablesen an der Skala, Messbereich wählen); geübt wird mit Anzeige und Messbereich bis 50 N (E7-2 a, Messbereiche Annahme) |
 
 ### NT.5.1.d — am Wortlaut nachgelesen
 
@@ -372,7 +372,7 @@ Die Stufe besteht nur aus der Erweiterung.
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| begründen, dass bei einfachen Maschinen die benötigten Kräfte verringert werden können, sich gleichzeitig aber die Strecke, entlang der die Kräfte wirken, verlängert (z.B. Hebel, schiefe Ebene, Flaschenzug). Goldene Regel der Mechanik — *Mit dem Verbindlichen Inhalt: Die Goldene Regel ist der Satz davor. Formeln (Hebelgesetz, Kraft · Weg bleibt gleich) sind Annahme der Übung, die Lehrplanseite nennt keine* | `hebel` 26 %, `flaschenzug-kraft` 25 %, `flaschenzug-weg` 25 %, `schiefe-ebene` 24 % | das Begründen (die Übung rechnet nur Kraft oder Seilweg aus); die längere Strecke rechnet nur flaschenzug-weg |
+| begründen, dass bei einfachen Maschinen die benötigten Kräfte verringert werden können, sich gleichzeitig aber die Strecke, entlang der die Kräfte wirken, verlängert (z.B. Hebel, schiefe Ebene, Flaschenzug). Goldene Regel der Mechanik — *Mit dem Verbindlichen Inhalt: Die Goldene Regel ist der Satz davor. Formeln (Hebelgesetz, Kraft · Weg bleibt gleich) sind Annahme der Übung, die Lehrplanseite nennt keine* | `hebel` 24 %, `flaschenzug-kraft` 25 %, `flaschenzug-weg` 26 %, `schiefe-ebene` 25 % | das Begründen (die Übung rechnet nur Kraft oder Seilweg aus); die längere Strecke rechnet nur flaschenzug-weg |
 
 ## Stromkreis und Ohmsches Gesetz (`stromkreis`, NT.5.2)
 
@@ -386,13 +386,13 @@ Die Stufe besteht nur aus der Erweiterung.
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| die massgeblichen Grössen eines einfachen Stromkreises miteinander in Beziehung setzen und Gesetzmässigkeiten experimentell herleiten. Stromstärke, Spannung, Widerstand, Ohm'sches Gesetz — *Ein Teil mit den Verbindlichen Inhalten: Sie nennen die Grössen und das Gesetz, die der Satz in Beziehung setzt. Formel U = R · I und Einheiten sind Annahme der Übung, die Lehrplanseite nennt keine* | `ohm-U` 33 %, `ohm-I` 33 %, `ohm-R` 34 % | das experimentelle Herleiten der Gesetzmässigkeiten |
+| die massgeblichen Grössen eines einfachen Stromkreises miteinander in Beziehung setzen und Gesetzmässigkeiten experimentell herleiten. Stromstärke, Spannung, Widerstand, Ohm'sches Gesetz — *Ein Teil mit den Verbindlichen Inhalten: Sie nennen die Grössen und das Gesetz, die der Satz in Beziehung setzt. Formel U = R · I und Einheiten sind Annahme der Übung, die Lehrplanseite nennt keine* | `ohm-U` 18 %, `ohm-I` 17 %, `ohm-R` 15 %, `netz-R` 24 %, `netz-I` 26 % | das experimentelle Herleiten der Gesetzmässigkeiten |
 
 ### NT.5.2.d — am Wortlaut nachgelesen
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| die massgeblichen Grössen eines verzweigten Stromkreises miteinander in Beziehung setzen, Gesetzmässigkeiten experimentell herleiten sowie entsprechende Versuchsprotokolle anfertigen. Knoten- und Maschenregel — *Ein Teil mit den Verbindlichen Inhalten (Knoten- und Maschenregel sind die Gesetzmässigkeiten des Satzes). masche und serie-ohm rechnen an einer unverzweigten Serienschaltung; serie-ohm (Ohm'sches Gesetz mit R1 + R2) passt nur ungefähr: Die Summe der Widerstände folgt aus der Maschenregel, ein verzweigter Stromkreis ist es nicht* | `knoten` 24 %, `masche` 22 %, `knoten-fehlt` 25 %, `parallel-ohm` 17 %, `serie-ohm` 13 % | das experimentelle Herleiten der Gesetzmässigkeiten und das Anfertigen von Versuchsprotokollen |
+| die massgeblichen Grössen eines verzweigten Stromkreises miteinander in Beziehung setzen, Gesetzmässigkeiten experimentell herleiten sowie entsprechende Versuchsprotokolle anfertigen. Knoten- und Maschenregel — *Ein Teil mit den Verbindlichen Inhalten (Knoten- und Maschenregel sind die Gesetzmässigkeiten des Satzes). masche und serie-ohm rechnen an einer unverzweigten Serienschaltung; serie-ohm (Ohm'sches Gesetz mit R1 + R2) passt nur ungefähr: Die Summe der Widerstände folgt aus der Maschenregel, ein verzweigter Stromkreis ist es nicht* | `knoten` 24 %, `masche` 22 %, `knoten-fehlt` 24 %, `parallel-ohm` 18 %, `serie-ohm` 12 % | das experimentelle Herleiten der Gesetzmässigkeiten und das Anfertigen von Versuchsprotokollen |
 
 ## Aussagen prüfen (`aussagen`, MA.1.B.2)
 

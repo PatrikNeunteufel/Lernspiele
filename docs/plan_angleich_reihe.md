@@ -250,7 +250,11 @@ Kindersprache.
    Te; Po, At, Se, Bi je nach Einteilung, nicht dabei); Hinweis nennt Wasserstoff als Ausnahme. Liste `pse` ungeprüft.
 7. **Kräfte:** Stufe a nach Seitentext (Diagramme erkennen und darstellen) statt nur v = s : t; Beispiele in
    `maschinen.js` eindeutig (Kran, Handbohrer); realistische Grössen (Kraftmesser, Spannungen in `stromkreis`).
-   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen bis auf zwei Teile. Stufe a fragt nur Geschwindigkeit und Weg aus einer Ursprungsgeraden ab, nichts zu „gleichförmige Bewegungen in Diagrammen erkennen und darstellen“ (`nt_zyklus3.md`). Kran eindeutig (Flaschenzug am Haken), einen Handbohrer gibt es nicht (Wellrad, nach KR1 a ausgeschlossen). Kraftmesser bis 1500 N und Massen bis 100 kg in Stufe c; `stromkreis` c bis 400 V, d und Challenge 3–24 V (realistisch).
+   *Stand 2026-11-09 (LERN_Session24):* erledigt nach E7-1 a, E7-2 a, E7-3 a — `kraefte` a mit mehreren Linien im
+   Weg-Zeit-Diagramm (Rahmen: `linien`): gleichförmige erkennen (neben Pause, schneller, langsamer werdend), schnellste
+   wählen, Linie zur Geschwindigkeit wählen; `kraefte` c mit Messbereich des Kraftmessers bis 50 N (Annahme 1–50 N) und
+   Diagramm Gewichtskraft–Masse; `stromkreis` c im Versuch 1.5–24 V, am Netz 230 V mit Haushaltgeräten. Kran und
+   Handbohrer schon vorher erledigt. Offen: Darstellen von Hand (gewählt wird die Linie).
 8. **Französisch:** „C'est le vélo de moi“, „les clés d'elle“ idiomatisch ersetzen (erledigt in LERN_Session22: „Ce vélo
    est à moi“, „Ces clés sont à elle“); Englisch „___ the table“ eindeutig (Englisch erledigt in LERN_Session22: ohne „at“).
 9. **Vielfalt:** `kombinatorik` f (23) mit drei Münzen, Glücksrad, Urne, Karten; `folgen` j (53) mit weiteren Figuren (erledigt in LERN_Session22: acht beschriebene Figuren, 61);

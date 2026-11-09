@@ -523,6 +523,13 @@ async function pruefeSeiten(uebungen, melde, LST, katalog = uebungen) {
         }
         else {
           if (!knopf) throw new Error(`kein Rechner-Knopf bei „${art}“`);
+          // Übernehmen braucht ein Eingabefeld: Auswahl-Aufgaben vorher richtig beantworten (kraefte a seit E7-1 a)
+          let erledigt = 0;
+          while (erledigt < e.anzahl && s.lauf("LST.pruefung.aufgabe()").art === "auswahl") {
+            await antworte(s, s.lauf("LST.pruefung.aufgabe()"), true);
+            s.klick(".knopf.weiter"); await ruhe(s, 20, 3); erledigt++;
+          }
+          if (erledigt === e.anzahl) throw new Error("keine Zahl-Aufgabe in der Runde, Übernehmen nicht prüfbar");
           s.klick(".rechner-knopf");
           for (const t of ["1", "2", "mal", "3", "gleich"]) s.klick(`.rechner .rt[aria-label="${t}"]`);
           s.klick(".rechner .rt.uebernehmen");
@@ -544,12 +551,12 @@ async function pruefeSeiten(uebungen, melde, LST, katalog = uebungen) {
           s.klick('[data-aktion="rechner-zu"]'); await ruhe(s, 20, 2);
           if (!zustand().startsWith("R-zu") || s.lauf(`document.querySelector(".rechner-knopf").getAttribute("aria-pressed")`) !== "false") throw new Error(`Rechner schliessen: ${zustand()}`);
           s.klick(".rechner-knopf"); await ruhe(s, 20, 2);
-          for (let i = 0; i < e.anzahl; i++) {
+          for (let i = erledigt; i < e.anzahl; i++) {
             await antworte(s, s.lauf("LST.pruefung.aufgabe()"), true);
             s.klick(".knopf.weiter"); await ruhe(s, 20, 3);
           }
           const r = s.json("lernsteig:runden") || [];
-          if (!r[0] || r[0].mitRechner !== true || !r[0].liste[0].rechner) throw new Error(`Rechner nicht im Protokoll: ${JSON.stringify(r[0] || {}).slice(0, 160)}`);
+          if (!r[0] || r[0].mitRechner !== true || !r[0].liste[erledigt].rechner) throw new Error(`Rechner nicht im Protokoll: ${JSON.stringify(r[0] || {}).slice(0, 160)}`);
         }
       } catch (err) { melde(ort, err.message); }
       fehlerVon(ort, s);

@@ -9,6 +9,14 @@
 const LST_PRUEFSTAND = {
   "listen": {},
   "uebungen": {
+    "englisch-grammatik": {
+      "am": "2026-11-09",
+      "von": "Patrik"
+    },
+    "flaechen-volumen": {
+      "am": "2026-11-09",
+      "von": "Patrik"
+    },
     "gleichungen": {
       "am": "2026-11-07",
       "von": "Patrik"

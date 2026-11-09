@@ -683,6 +683,13 @@
     if (d.m !== 0) for (const y of [y0, y1]) punkte.push([(y - d.b) / d.m, y]);
     const innen = punkte.filter(([x, y]) => x >= x0 - 1e-9 && x <= x1 + 1e-9 && y >= y0 - 1e-9 && y <= y1 + 1e-9).sort((p, q) => p[0] - q[0]);
     if (typeof d.m === "number" && innen.length >= 2) svg.append(s("line", { x1: px(innen[0][0]), y1: py(innen[0][1]), x2: px(innen[innen.length - 1][0]), y2: py(innen[innen.length - 1][1]), class: "gerade" }));
+    // Mehrere benannte Linien (E7-1 a): d.linien = [{ name, punkte: [[x, y], …] }] — Geraden oder Streckenzüge (etwa mit
+    // Pause), der Name am Ende der Linie
+    for (const l of d.linien || []) {
+      svg.append(s("polyline", { points: l.punkte.map(([x, y]) => `${px(x)},${py(y)}`).join(" "), class: "linie" }));
+      const [xe, ye] = l.punkte[l.punkte.length - 1];
+      if (l.name) svg.append(s("text", { x: px(xe) + 5, y: py(ye) + 4, class: "linienname" }, l.name));
+    }
     // Punkte mit Namen (d.punkte = [{ x, y, name }]), wahlweise als Vieleck verbunden (d.vieleck)
     if (d.punkte) {
       if (d.vieleck) svg.append(s("polygon", { points: d.punkte.map(p => `${px(p.x)},${py(p.y)}`).join(" "), class: "vieleck" }));

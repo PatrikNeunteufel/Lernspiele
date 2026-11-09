@@ -100,17 +100,27 @@ function stufeB() {
 }
 
 // ---------- c: Ohmsches Gesetz ----------
+// E7-3 a (Plan E 7): zwei Zusammenhänge mit passenden Grössen — Schulversuch mit Kleinspannung (1.5 bis 24 V) und
+// Haushaltgerät am Netz (230 V, Heizgeräte und Glühlampe als ohmsche Widerstände; Ströme Annahme nach üblicher Leistung)
+const NETZ = 230;
+const GERAETE = [["Eine Glühlampe", [0.25, 0.5]], ["Ein Bügeleisen", [4, 5, 8]], ["Ein Toaster", [4, 5]], ["Ein Föhn", [5, 8]],
+  ["Ein Wasserkocher", [8, 10]], ["Ein Heizlüfter", [5, 8, 10]]];
 function stufeC() {
+  if (LST.zufall(0, 1)) {
+    const [geraet, stroeme] = LST.waehle(GERAETE), I = LST.waehle(stroeme), R = rund(NETZ / I);
+    if (LST.zufall(0, 1)) return zahl("c", "netz-R", `${geraet} am Netz (230 V) nimmt ${dez(I)} A auf. Wie gross ist der Widerstand?`, R, "Ω", `R = U : I = 230 : ${dez(I)}`, { U: NETZ, R, I, gesucht: "R", netz: geraet });
+    return zahl("c", "netz-I", `${geraet} mit ${dez(R)} Ω ist am Netz (230 V) angeschlossen. Wie gross ist die Stromstärke in Ampere?`, I, "A", `I = U : R = 230 : ${dez(R)}`, { U: NETZ, R, I, gesucht: "I", netz: geraet });
+  }
   const gesucht = LST.waehle(["U", "U", "I", "I", "R", "R"]);
   const R = LST.waehle([5, 10, 12, 20, 25, 40, 50, 100, 200, 220, 470, 500, 1000]);
-  let I; do { I = LST.waehle([0.01, 0.02, 0.05, 0.1, 0.2, 0.25, 0.5, 0.75, 1, 1.5, 2]); } while (R * I > 400 || R * I < 0.5);
+  let I; do { I = LST.waehle([0.01, 0.02, 0.05, 0.1, 0.2, 0.25, 0.5, 0.75, 1, 1.5, 2]); } while (R * I > 24 || R * I < 1.5);
   const U = rund(R * I);
   const mA = I < 0.1 && LST.zufall(0, 1) === 1;
   const It = mA ? `${dez(I * 1000)} mA` : `${dez(I)} A`;
   const Rt = `${LST.zahlText(R)} Ω`, Ut = `${dez(U)} V`;
-  if (gesucht === "U") return zahl("c", "ohm-U", `Ein Widerstand von ${Rt} wird von ${It} durchflossen. Welche Spannung liegt an?`, U, "V", `U = R${MAL}I = ${LST.zahlText(R)}${MAL}${dez(I)}`, { U, R, I, gesucht, mA });
-  if (gesucht === "I") return zahl("c", "ohm-I", `An einem Widerstand von ${Rt} liegen ${Ut}. Wie gross ist die Stromstärke in Ampere?`, I, "A", `I = U : R = ${dez(U)} : ${LST.zahlText(R)}`, { U, R, I, gesucht });
-  return zahl("c", "ohm-R", `An einem Bauteil liegen ${Ut}, es fliessen ${It}. Wie gross ist sein Widerstand?`, R, "Ω", `R = U : I = ${dez(U)} : ${dez(I)}`, { U, R, I, gesucht, mA });
+  if (gesucht === "U") return zahl("c", "ohm-U", `Im Versuch wird ein Widerstand von ${Rt} von ${It} durchflossen. Welche Spannung liegt an?`, U, "V", `U = R${MAL}I = ${LST.zahlText(R)}${MAL}${dez(I)}`, { U, R, I, gesucht, mA });
+  if (gesucht === "I") return zahl("c", "ohm-I", `Im Versuch liegen an einem Widerstand von ${Rt} ${Ut}. Wie gross ist die Stromstärke in Ampere?`, I, "A", `I = U : R = ${dez(U)} : ${LST.zahlText(R)}`, { U, R, I, gesucht });
+  return zahl("c", "ohm-R", `Im Versuch liegen an einem Bauteil ${Ut}, es fliessen ${It}. Wie gross ist sein Widerstand?`, R, "Ω", `R = U : I = ${dez(U)} : ${dez(I)}`, { U, R, I, gesucht, mA });
 }
 
 // ---------- d: verzweigt ----------
@@ -179,6 +189,8 @@ function hinweis(a, eingabe) {
     "ohm-U": "Spannung ist Widerstand mal Stromstärke. Milliampere zuerst in Ampere umrechnen: durch tausend.",
     "ohm-I": "Stromstärke ist Spannung geteilt durch Widerstand.",
     "ohm-R": "Widerstand ist Spannung geteilt durch Stromstärke. Milliampere zuerst in Ampere umrechnen.",
+    "netz-R": "Am Netz liegen immer 230 Volt. Widerstand ist Spannung geteilt durch Stromstärke.",
+    "netz-I": "Am Netz liegen immer 230 Volt. Stromstärke ist Spannung geteilt durch Widerstand.",
     knoten: "Knotenregel: Was in eine Verzweigung hineinfliesst, fliesst auch wieder hinaus. Addiere die Zweigströme.",
     "knoten-fehlt": "Knotenregel: Der Strom vor der Verzweigung ist die Summe aller Zweigströme. Subtrahiere die bekannten.",
     masche: "Maschenregel: In Serie ergeben die Teilspannungen zusammen die Spannung der Quelle.",
@@ -265,6 +277,17 @@ function pruefeAufgabe(a, stufe, niveau) {
   if (a.antwort <= 0) m.push(`nicht positiv: ${a.text}`);
   if (!Number.isInteger(rund(a.antwort * 1000))) m.push(`mehr als drei Nachkommastellen: ${a.text}`);
   if (d.mA && !/mA/.test(a.text)) m.push("mA nicht im Text");
+  // E7-3 a: Grössen passend zum Zusammenhang — am Netz 230 V und ein Gerät mit üblichem Strom, im Versuch 1.5 bis 24 V
+  if (stufe === "c") {
+    if (d.netz) {
+      const g = GERAETE.find(x => x[0] === d.netz);
+      if (d.U !== NETZ || !a.text.includes("am Netz (230 V)") || !a.text.startsWith(d.netz)) m.push(`Netz-Aufgabe ohne 230 V oder Gerät: ${a.text}`);
+      if (!g || !g[1].includes(d.I)) m.push(`Strom ${d.I} A passt nicht zum Gerät ${d.netz}`);
+    } else {
+      if (d.U < 1.5 || d.U > 24) m.push(`Spannung ${d.U} V im Versuch (erlaubt 1.5 bis 24 V): ${a.text}`);
+      if (!a.text.startsWith("Im Versuch")) m.push(`Zusammenhang fehlt: ${a.text}`);
+    }
+  }
   return m;
 }
 

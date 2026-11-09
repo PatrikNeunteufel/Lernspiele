@@ -104,6 +104,8 @@ button, input { font: inherit; color: inherit; }
 .graph .gitter { stroke: var(--rand); stroke-width: 1; }
 .graph .achse { stroke: var(--text); stroke-width: 1.5; }
 .graph .gerade { stroke: var(--akzent); stroke-width: 3; }
+.graph .linie { fill: none; stroke: var(--akzent); stroke-width: 2.5; stroke-linejoin: round; }
+.graph .linienname { fill: var(--text); font-size: 14px; font-weight: 700; }
 .graph .beschriftung { fill: var(--leise); font-size: 11px; }
 .graph .achsname { fill: var(--text); font-weight: 700; }
 .term.lang { font-size: clamp(18px, 4.6vw, 22px); font-weight: 500; line-height: 1.4; }

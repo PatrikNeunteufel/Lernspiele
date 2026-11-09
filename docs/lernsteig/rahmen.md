@@ -105,7 +105,8 @@ Leerzeichen, Punkt und Komma sind erlaubt.
 - Optional `darstellung`: `{ art: "tabelle", kopf, zeilen }` (Wertetabelle) oder `{ art: "graph", m, b, x: [min, max],
   y: [min, max] }` (Gerade im Gitter); der Rahmen zeichnet sie unter den Aufgabentext. Zusätze zum Graphen:
   `schrittY`, `beschrY`, `hoehe` (eigener Massstab der y-Achse), `xName`, `yName` (Achsennamen), `punkte: [{ x, y, name }]`
-  und `vieleck: true` (Punkte verbunden); ohne `m` keine Gerade. Ohne `hoehe` gilt der gleiche Massstab auf beiden
+  und `vieleck: true` (Punkte verbunden), seit LERN_Session24 `linien: [{ name, punkte: [[x, y], …] }]` (mehrere
+  benannte Geraden oder Streckenzüge, der Name am Ende der Linie; E7-1 a); ohne `m` keine Gerade. Ohne `hoehe` gilt der gleiche Massstab auf beiden
   Achsen, aber die Fläche ist höchstens quadratisch und mindestens halb so hoch wie breit (`LST.graphHoehe`, LERN_Session19;
   vorher bis 2900 px hoch in `kraefte`); angezeigt höchstens 340 px breit und halb so hoch wie das Fenster, damit die
   ganze Aufgabe im Bild bleibt. Der Seitentest meldet eine Grafik, die höher als breit ist.
