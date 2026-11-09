@@ -1243,3 +1243,6 @@
   anlaut-angel (73 Einträge, mit ✏️). Eulenpfad-Stichprobe: anlaut-angel, auge-entdecker „Keine Fehler.“, kein voller
   Lauf. Doku: Kern 4.27, Eulenpfad 17, Lernsteig 5e, Plan C6 und C11. Tests: Kern „5808 Fälle, 0 Fehler.“, Lernsteig
   „0 Fehler, 139 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Voller Eulenpfad-Lauf auf `51686cd`: „Keine Fehler.“ (169 Spiele × 6 Stufen, 1184 s).
+- Abschluss: Report [LERN_Session24](docs/eulenpfad/report/LERN_Session24_2026-11-09.md), Handover Eulenpfad und
+  Lernsteig nachgeführt.

@@ -1,6 +1,18 @@
 # Handover — Lernsteig
 
 ## Stand
+**2026-11-09, nach LERN_Session24** (Lernspiele, [Report](../eulenpfad/report/LERN_Session24_2026-11-09.md)): Kern 1.31.0.
+Plan E 2 bis E 7 erledigt: daten-rabatt l Brutto/Netto beim Preis und beim Gewicht (E2-1 a); ueberschlagen-ordnen mit
+Überschlag aus gerundeten Zahlen, Ablenkern aus falschem Runden, Zahlen unter 1 und über 1'000, Typ prozentwert (E3-1 a,
+E3-2 a); Term-Leser mit derselben Basis, ×/⋅, Grossbuchstaben, zusammengefassten Faktoren, gemischten Zahlen (E4-1 a);
+Marke `nurE` in lehrplaene.js, Stufenwahl „nur Erweiterung · Stufe k geht auch ohne sie“ (E5-1 a); atombau ohne Be²⁺/B³⁺,
+Halbmetalle nur in der Challenge (E6-1); Graph mit mehreren Linien, kraefte a und c, stromkreis c (E7-1 a bis E7-3 a).
+Prüfansicht der Inhaltslisten (C6, LK1 a): `uebungen/<id>/pruefung.js` für alle sieben Listen, Knöpfe unter der
+Stufenwahl und in Verwaltung → Freigabe, ohne ✏️ bis zu den Meldungen (LK2 a, C11). `pruefe_uebungen.js` zählt Mängel je
+Übung und prüft Prüfdefinition und Fingerabdruck der Listen. Tests: Konten „101 Fälle, 0 Fehler.“, `pruefe_uebungen.js`
+„0 Fehler, 139 Hinweise.“ Weiter mit: Freigabe im Prüfstand durch Patrik (sieben Listen, geänderte Übungen), Plan E 10,
+C11, Abgleich mit dem mathbuch (E2-1, E3-1, E4-1, E7-2), weitere NT-Kompetenzen, C4, C7, C8.
+
 **2026-11-08, nach LERN_Session23** (Lernspiele, [Report](../eulenpfad/report/LERN_Session23_2026-11-08.md)): Kern 1.29.0.
 Tab Übungen auf `KERN.uebersicht` (KT1 a). Abdeckungstabelle (AT1 a): `docs/lernsteig/abdeckung.json`, Übersicht
 `abdeckung.md` (erzeugt mit `node tools/abdeckung.js`), alle 80 Stufen am Wortlaut, geprüft gegen die gesicherten

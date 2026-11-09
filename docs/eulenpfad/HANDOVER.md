@@ -1,6 +1,20 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-09, nach LERN_Session24** ([Report](report/LERN_Session24_2026-11-09.md)):
+- **Kern 1.31.0:** `terme.js` nach Plan E 4 (1.30.0: Potenz mit derselben Basis, „×“, „⋅“, Grossbuchstaben,
+  zusammengefasste Faktoren, gemischte Zahlen als Formhinweis), neu `listenpruefung.js` (`KERN.listenpruefung`, LK1 a).
+- **Eulenpfad:** Prüfansicht der Inhaltslisten über den Kern; behoben: sie lud seit LERN_Session20 nicht (Kommentar
+  verschluckte eine Klammer), `pruefe_spiele.js` lädt jetzt jede Prüfdefinition.
+- **Lernsteig:** Plan E 2 bis E 7 erledigt (daten-rabatt, ueberschlagen-ordnen, terme, Stufen nur aus Erweiterung,
+  atombau, kraefte, stromkreis), Prüfansicht für alle sieben Listen (C6 bis auf ✏️, C11 neu); Stand in
+  [docs/lernsteig/HANDOVER.md](../lernsteig/HANDOVER.md).
+- **Tests:** Kern „5808 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten 101 Fälle), Gratwanderung
+  „Keine Fehler.“; Eulenpfad **voller Lauf** auf `51686cd` „Keine Fehler.“ (169 × 6 Stufen, 1184 s). Commits `7c10b92` …
+  `51686cd` nicht gepusht.
+- **Weiter mit:** Push; Freigabe der sieben Listen und der geänderten Übungen im Prüfstand durch Patrik (jetzt mit der
+  Prüfansicht); Plan E 10; C11 als Entscheid; Prüfer-Kandidat „jede JS-Datei parsen“; dann C4, C7, C8, C10.
+
 **2026-11-08, nach LERN_Session23** ([Report](report/LERN_Session23_2026-11-08.md)):
 - **Kern 1.29.0:** `KERN.uebersicht` (1.28.0, KT1 a; Tab Spiele und Tab Übungen darauf), `KERN.terme` mit den Formen
   `primfaktoren` und `bruchterm` und „/“ als Division durch eine Zahl (1.29.0).
