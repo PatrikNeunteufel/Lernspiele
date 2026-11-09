@@ -93,6 +93,10 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
         : el("p", { class: "leise", text: "Noch kein Konto verbunden." }),
       el("h2", { class: "abschnitt", text: "Eigene Meldungen" }),
       LST_START.meldungenKarte(eigene, { ich: a.name, loeschen: true, neu: zeichne }),
+      // Korrekturvorschläge aus der Prüfansicht (✏️, Plan C11 Schritt 4): von allen Aufsichten dieses Geräts
+      el("h2", { class: "abschnitt", text: "Korrekturen an Inhaltslisten" }),
+      LST_START.meldungenKarte(LST.MELDUNGEN.korrekturen(), { ich: a.name, loeschen: true, neu: zeichne,
+        einleitung: "Mit ✏️ in der Prüfansicht einer Liste gespeichert (Freigabe → 🔍 prüfen). Senden geht ohne Namen an die Entwicklung; die Antwort kommt mit „Antworten abfragen“." }),
     ];
   }
 

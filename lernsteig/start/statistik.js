@@ -102,8 +102,9 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   // immer ohne Namen. Die Antwort holt „Antworten abfragen“ (lernsteig/meldungen-stand.json, Bemerkungen).
   const M = () => LST.MELDUNGEN;
   /**
-   * Liste von Meldungen mit Senden, Löschen und Antworten. opt: { ich (Name für den Verlauf), loeschen (eigene, noch nicht
-   * gesendete dürfen weg), ungelesen (Kennungen, die hervorgehoben werden), neu() (neu zeichnen), mitPerson (Name zeigen) }.
+   * Liste von Meldungen (auch Korrekturvorschläge) mit Senden, Löschen und Antworten. opt: { ich (Name für den Verlauf),
+   * loeschen (eigene, noch nicht gesendete dürfen weg), ungelesen (Kennungen, die hervorgehoben werden), neu() (neu
+   * zeichnen), mitPerson (Name zeigen), einleitung (Text oben) }.
    */
   function meldungenKarte(liste, opt) {
     const titel = id => (KAT.uebung(id) || {}).titel || id;
@@ -120,8 +121,13 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       if (weg) { opt.neu(); }
     }
     const eintrag = m => {
-      const zeilen = [["Art", LST.MELDUNG_ARTEN[m.art] || m.art], ["Aufgabe", m.aufgabe], ["Erwartete Lösung", m.loesung], ["Eingaben", m.eingabe],
-        ["Gewertet", m.ergebnis], ["Begründung", m.text], ["Antwort", m.antwort]].filter(([, w]) => w);
+      // Korrekturvorschläge (✏️ in der Prüfansicht) sind Anregungen mit Liste und Eintrag statt Aufgabe
+      const korrektur = M().istAnregung(m);
+      const zeilen = (korrektur ? [["Liste", m.liste], ["Eintrag", m.eintrag], ["Vorschlag", m.text], ["Antwort", m.antwort]]
+        : [["Art", LST.MELDUNG_ARTEN[m.art] || m.art], ["Aufgabe", m.aufgabe], ["Erwartete Lösung", m.loesung], ["Eingaben", m.eingabe],
+          ["Gewertet", m.ergebnis], ["Begründung", m.text], ["Antwort", m.antwort]]).filter(([, w]) => w);
+      const titelZeile = korrektur ? `✏️ ${titel(m.uebung)} · Liste ${String(m.liste || "").split("/").pop()}`
+        : `${opt.mitPerson ? `${m.name} · ` : ""}${titel(m.uebung)} · Stufe ${m.stufe === "challenge" ? "Challenge" : m.stufe}`;
       const knoepfe = [];
       if (m.status === "neu") {
         knoepfe.push(el("button", { type: "button", class: "knopf haupt", "data-aktion": "meldung-senden", text: "Senden", onclick: () => senden(m) }));
@@ -132,14 +138,14 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       } }));
       return el("details", { class: `meldung-eintrag status-${m.status}${(opt.ungelesen || []).includes(m.id) ? " ungelesen" : ""}`, "data-meldung": m.id,
         ...(m.status === "neu" || (opt.ungelesen || []).includes(m.id) ? { open: "" } : {}) },
-        el("summary", {}, el("b", { text: `${opt.mitPerson ? `${m.name} · ` : ""}${titel(m.uebung)} · Stufe ${m.stufe === "challenge" ? "Challenge" : m.stufe}` }),
+        el("summary", {}, el("b", { text: titelZeile }),
           el("span", { class: "leise", text: ` · ${datumText(m.zeit)} · ${status(m)}` })),
         el("dl", {}, ...zeilen.flatMap(([k, w]) => [el("dt", { text: k }), el("dd", { text: w })])),
         el("div", { class: "knopf-zeile" }, ...knoepfe));
     };
     const offen = liste.filter(m => m.status === "neu").length;
     return el("section", { class: "einstellungen meldungen" },
-      el("p", { class: "leise", text: "Mit „Fehler melden“ in einer Übung gespeichert. Senden geht ohne Namen an die Entwicklung; die Antwort kommt mit „Antworten abfragen“." }),
+      el("p", { class: "leise", text: opt.einleitung || "Mit „Fehler melden“ in einer Übung gespeichert. Senden geht ohne Namen an die Entwicklung; die Antwort kommt mit „Antworten abfragen“." }),
       el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", "data-aktion": "meldungen-abfragen", text: "Antworten abfragen", onclick: async () => {
         const n = await M().abfragen();
         opt.neu();

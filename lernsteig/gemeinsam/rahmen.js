@@ -58,7 +58,7 @@
     wer: m => (m.rolle === "aufsicht" ? "Aufsicht" : `Jugendliche/r${klasseName(m.klasse) ? `, ${klasseName(m.klasse)}` : ""}`),
     zusatz: m => [m.niveau ? `Niveau: ${LP.niveauName(m.niveau, m.lehrplan || { land: "CH" })}` : null,
       m.lp && m.lp !== m.stufe ? `Lehrplan-Stufe der Aufgabe: ${m.lp}` : null].filter(Boolean),
-    arten: MELDUNG_ARTEN, status: MELDUNG_STATUS,
+    arten: MELDUNG_ARTEN, status: MELDUNG_STATUS, anregungArten: { korrektur: "Korrektur an einer Inhaltsliste" },
     kontakt: () => (typeof LERNSTEIG_KONTAKT !== "undefined" ? LERNSTEIG_KONTAKT : {}),
     entwicklung: () => ENTWICKLUNG,
   });
@@ -171,7 +171,7 @@
   // Wie im Eulenpfad: Eine Übung meldet in uebungen/<id>/pruefung.js mit LST.listenPruefung(id, { <liste>: … }), wie ihre
   // Listen geprüft werden (Aufbau in kern/listenpruefung.js). Die Entwicklung hakt über den Entwickler-Server ab
   // (pruefstand-eintraege.json, ganz geprüft in pruefstand.js mit Fingerabdruck), eine Aufsicht für ihr Gerät und gibt die
-  // Liste dort frei. Korrekturvorschläge der Aufsicht kommen mit den Meldungen (LK2 a).
+  // Liste dort frei. Korrekturvorschläge der Aufsicht (✏️) gehen mit den Meldungen (LK2 a, seit LERN_Session25).
   const PRUEFUNGEN = {};
   const listenPruefung = (id, defs) => { PRUEFUNGEN[id] = { ...(PRUEFUNGEN[id] || {}), ...defs }; };
   const pruefungDefinition = id => PRUEFUNGEN[id] || null;
@@ -181,13 +181,25 @@
     s.src = src; s.onload = ok; s.onerror = fehler;
     document.head.append(s);
   });
+  // Korrekturvorschläge der Aufsicht (✏️, Plan C11 Schritt 4, LK2 a): eine Anregung der Art „korrektur“ mit Liste, Eintrag
+  // und Schlüssel, gesendet wie eine Meldung (Verwaltung → Meldungen); die Entwicklung schreibt direkt Bemerkungen.
+  // Die Prüfansicht liefert die Inhalts-Id als „inhalt“, die Meldungen führen sie als „uebung“.
+  const KORREKTUR = {
+    liste: quelle => MELDUNGEN.korrekturen().filter(k => k.liste === quelle),
+    neu: ({ inhalt, ...daten }) => {
+      const a = aufsichtDa();
+      return MELDUNGEN.neueKorrektur({ name: a ? a.name : "Aufsicht", person: a ? a.id : null, rolle: "aufsicht", uebung: inhalt, ...daten });
+    },
+    entferne: id => MELDUNGEN.entferne(id),
+    gespeichert: "✓ Korrektur gespeichert — senden unter Verwaltung → 🙋 Meldungen.",
+  };
   let pruefAnsicht = null;
   const ansicht = () => pruefAnsicht || (pruefAnsicht = KERN.listenpruefung.ansicht({
     el, eintraegeUrl: "../../gemeinsam/pruefstand-eintraege.json", entwicklung: () => ENTWICKLUNG,
     ich: () => (aufsichtDa() || {}).name || "Aufsicht",
     lokal: { lies: q => ({ ...(LST.lies("pruefungLokal", {})[q] || {}) }), schreibe: (q, h) => LST.schreibe("pruefungLokal", { ...LST.lies("pruefungLokal", {}), [q]: h }) },
     setzeFrei: FREIGABE.setzeListeFrei, liste: (id, listeId) => FREIGABE.listen(id).find(l => l.id === listeId) || null,
-    feld: "inhalt", wer: "Jugendliche", korrektur: null,
+    feld: "inhalt", wer: "Jugendliche", korrektur: KORREKTUR,
   }));
   /** Prüfansicht einer Liste öffnen (auf der Seite der Übung, die sie besitzt); false ohne Prüfdefinition. */
   async function listenPruefen(id, listeId) {
@@ -195,6 +207,9 @@
     return ansicht().oeffne(pruefungDefinition(id), id, listeId);
   }
   /** Knöpfe „Inhalte prüfen“ für Aufsicht und Entwicklung unter der Stufenwahl; ?pruefen=<liste> öffnet gleich. */
+  // ?pruefen=<liste> (aus Verwaltung → Freigabe) beim Laden der Seite gemerkt: Die Stufenwahl schreibt die Adresse um,
+  // bevor pruefung.js geladen ist (bis LERN_Session25 öffnete der Link darum die Prüfansicht nicht). Wirkt einmal.
+  let gefragtePruefung = typeof location !== "undefined" ? new URLSearchParams(location.search).get("pruefen") : null;
   function pruefKnoepfe(id, ort) {
     const eigene = FREIGABE.listen(id).filter(l => !l.von);
     if (!eigene.length || !(aufsichtDa() || ENTWICKLUNG.aktiv())) return;
@@ -204,7 +219,8 @@
       const mit = eigene.filter(l => defs[l.id]);
       if (mit.length) ort.append(el("div", { class: "knopf-zeile pruef-zeile" }, el("span", { class: "leise", text: "🔍 Inhalte prüfen:" }),
         ...mit.map(l => el("button", { type: "button", class: "knopf", "data-pruefen": l.id, text: `${l.geprueft ? "✓" : "○"} ${l.name}`, onclick: () => listenPruefen(id, l.id) }))));
-      const gefragt = new URLSearchParams(location.search).get("pruefen");
+      const gefragt = gefragtePruefung;
+      gefragtePruefung = null;
       if (gefragt && mit.some(l => l.id === gefragt)) listenPruefen(id, gefragt);
     }).catch(() => { /* noch keine Prüfansicht für diese Übung */ });
   }
@@ -863,6 +879,6 @@
   let aktuell = null;
   const pruefung = { aufgabe: () => aktuell };
 
-  Object.assign(LST, { MELDUNGEN, MELDUNG_ARTEN, MELDUNG_STATUS, meldungenVon, ungeleseneMeldungen, meldungenGelesen, meldenErlaubt, meldeFormular,
+  Object.assign(LST, { MELDUNGEN, KORREKTUR, MELDUNG_ARTEN, MELDUNG_STATUS, meldungenVon, ungeleseneMeldungen, meldungenGelesen, meldenErlaubt, meldeFormular,
     GRAPH, graphHoehe, el, FREIGABE, ENTWICKLUNG, listenPruefung, pruefungDefinition, listenPruefen, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, wackelt, stufenBedarf, WACKEL, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
 })(LST);

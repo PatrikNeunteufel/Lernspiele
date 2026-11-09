@@ -696,7 +696,7 @@ Format, Fingerabdruck bei Reihenfolge und Änderung); die Apps prüfen, dass jed
 Liste seit der Prüfung unverändert ist (`pruefe_spiele.js`, `pruefe_uebungen.js`). Beim Umzug fiel ein Fehler im
 Eulenpfad weg: Seit LERN_Session20 lud die Prüfansicht nicht mehr (ein Kommentar verschluckte eine Klammer).
 Benutzt von: Eulenpfad (`spiele/gemeinsam/listenpruefung.js` als Anbindung, mit Korrekturen über die Meldungen) und
-Lernsteig (`gemeinsam/rahmen.js`, `uebungen/<id>/pruefung.js`, ohne Korrekturen bis zu den Meldungen, LK2 a).
+Lernsteig (`gemeinsam/rahmen.js`, `uebungen/<id>/pruefung.js`; Korrekturen über die Meldungen seit LERN_Session25, `LST.KORREKTUR`, LK2 a).
 
 ### 4.28 `KERN.meldungen` (`kern/meldungen.js`) — Fehlermeldungen und Anregungen an die Entwicklung
 

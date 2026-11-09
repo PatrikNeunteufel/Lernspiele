@@ -1310,3 +1310,15 @@
   anlaut-angel, einmaleins-blitz „Keine Fehler.“, kein voller Lauf. Doku Kern 4.12 und 4.28, Eulenpfad 11, Lernsteig 5f
   und 6, Plan C11. Tests: Kern „5867 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „106 Fälle,
   0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan C11 Schritt 4 (LK2 a), Lernsteig: Korrekturvorschläge der Aufsicht (✏️) in der Prüfansicht der Inhaltslisten —
+  `LST.KORREKTUR` speichert eine Anregung der Art „korrektur“ mit Übung, Liste, Eintrag und Schlüssel; Verwaltung →
+  🙋 Meldungen zeigt sie unter „Korrekturen an Inhaltslisten“ und sendet sie wie eine Meldung (Text ohne Namen).
+  **Behoben:** Der Link „🔍 prüfen“ aus Verwaltung → Freigabe (`?pruefen=<liste>`) öffnete die Prüfansicht seit
+  LERN_Session24 nicht — die Stufenwahl schrieb die Adresse um, bevor `pruefung.js` geladen war; der Wert wird jetzt beim
+  Laden gemerkt (gefunden im Browser; der Seitentest prüft nur den Link, der Ersatz-DOM kennt kein `dialog`). Seitentest:
+  Korrektur speichern, in der Verwaltung sehen, als Text senden, kein Name im Text; Gegenprobe (falsches Feld): 2
+  gemeldet. Im Browser (375 px): Prüfansicht über `?pruefen=pse` mit 30 ✏️, Vorschlag gespeichert, in der Verwaltung zu
+  sehen; Testaufsicht danach entfernt. Kern 1.33.1 (nur ein Kommentar). Plan C11 und C6 erledigt bis auf den Nachweis,
+  dass die veröffentlichte Seite an localhost melden darf. Eulenpfad-Stichprobe tab, anlaut-angel „Keine Fehler.“, kein
+  voller Lauf. Doku Lernsteig 5e, Kern 4.27, Plan C6, C11. Tests: Kern „5867 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

@@ -8,7 +8,8 @@
    ein Eintrag, ist sein Haken weg. Die Entwicklung (Entwickler-Modus, KERN.entwicklung) schreibt über den Entwickler-
    Server <app>/…/pruefstand-eintraege.json und, wenn alles abgehakt ist, die Liste mit dem Fingerabdruck der ganzen
    Liste in den Prüfstand. Eine Aufsicht hakt für sich ab (lokal) und gibt die Liste auf ihrem Gerät frei (LP4 a).
-   Korrekturvorschläge der Aufsicht (✏️) nur, wenn die App sie anbietet (opt.korrektur; Lernsteig noch nicht, LK2 a).
+   Korrekturvorschläge der Aufsicht (✏️) nur, wenn die App sie anbietet (opt.korrektur; beide Apps über ihre Meldungen,
+   der Lernsteig seit LERN_Session25, LK2 a).
 
    KERN.listenpruefung.eintraegeVon(def)  → [{ roh, abschnitt, schluessel, zellen, gruppe }]
    KERN.listenpruefung.listenHash(liste)  → Fingerabdruck der ganzen Liste (alle Schlüssel)

@@ -362,10 +362,13 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
   4.27): Jede Übung mit eigener Liste meldet in `uebungen/<id>/pruefung.js` mit `LST.listenPruefung(id, { <liste>:
   { beschreibung, abschnitte } })`, wie sie geprüft wird (Abschnitte meist je Stufe, Gruppen je Thema oder Regel).
   `LST.listenPruefen(id, liste)` lädt sie nach und öffnet die Ansicht; Knöpfe „🔍 Inhalte prüfen“ unter der Stufenwahl
-  für Aufsicht und Entwicklung, `?pruefen=<liste>` aus der Verwaltung → Freigabe („🔍 prüfen“). Die Entwicklung hakt über
-  den Server ab (`gemeinsam/pruefstand-eintraege.json`, ganz geprüft in `pruefstand.js` mit Fingerabdruck), eine
-  Aufsicht für ihr Gerät (`lernsteig:pruefungLokal`) und gibt die Liste dort frei. Ohne Korrekturvorschläge (✏️), bis
-  der Lernsteig Meldungen hat (LK2 a). `pruefe_uebungen.js`: jede eigene Liste hat eine Prüfdefinition, die lädt, keine
+  für Aufsicht und Entwicklung, `?pruefen=<liste>` aus der Verwaltung → Freigabe („🔍 prüfen“; der Wert wird beim Laden
+  gemerkt, weil die Stufenwahl die Adresse umschreibt — bis LERN_Session25 öffnete der Link die Ansicht darum nicht). Die
+  Entwicklung hakt über den Server ab (`gemeinsam/pruefstand-eintraege.json`, ganz geprüft in `pruefstand.js` mit
+  Fingerabdruck), eine Aufsicht für ihr Gerät (`lernsteig:pruefungLokal`) und gibt die Liste dort frei. Korrekturvorschläge
+  der Aufsicht (✏️, Plan C11 Schritt 4, LK2 a, `LST.KORREKTUR`) speichern eine Anregung der Art „korrektur“ mit Übung,
+  Liste, Eintrag und Schlüssel; gesendet unter Verwaltung → 🙋 Meldungen → „Korrekturen an Inhaltslisten“ wie eine
+  Meldung (5f). `pruefe_uebungen.js`: jede eigene Liste hat eine Prüfdefinition, die lädt, keine
   doppelten Einträge, und eine geprüfte Liste ist seit der Prüfung unverändert. Die Freigabe je Gerät steht seit
   LERN_Session20 in der Verwaltung (5d).
 

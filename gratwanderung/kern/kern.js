@@ -1,4 +1,4 @@
-/* kern 1.33.0 · Prüfsumme sha256:f50d8f9eadc0caa462fbe5a4bb9aa00da886a900d97dc1a8a303fae9552a8962 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.33.1 · Prüfsumme sha256:af61eb1be08c81a173142d8f3aea917f0c73643831bb42eabfd0c19ebee8a151 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -4082,7 +4082,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
    ein Eintrag, ist sein Haken weg. Die Entwicklung (Entwickler-Modus, KERN.entwicklung) schreibt über den Entwickler-
    Server <app>/…/pruefstand-eintraege.json und, wenn alles abgehakt ist, die Liste mit dem Fingerabdruck der ganzen
    Liste in den Prüfstand. Eine Aufsicht hakt für sich ab (lokal) und gibt die Liste auf ihrem Gerät frei (LP4 a).
-   Korrekturvorschläge der Aufsicht (✏️) nur, wenn die App sie anbietet (opt.korrektur; Lernsteig noch nicht, LK2 a).
+   Korrekturvorschläge der Aufsicht (✏️) nur, wenn die App sie anbietet (opt.korrektur; beide Apps über ihre Meldungen,
+   der Lernsteig seit LERN_Session25, LK2 a).
 
    KERN.listenpruefung.eintraegeVon(def)  → [{ roh, abschnitt, schluessel, zellen, gruppe }]
    KERN.listenpruefung.listenHash(liste)  → Fingerabdruck der ganzen Liste (alle Schlüssel)

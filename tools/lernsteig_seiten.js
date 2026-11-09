@@ -346,6 +346,24 @@ async function pruefeSeiten(uebungen, melde, LST, katalog = uebungen) {
         const ohne = eigene.filter(q => s.attr(`a[data-pruefen="${q}"]`, "href") !== `uebungen/${q.split("/")[0]}/index.html?pruefen=${q.split("/")[1]}`);
         if (!eigene.length || ohne.length) melde(ort, `Freigabe: kein Weg zur Prüfansicht für ${ohne.join(", ") || "(keine Listen)"}`);
       }
+      // Korrekturvorschlag (✏️, Plan C11 Schritt 4): gespeichert mit Übung, Liste, Eintrag; in Verwaltung → Meldungen zu
+      // sehen und ohne Namen als Text zu senden. Die Prüfansicht selbst (dialog) ist im Browser angesehen.
+      if (mitListe) {
+        const q = s.lauf(`LST.FREIGABE.listen(${JSON.stringify(mitListe)}).find(l => !l.von).quelle`);
+        const k = s.lauf(`LST.KORREKTUR.neu({ inhalt: ${JSON.stringify(mitListe)}, liste: ${JSON.stringify(q)}, eintrag: "A | B", schluessel: "a:1", text: "So nicht richtig" })`);
+        if (!(k && k.typ === "anregung" && k.art === "korrektur" && k.uebung === mitListe && k.rolle === "aufsicht")) melde(ort, `Korrektur: ${JSON.stringify(k).slice(0, 160)}`);
+        if (s.lauf(`LST.KORREKTUR.liste(${JSON.stringify(q)}).length`) !== 1) melde(ort, "Korrektur: nicht in der Liste der Prüfansicht");
+        const t = s.lauf(`LST.MELDUNGEN.alsText(LST.MELDUNGEN.korrekturen()[0])`);
+        if (!t.startsWith(`Anregung ${k.id} (Aufsicht)`) || !t.includes(`Liste: ${q}`) || !t.includes("Eintrag: A | B [a:1]") || t.includes("Frau Muster")) melde(ort, `Korrektur: Text „${t.slice(0, 120)}“`);
+        s.hash("#verwaltung/meldungen"); await ruhe(s);
+        if (!/Korrekturen an Inhaltslisten/.test(s.text()) || !s.gibt(`[data-meldung="${k.id}"]`)) melde(ort, "Korrektur: in Verwaltung → Meldungen nicht zu sehen");
+        s.lauf(`globalThis.__kopiert = null; navigator.clipboard = { writeText: async t => { globalThis.__kopiert = t; } }; globalThis.confirm = () => true; globalThis.prompt = () => null;`);
+        s.klick(`[data-meldung="${k.id}"] [data-aktion="meldung-senden"]`); await ruhe(s);
+        if (!(s.lauf("globalThis.__kopiert") || "").startsWith(`Anregung ${k.id}`) || s.lauf(`LST.MELDUNGEN.korrekturen()[0].status`) !== "weitergeleitet") melde(ort, "Korrektur: nicht gesendet");
+        textPruefen(`${ort} Meldungen`, s);
+        s.lauf(`LST.MELDUNGEN.entferne(${JSON.stringify(k.id)})`);
+        s.hash("#verwaltung/freigabe"); await ruhe(s);
+      }
       if (mitListe) {
         const l = s.lauf(`LST.FREIGABE.listen(${JSON.stringify(mitListe)}).find(l => !l.von).quelle`);
         const war = s.lauf(`LST.FREIGABE.listeFrei(${JSON.stringify(mitListe)}, ${JSON.stringify(l.split("/")[1])})`);

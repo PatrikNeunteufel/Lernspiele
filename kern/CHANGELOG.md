@@ -3,6 +3,10 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.33.1 — 2026-11-09 (LERN_Session25)
+- `listenpruefung.js`: nur der Kopfkommentar — der Lernsteig bietet Korrekturvorschläge (✏️) jetzt auch an (Plan C11
+  Schritt 4). Keine Änderung am Verhalten.
+
 ## 1.33.0 — 2026-11-09 (LERN_Session25)
 - `entwicklung.js` (C11-3 a): Option `adresse()` — der Entwickler-Server muss nicht mehr dieselbe Seite sein; erlaubt sind
   nur `http(s)://localhost` und `127.0.0.1` mit Port (`KERN.entwicklung.adresseGueltig`, sonst gilt dieselbe Seite).
