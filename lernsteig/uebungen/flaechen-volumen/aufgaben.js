@@ -118,8 +118,16 @@ function aufgabeErzeugen(stufe, niveau) {
   throw new Error(`flaechen-volumen: keine Stufe ${stufe}`);
 }
 
+/** Quadrat der gesuchten Länge bei Pythagoras (Wurzel vergessen, Plan E 10, E10-1 a), sonst null. */
+const QUADRAT_DER_LOESUNG = {
+  hypotenuse: d => d.a * d.a + d.b * d.b, "hypotenuse-gerundet": d => d.a * d.a + d.b * d.b,
+  diagonale: d => d.a * d.a + d.b * d.b, kathete: d => d.c * d.c - d.a * d.a,
+};
+
 /** Hinweis zu einer falschen Eingabe — nennt die Lösung nie. */
 function hinweis(a, eingabe) {
+  const q = QUADRAT_DER_LOESUNG[a.typ];
+  if (q && eingabe !== null && Math.abs(eingabe - rund(q(a.daten))) < 1e-9) return "Das ist das Quadrat der gesuchten Länge. Ziehe noch die Wurzel.";
   const h = {
     "quader-volumen": "Volumen des Quaders: Länge mal Breite mal Höhe.",
     "quader-hoehe": "Teile das Volumen durch die Grundfläche (Länge mal Breite).",
@@ -128,16 +136,16 @@ function hinweis(a, eingabe) {
     trapez: "Trapez: Mittelwert der parallelen Seiten mal Höhe.",
     "quader-oberflaeche": "Ein Quader hat sechs Flächen, je zwei gleich grosse.",
     "quader-kanten": "Ein Quader hat zwölf Kanten: je vier gleich lange.",
-    hypotenuse: "Pythagoras: Die Quadrate der Katheten zusammen ergeben das Quadrat der Hypotenuse.",
+    hypotenuse: "Pythagoras: Quadrate der Katheten addieren, dann die Wurzel ziehen.",
     "hypotenuse-gerundet": "Pythagoras: Quadrate der Katheten addieren, dann die Wurzel ziehen und runden.",
     kathete: "Pythagoras rückwärts: Quadrat der Hypotenuse minus Quadrat der bekannten Kathete, dann die Wurzel.",
-    diagonale: "Die Diagonale teilt das Rechteck in zwei rechtwinklige Dreiecke.",
+    diagonale: "Die Diagonale ist die Hypotenuse eines rechtwinkligen Dreiecks: Quadrate der Seiten addieren, dann die Wurzel ziehen.",
     "kreis-umfang": "Umfang: Durchmesser mal π. Rechne mit der π-Taste, runde erst am Schluss.",
     "kreis-flaeche": "Fläche: Radius mal Radius mal π. Rechne mit der π-Taste.",
     "prisma-volumen": "Volumen eines Prismas: Grundfläche mal Körperhöhe.",
     "zylinder-volumen": "Volumen des Zylinders: Kreisfläche mal Höhe.",
     "rechteck-ohne-kreis": "Rechteckfläche minus Kreisfläche.",
-    gleichschenklig: "Die Höhe halbiert die Basis. Berechne sie mit Pythagoras.",
+    gleichschenklig: "Die Höhe halbiert die Basis. Höhe mit Pythagoras: Quadrat des Schenkels minus Quadrat der halben Basis, dann die Wurzel.",
     "zylinder-oberflaeche": "Zwei Kreise und ein Mantel (Umfang mal Höhe).",
   };
   return h[a.typ] || "Welche Formel passt zur Figur?";

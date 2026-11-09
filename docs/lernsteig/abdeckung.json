@@ -22,7 +22,7 @@
         "quelle": "wortlaut",
         "teile": [
           {"text":"die Grundoperationen mit rationalen Zahlen ausführen","typen":["plus-minus","mal-geteilt","dezimal-negativ"]},
-          {"text":"Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000)","typen":["potenz-wurzel"]},
+          {"text":"Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000)","typen":["potenz","wurzel"]},
           {"text":"Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png]","in":"brueche","notiz":"Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md, formel1 und formel6d am Bild nachgesehen): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d"}
         ]
       }
@@ -167,7 +167,7 @@
       "i": {
         "quelle": "wortlaut",
         "teile": [
-          {"text":"Zusammenhänge zwischen Termen und Figuren beschreiben (z.B. n(n+1) als Rechteck interpretieren; Die Summe der ersten n ungeraden Zahlen als Quadrat darstellen: 1 + 3 + 5 + 7 = 4 · 4)","typen":["gerade-summe","ungerade-summe","rechteckzahl"],"fehlt":"die Figur (Rechteck, Quadrat) als Bild; rechteckzahl nennt die Regel n · (n + 1) im Aufgabentext, gerechnet wird nur ein Wert"},
+          {"text":"Zusammenhänge zwischen Termen und Figuren beschreiben (z.B. n(n+1) als Rechteck interpretieren; Die Summe der ersten n ungeraden Zahlen als Quadrat darstellen: 1 + 3 + 5 + 7 = 4 · 4)","typen":["gerade-summe","ungerade-summe","rechteckzahl"],"fehlt":"die Figur als Bild bei den Summen (Quadrat bei ungerade-summe, Rechteck bei gerade-summe); gerechnet wird nur ein Wert"},
           {"text":"Terme zu Streckenlängen, Flächeninhalten und Volumen bilden und entsprechende Terme deuten","offen":true},
           {"text":"arithmetische und algebraische Terme veranschaulichen, insbesondere mit Text, Symbolen und Skizzen (z.B. das Produkt zweier Binome, die Summe dreier aufeinanderfolgender Zahlen)","offen":true},
           {"text":"arithmetische Gesetzmässigkeiten mit Buchstabentermen verallgemeinern (z.B. 3(4 + 5) = 3 · 4 + 3 · 5 → a(b + c) = ab + ac)","offen":true,"notiz":"Die Summen-Typen (Teil 1) wenden eine Verallgemeinerung an, verlangen sie aber nicht als Buchstabenterm"},

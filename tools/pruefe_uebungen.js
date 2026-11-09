@@ -137,6 +137,24 @@ function lehrplanStufen() {
 }
 const LP_STUFEN = lehrplanStufen();
 
+// ---------- Wurzel-Hinweise (Plan E 10, E10-1 a) ----------
+// Jede Wurzelaufgabe nennt im Hinweis die Wurzel (WURZEL_TYPEN; dazu jede Aufgabe mit „√“ im Text). Die zwei typischen
+// Fehler werden erkannt: Wurzel vergessen (Eingabe = Quadrat der Lösung) und Wurzel als Bruchteil (√ als Hälfte, ³√ als
+// Drittel). Die falsche Eingabe rechnet die Prüfung aus den Daten selbst, unabhängig von der Übung.
+const WURZEL_FEHLER = {
+  "flaechen-volumen": {
+    hypotenuse: d => d.a * d.a + d.b * d.b, "hypotenuse-gerundet": d => d.a * d.a + d.b * d.b,
+    diagonale: d => d.a * d.a + d.b * d.b, kathete: d => d.c * d.c - d.a * d.a,
+  },
+  koordinaten: { "abstand-schraeg": d => (d.B[0] - d.A[0]) ** 2 + (d.B[1] - d.A[1]) ** 2 },
+  "rationale-zahlen": { wurzel: d => d.radikand / d.index },
+};
+const WURZEL_TYPEN = {
+  "flaechen-volumen": ["hypotenuse", "hypotenuse-gerundet", "kathete", "diagonale", "gleichschenklig"],
+  koordinaten: ["abstand-schraeg"], "rationale-zahlen": ["wurzel"], "koerper-winkel": ["faktor-flaeche", "faktor-volumen"],
+};
+const WURZEL_ERKANNT = /Ziehe noch die Wurzel|Die Wurzel ist nicht/;
+
 // ---------- Vorrat je Stufe (Plan B2 Schritt 3, VF1 a) ----------
 // Gemessen in Runden: Hinweis, wenn sich die Aufgaben einer Stufe ohne Endlos vor der sechsten Runde wiederholen.
 const VORRAT_RUNDEN = 6;
@@ -280,6 +298,7 @@ function pruefeOhneBrowser(eintrag) {
 
   const uebersicht = [];
   const vorrat = {};
+  const wurzelGesehen = new Set(); // Gegenprobe: jeder Typ aus WURZEL_TYPEN kommt vor (sonst prüft die Tabelle nichts)
   // Die Aufgaben einer Stufe hängen nicht am Niveau (ST1 a); geprüft wird je Lehrplan-Stufe und Challenge mit jedem Niveau.
   for (const niveau of eintrag.niveaus) {
     for (const stufe of eintrag.stufen.concat("challenge")) {
@@ -327,6 +346,23 @@ function pruefeOhneBrowser(eintrag) {
           if (typeof h !== "string" || !h) { fehlerMelden(ort, "Hinweis leer"); break; }
           if (loes.test(h)) { fehlerMelden(ort, `Hinweis verrät die Lösung: ${h}`); break; }
         }
+        // Wurzel-Hinweise (E10-1 a)
+        if ((WURZEL_TYPEN[eintrag.id] || []).includes(a.typ) || (a.art === "zahl" && a.text.includes("√"))) {
+          wurzelGesehen.add(a.typ);
+          const h = U.hinweis(a, a.antwort + 1);
+          if (!/Wurzel/.test(h) && maengel++ < 3) fehlerMelden(ort, `Wurzelaufgabe ohne Wurzel-Hinweis (${a.typ}): ${h}`);
+        }
+        // folgen nennt die Regel nicht in der Aufgabe (Plan E 10, E10-2 a): kein Buchstabenterm in Zahl-Aufgaben
+        if (eintrag.id === "folgen" && a.art === "zahl" && /(^|[^A-Za-zÄÖÜäöü])n([^A-Za-zÄÖÜäöü]|$)/.test(a.text) && maengel++ < 3)
+          fehlerMelden(ort, `Aufgabe nennt die Regel: ${a.text}`);
+        const typisch = (WURZEL_FEHLER[eintrag.id] || {})[a.typ];
+        if (typisch) {
+          const falsch = Math.round(typisch(a.daten) * 1e9) / 1e9;
+          if (falsch !== a.antwort) {
+            const h = U.hinweis(a, falsch);
+            if (!WURZEL_ERKANNT.test(h) && maengel++ < 3) fehlerMelden(ort, `typischer Wurzel-Fehler ${falsch} nicht erkannt (${a.typ}): ${h}`);
+          }
+        }
       }
       if (maengel > 3) fehlerMelden(ort, `… insgesamt ${maengel} Aufgaben mit Mängeln`);
       if (annahme > 3) fehlerMelden(ort, `… insgesamt ${annahme} von ${Math.min(opt.aufgaben, ANNAHME_JE_STUFE)} Aufgaben mit Mängeln bei der Annahme`);
@@ -348,6 +384,7 @@ function pruefeOhneBrowser(eintrag) {
       if (niveau === eintrag.niveaus[0]) uebersicht.push(`${stufe}:${kennungen.size}`);
     }
   }
+  for (const t of WURZEL_TYPEN[eintrag.id] || []) if (!wurzelGesehen.has(t)) fehlerMelden(wo, `Wurzel-Typ ${t} nie erzeugt (Tabelle WURZEL_TYPEN veraltet?)`);
   console.log(`  verschiedene Aufgaben: ${uebersicht.join(" ")}`);
   return true;
 }

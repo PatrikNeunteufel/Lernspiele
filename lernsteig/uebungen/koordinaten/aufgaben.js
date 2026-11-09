@@ -120,10 +120,14 @@ function aufgabeErzeugen(stufe, niveau) {
 }
 
 function hinweis(a, eingabe) {
+  if (a.typ === "abstand-schraeg" && eingabe !== null) {
+    const dx = a.daten.B[0] - a.daten.A[0], dy = a.daten.B[1] - a.daten.A[1];
+    if (eingabe === dx * dx + dy * dy) return "Das ist das Quadrat des Abstands. Ziehe noch die Wurzel."; // Wurzel vergessen (E10-1 a)
+  }
   const h = {
     massstab: "Zähle die Häuschen zwischen den Punkten und rechne mit dem Massstab um.",
     abstand: "Gleiche x- oder y-Koordinate: Der Abstand ist die Differenz der anderen Koordinate. Achte auf negative Zahlen.",
-    "abstand-schraeg": "Zeichne ein rechtwinkliges Dreieck: waagrecht und senkrecht zählen, dann Pythagoras.",
+    "abstand-schraeg": "Zeichne ein rechtwinkliges Dreieck: waagrecht und senkrecht zählen, die Quadrate addieren, dann die Wurzel ziehen.",
     rechteck: "Seitenlängen aus den Koordinaten: Differenz der x-Werte und der y-Werte.",
     dreieck: "Die beiden Katheten liegen auf Gitterlinien. Grundseite mal Höhe, dann die Hälfte.",
     "spiegel-x": "Der Bildpunkt liegt gleich weit von der Geraden entfernt, auf der anderen Seite. Die y-Koordinate bleibt.",

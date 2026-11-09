@@ -38,7 +38,8 @@ function ladeLernsteig() {
 /** Aufgaben-Modul einer Übung, mit ihren Inhaltslisten als Globals (wie die Seite sie lädt). */
 function ladeUebung(id) {
   const ordner = path.join(APP, "uebungen", id);
-  for (const datei of fs.readdirSync(ordner).filter(d => d.endsWith(".js") && d !== "aufgaben.js"))
+  // pruefung.js ist die Prüfansicht der Inhaltslisten (LK1 a), kein Inhalt; sie braucht LST.listenPruefung aus dem Rahmen
+  for (const datei of fs.readdirSync(ordner).filter(d => d.endsWith(".js") && d !== "aufgaben.js" && d !== "pruefung.js"))
     global[path.basename(datei, ".js").toUpperCase().replace(/-/g, "_")] = require(path.join(ordner, datei));
   return require(path.join(ordner, "aufgaben.js"));
 }

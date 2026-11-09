@@ -27,7 +27,7 @@ const dez = x => LST.dezimalText(rund(x));
 const MAL = " · ";
 
 function fertig(stufe, typ, text, antwort, weg, daten, extra) {
-  return Object.assign({ art: "zahl", stufe, typ, text, antwort: rund(antwort), loesung: dez(antwort), weg: String(weg).replace(/(^|[^\d'.,])(\d{4,})(?![\d.,])/g, (_, p, d) => p + LST.zahlText(Number(d))), kennung: text + (extra && extra.darstellung ? JSON.stringify(extra.darstellung.zeilen) : ""), daten }, extra || {});
+  return Object.assign({ art: "zahl", stufe, typ, text, antwort: rund(antwort), loesung: dez(antwort), weg: String(weg).replace(/(^|[^\d'.,])(\d{4,})(?![\d.,])/g, (_, p, d) => p + LST.zahlText(Number(d))), kennung: text + (extra && extra.darstellung && extra.darstellung.zeilen ? JSON.stringify(extra.darstellung.zeilen) : ""), daten }, extra || {});
 }
 const teilerAnzahl = n => { let t = 0; for (let d = 1; d <= n; d++) if (n % d === 0) t++; return t; };
 
@@ -69,7 +69,10 @@ function stufeI() {
   const n = z(4, 60);
   if (typ === "ungerade-summe") return fertig("i", typ, `1 + 3 + 5 + … + ${2 * n - 1} =`, n * n, `Die ersten ${n} ungeraden Zahlen ergeben ${n}${MAL}${n} = ${n * n}`, { n });
   if (typ === "gerade-summe") return fertig("i", typ, `2 + 4 + 6 + … + ${2 * n} =`, n * (n + 1), `${n} gerade Zahlen: ${n}${MAL}(${n} + 1) = ${LST.zahlText(n * (n + 1))}`, { n });
-  return fertig("i", typ, `Rechteckzahlen 2, 6, 12, 20, … (n · (n + 1)). Die ${n}. Rechteckzahl =`, n * (n + 1), `${n}${MAL}${n + 1} = ${n * (n + 1)}`, { n });
+  // Ohne Regel im Text, dafür die Figuren 1 bis 4 als Rechtecke aus k Reihen zu k + 1 Feldern (Plan E 10, E10-2 a)
+  return fertig("i", typ, `Rechteckzahlen 2, 6, 12, 20, … Die ${n}. Rechteckzahl =`, n * (n + 1),
+    `Figur ${n}: ${n} Reihen zu ${n + 1} Feldern, ${n}${MAL}${n + 1} = ${n * (n + 1)}`, { n },
+    { darstellung: { art: "rechteck", quadratisch: true, teile: [1, 2, 3, 4].map(k => ({ spalten: k + 1, zeilen: k, faerben: [{ art: "felder", anzahl: k * (k + 1), farbe: 1 }], titel: String(k) })) } });
 }
 
 // ---------- j: Term zur Figurenfolge ----------
@@ -135,7 +138,7 @@ function hinweis(a, eingabe) {
     "figuren-quadrat": "Vergleiche die Anzahl mit der Nummer der Figur: Welche Rechnung passt?",
     "ungerade-summe": "Zähle, wie viele ungerade Zahlen es sind. Probiere mit 1 + 3 und 1 + 3 + 5.",
     "gerade-summe": "Zähle, wie viele gerade Zahlen es sind. Probiere mit kleinen Beispielen.",
-    rechteckzahl: "Setze die Nummer in die Regel ein.",
+    rechteckzahl: "Zähle bei jedem Rechteck die Felder in einer Reihe und die Zahl der Reihen. Wie hängen sie mit der Nummer zusammen?",
     "term-linear": "Der Zuwachs je Figur steht vor dem n. Was muss man bei Figur 1 noch dazu- oder wegzählen?",
     "linear-fern": "Finde die Regel: Zuwachs mal Nummer plus oder minus eine feste Zahl.",
     "quadratisch-naechste": "Schau die Abstände an. Wachsen sie gleichmässig?",
@@ -204,7 +207,7 @@ const LESER = {
   "figuren-quadrat": a => LESER["figuren-linear"](a),
   "ungerade-summe": a => { const z = muster(a.text, "1 + 3 + 5 + … + # ="); return z && { n: (z[0] + 1) / 2 }; },
   "gerade-summe": a => { const z = muster(a.text, "2 + 4 + 6 + … + # ="); return z && { n: z[0] / 2 }; },
-  rechteckzahl: a => { const z = muster(a.text, "Rechteckzahlen 2, 6, 12, 20, … (n · (n + 1)). Die #. Rechteckzahl ="); return z && { n: z[0] }; },
+  rechteckzahl: a => { const z = muster(a.text, "Rechteckzahlen 2, 6, 12, 20, … Die #. Rechteckzahl ="); return z && { n: z[0] }; },
   "term-linear": a => { const w = tabellenWerte(a), r = w.length >= 3 && linear(w); return r || null; },
   "linear-fern": a => { const z = muster(a.text, "#*, … Das #. Glied ="), r = z && z[0].length >= 3 && linear(z[0]); return r ? { a: r.a, b: r.b, N: z[1] } : null; },
   "quadratisch-naechste": a => { const z = muster(a.text, "#*, … Nächstes Glied ="), c = z && z[0].length >= 3 ? quadratPlus(z[0]) : null; return c === null ? null : { c, N: z[0].length + 1 }; },
@@ -261,7 +264,12 @@ function pruefeAufgabe(a, stufe, niveau) {
   if (!soll) return [`unbekannter Typ ${a.typ}`];
   m.push(...textMaengel(a, true));
   if (!B.gleich(soll, Z(a.antwort))) m.push(`Lösung ${a.antwort}, nachgerechnet ${B.text(soll)}: ${a.text}`);
-  if (a.darstellung) for (const [n, w] of a.darstellung.zeilen) {
+  // Rechteckzahlen (E10-2 a): Figur k hat k Reihen zu k + 1 Feldern, k = 1 … 4, alle gefärbt
+  if (a.darstellung && a.darstellung.art === "rechteck") {
+    const ok = a.darstellung.quadratisch && a.darstellung.teile.length === 4 && a.darstellung.teile.every((t, i) =>
+      t.zeilen === i + 1 && t.spalten === i + 2 && t.titel === String(i + 1) && t.faerben[0].anzahl === t.zeilen * t.spalten);
+    if (!ok) m.push("Rechtecke passen nicht zu den Rechteckzahlen 1 · 2, 2 · 3, 3 · 4, 4 · 5");
+  } else if (a.darstellung) for (const [n, w] of a.darstellung.zeilen) {
     const erwartet = d.quadrat ? n * n : d.a * n + d.b;
     if (w !== erwartet) m.push("Tabelle passt nicht zur Regel");
   }

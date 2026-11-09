@@ -666,8 +666,11 @@
    * "spalten" | "zeilen" | "felder", anzahl, farbe: 1 | 2 }] }. Gefärbt werden die ersten Spalten von links, die ersten
    * Zeilen von oben oder die ersten Felder spaltenweise von links oben; ein Feld in beiden Farben (Überlappung beim
    * Multiplizieren) bekommt die dritte. Zwischen den Modellen stehen Zeichen („+“, „−“). klein: kleinere Modelle (viele).
+   * quadratisch: quadratische Felder (RECHTECK.feld px), die Grösse folgt der Zahl der Felder — für Figurenfolgen wie
+   * die Rechteckzahlen (folgen i, E10-2 a); titel je Modell steht darunter („1“, „2“, …).
    */
-  const RECHTECK = { breite: 240, hoehe: 160, klein: 0.4 };
+  // feld 18: die Figuren 1 bis 4 der Rechteckzahlen (14 Felder breit) passen bei 375 px in eine Zeile (310 px Platz)
+  const RECHTECK = { breite: 240, hoehe: 160, klein: 0.4, feld: 18 };
   function farbeVon(m, sp, ze) {
     const k = sp * m.zeilen + ze;
     const an = f => f.art === "spalten" ? sp < f.anzahl : f.art === "zeilen" ? ze < f.anzahl : k < f.anzahl;
@@ -677,16 +680,17 @@
   function rechteck(d) {
     const NS = "http://www.w3.org/2000/svg";
     const s = (tag, attr) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v); return e; };
-    const f = d.klein ? RECHTECK.klein : 1, B = RECHTECK.breite, H = RECHTECK.hoehe;
-    const box = el("div", { class: "rechteckmodell", role: "img", "aria-label": "Rechteckmodell" });
+    const f = d.klein ? RECHTECK.klein : 1;
+    const box = el("div", { class: "rechteckmodell", role: "img", "aria-label": d.quadratisch ? "Figurenfolge aus Rechtecken" : "Rechteckmodell" });
     for (const t of d.teile) {
       if (typeof t === "string") { box.append(el("span", { class: "rm-zeichen", text: t })); continue; }
-      const svg = s("svg", { viewBox: `-2 -2 ${B + 4} ${H + 4}`, class: "rm", style: `width: ${Math.round(B * f)}px` });
+      const B = d.quadratisch ? t.spalten * RECHTECK.feld : RECHTECK.breite, H = d.quadratisch ? t.zeilen * RECHTECK.feld : RECHTECK.hoehe;
+      const svg = s("svg", { viewBox: `-2 -2 ${B + 4} ${H + 4}`, class: "rm", style: `width: ${d.quadratisch ? B + 4 : Math.round(B * f)}px` });
       const w = B / t.spalten, h = H / t.zeilen;
       for (let sp = 0; sp < t.spalten; sp++) for (let ze = 0; ze < t.zeilen; ze++)
         svg.append(s("rect", { x: sp * w, y: ze * h, width: w, height: h, class: `rm-feld ${farbeVon(t, sp, ze)}`.trim() }));
       svg.append(s("rect", { x: 0, y: 0, width: B, height: H, class: "rm-rahmen" }));
-      box.append(svg);
+      box.append(t.titel === undefined ? svg : el("figure", { class: "rm-figur" }, svg, el("figcaption", { text: t.titel })));
     }
     return box;
   }

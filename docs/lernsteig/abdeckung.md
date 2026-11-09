@@ -28,7 +28,7 @@ Erfasst: 27 von 27 Übungen, 80 von 80 Stufen.
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
 | die Grundoperationen mit rationalen Zahlen ausführen | `plus-minus` 25 %, `mal-geteilt` 26 %, `dezimal-negativ` 25 % | — |
-| Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000) | `potenz-wurzel` 25 % | — |
+| Wurzeln und Potenzen mit dem Rechner berechnen (z.B. 4³ · 4³ = 4'096; 4³ + 4³ = 128; ³√8000) | `potenz` 12 %, `wurzel` 13 % | — |
 | Erweiterung: die Grundoperationen mit gewöhnlichen Brüchen mit Variablen ausführen und mit Zahlen belegen: [Bild formel6a.png]; [Bild formel6b.png]; [Bild formel6c.png]; [Bild formel6d.png] — *Abschrift der Formelbilder (docs/lernsteig/lehrplan/mathematik_zyklus3.md, formel1 und formel6d am Bild nachgesehen): formel6a a/b + c/d; formel6b a/b − c/d; formel6c a/b · c/d; formel6d a : c/b : d = a/c · b/d* | in `brueche` | — |
 
 ## Gleichungen lösen (`gleichungen`, MA.1.A.4)
@@ -437,7 +437,7 @@ Die Stufe besteht nur aus der Erweiterung.
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| Zusammenhänge zwischen Termen und Figuren beschreiben (z.B. n(n+1) als Rechteck interpretieren; Die Summe der ersten n ungeraden Zahlen als Quadrat darstellen: 1 + 3 + 5 + 7 = 4 · 4) | `gerade-summe` 34 %, `ungerade-summe` 33 %, `rechteckzahl` 33 % | die Figur (Rechteck, Quadrat) als Bild; rechteckzahl nennt die Regel n · (n + 1) im Aufgabentext, gerechnet wird nur ein Wert |
+| Zusammenhänge zwischen Termen und Figuren beschreiben (z.B. n(n+1) als Rechteck interpretieren; Die Summe der ersten n ungeraden Zahlen als Quadrat darstellen: 1 + 3 + 5 + 7 = 4 · 4) | `gerade-summe` 34 %, `ungerade-summe` 33 %, `rechteckzahl` 33 % | die Figur als Bild bei den Summen (Quadrat bei ungerade-summe, Rechteck bei gerade-summe); gerechnet wird nur ein Wert |
 | Terme zu Streckenlängen, Flächeninhalten und Volumen bilden und entsprechende Terme deuten | **offen** | alles |
 | arithmetische und algebraische Terme veranschaulichen, insbesondere mit Text, Symbolen und Skizzen (z.B. das Produkt zweier Binome, die Summe dreier aufeinanderfolgender Zahlen) | **offen** | alles |
 | arithmetische Gesetzmässigkeiten mit Buchstabentermen verallgemeinern (z.B. 3(4 + 5) = 3 · 4 + 3 · 5 → a(b + c) = ab + ac) — *Die Summen-Typen (Teil 1) wenden eine Verallgemeinerung an, verlangen sie aber nicht als Buchstabenterm* | **offen** | alles |

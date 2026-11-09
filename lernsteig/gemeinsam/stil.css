@@ -125,6 +125,9 @@ button, input { font: inherit; color: inherit; }
 .rm-feld.rm-f1 { fill: #9fd5c4; } .rm-feld.rm-f2 { fill: #f7d68a; } .rm-feld.rm-f12 { fill: #3f8a73; }
 .rm-rahmen { fill: none; stroke: var(--text); stroke-width: 2.5; }
 .rm-zeichen { font-size: 26px; font-weight: 700; }
+/* Figurenfolge aus Rechtecken (quadratisch, E10-2 a): Figuren unten bündig, Nummer darunter */
+.rm-figur { margin: 0; align-self: flex-end; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.rm-figur figcaption { font-size: 15px; color: var(--leise); }
 .graph .gitter { stroke: var(--rand); stroke-width: 1; }
 .graph .achse { stroke: var(--text); stroke-width: 1.5; }
 .graph .gerade { stroke: var(--akzent); stroke-width: 3; }

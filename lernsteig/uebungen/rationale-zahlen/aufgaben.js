@@ -152,20 +152,21 @@ function stufeI() {
     const w = op === "+" ? a + b : a - b;
     return fertig("i", typ, `${inKlammer(a)} ${op} ${inKlammer(b)} =`, w, `${inKlammer(a)} ${op} ${inKlammer(b)} = ${dez(w)}`, {});
   }
-  // Potenzen und Wurzeln (mit dem Rechner), Beispiele des Lehrplans: 4³ · 4³; 4³ + 4³; ³√8000
+  // Potenzen und Wurzeln (mit dem Rechner), Beispiele des Lehrplans: 4³ · 4³; 4³ + 4³; ³√8000. Je ein Achtel der Stufe
+  // Typ potenz und Typ wurzel (bis LERN_Session25 gemeinsam potenz-wurzel, geteilt für den Wurzel-Hinweis, E10-1 a).
   const art = LST.waehle(["produkt", "summe", "quadratwurzel", "kubikwurzel"]);
   if (art === "produkt" || art === "summe") {
     const b = LST.zufall(2, 9), e = LST.zufall(2, 4), f = LST.zufall(2, 3);
     const t = `${b}${HOCH[e]}${art === "produkt" ? MAL : " + "}${b}${HOCH[f]}`;
     const w = art === "produkt" ? b ** (e + f) : b ** e + b ** f;
-    return fertig("i", typ, t + " =", w, `${t} = ${dez(b ** e)}${art === "produkt" ? MAL : " + "}${dez(b ** f)} = ${dez(w)}`, {});
+    return fertig("i", "potenz", t + " =", w, `${t} = ${dez(b ** e)}${art === "produkt" ? MAL : " + "}${dez(b ** f)} = ${dez(w)}`, {});
   }
   if (art === "quadratwurzel") {
     const r = LST.waehle([LST.zufall(11, 30), LST.zufall(2, 9) * 10]);
-    return fertig("i", typ, `√${dez(r * r)} =`, r, `${dez(r)}${MAL}${dez(r)} = ${dez(r * r)}, also √${dez(r * r)} = ${dez(r)}`, {});
+    return fertig("i", "wurzel", `√${dez(r * r)} =`, r, `${dez(r)}${MAL}${dez(r)} = ${dez(r * r)}, also √${dez(r * r)} = ${dez(r)}`, { radikand: r * r, index: 2 });
   }
   const r = LST.waehle([LST.zufall(2, 12), LST.zufall(2, 9) * 10]);
-  return fertig("i", typ, `³√${dez(r ** 3)} =`, r, `${dez(r)}${MAL}${dez(r)}${MAL}${dez(r)} = ${dez(r ** 3)}, also ³√${dez(r ** 3)} = ${dez(r)}`, {});
+  return fertig("i", "wurzel", `³√${dez(r ** 3)} =`, r, `${dez(r)}${MAL}${dez(r)}${MAL}${dez(r)} = ${dez(r ** 3)}, also ³√${dez(r ** 3)} = ${dez(r)}`, { radikand: r ** 3, index: 3 });
 }
 
 // ---------- Challenge (alle Stufen, mehrere Schritte) ----------
@@ -202,6 +203,9 @@ function aufgabeErzeugen(stufe, niveau) {
 /** Hinweis zu einer falschen Eingabe — nennt die Lösung nie. */
 function hinweis(a, eingabe) {
   if (eingabe !== null && eingabe !== 0 && Math.abs(eingabe) === Math.abs(a.antwort)) return "Prüfe das Vorzeichen.";
+  // Wurzel als Bruchteil gerechnet (√ als Hälfte, ³√ als Drittel; E10-1 a) — vor dem Komma: √400 → 200 hat dieselben Ziffern
+  if (a.typ === "wurzel" && eingabe !== null && Math.abs(eingabe - rund(a.daten.radikand / a.daten.index)) < 1e-9)
+    return `Die Wurzel ist nicht ${a.daten.index === 2 ? "die Hälfte" : "ein Drittel"}. Prüfe: Die Lösung ${a.daten.index === 2 ? "mal sich selbst" : "dreimal mit sich selbst malgenommen"} muss die Zahl unter der Wurzel ergeben.`;
   if (eingabe !== null && a.antwort !== 0 && [10, 100, 1000, 0.1, 0.01, 0.001].some(f => Math.abs(rund(eingabe * f) - a.antwort) < 1e-9)) return "Die Ziffern stimmen. Prüfe, wo das Komma hingehört.";
   const h = {
     "mal-ganz": "Zerlege einen Faktor, zum Beispiel in Zehner und Einer, und addiere die Teilprodukte.",
@@ -216,7 +220,8 @@ function hinweis(a, eingabe) {
     "plus-minus": "Rechne von links nach rechts. Minus eine negative Zahl ist plus ihre Gegenzahl.",
     "mal-geteilt": "Gleiche Vorzeichen geben ein positives Ergebnis, verschiedene ein negatives.",
     "dezimal-negativ": "Schreib beide Zahlen mit gleich vielen Nachkommastellen untereinander. Achte auf das Vorzeichen.",
-    "potenz-wurzel": "Potenz heisst: die Basis so oft mit sich selbst malnehmen, wie der Exponent sagt.",
+    potenz: "Potenz heisst: die Basis so oft mit sich selbst malnehmen, wie der Exponent sagt.",
+    wurzel: "Gesucht ist die Zahl, die mit sich selbst malgenommen die Zahl unter der Wurzel ergibt (bei ³√: dreimal mit sich selbst). Oder nimm die Wurzeltaste des Rechners.",
     "klammer-dezimal": "Zuerst die Klammer, dann malnehmen. Achte auf das Vorzeichen.",
     "prozent-zweimal": "Die zweite Änderung rechnet vom neuen Preis aus, nicht vom alten.",
     "potenz-term": "Potenz vor Punkt vor Strich. (−a)² ist positiv.",

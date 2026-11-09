@@ -21,7 +21,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 | B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.26.0; offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 Schritte 1–3 gebaut (LERN_Session17–20) | Abschnitt B |
 | C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C6 bis auf Korrekturvorschläge (C11), C3 gebaut (LERN_Session21) | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
-| E | Fachliche Korrekturen der Übungen | in Arbeit seit 2026-11-07 (LERN_Session21, E 9): E 8 und E 9 erledigt, übrige offen oder teilweise | Abschnitt E |
+| E | Fachliche Korrekturen der Übungen | in Arbeit seit 2026-11-07 (LERN_Session21, E 9): E 1 bis E 10 erledigt (E 1 und E 7 bis auf Zurückgestelltes), offen E 11 (Prüfen durch Patrik) | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
 | G | Doku-Drift beseitigen | offen, laufend | Abschnitt G |
 | H | Portal: Anleitungen und Listen je App | offen, nach C | Abschnitt H |
@@ -281,7 +281,11 @@ Kindersprache.
    franzoesisch-grammatik b, c, d (SP1 a: 13/13/16 → 51/48/52, Challenge mit 151 auch als Serie). Heute 0 Hinweise:
    E 9 ist damit für alle 21 Stufen erledigt. Karten nicht (Jass oder französisch?).
 10. **Hinweise:** Wurzelaufgaben bekommen einen Wurzel-Hinweis; `folgen` nennt die Formel nicht in der Aufgabe.
-   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise. Wurzel-Hinweis in `koerper-winkel`; in `flaechen-volumen` und `koordinaten` (Pythagoras) lückenhaft; `rationale-zahlen` i (√x, ³√x) hat nur den Potenz-Hinweis. `folgen` i nennt die Formel im Aufgabentext (Rechteckzahlen „n · (n + 1)“), die übrigen Stufen nur im Lösungsweg.
+   *Stand 2026-11-09 (LERN_Session25):* erledigt nach E10-1 a und E10-2 a — Wurzel-Hinweis in allen Wurzelaufgaben
+   (`flaechen-volumen` hypotenuse, diagonale, gleichschenklig; `koordinaten` abstand-schraeg; `rationale-zahlen` i mit
+   den Typen `potenz` und `wurzel` statt `potenz-wurzel`), dazu die zwei typischen Fehler erkannt (Wurzel vergessen,
+   Wurzel als Hälfte oder Drittel). `folgen` i nennt die Regel der Rechteckzahlen nicht mehr und zeigt die Figuren 1
+   bis 4 als Rechtecke (Rechteckmodell `quadratisch`).
 11. Danach: Patrik prüft die sieben Listen und die Annahmen je Übung im Entwickler-Modus (FG1 a).
 
 ## F. Recherchen ordnen

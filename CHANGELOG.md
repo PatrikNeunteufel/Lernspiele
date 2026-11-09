@@ -1246,3 +1246,22 @@
 - Voller Eulenpfad-Lauf auf `51686cd`: „Keine Fehler.“ (169 Spiele × 6 Stufen, 1184 s).
 - Abschluss: Report [LERN_Session24](docs/eulenpfad/report/LERN_Session24_2026-11-09.md), Handover Eulenpfad und
   Lernsteig nachgeführt.
+
+## 2026-11-09 — LERN_Session25
+- Plan E 10 (E10-1 a, E10-2 a), Hinweise im Lernsteig: Wurzel-Hinweis in allen Wurzelaufgaben — `flaechen-volumen`
+  hypotenuse, diagonale, gleichschenklig, `koordinaten` abstand-schraeg, `rationale-zahlen` i (Typ `potenz-wurzel`
+  geteilt in `potenz` und `wurzel`, je ein Achtel der Stufe; Wurzel-Hinweis mit der Wurzeltaste des Rechners). Erkannt
+  werden die zwei typischen Fehler: Wurzel vergessen (Eingabe = Quadrat der Lösung, „Ziehe noch die Wurzel.“; in
+  hypotenuse, hypotenuse-gerundet, kathete, diagonale, abstand-schraeg) und Wurzel als Hälfte oder Drittel
+  (`rationale-zahlen` wurzel, vor dem Komma-Hinweis: √400 → 200 hat dieselben Ziffern). `folgen` i: Rechteckzahlen
+  ohne die Regel „n · (n + 1)“ im Text, dafür die Figuren 1 bis 4 als Rechtecke aus k Reihen zu k + 1 Feldern; Hinweis
+  „Zähle bei jedem Rechteck …“; die Prüfung der Übung rechnet die Rechtecke nach. Rahmen: Rechteckmodell mit
+  `quadratisch` (Felder 18 px, Grösse nach der Zahl der Felder, Nummer darunter; bei 375 px eine Zeile, 310 px Platz).
+  `pruefe_uebungen.js`: Wurzelaufgaben ohne Wurzel-Hinweis, nicht erkannte typische Fehler (falsche Eingabe aus den
+  Daten nachgerechnet), Wurzel-Typen, die nie vorkommen, und Zahl-Aufgaben in `folgen` mit Buchstabenterm sind Fehler.
+  Gegenproben (3): alter Hinweis zu hypotenuse, Fehlererkennung in koordinaten entfernt, Regel wieder im Text von
+  folgen i — gemeldet. Behoben: `tools/abdeckung.js` brach seit LERN_Session24 ab (lud `pruefung.js` ohne
+  `LST.listenPruefung`), lädt sie jetzt nicht mehr. Abdeckung (`potenz` und `wurzel`; rechteckzahl ohne Mangel), Doku
+  Lernsteig 5 (`hinweis`, Rechteckmodell), Plan E 10. Im Browser angesehen (375 px, folgen i mit Hinweis). Eulenpfad
+  nicht berührt, kein Lauf. Tests: Kern „5808 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „101
+  Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

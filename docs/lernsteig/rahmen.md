@@ -102,6 +102,9 @@ Leerzeichen, Punkt und Komma sind erlaubt.
   `{ spalten, zeilen, faerben: [{ art: "spalten" | "zeilen" | "felder", anzahl, farbe: 1 | 2 }] }` und Zeichen („+“,
   „−“) dazwischen; gefärbt werden die ersten Spalten, Zeilen oder Felder (spaltenweise von links oben), ein Feld in
   beiden Farben bekommt die dritte (Überlappung beim Multiplizieren). Der Seitentest zählt die gezeichneten Felder.
+  Mit `quadratisch: true` (E10-2 a, Figurenfolgen wie die Rechteckzahlen in `folgen` i) sind die Felder quadratisch
+  (18 px), die Grösse folgt der Zahl der Felder, und ein `titel` je Modell steht als Nummer darunter; die Figuren stehen
+  unten bündig. 14 Felder nebeneinander passen bei 375 px in eine Zeile.
 - Optional `darstellung`: `{ art: "tabelle", kopf, zeilen }` (Wertetabelle) oder `{ art: "graph", m, b, x: [min, max],
   y: [min, max] }` (Gerade im Gitter); der Rahmen zeichnet sie unter den Aufgabentext. Zusätze zum Graphen:
   `schrittY`, `beschrY`, `hoehe` (eigener Massstab der y-Achse), `xName`, `yName` (Achsennamen), `punkte: [{ x, y, name }]`
@@ -120,7 +123,10 @@ Leerzeichen, Punkt und Komma sind erlaubt.
   Einheit), unabhängig vom Erzeuger geschrieben; abgeleitete Angaben zurückgerechnet (Durchmesser → Radius, Basis →
   halbe Basis). `pruefeAufgabe` vergleicht sie mit `a.daten` und rechnet die Lösung ein zweites Mal aus dem Gelesenen —
   so fällt auch ein Text auf, der andere oder vertauschte Werte zeigt, als die Prüfung nachrechnet.
-- `hinweis(aufgabe, eingabe)` → Text bei einem Fehlversuch. Nennt die Lösung nie.
+- `hinweis(aufgabe, eingabe)` → Text bei einem Fehlversuch. Nennt die Lösung nie. Wurzelaufgaben nennen die Wurzel
+  im Hinweis und erkennen die zwei typischen Fehler: Wurzel vergessen (Eingabe = Quadrat der Lösung: „Ziehe noch die
+  Wurzel.“) und Wurzel als Hälfte oder Drittel („Die Wurzel ist nicht …“) — Plan E 10, E10-1 a; `pruefe_uebungen.js`
+  rechnet die falsche Eingabe selbst aus den Daten (`WURZEL_FEHLER`, `WURZEL_TYPEN`).
 
 Der Katalog-Eintrag nennt `kompetenz` („MA.1.A.3“), `stufen` (Buchstaben), `weitere` (Nebenkompetenzen), `ohneE`,
 `rechner` (je Stufe und Challenge `ohne`/`mit`/`frei`, TR1 a), `niveaus`, `anzahl`, `endlos` (`true` oder Liste),
