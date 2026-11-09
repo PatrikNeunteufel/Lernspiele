@@ -441,38 +441,18 @@ function zeichneVerwaltung(box, neu) {
      * Mailprogramm (Entscheid M1 a; die Aufsicht sieht den Text und sendet selbst); ohne Adresse als Text.
      */
     async function weitergeben(m) {
-      const text = LS.meldungFuerEntwicklung(m);
-      if (LS.entwicklung.freigeschaltet() && (await LS.entwicklung.server())) {
-        const b = await LS.entwicklung.bemerkung({ text, spiel: m.spiel || undefined, stufe: m.stufe, aufgabe: m.aufgabe ? `Aufgabe ${m.aufgabeNr}: ${m.aufgabe}` : undefined, meldung: m.id });
-        if (!b) return;
-        LS.setzeMeldung(m.id, { status: "weitergeleitet" }, { von: ich, notiz: `Bemerkung Nr. ${b.nr}` });
-        return neu();
-      }
-      const mail = LS.meldungMailLink(m);
-      if (mail) {
-        if (!confirm(LS.istAnregung(m) ? "Das Mailprogramm öffnet sich mit der Anregung. Bitte ansehen und senden."
-          : "Das Mailprogramm öffnet sich mit der Meldung — ohne den Namen des Kindes. Bitte ansehen und senden.")) return;
-        location.href = mail;
-        LS.setzeMeldung(m.id, { status: "weitergeleitet" }, { von: ich, notiz: "per E-Mail" });
-        return neu();
-      }
-      try { await navigator.clipboard.writeText(text); } catch { prompt("Diesen Text an die Entwicklung schicken:", text); }
-      LS.setzeMeldung(m.id, { status: "weitergeleitet" }, { von: ich, notiz: "als Text kopiert" });
-      neu();
+      const weg = await LS.meldungWeitergeben(m, {
+        von: ich,
+        bestaetigen: art => confirm(art === "anregung" ? "Das Mailprogramm öffnet sich mit der Anregung. Bitte ansehen und senden."
+          : "Das Mailprogramm öffnet sich mit der Meldung — ohne den Namen des Kindes. Bitte ansehen und senden."),
+        oeffne: url => { location.href = url; },
+        kopiere: async text => { try { await navigator.clipboard.writeText(text); } catch { prompt("Diesen Text an die Entwicklung schicken:", text); } },
+      });
+      if (weg) neu();
     }
     /** Antworten der Entwicklung holen: Bemerkungen (Entwickler-Server) und die veröffentlichte Datei. */
     async function abfragen() {
-      const stand = {};
-      try {
-        const r = await fetch("meldungen-stand.json", { cache: "no-store" });
-        if (r.ok) Object.assign(stand, await r.json());
-      } catch { /* offline oder ohne Datei */ }
-      const b = LS.entwicklung.freigeschaltet() ? await LS.entwicklung.bemerkungen() : null;
-      for (const x of b || []) {
-        const s = LS.meldungStatusAusBemerkung(x.status);
-        if (x.meldung && s) stand[x.meldung] = { status: s, ...(x.antwort ? { antwort: x.antwort } : {}) };
-      }
-      const n = LS.meldungStandAnwenden(stand);
+      const n = await LS.meldungenAbfragen();
       neu();
       setTimeout(() => alert(n ? `${n} Antwort${n === 1 ? "" : "en"} der Entwicklung übernommen.` : "Keine neuen Antworten der Entwicklung."), 0);
     }

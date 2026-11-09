@@ -692,7 +692,36 @@ Eulenpfad weg: Seit LERN_Session20 lud die Prüfansicht nicht mehr (ein Kommenta
 Benutzt von: Eulenpfad (`spiele/gemeinsam/listenpruefung.js` als Anbindung, mit Korrekturen über die Meldungen) und
 Lernsteig (`gemeinsam/rahmen.js`, `uebungen/<id>/pruefung.js`, ohne Korrekturen bis zu den Meldungen, LK2 a).
 
-### 4.28 Geplant
+### 4.28 `KERN.meldungen` (`kern/meldungen.js`) — Fehlermeldungen und Anregungen an die Entwicklung
+
+Im Kern seit 1.32.0 (LERN_Session25, Plan C11, Entscheid C11-1 a), aus `eulenpfad/spiele/gemeinsam/spiel.js` (M1 a,
+Eulenpfad rahmen.md 13). `KERN.meldungen(opt)` mit `app`, `titel`, `speicher`, `person(name)`, `inhalt { feld, wort,
+name(id) }`, `stufe { text, aus }`, `wer(m)`, `zusatz(m)`, `woerter { eingaben, notiz }`, `arten`, `anregungArten`,
+`status`, `kontakt()` (`{ meldungen }`, aus `<app>/kontakt.js`), `entwicklung` (Objekt oder Funktion), `standDatei`.
+
+| Aufruf | Ergebnis |
+|---|---|
+| `neu`, `neueAnregung`, `neueKorrektur`, `setze`, `entferne`, `gelesen` | Speicher `<app>:meldungen`; ein neuer Status kommt mit Zeit, Person und Notiz in den Verlauf, neuer Status oder neue Antwort ist ungelesen |
+| `alle`, `von(name)`, `anregungen`, `korrekturen`, `ungelesen(name)`, `gefunden(name)` | Listen und Zähler |
+| `alsText(m)`, `ausText(text)` | Text für die Entwicklung **ohne Namen** (Kennung, wer, Inhalt, Stufe, Aufgabe, Eingaben, Begründung, Notizen) und zurück |
+| `mailLink(m)`, `adresse()` | `mailto:` mit Betreff „<Titel>: Fehlermeldung M-… (<inhalt>, Stufe …)“ oder `null` ohne Adresse |
+| `weitergeben(m, ui)` | Weg zur Entwicklung: Entwickler-Server (Bemerkung mit Kennung), sonst E-Mail, sonst Text; `ui { von, bestaetigen(art), oeffne(url), kopiere(text) }`; Ergebnis `"server"`, `"mail"`, `"text"` oder `null` |
+| `standAnwenden(stand)`, `abfragen()` | Antworten (`{ <id>: { status, antwort? } }`) aus `meldungen-stand.json` und den Bemerkungen übernehmen, nur für weitergegebene |
+| `teil` | Teil für `KERN.daten` (Sichern, Einlesen, Abgleich) |
+| `KERN.meldungen.zusammenfuehren(eigene, fremde, ctx)`, `.besser(a, b)`, `.vereinige(a, b)` | Zusammenführen je Kennung |
+
+**Besserer Stand gewinnt** (Patrik, C11-1 a: „neuer muss nicht zwingend gewinnen … besser gewinnt“): der weiter
+fortgeschrittene Status (neu < bestätigt < weitergeleitet < geplant < behoben = kein Fehler), bei gleichem Status der mit
+Antwort, dann der mit längerem Verlauf, zuletzt der jüngere Stand. Die Verläufe beider Seiten werden vereinigt; eine
+Antwort derselben Stufe geht nicht verloren; gesehen ist sie, wenn eine Seite sie gesehen hat. Das Ergebnis hängt nicht
+von der Reihenfolge der Seiten ab. Bis 1.31.0 gewann im Eulenpfad der jüngere Stand — dann konnte ein Gerät, das eine
+Meldung später nur bestätigte, ein „weitergeleitet“ des anderen überschreiben.
+
+Der Weg ist austauschbar gebaut, damit später ein Server der Entwicklung (nur verschlüsselt und mit geheimer Kennung,
+C11-3 a) dazukommen kann. Tests in `pruefe_kern.js` (Zusammenführen in beide Richtungen, Text wie im Eulenpfad, Lesen aus
+dem Text, Wege). Benutzt von: Eulenpfad (`spiele/gemeinsam/spiel.js`, Namen unter `LS` unverändert).
+
+### 4.29 Geplant
 
 Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): die
 Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Prüfen der Antwort und der Vertrag `aufgabeErzeugen`/`pruefeAufgabe`

@@ -25,6 +25,7 @@ require(path.join(WURZEL, "kern", "daten.js"));
 require(path.join(WURZEL, "kern", "abgleich.js"));
 require(path.join(WURZEL, "kern", "anmeldung.js"));
 require(path.join(WURZEL, "kern", "entwicklung.js"));
+require(path.join(WURZEL, "kern", "meldungen.js"));
 require(path.join(WURZEL, "kern", "einladung.js"));
 require(path.join(WURZEL, "kern", "auswertung.js"));
 require(path.join(WURZEL, "kern", "rolleiste.js"));
@@ -1860,6 +1861,96 @@ console.log("listenpruefung.js");
     gleich(L.D.dateiname("", new Date("2026-11-06T12:00:00Z")), "lernsteig-2026-11-06.json", "Dateiname ohne Teil");
     wirft(() => D({ speicher: A.sp }), "daten ohne app");
     delete global.localStorage;
+  }
+
+  // ---------- meldungen (C11-1 a: besserer Stand gewinnt, Text ohne Namen, Weg zur Entwicklung) ----------
+  console.log("meldungen.js");
+  {
+    const M = KERN.meldungen;
+    const v = (zeit, status, von, notiz) => ({ zeit, status, von, ...(notiz ? { notiz } : {}) });
+    const basis = { id: "M-a-1", name: "Mia", person: "p1", zeit: "2026-11-01T08:00:00Z", spiel: "x", stufe: "s3", art: "inhalt", text: "falsch" };
+    const neuM = { ...basis, status: "neu", stand: "2026-11-01T08:00:00Z", gelesen: true, verlauf: [v("2026-11-01T08:00:00Z", "neu", "Mia")] };
+    const weiter = { ...neuM, status: "weitergeleitet", stand: "2026-11-02T08:00:00Z",
+      verlauf: [...neuM.verlauf, v("2026-11-02T08:00:00Z", "bestaetigt", "Papa"), v("2026-11-02T08:00:01Z", "weitergeleitet", "Papa", "per E-Mail")] };
+    const jungAberZurueck = { ...neuM, status: "bestaetigt", stand: "2026-11-03T08:00:00Z", verlauf: [...neuM.verlauf, v("2026-11-03T08:00:00Z", "bestaetigt", "Mama")] };
+    // besser: Fortschritt vor Zeit
+    gleich(M.besser(weiter, jungAberZurueck), false, "besser: jünger, aber weniger weit, verliert");
+    gleich(M.besser(jungAberZurueck, weiter), true, "besser: weiter fortgeschritten gewinnt");
+    const r = M.zusammenfuehren([weiter], [jungAberZurueck]);
+    gleich(r.wert[0].status, "weitergeleitet", "zusammenführen: Status des besseren Stands");
+    gleich(r.wert[0].verlauf.map(x => `${x.status}/${x.von}`).join(","), "neu/Mia,bestaetigt/Papa,weitergeleitet/Papa,bestaetigt/Mama", "zusammenführen: Verläufe vereinigt, nach Zeit");
+    gleich(r.wert[0].stand, "2026-11-03T08:00:00Z", "zusammenführen: Stand der jüngeren Seite");
+    gleich(r.neu, 1, "zusammenführen: Verlauf dazugekommen zählt als geändert");
+    gleich(JSON.stringify(M.zusammenfuehren([jungAberZurueck], [weiter]).wert), JSON.stringify(r.wert), "zusammenführen: Reihenfolge der Seiten gleichgültig");
+    gleich(M.zusammenfuehren([weiter], [weiter]).neu, 0, "zusammenführen: gleiche Meldung zählt nicht");
+    gleich(M.zusammenfuehren(r.wert, [jungAberZurueck]).neu, 0, "zusammenführen: zweimal ergibt nichts Neues");
+    // gleicher Status: mit Antwort gewinnt, auch wenn älter; Antwort derselben Stufe bleibt
+    const mitAntwort = { ...weiter, status: "behoben", antwort: "Danke!", stand: "2026-11-04T08:00:00Z", gelesen: false };
+    const ohneAntwort = { ...weiter, status: "behoben", stand: "2026-11-05T08:00:00Z", gelesen: true };
+    gleich(M.zusammenfuehren([ohneAntwort], [mitAntwort]).wert[0].antwort, "Danke!", "gleicher Status: Antwort bleibt");
+    gleich(M.zusammenfuehren([{ ...mitAntwort, gelesen: true }], [mitAntwort]).wert[0].gelesen, true, "gleiche Antwort: gesehen, wenn eine Seite sie gesehen hat");
+    gleich(M.zusammenfuehren([mitAntwort], [{ ...mitAntwort, status: "geplant", antwort: "Kommt." }]).wert[0].antwort, "Danke!", "Antwort einer früheren Stufe ersetzt nicht");
+    // Person umbiegen, Anregungen ohne Person
+    const umg = M.zusammenfuehren([], [neuM, { ...neuM, id: "M-a-2", typ: "anregung", person: "p9" }], { umbiegen: id => (id === "p1" ? "p7" : id), personVon: () => null });
+    gleich(umg.wert.map(m => m.person).join(), "p7,p9", "zusammenführen: Person umgebogen, Anregung nicht");
+    gleich(M.statusAusBemerkung("erledigt 2026-11-09") + M.statusAusBemerkung("Kein Fehler, weil") + M.statusAusBemerkung("in Arbeit") + M.statusAusBemerkung("offen"),
+      "behobenkein-fehlergeplantnull", "statusAusBemerkung");
+
+    // Instanz wie im Eulenpfad: Text unverändert gegenüber der App-Fassung bis LERN_Session25
+    const daten = {};
+    const sp = { lies: (k, e) => (k in daten ? JSON.parse(daten[k]) : e), schreibe: (k, x) => { daten[k] = JSON.stringify(x); return true; } };
+    let adresse = "";
+    const EP = M({ app: "eulenpfad", titel: "Eulenpfad", speicher: sp, person: n => (n === "Mia" ? { id: "p1" } : null),
+      inhalt: { feld: "spiel", wort: "Spiel", name: id => (id === "x" ? "Zahlen-Xylofon" : null) },
+      stufe: { text: s => String(s).slice(1), aus: t => (/^\d$/.test(t) ? `s${t}` : null) },
+      wer: m => `Kind${m.klasse != null ? `, ${m.klasse}. Klasse` : ""}`, woerter: { eingaben: "Eingaben des Kindes", notiz: "Notiz der Aufsicht" },
+      arten: { inhalt: "Im Text ist ein Fehler" }, anregungArten: { korrektur: "Korrektur an einer Inhaltsliste" },
+      status: { neu: {}, bestaetigt: {}, weitergeleitet: {}, geplant: {}, behoben: {}, "kein-fehler": {} }, kontakt: () => ({ meldungen: adresse }) });
+    const m1 = EP.neu({ name: "Mia", spiel: "x", stufe: "s3", klasse: 3, aufgabeNr: 4, aufgabe: "6 · 7", loesung: "42", eingabe: "42", ergebnis: "falsch", art: "inhalt", text: "42 stimmt doch" });
+    gleich(m1.person + m1.status + m1.verlauf.length, "p1neu1", "neu: Person, Status, Verlauf");
+    gleich(EP.alsText(m1), [`Meldung ${m1.id} (Kind, 3. Klasse), ${KERN.zeit.tag(m1.zeit)}`, "Spiel: Zahlen-Xylofon (x), Stufe 3, Aufgabe 4",
+      "Art: Im Text ist ein Fehler", "Aufgabe: 6 · 7", "Erwartete Lösung: 42", "Eingaben des Kindes: 42", "Gewertet: falsch", "Begründung: 42 stimmt doch"].join("\n"), "alsText wie im Eulenpfad");
+    gleich(JSON.stringify(EP.ausText(EP.alsText(m1))), JSON.stringify({ meldung: m1.id, spiel: "x", stufe: "s3" }), "ausText liest Kennung, Spiel, Stufe");
+    gleich(EP.ausText("ohne Kennung"), null, "ausText ohne Kennung");
+    gleich(EP.mailLink(m1), null, "mailLink ohne Adresse");
+    adresse = "meldungen@example.org";
+    gleich(decodeURIComponent(EP.mailLink(m1).split("subject=")[1].split("&")[0]), `Eulenpfad: Fehlermeldung ${m1.id} (x, Stufe 3)`, "mailLink: Betreff");
+    EP.setze(m1.id, { status: "bestaetigt" }, { von: "Papa", notiz: "stimmt" });
+    const m1b = EP.alle()[0];
+    gleich([m1b.verlauf.length, m1b.gelesen, EP.alsText(m1b).endsWith("Notiz der Aufsicht: stimmt")].join(), "2,false,true", "setze: Verlauf, ungelesen, Notiz im Text");
+    gleich(EP.ungelesen("Mia").length, 1, "ungelesen");
+    EP.gelesen("Mia");
+    gleich(EP.ungelesen("Mia").length, 0, "gelesen");
+    gleich(EP.standAnwenden({ [m1.id]: { status: "behoben" } }), 0, "standAnwenden: nicht weitergegebene bleibt");
+    const a1 = EP.neueKorrektur({ name: "Papa", liste: "woerter", eintrag: "Haus", schluessel: "w:abc", text: "Haus mit s" });
+    gleich(EP.korrekturen().length + EP.anregungen().length + EP.von("Mia").length, 3, "Anregung und Korrektur getrennt von Meldungen");
+    gleich(EP.alsText(a1).split("\n")[0], `Anregung ${a1.id} (Aufsicht), ${KERN.zeit.tag(a1.zeit)}`, "alsText: Anregung");
+    // Weg: Server, E-Mail, Text
+    let gesendet = null, kopiert = null, geoeffnet = null;
+    const stub = { freigeschaltet: () => true, server: async () => ({ ok: true }), bemerkung: async d => { gesendet = d; return { nr: 7 }; }, bemerkungen: async () => [] };
+    const EP2 = M({ app: "eulenpfad", titel: "Eulenpfad", speicher: sp, inhalt: { feld: "spiel", wort: "Spiel" }, status: { geplant: {}, behoben: {} }, entwicklung: stub, kontakt: () => ({ meldungen: adresse }) });
+    gleich(await EP2.weitergeben(EP2.alle()[0], { von: "Papa" }), "server", "weitergeben: Entwickler-Server zuerst");
+    gleich([gesendet.meldung, gesendet.spiel, EP2.alle()[0].status, EP2.alle()[0].verlauf.pop().notiz].join(), `${m1.id},x,weitergeleitet,Bemerkung Nr. 7`, "weitergeben: Bemerkung mit Kennung, Status");
+    stub.freigeschaltet = () => false;
+    gleich(await EP2.weitergeben(a1, { bestaetigen: () => false }), null, "weitergeben: E-Mail abgebrochen");
+    gleich(await EP2.weitergeben(a1, { bestaetigen: () => true, oeffne: u => { geoeffnet = u; } }), "mail", "weitergeben: E-Mail");
+    gleich(geoeffnet.startsWith("mailto:meldungen@example.org?subject=Eulenpfad%3A%20Anregung"), true, "weitergeben: mailto geöffnet");
+    adresse = "";
+    const a2 = EP2.neueAnregung({ name: "Papa", art: "neu", text: "mehr Spiele bitte" });
+    gleich(await EP2.weitergeben(a2, { kopiere: async t => { kopiert = t; } }), "text", "weitergeben: ohne Adresse als Text");
+    gleich(kopiert.startsWith(`Anregung ${a2.id}`), true, "weitergeben: Text kopiert");
+    gleich(EP2.standAnwenden({ [m1.id]: { status: "behoben", antwort: "Danke!" } }), 1, "standAnwenden: weitergegebene übernimmt Antwort");
+    gleich(EP2.gefunden("Mia"), 1, "gefunden: behobene Meldung zählt");
+    gleich(EP.teil.sichern(["p1"], EP.alle()).length, 1, "teil.sichern: nur Meldungen der gewählten Personen");
+    // Lernsteig-artig: Feld uebung, Stufe als Kennung, Zusatzzeile
+    const LSM = M({ app: "lernsteig", titel: "Lernsteig", speicher: KERN.speicher("t-meld:"), inhalt: { feld: "uebung", wort: "Übung" },
+      wer: () => "Jugendliche, 2. Oberstufe", zusatz: m => [`Niveau: ${m.niveau}`] });
+    const l1 = { id: "M-b-2", zeit: "2026-11-09T08:00:00Z", uebung: "terme", stufe: "h-i", niveau: "n1", art: "wertung", aufgabeNr: 2, aufgabe: "2a + 3a", text: "5a ist richtig" };
+    gleich(LSM.alsText(l1).split("\n").slice(1, 3).join("|"), "Übung: terme (terme), Stufe h-i, Aufgabe 2|Niveau: n1", "alsText: Feld uebung, Stufe, Zusatzzeile");
+    gleich(JSON.stringify(LSM.ausText(LSM.alsText(l1))), JSON.stringify({ meldung: "M-b-2", uebung: "terme", stufe: "h-i" }), "ausText: Übung und Stufe mit Bindestrich");
+    gleich(LSM.bemerkungDaten(l1).inhalt, "terme", "bemerkungDaten: Feld inhalt für den Server");
+    wirft(() => M({ inhalt: { feld: "spiel" } }), "meldungen ohne speicher");
+    wirft(() => M({ speicher: sp }), "meldungen ohne inhalt");
   }
 
   // ---------- Kopien in den Apps ----------

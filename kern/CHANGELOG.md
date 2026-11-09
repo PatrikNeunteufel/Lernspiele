@@ -3,6 +3,15 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.32.0 — 2026-11-09 (LERN_Session25)
+- `meldungen.js` (`KERN.meldungen`, neu, Plan C11, Entscheid C11-1 a): Fehlermeldungen und Anregungen an die
+  Entwicklung aus dem Eulenpfad — Speicher, Status mit Verlauf, Text ohne Namen (`alsText`, `ausText`), E-Mail-Link,
+  Weitergeben über Entwickler-Server, E-Mail oder Text (`weitergeben`), Antworten (`standAnwenden`, `abfragen`), Teil
+  für `KERN.daten`. Neu beim Zusammenführen: Je Kennung gewinnt der **bessere** Stand (weiter fortgeschrittener Status,
+  dann mit Antwort, dann längerer Verlauf, zuletzt der jüngere), die Verläufe beider Seiten werden vereinigt; bisher
+  gewann im Eulenpfad der jüngere Stand. Was je App verschieden ist (Feld und Wort des Inhalts, Stufe im Text, wer
+  meldet, Zusatzzeilen, Wörter, Arten, Kontakt) gibt die App. Benutzt vom Eulenpfad.
+
 ## 1.31.0 — 2026-11-09 (LERN_Session24)
 - `listenpruefung.js` (`KERN.listenpruefung`, neu, Entscheid LK1 a): Prüfansicht der Inhaltslisten aus dem Eulenpfad —
   `eintraegeVon`, `listenHash` (Schlüssel und Fingerabdruck wie bisher, gleich nachgerechnet für alle fünf Listen mit

@@ -678,7 +678,9 @@ Aufsicht in `start/verwaltung.js` (Untertab „🙋 Meldungen“), Kind in `star
   Knöpfe, bei OK das Getippte; ein Hörer am Dokument) und wie gewertet wurde.
 - **Speicher:** `lernspiele:meldungen` = `[{ id, name, zeit, stand, status, verlauf, spiel, stufe, klasse,
   aufgabeNr, aufgabe, loesung, eingabe, ergebnis, art, text, antwort?, gelesen }]`. Reist mit dem Abgleich
-  (je Kennung gewinnt der jüngere `stand`) und beim Sichern mit.
+  und beim Sichern mit; je Kennung gewinnt der bessere Stand, die Verläufe werden vereinigt (C11-1 a, seit
+  LERN_Session25; vorher der jüngere `stand`). Die Logik steht seit Kern 1.32.0 in `KERN.meldungen`
+  (docs/kern/rahmen.md 4.28); `spiel.js` bindet sie an und behält die Namen unter `LS`.
 - **Status:** neu → (Aufsicht) bestätigt oder kein Fehler (mit Erklärung ans Kind) → weitergeleitet →
   (Entwicklung) geplant, behoben oder kein Fehler. Status- und Antwortwechsel zeigen dem Kind 🔔 an der
   Statistik, bis es sie gesehen hat; neue Meldungen zeigen der Aufsicht 🙋 an der Verwaltung.

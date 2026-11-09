@@ -671,27 +671,13 @@ const LS = (() => {
   // Löschvermerke in lernspiele:geloescht = { personen: { <id>: ISO }, namen: { <name>: ISO }, runden: [{ person, name,
   // inhalt (null = alle), bis }] } — der Kern liest auch die Form bis LERN_Session18 (spieler, spiel). Ein Vermerk entfernt
   // auf jedem Gerät, was bis zu seinem Zeitpunkt entstand; wer danach angelegt, geändert oder gespielt hat, bleibt.
-  // Meldungen reisen als Teil des Eulenpfads mit (je Kennung der jüngere Stand). Die Schreibvorgänge gehen über
+  // Meldungen reisen als Teil des Eulenpfads mit; je Kennung gewinnt der bessere Stand, die Verläufe werden vereinigt
+  // (KERN.meldungen.zusammenfuehren, C11-1 a; bis LERN_Session25 gewann der jüngere). Die Schreibvorgänge gehen über
   // schreibe(), damit der Abgleich (beiAenderung) sie sieht.
   const MELDUNGEN_TEIL = {
     schluessel: "meldungen",
     sichern: (ids, eigene) => (Array.isArray(eigene) ? eigene : []).filter(m => m && (!ids || ids.includes(m.person))),
-    zusammenfuehren(eigene, fremde, { umbiegen, personVon }) {
-      // Verweise auf eine zusammengeführte Person umbiegen (Kennung und Namenskopie); Anregungen tragen keine Person
-      const mitPerson = m => {
-        if (!m || typeof m !== "object" || istAnregung(m) || !m.person) return m;
-        const p = personVon(m.person);
-        return p ? { ...m, person: p.id, name: p.name } : { ...m, person: umbiegen(m.person) };
-      };
-      const da = new Map((Array.isArray(eigene) ? eigene : []).filter(m => m && m.id).map(m => [m.id, mitPerson(m)]));
-      let neu = 0;
-      for (const m of Array.isArray(fremde) ? fremde : []) {
-        if (!m || typeof m !== "object" || !m.id) continue;
-        const alt = da.get(m.id);
-        if (!alt || m.stand > alt.stand) { da.set(m.id, mitPerson(m)); neu++; }
-      }
-      return { wert: [...da.values()].sort((a, b) => (a.zeit < b.zeit ? -1 : 1)), neu };
-    },
+    zusammenfuehren: (eigene, fremde, ctx) => KERN.meldungen.zusammenfuehren(eigene, fremde, ctx),
   };
   const DATEN = KERN.daten({
     app: "eulenpfad", speicher: { praefix: SPEICHER.praefix, lies, schreibe, entferne: k => SPEICHER.entferne(k) },
@@ -819,22 +805,34 @@ const LS = (() => {
     behoben: "Entwicklung: umgesetzt",
     "kein-fehler": "Entwicklung: nicht geplant (siehe Antwort)",
   };
-  const istAnregung = m => m?.typ === "anregung";
-  const meldungen = () => lies("meldungen", []);
-  const meldungenVon = name => meldungen().filter(m => m.name === name && !istAnregung(m));
-  const anregungen = () => meldungen().filter(istAnregung);
+  // Logik im Kern (KERN.meldungen, C11-1 a, Kern 1.32.0); hier nur, was der Eulenpfad anders macht. Die Namen unter LS
+  // bleiben, damit Startseite, Verwaltung und Statistik unverändert weiterlaufen.
+  const MELD = KERN.meldungen({
+    app: "eulenpfad", titel: "Eulenpfad", speicher: { lies, schreibe }, person: name => person(name),
+    inhalt: { feld: "spiel", wort: "Spiel", name: id => (typeof SPIELE !== "undefined" && SPIELE.find(s => s.id === id)?.name) || null },
+    stufe: { text: s => String(s).slice(1), aus: t => (/^\d$/.test(t) ? `s${t}` : null) },
+    wer: m => `Kind${m.klasse != null ? `, ${klasseText(m.klasse)}` : ""}`,
+    woerter: { eingaben: "Eingaben des Kindes", notiz: "Notiz der Aufsicht" },
+    arten: MELDUNG_ARTEN, anregungArten: ANREGUNG_ARTEN, status: MELDUNG_STATUS,
+    // Weg zur Entwicklung ohne Entwickler-Server (Entscheid M1 a): E-Mail aus dem Mailprogramm der Aufsicht. Die Adresse
+    // steht in eulenpfad/kontakt.js (nur die Startseite lädt sie); leer: kein E-Mail-Knopf, nur Text kopieren.
+    kontakt: () => (typeof EULENPFAD_KONTAKT !== "undefined" ? EULENPFAD_KONTAKT : {}),
+    entwicklung: () => LS.entwicklung || null,
+  });
+  const istAnregung = MELD.istAnregung;
+  const meldungen = MELD.alle;
+  const meldungenVon = MELD.von;
+  const anregungen = MELD.anregungen;
   /** Neue Anregung der Aufsicht: { name, art, text, spiel? }; Status „neu“, bis sie gesendet ist. */
-  const neueAnregung = daten => neueMeldung({ ...daten, typ: "anregung" });
+  const neueAnregung = MELD.neueAnregung;
   // Korrekturen an Inhaltslisten (LP4 a, LERN_Session11): eine Anregung der Art „korrektur“ mit Liste, Eintrag und dessen
   // Schlüssel (Fingerabdruck); gesendet wie jede Anregung, angezeigt in der Prüfansicht der Liste.
-  const neueKorrektur = daten => neueAnregung({ ...daten, art: "korrektur" });
-  const korrekturen = () => anregungen().filter(m => m.art === "korrektur");
-  /** Eigene, noch nicht gesendete Meldung oder Anregung löschen. */
-  const entferneMeldung = id => schreibe("meldungen", meldungen().filter(m => m.id !== id));
+  const neueKorrektur = MELD.neueKorrektur;
+  const korrekturen = MELD.korrekturen;
+  const entferneMeldung = MELD.entferne;
   /** Echte Fehler, die ein Kind gefunden hat: von der Entwicklung bestätigt und behoben (für die Statistik). */
-  const gefundeneFehler = name => meldungenVon(name).filter(m => m.status === "behoben").length;
-  /** Neue Rückmeldungen, die das Kind noch nicht gesehen hat. */
-  const ungeleseneMeldungen = name => meldungenVon(name).filter(m => !m.gelesen);
+  const gefundeneFehler = MELD.gefunden;
+  const ungeleseneMeldungen = MELD.ungelesen;
 
   /** Darf diese Person melden? Aufsicht immer; Kinder nach der Einstellung und der Klasse im Profil. */
   function meldenErlaubt(name) {
@@ -847,103 +845,21 @@ const LS = (() => {
     return k != null && k >= (e === "ab5" ? 5 : 3);
   }
 
-  function neueMeldung(daten) {
-    const jetzt = new Date().toISOString();
-    const id = `M-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-    const p = person(daten.name);
-    const m = { id, zeit: jetzt, stand: jetzt, status: "neu", gelesen: true, ...daten, ...(p ? { person: p.id } : {}), verlauf: [{ zeit: jetzt, status: "neu", von: daten.name }] };
-    schreibe("meldungen", [...meldungen(), m]);
-    return m;
-  }
-  /**
-   * Meldung ändern (Status, Antwort fürs Kind …). Ein neuer Status kommt in den Verlauf; ändert sich Status
-   * oder Antwort, zeigt das Kind die Meldung als neu (gelesen: false).
-   */
-  function setzeMeldung(id, aenderung, { von = "", notiz = "" } = {}) {
-    const jetzt = new Date().toISOString();
-    schreibe("meldungen", meldungen().map(m => {
-      if (m.id !== id) return m;
-      const n = { ...m, ...aenderung, stand: jetzt };
-      if (aenderung.status && aenderung.status !== m.status) n.verlauf = [...(m.verlauf || []), { zeit: jetzt, status: aenderung.status, von, ...(notiz ? { notiz } : {}) }];
-      if ((aenderung.status && aenderung.status !== m.status) || (aenderung.antwort && aenderung.antwort !== m.antwort)) n.gelesen = false;
-      return n;
-    }));
-  }
-  /** Das Kind hat seine Rückmeldungen gesehen. */
-  function meldungenGelesen(name) {
-    if (!ungeleseneMeldungen(name).length) return;
-    schreibe("meldungen", meldungen().map(m => (m.name === name ? { ...m, gelesen: true } : m)));
-  }
-  // Weg zur Entwicklung ohne Entwickler-Server (Entscheid M1 a, LERN_Session9): E-Mail aus dem Mailprogramm
-  // der Aufsicht, die sie selbst sendet. Die Adresse steht in eulenpfad/kontakt.js (nur die Startseite lädt sie);
-  // leer oder nicht geladen: kein E-Mail-Knopf, dann nur Text kopieren.
-  const meldungAdresse = () => (typeof EULENPFAD_KONTAKT !== "undefined" && EULENPFAD_KONTAKT.meldungen) || "";
-  /** mailto-Link mit Betreff und Text (ohne Namen) oder null ohne Adresse. */
-  function meldungMailLink(m) {
-    const MELDUNG_ADRESSE = meldungAdresse();
-    if (!MELDUNG_ADRESSE) return null;
-    const betreff = istAnregung(m) ? `Eulenpfad: Anregung ${m.id}${m.spiel ? ` (${m.spiel})` : ""}`
-      : `Eulenpfad: Fehlermeldung ${m.id} (${m.spiel}, Stufe ${String(m.stufe).slice(1)})`;
-    return `mailto:${MELDUNG_ADRESSE}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(meldungFuerEntwicklung(m))}`;
-  }
-  /**
-   * Eine per E-Mail angekommene Meldung wieder lesen (Tab Entwicklung): { meldung, spiel, stufe } aus dem Text
-   * von meldungFuerEntwicklung, oder null, wenn keine Kennung darin steht.
-   */
-  function meldungAusText(text) {
-    const id = text.match(/(?:Meldung|Anregung) (M-[a-z0-9]+-[a-z0-9]+)/)?.[1];
-    if (!id) return null;
-    const ort = text.match(/\(([a-z0-9-]+)\), Stufe (\d)/);
-    return { meldung: id, ...(ort ? { spiel: ort[1], stufe: `s${ort[2]}` } : {}) };
-  }
-
+  const neueMeldung = MELD.neu;
+  /** Meldung ändern; ein neuer Status kommt in den Verlauf, neuer Status oder neue Antwort = ungelesen. */
+  const setzeMeldung = MELD.setze;
+  const meldungenGelesen = MELD.gelesen;
+  const meldungAdresse = MELD.adresse;
+  const meldungMailLink = MELD.mailLink;
+  const meldungAusText = MELD.ausText;
   /** Text für die Entwicklung: ohne den Namen des Kindes, mit Klasse und Kennung. */
-  function meldungFuerEntwicklung(m) {
-    const spielName = (typeof SPIELE !== "undefined" && SPIELE.find(s => s.id === m.spiel)?.name) || m.spiel;
-    if (istAnregung(m)) return [
-      `Anregung ${m.id} (Aufsicht), ${KERN.zeit.tag(m.zeit)}`,
-      `Art: ${ANREGUNG_ARTEN[m.art] || m.art}`,
-      m.spiel ? `Spiel: ${spielName} (${m.spiel})` : null,
-      m.liste ? `Liste: ${m.liste}` : null,
-      m.eintrag ? `Eintrag: ${m.eintrag}${m.schluessel ? ` [${m.schluessel}]` : ""}` : null,
-      `Anregung: ${m.text}`,
-    ].filter(Boolean).join("\n");
-    return [
-      `Meldung ${m.id} (Kind${m.klasse != null ? `, ${klasseText(m.klasse)}` : ""}), ${KERN.zeit.tag(m.zeit)}`,
-      `Spiel: ${spielName} (${m.spiel}), Stufe ${String(m.stufe).slice(1)}, Aufgabe ${m.aufgabeNr ?? "?"}`,
-      `Art: ${MELDUNG_ARTEN[m.art] || m.art}`,
-      `Aufgabe: ${m.aufgabe || "—"}`,
-      m.loesung ? `Erwartete Lösung: ${m.loesung}` : null,
-      m.eingabe ? `Eingaben des Kindes: ${m.eingabe}` : null,
-      m.ergebnis ? `Gewertet: ${m.ergebnis}` : null,
-      `Begründung: ${m.text}`,
-      ...(m.verlauf || []).filter(v => v.notiz).map(v => `Notiz der Aufsicht: ${v.notiz}`),
-    ].filter(Boolean).join("\n");
-  }
-
-  /**
-   * Antworten der Entwicklung übernehmen: { <id>: { status, antwort? } } mit status geplant | behoben | kein-fehler.
-   * Nur für Meldungen, die schon weitergegeben sind; gibt die Zahl der geänderten zurück.
-   */
-  function meldungStandAnwenden(stand) {
-    let n = 0;
-    for (const m of meldungen()) {
-      const s = stand?.[m.id];
-      if (!s || !MELDUNG_STATUS[s.status] || !["weitergeleitet", "geplant", "behoben", "kein-fehler"].includes(m.status)) continue;
-      if (s.status === m.status && (s.antwort || "") === (m.antwort || "")) continue;
-      setzeMeldung(m.id, { status: s.status, ...(s.antwort ? { antwort: s.antwort } : {}) }, { von: "Entwicklung" });
-      n++;
-    }
-    return n;
-  }
-  /** Status einer Bemerkung (bemerkungen.json) als Status einer Meldung; offen = noch keine Antwort. */
-  function meldungStatusAusBemerkung(text = "") {
-    const t = text.toLowerCase();
-    if (t.startsWith("erledigt")) return "behoben";
-    if (t.startsWith("kein fehler")) return "kein-fehler";
-    if (t.startsWith("geplant") || t.startsWith("in arbeit")) return "geplant";
-    return null;
-  }
+  const meldungFuerEntwicklung = MELD.alsText;
+  const meldungStandAnwenden = MELD.standAnwenden;
+  const meldungStatusAusBemerkung = MELD.statusAusBemerkung;
+  /** An die Entwicklung (Server, E-Mail oder Text, ohne Namen): ui { von, bestaetigen, oeffne, kopiere } → Weg oder null. */
+  const meldungWeitergeben = MELD.weitergeben;
+  /** Antworten der Entwicklung holen (meldungen-stand.json und Bemerkungen); gibt die Zahl der übernommenen zurück. */
+  const meldungenAbfragen = MELD.abfragen;
 
   // Pause der laufenden Aufgabe für Hilfe und Melden (setzt die Runde je Aufgabe) und Zähler für ❓.
   let aktuellePause = null;
@@ -3273,7 +3189,7 @@ const LS = (() => {
     listenPruefen, katalogEintrag,
     meldungen, meldungenVon, gefundeneFehler, ungeleseneMeldungen, meldenErlaubt, neueMeldung,
     setzeMeldung, meldungenGelesen, meldungFuerEntwicklung, meldeFormular, meldungStandAnwenden, meldungStatusAusBemerkung,
-    meldungAdresse, meldungMailLink, meldungAusText,
+    meldungAdresse, meldungMailLink, meldungAusText, meldungWeitergeben, meldungenAbfragen,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinStimmt, pinGueltig, neuerCode, setzeWiederherstellung, wiederherstellung, codeStimmt,
     antwortStimmt, zuruecksetzenStand, zuruecksetzenAnfordern, zuruecksetzenAbbrechen, zuruecksetzenAbbrechenMit, zuruecksetzenFaellig, ZURUECKSETZEN_TAGE,
     freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, aehnlich, passung, spielListen, listeFrei, setzeListeFrei, freieListen,

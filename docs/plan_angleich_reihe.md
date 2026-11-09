@@ -183,8 +183,20 @@ Kindersprache.
    Patrik: „Meldungswesen wie Entwicklung (Entwicklerserver) müssen sowieso erweitert werden, dass dies entsprechend
    eingestellt werden kann“): Meldungen wie im Eulenpfad (M1 a) für den Lernsteig, dazu einstellbar, wohin Meldungen
    und Bemerkungen gehen; danach Korrekturvorschläge (✏️) der Aufsicht in der Prüfansicht der Listen
-   (`KERN.listenpruefung`, Option `korrektur`). Zuschnitt (Kern oder je App, was einstellbar ist) vor dem Bau als
-   Entscheid vorlegen.
+   (`KERN.listenpruefung`, Option `korrektur`). Entschieden (LERN_Session25, 2026-11-09):
+   - **C11-1 a, Kern-Teil `KERN.meldungen`:** Speicher, Status mit Verlauf, Zusammenführen, Weitergabe ohne Namen,
+     Antworten; die App gibt Kontext und Oberfläche, der Eulenpfad stellt um. Beim Zusammenführen gewinnt nicht der
+     jüngere, sondern der **bessere** Stand (Patrik: „neuer muss nicht zwingend gewinnen … besser gewinnt“). Der Weg zur
+     Entwicklung ist austauschbar gebaut (E-Mail, Entwickler-Server, später ein Server), damit ein späterer Server
+     — auch nur für Meldungen und Entwicklung — ohne Umbau dazukommt.
+   - **C11-2 a:** Im Lernsteig leiten Jugendliche ihre Meldung selbst weiter, ohne Namen; eine verbundene Aufsicht
+     kann es ebenfalls (CLAUDE.md, Ausnahme Fehlermeldungen).
+   - **C11-3 a:** Vorgabe der Entwicklung je App in `<app>/kontakt.js` (E-Mail, Server-Adresse), dazu je Gerät in
+     Verwaltung → Einstellungen der Weg (E-Mail, Entwickler-Server, nur kopieren) und eine Server-Adresse auf
+     `localhost`/`127.0.0.1`; der Entwickler-Server antwortet mit CORS. Später möglich (Patrik): ein Abgleichs- und
+     Meldungsserver, den die Entwicklung anbietet — nur verschlüsselt (https) und mit geheimer Kennung des Servers,
+     ohne die der Zugang verweigert wird; dafür ein eigener Entscheid mit neuer Datenschutz-Ausnahme.
+   Reihenfolge: Kern-Teil und Eulenpfad, dann Lernsteig, dann Einstellungen, dann ✏️ in der Prüfansicht.
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 

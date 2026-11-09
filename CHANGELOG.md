@@ -1265,3 +1265,17 @@
   Lernsteig 5 (`hinweis`, Rechteckmodell), Plan E 10. Im Browser angesehen (375 px, folgen i mit Hinweis). Eulenpfad
   nicht berührt, kein Lauf. Tests: Kern „5808 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „101
   Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan C11 entschieden (C11-1 a, C11-2 a, C11-3 a; Plan C11, CLAUDE.md Ausnahme Fehlermeldungen: im Lernsteig leiten
+  Jugendliche selbst weiter, Entwickler-Server nur lokal, ein Server im Netz braucht einen eigenen Entscheid — später
+  möglich nur verschlüsselt und mit geheimer Kennung). Schritt 1: Kern 1.32.0 mit `kern/meldungen.js`
+  (`KERN.meldungen`, docs/kern/rahmen.md 4.28) aus dem Eulenpfad; beim Zusammenführen gewinnt je Kennung der **bessere**
+  Stand (Fortschritt des Status, dann Antwort, dann Verlauf, zuletzt Zeit), die Verläufe werden vereinigt — bisher
+  gewann der jüngere, und ein Gerät, das später nur bestätigte, überschrieb ein „weitergeleitet“. Weg zur Entwicklung
+  austauschbar (`weitergeben`: Server, E-Mail, Text). Eulenpfad: `spiel.js` bindet den Kern an (Namen unter `LS`
+  unverändert, neu `LS.meldungWeitergeben`, `LS.meldungenAbfragen`), `start/verwaltung.js` benutzt sie. Alt gegen neu
+  (alte `spiel.js` aus dem letzten Commit): Text, Betreff, Lesen aus dem Text, Antworten — 50 Vergleiche gleich;
+  Gegenprobe (anderes Wort im Text): 9 gemeldet. Kern-Fälle (41) zu Zusammenführen in beide Richtungen, Text, Wegen.
+  Im Browser: Eulenpfad-Startseite ohne Konsolenfehler, Probemeldung über `LS` (danach gelöscht). Eulenpfad-Stichprobe
+  tab, anlaut-angel, einmaleins-blitz „Keine Fehler.“, kein voller Lauf. Doku Kern 4.28, Eulenpfad 13,
+  `gemeinsame_mechaniken.md`. Tests: Kern „5849 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „101
+  Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
