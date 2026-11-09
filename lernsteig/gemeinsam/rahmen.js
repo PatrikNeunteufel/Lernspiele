@@ -182,7 +182,10 @@
       if (mk.gaZ2) texte.push("Grundanspruch Zyklus 2");
       if (mk.op) texte.push("Orientierungspunkt");
       if (mk.ga) texte.push("Grundanspruch");
-      if (mk.e && !(eintrag.ohneE || []).includes(st.id)) texte.push("mit Erweiterung");
+      // E5-1 a: eine Stufe nur aus Erweiterung sagt, dass die nächste Stufe ohne sie erreichbar ist
+      const naechste = eintrag.stufen[eintrag.stufen.indexOf(st.id) + 1];
+      if (mk.nurE) texte.push(naechste ? `nur Erweiterung · Stufe ${naechste} geht auch ohne sie` : "nur Erweiterung");
+      else if (mk.e && !(eintrag.ohneE || []).includes(st.id)) texte.push("mit Erweiterung");
       if (ziel === st.id) texte.push(`Ziel ${niveauName(niveau)}`);
       else if (ziel && st.id > ziel) texte.push("weiterführend");
       if (k.pruefungsziel !== "keins") {
@@ -190,7 +193,8 @@
         if (g.geprueft) texte.push("wird geprüft" + (g.ohneE ? " (ohne Erweiterung)" : ""));
       }
     } else if (st.typ === "uebergang") {
-      texte.push(`Aufgaben aus Stufe ${st.lp[0]} und ${st.lp[1]} gemischt`);
+      const nurE = s => (LP.marken(eintrag.kompetenz, s) || {}).nurE ? " (Erweiterung)" : "";
+      texte.push(`Aufgaben aus Stufe ${st.lp[0]}${nurE(st.lp[0])} und ${st.lp[1]}${nurE(st.lp[1])} gemischt`);
     } else {
       texte.push("über den Erwartungen");
     }

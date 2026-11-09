@@ -239,7 +239,9 @@ Kindersprache.
    nach E4-1 a erkannt, ausser in `frei` ein Formfehler „Schreibe als Bruch ohne Ganze“.
 5. **Terme, Reihenfolge j/k:** Stufen bleiben nach Lehrplan (j Erweiterung, k GA); in der Stufenwahl sichtbar machen,
    dass k ohne j erreichbar ist.
-   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise. Stufen i, j, k nach Lehrplan, die Stufenwahl zeigt „Grundanspruch“ und „mit Erweiterung“; kein Hinweis, dass k ohne j erreichbar ist, und der „Übergang j → k“ (`lernsteig/gemeinsam/werkzeug.js`) legt eine Reihenfolge nahe.
+   *Stand 2026-11-09 (LERN_Session24):* erledigt nach E5-1 a — generisch über die Marke `nurE` in `lehrplaene.js`
+   (gegen den Wortlaut geprüft): Stufe j von `terme` zeigt „nur Erweiterung · Stufe k geht auch ohne sie“, die Übergänge
+   neben ihr „Stufe j (Erweiterung)“; ebenso Stufe i von `ueberschlagen-ordnen`. Kennungen der Stufen unverändert.
 6. **Atombau:** B³⁺ und Be²⁺ aus der Challenge; B und Si als Halbmetall oder aus der Frage „Metall/Nichtmetall“
    nehmen; Hinweis zur Lage der Nichtmetalle mit Ausnahme H.
    *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen. Be²⁺ und B³⁺ in allen drei Typen der Challenge (ausgenommen sind nur H, He, Edelgase und Gruppe IV); B und Si als `nichtmetall` in `pse.js`; der Hinweis nennt H nicht als Ausnahme.

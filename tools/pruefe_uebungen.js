@@ -333,6 +333,26 @@ function pruefeOhneBrowser(eintrag) {
       if (LP_STUFEN.size && !LP_STUFEN.has(`${k}.${s}`)) fehlerMelden("lehrplaene.js", `Stufe ${k}.${s} nicht in der Recherche`);
     }
   }
+  // Stufen nur aus Erweiterung (E5-1 a) gegen den Wortlaut der gesicherten Seiten: genau die Stufen, deren Punkte alle
+  // mit „Erweiterung:“ beginnen. Ohne gesicherte Seite nicht prüfbar — Fehler, wenn eine Übung die Kompetenz benutzt.
+  {
+    const WL = require("./lehrplan_wortlaut.js");
+    for (const [k, m] of Object.entries(LST_LEHRPLAENE.MARKEN)) {
+      const seite = WL.alle()[k];
+      if (!seite) {
+        if (KAT.UEBUNGEN.some(u => u.kompetenz === k)) fehlerMelden("lehrplaene.js", `${k}: keine gesicherte Lehrplan-Seite, Stufen nur aus Erweiterung nicht prüfbar`);
+        continue;
+      }
+      for (const s of m.stufen) {
+        const st = seite.stufen[s];
+        if (!st) continue;
+        const nur = st.punkte.length > 0 && st.punkte.every(p => p.startsWith("Erweiterung:"));
+        if (nur && !m.nurE.includes(s)) fehlerMelden("lehrplaene.js", `${k}.${s} besteht nur aus Erweiterung, fehlt aber bei den Stufen nur aus E`);
+        if (!nur && m.nurE.includes(s)) fehlerMelden("lehrplaene.js", `${k}.${s} steht bei den Stufen nur aus E, hat aber Punkte ohne Erweiterung`);
+      }
+      for (const s of m.nurE) if (!m.e.includes(s)) fehlerMelden("lehrplaene.js", `${k}.${s}: nur aus Erweiterung, fehlt aber bei den Stufen mit E`);
+    }
+  }
   // Übungen ohne erzeugte Aufgaben: ihre Abdeckung meldete nur Folgefehler (jeder Teil „nicht erzeugt“), sie fällt aus
   const ohneAufgaben = new Set();
   for (const e of uebungen) {

@@ -60,6 +60,11 @@ Leerzeichen, Punkt und Komma sind erlaubt.
   Orientierungspunkt, Grundanspruch, mit Erweiterung — ausser die Übung lässt sie weg, `ohneE`), das **Ziel** des
   Niveaus (`LST.zielstufe`: `n1` GA Z3, ohne GA der OP; `n2` letzte Stufe Z3), „weiterführend“ darüber, „wird geprüft“
   nach Prüfungsziel und den Taschenrechner der Stufe.
+- Eine Stufe **nur aus Erweiterung** (E5-1 a, seit LERN_Session24; Marke `nurE` in `LST_LEHRPLAENE.MARKEN`, sechstes
+  Feld): die Stufenwahl schreibt „nur Erweiterung · Stufe k geht auch ohne sie“ statt „mit Erweiterung“, ein Übergang
+  neben ihr „Aufgaben aus Stufe j (Erweiterung) und k gemischt“. Die Kennungen der Stufen bleiben. `pruefe_uebungen.js`
+  prüft die Marke gegen den Wortlaut der gesicherten Seiten (genau die Stufen, deren Punkte alle mit „Erweiterung:“
+  beginnen); heute MA.1.A.2.i, MA.1.A.4.j, MA.1.B.2.i, MA.3.C.1.i.
 - Die Aufgaben einer Stufe hängen nicht am Niveau; Bestzeit und Rekord gelten je Stufe.
 - Adresse: `?niveau=n1&stufe=h` (oder `h-i`, `challenge`) startet direkt, `&endlos=1` als Serie.
 

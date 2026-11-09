@@ -74,15 +74,17 @@ var LST_LEHRPLAENE = (function () {
   /**
    * Marken der Kompetenzstufen Mathematik Zyklus 3, abgeschrieben aus der Übersicht in
    * docs/lernsteig/lehrplan/mathematik_zyklus3.md. Je Kompetenz: "GA Z2 | Stufen Z3 | OP Z3 | GA Z3 | Stufen mit E",
-   * „-“ = keine. Das Testskript gleicht die Stufen mit den Tabellen der Recherche ab.
+   * dazu wahlweise "| Stufen nur aus E" (E5-1 a, LERN_Session24: jeder Punkt der Stufe beginnt mit „Erweiterung:“; die
+   * nächste Stufe ist ohne sie erreichbar). „-“ = keine. Das Testskript gleicht die Stufen mit den Tabellen der Recherche
+   * ab und die Stufen nur aus E mit dem Wortlaut der gesicherten Seiten (tools/lehrplan_wortlaut.js).
    */
   const MARKEN_ROH = {
-    "MA.1.A.1": "g|h-l|i|j|i",   "MA.1.A.2": "g|h-j|j|j|i",   "MA.1.A.3": "f|g-j|i|-|h,i", "MA.1.A.4": "g|h-m|j|k|h,i,j",
-    "MA.1.B.1": "h|i-l|j|k|i,j", "MA.1.B.2": "g|h-k|i|j|i",   "MA.1.B.3": "-|e-h|g|g|-",   "MA.1.C.1": "f|g-i|-|h|-",
+    "MA.1.A.1": "g|h-l|i|j|i",   "MA.1.A.2": "g|h-j|j|j|i|i", "MA.1.A.3": "f|g-j|i|-|h,i", "MA.1.A.4": "g|h-m|j|k|h,i,j|j",
+    "MA.1.B.1": "h|i-l|j|k|i,j", "MA.1.B.2": "g|h-k|i|j|i|i", "MA.1.B.3": "-|e-h|g|g|-",   "MA.1.C.1": "f|g-i|-|h|-",
     "MA.1.C.2": "g|h-k|-|j|i",   "MA.2.A.1": "g|h-l|j|k|-",   "MA.2.A.2": "f|g-j|h|i|-",   "MA.2.A.3": "e|f-k|h|i|-",
     "MA.2.B.1": "g|h-l|i|j|-",   "MA.2.B.2": "c|d-h|e|f|-",   "MA.2.C.1": "g|h-l|j|k|j",   "MA.2.C.2": "f|g-j|i|i|-",
     "MA.2.C.3": "e|f-g|-|f|-",   "MA.2.C.4": "f|g-j|h|h|-",   "MA.3.A.1": "h|i-n|k|l|j",   "MA.3.A.2": "h|i-k|i|j|-",
-    "MA.3.A.3": "e|f-k|h|i|-",   "MA.3.B.1": "e|f-j|h|i|h",   "MA.3.B.2": "c|d-g|e|f|-",   "MA.3.C.1": "f|g-j|i|j|i",
+    "MA.3.A.3": "e|f-k|h|i|-",   "MA.3.B.1": "e|f-j|h|i|h",   "MA.3.B.2": "c|d-g|e|f|-",   "MA.3.C.1": "f|g-j|i|j|i|i",
     "MA.3.C.2": "e|f-i|g|h|f,g", "MA.3.C.3": "f|g-g|-|-|g",
     // Deutsch, aus docs/lernsteig/lehrplan/sprachen_zyklus3.md (Abschnitt 3, „Für Übungen besonders geeignet“)
     "D.5.D.1": "c|d-g|e|e|-", "D.5.E.1": "d|e-g|f|f|-",
@@ -93,18 +95,19 @@ var LST_LEHRPLAENE = (function () {
   };
   const MARKEN = {};
   for (const [k, roh] of Object.entries(MARKEN_ROH)) {
-    const [gaZ2, bereich, op, ga, e] = roh.split("|");
+    const [gaZ2, bereich, op, ga, e, nurE = "-"] = roh.split("|");
     const [von, bis] = bereich.split("-");
     const stufen = [];
     for (let c = von.charCodeAt(0); c <= bis.charCodeAt(0); c++) stufen.push(String.fromCharCode(c));
-    MARKEN[k] = { gaZ2: gaZ2 === "-" ? null : gaZ2, stufen, op: op === "-" ? null : op, ga: ga === "-" ? null : ga, e: e === "-" ? [] : e.split(",") };
+    MARKEN[k] = { gaZ2: gaZ2 === "-" ? null : gaZ2, stufen, op: op === "-" ? null : op, ga: ga === "-" ? null : ga, e: e === "-" ? [] : e.split(","),
+      nurE: nurE === "-" ? [] : nurE.split(",") };
   }
 
-  /** Marken einer Stufe, etwa ("MA.1.A.3", "i") → { op: true, ga: false, gaZ2: false, e: true, z3: true } */
+  /** Marken einer Stufe, etwa ("MA.1.A.3", "i") → { op: true, ga: false, gaZ2: false, e: true, nurE: false, z3: true } */
   function marken(kompetenz, stufe) {
     const m = MARKEN[kompetenz];
     if (!m) return null;
-    return { op: m.op === stufe, ga: m.ga === stufe, gaZ2: m.gaZ2 === stufe, e: m.e.includes(stufe), z3: m.stufen.includes(stufe) };
+    return { op: m.op === stufe, ga: m.ga === stufe, gaZ2: m.gaZ2 === stufe, e: m.e.includes(stufe), nurE: m.nurE.includes(stufe), z3: m.stufen.includes(stufe) };
   }
 
   const LAENDER = [

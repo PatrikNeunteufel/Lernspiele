@@ -653,6 +653,21 @@ async function pruefeSeiten(uebungen, melde, LST, katalog = uebungen) {
     } catch (err) { melde(ort, err.message); }
     fehlerVon(ort, st);
   }
+  // ---------- Stufen nur aus Erweiterung (E5-1 a): terme j sagt, dass Stufe k auch ohne j geht ----------
+  {
+    const ort = "Stufenwahl (terme, nur Erweiterung)";
+    const s = oeffne("uebungen/terme/index.html", { search: "?niveau=n1", ...alsJugendlicher() });
+    await ruhe(s);
+    try {
+      const info = id => s.lauf(`(document.querySelector('.stufe-knopf[data-stufe="${id}"] small') || {}).textContent || ""`);
+      if (!info("j").includes("nur Erweiterung · Stufe k geht auch ohne sie") || info("j").includes("mit Erweiterung")) throw new Error(`Stufe j: „${info("j")}“`);
+      if (!info("j-k").includes("Aufgaben aus Stufe j (Erweiterung) und k gemischt")) throw new Error(`Übergang j → k: „${info("j-k")}“`);
+      if (!info("i-j").includes("Aufgaben aus Stufe i und j (Erweiterung) gemischt")) throw new Error(`Übergang i → j: „${info("i-j")}“`);
+      if (/nur Erweiterung|\(Erweiterung\)/.test(info("k") + info("i"))) throw new Error(`Stufe i oder k als Erweiterung: „${info("i")}“, „${info("k")}“`);
+      textPruefen(ort, s);
+    } catch (err) { melde(ort, err.message); }
+    fehlerVon(ort, s);
+  }
   // ---------- Gleichung im Notizblock (GL1 a): Vorlage „=“ mit der Gleichung der Aufgabe, Zeilen, Zeichen ----------
   {
     const ort = "Notizblock Gleichung (gleichungen j)";

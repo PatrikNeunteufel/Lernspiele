@@ -1190,3 +1190,13 @@
   Fehler.“; kein voller Lauf. Im Browser angesehen (terme i: Formhinweis zur Basis). docs/kern/rahmen.md 4.17, Kern-
   CHANGELOG, Plan E 4 Stand ersetzt. Tests: Kern „5798 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten
   „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 5 (E5-1 a), Lernsteig: Stufen nur aus Erweiterung in der Stufenwahl. `lehrplaene.js` bekommt das sechste Feld
+  der Marken „Stufen nur aus E“ (`nurE`; MA.1.A.2.i, MA.1.A.4.j, MA.1.B.2.i, MA.3.C.1.i), `marken()` liefert `nurE`.
+  `rahmen.js`: eine solche Stufe zeigt „nur Erweiterung · Stufe k geht auch ohne sie“ statt „mit Erweiterung“, ein
+  Übergang neben ihr „Aufgaben aus Stufe j (Erweiterung) und k gemischt“; betrifft `terme` j und `ueberschlagen-ordnen` i
+  (mitten in der Reihe), Kennungen der Stufen unverändert. `pruefe_uebungen.js` prüft `nurE` gegen den Wortlaut der
+  gesicherten Seiten (genau die Stufen, deren Punkte alle mit „Erweiterung:“ beginnen; eine Kompetenz einer Übung ohne
+  gesicherte Seite ist ein Fehler); der Seitentest prüft die Texte der Stufenwahl von `terme`. Gegenproben (3): Marke bei
+  MA.1.A.4.j entfernt, bei MA.1.A.3.h ergänzt, Rahmen ohne den neuen Text — gemeldet. Im Browser angesehen (375 px,
+  terme und ueberschlagen-ordnen). docs/lernsteig/rahmen.md 3, Plan E 5 Stand ersetzt. Tests: Kern „5798 Fälle,
+  0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
