@@ -1,4 +1,4 @@
-/* kern 1.32.1 · Prüfsumme sha256:33ec1b914cc14c14c854ba2796c455ea22f30d8055cd0e05169e0f99756e95ca · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.33.0 · Prüfsumme sha256:f50d8f9eadc0caa462fbe5a4bb9aa00da886a900d97dc1a8a303fae9552a8962 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -2561,6 +2561,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
    * opt.arten      Bereiche des Prüfstands (Eulenpfad ["spiele", "listen"], Lernsteig ["uebungen", "listen"])
    * opt.melde      (text) → Meldung an die Person (die App zeigt sie; Standard: nichts)
    * opt.start      Pfad der App für die Meldung „Server fehlt“ (z. B. "eulenpfad/")
+   * opt.adresse    () → Adresse des Entwickler-Servers, "" = dieselbe Seite (Standard; C11-3 a: nur localhost und
+   *                127.0.0.1, siehe entwicklung.adresseGueltig). Der Server antwortet dafür mit CORS.
    */
   function entwicklung(opt) {
     const o = opt || {};
@@ -2569,13 +2571,17 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     if (typeof o.aufsicht !== "function") throw new Error("entwicklung: aufsicht fehlt");
     const arten = Array.isArray(o.arten) && o.arten.length ? o.arten : ["listen"];
     const melde = typeof o.melde === "function" ? o.melde : () => {};
-    const SERVER_FEHLT = "Entwickler-Server nicht gefunden.\n\nDer Entwickler-Modus funktioniert nur im lokalen Repo mit laufendem Server:\n"
+    /** Adresse des Servers ohne Schrägstrich am Ende; "" = dieselbe Seite. Eine ungültige Angabe gilt als "". */
+    const basis = () => adresseGueltig(typeof o.adresse === "function" ? o.adresse() : "") || "";
+    const SERVER_FEHLT_HIER = "Entwickler-Server nicht gefunden.\n\nDer Entwickler-Modus funktioniert nur im lokalen Repo mit laufendem Server:\n"
       + `python tools/entwickler_server.py\ndanach http://localhost:8765/${o.start || ""} öffnen.`;
+    const serverFehlt = () => (basis() ? `Entwickler-Server unter ${basis()} nicht erreichbar.\n\nLäuft python tools/entwickler_server.py `
+      + "auf diesem Gerät mit diesem Port? Die Adresse steht unter Verwaltung → Einstellungen." : SERVER_FEHLT_HIER);
     const FREMDER_SERVER = "Hier antwortet ein anderer Server ohne Entwickler-Funktionen (z. B. ein noch laufendes "
       + "python -m http.server auf demselben Port).\n\nDiesen beenden, dann python tools/entwickler_server.py starten "
       + "und die Seite mit Strg+F5 neu laden.";
     let fremd = false; // Auf der Adresse läuft ein Server, aber nicht der Entwickler-Server
-    const serverMeldung = () => (fremd ? FREMDER_SERVER : SERVER_FEHLT);
+    const serverMeldung = () => (fremd ? FREMDER_SERVER : serverFehlt());
 
     const zustand = () => ({ schluessel: null, an: false, name: "", ...(o.speicher.lies("entwickler", null) || {}) });
     const speichere = daten => o.speicher.schreibe("entwickler", { ...zustand(), ...daten });
@@ -2596,15 +2602,16 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     const benenne = n => speichere({ name: String(n ?? "").trim().slice(0, 40) });
 
     // ----- Entwickler-Server -----
-    let serverDa = null;
+    let serverDa = null, serverBasis = null; // gemerkt je Adresse
     const lokal = () => typeof location !== "undefined" && String(location.protocol).startsWith("http")
       && ["localhost", "127.0.0.1"].includes(location.hostname);
     /** Läuft die Seite über den Entwickler-Server? { ok, schluessel } oder null. Erfolg wird gemerkt. */
     async function server() {
-      if (serverDa) return serverDa;
+      if (serverDa && serverBasis === basis()) return serverDa;
+      serverDa = null; serverBasis = basis();
       try {
-        const r = await fetch("/entwicklung/status", { cache: "no-store" });
-        fremd = !r.ok && lokal();
+        const r = await fetch(`${basis()}/entwicklung/status`, { cache: "no-store" });
+        fremd = !r.ok && (!!basis() || lokal());
         if (r.ok) serverDa = await r.json();
       } catch (e) { /* kein Server */ }
       return serverDa;
@@ -2613,7 +2620,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     async function sende(pfad, daten) {
       if (!(await server())) { melde(serverMeldung()); return null; }
       try {
-        const r = await fetch(pfad, { method: "POST", headers: { "Content-Type": "application/json" },
+        const r = await fetch(basis() + pfad, { method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...daten, app: o.app, schluessel: zustand().schluessel }) });
         const antwort = await r.json();
         if (!r.ok) { melde(`Entwickler-Server: ${antwort.fehler || r.status}`); return null; }
@@ -2653,13 +2660,26 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     /** Alle Bemerkungen der App (über den Server) oder null. */
     async function bemerkungen() {
       if (!(await server())) return null;
-      try { return await (await fetch(`/entwicklung/bemerkungen?app=${o.app}`, { cache: "no-store" })).json(); } catch (e) { return null; }
+      try { return await (await fetch(`${basis()}/entwicklung/bemerkungen?app=${o.app}`, { cache: "no-store" })).json(); } catch (e) { return null; }
     }
 
-    return { app: o.app, freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung,
+    return { app: o.app, adresse: basis, freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung,
       /** Antwortet auf der Adresse ein anderer Server (nach server())? */ fremd: () => fremd,
       setzeGeprueft, setzeEintraege, bemerkung, bemerkungen, bemerkungStatus };
   }
+  /**
+   * Adresse eines Entwickler-Servers prüfen (C11-3 a): "" (dieselbe Seite) oder http(s)://localhost bzw. 127.0.0.1 mit
+   * Port; Ergebnis ohne Schrägstrich am Ende, oder null, wenn die Adresse nicht erlaubt ist. Ein Server im Netz braucht
+   * einen eigenen Entscheid (später nur verschlüsselt und mit geheimer Kennung).
+   */
+  function adresseGueltig(text) {
+    const t = String(text ?? "").trim();
+    if (!t) return "";
+    const m = t.match(/^(https?):\/\/(localhost|127\.0\.0\.1)(?::(\d{1,5}))?\/?$/i);
+    if (!m || (m[3] && (Number(m[3]) < 1 || Number(m[3]) > 65535))) return null;
+    return `${m[1].toLowerCase()}://${m[2].toLowerCase()}${m[3] ? `:${Number(m[3])}` : ""}`;
+  }
+  entwicklung.adresseGueltig = adresseGueltig;
   entwicklung.SALZ = SALZ;
   entwicklung.SCHLUESSEL_HASH = SCHLUESSEL_HASH;
 
@@ -2692,6 +2712,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
   const RANG = { neu: 0, bestaetigt: 1, weitergeleitet: 2, geplant: 3, behoben: 4, "kein-fehler": 4 };
   const rang = m => RANG[m?.status] ?? 0;
   const WEITERGEGEBEN = ["weitergeleitet", "geplant", "behoben", "kein-fehler"];
+  const WEGE = ["auto", "server", "mail", "text"];
 
   /** Ist b besser als a? (gleicher Kennung; siehe Kopf) */
   function besser(a, b) {
@@ -2761,7 +2782,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
    * opt.woerter          { eingaben, notiz } — Anfang der Zeilen (Eulenpfad: „Eingaben des Kindes“, „Notiz der Aufsicht“)
    * opt.arten, opt.anregungArten  { wert: Text }
    * opt.status           { status: { text, … } } (bekannte Status der App)
-   * opt.kontakt()        → { meldungen?: E-Mail } (Vorgabe der Entwicklung, <app>/kontakt.js)
+   * opt.kontakt()        → { meldungen?: E-Mail, server?: Adresse des Entwickler-Servers } (Vorgabe der Entwicklung,
+   *                      <app>/kontakt.js; je Gerät abweichend über setzeMeldeweg, C11-3 a)
    * opt.entwicklung      KERN.entwicklung der App, eine Funktion, die sie liefert (später geladen), oder null
    * opt.standDatei       Pfad der veröffentlichten Antworten (Standard „meldungen-stand.json“)
    */
@@ -2854,6 +2876,29 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
     // ----- Weg zur Entwicklung -----
     const adresse = () => (o.kontakt ? o.kontakt()?.meldungen : "") || "";
+    /**
+     * Weg je Gerät (C11-3 a), Speicher <app>:meldeweg = { weg, server? }: weg „auto“ (Server, sonst E-Mail, sonst Text),
+     * „server“, „mail“ oder „text“; server = Adresse des Entwickler-Servers ("" = dieselbe Seite), ohne Angabe die
+     * Vorgabe der Entwicklung aus <app>/kontakt.js (Feld server). Nur auf diesem Gerät, reist nicht mit.
+     */
+    function meldeweg() {
+      const e = o.speicher.lies("meldeweg", null) || {};
+      const vorgabe = (o.kontakt ? o.kontakt()?.server : "") || "";
+      const eigen = typeof e.server === "string";
+      return { weg: WEGE.includes(e.weg) ? e.weg : "auto", server: eigen ? e.server : vorgabe, eigeneAdresse: eigen, vorgabe };
+    }
+    /** Weg setzen; server null = Vorgabe der Entwicklung. Wirft bei einer nicht erlaubten Adresse. */
+    function setzeMeldeweg({ weg = "auto", server = null } = {}) {
+      if (!WEGE.includes(weg)) throw new Error(`Unbekannter Weg ${weg}`);
+      const pruefe = KERN.entwicklung && KERN.entwicklung.adresseGueltig ? KERN.entwicklung.adresseGueltig : t => String(t || "");
+      let s = null;
+      if (server !== null) {
+        s = pruefe(server);
+        if (s === null) throw new Error("Erlaubt ist nur ein Entwickler-Server auf diesem Gerät: http://localhost:<Port> oder http://127.0.0.1:<Port>, leer für diese Seite.");
+      }
+      o.speicher.schreibe("meldeweg", { weg, ...(s !== null ? { server: s } : {}) });
+      return meldeweg();
+    }
     /** mailto-Link mit Betreff und Text oder null ohne Adresse. */
     function mailLink(m) {
       const an = adresse();
@@ -2867,19 +2912,29 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       aufgabe: m.aufgabe ? `Aufgabe ${m.aufgabeNr}: ${m.aufgabe}` : undefined, meldung: m.id });
 
     /**
-     * Weitergeben: Entwickler-Server, sonst E-Mail, sonst Text kopieren. ui: { von, bestaetigen(„meldung“ | „anregung“) → bool,
-     * oeffne(url), kopiere(text) → Promise }. Setzt den Status „weitergeleitet“ mit Notiz; gibt den Weg zurück
-     * („server“, „mail“, „text“) oder null, wenn abgebrochen oder fehlgeschlagen.
+     * Weitergeben nach dem Weg des Geräts (meldeweg): „auto“ Entwickler-Server, sonst E-Mail, sonst Text; „server“, „mail“,
+     * „text“ nur diesen Weg. ui: { von, bestaetigen(„meldung“ | „anregung“) → bool, oeffne(url), kopiere(text) → Promise,
+     * melde(text) }. Setzt den Status „weitergeleitet“ mit Notiz; gibt den Weg zurück („server“, „mail“, „text“) oder null,
+     * wenn abgebrochen oder der gewählte Weg nicht geht (dann mit melde begründet).
      */
     async function weitergeben(m, ui = {}) {
       const e = entwicklung();
-      if (e && e.freigeschaltet() && (await e.server())) {
-        const b = await e.bemerkung(bemerkungDaten(m));
-        if (!b) return null;
-        setze(m.id, { status: "weitergeleitet" }, { von: ui.von, notiz: `Bemerkung Nr. ${b.nr}` });
-        return "server";
+      const { weg } = meldeweg();
+      const sag = text => { if (ui.melde) ui.melde(text); return null; };
+      if (weg === "auto" || weg === "server") {
+        const da = e && e.freigeschaltet() && (await e.server());
+        if (da) {
+          const b = await e.bemerkung(bemerkungDaten(m));
+          if (!b) return null;
+          setze(m.id, { status: "weitergeleitet" }, { von: ui.von, notiz: `Bemerkung Nr. ${b.nr}` });
+          return "server";
+        }
+        if (weg === "server") return sag(!e || !e.freigeschaltet()
+          ? "Gewählt ist der Entwickler-Server, aber der Entwickler-Modus ist auf diesem Gerät nicht freigeschaltet."
+          : e.serverMeldung());
       }
-      const mail = mailLink(m);
+      const mail = weg === "text" ? null : mailLink(m);
+      if (weg === "mail" && !mail) return sag("Gewählt ist E-Mail, aber die Entwicklung hat noch keine Adresse eingetragen.");
       if (mail) {
         if (ui.bestaetigen && !ui.bestaetigen(istAnregung(m) ? "anregung" : "meldung")) return null;
         if (ui.oeffne) ui.oeffne(mail);
@@ -2930,7 +2985,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     };
 
     return { app: o.app, istAnregung, alle, von, anregungen, korrekturen, gefunden, ungelesen, neu, neueAnregung,
-      neueKorrektur, entferne, setze, gelesen, alsText, ausText, adresse, mailLink, bemerkungDaten, weitergeben,
+      neueKorrektur, entferne, setze, gelesen, alsText, ausText, adresse, mailLink, bemerkungDaten, weitergeben, meldeweg, setzeMeldeweg, WEGE,
       standAnwenden, abfragen, statusAusBemerkung, teil };
   }
   meldungen.besser = besser;

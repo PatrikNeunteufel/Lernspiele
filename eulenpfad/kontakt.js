@@ -5,8 +5,11 @@
    meldungen: E-Mail-Adresse, an die eine Aufsicht bestätigte Fehlermeldungen schickt (aus ihrem eigenen
               Mailprogramm, ohne den Namen des Kindes). Die Seite ist öffentlich — darum ein eigenes
               Postfach nur für Eulenpfad-Meldungen, keine private Adresse.
-              Leer (""): kein E-Mail-Knopf; die Aufsicht kann den Text der Meldung nur kopieren. */
+              Leer (""): kein E-Mail-Knopf; die Aufsicht kann den Text der Meldung nur kopieren.
+   server:    Adresse des Entwickler-Servers für Meldungen und Entwicklung (C11-3 a), nur http://localhost:<Port> oder
+              http://127.0.0.1:<Port>. Leer (""): dieselbe Seite. Je Gerät abweichend unter Verwaltung → Einstellungen. */
 
 const EULENPFAD_KONTAKT = Object.freeze({
   meldungen: "",
+  server: "",
 });

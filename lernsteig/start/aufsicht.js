@@ -169,7 +169,33 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       ], e.rechner || "uebung", w => setze("rechner", w), { name: "rechner" }),
       auswahl("Dezimalzeichen", [{ id: "punkt", name: "Punkt (3.5)" }, { id: "komma", name: "Komma (3,5)" }], e.dezimal || "punkt", w => setze("dezimal", w), { name: "dezimal" }),
       auswahl("Gast", [{ id: "an", name: "erlaubt (nichts wird gespeichert)" }, { id: "aus", name: "abgeschaltet" }], e.gast || "an", w => setze("gast", w), { name: "gast" }),
-      el("small", { class: "leise", text: "Gilt für alle Konten auf diesem Gerät. Die Jugendlichen sehen die Einstellung in jeder Übung." }))];
+      el("small", { class: "leise", text: "Gilt für alle Konten auf diesem Gerät. Die Jugendlichen sehen die Einstellung in jeder Übung." })),
+      el("h2", { class: "abschnitt", text: "Meldungen an die Entwicklung" }), meldewegKarte()];
+  }
+
+  // Weg der Meldungen und Adresse des Entwickler-Servers (Plan C11, C11-3 a; KERN.meldungen.meldeweg): nur auf diesem
+  // Gerät; erlaubt ist nur ein Entwickler-Server auf diesem Gerät (localhost, 127.0.0.1).
+  function meldewegKarte() {
+    const M = LST.MELDUNGEN, w = M.meldeweg();
+    const hinweis = el("p", { class: "meldung", role: "status" });
+    const setze = daten => { try { M.setzeMeldeweg(daten); meldung = "Einstellung gespeichert."; } catch (e) { meldung = e.message; } zeichne(); };
+    const adresse = feld("Adresse des Entwickler-Servers", { type: "text", name: "server-adresse", value: w.eigeneAdresse ? w.server : "",
+      placeholder: `Vorgabe: ${w.vorgabe || "diese Seite"}`, autocomplete: "off" }, "Leer: diese Seite. Erlaubt ist nur http://localhost:<Port> oder http://127.0.0.1:<Port>.");
+    return el("section", { class: "einstellungen" },
+      auswahl("Weg", [
+        { id: "auto", name: "automatisch (Server, E-Mail, Text)" }, { id: "server", name: "nur Entwickler-Server" },
+        { id: "mail", name: "nur E-Mail" }, { id: "text", name: "nur Text kopieren" },
+      ], w.weg, v => setze({ weg: v, server: w.eigeneAdresse ? w.server : null }), { name: "meldeweg" }),
+      adresse,
+      el("div", { class: "knopf-zeile" },
+        el("button", { type: "button", class: "knopf", "data-aktion": "adresse-speichern", text: "Adresse speichern", onclick: () => setze({ weg: w.weg, server: wert(adresse, "input") }) }),
+        el("button", { type: "button", class: "knopf", text: "↺ Vorgabe", onclick: () => setze({ weg: w.weg, server: null }) }),
+        el("button", { type: "button", class: "knopf", "data-aktion": "server-pruefen", text: "Verbindung prüfen", onclick: async () => {
+          const da = await LST.ENTWICKLUNG.server();
+          hinweis.textContent = da ? `Entwickler-Server erreichbar (${LST.ENTWICKLUNG.adresse() || "diese Seite"}).` : LST.ENTWICKLUNG.serverMeldung();
+        } })),
+      hinweis,
+      el("small", { class: "leise", text: `Automatisch: zuerst der Entwickler-Server, sonst E-Mail aus dem eigenen Mailprogramm, sonst Text zum Kopieren. E-Mail an: ${M.adresse() || "noch keine Adresse eingetragen (lernsteig/kontakt.js)"}. Gilt für alle Konten auf diesem Gerät; Meldungen tragen keinen Namen.` }));
   }
 
   // Freigabe je Gerät (Plan C5; Kern KERN.freigabe, docs/kern/rahmen.md 4.8), wie im Eulenpfad: Frei ist, was nichts mehr

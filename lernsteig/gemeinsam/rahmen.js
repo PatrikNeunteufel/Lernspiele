@@ -31,6 +31,8 @@
     aufsicht: () => !!aufsichtDa(), name: () => (aufsichtDa() || {}).name || "",
     pruefstand: typeof LST_PRUEFSTAND !== "undefined" ? LST_PRUEFSTAND : null, arten: ["uebungen", "listen"],
     melde: text => alert(text), start: "lernsteig/",
+    // Adresse des Servers je Gerät oder Vorgabe aus kontakt.js (C11-3 a; "" = dieselbe Seite)
+    adresse: () => MELDUNGEN.meldeweg().server,
   });
   // ---------- Fehlermeldungen (Plan C11, Entscheide C11-1 a, C11-2 a; KERN.meldungen, docs/kern/rahmen.md 4.28) ----------
   // In der Übung meldet die angemeldete Person einen Fehler in der Aufgabe oder der davor; gesendet wird im Tab Statistik

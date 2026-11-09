@@ -1960,6 +1960,44 @@ console.log("listenpruefung.js");
     gleich(LSM.alsText(l1).split("\n").slice(1, 3).join("|"), "Übung: terme (terme), Stufe h-i, Aufgabe 2|Niveau: n1", "alsText: Feld uebung, Stufe, Zusatzzeile");
     gleich(JSON.stringify(LSM.ausText(LSM.alsText(l1))), JSON.stringify({ meldung: "M-b-2", uebung: "terme", stufe: "h-i" }), "ausText: Übung und Stufe mit Bindestrich");
     gleich(LSM.bemerkungDaten(l1).inhalt, "terme", "bemerkungDaten: Feld inhalt für den Server");
+    // Weg je Gerät und Server-Adresse (C11-3 a)
+    const AG = KERN.entwicklung.adresseGueltig;
+    gleich([AG(""), AG("http://localhost:8766"), AG("HTTP://127.0.0.1:8766/"), AG("https://localhost")].join("|"),
+      "|http://localhost:8766|http://127.0.0.1:8766|https://localhost", "adresseGueltig: leer, localhost, 127.0.0.1");
+    gleich([AG("http://192.168.1.20:8766"), AG("http://localhost.example.org"), AG("ftp://localhost"), AG("http://localhost:0"), AG("http://localhost:70000"), AG("localhost:8766")].every(x => x === null), true,
+      "adresseGueltig: Netz, fremder Name, anderes Protokoll, Port ausserhalb, ohne Protokoll abgewiesen");
+    const WEG_SP = (() => { const d = {}; return { lies: (k, e) => (k in d ? JSON.parse(d[k]) : e), schreibe: (k, x) => { d[k] = JSON.stringify(x); return true; } }; })();
+    let vorgabe = { meldungen: "", server: "http://localhost:8766" };
+    const stub2 = { freigeschaltet: () => true, server: async () => ({ ok: true }), serverMeldung: () => "Server fehlt", bemerkung: async () => ({ nr: 9 }), bemerkungen: async () => [] };
+    const W = M({ app: "lernsteig", titel: "Lernsteig", speicher: WEG_SP, inhalt: { feld: "uebung", wort: "Übung" }, kontakt: () => vorgabe, entwicklung: stub2 });
+    gleich(JSON.stringify(W.meldeweg()), JSON.stringify({ weg: "auto", server: "http://localhost:8766", eigeneAdresse: false, vorgabe: "http://localhost:8766" }), "meldeweg: Vorgabe der Entwicklung");
+    gleich(W.setzeMeldeweg({ weg: "text", server: "http://127.0.0.1:9000/" }).server, "http://127.0.0.1:9000", "setzeMeldeweg: eigene Adresse, bereinigt");
+    gleich(W.setzeMeldeweg({ weg: "auto", server: "" }).server, "", "setzeMeldeweg: leer = diese Seite, schlägt die Vorgabe");
+    gleich(W.setzeMeldeweg({ weg: "auto" }).server, "http://localhost:8766", "setzeMeldeweg ohne Adresse: wieder die Vorgabe");
+    wirft(() => W.setzeMeldeweg({ server: "http://10.0.0.5:8766" }), "setzeMeldeweg: Adresse im Netz");
+    wirft(() => W.setzeMeldeweg({ weg: "fax" }), "setzeMeldeweg: unbekannter Weg");
+    const wm = () => W.neu({ name: "Jo", uebung: "terme", stufe: "h", art: "inhalt", text: "a b c" });
+    let gemeldet = null, kopiert2 = null;
+    W.setzeMeldeweg({ weg: "text" });
+    gleich(await W.weitergeben(wm(), { kopiere: async t => { kopiert2 = t; } }), "text", "Weg text: kopiert, obwohl ein Server da wäre");
+    W.setzeMeldeweg({ weg: "mail" });
+    gleich([await W.weitergeben(wm(), { melde: t => { gemeldet = t; } }), /keine Adresse/.test(gemeldet)].join(), ",true", "Weg mail ohne Adresse: nichts, mit Begründung");
+    W.setzeMeldeweg({ weg: "server" });
+    stub2.server = async () => null;
+    gleich([await W.weitergeben(wm(), { melde: t => { gemeldet = t; } }), gemeldet].join(), ",Server fehlt", "Weg server ohne Server: nichts, Meldung des Servers");
+    gleich(W.alle().filter(x => x.status === "neu").length, 2, "nicht gesendete bleiben neu");
+    // KERN.entwicklung fragt die eingestellte Adresse
+    const urls = [];
+    const fetchAlt = global.fetch;
+    global.fetch = async u => { urls.push(String(u)); return { ok: true, json: async () => ({ ok: true }) }; };
+    const EW = KERN.entwicklung({ app: "lernsteig", speicher: WEG_SP, aufsicht: () => true, adresse: () => W.meldeweg().server });
+    W.setzeMeldeweg({ weg: "auto", server: "http://localhost:8766" });
+    await EW.server();
+    W.setzeMeldeweg({ weg: "auto", server: "" });
+    await EW.server();
+    gleich(urls.join(" "), "http://localhost:8766/entwicklung/status /entwicklung/status", "entwicklung: Adresse je Einstellung, neu gefragt nach dem Wechsel");
+    gleich(KERN.entwicklung({ app: "x", speicher: WEG_SP, aufsicht: () => true, adresse: () => "http://10.0.0.5" }).adresse(), "", "entwicklung: ungültige Adresse gilt als diese Seite");
+    global.fetch = fetchAlt;
     wirft(() => M({ inhalt: { feld: "spiel" } }), "meldungen ohne speicher");
     wirft(() => M({ speicher: sp }), "meldungen ohne inhalt");
   }

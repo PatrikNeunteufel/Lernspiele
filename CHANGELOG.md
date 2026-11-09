@@ -1295,3 +1295,18 @@
   einmaleins-blitz „Keine Fehler.“, kein voller Lauf. Doku Lernsteig 5f und 6, Kern 4.28, Eulenpfad 13, Plan C11,
   `gemeinsame_mechaniken.md`. Tests: Kern „5853 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „106
   Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan C11 Schritt 3 (C11-3 a), Kern 1.33.0: Weg der Meldungen und Adresse des Entwickler-Servers je Gerät — in beiden
+  Apps unter Verwaltung → Einstellungen → „Meldungen an die Entwicklung“ (Weg automatisch, nur Server, nur E-Mail, nur
+  Text; Adresse nur `localhost`/`127.0.0.1` mit Port, leer = diese Seite; „Verbindung prüfen“), Vorgabe in
+  `<app>/kontakt.js` (neu Feld `server`). `KERN.entwicklung` mit `adresse()` und `adresseGueltig`, `KERN.meldungen` mit
+  `meldeweg`/`setzeMeldeweg`, `weitergeben` folgt dem Weg und begründet, wenn er nicht geht. `tools/entwickler_server.py`
+  antwortet mit CORS nur für erlaubte Herkunft (lokal jeder Port, die veröffentlichte Seite, `--herkunft`), samt
+  Vorabfrage und `Access-Control-Allow-Private-Network`; er hört weiter nur auf 127.0.0.1. Kern-Fälle (14);
+  Gegenprobe (Adressprüfung ab): 3 gemeldet. Im Browser mit zwei Servern (App auf 8767, Entwickler-Server auf 8766):
+  Status lesbar, POST-Vorabfrage durch (403 mit falschem Schlüssel, nichts geschrieben), Netzadresse abgewiesen;
+  Lernsteig-Verwaltung (375 px, Texte gekürzt) und Eulenpfad-Verwaltung (Feld auf volle Breite) bedient; fremde
+  Herkunft per curl: Vorabfrage 403, ohne Freigabe. Nicht nachgewiesen: Zugriff der veröffentlichten Seite auf localhost
+  (erst nach einem Push). Testkonten und Einstellungen im Browser danach entfernt. Eulenpfad-Stichprobe tab,
+  anlaut-angel, einmaleins-blitz „Keine Fehler.“, kein voller Lauf. Doku Kern 4.12 und 4.28, Eulenpfad 11, Lernsteig 5f
+  und 6, Plan C11. Tests: Kern „5867 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „106 Fälle,
+  0 Fehler.“), Gratwanderung „Keine Fehler.“.

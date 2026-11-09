@@ -115,6 +115,7 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
         bestaetigen: () => confirm("Das Mailprogramm öffnet sich mit der Meldung — ohne Namen. Bitte ansehen und senden."),
         oeffne: url => { location.href = url; },
         kopiere: async text => { try { await navigator.clipboard.writeText(text); } catch (e) { prompt("Diesen Text an die Entwicklung schicken:", text); } },
+        melde: text => { hinweis.textContent = text; }, // gewählter Weg geht nicht (Verwaltung → Einstellungen, C11-3 a)
       });
       if (weg) { opt.neu(); }
     }

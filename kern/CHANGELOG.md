@@ -3,6 +3,14 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.33.0 — 2026-11-09 (LERN_Session25)
+- `entwicklung.js` (C11-3 a): Option `adresse()` — der Entwickler-Server muss nicht mehr dieselbe Seite sein; erlaubt sind
+  nur `http(s)://localhost` und `127.0.0.1` mit Port (`KERN.entwicklung.adresseGueltig`, sonst gilt dieselbe Seite).
+  Der Server wird je Adresse neu gefragt; Meldung „nicht erreichbar“ nennt die Adresse. Ohne `adresse` wie bisher.
+- `meldungen.js` (C11-3 a): Weg je Gerät `meldeweg()`, `setzeMeldeweg({ weg, server })` im Speicher `<app>:meldeweg` —
+  „auto“ (wie bisher: Server, sonst E-Mail, sonst Text), „server“, „mail“, „text“; Server-Adresse eigen oder Vorgabe aus
+  `<app>/kontakt.js` (Feld `server`). `weitergeben` folgt dem Weg und begründet mit `ui.melde`, wenn er nicht geht.
+
 ## 1.32.1 — 2026-11-09 (LERN_Session25)
 - `daten.js`: Beim Einlesen und im Abgleich nimmt `entferne` eines Teils der App jetzt auch die Einträge gelöschter
   Personen heraus (Löschvermerk), nicht nur beim Löschen auf dem eigenen Gerät. Bisher brachte eine alte Sicherung oder ein

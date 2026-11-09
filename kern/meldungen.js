@@ -21,6 +21,7 @@
   const RANG = { neu: 0, bestaetigt: 1, weitergeleitet: 2, geplant: 3, behoben: 4, "kein-fehler": 4 };
   const rang = m => RANG[m?.status] ?? 0;
   const WEITERGEGEBEN = ["weitergeleitet", "geplant", "behoben", "kein-fehler"];
+  const WEGE = ["auto", "server", "mail", "text"];
 
   /** Ist b besser als a? (gleicher Kennung; siehe Kopf) */
   function besser(a, b) {
@@ -90,7 +91,8 @@
    * opt.woerter          { eingaben, notiz } — Anfang der Zeilen (Eulenpfad: „Eingaben des Kindes“, „Notiz der Aufsicht“)
    * opt.arten, opt.anregungArten  { wert: Text }
    * opt.status           { status: { text, … } } (bekannte Status der App)
-   * opt.kontakt()        → { meldungen?: E-Mail } (Vorgabe der Entwicklung, <app>/kontakt.js)
+   * opt.kontakt()        → { meldungen?: E-Mail, server?: Adresse des Entwickler-Servers } (Vorgabe der Entwicklung,
+   *                      <app>/kontakt.js; je Gerät abweichend über setzeMeldeweg, C11-3 a)
    * opt.entwicklung      KERN.entwicklung der App, eine Funktion, die sie liefert (später geladen), oder null
    * opt.standDatei       Pfad der veröffentlichten Antworten (Standard „meldungen-stand.json“)
    */
@@ -183,6 +185,29 @@
 
     // ----- Weg zur Entwicklung -----
     const adresse = () => (o.kontakt ? o.kontakt()?.meldungen : "") || "";
+    /**
+     * Weg je Gerät (C11-3 a), Speicher <app>:meldeweg = { weg, server? }: weg „auto“ (Server, sonst E-Mail, sonst Text),
+     * „server“, „mail“ oder „text“; server = Adresse des Entwickler-Servers ("" = dieselbe Seite), ohne Angabe die
+     * Vorgabe der Entwicklung aus <app>/kontakt.js (Feld server). Nur auf diesem Gerät, reist nicht mit.
+     */
+    function meldeweg() {
+      const e = o.speicher.lies("meldeweg", null) || {};
+      const vorgabe = (o.kontakt ? o.kontakt()?.server : "") || "";
+      const eigen = typeof e.server === "string";
+      return { weg: WEGE.includes(e.weg) ? e.weg : "auto", server: eigen ? e.server : vorgabe, eigeneAdresse: eigen, vorgabe };
+    }
+    /** Weg setzen; server null = Vorgabe der Entwicklung. Wirft bei einer nicht erlaubten Adresse. */
+    function setzeMeldeweg({ weg = "auto", server = null } = {}) {
+      if (!WEGE.includes(weg)) throw new Error(`Unbekannter Weg ${weg}`);
+      const pruefe = KERN.entwicklung && KERN.entwicklung.adresseGueltig ? KERN.entwicklung.adresseGueltig : t => String(t || "");
+      let s = null;
+      if (server !== null) {
+        s = pruefe(server);
+        if (s === null) throw new Error("Erlaubt ist nur ein Entwickler-Server auf diesem Gerät: http://localhost:<Port> oder http://127.0.0.1:<Port>, leer für diese Seite.");
+      }
+      o.speicher.schreibe("meldeweg", { weg, ...(s !== null ? { server: s } : {}) });
+      return meldeweg();
+    }
     /** mailto-Link mit Betreff und Text oder null ohne Adresse. */
     function mailLink(m) {
       const an = adresse();
@@ -196,19 +221,29 @@
       aufgabe: m.aufgabe ? `Aufgabe ${m.aufgabeNr}: ${m.aufgabe}` : undefined, meldung: m.id });
 
     /**
-     * Weitergeben: Entwickler-Server, sonst E-Mail, sonst Text kopieren. ui: { von, bestaetigen(„meldung“ | „anregung“) → bool,
-     * oeffne(url), kopiere(text) → Promise }. Setzt den Status „weitergeleitet“ mit Notiz; gibt den Weg zurück
-     * („server“, „mail“, „text“) oder null, wenn abgebrochen oder fehlgeschlagen.
+     * Weitergeben nach dem Weg des Geräts (meldeweg): „auto“ Entwickler-Server, sonst E-Mail, sonst Text; „server“, „mail“,
+     * „text“ nur diesen Weg. ui: { von, bestaetigen(„meldung“ | „anregung“) → bool, oeffne(url), kopiere(text) → Promise,
+     * melde(text) }. Setzt den Status „weitergeleitet“ mit Notiz; gibt den Weg zurück („server“, „mail“, „text“) oder null,
+     * wenn abgebrochen oder der gewählte Weg nicht geht (dann mit melde begründet).
      */
     async function weitergeben(m, ui = {}) {
       const e = entwicklung();
-      if (e && e.freigeschaltet() && (await e.server())) {
-        const b = await e.bemerkung(bemerkungDaten(m));
-        if (!b) return null;
-        setze(m.id, { status: "weitergeleitet" }, { von: ui.von, notiz: `Bemerkung Nr. ${b.nr}` });
-        return "server";
+      const { weg } = meldeweg();
+      const sag = text => { if (ui.melde) ui.melde(text); return null; };
+      if (weg === "auto" || weg === "server") {
+        const da = e && e.freigeschaltet() && (await e.server());
+        if (da) {
+          const b = await e.bemerkung(bemerkungDaten(m));
+          if (!b) return null;
+          setze(m.id, { status: "weitergeleitet" }, { von: ui.von, notiz: `Bemerkung Nr. ${b.nr}` });
+          return "server";
+        }
+        if (weg === "server") return sag(!e || !e.freigeschaltet()
+          ? "Gewählt ist der Entwickler-Server, aber der Entwickler-Modus ist auf diesem Gerät nicht freigeschaltet."
+          : e.serverMeldung());
       }
-      const mail = mailLink(m);
+      const mail = weg === "text" ? null : mailLink(m);
+      if (weg === "mail" && !mail) return sag("Gewählt ist E-Mail, aber die Entwicklung hat noch keine Adresse eingetragen.");
       if (mail) {
         if (ui.bestaetigen && !ui.bestaetigen(istAnregung(m) ? "anregung" : "meldung")) return null;
         if (ui.oeffne) ui.oeffne(mail);
@@ -259,7 +294,7 @@
     };
 
     return { app: o.app, istAnregung, alle, von, anregungen, korrekturen, gefunden, ungelesen, neu, neueAnregung,
-      neueKorrektur, entferne, setze, gelesen, alsText, ausText, adresse, mailLink, bemerkungDaten, weitergeben,
+      neueKorrektur, entferne, setze, gelesen, alsText, ausText, adresse, mailLink, bemerkungDaten, weitergeben, meldeweg, setzeMeldeweg, WEGE,
       standAnwenden, abfragen, statusAusBemerkung, teil };
   }
   meldungen.besser = besser;

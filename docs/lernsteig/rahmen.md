@@ -385,6 +385,11 @@ Logik im Kern (`KERN.meldungen`, docs/kern/rahmen.md 4.28); `gemeinsam/rahmen.js
   eigenen Mailprogramm (Adresse in `lernsteig/kontakt.js`, nur die Startseite lädt sie; leer: kein E-Mail-Weg), sonst
   Text kopieren. Der Text trägt keinen Namen („Jugendliche/r, 2. Oberstufe …“). Ungesendete eigene Meldungen lassen sich
   löschen.
+- **Weg und Server-Adresse** (C11-3 a): Verwaltung → Einstellungen → „Meldungen an die Entwicklung“, nur auf diesem
+  Gerät (`lernsteig:meldeweg`): Weg automatisch, nur Entwickler-Server, nur E-Mail oder nur Text; Adresse des
+  Entwickler-Servers (leer: diese Seite; nur localhost/127.0.0.1), „Verbindung prüfen“. Vorgabe der Entwicklung in
+  `lernsteig/kontakt.js` (`server`). Gilt auch für den Entwickler-Modus (`LST.ENTWICKLUNG.adresse()`). Die Übungsseiten
+  laden `kontakt.js` nicht: Dort gilt die Adresse des Geräts oder dieselbe Seite.
 - **Antworten:** „Antworten abfragen“ liest `lernsteig/meldungen-stand.json` (`python tools/meldungen_stand.py lernsteig`)
   und mit Entwickler-Server die Bemerkungen (`docs/lernsteig/bemerkungen.json`). Neue Antworten sind hervorgehoben, bis
   die Person die Statistik geöffnet hat; die Aufsicht liest nur mit.
@@ -411,6 +416,7 @@ Logik im Kern (`KERN.meldungen`, docs/kern/rahmen.md 4.28); `gemeinsam/rahmen.js
 | `gestellt` | Gedächtnis gegen Wiederholungen (RA5 a): Fingerabdrücke je `konto\|uebung/stufe` (höchstens 400; bis LERN_Session18 die Kennungen je `konto/uebung/stufe/niveau`, höchstens 30) |
 | `geraet`, `abgleichStand` | Abgleich über einen Ordner (5b, `KERN.abgleich`): Kennung und Name dieses Geräts; Ordner, letzter Abgleich, andere Geräte. Den gewählten Ordner merkt der Browser in IndexedDB `lernsteig` |
 | `einstellungen` | `{ dezimal?, rechner? }`, nur von einer angemeldeten Aufsicht gesetzt (5d) |
+| `meldeweg` | Weg der Meldungen und Adresse des Entwickler-Servers `{ weg, server? }` (5f, C11-3 a; nur dieses Gerät) |
 | `meldungen` | Fehlermeldungen (5f, `KERN.meldungen`) `{ id, person, name, rolle, zeit, stand, status, verlauf, uebung, stufe, lp, niveau, lehrplan, klasse, aufgabeNr, aufgabe, loesung, eingabe, ergebnis, art, text, antwort?, gelesen }`; reist in Sicherung und Abgleich mit |
 
 ## 7. Prüfen

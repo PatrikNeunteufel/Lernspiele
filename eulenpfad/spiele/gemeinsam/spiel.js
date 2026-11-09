@@ -862,6 +862,9 @@ const LS = (() => {
   const meldungWeitergeben = MELD.weitergeben;
   /** Antworten der Entwicklung holen (meldungen-stand.json und Bemerkungen); gibt die Zahl der übernommenen zurück. */
   const meldungenAbfragen = MELD.abfragen;
+  /** Weg der Meldungen und Adresse des Entwickler-Servers auf diesem Gerät (C11-3 a; Verwaltung → Einstellungen). */
+  const meldeweg = MELD.meldeweg;
+  const setzeMeldeweg = MELD.setzeMeldeweg;
 
   // Pause der laufenden Aufgabe für Hilfe und Melden (setzt die Runde je Aufgabe) und Zähler für ❓.
   let aktuellePause = null;
@@ -3191,7 +3194,7 @@ const LS = (() => {
     listenPruefen, katalogEintrag,
     meldungen, meldungenVon, gefundeneFehler, ungeleseneMeldungen, meldenErlaubt, neueMeldung,
     setzeMeldung, meldungenGelesen, meldungFuerEntwicklung, meldeFormular, meldungStandAnwenden, meldungStatusAusBemerkung,
-    meldungAdresse, meldungMailLink, meldungAusText, meldungWeitergeben, meldungenAbfragen,
+    meldungAdresse, meldungMailLink, meldungAusText, meldungWeitergeben, meldungenAbfragen, meldeweg, setzeMeldeweg,
     istAufsicht, kinderListe, aufsichtListe, spielerName, aufsichtAngemeldet, abmelden, setzePin, meldeAufsichtAn, pinStimmt, pinGueltig, neuerCode, setzeWiederherstellung, wiederherstellung, codeStimmt,
     antwortStimmt, zuruecksetzenStand, zuruecksetzenAnfordern, zuruecksetzenAbbrechen, zuruecksetzenAbbrechenMit, zuruecksetzenFaellig, ZURUECKSETZEN_TAGE,
     freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, aehnlich, passung, spielListen, listeFrei, setzeListeFrei, freieListen,

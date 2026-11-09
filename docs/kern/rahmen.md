@@ -324,6 +324,12 @@ der App; Meldungen gehen an `opt.melde`.
 - **Zustand je App und Gerät** unter `entwickler` im Speicher der App (`{ schluessel, an, name }`, nicht abgeglichen).
 - **Server:** `tools/entwickler_server.py` (`APPS`): jede Anfrage nennt `app`; der Server schreibt Prüfstand
   (`<app>`-Datei, nur die Bereiche der App) und Bemerkungen der App. Ältere Seiten ohne `app` gelten als Eulenpfad.
+- **Adresse** (seit 1.33.0, C11-3 a): `opt.adresse()` nennt den Server, `""` = dieselbe Seite (wie bisher). Erlaubt sind
+  nur `http(s)://localhost` und `127.0.0.1` mit Port (`entwicklung.adresseGueltig`; eine andere Angabe gilt als dieselbe
+  Seite). Die Apps nehmen sie aus `KERN.meldungen.meldeweg()` (Gerät, sonst `<app>/kontakt.js`). Der Server antwortet
+  dafür mit CORS, aber nur für erlaubte Herkunft (lokal jeder Port, die veröffentlichte Seite, `--herkunft`), und
+  beantwortet die Vorabfrage samt `Access-Control-Allow-Private-Network`; er hört weiter nur auf 127.0.0.1. Ein Server im
+  Netz braucht einen eigenen Entscheid (später nur verschlüsselt und mit geheimer Kennung, Plan C11).
 
 | Aufruf | Ergebnis |
 |---|---|
@@ -705,7 +711,8 @@ name(id) }`, `stufe { text, aus }`, `wer(m)`, `zusatz(m)`, `woerter { eingaben, 
 | `alle`, `von(name)`, `anregungen`, `korrekturen`, `ungelesen(name)`, `gefunden(name)` | Listen und Zähler |
 | `alsText(m)`, `ausText(text)` | Text für die Entwicklung **ohne Namen** (Kennung, wer, Inhalt, Stufe, Aufgabe, Eingaben, Begründung, Notizen) und zurück |
 | `mailLink(m)`, `adresse()` | `mailto:` mit Betreff „<Titel>: Fehlermeldung M-… (<inhalt>, Stufe …)“ oder `null` ohne Adresse |
-| `weitergeben(m, ui)` | Weg zur Entwicklung: Entwickler-Server (Bemerkung mit Kennung), sonst E-Mail, sonst Text; `ui { von, bestaetigen(art), oeffne(url), kopiere(text) }`; Ergebnis `"server"`, `"mail"`, `"text"` oder `null` |
+| `weitergeben(m, ui)` | Weg zur Entwicklung nach `meldeweg()`: „auto“ Entwickler-Server (Bemerkung mit Kennung), sonst E-Mail, sonst Text; „server“, „mail“, „text“ nur diesen; `ui { von, bestaetigen(art), oeffne(url), kopiere(text), melde(text) }`; Ergebnis `"server"`, `"mail"`, `"text"` oder `null` (abgebrochen oder Weg geht nicht, dann mit `melde` begründet) |
+| `meldeweg()`, `setzeMeldeweg({ weg, server })` | Weg und Server-Adresse je Gerät (C11-3 a, Speicher `<app>:meldeweg`, reist nicht mit); `server: null` = Vorgabe aus `<app>/kontakt.js`; eine Adresse ausser localhost/127.0.0.1 wirft |
 | `standAnwenden(stand)`, `abfragen()` | Antworten (`{ <id>: { status, antwort? } }`) aus `meldungen-stand.json` und den Bemerkungen übernehmen, nur für weitergegebene |
 | `teil` | Teil für `KERN.daten` (Sichern, Einlesen, Abgleich) |
 | `KERN.meldungen.zusammenfuehren(eigene, fremde, ctx)`, `.besser(a, b)`, `.vereinige(a, b)` | Zusammenführen je Kennung |

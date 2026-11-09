@@ -316,6 +316,33 @@ function zeichneVerwaltung(box, neu) {
       abDatei, abMeldung));
   }
 
+  // ----- Weg der Meldungen und Adresse des Entwickler-Servers (Plan C11, C11-3 a; KERN.meldungen.meldeweg) -----
+  // Nur auf diesem Gerät. Erlaubt ist nur ein Entwickler-Server auf diesem Gerät (localhost, 127.0.0.1).
+  function meldewegTeil() {
+    const w = LS.meldeweg();
+    const WEGE = [["auto", "Automatisch: Entwickler-Server, sonst E-Mail, sonst Text"], ["server", "Nur Entwickler-Server"],
+      ["mail", "Nur E-Mail aus dem eigenen Mailprogramm"], ["text", "Nur Text kopieren"]];
+    const hinweis = el("p", { class: "leise-text", "aria-live": "polite" });
+    const adresse = el("input", { type: "text", class: "feld", name: "server-adresse", value: w.eigeneAdresse ? w.server : "", style: "width:100%;box-sizing:border-box",
+      placeholder: `Vorgabe: ${w.vorgabe || "diese Seite"}`, "aria-label": "Adresse des Entwickler-Servers", autocomplete: "off" });
+    const setze = daten => { try { LS.setzeMeldeweg(daten); neu(); } catch (e) { hinweis.textContent = e.message; } };
+    return el("div", { class: "einstellung" },
+      el("h3", { text: "Meldungen an die Entwicklung" }),
+      el("p", { class: "leise-text", style: "margin:0 0 6px", text: `Wie bestätigte Meldungen und Anregungen weitergehen. E-Mail an: ${LS.meldungAdresse() || "— noch keine Adresse eingetragen (kontakt.js)"}.` }),
+      el("div", { class: "zeile-knoepfe" }, ...WEGE.map(([wert, text]) => el("button", { type: "button", class: "schalter" + (wert === w.weg ? " frei" : ""),
+        "aria-pressed": String(wert === w.weg), "data-meldeweg": wert, text: (wert === w.weg ? "✓ " : "") + text,
+        onclick: () => setze({ weg: wert, server: w.eigeneAdresse ? w.server : null }) }))),
+      el("label", { class: "leise-text", text: "Adresse des Entwickler-Servers (leer: diese Seite; nur http://localhost:<Port> oder http://127.0.0.1:<Port>)" }),
+      adresse,
+      zeile(knopf("Adresse speichern", () => setze({ weg: w.weg, server: adresse.value })),
+        knopf("↺ Vorgabe", () => setze({ weg: w.weg, server: null })),
+        knopf("Verbindung prüfen", async () => {
+          const da = await LS.entwicklung.server();
+          hinweis.textContent = da ? `✓ Entwickler-Server erreichbar (${LS.entwicklung.adresse() || "diese Seite"}).` : LS.entwicklung.serverMeldung();
+        })),
+      hinweis);
+  }
+
   // ----- Einstellungen für alle auf diesem Gerät (LERN_Session7; später je Klasse durch die Lehrperson) -----
   function einstellungen() {
     /** Ein Knopf je Wahl; gewählt ist, was 'aktuell' gleicht (null = „wie global“). */
@@ -343,6 +370,7 @@ function zeichneVerwaltung(box, neu) {
       el("p", { class: "leise-text", style: "margin-top:0", text: "Gelten für alle Kinder auf diesem Gerät, je Spiel auch abweichend. „Alles auf Standard“ setzt auch die Spiele zurück." }),
       ...zeilen,
       zeile(knopf("↺ Alles auf Standard", () => { LS.einstellungenZuruecksetzen(); neu(); })),
+      meldewegTeil(),
       // Freiwillige Beiträge (LERN-50): nur hier für die Aufsicht und nur, wenn ein Link eingetragen ist
       typeof unterstuetzenAktiv === "function" && unterstuetzenAktiv().length
         ? el("p", { class: "leise-text", style: "margin-top:14px" }, el("a", { href: "../portal/unterstuetzen.html", text: "☕ Eulenpfad unterstützen" }),
@@ -447,6 +475,7 @@ function zeichneVerwaltung(box, neu) {
           : "Das Mailprogramm öffnet sich mit der Meldung — ohne den Namen des Kindes. Bitte ansehen und senden."),
         oeffne: url => { location.href = url; },
         kopiere: async text => { try { await navigator.clipboard.writeText(text); } catch { prompt("Diesen Text an die Entwicklung schicken:", text); } },
+        melde: text => alert(text), // gewählter Weg geht nicht (Verwaltung → Einstellungen, C11-3 a)
       });
       if (weg) neu();
     }

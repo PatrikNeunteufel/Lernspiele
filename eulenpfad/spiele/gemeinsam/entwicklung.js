@@ -15,6 +15,8 @@ LS.entwicklung = (() => {
     aufsicht: () => LS.aufsichtAngemeldet(), name: () => LS.aktuellerSpieler() || "",
     pruefstand: typeof PRUEFSTAND !== "undefined" ? PRUEFSTAND : null, arten: ["spiele", "listen"],
     melde: text => alert(text), start: "eulenpfad/",
+    // Adresse des Servers je Gerät oder Vorgabe aus kontakt.js (C11-3 a; "" = dieselbe Seite)
+    adresse: () => (LS.meldeweg ? LS.meldeweg().server : ""),
   });
   const { freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung,
     setzeGeprueft, setzeEintraege, bemerkung, bemerkungen, bemerkungStatus } = K;
@@ -138,5 +140,5 @@ LS.entwicklung = (() => {
   }
 
   return { freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, server, setzeGeprueft, setzeEintraege,
-    bemerkung, bemerkungen, bemerkungStatus, bemerkungsFeld, zeigeListe, zustand, serverMeldung };
+    bemerkung, bemerkungen, bemerkungStatus, bemerkungsFeld, zeigeListe, zustand, serverMeldung, adresse: K.adresse };
 })();

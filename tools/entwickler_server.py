@@ -10,6 +10,12 @@ Aufruf (aus beliebigem Ordner):
     python tools/entwickler_server.py 8770         anderer Port
     python tools/entwickler_server.py --oeffnen    zusätzlich die Einstiegsseite im Browser öffnen (SV1 a)
     python tools/entwickler_server.py --neuer-schluessel   Schlüssel neu erzeugen, Hash eintragen
+    python tools/entwickler_server.py --herkunft https://beispiel.ch   eine weitere Seite darf anfragen (mehrfach möglich)
+
+Andere Seiten (C11-3 a, LERN_Session25): Eine App, die nicht von diesem Server kommt — etwa die veröffentlichte Seite oder
+eine Vorschau auf einem anderen Port —, darf ihn für Meldungen und Entwicklung ansprechen (CORS), aber nur von einer
+erlaubten Herkunft: localhost und 127.0.0.1 mit beliebigem Port, die veröffentlichte Seite (HERKUNFT_FEST) und was
+--herkunft nennt. Der Server hört weiterhin nur auf 127.0.0.1; geschrieben wird nur mit dem Schlüssel.
 """
 import datetime
 import hashlib
@@ -104,6 +110,17 @@ def lies_bemerkungen(a: dict) -> list:
     return json.loads(a["bemerkungen"].read_text(encoding="utf-8")) if a["bemerkungen"].exists() else []
 
 
+# Herkunft, die den Server ansprechen darf (CORS, C11-3 a): lokal jeder Port, dazu die veröffentlichte Seite.
+HERKUNFT_LOKAL = re.compile(r"^https?://(localhost|127\.0\.0\.1)(:\d{1,5})?$")
+HERKUNFT_FEST = {"https://patrikneunteufel.github.io"}
+HERKUNFT_EXTRA: set = set()  # aus --herkunft
+
+
+def herkunft_erlaubt(herkunft: str) -> bool:
+    h = (herkunft or "").strip().rstrip("/")
+    return bool(h) and (bool(HERKUNFT_LOKAL.match(h)) or h in HERKUNFT_FEST or h in HERKUNFT_EXTRA)
+
+
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(WURZEL), **kwargs)
@@ -111,7 +128,24 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
         # Immer die Dateien von der Platte: kein veraltetes spiel.js oder pruefstand.js im Browser.
         self.send_header("Cache-Control", "no-store")
+        herkunft = self.headers.get("Origin", "")
+        if herkunft_erlaubt(herkunft):
+            self.send_header("Access-Control-Allow-Origin", herkunft.rstrip("/"))
+            self.send_header("Vary", "Origin")
         super().end_headers()
+
+    def do_OPTIONS(self):
+        """Vorabfrage des Browsers (POST mit JSON, Zugriff einer öffentlichen Seite auf localhost)."""
+        if not herkunft_erlaubt(self.headers.get("Origin", "")):
+            self.send_response(403)
+            return self.end_headers()
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Max-Age", "600")
+        if self.headers.get("Access-Control-Request-Private-Network", "").lower() == "true":
+            self.send_header("Access-Control-Allow-Private-Network", "true")
+        self.end_headers()
 
     def antwort(self, status: int, daten) -> None:
         roh = json.dumps(daten, ensure_ascii=False).encode("utf-8")
@@ -241,6 +275,9 @@ def main() -> None:
     if "--neuer-schluessel" in sys.argv:
         return neuer_schluessel()
     port = int(next((a for a in sys.argv[1:] if a.isdigit()), 8765))
+    for i, a in enumerate(sys.argv):
+        if a == "--herkunft" and i + 1 < len(sys.argv):
+            HERKUNFT_EXTRA.add(sys.argv[i + 1].strip().rstrip("/"))
     if not SCHLUESSEL_DATEI.exists():
         print("Hinweis: entwickler.key fehlt — Schreiben geht erst nach: python tools/entwickler_server.py --neuer-schluessel")
     try:

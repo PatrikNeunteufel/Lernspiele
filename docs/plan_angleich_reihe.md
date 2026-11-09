@@ -197,9 +197,9 @@ Kindersprache.
      Meldungsserver, den die Entwicklung anbietet — nur verschlüsselt (https) und mit geheimer Kennung des Servers,
      ohne die der Zugang verweigert wird; dafür ein eigener Entscheid mit neuer Datenschutz-Ausnahme.
    Reihenfolge: Kern-Teil und Eulenpfad, dann Lernsteig, dann Einstellungen, dann ✏️ in der Prüfansicht.
-   *Stand 2026-11-09 (LERN_Session25):* in Arbeit — Kern-Teil und Eulenpfad (Kern 1.32.0) und Lernsteig (Melden in der
-   Übung, Senden in Statistik und Verwaltung, Abgleich und Sichern, Kern 1.32.1) gebaut; offen Einstellungen (C11-3 a)
-   und ✏️ in der Prüfansicht.
+   *Stand 2026-11-09 (LERN_Session25):* in Arbeit — Kern-Teil, Eulenpfad, Lernsteig und Einstellungen (Kern 1.33.0)
+   gebaut; offen ✏️ in der Prüfansicht des Lernsteigs und der Nachweis, dass die veröffentlichte Seite an den lokalen
+   Server melden darf (nach dem nächsten Push).
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 
