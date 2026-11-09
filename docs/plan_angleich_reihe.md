@@ -225,7 +225,12 @@ Kindersprache.
    Lesart, gilt die.
 3. **Überschlagen** (`ueberschlagen-ordnen`): Ablenker aus falschem Runden (eine Stelle falsch gerundet, Ergebnis
    ±10–30 %), nicht nur Zehnerpotenzen daneben.
-   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen. Ablenker nur um Zehnerpotenzen (Faktoren 10, 0.1, 100 oder 0.01; bei `prozent` andere Sätze). Die Prüfung der Übung verlangt Abstand ab Faktor 1.8 und würde Ablenker ±10–30 % abweisen — sie muss mitgeändert werden.
+   *Stand 2026-11-09 (LERN_Session24):* erledigt nach E3-1 a und E3-2 a — Überschlag aus gerundeten Zahlen (Summe und
+   Differenz: alle auf die zweite Stelle der grössten Zahl; Produkt, Quotient, zwei Schritte: jede auf eine Ziffer), je
+   Aufgabe ein oder zwei Ablenker aus einer falsch gerundeten Zahl (10–30 % daneben, 5 % weiter weg als die richtige),
+   der Rest um Zehnerpotenzen; Prozentsatz mit zwei oder drei Sätzen 10–30 % daneben. Dazu Zahlen unter 1 und über
+   1'000 und der neue Typ `prozentwert` („45 % von 13'000 sind mehr als / weniger als …“). Die Prüfung der Übung
+   verlangt statt Faktor 1.8 jetzt 10 % Abstand und rechnet jeden Ablenker aus seinem Fehler nach.
 4. **Terme:** „Schreibe als Potenz“ nur mit derselben Basis; `a/2`, `×`, `⋅`, Grossbuchstaben annehmen; gemischte
    Zahl `1 3/4` erkennen oder ausdrücklich abweisen; „vereinfacht“ verlangt zusammengefasste Faktoren.
    *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise, nachgerechnet mit `KERN.terme.bewerte`. Die Aufgaben haben dieselbe Basis, die Form „potenz“ nimmt aber „2^6“ für 4³ und „8^1“ für 2³ an; „a/2“, „2×a“, „2⋅a“, „2A“ sind unlesbar; „1 3/4“ wird abgewiesen, mit der unpassenden Meldung zu Dreiergruppen; „vereinfacht“ nimmt „2a·3“ und „a·a“ an.

@@ -206,8 +206,8 @@ Die Stufe besteht nur aus Erweiterungen; jeder Teil darum mit „Erweiterung: �
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| Summen und Differenzen mit Dezimalzahlen überschlagen (z.B. 0.723 - 0.04 ≈ 0.7; 23'268 + 4'785 ≈ 28'000) | `summe` 37 %, `differenz` 29 % | den Überschlag selbst bilden: gewählt wird unter vier Antworten, die sich um Zehnerpotenzen unterscheiden (nur die Grössenordnung); die Zahlbereiche der Beispiele (Dezimalzahlen unter 1 wie 0.723 − 0.04, Zahlen über 1'000 wie 23'268 + 4'785): die Summanden liegen zwischen 1 und 999 |
-| in Prozentrechnungen Ergebnisse überschlagen (z.B. 263 von 830 sind etwa 30%; 45% von 13'000 sind mehr als 5'000) | `prozent` 34 % | das zweite Beispiel: einen Prozentwert überschlagen (45% von 13'000 sind mehr als 5'000); prozent überschlägt nur den Prozentsatz („… von … sind etwa … %“) |
+| Summen und Differenzen mit Dezimalzahlen überschlagen (z.B. 0.723 - 0.04 ≈ 0.7; 23'268 + 4'785 ≈ 28'000) — *E3-1 a, E3-2 a (LERN_Session24): Überschlag aus gerundeten Zahlen (alle auf die zweite Stelle der grössten: 23'268 + 4'785 → 23'000 + 5'000 = 28'000; 0.723 − 0.04 ergibt so 0.68, das Beispiel rundet gröber auf 0.7), Ablenker aus einer falsch gerundeten Zahl 10–30 % daneben; Zahlen unter 1, bis 999 und über 1'000 je ein Drittel* | `summe` 27 %, `differenz` 24 % | den Überschlag selbst aufschreiben: gewählt wird unter vier Antworten |
+| in Prozentrechnungen Ergebnisse überschlagen (z.B. 263 von 830 sind etwa 30%; 45% von 13'000 sind mehr als 5'000) — *prozent überschlägt den Prozentsatz („… von … sind etwa … %“, Ablenker 10–30 % daneben), prozentwert den Prozentwert („45 % von 13'000 sind …“ mehr als / weniger als eine Schwelle, E3-2 a)* | `prozent` 27 %, `prozentwert` 22 % | — |
 
 ### MA.1.A.2.i — am Wortlaut nachgelesen
 
@@ -215,13 +215,13 @@ Die Stufe besteht nur aus der Erweiterung.
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| Erweiterung: Produkte und Quotienten von Dezimalzahlen überschlagen. (z.B. 0.382 : 42.8 → 0.4 : 40 = 0.4 : 4 : 10 = 0.01; 32.7 : 0.085 → 30 : 0.1 = 300 : 1 = 300) | `produkt` 51 %, `quotient` 49 % | den Überschlag selbst bilden: gewählt wird unter vier Antworten, die sich um Zehnerpotenzen unterscheiden (nur die Grössenordnung) |
+| Erweiterung: Produkte und Quotienten von Dezimalzahlen überschlagen. (z.B. 0.382 : 42.8 → 0.4 : 40 = 0.4 : 4 : 10 = 0.01; 32.7 : 0.085 → 30 : 0.1 = 300 : 1 = 300) — *E3-1 a (LERN_Session24): jede Zahl auf eine Ziffer, Ablenker aus einer in die falsche Richtung gerundeten Zahl 10–30 % daneben, der Rest um Zehnerpotenzen* | `produkt` 50 %, `quotient` 50 % | den Überschlag selbst aufschreiben: gewählt wird unter vier Antworten |
 
 ### MA.1.A.2.j — am Wortlaut nachgelesen
 
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
-| positive und negative rationale Zahlen auf dem Zahlenstrahl ordnen | `groesste` 35 %, `kleinste` 33 %, `naechste-null` 32 % | der Zahlenstrahl als Bild und das Ordnen aller Zahlen (gewählt wird nur die grösste, kleinste oder nächste bei 0) |
+| positive und negative rationale Zahlen auf dem Zahlenstrahl ordnen | `groesste` 32 %, `kleinste` 35 %, `naechste-null` 33 % | der Zahlenstrahl als Bild und das Ordnen aller Zahlen (gewählt wird nur die grösste, kleinste oder nächste bei 0) |
 
 ## Mittelwert, Häufigkeit, Rabatt (`daten-rabatt`, MA.3.A.1)
 

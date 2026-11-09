@@ -1160,3 +1160,20 @@
   gemeldet. Im Browser angesehen (Desktop, 375 px, Hinweis nach Fehlversuch, kein Überlauf). Abdeckung nachgeführt,
   Plan E 2 Stand ersetzt. Tests: Kern „5752 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 140 Hinweise.“ (Konten „101 Fälle,
   0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 3 (E3-1 a, E3-2 a), `ueberschlagen-ordnen`: Der Überschlag kommt aus gerundeten Zahlen wie im Lehrplan
+  („23'268 + 4'785 ≈ 28'000“) — Summe und Differenz runden alle Zahlen auf die zweite Stelle der grössten (vorher wurde
+  das genaue Ergebnis auf eine Ziffer gerundet, bis 50 % daneben), Produkt, Quotient und zwei Schritte jede Zahl auf eine
+  Ziffer (Ergebnis mit höchstens zwei Ziffern). Je Aufgabe ein oder zwei Ablenker aus einer falsch gerundeten Zahl
+  (falsche Richtung, eine Stelle zu grob, Komma verschoben), 10–30 % neben dem genauen Wert und mindestens 5 % weiter weg
+  als die richtige Antwort, der Rest um Zehnerpotenzen (vorher nur Zehnerpotenzen); der Hinweis nennt die Zahl, die
+  anders gerundet wurde. Prozentsatz mit zwei oder drei Sätzen 10–30 % daneben. Neu: Summe und Differenz auch mit
+  Zahlen unter 1 und über 1'000 (je ein Drittel), Typ `prozentwert` („45 % von 13'000 sind …“, mehr als / weniger als,
+  Schwelle 10–40 % daneben); h je ein Viertel Summe, Differenz, Prozentsatz, Prozentwert. Die Prüfung verlangt statt
+  Faktor 1.8 jetzt 10 % Abstand und 5 % Vorsprung der richtigen Antwort, rechnet jeden Ablenker aus seinem Fehler und
+  den Überschlag nach der Regel nach. Je 20 000 Aufgaben der Stufen h, i, j und Challenge ohne Mängel (in i Produkt und
+  Quotient je 50 %); Gegenproben (29, je Typ: andere Antwort als richtig, Ablenker verschoben, Herkunft falsch, Ablenker
+  zu nahe, Überschlag nicht nach der Regel, Schwelle zu nahe, Text verändert): alle gemeldet. Im Browser angesehen
+  (375 px: Hinweis nach einem Rundungs-Ablenker, Prozentwert mit zwei Knöpfen, kein Überlauf). Abdeckung: Prozent in h
+  abgedeckt, offen bleibt in h und i nur das Aufschreiben des Überschlags. Plan E 3 Stand ersetzt. Tests: Kern „5752
+  Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine
+  Fehler.“.
