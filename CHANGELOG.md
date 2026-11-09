@@ -1200,3 +1200,14 @@
   MA.1.A.4.j entfernt, bei MA.1.A.3.h ergänzt, Rahmen ohne den neuen Text — gemeldet. Im Browser angesehen (375 px,
   terme und ueberschlagen-ordnen). docs/lernsteig/rahmen.md 3, Plan E 5 Stand ersetzt. Tests: Kern „5798 Fälle,
   0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 6 (E6-1: Patrik „für die normalen Stufen a, in der Challenge auch Halbmetalle“), `atombau`: Challenge ohne
+  Be²⁺ und B³⁺ (kein einfaches Ion: H, Edelgase, Halbmetalle, Hauptgruppe IV, Be); `pse.js` führt Bor und Silicium als
+  `halbmetall` und unter `weitere` Germanium, Arsen, Antimon, Tellur (die sechs meistgenannten Halbmetalle; Po, At, Se,
+  Bi je nach Einteilung, nicht dabei; Liste weiter ungeprüft). Stufe a (`art`, `welches`) lässt Halbmetalle aus, wie im
+  Lehrplan nur Metalle, Nichtmetalle, Edelgase. Neu in der Challenge der Typ `halbmetall` („Ist Germanium (Ge) ein
+  Metall, ein Nichtmetall, ein Halbmetall oder ein Edelgas?“, ein Viertel der Challenge); Hinweis zur Lage nennt
+  Wasserstoff als Ausnahme. Prüfung meldet Halbmetalle in a und Ionen ohne einfaches Ion. Challenge 42 → 60 verschiedene
+  Aufgaben. Je 20 000 Aufgaben der Stufen a, c, d und Challenge ohne Mängel; Gegenproben (6: Ion von Be und B, Si in
+  art und welches, Halbmetall als Nichtmetall, Antworten vertauscht): gemeldet. Im Browser angesehen (375 px, Challenge
+  mit Hinweis). Abdeckung nachgeführt, Plan E 6 Stand ersetzt. Tests: Kern „5798 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

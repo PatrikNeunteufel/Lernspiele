@@ -325,8 +325,8 @@ Die Stufe besteht nur aus der Erweiterung.
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
 | in der Entstehungsgeschichte des Periodensystems der Elemente PSE die Bedeutung des systematischen Beschreibens und Ordnens erkennen | **offen** | alles |
-| Element Metalle, Nichtmetalle, Edelgase — *Verbindliche Inhalte der Stufe (auf der Seite am ersten Punkt); art fragt je Element Metall, Nichtmetall oder Edelgas* | `art` 50 % | nur die Elemente 1 bis 20 |
-| aus dem Periodensystem Informationen zu den Elementen herauslesen — *welches lässt drei Elemente im PSE nachsehen; art liest dieselbe Angabe und ist beim Teil der Verbindlichen Inhalte gezählt* | `welches` 50 % | andere Informationen aus dem PSE als die Art (Metall, Nichtmetall, Edelgas); nur die Elemente 1 bis 20 |
+| Element Metalle, Nichtmetalle, Edelgase — *Verbindliche Inhalte der Stufe (auf der Seite am ersten Punkt); art fragt je Element Metall, Nichtmetall oder Edelgas. Bor und Silicium sind Halbmetalle und kommen in a nicht vor (E6-1 a); nach Halbmetallen fragt nur die Challenge* | `art` 51 % | nur die Elemente 1 bis 20 |
+| aus dem Periodensystem Informationen zu den Elementen herauslesen — *welches lässt drei Elemente im PSE nachsehen; art liest dieselbe Angabe und ist beim Teil der Verbindlichen Inhalte gezählt* | `welches` 49 % | andere Informationen aus dem PSE als die Art (Metall, Nichtmetall, Edelgas); nur die Elemente 1 bis 20 |
 
 ### NT.3.2.c — am Wortlaut nachgelesen
 

@@ -7,7 +7,9 @@
    Stufe b (GA, OP: Reaktion im Teilchenmodell, Energiediagramme) braucht Bilder und folgt später; e (Bindungsarten)
    ebenso. Elementdaten in pse.js (ungeprüft). Annahmen, mit dem Lehrmittel abzugleichen: Massenzahl statt Atommasse
    (ganzzahlig); Schalen für die Elemente 1 bis 20 mit 2, 8, 8, 2 Plätzen; Ionen nach der Edelgasregel für die
-   Hauptgruppen I bis III und V bis VII. */
+   Hauptgruppen I bis III und V bis VII, ohne Be²⁺ und B³⁺ (Plan E 6: keine einfachen Ionen in der Schulchemie).
+   E6-1 (LERN_Session24): Bor und Silicium sind Halbmetalle; Stufe a fragt nur Metall, Nichtmetall, Edelgas (Lehrplan
+   NT.3.2.a) und lässt sie aus, die Challenge fragt auch nach Halbmetallen (B, Si, Ge, As, Sb, Te). */
 "use strict";
 
 const UEBUNG = {
@@ -17,13 +19,18 @@ const UEBUNG = {
     a: "Metall, Nichtmetall oder Edelgas? Welches der drei ist …?",
     c: "Protonen, Neutronen, Elektronen; Isotope",
     d: "Schalenmodell, Aussenelektronen, Edelgasregel",
-    challenge: "Ionen: Ladung, Elektronen und Edelgas nach der Edelgasregel",
+    challenge: "Ionen nach der Edelgasregel; Metall, Nichtmetall, Halbmetall oder Edelgas?",
   },
 };
 
 const ARTEN = ["Metall", "Nichtmetall", "Edelgas"];
-const ARTID = { Metall: "metall", Nichtmetall: "nichtmetall", Edelgas: "edelgas" };
+const ARTEN4 = ["Metall", "Nichtmetall", "Halbmetall", "Edelgas"]; // Challenge (E6-1)
+const ARTID = { Metall: "metall", Nichtmetall: "nichtmetall", Halbmetall: "halbmetall", Edelgas: "edelgas" };
 const el = () => LST.waehle(PSE.elemente);
+// Stufe a nach dem Lehrplan: nur Metalle, Nichtmetalle, Edelgase (E6-1 a)
+const OHNE_HALBMETALL = () => PSE.elemente.filter(x => x.art !== "halbmetall");
+// kein einfaches Ion: Wasserstoff, Edelgase, Halbmetalle, Hauptgruppe IV, Beryllium (Plan E 6)
+const OHNE_ION = new Set([4]);
 const nenn = e => `${e.name} (${e.symbol}, Ordnungszahl ${e.oz})`;
 
 function zahl(stufe, typ, text, antwort, weg, daten) {
@@ -36,8 +43,8 @@ function zahl(stufe, typ, text, antwort, weg, daten) {
 const ART_TEXT = { metall: "ein Metall", nichtmetall: "ein Nichtmetall", edelgas: "ein Edelgas" };
 function stufeAWelches() {
   const gesucht = LST.waehle(Object.keys(ART_TEXT));
-  const treffer = LST.waehle(PSE.elemente.filter(x => x.art === gesucht));
-  const andere = PSE.elemente.filter(x => x.art !== gesucht);
+  const treffer = LST.waehle(OHNE_HALBMETALL().filter(x => x.art === gesucht));
+  const andere = OHNE_HALBMETALL().filter(x => x.art !== gesucht);
   const zwei = []; while (zwei.length < 2) { const x = LST.waehle(andere); if (!zwei.includes(x)) zwei.push(x); }
   const liste = zwei.slice(); liste.splice(LST.zufall(0, 2), 0, treffer); // der Treffer an zufälliger Stelle
   const optionen = liste.map(x => `${x.name} (${x.symbol})`);
@@ -48,7 +55,7 @@ function stufeAWelches() {
 }
 function stufeA() {
   if (LST.zufall(0, 1)) return stufeAWelches();
-  const e = el();
+  const e = LST.waehle(OHNE_HALBMETALL());
   const optionen = ARTEN.slice();
   const richtig = optionen.findIndex(o => ARTID[o] === e.art);
   return { art: "auswahl", stufe: "a", typ: "art", text: `Ist ${e.name} (${e.symbol}) ein Metall, ein Nichtmetall oder ein Edelgas?`, optionen, richtig,
@@ -82,9 +89,17 @@ function stufeD() {
 }
 
 function challenge() {
+  // E6-1: ein Viertel der Challenge fragt nach der Art mit Halbmetall, über die Elemente 1 bis 20 und die weiteren Halbmetalle
+  if (LST.zufall(1, 4) === 1) {
+    const e = LST.waehle(PSE.elemente.concat(PSE.weitere));
+    const optionen = ARTEN4.slice();
+    return { art: "auswahl", stufe: "challenge", typ: "halbmetall", text: `Ist ${e.name} (${e.symbol}) ein Metall, ein Nichtmetall, ein Halbmetall oder ein Edelgas?`,
+      optionen, richtig: optionen.findIndex(o => ARTID[o] === e.art), loesung: optionen.find(o => ARTID[o] === e.art), weg: `${e.name}: ${optionen.find(o => ARTID[o] === e.art)}`,
+      kennung: `halbmetall:${e.symbol}`, daten: { oz: e.oz } };
+  }
   for (;;) {
     const e = el(), s = schalen(e.oz), a = s[s.length - 1];
-    if (e.art === "edelgas" || e.oz === 1 || e.oz === 2 || a === 4) continue; // H, Edelgase und Hauptgruppe IV ohne einfaches Ion
+    if (e.art === "edelgas" || e.art === "halbmetall" || e.oz === 1 || a === 4 || OHNE_ION.has(e.oz)) continue;
     const ladung = a <= 3 ? a : a - 8;
     // Vorrat nach VF1 a (E 9): dazu, welches Edelgas gleich viele Elektronen hat wie das Ion (Edelgasregel)
     const typ = LST.waehle(["ladung", "ionen-elektronen", "edelgas-gleich"]);
@@ -112,7 +127,8 @@ function aufgabeErzeugen(stufe, niveau) {
 
 function hinweis(a, eingabe) {
   const h = {
-    art: "Metalle stehen links und in der Mitte, Nichtmetalle rechts oben, Edelgase ganz rechts.",
+    art: "Metalle stehen links und in der Mitte, Nichtmetalle rechts oben (Wasserstoff aber ganz links oben), Edelgase ganz rechts.",
+    halbmetall: "Metalle links und in der Mitte, Nichtmetalle rechts oben (Wasserstoff ganz links oben), Edelgase ganz rechts; Halbmetalle an der Treppenlinie dazwischen.",
     protonen: "Die Ordnungszahl sagt, wie viele Protonen im Kern sind.",
     elektronen: "Ein ungeladenes Atom hat gleich viele Elektronen wie Protonen.",
     neutronen: "Massenzahl minus Ordnungszahl gibt die Neutronen.",
@@ -122,7 +138,7 @@ function hinweis(a, eingabe) {
     gruppe: "Die Hauptgruppe entspricht der Zahl der Aussenelektronen; Edelgase stehen in der letzten.",
     ladung: "Wenige Aussenelektronen werden abgegeben (positiv), fast volle Schalen nehmen auf (negativ).",
     "ionen-elektronen": "Zuerst die Ladung nach der Edelgasregel; abgegebene Elektronen fehlen, aufgenommene kommen dazu.",
-    welches: "Metalle stehen links und in der Mitte, Nichtmetalle rechts oben, Edelgase ganz rechts. Prüfe jedes der drei.",
+    welches: "Metalle stehen links und in der Mitte, Nichtmetalle rechts oben (Wasserstoff aber ganz links oben), Edelgase ganz rechts. Prüfe jedes der drei.",
     "edelgas-gleich": "Zuerst die Elektronen des Ions nach der Edelgasregel; dann das Edelgas mit dieser Ordnungszahl.",
   };
   return h[a.typ] || "Schau im Periodensystem nach.";
@@ -141,6 +157,7 @@ function pruefeAufgabe(a, stufe, niveau) {
     if (!gesucht || gesucht !== d.gesucht) m.push(`Text nennt ${gesucht}, Daten ${d.gesucht}: ${a.text}`);
     const els = a.optionen.map(o => PSE.elemente.find(x => `${x.name} (${x.symbol})` === o));
     if (els.some(x => !x)) return m.concat(`Option nicht in pse.js: ${a.optionen.join(", ")}`);
+    if (els.some(x => x.art === "halbmetall")) m.push(`Halbmetall in Stufe a (E6-1 a): ${a.optionen.join(", ")}`);
     for (const x of els) if (edelLage(x.oz) !== (x.art === "edelgas")) m.push(`Edelgas-Kennzeichnung passt nicht zur Stellung: ${x.name}`);
     const passend = els.filter(x => x.art === gesucht);
     if (passend.length !== 1) m.push(`${passend.length} Optionen sind ${ART_TEXT[gesucht]}: ${a.optionen.join(", ")}`);
@@ -148,11 +165,26 @@ function pruefeAufgabe(a, stufe, niveau) {
     if (JSON.stringify(els.map(x => x.oz)) !== JSON.stringify(d.oz)) m.push("Optionen passen nicht zu den Daten");
     return m;
   }
+  if (a.typ === "halbmetall") {
+    // Challenge (E6-1): Art mit vier Antworten, Elemente 1 bis 20 und die weiteren Halbmetalle
+    const e = PSE.elemente.concat(PSE.weitere).find(x => x.oz === d.oz);
+    if (!e) return m.concat("Element fehlt in pse.js");
+    if (a.text !== `Ist ${e.name} (${e.symbol}) ein Metall, ein Nichtmetall, ein Halbmetall oder ein Edelgas?`) m.push(`Text passt nicht zu den Daten: ${a.text}`);
+    if (a.optionen.join(",") !== ARTEN4.join(",")) m.push(`Optionen ${a.optionen.join(", ")}`);
+    if (ARTID[a.optionen[a.richtig]] !== e.art) m.push(`Auswahl passt nicht zur Liste: ${e.name}`);
+    if (e.oz <= 20 && edelLage(e.oz) !== (e.art === "edelgas")) m.push(`Edelgas-Kennzeichnung passt nicht zur Stellung: ${e.name}`);
+    return m;
+  }
   const e = PSE.elemente.find(x => x.oz === d.oz);
   if (!e) return ["Element fehlt in pse.js"];
   const l = lage(d.oz);
   // Aussenelektronen = Stellung in der Periode (Hauptgruppenelemente 1 bis 20; K und Ca am Anfang von Periode 4)
   const aussen = l.stelle;
+  // kein einfaches Ion (Plan E 6): Wasserstoff, Edelgase, Halbmetalle, Hauptgruppe IV, Beryllium
+  if (["ladung", "ionen-elektronen", "edelgas-gleich"].includes(a.typ) && (d.oz === 1 || d.oz === 4 || aussen === 4 || e.art === "edelgas" || e.art === "halbmetall")) {
+    m.push(`Ion von ${e.name} in der Challenge (kein einfaches Ion, Plan E 6)`);
+  }
+  if (a.typ === "art" && e.art === "halbmetall") m.push(`Halbmetall in Stufe a (E6-1 a): ${e.name}`);
   if (a.typ === "edelgas-gleich") {
     // Elektronen des Ions aus der Stellung; das Edelgas mit dieser Ordnungszahl, aus dem Text gelesen
     const r = /^Das Ion von (\S+) \((\S+), Ordnungszahl (\d+)\) hat nach der Edelgasregel gleich viele Elektronen wie ein Edelgas\. Wie heisst es\?$/.exec(a.text);

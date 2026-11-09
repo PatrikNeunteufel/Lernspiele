@@ -244,7 +244,10 @@ Kindersprache.
    neben ihr „Stufe j (Erweiterung)“; ebenso Stufe i von `ueberschlagen-ordnen`. Kennungen der Stufen unverändert.
 6. **Atombau:** B³⁺ und Be²⁺ aus der Challenge; B und Si als Halbmetall oder aus der Frage „Metall/Nichtmetall“
    nehmen; Hinweis zur Lage der Nichtmetalle mit Ausnahme H.
-   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen. Be²⁺ und B³⁺ in allen drei Typen der Challenge (ausgenommen sind nur H, He, Edelgase und Gruppe IV); B und Si als `nichtmetall` in `pse.js`; der Hinweis nennt H nicht als Ausnahme.
+   *Stand 2026-11-09 (LERN_Session24):* erledigt nach E6-1 (Patrik: a in den Stufen, Halbmetalle in der Challenge) —
+   Challenge ohne Be²⁺ und B³⁺; B und Si in `pse.js` als `halbmetall`, Stufe a fragt sie nicht (Lehrplan: Metalle,
+   Nichtmetalle, Edelgase); neu in der Challenge der Typ `halbmetall` (vier Antworten, Elemente 1 bis 20 und Ge, As, Sb,
+   Te; Po, At, Se, Bi je nach Einteilung, nicht dabei); Hinweis nennt Wasserstoff als Ausnahme. Liste `pse` ungeprüft.
 7. **Kräfte:** Stufe a nach Seitentext (Diagramme erkennen und darstellen) statt nur v = s : t; Beispiele in
    `maschinen.js` eindeutig (Kran, Handbohrer); realistische Grössen (Kraftmesser, Spannungen in `stromkreis`).
    *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen bis auf zwei Teile. Stufe a fragt nur Geschwindigkeit und Weg aus einer Ursprungsgeraden ab, nichts zu „gleichförmige Bewegungen in Diagrammen erkennen und darstellen“ (`nt_zyklus3.md`). Kran eindeutig (Flaschenzug am Haken), einen Handbohrer gibt es nicht (Wellrad, nach KR1 a ausgeschlossen). Kraftmesser bis 1500 N und Massen bis 100 kg in Stufe c; `stromkreis` c bis 400 V, d und Challenge 3–24 V (realistisch).

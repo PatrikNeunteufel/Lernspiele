@@ -486,7 +486,7 @@
         "quelle": "wortlaut",
         "teile": [
           {"text":"in der Entstehungsgeschichte des Periodensystems der Elemente PSE die Bedeutung des systematischen Beschreibens und Ordnens erkennen","offen":true},
-          {"text":"Element Metalle, Nichtmetalle, Edelgase","typen":["art"],"fehlt":"nur die Elemente 1 bis 20","notiz":"Verbindliche Inhalte der Stufe (auf der Seite am ersten Punkt); art fragt je Element Metall, Nichtmetall oder Edelgas"},
+          {"text":"Element Metalle, Nichtmetalle, Edelgase","typen":["art"],"fehlt":"nur die Elemente 1 bis 20","notiz":"Verbindliche Inhalte der Stufe (auf der Seite am ersten Punkt); art fragt je Element Metall, Nichtmetall oder Edelgas. Bor und Silicium sind Halbmetalle und kommen in a nicht vor (E6-1 a); nach Halbmetallen fragt nur die Challenge"},
           {"text":"aus dem Periodensystem Informationen zu den Elementen herauslesen","typen":["welches"],"fehlt":"andere Informationen aus dem PSE als die Art (Metall, Nichtmetall, Edelgas); nur die Elemente 1 bis 20","notiz":"welches lässt drei Elemente im PSE nachsehen; art liest dieselbe Angabe und ist beim Teil der Verbindlichen Inhalte gezählt"}
         ]
       },
