@@ -249,7 +249,7 @@ Die Stufe besteht nur aus der Erweiterung.
 | Inhalt des Lehrplans | Abdeckung | Was fehlt |
 |---|---|---|
 | verstehen und verwenden die Begriffe Steigung in %, Zins, Zinssatz, Kapital — *aufgaben.js: Steigung und Zins übt „Prozent und Funktionswerte“ (prozent-funktionen, Typen zins und steigung), dort MA.3.A.3.i, andere Kompetenz* | **offen** | alles |
-| Rabatt, Brutto, Netto — *brutto und netto rechnen über einen Zuschlag auf den Nettopreis („Nettopreis … dazu 5 % Zuschlag“), nicht über einen Rabatt (Brutto vor, Netto nach Abzug); der Wortlaut nennt nur die Begriffe und klärt die Lesart nicht* | `rabatt` 23 %, `rabatt-betrag` 26 %, `brutto` 26 %, `netto` 25 % | — |
+| Rabatt, Brutto, Netto — *Lesart E2-1 a (LERN_Session24), der Wortlaut nennt nur die Begriffe: beim Preis Bruttopreis − Rabatt = Nettopreis (nettopreis, rabatt-betrag), beim Gewicht Bruttogewicht = Nettogewicht + Tara (nettogewicht, bruttogewicht), brutto je 100 % wie im Schweizer Skript oriesen.ch Prozent4S S. 19; Lesart des mathbuchs nicht nachgesehen* | `nettopreis` 24 %, `rabatt-betrag` 27 %, `nettogewicht` 25 %, `bruttogewicht` 24 % | — |
 
 ## Möglichkeiten zählen (`kombinatorik`, MA.3.B.2)
 

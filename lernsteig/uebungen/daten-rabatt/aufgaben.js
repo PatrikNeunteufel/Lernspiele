@@ -3,7 +3,10 @@
    Inhalte sinngemäss nach docs/lernsteig/lehrplan/mathematik_zyklus3.md, MA.3.A.1 (Begriffe, hier angewendet):
    j  arithmetisches Mittel; Währung (CHF, €, $)
    k  (OP) absolute und relative Häufigkeit; Wahrscheinlichkeit
-   l  (GA) Rabatt, Brutto, Netto (Steigung und Zins übt „Prozent und Funktionswerte“)
+   l  (GA) Rabatt, Brutto, Netto (Steigung und Zins übt „Prozent und Funktionswerte“). Lesart E2-1 a (LERN_Session24):
+      beim Preis Bruttopreis − Rabatt = Nettopreis, beim Gewicht Bruttogewicht = Nettogewicht + Tara, brutto ist je
+      100 % (Gewicht wie im Schweizer Skript oriesen.ch Prozent4S, S. 19: „Der Bruttowert ist grundsätzlich 100 %.“;
+      Lesart des mathbuchs nicht nachgesehen)
    Annahmen, mit Patrik abzustimmen: Wechselkurse sind erfunden und stehen in der Aufgabe; Frankenbeträge gehen auf
    5 Rappen auf; Wahrscheinlichkeit als Dezimalzahl oder in Prozent, wie die Aufgabe verlangt. */
 "use strict";
@@ -14,7 +17,7 @@ const UEBUNG = {
   stufen: {
     j: "Arithmetisches Mittel, Geld in andere Währungen umrechnen",
     k: "Absolute und relative Häufigkeit, Wahrscheinlichkeit",
-    l: "Rabatt, Brutto und Netto",
+    l: "Rabatt, Brutto und Netto (Preis und Gewicht)",
     challenge: "Fehlender Wert zum Mittelwert, Preis vor dem Rabatt",
   },
 };
@@ -68,15 +71,23 @@ function stufeK() {
 }
 
 // ---------- l ----------
+// E2-1 a: Preis (Bruttopreis − Rabatt = Nettopreis) und Gewicht (Bruttogewicht = Nettogewicht + Tara), je ein Viertel.
+// Gewichte in kg mit höchstens einer Nachkommastelle; brutto ist 100 %.
+const eineStelle = x => Number.isInteger(rund(x * 10));
 function stufeL() {
-  const typ = LST.waehle(["rabatt", "rabatt-betrag", "brutto", "netto"]);
+  const typ = LST.waehle(["nettopreis", "rabatt-betrag", "nettogewicht", "bruttogewicht"]);
   for (;;) {
-    const preis = z(4, 400) * 5, p = LST.waehle([5, 10, 15, 20, 25, 30, 40, 50]);
-    if (typ === "rabatt") { const w = preis * (100 - p) / 100; if (!auf5Rp(w)) continue; return fertig("l", typ, `Ein Velo kostet ${fr(preis)} Fr. Es gibt ${p} % Rabatt. Neuer Preis =`, w, "Fr.", `${fr(preis)}${MAL}${dez((100 - p) / 100)} = ${fr(w)}`, { preis, p }); }
-    if (typ === "rabatt-betrag") { const w = preis * p / 100; if (!auf5Rp(w)) continue; return fertig("l", typ, `${fr(preis)} Fr., davon ${p} % Rabatt. Wie viele Franken Rabatt?`, w, "Fr.", `${p} % von ${fr(preis)} = ${fr(w)}`, { preis, p }); }
-    if (typ === "brutto") { const zu = LST.waehle([2, 5, 8, 10, 20]); const w = preis * (100 + zu) / 100; if (!auf5Rp(w)) continue; return fertig("l", typ, `Nettopreis ${fr(preis)} Fr., dazu ${zu} % Zuschlag. Bruttopreis =`, w, "Fr.", `${fr(preis)}${MAL}${dez((100 + zu) / 100)} = ${fr(w)}`, { preis, p: zu }); }
-    const zu = LST.waehle([5, 10, 20, 25]); const brutto = preis * (100 + zu) / 100; if (!auf5Rp(brutto)) continue;
-    return fertig("l", "netto", `Bruttopreis ${fr(brutto)} Fr. mit ${zu} % Zuschlag. Nettopreis =`, preis, "Fr.", `${fr(brutto)} : ${dez((100 + zu) / 100)} = ${fr(preis)}`, { brutto, p: zu });
+    if (typ === "nettopreis" || typ === "rabatt-betrag") {
+      const preis = z(4, 400) * 5, p = LST.waehle([5, 10, 15, 20, 25, 30, 40, 50]);
+      if (typ === "nettopreis") { const w = preis * (100 - p) / 100; if (!auf5Rp(w)) continue; return fertig("l", typ, `Ein Velo kostet brutto ${fr(preis)} Fr. Es gibt ${p} % Rabatt. Nettopreis =`, w, "Fr.", `${fr(preis)}${MAL}${dez((100 - p) / 100)} = ${fr(w)}`, { preis, p }); }
+      const w = preis * p / 100; if (!auf5Rp(w)) continue;
+      return fertig("l", typ, `${fr(preis)} Fr., davon ${p} % Rabatt. Wie viele Franken Rabatt?`, w, "Fr.", `${p} % von ${fr(preis)} = ${fr(w)}`, { preis, p });
+    }
+    const brutto = z(2, 400), t = LST.waehle([4, 5, 8, 10, 12, 15, 20, 25, 30]);
+    const netto = brutto * (100 - t) / 100;
+    if (!eineStelle(netto)) continue;
+    if (typ === "nettogewicht") return fertig("l", typ, `Eine Sendung wiegt brutto ${brutto} kg, die Tara ist ${t} %. Nettogewicht =`, netto, "kg", `${brutto}${MAL}${dez((100 - t) / 100)} = ${dez(netto)}`, { brutto, t });
+    return fertig("l", typ, `Bei ${t} % Tara wiegt eine Sendung netto ${dez(netto)} kg. Bruttogewicht =`, brutto, "kg", `${dez(netto)} : ${dez((100 - t) / 100)} = ${brutto}`, { netto: rund(netto), t });
   }
 }
 
@@ -111,10 +122,10 @@ function hinweis(a, eingabe) {
     "relativ-prozent": "Relative Häufigkeit: Anteil durch Gesamtzahl, dann mal hundert für Prozent.",
     absolut: "Absolute Häufigkeit: Wie viele Fälle sind das? Prozentsatz der Gesamtzahl.",
     wahrscheinlichkeit: "Günstige Fälle durch alle möglichen Fälle.",
-    rabatt: "Vom Preis den Rabatt abziehen, oder gleich mit dem verbleibenden Anteil rechnen.",
+    nettopreis: "Der Bruttopreis ist 100 %. Rabatt abziehen ergibt den Nettopreis, oder gleich mit dem verbleibenden Anteil rechnen.",
     "rabatt-betrag": "Der Rabatt ist der Prozentanteil des Preises.",
-    brutto: "Brutto ist Netto plus Zuschlag.",
-    netto: "Rückwärts: Der Bruttopreis entspricht mehr als hundert Prozent. Durch den Faktor teilen.",
+    nettogewicht: "Das Bruttogewicht ist 100 %. Bruttogewicht = Nettogewicht + Tara.",
+    bruttogewicht: "Rückwärts: Das Nettogewicht ist weniger als 100 % des Bruttogewichts. Durch diesen Anteil teilen.",
     "fehlender-wert": "Mittel mal Anzahl ergibt die Summe aller Zahlen. Was fehlt noch?",
     "vor-rabatt": "Der neue Preis ist weniger als hundert Prozent des alten. Durch diesen Anteil teilen, nicht den Rabatt dazuzählen.",
   };
@@ -131,10 +142,10 @@ function sollAus(typ, d) {
     case "relativ-prozent": return B.mal(B.durch(Z(d.a), Z(d.n)), Z(100));
     case "absolut": return B.durch(B.mal(Z(d.n), Z(d.p)), Z(100));
     case "wahrscheinlichkeit": return B.durch(Z(d.r), Z(d.r + d.b + d.g));
-    case "rabatt": return B.durch(B.mal(Z(d.preis), Z(100 - d.p)), Z(100));
+    case "nettopreis": return B.durch(B.mal(Z(d.preis), Z(100 - d.p)), Z(100));
     case "rabatt-betrag": return B.durch(B.mal(Z(d.preis), Z(d.p)), Z(100));
-    case "brutto": return B.durch(B.mal(Z(d.preis), Z(100 + d.p)), Z(100));
-    case "netto": return B.durch(B.mal(Z(d.brutto), Z(100)), Z(100 + d.p));
+    case "nettogewicht": return B.durch(B.mal(Z(d.brutto), Z(100 - d.t)), Z(100));
+    case "bruttogewicht": return B.durch(B.mal(Z(d.netto), Z(100)), Z(100 - d.t));
     case "fehlender-wert": return B.minus(B.mal(Z(d.n), Z(d.m)), Z(summe(d.werte)));
     case "vor-rabatt": return B.durch(B.mal(Z(d.nachher), Z(100)), Z(100 - d.p));
     default: return null;
@@ -165,10 +176,10 @@ const LESER = {
     const zwei = muster(a.text, `In einer Urne liegen # rote, # blaue${ende}`);
     return zwei && { r: zwei[0], b: zwei[1], g: 0 };
   },
-  rabatt: a => { const z = muster(a.text, "Ein Velo kostet # Fr. Es gibt # % Rabatt. Neuer Preis ="); return z && { preis: z[0], p: z[1] }; },
+  nettopreis: a => { const z = muster(a.text, "Ein Velo kostet brutto # Fr. Es gibt # % Rabatt. Nettopreis ="); return z && { preis: z[0], p: z[1] }; },
   "rabatt-betrag": a => { const z = muster(a.text, "# Fr., davon # % Rabatt. Wie viele Franken Rabatt?"); return z && { preis: z[0], p: z[1] }; },
-  brutto: a => { const z = muster(a.text, "Nettopreis # Fr., dazu # % Zuschlag. Bruttopreis ="); return z && { preis: z[0], p: z[1] }; },
-  netto: a => { const z = muster(a.text, "Bruttopreis # Fr. mit # % Zuschlag. Nettopreis ="); return z && { brutto: z[0], p: z[1] }; },
+  nettogewicht: a => { const z = muster(a.text, "Eine Sendung wiegt brutto # kg, die Tara ist # %. Nettogewicht ="); return z && { brutto: z[0], t: z[1] }; },
+  bruttogewicht: a => { const z = muster(a.text, "Bei # % Tara wiegt eine Sendung netto # kg. Bruttogewicht ="); return z && { netto: z[1], t: z[0] }; },
   "fehlender-wert": a => {
     const z = muster(a.text, "Das Mittel von # Zahlen ist #. # davon sind #*. Die fehlende Zahl =");
     // „n − 1 davon“: die genannte Anzahl muss zur Liste passen

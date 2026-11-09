@@ -1150,3 +1150,13 @@
   jetzt 0 Fehler, 12 Runden); falsches Piktogramm in `terme` bzw. `aufgaben.js` von `terme` wirft — je 1 Fehler, `brueche`
   danach voll geprüft. docs/lernsteig/rahmen.md 7 nachgeführt. Tests: Kern „5752 Fälle, 0 Fehler.“, Lernsteig
   „0 Fehler, 140 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan E 2 (E2-1 a), `daten-rabatt` l: Brutto und Netto in beiden belegten Lesarten statt über einen Zuschlag. Neue
+  Typen `nettopreis` („Ein Velo kostet brutto … Fr. Es gibt … % Rabatt. Nettopreis =“, ersetzt `rabatt` mit „Neuer
+  Preis“), `nettogewicht` und `bruttogewicht` (Tara in %, Gewichte in kg mit höchstens einer Nachkommastelle;
+  ersetzen `brutto` und `netto` mit Zuschlag), `rabatt-betrag` bleibt; je rund 25 %. Hinweise: „Der Bruttopreis ist
+  100 % …“, „Bruttogewicht = Nettogewicht + Tara“. Beleg der Gewichts-Lesart: Schweizer Skript oriesen.ch Prozent4S,
+  S. 19; Lesart des mathbuchs nicht nachgesehen. Stufenbeschreibung „Rabatt, Brutto und Netto (Preis und Gewicht)“.
+  Über 20 000 Aufgaben keine Mängel (8795 verschiedene); Gegenproben je Typ (Lösung, Zahl im Text, Prüfdaten): alle 12
+  gemeldet. Im Browser angesehen (Desktop, 375 px, Hinweis nach Fehlversuch, kein Überlauf). Abdeckung nachgeführt,
+  Plan E 2 Stand ersetzt. Tests: Kern „5752 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 140 Hinweise.“ (Konten „101 Fälle,
+  0 Fehler.“), Gratwanderung „Keine Fehler.“.

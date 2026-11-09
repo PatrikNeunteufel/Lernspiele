@@ -398,7 +398,7 @@
         "quelle": "wortlaut",
         "teile": [
           {"text":"verstehen und verwenden die Begriffe Steigung in %, Zins, Zinssatz, Kapital","offen":true,"notiz":"aufgaben.js: Steigung und Zins übt „Prozent und Funktionswerte“ (prozent-funktionen, Typen zins und steigung), dort MA.3.A.3.i, andere Kompetenz"},
-          {"text":"Rabatt, Brutto, Netto","typen":["rabatt","rabatt-betrag","brutto","netto"],"notiz":"brutto und netto rechnen über einen Zuschlag auf den Nettopreis („Nettopreis … dazu 5 % Zuschlag“), nicht über einen Rabatt (Brutto vor, Netto nach Abzug); der Wortlaut nennt nur die Begriffe und klärt die Lesart nicht"}
+          {"text":"Rabatt, Brutto, Netto","typen":["nettopreis","rabatt-betrag","nettogewicht","bruttogewicht"],"notiz":"Lesart E2-1 a (LERN_Session24), der Wortlaut nennt nur die Begriffe: beim Preis Bruttopreis − Rabatt = Nettopreis (nettopreis, rabatt-betrag), beim Gewicht Bruttogewicht = Nettogewicht + Tara (nettogewicht, bruttogewicht), brutto je 100 % wie im Schweizer Skript oriesen.ch Prozent4S S. 19; Lesart des mathbuchs nicht nachgesehen"}
         ]
       }
     },

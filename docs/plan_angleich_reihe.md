@@ -217,7 +217,12 @@ Kindersprache.
    für E 2 bis E 10.
 2. **Brutto/Netto** (`daten-rabatt`): Bruttopreis − Rabatt = Nettopreis als Hauptfall; Lesart mit Lehrmittel (mathbuch)
    abgleichen.
-   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen. Stufe l zieht `rabatt`, `rabatt-betrag`, `brutto`, `netto` gleich oft; Brutto und Netto hängen am Zuschlag („Brutto ist Netto plus Zuschlag“), das Ergebnis nach Rabatt heisst „Neuer Preis“; kein Abgleich mit dem mathbuch dokumentiert.
+   *Stand 2026-11-09 (LERN_Session24):* erledigt nach E2-1 a — beide Lesarten, je ein Viertel der Stufe l: Preis
+   (Bruttopreis − Rabatt = Nettopreis: `nettopreis`, `rabatt-betrag`) und Gewicht (Bruttogewicht = Nettogewicht + Tara:
+   `nettogewicht`, `bruttogewicht`), der Zuschlag entfällt. Beleg der Gewichts-Lesart: Schweizer Skript oriesen.ch
+   Prozent4S, gedruckt S. 19 („Der Bruttowert ist grundsätzlich 100 %.“); die Preis-Lesart nur aus Zusammenfassungen
+   (DE/AT). Das mathbuch selbst ist nicht nachgesehen (nicht im Netz gefunden, nicht in `material/`); zeigt es nur eine
+   Lesart, gilt die.
 3. **Überschlagen** (`ueberschlagen-ordnen`): Ablenker aus falschem Runden (eine Stelle falsch gerundet, Ergebnis
    ±10–30 %), nicht nur Zehnerpotenzen daneben.
    *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* offen. Ablenker nur um Zehnerpotenzen (Faktoren 10, 0.1, 100 oder 0.01; bei `prozent` andere Sätze). Die Prüfung der Übung verlangt Abstand ab Faktor 1.8 und würde Ablenker ±10–30 % abweisen — sie muss mitgeändert werden.
