@@ -205,20 +205,20 @@ Kindersprache.
 
 | Nr. | Wo | Fehler | Behebung |
 |---|---|---|---|
-| D1 | `lernsteig/gemeinsam/rahmen.js:367` | absolute Toleranz: in `zehnerpotenzen` k gilt `0.000000076` für `7.62 · 10⁻⁸` | exakter Vergleich über Brüche, Toleranz nur wo gerundet wird, dann relativ |
-| D2 | `kombinatorik/aufgaben.js:97` | „mindestens eine Fünf“, „höchstens eine Zwei“ mehrdeutig | „eine Augenzahl von mindestens 5“; Challenge einheitlich als Anzahl |
+| D1 | `lernsteig/gemeinsam/rahmen.js:367` | absolute Toleranz: in `zehnerpotenzen` k gilt `0.000000076` für `7.62 · 10⁻⁸` | exakter Vergleich über Brüche, Toleranz nur wo gerundet wird, dann relativ — erledigt 2026-11-09 (LERN_Session25): Rundungsrest relativ zur Lösung (1e-14, bei 0 1e-15) statt absolut 1e-9, Toleranz der Übungen bleibt; der Test prüft „letzte Stelle ±1“ und „ein Millionstel daneben“ jetzt auch bei kleinen Zahlen und weist sie für alle Lösungen ab — damit gleich wie ein exakter Vergleich für jede vorkommende Lösung |
+| D2 | `kombinatorik/aufgaben.js:97` | „mindestens eine Fünf“, „höchstens eine Zwei“ mehrdeutig | „eine Augenzahl von mindestens 5“; Challenge einheitlich als Anzahl — erledigt 2026-11-09 (LERN_Session25): „Zahl und eine Augenzahl von mindestens 5“, „… höchstens 2“; die Challenge (zwei Würfel) meinte schon die Anzahl |
 | D3 | `terme.js:123–125` | Absturz bei `(3)(2x+3)` | `lies` in `try`, Rückmeldung „nicht lesbar“ — erledigt 2026-11-06 (LERN_Session17, Kern 1.14.0 `KERN.terme`: Formfehler „Zahl mal Klammer“) |
 | D4 | `daten.js:36–62` | Einlesen ohne Schema, halber Import, vergiftet spätere Importe | Schema je Datensatz, erst prüfen, dann schreiben (Kern `daten.js`) — erledigt 2026-11-05 (LERN_Session15, `lernsteig/gemeinsam/daten.js`, Test `pruefe_konten.js`) |
 | D5 | `aufsicht.js:135`, `konten.js:130` | Einlesen verbindet fremde Konten ohne Zustimmung; neue Aufsicht ohne Bestätigung | nur neu angelegte Konten verbinden; Aufsicht wie Eulenpfad (C5) — erledigt 2026-11-05 im Lernsteig (Bestätigung durch bestehende Aufsicht, nur neue Konten verbinden; Test `pruefe_konten.js`) |
 | D6 | `konten.js:24`, Eulenpfad `spiel.js:393` | fehlt `crypto.subtle` (http über LAN), technische Meldung | Prüfung und verständliche Meldung, im Kern — erledigt 2026-11-05 (Kern 1.2.0 `KERN.geheimnis`, beide Apps seit 1.3.0) |
-| D7 | `statistik.js:13`, `aufsicht.js:85` | Übungstage in UTC, Wochenziel in Ortszeit | überall Ortszeit (Kern) |
+| D7 | `statistik.js:13`, `aufsicht.js:85` | Übungstage in UTC, Wochenziel in Ortszeit | überall Ortszeit (Kern) — erledigt 2026-11-07 (LERN_Session20, Kern 1.26.0 `KERN.zeit`) |
 | D8 | `werkzeug.js:41`, Eulenpfad `spiel.js:22` | `zahlText(1234.5678)` → `1'234.5'678` | nur ganze Zahlen gruppieren (Kern `zahl.js`) — erledigt 2026-11-05 (Kern 1.0.0) |
 | D9 | `rechner.js:112` | NaN als „zu gross“, 11 Stellen bei 9999999999.6 | „nicht definiert“, Anzeige auf 10 Stellen — erledigt 2026-11-06 (LERN_Session17, Kern 1.14.0 `KERN.rechner`) |
 | D10 | `terme.js:63` | Exponent unbegrenzt friert den Tab ein | Grenze mit Meldung — erledigt 2026-11-06 (LERN_Session17, Kern 1.14.0: Exponent ≤ 100, ≤ 2000 Glieder) |
-| D11 | `rahmen.js:121`, `daten.js` | voller Speicher verliert Runden still | Rückgabe auswerten, Warnung wie Eulenpfad (80 %) |
+| D11 | `rahmen.js:121`, `daten.js` | voller Speicher verliert Runden still | Rückgabe auswerten, Warnung wie Eulenpfad (80 %) — Befund LERN_Session25: auch der Eulenpfad warnt nicht und verliert die Runde still; Entscheid D11 vorgelegt |
 | D12 | `konten.js:243–258` | Einladung prüft Land/Kanton nicht, verwirft `JJJJ-MM` | gegen `LP.LAENDER`/`KANTONE` prüfen; B3 — erledigt 2026-11-05 (Land, Kanton, Klasse geprüft; Geburtsdatum mit oder ohne Tag) |
 | D14 | Eulenpfad `LS.zusammenfuehren` | Runden aus einer Datei werden nicht geprüft; eine Runde ohne `fehlerAufgaben` bricht die Statistik (`auswertung.js` `anhieb`) | Schema wie im Lernsteig (`rundeGueltig`), in den Kern-Teil Sichern und Einlesen — erledigt 2026-11-05 (Kern 1.6.0 `KERN.runden`, `auswertung.js` verträgt fehlende `fehlerAufgaben`) |
-| D13 | `sachsituationen/aufgaben.js:66, 79` | ASCII-Minus | über `LST.zahlText` |
+| D13 | `sachsituationen/aufgaben.js:66, 79` | ASCII-Minus | über `LST.zahlText` — erledigt 2026-11-09 (LERN_Session25): Weg von h „y = −3“; `pruefe_uebungen.js` meldet jedes ASCII-Minus vor einer Zahl |
 
 ## E. Fachliche Korrekturen
 

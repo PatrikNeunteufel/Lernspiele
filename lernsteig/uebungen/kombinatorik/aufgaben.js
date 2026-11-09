@@ -116,7 +116,8 @@ function stufeF() {
     const [e, t, g] = LST.waehle([["pasch", "zweimal dieselbe Augenzahl", 6], ["sechs-sechs", "zweimal eine Sechs", 1], ["verschieden", "zwei verschiedene Augenzahlen", 30]]);
     return bruchAufgabe("f", typ, `Du wirfst zwei Würfel. Wie gross ist die Wahrscheinlichkeit für ${t}?`, g, 36, `günstig: ${g} von 36 Fällen: ${g}/36`, { stufen: ["wuerfel", "wuerfel"], ereignis: e });
   }
-  const [e, t, g] = LST.waehle([["k-gerade", "Kopf und eine gerade Augenzahl", 3], ["k-sechs", "Kopf und eine Sechs", 1], ["z-min5", "Zahl und mindestens eine Fünf", 2], ["z-max2", "Zahl und höchstens eine Zwei", 2], ["k-ungerade", "Kopf und eine ungerade Augenzahl", 3]]);
+  const [e, t, g] = LST.waehle([["k-gerade", "Kopf und eine gerade Augenzahl", 3], ["k-sechs", "Kopf und eine Sechs", 1], ["z-min5", "Zahl und eine Augenzahl von mindestens 5", 2], ["z-max2", "Zahl und eine Augenzahl von höchstens 2", 2], ["k-ungerade", "Kopf und eine ungerade Augenzahl", 3]]);
+  // Mit einem Würfel ist die Augenzahl gemeint, nicht eine Anzahl (Plan D2: „mindestens eine Fünf“ las sich als genau eine Fünf)
   return bruchAufgabe("f", "muenze-wuerfel", `Du wirfst eine Münze und einen Würfel. Wie gross ist die Wahrscheinlichkeit für ${t}?`, g, 12, `günstig: ${g} von 2 · 6 = 12 Fällen: ${g}/12`, { stufen: ["muenze", "wuerfel"], ereignis: e });
 }
 
@@ -262,8 +263,8 @@ function produkt(stufen) { return stufen.reduce((acc, s) => acc.flatMap(f => erg
 const WORTLAUT = {
   kk: "zweimal Kopf", zz: "zweimal Zahl", "kz-beliebig": "einmal Kopf und einmal Zahl (Reihenfolge egal)", "k-min1": "mindestens einmal Kopf",
   pasch: "zweimal dieselbe Augenzahl", "sechs-sechs": "zweimal eine Sechs", verschieden: "zwei verschiedene Augenzahlen",
-  "k-gerade": "Kopf und eine gerade Augenzahl", "k-sechs": "Kopf und eine Sechs", "z-min5": "Zahl und mindestens eine Fünf",
-  "z-max2": "Zahl und höchstens eine Zwei", "k-ungerade": "Kopf und eine ungerade Augenzahl",
+  "k-gerade": "Kopf und eine gerade Augenzahl", "k-sechs": "Kopf und eine Sechs", "z-min5": "Zahl und eine Augenzahl von mindestens 5",
+  "z-max2": "Zahl und eine Augenzahl von höchstens 2", "k-ungerade": "Kopf und eine ungerade Augenzahl",
   "sechs-min1": "mindestens eine Sechs", "ungerade-min1": "mindestens eine ungerade Augenzahl",
   k3: "dreimal Kopf", k2: "genau zweimal Kopf", k1: "genau einmal Kopf", "z-min1": "mindestens einmal Zahl", "k-max1": "höchstens einmal Kopf",
   "rad-gerade": "eine gerade Zahl", "rad-ungerade": "eine ungerade Zahl", "rad-gleich": "zweimal dieselbe Zahl", "eins-min1": "mindestens einmal die Eins",

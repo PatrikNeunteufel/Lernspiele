@@ -215,13 +215,16 @@ function annahmeMaengel(a) {
   soll(` ${k.replace("-", "−")} `, ["richtig"], "mit Leerzeichen und −");
   if (v > 0) soll(`+${k}`, ["richtig"], "mit +");
   if (k.includes(".")) soll(`${k}0`, ["richtig"], "mit Null am Ende");
-  // knapp falsch: letzte Stelle ±1, letzte Ziffer weggelassen — wo das mehr als die Toleranz ausmacht
+  // knapp falsch: letzte Stelle ±1, letzte Ziffer weggelassen — wo das mehr als die Toleranz ausmacht. Auch bei sehr
+  // kleinen Zahlen (Plan D1, LERN_Session25: bis dahin übersprang die Prüfung Schritte unter 1e-9, und 0.000000076 galt
+  // für 7.62 · 10⁻⁸ unbemerkt als richtig)
   const stellen = (k.split(".")[1] || "").length;
   const schritt = 10 ** -stellen;
-  for (const d of [schritt, -schritt]) if (Math.abs(d) > tol + 1e-9) soll(klarZahl(v + d), ["falsch"], "letzte Stelle ±1");
+  const ueberToleranz = d => Math.abs(d) > tol * (1 + 1e-9);
+  for (const d of [schritt, -schritt]) if (ueberToleranz(d)) soll(klarZahl(v + d), ["falsch"], "letzte Stelle ±1");
   const kurz = k.replace(/\.?\d$/, "");
-  if (kurz && kurz !== "-" && Math.abs(Number(kurz) - v) > tol + 1e-9) soll(kurz, ["falsch"], "letzte Ziffer weggelassen");
-  if (!tol && Math.abs(v) * 1e-6 > 1e-8) soll(klarZahl(v * (1 + 1e-6)), ["falsch"], "um ein Millionstel daneben");
+  if (kurz && kurz !== "-" && ueberToleranz(Number(kurz) - v)) soll(kurz, ["falsch"], "letzte Ziffer weggelassen");
+  if (!tol && v !== 0) soll(klarZahl(v * (1 + 1e-6)), ["falsch"], "um ein Millionstel daneben");
   if (tol) soll(klarZahl(v + tol * 0.9), ["richtig"], "innerhalb der Toleranz");
   return m;
 }
@@ -324,6 +327,8 @@ function pruefeOhneBrowser(eintrag) {
         if (VERDAECHTIG.test(sichtbar)) { fehlerMelden(ort, `verdächtiger Text: ${sichtbar}`); break; }
         // Zahlschreibung (Z1 a): ab vier Stellen mit Apostroph, auch im Lösungsweg (Jahreszahlen und Codes ausgenommen)
         if (eintrag.fach === "mathematik" && /(^|[^\d'.,])\d{4,}/.test(sichtbar.replace(/[.,]\d+/g, ""))) { fehlerMelden(ort, `Tausender ohne Apostroph: ${sichtbar}`); break; }
+        // Minus vor einer Zahl als „−“ (U+2212), nicht als Bindestrich (Plan D13, LERN_Session25: sachsituationen h zeigte „y = -3“)
+        if (/(^|[\s(=:;,])-\d/.test(sichtbar)) { fehlerMelden(ort, `ASCII-Minus vor einer Zahl: ${sichtbar.slice(0, 160)}`); break; }
         const m = U.pruefeAufgabe(a, stufe, niveau);
         if (m.length && maengel++ < 3) fehlerMelden(ort, m.join("; "));
         if (i < ANNAHME_JE_STUFE && a.art !== "auswahl") {

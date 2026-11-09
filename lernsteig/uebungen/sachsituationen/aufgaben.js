@@ -76,7 +76,8 @@ function stufeH() {
   const richtig = opt.findIndex(k => k[0] === m && k[1] === b);
   if (LST.zufall(0, 1)) {
     return { art: "auswahl", stufe: "h", typ: "tabelle-term", text: "Welcher Term passt zur Tabelle?", optionen: texte, richtig, loesung: texte[richtig],
-      weg: `Je Schritt +${m}, bei x = 0 ist y = ${b}: ${term(m, b)}`, kennung: `T ${m} ${b} ${texte.slice().sort().join("|")}`, daten: { m, b, opt },
+      // y mit „−“, nicht ASCII-Minus (Plan D13)
+      weg: `Je Schritt +${m}, bei x = 0 ist y = ${LST.zahlText(b)}: ${term(m, b)}`, kennung: `T ${m} ${b} ${texte.slice().sort().join("|")}`, daten: { m, b, opt },
       darstellung: { art: "tabelle", kopf: ["x", "y"], zeilen: [0, 1, 2, 3].map(x => [x, m * x + b]) } };
   }
   const grund = Math.abs(b) + 1 === m ? Math.abs(b) + 2 : Math.abs(b) + 1; // Grundgebühr ≠ Stundenpreis

@@ -129,8 +129,15 @@ var LST = (function () {
     const wert = leseZahl(eingabe);
     // ZL1 a: Apostroph nur zwischen Dreiergruppen; steht er falsch, ein Hinweis und kein Fehlversuch
     if (wert === null) return { art: "unlesbar", meldung: KERN.zahl.gliederungFalsch(eingabe) ? "Den Apostroph nur zwischen Dreiergruppen, zum Beispiel 12'340." : "Bitte eine Zahl eingeben." };
-    return { art: Math.abs(wert - a.antwort) <= (a.toleranz || 0) + 1e-9 ? "richtig" : "falsch", wert };
+    return { art: Math.abs(wert - a.antwort) <= (a.toleranz || 0) + rundungsrest(a.antwort) ? "richtig" : "falsch", wert };
   }
+  /**
+   * Was beim Vergleich mit der Lösung als Rundungsrest gilt (Plan D1, LERN_Session25): 1e-14 der Lösung — Gleitkomma-Reste
+   * weniger Rechenschritte (je etwa 1e-16), aber weniger als eine Stelle bei 15 gültigen Ziffern; nie relativ zur Eingabe,
+   * sonst wüchse er mit ihr. Bei der Lösung 0 gilt 1e-15. Bis LERN_Session25 absolut 1e-9: Dann galt in zehnerpotenzen k
+   * „0.000000076“ für 7.62 · 10⁻⁸.
+   */
+  const rundungsrest = loesung => (loesung === 0 ? 1e-15 : 1e-14 * Math.abs(loesung));
 
   /**
    * Tasten für die Antwort einer Aufgabe (TF1 a, für KERN.tastenfeld). Zahl: Ziffern, Komma, ⌫, ± (Vorzeichen wechseln).

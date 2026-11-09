@@ -1330,3 +1330,16 @@
   die echte kaputte Prüfansicht aus `2d64b4a` (Zeile 96) — alle 5 gemeldet, Daten-Blöcke und Auskommentiertes nicht.
   Steckbrief (CLAUDE.md, Tests) und Kern 6 nachgeführt. Tests: Skripte „Keine Fehler.“, Kern „5867 Fälle, 0 Fehler.“,
   Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.
+- Plan D, Lernsteig: **D1** Wertung von Zahlen mit einem Rundungsrest relativ zur Lösung (1e-14, bei 0 1e-15) statt
+  absolut 1e-9 (`gemeinsam/werkzeug.js`) — bis dahin galt in zehnerpotenzen k „0.000000076“ für 7.62 · 10⁻⁸; ein erster
+  Versuch relativ zur Eingabe nahm 999…9 an, einer mit 1e-12 nahm bei 8.54 · 10¹² die letzte Stelle ±1 an — beides fand
+  der Test. `pruefe_uebungen.js` prüft „letzte Stelle ±1“ und „ein Millionstel daneben“ jetzt auch bei kleinen Zahlen;
+  Gegenprobe (alte Regel): zehnerpotenzen k 101 von 300 Aufgaben gemeldet. **D2** kombinatorik f „Zahl und eine Augenzahl
+  von mindestens 5“ bzw. „… höchstens 2“ statt „mindestens eine Fünf“ (mit einem Würfel als genau eine Fünf lesbar).
+  **D13** sachsituationen h Weg „y = −3“ statt „-3“; `pruefe_uebungen.js` meldet jedes ASCII-Minus vor einer Zahl
+  (Gegenprobe gemeldet). **D7** war seit LERN_Session20 erledigt (Kern `zeit.js`), im Plan nachgetragen. **D11** Befund:
+  die geplante „Warnung wie Eulenpfad“ gibt es im Eulenpfad nicht, beide Apps verlieren eine Runde bei vollem Speicher
+  still — als Entscheid vorgelegt. Stolperfalle beim Bau: ein Kommentar am Zeilenende schluckte in sachsituationen die
+  Felder kennung und daten (gültiges JavaScript, gefunden vom Übungstest). Tests: Skripte „Keine Fehler.“, Kern
+  „5867 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine
+  Fehler.“.
