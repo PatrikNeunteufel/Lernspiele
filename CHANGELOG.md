@@ -1364,3 +1364,23 @@
 - Abschluss: Report [LERN_Session25](docs/eulenpfad/report/LERN_Session25_2026-11-09.md), Handover Eulenpfad (Haltepunkt
   16:42 aufgelöst) und Lernsteig nachgeführt. Befund: Commit `6f52459` enthält C11 Schritt 4, trägt aber die Message von
   Schritt 3. Kein voller Eulenpfad-Lauf in dieser Sitzung (letzter auf `51686cd`).
+
+## 2026-11-09 — LERN_Session26
+- Speicherschicht nach docs/konzept_gruppen.md 5a, Schritt 2: **Eulenpfad** (Plan D11 erledigt; D11 a, D11-W a; Kern
+  unverändert 1.34.0). `protokoll`, `rekorde`, `meldungen`, `geloescht` in IndexedDB `lernspiele-ablage`, Vereinen beim
+  Umzug wie im Lernsteig; `LS.bereit`, `LS.nachBereit`, `LS.beiBereit`: Spielseiten (`LS.spiel`), Startseite und Mix
+  zeichnen erst nach dem Laden, Abgleich und Umzug alter Stände laufen danach; ohne IndexedDB lädt `spiel.js` synchron
+  wie bisher (Testskripte, Klickzahlen unverändert). Band „Nicht gespeichert: Der Speicher dieses Browsers ist voll …“
+  für eine erwachsene Person (`.speicher-voll`, reserviert; bis hier ging die Runde still verloren); Startseite zeichnet
+  neu, wenn ein anderer Tab Runden speichert; Verwaltung → Einstellungen → Speicher mit Belegung, Warnung ab 80 % und
+  `persist()`; ohne Abgleich-Ordner Erinnerung ans Sichern nach 14 Tagen oben in der Verwaltung (zählt „💾 Alle sichern“
+  und „💾 Abgleich-Datei sichern“, nicht ein einzelnes Kind). Seitentest `speicher` in `tools/pruefe_spiele.js`
+  (`tools/eulenpfad_seiten.js`, 21 Prüfschritte: ohne IndexedDB, Umzug, neue Runde, Spielseite mit Sternen aus der Ablage,
+  Erinnerung und Speicheranzeige, voll, kaputt); `tools/ersatz_idb.js` nimmt `__idbOpt` im Kontext. Gegenproben (3):
+  ohne `beiFehler`-Hörer, ohne grosse Schlüssel, Spiel ohne Warten — gemeldet. Im Browser (Chromium, echte IndexedDB):
+  Umzug einer Runde und eines Rekords im alten Format, Runde gespielt und in der Ablage, Statistik, Verwaltung mit
+  Erinnerung, Speicheranzeige und Band, Mix mit sechs iframes, keine Konsolenfehler. Doku Eulenpfad 8 und 23, Konzept 5a,
+  Plan D11. Tests: Skripte „Keine Fehler.“, Kern „5888 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten
+  „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad-Stichprobe tab, daten, suche, zahlenhaus,
+  einmaleins-blitz, anlaut-angel, hoer-geschichte, kiosk-kasse mit gleichen Klickzahlen wie auf `c119a50`, Teil speicher
+  „Keine Fehler.“; kein voller Lauf (letzter auf `51686cd`).

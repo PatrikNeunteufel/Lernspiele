@@ -21,7 +21,10 @@ LS.abgleich = (() => {
     sichern: geraet => LS.abgleichDaten(geraet),
     einlesen: text => LS.zusammenfuehren(text),
   });
-  if (!imRahmen) AB.starte();
+  // erst nach dem Laden der Runden (Kern 1.34.0, IndexedDB), sonst schriebe er eine Datei ohne sie
+  if (!imRahmen) LS.beiBereit(() => AB.starte());
+  /** Abgleich-Datei sichern; zählt als Sicherung (Erinnerung ans Sichern in der Verwaltung, konzept_gruppen.md 5a). */
+  function dateiSichern() { LS.schreibe("letzteSicherung", new Date().toISOString()); return AB.dateiSichern(); }
 
   /** Was beim Zusammenführen dazukam, in einem Satz. */
   function ergebnisText(r) {
@@ -37,6 +40,6 @@ LS.abgleich = (() => {
   }
 
   return { kannOrdner: AB.kannOrdner, ordner: AB.ordner, jetzt: AB.jetzt, waehlen: AB.waehlen, vergessen: AB.vergessen,
-    dateiSichern: AB.dateiSichern, datenEinlesen: text => LS.zusammenfuehren(text), dateiEinlesen: AB.dateiEinlesen,
+    dateiSichern, datenEinlesen: text => LS.zusammenfuehren(text), dateiEinlesen: AB.dateiEinlesen,
     ergebnisText, stand: AB.stand, geraet: AB.geraet, benenne: AB.benenne };
 })();

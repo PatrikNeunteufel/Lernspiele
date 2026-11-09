@@ -682,6 +682,21 @@ if (opt.tab !== 0 && (!nurSpiele.length || nurSpiele.includes("tab"))) {
   console.log(`${gemeldet ? "✗" : "✓"} Tab Spiele: ${schritte} Prüfschritte${gemeldet ? `, ${gemeldet} Fehler` : ""}`);
 }
 
+// Speicherschicht (docs/konzept_gruppen.md 5a, Plan D11, Kern 1.34.0; LERN_Session26): Umzug nach IndexedDB, Start der
+// Seiten nach dem Laden, voller Speicher, Erinnerung ans Sichern — im Ersatz-DOM mit tools/ersatz_idb.js
+// (tools/eulenpfad_seiten.js); --speicher=0 schaltet ab; nur dieser Teil: node tools/pruefe_spiele.js speicher.
+const spaeterSpeicher = [];
+if (opt.speicher !== 0 && (!nurSpiele.length || nurSpiele.includes("speicher"))) {
+  spaeterSpeicher.push((async () => {
+    let gemeldet = 0, schritte = 0;
+    try {
+      schritte = await require("./eulenpfad_seiten.js").pruefeSpeicher((ort, text) => { console.log(`    FEHLER  ${ort}: ${text}`); gemeldet++; });
+    } catch (e) { console.log(`    FEHLER  Speicher: Abbruch: ${String(e.stack || e).split("\n").slice(0, 3).join(" | ")}`); gemeldet++; }
+    fehlerZahl += gemeldet;
+    console.log(`\nSpeicherschicht (IndexedDB):\n${gemeldet ? "✗" : "✓"} Speicher: ${schritte} Prüfschritte${gemeldet ? `, ${gemeldet} Fehler` : ""}`);
+  })());
+}
+
 // Sichern und Einlesen (LERN_Session18): Eine Datei eines Geräts muss sich auf einem anderen einlesen lassen. Bis dahin
 // wies LS.abgleich.dateiEinlesen jede Datei der Version 3 ab (prüfte das Feld profile, das sie seit LERN_Session15 nicht
 // mehr trägt), und kein Test merkte es. Seit Kern 1.15.0 über KERN.daten (Format reihe-daten). Je Fall ein frisches Gerät
@@ -827,7 +842,7 @@ if (ohneTipp.size) {
   console.log(`\nOhne Tipps (ctx.tipp): ${ohneTipp.size} Spiel${ohneTipp.size === 1 ? "" : "e"}`);
   for (const [id, st] of ohneTipp) console.log(`    ${id.padEnd(22)} ${st.length === STUFEN.length ? "alle Stufen" : st.join(" ")}`);
 }
-Promise.all(spaeter).then(() => {
+Promise.all([...spaeter, ...spaeterSpeicher]).then(() => {
   console.log(`\n${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`);
   require("./testausgabe.js").merke("pruefe_spiele", `${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`); // HK1 a
   process.exitCode = fehlerZahl ? 1 : 0;

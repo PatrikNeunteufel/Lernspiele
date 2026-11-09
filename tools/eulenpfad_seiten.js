@@ -22,22 +22,29 @@ globalThis.__klappe = (sel, offen) => { const d = __finde(sel); d.open = offen; 
 globalThis.__text = () => __textMitAbstand(document.body);
 `;
 
-/** Die Startseite öffnen; speicher (Map) = derselbe Browser wie eine frühere Seite. */
-function oeffne({ search = "", hash = "#spiele", speicher = new Map(), seed = 1, vorher = "" } = {}) {
-  const datei = path.join(APP, "index.html");
+/**
+ * Eine Seite öffnen (Standard die Startseite); speicher (Map) = derselbe Browser wie eine frühere Seite. Mit idb (Map, über
+ * Seiten teilbar) liegt ein IndexedDB-Ersatz vor den Skripten (tools/ersatz_idb.js; idbOpt: { voll, kaputt }) — dann laden
+ * die grossen Schlüssel asynchron, und die Seite zeichnet erst nach ruheAsync. vorher läuft vor dem Skript, das die Seite
+ * startet (start.js oder das erste Skript ohne src).
+ */
+function oeffne({ rel = "index.html", search = "", hash = "#spiele", speicher = new Map(), seed = 1, vorher = "", idb = null, idbOpt = null } = {}) {
+  const datei = path.join(APP, rel);
   const html = fs.readFileSync(datei, "utf8");
   const body = (html.match(/<body[^>]*>([\s\S]*)<\/body>/) || [, html])[1].replace(/<script[\s\S]*?<\/script>/g, "");
   const meldungen = [];
   const konsole = { log() {}, info() {}, warn() {}, debug() {}, error: (...a) => meldungen.push(a.map(String).join(" ")) };
-  const k = vm.createContext({ __seite: { html: body, search, hash, pfad: "/eulenpfad/index.html", seed, speicher }, console: konsole,
+  const k = vm.createContext({ __seite: { html: body, search, hash, pfad: "/eulenpfad/" + rel, seed, speicher }, console: konsole,
     URL, URLSearchParams, structuredClone, crypto: globalThis.crypto, TextEncoder, TextDecoder, Blob, atob, btoa });
   const lauf = (code, name = "prüfung") => vm.runInContext(code, k, { filename: name, timeout: 20000 });
   lauf(DOM, "pruef_dom.js");
   lauf(HILFEN, "hilfen");
+  if (idb) { k.__idbDaten = idb; k.__idbOpt = idbOpt || {}; lauf(require("./ersatz_idb.js").ERSATZ_IDB_CODE, "ersatz_idb.js"); }
   const skripte = [...html.matchAll(/<script(?:\s+src="([^"]+)")?[^>]*>([\s\S]*?)<\/script>/g)];
+  let vorherGelaufen = false;
   for (const m of skripte) {
-    // Vor dem letzten Skript (start.js zeichnet die Seite) die Person anlegen und anmelden
-    if (m[1] === "start/start.js" && vorher) lauf(vorher, "vorher");
+    // Vor dem Skript, das die Seite startet, die Person anlegen und anmelden
+    if (vorher && !vorherGelaufen && (m[1] === "start/start.js" || !m[1])) { lauf(vorher, "vorher"); vorherGelaufen = true; }
     if (!m[1]) { lauf(m[2], "index.html (inline)"); continue; }
     lauf(fs.readFileSync(path.join(path.dirname(datei), m[1]), "utf8"), m[1]);
   }
@@ -55,6 +62,107 @@ function oeffne({ search = "", hash = "#spiele", speicher = new Map(), seed = 1,
 
 /** Kurze Timer (requestAnimationFrame, hashchange) erledigen. */
 function ruhe(s, ms = 50, runden = 6) { for (let i = 0; i < runden; i++) s.lauf(`__uhr.weiter(${ms})`); }
+/** Wie ruhe, aber dazwischen die Versprechen laufen lassen (IndexedDB-Ersatz, PIN). */
+async function ruheAsync(s, ms = 50, runden = 12) {
+  for (let i = 0; i < runden; i++) { await new Promise(r => setImmediate(r)); s.lauf(`__uhr.weiter(${ms})`); }
+}
+
+/**
+ * Speicherschicht (docs/konzept_gruppen.md 5a, Plan D11, Kern 1.34.0; LERN_Session26): Runden aus localStorage ziehen beim
+ * ersten Start mit IndexedDB um, neue Runden landen dort, Spielseite und Startseite zeichnen erst nach dem Laden, voller
+ * Speicher zeigt das Band, kaputte IndexedDB fällt auf localStorage zurück, Erinnerung ans Sichern und Speicheranzeige in
+ * der Verwaltung. Asynchron; gibt die Zahl der Prüfschritte zurück.
+ */
+async function pruefeSpeicher(melde) {
+  let schritte = 0;
+  const pruefe = (ok, ort, text) => { schritte++; if (!ok) melde(ort, text); };
+  const fehlerVon = (ort, s) => { for (const f of new Set(s.fehler())) melde(ort, f); };
+  const runde = zeit => JSON.stringify({ name: "Mia", zeit, inhalt: "zahlenhaus", stufe: "s3", aufgaben: 5, fehler: 1, dauer: 90, sterne: 2 });
+  const vorTagen = t => new Date(Date.now() - t * 864e5).toISOString();
+  const browser = new Map(), idb = new Map();
+  const inIdb = k => { const w = idb.get("lernspiele-ablage")?.get("werte")?.get(k); return w ? JSON.parse(w) : null; };
+  const lokal = (k, b = browser) => (b.has("lernspiele:" + k) ? JSON.parse(b.get("lernspiele:" + k)) : null);
+  const anzahl = l => (Array.isArray(l) ? l.length : 0);
+
+  // 1. wie bis Kern 1.33: ohne IndexedDB in localStorage (eine Runde vor 30 Tagen)
+  {
+    const ort = "Speicher ohne IndexedDB";
+    const s = oeffne({ speicher: browser, vorher: `LS.neuerSpieler("Mia"); LS.setzeSpieler("Mia"); LS.protokolliere(${runde(vorTagen(30))});` });
+    ruhe(s);
+    pruefe(anzahl(lokal("protokoll")) === 1 && s.lauf("LS.SPEICHER.modus()") === "lokal", ort, "Runde nicht in localStorage");
+    pruefe(s.gibt(".spielkarte[data-spiel]") > 0, ort, "Startseite ohne IndexedDB nicht sofort gezeichnet");
+    fehlerVon(ort, s);
+  }
+  // 2. Startseite mit IndexedDB: zeichnet erst nach dem Laden, zieht um, neue Runden landen in IndexedDB
+  {
+    const ort = "Speicher mit IndexedDB, Startseite";
+    const s = oeffne({ speicher: browser, idb });
+    pruefe(s.gibt(".spielkarte[data-spiel]") === 0, ort, "Startseite vor dem Laden der grossen Schlüssel gezeichnet");
+    await ruheAsync(s);
+    pruefe(s.lauf("LS.SPEICHER.modus()") === "idb", ort, `Modus ${s.lauf("LS.SPEICHER.modus()")} statt idb`);
+    pruefe(lokal("protokoll") === null, ort, "Runden nach dem Umzug noch in localStorage");
+    pruefe(anzahl(inIdb("protokoll")) === 1 && s.lauf("LS.protokoll().length") === 1, ort, `nach dem Umzug ${anzahl(inIdb("protokoll"))} Runden in IndexedDB statt 1`);
+    pruefe(s.gibt(".spielkarte[data-spiel]") > 0, ort, "Startseite nach dem Laden nicht gezeichnet");
+    s.lauf(`LS.protokolliere(${runde(vorTagen(1))})`);
+    await ruheAsync(s, 50, 4);
+    pruefe(anzahl(inIdb("protokoll")) === 2 && lokal("protokoll") === null, ort, "neue Runde nicht in IndexedDB");
+    pruefe(s.gibt(".speicher-voll") === 0, ort, "Band „Speicher voll“ ohne Grund");
+    fehlerVon(ort, s);
+  }
+  // 3. Spielseite mit IndexedDB: Stufenwahl erst nach dem Laden, mit den Sternen der Runden aus IndexedDB
+  {
+    const ort = "Speicher mit IndexedDB, Spielseite";
+    const s = oeffne({ rel: "spiele/zahlenhaus/index.html", hash: "", speicher: browser, idb });
+    pruefe(s.gibt(".stufen") === 0, ort, "Stufenwahl vor dem Laden der grossen Schlüssel");
+    await ruheAsync(s);
+    pruefe(s.gibt(".stufen") === 1, ort, "keine Stufenwahl nach dem Laden");
+    pruefe(s.lauf(`LS.besteSterne("Mia", "zahlenhaus", "s3")`) === 2, ort, "Sterne der Runden aus IndexedDB fehlen in der Stufenwahl");
+    fehlerVon(ort, s);
+  }
+  // 4. Verwaltung: Erinnerung ans Sichern (älteste Runde vor 30 Tagen, nie gesichert), Speicheranzeige; nach dem Sichern weg
+  {
+    const ort = "Speicher, Verwaltung";
+    const s = oeffne({ speicher: browser, idb });
+    await ruheAsync(s);
+    const an = await s.lauf(`(async () => { LS.neuerSpieler("Mama", { rolle: "aufsicht" }); await LS.setzePin("Mama", "2468"); return LS.meldeAufsichtAn("Mama", "2468"); })()`);
+    pruefe(!!an, ort, "Aufsicht nicht angemeldet");
+    s.lauf(`location.hash = "#verwaltung/einstellungen"`);
+    await ruheAsync(s);
+    pruefe(s.gibt("[data-erinnerung]") === 1, ort, "keine Erinnerung ans Sichern nach 30 Tagen ohne Sicherung");
+    pruefe(s.gibt("[data-speicher]") === 1, ort, "keine Speicheranzeige unter Einstellungen");
+    pruefe(/Runden und Rekorde liegen in der Ablage/.test(s.text()), ort, "Speicheranzeige nennt die Ablage nicht");
+    s.lauf(`LS.schreibe("letzteSicherung", new Date().toISOString()); zeichneStart()`);
+    await ruheAsync(s, 50, 4);
+    pruefe(s.gibt("[data-erinnerung]") === 0, ort, "Erinnerung bleibt nach dem Sichern");
+    fehlerVon(ort, s);
+  }
+  // 5. voller Speicher: das Band erscheint (bis LERN_Session26 ging die Runde still verloren)
+  {
+    const ort = "Speicher voll";
+    const b = new Map();
+    const s = oeffne({ speicher: b, idb: new Map(), idbOpt: { voll: true }, vorher: `LS.neuerSpieler("Mia"); LS.setzeSpieler("Mia");` });
+    await ruheAsync(s);
+    s.lauf(`LS.protokolliere(${runde(vorTagen(0))})`);
+    await ruheAsync(s, 50, 4);
+    pruefe(s.gibt(".speicher-voll") === 1, ort, "kein Band „Speicher voll“, die Runde ginge still verloren");
+    // ein Band genügt, auch bei einem zweiten Fehler
+    s.lauf(`LS.protokolliere(${runde(vorTagen(0))})`);
+    await ruheAsync(s, 50, 4);
+    pruefe(s.gibt(".speicher-voll") <= 1, ort, "Band „Speicher voll“ doppelt");
+  }
+  // 6. IndexedDB lässt sich nicht öffnen: wie bis Kern 1.33 in localStorage
+  {
+    const ort = "Speicher, IndexedDB kaputt";
+    const b = new Map();
+    const s = oeffne({ speicher: b, idb: new Map(), idbOpt: { kaputt: true }, vorher: `LS.neuerSpieler("Mia"); LS.setzeSpieler("Mia");` });
+    await ruheAsync(s);
+    s.lauf(`LS.protokolliere(${runde(vorTagen(0))})`);
+    pruefe(s.lauf("LS.SPEICHER.modus()") === "lokal" && anzahl(lokal("protokoll", b)) === 1, ort, "Runde nicht in localStorage, obwohl IndexedDB fehlt");
+    pruefe(s.gibt(".spielkarte[data-spiel]") > 0, ort, "Startseite nicht gezeichnet");
+    fehlerVon(ort, s);
+  }
+  return schritte;
+}
 
 /** Prüft den Tab Spiele; melde(ort, text) meldet einen Fehler. Gibt die Zahl der Prüfschritte zurück. */
 function pruefeTabSpiele(melde) {
@@ -169,4 +277,4 @@ function pruefeTabSpiele(melde) {
   return schritte;
 }
 
-module.exports = { pruefeTabSpiele };
+module.exports = { pruefeTabSpiele, pruefeSpeicher };

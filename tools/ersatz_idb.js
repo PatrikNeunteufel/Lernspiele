@@ -55,5 +55,6 @@ function ersatzIdb(daten = new Map(), opt = {}) {
   };
 }
 
-const ERSATZ_IDB_CODE = `globalThis.indexedDB = (${ersatzIdb.toString()})(globalThis.__idbDaten || new Map());`;
+// Im Kontext vor dem Code setzen: __idbDaten (Map, über Seiten teilbar) und __idbOpt ({ voll, kaputt })
+const ERSATZ_IDB_CODE = `globalThis.indexedDB = (${ersatzIdb.toString()})(globalThis.__idbDaten || new Map(), globalThis.__idbOpt || {});`;
 module.exports = { ersatzIdb, ERSATZ_IDB_CODE };

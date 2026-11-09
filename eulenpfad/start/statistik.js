@@ -361,6 +361,8 @@ function zeichneStatistik(box, neu) {
    */
   function sichern(wer) {
     const { daten, dateiname } = LS.sicherung(wer, sichtbareRunde);
+    // Alle gesichert: zählt für die Erinnerung ans Sichern in der Verwaltung (konzept_gruppen.md 5a); ein Kind allein nicht
+    if (wer.length && wer.length === LS.spielerListe().filter(sichtbarerSpieler).length) LS.schreibe("letzteSicherung", new Date().toISOString());
     const a = el("a", { href: URL.createObjectURL(new Blob([JSON.stringify(daten, null, 2)], { type: "application/json" })), download: dateiname });
     document.body.append(a);
     a.click();

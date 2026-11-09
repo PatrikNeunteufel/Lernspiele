@@ -46,7 +46,43 @@ const LS = (() => {
   const el = KERN.el;
 
   // ---------- Speicher (nur im Browser, darf fehlen; kern/speicher.js mit Präfix „lernspiele:“) ----------
-  const SPEICHER = KERN.speicher("lernspiele:");
+  // Was wächst (Runden, Rekorde, Meldungen, Löschvermerke), liegt in IndexedDB „lernspiele-ablage“ (Kern 1.34.0,
+  // docs/konzept_gruppen.md 5a, Entscheide D11 a, D11-W a); localStorage hat je Ursprung nur 5 MiB für alle Apps. Jede
+  // Seite startet erst nach dem Laden (nachBereit); ohne IndexedDB (Testskripte, gesperrter Speicher) sofort und wie bisher
+  // in localStorage. Liegt ein Schlüssel beim Start in beiden Speichern (ein Tab der alten Fassung schrieb nach dem Umzug),
+  // werden Löschvermerke und Meldungen nach ihren Regeln vereinigt, Runden und Rekorde nach Kennung (Standard des Kerns).
+  const GROSS = ["protokoll", "rekorde", "meldungen", "geloescht"];
+  const SPEICHER = KERN.speicher("lernspiele:", { gross: GROSS, datenbank: "lernspiele-ablage",
+    vereinen: (s, a, b) => (s === "geloescht" ? KERN.daten.vermerkeVereinen(a, b) : s === "meldungen" ? KERN.meldungen.zusammenfuehren(a, b).wert : undefined) });
+  // Was nach dem Laden der grossen Schlüssel einmal laufen soll (Umzug alter Stände, Abgleich starten)
+  const nachLaden = [];
+  let geladen = false, bereitVersprechen = null;
+  function laden() {
+    if (geladen) return;
+    geladen = true;
+    for (const f of nachLaden) try { f(); } catch (e) { console.error(e); }
+  }
+  /** Versprechen, das nach dem Laden der grossen Schlüssel erfüllt ist (einmal je Seite). */
+  function bereit() {
+    if (!bereitVersprechen) bereitVersprechen = geladen ? Promise.resolve() : SPEICHER.bereit().then(laden);
+    return bereitVersprechen;
+  }
+  /** f nach dem Laden ausführen: sofort, wenn schon geladen (ohne IndexedDB immer), sonst danach; gibt f() oder ein Versprechen. */
+  function nachBereit(f) { return geladen ? f() : bereit().then(f); }
+  /** f einmal nach dem Laden ausführen (sofort, wenn schon geladen). */
+  function beiBereit(f) { if (geladen) f(); else nachLaden.push(f); }
+
+  // Scheitert das Speichern einer Runde, sagt die Seite es sichtbar (D11 a; konzept_gruppen.md 5a) — bis LERN_Session26
+  // ging sie still verloren. In IndexedDB scheitert es erst nach dem Schreiben; das meldet der Speicher über beiFehler.
+  // Für eine erwachsene Person geschrieben: Sichern und Löschen gehen in der Statistik.
+  let speicherVollGezeigt = false;
+  function speicherVoll() {
+    if (speicherVollGezeigt || typeof document === "undefined" || !document.body) return;
+    speicherVollGezeigt = true;
+    document.body.prepend(el("p", { class: "speicher-voll", role: "alert", text: "Nicht gespeichert: Der Speicher dieses Browsers ist voll. "
+      + "Bitte eine erwachsene Person holen: in der Statistik den Stand sichern und alte Runden löschen, sonst geht auch die nächste Runde verloren." }));
+  }
+  SPEICHER.beiFehler(() => speicherVoll());
 
   // Wer wissen will, dass etwas gespeichert wurde (der Abgleich zwischen Geräten, abgleich.js).
   const aenderungsHoerer = [];
@@ -358,7 +394,8 @@ const LS = (() => {
     return anders ? neu : null;
   }
   // Umzug (einmal): lernspiele:profile in die Personenliste; danach Kennungen in Runden, Rekorden und Meldungen.
-  (function umzugPersonen() {
+  // Nach dem Laden der grossen Schlüssel (Kern 1.34.0), ohne IndexedDB gleich beim Laden der Seite wie bisher.
+  beiBereit(function umzugPersonen() {
     const alt = lies("profile", null);
     if (alt && typeof alt === "object") {
       const personen = PERSONEN.alle();
@@ -400,7 +437,7 @@ const LS = (() => {
       const neu = Array.isArray(l) ? kennungNachtragen(l) : null;
       if (neu) schreibe(k, neu);
     }
-  })();
+  });
   // Schema der Felder, die nur der Eulenpfad in Runden und Rekorden führt (KERN.runden.maengel, Befund D14)
   const RUNDEN_PRUEFUNG = {
     pflicht: ["aufgaben", "fehler", "dauer"],
@@ -1073,7 +1110,7 @@ const LS = (() => {
     return p ? { ...e, person: p.id, name: p.name } : e;
   };
   /** Runde speichern; gleiche Kennung ersetzt einen Zwischenstand derselben Serie (RA3 a, KERN.runde.eintragen). */
-  function protokolliere(eintrag) { schreibe("protokoll", KERN.runde.eintragen(protokoll(), mitPerson(eintrag))); }
+  function protokolliere(eintrag) { if (!schreibe("protokoll", KERN.runde.eintragen(protokoll(), mitPerson(eintrag)))) speicherVoll(); }
 
   // ---------- Endlos-Rekorde (Vorgabe Patrik 2026-10-31) ----------
   // lernspiele:rekorde = [{ name, zeit, spiel, stufe, timer (Startzeit in Sekunden oder null), punkte,
@@ -1085,7 +1122,7 @@ const LS = (() => {
   // — noch Idee); heute bleibt alles im Browser.
   const rekorde = () => lies("rekorde", []);
   /** Rekord speichern; ein Zwischenstand derselben Serie (gleiche Kennung) wird ersetzt (KERN.runde). */
-  function speichereRekord(eintrag) { schreibe("rekorde", KERN.runde.rekordEintragen(rekorde(), mitPerson(eintrag))); }
+  function speichereRekord(eintrag) { if (!schreibe("rekorde", KERN.runde.rekordEintragen(rekorde(), mitPerson(eintrag)))) speicherVoll(); }
   /** Stufen, die den Endlos-Modus anbieten (Katalog: endlos). */
   const endlosStufen = spielId => katalogEintrag(spielId)?.endlos || [];
   const gleicherModus = (e, spiel, stufe, mitTimer) => e.inhalt === spiel && e.stufe === stufe && !!e.timer === !!mitTimer;
@@ -2101,7 +2138,9 @@ const LS = (() => {
    * def.lob: eigene Lobliste für richtig auf Anhieb statt LOB (LB2 a: Lob in der Fremdsprache, etwa ["Great!", "Yes!"]);
    *   nur reines Lob, jedes höchstens LOB_MAX Zeichen — sonst gilt LOB (und die Konsole sagt es)
    */
-  function spiel(def) {
+  function spiel(def) { return nachBereit(() => spielJetzt(def)); }
+  /** Ein Spiel starten, wenn Runden, Rekorde, Meldungen und Löschvermerke geladen sind (Kern 1.34.0; spiel). */
+  function spielJetzt(def) {
     const buehne = document.querySelector(".buehne");
     const eigenesLob = Array.isArray(def.lob) && def.lob.length && def.lob.every(t => typeof t === "string" && t.trim() && t.length <= LOB_MAX);
     if (def.lob && !eigenesLob) console.warn(`${def.id}: def.lob ist keine Liste kurzer Lobe (höchstens ${LOB_MAX} Zeichen) — es gilt LOB`);
@@ -3170,7 +3209,7 @@ const LS = (() => {
   const RAHMEN_KLASSEN = {
     reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein", "vorlesen", "los-huelle", "los-ueber", "los-zahl", "los-knopf",
       "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
-      "spieler-zeile",
+      "spieler-zeile", "speicher-voll",
       "stufen", "stufe", "fuer", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "aufsicht-fest", "avatar", "avatar-ersatz", "avatar-bild", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
@@ -3181,7 +3220,12 @@ const LS = (() => {
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
 
+  // Laden der grossen Schlüssel: ohne IndexedDB jetzt gleich (Umzug wie bis Kern 1.33 beim Laden der Seite), sonst
+  // sofort anstossen; die Seiten warten über nachBereit (spiel, Startseite, Mix), der Abgleich über beiBereit.
+  if (SPEICHER.modus() === "lokal") laden(); else bereit();
+
   return {
+    bereit, nachBereit, beiBereit, SPEICHER, speicherVoll,
     STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     LOB, MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,

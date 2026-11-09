@@ -435,6 +435,11 @@ Vorgabe Patrik 2026-10-31.
 - die Serienbremse: Kein Merkmal aus `ctx.serie` kommt öfter als `LS.SERIE_MAX`-mal hintereinander
   (Fehler). Musste der Rahmen nach 40 Versuchen aufgeben, meldet der Test einen Hinweis: Die Stufe hat
   dann wohl nur diesen Wert, und `ctx.serie` gehört dort weg.
+- die Speicherschicht im Ersatz-DOM mit IndexedDB-Ersatz (Abschnitt 23, `tools/eulenpfad_seiten.js`; `speicher` als id: nur
+  diese, `--speicher=0` schaltet ab): ohne IndexedDB in `localStorage` und sofort gezeichnet; mit IndexedDB zeichnen
+  Startseite und Spielseite erst nach dem Laden, der Umzug leert `localStorage`, neue Runden landen in der Ablage, die
+  Stufenwahl zeigt ihre Sterne; Verwaltung mit Erinnerung ans Sichern (weg nach dem Sichern) und Speicheranzeige; voller
+  Speicher zeigt das Band genau einmal; kaputte IndexedDB fällt auf `localStorage` zurück;
 - jedes Spiel im Zufallsmix (Abschnitt 9; `--mix=0` schaltet ab), Stufe 3 mit Timer und, falls es
   Endlos-Stufen hat, die erste davon im Endlos-Mix: Das Spiel meldet „bereit“, zeichnet erst auf
   „aufgabe“ hin, meldet je Aufgabe genau ein vollständiges Ergebnis, bleibt danach still und schreibt
@@ -998,3 +1003,32 @@ BZ1 a): ein Ding zeigt das Bild seiner Hauptkultur, Einträge je Kultur (etwa �
   wie ein Listeneintrag als ungeprüft (E1 a).
 - **Nicht in der Sammlung:** Zeichnungen, die ein Spiel aus Werten baut (Gegenteil-Wippe: Grösse je Stufe, Pakete;
   Geometrie, Uhren, Zahlenbilder).
+
+## 23. Speicher (`lernspiele:*`)
+
+Seit LERN_Session26 (Kern 1.34.0, docs/konzept_gruppen.md 5a, Plan D11, D11 a, D11-W a; wie im Lernsteig) liegen
+`protokoll`, `rekorde`, `meldungen` und `geloescht` in IndexedDB `lernspiele-ablage` (`GROSS` in `spiel.js`), der Rest in
+`localStorage` (Personen, Einstellungen, Freigabe, Anmeldung …). `localStorage` hat je Ursprung nur 5 MiB für alle Apps
+unter `patrikneunteufel.github.io` zusammen. Den Abgleich-Ordner merkt der Browser weiter in der IndexedDB `lernspiele`.
+
+- **Start erst nach dem Laden:** `LS.spiel` (und damit `spielMitStimme`), `start/start.js` und `mix/mix.js` starten über
+  `LS.nachBereit(f)`; der Abgleich und der Umzug alter Stände (Profile → Personen, Felder der Runden, Kennungen) laufen
+  über `LS.beiBereit(f)`. `LS.bereit()` gibt das Versprechen. Wer einen grossen Schlüssel vor dem Laden liest, bekommt
+  vom Kern einen Fehler („vor bereit() gelesen“) — so fällt eine vergessene Stelle sofort auf.
+- **Ohne IndexedDB** (Testskripte im Ersatz-DOM, gesperrter Speicher, sehr alte Browser) lädt `spiel.js` synchron am
+  Ende und alles läuft wie bis Kern 1.33 in `localStorage` — darum laufen `pruefe_spiele.js` und die Klickzahlen
+  unverändert. Lässt sich IndexedDB nicht öffnen, fällt der Kern ebenfalls auf `localStorage` zurück.
+- **Umzug:** Beim ersten Start mit IndexedDB zieht der Kern die vier Schlüssel aus `localStorage` um und löscht sie dort
+  erst nach dem Schreiben; liegt ein Schlüssel in beiden (ein Tab der alten Fassung schrieb danach), werden Runden und
+  Rekorde nach Kennung, Löschvermerke und Meldungen nach ihren Regeln vereinigt.
+- **Andere Tabs:** Speichert ein anderer Tab Runden oder Meldungen, zeichnet die Startseite neu (BroadcastChannel,
+  `LS.SPEICHER.beiFremdAenderung`), ausser jemand tippt gerade.
+- **Speicher voll:** Scheitert das Speichern einer Runde oder eines Rekords (in `localStorage` sofort, in IndexedDB über
+  `beiFehler`), steht oben auf der Seite ein Band (`.speicher-voll`, reserviert) für eine erwachsene Person: in der
+  Statistik sichern und alte Runden löschen. Bis LERN_Session26 ging die Runde still verloren.
+- **Verwaltung → Einstellungen → Speicher:** Belegung des kleinen Speichers und der Ablage (`KERN.speicher.belegung`),
+  Warnung ab 80 %, Knopf „Browser bitten, nichts von selbst zu löschen“ (`persist()`).
+- **Erinnerung ans Sichern:** Ohne Abgleich-Ordner steht in der Verwaltung oben ein Hinweis, wenn es Runden gibt und seit
+  14 Tagen nicht gesichert wurde (ab `letzteSicherung`, sonst ab der ältesten Runde) — mit dem Hinweis auf die
+  Sieben-Tage-Regel von Safari. Als Sicherung zählen „💾 Alle sichern“ in der Statistik und „💾 Abgleich-Datei sichern“;
+  die Sicherung eines einzelnen Kindes nicht.

@@ -113,9 +113,11 @@ async function abgleichKnopf(leiste) {
   leiste.append(k);
 }
 
-addEventListener("hashchange", () => zeichneStart());
-// Kam beim Abgleich etwas dazu (Runden, Rekorde, Kinder): neu zeichnen, ausser jemand tippt gerade etwas ein.
-addEventListener("lernspiele:abgeglichen", () => {
-  if (!document.activeElement?.matches("input, select, textarea")) zeichneStart();
-});
-zeichneStart();
+// Gezeichnet wird erst, wenn Runden, Rekorde, Meldungen und Löschvermerke geladen sind (Kern 1.34.0, IndexedDB)
+addEventListener("hashchange", () => LS.nachBereit(() => zeichneStart()));
+// Kam beim Abgleich etwas dazu (Runden, Rekorde, Kinder) oder hat ein anderer Tab Runden oder Meldungen gespeichert
+// (IndexedDB): neu zeichnen, ausser jemand tippt gerade etwas ein.
+const neuOhneTippen = () => { if (!document.activeElement?.matches("input, select, textarea")) zeichneStart(); };
+addEventListener("lernspiele:abgeglichen", neuOhneTippen);
+LS.SPEICHER.beiFremdAenderung(neuOhneTippen);
+LS.nachBereit(() => zeichneStart());

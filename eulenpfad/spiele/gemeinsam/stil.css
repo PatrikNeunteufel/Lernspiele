@@ -508,6 +508,10 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
 
 .zeitleiste.um .zeitbalken { background: var(--hinweis); width: 100% !important; transition: none !important; opacity: .35; }
 
+/* ---------- Speicher voll (LS.speicherVoll, D11 a): Band oben auf jeder Seite, für eine erwachsene Person ---------- */
+
+.speicher-voll { margin: 0; padding: 10px 16px; background: var(--hinweis-hell); color: #8a4b00; border-bottom: 3px solid var(--hinweis); font-weight: 700; font-size: 17px; }
+
 /* ---------- Angemeldet als … (Anmeldung auf der Startseite) ---------- */
 
 .spieler-zeile { font-size: 17px; margin-bottom: 10px; color: var(--text-leise); }

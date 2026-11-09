@@ -372,4 +372,5 @@ function starte(name, e) {
   wechsle();
 }
 
-zeichneEinstellungen();
+// Erst, wenn Runden und Rekorde geladen sind (Kern 1.34.0, IndexedDB); ohne IndexedDB sofort
+LS.nachBereit(zeichneEinstellungen);

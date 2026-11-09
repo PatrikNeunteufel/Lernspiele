@@ -5,6 +5,8 @@
 // Suche in der Freigabe (wie im Tab Spiele, KERN.uebersicht.suche, Aussehen suchAttr aus start/spiele.js); bleibt beim
 // Neuzeichnen erhalten.
 const FREIGABE_SUCHE = KERN.uebersicht.suche();
+// Ohne Abgleich-Ordner erinnert die Verwaltung nach so vielen Tagen ohne Sicherung (konzept_gruppen.md 5a; wie im Lernsteig)
+const ERINNERUNG_TAGE = 14;
 
 function zeichneVerwaltung(box, neu) {
   const { el } = LS;
@@ -40,6 +42,8 @@ function zeichneVerwaltung(box, neu) {
   const pruefKnopf = (art, id, g, text) => el("button", { type: "button", class: "schalter", text: g ? "aufheben" : text,
     onclick: async () => { if (await LS.entwicklung.setzeGeprueft(art, id, !g)) neu(); } });
   const unter = UNTER.find(u => u.id === location.hash.split("/")[1]) || UNTER[0];
+  const erinnerung = sichernErinnerung();
+  if (erinnerung) seite.append(erinnerung);
   seite.append(el("nav", { class: "tabs untertabs", role: "tablist" }, ...UNTER.map(u =>
     el("a", { class: "tab", role: "tab", href: `#verwaltung/${u.id}`, "aria-selected": String(u === unter), text: u.text }))));
   unter.zeichne();
@@ -343,6 +347,50 @@ function zeichneVerwaltung(box, neu) {
       hinweis);
   }
 
+  // ----- Speicher (docs/konzept_gruppen.md 5a, D11 a, Kern 1.34.0; wie im Lernsteig) -----
+  /** Ohne Abgleich-Ordner erinnert die Seite ans Sichern, wenn es Runden gibt und seit 14 Tagen keine Sicherung war. */
+  function sichernErinnerung() {
+    if ((LS.abgleich.stand() || {}).ordner) return null;
+    const runden = LS.protokoll();
+    if (!runden.length) return null;
+    // Gezählt ab der letzten Sicherung aller Kinder, ohne Sicherung ab der ältesten Runde (erst nach 14 Tagen Spielen erinnern)
+    const letzte = LS.lies("letzteSicherung", null);
+    const seit = letzte || runden.map(r => r && r.zeit).filter(Boolean).sort()[0];
+    const tage = seit ? Math.floor((Date.now() - Date.parse(seit)) / 864e5) : 0;
+    if (!(tage >= ERINNERUNG_TAGE)) return null;
+    return el("p", { class: "meldung", role: "status", "data-erinnerung": "sichern",
+      text: `${letzte ? `Die letzte Sicherung ist ${tage} Tage alt` : `Seit ${tage} Tagen wird hier gespielt und noch nie gesichert`}, und es ist kein Abgleich-Ordner gewählt. `
+        + "Bitte unter 📊 Statistik „💾 Alle sichern“ tippen oder unter 🔄 Abgleich einen Ordner wählen. "
+        + "Safari löscht die Daten einer Seite, die sieben Tage lang nicht geöffnet wurde." });
+  }
+  const mb = byte => `${(byte / 1048576).toFixed(byte < 10485760 ? 1 : 0)} MB`;
+  /** Belegung und „dauerhaft“ (KERN.speicher.belegung), mit Warnung ab 80 %; gemessen nach dem Zeichnen. */
+  function speicherTeil() {
+    const ausgabe = el("div", { "data-speicher": "", class: "leise-text", text: "Wird gemessen …" });
+    const hinweis = el("p", { class: "leise-text", "aria-live": "polite" });
+    KERN.speicher.belegung().then(b => {
+      const zeilen = [
+        `Kleiner Speicher (localStorage, alle Apps unter dieser Adresse): ${mb(b.lokal.byte)} von 5 MB (${Math.round(b.lokal.anteil * 100)} %)`,
+        b.ablage ? `Ablage für Runden, Rekorde und Meldungen (IndexedDB): ${mb(b.ablage.belegt)} belegt, ${mb(b.ablage.verfuegbar)} verfügbar` : "Ablage (IndexedDB): keine Angabe des Browsers",
+        LS.SPEICHER.modus() === "idb" ? "Runden und Rekorde liegen in der Ablage." : "Runden und Rekorde liegen im kleinen Speicher (dieser Browser hat keine Ablage).",
+        b.dauerhaft === true ? "Der Browser hält die Daten dauerhaft (löscht nicht von selbst)." : "Der Browser darf die Daten bei Platzmangel von selbst löschen.",
+      ];
+      ausgabe.replaceChildren(...[
+        b.warnen ? el("p", { class: "meldung", role: "alert", text: "Der Speicher ist fast voll (über 80 %). Bitte in der Statistik sichern und alte Runden löschen." }) : null,
+        ...zeilen.map(t => el("p", { style: "margin:0 0 4px", text: t })),
+        b.dauerhaft === true ? null : zeile(el("button", { type: "button", class: "knopf hell klein", "data-aktion": "dauerhaft", text: "Browser bitten, nichts von selbst zu löschen",
+          onclick: async () => {
+            const ok = await KERN.speicher.dauerhaftBitten();
+            if (ok) neu(); else hinweis.textContent = "Der Browser hat abgelehnt oder fragt später; regelmässig sichern bleibt der Schutz.";
+          } })),
+      ].filter(Boolean));
+    });
+    return el("div", { class: "einstellung" },
+      el("h3", { text: "Speicher" }),
+      el("p", { class: "leise-text", style: "margin:0 0 6px", text: "Alles bleibt in diesem Browser. Runden, Rekorde und Meldungen liegen in einer eigenen Ablage, die viel mehr fasst als der kleine Speicher." }),
+      ausgabe, hinweis);
+  }
+
   // ----- Einstellungen für alle auf diesem Gerät (LERN_Session7; später je Klasse durch die Lehrperson) -----
   function einstellungen() {
     /** Ein Knopf je Wahl; gewählt ist, was 'aktuell' gleicht (null = „wie global“). */
@@ -371,6 +419,7 @@ function zeichneVerwaltung(box, neu) {
       ...zeilen,
       zeile(knopf("↺ Alles auf Standard", () => { LS.einstellungenZuruecksetzen(); neu(); })),
       meldewegTeil(),
+      speicherTeil(),
       // Freiwillige Beiträge (LERN-50): nur hier für die Aufsicht und nur, wenn ein Link eingetragen ist
       typeof unterstuetzenAktiv === "function" && unterstuetzenAktiv().length
         ? el("p", { class: "leise-text", style: "margin-top:14px" }, el("a", { href: "../portal/unterstuetzen.html", text: "☕ Eulenpfad unterstützen" }),
