@@ -1,4 +1,4 @@
-/* kern 1.29.0 · Prüfsumme sha256:e83eee2df1e74622957357f38702d074d98c3778bacda916c986e71b587cc7e8 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.30.0 · Prüfsumme sha256:369194f9497c103c669af3a48ae8bc1600e994cf8700fa692d79b8d2c6db50dd · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -200,10 +200,26 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     if (/['’]/.test(r) || /[.,]\d+[   ]+\d/.test(r)) throw new Error(GLIEDERUNG);
     return r;
   }
+  // E4-1 a (1.30.0): gemischte Zahl „1 3/4“, „−2 1/2“ = Ganzes plus echter Bruch. Ein Zähler mit genau drei Ziffern ist
+  // Tausendergliederung („1 300/400“ = 1300/400, ZL1 a), ebenso ein Zähler mit führender Null oder ein unechter Bruch.
+  // Ganzes mit unechtem Bruch („1 7/4“) wirft GEMISCHT (bewerte meldet es), statt als Gliederung zu gelten.
+  const GEMISCHT = "Gemischt";
+  function gemischteZahlen(t) {
+    let n = 0;
+    const r = t.replace(/(^|[^\d'’.,/])(\d+)[   ]+([1-9]\d?|[1-9]\d{3,})\/(\d+)/g, (all, vor, g, z, nn) => {
+      if (Number(z) >= Number(nn)) throw new Error(GEMISCHT);
+      n++;
+      return `${vor}(${g}+${z}/${nn})`;
+    });
+    return { text: r, gemischt: n };
+  }
   function lies(text) {
-    const s = ohneGliederung(String(text)).replace(/\s+/g, "").replace(/[−–]/g, "-").replace(/\*/g, "·").replace(/,/g, ".");
+    const gm = gemischteZahlen(String(text));
+    // 1.30.0 (Plan E 4): „×“ und „⋅“ als Mal, Grossbuchstaben wie Kleinbuchstaben („2A“ = 2a)
+    const s = ohneGliederung(gm.text).replace(/\s+/g, "").replace(/[−–]/g, "-").replace(/[*×⋅]/g, "·").replace(/,/g, ".")
+      .replace(/[A-Z]/g, c => c.toLowerCase());
     let i = 0;
-    const info = { klammern: 0, potenzen: 0, mal: 0, teilen: 0 };
+    const info = { klammern: 0, potenzen: 0, mal: 0, teilen: 0, gemischt: gm.gemischt };
     if (!s) throw new Error("leer");
     function ausdruck() {
       let w = (s[i] === "-") ? (i++, neg(glied())) : (s[i] === "+" ? (i++, glied()) : glied());
@@ -270,6 +286,24 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
   }
 
   /**
+   * Faktoren je Glied zusammengefasst (1.30.0, Plan E 4): höchstens eine Zahl (ein Nenner „/12“ gehört zu ihr, Exponenten
+   * zählen nicht) und jede Variable nur einmal — „2a·3“, „a·a“, „aa“, „a²a“ sind nicht zusammengefasst. roh ohne Klammern.
+   */
+  function faktorenZusammengefasst(roh) {
+    return roh.split(/(?<!\^)[+-]/).filter(Boolean).every(g => {
+      const t = g.replace(/\^\d+/g, "").replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "").replace(/\/\d+(?:\.\d+)?/g, "");
+      const zahlen = t.match(/\d+(?:\.\d+)?/g) || [], vars = t.match(/[a-z]/g) || [];
+      return zahlen.length <= 1 && new Set(vars).size === vars.length;
+    });
+  }
+  /** Basis einer einzelnen Potenz („4^3“, „a⁵“, „(−2)^3“) als Text, sonst null. */
+  function basisText(roh) {
+    const m = roh.replace(/^\+/, "").match(/^(.+?)(?:\^\d+|[⁰¹²³⁴⁵⁶⁷⁸⁹]+)$/);
+    // „−2^3“ ist −(2³): das Minus gehört nicht zur Basis, das ist keine einzelne Potenz
+    return m && !m[1].startsWith("-") ? m[1] : null;
+  }
+
+  /**
    * Bewertet eine Eingabe gegen eine Aufgabe { antwortTerm, form }.
    * form: "vereinfacht" (keine Klammern, jedes Monom einmal, Zahlen ausgerechnet), "bruch" (ganze Zahl oder gekürzter
    *       Bruch), "potenz" (als eine Potenz geschrieben), "ausgeklammert" (Zahl mal Klammer, ggT ausgeklammert),
@@ -283,16 +317,21 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     try { e = lies(eingabe); } catch (err) {
       const meldung = /zu gross/.test(err.message) ? `Der Term ist zu gross: ${err.message}.`
         : err.message === GLIEDERUNG ? "Den Apostroph nur zwischen Dreiergruppen, zum Beispiel 12'340."
+        : err.message === GEMISCHT ? "Schreibe als Bruch, zum Beispiel 3/2 statt 1 1/2."
         : "Den Term kann ich nicht lesen. Beispiel: 3a + 4b oder 2(x + 5).";
       return { ok: false, gleichwertig: false, lesbar: false, meldung };
     }
-    const ziel = lies(a.antwortTerm).poly;
+    const zielGelesen = lies(a.antwortTerm), ziel = zielGelesen.poly;
     if (!gleich(e.poly, ziel)) return { ok: false, gleichwertig: false, lesbar: true };
     const form = a.form || "frei";
+    // E4-1 a: eine gemischte Zahl hat den richtigen Wert, aber nicht die verlangte Form (kein Fehlversuch)
+    if (e.info.gemischt > 0 && form !== "frei") return formFehler("Der Wert stimmt. Schreibe als Bruch ohne Ganze, zum Beispiel 1 1/2 als 3/2.");
+    const zusammenfassen = "Der Wert stimmt. Fasse die Faktoren noch zusammen, zum Beispiel a · a = a².";
     if (form === "vereinfacht") {
       if (e.info.klammern > 0) return formFehler("Der Wert stimmt. Löse noch die Klammern auf.");
       if (glieder(e.roh) > ziel.size) return formFehler("Der Wert stimmt. Fasse gleichartige Glieder noch zusammen.");
       if (/\d[·:]\d|:/.test(e.roh) || e.info.potenzen > 0 && /\d\^|\d[²-³⁴-⁹]/.test(e.roh)) return formFehler("Der Wert stimmt. Rechne die Zahlen noch aus.");
+      if (!faktorenZusammengefasst(e.roh)) return formFehler(zusammenfassen);
     }
     if (form === "bruch") {
       // eine ganze Zahl oder ein vollständig gekürzter Bruch „z/n“ (auch negativ), kein Dezimalbruch
@@ -306,9 +345,17 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     if (form === "potenz" && !(e.info.potenzen === 1 && e.info.mal === 0 && glieder(e.roh) === 1)) {
       return formFehler("Der Wert stimmt. Schreibe als eine Potenz, zum Beispiel 5^3.");
     }
+    // 1.30.0 (Plan E 4): ist die Lösung selbst eine Potenz, gilt nur dieselbe Basis („2^6“ für 4³ ist eine andere Potenz)
+    if (form === "potenz") {
+      const zb = basisText(zielGelesen.roh), eb = basisText(e.roh);
+      if (zb !== null && (eb === null || !gleich(lies(eb).poly, lies(zb).poly))) {
+        return formFehler(`Der Wert stimmt. Schreibe als Potenz mit der Basis ${zb.replace(/-/g, "−")}.`);
+      }
+    }
     if (form === "bruchterm") {
       if (e.info.klammern > 0) return formFehler("Der Wert stimmt. Löse noch die Klammern auf.");
       if (glieder(e.roh) > ziel.size) return formFehler("Der Wert stimmt. Fasse gleichartige Glieder noch zusammen.");
+      if (!faktorenZusammengefasst(e.roh)) return formFehler(zusammenfassen);
       if (/[·:]/.test(e.roh)) return formFehler("Der Wert stimmt. Rechne die Zahlen noch aus.");
       // jeder Bruch gekürzt: Zähler (Zahl vor den Variablen, sonst 1) und Nenner teilerfremd, Nenner nicht 1
       for (const m of e.roh.matchAll(/(\d*)([a-z²-³¹⁴-⁹^\d]*?)\/(\d+)/g)) {

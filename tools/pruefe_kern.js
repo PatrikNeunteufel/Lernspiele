@@ -301,6 +301,26 @@ console.log("terme.js");
     gleich(bw(e, "11/12a", "bruchterm"), soll, `bruchterm: bewerte(${JSON.stringify(e)})`);
   for (const [e, soll] of [["3a/4 + 1/2", "ok"], ["6a/8 + 1/2", "form"], ["3a/4 + 2/4", "form"], ["a + 1", "ok"]])
     gleich(bw(e, e === "a + 1" ? "a + 1" : "3/4a + 1/2", "bruchterm"), soll, `bruchterm: bewerte(${JSON.stringify(e)})`);
+  // 1.30.0 (Plan E 4): Potenz nur mit derselben Basis; „×“, „⋅“ und Grossbuchstaben; Faktoren zusammengefasst; gemischte
+  // Zahlen (E4-1 a: erkannt, in jeder Form ausser frei ein Formfehler)
+  for (const [e, ziel, soll] of [["4^3", "4^3", "ok"], ["4³", "4^3", "ok"], ["2^6", "4^3", "form"], ["64^1", "4^3", "form"],
+    ["8^1", "2^3", "form"], ["(x^2)^3", "x^6", "form"], ["A^5", "a^5", "ok"], ["5^3", "125", "ok"], ["(−2)^3", "(-2)^3", "ok"],
+    ["−2^3", "(-2)^3", "form"], ["4^4", "4^3", "falsch"]]) gleich(bw(e, ziel, "potenz"), soll, `potenz: bewerte(${JSON.stringify(e)}) für ${ziel}`);
+  gleich(/Basis 4/.test(T.bewerte("2^6", { antwortTerm: "4^3", form: "potenz" }).meldung), true, "potenz: Meldung nennt die Basis");
+  for (const [e, ziel, soll] of [["2×a", "2a", "ok"], ["2⋅a", "2a", "ok"], ["2A", "2a", "ok"], ["2Ab + B", "2ab+b", "ok"], ["3X × 2", "6x", "form"]])
+    gleich(bw(e, ziel, "vereinfacht"), soll, `Schreibweise: bewerte(${JSON.stringify(e)})`);
+  for (const [e, ziel, soll] of [["2a·3", "6a", "form"], ["a·a", "a^2", "form"], ["aa", "a^2", "form"], ["2a·3b", "6ab", "form"],
+    ["a^2a", "a^3", "form"], ["a·2a", "2a^2", "form"], ["a²·a", "a^3", "form"], ["6ab", "6ab", "ok"], ["2a·b", "2ab", "ok"],
+    ["2·a", "2a", "ok"], ["1/2x", "1/2x", "ok"], ["x² + 2x + 1", "x^2+2x+1", "ok"], ["−5a + 2y + 9/8", "-5a+2y+9/8", "ok"], ["0.5a", "a/2", "ok"]])
+    gleich(bw(e, ziel, "vereinfacht"), soll, `zusammengefasst: bewerte(${JSON.stringify(e)})`);
+  gleich(bw("11aa/12", "11/12a^2", "bruchterm"), "form", "bruchterm: Faktoren zusammengefasst");
+  gleich(/Faktoren/.test(T.bewerte("11a·a/12", { antwortTerm: "11/12a^2", form: "bruchterm" }).meldung), true, "bruchterm: Meldung nennt die Faktoren");
+  for (const [e, ziel, form, soll] of [["1 3/4", "7/4", "bruch", "form"], ["−1 3/4", "-7/4", "bruch", "form"], ["1 3/5", "7/4", "bruch", "falsch"],
+    ["1 3/4", "7/4", "frei", "ok"], [`1${SCHMAL}3/4`, "7/4", "bruch", "form"], ["1 3/4", "7/4", "bruch", "form"], ["x + 1 1/6", "x+7/6", "vereinfacht", "form"],
+    ["1 300/400", "1300/400", "frei", "ok"], ["1 003/4", "1003/4", "frei", "ok"], ["1 7/4", "11/4", "frei", "unlesbar"], ["1 03/4", "7/4", "frei", "unlesbar"]])
+    gleich(bw(e, ziel, form), soll, `gemischt: bewerte(${JSON.stringify(e)}, ${form})`);
+  gleich(/ohne Ganze/.test(T.bewerte("1 3/4", { antwortTerm: "7/4", form: "bruch" }).meldung), true, "gemischt: Meldung nennt den Bruch ohne Ganze");
+  gleich(/3\/2 statt 1 1\/2/.test(T.bewerte("1 7/4", { antwortTerm: "11/4" }).meldung), true, "gemischt mit unechtem Bruch: eigene Meldung statt Dreiergruppen");
 
   // Nachrechnung: zufällige Terme als Polynom gelesen und an zufälligen Stellen mit JavaScript-Zahlen ausgewertet
   const zuf = (() => { let s = 5; return () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; }; })();

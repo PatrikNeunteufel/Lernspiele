@@ -233,7 +233,10 @@ Kindersprache.
    verlangt statt Faktor 1.8 jetzt 10 % Abstand und rechnet jeden Ablenker aus seinem Fehler nach.
 4. **Terme:** „Schreibe als Potenz“ nur mit derselben Basis; `a/2`, `×`, `⋅`, Grossbuchstaben annehmen; gemischte
    Zahl `1 3/4` erkennen oder ausdrücklich abweisen; „vereinfacht“ verlangt zusammengefasste Faktoren.
-   *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise, nachgerechnet mit `KERN.terme.bewerte`. Die Aufgaben haben dieselbe Basis, die Form „potenz“ nimmt aber „2^6“ für 4³ und „8^1“ für 2³ an; „a/2“, „2×a“, „2⋅a“, „2A“ sind unlesbar; „1 3/4“ wird abgewiesen, mit der unpassenden Meldung zu Dreiergruppen; „vereinfacht“ nimmt „2a·3“ und „a·a“ an.
+   *Stand 2026-11-09 (LERN_Session24):* erledigt mit Kern 1.30.0 (`kern/terme.js`) — `potenz` verlangt die Basis der
+   Lösung („2^6“ für 4³ ist ein Formfehler); „×“, „⋅“ und Grossbuchstaben werden gelesen („a/2“ seit 1.29.0);
+   `vereinfacht` und `bruchterm` verlangen zusammengefasste Faktoren („2a·3“, „a·a“ sind Formfehler); gemischte Zahlen
+   nach E4-1 a erkannt, ausser in `frei` ein Formfehler „Schreibe als Bruch ohne Ganze“.
 5. **Terme, Reihenfolge j/k:** Stufen bleiben nach Lehrplan (j Erweiterung, k GA); in der Stufenwahl sichtbar machen,
    dass k ohne j erreichbar ist.
    *Stand 2026-11-08 (LERN_Session23, Code nachgelesen):* teilweise. Stufen i, j, k nach Lehrplan, die Stufenwahl zeigt „Grundanspruch“ und „mit Erweiterung“; kein Hinweis, dass k ohne j erreichbar ist, und der „Übergang j → k“ (`lernsteig/gemeinsam/werkzeug.js`) legt eine Reihenfolge nahe.

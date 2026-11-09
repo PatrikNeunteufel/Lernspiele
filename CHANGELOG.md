@@ -1177,3 +1177,16 @@
   abgedeckt, offen bleibt in h und i nur das Aufschreiben des Überschlags. Plan E 3 Stand ersetzt. Tests: Kern „5752
   Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine
   Fehler.“.
+- Plan E 4 (E4-1 a), Kern 1.30.0 (`kern/terme.js`, verteilt an alle Apps): Form `potenz` verlangt die Basis der Lösung
+  („2^6“ und „64^1“ für 4³, „8^1“ für 2³ sind Formfehler „Schreibe als Potenz mit der Basis 4“; „−2^3“ ist keine Potenz
+  von −2); „×“, „⋅“ und Grossbuchstaben werden gelesen („2A“ = 2a); `vereinfacht` und `bruchterm` verlangen je Glied
+  höchstens eine Zahl und jede Variable einmal („2a·3“, „a·a“, „aa“, „a²a“ sind Formfehler „Fasse die Faktoren noch
+  zusammen“); gemischte Zahlen „1 3/4“ werden gelesen und sind ausser in `frei` ein Formfehler „Schreibe als Bruch ohne
+  Ganze“ (kein Fehlversuch), ein Zähler mit genau drei Ziffern bleibt Gliederung (ZL1 a), „1 7/4“ ist unlesbar mit eigener
+  Meldung. Betrifft im Lernsteig vor allem `brueche` f, g, i, Challenge und `terme` k (16–26 % der Lösungen unechte
+  Brüche). 46 neue Kern-Fälle; Gegenprobe: mit dem Term-Leser 1.29.0 schlagen 29 davon fehl. Alle Lösungen der Übungen
+  bestehen ihre Form (`pruefe_uebungen.js`). Eulenpfad (benutzt `KERN.terme` nicht): Stichprobe tab, bruch-werkstatt,
+  dezimal-rakete, kiosk-kasse, prozent-bruecke mit Kern-Kopie 1.29.0 und 1.30.0 — gleiche Klickzahlen, „Keine
+  Fehler.“; kein voller Lauf. Im Browser angesehen (terme i: Formhinweis zur Basis). docs/kern/rahmen.md 4.17, Kern-
+  CHANGELOG, Plan E 4 Stand ersetzt. Tests: Kern „5798 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten
+  „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

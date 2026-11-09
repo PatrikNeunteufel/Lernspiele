@@ -3,6 +3,17 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.30.0 — 2026-11-09 (LERN_Session24)
+- `terme.js` (Plan E 4): Form `potenz` verlangt dieselbe Basis wie die Lösung, wenn diese selbst eine Potenz ist
+  („2^6“ und „64^1“ für 4³ sind Formfehler „Schreibe als Potenz mit der Basis 4“; „−2^3“ ist −(2³), keine Potenz von −2).
+  `lies` nimmt „×“ und „⋅“ als Mal und Grossbuchstaben wie Kleinbuchstaben („2A“ = 2a). `vereinfacht` und `bruchterm`
+  verlangen zusammengefasste Faktoren: je Glied höchstens eine Zahl, jede Variable einmal („2a·3“, „a·a“, „aa“, „a²a“
+  sind Formfehler „Fasse die Faktoren noch zusammen“).
+- `terme.js` (E4-1 a): gemischte Zahlen „1 3/4“, „−1 3/4“ (auch mit geschütztem oder schmalem Leerzeichen) werden
+  gelesen; in jeder Form ausser `frei` ein Formfehler „Schreibe als Bruch ohne Ganze“. Ein Zähler mit genau drei Ziffern
+  bleibt Tausendergliederung („1 300/400“ = 1300/400, ZL1 a); ein Ganzes mit unechtem Bruch („1 7/4“) ist unlesbar mit
+  eigener Meldung statt der Meldung zu den Dreiergruppen.
+
 ## 1.29.0 — 2026-11-08 (LERN_Session23)
 - `terme.js`: neue Form `primfaktoren` für `bewerte` — gleichwertig und nur Primzahlen als Faktoren, mit oder ohne
   Exponent („2³ · 3² · 5“, „2^3*3*3*5“); sonst Formfehler „Zerlege, bis nur noch Primzahlen dastehen“. Für die
