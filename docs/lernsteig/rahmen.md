@@ -385,6 +385,10 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
   Wiederholung vor der sechsten Runde, ausser der Katalog begründet den Vorrat (`vorrat`);
   Endlos-Stufen haben mindestens 100 verschiedene
   Aufgaben (Hinweis, wenn eine andere Stufe es auch hätte);
+- Mängel im Aufbau einer Übung (Seite, Katalog, Piktogramm, Pflichtfunktionen, `aufgaben.js` lädt nicht) halten nur
+  diese Übung an: ihre Aufgaben werden nicht erzeugt, ihre Abdeckung fällt aus (Zeile „keine Aufgaben erzeugt“), die
+  folgenden Übungen laufen voll (seit LERN_Session24; vorher hielt der erste Fehler, auch einer aus Kern oder Konten,
+  alle folgenden Übungen an, und ihre Abdeckung meldete Folgefehler);
 - Abdeckung der Lehrplan-Stufen (Plan E 1, AT1 a, seit LERN_Session23; `tools/abdeckung.js`): für jede Übung in
   `docs/lernsteig/abdeckung.json` je Stufe die Inhaltsteile des Lehrplans mit genau einer Zuordnung (`typen`, `in`,
   `bewusst`, `offen`; dazu `fehlt`, `aus`, `notiz`; `quelle` wortlaut oder sinngemaess). Fehler: ein erzeugter Typ
@@ -408,7 +412,10 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
   jeder Stufe und jedem Niveau eine Runde mit einem Fehlversuch (Protokoll, danach Statistik und Erfolge), Rechner je
   Lehrplan-Stufe (12 · 3 übernehmen, Nutzung im Protokoll), Serie speichert den Rekord vor „Zum Ergebnis“. Gemeldet
   werden Ausnahmen, Konsolenfehler und sichtbarer Text mit NaN, undefined, null (Knoten mit Abstand gelesen). Die
-  Prüfung schaltet alle Übungen und Listen frei; die Sperre selbst prüfen `tools/pruefe_konten.js` und die Startseite.
+  Prüfung schaltet alle Übungen und Listen des Katalogs frei, auch in einem Teillauf; die Sperre selbst prüfen
+  `tools/pruefe_konten.js` und die Startseite. Die festen Teile (Notizblock und Tastenfeld mit rationale-zahlen g und
+  terme, Gleichung im Block mit gleichungen j, Rechner-Sperre, Tab Übungen) laufen in jedem Teillauf, auch ohne ihre
+  Übungen (seit LERN_Session24).
   Über die Bedienung nicht geprüft (über die Schnittstelle in `pruefe_konten.js` schon): Verbinden mit Zustimmung,
   Lösen der Verbindung, Sichern und Einlesen als Datei.
 

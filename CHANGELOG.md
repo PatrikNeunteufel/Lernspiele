@@ -1138,3 +1138,15 @@
   Gratwanderung „Keine Fehler.“.
 - Abschluss: Report [LERN_Session23](docs/eulenpfad/report/LERN_Session23_2026-11-08.md), Handover Eulenpfad und
   Lernsteig nachgeführt.
+
+## 2026-11-09 — LERN_Session24
+- Prüfer-Kandidat aus LERN_Session23: `tools/pruefe_uebungen.js` zählt Mängel im Aufbau je Übung (vorher hielt
+  `if (fehler) return` beim ersten Fehler, auch einem aus Kern oder Konten, alle folgenden Übungen an, und ihre
+  Abdeckung meldete Folgefehler: in LERN_Session23 81 aus 2). Eine Übung mit Mangel oder mit einem `aufgaben.js`, das
+  beim Laden wirft, fällt allein aus („keine Aufgaben erzeugt“, Abdeckung ausgelassen); das Skript läuft weiter.
+  `tools/lernsteig_seiten.js` bekommt den ganzen Katalog: Freigabe für alle Übungen, die festen Teile (Notizblock,
+  Tastenfeld, Rechner-Sperre) laufen auch in Teilläufen ohne ihre Übungen — vorher meldeten sie dort Fehler und das
+  Skript brach bei `terme` ab, ohne Schlusszeile. Gegenproben: Teillauf `kombinatorik` (vorher 2 Fehler und Absturz,
+  jetzt 0 Fehler, 12 Runden); falsches Piktogramm in `terme` bzw. `aufgaben.js` von `terme` wirft — je 1 Fehler, `brueche`
+  danach voll geprüft. docs/lernsteig/rahmen.md 7 nachgeführt. Tests: Kern „5752 Fälle, 0 Fehler.“, Lernsteig
+  „0 Fehler, 140 Hinweise.“ (Konten „101 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“.

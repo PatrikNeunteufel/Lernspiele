@@ -208,7 +208,11 @@ function annahmeMaengel(a) {
   return m;
 }
 
+// Gibt true zurück, wenn die Aufgaben der Übung erzeugt wurden. Mängel im Aufbau zählen je Übung: sie halten nur diese
+// Übung an, nicht die folgenden (vorher zählte `if (fehler) return` über alle Übungen und den Kern; LERN_Session23 machte
+// so aus 2 echten Fehlern 81 gemeldete).
 function pruefeOhneBrowser(eintrag) {
+  const vorher = fehler;
   const ordner = path.join(APP, "uebungen", eintrag.id);
   const wo = eintrag.id;
   if (!fs.existsSync(path.join(ordner, "index.html"))) return fehlerMelden(wo, "index.html fehlt");
@@ -239,7 +243,7 @@ function pruefeOhneBrowser(eintrag) {
     if (!eintrag.stufen.concat("challenge").includes(s)) fehlerMelden(wo, `vorrat für unbekannte Stufe ${s}`);
     if (typeof grund !== "string" || !grund.trim()) fehlerMelden(wo, `vorrat.${s} ohne Begründung`);
   }
-  if (fehler) return;
+  if (fehler > vorher) return false;
 
   const uebersicht = [];
   const vorrat = {};
@@ -312,6 +316,7 @@ function pruefeOhneBrowser(eintrag) {
     }
   }
   console.log(`  verschiedene Aufgaben: ${uebersicht.join(" ")}`);
+  return true;
 }
 
 
@@ -328,20 +333,27 @@ function pruefeOhneBrowser(eintrag) {
       if (LP_STUFEN.size && !LP_STUFEN.has(`${k}.${s}`)) fehlerMelden("lehrplaene.js", `Stufe ${k}.${s} nicht in der Recherche`);
     }
   }
-  for (const e of uebungen) { console.log(`${e.id}`); pruefeOhneBrowser(e); }
+  // Übungen ohne erzeugte Aufgaben: ihre Abdeckung meldete nur Folgefehler (jeder Teil „nicht erzeugt“), sie fällt aus
+  const ohneAufgaben = new Set();
+  for (const e of uebungen) {
+    console.log(`${e.id}`);
+    let erzeugt = false;
+    try { erzeugt = pruefeOhneBrowser(e); } catch (err) { fehlerMelden(e.id, `Prüfung abgebrochen: ${err.message}`); }
+    if (!erzeugt) { ohneAufgaben.add(e.id); console.log("  keine Aufgaben erzeugt (Fehler oben): Abdeckung dieser Übung ausgelassen"); }
+  }
   // Abdeckung der Lehrplan-Stufen (Plan E 1, AT1 a): Daten gegen die erzeugten Typen; Übersicht aktuell?
   {
     const AB = require("./abdeckung.js");
     const daten = AB.lies();
     for (const id of Object.keys(daten.uebungen)) if (!KAT.UEBUNGEN.some(u => u.id === id)) fehlerMelden("abdeckung.json", `Übung „${id}“ gibt es nicht`);
-    for (const e of uebungen) for (const m of AB.pruefeUebung(daten, e, TYPEN.get(e.id) || new Map(), KAT)) (m.art === "fehler" ? fehlerMelden : hinweisMelden)(m.wo, m.text);
+    for (const e of uebungen.filter(u => !ohneAufgaben.has(u.id))) for (const m of AB.pruefeUebung(daten, e, TYPEN.get(e.id) || new Map(), KAT)) (m.art === "fehler" ? fehlerMelden : hinweisMelden)(m.wo, m.text);
     const erfasst = KAT.UEBUNGEN.filter(u => daten.uebungen[u.id]).length;
     console.log(`Abdeckung der Lehrplan-Stufen erfasst: ${erfasst} von ${KAT.UEBUNGEN.length} Übungen (docs/lernsteig/abdeckung.md)`);
     if (!nur.length) { const grund = AB.veraltet(); if (grund) fehlerMelden("Abdeckung", grund); }
   }
   if (opt.seiten) {
     const t0 = Date.now();
-    const { gespielt } = await require(path.join(__dirname, "lernsteig_seiten.js")).pruefeSeiten(uebungen, fehlerMelden, LST);
+    const { gespielt } = await require(path.join(__dirname, "lernsteig_seiten.js")).pruefeSeiten(uebungen, fehlerMelden, LST, KAT.UEBUNGEN);
     console.log(`Seiten im Ersatz-DOM: ${gespielt} Runden durchgespielt (${Math.round((Date.now() - t0) / 1000)} s)`);
   }
   if (TEXT_OFFEN.length) console.log(`Text gegen Prüfdaten (TD1 a) noch offen: ${TEXT_OFFEN.join(", ")}`);

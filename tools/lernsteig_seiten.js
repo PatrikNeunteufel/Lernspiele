@@ -83,12 +83,15 @@ async function antworte(s, a, richtig) {
 /**
  * Alle Seitenprüfungen. uebungen: Katalog-Einträge; melde(ort, text): Fehler; LST: Werkzeug des Lernsteigs (stufenListe).
  */
-async function pruefeSeiten(uebungen, melde, LST) {
+// uebungen: die gewählten Übungen (jede wird durchgespielt); katalog: alle Übungen. Die festen Teile (Notizblock,
+// Tastenfeld, Gleichung im Block, Tab Übungen) benutzen bestimmte Übungen und laufen auch in einem Teillauf ohne sie.
+async function pruefeSeiten(uebungen, melde, LST, katalog = uebungen) {
   const fehlerVon = (ort, s) => { for (const f of new Set(s.fehler())) melde(ort, f); };
   const textPruefen = (ort, s) => { const t = s.text(); if (VERDAECHTIG.test(t)) melde(ort, `verdächtiger Text: …${t.slice(Math.max(0, t.search(VERDAECHTIG) - 60), t.search(VERDAECHTIG) + 40)}…`); };
-  // Für die Prüfung gilt jede Übung und jede Liste als geprüft (die Sperre selbst prüfen pruefe_konten.js und die Startseite)
+  // Für die Prüfung gilt jede Übung und jede Liste des Katalogs als geprüft, auch in einem Teillauf (die Sperre selbst
+  // prüfen pruefe_konten.js und die Startseite)
   const frei = { uebungen: {}, listen: {} };
-  for (const e of uebungen) {
+  for (const e of katalog) {
     frei.uebungen[e.id] = { am: "2026-01-01", von: "Prüfung" };
     for (const l of Object.keys(e.listen || {})) frei.listen[`${e.id}/${l}`] = { am: "2026-01-01", von: "Prüfung" };
   }
@@ -296,7 +299,7 @@ async function pruefeSeiten(uebungen, melde, LST) {
         if (s.text().includes("4711") || !/nicht (mit (dir|Ihnen|der angemeldeten Aufsicht) )?verbunden|keine Verbindung|nicht verbunden/i.test(s.text())) melde(ort, "Statistik eines nicht verbundenen Kontos ohne Hinweis");
       }
       // Gerät ohne Rechner (Einstellung der Aufsicht): in einer Übung mit Rechner fehlt dann der Knopf
-      const mitRechner = uebungen.find(x => x.rechner && x.stufen.some(lp => x.rechner[lp] && x.rechner[lp] !== "ohne"));
+      const mitRechner = katalog.find(x => x.rechner && x.stufen.some(lp => x.rechner[lp] && x.rechner[lp] !== "ohne"));
       if (mitRechner && konto) {
         s.hash("#verwaltung/einstellungen"); await ruhe(s);
         s.fuelle('select[name="rechner"]', "ohne"); await ruhe(s);
@@ -638,7 +641,7 @@ async function pruefeSeiten(uebungen, melde, LST) {
       if (t !== "Richtig.") throw new Error(`${z} mit den Tasten getippt: «${t.slice(0, 80)}»`);
     } catch (err) { melde(ort, err.message); }
     fehlerVon(ort, s);
-    const st = oeffne("uebungen/terme/index.html", { search: `?niveau=n1&stufe=${uebungen.find(e => e.id === "terme").stufen[0]}`, ...alsJugendlicher() });
+    const st = oeffne("uebungen/terme/index.html", { search: `?niveau=n1&stufe=${katalog.find(e => e.id === "terme").stufen[0]}`, ...alsJugendlicher() });
     await ruhe(st);
     try {
       const a = st.lauf("LST.pruefung.aufgabe()");
