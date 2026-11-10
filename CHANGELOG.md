@@ -1440,3 +1440,10 @@
   Angaben von GitHub aus docs.github.com. Verlinkt in der Fusszeile des Portals und unter Verwaltung → Einstellungen
   beider Apps; `tools/pruefe_spiele.js` prüft Seite und Links (Gegenprobe ohne Seite: gemeldet). Im Browser auf 375 px
   angesehen (Seite 375 px breit, keine Konsolenfehler, Links in beiden Verwaltungen), Testkonten entfernt.
+- Plan C12, IM2 c, ES1 a bis ES5 a: Bemerkungen und Meldungen nicht mehr im öffentlichen Repo — `.gitignore` mit
+  `docs/*/bemerkungen.json`, `docs/*/pruefstand-eingang.json`, `.entwicklung/`; `docs/eulenpfad/bemerkungen.json` aus
+  dem Index genommen (nur Testbemerkungen von Patrik, im Verlauf bleiben sie). Entscheide zu Schlüssel je Aufsicht
+  (HMAC aus Name, E-Mail und Geheimnis des Servers), Speicher beim Server (Name, Hash, keine E-Mail), Abgleich
+  Entwicklung ↔ Server (holen, übernehmen, senden; Freigabe nur über pruefstand.js im Repo), Anforderung per E-Mail
+  mit Vorlage und Ausweisen (Nachweis der E-Mail-Adresse, kein Ausweis) im Plan C12; CLAUDE.md vermerkt die
+  Bemerkungen als nur lokal.

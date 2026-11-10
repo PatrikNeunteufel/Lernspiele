@@ -48,7 +48,7 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 - **Inhaltslisten (Wörter, Sätze) stehen in eigenen Dateien** (`woerter.js` im Spielordner), damit
   Eltern oder Lehrperson sie ohne Code prüfen können; jede neue Liste gilt als ungeprüft, bis sie im
   Entwickler-Modus geprüft ist (`spiele/gemeinsam/pruefstand.js`, Entscheid E1 a).
-- **Entwickler-Bemerkungen** (`docs/eulenpfad/bemerkungen.json`): zu Beginn jeder Sitzung die offenen
+- **Entwickler-Bemerkungen** (`docs/eulenpfad/bemerkungen.json`, seit LERN_Session27 gitignored — nur lokal, IM2 c): zu Beginn jeder Sitzung die offenen
   lesen, beheben und ihren Status auf „erledigt <Datum> (<Sitzung>)“ setzen.
 - **Alter:** 2. Klasse (≈ 7–8 J.) fast ohne Lesetext, Symbole/Bilder; 4. Klasse (≈ 9–10 J.)
   kurze Sätze erlaubt.

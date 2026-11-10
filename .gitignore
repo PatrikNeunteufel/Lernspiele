@@ -24,3 +24,10 @@ entwickler.key
 .secrets/
 # Testausgaben und Zwischenstände der Werkzeuge (HK1 a: .temp/pruefung/<skript>.json), nur lokal
 .temp/
+
+# Bemerkungen und Meldungen der Entwicklung (Entscheid IM2 c, LERN_Session27): Freitext von Fremden gehört nicht ins
+# öffentliche Repo, auch ohne Namen. Öffentlich ist nur <app>/meldungen-stand.json (Status und Antwort je Kennung,
+# tools/meldungen_stand.py). Eingereichte Prüfvermerke (ES3 a) und die Liste zugelassener Aufsichten (ES2 a) ebenso.
+docs/*/bemerkungen.json
+docs/*/pruefstand-eingang.json
+.entwicklung/

@@ -235,10 +235,34 @@ Kindersprache.
      („Kontaktadresse einschliesslich derjenigen der elektronischen Post“, Stand 1. Januar 2025, fedlex). Patrik trägt die
      Adresse selbst in `portal/impressum.js` ein. Ein Postfach allein genügt laut Sekundärquellen nicht (Swisscom
      B2B-Magazin, IT-Recht-Kanzlei; amtliche Aussage nicht gefunden, 10.11.2026).
-   Reihenfolge: Entscheide und E-Mail, Versionen (NS3), Impressum (IM1), Unterschrift und Meldungsserver (NS2, NS1),
-   Anleitung.
-   *Stand 2026-11-10 (LERN_Session27):* in Arbeit — Entscheide, E-Mail-Kontakt und Versionen (NS3, Kern 1.36.0)
-   gebaut; offen Unterschrift und Meldungsserver (NS2, NS1) und die Anleitung.
+   - **IM2 c (Bemerkungen nicht im öffentlichen Repo):** Meldungen und Bemerkungen bleiben in `docs/<app>/bemerkungen.json`,
+     aber gitignored (Repo ist öffentlich; Patrik: „ab nun sollen sie dann aus github entfernt sein, auch wenn keine
+     namen genannt werden“). Öffentlich nur `<app>/meldungen-stand.json`. Bisherige Einträge sind Testbemerkungen von
+     Patrik; sie bleiben im Git-Verlauf, kein Umschreiben.
+   - **ES1 a (Schlüssel je Aufsicht):** HMAC-SHA-256 aus Name, E-Mail und einem Geheimnis des Servers, erzeugt mit
+     `python tools/entwickler_server.py --zulassen "Vorname Name" person@…`; dieselben Angaben ergeben denselben
+     Schlüssel, `--neu` ersetzt ihn (Zähler in der Rechnung). Nicht ein Hash nur aus Name und E-Mail (b, ausrechenbar
+     für jeden, der beides kennt), nicht zufällig (c, ohne Bindung an die Person).
+   - **ES2 a (beim Server gespeichert):** Name, Hash des Schlüssels, Datum der Zulassung, Vermerk „gesperrt“ — keine
+     E-Mail-Adresse. `--sperren "Vorname Name"`. Ein Prüfvermerk trägt den Namen. Freigaben einreichen nur mit
+     zugelassenem Schlüssel; Meldungen gehen für alle. Der bisherige `entwickler.key` bleibt der Schlüssel der
+     Entwicklung (Abgleich, lokaler Betrieb). `freischalten` prüft künftig beim Server statt gegen den Hash im Kern.
+   - **ES3 a (Abgleich Entwicklung ↔ Server):** `tools/entwicklung_abgleich.py holen` (Meldungen und Bemerkungen nach
+     `docs/<app>/bemerkungen.json`, nach Kennung vereinigt; Prüfvermerke nach `docs/<app>/pruefstand-eingang.json`),
+     `uebernehmen` (angenommene Vermerke in `pruefstand.js`, dann Commit und Push durch Patrik), `senden` (Status und
+     Antworten zurück auf den Server). `pruefstand.js` im Repo bleibt die einzige Quelle der Freigabe; nicht b
+     (Freigabe sofort vom Server).
+   - **ES4 a (Anforderung):** Knopf „Entwicklermodus anfordern“ (Eulenpfad: Verwaltung → Entwicklung; Lernsteig:
+     Verwaltung → Einstellungen) öffnet das Mailprogramm an die Adresse der Entwicklung, Betreff „Anforderung
+     Entwicklermodus“, mit Vorlage (Name der Aufsicht, Rolle, Schule oder Ort, was geprüft werden soll, App und
+     Version; der Schlüssel geht nur an die anfragende Adresse).
+   - **ES5 a (Ausweisen):** Kein Ausweis und keine Dokumente. Der Schlüssel geht nur an die Adresse der Anfrage
+     (Nachweis der E-Mail-Adresse); das Vertrauen prüft Patrik (Schuladresse, Bekanntschaft, Rückfrage). Zusatz Patrik:
+     wie wird Missbrauch sicher ausgeschlossen — offen als ES5-S.
+   Reihenfolge: Entscheide und E-Mail, Versionen (NS3), Impressum (IM1), Bemerkungen aus dem Repo (IM2), Schlüssel je
+   Aufsicht und Abgleich (ES1–ES5), Unterschrift und Meldungsserver (NS2, NS1), Anleitung.
+   *Stand 2026-11-10 (LERN_Session27):* in Arbeit — Entscheide, E-Mail-Kontakt, Versionen (NS3, Kern 1.36.0) und
+   Impressum gebaut, Bemerkungen gitignored; offen ES1–ES5, Unterschrift und Meldungsserver (NS2, NS1), Anleitung.
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 
