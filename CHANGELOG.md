@@ -1466,3 +1466,11 @@
   6 neue Kern-Fälle. Im Browser mit dem echten Server: Anforderung in beiden Apps, Freischalten als Aufsicht, Vermerk
   eingereicht, pruefstand.js unverändert; Testzulassung, Geheimnis, Eingang und Testkonten danach entfernt. Doku Kern
   4.12, Eulenpfad 11, Lernsteig 5e, Plan C12 (offen: GET /entwicklung/bemerkungen für NS1 schützen).
+- Impressum: Postadresse in `portal/impressum.js` (IM1-A a).
+- Plan C12, ES3 a, SR1 a — Übernehmen nach der Richtlinie: neu `tools/entwicklung_abgleich.py uebernehmen [app]` zeigt
+  den Eingang je Freigabe mit Nummern, einreichenden Personen, Stufe (neu, bewährt, gesperrt) und Zählung, markiert
+  „übernahmereif“ (zwei verschiedene Personen, eine bewährt, keine offene Meldung) oder „selbst ansehen“ mit Grund;
+  `--reife`, `--annehmen`, `--ablehnen`, `--zuruecknehmen "Name"`; trägt in `pruefstand.js` ein (von: alle Namen), bei
+  Listen auch die Haken je Eintrag; Bewertung in `.entwicklung/bewertung.json`. 12 neue Fälle in
+  `tools/pruefe_server.py` (jetzt 34), Gegenprobe (Schwelle eine Person): gemeldet. Richtlinie Abschnitt 4 mit den
+  Befehlen, Plan C12, Steckbrief (Server in den kurzen Prüfungen).

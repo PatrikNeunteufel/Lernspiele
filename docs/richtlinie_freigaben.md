@@ -1,8 +1,8 @@
 # Richtlinie: Freigaben von Spielen, Übungen und Inhaltslisten übernehmen
 
 Gilt für alle Apps der Reihe (Eulenpfad, Lernsteig, Gratwanderung). Entschieden von Patrik am 10.11.2026
-(LERN_Session27, Plan C12: ES1 a bis ES5 a, ES5-S a, SR1 a). Gebaut wird sie mit `tools/entwicklung_abgleich.py`
-(ES3 a); bis dahin beschreibt sie die Regeln, nach denen das Werkzeug vorschlägt.
+(LERN_Session27, Plan C12: ES1 a bis ES5 a, ES5-S a, SR1 a). Umgesetzt in `tools/entwicklung_abgleich.py uebernehmen`
+(ES3 a); `holen` und `senden` kommen mit dem Meldungsserver im Netz (NS1).
 
 ## 1. Worum es geht
 
@@ -44,10 +44,15 @@ Sonst heisst sie **selbst ansehen**.
 - `uebernehmen` zeigt je Freigabe die einreichenden Personen mit Stufe und Zählung, etwa
   „Anna M. (bewährt, 12 angenommen, 0 abgelehnt), Ben K. (neu, 2/0)“, und die Markierung „übernahmereif“ oder
   „selbst ansehen“.
-- `uebernehmen --reife` nimmt alle übernahmereifen in einem Schritt an.
-- Alles andere entscheidet die Entwicklung einzeln: annehmen, ablehnen, liegen lassen.
-- `uebernehmen --zuruecknehmen "Vorname Name"` nimmt alle Vermerke einer Person aus `pruefstand.js` (bei Missbrauch,
-  zusammen mit `--sperren`).
+- `python tools/entwicklung_abgleich.py uebernehmen [app]` zeigt den Eingang; je Freigabe stehen die Nummern der
+  Vermerke in eckigen Klammern.
+- `uebernehmen <app> --reife` nimmt alle übernahmereifen in einem Schritt an.
+- Alles andere entscheidet die Entwicklung einzeln: `--annehmen 3,5`, `--ablehnen 4` (je mit den übrigen offenen
+  Vermerken derselben Freigabe) oder liegen lassen.
+- `uebernehmen <app> --zuruecknehmen "Vorname Name"` nimmt alle angenommenen Vermerke einer Person aus `pruefstand.js`
+  (bei Missbrauch, zusammen mit `python tools/entwickler_server.py --sperren`).
+- Die Schwellen stehen als `BEWAEHRT_AB`, `OHNE_ABLEHNUNG_IN`, `MIN_PERSONEN` im Werkzeug; geprüft in
+  `tools/pruefe_server.py`.
 - Danach: Commit und Push durch die Entwicklung; erst dann ist die Freigabe auf der veröffentlichten Seite.
 
 ## 5. Wo die Bewertung liegt

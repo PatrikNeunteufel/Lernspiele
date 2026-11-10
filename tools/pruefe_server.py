@@ -112,6 +112,55 @@ def pruefe(basis: str) -> None:
            "gesperrte Aufsicht reicht nichts mehr ein")
 
 
+def pruefe_uebernehmen() -> None:
+    """tools/entwicklung_abgleich.py nach docs/richtlinie_freigaben.md (ES3 a, SR1 a), im Lernsteig mit leerem Eingang."""
+    import entwicklung_abgleich as EA
+    app, a = "lernsteig", ES.APPS["lernsteig"]
+    jetzt = "2026-11-10T10:00:00+01:00"
+    ein = lambda von, id_, an=True: ES.reiche_ein(a, von, "pruefstand", {"art": "uebungen", "id": id_, "geprueft": an}, jetzt)
+    reif = lambda id_: next((g for g in EA.freigaben(app) if g["ziel"][1] == id_), None)
+    # Zwei neue Personen: nicht reif (niemand bewährt)
+    ein("Bea", "terme"), ein("Cem", "terme")
+    g = reif("terme")
+    gleich((g["reif"], g["grund"], [p["stufe"] for p in g["personen"]]), (False, "niemand bewährt", ["neu", "neu"]), "zwei neue Personen: selbst ansehen")
+    # Bea bewährt (5 angenommen): mit Cem reif
+    b = EA.lies_bewertung()
+    for n in range(5):
+        EA.merke_entscheid(b, app, "Bea", 100 + n, "angenommen")
+    EA.schreibe_bewertung(b)
+    gleich(reif("terme")["reif"], True, "zwei Personen, eine bewährt: übernahmereif")
+    # Bea allein bei einer anderen Übung: nicht reif
+    ein("Bea", "brueche")
+    gleich(reif("brueche")["grund"], "erst 1 Person", "eine bewährte Person allein: selbst ansehen")
+    # Offene Meldung zur Übung: nicht reif
+    ein("Cem", "brueche")
+    a["bemerkungen"].write_text(json.dumps([{"nr": 1, "status": "offen", "inhalt": "brueche", "text": "falsch gewertet"}]), encoding="utf-8")
+    gleich(reif("brueche")["grund"], "offene Meldung", "offene Meldung: selbst ansehen")
+    # --reife: nur terme in den Prüfstand, mit beiden Namen; Bewertung zählt mit
+    gleich(EA.reife_annehmen(app), [("uebungen", "terme", True)], "--reife nimmt nur die übernahmereife an")
+    stand = ES.lies_pruefstand(a)
+    gleich((sorted(stand["uebungen"]), stand["uebungen"]["terme"]["von"]), (["terme"], "Bea, Cem"), "Prüfstand mit beiden Namen")
+    gleich(EA.stufe(EA.lies_bewertung(), app, "Cem", set())["angenommen"], 1, "Bewertung: Cem 1 angenommen")
+    # Ablehnen: Bea verliert „bewährt“ (Ablehnung unter den letzten 10)
+    nr = next(v["nr"] for v in ES.lies_eingang(a) if v["von"] == "Bea" and v["inhalt"]["id"] == "brueche")
+    EA.entscheide(app, {nr}, "abgelehnt")
+    gleich((EA.stufe(EA.lies_bewertung(), app, "Bea", set())["stufe"], "brueche" in ES.lies_pruefstand(a)["uebungen"]), ("neu", False),
+           "Ablehnung: nicht im Prüfstand, Bea nicht mehr bewährt")
+    # Zurücknehmen: Cems angenommener Vermerk fällt aus dem Prüfstand
+    gleich(EA.zuruecknehmen(app, "Cem"), [("uebungen", "terme", True)], "zurücknehmen nennt den Vermerk")
+    gleich("terme" in ES.lies_pruefstand(a)["uebungen"], False, "zurückgenommen: nicht mehr im Prüfstand")
+    # Gesperrte Person zählt nicht
+    ES.zulassen("Dora", "dora@schule.ch")
+    ES.sperre_aufsicht("Dora")
+    ein("Dora", "zufall"), ein("Bea", "zufall")
+    gleich([p["name"] for p in reif("zufall")["personen"]], ["Bea"], "gesperrte Person zählt nicht")
+    # Liste: Haken je Eintrag und „geprüft“ nach dem Annehmen
+    v = ES.reiche_ein(a, "Bea", "eintraege", {"liste": "zufall/woerter", "setzen": ["a:1", "b:2"], "komplett": True, "hash": "abc"}, jetzt)
+    EA.entscheide(app, {v["nr"]}, "angenommen")
+    gleich((ES.lies_pruefstand(a)["listen"].get("zufall/woerter", {}).get("hash"), sorted(ES.lies_eintraege(a).get("zufall/woerter", {}))),
+           ("abc", ["a:1", "b:2"]), "Liste angenommen: geprüft mit Hash, Haken je Eintrag")
+
+
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     with tempfile.TemporaryDirectory() as t:
@@ -121,6 +170,7 @@ def main() -> int:
         threading.Thread(target=server.serve_forever, daemon=True).start()
         try:
             pruefe(f"http://127.0.0.1:{server.server_address[1]}")
+            pruefe_uebernehmen()
         except Exception as e:  # ein Absturz ist ein Fehler, kein Abbruch ohne Schlusszeile
             fehler.append(f"Abbruch: {type(e).__name__}: {e}")
         finally:

@@ -274,7 +274,8 @@ Kindersprache.
    wenn alles fertig“).
    *Stand 2026-11-10 (LERN_Session27):* in Arbeit — Entscheide, E-Mail-Kontakt, Versionen (NS3, Kern 1.36.0) und
    Impressum gebaut, Bemerkungen gitignored, Richtlinie geschrieben, Schlüssel je Aufsicht gebaut (Kern 1.37.0,
-   `--zulassen`, Eingang, Anforderung); offen Übernehmen (ES3, SR1), NS2, NS1, Anleitungen.
+   `--zulassen`, Eingang, Anforderung), Übernehmen nach der Richtlinie (`tools/entwicklung_abgleich.py uebernehmen`);
+   offen NS2, NS1 mit `holen`/`senden`, Anleitungen.
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 
