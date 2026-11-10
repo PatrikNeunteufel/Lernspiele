@@ -142,6 +142,12 @@ const TREIBER = `
         const bewegt = teile.filter(t => /^(animate|animatemotion|animatetransform|set)$/i.test(t.localName || "")).length;
         if (ruhig && bewegt) melde("Feier", "Stufe " + st + ": Bewegung trotz Bewegung reduzieren", "feier-ruhig");
         if (!ruhig && !bewegt) melde("Feier", "Stufe " + st + ": keine Bewegung", "feier-still");
+        // eine ungültige Art übergeht der Browser still — die Tür des Tresors blieb so zu (Rückmeldung Patrik nach M1)
+        for (const a of teile.filter(e => /^animatetransform$/i.test(e.localName || ""))) {
+          const art = a.getAttribute("type");
+          if (!["translate", "scale", "rotate", "skewX", "skewY"].includes(art))
+            melde("Feier", "Stufe " + st + ": animateTransform mit ungültiger Art „" + art + "“", "feier-art");
+        }
         // Schmuck der Stufe 2 (Fähnchen, Funkeln …) ab 2 Sternen, der Stufe 3 (Funken, Sternschnuppe …) bei 3 Sternen
         const schmuck = w => teile.filter(t => t.getAttribute && t.getAttribute("data-schmuck") === w).length;
         if ((n >= 2) !== (schmuck("2") > 0) || (n >= 3) !== (schmuck("3") > 0))

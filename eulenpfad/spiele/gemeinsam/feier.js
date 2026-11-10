@@ -784,34 +784,58 @@ var LS_FEIER = (function () {
         return svg;
       },
 
-      /** Zahlenrätsel-Tresor: die Tür geht auf, je Stufe liegt mehr darin (s6: alles, die Eule schaut hinein). */
+      /**
+       * Zahlenrätsel-Tresor: das Rad dreht sich, die Tür schwingt an der Angel auf, und darin liegt je Stufe etwas
+       * Wertvolleres: Münze, Münzstapel, Goldbarren, Perlenkette, Krone, grosser Diamant (s6 dazu die Eule, die
+       * hineinschaut). Rückmeldung Patrik nach M1: die Tür ging nie auf (animateTransform „matrix“ gibt es nicht).
+       */
       tresor(feier, { stufe, sterne, ruhig }) {
         const stufeNr = feier.ziele?.[stufe];
         if (!Number.isInteger(stufeNr) || stufeNr < 1 || stufeNr > 6) return null;
         const svg = neuesBild("sammeln", stufeNr, { "data-bilder": "tresor" });
+        // Gehäuse und Innenraum (Angel links bei x = 108)
+        const L = 108, O = 30, B = 104, H = 88, cx = L + B / 2, unten = O + H - 6;
         svg.append(tagGrund(), boden(),
-          s("rect", { x: 112, y: 36, width: 96, height: 90, rx: 6, fill: "#6b7089" }), s("rect", { x: 120, y: 44, width: 80, height: 74, rx: 3, fill: "#3a3f5c" }));
-        const muenze = (x, y) => s("g", { "data-stueck": "muenze" }, s("circle", { cx: x, cy: y, r: 7, fill: "#e9b300", stroke: "#b88a1f", "stroke-width": 1.2 }),
-          s("circle", { cx: x, cy: y, r: 4, fill: "none", stroke: "#b88a1f", "stroke-width": 0.8 }));
-        const SCHATZ = {
-          muenze1: () => muenze(140, 108), muenze2: () => muenze(156, 110),
-          krone: () => s("path", { d: "M166,104 l3,-12 l6,7 l5,-10 l5,10 l6,-7 l3,12 Z", fill: "#e9b300", stroke: "#b88a1f", "stroke-width": 1, "data-stueck": "krone" }),
-          kette: () => s("g", { "data-stueck": "kette" }, ...Array.from({ length: 9 }, (_, i) => s("circle", { cx: 134 + i * 6, cy: 68 + Math.sin((i / 8) * Math.PI) * 10, r: 2.6, fill: "#f4f0f8", stroke: "#b0a8c8", "stroke-width": 0.6 }))),
-          edelstein: () => s("path", { d: "M180,58 l8,-6 l8,6 l-8,12 Z", style: "fill:var(--deko-5)", stroke: "#0e8a7c", "stroke-width": 1, "data-stueck": "edelstein" }),
-        };
-        const inhalt = [["muenze1"], ["muenze1", "muenze2"], ["krone"], ["kette"], ["edelstein"], ["muenze1", "muenze2", "krone", "kette", "edelstein"]][stufeNr - 1];
-        inhalt.forEach((n, i) => svg.appendChild(erscheine(SCHATZ[n](), DAUER * 0.55 + i * 0.15, ruhig)));
-        // Tür mit Rad, schwingt links an der Angel auf
-        const tuer = s("g", {}, s("rect", { x: 120, y: 44, width: 80, height: 74, rx: 3, fill: "#8a94a6", stroke: "#4f5668", "stroke-width": 1.2 }),
-          s("circle", { cx: 160, cy: 81, r: 14, fill: "none", stroke: "#4f5668", "stroke-width": 3 }),
-          s("path", { d: "M160,67 v28 M146,81 h28", stroke: "#4f5668", "stroke-width": 2 }));
-        if (ruhig) tuer.setAttribute("transform", "translate(120 0) scale(0.12 1) translate(-120 0)");
-        else tuer.appendChild(s("animateTransform", { attributeName: "transform", type: "matrix", values: "1 0 0 1 0 0;0.12 0 0 1 105.6 0",
-          begin: t(DAUER * 0.2), dur: `${DAUER * 0.35}s`, fill: "freeze" }));
-        svg.appendChild(tuer);
-        if (stufeNr === 6) { const e = euleSitzend(0.42); e.setAttribute("transform", "translate(236 126)"); svg.appendChild(erscheine(e, DAUER, ruhig)); }
-        if (sterne >= 2) svg.appendChild(glanz(186, 50, ruhig));
-        if (sterne >= 3) svg.appendChild(funken(160, 24, ruhig));
+          s("rect", { x: L - 8, y: O - 8, width: B + 16, height: H + 16, rx: 7, fill: "#6b7089" }),
+          s("rect", { x: L, y: O, width: B, height: H, rx: 3, fill: "#3a3f5c" }),
+          s("rect", { x: L + 8, y: unten, width: B - 16, height: 4, rx: 2, fill: "#2a2e45" }));
+        svg.appendChild(erscheine(s("rect", { x: L, y: O, width: B, height: H, rx: 3, fill: "#fff2b3", "fill-opacity": 0.22 }), DAUER * 0.5, ruhig, 0.4));
+        const gold = { fill: "#e9b300", stroke: "#b88a1f", "stroke-width": 1.2 };
+        const muenze = (x, y, r = 12) => s("g", {}, s("circle", { cx: x, cy: y, r, ...gold }), s("circle", { cx: x, cy: y, r: r * 0.62, fill: "none", stroke: "#b88a1f", "stroke-width": 1 }));
+        const stapel = (x, y, n) => s("g", {}, ...Array.from({ length: n }, (_, i) => s("ellipse", { cx: x, cy: y - i * 5, rx: 13, ry: 4.5, ...gold })));
+        const barren = (x, y) => s("path", { d: `M${x - 16},${y} l5,-11 h22 l5,11 Z`, ...gold });
+        const SCHATZ = [
+          () => muenze(cx, unten - 13),
+          () => s("g", {}, stapel(cx - 16, unten - 4, 4), stapel(cx + 14, unten - 4, 6)),
+          () => s("g", {}, barren(cx - 17, unten), barren(cx + 17, unten), barren(cx, unten - 11)),
+          () => s("g", {}, ...Array.from({ length: 13 }, (_, i) => s("circle", { cx: cx - 30 + i * 5, cy: O + 22 + Math.sin((i / 12) * Math.PI) * 26, r: 3.2,
+            fill: "#f4f0f8", stroke: "#b0a8c8", "stroke-width": 0.6 })), s("path", { d: `M${cx},${O + 50} l6,7 l-6,9 l-6,-9 Z`, style: "fill:var(--deko-2)" })),
+          () => s("g", {}, s("path", { d: `M${cx - 24},${unten} l-4,-28 l12,12 l16,-22 l16,22 l12,-12 l-4,28 Z`, ...gold }),
+            ...[-14, 0, 14].map((dx, i) => s("circle", { cx: cx + dx, cy: unten - 7, r: 3, style: `fill:var(--deko-${[2, 5, 6][i]})` }))),
+          () => s("g", {}, s("ellipse", { cx, cy: unten - 4, rx: 30, ry: 7, style: "fill:var(--deko-2)" }),
+            s("path", { d: `M${cx - 18},${unten - 26} l8,-10 h20 l8,10 l-18,24 Z`, fill: "#d8f3ff", stroke: "#5aa9dc", "stroke-width": 1.4 }),
+            s("path", { d: `M${cx - 18},${unten - 26} h36 M${cx - 10},${unten - 36} l4,10 l4,-10 l4,10 l4,-10 M${cx},${unten - 2} l-6,-24 M${cx},${unten - 2} l6,-24`,
+              stroke: "#5aa9dc", "stroke-width": 0.8, fill: "none" })),
+        ];
+        // je Stufe das eine Stück dieser Stufe — immer wertvoller als das der Stufe davor
+        const schatz = SCHATZ[stufeNr - 1]();
+        schatz.setAttribute("data-stueck", ["muenze", "muenzstapel", "goldbarren", "perlenkette", "krone", "diamant"][stufeNr - 1]);
+        svg.appendChild(vonOben(schatz, DAUER * 0.62, ruhig, 8, 0.35));
+        // Tür mit Rad: das Rad dreht (entriegeln), dann schwingt die Tür an der linken Angel auf (scale um die Angel)
+        const rad = s("g", {}, s("circle", { cx, cy: O + H / 2, r: 16, fill: "none", stroke: "#4f5668", "stroke-width": 3 }),
+          s("path", { d: `M${cx},${O + H / 2 - 16} v32 M${cx - 16},${O + H / 2} h32`, stroke: "#4f5668", "stroke-width": 2.4 }));
+        if (!ruhig) rad.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", from: `0 ${cx} ${O + H / 2}`, to: `270 ${cx} ${O + H / 2}`,
+          begin: t(0), dur: `${DAUER * 0.3}s`, fill: "freeze" }));
+        const tuerBlatt = s("g", { transform: `translate(${-L} 0)` },
+          s("rect", { x: L, y: O, width: B, height: H, rx: 3, fill: "#8a94a6", stroke: "#4f5668", "stroke-width": 1.2 }), rad);
+        const schwingen = s("g", {}, tuerBlatt);
+        if (ruhig) schwingen.setAttribute("transform", "scale(0.1 1)");
+        else schwingen.appendChild(s("animateTransform", { attributeName: "transform", type: "scale", from: "1 1", to: "0.1 1",
+          begin: t(DAUER * 0.32), dur: `${DAUER * 0.3}s`, fill: "freeze", calcMode: "spline", keyTimes: "0;1", keySplines: "0.4 0 0.3 1" }));
+        svg.appendChild(s("g", { transform: `translate(${L} 0)`, "data-teil": "tuer" }, schwingen));
+        if (stufeNr === 6) { const e = euleSitzend(0.42); e.setAttribute("transform", `translate(${L + B + 36} 126)`); svg.appendChild(erscheine(e, DAUER, ruhig)); }
+        if (sterne >= 2) svg.appendChild(glanz(cx + 26, O + 14, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(cx, 19, ruhig));
         return svg;
       },
     },

@@ -1,6 +1,6 @@
 # Konzept: Abschluss-Animationen im Eulenpfad
 
-Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P8 und Ruhezeiten gebaut, alle acht Piloten von Patrik abgenommen; Ausrollen nach AR1 a in Arbeit (Block M1 gebaut).**
+Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P8 und Ruhezeiten gebaut, alle acht Piloten von Patrik abgenommen; Ausrollen nach AR1 a in Arbeit (Block M1 abgenommen).**
 Entscheide und Pilotliste in Abschnitt 7.
 
 ## 1. Auslöser
@@ -208,7 +208,7 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 
 | Block | Themen | Spiele | Status |
 |---|---|---|---|
-| M1 | Stellenwert, Dezimal | 10 | gebaut 10.11.2026 (LERN_Session27), Abnahme offen |
+| M1 | Stellenwert, Dezimal | 10 | abgenommen 10.11.2026 (Patrik, LERN_Session27); Tresor danach nachgebessert, dessen Abnahme offen |
 | M2 | Zahlen, Teiler, Begründen | 12 | offen |
 | M3 | Rechnen | 13 | offen |
 | M4 | Sachrechnen, Grössen | 12 | offen |
@@ -226,7 +226,9 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
   Fach“) statt „alle Fächer voll“; 2★ Glanz statt Postsack, 3★ Funken statt Konfetti und Stempel.
 - **Ziffernkarten:** 3 bis 7 Karten wie die Stufen des Spiels (nicht 3- bis 7-stellig je Stufe), ohne Umdrehen.
 - **Zahlen-Hüpfer:** Schritte der Stufen des Spiels (s1 +50 bis 1000, s6 −99 999 in den Millionen) statt 1er bis 1000er.
-- **Zahlenrätsel-Tresor:** wie entworfen; 2★ Glanz statt Ehrenrunde des Rads.
+- **Zahlenrätsel-Tresor:** das Rad dreht, die Tür schwingt auf, darin je Stufe etwas Wertvolleres: Münze, Münzstapel,
+  Goldbarren, Perlenkette, Krone, grosser Diamant (s6 mit der Eule) — nach Rückmeldung Patrik („der tresor öffnet sich
+  und es ist immer etwas wertvolleres darin“); in der ersten Fassung ging die Tür nie auf. 2★ Glanz, 3★ Funken.
 - **Punkte-Schieber:** Tafeln der Stufen des Spiels (s1 bis H, s2–s3 bis T, s4–s5 bis HT, s6 bis M) statt jede Stufe
   eine Stelle mehr; 2★ Glanz statt Hüpfen.
 - **Zehntel-Lupe:** Zahlen der Stufen des Spiels, s5 bis zu den Tausendsteln (0.725), s6 die Mitte 2.45; der

@@ -1640,3 +1640,10 @@
   `boden()` — berichtigt. Klickzahlen der zehn Spiele ändern sich (Gegenprobe ohne Animation: wieder gleich), Piloten
   gleich. Konzept: Entscheid AR1, Blockplan M1–M6 mit Status, Tabelle der Entscheide wieder zusammenhängend (Leerzeile
   vor AN3-K); rahmen.md 24 (Bilder je Spiel).
+- Block M1 von Patrik abgenommen („M1 gut“), mit Rückmeldung zum Zahlenrätsel-Tresor: nur der geschlossene Tresor, nie
+  offen. Ursache: die Tür schwang mit `animateTransform type="matrix"` — diese Art gibt es nicht, der Browser übergeht
+  sie still; nur das ruhige Endbild (geprüft) zeigte die Tür offen. Neu: das Rad dreht, die Tür schwingt an der Angel
+  auf (scale), darin je Stufe etwas Wertvolleres (Münze, Münzstapel, Goldbarren, Perlenkette, Krone, grosser Diamant;
+  s6 mit der Eule), grösser und mittig; Lichtschein im Tresor. `tools/pruefe_spiele.js` meldet jede `animateTransform`
+  mit ungültiger Art — Gegenprobe („matrix“ wieder eingebaut): gemeldet. Im Browser mitten im Lauf nachgemessen (Tür
+  104 → 33 → 10 Einheiten breit) und angesehen. Klickzahlen gleich.

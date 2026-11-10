@@ -1087,7 +1087,7 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   | REISE · `komma` | `{ von, faktor, durch? }`: Ziffern rutschen in der Stellentafel, das Komma bleibt; Rechnung darunter (`data-wert` = Ergebnis) | Stufenzahl-Schieber |
   | SAMMELN · `post` | ganze Zahl oder Teile `{ M: 2, H: 14, E: 5 }`: Briefe in die Fächer, Nullen leer, mehr als 9 wird gebündelt | Tabellen-Post |
   | SAMMELN · `punkte` | ganze Zahl: so viele Punkte je Spalte wie die Ziffer | Punkte-Schieber |
-  | SAMMELN · `tresor` | 1–6: der Tresor füllt sich | Zahlenrätsel-Tresor |
+  | SAMMELN · `tresor` | 1–6: das Rad dreht, die Tür geht auf, je Stufe ein wertvolleres Stück (Münze bis Diamant) | Zahlenrätsel-Tresor |
   | BAUEN · `baukasten` | `{ H: 4, E: 2 }`: Dienes-Bausteine je Stelle, Rechnung mit der Zahl darunter | Zahlen-Baukasten |
   | BAUEN · `karten` | Ziffern als Text (`"97532"`): Karten legen sich zur Zahl, ab fünf Stellen mit Lücke | Ziffernkarten |
   | ZOOM · `figur: "kaefer"` | wie ZOOM, ein Marienkäfer landet statt der Rakete | Zehntel-Lupe |
@@ -1099,7 +1099,8 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   (Himmels-Forscher übt in s5 und s6 Planeten statt Mondphasen).
 - **Test:** Der Rahmen meldet `pruefung.haken("schluss", …)`; `tools/pruefe_spiele.js` prüft für jedes Spiel mit
   `feier`: `feier.js` geladen, Animation im Schlussbild, jede Stufe mit Bild, Schmuck passend zu 1–3 Sternen, mit
-  „Bewegung reduzieren“ keine Bewegung, sonst Bewegung. Die Klickzahlen eines Spiels mit Animation ändern sich (kein
+  „Bewegung reduzieren“ keine Bewegung, sonst Bewegung, und jede `animateTransform` mit einer gültigen Art (translate,
+  scale, rotate, skewX, skewY — eine andere übergeht der Browser still). Die Klickzahlen eines Spiels mit Animation ändern sich (kein
   Konfetti mehr, das Zufallszahlen verbrauchte; die Animation ist anklickbar).
 - **Vorschau:** `?feier=<stufe>&sterne=1–3[&ruhig=1]` zeigt nur das Schlussbild mit der Animation und „↻ Nochmal“ —
   ohne Anmeldung, ohne Runde, nichts wird gespeichert; die Stufe kommt aus der Skala (auch wenn ihre Inhaltslisten
