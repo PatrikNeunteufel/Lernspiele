@@ -257,12 +257,21 @@ Kindersprache.
      Entwicklermodus“, mit Vorlage (Name der Aufsicht, Rolle, Schule oder Ort, was geprüft werden soll, App und
      Version; der Schlüssel geht nur an die anfragende Adresse).
    - **ES5 a (Ausweisen):** Kein Ausweis und keine Dokumente. Der Schlüssel geht nur an die Adresse der Anfrage
-     (Nachweis der E-Mail-Adresse); das Vertrauen prüft Patrik (Schuladresse, Bekanntschaft, Rückfrage). Zusatz Patrik:
-     wie wird Missbrauch sicher ausgeschlossen — offen als ES5-S.
+     (Nachweis der E-Mail-Adresse); das Vertrauen prüft Patrik (Schuladresse, Bekanntschaft, Rückfrage).
+   - **ES5-S a (Missbrauch):** Keine eingereichte Freigabe wirkt, bevor Patrik sie übernimmt; in der Vorlage wird
+     „Schule oder Organisation, oder woher wir uns kennen“ Pflicht; Melden als zweites Netz; bei Missbrauch `--sperren`
+     und `uebernehmen --zuruecknehmen`. Zusatz Patrik: alles nochmals sichten hilft kaum — Mehrfachfreigaben und eine
+     Bewertung der Person sollen die Gewichtung verlagern, nach einer festen Richtlinie (SR1).
+   - **SR1 a (Richtlinie):** [richtlinie_freigaben.md](richtlinie_freigaben.md) — Stufe je Person (neu, bewährt ab 5
+     angenommenen ohne Ablehnung unter den letzten 10, gesperrt), übernahmereif ab zwei verschiedenen Personen, davon
+     eine bewährt, ohne offene Meldung; `uebernehmen --reife` in einem Schritt; Bewertung nur bei Patrik
+     (`.entwicklung/bewertung.json`); Schwellen nur mit Eintrag in der Richtlinie. Nicht b (Punktzahl), nicht c (nur
+     Anzahl). Zusatz Patrik: Er gibt weiterhin selbst direkt frei; übernommen wird nie von selbst.
    Reihenfolge: Entscheide und E-Mail, Versionen (NS3), Impressum (IM1), Bemerkungen aus dem Repo (IM2), Schlüssel je
    Aufsicht und Abgleich (ES1–ES5), Unterschrift und Meldungsserver (NS2, NS1), Anleitung.
    *Stand 2026-11-10 (LERN_Session27):* in Arbeit — Entscheide, E-Mail-Kontakt, Versionen (NS3, Kern 1.36.0) und
-   Impressum gebaut, Bemerkungen gitignored; offen ES1–ES5, Unterschrift und Meldungsserver (NS2, NS1), Anleitung.
+   Impressum gebaut, Bemerkungen gitignored, Richtlinie für Freigaben geschrieben; offen ES1–ES5 und SR1 bauen,
+   Unterschrift und Meldungsserver (NS2, NS1), Anleitung.
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 

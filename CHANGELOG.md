@@ -1447,3 +1447,8 @@
   Entwicklung ↔ Server (holen, übernehmen, senden; Freigabe nur über pruefstand.js im Repo), Anforderung per E-Mail
   mit Vorlage und Ausweisen (Nachweis der E-Mail-Adresse, kein Ausweis) im Plan C12; CLAUDE.md vermerkt die
   Bemerkungen als nur lokal.
+- Plan C12, ES5-S a, SR1 a: Richtlinie [docs/richtlinie_freigaben.md](docs/richtlinie_freigaben.md) für das Übernehmen
+  eingereichter Freigaben — Stufe je Person (neu, bewährt, gesperrt), übernahmereif ab zwei verschiedenen Personen,
+  davon eine bewährt, ohne offene Meldung; Anzeige und Befehle von `uebernehmen`; Bewertung nur lokal bei der
+  Entwicklung; Schwellen nur mit Eintrag und Datum. Die Entwicklung gibt weiterhin selbst direkt frei.
+  `docs/eulenpfad/bemerkungen.json` aus dem Index (IM2 c).
