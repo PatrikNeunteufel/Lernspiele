@@ -87,7 +87,10 @@ def main(argv):
         message = f.read()
     grund = pruefe(message, git("diff", "--cached", "--name-only").splitlines())
     if grund:
-        sys.stderr.write(grund + "\n")
+        # als UTF-8 schreiben: Python nimmt unter Windows sonst cp1252, und Visual Studio zeigt statt der Meldung nur
+        # „Die Bytes [E4] … können nicht … übersetzt werden“ (das ä in „ändert“; LERN_Session27)
+        sys.stderr.buffer.write((grund + "\n").encode("utf-8"))
+        sys.stderr.flush()
         return 1
     return 0
 

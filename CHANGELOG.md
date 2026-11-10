@@ -1585,3 +1585,17 @@
   der beiden neuen Piloten ändern sich (Gegenprobe ohne Animation: wieder gleich), die drei ersten Piloten gleich wie in
   2a. Im Browser angesehen (alle Stufen, 1–3 Sterne, Endbild und laufend, keine Konsolenfehler): die Eule flog schon
   los, während der Stamm noch wuchs — berichtigt. Doku rahmen.md 24, Konzept (Status, Abweichungen P3–P5).
+- Eulenpfad, Abschluss-Animationen Schritt 2c: `feier.js` mit den Mustern AUFTRITT (Eulen mit Trommel, Querflöte,
+  Geige, Trompete, Cello, richtig gehalten; Solo bis Quintett, Orchester mit Streichern), SAMMELN (die Eule angelt Fische
+  in den Eimer, aufrecht nebeneinander und zählbar) und KARTE (Flug von West nach Ost über die stumme Karte aus den
+  Daten des Spiels, die Ziele leuchten auf). Ton nach Regel 8: `spiel.js` gibt `LS_FEIER.zeige` seinen Ton als `klang`
+  mit (beachtet 🔇, `ton` nimmt auch eine Folge), je Auftritt ein Ton des C-Dur-Dreiklangs; ein Tippen ans Ende bricht
+  ausstehende Töne ab (im Browser mit einem Zähler geprüft: fünf Töne, nach dem Tippen keine mehr). Piloten P6
+  Instrumenten-Kenner, P7 Anlaut-Angel, P8 Schweiz-Karten-Suche (s1 Wahlkreise SG im Ausschnitt bis s6 Kantone und
+  Hauptorte). Prüfhaken zählt Mengen (`data-anzahl` gegen `data-stueck`) — Gegenprobe (eine Menge zu viel): gemeldet.
+  Klickzahlen der drei neuen Piloten ändern sich (Gegenprobe ohne Animation: wieder gleich), die fünf ersten gleich wie in
+  2b; Stichprobe ohne Animation (tab, daten, speicher, zahlenhaus) ohne Fehler. Im Browser angesehen: Musikerinnen
+  vergrössert, Querflöte und Trompete gekürzt (berührten die Nachbarin), Fische im Eimer zuerst nicht zählbar —
+  aufrecht nebeneinander. Commit-Hook (`tools/git-hooks/commit_msg.py`) schreibt seine Meldung als UTF-8: Visual Studio
+  zeigte statt „Der Commit ändert …“ nur „Die Bytes [E4] im Index 31 können nicht … übersetzt werden“ (Python schrieb
+  cp1252). Doku rahmen.md 24 (Muster, Ton, Mengen), Konzept (Status, Abweichungen P6–P8).

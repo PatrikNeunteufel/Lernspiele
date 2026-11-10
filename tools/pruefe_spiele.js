@@ -146,6 +146,12 @@ const TREIBER = `
         const schmuck = w => teile.filter(t => t.getAttribute && t.getAttribute("data-schmuck") === w).length;
         if ((n >= 2) !== (schmuck("2") > 0) || (n >= 3) !== (schmuck("3") > 0))
           melde("Feier", "Stufe " + st + ", " + n + " Stern(e): Schmuck passt nicht zu den Sternen", "feier-sterne");
+        // Mengen (AUFTRITT, SAMMELN, KARTE): so viele Stücke im Bild, wie es angibt
+        const bild = teile.find(t => t.localName === "svg");
+        const anzahl = bild.getAttribute("data-anzahl");
+        const stuecke = teile.filter(t => t.getAttribute && t.getAttribute("data-stueck")).length;
+        if (anzahl !== null && anzahl !== undefined && Number(anzahl) !== stuecke)
+          melde("Feier", "Stufe " + st + ": " + stuecke + " Stücke im Bild statt " + anzahl, "feier-anzahl");
         // Zahlenmauer (BAUEN): jeder Stein die Summe der beiden darunter, die Zahl im Stein gleich seinem Wert
         const steine = new Map(teile.filter(t => t.getAttribute && t.getAttribute("data-stein"))
           .map(t => [t.getAttribute("data-stein"), t]));

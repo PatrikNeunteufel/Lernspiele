@@ -1067,6 +1067,14 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   | SZENE | `{ muster: "szene", szene: "eule-vollmond" }`: ein festes Bild für den Endgegner | Himmels-Forscher s6 |
   | WACHSEN | `{ muster: "wachsen", bilder: "baum", ziele: { s1: "stamm", … } }`: der Baum wächst Teil um Teil bis zum Teil der Stufe (`stamm`, `ast`, `aeste`, `blaetter`, `blueten`, `fruechte`; aus den Blüten werden Äpfel, die Eule setzt sich in die Krone); Wörter nur als leere Kärtchen | Wortfamilien-Baum |
   | BAUEN | `{ muster: "bauen", bilder: "mauer", ziele: { s1: [2, 3, 4], … } }`: Zahlenmauer aus den Grundsteinen der Stufe, Stein um Stein von unten; jeder Stein trägt `data-stein="r,i"` und `data-wert`, der Test rechnet die Summenregel und die Zahl im Stein nach | Zahlenmauer-Baumeister |
+  | AUFTRITT | `{ muster: "auftritt", bilder: "musik", ziele: { s1: 1, … s5: 5, s6: "orchester" } }`: Eulen treten mit Trommel, Querflöte, Geige, Trompete, Cello auf (Solo bis Quintett, im Orchester Streicher dahinter), richtig gehalten; je Auftritt ein Ton | Instrumenten-Kenner |
+  | SAMMELN | `{ muster: "sammeln", bilder: "angel", ziele: { s1: 1, … } }`: die Eule angelt so viele Fische, sie stehen aufrecht nebeneinander im Eimer (zählbar) | Anlaut-Angel |
+  | KARTE | `{ muster: "karte", karte: KARTE, ziele: { sX: { flaechen: [d …], punkte: [[x, y] …], ausschnitt } } }`: die Eule fliegt von West nach Ost über die stumme Karte aus den Daten des Spiels, was sie überfliegt, leuchtet auf; `ausschnitt` zeigt nur die Gegend der Ziele | Schweiz-Karten-Suche |
+
+  **Ton** (Regel 8 des Konzepts): Der Rahmen gibt `LS_FEIER.zeige` seinen Ton als `klang` mit (`ton`, nimmt auch eine
+  Folge `[[Frequenz, Dauer], …]`); er beachtet den Schalter 🔇, also klingt eine Animation nur mit Ton an. Ein Tippen ans
+  Ende bricht die ausstehenden Töne ab. **Mengen** (Musikerinnen, Fische, Kartenstücke) zählt der Test: `data-anzahl` am
+  Bild gegen die Stücke mit `data-stueck`.
 
   Eine Stufe kann ein anderes Muster nehmen: `ziele: { s5: { muster: "reise", reisender: "sonde", ziel: { rand: true } } }`
   (Himmels-Forscher übt in s5 und s6 Planeten statt Mondphasen).

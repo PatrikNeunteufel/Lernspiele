@@ -1404,11 +1404,12 @@ const LS = (() => {
   let audio = null;
   let tonAn = lies("ton", true);
 
+  /** Kurzer Klang: art ist ein Name unten oder eine eigene Folge [[Frequenz, Dauer], …] (Abschluss-Animation). */
   function ton(art) {
     if (!tonAn) return;
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-      const folgen = {
+      const folgen = Array.isArray(art) ? art : {
         tipp:    [[660, 0.05]],
         richtig: [[523, 0.10], [659, 0.10], [784, 0.16]],
         falsch:  [[330, 0.12], [262, 0.18]],
@@ -3085,7 +3086,7 @@ const LS = (() => {
         ton("fertig");
         // Abschluss-Animation des Spiels (feier.js, Entscheide AN1–AN3 a), sonst wie bisher Konfetti
         const feier = def.feier && typeof LS_FEIER !== "undefined" && einstellung("feier", def.id) === "an"
-          ? LS_FEIER.zeige(def.feier, { stufe: stufe.id, sterne }) : null;
+          ? LS_FEIER.zeige(def.feier, { stufe: stufe.id, sterne, klang: ton }) : null; // klang: nur mit Ton an (Regel 8)
         if (!feier) konfetti();
         pruefung.haken?.("schluss", { stufe: stufe.id, stufen: Object.keys(def.stufen || {}), sterne, feierDef: def.feier || null, feier });
         buehne.innerHTML = "";

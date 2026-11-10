@@ -9,7 +9,7 @@
    Schmuck der Stufe 2 und 3, data-schmuck="2"/"3"), ohne Text ausser Zahlen, die zum Inhalt gehören, SVG ohne
    Bibliothek. Die Animation ist Schmuck (aria-hidden); die Knöpfe des Schlussbilds sind sofort bedienbar.
 
-   Muster (Konzept, Abschnitt 5). Gebaut: REISE, ZOOM, ZYKLUS, SZENE, WACHSEN, BAUEN. Folgen: AUFTRITT, SAMMELN, KARTE.
+   Muster (Konzept, Abschnitt 5): REISE, ZOOM, ZYKLUS, SZENE, WACHSEN, BAUEN, AUFTRITT, SAMMELN, KARTE.
    Eine Stufe darf ein anderes Muster nehmen: ziele.sX = { muster: "…", ziel: …, … } (Himmels-Forscher s5, s6).
 
    REISE  { muster: "reise", reisender: "rakete" | "sonde", ziele: { s1 … s6 } } — je Stufe ein Ziel:
@@ -24,7 +24,15 @@
             der Stufe: stamm, ast, aeste, blaetter, blueten, fruechte (aus den Blüten werden Früchte, die Eule setzt sich
             in die Krone); Wörter sind nur als leere Kärtchen angedeutet
    BAUEN  { muster: "bauen", bilder: "mauer", ziele: { s1: [2, 3, 4], … } } — Zahlenmauer aus den Grundsteinen der
-            Stufe, Stein um Stein von unten; jeder Stein trägt die Summe der beiden darunter (data-stein, data-wert) */
+            Stufe, Stein um Stein von unten; jeder Stein trägt die Summe der beiden darunter (data-stein, data-wert)
+   AUFTRITT { muster: "auftritt", bilder: "musik", ziele: { s1: 1, … s5: 5, s6: "orchester" } } — Eulen treten mit ihren
+            Instrumenten auf (Trommel, Querflöte, Geige, Trompete, Cello; Orchester mit Streichern dahinter), richtig
+            gehalten; je Auftritt ein kurzer Ton über klang (der Ton des Rahmens, nur mit Ton an, Regel 8)
+   SAMMELN { muster: "sammeln", bilder: "angel", ziele: { s1: 1, … } } — die Eule angelt so viele Fische in den Eimer
+   KARTE  { muster: "karte", karte: KARTE, ziele: { sX: { flaechen: [d …] | punkte: [[x, y] …], umriss: [d …],
+            ausschnitt: true } } } — die Eule fliegt von West nach Ost über die stumme Karte (Daten des Spiels), was sie
+            überfliegt, leuchtet auf; ausschnitt zeigt nur die Gegend der Ziele
+   Mengen (Musiker, Fische) zählt der Test: data-anzahl am Bild, data-stueck je Stück. */
 "use strict";
 
 var LS_FEIER = (function () {
@@ -379,6 +387,71 @@ var LS_FEIER = (function () {
   /** Ganze Zahl in der Schreibweise des Lehrmittels (LS.zahlText: ab fünf Stellen mit schmalem Leerzeichen). */
   const ganzText = x => (typeof LS !== "undefined" && LS.zahlText ? LS.zahlText(x) : String(x));
 
+  // ---------- AUFTRITT: Instrumente in der Hand einer Eule ----------
+  // Koordinaten um die Füsse der Eule (0,0), Eule Grösse 0.42: Kopf bis etwa −38, Schnabel bei −12, Bauch um −15.
+  // Die Eule schaut uns an: ihre linke Seite ist im Bild rechts (Konzept: Geige an der linken Schulter, Bogen in der
+  // rechten Hand; Querflöte zeigt nach rechts der Spielerin, im Bild also nach links).
+  const HOLZ = "#9a5b2a", HOLZ_DUNKEL = "#5e3417", MESSING = "#e3b341", SILBER = "#c9ccd3";
+  const INSTRUMENTE = {
+    trommel: () => s("g", { "data-instrument": "trommel" },
+      s("rect", { x: -12, y: -14, width: 24, height: 12, fill: "#d8433a", stroke: "#7a2620", "stroke-width": 1 }),
+      s("ellipse", { cx: 0, cy: -14, rx: 12, ry: 3.4, fill: "#f4ecd8", stroke: "#7a2620", "stroke-width": 1 }),
+      s("path", { d: "M-12,-12 l6,8 l6,-8 l6,8 l6,-8", stroke: "#f4ecd8", "stroke-width": 0.8, fill: "none" }),
+      s("line", { x1: -14, y1: -26, x2: -4, y2: -16, stroke: HOLZ_DUNKEL, "stroke-width": 1.6, "stroke-linecap": "round" }),
+      s("line", { x1: 14, y1: -26, x2: 4, y2: -16, stroke: HOLZ_DUNKEL, "stroke-width": 1.6, "stroke-linecap": "round" })),
+    // quer vor dem Schnabel, das Mundloch an der Unterlippe, das Rohr zur rechten Seite der Spielerin (im Bild links)
+    floete: () => s("g", { "data-instrument": "querfloete" },
+      s("line", { x1: 4, y1: -11, x2: -21, y2: -14, stroke: SILBER, "stroke-width": 2.2, "stroke-linecap": "round" }),
+      s("path", { d: "M-6,-12.8 l0,0.01 M-11,-13.4 l0,0.01 M-16,-14 l0,0.01", stroke: "#6b7089", "stroke-width": 1.6, "stroke-linecap": "round" })),
+    // auf der linken Schulter (im Bild rechts), unter dem Kinn; der Bogen in der rechten Hand (im Bild links)
+    geige: () => s("g", { "data-instrument": "geige" },
+      s("g", { transform: "rotate(-28 8 -14)" },
+        s("ellipse", { cx: 6, cy: -14, rx: 5, ry: 3.4, fill: HOLZ }), s("ellipse", { cx: 12, cy: -14, rx: 4, ry: 2.8, fill: HOLZ }),
+        s("rect", { x: 15, y: -14.8, width: 9, height: 1.6, fill: HOLZ_DUNKEL })),
+      s("line", { x1: -14, y1: -6, x2: 14, y2: -22, stroke: "#d9c9a3", "stroke-width": 1.1, "stroke-linecap": "round" })),
+    // nach vorn aus dem Mund, mit Ventilen; der Schalltrichter vorne (im Bild nach rechts gedreht)
+    trompete: () => s("g", { "data-instrument": "trompete" },
+      s("line", { x1: 2, y1: -12, x2: 16, y2: -12, stroke: MESSING, "stroke-width": 2, "stroke-linecap": "round" }),
+      s("path", { d: "M16,-12 L21,-15.5 L21,-8.5 Z", fill: MESSING }),
+      s("path", { d: "M8,-12 v-3 M10.5,-12 v-3 M13,-12 v-3", stroke: "#b88a1f", "stroke-width": 1.2 })),
+    // steht vor der Spielerin zwischen den Knien, der Hals an ihrer linken Schulter (im Bild rechts), Bogen waagrecht
+    cello: () => s("g", { "data-instrument": "cello" },
+      s("line", { x1: 0, y1: 0, x2: 0, y2: 3, stroke: "#6b7089", "stroke-width": 1 }),
+      s("ellipse", { cx: 0, cy: -8, rx: 7.5, ry: 9, fill: HOLZ }), s("ellipse", { cx: 0.5, cy: -19, rx: 6, ry: 6.5, fill: HOLZ }),
+      s("line", { x1: 1, y1: -24, x2: 7, y2: -40, stroke: HOLZ_DUNKEL, "stroke-width": 1.8, "stroke-linecap": "round" }),
+      s("line", { x1: -18, y1: -11, x2: 10, y2: -11, stroke: "#d9c9a3", "stroke-width": 1.1, "stroke-linecap": "round" })),
+  };
+  const BESETZUNG = ["trommel", "floete", "geige", "trompete", "cello"];
+  const NOTEN = [262, 330, 392, 523, 659]; // c' e' g' c'' e'' — je Auftritt ein Ton des C-Dur-Dreiklangs
+
+  /** Eine Musikerin: Eule mit Instrument an x, y (Füsse). */
+  function musikerin(instrument, x, y, k) {
+    const g = s("g", { transform: `translate(${x} ${y}) scale(${k / 0.42})`, "data-stueck": instrument });
+    g.append(euleSitzend(0.42), INSTRUMENTE[instrument]());
+    return g;
+  }
+
+  // ---------- SAMMELN: Angel ----------
+  const FISCHFARBEN = ["#f07c2a", "#14b8a6", "#8e5bd6", "#e9b300", "#e0569a", "#6366f1"];
+  function fisch(farbe) {
+    return s("g", {},
+      s("ellipse", { cx: 0, cy: 0, rx: 8, ry: 4.4, fill: farbe }), s("path", { d: "M-7,0 L-13,-4.5 L-13,4.5 Z", fill: farbe }),
+      s("circle", { cx: 4.4, cy: -1, r: 1, fill: "#2d3047" }));
+  }
+
+  // ---------- KARTE ----------
+  /** Punkte eines SVG-Pfads (nur M/L mit absoluten Zahlen, wie karte.js sie schreibt). */
+  function pfadPunkte(d) {
+    const z = (d.match(/-?\d+(\.\d+)?/g) || []).map(Number), p = [];
+    for (let i = 0; i + 1 < z.length; i += 2) p.push([z[i], z[i + 1]]);
+    return p;
+  }
+  function mitte(punkte) {
+    const n = punkte.length || 1;
+    return [punkte.reduce((a, q) => a + q[0], 0) / n, punkte.reduce((a, q) => a + q[1], 0) / n];
+  }
+  const KARTENFARBEN = ["#8e5bd6", "#e0569a", "#f07c2a", "#e9b300", "#14b8a6", "#6366f1"];
+
   // ---------- Muster ----------
   const MUSTER = {
     /** REISE (Konzept 5): je Stufe ein Ziel weiter. */
@@ -573,6 +646,156 @@ var LS_FEIER = (function () {
       }
       return svg;
     },
+
+    /** AUFTRITT (Konzept 5, Instrumenten-Kenner): Solo, Duo, Trio, Quartett, Quintett, Orchester. */
+    auftritt(feier, { stufe, sterne, ruhig, klang, plane }) {
+      const ziel = feier.ziele?.[stufe];
+      if (feier.bilder !== "musik" || !(ziel === "orchester" || (Number.isInteger(ziel) && ziel >= 1 && ziel <= BESETZUNG.length))) return null;
+      const vorne = ziel === "orchester" ? BESETZUNG : BESETZUNG.slice(0, ziel);
+      const hinten = ziel === "orchester" ? ["geige", "geige", "cello", "geige", "geige", "cello"] : [];
+      const svg = s("svg", { viewBox: `0 0 ${BREITE} ${HOEHE}`, "data-muster": "auftritt", "data-ziel": String(ziel),
+        "data-anzahl": vorne.length + hinten.length },
+        s("rect", { x: 0, y: 0, width: BREITE, height: HOEHE, rx: 14, fill: "#3a1f3d" }),
+        // Vorhang links und rechts, Bühnenboden aus Holz
+        s("path", { d: "M14,0 L40,0 C34,50 44,100 30,132 L0,132 L0,14 Q0,0 14,0 Z", fill: "#8c2f4b" }),
+        s("path", { d: `M${BREITE - 14},0 L${BREITE - 40},0 C${BREITE - 34},50 ${BREITE - 44},100 ${BREITE - 30},132 L${BREITE},132 L${BREITE},14 Q${BREITE},0 ${BREITE - 14},0 Z`, fill: "#8c2f4b" }),
+        s("path", { d: `M0,128 L${BREITE},128 L${BREITE},136 Q${BREITE},${HOEHE} ${BREITE - 14},${HOEHE} L14,${HOEHE} Q0,${HOEHE} 0,136 Z`, fill: "#b07a45" }));
+      if (sterne >= 2) {
+        // Scheinwerfer von oben (Schmuck ab 2 Sternen)
+        const licht = s("g", { "data-schmuck": "2", fill: "#fff6c8", opacity: 0.16 },
+          s("path", { d: "M90,0 L104,0 L170,128 L100,128 Z" }), s("path", { d: "M216,0 L230,0 L220,128 L150,128 Z" }));
+        svg.appendChild(erscheine(licht, DAUER, ruhig, 0.5));
+      }
+      // vorne die Besetzung der Stufe (Abstand so, dass die Querflöte die Nachbarin nicht berührt), im Orchester
+      // dahinter die Streicher, kleiner
+      const alle = [...hinten.map((i, n) => ({ i, x: 84 + n * 30, y: 86, k: 0.42 })),
+        ...vorne.map((i, n) => ({ i, x: BREITE / 2 + (n - (vorne.length - 1) / 2) * 56, y: 128, k: 0.6 }))];
+      const je = DAUER / alle.length;
+      alle.forEach(({ i, x, y, k }, n) => {
+        const m = musikerin(i, x, y, k);
+        // tritt auf: erscheint mit einem kleinen Hüpfer; bei 3 Sternen verbeugen sich alle am Schluss
+        const innen = s("g", {}, m);
+        if (!ruhig) {
+          innen.setAttribute("opacity", "0");
+          innen.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(n * je), fill: "freeze" }));
+          innen.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", values: "0 -10;0 0", begin: t(n * je), dur: "0.3s", fill: "freeze" }));
+          if (sterne >= 3) innen.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", values: "0 0;0 3;0 0",
+            begin: t(DAUER + 0.2), dur: "0.6s", additive: "sum", fill: "freeze" }));
+        }
+        svg.appendChild(innen);
+        // Ton nur mit Ton an: klang ist der Ton des Rahmens, der den Schalter 🔇 beachtet
+        if (klang && plane) plane(START + (ruhig ? 0 : n * je), () => klang([[NOTEN[n % NOTEN.length], 0.18]]));
+      });
+      if (sterne >= 3) svg.appendChild(funken(BREITE / 2, ziel === "orchester" ? 26 : 50, ruhig));
+      return svg;
+    },
+
+    /** SAMMELN (Konzept 5, Anlaut-Angel): die Eule angelt Fisch um Fisch in den Eimer. */
+    sammeln(feier, { stufe, sterne, ruhig }) {
+      const zahl = feier.ziele?.[stufe];
+      if (feier.bilder !== "angel" || !Number.isInteger(zahl) || zahl < 1 || zahl > FISCHFARBEN.length) return null;
+      const svg = s("svg", { viewBox: `0 0 ${BREITE} ${HOEHE}`, "data-muster": "sammeln", "data-ziel": String(zahl), "data-anzahl": zahl },
+        tagGrund(),
+        s("path", { d: `M0,104 L${BREITE},104 L${BREITE},136 Q${BREITE},${HOEHE} ${BREITE - 14},${HOEHE} L14,${HOEHE} Q0,${HOEHE} 0,136 Z`, fill: "#5aa9dc" }),
+        s("path", { d: "M10,116 q10,-4 20,0 M60,126 q10,-4 20,0 M200,122 q10,-4 20,0 M270,114 q10,-4 20,0", stroke: "#cfe9f8", "stroke-width": 1.2, fill: "none" }),
+        // Steg mit Pfosten, die Eule sitzt vorne mit der Angel, der Eimer neben ihr
+        s("rect", { x: 0, y: 92, width: 132, height: 7, fill: "#a8743f" }),
+        s("rect", { x: 30, y: 99, width: 5, height: 26, fill: "#7a4f26" }), s("rect", { x: 110, y: 99, width: 5, height: 26, fill: "#7a4f26" }));
+      const eule = euleSitzend(0.55);
+      eule.setAttribute("transform", "translate(112 92)");
+      svg.append(eule, s("path", { d: "M120,74 L196,30", stroke: "#6b4a2b", "stroke-width": 1.6, "stroke-linecap": "round" }),
+        s("path", { d: "M196,30 L198,110", stroke: "#e8e9f5", "stroke-width": 0.6 }));
+      // Eimer, breit genug für sechs Fische nebeneinander: die Kinder sollen sie zählen können
+      const eimer = s("g", {}, s("path", { d: "M14,64 L78,64 L73,92 L19,92 Z", fill: "#8a94a6", stroke: "#4f5668", "stroke-width": 1.2 }),
+        s("path", { d: "M14,64 Q46,40 78,64", stroke: "#4f5668", "stroke-width": 1.2, fill: "none" }));
+      const imEimer = s("g", {});
+      svg.append(imEimer, eimer);
+      const je = DAUER / zahl;
+      for (let n = 0; n < zahl; n++) {
+        // springt aus dem Wasser an der Schnur und landet aufrecht im Eimer, der Kopf schaut über den Rand
+        const f = fisch(FISCHFARBEN[n]);
+        const platz = { x: 22 + n * 10, y: 55 };
+        const g = s("g", { "data-stueck": "fisch" }, f);
+        if (ruhig) {
+          g.setAttribute("transform", `translate(${platz.x} ${platz.y}) rotate(-90)`);
+        } else {
+          g.setAttribute("opacity", "0");
+          g.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(n * je), fill: "freeze" }));
+          g.appendChild(s("animateMotion", { path: `M198,112 C190,20 90,10 ${platz.x},${platz.y}`, begin: t(n * je), dur: `${Math.max(je, 0.6)}s`, fill: "freeze" }));
+          f.setAttribute("transform", "rotate(-90)");
+        }
+        imEimer.appendChild(g);
+        if (sterne >= 2) {
+          const ring = s("ellipse", { cx: 198, cy: 112, rx: 10, ry: 2.6, fill: "none", stroke: "#ffffff", "stroke-width": 1, "data-schmuck": "2" });
+          if (!ruhig) {
+            ring.setAttribute("opacity", "0");
+            ring.appendChild(s("animate", { attributeName: "opacity", values: "0;0.9;0", begin: t(n * je), dur: "0.8s", fill: "freeze" }));
+            ring.appendChild(s("animate", { attributeName: "rx", values: "4;16", begin: t(n * je), dur: "0.8s", fill: "freeze" }));
+          } else ring.setAttribute("opacity", "0.6");
+          svg.appendChild(ring);
+        }
+      }
+      if (sterne >= 3) svg.appendChild(funken(46, 36, ruhig));
+      return svg;
+    },
+
+    /** KARTE (Konzept 5, Schweiz-Karten-Suche): Flug über die stumme Karte, die Ziele leuchten der Reihe nach auf. */
+    karte(feier, { stufe, sterne, ruhig }) {
+      const ziel = feier.ziele?.[stufe], k = feier.karte;
+      if (!k || !ziel || !(ziel.flaechen?.length || ziel.punkte?.length)) return null;
+      // Stücke mit ihrer Mitte, von West nach Ost: in dieser Reihe fliegt die Eule darüber
+      const stuecke = [...(ziel.flaechen || []).map(d => ({ d, m: mitte(pfadPunkte(d)) })), ...(ziel.punkte || []).map(p => ({ p, m: p }))]
+        .sort((a, b) => a.m[0] - b.m[0]);
+      // Ausschnitt: ganze Karte oder die Gegend der Ziele, eingepasst in das Bild
+      let [x0, y0, x1, y1] = [0, 0, k.breite, k.hoehe];
+      if (ziel.ausschnitt) {
+        const alle = stuecke.flatMap(st => (st.d ? pfadPunkte(st.d) : [st.p]));
+        x0 = Math.min(...alle.map(q => q[0])); x1 = Math.max(...alle.map(q => q[0]));
+        y0 = Math.min(...alle.map(q => q[1])); y1 = Math.max(...alle.map(q => q[1]));
+      }
+      const rand = 10, fx = (BREITE - 2 * rand) / (x1 - x0), fy = (HOEHE - 2 * rand) / (y1 - y0), f = Math.min(fx, fy);
+      const ox = (BREITE - f * (x1 - x0)) / 2 - f * x0, oy = (HOEHE - f * (y1 - y0)) / 2 - f * y0;
+      const inBild = ([x, y]) => [ox + f * x, oy + f * y];
+      const svg = s("svg", { viewBox: `0 0 ${BREITE} ${HOEHE}`, "data-muster": "karte", "data-ziel": stufe, "data-anzahl": stuecke.length }, tagGrund());
+      const clip = `feier-karte-${stufe}`;
+      svg.appendChild(s("clipPath", { id: clip }, s("rect", { x: 0, y: 0, width: BREITE, height: HOEHE, rx: 14 })));
+      // der Zuschnitt hängt an einer Gruppe ohne Verschiebung: sonst gälte das Rechteck in Kartenkoordinaten
+      const karte = s("g", { transform: `translate(${ox} ${oy}) scale(${f})` });
+      karte.appendChild(s("path", { d: k.land, fill: "#f3efe4", stroke: "#8a8fa8", "stroke-width": 1.2 / f }));
+      // stumme Karte: nur Umrisse (Kantone, im Ausschnitt dazu der Umriss der Gegend)
+      for (const d of [...(k.kantone || []).map(kt => kt.d), ...(ziel.umriss || [])])
+        karte.appendChild(s("path", { d, fill: "none", stroke: "#c9c3b0", "stroke-width": 0.7 / f }));
+      svg.appendChild(s("g", { "clip-path": `url(#${clip})` }, karte));
+      const lw = stuecke.length > 1 ? stuecke.length - 1 : 1;
+      const zeit = n => (n / lw) * DAUER * 0.9;
+      stuecke.forEach((st, n) => {
+        const farbe = KARTENFARBEN[n % KARTENFARBEN.length];
+        const e = st.d
+          ? s("path", { d: st.d, fill: farbe, "fill-opacity": 0.55, stroke: farbe, "stroke-width": 0.8 / f, "data-stueck": "flaeche" })
+          : s("circle", { cx: st.p[0], cy: st.p[1], r: 2.6 / f, fill: "#2d3047", stroke: "#ffffff", "stroke-width": 0.8 / f, "data-stueck": "punkt" });
+        karte.appendChild(erscheine(e, zeit(n), ruhig, 0.25));
+      });
+      // Flugweg der Eule über die Mitten (höchstens acht Stützpunkte, damit er ruhig bleibt)
+      const schritt = Math.max(1, Math.ceil(stuecke.length / 8));
+      const wegpunkte = stuecke.filter((_, n) => n % schritt === 0 || n === stuecke.length - 1).map(st => inBild(st.m));
+      const [lx, ly] = wegpunkte[wegpunkte.length - 1];
+      const weg = "M" + wegpunkte.map(([x, y]) => `${x.toFixed(1)},${(y - 6).toFixed(1)}`).join(" L");
+      const eule = euleSilhouette();
+      eule.setAttribute("data-figur", "eule");
+      const flieger = s("g", {}, s("g", { transform: "scale(0.5)" }, eule));
+      if (ruhig) flieger.setAttribute("transform", `translate(${lx} ${ly - 14})`);
+      else {
+        flieger.setAttribute("opacity", "0");
+        flieger.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(0), fill: "freeze" }));
+        flieger.appendChild(s("animateMotion", { path: weg, begin: t(0), dur: `${DAUER}s`, fill: "freeze" }));
+        // am Ende etwas über dem letzten Ziel
+        flieger.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", from: "0 0", to: "0 -8", begin: t(DAUER), dur: "0.3s", additive: "sum", fill: "freeze" }));
+      }
+      svg.appendChild(flieger);
+      if (sterne >= 2) svg.appendChild(fahne(lx, ly, ruhig));
+      if (sterne >= 3) svg.appendChild(funken(Math.min(Math.max(lx, 24), BREITE - 24), Math.max(ly - 18, 20), ruhig));
+      return svg;
+    },
   };
 
   /** Soll das Gerät keine Bewegung zeigen (Einstellung „Bewegung reduzieren“)? */
@@ -583,7 +806,7 @@ var LS_FEIER = (function () {
    * Muster, keine Angabe für die Stufe). Eine Stufe mit eigenem Muster ({ muster, ziel, … }) nimmt dieses. Ein Tippen
    * springt ans Ende.
    */
-  function zeige(feier, { stufe, sterne, ruhig = bewegungReduziert() } = {}) {
+  function zeige(feier, { stufe, sterne, ruhig = bewegungReduziert(), klang = null } = {}) {
     let f = feier;
     const eigen = feier?.ziele?.[stufe];
     if (eigen && typeof eigen === "object" && !Array.isArray(eigen) && eigen.muster) {
@@ -592,13 +815,17 @@ var LS_FEIER = (function () {
     }
     const muster = MUSTER[f?.muster];
     if (!muster) return null;
-    const svg = muster(f, { stufe, sterne: Math.max(1, Math.min(3, sterne || 1)), ruhig });
-    if (!svg) return null;
+    // Klänge zeitlich zur Animation; ein Tippen ans Ende bricht die ausstehenden ab
+    const zeitgeber = [];
+    const plane = (sekunden, fn) => { if (typeof setTimeout === "function") zeitgeber.push(setTimeout(fn, sekunden * 1000)); };
+    const svg = muster(f, { stufe, sterne: Math.max(1, Math.min(3, sterne || 1)), ruhig, klang: typeof klang === "function" ? klang : null, plane });
+    if (!svg) { zeitgeber.forEach(clearTimeout); return null; }
     const box = document.createElement("div");
     box.className = "feier" + (ruhig ? " ruhig" : "");
     box.setAttribute("aria-hidden", "true");
     box.appendChild(svg);
     box.addEventListener("click", () => {
+      zeitgeber.forEach(clearTimeout);
       if (typeof svg.setCurrentTime === "function") { svg.setCurrentTime(START + DAUER + 2); svg.pauseAnimations(); }
     });
     return box;

@@ -1,6 +1,6 @@
 # Konzept: Abschluss-Animationen im Eulenpfad
 
-Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P5 gebaut, P6–P8 und Ruhezeiten offen, Abnahme durch Patrik offen.**
+Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P8 gebaut, Ruhezeiten offen, Abnahme durch Patrik offen.**
 Entscheide und Pilotliste in Abschnitt 7.
 
 ## 1. Auslöser
@@ -146,9 +146,9 @@ Desktop, Tablet (768 px) und Handy (375 px) angesehen und von Patrik abgenommen 
 | P3 | 🔭 Himmels-Forscher | ZYKLUS, dann REISE | NMG, 3 | zwei Muster in einem Spiel (Stufen 1–4 und 5–6), Mondphasen fachlich richtig | gebaut 10.11.2026 (LERN_Session27, Schritt 2a) |
 | P4 | 🌳 Wortfamilien-Baum | WACHSEN | Deutsch, 4 | Wachsen ohne Text (Wörter nur angedeutet), Sprachfach | gebaut 10.11.2026 (LERN_Session27, Schritt 2b) |
 | P5 | 🧱 Zahlenmauer-Baumeister | BAUEN | Mathe, 2 | Zahlen in den Steinen richtig (jeder Stein die Summe der beiden darunter), jüngere Kinder | gebaut 10.11.2026 (LERN_Session27, Schritt 2b) |
-| P6 | 🎺 Instrumenten-Kenner | AUFTRITT | Musik, 2 | Ton nur mit Ton an (Regel 8), Haltung der Instrumente richtig | offen |
-| P7 | 🎣 Anlaut-Angel | SAMMELN | Deutsch, 1 | jüngste Kinder (fast ohne Lesetext), das schlichteste Muster | offen |
-| P8 | 🗺️ Schweiz-Karten-Suche | KARTE | NMG, 4 | Kartendaten des Spiels wiederverwenden statt neu zeichnen | offen |
+| P6 | 🎺 Instrumenten-Kenner | AUFTRITT | Musik, 2 | Ton nur mit Ton an (Regel 8), Haltung der Instrumente richtig | gebaut 10.11.2026 (LERN_Session27, Schritt 2c) |
+| P7 | 🎣 Anlaut-Angel | SAMMELN | Deutsch, 1 | jüngste Kinder (fast ohne Lesetext), das schlichteste Muster | gebaut 10.11.2026 (LERN_Session27, Schritt 2c) |
+| P8 | 🗺️ Schweiz-Karten-Suche | KARTE | NMG, 4 | Kartendaten des Spiels wiederverwenden statt neu zeichnen | gebaut 10.11.2026 (LERN_Session27, Schritt 2c) |
 
 Fremdsprachen und Medien und Informatik sind im Pilot nicht vertreten; ihre Spiele nutzen dieselben Muster (ZYKLUS,
 AUFTRITT, KARTE, REISE) und kommen mit dem fachweisen Ausrollen.
@@ -171,6 +171,18 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
   Reihen; Grundsteine im Zahlenraum der Stufe (oberster Stein 12, 45, 72, 64, 690, 1435). Die Steine fallen von unten
   nach oben an ihren Platz, Sandstein statt Stellenfarben. Schmuck: Eule auf dem Deckstein (2★), Fähnchen und Funken
   (3★).
+- **P6 Instrumenten-Kenner:** Folge wie vorgeschlagen (Trommel, + Querflöte, + Geige, + Trompete, + Cello, Orchester
+  mit sechs Streichern dahinter); die Musikerinnen sind Eulen. Haltung: Querflöte zur rechten Seite der Spielerin,
+  Geige an der linken Schulter mit dem Bogen rechts, Cello zwischen den Knien mit dem Hals links; die Trompete zeigt
+  nach vorn (im Bild zur Seite). Je Auftritt ein Ton des C-Dur-Dreiklangs, nur mit Ton an. Schmuck: Scheinwerfer
+  (2★), Verbeugung und Funken (3★) statt Konfetti.
+- **P7 Anlaut-Angel:** Fische ohne Bild darauf (ein Bild in jedem Fisch wäre zu klein); sie stehen aufrecht
+  nebeneinander im Eimer, damit die Kinder sie zählen können. Schmuck: Wasserringe (2★), Funken über dem Eimer (3★)
+  statt Fischsprüngen im Bogen — die Fische springen schon in der Grundfassung im Bogen.
+- **P8 Schweiz-Karten-Suche:** Folge nach dem Spiel statt nach der Idee: s1 die Wahlkreise des Kantons St. Gallen
+  (Ausschnitt), s2 die Ostschweiz, s3 alle 26 Kantone, s4 die Hauptorte, s5 die Städte, s6 Kantone und Hauptorte.
+  Umrisse und Lage aus karte.js (swisstopo), keine Namen. Die Eule fliegt von West nach Ost, was sie überfliegt,
+  leuchtet auf. Schmuck: Fähnchen am letzten Ziel (2★), Funken (3★) statt glänzender Berge (keine Höhendaten).
 
 ## 8. Ideen je Spiel
 

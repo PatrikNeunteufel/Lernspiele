@@ -383,7 +383,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "MA.3.C.2", stufen: ALLE_STUFEN }] },
   { id: "anlaut-angel", art: ["antippen"], klasse: 1, bild: "🎣", name: "Anlaut-Angel", thema: "laute", farbe: "var(--deko-6)",
-    pfad: "spiele/anlaut-angel/index.html", stufen: ALLE_STUFEN, endlos: ["s2", "s3", "s5", "s6"], zeiten: { s1: 10, s2: 10, s3: 12, s4: 12, s5: 15, s6: 19 },
+    pfad: "spiele/anlaut-angel/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s2", "s3", "s5", "s6"], zeiten: { s1: 10, s2: 10, s3: 12, s4: 12, s5: 15, s6: 19 },
     beschreibung: "Was hörst du am Anfang, am Ende, in der Mitte?",
     listen: {
       "anlaut": { name: "Anlaut: Wörter, deren ersten Buchstaben man hört" },
@@ -485,7 +485,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.3.3", stufen: ALLE_STUFEN }] },
   { id: "instrumente", art: ["sortieren", "antippen"], klasse: 2, bild: "🎺", name: "Instrumenten-Kenner", thema: "musik", farbe: "var(--deko-2)",
-    pfad: "spiele/instrumente/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 10, s3: 10, s4: 12, s5: 15, s6: 19 },
+    pfad: "spiele/instrumente/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 10, s3: 10, s4: 12, s5: 15, s6: 19 },
     beschreibung: "Trommel, Geige, Flöte — und wie man sie spielt",
     listen: {
       "schlag": { name: "Schlaginstrumente (Name, Spielweise, Gruppe)" },
@@ -515,7 +515,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "MA.3.A.3", stufen: ALLE_STUFEN }] },
   { id: "schweiz-karte", art: ["antippen"], klasse: 4, neu: "LERN_Session6", bild: "🗺️", name: "Schweiz-Karten-Suche", thema: "orientierung", farbe: "var(--deko-2)",
-    pfad: "spiele/schweiz-karte/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 15, s6: 19 },
+    pfad: "spiele/schweiz-karte/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 15, s6: 19 },
     beschreibung: "Wahlkreise, Kantone, Hauptorte und Städte auf der stummen Karte finden",
     // Lage aus swisstopo (karte.js); geprüft werden die Namen in orte.js.
     listen: {
