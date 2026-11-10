@@ -225,7 +225,18 @@ Kindersprache.
    - **Notiz Patrik (Zukunft):** Ein Abgleich-Server für Spieldaten der Kinder teilte dieselben Entscheide; einstellen
      nur eine Aufsicht je Kind oder Klasse, mit einem zweiten Schlüssel der Aufsicht, die ihn betreibt
      (docs/konzept_gruppen.md 5c). Nicht Teil von C12.
-   Reihenfolge: Entscheide und E-Mail, Versionen (NS3), Unterschrift und Meldungsserver (NS2, NS1), Anleitung.
+   - **IM1 a (Impressum und Datenschutz):** Seite `portal/impressum.html`, verlinkt im Portal und in der Verwaltung beider
+     Apps: Impressum und Datenschutz in Klartext (alles bleibt im
+     Browser, die Ausnahmen aus CLAUDE.md, was die Entwicklung erhält und wozu, GitHub Pages protokolliert IP-Adressen,
+     Sitz in den Niederlanden und den USA — DSG Art. 19 Abs. 2 und 4). Gebaut vor dem Start des Meldungsservers.
+     Anlass: Mit dem Meldungsserver und der öffentlichen E-Mail-Adresse kommen Daten von Fremden bei der Entwicklung an.
+   - **IM1-A a (Adresse im Impressum):** Name, eine Postadresse, unter der Post sicher ankommt (Wohn- oder
+     Zustelladresse), und die E-Mail-Adresse — so hält das Impressum unter jeder Lesart von UWG Art. 3 Abs. 1 Bst. s
+     („Kontaktadresse einschliesslich derjenigen der elektronischen Post“, Stand 1. Januar 2025, fedlex). Patrik trägt die
+     Adresse selbst in `portal/impressum.js` ein. Ein Postfach allein genügt laut Sekundärquellen nicht (Swisscom
+     B2B-Magazin, IT-Recht-Kanzlei; amtliche Aussage nicht gefunden, 10.11.2026).
+   Reihenfolge: Entscheide und E-Mail, Versionen (NS3), Impressum (IM1), Unterschrift und Meldungsserver (NS2, NS1),
+   Anleitung.
    *Stand 2026-11-10 (LERN_Session27):* in Arbeit — Entscheide, E-Mail-Kontakt und Versionen (NS3, Kern 1.36.0)
    gebaut; offen Unterschrift und Meldungsserver (NS2, NS1) und die Anleitung.
 

@@ -426,7 +426,10 @@ function zeichneVerwaltung(box, neu) {
       typeof unterstuetzenAktiv === "function" && unterstuetzenAktiv().length
         ? el("p", { class: "leise-text", style: "margin-top:14px" }, el("a", { href: "../portal/unterstuetzen.html", text: "☕ Eulenpfad unterstützen" }),
           document.createTextNode(" — freiwillig; alle Spiele bleiben für alle gleich."))
-        : null));
+        : null,
+      // Impressum und Datenschutz (Plan C12, IM1 a): für die Aufsicht, nie in Tabs der Kinder
+      el("p", { class: "leise-text", style: "margin-top:14px" }, el("a", { href: "../portal/impressum.html", text: "Impressum und Datenschutz" }),
+        document.createTextNode(" — wer dahintersteht und wann Daten das Gerät verlassen."))));
   }
 
   // ----- Entwicklung (Entscheide E1 a, E2 a) -----

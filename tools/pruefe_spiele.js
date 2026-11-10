@@ -564,6 +564,13 @@ if (opt.endlosMessen !== 0) {
       fehlerZahl++;
     }
   }
+  // Impressum und Datenschutz (Plan C12, IM1 a): verlinkt im Portal und in der Verwaltung beider Apps, die Seite gibt es
+  const verweise = [["portal/index.html", 'href="impressum.html"'], ["eulenpfad/start/verwaltung.js", "../portal/impressum.html"],
+    ["lernsteig/start/aufsicht.js", "../portal/impressum.html"]];
+  if (!fs.existsSync(path.join(WURZEL, "portal", "impressum.html"))) { console.log("    FEHLER  portal/impressum.html fehlt"); fehlerZahl++; }
+  for (const [datei, link] of verweise) {
+    if (!fs.readFileSync(path.join(WURZEL, datei), "utf8").includes(link)) { console.log(`    FEHLER  ${datei}: kein Link auf Impressum und Datenschutz`); fehlerZahl++; }
+  }
 }
 // Endlos-Modus: je Spiel und Stufe mit endlos im Katalog einige Endlos-Runden (--endlos=0 schaltet ab).
 if (opt.endlos !== 0) {

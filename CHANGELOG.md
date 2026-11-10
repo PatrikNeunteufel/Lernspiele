@@ -1431,3 +1431,12 @@
   gemeldet. Im Browser mit dem Entwickler-Server angesehen (Status, Verbindung prüfen, Statistik, Meldung und Betreff in
   beiden Apps, kein Name im Betreff), Testkonten danach entfernt; Server direkt: Protokoll 2 abgewiesen. Doku Kern 3,
   4.12, 4.28, Eulenpfad 1, Lernsteig Aufbau, Plan C12.
+- Plan C12, IM1 a, IM1-A a — Impressum und Datenschutz: neue Seite `portal/impressum.html` mit Angaben aus
+  `portal/impressum.js` (Name, Postadresse — trägt Patrik ein, bis dahin „noch nicht eingetragen“ —, E-Mail, Stand).
+  Datenschutz in Klartext: alles bleibt im Browser, die Ausnahmen aus CLAUDE.md (Sichern, Abgleich, Meldungen ohne Namen
+  per E-Mail oder Text, Antworten in meldungen-stand.json, Einladung, Abzeichen, Aufsicht im Lernsteig), was die
+  Entwicklung erhält und wozu, GitHub Pages protokolliert IP-Adressen (Sitz Niederlande und USA; DSG Art. 19 Abs. 2 und
+  4), Rechte; der Meldungsserver als geplant. Wortlaut UWG Art. 3 Abs. 1 Bst. s und DSG Art. 19 auf fedlex gelesen,
+  Angaben von GitHub aus docs.github.com. Verlinkt in der Fusszeile des Portals und unter Verwaltung → Einstellungen
+  beider Apps; `tools/pruefe_spiele.js` prüft Seite und Links (Gegenprobe ohne Seite: gemeldet). Im Browser auf 375 px
+  angesehen (Seite 375 px breit, keine Konsolenfehler, Links in beiden Verwaltungen), Testkonten entfernt.

@@ -214,7 +214,10 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       auswahl("Gast", [{ id: "an", name: "erlaubt (nichts wird gespeichert)" }, { id: "aus", name: "abgeschaltet" }], e.gast || "an", w => setze("gast", w), { name: "gast" }),
       el("small", { class: "leise", text: "Gilt für alle Konten auf diesem Gerät. Die Jugendlichen sehen die Einstellung in jeder Übung." })),
       el("h2", { class: "abschnitt", text: "Meldungen an die Entwicklung" }), meldewegKarte(),
-      el("h2", { class: "abschnitt", text: "Speicher dieses Geräts" }), speicherKarte()];
+      el("h2", { class: "abschnitt", text: "Speicher dieses Geräts" }), speicherKarte(),
+      // Impressum und Datenschutz (Plan C12, IM1 a)
+      el("p", { class: "leise" }, el("a", { href: "../portal/impressum.html", text: "Impressum und Datenschutz" }),
+        document.createTextNode(" — wer dahintersteht und wann Daten das Gerät verlassen."))];
   }
 
   // Weg der Meldungen und Adresse des Entwickler-Servers (Plan C11, C11-3 a; KERN.meldungen.meldeweg): nur auf diesem
