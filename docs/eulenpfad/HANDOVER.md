@@ -13,7 +13,10 @@
   Fehler.“ — **letzter voller Lauf auf `6055527`**.
 - **Weiter mit:** Block M1 laufend mit Screenshots nachsehen (Memory „Animationen laufend prüfen“), Abnahme des
   nachgebesserten Tresors; Block M2 (Zahlen, Teiler, Begründen); voller Eulenpfad-Lauf auf Patriks Entscheid vor dem
-  nächsten Push mit `spiel.js`; Anleitungen am Schluss; Inbetriebnahme des Meldungsservers (Patrik).
+  nächsten Push mit `spiel.js`; Anleitungen am Schluss; Inbetriebnahme des Meldungsservers (Patrik). **Nach den
+  Animationen:** Rückmeldung zur Gestaltung ([rueckmeldung_gestaltung.md](rueckmeldung_gestaltung.md): Bildkarten statt
+  Textkarten, Kinder-Bühne und Lehrer-Cockpit, Schrift und Knöpfe) zu einem Konzept mit Entscheidungsfragen machen;
+  Screenshots der Animationen als mögliche Kartenbilder.
 
 **2026-11-09, nach LERN_Session26** ([Report](report/LERN_Session26_2026-11-09.md)):
 - **Kern:** unverändert 1.34.0.

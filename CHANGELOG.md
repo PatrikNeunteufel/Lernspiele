@@ -1650,3 +1650,7 @@
 - Session-Abschluss LERN_Session27: Report docs/eulenpfad/report/LERN_Session27_2026-11-10.md, Handover (Stand nach
   LERN_Session27, Haltepunkt der Sitzung aufgelöst). Anweisung Patrik als Memory: Animationen laufend durchspielen und
   mit Screenshots zu mehreren Zeitpunkten prüfen, nicht nur das ruhige Endbild. Keine Code-Änderung.
+- Rückmeldung zur Gestaltung aufgenommen (Wunsch Patrik, als Schritt nach den Abschluss-Animationen): neu
+  docs/eulenpfad/rueckmeldung_gestaltung.md (Eingang, nichts entschieden) — Eindruck „steril“ und „nach KI“, die drei
+  Hebel Bildkarten, Kinder-Bühne und Lehrer-Cockpit, Schrift und Knöpfe, und was im Konzept zu klären ist; Handover und
+  Report verweisen darauf.

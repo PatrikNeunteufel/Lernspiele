@@ -88,4 +88,8 @@ Eulenpfad (Plan B3). 28 Commits von `6055527` bis `f9e7a20`, dazu dieser Abschlu
 3. **Voller Eulenpfad-Lauf** auf Patriks Entscheid (rund 25 min) — vor dem nächsten Push, der `spiel.js` mitbringt.
 4. **Anleitungen** (Patrik: „erst wenn alles fertig“): Abschluss-Animation, Ruhezeiten, Kopfhörer in der Anleitung für
    Erwachsene.
-5. Patrik: Inbetriebnahme des Meldungsservers zu Hause nach `docs/anleitung_inbetriebnahme_meldungsserver.md`.
+5. **Nach den Animationen: Gestaltung** — Rückmeldung einer Lehrperson („steril“, „nach KI“), von Patrik
+   zusammengefasst, in `docs/eulenpfad/rueckmeldung_gestaltung.md` (Eingang): Bildkarten statt Textkarten, Kinder-Bühne
+   und Lehrer-Cockpit trennen, rundere Schrift und Knöpfe mit Tiefe. Erst Konzept mit Entscheidungsfragen (frühere
+   Entscheide wie ST1 a abgleichen, Schrift nur als lokale Datei), Screenshots der Animationen als mögliche Kartenbilder.
+6. Patrik: Inbetriebnahme des Meldungsservers zu Hause nach `docs/anleitung_inbetriebnahme_meldungsserver.md`.
