@@ -28,10 +28,10 @@ def gleich(ist, soll, was: str) -> None:
         fehler.append(f"{was}: {ist!r} statt {soll!r}")
 
 
-def anfrage(basis: str, pfad: str, daten: dict | None = None) -> tuple:
-    """(Status, JSON) einer GET- oder POST-Anfrage."""
+def anfrage(basis: str, pfad: str, daten: dict | None = None, kopf: dict | None = None) -> tuple:
+    """(Status, JSON) einer GET- oder POST-Anfrage; kopf: weitere Kopfzeilen (etwa X-Forwarded-For)."""
     roh = None if daten is None else json.dumps(daten).encode("utf-8")
-    req = urllib.request.Request(basis + pfad, data=roh, headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(basis + pfad, data=roh, headers={"Content-Type": "application/json", **(kopf or {})})
     lies = lambda roh: json.loads(roh or b"{}") if roh[:1] in (b"{", b"[", b"") else {"_kein_json": True}
     try:
         with urllib.request.urlopen(req, timeout=10) as r:
@@ -160,6 +160,15 @@ def pruefe_netz(basis: str, ordner: Path) -> None:
         ES._meldezeiten.clear()
         codes = [anfrage(basis, "/entwicklung/meldung", {**m, "meldung": f"M-grenze{n}-ab"})[0] for n in range(3)]
         gleich(codes, [200, 200, 429], "Grenze je Absender und Stunde")
+        # Hinter dem eigenen Proxy (--hinter-proxy): je Absender aus der letzten Angabe von X-Forwarded-For gezählt;
+        # eine vorn selbst mitgeschickte Angabe zählt nicht
+        ES._meldezeiten.clear()
+        ES.HINTER_PROXY = True
+        xff = lambda kette: {"X-Forwarded-For": kette}
+        a1 = [anfrage(basis, "/entwicklung/meldung", {**m, "meldung": f"M-proxya{n}-ab"}, xff(f"9.9.9.{n}, 203.0.113.1"))[0] for n in range(3)]
+        a2 = anfrage(basis, "/entwicklung/meldung", {**m, "meldung": "M-proxyb0-ab"}, xff("203.0.113.2"))[0]
+        ES.HINTER_PROXY = False
+        gleich((a1, a2), ([200, 200, 429], 200), "hinter dem Proxy: je Absender gezählt, selbst mitgeschickte Angabe zählt nicht")
         ES.MELDUNGEN_JE_STUNDE = alt
         ES._meldezeiten.clear()
         k = ES.zulassen("Eva Netz", "eva@schule.ch")

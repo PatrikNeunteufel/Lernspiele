@@ -277,8 +277,9 @@ Kindersprache.
    Impressum gebaut, Bemerkungen gitignored, Richtlinie geschrieben, Schlüssel je Aufsicht gebaut (Kern 1.37.0,
    `--zulassen`, Eingang, Anforderung), Übernehmen nach der Richtlinie (`tools/entwicklung_abgleich.py uebernehmen`),
    Unterschrift des Servers (NS2, Kern 1.38.0; Schlüsselpaar erzeugt Patrik mit `--neues-schluesselpaar`),
-   Meldungsserver im Netz (NS1, Kern 1.39.0: `--netz`, Meldungen für alle, `holen`/`senden`); offen die Anleitung zum
-   Server mit Datenschutzseite und Inbetriebnahme, dann die Anleitungen der Apps.
+   Meldungsserver im Netz (NS1, Kern 1.39.0: `--netz`, Meldungen für alle, `holen`/`senden`), Anleitung
+   [anleitung_entwickler_server.md](anleitung_entwickler_server.md) und Datenschutzseite; offen die Anleitungen der Apps
+   und die Inbetriebnahme durch Patrik (Schlüsselpaar, Server, Adresse in `kontakt.js`).
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 

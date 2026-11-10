@@ -1499,3 +1499,13 @@
   Zwang zur Unterschrift und Meldung ohne Schlüssel; Lernsteig-Test unverändert grün; im Browser: http im Netz
   abgewiesen, https im Netz erreichbar geprüft (`.invalid`, keine fremde Anfrage), keine Konsolenfehler ausser der
   Namensauflösung.
+- Plan C12 — Anleitung und Datenschutz zum Meldungsserver: neu
+  [docs/anleitung_entwickler_server.md](docs/anleitung_entwickler_server.md) (wer was darf, was wo liegt und was nie ins
+  Repo kommt, lokaler Betrieb, zugelassene Aufsichten mit Antwortvorlage, Schlüsselpaar, Meldungsserver im Netz mit Caddy
+  und systemd — als nicht geprüft gekennzeichnet —, Abgleich, Aktualisieren, was der Server speichert, Fehlersuche).
+  Behoben: Hinter einem Reverse-Proxy kam jede Meldung von 127.0.0.1, die Grenze von 20 je Stunde hätte für alle
+  zusammen gegolten — neu `--hinter-proxy` (letzte Angabe von X-Forwarded-For; selbst mitgeschickte zählt nicht), Fall
+  in `tools/pruefe_server.py` (59), Gegenprobe (erste Angabe): gemeldet. Datenschutzseite: Abschnitte
+  „Meldungsserver der Entwicklung“ (nur https, nur an einen Server mit Unterschrift, ohne Namen, keine IP-Adressen) und
+  „Prüfen im Entwicklermodus“ (Name und Prüfwert, keine E-Mail, Zählung nur bei der Entwicklung). Steckbrief verweist
+  auf die Anleitung.

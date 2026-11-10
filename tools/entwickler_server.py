@@ -15,7 +15,7 @@ Aufruf (aus beliebigem Ordner):
     python tools/entwickler_server.py --sperren "Vorname Name"     Schlüssel einer Aufsicht sperren
     python tools/entwickler_server.py --zugelassen                 zugelassene Aufsichten auflisten
     python tools/entwickler_server.py --neues-schluesselpaar       Schlüsselpaar für die Unterschrift des Servers (NS2 a)
-    python tools/entwickler_server.py 8443 --netz [--host 0.0.0.0] [--zertifikat cert.pem --zertifikat-schluessel key.pem]
+    python tools/entwickler_server.py 8443 --netz [--hinter-proxy] [--host 0.0.0.0] [--zertifikat cert.pem --zertifikat-schluessel key.pem]
                                       Meldungsserver im Netz (NS1 a): keine Repo-Dateien, Ablage .entwicklung/daten/
 
 Zugelassene Aufsichten (Plan C12, ES1 a bis ES5 a, LERN_Session27): Wer prüfen will, fordert per E-Mail an; die
@@ -280,6 +280,10 @@ def neues_schluesselpaar(eintragen: Path | None = ENTWICKLUNG_JS) -> str:
 # IP-Adressen). Meldungen nimmt er von allen an (ohne Schlüssel, mit Grenze je Absender), Vermerke nur von
 # zugelassenen Aufsichten, holen und senden nur mit dem Schlüssel der Entwicklung (tools/entwicklung_abgleich.py).
 NETZ = False
+# Hinter einem Reverse-Proxy (Caddy, docs/anleitung_entwickler_server.md) kommt jede Anfrage von 127.0.0.1; der Absender
+# steht dann in X-Forwarded-For. Gezählt wird die letzte Angabe — die trägt der eigene Proxy ein; was ein Absender
+# selbst mitschickt, steht davor und zählt nicht.
+HINTER_PROXY = False
 MELDUNGEN_JE_STUNDE = 20  # je Absender (IP-Adresse, nur im Arbeitsspeicher für diese Zählung, nie gespeichert)
 _meldezeiten: dict = {}
 MELDUNG_KENNUNG = re.compile(r"^M-[a-z0-9]{4,16}-[a-z0-9]{2,8}$")
@@ -408,6 +412,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Private-Network", "true")
         self.end_headers()
 
+    def absender(self) -> str:
+        """Absender für die Grenze je Stunde: hinter dem eigenen Proxy die letzte Angabe in X-Forwarded-For."""
+        if HINTER_PROXY:
+            kette = [t.strip() for t in self.headers.get("X-Forwarded-For", "").split(",") if t.strip()]
+            if kette:
+                return kette[-1]
+        return self.client_address[0]
+
     def log_message(self, format, *args):
         """Im Netz keine Zeile je Anfrage — sie enthielte die IP-Adresse (Datenschutzseite: der Server speichert keine)."""
         if not NETZ:
@@ -467,7 +479,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return self.antwort(400, {"fehler": "app unbekannt"})
             if not MELDUNG_KENNUNG.match(str(daten.get("meldung", ""))):
                 return self.antwort(400, {"fehler": "Kennung der Meldung fehlt oder ist ungültig"})
-            if zu_viele_meldungen(self.client_address[0]):
+            if zu_viele_meldungen(self.absender()):
                 return self.antwort(429, {"fehler": "Zu viele Meldungen in kurzer Zeit. Bitte später noch einmal."})
             daten["von"] = "Meldung"  # ohne Namen: wer meldet, bleibt beim Gerät
             jetzt = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
@@ -659,6 +671,8 @@ def main() -> None:
         print("Hinweis: entwickler.key fehlt — Schreiben geht erst nach: python tools/entwickler_server.py --neuer-schluessel")
     wert = lambda schalter: sys.argv[sys.argv.index(schalter) + 1] if schalter in sys.argv and sys.argv.index(schalter) + 1 < len(sys.argv) else None
     if "--netz" in sys.argv:
+        global HINTER_PROXY
+        HINTER_PROXY = "--hinter-proxy" in sys.argv
         return netz_starten(port, wert("--host") or "127.0.0.1", wert("--zertifikat"), wert("--zertifikat-schluessel"))
     try:
         server = Server(("127.0.0.1", port), Handler)

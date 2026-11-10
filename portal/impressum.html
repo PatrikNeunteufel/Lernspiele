@@ -61,8 +61,7 @@
         hat; im Lernsteig die oder der Jugendliche selbst oder eine verbundene Aufsicht. Die Meldung enthält <b>keinen
         Namen</b>, sondern Klasse, Spiel oder Übung, Stufe, die Aufgabe, die Eingaben, die Begründung und die Version
         des Programms. Sie geht per E-Mail aus Ihrem eigenen Mailprogramm — dann erhält die Entwicklung auch Ihre
-        Absenderadresse — oder als Text zum Kopieren. Ein Meldungsserver der Entwicklung ist geplant; bevor er in Betrieb
-        geht, wird hier beschrieben, was er speichert.</li>
+        Absenderadresse —, an den Meldungsserver der Entwicklung (unten) oder als Text zum Kopieren.</li>
       <li><b>Antworten auf Meldungen:</b> Status und Antwort je Meldungsnummer stehen öffentlich in
         <code>meldungen-stand.json</code> der App, ohne Namen; das Gerät holt sie dort ab.</li>
       <li><b>Einladung in die nächste App:</b> als Link oder Datei mit Vorname, Geburtsdatum (oder -monat) und Klasse, im
@@ -76,7 +75,20 @@
     <h3>Was die Entwicklung erhält und wozu</h3>
     <p>Nur Fehlermeldungen und Anregungen, die jemand weitergeleitet hat, und E-Mails an die Adresse oben. Zweck: Fehler
       in Spielen und Übungen beheben und die Antwort zurückgeben. Die Entwicklung legt sie mit Nummer, Datum und Status
-      in ihren Arbeitsunterlagen ab.</p>
+      in ihren Arbeitsunterlagen ab, nicht öffentlich.</p>
+
+    <h3>Meldungsserver der Entwicklung</h3>
+    <p>Ist ein Meldungsserver eingetragen (von der Entwicklung oder in den Einstellungen des Geräts), geht eine weitergeleitete Meldung verschlüsselt (https)
+      dorthin — nur an einen Server, der sich mit dem Schlüssel der Entwicklung ausweist. Er speichert die Meldung ohne
+      Namen (wie oben) mit Datum und den Versionen des Programms. Er speichert <b>keine IP-Adressen</b>; um zu viele
+      Meldungen in kurzer Zeit abzuwehren, zählt er sie je Absender nur im Arbeitsspeicher, höchstens eine Stunde lang.
+      Die Entwicklung holt die Meldungen von dort ab. Ohne eingetragenen Server gehen Meldungen per E-Mail oder als Text.</p>
+
+    <h3>Prüfen im Entwicklermodus</h3>
+    <p>Wer Spiele und Listen prüfen möchte, fordert den Entwicklermodus per E-Mail an. Die Entwicklung speichert dafür den
+      Namen und einen Prüfwert des persönlichen Schlüssels, nicht die E-Mail-Adresse. Eingereichte Prüfvermerke tragen den
+      Namen. Die Entwicklung zählt je Person, wie viele Vermerke sie übernommen oder abgelehnt hat — nur bei sich, nicht
+      öffentlich (<a href="https://github.com/patrikneunteufel/Lernspiele/blob/master/docs/richtlinie_freigaben.md">Richtlinie</a>).</p>
 
     <h3>Hosting: GitHub Pages</h3>
     <p>Die Seiten liegen auf GitHub Pages. Beim Aufruf protokolliert GitHub die IP-Adresse zu Sicherheitszwecken, auch
