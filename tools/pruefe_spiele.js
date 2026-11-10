@@ -146,6 +146,19 @@ const TREIBER = `
         const schmuck = w => teile.filter(t => t.getAttribute && t.getAttribute("data-schmuck") === w).length;
         if ((n >= 2) !== (schmuck("2") > 0) || (n >= 3) !== (schmuck("3") > 0))
           melde("Feier", "Stufe " + st + ", " + n + " Stern(e): Schmuck passt nicht zu den Sternen", "feier-sterne");
+        // Zahlenmauer (BAUEN): jeder Stein die Summe der beiden darunter, die Zahl im Stein gleich seinem Wert
+        const steine = new Map(teile.filter(t => t.getAttribute && t.getAttribute("data-stein"))
+          .map(t => [t.getAttribute("data-stein"), t]));
+        for (const [pos, t] of steine) {
+          const [r, i] = pos.split(",").map(Number), wert = Number(t.getAttribute("data-wert"));
+          const text = (t.textContent || "").replace(/\s/g, "");
+          if (text !== String(wert)) melde("Feier", "Stufe " + st + ": Stein " + pos + " zeigt " + text + " statt " + wert, "feier-stein");
+          if (r > 0) {
+            const a = steine.get((r - 1) + "," + i), b = steine.get((r - 1) + "," + (i + 1));
+            if (!a || !b || wert !== Number(a.getAttribute("data-wert")) + Number(b.getAttribute("data-wert")))
+              melde("Feier", "Stufe " + st + ": Stein " + pos + " ist nicht die Summe der beiden darunter", "feier-mauer");
+          }
+        }
       }
       return;
     }

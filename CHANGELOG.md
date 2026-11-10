@@ -1573,3 +1573,15 @@
   keine Konsolenfehler): in Stufe 1 ragte die Rakete aus dem Bild und verdeckte die Landezahl — unterste Zeile nun
   unten, Zahl unter der Linie. Doku rahmen.md 24 (Tabelle der Muster), Konzept (Stand, Status der Piloten, Abweichungen
   von den Ideen).
+- Eulenpfad, Abschluss-Animationen Schritt 2b: `feier.js` mit den Mustern WACHSEN (Baum wächst Teil um Teil, Wörter als
+  leere Kärtchen, aus den Blüten werden Äpfel, die Eule fliegt mit den Früchten in die Krone) und BAUEN (Zahlenmauer
+  Stein um Stein von unten, jeder Stein die Summe der beiden darunter); dazu Bilder am Tag, sitzende Eule, Schmetterling,
+  singender Vogel, `bewege` mit Beginn und Dauer. Pilot P4 Wortfamilien-Baum (s1 Stamm … s6 Früchte), Pilot P5
+  Zahlenmauer-Baumeister (Form und Zahlenraum wie die Stufe: drei, vier, fünf Reihen). Prüfhaken: `tools/pruefe_spiele.js`
+  rechnet in jeder Mauer die Summenregel und die Zahl im Stein nach — Gegenproben (falsche Summe, falsche Zahl):
+  gemeldet. Himmels-Forscher nach Rückmeldung Patrik: s1–s4 zieht der Mond im Bogen über den Himmel, Stufe um Stufe
+  zunehmend (Neumond mit der Sonne, Sichel, Halbmond, Vollmond) statt der Reihe der Phasen; die Sternschnuppe (Schmuck bei
+  3 Sternen) bekommt einen hellen Kopf und einen verblassenden Schweif und steht links oben im freien Himmel. Klickzahlen
+  der beiden neuen Piloten ändern sich (Gegenprobe ohne Animation: wieder gleich), die drei ersten Piloten gleich wie in
+  2a. Im Browser angesehen (alle Stufen, 1–3 Sterne, Endbild und laufend, keine Konsolenfehler): die Eule flog schon
+  los, während der Stamm noch wuchs — berichtigt. Doku rahmen.md 24, Konzept (Status, Abweichungen P3–P5).

@@ -1063,8 +1063,10 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   |---|---|---|
   | REISE | `{ muster: "reise", reisender: "rakete" \| "sonde", ziele: { s1 … s6 } }`, Ziel `"mond"`, `"mars"`, `"jupiter"`, `"saturn"`, `{ um: "erde" }` oder `{ rand: true }` (die acht Planeten) | Rechen-Rakete |
   | ZOOM | `{ muster: "zoom", ziele: { s1: 4, s2: 4.6, … } }`: Zahlenstrahl, je Stelle nach dem Komma eine Lupe tiefer, Landung auf der Zahl; Zahlen über `LS.dezimalText` (Punkt oder Komma); `stellen: { sX: n }` setzt die Tiefe, sonst zählt die Zahl | Dezimal-Rakete |
-  | ZYKLUS | `{ muster: "zyklus", bilder: "mond", ziele: { s1: ["neu"], … } }`: die Phasen der Reihe nach, die letzte gross; Phasen `neu`, `sichel`, `halb`, `dreiviertel`, `voll`, zunehmend rechts hell wie im Himmels-Forscher | Himmels-Forscher s1–s4 |
+  | ZYKLUS | `{ muster: "zyklus", bilder: "mond", ziele: { s1: "neu", … } }`: der Mond der Phase steigt hinter dem Hügel auf und zieht im Bogen über den Himmel (beim Neumond die Sonne daneben); als Liste (`["neu", "sichel"]`) die Phasen der Reihe nach, die letzte gross. Phasen `neu`, `sichel`, `halb`, `dreiviertel`, `voll`, zunehmend rechts hell wie im Himmels-Forscher | Himmels-Forscher s1–s4 |
   | SZENE | `{ muster: "szene", szene: "eule-vollmond" }`: ein festes Bild für den Endgegner | Himmels-Forscher s6 |
+  | WACHSEN | `{ muster: "wachsen", bilder: "baum", ziele: { s1: "stamm", … } }`: der Baum wächst Teil um Teil bis zum Teil der Stufe (`stamm`, `ast`, `aeste`, `blaetter`, `blueten`, `fruechte`; aus den Blüten werden Äpfel, die Eule setzt sich in die Krone); Wörter nur als leere Kärtchen | Wortfamilien-Baum |
+  | BAUEN | `{ muster: "bauen", bilder: "mauer", ziele: { s1: [2, 3, 4], … } }`: Zahlenmauer aus den Grundsteinen der Stufe, Stein um Stein von unten; jeder Stein trägt `data-stein="r,i"` und `data-wert`, der Test rechnet die Summenregel und die Zahl im Stein nach | Zahlenmauer-Baumeister |
 
   Eine Stufe kann ein anderes Muster nehmen: `ziele: { s5: { muster: "reise", reisender: "sonde", ziel: { rand: true } } }`
   (Himmels-Forscher übt in s5 und s6 Planeten statt Mondphasen).

@@ -209,10 +209,10 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "himmels-forscher",
-  // Abschluss-Animation (Pilot P3; docs/konzept_abschluss_animationen.md 6): s1–s4 Mondphasen (zunehmend rechts hell, wie
-  // das Spiel), s5 eine Sonde an den acht Planeten vorbei (s5 übt Planeten), s6 die Eule vor dem Vollmond
+  // Abschluss-Animation (Pilot P3; docs/konzept_abschluss_animationen.md 6): s1–s4 zieht der Mond über den Himmel,
+  // Stufe um Stufe zunehmend bis zum Vollmond (rechts hell, wie das Spiel), s5 eine Sonde an den acht Planeten vorbei (s5 übt Planeten), s6 die Eule vor dem Vollmond
   feier: { muster: "zyklus", bilder: "mond",
-    ziele: { s1: ["neu"], s2: ["neu", "sichel"], s3: ["neu", "sichel", "halb"], s4: ["neu", "sichel", "halb", "dreiviertel", "voll"],
+    ziele: { s1: "neu", s2: "sichel", s3: "halb", s4: "voll",
       s5: { muster: "reise", reisender: "sonde", ziel: { rand: true } }, s6: { muster: "szene", szene: "eule-vollmond" } } },
   hilfe: "Schau die Mondbilder genau an: Welche Seite ist hell? Bei einer Reihe tippst du die Mondbilder oder Planeten der Reihe nach an.",
   einleitung: "Schau in den Nachthimmel! Der Mond sieht jede Nacht ein bisschen anders aus. Und um die Sonne kreisen acht Planeten.",

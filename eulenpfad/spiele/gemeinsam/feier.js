@@ -9,7 +9,7 @@
    Schmuck der Stufe 2 und 3, data-schmuck="2"/"3"), ohne Text ausser Zahlen, die zum Inhalt gehören, SVG ohne
    Bibliothek. Die Animation ist Schmuck (aria-hidden); die Knöpfe des Schlussbilds sind sofort bedienbar.
 
-   Muster (Konzept, Abschnitt 5). Gebaut: REISE, ZOOM, ZYKLUS, SZENE. Folgen: WACHSEN, BAUEN, AUFTRITT, SAMMELN, KARTE.
+   Muster (Konzept, Abschnitt 5). Gebaut: REISE, ZOOM, ZYKLUS, SZENE, WACHSEN, BAUEN. Folgen: AUFTRITT, SAMMELN, KARTE.
    Eine Stufe darf ein anderes Muster nehmen: ziele.sX = { muster: "…", ziel: …, … } (Himmels-Forscher s5, s6).
 
    REISE  { muster: "reise", reisender: "rakete" | "sonde", ziele: { s1 … s6 } } — je Stufe ein Ziel:
@@ -19,7 +19,12 @@
             Zeile tiefer, wie unter einer Lupe (stellen: { sX: n } überschreibt die Zahl der Stellen)
    ZYKLUS { muster: "zyklus", bilder: "mond", ziele: { s1: ["neu"], … } } — die Phasen der Reihe nach bis zur Phase der
             Stufe; Mond zunehmend, rechts beleuchtet (Sicht von der Nordhalbkugel)
-   SZENE  { muster: "szene", szene: "eule-vollmond" } */
+   SZENE  { muster: "szene", szene: "eule-vollmond" }
+   WACHSEN { muster: "wachsen", bilder: "baum", ziele: { s1: "stamm", … } } — der Baum wächst Teil um Teil bis zum Teil
+            der Stufe: stamm, ast, aeste, blaetter, blueten, fruechte (aus den Blüten werden Früchte, die Eule setzt sich
+            in die Krone); Wörter sind nur als leere Kärtchen angedeutet
+   BAUEN  { muster: "bauen", bilder: "mauer", ziele: { s1: [2, 3, 4], … } } — Zahlenmauer aus den Grundsteinen der
+            Stufe, Stein um Stein von unten; jeder Stein trägt die Summe der beiden darunter (data-stein, data-wert) */
 "use strict";
 
 var LS_FEIER = (function () {
@@ -130,9 +135,9 @@ var LS_FEIER = (function () {
   }
   const REISENDE = { rakete, sonde };
 
-  /** Fähnchen (Schmuck ab 2 Sternen), erscheint nach der Bewegung. */
-  function fahne(x, y, ruhig) {
-    return erscheine(s("g", { "data-schmuck": "2" },
+  /** Fähnchen (Schmuck ab 2 Sternen; schmuck "3", wo es zum Schmuck der 3 Sterne gehört), erscheint nach der Bewegung. */
+  function fahne(x, y, ruhig, schmuck = "2") {
+    return erscheine(s("g", { "data-schmuck": schmuck },
       s("line", { x1: x, y1: y, x2: x, y2: y - 18, stroke: "#6b7089", "stroke-width": 1.5 }),
       s("path", { d: `M${x},${y - 18} L${x + 12},${y - 14} L${x},${y - 10} Z`, fill: "#2fb36b" })), DAUER, ruhig);
   }
@@ -165,9 +170,16 @@ var LS_FEIER = (function () {
 
   /** Sternschnuppe (Schmuck bei 3 Sternen, am Himmel statt der Funken). */
   function sternschnuppe(ruhig) {
-    const g = s("g", { "data-schmuck": "3" });
-    const strich = s("line", { x1: 250, y1: 14, x2: 214, y2: 32, stroke: "#ffffff", "stroke-width": 1.6, "stroke-linecap": "round" });
-    g.appendChild(strich);
+    // heller Kopf vorn, der Schweif verblasst nach hinten — so ist sie als Sternschnuppe zu erkennen (ein blosser
+    // Strich war es nicht, Rückmeldung Patrik)
+    const strich = s("g", {},
+      // links oben im freien Himmel (rechts stehen Mond und Ziele)
+      s("linearGradient", { id: "feier-schweif", gradientUnits: "userSpaceOnUse", x1: 96, y1: 32, x2: 144, y2: 8 },
+        s("stop", { offset: 0, "stop-color": "#ffffff", "stop-opacity": 1 }), s("stop", { offset: 1, "stop-color": "#ffffff", "stop-opacity": 0 })),
+      s("path", { d: "M96,30.5 L144,7 L144,9 L96,33.5 Z", fill: "url(#feier-schweif)" }),
+      s("circle", { cx: 96, cy: 32, r: 3.4, fill: "#fff6c8", opacity: 0.5 }),
+      s("circle", { cx: 96, cy: 32, r: 2, fill: "#ffffff" }));
+    const g = s("g", { "data-schmuck": "3" }, strich);
     if (!ruhig) {
       strich.setAttribute("opacity", "0");
       strich.appendChild(s("animate", { attributeName: "opacity", values: "0;1;0.7", begin: t(DAUER + 0.1), dur: "0.7s", fill: "freeze" }));
@@ -180,16 +192,16 @@ var LS_FEIER = (function () {
    * Eine Figur einen Weg entlang bewegen. weg: SVG-Pfad; ende: { x, y, winkel } für das stehende Bild („Bewegung
    * reduzieren“). Die Bewegung endet und bleibt stehen (fill freeze).
    */
-  function bewege(figur, weg, ende, ruhig, { drehen = true } = {}) {
+  function bewege(figur, weg, ende, ruhig, { drehen = true, ab = 0, dauer = DAUER } = {}) {
     if (ruhig) {
       figur.setAttribute("transform", `translate(${ende.x} ${ende.y}) rotate(${ende.winkel})`);
       return figur;
     }
-    figur.appendChild(s("animateMotion", { path: weg, begin: t(0), dur: `${DAUER}s`, ...(drehen ? { rotate: "auto" } : {}), fill: "freeze",
+    figur.appendChild(s("animateMotion", { path: weg, begin: t(ab), dur: `${dauer}s`, ...(drehen ? { rotate: "auto" } : {}), fill: "freeze",
       calcMode: "spline", keyTimes: "0;1", keySplines: "0.4 0 0.3 1" }));
     // vor dem Start noch nicht im Bild (sonst stünde die Figur kurz bei 0,0)
     figur.setAttribute("opacity", "0");
-    figur.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(0), fill: "freeze" }));
+    figur.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(ab), fill: "freeze" }));
     return figur;
   }
 
@@ -217,6 +229,155 @@ var LS_FEIER = (function () {
       s("circle", { cx: 0, cy: -8, r: 5.5, fill: f }),
       s("path", { d: "M-4.5,-11 L-3,-17 L-1,-12 Z M4.5,-11 L3,-17 L1,-12 Z", fill: f }));
   }
+
+  // ---------- Bilder am Tag (WACHSEN, BAUEN) ----------
+  const tagGrund = () => s("rect", { x: 0, y: 0, width: BREITE, height: HOEHE, rx: 14, fill: "#d6ecf8" });
+  /** Wiese unten, mit den runden Ecken des Bildes. */
+  const boden = () => s("path", { d: `M0,130 Q160,120 ${BREITE},130 L${BREITE},136 Q${BREITE},${HOEHE} ${BREITE - 14},${HOEHE} L14,${HOEHE} Q0,${HOEHE} 0,136 Z`, fill: "#86c46f" });
+
+  /** Sitzende Eule (Farben wie der Avatar „Eule“), Füsse bei 0,0; k = Grösse (1 = 100 Einheiten hoch). */
+  function euleSitzend(k) {
+    const innen = s("g", { transform: `scale(${k}) translate(-50 -90)` },
+      s("path", { d: "M26 30 L22 12 L40 24 Z", fill: "#7a5a40" }), s("path", { d: "M74 30 L78 12 L60 24 Z", fill: "#7a5a40" }),
+      s("ellipse", { cx: 50, cy: 56, rx: 30, ry: 32, fill: "#8e6b4f" }), s("ellipse", { cx: 50, cy: 66, rx: 18, ry: 16, fill: "#d8b98f" }),
+      s("circle", { cx: 37, cy: 46, r: 12, fill: "#ffffff" }), s("circle", { cx: 63, cy: 46, r: 12, fill: "#ffffff" }),
+      s("circle", { cx: 38, cy: 47, r: 6, fill: "#2d3047" }), s("circle", { cx: 62, cy: 47, r: 6, fill: "#2d3047" }),
+      s("path", { d: "M45 56 L55 56 L50 65 Z", fill: "#f5a623" }),
+      s("ellipse", { cx: 41, cy: 88, rx: 6, ry: 3, fill: "#f5a623" }), s("ellipse", { cx: 59, cy: 88, rx: 6, ry: 3, fill: "#f5a623" }));
+    // äussere Gruppe für die Bewegung, innere für die Grösse (bewege setzt im ruhigen Bild transform der äusseren)
+    return s("g", { "data-figur": "eule" }, innen);
+  }
+
+  /** Eine Figur nach der Hauptbewegung einen Weg entlang (Schmuck); im ruhigen Bild gleich am Ende. */
+  function nachher(figur, weg, ende, ruhig, dauer = 1.2) {
+    if (ruhig) { figur.setAttribute("transform", `translate(${ende.x} ${ende.y})`); return figur; }
+    figur.setAttribute("opacity", "0");
+    figur.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(DAUER), fill: "freeze" }));
+    figur.appendChild(s("animateMotion", { path: weg, begin: t(DAUER), dur: `${dauer}s`, fill: "freeze" }));
+    return figur;
+  }
+
+  /** Schmetterling (Schmuck ab 2 Sternen) flattert heran. */
+  function schmetterling(x, y, ruhig) {
+    const fluegel = s("g", {},
+      s("ellipse", { cx: -4, cy: -2, rx: 4, ry: 5, fill: "#f0a030" }), s("ellipse", { cx: 4, cy: -2, rx: 4, ry: 5, fill: "#f0a030" }),
+      s("ellipse", { cx: -3, cy: 4, rx: 3, ry: 3, fill: "#e0569a" }), s("ellipse", { cx: 3, cy: 4, rx: 3, ry: 3, fill: "#e0569a" }),
+      s("rect", { x: -0.8, y: -5, width: 1.6, height: 11, rx: 0.8, fill: "#2d3047" }));
+    if (!ruhig) fluegel.appendChild(s("animateTransform", { attributeName: "transform", type: "scale", values: "1 1;0.4 1;1 1", dur: "0.3s", repeatCount: 6, begin: t(DAUER) }));
+    return nachher(s("g", { "data-schmuck": "2" }, fluegel), `M${BREITE + 10},20 C${x + 60},0 ${x + 30},${y + 30} ${x},${y}`, { x, y }, ruhig);
+  }
+
+  /** Vogel auf der Wiese, zwei Noten steigen auf (Schmuck bei 3 Sternen). */
+  function vogelSingt(x, y, ruhig) {
+    const g = s("g", { "data-schmuck": "3" },
+      s("ellipse", { cx: x, cy: y - 6, rx: 7, ry: 5, fill: "#3f7fc8" }), s("circle", { cx: x + 6, cy: y - 11, r: 3.6, fill: "#3f7fc8" }),
+      s("path", { d: `M${x + 9},${y - 12} l4,1 l-4,1 Z`, fill: "#f5a623" }), s("circle", { cx: x + 7, cy: y - 12, r: 0.8, fill: "#ffffff" }),
+      s("path", { d: `M${x - 7},${y - 7} l-5,-3 l1,5 Z`, fill: "#2f62a0" }),
+      s("path", { d: `M${x - 1},${y - 1} l0,2 M${x + 2},${y - 1} l0,2`, stroke: "#6b4a2b", "stroke-width": 1 }));
+    // Noten als Zeichen (kein Text): Kopf und Hals
+    [[x + 14, y - 22, 0], [x + 24, y - 30, 0.35]].forEach(([nx, ny, spaet]) => {
+      const note = s("g", { fill: "#2d3047" }, s("ellipse", { cx: nx, cy: ny, rx: 2.6, ry: 2, transform: `rotate(-20 ${nx} ${ny})` }),
+        s("rect", { x: nx + 1.8, y: ny - 9, width: 1, height: 9 }));
+      if (!ruhig) {
+        note.setAttribute("opacity", "0");
+        note.appendChild(s("animate", { attributeName: "opacity", values: "0;1;1", begin: t(DAUER + 0.2 + spaet), dur: "0.8s", fill: "freeze" }));
+        note.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", from: "0 8", to: "0 0", begin: t(DAUER + 0.2 + spaet), dur: "0.8s", fill: "freeze" }));
+      }
+      g.appendChild(note);
+    });
+    return erscheine(g, DAUER, ruhig);
+  }
+
+  /** Leeres Wortkärtchen (ein Wort, nur angedeutet: zwei graue Striche statt Text). */
+  function kaertchen(x, y, b = 22) {
+    return s("g", { "data-kaertchen": "" },
+      s("rect", { x: x - b / 2, y: y - 6, width: b, height: 12, rx: 3, fill: "#fbf3dc", stroke: "#b89a6a", "stroke-width": 0.6 }),
+      s("path", { d: `M${x - b / 2 + 4},${y - 1.5} h${b - 8} M${x - b / 2 + 4},${y + 2} h${(b - 8) * 0.6}`, stroke: "#a8a092", "stroke-width": 1.2, "stroke-linecap": "round" }));
+  }
+
+  // Baum des Wortfamilien-Baums: Teile in der Reihenfolge, in der sie wachsen
+  const BAUM_TEILE = ["stamm", "ast", "aeste", "blaetter", "blueten", "fruechte"];
+  const ASTE = [[160, 100, 114, 78], [160, 90, 206, 66], [160, 74, 150, 42]];
+  const LAUB = [[114, 74, 16], [96, 86, 12], [134, 66, 13], [206, 62, 16], [224, 76, 12], [188, 56, 13], [150, 38, 16], [130, 46, 12],
+    [172, 42, 13], [180, 80, 12], [138, 88, 11]];
+  const BLUETEN = [[98, 72], [128, 56], [222, 62], [194, 46], [166, 32], [138, 32], [230, 84], [104, 94]];
+
+  /** Ein Teil des Baums wachsen lassen: ab = Beginn, dauer = Zeit für diesen Teil; ebenen = { laub, holz, vorn }. */
+  const BAUM = {
+    stamm(ebenen, ab, dauer, ruhig) {
+      const stamm = s("rect", { x: 154, y: 70, width: 12, height: 62, rx: 2, fill: "#8b5a2b" });
+      if (!ruhig) {
+        stamm.setAttribute("y", "132"); stamm.setAttribute("height", "0");
+        stamm.appendChild(s("animate", { attributeName: "y", from: 132, to: 70, begin: t(ab), dur: `${dauer}s`, fill: "freeze" }));
+        stamm.appendChild(s("animate", { attributeName: "height", from: 0, to: 62, begin: t(ab), dur: `${dauer}s`, fill: "freeze" }));
+      }
+      // am Holz das Familienwort (wie im Spiel), nur angedeutet
+      ebenen.holz.append(stamm, erscheine(kaertchen(160, 112, 26), ab + dauer * 0.8, ruhig));
+    },
+    ast(ebenen, ab, dauer, ruhig) { ast(ebenen, ASTE[0], ab, dauer, ruhig); },
+    aeste(ebenen, ab, dauer, ruhig) { ast(ebenen, ASTE[1], ab, dauer / 2, ruhig); ast(ebenen, ASTE[2], ab + dauer / 2, dauer / 2, ruhig); },
+    blaetter(ebenen, ab, dauer, ruhig) {
+      LAUB.forEach(([x, y, r], i) => {
+        const blatt = s("circle", { cx: 0, cy: 0, r, fill: i % 2 ? "#4f9d47" : "#64b25a" });
+        const innen = s("g", {}, blatt);
+        if (!ruhig) innen.appendChild(s("animateTransform", { attributeName: "transform", type: "scale", from: 0, to: 1,
+          begin: t(ab + (i / LAUB.length) * dauer * 0.7), dur: `${dauer * 0.4}s`, fill: "freeze" }));
+        if (!ruhig) innen.setAttribute("transform", "scale(0)");
+        ebenen.laub.appendChild(s("g", { transform: `translate(${x} ${y})` }, innen));
+      });
+    },
+    blueten(ebenen, ab, dauer, ruhig) {
+      const g = s("g", { "data-teil": "blueten" });
+      BLUETEN.forEach(([x, y], i) => {
+        const bl = s("g", {});
+        for (let k = 0; k < 5; k++) {
+          const w = (k / 5) * 2 * Math.PI;
+          bl.appendChild(s("circle", { cx: x + Math.cos(w) * 3, cy: y + Math.sin(w) * 3, r: 2.4, fill: "#fbe1ec" }));
+        }
+        bl.appendChild(s("circle", { cx: x, cy: y, r: 1.6, fill: "#f5b301" }));
+        g.appendChild(erscheine(bl, ab + (i / BLUETEN.length) * dauer, ruhig, 0.25));
+      });
+      ebenen.vorn.appendChild(g);
+      ebenen.blueten = g;
+    },
+    fruechte(ebenen, ab, dauer, ruhig) {
+      // aus den Blüten werden Früchte: die Blüten vergehen, an ihrer Stelle reifen Äpfel
+      if (ebenen.blueten) {
+        if (ruhig) ebenen.blueten.setAttribute("opacity", "0");
+        else ebenen.blueten.appendChild(s("animate", { attributeName: "opacity", from: 1, to: 0, begin: t(ab), dur: "0.4s", fill: "freeze" }));
+      }
+      BLUETEN.forEach(([x, y], i) => {
+        const apfel = s("g", { "data-frucht": "" }, s("circle", { cx: x, cy: y + 2, r: 4, fill: "#d8433a" }),
+          s("path", { d: `M${x},${y - 2} q2,-3 4,-2`, stroke: "#3f7a2c", "stroke-width": 1.2, fill: "none" }));
+        ebenen.vorn.appendChild(erscheine(apfel, ab + 0.2 + (i / BLUETEN.length) * dauer * 0.5, ruhig, 0.25));
+      });
+      // die Eule fliegt in die Krone und setzt sich auf den rechten Ast
+      ebenen.vorn.appendChild(bewege(euleSitzend(0.3), "M330,10 C280,0 230,30 186,74", { x: 186, y: 74, winkel: 0 }, ruhig,
+        { drehen: false, ab, dauer: Math.max(dauer, 0.8) }));
+    },
+  };
+  function ast(ebenen, [x1, y1, x2, y2], ab, dauer, ruhig) {
+    const laenge = Math.hypot(x2 - x1, y2 - y1);
+    const linie = s("line", { x1, y1, x2, y2, stroke: "#8b5a2b", "stroke-width": 6, "stroke-linecap": "round" });
+    if (!ruhig) {
+      linie.setAttribute("stroke-dasharray", `${laenge} ${laenge}`);
+      linie.setAttribute("stroke-dashoffset", String(laenge));
+      linie.appendChild(s("animate", { attributeName: "stroke-dashoffset", from: laenge, to: 0, begin: t(ab), dur: `${dauer}s`, fill: "freeze" }));
+    }
+    ebenen.holz.append(linie, erscheine(kaertchen(x2, y2), ab + dauer * 0.85, ruhig));
+  }
+
+  /** Stein fällt von oben an seinen Platz (BAUEN). */
+  function falle(stein, ab, ruhig) {
+    if (ruhig) return stein;
+    stein.setAttribute("opacity", "0");
+    stein.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(ab), fill: "freeze" }));
+    stein.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", from: "0 -40", to: "0 0", begin: t(ab), dur: "0.35s",
+      fill: "freeze", calcMode: "spline", keyTimes: "0;1", keySplines: "0.5 0 1 1" }));
+    return stein;
+  }
+  /** Ganze Zahl in der Schreibweise des Lehrmittels (LS.zahlText: ab fünf Stellen mit schmalem Leerzeichen). */
+  const ganzText = x => (typeof LS !== "undefined" && LS.zahlText ? LS.zahlText(x) : String(x));
 
   // ---------- Muster ----------
   const MUSTER = {
@@ -313,7 +474,23 @@ var LS_FEIER = (function () {
     /** ZYKLUS (Konzept 5): die Phasen der Reihe nach bis zur Phase der Stufe; die letzte gross. */
     zyklus(feier, { stufe, sterne, ruhig }) {
       const phasen = feier.ziele?.[stufe];
-      if (!Array.isArray(phasen) || !phasen.length || feier.bilder !== "mond") return null;
+      if (feier.bilder !== "mond") return null;
+      // eine Phase allein: der Mond dieser Phase steigt hinter dem Hügel auf und zieht im Bogen über den Himmel
+      // (Rückmeldung Patrik: Stufe um Stufe zunehmend, wie die Sonde in Stufe 5)
+      if (typeof phasen === "string" && phasen in MONDPHASEN) {
+        const hell = MONDPHASEN[phasen], r = 20;
+        const svg = s("svg", { viewBox: `0 0 ${BREITE} ${HOEHE}`, "data-muster": "zyklus", "data-ziel": phasen }, himmelGrund(), himmel());
+        const mond = s("g", { "data-phase": phasen });
+        if (hell) mond.appendChild(s("circle", { cx: 0, cy: 0, r: r + 8, fill: "#f4ecc8", opacity: 0.08 + 0.1 * hell }));
+        mond.appendChild(mondphase(0, 0, r, hell));
+        if (phasen === "neu") mond.appendChild(sonne(-r - 14, -r - 2, 6)); // Neumond steht bei der Sonne
+        svg.appendChild(bewege(mond, "M20,150 C60,40 170,22 232,54", { x: 232, y: 54, winkel: 0 }, ruhig, { drehen: false }));
+        svg.appendChild(s("path", { d: `M0,${HOEHE} L0,124 C60,108 120,130 180,118 C240,106 280,122 ${BREITE},112 L${BREITE},${HOEHE} Z`, fill: "#10132a" }));
+        if (sterne >= 2) svg.appendChild(funkeln(ruhig));
+        if (sterne >= 3) svg.appendChild(sternschnuppe(ruhig));
+        return svg;
+      }
+      if (!Array.isArray(phasen) || !phasen.length) return null;
       const svg = s("svg", { viewBox: `0 0 ${BREITE} ${HOEHE}`, "data-muster": "zyklus", "data-ziel": phasen[phasen.length - 1] }, himmelGrund(), himmel());
       // kleine Phasen in gleichem Abstand, die letzte gross; die ganze Reihe mittig
       const n = phasen.length, klein = 13, gross = 26, abstand = 46;
@@ -346,6 +523,54 @@ var LS_FEIER = (function () {
       svg.appendChild(bewege(euleSilhouette(), "M-20,40 C60,70 130,40 200,64", { x: 200, y: 64, winkel: 0 }, ruhig, { drehen: false }));
       if (sterne >= 2) svg.appendChild(funkeln(ruhig));
       if (sterne >= 3) svg.appendChild(sternschnuppe(ruhig));
+      return svg;
+    },
+
+    /** WACHSEN (Konzept 5, Wortfamilien-Baum): der Baum wächst Teil um Teil bis zum Teil der Stufe. */
+    wachsen(feier, { stufe, sterne, ruhig }) {
+      const ziel = feier.ziele?.[stufe], bis = BAUM_TEILE.indexOf(ziel);
+      if (feier.bilder !== "baum" || bis < 0) return null;
+      const teile = BAUM_TEILE.slice(0, bis + 1);
+      // Ebenen: Laub hinter dem Holz (die Kärtchen bleiben sichtbar), Blüten, Früchte und Eule davor
+      const ebenen = { laub: s("g", { "data-ebene": "laub" }), holz: s("g", { "data-ebene": "holz" }), vorn: s("g", { "data-ebene": "vorn" }) };
+      const svg = s("svg", { viewBox: `0 0 ${BREITE} ${HOEHE}`, "data-muster": "wachsen", "data-ziel": ziel }, tagGrund(), boden(),
+        ebenen.laub, ebenen.holz, ebenen.vorn);
+      const je = DAUER / teile.length;
+      teile.forEach((teil, i) => BAUM[teil](ebenen, i * je, je, ruhig));
+      if (sterne >= 2) svg.appendChild(schmetterling(teile.length > 3 ? 240 : 206, teile.length > 3 ? 40 : 56, ruhig));
+      if (sterne >= 3) svg.appendChild(vogelSingt(234, 132, ruhig));
+      return svg;
+    },
+
+    /** BAUEN (Konzept 5, Zahlenmauer-Baumeister): die Mauer der Stufe, Stein um Stein von unten. */
+    bauen(feier, { stufe, sterne, ruhig }) {
+      const grund = feier.ziele?.[stufe];
+      if (feier.bilder !== "mauer" || !Array.isArray(grund) || grund.length < 2) return null;
+      const n = grund.length, w = [grund.slice()];
+      // wie im Spiel: w[r][i] = w[r-1][i] + w[r-1][i+1]
+      for (let r = 1; r < n; r++) w.push(w[r - 1].slice(0, -1).map((x, i) => x + w[r - 1][i + 1]));
+      const svg = s("svg", { viewBox: `0 0 ${BREITE} ${HOEHE}`, "data-muster": "bauen", "data-ziel": "mauer" }, tagGrund(), boden());
+      const sb = Math.min(56, 270 / n), sh = n >= 5 ? 19 : 22, unten = 134, alle = (n * (n + 1)) / 2;
+      let k = 0;
+      w.forEach((reihe, r) => reihe.forEach((wert, i) => {
+        const x = BREITE / 2 - (reihe.length * sb) / 2 + i * sb, y = unten - (r + 1) * sh;
+        const stein = s("g", { "data-stein": `${r},${i}`, "data-wert": wert },
+          s("rect", { x: x + 1, y: y + 1, width: sb - 2, height: sh - 2, rx: 3, fill: "#ecd3a4", stroke: "#a9773f", "stroke-width": 1 }),
+          s("text", { x: x + sb / 2, y: y + sh / 2 + 4, fill: "#3b2a18", "font-size": n >= 5 ? 10 : 11, "font-weight": "bold",
+            "font-family": "system-ui, sans-serif", "text-anchor": "middle" }, ganzText(wert)));
+        svg.appendChild(falle(stein, (k++ / alle) * DAUER, ruhig));
+      }));
+      const oben = unten - n * sh;
+      if (sterne >= 2) {
+        const eule = euleSitzend(0.24);
+        eule.setAttribute("data-schmuck", "2");
+        eule.setAttribute("transform", `translate(${BREITE / 2 - 8} ${oben})`);
+        svg.appendChild(erscheine(eule, DAUER, ruhig));
+      }
+      if (sterne >= 3) {
+        svg.appendChild(fahne(BREITE / 2 + 10, oben, ruhig, "3"));
+        svg.appendChild(funken(BREITE / 2, Math.max(oben - 14, 18), ruhig));
+      }
       return svg;
     },
   };

@@ -1,6 +1,6 @@
 # Konzept: Abschluss-Animationen im Eulenpfad
 
-Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P3 gebaut, P4–P8 und Ruhezeiten offen, Abnahme durch Patrik offen.**
+Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P5 gebaut, P6–P8 und Ruhezeiten offen, Abnahme durch Patrik offen.**
 Entscheide und Pilotliste in Abschnitt 7.
 
 ## 1. Auslöser
@@ -144,8 +144,8 @@ Desktop, Tablet (768 px) und Handy (375 px) angesehen und von Patrik abgenommen 
 | P1 | 🚀 Rechen-Rakete | REISE | Mathe, 4 | Weg über sechs Ziele, Planeten fachlich richtig (Folge, Mars rötlich, Saturn mit Ring) | gebaut 10.11.2026 (LERN_Session27, Schritt 1) |
 | P2 | 🚀 Dezimal-Rakete | ZOOM | Mathe, 5 | Zahlen in der Animation über `LS.dezimalText` (Punkt oder Komma nach Einstellung), Zoom bis Tausendstel | gebaut 10.11.2026 (LERN_Session27, Schritt 2a) |
 | P3 | 🔭 Himmels-Forscher | ZYKLUS, dann REISE | NMG, 3 | zwei Muster in einem Spiel (Stufen 1–4 und 5–6), Mondphasen fachlich richtig | gebaut 10.11.2026 (LERN_Session27, Schritt 2a) |
-| P4 | 🌳 Wortfamilien-Baum | WACHSEN | Deutsch, 4 | Wachsen ohne Text (Wörter nur angedeutet), Sprachfach | offen |
-| P5 | 🧱 Zahlenmauer-Baumeister | BAUEN | Mathe, 2 | Zahlen in den Steinen richtig (jeder Stein die Summe der beiden darunter), jüngere Kinder | offen |
+| P4 | 🌳 Wortfamilien-Baum | WACHSEN | Deutsch, 4 | Wachsen ohne Text (Wörter nur angedeutet), Sprachfach | gebaut 10.11.2026 (LERN_Session27, Schritt 2b) |
+| P5 | 🧱 Zahlenmauer-Baumeister | BAUEN | Mathe, 2 | Zahlen in den Steinen richtig (jeder Stein die Summe der beiden darunter), jüngere Kinder | gebaut 10.11.2026 (LERN_Session27, Schritt 2b) |
 | P6 | 🎺 Instrumenten-Kenner | AUFTRITT | Musik, 2 | Ton nur mit Ton an (Regel 8), Haltung der Instrumente richtig | offen |
 | P7 | 🎣 Anlaut-Angel | SAMMELN | Deutsch, 1 | jüngste Kinder (fast ohne Lesetext), das schlichteste Muster | offen |
 | P8 | 🗺️ Schweiz-Karten-Suche | KARTE | NMG, 4 | Kartendaten des Spiels wiederverwenden statt neu zeichnen | offen |
@@ -158,10 +158,19 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 - **P2 Dezimal-Rakete:** gestapelte Zahlenstrahlen statt eines Planeten; je Stelle eine Lupe tiefer, die Rakete landet
   senkrecht auf der Zahl, die Zahl steht darunter. Schmuck wie bei der Reise (Fähnchen, Funken, Eule im Fenster) statt
   federnder Landebeine. Zahlen der Stufen: 4 · 4.6 · 7.3 · 3.75 · 6.47 · 4.375 (s6 Tausendstel, wie die Stufe übt).
-- **P3 Himmels-Forscher:** s1–s4 als Reihe der Phasen (Sonne neben dem Neumond, Pfeile, die letzte Phase gross) statt
-  Auf- und Untergang und Himmelsrichtung — die Lage am Himmel wäre ohne Text nicht lesbar. s5 Sonde an den acht
+- **P3 Himmels-Forscher:** s1–s4 steigt der Mond hinter dem Hügel auf und zieht im Bogen über den Himmel, Stufe um
+  Stufe zunehmend: Neumond (die Sonne daneben), Sichel, Halbmond, Vollmond (Rückmeldung Patrik, ersetzt die erste
+  Fassung mit der Reihe der Phasen); ohne Himmelsrichtung, die wäre ohne Text nicht lesbar. s5 Sonde an den acht
   Planeten vorbei, s6 Eule vor dem Vollmond wie vorgeschlagen. Schmuck: funkelnde Sterne (2★) statt eines Sternbilds,
-  Sternschnuppe (3★).
+  Sternschnuppe mit hellem Kopf und verblassendem Schweif links oben (3★; als blosser Strich war sie nicht erkennbar).
+- **P4 Wortfamilien-Baum:** Folge wie vorgeschlagen (Stamm, erster Ast, drei Äste, Blätter, Blüten, Früchte); Wörter
+  als leere Kärtchen am Holz und an den Ästen. Aus den Blüten werden Äpfel (die Blüten vergehen), die Eule fliegt erst
+  mit den Früchten in die Krone. Schmuck: ein Schmetterling flattert heran (2★), ein Vogel singt auf der Wiese (3★)
+  statt raschelnder Blätter und fallender Blüten — beides gäbe es in Stufe 1–3 noch nicht.
+- **P5 Zahlenmauer-Baumeister:** Form wie das Spiel (s1–s3 drei Reihen, s4 und s5 vier, s6 fünf) statt 2 bis 6
+  Reihen; Grundsteine im Zahlenraum der Stufe (oberster Stein 12, 45, 72, 64, 690, 1435). Die Steine fallen von unten
+  nach oben an ihren Platz, Sandstein statt Stellenfarben. Schmuck: Eule auf dem Deckstein (2★), Fähnchen und Funken
+  (3★).
 
 ## 8. Ideen je Spiel
 

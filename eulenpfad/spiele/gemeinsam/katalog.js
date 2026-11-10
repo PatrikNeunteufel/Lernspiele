@@ -149,7 +149,7 @@ const SPIELE = [
     beschreibung: "Muster auf der Hundertertafel: fehlende Zahlen, Reihen und Plätze finden — bis ins Tausenderbuch",
     lernziele: [{ lz: "MA.1.B.3", stufen: ALLE_STUFEN }, { lz: "MA.1.A.2", stufen: ALLE_STUFEN }] },
   { id: "zahlenmauer", art: ["eintippen"], klasse: 2, bild: "🧱", name: "Zahlenmauer-Baumeister", thema: "rechnen", farbe: "var(--deko-3)",
-    pfad: "spiele/zahlenmauer/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 45, s2: 60, s3: 90, s4: 120, s5: 150, s6: 188 },
+    pfad: "spiele/zahlenmauer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 45, s2: 60, s3: 90, s4: 120, s5: 150, s6: 188 },
     beschreibung: "Jeder Stein ist die Summe der beiden darunter — baue die Mauer fertig",
     lernziele: [{ lz: "MA.1.B.1", stufen: ALLE_STUFEN }] },
   { id: "rest-raetsel", art: ["eintippen"], klasse: 3, bild: "🍪", name: "Rest-Rätsel", thema: "rechnen", farbe: "var(--deko-2)",
@@ -545,7 +545,7 @@ const SPIELE = [
     beschreibung: "Geschickt rechnen: tauschen, verdoppeln und halbieren, zusammenfassen, Nachbaraufgabe",
     lernziele: [{ lz: "MA.1.A.4", stufen: ALLE_STUFEN }] },
   { id: "wortfamilien-baum", art: ["sortieren", "antippen"], klasse: 4, neu: "LERN_Session3", bild: "🌳", name: "Wortfamilien-Baum", thema: "wortarten", farbe: "var(--deko-5)",
-    pfad: "spiele/wortfamilien-baum/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s6"], zeiten: { s1: 12, s2: 15, s3: 15, s4: 20, s5: 20, s6: 40 },
+    pfad: "spiele/wortfamilien-baum/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s6"], zeiten: { s1: 12, s2: 15, s3: 15, s4: 20, s5: 20, s6: 40 },
     beschreibung: "Wörter mit demselben Stamm an den richtigen Baum hängen: fahren, Fahrer, Fähre",
     listen: {
       "abgeleitet": { name: "Abgeleitete Wörter mit unverändertem Stamm (Fahrer, Abfahrt)" },
