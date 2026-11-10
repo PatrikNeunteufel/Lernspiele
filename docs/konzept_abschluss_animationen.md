@@ -110,7 +110,17 @@ Patriks Idee (Vollmond in Stufe 4 und 5) setzt eine Stufe mehr Mond voraus; s5 u
 | AN1 | a — Rahmen und die acht Muster bauen, an einem Pilot von acht Spielen prüfen, dann fachweise alle übrigen | „liste mit den piloten ist ein muss“ — Pilotliste unten |
 | AN2 | a — Stufe ändert das Ziel, Sterne schmücken aus (Abschnitt 4) | — |
 | AN3 | a — Einstellung der Aufsicht „Abschluss-Animation: an (Standard) / aus“, global und je Spiel; „Bewegung reduzieren“ des Geräts gilt immer | „mit Zeitschaltuhr/en?“ → AN3-Z |
-| AN3-Z | a — **Ruhezeiten**, global für das Gerät: eine oder mehrere Zeitspannen je Wochentag (etwa Mo–Fr 08:00–12:00 und 13:30–16:00), Ortszeit des Geräts (`KERN.zeit`); während einer Ruhezeit ist die Abschluss-Animation aus, danach gilt an/aus wie eingestellt, auch je Spiel; reist mit dem Abgleich; die Verwaltung zeigt, ob gerade Ruhezeit ist | Frage Patrik: auch Ruhezeit für Töne? → AN3-T, vorgelegt |
+| AN3-Z | a — **Ruhezeiten**, global für das Gerät: eine oder mehrere Zeitspannen je Wochentag (etwa Mo–Fr 08:00–12:00 und 13:30–16:00), Ortszeit des Geräts (`KERN.zeit`); während einer Ruhezeit ist die Abschluss-Animation aus, danach gilt an/aus wie eingestellt, auch je Spiel; reist mit dem Abgleich; die Verwaltung zeigt, ob gerade Ruhezeit ist | Frage Patrik: auch Ruhezeit für Töne? → AN3-T |
+| AN3-T | a — die Ruhezeit gilt auch für den Ton; Spiele mit der Spielweise „Hören“ (23 im Katalog) zeigen während einer Ruhezeit beim Start „🎧 Diese Runde braucht Ton — mit Kopfhörern spielen“ und „Ton für diese Runde an“, nach der Runde wieder aus | „es sollte differenziert eingestellt werden können“ — Lesart unten |
+
+**Lesart „differenziert“ (AN3-T, von Patrik zu bestätigen):**
+
+- **Je Art**, wofür die Ruhezeit gilt, einzeln ein- und ausschaltbar: ☑ Abschluss-Animation · ☑ Klänge (Richtig, Falsch,
+  Sterne) · ☑ Vorlesen der Eule · ☑ Hören als Inhalt (Aussprache, Musik, Hörgeschichte; mit dem Kopfhörer-Hinweis oben).
+  Vorgabe: alle an.
+- **Je Zeitspanne** wählbar: etwa Unterricht 08:00–12:00 alles, Mittag 12:00–13:30 nur Abschluss-Animation.
+- **Je Spiel** abweichend, wie die übrigen Einstellungen je Spiel („wie global“ / eigene Wahl).
+- Die Aufsicht sieht in der Verwaltung, welche Ruhezeit gerade gilt und wofür.
 
 ### Pilotliste (AN1 a)
 

@@ -1535,3 +1535,7 @@
   Schweiz-Karten-Suche) mit dem, was jedes am Rahmen prüft; AN3-Z a: Ruhezeiten (eine oder mehrere Zeitspannen je
   Wochentag, Ortszeit, global, mit dem Abgleich), in denen die Abschluss-Animation aus ist; Frage Patrik „Ruhezeit auch
   für Töne?“ als AN3-T vorgelegt. Handover: Haltepunkt aufgenommen.
+- Konzept Abschluss-Animationen, AN3-T a: Die Ruhezeit gilt auch für den Ton; die 23 Spiele mit der Spielweise „Hören“
+  zeigen in der Ruhezeit „🎧 Diese Runde braucht Ton — mit Kopfhörern spielen“ und „Ton für diese Runde an“. Zusatz
+  Patrik „differenziert einstellbar“, Lesart zur Bestätigung: je Art (Animation, Klänge, Vorlesen, Hören als Inhalt),
+  je Zeitspanne und je Spiel.
