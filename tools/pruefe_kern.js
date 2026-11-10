@@ -1335,7 +1335,7 @@ console.log("listenpruefung.js");
     const D2 = E({ app: "lernsteig", speicher: KERN.speicher("lernsteig:"), aufsicht: () => true, pruefstand: PS, arten: ["uebungen", "listen"], melde: t => meldungen.push(t) });
     global.fetch = async (url, o2) => {
       anfragen.push({ url, body: o2 && o2.body ? JSON.parse(o2.body) : null });
-      if (url === "/entwicklung/status") return { ok: true, json: async () => ({ ok: true, schluessel: true }) };
+      if (url.startsWith("/entwicklung/status")) return { ok: true, json: async () => ({ ok: true, schluessel: true }) };
       if (url.startsWith("/entwicklung/bemerkungen")) return { ok: true, json: async () => [{ nr: 1 }] };
       if (url === "/entwicklung/pruefstand") return { ok: true, json: async () => ({ uebungen: { brueche: { am: "2026-11-06", von: "Patrik" } }, listen: {} }) };
       return { ok: false, status: 403, json: async () => ({ fehler: "Schlüssel passt nicht" }) };
@@ -2066,7 +2066,7 @@ console.log("listenpruefung.js");
     // KERN.entwicklung fragt die eingestellte Adresse
     const urls = [];
     const fetchAlt = global.fetch;
-    global.fetch = async u => { urls.push(String(u)); return { ok: true, json: async () => ({ ok: true }) }; };
+    global.fetch = async u => { urls.push(String(u).replace(/\?zufall=[0-9a-f]{32}$/, "")); return { ok: true, json: async () => ({ ok: true }) }; };
     const EW = KERN.entwicklung({ app: "lernsteig", speicher: WEG_SP, aufsicht: () => true, adresse: () => W.meldeweg().server });
     W.setzeMeldeweg({ weg: "auto", server: "http://localhost:8766" });
     await EW.server();
@@ -2105,7 +2105,7 @@ console.log("listenpruefung.js");
     global.fetch = async (u, init) => { const post = init && init.method === "POST"; if (post) anfrage = JSON.parse(init.body); return { ok: true, json: async () => (post ? { nr: 1 } : status) }; };
     const EV = KERN.entwicklung({ app: "lernsteig", speicher: WEG_SP, aufsicht: () => true, adresse: () => "http://localhost:8766", version: () => "0.9.1" });
     const vpV = await EV.verbindungPruefen();
-    gleich([vpV.ok, vpV.server, /Entwickler-Server 1\.0\.0 erreichbar: http:\/\/localhost:8766, Protokoll 1\./.test(vpV.text)].join("|"), "true|1.0.0|true", "verbindungPruefen: Server-Version und Protokoll im Text");
+    gleich([vpV.ok, vpV.server, /Entwickler-Server 1\.0\.0 erreichbar: http:\/\/localhost:8766, Protokoll 1, ohne Unterschrift\./.test(vpV.text)].join("|"), "true|1.0.0|true", "verbindungPruefen: Server-Version und Protokoll im Text");
     gleich(JSON.stringify(EV.versionen()), JSON.stringify({ app: "0.9.1", kern: "9.8.7", protokoll: P }), "versionen: App, Kern, Protokoll");
     WEG_SP.schreibe("entwickler", { schluessel: "x", an: true });
     await EV.bemerkung({ text: "t" });
@@ -2131,7 +2131,7 @@ console.log("listenpruefung.js");
     const routen = {};
     let gemeldetA = [];
     global.fetch = async (u, init) => {
-      const pfad = String(u).replace(/^https?:\/\/[^/]+/, "");
+      const pfad = String(u).replace(/^https?:\/\/[^/]+/, "").replace(/\?.*$/, "");
       const f = routen[pfad];
       if (!f) return { ok: false, status: 404, json: async () => ({}) };
       const [code, antwort] = f(init && init.body ? JSON.parse(init.body) : null);
@@ -2161,6 +2161,30 @@ console.log("listenpruefung.js");
     gleich([al.startsWith("mailto:dev@beispiel.ch?subject=Anforderung%20Entwicklermodus&"), /Name: Anna Muster/.test(alBody),
       /Schule oder Organisation, oder woher wir uns kennen: ____/.test(alBody), /App: Eulenpfad 1\.0\.0/.test(alBody), EA.anforderungLink("", {})].join("|"),
     "true|true|true|true|", "anforderungLink: Betreff, Vorlage mit Name, Pflichtzeile, App und Version; ohne Adresse null");
+    // Unterschrift des Servers (NS2 a): echte P-256-Unterschrift aus WebCrypto, geprüft gegen den öffentlichen Schlüssel
+    const paar = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+    const spki = Buffer.from(await crypto.subtle.exportKey("spki", paar.publicKey)).toString("base64");
+    const unterschreibe = async (zufall, version) => Buffer.from(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, paar.privateKey,
+      new TextEncoder().encode(`${KERN.entwicklung.UNTERSCHRIFT_ZWECK}|${zufall}|${version}`))).toString("base64");
+    const UE = KERN.entwicklung.unterschriftEcht;
+    const z1 = "00112233445566778899aabbccddeeff";
+    const u1 = await unterschreibe(z1, "1.0.0");
+    gleich([await UE({ server: "1.0.0", unterschrift: u1 }, z1, spki), await UE({ server: "1.0.0", unterschrift: u1 }, "ff" + z1.slice(2), spki),
+      await UE({ server: "1.0.1", unterschrift: u1 }, z1, spki), await UE({ server: "1.0.0" }, z1, spki), await UE({ server: "1.0.0", unterschrift: u1 }, z1, "")].join("|"),
+    "true|false|false|false|false", "unterschriftEcht: richtig; andere Zufallszahl, andere Version, ohne Unterschrift, ohne Schlüssel: nicht echt");
+    routen["/entwicklung/status"] = () => [200, { ok: true, schluessel: true, server: "1.0.0", protokoll: [P, P], unterschrift: "AAAA" }];
+    const EU = KERN.entwicklung({ app: "eulenpfad", speicher: mapSp(), aufsicht: () => true, adresse: () => "http://localhost:8766", serverSchluessel: spki });
+    const vpF2 = await EU.verbindungPruefen();
+    gleich([vpF2.ok, vpF2.echt, /Unterschrift passt nicht/.test(vpF2.text)].join("|"), "true|false|true", "lokal mit falscher Unterschrift: erreichbar, aber als nicht echt genannt");
+    // der Stub unterschreibt jetzt die Zufallszahl, die die App schickt
+    global.fetch = async u => {
+      const z = (String(u).match(/zufall=([0-9a-f]+)/) || [])[1];
+      return { ok: true, status: 200, json: async () => ({ ok: true, schluessel: true, server: "1.0.0", protokoll: [P, P], unterschrift: z ? await unterschreibe(z, "1.0.0") : undefined }) };
+    };
+    const vpE = await EU.verbindungPruefen();
+    const sE = await EU.server();
+    gleich([vpE.ok, vpE.echt, /Unterschrift der Entwicklung geprüft/.test(vpE.text), sE && sE.echt].join("|"), "true|true|true|true",
+      "Server unterschreibt die Zufallszahl: echt in verbindungPruefen und server()");
     KERN.version = kernAlt;
     global.fetch = fetchAlt;
     wirft(() => M({ inhalt: { feld: "spiel" } }), "meldungen ohne speicher");

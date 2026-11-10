@@ -112,6 +112,35 @@ def pruefe(basis: str) -> None:
            "gesperrte Aufsicht reicht nichts mehr ein")
 
 
+def pruefe_unterschrift(basis: str) -> None:
+    """NS2 a, NS2-K a: Der Server unterschreibt mit openssl, der Kern prüft mit WebCrypto — dieselbe Prüfung wie im Browser."""
+    import subprocess
+    st, j = anfrage(basis, "/entwicklung/status?zufall=00112233445566778899aabbccddeeff")
+    gleich("unterschrift" in j, False, "ohne Schlüsselpaar: keine Unterschrift")
+    gleich(ES.openssl() is not None, True, "openssl gefunden")
+    oeff = ES.neues_schluesselpaar(eintragen=None)
+    gleich((ES.privat_datei().exists(), len(oeff) > 80), (True, True), "Schlüsselpaar erzeugt, öffentlicher Schlüssel als SPKI")
+    kern = Path(__file__).resolve().parent.parent / "kern" / "entwicklung.js"
+    pruefe_js = ("require(process.argv[1]);const st=JSON.parse(process.argv[2]);"
+                 "globalThis.KERN.entwicklung.unterschriftEcht(st,process.argv[3],process.argv[4]).then(v=>console.log(v))")
+    echt = lambda antwort, zufall, schluessel=oeff: subprocess.run(["node", "-e", pruefe_js, str(kern), json.dumps(antwort), zufall, schluessel],
+                                                                     capture_output=True, text=True, timeout=30).stdout.strip()
+    for n in range(5):  # mehrere Unterschriften: auch solche mit führender Null in r oder s (DER → r‖s)
+        z = f"{n:02x}" * 16
+        st, j = anfrage(basis, f"/entwicklung/status?zufall={z}")
+        gleich(echt(j, z), "true", f"Unterschrift {n + 1} von openssl besteht die WebCrypto-Prüfung im Kern")
+    z = "ab" * 16
+    st, j = anfrage(basis, f"/entwicklung/status?zufall={z}")
+    gleich(echt(j, "cd" * 16), "false", "Unterschrift einer anderen Zufallszahl: nicht echt")
+    anderer = ES.neues_schluesselpaar(eintragen=None)  # ein fremder Server mit eigenem Paar unterschreibt jetzt
+    st, j = anfrage(basis, f"/entwicklung/status?zufall={z}")
+    gleich((anderer != oeff, echt(j, z, oeff), echt(j, z, anderer)), (True, "false", "true"),
+           "fremdes Schlüsselpaar: gegen den Schlüssel der Entwicklung nicht echt, gegen seinen eigenen schon")
+    st, j = anfrage(basis, "/entwicklung/status?zufall=nichthex")
+    gleich("unterschrift" in j, False, "keine Zufallszahl aus Hex: nichts unterschrieben")
+    ES.privat_datei().unlink()
+
+
 def pruefe_uebernehmen() -> None:
     """tools/entwicklung_abgleich.py nach docs/richtlinie_freigaben.md (ES3 a, SR1 a), im Lernsteig mit leerem Eingang."""
     import entwicklung_abgleich as EA
@@ -171,6 +200,7 @@ def main() -> int:
         try:
             pruefe(f"http://127.0.0.1:{server.server_address[1]}")
             pruefe_uebernehmen()
+            pruefe_unterschrift(f"http://127.0.0.1:{server.server_address[1]}")
         except Exception as e:  # ein Absturz ist ein Fehler, kein Abbruch ohne Schlusszeile
             fehler.append(f"Abbruch: {type(e).__name__}: {e}")
         finally:

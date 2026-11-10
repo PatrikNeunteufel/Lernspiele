@@ -13,6 +13,27 @@
   const SCHLUESSEL_HASH = "a1fb5dbb5d54c6de3acc1d372cdef564fedf87e2e349aa1bc4bbddf3be702035";
   const SALZ = "eulenpfad-entwickler"; // seit LERN_Session6; bleibt, damit der bestehende Schlüssel gilt
   /**
+   * Öffentlicher Schlüssel des Servers der Entwicklung (Plan C12, NS2 a): SPKI, Base64, ECDSA P-256. Eingetragen von
+   * python tools/entwickler_server.py --neues-schluesselpaar; leer = noch kein Paar (dann ist kein Server „echt“).
+   */
+  const SERVER_SCHLUESSEL = "";
+  const UNTERSCHRIFT_ZWECK = "lernspiele-entwicklung"; // wie tools/entwickler_server.py
+  const b64 = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+  /** Zufallszahl als Hex (16 Byte) für die Unterschrift. */
+  const zufallHex = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), x => x.toString(16).padStart(2, "0")).join("");
+  /**
+   * Hat der Server die Zufallszahl mit dem Schlüssel der Entwicklung unterschrieben? st: Antwort von /status (mit
+   * unterschrift und server). schluessel: SPKI Base64. false ohne Schlüssel, ohne Unterschrift oder ohne WebCrypto.
+   */
+  async function unterschriftEcht(st, zufall, schluessel) {
+    try {
+      if (!schluessel || !st || !st.unterschrift || !globalThis.crypto || !crypto.subtle) return false;
+      const k = await crypto.subtle.importKey("spki", b64(schluessel), { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"]);
+      const text = new TextEncoder().encode(`${UNTERSCHRIFT_ZWECK}|${zufall}|${st.server || ""}`);
+      return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, k, b64(st.unterschrift), text);
+    } catch (e) { return false; }
+  }
+  /**
    * Protokoll des Austauschs mit dem Server (Plan C12, NS3 a): eine ganze Zahl, die genau dann steigt, wenn sich Anfragen
    * oder Antworten so ändern, dass ein älterer Server oder eine ältere App sie falsch läse. Der Server nennt unter
    * /entwicklung/status die Protokolle, die er versteht ({ protokoll: [von, bis] }); ein Server ohne die Angabe (vor
@@ -38,6 +59,8 @@
    * opt.adresse    () → Adresse des Entwickler-Servers, "" = dieselbe Seite (Standard; C11-3 a: nur localhost und
    *                127.0.0.1, siehe entwicklung.adresseGueltig). Der Server antwortet dafür mit CORS.
    * opt.version    () → Version der App (APP_VERSION.version aus <app>/version.js, NS3 a); geht mit jeder Anfrage mit
+   * opt.serverSchluessel  öffentlicher Schlüssel, gegen den die Unterschrift geprüft wird (Standard SERVER_SCHLUESSEL der
+   *                Entwicklung; später für einen Abgleich-Server mit dem Schlüssel seiner Aufsicht, docs/konzept_gruppen.md 5c)
    */
   function entwicklung(opt) {
     const o = opt || {};
@@ -69,7 +92,10 @@
         + "App und Server auf denselben Stand bringen (neu laden, Server aktualisieren); bis dahin gehen Meldungen per E-Mail "
         + "oder als Text.";
     };
-    const serverMeldung = () => (unpassend ? unpassendText(unpassend, ziel(basis())) : fremd ? FREMDER_SERVER : serverFehlt());
+    const unechtText = (st, z) => `Der Server unter ${z} weist sich nicht als Server der Entwicklung aus (${st?.unterschrift
+      ? "Unterschrift passt nicht" : "keine Unterschrift"}). An ihn geht nichts. Stimmt die Adresse? Ist es der richtige Server?`;
+    const serverMeldung = () => (unecht ? unechtText(unecht, ziel(basis())) : unpassend ? unpassendText(unpassend, ziel(basis()))
+      : fremd ? FREMDER_SERVER : serverFehlt());
 
     const zustand = () => ({ schluessel: null, an: false, name: "", ...(o.speicher.lies("entwickler", null) || {}) });
     const speichere = daten => o.speicher.schreibe("entwickler", { ...zustand(), ...daten });
@@ -112,21 +138,34 @@
 
     // ----- Entwickler-Server -----
     let serverDa = null, serverBasis = null; // gemerkt je Adresse
+    let unecht = null; // Antwort eines Servers im Netz, der sich nicht mit dem Schlüssel der Entwicklung ausweist (NS2 a)
     const lokal = () => typeof location !== "undefined" && String(location.protocol).startsWith("http")
       && ["localhost", "127.0.0.1"].includes(location.hostname);
+    const schluesselDesServers = () => (typeof o.serverSchluessel === "string" ? o.serverSchluessel : SERVER_SCHLUESSEL);
+    /** Liegt die Adresse im Netz (nicht dieses Gerät)? Dann muss der Server unterschreiben (NS2 a). */
+    const imNetz = a => !!a && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(a);
+    /** Status einer Adresse mit Zufallszahl abfragen: { r, st, echt } (st und echt nur bei lesbarer Antwort). */
+    async function frageStatus(a) {
+      const zufall = zufallHex();
+      const r = await fetch(`${a}/entwicklung/status?zufall=${zufall}`, { cache: "no-store" });
+      if (!r.ok) return { r, st: null, echt: false };
+      const st = await r.json();
+      return { r, st, echt: await unterschriftEcht(st, zufall, schluesselDesServers()) };
+    }
     /**
-     * Läuft ein Entwickler-Server, der dieses Protokoll versteht? { ok, schluessel, server?, protokoll? } oder null
-     * (dann sagt serverMeldung warum). Erfolg wird gemerkt.
+     * Läuft ein Entwickler-Server, der dieses Protokoll versteht — im Netz zudem mit gültiger Unterschrift (NS2 a)?
+     * { ok, schluessel, server?, protokoll?, echt } oder null (dann sagt serverMeldung warum). Erfolg wird gemerkt.
      */
     async function server() {
       if (serverDa && serverBasis === basis()) return serverDa;
-      serverDa = null; unpassend = null; serverBasis = basis();
+      serverDa = null; unpassend = null; unecht = null; serverBasis = basis();
       try {
-        const r = await fetch(`${basis()}/entwicklung/status`, { cache: "no-store" });
+        const { r, st, echt } = await frageStatus(basis());
         fremd = !r.ok && (!!basis() || lokal());
-        if (r.ok) {
-          const st = await r.json();
-          if (verstehtProtokoll(st)) serverDa = st; else unpassend = st;
+        if (st) {
+          if (!verstehtProtokoll(st)) unpassend = st;
+          else if (imNetz(basis()) && !echt) unecht = st;
+          else serverDa = { ...st, echt };
         }
       } catch (e) { /* kein Server */ }
       return serverDa;
@@ -147,20 +186,23 @@
         return { ok: false, fremd: false, ungueltig: true, adresse: null, ziel: roh,
           text: `Nicht geprüft: ${roh} ist nicht erlaubt. Erlaubt ist nur http://localhost:<Port> oder http://127.0.0.1:<Port>, leer für diese Seite.` };
       }
-      let ok = false, andere = false, st = null;
+      let ok = false, andere = false, st = null, echt = false;
       try {
-        const r = await fetch(`${a}/entwicklung/status`, { cache: "no-store" });
-        andere = !r.ok && (!!a || lokal());
-        if (r.ok) { st = await r.json(); ok = true; }
+        const f = await frageStatus(a);
+        andere = !f.r.ok && (!!a || lokal());
+        if (f.st) { st = f.st; ok = true; echt = f.echt; }
       } catch (e) { /* kein Server oder keine lesbare Antwort */ }
       const z = ziel(a);
-      const passt = ok && verstehtProtokoll(st);
-      const meldung = passt ? `✓ Entwickler-Server${st.server ? ` ${st.server}` : ""} erreichbar: ${z}, Protokoll ${PROTOKOLL}.`
-        : ok ? unpassendText(st, z)
-          : andere ? FREMDER_SERVER.replace(/^Hier/, `Unter ${z}`)
-            : a ? serverFehltBei(a) : `Kein Entwickler-Server unter ${z}.\n\n${SERVER_FEHLT_HIER}`;
-      return { ok: passt, fremd: andere, unpassend: ok && !passt, ungueltig: false, adresse: a, ziel: z,
-        server: st?.server || "", protokoll: st?.protokoll || null, text: meldung };
+      const protokollPasst = ok && verstehtProtokoll(st);
+      const passt = protokollPasst && (echt || !imNetz(a));
+      const zusatz = echt ? ", Unterschrift der Entwicklung geprüft" : st?.unterschrift ? ", Unterschrift passt nicht" : ", ohne Unterschrift";
+      const meldung = passt ? `✓ Entwickler-Server${st.server ? ` ${st.server}` : ""} erreichbar: ${z}, Protokoll ${PROTOKOLL}${zusatz}.`
+        : protokollPasst ? unechtText(st, z)
+          : ok ? unpassendText(st, z)
+            : andere ? FREMDER_SERVER.replace(/^Hier/, `Unter ${z}`)
+              : a ? serverFehltBei(a) : `Kein Entwickler-Server unter ${z}.\n\n${SERVER_FEHLT_HIER}`;
+      return { ok: passt, fremd: andere, unpassend: ok && !protokollPasst, unecht: protokollPasst && !passt, echt, ungueltig: false,
+        adresse: a, ziel: z, server: st?.server || "", protokoll: st?.protokoll || null, text: meldung };
     }
     /** An den Server schicken (mit App und Schlüssel); meldet selbst, was schiefging, und gibt dann null zurück. */
     async function sende(pfad, daten) {
@@ -255,6 +297,9 @@
   }
   entwicklung.adresseGueltig = adresseGueltig;
   entwicklung.PROTOKOLL = PROTOKOLL;
+  entwicklung.SERVER_SCHLUESSEL = SERVER_SCHLUESSEL;
+  entwicklung.unterschriftEcht = unterschriftEcht;
+  entwicklung.UNTERSCHRIFT_ZWECK = UNTERSCHRIFT_ZWECK;
   entwicklung.verstehtProtokoll = verstehtProtokoll;
   entwicklung.SALZ = SALZ;
   entwicklung.SCHLUESSEL_HASH = SCHLUESSEL_HASH;

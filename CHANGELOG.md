@@ -1474,3 +1474,14 @@
   Listen auch die Haken je Eintrag; Bewertung in `.entwicklung/bewertung.json`. 12 neue Fälle in
   `tools/pruefe_server.py` (jetzt 34), Gegenprobe (Schwelle eine Person): gemeldet. Richtlinie Abschnitt 4 mit den
   Befehlen, Plan C12, Steckbrief (Server in den kurzen Prüfungen).
+- Plan C12, NS2 a, NS2-K a — Unterschrift des Servers (Kern 1.38.0): `tools/entwickler_server.py --neues-schluesselpaar`
+  erzeugt mit `openssl` ein ECDSA-P-256-Paar (privat `.entwicklung/server-privat.pem`, gitignored) und trägt den
+  öffentlichen Schlüssel als `SERVER_SCHLUESSEL` in `kern/entwicklung.js` ein; `/entwicklung/status?zufall=…`
+  unterschreibt „lernspiele-entwicklung|<zufall>|<Version>“ (openssl, DER in r‖s gewandelt). openssl wird im PATH und an
+  den Orten von Git for Windows gesucht. Kern: Zufallszahl bei jeder Statusabfrage, `unterschriftEcht` mit WebCrypto,
+  `echt` in `server()` und `verbindungPruefen`, im Netz nur mit gültiger Unterschrift („weist sich nicht als Server der
+  Entwicklung aus“), Text von „Verbindung prüfen“ mit „Unterschrift der Entwicklung geprüft / ohne Unterschrift /
+  Unterschrift passt nicht“. `SERVER_SCHLUESSEL` ist noch leer — das Paar erzeugt Patrik für seinen Server. Tests: 11
+  neue Fälle in `tools/pruefe_server.py` (45; fünf openssl-Unterschriften bestehen die WebCrypto-Prüfung des Kerns,
+  andere Zufallszahl und fremdes Paar nicht), Gegenprobe (r und s vertauscht): gemeldet; 3 neue Kern-Fälle mit echter
+  WebCrypto-Unterschrift; im Browser: „…, Protokoll 1, ohne Unterschrift.“, keine Konsolenfehler.

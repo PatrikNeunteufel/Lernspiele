@@ -14,6 +14,7 @@ Aufruf (aus beliebigem Ordner):
     python tools/entwickler_server.py --zulassen "Vorname Name" person@schule.ch [--neu]   Aufsicht zulassen, Schlüssel ausgeben
     python tools/entwickler_server.py --sperren "Vorname Name"     Schlüssel einer Aufsicht sperren
     python tools/entwickler_server.py --zugelassen                 zugelassene Aufsichten auflisten
+    python tools/entwickler_server.py --neues-schluesselpaar       Schlüsselpaar für die Unterschrift des Servers (NS2 a)
 
 Zugelassene Aufsichten (Plan C12, ES1 a bis ES5 a, LERN_Session27): Wer prüfen will, fordert per E-Mail an; die
 Entwicklung lässt mit --zulassen zu und schickt den ausgegebenen Schlüssel an die anfragende Adresse. Mit ihm schaltet
@@ -40,7 +41,9 @@ import mimetypes
 import json
 import re
 import secrets
+import shutil
 import socket
+import subprocess
 import sys
 import webbrowser
 
@@ -187,6 +190,88 @@ def wer(schluessel) -> tuple | None:
     return ("aufsicht", z["name"]) if z and not z.get("gesperrt") else None
 
 
+# ----- Unterschrift des Servers (Plan C12, NS2 a, NS2-K a, LERN_Session27) -----
+# Die App schickt eine Zufallszahl (/entwicklung/status?zufall=…); der Server unterschreibt „lernspiele-entwicklung|<zufall>|
+# <Version>“ mit seinem privaten ECDSA-P-256-Schlüssel (.entwicklung/server-privat.pem), die App prüft mit WebCrypto gegen
+# SERVER_SCHLUESSEL in kern/entwicklung.js. Unterschrieben wird mit openssl (die Standardbibliothek hat kein ECDSA).
+UNTERSCHRIFT_ZWECK = "lernspiele-entwicklung"
+OPENSSL_ORTE = [r"C:\Program Files\Git\mingw64\bin\openssl.exe", r"C:\Program Files\Git\usr\bin\openssl.exe",
+                "/usr/bin/openssl", "/usr/local/bin/openssl"]
+
+
+def privat_datei() -> Path:
+    return ENTWICKLUNG_ORDNER / "server-privat.pem"
+
+
+def openssl() -> str | None:
+    """Pfad zu openssl: im PATH, sonst an den üblichen Orten (Git for Windows, Linux)."""
+    return shutil.which("openssl") or next((p for p in OPENSSL_ORTE if Path(p).exists()), None)
+
+
+def unterschrift_text(zufall: str) -> bytes:
+    return f"{UNTERSCHRIFT_ZWECK}|{zufall}|{SERVER_VERSION}".encode("utf-8")
+
+
+def der_zu_roh(der: bytes) -> bytes:
+    """ECDSA-Unterschrift von openssl (DER: SEQUENCE aus zwei INTEGER) in r‖s mit je 32 Byte, wie WebCrypto sie prüft."""
+    if len(der) < 8 or der[0] != 0x30:
+        raise ValueError("keine DER-Unterschrift")
+    i = 2 if der[1] < 0x80 else 2 + (der[1] & 0x7F)
+    teile = []
+    for _ in range(2):
+        if der[i] != 0x02:
+            raise ValueError("DER: INTEGER erwartet")
+        n = der[i + 1]
+        zahl = der[i + 2:i + 2 + n].lstrip(b"\x00")
+        if len(zahl) > 32:
+            raise ValueError("DER: Zahl zu lang für P-256")
+        teile.append(zahl.rjust(32, b"\x00"))
+        i += 2 + n
+    return teile[0] + teile[1]
+
+
+def unterschreibe(zufall: str) -> str | None:
+    """Base64 der Unterschrift (r‖s) oder None ohne Schlüsselpaar oder ohne openssl."""
+    prog = openssl()
+    if not prog or not privat_datei().exists():
+        return None
+    r = subprocess.run([prog, "dgst", "-sha256", "-sign", str(privat_datei())], input=unterschrift_text(zufall),
+                       capture_output=True, timeout=10)
+    if r.returncode != 0:
+        return None
+    return base64.b64encode(der_zu_roh(r.stdout)).decode("ascii")
+
+
+def oeffentlich_b64() -> str:
+    """Öffentlicher Schlüssel als SPKI (DER) in Base64 — so importiert ihn WebCrypto („spki“)."""
+    r = subprocess.run([openssl(), "ec", "-in", str(privat_datei()), "-pubout", "-outform", "DER"], capture_output=True, timeout=10)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr.decode("utf-8", "replace"))
+    return base64.b64encode(r.stdout).decode("ascii")
+
+
+def neues_schluesselpaar(eintragen: Path | None = ENTWICKLUNG_JS) -> str:
+    """Schlüsselpaar erzeugen (.entwicklung/server-privat.pem, gitignored) und den öffentlichen Schlüssel in
+    kern/entwicklung.js eintragen (eintragen=None: nur zurückgeben, für Tests). Ein neues Paar macht alte Apps blind
+    für diesen Server, bis die neue Kern-Kopie verteilt und veröffentlicht ist."""
+    prog = openssl()
+    if not prog:
+        raise RuntimeError("openssl nicht gefunden (Git for Windows bringt es mit; unter Linux: Paket openssl)")
+    ENTWICKLUNG_ORDNER.mkdir(parents=True, exist_ok=True)
+    r = subprocess.run([prog, "ecparam", "-name", "prime256v1", "-genkey", "-noout", "-out", str(privat_datei())],
+                       capture_output=True, timeout=20)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr.decode("utf-8", "replace"))
+    oeff = oeffentlich_b64()
+    if eintragen:
+        text = eintragen.read_text(encoding="utf-8")
+        neu, n = re.subn(r'const SERVER_SCHLUESSEL = "[A-Za-z0-9+/=]*";', f'const SERVER_SCHLUESSEL = "{oeff}";', text)
+        if n != 1:
+            raise RuntimeError("SERVER_SCHLUESSEL in kern/entwicklung.js nicht genau einmal gefunden.")
+        eintragen.write_bytes(neu.encode("utf-8"))
+    return oeff
+
+
 def lies_eingang(a: dict) -> list:
     return json.loads(a["eingang"].read_text(encoding="utf-8")) if a["eingang"].exists() else []
 
@@ -276,9 +361,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(roh)
 
     def do_GET(self):
-        if self.path == "/entwicklung/status":
-            return self.antwort(200, {"ok": True, "schluessel": SCHLUESSEL_DATEI.exists(), "server": SERVER_VERSION,
-                                      "protokoll": list(PROTOKOLLE)})
+        if self.path.split("?")[0] == "/entwicklung/status":
+            st = {"ok": True, "schluessel": SCHLUESSEL_DATEI.exists(), "server": SERVER_VERSION, "protokoll": list(PROTOKOLLE)}
+            # Unterschrift einer Zufallszahl der App (NS2 a): weist den Server als den der Entwicklung aus
+            zufall = (re.search(r"[?&]zufall=([0-9a-f]{16,64})(?:&|$)", self.path) or [None, None])[1]
+            if zufall:
+                u = unterschreibe(zufall)
+                if u:
+                    st["unterschrift"] = u
+            return self.antwort(200, st)
         if self.path.split("?")[0] == "/entwicklung/bemerkungen":
             app = (re.search(r"[?&]app=([a-z]+)", self.path) or [None, "eulenpfad"])[1]
             if app not in APPS:
@@ -425,6 +516,14 @@ def main() -> None:
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     if "--neuer-schluessel" in sys.argv:
         return neuer_schluessel()
+    if "--neues-schluesselpaar" in sys.argv:
+        try:
+            neues_schluesselpaar()
+        except RuntimeError as e:
+            sys.exit(str(e))
+        return print(f"Neues Schlüsselpaar: privat in {privat_datei()} (gitignored, nie weitergeben; auf den Server im Netz\n"
+                     "kopieren), öffentlich in kern/entwicklung.js (SERVER_SCHLUESSEL) eingetragen.\n"
+                     "Jetzt die Version in kern/VERSION erhöhen und verteilen: python tools/kern_verteilen.py")
     # Zugelassene Aufsichten (ES1 a, ES2 a): --zulassen "Vorname Name" person@… [--neu], --sperren "Vorname Name", --zugelassen
     if "--zulassen" in sys.argv:
         i = sys.argv.index("--zulassen")

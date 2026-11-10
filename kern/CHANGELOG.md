@@ -3,6 +3,16 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.38.0 — 2026-11-10 (LERN_Session27)
+- `entwicklung.js`, Unterschrift des Servers (Plan C12, NS2 a, NS2-K a): `SERVER_SCHLUESSEL` (SPKI, Base64, ECDSA
+  P-256; eingetragen von `python tools/entwickler_server.py --neues-schluesselpaar`, noch leer). Jede Statusabfrage
+  schickt eine Zufallszahl (`?zufall=`, 16 Byte Hex); `unterschriftEcht(st, zufall, schluessel)` prüft mit WebCrypto
+  „lernspiele-entwicklung|<zufall>|<Version>“. `server()` und `verbindungPruefen` melden `echt`; eine Adresse im Netz
+  (nicht localhost/127.0.0.1) gilt nur mit gültiger Unterschrift als Server (heute lässt `adresseGueltig` noch keine zu,
+  das kommt mit NS1), sonst sagt `serverMeldung` „weist sich nicht als Server der Entwicklung aus“. Text von „Verbindung
+  prüfen“: „…, Unterschrift der Entwicklung geprüft“, „ohne Unterschrift“ oder „Unterschrift passt nicht“. Option
+  `serverSchluessel` (später für einen Abgleich-Server mit dem Schlüssel seiner Aufsicht).
+
 ## 1.37.0 — 2026-11-10 (LERN_Session27)
 - `entwicklung.js`, zugelassene Aufsichten (Plan C12, ES1 a bis ES4 a): `freischalten` nimmt neben dem Schlüssel der
   Entwicklung (Hash im Kern, ohne Server) den persönlichen Schlüssel einer zugelassenen Aufsicht, geprüft beim Server
