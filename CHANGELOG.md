@@ -1647,3 +1647,6 @@
   s6 mit der Eule), grösser und mittig; Lichtschein im Tresor. `tools/pruefe_spiele.js` meldet jede `animateTransform`
   mit ungültiger Art — Gegenprobe („matrix“ wieder eingebaut): gemeldet. Im Browser mitten im Lauf nachgemessen (Tür
   104 → 33 → 10 Einheiten breit) und angesehen. Klickzahlen gleich.
+- Session-Abschluss LERN_Session27: Report docs/eulenpfad/report/LERN_Session27_2026-11-10.md, Handover (Stand nach
+  LERN_Session27, Haltepunkt der Sitzung aufgelöst). Anweisung Patrik als Memory: Animationen laufend durchspielen und
+  mit Screenshots zu mehreren Zeitpunkten prüfen, nicht nur das ruhige Endbild. Keine Code-Änderung.

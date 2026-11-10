@@ -1,42 +1,20 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
-## HALTEPUNKT 2026-11-10 17:30 — LERN_Session27_2026-11-10_voller-lauf-push (aufgenommen 2026-11-10 19:54)
-
-Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
-
-- **Angehalten — beim Weitermachen neu starten:** nichts (kein Hintergrundbefehl, kein Agent, kein Server, keine
-  Schleife). Arbeitsbaum sauber, alles bis `97231c0` committet und gepusht.
-- **Stand:**
-  - Plan C12 (Meldungsserver im Netz, Versionen, E-Mail, Impressum, Schlüssel je Aufsicht, Richtlinie, Unterschrift)
-    im Code fertig, Kern 1.39.0; Anleitungen `docs/anleitung_entwickler_server.md`,
-    `docs/anleitung_inbetriebnahme_meldungsserver.md`, Anleitung für Erwachsene im Eulenpfad nachgeführt.
-  - Tests heute: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0
-    Fehler, 139 Hinweise.“, Konten „106 Fälle, 0 Fehler.“, Gratwanderung „Keine Fehler.“; Eulenpfad nur Stichproben mit
-    gleichen Klickzahlen — **letzter voller Lauf auf `6055527`** (vor Kern 1.35–1.39 und `version.js` in 199 Seiten).
-  - Konzept `docs/konzept_abschluss_animationen.md` committet (Entwurf, Ideen für alle 169 Spiele).
-- **Entscheide von Patrik (17:25, noch nicht ins Konzept eingetragen):**
-  - **AN1 a** — Rahmen und acht Muster, Pilot, dann fachweise alle; Zusatz: **eine Liste mit den Piloten ist Pflicht**
-    (acht Spiele, je Muster eines, darunter Rechen-Rakete, Dezimal-Rakete, Himmels-Forscher).
-  - **AN2 a** — Stufe ändert das Ziel, Sterne schmücken aus.
-  - **AN3 a** — Einstellung „Abschluss-Animation an/aus“, global und je Spiel; Zusatz/Frage Patrik: **„mit
-    Zeitschaltuhr/en?“** — offen, als Frage mit Optionen vorzulegen (z. B. aus während Schulzeiten / zu bestimmten
-    Uhrzeiten; vorher Konzepte nach Zeitplänen durchsuchen).
-- **Weiter mit:**
-  1. Entscheide AN1–AN3 in `docs/konzept_abschluss_animationen.md` Abschnitt 7 eintragen, Pilotliste (acht Spiele mit
-     Muster und Begründung) in Abschnitt 5 oder 7 ergänzen, Frage Zeitschaltuhr vorlegen.
-  2. **Geburtsdatum im Eulenpfad** (Plan B3, Vorgabe Patrik LERN_Session15; „nach dem Konzept gleich noch schnell“):
-     `eulenpfad/start/profil.js` fragt nur Monat und Jahr ab (Zeilen ~117–128, 307–331), `LS.alterVon` in
-     `spiele/gemeinsam/spiel.js` (~1044) liest nur `JJJJ-MM`. Umstellen auf `KERN.person.geburtsdatumLies`,
-     `geburtsdatumText`, `tagFehlt`, `alter` (Kern kann es schon); Tag nachtragbar, Profile ohne Tag gelten weiter.
-     Wie im Lernsteig eingeben (dort nachsehen). Anleitung für Erwachsene Abschnitt 4 („Geburtsmonat (Monat und Jahr …)“)
-     anpassen. Auch Anmeldung „Ich bin neu“ und Verwaltung → Konten prüfen. Tests: Eulenpfad-Stichprobe (Profil, Konten).
-  3. Danach Bau der Abschluss-Animationen nach AN1 a (Rahmen `spiele/gemeinsam/feier.js`, Muster, Pilot).
-  4. Patrik: Inbetriebnahme des Meldungsservers zu Hause nach der Anleitung; voller Eulenpfad-Lauf auf seinen Entscheid.
-  5. Am Sitzungsende: `/session-abschluss` (Report LERN_Session27, Handover, CHANGELOG).
-- **Gemerkt (Memory):** keine Befehle vorschlagen, die stagen (`git rm --cached`) — Patrik committet alles zusammen über
-  Visual Studio; Heredocs mit Backslash weist der Hook ab (heute dreimal) — Edit oder Skriptdatei nehmen.
-
 ## Stand
+**2026-11-10, nach LERN_Session27** ([Report](report/LERN_Session27_2026-11-10.md)):
+- **Kern:** 1.39.0 (1.35 Verbindung prüfen, 1.36 Versionen, 1.37 zugelassene Aufsichten, 1.38 Unterschrift, 1.39
+  Meldungsserver im Netz; Plan C12 im Code fertig, Inbetriebnahme bei Patrik zu Hause offen).
+- **Eulenpfad:** Geburtsdatum mit Tag (Plan B3); Abschluss-Animationen (`spiele/gemeinsam/feier.js`, neun Muster,
+  [rahmen.md](rahmen.md) 24) in 18 Spielen — acht Piloten und Block M1 von Patrik abgenommen, Ausrollen nach AR1 a
+  (Blockplan im Konzept); Ruhezeiten mit Kopfhörern und Ton-Spielen ([rahmen.md](rahmen.md) 25); Vorschau
+  `tools/feier_vorschau.html`.
+- **Tests:** Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten
+  „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Skripte „Keine Fehler.“; Eulenpfad Stichproben „Keine
+  Fehler.“ — **letzter voller Lauf auf `6055527`**.
+- **Weiter mit:** Block M1 laufend mit Screenshots nachsehen (Memory „Animationen laufend prüfen“), Abnahme des
+  nachgebesserten Tresors; Block M2 (Zahlen, Teiler, Begründen); voller Eulenpfad-Lauf auf Patriks Entscheid vor dem
+  nächsten Push mit `spiel.js`; Anleitungen am Schluss; Inbetriebnahme des Meldungsservers (Patrik).
+
 **2026-11-09, nach LERN_Session26** ([Report](report/LERN_Session26_2026-11-09.md)):
 - **Kern:** unverändert 1.34.0.
 - **Eulenpfad:** Speicherschicht umgestellt (Plan D11 erledigt): Runden, Rekorde, Meldungen, Löschvermerke in IndexedDB
