@@ -1,5 +1,5 @@
 /* Tab „Profil“. Ein Kind sieht nur „Mein Bild“ und wählt seinen Avatar (Entscheid AV1 a, LERN_Session12); Timer,
-   Vorlesen und Reihenfolge stellt es im Spiel um. Die Aufsicht wählt oben, wessen Profil, und setzt Geburtsmonat, Klasse (auch Aufsteigen),
+   Vorlesen und Reihenfolge stellt es im Spiel um. Die Aufsicht wählt oben, wessen Profil, und setzt Geburtsdatum, Klasse (auch Aufsteigen),
    Fokus und die Vorgaben für Reihenfolge, Vorlesen und Timer — je Einstellung auch „fest“ (VR1 a). Rollen und PIN:
    Tab Verwaltung. */
 "use strict";
@@ -11,7 +11,6 @@ let avatarNeu = null;  // { name, neu }: was beim ersten Öffnen neu freigeschal
 const FOKUS_FAECHER = { MA: "Mathe", D: "Deutsch", NMG: "NMG", FS1E: "Englisch", FS2F: "Französisch", MU: "Musik", MI: "Medien und Informatik",
   BG: "Bildnerisches Gestalten", TTG: "Textiles und Technisches Gestalten", BS: "Bewegung und Sport" };
 const fokusGruppe = lz => (/^\d/.test(lz) ? `Lernzielblatt ${lz.split("-")[0]}` : FOKUS_FAECHER[lz.split(".")[0]] || lz.split(".")[0]);
-const MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
 /**
  * Avatar wählen (AV2 a, AV4 a–AV6 a): grosses Bild, Reiter je Satz (Tiere, Weltall und Technik, Fantasie, aus den
@@ -112,23 +111,21 @@ function zeichneProfil(box, neu) {
       !fest && n ? el("button", { type: "button", class: "knopf hell klein", text: "↺ Auf Vorgabe zurück", onclick: () => { LS.wahlZuruecksetzen(name, art); neu(); } }) : null);
   };
 
-  // Geburtsmonat statt Alter (Wunsch Patrik, LERN_Session14): Jahr und Monat, ohne Tag; das Alter rechnet LS.alterVon.
-  const heute = new Date();
-  const [gJahr, gMonat] = (p.geboren || "").split("-");
-  const jahr = el("select", { "aria-label": "Geburtsjahr" }, el("option", { value: "", text: "Jahr" }),
-    ...Array.from({ length: 15 }, (_, i) => heute.getFullYear() - 2 - i).map(j => el("option", { value: String(j), text: String(j) })));
-  jahr.value = gJahr || "";
-  const monat = el("select", { "aria-label": "Geburtsmonat" }, el("option", { value: "", text: "Monat" }),
-    ...MONATE.map((m, i) => el("option", { value: String(i + 1).padStart(2, "0"), text: m })));
-  monat.value = gMonat || "";
+  // Geburtsdatum (Vorgabe Patrik LERN_Session15, Plan B3; umgestellt LERN_Session27, wie im Lernsteig): ein Datumsfeld,
+  // gespeichert „JJJJ-MM-TT“ über KERN.person. Profile seit LERN_Session14 kennen nur den Monat („JJJJ-MM“): Das Feld
+  // bleibt dann leer, der Monat gilt weiter, bis der Tag nachgetragen ist. Das Alter rechnet LS.alterVon (KERN.person.alter).
+  const nurMonat = p.geboren && KERN.person.tagFehlt(p.geboren) ? KERN.person.geburtsdatumLies(p.geboren) : null;
+  const datum = el("input", { type: "date", class: "feld", name: "geboren", "aria-label": "Geburtsdatum", max: KERN.zeit.tag(),
+    value: p.geboren && !nurMonat ? KERN.person.geburtsdatumLies(p.geboren) || "" : "" });
   const alterText = el("span", { class: "leise-text", "aria-live": "polite" });
   const zeigeAlter = () => {
-    const a = jahr.value && monat.value ? LS.alterVon({ geboren: `${jahr.value}-${monat.value}` }) : null;
-    alterText.textContent = a !== null ? `${a} Jahre alt`
-      : typeof p.alter === "number" ? `bisher „${p.alter} Jahre“ — bitte Geburtsmonat ergänzen` : "nur Monat und Jahr";
+    const g = datum.value || nurMonat;
+    const a = g ? LS.alterVon({ geboren: g }) : null;
+    alterText.textContent = a !== null
+      ? `${a} Jahre alt${!datum.value && nurMonat ? ` — bisher nur ${KERN.person.geburtsdatumText(nurMonat)}, bitte den Tag nachtragen` : ""}`
+      : typeof p.alter === "number" ? `bisher „${p.alter} Jahre“ — bitte das Geburtsdatum ergänzen` : "";
   };
-  jahr.addEventListener("change", zeigeAlter);
-  monat.addEventListener("change", zeigeAlter);
+  datum.addEventListener("change", zeigeAlter);
   zeigeAlter();
   const klasse = el("select", { "aria-label": "Klasse" },
     el("option", { value: "", text: "—" }),
@@ -302,9 +299,9 @@ function zeichneProfil(box, neu) {
       if (an.value || Object.keys(sek).length) timerJeSpiel[s.id] = { an: an.value ? an.value === "an" : null, sekunden: sek };
       else delete timerJeSpiel[s.id];
     }
-    // Nur Jahr oder nur Monat: nicht speichern, sonst wäre das Alter falsch
-    if (!jahr.value !== !monat.value) { meldung.textContent = "Bitte Jahr und Monat wählen (oder beide leer lassen)."; return false; }
-    const geboren = jahr.value ? `${jahr.value}-${monat.value}` : null;
+    // Ein Datum aus dem Feld, sonst der bisherige Monat (Tag nicht nachgetragen); ein ungültiges Datum nicht speichern
+    const geboren = datum.value ? KERN.person.geburtsdatumLies(datum.value) : nurMonat;
+    if (datum.value && !geboren) { meldung.textContent = "Dieses Datum gibt es nicht."; return false; }
     LS.speichereProfil(name, {
       geboren,
       ...(geboren ? { alter: null } : {}),
@@ -328,7 +325,7 @@ function zeichneProfil(box, neu) {
       el("div", { class: "profil-person" },
         istKind ? el("span", { class: "profil-bild", title: "Das Bild wählt das Kind selbst" }, LS.avatarBild(name, 64))
           : el("details", { class: "timer-details" }, el("summary", {}, LS.avatarBild(name, 28), " Mein Bild"), avatarWahl(name, neu)),
-        el("label", {}, "Geboren", el("span", { class: "geboren-wahl" }, monat, jahr), alterText),
+        el("label", {}, "Geboren", el("span", { class: "geboren-wahl" }, datum), alterText),
         el("label", {}, "Klasse", el("span", { class: "klasse-wahl" }, klasse, aufstiegKnopf() || "")),
       ),
       aufstiegVerlauf() || ""),

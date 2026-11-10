@@ -840,15 +840,17 @@ Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
   `LS.avatarBild(name, groesse)` gibt das Bild als Element, ohne Avatar den Anfangsbuchstaben. Es steht vor dem Namen:
   Anmeldung (Kachel), Kopfzeile, Spielerzeile im Spiel, Endlos-Ranglisten, Namens-Chips der Aufsicht, Abzeichen-Bild.
 - **Profil:** Ein Kind sieht sein Alter und seine Klasse (nur zum Lesen) und wählt „Mein Bild“. Die Aufsicht (Aufbau
-  nach Hinweis Patrik, LERN_Session14): oben ein Formular — **👤 Person** (Bild des Kindes nur zum Ansehen, Geburtsmonat
+  nach Hinweis Patrik, LERN_Session14): oben ein Formular — **👤 Person** (Bild des Kindes nur zum Ansehen, Geburtsdatum
   mit Alter, Klasse mit dem Aufstieg gleich daneben), **🎮 Vorgaben fürs Spielen** (Vorlesen, Reihenfolge global und je
   Spiel eingeklappt, Timer), **⭐ Fokus** (ganz und je Fach oder Lernzielblatt einklappbar, mit Zählern) — und gleich
   darunter „Speichern“. Darunter **🔒 Was das Kind selbst umstellen darf**: „🔒 fest“ und „↺ Auf Vorgabe zurück“ je
   Einstellung, die sofort wirken. Vor einem Aufstieg speichert das Formular, was geändert ist.
-- **Geburtsmonat** (Wunsch Patrik, LERN_Session14): Profilfeld `geboren: "JJJJ-MM"`, ohne Tag (Datensparsamkeit, Annahme
-  GM1); `LS.alterVon(profil, jetzt)` rechnet das Alter, im Geburtsmonat selbst ab dem Ersten. Ältere Profile mit der Zahl
-  `alter` gelten weiter, bis der Geburtsmonat gesetzt ist; das Profil bittet darum. Nur Jahr oder nur Monat wird nicht
-  gespeichert.
+- **Geburtsdatum** (Plan B3, Vorgabe Patrik LERN_Session15; umgestellt LERN_Session27, wie im Lernsteig): Profilfeld
+  `geboren: "JJJJ-MM-TT"`, eingegeben im Datumsfeld, gelesen und gezeigt über `KERN.person` (`geburtsdatumLies`,
+  `geburtsdatumText`); `LS.alterVon(profil, jetzt)` rechnet das Alter mit `KERN.person.alter`. Profile seit
+  LERN_Session14 tragen nur den Monat (`"JJJJ-MM"`, damals Datensparsamkeit, Annahme GM1): Das Datumsfeld bleibt leer,
+  der Monat gilt weiter (Alter ab dem Ersten des Monats), und das Profil bittet, den Tag nachzutragen. Ältere Profile mit
+  der Zahl `alter` gelten weiter, bis ein Geburtsdatum gesetzt ist.
 - **Übernahme in den Lernsteig** (Plan C9, Ü1 a, Ü2 b): Im eigenen Profil der angemeldeten Aufsicht „🔑 In den
   Lernsteig übernehmen“ mit der Rolle dort (Eltern oder Lehrperson; bleibt hier als Feld `art` ohne Wirkung) —
   `KERN.person.uebernehmen`, docs/kern/rahmen.md 4.7. Gleiche Kennung, PIN und Sicherheitsfrage, neuer Code (einmal

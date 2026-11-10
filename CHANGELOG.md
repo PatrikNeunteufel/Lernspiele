@@ -1543,3 +1543,9 @@
   mit Kopfhörern benutzt“ (Ruhezeit gilt dann nicht für Hören als Inhalt; reist nicht mit; Kopfhörer lassen sich nicht
   zuverlässig erkennen); Zusatz Patrik: Spiele, die Ton brauchen, in der Ruhezeit wahlweise ausblenden (auch in Zufall
   und Mix).
+- Eulenpfad, Geburtsdatum (Plan B3, Vorgabe Patrik LERN_Session15): Profil mit Datumsfeld wie im Lernsteig statt Monat
+  und Jahr (`start/profil.js`), gespeichert `JJJJ-MM-TT` über `KERN.person`; `LS.alterVon` rechnet mit
+  `KERN.person.alter`. Profile mit nur dem Monat bleiben gültig: Das Feld ist leer, der Hinweis sagt „bisher nur März
+  2017, bitte den Tag nachtragen“, Speichern ohne Tag lässt den Monat stehen. Im Browser angesehen (Monat → Tag
+  nachgetragen, Speichern ohne Tag, 375 px, keine Konsolenfehler), Testkonten entfernt. Anleitung für Erwachsene
+  (Abschnitt 4), README, rahmen.md 18, Steckbrief (sensible Daten), Plan B3 nachgeführt.

@@ -197,8 +197,9 @@ const LS = (() => {
   // ---------- Spieler, Profil und Protokoll (nur auf diesem Gerät) ----------
   // Profil einer Person (lernspiele:personen, KERN.person; Kennung id, Name je Gerät eindeutig; P1 a, LERN_Session15):
   //   { id, name, geboren, alter, klasse, fokus: [Lernziel-Ids, z. B. "4.2-G3"],
-  //   geboren: "JJJJ-MM" — Geburtsmonat, von der Aufsicht gesetzt (Wunsch Patrik, LERN_Session14); das Alter rechnet
-  //     alterVon daraus. alter: Zahl nur noch in älteren Profilen, gilt, solange geboren fehlt
+  //   geboren: "JJJJ-MM-TT" — Geburtsdatum, von der Aufsicht gesetzt (Plan B3, seit LERN_Session27); Profile seit
+  //     LERN_Session14 tragen nur "JJJJ-MM" (der Monat gilt, bis der Tag nachgetragen ist). Das Alter rechnet alterVon
+  //     (KERN.person.alter). alter: Zahl nur noch in älteren Profilen, gilt, solange geboren fehlt
   //   aufstiege: [{ von, nach, zeit }] — Klassenaufstiege durch die Aufsicht (LERN_Session14); aufstiegGesehen: ISO des
   //     zuletzt gefeierten Aufstiegs (das Kind hat die Nachricht gesehen)
   //   reihenfolge: { global, spiele: { <spiel-id>: … } } mit "stufe" | "geordnet" | "gemischt" }
@@ -1041,15 +1042,13 @@ const LS = (() => {
   }
 
   /**
-   * Alter in ganzen Jahren aus dem Geburtsmonat (geboren "JJJJ-MM"); der Tag fehlt mit Absicht (Datensparsamkeit), im
-   * Geburtsmonat selbst zählt das neue Lebensjahr schon ab dem Ersten — höchstens einen Monat zu früh. Ältere Profile
-   * ohne Geburtsmonat: die gespeicherte Zahl alter. Sonst null.
+   * Alter in ganzen Jahren aus dem Geburtsdatum (geboren "JJJJ-MM-TT", Plan B3) über KERN.person.alter; ohne Tag
+   * ("JJJJ-MM", Profile seit LERN_Session14) zählt das neue Lebensjahr ab dem Ersten des Geburtsmonats. Ältere Profile
+   * ohne Geburtsdatum: die gespeicherte Zahl alter. Sonst null.
    */
   function alterVon(p, jetzt = new Date()) {
-    const m = /^(\d{4})-(\d{2})$/.exec(p?.geboren || "");
-    if (!m) return typeof p?.alter === "number" ? p.alter : null;
-    const jahre = jetzt.getFullYear() - Number(m[1]) - (jetzt.getMonth() + 1 < Number(m[2]) ? 1 : 0);
-    return jahre >= 0 ? jahre : null;
+    if (!KERN.person.geburtsdatumLies(p?.geboren)) return typeof p?.alter === "number" ? p.alter : null;
+    return KERN.person.alter(p.geboren, jetzt);
   }
 
   /**

@@ -21,7 +21,7 @@ die Aufsicht ein. **Kinder sehen alles, was nichts mehr zu prüfen hat:** Neue S
 sobald sie angesehen sind, Spiele mit Wort- und Inhaltslisten, sobald eine Liste geprüft ist. Die
 Aufsicht kann im Tab Verwaltung anders freigeben oder sperren.
 
-**Klasse:** Die Aufsicht trägt je Kind Geburtsmonat und Klasse ein; das Alter rechnet die App selbst.
+**Klasse:** Die Aufsicht trägt je Kind Geburtsdatum und Klasse ein; das Alter rechnet die App selbst.
 Auf den Spielkarten zeigt ein farbiger Rand, wie ein Spiel zur Klasse des Kindes steht (✓ tiefer,
 ● meine Klasse, ▲ Herausforderung). Zum neuen Schuljahr lässt die Aufsicht das Kind im Profil
 **aufsteigen**; das Kind sieht beim nächsten Anmelden eine Nachricht und erhält ein Abzeichen.
@@ -59,7 +59,7 @@ Ranglisten je Mischung.
 
 ## Daten der Kinder
 
-Name, Geburtsmonat, Klasse und Lernstand bleiben **nur in diesem Browser auf diesem Gerät**
+Name, Geburtsdatum, Klasse und Lernstand bleiben **nur in diesem Browser auf diesem Gerät**
 (`localStorage`, Schlüssel `lernspiele:*`). Nichts wird verschickt. Die PIN der Aufsicht wird nur als
 Hash gespeichert und nie mitgesichert. In der Statistik lassen sich die Daten als JSON-Datei sichern
 (`lernspiele-<Namen>-<Datum>.json`) und auf einem anderen Gerät einlesen. Einlesen führt zusammen:

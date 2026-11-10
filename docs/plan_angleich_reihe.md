@@ -128,6 +128,8 @@ Apps gegenprüft (`node tools/pruefe.js [eulenpfad|lernsteig|gratwanderung] …`
 als `TT.MM.JJJJ`. Fehlt der Tag (Eulenpfad-Profile seit LERN_Session14: `JJJJ-MM`), bricht nichts: Das Alter wird wie
 heute aus dem Monat gerechnet, das Profil bietet an, den Tag nachzutragen. Einladung und Einlesen nehmen beide Formen
 an. Ersetzt im Eulenpfad die Datensparsamkeit „Monat ohne Tag“ (CLAUDE.md und `rahmen.md` 18 nachführen).
+*Stand 2026-11-10 (LERN_Session27):* im Eulenpfad umgesetzt — Datumsfeld im Profil, `LS.alterVon` über
+`KERN.person.alter`, Monat ohne Tag gilt weiter mit Bitte um den Tag; Lernsteig schon seit LERN_Session15.
 
 **B4 Reihenfolge des Umbaus:** Teil für Teil, je Teil beide Apps umstellen und das Testskript über alle grün halten;
 die Zeile in `gemeinsame_mechaniken.md` auf „im Kern seit <Version>“.
