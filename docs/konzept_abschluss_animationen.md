@@ -113,7 +113,15 @@ Patriks Idee (Vollmond in Stufe 4 und 5) setzt eine Stufe mehr Mond voraus; s5 u
 | AN3-Z | a — **Ruhezeiten**, global für das Gerät: eine oder mehrere Zeitspannen je Wochentag (etwa Mo–Fr 08:00–12:00 und 13:30–16:00), Ortszeit des Geräts (`KERN.zeit`); während einer Ruhezeit ist die Abschluss-Animation aus, danach gilt an/aus wie eingestellt, auch je Spiel; reist mit dem Abgleich; die Verwaltung zeigt, ob gerade Ruhezeit ist | Frage Patrik: auch Ruhezeit für Töne? → AN3-T |
 | AN3-T | a — die Ruhezeit gilt auch für den Ton; Spiele mit der Spielweise „Hören“ (23 im Katalog) zeigen während einer Ruhezeit beim Start „🎧 Diese Runde braucht Ton — mit Kopfhörern spielen“ und „Ton für diese Runde an“, nach der Runde wieder aus | „es sollte differenziert eingestellt werden können“ — Lesart unten |
 
-**Lesart „differenziert“ (AN3-T, von Patrik zu bestätigen):**
+| AN3-K | a — Einstellung je Gerät „🎧 Dieses Gerät wird mit Kopfhörern benutzt“: dann gilt die Ruhezeit nicht für „Hören als Inhalt“ (und, wenn gewählt, nicht für das Vorlesen); Klänge und Animation folgen weiter der Ruhezeit; reist nicht mit dem Abgleich. Kopfhörer erkennen kann eine Webseite nicht zuverlässig (keine Schnittstelle für die aktive Ausgabe; Gerätenamen nur mit Mikrofon-Freigabe; auf iPad und iPhone gar nicht) | „eventuell auch die option, dass spiele mit erforderlicher audioausgabe ausgeblendet werden“ — unten |
+
+**Spiele, die Ton brauchen, in der Ruhezeit (Zusatz Patrik zu AN3-K):** Einstellung je Gerät „Spiele, die Ton
+brauchen, während einer Ruhezeit: **mit Kopfhörer-Hinweis zeigen** (Standard) / **ausblenden**“. Ausgeblendet heisst: Im
+Tab Spiele fehlen sie mit einem Hinweis „… Spiele mit Ton sind während der Ruhezeit ausgeblendet“, Zufall und Mix nehmen
+sie nicht; nach der Ruhezeit sind sie wieder da. Mit „🎧 Kopfhörer“ (AN3-K) bleiben sie immer sichtbar. Welche Spiele Ton
+brauchen, sagt der Katalog (Spielweise `hoeren`).
+
+**Lesart „differenziert“ (AN3-T, von Patrik bestätigt 10.11.2026):**
 
 - **Je Art**, wofür die Ruhezeit gilt, einzeln ein- und ausschaltbar: ☑ Abschluss-Animation · ☑ Klänge (Richtig, Falsch,
   Sterne) · ☑ Vorlesen der Eule · ☑ Hören als Inhalt (Aussprache, Musik, Hörgeschichte; mit dem Kopfhörer-Hinweis oben).

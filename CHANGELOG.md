@@ -1539,3 +1539,7 @@
   zeigen in der Ruhezeit „🎧 Diese Runde braucht Ton — mit Kopfhörern spielen“ und „Ton für diese Runde an“. Zusatz
   Patrik „differenziert einstellbar“, Lesart zur Bestätigung: je Art (Animation, Klänge, Vorlesen, Hören als Inhalt),
   je Zeitspanne und je Spiel.
+- Konzept Abschluss-Animationen: Lesart „differenziert“ bestätigt; AN3-K a — Einstellung je Gerät „🎧 Dieses Gerät wird
+  mit Kopfhörern benutzt“ (Ruhezeit gilt dann nicht für Hören als Inhalt; reist nicht mit; Kopfhörer lassen sich nicht
+  zuverlässig erkennen); Zusatz Patrik: Spiele, die Ton brauchen, in der Ruhezeit wahlweise ausblenden (auch in Zufall
+  und Mix).
