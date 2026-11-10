@@ -11,6 +11,15 @@ Aufruf (aus beliebigem Ordner):
     python tools/entwickler_server.py --oeffnen    zusätzlich die Einstiegsseite im Browser öffnen (SV1 a)
     python tools/entwickler_server.py --neuer-schluessel   Schlüssel neu erzeugen, Hash eintragen
     python tools/entwickler_server.py --herkunft https://beispiel.ch   eine weitere Seite darf anfragen (mehrfach möglich)
+    python tools/entwickler_server.py --zulassen "Vorname Name" person@schule.ch [--neu]   Aufsicht zulassen, Schlüssel ausgeben
+    python tools/entwickler_server.py --sperren "Vorname Name"     Schlüssel einer Aufsicht sperren
+    python tools/entwickler_server.py --zugelassen                 zugelassene Aufsichten auflisten
+
+Zugelassene Aufsichten (Plan C12, ES1 a bis ES5 a, LERN_Session27): Wer prüfen will, fordert per E-Mail an; die
+Entwicklung lässt mit --zulassen zu und schickt den ausgegebenen Schlüssel an die anfragende Adresse. Mit ihm schaltet
+die Aufsicht den Entwickler-Modus frei (/entwicklung/freischalten). Ihre Prüfvermerke gehen in
+docs/<app>/pruefstand-eingang.json und wirken erst, wenn die Entwicklung sie übernimmt (docs/richtlinie_freigaben.md);
+den Status von Bemerkungen setzt nur die Entwicklung. Geheimnis und Liste liegen in .entwicklung/ (gitignored).
 
 Andere Seiten (C11-3 a, LERN_Session25): Eine App, die nicht von diesem Server kommt — etwa die veröffentlichte Seite oder
 eine Vorschau auf einem anderen Port —, darf ihn für Meldungen und Entwicklung ansprechen (CORS), aber nur von einer
@@ -22,6 +31,7 @@ Versionen (Plan C12, NS3 a, LERN_Session27): /entwicklung/status nennt SERVER_VE
 eine ohne Angabe (Seiten vor LERN_Session27) gilt als Protokoll 1. Bemerkungen merken die Fassung der Meldung und die
 Versionen der sendenden Seite.
 """
+import base64
 import datetime
 import hashlib
 import hmac
@@ -57,6 +67,7 @@ APPS = {
         "arten": ("spiele", "listen"),
         "bemerkungen": WURZEL / "docs" / "eulenpfad" / "bemerkungen.json",
         "eintraege": WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "pruefstand-eintraege.json",
+        "eingang": WURZEL / "docs" / "eulenpfad" / "pruefstand-eingang.json",  # Vermerke zugelassener Aufsichten (ES3 a)
         "start": "eulenpfad/",
     },
     "lernsteig": {
@@ -72,6 +83,7 @@ APPS = {
         "arten": ("uebungen", "listen"),
         "bemerkungen": WURZEL / "docs" / "lernsteig" / "bemerkungen.json",
         "eintraege": WURZEL / "lernsteig" / "gemeinsam" / "pruefstand-eintraege.json",
+        "eingang": WURZEL / "docs" / "lernsteig" / "pruefstand-eingang.json",
         "start": "lernsteig/",
     },
 }
@@ -92,6 +104,107 @@ def neuer_schluessel() -> None:
     ENTWICKLUNG_JS.write_bytes(neu.encode("utf-8"))
     print(f"Neuer Schlüssel in {SCHLUESSEL_DATEI.name}, Hash in kern/entwicklung.js eingetragen.\n"
           "Jetzt die Version in kern/VERSION erhöhen und verteilen: python tools/kern_verteilen.py")
+
+
+# ----- Zugelassene Aufsichten (Plan C12, ES1 a, ES2 a, LERN_Session27) -----
+# Der Schlüssel einer Aufsicht ist HMAC-SHA-256 aus Name, E-Mail und einem Zähler mit dem Geheimnis des Servers: Wer Name
+# und E-Mail kennt, kann ihn ohne das Geheimnis nicht ausrechnen; dieselben Angaben ergeben wieder denselben Schlüssel.
+# Gespeichert werden nur Name, Hash des Schlüssels, Datum, Zähler und „gesperrt“ — keine E-Mail-Adresse (ES2 a).
+ENTWICKLUNG_ORDNER = WURZEL / ".entwicklung"  # gitignored
+
+
+def geheimnis() -> bytes:
+    """Geheimnis des Servers (.entwicklung/geheimnis), beim ersten Gebrauch erzeugt. Geht es verloren, gelten alle
+    Schlüssel der Aufsichten nicht mehr (neu ausgeben mit --zulassen … --neu)."""
+    pfad = ENTWICKLUNG_ORDNER / "geheimnis"
+    if not pfad.exists():
+        pfad.parent.mkdir(parents=True, exist_ok=True)
+        pfad.write_text(secrets.token_hex(32) + "\n", encoding="utf-8")
+    return bytes.fromhex(pfad.read_text(encoding="utf-8").strip())
+
+
+def normiere_schluessel(s) -> str:
+    """Gross, ohne Leerzeichen und Bindestriche — so tippt man ihn auch klein oder ohne Gruppen ein."""
+    return re.sub(r"[\s-]", "", str(s or "")).upper()
+
+
+def aufsicht_schluessel(name: str, email: str, zaehler: int) -> str:
+    roh = hmac.new(geheimnis(), f"{name.strip()}|{email.strip().lower()}|{zaehler}".encode("utf-8"), hashlib.sha256).digest()
+    t = base64.b32encode(roh).decode("ascii")[:20]
+    return "-".join(t[i:i + 5] for i in range(0, 20, 5))
+
+
+def aufsicht_hash(schluessel: str) -> str:
+    return hashlib.sha256(normiere_schluessel(schluessel).encode("utf-8")).hexdigest()
+
+
+def lies_zugelassen() -> list:
+    pfad = ENTWICKLUNG_ORDNER / "zugelassen.json"
+    return json.loads(pfad.read_text(encoding="utf-8")) if pfad.exists() else []
+
+
+def schreibe_zugelassen(liste: list) -> None:
+    ENTWICKLUNG_ORDNER.mkdir(parents=True, exist_ok=True)
+    (ENTWICKLUNG_ORDNER / "zugelassen.json").write_bytes((json.dumps(liste, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+
+
+def zulassen(name: str, email: str, neu: bool = False) -> str:
+    """Aufsicht zulassen und ihren Schlüssel zurückgeben; schon zugelassen nur mit neu (ersetzt den alten Schlüssel)."""
+    name = name.strip()
+    if not name or "@" not in email:
+        raise ValueError("Name und E-Mail-Adresse angeben: --zulassen \"Vorname Name\" person@beispiel.ch")
+    liste = lies_zugelassen()
+    alt = next((z for z in liste if z["name"] == name), None)
+    if alt and not neu:
+        raise ValueError(f"{name} ist schon zugelassen. Einen neuen Schlüssel gibt --neu (der alte gilt dann nicht mehr).")
+    zaehler = alt["zaehler"] + 1 if alt else 1
+    schluessel = aufsicht_schluessel(name, email, zaehler)
+    eintrag = {"name": name, "hash": aufsicht_hash(schluessel), "am": datetime.date.today().isoformat(), "zaehler": zaehler,
+               "gesperrt": False}
+    schreibe_zugelassen([z for z in liste if z["name"] != name] + [eintrag])
+    return schluessel
+
+
+def sperre_aufsicht(name: str) -> bool:
+    liste = lies_zugelassen()
+    z = next((z for z in liste if z["name"] == name.strip()), None)
+    if not z:
+        return False
+    z["gesperrt"] = True
+    schreibe_zugelassen(liste)
+    return True
+
+
+def wer(schluessel) -> tuple | None:
+    """("entwicklung", None) für entwickler.key, ("aufsicht", Name) für eine zugelassene, nicht gesperrte Aufsicht."""
+    s = str(schluessel or "").strip()
+    if not s:
+        return None
+    if SCHLUESSEL_DATEI.exists() and hmac.compare_digest(s, SCHLUESSEL_DATEI.read_text(encoding="utf-8").strip()):
+        return ("entwicklung", None)
+    h = aufsicht_hash(s)
+    z = next((z for z in lies_zugelassen() if hmac.compare_digest(z["hash"], h)), None)
+    return ("aufsicht", z["name"]) if z and not z.get("gesperrt") else None
+
+
+def lies_eingang(a: dict) -> list:
+    return json.loads(a["eingang"].read_text(encoding="utf-8")) if a["eingang"].exists() else []
+
+
+def reiche_ein(a: dict, von: str, art: str, daten: dict, jetzt: str) -> dict:
+    """Vermerk einer zugelassenen Aufsicht in docs/<app>/pruefstand-eingang.json (ES3 a); derselbe offene Vermerk nur
+    einmal. Wirksam erst, wenn die Entwicklung ihn übernimmt (docs/richtlinie_freigaben.md)."""
+    eingang = lies_eingang(a)
+    inhalt = {k: daten[k] for k in ("art", "id", "geprueft", "liste", "setzen", "entfernen", "komplett", "hash") if k in daten}
+    schon = next((v for v in eingang if v.get("von") == von and v.get("pfad") == art and v.get("inhalt") == inhalt
+                  and v.get("status") == "offen"), None)
+    if schon:
+        return schon
+    v = {"nr": max((x["nr"] for x in eingang), default=0) + 1, "zeit": jetzt, "von": von, "pfad": art, "inhalt": inhalt,
+         "status": "offen"}
+    a["eingang"].parent.mkdir(parents=True, exist_ok=True)
+    a["eingang"].write_bytes((json.dumps(eingang + [v], ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+    return v
 
 
 def lies_pruefstand(a: dict) -> dict:
@@ -193,16 +306,35 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             bereich = str(von) if von == bis else f"{von}–{bis}"
             return self.antwort(409, {"fehler": f"Protokoll {protokoll} passt nicht: der Server {SERVER_VERSION} versteht "
                                                 f"{bereich}. App oder Server auf denselben Stand bringen."})
-        if not SCHLUESSEL_DATEI.exists():
-            return self.antwort(403, {"fehler": "entwickler.key fehlt: python tools/entwickler_server.py --neuer-schluessel"})
-        richtig = SCHLUESSEL_DATEI.read_text(encoding="utf-8").strip()
-        if not hmac.compare_digest(str(daten.get("schluessel", "")), richtig):
+        # Wer schreibt? Die Entwicklung (entwickler.key) oder eine zugelassene Aufsicht (ES1 a, ES2 a)
+        rolle = wer(daten.get("schluessel"))
+        if self.path == "/entwicklung/freischalten":
+            if not rolle:
+                return self.antwort(403, {"ok": False, "fehler": "Schlüssel passt nicht"})
+            return self.antwort(200, {"ok": True, "rolle": rolle[0], "name": rolle[1] or ""})
+        if not rolle:
+            if not SCHLUESSEL_DATEI.exists() and not lies_zugelassen():
+                return self.antwort(403, {"fehler": "entwickler.key fehlt: python tools/entwickler_server.py --neuer-schluessel"})
             return self.antwort(403, {"fehler": "Schlüssel passt nicht"})
+        aufsicht = rolle[1] if rolle[0] == "aufsicht" else None
+        if aufsicht:
+            daten["von"] = aufsicht  # der Name, unter dem die Aufsicht zugelassen ist, nicht was die Seite schickt
         jetzt = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
         # Ältere Seiten (vor LERN_Session16) schicken keine App: dann der Eulenpfad
         a = APPS.get(str(daten.get("app") or "eulenpfad"))
         if not a:
             return self.antwort(400, {"fehler": "app unbekannt"})
+        # Prüfvermerke einer Aufsicht gehen in den Eingang, nicht in pruefstand.js (ES3 a, docs/richtlinie_freigaben.md)
+        if aufsicht and self.path in ("/entwicklung/pruefstand", "/entwicklung/eintraege"):
+            if self.path == "/entwicklung/pruefstand" and (daten.get("art") not in a["arten"]
+                                                         or not re.fullmatch(r"[a-z0-9-]+(/[a-z0-9-]+)?", str(daten.get("id", "")))):
+                return self.antwort(400, {"fehler": "art oder id ungültig"})
+            if self.path == "/entwicklung/eintraege" and not re.fullmatch(r"[a-z0-9-]+/[a-z0-9-]+", str(daten.get("liste", ""))):
+                return self.antwort(400, {"fehler": "liste ungültig"})
+            v = reiche_ein(a, aufsicht, self.path.rsplit("/", 1)[1], daten, jetzt)
+            return self.antwort(200, {"eingereicht": True, "nr": v["nr"], "stand": lies_pruefstand(a)})
+        if aufsicht and self.path == "/entwicklung/bemerkung-status":
+            return self.antwort(403, {"fehler": "Den Status einer Bemerkung setzt nur die Entwicklung"})
 
         if self.path == "/entwicklung/pruefstand":
             art, schluessel = daten.get("art"), str(daten.get("id", ""))
@@ -293,6 +425,25 @@ def main() -> None:
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     if "--neuer-schluessel" in sys.argv:
         return neuer_schluessel()
+    # Zugelassene Aufsichten (ES1 a, ES2 a): --zulassen "Vorname Name" person@… [--neu], --sperren "Vorname Name", --zugelassen
+    if "--zulassen" in sys.argv:
+        i = sys.argv.index("--zulassen")
+        if len(sys.argv) < i + 3:
+            sys.exit('Aufruf: python tools/entwickler_server.py --zulassen "Vorname Name" person@beispiel.ch [--neu]')
+        try:
+            s = zulassen(sys.argv[i + 1], sys.argv[i + 2], neu="--neu" in sys.argv)
+        except ValueError as e:
+            sys.exit(str(e))
+        return print(f"Zugelassen: {sys.argv[i + 1].strip()}\nSchlüssel: {s}\n\nNur an die Adresse schicken, von der die "
+                     "Anforderung kam (ES5 a). Gespeichert sind Name und Hash, nicht die E-Mail-Adresse.")
+    if "--sperren" in sys.argv:
+        i = sys.argv.index("--sperren")
+        name = sys.argv[i + 1] if len(sys.argv) > i + 1 else ""
+        return print(f"Gesperrt: {name}" if sperre_aufsicht(name) else f"Nicht zugelassen: {name}")
+    if "--zugelassen" in sys.argv:
+        liste = lies_zugelassen()
+        return print("\n".join(f"{z['name']:30} seit {z['am']}  Schlüssel Nr. {z['zaehler']}{'  GESPERRT' if z.get('gesperrt') else ''}"
+                               for z in liste) or "Noch niemand zugelassen.")
     port = int(next((a for a in sys.argv[1:] if a.isdigit()), 8765))
     for i, a in enumerate(sys.argv):
         if a == "--herkunft" and i + 1 < len(sys.argv):

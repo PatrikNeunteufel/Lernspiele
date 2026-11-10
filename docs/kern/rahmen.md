@@ -370,7 +370,9 @@ der App; Meldungen gehen an `opt.melde`.
 | Aufruf | Ergebnis |
 |---|---|
 | `entwicklung({ app, speicher, aufsicht, name?, pruefstand?, arten, melde?, start?, adresse?, version? })` | Entwickler-Modus der App; `pruefstand` ist das Objekt der App (wird nach jeder Änderung auf den Stand des Servers gebracht, dasselbe Objekt) |
-| `freischalten(s)`, `sperren()`, `freigeschaltet()` | Schlüssel gegen den Hash prüfen und merken |
+| `freischalten(s)`, `sperren()`, `freigeschaltet()` | Schlüssel prüfen und merken: der der Entwicklung gegen den Hash (ohne Server), seit 1.37.0 der persönliche einer zugelassenen Aufsicht beim Server (`/entwicklung/freischalten`, Plan C12 ES1 a); `true`, `false` oder `null` (Server nicht erreichbar, gemeldet) |
+| `rolle()` | (1.37.0) „entwicklung“, „aufsicht“ oder `null`. Prüfvermerke einer Aufsicht beantwortet der Server mit `{ eingereicht, nr, stand }`: Prüfstand unverändert, Meldung „Eingereicht (Nr. …)“ — wirksam erst nach Übernahme durch die Entwicklung (docs/richtlinie_freigaben.md) |
+| `anforderungLink(an, { name, titel })` | (1.37.0) mailto „Anforderung Entwicklermodus“ mit Vorlage (ES4 a, ES5-S a) oder `null` ohne Adresse |
 | `aktiv()` | Zusätze sichtbar: angemeldete Aufsicht, freigeschaltet und eingeschaltet (`setzeAn`) |
 | `name()`, `benenne(n)`, `zustand()` | Name für „von“ (sonst `opt.name()`), Zustand |
 | `server()`, `fremd()`, `serverMeldung()` | läuft der Entwickler-Server? antwortet ein anderer auf dem Port? Text für die Meldung |

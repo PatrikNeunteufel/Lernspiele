@@ -392,17 +392,26 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
     const E = LST.ENTWICKLUNG;
     const karte = el("section", { class: "einstellungen" });
     if (!E.freigeschaltet()) {
-      const s = feld("Entwickler-Schlüssel", { type: "password", name: "entwickler-schluessel", autocomplete: "off" }, "Nur für die Entwicklung der App. Steht in entwickler.key im Repo.");
+      const s = feld("Entwickler-Schlüssel", { type: "password", name: "entwickler-schluessel", autocomplete: "off" }, "Schlüssel der Entwicklung (entwickler.key) oder Ihr persönlicher Schlüssel als zugelassene Aufsicht.");
+      // Anforderung per E-Mail (Plan C12, ES4 a): Vorlage an die Adresse der Entwicklung
+      const mail = E.anforderungLink(LST.MELDUNGEN.adresse(), { name: (KO.aufsichtAktiv() || {}).name || "", titel: "Lernsteig" });
       karte.append(s, el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", "data-aktion": "freischalten", text: "Freischalten",
-        onclick: async () => { meldung = (await E.freischalten(wert(s, "input"))) ? "Entwickler-Modus freigeschaltet." : "Der Schlüssel stimmt nicht."; zeichne(); } })));
+        onclick: async () => {
+          const r = await E.freischalten(wert(s, "input"));
+          meldung = r ? "Entwickler-Modus freigeschaltet." : r === null ? "Ohne Entwickler-Server lässt sich ein persönlicher Schlüssel nicht prüfen." : "Der Schlüssel stimmt nicht.";
+          zeichne();
+        } }),
+        mail ? el("a", { class: "knopf", href: mail, "data-aktion": "entwicklermodus-anfordern", text: "✉️ Entwicklermodus anfordern" }) : null),
+        el("small", { class: "leise", text: "Noch kein Schlüssel? „Entwicklermodus anfordern“ öffnet Ihr Mailprogramm mit einer Vorlage; der persönliche Schlüssel kommt an Ihre Absenderadresse." }));
       return karte;
     }
+    if (E.rolle() === "aufsicht") karte.append(el("p", { "data-rolle": "aufsicht", text: `Freigeschaltet als zugelassene Aufsicht: ${E.zustand().name}. Was Sie als angesehen oder geprüft markieren, wird eingereicht und wirkt, sobald die Entwicklung es übernimmt.` }));
     const z = E.zustand();
     const name = feld("Name für Vermerke", { type: "text", name: "entwickler-name", maxlength: "40", value: z.name || "" }, "Steht bei „angesehen“ und bei Bemerkungen.");
     name.querySelector("input").addEventListener("change", e => E.benenne(e.target.value));
     karte.append(el("label", { class: "einstellung" }, el("span", { text: "Leiste in den Übungen" }),
         el("input", { type: "checkbox", name: "entwickler-an", checked: !!z.an, onchange: e => { E.setzeAn(e.target.checked); meldung = e.target.checked ? "Leiste eingeschaltet." : "Leiste ausgeschaltet."; zeichne(); } })),
-      name,
+      E.rolle() === "aufsicht" ? null : name, // eine zugelassene Aufsicht steht unter dem Namen ihrer Zulassung (ES2 a)
       el("div", { class: "knopf-zeile" }, el("button", { type: "button", class: "knopf", text: "Sperren", onclick: () => { E.sperren(); meldung = "Entwickler-Modus gesperrt."; zeichne(); } })),
       el("small", { class: "leise", text: "„Übung angesehen“ und Bemerkungen schreibt der Entwickler-Server (python tools/entwickler_server.py) ins Repo." }));
     return karte;

@@ -445,12 +445,26 @@ function zeichneVerwaltung(box, neu) {
     if (!en.freigeschaltet()) {
       const feld = el("input", { class: "feld", type: "password", autocomplete: "off", placeholder: "Entwickler-Schlüssel", "aria-label": "Entwickler-Schlüssel" });
       const los = async () => {
-        if (await en.freischalten(feld.value)) return neu();
-        meldung.textContent = "Dieser Schlüssel passt nicht.";
+        const r = await en.freischalten(feld.value);
+        if (r) return neu();
+        // null: Server nicht erreichbar (schon gemeldet) — ein persönlicher Schlüssel lässt sich nur dort prüfen (ES1 a)
+        meldung.textContent = r === null ? "Ohne Entwickler-Server lässt sich ein persönlicher Schlüssel nicht prüfen." : "Dieser Schlüssel passt nicht.";
         feld.value = "";
       };
       feld.addEventListener("keydown", e => { if (e.key === "Enter") los(); });
-      teile.push(el("div", { class: "pin-zeile", style: "justify-content:flex-start" }, feld, knopf("Freischalten", los, "gruen")));
+      // Anforderung per E-Mail (Plan C12, ES4 a): Vorlage an die Adresse der Entwicklung, ohne Angaben über Kinder
+      const mail = en.anforderungLink(LS.meldungAdresse(), { name: LS.aktuellerSpieler() || "", titel: "Eulenpfad" });
+      teile.push(el("div", { class: "pin-zeile", style: "justify-content:flex-start" }, feld, knopf("Freischalten", los, "gruen")),
+        mail ? el("p", { class: "leise-text" }, "Noch kein Schlüssel? ",
+          el("a", { href: mail, "data-aktion": "entwicklermodus-anfordern", text: "✉️ Entwicklermodus anfordern" }),
+          " — öffnet Ihr Mailprogramm mit einer Vorlage. Der persönliche Schlüssel kommt an Ihre Absenderadresse.") : null);
+    } else if (en.rolle() === "aufsicht") {
+      // Zugelassene Aufsicht (ES1 a bis ES3 a): prüft und reicht ein; die Bemerkungen anderer sieht sie nicht
+      const an = en.zustand().an;
+      teile.push(
+        el("p", { "data-rolle": "aufsicht", text: `Freigeschaltet als zugelassene Aufsicht: ${en.zustand().name}. Was Sie als geprüft markieren, wird eingereicht und wirkt, sobald die Entwicklung es übernimmt.` }),
+        zeile(knopf(an ? "🛠 Entwickler-Zusätze an" : "Entwickler-Zusätze aus", () => { en.setzeAn(!an); neu(); }, an ? "gruen" : "hell"),
+          knopf("Schlüssel auf diesem Gerät vergessen", () => { en.sperren(); neu(); })));
     } else {
       const an = en.zustand().an;
       const name = el("input", { class: "feld", type: "text", maxlength: "40", placeholder: "Name für „geprüft von“", "aria-label": "Name für geprüft von", value: en.zustand().name });
@@ -500,7 +514,7 @@ function zeichneVerwaltung(box, neu) {
     }
     seite.append(karte(
       el("h2", { text: "Entwicklung" }),
-      el("p", { class: "leise-text", style: "margin-top:0", text: "Der Entwickler-Modus funktioniert nur im lokalen Repo mit laufendem Entwickler-Server: python tools/entwickler_server.py, dann http://localhost:8765/eulenpfad/ öffnen. Freigeschaltet wird er mit dem Schlüssel aus entwickler.key. Dann gibt es in den Spielen eine Leiste mit „Spiel angesehen“ und „Bemerkung“, und in der Freigabe „geprüft“ und „ansehen“ je Spiel und Inhaltsliste. Was hier geprüft wird, gilt nach Commit und Push für alle; eine lokale Sperre der Aufsicht gilt weiter." }),
+      el("p", { class: "leise-text", style: "margin-top:0", text: "Der Entwickler-Modus braucht einen laufenden Entwickler-Server (python tools/entwickler_server.py, Adresse unter Einstellungen → Meldungen an die Entwicklung). Freigeschaltet wird er mit dem Schlüssel der Entwicklung (entwickler.key) oder dem persönlichen Schlüssel einer zugelassenen Aufsicht. Dann gibt es in den Spielen eine Leiste mit „Spiel angesehen“ und „Bemerkung“, und in der Freigabe „geprüft“ und „ansehen“ je Spiel und Inhaltsliste. Was hier geprüft wird, gilt nach Commit und Push für alle; eine lokale Sperre der Aufsicht gilt weiter." }),
       status, ...teile, meldung));
   }
 

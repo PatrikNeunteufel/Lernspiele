@@ -78,13 +78,34 @@
     const aktiv = () => !!o.aufsicht() && freigeschaltet() && zustand().an;
     const name = () => zustand().name || (typeof o.name === "function" ? o.name() : "") || "";
 
-    /** Schlüssel prüfen (gegen den Hash) und auf diesem Gerät merken; true bei Erfolg. */
+    /**
+     * Schlüssel prüfen und auf diesem Gerät merken: der Schlüssel der Entwicklung gegen den Hash (ohne Server), der einer
+     * zugelassenen Aufsicht beim Server (Plan C12, ES1 a, ES2 a). true bei Erfolg, false wenn er nicht passt, null wenn
+     * der Server nicht erreichbar ist (dann schon gemeldet).
+     */
     async function freischalten(schluessel) {
       const s = String(schluessel ?? "").trim();
-      if (!s || (await KERN.geheimnis.hash(s, SALZ)) !== SCHLUESSEL_HASH) return false;
-      speichere({ schluessel: s, an: true });
-      return true;
+      if (!s) return false;
+      if ((await KERN.geheimnis.hash(s, SALZ)) === SCHLUESSEL_HASH) {
+        speichere({ schluessel: s, an: true, rolle: "entwicklung" });
+        return true;
+      }
+      if (!(await server())) { melde(serverMeldung()); return null; }
+      try {
+        const r = await fetch(basis() + "/entwicklung/freischalten", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ schluessel: s, app: o.app, versionen: versionen(), protokoll: PROTOKOLL }) });
+        const a = await r.json();
+        if (!r.ok || !a.ok) return false;
+        speichere({ schluessel: s, an: true, rolle: a.rolle === "aufsicht" ? "aufsicht" : "entwicklung", name: a.name || "" });
+        return true;
+      } catch (e) {
+        serverDa = null;
+        melde(serverMeldung());
+        return null;
+      }
     }
+    /** „entwicklung“, „aufsicht“ (zugelassen, reicht Prüfvermerke nur ein) oder null; ältere Stände ohne Rolle: Entwicklung. */
+    const rolle = () => (freigeschaltet() ? (zustand().rolle === "aufsicht" ? "aufsicht" : "entwicklung") : null);
     const sperren = () => o.speicher.schreibe("entwickler", null);
     const setzeAn = an => speichere({ an: !!an });
     const benenne = n => speichere({ name: String(n ?? "").trim().slice(0, 40) });
@@ -162,20 +183,48 @@
       for (const a of arten) o.pruefstand[a] = stand[a] || {};
     }
 
+    /**
+     * Antwort auf einen Prüfvermerk übernehmen. Eine zugelassene Aufsicht reicht nur ein (ES3 a): Der Server antwortet
+     * { eingereicht, nr, stand } mit dem unveränderten Prüfstand, und die Person erfährt, dass es noch nicht wirkt.
+     */
+    function nachVermerk(antwort) {
+      if (!antwort) return false;
+      if (antwort.eingereicht) {
+        uebernimm(antwort.stand);
+        melde(`Eingereicht (Nr. ${antwort.nr}). Es wirkt, sobald die Entwicklung es übernimmt — bis dahin bleibt es wie bisher.`);
+        return true;
+      }
+      uebernimm(antwort);
+      return true;
+    }
     /** Inhalt als angesehen bzw. Liste als geprüft setzen (geprueft false: aufheben). art aus opt.arten. */
     async function setzeGeprueft(art, id, geprueft) {
       if (!arten.includes(art)) throw new Error(`entwicklung: unbekannte Art ${art}`);
-      const stand = await sende("/entwicklung/pruefstand", { art, id, geprueft, von: name() });
-      if (!stand) return false;
-      uebernimm(stand);
-      return true;
+      return nachVermerk(await sende("/entwicklung/pruefstand", { art, id, geprueft, von: name() }));
     }
     /** Haken je Eintrag einer Liste (Prüfansicht, LP2 a): { liste, setzen, entfernen, komplett, hash }. */
     async function setzeEintraege(daten) {
-      const stand = await sende("/entwicklung/eintraege", { ...daten, von: name() });
-      if (!stand) return false;
-      uebernimm(stand);
-      return true;
+      return nachVermerk(await sende("/entwicklung/eintraege", { ...daten, von: name() }));
+    }
+    /**
+     * mailto-Link „Entwicklermodus anfordern“ (ES4 a, ES5-S a) an die Adresse der Entwicklung, mit Vorlage; null ohne
+     * Adresse. name: angemeldete Aufsicht, titel: Name der App („Eulenpfad“). Keine Angaben über Kinder.
+     */
+    function anforderungLink(an, { name: wer = "", titel = o.app } = {}) {
+      if (!an) return null;
+      const v = versionen();
+      const text = [
+        "Guten Tag", "",
+        "Ich möchte im Entwicklermodus Spiele und Inhaltslisten prüfen und freigeben.", "",
+        `Name: ${wer}`,
+        "Ich bin: Lehrperson / Elternteil / anderes: ____",
+        "Schule oder Organisation, oder woher wir uns kennen: ____",
+        "Was ich prüfen möchte: ____",
+        `App: ${titel}${v.app ? ` ${v.app}` : ""}`, "",
+        "Der Schlüssel wird aus meinem Namen und dieser E-Mail-Adresse erzeugt und nur an diese Adresse geschickt.", "",
+        "Freundliche Grüsse", wer,
+      ].join("\n");
+      return `mailto:${an}?subject=${encodeURIComponent("Anforderung Entwicklermodus")}&body=${encodeURIComponent(text)}`;
     }
     /** Status einer Bemerkung setzen (z. B. „erledigt …“). */
     const bemerkungStatus = async (nr, status) => !!(await sende("/entwicklung/bemerkung-status", { nr, status }));
@@ -188,7 +237,7 @@
       try { return await (await fetch(`${basis()}/entwicklung/bemerkungen?app=${o.app}`, { cache: "no-store" })).json(); } catch (e) { return null; }
     }
 
-    return { app: o.app, adresse: basis, freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung, verbindungPruefen, versionen,
+    return { app: o.app, adresse: basis, freigeschaltet, aktiv, freischalten, rolle, anforderungLink, sperren, setzeAn, benenne, name, zustand, server, serverMeldung, verbindungPruefen, versionen,
       /** Antwortet auf der Adresse ein anderer Server (nach server())? */ fremd: () => fremd,
       setzeGeprueft, setzeEintraege, bemerkung, bemerkungen, bemerkungStatus };
   }

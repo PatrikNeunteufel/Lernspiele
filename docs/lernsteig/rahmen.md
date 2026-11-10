@@ -354,7 +354,10 @@ Codes nur aus `docs/lernsteig/lehrplan/`.
 
 - Wie im Eulenpfad (docs/eulenpfad/rahmen.md 11) über den Kern (`KERN.entwicklung`, docs/kern/rahmen.md 4.12),
   `LST.ENTWICKLUNG`. Die angemeldete Aufsicht schaltet ihn auf der Aufsichtsseite unter „Entwicklung“ mit dem
-  Entwickler-Schlüssel frei (`lernsteig:entwickler`, nur dieses Gerät) und schaltet die Leiste ein.
+  Entwickler-Schlüssel frei (`lernsteig:entwickler`, nur dieses Gerät) und schaltet die Leiste ein. Seit LERN_Session27
+  (Plan C12 ES1 a bis ES5 a, Kern 1.37.0) auch mit dem persönlichen Schlüssel einer zugelassenen Aufsicht (angefordert
+  mit „✉️ Entwicklermodus anfordern“, zugelassen mit `--zulassen`); deren Vermerke gehen in
+  `docs/lernsteig/pruefstand-eingang.json` und wirken erst nach Übernahme (docs/richtlinie_freigaben.md).
 - **Leiste** unten in jeder Übung (`entwickler-leiste`): Stand (angesehen am …, Sperrgrund), „✓ Übung angesehen“ bzw.
   „Markierung aufheben“, „📝 Bemerkung“ (mit Übung und Stufe).
 - **Geschrieben** nur über den Entwickler-Server (`python tools/entwickler_server.py`, dann

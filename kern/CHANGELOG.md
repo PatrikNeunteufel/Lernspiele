@@ -3,6 +3,15 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.37.0 — 2026-11-10 (LERN_Session27)
+- `entwicklung.js`, zugelassene Aufsichten (Plan C12, ES1 a bis ES4 a): `freischalten` nimmt neben dem Schlüssel der
+  Entwicklung (Hash im Kern, ohne Server) den persönlichen Schlüssel einer zugelassenen Aufsicht, geprüft beim Server
+  (`/entwicklung/freischalten`); gibt `true`, `false` oder `null` (Server nicht erreichbar, gemeldet). `rolle()`
+  („entwicklung“, „aufsicht“, ältere Stände ohne Rolle: Entwicklung). Prüfvermerke einer Aufsicht beantwortet der Server
+  mit `{ eingereicht, nr, stand }`: Der Prüfstand bleibt, die Person erfährt „Eingereicht (Nr. …)“.
+  `anforderungLink(an, { name, titel })`: mailto „Anforderung Entwicklermodus“ mit Vorlage (Name, Rolle, Schule oder
+  Organisation, was geprüft werden soll, App und Version).
+
 ## 1.36.0 — 2026-11-10 (LERN_Session27)
 - Versionen und Protokoll (Plan C12, NS3 a): `KERN.version` (von `tools/kern_verteilen.py` ans Ende des Bündels
   geschrieben). `entwicklung.js`: `PROTOKOLL = 1` (`KERN.entwicklung.PROTOKOLL`, `verstehtProtokoll`), Option `version`

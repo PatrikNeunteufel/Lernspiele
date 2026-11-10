@@ -596,6 +596,11 @@ Zustand, Server) und `tools/entwickler_server.py` (für alle Apps, jede Anfrage 
   `kern/entwicklung.js` steht nur `SCHLUESSEL_HASH` (SHA-256 mit Salz; ein Schlüssel für das ganze Repo). Die Aufsicht schaltet unter Verwaltung →
   Entwicklung je Gerät frei (`lernspiele:entwickler`, nicht abgeglichen); der Server prüft den Schlüssel
   bei jedem Schreiben noch einmal. Neuer Schlüssel: `python tools/entwickler_server.py --neuer-schluessel`.
+- **Zugelassene Aufsichten** (seit LERN_Session27, Plan C12 ES1 a bis ES5 a, Kern 1.37.0): Wer prüfen will, tippt unter
+  Verwaltung → Entwicklung „✉️ Entwicklermodus anfordern“ (E-Mail mit Vorlage an die Adresse aus `kontakt.js`). Die
+  Entwicklung lässt mit `--zulassen "Vorname Name" person@…` zu und schickt den Schlüssel an die anfragende Adresse.
+  Mit ihm schaltet die Aufsicht frei (geprüft beim Server); ihre Vermerke gehen in `docs/eulenpfad/pruefstand-eingang.json`
+  (gitignored) und wirken erst nach Übernahme (docs/richtlinie_freigaben.md). Die Bemerkungen anderer sieht sie nicht.
 - **Zusätze**, eingeschaltet über einen eigenen Schalter, nur für die angemeldete Aufsicht:
   - in jedem Spiel eine Leiste unten (`entwickler-leiste`): „✓ Spiel angesehen“ und „📝 Bemerkung“ mit
     Spiel, Stufe und laufender Aufgabe (`LS.spielStand()`), ob Kinder das Spiel sehen (`LS.sperrGrund`), und

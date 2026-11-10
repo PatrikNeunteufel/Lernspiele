@@ -1452,3 +1452,17 @@
   davon eine bewährt, ohne offene Meldung; Anzeige und Befehle von `uebernehmen`; Bewertung nur lokal bei der
   Entwicklung; Schwellen nur mit Eintrag und Datum. Die Entwicklung gibt weiterhin selbst direkt frei.
   `docs/eulenpfad/bemerkungen.json` aus dem Index (IM2 c).
+- Plan C12, ES1 a, ES2 a, ES4 a, ES5 a — zugelassene Aufsichten (Kern 1.37.0): `tools/entwickler_server.py` mit
+  `--zulassen "Vorname Name" person@… [--neu]` (Schlüssel HMAC-SHA-256 aus Name, E-Mail, Zähler und Geheimnis des
+  Servers, 20 Zeichen in Gruppen, klein und ohne Bindestriche getippt geht auch), `--sperren`, `--zugelassen`;
+  `.entwicklung/geheimnis` und `.entwicklung/zugelassen.json` (Name, Hash, Datum, Zähler, gesperrt — keine E-Mail);
+  `/entwicklung/freischalten`; Prüfvermerke einer Aufsicht gehen in `docs/<app>/pruefstand-eingang.json` (einmal je
+  offenem Vermerk, unter dem Namen der Zulassung), Status von Bemerkungen setzt nur die Entwicklung. Kern:
+  `freischalten` auch über den Server (`true`/`false`/`null`), `rolle()`, Meldung „Eingereicht (Nr. …)“,
+  `anforderungLink`. Eulenpfad und Lernsteig (Verwaltung → Entwicklung): „✉️ Entwicklermodus anfordern“ mit Vorlage an
+  patrik.neunteufel@gmail.com, Hinweis bei fehlendem Server, Zeile „Freigeschaltet als zugelassene Aufsicht“; im
+  Eulenpfad sieht die Aufsicht die Bemerkungen anderer nicht. Neu `tools/pruefe_server.py` (Server im Prozess mit
+  leerem Ordner, 22 Fälle) in den kurzen Prüfungen (`node tools/pruefe.js server`), Gegenprobe ohne Eingang: gemeldet;
+  6 neue Kern-Fälle. Im Browser mit dem echten Server: Anforderung in beiden Apps, Freischalten als Aufsicht, Vermerk
+  eingereicht, pruefstand.js unverändert; Testzulassung, Geheimnis, Eingang und Testkonten danach entfernt. Doku Kern
+  4.12, Eulenpfad 11, Lernsteig 5e, Plan C12 (offen: GET /entwicklung/bemerkungen für NS1 schützen).

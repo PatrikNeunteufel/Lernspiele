@@ -1317,7 +1317,8 @@ console.log("listenpruefung.js");
     const D = E({ app: "lernsteig", speicher: KERN.speicher("lernsteig:"), aufsicht: () => aufsicht, name: () => "Mama",
       pruefstand: PS, arten: ["uebungen", "listen"], melde: t => meldungen.push(t), start: "lernsteig/" });
     gleich([D.freigeschaltet(), D.aktiv()].join(), "false,false", "anfangs gesperrt");
-    gleich(await D.freischalten("falsch"), false, "falscher Schlüssel");
+    // Ohne Server lässt sich ein Schlüssel, der nicht der der Entwicklung ist, nicht prüfen: null (ES1 a, Kern 1.37.0)
+    gleich(!(await D.freischalten("falsch")) && !D.freigeschaltet(), true, "falscher Schlüssel: nicht freigeschaltet");
     gleich(await D.freischalten(""), false, "leerer Schlüssel");
     // freigeschaltet wie nach einem richtigen Schlüssel (der Klartext steht nur in entwickler.key)
     lokal.set("lernsteig:entwickler", JSON.stringify({ schluessel: "s", an: true }));
@@ -2126,6 +2127,40 @@ console.log("listenpruefung.js");
     gleich([JSON.stringify(mv.versionen), MV.alsText(mv).split("\n")[1], betreffV.split(":")[0], MV.bemerkungDaten(mv).fassung].join("|"),
       `{"app":"0.9.1","kern":"9.8.7"}|Version: Lernsteig 0.9.1 · Kern 9.8.7|Lernsteig 0.9.1|Lernsteig 0.9.1 · Kern 9.8.7`, "meldungen: Versionen bei neu, im Text, im Betreff, an den Server");
     gleich(MV.ausText(MV.alsText(mv)).meldung, mv.id, "ausText: liest die Kennung auch mit Zeile Version");
+    // Zugelassene Aufsicht (Plan C12, ES1 a bis ES4 a): freischalten beim Server, Rolle, Vermerke nur eingereicht, Anforderung
+    const routen = {};
+    let gemeldetA = [];
+    global.fetch = async (u, init) => {
+      const pfad = String(u).replace(/^https?:\/\/[^/]+/, "");
+      const f = routen[pfad];
+      if (!f) return { ok: false, status: 404, json: async () => ({}) };
+      const [code, antwort] = f(init && init.body ? JSON.parse(init.body) : null);
+      return { ok: code < 300, status: code, json: async () => antwort };
+    };
+    routen["/entwicklung/status"] = () => [200, { ok: true, schluessel: true, server: "1.0.0", protokoll: [P, P] }];
+    routen["/entwicklung/freischalten"] = b => (b.schluessel === "ABCDE-FGHIJ" ? [200, { ok: true, rolle: "aufsicht", name: "Anna Muster" }] : [403, { ok: false }]);
+    routen["/entwicklung/pruefstand"] = () => [200, { eingereicht: true, nr: 3, stand: { spiele: {}, listen: {} } }];
+    const mapSp = () => { const d = {}; return { lies: (k, e) => (k in d ? JSON.parse(d[k]) : e), schreibe: (k, x) => { d[k] = JSON.stringify(x); return true; } }; };
+    const SPA = mapSp();
+    const pst = { spiele: {}, listen: {} };
+    const EA = KERN.entwicklung({ app: "eulenpfad", speicher: SPA, aufsicht: () => true, adresse: () => "http://localhost:8766", pruefstand: pst,
+      arten: ["spiele", "listen"], melde: t => gemeldetA.push(t), version: () => "1.0.0" });
+    gleich(await EA.freischalten("falsch"), false, "freischalten: falscher Schlüssel beim Server");
+    gleich([await EA.freischalten("ABCDE-FGHIJ"), EA.rolle(), EA.zustand().name, EA.aktiv()].join("|"), "true|aufsicht|Anna Muster|true",
+      "freischalten: Schlüssel einer Aufsicht beim Server, Rolle und Name vom Server");
+    gleich([await EA.setzeGeprueft("spiele", "zahlenhaus", true), JSON.stringify(pst.spiele), /^Eingereicht \(Nr\. 3\)/.test(gemeldetA[gemeldetA.length - 1] || "")].join("|"),
+      "true|{}|true", "setzeGeprueft als Aufsicht: eingereicht, Prüfstand unverändert, Person erfährt es");
+    const ED = KERN.entwicklung({ app: "eulenpfad", speicher: mapSp(), aufsicht: () => true, adresse: () => "http://localhost:8799", melde: t => gemeldetA.push(t) });
+    routen["/entwicklung/status"] = () => [500, {}];
+    gemeldetA = [];
+    gleich([await ED.freischalten("ABCDE-FGHIJ"), gemeldetA.length, ED.rolle()].join("|"), "|1|", "freischalten ohne Server: null, gemeldet, nicht freigeschaltet");
+    SPA.schreibe("entwickler", { schluessel: "alt", an: true });
+    gleich(EA.rolle(), "entwicklung", "älterer Zustand ohne Rolle gilt als Entwicklung");
+    const al = EA.anforderungLink("dev@beispiel.ch", { name: "Anna Muster", titel: "Eulenpfad" });
+    const alBody = decodeURIComponent(al.match(/body=(.*)$/)[1]);
+    gleich([al.startsWith("mailto:dev@beispiel.ch?subject=Anforderung%20Entwicklermodus&"), /Name: Anna Muster/.test(alBody),
+      /Schule oder Organisation, oder woher wir uns kennen: ____/.test(alBody), /App: Eulenpfad 1\.0\.0/.test(alBody), EA.anforderungLink("", {})].join("|"),
+    "true|true|true|true|", "anforderungLink: Betreff, Vorlage mit Name, Pflichtzeile, App und Version; ohne Adresse null");
     KERN.version = kernAlt;
     global.fetch = fetchAlt;
     wirft(() => M({ inhalt: { feld: "spiel" } }), "meldungen ohne speicher");
