@@ -35,6 +35,7 @@
       <li><a href="#sichern">Daten sichern und einlesen</a></li>
       <li><a href="#abgleich">Mehrere Geräte abgleichen</a></li>
       <li><a href="#einstellungen">Einstellungen</a></li>
+      <li><a href="#pruefen">Mithelfen: Spiele prüfen</a></li>
       <li><a href="#fragen">Häufige Fragen</a></li>
     </ol>
   </section></nav>
@@ -45,7 +46,8 @@
       <li><b>Alles bleibt auf diesem Gerät.</b> Namen, Klasse und gespielte Runden speichert nur der Browser. Nichts geht von selbst
         an einen Server, es gibt kein Konto bei einem Dienst und keine Werbung. Daten verlassen das Gerät nur auf Knopfdruck:
         beim Sichern, beim Abgleich in einen Ordner, den Sie wählen, beim Weiterleiten einer Fehlermeldung (ohne den Namen des
-        Kindes) und wenn ein Kind ein Abzeichen als Bild teilt (mit seinem Vornamen).</li>
+        Kindes, per E-Mail oder an den Meldungsserver der Entwicklung) und wenn ein Kind ein Abzeichen als Bild teilt (mit
+        seinem Vornamen). Alles dazu: <a href="../../portal/impressum.html">Impressum und Datenschutz</a>.</li>
       <li><b>Nur Vornamen.</b> Für die Kinder genügt ein Vorname oder ein Spitzname — keine Nachnamen, keine Schule, keine Fotos.</li>
       <li><b>Daten sichern.</b> Wer die Browserdaten löscht, löscht auch die Spielstände. Sichern Sie deshalb ab und zu
         (<a href="#sichern">Abschnitt 15</a>).</li>
@@ -282,6 +284,8 @@
         ob es im Kopf, mit Notizen oder mit dem Notizblock rechnet (<a href="#notizen">Abschnitt 8</a>).</li>
       <li><b>📅 Lernplan:</b> die letzten zwölf Wochen, erfüllt oder nicht (Wochenziel in <a href="#konten">Abschnitt 6</a>).</li>
       <li><b>Lernziele</b> und <b>beste Sterne je Spiel und Stufe</b>, Endlos-Rekorde und die letzten Runden.</li>
+      <li><b>Version</b> ganz unten, etwa „Eulenpfad 1.0.0 · Kern 1.39.0“ — hilfreich, wenn Sie der Entwicklung etwas schreiben;
+        jede Fehlermeldung trägt sie ohnehin mit.</li>
     </ul>
     <figure><img src="bilder/a17-lernplan.webp" alt="Karte Lernplan mit den letzten Wochen" loading="lazy"></figure>
     <figure><img src="bilder/a10-vorgehen.webp" alt="Karte Vorgehen mit Punkten für die letzten Aufgaben" loading="lazy">
@@ -313,8 +317,11 @@
     <ol>
       <li>Neue Meldungen zeigt 🙋 an der <b>Verwaltung</b>, Untertab <b>Meldungen</b>.</li>
       <li>Sie lesen und entscheiden: <b>bestätigt</b> oder <b>kein Fehler</b> (mit einer Erklärung fürs Kind).</li>
-      <li>Bestätigte Meldungen <b>leiten Sie weiter</b> an die Entwicklung — per E-Mail aus Ihrem eigenen Mailprogramm, ohne den Namen
-        des Kindes (Klasse, Spiel, Aufgabe, Begründung). Ist noch keine Adresse eingetragen, kopieren Sie den Text.</li>
+      <li>Bestätigte Meldungen <b>leiten Sie weiter</b> an die Entwicklung, immer ohne den Namen des Kindes (Klasse, Spiel, Stufe,
+        Aufgabe, Eingaben, Begründung, Version). Der Weg richtet sich nach den Einstellungen (<a href="#einstellungen">Abschnitt 17</a>):
+        zuerst an den <b>Meldungsserver</b> der Entwicklung, wenn einer eingetragen ist und sich ausweist; sonst <b>per E-Mail</b> aus
+        Ihrem eigenen Mailprogramm (Betreff mit Programm, Version, Meldungsnummer und Spiel); sonst kopieren Sie den <b>Text</b>.
+        Im Verlauf der Meldung steht dann, wie sie ging („Bemerkung Nr. …“, „per E-Mail“ oder „als Text kopiert“).</li>
       <li>„🔄 Antworten der Entwicklung abfragen“ holt den Stand: geplant, behoben oder kein Fehler. Das Kind sieht die Antwort mit 🔔 in
         seiner Statistik. Behobene Meldungen zählen für das Abzeichen <b>Fehlerfinder</b>.</li>
     </ol>
@@ -370,6 +377,35 @@
       nie; ohne Notizen gibt es auch keinen Block. Beides auch je Spiel (<a href="#notizen">Abschnitt 8</a>).</p>
     <p><b>Fehler melden durch Kinder:</b> aus, ab der 3. Klasse (Standard, weil die Begründung geschrieben wird), ab der 5. Klasse oder alle
       Kinder. Die Aufsicht kann immer melden.</p>
+    <p><b>Meldungen an die Entwicklung:</b> der Weg — automatisch (Meldungsserver, sonst E-Mail, sonst Text), nur Server, nur
+      E-Mail oder nur Text — und, falls nötig, eine eigene Adresse. Erlaubt ist ein Server auf diesem Gerät
+      (<kbd>http://localhost:…</kbd>) oder ein Server im Netz über <kbd>https://</kbd>. Leer lassen heisst: die Vorgabe der
+      Entwicklung. <b>„Verbindung prüfen“</b> prüft die Adresse im Feld und sagt, was antwortet, zum Beispiel
+      „✓ … erreichbar: https://…, Protokoll 1, Unterschrift der Entwicklung geprüft.“ Ein Server im Netz, der sich nicht mit
+      dem Schlüssel der Entwicklung ausweist, bekommt keine Meldung.</p>
+    <p><b>Speicher:</b> wie viel Platz Runden und Rekorde auf diesem Gerät belegen, mit Warnung ab 80 % und dem Knopf „Browser
+      bitten, nichts von selbst zu löschen“. Ohne Abgleich-Ordner erinnert die Verwaltung oben ans Sichern, wenn 14 Tage lang
+      nicht gesichert wurde. Safari löscht die Daten einer Seite, die sieben Tage lang nicht geöffnet wurde — dort besonders
+      regelmässig sichern (<a href="#sichern">Abschnitt 15</a>).</p>
+  </section>
+
+  <section id="pruefen">
+    <h2>18. Mithelfen: Spiele prüfen (Entwicklermodus)</h2>
+    <p>Lehrpersonen und Eltern können der Entwicklung helfen, neue Spiele und Wortlisten zu prüfen, bevor sie für alle
+      sichtbar werden.</p>
+    <ol>
+      <li>Unter <b>Verwaltung → 🛠 Entwicklung</b> tippen Sie „✉️ Entwicklermodus anfordern“. Ihr Mailprogramm öffnet eine
+        Vorlage an die Entwicklung; bitte Rolle, Schule oder Organisation (oder woher wir uns kennen) und das, was Sie prüfen
+        möchten, ergänzen.</li>
+      <li>Die Entwicklung schickt Ihnen einen <b>persönlichen Schlüssel</b> an Ihre Absenderadresse. Sie geben ihn unter
+        Entwicklung ein und tippen „Freischalten“ (dafür muss der Server der Entwicklung erreichbar sein).</li>
+      <li>In den Spielen erscheint eine Leiste mit „Spiel angesehen“ und „Bemerkung“, in der Freigabe „geprüft“ je Wortliste.
+        Was Sie markieren, wird <b>eingereicht</b> und wirkt erst, wenn die Entwicklung es übernommen hat — bis dahin bleibt
+        alles wie vorher. Die Entwicklung übernimmt nach einer festen
+        <a href="https://github.com/patrikneunteufel/Lernspiele/blob/master/docs/richtlinie_freigaben.md">Richtlinie</a>.</li>
+    </ol>
+    <p>Gespeichert wird beim Server nur Ihr Name und ein Prüfwert des Schlüssels, nicht Ihre E-Mail-Adresse. Bitte den Schlüssel
+      nicht weitergeben; „Schlüssel auf diesem Gerät vergessen“ entfernt ihn vom Gerät.</p>
   </section>
 
   <!-- Freiwillige Beiträge (LERN-50): erscheint erst, wenn in portal/unterstuetzen.js ein Link eingetragen ist -->
@@ -380,7 +416,7 @@
   </section>
 
   <section id="fragen">
-    <h2>18. Häufige Fragen</h2>
+    <h2>19. Häufige Fragen</h2>
     <h3>Die Spielstände sind weg — was ist passiert?</h3>
     <p>Meist wurden die Browserdaten gelöscht, oder es wurde in einem privaten Fenster gespielt (dort vergisst der Browser alles beim Schliessen).
       Mit einer gesicherten Datei holen Sie alles zurück (<a href="#sichern">Abschnitt 15</a>).</p>
@@ -396,7 +432,8 @@
       zum Öffnen Internet; gespeichert wird aber auch dort nur im Browser.</p>
   </section>
 
-  <p class="unter">Die Anleitung für Kinder: <a href="kinder.html">So spielst du</a>.</p>
+  <p class="unter">Die Anleitung für Kinder: <a href="kinder.html">So spielst du</a>. ·
+    <a href="../../portal/impressum.html">Impressum und Datenschutz</a></p>
 </main>
 <script>
 // Aus der App geöffnet (?von=app, LERN_Session14): „Zurück“ führt in die App statt ins Portal.

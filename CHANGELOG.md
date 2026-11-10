@@ -1514,3 +1514,11 @@
   Hause (A Schlüsselpaar und Veröffentlichen am Arbeitsrechner, B Anschluss, DynDNS, feste Adresse, Portfreigabe, C
   Linux-Gerät oder Windows-PC mit Caddy und Dienst, D Prüfen von aussen, E Apps umstellen, F eine Meldung von Anfang bis
   Ende mit holen, senden und Antwort, G Betrieb), als nicht geprüft gekennzeichnet, mit Rückfall auf E-Mail.
+- Plan C12 — Anleitung für Erwachsene im Eulenpfad (`eulenpfad/anleitung/aufsicht.html`) nachgeführt: Abschnitt 1 mit
+  Meldungsserver und Link auf Impressum und Datenschutz; Statistik mit der Versionszeile; Abschnitt 14 mit dem Weg der
+  Meldungen (Meldungsserver, sonst E-Mail mit Programm, Version, Nummer und Spiel im Betreff, sonst Text; wie sie ging,
+  steht im Verlauf); Einstellungen mit „Meldungen an die Entwicklung“ (Weg, Adresse, Verbindung prüfen) und „Speicher“
+  (Belegung, Warnung, Erinnerung ans Sichern, Sieben-Tage-Regel von Safari); neu Abschnitt 18 „Mithelfen: Spiele prüfen
+  (Entwicklermodus)“ (Anfordern, persönlicher Schlüssel, Einreichen, Richtlinie), Häufige Fragen jetzt 19, Fusszeile mit
+  Impressum. Im Browser auf 375 px: alle Sprungmarken vorhanden, kein seitliches Überlaufen. Lernsteig und Portal haben
+  noch keine Anleitung (Plan H).
