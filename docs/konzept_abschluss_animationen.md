@@ -17,9 +17,12 @@ richtigen Folge) — darum Regel 1 in Abschnitt 3.
 
 ## 2. Heute
 
-`spiele/gemeinsam/spiel.js`: Am Ende einer Runde der Schluss mit Sternen (`sterne`, `flug`), bei 3 Sternen und bei einem
-neuen Endlos-Rekord `konfetti()` — für alle Spiele gleich. Reservierte Klassen dafür: `sterne`, `sterne-klein`, `aus`,
-`konfetti`, `flug` (docs/eulenpfad/rahmen.md 2).
+`spiele/gemeinsam/spiel.js`: Am Ende jeder geschafften Runde der Schluss mit Sternen (`sterne`, `flug`) und `konfetti()`
+(berichtigt LERN_Session27: bei jeder Runde, nicht nur bei 3 Sternen), im Endlos-Modus Konfetti bei einem neuen Rekord —
+für alle Spiele gleich. Reservierte Klassen: `sterne`, `sterne-klein`, `aus`, `konfetti`, `flug` (docs/eulenpfad/rahmen.md 2).
+
+**Gebaut (LERN_Session27):** Rahmen `spiele/gemeinsam/feier.js` mit Muster REISE und Pilot P1 Rechen-Rakete
+(docs/eulenpfad/rahmen.md 24); die übrigen sieben Muster und Piloten folgen, danach die Ruhezeiten (AN3-Z, AN3-T, AN3-K).
 
 ## 3. Regeln für jede Animation
 
@@ -34,7 +37,8 @@ neuen Endlos-Rekord `konfetti()` — für alle Spiele gleich. Reservierte Klasse
 5. **Eigenes, nichts Nachgebautes:** keine Figuren, Marken, Logos oder bekannten Filmszenen. Die Eule des Eulenpfads ist
    die eigene Figur und darf überall auftreten.
 6. **Ohne Text:** höchstens Zahlen, wo sie zum Inhalt gehören (Alter 2. Klasse: fast ohne Lesetext).
-7. **Offline und leicht:** SVG und CSS, keine Bibliothek, keine Bilddateien aus dem Netz. Farben aus `--deko-*`; die
+7. **Offline und leicht:** SVG und CSS, keine Bibliothek, keine Bilddateien aus dem Netz. Farben aus `--deko-*`, wo der
+   Inhalt keine Farbe verlangt; Naturfarben, wo er es tut (Mars rötlich, Erde blau mit Land). Die
    Stellenfarben `--st-*` nur, wo eine Stelle gezeigt wird — dort aber genau so wie im Spiel (Einer rot, Zehner blau,
    Hunderter grün, ab den Tausendern wiederholt). Dezimalzahlen über `LS.dezimalText`, Geld über `LS.geldText`.
 8. **Ton nur mit Ton an:** Wenn das Spiel Töne hat (🔇-Schalter), darf die Animation einen kurzen Klang haben, sonst still.

@@ -109,7 +109,7 @@ const SPIELE = [
     beschreibung: "Malaufgaben blitzschnell lösen — von der 2er-Reihe bis 30 × 7",
     lernziele: [{ lz: "MA.1.A.3", stufen: ALLE_STUFEN }] },
   { id: "rechen-rakete", art: ["eintippen"], klasse: 4, bild: "🚀", name: "Rechen-Rakete", thema: "rechnen", farbe: "var(--deko-6)",
-    pfad: "spiele/rechen-rakete/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 40, s6: 50 },
+    pfad: "spiele/rechen-rakete/index.html", einstellungen: ["feier"], stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 40, s6: 50 },
     beschreibung: "Im Kopf rechnen mit Wertziffern: 402 + 90, 320 000 + 38 000",
     lernziele: [{ lz: "MA.1.A.3", stufen: ALLE_STUFEN }] },
   { id: "wortarten-sortierer", art: ["markieren"], klasse: 3, bild: "🧺", name: "Wortarten-Sortierer", thema: "wortarten", farbe: "var(--deko-3)",

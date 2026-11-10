@@ -680,6 +680,11 @@ button.link, a.link {
 .notenblatt { background: #fff; border: 3px solid var(--rand); border-radius: 18px; padding: 6px 10px; margin: 4px auto 14px; max-width: 580px; }
 .hoer-zeile { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
 
+/* ---------- Abschluss-Animation (feier.js, Entscheide AN1–AN3 a; reserviert: feier, ruhig) ---------- */
+
+.feier { margin: 4px auto 10px; max-width: 360px; cursor: pointer; }
+.feier svg { display: block; width: 100%; height: auto; }
+
 /* ---------- Konfetti ---------- */
 
 .konfetti {

@@ -136,6 +136,12 @@ const LS = (() => {
       werte: { stufe: "ab Stufe 4", immer: "immer, wo Notizen sind", nie: "nie" },
       erklaerung: "Neben den Notizfeldern steht „📝 Notizblock“: Das Kind wählt eine Vorlage (Plus, Minus, Mal, Geteilt oder Häuschen), tippt seine Zahlen ein und rechnet darunter wie auf einem Blatt, mit Überträgen. Plus und Minus lassen sich mischen, und mit „Weiterrechnen“ hängt es die nächste Rechnung an. Nichts wird geprüft; das Ergebnis schreibt das Kind selbst ab. Gibt es keine Notizen (Einstellung oben auf „nie“), gibt es auch keinen Block. Die Statistik zeigt „mit Notizblock“.",
     },
+    // Entscheid AN3 a (LERN_Session27, docs/konzept_abschluss_animationen.md): Abschluss-Animation am Ende einer Runde
+    feier: {
+      titel: "Abschluss-Animation", standard: "an",
+      werte: { an: "an", aus: "aus" },
+      erklaerung: "Am Ende einer geschafften Runde zeigt das Spiel eine kurze Animation, die mit der Stufe weiter führt (etwa die Rakete vom Mond bis zum Saturn); mehr Sterne schmücken sie aus. Ein Tippen überspringt sie. Mit der Einstellung „Bewegung reduzieren“ des Geräts steht gleich das Schlussbild. Spiele ohne eigene Animation zeigen wie bisher Konfetti.",
+    },
     // Entscheid KR1 a (LERN_Session13): ein Kind fängt auch ohne Aufsicht an
     selbstAnlegen: {
       titel: "Kinder legen sich selbst an", standard: "ja",
@@ -3077,7 +3083,11 @@ const LS = (() => {
         const sterne = sterneFuer(fehler + tippsRunde / 2);
         protokolliere(L.eintrag(eintragFelder(sterne)));
         ton("fertig");
-        konfetti();
+        // Abschluss-Animation des Spiels (feier.js, Entscheide AN1–AN3 a), sonst wie bisher Konfetti
+        const feier = def.feier && typeof LS_FEIER !== "undefined" && einstellung("feier", def.id) === "an"
+          ? LS_FEIER.zeige(def.feier, { stufe: stufe.id, sterne }) : null;
+        if (!feier) konfetti();
+        pruefung.haken?.("schluss", { stufe: stufe.id, stufen: Object.keys(def.stufen || {}), sterne, feierDef: def.feier || null, feier });
         buehne.innerHTML = "";
         const karte = el("div", { class: "karte schluss mitte" });
         const st = el("div", { class: "sterne" });
@@ -3085,6 +3095,7 @@ const LS = (() => {
         const eule = euleZeile();
         karte.append(
           el("div", { class: "auftrag", text: `Geschafft, ${name}!` }),
+          ...(feier ? [feier] : []),
           st,
           eule.element,
           el("div", { class: "knopfzeile" },

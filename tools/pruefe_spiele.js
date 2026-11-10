@@ -127,6 +127,27 @@ const TREIBER = `
     // Neue Aufgabe: Hinweise einer übersprungenen Aufgabe mit derselben Nummer vergessen.
     if (art === "aufgabe") { hinweise.delete(a.nr); return; }
     if (art === "gestellt" && a.tipps) mitTipp = true;
+    // Abschluss-Animation (feier.js, Entscheide AN1–AN3 a, LERN_Session27): im Schlussbild gezeigt; je Stufe ein Bild,
+    // 2 Sterne mit Fähnchen, 3 dazu Funken; mit „Bewegung reduzieren“ keine Bewegung, sonst Bewegung.
+    if (art === "schluss") {
+      if (!a.feierDef) return;
+      if (typeof LS_FEIER === "undefined") { melde("Feier", "feier in LS.spiel, aber feier.js nicht geladen", "feier-js"); return; }
+      if (!a.feier) melde("Feier", "keine Abschluss-Animation im Schlussbild (Stufe " + a.stufe + ")", "feier-fehlt");
+      const alle = e => [e, ...e.querySelectorAll("*")];
+      for (const st of a.stufen) for (const n of [1, 2, 3]) for (const ruhig of [false, true]) {
+        const f = LS_FEIER.zeige(a.feierDef, { stufe: st, sterne: n, ruhig });
+        const teile = f ? alle(f) : [];
+        if (!teile.some(t => t.localName === "svg")) { melde("Feier", "Stufe " + st + ": keine Animation", "feier-" + st); continue; }
+        // localName ohne Gross/klein: der Ersatz-DOM schreibt klein, der Browser behält „animateMotion“
+        const bewegt = teile.filter(t => /^(animate|animatemotion)$/i.test(t.localName || "")).length;
+        if (ruhig && bewegt) melde("Feier", "Stufe " + st + ": Bewegung trotz Bewegung reduzieren", "feier-ruhig");
+        if (!ruhig && !bewegt) melde("Feier", "Stufe " + st + ": keine Bewegung", "feier-still");
+        const zusatz = w => teile.filter(t => t.getAttribute && t.getAttribute("data-zusatz") === w).length;
+        if ((n >= 2) !== (zusatz("fahne") > 0) || (n >= 3) !== (zusatz("funken") > 0))
+          melde("Feier", "Stufe " + st + ", " + n + " Stern(e): Schmuck passt nicht zu den Sternen", "feier-sterne");
+      }
+      return;
+    }
     // Ein Tipp (ctx.tipp, LERN_Session9) darf die Lösung so wenig verraten wie ein Hinweis nach einem Fehler.
     if (art === "tipp") {
       const liste = hinweise.get(a.nr) || [];

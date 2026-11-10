@@ -1549,3 +1549,16 @@
   2017, bitte den Tag nachtragen“, Speichern ohne Tag lässt den Monat stehen. Im Browser angesehen (Monat → Tag
   nachgetragen, Speichern ohne Tag, 375 px, keine Konsolenfehler), Testkonten entfernt. Anleitung für Erwachsene
   (Abschnitt 4), README, rahmen.md 18, Steckbrief (sensible Daten), Plan B3 nachgeführt.
+- Eulenpfad, Abschluss-Animationen Schritt 1 (AN1 a, AN2 a, AN3 a): neu `spiele/gemeinsam/feier.js` (`LS_FEIER.zeige`,
+  SVG mit SMIL, ohne Bibliothek) mit Muster REISE; Schlussbild zeigt die Animation statt Konfetti, wenn das Spiel `feier`
+  angibt und die neue Einstellung „Abschluss-Animation“ (global und je Spiel) an ist; Tippen springt ans Ende,
+  „Bewegung reduzieren“ zeigt gleich das Endbild, 2 Sterne Fähnchen, 3 Sterne dazu Funken und die Eule im Fenster.
+  Pilot P1 Rechen-Rakete: s1 einmal um die Erde, s2 Mond, s3 Mars, s4 Jupiter (Streifen), s5 Saturn (Ring), s6 an den
+  acht Planeten in ihrer Reihenfolge vorbei bis an den Rand des Sonnensystems, die Sonne als heller Punkt. Reservierte
+  Klassen `feier`, `ruhig`; Prüfhaken `schluss`; `tools/pruefe_spiele.js` prüft je Spiel mit `feier` Laden, Anzeige, jede
+  Stufe, Schmuck je Sternen und „Bewegung reduzieren“ — Gegenproben (Bewegung trotz Reduzieren, kein Fähnchen bei 2
+  Sternen): gemeldet. Klickzahlen der Rechen-Rakete ändern sich (Gegenproben: ohne Konfetti verbraucht der Schluss keine
+  Zufallszahlen, die Animation ist anklickbar — mit beidem zurückgesetzt wieder gleich); Spiele ohne Animation gleich.
+  Im Browser angesehen (alle Stufen mit 1–3 Sternen, laufend und im Endbild; Mars in der Planetenreihe berichtigt,
+  Funken im Bild, Ankunft waagrecht), Einstellung in der Verwaltung. Doku rahmen.md 2 und 24, Konzept (Heute berichtigt:
+  Konfetti bei jeder Runde; Regel 7 Naturfarben).

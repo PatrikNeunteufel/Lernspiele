@@ -52,6 +52,7 @@ untereinander.
 | Eule | `eule`, `eule-zeile`, `blase`, `vorlesen` | Eule mit Sprechblase und Vorlese-Knopf 🔊 (Abschnitt 12) |
 | Runde | `fortschritt`, `zeitleiste`, `zeitbalken`, `testhilfe` | Punkte je Aufgabe, Timer, Testhilfen |
 | Sterne | `sterne`, `sterne-klein`, `aus`, `konfetti`, `flug` | Belohnung und Animation |
+| Abschluss-Animation | `feier`, `ruhig` | Animation im Schlussbild (`feier.js`, Abschnitt 24) |
 | Angemeldet | `spieler-zeile` | „Du spielst als …“ im Startbild; angemeldet wird auf der Startseite |
 | Stufenwahl | `stufen`, `stufe`, `fuer`, `timer-zeile`, `timer-schalter`, `option-zeile`, `option-schalter`, `leise` |
 | Entwickler-Modus | `entwickler-leiste`, `entwickler-feld` | Leiste unten im Spiel (Abschnitt 11) | Startbild des Spiels |
@@ -1041,3 +1042,23 @@ unter `patrikneunteufel.github.io` zusammen. Den Abgleich-Ordner merkt der Brows
   14 Tagen nicht gesichert wurde (ab `letzteSicherung`, sonst ab der ältesten Runde) — mit dem Hinweis auf die
   Sieben-Tage-Regel von Safari. Als Sicherung zählen „💾 Alle sichern“ in der Statistik und „💾 Abgleich-Datei sichern“;
   die Sicherung eines einzelnen Kindes nicht.
+
+## 24. Abschluss-Animation (`feier.js`)
+
+Seit LERN_Session27 (docs/konzept_abschluss_animationen.md, Entscheide AN1 a, AN2 a, AN3 a). Ein Spiel beschreibt seine
+Animation in `LS.spiel({ …, feier: { muster, … } })`, lädt `../gemeinsam/feier.js` nach `spiel.js` und nennt im Katalog
+`einstellungen: ["feier"]`. Das Schlussbild zeigt sie (`LS_FEIER.zeige`) zwischen „Geschafft“ und den Sternen, wenn die
+Einstellung „Abschluss-Animation“ (`EINSTELLUNGEN.feier`, global und je Spiel) an ist; dann entfällt das Konfetti.
+Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
+
+- **Stufe ändert das Ziel, Sterne schmücken aus:** 2 Sterne ein Fähnchen (`data-zusatz="fahne"`), 3 dazu Funken
+  (`funken`); 1 Stern die Animation der Stufe ohne Schmuck.
+- **Ein Tippen** springt ans Ende (SMIL `setCurrentTime`); die Knöpfe des Schlussbilds sind sofort bedienbar. Die
+  Animation ist Schmuck (`aria-hidden`).
+- **„Bewegung reduzieren“** des Geräts (`prefers-reduced-motion`): gleich das Endbild ohne Bewegung (Klasse `ruhig`).
+- **Muster:** gebaut REISE (`{ muster: "reise", ziele: { s1 … s6 } }` mit `"mond"`, `"mars"`, `"jupiter"`, `"saturn"`,
+  `{ um: "erde" }`, `{ rand: true }`); die übrigen sieben folgen mit den Piloten (Konzept, Abschnitt 7).
+- **Test:** Der Rahmen meldet `pruefung.haken("schluss", …)`; `tools/pruefe_spiele.js` prüft für jedes Spiel mit
+  `feier`: `feier.js` geladen, Animation im Schlussbild, jede Stufe mit Bild, Schmuck passend zu 1–3 Sternen, mit
+  „Bewegung reduzieren“ keine Bewegung, sonst Bewegung. Die Klickzahlen eines Spiels mit Animation ändern sich (kein
+  Konfetti mehr, das Zufallszahlen verbrauchte; die Animation ist anklickbar).
