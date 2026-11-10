@@ -1530,3 +1530,8 @@
   Stelle genauer, bis Tausendstel wie s6) und Himmels-Forscher (s1–s4 Mondphasen, s5 Planeten wie im Spiel, s6 Eule vor
   dem Vollmond statt einer bekannten Filmszene); Ideen für alle 169 Spiele (von einem Hilfsagenten entworfen, von Hand
   durchgesehen), Liste „Beim Bauen zu prüfen“; Entscheide AN1 bis AN3 vorgelegt.
+- Konzept Abschluss-Animationen entschieden (AN1 a, AN2 a, AN3 a): Pilotliste P1–P8, je Muster ein Spiel (Rechen-Rakete,
+  Dezimal-Rakete, Himmels-Forscher, Wortfamilien-Baum, Zahlenmauer-Baumeister, Instrumenten-Kenner, Anlaut-Angel,
+  Schweiz-Karten-Suche) mit dem, was jedes am Rahmen prüft; AN3-Z a: Ruhezeiten (eine oder mehrere Zeitspannen je
+  Wochentag, Ortszeit, global, mit dem Abgleich), in denen die Abschluss-Animation aus ist; Frage Patrik „Ruhezeit auch
+  für Töne?“ als AN3-T vorgelegt. Handover: Haltepunkt aufgenommen.

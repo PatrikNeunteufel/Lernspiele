@@ -1,6 +1,7 @@
 # Konzept: Abschluss-Animationen im Eulenpfad
 
-Stand: 10.11.2026 (LERN_Session27) · **Entwurf, nicht entschieden, nicht gebaut.** Entscheide in Abschnitt 7.
+Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a; Frage Zeitschaltuhr offen), nicht gebaut.**
+Entscheide und Pilotliste in Abschnitt 7.
 
 ## 1. Auslöser
 
@@ -102,13 +103,33 @@ Patriks Idee (Vollmond in Stufe 4 und 5) setzt eine Stufe mehr Mond voraus; s5 u
 
 ## 7. Entscheide
 
-Vorgelegt am 10.11.2026 (LERN_Session27), offen:
+**Entschieden** von Patrik am 10.11.2026 (LERN_Session27):
 
-| Nr. | Frage | Empfehlung |
+| Nr. | Entscheid | Zusatz Patrik |
 |---|---|---|
-| AN1 | Umfang und Reihenfolge | a — Rahmen und die acht Muster bauen, an einem Pilot von acht Spielen (je Muster eines, darunter Rechen-Rakete, Dezimal-Rakete, Himmels-Forscher) prüfen, dann fachweise alle übrigen |
-| AN2 | Was sich ändert | a — Stufe ändert das Ziel, Sterne schmücken aus (Abschnitt 4) |
-| AN3 | Abschaltbar | a — Einstellung der Aufsicht „Abschluss-Animation: an (Standard) / aus“, global und je Spiel; „Bewegung reduzieren“ des Geräts gilt immer |
+| AN1 | a — Rahmen und die acht Muster bauen, an einem Pilot von acht Spielen prüfen, dann fachweise alle übrigen | „liste mit den piloten ist ein muss“ — Pilotliste unten |
+| AN2 | a — Stufe ändert das Ziel, Sterne schmücken aus (Abschnitt 4) | — |
+| AN3 | a — Einstellung der Aufsicht „Abschluss-Animation: an (Standard) / aus“, global und je Spiel; „Bewegung reduzieren“ des Geräts gilt immer | „mit Zeitschaltuhr/en?“ → AN3-Z |
+| AN3-Z | a — **Ruhezeiten**, global für das Gerät: eine oder mehrere Zeitspannen je Wochentag (etwa Mo–Fr 08:00–12:00 und 13:30–16:00), Ortszeit des Geräts (`KERN.zeit`); während einer Ruhezeit ist die Abschluss-Animation aus, danach gilt an/aus wie eingestellt, auch je Spiel; reist mit dem Abgleich; die Verwaltung zeigt, ob gerade Ruhezeit ist | Frage Patrik: auch Ruhezeit für Töne? → AN3-T, vorgelegt |
+
+### Pilotliste (AN1 a)
+
+Je Muster ein Spiel, über Fächer und Klassen verteilt; jedes prüft etwas Eigenes am Rahmen. Erst wenn alle acht auf
+Desktop, Tablet (768 px) und Handy (375 px) angesehen und von Patrik abgenommen sind, folgen die übrigen Spiele.
+
+| Nr. | Spiel | Muster | Fach, Klasse | Prüft am Rahmen |
+|---|---|---|---|---|
+| P1 | 🚀 Rechen-Rakete | REISE | Mathe, 4 | Weg über sechs Ziele, Planeten fachlich richtig (Folge, Mars rötlich, Saturn mit Ring) |
+| P2 | 🚀 Dezimal-Rakete | ZOOM | Mathe, 5 | Zahlen in der Animation über `LS.dezimalText` (Punkt oder Komma nach Einstellung), Zoom bis Tausendstel |
+| P3 | 🔭 Himmels-Forscher | ZYKLUS, dann REISE | NMG, 3 | zwei Muster in einem Spiel (Stufen 1–4 und 5–6), Mondphasen fachlich richtig |
+| P4 | 🌳 Wortfamilien-Baum | WACHSEN | Deutsch, 4 | Wachsen ohne Text (Wörter nur angedeutet), Sprachfach |
+| P5 | 🧱 Zahlenmauer-Baumeister | BAUEN | Mathe, 2 | Zahlen in den Steinen richtig (jeder Stein die Summe der beiden darunter), jüngere Kinder |
+| P6 | 🎺 Instrumenten-Kenner | AUFTRITT | Musik, 2 | Ton nur mit Ton an (Regel 8), Haltung der Instrumente richtig |
+| P7 | 🎣 Anlaut-Angel | SAMMELN | Deutsch, 1 | jüngste Kinder (fast ohne Lesetext), das schlichteste Muster |
+| P8 | 🗺️ Schweiz-Karten-Suche | KARTE | NMG, 4 | Kartendaten des Spiels wiederverwenden statt neu zeichnen |
+
+Fremdsprachen und Medien und Informatik sind im Pilot nicht vertreten; ihre Spiele nutzen dieselben Muster (ZYKLUS,
+AUFTRITT, KARTE, REISE) und kommen mit dem fachweisen Ausrollen.
 
 Die Ideen je Spiel stehen in Abschnitt 8.
 
