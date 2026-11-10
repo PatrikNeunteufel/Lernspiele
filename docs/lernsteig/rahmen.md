@@ -390,7 +390,8 @@ Logik im Kern (`KERN.meldungen`, docs/kern/rahmen.md 4.28); `gemeinsam/rahmen.js
   löschen.
 - **Weg und Server-Adresse** (C11-3 a): Verwaltung → Einstellungen → „Meldungen an die Entwicklung“, nur auf diesem
   Gerät (`lernsteig:meldeweg`): Weg automatisch, nur Entwickler-Server, nur E-Mail oder nur Text; Adresse des
-  Entwickler-Servers (leer: diese Seite; nur localhost/127.0.0.1), „Verbindung prüfen“. Vorgabe der Entwicklung in
+  Entwickler-Servers (leer: diese Seite; nur localhost/127.0.0.1), „Verbindung prüfen“ (prüft die Adresse im Feld, nennt
+  sie und sagt, wenn sie noch nicht gespeichert ist; Kern 1.35.0 `verbindungPruefen`). Vorgabe der Entwicklung in
   `lernsteig/kontakt.js` (`server`). Gilt auch für den Entwickler-Modus (`LST.ENTWICKLUNG.adresse()`). Die Übungsseiten
   laden `kontakt.js` nicht: Dort gilt die Adresse des Geräts oder dieselbe Seite.
 - **Antworten:** „Antworten abfragen“ liest `lernsteig/meldungen-stand.json` (`python tools/meldungen_stand.py lernsteig`)

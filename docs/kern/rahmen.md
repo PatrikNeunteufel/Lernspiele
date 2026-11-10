@@ -360,6 +360,7 @@ der App; Meldungen gehen an `opt.melde`.
 | `aktiv()` | Zusätze sichtbar: angemeldete Aufsicht, freigeschaltet und eingeschaltet (`setzeAn`) |
 | `name()`, `benenne(n)`, `zustand()` | Name für „von“ (sonst `opt.name()`), Zustand |
 | `server()`, `fremd()`, `serverMeldung()` | läuft der Entwickler-Server? antwortet ein anderer auf dem Port? Text für die Meldung |
+| `verbindungPruefen(text?)` | (1.35.0) prüft die genannte Adresse (wie im Feld, `""` = diese Seite; ohne Angabe die eingestellte) neu, ohne sie zu speichern; `{ ok, fremd, ungueltig, adresse, ziel, text }`, `text` nennt die geprüfte Adresse, eine nicht erlaubte wird nicht angefragt. „Verbindung prüfen“ in beiden Apps prüft so die Adresse im Feld und sagt, wenn sie noch nicht gespeichert ist |
 | `setzeGeprueft(art, id, ja)` | Inhalt angesehen bzw. Liste geprüft setzen oder aufheben; `art` aus `opt.arten`, sonst Fehler |
 | `setzeEintraege(daten)` | Haken je Eintrag (Prüfansicht, LP2 a) |
 | `bemerkung(daten)`, `bemerkungen()`, `bemerkungStatus(nr, status)` | Bemerkungen der App schreiben, lesen, Status setzen |

@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.35.0 — 2026-11-10 (LERN_Session27)
+- `entwicklung.js`: `verbindungPruefen(text?)` prüft eine Adresse, ohne sie zu speichern und ohne Gemerktes, und gibt
+  `{ ok, fremd, ungueltig, adresse, ziel, text }` mit der geprüften Adresse in der Meldung („diese Seite“ mit ihrem
+  Ursprung); eine nicht erlaubte Adresse wird nicht angefragt. Rückmeldung Patrik: „Verbindung prüfen“ prüfte die
+  gespeicherte Adresse statt der im Feld und sagte „(diese Seite)“ — mit dem Entwickler-Server auf 8765 war jede Eingabe
+  „erreichbar“. `server()` und `serverMeldung()` unverändert.
+
 ## 1.34.0 — 2026-11-09 (LERN_Session25)
 - `speicher.js` (docs/konzept_gruppen.md 5a, entschieden LERN_Session11; D11 a, D11-W a): Option `gross` mit `datenbank` —
   diese Schlüssel liegen in IndexedDB statt in localStorage (localStorage: 5 MiB je Ursprung für alle Apps zusammen).

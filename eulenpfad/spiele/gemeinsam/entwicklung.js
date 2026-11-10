@@ -140,5 +140,6 @@ LS.entwicklung = (() => {
   }
 
   return { freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, server, setzeGeprueft, setzeEintraege,
-    bemerkung, bemerkungen, bemerkungStatus, bemerkungsFeld, zeigeListe, zustand, serverMeldung, adresse: K.adresse };
+    bemerkung, bemerkungen, bemerkungStatus, bemerkungsFeld, zeigeListe, zustand, serverMeldung, adresse: K.adresse,
+    verbindungPruefen: K.verbindungPruefen };
 })();

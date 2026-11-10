@@ -37,8 +37,9 @@
     const basis = () => adresseGueltig(typeof o.adresse === "function" ? o.adresse() : "") || "";
     const SERVER_FEHLT_HIER = "Entwickler-Server nicht gefunden.\n\nDer Entwickler-Modus funktioniert nur im lokalen Repo mit laufendem Server:\n"
       + `python tools/entwickler_server.py\ndanach http://localhost:8765/${o.start || ""} öffnen.`;
-    const serverFehlt = () => (basis() ? `Entwickler-Server unter ${basis()} nicht erreichbar.\n\nLäuft python tools/entwickler_server.py `
+    const serverFehltBei = a => (a ? `Entwickler-Server unter ${a} nicht erreichbar.\n\nLäuft python tools/entwickler_server.py `
       + "auf diesem Gerät mit diesem Port? Die Adresse steht unter Verwaltung → Einstellungen." : SERVER_FEHLT_HIER);
+    const serverFehlt = () => serverFehltBei(basis());
     const FREMDER_SERVER = "Hier antwortet ein anderer Server ohne Entwickler-Funktionen (z. B. ein noch laufendes "
       + "python -m http.server auf demselben Port).\n\nDiesen beenden, dann python tools/entwickler_server.py starten "
       + "und die Seite mit Strg+F5 neu laden.";
@@ -77,6 +78,34 @@
         if (r.ok) serverDa = await r.json();
       } catch (e) { /* kein Server */ }
       return serverDa;
+    }
+    /** Volle Adresse für die Anzeige: "" = diese Seite, mit ihrem Ursprung, wenn sie über http läuft. */
+    const ziel = a => (a || (typeof location !== "undefined" && String(location.protocol).startsWith("http")
+      ? `${location.origin} (diese Seite)` : "diese Seite"));
+    /**
+     * Verbindung zu einer Adresse prüfen, ohne sie zu speichern und ohne Gemerktes (C11-3 a; LERN_Session27: „Verbindung
+     * prüfen“ prüfte die gespeicherte Adresse, nicht die im Feld, und sagte nicht, welche). text wie im Feld
+     * ("" = diese Seite), ohne Angabe die eingestellte. → { ok, fremd, ungueltig, adresse, ziel, text }; adresse ist die
+     * bereinigte Adresse (null, wenn nicht erlaubt), ziel die angezeigte, text die fertige Meldung mit ziel.
+     */
+    async function verbindungPruefen(text) {
+      const roh = text === undefined ? basis() : String(text ?? "").trim();
+      const a = adresseGueltig(roh);
+      if (a === null) {
+        return { ok: false, fremd: false, ungueltig: true, adresse: null, ziel: roh,
+          text: `Nicht geprüft: ${roh} ist nicht erlaubt. Erlaubt ist nur http://localhost:<Port> oder http://127.0.0.1:<Port>, leer für diese Seite.` };
+      }
+      let ok = false, andere = false;
+      try {
+        const r = await fetch(`${a}/entwicklung/status`, { cache: "no-store" });
+        ok = r.ok;
+        andere = !r.ok && (!!a || lokal());
+      } catch (e) { /* kein Server */ }
+      const z = ziel(a);
+      const meldung = ok ? `✓ Entwickler-Server erreichbar: ${z}.`
+        : andere ? FREMDER_SERVER.replace(/^Hier/, `Unter ${z}`)
+          : a ? serverFehltBei(a) : `Kein Entwickler-Server unter ${z}.\n\n${SERVER_FEHLT_HIER}`;
+      return { ok, fremd: andere, ungueltig: false, adresse: a, ziel: z, text: meldung };
     }
     /** An den Server schicken (mit App und Schlüssel); meldet selbst, was schiefging, und gibt dann null zurück. */
     async function sende(pfad, daten) {
@@ -125,7 +154,7 @@
       try { return await (await fetch(`${basis()}/entwicklung/bemerkungen?app=${o.app}`, { cache: "no-store" })).json(); } catch (e) { return null; }
     }
 
-    return { app: o.app, adresse: basis, freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung,
+    return { app: o.app, adresse: basis, freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung, verbindungPruefen,
       /** Antwortet auf der Adresse ein anderer Server (nach server())? */ fremd: () => fremd,
       setzeGeprueft, setzeEintraege, bemerkung, bemerkungen, bemerkungStatus };
   }

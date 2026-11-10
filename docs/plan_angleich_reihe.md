@@ -197,9 +197,11 @@ Kindersprache.
      Meldungsserver, den die Entwicklung anbietet — nur verschlüsselt (https) und mit geheimer Kennung des Servers,
      ohne die der Zugang verweigert wird; dafür ein eigener Entscheid mit neuer Datenschutz-Ausnahme.
    Reihenfolge: Kern-Teil und Eulenpfad, dann Lernsteig, dann Einstellungen, dann ✏️ in der Prüfansicht.
-   *Stand 2026-11-09 (LERN_Session25):* erledigt bis auf einen Nachweis — Kern-Teil, Eulenpfad, Lernsteig, Einstellungen
-   (Kern 1.33.0) und ✏️ in der Prüfansicht gebaut; offen nur der Nachweis, dass die veröffentlichte Seite an den lokalen
-   Server melden darf (nach dem nächsten Push).
+   *Stand 2026-11-10 (LERN_Session27):* erledigt bis auf einen Nachweis — Kern-Teil, Eulenpfad, Lernsteig, Einstellungen
+   (Kern 1.33.0) und ✏️ in der Prüfansicht gebaut; die Server-Seite ist nachgewiesen (Vorabfrage und Status mit Herkunft
+   der veröffentlichten Seite: CORS und `Access-Control-Allow-Private-Network` richtig). Offen nur der Nachweis in einem
+   gewöhnlichen Browser: Der Vorschau-Browser von Claude sperrt Anfragen der veröffentlichten Seite an localhost selbst
+   (`ERR_BLOCKED_BY_CLIENT`, die Anfrage erreicht den Server nicht).
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 

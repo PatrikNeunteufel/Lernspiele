@@ -234,9 +234,11 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       el("div", { class: "knopf-zeile" },
         el("button", { type: "button", class: "knopf", "data-aktion": "adresse-speichern", text: "Adresse speichern", onclick: () => setze({ weg: w.weg, server: wert(adresse, "input") }) }),
         el("button", { type: "button", class: "knopf", text: "↺ Vorgabe", onclick: () => setze({ weg: w.weg, server: null }) }),
+        // Prüft die Adresse im Feld (was „Adresse speichern“ speichern würde) und nennt sie (Rückmeldung Patrik LERN_Session27)
         el("button", { type: "button", class: "knopf", "data-aktion": "server-pruefen", text: "Verbindung prüfen", onclick: async () => {
-          const da = await LST.ENTWICKLUNG.server();
-          hinweis.textContent = da ? `Entwickler-Server erreichbar (${LST.ENTWICKLUNG.adresse() || "diese Seite"}).` : LST.ENTWICKLUNG.serverMeldung();
+          hinweis.textContent = "Prüfe …";
+          const p = await LST.ENTWICKLUNG.verbindungPruefen(wert(adresse, "input"));
+          hinweis.textContent = p.text + (!p.ungueltig && p.adresse !== M.meldeweg().server ? " Die Adresse ist noch nicht gespeichert." : "");
         } })),
       hinweis,
       el("small", { class: "leise", text: `Automatisch: zuerst der Entwickler-Server, sonst E-Mail aus dem eigenen Mailprogramm, sonst Text zum Kopieren. E-Mail an: ${M.adresse() || "noch keine Adresse eingetragen (lernsteig/kontakt.js)"}. Gilt für alle Konten auf diesem Gerät; Meldungen tragen keinen Namen.` }));

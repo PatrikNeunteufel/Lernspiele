@@ -589,7 +589,8 @@ Zustand, Server) und `tools/entwickler_server.py` (für alle Apps, jede Anfrage 
   (C11-3 a, Kern 1.33.0) darf die Seite von woanders kommen (anderer Port, veröffentlichte Seite): Die Adresse des
   Servers steht unter Verwaltung → Einstellungen → „Meldungen an die Entwicklung“ (nur dieses Gerät, `lernspiele:meldeweg`;
   nur `localhost`/`127.0.0.1`; Vorgabe `eulenpfad/kontakt.js`, Feld `server`), dort auch der Weg der Meldungen (automatisch,
-  nur Server, nur E-Mail, nur Text) und „Verbindung prüfen“. Der Server antwortet mit CORS nur für erlaubte Herkunft.
+  nur Server, nur E-Mail, nur Text) und „Verbindung prüfen“ (prüft die Adresse im Feld, nennt sie und sagt, wenn sie noch
+  nicht gespeichert ist; Kern 1.35.0 `verbindungPruefen`). Der Server antwortet mit CORS nur für erlaubte Herkunft.
 - **Schlüssel:** Im Klartext nur in `entwickler.key` in der Repo-Wurzel (von Git ausgeschlossen); in
   `kern/entwicklung.js` steht nur `SCHLUESSEL_HASH` (SHA-256 mit Salz; ein Schlüssel für das ganze Repo). Die Aufsicht schaltet unter Verwaltung →
   Entwicklung je Gerät frei (`lernspiele:entwickler`, nicht abgeglichen); der Server prüft den Schlüssel

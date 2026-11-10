@@ -1396,3 +1396,16 @@
   und Speicheranzeige (LERN_Session26) auf Handy-Breite gelesen, ohne Befund.
 - Voller Eulenpfad-Lauf (169 Spiele × 6 Stufen, 1442 s): „Keine Fehler.“ — erster voller Lauf seit `51686cd`, deckt Kern
   1.32–1.34 und die Speicherschicht ab.
+- Nach dem Push (`6055527`), Nachweis C11 auf der veröffentlichten Seite: Sie trägt den neuen Stand (Ablage im Modus
+  `idb`, Untertabs mit Umbruch). Der Entwickler-Server beantwortet Vorabfrage und Status für ihre Herkunft richtig
+  (CORS, `Access-Control-Allow-Private-Network`); eine Adresse ausser localhost wird abgewiesen. Aus dem Vorschau-Browser
+  von Claude kommt die Anfrage nicht an (`ERR_BLOCKED_BY_CLIENT`, Sperre des Browsers selbst) — der Nachweis in einem
+  gewöhnlichen Browser ist offen (Plan C11). Testdaten auf der veröffentlichten Seite im Vorschau-Browser entfernt.
+- Kern 1.35.0 (`entwicklung.js`, `verbindungPruefen`), Eulenpfad und Lernsteig: „Verbindung prüfen“ unter Verwaltung →
+  Einstellungen → Meldungen prüft die Adresse **im Feld** (was „Adresse speichern“ speichern würde) statt der
+  gespeicherten und nennt sie in der Meldung („✓ Entwickler-Server erreichbar: http://localhost:8766.“, bei leerem Feld
+  „http://localhost:8765 (diese Seite)“), dazu „Die Adresse ist noch nicht gespeichert.“, wenn sie abweicht, und „Prüfe …“
+  während der Anfrage; eine nicht erlaubte Adresse wird nicht angefragt. Rückmeldung Patrik: Mit dem Entwickler-Server auf
+  8765 war jede Eingabe „erreichbar (diese Seite)“, weil die ungespeicherte Eingabe nicht zählte. 6 neue Kern-Fälle; im
+  Browser in beiden Apps angesehen (leer gegen `tools/server.py`: anderer Server; 8766: erreichbar; 8799: nicht erreichbar;
+  127.0.1.1: nicht erlaubt), Testkonten danach entfernt. Doku Kern 4.12, Eulenpfad 11, Lernsteig 5f.

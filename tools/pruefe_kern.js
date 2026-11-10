@@ -2073,6 +2073,29 @@ console.log("listenpruefung.js");
     await EW.server();
     gleich(urls.join(" "), "http://localhost:8766/entwicklung/status /entwicklung/status", "entwicklung: Adresse je Einstellung, neu gefragt nach dem Wechsel");
     gleich(KERN.entwicklung({ app: "x", speicher: WEG_SP, aufsicht: () => true, adresse: () => "http://10.0.0.5" }).adresse(), "", "entwicklung: ungültige Adresse gilt als diese Seite");
+    // verbindungPruefen: prüft die genannte Adresse (nicht die gespeicherte), ohne Gemerktes, und nennt sie (LERN_Session27)
+    urls.length = 0;
+    const vp1 = await EW.verbindungPruefen("http://127.0.0.1:9000/");
+    const vp2 = await EW.verbindungPruefen("http://127.0.0.1:9000");
+    gleich([urls.join(" "), vp1.ok, vp1.adresse, /127\.0\.0\.1:9000/.test(vp1.text), vp2.ok].join("|"),
+      "http://127.0.0.1:9000/entwicklung/status http://127.0.0.1:9000/entwicklung/status|true|http://127.0.0.1:9000|true|true",
+      "verbindungPruefen: Adresse aus dem Feld statt der gespeicherten (\"\"), jedes Mal neu gefragt, im Text genannt");
+    urls.length = 0;
+    const vpU = await EW.verbindungPruefen("http://127.0.1.1:87");
+    gleich([vpU.ok, vpU.ungueltig, vpU.adresse, urls.length, /127\.0\.1\.1:87 ist nicht erlaubt/.test(vpU.text)].join("|"), "false|true||0|true",
+      "verbindungPruefen: nicht erlaubte Adresse nicht angefragt, im Text genannt");
+    const vpL = await EW.verbindungPruefen("");
+    gleich([urls.join(" "), vpL.ok, vpL.adresse, /diese Seite/.test(vpL.text)].join("|"), "/entwicklung/status|true||true", "verbindungPruefen: leer = diese Seite");
+    W.setzeMeldeweg({ weg: "auto", server: "http://localhost:8766" });
+    urls.length = 0;
+    await EW.verbindungPruefen();
+    gleich(urls.join(" "), "http://localhost:8766/entwicklung/status", "verbindungPruefen ohne Angabe: die eingestellte Adresse");
+    global.fetch = async () => { throw new Error("weg"); };
+    const vpF = await EW.verbindungPruefen("http://localhost:8799");
+    gleich([vpF.ok, vpF.fremd, /unter http:\/\/localhost:8799 nicht erreichbar/.test(vpF.text)].join("|"), "false|false|true", "verbindungPruefen: kein Server, Adresse im Text");
+    global.fetch = async () => ({ ok: false, json: async () => ({}) });
+    const vpA = await EW.verbindungPruefen("http://localhost:8799");
+    gleich([vpA.ok, vpA.fremd, /Unter http:\/\/localhost:8799 antwortet ein anderer Server/.test(vpA.text)].join("|"), "false|true|true", "verbindungPruefen: anderer Server, Adresse im Text");
     global.fetch = fetchAlt;
     wirft(() => M({ inhalt: { feld: "spiel" } }), "meldungen ohne speicher");
     wirft(() => M({ speicher: sp }), "meldungen ohne inhalt");

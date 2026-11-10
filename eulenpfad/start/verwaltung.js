@@ -340,9 +340,11 @@ function zeichneVerwaltung(box, neu) {
       adresse,
       zeile(knopf("Adresse speichern", () => setze({ weg: w.weg, server: adresse.value })),
         knopf("↺ Vorgabe", () => setze({ weg: w.weg, server: null })),
+        // Prüft die Adresse im Feld (was „Adresse speichern“ speichern würde) und nennt sie (Rückmeldung Patrik LERN_Session27)
         knopf("Verbindung prüfen", async () => {
-          const da = await LS.entwicklung.server();
-          hinweis.textContent = da ? `✓ Entwickler-Server erreichbar (${LS.entwicklung.adresse() || "diese Seite"}).` : LS.entwicklung.serverMeldung();
+          hinweis.textContent = "Prüfe …";
+          const p = await LS.entwicklung.verbindungPruefen(adresse.value);
+          hinweis.textContent = p.text + (!p.ungueltig && p.adresse !== LS.meldeweg().server ? " Die Adresse ist noch nicht gespeichert." : "");
         })),
       hinweis);
   }
