@@ -700,8 +700,8 @@ Aufsicht in `start/verwaltung.js` (Untertab „🙋 Meldungen“), Kind in `star
   in `docs/eulenpfad/bemerkungen.json` (Feld `meldung` = Kennung, nur einmal). Ohne Entwickler-Server per
   E-Mail (Entscheid M1 a): Das Mailprogramm der Aufsicht öffnet sich mit Betreff und Text
   (`LS.meldungMailLink`). **Die Adresse trägt die Entwicklung an genau einer Stelle ein:**
-  `eulenpfad/kontakt.js`, Feld `meldungen` (Entscheid A1 a: ein eigenes Postfach nur für Eulenpfad-Meldungen,
-  keine private Adresse — die Seite ist öffentlich). Nur die Startseite lädt die Datei; `LS.meldungAdresse()`
+  `eulenpfad/kontakt.js`, Feld `meldungen` (Entscheid A1 a riet zu einem eigenen Postfach; seit LERN_Session27 die
+  Adresse der Entwicklung nach NS1 a, Plan C12 — die Seite ist öffentlich, die Adresse also für jeden lesbar). Nur die Startseite lädt die Datei; `LS.meldungAdresse()`
   liest sie. Leer = kein E-Mail-Knopf, nur Text kopieren; der Tab Entwicklung zeigt, ob sie eingetragen ist. Bei der
   Entwicklung: Tab Entwicklung → „🙋 Meldung aus E-Mail einfügen“ macht daraus eine Bemerkung mit derselben
   Kennung (`LS.meldungAusText`). Datenschutz: CLAUDE.md, Ausnahme Fehlermeldungen.

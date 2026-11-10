@@ -359,7 +359,8 @@ async function pruefeSeiten(uebungen, melde, LST, katalog = uebungen) {
         if (!t.startsWith(`Anregung ${k.id} (Aufsicht)`) || !t.includes(`Liste: ${q}`) || !t.includes("Eintrag: A | B [a:1]") || t.includes("Frau Muster")) melde(ort, `Korrektur: Text „${t.slice(0, 120)}“`);
         s.hash("#verwaltung/meldungen"); await ruhe(s);
         if (!/Korrekturen an Inhaltslisten/.test(s.text()) || !s.gibt(`[data-meldung="${k.id}"]`)) melde(ort, "Korrektur: in Verwaltung → Meldungen nicht zu sehen");
-        s.lauf(`globalThis.__kopiert = null; navigator.clipboard = { writeText: async t => { globalThis.__kopiert = t; } }; globalThis.confirm = () => true; globalThis.prompt = () => null;`);
+        // Weg Text ausdrücklich: kontakt.js trägt seit LERN_Session27 eine E-Mail-Adresse, „automatisch“ nähme sonst die E-Mail
+        s.lauf(`LST.MELDUNGEN.setzeMeldeweg({ weg: "text" }); globalThis.__kopiert = null; navigator.clipboard = { writeText: async t => { globalThis.__kopiert = t; } }; globalThis.confirm = () => true; globalThis.prompt = () => null;`);
         s.klick(`[data-meldung="${k.id}"] [data-aktion="meldung-senden"]`); await ruhe(s);
         if (!(s.lauf("globalThis.__kopiert") || "").startsWith(`Anregung ${k.id}`) || s.lauf(`LST.MELDUNGEN.korrekturen()[0].status`) !== "weitergeleitet") melde(ort, "Korrektur: nicht gesendet");
         textPruefen(`${ort} Meldungen`, s);
@@ -804,13 +805,19 @@ async function pruefeSeiten(uebungen, melde, LST, katalog = uebungen) {
       if (s.gibt(".melde-hintergrund")) throw new Error("Formular bleibt offen");
       textPruefen(ort, s);
       fehlerVon(ort, s);
-      // Statistik: die Meldung steht dort; ohne Adresse und Server geht sie als Text (kopiert), Status „gesendet“
+      // Statistik: die Meldung steht dort; E-Mail an die Adresse aus kontakt.js mit Lernprogramm, Kennung und Thema im
+      // Betreff (NS1 a); mit Weg Text geht sie als Text (kopiert), Status „weitergeleitet“
       const st = oeffne("index.html", { speicher: geraet.speicher, sitzung: new Map(jugendTab), hash: "#statistik" });
       await ruhe(st);
       const t = st.text();
       if (!/Meldungen/.test(t) || !/noch nicht gesendet/.test(t)) throw new Error("Statistik zeigt die Meldung nicht");
       if (/Test/.test(st.lauf(`LST.MELDUNGEN.alsText(LST.MELDUNGEN.alle()[0])`))) throw new Error("Text für die Entwicklung enthält den Namen");
-      st.lauf(`globalThis.__kopiert = null; navigator.clipboard = { writeText: async t => { globalThis.__kopiert = t; } }; globalThis.confirm = () => true; globalThis.prompt = () => null;`);
+      const mail = st.lauf(`LST.MELDUNGEN.mailLink(LST.MELDUNGEN.alle()[0])`) || "";
+      const an = st.lauf(`LERNSTEIG_KONTAKT.meldungen`);
+      const betreff = decodeURIComponent((mail.match(/[?&]subject=([^&]*)/) || [, ""])[1]);
+      if (!an || !mail.startsWith(`mailto:${an}?`) || !betreff.startsWith("Lernsteig") || !betreff.includes(m.id) || !betreff.includes("rationale-zahlen")) throw new Error(`E-Mail: „${mail.slice(0, 60)}“, Betreff „${betreff}“`);
+      if (/Test/.test(decodeURIComponent(mail))) throw new Error("E-Mail enthält den Namen");
+      st.lauf(`LST.MELDUNGEN.setzeMeldeweg({ weg: "text" }); globalThis.__kopiert = null; navigator.clipboard = { writeText: async t => { globalThis.__kopiert = t; } }; globalThis.confirm = () => true; globalThis.prompt = () => null;`);
       st.klick('[data-aktion="meldung-senden"]'); await ruhe(st);
       const kopiert = st.lauf("globalThis.__kopiert") || "";
       if (!kopiert.startsWith(`Meldung ${m.id} (Jugendliche/r`)) throw new Error(`kopierter Text: „${kopiert.slice(0, 60)}“`);

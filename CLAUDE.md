@@ -63,12 +63,17 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
   Statistik. Ausnahme Abgleich (Entscheid S1 a, 2026-11-01): Daten verlassen den Browser nur in
   einen Ordner, den die Aufsicht wählt (Netzwerkordner oder Ordner eines Cloud-Dienstes), ohne PIN.
   Ausnahme Fehlermeldungen (Entscheid M1 a, 2026-11-02): Eine Meldung, die die Aufsicht bestätigt hat, geht
-  nur auf ihren Knopfdruck an die Entwicklung — per E-Mail aus ihrem eigenen Mailprogramm oder als Bemerkung
-  über den lokalen Entwickler-Server —, ohne den Namen des Kindes (Klasse, Aufgabe, Begründung). Zurück kommt
+  nur auf ihren Knopfdruck an die Entwicklung — per E-Mail aus ihrem eigenen Mailprogramm, als Bemerkung
+  über den lokalen Entwickler-Server oder an den Meldungsserver der Entwicklung im Netz —, ohne den Namen des Kindes
+  (Klasse, Aufgabe, Begründung; dazu die Versionen von App, Kern und Protokoll, NS3 a). Zurück kommt
   nur `<app>/meldungen-stand.json` (je Kennung Status und Antwort). Im Lernsteig leitet die oder der Jugendliche
   die eigene Meldung selbst weiter, auf eigenen Knopfdruck und ohne Namen (Klasse, Niveau, Übung, Aufgabe, Eingaben,
   Begründung); eine verbundene Aufsicht kann es ebenfalls (Entscheid C11-2 a, 2026-11-09). Der Entwickler-Server ist
-  lokal (`localhost`, `127.0.0.1`); ein Server im Netz braucht einen eigenen Entscheid (C11-3 a).
+  lokal (`localhost`, `127.0.0.1`, C11-3 a) und schreibt Prüfstand und Bemerkungen. Der Meldungsserver im Netz
+  (Entscheide NS1 a, NS2 a, NS2-K a, 2026-11-10) nimmt nur Meldungen an und gibt ihren Stand heraus; die App schickt
+  ihm nur über https und nur, wenn er eine Zufallszahl der App mit dem privaten Schlüssel der Entwicklung unterschreibt
+  (ECDSA P-256, geprüft mit WebCrypto gegen den öffentlichen Schlüssel im Kern). Ein Abgleich-Server für Spieldaten
+  ist damit nicht erlaubt; er bräuchte einen eigenen Entscheid (Notiz in docs/konzept_gruppen.md 5c).
   Ausnahme Abzeichen (Entscheid L1 a, Annahme B1, 2026-11-03): Ein Abzeichen aus dem Tab Erfolge verlässt den
   Browser nur auf Knopfdruck des Kindes als Bild (Vorname, Titel, Datum) über den Teilen-Dialog des Geräts oder als
   gespeicherte Datei.

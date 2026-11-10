@@ -3,12 +3,12 @@
    docs/lernsteig/rahmen.md, Abschnitt „Fehler melden“.
 
    meldungen: E-Mail-Adresse, an die Jugendliche oder eine verbundene Aufsicht Fehlermeldungen schicken (aus dem eigenen
-              Mailprogramm, ohne Namen). Die Seite ist öffentlich — darum ein eigenes Postfach nur für Meldungen, keine
-              private Adresse. Leer (""): kein E-Mail-Weg; die Meldung lässt sich dann nur als Text kopieren.
+              Mailprogramm, ohne Namen). Die Seite ist öffentlich, die Adresse also für jeden lesbar. Seit LERN_Session27 die
+              Adresse der Entwicklung (NS1 a, Plan C12); im Betreff Lernprogramm, Thema und Kennung der Meldung. Leer (""): kein E-Mail-Weg; die Meldung lässt sich dann nur als Text kopieren.
    server:    Adresse des Entwickler-Servers für Meldungen und Entwicklung (C11-3 a), nur http://localhost:<Port> oder
               http://127.0.0.1:<Port>. Leer (""): dieselbe Seite. Je Gerät abweichend unter Verwaltung → Einstellungen. */
 
 const LERNSTEIG_KONTAKT = Object.freeze({
-  meldungen: "",
+  meldungen: "patrik.neunteufel@gmail.com",
   server: "",
 });

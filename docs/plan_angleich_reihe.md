@@ -19,7 +19,7 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 |---|---|---|---|
 | A | Rücknahme des Lernsteigs nach Lernspiele, mit Sperre | erledigt 2026-11-05 (LERN_Session15, Commit d27d7cd) | Abschnitt A |
 | B | Gemeinsamer Kern und Testgerüst für alle drei Apps | in Arbeit seit 2026-11-05 (LERN_Session15, B1): Kern 1.26.0; offen: Gruppenleitung mit LERN-48 (RL1 a); Testgerüst B2 Schritte 1–3 gebaut (LERN_Session17–20) | Abschnitt B |
-| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C3, C6 und C11 gebaut (bis LERN_Session25) | Abschnitt C |
+| C | Grundgerüst Lernsteig wie Eulenpfad, Gratwanderung dazu | in Arbeit seit 2026-11-06 (LERN_Session16, C1 vorgezogen, AZ1 a): C1, C2 und C9 gebaut, C5 bis auf die Gruppenleitung, C3, C6 und C11 gebaut (bis LERN_Session25), C12 in Arbeit (LERN_Session27) | Abschnitt C |
 | D | Fehler und Schwachstellen beheben | offen, mit B/C | Abschnitt D |
 | E | Fachliche Korrekturen der Übungen | in Arbeit seit 2026-11-07 (LERN_Session21, E 9): E 1 bis E 10 erledigt (E 1 und E 7 bis auf Zurückgestelltes), offen E 11 (Prüfen durch Patrik) | Abschnitt E |
 | F | Recherchen ordnen, Widersprüche und Zweifel klären | offen | Abschnitt F |
@@ -202,6 +202,31 @@ Kindersprache.
    der veröffentlichten Seite: CORS und `Access-Control-Allow-Private-Network` richtig). Offen nur der Nachweis in einem
    gewöhnlichen Browser: Der Vorschau-Browser von Claude sperrt Anfragen der veröffentlichten Seite an localhost selbst
    (`ERR_BLOCKED_BY_CLIENT`, die Anfrage erreicht den Server nicht).
+12. **Meldungsserver im Netz, Versionen, E-Mail-Kontakt** (Rückmeldung Patrik LERN_Session27: „was bringt es, meldungen
+   an den Entwickler-Server zu schicken, wenn es nur localhost sein kann? … er muss einfach eine definierte Kennung
+   übermitteln, dass klar ist, dass es ein legitimer server ist … zudem sollte auch die Version des Server abgefragt
+   werden, und die Version des Lernprogramm“). Entschieden (LERN_Session27, 2026-11-10):
+   - **NS1 a:** Eine bestätigte Meldung kann auf Knopfdruck auch an den Meldungsserver der Entwicklung im Netz gehen —
+     nur https, dieselben Angaben wie per E-Mail (ohne Namen). Er nimmt nur Meldungen an und gibt ihren Stand heraus;
+     Prüfstand und Bemerkungen schreiben bleibt beim lokalen Entwickler-Server. Adresse in `<app>/kontakt.js`. Zusatz
+     Patrik: im Eulenpfad ohnehin nur für die Aufsicht (im Lernsteig nach C11-2 a); E-Mail-Kontakt
+     patrik.neunteufel@gmail.com, im Betreff immer Lernprogramm und Thema, dazu die Kennung der Meldung (M-…).
+   - **NS2 a:** Die App schickt eine Zufallszahl, der Server unterschreibt sie mit dem privaten Schlüssel der
+     Entwicklung (ECDSA P-256), die App prüft mit WebCrypto gegen den öffentlichen Schlüssel im Kern. Eine Adresse im
+     Netz ist auf dem Gerät eintragbar, gesendet wird nur bei gültiger Unterschrift. Eine feste Kennung (b) beweist
+     nichts, weil sie im öffentlichen Code steht. Zusatz Patrik: genaue Anleitung zum Server und Entwicklungsserver.
+   - **NS2-K a:** Der Server unterschreibt mit `openssl` als Hilfsprogramm (Python-Standardbibliothek hat kein
+     ECDSA); Schlüsselpaar mit `--neues-schluesselpaar`, der öffentliche Schlüssel wird in den Kern eingetragen und
+     verteilt. Nicht `cryptography` (b, neue Abhängigkeit), nicht selbst geschrieben (c, wie G10 verworfen).
+   - **NS3 a:** Version je App nach den Regeln des Kerns (`<app>/VERSION`; Start Eulenpfad 1.0.0, Lernsteig 0.1.0,
+     Gratwanderung 0.1.0), dazu eine Protokollnummer für den Austausch mit dem Server (ganze Zahl, Start 1). `/status`
+     nennt Server-Version und verstandene Protokolle, jede Meldung App, App-Version, Kern-Version und Protokoll; passt
+     die Protokollnummer nicht, sagt die App es deutlich und bietet E-Mail oder Text an.
+   - **Notiz Patrik (Zukunft):** Ein Abgleich-Server für Spieldaten der Kinder teilte dieselben Entscheide; einstellen
+     nur eine Aufsicht je Kind oder Klasse, mit einem zweiten Schlüssel der Aufsicht, die ihn betreibt
+     (docs/konzept_gruppen.md 5c). Nicht Teil von C12.
+   Reihenfolge: Entscheide und E-Mail, Versionen (NS3), Unterschrift und Meldungsserver (NS2, NS1), Anleitung.
+   *Stand 2026-11-10 (LERN_Session27):* in Arbeit — Entscheide festgehalten, E-Mail-Kontakt eingetragen.
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 

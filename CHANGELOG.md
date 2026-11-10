@@ -1409,3 +1409,12 @@
   8765 war jede Eingabe „erreichbar (diese Seite)“, weil die ungespeicherte Eingabe nicht zählte. 6 neue Kern-Fälle; im
   Browser in beiden Apps angesehen (leer gegen `tools/server.py`: anderer Server; 8766: erreichbar; 8799: nicht erreichbar;
   127.0.1.1: nicht erlaubt), Testkonten danach entfernt. Doku Kern 4.12, Eulenpfad 11, Lernsteig 5f.
+- Plan C12 (Meldungsserver im Netz, Versionen, E-Mail-Kontakt; Rückmeldung Patrik): Entscheide NS1 a, NS2 a, NS2-K a,
+  NS3 a festgehalten (Plan C12; CLAUDE.md, Ausnahme Fehlermeldungen um den Meldungsserver im Netz erweitert: nur https,
+  nur Meldungen und ihr Stand, nur bei gültiger Unterschrift mit dem Schlüssel der Entwicklung); Notiz Patrik zu einem
+  künftigen Abgleich-Server für Spieldaten (zweiter Schlüssel der Aufsicht, die ihn betreibt) in
+  docs/konzept_gruppen.md 5c. E-Mail-Kontakt patrik.neunteufel@gmail.com in `eulenpfad/kontakt.js` und
+  `lernsteig/kontakt.js` (Kommentar und Eulenpfad-Doku 13: die Adresse ist auf der öffentlichen Seite lesbar); Betreff
+  wie bisher mit Lernprogramm, Kennung und Thema. Lernsteig-Seitentest: E-Mail-Weg über `mailLink` (Adresse aus
+  kontakt.js, Betreff mit „Lernsteig“, Kennung, Übung, kein Name), Text-Weg mit ausdrücklich gewähltem Weg; Gegenprobe
+  (Adresse leer): gemeldet.

@@ -208,6 +208,14 @@ Portfreigabe und Let's Encrypt) und b (gemieteter Server); c (Tunnel-Dienst eine
 halber beschrieben, mit Abraten. Die Lehrperson wählt nach der Vergleichsmatrix in
 [anleitung_klassenserver_internet.md](anleitung_klassenserver_internet.md).
 
+**Notiz Patrik (LERN_Session27, 2026-11-10), für später:** Ein Abgleich-Server für die Spieldaten der Kinder teilte die
+Entscheide des Meldungsservers (Plan C12: NS1 a nur https, NS2 a Unterschrift einer Zufallszahl mit ECDSA P-256 und
+Prüfung mit WebCrypto, NS2-K a mit `openssl`, NS3 a Versionen und Protokollnummer). Einstellen dürfte ihn nur eine
+Aufsicht je Kind oder je Klasse. Der Schlüssel, mit dem sich der Server ausweist, wäre ein **zweiter Schlüssel**, den
+die Aufsicht bestimmt, die den Abgleich-Server betreibt — nicht der Schlüssel der Entwicklung. Dazu käme wie bisher
+die Ende-zu-Ende-Verschlüsselung des Inhalts (G4). Noch nicht entschieden und nicht gebaut; braucht einen eigenen
+Entscheid mit Datenschutz-Ausnahme (CLAUDE.md).
+
 ## 6. Lerngruppen von Kindern
 
 - Gleiche Struktur, Art `lerngruppe`; die Leitung ist ein Kind. Ein Kind lädt andere über einen Code ein.
