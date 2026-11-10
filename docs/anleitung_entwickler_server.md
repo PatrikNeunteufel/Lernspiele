@@ -107,6 +107,9 @@ kann das nicht.
 
 ## 6. Meldungsserver im Netz (NS1 a) — nicht geprüft
 
+Zum Abhaken, Schritt für Schritt für einen Server zu Hause:
+[anleitung_inbetriebnahme_meldungsserver.md](anleitung_inbetriebnahme_meldungsserver.md).
+
 ### 6.1 Wo er läuft
 
 Ein Rechner, der immer läuft und unter einem Namen über https erreichbar ist. Die Wege (eigenes Gerät mit DynDNS oder

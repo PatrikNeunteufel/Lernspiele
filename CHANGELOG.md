@@ -1509,3 +1509,8 @@
   „Meldungsserver der Entwicklung“ (nur https, nur an einen Server mit Unterschrift, ohne Namen, keine IP-Adressen) und
   „Prüfen im Entwicklermodus“ (Name und Prüfwert, keine E-Mail, Zählung nur bei der Entwicklung). Steckbrief verweist
   auf die Anleitung.
+- Plan C12 — Inbetriebnahme zum Abhaken: neu
+  [docs/anleitung_inbetriebnahme_meldungsserver.md](docs/anleitung_inbetriebnahme_meldungsserver.md) für einen Server zu
+  Hause (A Schlüsselpaar und Veröffentlichen am Arbeitsrechner, B Anschluss, DynDNS, feste Adresse, Portfreigabe, C
+  Linux-Gerät oder Windows-PC mit Caddy und Dienst, D Prüfen von aussen, E Apps umstellen, F eine Meldung von Anfang bis
+  Ende mit holen, senden und Antwort, G Betrieb), als nicht geprüft gekennzeichnet, mit Rückfall auf E-Mail.
