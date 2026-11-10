@@ -201,7 +201,10 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       meldungen.length ? meldungenKarte(meldungen, { ich, loeschen: !aufsicht, ungelesen, neu: zeichne }) : null,
       aufsicht ? el("p", { class: "knopf-zeile" }, el("a", { class: "knopf", href: `#erfolge/${encodeURIComponent(k.id)}`, text: "Erfolge" }), el("a", { class: "knopf", href: "#verwaltung", text: "← Zur Verwaltung" }))
         : el("h2", { class: "abschnitt", text: "Sichern und Einlesen" }),
-      aufsicht ? null : datenKarte(k)].filter(Boolean));
+      aufsicht ? null : datenKarte(k),
+      // Fassung dieser Seite (Plan C12, NS3 a): hilft, eine Meldung oder Sicherung einer Version zuzuordnen
+      el("p", { class: "leise", "data-versionen": "", text: `Lernsteig ${typeof APP_VERSION !== "undefined" ? APP_VERSION.version : "?"} · Kern ${KERN.version || "?"}` }),
+    ].filter(Boolean));
   }
 
   /** Tab Erfolge (Plan C2, BF1 a): Wochenziel mit Serie über Tage, Kompetenzstand je Übung, Rekorde — keine Sterne. */

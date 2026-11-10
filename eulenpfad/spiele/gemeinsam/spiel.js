@@ -846,8 +846,10 @@ const LS = (() => {
   };
   // Logik im Kern (KERN.meldungen, C11-1 a, Kern 1.32.0); hier nur, was der Eulenpfad anders macht. Die Namen unter LS
   // bleiben, damit Startseite, Verwaltung und Statistik unverändert weiterlaufen.
+  /** Version des Eulenpfads aus eulenpfad/version.js (NS3 a; jede Seite lädt sie vor dem Kern). */
+  const appVersion = () => (typeof APP_VERSION !== "undefined" ? APP_VERSION.version : "");
   const MELD = KERN.meldungen({
-    app: "eulenpfad", titel: "Eulenpfad", speicher: { lies, schreibe }, person: name => person(name),
+    app: "eulenpfad", titel: "Eulenpfad", speicher: { lies, schreibe }, person: name => person(name), version: appVersion,
     inhalt: { feld: "spiel", wort: "Spiel", name: id => (typeof SPIELE !== "undefined" && SPIELE.find(s => s.id === id)?.name) || null },
     stufe: { text: s => String(s).slice(1), aus: t => (/^\d$/.test(t) ? `s${t}` : null) },
     wer: m => `Kind${m.klasse != null ? `, ${klasseText(m.klasse)}` : ""}`,

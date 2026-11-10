@@ -16,6 +16,11 @@ Andere Seiten (C11-3 a, LERN_Session25): Eine App, die nicht von diesem Server k
 eine Vorschau auf einem anderen Port —, darf ihn für Meldungen und Entwicklung ansprechen (CORS), aber nur von einer
 erlaubten Herkunft: localhost und 127.0.0.1 mit beliebigem Port, die veröffentlichte Seite (HERKUNFT_FEST) und was
 --herkunft nennt. Der Server hört weiterhin nur auf 127.0.0.1; geschrieben wird nur mit dem Schlüssel.
+
+Versionen (Plan C12, NS3 a, LERN_Session27): /entwicklung/status nennt SERVER_VERSION und die verstandenen Protokolle
+(PROTOKOLLE, wie PROTOKOLL in kern/entwicklung.js). Eine Anfrage mit einem anderen Protokoll wird abgewiesen (409);
+eine ohne Angabe (Seiten vor LERN_Session27) gilt als Protokoll 1. Bemerkungen merken die Fassung der Meldung und die
+Versionen der sendenden Seite.
 """
 import datetime
 import hashlib
@@ -37,6 +42,8 @@ WURZEL = Path(__file__).resolve().parent.parent
 SCHLUESSEL_DATEI = WURZEL / "entwickler.key"
 ENTWICKLUNG_JS = WURZEL / "kern" / "entwicklung.js"
 SALZ = "eulenpfad-entwickler:"  # wie in kern/entwicklung.js (SALZ + ":")
+SERVER_VERSION = "1.0.0"  # Regeln wie beim Kern: klein Fehler, mittel neu, gross Schnittstelle (NS3 a)
+PROTOKOLLE = (1, 1)  # verstandene Protokolle von … bis (kern/entwicklung.js PROTOKOLL)
 
 # Je App: Prüfstand (Datei, Name der Konstante, Kopf und Fuss beim Schreiben, Bereiche), Bemerkungen, Haken je Eintrag.
 APPS = {
@@ -157,7 +164,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/entwicklung/status":
-            return self.antwort(200, {"ok": True, "schluessel": SCHLUESSEL_DATEI.exists()})
+            return self.antwort(200, {"ok": True, "schluessel": SCHLUESSEL_DATEI.exists(), "server": SERVER_VERSION,
+                                      "protokoll": list(PROTOKOLLE)})
         if self.path.split("?")[0] == "/entwicklung/bemerkungen":
             app = (re.search(r"[?&]app=([a-z]+)", self.path) or [None, "eulenpfad"])[1]
             if app not in APPS:
@@ -179,6 +187,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             daten = json.loads(self.rfile.read(laenge) or b"{}")
         except (ValueError, json.JSONDecodeError):
             return self.antwort(400, {"fehler": "Anfrage nicht lesbar"})
+        protokoll = daten.get("protokoll", 1)  # ohne Angabe: Seite vor LERN_Session27, Protokoll 1
+        if not isinstance(protokoll, int) or not PROTOKOLLE[0] <= protokoll <= PROTOKOLLE[1]:
+            von, bis = PROTOKOLLE
+            bereich = str(von) if von == bis else f"{von}–{bis}"
+            return self.antwort(409, {"fehler": f"Protokoll {protokoll} passt nicht: der Server {SERVER_VERSION} versteht "
+                                                f"{bereich}. App oder Server auf denselben Stand bringen."})
         if not SCHLUESSEL_DATEI.exists():
             return self.antwort(403, {"fehler": "entwickler.key fehlt: python tools/entwickler_server.py --neuer-schluessel"})
         richtig = SCHLUESSEL_DATEI.read_text(encoding="utf-8").strip()
@@ -247,9 +261,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if schon:
                 return self.antwort(200, schon)
             eintrag = {"nr": max((b["nr"] for b in liste), default=0) + 1, "zeit": jetzt, "status": "offen", "text": text[:2000]}
-            for feld in ("von", "spiel", "inhalt", "stufe", "liste", "eintrag", "schluessel", "aufgabe", "seite", "meldung"):
+            for feld in ("von", "spiel", "inhalt", "stufe", "liste", "eintrag", "schluessel", "aufgabe", "seite", "meldung",
+                         "fassung"):
                 if daten.get(feld):
                     eintrag[feld] = str(daten[feld])[:500]
+            # Versionen der sendenden Seite (NS3 a); „fassung“ ist die der Meldung, als sie entstand
+            v = daten.get("versionen")
+            if isinstance(v, dict) and (v.get("app") or v.get("kern")):
+                eintrag["gesendet_mit"] = {k: str(v[k])[:20] for k in ("app", "kern", "protokoll") if v.get(k) not in (None, "")}
             liste.append(eintrag)
             a["bemerkungen"].parent.mkdir(parents=True, exist_ok=True)
             a["bemerkungen"].write_bytes((json.dumps(liste, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))

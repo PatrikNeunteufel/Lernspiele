@@ -26,6 +26,8 @@
   // Entwicklung); in den Übungen dann eine Leiste mit „Übung angesehen“ und „Bemerkung“. Geschrieben wird nur über den
   // Entwickler-Server: Prüfstand nach gemeinsam/pruefstand.js, Bemerkungen nach docs/lernsteig/bemerkungen.json.
   const aufsichtDa = () => (typeof LST_KONTEN !== "undefined" ? LST_KONTEN.aufsichtAktiv() : null);
+  /** Version des Lernsteigs aus lernsteig/version.js (NS3 a; jede Seite lädt sie vor dem Kern). */
+  const appVersion = () => (typeof APP_VERSION !== "undefined" ? APP_VERSION.version : "");
   const ENTWICKLUNG = KERN.entwicklung({
     app: "lernsteig", speicher: { praefix: LST.PRAEFIX, lies: LST.lies, schreibe: LST.schreibe },
     aufsicht: () => !!aufsichtDa(), name: () => (aufsichtDa() || {}).name || "",
@@ -33,6 +35,7 @@
     melde: text => alert(text), start: "lernsteig/",
     // Adresse des Servers je Gerät oder Vorgabe aus kontakt.js (C11-3 a; "" = dieselbe Seite)
     adresse: () => MELDUNGEN.meldeweg().server,
+    version: appVersion,
   });
   // ---------- Fehlermeldungen (Plan C11, Entscheide C11-1 a, C11-2 a; KERN.meldungen, docs/kern/rahmen.md 4.28) ----------
   // In der Übung meldet die angemeldete Person einen Fehler in der Aufgabe oder der davor; gesendet wird im Tab Statistik
@@ -53,7 +56,7 @@
   };
   const klasseName = k => ((typeof LST_KONTEN !== "undefined" && LST_KONTEN.KLASSEN.find(x => x.id === String(k))) || {}).name || null;
   const MELDUNGEN = KERN.meldungen({
-    app: "lernsteig", titel: "Lernsteig", speicher: { lies: LST.lies, schreibe: LST.schreibe },
+    app: "lernsteig", titel: "Lernsteig", speicher: { lies: LST.lies, schreibe: LST.schreibe }, version: appVersion,
     inhalt: { feld: "uebung", wort: "Übung", name: id => (KAT.uebung(id) || {}).titel || null },
     wer: m => (m.rolle === "aufsicht" ? "Aufsicht" : `Jugendliche/r${klasseName(m.klasse) ? `, ${klasseName(m.klasse)}` : ""}`),
     zusatz: m => [m.niveau ? `Niveau: ${LP.niveauName(m.niveau, m.lehrplan || { land: "CH" })}` : null,

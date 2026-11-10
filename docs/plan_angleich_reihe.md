@@ -226,7 +226,8 @@ Kindersprache.
      nur eine Aufsicht je Kind oder Klasse, mit einem zweiten Schlüssel der Aufsicht, die ihn betreibt
      (docs/konzept_gruppen.md 5c). Nicht Teil von C12.
    Reihenfolge: Entscheide und E-Mail, Versionen (NS3), Unterschrift und Meldungsserver (NS2, NS1), Anleitung.
-   *Stand 2026-11-10 (LERN_Session27):* in Arbeit — Entscheide festgehalten, E-Mail-Kontakt eingetragen.
+   *Stand 2026-11-10 (LERN_Session27):* in Arbeit — Entscheide, E-Mail-Kontakt und Versionen (NS3, Kern 1.36.0)
+   gebaut; offen Unterschrift und Meldungsserver (NS2, NS1) und die Anleitung.
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 

@@ -12,6 +12,18 @@
 (function (KERN) {
   const SCHLUESSEL_HASH = "a1fb5dbb5d54c6de3acc1d372cdef564fedf87e2e349aa1bc4bbddf3be702035";
   const SALZ = "eulenpfad-entwickler"; // seit LERN_Session6; bleibt, damit der bestehende Schlüssel gilt
+  /**
+   * Protokoll des Austauschs mit dem Server (Plan C12, NS3 a): eine ganze Zahl, die genau dann steigt, wenn sich Anfragen
+   * oder Antworten so ändern, dass ein älterer Server oder eine ältere App sie falsch läse. Der Server nennt unter
+   * /entwicklung/status die Protokolle, die er versteht ({ protokoll: [von, bis] }); ein Server ohne die Angabe (vor
+   * LERN_Session27) versteht 1. Jede Anfrage trägt das Protokoll und die Versionen von App und Kern.
+   */
+  const PROTOKOLL = 1;
+  /** Versteht der Server dieses Protokoll? st: Antwort von /entwicklung/status. */
+  const verstehtProtokoll = st => {
+    const [von, bis] = Array.isArray(st?.protokoll) && st.protokoll.length === 2 ? st.protokoll : [1, 1];
+    return PROTOKOLL >= von && PROTOKOLL <= bis;
+  };
 
   /**
    * Entwickler-Modus einer App.
@@ -25,6 +37,7 @@
    * opt.start      Pfad der App für die Meldung „Server fehlt“ (z. B. "eulenpfad/")
    * opt.adresse    () → Adresse des Entwickler-Servers, "" = dieselbe Seite (Standard; C11-3 a: nur localhost und
    *                127.0.0.1, siehe entwicklung.adresseGueltig). Der Server antwortet dafür mit CORS.
+   * opt.version    () → Version der App (APP_VERSION.version aus <app>/version.js, NS3 a); geht mit jeder Anfrage mit
    */
   function entwicklung(opt) {
     const o = opt || {};
@@ -44,7 +57,19 @@
       + "python -m http.server auf demselben Port).\n\nDiesen beenden, dann python tools/entwickler_server.py starten "
       + "und die Seite mit Strg+F5 neu laden.";
     let fremd = false; // Auf der Adresse läuft ein Server, aber nicht der Entwickler-Server
-    const serverMeldung = () => (fremd ? FREMDER_SERVER : serverFehlt());
+    let unpassend = null; // Antwort eines Entwickler-Servers, der dieses Protokoll nicht versteht
+    /** Versionen dieser Seite, mit jeder Anfrage an den Server (NS3 a). */
+    const versionen = () => ({ app: (typeof o.version === "function" ? o.version() : "") || "", kern: KERN.version || "",
+      protokoll: PROTOKOLL });
+    const unpassendText = (st, z) => {
+      const [von, bis] = Array.isArray(st?.protokoll) ? st.protokoll : [1, 1];
+      const v = versionen();
+      return `Der Entwickler-Server${st?.server ? ` ${st.server}` : ""} unter ${z} versteht Protokoll ${von === bis ? von : `${von}–${bis}`}, `
+        + `diese Seite spricht Protokoll ${PROTOKOLL} (${o.app} ${v.app || "ohne Version"}, Kern ${v.kern || "?"}).\n\n`
+        + "App und Server auf denselben Stand bringen (neu laden, Server aktualisieren); bis dahin gehen Meldungen per E-Mail "
+        + "oder als Text.";
+    };
+    const serverMeldung = () => (unpassend ? unpassendText(unpassend, ziel(basis())) : fremd ? FREMDER_SERVER : serverFehlt());
 
     const zustand = () => ({ schluessel: null, an: false, name: "", ...(o.speicher.lies("entwickler", null) || {}) });
     const speichere = daten => o.speicher.schreibe("entwickler", { ...zustand(), ...daten });
@@ -68,14 +93,20 @@
     let serverDa = null, serverBasis = null; // gemerkt je Adresse
     const lokal = () => typeof location !== "undefined" && String(location.protocol).startsWith("http")
       && ["localhost", "127.0.0.1"].includes(location.hostname);
-    /** Läuft die Seite über den Entwickler-Server? { ok, schluessel } oder null. Erfolg wird gemerkt. */
+    /**
+     * Läuft ein Entwickler-Server, der dieses Protokoll versteht? { ok, schluessel, server?, protokoll? } oder null
+     * (dann sagt serverMeldung warum). Erfolg wird gemerkt.
+     */
     async function server() {
       if (serverDa && serverBasis === basis()) return serverDa;
-      serverDa = null; serverBasis = basis();
+      serverDa = null; unpassend = null; serverBasis = basis();
       try {
         const r = await fetch(`${basis()}/entwicklung/status`, { cache: "no-store" });
         fremd = !r.ok && (!!basis() || lokal());
-        if (r.ok) serverDa = await r.json();
+        if (r.ok) {
+          const st = await r.json();
+          if (verstehtProtokoll(st)) serverDa = st; else unpassend = st;
+        }
       } catch (e) { /* kein Server */ }
       return serverDa;
     }
@@ -95,24 +126,27 @@
         return { ok: false, fremd: false, ungueltig: true, adresse: null, ziel: roh,
           text: `Nicht geprüft: ${roh} ist nicht erlaubt. Erlaubt ist nur http://localhost:<Port> oder http://127.0.0.1:<Port>, leer für diese Seite.` };
       }
-      let ok = false, andere = false;
+      let ok = false, andere = false, st = null;
       try {
         const r = await fetch(`${a}/entwicklung/status`, { cache: "no-store" });
-        ok = r.ok;
         andere = !r.ok && (!!a || lokal());
-      } catch (e) { /* kein Server */ }
+        if (r.ok) { st = await r.json(); ok = true; }
+      } catch (e) { /* kein Server oder keine lesbare Antwort */ }
       const z = ziel(a);
-      const meldung = ok ? `✓ Entwickler-Server erreichbar: ${z}.`
-        : andere ? FREMDER_SERVER.replace(/^Hier/, `Unter ${z}`)
-          : a ? serverFehltBei(a) : `Kein Entwickler-Server unter ${z}.\n\n${SERVER_FEHLT_HIER}`;
-      return { ok, fremd: andere, ungueltig: false, adresse: a, ziel: z, text: meldung };
+      const passt = ok && verstehtProtokoll(st);
+      const meldung = passt ? `✓ Entwickler-Server${st.server ? ` ${st.server}` : ""} erreichbar: ${z}, Protokoll ${PROTOKOLL}.`
+        : ok ? unpassendText(st, z)
+          : andere ? FREMDER_SERVER.replace(/^Hier/, `Unter ${z}`)
+            : a ? serverFehltBei(a) : `Kein Entwickler-Server unter ${z}.\n\n${SERVER_FEHLT_HIER}`;
+      return { ok: passt, fremd: andere, unpassend: ok && !passt, ungueltig: false, adresse: a, ziel: z,
+        server: st?.server || "", protokoll: st?.protokoll || null, text: meldung };
     }
     /** An den Server schicken (mit App und Schlüssel); meldet selbst, was schiefging, und gibt dann null zurück. */
     async function sende(pfad, daten) {
       if (!(await server())) { melde(serverMeldung()); return null; }
       try {
         const r = await fetch(basis() + pfad, { method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...daten, app: o.app, schluessel: zustand().schluessel }) });
+          body: JSON.stringify({ ...daten, app: o.app, versionen: versionen(), protokoll: PROTOKOLL, schluessel: zustand().schluessel }) });
         const antwort = await r.json();
         if (!r.ok) { melde(`Entwickler-Server: ${antwort.fehler || r.status}`); return null; }
         return antwort;
@@ -154,7 +188,7 @@
       try { return await (await fetch(`${basis()}/entwicklung/bemerkungen?app=${o.app}`, { cache: "no-store" })).json(); } catch (e) { return null; }
     }
 
-    return { app: o.app, adresse: basis, freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung, verbindungPruefen,
+    return { app: o.app, adresse: basis, freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung, verbindungPruefen, versionen,
       /** Antwortet auf der Adresse ein anderer Server (nach server())? */ fremd: () => fremd,
       setzeGeprueft, setzeEintraege, bemerkung, bemerkungen, bemerkungStatus };
   }
@@ -171,6 +205,8 @@
     return `${m[1].toLowerCase()}://${m[2].toLowerCase()}${m[3] ? `:${Number(m[3])}` : ""}`;
   }
   entwicklung.adresseGueltig = adresseGueltig;
+  entwicklung.PROTOKOLL = PROTOKOLL;
+  entwicklung.verstehtProtokoll = verstehtProtokoll;
   entwicklung.SALZ = SALZ;
   entwicklung.SCHLUESSEL_HASH = SCHLUESSEL_HASH;
 

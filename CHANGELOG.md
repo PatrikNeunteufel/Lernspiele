@@ -1418,3 +1418,16 @@
   wie bisher mit Lernprogramm, Kennung und Thema. Lernsteig-Seitentest: E-Mail-Weg über `mailLink` (Adresse aus
   kontakt.js, Betreff mit „Lernsteig“, Kennung, Übung, kein Name), Text-Weg mit ausdrücklich gewähltem Weg; Gegenprobe
   (Adresse leer): gemeldet.
+- Plan C12, NS3 a — Versionen (Kern 1.36.0): `eulenpfad/VERSION` 1.0.0, `lernsteig/VERSION` 0.1.0,
+  `gratwanderung/VERSION` 0.1.0; `tools/kern_verteilen.py` erzeugt daraus `<app>/version.js` (`APP_VERSION`) und schreibt
+  `KERN.version` ans Ende des Bündels, `--pruefe` vergleicht. Alle 199 Seiten, die den Kern laden (172 Eulenpfad, 27
+  Lernsteig), laden `version.js` davor; `tools/pruefe_skripte.js` meldet eine Seite ohne (Gegenprobe gemeldet).
+  Protokoll 1 (`KERN.entwicklung.PROTOKOLL`): `/entwicklung/status` nennt Server-Version 1.0.0 und `protokoll: [1, 1]`,
+  der Server weist ein anderes Protokoll mit 409 ab und merkt bei Bemerkungen `fassung` und `gesendet_mit`; die App
+  nimmt einen Server mit anderem Protokoll nicht an und sagt warum, mit den Versionen beider Seiten. Meldungen merken
+  die Fassung, in der sie entstanden: Zeile „Version: Eulenpfad 1.0.0 · Kern 1.36.0“, Betreff „Eulenpfad 1.0.0:
+  Fehlermeldung M-… (zahlenhaus, Stufe 3)“. „Verbindung prüfen“ nennt Server-Version und Protokoll. Statistik beider Apps
+  mit der Zeile „Eulenpfad 1.0.0 · Kern 1.36.0“. 8 neue Kern-Fälle, Gegenprobe (Protokollprüfung immer „passt“):
+  gemeldet. Im Browser mit dem Entwickler-Server angesehen (Status, Verbindung prüfen, Statistik, Meldung und Betreff in
+  beiden Apps, kein Name im Betreff), Testkonten danach entfernt; Server direkt: Protokoll 2 abgewiesen. Doku Kern 3,
+  4.12, 4.28, Eulenpfad 1, Lernsteig Aufbau, Plan C12.

@@ -82,6 +82,8 @@
   /**
    * Meldungen einer App.
    * opt.app, opt.titel   „eulenpfad“, „Eulenpfad“ (Betreff der E-Mail)
+   * opt.version()        → Version der App (APP_VERSION.version, NS3 a); jede neue Meldung merkt sich
+   *                      versionen = { app, kern } — die Fassung, in der es geschah —, Text und Betreff nennen sie
    * opt.speicher         { lies, schreibe } der App; opt.schluessel (Standard „meldungen“)
    * opt.person(name)     → { id } oder null (Kennung der Person in der Meldung)
    * opt.inhalt           { feld: „spiel“ | „uebung“, wort: „Spiel“ | „Übung“, name: id → Anzeigename }
@@ -123,8 +125,9 @@
       const jetzt = new Date().toISOString();
       const id = `M-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
       const p = o.person ? o.person(daten.name) : null;
-      const m = { id, zeit: jetzt, stand: jetzt, status: "neu", gelesen: true, ...daten, ...(p ? { person: p.id } : {}),
-        verlauf: [{ zeit: jetzt, status: "neu", von: daten.name }] };
+      const v = { app: (typeof o.version === "function" ? o.version() : "") || "", kern: KERN.version || "" };
+      const m = { id, zeit: jetzt, stand: jetzt, status: "neu", gelesen: true, ...(v.app || v.kern ? { versionen: v } : {}),
+        ...daten, ...(p ? { person: p.id } : {}), verlauf: [{ zeit: jetzt, status: "neu", von: daten.name }] };
       schreibe([...alle(), m]);
       return m;
     }
@@ -150,11 +153,19 @@
       schreibe(alle().map(m => (m.name === name ? { ...m, gelesen: true } : m)));
     }
 
+    /** „Eulenpfad 1.0.0 · Kern 1.36.0“ aus den Versionen einer Meldung, "" bei älteren ohne (NS3 a). */
+    const versionText = m => {
+      const v = m?.versionen;
+      if (!v || (!v.app && !v.kern)) return "";
+      return [v.app ? `${o.titel || o.app} ${v.app}` : null, v.kern ? `Kern ${v.kern}` : null].filter(Boolean).join(" · ");
+    };
     /** Text für die Entwicklung: ohne Namen, mit Kennung. */
     function alsText(m) {
       const id = m[feld];
+      const version = versionText(m) ? `Version: ${versionText(m)}` : null;
       if (istAnregung(m)) return [
         `Anregung ${m.id} (Aufsicht), ${tag(m.zeit)}`,
+        version,
         `Art: ${anregungArten[m.art] || m.art}`,
         id ? `${o.inhalt.wort}: ${inhaltName(id)} (${id})` : null,
         m.liste ? `Liste: ${m.liste}` : null,
@@ -163,6 +174,7 @@
       ].filter(Boolean).join("\n");
       return [
         `Meldung ${m.id} (${o.wer ? o.wer(m) : "Person"}), ${tag(m.zeit)}`,
+        version,
         `${o.inhalt.wort}: ${inhaltName(id)} (${id}), Stufe ${stufeText(m.stufe)}, Aufgabe ${m.aufgabeNr ?? "?"}`,
         ...(o.zusatz ? o.zusatz(m) || [] : []),
         `Art: ${arten[m.art] || m.art}`,
@@ -212,13 +224,16 @@
     function mailLink(m) {
       const an = adresse();
       if (!an) return null;
-      const betreff = istAnregung(m) ? `${o.titel}: Anregung ${m.id}${m[feld] ? ` (${m[feld]})` : ""}`
-        : `${o.titel}: Fehlermeldung ${m.id} (${m[feld]}, Stufe ${stufeText(m.stufe)})`;
+      // Lernprogramm mit Version, Kennung (Ticket) und Thema im Betreff (NS1 a, Zusatz Patrik)
+      const app = `${o.titel}${m.versionen?.app ? ` ${m.versionen.app}` : ""}`;
+      const betreff = istAnregung(m) ? `${app}: Anregung ${m.id}${m[feld] ? ` (${m[feld]})` : ""}`
+        : `${app}: Fehlermeldung ${m.id} (${m[feld]}, Stufe ${stufeText(m.stufe)})`;
       return `mailto:${an}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(alsText(m))}`;
     }
     /** Daten einer Bemerkung für den Entwickler-Server. */
     const bemerkungDaten = m => ({ text: alsText(m), [feld === "spiel" ? "spiel" : "inhalt"]: m[feld] || undefined, stufe: m.stufe,
-      aufgabe: m.aufgabe ? `Aufgabe ${m.aufgabeNr}: ${m.aufgabe}` : undefined, meldung: m.id });
+      aufgabe: m.aufgabe ? `Aufgabe ${m.aufgabeNr}: ${m.aufgabe}` : undefined, meldung: m.id,
+      fassung: versionText(m) || undefined });
 
     /**
      * Weitergeben nach dem Weg des Geräts (meldeweg): „auto“ Entwickler-Server, sonst E-Mail, sonst Text; „server“, „mail“,

@@ -9,6 +9,8 @@ Pfade gelten relativ zum App-Ordner `lernsteig/`.
 ## 1. Aufbau
 
 ```
+VERSION, version.js       Version des Lernsteigs (Plan C12, NS3 a): VERSION von Hand, version.js daraus erzeugt von
+                          tools/kern_verteilen.py; jede Seite lädt version.js vor kern/kern.js
 kern/kern.js              gemeinsamer Kern der Reihe (KERN.zahl, KERN.bruch: exakte Bruchrechnung für Prüffunktionen),
                           erzeugt von tools/kern_verteilen.py aus kern/ — nie von Hand ändern
 gemeinsam/werkzeug.js     reiner Teil (ohne DOM): Speicher lernsteig:*, Zufall, Schreibweise der Zahlen, Niveaus, Stufen
@@ -31,7 +33,7 @@ index.html, start/        Startseite: Anmeldung, dann Tabs wie im Eulenpfad (Pla
                           (start/statistik.js), Verwaltung nur für die Aufsicht (start/aufsicht.js); statistik.html und
                           aufsicht.html leiten auf #statistik und #verwaltung weiter
 uebungen/<id>/aufgaben.js Aufgaben als Daten (ohne DOM), Prüffunktion, Hinweise
-uebungen/<id>/index.html  lädt kern/kern.js, werkzeug, lehrplaene, katalog, terme, rechner, konten, pruefstand, rahmen,
+uebungen/<id>/index.html  lädt version.js, kern/kern.js, werkzeug, lehrplaene, katalog, terme, rechner, konten, pruefstand, rahmen,
                           die Inhaltslisten und aufgaben.js, ruft LST.uebung(...)
 ```
 

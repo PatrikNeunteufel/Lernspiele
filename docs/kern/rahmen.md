@@ -54,6 +54,13 @@ Jede Seite lädt **einmal** die Kopie, **vor** dem Rahmen der App:
 | Lernsteig | `index.html` (Tabs; `statistik.html`, `aufsicht.html` leiten nur weiter) | `<script src="kern/kern.js"></script>` vor `gemeinsam/werkzeug.js` |
 | Gratwanderung | noch ohne Skripte | lädt die Kopie mit dem Grundgerüst (Plan C8) |
 
+**Version der App** (seit 1.36.0, Plan C12, NS3 a): Direkt vor der Kopie lädt jede Seite `<app>/version.js`
+(gleicher Pfad wie `kern/kern.js`, ohne `kern/`), die `APP_VERSION = { app, version }` setzt. `tools/kern_verteilen.py`
+erzeugt sie aus `<app>/VERSION` (Start Eulenpfad 1.0.0, Lernsteig und Gratwanderung 0.1.0; Regeln wie beim Kern) und
+schreibt `KERN.version` ans Ende des Bündels; `tools/pruefe_skripte.js` meldet eine Seite, die den Kern ohne
+`version.js` davor lädt, `--pruefe` eine `version.js`, die nicht zu `VERSION` passt. Die Apps geben die Version als
+Option `version` an `KERN.meldungen` und `KERN.entwicklung` weiter und zeigen sie in der Statistik.
+
 Ein neuer Kern-Teil braucht keine Änderung an den Seiten: Er kommt in `kern/TEILE` und ist nach dem Verteilen in
 `kern.js` enthalten. Die Rahmen der Apps reichen weiter (etwa `LS.zahlText` → `KERN.zahl.text` mit der Schreibweise
 des Eulenpfads), damit Spiele und Übungen ihre gewohnten Aufrufe behalten.
@@ -352,15 +359,23 @@ der App; Meldungen gehen an `opt.melde`.
   dafür mit CORS, aber nur für erlaubte Herkunft (lokal jeder Port, die veröffentlichte Seite, `--herkunft`), und
   beantwortet die Vorabfrage samt `Access-Control-Allow-Private-Network`; er hört weiter nur auf 127.0.0.1. Ein Server im
   Netz braucht einen eigenen Entscheid (später nur verschlüsselt und mit geheimer Kennung, Plan C11).
+- **Versionen und Protokoll** (seit 1.36.0, Plan C12, NS3 a): `KERN.entwicklung.PROTOKOLL` (heute 1) steigt nur, wenn
+  sich der Austausch so ändert, dass die andere Seite ihn falsch läse. `/entwicklung/status` antwortet
+  `{ ok, schluessel, server: "1.0.0", protokoll: [von, bis] }` (`SERVER_VERSION`, `PROTOKOLLE` in
+  `tools/entwickler_server.py`); ohne `protokoll` (Server vor LERN_Session27) gilt 1. Versteht der Server das Protokoll
+  nicht, gilt er als nicht da (`server()` → `null`), `serverMeldung()` nennt beide Seiten mit Version, die Meldung geht
+  per E-Mail oder als Text. Jede Anfrage trägt `protokoll` und `versionen { app, kern, protokoll }`; der Server weist ein
+  anderes Protokoll mit 409 ab (ohne Angabe = 1) und merkt bei Bemerkungen `fassung` (der Meldung) und `gesendet_mit`.
 
 | Aufruf | Ergebnis |
 |---|---|
-| `entwicklung({ app, speicher, aufsicht, name?, pruefstand?, arten, melde?, start? })` | Entwickler-Modus der App; `pruefstand` ist das Objekt der App (wird nach jeder Änderung auf den Stand des Servers gebracht, dasselbe Objekt) |
+| `entwicklung({ app, speicher, aufsicht, name?, pruefstand?, arten, melde?, start?, adresse?, version? })` | Entwickler-Modus der App; `pruefstand` ist das Objekt der App (wird nach jeder Änderung auf den Stand des Servers gebracht, dasselbe Objekt) |
 | `freischalten(s)`, `sperren()`, `freigeschaltet()` | Schlüssel gegen den Hash prüfen und merken |
 | `aktiv()` | Zusätze sichtbar: angemeldete Aufsicht, freigeschaltet und eingeschaltet (`setzeAn`) |
 | `name()`, `benenne(n)`, `zustand()` | Name für „von“ (sonst `opt.name()`), Zustand |
 | `server()`, `fremd()`, `serverMeldung()` | läuft der Entwickler-Server? antwortet ein anderer auf dem Port? Text für die Meldung |
-| `verbindungPruefen(text?)` | (1.35.0) prüft die genannte Adresse (wie im Feld, `""` = diese Seite; ohne Angabe die eingestellte) neu, ohne sie zu speichern; `{ ok, fremd, ungueltig, adresse, ziel, text }`, `text` nennt die geprüfte Adresse, eine nicht erlaubte wird nicht angefragt. „Verbindung prüfen“ in beiden Apps prüft so die Adresse im Feld und sagt, wenn sie noch nicht gespeichert ist |
+| `verbindungPruefen(text?)` | (1.35.0) prüft die genannte Adresse (wie im Feld, `""` = diese Seite; ohne Angabe die eingestellte) neu, ohne sie zu speichern; `{ ok, fremd, ungueltig, adresse, ziel, text }`, `text` nennt die geprüfte Adresse, eine nicht erlaubte wird nicht angefragt. „Verbindung prüfen“ in beiden Apps prüft so die Adresse im Feld und sagt, wenn sie noch nicht gespeichert ist. Seit 1.36.0 dazu `unpassend`, `server` (Version), `protokoll`; der Text nennt Server-Version und Protokoll |
+| `versionen()` | (1.36.0) `{ app, kern, protokoll }` dieser Seite, geht mit jeder Anfrage mit |
 | `setzeGeprueft(art, id, ja)` | Inhalt angesehen bzw. Liste geprüft setzen oder aufheben; `art` aus `opt.arten`, sonst Fehler |
 | `setzeEintraege(daten)` | Haken je Eintrag (Prüfansicht, LP2 a) |
 | `bemerkung(daten)`, `bemerkungen()`, `bemerkungStatus(nr, status)` | Bemerkungen der App schreiben, lesen, Status setzen |
@@ -726,7 +741,9 @@ Lernsteig (`gemeinsam/rahmen.js`, `uebungen/<id>/pruefung.js`; Korrekturen über
 Im Kern seit 1.32.0 (LERN_Session25, Plan C11, Entscheid C11-1 a), aus `eulenpfad/spiele/gemeinsam/spiel.js` (M1 a,
 Eulenpfad rahmen.md 13). `KERN.meldungen(opt)` mit `app`, `titel`, `speicher`, `person(name)`, `inhalt { feld, wort,
 name(id) }`, `stufe { text, aus }`, `wer(m)`, `zusatz(m)`, `woerter { eingaben, notiz }`, `arten`, `anregungArten`,
-`status`, `kontakt()` (`{ meldungen }`, aus `<app>/kontakt.js`), `entwicklung` (Objekt oder Funktion), `standDatei`.
+`status`, `kontakt()` (`{ meldungen }`, aus `<app>/kontakt.js`), `entwicklung` (Objekt oder Funktion), `standDatei`,
+`version()` (seit 1.36.0, NS3 a: jede neue Meldung merkt `versionen { app, kern }`; Text „Version: Lernsteig 0.1.0 ·
+Kern 1.36.0“, Betreff „Lernsteig 0.1.0: Fehlermeldung M-… (terme, Stufe h)“, an den Server als `fassung`).
 
 | Aufruf | Ergebnis |
 |---|---|

@@ -1,4 +1,4 @@
-/* kern 1.35.0 · Prüfsumme sha256:68121f995845fbd253635ce437343a48d81e3822f7a005cb671464bb136ddb45 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.36.0 · Prüfsumme sha256:5052929d3a846b35a7878af5426466cbc19090e092a6cac341b0cf97760bba96 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -2727,6 +2727,18 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 (function (KERN) {
   const SCHLUESSEL_HASH = "a1fb5dbb5d54c6de3acc1d372cdef564fedf87e2e349aa1bc4bbddf3be702035";
   const SALZ = "eulenpfad-entwickler"; // seit LERN_Session6; bleibt, damit der bestehende Schlüssel gilt
+  /**
+   * Protokoll des Austauschs mit dem Server (Plan C12, NS3 a): eine ganze Zahl, die genau dann steigt, wenn sich Anfragen
+   * oder Antworten so ändern, dass ein älterer Server oder eine ältere App sie falsch läse. Der Server nennt unter
+   * /entwicklung/status die Protokolle, die er versteht ({ protokoll: [von, bis] }); ein Server ohne die Angabe (vor
+   * LERN_Session27) versteht 1. Jede Anfrage trägt das Protokoll und die Versionen von App und Kern.
+   */
+  const PROTOKOLL = 1;
+  /** Versteht der Server dieses Protokoll? st: Antwort von /entwicklung/status. */
+  const verstehtProtokoll = st => {
+    const [von, bis] = Array.isArray(st?.protokoll) && st.protokoll.length === 2 ? st.protokoll : [1, 1];
+    return PROTOKOLL >= von && PROTOKOLL <= bis;
+  };
 
   /**
    * Entwickler-Modus einer App.
@@ -2740,6 +2752,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
    * opt.start      Pfad der App für die Meldung „Server fehlt“ (z. B. "eulenpfad/")
    * opt.adresse    () → Adresse des Entwickler-Servers, "" = dieselbe Seite (Standard; C11-3 a: nur localhost und
    *                127.0.0.1, siehe entwicklung.adresseGueltig). Der Server antwortet dafür mit CORS.
+   * opt.version    () → Version der App (APP_VERSION.version aus <app>/version.js, NS3 a); geht mit jeder Anfrage mit
    */
   function entwicklung(opt) {
     const o = opt || {};
@@ -2759,7 +2772,19 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       + "python -m http.server auf demselben Port).\n\nDiesen beenden, dann python tools/entwickler_server.py starten "
       + "und die Seite mit Strg+F5 neu laden.";
     let fremd = false; // Auf der Adresse läuft ein Server, aber nicht der Entwickler-Server
-    const serverMeldung = () => (fremd ? FREMDER_SERVER : serverFehlt());
+    let unpassend = null; // Antwort eines Entwickler-Servers, der dieses Protokoll nicht versteht
+    /** Versionen dieser Seite, mit jeder Anfrage an den Server (NS3 a). */
+    const versionen = () => ({ app: (typeof o.version === "function" ? o.version() : "") || "", kern: KERN.version || "",
+      protokoll: PROTOKOLL });
+    const unpassendText = (st, z) => {
+      const [von, bis] = Array.isArray(st?.protokoll) ? st.protokoll : [1, 1];
+      const v = versionen();
+      return `Der Entwickler-Server${st?.server ? ` ${st.server}` : ""} unter ${z} versteht Protokoll ${von === bis ? von : `${von}–${bis}`}, `
+        + `diese Seite spricht Protokoll ${PROTOKOLL} (${o.app} ${v.app || "ohne Version"}, Kern ${v.kern || "?"}).\n\n`
+        + "App und Server auf denselben Stand bringen (neu laden, Server aktualisieren); bis dahin gehen Meldungen per E-Mail "
+        + "oder als Text.";
+    };
+    const serverMeldung = () => (unpassend ? unpassendText(unpassend, ziel(basis())) : fremd ? FREMDER_SERVER : serverFehlt());
 
     const zustand = () => ({ schluessel: null, an: false, name: "", ...(o.speicher.lies("entwickler", null) || {}) });
     const speichere = daten => o.speicher.schreibe("entwickler", { ...zustand(), ...daten });
@@ -2783,14 +2808,20 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     let serverDa = null, serverBasis = null; // gemerkt je Adresse
     const lokal = () => typeof location !== "undefined" && String(location.protocol).startsWith("http")
       && ["localhost", "127.0.0.1"].includes(location.hostname);
-    /** Läuft die Seite über den Entwickler-Server? { ok, schluessel } oder null. Erfolg wird gemerkt. */
+    /**
+     * Läuft ein Entwickler-Server, der dieses Protokoll versteht? { ok, schluessel, server?, protokoll? } oder null
+     * (dann sagt serverMeldung warum). Erfolg wird gemerkt.
+     */
     async function server() {
       if (serverDa && serverBasis === basis()) return serverDa;
-      serverDa = null; serverBasis = basis();
+      serverDa = null; unpassend = null; serverBasis = basis();
       try {
         const r = await fetch(`${basis()}/entwicklung/status`, { cache: "no-store" });
         fremd = !r.ok && (!!basis() || lokal());
-        if (r.ok) serverDa = await r.json();
+        if (r.ok) {
+          const st = await r.json();
+          if (verstehtProtokoll(st)) serverDa = st; else unpassend = st;
+        }
       } catch (e) { /* kein Server */ }
       return serverDa;
     }
@@ -2810,24 +2841,27 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
         return { ok: false, fremd: false, ungueltig: true, adresse: null, ziel: roh,
           text: `Nicht geprüft: ${roh} ist nicht erlaubt. Erlaubt ist nur http://localhost:<Port> oder http://127.0.0.1:<Port>, leer für diese Seite.` };
       }
-      let ok = false, andere = false;
+      let ok = false, andere = false, st = null;
       try {
         const r = await fetch(`${a}/entwicklung/status`, { cache: "no-store" });
-        ok = r.ok;
         andere = !r.ok && (!!a || lokal());
-      } catch (e) { /* kein Server */ }
+        if (r.ok) { st = await r.json(); ok = true; }
+      } catch (e) { /* kein Server oder keine lesbare Antwort */ }
       const z = ziel(a);
-      const meldung = ok ? `✓ Entwickler-Server erreichbar: ${z}.`
-        : andere ? FREMDER_SERVER.replace(/^Hier/, `Unter ${z}`)
-          : a ? serverFehltBei(a) : `Kein Entwickler-Server unter ${z}.\n\n${SERVER_FEHLT_HIER}`;
-      return { ok, fremd: andere, ungueltig: false, adresse: a, ziel: z, text: meldung };
+      const passt = ok && verstehtProtokoll(st);
+      const meldung = passt ? `✓ Entwickler-Server${st.server ? ` ${st.server}` : ""} erreichbar: ${z}, Protokoll ${PROTOKOLL}.`
+        : ok ? unpassendText(st, z)
+          : andere ? FREMDER_SERVER.replace(/^Hier/, `Unter ${z}`)
+            : a ? serverFehltBei(a) : `Kein Entwickler-Server unter ${z}.\n\n${SERVER_FEHLT_HIER}`;
+      return { ok: passt, fremd: andere, unpassend: ok && !passt, ungueltig: false, adresse: a, ziel: z,
+        server: st?.server || "", protokoll: st?.protokoll || null, text: meldung };
     }
     /** An den Server schicken (mit App und Schlüssel); meldet selbst, was schiefging, und gibt dann null zurück. */
     async function sende(pfad, daten) {
       if (!(await server())) { melde(serverMeldung()); return null; }
       try {
         const r = await fetch(basis() + pfad, { method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...daten, app: o.app, schluessel: zustand().schluessel }) });
+          body: JSON.stringify({ ...daten, app: o.app, versionen: versionen(), protokoll: PROTOKOLL, schluessel: zustand().schluessel }) });
         const antwort = await r.json();
         if (!r.ok) { melde(`Entwickler-Server: ${antwort.fehler || r.status}`); return null; }
         return antwort;
@@ -2869,7 +2903,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       try { return await (await fetch(`${basis()}/entwicklung/bemerkungen?app=${o.app}`, { cache: "no-store" })).json(); } catch (e) { return null; }
     }
 
-    return { app: o.app, adresse: basis, freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung, verbindungPruefen,
+    return { app: o.app, adresse: basis, freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung, verbindungPruefen, versionen,
       /** Antwortet auf der Adresse ein anderer Server (nach server())? */ fremd: () => fremd,
       setzeGeprueft, setzeEintraege, bemerkung, bemerkungen, bemerkungStatus };
   }
@@ -2886,6 +2920,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     return `${m[1].toLowerCase()}://${m[2].toLowerCase()}${m[3] ? `:${Number(m[3])}` : ""}`;
   }
   entwicklung.adresseGueltig = adresseGueltig;
+  entwicklung.PROTOKOLL = PROTOKOLL;
+  entwicklung.verstehtProtokoll = verstehtProtokoll;
   entwicklung.SALZ = SALZ;
   entwicklung.SCHLUESSEL_HASH = SCHLUESSEL_HASH;
 
@@ -2979,6 +3015,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
   /**
    * Meldungen einer App.
    * opt.app, opt.titel   „eulenpfad“, „Eulenpfad“ (Betreff der E-Mail)
+   * opt.version()        → Version der App (APP_VERSION.version, NS3 a); jede neue Meldung merkt sich
+   *                      versionen = { app, kern } — die Fassung, in der es geschah —, Text und Betreff nennen sie
    * opt.speicher         { lies, schreibe } der App; opt.schluessel (Standard „meldungen“)
    * opt.person(name)     → { id } oder null (Kennung der Person in der Meldung)
    * opt.inhalt           { feld: „spiel“ | „uebung“, wort: „Spiel“ | „Übung“, name: id → Anzeigename }
@@ -3020,8 +3058,9 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       const jetzt = new Date().toISOString();
       const id = `M-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
       const p = o.person ? o.person(daten.name) : null;
-      const m = { id, zeit: jetzt, stand: jetzt, status: "neu", gelesen: true, ...daten, ...(p ? { person: p.id } : {}),
-        verlauf: [{ zeit: jetzt, status: "neu", von: daten.name }] };
+      const v = { app: (typeof o.version === "function" ? o.version() : "") || "", kern: KERN.version || "" };
+      const m = { id, zeit: jetzt, stand: jetzt, status: "neu", gelesen: true, ...(v.app || v.kern ? { versionen: v } : {}),
+        ...daten, ...(p ? { person: p.id } : {}), verlauf: [{ zeit: jetzt, status: "neu", von: daten.name }] };
       schreibe([...alle(), m]);
       return m;
     }
@@ -3047,11 +3086,19 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       schreibe(alle().map(m => (m.name === name ? { ...m, gelesen: true } : m)));
     }
 
+    /** „Eulenpfad 1.0.0 · Kern 1.36.0“ aus den Versionen einer Meldung, "" bei älteren ohne (NS3 a). */
+    const versionText = m => {
+      const v = m?.versionen;
+      if (!v || (!v.app && !v.kern)) return "";
+      return [v.app ? `${o.titel || o.app} ${v.app}` : null, v.kern ? `Kern ${v.kern}` : null].filter(Boolean).join(" · ");
+    };
     /** Text für die Entwicklung: ohne Namen, mit Kennung. */
     function alsText(m) {
       const id = m[feld];
+      const version = versionText(m) ? `Version: ${versionText(m)}` : null;
       if (istAnregung(m)) return [
         `Anregung ${m.id} (Aufsicht), ${tag(m.zeit)}`,
+        version,
         `Art: ${anregungArten[m.art] || m.art}`,
         id ? `${o.inhalt.wort}: ${inhaltName(id)} (${id})` : null,
         m.liste ? `Liste: ${m.liste}` : null,
@@ -3060,6 +3107,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       ].filter(Boolean).join("\n");
       return [
         `Meldung ${m.id} (${o.wer ? o.wer(m) : "Person"}), ${tag(m.zeit)}`,
+        version,
         `${o.inhalt.wort}: ${inhaltName(id)} (${id}), Stufe ${stufeText(m.stufe)}, Aufgabe ${m.aufgabeNr ?? "?"}`,
         ...(o.zusatz ? o.zusatz(m) || [] : []),
         `Art: ${arten[m.art] || m.art}`,
@@ -3109,13 +3157,16 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     function mailLink(m) {
       const an = adresse();
       if (!an) return null;
-      const betreff = istAnregung(m) ? `${o.titel}: Anregung ${m.id}${m[feld] ? ` (${m[feld]})` : ""}`
-        : `${o.titel}: Fehlermeldung ${m.id} (${m[feld]}, Stufe ${stufeText(m.stufe)})`;
+      // Lernprogramm mit Version, Kennung (Ticket) und Thema im Betreff (NS1 a, Zusatz Patrik)
+      const app = `${o.titel}${m.versionen?.app ? ` ${m.versionen.app}` : ""}`;
+      const betreff = istAnregung(m) ? `${app}: Anregung ${m.id}${m[feld] ? ` (${m[feld]})` : ""}`
+        : `${app}: Fehlermeldung ${m.id} (${m[feld]}, Stufe ${stufeText(m.stufe)})`;
       return `mailto:${an}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(alsText(m))}`;
     }
     /** Daten einer Bemerkung für den Entwickler-Server. */
     const bemerkungDaten = m => ({ text: alsText(m), [feld === "spiel" ? "spiel" : "inhalt"]: m[feld] || undefined, stufe: m.stufe,
-      aufgabe: m.aufgabe ? `Aufgabe ${m.aufgabeNr}: ${m.aufgabe}` : undefined, meldung: m.id });
+      aufgabe: m.aufgabe ? `Aufgabe ${m.aufgabeNr}: ${m.aufgabe}` : undefined, meldung: m.id,
+      fassung: versionText(m) || undefined });
 
     /**
      * Weitergeben nach dem Weg des Geräts (meldeweg): „auto“ Entwickler-Server, sonst E-Mail, sonst Text; „server“, „mail“,
@@ -4531,3 +4582,6 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 
 if (typeof module !== "undefined") module.exports = globalThis.KERN;
+
+/* ---- erzeugt: Version des Kerns (kern/VERSION) ---- */
+globalThis.KERN.version = "1.36.0";

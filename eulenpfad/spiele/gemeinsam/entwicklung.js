@@ -17,6 +17,7 @@ LS.entwicklung = (() => {
     melde: text => alert(text), start: "eulenpfad/",
     // Adresse des Servers je Gerät oder Vorgabe aus kontakt.js (C11-3 a; "" = dieselbe Seite)
     adresse: () => (LS.meldeweg ? LS.meldeweg().server : ""),
+    version: () => (typeof APP_VERSION !== "undefined" ? APP_VERSION.version : ""), // NS3 a
   });
   const { freigeschaltet, aktiv, freischalten, sperren, setzeAn, benenne, name, zustand, server, serverMeldung,
     setzeGeprueft, setzeEintraege, bemerkung, bemerkungen, bemerkungStatus } = K;

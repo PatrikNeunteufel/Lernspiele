@@ -3,7 +3,8 @@
 // nachgeladen wird). Über eulenpfad/, lernsteig/, gratwanderung/, portal/ und kern/:
 //   1. jede .js-Datei und jedes Inline-Skript einer HTML-Seite ist lesbar (vm.Script: nur Syntax, nichts läuft);
 //   2. jede <script src="…"> zeigt auf eine vorhandene Datei;
-//   3. kein Skript kommt von aussen (http, https, //) — die Reihe läuft ohne externe Abhängigkeiten (Entscheid LERN-1).
+//   3. kein Skript kommt von aussen (http, https, //) — die Reihe läuft ohne externe Abhängigkeiten (Entscheid LERN-1);
+//   4. jede Seite, die <app>/kern/kern.js lädt, lädt davor <app>/version.js (Plan C12, NS3 a: Version der App).
 // Fehler im Verhalten fängt sie nicht; dafür sind die Seitentests da.
 // Aufruf: node tools/pruefe_skripte.js — läuft mit den kurzen Prüfungen (node tools/pruefe.js); Ende mit Code 1 bei Fehlern.
 "use strict";
@@ -34,11 +35,13 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
     for (const f of dateien(start, ".html")) {
       const wo = path.relative(wurzel, f).replace(/\\/g, "/");
       const html = fs.readFileSync(f, "utf8").replace(/<!--[\s\S]*?-->/g, "");
+      const geladen = []; // aufgelöste Pfade der <script src> in Reihenfolge (für Punkt 4)
       for (const m of html.matchAll(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/gi)) {
         const attr = m[1] || "";
         const src = attr.match(/\ssrc\s*=\s*["']([^"']+)["']/i);
         if (src) {
           zahlen.verweise++;
+          geladen.push(path.relative(wurzel, path.join(path.dirname(f), decodeURI(src[1].split(/[?#]/)[0]))).replace(/\\/g, "/"));
           if (/^(https?:)?\/\//i.test(src[1])) { fehler.push(`${wo}: Skript von aussen ${src[1]} (LERN-1)`); continue; }
           const ziel = path.join(path.dirname(f), decodeURI(src[1].split(/[?#]/)[0]));
           if (!fs.existsSync(ziel)) fehler.push(`${wo}: Skript fehlt ${src[1]}`);
@@ -46,6 +49,13 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
           zahlen.inline++;
           lies(m[2], `${wo} (Skript in der Seite)`);
         }
+      }
+      // 4. Version der App vor dem Kern (NS3 a)
+      const kern = geladen.findIndex(p => /^[a-z]+\/kern\/kern\.js$/.test(p));
+      if (kern >= 0) {
+        const soll = geladen[kern].replace(/kern\/kern\.js$/, "version.js");
+        const v = geladen.indexOf(soll);
+        if (v < 0 || v > kern) fehler.push(`${wo}: lädt ${geladen[kern]} ohne ${soll} davor (NS3 a)`);
       }
     }
   }

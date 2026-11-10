@@ -353,6 +353,9 @@ function zeichneStatistik(box, neu) {
       }
     })),
     datei));
+  // Fassung dieser Seite (Plan C12, NS3 a): hilft, eine Meldung oder Sicherung einer Version zuzuordnen
+  seite.append(el("p", { class: "leise-text", "data-versionen": "", style: "text-align:center",
+    text: `Eulenpfad ${typeof APP_VERSION !== "undefined" ? APP_VERSION.version : "?"} · Kern ${KERN.version || "?"}` }));
 
   /**
    * Profile, Runden, Rekorde und Meldungen der genannten Personen als Datei (Format des Kerns reihe-daten, LS.sicherung):

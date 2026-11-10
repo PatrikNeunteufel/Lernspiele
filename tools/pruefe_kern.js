@@ -2096,6 +2096,37 @@ console.log("listenpruefung.js");
     global.fetch = async () => ({ ok: false, json: async () => ({}) });
     const vpA = await EW.verbindungPruefen("http://localhost:8799");
     gleich([vpA.ok, vpA.fremd, /Unter http:\/\/localhost:8799 antwortet ein anderer Server/.test(vpA.text)].join("|"), "false|true|true", "verbindungPruefen: anderer Server, Adresse im Text");
+    // Versionen und Protokoll (Plan C12, NS3 a): Server nennt Version und verstandene Protokolle, jede Anfrage trägt beides
+    const kernAlt = KERN.version;
+    KERN.version = "9.8.7";
+    const P = KERN.entwicklung.PROTOKOLL;
+    let status = { ok: true, schluessel: true, server: "1.0.0", protokoll: [P, P] }, anfrage = null;
+    global.fetch = async (u, init) => { const post = init && init.method === "POST"; if (post) anfrage = JSON.parse(init.body); return { ok: true, json: async () => (post ? { nr: 1 } : status) }; };
+    const EV = KERN.entwicklung({ app: "lernsteig", speicher: WEG_SP, aufsicht: () => true, adresse: () => "http://localhost:8766", version: () => "0.9.1" });
+    const vpV = await EV.verbindungPruefen();
+    gleich([vpV.ok, vpV.server, /Entwickler-Server 1\.0\.0 erreichbar: http:\/\/localhost:8766, Protokoll 1\./.test(vpV.text)].join("|"), "true|1.0.0|true", "verbindungPruefen: Server-Version und Protokoll im Text");
+    gleich(JSON.stringify(EV.versionen()), JSON.stringify({ app: "0.9.1", kern: "9.8.7", protokoll: P }), "versionen: App, Kern, Protokoll");
+    WEG_SP.schreibe("entwickler", { schluessel: "x", an: true });
+    await EV.bemerkung({ text: "t" });
+    gleich(JSON.stringify([anfrage && anfrage.protokoll, anfrage && anfrage.versionen]), JSON.stringify([P, { app: "0.9.1", kern: "9.8.7", protokoll: P }]), "sende: Protokoll und Versionen in jeder Anfrage");
+    status = { ok: true, schluessel: true, server: "2.0.0", protokoll: [P + 1, P + 2] };
+    const vpN = await EV.verbindungPruefen();
+    gleich([vpN.ok, vpN.unpassend, /2\.0\.0 .*versteht Protokoll 2–3, diese Seite spricht Protokoll 1 \(lernsteig 0\.9\.1, Kern 9\.8\.7\)/.test(vpN.text)].join("|"), "false|true|true",
+      "verbindungPruefen: anderes Protokoll — nicht verbunden, Versionen beider Seiten im Text");
+    const EV2 = KERN.entwicklung({ app: "lernsteig", speicher: WEG_SP, aufsicht: () => true, adresse: () => "http://localhost:8766", version: () => "0.9.1" });
+    gleich([await EV2.server(), /versteht Protokoll 2–3/.test(EV2.serverMeldung())].join("|"), "|true", "server: anderes Protokoll gilt als nicht da, serverMeldung sagt warum");
+    status = { ok: true, schluessel: true };
+    const EV3 = KERN.entwicklung({ app: "lernsteig", speicher: WEG_SP, aufsicht: () => true, adresse: () => "http://localhost:8766" });
+    gleich(!!(await EV3.server()), true, "server: ohne Angabe des Protokolls (Server vor LERN_Session27) = Protokoll 1");
+    WEG_SP.schreibe("entwickler", null);
+    // Meldungen merken die Fassung, in der sie entstanden; Text und Betreff nennen sie
+    const MV = M({ app: "lernsteig", titel: "Lernsteig", speicher: KERN.speicher("t-meldv:"), inhalt: { feld: "uebung", wort: "Übung" }, kontakt: () => ({ meldungen: "a@b.ch" }), version: () => "0.9.1" });
+    const mv = MV.neu({ name: "Jo", uebung: "terme", stufe: "h", art: "inhalt", text: "x" });
+    const betreffV = decodeURIComponent(MV.mailLink(mv).match(/subject=([^&]*)/)[1]);
+    gleich([JSON.stringify(mv.versionen), MV.alsText(mv).split("\n")[1], betreffV.split(":")[0], MV.bemerkungDaten(mv).fassung].join("|"),
+      `{"app":"0.9.1","kern":"9.8.7"}|Version: Lernsteig 0.9.1 · Kern 9.8.7|Lernsteig 0.9.1|Lernsteig 0.9.1 · Kern 9.8.7`, "meldungen: Versionen bei neu, im Text, im Betreff, an den Server");
+    gleich(MV.ausText(MV.alsText(mv)).meldung, mv.id, "ausText: liest die Kennung auch mit Zeile Version");
+    KERN.version = kernAlt;
     global.fetch = fetchAlt;
     wirft(() => M({ inhalt: { feld: "spiel" } }), "meldungen ohne speicher");
     wirft(() => M({ speicher: sp }), "meldungen ohne inhalt");

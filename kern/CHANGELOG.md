@@ -3,6 +3,16 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.36.0 — 2026-11-10 (LERN_Session27)
+- Versionen und Protokoll (Plan C12, NS3 a): `KERN.version` (von `tools/kern_verteilen.py` ans Ende des Bündels
+  geschrieben). `entwicklung.js`: `PROTOKOLL = 1` (`KERN.entwicklung.PROTOKOLL`, `verstehtProtokoll`), Option `version`
+  (Version der App), `versionen()`; `server()` gilt nur, wenn der Server das Protokoll versteht (`/status` mit
+  `protokoll: [von, bis]`, ohne Angabe 1), sonst sagt `serverMeldung()` warum — mit den Versionen beider Seiten;
+  `verbindungPruefen` nennt die Server-Version und das Protokoll (`unpassend`, `server`, `protokoll` im Ergebnis); jede
+  Anfrage trägt `protokoll` und `versionen`. `meldungen.js`: Option `version`; jede neue Meldung merkt `versionen`
+  `{ app, kern }`, Text („Version: Lernsteig 0.1.0 · Kern 1.36.0“), Betreff („Lernsteig 0.1.0: Fehlermeldung …“) und
+  `bemerkungDaten` (`fassung`) nennen sie. Ältere Meldungen ohne Versionen wie bisher.
+
 ## 1.35.0 — 2026-11-10 (LERN_Session27)
 - `entwicklung.js`: `verbindungPruefen(text?)` prüft eine Adresse, ohne sie zu speichern und ohne Gemerktes, und gibt
   `{ ok, fremd, ungueltig, adresse, ziel, text }` mit der geprüften Adresse in der Meldung („diese Seite“ mit ihrem

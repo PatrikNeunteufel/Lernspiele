@@ -2,7 +2,11 @@
 
 kern/ ist die einzige Quelle. Dieses Werkzeug bündelt die Teile aus kern/TEILE in eine Datei je App,
 <app>/kern/kern.js, mit Version und Prüfsumme im Kopf. Die Kopie ist ein Ergebnis, nie eine zweite Quelle:
-Wer etwas am Kern ändert, ändert es in kern/ und verteilt neu.
+Wer etwas am Kern ändert, ändert es in kern/ und verteilt neu. Am Ende des Bündels steht `KERN.version`.
+
+Dazu schreibt es je App <app>/version.js aus <app>/VERSION (Plan C12, NS3 a): `APP_VERSION = { app, version }`. Jede
+Seite, die den Kern lädt, lädt version.js davor (tools/pruefe_skripte.js prüft das). Eine neue App-Version: Zahl in
+<app>/VERSION ändern, dieses Werkzeug laufen lassen. Regeln wie beim Kern (klein Fehler, mittel neu, gross Schnittstelle).
 
 Aufruf:
     python tools/kern_verteilen.py                 alle Apps neu schreiben
@@ -48,7 +52,7 @@ def pruefsumme(text: str) -> str:
 
 def buendel() -> tuple[str, str]:
     version = lies_text(KERN / "VERSION").strip()
-    r = rumpf()
+    r = rumpf() + f'\n/* ---- erzeugt: Version des Kerns (kern/VERSION) ---- */\nglobalThis.KERN.version = "{version}";\n'
     kopf = (f"/* kern {version} · Prüfsumme sha256:{pruefsumme(r)} · erzeugt von tools/kern_verteilen.py aus kern/ — "
             f"nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */\n")
     return version, kopf + r
@@ -75,6 +79,35 @@ def pruefe_app(app: str, version: str, soll: str) -> tuple[int, str]:
     return 1, f"{app}: liegt zurück (kern {m.group(1)} statt {version})"
 
 
+VERSION_MUSTER = re.compile(r"^\d+\.\d+\.\d+$")
+
+
+def version_ziel(app: str) -> Path:
+    return WURZEL / app / "version.js"
+
+
+def version_soll(app: str) -> str:
+    """Inhalt von <app>/version.js aus <app>/VERSION (NS3 a)."""
+    quelle = WURZEL / app / "VERSION"
+    if not quelle.is_file():
+        raise SystemExit(f"{app}/VERSION fehlt")
+    v = lies_text(quelle).strip()
+    if not VERSION_MUSTER.match(v):
+        raise SystemExit(f"{app}/VERSION: „{v}“ ist keine Version der Form 1.2.3")
+    return (f"/* {app} {v} · erzeugt von tools/kern_verteilen.py aus {app}/VERSION — nicht von Hand ändern, sondern "
+            f"{app}/VERSION ändern und neu verteilen (Plan C12, NS3 a). */\n"
+            f'var APP_VERSION = Object.freeze({{ app: "{app}", version: "{v}" }});\n')
+
+
+def pruefe_version(app: str) -> tuple[int, str]:
+    pfad = version_ziel(app)
+    if not pfad.is_file():
+        return 2, f"{app}: version.js fehlt — python tools/kern_verteilen.py"
+    if lies_text(pfad) != version_soll(app):
+        return 2, f"{app}: version.js passt nicht zu {app}/VERSION — python tools/kern_verteilen.py"
+    return 0, f"{app}: version.js gleich"
+
+
 def main() -> int:
     # Ausgabe immer UTF-8, auch in der Windows-Konsole und wenn ein Testskript sie liest (sonst „ge�ndert“).
     sys.stdout.reconfigure(encoding="utf-8")
@@ -88,14 +121,16 @@ def main() -> int:
     schlimmste = 0
     for app in apps:
         if nur_pruefen:
-            stufe, text = pruefe_app(app, version, soll)
-            schlimmste = max(schlimmste, stufe)
-            print(("    " if stufe == 0 else "    HINWEIS " if stufe == 1 else "    FEHLER  ") + text)
+            for stufe, text in (pruefe_app(app, version, soll), pruefe_version(app)):
+                schlimmste = max(schlimmste, stufe)
+                print(("    " if stufe == 0 else "    HINWEIS " if stufe == 1 else "    FEHLER  ") + text)
         else:
             pfad = ziel(app)
             pfad.parent.mkdir(parents=True, exist_ok=True)
             pfad.write_text(soll, encoding="utf-8", newline="\n")
             print(f"{app}: kern {version} nach {pfad.relative_to(WURZEL).as_posix()}")
+            version_ziel(app).write_text(version_soll(app), encoding="utf-8", newline="\n")
+            print(f"{app}: version.js aus {app}/VERSION ({lies_text(WURZEL / app / 'VERSION').strip()})")
     return 1 if schlimmste == 2 else 0
 
 
