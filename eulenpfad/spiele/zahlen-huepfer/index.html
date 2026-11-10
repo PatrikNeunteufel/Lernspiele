@@ -110,6 +110,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -195,6 +196,9 @@ function tippsFuer(schritt, vorwaerts) {
 
 LS.spiel({
   id: "zahlen-huepfer",
+  // Abschluss-Animation (Block M1, AR1 a; docs/konzept_abschluss_animationen.md 8): der Frosch hüpft in den Schritten der Stufe über Seerosen
+  feier: { muster: "reise", bilder: "seerosen", ziele: { s1: { start: 350, schritt: 50 }, s2: { start: 2500, schritt: 500 },
+    s3: { start: 9200, schritt: -1000 }, s4: { start: 15000, schritt: 25000 }, s5: { start: 5000, schritt: -999 }, s6: { start: 1000000, schritt: -99999 } } },
   einleitung: "Quak! Der Frosch hüpft von Seerose zu Seerose — immer gleich weit. Schreib auf, wo er landet. Pass auf, ob er vorwärts (+) oder rückwärts (−) hüpft!",
   hilfe: "Auf dem Schild steht, wie weit der Frosch hüpft. Tipp die Zahl der leuchtenden Seerose ein und drück OK — dann hüpft der Frosch dorthin, und die nächste Seerose ist dran.",
   anzahl: 6,

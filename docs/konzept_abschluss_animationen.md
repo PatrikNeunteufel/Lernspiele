@@ -1,6 +1,6 @@
 # Konzept: Abschluss-Animationen im Eulenpfad
 
-Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P8 und Ruhezeiten gebaut, Abnahme durch Patrik offen.**
+Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P8 und Ruhezeiten gebaut, alle acht Piloten von Patrik abgenommen; Ausrollen nach AR1 a in Arbeit (Block M1 gebaut).**
 Entscheide und Pilotliste in Abschnitt 7.
 
 ## 1. Auslöser
@@ -116,8 +116,8 @@ Patriks Idee (Vollmond in Stufe 4 und 5) setzt eine Stufe mehr Mond voraus; s5 u
 | AN3 | a — Einstellung der Aufsicht „Abschluss-Animation: an (Standard) / aus“, global und je Spiel; „Bewegung reduzieren“ des Geräts gilt immer | „mit Zeitschaltuhr/en?“ → AN3-Z |
 | AN3-Z | a — **Ruhezeiten**, global für das Gerät: eine oder mehrere Zeitspannen je Wochentag (etwa Mo–Fr 08:00–12:00 und 13:30–16:00), Ortszeit des Geräts (`KERN.zeit`); während einer Ruhezeit ist die Abschluss-Animation aus, danach gilt an/aus wie eingestellt, auch je Spiel; reist mit dem Abgleich; die Verwaltung zeigt, ob gerade Ruhezeit ist | Frage Patrik: auch Ruhezeit für Töne? → AN3-T |
 | AN3-T | a — die Ruhezeit gilt auch für den Ton; Spiele mit der Spielweise „Hören“ (23 im Katalog) zeigen während einer Ruhezeit beim Start „🎧 Diese Runde braucht Ton — mit Kopfhörern spielen“ und „Ton für diese Runde an“, nach der Runde wieder aus | „es sollte differenziert eingestellt werden können“ — Lesart unten |
-
 | AN3-K | a — Einstellung je Gerät „🎧 Dieses Gerät wird mit Kopfhörern benutzt“: dann gilt die Ruhezeit nicht für „Hören als Inhalt“ (und, wenn gewählt, nicht für das Vorlesen); Klänge und Animation folgen weiter der Ruhezeit; reist nicht mit dem Abgleich. Kopfhörer erkennen kann eine Webseite nicht zuverlässig (keine Schnittstelle für die aktive Ausgabe; Gerätenamen nur mit Mikrofon-Freigabe; auf iPad und iPhone gar nicht) | „eventuell auch die option, dass spiele mit erforderlicher audioausgabe ausgeblendet werden“ — unten |
+| AR1 | a — **Reihenfolge beim Ausrollen:** Mathe zuerst, in Blöcken nach Thema von je etwa 10 bis 15 Spielen; danach Deutsch, NMG und am Schluss Englisch, Französisch, Musik, Medien und Informatik; je Block ein Commit und die Abnahme durch Patrik in der Vorschau (`tools/feier_vorschau.html`) | — |
 
 **Spiele, die Ton brauchen, in der Ruhezeit (Zusatz Patrik zu AN3-K):** Einstellung je Gerät „Spiele, die Ton
 brauchen, während einer Ruhezeit: **mit Kopfhörer-Hinweis zeigen** (Standard) / **ausblenden**“. Ausgeblendet heisst: Im
@@ -154,14 +154,14 @@ Desktop, Tablet (768 px) und Handy (375 px) angesehen und von Patrik abgenommen 
 
 | Nr. | Spiel | Muster | Fach, Klasse | Prüft am Rahmen | Status |
 |---|---|---|---|---|---|
-| P1 | 🚀 Rechen-Rakete | REISE | Mathe, 4 | Weg über sechs Ziele, Planeten fachlich richtig (Folge, Mars rötlich, Saturn mit Ring) | gebaut 10.11.2026 (LERN_Session27, Schritt 1) |
-| P2 | 🚀 Dezimal-Rakete | ZOOM | Mathe, 5 | Zahlen in der Animation über `LS.dezimalText` (Punkt oder Komma nach Einstellung), Zoom bis Tausendstel | gebaut 10.11.2026 (LERN_Session27, Schritt 2a) |
-| P3 | 🔭 Himmels-Forscher | ZYKLUS, dann REISE | NMG, 3 | zwei Muster in einem Spiel (Stufen 1–4 und 5–6), Mondphasen fachlich richtig | gebaut 10.11.2026 (LERN_Session27, Schritt 2a) |
-| P4 | 🌳 Wortfamilien-Baum | WACHSEN | Deutsch, 4 | Wachsen ohne Text (Wörter nur angedeutet), Sprachfach | gebaut 10.11.2026 (LERN_Session27, Schritt 2b) |
-| P5 | 🧱 Zahlenmauer-Baumeister | BAUEN | Mathe, 2 | Zahlen in den Steinen richtig (jeder Stein die Summe der beiden darunter), jüngere Kinder | gebaut 10.11.2026 (LERN_Session27, Schritt 2b) |
-| P6 | 🎺 Instrumenten-Kenner | AUFTRITT | Musik, 2 | Ton nur mit Ton an (Regel 8), Haltung der Instrumente richtig | gebaut 10.11.2026 (LERN_Session27, Schritt 2c) |
-| P7 | 🎣 Anlaut-Angel | SAMMELN | Deutsch, 1 | jüngste Kinder (fast ohne Lesetext), das schlichteste Muster | gebaut 10.11.2026 (LERN_Session27, Schritt 2c) |
-| P8 | 🗺️ Schweiz-Karten-Suche | KARTE | NMG, 4 | Kartendaten des Spiels wiederverwenden statt neu zeichnen | gebaut 10.11.2026 (LERN_Session27, Schritt 2c) |
+| P1 | 🚀 Rechen-Rakete | REISE | Mathe, 4 | Weg über sechs Ziele, Planeten fachlich richtig (Folge, Mars rötlich, Saturn mit Ring) | abgenommen 10.11.2026 (Patrik, LERN_Session27) |
+| P2 | 🚀 Dezimal-Rakete | ZOOM | Mathe, 5 | Zahlen in der Animation über `LS.dezimalText` (Punkt oder Komma nach Einstellung), Zoom bis Tausendstel | abgenommen 10.11.2026 (Patrik, LERN_Session27) |
+| P3 | 🔭 Himmels-Forscher | ZYKLUS, dann REISE | NMG, 3 | zwei Muster in einem Spiel (Stufen 1–4 und 5–6), Mondphasen fachlich richtig | abgenommen 10.11.2026 (Patrik, LERN_Session27) |
+| P4 | 🌳 Wortfamilien-Baum | WACHSEN | Deutsch, 4 | Wachsen ohne Text (Wörter nur angedeutet), Sprachfach | abgenommen 10.11.2026 (Patrik, LERN_Session27) |
+| P5 | 🧱 Zahlenmauer-Baumeister | BAUEN | Mathe, 2 | Zahlen in den Steinen richtig (jeder Stein die Summe der beiden darunter), jüngere Kinder | abgenommen 10.11.2026 (Patrik, LERN_Session27) |
+| P6 | 🎺 Instrumenten-Kenner | AUFTRITT | Musik, 2 | Ton nur mit Ton an (Regel 8), Haltung der Instrumente richtig | abgenommen 10.11.2026 (Patrik, LERN_Session27) |
+| P7 | 🎣 Anlaut-Angel | SAMMELN | Deutsch, 1 | jüngste Kinder (fast ohne Lesetext), das schlichteste Muster | abgenommen 10.11.2026 (Patrik, LERN_Session27) |
+| P8 | 🗺️ Schweiz-Karten-Suche | KARTE | NMG, 4 | Kartendaten des Spiels wiederverwenden statt neu zeichnen | abgenommen 10.11.2026 (Patrik, LERN_Session27) |
 
 **Abnahme** (Patrik): `python tools/entwickler_server.py`, dann `http://localhost:<port>/tools/feier_vorschau.html` —
 je Pilot alle sechs Stufen in 1024, 768 und 375 px, mit 1, 2 und 3 Sternen, einmal mit „Bewegung reduzieren“.
@@ -203,6 +203,39 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
   (Ausschnitt), s2 die Ostschweiz, s3 alle 26 Kantone, s4 die Hauptorte, s5 die Städte, s6 Kantone und Hauptorte.
   Umrisse und Lage aus karte.js (swisstopo), keine Namen. Die Eule fliegt von West nach Ost, was sie überfliegt,
   leuchtet auf. Schmuck: Fähnchen am letzten Ziel (2★), Funken (3★) statt glänzender Berge (keine Höhendaten).
+
+### Ausrollen (AR1 a)
+
+| Block | Themen | Spiele | Status |
+|---|---|---|---|
+| M1 | Stellenwert, Dezimal | 10 | gebaut 10.11.2026 (LERN_Session27), Abnahme offen |
+| M2 | Zahlen, Teiler, Begründen | 12 | offen |
+| M3 | Rechnen | 13 | offen |
+| M4 | Sachrechnen, Grössen | 12 | offen |
+| M5 | Geometrie | 13 | offen |
+| M6 | Daten, Kombinatorik, Brüche | 9 | offen |
+| D, N, F | Deutsch (30), NMG (33), danach Englisch (8), Französisch (8), Musik (6), Medien und Informatik (7) | 92 | offen |
+
+**Block M1 — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme):
+
+- **Stellen-Detektiv:** die Lupe wandert über eine Zahl der Stufe (s1 bis H wie das Spiel, nicht E, Z, H allein);
+  2★ Glanz an der Lupe statt Blinken, 3★ Funken ohne Detektivhut.
+- **Zahlen-Baukasten:** die Bausteine der Stufe wie im Spiel (s1 4 H + 2 E mit leerer Stelle, s6 14 H + 3 T), mit der
+  Rechnung darunter, statt eines Turms Stelle um Stelle; 2★ Fähnchen statt Kran.
+- **Tabellen-Post:** Zahlen der Stufen mit Nullen wie im Spiel; s6 bündelt 14 H zu 1 T und 4 H („mehr als 9 in einem
+  Fach“) statt „alle Fächer voll“; 2★ Glanz statt Postsack, 3★ Funken statt Konfetti und Stempel.
+- **Ziffernkarten:** 3 bis 7 Karten wie die Stufen des Spiels (nicht 3- bis 7-stellig je Stufe), ohne Umdrehen.
+- **Zahlen-Hüpfer:** Schritte der Stufen des Spiels (s1 +50 bis 1000, s6 −99 999 in den Millionen) statt 1er bis 1000er.
+- **Zahlenrätsel-Tresor:** wie entworfen; 2★ Glanz statt Ehrenrunde des Rads.
+- **Punkte-Schieber:** Tafeln der Stufen des Spiels (s1 bis H, s2–s3 bis T, s4–s5 bis HT, s6 bis M) statt jede Stufe
+  eine Stelle mehr; 2★ Glanz statt Hüpfen.
+- **Zehntel-Lupe:** Zahlen der Stufen des Spiels, s5 bis zu den Tausendsteln (0.725), s6 die Mitte 2.45; der
+  Marienkäfer landet bei jeder Stufe, nicht erst in s6.
+- **Dezimal-Rutsche:** die Rutsche als Hügel zwischen den beiden Nachbarn, der Gipfel ist die Mitte (x.5 rundet
+  auf); s1 Geld (3.40 Fr. ≈ 3 Fr.), s6 zwei Wagen von beiden Seiten ins Tal 4.5 (die kleinste und die grösste Zahl,
+  die auf 4.5 rundet, auf Hundertstel) statt dreier Rundungen.
+- **Stufenzahl-Schieber:** Ziffern rutschen in der Stellentafel statt eines hüpfenden Kommas — das Komma bleibt, wie
+  im Spiel; Rechnungen der Stufen des Spiels (s5 36 · 0.1, s6 0.36 : 0.1).
 
 ## 8. Ideen je Spiel
 

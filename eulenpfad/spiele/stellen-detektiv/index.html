@@ -94,6 +94,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -266,6 +267,8 @@ function zifferFinden(ctx, zahl, knapp = false) {
 
 LS.spiel({
   id: "stellen-detektiv",
+  // Abschluss-Animation (Block M1, AR1 a; docs/konzept_abschluss_animationen.md 8): die Lupe wandert über die Zahl der Stufe, von E bis zur höchsten Stelle
+  feier: { muster: "reise", bilder: "stellen", ziele: { s1: 472, s2: 3856, s3: 41627, s4: 508314, s5: 2764190, s6: 7007070 } },
   einleitung: "Psst, Detektiv! Jede Ziffer hat ihren Platz in der Zahl. Findest du heraus, wie die Stellen heissen?",
   hilfe: stufe => "Die Lupe zeigt auf eine Ziffer: Tipp auf den Namen ihrer Stelle."
     + (!stufe || STUFE[stufe]?.umgekehrt ? " Oder die Stelle ist genannt: Dann tippst du die Ziffer in der Zahl an, die dort steht." : ""),

@@ -386,6 +386,130 @@ var LS_FEIER = (function () {
   }
   /** Ganze Zahl in der Schreibweise des Lehrmittels (LS.zahlText: ab fünf Stellen mit schmalem Leerzeichen). */
   const ganzText = x => (typeof LS !== "undefined" && LS.zahlText ? LS.zahlText(x) : String(x));
+  /** Nachkommastellen einer Zahl, wie sie geschrieben ist (3.75 → 2). */
+  const nachkomma = x => ((String(x).split(".")[1] || "").length);
+  /** Zahl mit ihren Nachkommastellen in der Schreibweise des Geräts (ganze Zahlen mit Tausendertrennung). */
+  const zahlGeschrieben = x => (Number.isInteger(x) ? ganzText(x) : zahlText(x, nachkomma(x)));
+
+  // ---------- Stellentafel (Block M1: Stellen-Detektiv, Tabellen-Post, Punkte-Schieber, Stufenzahl-Schieber) ----------
+  // Stellenfarben wie im Spiel, aus stil.css (--st-*: Einer rot, Zehner blau, Hunderter grün, ab T wiederholt); nach dem
+  // Komma neutral (--deko-7) mit der Kommalinie links der Zehntel (stil.css, „Nach dem Komma“).
+  const SCHRIFT = "system-ui, sans-serif";
+  const GANZE = ["M", "HT", "ZT", "T", "H", "Z", "E"];
+  const WERT = { M: 1e6, HT: 1e5, ZT: 1e4, T: 1e3, H: 100, Z: 10, E: 1 };
+  const EXPONENT = { M: 6, HT: 5, ZT: 4, T: 3, H: 2, Z: 1, E: 0, z: -1, h: -2, t: -3 };
+  const STELLE_ZU = Object.fromEntries(Object.entries(EXPONENT).map(([k, e]) => [e, k]));
+  const stellenFarbe = k => (GANZE.includes(k) ? `var(--st-${k})` : "var(--deko-7)");
+  /** Ziffern einer ganzen Zahl je Stelle: 402 → { H: 4, Z: 0, E: 2 }. */
+  function ziffernJeStelle(n) {
+    const d = {};
+    [...String(Math.round(n))].reverse().forEach((z, i) => { d[GANZE[GANZE.length - 1 - i]] = Number(z); });
+    return d;
+  }
+  /** Die letzten anzahl ganzen Stellen bis E: 3 → ["H", "Z", "E"]. */
+  const stellenBis = anzahl => GANZE.slice(GANZE.length - anzahl);
+  /** Stellentafel: Kopf mit dem Kürzel in der Stellenfarbe, darunter ein Feld. */
+  function stellentafel(keys, { y = 40, sb = 36, kopf = 16, feld = 34, cx = BREITE / 2 } = {}) {
+    const x0 = cx - (keys.length * sb) / 2;
+    const g = s("g", { "data-tafel": keys.join(" ") });
+    keys.forEach((k, i) => {
+      const x = x0 + i * sb;
+      g.append(s("rect", { x: x + 1, y, width: sb - 2, height: kopf, rx: 3, style: `fill:${stellenFarbe(k)}` }),
+        s("text", { x: x + sb / 2, y: y + kopf - 4, fill: "#ffffff", "font-size": 10, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" }, k),
+        s("rect", { x: x + 1, y: y + kopf + 1, width: sb - 2, height: feld, rx: 3, fill: "#ffffff", style: `stroke:${stellenFarbe(k)}`, "stroke-width": 1.4 }));
+    });
+    const iz = keys.indexOf("z");
+    if (iz > 0) g.appendChild(s("line", { x1: x0 + iz * sb, y1: y - 3, x2: x0 + iz * sb, y2: y + kopf + feld + 4, style: "stroke:var(--deko-1)", "stroke-width": 3 }));
+    return { g, x: k => x0 + keys.indexOf(k) * sb, mitte: k => x0 + keys.indexOf(k) * sb + sb / 2, feldY: y + kopf + 1, feldH: feld, sb, unten: y + kopf + feld + 1 };
+  }
+  const zifferText = (x, y, z, gross = 16, farbe = "#2d3047") => s("text", { x, y, fill: farbe, "font-size": gross, "font-weight": "bold",
+    "font-family": SCHRIFT, "text-anchor": "middle" }, String(z));
+  /** Zeile unter dem Bild (die Zahl oder Rechnung der Stufe). */
+  const zeileUnten = (text, y = 138) => s("text", { x: BREITE / 2, y, fill: "#2d3047", "font-size": 13, "font-weight": "bold", "font-family": SCHRIFT,
+    "text-anchor": "middle", "data-zeile": "unten" }, text);
+  /** Teil von oben in seinen Platz fallen lassen (dy über dem Ziel). */
+  function vonOben(e, ab, ruhig, dy = 60, dauer = 0.4) {
+    if (ruhig) return e;
+    e.setAttribute("opacity", "0");
+    e.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(ab), fill: "freeze" }));
+    e.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", from: `0 ${-dy}`, to: "0 0", begin: t(ab), dur: `${dauer}s`,
+      fill: "freeze", calcMode: "spline", keyTimes: "0;1", keySplines: "0.5 0 1 1" }));
+    return e;
+  }
+  /** Ausblenden ab Zeitpunkt (im ruhigen Bild gleich weg). */
+  function verschwinde(e, ab, ruhig, dauer = 0.3) {
+    if (ruhig) { e.setAttribute("opacity", "0"); return e; }
+    e.appendChild(s("animate", { attributeName: "opacity", from: 1, to: 0, begin: t(ab), dur: `${dauer}s`, fill: "freeze" }));
+    return e;
+  }
+
+  function lupe() {
+    return s("g", { "data-figur": "lupe" }, s("circle", { cx: 0, cy: 0, r: 14, fill: "#ffffff", opacity: 0.3 }),
+      s("circle", { cx: 0, cy: 0, r: 14, fill: "none", stroke: "#2d3047", "stroke-width": 3 }),
+      s("line", { x1: 10, y1: 10, x2: 21, y2: 21, stroke: "#7a4f26", "stroke-width": 5, "stroke-linecap": "round" }));
+  }
+  function marienkaefer() {
+    return s("g", { "data-figur": "marienkaefer" },
+      s("ellipse", { cx: 0, cy: 0, rx: 7, ry: 5.5, fill: "#d8433a", stroke: "#2d3047", "stroke-width": 0.8 }),
+      s("line", { x1: 0, y1: -5.5, x2: 0, y2: 5.5, stroke: "#2d3047", "stroke-width": 0.8 }),
+      s("circle", { cx: -3, cy: -1.5, r: 1.2, fill: "#2d3047" }), s("circle", { cx: 3, cy: 1.5, r: 1.2, fill: "#2d3047" }),
+      s("circle", { cx: 2.6, cy: -2.4, r: 1, fill: "#2d3047" }), s("circle", { cx: 0, cy: -7, r: 2.6, fill: "#2d3047" }));
+  }
+  /** Funkelnder Glanz (Schmuck ab 2 Sternen) an x, y. */
+  function glanz(x, y, ruhig) {
+    return erscheine(s("path", { d: `M${x},${y - 7} L${x + 2},${y - 2} L${x + 7},${y} L${x + 2},${y + 2} L${x},${y + 7} L${x - 2},${y + 2} L${x - 7},${y} L${x - 2},${y - 2} Z`,
+      fill: "#fff6c8", stroke: "#e9b300", "stroke-width": 0.8, "data-schmuck": "2" }), DAUER, ruhig);
+  }
+
+  // Dienes-Bausteine (Zahlen-Baukasten): E Würfelchen, Z Stange, H Platte, T Würfel; ZT, HT, M dieselben Formen aus
+  // Tausenderwürfeln (Stange, Platte, grosser Würfel) — wie im Baukasten, die Farben wiederholen sich ab T.
+  function baustein(k, x, y) {
+    const f = stellenFarbe(k), linie = { stroke: "#ffffff", "stroke-width": 0.5, "stroke-opacity": 0.8 };
+    const g = s("g", { "data-baustein": k });
+    // Würfel mit Vorderseite w × h und schräger Tiefe (Deckel und Seite heller)
+    const wuerfel = (bx, by, w, h, tiefe) => g.append(
+      s("path", { d: `M${bx},${by - h} l${tiefe},${-tiefe} l${w},0 l${-tiefe},${tiefe} Z`, style: `fill:${f}`, "fill-opacity": 0.6 }),
+      s("path", { d: `M${bx + w},${by} l${tiefe},${-tiefe} l0,${-h} l${-tiefe},${tiefe} Z`, style: `fill:${f}`, "fill-opacity": 0.8 }),
+      s("rect", { x: bx, y: by - h, width: w, height: h, style: `fill:${f}` }));
+    const teile = (n, l) => Array.from({ length: n - 1 }, (_, i) => ((i + 1) * l) / n);
+    if (k === "E") g.appendChild(s("rect", { x, y: y - 7, width: 7, height: 7, style: `fill:${f}` }));
+    else if (k === "Z") { g.appendChild(s("rect", { x, y: y - 28, width: 7, height: 28, style: `fill:${f}` })); for (const v of teile(10, 28)) g.appendChild(s("path", { d: `M${x},${y - v} h7`, ...linie })); }
+    else if (k === "H") { g.appendChild(s("rect", { x, y: y - 28, width: 28, height: 28, style: `fill:${f}` })); for (const v of teile(10, 28)) g.appendChild(s("path", { d: `M${x + v},${y - 28} v28 M${x},${y - v} h28`, ...linie })); }
+    else if (k === "T") wuerfel(x, y, 20, 20, 7);
+    else if (k === "ZT") { wuerfel(x, y, 20, 44, 7); for (const v of teile(10, 44)) g.appendChild(s("path", { d: `M${x},${y - v} h20`, ...linie })); }
+    else if (k === "HT") { wuerfel(x, y, 44, 44, 7); for (const v of teile(10, 44)) g.appendChild(s("path", { d: `M${x + v},${y - 44} v44 M${x},${y - v} h44`, ...linie })); }
+    else if (k === "M") { wuerfel(x, y, 44, 44, 18); for (const v of teile(10, 44)) g.appendChild(s("path", { d: `M${x + v},${y - 44} v44 M${x},${y - v} h44`, ...linie })); }
+    return g;
+  }
+  const BAUSTEIN_BREITE = { E: 7, Z: 7, H: 28, T: 27, ZT: 27, HT: 51, M: 62 };
+
+  const KARTENFARBEN_DEKO = ["var(--deko-1)", "var(--deko-2)", "var(--deko-3)", "var(--deko-5)", "var(--deko-6)", "var(--deko-4)", "var(--deko-7)"];
+
+  function frosch() {
+    return s("g", { "data-figur": "frosch" },
+      s("ellipse", { cx: 0, cy: -5, rx: 9, ry: 6, fill: "#4f9d47" }), s("ellipse", { cx: 0, cy: -3, rx: 5.5, ry: 3.5, fill: "#b8e08a" }),
+      s("circle", { cx: -4, cy: -11, r: 3, fill: "#4f9d47" }), s("circle", { cx: 4, cy: -11, r: 3, fill: "#4f9d47" }),
+      s("circle", { cx: -4, cy: -11.5, r: 1.3, fill: "#2d3047" }), s("circle", { cx: 4, cy: -11.5, r: 1.3, fill: "#2d3047" }));
+  }
+  function libelle(x, y, ruhig) {
+    return erscheine(s("g", { "data-schmuck": "2" },
+      s("ellipse", { cx: x - 5, cy: y - 3, rx: 6, ry: 2, fill: "#cfe9f8", opacity: 0.9 }), s("ellipse", { cx: x + 5, cy: y - 3, rx: 6, ry: 2, fill: "#cfe9f8", opacity: 0.9 }),
+      s("rect", { x: x - 1, y: y - 6, width: 2, height: 14, rx: 1, fill: "#2f62a0" })), DAUER, ruhig);
+  }
+  function wagen() {
+    return s("g", { "data-figur": "wagen" },
+      s("rect", { x: -9, y: -12, width: 18, height: 8, rx: 2, style: "fill:var(--deko-3)" }),
+      s("circle", { cx: -5, cy: -3, r: 3, fill: "#2d3047" }), s("circle", { cx: 5, cy: -3, r: 3, fill: "#2d3047" }));
+  }
+
+  /** Ziffern einer Zahl nach Exponent (0.25 → { 0: 0, -1: 2, -2: 5 }); ganz mit E, gebrochen bis zur letzten Ziffer. */
+  function ziffernNachExponent(x) {
+    const [ganz, bruch = ""] = String(Number(x.toFixed(6))).split(".");
+    const d = {};
+    [...ganz].reverse().forEach((z, i) => { d[i] = Number(z); });
+    [...bruch].forEach((z, i) => { d[-(i + 1)] = Number(z); });
+    return d;
+  }
 
   // ---------- AUFTRITT: Instrumente in der Hand einer Eule ----------
   // Koordinaten um die Füsse der Eule (0,0), Eule Grösse 0.42: Kopf bis etwa −38, Schnabel bei −12, Bauch um −15.
@@ -453,9 +577,315 @@ var LS_FEIER = (function () {
   const KARTENFARBEN = ["#8e5bd6", "#e0569a", "#f07c2a", "#e9b300", "#14b8a6", "#6366f1"];
 
   // ---------- Muster ----------
+  // ---------- Bilder je Spiel (Block M1, AR1 a): je Muster ein Satz, gewählt mit feier.bilder ----------
+  // Jedes Bild folgt den Stufen seines Spiels (Zahlenraum, Stellen, Schritte), nicht nur der Idee im Konzept.
+  const neuesBild = (muster, ziel, extra = {}) => s("svg", { viewBox: `0 0 ${BREITE} ${HOEHE}`, "data-muster": muster, "data-ziel": String(ziel), ...extra });
+
+  const BILDER = {
+    reise: {
+      /** Stellen-Detektiv: die Lupe wandert von E nach links über die Zahl der Stufe; unter ihr leuchten die Ziffern auf. */
+      stellen(feier, { stufe, sterne, ruhig }) {
+        const n = feier.ziele?.[stufe];
+        if (!Number.isInteger(n) || n < 1 || n >= 1e7) return null;
+        const d = ziffernJeStelle(n), keys = stellenBis(String(n).length);
+        const svg = neuesBild("reise", n, { "data-bilder": "stellen" });
+        svg.appendChild(tagGrund());
+        const tf = stellentafel(keys, { y: 34, sb: Math.min(40, 280 / keys.length) });
+        svg.appendChild(tf.g);
+        const je = (DAUER * 0.9) / keys.length, cy = tf.feldY + tf.feldH / 2;
+        [...keys].reverse().forEach((k, i) => {
+          svg.appendChild(erscheine(s("rect", { x: tf.x(k) + 2, y: tf.feldY + 1, width: tf.sb - 4, height: tf.feldH - 2, rx: 3, style: `fill:${stellenFarbe(k)}`, opacity: 0.18 }), i * je, ruhig, 0.25));
+          svg.appendChild(erscheine(zifferText(tf.mitte(k), cy + 6, d[k], 18), i * je, ruhig, 0.25));
+        });
+        svg.appendChild(erscheine(zeileUnten(ganzText(n), 120), DAUER, ruhig));
+        const lx = tf.mitte(keys[0]);
+        svg.appendChild(bewege(lupe(), `M${tf.mitte("E") + 40},${cy} L${lx},${cy}`, { x: lx, y: cy, winkel: 0 }, ruhig, { drehen: false }));
+        if (sterne >= 2) svg.appendChild(glanz(lx - 6, cy - 8, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(Math.max(lx, 24), 22, ruhig));
+        return svg;
+      },
+
+      /** Zahlen-Hüpfer: der Frosch hüpft in den Schritten der Stufe über Seerosen; jede trägt ihre Zahl. */
+      seerosen(feier, { stufe, sterne, ruhig }) {
+        const z = feier.ziele?.[stufe];
+        if (!z || !Number.isInteger(z.start) || !Number.isInteger(z.schritt)) return null;
+        const anzahl = z.anzahl || 4, zahlen = Array.from({ length: anzahl + 1 }, (_, i) => z.start + i * z.schritt);
+        const svg = neuesBild("reise", stufe, { "data-bilder": "seerosen", "data-anzahl": zahlen.length });
+        svg.append(tagGrund(), s("path", { d: `M0,70 L${BREITE},70 L${BREITE},136 Q${BREITE},${HOEHE} ${BREITE - 14},${HOEHE} L14,${HOEHE} Q0,${HOEHE} 0,136 Z`, fill: "#5aa9dc" }));
+        const ab = (BREITE - 60) / anzahl, y = 104, xs = zahlen.map((_, i) => 30 + i * ab);
+        zahlen.forEach((n, i) => svg.appendChild(s("g", { "data-stueck": "seerose", "data-wert": n },
+          s("ellipse", { cx: xs[i], cy: y, rx: 25, ry: 8, fill: "#4f9d47" }), s("path", { d: `M${xs[i]},${y} l18,-5 l0,6 Z`, fill: "#5aa9dc" }),
+          s("text", { x: xs[i], y: y + 22, fill: "#ffffff", "font-size": 10, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" }, ganzText(n)))));
+        const weg = "M" + xs[0] + "," + y + xs.slice(1).map((x, i) => ` Q${(xs[i] + x) / 2},${y - 46} ${x},${y}`).join("");
+        svg.appendChild(bewege(frosch(), weg, { x: xs[anzahl], y, winkel: 0 }, ruhig, { drehen: false }));
+        if (sterne >= 2) svg.appendChild(libelle(xs[anzahl] - 30, 40, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(Math.min(xs[anzahl], BREITE - 24), 72, ruhig));
+        return svg;
+      },
+
+      /**
+       * Dezimal-Rutsche: zwischen den beiden Nachbarn der Stufe steht ein Hügel, sein Gipfel ist die Mitte (x.5). Der Wagen
+       * steht an der Zahl und rollt auf die Seite, auf die sie gerundet wird; genau auf dem Gipfel rollt er nach oben weiter.
+       */
+      rutsche(feier, { stufe, sterne, ruhig }) {
+        const z = feier.ziele?.[stufe];
+        if (!z || !Array.isArray(z.werte) || !z.werte.length || !Number.isInteger(z.stellen)) return null;
+        const schritt = 10 ** -z.stellen, rund = v => Number(v.toFixed(z.stellen + 4));
+        const faelle = z.werte.map(w => {
+          const a = rund(Math.floor(rund(w / schritt)) * schritt), b = rund(a + schritt), mitte = rund(a + schritt / 2);
+          return { w, a, b, ziel: w >= mitte ? b : a };
+        });
+        const lo = Math.min(...faelle.map(f => f.a)), hi = Math.max(...faelle.map(f => f.b));
+        const x = v => 30 + ((v - lo) / (hi - lo)) * (BREITE - 60), grundY = 108, gipfel = 52;
+        const svg = neuesBild("reise", stufe, { "data-bilder": "rutsche" });
+        svg.append(tagGrund(), boden());
+        const taeler = [...new Set(faelle.flatMap(f => [f.a, f.b]))].sort((p, q) => p - q);
+        let bahn = `M${x(taeler[0])},${grundY}`;
+        for (let i = 1; i < taeler.length; i++) bahn += ` L${(x(taeler[i - 1]) + x(taeler[i])) / 2},${gipfel} L${x(taeler[i])},${grundY}`;
+        svg.appendChild(s("path", { d: bahn, fill: "none", stroke: "#8a5a32", "stroke-width": 4, "stroke-linejoin": "round" }));
+        const text = (v, st) => zahlText(v, st) + (z.einheit ? ` ${z.einheit}` : "");
+        for (const v of taeler) svg.appendChild(s("text", { x: x(v), y: grundY + 16, fill: "#2d3047", "font-size": 11, "font-family": SCHRIFT, "text-anchor": "middle" }, text(v, z.stellen)));
+        const hoehe = v => { // auf dem Hang zwischen Tal und Gipfel
+          const f = faelle.find(q => v >= q.a && v <= q.b);
+          const xa = x(f.a), xb = x(f.b), xm = (xa + xb) / 2, xv = x(v);
+          return grundY - (grundY - gipfel) * (1 - Math.abs(xv - xm) / ((xb - xa) / 2));
+        };
+        // landen zwei Wagen im selben Tal (s6: 4.45 und 4.54 ≈ 4.5), bleibt jeder auf seiner Seite stehen
+        const imTal = v => faelle.filter(q => q.ziel === v).length;
+        const gezeigt = new Set();
+        faelle.forEach((f, i) => {
+          const sx = x(f.w), sy = hoehe(f.w), ex = x(f.ziel) + (imTal(f.ziel) > 1 ? (f.w < f.ziel ? -11 : 11) : 0);
+          svg.appendChild(s("g", {}, s("line", { x1: sx, y1: sy - 18, x2: sx, y2: sy - 4, stroke: "#6b7089", "stroke-width": 1, "stroke-dasharray": "2 2" }),
+            s("text", { x: sx, y: sy - 22, fill: "#2d3047", "font-size": 10, "font-family": SCHRIFT, "text-anchor": "middle" }, text(f.w, z.wertStellen ?? nachkomma(f.w)))));
+          const wg = wagen();
+          wg.setAttribute("data-stueck", "wagen");
+          svg.appendChild(bewege(wg, `M${sx},${sy} L${ex},${grundY}`, { x: ex, y: grundY, winkel: 0 }, ruhig, { drehen: false, ab: i * 0.3, dauer: DAUER - i * 0.3 }));
+          if (gezeigt.has(f.ziel)) return;
+          gezeigt.add(f.ziel);
+          svg.appendChild(erscheine(s("text", { x: x(f.ziel), y: grundY + 32, fill: "#2d3047", "font-size": 13, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" },
+            "≈ " + text(f.ziel, z.stellen)), DAUER, ruhig));
+        });
+        const letzt = x(faelle[faelle.length - 1].ziel);
+        if (sterne >= 2) svg.appendChild(fahne(Math.min(letzt + 12, BREITE - 16), grundY - 4, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(Math.min(Math.max(letzt, 24), BREITE - 24), 30, ruhig));
+        return svg;
+      },
+
+      /**
+       * Stufenzahl-Schieber: die Ziffern rutschen in der Stellentafel um so viele Stellen, wie die Rechnung verlangt; das
+       * Komma bleibt stehen. Führende Nullen gehen, neue Nullen kommen dazu; darunter die Rechnung.
+       */
+      komma(feier, { stufe, sterne, ruhig }) {
+        const z = feier.ziele?.[stufe];
+        if (!z || typeof z.von !== "number" || typeof z.faktor !== "number") return null;
+        const k = Math.round(Math.log10(z.faktor)) * (z.durch ? -1 : 1);
+        const ergebnis = Number((z.von * 10 ** k).toFixed(6));
+        const vor = ziffernNachExponent(z.von), nach = ziffernNachExponent(ergebnis);
+        // tragende Ziffern: von der ersten Nicht-Null bis zur letzten Ziffer
+        const exp = d => Object.keys(d).map(Number);
+        const tragend = Object.entries(vor).map(([e, v]) => [Number(e), v]).filter(([e]) => e <= Math.max(...exp(vor).filter(q => vor[q] !== 0)));
+        const alle = [...exp(vor), ...exp(nach), 0, -1];
+        const keys = [];
+        for (let e = Math.max(...alle); e >= Math.min(...alle); e--) keys.push(STELLE_ZU[e]);
+        const svg = neuesBild("reise", stufe, { "data-bilder": "komma", "data-wert": String(ergebnis) });
+        svg.appendChild(tagGrund());
+        const tf = stellentafel(keys, { y: 30, sb: Math.min(38, 280 / keys.length) });
+        svg.appendChild(tf.g);
+        const cy = tf.feldY + tf.feldH / 2 + 6, xe = e => tf.mitte(STELLE_ZU[e]);
+        // Startziffern; die nicht tragenden (führende Null) gehen beim Schieben
+        for (const [e, v] of Object.entries(vor).map(([q, w]) => [Number(q), w])) {
+          const zt = zifferText(xe(e), cy, v, 17);
+          if (!tragend.some(([q]) => q === e)) { svg.appendChild(verschwinde(zt, 0.4, ruhig)); continue; }
+          if (ruhig) zt.setAttribute("transform", `translate(${xe(e + k) - xe(e)} 0)`);
+          else zt.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", from: "0 0", to: `${xe(e + k) - xe(e)} 0`,
+            begin: t(0.5), dur: `${DAUER * 0.6}s`, fill: "freeze", calcMode: "spline", keyTimes: "0;1", keySplines: "0.4 0 0.3 1" }));
+          zt.setAttribute("data-ziffer", String(e + k));
+          // eine Null, die hinter das Komma rutscht und im Ergebnis nicht steht, geht (7200 : 10 = 720)
+          if (!(e + k in nach)) verschwinde(zt, DAUER * 0.9, ruhig);
+          svg.appendChild(zt);
+        }
+        // neue Nullen des Ergebnisses
+        const belegt = new Set(tragend.map(([e]) => e + k));
+        for (const [e, v] of Object.entries(nach).map(([q, w]) => [Number(q), w])) if (!belegt.has(e)) svg.appendChild(erscheine(zifferText(xe(e), cy, v, 17), DAUER * 0.9, ruhig));
+        svg.appendChild(erscheine(zeileUnten(`${zahlGeschrieben(z.von)} ${z.durch ? ":" : "·"} ${zahlGeschrieben(z.faktor)} = ${zahlGeschrieben(ergebnis)}`, 118), DAUER, ruhig));
+        if (sterne >= 2) svg.appendChild(glanz(tf.mitte("E") + tf.sb / 2, tf.feldY - 6, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(BREITE - 28, 22, ruhig));
+        return svg;
+      },
+    },
+
+    sammeln: {
+      /**
+       * Tabellen-Post: Briefe mit den Ziffern fallen in die Fächer ihrer Stelle; leere Fächer bekommen die Null. Steht
+       * mehr als 9 in einem Fach (Stufe 6), wandert ein Zehnerbündel als Brief in das Fach links davon.
+       */
+      post(feier, { stufe, sterne, ruhig }) {
+        const z = feier.ziele?.[stufe];
+        let teile;
+        if (Number.isInteger(z) && z > 0) teile = ziffernJeStelle(z);
+        else if (z && typeof z === "object" && Object.keys(z).every(k => k in WERT)) teile = { ...z };
+        else return null;
+        const ergebnis = Object.entries(teile).reduce((a, [k, v]) => a + v * WERT[k], 0);
+        const keys = stellenBis(String(ergebnis).length);
+        const briefe = keys.filter(k => teile[k] > 0);
+        const buendel = keys.filter(k => (teile[k] || 0) > 9);
+        const svg = neuesBild("sammeln", ergebnis, { "data-bilder": "post", "data-anzahl": briefe.length + buendel.length });
+        svg.appendChild(tagGrund());
+        const tf = stellentafel(keys, { y: 30, sb: Math.min(40, 280 / keys.length), feld: 44 });
+        svg.appendChild(tf.g);
+        const brief = (k, text) => s("g", { "data-stueck": "brief" },
+          s("rect", { x: tf.mitte(k) - 12, y: tf.feldY + 3, width: 24, height: 15, rx: 2, fill: "#fffdf3", style: `stroke:${stellenFarbe(k)}`, "stroke-width": 1.2 }),
+          s("path", { d: `M${tf.mitte(k) - 12},${tf.feldY + 3} l12,8 l12,-8`, fill: "none", style: `stroke:${stellenFarbe(k)}`, "stroke-width": 1 }),
+          s("text", { x: tf.mitte(k), y: tf.feldY + 15, fill: "#2d3047", "font-size": 9, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" }, String(text)));
+        const je = (DAUER * 0.6) / Math.max(1, briefe.length);
+        briefe.forEach((k, i) => svg.appendChild(vonOben(brief(k, teile[k]), i * je, ruhig, 50)));
+        // Bündeln: zehn Teile sind einer der nächsten Stelle
+        for (const k of buendel) {
+          const links = GANZE[GANZE.indexOf(k) - 1];
+          const b = brief(k, Math.floor(teile[k] / 10));
+          const dx = tf.mitte(links) - tf.mitte(k);
+          if (ruhig) b.setAttribute("transform", `translate(${dx} 0)`);
+          else {
+            b.setAttribute("opacity", "0");
+            b.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(DAUER * 0.65), fill: "freeze" }));
+            b.appendChild(s("animateMotion", { path: `M0,0 Q${dx / 2},-30 ${dx},0`, begin: t(DAUER * 0.65), dur: "0.5s", fill: "freeze" }));
+          }
+          svg.appendChild(b);
+        }
+        // die Ziffern der Zahl in jedem Fach (auch die Nullen)
+        const d = ziffernJeStelle(ergebnis);
+        for (const k of keys) svg.appendChild(erscheine(zifferText(tf.mitte(k), tf.feldY + 38, d[k], 15, d[k] === 0 ? "#6b7089" : "#2d3047"), DAUER, ruhig));
+        svg.appendChild(erscheine(zeileUnten(ganzText(ergebnis), 126), DAUER, ruhig));
+        if (sterne >= 2) svg.appendChild(glanz(tf.x(keys[0]) - 4, tf.feldY - 6, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(BREITE - 30, 22, ruhig));
+        return svg;
+      },
+
+      /** Punkte-Schieber: so viele Punkte, wie die Ziffer sagt (höchstens 9), rollen in die Spalte ihrer Stelle. */
+      punkte(feier, { stufe, sterne, ruhig }) {
+        const n = feier.ziele?.[stufe];
+        if (!Number.isInteger(n) || n < 1 || n >= 1e7) return null;
+        const d = ziffernJeStelle(n), keys = stellenBis(String(n).length);
+        const summe = keys.reduce((a, k) => a + d[k], 0);
+        const svg = neuesBild("sammeln", n, { "data-bilder": "punkte", "data-anzahl": summe });
+        svg.appendChild(tagGrund());
+        const tf = stellentafel(keys, { y: 24, sb: Math.min(40, 280 / keys.length), feld: 44 });
+        svg.appendChild(tf.g);
+        const je = (DAUER * 0.85) / Math.max(1, summe);
+        let i = 0;
+        for (const k of keys) for (let p = 0; p < d[k]; p++) {
+          const cx = tf.mitte(k) + ((p % 3) - 1) * 10, cy = tf.feldY + 9 + Math.floor(p / 3) * 13;
+          svg.appendChild(vonOben(s("circle", { cx, cy, r: 4.4, style: `fill:${stellenFarbe(k)}`, "data-stueck": "punkt" }), i++ * je, ruhig, 40, 0.3));
+        }
+        for (const k of keys) svg.appendChild(erscheine(zifferText(tf.mitte(k), tf.unten + 16, d[k], 15), DAUER, ruhig));
+        svg.appendChild(erscheine(zeileUnten(ganzText(n), 132), DAUER, ruhig));
+        if (sterne >= 2) svg.appendChild(glanz(tf.x(keys[0]) - 4, tf.feldY - 4, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(BREITE - 30, 20, ruhig));
+        return svg;
+      },
+
+      /** Zahlenrätsel-Tresor: die Tür geht auf, je Stufe liegt mehr darin (s6: alles, die Eule schaut hinein). */
+      tresor(feier, { stufe, sterne, ruhig }) {
+        const stufeNr = feier.ziele?.[stufe];
+        if (!Number.isInteger(stufeNr) || stufeNr < 1 || stufeNr > 6) return null;
+        const svg = neuesBild("sammeln", stufeNr, { "data-bilder": "tresor" });
+        svg.append(tagGrund(), boden(),
+          s("rect", { x: 112, y: 36, width: 96, height: 90, rx: 6, fill: "#6b7089" }), s("rect", { x: 120, y: 44, width: 80, height: 74, rx: 3, fill: "#3a3f5c" }));
+        const muenze = (x, y) => s("g", { "data-stueck": "muenze" }, s("circle", { cx: x, cy: y, r: 7, fill: "#e9b300", stroke: "#b88a1f", "stroke-width": 1.2 }),
+          s("circle", { cx: x, cy: y, r: 4, fill: "none", stroke: "#b88a1f", "stroke-width": 0.8 }));
+        const SCHATZ = {
+          muenze1: () => muenze(140, 108), muenze2: () => muenze(156, 110),
+          krone: () => s("path", { d: "M166,104 l3,-12 l6,7 l5,-10 l5,10 l6,-7 l3,12 Z", fill: "#e9b300", stroke: "#b88a1f", "stroke-width": 1, "data-stueck": "krone" }),
+          kette: () => s("g", { "data-stueck": "kette" }, ...Array.from({ length: 9 }, (_, i) => s("circle", { cx: 134 + i * 6, cy: 68 + Math.sin((i / 8) * Math.PI) * 10, r: 2.6, fill: "#f4f0f8", stroke: "#b0a8c8", "stroke-width": 0.6 }))),
+          edelstein: () => s("path", { d: "M180,58 l8,-6 l8,6 l-8,12 Z", style: "fill:var(--deko-5)", stroke: "#0e8a7c", "stroke-width": 1, "data-stueck": "edelstein" }),
+        };
+        const inhalt = [["muenze1"], ["muenze1", "muenze2"], ["krone"], ["kette"], ["edelstein"], ["muenze1", "muenze2", "krone", "kette", "edelstein"]][stufeNr - 1];
+        inhalt.forEach((n, i) => svg.appendChild(erscheine(SCHATZ[n](), DAUER * 0.55 + i * 0.15, ruhig)));
+        // Tür mit Rad, schwingt links an der Angel auf
+        const tuer = s("g", {}, s("rect", { x: 120, y: 44, width: 80, height: 74, rx: 3, fill: "#8a94a6", stroke: "#4f5668", "stroke-width": 1.2 }),
+          s("circle", { cx: 160, cy: 81, r: 14, fill: "none", stroke: "#4f5668", "stroke-width": 3 }),
+          s("path", { d: "M160,67 v28 M146,81 h28", stroke: "#4f5668", "stroke-width": 2 }));
+        if (ruhig) tuer.setAttribute("transform", "translate(120 0) scale(0.12 1) translate(-120 0)");
+        else tuer.appendChild(s("animateTransform", { attributeName: "transform", type: "matrix", values: "1 0 0 1 0 0;0.12 0 0 1 105.6 0",
+          begin: t(DAUER * 0.2), dur: `${DAUER * 0.35}s`, fill: "freeze" }));
+        svg.appendChild(tuer);
+        if (stufeNr === 6) { const e = euleSitzend(0.42); e.setAttribute("transform", "translate(236 126)"); svg.appendChild(erscheine(e, DAUER, ruhig)); }
+        if (sterne >= 2) svg.appendChild(glanz(186, 50, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(160, 24, ruhig));
+        return svg;
+      },
+    },
+
+    bauen: {
+      /** Zahlen-Baukasten: die Bausteine der Stufe fallen zum Turm je Stelle; darunter die Rechnung mit der Zahl. */
+      baukasten(feier, { stufe, sterne, ruhig }) {
+        const z = feier.ziele?.[stufe];
+        if (!z || typeof z !== "object" || !Object.keys(z).length || !Object.entries(z).every(([k, v]) => k in WERT && Number.isInteger(v) && v > 0 && v <= 19)) return null;
+        const keys = GANZE.filter(k => z[k]);
+        const ergebnis = keys.reduce((a, k) => a + z[k] * WERT[k], 0);
+        const anzahl = keys.reduce((a, k) => a + z[k], 0);
+        const svg = neuesBild("bauen", ergebnis, { "data-bilder": "baukasten", "data-anzahl": anzahl });
+        svg.append(tagGrund(), boden());
+        // Gruppen nebeneinander, je Gruppe ein Stapel (etwas versetzt, damit man zählen kann)
+        const versatz = k => (k === "E" || k === "Z" ? 9 : 4);
+        const breite = k => BAUSTEIN_BREITE[k] + (z[k] - 1) * versatz(k);
+        const gesamt = keys.reduce((a, k) => a + breite(k), 0) + (keys.length - 1) * 14;
+        let x = (BREITE - gesamt) / 2, i = 0;
+        const je = (DAUER * 0.85) / anzahl;
+        for (const k of keys) {
+          for (let n = 0; n < z[k]; n++) {
+            const b = baustein(k, x + n * versatz(k), 112 - (k === "E" || k === "Z" ? 0 : n * 2));
+            b.setAttribute("data-stueck", k);
+            svg.appendChild(vonOben(b, i++ * je, ruhig, 70, 0.3));
+          }
+          x += breite(k) + 14;
+        }
+        const rechnung = keys.map(k => `${z[k]} ${k}`).join(" + ") + " = " + ganzText(ergebnis);
+        svg.appendChild(erscheine(zeileUnten(rechnung, 136), DAUER, ruhig));
+        if (sterne >= 2) svg.appendChild(fahne(BREITE - 26, 112, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(BREITE / 2, 24, ruhig));
+        return svg;
+      },
+
+      /** Ziffernkarten: die Karten der Stufe legen sich nacheinander zur Zahl, ab fünf Stellen mit Lücke je drei. */
+      karten(feier, { stufe, sterne, ruhig }) {
+        const ziffern = feier.ziele?.[stufe];
+        if (typeof ziffern !== "string" || !/^\d{2,7}$/.test(ziffern)) return null;
+        const n = ziffern.length, kb = 26, abstand = 4, luecke = n >= 5 ? 8 : 0;
+        const gruppe = i => Math.floor((n - 1 - i) / 3); // von rechts gezählt
+        const breiteGesamt = n * kb + (n - 1) * abstand + (n >= 5 ? (gruppe(0)) * luecke : 0);
+        const x0 = (BREITE - breiteGesamt) / 2;
+        const xi = i => x0 + i * (kb + abstand) + (n >= 5 ? (gruppe(0) - gruppe(i)) * luecke : 0);
+        const svg = neuesBild("bauen", ziffern, { "data-bilder": "karten", "data-anzahl": n });
+        svg.append(tagGrund(), boden());
+        const je = (DAUER * 0.85) / n;
+        [...ziffern].forEach((zf, i) => {
+          const karte = s("g", { "data-stueck": "karte" },
+            s("rect", { x: xi(i), y: 48, width: kb, height: 38, rx: 4, fill: "#ffffff", style: `stroke:${KARTENFARBEN_DEKO[i % KARTENFARBEN_DEKO.length]}`, "stroke-width": 2 }),
+            zifferText(xi(i) + kb / 2, 74, zf, 20));
+          const dx = 20 - xi(i), dy = 70;
+          if (ruhig) svg.appendChild(karte);
+          else {
+            karte.setAttribute("opacity", "0");
+            karte.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(i * je), fill: "freeze" }));
+            karte.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", from: `${dx} ${dy}`, to: "0 0", begin: t(i * je), dur: "0.4s",
+              fill: "freeze", calcMode: "spline", keyTimes: "0;1", keySplines: "0.4 0 0.3 1" }));
+            svg.appendChild(karte);
+          }
+        });
+        if (sterne >= 2) svg.appendChild(glanz(xi(n - 1) + kb + 6, 46, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(BREITE / 2, 26, ruhig));
+        return svg;
+      },
+    },
+  };
+
   const MUSTER = {
     /** REISE (Konzept 5): je Stufe ein Ziel weiter. */
-    reise(feier, { stufe, sterne, ruhig }) {
+    reise(feier, opt) {
+      // nur ein eigenes Bild der Reise: eine Stufe mit anderem Muster erbt sonst das bilder des Spiels (Himmels-Forscher s5)
+      if (feier.bilder && BILDER.reise[feier.bilder]) return BILDER.reise[feier.bilder](feier, opt);
+      const { stufe, sterne, ruhig } = opt;
       const ziel = feier.ziele?.[stufe];
       if (!ziel) return null;
       const figur = () => (REISENDE[feier.reisender] || rakete)(sterne >= 3);
@@ -535,10 +965,14 @@ var LS_FEIER = (function () {
         }
         svg.appendChild(erscheine(zeile, (k / (stellen + 1)) * DAUER * 0.8, ruhig));
       }
-      // Rakete senkrecht nach unten auf den Landeplatz (Spitze auf der Linie)
-      const landeY = zeileY(stellen) - 24;
-      const r = rakete(sterne >= 3);
-      svg.appendChild(bewege(r, `M${landeX},-30 L${landeX},${landeY}`, { x: landeX, y: landeY, winkel: 90 }, ruhig));
+      // Rakete senkrecht nach unten auf den Landeplatz (Spitze auf der Linie); mit figur "kaefer" (Zehntel-Lupe) fliegt
+      // ein Marienkäfer im Bogen herab und setzt sich auf den Punkt
+      let landeY = zeileY(stellen) - 24;
+      if (feier.figur === "kaefer") {
+        landeY = zeileY(stellen) - 6;
+        svg.appendChild(bewege(marienkaefer(), `M${BREITE + 10},10 C${landeX + 80},0 ${landeX + 30},${landeY - 40} ${landeX},${landeY}`,
+          { x: landeX, y: landeY, winkel: 0 }, ruhig, { drehen: false }));
+      } else svg.appendChild(bewege(rakete(sterne >= 3), `M${landeX},-30 L${landeX},${landeY}`, { x: landeX, y: landeY, winkel: 90 }, ruhig));
       if (sterne >= 2) svg.appendChild(fahne(Math.min(landeX + 14, BREITE - 16), zeileY(stellen) - 2, ruhig));
       if (sterne >= 3) svg.appendChild(funken(Math.min(Math.max(landeX, 24), BREITE - 24), Math.max(landeY - 4, 20), ruhig));
       return svg;
@@ -616,7 +1050,9 @@ var LS_FEIER = (function () {
     },
 
     /** BAUEN (Konzept 5, Zahlenmauer-Baumeister): die Mauer der Stufe, Stein um Stein von unten. */
-    bauen(feier, { stufe, sterne, ruhig }) {
+    bauen(feier, opt) {
+      if (feier.bilder !== "mauer") return BILDER.bauen[feier.bilder]?.(feier, opt) ?? null;
+      const { stufe, sterne, ruhig } = opt;
       const grund = feier.ziele?.[stufe];
       if (feier.bilder !== "mauer" || !Array.isArray(grund) || grund.length < 2) return null;
       const n = grund.length, w = [grund.slice()];
@@ -691,7 +1127,9 @@ var LS_FEIER = (function () {
     },
 
     /** SAMMELN (Konzept 5, Anlaut-Angel): die Eule angelt Fisch um Fisch in den Eimer. */
-    sammeln(feier, { stufe, sterne, ruhig }) {
+    sammeln(feier, opt) {
+      if (feier.bilder !== "angel") return BILDER.sammeln[feier.bilder]?.(feier, opt) ?? null;
+      const { stufe, sterne, ruhig } = opt;
       const zahl = feier.ziele?.[stufe];
       if (feier.bilder !== "angel" || !Number.isInteger(zahl) || zahl < 1 || zahl > FISCHFARBEN.length) return null;
       const svg = s("svg", { viewBox: `0 0 ${BREITE} ${HOEHE}`, "data-muster": "sammeln", "data-ziel": String(zahl), "data-anzahl": zahl },

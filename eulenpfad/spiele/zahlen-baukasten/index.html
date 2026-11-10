@@ -80,6 +80,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -143,6 +144,9 @@ function pruefeAufgabe(a, stufe) {
 
 LS.spiel({
   id: "zahlen-baukasten",
+  // Abschluss-Animation (Block M1, AR1 a; docs/konzept_abschluss_animationen.md 8): die Bausteine der Stufe fallen zum Turm, darunter die Rechnung
+  feier: { muster: "bauen", bilder: "baukasten", ziele: { s1: { H: 4, E: 2 }, s2: { T: 3, Z: 5 }, s3: { ZT: 3, H: 4 }, s4: { HT: 2, T: 5, Z: 1 },
+    s5: { M: 1, ZT: 2, H: 3, E: 6 }, s6: { T: 3, H: 14 } } },
   einleitung: "Hallo! Ich bin Eule Zahlina. Setz die Bausteine zu einer Zahl zusammen. Tipp auf einen Baustein, dann verrate ich dir, wie viel er wert ist.",
   hilfe: "Die Bausteine zeigen, wie viele Einer, Zehner, Hunderter … die Zahl hat. Tipp die ganze Zahl ein. Tippst du einen Baustein an, sagt die Eule, wie viel er wert ist; die Tabelle unter der Anzeige zeigt, wo deine Ziffern landen.",
   anzahl: 8,

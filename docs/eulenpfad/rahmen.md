@@ -1076,6 +1076,25 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   Ende bricht die ausstehenden Töne ab. **Mengen** (Musikerinnen, Fische, Kartenstücke) zählt der Test: `data-anzahl` am
   Bild gegen die Stücke mit `data-stueck`.
 
+  **Bilder je Spiel** (`feier.bilder`, `BILDER` in `feier.js`, seit dem Ausrollen AR1 a): ein Muster hat mehrere Bilder;
+  jedes folgt den Stufen seines Spiels. Block M1 (Stellenwert, Dezimal):
+
+  | Muster · bilder | Angabe je Stufe | Spiel |
+  |---|---|---|
+  | REISE · `stellen` | ganze Zahl (`472`): Stellentafel bis zu ihrer höchsten Stelle, die Lupe wandert von E nach links | Stellen-Detektiv |
+  | REISE · `seerosen` | `{ start, schritt, anzahl = 4 }`: Frosch hüpft über Seerosen mit den Zahlen (`data-wert`) | Zahlen-Hüpfer |
+  | REISE · `rutsche` | `{ werte: [...], stellen, einheit?, wertStellen? }`: Hügel zwischen den Nachbarn, Gipfel = Mitte, der Wagen rollt zur gerundeten Zahl | Dezimal-Rutsche |
+  | REISE · `komma` | `{ von, faktor, durch? }`: Ziffern rutschen in der Stellentafel, das Komma bleibt; Rechnung darunter (`data-wert` = Ergebnis) | Stufenzahl-Schieber |
+  | SAMMELN · `post` | ganze Zahl oder Teile `{ M: 2, H: 14, E: 5 }`: Briefe in die Fächer, Nullen leer, mehr als 9 wird gebündelt | Tabellen-Post |
+  | SAMMELN · `punkte` | ganze Zahl: so viele Punkte je Spalte wie die Ziffer | Punkte-Schieber |
+  | SAMMELN · `tresor` | 1–6: der Tresor füllt sich | Zahlenrätsel-Tresor |
+  | BAUEN · `baukasten` | `{ H: 4, E: 2 }`: Dienes-Bausteine je Stelle, Rechnung mit der Zahl darunter | Zahlen-Baukasten |
+  | BAUEN · `karten` | Ziffern als Text (`"97532"`): Karten legen sich zur Zahl, ab fünf Stellen mit Lücke | Ziffernkarten |
+  | ZOOM · `figur: "kaefer"` | wie ZOOM, ein Marienkäfer landet statt der Rakete | Zehntel-Lupe |
+
+  Stellenfarben in den Bildern nur über `var(--st-…)` aus `stil.css`, nach dem Komma `--deko-7` mit der Kommalinie
+  `--deko-1` (wie `.schriftlich`); Zahlen über `LS.zahlText` und `LS.dezimalText`.
+
   Eine Stufe kann ein anderes Muster nehmen: `ziele: { s5: { muster: "reise", reisender: "sonde", ziel: { rand: true } } }`
   (Himmels-Forscher übt in s5 und s6 Planeten statt Mondphasen).
 - **Test:** Der Rahmen meldet `pruefung.haken("schluss", …)`; `tools/pruefe_spiele.js` prüft für jedes Spiel mit

@@ -1624,3 +1624,19 @@
   px, Sterne und „Bewegung reduzieren“ wählbar. Im Browser alle 48 Bilder geprüft; zuerst fehlten sie in fünf Spielen,
   deren Stufen an freigegebenen Inhaltslisten hängen — die Vorschau nimmt die Stufe jetzt aus der Skala. Abnahmeliste im
   Konzept (Pilotliste). Klickzahlen unverändert.
+- Abnahme der Piloten durch Patrik: alle acht geprüft und gut — P1 Rechen-Rakete bis P5 Zahlenmauer-Baumeister („bis P5
+  ist alles geprüft und gut“), dann P6 Instrumenten-Kenner, P7 Anlaut-Angel, P8 Schweiz-Karten-Suche („P6–P8 auch
+  gut“). Konzept: Status der Pilotliste und Stand nachgeführt; keine Code-Änderung.
+- Ausrollen der Abschluss-Animationen, Entscheid AR1 a (Mathe zuerst in Blöcken nach Thema, dann Deutsch, NMG, die
+  übrigen Fächer; je Block Commit und Abnahme). Block M1 (Stellenwert, Dezimal), zehn Spiele: Stellen-Detektiv,
+  Zahlen-Baukasten, Tabellen-Post, Ziffernkarten, Zahlen-Hüpfer, Zahlenrätsel-Tresor, Punkte-Schieber, Zehntel-Lupe,
+  Dezimal-Rutsche, Stufenzahl-Schieber. `feier.js`: Bilder je Spiel (`feier.bilder`) für REISE (stellen, seerosen,
+  rutsche, komma), SAMMELN (post, punkte, tresor), BAUEN (baukasten, karten), ZOOM mit Marienkäfer; Stellentafel und
+  Dienes-Bausteine in den Stellenfarben aus `stil.css`, nach dem Komma neutral mit Kommalinie wie im Spiel. Jedes Bild
+  folgt den Stufen seines Spiels (Abweichungen vom Entwurf im Konzept). Vorschau (`tools/feier_vorschau.html`) liest die
+  Spiele mit Animation jetzt aus dem Katalog, nach Fach. Im Browser alle 60 Endbilder rechnerisch geprüft (alles im
+  Bild, keine überlappenden Zahlen) und die gezeigten Zahlen gegen die Stufen gelesen: Dezimal-Rutsche s6 mit zwei
+  Wagen und doppeltem „≈ 4.5“ übereinander, Funken des Stufenzahl-Schiebers unten aus dem Bild, eine Variable verdeckte
+  `boden()` — berichtigt. Klickzahlen der zehn Spiele ändern sich (Gegenprobe ohne Animation: wieder gleich), Piloten
+  gleich. Konzept: Entscheid AR1, Blockplan M1–M6 mit Status, Tabelle der Entscheide wieder zusammenhängend (Leerzeile
+  vor AN3-K); rahmen.md 24 (Bilder je Spiel).

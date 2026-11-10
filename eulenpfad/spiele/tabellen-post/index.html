@@ -75,6 +75,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -289,6 +290,8 @@ function ablesen(ctx, zahl) {
 
 LS.spiel({
   id: "tabellen-post",
+  // Abschluss-Animation (Block M1, AR1 a; docs/konzept_abschluss_animationen.md 8): Briefe mit den Ziffern fallen in die Fächer, s6 bündelt 14 H zu 1 T und 4 H
+  feier: { muster: "sammeln", bilder: "post", ziele: { s1: 605, s2: 7302, s3: 482136, s4: 907005, s5: 3040006, s6: { M: 2, H: 14, E: 5 } } },
   hilfe: "Einsortieren: Tipp auf ein Fach und dann auf eine Ziffer — danach geht es von selbst ein Fach weiter; ◀ springt zurück, ⌫ leert das Fach, „OK ✓“ prüft. Ablesen: Lies die Tabelle und tipp die Zahl ein.",
   einleitung: "Hallo, hier ist Eule Zahlina mit der Zahlen-Post! Jede Ziffer muss ins richtige Fach der Stellenwerttabelle. Manchmal musst du auch eine Zahl aus der Tabelle ablesen.",
   anzahl: 8,

@@ -46,6 +46,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -483,6 +484,8 @@ function tippsFuer(a, p) {
 
 LS.spiel({
   id: "zehntel-lupe",
+  // Abschluss-Animation (Block M1, AR1 a; docs/konzept_abschluss_animationen.md 8): Zoom wie die Dezimal-Rakete, ein Marienkäfer landet auf der Zahl der Stufe
+  feier: { muster: "zoom", figur: "kaefer", ziele: { s1: 1.5, s2: 2.7, s3: 2.37, s4: 4.25, s5: 0.725, s6: 2.45 } },
   einleitung: "Zwischen zwei Strichen hat es noch viel Platz! Die Lupe zeigt ein Stück des Zahlenstrahls zehnmal grösser. Setze, lies ab, ordne und zähle mit Dezimalzahlen.",
   hilfe: "Zum Setzen tippst du auf den Strahl: zuerst auf das Stück, in dem die Zahl liegt — die Lupe darunter zeigt es zehnmal grösser —, dann auf den Strich. Beim Ablesen, Zählen und bei der Mitte tippst du die Zahl ein, sonst die Antwort oder die Zahlen der Reihe nach.",
   anzahl: 8,

@@ -35,18 +35,23 @@ des Geräts. Verkleinert passt eine Breite ins Fenster; für die Abnahme in echt
   <button type="button" id="neu">↻ Alle neu</button>
 </div>
 <div id="stufen"></div>
+<script src="../eulenpfad/spiele/gemeinsam/katalog.js"></script>
 <script>
 "use strict";
-// Die acht Piloten (Konzept, Pilotliste): Id des Spiels, Name, Muster
-const PILOTEN = [
-  ["rechen-rakete", "P1 Rechen-Rakete", "REISE"], ["dezimal-rakete", "P2 Dezimal-Rakete", "ZOOM"],
-  ["himmels-forscher", "P3 Himmels-Forscher", "ZYKLUS, REISE, SZENE"], ["wortfamilien-baum", "P4 Wortfamilien-Baum", "WACHSEN"],
-  ["zahlenmauer", "P5 Zahlenmauer-Baumeister", "BAUEN"], ["instrumente", "P6 Instrumenten-Kenner", "AUFTRITT"],
-  ["anlaut-angel", "P7 Anlaut-Angel", "SAMMELN"], ["schweiz-karte", "P8 Schweiz-Karten-Suche", "KARTE"],
-];
+// Alle Spiele mit Abschluss-Animation aus dem Katalog (Feld einstellungen enthält "feier"), nach Fach und Thema
+// gruppiert — so kommt jeder Block des Ausrollens (AR1 a) von selbst dazu.
 const $ = id => document.getElementById(id);
 const auswahl = new URLSearchParams(location.search);
-for (const [id, name, muster] of PILOTEN) $("spiel").append(new Option(`${name} · ${muster}`, id));
+const mitFeier = SPIELE.filter(s => (s.einstellungen || []).includes("feier"));
+for (const fach of [...new Set(THEMEN.map(t => t.fach))]) {
+  const themen = THEMEN.filter(t => t.fach === fach).map(t => t.id);
+  const spiele = mitFeier.filter(s => themen.includes(s.thema));
+  if (!spiele.length) continue;
+  const gruppe = document.createElement("optgroup");
+  gruppe.label = `${fach} (${spiele.length})`;
+  for (const s of spiele) gruppe.append(new Option(`${s.bild} ${s.name}`, s.id));
+  $("spiel").append(gruppe);
+}
 for (const k of ["spiel", "breite", "sterne"]) if (auswahl.get(k)) $(k).value = auswahl.get(k);
 const HOEHE = 620;
 function zeichne() {
