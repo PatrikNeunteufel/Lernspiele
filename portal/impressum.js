@@ -12,7 +12,7 @@
 
 const IMPRESSUM = Object.freeze({
   name: "Patrik Neunteufel",
-  adresse: [],
+  adresse: ["Bachstrasse 21", "9244 Niederuzwil"],
   email: "patrik.neunteufel@gmail.com",
   stand: "2026-11-10",
 });
