@@ -128,7 +128,7 @@ const TREIBER = `
     if (art === "aufgabe") { hinweise.delete(a.nr); return; }
     if (art === "gestellt" && a.tipps) mitTipp = true;
     // Abschluss-Animation (feier.js, Entscheide AN1–AN3 a, LERN_Session27): im Schlussbild gezeigt; je Stufe ein Bild,
-    // 2 Sterne mit Fähnchen, 3 dazu Funken; mit „Bewegung reduzieren“ keine Bewegung, sonst Bewegung.
+    // Schmuck der Stufe 2 ab 2 Sternen, der Stufe 3 bei 3 Sternen; mit „Bewegung reduzieren“ keine Bewegung, sonst Bewegung.
     if (art === "schluss") {
       if (!a.feierDef) return;
       if (typeof LS_FEIER === "undefined") { melde("Feier", "feier in LS.spiel, aber feier.js nicht geladen", "feier-js"); return; }
@@ -139,11 +139,12 @@ const TREIBER = `
         const teile = f ? alle(f) : [];
         if (!teile.some(t => t.localName === "svg")) { melde("Feier", "Stufe " + st + ": keine Animation", "feier-" + st); continue; }
         // localName ohne Gross/klein: der Ersatz-DOM schreibt klein, der Browser behält „animateMotion“
-        const bewegt = teile.filter(t => /^(animate|animatemotion)$/i.test(t.localName || "")).length;
+        const bewegt = teile.filter(t => /^(animate|animatemotion|animatetransform|set)$/i.test(t.localName || "")).length;
         if (ruhig && bewegt) melde("Feier", "Stufe " + st + ": Bewegung trotz Bewegung reduzieren", "feier-ruhig");
         if (!ruhig && !bewegt) melde("Feier", "Stufe " + st + ": keine Bewegung", "feier-still");
-        const zusatz = w => teile.filter(t => t.getAttribute && t.getAttribute("data-zusatz") === w).length;
-        if ((n >= 2) !== (zusatz("fahne") > 0) || (n >= 3) !== (zusatz("funken") > 0))
+        // Schmuck der Stufe 2 (Fähnchen, Funkeln …) ab 2 Sternen, der Stufe 3 (Funken, Sternschnuppe …) bei 3 Sternen
+        const schmuck = w => teile.filter(t => t.getAttribute && t.getAttribute("data-schmuck") === w).length;
+        if ((n >= 2) !== (schmuck("2") > 0) || (n >= 3) !== (schmuck("3") > 0))
           melde("Feier", "Stufe " + st + ", " + n + " Stern(e): Schmuck passt nicht zu den Sternen", "feier-sterne");
       }
       return;

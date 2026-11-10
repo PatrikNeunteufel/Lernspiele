@@ -1051,13 +1051,23 @@ Animation in `LS.spiel({ …, feier: { muster, … } })`, lädt `../gemeinsam/fe
 Einstellung „Abschluss-Animation“ (`EINSTELLUNGEN.feier`, global und je Spiel) an ist; dann entfällt das Konfetti.
 Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
 
-- **Stufe ändert das Ziel, Sterne schmücken aus:** 2 Sterne ein Fähnchen (`data-zusatz="fahne"`), 3 dazu Funken
-  (`funken`); 1 Stern die Animation der Stufe ohne Schmuck.
+- **Stufe ändert das Ziel, Sterne schmücken aus:** 2 Sterne ein Fähnchen oder funkelnde Sterne (`data-schmuck="2"`),
+  3 dazu Funken oder eine Sternschnuppe (`data-schmuck="3"`); 1 Stern die Animation der Stufe ohne Schmuck. Die
+  Bewegung beginnt kurz nach dem Aufbau (0,15 s), damit sie nicht ruckelt.
 - **Ein Tippen** springt ans Ende (SMIL `setCurrentTime`); die Knöpfe des Schlussbilds sind sofort bedienbar. Die
   Animation ist Schmuck (`aria-hidden`).
 - **„Bewegung reduzieren“** des Geräts (`prefers-reduced-motion`): gleich das Endbild ohne Bewegung (Klasse `ruhig`).
-- **Muster:** gebaut REISE (`{ muster: "reise", ziele: { s1 … s6 } }` mit `"mond"`, `"mars"`, `"jupiter"`, `"saturn"`,
-  `{ um: "erde" }`, `{ rand: true }`); die übrigen sieben folgen mit den Piloten (Konzept, Abschnitt 7).
+- **Muster** (gebaut; die übrigen folgen mit den Piloten, Konzept, Abschnitt 7):
+
+  | Muster | Angabe | Pilot |
+  |---|---|---|
+  | REISE | `{ muster: "reise", reisender: "rakete" \| "sonde", ziele: { s1 … s6 } }`, Ziel `"mond"`, `"mars"`, `"jupiter"`, `"saturn"`, `{ um: "erde" }` oder `{ rand: true }` (die acht Planeten) | Rechen-Rakete |
+  | ZOOM | `{ muster: "zoom", ziele: { s1: 4, s2: 4.6, … } }`: Zahlenstrahl, je Stelle nach dem Komma eine Lupe tiefer, Landung auf der Zahl; Zahlen über `LS.dezimalText` (Punkt oder Komma); `stellen: { sX: n }` setzt die Tiefe, sonst zählt die Zahl | Dezimal-Rakete |
+  | ZYKLUS | `{ muster: "zyklus", bilder: "mond", ziele: { s1: ["neu"], … } }`: die Phasen der Reihe nach, die letzte gross; Phasen `neu`, `sichel`, `halb`, `dreiviertel`, `voll`, zunehmend rechts hell wie im Himmels-Forscher | Himmels-Forscher s1–s4 |
+  | SZENE | `{ muster: "szene", szene: "eule-vollmond" }`: ein festes Bild für den Endgegner | Himmels-Forscher s6 |
+
+  Eine Stufe kann ein anderes Muster nehmen: `ziele: { s5: { muster: "reise", reisender: "sonde", ziel: { rand: true } } }`
+  (Himmels-Forscher übt in s5 und s6 Planeten statt Mondphasen).
 - **Test:** Der Rahmen meldet `pruefung.haken("schluss", …)`; `tools/pruefe_spiele.js` prüft für jedes Spiel mit
   `feier`: `feier.js` geladen, Animation im Schlussbild, jede Stufe mit Bild, Schmuck passend zu 1–3 Sternen, mit
   „Bewegung reduzieren“ keine Bewegung, sonst Bewegung. Die Klickzahlen eines Spiels mit Animation ändern sich (kein

@@ -1562,3 +1562,14 @@
   Im Browser angesehen (alle Stufen mit 1–3 Sternen, laufend und im Endbild; Mars in der Planetenreihe berichtigt,
   Funken im Bild, Ankunft waagrecht), Einstellung in der Verwaltung. Doku rahmen.md 2 und 24, Konzept (Heute berichtigt:
   Konfetti bei jeder Runde; Regel 7 Naturfarben).
+- Eulenpfad, Abschluss-Animationen Schritt 2a: `feier.js` mit den Mustern ZOOM, ZYKLUS und SZENE, der Raumsonde als
+  zweitem Reisenden und einem anderen Muster je Stufe (`ziele: { s5: { muster, … } }`); Schmuck einheitlich markiert
+  (`data-schmuck`), am Himmel funkelnde Sterne und Sternschnuppe; die Bewegung beginnt 0,15 s nach dem Aufbau (Rakete
+  ruckelte zu Beginn, Rückmeldung Patrik). Pilot P2 Dezimal-Rakete (ZOOM): gestapelte Zahlenstrahlen, je Stelle eine Lupe
+  tiefer, Landung auf 4 · 4.6 · 7.3 · 3.75 · 6.47 · 4.375, Zahlen über `LS.dezimalText`. Pilot P3 Himmels-Forscher: s1–s4
+  Mondphasen der Reihe nach (zunehmend rechts hell wie im Spiel), s5 Sonde an den acht Planeten vorbei, s6 Eule vor dem
+  Vollmond. Klickzahlen beider Spiele ändern sich (Gegenprobe mit den Spielseiten ohne Animation: wieder die alten Zahlen),
+  Rechen-Rakete gleich wie in Schritt 1. Im Browser angesehen (alle Stufen, 1–3 Sterne, Endbild und laufend, Komma,
+  keine Konsolenfehler): in Stufe 1 ragte die Rakete aus dem Bild und verdeckte die Landezahl — unterste Zeile nun
+  unten, Zahl unter der Linie. Doku rahmen.md 24 (Tabelle der Muster), Konzept (Stand, Status der Piloten, Abweichungen
+  von den Ideen).

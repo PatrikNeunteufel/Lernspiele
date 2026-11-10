@@ -68,6 +68,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -267,6 +268,9 @@ function tippsFuer(x, p) {
 
 LS.spiel({
   id: "dezimal-rakete",
+  // Abschluss-Animation (Pilot P2, Muster ZOOM; docs/konzept_abschluss_animationen.md 6): Landung auf dem Zahlenstrahl,
+  // je Stelle eine Lupe tiefer — s1 Ganze, s2 und s3 Zehntel, s4 und s5 Hundertstel, s6 Tausendstel (wie die Stufe übt)
+  feier: { muster: "zoom", ziele: { s1: 4, s2: 4.6, s3: 7.3, s4: 3.75, s5: 6.47, s6: 4.375 } },
   hilfe: "Rechne die Aufgabe im Kopf und tippe das Ergebnis mit den Zifferntasten ein; das Zeichen nach den Ganzen hat eine eigene Taste. Steht ein „?“ in der Rechnung, tippst du, was fehlt. Mit jeder richtigen Aufgabe fliegt die Rakete höher 🚀.",
   einleitung: "3, 2, 1 … Start! Diesmal rechnet die Rakete mit Dezimalzahlen. Zehntel zu Zehnteln, Hundertstel zu Hundertsteln — rechne im Kopf!",
   anzahl: 8,
