@@ -32,11 +32,12 @@ def anfrage(basis: str, pfad: str, daten: dict | None = None) -> tuple:
     """(Status, JSON) einer GET- oder POST-Anfrage."""
     roh = None if daten is None else json.dumps(daten).encode("utf-8")
     req = urllib.request.Request(basis + pfad, data=roh, headers={"Content-Type": "application/json"})
+    lies = lambda roh: json.loads(roh or b"{}") if roh[:1] in (b"{", b"[", b"") else {"_kein_json": True}
     try:
         with urllib.request.urlopen(req, timeout=10) as r:
-            return r.status, json.loads(r.read() or b"{}")
+            return r.status, lies(r.read())
     except urllib.error.HTTPError as e:
-        return e.code, json.loads(e.read() or b"{}")
+        return e.code, lies(e.read())
 
 
 def richte_ein(ordner: Path) -> None:
@@ -141,6 +142,71 @@ def pruefe_unterschrift(basis: str) -> None:
     ES.privat_datei().unlink()
 
 
+def pruefe_netz(basis: str, ordner: Path) -> None:
+    """NS1 a: Betrieb im Netz — kein Repo, Meldungen ohne Schlüssel mit Grenze, Vermerke ohne Stand, holen und senden."""
+    import urllib.error as UE
+    import entwicklung_abgleich as EA
+    E = "schluessel-der-entwicklung"
+    ES.NETZ = True
+    try:
+        gleich(anfrage(basis, "/eulenpfad/index.html")[0], 404, "im Netz: keine Dateien des Repos")
+        gleich(anfrage(basis, "/entwicklung/bemerkungen?app=eulenpfad")[0], 404, "im Netz: Bemerkungen nicht ohne Schlüssel lesbar")
+        m = {"app": "eulenpfad", "meldung": "M-mwaxyz12-ab12", "text": "3 H 4 Z ist 340", "spiel": "zahlenhaus", "stufe": "s3", "von": "Mia"}
+        st, j = anfrage(basis, "/entwicklung/meldung", m)
+        gleich((st, j.get("von"), j.get("meldung")), (200, "Meldung", "M-mwaxyz12-ab12"), "Meldung ohne Schlüssel angenommen, ohne Namen")
+        gleich(anfrage(basis, "/entwicklung/meldung", m)[1].get("nr"), j.get("nr"), "dieselbe Meldung nur einmal")
+        gleich(anfrage(basis, "/entwicklung/meldung", {**m, "meldung": "kaputt"})[0], 400, "Meldung ohne gültige Kennung abgewiesen")
+        ES.MELDUNGEN_JE_STUNDE, alt = 2, ES.MELDUNGEN_JE_STUNDE
+        ES._meldezeiten.clear()
+        codes = [anfrage(basis, "/entwicklung/meldung", {**m, "meldung": f"M-grenze{n}-ab"})[0] for n in range(3)]
+        gleich(codes, [200, 200, 429], "Grenze je Absender und Stunde")
+        ES.MELDUNGEN_JE_STUNDE = alt
+        ES._meldezeiten.clear()
+        k = ES.zulassen("Eva Netz", "eva@schule.ch")
+        st, j = anfrage(basis, "/entwicklung/pruefstand", {"app": "eulenpfad", "schluessel": k, "art": "spiele", "id": "kiosk-kasse", "geprueft": True})
+        gleich((st, j.get("eingereicht"), "stand" in j), (200, True, False), "im Netz: Vermerk eingereicht, ohne Prüfstand in der Antwort")
+        gleich(anfrage(basis, "/entwicklung/holen", {"app": "eulenpfad", "schluessel": k})[0], 403, "holen nur mit dem Schlüssel der Entwicklung")
+        # Unterschrift aus der Sicht des Werkzeugs (openssl verify), wie vor holen und senden
+        oeff = ES.neues_schluesselpaar(eintragen=None)
+        z = "ab" * 16
+        st, j = anfrage(basis, f"/entwicklung/status?zufall={z}")
+        anderer = ES.neues_schluesselpaar(eintragen=None)
+        gleich((EA.unterschrift_gueltig(j, z, oeff), EA.unterschrift_gueltig(j, z, anderer), EA.unterschrift_gueltig(j, "cd" * 16, oeff)),
+               (True, False, False), "Werkzeug prüft die Unterschrift mit openssl: richtig, fremder Schlüssel, andere Zufallszahl")
+        try:
+            EA.pruefe_server("http://meldungen.beispiel.ch", oeff)
+            gleich("angenommen", "abgewiesen", "Werkzeug: http im Netz")
+        except RuntimeError:
+            gleich(True, True, "Werkzeug: http im Netz abgewiesen")
+        # holen und senden mit eigener lokaler Ablage (wie bei der Entwicklung)
+        lokal = {"bemerkungen": ordner / "lokal" / "bemerkungen.json", "eingang": ordner / "lokal" / "eingang.json"}
+        n1 = EA.holen(basis, "eulenpfad", E, "", lokal)
+        n2 = EA.holen(basis, "eulenpfad", E, "", lokal)
+        b = json.loads(lokal["bemerkungen"].read_text(encoding="utf-8"))
+        meld = next(x for x in b if x.get("meldung") == "M-mwaxyz12-ab12")
+        gleich((n1["bemerkungen"] >= 3, n1["eingang"] >= 1, n2, meld.get("quelle", "").startswith("127.0.0.1")), (True, True, {"bemerkungen": 0, "eingang": 0}, True),
+               "holen: neu, beim zweiten Mal nichts doppelt, mit Quelle")
+        meld["status"], meld["antwort"] = "erledigt 10.11.2026", "Danke, behoben!"
+        lokal["bemerkungen"].write_text(json.dumps(b), encoding="utf-8")
+        e = json.loads(lokal["eingang"].read_text(encoding="utf-8"))
+        ev = next(x for x in e if x.get("von") == "Eva Netz")
+        ev["status"] = "angenommen"
+        lokal["eingang"].write_text(json.dumps(e), encoding="utf-8")
+        s = EA.senden(basis, "eulenpfad", E, "", lokal)
+        srv_b = next(x for x in ES.lies_bemerkungen(ES.APPS["eulenpfad"]) if x.get("meldung") == "M-mwaxyz12-ab12")
+        srv_e = next(x for x in ES.lies_eingang(ES.APPS["eulenpfad"]) if x.get("nr") == ev["server_nr"])
+        gleich((s["eingang"], srv_b.get("status"), srv_b.get("antwort"), srv_e.get("status")), (1, "erledigt 10.11.2026", "Danke, behoben!", "angenommen"),
+               "senden: Status, Antwort und Entscheid zurück auf den Server")
+        try:
+            EA.holen(basis, "eulenpfad", k, "", lokal)
+            gleich("geholt", "abgewiesen", "holen mit Schlüssel einer Aufsicht")
+        except UE.HTTPError as err:
+            gleich(err.code, 403, "holen mit Schlüssel einer Aufsicht abgewiesen")
+        ES.privat_datei().unlink()
+    finally:
+        ES.NETZ = False
+
+
 def pruefe_uebernehmen() -> None:
     """tools/entwicklung_abgleich.py nach docs/richtlinie_freigaben.md (ES3 a, SR1 a), im Lernsteig mit leerem Eingang."""
     import entwicklung_abgleich as EA
@@ -201,6 +267,7 @@ def main() -> int:
             pruefe(f"http://127.0.0.1:{server.server_address[1]}")
             pruefe_uebernehmen()
             pruefe_unterschrift(f"http://127.0.0.1:{server.server_address[1]}")
+            pruefe_netz(f"http://127.0.0.1:{server.server_address[1]}", Path(t))
         except Exception as e:  # ein Absturz ist ein Fehler, kein Abbruch ohne Schlusszeile
             fehler.append(f"Abbruch: {type(e).__name__}: {e}")
         finally:

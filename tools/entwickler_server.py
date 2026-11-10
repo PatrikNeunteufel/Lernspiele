@@ -15,6 +15,8 @@ Aufruf (aus beliebigem Ordner):
     python tools/entwickler_server.py --sperren "Vorname Name"     Schlüssel einer Aufsicht sperren
     python tools/entwickler_server.py --zugelassen                 zugelassene Aufsichten auflisten
     python tools/entwickler_server.py --neues-schluesselpaar       Schlüsselpaar für die Unterschrift des Servers (NS2 a)
+    python tools/entwickler_server.py 8443 --netz [--host 0.0.0.0] [--zertifikat cert.pem --zertifikat-schluessel key.pem]
+                                      Meldungsserver im Netz (NS1 a): keine Repo-Dateien, Ablage .entwicklung/daten/
 
 Zugelassene Aufsichten (Plan C12, ES1 a bis ES5 a, LERN_Session27): Wer prüfen will, fordert per E-Mail an; die
 Entwicklung lässt mit --zulassen zu und schickt den ausgegebenen Schlüssel an die anfragende Adresse. Mit ihm schaltet
@@ -272,6 +274,60 @@ def neues_schluesselpaar(eintragen: Path | None = ENTWICKLUNG_JS) -> str:
     return oeff
 
 
+# ----- Betrieb im Netz (Plan C12, NS1 a, LERN_Session27) -----
+# Mit --netz liefert der Server kein Repo aus, schreibt keinen Prüfstand und keine Datei im Repo, sondern nur in
+# .entwicklung/daten/<app>/ (Meldungen, Bemerkungen, eingereichte Vermerke); er protokolliert keine Anfragen (keine
+# IP-Adressen). Meldungen nimmt er von allen an (ohne Schlüssel, mit Grenze je Absender), Vermerke nur von
+# zugelassenen Aufsichten, holen und senden nur mit dem Schlüssel der Entwicklung (tools/entwicklung_abgleich.py).
+NETZ = False
+MELDUNGEN_JE_STUNDE = 20  # je Absender (IP-Adresse, nur im Arbeitsspeicher für diese Zählung, nie gespeichert)
+_meldezeiten: dict = {}
+MELDUNG_KENNUNG = re.compile(r"^M-[a-z0-9]{4,16}-[a-z0-9]{2,8}$")
+
+
+def netz_pfade() -> None:
+    """Ablagen im Netz-Betrieb: nichts im Repo, alles unter .entwicklung/daten/<app>/ (gitignored)."""
+    for app, a in APPS.items():
+        ordner = ENTWICKLUNG_ORDNER / "daten" / app
+        for feld in ("bemerkungen", "eingang"):
+            a[feld] = ordner / Path(a[feld]).name
+
+
+def zu_viele_meldungen(absender: str) -> bool:
+    """Grenze je Absender und Stunde; die Zeiten liegen nur im Arbeitsspeicher."""
+    jetzt = datetime.datetime.now().timestamp()
+    zeiten = [t for t in _meldezeiten.get(absender, []) if jetzt - t < 3600]
+    if len(zeiten) >= MELDUNGEN_JE_STUNDE:
+        _meldezeiten[absender] = zeiten
+        return True
+    _meldezeiten[absender] = zeiten + [jetzt]
+    return False
+
+
+def speichere_bemerkung(a: dict, daten: dict, jetzt: str) -> tuple:
+    """Bemerkung oder Meldung in docs/<app>/bemerkungen.json (im Netz: .entwicklung/daten/<app>/); eine Meldung (Kennung
+    „meldung“) nur einmal. → (Status, Antwort)."""
+    text = str(daten.get("text", "")).strip()
+    if not text:
+        return 400, {"fehler": "Bemerkung ist leer"}
+    liste = lies_bemerkungen(a)
+    schon = next((b for b in liste if daten.get("meldung") and b.get("meldung") == daten.get("meldung")), None)
+    if schon:
+        return 200, schon
+    eintrag = {"nr": max((b["nr"] for b in liste), default=0) + 1, "zeit": jetzt, "status": "offen", "text": text[:2000]}
+    for feld in ("von", "spiel", "inhalt", "stufe", "liste", "eintrag", "schluessel", "aufgabe", "seite", "meldung", "fassung"):
+        if daten.get(feld):
+            eintrag[feld] = str(daten[feld])[:500]
+    # Versionen der sendenden Seite (NS3 a); „fassung“ ist die der Meldung, als sie entstand
+    v = daten.get("versionen")
+    if isinstance(v, dict) and (v.get("app") or v.get("kern")):
+        eintrag["gesendet_mit"] = {k: str(v[k])[:20] for k in ("app", "kern", "protokoll") if v.get(k) not in (None, "")}
+    liste.append(eintrag)
+    a["bemerkungen"].parent.mkdir(parents=True, exist_ok=True)
+    a["bemerkungen"].write_bytes((json.dumps(liste, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+    return 200, eintrag
+
+
 def lies_eingang(a: dict) -> list:
     return json.loads(a["eingang"].read_text(encoding="utf-8")) if a["eingang"].exists() else []
 
@@ -352,6 +408,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Private-Network", "true")
         self.end_headers()
 
+    def log_message(self, format, *args):
+        """Im Netz keine Zeile je Anfrage — sie enthielte die IP-Adresse (Datenschutzseite: der Server speichert keine)."""
+        if not NETZ:
+            super().log_message(format, *args)
+
     def antwort(self, status: int, daten) -> None:
         roh = json.dumps(daten, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
@@ -370,6 +431,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 if u:
                     st["unterschrift"] = u
             return self.antwort(200, st)
+        if NETZ:  # im Netz: kein Repo, keine Liste der Bemerkungen ohne Schlüssel (die holt die Entwicklung mit POST)
+            return self.antwort(404, {"fehler": "nicht vorhanden"})
         if self.path.split("?")[0] == "/entwicklung/bemerkungen":
             app = (re.search(r"[?&]app=([a-z]+)", self.path) or [None, "eulenpfad"])[1]
             if app not in APPS:
@@ -397,6 +460,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             bereich = str(von) if von == bis else f"{von}–{bis}"
             return self.antwort(409, {"fehler": f"Protokoll {protokoll} passt nicht: der Server {SERVER_VERSION} versteht "
                                                 f"{bereich}. App oder Server auf denselben Stand bringen."})
+        # Meldungen gehen für alle, ohne Schlüssel (NS1 a), mit Grenze je Absender
+        if self.path == "/entwicklung/meldung":
+            a = APPS.get(str(daten.get("app") or ""))
+            if not a:
+                return self.antwort(400, {"fehler": "app unbekannt"})
+            if not MELDUNG_KENNUNG.match(str(daten.get("meldung", ""))):
+                return self.antwort(400, {"fehler": "Kennung der Meldung fehlt oder ist ungültig"})
+            if zu_viele_meldungen(self.client_address[0]):
+                return self.antwort(429, {"fehler": "Zu viele Meldungen in kurzer Zeit. Bitte später noch einmal."})
+            daten["von"] = "Meldung"  # ohne Namen: wer meldet, bleibt beim Gerät
+            jetzt = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
+            return self.antwort(*speichere_bemerkung(a, daten, jetzt))
         # Wer schreibt? Die Entwicklung (entwickler.key) oder eine zugelassene Aufsicht (ES1 a, ES2 a)
         rolle = wer(daten.get("schluessel"))
         if self.path == "/entwicklung/freischalten":
@@ -415,14 +490,38 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         a = APPS.get(str(daten.get("app") or "eulenpfad"))
         if not a:
             return self.antwort(400, {"fehler": "app unbekannt"})
-        # Prüfvermerke einer Aufsicht gehen in den Eingang, nicht in pruefstand.js (ES3 a, docs/richtlinie_freigaben.md)
-        if aufsicht and self.path in ("/entwicklung/pruefstand", "/entwicklung/eintraege"):
+        # holen und senden (ES3 a, tools/entwicklung_abgleich.py): nur die Entwicklung
+        if self.path in ("/entwicklung/holen", "/entwicklung/senden"):
+            if aufsicht:
+                return self.antwort(403, {"fehler": "Nur für die Entwicklung"})
+            if self.path == "/entwicklung/holen":
+                return self.antwort(200, {"bemerkungen": lies_bemerkungen(a), "eingang": lies_eingang(a)})
+            bemerkungen, eingang = lies_bemerkungen(a), lies_eingang(a)
+            for s in daten.get("bemerkungen", []):
+                b = next((x for x in bemerkungen if x.get("nr") == s.get("nr")), None)
+                if b:
+                    for feld in ("status", "antwort"):
+                        if s.get(feld) is not None:
+                            b[feld] = str(s[feld])[:300]
+            for s in daten.get("eingang", []):
+                v = next((x for x in eingang if x.get("nr") == s.get("nr")), None)
+                if v and s.get("status") in ("angenommen", "abgelehnt", "zurueckgenommen"):
+                    v["status"] = s["status"]
+            for datei, inhalt in ((a["bemerkungen"], bemerkungen), (a["eingang"], eingang)):
+                datei.parent.mkdir(parents=True, exist_ok=True)
+                datei.write_bytes((json.dumps(inhalt, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+            return self.antwort(200, {"ok": True})
+        # Prüfvermerke einer Aufsicht gehen in den Eingang, nicht in pruefstand.js (ES3 a, docs/richtlinie_freigaben.md);
+        # im Netz gibt es keinen Prüfstand: dort geht jeder Vermerk in den Eingang, die Antwort ohne Stand
+        if (aufsicht or NETZ) and self.path in ("/entwicklung/pruefstand", "/entwicklung/eintraege"):
             if self.path == "/entwicklung/pruefstand" and (daten.get("art") not in a["arten"]
                                                          or not re.fullmatch(r"[a-z0-9-]+(/[a-z0-9-]+)?", str(daten.get("id", "")))):
                 return self.antwort(400, {"fehler": "art oder id ungültig"})
             if self.path == "/entwicklung/eintraege" and not re.fullmatch(r"[a-z0-9-]+/[a-z0-9-]+", str(daten.get("liste", ""))):
                 return self.antwort(400, {"fehler": "liste ungültig"})
-            v = reiche_ein(a, aufsicht, self.path.rsplit("/", 1)[1], daten, jetzt)
+            v = reiche_ein(a, aufsicht or "Entwicklung", self.path.rsplit("/", 1)[1], daten, jetzt)
+            if NETZ:
+                return self.antwort(200, {"eingereicht": True, "nr": v["nr"]})
             return self.antwort(200, {"eingereicht": True, "nr": v["nr"], "stand": lies_pruefstand(a)})
         if aufsicht and self.path == "/entwicklung/bemerkung-status":
             return self.antwort(403, {"fehler": "Den Status einer Bemerkung setzt nur die Entwicklung"})
@@ -475,27 +574,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.antwort(200, b)
 
         if self.path == "/entwicklung/bemerkung":
-            text = str(daten.get("text", "")).strip()
-            if not text:
-                return self.antwort(400, {"fehler": "Bemerkung ist leer"})
-            liste = lies_bemerkungen(a)
             # Fehlermeldung eines Kindes (Kennung „meldung“, LERN_Session9): nur einmal aufnehmen.
-            schon = next((b for b in liste if daten.get("meldung") and b.get("meldung") == daten.get("meldung")), None)
-            if schon:
-                return self.antwort(200, schon)
-            eintrag = {"nr": max((b["nr"] for b in liste), default=0) + 1, "zeit": jetzt, "status": "offen", "text": text[:2000]}
-            for feld in ("von", "spiel", "inhalt", "stufe", "liste", "eintrag", "schluessel", "aufgabe", "seite", "meldung",
-                         "fassung"):
-                if daten.get(feld):
-                    eintrag[feld] = str(daten[feld])[:500]
-            # Versionen der sendenden Seite (NS3 a); „fassung“ ist die der Meldung, als sie entstand
-            v = daten.get("versionen")
-            if isinstance(v, dict) and (v.get("app") or v.get("kern")):
-                eintrag["gesendet_mit"] = {k: str(v[k])[:20] for k in ("app", "kern", "protokoll") if v.get(k) not in (None, "")}
-            liste.append(eintrag)
-            a["bemerkungen"].parent.mkdir(parents=True, exist_ok=True)
-            a["bemerkungen"].write_bytes((json.dumps(liste, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
-            return self.antwort(200, eintrag)
+            return self.antwort(*speichere_bemerkung(a, daten, jetzt))
 
         return self.antwort(404, {"fehler": "unbekannt"})
 
@@ -509,6 +589,34 @@ class Server(http.server.ThreadingHTTPServer):
         if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
         super().server_bind()
+
+
+def netz_starten(port: int, host: str, zertifikat: str | None, zertifikat_schluessel: str | None) -> None:
+    """Betrieb im Netz (NS1 a): nur Meldungen, Vermerke, holen und senden; Ablage in .entwicklung/daten/. https entweder
+    hier (--zertifikat, --zertifikat-schluessel) oder vor dem Server (Reverse-Proxy, docs/anleitung_entwickler_server.md)."""
+    global NETZ
+    import ssl
+    NETZ = True
+    netz_pfade()
+    if not privat_datei().exists():
+        print("Hinweis: kein Schlüsselpaar (.entwicklung/server-privat.pem) — die Apps nehmen diesen Server erst an, wenn er\n"
+              "unterschreibt: python tools/entwickler_server.py --neues-schluesselpaar (dann verteilen und veröffentlichen).")
+    if not openssl():
+        print("Hinweis: openssl nicht gefunden — ohne openssl keine Unterschrift.")
+    try:
+        server = Server((host, port), Handler)
+    except OSError as e:
+        sys.exit(f"Port {port} auf {host} lässt sich nicht belegen: {e}")
+    art = "http (https davor über einen Reverse-Proxy)"
+    if zertifikat:
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.load_cert_chain(zertifikat, zertifikat_schluessel)
+        server.socket = ctx.wrap_socket(server.socket, server_side=True)
+        art = "https"
+    print(f"Meldungsserver im Netz läuft auf {host}:{port} ({art}), Version {SERVER_VERSION}, Protokoll {PROTOKOLLE}.\n"
+          f"Ablage: {ENTWICKLUNG_ORDNER / 'daten'}. Keine Auslieferung des Repos, kein Protokoll der Anfragen.\n"
+          "Beenden mit Strg+C.", flush=True)
+    server.serve_forever()
 
 
 def main() -> None:
@@ -549,6 +657,9 @@ def main() -> None:
             HERKUNFT_EXTRA.add(sys.argv[i + 1].strip().rstrip("/"))
     if not SCHLUESSEL_DATEI.exists():
         print("Hinweis: entwickler.key fehlt — Schreiben geht erst nach: python tools/entwickler_server.py --neuer-schluessel")
+    wert = lambda schalter: sys.argv[sys.argv.index(schalter) + 1] if schalter in sys.argv and sys.argv.index(schalter) + 1 < len(sys.argv) else None
+    if "--netz" in sys.argv:
+        return netz_starten(port, wert("--host") or "127.0.0.1", wert("--zertifikat"), wert("--zertifikat-schluessel"))
     try:
         server = Server(("127.0.0.1", port), Handler)
     except OSError:

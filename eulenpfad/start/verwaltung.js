@@ -321,7 +321,8 @@ function zeichneVerwaltung(box, neu) {
   }
 
   // ----- Weg der Meldungen und Adresse des Entwickler-Servers (Plan C11, C11-3 a; KERN.meldungen.meldeweg) -----
-  // Nur auf diesem Gerät. Erlaubt ist nur ein Entwickler-Server auf diesem Gerät (localhost, 127.0.0.1).
+  // Nur auf diesem Gerät. Erlaubt: ein Entwickler-Server auf diesem Gerät (localhost, 127.0.0.1) oder ein Meldungsserver
+  // im Netz über https, angenommen nur mit der Unterschrift der Entwicklung (Plan C12, NS1 a, NS2 a).
   function meldewegTeil() {
     const w = LS.meldeweg();
     const WEGE = [["auto", "Automatisch: Entwickler-Server, sonst E-Mail, sonst Text"], ["server", "Nur Entwickler-Server"],
@@ -336,7 +337,7 @@ function zeichneVerwaltung(box, neu) {
       el("div", { class: "zeile-knoepfe" }, ...WEGE.map(([wert, text]) => el("button", { type: "button", class: "schalter" + (wert === w.weg ? " frei" : ""),
         "aria-pressed": String(wert === w.weg), "data-meldeweg": wert, text: (wert === w.weg ? "✓ " : "") + text,
         onclick: () => setze({ weg: wert, server: w.eigeneAdresse ? w.server : null }) }))),
-      el("label", { class: "leise-text", text: "Adresse des Entwickler-Servers (leer: diese Seite; nur http://localhost:<Port> oder http://127.0.0.1:<Port>)" }),
+      el("label", { class: "leise-text", text: `Adresse des Entwickler- oder Meldungsservers. ${KERN.entwicklung.ADRESSE_REGEL}` }),
       adresse,
       zeile(knopf("Adresse speichern", () => setze({ weg: w.weg, server: adresse.value })),
         knopf("↺ Vorgabe", () => setze({ weg: w.weg, server: null })),

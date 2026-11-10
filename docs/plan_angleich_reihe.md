@@ -266,8 +266,9 @@ Kindersprache.
      eine bewährt, ohne offene Meldung; `uebernehmen --reife` in einem Schritt; Bewertung nur bei Patrik
      (`.entwicklung/bewertung.json`); Schwellen nur mit Eintrag in der Richtlinie. Nicht b (Punktzahl), nicht c (nur
      Anzahl). Zusatz Patrik: Er gibt weiterhin selbst direkt frei; übernommen wird nie von selbst.
-   - **Offen für NS1** (gefunden LERN_Session27): `GET /entwicklung/bemerkungen` ist beim Server ohne Schlüssel lesbar —
-     lokal harmlos, im Netz nur mit dem Schlüssel der Entwicklung. Die Apps fragen die Liste nur mit dieser Rolle ab.
+   - **Bemerkungen lesen** (gefunden LERN_Session27, gelöst mit NS1): `GET /entwicklung/bemerkungen` ist nur beim
+     lokalen Server ohne Schlüssel lesbar; im Netz (`--netz`) gibt es ihn nicht, dort holt die Entwicklung mit
+     `POST /entwicklung/holen` und ihrem Schlüssel.
    Reihenfolge: Entscheide und E-Mail, Versionen (NS3), Impressum (IM1), Bemerkungen aus dem Repo (IM2), Schlüssel je
    Aufsicht (ES1, ES2, ES4, ES5), Übernehmen nach der Richtlinie (ES3, SR1), Unterschrift und Meldungsserver (NS2, NS1)
    mit `holen`/`senden`, Anleitung zum Server; zuletzt die Anleitungen der Apps und des Portals (Vorgabe Patrik: „erst
@@ -275,8 +276,9 @@ Kindersprache.
    *Stand 2026-11-10 (LERN_Session27):* in Arbeit — Entscheide, E-Mail-Kontakt, Versionen (NS3, Kern 1.36.0) und
    Impressum gebaut, Bemerkungen gitignored, Richtlinie geschrieben, Schlüssel je Aufsicht gebaut (Kern 1.37.0,
    `--zulassen`, Eingang, Anforderung), Übernehmen nach der Richtlinie (`tools/entwicklung_abgleich.py uebernehmen`),
-   Unterschrift des Servers (NS2, Kern 1.38.0; Schlüsselpaar erzeugt Patrik mit `--neues-schluesselpaar`); offen NS1
-   mit `holen`/`senden`, Anleitungen.
+   Unterschrift des Servers (NS2, Kern 1.38.0; Schlüsselpaar erzeugt Patrik mit `--neues-schluesselpaar`),
+   Meldungsserver im Netz (NS1, Kern 1.39.0: `--netz`, Meldungen für alle, `holen`/`senden`); offen die Anleitung zum
+   Server mit Datenschutzseite und Inbetriebnahme, dann die Anleitungen der Apps.
 
 ## D. Fehler und Schwachstellen (aus der Prüfung 2026-11-05)
 

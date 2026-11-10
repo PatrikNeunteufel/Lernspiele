@@ -3,6 +3,15 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.39.0 — 2026-11-10 (LERN_Session27)
+- Meldungsserver im Netz (Plan C12, NS1 a): `adresseGueltig` nimmt neben localhost/127.0.0.1 einen Namen im Netz über
+  https (`https://name.beispiel.ch[:Port]`), nicht http im Netz, keine IP-Adressen im Netz, keine Pfade;
+  `KERN.entwicklung.ADRESSE_REGEL` als Text für Kern und Apps. `meldung(daten)`: bestätigte Meldung an den Server ohne
+  Entwickler-Schlüssel (`/entwicklung/meldung`), nur an einen Server, den `server()` annimmt (im Netz mit gültiger
+  Unterschrift). `KERN.meldungen.weitergeben` braucht den Entwickler-Modus nicht mehr: Meldungen gehen für alle
+  (vorher nur mit freigeschaltetem Schlüssel). Antwortet der Server beim Einreichen ohne Prüfstand (im Netz), bleibt
+  der Prüfstand der Seite unverändert.
+
 ## 1.38.0 — 2026-11-10 (LERN_Session27)
 - `entwicklung.js`, Unterschrift des Servers (Plan C12, NS2 a, NS2-K a): `SERVER_SCHLUESSEL` (SPKI, Base64, ECDSA
   P-256; eingetragen von `python tools/entwickler_server.py --neues-schluesselpaar`, noch leer). Jede Statusabfrage

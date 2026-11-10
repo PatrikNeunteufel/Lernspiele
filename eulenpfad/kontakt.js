@@ -7,8 +7,9 @@
               jeden lesbar (auch für Sammelprogramme). Seit LERN_Session27 die Adresse der Entwicklung (NS1 a,
               Plan C12); im Betreff stehen Lernprogramm, Thema und Kennung der Meldung.
               Leer (""): kein E-Mail-Knopf; die Aufsicht kann den Text der Meldung nur kopieren.
-   server:    Adresse des Entwickler-Servers für Meldungen und Entwicklung (C11-3 a), nur http://localhost:<Port> oder
-              http://127.0.0.1:<Port>. Leer (""): dieselbe Seite. Je Gerät abweichend unter Verwaltung → Einstellungen. */
+   server:    Adresse des Servers für Meldungen und Entwicklung: http://localhost:<Port> oder http://127.0.0.1:<Port>
+              (C11-3 a) oder der Meldungsserver im Netz über https (Plan C12, NS1 a; angenommen nur mit der Unterschrift
+              der Entwicklung, NS2 a). Leer (""): dieselbe Seite. Je Gerät abweichend unter Verwaltung → Einstellungen. */
 
 const EULENPFAD_KONTAKT = Object.freeze({
   meldungen: "patrik.neunteufel@gmail.com",

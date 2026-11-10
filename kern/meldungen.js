@@ -215,7 +215,7 @@
       let s = null;
       if (server !== null) {
         s = pruefe(server);
-        if (s === null) throw new Error("Erlaubt ist nur ein Entwickler-Server auf diesem Gerät: http://localhost:<Port> oder http://127.0.0.1:<Port>, leer für diese Seite.");
+        if (s === null) throw new Error(`Diese Adresse ist nicht erlaubt. ${KERN.entwicklung && KERN.entwicklung.ADRESSE_REGEL ? KERN.entwicklung.ADRESSE_REGEL : ""}`.trim());
       }
       o.speicher.schreibe("meldeweg", { weg, ...(s !== null ? { server: s } : {}) });
       return meldeweg();
@@ -246,16 +246,16 @@
       const { weg } = meldeweg();
       const sag = text => { if (ui.melde) ui.melde(text); return null; };
       if (weg === "auto" || weg === "server") {
-        const da = e && e.freigeschaltet() && (await e.server());
+        // Meldungen gehen für alle, ohne Entwickler-Schlüssel (Plan C12, NS1 a), aber nur an einen Server, den der Kern
+        // annimmt: auf diesem Gerät, oder im Netz mit gültiger Unterschrift der Entwicklung (NS2 a)
+        const da = e && (await e.server());
         if (da) {
-          const b = await e.bemerkung(bemerkungDaten(m));
+          const b = await (e.meldung ? e.meldung(bemerkungDaten(m)) : e.bemerkung(bemerkungDaten(m)));
           if (!b) return null;
           setze(m.id, { status: "weitergeleitet" }, { von: ui.von, notiz: `Bemerkung Nr. ${b.nr}` });
           return "server";
         }
-        if (weg === "server") return sag(!e || !e.freigeschaltet()
-          ? "Gewählt ist der Entwickler-Server, aber der Entwickler-Modus ist auf diesem Gerät nicht freigeschaltet."
-          : e.serverMeldung());
+        if (weg === "server") return sag(!e ? "Gewählt ist der Entwickler-Server, aber diese Seite kennt keinen." : e.serverMeldung());
       }
       const mail = weg === "text" ? null : mailLink(m);
       if (weg === "mail" && !mail) return sag("Gewählt ist E-Mail, aber die Entwicklung hat noch keine Adresse eingetragen.");

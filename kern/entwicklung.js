@@ -73,8 +73,12 @@
     const basis = () => adresseGueltig(typeof o.adresse === "function" ? o.adresse() : "") || "";
     const SERVER_FEHLT_HIER = "Entwickler-Server nicht gefunden.\n\nDer Entwickler-Modus funktioniert nur im lokalen Repo mit laufendem Server:\n"
       + `python tools/entwickler_server.py\ndanach http://localhost:8765/${o.start || ""} öffnen.`;
-    const serverFehltBei = a => (a ? `Entwickler-Server unter ${a} nicht erreichbar.\n\nLäuft python tools/entwickler_server.py `
-      + "auf diesem Gerät mit diesem Port? Die Adresse steht unter Verwaltung → Einstellungen." : SERVER_FEHLT_HIER);
+    const serverFehltBei = a => (!a ? SERVER_FEHLT_HIER
+      : /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(a)
+        ? `Entwickler-Server unter ${a} nicht erreichbar.\n\nLäuft python tools/entwickler_server.py auf diesem Gerät mit diesem Port? `
+          + "Die Adresse steht unter Verwaltung → Einstellungen."
+        : `Meldungsserver unter ${a} nicht erreichbar.\n\nStimmt die Adresse (Verwaltung → Einstellungen)? Ist das Gerät mit dem `
+          + "Internet verbunden? Bis er wieder erreichbar ist, gehen Meldungen per E-Mail oder als Text.");
     const serverFehlt = () => serverFehltBei(basis());
     const FREMDER_SERVER = "Hier antwortet ein anderer Server ohne Entwickler-Funktionen (z. B. ein noch laufendes "
       + "python -m http.server auf demselben Port).\n\nDiesen beenden, dann python tools/entwickler_server.py starten "
@@ -184,7 +188,7 @@
       const a = adresseGueltig(roh);
       if (a === null) {
         return { ok: false, fremd: false, ungueltig: true, adresse: null, ziel: roh,
-          text: `Nicht geprüft: ${roh} ist nicht erlaubt. Erlaubt ist nur http://localhost:<Port> oder http://127.0.0.1:<Port>, leer für diese Seite.` };
+          text: `Nicht geprüft: ${roh} ist nicht erlaubt. ${ADRESSE_REGEL}` };
       }
       let ok = false, andere = false, st = null, echt = false;
       try {
@@ -232,7 +236,7 @@
     function nachVermerk(antwort) {
       if (!antwort) return false;
       if (antwort.eingereicht) {
-        uebernimm(antwort.stand);
+        if (antwort.stand) uebernimm(antwort.stand); // ein Server im Netz kennt den Prüfstand nicht und schickt keinen
         melde(`Eingereicht (Nr. ${antwort.nr}). Es wirkt, sobald die Entwicklung es übernimmt — bis dahin bleibt es wie bisher.`);
         return true;
       }
@@ -273,6 +277,24 @@
     /** Bemerkung für die Entwicklung: { text, spiel?|inhalt?, stufe?, liste?, eintrag?, schluessel?, aufgabe? }. */
     const bemerkung = daten => sende("/entwicklung/bemerkung",
       { von: name(), seite: typeof location !== "undefined" ? location.pathname : "", ...daten });
+    /**
+     * Bestätigte Meldung an den Server, ohne Entwickler-Schlüssel (Plan C12, NS1 a: Meldungen gehen für alle). Nur an
+     * einen Server, den server() annimmt (im Netz mit gültiger Unterschrift). { nr } oder null (dann gemeldet).
+     */
+    async function meldung(daten) {
+      if (!(await server())) { melde(serverMeldung()); return null; }
+      try {
+        const r = await fetch(basis() + "/entwicklung/meldung", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...daten, app: o.app, versionen: versionen(), protokoll: PROTOKOLL }) });
+        const antwort = await r.json();
+        if (!r.ok) { melde(`Server: ${antwort.fehler || r.status}`); return null; }
+        return antwort;
+      } catch (e) {
+        serverDa = null;
+        melde(serverMeldung());
+        return null;
+      }
+    }
     /** Alle Bemerkungen der App (über den Server) oder null. */
     async function bemerkungen() {
       if (!(await server())) return null;
@@ -281,21 +303,29 @@
 
     return { app: o.app, adresse: basis, freigeschaltet, aktiv, freischalten, rolle, anforderungLink, sperren, setzeAn, benenne, name, zustand, server, serverMeldung, verbindungPruefen, versionen,
       /** Antwortet auf der Adresse ein anderer Server (nach server())? */ fremd: () => fremd,
-      setzeGeprueft, setzeEintraege, bemerkung, bemerkungen, bemerkungStatus };
+      setzeGeprueft, setzeEintraege, bemerkung, meldung, bemerkungen, bemerkungStatus };
   }
+  /** Was als Adresse erlaubt ist, für Meldungen an die Person (eine Stelle für Kern und Apps). */
+  const ADRESSE_REGEL = "Erlaubt ist ein Entwickler-Server auf diesem Gerät (http://localhost:<Port> oder http://127.0.0.1:<Port>) "
+    + "oder ein Server im Netz über https (https://name.beispiel.ch), leer für diese Seite.";
   /**
-   * Adresse eines Entwickler-Servers prüfen (C11-3 a): "" (dieselbe Seite) oder http(s)://localhost bzw. 127.0.0.1 mit
-   * Port; Ergebnis ohne Schrägstrich am Ende, oder null, wenn die Adresse nicht erlaubt ist. Ein Server im Netz braucht
-   * einen eigenen Entscheid (später nur verschlüsselt und mit geheimer Kennung).
+   * Adresse eines Entwickler-Servers prüfen: "" (dieselbe Seite), http(s)://localhost bzw. 127.0.0.1 mit Port (C11-3 a)
+   * oder — seit Kern 1.39.0, Plan C12 NS1 a — ein Name im Netz nur über https (https://name.beispiel.ch[:Port]); dort
+   * nimmt server() nur einen Server mit gültiger Unterschrift der Entwicklung an (NS2 a). Ergebnis ohne Schrägstrich
+   * am Ende, oder null, wenn die Adresse nicht erlaubt ist (http im Netz, IP-Adressen im Netz, Pfade, andere Protokolle).
    */
   function adresseGueltig(text) {
     const t = String(text ?? "").trim();
     if (!t) return "";
-    const m = t.match(/^(https?):\/\/(localhost|127\.0\.0\.1)(?::(\d{1,5}))?\/?$/i);
-    if (!m || (m[3] && (Number(m[3]) < 1 || Number(m[3]) > 65535))) return null;
-    return `${m[1].toLowerCase()}://${m[2].toLowerCase()}${m[3] ? `:${Number(m[3])}` : ""}`;
+    const port = p => !p || (Number(p) >= 1 && Number(p) <= 65535);
+    const lokal = t.match(/^(https?):\/\/(localhost|127\.0\.0\.1)(?::(\d{1,5}))?\/?$/i);
+    if (lokal) return port(lokal[3]) ? `${lokal[1].toLowerCase()}://${lokal[2].toLowerCase()}${lokal[3] ? `:${Number(lokal[3])}` : ""}` : null;
+    const netz = t.match(/^https:\/\/((?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63})(?::(\d{1,5}))?\/?$/i);
+    if (!netz || !port(netz[2])) return null;
+    return `https://${netz[1].toLowerCase()}${netz[2] ? `:${Number(netz[2])}` : ""}`;
   }
   entwicklung.adresseGueltig = adresseGueltig;
+  entwicklung.ADRESSE_REGEL = ADRESSE_REGEL;
   entwicklung.PROTOKOLL = PROTOKOLL;
   entwicklung.SERVER_SCHLUESSEL = SERVER_SCHLUESSEL;
   entwicklung.unterschriftEcht = unterschriftEcht;

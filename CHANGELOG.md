@@ -1485,3 +1485,17 @@
   neue Fälle in `tools/pruefe_server.py` (45; fünf openssl-Unterschriften bestehen die WebCrypto-Prüfung des Kerns,
   andere Zufallszahl und fremdes Paar nicht), Gegenprobe (r und s vertauscht): gemeldet; 3 neue Kern-Fälle mit echter
   WebCrypto-Unterschrift; im Browser: „…, Protokoll 1, ohne Unterschrift.“, keine Konsolenfehler.
+- Plan C12, NS1 a — Meldungsserver im Netz (Kern 1.39.0): `tools/entwickler_server.py <port> --netz [--host …]
+  [--zertifikat … --zertifikat-schluessel …]` liefert kein Repo aus, schreibt nur nach `.entwicklung/daten/<app>/`,
+  protokolliert keine Anfragen (keine IP-Adressen), nimmt Meldungen von allen ohne Schlüssel an
+  (`/entwicklung/meldung`, gültige Kennung, höchstens 20 je Absender und Stunde, ohne Namen), Vermerke nur von
+  zugelassenen Aufsichten (Antwort ohne Prüfstand), `/entwicklung/holen` und `/entwicklung/senden` nur mit dem
+  Schlüssel der Entwicklung; `GET /entwicklung/bemerkungen` gibt es dort nicht. Werkzeug: `entwicklung_abgleich.py holen
+  --server https://…` und `senden` prüfen vorher die Unterschrift mit openssl (nur dann geht entwickler.key hin), legen
+  Meldungen nach Kennung und den Rest nach Quelle und Server-Nummer zusammen. Kern: Adressen im Netz nur über https mit
+  Namen, `meldung()` ohne Schlüssel, `weitergeben` ohne Entwickler-Modus, Hinweis „Meldungsserver … nicht erreichbar“
+  für Adressen im Netz. Apps: Text zur Adresse aus `KERN.entwicklung.ADRESSE_REGEL`, `kontakt.js` beschrieben. Tests: 13
+  neue Fälle in `tools/pruefe_server.py` (58), Gegenprobe (Netz ohne Sperre): gemeldet; Kern-Fälle für Adressen im Netz,
+  Zwang zur Unterschrift und Meldung ohne Schlüssel; Lernsteig-Test unverändert grün; im Browser: http im Netz
+  abgewiesen, https im Netz erreichbar geprüft (`.invalid`, keine fremde Anfrage), keine Konsolenfehler ausser der
+  Namensauflösung.

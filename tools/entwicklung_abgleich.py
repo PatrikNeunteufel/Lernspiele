@@ -13,7 +13,12 @@ Aufruf:
     python tools/entwicklung_abgleich.py uebernehmen app --ablehnen 4      Vermerk Nr. 4 (mit seiner Freigabe) ablehnen
     python tools/entwicklung_abgleich.py uebernehmen app --zuruecknehmen "Vorname Name"   alle angenommenen Vermerke
                                                                            der Person aus dem Prüfstand nehmen
-Später (mit dem Meldungsserver im Netz, NS1): holen und senden.
+    python tools/entwicklung_abgleich.py holen --server https://… [app]    Meldungen, Bemerkungen und Vermerke vom
+                                                                           Meldungsserver im Netz holen (NS1 a)
+    python tools/entwicklung_abgleich.py senden --server https://… [app]   Status, Antworten und Entscheide zurück
+Vor holen und senden muss sich der Server mit der Unterschrift der Entwicklung ausweisen (NS2 a, SERVER_SCHLUESSEL in
+kern/entwicklung.js); erst dann geht der Schlüssel der Entwicklung (entwickler.key) an ihn. Ein Server auf diesem Gerät
+(localhost) darf ohne Unterschrift.
 """
 import datetime
 import json
@@ -188,6 +193,117 @@ def zuruecknehmen(app: str, name: str) -> list:
     return ziele
 
 
+# ----- holen und senden: Abgleich mit dem Meldungsserver im Netz (NS1 a, ES3 a) -----
+# Vor jedem Abgleich weist sich der Server mit seiner Unterschrift aus (NS2 a): nur dann bekommt er den Schlüssel der
+# Entwicklung. Ein Server auf diesem Gerät (localhost) darf ohne Unterschrift.
+import re  # noqa: E402
+import secrets  # noqa: E402
+import subprocess  # noqa: E402
+import tempfile  # noqa: E402
+import urllib.parse  # noqa: E402
+import urllib.request  # noqa: E402
+
+
+def server_schluessel_aus_kern() -> str:
+    t = (Path(ES.ENTWICKLUNG_JS)).read_text(encoding="utf-8")
+    m = re.search(r'const SERVER_SCHLUESSEL = "([A-Za-z0-9+/=]*)";', t)
+    return m.group(1) if m else ""
+
+
+def roh_zu_der(roh: bytes) -> bytes:
+    """r‖s (je 32 Byte) wieder als DER, für openssl dgst -verify."""
+    def zahl(b: bytes) -> bytes:
+        b = b.lstrip(b"\x00") or b"\x00"
+        if b[0] & 0x80:
+            b = b"\x00" + b
+        return b"\x02" + bytes([len(b)]) + b
+    inhalt = zahl(roh[:32]) + zahl(roh[32:])
+    return b"\x30" + bytes([len(inhalt)]) + inhalt
+
+
+def unterschrift_gueltig(st: dict, zufall: str, oeffentlich_b64: str) -> bool:
+    import base64
+    if not oeffentlich_b64 or not st.get("unterschrift") or not ES.openssl():
+        return False
+    pem = "-----BEGIN PUBLIC KEY-----\n" + "\n".join(oeffentlich_b64[i:i + 64] for i in range(0, len(oeffentlich_b64), 64)) + "\n-----END PUBLIC KEY-----\n"
+    text = f"{ES.UNTERSCHRIFT_ZWECK}|{zufall}|{st.get('server', '')}".encode("utf-8")
+    with tempfile.TemporaryDirectory() as t:
+        (Path(t) / "oeff.pem").write_text(pem, encoding="ascii")
+        (Path(t) / "u.der").write_bytes(roh_zu_der(base64.b64decode(st["unterschrift"])))
+        r = subprocess.run([ES.openssl(), "dgst", "-sha256", "-verify", str(Path(t) / "oeff.pem"), "-signature", str(Path(t) / "u.der")],
+                           input=text, capture_output=True, timeout=10)
+    return r.returncode == 0
+
+
+def auf_diesem_geraet(url: str) -> bool:
+    return urllib.parse.urlparse(url).hostname in ("localhost", "127.0.0.1")
+
+
+def frage(url: str, pfad: str, daten: dict | None = None) -> dict:
+    roh = None if daten is None else json.dumps(daten).encode("utf-8")
+    req = urllib.request.Request(url.rstrip("/") + pfad, data=roh, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return json.loads(r.read() or b"{}")
+
+
+def pruefe_server(url: str, oeffentlich_b64: str) -> dict:
+    """Status mit Zufallszahl; wirft, wenn der Server im Netz nicht mit dem Schlüssel der Entwicklung unterschreibt."""
+    if not url.startswith("https://") and not auf_diesem_geraet(url):
+        raise RuntimeError("Im Netz nur über https.")
+    zufall = secrets.token_hex(16)
+    st = frage(url, f"/entwicklung/status?zufall={zufall}")
+    if not auf_diesem_geraet(url) and not unterschrift_gueltig(st, zufall, oeffentlich_b64):
+        raise RuntimeError(f"{url} weist sich nicht als Server der Entwicklung aus — der Schlüssel der Entwicklung geht nicht dorthin.")
+    return st
+
+
+def schluessel_der_entwicklung() -> str:
+    if not ES.SCHLUESSEL_DATEI.exists():
+        raise RuntimeError("entwickler.key fehlt: python tools/entwickler_server.py --neuer-schluessel")
+    return ES.SCHLUESSEL_DATEI.read_text(encoding="utf-8").strip()
+
+
+def holen(url: str, app: str, schluessel: str, oeffentlich_b64: str, lokal: dict | None = None) -> dict:
+    """Meldungen, Bemerkungen und eingereichte Vermerke vom Server in die lokalen Dateien (gitignored), nach Kennung
+    vereinigt: eine Meldung nur einmal, sonst je Server und Nummer (quelle, server_nr). → { bemerkungen, eingang } neu.
+    lokal: { bemerkungen, eingang } als Pfade (Standard: die der App im Repo)."""
+    pruefe_server(url, oeffentlich_b64)
+    a = lokal or ES.APPS[app]
+    quelle = urllib.parse.urlparse(url).netloc
+    d = frage(url, "/entwicklung/holen", {"schluessel": schluessel, "app": app, "protokoll": ES.PROTOKOLLE[1]})
+    neu = {"bemerkungen": 0, "eingang": 0}
+    lokal = ES.lies_bemerkungen(a) if a["bemerkungen"].exists() else []
+    for b in d.get("bemerkungen", []):
+        if b.get("meldung") and any(x.get("meldung") == b["meldung"] for x in lokal):
+            continue
+        if any(x.get("quelle") == quelle and x.get("server_nr") == b.get("nr") for x in lokal):
+            continue
+        lokal.append({**b, "nr": max((x["nr"] for x in lokal), default=0) + 1, "quelle": quelle, "server_nr": b.get("nr")})
+        neu["bemerkungen"] += 1
+    eingang = ES.lies_eingang(a)
+    for v in d.get("eingang", []):
+        if any(x.get("quelle") == quelle and x.get("server_nr") == v.get("nr") for x in eingang):
+            continue
+        eingang.append({**v, "nr": max((x["nr"] for x in eingang), default=0) + 1, "quelle": quelle, "server_nr": v.get("nr")})
+        neu["eingang"] += 1
+    for datei, inhalt in ((a["bemerkungen"], lokal), (a["eingang"], eingang)):
+        datei.parent.mkdir(parents=True, exist_ok=True)
+        datei.write_bytes((json.dumps(inhalt, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+    return neu
+
+
+def senden(url: str, app: str, schluessel: str, oeffentlich_b64: str, lokal: dict | None = None) -> dict:
+    """Status und Antworten der Bemerkungen und die Entscheide über Vermerke zurück auf den Server, von dem sie kamen."""
+    pruefe_server(url, oeffentlich_b64)
+    a = lokal or ES.APPS[app]
+    quelle = urllib.parse.urlparse(url).netloc
+    bem = [{"nr": b["server_nr"], "status": b.get("status"), "antwort": b.get("antwort")}
+           for b in (ES.lies_bemerkungen(a) if a["bemerkungen"].exists() else []) if b.get("quelle") == quelle]
+    ein = [{"nr": v["server_nr"], "status": v["status"]} for v in ES.lies_eingang(a) if v.get("quelle") == quelle and v.get("status") != "offen"]
+    frage(url, "/entwicklung/senden", {"schluessel": schluessel, "app": app, "protokoll": ES.PROTOKOLLE[1], "bemerkungen": bem, "eingang": ein})
+    return {"bemerkungen": len(bem), "eingang": len(ein)}
+
+
 # ----- Ausgabe -----
 def zeige(app: str) -> None:
     gs = freigaben(app)
@@ -205,6 +321,18 @@ def zeige(app: str) -> None:
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     args = sys.argv[1:]
+    if args and args[0] in ("holen", "senden"):
+        url = args[args.index("--server") + 1] if "--server" in args and args.index("--server") + 1 < len(args) else None
+        if not url:
+            sys.exit(f"Aufruf: python tools/entwicklung_abgleich.py {args[0]} --server https://… [app]")
+        try:
+            for app in [a for a in args[1:] if a in ES.APPS] or list(ES.APPS):
+                f = holen if args[0] == "holen" else senden
+                n = f(url, app, schluessel_der_entwicklung(), server_schluessel_aus_kern())
+                print(f"{app}: {args[0]} — {n['bemerkungen']} Bemerkung(en), {n['eingang']} Vermerk(e)")
+        except (RuntimeError, OSError) as e:
+            sys.exit(str(e))
+        return 0
     if not args or args[0] != "uebernehmen":
         print(__doc__)
         return 2

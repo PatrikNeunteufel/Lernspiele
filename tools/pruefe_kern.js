@@ -2019,7 +2019,13 @@ console.log("listenpruefung.js");
     const EP2 = M({ app: "eulenpfad", titel: "Eulenpfad", speicher: sp, inhalt: { feld: "spiel", wort: "Spiel" }, status: { geplant: {}, behoben: {} }, entwicklung: stub, kontakt: () => ({ meldungen: adresse }) });
     gleich(await EP2.weitergeben(EP2.alle()[0], { von: "Papa" }), "server", "weitergeben: Entwickler-Server zuerst");
     gleich([gesendet.meldung, gesendet.spiel, EP2.alle()[0].status, EP2.alle()[0].verlauf.pop().notiz].join(), `${m1.id},x,weitergeleitet,Bemerkung Nr. 7`, "weitergeben: Bemerkung mit Kennung, Status");
+    // Meldungen gehen für alle (NS1 a): ohne Entwickler-Modus über meldung(), ohne Schlüssel
+    let offen = null;
     stub.freigeschaltet = () => false;
+    stub.meldung = async d => { offen = d; return { nr: 8 }; };
+    const a0 = EP2.neueAnregung({ name: "Papa", art: "neu", text: "ohne Schlüssel" });
+    gleich([await EP2.weitergeben(a0, { von: "Papa" }), offen && offen.meldung].join(), `server,${a0.id}`, "weitergeben: ohne Entwickler-Modus über meldung() an den Server");
+    stub.server = async () => null; // kein Server: E-Mail, sonst Text
     gleich(await EP2.weitergeben(a1, { bestaetigen: () => false }), null, "weitergeben: E-Mail abgebrochen");
     gleich(await EP2.weitergeben(a1, { bestaetigen: () => true, oeffne: u => { geoeffnet = u; } }), "mail", "weitergeben: E-Mail");
     gleich(geoeffnet.startsWith("mailto:meldungen@example.org?subject=Eulenpfad%3A%20Anregung"), true, "weitergeben: mailto geöffnet");
@@ -2185,6 +2191,27 @@ console.log("listenpruefung.js");
     const sE = await EU.server();
     gleich([vpE.ok, vpE.echt, /Unterschrift der Entwicklung geprüft/.test(vpE.text), sE && sE.echt].join("|"), "true|true|true|true",
       "Server unterschreibt die Zufallszahl: echt in verbindungPruefen und server()");
+    // Server im Netz (NS1 a): nur https mit Namen; angenommen nur mit gültiger Unterschrift (NS2 a); Meldung ohne Schlüssel
+    const AG2 = KERN.entwicklung.adresseGueltig;
+    gleich([AG2("https://Meldungen.Beispiel.ch/"), AG2("https://a.b.ch:8443"), AG2("http://meldungen.beispiel.ch"), AG2("https://10.0.0.5"),
+      AG2("https://beispiel"), AG2("https://beispiel.ch/pfad"), AG2("https://-x.ch")].join("|"),
+    "https://meldungen.beispiel.ch|https://a.b.ch:8443|||||", "adresseGueltig: https mit Namen ja; http im Netz, IP, ohne Punkt, Pfad, Bindestrich vorn nein");
+    const EN = KERN.entwicklung({ app: "lernsteig", speicher: mapSp(), aufsicht: () => true, adresse: () => "https://meldungen.beispiel.ch", serverSchluessel: spki, melde: () => {} });
+    let netzAnfrage = null;
+    const signiert = { an: false };
+    global.fetch = async (u, init) => {
+      if (init && init.method === "POST") { netzAnfrage = { u: String(u), body: JSON.parse(init.body) }; return { ok: true, status: 200, json: async () => ({ nr: 12 }) }; }
+      const z = (String(u).match(/zufall=([0-9a-f]+)/) || [])[1];
+      return { ok: true, status: 200, json: async () => ({ ok: true, server: "1.0.0", protokoll: [P, P], ...(signiert.an ? { unterschrift: await unterschreibe(z, "1.0.0") } : {}) }) };
+    };
+    gleich([await EN.server(), /weist sich nicht als Server der Entwicklung aus \(keine Unterschrift\)/.test(EN.serverMeldung()), await EN.meldung({ text: "x" })].join("|"),
+      "|true|", "im Netz ohne Unterschrift: kein Server, Meldung sagt warum, nichts gesendet");
+    gleich(netzAnfrage, null, "im Netz ohne Unterschrift: keine Anfrage mit Daten");
+    signiert.an = true;
+    const EN2 = KERN.entwicklung({ app: "lernsteig", speicher: mapSp(), aufsicht: () => false, adresse: () => "https://meldungen.beispiel.ch", serverSchluessel: spki, melde: () => {} });
+    const mn = await EN2.meldung({ text: "Fehler", meldung: "M-a-b" });
+    gleich([mn && mn.nr, netzAnfrage && netzAnfrage.u, netzAnfrage && "schluessel" in netzAnfrage.body, netzAnfrage && netzAnfrage.body.protokoll].join("|"),
+      `12|https://meldungen.beispiel.ch/entwicklung/meldung|false|${P}`, "im Netz mit Unterschrift: Meldung ohne Schlüssel und ohne Anmeldung als Aufsicht");
     KERN.version = kernAlt;
     global.fetch = fetchAlt;
     wirft(() => M({ inhalt: { feld: "spiel" } }), "meldungen ohne speicher");

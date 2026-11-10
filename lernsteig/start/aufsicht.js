@@ -221,13 +221,14 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
   }
 
   // Weg der Meldungen und Adresse des Entwickler-Servers (Plan C11, C11-3 a; KERN.meldungen.meldeweg): nur auf diesem
-  // Gerät; erlaubt ist nur ein Entwickler-Server auf diesem Gerät (localhost, 127.0.0.1).
+  // Gerät; erlaubt ist ein Entwickler-Server auf diesem Gerät (localhost, 127.0.0.1) oder ein Meldungsserver im Netz über
+  // https, angenommen nur mit der Unterschrift der Entwicklung (Plan C12, NS1 a, NS2 a).
   function meldewegKarte() {
     const M = LST.MELDUNGEN, w = M.meldeweg();
     const hinweis = el("p", { class: "meldung", role: "status" });
     const setze = daten => { try { M.setzeMeldeweg(daten); meldung = "Einstellung gespeichert."; } catch (e) { meldung = e.message; } zeichne(); };
     const adresse = feld("Adresse des Entwickler-Servers", { type: "text", name: "server-adresse", value: w.eigeneAdresse ? w.server : "",
-      placeholder: `Vorgabe: ${w.vorgabe || "diese Seite"}`, autocomplete: "off" }, "Leer: diese Seite. Erlaubt ist nur http://localhost:<Port> oder http://127.0.0.1:<Port>.");
+      placeholder: `Vorgabe: ${w.vorgabe || "diese Seite"}`, autocomplete: "off" }, KERN.entwicklung.ADRESSE_REGEL);
     return el("section", { class: "einstellungen" },
       auswahl("Weg", [
         { id: "auto", name: "automatisch (Server, E-Mail, Text)" }, { id: "server", name: "nur Entwickler-Server" },
