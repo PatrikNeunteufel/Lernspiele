@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vorschau Abschluss-Animationen</title>
+<!-- Abnahme der Piloten (docs/konzept_abschluss_animationen.md 7, AN1 a; LERN_Session27): jedes Pilotspiel mit
+     ?feier=<stufe>&sterne=… in einem Rahmen der gewählten Breite, alle sechs Stufen untereinander. Nicht Teil einer App,
+     wird nicht veröffentlicht; öffnen über den Entwickler-Server (python tools/entwickler_server.py), dann
+     http://localhost:<port>/tools/feier_vorschau.html — die Spiele liegen unter ../eulenpfad/spiele/. -->
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px 16px; background: #f4f1ea; color: #2d3047; }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  .leiste { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 12px; }
+  .leiste label { display: flex; gap: 6px; align-items: center; max-width: 100%; }
+  select, button { font: inherit; padding: 4px 8px; max-width: 100%; min-width: 0; }
+  .stufe { margin: 10px 0 18px; }
+  .stufe h2 { font-size: 15px; margin: 0 0 4px; }
+  .rahmen { overflow: hidden; border: 1px solid #c9c3b0; background: #fff; }
+  iframe { border: 0; transform-origin: 0 0; display: block; }
+  .hinweis { font-size: 13px; color: #6b7089; margin: 0 0 10px; max-width: 70em; }
+</style>
+</head>
+<body>
+<h1>Vorschau Abschluss-Animationen</h1>
+<p class="hinweis">Je Stufe das Schlussbild des Spiels in der gewählten Breite. „Nochmal“ im Bild spielt die Animation neu,
+ein Tippen springt ans Ende. Es wird nichts gespeichert. „Bewegung reduzieren“ zeigt das Endbild wie mit der Einstellung
+des Geräts. Verkleinert passt eine Breite ins Fenster; für die Abnahme in echter Grösse „Verkleinern“ ausschalten.</p>
+<div class="leiste">
+  <label>Spiel <select id="spiel"></select></label>
+  <label>Breite <select id="breite"><option value="1024">Desktop (1024 px)</option><option value="768">Tablet (768 px)</option><option value="375">Handy (375 px)</option></select></label>
+  <label>Sterne <select id="sterne"><option>1</option><option>2</option><option selected>3</option></select></label>
+  <label><input type="checkbox" id="ruhig"> Bewegung reduzieren</label>
+  <label><input type="checkbox" id="klein" checked> Verkleinern</label>
+  <button type="button" id="neu">↻ Alle neu</button>
+</div>
+<div id="stufen"></div>
+<script>
+"use strict";
+// Die acht Piloten (Konzept, Pilotliste): Id des Spiels, Name, Muster
+const PILOTEN = [
+  ["rechen-rakete", "P1 Rechen-Rakete", "REISE"], ["dezimal-rakete", "P2 Dezimal-Rakete", "ZOOM"],
+  ["himmels-forscher", "P3 Himmels-Forscher", "ZYKLUS, REISE, SZENE"], ["wortfamilien-baum", "P4 Wortfamilien-Baum", "WACHSEN"],
+  ["zahlenmauer", "P5 Zahlenmauer-Baumeister", "BAUEN"], ["instrumente", "P6 Instrumenten-Kenner", "AUFTRITT"],
+  ["anlaut-angel", "P7 Anlaut-Angel", "SAMMELN"], ["schweiz-karte", "P8 Schweiz-Karten-Suche", "KARTE"],
+];
+const $ = id => document.getElementById(id);
+const auswahl = new URLSearchParams(location.search);
+for (const [id, name, muster] of PILOTEN) $("spiel").append(new Option(`${name} · ${muster}`, id));
+for (const k of ["spiel", "breite", "sterne"]) if (auswahl.get(k)) $(k).value = auswahl.get(k);
+const HOEHE = 620;
+function zeichne() {
+  const spiel = $("spiel").value, breite = Number($("breite").value), sterne = $("sterne").value;
+  const ruhig = $("ruhig").checked, klein = $("klein").checked;
+  history.replaceState(null, "", `?spiel=${spiel}&breite=${breite}&sterne=${sterne}`);
+  const platz = Math.max(320, document.body.clientWidth - 34);
+  const faktor = klein ? Math.min(1, platz / breite) : 1;
+  $("stufen").innerHTML = "";
+  for (let n = 1; n <= 6; n++) {
+    const box = document.createElement("div");
+    box.className = "stufe";
+    const h = document.createElement("h2");
+    h.textContent = `Stufe ${n}`;
+    const rahmen = document.createElement("div");
+    rahmen.className = "rahmen";
+    rahmen.style.width = `${Math.round(breite * faktor)}px`;
+    rahmen.style.height = `${Math.round(HOEHE * faktor)}px`;
+    const f = document.createElement("iframe");
+    f.width = breite; f.height = HOEHE;
+    f.style.transform = `scale(${faktor})`;
+    f.title = `Stufe ${n}`;
+    f.src = `../eulenpfad/spiele/${spiel}/index.html?feier=s${n}&sterne=${sterne}${ruhig ? "&ruhig=1" : ""}`;
+    rahmen.append(f);
+    box.append(h, rahmen);
+    $("stufen").append(box);
+  }
+}
+for (const k of ["spiel", "breite", "sterne", "ruhig", "klein"]) $(k).addEventListener("change", zeichne);
+$("neu").addEventListener("click", zeichne);
+zeichne();
+</script>
+</body>
+</html>

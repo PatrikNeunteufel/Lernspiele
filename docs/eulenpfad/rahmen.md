@@ -1082,6 +1082,10 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   `feier`: `feier.js` geladen, Animation im Schlussbild, jede Stufe mit Bild, Schmuck passend zu 1–3 Sternen, mit
   „Bewegung reduzieren“ keine Bewegung, sonst Bewegung. Die Klickzahlen eines Spiels mit Animation ändern sich (kein
   Konfetti mehr, das Zufallszahlen verbrauchte; die Animation ist anklickbar).
+- **Vorschau:** `?feier=<stufe>&sterne=1–3[&ruhig=1]` zeigt nur das Schlussbild mit der Animation und „↻ Nochmal“ —
+  ohne Anmeldung, ohne Runde, nichts wird gespeichert; die Stufe kommt aus der Skala (auch wenn ihre Inhaltslisten
+  nicht frei sind), Einstellung und Ruhezeit gelten nicht, der Ton schon. `tools/feier_vorschau.html` (nicht
+  veröffentlicht, über den Entwickler-Server) zeigt so alle sechs Stufen eines Piloten in 1024, 768 oder 375 px.
 
 ## 25. Ruhezeiten
 

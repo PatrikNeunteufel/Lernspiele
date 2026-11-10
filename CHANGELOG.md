@@ -1618,3 +1618,9 @@
   mit ausgeblendeten Spielen, Verwaltung auf 768 und 375 px mit allen Bedienungen (Probe-Kind und Probe-Aufsicht danach
   entfernt); „bis 24:00“ stand zuerst leer im Zeitfeld — berichtigt. Doku rahmen.md 25, Konzept (gebaut, eigene
   Entscheide zur Abnahme).
+- Eulenpfad, Vorschau der Abschluss-Animationen für die Abnahme der Piloten: Ein Spiel zeigt mit
+  `?feier=<stufe>&sterne=1–3[&ruhig=1]` nur sein Schlussbild mit „↻ Nochmal“, ohne Anmeldung und ohne Runde (nichts wird
+  gespeichert). Neu `tools/feier_vorschau.html` (nicht veröffentlicht): je Pilot alle sechs Stufen in 1024, 768 oder 375
+  px, Sterne und „Bewegung reduzieren“ wählbar. Im Browser alle 48 Bilder geprüft; zuerst fehlten sie in fünf Spielen,
+  deren Stufen an freigegebenen Inhaltslisten hängen — die Vorschau nimmt die Stufe jetzt aus der Skala. Abnahmeliste im
+  Konzept (Pilotliste). Klickzahlen unverändert.

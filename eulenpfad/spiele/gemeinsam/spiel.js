@@ -2366,6 +2366,21 @@ const LS = (() => {
       }, k => setzeWahl(name, "vorlesen", null, k), neuZeichnen);
     }
 
+    /** Vorschau des Schlussbilds (?feier=): Animation der Stufe mit den Sternen aus ?sterne, „Nochmal“ spielt sie neu. */
+    function feierVorschau(stufe) {
+      const sterne = Math.max(1, Math.min(3, Number(adresse.get("sterne")) || 3));
+      const ruhig = adresse.get("ruhig") === "1" ? true : undefined; // sonst „Bewegung reduzieren“ des Geräts
+      const zeichne = () => {
+        buehne.innerHTML = "";
+        const f = LS_FEIER.zeige(def.feier, { stufe: stufe.id, sterne, klang: ton, ...(ruhig ? { ruhig } : {}) });
+        buehne.append(el("div", { class: "karte mitte", "data-vorschau": "feier" },
+          el("div", { class: "auftrag", text: `Vorschau · Stufe ${stufe.nr} · ${"★".repeat(sterne)}` }),
+          f || el("p", { class: "leise-text", text: "Für diese Stufe gibt es keine Animation." }),
+          el("div", { class: "knopfzeile" }, el("button", { type: "button", class: "knopf hell", text: "↻ Nochmal", onclick: zeichne }))));
+      };
+      zeichne();
+    }
+
     /** „🎧 Diese Runde braucht Ton“ (AN3-T a): mit „Ton für diese Runde an“ weiter, sonst zurück zur Stufenwahl. */
     function tonHinweis(weiter) {
       buehne.innerHTML = "";
@@ -3302,6 +3317,12 @@ const LS = (() => {
     // mit &endlos=1 im Endlos-Modus, wenn die Stufe ihn anbietet.
     const adresse = new URLSearchParams(location.search);
     const direkt = stufenListe.find(st => st.id === adresse.get("stufe"));
+    // ?feier=<stufe>&sterne=1–3[&ruhig=1]: nur das Schlussbild mit der Abschluss-Animation, für die Abnahme der Piloten
+    // (tools/feier_vorschau.html, LERN_Session27). Ohne Anmeldung und ohne Runde: es wird nichts gespeichert. Die
+    // Einstellung „Abschluss-Animation“ und die Ruhezeit gelten hier nicht (es ist eine Vorschau), der Ton schon.
+    // aus der Skala, nicht aus den angebotenen Stufen: die hängen an freigegebenen Inhaltslisten, die Animation nicht
+    const vorschau = SKALA.find(st => st.id === adresse.get("feier"));
+    if (vorschau && def.feier && typeof LS_FEIER !== "undefined") return feierVorschau(vorschau);
     // &mix=1 im iframe des Zufallsmix (Entscheid M1 a): ohne Kopfzeile, mit &timer=1 und &endlos=1 vom Mix.
     // Kann das Spiel die verlangte Stufe nicht stellen (nicht frei, keine Stimme), sagt es das dem Mix.
     if (adresse.get("mix") === "1" && parent !== window) {

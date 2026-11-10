@@ -163,6 +163,13 @@ Desktop, Tablet (768 px) und Handy (375 px) angesehen und von Patrik abgenommen 
 | P7 | 🎣 Anlaut-Angel | SAMMELN | Deutsch, 1 | jüngste Kinder (fast ohne Lesetext), das schlichteste Muster | gebaut 10.11.2026 (LERN_Session27, Schritt 2c) |
 | P8 | 🗺️ Schweiz-Karten-Suche | KARTE | NMG, 4 | Kartendaten des Spiels wiederverwenden statt neu zeichnen | gebaut 10.11.2026 (LERN_Session27, Schritt 2c) |
 
+**Abnahme** (Patrik): `python tools/entwickler_server.py`, dann `http://localhost:<port>/tools/feier_vorschau.html` —
+je Pilot alle sechs Stufen in 1024, 768 und 375 px, mit 1, 2 und 3 Sternen, einmal mit „Bewegung reduzieren“.
+Je Pilot prüfen: führt die Stufe sichtbar weiter; stimmt der Inhalt fachlich (Spalte „Prüft am Rahmen“ oben und die
+Abweichungen unten); passt der Schmuck zu den Sternen; ruckelt nichts, ragt nichts aus dem Bild; beim
+Instrumenten-Kenner mit Ton an je Auftritt ein Ton, mit 🔇 still. Was nicht passt, als Bemerkung (Entwickler-Modus)
+oder im Chat.
+
 Fremdsprachen und Medien und Informatik sind im Pilot nicht vertreten; ihre Spiele nutzen dieselben Muster (ZYKLUS,
 AUFTRITT, KARTE, REISE) und kommen mit dem fachweisen Ausrollen.
 
