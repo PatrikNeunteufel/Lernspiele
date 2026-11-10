@@ -1,0 +1,338 @@
+# Konzept: Abschluss-Animationen im Eulenpfad
+
+Stand: 10.11.2026 (LERN_Session27) · **Entwurf, nicht entschieden, nicht gebaut.** Entscheide in Abschnitt 7.
+
+## 1. Auslöser
+
+Patrik (LERN_Session27), nach einem Hinweis von Gemini: Bei erfolgreichem Abschluss einer Runde wäre eine kleine
+Animation „toll für den Lerneffekt“ — je nach Stufe oder Erfolgsgrad (Sterne) oder beidem etwas anders. Beispiele von
+Patrik: Rechen-Rakete (Stufe 1 umrundet die Erde, 2 Mond, 3 Mars, 4 Jupiter, 5 Saturn), Himmels-Forscher (Mondphasen je
+Stufe). Auftrag: Ideen für alle Spiele, als Muster.
+
+**Was belegt ist und was nicht:** Dass eine Belohnung am Ende motiviert weiterzuspielen, ist plausibel; dass eine
+Animation den *Lerneffekt* steigert, ist hier nicht belegt (keine Quelle gesucht). Ein Lerneffekt ist am ehesten zu
+erwarten, wo die Animation den Inhalt des Spiels zeigt (Mondphasen in der richtigen Reihenfolge, Planeten in der
+richtigen Folge) — darum Regel 1 in Abschnitt 3.
+
+## 2. Heute
+
+`spiele/gemeinsam/spiel.js`: Am Ende einer Runde der Schluss mit Sternen (`sterne`, `flug`), bei 3 Sternen und bei einem
+neuen Endlos-Rekord `konfetti()` — für alle Spiele gleich. Reservierte Klassen dafür: `sterne`, `sterne-klein`, `aus`,
+`konfetti`, `flug` (docs/eulenpfad/rahmen.md 2).
+
+## 3. Regeln für jede Animation
+
+1. **Fachlich treu:** Die Animation zeigt den Inhalt richtig — Mondphasen, Planetenfolge, Geografie, Stellenwerte, Noten.
+   Wo ein Bild etwas Falsches behaupten könnte, ein neutrales Bild wählen.
+2. **Kurz und überspringbar:** 2–4 Sekunden; ein Tippen überspringt sie, „Nochmal“ und „Andere Stufe“ sind sofort
+   bedienbar.
+3. **Ruhig:** Mit der Einstellung „Bewegung reduzieren“ des Geräts (`prefers-reduced-motion`) ein stehendes Schlussbild
+   statt Bewegung. Kein Blinken, nichts Grelles, keine Explosionen.
+4. **Nie strafend:** Auch 1 Stern ist ein Erfolg und bekommt die Animation der Stufe; mehr Sterne schmücken nur aus.
+   Eine abgebrochene Runde bekommt keine.
+5. **Eigenes, nichts Nachgebautes:** keine Figuren, Marken, Logos oder bekannten Filmszenen. Die Eule des Eulenpfads ist
+   die eigene Figur und darf überall auftreten.
+6. **Ohne Text:** höchstens Zahlen, wo sie zum Inhalt gehören (Alter 2. Klasse: fast ohne Lesetext).
+7. **Offline und leicht:** SVG und CSS, keine Bibliothek, keine Bilddateien aus dem Netz. Farben aus `--deko-*`; die
+   Stellenfarben `--st-*` nur, wo eine Stelle gezeigt wird — dort aber genau so wie im Spiel (Einer rot, Zehner blau,
+   Hunderter grün, ab den Tausendern wiederholt). Dezimalzahlen über `LS.dezimalText`, Geld über `LS.geldText`.
+8. **Ton nur mit Ton an:** Wenn das Spiel Töne hat (🔇-Schalter), darf die Animation einen kurzen Klang haben, sonst still.
+
+## 4. Was sich ändert: Stufe und Sterne
+
+- **Stufe → Ziel oder Szene.** s1 Einstieg bis s6 Königsstufe gehen einen Schritt weiter: weiter weg, grösser, genauer,
+  vollständiger. So sieht das Kind, dass die höhere Stufe „weiter“ führt.
+- **Sterne → Ausschmückung.** 1 Stern: die Animation schlicht. 2 Sterne: ein Zusatz (etwa ein Fähnchen). 3 Sterne:
+  Feier (Funken oder das bisherige Konfetti, kurz).
+- **Endlos-Modus:** keine Stufen-Animation (die Runde endet mit einem Fehler); wie heute Konfetti bei einem neuen Rekord.
+
+## 5. Muster
+
+Damit nicht 169 Einzelstücke entstehen, baut der Rahmen wenige **Muster**; ein Spiel wählt eines und gibt nur die
+Bilder je Stufe an. Vorschlag für `spiele/gemeinsam/feier.js`:
+
+| Muster | Was geschieht | Beispiel |
+|---|---|---|
+| **REISE** | ein Objekt fliegt oder fährt zu einem Ziel, je Stufe weiter | Rechen-Rakete |
+| **ZYKLUS** | etwas durchläuft Phasen, je Stufe eine Phase weiter | Mondphasen, Jahreszeiten, Lebenszyklus |
+| **WACHSEN** | etwas wächst je Stufe grösser | Samen → Baum |
+| **BAUEN** | etwas wird je Stufe höher oder vollständiger | Zahlenmauer wird zum Turm |
+| **ZOOM** | Genauigkeit oder Vergrösserung, je Stufe eine Stelle mehr | Dezimal-Rakete |
+| **AUFTRITT** | eine Szene wird je Stufe voller | Musik: Solo → Orchester |
+| **SAMMELN** | eine Sammlung füllt sich je Stufe | Regal, Album, Truhe |
+| **KARTE** | ein Weg über eine Karte, je Stufe weiter | Schweiz-Karte |
+
+Schnittstelle (Vorschlag): Das Spiel gibt im Aufruf von `LS.spiel` `feier: { muster: "reise", stufen: { s1: …, s6: … } }`
+mit; der Rahmen spielt sie im Schlussbild ab und kümmert sich um Regeln 2–4 und 8. Ein Spiel ohne `feier` behält das
+heutige Schlussbild.
+
+## 6. Ausgearbeitete Beispiele
+
+### Rechen-Rakete (REISE) — Vorschlag Patrik
+
+s1 die Rakete umrundet die Erde · s2 fliegt zum Mond · s3 zum Mars · s4 zum Jupiter · s5 zum Saturn · s6 hinaus an den
+Rand des Sonnensystems, die Sonne nur noch ein heller Punkt. Die Planeten in der richtigen Folge und mit erkennbaren
+Merkmalen (Mars rötlich, Jupiter mit Streifen, Saturn mit Ring); Abstände nicht massstäblich. Sterne: 2 — ein Fähnchen
+am Ziel, 3 — die Eule winkt aus dem Fenster.
+
+### Dezimal-Rakete (ZOOM) — statt derselben Reise
+
+Gleich wie die Rechen-Rakete wäre doppelt; passender zum Inhalt (Dezimalzahlen): Die Rakete **landet auf einem
+Zahlenstrahl**, und je Stufe wird hineingezoomt — s1 landet auf einer ganzen Zahl, s2 auf dem Zehntel, s3 zwischen zwei
+Zehnteln genau, s4 auf dem Hundertstel, s5 nach zweimal Zoomen auf dem Hundertstel, s6 auf dem Tausendstel genau. Die
+Zahl am Landeplatz steht in der Schreibweise des Geräts (`LS.dezimalText`). Sterne: 2 — Landelichter, 3 — Funken.
+
+### Himmels-Forscher (ZYKLUS, dann REISE)
+
+Das Spiel übt in s1–s4 **Mondphasen**, in s5 und s6 **Planeten**. Darum:
+
+- s1 Sonnenaufgang und -untergang mit **Neumond** daneben — er geht etwa mit der Sonne auf und unter und ist darum
+  nicht zu sehen (nur als dunkle Scheibe angedeutet).
+- s2 nach Sonnenuntergang im Westen die **zunehmende Sichel** (auf der Nordhalbkugel rechts hell).
+- s3 der **Halbmond** im ersten Viertel (rechte Hälfte hell), abends im Süden.
+- s4 der **zunehmende Dreiviertelmond**, dann der **Vollmond**, der bei Sonnenuntergang im Osten aufgeht — der ganze
+  Zyklus, den s4 übt.
+- s5 eine Sonde fliegt von der Sonne aus an den **acht Planeten der Reihe nach** vorbei (was s5 übt).
+- s6 Königsstufe: **Vollmond über einer Hügelkante, die Eule fliegt als Silhouette davor durchs Bild** — eigenes
+  Bild statt der bekannten Filmszene mit dem Fahrrad vor dem Mond (Regel 5).
+
+Sterne: 2 — ein Sternbild leuchtet auf, 3 — Sternschnuppe.
+
+Patriks Idee (Vollmond in Stufe 4 und 5) setzt eine Stufe mehr Mond voraus; s5 und s6 üben aber Planeten.
+
+## 7. Entscheide
+
+Vorgelegt am 10.11.2026 (LERN_Session27), offen:
+
+| Nr. | Frage | Empfehlung |
+|---|---|---|
+| AN1 | Umfang und Reihenfolge | a — Rahmen und die acht Muster bauen, an einem Pilot von acht Spielen (je Muster eines, darunter Rechen-Rakete, Dezimal-Rakete, Himmels-Forscher) prüfen, dann fachweise alle übrigen |
+| AN2 | Was sich ändert | a — Stufe ändert das Ziel, Sterne schmücken aus (Abschnitt 4) |
+| AN3 | Abschaltbar | a — Einstellung der Aufsicht „Abschluss-Animation: an (Standard) / aus“, global und je Spiel; „Bewegung reduzieren“ des Geräts gilt immer |
+
+Die Ideen je Spiel stehen in Abschnitt 8.
+
+## 8. Ideen je Spiel
+
+Entwurf je Spiel (Muster, Folge der sechs Stufen, Zusatz bei 2 und 3 Sternen), entworfen nach den Regeln in
+Abschnitt 3 und von Hand durchgesehen (Himmels-Forscher und Speicher-Leiter an den Inhalt des Spiels angepasst).
+Viele SAMMELN-Ideen sind bewusst schlicht; sie sind Platzhalter, bis ein Spiel ein besseres Bild bekommt.
+
+### Mathe
+
+| Spiel | Muster | s1 → s6 | Sterne |
+|---|---|---|---|
+| 🔍 Stellen-Detektiv | REISE | s1 Lupe leuchtet E, Z, H an · s2 wandert nach links zu T · s3 zu ZT · s4 zu HT · s5 zu M · s6 alle sieben Stellen einer Million leuchten von rechts nach links auf (Stellenfarben) | 2★ Lupe blinkt · 3★ Eule zieht den Detektivhut, Funken |
+| 🧱 Zahlen-Baukasten | BAUEN | s1 Turm aus Einerwürfeln und Zehnerstangen · s2 + Hunderterplatte · s3 + Tausenderwürfel · s4 + ZT-Stange aus 10 Tausenderwürfeln · s5 + HT · s6 Turm bis zur Million (Stellenfarben) | 2★ Kran setzt den letzten Stein · 3★ Fähnchen auf der Spitze |
+| 📮 Tabellen-Post | SAMMELN | s1 Briefe fallen in die Fächer E, Z, H · s2 + Fach T · s3 + ZT · s4 + HT · s5 + M · s6 alle Fächer voll, jede Ziffer im Fach ihrer Stelle (Stellenfarben) | 2★ Postsack winkt · 3★ Eule stempelt, Konfetti |
+| 🃏 Ziffernkarten | BAUEN | s1 Karten legen sich zu einer 3-stelligen Zahl · s2 4-stellig · s3 5-stellig (mit schmalem Leerzeichen) · s4 6-stellig · s5 7-stellig · s6 grösste Zahl aus den Karten, Karten drehen sich der Reihe nach um | 2★ Karten fächern sich · 3★ Karten springen hoch, Funken |
+| 🐸 Zahlen-Hüpfer | REISE | s1 Frosch hüpft in 1er-Schritten über Seerosen · s2 2er · s3 10er · s4 100er · s5 1000er · s6 vor und zurück in 1000er-Schritten bis ans Ufer; jede Seerose trägt die richtige Zahl | 2★ Libelle fliegt mit · 3★ Frosch hüpft im Bogen, Wasserringe glitzern |
+| 🔐 Zahlenrätsel-Tresor | SAMMELN | s1 Tresor öffnet sich, eine Münze · s2 zwei Münzen · s3 kleine Krone · s4 Perlenkette · s5 Edelstein · s6 voller Tresor glänzt, Eule schaut hinein | 2★ Tresorrad dreht eine Ehrenrunde · 3★ Edelsteine funkeln |
+| ⚪ Punkte-Schieber | SAMMELN | s1 Punkte rollen in die Spalten E, Z, H · s2 + T · s3 + ZT · s4 + HT · s5 + M · s6 alle Spalten gefüllt, höchstens 9 Punkte je Spalte, Stellenfarben | 2★ Punkte hüpfen einmal · 3★ Punkte tanzen im Kreis, Funken |
+| ⚡ Einmaleins-Blitz | WACHSEN | Blumenbeet in Reihen: s1 2 × 3 = 6 · s2 2 × 5 = 10 · s3 5 × 6 = 30 · s4 7 × 8 = 56 · s5 9 × 9 = 81 · s6 30 × 7 = 210 als drei Zehnerblöcke je Reihe | 2★ Schmetterling landet · 3★ alle Blumen öffnen sich, Funken |
+| 🚀 Rechen-Rakete | REISE | s1 Rakete umrundet die Erde · s2 fliegt zum Mond · s3 zum Mars · s4 zum Jupiter · s5 zum Saturn mit Ringen · s6 hinter Neptun bis zum Rand des Sonnensystems | 2★ Schweif aus Sternenstaub · 3★ Eule winkt aus dem Fenster, Funkenregen |
+| 🛝 Runden-Rutsche | REISE | s1 Kugel rutscht auf den nächsten Zehner (bis 100) · s2 Zehner bis 1000 · s3 Hunderter · s4 Tausender · s5 Zehntausender · s6 Hunderttausender; Kugel landet immer auf der richtig gerundeten Zahl | 2★ Kugel macht einen Looping · 3★ Fähnchen am Ziel |
+| 🎯 Zahlenstrahl-Pfeil | ZOOM | Pfeil trifft die Zahl auf dem Strahl: s1 bis 100 · s2 bis 1000 · s3 bis 10 000 · s4 bis 100 000 · s5 bis 1 000 000 · s6 1 000 000 auf den Tausender genau, Strahl zoomt hinein | 2★ Pfeil zittert und glänzt · 3★ Ringe um den Treffer, Funken |
+| 🔢 Hundertertafel-Detektiv | SAMMELN | s1 Felder 1–20 leuchten · s2 1–50 · s3 ganze Tafel 1–100 · s4 Tafel wird erste Seite des Tausenderbuchs · s5 fünf Seiten bis 500 · s6 alle zehn Seiten bis 1000 | 2★ Eule blättert eine Seite · 3★ Buch klappt zu, Funken |
+| 🧱 Zahlenmauer-Baumeister | BAUEN | s1 Mauer mit 2 Reihen · s2 3 Reihen · s3 4 Reihen · s4 5 Reihen · s5 grössere Zahlen · s6 6 Reihen; jeder Stein ist die Summe der beiden darunter | 2★ Eule setzt sich oben drauf · 3★ Fähnchen auf dem Deckstein |
+| 🍪 Rest-Rätsel | SAMMELN | Guetzli auf Teller: s1 7 : 2 = 3 Rest 1 · s2 10 : 3 = 3 Rest 1 · s3 17 : 5 = 3 Rest 2 · s4 29 : 4 = 7 Rest 1 · s5 50 : 6 = 8 Rest 2 · s6 100 : 7 = 14 Rest 2; Rest liegt im Glas | 2★ Glas mit dem Rest glänzt · 3★ Eule zählt nach und nickt, Funken |
+| 🍕 Bruch-Pizzeria | BAUEN | Pizza wird belegt: s1 Halbe · s2 Viertel · s3 Achtel · s4 Drittel und Sechstel · s5 1/2 = 2/4 = 4/8 (Erweitern) · s6 6/8 wird zu 3/4 (Kürzen); alle Stücke gleich gross | 2★ Dampf steigt auf · 3★ Eule serviert, Funken |
+| 🐶 Teiler-Spürnase | SAMMELN | Hund schnuppert und findet: s1 Vielfache von 2 bis 20 · s2 von 5 bis 50 · s3 von 3 bis 30 · s4 Teiler von 12 · s5 Teiler von 36 · s6 Primzahlen bis 50 leuchten | 2★ Hund wedelt · 3★ Hund dreht sich, Knochen-Fähnchen |
+| 📡 Überschlags-Radar | ZOOM | Radar wird schärfer: s1 Ergebnis auf den Zehner · s2 Hunderter · s3 Tausender · s4 Stellenzahl erkannt · s5 grosse Zahlen · s6 falsche Rechnung fällt heraus, richtige bleibt im Kreuz | 2★ Radar piept fröhlich · 3★ Radarkreise leuchten auf |
+| 🏰 Mittelwert-Türme | BAUEN | Türme gleichen sich aus: s1 3 und 5 → 4, 4 · s2 2, 4, 6 → 4 · s3 1, 3, 5, 7 → 4 · s4 fünf Türme · s5 sechs Türme · s6 fehlender Turm wächst, bis der Mittelwert stimmt | 2★ Fähnchen auf dem höchsten Turm · 3★ alle Türme mit Fähnchen |
+| 🚲 Velo-Tabelle | REISE | s1 Velo fährt 1 km · s2 2 km · s3 5 km · s4 10 km · s5 zwei Velos, das schnellere ist in gleicher Zeit weiter · s6 Etappe mit Pause, Strecke und Zeit passen zur Tabelle | 2★ Klingel läutet · 3★ Zielband flattert, Fähnchen |
+| 🕰️ Uhr-Werkstatt | ZYKLUS | s1 Zeiger auf volle Stunde · s2 halbe Stunde · s3 Viertel · s4 5 Minuten · s5 auf die Minute · s6 Stundenzeiger dreht zweimal herum: ein ganzer Tag (24 h) | 2★ Kuckuck-Eule ruft einmal · 3★ Zahnräder glänzen, Funken |
+| 🏪 Kiosk-Kasse | SAMMELN | Kasse füllt sich: s1 10 und 20 Rp. · s2 50 Rp. · s3 1 Fr. · s4 2 und 5 Fr. · s5 10-Fr.-Note · s6 volle Kasse bis 100 Fr.; nur Wert auf der Münze, keine echten Notenbilder | 2★ Kasse klingelt · 3★ Münzen glänzen, Fähnchen |
+| 📏 Masse-Umwandler | BAUEN | Messband wächst: s1 10 mm = 1 cm · s2 100 cm = 1 m · s3 1000 g = 1 kg · s4 1000 ml = 1 l · s5 1000 m = 1 km · s6 Messband, Waage und Krug stehen nebeneinander | 2★ Messband rollt sich ein · 3★ Eule misst sich selbst, Funken |
+| 🪞 Spiegel-Raster | BAUEN | Mosaik an der Achse: s1 Quadrat gespiegelt · s2 L-Form · s3 Schmetterling · s4 schräge Form · s5 Form verschoben · s6 zwei Achsen, vier gleiche Teile; jedes Kästchen am richtigen Spiegelplatz | 2★ Spiegel glänzt · 3★ Schmetterling flattert, Funken |
+| 🏴‍☠️ Koordinaten-Schatzsuche | KARTE | Eule geht im Raster, erst nach rechts, dann nach oben: s1 (1∣1) · s2 (2∣3) · s3 (3∣7) · s4 (5∣4) · s5 (8∣6) · s6 über drei Punkte zur Truhe bei (9∣9) | 2★ Truhe öffnet sich · 3★ Edelsteine funkeln |
+| 🐊 Vergleichs-Krokodil | REISE | Krokodil schwimmt den Fluss entlang, Maul offen zur grösseren Zahl: s1 bis 20 · s2 bis 100 · s3 bis 1000 · s4 bis 10 000 · s5 bis 1 000 000 · s6 lange Reihe, alle Zeichen richtig | 2★ Krokodil lächelt · 3★ Seerosen blühen, Funken |
+| 🔟 Zehner-Ergänzer | BAUEN | Turm wird ergänzt: s1 7 + 3 = 10 · s2 37 + 3 = 40 · s3 65 + 35 = 100 · s4 365 + 635 = 1000 · s5 820 + 180 = 1000 · s6 3650 + 6350 = 10 000 (Stellenfarben) | 2★ Deckel klickt auf · 3★ Fähnchen oben |
+| ⚡ Punkte-Blitz | SAMMELN | s1 Würfelbilder 1–6 · s2 Zehnerfeld voll (10) · s3 zwei Zehnerfelder (20) · s4 Zehnerstangen bis 50 · s5 zehn Stangen = 100 · s6 Hunderterplatte und Stangen; Einer rot, Zehner blau, Hunderter grün | 2★ Punkte blinken · 3★ Punkte springen wie Funken |
+| 🏠 Zahlenhaus | BAUEN | Haus wächst: s1 Dach 5, 2 Stockwerke · s2 Dach 7 · s3 Dach 10 · s4 Dach 15 · s5 Dach 20 · s6 Dach 100, sechs Stockwerke; jedes Stockwerk zerlegt richtig (7 = 3 + 4) | 2★ Licht in allen Fenstern · 3★ Eule winkt vom Dach |
+| 🪞 Doppel-Spiegel | WACHSEN | Spiegel verdoppelt: s1 2 → 4 · s2 5 → 10 · s3 25 → 50 · s4 75 → 150 · s5 250 → 500 · s6 500 → 1000, und zurück halbiert | 2★ Spiegel funkelt · 3★ zwei Eulen winken sich zu |
+| ⚖️ Zahlen-Waage | BAUEN | Waage bleibt gerade: s1 3 = 3 · s2 2 + 2 = 4 · s3 8 + 5 = 6 + 7 · s4 9 + 6 = 10 + 5 · s5 25 + 25 = 40 + 10 · s6 70 + 30 = 55 + 45 | 2★ Waage wippt sanft · 3★ Schalen glänzen, Funken |
+| 🔁 Muster-Fortsetzer | BAUEN | Perlenkette wächst (Deko-Farben): s1 AB AB · s2 ABB ABB · s3 ABC ABC · s4 1, 3, 5, 7 · s5 1, 4, 9, 16 als Punkt-Quadrate · s6 1, 4, 9, 16, 25 | 2★ Kette schwingt · 3★ Kette glitzert, Funken |
+| 🔺 Formen-Detektiv | BAUEN | Haus aus Formen: s1 Quadrat · s2 + Dreieck-Dach · s3 + Kreis-Fenster · s4 + Rechteck-Tür · s5 Würfel daneben (8 Ecken, 12 Kanten) · s6 Haus mit Symmetrieachse gespiegelt | 2★ Rauch aus dem Kamin · 3★ Fähnchen auf dem Dach |
+| 📏 Schätz-Waage | BAUEN | Reihe von leicht zu schwer: s1 Feder · s2 + Apfel · s3 + Buch · s4 + Katze · s5 + Kind · s6 + Kuh; die Waage neigt sich immer zur schwereren Seite | 2★ Waage wippt · 3★ Eule landet sanft auf der Feder-Seite, Funken |
+| 🟩 Flächen-Pixel | BAUEN | Mosaik füllt sich: s1 4 Häuschen · s2 8 · s3 12 · s4 20 · s5 zwei Flächen gleich gross · s6 Umfang-Linie läuft einmal ganz herum | 2★ Mosaik leuchtet · 3★ Kästchen hüpfen, Funken |
+| 📖 Rechengeschichten | SAMMELN | Bilderbuch füllt sich: s1 2 + 1 Äpfel · s2 3 + 2 Vögel · s3 8 − 3 Ballone · s4 4 × 2 Räder · s5 12 : 3 Kuchenstücke · s6 Buch mit sechs Seiten klappt auf | 2★ Seiten blättern · 3★ Eule liest, Funken |
+| 🔎 Daten-Detektiv | WACHSEN | s1 Strichliste wächst · s2 Tabelle füllt sich · s3 Säulen wachsen · s4 höchste Säule glänzt · s5 Differenz zweier Säulen leuchtet · s6 ganzes Diagramm passt zur Strichliste | 2★ Säulen wippen · 3★ Fähnchen auf der höchsten Säule |
+| 🧾 Preis-Tabelle | SAMMELN | Korb füllt sich, Preis wächst: s1 1 Stück 2.40 Fr. · s2 2 Stück 4.80 Fr. · s3 5 Stück 12.00 Fr. · s4 10 Stück 24.00 Fr. · s5 rückwärts 12.00 Fr. : 5 · s6 volle Tabelle (Geld über LS.geldText) | 2★ Kassenzettel rollt · 3★ Korb glänzt, Funken |
+| 🛠️ Schriftlich-Werkstatt | BAUEN | Stellen füllen sich von rechts: s1 E · s2 Z · s3 H mit Übertrag (457 + 368 = 825) · s4 T · s5 ZT · s6 HT; Übertrag hüpft je eine Stelle nach links (Stellenfarben) | 2★ Werkzeug klappert · 3★ Eule zieht den Strich, Funken |
+| ✖️ Malkreuz | BAUEN | Rechteck aus Teilen: s1 2 × 7 · s2 12 × 7 · s3 23 × 7 = 140 + 21 = 161 · s4 48 × 6 · s5 23 × 17 · s6 34 × 26 = 600 + 180 + 80 + 24 = 884 | 2★ Teile schieben sich zusammen · 3★ Rechteck glänzt, Funken |
+| 🕵️ Rechentrick-Detektiv | SAMMELN | Werkzeugkasten füllt sich: s1 Tauschen · s2 Verdoppeln · s3 Halbieren · s4 Zusammenfassen · s5 Nachbaraufgabe · s6 voller Kasten klappt zu (Werkzeugbilder, kein Text) | 2★ Lupe glänzt · 3★ Eule tippt an den Hut, Funken |
+| ⚙️ Rechen-Maschine | BAUEN | Maschine bekommt Zahnräder: s1 ein Rad · s2 zwei · s3 drei · s4 vier · s5 fünf · s6 Zahl läuft durch (5 → 10 → 7) und zurück; benachbarte Räder drehen gegenläufig | 2★ Lämpchen leuchtet · 3★ Dampfwölkchen und Funken |
+| 🎯 Zielzahl-Jagd | ZOOM | Pfeil trifft Zielscheibe: s1 äusserer Ring · s2 nächster · s3 mittlerer · s4 innerer · s5 kleiner Kern · s6 genau die Mitte, dort steht die Zielzahl | 2★ Scheibe dreht sich · 3★ Ringe leuchten auf, Funken |
+| 🧩 Möglichkeiten-Finder | SAMMELN | Kleiderschrank füllt sich mit allen Kombinationen: s1 1 Hose × 2 Shirts = 2 · s2 2 × 2 = 4 · s3 2 × 3 = 6 · s4 3 × 3 = 9 · s5 3 × 4 = 12 · s6 2 × 3 × 4 = 24 mit Hüten | 2★ Eule probiert ein Outfit · 3★ Spiegel glänzt, Funken |
+| 🧩 Pentomino-Puzzle | BAUEN | Umriss füllt sich: s1 2 Vierlinge · s2 4 Vierlinge · s3 3 Pentominos · s4 6 Pentominos · s5 9 Pentominos · s6 alle 12 Pentominos im 6 × 10-Rechteck (gültige Lösung) | 2★ Teile rasten ein · 3★ Rechteck glänzt, Funken |
+| 🧊 Würfelbau-Blick | BAUEN | Würfelgebäude wächst: s1 3 Würfel · s2 6 · s3 10 · s4 Treppe · s5 Turm mit Anbau · s6 Gebäude dreht sich, Ansicht vorne, rechts, oben passt | 2★ Schatten zeigt die Ansicht · 3★ Fähnchen auf dem Turm |
+| 📦 Netz-Falter | BAUEN | Netz faltet sich zu: s1 Würfel · s2 Quader · s3 Dreiecksprisma · s4 Pyramide mit quadratischer Grundfläche · s5 Würfel mit Augen, Gegenseiten ergeben 7 · s6 alle Körper als Geschenkschachteln | 2★ Schleife auf der Schachtel · 3★ Deckel springt auf, Funken |
+| 🔎 Zehntel-Lupe | ZOOM | Lupe zoomt auf den Strahl: s1 Ganze · s2 Halbe · s3 Zehntel · s4 Zehntel in Schritten · s5 Hundertstel · s6 Hundertstel ganz genau, Marienkäfer sitzt auf dem Punkt (Zeichen über LS.dezimalText) | 2★ Lupe glänzt · 3★ Marienkäfer fliegt eine Runde, Funken |
+| 🚀 Dezimal-Rakete | ZOOM | Landung auf dem Zahlenstrahl-Planeten: s1 auf die Ganze · s2 auf den Zehntel · s3 Zehntel, engerer Platz · s4 auf den Hundertstel · s5 Hundertstel, kleinster Platz · s6 auf den Tausendstel genau | 2★ Landebeine federn · 3★ Eule steigt aus, Fähnchen, Funken |
+| 🎢 Dezimal-Rutsche | REISE | Wagen rollt zur gerundeten Zahl: s1 auf Ganze · s2 auf Ganze bei x.5 aufwärts · s3 auf Zehntel · s4 auf Zehntel bei längeren Zahlen · s5 auf Hundertstel · s6 drei Rundungen nacheinander | 2★ Wagen macht eine Welle · 3★ Fähnchen am Ziel |
+| 🍫 Schoggi-Brüche | BAUEN | Schoggitafel aus 12 Stücken: s1 1/2 · s2 1/4 + 1/4 · s3 1/2 + 1/4 = 3/4 · s4 1/3 + 1/6 = 1/2 · s5 2/3 − 1/4 = 5/12 · s6 ganze Tafel 12/12 | 2★ Silberpapier glänzt · 3★ Eule teilt, Funken |
+| ✅ Probe-Stempel | SAMMELN | Heft bekommt Stempel: s1 ein Häkchen · s2 zwei · s3 Umkehraufgabe · s4 Überschlag · s5 Endziffer · s6 ganze Seite gestempelt | 2★ Stempel wird farbig · 3★ Eule stempelt im Takt, Funken |
+| 🎲 Zufalls-Skala | SAMMELN | Skala füllt sich: s1 Säckchen nur blau: blau ist sicher · s2 kein Rot: rot ist unmöglich · s3 halb-halb: Mitte · s4 Würfel: 6 ist möglich · s5 Würfel: 7 ist unmöglich · s6 Glücksrad zu 3/4 grün | 2★ Würfel rollt aus · 3★ Glücksrad leuchtet, Funken |
+| 📐 Rechteck-Labor | BAUEN | Rechtecke mit Umfang 12: s1 1 × 5 (Fläche 5) · s2 2 × 4 (8) · s3 3 × 3 (9) · s4 Umfang 16 · s5 Umfang 20 · s6 grösste Fläche ist jeweils das Quadrat, es leuchtet | 2★ Gummiband schnalzt sanft · 3★ Quadrat glänzt, Funken |
+| ⚀ Würfel-Kipper | REISE | Würfel kippt über einen Pfad: s1 1 Kipp · s2 2 · s3 3 · s4 4 · s5 5 · s6 6 Kipps bis ins Ziel; oben immer die richtige Augenzahl, Gegenseiten ergeben 7 | 2★ Würfel hüpft · 3★ Ziel-Fähnchen, Funken |
+| 📏 Begriffs-Geodreieck | BAUEN | Figur entsteht: s1 Strecke · s2 Parallele · s3 Senkrechte mit rechtem Winkel · s4 Rechteck mit Diagonale · s5 Kreis mit Radius · s6 Haus aus allem zusammen | 2★ Geodreieck dreht sich · 3★ Linien leuchten nach, Funken |
+| 🪜 Flächenmass-Treppe | BAUEN | Treppe steigt, jede Stufe × 100: s1 mm² → cm² · s2 cm² → dm² · s3 dm² → m² · s4 m² → a · s5 a → ha · s6 ha → km² | 2★ Eule steigt eine Stufe · 3★ Fähnchen oben |
+| 🧺 Sortier-Kiste | SAMMELN | Klötze springen in Kisten: s1 nach Farbe · s2 + Form · s3 + Grösse · s4 Zahl je Kiste erscheint · s5 Kisten nebeneinander verglichen · s6 alle Kisten voll, richtig sortiert | 2★ Kisten wippen · 3★ Deckel öffnen sich, Fähnchen |
+| ⚖️ Gegenteil-Wippe | SAMMELN | Paare kommen aufs Regal: s1 gross–klein · s2 dick–dünn · s3 lang–kurz · s4 schwer–leicht (Wippe neigt sich zur schweren Seite) · s5 hoch–tief · s6 alle Paare nebeneinander | 2★ Wippe schaukelt · 3★ Paare winken sich zu, Funken |
+| 👀 Merk-Blick | SAMMELN | Fotoalbum füllt sich: s1 ein Bild · s2 zwei · s3 drei · s4 vier · s5 fünf · s6 sechs Bilder, Eule klappt es zu | 2★ Kamera blitzt sanft · 3★ Album glänzt, Funken |
+| 🖐️ Finger-Zähler | SAMMELN | Finger strecken sich: s1 3 · s2 5 · s3 7 (5 + 2) · s4 10 · s5 zwei Kinder, 20 Finger · s6 zehn Paar Hände, 100 Finger | 2★ Hände winken · 3★ Hände klatschen, Funken |
+| 🍪 Gerecht-Teiler | SAMMELN | Guetzli verteilen sich gleich: s1 2 Teller je 2 · s2 2 je 3 · s3 2 je 5 · s4 3 Teller je 4 · s5 4 Teller je 5 · s6 6 Teller je 6 | 2★ Teller glänzen · 3★ Eule lädt alle ein, Funken |
+| 🧭 Sachaufgaben-Kompass | KARTE | Kompass führt über die Karte: s1 Angabe finden · s2 zweite Angabe · s3 Rechenweg · s4 Zwischenhalt · s5 Ergebnis · s6 Ziel mit Ergebnis und Einheit | 2★ Nadel zittert · 3★ Fähnchen am Ziel |
+| 🚆 Fahrplan-Rechner | REISE | Zug fährt, Uhr läuft mit: s1 eine Station · s2 zwei · s3 mit Umsteigen · s4 90 Minuten = 1 h 30 min · s5 lange Fahrt · s6 über Mitternacht: 23:59 → 00:00 (erfundene Stationen) | 2★ Zug pfeift · 3★ Winken am Bahnsteig, Funken |
+| 📏 Komma-Messband | ZOOM | Messband zoomt: s1 2 m · s2 2.4 m · s3 2.45 m · s4 2.457 m = 2457 mm · s5 1.250 kg = 1250 g · s6 0.75 l = 7.5 dl (Zeichen über LS.dezimalText) | 2★ Messband rollt ein · 3★ Eule misst sich selbst, Funken |
+| 🌉 Prozent-Brücke | BAUEN | Brücke bekommt Pfeiler: s1 1/2 = 0.5 = 50 % · s2 1/4 = 25 % · s3 3/4 = 75 % · s4 1/5 = 20 % · s5 1/10 = 10 % · s6 1/1 = 100 %, Eule läuft hinüber | 2★ Geländer leuchtet · 3★ Fähnchen an beiden Enden |
+| 🔟 Stufenzahl-Schieber | REISE | Komma hüpft: s1 3.5 × 10 = 35 · s2 3.5 × 100 = 350 · s3 3.5 × 1000 = 3500 · s4 35 : 10 = 3.5 · s5 35 : 100 = 0.35 · s6 hin und zurück (Zeichen über LS.dezimalText) | 2★ Komma winkt · 3★ Ziffern tanzen, Funken |
+| 🤔 Stimmt immer? | SAMMELN | Mosaik füllt sich: s1 ein Stein · s2 zwei · s3 drei · s4 vier · s5 fünf · s6 sechs Steine, Mosaik zeigt eine Eule | 2★ Mosaik glänzt · 3★ Mosaik-Eule zwinkert, Funken |
+| ❔ Platzhalter-Geschichten | SAMMELN | Fragezeichen-Karten drehen sich um: s1 7 + ? = 12 → 5 · s2 ? − 4 = 9 → 13 · s3 6 × ? = 42 → 7 · s4 ? : 5 = 8 → 40 · s5 zwei Schritte · s6 ganze Geschichte gelöst | 2★ Karte glänzt · 3★ Karten fliegen hoch, Funken |
+| ⏱️ Zeit-Schätzer | ZYKLUS | s1 Sekundenzeiger macht einen Schritt · s2 Sekundenzeiger einmal ganz herum: 1 Minute · s3 Minutenzeiger einmal herum: 1 Stunde · s4 Sonne geht auf und unter: 1 Tag · s5 7 Tage · s6 Jahreszeiten: 1 Jahr | 2★ Sanduhr dreht sich · 3★ Eule schaut auf die Uhr, Funken |
+| 🧱 Würfel-Zähler | BAUEN | Kiste füllt sich mit Würfeln: s1 2 · s2 2 × 2 = 4 · s3 2 × 2 × 2 = 8 · s4 3 × 3 × 2 = 18 · s5 3 × 3 × 3 = 27 · s6 4 × 4 × 4 = 64 | 2★ Deckel klappt zu · 3★ Schleife auf der Kiste |
+| 🗃️ Quader-Volumen | BAUEN | s1 3 Würfel in einer Reihe · s2 Schicht 3 × 2 = 6 · s3 3 × 2 × 2 = 12 · s4 4 × 3 × 2 = 24 · s5 10 × 10 × 10 = 1000 cm³ = 1 dm³ · s6 1 dm³ füllt sich mit Wasser: 1 Liter | 2★ Wasser glitzert · 3★ Eule taucht den Finger ein, Funken |
+| 🥧 Diagramm-Wahl | WACHSEN | Sonnenblume wächst, Diagramme zeigen es: s1 Säule · s2 mehrere Säulen · s3 Linie steigt · s4 Linie über Wochen · s5 Kreis füllt sich bis 100 % · s6 alle drei Diagramme nebeneinander | 2★ Biene besucht die Blüte · 3★ Blüte öffnet sich, Funken |
+
+### Deutsch
+
+| Spiel | Muster | s1 → s6 | Sterne |
+|---|---|---|---|
+| 🧺 Wortarten-Sortierer | SAMMELN | Bildkarten in drei Körbe (Ding, Tun, Wie): s1 je eine · s2 je zwei · s3 je drei · s4 je vier · s5 je fünf · s6 alle Körbe voll | 2★ Körbe wippen · 3★ Bänder an den Körben |
+| ✏️ Regel-Lücke | BAUEN | Steg über den Bach: s1 1 Lücke geschlossen · s2 2 · s3 3 · s4 4 · s5 5 · s6 Steg vollständig, Eule läuft hinüber | 2★ Fisch springt · 3★ Fähnchen am Ufer |
+| 🔧 Satz-Reparatur | BAUEN | Zug wird gekoppelt: s1 grosse Lok + 1 Wagen · s2 + 2 Wagen · s3 Schlusswagen mit Punkt · s4 längerer Zug · s5 Schlusswagen mit ? · s6 Schlusswagen mit !, Zug fährt ab | 2★ Dampfwölkchen · 3★ Fähnchen am Schlusswagen |
+| ✂️ Wörter-Trenner | SAMMELN | Lange Papierschlange wird an den Wortgrenzen zu Fähnchen: s1 2 Fähnchen · s2 3 · s3 4 · s4 5 · s5 6 · s6 Girlande hängt quer über dem Bild | 2★ Girlande schwingt · 3★ Konfetti |
+| ⌨️ Tipp-Trainer | REISE | Eule läuft über die Tasten (ohne Beschriftung): s1 halbe Grundreihe · s2 ganze Grundreihe · s3 obere Reihe · s4 untere Reihe · s5 Umschalttaste hebt die Eule hoch · s6 Lichtwelle über die ganze Tastatur | 2★ Tasten klicken · 3★ Leertaste wird Sprungbrett, Funken |
+| 👏 Silben-Klatscher | AUFTRITT | s1 Eule klatscht allein · s2 + Hase · s3 + Igel · s4 + Maus · s5 + Fuchs · s6 ganzer Kreis klatscht im Takt | 2★ Klatschfunken · 3★ alle verbeugen sich, Konfetti |
+| 🎵 Reim-Paare | SAMMELN | Paare springen zusammen: s1 Maus–Haus · s2 Fisch–Tisch · s3 Hose–Rose · s4 Kanne–Tanne · s5 Hund–Mund · s6 Schnecke–Decke, alle Paare tanzen | 2★ Paare drehen sich · 3★ Herzchen und Funken |
+| 🔤 ABC-Sortierer | REISE | Eule hüpft über einen Pfad aus 26 Steinen (ohne Buchstaben): s1 bis Stein 4 · s2 bis 8 · s3 bis 13 · s4 bis 18 · s5 bis 22 · s6 alle 26 Steine | 2★ Steine leuchten nach · 3★ Fähnchen am letzten Stein |
+| 🎣 Anlaut-Angel | SAMMELN | Eule angelt Bildfische in den Eimer: s1 1 · s2 2 · s3 3 · s4 4 · s5 5 · s6 6 Fische, Eimer voll | 2★ Wasserringe · 3★ Fische springen im Bogen, Funken |
+| 🔡 Buchstaben-Zwillinge | SAMMELN | Sockenpaare an der Wäscheleine: s1 1 Paar · s2 2 · s3 3 · s4 4 · s5 5 · s6 6 Paare, Leine voll | 2★ Wind bläht die Socken · 3★ Wäscheklammern tanzen, Funken |
+| ⚡ Blitzlesen | SAMMELN | Laternenkette leuchtet auf: s1 1 Laterne · s2 2 · s3 3 · s4 4 · s5 5 · s6 6, ganze Kette leuchtet | 2★ Laternen schaukeln · 3★ Glühwürmchen fliegen um die Kette |
+| 🧩 Nomen-Puzzle | BAUEN | Haus wird zusammengesetzt: s1 Haus · s2 + Haustür · s3 + Dachfenster · s4 + Gartenzaun · s5 + Blumentopf · s6 + Briefkasten, fertiges Haus | 2★ Licht im Fenster · 3★ Rauch und Fähnchen |
+| 🕵️ Lese-Detektiv | ZOOM | Lupe über einem Wimmelbild: s1 grosses Haus · s2 Fenster · s3 Katze im Fenster · s4 Halsband · s5 Glöckchen · s6 Marienkäfer auf dem Glöckchen | 2★ Lupe glänzt · 3★ Marienkäfer fliegt los, Funken |
+| 🌳 Wortfamilien-Baum | WACHSEN | s1 Stamm wächst · s2 erster Ast · s3 drei Äste · s4 Blätter · s5 Blüten · s6 Früchte, Eule setzt sich in die Krone | 2★ Blätter rascheln · 3★ Vögel singen, Blüten fallen sanft |
+| ⏳ Zeitreise-Verben | REISE | Eule spaziert auf einem Pfad, ihre Spuren bleiben hinter ihr: s1 ein Schritt · s2 zwei · s3 drei · s4 vier · s5 fünf · s6 ganzer Pfad mit Spuren bis zur Bank | 2★ Sanduhr dreht sich · 3★ Fähnchen an der Bank |
+| 🔍 Fehler-Lupe | ZOOM | Lupe sucht im Sand: s1 Stein · s2 Muschel · s3 Muster der Muschel · s4 Kristall · s5 Kristallkante · s6 winziger Funkelpunkt | 2★ Kristall glänzt · 3★ Regenbogen-Funken |
+| 📜 Gedicht-Baukasten | BAUEN | Gedicht aus Zeilen-Balken, reimende Zeilen gleiche Farbe: s1 1 Vers · s2 2 Verse · s3 Strophe aus 4 Versen · s4 Paarreim (1–2, 3–4) · s5 Kreuzreim (1–3, 2–4) · s6 zwei Strophen, umarmender Reim (1–4, 2–3) | 2★ Reimbögen leuchten · 3★ Blätter wirbeln wie Konfetti |
+| ✒️ Komma-Jagd | SAMMELN | Eule fängt fliegende Kommas sanft mit dem Netz: s1 1 · s2 2 · s3 3 · s4 4 · s5 5 · s6 6, das Glas leuchtet | 2★ Netz glänzt · 3★ Kommas tanzen im Glas, Funken |
+| ✂️ Morphem-Schere | BAUEN | Drei Bausteine stecken zusammen (Vorsilbe, Stamm, Endung in Deko-Farben): s1 Stamm · s2 + Endung · s3 + Vorsilbe · s4 zwei Wörter, gleicher Stamm · s5 vier · s6 Turm aus einer Wortfamilie | 2★ Bausteine klicken · 3★ Fähnchen oben |
+| 💬 Rede-Zeichen | AUFTRITT | Sprechblasen ohne Text mit „ “: s1 Eule allein · s2 + Freund · s3 drei Figuren · s4 vier · s5 fünf · s6 Gesprächsrunde am Tisch | 2★ Blasen poppen sanft · 3★ alle lachen, Konfetti |
+| 📄 Trenn-Schere | SAMMELN | Papierstreifen wird an den Silben geschnitten und zu einer Kette: s1 2 Teile · s2 3 · s3 4 · s4 5 · s5 6 · s6 lange Kette um den Bildrand | 2★ Kette schwingt · 3★ Schere klappert im Takt, Konfetti |
+| 🪭 Verben-Fächer | BAUEN | Fächer öffnet sich: s1 1 Blatt · s2 2 · s3 3 · s4 4 · s5 5 · s6 ganzer Fächer, Eule fächelt sich Luft zu | 2★ Fächer glänzt · 3★ Blüten wehen heraus |
+| 👃 Wort-Spürnase | KARTE | Spürnase folgt einer Fährte über die Karte: s1 1 Abschnitt · s2 2 · s3 3 · s4 4 · s5 5 · s6 bis zum Buch-Schatz | 2★ Nase schnuppert, Blätter fliegen · 3★ Buch öffnet sich, Funken |
+| 🔎 Sachtext-Spurensuche | ZOOM | Fernglas stellt scharf auf eine Landschaft: s1 Hügel · s2 Baum · s3 Ast · s4 Nest · s5 Ei im Nest · s6 Vogel schlüpft | 2★ Fernglas glänzt · 3★ Vogel piepst, Funken |
+| ✏️ Korrektur-Stift | BAUEN | Stift malt ein Bild sauber nach: s1 Umriss · s2 Himmel · s3 Haus · s4 Baum · s5 Garten · s6 Farben fertig | 2★ Stift wirbelt · 3★ Bild im Rahmen, Funken |
+| 🎧 Hör-Reporter | AUFTRITT | Eule am Mikrofon, Zuhörer kommen dazu: s1 1 · s2 2 · s3 3 · s4 5 · s5 8 · s6 grosses Publikum, alle klatschen | 2★ Scheinwerfer an · 3★ Applaus und Konfetti |
+| 🧪 Wortarten-Probe | SAMMELN | Reagenzgläser im Ständer füllen sich mit drei Deko-Farben: s1 1 · s2 2 · s3 3 · s4 4 · s5 5 · s6 6 Gläser, alle leuchten | 2★ Bläschen steigen · 3★ Gläser glitzern, Funken |
+| 🎭 Gefühle-Radar | AUFTRITT | Fröhliche Gesichter kommen dazu: s1 Eule lächelt · s2 + 1 Kind · s3 + 2 · s4 + 3 · s5 + 4 · s6 Kreis aus lachenden Gesichtern, alle winken | 2★ Herzchen · 3★ Konfetti |
+| 📚 Geschichten-Ordner | BAUEN | Bildstreifen füllt sich in Reihenfolge, Eule baut einen Schneemann: s1 Schnee fällt · s2 Kugel rollen · s3 zweite Kugel · s4 Kopf · s5 Nase · s6 Hut, fertig | 2★ Schneeflocken tanzen · 3★ Schneemann winkt, Funken |
+| 👂 Hör-Geschichte | AUFTRITT | Eule erzählt, Zuhörer setzen sich dazu: s1 Hase · s2 + Igel · s3 + Maus · s4 + Eichhörnchen · s5 + Reh · s6 ganzer Kreis am Lagerfeuer | 2★ Glühwürmchen · 3★ alle klatschen, Funken |
+| 📜 Gattungs-Kenner | SAMMELN | Bücherregal füllt sich (Symbole statt Titel): s1 1 Buch · s2 2 · s3 3 · s4 4 · s5 5 · s6 volles Regal, Eule liest | 2★ Leselampe an · 3★ Buch öffnet sich, Funken |
+| 🪞 Figuren-Spiegel | AUFTRITT | Puppentheater: s1 eine Figur · s2 zwei · s3 drei · s4 vier · s5 fünf · s6 alle Figuren verbeugen sich | 2★ Vorhang schwingt · 3★ Applaus, Konfetti |
+
+### NMG
+
+| Spiel | Muster | s1 → s6 | Sterne |
+|---|---|---|---|
+| 📅 Jahreskreis-Ordner | ZYKLUS | Jahresrad dreht sich: s1 Frühling · s2 Sommer · s3 Herbst · s4 Winter · s5 12 Monatsfelder leuchten der Reihe nach · s6 innen 7 Wochentage, aussen 12 Monate | 2★ Rad glänzt · 3★ Blüten, Sonne, Blätter, Flocken wirbeln |
+| 🔭 Himmels-Forscher | ZYKLUS, dann REISE | s1 Sonne geht auf und unter, Neumond daneben (nicht sichtbar) · s2 zunehmende Sichel abends im Westen · s3 Halbmond, erstes Viertel · s4 Dreiviertel- und Vollmond, geht bei Sonnenuntergang im Osten auf · s5 Sonde fliegt an den 8 Planeten der Reihe nach vorbei · s6 Vollmond über Hügel, Eule fliegt als Silhouette davor (Abschnitt 6) | 2★ ein Sternbild leuchtet auf · 3★ Sternschnuppe |
+| 🐾 Tier-Sortierer | SAMMELN | Album füllt sich, je Gruppe eine Seite: s1 Heimtiere (Katze, Meerschweinchen) · s2 Wildtiere (Fuchs, Reh) · s3 Vögel (Amsel, Meise) · s4 Nager (Maus, Eichhörnchen) · s5 Raubtiere (Fuchs, Luchs) · s6 Paarhufer (Reh, Kuh, Gämse) | 2★ Tiere winken · 3★ Album glänzt, Funken |
+| 🌳 Lebensraum-Zuordnung | REISE | Eule fliegt: s1 Wiese (Schmetterling) · s2 Wald (Eichhörnchen) · s3 Weiher (Frosch) · s4 Gebirge (Murmeltier) · s5 Pfeile Löwenzahn → Schnecke → Igel · s6 alle vier Lebensräume nebeneinander | 2★ Tiere schauen hervor · 3★ Regenbogen nach dem Regen (rot aussen), Funken |
+| 🦇 Fledermaus-Forscher | ZYKLUS | Jahr der Fledermaus: s1 erwacht im Frühling · s2 jagt nachts Insekten, Echo-Bögen gehen hin und zurück · s3 Wochenstube mit Jungtier · s4 Jungtier fliegt mit · s5 Herbst: frisst sich Vorrat an · s6 Winterschlaf kopfüber | 2★ Mond scheint · 3★ Sterne funkeln über der Höhle |
+| 🐛 Lebenszyklus-Puzzle | ZYKLUS | Frosch: s1 Laich · s2 Kaulquappe · s3 mit Hinterbeinen · s4 mit Vorderbeinen · s5 Jungfrosch, Schwanz wird kürzer · s6 Frosch springt auf ein Seerosenblatt | 2★ Libelle fliegt · 3★ Seerose blüht, Wasserringe |
+| 🫀 Körper-Puzzle | REISE | Weg des Apfels: s1 Mund, Zähne beissen · s2 Speiseröhre · s3 Magen · s4 Dünndarm · s5 Dickdarm · s6 Körper hat Kraft, Kind springt | 2★ Herz klopft sichtbar · 3★ Kind jubelt, Funken |
+| 🍎 Znüni-Teller | SAMMELN | Teller füllt sich: s1 Apfel · s2 + Karotte · s3 + Vollkornbrot · s4 + Käse · s5 + Nüsse · s6 + Glas Wasser, feines Znüni | 2★ Apfel glänzt · 3★ Serviette und Funken |
+| 🧲 Magnet-Labor | SAMMELN | Magnet zieht an: s1 Büroklammer · s2 + Nagel · s3 + Schraube; Holz und Plastik bleiben liegen · s4 Nordpol zieht Südpol an · s5 Kompassnadel zeigt nach Norden · s6 Kette aus Klammern hängt am Magnet | 2★ Magnetfeld-Linien leuchten · 3★ Funken |
+| 🛁 Schwimmt oder sinkt? | SAMMELN | Wanne: s1 Holz schwimmt · s2 Stein sinkt · s3 Kerze schwimmt · s4 Korken schwimmt · s5 Nagel sinkt · s6 Holzschiffchen trägt die Eule | 2★ Wasserringe · 3★ Seifenblasen steigen auf |
+| 🗺️ Schweiz-Karten-Suche | KARTE | Eule fliegt über die stumme Karte (Umrisse aus dem Spiel): s1 1 Kanton leuchtet · s2 3 · s3 Hauptorte als Punkte · s4 10 Kantone · s5 Städte · s6 alle 26 Kantone leuchten nacheinander | 2★ Fähnchen am letzten Punkt · 3★ Berge glänzen, Funken |
+| 🧭 Kompass-Spiel | KARTE | Eule geht auf dem Plan: s1 nach Norden · s2 nach Osten · s3 nach Süden · s4 nach Westen · s5 Karte dreht sich, Nadel zeigt weiter nach Norden · s6 Rundweg durch alle vier Richtungen | 2★ Nadel zittert · 3★ Fähnchen am Ziel |
+| 🕰️ Früher und heute | REISE | Reise durch die Zeit: s1 Brief mit der Postkutsche · s2 Kurbeltelefon an der Wand · s3 Telefon mit Wählscheibe · s4 Tastentelefon · s5 Handy mit Tasten · s6 Smartphone | 2★ Telefon klingelt freundlich · 3★ Eule winkt, Funken |
+| 🚸 Schulweg-Profi | KARTE | Kind geht zur Schule: s1 auf dem Trottoir · s2 wartet am Randstein · s3 gelber Fussgängerstreifen: warte, luege, lose, laufe · s4 Lichtsignal grün · s5 Velo mit Helm · s6 ganzer Weg bis ins Schulhaus | 2★ Schulglocke läutet · 3★ Freunde winken, Fähnchen |
+| 🌦️ Wetter und Jahreszeiten | ZYKLUS | Baum durchs Jahr: s1 Knospen · s2 Blüten · s3 Sommer, grün, Sonne · s4 Herbst, bunte Blätter · s5 Winter, Schnee, Thermometer unter 0 °C · s6 ganzer Kreis zurück zum Frühling | 2★ Wettersymbol glänzt · 3★ Regenbogen (rot aussen, violett innen) |
+| 📏 Zeitstrahl-Sortierer | WACHSEN | Ein Mensch wächst auf dem Zeitstrahl: s1 Baby · s2 Kleinkind · s3 Schulkind · s4 Jugendliche · s5 Erwachsene · s6 Grosseltern, dazu drei Generationen zusammen | 2★ Familienfoto blitzt · 3★ alle winken, Funken |
+| 💡 Stromkreis-Bauer | BAUEN | Stromkreis schliesst sich: s1 Batterie und Lampe · s2 + Schalter, ein · s3 + Kabelstück aus Metall · s4 zwei Lampen in Serie · s5 zwei Lampen parallel · s6 Haus mit Lampen in jedem Zimmer | 2★ Lampe flackert freundlich an · 3★ Lichtpunkte wandern im Kreis |
+| 🗺️ Plan-Leser | KARTE | Weg nach Plan mit Legendenzeichen: s1 Weg · s2 + Brücke · s3 + Kirche · s4 + Wald · s5 Massstab: 1 cm = 100 m · s6 ganze Strecke bis zum Ziel | 2★ Fussspuren leuchten · 3★ Fähnchen am Ziel |
+| 🦄 Echt oder erfunden? | SAMMELN | Zwei Orte füllen sich: echte Tiere in den Korb, Fabelwesen ins Wolkenschloss: s1 1 + 1 · s2 2 + 2 · s3 3 + 3 · s4 4 + 4 · s5 5 + 5 · s6 beide voll, richtig verteilt | 2★ Wolkenschloss glänzt · 3★ Einhorn verbeugt sich, Funken |
+| 🪵 Hebel-Wippe | BAUEN | Wippe bleibt waagrecht (Gewicht × Abstand gleich): s1 1 auf 2 gegen 1 auf 2 · s2 2 auf 2 gegen 2 auf 2 · s3 2 auf 1 gegen 1 auf 2 · s4 3 auf 2 gegen 2 auf 3 · s5 drei Gruppen · s6 langer Hebel hebt grossen Stein | 2★ Wippe schaukelt sanft · 3★ Eule landet in der Mitte, Funken |
+| 👛 Taschengeld-Planer | SAMMELN | Sparkässeli füllt sich: s1 eine Münze · s2 zwei · s3 drei · s4 vier · s5 fünf · s6 Wunsch (Ball) ist erreicht | 2★ Kässeli klimpert · 3★ Ball hüpft, Funken |
+| 💧 Wassertropfen-Reise | ZYKLUS | s1 Tropfen im See · s2 verdunstet in der Sonne · s3 kondensiert zur Wolke · s4 fällt als Regen · s5 versickert ins Grundwasser · s6 Quelle und Bach bringen ihn zurück in den See | 2★ Tropfen lächelt · 3★ Regenbogen (rot aussen, violett innen) |
+| 🦕 Erdzeit-Leiter | REISE | Eule klettert die Zeitleiter: s1 Einzeller im Meer · s2 erste Meerestiere · s3 Fische · s4 Tiere gehen an Land · s5 Dinosaurier · s6 nach den Dinosauriern Säugetiere, zuletzt der Mensch | 2★ Farn wiegt sich · 3★ Fähnchen oben auf der Leiter |
+| 🌿 Pflanzen-Bestimmer | WACHSEN | s1 Samen keimt, Wurzel nach unten · s2 erste Blätter · s3 Stängel mit Blättern · s4 Knospe · s5 Blüte öffnet sich · s6 Wiese mit verschiedenen Blattformen | 2★ Biene besucht die Blüte · 3★ Schmetterlinge, Funken |
+| ❤️ Blutkreislauf-Lotse | REISE | Blutkörperchen: s1 Herz → Lunge · s2 in der Lunge wird es hellrot · s3 zurück ins Herz · s4 Arterie in den Körper · s5 gibt im Muskel Sauerstoff ab, wird dunkler · s6 Vene zurück zum Herz | 2★ Herz klopft · 3★ Herz leuchtet, Funken |
+| ⚡ Energie-Wandler | REISE | s1 Wasser im Stausee · s2 fliesst hinunter · s3 dreht die Turbine · s4 Generator wandelt Bewegung in Strom · s5 Strom fliesst durch die Leitung · s6 Lampen im Dorf leuchten | 2★ Lampe strahlt · 3★ Lichter gehen der Reihe nach an |
+| 🦎 Bionik-Paare | SAMMELN | Album mit Paaren aus der Liste des Spiels: s1 Klette ↔ Klettverschluss · s2 zwei Paare · s3 drei · s4 vier · s5 fünf · s6 Album voll | 2★ Paare klicken zusammen · 3★ Album glänzt, Funken |
+| 🍫 Kakao-Weg | REISE | s1 Kakaofrucht wächst am Stamm · s2 Bohnen trocknen in der Sonne · s3 Schiff über das Meer · s4 Fabrik röstet · s5 Schoggitafel entsteht · s6 Tafel im Laden, Kind kauft sie | 2★ Duftwölkchen · 3★ Silberpapier glänzt, Funken |
+| ⠃ Braille-Finger | BAUEN | Punkte erscheinen in der 6-Punkte-Zelle nach der Tabelle des Spiels: s1 a · s2 b · s3 c · s4 d · s5 e · s6 ganzes kurzes Wort, Finger tastet darüber | 2★ Punkte leuchten · 3★ Punkte klingen wie Glöckchen, Funken |
+| 🧸 Teddy-Versteck | REISE | Teddy hüpft durchs Zimmer: s1 auf den Stuhl · s2 unter den Tisch · s3 neben die Kiste · s4 hinter den Vorhang · s5 zwischen zwei Kissen · s6 links und rechts winken, dann ins Bett | 2★ Teddy gähnt · 3★ Sterne über dem Bett |
+| 🌞 Tageslauf-Sonne | ZYKLUS | Blick nach Süden: s1 Sonne geht links (Osten) auf · s2 Vormittag · s3 Mittag, am höchsten · s4 Nachmittag · s5 Abend, geht rechts (Westen) unter · s6 Nacht mit Mond und Sternen, dann neuer Morgen | 2★ Vogel singt · 3★ Sternschnuppe |
+| 👁️ Auge-Entdecker | ZOOM | Zoom ins Auge: s1 Gesicht · s2 Augenlid und Wimpern · s3 Iris · s4 Pupille wird im Hellen klein · s5 Hornhaut glänzt · s6 im Dunkeln wird die Pupille wieder weit, Auge zwinkert | 2★ Augenzwinkern · 3★ Glanzpunkt funkelt |
+| 🏛️ Gemeinde-Helfer | KARTE | Eule besucht den Dorfplan: s1 Gemeindehaus · s2 Bibliothek · s3 Werkhof · s4 Feuerwehr (118) · s5 Spital mit Ambulanz (144) · s6 ganzes Dorf leuchtet | 2★ Glocke am Gemeindehaus · 3★ Fähnchen auf dem Dorfplatz |
+| 🧳 Kulturen-Koffer | SAMMELN | Koffer füllt sich mit Dingen aus der Liste des Spiels: s1 Pfahlbauhaus · s2 Pyramide · s3 Amphore · s4 vier Dinge · s5 fünf · s6 Koffer voll, klappt zu | 2★ Kofferschloss klickt · 3★ Reiseaufkleber, Funken |
+| 🦻 Lärm-Wächter | REISE | Schall reist: s1 Glöckchen klingt · s2 Schallbögen fliegen zum Ohr · s3 Trichter bündelt den Schall · s4 Dämmung macht leiser · s5 Ohrstöpsel schützen bei lautem Klang · s6 Echo: Ruf hallt von der Felswand zurück | 2★ Ohr wackelt · 3★ leise Musiknoten schweben |
+
+### Englisch
+
+| Spiel | Muster | s1 → s6 | Sterne |
+|---|---|---|---|
+| 🇬🇧 English Word-Match | SAMMELN | Bildkarten-Paare (ohne Wörter): s1 1 Paar · s2 2 · s3 3 · s4 4 · s5 5 · s6 6 Paare, Karten drehen sich | 2★ Karten glänzen · 3★ Eule jongliert sanft, Funken |
+| 👯 Wort-Zwillinge | SAMMELN | Zwillingspaare aus Bildern (Haus, Maus, Ball …): s1 1 Paar · s2 2 · s3 3 · s4 4 · s5 5 · s6 6 Paare tanzen | 2★ Paare drehen sich · 3★ Herzchen, Funken |
+| 🧱 Sentence-Builder | BAUEN | Zug aus Wortkarten-Wagen (ohne Text): s1 Lok + 1 · s2 + 2 · s3 + 3 · s4 + 4 · s5 + 5 · s6 langer Zug mit Fragezeichen-Schlusswagen fährt ab | 2★ Dampfwölkchen · 3★ Fähnchen am Zug |
+| 👂 Listen & Tap | AUFTRITT | Eule mit Kopfhörern, Tiere tauchen auf: s1 Katze · s2 + Hund · s3 + Vogel · s4 + Fisch · s5 + Pferd · s6 alle Tiere tanzen | 2★ Musiknoten schweben · 3★ Konfetti |
+| 🐝 Spelling-Bee | BAUEN | Biene baut Waben (Sechsecke): s1 1 Zelle · s2 3 · s3 5 · s4 7 · s5 10 · s6 volle Wabe mit Honig | 2★ Honig glänzt · 3★ Biene fliegt eine Acht, Funken |
+| 🔊 Sound-Sorter | SAMMELN | Klangkugeln rollen in zwei Röhren: s1 je 1 · s2 je 2 · s3 je 3 · s4 je 4 · s5 je 5 · s6 beide Röhren voll | 2★ Kugeln klingen · 3★ Röhren leuchten, Funken |
+| 🌦️ Weather-Report | ZYKLUS | Wetterbild wechselt: s1 Sonne · s2 Wolke · s3 Regen · s4 Wind · s5 Schnee · s6 Sonne nach Regen mit Regenbogen (rot aussen, violett innen) | 2★ Mikrofon glänzt · 3★ Eule-Sprecherin verbeugt sich |
+| 💬 Hello-Dialog | AUFTRITT | Figuren winken sich zu, Sprechblasen ohne Text: s1 Eule · s2 + 1 Kind · s3 + 2 · s4 + 3 · s5 + 4 · s6 Kreis, alle geben sich die Hand | 2★ Herzchen · 3★ Konfetti |
+
+### Musik
+
+| Spiel | Muster | s1 → s6 | Sterne |
+|---|---|---|---|
+| 🎼 Noten-Namen | AUFTRITT | Eulenchor singt, Noten im Violinschlüssel richtig gesetzt: s1 c · s2 c d e · s3 c bis g · s4 c bis a · s5 c bis h · s6 bis zum oberen c, ganzer Chor | 2★ Noten schweben · 3★ Chor verbeugt sich, Funken |
+| 🥁 Rhythmus-Leser | AUFTRITT | 4/4-Takt füllt sich, Musiker kommen dazu: s1 1 Ganze (Trommel) · s2 2 Halbe · s3 4 Viertel · s4 8 Achtel · s5 gemischter Takt · s6 Ensemble spielt mehrere Takte | 2★ Taktstrich leuchtet · 3★ Applaus, Konfetti |
+| 👂 Hoch-Tief-Ohr | REISE | Vogel fliegt die Melodie: s1 hoch und tief · s2 aufwärts · s3 abwärts · s4 auf und ab · s5 Halbton als kleiner, Ganzton als grösserer Schritt · s6 ganze Melodie bis zum Nest | 2★ Vogel trillert · 3★ Noten wirbeln, Funken |
+| 🎺 Instrumenten-Kenner | AUFTRITT | s1 Trommel solo · s2 + Flöte (Duo) · s3 + Geige mit Bogen (Trio) · s4 + Trompete (Quartett) · s5 + Cello (Quintett) · s6 Orchester; alle richtig gehalten | 2★ Scheinwerfer · 3★ Verbeugung, Konfetti |
+| 🔔 Klang-Wichtel | AUFTRITT | Wichtel spielen: s1 Glöckchen leise · s2 laut · s3 kurz und lang · s4 schnell und langsam · s5 vier Wichtel · s6 ganzes Wichtelkonzert im Wald | 2★ Glühwürmchen · 3★ Pilze leuchten sanft |
+| 🥁 Rhythmus-Diktat | BAUEN | Takte aus Notenkarten: s1 Achtel · s2 + Sechzehntel · s3 + punktierte Viertel (= 3 Achtel) · s4 gemischter Takt · s5 zwei Takte · s6 ganze Zeile, Trommel spielt mit | 2★ Karten wippen · 3★ Applaus, Funken |
+| 🎼 Tonleiter-Treppe | BAUEN | C-Dur-Treppe: s1 c d e · s2 + f (kleine Halbtonstufe) · s3 + g · s4 + a · s5 + h · s6 + oberes c, Halbtöne bei e–f und h–c | 2★ Eule hüpft die Treppe · 3★ Klangfunken oben |
+
+### Medien und Informatik
+
+| Spiel | Muster | s1 → s6 | Sterne |
+|---|---|---|---|
+| 🤖 Roboter-Pfad | KARTE | Roboter fährt im Raster: s1 vor · s2 vor, links · s3 um Steine herum · s4 mit Wiederholung · s5 mit Bedingung · s6 ganzer Weg bis zur Ladestation | 2★ Lämpchen blinkt · 3★ Roboter dreht sich, Funken |
+| 💾 Speicher-Leiter | BAUEN | Leiter wächst, Sprossen werden breiter: s1 1 bit (Lämpchen an/aus) · s2 8 bit = 1 Byte · s3 kB · s4 MB · s5 GB · s6 die ganze Leiter bit → Byte → kB → MB → GB leuchtet, Eule oben | 2★ Sprossen leuchten · 3★ Fähnchen oben |
+| 📜 Geheimschrift-Knacker | ZYKLUS | Schlüsselscheibe dreht sich: s1 um 1 Feld · s2 um 3 · s3 um 5 · s4 um 10 · s5 um 13 · s6 um 26, ganzer Kreis, Truhe öffnet sich | 2★ Scheibe klickt · 3★ Truhe glänzt, Funken |
+| 🗂️ Datei-Typen | SAMMELN | Ordner füllen sich mit Zeichen (Text, Bild, Ton, Film): s1 1 Ordner · s2 2 · s3 3 · s4 4 · s5 grösste Datei am dicksten · s6 alle Ordner sauber im Schrank | 2★ Schublade klickt · 3★ Ordner glänzen, Funken |
+| 🪨 Stein-Duell | BAUEN | Eule baut ein Steinmännchen: s1 2 Steine · s2 3 · s3 4 · s4 5 · s5 6 · s6 7 Steine, ganz ruhig im Gleichgewicht | 2★ Moos wächst darauf · 3★ Schmetterling landet oben |
+| ⚫ Steine fangen | SAMMELN | Schwarze und weisse Steine kommen in die Schalen: s1 2 · s2 4 · s3 6 · s4 8 · s5 10 · s6 beide Schalen voll | 2★ Steine klacken · 3★ Schalen glänzen, Funken |
+| ♟️ König in der Falle | REISE | Springer springt in L-Zügen übers Brett: s1 1 Sprung · s2 2 · s3 3 · s4 4 · s5 5 · s6 6 Sprünge von Ecke zu Ecke (a1 → h8), jeder Zug gültig | 2★ Springer wiehert sanft · 3★ Fähnchen auf dem Zielfeld |
+
+### Französisch
+
+| Spiel | Muster | s1 → s6 | Sterne |
+|---|---|---|---|
+| 🥐 Mots-Match | SAMMELN | Bildkarten-Paare auf dem Marktstand: s1 1 · s2 2 · s3 3 · s4 4 · s5 5 · s6 voller Stand | 2★ Croissant duftet · 3★ Eule verbeugt sich, Funken |
+| 🌉 Wörter-Brücke | BAUEN | Brücke bekommt Bögen: s1 1 · s2 2 · s3 3 · s4 4 · s5 5 · s6 ganze Brücke, Eule geht hinüber | 2★ Fluss glitzert · 3★ Fähnchen an beiden Enden |
+| 🏷️ Le ou la? | SAMMELN | Geschenke bekommen Bänder in zwei Deko-Farben: s1 1 · s2 2 · s3 3 · s4 4 · s5 5 · s6 Stapel aus 6 Geschenken | 2★ Schleifen glänzen · 3★ Konfetti |
+| 👂 Son-Lauscher | AUFTRITT | Eule lauscht, Klangtiere kommen dazu: s1 Kuh · s2 + Taube · s3 + Hahn · s4 + Katze · s5 + Hund · s6 alle machen leise Musik | 2★ Ohr wackelt · 3★ Noten schweben, Funken |
+| 🔢 Nombres-Rallye | REISE | Rallye-Auto fährt an Zahltafeln vorbei: s1 bis 10 · s2 bis 20 · s3 bis 40 · s4 bis 60 · s5 bis 80 · s6 bis 100 ins Ziel | 2★ Hupe tönt · 3★ Zielflagge weht, Funken |
+| 🕰️ Quelle heure? | ZYKLUS | Uhr am Turm: s1 volle Stunde · s2 halbe · s3 Viertel nach · s4 Viertel vor · s5 Minuten · s6 Zeiger einmal ganz herum | 2★ Glocke läutet · 3★ Tauben fliegen auf |
+| 📆 Calendrier | ZYKLUS | Kalenderrad: s1 1 Tag · s2 7 Tage · s3 1 Monat · s4 4 Monate · s5 8 Monate · s6 12 Monate, ganzes Jahr (nur Zahlen) | 2★ Blatt flattert · 3★ Konfetti |
+| ☕ Au café | AUFTRITT | Café füllt sich: s1 1 Gast · s2 2 · s3 3 · s4 4 · s5 5 · s6 alle Tische besetzt, Eule serviert | 2★ Tassen dampfen · 3★ alle stossen an, Funken |
+
+### Beim Bauen zu prüfen
+
+- **🚀 Dezimal-Rakete:** s6 „auf den Tausendstel“ setzt voraus, dass Stufe 6 Tausendstel übt; sonst s6 = Hundertstel auf dem engsten Landeplatz.
+- **🔭 Himmels-Forscher:** Phasen und Lage (zunehmend rechts hell) sind sicher; s5 überspringt den abnehmenden Mond zwischen Vollmond und letztem Viertel — die Animation sollte ihn im Übergang zeigen, nicht als eigene Stufe.
+- **🦕 Erdzeit-Leiter:** Reihenfolge Einzeller → Meerestiere → Fische → Landtiere → Dinosaurier → Säugetiere/Mensch stimmt im Groben; welches Tier „an Land geht“ (Amphibie) und die Bilder gegen die Liste des Spiels abgleichen.
+- **🦇 Fledermaus-Forscher:** Jahreslauf (Wochenstube im Sommer, Fettvorrat im Herbst, Winterschlaf kopfüber) gilt für einheimische Arten; mit den Inhalten des Spiels abgleichen.
+- **🗺️ Schweiz-Karten-Suche:** nur sicher, wenn Kantonsumrisse und Hauptorte aus den Kartendaten des Spiels kommen; Wahlkreise sind bewusst nicht abgebildet.
+- **💾 Speicher-Leiter:** Umrechnungsfaktor (1000 oder 1024) bewusst nicht gezeigt; s6 „TB“ geht über das Spiel (bis GB) hinaus — falls unerwünscht, s6 = GB mit Film-Symbol.
+- **💡 Stromkreis-Bauer:** Serie und parallel nur als „Lampen leuchten“ zeigen, keine Helligkeit vergleichen (in Serie leuchten gleiche Lampen schwächer — falsch gezeichnet wäre das ein Fehler).
+- **🦎 Bionik-Paare, 🧳 Kulturen-Koffer, ⠃ Braille-Finger:** bewusst an die Liste beziehungsweise Tabelle des Spiels gebunden; ausser Klette ↔ Klettverschluss, Pfahlbau, Pyramide, Amphore und den Punkten für a–e keine Inhalte von mir festgelegt.
+- **🏛️ Gemeinde-Helfer:** 118 (Feuerwehr) und 144 (Sanität) stimmen für die Schweiz; prüfen, ob das Spiel sie gleich zeigt.
+- **🌞 Tageslauf-Sonne:** „Osten links, Westen rechts“ gilt nur, wenn das Bild nach Süden blickt — so zeichnen oder die Himmelsrichtungen weglassen.
+- **🍫 Kakao-Weg:** Gären der Bohnen vor dem Trocknen weggelassen (Vereinfachung, nichts Falsches).
+- **🎺 Instrumenten-Kenner:** Haltung muss stimmen (Geige an der linken Schulter, Bogen rechts; Querflöte nach rechts) — beim Zeichnen prüfen.

@@ -1522,3 +1522,11 @@
   (Entwicklermodus)“ (Anfordern, persönlicher Schlüssel, Einreichen, Richtlinie), Häufige Fragen jetzt 19, Fusszeile mit
   Impressum. Im Browser auf 375 px: alle Sprungmarken vorhanden, kein seitliches Überlaufen. Lernsteig und Portal haben
   noch keine Anleitung (Plan H).
+- Konzept [docs/konzept_abschluss_animationen.md](docs/konzept_abschluss_animationen.md) (Wunsch Patrik, Entwurf, nicht
+  entschieden): Regeln (fachlich treu, 2–4 s und überspringbar, „Bewegung reduzieren“, nie strafend, nichts
+  Nachgebautes, ohne Text, offline, Ton nur mit Ton an), Stufe ändert das Ziel und Sterne schmücken aus, acht Muster
+  (REISE, ZYKLUS, WACHSEN, BAUEN, ZOOM, AUFTRITT, SAMMELN, KARTE) mit Schnittstelle `feier` im Rahmen, ausgearbeitet
+  Rechen-Rakete (Reise bis zum Rand des Sonnensystems), Dezimal-Rakete (Landung auf dem Zahlenstrahl, je Stufe eine
+  Stelle genauer, bis Tausendstel wie s6) und Himmels-Forscher (s1–s4 Mondphasen, s5 Planeten wie im Spiel, s6 Eule vor
+  dem Vollmond statt einer bekannten Filmszene); Ideen für alle 169 Spiele (von einem Hilfsagenten entworfen, von Hand
+  durchgesehen), Liste „Beim Bauen zu prüfen“; Entscheide AN1 bis AN3 vorgelegt.
