@@ -394,6 +394,83 @@ function zeichneVerwaltung(box, neu) {
       ausgabe, hinweis);
   }
 
+  // ----- Ruhezeiten (Entscheide AN3-Z a, AN3-T a „differenziert“, AN3-K a; LERN_Session27) -----
+  // Zeitspannen je Wochentag, je Zeitspanne wofür sie gilt, je Spiel abweichend; reisen mit dem Abgleich. Die beiden
+  // Einstellungen des Geräts (Kopfhörer, Spiele mit Ton) stehen oben bei den übrigen.
+  function ruhezeitenTeil(wahlKnoepfe) {
+    const r = LS.ruhezeiten();
+    const meldung = el("p", { class: "meldung", style: "text-align:left;margin:6px 0", "aria-live": "polite" });
+    const setze = zeiten => { LS.setzeRuhezeiten({ zeiten }); neu(); };
+    const stand = LS.ruheStand();
+    const kopf = LS.einstellung("kopfhoerer", null);
+    const jetzt = el("p", { "data-ruhe": stand.length ? "an" : "aus", style: "margin:0 0 8px",
+      text: stand.length
+        ? `🤫 Gerade gilt: ${stand.map(z => `${z.text} für ${z.arten.join(", ")}`).join("; ")}.`
+          + (kopf !== "nein" ? ` Mit Kopfhörern hier ausgenommen: Hören${kopf === "vorlesen" ? " und Vorlesen" : ""}.` : "")
+        : "Gerade ist keine Ruhezeit." });
+    const spanne = (z, i) => {
+      const andere = neuZ => r.zeiten.map((x, j) => (j === i ? neuZ : x));
+      const tage = el("div", { class: "zeile-knoepfe" }, ...LS.WOCHENTAGE.map((t, n) => {
+        const an = z.tage.includes(n + 1);
+        return el("button", { type: "button", class: "schalter" + (an ? " frei" : ""), "aria-pressed": String(an), text: t,
+          onclick: () => {
+            const tageNeu = an ? z.tage.filter(x => x !== n + 1) : [...z.tage, n + 1].sort((a, b) => a - b);
+            if (!tageNeu.length) { meldung.textContent = "Mindestens ein Wochentag — sonst die Zeitspanne entfernen."; return; }
+            setze(andere({ ...z, tage: tageNeu }));
+          } });
+      }));
+      // Ein Zeitfeld kennt kein 24:00: das Ende des Tages steht als 00:00 „(Mitternacht)“, und 00:00 als Ende heisst Mitternacht
+      const zeige = (feld, w) => (feld === "bis" && w === "24:00" ? "00:00" : w);
+      const zeitFeld = (feld, label) => {
+        const f = el("input", { class: "feld", type: "time", value: zeige(feld, z[feld]), "aria-label": label, style: "width:auto" });
+        f.addEventListener("change", () => {
+          const neuZ = { ...z, [feld]: feld === "bis" && f.value === "00:00" ? "24:00" : f.value };
+          if (!LS.ruheZeitGueltig(neuZ)) { meldung.textContent = "Die Zeitspanne muss vor ihrem Ende beginnen (etwa 08:00 bis 12:00; bis Mitternacht: 00:00)."; f.value = zeige(feld, z[feld]); return; }
+          setze(andere(neuZ));
+        });
+        return f;
+      };
+      const arten = el("div", { class: "zeile-knoepfe" }, ...Object.entries(LS.RUHE_ARTEN).map(([a, text]) => {
+        const an = z.arten.includes(a);
+        return el("button", { type: "button", class: "schalter" + (an ? " frei" : ""), "aria-pressed": String(an), text: (an ? "✓ " : "") + text,
+          onclick: () => {
+            const artenNeu = an ? z.arten.filter(x => x !== a) : [...z.arten, a];
+            if (!artenNeu.length) { meldung.textContent = "Mindestens eine Art — sonst die Zeitspanne entfernen."; return; }
+            setze(andere({ ...z, arten: artenNeu }));
+          } });
+      }));
+      return el("div", { class: "einstellung-spiel", "data-ruhezeit": z.id, style: "display:block;padding:8px 0;border-top:1px solid var(--rand, #ddd)" },
+        tage,
+        el("div", { class: "pin-zeile", style: "justify-content:flex-start;margin:6px 0" }, zeitFeld("von", "von"), el("span", { text: "bis" }), zeitFeld("bis", "bis"),
+          z.bis === "24:00" ? el("span", { class: "leise-text", text: "(Mitternacht)" }) : null,
+          knopf("🗑 Entfernen", () => setze(r.zeiten.filter((_, j) => j !== i)), "hell")),
+        el("div", { class: "leise-text", text: "Gilt für:" }), arten);
+    };
+    const neueSpanne = () => {
+      const id = "rz-" + Date.now().toString(36);
+      setze([...r.zeiten, { id, tage: [1, 2, 3, 4, 5], von: "08:00", bis: "12:00", arten: Object.keys(LS.RUHE_ARTEN) }]);
+    };
+    const JE_SPIEL = [[null, "wie eingestellt"], ["aus", "gilt hier nicht"], ["alles", "gilt hier ganz"]];
+    const spiele = SPIELE.filter(s => LS.spielSichtbar(s.id));
+    return el("div", { class: "einstellung", "data-teil": "ruhezeiten" },
+      el("h3", { text: "🤫 Ruhezeiten" }),
+      el("p", { class: "leise-text", style: "margin:0 0 6px", text: "Zu diesen Zeiten bleibt es still, etwa während des Unterrichts: je Zeitspanne wählbar, ob die Abschluss-Animation, die Klänge, das Vorlesen der Eule und das Hören ruhen. Es gilt die Uhrzeit dieses Geräts. Die Ruhezeiten reisen mit dem Abgleich auf die anderen Geräte; Kopfhörer und das Ausblenden der Spiele mit Ton stellt jedes Gerät oben selbst ein." }),
+      jetzt,
+      ...r.zeiten.map(spanne),
+      r.zeiten.length ? null : el("p", { class: "leise-text", text: "Noch keine Ruhezeit — alles klingt wie eingestellt." }),
+      meldung,
+      zeile(knopf("➕ Zeitspanne", neueSpanne, "gruen")),
+      r.zeiten.length && spiele.length ? el("details", { class: "einstellung-spiele" },
+        el("summary", { text: `Je Spiel (${spiele.length})` }),
+        ...spiele.map(s => el("div", { class: "einstellung-spiel" },
+          el("span", { text: `${s.bild} ${s.name}` }),
+          wahlKnoepfe(JE_SPIEL, r.spiele[s.id] ?? null, w => {
+            const neuSpiele = { ...r.spiele };
+            if (w === null) delete neuSpiele[s.id]; else neuSpiele[s.id] = w;
+            LS.setzeRuhezeiten({ spiele: neuSpiele });
+          })))) : null);
+  }
+
   // ----- Einstellungen für alle auf diesem Gerät (LERN_Session7; später je Klasse durch die Lehrperson) -----
   function einstellungen() {
     /** Ein Knopf je Wahl; gewählt ist, was 'aktuell' gleicht (null = „wie global“). */
@@ -419,7 +496,8 @@ function zeichneVerwaltung(box, neu) {
     seite.append(karte(
       el("h2", { text: "Einstellungen" }),
       el("p", { class: "leise-text", style: "margin-top:0", text: "Gelten für alle Kinder auf diesem Gerät, je Spiel auch abweichend. „Alles auf Standard“ setzt auch die Spiele zurück." }),
-      ...zeilen,
+      // die Ruhezeiten gleich nach den beiden Einstellungen, die von ihnen handeln (Kopfhörer, Spiele mit Ton)
+      ...(() => { const n = Object.keys(LS.EINSTELLUNGEN).indexOf("tonSpieleRuhe") + 1; return [...zeilen.slice(0, n), ruhezeitenTeil(wahlKnoepfe), ...zeilen.slice(n)]; })(),
       zeile(knopf("↺ Alles auf Standard", () => { LS.einstellungenZuruecksetzen(); neu(); })),
       meldewegTeil(),
       speicherTeil(),

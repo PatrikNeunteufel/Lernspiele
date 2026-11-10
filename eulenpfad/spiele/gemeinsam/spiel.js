@@ -140,7 +140,19 @@ const LS = (() => {
     feier: {
       titel: "Abschluss-Animation", standard: "an",
       werte: { an: "an", aus: "aus" },
-      erklaerung: "Am Ende einer geschafften Runde zeigt das Spiel eine kurze Animation, die mit der Stufe weiter führt (etwa die Rakete vom Mond bis zum Saturn); mehr Sterne schmücken sie aus. Ein Tippen überspringt sie. Mit der Einstellung „Bewegung reduzieren“ des Geräts steht gleich das Schlussbild. Spiele ohne eigene Animation zeigen wie bisher Konfetti.",
+      erklaerung: "Am Ende einer geschafften Runde zeigt das Spiel eine kurze Animation, die mit der Stufe weiter führt (etwa die Rakete vom Mond bis zum Saturn); mehr Sterne schmücken sie aus. Ein Tippen überspringt sie. Mit der Einstellung „Bewegung reduzieren“ des Geräts steht gleich das Schlussbild. Spiele ohne eigene Animation zeigen wie bisher Konfetti. Während einer Ruhezeit (unten) kann sie ruhen.",
+    },
+    // Entscheid AN3-K a (LERN_Session27): je Gerät, reist nicht mit dem Abgleich (Kopfhörer erkennt eine Webseite nicht)
+    kopfhoerer: {
+      titel: "🎧 Dieses Gerät wird mit Kopfhörern benutzt", standard: "nein",
+      werte: { nein: "nein", hoeren: "ja: Hören auch in der Ruhezeit", vorlesen: "ja: Hören und Vorlesen auch in der Ruhezeit" },
+      erklaerung: "Mit Kopfhörern stört der Ton niemanden: Dann gilt die Ruhezeit nicht für das Hören (Aussprache, Musik, Hörgeschichten), auf Wunsch auch nicht für das Vorlesen der Eule. Klänge und Abschluss-Animation folgen weiter der Ruhezeit. Ob Kopfhörer stecken, kann eine Webseite nicht zuverlässig erkennen, darum steht es hier.",
+    },
+    // Zusatz Patrik zu AN3-K (LERN_Session27): je Gerät
+    tonSpieleRuhe: {
+      titel: "Spiele, die Ton brauchen, während einer Ruhezeit", standard: "zeigen",
+      werte: { zeigen: "mit Kopfhörer-Hinweis zeigen", ausblenden: "ausblenden" },
+      erklaerung: "Spiele mit der Spielweise „Hören“ brauchen Ton. In einer Ruhezeit, die das Hören einschliesst, zeigen sie vor der Runde „🎧 Diese Runde braucht Ton“ mit „Ton für diese Runde an“ — oder sie fehlen im Tab Spiele, bis die Ruhezeit vorbei ist. Zufall und Zufallsmix nehmen sie in der Ruhezeit nie, weil dort niemand den Ton einschalten kann. Mit Kopfhörern (oben) bleiben sie immer da.",
     },
     // Entscheid KR1 a (LERN_Session13): ein Kind fängt auch ohne Aufsicht an
     selbstAnlegen: {
@@ -180,6 +192,93 @@ const LS = (() => {
   }
 
   const einstellungenZuruecksetzen = () => schreibe("einstellungen", {});
+
+  // ---------- Ruhezeiten (Entscheide AN3-Z a, AN3-T a mit der Lesart „differenziert“, AN3-K a; LERN_Session27) ----------
+  // lernspiele:ruhezeiten = { stand, zeiten: [{ id, tage: [1–7, Mo = 1], von: "08:00", bis: "12:00", arten: [...] }],
+  // spiele: { <spiel>: "aus" | "alles" } }; reist mit dem Abgleich (Teil ruhezeiten, der jüngere Stand gewinnt).
+  // Während einer Zeitspanne schweigt, was sie nennt (RUHE_ARTEN), nach der Ortszeit des Geräts. Je Spiel: „aus“ = gilt in
+  // diesem Spiel nicht, „alles“ = gilt hier für alle Arten. Die Kopfhörer-Einstellung des Geräts nimmt Hören, auf Wunsch
+  // auch Vorlesen aus; „Ton für diese Runde an“ nimmt Hören für eine Runde aus. Ohne Zeitspannen ändert sich nichts.
+  const RUHE_ARTEN = {
+    feier: "Abschluss-Animation",
+    klaenge: "Klänge (Richtig, Falsch, Sterne)",
+    vorlesen: "Vorlesen der Eule",
+    hoeren: "Hören als Inhalt (Aussprache, Musik, Hörgeschichten)",
+  };
+  const WOCHENTAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+  const UHRZEIT = /^(([01]\d|2[0-3]):[0-5]\d|24:00)$/;
+  const minuten = hhmm => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3));
+  /** Eine Zeitspanne in der gespeicherten Form? (Fremde Daten aus dem Abgleich gehen erst nach dieser Prüfung durch.) */
+  function ruheZeitGueltig(z) {
+    return !!z && typeof z === "object" && typeof z.id === "string" && z.id.length > 0 && z.id.length <= 40
+      && Array.isArray(z.tage) && z.tage.length > 0 && z.tage.every(t => Number.isInteger(t) && t >= 1 && t <= 7)
+      && typeof z.von === "string" && typeof z.bis === "string" && UHRZEIT.test(z.von) && UHRZEIT.test(z.bis)
+      && minuten(z.von) < minuten(z.bis)
+      && Array.isArray(z.arten) && z.arten.length > 0 && z.arten.every(a => a in RUHE_ARTEN);
+  }
+  const ruheSpielWert = w => w === "aus" || w === "alles";
+  /** Gespeicherte Ruhezeiten, bereinigt: { stand, zeiten, spiele }. */
+  function ruhezeiten() {
+    const r = lies("ruhezeiten", null);
+    const roh = r && typeof r === "object" ? r : {};
+    const spiele = {};
+    if (roh.spiele && typeof roh.spiele === "object") for (const [id, w] of Object.entries(roh.spiele)) if (ruheSpielWert(w)) spiele[id] = w;
+    return { stand: typeof roh.stand === "string" ? roh.stand : "", zeiten: Array.isArray(roh.zeiten) ? roh.zeiten.filter(ruheZeitGueltig) : [], spiele };
+  }
+  /** Ruhezeiten ändern (nur die genannten Teile); stand = jetzt, damit der Abgleich den jüngeren Stand erkennt. */
+  function setzeRuhezeiten({ zeiten, spiele } = {}) {
+    const alt = ruhezeiten();
+    const neu = { stand: new Date().toISOString(), zeiten: (zeiten ?? alt.zeiten).filter(ruheZeitGueltig), spiele: { ...(spiele ?? alt.spiele) } };
+    for (const [id, w] of Object.entries(neu.spiele)) if (!ruheSpielWert(w)) delete neu.spiele[id];
+    schreibe("ruhezeiten", neu);
+  }
+  /** Zeitspannen, die jetzt gelten (Ortszeit des Geräts). */
+  function ruheJetzt(jetzt = new Date()) {
+    const tag = ((jetzt.getDay() + 6) % 7) + 1, min = jetzt.getHours() * 60 + jetzt.getMinutes();
+    return ruhezeiten().zeiten.filter(z => z.tage.includes(tag) && minuten(z.von) <= min && min < minuten(z.bis));
+  }
+  let tonFuerRunde = false; // „Ton für diese Runde an“ (AN3-T a): bis zum Ende der Runde
+  /** Schweigt art („feier“, „klaenge“, „vorlesen“, „hoeren“) gerade, im Spiel spielId (ohne: das laufende)? */
+  function ruhe(art, spielId = spielStand?.spiel ?? seitenSpiel(), jetzt = new Date()) {
+    const aktiv = ruheJetzt(jetzt);
+    if (!aktiv.length) return false;
+    const je = spielId ? ruhezeiten().spiele[spielId] : undefined;
+    if (je === "aus") return false;
+    if (je !== "alles" && !aktiv.some(z => z.arten.includes(art))) return false;
+    const kopf = einstellung("kopfhoerer", null);
+    if (art === "hoeren" && (kopf !== "nein" || tonFuerRunde)) return false;
+    if (art === "vorlesen" && kopf === "vorlesen") return false;
+    return true;
+  }
+  /** Braucht das Spiel Ton (Spielweise „Hören“ im Katalog)? */
+  const brauchtTon = spielId => !!katalogEintrag(spielId)?.art?.includes("hoeren");
+  /** Spiel mit Ton, das gerade ruht (Hinweis vor der Runde; Zufall und Mix nehmen es nicht). */
+  const tonSpielRuht = spielId => brauchtTon(spielId) && ruhe("hoeren", spielId);
+  /** Ausgeblendet im Tab Spiele, weil die Aufsicht Ton-Spiele in der Ruhezeit ausblendet? */
+  const ruheAusgeblendet = spielId => einstellung("tonSpieleRuhe", null) === "ausblenden" && tonSpielRuht(spielId);
+  /** Für die Verwaltung: was gerade gilt — [] ohne Ruhezeit, sonst je Zeitspanne { text, arten }. */
+  const ruheStand = (jetzt = new Date()) => ruheJetzt(jetzt).map(z => ({
+    text: `${ruheTageText(z.tage)} ${z.von}–${z.bis}`, arten: z.arten.map(a => RUHE_ARTEN[a]) }));
+  /** „Mo–Fr“, „Mo, Mi, Fr“, „jeden Tag“. */
+  function ruheTageText(tage) {
+    const t = [...new Set(tage)].sort((a, b) => a - b);
+    if (t.length === 7) return "jeden Tag";
+    const lueckenlos = t.every((x, i) => i === 0 || x === t[i - 1] + 1);
+    return lueckenlos && t.length > 2 ? `${WOCHENTAGE[t[0] - 1]}–${WOCHENTAGE[t[t.length - 1] - 1]}` : t.map(x => WOCHENTAGE[x - 1]).join(", ");
+  }
+  // Abgleich (AN3-Z a): die Ruhezeiten gelten für das Gerät, nicht für eine Person — sie reisen nur in der Abgleich-Datei,
+  // nicht in der Sicherung eines Kindes; der jüngere Stand gewinnt, fremde Zeitspannen nur nach der Prüfung.
+  const RUHE_TEIL = {
+    schluessel: "ruhezeiten",
+    sichern: (ids, eigene) => (ids ? null : eigene && typeof eigene === "object" ? eigene : null),
+    zusammenfuehren: (eigene, fremde) => {
+      if (!fremde || typeof fremde !== "object" || typeof fremde.stand !== "string") return { wert: eigene ?? null, neu: 0 };
+      if (eigene && typeof eigene === "object" && typeof eigene.stand === "string" && eigene.stand >= fremde.stand) return { wert: eigene, neu: 0 };
+      const spiele = {};
+      if (fremde.spiele && typeof fremde.spiele === "object") for (const [id, w] of Object.entries(fremde.spiele)) if (ruheSpielWert(w)) spiele[id] = w;
+      return { wert: { stand: fremde.stand, zeiten: Array.isArray(fremde.zeiten) ? fremde.zeiten.filter(ruheZeitGueltig) : [], spiele }, neu: 1 };
+    },
+  };
 
   /**
    * Dezimalzahl mit dem eingestellten Zeichen, vor dem Komma in Schulschreibweise: 30 400.5 oder 30 400,5.
@@ -729,7 +828,7 @@ const LS = (() => {
     app: "eulenpfad", speicher: { praefix: SPEICHER.praefix, lies, schreibe, entferne: k => SPEICHER.entferne(k) },
     schluessel: { runden: "protokoll" }, dateiPraefix: "lernspiele",
     pruefung: { runde: RUNDEN_PRUEFUNG, rekord: REKORD_PRUEFUNG }, freigabe: true,
-    teile: { meldungen: MELDUNGEN_TEIL }, altePerson: personAusProfil,
+    teile: { meldungen: MELDUNGEN_TEIL, ruhezeiten: RUHE_TEIL }, altePerson: personAusProfil,
     // Runden älterer Fassungen (aufgabenZeiten, fehlerAufgaben bis LERN_Session18) vor der Prüfung umdeuten (RA4 a)
     umdeuten: ({ runden, rekorde }) => ({ runden: runden.map(KERN.runde.ausEulenpfad), rekorde }),
   });
@@ -1218,13 +1317,18 @@ const LS = (() => {
   // damit man Rückmeldung und Aufgabe am Klang unterscheidet. Mehr als Tonhöhe und Tempo bietet die
   // Sprachausgabe der Browser nicht.
   const STIMMLAGE = { "": { pitch: 1, rate: 0.85 }, gut: { pitch: 1.35, rate: 1 }, hinweis: { pitch: 0.85, rate: 0.78 } };
-  /** Text vorlesen; art: "" (Aufgabe), "gut" (Lob), "hinweis" (Tipp). false ohne Stimme oder bei Ton aus. */
-  function sprich(text, sprache = "en", art = "", fertig = null) {
+  /**
+   * Text vorlesen; art: "" (Aufgabe), "gut" (Lob), "hinweis" (Tipp). false ohne Stimme, bei Ton aus oder in der Ruhezeit.
+   * kanal (Ruhezeit, AN3-T a): "vorlesen" (die Eule liest vor), "hoeren" (Hören als Inhalt: LS.sprich der Spiele), null
+   * (Probe auf dem Startblatt: auf Knopfdruck der Aufsicht, immer).
+   */
+  function sprich(text, sprache = "en", art = "", fertig = null, kanal = null) {
     // fertig: einmal gerufen, wenn die Stimme fertig ist (ctx.uhrWarten) — gleich danach, wenn nichts gesprochen wird.
     let gerufen = false;
     const ende = () => { if (!gerufen && fertig) { gerufen = true; fertig(); } };
     const nichts = () => { setTimeout(ende, 0); return false; };
     if (!tonAn) return nichts(); // Ton aus (🔇 in der Kopfzeile) gilt auch für die Stimme
+    if (kanal && ruhe(kanal)) return nichts();
     // Leerer Text: nichts sagen — und nichts abbrechen, was gerade gesprochen wird (Meldung Hör-Reporter).
     if (!String(text).trim()) return nichts();
     const v = stimme(sprache);
@@ -1252,6 +1356,8 @@ const LS = (() => {
       return true;
     } catch { return nichts(); }
   }
+  /** LS.sprich der Spiele: Hören als Inhalt (Aussprache, Hörtexte) — ruht in der Ruhezeit für das Hören (AN3-T a). */
+  const sprichInhalt = (text, sprache, art, fertig) => sprich(text, sprache, art, fertig, "hoeren");
   /**
    * fn rufen, sobald keine Stimme mehr spricht (Lob der vorigen Aufgabe, Vorlesen); spätestens nach max ms.
    * Abgefragt statt auf onend gewartet: Manche Browser melden das Ende nicht, und sprich bricht Fremdes ab.
@@ -1374,7 +1480,7 @@ const LS = (() => {
       halt();
       uhr = setTimeout(() => {
         const text = fuerStimme(k.dataset.vorlesen || k.getAttribute("aria-label") || k.textContent || "");
-        if (text && sprich(text, "de")) gelesen = true; // ohne Stimme bleibt der Klick erhalten
+        if (text && sprich(text, "de", "", null, "vorlesen")) gelesen = true; // ohne Stimme bleibt der Klick erhalten
       }, 500);
     });
     document.addEventListener("pointermove", e => { if (uhr && start && Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 12) halt(); });
@@ -1406,7 +1512,7 @@ const LS = (() => {
 
   /** Kurzer Klang: art ist ein Name unten oder eine eigene Folge [[Frequenz, Dauer], …] (Abschluss-Animation). */
   function ton(art) {
-    if (!tonAn) return;
+    if (!tonAn || ruhe("klaenge")) return; // Ruhezeit (AN3-T a): Klänge schweigen, die Abschluss-Animation spielt hierüber
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
       const folgen = Array.isArray(art) ? art : {
@@ -2260,8 +2366,22 @@ const LS = (() => {
       }, k => setzeWahl(name, "vorlesen", null, k), neuZeichnen);
     }
 
+    /** „🎧 Diese Runde braucht Ton“ (AN3-T a): mit „Ton für diese Runde an“ weiter, sonst zurück zur Stufenwahl. */
+    function tonHinweis(weiter) {
+      buehne.innerHTML = "";
+      const eule = euleZeile();
+      buehne.append(el("div", { class: "karte" }, eule.element,
+        el("div", { class: "auftrag", text: "🎧 Diese Runde braucht Ton — mit Kopfhörern spielen" }),
+        el("div", { class: "knopfzeile" },
+          el("button", { type: "button", class: "knopf gruen", "data-aktion": "ton-fuer-runde", text: "🔊 Ton für diese Runde an",
+            onclick: () => { tonFuerRunde = true; weiter(); } }),
+          el("button", { type: "button", class: "knopf hell", text: "Zurück", onclick: () => stufenwahl() }))));
+      eule.sag("Gerade ist Ruhezeit. Mit Kopfhörern kannst du trotzdem spielen — nach der Runde ist der Ton wieder still.");
+    }
+
     function stufenwahl() {
       if (!zugang()) return;
+      tonFuerRunde = false; // „Ton für diese Runde an“ gilt nur bis zum Ende der Runde (AN3-T a)
       buehne.innerHTML = "";
       aktuellePause = null; // keine Aufgabe, die eine Hilfe anhalten müsste
       hilfeGezaehlt = null;
@@ -2310,7 +2430,7 @@ const LS = (() => {
       // Vorlesen auf dem Startblatt: 🗣️ liest die Einleitung, langes Drücken einen Stufenknopf — nur auf
       // Knopfdruck; automatisch liest die Eule nur im Spiel selbst (Vorgabe Patrik, LERN_Session8).
       if (vorlesenErlaubt(def.id)) {
-        const einleitung = () => sprich(fuerStimme(def.einleitung), "de");
+        const einleitung = () => sprich(fuerStimme(def.einleitung), "de", "", null, "vorlesen");
         const einrichten = ok => {
           if (!ok) return;
           eule.element.append(el("button", { type: "button", class: "vorlesen", text: "🗣️", "aria-label": "Vorlesen", onclick: einleitung }));
@@ -2358,6 +2478,9 @@ const LS = (() => {
      */
     function runde(stufe, endlos = false, mix = null) {
       if (!zugang()) return;
+      // Ruhezeit für das Hören (AN3-T a): ein Spiel, das Ton braucht, fragt vor der Runde nach Kopfhörern (im Mix nicht:
+      // der Mix nimmt solche Spiele in der Ruhezeit nicht)
+      if (!mix && !tonFuerRunde && tonSpielRuht(def.id)) return tonHinweis(() => runde(stufe, endlos, mix));
       const name = aktuellerSpieler();
       const timer = mix ? { ...timerFuer(name, def.id, stufe.id), an: mix.timer } : timerFuer(name, def.id, stufe.id);
       let nr = 0;
@@ -2443,7 +2566,7 @@ const LS = (() => {
         // vorigen, und es käme zweimal (Meldung Patrik, LERN_Session8).
         const text = auftragAuch => fuerStimme([blaseNeu ? eule.blase.textContent.trim() : "", ...(auftragAuch ? auftrag() : [])]
           .filter(Boolean).map(satz).join(" "));
-        const lies = () => sprich(text(true), "de");
+        const lies = () => sprich(text(true), "de", "", null, "vorlesen");
         // Automatisch liest die Eule den Auftrag nur, wenn er anders lautet als bei der vorigen Aufgabe: Bleibt
         // die Frage gleich („Wohin geht die Melodie?“), kennt das Kind sie schon (Meldung Patrik, LERN_Session11).
         // 🗣️ liest ihn immer. fertig: wenn die Stimme fertig ist (ctx.nachAnsage).
@@ -2452,11 +2575,11 @@ const LS = (() => {
           const jetzt = auftrag().join(" ");
           const neu = jetzt !== zuletztGelesen;
           zuletztGelesen = jetzt;
-          sprich(text(neu), "de", "", fertig);
+          sprich(text(neu), "de", "", fertig, "vorlesen");
         };
         // 🗣️ statt 🔊: Das Lautsprecher-Zeichen ist der Ton-Schalter in der Kopfzeile.
         eule.element.append(el("button", { type: "button", class: "vorlesen", text: "🗣️", "aria-label": "Vorlesen", onclick: lies }));
-        eule.beiSag = (t, art) => { blaseNeu = true; if (auto && !zeichnet) sprich(fuerStimme(t), "de", art); };
+        eule.beiSag = (t, art) => { blaseNeu = true; if (auto && !zeichnet) sprich(fuerStimme(t), "de", art, null, "vorlesen"); };
         if (auto) { eule.vorlesen = liesNeu; if (gezeigt) liesNeu(); }
         if (knoepfeVorlesen(def.id)) langDruecken(flaeche);
       };
@@ -3084,8 +3207,9 @@ const LS = (() => {
         const sterne = sterneFuer(fehler + tippsRunde / 2);
         protokolliere(L.eintrag(eintragFelder(sterne)));
         ton("fertig");
+        tonFuerRunde = false; // nach der Runde ist das Hören wieder still (AN3-T a)
         // Abschluss-Animation des Spiels (feier.js, Entscheide AN1–AN3 a), sonst wie bisher Konfetti
-        const feier = def.feier && typeof LS_FEIER !== "undefined" && einstellung("feier", def.id) === "an"
+        const feier = def.feier && typeof LS_FEIER !== "undefined" && einstellung("feier", def.id) === "an" && !ruhe("feier", def.id)
           ? LS_FEIER.zeige(def.feier, { stufe: stufe.id, sterne, klang: ton }) : null; // klang: nur mit Ton an (Regel 8)
         if (!feier) konfetti();
         pruefung.haken?.("schluss", { stufe: stufe.id, stufen: Object.keys(def.stufen || {}), sterne, feierDef: def.feier || null, feier });
@@ -3152,6 +3276,7 @@ const LS = (() => {
         const vorher = speichereEndlos();
         const neuerRekord = L.geschafft > 0 && L.geschafft > vorher;
         ton("fertig");
+        tonFuerRunde = false; // nach der Runde ist das Hören wieder still (AN3-T a)
         if (neuerRekord) konfetti();
         buehne.innerHTML = "";
         const karte = el("div", { class: "karte schluss mitte" });
@@ -3239,7 +3364,8 @@ const LS = (() => {
 
   return {
     bereit, nachBereit, beiBereit, SPEICHER, speicherVoll,
-    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
+    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
+    RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     LOB, MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     person, umbenennen, gehoert, PERSONEN,
@@ -3258,7 +3384,7 @@ const LS = (() => {
     basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, alterVon, aufsteigen, aufstiegZuruecknehmen, neuerAufstieg, sortierungFuer, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, reihenfolgeFuer, vorgabeZeit, timerFuer, waehleTimer, zeitVorschlag,
     WAHL_ARTEN, istFest, wahlFuer, setzeWahl, wahlZuruecksetzen, setzeFest, wahlAnzahl, FEST_TEXT, avatarBild,
-    stimmeBereit, sprich, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen,
+    stimmeBereit, sprich: sprichInhalt, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen,
     protokoll, besteSterne, auswahl, reihenfolge, fliegen, koerbe, pruefung, RAHMEN_KLASSEN,
   };
 })();

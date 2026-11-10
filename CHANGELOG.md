@@ -1599,3 +1599,22 @@
   aufrecht nebeneinander. Commit-Hook (`tools/git-hooks/commit_msg.py`) schreibt seine Meldung als UTF-8: Visual Studio
   zeigte statt „Der Commit ändert …“ nur „Die Bytes [E4] im Index 31 können nicht … übersetzt werden“ (Python schrieb
   cp1252). Doku rahmen.md 24 (Muster, Ton, Mengen), Konzept (Status, Abweichungen P6–P8).
+- Eulenpfad, Ruhezeiten (Schritt 3; AN3-Z a, AN3-T a „differenziert“, AN3-K a, Zusatz Patrik zu den Spielen mit Ton):
+  Verwaltung → Einstellungen, Teil „🤫 Ruhezeiten“ — Zeitspannen je Wochentag mit von/bis (Ortszeit des Geräts, bis
+  Mitternacht als 00:00), je Zeitspanne wofür (Abschluss-Animation, Klänge, Vorlesen der Eule, Hören als Inhalt), je
+  Spiel „wie eingestellt“ / „gilt hier nicht“ / „gilt hier ganz“, und welche Ruhezeit gerade gilt. Neu je Gerät:
+  „🎧 Dieses Gerät wird mit Kopfhörern benutzt“ (Hören, auf Wunsch auch Vorlesen ausgenommen) und „Spiele, die Ton
+  brauchen, während einer Ruhezeit“ (mit Kopfhörer-Hinweis zeigen / ausblenden). Rahmen (`spiel.js`): `LS.ruhe` und
+  Freunde; `ton` schweigt bei den Klängen, das Vorlesen beim Vorlesen, `LS.sprich`, `noten.js` und der Klang-Wichtel
+  beim Hören, die Abschluss-Animation wird zum Konfetti. Spiele mit der Spielweise „Hören“ zeigen vor der Runde
+  „🎧 Diese Runde braucht Ton“ mit „Ton für diese Runde an“ (bis zum Schluss der Runde); ausgeblendet fehlen sie im Tab
+  Spiele mit Hinweis; Zufall und Zufallsmix nehmen sie in der Ruhezeit nie. Die Ruhezeiten reisen mit dem Abgleich
+  (Teil `ruhezeiten`, jüngerer Stand gewinnt, fremde Daten nur geprüft), nicht in der Sicherung eines Kindes. Neuer
+  Prüfteil `node tools/pruefe_spiele.js ruhe` (Regeln mit fester Uhrzeit, ungültige Zeitspannen, Spiele mit Ton, Klang
+  entsteht nicht, Abgleich) — Gegenproben (Klänge ohne Sperre, fremde Zeitspanne ungeprüft, Ende eingeschlossen):
+  gemeldet; die zweite fiel zuerst nicht auf (das Lesen filtert noch einmal), der Test prüft jetzt den Speicher.
+  Ohne Ruhezeit gleiche Klickzahlen wie vorher (Ton-Spiele hoch-tief-ohr, klang-wichtel, noten-namen, wort-zwillinge
+  gegen den letzten Commit; die acht Piloten). Im Browser angesehen: Hinweis vor der Runde im Hoch-Tief-Ohr, Tab Spiele
+  mit ausgeblendeten Spielen, Verwaltung auf 768 und 375 px mit allen Bedienungen (Probe-Kind und Probe-Aufsicht danach
+  entfernt); „bis 24:00“ stand zuerst leer im Zeitfeld — berichtigt. Doku rahmen.md 25, Konzept (gebaut, eigene
+  Entscheide zur Abnahme).

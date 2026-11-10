@@ -1082,3 +1082,35 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   `feier`: `feier.js` geladen, Animation im Schlussbild, jede Stufe mit Bild, Schmuck passend zu 1–3 Sternen, mit
   „Bewegung reduzieren“ keine Bewegung, sonst Bewegung. Die Klickzahlen eines Spiels mit Animation ändern sich (kein
   Konfetti mehr, das Zufallszahlen verbrauchte; die Animation ist anklickbar).
+
+## 25. Ruhezeiten
+
+Seit LERN_Session27 (docs/konzept_abschluss_animationen.md 7, Entscheide AN3-Z a, AN3-T a mit der Lesart „differenziert“,
+AN3-K a). Zu festen Zeiten bleibt es still, etwa im Unterricht. Eingestellt in Verwaltung → Einstellungen, Teil
+„🤫 Ruhezeiten“, gleich nach den beiden Einstellungen des Geräts dazu.
+
+- **Daten:** `lernspiele:ruhezeiten = { stand, zeiten: [{ id, tage: [1–7, Mo = 1], von: "08:00", bis: "12:00", arten }],
+  spiele: { <spiel>: "aus" | "alles" } }`. `bis` ist ausgeschlossen, `"24:00"` = Mitternacht (das Zeitfeld zeigt es als
+  00:00 „(Mitternacht)“). Es gilt die Ortszeit des Geräts. Gelesen wird nur, was `LS.ruheZeitGueltig` besteht.
+- **Arten** (`LS.RUHE_ARTEN`), je Zeitspanne wählbar: `feier` (Abschluss-Animation; dann wie „aus“, also Konfetti),
+  `klaenge` (`LS.ton`, auch die Töne der Animation), `vorlesen` (die Eule liest vor: das interne `sprich` mit Kanal
+  „vorlesen“), `hoeren` (Hören als Inhalt: `LS.sprich` der Spiele, `noten.js`, Klang-Wichtel). Die Probe der Stimme auf
+  dem Startblatt klingt immer (Knopfdruck der Aufsicht).
+- **Je Spiel:** „wie eingestellt“, „gilt hier nicht“ (`aus`), „gilt hier ganz“ (`alles`: alle Arten, solange eine
+  Zeitspanne läuft).
+- **Gerät** (`EINSTELLUNGEN`, reisen nicht mit): `kopfhoerer` — `nein` / `hoeren` (Hören ausgenommen) / `vorlesen` (Hören
+  und Vorlesen ausgenommen); `tonSpieleRuhe` — `zeigen` / `ausblenden`.
+- **Spiele, die Ton brauchen** (Katalog `art` mit `hoeren`, `LS.brauchtTon`): ruht das Hören (`LS.tonSpielRuht`), zeigt
+  `runde` vor dem Start „🎧 Diese Runde braucht Ton — mit Kopfhörern spielen“ mit „🔊 Ton für diese Runde an“
+  (`data-aktion="ton-fuer-runde"`) und „Zurück“; der Ton bleibt bis zum Schluss der Runde an, dann und auf der
+  Stufenwahl wieder still. Mit `ausblenden` fehlen sie im Tab Spiele (`LS.ruheAusgeblendet`, Hinweis
+  `data-hinweis="ruhezeit"`). Zufall und Zufallsmix nehmen sie in der Ruhezeit nie, auch mit `zeigen`: dort kann niemand
+  den Ton für die Runde einschalten.
+- **Abgleich:** Teil `ruhezeiten` von `KERN.daten` (in der App, `RUHE_TEIL`): reist in der Abgleich-Datei und in der
+  Sicherung aller, nicht in der Sicherung einzelner Kinder; der jüngere `stand` gewinnt; fremde Zeitspannen und Werte je
+  Spiel gehen nur geprüft in den Speicher.
+- **API:** `LS.ruhe(art, spielId?, jetzt?)`, `ruhezeiten()`, `setzeRuhezeiten({ zeiten?, spiele? })`, `ruheJetzt(jetzt?)`,
+  `ruheStand(jetzt?)` (für die Verwaltung: „Mo–Fr 08:00–12:00“ und Arten), `ruheTageText`, `WOCHENTAGE`.
+- **Test:** `node tools/pruefe_spiele.js ruhe` — Regeln mit fester Uhrzeit (Wochentag, Ende ausgeschlossen, zwei
+  Zeitspannen, je Spiel, Kopfhörer), ungültige Zeitspannen, Spiele mit Ton (ruht, ausgeblendet, mit Kopfhörern), ein
+  Klang entsteht in der Ruhezeit nicht (WebAudio ersetzt), Abgleich und Sicherung.

@@ -1,6 +1,6 @@
 # Konzept: Abschluss-Animationen im Eulenpfad
 
-Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P8 gebaut, Ruhezeiten offen, Abnahme durch Patrik offen.**
+Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P8 und Ruhezeiten gebaut, Abnahme durch Patrik offen.**
 Entscheide und Pilotliste in Abschnitt 7.
 
 ## 1. Auslöser
@@ -133,6 +133,19 @@ brauchen, sagt der Katalog (Spielweise `hoeren`).
 - **Je Zeitspanne** wählbar: etwa Unterricht 08:00–12:00 alles, Mittag 12:00–13:30 nur Abschluss-Animation.
 - **Je Spiel** abweichend, wie die übrigen Einstellungen je Spiel („wie global“ / eigene Wahl).
 - Die Aufsicht sieht in der Verwaltung, welche Ruhezeit gerade gilt und wofür.
+
+**Gebaut** 10.11.2026 (LERN_Session27, Schritt 3; docs/eulenpfad/rahmen.md 25). Wo der Bau selbst entschieden hat (zur
+Abnahme):
+
+- **Je Spiel** drei Werte: „wie eingestellt“, „gilt hier nicht“, „gilt hier ganz“ (alle Arten, solange eine Zeitspanne
+  läuft) — statt je Spiel und je Art einzeln, das wären bei 169 Spielen vier Schalter je Zeile.
+- **Zufall und Zufallsmix** nehmen Spiele mit Ton in der Ruhezeit nie, auch mit „mit Kopfhörer-Hinweis zeigen“: Dort
+  gibt es keinen Ort, an dem jemand „Ton für diese Runde an“ wählen könnte; die Runde wäre stumm.
+- **Der Kopfhörer-Hinweis** steht vor jeder Runde, nicht nur auf der Stufenwahl: Die Stufenknöpfe im Tab Spiele
+  starten die Runde direkt.
+- **Abschluss-Animation in der Ruhezeit** wie „aus“: das Schlussbild mit Konfetti (still, ohne Bewegung der Animation).
+- **Abgleich:** Die Ruhezeiten reisen auch in einer Sicherung aller Personen, nicht in der Sicherung eines Kindes.
+- **Mitternacht** als Ende: Das Zeitfeld kennt kein 24:00; „bis 00:00“ heisst Mitternacht und steht so da.
 
 ### Pilotliste (AN1 a)
 

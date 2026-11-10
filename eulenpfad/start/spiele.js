@@ -146,7 +146,8 @@ function zeichneSpiele(box, neu) {
     merke: filterZu => LS.speichereProfil(name, { filterZu }) }));
 
   // ----- Spiele auswählen -----
-  const passt = s => LS.spielSichtbar(s.id)
+  // Ruhezeit (Zusatz Patrik zu AN3-K): Spiele mit Ton fehlen, wenn die Aufsicht sie dann ausblendet
+  const passt = s => LS.spielSichtbar(s.id) && !LS.ruheAusgeblendet(s.id)
     && (filter.fach === "alle" || THEMEN.find(t => t.id === s.thema)?.fach === filter.fach)
     && (!filter.thema.length || filter.thema.includes(s.thema))
     && (!filter.stufe.length || s.stufen.some(st => filter.stufe.includes(st)))
@@ -219,7 +220,9 @@ function zeichneSpiele(box, neu) {
   const ziehe = AUSWERTUNG.ziehe;
   // ♾ auf der Karte (Wunsch Patrik, LERN_Session12): dann nur Spiele, die in dieser Stufe Endlos anbieten, endlos gestartet.
   const zufallEndlos = p.endlosAn.includes("zufall");
-  const stufenZufall = st => auswahl.filter(s => s.stufen.includes(st.id) && (!zufallEndlos || (s.endlos || []).includes(st.id)));
+  // Zufall nimmt in der Ruhezeit keine Spiele, die Ton brauchen: niemand könnte dort den Ton für die Runde einschalten
+  const zufallAuswahl = auswahl.filter(s => !LS.tonSpielRuht(s.id));
+  const stufenZufall = st => zufallAuswahl.filter(s => s.stufen.includes(st.id) && (!zufallEndlos || (s.endlos || []).includes(st.id)));
   const zufallsSpiel = st => { const s = ziehe(stufenZufall(st), x => bedarf(x, st.id)); location.href = `${s.pfad}?stufe=${st.id}${zufallEndlos ? "&endlos=1" : ""}`; };
   const zufallsKnoepfe = LS.SKALA.filter(st => (!filter.stufe.length || filter.stufe.includes(st.id)) && stufenZufall(st).length).map(st => {
     const b = el("button", { type: "button", class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empfohlen && !gross ? " empfohlen" : ""),
@@ -263,7 +266,7 @@ function zeichneSpiele(box, neu) {
     titelText: "Antippen: zur Mix-Seite", beiTipp: () => { location.href = "mix.html"; },
     knoepfe: [el("a", { class: "stufenknopf gross", href: "mix.html", "data-vorlesen": "Zufallsmix einstellen und los." }, el("span", { class: "stufen-text", text: "🎲 Einstellen und los" }))] }));
   // Die Karte bleibt auch mit ♾ ohne passendes Spiel stehen, damit der Schalter erreichbar ist.
-  if (zufallsKnoepfe.length || (zufallEndlos && auswahl.length)) zufallsKarten.push(zufallsKarte({ bild: "🎯", name: "Zufälliges Spiel", farbe: "var(--deko-6)",
+  if (zufallsKnoepfe.length || (zufallEndlos && zufallAuswahl.length)) zufallsKarten.push(zufallsKarte({ bild: "🎯", name: "Zufälliges Spiel", farbe: "var(--deko-6)",
     ziel: zufallEndlos ? "Die Eule zieht ein Endlos-Spiel aus deiner Auswahl: so viele Aufgaben wie möglich ohne Fehler."
       : "Die Eule zieht ein Spiel aus deiner Auswahl — eher eines, das du noch üben solltest.",
     titelText: "Antippen: Startbild eines zufälligen Spiels",
@@ -272,10 +275,13 @@ function zeichneSpiele(box, neu) {
       onclick: () => speichere({ endlosAn: zufallEndlos ? p.endlosAn.filter(x => x !== "zufall") : [...p.endlosAn, "zufall"] }) },
     beiTipp: () => {
       const st = LS.SKALA.find(x => x.id === (gross ? filter.stufe[0] : empfohlen)) || LS.SKALA[2];
-      const s = ziehe(zufallEndlos ? stufenZufall(st) : auswahl, x => bedarf(x, st.id));
+      const s = ziehe(zufallEndlos ? stufenZufall(st) : zufallAuswahl, x => bedarf(x, st.id));
       if (s) location.href = s.pfad;
     } }));
   if (zufallsKarten.length) box.append(el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") }, ...zufallsKarten));
+  const ruhend = SPIELE.filter(s => LS.spielSichtbar(s.id) && LS.ruheAusgeblendet(s.id)).length;
+  if (ruhend) box.append(el("p", { class: "leise-text", "data-hinweis": "ruhezeit",
+    text: `🤫 Ruhezeit: ${ruhend} ${ruhend === 1 ? "Spiel mit Ton ist" : "Spiele mit Ton sind"} ausgeblendet, bis sie vorbei ist.` }));
 
   // Auf- und zuklappbare Gruppen; der Zustand landet im Profil. Gruppen gibt es nur ohne Suche (dann eine Liste).
   const G = UE.gruppen({ zu: p.zu, merke: zu => LS.speichereProfil(name, { zu }) });

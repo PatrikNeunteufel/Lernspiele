@@ -60,7 +60,8 @@ const fachVon = s => THEMEN.find(t => t.id === s.thema)?.fach;
 
 function kandidaten(name, e, auchGesperrte = false) {
   // auchGesperrte: alle Spiele, die passen würden — um zu sagen, wie viele die Aufsicht noch freigeben kann.
-  const sichtbar = s => auchGesperrte || LS.spielSichtbar(s.id);
+  // In der Ruhezeit keine Spiele, die Ton brauchen (AN3-T a): im Mix kann niemand den Ton für die Runde einschalten
+  const sichtbar = s => (auchGesperrte || LS.spielSichtbar(s.id)) && !LS.tonSpielRuht(s.id);
   if (e.check) return SPIELE.filter(s => sichtbar(s) && UEBERTRITT.faecher.includes(fachVon(s)))
     .map(s => ({ s, stufe: UEBERTRITT.stufeNachAbstand[UEBERTRITT.klasse - s.klasse] }))
     .filter(x => x.stufe && x.s.stufen.includes(x.stufe));

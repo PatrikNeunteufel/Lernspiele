@@ -864,6 +864,93 @@ if (opt.daten !== 0 && (!nurSpiele.length || nurSpiele.includes("daten"))) {
   })().catch(e => { console.log(`    FEHLER  Geschützte Aufsicht: ${e.stack || e}`); fehlerZahl++; }));
 }
 
+// Ruhezeiten (Entscheide AN3-Z a, AN3-T a „differenziert“, AN3-K a; LERN_Session27): die Regeln von LS.ruhe mit fester
+// Uhrzeit, ungültige Zeitspannen, Spiele mit Ton (Ausblenden, Zufall), Abgleich und Sicherung, und dass ein Klang in
+// der Ruhezeit nicht entsteht. Je Fall ein frisches Gerät; --ruhe=0 schaltet ab; nur dieser Teil: node tools/pruefe_spiele.js ruhe.
+if (opt.ruhe !== 0 && (!nurSpiele.length || nurSpiele.includes("ruhe"))) {
+  const geraet = () => {
+    const k = vm.createContext({ __seite: { html: "", search: "", seed: opt.seed }, console, URL, URLSearchParams, structuredClone, crypto: globalThis.crypto, TextEncoder });
+    vm.runInContext(DOM, k, { filename: "pruef_dom.js" });
+    vm.runInContext(fs.readFileSync(path.join(WURZEL, "eulenpfad", "kern", "kern.js"), "utf8"), k, { filename: "kern.js" });
+    for (const d of ["spiel.js", "katalog.js", "pruefstand.js", "abgleich.js"]) vm.runInContext(fs.readFileSync(path.join(SPIELE_DIR, "gemeinsam", d), "utf8"), k, { filename: d });
+    return k;
+  };
+  const maengel = [];
+  const soll = (was, ist, erwartet) => { if (JSON.stringify(ist) !== JSON.stringify(erwartet)) maengel.push(`${was}: ${JSON.stringify(ist)} statt ${JSON.stringify(erwartet)}`); };
+  const lauf = (k, code) => JSON.parse(vm.runInContext(`JSON.stringify((() => { ${code} })())`, k));
+  // Ortszeit wie auf dem Gerät: Mo 9. November 2026
+  const ZEIT = `const um = (tag, h, m = 0) => new Date(2026, 10, 8 + tag, h, m); const ARTEN = ["feier", "klaenge", "vorlesen", "hoeren"];
+    const alle = (t, id = "zahlenhaus") => ARTEN.map(a => LS.ruhe(a, id, t));`;
+  try {
+    const a = geraet();
+    soll("ohne Ruhezeit", lauf(a, `${ZEIT} return alle(um(1, 9));`), [false, false, false, false]);
+    soll("Zeitspanne Mo–Fr 08:00–12:00, alle Arten", lauf(a, `${ZEIT}
+      LS.setzeRuhezeiten({ zeiten: [{ id: "u", tage: [1, 2, 3, 4, 5], von: "08:00", bis: "12:00", arten: ARTEN }] });
+      return [alle(um(1, 9)), alle(um(1, 7, 59)), alle(um(1, 12)), alle(um(6, 9)), alle(um(5, 11, 59))];`),
+      [[true, true, true, true], [false, false, false, false], [false, false, false, false], [false, false, false, false], [true, true, true, true]]);
+    soll("zweite Zeitspanne Mittag nur Animation", lauf(a, `${ZEIT}
+      LS.setzeRuhezeiten({ zeiten: [...LS.ruhezeiten().zeiten, { id: "m", tage: [1, 2, 3, 4, 5], von: "12:00", bis: "13:30", arten: ["feier"] }] });
+      return [alle(um(1, 12, 30)), alle(um(1, 13, 30))];`), [[true, false, false, false], [false, false, false, false]]);
+    soll("je Spiel: aus, alles", lauf(a, `${ZEIT}
+      LS.setzeRuhezeiten({ spiele: { zahlenhaus: "aus", "rechen-rakete": "alles" } });
+      return [alle(um(1, 9)), alle(um(1, 12, 30), "rechen-rakete"), alle(um(1, 12, 30), "anlaut-angel")];`),
+      [[false, false, false, false], [true, true, true, true], [true, false, false, false]]);
+    soll("Kopfhörer: Hören, dann Hören und Vorlesen", lauf(a, `${ZEIT}
+      LS.setzeEinstellung("kopfhoerer", "hoeren"); const h = alle(um(1, 9), "anlaut-angel");
+      LS.setzeEinstellung("kopfhoerer", "vorlesen"); const v = alle(um(1, 9), "anlaut-angel");
+      LS.setzeEinstellung("kopfhoerer", null); return [h, v];`), [[true, true, true, false], [true, true, false, false]]);
+    soll("ungültige Zeitspannen", lauf(a, `return [
+      LS.ruheZeitGueltig({ id: "x", tage: [1], von: "12:00", bis: "08:00", arten: ["feier"] }),
+      LS.ruheZeitGueltig({ id: "x", tage: [8], von: "08:00", bis: "12:00", arten: ["feier"] }),
+      LS.ruheZeitGueltig({ id: "x", tage: [1], von: "08:00", bis: "12:00", arten: ["laerm"] }),
+      LS.ruheZeitGueltig({ id: "x", tage: [1], von: "8:00", bis: "12:00", arten: ["feier"] }),
+      LS.ruheZeitGueltig({ id: "x", tage: [7], von: "00:00", bis: "24:00", arten: ["hoeren"] })];`), [false, false, false, false, true]);
+    soll("Stand in der Verwaltung", lauf(a, `${ZEIT} return LS.ruheStand(um(1, 9)).map(z => z.text);`), ["Mo–Fr 08:00–12:00"]);
+
+    // Spiele mit Ton: ruht jetzt (Zeitspanne den ganzen Tag), ausgeblendet nur auf Wunsch, mit Kopfhörern nie
+    const b = geraet();
+    soll("Spiele mit Ton (ruht, ausgeblendet: zeigen, ausblenden, mit Kopfhörern; ein Spiel ohne Ton)", lauf(b, `
+      LS.setzeRuhezeiten({ zeiten: [{ id: "t", tage: [1, 2, 3, 4, 5, 6, 7], von: "00:00", bis: "24:00", arten: ["hoeren"] }] });
+      const id = SPIELE.find(s => s.art.includes("hoeren")).id, ohne = SPIELE.find(s => !s.art.includes("hoeren")).id;
+      const r = [LS.tonSpielRuht(id), LS.ruheAusgeblendet(id)];
+      LS.setzeEinstellung("tonSpieleRuhe", "ausblenden"); r.push(LS.ruheAusgeblendet(id), LS.ruheAusgeblendet(ohne));
+      LS.setzeEinstellung("kopfhoerer", "hoeren"); r.push(LS.ruheAusgeblendet(id), LS.tonSpielRuht(id));
+      return r;`), [true, false, true, false, false, false]);
+
+    // Klang: in der Ruhezeit entsteht kein Ton (WebAudio ersetzt, gezählt werden die Oszillatoren)
+    const c = geraet();
+    soll("Klänge in der Ruhezeit", lauf(c, `
+      let n = 0; window.AudioContext = function () { this.currentTime = 0; this.destination = {};
+        this.createOscillator = () => { n++; return { frequency: {}, connect: x => x, start() {}, stop() {} }; };
+        this.createGain = () => ({ gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect: x => x }); };
+      LS.ton("richtig"); const vorher = n;
+      LS.setzeRuhezeiten({ zeiten: [{ id: "k", tage: [1, 2, 3, 4, 5, 6, 7], von: "00:00", bis: "24:00", arten: ["klaenge"] }] });
+      LS.ton("richtig"); return [vorher > 0, n === vorher];`), [true, true]);
+
+    // Abgleich: die Ruhezeiten reisen mit; die Sicherung eines Kindes nimmt sie nicht mit und löscht sie nicht; der
+    // jüngere Stand gewinnt; fremde ungültige Zeitspannen fallen weg
+    const quelle = geraet(), ziel = geraet();
+    vm.runInContext(`LS.neuerSpieler("Mia"); LS.setzeRuhezeiten({ zeiten: [{ id: "q", tage: [1], von: "08:00", bis: "09:00", arten: ["feier"] }] });`, quelle);
+    quelle.__datei = JSON.parse(vm.runInContext("JSON.stringify(LS.abgleichDaten())", quelle));
+    quelle.__sicherung = JSON.parse(vm.runInContext(`JSON.stringify(LS.sicherung(["Mia"]).daten)`, quelle));
+    ziel.__datei = quelle.__datei; ziel.__sicherung = quelle.__sicherung;
+    soll("Abgleich bringt die Ruhezeiten", lauf(ziel, `LS.abgleich.datenEinlesen(__datei); return LS.ruhezeiten().zeiten.map(z => z.id);`), ["q"]);
+    soll("Sicherung eines Kindes trägt keine Ruhezeiten", quelle.__sicherung.ruhezeiten ?? null, null);
+    soll("Sicherung lässt die Ruhezeiten stehen", lauf(ziel, `LS.abgleich.datenEinlesen(__sicherung); return LS.ruhezeiten().zeiten.map(z => z.id);`), ["q"]);
+    soll("älterer Stand überschreibt nicht", lauf(ziel, `
+      LS.setzeRuhezeiten({ zeiten: [{ id: "neu", tage: [2], von: "10:00", bis: "11:00", arten: ["klaenge"] }] });
+      LS.abgleich.datenEinlesen(__datei); return LS.ruhezeiten().zeiten.map(z => z.id);`), ["neu"]);
+    ziel.__fremd = { ...quelle.__datei, ruhezeiten: { stand: "2099-01-01T00:00:00.000Z", spiele: { x: "laut" },
+      zeiten: [{ id: "gut", tage: [3], von: "08:00", bis: "09:00", arten: ["vorlesen"] }, { id: "schlecht", tage: [3], von: "09:00", bis: "08:00", arten: ["vorlesen"] }] } };
+    // gespeichert, nicht nur gelesen: LS.ruhezeiten() filtert beim Lesen noch einmal (Gegenprobe LERN_Session27)
+    soll("fremde Daten nur geprüft", lauf(ziel, `LS.abgleich.datenEinlesen(__fremd); const r = LS.lies("ruhezeiten", null); return [r.zeiten.map(z => z.id), r.spiele];`), [["gut"], {}]);
+  } catch (e) { maengel.push(`Abbruch: ${String(e.stack || e).split("\n").slice(0, 3).join(" | ")}`); }
+  console.log("\nRuhezeiten:\n");
+  for (const m of maengel) console.log(`    FEHLER  Ruhezeiten: ${m}`);
+  fehlerZahl += maengel.length;
+  console.log(`${maengel.length ? "✗" : "✓"} Ruhezeiten: Regeln, Spiele mit Ton, Klänge, Abgleich`);
+}
+
 // Namen der Spiele (Hinweis Patrik, LERN_Session7): kein Name doppelt (Fehler); dasselbe Grundwort
 // am Ende („…-Werkstatt“, „…-Detektiv“) in mehr als NAMEN_GRUNDWORT_MAX Spielen ist ein Hinweis.
 const NAMEN_GRUNDWORT_MAX = 2;

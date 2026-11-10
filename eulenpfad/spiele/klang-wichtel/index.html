@@ -218,7 +218,7 @@ function pruefeAufgabe(a, stufe) {
 let audio = null;
 /** Töne spielen (WebAudio); gibt die Dauer in Sekunden zurück, ohne Ton oder WebAudio 0. */
 function spieleToene(toene, freq) {
-  if (!LS.lies("ton", true)) return 0;
+  if (!LS.lies("ton", true) || LS.ruhe("hoeren")) return 0; // Ruhezeit für das Hören (AN3-T a)
   try {
     audio = audio || new (window.AudioContext || window.webkitAudioContext)();
     if (audio.state === "suspended") audio.resume();

@@ -124,7 +124,8 @@ const NOTEN = (() => {
 
   let audio = null;
   /** Ist der Ton im Rahmen eingeschaltet? (Knopf oben rechts) */
-  const tonAn = () => LS.lies("ton", true);
+  // Ton aus (🔇) oder Ruhezeit für das Hören (AN3-T a; Kopfhörer und „Ton für diese Runde an“ prüft LS.ruhe)
+  const tonAn = () => LS.lies("ton", true) && !LS.ruhe("hoeren");
 
   /**
    * Töne nacheinander spielen: [{ midi, dauer (s) }], midi null = Pause, klick = nur ein Klick
@@ -159,7 +160,7 @@ const NOTEN = (() => {
   function hoerKnopf(ctx, folgeFn, text = "🔊 Anhören") {
     return el("button", {
       type: "button", class: "knopf hell hoer-knopf", text,
-      onclick: () => { if (!spiele(folgeFn())) ctx.sag("Der Ton ist aus. Schalte ihn oben rechts ein: 🔊", "hinweis"); },
+      onclick: () => { if (!spiele(folgeFn())) ctx.sag(LS.ruhe("hoeren") ? "Gerade ist Ruhezeit, darum bleibt es still. Mit Kopfhörern: vor der Runde „Ton für diese Runde an“ wählen." : "Der Ton ist aus. Schalte ihn oben rechts ein: 🔊", "hinweis"); },
     });
   }
 
