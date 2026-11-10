@@ -52,8 +52,9 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
   box-shadow: 0 3px 0 var(--rand); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
 }
 .tab[aria-selected="true"] { background: var(--knopf); color: #fff; box-shadow: 0 3px 0 var(--knopf-dunkel); }
-/* Untertabs in einem Tab (Verwaltung): kleiner, rundum gerundet */
-.untertabs { margin-bottom: 14px; }
+/* Untertabs in einem Tab (Verwaltung): kleiner, rundum gerundet; brechen um wie im Lernsteig (ohne Rollleiste ragten sie
+   seit LERN_Session17 auf dem Handy über den Rand, LERN_Session27) */
+.untertabs { flex-wrap: wrap; margin-bottom: 14px; }
 .untertabs .tab { border-radius: 12px; min-height: 44px; padding: 8px 14px; font-size: 16px; }
 .verwaltung .gruppe > summary { font-size: 19px; }
 /* Personen-Knopf mit Menü (KERN.personenMenue, Entscheid PA1 a): wechseln und abmelden an einem Ort */

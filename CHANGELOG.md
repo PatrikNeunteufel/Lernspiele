@@ -1387,3 +1387,12 @@
 - Abschluss: Report [LERN_Session26](docs/eulenpfad/report/LERN_Session26_2026-11-09.md), Handover Eulenpfad nachgeführt.
   Stolperfalle: Die Vorschau auf `eulenpfad/README.md` öffnete einen Speichern-unter-Dialog (`.md` ohne Typ aus
   `tools/server.py`); zum Verlassen einer Seite künftig nur HTML.
+
+## 2026-11-10 — LERN_Session27
+- Eulenpfad, Verwaltung: Die Untertabs (Konten, Freigabe, Abgleich, Einstellungen, Meldungen, Entwicklung) brechen um
+  wie im Lernsteig (`eulenpfad/start/start.css`). Seit LERN_Session17 stehen alle `.tabs` einzeilig, die Untertabs aber
+  ohne Rollleiste — auf 375 px ragten sie bis 694 px über den Rand und die ganze Seite liess sich seitlich schieben.
+  Im Browser auf 375 px angesehen: drei Zeilen, Seite 375 px breit, keine Konsolenfehler; dabei Erinnerung ans Sichern
+  und Speicheranzeige (LERN_Session26) auf Handy-Breite gelesen, ohne Befund.
+- Voller Eulenpfad-Lauf (169 Spiele × 6 Stufen, 1442 s): „Keine Fehler.“ — erster voller Lauf seit `51686cd`, deckt Kern
+  1.32–1.34 und die Speicherschicht ab.
