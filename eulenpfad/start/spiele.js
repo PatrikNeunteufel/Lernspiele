@@ -38,7 +38,7 @@ function schalterSymbol(art, an) {
 const SPIEL_SUCHE = UE.suche();
 
 // ----- Kartenbild (Entscheid GS1 a, LERN_Session32; docs/eulenpfad/konzept_gestaltung.md) -----
-// Das ruhige Endbild der Abschluss-Animation (Stufe 3, 3 Sterne) aus der Angabe feier im Katalog — dieselbe Quelle wie
+// Das ruhige Endbild der Abschluss-Animation (Stufe 3, 1 Stern: ohne Schmuck) aus der Angabe feier im Katalog — dieselbe Quelle wie
 // im Spiel. Gezeichnet erst, wenn die Karte ins Bild kommt; Daten eines Spiels (feier.daten, Schweiz-Karte) lädt es
 // einmal nach. Ohne feier.js oder ohne Bild bleibt die Fläche leer und klappt zu.
 const KARTENBILD_STUFEN = ["s3", "s2", "s4", "s1", "s5", "s6"];
@@ -59,7 +59,8 @@ function ladeKartenDaten(s) {
 function zeichneKartenBild(flaeche, s) {
   const zeichne = () => {
     for (const stufe of KARTENBILD_STUFEN) {
-      const bild = LS_FEIER.zeige(s.feier, { stufe, sterne: 3, ruhig: true });
+      // 1 Stern: ohne Schmuck (Funkenkreis, Glanzstern, Fähnchen) — Wunsch Patrik LERN_Session32
+      const bild = LS_FEIER.zeige(s.feier, { stufe, sterne: 1, ruhig: true });
       if (bild) { flaeche.replaceChildren(bild); flaeche.dataset.stufe = stufe; return; }
     }
     ohneBild(flaeche);
@@ -76,6 +77,74 @@ function ohneBild(flaeche) {
 const KARTENBILD_BEOBACHTER = typeof IntersectionObserver === "function" ? new IntersectionObserver(eintraege => {
   for (const e of eintraege) if (e.isIntersecting) { KARTENBILD_BEOBACHTER.unobserve(e.target); zeichneKartenBild(e.target, e.target.spiel); }
 }, { rootMargin: "300px 0px" }) : null;
+// ----- Rahmen wie von Hand gezeichnet (Einstellung kartenrahmen, Wunsch Patrik LERN_Session32) -----
+// Ein SVG über der Karte: eine gefüllte Fläche zwischen zwei leicht krummen Linien um die Karte, auf der Kopfseite dick
+// (wie der Streifen der glatten Karte), sonst dünn, die Dicke wechselt langsam. Farbe --f wie die glatte Karte. Die Form
+// hängt am Spiel (gleicher Zufall je Id), damit sie beim Neuzeichnen gleich bleibt; neu gerechnet, wenn sich die Grösse
+// der Karte ändert.
+const NS_SVG = "http://www.w3.org/2000/svg";
+/** Zufall mit Startwert (mulberry32): dieselbe Karte bekommt dieselbe Form. */
+function zufallAus(text) {
+  let h = 2166136261;
+  for (const c of text) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return () => { h = (h + 0x6d2b79f5) | 0; let t = Math.imul(h ^ (h >>> 15), 1 | h); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+/** Pfad der handgezeichneten Fläche für eine Karte b × h; kopf "oben" (Kacheln) oder "links" (kompakt). */
+function handPfad(b, h, id, kopf) {
+  const z = zufallAus(id), r = 18, schritt = 10;
+  // Umfang eines abgerundeten Rechtecks als Punkte mit Normale (nach aussen), im Uhrzeigersinn ab oben links
+  const pkt = [];
+  const gerade = (x0, y0, x1, y1, nx, ny, seite) => {
+    const n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / schritt));
+    for (let i = 0; i < n; i++) pkt.push({ x: x0 + ((x1 - x0) * i) / n, y: y0 + ((y1 - y0) * i) / n, nx, ny, seite });
+  };
+  const bogen = (cx, cy, a0, seite) => {
+    for (let i = 0; i < 4; i++) { const a = a0 + (i * Math.PI) / 8; pkt.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a), nx: Math.cos(a), ny: Math.sin(a), seite }); }
+  };
+  gerade(r, 0, b - r, 0, 0, -1, "oben"); bogen(b - r, r, -Math.PI / 2, "oben");
+  gerade(b, r, b, h - r, 1, 0, "rechts"); bogen(b - r, h - r, 0, "unten");
+  gerade(b - r, h, r, h, 0, 1, "unten"); bogen(r, h - r, Math.PI / 2, "unten");
+  gerade(0, h - r, 0, r, -1, 0, "links"); bogen(r, r, Math.PI, "oben");
+  // lange Wellen (krumm und gebogen, nicht zittrig): Lage bis ±2.6 px, Dicke auf der Kopfseite 7–11 px, sonst 1.8–4 px
+  const welle = (f1, f2) => { const p1 = z() * 6.3, p2 = z() * 6.3, a = 0.6 + 0.3 * z(); return t => a * Math.sin(t * f1 + p1) + (1 - a) * Math.sin(t * f2 + p2); };
+  const lage = welle(2 + z() * 2, 6 + z() * 3), dicke = welle(2 + z() * 2, 7 + z() * 4);
+  const n = pkt.length, aussen = [], innen = [];
+  pkt.forEach((q, i) => {
+    const t = (i / n) * Math.PI * 2;
+    const istKopf = kopf === "links" ? q.seite === "links" : q.seite === "oben" && Math.abs(q.ny) > 0.3;
+    const w = istKopf ? 9 + 2 * dicke(t) : 2.9 + 1.1 * dicke(t);
+    const d = 2.6 * lage(t);
+    aussen.push([q.x + q.nx * d, q.y + q.ny * d]);
+    innen.push([q.x + q.nx * (d - w), q.y + q.ny * (d - w)]);
+  });
+  const zug = ps => "M" + ps.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" L") + " Z";
+  return zug(aussen) + " " + zug(innen.reverse());
+}
+const HAND_BEOBACHTER = typeof ResizeObserver === "function" ? new ResizeObserver(eintraege => {
+  for (const e of eintraege) zeichneHandRahmen(e.target);
+}) : null;
+/** Rahmen einer Karte (neu) zeichnen, in ihrer heutigen Grösse. */
+function zeichneHandRahmen(k) {
+  const b = k.offsetWidth, h = k.offsetHeight;
+  if (!b || !h) return;
+  let svg = k.querySelector(":scope > svg.hand-rahmen");
+  if (!svg) {
+    svg = document.createElementNS(NS_SVG, "svg");
+    svg.setAttribute("class", "hand-rahmen");
+    svg.setAttribute("aria-hidden", "true");
+    svg.appendChild(document.createElementNS(NS_SVG, "path"));
+    k.appendChild(svg);
+  }
+  svg.setAttribute("viewBox", `0 0 ${b} ${h}`);
+  svg.firstChild.setAttribute("d", handPfad(b, h, k.dataset.spiel || k.title || "karte", k.closest(".spiele.kompakt") ? "links" : "oben"));
+  svg.firstChild.setAttribute("fill-rule", "evenodd");
+}
+/** Karte für den Handrahmen anmelden (nur mit der Einstellung „hand“). */
+function handRahmen(k) {
+  if (LS.einstellung("kartenrahmen") !== "hand") return;
+  if (HAND_BEOBACHTER) HAND_BEOBACHTER.observe(k); else zeichneHandRahmen(k);
+}
+
 /** Fläche für das Kartenbild einer Spielkarte; null, wenn das Spiel keine Animation hat. */
 function kartenBild(s) {
   if (!s.feier || typeof LS_FEIER === "undefined") return null;
@@ -90,6 +159,8 @@ const suchAttr = platzhalter => ({ class: "feld suche", placeholder: platzhalter
 
 function zeichneSpiele(box, neu) {
   const { el } = LS;
+  // Stil der Karten (Einstellung kartenrahmen): an der Seite, damit start.css ihn umschaltet
+  document.body.classList.toggle("rahmen-hand", LS.einstellung("kartenrahmen") === "hand");
   const name = LS.aktuellerSpieler();
   const p = LS.profil(name);
   const aufsicht = LS.aufsichtAngemeldet();
@@ -261,6 +332,7 @@ function zeichneSpiele(box, neu) {
     // ein Kind sieht nur den Titel (GS2 a); den Satz liest langes Drücken vor, die Aufsicht sieht ihn
     k.append(el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: bild }), el("b", { class: "name", text: titel })),
       aufsicht ? el("div", { class: "ziel", text: ziel }) : "", el("div", { class: "stufenknoepfe" }, ...knoepfe));
+    handRahmen(k);
     return k;
   }
   // Bedarf (Wunsch Patrik, LERN_Session10): der Zufall wählt, wo die Statistik Bedarf zeigt — AUSWERTUNG.bedarf,
@@ -434,6 +506,7 @@ function zeichneSpiele(box, neu) {
       knoepfe.append(a);
     }
     k.append(knoepfe);
+    handRahmen(k);
     return k;
   }
 

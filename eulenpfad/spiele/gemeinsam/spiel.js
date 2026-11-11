@@ -154,6 +154,12 @@ const LS = (() => {
       werte: { zeigen: "mit Kopfhörer-Hinweis zeigen", ausblenden: "ausblenden" },
       erklaerung: "Spiele mit der Spielweise „Hören“ brauchen Ton. In einer Ruhezeit, die das Hören einschliesst, zeigen sie vor der Runde „🎧 Diese Runde braucht Ton“ mit „Ton für diese Runde an“ — oder sie fehlen im Tab Spiele, bis die Ruhezeit vorbei ist. Zufall und Zufallsmix nehmen sie in der Ruhezeit nie, weil dort niemand den Ton einschalten kann. Mit Kopfhörern (oben) bleiben sie immer da.",
     },
+    // Wunsch Patrik (LERN_Session32, Konzept Gestaltung): Rahmen der Spielkarten wie von Hand gezeichnet, umschaltbar
+    kartenrahmen: {
+      titel: "Rahmen der Spielkarten", standard: "glatt",
+      werte: { glatt: "glatt", hand: "wie von Hand gezeichnet" },
+      erklaerung: "So sehen die Karten im Tab Spiele aus: glatt mit farbigem Streifen oben oder wie von Hand gezeichnet — leicht krumm, die Linie mal dicker, mal dünner, in denselben Farben.",
+    },
     // Entscheid KR1 a (LERN_Session13): ein Kind fängt auch ohne Aufsicht an
     selbstAnlegen: {
       titel: "Kinder legen sich selbst an", standard: "ja",

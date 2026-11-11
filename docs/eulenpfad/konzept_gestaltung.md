@@ -1,8 +1,9 @@
 # Konzept: Gestaltung der Startseite (Kinder-Bühne, Kartenbilder, Schrift)
 
 Stand: 11.11.2026 (LERN_Session32) · **GS0 a, GS1 a, GS2 a, SK1 a entschieden und gebaut** (Patrik, LERN_Session32;
-Umsetzung docs/eulenpfad/rahmen.md 6, „Kartenbild und Kinderkarte“); offen GS3 (Schrift, Zahlen fehlen), Druckknöpfe,
-Versuch mit Kindern und der Lehrperson.
+Umsetzung docs/eulenpfad/rahmen.md 6, „Kartenbild und Kinderkarte“); GS3 (Schrift) mit gemessenen Zahlen vorgelegt;
+dazu ein umschaltbarer Rahmen wie von Hand gezeichnet (Wunsch Patrik, Einstellung `kartenrahmen`, Standard glatt);
+offen Druckknöpfe, Versuch mit Kindern und der Lehrperson.
 
 **Kipppunkt GS1 gemessen** (Desktop, lokaler Server): `feier.js` 28 ms übertragen, 2 ms ausgeführt, ein Kartenbild
 0,17 ms; die Seite ist nach 83 ms fertig. Für das Handy übers Mobilnetz nur gerechnet, nicht gemessen: 204 KB gepackt
@@ -132,16 +133,44 @@ macht aus 169 Karten wieder eine Textwand. a gilt für alle Klassen gleich, Vorl
 Für b spricht, dass Ältere am Text ein Spiel schneller finden — dafür ist die Suche da (SU1 a). Kippen würde die
 Empfehlung, wenn Kinder ab der 4. Klasse im Versuch Spiele am Bild allein nicht wiederfinden.
 
-### GS3 — Welche Schrift? (noch nicht vorlegbar)
+### GS3 — Welche Schrift?
 
-**Ort:** `spiele/gemeinsam/stil.css` `--schrift` (Startseite zuerst, GS0).
+**Ort:** `spiele/gemeinsam/stil.css` `--schrift`; nach GS0 a gilt sie zuerst auf der Startseite (`start/start.css`).
 **Heute:** `"Nunito", "Segoe UI Rounded", "Arial Rounded MT Bold", "Segoe UI", system-ui, sans-serif` — Nunito liegt
-nicht im Repo; jedes Gerät zeigt seine eigene Schrift.
-**Problem:** Die Wahl hängt an Zahlen, die noch fehlen: Dateigrösse je Schnitt (woff2), gleich breite Ziffern
-(Stellenwert, Tausendertrennung mit U+202F), Formen, die Kinder aus der Schule kennen (einstöckiges a wie in der
-Deutschschweizer Basisschrift), ß nicht nötig, aber ä ö ü, «», „“. Kandidaten (alle SIL OFL, aus dem Gedächtnis, vor
-dem Entscheid belegen): Nunito (rund, heute schon genannt), Andika (von SIL für Leseanfänger, einstöckiges a), Fredoka
-(nur Titel). Dafür müssen die Schriftdateien geladen und gemessen werden; erst dann folgt die Frage mit Optionen.
+nicht im Repo; jedes Gerät zeigt seine eigene Schrift (unter Windows Segoe UI).
+**Problem:** Eine rundere Schrift gibt es nur als Datei im App-Ordner (LERN-1). Sie muss die Zahlen der Spiele tragen
+(gleich breite Ziffern, U+202F), die Zeichen der Apps haben und ihre Lizenz muss das Zuschneiden erlauben.
+
+**Gemessen (LERN_Session32):** Dateien aus `google/fonts` (`ofl/nunito`, `ofl/andika`, `ofl/fredoka`), zugeschnitten mit
+fontTools auf die 207 Zeichen, die Eulenpfad, Lernsteig und Portal ohne Emoji zeigen, als woff2; Probebilder in der
+Stärke der Karten (Namen 800–900).
+
+| | Nunito (variabel) | Andika Regular + Bold | Fredoka (variabel) |
+|---|---|---|---|
+| woff2 zugeschnitten | **33 KB** (alle Stärken) | 57 KB (zwei Dateien) | 54 KB |
+| Stärken | 200–1000 | nur 400 und 700 — 800/900 der Karten zeigt der Browser als 700 | 300–700 |
+| Ziffern gleich breit | ja (600) | ja | **nein** (396–608): Stellentafeln und Rechnungen springen |
+| fehlende wichtige Zeichen | U+202F (Browser nimmt es aus der nächsten Schrift) | keine | **≈**, U+2009, U+202F, ≤ ≥ ≠, Pfeile |
+| a, g | zweistöckig (die Stilsets ss01/ss02 ändern das nicht) | **einstöckig wie die Basisschrift** | einstöckig |
+| I, l, 1 | l mit kleinem Bogen unten, unterscheidbar | I mit Querstrichen, klar | I und l fast gleich |
+| Wirkung | rund, freundlich | sachlich, Fibel | sehr rund, verspielt |
+| Lizenz | OFL 1.1, kein reservierter Name | OFL 1.1, **reservierter Name „Andika“**: zugeschnitten muss sie anders heissen, sonst ungekürzt 1,35 MB | OFL 1.1, kein reservierter Name |
+
+- **a (Empfehlung):** „Die Startseite nimmt Nunito (variabel, zugeschnitten als woff2 in `eulenpfad/schriften/`, mit
+  OFL.txt), `--schrift` bleibt wie heute; Ziffern, Zeichen und Stärken trägt sie, U+202F kommt aus der nächsten Schrift.
+  Ein Werkzeug `tools/schrift_zuschneiden.py` schneidet sie aus der Originaldatei auf die Zeichen der App zu.“
+- **b:** „Die Startseite nimmt Andika, umbenannt (zugeschnitten, etwa ‚Eulenpfad Fibel‘, wie es die OFL verlangt):
+  einstöckiges a und g wie die Basisschrift, klare I/l/1.“
+- **c:** „Fredoka für den Titel ‚Eulenpfad‘ und die Kartennamen, sonst Nunito wie a“ (zusammen 87 KB).
+
+*Warum die Empfehlung:* Die Rückmeldung verlangt eine rundere Schrift für Titel und Kartennamen; nach GS2 a stehen auf
+der Startseite kaum noch Lesetexte, sondern Namen, Knöpfe und Zahlen. Nunito trägt alle Stärken, die die Karten nutzen,
+hat gleich breite Ziffern, fast alle Zeichen und ist mit 33 KB die kleinste. Für b spricht die Basisschrift: einstöckiges a
+und g kennen die Kinder aus der Schule, das wiegt für Lesetext viel — auf der Startseite gibt es davon nach GS2 a kaum
+etwas, und Andika fehlt 800/900, sie wirkt sachlich statt rund und muss umbenannt werden. c gibt dem Titel mehr Spiel,
+aber Fredoka kann keine Zahlen (Ziffern ungleich breit, ≈ fehlt) und gehört damit nie in eine Zeile mit Zahlen. Kippen
+würde die Empfehlung, wenn die Schrift später auch in die Spiele soll (Lesetexte der Deutsch-Spiele): dann b für den
+Lesetext, Nunito für Titel und Knöpfe.
 
 ## Reihenfolge nach den Entscheiden (Vorschlag)
 

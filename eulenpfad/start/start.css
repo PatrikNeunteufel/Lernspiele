@@ -245,6 +245,13 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .spielkarte .karten-bild { aspect-ratio: 320 / 150; margin: -2px -4px 2px; border-radius: 14px; background: #eef4fb; overflow: hidden; }
 .spielkarte .karten-bild .feier { margin: 0; max-width: none; cursor: inherit; pointer-events: none; }
 .spielkarte.mit-bild .kopfzeile .spiel-bild { display: none; }
+/* Rahmen wie von Hand gezeichnet (Einstellung kartenrahmen „hand“): statt des glatten Streifens ein SVG über der Karte
+   (start/spiele.js handPfad), dick auf der Kopfseite, sonst dünn, in der Farbe --f; der Platz des Streifens bleibt */
+.rahmen-hand .spielkarte { border-top: none; padding-top: 26px; }
+.rahmen-hand .spiele.kompakt .spielkarte { border-left: none; padding-top: 8px; padding-left: 20px; }
+.spielkarte > svg.hand-rahmen { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 1; }
+.spielkarte > svg.hand-rahmen path { fill: var(--f, var(--knopf)); }
+body:not(.rahmen-hand) .spielkarte > svg.hand-rahmen { display: none; }
 /* ⓘ zeigt dem Kind die Beschreibung (GS2 a) */
 .karten-info { flex: none; width: 40px; height: 40px; border: none; border-radius: 999px; background: #f0f2fb; color: var(--text-leise);
   font: inherit; font-size: 22px; font-weight: 900; line-height: 1; cursor: pointer; }

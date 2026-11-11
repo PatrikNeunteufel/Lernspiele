@@ -197,6 +197,14 @@ function pruefeTabSpiele(melde) {
       s.klick(`${k} .karten-info`); ruhe(s);
       pruefe(s.lauf(`document.querySelector('${k} .ziel').hidden`) === false && s.lauf(`location.hash`) === "#spiele", ort, "ⓘ zeigt die Beschreibung nicht (oder öffnet das Spiel)");
       s.klick(`${k} .karten-info`); ruhe(s);
+      // Rahmen wie von Hand gezeichnet (Einstellung kartenrahmen, LERN_Session32): umschaltbar, Pfad geschlossen und je
+      // Spiel gleich; glatt ohne Klasse
+      pruefe(s.lauf(`document.body.classList.contains("rahmen-hand")`) === false, ort, "Handrahmen ohne Einstellung an");
+      s.lauf(`LS.setzeEinstellung("kartenrahmen", "hand"); zeichneStart()`); ruhe(s);
+      pruefe(s.lauf(`document.body.classList.contains("rahmen-hand")`) === true, ort, "Einstellung „hand“ schaltet den Rahmen nicht ein");
+      const pfad = s.lauf(`[handPfad(300, 420, "${id}", "oben"), handPfad(300, 420, "${id}", "oben"), handPfad(300, 420, "anders", "oben")]`);
+      pruefe(/^M[\d.,\s L-]+Z M[\d.,\s L-]+Z$/.test(pfad[0]) && pfad[0] === pfad[1] && pfad[0] !== pfad[2], ort, "Handrahmen: Pfad ungültig oder nicht je Spiel gleich");
+      s.lauf(`LS.setzeEinstellung("kartenrahmen", null); zeichneStart()`); ruhe(s);
     }
     const erste = s.lauf(`document.querySelector(".spielkarte[data-spiel]").dataset.spiel`);
     // Favorit: Stern antippen → im Profil, Karte in der Gruppe Favoriten (doppelt), Stern an

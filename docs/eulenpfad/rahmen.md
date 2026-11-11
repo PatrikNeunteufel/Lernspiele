@@ -361,7 +361,8 @@ Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim
 `kompakt`) und welche Gruppen zugeklappt sind (`zu`).
 
 **Kartenbild und Kinderkarte** (Entscheide GS1 a, GS2 a, SK1 a; LERN_Session32, docs/eulenpfad/konzept_gestaltung.md):
-- In den Kacheln trägt jede Spielkarte oben das ruhige Endbild ihrer Abschluss-Animation, Stufe 3 mit 3 Sternen (fehlt
+- In den Kacheln trägt jede Spielkarte oben das ruhige Endbild ihrer Abschluss-Animation, Stufe 3 mit 1 Stern, also
+  ohne Schmuck wie Funkenkreis, Glanzstern oder Fähnchen (Wunsch Patrik LERN_Session32; fehlt
   sie, die nächste nach `KARTENBILD_STUFEN` in `start/spiele.js`), gezeichnet mit `LS_FEIER.zeige` aus `feier` im Katalog
   — dieselbe Quelle wie im Spiel. Die Startseite lädt dafür `feier.js`. Gezeichnet wird erst, wenn die Karte ins Bild kommt
   (IntersectionObserver, 300 px Vorlauf); die Fläche steht vorher schon in ihrer Grösse (320 : 150). Nennt `feier.daten`
@@ -370,6 +371,12 @@ Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim
 - Ein Kind sieht je Karte Bild, Name und Stufenknöpfe. Die Beschreibung zeigt ⓘ (`.karten-info`) und liest langes
   Drücken vor; Lernziel-Kürzel und Sperrmarken sieht nur die Aufsicht, den Grund eines Suchtreffers alle. Die
   Zufallskarten tragen für ein Kind nur den Titel; „🎯 Zufälliges Spiel“ heisst für ein Kind „🎯 Überrasch mich“.
+- **Rahmen wie von Hand gezeichnet** (Einstellung `kartenrahmen`: `glatt` Standard, `hand`; Wunsch Patrik LERN_Session32):
+  `start/spiele.js` legt über jede Spielkarte ein SVG (`svg.hand-rahmen`, `handPfad`): eine gefüllte Fläche zwischen
+  zwei leicht krummen Linien, auf der Kopfseite 7–11 px dick (in den Kacheln oben, kompakt links), sonst 2–4 px, in
+  `--f` wie der glatte Streifen. Die Form hängt am Spiel (Zufall mit der Id als Startwert) und wird neu gerechnet, wenn
+  sich die Grösse der Karte ändert (ResizeObserver). Umgeschaltet über die Klasse `rahmen-hand` an `body` in
+  `start/start.css`; glatt bleibt alles wie zuvor.
 - Gemessen (LERN_Session32, Desktop, lokaler Server): `feier.js` 739 KB ausgeliefert (gepackt 204 KB), Ausführen 2 ms,
   ein Kartenbild 0,17 ms; geprüft in `tools/eulenpfad_seiten.js` (Tab Spiele).
 
