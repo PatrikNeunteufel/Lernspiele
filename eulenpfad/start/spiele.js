@@ -185,13 +185,30 @@ function zeichneSpiele(box, neu) {
   };
 
   // ----- Filter: Fach, dann die Themen dieses Fachs; Stufe -----
+  // Jede Gruppe des Filters klappt für sich auf und zu (Wunsch Patrik, LERN_Session32), vorgegeben zu; zugeklappt nennt
+  // sie, was in ihr gilt. Welche offen sind, merkt das Profil (filterOffen, Liste der Gruppen).
+  const offeneGruppen = new Set(p.filterOffen || []);
+  /** Gruppe des Filters: details mit Titel und Wahl im Kopf, darunter die Chips. */
+  const filterGruppe = (id, titel, wahl, ...chips) => {
+    const d = el("details", { class: "filter-zeile filter-gruppe", "data-gruppe": id },
+      el("summary", {}, el("span", { class: "filter-gruppe-titel", text: titel }), el("span", { class: "filter-gruppe-wahl", text: wahl })),
+      el("div", { class: "filter-chips" }, ...chips));
+    d.open = offeneGruppen.has(id);
+    d.addEventListener("toggle", () => {
+      if (d.open === offeneGruppen.has(id)) return;
+      if (d.open) offeneGruppen.add(id); else offeneGruppen.delete(id);
+      LS.speichereProfil(name, { filterOffen: [...offeneGruppen] });
+    });
+    return d;
+  };
   const empfohlen = LS.empfohleneStufe(name);
-  const faecher = el("div", { class: "filter-zeile" }, el("span", { text: "Fach" }),
+  const faecher = filterGruppe("fach", "Fach", filter.fach === "alle" ? "alle" : filter.fach,
     chip("Alle", filter.fach === "alle", setze("fach", "alle")),
     ...FAECHER.map(f => chip(f, filter.fach === f, setze("fach", f))));
-  // Eigene Zeile „Nur“ für Fokus, Meine Klasse und Zu prüfen — das sind keine Fächer (Hinweis Patrik, LERN_Session10).
-  const nur = el("div", { class: "filter-zeile" }, el("span", { text: "Nur" }));
-  if (fokus.length) nur.append(chip("⭐ Mein Fokus", filter.fokus, setze("fokus", !filter.fokus)));
+  // Gruppe „Nur“ für Fokus und, bei der Aufsicht, Zu prüfen — das sind keine Fächer (Hinweis Patrik, LERN_Session10);
+  // Meine Klasse steht seit LERN_Session32 in der Gruppe Klasse.
+  const nur = [];
+  if (fokus.length) nur.push(chip("⭐ Mein Fokus", filter.fokus, setze("fokus", !filter.fokus)));
   // Meine Klasse (Entscheide K1 a, K2 a, LERN_Session6): nur Spiele mit einer Stufe genau für die Klasse
   // des Kindes, also Basisklasse ±1. Für Kinder mit Klasse im Profil, vorgegeben an; das Kind darf ihn
   // ausschalten (Profil-Feld meineKlasse, je Kind statt je Browser).
@@ -230,26 +247,28 @@ function zeichneSpiele(box, neu) {
     box.append(w);
   }
   const nurKlasse = !aufsicht && klasse !== null && p.meineKlasse !== false;
-  if (!aufsicht && klasse !== null) nur.append(chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), LS.klasseText(klasse)));
+  const meineKlasse = !aufsicht && klasse !== null ? chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), LS.klasseText(klasse)) : null;
   // Für die Aufsicht: nur, was noch zu prüfen ist — Spiel nicht angesehen oder eine eigene Inhaltsliste ungeprüft.
   const zuPruefen = s => LS.spielZuPruefen(s.id) || LS.spielListen(s.id).some(l => !l.von && !l.geprueft);
   const nurZuPruefen = aufsicht && filter.zuPruefen;
-  if (aufsicht) nur.append(chip("🔍 Zu prüfen", nurZuPruefen, setze("zuPruefen", !filter.zuPruefen), `${SPIELE.filter(zuPruefen).length}`));
+  if (aufsicht) nur.push(chip("🔍 Zu prüfen", nurZuPruefen, setze("zuPruefen", !filter.zuPruefen), `${SPIELE.filter(zuPruefen).length}`));
   // Klasse (Wunsch Patrik, LERN_Session10): Basisklasse des Spiels, Mehrfachwahl wie Thema und Stufe; für alle sichtbar,
-  // gedacht vor allem für die Aufsicht. „🎒 Meine Klasse“ bleibt die Abkürzung des Kindes (Basisklasse ±1).
+  // gedacht vor allem für die Aufsicht. „🎒 Meine Klasse“ (Basisklasse ±1) steht als Abkürzung des Kindes vorne.
   const basisklassen = [...new Set(SPIELE.map(s => s.klasse))].sort((a, b) => a - b);
-  const klassen = el("div", { class: "filter-zeile" }, el("span", { text: "Klasse" }),
-    alleChip("klasse", basisklassen),
+  const klassen = filterGruppe("klasse", "Klasse",
+    [nurKlasse ? "🎒 Meine Klasse" : null, filter.klasse.length ? filter.klasse.map(LS.klasseText).join(", ") : null].filter(Boolean).join(" · ") || "alle",
+    meineKlasse, alleChip("klasse", basisklassen),
     ...basisklassen.map(k => chip(LS.klasseText(k), filter.klasse.includes(k), schalte("klasse", k))));
   const zeilen = [faecher, klassen];
-  if (nur.childElementCount > 1) zeilen.push(nur);
+  if (nur.length) zeilen.push(filterGruppe("nur", "Nur",
+    [filter.fokus && fokus.length ? "⭐ Mein Fokus" : null, nurZuPruefen ? "🔍 Zu prüfen" : null].filter(Boolean).join(" · ") || "—", ...nur));
   if (filter.fach !== "alle") {
     const themen = THEMEN.filter(t => t.fach === filter.fach);
-    zeilen.push(el("div", { class: "filter-zeile" }, el("span", { text: "Thema" }),
+    zeilen.push(filterGruppe("thema", "Thema", filter.thema.length ? themen.filter(t => filter.thema.includes(t.id)).map(t => t.name).join(", ") : "alle",
       alleChip("thema", themen.map(t => t.id), "klein"),
       ...themen.map(t => chip(t.name, filter.thema.includes(t.id), schalte("thema", t.id), null, "klein"))));
   }
-  zeilen.push(el("div", { class: "filter-zeile" }, el("span", { text: "Stufe" }),
+  zeilen.push(filterGruppe("stufe", "Stufe", filter.stufe.length ? `Stufe ${filter.stufe.map(id => LS.SKALA.find(s => s.id === id)?.nr).join(", ")}` : "alle",
     alleChip("stufe", LS.SKALA.map(s => s.id)),
     ...LS.SKALA.map(s => chip(`${s.icon} ${s.nr} ${s.name}`, filter.stufe.includes(s.id), schalte("stufe", s.id), s.id === empfohlen ? "👍" : ""))));
   // Einklappbar (Wunsch Patrik, LERN_Session14: auf dem Handy wird der Filter schnell unübersichtlich). Zugeklappt nennt

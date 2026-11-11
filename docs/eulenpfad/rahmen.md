@@ -328,8 +328,11 @@ jedes Spiels öffnet `index.html?aehnlich=<id>#spiele`, die Startseite zeigt die
 Lernziel …“ an der Karte), „✕ Alle Spiele“ oder eine Eingabe im Suchfeld beendet sie. Der Filter „🎒 Meine Klasse“ (Entscheide K1 a, K2 a) zeigt einem Kind mit
 Klasse im Profil nur Spiele, deren Basisklasse höchstens eine Klasse daneben liegt, die also eine
 Stufe genau für seine Klasse haben. Er ist vorgegeben an, das Kind darf ihn ausschalten (Profil-Feld
-`meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Er steht mit „⭐ Mein Fokus“ und
-„🔍 Zu prüfen“ in einer eigenen Zeile **Nur** unter den Fächern, weil er kein Fach ist (Hinweis Patrik, LERN_Session10).
+`meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Seit LERN_Session32 steht er vorne in
+der Gruppe **Klasse**; die Gruppe **Nur** trägt „⭐ Mein Fokus“ und für die Aufsicht „🔍 Zu prüfen“ (Hinweis Patrik,
+LERN_Session10: das sind keine Fächer). **Gruppen des Filters** (Wunsch Patrik, LERN_Session32): Fach, Klasse, Nur,
+Thema und Stufe klappen je für sich auf und zu, vorgegeben zu; zugeklappt nennt der Kopf die Wahl der Gruppe. Welche offen
+sind, merkt das Profil (`filterOffen`, Liste der Gruppen).
 **Klassen-Rand** (Entscheid G1 a, LERN_Session14): Ist „🎒 Meine Klasse“ aus, bekommt jede Karte eines Kindes mit Klasse
 einen Glow nach aussen und links oben ein Zeichen: ✓ Türkis (`--deko-5`) Basisklasse tiefer als die eigene, ● Gold
 (`--deko-4`) die eigene, ▲ Violett (`--deko-1`) höher, „Herausforderung“. Nie Stellenfarben; das Zeichen trägt die

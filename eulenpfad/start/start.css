@@ -145,6 +145,17 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
 .filter-aktiv { color: var(--text-leise); font-weight: 700; font-size: 15px; min-width: 0; overflow-wrap: anywhere; }
 .filter-zeile { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .filter-zeile > span { font-weight: 900; min-width: 64px; }
+/* Gruppen des Filters (LERN_Session32): jede klappt für sich, vorgegeben zu; zugeklappt steht die Wahl im Kopf */
+.filter-gruppe { display: block; border-top: 1px solid var(--rand); padding-top: 6px; }
+.filter-gruppe:first-child { border-top: none; padding-top: 0; }
+.filter-gruppe > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; cursor: pointer; list-style: none; min-height: 40px;
+  align-content: center; }
+.filter-gruppe > summary::-webkit-details-marker { display: none; }
+.filter-gruppe > summary::before { content: "▸"; font-weight: 900; color: var(--knopf); }
+.filter-gruppe[open] > summary::before { content: "▾"; }
+.filter-gruppe-titel { font-weight: 900; min-width: 56px; }
+.filter-gruppe-wahl { color: var(--text-leise); font-weight: 700; font-size: 15px; min-width: 0; overflow-wrap: anywhere; }
+.filter-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 4px 0 6px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .chip {
   border: none; border-radius: 999px; padding: 8px 16px; min-height: 44px;

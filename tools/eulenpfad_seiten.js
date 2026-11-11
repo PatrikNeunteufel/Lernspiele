@@ -183,6 +183,13 @@ function pruefeTabSpiele(melde) {
     pruefe(karten > 0, ort, "keine Spielkarte");
     pruefe(s.gibt('details.gruppe[data-gruppe^="fach:"]') > 0 && s.gibt('details.gruppe[data-gruppe^="thema:"]') > 0, ort, "keine Gruppen nach Fach und Thema");
     pruefe(s.gibt("details.filter-klapp") === 1, ort, "kein Filter-Block");
+    // Gruppen des Filters (LERN_Session32): je für sich einklappbar, vorgegeben zu, Aufklappen merkt das Profil
+    pruefe(s.gibt("details.filter-gruppe") >= 3 && s.lauf(`[...document.querySelectorAll("details.filter-gruppe")].every(d => !d.open)`), ort, "Gruppen des Filters fehlen oder sind nicht zu");
+    s.klappe('details.filter-gruppe[data-gruppe="stufe"]', true);
+    pruefe((s.profil("Mia").filterOffen || []).includes("stufe"), ort, "aufgeklappte Gruppe Stufe nicht im Profil");
+    s.lauf("zeichneStart()"); ruhe(s);
+    pruefe(s.lauf(`document.querySelector('details.filter-gruppe[data-gruppe="stufe"]').open`) === true, ort, "Gruppe Stufe nach dem Neuzeichnen wieder zu");
+    s.klappe('details.filter-gruppe[data-gruppe="stufe"]', false);
     pruefe(s.gibt("button", "Alle auf") === 1 && s.gibt("button", "Alle zu") === 1, ort, "„Alle auf“ / „Alle zu“ fehlen bei Gruppen");
     textPruefen(ort, s);
     // Kinderkarte (GS2 a) und Kartenbild (GS1 a, LERN_Session32): Bild aus feier im Katalog, keine Lernziel-Kürzel,
