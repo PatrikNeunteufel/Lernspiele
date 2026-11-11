@@ -6,8 +6,11 @@ Auftrag Patrik vom 2026-11-05 im Chat, [Übergabe](Uebergabe_Lernsteig_an_lokale
 
 **Grundsätze (Auftrag Patrik):**
 - **Lernspiele ist massgebend.** Was hier aktueller ist, gilt; im Zweifel wird nachgefragt.
-- **Erst das Grundgerüst angleichen**, dann Inhalte. Der Eulenpfad bleibt im Aussehen, wie er ist (höchstens kleine
-  Retuschen); der Lernsteig wird ihm im Aufbau ähnlich, nur erwachsener; die Gratwanderung bekommt dasselbe Gerüst.
+- **Erst das Grundgerüst angleichen**, dann Inhalte. Der Eulenpfad bleibt in den Spielen im Aussehen, wie er ist
+  (höchstens kleine Retuschen). Die Startseite (Tabs Spiele, Profil, Statistik, Erfolge) wird nach
+  docs/eulenpfad/konzept_gestaltung.md überarbeitet (Entscheid GS0 a, LERN_Session32); der Lernsteig übernimmt davon
+  nur den Aufbau, nicht das Kindliche, und wird dem Eulenpfad im Aufbau ähnlich, nur erwachsener; die Gratwanderung
+  bekommt dasselbe Gerüst.
 - **Doku folgt dem richtigen Soll, nicht dem fehlerhaften Ist:** Wo Code und Doku auseinanderlaufen, wird geprüft,
   was richtig ist; ist der Code falsch, wird der Code korrigiert.
 - **Nichts Ungeprüftes online:** Im Lernsteig ist jede Übung gesperrt, bis sie im Entwickler-Modus geprüft ist (wie

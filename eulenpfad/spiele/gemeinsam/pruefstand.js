@@ -4,6 +4,18 @@
    Geschrieben vom Entwickler-Server (tools/entwickler_server.py) — nicht von Hand ändern. */
 const PRUEFSTAND = {
   "feier": {
+    "abc-sortierer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "anlaut-angel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "au-cafe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "auge-entdecker": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -13,6 +25,10 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "bionik-paare": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "blitzlesen": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -32,7 +48,23 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "buchstaben-zwillinge": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "calendrier": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "datei-typen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "dezimal-rakete": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "dezimal-rutsche": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -48,6 +80,14 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "echt-oder-erfunden": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "einmaleins-blitz": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "energie-wandler": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -57,6 +97,14 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "fahrplan-rechner": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "fehler-lupe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "figuren-spiegel": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -84,7 +132,23 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "gattungs-kenner": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "gedicht-baukasten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "gefuehle-radar": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "gegenteil-wippe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "geheimschrift-knacker": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -96,6 +160,10 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "geschichten-ordner": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "glace-kombinator": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -104,11 +172,31 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "hello-dialog": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "himmels-forscher": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "hoch-tief-ohr": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "hoer-geschichte": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "hoer-reporter": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "hundertertafel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "instrumente": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -124,7 +212,19 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "klang-wichtel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "koenig-falle": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "koerper-puzzle": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "komma-jagd": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -140,6 +240,10 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "korrektur-stift": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "kulturen-koffer": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -148,11 +252,23 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "le-ou-la": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "lebensraum": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
     "lebenszyklus": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "lese-detektiv": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "listen-tap": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -176,11 +292,35 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "morphem-schere": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "mots-match": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "muster-fortsetzer": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
     "netz-falter": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "nombres-rallye": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "nomen-puzzle": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "noten-namen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "parallelwort-bruecke": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -220,6 +360,10 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "quelle-heure": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "rechen-maschine": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -244,7 +388,15 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "rede-zeichen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "regel-luecke": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "reim-paare": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -252,7 +404,27 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "rhythmus-diktat": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "rhythmus-leser": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "roboter-pfad": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "runden-rutsche": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "sachaufgaben-kompass": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "sachtext-spurensuche": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -280,11 +452,43 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "sentence-builder": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "silben-klatscher": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "son-lauscher": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "sortier-kiste": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "sound-sorter": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "speicher-leiter": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "spelling-bee": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "spiegel-raster": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "stein-duell": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "steine-fangen": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -328,6 +532,18 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "tipp-trainer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "tonleiter-treppe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "trenn-schere": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "ueberschlags-blitz": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -340,11 +556,19 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "verben-faecher": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "vergleichs-krokodil": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
     "wassertropfen-reise": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "weather-report": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -356,7 +580,27 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "word-match": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wort-spuernase": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wort-zwillinge": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wortarten-probe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "wortarten-sortierer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wortfamilien-baum": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -373,6 +617,10 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "zahlen-baukasten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zahlen-huepfer": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -405,6 +653,14 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "zeit-schaetzer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zeitreise-verben": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zeitstrahl-sortierer": {
       "am": "2026-11-11",
       "von": "Patrik"
     },

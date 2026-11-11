@@ -1,7 +1,7 @@
 # Konzept: Gestaltung der Startseite (Kinder-Bühne, Kartenbilder, Schrift)
 
-Stand: 11.11.2026 (LERN_Session32) · **Entwurf, nichts entschieden.** Fragen GS0–GS3 vorgelegt; gebaut wird erst nach
-den Entscheiden. Eingang: [rueckmeldung_gestaltung.md](rueckmeldung_gestaltung.md).
+Stand: 11.11.2026 (LERN_Session32) · **GS0 a, GS1 a, GS2 a entschieden** (Patrik, LERN_Session32), Umsetzung in Arbeit;
+GS3 offen (Zahlen fehlen). Eingang: [rueckmeldung_gestaltung.md](rueckmeldung_gestaltung.md).
 
 ## Auslöser
 
@@ -58,7 +58,7 @@ Gemessen im Browser: je Spiel die Spielseite im Vorschau-Modus (`?feier=s3&stern
 
 ## Entscheidungsfragen
 
-### GS0 — Gilt „Aussehen bleibt“ weiter für die Startseite?
+### GS0 — Gilt „Aussehen bleibt“ weiter für die Startseite? → **a** (Patrik, 11.11.2026)
 
 **Ort:** `docs/plan_angleich_reihe.md`, Grundsätze.
 **Heute:** „Der Eulenpfad bleibt im Aussehen, wie er ist (höchstens kleine Retuschen); der Lernsteig wird ihm im Aufbau
@@ -77,7 +77,7 @@ Für b spricht, dass die Reihe gerade erst angeglichen ist und jede Änderung an
 fängt a ab, weil der Lernsteig nur den Aufbau übernimmt. Kippen würde die Empfehlung, wenn Kinder und die Lehrperson im
 Versuch die heutige Startseite gar nicht als Hürde erleben (dann reichen Retuschen).
 
-### GS1 — Woher kommen die Kartenbilder?
+### GS1 — Woher kommen die Kartenbilder? → **a** (Patrik, 11.11.2026)
 
 **Ort:** neu; Startseite `start/spiele.js` `karte()`, Katalog `spiele/gemeinsam/katalog.js`, Feier-Angaben heute in
 `spiele/<id>/index.html` (`LS.spiel({ feier })`).
@@ -104,7 +104,7 @@ alle Dateien falsch, bis das Werkzeug läuft. c ist wie b ohne Prüfung und unsc
 die Empfehlung, wenn die Startseite auf dem Handy über das Mobilnetz spürbar langsamer startet (messen: erster Aufruf
 mit und ohne `feier.js` auf `handy-quer` und 375 px) — dann b mit derselben Quelle im Katalog.
 
-### GS2 — Welcher Text bleibt auf der Karte, die ein Kind sieht?
+### GS2 — Welcher Text bleibt auf der Karte, die ein Kind sieht? → **a** (Patrik, 11.11.2026)
 
 **Ort:** `start/spiele.js` `karte()`, `start/start.css` `.ziel`, `.marken`; Zufallskarten `zufallsKarte`.
 **Heute:** Name, Beschreibung (grau, 15 px), Lernziel-Kürzel, sechs Stufenknöpfe; Zufallskarten mit ganzen Sätzen.

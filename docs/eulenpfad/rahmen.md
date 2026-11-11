@@ -1147,7 +1147,9 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
 
   Block M4 (Sachrechnen, Grössen; LERN_Session29) — Uhrzeiten, Geld, Umwandlungen und Gleichungen rechnet jedes Bild
   nach (Einheiten je Familie wie die Treppen der Spiele: Längen bis km, Hohlmasse, Gewichte bis t, Zeit, Geld,
-  Flächenmasse bis km²). Dinge, die das Spiel als Bildzeichen (Emoji) zeigt, zeigt das Bild ebenso. ZYKLUS nimmt
+  Flächenmasse bis km²). Dinge, die das Spiel als Bildzeichen (Emoji) zeigt, zeigt das Bild ebenso; ein `svg:<name>`
+  aus der Bildersammlung zeichnet `bildzeichen` über `LS.bild` gleich gross und mittig (seit LERN_Session32, ZS2 a:
+  Mondlandung, Karavelle im Zeitstrahl-Sortierer). ZYKLUS nimmt
   eigene Bilder (`BILDER.zyklus`). Geld schreibt die Klasse der Stufe (`feier.klasse` = Basisklasse des Spiels, wie
   `LS.geldText`):
 

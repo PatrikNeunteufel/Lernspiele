@@ -309,8 +309,10 @@ LS.spiel({
   feier: { muster: "wachsen", bilder: "lebenslinie", ziele: { s1: { reihe: ["👶", "🎒", "🧑"] }, s2: { reihe: ["🧒", "👩", "👵"] },
     s3: { von: 1940, bis: 2040, klein: 5, gross: 20, marken: [[1956, "👵"], [1986, "👩"], [2016, "🧒"]] },
     s4: { von: 1900, bis: 2040, klein: 5, gross: 20, marken: [[2016, "🧒"]], alter: [2016, 2026] },
-    s5: { von: 1200, bis: 2100, klein: 50, gross: 100, marken: [[1291, "📜"], [1848, "🇨🇭"], [1969, "🌕"]] },
-    s6: { von: 600, bis: 2100, klein: 50, gross: 300, marken: [[612, "⛪"], [1291, "📜"], [1803, "🏛️"], [1969, "🌕"]], jahrhundert: 1291 } } },
+    // s5 und s6 mit bekannten Ereignissen und einem Anker der Gegenwart (ZS1 a, Bemerkung 42): auf dem Strahl von s6
+    // brauchen zwei Marken 147 Jahre Abstand, darum dort nur eines nach 1900; die Mondlandung gezeichnet (ZS2 a)
+    s5: { von: 1200, bis: 2100, klein: 50, gross: 100, marken: [[1291, "📜"], [1848, "🇨🇭"], [1969, "svg:mondlandung"]] },
+    s6: { von: 600, bis: 2100, klein: 50, gross: 300, marken: [[1291, "📜"], [1492, "svg:karavelle"], [1848, "🇨🇭"], [2007, "📱"]], jahrhundert: 1291 } } },
   id: ID,
   einleitung: "Was war zuerst, was kam danach? Bring Menschen und Ereignisse auf dem Zeitstrahl in die richtige Reihenfolge!",
   hilfe: "Lies die Frage. Beim Ordnen tippst du die Karten der Reihe nach an, sie wandern dann in die Reihe. Sonst tippst du die Antwort an, die passt — die Jahrzahl, das Alter, den Buchstaben oder das Zeitalter.",

@@ -2454,7 +2454,20 @@ var LS_FEIER = (function () {
 
   const EMOJI = "\"Segoe UI Emoji\", \"Apple Color Emoji\", \"Noto Color Emoji\", system-ui, sans-serif";
   /** Bildzeichen wie im Spiel (Emoji), Mitte bei x, y. */
-  const bildzeichen = (x, y, z, gross = 24) => s("text", { x, y: (y + gross * 0.36).toFixed(1), "font-size": gross, "font-family": EMOJI, "text-anchor": "middle" }, z);
+  /**
+   * Bildzeichen um x, y: ein Emoji als Text, „svg:<name>“ als Zeichnung aus der Bildersammlung (bilder.js, B1 a), gleich
+   * gross und gleich mittig — so steht ein Ereignis im Abschlussbild wie im Spiel (Mondlandung, ZS2 a, LERN_Session32).
+   */
+  const bildzeichen = (x, y, z, gross = 24) => {
+    if (typeof z === "string" && z.startsWith("svg:")) {
+      // über LS.bild (spiel.js): BILDER heisst hier schon die Sammlung der Abschlussbilder und verdeckt die Bildersammlung
+      const g = typeof LS !== "undefined" && LS.bild ? LS.bild(z).querySelector?.("svg") : null;
+      if (!g) return s("g", { "data-bild": z });
+      for (const [k, v] of Object.entries({ x: (x - gross / 2).toFixed(1), y: (y - gross / 2).toFixed(1), width: gross, height: gross, "data-bild": z })) g.setAttribute(k, v);
+      return g;
+    }
+    return s("text", { x, y: (y + gross * 0.36).toFixed(1), "font-size": gross, "font-family": EMOJI, "text-anchor": "middle" }, z);
+  };
   /** Zahl auf neun Stellen gerundet (Gleitkomma: 21.6 : 3 = 7.2, nicht 7.199…). */
   const rund = x => Math.round(x * 1e9) / 1e9;
   /** Grösse als Text: „3.25 m“, „300 000 cm“ (Dezimalzeichen nach Einstellung). */

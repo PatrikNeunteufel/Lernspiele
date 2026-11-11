@@ -551,6 +551,18 @@ const BILDER = (() => {
         + `<path d="M36 58 L30 38 M25 38 H35" stroke="#2a2a2a" stroke-width="2.6" stroke-linecap="round"/>`
         + `<ellipse cx="82" cy="54" rx="9" ry="3" fill="#8d857a" stroke="#4e4a44" stroke-width="1.4"/><rect x="74" y="56" width="10" height="8" fill="#6b6b6b"/>`
         + `<circle cx="66" cy="68" r="3" fill="#2a2a2a"/><circle cx="18" cy="76" r="2.4" fill="#2a2a2a"/>` },
+    mondlandung: { name: "Mondlandung 1969 (Landefähre mit vier Beinen auf dem grauen Mondboden, Fussspuren, die Erde am schwarzen Himmel)", box: "0 0 100 100",
+      svg: `<rect x="0" y="0" width="100" height="100" fill="#1b1d33"/><circle cx="16" cy="12" r="1" fill="#ffffff"/><circle cx="44" cy="8" r="0.8" fill="#ffffff"/><circle cx="90" cy="34" r="0.9" fill="#ffffff"/><circle cx="60" cy="20" r="0.7" fill="#ffffff"/>`
+        + `<circle cx="80" cy="16" r="9" fill="#2f7fd6"/><path d="M74 12 Q78 9 81 14 Q83 19 78 22 Q75 19 74 15 Z M83 9 Q88 11 88 16 Q85 18 84 14 Z" fill="#86c46f"/>`
+        + `<path d="M0 74 Q20 68 42 72 Q66 66 100 72 V100 H0 Z" fill="#a7a9ad"/>`
+        + `<ellipse cx="18" cy="86" rx="7" ry="2.4" fill="#8d8f94"/><ellipse cx="82" cy="90" rx="9" ry="2.8" fill="#8d8f94"/>`
+        + `<path d="M58 88 l3 -1 M64 90 l3 -1 M70 87 l3 -1 M76 89 l3 -1" stroke="#6f7176" stroke-width="2" stroke-linecap="round"/>`
+        + `<path d="M28 62 L18 80 M72 62 L82 80 M38 64 L34 80 M62 64 L66 80" stroke="#c9ccd3" stroke-width="2.4"/>`
+        + `<path d="M14 80 H22 M78 80 H86 M30 80 H38 M62 80 H70" stroke="#c9ccd3" stroke-width="2.4" stroke-linecap="round"/>`
+        + `<path d="M26 50 H74 L70 66 H30 Z" fill="#e3b341" stroke="#9a7420" stroke-width="1.6"/>`
+        + `<path d="M34 30 H66 L70 50 H30 Z" fill="#d7dade" stroke="#7b7f88" stroke-width="1.6"/>`
+        + `<path d="M42 36 L48 36 L46 44 L40 44 Z M52 36 L58 36 L60 44 L54 44 Z" fill="#2a2d45"/>`
+        + `<path d="M50 30 V20 M44 22 H56" stroke="#7b7f88" stroke-width="1.8"/><circle cx="50" cy="19" r="2.4" fill="#d7dade" stroke="#7b7f88" stroke-width="1.2"/>` },
     "wright-flyer": { name: "Flugzeug der Brüder Wright (zwei lange Flügel übereinander, aus Holz und Stoff, Pilot liegt)", box: "0 0 100 100",
       svg: `<path d="M0 86 Q30 78 60 84 Q80 88 100 82 V100 H0 Z" fill="#e8d6a0"/>`
         + `<rect x="18" y="24" width="70" height="8" rx="2" fill="#efe6cc" stroke="#9c8a68" stroke-width="1.6"/>`

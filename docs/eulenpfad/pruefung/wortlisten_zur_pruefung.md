@@ -2382,9 +2382,12 @@ Jahrzahlen bitte nachprüfen.
 | 1848 | 1848 | 🇨🇭 | Die Schweiz wird ein Bundesstaat | Neuzeit | ☐ |
 | 1886 | 1886 | svg:motorwagen | Carl Benz baut das erste Auto mit Benzinmotor | Neuzeit | ☐ |
 | 1903 | 1903 | svg:wright-flyer | Die Brüder Wright fliegen mit dem ersten Motorflugzeug | Neuzeit | ☐ |
-| 1969 | 1969 | 🌕 | Die ersten Menschen landen auf dem Mond | Neuzeit | ☐ |
+| 1969 | 1969 | svg:mondlandung | Die ersten Menschen landen auf dem Mond | Neuzeit | ☐ |
 | 1971 | 1971 | 🗳️ | Die Frauen dürfen in der Schweiz eidgenössisch abstimmen und wählen | Neuzeit | ☐ |
+| 1991 | 1991 | 🌐 | Am CERN bei Genf geht die erste Website ins Internet | Neuzeit | ☐ |
+| 2007 | 2007 | 📱 | Ein Smartphone kommt in die Läden, das man ohne Stift mit den Fingern bedient | Neuzeit | ☐ |
 | 2016 | 2016 | 🚄 | Der Gotthard-Basistunnel wird eröffnet | Neuzeit | ☐ |
+| 2022 | 2022 | 💬 | Ein Chatprogramm mit künstlicher Intelligenz (KI) wird veröffentlicht | Neuzeit | ☐ |
 
 ### Zeitalter
 

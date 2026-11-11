@@ -34,7 +34,11 @@ const ZS_GENERATIONEN = [
 ];
 
 // [Jahr zum Ordnen, Jahrzahl wie angezeigt, Bild, Ereignis, Zeitalter] — Liste ereignisse. Bild aus der Zeit des
-// Ereignisses (BZ1 a): Karavelle, Motorwagen und Doppeldecker aus der Bildersammlung statt heutiger Boote, Autos, Flugzeuge.
+// Ereignisses (BZ1 a): Karavelle, Motorwagen und Doppeldecker aus der Bildersammlung statt heutiger Boote, Autos, Flugzeuge;
+// die Mondlandung mit der Landefähre (ZS2 a, Bemerkung 43). 1991, 2007 und 2022 als Anker nahe am Leben der Kinder
+// (ZS1 a, Bemerkung 42; belegt LERN_Session32 aus Wikipedia „World Wide Web“: „First published 6 August 1991“,
+// „iPhone (1st generation)“: 2007, „finger-friendly touchscreen interface that did not need a stylus“ — das IBM Simon
+// von 1994 hatte schon einen Touchscreen, aber mit Stift; „ChatGPT“: „Originally released on November 30, 2022“).
 // Gefragt wird das Zeitalter nur, wo es eindeutig ist (eines aus ZS_EPOCHEN). Um 1450 und 1492 beginnt je nach
 // Buch die Neuzeit („ab 1500“ oder „mit der Entdeckung Amerikas“): dort steht ZS_UEBERGANG, und die Frage nach dem
 // Zeitalter lässt das Ereignis aus (Entscheid ZA1 a, Bemerkungen 26 und 27). Ordnen und Jahrhundert gelten weiter.
@@ -49,9 +53,12 @@ const ZS_EREIGNISSE = [
   [1848, "1848", "🇨🇭", "Die Schweiz wird ein Bundesstaat", "Neuzeit"],
   [1886, "1886", "svg:motorwagen", "Carl Benz baut das erste Auto mit Benzinmotor", "Neuzeit"],
   [1903, "1903", "svg:wright-flyer", "Die Brüder Wright fliegen mit dem ersten Motorflugzeug", "Neuzeit"],
-  [1969, "1969", "🌕", "Die ersten Menschen landen auf dem Mond", "Neuzeit"],
+  [1969, "1969", "svg:mondlandung", "Die ersten Menschen landen auf dem Mond", "Neuzeit"],
   [1971, "1971", "🗳️", "Die Frauen dürfen in der Schweiz eidgenössisch abstimmen und wählen", "Neuzeit"],
+  [1991, "1991", "🌐", "Am CERN bei Genf geht die erste Website ins Internet", "Neuzeit"],
+  [2007, "2007", "📱", "Ein Smartphone kommt in die Läden, das man ohne Stift mit den Fingern bedient", "Neuzeit"],
   [2016, "2016", "🚄", "Der Gotthard-Basistunnel wird eröffnet", "Neuzeit"],
+  [2022, "2022", "💬", "Ein Chatprogramm mit künstlicher Intelligenz (KI) wird veröffentlicht", "Neuzeit"],
 ];
 
 // [Bild, Zeitalter] vom ältesten zum neusten — Liste epochen
