@@ -40,6 +40,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -257,6 +258,15 @@ function loesungText(a) {
 
 LS.spiel({
   id: "merk-blick",
+  // Abschluss-Animation (feier.js, Block M5, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "merken", ziele: { s1: { dinge: ["🧸", "🍎", "⚽"], art: "fehlt", i: 1 },
+    s2: { dinge: ["🐶", "🌼", "🚗", "🍌"], art: "fehlt", i: 2 }, s3: { dinge: ["🎈", "🐟", "🦆", "🍓", "🥕", "🚲"], art: "neu", i: 4 },
+    s4: { dinge: ["⭐", "🐞", "🍐", "👟", "🎁", "🐸", "☂️"], art: "tausch", i: 1, mit: 5 },
+    s5: { dinge: [["dreieck", "deko-2"], ["pfeil", "deko-3"], ["herz", "deko-4"], ["halbkreis", "deko-5"], ["tropfen", "deko-6"], ["haus", "deko-2"],
+      ["stueck", "deko-3"], ["pfeil", "deko-5"], ["dreieck", "deko-6"]], art: "dreh", i: 1 },
+    s6: { dinge: [["haus", "deko-3"], ["herz", "deko-2"], ["tropfen", "deko-5"], ["pfeil", "deko-6"], ["dreieck", "deko-4"], ["stueck", "deko-2"],
+      ["halbkreis", "deko-6"], ["herz", "deko-5"], ["haus", "deko-6"], ["pfeil", "deko-4"], ["tropfen", "deko-3"], ["dreieck", "deko-5"]],
+      aenderungen: [{ art: "dreh", i: 3 }, { art: "farbe", i: 8, zu: "deko-4" }] } } },
   einleitung: "Schau dir das Bild gut an und merk es dir. Dann deckt die Eule es zu — und verändert etwas!",
   hilfe: "Schau dir das Bild an, bis die Eule es zudeckt. Dann siehst du es verändert: Tippe auf das, was anders ist.",
   anzahl: 8,

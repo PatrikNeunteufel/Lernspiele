@@ -1164,6 +1164,26 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   | BAUEN · `schaetzen` | `{ waage }`, `{ reihe }` oder `{ ding, wert, einheit, mass: "lineal" \| "waage" }`: Wippe, Dinge von leicht zu schwer, Lineal oder Waage mit Anzeige | Schätz-Waage |
   | SAMMELN · `wippe` | `{ wippe }`, `{ paar, merkmal: "lang" \| "schnell" \| "gross" }`, `{ reihe, hervor? }`, `{ pakete }`: Wippe, Balken, Wettlauf, Reihe nach Grösse, zwei Wippen mit Paketen wie im Spiel | Gegenteil-Wippe |
 
+  Block M5 (Geometrie; LERN_Session29) — Würfelgebäude wie im Würfelbau-Blick (von vorne rechts oben, Bauplan Zeilen
+  hinten → vorne), mehrere Gebäude in einem Bild im selben Massstab; Linien zeichnen sich (`zeichne`, gestrichelte
+  blenden ein):
+
+  | Muster · bilder | Angabe je Stufe | Spiel |
+  |---|---|---|
+  | BAUEN · `spiegelraster` | `{ breite, hoehe, zellen, achse \| achsen \| schub }`: Bild an der senkrechten, waagrechten, schrägen Achse, an zwei Achsen oder verschoben; im Raster und nicht auf der Figur (geprüft) | Spiegel-Raster |
+  | REISE · `koordinaten` | `{ tafel: [E, Z] }`, `{ punkt }`, `{ figur, schub? \| fehlt? }`: Hundertertafel, Weg zum Schatz, Figur verschieben oder zeichnen, fehlende Quadratecke (geprüft) | Koordinaten-Schatzsuche |
+  | BAUEN · `formen` | `{ formen, gedreht?, ecken? }` oder `{ eigenschaften: "rechteck" }`: Formen und Körper, Ecken mit Zahl; Rechteck mit rechten Winkeln und Symmetrieachsen | Formen-Detektiv |
+  | BAUEN · `pixel` | `{ figuren, umfang? }`: Häuschen zählen, zwei Figuren vergleichen, Umfang in Häuschen-Seiten | Flächen-Pixel |
+  | BAUEN · `pentomino` | `{ breite, hoehe, teile }`: Teile füllen den Umriss lückenlos (geprüft) | Pentomino-Puzzle |
+  | BAUEN · `wuerfelbau` | `{ plan, ansichten?, zahlen? }`: Gebäude, Ansichten oben, vorne, rechts wie im Spiel, Bauplan mit Zahlen | Würfelbau-Blick |
+  | BAUEN · `netz` | `{ wuerfel: "kreuz" \| "treppe", gegenueber?, augen? }`, `{ quader: [l, b, h] }`, `{ pyramide }`: Netz und Körper; Augen der Gegenseiten zusammen 7 (geprüft) | Netz-Falter |
+  | BAUEN · `rechtecke` | `{ rechtecke, zeige: "flaeche" \| "umfang" \| "beide", hervor? }`: Rechtecke mit Fläche und Umfang; das hervorgehobene hat die grösste Fläche (geprüft) | Rechteck-Labor |
+  | REISE · `kipper` | `{ weg, oben? }`: Wegkarte und Spielwürfel nach jedem Kipp (Kippregel und Startlage des Spiels) | Würfel-Kipper |
+  | BAUEN · `geo` | eine der Figuren `rechteck-kreis`, `sechseck-kreis`, `parallel-senkrecht`, `schnittpunkt`, `quadrat-diagonalen`, `alles` | Begriffs-Geodreieck |
+  | SAMMELN · `merken` | `{ dinge, art: "fehlt" \| "neu" \| "tausch" \| "dreh" \| "farbe", i, mit?, zu? }` oder `{ dinge, aenderungen }`: Bildzeichen oder Formen des Spiels | Merk-Blick |
+  | BAUEN · `zaehler` | `{ plaene, dazu? }` oder `{ kiste: [l, b, h], da }`: Gebäude vergleichen, gleich viele bauen, Kiste füllen | Würfel-Zähler |
+  | BAUEN · `quader` | `{ masse, einheit?, da? }` oder `{ gross: [[w, e] × 3], in, gitter? \| wasser? \| liter?, zeile? }`: Quader aus Würfeln, grosse Quader mit Massen, Liter | Quader-Volumen |
+
   Stellenfarben in den Bildern nur über `var(--st-…)` aus `stil.css`, nach dem Komma `--deko-7` mit der Kommalinie
   `--deko-1` (wie `.schriftlich`); Zahlen über `LS.zahlText` und `LS.dezimalText`.
 

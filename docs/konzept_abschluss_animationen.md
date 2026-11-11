@@ -212,7 +212,7 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 | M2 | Zahlen, Teiler, Begründen | 12 | in Arbeit seit 11.11.2026 (LERN_Session28, M2): gebaut, Abnahme offen |
 | M3 | Rechnen | 13 | in Arbeit seit 11.11.2026 (LERN_Session28, M3): gebaut, Abnahme offen |
 | M4 | Sachrechnen, Grössen | 12 | in Arbeit seit 11.11.2026 (LERN_Session29, M4): gebaut, Abnahme offen |
-| M5 | Geometrie | 13 | offen |
+| M5 | Geometrie | 13 | in Arbeit seit 11.11.2026 (LERN_Session29, M5): gebaut, Abnahme offen |
 | M6 | Daten, Kombinatorik, Brüche | 9 | offen |
 | D, N, F | Deutsch (30), NMG (33), danach Englisch (8), Französisch (8), Musik (6), Medien und Informatik (7) | 92 | offen |
 
@@ -343,6 +343,42 @@ in den Inhaltslisten der Spiele — bisher war jedes Bild gezeichnet; das Ausseh
   ? · 8 = 320, 945 : ? = 7) und der Probe mit Haken; s6 zwei Lücken nacheinander (3 · ? = 240, ? + 80 = 500).
 - **Zeit-Schätzer:** Stoppuhr für s1–s4 (1 s, 60 s = 1 min, 10 min, 60 min = 1 h), dann die Uhr: s5 „9:45 → 10:20 =
   35 min“, s6 „135 min = 2 h 15 min“ — die Stufen des Spiels statt Tag, Woche und Jahr.
+
+**Block M5 — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme):
+
+- **Spiegel-Raster:** wie vorgeschlagen Kästchen um Kästchen am Spiegelplatz, mit den Achsen der Stufen: senkrecht,
+  grösseres Raster, waagrecht, s4 Verschieben mit Pfeil (statt einer schrägen Form), s5 die schräge Achse (Diagonale),
+  s6 zwei Achsen, vier Teile. Ohne flatternden Schmetterling (2★ Glanz, 3★ Funken).
+- **Koordinaten-Schatzsuche:** REISE statt KARTE, nach den Stufen: s1 und s2 die Hundertertafel („2 E 5 Z = 52“, E und
+  Z in den Stellenfarben), s3 der Weg nach rechts, dann nach oben zur Truhe bei (3|7), s4 ein Dreieck wird verschoben,
+  s5 ein Rechteck aus Koordinaten, s6 die fehlende Ecke des Quadrats (nachgerechnet) mit der Truhe. Schreibweise
+  „(3|7)“ wie im Spiel.
+- **Formen-Detektiv:** die Formen und Körper der Stufen nebeneinander statt eines Hauses (s3 gedreht mit Ecken und ihrer
+  Zahl, s4 Würfel und Kugel, s5 alle fünf Körper), s6 ein Rechteck mit rechten Winkeln, Symmetrieachsen und
+  Parallelzeichen statt des gespiegelten Hauses.
+- **Flächen-Pixel:** Häuschen der Stufen (6 < 9, 9, 12, 11 < 12), s5 Rechteck 15 mit Umfang 16, s6 krumme Figur mit
+  Umfang 20 — der Umfang in Häuschen-Seiten wie im Spiel (nachgerechnet).
+- **Pentomino-Puzzle:** Teile der Stufen statt immer mehr Pentominos bis 6 × 10: zwei und drei Vierlinge, dann zwei,
+  drei, vier und sechs Pentominos im Rechteck — jeder Umriss lückenlos (geprüft), s6 nicht alle zwölf verschiedenen.
+- **Würfelbau-Blick:** Gebäude wie im Spiel (von vorne rechts oben), dazu die Ansichten oben, vorne, rechts mit Pfeil der
+  Blickrichtung, s5 der Bauplan mit Zahlen; ohne Drehen des Gebäudes.
+- **Netz-Falter:** Netz links Fläche um Fläche, rechts der Körper — statt eines Falt-Films (im Bild ohne Raum nicht
+  sauber zu zeigen): Würfelnetze, s3 Gegenflächen gleich gefärbt, s4 Spielwürfel (1 + 6 = 2 + 5 = 3 + 4 = 7, gefaltet
+  1 oben, 2 vorne, 3 rechts wie im Würfel-Kipper), s5 Quader in den Farben seiner Gegenflächen, s6 Pyramide.
+- **Rechteck-Labor:** Rechtecke der Stufen (4 · 3 = 12 cm², Umfang 16 cm, beides, alle mit 24 cm² ausser 1 × 24, s5 und
+  s6 gleicher Umfang, das Quadrat mit der grössten Fläche leuchtet) statt nur Umfang 12, 16 und 20.
+- **Würfel-Kipper:** Wegkarte von oben und der Spielwürfel im Schrägbild wie im Spiel nach jedem Kipp (Kippregel und
+  Startlage des Spiels); s1 die Gegenseiten (1 + 6 = 7), s6 ein Weg mit der 6 oben (nachgerechnet).
+- **Begriffs-Geodreieck:** Figuren der Stufen statt eines Hauses: Rechteck mit Ecken und Diagonale und Kreis mit
+  Mittelpunkt, Sechseck mit Diagonalen, Radius und Durchmesser, Parallele und Senkrechte mit rechten Winkeln,
+  Schnittpunkt der Diagonalen, Quadrat (Diagonalen senkrecht, gleich lang, halbiert), s6 alles.
+- **Merk-Blick:** was das Spiel fragt statt eines Fotoalbums: fehlt (3 und 4 Dinge), neu (6), Platztausch (7), eine Form
+  dreht sich (9 Formen), s6 eine dreht sich und eine färbt sich um (12 Formen); Bildzeichen und Formen des Spiels.
+- **Würfel-Zähler:** Gebäude im selben Massstab mit Zahl und Zeichen (3 < 5 … 7 < 9 < 12), s4 gleich viele bauen
+  (7 = 4 + 3), s5 eine Kiste 3 × 3 × 2, die fehlenden 6 Würfel kommen dazu; ohne Deckel und Schleife.
+- **Quader-Volumen:** Schicht um Schicht wie vorgeschlagen (3 · 2 · 2, 4 · 3 · 2 mit den fehlenden Würfeln, 5 cm · 3 cm
+  · 2 cm), s4 1 dm³ = 1000 cm³ = 1 l, s5 Quader mit 0.5 m (10 dm³ = 10 l), s6 Aquarium 40 cm · 20 cm · 25 cm füllt sich
+  (20 000 cm³ = 20 l).
 
 ## 8. Ideen je Spiel
 

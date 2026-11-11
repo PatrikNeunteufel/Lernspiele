@@ -1764,3 +1764,22 @@
 - Tests: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
   139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad die 55 Spiele mit Animation
   „Keine Fehler.“
+- Abschluss-Animationen Block M5 (Geometrie; AR1 a): Spiegel-Raster, Koordinaten-Schatzsuche, Formen-Detektiv,
+  Flächen-Pixel, Pentomino-Puzzle, Würfelbau-Blick, Netz-Falter, Rechteck-Labor, Würfel-Kipper, Begriffs-Geodreieck,
+  Merk-Blick, Würfel-Zähler, Quader-Volumen — `feier.js` mit dreizehn Bildern nach den Stufen der Spiele. Geprüft wird,
+  was die Bilder zeigen: Spiegelbilder im Raster und nicht auf der Figur, Quadratecke, Fläche und Umfang in
+  Häuschen-Seiten, Puzzle lückenlos ohne Überlappung, Augen der Gegenseiten zusammen 7, grösste Fläche, Kipplagen nach
+  der Kippregel des Spiels, Würfelzahlen und Volumen mit Einheiten. Würfelgebäude wie im Würfelbau-Blick (von vorne
+  rechts oben), Ansichten wie dort berechnet; Würfel im Schrägbild wie im Würfel-Kipper. Abweichungen vom Entwurf im
+  Konzept, Abschnitt 7 (zur Abnahme); Doku rahmen.md 24.
+- Im Browser alle 78 Endbilder in Handybreite angesehen, den Ablauf mitten drin (Merk-Blick beim Verschwinden, Tauschen
+  und Drehen, Wasser im Aquarium, Kipplagen); dabei verbessert: Gebäude im Würfel-Zähler im selben Massstab (der Turm aus
+  5 Würfeln sah so hoch aus wie der aus 3), Quader im Netz in den Farben seiner Gegenflächen, Spielwürfel aus dem Netz
+  mit Augen auf drei Seiten, Umfärben im Merk-Blick als Einblenden (style lässt sich mit SMIL nicht bewegen), Ring um
+  beide getauschten Dinge, gestrichelte Linien blenden ein statt sich zu zeichnen (die Strichelung ging verloren),
+  Hervorhebung in der Hundertertafel durchscheinend (opacity unter `erscheine` wurde voll), Raster, Puzzles,
+  Wegkarte, Ansichten und einzelne Rechtecke grösser, Quader frei von der Rechnung. Gegenprüfung im Browser über alle
+  68 Spiele mit Animation × 6 Stufen: nichts über dem Rand, kein Text unter 9 Einheiten.
+- Tests: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe: die dreizehn
+  Spiele von M5 „Keine Fehler.“ — letzter voller Lauf weiter auf `6055527`.

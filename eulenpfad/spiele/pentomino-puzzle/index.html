@@ -57,6 +57,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -606,6 +607,16 @@ function legen(ctx, a) {
 
 LS.spiel({
   id: "pentomino-puzzle",
+  // Abschluss-Animation (feier.js, Block M5, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "pentomino", ziele: {
+    s1: { breite: 4, hoehe: 2, teile: [[[0, 0], [1, 0], [2, 0], [0, 1]], [[3, 0], [1, 1], [2, 1], [3, 1]]] },
+    s2: { breite: 4, hoehe: 3, teile: [[[0, 0], [1, 0], [2, 0], [3, 0]], [[0, 1], [1, 1], [2, 1], [0, 2]], [[3, 1], [1, 2], [2, 2], [3, 2]]] },
+    s3: { breite: 5, hoehe: 2, teile: [[[0, 0], [1, 0], [2, 0], [3, 0], [0, 1]], [[4, 0], [1, 1], [2, 1], [3, 1], [4, 1]]] },
+    s4: { breite: 5, hoehe: 3, teile: [[[0, 0], [1, 0], [2, 0], [3, 0], [0, 1]], [[4, 0], [3, 1], [4, 1], [3, 2], [4, 2]], [[1, 1], [2, 1], [0, 2], [1, 2], [2, 2]]] },
+    s5: { breite: 5, hoehe: 4, teile: [[[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]], [[0, 1], [1, 1], [2, 1], [3, 1], [0, 2]], [[4, 1], [3, 2], [4, 2], [3, 3], [4, 3]],
+      [[1, 2], [2, 2], [0, 3], [1, 3], [2, 3]]] },
+    s6: { breite: 5, hoehe: 6, teile: [[[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]], [[0, 1], [1, 1], [2, 1], [3, 1], [0, 2]], [[4, 1], [3, 2], [4, 2], [3, 3], [4, 3]],
+      [[1, 2], [2, 2], [0, 3], [1, 3], [2, 3]], [[0, 4], [1, 4], [2, 4], [3, 4], [0, 5]], [[4, 4], [1, 5], [2, 5], [3, 5], [4, 5]]] } } },
   einleitung: "Puzzle-Zeit! Leg die Teile in den Umriss – du darfst sie drehen und spiegeln.",
   hilfe: "Beim Legen tippst du unten ein Teil an, drehst oder spiegelst es mit „⟳ Drehen“ und „⇋ Spiegeln“ und tippst dann ins Feld. Ein gelegtes Teil nimmst du mit Antippen wieder weg. Kommst du nicht weiter, legt „🧩 Ein Teil legen“ ein Teil richtig hin — das zählt als Fehler. Bei den anderen Aufgaben tippst du das passende Teil an.",
   anzahl: 6,

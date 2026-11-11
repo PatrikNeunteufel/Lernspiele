@@ -53,6 +53,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -385,6 +386,10 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "wuerfel-kipper",
+  // Abschluss-Animation (feier.js, Block M5, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "kipper", ziele: { s1: { weg: [] }, s2: { weg: ["rechts"] }, s3: { weg: ["rechts", "hinten"] },
+    s4: { weg: ["rechts", "rechts", "vorne", "rechts"] }, s5: { weg: ["vorne", "rechts", "vorne", "links"] },
+    s6: { weg: ["rechts", "rechts", "vorne", "rechts", "hinten"], oben: 6 } } },
   einleitung: "Ein Spielwürfel: Gegenüberliegende Seiten ergeben zusammen 7. Kippe ihn im Kopf — rollt er nach rechts, landet die obere Seite rechts. Welche Zahl liegt danach oben?",
   hilfe: stufe => (stufe === "s6"
     ? "Tipp die Pfeilknöpfe, um den Würfel Feld für Feld zur 🏁 zu kippen. Am Ziel soll die gesuchte Zahl oben liegen. Mit „↺ zum Start“ beginnst du neu."

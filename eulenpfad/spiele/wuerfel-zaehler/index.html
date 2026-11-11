@@ -54,6 +54,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -654,6 +655,10 @@ const SAG = {
 
 LS.spiel({
   id: ID,
+  // Abschluss-Animation (feier.js, Block M5, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "zaehler", ziele: { s1: { plaene: [[[3]], [[5]]] }, s2: { plaene: [[[1, 1], [2, 1]], [[2, 2], [1, 1]]] },
+    s3: { plaene: [[[3, 2], [1, 1]], [[2, 2], [2, 2]]] }, s4: { plaene: [[[2, 2], [2, 1]], [[1, 1], [1, 1]]], dazu: 3 },
+    s5: { kiste: [3, 3, 2], da: 12 }, s6: { plaene: [[[1, 2], [2, 2]], [[2, 2, 1], [1, 2, 1]], [[3, 2], [2, 2], [1, 2]]] } } },
   einleitung: "Wo stehen mehr Würfel? Zähl genau — auch die Würfel, die sich verstecken! Bau gleich grosse Gebäude und füll die Kiste.",
   hilfe: stufe => ({
     s1: "Schau die zwei Würfeltürme an. Tipp auf ⬅️, wenn links mehr Würfel stehen, auf ➡️, wenn rechts mehr stehen, und auf 🟰, wenn es gleich viele sind.",

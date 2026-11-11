@@ -50,6 +50,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -181,6 +182,10 @@ function tippsFuer(art, form) {
 
 LS.spiel({
   id: "koordinaten-schatz",
+  // Abschluss-Animation (feier.js, Block M5, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "koordinaten", ziele: { s1: { tafel: [2, 5] }, s2: { tafel: [7, 3] }, s3: { punkt: [3, 7] },
+    s4: { figur: [[1, 1], [4, 1], [1, 3]], schub: [3, 2] }, s5: { figur: [[2, 1], [7, 1], [7, 4], [2, 4]] },
+    s6: { figur: [[2, 2], [6, 2], [6, 6]], fehlt: [2, 6] } } },
   hilfe: stufe => (stufe === "s1" || stufe === "s2"
     ? "Auf der Hundertertafel stehen die Einer (E) oben und die Zehner (Z) links. Tipp auf das Feld oder wähl die passenden Koordinaten."
     : "Auf der Schatzkarte tippst du auf einen Gitterpunkt oder wählst die passenden Koordinaten (x|y): x zählt nach rechts, y nach oben."),

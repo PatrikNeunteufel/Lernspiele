@@ -31,6 +31,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -399,6 +400,9 @@ function tippAufgabe(ctx, { netz, svgOpt, tippbar, richtig, hinweis, loesung }) 
 
 LS.spiel({
   id: "netz-falter",
+  // Abschluss-Animation (feier.js, Block M5, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "netz", ziele: { s1: { wuerfel: "kreuz" }, s2: { wuerfel: "treppe" }, s3: { wuerfel: "kreuz", gegenueber: true },
+    s4: { wuerfel: "kreuz", augen: [2, 3, 1, 4, 6, 5] }, s5: { quader: [3, 2, 1] }, s6: { pyramide: true } } },
   einleitung: "Schneiden, falten, kleben – im Kopf! Finde Würfelnetze und sag, welche Flächen sich gegenüberliegen.",
   hilfe: "Falte das Netz im Kopf. Je nach Frage tippst du ein Netz, „Ja“ oder „Nein“, einen Körper oder eine Fläche direkt im Netz an.",
   anzahl: 6,

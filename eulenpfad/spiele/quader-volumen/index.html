@@ -62,6 +62,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -859,6 +860,10 @@ const SAG = {
 
 LS.spiel({
   id: ID,
+  // Abschluss-Animation (feier.js, Block M5, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "quader", ziele: { s1: { masse: [3, 2, 2] }, s2: { masse: [4, 3, 2], da: 15 },
+    s3: { masse: [5, 3, 2], einheit: "cm" }, s4: { gross: [[10, "cm"], [10, "cm"], [10, "cm"]], in: "dm", gitter: true, zeile: "gleich" },
+    s5: { gross: [[0.5, "m"], [2, "dm"], [1, "dm"]], in: "dm", liter: true }, s6: { gross: [[40, "cm"], [20, "cm"], [25, "cm"]], in: "cm", wasser: true } } },
   einleitung: "Wie viel passt in einen Quader? Zähl die Würfel, rechne Länge mal Breite mal Höhe — und finde heraus, was cm³, dm³ und Liter bedeuten!",
   hilfe: stufe => ({
     s1: "Tipp zuerst ein, wie viele Würfel in einer Schicht liegen, und drück OK. Dann, wie viele Schichten es sind. Zuletzt alle Würfel zusammen.",

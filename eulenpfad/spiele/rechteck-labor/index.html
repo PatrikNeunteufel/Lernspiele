@@ -44,6 +44,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -239,6 +240,10 @@ function tippsFuer(a, p) {
 
 LS.spiel({
   id: "rechteck-labor",
+  // Abschluss-Animation (feier.js, Block M5, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "rechtecke", ziele: { s1: { rechtecke: [[4, 3]], zeige: "flaeche" }, s2: { rechtecke: [[5, 3]], zeige: "umfang" },
+    s3: { rechtecke: [[4, 3]], zeige: "beide" }, s4: { rechtecke: [[12, 2], [8, 3], [6, 4]], zeige: "flaeche" },
+    s5: { rechtecke: [[8, 2], [6, 4], [5, 5]], zeige: "beide", hervor: 2 }, s6: { rechtecke: [[9, 3], [7, 5], [6, 6]], zeige: "beide", hervor: 2 } } },
   einleitung: "Willkommen im Rechteck-Labor! Die Ecke oben links ist fest. Tippe ein Häuschen an — dort ist die andere Ecke. Jedes Häuschen ist 1 cm breit und 1 cm hoch, also 1 cm² gross.",
   hilfe: stufe => "Die Ecke oben links ist fest. Tippe ein Häuschen an — dort ist die andere Ecke. Dann tippst du auf „Prüfen ✓“."
     + (!stufe || STUFE[stufe].arten.some(x => x === "alleF" || x === "alleU") ? " Sollst du alle Rechtecke finden, baust und prüfst du jedes einzeln." : "")
