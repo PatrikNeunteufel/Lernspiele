@@ -1890,3 +1890,5 @@
   Rand statt im Grün der Seerose; Einmaleins-Blitz (einmaleins-blitz) s3: Division als Aufteilen (grauer Haufen, Gruppen
   mit Rahmen, Farbe und Nummer, die Zahl der Gruppen leuchtet); Runden-Rutsche (runden-rutsche): Kopf der Stelle, auf die
   gerundet wird, in der Stellenfarbe und die entscheidende Ziffer gross in ihrer Farbe, s2 und s5 runden jetzt ab.
+- Session-Abschluss: Report docs/eulenpfad/report/LERN_Session31_2026-11-11.md, Handover (weiter mit der Überarbeitung
+  der Kacheln und der Gestaltung).

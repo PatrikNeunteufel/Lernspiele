@@ -4,6 +4,10 @@
    Geschrieben vom Entwickler-Server (tools/entwickler_server.py) — nicht von Hand ändern. */
 const PRUEFSTAND = {
   "feier": {
+    "begriffs-geodreieck": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "bruch-rechteck": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -24,11 +28,31 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "fahrplan-rechner": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "finger-zaehler": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "flaechen-pixel": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "flaechenmass-treppe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "formen-detektiv": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "gegenteil-wippe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "gerecht-teiler": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -44,6 +68,10 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "komma-messband": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "koordinaten-schatz": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -53,6 +81,10 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "masse-umwandler": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "merk-blick": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -73,6 +105,10 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "preis-tabelle": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "prozent-bruecke": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -104,7 +140,15 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "rechteck-labor": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "rest-raetsel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "sachaufgaben-kompass": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -116,11 +160,23 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "sortier-kiste": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "spiegel-raster": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
     "stellen-detektiv": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "stimmt-immer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "stufenzahl-schieber": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -145,6 +201,10 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "vergleichs-krokodil": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wuerfel-kipper": {
       "am": "2026-11-11",
       "von": "Patrik"
     },

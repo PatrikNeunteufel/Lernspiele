@@ -1,6 +1,21 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-11, nach LERN_Session31** ([Report](report/LERN_Session31_2026-11-11.md)):
+- **Kern:** unverändert 1.39.0 (Inbetriebnahme des Meldungsservers bei Patrik offen).
+- **Eulenpfad:** Abschluss-Animationen in **allen 169 Spielen** (Block D: Englisch, Französisch, Musik, Medien und
+  Informatik neu). Vorschau mit Abnahme (geprüft im Prüfstand, Art `feier`; Anmerkungen je Stufe und zur Serie; alle
+  sechs ins Fenster), verlinkt aus Verwaltung → Entwicklung. Neue schnelle Prüfung `tools/pruefe_feier.js` (Schmuck über
+  Text, bewegt gegen ruhig, Animationen) in den kurzen Tests; Bemerkungen 37–40 erledigt.
+- **Tests:** Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Feier „169 Spiele, 6084 Bilder, keine
+  Fehler.“; Eulenpfad Stichproben „Keine Fehler.“ — **letzter voller Lauf auf `6055527`**. Commits bis zu den
+  Bemerkungen 37–40 von Patrik gemacht, nicht gepusht; dieser Abschluss noch zu committen.
+- **Weiter mit:** Überarbeitung der Kacheln und der Gestaltung — Rückmeldung zur Gestaltung
+  ([rueckmeldung_gestaltung.md](rueckmeldung_gestaltung.md)) zu einem Konzept mit Entscheidungsfragen machen (vorher
+  `docs/konzept_*` durchsuchen); daneben offene Anmerkungen aus der Abnahme abarbeiten; voller Eulenpfad-Lauf auf Patriks
+  Entscheid vor dem nächsten Push.
+
 **2026-11-11, nach LERN_Session30** ([Report](report/LERN_Session30_2026-11-11.md)):
 - **Kern:** unverändert 1.39.0 (Inbetriebnahme des Meldungsservers bei Patrik offen).
 - **Eulenpfad:** Bemerkung 36 behoben (Farbfeld vor Farbcodes in Listen- und Prüfansicht). Abschluss-Animationen in
