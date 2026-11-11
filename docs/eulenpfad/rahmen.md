@@ -929,9 +929,25 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   Rasters, braucht sie `margin-inline: 0` — mit `margin: 0 auto` wird sie so breit wie ihr Mindestinhalt, und die
   Seite läuft seitlich über (Pflanzen-Bestimmer). Ein Spiel, das die Tastatur in einen
   eigenen Behälter setzt, bekommt (2) und (3) nicht und ordnet selbst.
+- **Untergrenze** (Entscheid H1 a, LERN_Session28): Jede Grösse nach der Bildhöhe hat eine Untergrenze —
+  `max(Mindestmass, min(…, calc(100vh - …)))`, wo der Platz schmal sein kann `max(min(Mindestmass, 100%), …)`, oder
+  `min-width`/`min-height` derselben Achse im selben Regelblock. Lieber scrollen als nichts sehen: Ohne sie wurde die
+  Breite unter etwa 480 px Bildhöhe null — Handy quer und das Spielfenster des Zufallsmix (ab 460 px hoch) zeigten
+  leere Felder (Finger-Zähler Stufe 6, Bemerkungen 34 und 35; dazu Uhr, Kompass, Erdzeit-Leiter, Wassertropfen,
+  Plan-Leser, Diagramm-Detektiv, Go-Brett, Roboter-Pfad). Das Mindestmass richtet sich nach der Grafik: Felder
+  bleiben antippbar, Zahlen lesbar (Uhr und Kompassrose 160 px, Bretter und Pläne 200–300 px). Ausnahme nur mit
+  dem Kommentar „ohne Untergrenze: <Grund>“ im Regelblock (feste Fenster). `tools/pruefe_skripte.js` weist jede
+  Stelle ohne Untergrenze ab.
 - **Messen:** `node tools/bildhoehe.js [Basis-URL] [spiel-id …]` (Server nötig; Chrome ohne Fenster, Messkind mit allem
   freigegeben). Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe selbst über dem Rand (ohne Tipp-Zeile), mit der
-  Zifferntastatur nicht ganz im Bild, und seitlich (Code 1). `--css=datei` probiert CSS aus, ohne den Code zu ändern.
+  Zifferntastatur nicht ganz im Bild, und seitlich (Code 1). Dazu die Grafiken der Aufgabe (svg, canvas, img mit
+  Klasse, nicht in Knöpfen, Eule mit Blase, Legende, Kopf): Geschrumpft heisst eine, deren kürzere Seite unter 100 px
+  liegt und deren Massstab (gezeichnete Breite je Einheit der viewBox, bei img je Bildpixel) unter der Hälfte des
+  kleinsten Massstabs derselben Klasse bei 1024 × 768 (fehlt der Vergleich, unter 40 px); sie wird aufgelistet
+  (Code 1, H1 a). 1024 × 768 wird dafür immer mitgemessen. Der Massstab hängt nicht vom Inhalt ab: Eine lange
+  Notenzeile ist flach, aber nicht geschrumpft; Grafiken, die schon dort klein sind (Nordpfeil), bleiben ruhig.
+  Die niedrigen Fenster `--geraete=mix,handy-quer` (1024 × 460, 800 × 450) müssen nicht ins Bild passen, aber ohne
+  zu kleine Grafik bleiben. `--css=datei` probiert CSS aus, ohne den Code zu ändern.
 
 ## 21. Notizblock für schriftliches Rechnen
 

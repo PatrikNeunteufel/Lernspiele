@@ -35,7 +35,7 @@
     .korb-karte b { font-size: clamp(18px, 4.6vw, 24px); }
   }
   @media (max-width: 560px) {
-    .ez-leiter { width: min(100%, 400px, calc((100vh - 490px) * 320 / 345)); } /* Abschnitte bleiben über 44 px hoch */
+    .ez-leiter { width: max(min(260px, 100%), min(100%, 400px, calc((100vh - 490px) * 320 / 345))); } /* Abschnitte bleiben über 44 px hoch */
     .wahl.ez-ordnen { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
     .ez-ordnen .wahl-knopf { font-size: 16px; padding: 6px; }
     .ez-ordnen .wahl-knopf .bild { font-size: 30px; }
@@ -51,7 +51,7 @@
   }
   @media (min-width: 700px) {
     .ez-leiter-zeile { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; max-width: 900px; margin: 0 auto; }
-    .ez-leiter-zeile .ez-leiter { width: min(400px, calc((100vh - 250px) * 320 / 345)); margin: 0; }
+    .ez-leiter-zeile .ez-leiter { width: max(260px, min(400px, calc((100vh - 250px) * 320 / 345))); margin: 0; }
   }
 </style>
 </head>

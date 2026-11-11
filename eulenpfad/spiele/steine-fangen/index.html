@@ -8,8 +8,8 @@
 <style>
   /* Ganze Aufgabe im Bild (BH3 a): Das Brett ist quadratisch, seine Breite folgt der Bildhöhe (Platz für Kopf,
      Eule, Auftrag, Legende; mit Zahlen zur Wahl darunter mehr). */
-  .go-feld { max-width: min(520px, calc(100vh - 345px)); margin: 4px auto 6px; }
-  .go-feld:has(~ .go-zahlen) { max-width: min(520px, calc(100vh - 410px)); }
+  .go-feld { max-width: max(min(300px, 100%), min(520px, calc(100vh - 345px))); margin: 4px auto 6px; }
+  .go-feld:has(~ .go-zahlen) { max-width: max(min(300px, 100%), min(520px, calc(100vh - 410px))); }
   .go-brett { display: block; width: 100%; height: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
   .go-brett .go-holz { fill: #e8c88c; }
   .go-brett .go-linie { stroke: #6b5235; stroke-width: 1.4; }

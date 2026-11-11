@@ -1666,3 +1666,27 @@
   Liniendiagramm. Angesehen in 1024 × 768 und 375 px.
 - Antworten an das Kind in den drei Bemerkungen, `eulenpfad/meldungen-stand.json` mit `tools/meldungen_stand.py`
   erzeugt.
+- Entscheid H1 a (Untergrenze für Grafiken nach der Bildhöhe): Bei 1024 × 460 (Spielfenster des Zufallsmix), 800 × 450
+  (Handy quer) und 375 × 460 gemessen, schrumpften in acht weiteren Spielen die Hauptgrafiken auf 0 bis 42 px: Uhr
+  (Quelle heure), Kompassrose und Plan, Erdzeit-Leiter, Wassertropfen-Grafik, Plan-Leser, Diagramm-Detektiv, Go-Brett
+  (Steine fangen), Roboter-Pfad. Jetzt hat jede Grösse nach der Bildhöhe eine Untergrenze, je Grafik gewählt (Uhr und
+  Rose 160 px, Pläne, Bretter und Leiter 200–300 px, wo der Platz schmal sein kann höchstens 100 %): auch in
+  Auge-Entdecker, Blutkreislauf-Lotse, König-Falle, Koordinaten-Schatz, Schweiz-Karten-Suche, Spiegel-Raster und im
+  Mix-Fenster fürs Handy (`max(460px, …)` wie auf grossen Bildschirmen). Notizblock und Rechner (feste Fenster, Eulenpfad
+  und Lernsteig) tragen die Ausnahme „ohne Untergrenze: …“.
+- `tools/pruefe_skripte.js` Punkt 5: liest alle Stile (`.css`, `<style>`) aller Apps und weist jede Stelle `100vh - …`
+  ohne Untergrenze ab (umschliessendes `max()`, `clamp()` nicht im ersten Glied, `min-width`/`min-height` derselben
+  Achse über 0 im Regelblock, oder die Ausnahme mit Grund); elf Gegenproben laufen bei jedem Aufruf mit. Vorher 38
+  Stellen gemeldet, jetzt keine.
+- `tools/bildhoehe.js`: Geräte `mix` (1024 × 460) und `handy-quer` (800 × 450); je Seite die Grafiken der Aufgabe,
+  gemeldet wird eine geschrumpfte: kürzere Seite unter 100 px und Massstab (gezeichnete Breite je Einheit der viewBox)
+  unter der Hälfte des kleinsten derselben Klasse bei 1024 × 768, das immer mitgemessen wird; ohne Vergleich unter
+  40 px; Code 1. Zwei Vorstufen verworfen: eine feste Schwelle von 100 px traf vor allem Grafiken, die schon gross so
+  klein oder flach sind (Nordpfeil, Zahlenstrahl, Thermometer) und die Eule (zählt nicht mehr); der Vergleich der
+  kürzeren Seite traf die Notenzeile, deren Höhe von der Zahl der Noten abhängt, und kleine neben grossen
+  Braille-Zellen. Gegenprobe: die alte Formel des Finger-Zählers per `--css` → gemeldet.
+- Doku: docs/eulenpfad/rahmen.md 20 (Untergrenze, Messen), docs/kern/rahmen.md 6, Steckbrief in CLAUDE.md, tools/pruefe.js.
+- Geprüft (H1 a): `tools/bildhoehe.js` über alle 169 Spiele, sechs Stufen, `mix`, `handy-quer` und `quer` (3042 Seiten):
+  keine geschrumpfte Grafik, seitlich kein Überlauf. Im Browser angesehen bei 800 × 450 (Uhr, Plan-Leser,
+  Wassertropfen) und 1024 × 460 (Go-Brett 300 px, Diagramm-Detektiv 320 × 267). Kompass s2 meldete zuerst die
+  Windrose `.rose.klein` (bewusst 96 px); die Messung unterscheidet Grafiken jetzt nach allen Klassen.

@@ -3,7 +3,8 @@
 // Aufruf: node tools/pruefe.js [skripte] [kern] [server] [lernsteig] [gratwanderung] [eulenpfad] [-- weitere Angaben]
 //   ohne App   die kurzen Prüfungen: Skripte, Kern, Server, Lernsteig, Gratwanderung (je Sekunden bis wenige Minuten)
 //   server     Entwickler-Server im Prozess mit leerem Ordner (tools/pruefe_server.py, Plan C12)
-//   skripte    jedes Skript aller Apps lesbar, jede <script src> vorhanden, keins von aussen (PK1 a, pruefe_skripte.js)
+//   skripte    jedes Skript aller Apps lesbar, jede <script src> vorhanden, keins von aussen (PK1 a, pruefe_skripte.js);
+//              Untergrenze für jede Grösse nach der Bildhöhe in den Stilen (H1 a)
 //   eulenpfad  nur, wenn genannt: ohne Spielnamen läuft er über alle Spiele (rund 25 min, der volle Lauf — ob er
 //              läuft, entscheidet Patrik); mit Namen nur diese: node tools/pruefe.js eulenpfad zahlenhaus anlaut-angel
 //   Was nach einer App steht und keine App ist, geht an deren Treiber (Spiel- oder Übungsnamen, --seed=…, --aufgaben=…).
@@ -18,7 +19,7 @@ const node = (skript, args) => [process.execPath, [path.join(__dirname, skript),
 
 /** Je App: was geprüft wird und wie. */
 const TREIBER = {
-  skripte: { was: "jedes Skript lesbar, Verweise vorhanden, keins von aussen", befehl: args => node("pruefe_skripte.js", args) },
+  skripte: { was: "jedes Skript lesbar, Verweise vorhanden, keins von aussen, Untergrenze nach der Bildhöhe", befehl: args => node("pruefe_skripte.js", args) },
   kern: { was: "gemeinsamer Kern (kern/) und alle Kopien", befehl: args => node("pruefe_kern.js", args) },
   server: { was: "Entwickler-Server im Prozess: Version, Protokoll, zugelassene Aufsichten, Eingang (Plan C12)",
     befehl: args => ["python", [path.join(__dirname, "pruefe_server.py"), ...args]] },

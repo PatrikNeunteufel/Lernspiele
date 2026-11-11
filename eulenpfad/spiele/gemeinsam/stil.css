@@ -767,7 +767,7 @@ button.link, a.link {
 /* Notizblock (NB1–NB3 a): Feld am Bildrand, die Aufgabe bleibt daneben sichtbar; Häuschen wie Notizen (Zettelfarben),
    damit nichts wie ein Antwortfeld aussieht */
 /* Oben rechts neben der Aufgabe, über der Entwickler-Leiste (z-index 50): unten rechts verdeckte sie den Block (LERN_Session14) */
-.notizblock { position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 110px);
+.notizblock { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 110px);
   display: flex; flex-direction: column; background: #fffdf3; border: 3px solid #e6d38d; border-radius: 18px;
   box-shadow: 0 10px 30px rgba(40, 45, 80, .25); }
 .notizblock.klein .nb-inhalt { display: none; }
@@ -828,7 +828,7 @@ button.link, a.link {
 /* Tablet quer (LERN_Session15): unten bliebe über dem Blatt kaum etwas von der Aufgabe; schmaler rechts daneben behält sie
    rund 620 px — so viel wie ab 1100 px. Überschreibt die Regel davor (kein „not (…)“: ältere Safari verwerfen es) */
 @media (min-width: 980px) and (max-width: 1099px) and (orientation: landscape) {
-  .notizblock { --nb-breite: 360px; left: auto; right: 12px; top: 12px; bottom: auto; width: var(--nb-breite); max-height: calc(100vh - 24px);
+  .notizblock { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ --nb-breite: 360px; left: auto; right: 12px; top: 12px; bottom: auto; width: var(--nb-breite); max-height: calc(100vh - 24px);
     border-radius: 18px; border-bottom: 3px solid #e6d38d; }
   body.mit-notizblock:not(.notizblock-klein) { padding-bottom: 0; }
   body.mit-notizblock:not(.notizblock-klein) .buehne { margin-right: 372px; }

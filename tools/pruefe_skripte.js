@@ -4,7 +4,12 @@
 //   1. jede .js-Datei und jedes Inline-Skript einer HTML-Seite ist lesbar (vm.Script: nur Syntax, nichts läuft);
 //   2. jede <script src="…"> zeigt auf eine vorhandene Datei;
 //   3. kein Skript kommt von aussen (http, https, //) — die Reihe läuft ohne externe Abhängigkeiten (Entscheid LERN-1);
-//   4. jede Seite, die <app>/kern/kern.js lädt, lädt davor <app>/version.js (Plan C12, NS3 a: Version der App).
+//   4. jede Seite, die <app>/kern/kern.js lädt, lädt davor <app>/version.js (Plan C12, NS3 a: Version der App);
+//   5. jede Grösse nach der Bildhöhe (`100vh - …`, auch dvh, svh, lvh) in .css-Dateien und <style>-Blöcken steht in
+//      einem max() oder clamp() mit Untergrenze (Entscheid H1 a, LERN_Session28: unter 480 px Bildhöhe wurde die Breite
+//      der Hände im Finger-Zähler null, Stufe 6 blitzte ein leeres Feld; acht weitere Spiele ebenso). Ausnahme nur mit
+//      dem Kommentar „ohne Untergrenze: <Grund>“ im selben Regelblock (feste Fenster, die nie grösser als das Bild sein
+//      sollen).
 // Fehler im Verhalten fängt sie nicht; dafür sind die Seitentests da.
 // Aufruf: node tools/pruefe_skripte.js — läuft mit den kurzen Prüfungen (node tools/pruefe.js); Ende mit Code 1 bei Fehlern.
 "use strict";
@@ -21,10 +26,81 @@ const KEIN_SKRIPT = /\btype="(?!text\/javascript|module)[^"]*"/;
 const dateien = (ordner, endung) => fs.readdirSync(ordner, { withFileTypes: true }).flatMap(e =>
   e.isDirectory() ? dateien(path.join(ordner, e.name), endung) : e.name.endsWith(endung) ? [path.join(ordner, e.name)] : []);
 
-/** Prüft alles; gibt { fehler: [Text], zahlen: { js, inline, verweise } } zurück. ordner: zum Prüfen mit anderen Ordnern. */
+// 5. Grösse nach der Bildhöhe: Zahl mit vh (dvh, svh, lvh), dann ein Minus
+const VH_MINUS = /\b\d+(?:\.\d+)?[dsl]?vh\s*-/g;
+const AUSNAHME = "ohne Untergrenze:";
+
+/**
+ * Mängel einer CSS-Quelle nach Punkt 5: jede Stelle `100vh - …` ohne Untergrenze. Eine Untergrenze ist (1) ein
+ * umschliessendes max() oder ein clamp(), in dem die Stelle nicht im ersten Glied steht, oder (2) im selben Regelblock
+ * min-width beziehungsweise min-height derselben Achse mit einem Wert über 0. text: CSS (Datei oder Inhalt eines
+ * <style>), wo: Name für die Meldung, zeile0: Zeile, auf der text in der Datei beginnt. Gibt [Text] zurück.
+ */
+function pruefeCss(text, wo, zeile0 = 1) {
+  const m = [];
+  // Kommentare durch gleich viele Leerzeichen ersetzen: Stellen bleiben gleich, im Kommentar zählt nichts
+  const leer = text.replace(/\/\*[\s\S]*?\*\//g, k => k.replace(/[^\n]/g, " "));
+  for (const t of leer.matchAll(VH_MINUS)) {
+    const { geschuetzt, eigenschaft } = umgebung(leer, t.index);
+    if (geschuetzt) continue;
+    const auf = leer.lastIndexOf("{", t.index), zu = leer.indexOf("}", t.index);
+    const block = leer.slice(auf + 1, zu < 0 ? undefined : zu);
+    if (text.slice(auf + 1, zu < 0 ? undefined : zu).includes(AUSNAHME)) continue;
+    const achse = (eigenschaft.match(/(?:^|-)(width|height)$/) || [])[1];
+    const mindest = achse && block.match(new RegExp(`(?:^|[;\\s{])min-${achse}\\s*:\\s*([^;]+)`));
+    if (mindest && !/^\s*(0(px)?|auto|none|initial|unset)\s*(!important)?\s*$/.test(mindest[1])) continue;
+    const zeile = zeile0 + (text.slice(0, t.index).match(/\n/g) || []).length;
+    const anfang = leer.lastIndexOf("\n", t.index) + 1;
+    m.push(`${wo} (Zeile ${zeile}): Grösse nach der Bildhöhe ohne Untergrenze — ${leer.slice(anfang, leer.indexOf("\n", t.index) >>> 0).trim().slice(0, 110)} (H1 a: max(Mindestmass, …) oder „${AUSNAHME} <Grund>“)`);
+  }
+  return m;
+}
+
+// Gegenproben zu Punkt 5: [CSS, erwartete Zahl Meldungen, Name]; laufen bei jedem Aufruf mit
+const GEGENPROBEN_CSS = [
+  [".a { width: min(300px, calc(100vh - 400px)); }", 1, "ohne Untergrenze"],
+  [".a { width: max(200px, min(300px, calc(100vh - 400px))); }", 0, "max aussen"],
+  [".a { width: clamp(190px, 100vh - 620px, 300px); }", 0, "clamp, mittleres Glied"],
+  [".a { width: clamp(100vh - 620px, 10px, 300px); }", 1, "clamp, erstes Glied"],
+  [".a { max-height: calc(100vh - 600px); min-height: 200px; }", 0, "min-height derselben Achse"],
+  [".a { max-width: min(400px, 100vh - 565px); min-width: 0; }", 1, "min-width 0"],
+  [".a { max-width: min(400px, 100vh - 565px); min-height: 240px; }", 1, "min- der anderen Achse"],
+  [`.a { /* ${AUSNAHME} Fenster */ max-height: calc(100vh - 24px); }`, 0, "Ausnahme im Block"],
+  [`/* ${AUSNAHME} */ .a { max-height: calc(100vh - 24px); }`, 1, "Ausnahme vor dem Block"],
+  ["/* .a { width: calc(100vh - 9px); } */ .b {}", 0, "nur im Kommentar"],
+  ["@media (x) { .a { height: calc(100dvh - 50px); } }", 1, "dvh in @media"],
+];
+
+/**
+ * Umgebung der Stelle bei i bis zum Anfang ihrer Deklaration: geschuetzt = steht in einem max() oder als zweites oder
+ * drittes Glied eines clamp(); eigenschaft = Name der Eigenschaft (klein, "" wenn nicht gefunden).
+ */
+function umgebung(css, i) {
+  let tiefe = 0, komma = 0, geschuetzt = false;
+  for (let j = i - 1; j >= 0; j--) {
+    const c = css[j];
+    if (c === ")") tiefe++;
+    else if (c === "," && tiefe === 0) komma++;
+    else if (c === "(") {
+      if (tiefe > 0) { tiefe--; continue; }
+      const name = ((css.slice(Math.max(0, j - 12), j).match(/([a-z-]+)\s*$/i) || [])[1] || "").toLowerCase();
+      if (name === "max" || (name === "clamp" && komma >= 1)) geschuetzt = true;
+      komma = 0; // eine Klammer weiter aussen: Glieder neu zählen
+    } else if (tiefe === 0 && c === ":") {
+      return { geschuetzt, eigenschaft: ((css.slice(Math.max(0, j - 40), j).match(/([a-z-]+)\s*$/i) || [])[1] || "").toLowerCase() };
+    } else if (tiefe === 0 && (c === ";" || c === "{" || c === "}")) break;
+  }
+  return { geschuetzt, eigenschaft: "" };
+}
+
+/** Prüft alles; gibt { fehler: [Text], zahlen: { js, inline, verweise, css } } zurück. ordner: zum Prüfen mit anderen Ordnern. */
 function pruefe(wurzel = WURZEL, ordner = ORDNER) {
   const fehler = [];
-  const zahlen = { js: 0, inline: 0, verweise: 0 };
+  const zahlen = { js: 0, inline: 0, verweise: 0, css: 0 };
+  for (const [css, soll, name] of GEGENPROBEN_CSS) {
+    const ist = pruefeCss(css, "Gegenprobe").length;
+    if (ist !== soll) fehler.push(`Gegenprobe Punkt 5 „${name}“: ${ist} statt ${soll} Meldungen`);
+  }
   const lies = (code, wo) => {
     try { new vm.Script(code, { filename: wo }); } catch (e) { fehler.push(`${wo}: ${e.message}${zeileVon(e)}`); }
   };
@@ -32,8 +108,15 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
     const start = path.join(wurzel, o);
     if (!fs.existsSync(start)) { fehler.push(`Ordner ${o}/ fehlt`); continue; }
     for (const f of dateien(start, ".js")) { zahlen.js++; lies(fs.readFileSync(f, "utf8"), path.relative(wurzel, f).replace(/\\/g, "/")); }
+    for (const f of dateien(start, ".css")) { zahlen.css++; fehler.push(...pruefeCss(fs.readFileSync(f, "utf8"), path.relative(wurzel, f).replace(/\\/g, "/"))); }
     for (const f of dateien(start, ".html")) {
       const wo = path.relative(wurzel, f).replace(/\\/g, "/");
+      // 5. Stil in der Seite (Zeilen aus dem Original, vor dem Entfernen der HTML-Kommentare)
+      for (const s of fs.readFileSync(f, "utf8").matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)) {
+        zahlen.css++;
+        const start = s.index + s[0].indexOf(">") + 1;
+        fehler.push(...pruefeCss(s[1], wo, 1 + (s.input.slice(0, start).match(/\n/g) || []).length));
+      }
       const html = fs.readFileSync(f, "utf8").replace(/<!--[\s\S]*?-->/g, "");
       const geladen = []; // aufgelöste Pfade der <script src> in Reihenfolge (für Punkt 4)
       for (const m of html.matchAll(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/gi)) {
@@ -70,7 +153,7 @@ function zeileVon(e) {
 
 if (require.main === module) {
   const { fehler, zahlen } = pruefe();
-  console.log(`${zahlen.js} Skriptdateien, ${zahlen.inline} Skripte in Seiten, ${zahlen.verweise} Verweise geprüft.`);
+  console.log(`${zahlen.js} Skriptdateien, ${zahlen.inline} Skripte in Seiten, ${zahlen.verweise} Verweise, ${zahlen.css} Stile geprüft.`);
   for (const f of fehler) console.log(`    FEHLER  ${f}`);
   const schluss = fehler.length ? `${fehler.length} Fehler.` : "Keine Fehler.";
   console.log(schluss);
@@ -78,4 +161,4 @@ if (require.main === module) {
   process.exit(fehler.length ? 1 : 0);
 }
 
-module.exports = { pruefe };
+module.exports = { pruefe, pruefeCss };

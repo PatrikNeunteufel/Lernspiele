@@ -36,18 +36,18 @@
     .wt-rechts .wahl-knopf { min-height: 54px; }
   }
   @media (max-width: 560px) {
-    .wt-zeile .wt-grafik { width: min(100%, calc((100vh - 500px) * 400 / 270)); }
+    .wt-zeile .wt-grafik { width: max(min(240px, 100%), min(100%, calc((100vh - 500px) * 400 / 270))); }
     .wt-rechts .ablage { min-height: 50px; margin-bottom: 8px; padding: 4px; }
     .wt-rechts .wahl-knopf { flex-direction: row; gap: 6px; }
     .wt-rechts .wahl-knopf .bild { font-size: 30px; }
   }
   @media (min-width: 561px) and (orientation: portrait) { /* Tablet hoch: Grafik nach der Bildhöhe */
-    .wt-zeile .wt-grafik { width: min(100%, 560px, calc((100vh - 700px) * 400 / 270)); }
+    .wt-zeile .wt-grafik { width: max(min(300px, 100%), min(100%, 560px, calc((100vh - 700px) * 400 / 270))); }
   }
   @media (min-width: 900px) and (orientation: landscape) {
     .wt-zeile { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: center; }
-    .wt-zeile .wt-grafik { margin: 0 auto; width: min(100%, calc((100vh - 230px) * 400 / 270)); }
-    .wt-zeile .wt-grafik[viewBox="0 0 300 230"] { width: min(100%, 420px, calc((100vh - 230px) * 300 / 230)); }
+    .wt-zeile .wt-grafik { margin: 0 auto; width: max(280px, min(100%, calc((100vh - 230px) * 400 / 270))); }
+    .wt-zeile .wt-grafik[viewBox="0 0 300 230"] { width: max(280px, min(100%, 420px, calc((100vh - 230px) * 300 / 230))); }
   }
 </style>
 </head>

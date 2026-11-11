@@ -26,7 +26,21 @@ const GERAETE = {
   "laptop-sicht": { w: 1366, h: 650 },  // Laptop 1366 × 768 mit Browserleisten
   "klein-sicht": { w: 1000, h: 500 },   // Laptop mit 200 % Skalierung (Gerät Patrik)
   "klein-voll": { w: 1000, h: 600 },    // dasselbe im Vollbild (ohne Browserleisten)
+  // Niedrige Fenster (Entscheid H1 a, LERN_Session28): hier muss nicht alles ins Bild passen, aber keine Grafik darf
+  // zusammenschrumpfen (dort wurde sie null, wo die Untergrenze fehlte).
+  mix: { w: 1024, h: 460 },             // Spielfenster im Zufallsmix, kleinste Höhe (mix.css)
+  "handy-quer": { w: 800, h: 450 },     // Handy quer mit Leisten
 };
+// Geschrumpfte Grafik (H1 a). Grafik = svg, canvas oder img mit eigener Klasse in der Spielfläche, nicht in Knöpfen, Eule
+// mit Sprechblase, Legende, Tipp-Zeile oder Kopf. Gemeldet wird sie, wenn ihre kürzere Seite unter KLEINSTE_GRAFIK liegt
+// und ihr Massstab (gezeichnete Breite je Einheit der viewBox, bei img je Pixel des Bildes) unter der Hälfte des kleinsten
+// Massstabs derselben Klasse im selben Spiel und derselben Stufe auf dem Vergleichsgerät. Der Massstab hängt nicht vom
+// Inhalt ab (eine lange Notenzeile ist flach, aber nicht geschrumpft); Grafiken, die schon dort klein sind (Nordpfeil),
+// bleiben ruhig. Fehlt der Vergleich (Zufallsaufgabe, Grafik ohne viewBox), zählt nur ZUSAMMENGEFALLEN. Das
+// Vergleichsgerät wird bei jedem Lauf mitgemessen.
+const KLEINSTE_GRAFIK = 100;
+const ZUSAMMENGEFALLEN = 40;
+const VERGLEICH = "quer";
 const opt = { stufen: "s1,s3,s6", geraete: "handy,tablet,quer,desktop", css: null, json: null, port: "9334" }; // --port: eigener Chrome je Lauf, wenn mehrere zugleich messen
 const nurSpiele = [];
 let BASIS = "http://localhost:8765";
@@ -77,6 +91,21 @@ const MESSEN = (auftraege, css) => `
             gesperrt: /noch nicht freigegeben|erst anmelden/i.test(d.body.innerText), tastatur: !!t,
             // Liegt die Zifferntastatur ganz im Bild (ohne zu scrollen)?
             tastaturImBild: t ? t.getBoundingClientRect().bottom <= a.h + 1 : null,
+            // Grafiken der Aufgabe (H1 a): je [Breite, Höhe, Klasse, Massstab oder null]
+            grafiken: (() => {
+              const k = d.querySelector(".karte");
+              if (!k) return [];
+              return [...k.querySelectorAll("svg[class], canvas[class], img[class]")]
+                .filter(x => !x.closest("button, .blase, .eule-zeile, .legende, .tipp-zeile, .kopf, .wahl, label") && !x.parentElement.closest("svg"))
+                .filter(x => f.contentWindow.getComputedStyle(x).display !== "none")
+                .map(x => {
+                  const r = x.getBoundingClientRect();
+                  const eigen = x.viewBox?.baseVal?.width || x.naturalWidth || 0;
+                  // Schlüssel aus allen Klassen: .rose.klein ist bewusst klein, .rose nicht (Kompass)
+                  return [Math.round(r.width), Math.round(r.height), x.tagName.toLowerCase() + "." + x.getAttribute("class").trim().split(/\s+/).sort().join("."),
+                    eigen ? Math.round(r.width / eigen * 1000) / 1000 : null];
+                });
+            })(),
             // Die Aufgabe selbst: unterer Rand der Spielfläche ohne die Tipp-Zeile darunter
             aufgabe: (() => {
               const k = d.querySelector(".karte");
@@ -127,6 +156,7 @@ async function main() {
       return SPIELE.map(s => ({ id: s.id, pfad: s.pfad, stufen: s.stufen }));`);
     const stufen = opt.stufen.split(",");
     const geraete = opt.geraete.split(",").filter(g => GERAETE[g]);
+    if (!geraete.includes(VERGLEICH)) geraete.push(VERGLEICH); // Vergleich für geschrumpfte Grafiken (H1 a)
     const auftraege = [];
     for (const s of spiele.filter(s => !nurSpiele.length || nurSpiele.includes(s.id)))
       for (const stufe of stufen.filter(st => s.stufen.includes(st)))
@@ -152,7 +182,25 @@ async function main() {
   }
 }
 
+/** Die geschrumpfte Grafik einer Seite (H1 a) oder null; vergleich: Map "id/stufe/klasse" → kleinster Massstab auf VERGLEICH. */
+function geschrumpft(e, vergleich) {
+  for (const [w, h, klasse, mass] of e.grafiken || []) {
+    if (Math.min(w, h) >= KLEINSTE_GRAFIK) continue;
+    const soll = vergleich.get(`${e.id}/${e.stufe}/${klasse}`);
+    if (soll === undefined || mass === null ? Math.min(w, h) < ZUSAMMENGEFALLEN : mass < soll / 2) return { w, h, klasse, mass, soll };
+  }
+  return null;
+}
+
 function auswerten(erg, geraete, stufen) {
+  const vergleich = new Map();
+  for (const e of erg.filter(e => e.geraet === VERGLEICH))
+    for (const [, , klasse, mass] of e.grafiken || []) {
+      if (!mass) continue;
+      const k = `${e.id}/${e.stufe}/${klasse}`;
+      vergleich.set(k, Math.min(vergleich.get(k) ?? Infinity, mass));
+    }
+  const zuKlein = e => geschrumpft(e, vergleich);
   const gesperrt = erg.filter(e => e.gesperrt || e.fehler);
   if (gesperrt.length) console.log(`Nicht gemessen (gesperrt oder Fehler): ${[...new Set(gesperrt.map(e => e.id))].join(", ")}\n`);
   const zaehlbar = erg.filter(e => !e.gesperrt && !e.fehler);
@@ -163,7 +211,19 @@ function auswerten(erg, geraete, stufen) {
     console.log(`${g.padEnd(12)} ${GERAETE[g].w}×${GERAETE[g].h}: ${ueber.length} von ${alle.length} Seiten laufen unten über, ` +
       `${new Set(ueber.map(e => e.id)).size} Spiele, höchstens ${max} px; seitlich: ${alle.filter(e => e.seitlich > 2).length}; ` +
       `Zifferntastatur nicht ganz im Bild: ${alle.filter(e => e.tastaturImBild === false).length} von ${alle.filter(e => e.tastatur).length}; ` +
-      `Aufgabe selbst (ohne Tipp-Zeile) über: ${alle.filter(e => e.aufgabe > 2).length} Seiten, ${new Set(alle.filter(e => e.aufgabe > 2).map(e => e.id)).size} Spiele`);
+      `Aufgabe selbst (ohne Tipp-Zeile) über: ${alle.filter(e => e.aufgabe > 2).length} Seiten, ${new Set(alle.filter(e => e.aufgabe > 2).map(e => e.id)).size} Spiele; ` +
+      `Grafik geschrumpft: ${alle.filter(zuKlein).length} Seiten`);
+  }
+  // H1 a: Grafiken, die nach der Bildhöhe zusammenschrumpfen — je Seite mit Grösse, Klasse und Vergleich; Code 1
+  const klein = zaehlbar.filter(zuKlein);
+  if (klein.length) {
+    console.log(`\nGrafik geschrumpft (H1 a: unter ${KLEINSTE_GRAFIK} px und Massstab unter der Hälfte von ${VERGLEICH}, ohne Vergleich unter ${ZUSAMMENGEFALLEN} px):`);
+    for (const e of klein) {
+      const g = zuKlein(e);
+      console.log(`  ${e.id.padEnd(24)} ${e.stufe} ${e.geraet.padEnd(12)} ${g.klasse} ${g.w} × ${g.h}` +
+        (g.soll === undefined || g.mass === null ? " (ohne Vergleich)" : ` (Massstab ${g.mass}, ${VERGLEICH}: ${g.soll})`));
+    }
+    process.exitCode = 1;
   }
   const je = new Map();
   for (const e of zaehlbar.filter(e => e.ueber > 2 || e.seitlich > 2)) {

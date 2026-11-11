@@ -797,6 +797,11 @@ Eine App darf hinter dem Kern zurückliegen; sie verteilt erst, wenn ihr Testskr
 - `node tools/pruefe_skripte.js` (PK1 a, LERN_Session25) — jede `.js`-Datei und jedes Skript in einer Seite unter den
   App-Ordnern, `portal/` und `kern/` lesbar (`vm.Script`, nichts läuft), jede `<script src>` vorhanden, keins von aussen
   (LERN-1); fängt auch Dateien, die erst nachgeladen werden (Anlass: Prüfansicht des Eulenpfads LERN_Session20–24).
+  Seit LERN_Session28 auch die Stile aller Apps (Entscheid H1 a): jede Grösse nach der Bildhöhe (`100vh - …`, auch dvh,
+  svh, lvh) in `.css`-Dateien und `<style>`-Blöcken braucht eine Untergrenze — ein umschliessendes `max()`, ein `clamp()`
+  mit der Stelle nicht im ersten Glied oder `min-width`/`min-height` derselben Achse über 0 im selben Regelblock; sonst
+  der Kommentar „ohne Untergrenze: <Grund>“ im Block (feste Fenster wie Notizblock und Rechner). Die Gegenproben der
+  Regel laufen bei jedem Aufruf mit.
 - `node tools/pruefe.js` — Einstieg für alle Apps (Plan B2): ohne Angabe Skripte, Kern, Lernsteig und Gratwanderung, den
   Eulenpfad nur, wenn genannt (`node tools/pruefe.js eulenpfad [spiel …]`); Übersicht mit Dauer je App.
 - `node tools/pruefe_kern.js` — alle Teile und die Kopien; Ende mit Code 1 bei einem Fehler.

@@ -8,7 +8,7 @@
 <style>
   /* Ganze Aufgabe im Bild (BH3 a): Die Breite folgt der Bildhöhe; --seiten = Breite/Höhe des Ausschnitts (aus dem Code),
      --rest = was über und unter der Karte noch Platz braucht (Kopf, Auftrag, Quelle, Tipp; mit Namen zur Wahl mehr). */
-  .karte-svg { --rest: 330px; display: block; width: min(100%, 900px, calc((100vh - var(--rest)) * var(--seiten, 1.6))); height: auto;
+  .karte-svg { --rest: 330px; display: block; width: max(min(320px, 100%), min(100%, 900px, calc((100vh - var(--rest)) * var(--seiten, 1.6)))); height: auto;
     margin: 6px auto 4px; background: #eaf5fb; border-radius: 16px; touch-action: manipulation; }
   .karte-svg.mit-wahl { --rest: 400px; }
   @media (min-height: 821px) { .karte-svg { --rest: 420px; } .karte-svg.mit-wahl { --rest: 500px; } }

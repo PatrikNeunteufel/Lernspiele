@@ -189,7 +189,7 @@ button, input { font: inherit; color: inherit; }
 .schriftlich .strich { grid-column: 1 / -1; height: 0; border-top: 2px solid var(--text); }
 .schriftlich .nach-komma { position: relative; }
 .schriftlich .nach-komma::before { content: ""; position: absolute; left: -4px; top: -3px; bottom: -3px; border-left: 2px solid var(--akzent); }
-.notizblock { position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 110px);
+.notizblock { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 110px);
   display: flex; flex-direction: column; background: var(--karte); border: 2px solid var(--rand); border-radius: var(--radius);
   box-shadow: 0 8px 24px rgba(31, 41, 51, .18); }
 .notizblock.klein .nb-inhalt { display: none; }
@@ -240,14 +240,14 @@ button, input { font: inherit; color: inherit; }
   body.mit-notizblock:not(.notizblock-klein) { padding-bottom: 58vh; }
 }
 @media (min-width: 980px) and (max-width: 1099px) and (orientation: landscape) {
-  .notizblock { --nb-breite: 360px; left: auto; right: 12px; top: 12px; bottom: auto; width: var(--nb-breite); max-height: calc(100vh - 24px); border-radius: var(--radius); border-bottom: 2px solid var(--rand); }
+  .notizblock { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ --nb-breite: 360px; left: auto; right: 12px; top: 12px; bottom: auto; width: var(--nb-breite); max-height: calc(100vh - 24px); border-radius: var(--radius); border-bottom: 2px solid var(--rand); }
   body.mit-notizblock:not(.notizblock-klein) { padding-bottom: 0; }
   body.mit-notizblock:not(.notizblock-klein) .buehne { margin-right: 372px; }
 }
 
 /* Rechner am Bildrand wie der Notizblock (Hinweis Patrik, LERN_Session21): derselbe Platz, dieselben Breiten. Beide teilen
    ihn (RP1 a): gross ist immer nur einer, der andere liegt als Kopfzeile darunter (breit) oder über dem Blatt (schmal). */
-.rechner-fenster { position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 24px);
+.rechner-fenster { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 24px);
   display: flex; flex-direction: column; background: #26313b; border-radius: var(--radius); box-shadow: 0 8px 24px rgba(31, 41, 51, .25); }
 .rechner-fenster[hidden] { display: none; }
 .rf-kopf { display: flex; align-items: center; gap: 8px; padding: 8px 10px 6px 14px; color: #fff; }
@@ -270,7 +270,7 @@ button, input { font: inherit; color: inherit; }
   body.notizblock-klein .rechner-fenster.klein { bottom: 64px; }
 }
 @media (min-width: 980px) and (max-width: 1099px) and (orientation: landscape) {
-  .rechner-fenster { left: auto; right: 12px; top: 12px; bottom: auto; width: 360px; max-height: calc(100vh - 24px); border-radius: var(--radius); }
+  .rechner-fenster { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ left: auto; right: 12px; top: 12px; bottom: auto; width: 360px; max-height: calc(100vh - 24px); border-radius: var(--radius); }
   body.mit-rechner:not(.rechner-klein) { padding-bottom: 0; }
   body.mit-rechner:not(.rechner-klein) .buehne { margin-right: 372px; }
   .rechner-fenster.klein, .notizblock.klein,
@@ -279,7 +279,7 @@ button, input { font: inherit; color: inherit; }
 }
 /* Seitlich: das grosse Fenster lässt unten Platz für die Kopfzeile des verkleinerten */
 @media (min-width: 1100px), (min-width: 980px) and (orientation: landscape) {
-  body.notizblock-klein .rechner-fenster:not(.klein), body.rechner-klein .notizblock:not(.klein) { max-height: calc(100vh - 88px); }
+  body.notizblock-klein .rechner-fenster:not(.klein), body.rechner-klein .notizblock:not(.klein) { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ max-height: calc(100vh - 88px); }
 }
 /* Warnung (Speicher fast voll, Erinnerung ans Sichern; konzept_gruppen.md 5a) */
 .meldung.warnung { background: var(--hinweis-hell); color: var(--hinweis); border-left: 4px solid var(--hinweis); padding: 8px 12px; border-radius: 8px; }

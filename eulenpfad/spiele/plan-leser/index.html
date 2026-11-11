@@ -44,7 +44,7 @@
   .legende b, .legende .massstab { grid-column: 1 / -1; }
   @media (max-width: 560px) {
     .plan-zeile { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 8px; margin-bottom: 8px; width: 100%; }
-    .plan-zeile.mit-wahl .plan-bild { width: min(100%, calc(100vh - 580px)); }
+    .plan-zeile.mit-wahl .plan-bild { width: max(min(200px, 100%), min(100%, calc(100vh - 580px))); }
     .plan-zeile .wahl { gap: 8px; }
     .plan-zeile .wahl-knopf { min-height: 54px; padding: 6px 8px; }
     .legende { padding: 6px 10px; min-width: 0; width: 100%; grid-template-columns: repeat(2, minmax(0, auto)); justify-content: space-between; column-gap: 8px; }
@@ -62,7 +62,7 @@
   @media (min-width: 900px) and (orientation: landscape) {
     .plan-zeile { gap: 18px; }
     .plan-seite { display: flex; flex-direction: column; gap: 10px; max-width: 520px; }
-    .plan-bild { width: min(360px, calc(100vh - 300px)); }
+    .plan-bild { width: max(240px, min(360px, calc(100vh - 300px))); }
   }
 </style>
 </head>

@@ -66,14 +66,14 @@
   }
   @media (min-width: 900px) and (orientation: landscape) {
     /* Tabelle und Diagramm nebeneinander, die Frage rechts daneben */
-    .zwei .diagramm { width: min(400px, calc((100vh - 400px) * 1.2)); min-width: 0; }
+    .zwei .diagramm { width: max(240px, min(400px, calc((100vh - 400px) * 1.2))); min-width: 0; }
   }
   @media (min-width: 700px) {
     /* Ohne Zifferntastatur (Tablet hoch und quer): links Tabelle oder Strichliste, darunter Frage und Antworten, rechts das Diagramm */
     .dd-zeile.dd-raster { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "links diag" "antw diag"; gap: 12px 20px; align-items: start; }
     .dd-raster .dd-daten, .dd-raster .zwei { display: contents; }
     .dd-raster .zwei > .daten { grid-area: links; justify-self: center; }
-    .dd-raster .zwei > .diagramm { grid-area: diag; align-self: center; width: min(400px, calc((100vh - 400px) * 1.2)); }
+    .dd-raster .zwei > .diagramm { grid-area: diag; align-self: center; width: max(240px, min(400px, calc((100vh - 400px) * 1.2))); }
     .dd-raster .dd-antwort { grid-area: antw; max-width: none; }
   }
 </style>

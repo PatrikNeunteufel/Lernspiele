@@ -29,5 +29,5 @@
 @media (max-width: 560px) {
   .mix-bild { font-size: 22px; padding: 2px; }
   .mix-rahmen { margin: 0 -10px; }
-  .mix-spiel { height: calc(100vh - 170px); }
+  .mix-spiel { height: max(460px, calc(100vh - 170px)); }
 }

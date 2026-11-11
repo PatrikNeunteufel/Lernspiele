@@ -10,17 +10,17 @@
   .frage b { color: var(--knopf); white-space: nowrap; }
 
   /* Hundertertafel 0–99 mit Achsen E (Einer, Spalten) und Z (Zehner, Zeilen) */
-  .tafel { display: grid; grid-template-columns: 28px repeat(10, 1fr); gap: 2px; width: min(520px, 94vw, calc(100vh - 295px)); margin: 0 auto 12px; }
+  .tafel { display: grid; grid-template-columns: 28px repeat(10, 1fr); gap: 2px; width: max(min(280px, 94vw), min(520px, 94vw, calc(100vh - 295px))); margin: 0 auto 12px; }
   /* Ganze Aufgabe im Bild (BH3 a): Tafel und Koordinatensystem folgen auf niedrigen Bildschirmen der Bildhöhe;
      stehen Antworten darunter, bleibt mehr Platz frei. */
-  .tafel:has(~ .optionen) { width: min(520px, 94vw, calc(100vh - 355px)); }
+  .tafel:has(~ .optionen) { width: max(min(280px, 94vw), min(520px, 94vw, calc(100vh - 355px))); }
   .tafel .kopf-e, .tafel .kopf-z { font-weight: 900; font-size: 13px; color: var(--text-leise); display: flex; align-items: center; justify-content: center; }
   .tafel .feld { aspect-ratio: 1; border: none; border-radius: 6px; background: #eaf4ff; font-family: inherit; font-weight: 800; font-size: clamp(11px, 2.6vw, 16px); color: #8aa0bd; cursor: pointer; padding: 0; }
   .tafel .feld.schatz { background: #fff1c2; color: var(--text); font-size: clamp(16px, 4vw, 24px); }
   .tafel .feld.daneben { background: var(--hinweis-hell); }
   .tafel .feld.treffer { background: var(--gut-hell); color: var(--text); }
 
-  .ksys { width: min(440px, 90vw, calc(100vh - 365px)); display: block; margin: 0 auto 12px; touch-action: manipulation; }
+  .ksys { width: max(min(240px, 90vw), min(440px, 90vw, calc(100vh - 365px))); display: block; margin: 0 auto 12px; touch-action: manipulation; }
   .ksys .gitter { stroke: #dfe3ef; stroke-width: 1; }
   .ksys .achse { stroke: var(--text); stroke-width: 2; }
   .ksys text { font-family: var(--schrift); font-size: 10px; font-weight: 800; fill: var(--text-leise); }

@@ -56,8 +56,8 @@
       column-gap: 24px; align-content: start; }
     div:has(> svg.kreislauf) > * { grid-column: 2; min-width: 0; }
     div:has(> svg.kreislauf) > .wahl { margin-inline: 0; }
-    div:has(> svg.kreislauf) > svg.kreislauf { grid-column: 1; grid-row: 1 / 8; width: min(420px, (100vh - 220px) * 420 / 460); margin: 0; }
-    div:has(> svg.kreislauf) > svg.kreislauf.koerperbild { width: min(300px, (100vh - 220px) * 300 / 420); }
+    div:has(> svg.kreislauf) > svg.kreislauf { grid-column: 1; grid-row: 1 / 8; width: max(260px, min(420px, (100vh - 220px) * 420 / 460)); margin: 0; }
+    div:has(> svg.kreislauf) > svg.kreislauf.koerperbild { width: max(200px, min(300px, (100vh - 220px) * 300 / 420)); }
     div:has(> svg.kreislauf) > .frage { margin-top: 12px; }
   }
   /* Handy: zwei Antworten nebeneinander statt untereinander. */

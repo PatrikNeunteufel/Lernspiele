@@ -52,7 +52,7 @@
     .rp { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 24px; align-items: start; align-content: start; }
     .rp > * { grid-column: 2; }
     .rp > .rp-raster, .rp > :has(> .rp-raster) { grid-column: 1; grid-row: 1 / span 8; }
-    .rp .rp-raster { width: min(400px, 100vh - 300px, 45vw); margin: 0; }
+    .rp .rp-raster { width: max(240px, min(400px, 100vh - 300px, 45vw)); margin: 0; }
   }
 </style>
 </head>

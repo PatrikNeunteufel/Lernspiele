@@ -14,7 +14,7 @@
 
   /* Brett: 8 × 50 Einheiten, links und unten Platz für die Koordinaten. Auf 375 px gut 40 px je Feld. */
   /* Ganze Aufgabe im Bild (BH3 a): auf niedrigen Bildschirmen so breit, wie die Höhe unter Kopf, Eule und Auftrag reicht. */
-  .kf-brett { width: min(100%, 500px, calc(100vh - 340px)); height: auto; display: block; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+  .kf-brett { width: max(min(280px, 100%), min(100%, 500px, calc(100vh - 340px))); height: auto; display: block; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
   .kf-brett .kf-hell { fill: #f3e3c3; }
   .kf-brett .kf-dunkel { fill: #c49a6c; }
   .kf-brett .kf-feld.kf-tippbar { cursor: pointer; }

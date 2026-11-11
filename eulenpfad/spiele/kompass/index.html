@@ -43,14 +43,14 @@
     .karten-zeile { margin-bottom: 6px; }
     .frage { margin-bottom: 8px; }
     .achtung { margin-bottom: 4px; }
-    .rose { width: min(300px, 80vw, calc(100vh - 470px)); margin-bottom: 8px; }
+    .rose { width: max(160px, min(300px, 80vw, calc(100vh - 470px))); margin-bottom: 8px; }
   }
   @media (max-width: 560px) { /* Nordpfeil oder kleine Rose links neben der Frage, unter dem Plan */
     .karten-zeile { justify-content: flex-start; align-items: flex-start; }
     .kompass-seite { flex: 1 1 200px; }
     .nur-sehen { align-items: center; }
-    .nur-sehen .plan { width: min(calc(100% - 74px), calc(100vh - 560px)); }
-    .nur-sehen:has(.lang) .plan { width: min(calc(100% - 74px), calc(100vh - 595px)); }
+    .nur-sehen .plan { width: max(min(200px, calc(100% - 74px)), min(calc(100% - 74px), calc(100vh - 560px))); }
+    .nur-sehen:has(.lang) .plan { width: max(min(200px, calc(100% - 74px)), min(calc(100% - 74px), calc(100vh - 595px))); }
     .nur-sehen .kompass-seite, .kompass-seite.lang { flex-basis: 100%; }
     .kompass-seite .wahl, .wahl.kompass-wahl { gap: 8px; }
     .kompass-seite:not(.lang) .wahl, .wahl.kompass-wahl { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); }
@@ -60,11 +60,11 @@
     .kompass-seite .wahl-knopf { min-height: 54px; }
   }
   @media (min-width: 561px) and (orientation: portrait) { /* Tablet hoch: Plan nach der Bildhöhe */
-    .plan { width: min(420px, 100%, calc(100vh - 640px)); }
+    .plan { width: max(min(240px, 100%), min(420px, 100%, calc(100vh - 640px))); }
   }
   @media (min-width: 900px) and (orientation: landscape) {
     .karten-zeile { flex-wrap: nowrap; align-items: center; gap: 16px; }
-    .karten-zeile .plan { width: min(420px, calc(100vh - 290px)); flex: none; }
+    .karten-zeile .plan { width: max(240px, min(420px, calc(100vh - 290px))); flex: none; }
     .kompass-seite { flex: 0 1 400px; }
   }
 </style>
