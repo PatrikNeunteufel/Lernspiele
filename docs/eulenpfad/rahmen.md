@@ -340,7 +340,13 @@ LERN_Session10: das sind keine Fächer). **Über den Spielen** (Entscheid FB1 a,
 Knopf **„Filter“** mit drei Schiebereglern (kein Trichter, kein Zahnrad); daneben steht, was im Filter gilt. Der Knopf
 klappt das Feld auf (`#filter-feld`, vorgegeben zu, offen merkt das Profil mit `filterZu: false`): die **Gruppen**
 Klasse, Nur, Thema und Stufe, je für sich auf- und zuklappbar, vorgegeben zu, zugeklappt mit ihrer Wahl im Kopf (offene im
-Profil, `filterOffen`), darunter Sortierung, Kacheln/Kompakt und Alle auf/zu.
+Profil, `filterOffen`), darunter Sortierung, Kacheln/Kompakt und Alle auf/zu. **Fach und Thema als Blöcke**
+(Entscheid GR1 a, LERN_Session32): Jedes Fach ist eine Fläche in der Farbe seines Reiters (`.fach-block`, Bild und
+Farbe aus `FACH_BILD` und `fachFarbe` in `start/spiele.js`, für Reiter und Block gleich), darin je Thema ein Block
+(`.thema-block`) mit dem Bild des Themas (`THEMEN[].bild` im Katalog), dem kurzen Namen und ⓘ, das den langen Titel
+zeigt, ohne den Block zuzuklappen; der Titel steht auch beim Darüberfahren (`title`) und beim langen Drücken. Auf- und
+Zuklappen wie bisher (`KERN.uebersicht.gruppen`). Im Stil „hand“ haben die Blöcke ungleiche Ecken statt eines
+SVG-Rahmens, weil ein zugeklapptes `details` nur seinen Kopf zeigt.
 **Klassen-Rand** (Entscheid G1 a, LERN_Session14): Ist „🎒 Meine Klasse“ aus, bekommt jede Karte eines Kindes mit Klasse
 einen Glow nach aussen und links oben ein Zeichen: ✓ Türkis (`--deko-5`) Basisklasse tiefer als die eigene, ● Gold
 (`--deko-4`) die eigene, ▲ Violett (`--deko-1`) höher, „Herausforderung“. Nie Stellenfarben; das Zeichen trägt die

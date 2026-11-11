@@ -19,6 +19,9 @@ const schalterSymbol = (art, an) => LS.schalterSymbol(art, an);
 
 // Suche im Tab Spiele (Wunsch Patrik, LERN_Session6): bleibt beim Neuzeichnen erhalten, nicht gespeichert.
 const SPIEL_SUCHE = UE.suche();
+/** Bild und Farbe je Fach: auf den Reitern (FB1 a) und den Fach-Blöcken (GR1 a) gleich; Farben aus --deko-*. */
+const FACH_BILD = { Mathe: "➕", Deutsch: "📖", NMG: "🌍", Englisch: "🔤", Französisch: "🥖", Musik: "🎵", "Medien und Informatik": "💻" };
+const fachFarbe = fach => `var(--deko-${(Math.max(0, FAECHER.indexOf(fach)) % 6) + 1})`;
 /** Symbol des Filters: drei Schieberegler („einstellen“; ein Trichter ist eine Metapher für Erwachsene, FB1 a). */
 const SCHIEBEREGLER = `<svg viewBox="0 0 24 24" width="22" height="22"><g stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none">`
   + `<path d="M4 6h16M4 12h16M4 18h16"/></g><g fill="#fff" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="2.6"/>`
@@ -120,7 +123,6 @@ function zeichneSpiele(box, neu) {
   };
   const empfohlen = LS.empfohleneStufe(name);
   // Fach als bunte Reiter über den Spielen (FB1 a, LERN_Session32): die häufigste Wahl mit einem Tipp, selbsterklärend
-  const FACH_BILD = { Mathe: "➕", Deutsch: "📖", NMG: "🌍", Englisch: "🔤", Französisch: "🥖", Musik: "🎵", "Medien und Informatik": "💻" };
   const reiter = (text, bild, an, onclick, farbe) => {
     const b = el("button", { type: "button", class: "fach-reiter", "aria-pressed": String(an), onclick }, el("span", { class: "fach-reiter-bild", text: bild }), text);
     b.style.setProperty("--f", farbe);
@@ -128,7 +130,7 @@ function zeichneSpiele(box, neu) {
   };
   const fachReiter = el("nav", { class: "fach-reiter-zeile", "aria-label": "Fach" },
     reiter("Alle", "🌟", filter.fach === "alle", setze("fach", "alle"), "var(--knopf)"),
-    ...FAECHER.map((f, i) => reiter(f, FACH_BILD[f] || "📚", filter.fach === f, setze("fach", f), `var(--deko-${(i % 6) + 1})`)));
+    ...FAECHER.map(f => reiter(f, FACH_BILD[f] || "📚", filter.fach === f, setze("fach", f), fachFarbe(f))));
   // Gruppe „Nur“ für Fokus und, bei der Aufsicht, Zu prüfen — das sind keine Fächer (Hinweis Patrik, LERN_Session10);
   // Meine Klasse steht seit LERN_Session32 in der Gruppe Klasse.
   const nur = [];
@@ -477,8 +479,24 @@ function zeichneSpiele(box, neu) {
       .filter(x => x.spiele.length);
     if (!themen.length) continue;
     const anzahl = themen.reduce((n, x) => n + x.spiele.length, 0);
-    box.append(gruppe("fach:" + fach, fach, anzahl,
-      ...themen.map(({ t, spiele }) => gruppe("thema:" + t.id, t.titel, spiele.length, gitter(spiele)))));
+    // Fach und Thema als Blöcke mit Bild (Entscheid GR1 a, LERN_Session32): das Fach in der Farbe seines Reiters, das
+    // Thema mit Bild und kurzem Namen; den langen Titel zeigt ⓘ im Kopf, dazu beim Darüberfahren und langen Drücken
+    const themaBloecke = themen.map(({ t, spiele }) => {
+      const titel = el("div", { class: "thema-titel blase-klein", hidden: true, text: t.titel });
+      const info = el("button", { type: "button", class: "karten-info thema-info", "aria-expanded": "false", "aria-label": `Was gehört zu ${t.name}?`, title: t.titel, text: "ⓘ",
+        onclick: e => { e.preventDefault(); e.stopPropagation(); titel.hidden = !titel.hidden; info.setAttribute("aria-expanded", String(!titel.hidden)); } });
+      const d = G.gruppe({ id: "thema:" + t.id, kopf: [el("span", { class: "gruppe-bild", text: t.bild || "📚" }), el("span", { class: "gruppe-name", text: t.name }), info],
+        anzahl: spiele.length }, titel, gitter(spiele));
+      d.classList.add("thema-block");
+      d.querySelector("summary").title = t.titel;
+      d.querySelector("summary").dataset.vorlesen = `${t.name}: ${t.titel}`;
+      return d;
+    });
+    const fachBlock = G.gruppe({ id: "fach:" + fach, kopf: [el("span", { class: "gruppe-bild", text: FACH_BILD[fach] || "📚" }), el("span", { class: "gruppe-name", text: fach })], anzahl },
+      ...themaBloecke);
+    fachBlock.classList.add("fach-block");
+    fachBlock.style.setProperty("--f", fachFarbe(fach));
+    box.append(fachBlock);
   }
   // Langes Drücken auf eine Karte oder einen Stufenknopf liest vor (Kindergarten, 1. Klasse; LERN_Session8).
   LS.langDruecken(box);

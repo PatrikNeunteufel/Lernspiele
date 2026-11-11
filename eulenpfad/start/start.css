@@ -209,7 +209,23 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .gruppe > summary .anzahl { font-size: 15px; font-weight: 800; color: var(--text-leise); }
 .gruppe .gruppe > summary { font-size: clamp(18px, 4vw, 21px); padding-left: 18px; }
 .gruppe .gruppe { margin-bottom: 6px; }
-
+/* Fach und Thema als Blöcke (GR1 a, LERN_Session32): das Fach eine Fläche in der Farbe seines Reiters, darin je Thema
+   ein Block mit Bild, kurzem Namen und ⓘ für den langen Titel */
+.fach-block { position: relative; border-radius: var(--rund); padding: 4px 12px 10px; margin-bottom: 18px;
+  background: color-mix(in srgb, var(--f) 11%, #ffffff); box-shadow: 0 5px 0 color-mix(in srgb, var(--f) 35%, #cdd2ea); border-top: 8px solid var(--f); }
+.fach-block > summary { font-size: clamp(22px, 4.8vw, 28px); }
+.gruppe-bild { font-size: 1.15em; line-height: 1; }
+.fach-block > summary::before, .thema-block > summary::before { color: var(--f); }
+.thema-block { position: relative; border-radius: 16px; background: rgba(255, 255, 255, .72); padding: 2px 10px 8px; margin: 10px 0 12px;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--f) 22%, #dde0ef); }
+.gruppe .thema-block > summary { padding-left: 4px; }
+.thema-block > summary .thema-info { margin-left: 2px; width: 34px; height: 34px; font-size: 19px; }
+.thema-titel { margin: 0 0 8px; font-size: 15px; }
+.thema-titel[hidden] { display: none; }
+/* im Stil „hand“ ungleiche Ecken (kein SVG-Rahmen: zugeklappt zeigt ein details nur seinen Kopf) */
+.stil-hand .fach-block { border-radius: 18px 26px 16px 28px / 26px 16px 28px 18px; }
+.stil-hand .thema-block { border-radius: 14px 20px 12px 22px / 20px 12px 22px 14px; }
+.stil-hand .thema-block:nth-child(2n) { border-radius: 22px 12px 20px 14px / 12px 22px 14px 20px; }
 /* Erfolge: Wochenziel und Abzeichen (Entscheid L1 a, LERN_Session10) */
 .abzeichen-hinweis { display: flex; align-items: center; gap: 12px; padding: 10px 16px; margin-bottom: 14px; border-radius: var(--rund);
   background: linear-gradient(160deg, #fff6d6, #ffe9a8); box-shadow: 0 3px 0 #e8c76a; color: var(--text); text-decoration: none; font-size: 16px; }

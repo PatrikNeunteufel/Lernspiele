@@ -197,6 +197,15 @@ function pruefeTabSpiele(melde) {
     // Über den Spielen nur Fach-Reiter, Suche und „Filter“ (FB1 a, LERN_Session32); das Feld des Filters vorgegeben zu
     pruefe(s.gibt("button.fach-reiter") >= 3 && s.gibt(".filter-knopf") === 1 && s.lauf(`document.getElementById("filter-feld").hidden`) === true,
       ort, "Fach-Reiter oder Knopf „Filter“ fehlen, oder der Filter ist offen");
+    // Fach und Thema als Blöcke mit Bild (GR1 a, LERN_Session32): jedes Thema mit Bild und kurzem Namen; ⓘ zeigt den
+    // langen Titel, ohne den Block zuzuklappen
+    {
+      const ohneBild = s.lauf(`[...document.querySelectorAll("details.thema-block")].filter(d => !d.querySelector("summary .gruppe-bild")?.textContent.trim()).length`);
+      pruefe(s.gibt("details.fach-block") > 0 && s.gibt("details.thema-block") > 0 && ohneBild === 0, ort, "Fach- oder Themenblöcke fehlen oder ein Thema ohne Bild");
+      s.klick("details.thema-block .thema-info"); ruhe(s);
+      pruefe(s.lauf(`(() => { const d = document.querySelector("details.thema-block"); return d.open && !d.querySelector(".thema-titel").hidden; })()`), ort, "ⓘ im Thema zeigt den Titel nicht oder klappt den Block zu");
+      s.klick("details.thema-block .thema-info"); ruhe(s);
+    }
     // Gruppen des Filters (LERN_Session32): je für sich einklappbar, vorgegeben zu, Aufklappen merkt das Profil
     pruefe(s.gibt("details.filter-gruppe") >= 2 && s.lauf(`[...document.querySelectorAll("details.filter-gruppe")].every(d => !d.open)`), ort, "Gruppen des Filters fehlen oder sind nicht zu");
     s.klappe('details.filter-gruppe[data-gruppe="stufe"]', true);
