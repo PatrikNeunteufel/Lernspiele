@@ -54,7 +54,7 @@ untereinander.
 | Sterne | `sterne`, `sterne-klein`, `aus`, `konfetti`, `flug` | Belohnung und Animation |
 | Abschluss-Animation | `feier`, `ruhig` | Animation im Schlussbild (`feier.js`, Abschnitt 24) |
 | Angemeldet | `spieler-zeile` | „Du spielst als …“ im Startbild; angemeldet wird auf der Startseite |
-| Stufenwahl | `stufen`, `stufe`, `fuer`, `timer-zeile`, `timer-schalter`, `option-zeile`, `option-schalter`, `leise` |
+| Stufenwahl | `stufen`, `stufe`, `fuer`, `stufe-huelle`, `stufe-kopf`, `stufe-symbol`, `stufe-nr`, `stufe-name`, `sterne-gross`, `stufe-info`, `stufe-text`, `blase-klein`, `timer-zeile`, `timer-schalter`, `option-zeile`, `option-schalter`, `leise` | Stufen wie Level (Entscheid FB2 a, LERN_Session32): gross Symbol und Nummer, Name, drei Sterne (auch die nicht erreichten), Untertitel für wen; den Lehrplantext der Stufe zeigt einem Kind ⓘ neben dem Knopf (`stufe-info`) und liest langes Drücken vor, die Aufsicht sieht ihn offen. Timer und Endlos mit dem Symbol der Kacheln und dem Wort (`LS.schalterSymbol`, seit LERN_Session32 in `spiel.js`, Stile in `stil.css`) |
 | Entwickler-Modus | `entwickler-leiste`, `entwickler-feld` | Leiste unten im Spiel (Abschnitt 11) | Startbild des Spiels |
 | Kurztasten | `mit-tasten` (am `html`), Attribut `data-marke` | Marke der Taste am Knopf (Abschnitt 19) |
 
