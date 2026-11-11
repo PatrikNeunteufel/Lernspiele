@@ -726,6 +726,10 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "koenig-falle/stellungen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "kulturen-koffer/dinge": {
       "am": "2026-11-06",
       "von": "Patrik"
@@ -856,6 +860,26 @@ const PRUEFSTAND = {
     },
     "taschengeld-planer/waren": {
       "am": "2026-11-08",
+      "von": "Patrik"
+    },
+    "word-match/essen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "word-match/familie-koerper": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "word-match/farben": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "word-match/tiere": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "word-match/zahlen": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "zeit-schaetzer/taetigkeiten": {
@@ -1022,6 +1046,10 @@ const PRUEFSTAND = {
     },
     "netz-falter": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "nombres-rallye": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "pentomino-puzzle": {

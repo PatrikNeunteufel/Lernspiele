@@ -77,7 +77,8 @@ const SPIELWEISEN = {
 
 // Je Spiel auch feier: die Abschluss-Animation (feier.js; Muster, Bilder und Ziele je Stufe). Sie steht hier und nicht
 // in der Spielseite (Entscheid GS1 a, LERN_Session32), damit die Startseite das Kartenbild zeichnen kann; LS.spiel
-// übernimmt sie. Ausnahme: ein Spiel, dessen Animation Daten der Seite braucht (Schweiz-Karte), gibt sie in LS.spiel.
+// übernimmt sie. Braucht sie Daten des Spiels, nennt sie diese beim Namen und daten die Dateien im Spielordner, die sie
+// anmelden (Schweiz-Karte: karte "schweiz", orte.js meldet an; Entscheid SK1 a).
 const SPIELE = [
   { id: "stellen-detektiv", art: ["antippen"], klasse: 4, bild: "🔍", name: "Stellen-Detektiv", thema: "stellenwert", farbe: "var(--deko-6)",
     pfad: "spiele/stellen-detektiv/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 10, s3: 12, s4: 15, s5: 15, s6: 19 },
@@ -754,7 +755,13 @@ const SPIELE = [
       "hauptorte": { name: "Kantonshauptorte (deutsche Namen)" },
       "staedte": { name: "Grosse Städte ab 25 000 Einwohnern" },
     },
-    lernziele: [{ lz: "NMG.8.4", stufen: ALLE_STUFEN }] },
+    lernziele: [{ lz: "NMG.8.4", stufen: ALLE_STUFEN }],
+    // Abschluss-Animation (Pilot P8, Muster KARTE; docs/konzept_abschluss_animationen.md 7): die Eule fliegt über die
+    // stumme Karte aus karte.js, die Ziele der Stufe leuchten auf (nur Formen und Lage, keine Namen). Karte und Auswahl
+    // nur beim Namen; orte.js meldet sie an (Entscheid SK1 a, LERN_Session32), daten nennt die Dateien des Spiels dazu.
+    feier: { muster: "karte", karte: "schweiz", daten: ["karte.js", "orte.js"], ziele: {
+      s1: { flaechen: "wahlkreise", ausschnitt: true }, s2: { flaechen: "ostschweiz" }, s3: { flaechen: "kantone" },
+      s4: { punkte: "hauptorte" }, s5: { punkte: "staedte" }, s6: { flaechen: "kantone", punkte: "hauptorte" } } } },
   { id: "kompass", art: ["antippen"], klasse: 4, neu: "LERN_Session3", bild: "🧭", name: "Kompass-Spiel", thema: "orientierung", farbe: "var(--deko-5)",
     pfad: "spiele/kompass/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 15, s3: 20, s4: 25, s5: 30, s6: 38 },
     beschreibung: "Norden, Osten, Süden, Westen: auf Kompass und Plan zeigen, Wege gehen, Karte drehen",

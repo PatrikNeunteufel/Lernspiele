@@ -104,6 +104,11 @@ alle Dateien falsch, bis das Werkzeug läuft. c ist wie b ohne Prüfung und unsc
 die Empfehlung, wenn die Startseite auf dem Handy über das Mobilnetz spürbar langsamer startet (messen: erster Aufruf
 mit und ohne `feier.js` auf `handy-quer` und 375 px) — dann b mit derselben Quelle im Katalog.
 
+**Zusatz SK1 a (Patrik, 11.11.2026):** Die Schweiz-Karte rechnete ihre Animation aus den Kartendaten der Seite. Jetzt
+nennt der Katalog Karte und Auswahl nur beim Namen (`karte: "schweiz"`, `flaechen: "ostschweiz"`, `daten: ["karte.js",
+"orte.js"]`); `orte.js` meldet sie mit den Regeln des Spiels an (`LS_FEIER.kartenDaten`), die Startseite lädt die beiden
+Dateien nach, wenn die Karte ins Bild kommt. Damit stehen alle 169 Angaben im Katalog.
+
 ### GS2 — Welcher Text bleibt auf der Karte, die ein Kind sieht? → **a** (Patrik, 11.11.2026)
 
 **Ort:** `start/spiele.js` `karte()`, `start/start.css` `.ziel`, `.marken`; Zufallskarten `zufallsKarte`.

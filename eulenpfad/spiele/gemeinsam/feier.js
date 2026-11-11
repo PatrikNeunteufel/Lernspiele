@@ -9433,7 +9433,7 @@ var LS_FEIER = (function () {
     karte(feier, opt) {
       if (feier.bilder && BILDER.karte?.[feier.bilder]) return BILDER.karte[feier.bilder](feier, opt);
       const { stufe, sterne, ruhig } = opt;
-      const ziel = feier.ziele?.[stufe], k = feier.karte;
+      const { karte: k, ziel } = karteAufloesen(feier, feier.ziele?.[stufe]);
       if (!k || !ziel || !(ziel.flaechen?.length || ziel.punkte?.length)) return null;
       // Stücke mit ihrer Mitte, von West nach Ost: in dieser Reihe fliegt die Eule darüber
       const stuecke = [...(ziel.flaechen || []).map(d => ({ d, m: mitte(pfadPunkte(d)) })), ...(ziel.punkte || []).map(p => ({ p, m: p }))]
@@ -9523,7 +9523,25 @@ var LS_FEIER = (function () {
     return box;
   }
 
-  return { zeige, MUSTER, DAUER, bewegungReduziert };
+  // ---------- Kartendaten, die ein Spiel anmeldet (Entscheid SK1 a, LERN_Session32) ----------
+  // Der Katalog nennt Karte und Auswahl nur beim Namen (feier.karte "schweiz", ziele { flaechen: "ostschweiz" }); das
+  // Spiel meldet in seiner Datendatei die Karte und je Name eine Auswahl an (schweiz-karte/orte.js). So stehen die Regeln
+  // der Auswahl (welche Kantone, ab wie vielen Einwohnern) nur einmal, beim Spiel.
+  const KARTEN_DATEN = {};
+  /** Karte und Auswahl unter einem Namen anmelden: { karte, auswahl: { name: karte => [Pfad | [x, y]] } }. */
+  function kartenDaten(name, daten) { KARTEN_DATEN[name] = daten; }
+  /** feier.karte und die Ziele einer Stufe auflösen: Namen → Pfade und Punkte; unbekannte Namen → kein Bild. */
+  function karteAufloesen(feier, ziel) {
+    if (typeof feier.karte !== "string") return { karte: feier.karte, ziel };
+    const d = KARTEN_DATEN[feier.karte];
+    if (!d || !ziel) return { karte: null, ziel: null };
+    const nimm = w => (typeof w !== "string" ? w : d.auswahl?.[w] ? d.auswahl[w](d.karte) : null);
+    const aus = { ...ziel, flaechen: nimm(ziel.flaechen), punkte: nimm(ziel.punkte) };
+    if ((ziel.flaechen && !aus.flaechen) || (ziel.punkte && !aus.punkte)) return { karte: null, ziel: null };
+    return { karte: d.karte, ziel: aus };
+  }
+
+  return { zeige, MUSTER, DAUER, bewegungReduziert, kartenDaten };
 })();
 
 if (typeof module !== "undefined") module.exports = LS_FEIER;

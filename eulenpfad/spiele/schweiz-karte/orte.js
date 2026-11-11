@@ -28,3 +28,15 @@ const ORT_NAMEN = {
 
 // Städte für Stufe 5: ab so vielen Einwohnern (ohne die Kantonshauptorte)
 const STADT_MIN = 25000;
+
+// Auswahl für die Abschluss-Animation (Entscheid SK1 a, LERN_Session32): Der Katalog nennt Karte und Auswahl nur beim
+// Namen (feier.karte "schweiz", ziele mit "ostschweiz", "staedte" …); hier stehen sie mit den Regeln des Spiels, damit
+// OSTSCHWEIZ und STADT_MIN nur einmal vorkommen. feier.js löst die Namen auf; die Startseite lädt dafür karte.js und
+// orte.js nach (feier.daten im Katalog).
+if (typeof LS_FEIER !== "undefined") LS_FEIER.kartenDaten("schweiz", { karte: KARTE, auswahl: {
+  wahlkreise: k => k.wahlkreise.map(w => w.d),
+  kantone: k => k.kantone.map(x => x.d),
+  ostschweiz: k => k.kantone.filter(x => OSTSCHWEIZ.includes(x.nr)).map(x => x.d),
+  hauptorte: k => k.orte.filter(o => o.hauptort).map(o => [o.x, o.y]),
+  staedte: k => k.orte.filter(o => !o.hauptort && o.einwohner >= STADT_MIN).map(o => [o.x, o.y]),
+} });

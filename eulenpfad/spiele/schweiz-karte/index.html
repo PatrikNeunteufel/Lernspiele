@@ -143,16 +143,6 @@ function tippsFuer(p, ziel, gebiete) {
 
 LS.spiel({
   id: SPIEL_ID,
-  // Abschluss-Animation (Pilot P8, Muster KARTE; docs/konzept_abschluss_animationen.md 7): die Eule fliegt über die
-  // stumme Karte aus karte.js, die Ziele der Stufe leuchten auf (nur Formen und Lage, keine Namen)
-  feier: { muster: "karte", karte: KARTE, ziele: {
-    s1: { flaechen: KARTE.wahlkreise.map(w => w.d), ausschnitt: true },
-    s2: { flaechen: KARTE.kantone.filter(k => OSTSCHWEIZ.includes(k.nr)).map(k => k.d) },
-    s3: { flaechen: KARTE.kantone.map(k => k.d) },
-    s4: { punkte: KARTE.orte.filter(o => o.hauptort).map(o => [o.x, o.y]) },
-    s5: { punkte: KARTE.orte.filter(o => !o.hauptort && o.einwohner >= STADT_MIN).map(o => [o.x, o.y]) },
-    s6: { flaechen: KARTE.kantone.map(k => k.d), punkte: KARTE.orte.filter(o => o.hauptort).map(o => [o.x, o.y]) },
-  } },
   einleitung: "Auf dieser Karte steht kein einziger Name! Ich sage dir, was du suchst — tipp es auf der Karte an.",
   hilfe: stufe => (STUFE[stufe]?.art === "erkennen"
     ? "Auf der Karte ist ein Kanton oder Hauptort rot markiert. Tippe unten den passenden Namen an."
