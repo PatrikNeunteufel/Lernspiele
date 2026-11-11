@@ -1690,3 +1690,21 @@
   keine geschrumpfte Grafik, seitlich kein Überlauf. Im Browser angesehen bei 800 × 450 (Uhr, Plan-Leser,
   Wassertropfen) und 1024 × 460 (Go-Brett 300 px, Diagramm-Detektiv 320 × 267). Kompass s2 meldete zuerst die
   Windrose `.rose.klein` (bewusst 96 px); die Messung unterscheidet Grafiken jetzt nach allen Klassen.
+- Abschluss-Animationen Block M2 (Zahlen, Teiler, Begründen; AR1 a): Runden-Rutsche, Zahlenstrahl-Pfeil,
+  Hundertertafel-Detektiv, Teiler-Spürnase, Überschlags-Radar, Velo-Tabelle, Vergleichs-Krokodil, Punkte-Blitz,
+  Muster-Fortsetzer, Preis-Tabelle, Finger-Zähler, Stimmt immer? — `feier.js` mit zwölf Bildern, jedes nach den Stufen
+  seines Spiels und mit der Darstellung des Spiels (Kugel der Rutsche, Hände ab dem Daumen, Farben 🔴 🔵 🟡, Dienes in
+  den Stellenfarben, Geld über `LS.geldText`). Jedes Bild prüft die Zahlen, die es zeigt (Teiler teilen, Teilerpaare
+  vollständig, Preise proportional, Folge und Muster setzen sich fort, Überschlag nach der Regel des Spiels, Winkelsumme
+  180°), und gibt sonst kein Bild. „Stimmt immer?“ zeigt je Stufe eine Begründung aus dem Spiel statt eines Mosaiks.
+  Rahmen: `bewege` mit `linear` (Hund und Knochen, Velo und Tabelle im Takt), ZOOM mit eigenen Bildern, Rutsche für
+  ganze Zahlen (dabei gefunden: 6 500 000 hätte innen schon auf 7 gerundet und den linken Nachbarn verschoben).
+  Abweichungen vom Entwurf im Konzept, Abschnitt 7 (zur Abnahme); Doku rahmen.md 24.
+- Im Browser alle 72 Endbilder in 375 px angesehen und die bewegten Teile mitten im Ablauf (1,2 und 1,6 s);
+  dabei verbessert: Hände grösser, Decke mit Streifen wie im Spiel; Knochen über dem Weg des Hundes (er verdeckte den
+  letzten); Hundertertafel mit sichtbaren Feldern im Tausenderbuch und der Lupe für die gesuchte Zahl (s2, s5);
+  Krokodil grösser mit weit offenem Maul, Ergebnis der Rechnung in der Karte; Dienes im Punkte-Blitz 1,6-mal grösser
+  (die Einer waren nicht zu zählen); Äpfel über dem Korbrand; km-Angaben neben dem Velo frei vom Rad; Steine und
+  Halbkreis in „Stimmt immer?“ grösser.
+- `tools/feier_vorschau.html`: „Nebeneinander“ (drei Stufen je Zeile) und „Anhalten bei“ einer Sekunde, damit der
+  Ablauf Bild um Bild geprüft werden kann, nicht nur das Endbild (Anweisung Patrik, LERN_Session27).

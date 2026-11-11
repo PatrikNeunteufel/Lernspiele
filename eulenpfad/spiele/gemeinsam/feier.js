@@ -200,13 +200,14 @@ var LS_FEIER = (function () {
    * Eine Figur einen Weg entlang bewegen. weg: SVG-Pfad; ende: { x, y, winkel } für das stehende Bild („Bewegung
    * reduzieren“). Die Bewegung endet und bleibt stehen (fill freeze).
    */
-  function bewege(figur, weg, ende, ruhig, { drehen = true, ab = 0, dauer = DAUER } = {}) {
+  function bewege(figur, weg, ende, ruhig, { drehen = true, ab = 0, dauer = DAUER, linear = false } = {}) {
     if (ruhig) {
       figur.setAttribute("transform", `translate(${ende.x} ${ende.y}) rotate(${ende.winkel})`);
       return figur;
     }
+    // linear: gleichmässig, wo etwas im Takt der Figur erscheint (Hund und Knochen, Velo und Tabelle)
     figur.appendChild(s("animateMotion", { path: weg, begin: t(ab), dur: `${dauer}s`, ...(drehen ? { rotate: "auto" } : {}), fill: "freeze",
-      calcMode: "spline", keyTimes: "0;1", keySplines: "0.4 0 0.3 1" }));
+      ...(linear ? {} : { calcMode: "spline", keyTimes: "0;1", keySplines: "0.4 0 0.3 1" }) }));
     // vor dem Start noch nicht im Bild (sonst stünde die Figur kurz bei 0,0)
     figur.setAttribute("opacity", "0");
     figur.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(ab), fill: "freeze" }));
@@ -496,6 +497,11 @@ var LS_FEIER = (function () {
       s("ellipse", { cx: x - 5, cy: y - 3, rx: 6, ry: 2, fill: "#cfe9f8", opacity: 0.9 }), s("ellipse", { cx: x + 5, cy: y - 3, rx: 6, ry: 2, fill: "#cfe9f8", opacity: 0.9 }),
       s("rect", { x: x - 1, y: y - 6, width: 2, height: 14, rx: 1, fill: "#2f62a0" })), DAUER, ruhig);
   }
+  /** Kugel der Runden-Rutsche (Farbe der Kugel im Spiel), unten auf 0,0. */
+  function kugel() {
+    return s("g", { "data-figur": "kugel" },
+      s("circle", { cx: 0, cy: -8, r: 8, style: "fill:var(--knopf)" }), s("circle", { cx: -2.6, cy: -10.6, r: 2.2, fill: "#ffffff", opacity: 0.7 }));
+  }
   function wagen() {
     return s("g", { "data-figur": "wagen" },
       s("rect", { x: -9, y: -12, width: 18, height: 8, rx: 2, style: "fill:var(--deko-3)" }),
@@ -629,10 +635,14 @@ var LS_FEIER = (function () {
        */
       rutsche(feier, { stufe, sterne, ruhig }) {
         const z = feier.ziele?.[stufe];
-        if (!z || !Array.isArray(z.werte) || !z.werte.length || !Number.isInteger(z.stellen)) return null;
-        const schritt = 10 ** -z.stellen, rund = v => Number(v.toFixed(z.stellen + 4));
+        // ganze Zahlen (Runden-Rutsche, Block M2): auf: der Zehner, Hunderter … auf den gerundet wird
+        const ganz = Number.isInteger(z?.auf) && z.auf > 0;
+        if (!z || !Array.isArray(z.werte) || !z.werte.length || !(ganz || Number.isInteger(z.stellen))) return null;
+        if (ganz && z.werte.some(w => !Number.isInteger(w) || w % z.auf === 0)) return null;
+        const schritt = ganz ? z.auf : 10 ** -z.stellen, rund = v => (ganz ? Math.round(v) : Number(v.toFixed(z.stellen + 4)));
         const faelle = z.werte.map(w => {
-          const a = rund(Math.floor(rund(w / schritt)) * schritt), b = rund(a + schritt), mitte = rund(a + schritt / 2);
+          // ganz: w / schritt ist genau (6 500 000 / 1 000 000 = 6.5 darf nicht vorher auf 7 gerundet werden)
+          const a = rund(Math.floor(ganz ? w / schritt : rund(w / schritt)) * schritt), b = rund(a + schritt), mitte = rund(a + schritt / 2);
           return { w, a, b, ziel: w >= mitte ? b : a };
         });
         const lo = Math.min(...faelle.map(f => f.a)), hi = Math.max(...faelle.map(f => f.b));
@@ -643,7 +653,7 @@ var LS_FEIER = (function () {
         let bahn = `M${x(taeler[0])},${grundY}`;
         for (let i = 1; i < taeler.length; i++) bahn += ` L${(x(taeler[i - 1]) + x(taeler[i])) / 2},${gipfel} L${x(taeler[i])},${grundY}`;
         svg.appendChild(s("path", { d: bahn, fill: "none", stroke: "#8a5a32", "stroke-width": 4, "stroke-linejoin": "round" }));
-        const text = (v, st) => zahlText(v, st) + (z.einheit ? ` ${z.einheit}` : "");
+        const text = (v, st) => (ganz ? ganzText(v) : zahlText(v, st)) + (z.einheit ? ` ${z.einheit}` : "");
         for (const v of taeler) svg.appendChild(s("text", { x: x(v), y: grundY + 16, fill: "#2d3047", "font-size": 11, "font-family": SCHRIFT, "text-anchor": "middle" }, text(v, z.stellen)));
         const hoehe = v => { // auf dem Hang zwischen Tal und Gipfel
           const f = faelle.find(q => v >= q.a && v <= q.b);
@@ -657,7 +667,7 @@ var LS_FEIER = (function () {
           const sx = x(f.w), sy = hoehe(f.w), ex = x(f.ziel) + (imTal(f.ziel) > 1 ? (f.w < f.ziel ? -11 : 11) : 0);
           svg.appendChild(s("g", {}, s("line", { x1: sx, y1: sy - 18, x2: sx, y2: sy - 4, stroke: "#6b7089", "stroke-width": 1, "stroke-dasharray": "2 2" }),
             s("text", { x: sx, y: sy - 22, fill: "#2d3047", "font-size": 10, "font-family": SCHRIFT, "text-anchor": "middle" }, text(f.w, z.wertStellen ?? nachkomma(f.w)))));
-          const wg = wagen();
+          const wg = feier.figur === "kugel" ? kugel() : wagen();
           wg.setAttribute("data-stueck", "wagen");
           svg.appendChild(bewege(wg, `M${sx},${sy} L${ex},${grundY}`, { x: ex, y: grundY, winkel: 0 }, ruhig, { drehen: false, ab: i * 0.3, dauer: DAUER - i * 0.3 }));
           if (gezeigt.has(f.ziel)) return;
@@ -904,6 +914,827 @@ var LS_FEIER = (function () {
     },
   };
 
+  // ---------- Bilder Block M2: Zahlen, Teiler, Begründen (AR1 a, LERN_Session28) ----------
+  // Wie in M1 folgt jedes Bild den Stufen seines Spiels. Jedes prüft die Zahlen, die es zeigt (Teiler teilen, Preise
+  // sind proportional, der Überschlag liegt nahe …), und gibt ohne stimmige Angabe kein Bild — dann meldet der Test
+  // „keine Animation“ statt einer falschen.
+
+  /** Text im Bild (Zahlen, Rechnungen). */
+  const text = (x, y, inhalt, { gross = 11, farbe = "#2d3047", anker = "middle", fett = true } = {}) =>
+    s("text", { x, y, fill: farbe, "font-size": gross, ...(fett ? { "font-weight": "bold" } : {}), "font-family": SCHRIFT, "text-anchor": anker }, String(inhalt));
+  const RECHNEN = { "+": (a, b) => a + b, "-": (a, b) => a - b, "·": (a, b) => a * b, ":": (a, b) => a / b };
+  const OP_TEXT = { "+": "+", "-": "−", "·": "·", ":": ":" };
+  /** Geld wie ab der 4. Klasse (LS.geldText): „7.20 Fr.“, ganze Franken „12 Fr.“. */
+  const geld = rp => (typeof LS !== "undefined" && LS.geldText ? LS.geldText(rp, 4) : (rp % 100 ? `${(rp / 100).toFixed(2)} Fr.` : `${rp / 100} Fr.`));
+  /** Verschieben ab Zeitpunkt, gerade oder im Bogen (im ruhigen Bild gleich am Ziel). */
+  function schiebe(e, dx, dy, ab, ruhig, { dauer = 0.6, bogen = 0 } = {}) {
+    if (ruhig) { e.setAttribute("transform", `translate(${dx} ${dy})`); return e; }
+    if (bogen) e.appendChild(s("animateMotion", { path: `M0,0 Q${dx / 2},${Math.min(0, dy) - bogen} ${dx},${dy}`, begin: t(ab), dur: `${dauer}s`, fill: "freeze" }));
+    else e.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", from: "0 0", to: `${dx} ${dy}`, begin: t(ab), dur: `${dauer}s`,
+      fill: "freeze", calcMode: "spline", keyTimes: "0;1", keySplines: "0.4 0 0.3 1" }));
+    return e;
+  }
+  /** Sichtbar nur bis zum Zeitpunkt bis (danach weg; im ruhigen Bild gar nicht). */
+  function kurz(e, ab, bis, ruhig) {
+    if (ruhig) { e.setAttribute("opacity", "0"); return e; }
+    e.setAttribute("opacity", "0");
+    e.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(ab), fill: "freeze" }));
+    e.appendChild(s("animate", { attributeName: "opacity", from: 1, to: 0, begin: t(bis), dur: "0.25s", fill: "freeze" }));
+    return e;
+  }
+
+  // ----- Zahlenstrahl-Pfeil (ZOOM · strahl) -----
+  /** Pfeil, Spitze bei 0,0, nach rechts (die Bewegung dreht ihn in die Flugrichtung). */
+  function pfeil() {
+    return s("g", { "data-figur": "pfeil" },
+      s("line", { x1: -36, y1: 0, x2: -7, y2: 0, stroke: "#7a4f26", "stroke-width": 2.2 }),
+      s("path", { d: "M0,0 L-10,-4.5 L-10,4.5 Z", fill: "#4f5668" }),
+      s("path", { d: "M-36,0 l-6,-5 M-36,0 l-6,5 M-32,0 l-6,-5 M-32,0 l-6,5", stroke: "#e5484d", "stroke-width": 1.6, fill: "none" }));
+  }
+  /** Zahlenstrahl in zehn Abschnitten von a bis b auf der Höhe y, mit den Zahlen am Anfang und am Ende. */
+  function strahlLinie(y, a, b, L = 30, R = 290) {
+    const g = s("g", {}, s("line", { x1: L, y1: y, x2: R, y2: y, stroke: "#2d3047", "stroke-width": 1.6 }));
+    for (let i = 0; i <= 10; i++) {
+      const x = L + (i / 10) * (R - L), h = i === 0 || i === 10 ? 8 : i === 5 ? 6 : 4;
+      g.appendChild(s("line", { x1: x, y1: y - h, x2: x, y2: y + h, stroke: "#2d3047", "stroke-width": 1.2 }));
+    }
+    g.append(text(L, y + 19, ganzText(a), { gross: 10 }), text(R, y + 19, ganzText(b), { gross: 10 }));
+    return g;
+  }
+  /**
+   * Der Pfeil fliegt im Bogen und trifft die Zahl der Stufe auf dem Strahl von von bis bis (zehn Abschnitte wie im
+   * Spiel). Mit ganz ([a, b], Ausschnitte ab Stufe 4) steht darüber der grössere Strahl mit dem markierten Ausschnitt.
+   */
+  function strahl(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || ![z.von, z.bis, z.wert].every(Number.isFinite) || !(z.von < z.bis && z.von <= z.wert && z.wert <= z.bis)) return null;
+    if (z.ganz && !(z.ganz[0] <= z.von && z.bis <= z.ganz[1] && z.ganz[0] < z.ganz[1])) return null;
+    const L = 30, R = 290, y = z.ganz ? 100 : 88;
+    const px = (v, a, b) => L + ((v - a) / (b - a)) * (R - L);
+    const svg = neuesBild("zoom", z.wert, { "data-bilder": "strahl", "data-wert": z.wert });
+    svg.appendChild(tagGrund());
+    let ab = 0.1;
+    if (z.ganz) {
+      const oben = 30, [a, b] = z.ganz, xa = px(z.von, a, b), xb = Math.max(px(z.bis, a, b), xa + 3);
+      svg.appendChild(strahlLinie(oben, a, b));
+      svg.appendChild(erscheine(s("g", {},
+        s("rect", { x: xa, y: oben - 5, width: xb - xa, height: 10, fill: "#f5b301", opacity: 0.6 }),
+        s("path", { d: `M${xa},${oben + 5} L${L},${y - 10} M${xb},${oben + 5} L${R},${y - 10}`, stroke: "#f5b301", "stroke-width": 1, "stroke-dasharray": "3 2", fill: "none" })), 0.05, ruhig));
+      ab = 0.45;
+    }
+    svg.appendChild(erscheine(strahlLinie(y, z.von, z.bis), z.ganz ? 0.3 : 0, ruhig));
+    const xw = px(z.wert, z.von, z.bis), kx = (xw - 20) / 2, ky = z.ganz ? 20 : -10;
+    const winkel = (Math.atan2(y - ky, xw - kx) * 180) / Math.PI;
+    svg.appendChild(bewege(pfeil(), `M-20,${y - 40} Q${kx},${ky} ${xw},${y}`, { x: xw, y, winkel }, ruhig, { ab, dauer: DAUER - ab }));
+    svg.appendChild(erscheine(s("circle", { cx: xw, cy: y, r: 3, fill: "#2fb36b", "data-treffer": z.wert }), DAUER, ruhig));
+    svg.appendChild(erscheine(text(Math.min(Math.max(xw, 34), BREITE - 34), y + 38, ganzText(z.wert), { gross: 13 }), DAUER, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(Math.min(xw + 14, BREITE - 10), y - 16, ruhig));
+    if (sterne >= 3) {
+      const ringe = s("g", { "data-schmuck": "3", fill: "none", stroke: "#f5b301", "stroke-width": 1.4 });
+      for (const r of [7, 12]) {
+        const c = s("circle", { cx: xw, cy: y, r });
+        if (!ruhig) { c.setAttribute("opacity", "0"); c.appendChild(s("animate", { attributeName: "opacity", values: "0;1;0.5", begin: t(DAUER + (r - 7) * 0.04), dur: "0.7s", fill: "freeze" })); }
+        ringe.appendChild(c);
+      }
+      svg.append(ringe, funken(Math.min(Math.max(xw, 24), BREITE - 24), 20, ruhig));
+    }
+    return svg;
+  }
+
+  // ----- Überschlags-Radar (ZOOM · radar) -----
+  /**
+   * Der Strahl des Radars dreht einmal, der Punkt leuchtet auf — je Stufe schärfer —, daneben die Rechnung der Stufe,
+   * ihr Überschlag und das Ergebnis; in Stufe 5 der Anteil in Prozent (263 von 830 ≈ 30 %, wie im Spiel).
+   */
+  function radar(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z) return null;
+    let zeilen;
+    if (z.teil !== undefined) {
+      if (![z.teil, z.ganz, z.prozent].every(Number.isFinite) || Math.abs((z.teil / z.ganz) * 100 - z.prozent) > 3) return null;
+      zeilen = [`${ganzText(z.teil)} von ${ganzText(z.ganz)}`, `≈ ${z.prozent} %`];
+    } else {
+      if (!RECHNEN[z.op] || ![z.a, z.b, z.ra, z.rb].every(Number.isFinite)) return null;
+      // überschlagen wie im Spiel: jede Zahl auf ihre erste Ziffer gerundet; bei der Division der Teiler so und der
+      // Dividend auf ein passendes Vielfaches (kompatible Zahlen); das genaue Ergebnis 0.6- bis 1.6-mal der Überschlag
+      const rund1 = x => { const p = 10 ** Math.floor(Math.log10(x)); return Math.round(x / p) * p; };
+      const passt = z.op === ":" ? z.rb === rund1(z.b) && z.ra === rund1(z.a / z.rb) * z.rb : z.ra === rund1(z.a) && z.rb === rund1(z.b);
+      const erg = RECHNEN[z.op](z.ra, z.rb), genau = RECHNEN[z.op](z.a, z.b);
+      if (!passt || !Number.isInteger(erg) || !(erg >= 1) || genau / erg < 0.6 || genau / erg > 1.6) return null;
+      const op = OP_TEXT[z.op];
+      zeilen = [`${ganzText(z.a)} ${op} ${ganzText(z.b)}`, `≈ ${ganzText(z.ra)} ${op} ${ganzText(z.rb)}`, `= ${ganzText(erg)}`];
+    }
+    const nr = Number(String(stufe).slice(1)) || 1;
+    const svg = neuesBild("zoom", stufe, { "data-bilder": "radar" });
+    svg.appendChild(tagGrund());
+    const cx = 70, cy = 75, r = 54;
+    svg.append(s("circle", { cx, cy, r, fill: "#12382c", stroke: "#2fb36b", "stroke-width": 2 }),
+      ...[0.33, 0.66].map(k => s("circle", { cx, cy, r: r * k, fill: "none", stroke: "#2fb36b", "stroke-width": 0.8, opacity: 0.6 })),
+      s("path", { d: `M${cx - r},${cy} H${cx + r} M${cx},${cy - r} V${cy + r}`, stroke: "#2fb36b", "stroke-width": 0.6, opacity: 0.5 }));
+    // Strahl: dreht einmal im Uhrzeigersinn und beginnt oben; der helle Fächer folgt ihm
+    const runde = DAUER * 0.75;
+    const strahlG = s("g", {},
+      s("path", { d: `M${cx},${cy} L${cx},${cy - r} A${r},${r} 0 0,0 ${cx - r * Math.sin(0.5)},${cy - r * Math.cos(0.5)} Z`, fill: "#6ee7a8", opacity: 0.25 }),
+      s("line", { x1: cx, y1: cy, x2: cx, y2: cy - r, stroke: "#6ee7a8", "stroke-width": 1.6 }));
+    if (!ruhig) strahlG.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", from: `0 ${cx} ${cy}`, to: `360 ${cx} ${cy}`, begin: t(0), dur: `${runde}s`, fill: "freeze" }));
+    svg.appendChild(strahlG);
+    // der Punkt bei 60° nach oben: dort kommt der Strahl nach einem Sechstel der Runde vorbei
+    const w = Math.PI / 3, bx = cx + 0.55 * r * Math.sin(w), by = cy - 0.55 * r * Math.cos(w);
+    const unscharf = Math.max(0, 6 - nr); // Stufe 1: fünf Teile unscharf … Stufe 6: scharf
+    svg.appendChild(erscheine(s("g", { "data-punkt": nr },
+      s("circle", { cx: bx, cy: by, r: 3 + unscharf * 1.6, fill: "#b7f5d0", opacity: 0.25 }),
+      s("circle", { cx: bx, cy: by, r: 2.6 + unscharf * 0.5, fill: "#e9fff2" })), runde / 6, ruhig, 0.2));
+    const zx = 138, ys = zeilen.length === 3 ? [50, 76, 108] : [62, 102];
+    zeilen.forEach((zeile, i) => {
+      const letzte = i === zeilen.length - 1;
+      svg.appendChild(erscheine(text(zx, ys[i], zeile, { gross: letzte ? 17 : 12, anker: "start", farbe: !letzte && i === 1 ? "#2f7a50" : "#2d3047" }),
+        (i / zeilen.length) * DAUER * 0.9, ruhig));
+    });
+    if (sterne >= 2) svg.appendChild(glanz(cx + r - 6, cy - r + 8, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE - 30, 24, ruhig));
+    return svg;
+  }
+
+  // ----- Hundertertafel-Detektiv (SAMMELN · tafel) -----
+  /**
+   * Die Tafel füllt sich Zeile um Zeile — bis 20 und bis 50 mit den Zahlen in den Feldern, ab der ganzen Tafel mit der
+   * Reihe der Stufe als Muster (5er-Reihe: zwei Spalten, 3er-Reihe: schräge Linien); ab Stufe 5 eine Seite des
+   * Tausenderbuchs. Gezählt (data-stueck) werden die Felder, mit Reihe ihre Vielfachen.
+   */
+  function tafel(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Number.isInteger(z.von) || !Number.isInteger(z.bis)) return null;
+    const anzahl = z.bis - z.von + 1;
+    if (anzahl % 10 || anzahl < 10 || anzahl > 100 || (z.von - 1) % 10 || (z.reihe !== undefined && !(Number.isInteger(z.reihe) && z.reihe > 1))) return null;
+    if (z.finde !== undefined && !(Number.isInteger(z.finde) && z.finde >= z.von && z.finde <= z.bis)) return null;
+    const zeilen = anzahl / 10, mitZahlen = zeilen <= 5;
+    const cw = mitZahlen ? 26 : 11.5, ch = mitZahlen ? 22 : 11.5, B = 10 * cw, H = zeilen * ch;
+    const x0 = (BREITE - B) / 2, y0 = mitZahlen ? (HOEHE - H) / 2 - 2 : 18;
+    const werte = Array.from({ length: anzahl }, (_, i) => z.von + i);
+    const vielfache = z.reihe ? werte.filter(v => v % z.reihe === 0) : [];
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "tafel", "data-anzahl": z.reihe ? vielfache.length : anzahl });
+    svg.appendChild(tagGrund());
+    const buch = z.von > 100; // Seite im Tausenderbuch: Blätter dahinter
+    if (buch) for (const d of [6, 3]) svg.appendChild(s("rect", { x: x0 - 6 + d, y: y0 - 6 + d, width: B + 12, height: H + 12, rx: 3, fill: "#efe6cf", stroke: "#b8a98a", "stroke-width": 0.8 }));
+    svg.appendChild(s("rect", { x: x0 - 6, y: y0 - 6, width: B + 12, height: H + 12, rx: 3, fill: buch ? "#fbf6e8" : "#ffffff", stroke: "#b8a98a", "stroke-width": 0.8 }));
+    const je = (DAUER * 0.5) / zeilen;
+    for (let r = 0; r < zeilen; r++) {
+      const zeile = s("g", {});
+      for (let c = 0; c < 10; c++) {
+        const v = z.von + r * 10 + c, x = x0 + c * cw, y = y0 + r * ch;
+        const feld = s("g", z.reihe ? {} : { "data-stueck": "feld", "data-wert": v },
+          s("rect", { x: x + 0.6, y: y + 0.6, width: cw - 1.2, height: ch - 1.2, rx: mitZahlen ? 3 : 1.5, fill: mitZahlen ? "#eaf4ff" : "#cfe2f7" }));
+        if (mitZahlen) feld.appendChild(text(x + cw / 2, y + ch / 2 + 3.5, v, { gross: 10, farbe: "#4a5a7a" }));
+        zeile.appendChild(feld);
+      }
+      svg.appendChild(erscheine(zeile, r * je, ruhig, 0.2));
+    }
+    if (!mitZahlen) svg.append(text(x0 - 10, y0 + 9, ganzText(z.von), { gross: 10, anker: "end" }), text(x0 + B + 10, y0 + H - 1, ganzText(z.bis), { gross: 10, anker: "start" }));
+    const jeV = (DAUER * 0.35) / Math.max(1, vielfache.length);
+    vielfache.forEach((v, k) => {
+      const i = v - z.von, x = x0 + (i % 10) * cw, y = y0 + Math.floor(i / 10) * ch;
+      svg.appendChild(erscheine(s("rect", { x: x + 0.6, y: y + 0.6, width: cw - 1.2, height: ch - 1.2, rx: 1.5, style: "fill:var(--deko-2)", "data-stueck": "vielfaches", "data-wert": v }),
+        DAUER * 0.6 + k * jeV, ruhig, 0.15));
+    });
+    if (z.finde !== undefined) {
+      // der Detektiv sucht eine Zahl (Stufen mit „Zahlen auf der Tafel finden“): das Feld leuchtet, die Lupe kommt
+      const i = z.finde - z.von, fx = x0 + (i % 10) * cw + cw / 2, fy = y0 + Math.floor(i / 10) * ch + ch / 2;
+      svg.appendChild(erscheine(s("rect", { x: fx - cw / 2 + 0.6, y: fy - ch / 2 + 0.6, width: cw - 1.2, height: ch - 1.2, rx: 2, style: "fill:var(--deko-5)", "data-gefunden": z.finde }), DAUER * 0.85, ruhig, 0.2));
+      if (!mitZahlen) svg.appendChild(erscheine(text(x0 + B + 10, fy + 4, ganzText(z.finde), { gross: 13, anker: "start" }), DAUER * 0.85, ruhig));
+      svg.appendChild(bewege(lupe(), `M${BREITE + 20},${fy - 40} Q${fx + 60},${fy - 50} ${fx},${fy}`, { x: fx, y: fy, winkel: 0 }, ruhig, { drehen: false, ab: DAUER * 0.45, dauer: DAUER * 0.45 }));
+    }
+    if (sterne >= 2) svg.appendChild(glanz(x0 + B + 4, y0 - 4, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(Math.min(x0 + B + 34, BREITE - 24), 26, ruhig));
+    return svg;
+  }
+
+  // ----- Teiler-Spürnase (SAMMELN · spuernase) -----
+  /** Hund nach rechts, Füsse auf 0,0, die Nase bei x = 24. */
+  function hund() {
+    const f = "#c58b4c", d = "#7a4f26";
+    return s("g", { "data-figur": "hund" },
+      s("path", { d: "M-17,-14 q-6,-8 -2,-13", stroke: f, "stroke-width": 2.4, fill: "none", "stroke-linecap": "round" }),
+      ...[-15, -8, 2, 9].map(x => s("rect", { x, y: -8, width: 3, height: 8, fill: d })),
+      s("ellipse", { cx: -3, cy: -12, rx: 15, ry: 6.5, fill: f }),
+      s("circle", { cx: 13, cy: -14, r: 6, fill: f }), s("ellipse", { cx: 19, cy: -10.5, rx: 5, ry: 3, fill: f }),
+      s("circle", { cx: 23.5, cy: -11, r: 1.6, fill: "#2d3047" }), s("circle", { cx: 14.5, cy: -16, r: 1.1, fill: "#2d3047" }),
+      s("path", { d: "M9,-19 q-4,2 -3,9 q3,-1 5,-6 Z", fill: d }));
+  }
+  /** Knochen der Breite b um x, y mit der Zahl darauf. */
+  function knochen(x, y, b, zahl) {
+    const h = 4.5, e = 3.6;
+    return s("g", {},
+      ...[[x - b / 2, y - h], [x - b / 2, y + h], [x + b / 2, y - h], [x + b / 2, y + h]].map(([cx, cy]) => s("circle", { cx, cy, r: e, fill: "#f4ecd8", stroke: "#b8a98a", "stroke-width": 0.8 })),
+      s("rect", { x: x - b / 2, y: y - h - 0.5, width: b, height: 2 * h + 1, fill: "#f4ecd8" }),
+      text(x, y + 3.6, ganzText(zahl), { gross: zahl >= 1000 ? 9 : 10 }));
+  }
+  /**
+   * Der Hund läuft die Reihe ab, unter seiner Nase tauchen die Teiler der Zahl als Knochen auf. Mit paare (alle Teiler,
+   * ab Stufe 3) verbinden Bögen die Teilerpaare (2 · 12 = 24); ein Teiler, der mit sich selbst die Zahl gibt (7 · 7 = 49),
+   * bleibt allein im Ring — darum hat 49 eine ungerade Anzahl Teiler (Stufe 6).
+   */
+  function spuernase(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Number.isInteger(z.zahl) || z.zahl < 2 || !Array.isArray(z.teiler) || !z.teiler.length) return null;
+    const teiler = [...z.teiler].sort((a, b) => a - b);
+    if (teiler.some(d => !Number.isInteger(d) || d < 1 || z.zahl % d) || new Set(teiler).size !== teiler.length) return null;
+    if (z.paare) {
+      const alle = [];
+      for (let d = 1; d <= z.zahl; d++) if (z.zahl % d === 0) alle.push(d);
+      if (alle.join() !== teiler.join()) return null;
+    }
+    const n = teiler.length;
+    const svg = neuesBild("sammeln", z.zahl, { "data-bilder": "spuernase", "data-anzahl": n, "data-zahl": z.zahl });
+    svg.append(tagGrund(), boden(),
+      s("rect", { x: 10, y: 22, width: 62, height: 32, rx: 6, fill: "#ffffff", stroke: "#6b7089", "stroke-width": 1.4 }),
+      text(41, 44, ganzText(z.zahl), { gross: 16 }));
+    // die Knochen liegen über dem Weg des Hundes (er verdeckt sonst den letzten), die Bögen darüber
+    const links = 86, rechts = 308, schritt = (rechts - links) / n, bw = Math.min(30, schritt - 9), ky = 86;
+    const xs = teiler.map((_, i) => links + schritt * (i + 0.5));
+    // der Hund läuft gleichmässig; ein Knochen taucht auf, wenn die Nase (24 vor den Füssen) bei ihm ist
+    const start = 40, ende = rechts - 26, lauf = DAUER * 0.8;
+    const zeitBei = x => Math.max(0, Math.min(lauf, ((x - 24 - start) / (ende - start)) * lauf));
+    teiler.forEach((d, i) => {
+      const k = knochen(xs[i], ky, bw, d);
+      k.setAttribute("data-stueck", "teiler");
+      k.setAttribute("data-wert", d);
+      svg.appendChild(erscheine(k, zeitBei(xs[i]), ruhig, 0.2));
+    });
+    svg.appendChild(bewege(hund(), `M${start},130 L${ende},130`, { x: ende, y: 130, winkel: 0 }, ruhig, { drehen: false, dauer: lauf, linear: true }));
+    if (z.paare) {
+      const farben = ["#e0569a", "#2f8fe0", "#f07c2a", "#2fb36b", "#8e5bd6"];
+      let k = 0;
+      teiler.forEach((d, i) => {
+        const p = z.zahl / d;
+        if (p < d) return;
+        const ab = lauf + 0.1 + k * 0.15, farbe = farben[k++ % farben.length];
+        if (p === d) {
+          svg.appendChild(erscheine(s("circle", { cx: xs[i], cy: ky, r: bw / 2 + 7, fill: "none", stroke: "#e9b300", "stroke-width": 2, "data-paar": `${d}·${d}` }), ab, ruhig));
+          return;
+        }
+        const x1 = xs[i], x2 = xs[teiler.indexOf(p)], h = Math.min(52, 8 + (x2 - x1) * 0.25);
+        svg.appendChild(erscheine(s("path", { d: `M${x1},${ky - 9} Q${(x1 + x2) / 2},${ky - 9 - 2 * h} ${x2},${ky - 9}`, fill: "none", stroke: farbe, "stroke-width": 1.6, "data-paar": `${d}·${p}` }), ab, ruhig));
+      });
+    }
+    if (sterne >= 2) svg.appendChild(glanz(68, 22, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE - 30, 22, ruhig));
+    return svg;
+  }
+
+  // ----- Velo-Tabelle (REISE · velo) -----
+  /** Velo nach rechts mit der Eule im Sattel, Räder auf 0,0; farbe des Rahmens. */
+  function veloFigur(farbe = "var(--deko-3)") {
+    return s("g", { "data-figur": "velo" },
+      s("circle", { cx: -10, cy: -6, r: 6, fill: "none", stroke: "#2d3047", "stroke-width": 1.6 }),
+      s("circle", { cx: 10, cy: -6, r: 6, fill: "none", stroke: "#2d3047", "stroke-width": 1.6 }),
+      s("path", { d: "M-10,-6 L-2,-6 L6,-15 L-5,-15 Z M-2,-6 L-6,-18 M10,-6 L6,-18 L9,-19", style: `stroke:${farbe}`, "stroke-width": 1.8, fill: "none", "stroke-linejoin": "round" }),
+      s("path", { d: "M-9,-19 h5", stroke: "#2d3047", "stroke-width": 2, "stroke-linecap": "round" }),
+      s("ellipse", { cx: -4, cy: -25, rx: 4.5, ry: 6, fill: "#8e6b4f" }), s("circle", { cx: -2, cy: -33, r: 4.2, fill: "#8e6b4f" }),
+      s("circle", { cx: -0.4, cy: -33.6, r: 1.5, fill: "#ffffff" }), s("path", { d: "M0,-31.5 l2,1 l-2,1 Z", fill: "#f5a623" }),
+      s("path", { d: "M-2,-24 L7,-18", stroke: "#8e6b4f", "stroke-width": 1.6 }));
+  }
+  const zeitText = (min, stunden) => (stunden && min % 60 === 0 ? `${min / 60} h` : `${min} min`);
+  /**
+   * Das Velo fährt gleichmässig, und die Tabelle Zeit → Weg füllt sich, wenn es die Marke erreicht (Weg =
+   * Geschwindigkeit · Zeit). frage: diese Zeit kommt zuletzt (Stufe 4, rückwärts); fehler: ein falscher Weg wird
+   * gestrichen und berichtigt (Stufe 6); vergleich: zwei Velos gleich lang unterwegs, das schnellere kommt weiter (Stufe 5).
+   */
+  function velo(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !(z.v > 0) || !Array.isArray(z.zeiten) || !z.zeiten.length) return null;
+    const weg = (v, min) => Number(((v * min) / 60).toFixed(6));
+    const eineStelle = w => Number.isInteger(Number((w * 10).toFixed(6)));
+    const kmText = w => `${zahlGeschrieben(w)} km`;
+    const svg = neuesBild("reise", stufe, { "data-bilder": "velo" });
+    svg.append(tagGrund(), boden());
+    const strasse = y => s("rect", { x: 14, y: y - 1, width: BREITE - 28, height: 5, rx: 2, fill: "#8a8fa8" });
+    if (z.vergleich) {
+      const min = z.zeiten[0], v2 = z.vergleich, w1 = weg(z.v, min), w2 = weg(v2, min);
+      if (!(v2 > 0) || v2 === z.v || ![w1, w2].every(eineStelle)) return null;
+      const max = Math.max(w1, w2), px = w => 26 + (w / max) * 228;
+      svg.appendChild(text(BREITE / 2, 20, zeitText(min, z.stunden), { gross: 13 }));
+      [[w1, 72, "var(--deko-3)"], [w2, 124, "var(--deko-6)"]].forEach(([w, y, farbe]) => {
+        svg.appendChild(strasse(y));
+        const v = veloFigur(farbe);
+        v.setAttribute("data-weg", w);
+        svg.appendChild(bewege(v, `M26,${y} L${px(w)},${y}`, { x: px(w), y, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: DAUER * 0.85 }));
+        svg.appendChild(erscheine(text(px(w) + 22, y - 4, kmText(w), { gross: 11, anker: "start" }), DAUER * 0.85, ruhig));
+      });
+      if (sterne >= 2) svg.appendChild(glanz(px(max), (w1 > w2 ? 72 : 124) - 44, ruhig));
+      if (sterne >= 3) svg.appendChild(funken(BREITE - 30, 22, ruhig));
+      return svg;
+    }
+    const zeiten = z.zeiten, wege = zeiten.map(m => weg(z.v, m)), n = zeiten.length;
+    if (!wege.every(eineStelle) || wege.some((w, i) => i && w <= wege[i - 1])) return null;
+    const f = z.fehler;
+    if (f && !(Number.isInteger(f.index) && f.index < n && Number.isFinite(f.falsch) && f.falsch !== wege[f.index])) return null;
+    if (z.frage !== undefined && !(Number.isInteger(z.frage) && z.frage < n)) return null;
+    const cw = Math.min(62, 292 / n), x0 = (BREITE - n * cw) / 2, ys = [10, 33], ch = 22, ry = 126;
+    const max = wege[n - 1], px = w => 30 + (w / max) * 250, lauf = DAUER * 0.8;
+    const zeitBei = w => ((px(w) - 30) / 250) * lauf;
+    svg.appendChild(strasse(ry));
+    zeiten.forEach((m, i) => {
+      const x = x0 + i * cw, w = wege[i];
+      for (const y of ys) svg.appendChild(s("rect", { x: x + 1, y, width: cw - 2, height: ch - 1, rx: 3, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1 }));
+      svg.appendChild(s("path", { d: `M${px(w)},${ry - 2} v-9 l6,2 l-6,2`, stroke: "#6b7089", "stroke-width": 1.2, fill: "#6b7089" }));
+      const zt = text(x + cw / 2, ys[0] + 15, zeitText(m, z.stunden), { gross: 11 });
+      const wt = text(x + cw / 2, ys[1] + 15, kmText(f?.index === i ? f.falsch : w), { gross: 11, farbe: f?.index === i ? "#c0392b" : "#2d3047" });
+      wt.setAttribute("data-zelle", `weg-${i}`);
+      if (z.frage === i) {
+        // rückwärts gefragt: der Weg steht, die Zeit kommt, wenn das Velo ankommt
+        svg.append(wt, erscheine(zt, zeitBei(w), ruhig, 0.2),
+          erscheine(s("rect", { x: x + 1, y: ys[0], width: cw - 2, height: ch - 1, rx: 3, fill: "none", stroke: "#f5b301", "stroke-width": 2 }), zeitBei(w), ruhig, 0.2));
+      } else if (f) svg.append(zt, f.index === i ? verschwinde(wt, DAUER * 0.85, ruhig) : wt);
+      else svg.append(zt, erscheine(wt, zeitBei(w), ruhig, 0.2));
+    });
+    if (f) {
+      // der falsche Wert wird gestrichen, an seiner Stelle steht der richtige
+      const x = x0 + f.index * cw;
+      svg.append(kurz(s("path", { d: `M${x + 8},${ys[1] + 15} L${x + cw - 8},${ys[1] + 5}`, stroke: "#c0392b", "stroke-width": 1.8 }), DAUER * 0.55, DAUER * 0.85, ruhig),
+        erscheine(text(x + cw / 2, ys[1] + 15, kmText(wege[f.index]), { gross: 11 }), DAUER * 0.9, ruhig));
+    }
+    svg.appendChild(bewege(veloFigur(), `M30,${ry} L${px(max)},${ry}`, { x: px(max), y: ry, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: lauf }));
+    if (sterne >= 2) svg.appendChild(fahne(Math.min(px(max) + 16, BREITE - 18), ry - 2, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE / 2, 80, ruhig));
+    return svg;
+  }
+
+  // ----- Vergleichs-Krokodil (REISE · krokodil) -----
+  /** Krokodil nach rechts, Gelenk des Mauls bei 0,0; { g, oben, unten } — die Kiefer drehen um das Gelenk. */
+  function krokodilFigur() {
+    const gruen = "#4f9d47", dunkel = "#3f7f39";
+    const zaehne = (y, h) => `M8,${y} ` + Array.from({ length: 11 }, (_, i) => `l2.5,${i % 2 ? -h : h}`).join(" ");
+    const oben = s("g", {}, s("path", { d: "M0,0 L0,-8 Q18,-12 40,-4 L40,0 Z", fill: gruen }), s("path", { d: zaehne(0, 3.5), fill: "#ffffff" }),
+      s("circle", { cx: 6, cy: -9, r: 3.4, fill: "#ffffff", stroke: dunkel, "stroke-width": 0.8 }), s("circle", { cx: 7, cy: -9.4, r: 1.5, fill: "#2d3047" }),
+      s("circle", { cx: 37, cy: -6, r: 0.9, fill: dunkel }));
+    const unten = s("g", {}, s("path", { d: "M0,0 L40,0 L40,3 Q20,9 0,8 Z", fill: dunkel }), s("path", { d: zaehne(0, -3.5), fill: "#ffffff" }));
+    const koerper = s("g", {}, s("path", { d: "M2,-8 Q-20,-12 -46,-2 Q-60,4 -72,0 Q-58,10 -40,10 Q-16,12 2,8 Z", fill: gruen }),
+      s("path", { d: "M-10,-10 l3,-3 l3,3 M-22,-9 l3,-3 l3,3 M-34,-6 l3,-3 l3,3", stroke: dunkel, "stroke-width": 1, fill: "none" }));
+    return { g: s("g", { "data-figur": "krokodil" }, koerper, unten, oben), oben, unten };
+  }
+  /**
+   * Zwei Zahlen (ab Stufe 5 Rechnungen mit ihrem Ergebnis) auf Karten; das Krokodil taucht auf und öffnet das Maul zur
+   * grösseren — offen ist es das Zeichen < oder >, das am Schluss darunter im Wasser steht.
+   */
+  function krokodil(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    const wert = q => (typeof q === "number" ? q : q && RECHNEN[q.op] && Number.isFinite(q.a) && Number.isFinite(q.b) ? RECHNEN[q.op](q.a, q.b) : NaN);
+    if (!z) return null;
+    const lw = wert(z.links), rw = wert(z.rechts);
+    if (!Number.isFinite(lw) || !Number.isFinite(rw) || lw === rw) return null;
+    const zeichen = lw < rw ? "<" : ">";
+    const svg = neuesBild("reise", stufe, { "data-bilder": "krokodil", "data-zeichen": zeichen });
+    svg.append(tagGrund(), s("path", { d: `M0,104 Q80,98 160,104 T${BREITE},104 L${BREITE},136 Q${BREITE},${HOEHE} ${BREITE - 14},${HOEHE} L14,${HOEHE} Q0,${HOEHE} 0,136 Z`, fill: "#5aa9dc" }));
+    // Rechnungen (Stufe 5–6) mit dem Ergebnis in der Karte: darunter braucht das Maul Platz
+    const term = typeof z.links !== "number" || typeof z.rechts !== "number";
+    const karte = (cx, q) => {
+      svg.append(s("rect", { x: cx - 58, y: 8, width: 116, height: term ? 44 : 32, rx: 6, fill: "#ffffff", stroke: "#6b7089", "stroke-width": 1.4 }),
+        text(cx, 29, typeof q === "number" ? ganzText(q) : `${ganzText(q.a)} ${OP_TEXT[q.op]} ${ganzText(q.b)}`, { gross: 14 }));
+      if (typeof q !== "number") svg.appendChild(erscheine(text(cx, 46, `= ${ganzText(wert(q))}`, { gross: 11, farbe: "#4f5668" }), DAUER * 0.3, ruhig));
+    };
+    karte(70, z.links);
+    karte(250, z.rechts);
+    const { g, oben, unten } = krokodilFigur();
+    // nach rechts offen, wenn rechts die grössere Zahl steht; sonst gespiegelt. Weit offen: das Maul ist das Zeichen.
+    const rechtsGroesser = lw < rw, auf = 30, k = 1.35;
+    svg.appendChild(s("g", { transform: `translate(${rechtsGroesser ? 184 : 136} 96) scale(${rechtsGroesser ? k : -k} ${k})` }, g));
+    if (ruhig) {
+      oben.setAttribute("transform", `rotate(${-auf})`);
+      unten.setAttribute("transform", `rotate(${auf})`);
+    } else {
+      // auftauchen, das Maul öffnen, einmal zuschnappen, wieder auf
+      g.setAttribute("opacity", "0");
+      g.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(0), fill: "freeze" }));
+      g.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", from: "0 34", to: "0 0", begin: t(0), dur: `${DAUER * 0.3}s`, fill: "freeze" }));
+      const kt = "0;0.3;0.45;0.62;0.72;0.84;1";
+      oben.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", values: `0;0;${-auf};${-auf};-3;${-auf};${-auf}`, keyTimes: kt, begin: t(0), dur: `${DAUER}s`, fill: "freeze" }));
+      unten.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", values: `0;0;${auf};${auf};3;${auf};${auf}`, keyTimes: kt, begin: t(0), dur: `${DAUER}s`, fill: "freeze" }));
+    }
+    svg.appendChild(erscheine(text(160, 136, zeichen, { gross: 24, farbe: "#ffffff" }), DAUER * 0.9, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(rechtsGroesser ? 302 : 18, 12, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(160, 52, ruhig));
+    return svg;
+  }
+
+  // ----- Punkte-Blitz (SAMMELN · blitz) -----
+  const WUERFELBILD = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+  /**
+   * Das Bild der Stufe blitzt auf wie im Spiel — Würfelbild, Zehnerfeld, zwei Zehnerfelder, Zehnerstangen und
+   * Einerwürfel, Hunderterplatten (Stellenfarben aus stil.css) —, dann steht die Anzahl darunter.
+   */
+  function punkteBlitz(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z) return null;
+    const bild = s("g", {});
+    let n, stuecke = 0;
+    if (Number.isInteger(z.wuerfel) && WUERFELBILD[z.wuerfel]) {
+      n = z.wuerfel;
+      const x = 128, y = 20, g = 64;
+      bild.appendChild(s("rect", { x, y, width: g, height: g, rx: 11, fill: "#ffffff", stroke: "#2d3047", "stroke-width": 3 }));
+      for (const i of WUERFELBILD[n]) { bild.appendChild(s("circle", { cx: x + 14 + (i % 3) * 18, cy: y + 14 + Math.floor(i / 3) * 18, r: 6, fill: "#2d3047", "data-stueck": "punkt" })); stuecke++; }
+    } else if (Number.isInteger(z.zehner) && z.zehner >= 1 && z.zehner <= 20) {
+      // Zehnerfeld 2 × 5, gefüllt zeilenweise (Kraft der Fünf); ab 11 zwei Felder
+      n = z.zehner;
+      const felder = Math.ceil(n / 10), fb = 108, fh = 48, gap = 16, x0 = (BREITE - felder * fb - (felder - 1) * gap) / 2;
+      for (let f = 0; f < felder; f++) {
+        const fx = x0 + f * (fb + gap), fy = 30;
+        bild.appendChild(s("rect", { x: fx, y: fy, width: fb, height: fh, rx: 6, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 2 }));
+        for (let i = 0; i < 10; i++) {
+          const voll = f * 10 + i < n, cx = fx + 14 + (i % 5) * 20, cy = fy + 14 + Math.floor(i / 5) * 20;
+          bild.appendChild(s("circle", { cx, cy, r: 7.5, ...(voll ? { style: "fill:var(--deko-6)", "data-stueck": "punkt" } : { fill: "none", stroke: "#c9cde0", "stroke-width": 1.4 }) }));
+          if (voll) stuecke++;
+        }
+      }
+    } else if (Number.isInteger(z.stellen) && z.stellen > 0 && z.stellen < 1000) {
+      n = z.stellen;
+      const d = ziffernJeStelle(n), keys = ["H", "Z", "E"].filter(k => d[k]);
+      const versatz = k => (k === "H" ? 5 : 9), breite = k => BAUSTEIN_BREITE[k] + (d[k] - 1) * versatz(k);
+      const gesamt = keys.reduce((a, k) => a + breite(k), 0) + (keys.length - 1) * 18;
+      let x = (BREITE - gesamt) / 2;
+      // grösser als im Baukasten (Einerwürfel im Spiel 13 px): sonst sind die Einer nicht zu zählen
+      const gross = s("g", { transform: "translate(160 92) scale(1.6) translate(-160 -92)" });
+      bild.appendChild(gross);
+      for (const k of keys) {
+        for (let i = 0; i < d[k]; i++) {
+          const b = baustein(k, x + i * versatz(k), k === "H" ? 90 - i * 4 : 90);
+          b.setAttribute("data-stueck", k);
+          gross.appendChild(b);
+          stuecke++;
+        }
+        x += breite(k) + 18;
+      }
+    } else return null;
+    const svg = neuesBild("sammeln", n, { "data-bilder": "blitz", "data-anzahl": stuecke });
+    svg.appendChild(tagGrund());
+    // Blitz: das Bild ist mit einem Schlag da, ein heller Schein vergeht
+    if (!ruhig) {
+      bild.setAttribute("opacity", "0");
+      bild.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(0.2), fill: "freeze" }));
+    }
+    svg.appendChild(bild);
+    if (!ruhig) {
+      const schein = s("rect", { x: 0, y: 0, width: BREITE, height: HOEHE, rx: 14, fill: "#ffffff", opacity: 0 });
+      schein.appendChild(s("animate", { attributeName: "opacity", values: "0;0.85;0", keyTimes: "0;0.15;1", begin: t(0.2), dur: "0.6s", fill: "freeze" }));
+      svg.appendChild(schein);
+    }
+    svg.appendChild(erscheine(text(BREITE / 2, 128, ganzText(n), { gross: 20 }), DAUER * 0.55, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 40, 30, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(40, 30, ruhig));
+    return svg;
+  }
+
+  // ----- Muster-Fortsetzer (BAUEN · kette) -----
+  const PERLEN = { r: "#e5484d", b: "#2f7fd6", g: "#f5b301" }; // wie 🔴 🔵 🟡 im Spiel
+  /**
+   * Die Kette der Stufe fädelt sich Perle um Perle auf, dann fällt die nächste an ihren Platz: Bildmuster in den Farben
+   * des Spiels, Zahlenfolgen mit der Zahl auf der Perle (regel "quadrat": 1, 4, 9, 16 …; sonst gleich viel mehr).
+   */
+  function kette(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.folge) || z.folge.length < 3) return null;
+    const f = z.folge, zahlen = f.every(Number.isFinite);
+    if (zahlen) {
+      if (z.regel === "quadrat") {
+        const k = Math.round(Math.sqrt(f[0]));
+        if (f.some((v, i) => v !== (k + i) ** 2) || z.weiter !== (k + f.length) ** 2) return null;
+      } else {
+        const d = f[1] - f[0];
+        if (f.some((v, i) => i && v - f[i - 1] !== d) || z.weiter !== f[f.length - 1] + d) return null;
+      }
+    } else {
+      if (!f.every(c => PERLEN[c])) return null;
+      // kleinste Länge q, mit der sich die Folge (mindestens zweimal) wiederholt; die nächste Perle setzt sie fort
+      const q = [1, 2, 3, 4].find(p => f.length >= 2 * p && f.every((c, i) => i < p || c === f[i - p]));
+      if (!q || z.weiter !== f[f.length - q]) return null;
+    }
+    const alle = [...f, z.weiter], n = alle.length, r = zahlen ? 14 : 12;
+    const xs = alle.map((_, i) => 34 + (i * (BREITE - 68)) / (n - 1));
+    const ys = xs.map((_, i) => 60 + 26 * Math.sin((Math.PI * i) / (n - 1)));
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "kette", "data-anzahl": n });
+    svg.append(tagGrund(),
+      s("path", { d: `M12,34 L${xs.map((x, i) => `${x.toFixed(1)},${ys[i].toFixed(1)}`).join(" L")} L${BREITE - 12},34`, fill: "none", stroke: "#8a8fa8", "stroke-width": 1.4, "stroke-linejoin": "round" }),
+      s("circle", { cx: 12, cy: 34, r: 2.6, fill: "#6b7089" }), s("circle", { cx: BREITE - 12, cy: 34, r: 2.6, fill: "#6b7089" }));
+    const je = (DAUER * 0.55) / f.length;
+    alle.forEach((c, i) => {
+      const perle = s("g", { "data-stueck": "perle", "data-wert": c },
+        zahlen ? s("circle", { cx: xs[i], cy: ys[i], r, fill: "#ffffff", style: "stroke:var(--deko-4)", "stroke-width": 2.2 })
+          : s("circle", { cx: xs[i], cy: ys[i], r, fill: PERLEN[c], stroke: "#2d3047", "stroke-opacity": 0.25, "stroke-width": 1 }),
+        zahlen ? text(xs[i], ys[i] + 4, ganzText(c), { gross: c >= 100 ? 9 : 11 })
+          : s("circle", { cx: xs[i] - r * 0.35, cy: ys[i] - r * 0.35, r: r * 0.25, fill: "#ffffff", opacity: 0.6 }));
+      if (i < f.length) { svg.appendChild(erscheine(perle, i * je, ruhig, 0.2)); return; }
+      svg.appendChild(erscheine(s("circle", { cx: xs[i], cy: ys[i], r: r + 5, fill: "none", stroke: "#f5b301", "stroke-width": 2 }), DAUER, ruhig));
+      svg.appendChild(vonOben(perle, DAUER * 0.68, ruhig, 70, 0.45));
+    });
+    if (sterne >= 2) svg.appendChild(glanz(xs[n - 1] + r + 4, ys[n - 1] - r - 4, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE / 2, 120, ruhig));
+    return svg;
+  }
+
+  // ----- Preis-Tabelle (SAMMELN · korb) -----
+  function apfel(x, y) {
+    return s("g", {}, s("circle", { cx: x, cy: y, r: 6, fill: "#e5484d" }), s("path", { d: `M${x},${y - 5} q1,-3 3,-4`, stroke: "#6b4a2b", "stroke-width": 1, fill: "none" }),
+      s("ellipse", { cx: x + 3.4, cy: y - 8, rx: 2.4, ry: 1.2, fill: "#4f9d47" }));
+  }
+  function muenzeKlein(x, y, r = 6) {
+    return s("g", {}, s("circle", { cx: x, cy: y, r, fill: "#e9b300", stroke: "#b88a1f", "stroke-width": 1 }), s("circle", { cx: x, cy: y, r: r * 0.6, fill: "none", stroke: "#b88a1f", "stroke-width": 0.8 }));
+  }
+  /** Kalenderblatt (Woche) um x, y. */
+  const kalender = (x, y) => s("g", {}, s("rect", { x: x - 7, y: y - 7, width: 14, height: 14, rx: 2, fill: "#ffffff", stroke: "#6b7089", "stroke-width": 1 }),
+    s("rect", { x: x - 7, y: y - 7, width: 14, height: 4, fill: "#e5484d" }), s("path", { d: `M${x - 4},${y - 9} v4 M${x + 4},${y - 9} v4`, stroke: "#6b7089", "stroke-width": 1.2 }));
+  /** Gewichtsstein (Gramm) um x, y. */
+  const gewicht = (x, y) => s("g", {}, s("path", { d: `M${x - 7},${y + 7} L${x - 4},${y - 4} L${x + 4},${y - 4} L${x + 7},${y + 7} Z`, fill: "#6b7089" }),
+    s("circle", { cx: x, cy: y - 6, r: 2.4, fill: "none", stroke: "#6b7089", "stroke-width": 1.4 }));
+  /** Säckchen, unten Mitte auf 0,0. */
+  const saeckchen = () => s("g", {}, s("path", { d: "M-16,0 Q-20,-22 -8,-30 L8,-30 Q20,-22 16,0 Z", fill: "#e8d7b0", stroke: "#b8a98a", "stroke-width": 1.2 }),
+    s("path", { d: "M-9,-30 Q0,-36 9,-30 M-6,-34 l-3,-5 M6,-34 l3,-5", stroke: "#b8a98a", "stroke-width": 1.4, fill: "none" }));
+  /**
+   * Die Tabelle der Stufe füllt sich Spalte um Spalte (oben Woche, Stück oder Gramm, unten der Preis; links je ein
+   * Zeichen statt eines Worts). Dazu fallen Münzen neben das Sparschwein (Folge: jede Woche gleich viel mehr), Äpfel in
+   * den Korb (Stückpreis) oder das Säckchen wird voller (Preis nach Gewicht). Geprüft: Folge gleichmässig, Preise
+   * proportional.
+   */
+  function korb(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !["spar", "stueck", "gramm"].includes(z.art) || !Array.isArray(z.x) || !Array.isArray(z.rp) || z.x.length !== z.rp.length || z.x.length < 2) return null;
+    if (![...z.x, ...z.rp].every(v => Number.isInteger(v) && v > 0)) return null;
+    if (z.art === "spar") {
+      const d = z.rp[1] - z.rp[0];
+      if (z.x.some((v, i) => i && v - z.x[i - 1] !== 1) || z.rp.some((v, i) => i && v - z.rp[i - 1] !== d)) return null;
+    } else if (z.x.some((v, i) => i && v <= z.x[i - 1]) || z.rp.some((p, i) => p * z.x[0] !== z.rp[0] * z.x[i])) return null;
+    const n = z.x.length, letzte = z.x[n - 1];
+    if (z.art === "stueck" && letzte > 8) return null;
+    const anzahl = z.art === "spar" ? n : z.art === "stueck" ? letzte : null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "korb", ...(anzahl ? { "data-anzahl": anzahl } : {}) });
+    svg.appendChild(tagGrund());
+    const ib = 26, cw = Math.min(58, (BREITE - 24 - ib) / n), x0 = (BREITE - ib - n * cw) / 2, ys = [8, 31], ch = 22;
+    svg.append(z.art === "spar" ? kalender(x0 + ib / 2, ys[0] + 11) : z.art === "stueck" ? apfel(x0 + ib / 2, ys[0] + 12) : gewicht(x0 + ib / 2, ys[0] + 11),
+      muenzeKlein(x0 + ib / 2, ys[1] + 11));
+    const je = (DAUER * 0.8) / n;
+    z.x.forEach((x, i) => {
+      const cx = x0 + ib + i * cw;
+      const spalte = s("g", {});
+      for (const y of ys) spalte.appendChild(s("rect", { x: cx + 1, y, width: cw - 2, height: ch - 1, rx: 3, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1 }));
+      spalte.append(text(cx + cw / 2, ys[0] + 15, z.art === "gramm" ? `${x} g` : x, { gross: 11 }),
+        text(cx + cw / 2, ys[1] + 15, geld(z.rp[i]), { gross: 10.5 }));
+      spalte.setAttribute("data-spalte", `${x}:${z.rp[i]}`);
+      svg.appendChild(erscheine(spalte, i * je, ruhig, 0.2));
+    });
+    if (z.art === "spar") {
+      // Sparschwein, daneben wächst der Münzstapel: je Woche eine Münze
+      svg.append(s("ellipse", { cx: 140, cy: 108, rx: 30, ry: 21, fill: "#f4a6b8", stroke: "#c9708a", "stroke-width": 1.2 }),
+        s("ellipse", { cx: 170, cy: 106, rx: 7, ry: 6, fill: "#f4a6b8", stroke: "#c9708a", "stroke-width": 1.2 }),
+        s("circle", { cx: 168, cy: 105, r: 1, fill: "#c9708a" }), s("circle", { cx: 172, cy: 105, r: 1, fill: "#c9708a" }),
+        s("path", { d: "M124,90 l4,-8 l5,7 Z", fill: "#f4a6b8", stroke: "#c9708a", "stroke-width": 1 }),
+        s("rect", { x: 132, y: 87, width: 14, height: 3, rx: 1.5, fill: "#9a4f63" }), s("circle", { cx: 152, cy: 100, r: 1.4, fill: "#2d3047" }),
+        ...[118, 132, 150, 162].map(x => s("rect", { x, y: 124, width: 6, height: 9, rx: 2, fill: "#f4a6b8", stroke: "#c9708a", "stroke-width": 1 })));
+      z.x.forEach((_, i) => {
+        const m = s("g", { "data-stueck": "muenze" }, s("ellipse", { cx: 214, cy: 128 - i * 6, rx: 12, ry: 4.5, fill: "#e9b300", stroke: "#b88a1f", "stroke-width": 1 }));
+        svg.appendChild(vonOben(m, i * je, ruhig, 50, 0.35));
+      });
+    } else if (z.art === "stueck") {
+      // Korb, die Äpfel jeder Spalte fallen hinein
+      // die Äpfel schauen über den Rand: zählbar wie im Spiel
+      const platz = k => [160 - ((Math.min(letzte, 4) - 1) * 14) / 2 + (k % 4) * 14, 100 - Math.floor(k / 4) * 12];
+      let k = 0;
+      z.x.forEach((x, i) => {
+        for (; k < x; k++) {
+          const [ax, ay] = platz(k), a = apfel(ax, ay);
+          a.setAttribute("data-stueck", "apfel");
+          svg.appendChild(vonOben(a, i * je + (k - (i ? z.x[i - 1] : 0)) * 0.08, ruhig, 50, 0.35));
+        }
+      });
+      svg.append(s("path", { d: "M118,104 L202,104 L192,134 L128,134 Z", fill: "#c58b4c", stroke: "#7a4f26", "stroke-width": 1.4 }),
+        s("path", { d: "M124,114 h72 M127,124 h66", stroke: "#7a4f26", "stroke-width": 0.8 }),
+        s("path", { d: "M126,104 Q160,66 194,104", stroke: "#7a4f26", "stroke-width": 2.4, fill: "none" }));
+    } else {
+      // Waage: das Säckchen wächst mit der Menge der Spalten
+      svg.append(s("rect", { x: 120, y: 130, width: 80, height: 6, rx: 2, fill: "#6b7089" }), s("rect", { x: 156, y: 122, width: 8, height: 8, fill: "#6b7089" }),
+        s("rect", { x: 128, y: 118, width: 64, height: 4, rx: 2, fill: "#8a94a6" }));
+      const sack = s("g", {}, saeckchen());
+      const masse = z.x.map(x => (0.35 + (0.65 * x) / letzte).toFixed(3));
+      if (ruhig) sack.setAttribute("transform", "scale(1)");
+      else {
+        sack.setAttribute("transform", `scale(${masse[0]})`);
+        sack.appendChild(s("animateTransform", { attributeName: "transform", type: "scale", values: masse.map(m => `${m} ${m}`).join(";"),
+          keyTimes: masse.map((_, i) => (n > 1 ? i / (n - 1) : 0).toFixed(3)).join(";"), begin: t(0), dur: `${(n - 1) * je + 0.01}s`, fill: "freeze" }));
+      }
+      svg.appendChild(s("g", { transform: "translate(160 118)" }, sack));
+    }
+    if (sterne >= 2) svg.appendChild(glanz(x0 + ib + n * cw + 4, ys[0], ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE - 34, 100, ruhig));
+    return svg;
+  }
+
+  // ----- Finger-Zähler (SAMMELN · haende) -----
+  // Hand wie im Spiel: linke Hand von hinten (Daumen rechts), die rechte gespiegelt; 160 × 170 Einheiten je Hand.
+  const FINGER_LAGE = { 4: [14, 44], 3: [37, 58], 2: [60, 64], 1: [83, 58] };
+  const HAUT = { fill: "#f9d3b0", stroke: "#a8714a", "stroke-width": 3 }, HAUT_ZU = { fill: "#efbf96", stroke: "#a8714a", "stroke-width": 3 };
+  /** Finger f (0 Daumen … 4 kleiner Finger), offen oder eingeklappt; geist: nur der gestrichelte Umriss des offenen. */
+  function finger(f, offen, geist = false) {
+    const art = geist ? { fill: "none", style: "stroke:var(--knopf)", "stroke-width": 3, "stroke-dasharray": "6 5" } : offen ? HAUT : HAUT_ZU;
+    if (f === 0) return offen || geist ? s("rect", { x: 104, y: 86, width: 22, height: 56, rx: 11, transform: "rotate(25 112 140)", ...art })
+      : s("rect", { x: 46, y: 112, width: 64, height: 24, rx: 12, ...art });
+    const [x, l] = FINGER_LAGE[f];
+    return offen || geist ? s("rect", { x, y: 92 - l, width: 22, height: l + 10, rx: 11, ...art }) : s("rect", { x, y: 76, width: 22, height: 26, rx: 11, ...art });
+  }
+  /**
+   * Die Finger strecken sich ab dem Daumen, wie Kinder in der Schweiz zählen (die zweite Hand beginnt wieder beim
+   * Daumen); dann steht die Zahl darunter. vergleich: daneben Würfelbild und Zehnerfeld mit gleich vielen (Stufe 4);
+   * rest: die fehlenden Finger bis 10 als gestrichelter Umriss, darunter n + Rest = 10 (Kraft der Fünf, Stufe 5); blitz:
+   * die Hände sind kurz zu sehen, dann zugedeckt, am Schluss wieder offen mit der Zahl (Stufe 6).
+   */
+  function haende(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    const n = z?.n;
+    if (!Number.isInteger(n) || n < 1 || n > 10 || (z.vergleich && !WUERFELBILD[n]) || (z.rest && n >= 10)) return null;
+    // so gross wie möglich; mit Würfel und Zehnerfeld daneben (vergleich) kleiner
+    const zwei = n > 5 || z.rest || z.blitz || z.vergleich, k = z.vergleich ? 0.5 : 0.62, breite = (zwei ? 2 : 1) * 160 * k;
+    const hx = z.vergleich ? 12 : (BREITE - breite) / 2, hy = z.vergleich ? 10 : 6;
+    const svg = neuesBild("sammeln", n, { "data-bilder": "haende", "data-anzahl": n });
+    svg.appendChild(tagGrund());
+    const flaeche = s("g", { transform: `translate(${hx} ${hy}) scale(${k})` });
+    const offen = [Math.min(5, n), Math.max(0, n - 5)]; // je Hand so viele Finger, ab dem Daumen
+    const je = (DAUER * 0.7) / n;
+    for (let h = 0; h < (zwei ? 2 : 1); h++) {
+      const hand = s("g", h === 1 ? { transform: "translate(320 0) scale(-1 1)" } : {});
+      hand.appendChild(s("rect", { x: 12, y: 86, width: 96, height: 74, rx: 28, ...HAUT }));
+      // gezeichnet wie im Spiel: kleiner Finger bis Zeigefinger, dann der Daumen obenauf
+      for (const f of [4, 3, 2, 1, 0]) {
+        if (f >= offen[h]) {
+          hand.appendChild(finger(f, false));
+          if (z.rest) hand.appendChild(erscheine(finger(f, false, true), DAUER * 0.8, ruhig));
+          continue;
+        }
+        const auf = finger(f, true);
+        auf.setAttribute("data-stueck", "finger");
+        if (ruhig || z.blitz) { hand.appendChild(auf); continue; }
+        const ab = (h * 5 + f) * je; // gezählt: Daumen zuerst, die zweite Hand nach der ersten
+        hand.append(verschwinde(finger(f, false), ab + 0.1, ruhig, 0.12), erscheine(auf, ab, ruhig, 0.15));
+      }
+      flaeche.appendChild(hand);
+    }
+    svg.appendChild(flaeche);
+    const mx = hx + breite / 2;
+    if (z.blitz) {
+      // kurz zu sehen (wie im Spiel 1,5 s), dann zugedeckt; am Schluss wieder offen
+      if (!ruhig) {
+        flaeche.setAttribute("opacity", "0");
+        flaeche.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(0.15), fill: "freeze" }));
+      }
+      // Decke mit Streifen wie im Spiel (.fz-feld.verdeckt)
+      const dx = hx - 6, dy = hy - 4, db = breite + 12, dh = 170 * k + 8;
+      const decke = s("g", {}, s("clipPath", { id: "feier-decke" }, s("rect", { x: dx, y: dy, width: db, height: dh, rx: 10 })),
+        s("rect", { x: dx, y: dy, width: db, height: dh, rx: 10, fill: "#f7f8fd" }),
+        s("path", { d: Array.from({ length: Math.ceil((db + dh) / 17) }, (_, i) => `M${dx + i * 17 - dh},${dy + dh} l${dh},${-dh}`).join(" "),
+          stroke: "#eef0fa", "stroke-width": 8, "clip-path": "url(#feier-decke)" }));
+      svg.appendChild(kurz(decke, 1.2, DAUER * 0.8, ruhig));
+    }
+    if (z.vergleich) {
+      // gleich viele: Würfelbild und Zehnerfeld daneben
+      const wx = 196, wy = 26, g = 44;
+      const vgl = s("g", {}, text(184, 58, "=", { gross: 18 }),
+        s("rect", { x: wx, y: wy, width: g, height: g, rx: 8, fill: "#ffffff", stroke: "#2d3047", "stroke-width": 2.4 }),
+        ...WUERFELBILD[n].map(i => s("circle", { cx: wx + 10 + (i % 3) * 12, cy: wy + 10 + Math.floor(i / 3) * 12, r: 4, fill: "#2d3047" })),
+        text(250, 58, "=", { gross: 18 }),
+        s("rect", { x: 260, y: 34, width: 54, height: 26, rx: 4, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.6 }),
+        ...Array.from({ length: 10 }, (_, i) => s("circle", { cx: 266 + (i % 5) * 10.5, cy: 41 + Math.floor(i / 5) * 12, r: 4,
+          ...(i < n ? { style: "fill:var(--deko-6)" } : { fill: "none", stroke: "#c9cde0", "stroke-width": 1 }) })));
+      svg.appendChild(erscheine(vgl, DAUER * 0.75, ruhig));
+    }
+    svg.appendChild(erscheine(text(mx, z.vergleich ? 134 : 141, z.rest ? `${n} + ${10 - n} = 10` : ganzText(n), { gross: z.rest ? 17 : 20 }), DAUER * (z.blitz ? 0.85 : 0.8), ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(Math.min(hx + breite + 8, BREITE - 12), 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(z.vergleich ? 286 : 34, z.vergleich ? 108 : 30, ruhig));
+    return svg;
+  }
+
+  // ----- Stimmt immer? (BAUEN · beweis) -----
+  const stein = (x, y, farbe, r = 6.5) => s("circle", { cx: x, cy: y, r, style: `fill:${farbe}`, stroke: "#2d3047", "stroke-opacity": 0.3, "stroke-width": 1 });
+  /** Kreissektor um cx, cy von Winkel a1 bis a2 (Grad, gegen den Uhrzeigersinn wie in der Mathematik). */
+  function sektor(cx, cy, r, a1, a2, farbe) {
+    const p = a => [cx + r * Math.cos((a * Math.PI) / 180), cy - r * Math.sin((a * Math.PI) / 180)];
+    const [x1, y1] = p(a1), [x2, y2] = p(a2);
+    return s("path", { d: `M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${a2 - a1 > 180 ? 1 : 0},0 ${x2.toFixed(2)},${y2.toFixed(2)} Z`,
+      style: `fill:${farbe}`, "fill-opacity": 0.85 });
+  }
+  /** Richtung von a nach b als Winkel in Grad (0 = rechts, gegen den Uhrzeigersinn, 0 … 360). */
+  const richtung = ([ax, ay], [bx, by]) => ((Math.atan2(ay - by, bx - ax) * 180) / Math.PI + 360) % 360;
+  /**
+   * „Stimmt immer?“ übt Begründen; das Bild zeigt je Stufe eine Begründung aus dem Spiel, mit Steinen und Figuren wie dort:
+   * paare (s1, zwei ungerade Zahlen: die beiden übrigen Steine bilden ein Paar), gruppen (s2, ein Vielfaches von 6 ist eines
+   * von 3), verdoppeln (s3, 4 · 6 = 2 · 12), ausgleich (s4, drei aufeinanderfolgende Zahlen), quadrat (s5, doppelte Seite →
+   * vierfache Fläche), winkel (s6, die drei Winkel eines Dreiecks ergeben zusammen eine Gerade: 180°).
+   */
+  function beweis(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !z.art) return null;
+    const svg = neuesBild("bauen", z.art, { "data-bilder": "beweis" });
+    svg.appendChild(tagGrund());
+    const A = "var(--deko-6)", Bf = "var(--deko-3)", C = "var(--deko-2)";
+    let unten = null;
+    if (z.art === "paare") {
+      if (!(z.a % 2 && z.b % 2)) return null;
+      const lage = (x0, i) => [x0 + Math.floor(i / 2) * 20, 54 + (i % 2) * 20];
+      const gruppe = (x0, anzahl, farbe) => Array.from({ length: anzahl }, (_, i) => stein(...lage(x0, i), farbe, 8));
+      const xa = 64, xb = 190;
+      gruppe(xa, z.a, A).forEach((e, i) => svg.appendChild(erscheine(e, i * 0.08, ruhig, 0.15)));
+      const steineB = gruppe(xb, z.b, Bf);
+      steineB.forEach((e, i) => { if (i < z.b - 1) svg.appendChild(erscheine(e, 0.3 + i * 0.08, ruhig, 0.15)); });
+      // die beiden übrigen Steine: Ring, dann wandert der von B zu dem von A — ein Paar
+      const [ax, ay] = lage(xa, z.a - 1), [bx, by] = lage(xb, z.b - 1);
+      // die Ringe zeigen die beiden übrigen Steine, bis sie ein Paar sind
+      svg.appendChild(kurz(s("g", { fill: "none", stroke: "#f5b301", "stroke-width": 1.6 }, s("circle", { cx: ax, cy: ay, r: 12 }), s("circle", { cx: bx, cy: by, r: 12 })), 0.8, 1.3, ruhig));
+      svg.appendChild(erscheine(schiebe(s("g", {}, steineB[z.b - 1]), ax - bx, ay + 20 - by, 1.3, ruhig, { dauer: 0.8, bogen: 30 }), 0.3 + (z.b - 1) * 0.08, ruhig, 0.15));
+      unten = `${z.a} + ${z.b} = ${z.a + z.b}`;
+    } else if (z.art === "gruppen") {
+      if (!(z.zahl % z.gross === 0 && z.gross % z.klein === 0)) return null;
+      const xs = Array.from({ length: z.zahl }, (_, i) => 160 - ((z.zahl - 1) * 18) / 2 + i * 18), y = 68;
+      xs.forEach((x, i) => svg.appendChild(erscheine(stein(x, y, A), i * 0.05, ruhig, 0.15)));
+      const rahmen = (von, anzahl, innen, farbe, ab) => svg.appendChild(erscheine(s("rect", { x: xs[von] - (innen ? 8 : 11), y: y - (innen ? 10 : 15), width: (anzahl - 1) * 18 + (innen ? 16 : 22),
+        height: innen ? 20 : 30, rx: 7, fill: "none", style: `stroke:${farbe}`, "stroke-width": innen ? 1.6 : 2, ...(innen ? { "stroke-dasharray": "3 2" } : {}) }), ab, ruhig));
+      for (let i = 0; i < z.zahl / z.gross; i++) rahmen(i * z.gross, z.gross, false, Bf, 0.8 + i * 0.15);
+      for (let i = 0; i < z.zahl / z.klein; i++) rahmen(i * z.klein, z.klein, true, C, 1.5 + i * 0.12);
+      unten = `${z.zahl} = ${z.zahl / z.gross} · ${z.gross} = ${z.zahl / z.klein} · ${z.klein}`;
+    } else if (z.art === "verdoppeln") {
+      if (!(z.zeilen % 2 === 0 && z.spalten > 0)) return null;
+      const d = 12, x0 = 160 - z.spalten * d + d / 2, y0 = 40, halb = z.zeilen / 2;
+      for (let r = 0; r < z.zeilen; r++) {
+        const reihe = s("g", {});
+        for (let c = 0; c < z.spalten; c++) reihe.appendChild(s("circle", { cx: x0 + c * d, cy: y0 + r * d, r: 4.5, style: `fill:${r < halb ? Bf : A}` }));
+        // die obere Hälfte rutscht neben die untere: halb so hoch, doppelt so lang
+        svg.appendChild(erscheine(r < halb ? schiebe(reihe, z.spalten * d, halb * d, 1.0, ruhig, { dauer: 0.9 }) : reihe, r * 0.12, ruhig, 0.2));
+      }
+      unten = `${z.zeilen} · ${z.spalten} = ${halb} · ${2 * z.spalten}`;
+    } else if (z.art === "ausgleich") {
+      const [a, b, c] = z.zahlen || [];
+      if (!(Number.isInteger(a) && b === a + 1 && c === a + 2 && c <= 7)) return null;
+      const xs = [110, 160, 210], boden0 = 116, h = 13;
+      svg.appendChild(s("rect", { x: 88, y: boden0 + 1, width: 144, height: 3, rx: 1.5, fill: "#8a8fa8" }));
+      [a, b, c].forEach((anzahl, t0) => {
+        for (let j = 0; j < anzahl; j++) {
+          const e = s("rect", { x: xs[t0] - 9, y: boden0 - (j + 1) * h + 1, width: 18, height: h - 2, rx: 3, style: `fill:${[A, Bf, C][t0]}` });
+          // der oberste Stein des höchsten Turms wandert auf den niedrigsten: alle gleich hoch
+          svg.appendChild(erscheine(t0 === 2 && j === c - 1 ? schiebe(s("g", {}, e), xs[0] - xs[2], h, 1.1, ruhig, { dauer: 0.9, bogen: 26 }) : e, (t0 * 3 + j) * 0.04, ruhig, 0.15));
+        }
+      });
+      unten = `${a} + ${b} + ${c} = 3 · ${b}`;
+    } else if (z.art === "quadrat") {
+      // Seite 1 → Seite 2: vier kleine Quadrate füllen das grosse, die Fläche wird viermal so gross
+      const kq = 28;
+      svg.appendChild(erscheine(s("rect", { x: 50, y: 58, width: kq, height: kq, style: `fill:${A}`, stroke: "#2d3047", "stroke-width": 1 }), 0, ruhig));
+      svg.appendChild(text(64, 102, "1", { gross: 11 }));
+      svg.appendChild(erscheine(s("path", { d: "M92,72 h40 m-6,-5 l6,5 l-6,5", stroke: "#6b7089", "stroke-width": 1.6, fill: "none" }), 0.3, ruhig));
+      const gx = 160, gy = 30;
+      svg.appendChild(erscheine(s("rect", { x: gx, y: gy, width: 2 * kq, height: 2 * kq, fill: "none", stroke: "#2d3047", "stroke-width": 1.4 }), 0.5, ruhig));
+      svg.appendChild(erscheine(text(gx + kq, gy + 2 * kq + 16, "2", { gross: 11 }), 0.5, ruhig));
+      [[0, 0], [1, 0], [0, 1], [1, 1]].forEach(([i, j], k) => {
+        const q = s("rect", { x: gx + i * kq, y: gy + j * kq, width: kq, height: kq, style: `fill:${A}`, stroke: "#2d3047", "stroke-width": 1, "data-stueck": "quadrat" });
+        svg.appendChild(vonOben(q, 0.8 + k * 0.3, ruhig, 40, 0.3));
+      });
+      svg.setAttribute("data-anzahl", 4);
+      unten = "2 · 2 = 4";
+    } else if (z.art === "winkel") {
+      // Dreieck; seine drei Winkel wandern an einen Punkt auf der Geraden und füllen dort den gestreckten Winkel
+      const P = { a: [36, 118], b: [150, 118], c: [76, 32] }, Q = [244, 108], r = 22;
+      svg.appendChild(s("path", { d: `M${P.a} L${P.b} L${P.c} Z`, fill: "#ffffff", stroke: "#2d3047", "stroke-width": 1.6 }));
+      const ecken = [["a", "b", "c"], ["b", "c", "a"], ["c", "a", "b"]].map(([e, n1, n2]) => {
+        let s1 = richtung(P[e], P[n1]), s2 = richtung(P[e], P[n2]);
+        let [von, bis] = [s1, s2].sort((x, y) => x - y);
+        if (bis - von > 180) [von, bis] = [bis, von + 360];
+        return { e, von, gross: bis - von };
+      });
+      const summe = ecken.reduce((a, q) => a + q.gross, 0);
+      if (Math.abs(summe - 180) > 0.01) return null;
+      svg.appendChild(s("path", { d: `M174,${Q[1]} H310`, stroke: "#2d3047", "stroke-width": 1.6 }));
+      // an der Geraden: β rechts, γ in der Mitte, α links — wie die Ecken im Dreieck liegen
+      const folge = { b: 0, c: ecken.find(q => q.e === "b").gross, a: 180 - ecken.find(q => q.e === "a").gross };
+      const farben = { a: A, b: Bf, c: C };
+      ecken.forEach((q, i) => {
+        svg.appendChild(sektor(...P[q.e], r, q.von, q.von + q.gross, farben[q.e]));
+        const drehen = folge[q.e] - q.von; // um so viel dreht der Winkel auf dem Weg zur Geraden
+        const innen = s("g", {}, sektor(...Q, r, folge[q.e], folge[q.e] + q.gross, farben[q.e]));
+        const aussen = s("g", {}, innen);
+        if (!ruhig) {
+          innen.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", from: `${drehen} ${Q[0]} ${Q[1]}`, to: `0 ${Q[0]} ${Q[1]}`, begin: t(0.5 + i * 0.45), dur: "0.7s", fill: "freeze" }));
+          aussen.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", from: `${P[q.e][0] - Q[0]} ${P[q.e][1] - Q[1]}`, to: "0 0", begin: t(0.5 + i * 0.45), dur: "0.7s", fill: "freeze" }));
+          aussen.setAttribute("opacity", "0");
+          aussen.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(0.5 + i * 0.45), fill: "freeze" }));
+        }
+        svg.appendChild(aussen);
+      });
+      svg.setAttribute("data-winkelsumme", summe.toFixed(2));
+      unten = "180°";
+    } else return null;
+    svg.appendChild(erscheine(zeileUnten(unten, 138), DAUER * 0.85, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 26, 22, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(30, 24, ruhig));
+    return svg;
+  }
+
+  BILDER.zoom = { strahl, radar };
+  Object.assign(BILDER.reise, { velo, krokodil });
+  Object.assign(BILDER.sammeln, { tafel, spuernase, blitz: punkteBlitz, korb, haende });
+  Object.assign(BILDER.bauen, { kette, beweis });
+
   const MUSTER = {
     /** REISE (Konzept 5): je Stufe ein Ziel weiter. */
     reise(feier, opt) {
@@ -949,7 +1780,9 @@ var LS_FEIER = (function () {
     },
 
     /** ZOOM (Konzept 6, Dezimal-Rakete): Landung auf dem Zahlenstrahl, je Stelle nach dem Komma eine Zeile tiefer. */
-    zoom(feier, { stufe, sterne, ruhig }) {
+    zoom(feier, opt) {
+      if (feier.bilder && BILDER.zoom?.[feier.bilder]) return BILDER.zoom[feier.bilder](feier, opt);
+      const { stufe, sterne, ruhig } = opt;
       const wert = feier.ziele?.[stufe];
       if (typeof wert !== "number") return null;
       const stellen = feier.stellen?.[stufe] ?? ((String(wert).split(".")[1] || "").length);

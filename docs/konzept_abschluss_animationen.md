@@ -209,7 +209,7 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 | Block | Themen | Spiele | Status |
 |---|---|---|---|
 | M1 | Stellenwert, Dezimal | 10 | abgenommen 10.11.2026 (Patrik, LERN_Session27); Tresor danach nachgebessert, dessen Abnahme offen |
-| M2 | Zahlen, Teiler, Begründen | 12 | offen |
+| M2 | Zahlen, Teiler, Begründen | 12 | in Arbeit seit 11.11.2026 (LERN_Session28, M2): gebaut, Abnahme offen |
 | M3 | Rechnen | 13 | offen |
 | M4 | Sachrechnen, Grössen | 12 | offen |
 | M5 | Geometrie | 13 | offen |
@@ -238,6 +238,43 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
   die auf 4.5 rundet, auf Hundertstel) statt dreier Rundungen.
 - **Stufenzahl-Schieber:** Ziffern rutschen in der Stellentafel statt eines hüpfenden Kommas — das Komma bleibt, wie
   im Spiel; Rechnungen der Stufen des Spiels (s5 36 · 0.1, s6 0.36 : 0.1).
+
+**Block M2 — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme):
+
+- **Runden-Rutsche:** die Rutsche aus M1 mit der Kugel des Spiels, Zahlen der Stufen statt „je Stufe eine Stelle
+  mehr“: 347 ≈ 350, 4362 ≈ 4400, 7520 ≈ 8000, 499 600 ≈ 500 000 (über die Stelle hinweg), 685 412 ≈ 690 000,
+  6 500 000 ≈ 7 000 000 (genau die Mitte rundet auf); 2★ Fähnchen statt Looping.
+- **Zahlenstrahl-Pfeil:** Strahlen der Stufen (0–1000 in Hundertern … 7 240 000–7 250 000); ab s4 steht der
+  Ausschnitt markiert auf dem grösseren Strahl darüber; s5 und s6 treffen zwischen zwei Striche (4637, 7 246 500),
+  wie die Stufen „genau schätzen“ üben. 2★ Glanz statt Zittern.
+- **Hundertertafel-Detektiv:** Streifen bis 20 und 50 mit den Zahlen, die ganze Tafel mit der 5er- und 3er-Reihe
+  als Muster, Seiten im Tausenderbuch 401–500 und 601–700 (7er-Reihe); in s2 und s5 sucht die Lupe eine Zahl (37,
+  457), wie die Stufen „Zahlen auf der Tafel finden“ üben. Ohne Umblättern und Zuklappen.
+- **Teiler-Spürnase:** Teilbar durch 2, 5, 10 (340) und bis 1000 (7000) wie s1 und s2, dann alle Teiler von 24 und 36
+  mit Bögen für die Teilerpaare, die Primzahl 97 (nur 1 und 97) und 49 mit der 7 allein im Ring (ungerade Anzahl
+  Teiler, s6) statt Vielfacher und der Primzahlen bis 50. 2★ Glanz statt Wedeln.
+- **Überschlags-Radar:** Rechnungen der Stufen mit dem Überschlag wie im Spiel (erste Ziffer; Division mit
+  kompatiblen Zahlen): 38 712 + 21 196 ≈ 60 000 … s5 „263 von 830 ≈ 30 %“ (das kleine Wort „von“ wie im Spiel),
+  s6 198 765 · 48 ≈ 10 000 000. Der Leuchtpunkt wird je Stufe schärfer; s6 ohne herausfallende Rechnung.
+- **Velo-Tabelle:** Tabelle Zeit → Weg wie im Spiel statt 1, 2, 5, 10 km: s1 12 km je Stunde, s3 mit Kommazahlen,
+  s4 rückwärts (18 km → 90 min), s5 zwei Velos 9 und 12 km in 60 min, s6 der falsche Wert 8 km wird zu 7.5 km.
+  2★ Fähnchen statt Klingel; die Fahrerin ist die Eule.
+- **Vergleichs-Krokodil:** Zahlen und Rechnungen der Stufen; das Krokodil taucht zwischen den Karten auf, das offene
+  Maul ist das Zeichen (beide Richtungen kommen vor). 2★ Glanz statt Lächeln, 3★ Funken statt blühender Seerosen.
+- **Punkte-Blitz:** Bilder der Stufen (Würfel 5, Zehnerfeld 7, zwei Felder 16 und 13, 47 und 352 in Dienes-Material)
+  blitzen mit einem hellen Schein auf, statt sich zu sammeln; die Dienes-Teile grösser als im Baukasten.
+- **Muster-Fortsetzer:** Bildmuster in den Farben von 🔴 🔵 🟡 (s1–s3), Folgen 18, 15, 12, 9 → 6, 0, 9, 18, 27 → 36
+  und 1, 4, 9, 16 → 25 statt Punkt-Quadraten; die nächste Perle fällt an ihren Platz.
+- **Preis-Tabelle:** s1 das Sparschwein der Folge „jede Woche 3 Fr. mehr“ statt eines Korbs; Stückpreise s2–s4
+  (s4 ohne Preis für 1 Stück), Gramm s5 und s6 (250 g über 50 g) mit einem wachsenden Säckchen; Geld über
+  `LS.geldText`. 2★ Glanz statt Kassenzettel.
+- **Finger-Zähler:** Stufen des Spiels statt 20 und 100 Fingern: 3, 5, 7 Finger ab dem Daumen, s4 6 Finger gleich
+  Würfel und Zehnerfeld, s5 8 + 2 = 10 mit den fehlenden Fingern gestrichelt, s6 die Hände blitzen kurz auf, eine
+  Decke wie im Spiel, dann 9. 2★ Glanz statt Winken.
+- **Stimmt immer?:** statt eines Mosaiks je Stufe eine Begründung aus den Aussagen des Spiels: zwei ungerade Zahlen
+  (die übrigen Steine werden ein Paar), ein Vielfaches von 6 ist eines von 3, 4 · 6 = 2 · 12 (verdoppeln und
+  halbieren), drei Nachbarzahlen ausgleichen, doppelte Seite gibt vierfache Fläche, die drei Winkel eines Dreiecks
+  füllen die Gerade (180°).
 
 ## 8. Ideen je Spiel
 

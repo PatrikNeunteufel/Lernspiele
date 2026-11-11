@@ -19,19 +19,24 @@
   .rahmen { overflow: hidden; border: 1px solid #c9c3b0; background: #fff; }
   iframe { border: 0; transform-origin: 0 0; display: block; }
   .hinweis { font-size: 13px; color: #6b7089; margin: 0 0 10px; max-width: 70em; }
+  #stufen.raster { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 12px; }
 </style>
 </head>
 <body>
 <h1>Vorschau Abschluss-Animationen</h1>
 <p class="hinweis">Je Stufe das Schlussbild des Spiels in der gewählten Breite. „Nochmal“ im Bild spielt die Animation neu,
 ein Tippen springt ans Ende. Es wird nichts gespeichert. „Bewegung reduzieren“ zeigt das Endbild wie mit der Einstellung
-des Geräts. Verkleinert passt eine Breite ins Fenster; für die Abnahme in echter Grösse „Verkleinern“ ausschalten.</p>
+des Geräts. Verkleinert passt eine Breite ins Fenster; für die Abnahme in echter Grösse „Verkleinern“ ausschalten.
+„Nebeneinander“ zeigt drei Stufen je Zeile. „Anhalten bei“ hält jede Animation bei dieser Sekunde an — so lässt sich der
+Ablauf Bild um Bild prüfen, nicht nur das Endbild (Anweisung Patrik, LERN_Session27).</p>
 <div class="leiste">
   <label>Spiel <select id="spiel"></select></label>
   <label>Breite <select id="breite"><option value="1024">Desktop (1024 px)</option><option value="768">Tablet (768 px)</option><option value="375">Handy (375 px)</option></select></label>
   <label>Sterne <select id="sterne"><option>1</option><option>2</option><option selected>3</option></select></label>
   <label><input type="checkbox" id="ruhig"> Bewegung reduzieren</label>
   <label><input type="checkbox" id="klein" checked> Verkleinern</label>
+  <label><input type="checkbox" id="raster"> Nebeneinander</label>
+  <label>Anhalten bei <select id="zeit"><option value="">— läuft</option><option>0.4</option><option>0.8</option><option>1.2</option><option>1.6</option><option>2.0</option><option>2.4</option><option value="5">Ende</option></select> s</label>
   <button type="button" id="neu">↻ Alle neu</button>
 </div>
 <div id="stufen"></div>
@@ -52,14 +57,23 @@ for (const fach of [...new Set(THEMEN.map(t => t.fach))]) {
   for (const s of spiele) gruppe.append(new Option(`${s.bild} ${s.name}`, s.id));
   $("spiel").append(gruppe);
 }
-for (const k of ["spiel", "breite", "sterne"]) if (auswahl.get(k)) $(k).value = auswahl.get(k);
-const HOEHE = 620;
+for (const k of ["spiel", "breite", "sterne", "zeit"]) if (auswahl.get(k)) $(k).value = auswahl.get(k);
+if (auswahl.get("raster")) $("raster").checked = true;
+const HOEHE = 620, HOEHE_RASTER = 410; // nebeneinander: unter dem Schlussbild bleibt nur leerer Platz
+/** Animation im Rahmen bei sekunde anhalten (SMIL: pauseAnimations, setCurrentTime). */
+function anhalten(f, sekunde) {
+  const svg = f.contentDocument?.querySelector(".feier svg");
+  if (!svg) return setTimeout(() => anhalten(f, sekunde), 150);
+  svg.pauseAnimations();
+  svg.setCurrentTime(sekunde);
+}
 function zeichne() {
-  const spiel = $("spiel").value, breite = Number($("breite").value), sterne = $("sterne").value;
-  const ruhig = $("ruhig").checked, klein = $("klein").checked;
-  history.replaceState(null, "", `?spiel=${spiel}&breite=${breite}&sterne=${sterne}`);
-  const platz = Math.max(320, document.body.clientWidth - 34);
-  const faktor = klein ? Math.min(1, platz / breite) : 1;
+  const spiel = $("spiel").value, breite = Number($("breite").value), sterne = $("sterne").value, zeit = $("zeit").value;
+  const ruhig = $("ruhig").checked, klein = $("klein").checked, raster = $("raster").checked;
+  history.replaceState(null, "", `?spiel=${spiel}&breite=${breite}&sterne=${sterne}${zeit ? `&zeit=${zeit}` : ""}${raster ? "&raster=1" : ""}`);
+  const platz = Math.max(320, document.body.clientWidth - 34) / (raster ? 3 : 1) - (raster ? 12 : 0);
+  const faktor = klein || raster ? Math.min(1, platz / breite) : 1;
+  $("stufen").className = raster ? "raster" : "";
   $("stufen").innerHTML = "";
   for (let n = 1; n <= 6; n++) {
     const box = document.createElement("div");
@@ -69,18 +83,20 @@ function zeichne() {
     const rahmen = document.createElement("div");
     rahmen.className = "rahmen";
     rahmen.style.width = `${Math.round(breite * faktor)}px`;
-    rahmen.style.height = `${Math.round(HOEHE * faktor)}px`;
+    const hoehe = raster ? HOEHE_RASTER : HOEHE;
+    rahmen.style.height = `${Math.round(hoehe * faktor)}px`;
     const f = document.createElement("iframe");
-    f.width = breite; f.height = HOEHE;
+    f.width = breite; f.height = hoehe;
     f.style.transform = `scale(${faktor})`;
     f.title = `Stufe ${n}`;
     f.src = `../eulenpfad/spiele/${spiel}/index.html?feier=s${n}&sterne=${sterne}${ruhig ? "&ruhig=1" : ""}`;
+    if (zeit) f.addEventListener("load", () => anhalten(f, Number(zeit)));
     rahmen.append(f);
     box.append(h, rahmen);
     $("stufen").append(box);
   }
 }
-for (const k of ["spiel", "breite", "sterne", "ruhig", "klein"]) $(k).addEventListener("change", zeichne);
+for (const k of ["spiel", "breite", "sterne", "ruhig", "klein", "raster", "zeit"]) $(k).addEventListener("change", zeichne);
 $("neu").addEventListener("click", zeichne);
 zeichne();
 </script>

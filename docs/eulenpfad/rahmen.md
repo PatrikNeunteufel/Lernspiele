@@ -1108,6 +1108,24 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   | BAUEN · `karten` | Ziffern als Text (`"97532"`): Karten legen sich zur Zahl, ab fünf Stellen mit Lücke | Ziffernkarten |
   | ZOOM · `figur: "kaefer"` | wie ZOOM, ein Marienkäfer landet statt der Rakete | Zehntel-Lupe |
 
+  Block M2 (Zahlen, Teiler, Begründen; LERN_Session28) — jedes Bild prüft die Zahlen, die es zeigt, und gibt ohne
+  stimmige Angabe kein Bild (der Test meldet dann „keine Animation“):
+
+  | Muster · bilder | Angabe je Stufe | Spiel |
+  |---|---|---|
+  | REISE · `rutsche`, `figur: "kugel"` | `{ werte: [347], auf: 10 }`: ganze Zahlen, auf den Zehner, Hunderter … | Runden-Rutsche |
+  | ZOOM · `strahl` | `{ von, bis, wert, ganz? }`: der Pfeil trifft die Zahl auf dem Strahl (zehn Abschnitte); `ganz` zeigt darüber den Ausschnitt auf dem grösseren Strahl | Zahlenstrahl-Pfeil |
+  | SAMMELN · `tafel` | `{ von, bis, reihe?, finde? }`: Tafel Zeile um Zeile (bis 50 mit Zahlen), die Reihe als Muster, ab 101 eine Seite im Tausenderbuch; `finde`: die Lupe sucht die Zahl | Hundertertafel-Detektiv |
+  | SAMMELN · `spuernase` | `{ zahl, teiler, paare? }`: der Hund findet die Teiler als Knochen; mit `paare` (alle Teiler, geprüft) Bögen für die Teilerpaare, ein Teiler mit sich selbst im Ring | Teiler-Spürnase |
+  | ZOOM · `radar` | `{ a, op, b, ra, rb }` oder `{ teil, ganz, prozent }`: Radar, je Stufe schärfer; Überschlag wie im Spiel (erste Ziffer, bei der Division kompatible Zahlen, 0.6- bis 1.6-mal) | Überschlags-Radar |
+  | REISE · `velo` | `{ v, zeiten, stunden?, frage?, fehler?, vergleich? }`: Velo und Tabelle Zeit → Weg; rückwärts, berichtigter Fehler, zwei Velos | Velo-Tabelle |
+  | REISE · `krokodil` | `{ links, rechts }` (Zahl oder `{ a, op, b }`): das Maul öffnet sich zur grösseren, darunter < oder > | Vergleichs-Krokodil |
+  | SAMMELN · `blitz` | `{ wuerfel }`, `{ zehner }` oder `{ stellen }`: Würfelbild, Zehnerfeld(er), Dienes-Material blitzen auf | Punkte-Blitz |
+  | BAUEN · `kette` | `{ folge, weiter, regel? }`: Perlen in den Farben des Spiels (`r`, `b`, `g`) oder mit Zahlen; Muster und Folge geprüft | Muster-Fortsetzer |
+  | SAMMELN · `korb` | `{ art: "spar" \| "stueck" \| "gramm", x, rp }`: Tabelle Spalte um Spalte, dazu Sparschwein, Korb oder Säckchen; Folge gleichmässig, Preise proportional | Preis-Tabelle |
+  | SAMMELN · `haende` | `{ n, vergleich?, rest?, blitz? }`: Finger strecken sich ab dem Daumen; Würfel und Zehnerfeld daneben, fehlende Finger bis 10, Blitz mit Decke | Finger-Zähler |
+  | BAUEN · `beweis` | `{ art: "paare" \| "gruppen" \| "verdoppeln" \| "ausgleich" \| "quadrat" \| "winkel", … }`: je Stufe eine Begründung aus dem Spiel mit Steinen und Figuren | Stimmt immer? |
+
   Stellenfarben in den Bildern nur über `var(--st-…)` aus `stil.css`, nach dem Komma `--deko-7` mit der Kommalinie
   `--deko-1` (wie `.schriftlich`); Zahlen über `LS.zahlText` und `LS.dezimalText`.
 
@@ -1121,7 +1139,9 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
 - **Vorschau:** `?feier=<stufe>&sterne=1–3[&ruhig=1]` zeigt nur das Schlussbild mit der Animation und „↻ Nochmal“ —
   ohne Anmeldung, ohne Runde, nichts wird gespeichert; die Stufe kommt aus der Skala (auch wenn ihre Inhaltslisten
   nicht frei sind), Einstellung und Ruhezeit gelten nicht, der Ton schon. `tools/feier_vorschau.html` (nicht
-  veröffentlicht, über den Entwickler-Server) zeigt so alle sechs Stufen eines Piloten in 1024, 768 oder 375 px.
+  veröffentlicht, über den Entwickler-Server) zeigt so alle sechs Stufen eines Piloten in 1024, 768 oder 375 px;
+  „Nebeneinander“ drei je Zeile, „Anhalten bei“ hält jede Animation bei einer Sekunde an (SMIL `setCurrentTime`) — so
+  lässt sich der Ablauf Bild um Bild prüfen, nicht nur das Endbild (LERN_Session28).
 
 ## 25. Ruhezeiten
 

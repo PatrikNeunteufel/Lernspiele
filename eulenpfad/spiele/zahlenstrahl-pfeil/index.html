@@ -31,6 +31,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -134,6 +135,10 @@ function strahlZeichnen(a, onTipp) {
 
 LS.spiel({
   id: "zahlenstrahl-pfeil",
+  // Abschluss-Animation (feier.js, Block M2, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "zoom", bilder: "strahl", ziele: { s1: { von: 0, bis: 1000, wert: 700 }, s2: { von: 0, bis: 10000, wert: 6000 },
+    s3: { von: 0, bis: 1000000, wert: 72000 }, s4: { von: 300000, bis: 400000, wert: 340000, ganz: [0, 1000000] },
+    s5: { von: 4600, bis: 4700, wert: 4637, ganz: [4000, 5000] }, s6: { von: 7240000, bis: 7250000, wert: 7246500, ganz: [7000000, 8000000] } } },
   einleitung: "Wo steht die Zahl auf dem Zahlenstrahl? Tipp auf die richtige Stelle — oder lies ab, wohin der Pfeil zeigt.",
   hilfe: "Steht oben eine Zahl, tippst du auf dem Zahlenstrahl auf ihre Stelle — der Pfeil springt dorthin — und dann auf „OK ✓“. Zeigt schon ein Pfeil, tippst du die Zahl ein. Ungefähr genügt.",
   anzahl: 8,

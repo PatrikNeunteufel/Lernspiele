@@ -61,6 +61,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -303,6 +304,9 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "finger-zaehler",
+  // Abschluss-Animation (feier.js, Block M2, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "haende", ziele: { s1: { n: 3 }, s2: { n: 5 }, s3: { n: 7 }, s4: { n: 6, vergleich: true },
+    s5: { n: 8, rest: true }, s6: { n: 9, blitz: true } } },
   hilfe: "Schau auf die Hände und tippe die passende Antwort an. Sollst du Finger zeigen, tippst du die Finger an — nochmals tippen klappt einen wieder ein — und dann «✓ Fertig».",
   einleitung: "Wie viele Finger sind es? Schau auf die Hände — und zeig es auch mit deinen eigenen!",
   anzahl: 8,

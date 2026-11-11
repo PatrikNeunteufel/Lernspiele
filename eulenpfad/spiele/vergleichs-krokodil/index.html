@@ -31,6 +31,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -162,6 +163,10 @@ function tippsFuer(stufe) {
 
 LS.spiel({
   id: "vergleichs-krokodil",
+  // Abschluss-Animation (feier.js, Block M2, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "krokodil", ziele: { s1: { links: 347, rechts: 374 }, s2: { links: 4572, rechts: 4527 },
+    s3: { links: 47382, rechts: 47832 }, s4: { links: 99870, rechts: 100020 }, s5: { links: { a: 300, op: "·", b: 4 }, rechts: { a: 1000, op: "+", b: 250 } },
+    s6: { links: { a: 125000, op: "·", b: 8 }, rechts: 999999 } } },
   hilfe: "Schau beide Seiten an und tippe das Zeichen, das in die Mitte gehört: < (kleiner als), = (gleich) oder > (grösser als). Das Maul des Krokodils zeigt zur grösseren Zahl.",
   einleitung: "Das hungrige Krokodil frisst immer die grössere Zahl! Wähle das richtige Zeichen: < (kleiner als), > (grösser als) oder = (gleich).",
   anzahl: 10,
