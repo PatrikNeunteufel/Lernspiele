@@ -4,6 +4,7 @@
 //   1. jede .js-Datei und jedes Inline-Skript einer HTML-Seite ist lesbar (vm.Script: nur Syntax, nichts läuft);
 //   2. jede <script src="…"> zeigt auf eine vorhandene Datei;
 //   3. kein Skript kommt von aussen (http, https, //) — die Reihe läuft ohne externe Abhängigkeiten (Entscheid LERN-1);
+//      ebenso kein <link href>, @import oder url() von aussen (Stile, Schriften; seit LERN_Session32);
 //   4. jede Seite, die <app>/kern/kern.js lädt, lädt davor <app>/version.js (Plan C12, NS3 a: Version der App);
 //   5. jede Grösse nach der Bildhöhe (`100vh - …`, auch dvh, svh, lvh) in .css-Dateien und <style>-Blöcken steht in
 //      einem max() oder clamp() mit Untergrenze (Entscheid H1 a, LERN_Session28: unter 480 px Bildhöhe wurde die Breite
@@ -53,6 +54,12 @@ function pruefeCss(text, wo, zeile0 = 1) {
     const anfang = leer.lastIndexOf("\n", t.index) + 1;
     m.push(`${wo} (Zeile ${zeile}): Grösse nach der Bildhöhe ohne Untergrenze — ${leer.slice(anfang, leer.indexOf("\n", t.index) >>> 0).trim().slice(0, 110)} (H1 a: max(Mindestmass, …) oder „${AUSNAHME} <Grund>“)`);
   }
+  // 3. auch Stile nichts von aussen: @import und url() mit http, https oder // (eine Schrift von einem Schriftdienst,
+  // LERN-1; Lücke gefunden in LERN_Session32 bei der Vorarbeit zum Konzept Gestaltung)
+  for (const t of leer.matchAll(/@import\s+(?:url\(\s*)?["']?((?:https?:)?\/\/[^"')\s]+)|url\(\s*["']?((?:https?:)?\/\/[^"')\s]+)/gi)) {
+    const zeile = zeile0 + (text.slice(0, t.index).match(/\n/g) || []).length;
+    m.push(`${wo} (Zeile ${zeile}): Stil oder Schrift von aussen ${t[1] || t[2]} (LERN-1)`);
+  }
   return m;
 }
 
@@ -69,6 +76,10 @@ const GEGENPROBEN_CSS = [
   [`/* ${AUSNAHME} */ .a { max-height: calc(100vh - 24px); }`, 1, "Ausnahme vor dem Block"],
   ["/* .a { width: calc(100vh - 9px); } */ .b {}", 0, "nur im Kommentar"],
   ["@media (x) { .a { height: calc(100dvh - 50px); } }", 1, "dvh in @media"],
+  ["@import url('https://fonts.example/css?family=X');", 1, "Schrift von aussen per @import"],
+  ["@font-face { font-family: X; src: url(//cdn.example/x.woff2); }", 1, "Schriftdatei von aussen"],
+  ["@font-face { font-family: X; src: url('schriften/x.woff2'); }", 0, "Schriftdatei im App-Ordner"],
+  [".a { background: url(data:image/svg+xml,%3Csvg%3E); }", 0, "Bild als data-URL"],
 ];
 
 /**
@@ -118,6 +129,8 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
         fehler.push(...pruefeCss(s[1], wo, 1 + (s.input.slice(0, start).match(/\n/g) || []).length));
       }
       const html = fs.readFileSync(f, "utf8").replace(/<!--[\s\S]*?-->/g, "");
+      // 3. auch kein <link href> von aussen (Stile, Schriften, Vorladen; LERN-1)
+      for (const l of html.matchAll(/<link\s[^>]*href\s*=\s*["']((?:https?:)?\/\/[^"']+)["']/gi)) fehler.push(`${wo}: Verweis von aussen ${l[1]} (LERN-1)`);
       const geladen = []; // aufgelöste Pfade der <script src> in Reihenfolge (für Punkt 4)
       for (const m of html.matchAll(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/gi)) {
         const attr = m[1] || "";

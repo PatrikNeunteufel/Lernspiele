@@ -1,4 +1,6 @@
-# Rückmeldung zur Gestaltung — Eingang (noch kein Konzept)
+# Rückmeldung zur Gestaltung — Eingang
+
+> Seit LERN_Session32 gibt es das Konzept dazu: [konzept_gestaltung.md](konzept_gestaltung.md) (Fragen GS0–GS3).
 
 Stand: 10.11.2026 (LERN_Session27) · **Eingang, nichts entschieden.** Aufgenommen auf Wunsch Patrik als nächster
 Arbeitsschritt **nach den Abschluss-Animationen** (Ausrollen nach AR1 a, docs/konzept_abschluss_animationen.md 7).

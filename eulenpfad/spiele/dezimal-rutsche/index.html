@@ -364,8 +364,8 @@ function tippsFuer(a, p) {
 LS.spiel({
   id: "dezimal-rutsche",
   // Abschluss-Animation (Block M1, AR1 a; docs/konzept_abschluss_animationen.md 8): der Wagen rollt vom Hügel (Gipfel = Mitte) zur gerundeten Zahl
-  feier: { muster: "reise", bilder: "rutsche", ziele: { s1: { werte: [3.4], stellen: 0, einheit: "Fr.", wertStellen: 2 },
-    s2: { werte: [4.7], stellen: 0 }, s3: { werte: [1.745], stellen: 1 }, s4: { werte: [2.96], stellen: 1 }, s5: { werte: [5.678], stellen: 2 },
+  feier: { muster: "reise", bilder: "rutsche", ziele: { s1: { werte: [3.4], stellen: 0, einheit: "Fr.", wertStellen: 2, figur: "muenze" },
+    s2: { werte: [4.7], stellen: 0 }, s3: { werte: [1.745], stellen: 1 }, s4: { werte: [2.96], stellen: 1 }, s5: { werte: [5.678], stellen: 2, tippen: true },
     s6: { werte: [4.45, 4.54], stellen: 1 } } },
   hilfe: stufe => (stufe === "s5" || stufe === "s6"
     ? "Runde die Zahl und tippe das Ergebnis mit den Zifferntasten ein, mit allen Stellen, die zum Runden gehören. Stehen Zahlen auf Knöpfen, tippst du die passende an."

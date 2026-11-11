@@ -125,7 +125,8 @@ function zeichneStatistik(box, neu) {
     seite.append(karte(el("h2", { text: "🦉 Das übe ich als Nächstes" }),
       // Das freundliche Fazit erst, wenn die Aufsicht es freigegeben hat (Entscheid G3, Profil-Feld fazitFuerKind)
       p.fazitFuerKind ? el("ul", { class: "fazit-kind" }, ...AUSWERTUNG.fazitFuerKind(runden, p, Date.now(), meine).map(s => el("li", { text: s }))) : null,
-      vorschlagListe(AUSWERTUNG.vorschlaege(gewaehlt, runden, p).slice(0, 4))));
+      // ohne Konzentration: sie gehört nach ST1 a nur der Aufsicht (vorher erreichte sie das Kind, LERN_Session32)
+      vorschlagListe(AUSWERTUNG.vorschlaege(gewaehlt, runden, p).filter(v => v.art !== "konzentration").slice(0, 4))));
     seite.append(lernplanKarte("📅 Meine Woche"), rundenKarte("🔁 Meine Runden", 15));
     if (meine.length) seite.append(meldungenKarte());
     return;

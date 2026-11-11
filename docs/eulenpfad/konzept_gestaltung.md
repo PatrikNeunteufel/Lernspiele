@@ -1,0 +1,141 @@
+# Konzept: Gestaltung der Startseite (Kinder-Bühne, Kartenbilder, Schrift)
+
+Stand: 11.11.2026 (LERN_Session32) · **Entwurf, nichts entschieden.** Fragen GS0–GS3 vorgelegt; gebaut wird erst nach
+den Entscheiden. Eingang: [rueckmeldung_gestaltung.md](rueckmeldung_gestaltung.md).
+
+## Auslöser
+
+Eine Lehrperson fand den Eulenpfad „steril“ und „nach KI“. Die Einschätzung dazu (Eingang, Chat LERN_Session27):
+Inhaltlich stark, im Auftritt ein Verwaltungsportal — viel kleiner grauer Text auf den Karten, Standard-Look von
+Dashboards (Pillen-Filter, Tab-Leiste, dünne Ränder, Systemschrift), keine Bild-Identität der Spiele. Die Spielseiten
+selbst gelten als gelungen. Hebel: Bildkarten (Idee Patrik: aus den Abschluss-Animationen), Kinder-Bühne und
+Lehrer-Cockpit trennen, rundere Schrift und Druckknöpfe.
+
+## Befund heute (Vorarbeit LERN_Session32)
+
+**Spielkarte** (`start/spiele.js` `karte()`, Stil `start/start.css` `.spielkarte`): Schalterleiste (Klassen-Marke,
+Reihenfolge, ⏱, ♾, ☆) · Emoji 44 px und Name 22 px · Beschreibung als grauer Text 15 px (`--text-leise`) · Lernziel-Kürzel
+als Pillen 13 px („4.2-G1“) · sechs Stufenknöpfe mit Symbol, Nummer und Sternen 11 px. Darüber der Filter (Fach, Klasse,
+Nur, Stufe als Pillen, ausgeklappt), Suche, Kacheln/Kompakt, die Zufallskarten mit langen Sätzen („Die Eule zieht ein
+Spiel aus deiner Auswahl — eher eines, das du noch üben solltest.“). Gesehen im Browser mit einem Testprofil 3. Klasse.
+
+**Der zitierte Satz** „In den letzten 3 Aufgaben nur 33 % auf Anhieb richtig …“ steht nicht auf den Spielkarten, sondern
+in der Kinder-Statistik, Karte „🦉 Das übe ich als Nächstes“ (`auswertung.js` `vorschlaege()`, `statistik.js`).
+
+**Frühere Entscheide, die das Konzept binden** (Fundstellen im Bericht der Vorarbeit, LERN_Session32):
+
+| Entscheid | Inhalt | Folge für dieses Konzept |
+|---|---|---|
+| Plan Angleich, Grundsatz (Auftrag Patrik 2026-11-05, `docs/plan_angleich_reihe.md`) | „Der Eulenpfad bleibt im Aussehen, wie er ist (höchstens kleine Retuschen)“ | steht dem Umbau entgegen → **GS0** |
+| ST1 a (LERN_Session12) | Kind sieht in der Statistik vier Karten; Konzentration, Vorgehen, Lernzeiten nur die Aufsicht | Hebel 2 ist in der Statistik schon entschieden; Lücke behoben (unten) |
+| L1 a–L4 a, K1 a, K2 a, G1 a, ZG1 a, SU1 a | Tabs, Freigaben, „Meine Klasse“, Klassen-Rand, Weiterspielen, Suche | bleiben; das Konzept ändert Aussehen und Text der Karte, nicht diese Abläufe |
+| Vorlesen (LERN_Session8) | langes Drücken liest Name und Beschreibung | trägt die Beschreibung, wenn sie von der Karte geht → **GS2** |
+| CLAUDE.md, Alter | 2. Klasse fast ohne Lesetext, 4. Klasse kurze Sätze erlaubt | Massstab für **GS2** |
+| AN1 a–AR1 a, Regeln 3, 6, 7 (Konzept Abschluss-Animationen) | ruhiges Endbild, ohne Text, SVG ohne Bilddateien | Kartenbild ohne neue Zeichnungen möglich → **GS1** |
+| KT1 a, PA1 a (Kern) | Übersicht, Filter, Personenmenü, Tab-Leiste sind Kern-Bausteine beider Apps | reine CSS-Änderungen in `start.css` berühren den Lernsteig nicht; ein Umbau der Bausteine schon |
+| LERN-1, P1 a | ohne externe Abhängigkeiten, App-Ordner eigenständig | eine Schrift nur als Datei im App-Ordner → **GS3** |
+| — | Schrift: kein Entscheid; `--schrift` nennt „Nunito“ zuerst, im Repo liegt aber keine Schriftdatei | heute zeigt jedes Gerät seine eigene Schrift → **GS3** |
+
+**Behoben in der Vorarbeit** (Abweichungen von Entscheiden, keine Frage):
+- Die Kinder-Statistik zeigte Konzentrations-Vorschläge („🧠 Konzentration … Prozentpunkte“) — gegen ST1 a. Jetzt
+  ausgefiltert (`statistik.js`).
+- `tools/pruefe_skripte.js` prüfte nach LERN-1 nur `<script src>`; eine Schrift von einem Schriftdienst per `<link>`,
+  `@import` oder `url()` wäre durchgerutscht. Jetzt geprüft, mit Gegenproben.
+
+## Zahlen zu den Kartenbildern (gemessen LERN_Session32)
+
+Gemessen im Browser: je Spiel die Spielseite im Vorschau-Modus (`?feier=s3&sterne=3&ruhig=1`), Länge des SVG-Markups.
+
+| Grösse | Wert |
+|---|---|
+| Endbild je Spiel, Median | 3,5 KB (kleinstes 1,7 KB, 90 % unter 7,2 KB) |
+| Ausreisser | Schweiz-Karte 123 KB (Kantonsgrenzen), danach 16 KB |
+| alle 169 Endbilder zusammen | 821 KB (ohne Schweiz-Karte 698 KB) |
+| Feier-Angaben aller Spiele (`feier: {…}` in den Spielseiten) | 63 KB, im Schnitt 371 B je Spiel |
+| `feier.js` (alle Muster und Bilder) | 737 KB, gepackt (gzip, wie Pages ausliefert) 204 KB |
+| `katalog.js` heute | 131 KB; jede Spielseite lädt ihn (169 von 169) |
+| Farben in den Bildern | 191 Stellen mit `var(--…)` in `feier.js`: ein Bild als eigene Datei (`<img>`) kennt die Variablen aus `stil.css` nicht |
+
+## Entscheidungsfragen
+
+### GS0 — Gilt „Aussehen bleibt“ weiter für die Startseite?
+
+**Ort:** `docs/plan_angleich_reihe.md`, Grundsätze.
+**Heute:** „Der Eulenpfad bleibt im Aussehen, wie er ist (höchstens kleine Retuschen); der Lernsteig wird ihm im Aufbau
+ähnlich, nur erwachsener …“
+**Problem:** Die Rückmeldung verlangt mehr als Retuschen (Kartenbilder, weniger Text, Schrift). Ohne neuen Entscheid
+widerspricht jeder Schritt dem Grundsatz.
+
+- **a (Empfehlung):** „Der Eulenpfad bleibt in den Spielen im Aussehen, wie er ist (höchstens kleine Retuschen). Die
+  Startseite (Tabs Spiele, Profil, Statistik, Erfolge) wird nach docs/eulenpfad/konzept_gestaltung.md überarbeitet
+  (Entscheid GS0 a); der Lernsteig übernimmt davon nur den Aufbau, nicht das Kindliche.“
+- **b:** Grundsatz bleibt; aus der Rückmeldung nur Retuschen (Text kürzen, Knöpfe), keine Kartenbilder, keine Schrift.
+
+*Warum die Empfehlung:* Der Grundsatz schützte die Spielseiten beim Angleich der Reihe vor dem Umbau des Lernsteigs — sie
+gelten auch in der Rückmeldung als gelungen. Die Kritik trifft die Startseite; a öffnet genau sie und hält die Spiele fest.
+Für b spricht, dass die Reihe gerade erst angeglichen ist und jede Änderung an Kern-Bausteinen beide Apps trifft — das
+fängt a ab, weil der Lernsteig nur den Aufbau übernimmt. Kippen würde die Empfehlung, wenn Kinder und die Lehrperson im
+Versuch die heutige Startseite gar nicht als Hürde erleben (dann reichen Retuschen).
+
+### GS1 — Woher kommen die Kartenbilder?
+
+**Ort:** neu; Startseite `start/spiele.js` `karte()`, Katalog `spiele/gemeinsam/katalog.js`, Feier-Angaben heute in
+`spiele/<id>/index.html` (`LS.spiel({ feier })`).
+**Heute:** je Karte ein Emoji (`bild` im Katalog). Die Feier-Angaben stehen nur in den Spielseiten; die Startseite lädt
+`feier.js` nicht.
+**Problem:** Das Endbild der Abschluss-Animation ist die Bild-Identität, die die Rückmeldung vermisst — es braucht eine
+Quelle, aus der die Startseite es zeichnen kann, ohne dass es zweimal gepflegt wird.
+
+- **a (Empfehlung):** „Die Feier-Angabe jedes Spiels zieht in den Katalog (`feier` im Eintrag, einzige Quelle; die
+  Spielseite liest sie dort). Die Startseite lädt `feier.js` und zeichnet je sichtbarer Karte das ruhige Endbild der
+  Stufe 3 mit 3 Sternen (`LS_FEIER.zeige(…, { ruhig: true })`), erst wenn die Karte ins Bild kommt.“
+- **b:** „Ein Werkzeug `tools/kartenbilder.js` schreibt je Spiel das Endbild als SVG-Datei nach
+  `eulenpfad/kartenbilder/<id>.svg` (Farben aufgelöst); die Startseite zeigt sie als `<img loading="lazy">`; eine
+  Prüfung meldet jede Datei, die nicht mehr dem heutigen Bild gleicht.“
+- **c:** Bildschirmfotos der Vorschau als PNG je Spiel.
+
+*Warum die Empfehlung:* a hat eine Quelle und keine Kopie: Wird ein Bild nachgebessert (wie heute 41–49), stimmt die
+Karte sofort; Farben kommen aus `stil.css` wie im Spiel. Der Katalog ist schon die Quelle aller Angaben je Spiel, jede
+Spielseite lädt ihn — die 63 KB Feier-Angaben gehören dorthin (Katalog 131 → 194 KB). Gegen a spricht die Ladegrösse:
+`feier.js` 737 KB (204 KB gepackt) einmal beim ersten Besuch, danach aus dem Zwischenspeicher. b lädt je Bildschirm nur
+die sichtbaren Bilder (rund 10 × 3,5 KB), legt aber 821 KB erzeugte Dateien ins Repo, braucht eine Gleichheitsprüfung
+(wie Kern und Kopien) und muss die 191 Farbvariablen beim Erzeugen auflösen — ändert sich eine Farbe in `stil.css`, sind
+alle Dateien falsch, bis das Werkzeug läuft. c ist wie b ohne Prüfung und unscharf auf grossen Bildschirmen. Kippen würde
+die Empfehlung, wenn die Startseite auf dem Handy über das Mobilnetz spürbar langsamer startet (messen: erster Aufruf
+mit und ohne `feier.js` auf `handy-quer` und 375 px) — dann b mit derselben Quelle im Katalog.
+
+### GS2 — Welcher Text bleibt auf der Karte, die ein Kind sieht?
+
+**Ort:** `start/spiele.js` `karte()`, `start/start.css` `.ziel`, `.marken`; Zufallskarten `zufallsKarte`.
+**Heute:** Name, Beschreibung (grau, 15 px), Lernziel-Kürzel, sechs Stufenknöpfe; Zufallskarten mit ganzen Sätzen.
+**Problem:** Ein Kind liest die Beschreibung nicht, die Kürzel versteht es nicht; für die Lehrperson wirkt der Text
+generiert. Die Regel im CLAUDE.md erlaubt ab der 4. Klasse kurze Sätze, verlangt sie aber nicht.
+
+- **a (Empfehlung):** „Ein Kind sieht je Karte das Kartenbild (GS1), den Namen und die Stufenknöpfe. Die Beschreibung
+  liest langes Drücken vor (wie heute) und zeigt ein Tipp auf ⓘ; Lernziel-Kürzel und Sperrmarken sieht nur die
+  Aufsicht. Zufallskarten tragen nur einen kurzen Titel („🎲 Überrasch mich“).“
+- **b:** „Wie a, aber ab der 4. Klasse bleibt die Beschreibung auf der Karte, gekürzt auf eine Zeile.“
+
+*Warum die Empfehlung:* Mit dem Kartenbild trägt das Bild, was heute die Beschreibung trägt; eine Zeile Text pro Karte
+macht aus 169 Karten wieder eine Textwand. a gilt für alle Klassen gleich, Vorlesen bleibt für die, die nicht lesen.
+Für b spricht, dass Ältere am Text ein Spiel schneller finden — dafür ist die Suche da (SU1 a). Kippen würde die
+Empfehlung, wenn Kinder ab der 4. Klasse im Versuch Spiele am Bild allein nicht wiederfinden.
+
+### GS3 — Welche Schrift? (noch nicht vorlegbar)
+
+**Ort:** `spiele/gemeinsam/stil.css` `--schrift` (Startseite zuerst, GS0).
+**Heute:** `"Nunito", "Segoe UI Rounded", "Arial Rounded MT Bold", "Segoe UI", system-ui, sans-serif` — Nunito liegt
+nicht im Repo; jedes Gerät zeigt seine eigene Schrift.
+**Problem:** Die Wahl hängt an Zahlen, die noch fehlen: Dateigrösse je Schnitt (woff2), gleich breite Ziffern
+(Stellenwert, Tausendertrennung mit U+202F), Formen, die Kinder aus der Schule kennen (einstöckiges a wie in der
+Deutschschweizer Basisschrift), ß nicht nötig, aber ä ö ü, «», „“. Kandidaten (alle SIL OFL, aus dem Gedächtnis, vor
+dem Entscheid belegen): Nunito (rund, heute schon genannt), Andika (von SIL für Leseanfänger, einstöckiges a), Fredoka
+(nur Titel). Dafür müssen die Schriftdateien geladen und gemessen werden; erst dann folgt die Frage mit Optionen.
+
+## Reihenfolge nach den Entscheiden (Vorschlag)
+
+1. GS1: Feier-Angaben in den Katalog, Kartenbild auf der Startseite, Ladezeit messen.
+2. GS2: Text der Kinderkarte.
+3. GS3: Schrift messen, entscheiden, als Datei im App-Ordner.
+4. Druckknöpfe auf der Startseite (`.chip`, `.tab`, Stufenknöpfe) wie `.knopf` im Rahmen — Retusche, ohne eigene Frage.
+5. Versuch mit Kindern und der Lehrperson, die die Rückmeldung gab.

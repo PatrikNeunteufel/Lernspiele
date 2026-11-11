@@ -4,7 +4,23 @@
    Geschrieben vom Entwickler-Server (tools/entwickler_server.py) — nicht von Hand ändern. */
 const PRUEFSTAND = {
   "feier": {
+    "auge-entdecker": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "begriffs-geodreieck": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "bionik-paare": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "blutkreislauf-lotse": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "braille-finger": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -24,7 +40,19 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "diagramm-wahl": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "doppel-spiegel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "energie-wandler": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "erdzeit-leiter": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -44,11 +72,23 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "fledermaus-forscher": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "formen-detektiv": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "frueher-heute": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "gegenteil-wippe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "gemeinde-helfer": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -60,7 +100,23 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "hebel-wippe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "himmels-forscher": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "hundertertafel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "jahreskreis": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "kakao-weg": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -68,11 +124,39 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "koerper-puzzle": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "komma-messband": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "kompass": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "koordinaten-schatz": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "kulturen-koffer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "laerm-waechter": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "lebensraum": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "lebenszyklus": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "magnet-labor": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -104,6 +188,18 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "pflanzen-bestimmer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "plan-leser": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "platzhalter-geschichten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "preis-tabelle": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -117,6 +213,10 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "punkte-schieber": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "quader-volumen": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -144,6 +244,10 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "regel-luecke": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "rest-raetsel": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -152,11 +256,27 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "satz-reparatur": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "schaetz-waage": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
     "schriftlich-werkstatt": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "schulweg-profi": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "schweiz-karte": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "schwimmt-sinkt": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -176,6 +296,10 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "stromkreis-bauer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "stufenzahl-schieber": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -184,7 +308,23 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "tageslauf-sonne": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "taschengeld-planer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "teddy-versteck": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "teiler-detektiv": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "tier-sortierer": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -204,7 +344,27 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "wassertropfen-reise": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wetter-jahreszeiten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "woerter-trenner": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wortarten-sortierer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "wuerfel-kipper": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wuerfel-zaehler": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -244,11 +404,19 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "zeit-schaetzer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "zielzahl-jagd": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
     "ziffernkarten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "znueni-teller": {
       "am": "2026-11-11",
       "von": "Patrik"
     },

@@ -675,42 +675,68 @@ var LS_FEIER = (function () {
         // landen zwei Wagen im selben Tal (s6: 4.45 und 4.54 ≈ 4.5), bleibt jeder auf seiner Seite stehen
         const imTal = v => faelle.filter(q => q.ziel === v).length;
         const gezeigt = new Set();
+        // rückwärts (Dezimal-Rutsche s6): landen alle im selben Tal, zeigt ein Band am Boden, welche Zahlen dorthin rollen
+        if (!ganz && faelle.length > 1 && faelle.every(f => f.ziel === faelle[0].ziel)) {
+          const ws = faelle.map(f => x(f.w));
+          svg.appendChild(s("rect", { x: Math.min(...ws), y: grundY + 2, width: Math.max(...ws) - Math.min(...ws), height: 5, rx: 2.5, fill: HINWEIS,
+            opacity: 0.75, "data-spanne": faelle[0].ziel }));
+        }
         // ganze Zahlen (Bemerkung 40, LERN_Session31): oben links der Kopf der Stelle, auf die gerundet wird, in ihrer
         // Stellenfarbe; in der Zahl leuchtet die Ziffer, die entscheidet (die Stelle rechts davon) — so zeigt jede Stufe,
         // was gerundet wird und warum die Kugel rollt, nicht nur andere Zahlen
-        const auf = ganz ? STELLE_ZU[Math.round(Math.log10(z.auf))] : null, entscheidet = ganz ? STELLE_ZU[Math.round(Math.log10(z.auf)) - 1] : null;
-        if (auf && entscheidet && 10 ** EXPONENT[auf] === z.auf)
+        // Dezimalzahlen ebenso (Bemerkung 41, LERN_Session32): der Kopf ist E, z oder h, die entscheidende Ziffer steht nach
+        // dem Komma und bleibt dort neutral (--deko-7, stil.css „Nach dem Komma“), gross und fett
+        const eAuf = ganz ? Math.round(Math.log10(z.auf)) : -z.stellen;
+        const auf = STELLE_ZU[eAuf] ?? null, entscheidet = STELLE_ZU[eAuf - 1] ?? null;
+        if (auf && entscheidet && (!ganz || 10 ** EXPONENT[auf] === z.auf))
           svg.appendChild(s("g", { "data-stelle": auf }, s("rect", { x: 12, y: 10, width: 34, height: 22, rx: 4, style: `fill:${stellenFarbe(auf)}` }),
             s("text", { x: 29, y: 26, fill: "#ffffff", "font-size": 14, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" }, auf)));
-        /** Zahl über dem Hang; ganz: die entscheidende Ziffer gross in ihrer Farbe. */
-        const wertText = (w, attr) => {
-          const t0 = s("text", attr);
-          if (!ganz || !entscheidet) { t0.appendChild(document.createTextNode(text(w, z.wertStellen ?? nachkomma(w)))); return t0; }
-          const zeichen = [...ganzText(w)];
-          let stelle = 0;
-          const stellen = zeichen.map(c => (/\d/.test(c) ? 1 : 0)).reverse().map(d => (d ? stelle++ : -1)).reverse();
-          zeichen.forEach((c, i) => t0.appendChild(stellen[i] === EXPONENT[entscheidet]
-            ? s("tspan", { style: `fill:${stellenFarbe(entscheidet)}`, "font-size": 15, "font-weight": "bold", "data-entscheidet": c }, c) : s("tspan", {}, c)));
+        /** Exponent je Zeichen einer geschriebenen Zahl („3.40“ → 0, null, −1, −2); Trenner und Leerzeichen null. */
+        const exponenten = zeichen => {
+          const trenner = zeichen.findIndex(c => c === "." || c === ",");
+          const ende = trenner < 0 ? zeichen.length : trenner;
+          let e = 0;
+          const vor = zeichen.slice(0, ende).map(c => (/\d/.test(c) ? 1 : 0)).reverse().map(d => (d ? e++ : null)).reverse();
+          let n = 0;
+          return [...vor, ...zeichen.slice(ende).map(c => (/\d/.test(c) ? -++n : null))];
+        };
+        /** Text mit einer hervorgehobenen Stelle (exp) als tspan; einheit dahinter. */
+        const mitStelle = (geschrieben, exp, stelle, attr, hervor) => {
+          const t0 = s("text", attr), zeichen = [...geschrieben], ex = exponenten(zeichen);
+          zeichen.forEach((c, i) => t0.appendChild(ex[i] === exp && stelle ? s("tspan", { style: `fill:${stellenFarbe(stelle)}`, ...hervor, [`data-${hervor.daten}`]: c }, c) : s("tspan", {}, c)));
           if (z.einheit) t0.appendChild(s("tspan", {}, ` ${z.einheit}`));
           return t0;
         };
+        /** Zahl über dem Hang: die entscheidende Ziffer gross in ihrer Farbe. */
+        const wertText = (w, attr) => mitStelle(ganz ? ganzText(w) : zahlText(w, z.wertStellen ?? nachkomma(w)), EXPONENT[entscheidet], entscheidet, attr,
+          { "font-size": 15, "font-weight": "bold", daten: "entscheidet" });
+        // Geld (s1): eine Münze rollt statt des Wagens; Eintippen (s5): das Ergebnis steht im Eingabefeld
+        const figur = () => (z.figur === "muenze" ? s("g", { "data-figur": "muenze" }, muenzeKlein(0, -7, 7)) : feier.figur === "kugel" ? kugel() : wagen());
         faelle.forEach((f, i) => {
           const sx = x(f.w), sy = hoehe(f.w), ex = x(f.ziel) + (imTal(f.ziel) > 1 ? (f.w < f.ziel ? -11 : 11) : 0);
           svg.appendChild(s("g", {}, s("line", { x1: sx, y1: sy - 18, x2: sx, y2: sy - 4, stroke: "#6b7089", "stroke-width": 1, "stroke-dasharray": "2 2" }),
             wertText(f.w, { x: sx, y: sy - 22, fill: "#2d3047", "font-size": ganz ? 12 : 10, "font-family": SCHRIFT, "text-anchor": "middle" })));
-          const wg = feier.figur === "kugel" ? kugel() : wagen();
+          const wg = figur();
           wg.setAttribute("data-stueck", "wagen");
           svg.appendChild(bewege(wg, `M${sx},${sy} L${ex},${grundY}`, { x: ex, y: grundY, winkel: 0 }, ruhig, { drehen: false, ab: i * 0.3, dauer: DAUER - i * 0.3 }));
           if (gezeigt.has(f.ziel)) return;
           gezeigt.add(f.ziel);
           // ganz im Bild: „≈ 7 000 000“ ragte unter dem rechten Tal 4 Einheiten hinaus (Prüfung Lage, LERN_Session29)
           const ergebnis = "≈ " + text(f.ziel, z.stellen), halb = ergebnis.length * 3.6;
-          svg.appendChild(erscheine(s("text", { x: Math.min(Math.max(x(f.ziel), halb + 4), BREITE - halb - 4), y: grundY + 32, fill: "#2d3047", "font-size": 13,
-            "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" }, ergebnis), DAUER, ruhig));
+          const ex0 = Math.min(Math.max(x(f.ziel), halb + 4), BREITE - halb - 4), attr = { x: ex0, y: grundY + 32, fill: "#2d3047", "font-size": 13,
+            "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" };
+          if (ganz) { svg.appendChild(erscheine(s("text", attr, ergebnis), DAUER, ruhig)); return; }
+          // Dezimalzahlen: die Rundungsstelle leuchtet im Ergebnis wie im Kopf (2.96 ≈ 3.0 — die Endnull zeigt, wie genau)
+          const g = s("g", { "data-ergebnis": f.ziel });
+          if (z.tippen) g.appendChild(s("rect", { x: ex0 - halb - 6, y: grundY + 19, width: 2 * halb + 12, height: 18, rx: 4, fill: "#ffffff",
+            style: "stroke:var(--knopf)", "stroke-width": 1.6, "data-feld": "tippen" }));
+          g.appendChild(mitStelle("≈ " + zahlText(f.ziel, z.stellen), EXPONENT[auf], auf, attr, { daten: "rundet" }));
+          svg.appendChild(erscheine(g, DAUER, ruhig));
         });
         const letzt = x(faelle[faelle.length - 1].ziel);
         if (sterne >= 2) svg.appendChild(fahne(Math.min(letzt + 12, BREITE - 16), grundY - 4, ruhig));
-        if (sterne >= 3) svg.appendChild(funken(Math.min(Math.max(letzt, 24), BREITE - 24), 30, ruhig));
+        // nicht auf den Kopf der Stelle oben links (Dezimal-Rutsche s1, s3 rollen nach links)
+        if (sterne >= 3) svg.appendChild(funken(Math.min(Math.max(letzt, auf ? 72 : 24), BREITE - 24), 30, ruhig));
         return svg;
       },
 
@@ -5735,7 +5761,12 @@ var LS_FEIER = (function () {
     }
     if (z.jahrhundert !== undefined) {
       if (!Number.isInteger(z.jahrhundert) || z.jahrhundert < 1) return null;
-      svg.appendChild(erscheine(text(BREITE / 2, 138, `${z.jahrhundert} → ${Math.floor((z.jahrhundert - 1) / 100) + 1}. Jahrhundert`, { gross: 13, farbe: "#e5484d" }), T + 0.2, ruhig));
+      // das Jahrhundert als Band auf dem Strahl (1201 bis 1300), damit sichtbar ist, warum 1291 ins 13. gehört (Bemerkung 42)
+      const n = Math.floor((z.jahrhundert - 1) / 100) + 1, a = (n - 1) * 100 + 1, b = n * 100;
+      if (a < z.von || b > z.bis) return null;
+      svg.insertBefore(erscheine(s("rect", { x: X(a - 1), y: y - 9, width: X(b) - X(a - 1), height: 18, rx: 3, fill: "#e5484d", "fill-opacity": 0.28, "data-jahrhundert": n }), T + 0.2, ruhig), svg.children[1]);
+      svg.appendChild(erscheine(text((X(a - 1) + X(b)) / 2, y + 30, `${a} bis ${b}`, { gross: 9, farbe: "#e5484d" }), T + 0.2, ruhig));
+      svg.appendChild(erscheine(text(BREITE / 2, 140, `${z.jahrhundert} liegt im ${n}. Jahrhundert`, { gross: 13, farbe: "#e5484d" }), T + 0.2, ruhig));
     }
     if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
     if (sterne >= 3) svg.appendChild(funken(30, 130, ruhig));
@@ -5903,29 +5934,49 @@ var LS_FEIER = (function () {
   }
 
   // ----- Echt oder erfunden? (SAMMELN · wolkenschloss) -----
-  // Merkmale des Erfundenen wie im Spiel: Tier spricht, Ding bewegt sich von selbst, Fabelwesen, Zauber, Unmögliches
-  const MERKMAL_BILD = { spricht: "💬", bewegt: "💨", fabelwesen: "🦄", zauber: "✨", unmoeglich: "🦸" };
+  // Merkmale des Erfundenen mit den Schlüsseln des Spiels (texte.js, MERKMALE): Tier spricht, Ding bewegt sich oder
+  // spricht von selbst, Fabelwesen, Zauber, ein Mensch kann, was kein Mensch kann
+  const MERKMAL_BILD = { tier: "💬", ding: "💨", wesen: "🐉", zauber: "🪄", mensch: "🦸" };
   /**
-   * Links die Erde 🌍 (kann es geben), rechts das Wolkenschloss (erfunden); die Bilder der Aussagen fliegen an ihren Ort,
-   * beim Erfundenen mit dem Merkmal. Angabe: { echt: [Bild …], erfunden: [Bild | [Bild, Merkmal] …] }.
+   * Links die Erde 🌍 (kann es geben, wie der Korb im Spiel), rechts das Wolkenschloss (erfunden); die Bilder der Sätze
+   * fliegen an ihren Ort. Im Spiel kommt jedes Bild echt und erfunden vor — es verrät nichts, der Satz entscheidet. Darum
+   * trägt jedes Bild hier seine Wendung aus dem Satz in einer Blase: 🐶 mit 📰 liest Zeitung, 🐸 mit 👑 trägt eine Krone,
+   * oder das Merkmal der Geschichte (s5). Angabe: { echt: [Bild | [Bild, Wendung] …], erfunden: [Bild | [Bild, Wendung
+   * | Merkmal] …] } (Bemerkungen 44–49, LERN_Session32).
    */
   function wolkenschloss(feier, { stufe, sterne, ruhig }) {
-    const z = feier.ziele?.[stufe], bild = b => typeof b === "string" && b.length;
-    if (!z || !Array.isArray(z.echt) || !Array.isArray(z.erfunden) || z.echt.length > 4 || z.erfunden.length > 4 || !z.echt.every(bild)
-      || !z.erfunden.every(e => bild(e) || (Array.isArray(e) && e.length === 2 && bild(e[0]) && MERKMAL_BILD[e[1]]))) return null;
+    const z = feier.ziele?.[stufe], bild = b => typeof b === "string" && b.length > 0 && b.length <= 8;
+    const eintrag = e => bild(e) || (Array.isArray(e) && e.length === 2 && bild(e[0]) && (bild(e[1]) || MERKMAL_BILD[e[1]]));
+    if (!z || !Array.isArray(z.echt) || !Array.isArray(z.erfunden) || z.echt.length > 4 || z.erfunden.length > 4 || !z.echt.every(eintrag)
+      || !z.erfunden.every(eintrag)) return null;
+    // Merkmale nur mit Schlüsseln, die das Spiel kennt (texte.js geladen)
+    if (typeof MERKMALE === "object" && z.erfunden.some(e => Array.isArray(e) && MERKMAL_BILD[e[1]] && !MERKMALE[e[1]])) return null;
     const anzahl = z.echt.length + z.erfunden.length;
     if (!anzahl) return null;
     const svg = neuesBild("sammeln", stufe, { "data-bilder": "wolkenschloss", "data-anzahl": anzahl });
-    svg.append(tagGrund(), boden(), s("circle", { cx: 72, cy: 104, r: 34, fill: "#2f7fd6" }), s("path", { d: "M50,86 Q62,78 70,92 Q78,104 66,114 Q56,108 50,96 Z M80,80 Q96,84 98,100 Q90,112 84,100 Z", fill: "#86c46f" }));
-    // das Wolkenschloss: Wolke mit Türmen in Rosa
-    svg.append(s("path", { d: "M200,100 Q196,84 214,84 Q218,68 238,74 Q252,62 266,76 Q290,74 290,94 Q300,104 286,110 L206,110 Q194,108 200,100 Z", fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.4 }),
-      s("path", { d: "M222,84 v-26 h10 v26 M258,84 v-34 h12 v34 M238,76 v-16 h14 v16", fill: "#f8c8dc", stroke: "#e0569a", "stroke-width": 1 }), s("path", { d: "M220,58 L227,46 L234,58 Z M256,50 L264,36 L272,50 Z", fill: "#e0569a" }));
+    // die Erde klein oben links als Zeichen des Korbs; das Echte steht auf der Wiese
+    svg.append(tagGrund(), boden(), s("g", { "data-ort": "erde" }, s("circle", { cx: 34, cy: 34, r: 20, fill: "#2f7fd6" }),
+      s("path", { d: "M21,24 Q28,19 33,28 Q38,36 30,42 Q24,38 21,31 Z M39,20 Q49,22 50,32 Q45,40 41,32 Z", fill: "#86c46f" })));
+    // das Wolkenschloss: Türme rechts, davor die Wolke, auf ihr das Erfundene
+    svg.append(s("path", { d: "M258,74 v-30 h11 v30 M274,74 v-40 h13 v40 M291,74 v-22 h10 v22", fill: "#f8c8dc", stroke: "#e0569a", "stroke-width": 1 }),
+      s("path", { d: "M256,44 L263.5,32 L271,44 Z M272,34 L280.5,20 L289,34 Z", fill: "#e0569a" }),
+      s("path", { d: "M182,116 Q166,104 182,94 Q182,76 204,80 Q214,64 236,72 Q254,60 272,72 Q302,68 304,92 Q316,106 300,116 Z", fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.4 }));
     const T = DAUER * 0.8;
     let k = 0;
-    z.echt.forEach((b, i) => { const x = 56 + (i % 2) * 32, y = 96 + Math.floor(i / 2) * 22 - 14; svg.appendChild(herein(s("g", { "data-stueck": "echt" }, bildzeichen(x, y, b, 20)), 160 - x, 20 - y, 0.2 + (k++ * T * 0.8) / anzahl, ruhig, 0.45)); });
+    /** Ein Bild mit seiner Wendung in einer Blase oben rechts. */
+    const stueck = (art, e, x, y, eng) => {
+      const [b, w] = Array.isArray(e) ? e : [e, null], merkmal = MERKMAL_BILD[w] ? w : null, zeichen = merkmal ? MERKMAL_BILD[w] : w;
+      const gr = eng ? 26 : 30, d = gr * 0.55, r = eng ? 10 : 11.5;
+      const g = s("g", { "data-stueck": art, ...(merkmal ? { "data-merkmal": merkmal } : w ? { "data-wendung": w } : {}) }, bildzeichen(x, y, b, gr));
+      if (zeichen) g.append(s("circle", { cx: x + d, cy: y - d, r, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1 }), bildzeichen(x + d, y - d, zeichen, r * 1.4));
+      return g;
+    };
+    const ab = n => (n === 1 ? 0 : n === 2 ? 40 : n === 3 ? 34 : 30);
+    // auf der Wiese (Boden ab y ≈ 124), nach rechts verteilt bis vor die Wolke
+    z.echt.forEach((e, i) => { const n = z.echt.length, x = 62 + (n === 1 ? 30 : i * (n === 4 ? 32 : 46)), y = 109; svg.appendChild(herein(stueck("echt", e, x, y, n === 4), 160 - x, 20 - y, 0.2 + (k++ * T * 0.8) / anzahl, ruhig, 0.45)); });
     z.erfunden.forEach((e, i) => {
-      const [b, m] = Array.isArray(e) ? e : [e, null], x = 222 + (i % 2) * 42, y = 92 + Math.floor(i / 2) * 18 - 30;
-      svg.appendChild(herein(s("g", { "data-stueck": "erfunden", ...(m ? { "data-merkmal": m } : {}) }, bildzeichen(x, y, b, 20), m ? bildzeichen(x + 16, y - 10, MERKMAL_BILD[m], 11) : null), 160 - x, 20 - y, 0.2 + (k++ * T * 0.8) / anzahl, ruhig, 0.45));
+      const n = z.erfunden.length, x = (n === 4 ? 190 : 200) + (n === 1 ? 40 : i * (n === 4 ? 30 : ab(n))), y = 97;
+      svg.appendChild(herein(stueck("erfunden", e, x, y, n === 4), 160 - x, 20 - y, 0.2 + (k++ * T * 0.8) / anzahl, ruhig, 0.45));
     });
     if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
     if (sterne >= 3) svg.appendChild(funken(150, 30, ruhig));
