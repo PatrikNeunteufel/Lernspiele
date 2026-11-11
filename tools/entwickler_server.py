@@ -66,10 +66,11 @@ APPS = {
         "pruefstand": WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "pruefstand.js",
         "name": "PRUEFSTAND",
         "kopf": ("/* Prüfstand (Entscheid E1 a, LERN_Session6): welche Spiele angesehen und welche Inhaltslisten geprüft\n"
-                 "   sind, je { am, von }. Schlüssel: Spiel-Id bzw. \"<spiel>/<liste>\" der Quelle einer Liste.\n"
+                 "   sind, je { am, von }. Schlüssel: Spiel-Id bzw. \"<spiel>/<liste>\" der Quelle einer Liste; unter feier die\n"
+                 "   Spiele, deren Abschluss-Animation in tools/feier_vorschau.html abgenommen ist (LERN_Session31).\n"
                  "   Geschrieben vom Entwickler-Server (tools/entwickler_server.py) — nicht von Hand ändern. */\n"),
         "fuss": "",
-        "arten": ("spiele", "listen"),
+        "arten": ("spiele", "listen", "feier"),
         "bemerkungen": WURZEL / "docs" / "eulenpfad" / "bemerkungen.json",
         "eintraege": WURZEL / "eulenpfad" / "spiele" / "gemeinsam" / "pruefstand-eintraege.json",
         "eingang": WURZEL / "docs" / "eulenpfad" / "pruefstand-eingang.json",  # Vermerke zugelassener Aufsichten (ES3 a)

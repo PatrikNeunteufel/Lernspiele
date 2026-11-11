@@ -52,6 +52,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -237,6 +238,8 @@ function tippsFuer(s) {
 let AKTUELL = null;
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "diktat", ziele: { s1: { takte: [["4", "88", "4", "88"]] }, s2: { takte: [["2", "88", "p"]] }, s3: { takte: [["16", "4", "88", "4"]] }, s4: { takte: [["8-16-16", "4", "16-16-8", "88"]] }, s5: { takte: [["4.8", "8.16", "4"]] }, s6: { takte: [["16-8-16", "4.8", "p"], ["88", "16", "2"]] } } },
   id: "rhythmus-diktat",
   einleitung: "Hör gut zu: Erst zählen vier Klicks vor, dann kommt ein Rhythmus. Lege ihn mit den Notenkarten nach!",
   hilfe: "Hör zu: Erst klickt es viermal vor, dann kommt der Rhythmus. Tippe die Notenkarten der Reihe nach an — ist der Takt voll, wird geprüft. „⌫ Zurück“ nimmt die letzte Karte weg.",

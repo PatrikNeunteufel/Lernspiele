@@ -44,6 +44,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -325,6 +326,8 @@ function tippsFuer(a) {
 }
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "speicher", ziele: { s1: { dinge: ["📷", "🔤", "🍿", "💬"] }, s2: { bits: "01000001" }, s3: { leiter: ["GB", "MB", "kB"] }, s4: { umrechnen: [3, "MB", 3000, "kB"] }, s5: { karte: { gb: 32, mb: 4, bild: "📷" } }, s6: { laden: { mb: 100, mbits: 20 } } } },
   id: "speicher-leiter",
   einleitung: "Ein Buchstabe, ein Foto, ein Film — alles braucht Speicherplatz. Klettere die Speicher-Leiter hinauf: bit, Byte, kB, MB, GB!",
   hilfe: stufe => (stufe === "s1"

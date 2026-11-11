@@ -1275,6 +1275,44 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   | SAMMELN · `kaesseli` | `{ reicht }`, `{ rest }`, `{ woche, wahl }`, `{ sparen }`, `{ bedarf, wunsch }`, `{ vergleich }` (Beträge über `LS.geldText`, nachgerechnet) | Taschengeld-Planer |
   | REISE · `kakao` | `{ schritte, fehlt?, wer?, herkunft? }` oder `{ kreislauf }` | Kakao-Weg |
 
+  Block D (Englisch, Französisch, Musik, Medien und Informatik; LERN_Session31) — Wörter der Fremdsprachen als leere
+  Kärtchen, Zeichen nur, wo sie selbst der Inhalt sind (Artikel, Laute, Buchstaben beim Buchstabieren, Notennamen,
+  Endungen, Einheiten, Uhrzeiten); Farben der Spiele (Körbe le/un deko-6, la/une deko-3, l’/des deko-5, les deko-2;
+  Datei-Körbe Text deko-1, Bild deko-2, Ton deko-3, Video deko-4; Speicher GB deko-1 bis bit deko-5). Musikbilder spielen
+  mit Ton an ihre Töne über `klang`. Gemeinsam: `korbBild` (Körbe mit Beschriftung, die Karten fallen hinein), `hoerbild`
+  (Eule mit Kopfhörern, Antippen), `gespraech` (zwei Sprecher, Sprechblasen):
+
+  | Muster · bilder | Angabe je Stufe | Spiel |
+  |---|---|---|
+  | SAMMELN · `themenkarten` | `{ themen: [Bild], ton?: "an" \| "aus", richtung?: "wort", wendung? }` oder `{ artikel: { bild, richtig, falsch } }` | English Word-Match, Mots-Match |
+  | BAUEN · `buchstaben` | `{ wort, bild?, hilfe: "wort" \| "bild" \| "deutsch" \| "hoeren", extra? }` (genau die Buchstaben des Worts, überzählige fallen weg); mit `waben: true` als Wabe mit Biene | Word-Match s5, s6, Spelling-Bee |
+  | SAMMELN · `wortzwillinge` | Liste von `{ art: "gleich" \| "aehnlich" \| "falsch", bild? }` (falscher Freund: die deutsche Falle fällt weg, ⚠️) | Wort-Zwillinge |
+  | BAUEN · `wortzug` | Liste von `{ woerter: 3–6, zeichen: "." \| "?", gross?, falsch?, nicht? }` (Verwechsler-Karte fällt herunter, Verneinung durchgestrichen) | Sentence-Builder |
+  | AUFTRITT · `hoerbild` | `{ bilder: [2–6], ziel, anders? }` oder `{ wo: [{ tier, ort: "on" \| "under" \| "next" \| "in", ding: "table" \| "box" }] }` | Listen & Tap, Mots-Match s4, s6, Sound-Sorter s1, s6 |
+  | SAMMELN · `lautkoerbe` | `{ koerbe: ["i-kurz", "i-lang", …] \| ["🌳", "🚲", "🎂"], dinge, ohneTon? }` (Laut nach der Liste des Spiels; kurz Punkt, lang Strich) | Sound-Sorter |
+  | AUFTRITT · `wetterbericht` | `{ wetter }`, `{ meldung: { wetter, grad } }`, `{ tage }`, `{ sport: [[Team, Tore] ×2] }` (Pokal oder 🤝), `{ weg: { strasse, seite, ziel } }` | Weather-Report |
+  | AUFTRITT · `gespraech` | `{ a, b, zuege: 2–6, antwort?, ort?, fremd?, luecke?, ordnen?, hoeflich? }` | Hello-Dialog, Au café |
+  | BAUEN · `bruecke` | Liste von `{ bild? }`, `{ falle: true }` (bleibt am ⚠️ und fällt ins Wasser) oder `{ satz: 3–6, bild }` | Wörter-Brücke |
+  | SAMMELN · `artikel` | `{ koerbe: [Artikel], dinge: [[Bild, mehr?]], ohneBild? }` (Artikel nach Geschlecht, Vokal und Zahl geprüft) oder `{ mehrzahl: [Bild] }` (le/la → les, Endung ‑s, ‑x, ‑aux) | Le ou la ? |
+  | SAMMELN · `laute` | `{ gleich: [Bild, Bild] }`, `{ koerbe: [Laut], dinge, lesen? }` oder `{ luecke: { bild, wort, laut }, tippen? }` (Schreibweise passt zum Laut) | Son-Lauscher |
+  | REISE · `rallye` | `{ von, bis, tafeln: [Zahl \| { geld } \| { telefon } \| { ch }], ziel? }` (Geld über `LS.geldText`, Westschweizer Form mit Schweizer Kreuz) | Nombres-Rallye |
+  | ZYKLUS · `uhren` | `{ zeiten: ["h:mm" ×1–3], tag?, hoeren? }` (ab 13 Uhr und mit `tag` die Digitalform darunter) | Quelle heure ? |
+  | ZYKLUS · `kalenderfr` | `{ woche }`, `{ heute: 1–5 }`, `{ monate }`, `{ blaetter: [[Tag, Monat]] }`, `{ blatt: { jahr, monat, tag, geburtstag? } }`, `{ wechsel: { jahr, monat } }` (Montag zuerst, Wochenende deko-2) | Calendrier |
+  | AUFTRITT · `bestellung` | `{ sachen: [Bild], preis: 2–20, anrede?: [[Person, "tu" \| "vous"]], hoeren? }` (tu nur Kinder, vous Erwachsene) | Au café s4, s5 |
+  | AUFTRITT · `notennamen` | `{ toene: [p \| [p, ±1]] }` (p wie `noten.js`: 0 = e′, −2 = c′; Hilfslinien, ♯/♭, deutscher Name darunter) | Noten-Namen |
+  | AUFTRITT · `rhythmus` | `{ takte: [{ art: 2–4, noten: [Werte in Vierteln] }], luecke? }` (jeder Takt geht auf) | Rhythmus-Leser |
+  | BAUEN · `diktat` | `{ takte: [[Karte]] }` mit Karten `4`, `88`, `2`, `p`, `16`, `8-16-16`, `16-16-8`, `4.8`, `8.16`, `16-8-16` (4/4, höchstens eine Pause je Takt, Balken wie im Spiel) | Rhythmus-Diktat |
+  | REISE · `melodie` | `{ toene: [p ×2–4], vergleich?, gleich?, pfeile?, schritte?: ["½" \| "1"] }` (Halbton und Ganzton nachgerechnet; der Vogel landet auf jeder Note, wenn sie klingt) | Hoch-Tief-Ohr |
+  | AUFTRITT · `klangwichtel` | `{ gegensatz: "laut" \| "lang" \| "schnell" }`, `{ vergleich: [Art, a, b] }`, `{ schrift: ["k" \| "l"] \| ["g" \| "kl"] }`, `{ karten, ziel }` | Klang-Wichtel |
+  | BAUEN · `tonleiter` | `{ leiter: "C" \| "G" \| "F" \| "D" \| "B" \| "a" \| "e" \| "d", halbtoene?, richtung? }` (Schritte aus den Namen gegen Dur bzw. Moll geprüft) oder `{ klaviatur: [[Taste, Taste]] }` | Tonleiter-Treppe |
+  | KARTE · `roboter` | `{ raster: 4–6, start: [x, y, Richtung], steine, programm: ["V" \| "L" \| "R" \| { mal, karten } \| { solange }] }` (Weg gerechnet, kein Stein, nicht aus dem Raster; das Ziel am Ende) | Roboter-Pfad |
+  | BAUEN · `speicher` | `{ dinge }`, `{ bits }`, `{ leiter }`, `{ umrechnen: [Zahl, Einheit, Zahl, Einheit] }`, `{ karte: { gb, mb, bild } }`, `{ laden: { mb, mbits } }` (Faktor 1000 wie im Spiel, nachgerechnet) | Speicher-Leiter |
+  | ZYKLUS · `scheibe` | `{ wort, schluessel: 1–25, richtung: "ver" \| "ent", knacken? }` (Caesar über A–Z wie im Spiel) | Geheimschrift-Knacker |
+  | SAMMELN · `dateien` | `{ dinge }`, `{ endungen: [Endung \| [Endung, Bild]] }`, `{ programme }`, `{ groessen }` (Endungen, Programme und Grössen des Spiels) | Datei-Typen |
+  | SAMMELN · `nim` | `{ reihen: [n ×1–3], max?, eule? }` (das Kind spielt richtig, die Eule nimmt einen Stein; nur ein Bild, wenn das Kind den letzten nimmt) | Stein-Duell |
+  | SAMMELN · `atari` | `{ brett: 5–9, weiss, schwarz, zuege: [["s" \| "w", x, y]], freiheiten?, retten?, falle? }` (Fang nach den Regeln gerechnet, kein Selbstmord) | Steine fangen |
+  | REISE · `schach` | `{ weiss: { Feld: Figur }, schwarz, zuege: [[von, nach]] }` (Gangart geprüft; am Ende Schach und kein freies Fluchtfeld) | König in der Falle |
+
   Stellenfarben in den Bildern nur über `var(--st-…)` aus `stil.css`, nach dem Komma `--deko-7` mit der Kommalinie
   `--deko-1` (wie `.schriftlich`); Zahlen über `LS.zahlText` und `LS.dezimalText`.
 
@@ -1294,7 +1332,13 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   nicht frei sind), Einstellung und Ruhezeit gelten nicht, der Ton schon. `tools/feier_vorschau.html` (nicht
   veröffentlicht, über den Entwickler-Server) zeigt so alle sechs Stufen eines Piloten in 1024, 768 oder 375 px;
   „Nebeneinander“ drei je Zeile, „Anhalten bei“ hält jede Animation bei einer Sekunde an (SMIL `setCurrentTime`) — so
-  lässt sich der Ablauf Bild um Bild prüfen, nicht nur das Endbild (LERN_Session28).
+  lässt sich der Ablauf Bild um Bild prüfen, nicht nur das Endbild (LERN_Session28). **Abnahme** (Wunsch Patrik,
+  LERN_Session31): „✓ Animation geprüft“ je Spiel schreibt über den Entwickler-Server in den Prüfstand (`pruefstand.js`,
+  Art `feier`, neben `spiele` und `listen`), „Geprüfte ausblenden“ nimmt sie aus der Auswahl (gemerkt im Browser), und
+  „📝 Anmerkung“ je Stufe legt eine Bemerkung an (`inhalt: "feier"`, Stufe, dazu Sterne, Breite und Zeitpunkt) — die
+  offenen stehen unter der Stufe und werden wie alle Bemerkungen zu Beginn einer Sitzung abgearbeitet. Schlüssel und
+  Adresse des Servers nimmt die Vorschau vom Eulenpfad desselben Browsers (`lernspiele:entwickler`, `lernspiele:meldeweg`,
+  sonst `kontakt.js`); ohne Schlüssel lässt sie nur ansehen.
 
 ## 25. Ruhezeiten
 

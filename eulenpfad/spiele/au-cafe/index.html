@@ -42,6 +42,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -376,6 +377,8 @@ function tippsFuer(a) {
 }
 
 const SPIEL = {
+  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "auftritt", bilder: "gespraech", ziele: { s1: { a: "👧", b: "👩", zuege: 2, antwort: "👋", ort: "☕" }, s2: { a: "👩", b: "👧", zuege: 2, antwort: "😀", ort: "☕" }, s3: { a: "👩", b: "👦", zuege: 4, ordnen: true, ort: "☕" }, s4: { muster: "auftritt", bilder: "bestellung", ziel: { sachen: ["☕", "🥐"], preis: 7, anrede: [["👧", "tu"], ["👵", "vous"]] } }, s5: { muster: "auftritt", bilder: "bestellung", ziel: { sachen: ["🍦"], preis: 4, hoeren: true } }, s6: { a: "👩", b: "👧", zuege: 6, ordnen: true, ort: "☕" } } },
   id: ID,
   // Lob auf Anhieb in der Fremdsprache (LB2 a); Bestätigungen mit dem Lösungswort kommen nur nach einem Fehlversuch
   lob: ["Oui !", "Super !", "Bravo !", "Très bien !"],

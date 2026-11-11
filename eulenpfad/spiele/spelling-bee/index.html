@@ -35,6 +35,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -144,6 +145,8 @@ function tippsFuer(a, st) {
   return t;
 }
 const SPIEL = {
+  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "buchstaben", waben: true, ziele: { s1: { wort: "cat", bild: "🐱", hilfe: "wort" }, s2: { wort: "dog", bild: "🐶", hilfe: "bild" }, s3: { wort: "banana", bild: "🍌", hilfe: "bild" }, s4: { wort: "teacher", hilfe: "deutsch", extra: ["s"] }, s5: { wort: "strawberry", hilfe: "hoeren", extra: ["p", "e"] }, s6: { wort: "brown", hilfe: "hoeren", extra: ["p", "d", "v"] } } },
   id: ID,
   einleitung: "Spelling Bee! Hör das englische Wort und leg es aus Buchstaben. Mit 🔊 hörst du es nochmal.",
   hilfe: "Hör das englische Wort und tippe seine Buchstaben der Reihe nach an — sie füllen die Felder von links. Mit „🔊 nochmal“ hörst du das Wort so oft du willst.",

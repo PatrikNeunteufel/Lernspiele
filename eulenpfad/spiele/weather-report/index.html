@@ -49,6 +49,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -450,6 +451,8 @@ function zweiFragen(ctx, a) {
 }
 
 const SPIEL = {
+  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "auftritt", bilder: "wetterbericht", ziele: { s1: { wetter: "🌬️" }, s2: { meldung: { wetter: "🌧️", grad: 12 } }, s3: { tage: [["🌧️", 8], ["☀️", 15]] }, s4: { sport: [["🦁", 3], ["🐯", 1]] }, s5: { weg: { strasse: 2, seite: "links", ziel: "🏥" } }, s6: { meldung: { wetter: "🌨️", grad: -2 }, sport: [["🐻", 2], ["🦅", 2]] } } },
   id: ID,
   // Lob auf Anhieb in der Fremdsprache (LB2 a); Bestätigungen mit dem Lösungswort kommen nur nach einem Fehlversuch
   lob: ["Great!", "Well done!", "Brilliant!", "Super!", "Yes!"],

@@ -44,6 +44,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -417,6 +418,8 @@ function tippsFuer(a, stufe) {
 }
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "tonleiter", ziele: { s1: { leiter: "C" }, s2: { leiter: "C", halbtoene: true }, s3: { klaviatur: [["e", "f"], ["c", "d"]] }, s4: { leiter: "G", halbtoene: true }, s5: { leiter: "a", halbtoene: true }, s6: { leiter: "B", halbtoene: true } } },
   id: "tonleiter-treppe",
   hilfe: stufe => ({
     s1: "Hör die Töne an und tippe, ob sie hinauf- oder hinuntergehen. Oder lies zwei Namen auf der Treppe und vergleiche.",

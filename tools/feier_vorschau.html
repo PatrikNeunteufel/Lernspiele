@@ -20,12 +20,23 @@
   iframe { border: 0; transform-origin: 0 0; display: block; }
   .hinweis { font-size: 13px; color: #6b7089; margin: 0 0 10px; max-width: 70em; }
   #stufen.raster { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 12px; }
+  .abnahme { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 0 0 12px; padding: 8px 10px; background: #fff; border: 1px solid #c9c3b0; border-radius: 6px; }
+  .abnahme .stand { font-weight: bold; }
+  .abnahme .geprueft { color: #1f8a4c; }
+  .leise { color: #6b7089; font-size: 13px; }
+  .stufe-kopf { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+  .anmerkung { margin: 6px 0 0; max-width: 60em; }
+  .anmerkung textarea { width: 100%; box-sizing: border-box; font: inherit; min-height: 4.5em; }
+  .anmerkungen { margin: 4px 0 0; padding-left: 1.2em; font-size: 13px; max-width: 60em; }
+  .anmerkungen li.erledigt { color: #6b7089; }
 </style>
 </head>
 <body>
 <h1>Vorschau Abschluss-Animationen</h1>
 <p class="hinweis">Je Stufe das Schlussbild des Spiels in der gewählten Breite. „Nochmal“ im Bild spielt die Animation neu,
-ein Tippen springt ans Ende. Es wird nichts gespeichert. „Bewegung reduzieren“ zeigt das Endbild wie mit der Einstellung
+ein Tippen springt ans Ende. „✓ Geprüft“ und Anmerkungen gehen über den Entwickler-Server in den Prüfstand
+(<code>pruefstand.js</code>, Art <code>feier</code>) und in die Bemerkungen (<code>docs/eulenpfad/bemerkungen.json</code>) — dafür den
+Entwickler-Modus im Eulenpfad auf diesem Server freischalten (Verwaltung → Entwicklung). „Bewegung reduzieren“ zeigt das Endbild wie mit der Einstellung
 des Geräts. Verkleinert passt eine Breite ins Fenster; für die Abnahme in echter Grösse „Verkleinern“ ausschalten.
 „Nebeneinander“ zeigt drei Stufen je Zeile. „Anhalten bei“ hält jede Animation bei dieser Sekunde an — so lässt sich der
 Ablauf Bild um Bild prüfen, nicht nur das Endbild (Anweisung Patrik, LERN_Session27).</p>
@@ -38,9 +49,15 @@ Ablauf Bild um Bild prüfen, nicht nur das Endbild (Anweisung Patrik, LERN_Sessi
   <label><input type="checkbox" id="raster"> Nebeneinander</label>
   <label>Anhalten bei <select id="zeit"><option value="">— läuft</option><option>0.4</option><option>0.8</option><option>1.2</option><option>1.6</option><option>2.0</option><option>2.4</option><option value="5">Ende</option></select> s</label>
   <button type="button" id="neu">↻ Alle neu</button>
+  <label><input type="checkbox" id="ausblenden"> Geprüfte ausblenden</label>
 </div>
+<div class="abnahme" id="abnahme"></div>
 <div id="stufen"></div>
+<script src="../eulenpfad/version.js"></script>
+<script src="../eulenpfad/kern/kern.js"></script>
+<script src="../eulenpfad/kontakt.js"></script>
 <script src="../eulenpfad/spiele/gemeinsam/katalog.js"></script>
+<script src="../eulenpfad/spiele/gemeinsam/pruefstand.js"></script>
 <script>
 "use strict";
 // Alle Spiele mit Abschluss-Animation aus dem Katalog (Feld einstellungen enthält "feier"), nach Fach und Thema
@@ -48,16 +65,128 @@ Ablauf Bild um Bild prüfen, nicht nur das Endbild (Anweisung Patrik, LERN_Sessi
 const $ = id => document.getElementById(id);
 const auswahl = new URLSearchParams(location.search);
 const mitFeier = SPIELE.filter(s => (s.einstellungen || []).includes("feier"));
-for (const fach of [...new Set(THEMEN.map(t => t.fach))]) {
-  const themen = THEMEN.filter(t => t.fach === fach).map(t => t.id);
-  const spiele = mitFeier.filter(s => themen.includes(s.thema));
-  if (!spiele.length) continue;
-  const gruppe = document.createElement("optgroup");
-  gruppe.label = `${fach} (${spiele.length})`;
-  for (const s of spiele) gruppe.append(new Option(`${s.bild} ${s.name}`, s.id));
-  $("spiel").append(gruppe);
+
+// ----- Abnahme (Wunsch Patrik, LERN_Session31): geprüft je Spiel im Prüfstand (Art „feier“), Anmerkungen je Stufe als
+// Bemerkung (inhalt „feier“) — beides über den Entwickler-Server, mit dem Schlüssel des Eulenpfads auf diesem Gerät
+// (lernspiele:entwickler, gleiche Herkunft). Ohne Schlüssel oder Server zeigt die Leiste, was fehlt.
+const SP = KERN.speicher("lernspiele:");
+PRUEFSTAND.feier ||= {};
+const E = KERN.entwicklung({
+  app: "eulenpfad", speicher: { praefix: "lernspiele:", lies: SP.lies, schreibe: SP.schreibe },
+  aufsicht: () => true, name: () => E.zustand().name || "", pruefstand: PRUEFSTAND, arten: ["spiele", "listen", "feier"],
+  melde: text => meldeAbnahme(text), start: "eulenpfad/",
+  // Adresse des Entwickler-Servers wie im Eulenpfad (Verwaltung → Einstellungen, sonst kontakt.js, sonst diese Seite):
+  // so geht es auch, wenn die Vorschau über tools/server.py kommt und der Entwickler-Server auf einem anderen Port läuft
+  adresse: () => {
+    const e = SP.lies("meldeweg", null) || {};
+    return typeof e.server === "string" ? e.server : (typeof EULENPFAD_KONTAKT !== "undefined" && EULENPFAD_KONTAKT.server) || "";
+  },
+  version: () => (typeof APP_VERSION !== "undefined" ? APP_VERSION.version : ""),
+});
+let bemerkungen = [];
+const AUSBLENDEN = "feier-vorschau:ausblenden"; // nur Bequemlichkeit dieses Browsers
+try { $("ausblenden").checked = localStorage.getItem(AUSBLENDEN) === "1"; } catch { /* ohne Speicher: aus */ }
+const geprueft = id => PRUEFSTAND.feier?.[id];
+function meldeAbnahme(text) {
+  const m = $("abnahme").querySelector(".meldung");
+  if (m) m.textContent = text;
 }
-for (const k of ["spiel", "breite", "sterne", "zeit"]) if (auswahl.get(k)) $(k).value = auswahl.get(k);
+/** Auswahl der Spiele neu aufbauen (geprüfte mit ✓, auf Wunsch ausgeblendet); die Wahl bleibt, wenn sie noch da ist. */
+function fuelleAuswahl() {
+  const vorher = $("spiel").value || auswahl.get("spiel");
+  const ohne = $("ausblenden").checked;
+  $("spiel").innerHTML = "";
+  for (const fach of [...new Set(THEMEN.map(t => t.fach))]) {
+    const themen = THEMEN.filter(t => t.fach === fach).map(t => t.id);
+    const alle = mitFeier.filter(s => themen.includes(s.thema)), spiele = alle.filter(s => !ohne || !geprueft(s.id) || s.id === vorher);
+    if (!spiele.length) continue;
+    const gruppe = document.createElement("optgroup");
+    const offen = alle.filter(s => !geprueft(s.id)).length;
+    gruppe.label = `${fach} (${alle.length}, ${offen} offen)`;
+    for (const s of spiele) gruppe.append(new Option(`${geprueft(s.id) ? "✓ " : ""}${s.bild} ${s.name}`, s.id));
+    $("spiel").append(gruppe);
+  }
+  if ([...$("spiel").options].some(o => o.value === vorher)) $("spiel").value = vorher;
+}
+/** Leiste über den Stufen: Stand des Spiels, Knopf geprüft, Meldungen. */
+function zeigeAbnahme() {
+  const id = $("spiel").value, g = geprueft(id), box = $("abnahme");
+  box.innerHTML = "";
+  const stand = document.createElement("span");
+  stand.className = "stand" + (g ? " geprueft" : "");
+  stand.textContent = g ? `✓ geprüft ${g.am}${g.von ? " · " + g.von : ""}` : "noch nicht geprüft";
+  const knopf = document.createElement("button");
+  knopf.type = "button";
+  knopf.textContent = g ? "Prüfung aufheben" : "✓ Animation geprüft (alle Stufen)";
+  knopf.addEventListener("click", async () => {
+    if (!E.freigeschaltet()) return meldeAbnahme("Kein Entwickler-Schlüssel in diesem Browser: im Eulenpfad auf diesem Server Verwaltung → Entwicklung freischalten.");
+    if (await E.setzeGeprueft("feier", id, !g)) { fuelleAuswahl(); zeigeAbnahme(); }
+  });
+  const offen = bemerkungen.filter(b => b.inhalt === "feier" && !String(b.status).startsWith("erledigt"));
+  const zahl = document.createElement("span");
+  zahl.className = "leise";
+  zahl.textContent = `Offene Anmerkungen: ${offen.filter(b => b.spiel === id).length} hier, ${offen.length} insgesamt · geprüft ${mitFeier.filter(s => geprueft(s.id)).length} von ${mitFeier.length}`;
+  const meldung = document.createElement("span");
+  meldung.className = "meldung leise";
+  if (!E.freigeschaltet()) meldung.textContent = "⚠ Kein Entwickler-Schlüssel in diesem Browser — Ansehen geht, Speichern nicht.";
+  box.append(stand, knopf, zahl, meldung);
+}
+/** Prüfstand und Bemerkungen vom Server holen (der Prüfstand im Browser kann älter sein als die Datei). */
+async function holeStand() {
+  try {
+    const r = await fetch("../eulenpfad/spiele/gemeinsam/pruefstand.js", { cache: "no-store" });
+    const text = await r.text(), m = text.indexOf("const PRUEFSTAND = ");
+    if (m >= 0) Object.assign(PRUEFSTAND, JSON.parse(text.slice(m + 19).replace(/;\s*$/, "")));
+  } catch { /* ohne Server bleibt der geladene Stand */ }
+  bemerkungen = (await E.bemerkungen()) || [];
+  PRUEFSTAND.feier ||= {};
+}
+/** Anmerkungen zu einer Stufe: Liste der bisherigen und ein Feld für eine neue. */
+function anmerkungen(spiel, stufe) {
+  const box = document.createElement("div");
+  const liste = bemerkungen.filter(b => b.inhalt === "feier" && b.spiel === spiel && b.stufe === stufe);
+  if (liste.length) {
+    const ul = document.createElement("ul");
+    ul.className = "anmerkungen";
+    for (const b of liste) {
+      const li = document.createElement("li");
+      const erledigt = String(b.status).startsWith("erledigt");
+      li.className = erledigt ? "erledigt" : "";
+      li.textContent = `Nr. ${b.nr} (${b.eintrag || ""}): ${b.text} — ${b.status}`;
+      ul.append(li);
+    }
+    box.append(ul);
+  }
+  return box;
+}
+function anmerkungsFeld(spiel, stufe, ort) {
+  ort.querySelector(".anmerkung")?.remove();
+  const feld = document.createElement("div");
+  feld.className = "anmerkung";
+  const text = document.createElement("textarea");
+  text.placeholder = "Was passt nicht, was ist zu korrigieren?";
+  const senden = document.createElement("button"), abbrechen = document.createElement("button"), m = document.createElement("span");
+  senden.type = abbrechen.type = "button";
+  senden.textContent = "Speichern"; abbrechen.textContent = "Abbrechen"; m.className = "leise";
+  abbrechen.addEventListener("click", () => feld.remove());
+  senden.addEventListener("click", async () => {
+    if (!text.value.trim()) return (m.textContent = "Bitte etwas eintragen.");
+    if (!E.freigeschaltet()) return (m.textContent = "Kein Entwickler-Schlüssel in diesem Browser (Eulenpfad → Verwaltung → Entwicklung).");
+    const zeit = $("zeit").value, umstand = [`${$("sterne").value} Sterne`, `${$("breite").value} px`, $("ruhig").checked ? "Bewegung reduziert" : "",
+      zeit ? (zeit === "5" ? "Endbild" : `bei ${zeit} s`) : ""].filter(Boolean).join(", ");
+    const b = await E.bemerkung({ text: text.value, spiel, stufe, inhalt: "feier", eintrag: umstand, seite: "tools/feier_vorschau.html" });
+    if (!b) return;
+    bemerkungen.push(b);
+    feld.remove();
+    ort.querySelector(".liste")?.replaceChildren(anmerkungen(spiel, stufe));
+    zeigeAbnahme();
+  });
+  feld.append(text, senden, " ", abbrechen, " ", m);
+  ort.append(feld);
+  text.focus();
+}
+for (const k of ["breite", "sterne", "zeit"]) if (auswahl.get(k)) $(k).value = auswahl.get(k);
+fuelleAuswahl();
 if (auswahl.get("raster")) $("raster").checked = true;
 const HOEHE = 620, HOEHE_RASTER = 410; // nebeneinander: unter dem Schlussbild bleibt nur leerer Platz
 /** Animation im Rahmen bei sekunde anhalten (SMIL: pauseAnimations, setCurrentTime). */
@@ -75,11 +204,23 @@ function zeichne() {
   const faktor = klein || raster ? Math.min(1, platz / breite) : 1;
   $("stufen").className = raster ? "raster" : "";
   $("stufen").innerHTML = "";
+  zeigeAbnahme();
   for (let n = 1; n <= 6; n++) {
     const box = document.createElement("div");
     box.className = "stufe";
+    const kopf = document.createElement("div");
+    kopf.className = "stufe-kopf";
     const h = document.createElement("h2");
     h.textContent = `Stufe ${n}`;
+    const notiz = document.createElement("button");
+    notiz.type = "button";
+    notiz.textContent = "📝 Anmerkung";
+    const ort = document.createElement("div"), liste = document.createElement("div");
+    liste.className = "liste";
+    liste.append(anmerkungen(spiel, `s${n}`));
+    ort.append(liste);
+    notiz.addEventListener("click", () => anmerkungsFeld(spiel, `s${n}`, ort));
+    kopf.append(h, notiz);
     const rahmen = document.createElement("div");
     rahmen.className = "rahmen";
     rahmen.style.width = `${Math.round(breite * faktor)}px`;
@@ -92,13 +233,19 @@ function zeichne() {
     f.src = `../eulenpfad/spiele/${spiel}/index.html?feier=s${n}&sterne=${sterne}${ruhig ? "&ruhig=1" : ""}`;
     if (zeit) f.addEventListener("load", () => anhalten(f, Number(zeit)));
     rahmen.append(f);
-    box.append(h, rahmen);
+    box.append(kopf, ort, rahmen); // Anmerkungen gleich unter dem Knopf, nicht unter dem hohen Bild
     $("stufen").append(box);
   }
 }
 for (const k of ["spiel", "breite", "sterne", "ruhig", "klein", "raster", "zeit"]) $(k).addEventListener("change", zeichne);
+$("ausblenden").addEventListener("change", () => {
+  try { localStorage.setItem(AUSBLENDEN, $("ausblenden").checked ? "1" : "0"); } catch { /* ohne Speicher: nur jetzt */ }
+  fuelleAuswahl();
+  zeigeAbnahme();
+});
 $("neu").addEventListener("click", zeichne);
 zeichne();
+holeStand().then(() => { fuelleAuswahl(); zeichne(); });
 </script>
 </body>
 </html>

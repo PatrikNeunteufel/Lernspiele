@@ -7299,6 +7299,1723 @@ var LS_FEIER = (function () {
   Object.assign(BILDER.karte, { kompassweg, planweg });
   Object.assign(BILDER.wachsen, { pflanze });
 
+  // ---------- Bilder Block D: Englisch, Französisch, Musik, Medien und Informatik (LERN_Session31) ----------
+  // Wie die Blöcke davor: jedes Bild folgt den Stufen seines Spiels (der Entwurf in Abschnitt 8 des Konzepts passte hier
+  // meist nicht) und prüft, was es zeigt. Wörter der Fremdsprachen als leere Kärtchen; Zeichen nur, wo sie selbst der
+  // Inhalt sind (Artikel, Laute, Buchstaben beim Buchstabieren, Notennamen, Endungen, Einheiten, Uhrzeiten, Zahlen).
+  // Bildzeichen und Farben wie in den Spielen.
+
+  /** Eule mit Kopfhörern (Füsse bei 0,0, Grösse k wie euleSitzend). */
+  function euleKopfhoerer(k) {
+    const g = euleSitzend(k);
+    g.appendChild(s("g", { transform: `scale(${k})` },
+      s("path", { d: "M-31,-50 C-31,-102 31,-102 31,-50", fill: "none", stroke: "#2d3047", "stroke-width": 5 }),
+      s("rect", { x: -38, y: -62, width: 12, height: 22, rx: 5, fill: "#e5484d" }), s("rect", { x: 26, y: -62, width: 12, height: 22, rx: 5, fill: "#e5484d" })));
+    return g;
+  }
+  /** Schallbögen nach rechts ab x, y (drei, nacheinander). */
+  function schallAus(x, y, ruhig, ab = 0, gross = 1) {
+    const g = s("g", {});
+    [8, 15, 22].forEach((r, i) => g.appendChild(erscheine(s("path", { d: `M${x + r * gross * 0.5},${y - r * gross} Q${x + r * gross * 1.1},${y} ${x + r * gross * 0.5},${y + r * gross}`,
+      fill: "none", stroke: KNOPF, "stroke-width": 2, "stroke-linecap": "round" }), ab + i * 0.15, ruhig, 0.2)));
+    return g;
+  }
+  /** Bildkarte (weiss, gerundet) mit Bildzeichen, Mitte x, y. */
+  function bildKarte(x, y, b, bild, { rand = "#c9cde0", gross } = {}) {
+    return s("g", {}, s("rect", { x: x - b / 2, y: y - b / 2, width: b, height: b, rx: 6, fill: "#ffffff", style: `stroke:${rand}`, "stroke-width": 1.6 }),
+      bild ? bildzeichen(x, y, bild, gross ?? b * 0.62) : null);
+  }
+  /** Ring, der das Antippen zeigt (grün, wie --gut), ab Zeitpunkt. */
+  const tippRing = (x, y, r, ab, ruhig) => erscheine(s("circle", { cx: x, cy: y, r, fill: "none", stroke: GUT, "stroke-width": 3 }), ab, ruhig, 0.25);
+  /** Sprechblase (leer, zwei Striche), Spitze nach links oder rechts. */
+  function sprechblase(x, y, b, h, { links = true, rand = "#8a8fa8", grund = "#ffffff", gestrichelt = false } = {}) {
+    const sx = links ? x + 10 : x + b - 10, d = links ? -8 : 8;
+    return s("g", {},
+      s("path", { d: `M${x + 6},${y} H${x + b - 6} Q${x + b},${y} ${x + b},${y + 6} V${y + h - 6} Q${x + b},${y + h} ${x + b - 6},${y + h} H${sx + 5} L${sx + d},${y + h + 6} L${sx - 2},${y + h} H${x + 6} Q${x},${y + h} ${x},${y + h - 6} V${y + 6} Q${x},${y} ${x + 6},${y} Z`,
+        fill: grund, style: `stroke:${rand}`, "stroke-width": 1.4, ...(gestrichelt ? { "stroke-dasharray": "4 3" } : {}) }));
+  }
+  const blasenStriche = (x, y, b, h) => s("path", { d: `M${x + 6},${y + h / 2 - 2} h${b - 12} M${x + 6},${y + h / 2 + 2.5} h${(b - 12) * 0.6}`, stroke: "#c9cde0", "stroke-width": 1.4, "stroke-linecap": "round" });
+
+  // ----- Hören und antippen (AUFTRITT · hoerbild): Listen & Tap, Mots-Match (nur hören), Sound-Sorter (s1, s6) -----
+  /**
+   * Links die Eule mit Kopfhörern, aus dem Lautsprecher kommen Schallbögen; rechts die Bilder der Aufgabe (2–6, so viele
+   * wie im Spiel). Das gehörte Bild wird angetippt und bekommt den Haken; mit anders hüpft das eine Bild heraus, das
+   * anders klingt (Sound-Sorter s6). Mit wo: Tisch und Kiste wie im Spiel, das Tier läuft an seinen Ort (on, under,
+   * next, in). Angabe: { bilder: [Bild …], ziel: Stelle, anders? } oder { wo: [{ tier, ort, ding }] }.
+   */
+  const WO_TIERE = ["🐱", "🐶", "🐭", "🐸", "🐦", "🦆"];
+  function hoerbild(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    const svg = neuesBild("auftritt", stufe, { "data-bilder": "hoerbild" });
+    svg.appendChild(tagGrund());
+    const eule = euleKopfhoerer(0.56);
+    eule.setAttribute("transform", "translate(42 132)");
+    svg.append(eule, bildzeichen(42, 40, "🔊", 18), schallAus(56, 40, ruhig, 0.1, 0.8));
+    if (Array.isArray(z.wo)) {
+      // Tisch (deko-7) und Kiste (deko-3) wie im Spiel; Orte: on, under, next (links neben dem Tisch, rechts neben der Kiste), in
+      const ORTE = { table: { on: [160, 76], under: [160, 124], next: [112, 124] }, box: { in: [262, 108], on: [262, 86], next: [304, 124] } };
+      if (!z.wo.length || z.wo.length > 2 || !z.wo.every(w => WO_TIERE.includes(w.tier) && ORTE[w.ding]?.[w.ort])) return null;
+      svg.setAttribute("data-anzahl", z.wo.length);
+      svg.append(s("rect", { x: 122, y: 86, width: 76, height: 7, rx: 2, style: "fill:var(--deko-7)" }),
+        s("rect", { x: 128, y: 93, width: 5, height: 41, style: "fill:var(--deko-7)" }), s("rect", { x: 187, y: 93, width: 5, height: 41, style: "fill:var(--deko-7)" }),
+        s("line", { x1: 96, y1: 135, x2: 316, y2: 135, stroke: "#8a8fa8", "stroke-width": 1.4 }));
+      const kisteHinten = s("rect", { x: 236, y: 98, width: 52, height: 37, rx: 2, style: "fill:var(--deko-3)", opacity: 0.6 });
+      const kisteVorn = s("rect", { x: 236, y: 112, width: 52, height: 23, rx: 2, style: "fill:var(--deko-3)" });
+      svg.appendChild(kisteHinten);
+      const tiere = s("g", {});
+      svg.append(tiere, kisteVorn);
+      z.wo.forEach((w, i) => {
+        const [x, y] = ORTE[w.ding][w.ort], ab = 0.4 + i * T * 0.45;
+        const tier = s("g", { "data-stueck": `${w.ort}-${w.ding}` }, bildzeichen(0, -9, w.tier, 20));
+        tiere.appendChild(bewege(tier, `M80,124 Q${(80 + x) / 2},${Math.min(y, 124) - 30} ${x},${y}`, { x, y, winkel: 0 }, ruhig, { drehen: false, ab, dauer: T * 0.45 }));
+      });
+      if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 16, ruhig));
+      if (sterne >= 3) svg.appendChild(funken(160, 30, ruhig));
+      return svg;
+    }
+    const b = z.bilder;
+    if (!Array.isArray(b) || b.length < 2 || b.length > 6 || !Number.isInteger(z.ziel) || z.ziel < 0 || z.ziel >= b.length) return null;
+    svg.setAttribute("data-wert", b[z.ziel]);
+    svg.setAttribute("data-anzahl", b.length);
+    // eine Reihe bis 4 Bilder, sonst zwei Reihen zu 3
+    const reihen = b.length <= 4 ? [b.length] : [Math.ceil(b.length / 2), Math.floor(b.length / 2)], k = b.length <= 4 ? 46 : 40;
+    let i = 0;
+    reihen.forEach((n, r) => {
+      const y = reihen.length === 1 ? 78 : 50 + r * 54;
+      for (let j = 0; j < n; j++, i++) {
+        const x = 96 + (216 - (n * k + (n - 1) * 10)) / 2 + k / 2 + j * (k + 10), ziel = i === z.ziel;
+        const karte = s("g", { "data-stueck": ziel ? "gehoert" : "bild" }, bildKarte(x, y, k, b[i]));
+        svg.appendChild(erscheine(karte, 0.2 + (i * T * 0.3) / b.length, ruhig));
+        if (ziel) {
+          if (z.anders) svg.lastChild.appendChild(s("g", {}));
+          svg.append(tippRing(x, y, k / 2 + 3, T * 0.75, ruhig), erscheine(haken(x + k / 2 - 2, y - k / 2 + 6, 15), T * 0.85, ruhig));
+          if (z.anders && !ruhig) karte.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", values: "0 0;0 -8;0 0", begin: t(T * 0.75), dur: "0.5s", fill: "freeze" }));
+        }
+      }
+    });
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(86, 100, ruhig));
+    return svg;
+  }
+
+  // ----- English Word-Match, Mots-Match (SAMMELN · themenkarten) -----
+  /**
+   * Bild → Wort: je Thema der Stufe eine Bildkarte, darunter das (leere) Wortkärtchen, ein Strich verbindet sie. ton: "an"
+   * (🔊, die Wörter werden vorgelesen) oder "aus" (🔇); richtung "wort": zuerst das Wort, dann das Bild. wendung: dazu
+   * eine Sprechblase (kleine Sätze, Word-Match s4). artikel: { bild, richtig, falsch } — am Wort steckt erst der falsche
+   * Artikel und fällt weg, dann der richtige (Mots-Match s5). Angabe: { themen: [Bild …] } (2–8).
+   */
+  function themenkarten(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "themenkarten" });
+    svg.appendChild(tagGrund());
+    if (z.artikel) {
+      const a = z.artikel, ART = ["le", "la", "l’", "les"];
+      if (!ART.includes(a.richtig) || !ART.includes(a.falsch) || a.richtig === a.falsch || !a.bild) return null;
+      svg.setAttribute("data-wert", a.richtig);
+      svg.append(bildKarte(96, 74, 64, a.bild), s("line", { x1: 130, y1: 74, x2: 160, y2: 74, stroke: "#8a8fa8", "stroke-width": 1.4 }));
+      svg.appendChild(leerKarte(206, 60, 90, 28, { rand: "var(--deko-2)", grund: "#fdeef5" }));
+      const schild = (art, farbe) => s("g", {}, s("rect", { x: 162, y: 62, width: 38, height: 24, rx: 5, fill: "#ffffff", style: `stroke:${farbe}`, "stroke-width": 2 }), text(181, 79, art, { gross: 14 }));
+      const falsch = s("g", {}, schild(a.falsch, HINWEIS));
+      svg.appendChild(ruhig ? s("g", { opacity: 0 }, falsch) : falsch);
+      if (!ruhig) {
+        falsch.setAttribute("opacity", "0");
+        falsch.append(s("set", { attributeName: "opacity", to: 1, begin: t(0.2), fill: "freeze" }),
+          s("animateTransform", { attributeName: "transform", type: "translate", values: "0 0;0 0;4 60", keyTimes: "0;0.5;1", begin: t(0.2), dur: `${T * 0.5}s`, fill: "freeze" }),
+          s("animate", { attributeName: "opacity", from: 1, to: 0, begin: t(0.2 + T * 0.45), dur: "0.2s", fill: "freeze" }));
+        svg.appendChild(kurz(kreuz(214, 52, 16), T * 0.25, T * 0.55, ruhig));
+      }
+      svg.append(s("g", { "data-stueck": a.richtig }, herein(schild(a.richtig, GUT), 0, -50, T * 0.6, ruhig, 0.4)), erscheine(haken(282, 54, 16), T, ruhig));
+      svg.setAttribute("data-anzahl", 1);
+    } else {
+      const th = z.themen;
+      if (!Array.isArray(th) || th.length < 2 || th.length > 8 || (z.ton && !["an", "aus"].includes(z.ton))) return null;
+      svg.setAttribute("data-anzahl", th.length);
+      const oben = z.wendung ? 30 : 46, unten = oben + 46, b = Math.min(40, (290 - (th.length - 1) * 6) / th.length);
+      const x0 = BREITE / 2 - (th.length * b + (th.length - 1) * 6) / 2;
+      if (z.ton) svg.appendChild(bildzeichen(18, 16, z.ton === "an" ? "🔊" : "🔇", 14));
+      th.forEach((bild, i) => {
+        const x = x0 + b / 2 + i * (b + 6), ab = 0.2 + (i * T * 0.75) / th.length;
+        const paar = s("g", { "data-stueck": bild },
+          s("line", { x1: x, y1: oben + b / 2, x2: x, y2: unten - 7, stroke: "#8a8fa8", "stroke-width": 1.2 }),
+          bildKarte(x, oben, b, bild), leerKarte(x - b / 2, unten - 7, b, 14, { rand: "var(--deko-6)", grund: "#eef0ff" }));
+        if (z.ton === "an") paar.appendChild(schallAus(x + b / 2 - 4, unten - 14, ruhig, ab + 0.15, 0.3));
+        svg.appendChild(z.richtung === "wort" ? herein(paar, 0, 30, ab, ruhig, 0.35) : herein(paar, 0, -30, ab, ruhig, 0.35));
+      });
+      if (z.wendung) {
+        svg.append(erscheine(s("g", {}, sprechblase(90, 104, 140, 26, { rand: "var(--deko-6)", grund: "#eef0ff" }), blasenStriche(90, 104, 140, 26), text(220, 122, "?", { gross: 14 })), T, ruhig));
+        if (z.wendung && th.length) svg.appendChild(erscheine(bildzeichen(66, 118, "🧒", 20), T, ruhig));
+      }
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(z.wendung ? 274 : 160, z.wendung ? 118 : 128, ruhig));
+    return svg;
+  }
+
+  // ----- Buchstabieren (BAUEN · buchstaben): Word-Match s5, s6, Spelling-Bee -----
+  /** Biene (Mitte 0,0). */
+  function biene() {
+    return s("g", { "data-figur": "biene" },
+      s("ellipse", { cx: -3, cy: -8, rx: 5, ry: 3.4, fill: "#cfe9f8", opacity: 0.9 }), s("ellipse", { cx: 4, cy: -8, rx: 5, ry: 3.4, fill: "#cfe9f8", opacity: 0.9 }),
+      s("ellipse", { cx: 0, cy: 0, rx: 8, ry: 5.5, fill: "#f5b301", stroke: "#2d3047", "stroke-width": 0.8 }),
+      s("path", { d: "M-3,-5 v10 M2,-5.4 v10.8", stroke: "#2d3047", "stroke-width": 2 }), s("circle", { cx: 8.5, cy: -1, r: 3, fill: "#2d3047" }));
+  }
+  /** Sechseck (Wabe) um x, y mit Radius r. */
+  const wabe = (x, y, r, attr) => s("path", { d: "M" + [0, 1, 2, 3, 4, 5].map(i => { const w = ((60 * i - 30) * Math.PI) / 180; return `${(x + r * Math.cos(w)).toFixed(1)},${(y + r * Math.sin(w)).toFixed(1)}`; }).join(" L") + " Z", ...attr });
+  /**
+   * Das Wort wird aus Buchstaben gelegt (wie im Spiel: genau die Buchstaben des Worts, dazu extra überzählige, die am
+   * Ende wegfallen). hilfe zeigt, was das Spiel gibt: "wort" (Bild und das Wort zum Abschreiben), "bild", "deutsch" (nur
+   * das deutsche Wort, als leeres Kärtchen), "hoeren" (nichts, nur der Ton). waben: als Wabe mit der Biene (Spelling-Bee),
+   * sonst Kacheln (Word-Match). Angabe: { wort, bild?, hilfe, extra?: [Buchstabe …] }.
+   */
+  function buchstaben(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z || !/^[a-z]{2,11}$/.test(z.wort || "") || !["wort", "bild", "deutsch", "hoeren"].includes(z.hilfe)) return null;
+    const extra = z.extra || [];
+    if (extra.length > 3 || !extra.every(b => /^[a-z]$/.test(b)) || (["wort", "bild"].includes(z.hilfe) && !z.bild)) return null;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "buchstaben", "data-wert": z.wort, "data-anzahl": z.wort.length });
+    svg.appendChild(tagGrund());
+    const waben = !!feier.waben, n = z.wort.length;
+    // Hilfe links, die Buchstaben rechts: oben gemischt (Vorrat), unten der Platz im Wort
+    if (z.hilfe === "wort" || z.hilfe === "bild") svg.appendChild(bildKarte(34, 54, 44, z.bild));
+    if (z.hilfe === "wort") svg.appendChild(text(34, 96, z.wort, { gross: 11, farbe: "#8a8fa8" }));
+    if (z.hilfe === "deutsch") svg.appendChild(leerKarte(8, 46, 52, 18));
+    if (z.hilfe === "hoeren") svg.append(bildzeichen(34, 54, "🔊", 22), schallAus(46, 54, ruhig, 0.1, 0.6));
+    const L = 70, R = 312, alle = n + extra.length;
+    const r = Math.min(13, (R - L) / (alle * 1.8)), schritt = Math.min(2 * r * 1.0 + 3, (R - L) / Math.max(n, 1));
+    const platz = i => L + (R - L - (n - 1) * schritt) / 2 + i * schritt;
+    // Vorrat: die Buchstaben gemischt (fest: jeder zweite von hinten), die überzähligen dazwischen
+    const vorrat = [...z.wort].map((b, i) => ({ b, i })).sort((p, q) => ((p.i * 7) % n) - ((q.i * 7) % n));
+    extra.forEach((b, k) => vorrat.splice(Math.min(vorrat.length, 1 + k * 3), 0, { b, i: -1 }));
+    const vs = Math.min(2 * r + 3, (R - L) / alle), vx = j => L + (R - L - (alle - 1) * vs) / 2 + j * vs, vy = 44, py = 108;
+    const zeichen = (x, y, b, platzhalter) => s("g", {},
+      waben ? wabe(x, y, r, { fill: platzhalter ? "#fff3c4" : "#f5c542", stroke: "#b88a1f", "stroke-width": 1.2 })
+        : s("rect", { x: x - r, y: y - r, width: 2 * r, height: 2 * r, rx: 3, fill: platzhalter ? "#eef0ff" : "#ffffff", style: `stroke:${KNOPF}`, "stroke-width": 1.4 }),
+      b ? text(x, y + r * 0.42, b, { gross: Math.max(10, r * 1.15) }) : null);
+    for (let i = 0; i < n; i++) svg.appendChild(zeichen(platz(i), py, null, true));
+    const je = (T * 0.8) / n;
+    vorrat.forEach((v, j) => {
+      if (v.i < 0) {
+        // überzählig: bleibt liegen, wird am Ende durchgestrichen und blendet aus
+        svg.appendChild(verschwinde(s("g", {}, zeichen(vx(j), vy, v.b), erscheine(kreuz(vx(j) + r, vy - r, 11), T * 0.85, ruhig)), T + 0.3, ruhig, 0.4));
+        return;
+      }
+      const g = s("g", { "data-stueck": v.b }, zeichen(platz(v.i), py, v.b));
+      svg.appendChild(herein(g, vx(j) - platz(v.i), vy - py, 0.2 + v.i * je, ruhig, 0.35));
+    });
+    if (waben) {
+      const pts = [[L - 6, 20], ...[...Array(n).keys()].map(i => [platz(i), py - r - 8])];
+      svg.appendChild(bewege(biene(), "M" + pts.map(p => p.join(",")).join(" L"), { x: platz(n - 1), y: py - r - 8, winkel: 0 }, ruhig, { drehen: false, linear: true, ab: 0.2, dauer: T * 0.8 + 0.3 }));
+    }
+    svg.appendChild(erscheine(haken(Math.min(platz(n - 1) + r + 8, BREITE - 10), py + r + 12, 15), T + 0.1, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(200, 26, ruhig)); // oben, wo am Ende kein Buchstabe mehr liegt
+    return svg;
+  }
+
+  // ----- Wort-Zwillinge (SAMMELN · wortzwillinge) -----
+  /**
+   * Je Paar eine englische Karte (Rand deko-6 wie im Spiel) und ihr deutscher Zwilling; sie rücken zusammen, gleich lange
+   * Karten bei „gleich“ (hand – Hand), fast gleich lange bei „ähnlich“ (house – Haus), dazu 👯. Ein falscher Freund (Karte
+   * deko-3) rückt zur deutschen Falle, die wegfällt (⚠️); dann kommt die richtige Bedeutung. bild: das Bildzeichen des
+   * Spiels links (nur, wo das Spiel ein Bild zeigt). Angabe: Liste von { art: "gleich" | "aehnlich" | "falsch", bild? } (1–5).
+   */
+  function wortzwillinge(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!Array.isArray(z) || !z.length || z.length > 5 || !z.every(p => ["gleich", "aehnlich", "falsch"].includes(p.art))) return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "wortzwillinge", "data-anzahl": z.length });
+    svg.appendChild(tagGrund());
+    const zh = Math.min(30, 136 / z.length), h = Math.min(20, zh - 6), je = T / z.length;
+    z.forEach((p, i) => {
+      const y = 8 + (136 - z.length * zh) / 2 + i * zh, ab = 0.15 + i * je, falsch = p.art === "falsch";
+      const g = s("g", { "data-stueck": p.art });
+      if (p.bild) g.appendChild(bildzeichen(22, y + h / 2, p.bild, Math.min(18, h)));
+      const en = leerKarte(40, y, 80, h, { rand: falsch ? "var(--deko-3)" : "var(--deko-6)", grund: falsch ? "#fff1e6" : "#eef0ff" });
+      const de = leerKarte(0, y, p.art === "gleich" ? 80 : 70, h);
+      g.appendChild(herein(en, -40, 0, ab, ruhig, 0.35));
+      if (falsch) {
+        // die deutsche Falle (sieht gleich aus) kommt heran und fällt weg, dann die richtige Bedeutung
+        const falle = s("g", { transform: "translate(128 0)" }, leerKarte(0, y, 80, h, { rand: HINWEIS }));
+        if (!ruhig) {
+          falle.setAttribute("opacity", "0");
+          falle.append(s("set", { attributeName: "opacity", to: 1, begin: t(ab), fill: "freeze" }),
+            s("animate", { attributeName: "opacity", from: 1, to: 0, begin: t(ab + je * 0.6), dur: "0.25s", fill: "freeze" }));
+          g.appendChild(falle);
+        }
+        g.appendChild(herein(s("g", { transform: "translate(128 0)" }, leerKarte(0, y, 66, h)), 60, 0, ab + je * 0.7, ruhig, 0.3));
+        g.appendChild(erscheine(bildzeichen(222, y + h / 2, "⚠️", Math.min(16, h)), ab + je * 0.5, ruhig));
+      } else {
+        g.appendChild(herein(s("g", { transform: "translate(128 0)" }, de), 60, 0, ab + 0.1, ruhig, 0.35));
+        g.appendChild(erscheine(bildzeichen(p.art === "gleich" ? 226 : 216, y + h / 2, "👯", Math.min(16, h)), ab + je * 0.6, ruhig));
+      }
+      svg.appendChild(g);
+    });
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 16, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(282, 120, ruhig));
+    return svg;
+  }
+
+  // ----- Sentence-Builder (BAUEN · wortzug) -----
+  /**
+   * Wie die Satz-Reparatur: je Satz ein Zug aus leeren Wortwagen (das Satzzeichen hängt am letzten Wort, darum kein
+   * eigener Wagen), grosse Wörter mit Dach (am Anfang, „I“); falsch: dazu eine Verwechsler-Karte (has statt have), die
+   * nicht in den Zug passt und herunterfällt. nicht: eine Karte der Verneinung (don’t) mit einem Strich. Angabe: Liste von
+   * { woerter, zeichen: "." | "?", gross?, falsch?, nicht? } (1–2 Sätze).
+   */
+  function wortzug(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    const ok = zg => zg && Number.isInteger(zg.woerter) && zg.woerter >= 3 && zg.woerter <= 6 && [".", "?"].includes(zg.zeichen)
+      && (zg.gross ?? [0]).every(i => Number.isInteger(i) && i >= 0 && i < zg.woerter) && (zg.nicht === undefined || (Number.isInteger(zg.nicht) && zg.nicht < zg.woerter));
+    if (!Array.isArray(z) || !z.length || z.length > 2 || !z.every(ok)) return null;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "wortzug", "data-anzahl": z.length });
+    svg.append(tagGrund(), boden());
+    const zh = 116 / z.length, h = Math.min(28, zh - 22), alle = z.reduce((a, zg) => a + zg.woerter, 0), je = (T * 0.75) / alle;
+    let k = 0;
+    z.forEach((zg, r) => {
+      const y = 16 + r * zh + (zh - h - 6) / 2 + (zg.falsch ? 6 : 0), n = zg.woerter, wb = Math.min(44, (250 - (n - 1) * 5) / n), x0 = BREITE / 2 - (n * wb + (n - 1) * 5) / 2;
+      const zug = s("g", { "data-stueck": "satz", "data-zeichen": zg.zeichen, "data-woerter": n });
+      zug.appendChild(s("line", { x1: 10, y1: y + h + 6, x2: 310, y2: y + h + 6, stroke: "#6b4a2b", "stroke-width": 1.4 }));
+      for (let i = 0; i < n; i++) {
+        const x = x0 + i * (wb + 5), w = s("g", {});
+        if (i) w.appendChild(s("line", { x1: x - 5, y1: y + h * 0.6, x2: x, y2: y + h * 0.6, stroke: "#2d3047", "stroke-width": 1.4 }));
+        w.appendChild(leerKarte(x, y, wb, h, { rand: "var(--deko-1)", grund: "#f4eefc" }));
+        if ((zg.gross ?? [0]).includes(i)) w.appendChild(s("rect", { x: x + 2, y: y - 5, width: wb - 4, height: 5, rx: 2, style: "fill:var(--deko-3)", "data-gross": i }));
+        if (zg.nicht === i) w.appendChild(s("path", { d: `M${x + 4},${y + h - 4} L${x + wb - 4},${y + 4}`, stroke: "#e5484d", "stroke-width": 1.6 }));
+        if (i === n - 1) w.appendChild(text(x + wb + 6, y + h * 0.78, zg.zeichen, { gross: 16 }));
+        w.append(s("circle", { cx: x + wb * 0.28, cy: y + h + 3, r: 2.6, fill: "#2d3047" }), s("circle", { cx: x + wb * 0.72, cy: y + h + 3, r: 2.6, fill: "#2d3047" }));
+        zug.appendChild(herein(w, -36, 0, 0.15 + k++ * je, ruhig, 0.35));
+      }
+      svg.appendChild(zug);
+      if (zg.falsch) {
+        // die Verwechsler-Karte schwebt über dem Zug, passt nicht und fällt herab
+        const fx = x0 + n * (wb + 5) - wb - 5, karte = s("g", {}, leerKarte(fx, y - h - 4, wb, h, { rand: HINWEIS, grund: "#fff1e6" }), kreuz(fx + wb + 6, y - 6, 12));
+        svg.appendChild(ruhig ? s("g", { opacity: 0 }, karte) : karte);
+        if (!ruhig) {
+          karte.append(s("animateTransform", { attributeName: "transform", type: "translate", values: "0 0;0 0;10 90", keyTimes: "0;0.6;1", begin: t(0.2), dur: `${T}s`, fill: "freeze" }),
+            s("animate", { attributeName: "opacity", from: 1, to: 0, begin: t(0.2 + T * 0.9), dur: "0.2s", fill: "freeze" }));
+        }
+      }
+    });
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(30, 26, ruhig));
+    return svg;
+  }
+
+  // ----- Sound-Sorter, Le ou la ?, Son-Lauscher, Datei-Typen (SAMMELN · koerbe) -----
+  /**
+   * Körbe in den Farben des Spiels, beschriftet mit dem, was sortiert wird (Artikel, Laut, Bildzeichen); die Karten
+   * fallen von oben in ihren Korb. Gemeinsam für die Sortier-Spiele; jedes Spiel prüft vorher, was es sortiert.
+   * koerbe: [{ zeichen, farbe, strich?: "kurz" | "lang", bild? }], dinge: [{ bild?, text?, mal?, korb }], kopf: Zeichen oben
+   * links (🔇 ohne Ton, 👂 nur hören).
+   */
+  function korbBild(stufe, name, { koerbe, dinge, kopf }, sterne, ruhig) {
+    const T = DAUER * 0.8, k = koerbe.length, kb = Math.min(92, (300 - (k - 1) * 8) / k), x0 = BREITE / 2 - (k * kb + (k - 1) * 8) / 2;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": name, "data-anzahl": dinge.length });
+    svg.appendChild(tagGrund());
+    if (kopf) svg.appendChild(bildzeichen(18, 16, kopf, 14));
+    const kx = i => x0 + i * (kb + 8);
+    const vorn = s("g", {});
+    koerbe.forEach((kb_, i) => {
+      const x = kx(i);
+      svg.appendChild(s("path", { d: `M${x},${98} L${x + kb},${98} L${x + kb - 6},${142} L${x + 6},${142} Z`, style: `fill:${kb_.farbe}`, opacity: 0.22 }));
+      vorn.appendChild(s("path", { d: `M${x},${110} L${x + kb},${110} L${x + kb - 4},${142} L${x + 4},${142} Z`, style: `fill:${kb_.farbe}`, opacity: 0.9 }));
+      if (kb_.bild) vorn.appendChild(bildzeichen(x + kb / 2, 126, kb_.bild, 20));
+      else vorn.appendChild(text(x + kb / 2, kb_.strich ? 127 : 131, kb_.zeichen, { gross: 15, farbe: "#ffffff" }));
+      if (kb_.strich) vorn.appendChild(kb_.strich === "kurz" ? s("circle", { cx: x + kb / 2, cy: 135, r: 2, fill: "#ffffff" })
+        : s("rect", { x: x + kb / 2 - 9, y: 133.5, width: 18, height: 3, rx: 1.5, fill: "#ffffff" }));
+    });
+    const imKorb = koerbe.map(() => 0), proKorb = koerbe.map((_, i) => dinge.filter(d => d.korb === i).length);
+    dinge.forEach((d, j) => {
+      const i = d.korb, n = proKorb[i], p = imKorb[i]++, kw = Math.min(30, (kb - 6) / Math.max(n, 1));
+      const x = kx(i) + kb / 2 + (p - (n - 1) / 2) * kw, y = 96, ab = 0.2 + (j * T * 0.8) / dinge.length;
+      const g = s("g", { "data-stueck": koerbe[i].zeichen });
+      if (d.mal === 3) [-5, 0, 5].forEach((dx, m) => g.appendChild(bildzeichen(x + dx, y - 4 + (m === 1 ? -4 : 0), d.bild, Math.min(14, kw * 0.55))));
+      else if (d.bild) g.appendChild(bildzeichen(x, y - 4, d.bild, Math.min(22, kw * 0.8)));
+      // eine Datei ohne Bild: Kärtchen mit der Endung darin (orange wie im Spiel), sonst ein leeres Wortkärtchen
+      else if (d.text) g.append(s("rect", { x: x - kw / 2 + 1, y: y - 13, width: kw - 2, height: 16, rx: 3, fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 1 }),
+        text(x, y - 1.5, d.text, { gross: 9, farbe: "#c25e12" }));
+      else g.appendChild(leerKarte(x - kw / 2 + 1, y - 12, kw - 2, 14));
+      if (d.text && d.bild) g.appendChild(text(x, y + 9, d.text, { gross: 9, farbe: "#c25e12" }));
+      // Startplatz oben, der Reihe nach von links
+      const sx = 40 + (j * 240) / Math.max(1, dinge.length - 1 || 1);
+      svg.appendChild(herein(g, sx - x, 24 - y + 30, ab, ruhig, 0.45));
+    });
+    svg.appendChild(vorn);
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE / 2, 26, ruhig));
+    return svg;
+  }
+
+  // Sound-Sorter: Laute mit den Bildzeichen der Liste des Spiels (woerter.js, Auswahl)
+  const LAUTE_EN = {
+    "i-kurz": ["🐟", "🐷", "🚢", "6️⃣", "🎁", "🎤"], "i-lang": ["🚲", "5️⃣", "🪁", "9️⃣", "🧊", "🦁"],
+    "a-kurz": ["🐱", "🎩", "🗺️", "🧢", "🦇"], "a-lang": ["🎂", "✈️", "🐍", "🐋", "🚆"],
+    "o-kurz": ["🐶", "📦", "🐸", "🧦", "🦊"], "o-lang": ["🏠", "👃", "🦴", "📱", "⛵"],
+    ee: ["🌳", "🌊", "🐑", "🐝", "🔑"], "oo-lang": ["🌙", "🥄", "👟", "🧃"],
+  };
+  const lautVon = bild => Object.keys(LAUTE_EN).find(l => LAUTE_EN[l].includes(bild));
+  /**
+   * s2–s4: Körbe kurz (Punkt) und lang (Strich) je Buchstabe, die Karten nach ihrem Laut; s5: Körbe „wie in tree, bike,
+   * cake“ (Bildzeichen), gleicher Laut in anderer Schrift. Angabe: { koerbe: ["i-kurz", …], dinge: [Bild …], ohneTon? }.
+   */
+  function lautkoerbe(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.koerbe) || !Array.isArray(z.dinge) || !z.dinge.length || z.dinge.length > 8) return null;
+    // Körbe „wie in“: der lange Laut des Beispiels (tree = ee, bike = i lang, cake = a lang)
+    const WIE = { "🌳": "ee", "🚲": "i-lang", "🎂": "a-lang", "🏠": "o-lang", "🌙": "oo-lang" };
+    const laute = z.koerbe.map(k => WIE[k] || k);
+    if (!laute.every(l => LAUTE_EN[l]) || new Set(laute).size !== laute.length) return null;
+    const FARBEN = ["var(--deko-6)", "var(--deko-3)", "var(--deko-5)", "var(--deko-2)", "var(--deko-1)", "var(--deko-4)"];
+    const koerbe = z.koerbe.map((k, i) => WIE[k] ? { zeichen: k, bild: k, farbe: FARBEN[i] } : { zeichen: k.split("-")[0], strich: k.split("-")[1], farbe: FARBEN[i] });
+    const dinge = [];
+    for (const d of z.dinge) {
+      const i = laute.indexOf(lautVon(d));
+      if (i < 0 || z.koerbe.includes(d)) return null;
+      dinge.push({ bild: d, korb: i });
+    }
+    return korbBild(stufe, "lautkoerbe", { koerbe, dinge, kopf: z.ohneTon ? "🔇" : "👂" }, sterne, ruhig);
+  }
+
+  // ----- Weather-Report (AUFTRITT · wetterbericht) -----
+  const WETTER_EN = ["☀️", "☁️", "🌧️", "🌬️", "🌨️", "🌫️", "⛈️", "🥵", "🥶"], TEAMS_EN = ["🦁", "🐯", "🐻", "🐺", "🦅", "🦈", "🦊"];
+  /**
+   * Das Radio 📻 sendet, rechts erscheint, was die Durchsage sagt (so viel, wie die Stufe heraushören lässt): wetter (ein
+   * Wort), meldung { wetter, grad }, tage: [[Wetter, Grad] …] (heute und morgen, oder zwei Orte), sport: [[Team, Tore] …]
+   * (der Sieger bekommt den Pokal, bei Gleichstand 🤝), weg: { strasse: 1 | 2, seite: "links" | "rechts", ziel } (Plan wie
+   * im Spiel: Start ⭐, Hauptstrasse, zwei Querstrassen).
+   */
+  function wetterbericht(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    const svg = neuesBild("auftritt", stufe, { "data-bilder": "wetterbericht" });
+    svg.appendChild(tagGrund());
+    svg.append(bildzeichen(32, 76, "📻", 34), schallAus(52, 70, ruhig, 0.1, 0.9));
+    const tafeln = [];
+    const wetterTafel = (x, y, w, grad) => {
+      const g = s("g", { "data-stueck": w }, s("rect", { x: x - 32, y: y - 34, width: 64, height: 68, rx: 8, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.4 }), bildzeichen(x, y - 8, w, 30));
+      if (grad !== undefined) g.appendChild(text(x, y + 26, `${grad} °C`, { gross: 12, farbe: grad < 0 ? "#2f7fd6" : "#c8553d" }));
+      return g;
+    };
+    if (z.wetter || z.meldung) {
+      const w = z.wetter || z.meldung.wetter;
+      if (!WETTER_EN.includes(w) || (z.meldung && (!Number.isInteger(z.meldung.grad) || z.meldung.grad < -5 || z.meldung.grad > 30 || WETTER_EN.indexOf(w) > 6))) return null;
+      tafeln.push(wetterTafel(z.sport ? 116 : 190, 74, w, z.meldung?.grad));
+    }
+    if (z.tage) {
+      if (z.tage.length !== 2 || !z.tage.every(([w, g]) => WETTER_EN.indexOf(w) >= 0 && WETTER_EN.indexOf(w) <= 6 && Number.isInteger(g) && g >= -5 && g <= 30)) return null;
+      tafeln.push(wetterTafel(150, 74, ...z.tage[0]), wetterTafel(250, 74, ...z.tage[1]));
+      svg.appendChild(erscheine(s("path", { d: "M188,74 h22 m-6,-5 l6,5 l-6,5", stroke: "#8a8fa8", "stroke-width": 2, fill: "none" }), T * 0.5, ruhig));
+    }
+    if (z.sport) {
+      const [[a, ta], [b, tb]] = z.sport;
+      if (!TEAMS_EN.includes(a) || !TEAMS_EN.includes(b) || a === b || ![ta, tb].every(n => Number.isInteger(n) && n >= 0 && n <= 9)) return null;
+      const x = z.meldung ? 236 : 200, g = s("g", { "data-stueck": "sport", "data-wert": `${ta}:${tb}` },
+        s("rect", { x: x - 62, y: 40, width: 124, height: 70, rx: 8, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.4 }),
+        bildzeichen(x - 34, 64, a, 26), bildzeichen(x + 34, 64, b, 26), text(x, 100, `${ta} : ${tb}`, { gross: 15 }));
+      tafeln.push(g);
+      const sieg = ta === tb ? null : ta > tb ? x - 34 : x + 34;
+      svg.appendChild(erscheine(bildzeichen(sieg ?? x, 28, ta === tb ? "🤝" : "🏆", 18), T + 0.1, ruhig)); // über der Tafel, nicht dahinter
+    }
+    if (z.weg) {
+      const { strasse, seite, ziel } = z.weg;
+      const GEB = ["🏫", "🏥", "🏛️", "🎬", "📮", "🏦", "🛒", "🏊", "📚", "🥐", "☕", "🚉"];
+      if (![1, 2].includes(strasse) || !["links", "rechts"].includes(seite) || !GEB.includes(ziel)) return null;
+      // Plan: Hauptstrasse senkrecht, Querstrassen auf 98 (1st) und 58 (2nd); Start ⭐ unten
+      const hx = 200, qy = strasse === 1 ? 98 : 58, zx = seite === "links" ? 136 : 264;
+      svg.append(s("rect", { x: 100, y: 14, width: 200, height: 128, rx: 8, fill: "#e8f5e3" }),
+        s("rect", { x: hx - 7, y: 14, width: 14, height: 128, style: "fill:var(--deko-7)" }),
+        s("rect", { x: 100, y: 91, width: 200, height: 14, style: "fill:var(--deko-7)" }), s("rect", { x: 100, y: 51, width: 200, height: 14, style: "fill:var(--deko-7)" }),
+        bildzeichen(hx, 132, "⭐", 14));
+      for (const [x, y] of [[136, 32], [264, 32], [136, 76], [264, 76], [136, 122], [264, 122]]) if (!(x === zx && y === qy - 22)) svg.appendChild(s("rect", { x: x - 16, y: y - 9, width: 32, height: 18, rx: 3, fill: "#ffffff", style: "stroke:var(--deko-4)", "stroke-width": 1.2 }));
+      tafeln.push(s("g", { "data-stueck": "ziel" }, bildzeichen(zx, qy - 22, ziel, 18)));
+      const weg = `M${hx},122 L${hx},${qy} L${zx},${qy}`;
+      svg.appendChild(zeichne(s("path", { d: weg, fill: "none", stroke: GUT, "stroke-width": 3, "stroke-linecap": "round" }), 0.2, ruhig, T * 0.7));
+      svg.appendChild(bewege(s("g", {}, s("circle", { cx: 0, cy: 0, r: 5, fill: "#e5484d", stroke: "#ffffff", "stroke-width": 1.4 })), weg, { x: zx, y: qy, winkel: 0 }, ruhig, { drehen: false, ab: 0.2, dauer: T * 0.7, linear: true }));
+    }
+    if (!tafeln.length) return null;
+    svg.setAttribute("data-anzahl", tafeln.length);
+    tafeln.forEach((g, i) => svg.appendChild(erscheine(g, 0.4 + i * T * 0.35, ruhig, 0.35)));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(34, 124, ruhig));
+    return svg;
+  }
+
+  // ----- Hello-Dialog, Au café (AUFTRITT · gespraech) -----
+  /**
+   * Zwei Sprecher (Bildzeichen des Spiels), ihre Sprechblasen erscheinen Zug um Zug abwechselnd (links a, rechts b in
+   * --gut-hell wie im Spiel). antwort: Bildzeichen in der letzten Blase (s1: der Gruss als Bild, s2: das Gesicht); ort:
+   * Bildzeichen des Orts oben; fremd: eine Blase passt nicht und fällt heraus; luecke: eine gestrichelte Blase (deko-1)
+   * füllt sich; ordnen: die Blasen kommen gemischt und rücken an ihren Platz, mit Nummer. Angabe: { a, b, zuege (2–6), … }.
+   */
+  function gespraech(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z || !z.a || !z.b || !Number.isInteger(z.zuege) || z.zuege < 2 || z.zuege > 6) return null;
+    const n = z.zuege, alle = n + (z.fremd !== undefined ? 1 : 0);
+    if (z.fremd !== undefined && !(Number.isInteger(z.fremd) && z.fremd > 0 && z.fremd < n)) return null;
+    if (z.luecke !== undefined && !(Number.isInteger(z.luecke) && z.luecke > 0 && z.luecke < n - 1)) return null;
+    const svg = neuesBild("auftritt", stufe, { "data-bilder": "gespraech", "data-anzahl": n });
+    svg.appendChild(tagGrund());
+    svg.append(bildzeichen(26, 120, z.a, 30), bildzeichen(294, 120, z.b, 30));
+    if (z.ort) svg.appendChild(bildzeichen(160, 14, z.ort, 14));
+    const oben = z.ort ? 26 : 12, zh = Math.min(30, (138 - oben) / alle), h = Math.min(22, zh - 5), je = T / alle;
+    let reihe = 0;
+    for (let i = 0; i < n; i++) {
+      if (z.fremd === i) {
+        // die fremde Zeile: erscheint an ihrem Platz, wird durchgestrichen und fällt heraus; die übrigen rücken nach
+        const y = oben + reihe * zh, f = s("g", {}, sprechblase(110, y, 100, h, { links: false, rand: HINWEIS }), blasenStriche(110, y, 100, h), kreuz(218, y + h * 0.75, 13));
+        svg.appendChild(ruhig ? s("g", { opacity: 0 }, f) : f);
+        if (!ruhig) {
+          f.setAttribute("opacity", "0");
+          f.append(s("set", { attributeName: "opacity", to: 1, begin: t(0.15 + reihe * je), fill: "freeze" }),
+            s("animateTransform", { attributeName: "transform", type: "translate", values: "0 0;0 0;0 140", keyTimes: "0;0.6;1", begin: t(0.15 + reihe * je), dur: `${je * 2.2}s`, fill: "freeze" }));
+        }
+        reihe++;
+      }
+      const a = i % 2 === 0, y = oben + (ruhig || z.fremd === undefined || i < z.fremd ? i : i) * zh + (z.fremd !== undefined && i >= z.fremd ? 0 : 0);
+      const b = 150, x = a ? 50 : 120, letzte = i === n - 1, luecke = z.luecke === i;
+      const blase = s("g", { "data-stueck": a ? "a" : "b" },
+        sprechblase(x, y, b, h, { links: a, rand: luecke ? "var(--deko-1)" : a ? "#8a8fa8" : GUT, grund: a ? "#ffffff" : "#e3f7ec", gestrichelt: luecke }));
+      if (letzte && z.antwort) blase.appendChild(bildzeichen(x + b / 2, y + h / 2, z.antwort, Math.min(18, h - 2)));
+      else if (luecke) blase.appendChild(erscheine(blasenStriche(x, y, b, h), 0.15 + (i + 1) * je + 0.3, ruhig));
+      else blase.appendChild(blasenStriche(x, y, b, h));
+      if (z.ordnen) blase.appendChild(text(a ? x - 8 : x + b + 8, y + h * 0.72, i + 1, { gross: 10, farbe: "var(--deko-1)" }));
+      // geordnet: kommt von der Seite her an ihren Platz (vorher in anderer Reihenfolge), sonst einfach nacheinander
+      const ab = 0.15 + reihe * je;
+      svg.appendChild(z.ordnen ? herein(blase, a ? -60 : 60, ((n - 1 - i) - i) * zh * 0.5, ab, ruhig, 0.4) : erscheine(blase, ab, ruhig, 0.3));
+      reihe++;
+    }
+    if (z.hoeflich) svg.appendChild(erscheine(haken(160, 140, 14), T + 0.1, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 76, ruhig));
+    return svg;
+  }
+
+  // ----- Wörter-Brücke (BAUEN · bruecke) -----
+  /**
+   * Die Brücke zwischen Französisch (links, Kärtchen deko-5 wie im Spiel) und Deutsch (rechts): ein Wort geht hinüber und
+   * kommt drüben als deutsches Kärtchen an, mit dem Bild, wo das Spiel eins zeigt. falle: ein falscher Freund (Karte
+   * deko-3) bleibt am ⚠️ in der Mitte stehen und fällt ins Wasser. satz: ein kurzer Satz (Kärtchen als Zug) geht hinüber,
+   * drüben erscheint, wovon die Rede ist. Angabe: Liste von { bild? , falle? , satz?: Wörter } (1–4).
+   */
+  function bruecke(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.9;
+    if (!Array.isArray(z) || !z.length || z.length > 4 || !z.every(w => !w.satz || (Number.isInteger(w.satz) && w.satz >= 3 && w.satz <= 6 && w.bild))) return null;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "bruecke", "data-anzahl": z.length });
+    svg.append(tagGrund(), s("path", { d: `M0,112 H${BREITE} V136 Q${BREITE},${HOEHE} ${BREITE - 14},${HOEHE} H14 Q0,${HOEHE} 0,136 Z`, fill: "#5aa9dc" }),
+      s("path", { d: "M0,80 H62 V150 H0 Z M258,80 H320 V150 H258 Z", fill: "#86c46f" }));
+    // Brücke mit vier Bögen
+    let bogen = "M62,80 H258 V88 ";
+    for (let i = 4; i > 0; i--) { const x = 62 + i * 49; bogen += `L${x},88 Q${x - 24.5},104 ${x - 49},88 `; }
+    svg.append(s("path", { d: bogen + "Z", fill: "#c9b08a", stroke: "#8a6a3f", "stroke-width": 1.2 }), s("rect", { x: 62, y: 74, width: 196, height: 6, fill: "#a8743f" }));
+    const je = T / z.length;
+    z.forEach((w, i) => {
+      const ab = 0.15 + i * je, y = 66;
+      const karte = w.satz
+        ? s("g", {}, ...[...Array(w.satz).keys()].map(k => leerKarte(-w.satz * 7 + k * 14, y - 8, 12, 12, { rand: "var(--deko-5)", grund: "#e6f7f5", breit: 1.2 })))
+        : s("g", {}, leerKarte(-18, y - 9, 36, 16, { rand: w.falle ? "var(--deko-3)" : "var(--deko-5)", grund: w.falle ? "#fff1e6" : "#e6f7f5" }));
+      const g = s("g", { "data-stueck": w.falle ? "falle" : w.satz ? "satz" : "wort" });
+      if (w.falle) {
+        g.appendChild(erscheine(bildzeichen(160, 52, "⚠️", 16), ab + je * 0.35, ruhig));
+        if (ruhig) g.appendChild(s("g", { transform: "translate(160 70)" }, karte));
+        else {
+          karte.append(s("set", { attributeName: "opacity", to: 1, begin: t(ab), fill: "freeze" }),
+            s("animateMotion", { path: "M30,0 L160,0 L166,58", keyPoints: "0;0.8;1", keyTimes: "0;0.6;1", calcMode: "linear", begin: t(ab), dur: `${je * 0.95}s`, fill: "freeze" }));
+          karte.setAttribute("opacity", "0");
+          g.appendChild(karte);
+        }
+      } else {
+        const ende = w.satz ? BREITE - 8 - w.satz * 7 : 290;
+        g.appendChild(bewege(karte, `M30,0 L${ende},0`, { x: ende, y: 0, winkel: 0 }, ruhig, { drehen: false, ab, dauer: je * 0.8, linear: true }));
+        if (w.bild) g.appendChild(erscheine(bildzeichen(290, 40, w.bild, 18), ab + je * 0.8, ruhig));
+      }
+      // im Endbild nur das letzte Wort drüben, die früheren sind weitergegangen
+      if (i < z.length - 1 && !w.falle) svg.appendChild(verschwinde(g, ab + je * 0.98, ruhig, 0.15));
+      else svg.appendChild(g);
+    });
+    // die früheren Wörter zählen im Endbild als Häkchen am Ufer
+    z.forEach((w, i) => svg.appendChild(erscheine(w.falle ? s("g", {}, bildzeichen(276 + (i - 1.5) * 12, 98, "⚠️", 9)) : haken(276 + (i - 1.5) * 12, 102, 11), 0.15 + (i + 1) * je - 0.1, ruhig)));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(30, 30, ruhig));
+    return svg;
+  }
+
+  // ----- Le ou la ? (SAMMELN · artikel) -----
+  // Wörter der Liste des Spiels: Geschlecht m/f, Anfang mit Vokal oder stummem h (v), Mehrzahl-Endung
+  const NOMEN_FR = {
+    "🐱": ["m", "", "s"], "🐶": ["m", "", "s"], "🐴": ["m", "", "aux"], "🍰": ["m", "", "x"], "⛵": ["m", "", "x"], "🎩": ["m", "", "x"],
+    "🎁": ["m", "", "x"], "🏰": ["m", "", "x"], "🎲": ["m", "", "x"], "🔥": ["m", "", "x"], "🚆": ["m", "", "s"], "☀️": ["m", "", "s"],
+    "🐄": ["f", "", "s"], "🍎": ["f", "", "s"], "🍌": ["f", "", "s"], "🏠": ["f", "", "s"], "🚗": ["f", "", "s"], "🌸": ["f", "", "s"],
+    "🌙": ["f", "", "s"], "🔑": ["f", "", "s"], "🎸": ["f", "", "s"], "👗": ["f", "", "s"],
+    "🐦": ["m", "v", "x"], "🐘": ["m", "v", "s"], "🌳": ["m", "v", "s"], "✈️": ["m", "v", "s"], "🏨": ["m", "v", "s"], "🏥": ["m", "v", "aux"],
+    "🍊": ["f", "v", "s"], "🐝": ["f", "v", "s"], "⭐": ["f", "v", "s"], "🏫": ["f", "v", "s"],
+  };
+  /** Artikel nach der Regel des Spiels: bestimmt (le, la, l’, les) oder unbestimmt (un, une, des). */
+  function artikelVon(bild, { mehr = false, unbestimmt = false } = {}) {
+    const n = NOMEN_FR[bild];
+    if (!n) return null;
+    if (unbestimmt) return mehr ? "des" : n[0] === "m" ? "un" : "une";
+    return mehr ? "les" : n[1] === "v" ? "l’" : n[0] === "m" ? "le" : "la";
+  }
+  // Körbe in fester Reihenfolge wie im Spiel: le/un deko-6, la/une deko-3, l’/des deko-5, les deko-2
+  const ARTIKEL_FARBE = { le: "var(--deko-6)", un: "var(--deko-6)", la: "var(--deko-3)", une: "var(--deko-3)", "l’": "var(--deko-5)", des: "var(--deko-5)", les: "var(--deko-2)" };
+  /**
+   * Die Bilder fallen in den Korb ihres Artikels (Körbe wie im Spiel); in der Mehrzahl zeigt das Spiel das Bild dreimal.
+   * mehrzahl: ein Bild wird zu dreien, dazu der Artikel le/la → les und die Endung (‑s, ‑x, ‑aux; s5). Angabe:
+   * { koerbe: [Artikel …], dinge: [[Bild, mehr?] …] } oder { mehrzahl: [Bild …] }.
+   */
+  function artikel(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z) return null;
+    if (Array.isArray(z.mehrzahl)) {
+      if (!z.mehrzahl.length || z.mehrzahl.length > 3 || !z.mehrzahl.every(b => NOMEN_FR[b])) return null;
+      const svg = neuesBild("sammeln", stufe, { "data-bilder": "artikel", "data-anzahl": z.mehrzahl.length }), T = DAUER * 0.8, je = T / z.mehrzahl.length;
+      svg.appendChild(tagGrund());
+      z.mehrzahl.forEach((b, i) => {
+        const y = 28 + i * (110 / z.mehrzahl.length) + (3 - z.mehrzahl.length) * 14, ab = 0.15 + i * je, ein = artikelVon(b), mehr = "les";
+        const schild = (art, x) => s("g", {}, s("rect", { x: x - 18, y: y - 11, width: 36, height: 22, rx: 5, fill: "#ffffff", style: `stroke:${ARTIKEL_FARBE[art]}`, "stroke-width": 2 }), text(x + 0, y + 5, art, { gross: 13 }));
+        const g = s("g", { "data-stueck": NOMEN_FR[b][2] }, schild(ein, 40), bildzeichen(82, y, b, 20),
+          s("path", { d: `M108,${y} h40 m-6,-5 l6,5 l-6,5`, stroke: "#8a8fa8", "stroke-width": 2, fill: "none" }));
+        svg.appendChild(erscheine(g, ab, ruhig));
+        svg.appendChild(erscheine(s("g", {}, schild(mehr, 172), ...[0, 1, 2].map(k => bildzeichen(206 + k * 15, y + (k === 1 ? -3 : 0), b, 15)),
+          text(252, y + 5, `‑${NOMEN_FR[b][2]}`, { gross: 13, farbe: "#c25e12", anker: "start" })), ab + je * 0.5, ruhig));
+      });
+      if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+      if (sterne >= 3) svg.appendChild(funken(296, 128, ruhig));
+      return svg;
+    }
+    if (!Array.isArray(z.koerbe) || !z.koerbe.every(a => ARTIKEL_FARBE[a]) || !Array.isArray(z.dinge) || !z.dinge.length || z.dinge.length > 8) return null;
+    const unbestimmt = z.koerbe.some(a => ["un", "une", "des"].includes(a)), dinge = [];
+    for (const [b, mehr] of z.dinge) {
+      const a = artikelVon(b, { mehr, unbestimmt }), korb = z.koerbe.indexOf(a);
+      if (korb < 0) return null;
+      dinge.push(z.ohneBild ? { korb } : { bild: b, korb, mal: mehr ? 3 : 1 });
+    }
+    return korbBild(stufe, "artikel", { koerbe: z.koerbe.map(a => ({ zeichen: a, farbe: ARTIKEL_FARBE[a] })), dinge }, sterne, ruhig);
+  }
+
+  // ----- Son-Lauscher (SAMMELN · laute) -----
+  // Wörter der Liste des Spiels mit ihrem Laut (Auswahl mit Bild)
+  const LAUTE_FR = {
+    ou: ["🐺", "🍲", "🐔", "🛞", "🐭", "🐻", "🦉", "🔴"], au: ["💧", "🎂", "⛵", "🎁", "🖼️", "🔨", "🟡"],
+    on: ["⚽", "🍈", "✏️", "🍋", "🌉", "🏠", "🧼", "🦁", "🎻"], an: ["🧒", "⚪", "🦷", "🌬️", "🦵", "💡", "🍊", "🐍", "🧤", "💃"],
+    in: ["🐰", "🍞", "✋", "🎄", "5️⃣", "🚆", "🛁", "🐒", "🦈"], ch: ["🐱", "🪑", "🐴", "🐮", "👔"],
+    "é": ["☕", "👶", "🏫", "🚲", "🎲", "🍵", "🔑", "🚀", "🦎"], "è": ["🎉", "🌲", "📏"], oi: ["3️⃣", "👑", "⚫", "🍐", "🚗", "☝️"],
+  };
+  const lautFr = b => Object.keys(LAUTE_FR).find(l => LAUTE_FR[l].includes(b));
+  /**
+   * gleich: zwei Wörter klingen am Schluss gleich (zwei Bilder, Schallbögen, „=“; s1). koerbe: Körbe mit dem Laut, die
+   * Bilder fallen in ihren Korb (s2–s5); lesen: ohne Ton (📖 statt 👂, s4). luecke: { bild, wort, laut } — die Lücke im
+   * Wort füllt sich mit der Schreibweise (s5); tippen: dazu die Tasten des Spiels, die Lautgruppe wird getippt (s6).
+   */
+  function laute(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    if (Array.isArray(z.koerbe)) {
+      if (!z.koerbe.every(l => LAUTE_FR[l]) || !Array.isArray(z.dinge) || !z.dinge.length || z.dinge.length > 8) return null;
+      const FARBEN = ["var(--deko-6)", "var(--deko-3)", "var(--deko-5)", "var(--deko-2)"], dinge = [];
+      for (const b of z.dinge) { const k = z.koerbe.indexOf(lautFr(b)); if (k < 0) return null; dinge.push({ bild: b, korb: k }); }
+      return korbBild(stufe, "laute", { koerbe: z.koerbe.map((l, i) => ({ zeichen: l, farbe: FARBEN[i] })), dinge, kopf: z.lesen ? "📖" : "👂" }, sterne, ruhig);
+    }
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "laute" });
+    svg.appendChild(tagGrund());
+    if (Array.isArray(z.gleich)) {
+      const [a, b] = z.gleich;
+      if (!lautFr(a) || lautFr(a) !== lautFr(b) || a === b) return null;
+      svg.setAttribute("data-wert", lautFr(a));
+      svg.setAttribute("data-anzahl", 2);
+      [[90, a], [230, b]].forEach(([x, bild], i) => svg.appendChild(s("g", { "data-stueck": "wort" }, erscheine(bildKarte(x, 70, 60, bild), 0.2 + i * T * 0.35, ruhig),
+        bildzeichen(x - 18, 118, "🔊", 14), schallAus(x - 8, 118, ruhig, 0.3 + i * T * 0.35, 0.5))));
+      svg.appendChild(erscheine(text(160, 80, "=", { gross: 30, farbe: GUT }), T, ruhig));
+    } else if (z.luecke) {
+      const { bild, wort, laut } = z.luecke;
+      // die Schreibweise muss zum Laut des Bildes passen (bateau: au wird „eau“ geschrieben)
+      const SCHRIFT_LAUT = { "é": "é", "è": "è", "ê": "è", eau: "au", au: "au", ou: "ou", on: "on", an: "an", en: "an", in: "in", ain: "in" };
+      if (lautFr(bild) !== SCHRIFT_LAUT[laut] || !/^[a-zâàçéèêîôûœ’ ]{2,12}$/.test(wort || "")) return null;
+      svg.setAttribute("data-wert", laut);
+      svg.setAttribute("data-anzahl", 1);
+      svg.append(bildKarte(60, 58, 64, bild), bildzeichen(60, 112, "🔊", 14), schallAus(70, 112, ruhig, 0.1, 0.5));
+      const breite = [...wort].length * 9.5 + 8, x = 112;
+      svg.appendChild(text(x, 66, wort, { gross: 17, anker: "start", fett: false }));
+      const lx = x + breite, lw = [...laut].length * 10 + 10;
+      svg.appendChild(s("rect", { x: lx, y: 46, width: lw, height: 28, rx: 4, fill: "#fff1e6", style: "stroke:var(--deko-3)", "stroke-width": 1.6, "stroke-dasharray": "4 3" }));
+      if (z.tippen) {
+        // Tasten des Spiels: a e i o u n m c h é è ê
+        const TASTEN = ["a", "e", "i", "o", "u", "n", "m", "c", "h", "é", "è", "ê"];
+        if (![...laut].every(b => TASTEN.includes(b))) return null;
+        TASTEN.forEach((b, i) => {
+          const tx = 112 + (i % 6) * 32, ty = 96 + Math.floor(i / 6) * 26;
+          const taste = s("g", {}, s("rect", { x: tx, y: ty, width: 28, height: 22, rx: 4, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.2 }), text(tx + 14, ty + 15.5, b, { gross: 12 }));
+          svg.appendChild(taste);
+          [...laut].forEach((l, k) => { if (l === b) svg.appendChild(kurz(s("rect", { x: tx, y: ty, width: 28, height: 22, rx: 4, style: "fill:var(--deko-3)", opacity: 0.4 }), 0.3 + k * T * 0.25, 0.3 + k * T * 0.25 + 0.3, ruhig)); });
+        });
+      }
+      [...laut].forEach((l, k) => svg.appendChild(s("g", { "data-stueck": k ? "" : laut }, erscheine(text(lx + 5 + k * 10 + 5, 66, l, { gross: 17, farbe: "#c25e12" }), 0.35 + k * T * 0.25, ruhig))));
+      svg.appendChild(erscheine(haken(lx + lw + 12, 60, 15), T + 0.1, ruhig));
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(z.gleich ? 160 : 250, z.gleich ? 30 : 26, ruhig)); // nicht auf den Tasten
+    return svg;
+  }
+
+  // ----- Nombres-Rallye (REISE · rallye) -----
+  /** Rallye-Auto nach rechts, Mitte unten auf 0,0. */
+  const rallyeAuto = () => s("g", { "data-figur": "auto" },
+    s("path", { d: "M-16,-6 L-14,-13 L-4,-14 L2,-20 L10,-20 L14,-13 L18,-11 L18,-6 Z", style: "fill:var(--deko-4)", stroke: "#2d3047", "stroke-width": 0.8 }),
+    s("rect", { x: 3, y: -18, width: 6, height: 4, fill: "#cfe9f8" }), s("circle", { cx: -9, cy: -5, r: 4, fill: "#2d3047" }), s("circle", { cx: 11, cy: -5, r: 4, fill: "#2d3047" }));
+  /**
+   * Das Auto fährt an Zahltafeln vorbei, die Tafeln leuchten auf, wenn es dort ist (ankunft). tafeln: Zahlen (im Raum der
+   * Stufe: von, bis), { geld: Rappen } (Preise wie im Spiel, s5, s6), { telefon: [Paare] } (s5: drei, s6: vier Paare),
+   * { ch: Zahl } (die Westschweizer Form septante, huitante, nonante: Tafel mit Schweizer Kreuz). ziel: Zielflagge.
+   */
+  function rallye(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.9;
+    if (!z || !Array.isArray(z.tafeln) || !z.tafeln.length || z.tafeln.length > 5) return null;
+    const ok = w => (Number.isInteger(w) && w >= z.von && w <= z.bis)
+      || (w && Number.isInteger(w.geld) && w.geld >= 100 && w.geld <= 9995 && w.geld % 5 === 0)
+      || (w && Array.isArray(w.telefon) && [3, 4].includes(w.telefon.length) && w.telefon.every(p => Number.isInteger(p) && p >= 10 && p <= 99))
+      || (w && [70, 71, 75, 80, 87, 90, 99].includes(w.ch) && w.ch >= z.von && w.ch <= z.bis);
+    if (!Number.isInteger(z.von) || !Number.isInteger(z.bis) || !z.tafeln.every(ok)) return null;
+    const svg = neuesBild("reise", stufe, { "data-bilder": "rallye", "data-anzahl": z.tafeln.length });
+    svg.append(tagGrund(), s("rect", { x: 0, y: 112, width: BREITE, height: 24, fill: "#8a8fa8" }), s("path", { d: "M0,124 H320", stroke: "#ffffff", "stroke-width": 1.6, "stroke-dasharray": "10 8" }),
+      s("path", { d: `M0,136 H${BREITE} V136 Q${BREITE},${HOEHE} ${BREITE - 14},${HOEHE} H14 Q0,${HOEHE} 0,136 Z`, fill: "#86c46f" }));
+    const n = z.tafeln.length, xs = z.tafeln.map((_, i) => 46 + ((i + 0.5) * (z.ziel ? 236 : 260)) / n);
+    const ende = z.ziel ? 290 : xs[n - 1] + 12, zeiten = ankunft([[-10, 124], ...xs.map(x => [x, 124]), [ende, 124]], T);
+    z.tafeln.forEach((w, i) => {
+      const inhalt = Number.isInteger(w) ? ganzText(w) : w.geld ? geld(w.geld) : w.telefon ? w.telefon.join(" ") : ganzText(w.ch);
+      const breit = Math.max(30, [...inhalt].length * (inhalt.length > 7 ? 6 : 7.2) + 10), x = xs[i], g = s("g", { "data-stueck": "tafel" },
+        s("rect", { x: x - 1.5, y: 70, width: 3, height: 42, fill: "#6b7089" }),
+        s("rect", { x: x - breit / 2, y: 46, width: breit, height: 26, rx: 4, fill: "#ffffff", style: "stroke:var(--deko-4)", "stroke-width": 2 }),
+        text(x, 64, inhalt, { gross: inhalt.length > 7 ? 10 : 13 }));
+      if (w.ch) g.append(s("rect", { x: x + breit / 2 - 6, y: 36, width: 14, height: 14, rx: 2, fill: "#e5484d" }),
+        s("path", { d: `M${x + breit / 2 + 1},${39} v8 M${x + breit / 2 - 3},${43} h8`, stroke: "#ffffff", "stroke-width": 2.4 }));
+      g.appendChild(kurz(s("rect", { x: x - breit / 2 - 3, y: 43, width: breit + 6, height: 32, rx: 6, fill: "none", stroke: GUT, "stroke-width": 2.4 }), zeiten[i + 1], zeiten[i + 1] + 0.5, ruhig));
+      svg.appendChild(erscheine(g, Math.max(0, zeiten[i + 1] - 0.35), ruhig));
+    });
+    if (z.ziel) {
+      const fl = s("g", {}, s("rect", { x: 302, y: 80, width: 2, height: 32, fill: "#2d3047" }));
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) fl.appendChild(s("rect", { x: 304 + c * 3.5, y: 80 + r * 3.5, width: 3.5, height: 3.5, fill: (r + c) % 2 ? "#ffffff" : "#2d3047" }));
+      svg.appendChild(fl);
+    }
+    svg.appendChild(bewege(rallyeAuto(), `M-10,124 L${ende},124`, { x: ende, y: 124, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: T }));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(ende, 96, ruhig));
+    return svg;
+  }
+
+  // ----- Quelle heure ? (ZYKLUS · uhren) -----
+  /**
+   * Eine bis drei Uhren wie im Spiel (Stundenzeiger --text, Minutenzeiger --knopf); die Zeiger drehen von 12 Uhr zur
+   * Zeit der Stufe. Zeiten „h:mm“ (0–23 Uhr): ab 13 Uhr dazu die 24-Stunden-Form darunter, tag ☀️/🌙 für midi und minuit
+   * (s5). hoeren: 👂 statt Lesen (s1, s6). Angabe: { zeiten: ["3:00", …], tag?: [Zeichen …], hoeren? }.
+   */
+  function uhren(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    const min = Array.isArray(z?.zeiten) ? z.zeiten.map(minutenVon) : null;
+    if (!min || !min.length || min.length > 3 || min.some(m => m === null)) return null;
+    const svg = neuesBild("zyklus", stufe, { "data-bilder": "uhren", "data-anzahl": min.length });
+    svg.appendChild(tagGrund());
+    if (z.hoeren) svg.append(bildzeichen(18, 18, "👂", 14), schallAus(28, 18, ruhig, 0.1, 0.5));
+    const n = min.length, r = n === 1 ? 48 : n === 2 ? 42 : 36, digital = min.some(m => m >= 13 * 60) || !!z.tag;
+    min.forEach((m, i) => {
+      const cx = BREITE / 2 + (i - (n - 1) / 2) * (n === 3 ? 100 : 130), cy = digital ? 62 : 72, h = Math.floor(m / 60), mm = m % 60, ab = 0.2 + i * 0.25;
+      const g = s("g", { "data-stueck": z.zeiten[i] }, zifferblatt(cx, cy, r),
+        zeiger(cx, cy, r * 0.5, 4, "#2d3047", 0, (h % 12) * 30 + mm * 0.5, ruhig, ab, T * 0.8),
+        zeiger(cx, cy, r * 0.78, 2.6, "var(--knopf)", 0, mm * 6 + (z.hoeren ? 360 : 0), ruhig, ab, T * 0.8), s("circle", { cx, cy, r: 3, fill: "#2d3047" }));
+      if (digital) g.appendChild(erscheine(text(cx, cy + r + 20, uhrzeitText(m), { gross: 14 }), T, ruhig));
+      if (z.tag?.[i]) g.appendChild(erscheine(bildzeichen(cx + r - 4, cy - r + 6, z.tag[i], 16), T, ruhig));
+      svg.appendChild(g);
+    });
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(n === 2 ? 160 : 24, n === 2 ? 72 : 130, ruhig));
+    return svg;
+  }
+
+  // ----- Calendrier (ZYKLUS · kalenderfr) -----
+  /**
+   * woche: die sieben Tage ordnen sich (Montag zuerst, Samstag und Sonntag deko-2 wie im Monatsblatt des Spiels; s1);
+   * heute: Index des Tags (0 = Montag), dazu Pfeile zu morgen und gestern (s2). monate: die zwölf Monate im Kreis, mit
+   * der Jahreszeit für die Monate, die das Spiel fragt (s3). blaetter: Kalenderblätter [Tag, Monat] (s4). blatt:
+   * { jahr, monat, tag, geburtstag? } — Monatsblatt, der Tag wird angetippt (s5); wechsel: { jahr, monat } — vom letzten
+   * Tag des Monats auf den ersten des nächsten (s6).
+   */
+  function kalenderfr(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    const svg = neuesBild("zyklus", stufe, { "data-bilder": "kalenderfr" });
+    svg.appendChild(tagGrund());
+    const tageIm = (j, m) => new Date(j, m, 0).getDate(); // m 1–12
+    const blattBild = (x, y, tag, monat, b = 46) => s("g", {}, s("rect", { x: x - b / 2, y: y - b / 2, width: b, height: b * 1.05, rx: 5, fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 1.2 }),
+      s("rect", { x: x - b / 2, y: y - b / 2, width: b, height: b * 0.28, rx: 5, style: "fill:var(--deko-2)" }), text(x, y - b / 2 + b * 0.22, `${monat}.`, { gross: 10, farbe: "#ffffff" }),
+      text(x, y + b * 0.34, tag, { gross: b * 0.42 }));
+    if (z.woche || Number.isInteger(z.heute)) {
+      if (z.heute !== undefined && !(z.heute >= 1 && z.heute <= 5)) return null; // heute mit morgen und gestern in derselben Woche
+      svg.setAttribute("data-anzahl", 7);
+      for (let i = 0; i < 7; i++) {
+        const x = 34 + i * 42, ende = i >= 5, g = s("g", { "data-stueck": `tag-${i}` },
+          s("rect", { x: x - 18, y: 50, width: 36, height: 40, rx: 5, fill: ende ? "#fdeef5" : "#ffffff", style: `stroke:${ende ? "var(--deko-2)" : "#8a8fa8"}`, "stroke-width": 1.6 }),
+          s("path", { d: `M${x - 11},68 h22 M${x - 11},74 h14`, stroke: "#c9cde0", "stroke-width": 1.6, "stroke-linecap": "round" }));
+        svg.appendChild(z.woche ? herein(g, ((i * 3) % 7 - i) * 42, -30, 0.15 + (i * T * 0.7) / 7, ruhig, 0.35) : g);
+      }
+      if (Number.isInteger(z.heute)) {
+        const x = 34 + z.heute * 42;
+        svg.append(erscheine(bildzeichen(x, 36, "☀️", 16), 0.2, ruhig),
+          erscheine(s("rect", { x: x - 20, y: 48, width: 40, height: 44, rx: 6, fill: "none", stroke: KNOPF, "stroke-width": 2.4 }), 0.3, ruhig));
+        svg.append(erscheine(s("path", { d: `M${x + 6},104 Q${x + 21},118 ${x + 36},104 m-6,0 l6,0 l0,6`, fill: "none", stroke: GUT, "stroke-width": 2 }), T * 0.5, ruhig),
+          erscheine(s("path", { d: `M${x - 6},104 Q${x - 21},118 ${x - 36},104 m6,0 l-6,0 l0,6`, fill: "none", stroke: HINWEIS, "stroke-width": 2 }), T * 0.75, ruhig),
+          erscheine(tippRing(x + 42, 70, 22, T * 0.55, ruhig), T * 0.5, ruhig));
+      }
+    } else if (z.monate) {
+      svg.setAttribute("data-anzahl", 12);
+      for (let m = 0; m < 12; m++) {
+        const w = ((m * 30 - 90) * Math.PI) / 180, x = 160 + Math.cos(w) * 54, y = 76 + Math.sin(w) * 54, zeit = MONAT_ZEIT[m];
+        const g = s("g", { "data-stueck": `monat-${m + 1}` }, s("circle", { cx: x, cy: y, r: 11, fill: zeit ? zeit[0] : "#ffffff", stroke: "#8a8fa8", "stroke-width": 1 }), text(x, y + 4, m + 1, { gross: 10 }));
+        svg.appendChild(erscheine(g, 0.15 + (m * T * 0.6) / 12, ruhig, 0.2));
+        if (zeit) svg.appendChild(erscheine(bildzeichen(160 + Math.cos(w) * 80, 76 + Math.sin(w) * 64, zeit[1], 12), T * 0.7 + (m * 0.03), ruhig));
+      }
+    } else if (Array.isArray(z.blaetter)) {
+      if (!z.blaetter.length || z.blaetter.length > 3 || !z.blaetter.every(([d, m]) => m >= 1 && m <= 12 && d >= 1 && d <= tageIm(2026, m))) return null;
+      svg.setAttribute("data-anzahl", z.blaetter.length);
+      z.blaetter.forEach(([d, m], i) => svg.appendChild(s("g", { "data-stueck": `${d}.${m}.` }, vonOben(blattBild(BREITE / 2 + (i - (z.blaetter.length - 1) / 2) * 90, 72, d, m, 56), 0.2 + i * T * 0.3, ruhig, 50))));
+    } else if (z.blatt || z.wechsel) {
+      const { jahr, monat } = z.blatt || z.wechsel;
+      if (!(jahr >= 2026 && jahr <= 2028 && monat >= 1 && monat <= 12)) return null;
+      const n = tageIm(jahr, monat), tag = z.blatt ? z.blatt.tag : n, versatz = (new Date(jahr, monat - 1, 1).getDay() + 6) % 7; // Montag zuerst
+      if (!(tag >= 1 && tag <= n)) return null;
+      svg.setAttribute("data-wert", `${tag}.${monat}.${jahr}`);
+      const c = 15, x0 = z.wechsel ? 18 : 108, y0 = 30;
+      svg.append(s("rect", { x: x0 - 4, y: y0 - 18, width: 7 * c + 8, height: 6 * c + 26, rx: 5, fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 1.2 }),
+        s("rect", { x: x0 - 4, y: y0 - 18, width: 7 * c + 8, height: 14, rx: 5, style: "fill:var(--deko-2)" }), text(x0 + 3.5 * c, y0 - 7.5, `${monat}.${jahr}`, { gross: 9, farbe: "#ffffff" }));
+      for (let d = 1; d <= n; d++) {
+        const k = versatz + d - 1, x = x0 + (k % 7) * c + c / 2, y = y0 + Math.floor(k / 7) * c + c / 2 + 4;
+        svg.appendChild(text(x, y + 3, d, { gross: 9, farbe: k % 7 >= 5 ? "#c0367a" : "#2d3047", fett: d === tag }));
+      }
+      const k = versatz + tag - 1, tx = x0 + (k % 7) * c + c / 2, ty = y0 + Math.floor(k / 7) * c + c / 2 + 4;
+      svg.appendChild(s("g", { "data-stueck": "tag" }, tippRing(tx, ty, 8, T * 0.5, ruhig)));
+      svg.setAttribute("data-anzahl", 1);
+      if (z.blatt?.geburtstag) svg.appendChild(erscheine(bildzeichen(64, 76, "🎂", 34), T * 0.7, ruhig));
+      if (z.wechsel) {
+        // vom letzten Tag des Monats geht es zum ersten des nächsten: das Blatt fällt, darunter der 1.
+        const nm = monat % 12 + 1;
+        svg.append(s("path", { d: "M152,76 h30 m-6,-5 l6,5 l-6,5", stroke: "#8a8fa8", "stroke-width": 2, fill: "none" }),
+          s("g", {}, blattBild(244, 74, 1, nm, 60)));
+        svg.appendChild(verschwinde(s("g", {}, blattBild(244, 74, n, monat, 60)), T * 0.7, ruhig, 0.4));
+        svg.appendChild(erscheine(bildzeichen(244, 126, "👂", 14), 0.1, ruhig));
+      }
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(z.monate ? 270 : 28, z.monate ? 120 : 126, ruhig));
+    return svg;
+  }
+
+  // ----- Au café: Bestellen (AUFTRITT · bestellung) -----
+  const CAFE = ["☕", "🥐", "🍊", "🍦", "🍨", "🥞", "🍵", "💧", "🥪", "🥧", "🍋"];
+  /**
+   * Am Tisch des Cafés: die Kellnerin 👩 bringt, was bestellt wird (Bildzeichen des Spiels), der Preis in ganzen Franken
+   * erscheint am Tisch; anrede: Personen mit tu oder vous (wie im Spiel: Kinder tu, Erwachsene vous); hoeren: 👂.
+   * Angabe: { sachen: [Bild …], preis, anrede?: [[Person, "tu" | "vous"] …], hoeren? }.
+   */
+  function bestellung(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    const TU = ["👧", "👦", "🧒"], VOUS = ["👩", "👨", "👵", "👮"];
+    if (!z || !Array.isArray(z.sachen) || !z.sachen.length || z.sachen.length > 3 || !z.sachen.every(b => CAFE.includes(b))
+      || !Number.isInteger(z.preis) || z.preis < 2 || z.preis > 20) return null;
+    if (z.anrede && !z.anrede.every(([p, a]) => (a === "tu" && TU.includes(p)) || (a === "vous" && VOUS.includes(p)))) return null;
+    const svg = neuesBild("auftritt", stufe, { "data-bilder": "bestellung", "data-anzahl": z.sachen.length });
+    svg.appendChild(tagGrund());
+    svg.append(s("rect", { x: 60, y: 96, width: 150, height: 8, rx: 3, fill: "#a8743f" }), s("rect", { x: 131, y: 104, width: 8, height: 34, fill: "#7a4f26" }),
+      bildzeichen(36, 100, "👧", 34), bildzeichen(268, 92, "👩", 34));
+    if (z.hoeren) svg.append(bildzeichen(36, 56, "👂", 16));
+    svg.appendChild(erscheine(s("g", {}, sprechblase(16, 18, 76, 24, { links: true }), blasenStriche(16, 18, 76, 24)), 0.1, ruhig));
+    z.sachen.forEach((b, i) => svg.appendChild(s("g", { "data-stueck": b }, bewege(s("g", {}, bildzeichen(0, -12, b, 22)), `M262,70 Q200,40 ${110 + i * 28},96`, { x: 110 + i * 28, y: 96, winkel: 0 }, ruhig,
+      { drehen: false, ab: 0.4 + i * T * 0.25, dauer: 0.7 }))));
+    svg.appendChild(erscheine(s("g", { "data-wert": z.preis }, s("rect", { x: 160, y: 112, width: 48, height: 20, rx: 4, fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 1.2 }),
+      text(184, 126.5, `${z.preis} Fr.`, { gross: 11 })), T, ruhig));
+    (z.anrede || []).forEach(([p, a], i) => {
+      const x = 236 + i * 40;
+      svg.appendChild(erscheine(s("g", {}, bildzeichen(x, 130, p, 18), text(x, 147, a, { gross: 10, farbe: a === "tu" ? "var(--deko-6)" : "var(--deko-3)" })), T * 0.6 + i * 0.2, ruhig));
+    });
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(134, 60, ruhig));
+    return svg;
+  }
+
+  // ----- Musik: Notenzeile wie gemeinsam/noten.js (p = 0 ist e′ auf der untersten Linie, p = −2 c′, Schritt = eine Linie
+  // oder ein Zwischenraum; Hilfslinien ab p ≤ −2 und p ≥ 10; deutsche Namen c d e f g a h, ♯ = -is, ♭: b, es, as …) -----
+  const STAMM = ["c", "d", "e", "f", "g", "a", "h"], STAMM_HALB = [0, 2, 4, 5, 7, 9, 11];
+  /** MIDI-Nummer eines Tons (p, Vorzeichen +1/−1): c′ = 60. */
+  function midiVon(p, vz = 0) {
+    const i = p + 2, okt = Math.floor(i / 7);
+    return 60 + okt * 12 + STAMM_HALB[((i % 7) + 7) % 7] + vz;
+  }
+  /** Deutscher Name (fis, cis, b, es, as, des …); Oktave nicht angegeben, wie im Spiel. */
+  function tonName(p, vz = 0) {
+    const n = STAMM[(((p + 2) % 7) + 7) % 7];
+    if (vz > 0) return n + "is";
+    if (vz < 0) return n === "h" ? "b" : n === "e" ? "es" : n === "a" ? "as" : n + "es";
+    return n;
+  }
+  const hz = m => 440 * 2 ** ((m - 69) / 12);
+  const LINIE = 7; // Linienabstand im Bild
+  /** Fünf Linien von x0 bis x1, unterste Linie auf y; mit Violinschlüssel. → Funktion p → y. */
+  function notenLinien(svg, x0, x1, y, schluessel = true) {
+    for (let i = 0; i < 5; i++) svg.appendChild(s("line", { x1: x0, y1: y - i * LINIE, x2: x1, y2: y - i * LINIE, stroke: "#2d3047", "stroke-width": 1 }));
+    if (schluessel) svg.appendChild(s("text", { x: x0 + 2, y: y + LINIE * 1.15, "font-size": LINIE * 6.3, "font-family": "\"Segoe UI Symbol\", \"Noto Music\", serif", fill: "#2d3047" }, "𝄞"));
+    return p => y - (p * LINIE) / 2;
+  }
+  /** Notenkopf (Viertel, gefüllt) mit Hals, Hilfslinien und Vorzeichen an x für Ton p. */
+  function notenKopf(x, py, p, vz = 0, { hohl = false, hals = true } = {}) {
+    const y = py(p), g = s("g", {});
+    for (let q = -2; q >= p; q -= 2) g.appendChild(s("line", { x1: x - 7, y1: py(q), x2: x + 7, y2: py(q), stroke: "#2d3047", "stroke-width": 1 }));
+    for (let q = 10; q <= p; q += 2) g.appendChild(s("line", { x1: x - 7, y1: py(q), x2: x + 7, y2: py(q), stroke: "#2d3047", "stroke-width": 1 }));
+    g.appendChild(s("ellipse", { cx: x, cy: y, rx: 4.4, ry: 3.2, transform: `rotate(-20 ${x} ${y})`, fill: hohl ? "#ffffff" : "#2d3047", stroke: "#2d3047", "stroke-width": 1.2 }));
+    if (hals) g.appendChild(p < 4 ? s("line", { x1: x + 4, y1: y, x2: x + 4, y2: y - 22, stroke: "#2d3047", "stroke-width": 1.2 })
+      : s("line", { x1: x - 4, y1: y, x2: x - 4, y2: y + 22, stroke: "#2d3047", "stroke-width": 1.2 }));
+    if (vz) g.appendChild(text(x - 11, y + 4, vz > 0 ? "♯" : "♭", { gross: 12, fett: false }));
+    return g;
+  }
+
+  // ----- Noten-Namen (AUFTRITT · notennamen) -----
+  /**
+   * Die Töne der Stufe erscheinen Note um Note im Violinschlüssel, darunter ihr Name (wie im Spiel deutsch); mit Ton an
+   * klingt jede Note. Angabe: { toene: [p | [p, ±1] …] } (2–9), p von −5 (g) bis 12 (c‴).
+   */
+  function notennamen(feier, { stufe, sterne, ruhig, klang, plane }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    const toene = (z?.toene || []).map(x => (Array.isArray(x) ? x : [x, 0]));
+    if (toene.length < 2 || toene.length > 9 || !toene.every(([p, v]) => Number.isInteger(p) && p >= -5 && p <= 12 && [-1, 0, 1].includes(v))) return null;
+    const svg = neuesBild("auftritt", stufe, { "data-bilder": "notennamen", "data-anzahl": toene.length });
+    svg.appendChild(tagGrund());
+    const py = notenLinien(svg, 12, 308, 92), x0 = 66, dx = Math.min(30, 236 / toene.length), je = T / toene.length;
+    toene.forEach(([p, v], i) => {
+      const x = x0 + dx / 2 + i * dx + (v ? 4 : 0), ab = 0.15 + i * je;
+      const g = s("g", { "data-stueck": tonName(p, v), "data-midi": midiVon(p, v) }, notenKopf(x, py, p, v), text(x, 138, tonName(p, v), { gross: 12, farbe: "var(--deko-6)" }));
+      svg.appendChild(vonOben(g, ab, ruhig, 24, 0.3));
+      if (klang && plane) plane(START + (ruhig ? 0 : ab), () => klang([[hz(midiVon(p, v)), 0.22]]));
+    });
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(250, 24, ruhig));
+    return svg;
+  }
+
+  // ----- Rhythmus: Notenwerte auf einer Linie (Werte in Vierteln: 4 Ganze, 3 punktierte Halbe, 2 Halbe, 1.5 punktierte
+  // Viertel, 1 Viertel, 0.5 Achtel, 0.25 Sechzehntel; wie im Spiel einzeln mit Fähnchen) -----
+  const WERTE = [4, 3, 2, 1.5, 1, 0.5, 0.25];
+  /** Note mit Wert w an x, Kopf auf der Linie y. */
+  function rhythmusNote(x, y, w) {
+    const g = s("g", { "data-wert": w });
+    const hohl = w >= 2, hals = w < 4, punkt = w === 3 || w === 1.5, faehnchen = w === 0.5 ? 1 : w === 0.25 ? 2 : 0;
+    g.appendChild(s("ellipse", { cx: x, cy: y, rx: 4.6, ry: 3.3, transform: `rotate(-20 ${x} ${y})`, fill: hohl ? "#ffffff" : "#2d3047", stroke: "#2d3047", "stroke-width": 1.3 }));
+    if (hals) g.appendChild(s("line", { x1: x + 4.2, y1: y, x2: x + 4.2, y2: y - 24, stroke: "#2d3047", "stroke-width": 1.3 }));
+    for (let f = 0; f < faehnchen; f++) g.appendChild(s("path", { d: `M${x + 4.2},${y - 24 + f * 5} q6,4 5,11`, fill: "none", stroke: "#2d3047", "stroke-width": 1.4 }));
+    if (punkt) g.appendChild(s("circle", { cx: x + 8, cy: y - 1, r: 1.6, fill: "#2d3047" }));
+    return g;
+  }
+  /**
+   * Rhythmus-Leser: Takte auf der Rhythmuslinie, mit Taktangabe; die Noten erscheinen der Reihe nach (mit Ton an je ein
+   * Schlag), luecke: [Takt, Stelle] — die Lücke (gestrichelt, deko-4 wie im Spiel) füllt sich zuletzt. Jeder Takt geht
+   * auf (Summe der Werte = Zähler über 4). Angabe: { takte: [{ art: 2 | 3 | 4, noten: [Wert …] } …], luecke? }.
+   */
+  function rhythmus(feier, { stufe, sterne, ruhig, klang, plane }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z || !Array.isArray(z.takte) || !z.takte.length || z.takte.length > 3) return null;
+    if (!z.takte.every(tk => [2, 3, 4].includes(tk.art) && Array.isArray(tk.noten) && tk.noten.every(w => WERTE.includes(w))
+      && Math.abs(tk.noten.reduce((a, w) => a + w, 0) - tk.art) < 1e-9)) return null;
+    const alle = z.takte.reduce((a, tk) => a + tk.noten.length, 0);
+    const svg = neuesBild("auftritt", stufe, { "data-bilder": "rhythmus", "data-anzahl": alle });
+    svg.appendChild(tagGrund());
+    const y = 96, breiten = z.takte.map(tk => 26 + tk.noten.length * 22), gesamt = breiten.reduce((a, b) => a + b, 0) + 8;
+    const f = Math.min(1, 296 / gesamt);
+    const g0 = s("g", { transform: `translate(${(BREITE - gesamt * f) / 2} 0) scale(${f} 1)` });
+    let x = 0, k = 0;
+    const je = T / alle;
+    g0.appendChild(s("line", { x1: 0, y1: y, x2: gesamt, y2: y, stroke: "#2d3047", "stroke-width": 1.2 }));
+    z.takte.forEach((tk, ti) => {
+      g0.append(text(x + 9, y - 6, tk.art, { gross: 13, fett: true }), text(x + 9, y + 12, 4, { gross: 13, fett: true }));
+      let nx = x + 30;
+      tk.noten.forEach((w, ni) => {
+        const luecke = z.luecke && z.luecke[0] === ti && z.luecke[1] === ni, ab = luecke ? T : 0.15 + k * je;
+        const note = s("g", { "data-stueck": String(w) }, rhythmusNote(nx, y, w));
+        if (luecke) g0.appendChild(s("rect", { x: nx - 9, y: y - 32, width: 22, height: 42, rx: 4, fill: "#fff8e1", style: "stroke:var(--deko-4)", "stroke-width": 1.6, "stroke-dasharray": "4 3" }));
+        g0.appendChild(luecke ? vonOben(note, ab, ruhig, 30, 0.35) : erscheine(note, ab, ruhig, 0.2));
+        if (klang && plane) plane(START + (ruhig ? 0 : ab), () => klang([[523, Math.min(0.3, w * 0.25)]]));
+        nx += 22; k++;
+      });
+      x += breiten[ti];
+      g0.appendChild(s("line", { x1: x, y1: y - 14, x2: x, y2: y + 14, stroke: "#2d3047", "stroke-width": ti === z.takte.length - 1 ? 2.6 : 1.2 }));
+    });
+    svg.appendChild(g0);
+    svg.appendChild(bildzeichen(28, 32, "🥁", 20));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(160, 30, ruhig));
+    return svg;
+  }
+
+  // ----- Rhythmus-Diktat (BAUEN · diktat) -----
+  // Notenkarten des Spiels: Dauer in Vierteln und Noten (Wert je Kopf; die Balken wie im Spiel)
+  const KARTEN_DIKTAT = {
+    "4": { d: 1, n: [1] }, "88": { d: 1, n: [0.5, 0.5] }, "2": { d: 2, n: [2] }, "p": { d: 1, n: [] }, "16": { d: 1, n: [0.25, 0.25, 0.25, 0.25] },
+    "8-16-16": { d: 1, n: [0.5, 0.25, 0.25] }, "16-16-8": { d: 1, n: [0.25, 0.25, 0.5] }, "4.8": { d: 2, n: [1.5, 0.5] }, "8.16": { d: 1, n: [0.75, 0.25] },
+    "16-8-16": { d: 1, n: [0.25, 0.5, 0.25] },
+  };
+  /** Notenkarte k an x (Breite je Viertel q), Linie y; Achtel und Sechzehntel mit Balken. */
+  function diktatKarte(k, x, y, q) {
+    const kt = KARTEN_DIKTAT[k], g = s("g", { "data-karte": k });
+    g.appendChild(s("rect", { x: x + 2, y: y - 36, width: kt.d * q - 4, height: 48, rx: 5, fill: "#ffffff", style: "stroke:var(--deko-5)", "stroke-width": 1.6 }));
+    if (k === "p") { g.appendChild(s("path", { d: `M${x + q / 2 - 3},${y - 22} l6,7 l-5,5 l5,7 q-7,-3 -4,4`, fill: "none", stroke: "#2d3047", "stroke-width": 2.2, "stroke-linejoin": "round" })); return g; }
+    const n = kt.n.length, xs = kt.n.map((_, i) => x + 6 + ((i + 0.5) * (kt.d * q - 14)) / n - 2); // Köpfe innerhalb der Karte
+    kt.n.forEach((w, i) => {
+      const hohl = w >= 2;
+      g.appendChild(s("ellipse", { cx: xs[i], cy: y, rx: 4.2, ry: 3, transform: `rotate(-20 ${xs[i]} ${y})`, fill: hohl ? "#ffffff" : "#2d3047", stroke: "#2d3047", "stroke-width": 1.2 }));
+      g.appendChild(s("line", { x1: xs[i] + 3.8, y1: y, x2: xs[i] + 3.8, y2: y - 24, stroke: "#2d3047", "stroke-width": 1.2 }));
+      if (w === 1.5 || w === 0.75) g.appendChild(s("circle", { cx: xs[i] + 8, cy: y - 1, r: 1.5, fill: "#2d3047" }));
+    });
+    const kurzeNoten = kt.n.map((w, i) => [w, i]).filter(([w]) => w < 1);
+    if (kurzeNoten.length === 1) {
+      // eine Achtel allein (nach der punktierten Viertel): Fähnchen
+      const i = kurzeNoten[0][1];
+      g.appendChild(s("path", { d: `M${xs[i] + 3.8},${y - 24} q6,4 5,11`, fill: "none", stroke: "#2d3047", "stroke-width": 1.4 }));
+    } else if (kurzeNoten.length > 1) {
+      const a = kurzeNoten[0][1], b = kurzeNoten[kurzeNoten.length - 1][1];
+      g.appendChild(s("rect", { x: xs[a] + 3.2, y: y - 25, width: xs[b] - xs[a] + 1.2, height: 3.6, fill: "#2d3047" }));
+      // zweiter Balken für Sechzehntel: zwischen benachbarten, sonst ein kurzer Stummel
+      kt.n.forEach((w, i) => {
+        if (w !== 0.25) return;
+        const nb = kt.n[i + 1] === 0.25 ? i + 1 : null;
+        if (nb !== null) g.appendChild(s("rect", { x: xs[i] + 3.2, y: y - 20, width: xs[nb] - xs[i] + 1.2, height: 3.6, fill: "#2d3047" }));
+        else if (kt.n[i - 1] !== 0.25) g.appendChild(s("rect", { x: i ? xs[i] - 3 : xs[i] + 3.2, y: y - 20, width: 7, height: 3.6, fill: "#2d3047" }));
+      });
+    }
+    return g;
+  }
+  /**
+   * Die Notenkarten der Stufe fallen der Reihe nach in die Taktleiste (4/4 wie im Spiel; höchstens eine Viertelpause je
+   * Takt, jeder Takt voll). Angabe: { takte: [[Karte …] …] } (1–2 Takte).
+   */
+  function diktat(feier, { stufe, sterne, ruhig, klang, plane }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z || !Array.isArray(z.takte) || !z.takte.length || z.takte.length > 2) return null;
+    if (!z.takte.every(tk => Array.isArray(tk) && tk.every(k => KARTEN_DIKTAT[k]) && tk.reduce((a, k) => a + KARTEN_DIKTAT[k].d, 0) === 4 && tk.filter(k => k === "p").length <= 1)) return null;
+    const alle = z.takte.flat();
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "diktat", "data-anzahl": alle.length });
+    svg.appendChild(tagGrund());
+    // ein Takt in der Mitte, zwei Takte untereinander (sonst würden die Sechzehntel zu eng)
+    const q = 56, x0 = BREITE / 2 - (4 * q) / 2 + 8, je = T / alle.length, zeileY = z.takte.length === 1 ? [96] : [70, 132];
+    let k = 0;
+    z.takte.forEach((tk, ti) => {
+      const y = zeileY[ti];
+      let x = x0;
+      if (!ti) svg.append(text(x0 - 12, y - 4, 4, { gross: 13 }), text(x0 - 12, y + 12, 4, { gross: 13 }));
+      svg.appendChild(s("line", { x1: x, y1: y, x2: x + 4 * q, y2: y, stroke: "#2d3047", "stroke-width": 1.2 }));
+      for (const karte of tk) {
+        const ab = 0.15 + k++ * je;
+        svg.appendChild(s("g", { "data-stueck": karte }, falle(diktatKarte(karte, x, y, q), ab, ruhig)));
+        let tz = 0;
+        if (klang && plane) for (const w of KARTEN_DIKTAT[karte].n) { const zeit = ab + tz * 0.25; plane(START + (ruhig ? 0 : zeit), () => klang([[523, Math.min(0.25, w * 0.2)]])); tz += w; }
+        x += KARTEN_DIKTAT[karte].d * q;
+      }
+      svg.appendChild(s("line", { x1: x, y1: y - 40, x2: x, y2: y + 16, stroke: "#2d3047", "stroke-width": ti === z.takte.length - 1 ? 2.6 : 1.2 }));
+    });
+    svg.appendChild(bildzeichen(28, 26, "🥁", 18));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(z.takte.length === 1 ? funken(160, 132, ruhig) : funken(26, 104, ruhig));
+    return svg;
+  }
+
+  // ----- Hoch-Tief-Ohr (REISE · melodie) -----
+  /**
+   * Ein Vogel hüpft die Töne entlang (Noten im Violinschlüssel), mit Ton an klingt jeder Ton. vergleich: von zwei Tönen
+   * leuchtet der höhere auf, gleich: beide gleich hoch (=); pfeile: Richtung zwischen den Tönen (↗ ↘); schritte: über
+   * jedem Schritt ½ oder 1 (Halbton, Ganzton; geprüft an den Halbtönen e–f und h–c). Angabe: { toene: [p …] (2–4), … }.
+   */
+  function melodie(feier, { stufe, sterne, ruhig, klang, plane }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85, p = z?.toene;
+    if (!Array.isArray(p) || p.length < 2 || p.length > 4 || !p.every(x => Number.isInteger(x) && x >= -2 && x <= 9)) return null;
+    const m = p.map(x => midiVon(x));
+    if (z.gleich && !(p.length === 2 && p[0] === p[1])) return null;
+    if (z.vergleich && !(p.length === 2 && p[0] !== p[1])) return null;
+    if (z.schritte && !(z.schritte.length === p.length - 1 && z.schritte.every((sch, i) => Math.abs(p[i + 1] - p[i]) === 1 && Math.abs(m[i + 1] - m[i]) === (sch === "½" ? 1 : sch === "1" ? 2 : -1)))) return null;
+    const svg = neuesBild("reise", stufe, { "data-bilder": "melodie", "data-anzahl": p.length });
+    svg.appendChild(tagGrund());
+    const py = notenLinien(svg, 12, 308, 104), xs = p.map((_, i) => 96 + (i * 190) / Math.max(1, p.length - 1));
+    const hoch = Math.max(...m);
+    // der Vogel hüpft gleichmässig von Note zu Note; jede Note erscheint und klingt, wenn er bei ihr ankommt (ankunft)
+    const punkte = p.map((x, i) => [xs[i], py(x) - 8]), start = [punkte[0][0] - 40, punkte[0][1] - 30];
+    const an = ankunft([start, ...punkte], T).slice(1).map(z => 0.05 + Math.max(0, z - 0.1));
+    p.forEach((x, i) => {
+      const g = s("g", { "data-stueck": tonName(x) }, notenKopf(xs[i], py, x, 0, { hals: false }));
+      if (z.vergleich && m[i] === hoch) g.appendChild(erscheine(s("circle", { cx: xs[i], cy: py(x), r: 9, fill: "none", stroke: GUT, "stroke-width": 2.4 }), T, ruhig));
+      svg.appendChild(erscheine(g, an[i], ruhig, 0.15));
+      if (klang && plane) plane(START + (ruhig ? 0 : an[i]), () => klang([[hz(m[i]), 0.3]]));
+      const je = an[i] - (an[i - 1] ?? 0);
+      if (i && (z.pfeile || z.schritte)) {
+        const mx = (xs[i] + xs[i - 1]) / 2, y1 = py(p[i - 1]), y2 = py(x), my = Math.min(y1, y2) - 18;
+        if (z.pfeile) svg.appendChild(erscheine(s("path", { d: `M${mx - 10},${my + (y2 < y1 ? 6 : -6)} L${mx + 10},${my + (y2 < y1 ? -6 : 6)}`, stroke: y2 < y1 ? GUT : HINWEIS, "stroke-width": 2.4,
+          "marker-end": "none", "stroke-linecap": "round" }), an[i] - je * 0.4, ruhig));
+        if (z.schritte) svg.appendChild(erscheine(text(mx, my, z.schritte[i - 1], { gross: 13, farbe: z.schritte[i - 1] === "½" ? "#c25e12" : "var(--deko-6)" }), an[i], ruhig));
+      }
+    });
+    if (z.gleich) svg.appendChild(erscheine(text(160, py(p[0]) + 4, "=", { gross: 18, farbe: GUT }), T, ruhig));
+    // Weg des Vogels: gerade Stücke (ankunft rechnet mit ihnen), sitzt am Ende auf der letzten Note
+    const weg = "M" + [start, ...punkte].map(q => q.map(v => v.toFixed(1)).join(",")).join(" L");
+    const vogel = s("g", {}, s("ellipse", { cx: 0, cy: -5, rx: 6, ry: 4.4, fill: "#3f7fc8" }), s("circle", { cx: 5, cy: -9, r: 3.2, fill: "#3f7fc8" }),
+      s("path", { d: "M8,-10 l3.5,1 l-3.5,1 Z", fill: "#f5a623" }), s("circle", { cx: 6, cy: -10, r: 0.8, fill: "#ffffff" }));
+    svg.appendChild(bewege(vogel, weg, { x: punkte[p.length - 1][0], y: punkte[p.length - 1][1], winkel: 0 }, ruhig, { drehen: false, ab: 0.05, dauer: T, linear: true }));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(36, 30, ruhig));
+    return svg;
+  }
+
+  // ----- Klang-Wichtel (AUFTRITT · klangwichtel) -----
+  /**
+   * Der Wichtel 🧝 spielt, rechts erscheint, worauf zu achten ist — mit den Zeichen des Spiels: laut 🦁 / leise 🐭 als
+   * grosser und kleiner Punkt, kurz und lang als Strich, schnell 🐇 / langsam 🐢 als Schläge; vergleich: zwei Klänge,
+   * der längere (oder lautere) bekommt den Haken; schrift: die Klangschrift der Stufe (Striche k/l oder Punkte g/k);
+   * karten: Bildkarten mit zwei Merkmalen, die richtige (ziel) bekommt den Haken.
+   */
+  function klangwichtel(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const svg = neuesBild("auftritt", stufe, { "data-bilder": "klangwichtel" });
+    svg.appendChild(tagGrund());
+    svg.append(bildzeichen(40, 96, "🧝", 44), bildzeichen(72, 112, "🔔", 18));
+    const strich = (x, y, lang, ab) => {
+      const b = lang ? 66 : 18, r = s("rect", { x, y: y - 5, width: b, height: 10, rx: 5, style: "fill:var(--deko-7)" });
+      if (!ruhig) { r.setAttribute("width", "0"); r.appendChild(s("animate", { attributeName: "width", from: 0, to: b, begin: t(ab), dur: `${lang ? 0.9 : 0.2}s`, fill: "freeze" })); }
+      return r;
+    };
+    const punkt = (x, y, gross, ab) => erscheine(s("circle", { cx: x, cy: y, r: gross ? 18 : 7, style: "fill:var(--deko-7)" }), ab, ruhig, 0.2);
+    const stuecke = [];
+    if (z.gegensatz) {
+      const A = { laut: ["🦁", "🐭"], lang: ["", ""], schnell: ["🐇", "🐢"] }[z.gegensatz];
+      if (!A) return null;
+      [0, 1].forEach(i => {
+        const y = 46 + i * 56, g = s("g", { "data-stueck": i ? "zweites" : "erstes" });
+        if (A[i]) g.appendChild(bildzeichen(124, y, A[i], 24));
+        if (z.gegensatz === "laut") g.appendChild(punkt(184, y, i === 0, 0.2 + i * T * 0.45));
+        if (z.gegensatz === "lang") g.appendChild(strich(150, y, i === 1, 0.2 + i * T * 0.45));
+        if (z.gegensatz === "schnell") {
+          const n = i ? 4 : 6, abst = i ? 34 : 16;
+          for (let k = 0; k < n; k++) g.appendChild(erscheine(s("circle", { cx: 160 + k * abst, cy: y, r: 4, style: "fill:var(--deko-7)" }), 0.2 + i * T * 0.45 + k * (i ? 0.25 : 0.08), ruhig, 0.1));
+        }
+        stuecke.push(g);
+      });
+    } else if (Array.isArray(z.vergleich)) {
+      const [art, a, b] = z.vergleich;
+      if (!["lang", "laut"].includes(art) || !(a > 0 && b > 0 && a !== b)) return null;
+      [a, b].forEach((w, i) => {
+        const y = 46 + i * 56, g = s("g", { "data-stueck": String(w) }, text(124, y + 5, i + 1, { gross: 14 }));
+        g.appendChild(art === "lang" ? strich(146, y, false, 0) : punkt(180, y, false, 0));
+        const el = g.lastChild;
+        if (art === "lang") { el.setAttribute("width", String(Math.round(140 * w / Math.max(a, b)))); el.querySelector("animate")?.setAttribute("to", String(Math.round(140 * w / Math.max(a, b)))); }
+        else el.setAttribute("r", String(Math.round(20 * w / Math.max(a, b))));
+        if (w === Math.max(a, b)) g.appendChild(erscheine(haken(300, y, 15), T, ruhig));
+        stuecke.push(erscheine(g, 0.2 + i * T * 0.4, ruhig));
+      });
+    } else if (Array.isArray(z.schrift)) {
+      const st = z.schrift.every(c => c === "k" || c === "l"), pu = z.schrift.every(c => c === "g" || c === "kl");
+      if (z.schrift.length < 3 || z.schrift.length > 4 || (!st && !pu)) return null;
+      let x = 116;
+      z.schrift.forEach((c, i) => {
+        const ab = 0.2 + i * (T / z.schrift.length);
+        stuecke.push(s("g", { "data-stueck": c }, st ? strich(x, 74, c === "l", ab) : punkt(x + 18, 74, c === "g", ab)));
+        x += st ? (c === "l" ? 76 : 28) : 46;
+      });
+    } else if (Array.isArray(z.karten)) {
+      if (z.karten.length !== 2 || !z.karten.every(k => k.length === 2) || ![0, 1].includes(z.ziel)) return null;
+      z.karten.forEach(([dauer, staerke], i) => {
+        const x = 150 + i * 96, g = s("g", { "data-stueck": `${dauer}-${staerke}` }, s("rect", { x: x - 40, y: 34, width: 80, height: 80, rx: 8, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.6 }));
+        g.append(strich(x - (dauer === "lang" ? 33 : 9), 58, dauer === "lang", 0.2 + i * 0.4), punkt(x, 92, staerke === "laut", 0.3 + i * 0.4));
+        if (i === z.ziel) g.append(tippRing(x, 74, 44, T * 0.7, ruhig), erscheine(haken(x + 34, 40, 15), T, ruhig));
+        stuecke.push(g);
+      });
+    } else return null;
+    svg.setAttribute("data-anzahl", stuecke.length);
+    stuecke.forEach(g => svg.appendChild(g));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(40, 30, ruhig));
+    return svg;
+  }
+
+  // ----- Tonleiter-Treppe (BAUEN · tonleiter) -----
+  // Leitern des Spiels: Namen von unten nach oben; Dur 2-2-1-2-2-2-1, natürliches Moll 2-1-2-2-1-2-2 (in Halbtönen)
+  const LEITERN = {
+    C: ["c", "d", "e", "f", "g", "a", "h", "c"], G: ["g", "a", "h", "c", "d", "e", "fis", "g"], F: ["f", "g", "a", "b", "c", "d", "e", "f"],
+    D: ["d", "e", "fis", "g", "a", "h", "cis", "d"], B: ["b", "c", "d", "es", "f", "g", "a", "b"],
+    a: ["a", "h", "c", "d", "e", "f", "g", "a"], e: ["e", "fis", "g", "a", "h", "c", "d", "e"], d: ["d", "e", "f", "g", "a", "b", "c", "d"],
+  };
+  const KLASSE = { c: 0, cis: 1, d: 2, es: 3, e: 4, f: 5, fis: 6, g: 7, a: 9, b: 10, h: 11 };
+  /**
+   * Die Treppe der Leiter wie im Spiel (Ganzton hohe, Halbton halbe Stufe; Name im Block): die Eule steigt hinauf (oder
+   * hinunter), die Halbtonschritte leuchten (deko-4) mit ½; Dur ☀️, Moll 🌧️ wie im Spiel. klaviatur: [[Taste, Taste] …]
+   * auf der Klaviatur c′–h′ mit ½ oder 1 (s3). Die Schritte rechnet das Bild aus den Namen und prüft sie gegen Dur bzw. Moll.
+   */
+  function tonleiter(feier, { stufe, sterne, ruhig, klang, plane }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.9;
+    if (!z) return null;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "tonleiter" });
+    svg.appendChild(tagGrund());
+    if (Array.isArray(z.klaviatur)) {
+      const WEISS = ["c", "d", "e", "f", "g", "a", "h"], SCHWARZ = { cis: 0, es: 1, fis: 3, gis: 4, b: 5 }, KL = { ...KLASSE, gis: 8 };
+      if (!z.klaviatur.length || z.klaviatur.length > 2 || !z.klaviatur.every(([a, b]) => a in KL && b in KL && [1, 2].includes(Math.abs(KL[b] - KL[a])))) return null;
+      svg.setAttribute("data-anzahl", z.klaviatur.length);
+      const x0 = 62, w = 28, y0 = 30, tx = n => (n in SCHWARZ ? x0 + (SCHWARZ[n] + 1) * w - 8 + 8 : x0 + WEISS.indexOf(n) * w + w / 2);
+      WEISS.forEach((n, i) => svg.appendChild(s("rect", { x: x0 + i * w, y: y0, width: w, height: 92, fill: "#ffffff", stroke: "#2d3047", "stroke-width": 1.2 })));
+      Object.values(SCHWARZ).forEach(i => svg.appendChild(s("rect", { x: x0 + (i + 1) * w - 8, y: y0, width: 16, height: 60, fill: "#2d3047" })));
+      z.klaviatur.forEach(([a, b], k) => {
+        const ab = 0.2 + k * T * 0.45, g = s("g", { "data-stueck": `${a}-${b}` });
+        for (const n of [a, b]) g.appendChild(erscheine(s("circle", { cx: tx(n), cy: n in SCHWARZ ? y0 + 50 : y0 + 80, r: 7, style: `fill:${n === a ? "var(--deko-4)" : GUT}` }), ab + (n === b ? 0.3 : 0), ruhig));
+        const schritt = Math.abs(KL[b] - KL[a]) === 1 ? "½" : "1";
+        g.appendChild(erscheine(text((tx(a) + tx(b)) / 2, y0 + 110, schritt, { gross: 13, farbe: schritt === "½" ? "#c25e12" : "var(--deko-6)" }), ab + 0.5, ruhig));
+        svg.appendChild(g);
+        if (klang && plane) [a, b].forEach((n, j) => plane(START + (ruhig ? 0 : ab + j * 0.3), () => klang([[hz(60 + KL[n]), 0.3]])));
+      });
+    } else {
+      const namen = LEITERN[z.leiter];
+      if (!namen) return null;
+      const moll = z.leiter === z.leiter.toLowerCase(), MUSTER_HT = moll ? [2, 1, 2, 2, 1, 2, 2] : [2, 2, 1, 2, 2, 2, 1];
+      const schritte = namen.slice(1).map((n, i) => (KLASSE[n] - KLASSE[namen[i]] + 12) % 12);
+      if (schritte.join() !== MUSTER_HT.join()) return null;
+      svg.setAttribute("data-anzahl", 8);
+      svg.setAttribute("data-wert", z.leiter);
+      const bw = 34, x0 = 24, unten = 138, halb = 6.5;
+      let h = 16;
+      const bloecke = namen.map((n, i) => { if (i) h += schritte[i - 1] * halb; return { n, x: x0 + i * bw, top: unten - h }; });
+      const ab = (i, dauer) => 0.15 + ((z.richtung === "ab" ? 7 - i : i) * dauer) / 8;
+      bloecke.forEach((b, i) => {
+        const halbton = z.halbtoene && ((i < 7 && schritte[i] === 1) || (i > 0 && schritte[i - 1] === 1));
+        const g = s("g", { "data-stueck": b.n }, s("rect", { x: b.x, y: b.top, width: bw - 2, height: unten - b.top, rx: 3, fill: halbton ? "#fff3c4" : "#ffffff",
+          style: `stroke:${halbton ? "var(--deko-4)" : "var(--deko-6)"}`, "stroke-width": 1.6 }), text(b.x + bw / 2 - 1, b.top + 14, b.n, { gross: 11 }));
+        svg.appendChild(erscheine(g, ab(i, T * 0.5), ruhig, 0.2));
+        if (z.halbtoene && i < 7 && schritte[i] === 1) svg.appendChild(erscheine(text(b.x + bw - 1, b.top - 14, "½", { gross: 12, farbe: "#c25e12" }), T * 0.7, ruhig));
+      });
+      svg.appendChild(bildzeichen(150, 22, moll ? "🌧️" : "☀️", 18)); // über den unteren Stufen, nicht auf der Eule oben
+      // die Eule steigt Stufe um Stufe
+      const reihe = z.richtung === "ab" ? [...bloecke].reverse() : bloecke;
+      let weg = `M${reihe[0].x + bw / 2},${reihe[0].top}`;
+      for (let i = 1; i < 8; i++) weg += ` Q${(reihe[i - 1].x + reihe[i].x) / 2 + bw / 2},${Math.min(reihe[i - 1].top, reihe[i].top) - 12} ${reihe[i].x + bw / 2},${reihe[i].top}`;
+      const ende = reihe[7];
+      svg.appendChild(bewege(euleSitzend(0.22), weg, { x: ende.x + bw / 2, y: ende.top, winkel: 0 }, ruhig, { drehen: false, ab: 0.15, dauer: T }));
+      // Ton der Stufe j: Grundton (Oktave über c′) plus die Schritte bis dahin
+      if (klang && plane) reihe.forEach((_, i) => {
+        const j = z.richtung === "ab" ? 7 - i : i, m = 60 + KLASSE[namen[0]] + MUSTER_HT.slice(0, j).reduce((a, x) => a + x, 0);
+        plane(START + (ruhig ? 0 : 0.15 + (i * T) / 8), () => klang([[hz(m), 0.25]]));
+      });
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 44, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(50, 30, ruhig));
+    return svg;
+  }
+
+  // ----- Roboter-Pfad (KARTE · roboter) -----
+  const RICHTUNG_XY = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // 0 oben, 1 rechts, 2 unten, 3 links
+  /** Roboter mit Blickrichtung (oranges Dreieck deko-3 wie im Spiel), Mitte 0,0. */
+  const roboterFigur = c => s("g", { "data-figur": "roboter" }, bildzeichen(0, 0, "🤖", c * 0.7),
+    s("path", { d: `M0,${-c * 0.5} l-${c * 0.14},${c * 0.16} h${c * 0.28} Z`, style: "fill:var(--deko-3)", class: "blick" }));
+  /**
+   * Das Programm der Stufe läuft im Raster wie im Spiel (4×4, 5×5, 6×6; Steine 🪨, Ziel ⭐): unten die Karten (⬆️ vor,
+   * ↺ links, ↻ rechts, Wiederholung „n×“ deko-1, Bedingung „wenn frei“), der Roboter fährt, die Spur wird grün (--gut-hell).
+   * Das Bild rechnet den Weg und gibt kein Bild, wenn er durch einen Stein oder aus dem Raster ginge; das Ziel liegt am
+   * Ende des Wegs. Angabe: { raster, start: [x, y, Richtung], steine: [[x, y] …], programm: [Karte …] } mit Karte "V",
+   * "L", "R", { mal: n, karten: [ … ] } oder { solange: n } (Wiederhole n-mal: wenn vorne frei vor, sonst links drehen).
+   */
+  function roboter(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.9;
+    if (!z || ![4, 5, 6].includes(z.raster) || !Array.isArray(z.programm) || !Array.isArray(z.start)) return null;
+    const n = z.raster, stein = new Set((z.steine || []).map(schluessel));
+    let [x, y, r] = z.start;
+    const pfad = [[x, y, r]], frei = (a, b) => a >= 0 && b >= 0 && a < n && b < n && !stein.has(`${a},${b}`);
+    let ok = frei(x, y);
+    const fuehre = k => {
+      if (k === "V") { const [dx, dy] = RICHTUNG_XY[r]; if (!frei(x + dx, y + dy)) ok = false; else { x += dx; y += dy; } }
+      else if (k === "L") r = (r + 3) % 4;
+      else if (k === "R") r = (r + 1) % 4;
+      else if (k && Number.isInteger(k.mal)) { for (let i = 0; i < k.mal; i++) k.karten.forEach(fuehre); return; }
+      else if (k && Number.isInteger(k.solange)) {
+        for (let i = 0; i < k.solange; i++) { const [dx, dy] = RICHTUNG_XY[r]; if (frei(x + dx, y + dy)) { x += dx; y += dy; } else r = (r + 3) % 4; pfad.push([x, y, r]); }
+        return;
+      } else ok = false;
+      pfad.push([x, y, r]);
+    };
+    z.programm.forEach(fuehre);
+    if (!ok || pfad.length < 2 || pfad.length > 40) return null;
+    const svg = neuesBild("karte", stufe, { "data-bilder": "roboter", "data-wert": `${x},${y}` });
+    svg.appendChild(tagGrund());
+    const c = Math.min(22, 104 / n), x0 = 16, y0 = (HOEHE - n * c) / 2, mz = zelle(x0, y0, c);
+    svg.append(s("rect", { x: x0, y: y0, width: n * c, height: n * c, fill: "#ffffff" }), gitter(x0, y0, n, n, c, "#8a8fa8"));
+    for (const st of z.steine || []) svg.appendChild(bildzeichen(...mz(st), "🪨", c * 0.66));
+    // Spur: Feld um Feld (nur die Fahrten, nicht die Drehungen am Ort)
+    const felder = pfad.filter((p, i) => !i || p[0] !== pfad[i - 1][0] || p[1] !== pfad[i - 1][1]);
+    const zeiten = ankunft(felder.map(p => mz(p)), T);
+    felder.forEach((p, i) => svg.appendChild(erscheine(s("rect", { x: x0 + p[0] * c + 1, y: y0 + p[1] * c + 1, width: c - 2, height: c - 2, fill: "#c9f0d8" }), zeiten[i], ruhig, 0.15)));
+    svg.appendChild(s("g", { "data-stueck": "ziel" }, bildzeichen(...mz([x, y]), "⭐", c * 0.66)));
+    // der Roboter fährt die Felder ab und dreht sich, wohin er schaut
+    const robo = roboterFigur(c);
+    const weg = "M" + felder.map(p => mz(p).map(v => v.toFixed(1)).join(",")).join(" L");
+    const aussen = s("g", {}, robo);
+    if (ruhig) aussen.setAttribute("transform", `translate(${mz([x, y]).join(" ")})`);
+    else {
+      aussen.appendChild(s("animateMotion", { path: weg, begin: t(0), dur: `${T}s`, fill: "freeze" }));
+      // Drehung zu den Zeitpunkten der Schritte (je Eintrag im Pfad gleich lang)
+      const werte = pfad.map(p => p[2] * 90), keyTimes = pfad.map((_, i) => (i / (pfad.length - 1)).toFixed(3));
+      robo.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", values: werte.join(";"), keyTimes: keyTimes.join(";"), calcMode: "discrete", begin: t(0), dur: `${T}s`, fill: "freeze" }));
+    }
+    if (ruhig) robo.setAttribute("transform", `rotate(${r * 90})`);
+    svg.appendChild(aussen);
+    // Karten rechts in Zeilen
+    const karten = [];
+    const karte = (k, tiefe = 0) => {
+      if (typeof k === "string") karten.push({ z: { V: "⬆️", L: "↺", R: "↻" }[k], tiefe });
+      else if (k.mal) { karten.push({ z: `${k.mal}×`, tiefe, block: true }); k.karten.forEach(q => karte(q, tiefe + 1)); }
+      else karten.push({ z: `${k.solange}×`, tiefe, block: true }, { z: "❓", tiefe: tiefe + 1, wenn: true }, { z: "⬆️", tiefe: tiefe + 2 }, { z: "↺", tiefe: tiefe + 2 });
+    };
+    z.programm.forEach(q => karte(q));
+    const kx = x0 + n * c + 18, kb = 20, proZeile = Math.floor((BREITE - kx - 8) / (kb + 4));
+    karten.forEach((k, i) => {
+      const xx = kx + (i % proZeile) * (kb + 4), yy = 20 + Math.floor(i / proZeile) * (kb + 6);
+      const g = s("g", {}, s("rect", { x: xx, y: yy, width: kb, height: kb, rx: 4, fill: k.block ? "#f4eefc" : "#ffffff", style: `stroke:${k.block ? "var(--deko-1)" : "var(--deko-6)"}`, "stroke-width": 1.4 }),
+        /[0-9]/.test(k.z) ? text(xx + kb / 2, yy + kb * 0.7, k.z, { gross: 10 }) : ["↺", "↻"].includes(k.z) ? text(xx + kb / 2, yy + kb * 0.72, k.z, { gross: 13 }) : bildzeichen(xx + kb / 2, yy + kb / 2, k.z, 12));
+      svg.appendChild(erscheine(g, (i * 0.4) / karten.length, ruhig, 0.15));
+    });
+    svg.setAttribute("data-anzahl", 1);
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, HOEHE - 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(...mz([x, y]), ruhig));
+    return svg;
+  }
+
+  // ----- Speicher-Leiter (BAUEN · speicher) -----
+  // Dinge und Grössen des Spiels (Faktor 1000, wie im Spiel; Byte zu bit 8)
+  const SPEICHER_DINGE = { "🔤": 1, "💬": 140, "📄": 2e3, "📕": 5e5, "📷": 3e6, "🎵": 4e6, "🎥": 1e8, "🍿": 2e9 };
+  const STUFEN_SP = ["GB", "MB", "kB", "Byte", "bit"], FAKTOR = { GB: 1e9, MB: 1e6, kB: 1e3, Byte: 1, bit: 1 / 8 };
+  const SP_FARBE = { GB: "var(--deko-1)", MB: "var(--deko-2)", kB: "var(--deko-3)", Byte: "var(--deko-4)", bit: "var(--deko-5)" };
+  /**
+   * dinge: Bildzeichen des Spiels ordnen sich nach Grösse (ohne Einheiten, Säulen mit dem Logarithmus der Grösse; s1);
+   * bits: acht Lämpchen 0/1 werden ein Byte (s2); leiter: die Kästchen der Leiter wie im Spiel (GB → MB → kB … mit ×1000 und
+   * ×8; s3); umrechnen: [Zahl, Einheit, Zahl, Einheit] — nachgerechnet (s4); karte: { gb, mb, bild } — so viele Stücke
+   * passen auf die Speicherkarte (s5); laden: { mb, mbits } — die Datei kommt in mb·8 : mbits Sekunden (s6).
+   */
+  function speicher(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "speicher" });
+    svg.appendChild(tagGrund());
+    const kaestchen = (x, y, e, b = 44) => s("g", {}, s("rect", { x, y, width: b, height: 24, rx: 5, style: `fill:${SP_FARBE[e]}` }), text(x + b / 2, y + 16.5, e, { gross: 11, farbe: "#ffffff" }));
+    if (Array.isArray(z.dinge)) {
+      if (z.dinge.length < 2 || z.dinge.length > 5 || !z.dinge.every(d => SPEICHER_DINGE[d])) return null;
+      const sortiert = [...z.dinge].sort((a, b) => SPEICHER_DINGE[a] - SPEICHER_DINGE[b]);
+      svg.setAttribute("data-anzahl", sortiert.length);
+      sortiert.forEach((d, i) => {
+        const x = 70 + (i * 200) / Math.max(1, sortiert.length - 1), h = 10 + Math.log10(SPEICHER_DINGE[d]) * 9, von = 70 + (z.dinge.indexOf(d) * 200) / Math.max(1, z.dinge.length - 1);
+        const g = s("g", { "data-stueck": d }, s("rect", { x: x - 14, y: 128 - h, width: 28, height: h, rx: 3, style: "fill:var(--deko-2)", opacity: 0.85 }), bildzeichen(x, 128 - h - 14, d, 22));
+        svg.appendChild(herein(g, von - x, 0, 0.2 + i * 0.15, ruhig, 0.7)); // von der gemischten Reihenfolge an den Platz nach Grösse
+      });
+      svg.appendChild(s("line", { x1: 30, y1: 128, x2: 300, y2: 128, stroke: "#2d3047", "stroke-width": 1.4 }));
+    } else if (typeof z.bits === "string") {
+      if (!/^[01]{8}$/.test(z.bits)) return null;
+      svg.setAttribute("data-anzahl", 8);
+      [...z.bits].forEach((b, i) => {
+        const x = 36 + i * 30, an = b === "1", g = s("g", { "data-stueck": b }, s("circle", { cx: x, cy: 50, r: 11, fill: an ? "#f5b301" : "#c9cde0", stroke: "#2d3047", "stroke-width": 1 }),
+          text(x, 80, b, { gross: 13 }));
+        svg.appendChild(erscheine(g, 0.15 + (i * T * 0.6) / 8, ruhig, 0.15));
+      });
+      svg.append(erscheine(s("path", { d: "M24,92 Q160,112 296,92", fill: "none", stroke: "#8a8fa8", "stroke-width": 1.6 }), T * 0.7, ruhig),
+        erscheine(s("g", {}, kaestchen(30, 110, "bit", 60), text(160, 127, "8 bit = 1 Byte", { gross: 12 }), kaestchen(230, 110, "Byte", 60)), T * 0.8, ruhig));
+    } else if (Array.isArray(z.leiter)) {
+      if (z.leiter.length < 2 || !z.leiter.every((e, i) => STUFEN_SP.includes(e) && (!i || STUFEN_SP.indexOf(e) === STUFEN_SP.indexOf(z.leiter[i - 1]) + 1))) return null;
+      svg.setAttribute("data-anzahl", z.leiter.length);
+      const b = 44, ab = 30, gesamt = z.leiter.length * b + (z.leiter.length - 1) * ab, x0 = BREITE / 2 - gesamt / 2;
+      z.leiter.forEach((e, i) => {
+        const x = x0 + i * (b + ab);
+        svg.appendChild(s("g", { "data-stueck": e }, erscheine(kaestchen(x, 62, e, b), 0.15 + i * T * 0.2, ruhig)));
+        if (i) svg.appendChild(erscheine(s("g", {}, text(x - ab / 2, 56, e === "bit" ? "×8" : "×1000", { gross: 9.5 }),
+          s("path", { d: `M${x - ab + 4},74 h${ab - 8} m-4,-3 l4,3 l-4,3`, stroke: "#2d3047", "stroke-width": 1.4, fill: "none" })), 0.15 + i * T * 0.2, ruhig));
+      });
+    } else if (Array.isArray(z.umrechnen)) {
+      const [a, ea, b, eb] = z.umrechnen;
+      if (!(FAKTOR[ea] && FAKTOR[eb] && Math.abs(a * FAKTOR[ea] - b * FAKTOR[eb]) < 1e-9 * Math.max(1, a * FAKTOR[ea]))) return null;
+      svg.setAttribute("data-anzahl", 2);
+      svg.append(s("g", { "data-stueck": ea }, kaestchen(60, 40, ea), text(82, 92, ganzText(a), { gross: 18 })));
+      svg.appendChild(erscheine(s("path", { d: "M120,52 h70 m-6,-5 l6,5 l-6,5", stroke: "#2d3047", "stroke-width": 1.6, fill: "none" }), 0.3, ruhig));
+      svg.appendChild(erscheine(text(155, 44, FAKTOR[ea] / FAKTOR[eb] === 8 ? "×8" : `×${ganzText(FAKTOR[ea] / FAKTOR[eb])}`, { gross: 10 }), 0.3, ruhig));
+      svg.appendChild(s("g", { "data-stueck": eb }, erscheine(s("g", {}, kaestchen(212, 40, eb), text(234, 92, ganzText(b), { gross: 18 })), T * 0.6, ruhig)));
+      svg.appendChild(erscheine(text(160, 128, `${ganzText(a)} ${ea} = ${ganzText(b)} ${eb}`, { gross: 13 }), T, ruhig));
+    } else if (z.karte) {
+      const { gb, mb, bild } = z.karte;
+      if (!(Number.isInteger(gb) && gb >= 1 && gb <= 64 && Number.isInteger(mb) && mb >= 2 && mb <= 500 && SPEICHER_DINGE[bild])) return null;
+      const anzahl = Math.floor((gb * 1000) / mb);
+      svg.setAttribute("data-wert", anzahl);
+      svg.setAttribute("data-anzahl", 1);
+      svg.append(s("path", { d: "M30,30 h60 l14,14 v84 h-74 Z", fill: "#2d3047" }), text(66, 70, `${gb} GB`, { gross: 13, farbe: "#ffffff" }));
+      for (let i = 0; i < 4; i++) svg.appendChild(s("rect", { x: 40 + i * 14, y: 36, width: 8, height: 12, fill: "#e3b341" }));
+      for (let i = 0; i < 12; i++) svg.appendChild(herein(bildzeichen(128 + (i % 6) * 28, 48 + Math.floor(i / 6) * 30, bild, 18), -70, 0, 0.15 + i * (T * 0.6) / 12, ruhig, 0.3));
+      svg.append(s("g", { "data-stueck": "rechnung" }, erscheine(text(206, 128, `${ganzText(gb * 1000)} MB : ${ganzText(mb)} MB = ${ganzText(anzahl)}`, { gross: 12 }), T, ruhig)));
+    } else if (z.laden) {
+      const { mb, mbits } = z.laden, sek = (mb * 8) / mbits;
+      if (!(Number.isInteger(mb) && mb > 0 && Number.isInteger(mbits) && mbits >= 2 && mbits <= 100 && Number.isInteger(sek))) return null;
+      svg.setAttribute("data-wert", sek);
+      svg.setAttribute("data-anzahl", 1);
+      svg.append(bildzeichen(40, 52, "📶", 26), bildzeichen(280, 52, "📱", 26), s("rect", { x: 70, y: 46, width: 180, height: 14, rx: 7, fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 1.2 }));
+      const balken = s("rect", { x: 70, y: 46, width: 180, height: 14, rx: 7, style: "fill:var(--deko-5)" });
+      if (!ruhig) { balken.setAttribute("width", "0"); balken.appendChild(s("animate", { attributeName: "width", from: 0, to: 180, begin: t(0.15), dur: `${T * 0.8}s`, fill: "freeze" })); }
+      svg.append(balken, s("g", { "data-stueck": "rechnung" }, erscheine(text(160, 98, `${ganzText(mb)} MB = ${ganzText(mb * 8)} Mbit`, { gross: 12 }), T * 0.5, ruhig),
+        erscheine(text(160, 124, `${ganzText(mb * 8)} Mbit : ${mbits} Mbit/s = ${ganzText(sek)} s`, { gross: 12 }), T, ruhig)));
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(28, 132, ruhig));
+    return svg;
+  }
+
+  // ----- Geheimschrift-Knacker (ZYKLUS · scheibe) -----
+  const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const verschiebe = (w, k) => [...w].map(b => ABC[(ABC.indexOf(b) + k + 26) % 26]).join("");
+  /**
+   * Die Schlüsselscheibe wie im Spiel: aussen der Klartext, innen die Geheimbuchstaben (deko-1); die innere Scheibe dreht
+   * um den Schlüssel der Stufe, dann wird das Wort Buchstabe für Buchstabe ver- oder entschlüsselt (Caesar über A–Z,
+   * nach Z mit A weiter). knacken: zuerst passen andere Schlüssel nicht (✗), dann der richtige (s5, s6). Angabe:
+   * { wort, schluessel (1–25), richtung: "ver" | "ent", knacken?: [falsche Schlüssel …] }.
+   */
+  function scheibe(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.9;
+    if (!z || !/^[A-Z]{1,7}$/.test(z.wort || "") || !Number.isInteger(z.schluessel) || z.schluessel < 1 || z.schluessel > 25 || !["ver", "ent"].includes(z.richtung)) return null;
+    const k = z.schluessel, klar = z.richtung === "ver" ? z.wort : verschiebe(z.wort, -k), geheim = verschiebe(klar, k);
+    const svg = neuesBild("zyklus", stufe, { "data-bilder": "scheibe", "data-wert": `${klar}:${geheim}`, "data-anzahl": z.wort.length });
+    svg.appendChild(tagGrund());
+    const cx = 74, cy = 76, ra = 68, ri = 50;
+    svg.append(s("circle", { cx, cy, r: ra, fill: "#fbf3dc", stroke: "#b89a6a", "stroke-width": 1.2 }));
+    [...ABC].forEach((b, i) => { const w = ((i * 360) / 26 - 90) * Math.PI / 180; svg.appendChild(text(cx + Math.cos(w) * (ra - 9), cy + Math.sin(w) * (ra - 9) + 3.4, b, { gross: 9.5 })); });
+    const innen = s("g", {}, s("circle", { cx, cy, r: ri, fill: "#ffffff", style: "stroke:var(--deko-1)", "stroke-width": 1.6 }));
+    // innen steht unter jedem Klartext-Buchstaben sein Geheimbuchstabe: um k verschoben
+    [...ABC].forEach((b, i) => { const w = ((i * 360) / 26 - 90) * Math.PI / 180; innen.appendChild(text(cx + Math.cos(w) * (ri - 9), cy + Math.sin(w) * (ri - 9) + 3.4, b, { gross: 9, farbe: "var(--deko-1)" })); });
+    innen.appendChild(bildzeichen(cx, cy - 4, "🔑", 14));
+    innen.appendChild(text(cx, cy + 16, k, { gross: 11, farbe: "var(--deko-1)" }));
+    const winkel = (-k * 360) / 26, falsch = Array.isArray(z.knacken) ? z.knacken.filter(f => Number.isInteger(f) && f !== k && f >= 1 && f <= 25) : [];
+    if (ruhig) innen.setAttribute("transform", `rotate(${winkel} ${cx} ${cy})`);
+    else {
+      const stationen = [0, ...falsch.map(f => (-f * 360) / 26), winkel];
+      innen.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", values: stationen.map(w => `${w.toFixed(1)} ${cx} ${cy}`).join(";"),
+        keyTimes: stationen.map((_, i) => (i / (stationen.length - 1)).toFixed(3)).join(";"), begin: t(0.1), dur: `${T * 0.5}s`, fill: "freeze" }));
+    }
+    svg.appendChild(innen);
+    svg.appendChild(s("path", { d: `M${cx - 4},${cy - ra - 4} l4,8 l4,-8 Z`, fill: "#e5484d" }));
+    // das Wort: oben Klartext, unten das Geheimwort (je nach Richtung von oben nach unten oder umgekehrt)
+    const von = z.richtung === "ver" ? klar : geheim, nach = z.richtung === "ver" ? geheim : klar, bx = 168, b = Math.min(20, 140 / z.wort.length);
+    falsch.forEach((f, i) => svg.appendChild(kurz(s("g", {}, text(bx + 62, 30, `${f}?`, { gross: 11 }), kreuz(bx + 84, 30, 11)), 0.1 + ((i + 1) * T * 0.5) / (falsch.length + 1), 0.1 + ((i + 2) * T * 0.5) / (falsch.length + 1), ruhig)));
+    [...von].forEach((ch, i) => {
+      const x = bx + i * b + b / 2;
+      svg.appendChild(text(x, 64, ch, { gross: 15, farbe: z.richtung === "ver" ? "#2d3047" : "var(--deko-1)" }));
+      svg.appendChild(s("g", { "data-stueck": nach[i] }, erscheine(text(x, 108, nach[i], { gross: 15, farbe: z.richtung === "ver" ? "var(--deko-1)" : "#2d3047" }), T * 0.55 + (i * T * 0.4) / z.wort.length, ruhig)));
+      svg.appendChild(erscheine(s("path", { d: `M${x},72 v20 m-3,-4 l3,4 l3,-4`, stroke: "#8a8fa8", "stroke-width": 1.2, fill: "none" }), T * 0.55 + (i * T * 0.4) / z.wort.length, ruhig));
+    });
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(240, 26, ruhig)); // über dem Wort, nicht auf den Buchstaben
+    return svg;
+  }
+
+  // ----- Datei-Typen (SAMMELN · dateien) -----
+  const ENDUNG_ART = { txt: 0, docx: 0, pdf: 0, jpg: 1, jpeg: 1, png: 1, gif: 1, bmp: 1, mp3: 2, wav: 2, m4a: 2, mp4: 3, mov: 3, avi: 3 };
+  const DATEI_KORB = [["📄", "var(--deko-1)"], ["🖼️", "var(--deko-2)"], ["🎵", "var(--deko-3)"], ["🎬", "var(--deko-4)"]];
+  const DINGE_ART = { "✉️": 0, "📷": 1, "🎵": 2 };
+  const PROGRAMM = { txt: "🗒️", docx: "📝", pdf: "📕", jpg: "🖼️", png: "🖼️", mp3: "🎧", mp4: "📺", mov: "📽️", pptx: "📽️", xlsx: "📊", zip: "📦", html: "🌐" };
+  const DATEI_GROESSE = { "txt": [2, "kB"], "jpg": [3, "MB"], "mp3": [4, "MB"], "mp4-video": [100, "MB"], "mp4-film": [2, "GB"] };
+  /**
+   * Körbe Text, Bild, Ton, Video (Farben des Spiels); dinge: Bildzeichen ✉️ 📷 🎵 in drei Körbe (s1); endungen: Dateien
+   * mit ihrer Endung (orange wie im Spiel) in ihren Korb (s2, s3), falle: der Name sagt etwas anderes (🎵 durchgestrichen,
+   * .jpg ist ein Bild; s6). programme: Endung → Programm (s4). groessen: drei Dateien als Stapel, die grösste oben mit Haken
+   * (s5). Angabe je nach Stufe.
+   */
+  function dateien(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    if (Array.isArray(z.dinge) || Array.isArray(z.endungen)) {
+      const dinge = [];
+      for (const d of z.dinge || []) { if (!(d in DINGE_ART)) return null; dinge.push({ bild: d, korb: DINGE_ART[d] }); }
+      for (const e of z.endungen || []) {
+        const [endung, name] = Array.isArray(e) ? e : [e, null];
+        if (!(endung in ENDUNG_ART)) return null;
+        dinge.push({ text: `.${endung}`, korb: ENDUNG_ART[endung], ...(name ? { bild: name } : {}) });
+      }
+      if (!dinge.length || dinge.length > 8) return null;
+      const k = z.dinge ? 3 : 4;
+      const svg = korbBild(stufe, "dateien", { koerbe: DATEI_KORB.slice(0, k).map(([b, f]) => ({ zeichen: b, bild: b, farbe: f })), dinge }, sterne, ruhig);
+      // ein Name, der täuscht: durchgestrichen
+      if (svg && (z.endungen || []).some(Array.isArray)) svg.querySelectorAll("[data-stueck]").forEach(g => {
+        const bild = g.querySelector("text"), tx = g.querySelectorAll("text")[1];
+        if (bild && tx && /^\./.test(tx.textContent)) g.appendChild(s("line", { x1: Number(bild.getAttribute("x")) - 8, y1: Number(bild.getAttribute("y")) - 12, x2: Number(bild.getAttribute("x")) + 8, y2: Number(bild.getAttribute("y")) + 2, stroke: "#e5484d", "stroke-width": 2 }));
+      });
+      return svg;
+    }
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "dateien" });
+    svg.appendChild(tagGrund());
+    if (Array.isArray(z.programme)) {
+      if (!z.programme.length || z.programme.length > 4 || !z.programme.every(e => PROGRAMM[e])) return null;
+      svg.setAttribute("data-anzahl", z.programme.length);
+      z.programme.forEach((e, i) => {
+        const y = 22 + i * (112 / z.programme.length) + (4 - z.programme.length) * 7, ab = 0.15 + (i * T) / z.programme.length;
+        svg.appendChild(s("g", { "data-stueck": e }, s("rect", { x: 60, y: y - 11, width: 70, height: 22, rx: 4, fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 1.2 }),
+          text(95, y + 5, `.${e}`, { gross: 12, farbe: "#c25e12" }),
+          erscheine(s("path", { d: `M138,${y} h60 m-6,-5 l6,5 l-6,5`, stroke: "#8a8fa8", "stroke-width": 1.6, fill: "none" }), ab, ruhig),
+          herein(bildzeichen(226, y, PROGRAMM[e], 20), 30, 0, ab + 0.2, ruhig, 0.3)));
+      });
+    } else if (Array.isArray(z.groessen)) {
+      if (z.groessen.length !== 3 || !z.groessen.every(g => DATEI_GROESSE[g])) return null;
+      const bytes = g => DATEI_GROESSE[g][0] * { kB: 1e3, MB: 1e6, GB: 1e9 }[DATEI_GROESSE[g][1]], gross = z.groessen.reduce((a, g) => (bytes(g) > bytes(a) ? g : a));
+      svg.setAttribute("data-wert", gross);
+      svg.setAttribute("data-anzahl", 3);
+      z.groessen.forEach((g, i) => {
+        const x = 70 + i * 90, h = 6 + Math.log10(bytes(g)) * 8, [zahl, einheit] = DATEI_GROESSE[g], endung = g.split("-")[0];
+        const stapel = s("g", { "data-stueck": g }, s("rect", { x: x - 24, y: 116 - h, width: 48, height: h, rx: 3, style: `fill:${DATEI_KORB[ENDUNG_ART[endung]][1]}`, opacity: 0.85 }),
+          text(x, 132, `.${endung}`, { gross: 11, farbe: "#c25e12" }), text(x, 110 - h, `${zahl} ${einheit}`, { gross: 11 }));
+        svg.appendChild(vonOben(stapel, 0.15 + i * T * 0.3, ruhig, 40));
+        if (g === gross) svg.appendChild(erscheine(haken(x + 30, 96 - h, 15), T, ruhig));
+      });
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(28, 30, ruhig));
+    return svg;
+  }
+
+  // ----- Stein-Duell (SAMMELN · nim) -----
+  /**
+   * Nim wie im Spiel: eine bis drei Reihen grauer Steine; abwechselnd nehmen das Kind (Rand deko-6) und die Eule (🦉) —
+   * genommene Steine werden blass und klein. Das Kind spielt richtig (eine Reihe mit höchstens max: es lässt ein Vielfaches
+   * von max + 1; mehrere Reihen: es macht die Summe ohne Übertrag, XOR, zu null), die Eule nimmt einen Stein aus der
+   * längsten Reihe. Wer den letzten nimmt, gewinnt: das Kind, sonst gibt das Bild keines. eule: die Eule beginnt (s4, wenn
+   * die Zahl schon ein Vielfaches ist). Angabe: { reihen: [n …], max?, eule? }.
+   */
+  function nim(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.95;
+    if (!z || !Array.isArray(z.reihen) || !z.reihen.length || z.reihen.length > 3 || !z.reihen.every(n => Number.isInteger(n) && n >= 1 && n <= 25)) return null;
+    if (z.reihen.length === 1 && !(Number.isInteger(z.max) && z.max >= 2 && z.max <= 5)) return null;
+    const reihen = [...z.reihen], zuege = [];
+    let kind = !z.eule;
+    while (reihen.some(n => n > 0) && zuege.length < 30) {
+      let r, n;
+      if (kind) {
+        if (reihen.length === 1) { r = 0; n = reihen[0] % (z.max + 1); }
+        else {
+          const x = reihen.reduce((a, b) => a ^ b, 0);
+          r = reihen.findIndex(q => (q ^ x) < q); n = r >= 0 ? reihen[r] - (reihen[r] ^ x) : 0;
+        }
+        if (!n || r < 0) return null; // das Kind stünde auf Verlust
+      } else {
+        r = reihen.indexOf(Math.max(...reihen)); n = 1;
+      }
+      zuege.push({ kind, r, von: reihen[r] - n, n });
+      reihen[r] -= n;
+      kind = !kind;
+    }
+    if (!zuege.length || !zuege[zuege.length - 1].kind) return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "nim", "data-anzahl": z.reihen.reduce((a, b) => a + b, 0) });
+    svg.appendChild(tagGrund());
+    // Reihen bis vor den Pokal rechts
+    const R = Math.min(7, 226 / (Math.max(...z.reihen) * 2.4)), dx = R * 2.4, zh = Math.min(40, 118 / z.reihen.length), je = T / zuege.length;
+    const stein = z.reihen.map((n, r) => [...Array(n).keys()].map(i => {
+      const x = 40 + R + i * dx, y = 20 + (130 - z.reihen.length * zh) / 2 + r * zh + zh / 2;
+      return s("circle", { cx: x, cy: y, r: R, style: "fill:var(--deko-7)", "data-stueck": "stein" });
+    }));
+    stein.forEach((reihe, r) => { if (z.reihen.length > 1) svg.appendChild(text(22, Number(reihe[0].getAttribute("cy")) + 4, r + 1, { gross: 11, farbe: "var(--deko-1)" })); reihe.forEach(c => svg.appendChild(c)); });
+    zuege.forEach((zg, k) => {
+      const ab = 0.15 + k * je;
+      for (let i = zg.von; i < zg.von + zg.n; i++) {
+        const c = stein[zg.r][i];
+        c.setAttribute("stroke", zg.kind ? "var(--deko-6)" : "#8e6b4f");
+        c.setAttribute("stroke-width", "2");
+        if (ruhig) c.setAttribute("fill-opacity", "0.15");
+        else c.append(s("animate", { attributeName: "fill-opacity", from: 1, to: 0.15, begin: t(ab), dur: "0.3s", fill: "freeze" }),
+          s("animate", { attributeName: "r", from: R, to: R * 0.6, begin: t(ab), dur: "0.3s", fill: "freeze" }));
+        if (ruhig) c.setAttribute("r", String(R * 0.6));
+      }
+      const c0 = stein[zg.r][zg.von];
+      svg.appendChild(kurz(bildzeichen(Number(c0.getAttribute("cx")), Number(c0.getAttribute("cy")) - R - 9, zg.kind ? "👆" : "🦉", 12), ab, ab + je, ruhig));
+    });
+    svg.appendChild(erscheine(bildzeichen(292, 76, "🏆", 26), T + 0.1, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(292, 76, ruhig));
+    return svg;
+  }
+
+  // ----- Steine fangen (SAMMELN · atari) -----
+  /**
+   * Atari-Go wie im Spiel (Holz, Schwarz = du, Weiss = die Eule): die Züge der Stufe werden gespielt, eine weisse Gruppe
+   * ohne Freiheit wird gefangen und rollt in die Schale (nachgerechnet; ohne Fang kein Bild, ausser freiheiten oder
+   * retten). freiheiten: die freien Nachbarpunkte des weissen Steins leuchten (s1); retten: die schwarze Gruppe im Atari
+   * verlängert und hat danach so viele Freiheiten (s4); falle: ein Zug, der nicht geht, erscheint zuerst blass mit ✗ (s6).
+   * Angabe: { brett, weiss: [[x, y] …], schwarz: [[x, y] …], zuege: [["s" | "w", x, y] …], freiheiten?, retten?, falle? }.
+   */
+  function atari(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.9;
+    if (!z || !(z.brett >= 5 && z.brett <= 9)) return null;
+    const n = z.brett, feld = new Map(), key = (x, y) => `${x},${y}`, im = (x, y) => x >= 0 && y >= 0 && x < n && y < n;
+    for (const [x, y] of z.weiss || []) feld.set(key(x, y), "w");
+    for (const [x, y] of z.schwarz || []) { if (feld.has(key(x, y))) return null; feld.set(key(x, y), "s"); }
+    const nachbarn = (x, y) => [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]].filter(([a, b]) => im(a, b));
+    function gruppe(x, y) {
+      const f = feld.get(key(x, y)), g = [[x, y]], ges = new Set([key(x, y)]), frei = new Set();
+      for (let i = 0; i < g.length; i++) for (const [a, b] of nachbarn(...g[i])) {
+        const v = feld.get(key(a, b));
+        if (!v) frei.add(key(a, b)); else if (v === f && !ges.has(key(a, b))) { ges.add(key(a, b)); g.push([a, b]); }
+      }
+      return { g, frei };
+    }
+    const gefangen = [], ereignisse = [];
+    for (const [farbe, x, y] of z.zuege || []) {
+      if (!im(x, y) || feld.has(key(x, y)) || !["s", "w"].includes(farbe)) return null;
+      feld.set(key(x, y), farbe);
+      const weg = [];
+      for (const [a, b] of nachbarn(x, y)) {
+        if (feld.get(key(a, b)) && feld.get(key(a, b)) !== farbe && !gruppe(a, b).frei.size) for (const p of gruppe(a, b).g) { weg.push(p); }
+      }
+      for (const p of weg) feld.delete(key(...p));
+      if (!weg.length && !gruppe(x, y).frei.size) return null; // Selbstmord ist verboten
+      ereignisse.push({ farbe, x, y, weg });
+      if (farbe === "s") gefangen.push(...weg);
+    }
+    const zielW = z.freiheiten ? (z.weiss || [])[0] : null, retten = z.retten ? ereignisse[ereignisse.length - 1] : null;
+    if (z.freiheiten && !zielW) return null;
+    if (!z.freiheiten && !z.retten && !gefangen.length) return null;
+    if (z.retten && !(retten && retten.farbe === "s" && gruppe(retten.x, retten.y).frei.size >= 2)) return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "atari" });
+    svg.appendChild(tagGrund());
+    const c = Math.min(16, 128 / n), x0 = 20 + c / 2, y0 = (HOEHE - (n - 1) * c) / 2, P = (x, y) => [x0 + x * c, y0 + (n - 1 - y) * c]; // y von unten wie im Spiel
+    svg.appendChild(s("rect", { x: x0 - c * 0.7, y: y0 - c * 0.7, width: (n - 1) * c + c * 1.4, height: (n - 1) * c + c * 1.4, rx: 4, fill: "#e8c88c" }));
+    let d = "";
+    for (let i = 0; i < n; i++) d += `M${x0 + i * c},${y0} v${(n - 1) * c} M${x0},${y0 + i * c} h${(n - 1) * c} `;
+    svg.appendChild(s("path", { d, stroke: "#6b5235", "stroke-width": 0.9 }));
+    const steinBild = (x, y, f, attr = {}) => s("circle", { cx: P(x, y)[0], cy: P(x, y)[1], r: c * 0.44, fill: f === "s" ? "#23263a" : "#ffffff", stroke: f === "s" ? "#23263a" : "#6b6f8a", "stroke-width": 1, ...attr });
+    const steine = new Map();
+    for (const [x, y] of z.weiss || []) { const e = steinBild(x, y, "w"); steine.set(key(x, y), e); svg.appendChild(e); }
+    for (const [x, y] of z.schwarz || []) svg.appendChild(steinBild(x, y, "s"));
+    // Schale rechts für die Gefangenen
+    const sx = 262, sy = 104;
+    svg.append(s("ellipse", { cx: sx, cy: sy, rx: 40, ry: 16, fill: "#a8743f" }), s("ellipse", { cx: sx, cy: sy - 4, rx: 34, ry: 11, fill: "#7a4f26" }));
+    const je = T / Math.max(1, ereignisse.length + (z.falle ? 1 : 0));
+    let k = 0;
+    if (z.falle) {
+      const [x, y] = z.falle;
+      if (!im(x, y) || feld.has(key(x, y)) && !ereignisse.length) return null;
+      svg.appendChild(kurz(s("g", {}, steinBild(x, y, "s", { opacity: 0.4 }), kreuz(P(x, y)[0] + c * 0.6, P(x, y)[1] - c * 0.4, 11)), 0.15, 0.15 + je * 0.9, ruhig));
+      k++;
+    }
+    let inSchale = 0;
+    ereignisse.forEach(ev => {
+      const ab = 0.15 + k++ * je, e = steinBild(ev.x, ev.y, ev.farbe);
+      svg.appendChild(vonOben(e, ab, ruhig, 16, 0.25));
+      steine.set(key(ev.x, ev.y), e);
+      for (const p of ev.weg) {
+        const alt = steine.get(key(...p)), [px, py] = P(...p), ziel = [sx - 16 + (inSchale % 4) * 10, sy - 6 - Math.floor(inSchale / 4) * 5];
+        inSchale++;
+        // der gefangene Stein rollt in die Schale (bleibt auf dem Brett unsichtbar zurück)
+        if (alt) svg.appendChild(verschwinde(alt, ab + 0.3, ruhig, 0.1));
+        const roll = s("g", { "data-stueck": "gefangen" }, s("circle", { cx: 0, cy: 0, r: c * 0.4, fill: ev.farbe === "s" ? "#ffffff" : "#23263a", stroke: "#6b6f8a", "stroke-width": 1 }));
+        svg.appendChild(bewege(roll, `M${px},${py} Q${(px + ziel[0]) / 2},${Math.min(py, ziel[1]) - 30} ${ziel[0]},${ziel[1]}`, { x: ziel[0], y: ziel[1], winkel: 0 }, ruhig, { drehen: false, ab: ab + 0.3, dauer: 0.6 }));
+      }
+    });
+    svg.setAttribute("data-anzahl", gefangen.length);
+    if (zielW) {
+      const { frei } = gruppe(...zielW);
+      svg.setAttribute("data-wert", frei.size);
+      [...frei].forEach((p, i) => { const [a, b] = p.split(",").map(Number); svg.appendChild(erscheine(s("circle", { cx: P(a, b)[0], cy: P(a, b)[1], r: c * 0.22, fill: GUT }), 0.3 + i * 0.3, ruhig)); });
+      svg.appendChild(erscheine(text(sx, 50, frei.size, { gross: 26, farbe: GUT }), T, ruhig));
+    }
+    if (retten) {
+      const { frei } = gruppe(retten.x, retten.y);
+      svg.setAttribute("data-wert", frei.size);
+      [...frei].forEach((p, i) => { const [a, b] = p.split(",").map(Number); svg.appendChild(erscheine(s("circle", { cx: P(a, b)[0], cy: P(a, b)[1], r: c * 0.22, fill: GUT }), T * 0.6 + i * 0.15, ruhig)); });
+    }
+    svg.appendChild(text(sx, 140, "⚫ ⚪", { gross: 10 }));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(sx, 40, ruhig));
+    return svg;
+  }
+
+  // ----- König in der Falle (REISE · schach) -----
+  const FIGUR = { K: "♚︎", D: "♛︎", T: "♜︎", L: "♝︎", S: "♞︎", B: "♟︎" };
+  /**
+   * Matt-Rätsel wie im Spiel (8×8, helle und dunkle Felder des Spiels, Weiss am Zug): die Züge der Stufe werden gespielt;
+   * am Ende steht der schwarze König im Schach (rot umrandet wie --hinweis) und kann auf kein Feld ziehen, das nicht
+   * besetzt oder angegriffen ist — das rechnet das Bild nach (ohne Gegenzug-Schlagen, das die Stellungen des Spiels
+   * ausschliessen); er kippt um. Felder „e4“. Angabe: { weiss: { e1: "K", … }, schwarz: { … }, zuege: [["h1", "h8"] …] }.
+   */
+  function schach(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.9;
+    if (!z || !z.weiss || !z.schwarz || !Array.isArray(z.zuege) || !z.zuege.length || z.zuege.length > 3) return null;
+    const pos = f => /^[a-h][1-8]$/.test(f) ? [f.charCodeAt(0) - 97, Number(f[1]) - 1] : null;
+    const brett = new Map();
+    for (const [f, fig] of Object.entries(z.weiss)) { if (!pos(f) || !FIGUR[fig]) return null; brett.set(f, ["w", fig]); }
+    for (const [f, fig] of Object.entries(z.schwarz)) { if (!pos(f) || !FIGUR[fig] || brett.has(f)) return null; brett.set(f, ["s", fig]); }
+    const name = ([x, y]) => String.fromCharCode(97 + x) + (y + 1);
+    const frei = (a, b) => { const [x1, y1] = pos(a), [x2, y2] = pos(b), dx = Math.sign(x2 - x1), dy = Math.sign(y2 - y1); for (let x = x1 + dx, y = y1 + dy; x !== x2 || y !== y2; x += dx, y += dy) if (brett.has(name([x, y]))) return false; return true; };
+    /** Greift die Figur auf a das Feld b an (Gangart und freier Weg)? */
+    function greift(a, b) {
+      const [farbe, fig] = brett.get(a), [x1, y1] = pos(a), [x2, y2] = pos(b), dx = x2 - x1, dy = y2 - y1, ax = Math.abs(dx), ay = Math.abs(dy);
+      if (!ax && !ay) return false;
+      if (fig === "K") return ax <= 1 && ay <= 1;
+      if (fig === "S") return (ax === 1 && ay === 2) || (ax === 2 && ay === 1);
+      if (fig === "T") return (!ax || !ay) && frei(a, b);
+      if (fig === "L") return ax === ay && frei(a, b);
+      if (fig === "D") return (!ax || !ay || ax === ay) && frei(a, b);
+      if (fig === "B") return ax === 1 && dy === (farbe === "w" ? 1 : -1);
+      return false;
+    }
+    const angegriffen = (f, von) => [...brett].some(([a, [farbe]]) => farbe === von && a !== f && greift(a, f));
+    const ablauf = [];
+    for (const [a, b] of z.zuege) {
+      if (!brett.has(a) || !pos(b) || (brett.get(b) && brett.get(b)[0] === brett.get(a)[0])) return null;
+      const fig = brett.get(a), geschlagen = brett.get(b);
+      // Zug nach der Gangart (geschlagen werden darf, was dort steht)
+      if (!(greift(a, b) || (fig[1] === "B" && !geschlagen && pos(a)[0] === pos(b)[0] && pos(b)[1] - pos(a)[1] === (fig[0] === "w" ? 1 : -1)))) return null;
+      brett.delete(a); brett.set(b, fig);
+      ablauf.push({ a, b, fig, geschlagen });
+    }
+    // Matt: der schwarze König steht im Schach, und jedes Nachbarfeld ist besetzt (von Schwarz) oder angegriffen
+    const k = [...brett].find(([, [f, fig]]) => f === "s" && fig === "K")?.[0];
+    if (!k || !angegriffen(k, "w")) return null;
+    const [kx, ky] = pos(k);
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+      const x = kx + dx, y = ky + dy;
+      if ((!dx && !dy) || x < 0 || y < 0 || x > 7 || y > 7) continue;
+      const f = name([x, y]), da = brett.get(f);
+      if (da && da[0] === "s") continue;
+      const sicher = (() => { const alt = brett.get(f); brett.delete(k); brett.set(f, ["s", "K"]); const an = angegriffen(f, "w"); brett.delete(f); if (alt) brett.set(f, alt); brett.set(k, ["s", "K"]); return !an; })();
+      if (sicher) return null;
+    }
+    const svg = neuesBild("reise", stufe, { "data-bilder": "schach", "data-wert": k, "data-anzahl": 1 });
+    svg.appendChild(tagGrund());
+    const c = 16, x0 = 18, y0 = 11, P = f => { const [x, y] = pos(f); return [x0 + x * c + c / 2, y0 + (7 - y) * c + c / 2]; };
+    for (let x = 0; x < 8; x++) for (let y = 0; y < 8; y++) svg.appendChild(s("rect", { x: x0 + x * c, y: y0 + (7 - y) * c, width: c, height: c, fill: (x + y) % 2 ? "#f3e3c3" : "#c49a6c" }));
+    const figurBild = (f, [farbe, fig]) => s("text", { x: P(f)[0], y: P(f)[1] + 5.8, "font-size": 17, "text-anchor": "middle", "font-family": "\"Segoe UI Symbol\", \"DejaVu Sans\", serif",
+      fill: farbe === "w" ? "#ffffff" : "#2d3047", stroke: farbe === "w" ? "#2d3047" : "none", "stroke-width": 0.8 }, FIGUR[fig]);
+    // Ausgangsstellung zeichnen, dann die Züge
+    const start = new Map([...Object.entries(z.weiss).map(([f, fig]) => [f, ["w", fig]]), ...Object.entries(z.schwarz).map(([f, fig]) => [f, ["s", fig]])]);
+    const bilder = new Map();
+    for (const [f, v] of start) { const e = s("g", {}, figurBild(f, v)); bilder.set(f, e); svg.appendChild(e); }
+    const je = (T * 0.7) / ablauf.length;
+    ablauf.forEach((zg, i) => {
+      const ab = 0.25 + i * je, e = bilder.get(zg.a), [ax, ay] = P(zg.a), [bx, by] = P(zg.b);
+      if (zg.geschlagen) svg.appendChild(verschwinde(bilder.get(zg.b), ab + 0.35, ruhig, 0.1));
+      svg.appendChild(schiebe(e, bx - ax, by - ay, ab, ruhig, { dauer: 0.4 }));
+      bilder.delete(zg.a); bilder.set(zg.b, e);
+      svg.appendChild(erscheine(s("rect", { x: bx - c / 2, y: by - c / 2, width: c, height: c, fill: "none", stroke: zg.fig[0] === "w" ? GUT : "var(--deko-6)", "stroke-width": 2 }), ab + 0.4, ruhig));
+    });
+    // der König im Matt: rot umrandet, kippt um
+    const [kpx, kpy] = P(k), konig = bilder.get(k);
+    svg.appendChild(erscheine(s("rect", { x: kpx - c / 2, y: kpy - c / 2, width: c, height: c, fill: "none", stroke: HINWEIS, "stroke-width": 2.4 }), T * 0.8, ruhig));
+    if (ruhig) konig.setAttribute("transform", `rotate(70 ${kpx} ${kpy + 5})`);
+    else konig.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", from: `0 ${kpx} ${kpy + 5}`, to: `70 ${kpx} ${kpy + 5}`, begin: t(T * 0.85), dur: "0.4s", fill: "freeze" }));
+    svg.appendChild(s("g", { "data-stueck": "matt" }, erscheine(text(230, 82, "#", { gross: 40, farbe: GUT }), T, ruhig)));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(230, 70, ruhig));
+    return svg;
+  }
+
+  Object.assign(BILDER.auftritt, { hoerbild, wetterbericht, gespraech, bestellung, notennamen, rhythmus, klangwichtel });
+  Object.assign(BILDER.sammeln, { themenkarten, wortzwillinge, lautkoerbe, artikel, laute, dateien, nim, atari });
+  Object.assign(BILDER.bauen, { buchstaben, wortzug, bruecke, diktat, tonleiter, speicher });
+  Object.assign(BILDER.reise, { rallye, melodie, schach });
+  Object.assign(BILDER.zyklus, { uhren, kalenderfr, scheibe });
+  Object.assign(BILDER.karte, { roboter });
+
   const MUSTER = {
     /** REISE (Konzept 5): je Stufe ein Ziel weiter. */
     reise(feier, opt) {

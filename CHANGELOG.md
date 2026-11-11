@@ -1859,3 +1859,18 @@
 - Session-Abschluss LERN_Session30: Report docs/eulenpfad/report/LERN_Session30_2026-11-11.md (Bemerkung 36, Blöcke B
   und C, `ankunft`, 140 von 169 Spielen mit Animation, Stolperfallen mit Prüfer-Kandidat „Schmuck über Inhalt“, Plan
   Block D), Handover (Stand nach LERN_Session30, Haltepunkt aufgelöst).
+
+## 2026-11-11 — LERN_Session31
+- **Abschluss-Animationen Block D** (Englisch, Französisch, Musik, Medien und Informatik; 29 Spiele): `feier.js` mit 29
+  Bildern nach den Stufen der Spiele, gesammelt aus deren Code (die Entwürfe im Konzept passten meist nicht; Stein-Duell
+  ist Nim, König in der Falle Matt-Rätsel, Geheimschrift ohne Schlüssel 26). Gemeinsame Bausteine `korbBild`, `hoerbild`,
+  `gespraech`; Musik mit Notenzeile wie `noten.js` und Tönen über `klang`. Jedes Bild prüft, was es zeigt: Artikel nach
+  Geschlecht und Vokal, Laute nach der Liste, Takte gehen auf, Halbtöne und Leitern nachgerechnet, Roboterweg, Nim mit
+  richtigem Spiel, Atari-Fang nach den Regeln, Matt mit Fluchtfeldern, Speicher-Rechnungen mit Faktor 1000. Katalog
+  `einstellungen` `feier` jetzt in allen 169 Spielen; `feier.js` nach `spiel.js` in den 29 Seiten. Alle Endbilder und
+  Abläufe (1.0–1.2 s) im Browser angesehen und nachgebessert. Doku rahmen.md 24 (Tabelle Block D), Konzept (Status,
+  Abweichungen Block D).
+- **Vorschau der Abschluss-Animationen** (`tools/feier_vorschau.html`, Wunsch Patrik): „✓ Animation geprüft“ je Spiel in
+  den Prüfstand (Art `feier`, neu im Entwickler-Server neben `spiele` und `listen`), „Geprüfte ausblenden“ in der
+  Auswahl, „📝 Anmerkung“ je Stufe als Bemerkung (`inhalt: "feier"`, mit Sternen, Breite und Zeitpunkt), die offenen
+  unter der Stufe. Schlüssel und Server-Adresse vom Eulenpfad desselben Browsers. Doku rahmen.md 24 (Vorschau).

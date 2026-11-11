@@ -27,6 +27,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -228,6 +229,8 @@ function tippsFuer(a) {
 }
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "dateien", ziele: { s1: { dinge: ["✉️", "📷", "🎵"] }, s2: { endungen: ["docx", "jpg", "mp3", "mp4"] }, s3: { endungen: ["pdf", "gif", "wav", "mov", "txt"] }, s4: { programme: ["docx", "xlsx", "zip", "html"] }, s5: { groessen: ["txt", "jpg", "mp4-film"] }, s6: { endungen: [["jpg", "🎵"], "mp3", "pdf"] } } },
   id: "datei-typen",
   hilfe: "Schau auf die Datei, vor allem auf die Endung nach dem Punkt. Dann legst du sie in den passenden Korb oder tippst die passende Antwort an.",
   einleitung: "Jede Datei hat einen Namen und eine Endung nach dem Punkt: ferien.jpg, lied.mp3. Die Endung verrät, ob Text, ein Bild, Ton oder ein Video darin steckt!",

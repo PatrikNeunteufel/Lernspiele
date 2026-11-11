@@ -25,6 +25,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -138,6 +139,8 @@ function tippsFuer(a) {
 }
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "auftritt", bilder: "rhythmus", ziele: { s1: { takte: [{ art: 4, noten: [4] }, { art: 4, noten: [2, 2] }, { art: 4, noten: [1, 1, 1, 1] }] }, s2: { takte: [{ art: 4, noten: [2, 1, 0.5, 0.5] }] }, s3: { takte: [{ art: 4, noten: [1, 0.5, 0.5, 2] }], luecke: [0, 3] }, s4: { takte: [{ art: 3, noten: [1, 1, 1] }, { art: 3, noten: [2, 0.5, 0.5] }], luecke: [1, 0] }, s5: { takte: [{ art: 2, noten: [1, 1] }, { art: 3, noten: [2, 1] }, { art: 4, noten: [1, 1, 2] }] }, s6: { takte: [{ art: 4, noten: [3, 1] }, { art: 4, noten: [1.5, 0.5, 0.25, 0.25, 0.25, 0.25, 1] }], luecke: [1, 0] } } },
   id: "rhythmus-leser",
   einleitung: "Ganze, Halbe, Viertel, Achtel — jede Note dauert verschieden lang. Kannst du Rhythmen lesen?",
   hilfe: "Schau die Noten an und tippe die passende Antwort an. Mit 🔊 hörst du, wie lange die Noten klingen.",

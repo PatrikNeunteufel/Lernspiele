@@ -49,6 +49,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -348,6 +349,8 @@ function blase(z, d, art = "") {
 }
 
 const SPIEL = {
+  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "auftritt", bilder: "gespraech", ziele: { s1: { a: "👩", b: "🧒", zuege: 2, antwort: "👋" }, s2: { a: "👨", b: "👧", zuege: 2 }, s3: { a: "👩", b: "🧒", zuege: 3, ort: "🍎" }, s4: { a: "👦", b: "👧", zuege: 3, fremd: 1, ort: "🏫" }, s5: { a: "👧", b: "👨", zuege: 4, luecke: 2, ort: "📅" }, s6: { a: "👦", b: "👩", zuege: 5, ordnen: true, hoeflich: true, ort: "🛒" } } },
   id: ID,
   einleitung: "Hello! Hör zu, was jemand auf Englisch sagt, und tippe die Antwort an, die passt. Mit 🔊 hörst du es nochmal.",
   hilfe: stufe => ({

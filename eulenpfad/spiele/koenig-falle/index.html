@@ -44,6 +44,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -225,6 +226,8 @@ function brettEl(z) {
 // ---------- Spiel ----------
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "schach", ziele: { s1: { weiss: { b6: "K", h1: "T" }, schwarz: { b8: "K" }, zuege: [["h1", "h8"]] }, s2: { weiss: { b6: "K", h1: "D" }, schwarz: { a8: "K" }, zuege: [["h1", "h8"]] }, s3: { weiss: { e1: "K", a7: "T", h1: "T" }, schwarz: { e8: "K" }, zuege: [["h1", "h8"]] }, s4: { weiss: { g6: "K", e7: "S", c7: "L" }, schwarz: { h8: "K" }, zuege: [["c7", "e5"]] }, s5: { weiss: { a1: "K", g5: "S" }, schwarz: { h8: "K", g8: "T", g7: "B", h7: "B" }, zuege: [["g5", "f7"]] }, s6: { weiss: { g1: "K", c4: "D", h6: "S" }, schwarz: { h8: "K", d8: "T", g7: "B", h7: "B" }, zuege: [["c4", "g8"], ["d8", "g8"], ["h6", "f7"]] } } },
   id: ID,
   einleitung: "Schach-Rätsel! Du spielst Weiss und bist dran. Finde den Zug, nach dem der schwarze König nicht mehr entkommt: Matt!",
   hilfe: stufe => (stufe === "s6"

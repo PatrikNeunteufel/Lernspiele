@@ -1,6 +1,6 @@
 # Konzept: Abschluss-Animationen im Eulenpfad
 
-Stand: 11.11.2026 (LERN_Session30) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); Piloten P1–P8 und Ruhezeiten gebaut und abgenommen; Ausrollen nach AR1 a in Arbeit: M1 abgenommen, M2 bis M5, A, B und C gebaut (140 von 169 Spielen), Abnahme offen; D offen.**
+Stand: 11.11.2026 (LERN_Session31) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); Piloten P1–P8 und Ruhezeiten gebaut und abgenommen; Ausrollen nach AR1 a gebaut für alle 169 Spiele: M1 abgenommen, M2 bis M5, A, B, C und D zur Abnahme in tools/feier_vorschau.html (geprüft und Anmerkungen dort).**
 Entscheide und Pilotliste in Abschnitt 7.
 
 ## 1. Auslöser
@@ -216,7 +216,7 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 | A | Mathe M6 (Daten, Kombinatorik, Brüche) und Deutsch Teil 1 (Laute, Lesen, Schreiben, Rechtschreibung, Erzählen) | 23 | in Arbeit seit 11.11.2026 (LERN_Session29, A): gebaut, Abnahme offen |
 | B | Deutsch Teil 2 (Sätze, Wortarten, Gedichte, Zuhören) und NMG Teil 1 (Zeit, Geschichten, Gemeinschaft, Verkehr) | 25 | in Arbeit seit 11.11.2026 (LERN_Session30, B): gebaut, Abnahme offen |
 | C | NMG Rest (Forschen, Körper, Orientierung, Tiere, Wetter, Wirtschaft) | 24 | in Arbeit seit 11.11.2026 (LERN_Session30, C): gebaut, Abnahme offen |
-| D | Englisch, Französisch, Musik, Medien und Informatik | 29 | offen |
+| D | Englisch, Französisch, Musik, Medien und Informatik | 29 | in Arbeit seit 11.11.2026 (LERN_Session31, D): gebaut, Abnahme offen |
 
 **Block M1 — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme):
 
@@ -532,6 +532,73 @@ Sternschnuppe am Nachthimmel).
   Bedarf und Wunsch, Packungen vergleichen.
 - **Kakao-Weg:** die acht Schritte des Wegs der Schoggi auf einer Karte (Westafrika, Meer, Schweiz), s3 mit fehlendem
   Schritt und wer ihn macht, s4 Herkunft, s5 der Kreislauf Haushalte und Unternehmen.
+
+**Block D — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme).
+Die Entwürfe für Englisch, Französisch, Musik, Medien und Informatik passten meist nicht zu den Stufen (gesammelt aus dem
+Code der Spiele, LERN_Session31); die Bilder zeigen, was die Stufe übt. Schmuck 2★ Glanz, 3★ Funken.
+
+- **English Word-Match:** statt Bildkarten-Paaren je Thema der Stufe eine Bildkarte mit Wortkärtchen (s1 drei Themen bis
+  s4 alle acht mit einer Sprechblase für die Wendungen), s5 und s6 Buchstabieren (horse mit Bild; carrot ohne Bild mit
+  zwei überzähligen Buchstaben).
+- **Wort-Zwillinge:** Zwillinge sind Wortpaare Englisch–Deutsch, keine Bildpaare: gleich lange Karten bei „gleich“ (hand),
+  fast gleich lange bei „ähnlich“ (house), s5 falsche Freunde (die deutsche Falle fällt weg, ⚠️), s6 gemischt.
+- **Sentence-Builder:** der Zug wie vorgeschlagen, aber mit der Kartenzahl der Stufen (s1 drei, s2 fünf), dazu die
+  falsche Karte (has statt have, s4, s6), die herunterfällt, und Frage und Verneinung ab s5 (nicht erst s6).
+- **Listen & Tap:** statt Tieren, die dazukommen, das Antippen der Aufgabe: s1 und s2 Wort → Bild unter vier, s3 Farbe
+  und Form (red heart), s4 und s5 Tisch und Kiste wie im Spiel (Katze unter dem Tisch; Hund in der Kiste, Frosch auf dem
+  Tisch), s6 sechs Bilder.
+- **Spelling-Bee:** Wabe und Biene wie vorgeschlagen, aber eine Wabe je Buchstabe: s1 cat mit Bild und Wort, s2 dog,
+  s3 banana, s4 teacher nur mit dem deutschen Wort und einem überzähligen Buchstaben, s5 strawberry nur gehört (zwei
+  zu viel), s6 brown mit p, d, v zum Verwechseln.
+- **Sound-Sorter:** s1 und s6 hören und antippen (s6: das Wort, das anders klingt), s2–s4 Körbe kurz (Punkt) und lang
+  (Strich) — s4 ohne Ton, mit stummem e —, s5 drei Körbe „wie in tree, bike, cake“ statt zweier Röhren.
+- **Weather-Report:** das Radio sendet, was die Stufe heraushören lässt: ein Wetter, eine Meldung mit Grad, zwei Tage,
+  ein Sportresultat (Pokal), der Weg auf dem Plan (zweite Strasse links), s6 Wetter und Sport (Gleichstand 🤝) — statt
+  eines Wetters je Stufe mit Regenbogen.
+- **Hello-Dialog:** zwei Sprecher wie im Spiel statt mehr Figuren; je Stufe mehr Züge: s1 eine Zeile und der Gruss als
+  Bild, s3 Gespräch mit Ort, s4 eine Zeile passt nicht, s5 Lücke, s6 ordnen und höflich antworten.
+- **Mots-Match:** wie Word-Match (s1 drei Themen mit Ton, s3 ohne Ton), s4 und s6 nur hören, s5 der richtige Artikel
+  (le chat, nicht la chat) — statt Paaren am Marktstand.
+- **Wörter-Brücke:** die Brücke wie vorgeschlagen; Wörter gehen hinüber (s1 mit Bild, s3 ohne), s4 ein Satz, s5 falsche
+  Freunde bleiben am ⚠️ stehen und fallen ins Wasser, s6 gemischt.
+- **Le ou la ?:** Körbe in den Farben des Spiels statt Geschenke: s1 le/la, s2 dazu l’, s3 un/une, s4 Mehrzahl mit les
+  (Bild dreimal), s5 Mehrzahl bilden (chats ‑s, cadeaux ‑x, chevaux ‑aux), s6 ohne Bild.
+- **Son-Lauscher:** statt Klangtieren die Laute der Stufen: s1 gleicher Schluss (gâteau, bateau), s2 ou | au, s3 ou, on,
+  ch, s4 Nasale (lesen), s5 die Lücke le caf_ → é, s6 die Lautgruppe eau getippt.
+- **Nombres-Rallye:** die Zahlenräume des Spiels (s3 bis 69, s4 70 bis 100 mit Westschweizer Form, s5 Preis und
+  Telefonnummer, s6 gemischt mit Ziel) statt 10, 20, 40, 60, 80, 100.
+- **Quelle heure ?:** s1 volle Stunde gehört, s2 volle Stunden gelesen, s3 et quart, et demie, moins le quart, s4
+  Fünferschritte, s5 24-Stunden-Form mit midi ☀️ und minuit 🌙, s6 nur hören — statt halber und Viertelstunden der Reihe
+  nach.
+- **Calendrier:** s1 die Woche, s2 heute, morgen, gestern, s3 die Monate mit Jahreszeit, s4 Daten, s5 Monatsblatt mit
+  Geburtstag, s6 vom 30. April zum 1. Mai — statt eines Kalenderrads „nur Zahlen“.
+- **Au café:** Gespräche wie Hello-Dialog (s1 Gruss, s2 Ça va ? 😀, s3 ordnen, s6 lang), s4 und s5 die Bestellung am Tisch
+  mit Preis und tu/vous — statt Gästen, die dazukommen.
+- **Noten-Namen:** die Tonräume des Spiels (s1 c bis g, s2 bis c″, s3 bis g″, s4 mit Hilfslinien, s5 Vorzeichen, s6
+  gemischt) mit den Namen darunter statt eines Eulenchors.
+- **Rhythmus-Leser:** Takte der Stufen (s1 Ganze, Halbe, Viertel, s2 mit Achteln, s3 Lücke im 4/4, s4 3/4, s5 2/4 bis
+  4/4, s6 punktiert und Sechzehntel) statt Musikern, die dazukommen.
+- **Rhythmus-Diktat:** Notenkarten des Spiels der Stufen (s2 Halbe und Pause, s3 Sechzehntel, s5 punktiert, s6 zwei Takte).
+- **Hoch-Tief-Ohr:** s1 grosser Sprung (der höhere leuchtet), s2 gleich hoch, s3 und s4 Richtung, s5 Melodie, s6 Halbton
+  und Ganzton (e–f, f–g) — nach den Stufen, nicht eine Bewegung je Stufe.
+- **Klang-Wichtel:** s1 laut und leise, s2 kurz und lang, s3 schnell und langsam, s4 Vergleich, s5 Klangschrift, s6 zwei
+  Merkmale (das Konzept war um eine Stufe verschoben).
+- **Tonleiter-Treppe:** Treppen mit Ganz- und Halbtonstufen: s1 C-Dur, s2 Halbtöne, s3 Klaviatur, s4 G-Dur, s5 a-Moll,
+  s6 B-Dur — statt Ton um Ton zu C-Dur.
+- **Roboter-Pfad:** Raster 4 × 4 bis 6 × 6 des Spiels, Ziel ⭐ statt Ladestation; s4 lange Wege, s5 Wiederholung, s6 die
+  Bedingung „wenn vorne frei“ (Weg gerechnet).
+- **Speicher-Leiter:** s1 Dinge nach Grösse ohne Einheiten, s2 8 bit = 1 Byte, s3 die Leiter GB, MB, kB, s4 umrechnen, s5
+  Speicherkarte, s6 Ladezeit — Faktor 1000 wie im Spiel.
+- **Geheimschrift-Knacker:** Schlüssel der Stufen (2, 3, 4, 10 mit Überlauf, s5 und s6 knacken) — **nicht 26**: Schlüssel
+  26 liesse jeden Buchstaben gleich, das Spiel nutzt 1–25.
+- **Datei-Typen:** Körbe des Spiels (s1 schon drei, s2 vier), s4 Programme, s5 Grössen, s6 der Name täuscht (🎵 mit .jpg
+  ist ein Bild) — statt Ordnern 1 bis 4.
+- **Stein-Duell:** Nim wie im Spiel statt eines Steinmännchens: eine Reihe (s1–s4, in s4 beginnt die Eule), zwei und drei
+  Reihen; das Kind spielt richtig und nimmt den letzten Stein.
+- **Steine fangen:** Atari-Go wie im Spiel: s1 Freiheiten zählen, s2 einen Stein fangen, s3 eine Gruppe, s4 retten, s5 Fang
+  in zwei Zügen, s6 dasselbe auf 9 × 9 mit der Falle — statt Schalen mit 2 bis 10 Steinen.
+- **König in der Falle:** Matt-Bilder der Stufen statt einer Springer-Tour: Turm, Dame, zwei Türme, Läufer mit Springer,
+  ersticktes Matt, s6 Matt in zwei mit Damenopfer.
 
 ## 8. Ideen je Spiel
 
