@@ -1783,3 +1783,7 @@
 - Tests: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
   139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe: die dreizehn
   Spiele von M5 „Keine Fehler.“ — letzter voller Lauf weiter auf `6055527`.
+- Stellen-Detektiv (stellen-detektiv): die Felder unter den Ziffern sind jetzt auch im bewegten Bild zart wie in der
+  Stellentafel des Spiels (Entscheid Patrik, Variante a, nach Vergleich im Browser). Vorher wurden sie bewegt voll
+  farbig und dunkle Ziffern standen auf kräftigem Rot und Blau, im ruhigen Bild zart — `erscheine` bewegte die opacity
+  0.18 auf 1; jetzt fill-opacity. Tests: Skripte „Keine Fehler.“, Eulenpfad stellen-detektiv „Keine Fehler.“

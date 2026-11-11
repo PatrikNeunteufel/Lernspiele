@@ -219,7 +219,8 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 **Block M1 — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme):
 
 - **Stellen-Detektiv:** die Lupe wandert über eine Zahl der Stufe (s1 bis H wie das Spiel, nicht E, Z, H allein);
-  2★ Glanz an der Lupe statt Blinken, 3★ Funken ohne Detektivhut.
+  2★ Glanz an der Lupe statt Blinken, 3★ Funken ohne Detektivhut. Die Felder unter den Ziffern zart wie im Spiel,
+  bewegt wie ruhig (Entscheid Patrik LERN_Session29 nach Vergleich; abgenommen war die bewegt voll farbige Fassung).
 - **Zahlen-Baukasten:** die Bausteine der Stufe wie im Spiel (s1 4 H + 2 E mit leerer Stelle, s6 14 H + 3 T), mit der
   Rechnung darunter, statt eines Turms Stelle um Stelle; 2★ Fähnchen statt Kran.
 - **Tabellen-Post:** Zahlen der Stufen mit Nullen wie im Spiel; s6 bündelt 14 H zu 1 T und 4 H („mehr als 9 in einem

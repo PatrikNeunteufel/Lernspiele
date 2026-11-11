@@ -600,7 +600,9 @@ var LS_FEIER = (function () {
         svg.appendChild(tf.g);
         const je = (DAUER * 0.9) / keys.length, cy = tf.feldY + tf.feldH / 2;
         [...keys].reverse().forEach((k, i) => {
-          svg.appendChild(erscheine(s("rect", { x: tf.x(k) + 2, y: tf.feldY + 1, width: tf.sb - 4, height: tf.feldH - 2, rx: 3, style: `fill:${stellenFarbe(k)}`, opacity: 0.18 }), i * je, ruhig, 0.25));
+          // zart wie die Stellentafel im Spiel, bewegt wie ruhig: fill-opacity, weil erscheine opacity auf 1 bewegt
+          // (Entscheid Patrik LERN_Session29, a: vorher bewegt voll farbig)
+          svg.appendChild(erscheine(s("rect", { x: tf.x(k) + 2, y: tf.feldY + 1, width: tf.sb - 4, height: tf.feldH - 2, rx: 3, style: `fill:${stellenFarbe(k)}`, "fill-opacity": 0.18 }), i * je, ruhig, 0.25));
           svg.appendChild(erscheine(zifferText(tf.mitte(k), cy + 6, d[k], 18), i * je, ruhig, 0.25));
         });
         svg.appendChild(erscheine(zeileUnten(ganzText(n), 120), DAUER, ruhig));
