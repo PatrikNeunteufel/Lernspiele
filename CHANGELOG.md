@@ -1654,3 +1654,15 @@
   docs/eulenpfad/rueckmeldung_gestaltung.md (Eingang, nichts entschieden) — Eindruck „steril“ und „nach KI“, die drei
   Hebel Bildkarten, Kinder-Bühne und Lehrer-Cockpit, Schrift und Knöpfe, und was im Konzept zu klären ist; Handover und
   Report verweisen darauf.
+
+## 2026-11-11 — LERN_Session28
+- Bemerkungen 34 und 35 (Meldungen eines Kindes, 4. Klasse): Finger-Zähler Stufe 6 zeigte beim Blitz ein leeres Feld.
+  Ursache: die Breite der Hände `min(560px, (100vh - 480px) * 1.88)` wird unter 480 px Bildhöhe null oder negativ —
+  Handy quer oder Zufallsmix (iframe ab 460 px). Neu mit Untergrenze `max(240px, …)` für zwei Hände, `max(120px, …)` für
+  eine; auf grösseren Bildschirmen unverändert. Im Browser bei 800 × 450 nachgestellt (vorher 0 px, jetzt 240 px, ganz
+  im Bild) und während des Blitzes angesehen.
+- Bemerkung 33: Diagramm-Wahl, Hilfslinien kaum zu sehen (Randfarbe, 1 px, verkleinert dünner). Jetzt Linien mit Zahl
+  kräftig, Zwischenlinien heller, gleich dick auch auf dem Handy (`vector-effect: non-scaling-stroke`); Säulen- und
+  Liniendiagramm. Angesehen in 1024 × 768 und 375 px.
+- Antworten an das Kind in den drei Bemerkungen, `eulenpfad/meldungen-stand.json` mit `tools/meldungen_stand.py`
+  erzeugt.

@@ -6,10 +6,12 @@
 <title>Finger-Zähler</title>
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  /* Hände nach der Bildhöhe (BH3 a): eine Hand 160 : 170, zwei Hände 320 : 170 */
-  .fz-haende { display: block; width: 100%; max-width: min(340px, (100vh - 480px) * .94); margin: 0 auto 12px; }
-  .fz-haende.zwei { max-width: min(560px, (100vh - 480px) * 1.88); }
-  @media (max-width: 560px) { .fz-haende { max-width: min(340px, (100vh - 495px) * .94); } }
+  /* Hände nach der Bildhöhe (BH3 a): eine Hand 160 : 170, zwei Hände 320 : 170. Untergrenze 120 und 240 px: ohne sie
+     wird die Breite unter 480 px Bildhöhe (Handy quer, Zufallsmix ab 460 px) null, und Stufe 6 blitzt ein leeres Feld
+     (Bemerkungen 34, 35, LERN_Session28). Lieber etwas scrollen als nichts sehen. */
+  .fz-haende { display: block; width: 100%; max-width: max(120px, min(340px, (100vh - 480px) * .94)); margin: 0 auto 12px; }
+  .fz-haende.zwei { max-width: max(240px, min(560px, (100vh - 480px) * 1.88)); }
+  @media (max-width: 560px) { .fz-haende { max-width: max(120px, min(340px, (100vh - 495px) * .94)); } }
   @media (min-width: 900px) and (orientation: landscape) {
     .fz-paar { display: flex; gap: 20px; align-items: center; }
     .fz-paar > * { flex: 1 1 0; min-width: 0; }
@@ -18,8 +20,8 @@
     .fz-paar:has(> .fz-ziel) > .fz-feld { flex: 0 1 340px; }
   }
   @media (min-width: 561px) and (orientation: portrait) {
-    .fz-haende { max-width: min(340px, (100vh - 700px) * .94); }
-    .fz-haende.zwei { max-width: min(560px, (100vh - 765px) * 1.88); }
+    .fz-haende { max-width: max(120px, min(340px, (100vh - 700px) * .94)); }
+    .fz-haende.zwei { max-width: max(240px, min(560px, (100vh - 765px) * 1.88)); }
   }
   .fz-feld { position: relative; }
   .fz-feld.verdeckt .fz-haende { visibility: hidden; }

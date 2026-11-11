@@ -19,7 +19,10 @@
   .dw-diagramm .bild { font-size: 16px; }
   .dw-diagramm .einheit { font-size: 11px; fill: var(--text-leise); }
   .dw-diagramm .gruppe { font-size: 14px; }
-  .dw-diagramm .gitter { stroke: var(--rand); stroke-width: 1; }
+  /* Waagrechte Hilfslinien zum Ablesen (Bemerkung 33, LERN_Session28: in var(--rand) kaum zu sehen). Linien mit Zahl
+     kräftiger, Zwischenlinien heller; gleich dick, auch wenn das Diagramm auf dem Handy verkleinert ist. */
+  .dw-diagramm .gitter { stroke: #c9cde0; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+  .dw-diagramm .gitter.mit-zahl { stroke: #959ab6; }
   .dw-diagramm .achse { stroke: var(--text); stroke-width: 2; }
   .dw-diagramm .saeule { fill: var(--deko-6); }
   .dw-diagramm .saeule.b { fill: var(--deko-3); }
@@ -617,8 +620,9 @@ function saeulenSvg(opt) {
   const Y = v => O + ph - ((v - basis) / (opt.achse - basis)) * ph;
   let s = "";
   for (let v = basis; v <= opt.achse; v += raster) {
-    s += `<line class="gitter" x1="${L}" x2="${B - R}" y1="${Y(v)}" y2="${Y(v)}"/>`;
-    if (opt.zahlen !== false && (v - basis) % label === 0) s += `<text class="zahl" x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
+    const mitZahl = (v - basis) % label === 0;
+    s += `<line class="gitter${mitZahl ? " mit-zahl" : ""}" x1="${L}" x2="${B - R}" y1="${Y(v)}" y2="${Y(v)}"/>`;
+    if (opt.zahlen !== false && mitZahl) s += `<text class="zahl" x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
   }
   opt.kategorien.forEach((k, i) => {
     const x0 = L + i * spalte;
@@ -643,8 +647,9 @@ function linieSvg(opt) {
   const Y = v => O + ph - (v / opt.achse) * ph;
   let s = "";
   for (let v = 0; v <= opt.achse; v += raster) {
-    s += `<line class="gitter" x1="${L}" x2="${B - R}" y1="${Y(v)}" y2="${Y(v)}"/>`;
-    if (v % label === 0) s += `<text class="zahl" x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
+    const mitZahl = v % label === 0;
+    s += `<line class="gitter${mitZahl ? " mit-zahl" : ""}" x1="${L}" x2="${B - R}" y1="${Y(v)}" y2="${Y(v)}"/>`;
+    if (mitZahl) s += `<text class="zahl" x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
   }
   s += `<line class="achse" x1="${L}" x2="${B - R}" y1="${Y(0)}" y2="${Y(0)}"/><line class="achse" x1="${L}" x2="${L}" y1="${Y(0)}" y2="${O - 4}"/>`;
   s += `<polyline class="linie" points="${opt.werte.map((w, i) => `${X(i)},${Y(w)}`).join(" ")}"/>`;
