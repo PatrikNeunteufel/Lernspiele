@@ -2054,6 +2054,13 @@ const LS = (() => {
    * Gibt ein <td> zurück; title nennt den Rohtext, damit sich Bild und Name abgleichen lassen.
    */
   function zelleMitBildern(text, klasse = "") {
+    // Farbe als Inhalt (etwa die Glacesorten): Feld in der Farbe vor dem Code (Bemerkung 36, LERN_Session30)
+    const code = String(text ?? "").trim();
+    if (/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(code)) {
+      const feld = el("span", { class: "pruef-farbfeld", "aria-hidden": "true" });
+      feld.style.background = code;
+      return el("td", { class: `${klasse} pruef-farbe`.trim() }, feld, code);
+    }
     const teile = String(text ?? "").split(/(svg:[a-z0-9-]+)/);
     if (teile.length === 1) return el("td", { class: klasse, text: teile[0] });
     // Nur ein Bild: gross (Bildspalte); Bilder im Text: so gross wie die Emojis daneben
@@ -3375,7 +3382,7 @@ const LS = (() => {
       "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
       "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "blase-text", "lesetext", "zw-notiz", "weiter-leiste", "weiter-balken", "weiter-knopf",
       "notizblock", "nb-knopf", "nb-feld", "nb-kopf", "nb-inhalt", "nb-platz"],
-    bausteine: ["wahl", "wahl-knopf", "bild", "gezeichnet", "pruef-bild", "pruef-text-bild", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
+    bausteine: ["wahl", "wahl-knopf", "bild", "gezeichnet", "pruef-bild", "pruef-text-bild", "pruef-farbe", "pruef-farbfeld", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
 

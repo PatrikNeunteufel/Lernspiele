@@ -69,7 +69,7 @@ zum Beispiel grössere Wahlknöpfe. Die Liste steht in `LS.RAHMEN_KLASSEN.bauste
 | Baustein | Klassen |
 |---|---|
 | `LS.auswahl`, `LS.reihenfolge` | `wahl`, `wahl-knopf`, `bild`, `ablage`, `pfeil` |
-| `LS.bild` (Bildersammlung, Abschnitt 22) | `gezeichnet`, `pruef-bild`, `pruef-text-bild` |
+| `LS.bild` (Bildersammlung, Abschnitt 22) | `gezeichnet`, `pruef-bild`, `pruef-text-bild`; `pruef-farbe`, `pruef-farbfeld` (Farbcode `#rgb`/`#rrggbb` in einer Liste: Feld in der Farbe vor dem Code) |
 | `LS.koerbe` | `korb-karte`, `korb-reihe`, `korb-knopf` |
 | `LS.tastatur` | `tastatur`, `anzeige`, `ok`, `loeschen`, `zeichen` (Dezimalzeichen) |
 | Noten (`noten.js`) | `hoer-zeile`, `hoer-knopf`, `notenblatt`, `noten-zeile` |

@@ -463,6 +463,8 @@ body:has(.entwickler-leiste) { padding-bottom: 90px; }
 .listen-dialog td { padding: 6px 8px; background: #f8f9fe; }
 td.pruef-bild .bild.gezeichnet { font-size: 30px; }
 td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-block; }
+/* Farbe als Inhalt einer Liste (Bemerkung 36): Feld in der Farbe vor dem Code, mit Rand für helle Farben wie Weiss */
+.pruef-farbfeld { display: inline-block; width: 1.4em; height: 1.4em; margin-right: 6px; vertical-align: -0.35em; border-radius: 50%; border: 1px solid var(--text-leise); }
 .listen-dialog .knopf.klein { min-height: 34px; padding: 2px 10px; font-size: 15px; }
 .listen-dialog textarea { font: inherit; width: 100%; border-radius: 10px; border: 2px solid var(--rand); padding: 8px; }
 /* Prüfansicht je Eintrag (listenpruefung.js, LERN_Session11): Linien zwischen den Zeilen, Spalten so breit wie ihr
