@@ -166,8 +166,9 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
 .chip.klein { font-size: 15px; min-height: 38px; padding: 6px 12px; }
 .chip .tipp { font-size: 12px; font-weight: 800; margin-left: 4px; opacity: .8; }
 .werkzeuge { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
-/* Fach-Reiter (FB1 a, LERN_Session32): eine Zeile bunter Knöpfe über den Spielen, auf dem Handy wischbar */
-.fach-reiter-zeile { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; margin: 0 0 6px; scrollbar-width: thin; }
+/* Fach-Reiter (FB1 a, LERN_Session32): bunte Knöpfe über den Spielen; sie brechen um statt seitlich zu scrollen
+   (Hinweis Patrik: Scrollen ist nicht schön) */
+.fach-reiter-zeile { display: flex; flex-wrap: wrap; gap: 8px; padding: 2px 2px 8px; margin: 0 0 6px; }
 .fach-reiter { flex: none; display: inline-flex; align-items: center; gap: 6px; border: none; border-radius: 16px; padding: 8px 14px; min-height: 48px;
   font: inherit; font-size: 17px; font-weight: 900; color: var(--text); background: #fff; cursor: pointer;
   box-shadow: 0 4px 0 color-mix(in srgb, var(--f) 45%, #cdd2ea); border-top: 4px solid var(--f); transition: transform .08s, box-shadow .08s; }
@@ -325,11 +326,6 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .stufen-text .symbol { width: 18px; height: 18px; }
 .karten-schalter { border: none; background: none; cursor: pointer; line-height: 0; padding: 5px; border-radius: 10px; }
 .karten-schalter:focus-visible { outline: 3px solid var(--knopf); }
-.symbol { width: 30px; height: 30px; fill: none; stroke: #a7acc2; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
-.symbol.an { fill: url(#gold-verlauf); stroke: #c98400; filter: drop-shadow(0 1px 1px rgba(150, 95, 0, .35)); }
-.symbol.endlos { stroke-width: 2.6; }
-.symbol.endlos.an { fill: none; stroke: url(#gold-verlauf); stroke-width: 3.4; }
-.symbol.uhr.an .zeiger { stroke: #7a4f00; }
 /* Weiterspielen (ZG1 a): eine Zeile zuoberst im Tab Spiele */
 .weiter-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 16px; }
 .weiter-titel { font-size: 20px; margin-right: 4px; }
@@ -338,8 +334,6 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .weiter-bild { font-size: 30px; line-height: 1; }
 .weiter-stufe { display: inline-flex; align-items: center; gap: 2px; background: #f6f7fd; border-radius: 999px; padding: 2px 8px; font-size: 15px; }
 .weiter-stufe .symbol { width: 18px; height: 18px; }
-.symbol.mischen { stroke-width: 2.4; }
-.symbol.mischen.an { fill: none; stroke: #e39a00; stroke-width: 2.8; }
 .karten-schalter.fest { position: relative; cursor: default; display: inline-block; }
 .karten-schalter.fest .schloss { position: absolute; right: 0; bottom: 0; font-size: 13px; line-height: 1; }
 .spielkarte.endlos-an { box-shadow: var(--schatten), 0 0 0 3px var(--knopf), var(--glow, 0 0 #0000); }

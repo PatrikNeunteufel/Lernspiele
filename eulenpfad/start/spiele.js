@@ -8,31 +8,14 @@ const UE = KERN.uebersicht;
 
 // Symbole der Karten-Schalter: aus = grauer Umriss, an = gold mit Verlauf wie der Favoriten-Stern.
 // Der Verlauf steht einmal im Dokument (#gold-verlauf). Die Form des Sterns kommt aus dem Kern.
-const SCHALTER_SYMBOL = {
-  stern: UE.STERN,
-  endlos: '<path class="linie" d="M7.6 8.2C5.3 8.2 3.5 9.9 3.5 12s1.8 3.8 4.1 3.8c3.6 0 5.2-7.6 8.8-7.6 2.3 0 4.1 1.7 4.1 3.8s-1.8 3.8-4.1 3.8c-3.6 0-5.2-7.6-8.8-7.6z"/>',
-  uhr: '<rect x="10.2" y="1.8" width="3.6" height="2.6" rx="1"/><circle cx="12" cy="13.6" r="7.6"/><path class="zeiger" d="M12 13.6V9.2M12 13.6l3 2"/>',
-  // Reihenfolge der Teile (RF1 a, Satz B): drei absteigende Balken (grösste Stelle links), gemischt ein Mischpfeil
-  balken: '<rect x="3.4" y="4.5" width="4.4" height="15.5" rx="1"/><rect x="9.8" y="8.8" width="4.4" height="11.2" rx="1"/><rect x="16.2" y="13.2" width="4.4" height="6.8" rx="1"/>',
-  mischen: '<path d="M3 7h3.5c4.5 0 6.5 10 11 10H20M3 17h3.5c4.5 0 6.5-10 11-10H20M17.5 4.5 20.5 7l-3 2.5M17.5 14.5l3 2.5-3 2.5"/>',
-};
 // Reihenfolge auf der Karte: Antippen schaltet weiter (nach Stufe → geordnet → gemischt → nach Stufe).
 const REIHENFOLGE_KARTE = {
   stufe: { symbol: "balken", an: false, naechste: "geordnet", text: "Teile nach Stufe (1–3 geordnet, ab 4 gemischt)" },
   geordnet: { symbol: "balken", an: true, naechste: "gemischt", text: "Teile geordnet: grösste Stelle links" },
   gemischt: { symbol: "mischen", an: true, naechste: "stufe", text: "Teile gemischt" },
 };
-function schalterSymbol(art, an) {
-  if (!document.getElementById("gold-verlauf")) {
-    const defs = document.createElement("div");
-    defs.innerHTML = '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gold-verlauf" x1="0" y1="0" x2="0" y2="1">'
-      + '<stop offset="0" stop-color="#ffe27a"/><stop offset=".55" stop-color="#ffc107"/><stop offset="1" stop-color="#f29a00"/></linearGradient></defs></svg>';
-    document.body.append(defs.firstChild);
-  }
-  const box = document.createElement("span");
-  box.innerHTML = `<svg class="symbol ${art}${an ? " an" : ""}" viewBox="0 0 24 24" aria-hidden="true">${SCHALTER_SYMBOL[art]}</svg>`;
-  return box.firstChild;
-}
+/** Symbol der Schalter (⏱ Uhr, ♾ Endlos, ☆ Stern, Balken, Mischen): aus spiel.js, gleich auf Karten und Stufenwahl. */
+const schalterSymbol = (art, an) => LS.schalterSymbol(art, an);
 
 // Suche im Tab Spiele (Wunsch Patrik, LERN_Session6): bleibt beim Neuzeichnen erhalten, nicht gespeichert.
 const SPIEL_SUCHE = UE.suche();

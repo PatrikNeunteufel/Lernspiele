@@ -2331,13 +2331,14 @@ const LS = (() => {
       const name = aktuellerSpieler();
       const an = stufenListe.some(st => timerFuer(name, def.id, st.id).an);
       const fest = istFest(name, "timer");
+      // Symbol wie auf den Kacheln und das Wort dazu (FB2 a, LERN_Session32): hier lernt das Kind, was die Uhr heisst
       return el("div", { class: "timer-zeile" },
         fest
-          ? el("span", { class: "timer-schalter aufsicht-fest" + (an ? " an" : ""), title: FEST_TEXT, text: `🔒 ${an ? "⏱ Timer an" : "⏱ Timer aus"}` })
+          ? el("span", { class: "timer-schalter aufsicht-fest" + (an ? " an" : ""), title: FEST_TEXT }, "🔒 ", schalterSymbol("uhr", an), an ? " Timer an" : " Timer aus")
           : el("button", {
             type: "button", class: "timer-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
             onclick: () => { waehleTimer(name, def.id, !an); ton("tipp"); neuZeichnen(); },
-          }, an ? "⏱ Timer an" : "⏱ Timer aus"),
+          }, schalterSymbol("uhr", an), an ? " Timer an" : " Timer aus"),
         el("span", { class: "leise", text: fest ? FEST_TEXT : an ? "Jede Aufgabe hat eine Zeit. Ist sie um, zählt es als Fehler." : "Für mehr Spannung: Timer einschalten." }));
     }
 
@@ -2444,15 +2445,28 @@ const LS = (() => {
         const beste = besteSterne(name, def.id, st.id);
         const timer = timerFuer(name, def.id, st.id);
         // aria-label: was langes Drücken vorliest (Vorlesen auf dem Startblatt, Wunsch Patrik LERN_Session8)
+        const empfohlen = st.id === empfohleneStufe(name, def.id);
+        const aufsichtHier = aufsichtAngemeldet();
+        // Stufe wie ein Level (FB2 a, LERN_Session32): gross Symbol und Nummer, darunter der Name, drei Sterne (auch die
+        // nicht erreichten) und als Untertitel, für wen sie ist. Den Lehrplantext der Stufe sieht das Kind über ⓘ und
+        // hört ihn mit langem Drücken; die Aufsicht sieht ihn offen.
         const knopf = el("button", { class: "stufe", type: "button", onclick: () => runde(st),
-          "aria-label": `Stufe ${st.nr}, ${st.name}. ${stufeFuer(def.id, st.id)}${st.id === empfohleneStufe(name, def.id) ? ", für dich empfohlen" : ""}. ${st.text}` },
-          el("b", { text: `${st.icon} Stufe ${st.nr} · ${st.name}` }),
-          el("div", { class: "fuer", text: stufeFuer(def.id, st.id) + (st.id === empfohleneStufe(name, def.id) ? " · 👍 für dich empfohlen" : "") }),
-          el("span", { text: st.text }),
-          timer.an ? el("div", { class: "fuer", style: "margin-top:6px", text: `⏱ ${timer.sekunden} s je Aufgabe` }) : null,
-          el("div", { class: "sterne-klein", html: beste ? `<span style="color:#f5b301">${"★".repeat(beste)}</span><span class="aus">${"★".repeat(3 - beste)}</span>` : '<span class="leise" style="font-size:16px">noch nicht gespielt</span>' }));
+          "aria-label": `Stufe ${st.nr}, ${st.name}. ${stufeFuer(def.id, st.id)}${empfohlen ? ", für dich empfohlen" : ""}. ${st.text}` },
+          el("div", { class: "stufe-kopf" }, el("span", { class: "stufe-symbol", text: st.icon }), el("span", { class: "stufe-nr", text: String(st.nr) })),
+          el("div", { class: "stufe-name", text: st.name }),
+          el("div", { class: "sterne-gross", "aria-hidden": "true", html: `<span style="color:#f5b301">${"★".repeat(beste)}</span><span class="aus">${"★".repeat(3 - beste)}</span>` }),
+          el("div", { class: "fuer", text: stufeFuer(def.id, st.id) + (empfohlen ? " · 👍 für dich" : "") }),
+          aufsichtHier ? el("span", { class: "stufe-text", text: st.text }) : null,
+          timer.an ? el("div", { class: "fuer", style: "margin-top:4px", text: `⏱ ${timer.sekunden} s je Aufgabe` }) : null);
         knopf.style.setProperty("--farbe", st.farbe);
-        stufen.append(knopf);
+        const huelle = el("div", { class: "stufe-huelle" }, knopf);
+        if (!aufsichtHier) {
+          const text = el("div", { class: "stufe-text blase-klein", hidden: true, text: st.text });
+          const info = el("button", { type: "button", class: "stufe-info", "aria-expanded": "false", "aria-label": `Was übt Stufe ${st.nr}?`, title: "Was übt diese Stufe?", text: "ⓘ",
+            onclick: () => { text.hidden = !text.hidden; info.setAttribute("aria-expanded", String(!text.hidden)); } });
+          huelle.append(info, text);
+        }
+        stufen.append(huelle);
       }
       karte.append(stufen);
       // Ähnliche Spiele (Wunsch Patrik, LERN_Session10): die Startseite zeigt sie als Liste (start/spiele.js, ?aehnlich=).
@@ -2489,7 +2503,7 @@ const LS = (() => {
       if (endlosListe.length) {
         const mitTimer = st => timerFuer(name, def.id, st.id).an;
         karte.append(el("div", { class: "endlos-wahl" },
-          el("b", { text: "♾ Endlos — wie viele schaffst du ohne Fehler?" }),
+          el("b", { class: "endlos-titel" }, schalterSymbol("endlos", true), " Endlos — wie viele schaffst du ohne Fehler?"),
           el("span", { class: "leise", text: "Mit Timer wird die Zeit nach jeder richtigen Aufgabe etwas knapper." }),
           el("div", { class: "endlos-knoepfe" }, ...endlosListe.map(st => {
             const rekord = besterRekord(name, def.id, st.id, mitTimer(st));
@@ -3395,11 +3409,33 @@ const LS = (() => {
    *   <style> nie auf oberster Ebene neu (Vergleichs-Krokodil: eigene .mitte liess die Schlusskarte schrumpfen).
    * bausteine: Teile der Bausteine (auswahl, reihenfolge, koerbe, tastatur, Noten), die ein Spiel anpassen darf.
    */
+  // Symbole der Schalter (seit LERN_Session32 hier, vorher start/spiele.js): auf den Kacheln der Startseite und auf
+  // der Stufenwahl gleich (FB2 a: dort mit Wort, damit Kinder lernen, was die Symbole heissen)
+  const SCHALTER_SYMBOL = {
+    stern: KERN.uebersicht.STERN,
+    endlos: '<path class="linie" d="M7.6 8.2C5.3 8.2 3.5 9.9 3.5 12s1.8 3.8 4.1 3.8c3.6 0 5.2-7.6 8.8-7.6 2.3 0 4.1 1.7 4.1 3.8s-1.8 3.8-4.1 3.8c-3.6 0-5.2-7.6-8.8-7.6z"/>',
+    uhr: '<rect x="10.2" y="1.8" width="3.6" height="2.6" rx="1"/><circle cx="12" cy="13.6" r="7.6"/><path class="zeiger" d="M12 13.6V9.2M12 13.6l3 2"/>',
+    // Reihenfolge der Teile (RF1 a, Satz B): drei absteigende Balken (grösste Stelle links), gemischt ein Mischpfeil
+    balken: '<rect x="3.4" y="4.5" width="4.4" height="15.5" rx="1"/><rect x="9.8" y="8.8" width="4.4" height="11.2" rx="1"/><rect x="16.2" y="13.2" width="4.4" height="6.8" rx="1"/>',
+    mischen: '<path d="M3 7h3.5c4.5 0 6.5 10 11 10H20M3 17h3.5c4.5 0 6.5-10 11-10H20M17.5 4.5 20.5 7l-3 2.5M17.5 14.5l3 2.5-3 2.5"/>',
+  };
+  function schalterSymbol(art, an) {
+    if (!document.getElementById("gold-verlauf")) {
+      const defs = document.createElement("div");
+      defs.innerHTML = '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gold-verlauf" x1="0" y1="0" x2="0" y2="1">'
+        + '<stop offset="0" stop-color="#ffe27a"/><stop offset=".55" stop-color="#ffc107"/><stop offset="1" stop-color="#f29a00"/></linearGradient></defs></svg>';
+      document.body.append(defs.firstChild);
+    }
+    const box = document.createElement("span");
+    box.innerHTML = `<svg class="symbol ${art}${an ? " an" : ""}" viewBox="0 0 24 24" aria-hidden="true">${SCHALTER_SYMBOL[art]}</svg>`;
+    return box.firstChild;
+  }
+
   const RAHMEN_KLASSEN = {
     reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein", "vorlesen", "los-huelle", "los-ueber", "los-zahl", "los-knopf",
       "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
       "spieler-zeile", "speicher-voll",
-      "stufen", "stufe", "fuer", "stil-hand", "hand-rahmen", "raster-luecke", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "aufsicht-fest", "avatar", "avatar-ersatz", "avatar-bild", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
+      "stufen", "stufe", "fuer", "stufe-huelle", "stufe-kopf", "stufe-symbol", "stufe-nr", "stufe-name", "sterne-gross", "stufe-info", "stufe-text", "blase-klein", "stil-hand", "hand-rahmen", "raster-luecke", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "aufsicht-fest", "avatar", "avatar-ersatz", "avatar-bild", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
       "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
@@ -3435,7 +3471,7 @@ const LS = (() => {
     basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, alterVon, aufsteigen, aufstiegZuruecknehmen, neuerAufstieg, sortierungFuer, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, reihenfolgeFuer, vorgabeZeit, timerFuer, waehleTimer, zeitVorschlag,
     WAHL_ARTEN, istFest, wahlFuer, setzeWahl, wahlZuruecksetzen, setzeFest, wahlAnzahl, FEST_TEXT, avatarBild,
-    stimmeBereit, sprich: sprichInhalt, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen,
+    stimmeBereit, sprich: sprichInhalt, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen, schalterSymbol,
     protokoll, besteSterne, auswahl, reihenfolge, fliegen, koerbe, pruefung, RAHMEN_KLASSEN,
   };
 })();
