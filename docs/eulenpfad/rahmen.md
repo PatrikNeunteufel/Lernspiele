@@ -882,7 +882,11 @@ Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
   (Deko-Farben, nie Stellenfarben) und 4 Rahmen; Kennung `<motiv>-<farbe>[-<rahmen>]` im Profilfeld `avatar`; keine
   Fotos. Freigeschaltet (`ERFOLGE.freischaltungen`, AV5 a, AV6 a): das Symbol eines Abzeichens ab Gold, die Rahmen
   Gold, Platin, Diamant ab dem ersten Abzeichen in diesem Rang. Neues meldet der Tab Spiele, bis das Kind die Bildwahl
-  öffnet (`freiGesehen`). Die Abzeichen zeigen dieselben Symbole statt Emoji, auch im geteilten Bild.
+  öffnet (`freiGesehen`). Die Abzeichen zeigen dieselben Symbole statt Emoji, auch im geteilten Bild. Im Stil „wie von
+  Hand gezeichnet“ (Einstellung `stil`, Wunsch Patrik LERN_Session32) ist die Form leicht verformt, je Motiv und Farbe
+  rund oder eher eckig (Superellipse), der Rand wellt sich, das Band des Rahmens ist mal dicker, mal dünner; Fläche,
+  Zuschnitt und der Schmuck von Gold, Platin und Diamant folgen der Form (`AVATARE.svg(k, groesse, { hand })`, ohne
+  `hand` nach der Einstellung).
   `LS.avatarBild(name, groesse)` gibt das Bild als Element, ohne Avatar den Anfangsbuchstaben. Es steht vor dem Namen:
   Anmeldung (Kachel), Kopfzeile, Spielerzeile im Spiel, Endlos-Ranglisten, Namens-Chips der Aufsicht, Abzeichen-Bild.
 - **Profil:** Ein Kind sieht sein Alter und seine Klasse (nur zum Lesen) und wählt „Mein Bild“. Die Aufsicht (Aufbau

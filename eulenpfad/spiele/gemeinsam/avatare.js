@@ -288,31 +288,71 @@ const AVATARE = (() => {
   const kennung = (motivId, farbId, rahmenId = "einfach") => `${motivId}-${farbId}${rahmenId && rahmenId !== "einfach" ? `-${rahmenId}` : ""}`;
 
   let zaehler = 0; // je Bild eigene Ids für Zuschnitt und Verläufe (mehrere Avatare auf einer Seite)
-  /** Rahmen um den Kreis (Radius 46): einfach in der Farbe, sonst Gold, Platin oder Diamant. */
-  function rahmenSvg(r, f, id) {
+
+  // ----- Form: Kreis, oder im Stil „wie von Hand gezeichnet“ leicht verformt (Wunsch Patrik LERN_Session32) -----
+  // Je Avatar (Motiv und Farbe) gleich: rund oder eher eckig (Superellipse), der Rand wellt sich langsam, das Band des
+  // Rahmens ist mal dicker, mal dünner. form.r(w) ist der Abstand der Mitte des Bandes von (50, 50) im Winkel w,
+  // form.d(w) seine Dicke; ohne „hand“ ein Kreis mit Radius 47 und fester Dicke.
+  const KREIS = { r: () => 47, d: (_, d) => d, hand: false };
+  function handForm(saat) {
+    let h = 2166136261;
+    for (const c of saat) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+    const z = () => { h = (h + 0x6d2b79f5) | 0; let t = Math.imul(h ^ (h >>> 15), 1 | h); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const eckig = z() < 0.45, p1 = z() * 6.3, p2 = z() * 6.3, p3 = z() * 6.3, f1 = 2 + Math.floor(z() * 2), f2 = 5 + Math.floor(z() * 3);
+    return {
+      hand: true,
+      r: w => {
+        const c = Math.abs(Math.cos(w)), s = Math.abs(Math.sin(w));
+        const grund = eckig ? 43 / Math.pow(c ** 4 + s ** 4, 0.25) : 46.5; // eckig: Ecken bis 51, Seiten 43 (im Bild bis 56)
+        return grund + 1.6 * Math.sin(f1 * w + p1) + 0.8 * Math.sin(f2 * w + p2);
+      },
+      d: (w, d) => d * (1 + 0.45 * Math.sin(f1 * w + p3)),
+    };
+  }
+  /** Geschlossener Pfad im Abstand r(w) + versatz(w) um (50, 50). */
+  const umrissPfad = (r, versatz = () => 0, n = 96) => "M" + [...Array(n)].map((_, i) => {
+    const w = (i / n) * 2 * Math.PI, q = r(w) + versatz(w);
+    return `${(50 + q * Math.cos(w)).toFixed(2)},${(50 + q * Math.sin(w)).toFixed(2)}`;
+  }).join(" L") + " Z";
+  /** Band des Rahmens: Fläche zwischen aussen und innen, Dicke d (je Winkel veränderlich bei „hand“). */
+  const band = (form, d, fuellung) => form.hand
+    ? `<path d="${umrissPfad(form.r, w => form.d(w, d) / 2)} ${umrissPfad(form.r, w => -form.d(w, d) / 2)}" fill="${fuellung}" fill-rule="evenodd"/>`
+    : `<circle cx="50" cy="50" r="47" fill="none" stroke="${fuellung}" stroke-width="${d}"/>`;
+
+  /** Rahmen um die Form: einfach in der Farbe, sonst Gold, Platin oder Diamant. */
+  function rahmenSvg(r, f, id, form = KREIS) {
     const verlauf = (stopps) => `<linearGradient id="${id}-v" x1="0" y1="0" x2="1" y2="1">${stopps.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join("")}</linearGradient>`;
-    const ring = (breite, rand = "") => `<circle cx="50" cy="50" r="47" fill="none" stroke="url(#${id}-v)" stroke-width="${breite}"${rand}/>`;
+    const ring = breite => band(form, breite, `url(#${id}-v)`);
+    // Schmuck auf dem Band: im Winkel w im Abstand r(w) (+ aussen) von der Mitte
+    const auf = (w, aussen = 0) => [50 + (form.r(w) + aussen) * Math.cos(w), 50 + (form.r(w) + aussen) * Math.sin(w)];
     const rund = (n, fn) => [...Array(n)].map((_, i) => fn(-Math.PI / 2 + i * 2 * Math.PI / n)).join("");
     if (r.id === "gold") return `<defs>${verlauf([[0, "#fff3b0"], [0.45, "#ffc107"], [1, "#c98400"]])}</defs>` + ring(7)
-      + rund(12, w => kreis((50 + 47 * Math.cos(w)).toFixed(1), (50 + 47 * Math.sin(w)).toFixed(1), 2.8, "#fff7cc", ' stroke="#c98400" stroke-width="1"'));
+      + rund(12, w => { const [x, y] = auf(w); return kreis(x.toFixed(1), y.toFixed(1), 2.8, "#fff7cc", ' stroke="#c98400" stroke-width="1"'); });
     if (r.id === "platin") return `<defs>${verlauf([[0, "#ffffff"], [0.5, "#cfd6e3"], [1, "#8a94a8"]])}</defs>` + ring(7)
       + [-1, 1].map(s => [...Array(6)].map((_, i) => {
-        const w = Math.PI / 2 + s * (0.35 + i * 0.32), x = 50 + 50 * Math.cos(w), y = 50 + 50 * Math.sin(w);
+        const w = Math.PI / 2 + s * (0.35 + i * 0.32), [x, y] = auf(w, 3);
         return `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="3.4" ry="7" fill="#e6ebf3" stroke="#8a94a8" stroke-width="1" transform="rotate(${(w * 180 / Math.PI + 90 + s * 35).toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
       }).join("")).join("");
     if (r.id === "diamant") return `<defs>${verlauf([[0, "#ffffff"], [0.4, "#9fe3ff"], [1, "#2f8fe0"]])}</defs>` + ring(6)
-      + rund(8, w => { const x = 50 + 47 * Math.cos(w), y = 50 + 47 * Math.sin(w), g = w === -Math.PI / 2 ? 8 : 5;
-        return `<polygon points="${x},${y - g} ${x + g * 0.75},${y} ${x},${y + g} ${x - g * 0.75},${y}" fill="#e0f7ff" stroke="#2f8fe0" stroke-width="1.2"/>`; });
-    return `<circle cx="50" cy="50" r="47" fill="none" stroke="${f.rand}" stroke-width="4"/>`;
+      + rund(8, w => { const [x, y] = auf(w), g = w === -Math.PI / 2 ? 8 : 5;
+        return `<polygon points="${x.toFixed(1)},${(y - g).toFixed(1)} ${(x + g * 0.75).toFixed(1)},${y.toFixed(1)} ${x.toFixed(1)},${(y + g).toFixed(1)} ${(x - g * 0.75).toFixed(1)},${y.toFixed(1)}" fill="#e0f7ff" stroke="#2f8fe0" stroke-width="1.2"/>`; });
+    return band(form, 4, f.rand);
   }
-  /** SVG als Text; ohne gültige Kennung null. */
-  function svg(k, groesse = 48) {
+  /**
+   * SVG als Text; ohne gültige Kennung null. opt.hand: verformte Form (Stil „wie von Hand gezeichnet“); ohne Angabe
+   * nach der Einstellung stil (STIL in spiel.js), sonst Kreis.
+   */
+  function svg(k, groesse = 48, opt = {}) {
     const a = zerlege(k);
     if (!a) return null;
     const id = `avatar-${++zaehler}`;
+    const hand = opt.hand ?? (typeof STIL !== "undefined" && STIL.an());
+    const form = hand ? handForm(`${a.motiv.id}-${a.farbe.id}`) : KREIS;
+    const flaeche = form.hand ? `<path d="${umrissPfad(form.r)}" fill="${a.farbe.hell}"/>` : kreis(50, 50, 47, a.farbe.hell);
+    const zuschnitt = form.hand ? `<path d="${umrissPfad(form.r, () => -1)}"/>` : `<circle cx="50" cy="50" r="46"/>`;
     return `<svg class="avatar-bild" viewBox="-6 -6 112 112" width="${groesse}" height="${groesse}" role="img" aria-label="${a.motiv.name}">`
-      + `<defs><clipPath id="${id}-rund"><circle cx="50" cy="50" r="46"/></clipPath></defs>`
-      + kreis(50, 50, 47, a.farbe.hell) + `<g clip-path="url(#${id}-rund)">${a.motiv.zeichne()}</g>` + rahmenSvg(a.rahmen, a.farbe, id) + `</svg>`;
+      + `<defs><clipPath id="${id}-rund">${zuschnitt}</clipPath></defs>`
+      + flaeche + `<g clip-path="url(#${id}-rund)">${a.motiv.zeichne()}</g>` + rahmenSvg(a.rahmen, a.farbe, id, form) + `</svg>`;
   }
   /** Nur das Motiv ohne Kreis (Abzeichen-Symbol im Tab Erfolge); null, wenn unbekannt. */
   function motivSvg(id, groesse = 48) {
