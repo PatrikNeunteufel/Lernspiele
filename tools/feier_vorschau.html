@@ -29,17 +29,28 @@
   .anmerkung textarea { width: 100%; box-sizing: border-box; font: inherit; min-height: 4.5em; }
   .anmerkungen { margin: 4px 0 0; padding-left: 1.2em; font-size: 13px; max-width: 60em; }
   .anmerkungen li.erledigt { color: #6b7089; }
+  details.hinweis summary { cursor: pointer; font-weight: bold; }
+  /* Alle sechs ins Fenster: kleine Köpfe, Anmerkungen nur als Zahl am Knopf (Wunsch Patrik, LERN_Session31) */
+  #stufen.fenster .stufe { margin: 0 0 6px; }
+  #stufen.fenster .stufe h2 { font-size: 13px; }
+  #stufen.fenster .liste { display: none; }
+  #stufen.fenster .stufe-kopf button { padding: 1px 6px; font-size: 12px; }
+  body.fenster { padding-top: 6px; padding-bottom: 0; }
+  body.fenster h1 { display: none; }
+  body.fenster .leiste, body.fenster .abnahme { margin-bottom: 6px; }
 </style>
 </head>
 <body>
 <h1>Vorschau Abschluss-Animationen</h1>
-<p class="hinweis">Je Stufe das Schlussbild des Spiels in der gewählten Breite. „Nochmal“ im Bild spielt die Animation neu,
+<details class="hinweis" id="hilfe"><summary>Erklärung</summary>Je Stufe das Schlussbild des Spiels in der gewählten Breite. „Nochmal“ im Bild spielt die Animation neu,
 ein Tippen springt ans Ende. „✓ Geprüft“ und Anmerkungen gehen über den Entwickler-Server in den Prüfstand
 (<code>pruefstand.js</code>, Art <code>feier</code>) und in die Bemerkungen (<code>docs/eulenpfad/bemerkungen.json</code>) — dafür den
 Entwickler-Modus im Eulenpfad auf diesem Server freischalten (Verwaltung → Entwicklung). „Bewegung reduzieren“ zeigt das Endbild wie mit der Einstellung
 des Geräts. Verkleinert passt eine Breite ins Fenster; für die Abnahme in echter Grösse „Verkleinern“ ausschalten.
 „Nebeneinander“ zeigt drei Stufen je Zeile. „Anhalten bei“ hält jede Animation bei dieser Sekunde an — so lässt sich der
-Ablauf Bild um Bild prüfen, nicht nur das Endbild (Anweisung Patrik, LERN_Session27).</p>
+Ablauf Bild um Bild prüfen, nicht nur das Endbild (Anweisung Patrik, LERN_Session27). „Alle sechs ins Fenster“ zeigt die
+sechs Stufen in zwei Zeilen so verkleinert, dass sie ohne Scrollen ins Fenster passen; die Anmerkungen stehen dann nur als
+Zahl am Knopf. „📝 Anmerkung zur ganzen Serie“ gilt für alle Stufen des Spiels.</details>
 <div class="leiste">
   <label>Spiel <select id="spiel"></select></label>
   <label>Breite <select id="breite"><option value="1024">Desktop (1024 px)</option><option value="768">Tablet (768 px)</option><option value="375">Handy (375 px)</option></select></label>
@@ -47,6 +58,7 @@ Ablauf Bild um Bild prüfen, nicht nur das Endbild (Anweisung Patrik, LERN_Sessi
   <label><input type="checkbox" id="ruhig"> Bewegung reduzieren</label>
   <label><input type="checkbox" id="klein" checked> Verkleinern</label>
   <label><input type="checkbox" id="raster"> Nebeneinander</label>
+  <label><input type="checkbox" id="fenster"> Alle sechs ins Fenster</label>
   <label>Anhalten bei <select id="zeit"><option value="">— läuft</option><option>0.4</option><option>0.8</option><option>1.2</option><option>1.6</option><option>2.0</option><option>2.4</option><option value="5">Ende</option></select> s</label>
   <button type="button" id="neu">↻ Alle neu</button>
   <label><input type="checkbox" id="ausblenden"> Geprüfte ausblenden</label>
@@ -129,7 +141,22 @@ function zeigeAbnahme() {
   const meldung = document.createElement("span");
   meldung.className = "meldung leise";
   if (!E.freigeschaltet()) meldung.textContent = "⚠ Kein Entwickler-Schlüssel in diesem Browser — Ansehen geht, Speichern nicht.";
-  box.append(stand, knopf, zahl, meldung);
+  const serie = document.createElement("button");
+  serie.type = "button";
+  serie.textContent = "📝 Anmerkung zur ganzen Serie";
+  const ort = document.createElement("div");
+  ort.style.flexBasis = "100%";
+  ort.append(anmerkungen(id, ""));
+  serie.addEventListener("click", () => anmerkungsFeld(id, "", ort));
+  box.append(stand, knopf, serie, zahl, meldung, ort);
+}
+/** Offene Anmerkungen je Stufe als Zahl am Knopf (im Fenster-Bild stehen sie nicht darunter). */
+function zeichneKnopfZahlen() {
+  const id = $("spiel").value;
+  document.querySelectorAll("[data-notiz]").forEach(k => {
+    const n = bemerkungen.filter(b => b.inhalt === "feier" && b.spiel === id && b.stufe === k.dataset.notiz && !String(b.status).startsWith("erledigt")).length;
+    k.textContent = n ? `📝 Anmerkung (${n} offen)` : "📝 Anmerkung";
+  });
 }
 /** Prüfstand und Bemerkungen vom Server holen (der Prüfstand im Browser kann älter sein als die Datei). */
 async function holeStand() {
@@ -144,7 +171,8 @@ async function holeStand() {
 /** Anmerkungen zu einer Stufe: Liste der bisherigen und ein Feld für eine neue. */
 function anmerkungen(spiel, stufe) {
   const box = document.createElement("div");
-  const liste = bemerkungen.filter(b => b.inhalt === "feier" && b.spiel === spiel && b.stufe === stufe);
+  // stufe "" = Anmerkung zur ganzen Serie (ohne Stufe gespeichert)
+  const liste = bemerkungen.filter(b => b.inhalt === "feier" && b.spiel === spiel && (b.stufe || "") === (stufe || ""));
   if (liste.length) {
     const ul = document.createElement("ul");
     ul.className = "anmerkungen";
@@ -174,12 +202,14 @@ function anmerkungsFeld(spiel, stufe, ort) {
     if (!E.freigeschaltet()) return (m.textContent = "Kein Entwickler-Schlüssel in diesem Browser (Eulenpfad → Verwaltung → Entwicklung).");
     const zeit = $("zeit").value, umstand = [`${$("sterne").value} Sterne`, `${$("breite").value} px`, $("ruhig").checked ? "Bewegung reduziert" : "",
       zeit ? (zeit === "5" ? "Endbild" : `bei ${zeit} s`) : ""].filter(Boolean).join(", ");
-    const b = await E.bemerkung({ text: text.value, spiel, stufe, inhalt: "feier", eintrag: umstand, seite: "tools/feier_vorschau.html" });
+    const b = await E.bemerkung({ text: text.value, spiel, ...(stufe ? { stufe } : {}), inhalt: "feier", eintrag: stufe ? umstand : `ganze Serie, ${umstand}`,
+      seite: "tools/feier_vorschau.html" });
     if (!b) return;
     bemerkungen.push(b);
     feld.remove();
-    ort.querySelector(".liste")?.replaceChildren(anmerkungen(spiel, stufe));
+    if (stufe) ort.querySelector(".liste")?.replaceChildren(anmerkungen(spiel, stufe));
     zeigeAbnahme();
+    if (stufe) zeichneKnopfZahlen();
   });
   feld.append(text, senden, " ", abbrechen, " ", m);
   ort.append(feld);
@@ -188,6 +218,13 @@ function anmerkungsFeld(spiel, stufe, ort) {
 for (const k of ["breite", "sterne", "zeit"]) if (auswahl.get(k)) $(k).value = auswahl.get(k);
 fuelleAuswahl();
 if (auswahl.get("raster")) $("raster").checked = true;
+// Erklärung offen oder zu, Fenster-Bild: nur Bequemlichkeit dieses Browsers
+const HILFE = "feier-vorschau:hilfe", FENSTER = "feier-vorschau:fenster";
+try {
+  $("hilfe").open = localStorage.getItem(HILFE) !== "zu";
+  $("fenster").checked = auswahl.get("fenster") ? auswahl.get("fenster") === "1" : localStorage.getItem(FENSTER) === "1";
+} catch { /* ohne Speicher: Erklärung offen, Fenster-Bild aus */ }
+$("hilfe").addEventListener("toggle", () => { try { localStorage.setItem(HILFE, $("hilfe").open ? "offen" : "zu"); } catch { /* nur jetzt */ } if ($("fenster").checked) zeichne(); });
 const HOEHE = 620, HOEHE_RASTER = 410; // nebeneinander: unter dem Schlussbild bleibt nur leerer Platz
 /** Animation im Rahmen bei sekunde anhalten (SMIL: pauseAnimations, setCurrentTime). */
 function anhalten(f, sekunde) {
@@ -196,15 +233,31 @@ function anhalten(f, sekunde) {
   svg.pauseAnimations();
   svg.setCurrentTime(sekunde);
 }
+/** Rahmen auf die Animation (.feier) im Schlussbild zuschneiden und sie in die Zelle (b × h) einpassen. */
+function zuschneiden(f, rahmen, b, h, versuch = 0) {
+  const feier = f.contentDocument?.querySelector(".feier");
+  if (!feier) { if (versuch < 30) setTimeout(() => zuschneiden(f, rahmen, b, h, versuch + 1), 150); return; }
+  const r = feier.getBoundingClientRect(), k = Math.min(b / r.width, h / r.height);
+  f.style.transform = `scale(${k}) translate(${-r.left}px, ${-r.top}px)`;
+  rahmen.style.width = `${Math.round(r.width * k)}px`;
+  rahmen.style.height = `${Math.round(r.height * k)}px`;
+}
 function zeichne() {
   const spiel = $("spiel").value, breite = Number($("breite").value), sterne = $("sterne").value, zeit = $("zeit").value;
-  const ruhig = $("ruhig").checked, klein = $("klein").checked, raster = $("raster").checked;
-  history.replaceState(null, "", `?spiel=${spiel}&breite=${breite}&sterne=${sterne}${zeit ? `&zeit=${zeit}` : ""}${raster ? "&raster=1" : ""}`);
-  const platz = Math.max(320, document.body.clientWidth - 34) / (raster ? 3 : 1) - (raster ? 12 : 0);
-  const faktor = klein || raster ? Math.min(1, platz / breite) : 1;
-  $("stufen").className = raster ? "raster" : "";
+  const ruhig = $("ruhig").checked, klein = $("klein").checked, fenster = $("fenster").checked, raster = $("raster").checked || fenster;
+  history.replaceState(null, "", `?spiel=${spiel}&breite=${breite}&sterne=${sterne}${zeit ? `&zeit=${zeit}` : ""}${raster ? "&raster=1" : ""}${fenster ? "&fenster=1" : ""}`);
+  document.body.classList.toggle("fenster", fenster);
+  $("stufen").className = (raster ? "raster" : "") + (fenster ? " fenster" : "");
   $("stufen").innerHTML = "";
   zeigeAbnahme();
+  const platz = Math.max(320, document.body.clientWidth - 34) / (raster ? 3 : 1) - (raster ? 12 : 0);
+  let faktor = klein || raster ? Math.min(1, platz / breite) : 1, zellHoehe = 0;
+  if (fenster) {
+    // zwei Zeilen zu drei Stufen sollen ohne Scrollen ins Fenster passen: je Zeile der Kopf (etwa 26 px) und das Bild
+    const oben = $("stufen").getBoundingClientRect().top + scrollY, frei = innerHeight - oben - 8;
+    zellHoehe = frei / 2 - 32;
+    faktor = Math.min(faktor, zellHoehe / HOEHE_RASTER);
+  }
   for (let n = 1; n <= 6; n++) {
     const box = document.createElement("div");
     box.className = "stufe";
@@ -215,6 +268,7 @@ function zeichne() {
     const notiz = document.createElement("button");
     notiz.type = "button";
     notiz.textContent = "📝 Anmerkung";
+    notiz.dataset.notiz = `s${n}`;
     const ort = document.createElement("div"), liste = document.createElement("div");
     liste.className = "liste";
     liste.append(anmerkungen(spiel, `s${n}`));
@@ -232,12 +286,21 @@ function zeichne() {
     f.title = `Stufe ${n}`;
     f.src = `../eulenpfad/spiele/${spiel}/index.html?feier=s${n}&sterne=${sterne}${ruhig ? "&ruhig=1" : ""}`;
     if (zeit) f.addEventListener("load", () => anhalten(f, Number(zeit)));
+    // Fenster-Bild: auf die Animation zuschneiden, damit sie gross genug ist (der Rest des Schlussbilds fällt weg)
+    if (fenster) f.addEventListener("load", () => zuschneiden(f, rahmen, platz, zellHoehe));
     rahmen.append(f);
     box.append(kopf, ort, rahmen); // Anmerkungen gleich unter dem Knopf, nicht unter dem hohen Bild
     $("stufen").append(box);
   }
+  zeichneKnopfZahlen();
 }
 for (const k of ["spiel", "breite", "sterne", "ruhig", "klein", "raster", "zeit"]) $(k).addEventListener("change", zeichne);
+$("fenster").addEventListener("change", () => {
+  try { localStorage.setItem(FENSTER, $("fenster").checked ? "1" : "0"); } catch { /* nur jetzt */ }
+  zeichne();
+});
+let groesseZeit = null;
+addEventListener("resize", () => { if (!$("fenster").checked) return; clearTimeout(groesseZeit); groesseZeit = setTimeout(zeichne, 250); });
 $("ausblenden").addEventListener("change", () => {
   try { localStorage.setItem(AUSBLENDEN, $("ausblenden").checked ? "1" : "0"); } catch { /* ohne Speicher: nur jetzt */ }
   fuelleAuswahl();

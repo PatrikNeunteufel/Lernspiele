@@ -612,7 +612,7 @@ var LS_FEIER = (function () {
         const lx = tf.mitte(keys[0]);
         svg.appendChild(bewege(lupe(), `M${tf.mitte("E") + 40},${cy} L${lx},${cy}`, { x: lx, y: cy, winkel: 0 }, ruhig, { drehen: false }));
         if (sterne >= 2) svg.appendChild(glanz(lx - 6, cy - 8, ruhig));
-        if (sterne >= 3) svg.appendChild(funken(Math.max(lx, 24), 22, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(BREITE - 28, 122, ruhig)); // unten rechts, nicht auf den Köpfen der Tafel
         return svg;
       },
 
@@ -797,7 +797,7 @@ var LS_FEIER = (function () {
         for (const k of keys) svg.appendChild(erscheine(zifferText(tf.mitte(k), tf.unten + 16, d[k], 15), DAUER, ruhig));
         svg.appendChild(erscheine(zeileUnten(ganzText(n), 132), DAUER, ruhig));
         if (sterne >= 2) svg.appendChild(glanz(tf.x(keys[0]) - 4, tf.feldY - 4, ruhig));
-        if (sterne >= 3) svg.appendChild(funken(BREITE - 30, 20, ruhig));
+        if (sterne >= 3) svg.appendChild(funken(BREITE - 26, 128, ruhig)); // unten rechts, nicht auf den Köpfen der Tafel
         return svg;
       },
 
@@ -1111,7 +1111,9 @@ var LS_FEIER = (function () {
       svg.appendChild(bewege(lupe(), `M${BREITE + 20},${fy - 40} Q${fx + 60},${fy - 50} ${fx},${fy}`, { x: fx, y: fy, winkel: 0 }, ruhig, { drehen: false, ab: DAUER * 0.45, dauer: DAUER * 0.45 }));
     }
     if (sterne >= 2) svg.appendChild(glanz(x0 + B + 4, y0 - 4, ruhig));
-    if (sterne >= 3) svg.appendChild(funken(Math.min(x0 + B + 34, BREITE - 24), 26, ruhig));
+    // Funken, wo neben der Tafel Platz ist (nicht auf ihren Zahlen): darüber, sonst rechts daneben
+    if (sterne >= 3) svg.appendChild(y0 - 6 >= 30 ? funken(BREITE / 2, Math.max(19, (y0 - 6) / 2), ruhig)
+      : BREITE - (x0 + B + 6) >= 40 ? funken(x0 + B + 6 + (BREITE - (x0 + B + 6)) / 2, 26, ruhig) : funken(19, 19, ruhig)); // sonst auf der Ecke des Rahmens
     return svg;
   }
 
@@ -2210,7 +2212,7 @@ var LS_FEIER = (function () {
     }
     svg.appendChild(erscheine(zeileUnten([z.start, ...kaesten.map(k => termText(k))].map((v, i) => (i ? v : ganzText(v))).join(" → ") + ` → ${ganzText(w)}`, 144), DAUER * 0.85, ruhig));
     if (sterne >= 2) svg.appendChild(glanz(aus, ysK[ysK.length - 1] - 26, ruhig));
-    if (sterne >= 3) svg.appendChild(funken(BREITE / 2, 18, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(30, 26, ruhig)); // oben links: oben in der Mitte stehen in s6 die Kästen
     return svg;
   }
 
@@ -2829,7 +2831,7 @@ var LS_FEIER = (function () {
     svg.appendChild(erscheine(s("text", { x: BREITE / 2, y: 140, fill: nacht ? "#ffffff" : "#2d3047", "font-size": zeile.length > 36 ? 11.5 : 13, "font-weight": "bold",
       "font-family": SCHRIFT, "text-anchor": "middle", "data-zeile": "unten" }, zeile), DAUER * 0.85, ruhig));
     if (sterne >= 2) svg.appendChild(fahne(xs[n - 1] + 8, gy - 22, ruhig));
-    if (sterne >= 3) svg.appendChild(funken(BREITE / 2, 18, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE - 26, 118, ruhig)); // unten rechts: oben stehen die Zeiten
     return svg;
   }
 
@@ -3356,7 +3358,7 @@ var LS_FEIER = (function () {
         }
       } else return null;
     }
-    if (sterne >= 2) svg.appendChild(fahne(Math.min(zielX + 10, BREITE - 16), Math.max(zielY, 24), ruhig));
+    if (sterne >= 2) svg.appendChild(fahne(Math.max(zielX - 16, 6), Math.max(zielY, 24), ruhig)); // links: rechts steht die Beschriftung
     if (sterne >= 3) svg.appendChild(funken(BREITE - 34, 26, ruhig));
     return svg;
   }
@@ -5745,7 +5747,7 @@ var LS_FEIER = (function () {
     const a = X(sortiert[0][0]), b = X(sortiert[n - 1][0]);
     svg.appendChild(bewege(s("g", {}, euleSitzend(0.16)), `M${a},90 L${b},90`, { x: b, y: 90, winkel: 0 }, ruhig, { drehen: false, linear: true }));
     if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
-    if (sterne >= 3) svg.appendChild(funken(BREITE - 36, 128, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(b, 86, ruhig)); // um die Eule: unten stehen die Zahlen der Leiter
     return svg;
   }
 
@@ -7769,7 +7771,9 @@ var LS_FEIER = (function () {
         if (!ruhig) {
           f.setAttribute("opacity", "0");
           f.append(s("set", { attributeName: "opacity", to: 1, begin: t(0.15 + reihe * je), fill: "freeze" }),
-            s("animateTransform", { attributeName: "transform", type: "translate", values: "0 0;0 0;0 140", keyTimes: "0;0.6;1", begin: t(0.15 + reihe * je), dur: `${je * 2.2}s`, fill: "freeze" }));
+            s("animateTransform", { attributeName: "transform", type: "translate", values: "0 0;0 0;0 140", keyTimes: "0;0.6;1", begin: t(0.15 + reihe * je), dur: `${je * 2.2}s`, fill: "freeze" }),
+            // am Ende auch unsichtbar (nicht nur unter dem Bild), wie im ruhigen Bild
+            s("animate", { attributeName: "opacity", from: 1, to: 0, begin: t(0.15 + reihe * je + je * 2), dur: "0.2s", fill: "freeze" }));
         }
         reihe++;
       }
@@ -7788,7 +7792,7 @@ var LS_FEIER = (function () {
     }
     if (z.hoeflich) svg.appendChild(erscheine(haken(160, 140, 14), T + 0.1, ruhig));
     if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
-    if (sterne >= 3) svg.appendChild(funken(26, 76, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(20, 22, ruhig)); // oben links, nicht auf den Nummern beim Ordnen
     return svg;
   }
 
@@ -8580,7 +8584,7 @@ var LS_FEIER = (function () {
     });
     svg.setAttribute("data-anzahl", 1);
     if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, HOEHE - 14, ruhig));
-    if (sterne >= 3) svg.appendChild(funken(...mz([x, y]), ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE - 40, 112, ruhig)); // unter den Karten, nicht auf den Steinen am Ziel
     return svg;
   }
 
@@ -8916,7 +8920,7 @@ var LS_FEIER = (function () {
       const { frei } = gruppe(...zielW);
       svg.setAttribute("data-wert", frei.size);
       [...frei].forEach((p, i) => { const [a, b] = p.split(",").map(Number); svg.appendChild(erscheine(s("circle", { cx: P(a, b)[0], cy: P(a, b)[1], r: c * 0.22, fill: GUT }), 0.3 + i * 0.3, ruhig)); });
-      svg.appendChild(erscheine(text(sx, 50, frei.size, { gross: 26, farbe: GUT }), T, ruhig));
+      svg.appendChild(erscheine(text(sx, 68, frei.size, { gross: 26, farbe: GUT }), T, ruhig));
     }
     if (retten) {
       const { frei } = gruppe(retten.x, retten.y);
@@ -8925,7 +8929,7 @@ var LS_FEIER = (function () {
     }
     svg.appendChild(text(sx, 140, "⚫ ⚪", { gross: 10 }));
     if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
-    if (sterne >= 3) svg.appendChild(funken(sx, 40, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(sx, 26, ruhig));
     return svg;
   }
 
@@ -9005,7 +9009,7 @@ var LS_FEIER = (function () {
     else konig.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", from: `0 ${kpx} ${kpy + 5}`, to: `70 ${kpx} ${kpy + 5}`, begin: t(T * 0.85), dur: "0.4s", fill: "freeze" }));
     svg.appendChild(s("g", { "data-stueck": "matt" }, erscheine(text(230, 82, "#", { gross: 40, farbe: GUT }), T, ruhig)));
     if (sterne >= 2) svg.appendChild(glanz(BREITE - 12, 14, ruhig));
-    if (sterne >= 3) svg.appendChild(funken(230, 70, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(230, 30, ruhig)); // über dem Zeichen #, nicht darauf
     return svg;
   }
 

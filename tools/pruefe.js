@@ -1,7 +1,8 @@
 // Einstieg in die Prüfungen der Reihe (Plan docs/plan_angleich_reihe.md B2): ein Aufruf für alle Apps, je App ein Treiber.
 //
 // Aufruf: node tools/pruefe.js [skripte] [kern] [server] [lernsteig] [gratwanderung] [eulenpfad] [-- weitere Angaben]
-//   ohne App   die kurzen Prüfungen: Skripte, Kern, Server, Lernsteig, Gratwanderung (je Sekunden bis wenige Minuten)
+//   ohne App   die kurzen Prüfungen: Skripte, Kern, Server, Lernsteig, Gratwanderung, Feier (je Sekunden bis wenige Minuten)
+//   feier      Abschluss-Animationen aller Spiele ohne Runden (tools/pruefe_feier.js, LERN_Session31; Sekunden)
 //   server     Entwickler-Server im Prozess mit leerem Ordner (tools/pruefe_server.py, Plan C12)
 //   skripte    jedes Skript aller Apps lesbar, jede <script src> vorhanden, keins von aussen (PK1 a, pruefe_skripte.js);
 //              Untergrenze für jede Grösse nach der Bildhöhe in den Stilen (H1 a)
@@ -25,9 +26,10 @@ const TREIBER = {
     befehl: args => ["python", [path.join(__dirname, "pruefe_server.py"), ...args]] },
   lernsteig: { was: "Übungen, Seiten im Ersatz-DOM, Konten, Sichern und Einlesen", befehl: args => node("pruefe_uebungen.js", args) },
   gratwanderung: { was: "Grundgerüst: Kern-Kopie und Startseite", befehl: () => null, selbst: pruefeGratwanderung },
+  feier: { was: "Abschluss-Animationen aller Spiele ohne Runden: Lage, Schrift, Schmuck, bewegt gegen ruhig, Animationen", befehl: args => node("pruefe_feier.js", args) },
   eulenpfad: { was: "Spiele im Ersatz-DOM", befehl: args => node("pruefe_spiele.js", args) },
 };
-const KURZ = ["skripte", "kern", "server", "lernsteig", "gratwanderung"];
+const KURZ = ["skripte", "kern", "server", "lernsteig", "gratwanderung", "feier"];
 
 /** Gratwanderung hat noch kein Gerüst (Plan C8): die Kopie des Kerns stimmt, die Startseite ist da. Mit C8 ein eigener Treiber. */
 function pruefeGratwanderung() {

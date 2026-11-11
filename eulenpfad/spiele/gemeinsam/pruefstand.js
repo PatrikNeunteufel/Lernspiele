@@ -1,7 +1,78 @@
 /* Prüfstand (Entscheid E1 a, LERN_Session6): welche Spiele angesehen und welche Inhaltslisten geprüft
-   sind, je { am, von }. Schlüssel: Spiel-Id bzw. "<spiel>/<liste>" der Quelle einer Liste.
+   sind, je { am, von }. Schlüssel: Spiel-Id bzw. "<spiel>/<liste>" der Quelle einer Liste; unter feier die
+   Spiele, deren Abschluss-Animation in tools/feier_vorschau.html abgenommen ist (LERN_Session31).
    Geschrieben vom Entwickler-Server (tools/entwickler_server.py) — nicht von Hand ändern. */
 const PRUEFSTAND = {
+  "feier": {
+    "bruch-werkstatt": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "hundertertafel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "mittelwert-waage": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "punkte-schieber": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "rechen-rakete": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "rest-raetsel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "stellen-detektiv": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "tabellen-post": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "teiler-detektiv": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "ueberschlags-blitz": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "uhr-werkstatt": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "velo-tabelle": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zahlen-baukasten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zahlenmauer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zahlenraetsel-tresor": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zahlenstrahl-pfeil": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "ziffernkarten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    }
+  },
   "listen": {
     "abc-sortierer/nomen-bild": {
       "am": "2026-11-03",

@@ -1325,7 +1325,17 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   im ruhigen Endbild mit 3 Sternen (`tools/feier_geometrie.js`, ohne Layout aus den Attributen gerechnet): kein Text
   unter 9 Einheiten der viewBox, kein Teil mehr als 1,5 Einheiten über den Rand; Unsichtbares (opacity 0) und
   Zugeschnittenes (clip-path, die Karte) zählen nicht. Kurven über Punkte auf der Kurve, Bögen über ihren Mittelpunkt,
-  Textbreite geschätzt (gegen `getBBox` im Browser abgeglichen); vierzehn Gegenproben bei jedem Lauf. Die Klickzahlen eines Spiels mit Animation ändern sich (kein
+  Textbreite geschätzt (gegen `getBBox` im Browser abgeglichen); vierzehn Gegenproben bei jedem Lauf. Seit LERN_Session31
+  dazu (alles in `tools/feier_geometrie.js`, `feierPruefungen()`): **Schmuck über Text** (ein Teil mit `data-schmuck` liegt
+  zu mehr als einem Viertel auf einem Text oder Bildzeichen; ein Ring ohne Füllung und ein durchscheinendes Licht unter
+  halber Deckkraft zählen nicht, ein Bildzeichen zählt als rund), **bewegt gegen ruhig** (das Endbild der Bewegung, die
+  SMIL-Animationen bis zum Ende gerechnet: `fill="freeze"`, `set`, `animateTransform` ersetzend oder `additive="sum"`,
+  `animateMotion` ans Ende des Wegs — zeigt dieselben Texte am selben Ort wie das ruhige Bild), **Animationen, die der
+  Browser still übergeht** (`attributeName` passt zum Element, `keyTimes` von 0 bis 1 mit so vielen `values` und
+  `keyPoints`, `keySplines` passend zu `calcMode="spline"`), und Bildzeichen aus mehreren Zeichen (👩‍🏫, ☀️) zählen als
+  eines. **Schnell für alle Spiele:** `node tools/pruefe_feier.js [spiel …]` lädt jede Seite im Vorschau-Modus, fängt die
+  Angabe aus `LS.spiel` ab und prüft alle Stufen des Katalogs mit 1–3 Sternen, bewegt und ruhig (169 Spiele, 6084 Bilder
+  in Sekunden; mit Gegenproben), Teil der kurzen Prüfungen (`node tools/pruefe.js`, App `feier`). Die Klickzahlen eines Spiels mit Animation ändern sich (kein
   Konfetti mehr, das Zufallszahlen verbrauchte; die Animation ist anklickbar).
 - **Vorschau:** `?feier=<stufe>&sterne=1–3[&ruhig=1]` zeigt nur das Schlussbild mit der Animation und „↻ Nochmal“ —
   ohne Anmeldung, ohne Runde, nichts wird gespeichert; die Stufe kommt aus der Skala (auch wenn ihre Inhaltslisten

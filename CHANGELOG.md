@@ -1874,3 +1874,14 @@
   den Prüfstand (Art `feier`, neu im Entwickler-Server neben `spiele` und `listen`), „Geprüfte ausblenden“ in der
   Auswahl, „📝 Anmerkung“ je Stufe als Bemerkung (`inhalt: "feier"`, mit Sternen, Breite und Zeitpunkt), die offenen
   unter der Stufe. Schlüssel und Server-Adresse vom Eulenpfad desselben Browsers. Doku rahmen.md 24 (Vorschau).
+- **Prüfer-Kandidaten gebaut** (aus LERN_Session29 bis 31): `tools/feier_geometrie.js` sammelt alle Prüfungen der
+  Abschluss-Animationen (`feierPruefungen()`, auch vom Treiber in `pruefe_spiele.js` genutzt): Schmuck über Text, bewegtes
+  Endbild gleich dem ruhigen (SMIL bis zum Ende gerechnet), `attributeName`, `keyTimes`, `keyPoints`, `keySplines`,
+  Bildzeichen aus mehreren Zeichen als eines; die schmalen Leerzeichen der Breitenregel als `\u202f`, `\u2009`. Neu
+  `tools/pruefe_feier.js`: alle 169 Spiele im Vorschau-Modus, alle Stufen des Katalogs (vorher nur die angebotenen), 6084
+  Bilder in Sekunden, mit Gegenproben; in den kurzen Prüfungen. Gefunden und behoben: Funken oder Fähnchen auf Text in
+  Stellen-Detektiv, Punkte-Schieber, Hundertertafel, Rechen-Maschine, Fahrplan-Rechner, Erdzeit-Leiter,
+  Koordinaten-Schatz, Roboter-Pfad, Steine fangen, König in der Falle, Hello-Dialog, Au café; die fremde Zeile im
+  Hello-Dialog am Ende unsichtbar.
+- **Vorschau** weiter: Anmerkung zur ganzen Serie, Erklärung einklappbar, „Alle sechs ins Fenster“ (zwei Zeilen ohne
+  Scrollen, auf die Animation zugeschnitten); Verwaltung → Entwicklung verlinkt sie (neuer Tab, über den Entwickler-Server).

@@ -38,8 +38,9 @@ for (const a of process.argv.slice(2)) {
 
 const { skripte, abweichungen, fingerabdrueckeVon } = require("./listen_fingerabdruck");
 
-// Lage und Schrift der Abschluss-Animation (tools/feier_geometrie.js), als Quelltext in den Treiber gegeben
-const GEOMETRIE = require("./feier_geometrie").pruefeFeierBild.toString();
+// Prüfungen der Abschluss-Animation (tools/feier_geometrie.js: Lage, Schrift, Schmuck, bewegt gegen ruhig, Animationen),
+// als Quelltext in den Treiber gegeben
+const GEOMETRIE = `const { pruefeFeier, pruefeFeierBild } = (${require("./feier_geometrie").feierPruefungen.toString()})();`;
 // Treiber im Kontext: Runden spielen, bis opt.runden protokolliert sind oder die Klicks ausgehen.
 const TREIBER = `
 (function treiber(runden, maxKlicks, endlos) {
@@ -136,49 +137,7 @@ const TREIBER = `
       if (!a.feierDef) return;
       if (typeof LS_FEIER === "undefined") { melde("Feier", "feier in LS.spiel, aber feier.js nicht geladen", "feier-js"); return; }
       if (!a.feier) melde("Feier", "keine Abschluss-Animation im Schlussbild (Stufe " + a.stufe + ")", "feier-fehlt");
-      const alle = e => [e, ...e.querySelectorAll("*")];
-      for (const st of a.stufen) for (const n of [1, 2, 3]) for (const ruhig of [false, true]) {
-        const f = LS_FEIER.zeige(a.feierDef, { stufe: st, sterne: n, ruhig });
-        const teile = f ? alle(f) : [];
-        if (!teile.some(t => t.localName === "svg")) { melde("Feier", "Stufe " + st + ": keine Animation", "feier-" + st); continue; }
-        // localName ohne Gross/klein: der Ersatz-DOM schreibt klein, der Browser behält „animateMotion“
-        const bewegt = teile.filter(t => /^(animate|animatemotion|animatetransform|set)$/i.test(t.localName || "")).length;
-        if (ruhig && bewegt) melde("Feier", "Stufe " + st + ": Bewegung trotz Bewegung reduzieren", "feier-ruhig");
-        if (!ruhig && !bewegt) melde("Feier", "Stufe " + st + ": keine Bewegung", "feier-still");
-        // eine ungültige Art übergeht der Browser still — die Tür des Tresors blieb so zu (Rückmeldung Patrik nach M1)
-        for (const a of teile.filter(e => /^animatetransform$/i.test(e.localName || ""))) {
-          const art = a.getAttribute("type");
-          if (!["translate", "scale", "rotate", "skewX", "skewY"].includes(art))
-            melde("Feier", "Stufe " + st + ": animateTransform mit ungültiger Art „" + art + "“", "feier-art");
-        }
-        // Schmuck der Stufe 2 (Fähnchen, Funkeln …) ab 2 Sternen, der Stufe 3 (Funken, Sternschnuppe …) bei 3 Sternen
-        const schmuck = w => teile.filter(t => t.getAttribute && t.getAttribute("data-schmuck") === w).length;
-        if ((n >= 2) !== (schmuck("2") > 0) || (n >= 3) !== (schmuck("3") > 0))
-          melde("Feier", "Stufe " + st + ", " + n + " Stern(e): Schmuck passt nicht zu den Sternen", "feier-sterne");
-        // Mengen (AUFTRITT, SAMMELN, KARTE): so viele Stücke im Bild, wie es angibt
-        const bild = teile.find(t => t.localName === "svg");
-        const anzahl = bild.getAttribute("data-anzahl");
-        const stuecke = teile.filter(t => t.getAttribute && t.getAttribute("data-stueck")).length;
-        if (anzahl !== null && anzahl !== undefined && Number(anzahl) !== stuecke)
-          melde("Feier", "Stufe " + st + ": " + stuecke + " Stücke im Bild statt " + anzahl, "feier-anzahl");
-        // Lage und Schrift im Endbild mit allem Schmuck (LERN_Session29): kein Text unter 9 Einheiten, nichts über den
-        // Rand — beides fand bisher nur das Ansehen der Bilder
-        if (ruhig && n === 3) for (const f of pruefeFeierBild(bild))
-          melde("Feier", "Stufe " + st + ": " + f.text, "feier-" + f.art + ":" + st + ":" + f.text);
-        // Zahlenmauer (BAUEN): jeder Stein die Summe der beiden darunter, die Zahl im Stein gleich seinem Wert
-        const steine = new Map(teile.filter(t => t.getAttribute && t.getAttribute("data-stein"))
-          .map(t => [t.getAttribute("data-stein"), t]));
-        for (const [pos, t] of steine) {
-          const [r, i] = pos.split(",").map(Number), wert = Number(t.getAttribute("data-wert"));
-          const text = (t.textContent || "").replace(/\s/g, "");
-          if (text !== String(wert)) melde("Feier", "Stufe " + st + ": Stein " + pos + " zeigt " + text + " statt " + wert, "feier-stein");
-          if (r > 0) {
-            const a = steine.get((r - 1) + "," + i), b = steine.get((r - 1) + "," + (i + 1));
-            if (!a || !b || wert !== Number(a.getAttribute("data-wert")) + Number(b.getAttribute("data-wert")))
-              melde("Feier", "Stufe " + st + ": Stein " + pos + " ist nicht die Summe der beiden darunter", "feier-mauer");
-          }
-        }
-      }
+      for (const m of pruefeFeier(LS_FEIER, a.feierDef, a.stufen)) melde("Feier", m.text, m.schluessel);
       return;
     }
     // Ein Tipp (ctx.tipp, LERN_Session9) darf die Lösung so wenig verraten wie ein Hinweis nach einem Fehler.

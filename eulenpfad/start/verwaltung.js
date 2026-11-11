@@ -568,6 +568,14 @@ function zeichneVerwaltung(box, neu) {
         }, "gruen"), knopf("Abbrechen", () => (neueBemerkung.innerHTML = "")), hinweis));
         feld.focus();
       };
+      // Vorschau der Abschluss-Animationen (tools/feier_vorschau.html, Wunsch Patrik LERN_Session31): liegt nicht in der
+      // App, sondern im Repo; darum über den Entwickler-Server (seine Adresse, sonst dieselbe Seite) in einem neuen Tab
+      const server = (LS.meldeweg ? LS.meldeweg().server : "") || "";
+      const vorschau = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/.test(server) ? `${server.replace(/\/$/, "")}/tools/feier_vorschau.html` : "../tools/feier_vorschau.html";
+      teile.push(el("h3", { text: "Abschluss-Animationen" }),
+        el("p", { class: "leise-text" },
+          el("a", { class: "knopf hell", href: vorschau, target: "_blank", rel: "noopener", "data-aktion": "feier-vorschau", text: "🎬 Vorschau der Abschluss-Animationen" }),
+          " — alle sechs Stufen je Spiel, „✓ geprüft“ und Anmerkungen je Stufe oder zur ganzen Serie (öffnet in einem neuen Tab; nur über den Entwickler-Server)."));
       teile.push(el("h3", { text: "Bemerkungen" }),
         zeile(knopf("📝 Allgemeine Bemerkung", () => {
           neueBemerkung.innerHTML = "";
