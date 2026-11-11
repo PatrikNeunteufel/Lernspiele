@@ -1751,3 +1751,16 @@
   139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe: die zwölf
   Spiele von M4 „Keine Fehler.“, dazu himmels-forscher, rechen-rakete, dezimal-rakete (ZYKLUS, REISE, ZOOM) „Keine
   Fehler.“ — letzter voller Lauf weiter auf `6055527`.
+- Prüfung Lage und Schrift der Abschluss-Animationen (Prüfer-Kandidat aus LERN_Session28): `tools/feier_geometrie.js`
+  rechnet am ruhigen Endbild mit 3 Sternen ohne Layout aus den Attributen nach, ob ein Text unter 9 Einheiten der
+  viewBox liegt oder ein Teil mehr als 1,5 Einheiten über den Rand ragt (Transformationen, Kurven über Punkte auf der
+  Kurve, Bögen über ihren Mittelpunkt, Textbreite geschätzt); `tools/pruefe_spiele.js` ruft sie für jedes Spiel mit
+  Animation und prüft sie mit vierzehn Gegenproben. Die erste Fassung meldete 114 Stellen, im Browser mit `getBBox`
+  nachgemessen waren zwei echt: die Krone der Stoppuhr (Zeit-Schätzer s1–s4, 2 Einheiten über dem oberen Rand) und
+  „≈ 7 000 000“ unter dem rechten Tal der Runden-Rutsche s6 (4,4 Einheiten) — beide behoben. Die übrigen kamen aus der
+  Rechnung (Stützpunkte von Kurven, Leerzeichen so breit wie Ziffern); berichtigt und als Gegenprobe aufgenommen.
+  Gegenprüfung im Browser über alle 55 Spiele × 6 Stufen: nichts über dem Rand, kein Text unter 9 Einheiten. Doku
+  rahmen.md 24.
+- Tests: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad die 55 Spiele mit Animation
+  „Keine Fehler.“

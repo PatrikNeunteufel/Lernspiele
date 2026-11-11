@@ -38,9 +38,12 @@ for (const a of process.argv.slice(2)) {
 
 const { skripte, abweichungen, fingerabdrueckeVon } = require("./listen_fingerabdruck");
 
+// Lage und Schrift der Abschluss-Animation (tools/feier_geometrie.js), als Quelltext in den Treiber gegeben
+const GEOMETRIE = require("./feier_geometrie").pruefeFeierBild.toString();
 // Treiber im Kontext: Runden spielen, bis opt.runden protokolliert sind oder die Klicks ausgehen.
 const TREIBER = `
 (function treiber(runden, maxKlicks, endlos) {
+  ${GEOMETRIE}
   const buehne = document.querySelector(".buehne");
   const versteckt = e => !!e && (e.hidden === true || versteckt(e.parentNode));
   const funde = [];
@@ -158,6 +161,10 @@ const TREIBER = `
         const stuecke = teile.filter(t => t.getAttribute && t.getAttribute("data-stueck")).length;
         if (anzahl !== null && anzahl !== undefined && Number(anzahl) !== stuecke)
           melde("Feier", "Stufe " + st + ": " + stuecke + " Stücke im Bild statt " + anzahl, "feier-anzahl");
+        // Lage und Schrift im Endbild mit allem Schmuck (LERN_Session29): kein Text unter 9 Einheiten, nichts über den
+        // Rand — beides fand bisher nur das Ansehen der Bilder
+        if (ruhig && n === 3) for (const f of pruefeFeierBild(bild))
+          melde("Feier", "Stufe " + st + ": " + f.text, "feier-" + f.art + ":" + st + ":" + f.text);
         // Zahlenmauer (BAUEN): jeder Stein die Summe der beiden darunter, die Zahl im Stein gleich seinem Wert
         const steine = new Map(teile.filter(t => t.getAttribute && t.getAttribute("data-stein"))
           .map(t => [t.getAttribute("data-stein"), t]));
@@ -487,6 +494,38 @@ try {
   const exportiert = exportBlock.split(/[,\n]/).map(s => s.trim()).filter(s => /^[A-Za-z_$][\w$]*$/.test(s));
   for (const n of zaehle(deklariert)) { console.log(`    FEHLER  spiel.js: ${n} ist auf oberster Ebene doppelt deklariert (die spätere verdeckt die frühere)`); fehlerZahl++; }
   for (const n of zaehle(exportiert)) { console.log(`    FEHLER  spiel.js: ${n} steht doppelt in der Exportliste`); fehlerZahl++; }
+}
+// Gegenproben der Lage- und Schriftprüfung der Abschluss-Animation (tools/feier_geometrie.js, LERN_Session29): sie muss
+// melden, was über den Rand ragt oder zu klein geschrieben ist, und darf Unsichtbares und Zugeschnittenes nicht melden.
+{
+  const el = (localName, attr = {}, kinder = [], text = "") => ({ localName, children: kinder,
+    getAttribute: n => (n in attr ? String(attr[n]) : null), textContent: text || kinder.map(k => k.textContent).join("") });
+  const bild = (...k) => el("svg", { viewBox: "0 0 320 150" }, k);
+  const { pruefeFeierBild } = require("./feier_geometrie");
+  const FAELLE = [
+    ["Text 8 gross", bild(el("text", { x: 10, y: 20, "font-size": 8 }, [], "12")), "schrift"],
+    ["Text 14 halbiert", bild(el("g", { transform: "scale(0.5)" }, [el("text", { x: 10, y: 40, "font-size": 14 }, [], "12")])), "schrift"],
+    ["Text 9 gross", bild(el("text", { x: 10, y: 20, "font-size": 9 }, [], "12")), null],
+    ["Kreis rechts hinaus", bild(el("circle", { cx: 315, cy: 70, r: 10 })), "rand"],
+    ["Rechteck verschoben", bild(el("g", { transform: "translate(300 0)" }, [el("rect", { x: 0, y: 10, width: 40, height: 10 })])), "rand"],
+    ["Bogen rechts herum hinaus", bild(el("path", { d: "M300,10 A30,30 0 1,1 300,70" })), "rand"],
+    ["Bogen links herum drinnen", bild(el("path", { d: "M300,10 A30,30 0 1,0 300,70" })), null],
+    ["Text am Ende verankert", bild(el("text", { x: 316, y: 70, "font-size": 12, "text-anchor": "end" }, [], "1 h 20 min")), null],
+    ["Text am Anfang verankert", bild(el("text", { x: 316, y: 70, "font-size": 12 }, [], "1 h 20 min")), "rand"],
+    ["unsichtbar", bild(el("g", { opacity: 0 }, [el("circle", { cx: 400, cy: 70, r: 5 })])), null],
+    ["zugeschnitten", bild(el("g", { "clip-path": "url(#k)" }, [el("rect", { x: -100, y: -100, width: 600, height: 400 })])), null],
+    // der Stützpunkt liegt über dem Rand, die Kurve nicht (Bögen der Teiler-Spürnase)
+    ["Kurve mit hohem Stützpunkt", bild(el("path", { d: "M100,30 Q150,-20 200,30" })), null],
+    ["Kurve über dem Rand", bild(el("path", { d: "M100,30 Q150,-40 200,30" })), "rand"],
+    ["Linie um die Mitte gedreht", bild(el("g", { transform: "rotate(90 160 75)" }, [el("line", { x1: 60, y1: 75, x2: 260, y2: 75 })])), "rand"],
+  ];
+  for (const [name, b, art] of FAELLE) {
+    const f = pruefeFeierBild(b);
+    if (art ? !f.some(x => x.art === art) : f.length) {
+      console.log(`    FEHLER  Gegenprobe Feier-Geometrie „${name}“: erwartet ${art || "keine Meldung"}, gemeldet ${JSON.stringify(f)}`);
+      fehlerZahl++;
+    }
+  }
 }
 const ohneTipp = new Map(); // Spiel → Stufen ohne ctx.tipp (Übersicht am Ende, LERN_Session9)
 console.log(`Prüfe ${ids.length} Spiele × ${STUFEN.length} Stufen (je ${opt.runden} Runden, ${opt.aufgaben} Generator-Aufgaben, Startwert ${opt.seed})\n`);

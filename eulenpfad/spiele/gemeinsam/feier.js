@@ -672,8 +672,10 @@ var LS_FEIER = (function () {
           svg.appendChild(bewege(wg, `M${sx},${sy} L${ex},${grundY}`, { x: ex, y: grundY, winkel: 0 }, ruhig, { drehen: false, ab: i * 0.3, dauer: DAUER - i * 0.3 }));
           if (gezeigt.has(f.ziel)) return;
           gezeigt.add(f.ziel);
-          svg.appendChild(erscheine(s("text", { x: x(f.ziel), y: grundY + 32, fill: "#2d3047", "font-size": 13, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" },
-            "≈ " + text(f.ziel, z.stellen)), DAUER, ruhig));
+          // ganz im Bild: „≈ 7 000 000“ ragte unter dem rechten Tal 4 Einheiten hinaus (Prüfung Lage, LERN_Session29)
+          const ergebnis = "≈ " + text(f.ziel, z.stellen), halb = ergebnis.length * 3.6;
+          svg.appendChild(erscheine(s("text", { x: Math.min(Math.max(x(f.ziel), halb + 4), BREITE - halb - 4), y: grundY + 32, fill: "#2d3047", "font-size": 13,
+            "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" }, ergebnis), DAUER, ruhig));
         });
         const letzt = x(faelle[faelle.length - 1].ziel);
         if (sterne >= 2) svg.appendChild(fahne(Math.min(letzt + 12, BREITE - 16), grundY - 4, ruhig));
@@ -2477,7 +2479,9 @@ var LS_FEIER = (function () {
   function uhr(feier, { stufe, sterne, ruhig }) {
     const z = feier.ziele?.[stufe];
     if (!z) return null;
-    const cx = 160, cy = 64, r = 54, ab = 0.15, dauer = DAUER * 0.75;
+    // die Stoppuhr etwas tiefer und kleiner: ihre Krone ragte sonst 2 Einheiten über den Rand (Prüfung Lage)
+    const stopp = z.sekunden !== undefined || z.minuten !== undefined;
+    const cx = 160, cy = stopp ? 68 : 64, r = stopp ? 52 : 54, ab = 0.15, dauer = DAUER * 0.75;
     const svg = neuesBild("zyklus", stufe, { "data-bilder": "uhr" });
     svg.appendChild(tagGrund());
     let zeile = null, digital = null;

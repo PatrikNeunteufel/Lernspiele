@@ -1172,7 +1172,11 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
 - **Test:** Der Rahmen meldet `pruefung.haken("schluss", …)`; `tools/pruefe_spiele.js` prüft für jedes Spiel mit
   `feier`: `feier.js` geladen, Animation im Schlussbild, jede Stufe mit Bild, Schmuck passend zu 1–3 Sternen, mit
   „Bewegung reduzieren“ keine Bewegung, sonst Bewegung, und jede `animateTransform` mit einer gültigen Art (translate,
-  scale, rotate, skewX, skewY — eine andere übergeht der Browser still). Die Klickzahlen eines Spiels mit Animation ändern sich (kein
+  scale, rotate, skewX, skewY — eine andere übergeht der Browser still). Seit LERN_Session29 dazu **Lage und Schrift**
+  im ruhigen Endbild mit 3 Sternen (`tools/feier_geometrie.js`, ohne Layout aus den Attributen gerechnet): kein Text
+  unter 9 Einheiten der viewBox, kein Teil mehr als 1,5 Einheiten über den Rand; Unsichtbares (opacity 0) und
+  Zugeschnittenes (clip-path, die Karte) zählen nicht. Kurven über Punkte auf der Kurve, Bögen über ihren Mittelpunkt,
+  Textbreite geschätzt (gegen `getBBox` im Browser abgeglichen); vierzehn Gegenproben bei jedem Lauf. Die Klickzahlen eines Spiels mit Animation ändern sich (kein
   Konfetti mehr, das Zufallszahlen verbrauchte; die Animation ist anklickbar).
 - **Vorschau:** `?feier=<stufe>&sterne=1–3[&ruhig=1]` zeigt nur das Schlussbild mit der Animation und „↻ Nochmal“ —
   ohne Anmeldung, ohne Runde, nichts wird gespeichert; die Stufe kommt aus der Skala (auch wenn ihre Inhaltslisten
