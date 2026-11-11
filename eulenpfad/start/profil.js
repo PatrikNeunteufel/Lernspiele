@@ -23,6 +23,7 @@ function avatarWahl(name, neu, alsKind) {
   const motiv = jetzt?.motiv.id || null;
   const farbe = jetzt?.farbe.id || AVATARE.FARBEN[0].id;
   const rahmen = jetzt?.rahmen.id || "einfach";
+  const form = jetzt?.form.id || "rund"; // Form des Rahmens (Wunsch Patrik LERN_Session32), frei für alle
   const frei = freischaltungenVon(name);
   const freiMotive = new Set(frei.motive.map(x => x.id));
   const freiRahmen = new Set(["einfach", ...frei.rahmen.map(x => x.id)]);
@@ -32,7 +33,7 @@ function avatarWahl(name, neu, alsKind) {
   if (alsKind && avatarNeu?.name !== name) avatarNeu = { name, neu: new Set(frei.schluessel.filter(s => !gesehen.has(s))) };
   if (alsKind && frei.schluessel.some(s => !gesehen.has(s))) LS.speichereProfil(name, { freiGesehen: frei.schluessel });
   const neuFrei = s => (alsKind ? avatarNeu.neu.has(s) : !gesehen.has(s));
-  const setze = (m, f, r) => { LS.speichereProfil(name, { avatar: AVATARE.kennung(m, f, r) }); LS.ton?.("tipp"); neu(); };
+  const setze = (m, f, r, fo = form) => { LS.speichereProfil(name, { avatar: AVATARE.kennung(m, f, r, fo) }); LS.ton?.("tipp"); neu(); };
   const satz = AVATARE.SAETZE.find(s => s.id === avatarSatz) || AVATARE.SAETZE.find(s => s.motive.some(m => m.id === motiv)) || AVATARE.SAETZE[0];
   const titelVon = id => ERFOLGE.ABZEICHEN.find(a => `abz-${a.id}` === id)?.titel || "";
   const knopf = (kennung, an, offen, text, onclick, neuMarke) => {
@@ -46,7 +47,7 @@ function avatarWahl(name, neu, alsKind) {
   const motivKnopf = m => {
     const offen = !satz.freischalten || freiMotive.has(m.id);
     const text = offen ? m.name : `${m.name} — wählbar ab 🥇 Gold bei „${titelVon(m.id)}“`;
-    return knopf(AVATARE.kennung(m.id, farbe, rahmen), m.id === motiv, offen, text, () => setze(m.id, farbe, rahmen), satz.freischalten && neuFrei(`motiv:${m.id}`));
+    return knopf(AVATARE.kennung(m.id, farbe, rahmen, form), m.id === motiv, offen, text, () => setze(m.id, farbe, rahmen), satz.freischalten && neuFrei(`motiv:${m.id}`));
   };
   const RAHMEN_WEG = { gold: "ab dem ersten Abzeichen in 🥇 Gold", platin: "ab dem ersten Abzeichen in 🏆 Platin", diamant: "ab dem ersten Abzeichen in 💎 Diamant" };
   return el("div", { class: "avatar-wahl" },
@@ -67,9 +68,14 @@ function avatarWahl(name, neu, alsKind) {
     el("b", { text: "Rahmen" }),
     el("div", { class: "avatar-rahmen" }, ...AVATARE.RAHMEN.map(r => {
       const offen = freiRahmen.has(r.id);
-      return knopf(AVATARE.kennung(motiv || AVATARE.SAETZE[0].motive[0].id, farbe, r.id), r.id === rahmen, offen,
+      return knopf(AVATARE.kennung(motiv || AVATARE.SAETZE[0].motive[0].id, farbe, r.id, form), r.id === rahmen, offen,
         offen ? `Rahmen ${r.name}` : `Rahmen ${r.name} — ${RAHMEN_WEG[r.id]}`, () => setze(motiv || AVATARE.SAETZE[0].motive[0].id, farbe, r.id), r.id !== "einfach" && neuFrei(`rahmen:${r.id}`));
-    })));
+    })),
+    // Form des Rahmens: rund, Quadrat, Dreieck mit der Spitze oben oder unten, Fünfeck — für alle frei
+    el("b", { text: "Form" }),
+    el("div", { class: "avatar-rahmen avatar-formen" }, ...AVATARE.FORMEN.map(fo =>
+      knopf(AVATARE.kennung(motiv || AVATARE.SAETZE[0].motive[0].id, farbe, rahmen, fo.id), fo.id === form, true, `Form ${fo.name}`,
+        () => setze(motiv || AVATARE.SAETZE[0].motive[0].id, farbe, rahmen, fo.id)))));
 }
 
 function zeichneProfil(box, neu) {

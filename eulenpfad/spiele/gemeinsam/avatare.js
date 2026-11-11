@@ -273,39 +273,57 @@ const AVATARE = (() => {
     { id: "platin", name: "Platin", rang: "platin" },
     { id: "diamant", name: "Diamant", rang: "diamant" },
   ];
+  // Form des Rahmens (Wunsch Patrik LERN_Session32): das Kind wählt sie im Profil; rund ist die Vorgabe. ecken: Zahl der
+  // Ecken, dreh: Winkel der ersten Ecke, k: wie stark die Ecken gegenüber dem Kreis hervortreten (sonst würde das Motiv
+  // im Dreieck zu stark beschnitten). In der Kennung nur, wenn nicht rund.
+  const FORMEN = [
+    { id: "rund", name: "Rund", ecken: 0 },
+    { id: "quadrat", name: "Quadrat", ecken: 4, dreh: -Math.PI / 4, k: 0.8 },
+    { id: "spitzoben", name: "Dreieck, Spitze oben", ecken: 3, dreh: -Math.PI / 2, k: 0.55 },
+    { id: "spitzunten", name: "Dreieck, Spitze unten", ecken: 3, dreh: Math.PI / 2, k: 0.55 },
+    { id: "fuenfeck", name: "Fünfeck", ecken: 5, dreh: -Math.PI / 2, k: 0.7 },
+  ];
   const ALLE = SAETZE.flatMap(s => s.motive.map(m => ({ ...m, satz: s.id })));
   const motiv = id => ALLE.find(m => m.id === id);
   const farbe = id => FARBEN.find(f => f.id === id);
   const rahmen = id => RAHMEN.find(r => r.id === id);
-  /** Kennung „<motiv>-<farbe>[-<rahmen>]“ zerlegen (Motive dürfen Bindestriche haben); null, wenn unbekannt. */
+  const formVon = id => FORMEN.find(f => f.id === id);
+  /** Kennung „<motiv>-<farbe>[-<rahmen>][-<form>]“ zerlegen (Motive dürfen Bindestriche haben); null, wenn unbekannt. */
   function zerlege(kennung) {
     const teile = String(kennung || "").split("-");
+    const fo = formVon(teile.at(-1)) ? formVon(teile.pop()) : FORMEN[0];
     const r = rahmen(teile.at(-1)) ? rahmen(teile.pop()) : RAHMEN[0];
     const f = farbe(teile.pop());
     const m = motiv(teile.join("-"));
-    return m && f ? { motiv: m, farbe: f, rahmen: r } : null;
+    return m && f ? { motiv: m, farbe: f, rahmen: r, form: fo } : null;
   }
-  const kennung = (motivId, farbId, rahmenId = "einfach") => `${motivId}-${farbId}${rahmenId && rahmenId !== "einfach" ? `-${rahmenId}` : ""}`;
+  const kennung = (motivId, farbId, rahmenId = "einfach", formId = "rund") =>
+    `${motivId}-${farbId}${rahmenId && rahmenId !== "einfach" ? `-${rahmenId}` : ""}${formId && formId !== "rund" ? `-${formId}` : ""}`;
 
   let zaehler = 0; // je Bild eigene Ids für Zuschnitt und Verläufe (mehrere Avatare auf einer Seite)
 
-  // ----- Form: Kreis, oder im Stil „wie von Hand gezeichnet“ leicht verformt (Wunsch Patrik LERN_Session32) -----
-  // Je Avatar (Motiv und Farbe) gleich: rund oder eher eckig (Superellipse), der Rand wellt sich langsam, das Band des
-  // Rahmens ist mal dicker, mal dünner. form.r(w) ist der Abstand der Mitte des Bandes von (50, 50) im Winkel w,
-  // form.d(w) seine Dicke; ohne „hand“ ein Kreis mit Radius 47 und fester Dicke.
-  const KREIS = { r: () => 47, d: (_, d) => d, hand: false };
-  function handForm(saat) {
+  // ----- Form zeichnen: Kreis oder Vieleck, im Stil „wie von Hand gezeichnet“ leicht verformt -----
+  // form.r(w) ist der Abstand der Mitte des Bandes von (50, 50) im Winkel w, form.d(w) seine Dicke. Vielecke: zwischen
+  // Kreis (46.5) und Vieleck (Umkreis 54) gemischt, damit die Ecken gerundet bleiben und das Motiv sichtbar. „hand“: der
+  // Rand wellt sich langsam, das Band ist mal dicker, mal dünner (je Motiv und Farbe gleich).
+  const KREIS = { r: () => 47, d: (_, d) => d, pfad: false };
+  function formFuer(fo, hand, saat) {
+    if (!hand && !fo.ecken) return KREIS;
+    const vieleck = w => {
+      if (!fo.ecken) return 46.5;
+      const teil = (2 * Math.PI) / fo.ecken, phi = ((((w - fo.dreh) % teil) + teil) % teil) - teil / 2;
+      return (1 - fo.k) * 46.5 + fo.k * (54 * Math.cos(Math.PI / fo.ecken)) / Math.cos(phi);
+    };
+    // Ecken höchstens 48 von der Mitte: mit Band und Schmuck (der grosse Diamant auf der Spitze oben) bleibt alles im
+    // Bild (Radius 56; gemessen LERN_Session32)
+    if (!hand) return { r: w => Math.min(48, vieleck(w)), d: (_, d) => d, pfad: true };
     let h = 2166136261;
     for (const c of saat) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
     const z = () => { h = (h + 0x6d2b79f5) | 0; let t = Math.imul(h ^ (h >>> 15), 1 | h); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-    const eckig = z() < 0.45, p1 = z() * 6.3, p2 = z() * 6.3, p3 = z() * 6.3, f1 = 2 + Math.floor(z() * 2), f2 = 5 + Math.floor(z() * 3);
+    const p1 = z() * 6.3, p2 = z() * 6.3, p3 = z() * 6.3, f1 = 2 + Math.floor(z() * 2), f2 = 5 + Math.floor(z() * 3);
     return {
-      hand: true,
-      r: w => {
-        const c = Math.abs(Math.cos(w)), s = Math.abs(Math.sin(w));
-        const grund = eckig ? 43 / Math.pow(c ** 4 + s ** 4, 0.25) : 46.5; // eckig: Ecken bis 51, Seiten 43 (im Bild bis 56)
-        return grund + 1.6 * Math.sin(f1 * w + p1) + 0.8 * Math.sin(f2 * w + p2);
-      },
+      pfad: true,
+      r: w => Math.min(50, vieleck(w)) + 1.6 * Math.sin(f1 * w + p1) + 0.8 * Math.sin(f2 * w + p2),
       d: (w, d) => d * (1 + 0.45 * Math.sin(f1 * w + p3)),
     };
   }
@@ -315,7 +333,7 @@ const AVATARE = (() => {
     return `${(50 + q * Math.cos(w)).toFixed(2)},${(50 + q * Math.sin(w)).toFixed(2)}`;
   }).join(" L") + " Z";
   /** Band des Rahmens: Fläche zwischen aussen und innen, Dicke d (je Winkel veränderlich bei „hand“). */
-  const band = (form, d, fuellung) => form.hand
+  const band = (form, d, fuellung) => form.pfad
     ? `<path d="${umrissPfad(form.r, w => form.d(w, d) / 2)} ${umrissPfad(form.r, w => -form.d(w, d) / 2)}" fill="${fuellung}" fill-rule="evenodd"/>`
     : `<circle cx="50" cy="50" r="47" fill="none" stroke="${fuellung}" stroke-width="${d}"/>`;
 
@@ -339,17 +357,17 @@ const AVATARE = (() => {
     return band(form, 4, f.rand);
   }
   /**
-   * SVG als Text; ohne gültige Kennung null. opt.hand: verformte Form (Stil „wie von Hand gezeichnet“); ohne Angabe
-   * nach der Einstellung stil (STIL in spiel.js), sonst Kreis.
+   * SVG als Text; ohne gültige Kennung null. Form aus der Kennung (rund, Quadrat, Dreiecke, Fünfeck); opt.hand: leicht
+   * verformt (Stil „wie von Hand gezeichnet“), ohne Angabe nach der Einstellung stil (STIL in spiel.js).
    */
   function svg(k, groesse = 48, opt = {}) {
     const a = zerlege(k);
     if (!a) return null;
     const id = `avatar-${++zaehler}`;
     const hand = opt.hand ?? (typeof STIL !== "undefined" && STIL.an());
-    const form = hand ? handForm(`${a.motiv.id}-${a.farbe.id}`) : KREIS;
-    const flaeche = form.hand ? `<path d="${umrissPfad(form.r)}" fill="${a.farbe.hell}"/>` : kreis(50, 50, 47, a.farbe.hell);
-    const zuschnitt = form.hand ? `<path d="${umrissPfad(form.r, () => -1)}"/>` : `<circle cx="50" cy="50" r="46"/>`;
+    const form = formFuer(a.form, hand, `${a.motiv.id}-${a.farbe.id}`);
+    const flaeche = form.pfad ? `<path d="${umrissPfad(form.r)}" fill="${a.farbe.hell}"/>` : kreis(50, 50, 47, a.farbe.hell);
+    const zuschnitt = form.pfad ? `<path d="${umrissPfad(form.r, () => -1)}"/>` : `<circle cx="50" cy="50" r="46"/>`;
     return `<svg class="avatar-bild" viewBox="-6 -6 112 112" width="${groesse}" height="${groesse}" role="img" aria-label="${a.motiv.name}">`
       + `<defs><clipPath id="${id}-rund">${zuschnitt}</clipPath></defs>`
       + flaeche + `<g clip-path="url(#${id}-rund)">${a.motiv.zeichne()}</g>` + rahmenSvg(a.rahmen, a.farbe, id, form) + `</svg>`;
@@ -359,5 +377,5 @@ const AVATARE = (() => {
     const m = motiv(id);
     return m ? `<svg class="motiv-bild" viewBox="0 0 100 100" width="${groesse}" height="${groesse}" role="img" aria-label="${m.name}">${m.zeichne()}</svg>` : null;
   }
-  return { SAETZE, FARBEN, RAHMEN, zerlege, kennung, svg, motivSvg, motiv, name: k => zerlege(k)?.motiv.name || null };
+  return { SAETZE, FARBEN, RAHMEN, FORMEN, zerlege, kennung, svg, motivSvg, motiv, name: k => zerlege(k)?.motiv.name || null };
 })();
