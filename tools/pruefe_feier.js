@@ -84,7 +84,8 @@ function lade(id) {
   }
   lauf("__uhr.weiter(5000)", "warten"); // Spiele, die auf eine Stimme warten
   const def = vm.runInContext("typeof __def === 'undefined' ? null : __def", kontext);
-  if (!def || !def.feier) return null;
+  // die Angabe steht im Katalog (GS1 a), bei Seiten, die Daten der Seite brauchen, in LS.spiel
+  if (!def || !(def.feier || kat.SPIELE.find(x => x.id === id)?.feier)) return null;
   // alle Stufen des Katalogs, nicht nur die angebotenen (die hängen an freien Inhaltslisten)
   const eintrag = kat.SPIELE.find(x => x.id === id);
   return { kontext, stufen: [...(eintrag && eintrag.stufen) || Object.keys(def.stufen || {})] };
@@ -103,7 +104,7 @@ for (const id of liste) {
   if (!s) { if (mitFeier.includes(id)) melde(id, "im Katalog mit „feier“, aber ohne feier in LS.spiel"); continue; }
   if (!mitFeier.includes(id)) melde(id, "feier in LS.spiel, aber im Katalog ohne „feier“ in einstellungen");
   let m;
-  try { m = vm.runInContext(`${PRUEFUNG}; typeof LS_FEIER === "undefined" ? null : __pruefeFeier(LS_FEIER, __def.feier, ${JSON.stringify(s.stufen)})`, s.kontext, { timeout: 30000 }); }
+  try { m = vm.runInContext(`${PRUEFUNG}; typeof LS_FEIER === "undefined" ? null : __pruefeFeier(LS_FEIER, __def.feier || SPIELE.find(x => x.id === __def.id)?.feier,${JSON.stringify(s.stufen)})`, s.kontext, { timeout: 30000 }); }
   catch (e) { melde(id, `Prüfung bricht ab: ${e.message}`); continue; }
   if (m === null) { melde(id, "feier in LS.spiel, aber feier.js nicht geladen"); continue; }
   geprueft++;

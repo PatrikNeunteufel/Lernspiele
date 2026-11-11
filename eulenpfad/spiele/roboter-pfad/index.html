@@ -557,8 +557,6 @@ function tippsFuer(a) {
 }
 
 LS.spiel({
-  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "karte", bilder: "roboter", ziele: { s1: { raster: 4, start: [0, 3, 0], steine: [[2, 1]], programm: ["V", "V", "R", "V"] }, s2: { raster: 4, start: [0, 3, 1], programm: ["V", "V", "L", "V"] }, s3: { raster: 5, start: [0, 4, 0], steine: [[0, 2], [3, 1], [3, 3]], programm: ["V", "R", "V", "L", "V", "V"] }, s4: { raster: 5, start: [0, 0, 2], steine: [[1, 1], [2, 3], [4, 2], [0, 3]], programm: ["V", "V", "L", "V", "V", "V", "R", "V"] }, s5: { raster: 6, start: [0, 5, 0], steine: [[2, 1], [3, 4], [4, 0]], programm: [{ mal: 3, karten: ["V"] }, "R", { mal: 4, karten: ["V"] }, "L", "V"] }, s6: { raster: 6, start: [0, 5, 1], steine: [[3, 5], [1, 2], [4, 4], [5, 1], [0, 0]], programm: [{ solange: 8 }] } } },
   id: "roboter-pfad",
   einleitung: "Piep! Ich bin ein Roboter und mache genau, was die Karten sagen: vor, links drehen, rechts drehen.",
   hilfe: stufe => {

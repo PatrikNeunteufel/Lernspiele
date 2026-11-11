@@ -207,10 +207,6 @@ const TIPPS = {
 
 LS.spiel({
   id: "reim-paare",
-  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "sammeln", bilder: "reime", ziele: { s1: { paare: [["🐭", "🏠"]] }, s2: { paare: [["🐕", "👄"]] },
-    s3: { paare: [["🐄", "👟"], ["👖", "🌹"], ["👃", "🐇"]] }, s4: { paare: [["🐭", "🏠"], ["🦵", "🐖"], ["☀️", "🛢️"], ["👓", "🦗"]], nicht: "🍎" },
-    s5: { paare: [["🐕", "👄"], ["🐄", "👟"]], nicht: "🚗" }, s6: { paare: [["🐭", "🏠"], ["🐕", "👄"], ["🐄", "👟"], ["👖", "🌹"], ["👃", "🐇"], ["🦵", "🐖"]] } } },
   einleitung: "Maus und Haus — das reimt sich! Hör genau hin: Welche Wörter klingen am Ende gleich?",
   hilfe: stufe => (STUFE[stufe] && STUFE[stufe].every(([, art]) => art === "paare")
     ? "Tippe zwei Bilder an, die sich reimen. Passen sie, bleiben sie liegen. Mach weiter, bis alle Paare gefunden sind."

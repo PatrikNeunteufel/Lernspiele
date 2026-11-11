@@ -1061,9 +1061,12 @@ unter `patrikneunteufel.github.io` zusammen. Den Abgleich-Ordner merkt der Brows
 
 ## 24. Abschluss-Animation (`feier.js`)
 
-Seit LERN_Session27 (docs/konzept_abschluss_animationen.md, Entscheide AN1 a, AN2 a, AN3 a). Ein Spiel beschreibt seine
-Animation in `LS.spiel({ …, feier: { muster, … } })`, lädt `../gemeinsam/feier.js` nach `spiel.js` und nennt im Katalog
-`einstellungen: ["feier"]`. Das Schlussbild zeigt sie (`LS_FEIER.zeige`) zwischen „Geschafft“ und den Sternen, wenn die
+Seit LERN_Session27 (docs/konzept_abschluss_animationen.md, Entscheide AN1 a, AN2 a, AN3 a). Die Animation eines Spiels
+steht **im Katalog**, im Eintrag als `feier: { muster, … }` (Entscheid GS1 a, LERN_Session32: einzige Quelle, damit die
+Startseite das Kartenbild zeichnen kann; docs/eulenpfad/konzept_gestaltung.md). `LS.spiel` übernimmt sie von dort
+(`def.feier`); eine Seite gibt sie nur selbst in `LS.spiel({ …, feier })`, wenn sie Daten der Seite braucht (heute die
+Schweiz-Karte mit `KARTE` aus `karte.js`) — stehen beide da, meldet die Konsole einen Fehler. Das Spiel lädt
+`../gemeinsam/feier.js` nach `spiel.js` und nennt im Katalog `einstellungen: ["feier"]`. Das Schlussbild zeigt sie (`LS_FEIER.zeige`) zwischen „Geschafft“ und den Sternen, wenn die
 Einstellung „Abschluss-Animation“ (`EINSTELLUNGEN.feier`, global und je Spiel) an ist; dann entfällt das Konfetti.
 Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
 

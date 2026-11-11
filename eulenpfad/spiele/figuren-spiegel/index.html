@@ -215,9 +215,6 @@ const BREITE = 280; // Antworten sind Sätze: ein Knopf je Zeile auf dem Handy, 
 
 LS.spiel({
   id: ID,
-  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "auftritt", bilder: "theater", ziele: { s1: ["😊"], s2: ["😊", "😢"], s3: ["😊", "😢", "😠"], s4: ["😊", "😢", "😠", "😮"],
-    s5: ["😊", "😢", "😠", "😮", "🤔"], s6: ["😊", "😢", "😠", "😮", "🤔", "😏"] } },
   einleitung: "Schau in den Figuren-Spiegel! Lies die Szene genau: Was fühlt die Figur, was will sie wirklich — und warum tut sie das?",
   hilfe: stufe => "Lies zuerst die ganze Szene. Dann lies die Frage und tippe die Antwort an, die zur Szene passt."
     + (STUFE[stufe].bloecke.length > 1 ? ` Zu jeder Szene kommen ${STUFE[stufe].bloecke.length} Fragen nacheinander.` : ""),

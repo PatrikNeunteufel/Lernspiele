@@ -332,10 +332,6 @@ const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter((
 
 LS.spiel({
   id: ID,
-  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "bauen", bilder: "morphem", ziele: { s1: [["s", "e"]], s2: [["v", "s", "e"]], s3: [["v", "s", "e"], ["s", "e"]],
-    s4: [["s", "e"], ["v", "s"], ["s", "s", "e"]], s5: [["s", "e"], ["v", "s", "e"], ["s", "e", "e"], ["v", "s"]],
-    s6: [["v", "s", "e", "e"], ["s", "s", "e"], ["v", "s", "e"], ["s", "e"]] } },
   einleitung: "Wörter sind aus Bausteinen gebaut: Vorsilbe, Stamm und Endung — wie ver | kauf | en. Schneide sie mit der Schere auseinander! Der Stamm verrät dir auch, ob man e oder ä schreibt.",
   hilfe: "Tippe zwischen zwei Buchstaben, dann schneidet die Schere dort; nochmals tippen klebt wieder zusammen. Mit „Prüfen ✓“ schaust du, ob die Schnitte stimmen. Danach tippst du den Stamm an. Bei e oder ä tippst du die richtige Schreibweise an.",
   anzahl: 8,

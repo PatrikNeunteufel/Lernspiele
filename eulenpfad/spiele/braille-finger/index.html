@@ -300,8 +300,6 @@ function tippsFuer(a, stufe) {
 
 LS.spiel({
   id: "braille-finger",
-  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "bauen", bilder: "braille", ziele: { s1: { text: "d", zaehlen: true }, s2: { text: "b" }, s3: { text: "k" }, s4: { text: "hund" }, s5: { text: "m" }, s6: { text: "eule", finger: true } } },
   hilfe: stufe => (stufe === "s1" ? "Schau die Braille-Zelle an und tippe die passende Antwort an."
     : stufe === "s5" || stufe === "s6" ? `Tippe in der grossen Zelle die Punkte an, die schwarz sein sollen; nochmals tippen nimmt einen Punkt weg, «Alle weg ↺» leert die Zelle. Dann tippst du «Prüfen ✓»${stufe === "s6" ? " — so schreibst du das Wort Buchstabe für Buchstabe" : ""}.`
     : "Lies die Braille-Zelle und tippe die passende Antwort an. Die Tafel zeigt dir, wie die Buchstaben aussehen."),

@@ -492,9 +492,6 @@ function eingabe(ctx, zs, { soll, einheit, label, loesung, hinweis, maxStellen =
 
 LS.spiel({
   id: ID,
-  // Abschluss-Animation (feier.js, Block M4, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "zyklus", bilder: "uhr", ziele: { s1: { sekunden: 1 }, s2: { sekunden: 60 }, s3: { minuten: 10 }, s4: { minuten: 60 },
-    s5: { von: "9:45", bis: "10:20" }, s6: { von: "8:00", dauer: 135, zerlegen: true } } },
   einleitung: "Wie lange dauert das? Hier schätzt du Zeit: Was ist schnell vorbei, was dauert lange — und was ist ein Zeitpunkt, was eine Zeitdauer?",
   hilfe: stufe => ({
     s1: "Tippe das Bild an, das zur Frage passt. Bei der Karte tippst du den Korb an, in den sie gehört.",

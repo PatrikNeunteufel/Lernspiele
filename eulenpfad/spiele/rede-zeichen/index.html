@@ -358,9 +358,6 @@ function tippsFuer(a, p) {
 const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => angeboten(s)));
 
 LS.spiel({
-  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "auftritt", bilder: "rede", ziele: { s1: [{ art: "erkennen", woerter: 6, rede: [3, 4, 5] }], s2: [{ art: "vorne", zeichen: "." }], s3: [{ art: "hinten", zeichen: "." }],
-    s4: [{ art: "vorne", zeichen: "." }, { art: "hinten", zeichen: "." }], s5: [{ art: "vorne", zeichen: "?" }, { art: "hinten", zeichen: "!" }], s6: [{ art: "mitte", zeichen: "." }] } },
   id: ID,
   einleitung: "Wenn jemand spricht, braucht der Satz besondere Zeichen: Lea sagt: „Ich komme mit.“ Setz sie richtig — das Schema hilft dir!",
   hilfe: stufe => (STUFE[stufe]?.modus === "erkennen"

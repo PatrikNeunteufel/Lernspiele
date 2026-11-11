@@ -116,10 +116,6 @@ const text = t => (t.op ? `${zahlText(t.a)} ${t.op} ${zahlText(t.b)}` : zahlText
 
 LS.spiel({
   id: "zahlen-waage",
-  // Abschluss-Animation (feier.js, Block M3, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "bauen", bilder: "waage", ziele: { s1: { links: [2, "+", 3], rechts: [5] }, s2: { links: [4, "+", 5], rechts: [9] },
-    s3: { links: [6, "+", 3], rechts: [5, "+", 4] }, s4: { links: [15, "−", 4], rechts: [8, "+", 3] },
-    s5: { links: [40, "+", 23], rechts: [50, "+", 13] }, s6: { links: [4, "·", 6], rechts: [3, "·", 8] } } },
   einleitung: "Die Waage ist nur dann gerade, wenn beide Seiten gleich viel sind. Welche Zahl fehlt?",
   hilfe: "Tipp die Zahl ein, die beim „?“ fehlt. Die Waage neigt sich schon beim Eintippen: Die schwerere Seite geht nach unten. Ist sie gerade, drückst du OK.",
   anzahl: 8,

@@ -231,9 +231,6 @@ function tippsFuer(stufe) {
 }
 
 const SPIEL = {
-  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "auftritt", bilder: "lagerfeuer", ziele: { s1: { zuhoerer: ["🧒"] }, s2: { zuhoerer: ["🧒", "👴"] }, s3: { zuhoerer: ["👧", "🧒", "👴"] },
-    s4: { zuhoerer: ["👴", "👧", "🧒"] }, s5: { zuhoerer: ["🧒", "👧", "👴"] }, s6: { zuhoerer: ["🧒", "👧", "👴"], titel: true } } },
   id: ID,
   hilfe: stufe => (STUFE[stufe]?.vorher ? "Schau zuerst die Fragen an. " : "")
     + "Die Eule erzählt dir eine Geschichte. Hör gut zu! Danach kommen die Fragen, eine nach der anderen — tipp die richtige Antwort an. Mit „🔊 Nochmal hören“ hörst du die Geschichte noch einmal."

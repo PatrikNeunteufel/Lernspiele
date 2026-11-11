@@ -388,8 +388,6 @@ function wahlAufgabe(ctx, a) {
 }
 
 LS.spiel({
-  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "sammeln", bilder: "nim", ziele: { s1: { reihen: [5], max: 2 }, s2: { reihen: [10], max: 3 }, s3: { reihen: [18], max: 3 }, s4: { reihen: [20], max: 4, eule: true }, s5: { reihen: [5, 3] }, s6: { reihen: [3, 5, 7] } } },
   id: "stein-duell",
   einleitung: "Du und ich nehmen abwechselnd Steine. Wer den letzten Stein nimmt, gewinnt! Findest du den Zug, nach dem ich nicht mehr gewinnen kann?",
   hilfe: stufe => (stufe === "s4"

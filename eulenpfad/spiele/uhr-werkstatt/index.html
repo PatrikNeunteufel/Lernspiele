@@ -232,10 +232,6 @@ const HILFE_TIPPEN = "Eine Uhrzeit tippst du so: zuerst die Stunde, dann zwei Zi
 
 LS.spiel({
   id: "uhr-werkstatt",
-  // Abschluss-Animation (feier.js, Block M4, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "zyklus", bilder: "uhr", ziele: { s1: { von: "3:00", zeit: "3:30" }, s2: { von: "4:00", zeit: "4:45" },
-    s3: { von: "7:00", zeit: "7:25", digital: true }, s4: { von: "8:00", zeit: "8:43", digital: true }, s5: { von: "7:50", dauer: 35 },
-    s6: { von: "8:47", bis: "11:20" } } },
   hilfe: stufe => (["s1", "s2"].includes(stufe) ? HILFE_LESEN
     : ["s3", "s4"].includes(stufe) ? `${HILFE_LESEN} ${HILFE_TIPPEN}`
     : `Rechne mit der Zeit und tipp das Ergebnis ein: Minuten oder eine Uhrzeit. ${HILFE_TIPPEN}`),

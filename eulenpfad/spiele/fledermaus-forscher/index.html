@@ -159,8 +159,6 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "fledermaus-forscher",
-  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "zyklus", bilder: "fledermaus", ziele: { s1: { echo: true }, s2: { jagd: 3 }, s3: { wochenstube: true }, s4: { jahr: true }, s5: { anpassungen: 3 }, s6: { jahr: true, ohneZeit: true } } },
   einleitung: "Fledermäuse fliegen in der Nacht, hängen kopfüber und hören, wo die Mücken sind. Was weisst du über sie?",
   hilfe: stufe => "Hör zu oder lies die Aussage oder Frage und wähl deine Antwort."
     + (["s4", "s5", "s6"].includes(stufe) ? " Beim Jahr der Fledermaus tippst du die Karten der Reihe nach an, angefangen beim Winter." : ""),

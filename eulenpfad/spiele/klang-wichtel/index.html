@@ -303,8 +303,6 @@ function tippsFuer(a) {
 }
 
 LS.spiel({
-  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "auftritt", bilder: "klangwichtel", ziele: { s1: { gegensatz: "laut" }, s2: { gegensatz: "lang" }, s3: { gegensatz: "schnell" }, s4: { vergleich: ["lang", 0.25, 1.2] }, s5: { schrift: ["k", "l", "l", "k"] }, s6: { karten: [["kurz", "laut"], ["lang", "leise"]], ziel: 1 } } },
   id: "klang-wichtel",
   hilfe: stufe => "Der Wichtel spielt die Töne gleich vor. Mit dem grossen Knopf 🔊 beim Wichtel hörst du sie nochmal."
     + (stufe === "s5" ? " Tipp für jeden Klang ein Zeichen. ⌫ nimmt das letzte weg, ✓ prüft." : ""),

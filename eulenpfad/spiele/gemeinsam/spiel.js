@@ -2262,6 +2262,11 @@ const LS = (() => {
   function spiel(def) { return nachBereit(() => spielJetzt(def)); }
   /** Ein Spiel starten, wenn Runden, Rekorde, Meldungen und Löschvermerke geladen sind (Kern 1.34.0; spiel). */
   function spielJetzt(def) {
+    // Abschluss-Animation aus dem Katalog (Entscheid GS1 a, LERN_Session32): dort ist sie die einzige Quelle, damit auch
+    // die Startseite das Kartenbild zeichnen kann. Eine Seite gibt sie nur selbst, wenn sie Daten der Seite braucht.
+    const feierAusKatalog = katalogEintrag(def.id)?.feier;
+    if (feierAusKatalog && def.feier) console.error(`${def.id}: feier im Katalog und in der Seite — nur eine Quelle (GS1 a)`);
+    if (feierAusKatalog) def.feier = feierAusKatalog;
     const buehne = document.querySelector(".buehne");
     const eigenesLob = Array.isArray(def.lob) && def.lob.length && def.lob.every(t => typeof t === "string" && t.trim() && t.length <= LOB_MAX);
     if (def.lob && !eigenesLob) console.warn(`${def.id}: def.lob ist keine Liste kurzer Lobe (höchstens ${LOB_MAX} Zeichen) — es gilt LOB`);

@@ -160,9 +160,6 @@ const stab = pole => el("div", { class: "stab" }, ...pole.map(p => el("span", { 
 
 LS.spiel({
   id: "magnet-labor",
-  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "sammeln", bilder: "magnet", ziele: { s1: { an: ["📎", "🔩"], nicht: ["🪵", "📄"] }, s2: { pole: [["N", "S"], ["S", "N"]] }, s3: { durch: "📄" },
-    s4: { kompass: true }, s5: { pole: [["S", "N"], ["S", "N"]], wahl: true }, s6: { strom: true } } },
   einleitung: "Willkommen im Labor! Was zieht der Magnet an? Und was passiert, wenn zwei Magnete sich treffen?",
   hilfe: "Überleg, was der Magnet mit dem Ding oder mit dem anderen Magneten macht, und gib deine Antwort.",
   anzahl: 8,

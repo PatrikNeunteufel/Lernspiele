@@ -201,12 +201,6 @@ const HILFE = {
 
 LS.spiel({
   id: "tageslauf-sonne",
-  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "zyklus", bilder: "sonnenbogen", ziele: { s1: { zeiten: ["mittag", "nacht"], bilder: ["🍝", "🛌"] },
-    s2: { zeiten: ["morgen", "mittag", "abend", "nacht"], bilder: ["🥣", "🍝", "🛁", "🛌"] },
-    s3: { zeiten: ["morgen", "mittag", "nachmittag", "abend", "nacht"], bilder: ["⏰", "🍲", "🍪", "📖", "🦉"] },
-    s4: { zeiten: ["morgen", "mittag", "abend"], bilder: ["🥐", "🥗", "🧸"] }, s5: { woche: 2 },
-    s6: { zeiten: ["morgen", "mittag", "nachmittag", "abend"], bilder: ["🐓", "🍽️", "🧃", "🛁"], fremd: "🦇" } } },
   hilfe: stufe => (stufe === "s6" ? `${HILFE.ordnen} Oder du tippst das Bild, das nicht zu den anderen passt.`
     : HILFE[STUFE[stufe]?.arten[0]] || HILFE.zuordnen),
   einleitung: "Die Sonne wandert über den Himmel: Am Morgen geht sie auf, am Abend geht sie unter. Was machst du wann?",

@@ -758,11 +758,6 @@ const HINWEIS_WAHL = {
 
 LS.spiel({
   id: ID,
-  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "wachsen", bilder: "diagramm", ziele: { s1: { art: "saeulen", werte: [25, 40, 15, 30], schritt: 10 },
-    s2: { art: "kreis", teile: [[1, 2], [1, 4], [1, 4]] }, s3: { art: "kreis", teile: [[3, 8], [1, 8], [1, 2]] },
-    s4: { art: "linie", werte: [12, 15, 14, 18, 22, 21, 25], schritt: 5 }, s5: { art: "kreis", teile: [[1, 2], [3, 10], [1, 5]], prozent: true },
-    s6: { art: "saeulen", werte: [14, 18, 11, 17], schritt: 5, mittel: 15 } } },
   einleitung: "Kreis, Säulen oder Linie? Jedes Diagramm erzählt etwas anderes. Finde heraus, welches zur Frage passt — und lies genau, was es zeigt!",
   hilfe: stufe => HILFE[stufe],
   anzahl: 8,

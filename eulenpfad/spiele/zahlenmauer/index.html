@@ -131,10 +131,6 @@ function aufgabeErzeugen(stufe) {
 
 LS.spiel({
   id: "zahlenmauer",
-  // Abschluss-Animation (Pilot P5, Muster BAUEN; docs/konzept_abschluss_animationen.md 7): die Mauer baut sich Stein um
-  // Stein; Grundsteine je Stufe in Form und Zahlenraum der Stufe (STUFE oben: 3, 4, 5 Grundsteine; oberster bis 20, 100, 1000)
-  feier: { muster: "bauen", bilder: "mauer", ziele: { s1: [2, 3, 4], s2: [12, 9, 15], s3: [8, 25, 14], s4: [5, 9, 7, 11],
-    s5: [45, 80, 115, 60], s6: [35, 90, 120, 55, 100] } },
   einleitung: "Baue die Zahlenmauer fertig! Jeder Stein ist so gross wie die beiden Steine darunter zusammen.",
   hilfe: "Tipp auf einen leeren Stein mit „?“ — er leuchtet auf. Dann tippst du seine Zahl ein und drückst OK. Ist sie richtig, kommt von selbst der nächste leere Stein dran; du kannst aber jederzeit einen anderen antippen.",
   anzahl: 5,

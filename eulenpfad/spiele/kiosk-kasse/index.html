@@ -185,10 +185,6 @@ function tippsFuer(art, mitRappen) {
 
 LS.spiel({
   id: "kiosk-kasse",
-  // Abschluss-Animation (feier.js, Block M4, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "sammeln", bilder: "kasse", klasse: 2, ziele: { s1: { legen: [1000, 500, 200] }, s2: { legen: [5000, 2000, 1000, 500, 200] },
-    s3: { legen: [500, 200, 20, 20] }, s4: { preise: [1360], bezahlt: 2000, zurueck: [500, 100, 20, 20] },
-    s5: { preise: [350, 420, 180], bezahlt: 1000, zurueck: [50] }, s6: { menge: 4, preise: [235], bezahlt: 1000, zurueck: [50, 10], wenig: true } } },
   hilfe: stufe => (stufe === "s5" ? "Rechne und tipp den Betrag ein." : "Beim Legen tippst du auf Münzen und Noten, sie kommen in die Kasse; tipp ein Stück in der Kasse nochmal an, um es zurückzunehmen.")
     + (STUFE[stufe].raster < 100 ? ` Beträge tippst du ohne Komma ein: 1 3 6 0 heisst ${LS.geldText(1360)}` : " Beträge tippst du in Franken ein."),
   einleitung: "Willkommen im Kiosk! Lege Geld in die Kasse, zähl zusammen und gib das Rückgeld richtig heraus.",

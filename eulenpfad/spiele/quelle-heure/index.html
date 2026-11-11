@@ -291,8 +291,6 @@ function tippsFuer(a, stufe) {
 }
 
 LS.spielMitStimme({
-  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "zyklus", bilder: "uhren", ziele: { s1: { zeiten: ["3:00"], hoeren: true }, s2: { zeiten: ["1:00", "8:00"] }, s3: { zeiten: ["4:15", "6:30", "8:45"] }, s4: { zeiten: ["5:10", "5:40"] }, s5: { zeiten: ["15:30", "12:00", "0:00"], tag: ["", "☀️", "🌙"] }, s6: { zeiten: ["11:45", "23:35"], hoeren: true } } },
   id: "quelle-heure",
   hilfe: stufe => "Hör zu oder lies, wie spät es ist. Dann tippst du die passende Uhr oder den passenden Satz an, tippst die Uhrzeit ein oder stellst die Uhr."
     + (stufe === "s1" || stufe === "s2" ? " Zum Stellen tippst du die Zahl an, auf die der kurze Zeiger zeigen soll, dann „OK ✓“."

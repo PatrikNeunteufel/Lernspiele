@@ -738,14 +738,6 @@ function tippsFuer(a, p) {
 
 LS.spiel({
   id: "sachaufgaben-kompass",
-  // Abschluss-Animation (feier.js, Block M4, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "reise", bilder: "kompass", klasse: 6, ziele: { s1: { schritte: [{ r: [24, "·", [12, "Fr."]], e: "Fr." }] },
-    s2: { schritte: [{ r: [3, "·", [4, "Fr."]], e: "Fr." }, { r: [[20, "Fr."], "−", [12, "Fr."]], e: "Fr." }] },
-    s3: { unwichtig: [45, "min"], schritte: [{ r: [[21.6, "Fr."], ":", 3], e: "Fr." }, { r: [5, "·", [7.2, "Fr."]], e: "Fr." }] },
-    s4: { saeulen: [120, 85, 64], schritte: [{ r: [[120, "Fr."], "+", [85, "Fr."], "+", [64, "Fr."]], e: "Fr." }] },
-    s5: { schritte: [{ r: [[6, "Fr."], "+", 8, "·", [3, "Fr."]], e: "Fr." }] },
-    s6: { unwichtig: [3, "h"], schritte: [{ r: [24, "·", [35, "Fr."]], e: "Fr." }, { r: [[840, "Fr."], "+", [360, "Fr."]], e: "Fr." },
-      { r: [[1200, "Fr."], ":", 24], e: "Fr." }] } } },
   einleitung: "Ein Sachtext steckt voller Zahlen. Finde heraus, welche du wirklich brauchst, wähle den Rechenweg und gib das Ergebnis mit der richtigen Einheit an!",
   hilfe: stufe => {
     const ph = STUFE[stufe]?.phasen || ["angaben", "weg", "zusammenhang", "ergebnis"];

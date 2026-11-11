@@ -310,8 +310,6 @@ function tippsFuer(a, p) {
 const EINGABE_HILFE = "Tipp die Buchstaben deiner Antwort auf den Buchstabentasten, ⌫ löscht, „OK ✓“ prüft.";
 
 LS.spiel({
-  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "zyklus", bilder: "scheibe", ziele: { s1: { wort: "C", schluessel: 2, richtung: "ver" }, s2: { wort: "KXQG", schluessel: 3, richtung: "ent" }, s3: { wort: "BAUM", schluessel: 4, richtung: "ver" }, s4: { wort: "ZEBRA", schluessel: 10, richtung: "ver" }, s5: { wort: "LBSL", schluessel: 7, richtung: "ent", knacken: [3, 12] }, s6: { wort: "WKTVAX", schluessel: 19, richtung: "ent", knacken: [5] } } },
   id: "geheimschrift-knacker",
   hilfe: stufe => ({
     s1: "Schau auf den Buchstabenkreis und geh die Schritte. Dann tipp auf den Buchstaben, bei dem du landest.",

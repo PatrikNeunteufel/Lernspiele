@@ -190,9 +190,6 @@ function tippsFuer(stufe) {
 }
 
 const SPIEL = {
-  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "auftritt", bilder: "reporter", ziele: { s1: { fragen: ["wer", "wo"] }, s2: { fragen: ["warum", "wer", "was"] }, s3: { fragen: ["schluss", "wo", "wann"] },
-    s4: { fragen: ["schluss", "schluss", "was"] }, s5: { fragen: ["zahl", "schluss", "wer"] }, s6: { fragen: ["kern", "zahl", "schluss", "wo"] } } },
   id: ID,
   hilfe: stufe => (STUFE[stufe]?.vorher ? "Lies zuerst die Fragen. " : "")
     + "Die Eule liest dir den Bericht vor, danach kommen die Fragen, eine nach der anderen. Mit „🔊 Nochmal hören“ hörst du ihn nochmal. Hat das Gerät keine deutsche Stimme, liest du den Bericht selbst (📖).",

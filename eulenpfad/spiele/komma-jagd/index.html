@@ -144,9 +144,6 @@ function tippsFuer(stufe) {
 const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => angeboten(s)));
 
 LS.spiel({
-  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "sammeln", bilder: "kommas", ziele: { s1: [{ woerter: 6, kommas: [3] }], s2: [{ woerter: 7, kommas: [3, 4] }], s3: [{ woerter: 7, kommas: [3, 4] }, { woerter: 5, kommas: [] }],
-    s4: [{ woerter: 6, kommas: [2] }], s5: [{ woerter: 6, kommas: [2] }, { woerter: 7, kommas: [3, 4] }], s6: [{ woerter: 9, kommas: [3, 4, 5] }, { woerter: 6, kommas: [] }] } },
   id: ID,
   hilfe: "Tipp auf die kleinen Lücken zwischen den Wörtern, um ein Komma zu setzen; nochmals tippen nimmt es weg. Dann tippst du auf „Prüfen ✓“.",
   einleitung: "Auf der Jagd nach Kommas! Tippe zwischen die Wörter, wo ein Komma hingehört. Nochmals tippen nimmt es weg. Dann „Prüfen“.",

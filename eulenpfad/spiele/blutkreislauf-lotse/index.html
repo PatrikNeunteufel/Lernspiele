@@ -472,8 +472,6 @@ let gezeigt = null;
 
 LS.spiel({
   id: "blutkreislauf-lotse",
-  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "reise", bilder: "blut", ziele: { s1: { organe: true }, s2: { bis: 3 }, s3: { bis: 5 }, s4: { bis: 8 }, s5: { bis: 8, kammern: true }, s6: { bis: 8, kammern: true, spaet: true } } },
   hilfe: stufe => (stufe === "s1" ? "Tippe im Körperbild auf das Organ, nach dem gefragt wird, oder tippe die passende Antwort an."
     : stufe === "s5" ? "Lies die Frage und tippe die passende Antwort an."
     : "Lotse das Blutkörperchen: Tippe im Bild Station für Station an, wohin es fliesst. Ist etwas gelb markiert, tippst du unten die passende Antwort an."),

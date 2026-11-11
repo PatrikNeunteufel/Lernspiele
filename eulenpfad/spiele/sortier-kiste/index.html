@@ -297,14 +297,6 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "sortier-kiste",
-  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "sammeln", bilder: "sortieren", ziele: {
-    s1: { regel: "farbe", kisten: ["r", "b"], teile: [["kreis", "r", "gross"], ["kreis", "b", "gross"], ["quadrat", "r", "gross"], ["dreieck", "b", "gross"], ["kreis", "r", "gross"], ["quadrat", "b", "gross"]] },
-    s2: { regel: "form", kisten: ["kreis", "dreieck", "quadrat"], teile: [["kreis", "y", "gross"], ["dreieck", "r", "gross"], ["quadrat", "b", "gross"], ["dreieck", "g", "gross"], ["kreis", "b", "gross"], ["quadrat", "y", "gross"]] },
-    s3: { regel: "groesse", kisten: ["gross", "klein"], teile: [["kreis", "r", "gross"], ["kreis", "r", "klein"], ["quadrat", "b", "klein"], ["dreieck", "y", "gross"], ["quadrat", "g", "gross"], ["dreieck", "b", "klein"]] },
-    s4: { regel: "farbe", kisten: ["r", "b", "y"], zaehlen: true, teile: [["kreis", "r", "gross"], ["quadrat", "b", "gross"], ["dreieck", "y", "gross"], ["kreis", "y", "gross"], ["kreis", "b", "gross"], ["quadrat", "r", "gross"], ["dreieck", "y", "gross"], ["quadrat", "y", "gross"]] },
-    s5: { regel: "farbe-form", ziel: ["dreieck", "y"], kisten: ["ziel", "rest"], zaehlen: true, teile: [["dreieck", "y", "gross"], ["dreieck", "r", "gross"], ["kreis", "y", "gross"], ["dreieck", "y", "gross"], ["quadrat", "y", "gross"], ["dreieck", "b", "gross"], ["dreieck", "y", "gross"]] },
-    s6: { regel: "form", kisten: ["kreis", "dreieck", "quadrat"], zaehlen: true, teile: [["kreis", "r", "klein"], ["dreieck", "b", "gross"], ["quadrat", "y", "klein"], ["kreis", "g", "gross"], ["dreieck", "y", "klein"], ["quadrat", "r", "gross"], ["kreis", "b", "gross"], ["dreieck", "g", "gross"], ["quadrat", "b", "klein"]] } } },
   einleitung: "Hilf beim Aufräumen! Jede Form kommt in die passende Kiste. Schau genau: Farbe, Form oder Grösse?",
   hilfe: stufe => (stufe === "s6"
     ? "Schau in die grauen Kisten. Tippe an, wonach sortiert wurde — oder in welche Kiste die neue Form gehört."

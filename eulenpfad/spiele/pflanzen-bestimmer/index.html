@@ -761,9 +761,6 @@ const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => au
 
 LS.spiel({
   id: "pflanzen-bestimmer",
-  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "wachsen", bilder: "pflanze", ziele: { s1: { baeume: true }, s2: { blaetter: ["oval", "herz", "lanzett"] }, s3: { rand: true }, s4: { schluessel: true },
-    s5: { bluete: 4 }, s6: { bluete: 9 } } },
   einleitung: "Wie heisst diese Pflanze? Schau genau auf Blätter und Blüten — so bestimmen auch Fachleute Pflanzen!",
   hilfe: "Schau das Bild genau an und tippe die passende Antwort an. Beim Bestimmungsschlüssel beantwortest du Frage für Frage mit Ja oder Nein, bis nur eine Pflanze übrig ist. Manchmal tippst du direkt auf einen Teil der Blüte.",
   anzahl: 8,

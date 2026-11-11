@@ -454,10 +454,6 @@ const titel = a => el("div", { class: "titel", text: UMFRAGEN[a.u].titel });
 
 LS.spiel({
   id: "diagramm-detektiv",
-  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "wachsen", bilder: "diagramm", ziele: { s1: { art: "strich", werte: [7, 4, 9] }, s2: { art: "saeulen", werte: [6, 3, 8, 5] },
-    s3: { art: "saeulen", werte: [12, 6, 16], schritt: 2, differenz: [0, 2] }, s4: { art: "saeulen", werte: [15, 25, 10, 20], schritt: 5, fehlt: 3 },
-    s5: { art: "saeulen", werte: [18, 24, 12, 22, 24], schritt: 5, mittel: 20 }, s6: { art: "saeulen", gruppen: true, werte: [[12, 15], [8, 10], [14, 9]], schritt: 5, total: 68 } } },
   hilfe: "Lies die Strichliste, die Tabelle oder das Säulendiagramm und beantworte die Frage: Antwort antippen oder Zahl eintippen. Fehlt eine Säule, tippst du in der leeren Spalte an, wie hoch sie sein muss, und dann auf «Prüfen ✓».",
   einleitung: "Detektivarbeit! Lies Strichlisten, Tabellen und Säulendiagramme genau — dann findest du jede Antwort.",
   anzahl: 8,

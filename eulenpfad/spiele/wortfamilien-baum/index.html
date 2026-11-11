@@ -310,10 +310,6 @@ function tippsFuer(a, stufe) {
 
 LS.spiel({
   id: "wortfamilien-baum",
-  // Abschluss-Animation (Pilot P4, Muster WACHSEN; docs/konzept_abschluss_animationen.md 7): der Baum wächst je Stufe
-  // einen Teil weiter, die Wörter sind nur als leere Kärtchen angedeutet
-  feier: { muster: "wachsen", bilder: "baum",
-    ziele: { s1: "stamm", s2: "ast", s3: "aeste", s4: "blaetter", s5: "blueten", s6: "fruechte" } },
   einleitung: "Wörter mit demselben Stamm gehören zu einer Familie: fahren, Fahrer, Abfahrt. Hilf mir, die Wörter an den richtigen Baum zu hängen!",
   hilfe: stufe => ({
     s1: "Am Baum hängen schon zwei Wörter einer Familie. Tipp unten das Wort an, das auch dazugehört.",

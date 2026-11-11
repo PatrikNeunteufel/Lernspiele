@@ -436,10 +436,6 @@ const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => au
 
 LS.spiel({
   id: "erdzeit-leiter",
-  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "reise", bilder: "erdleiter", ziele: { s1: { ereignisse: [[3.5e9, "🦠"], [230e6, "🦖"]] }, s2: { ereignisse: [[500e6, "🐟"], [230e6, "🦖"], [50e6, "🐋"]] },
-    s3: { ereignisse: [[3.5e9, "🦠"], [500e6, "🐟"], [230e6, "🦖"], [66e6, "☄️"]], zahlen: true }, s4: { ereignisse: [[450e6, "🌿"], [370e6, "🐸"], [150e6, "🪶"], [30e6, "🏔️"]] },
-    s5: { tag: [230e6, "🦖"] }, s6: { ereignisse: [[4.5e9, "🌕"], [600e6, "🪼"], [210e6, "🦕"], [3e6, "🦴"], [12000, "🌤️"]] } } },
   hilfe: "Tippe die passende Antwort an oder lege die Karte in den passenden Korb. Beim Ordnen tippst du die Ereignisse der Reihe nach an, das älteste zuerst. Auf der Erdzeit-Leiter tippst du den Abschnitt an, in den das Ereignis gehört.",
   einleitung: "Die Erde ist unvorstellbar alt: etwa 4600 Millionen Jahre! Klettere die Erdzeit-Leiter hinauf und ordne, was wann geschah.",
   anzahl: 8,

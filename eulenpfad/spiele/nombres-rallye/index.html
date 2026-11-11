@@ -213,8 +213,6 @@ function tippsFuer(a) {
 const hoerKnopf = text => el("button", { type: "button", class: "nr-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(text) });
 
 LS.spielMitStimme({
-  // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "reise", bilder: "rallye", ziele: { s1: { von: 0, bis: 10, tafeln: [2, 5, 8, 10] }, s2: { von: 0, bis: 20, tafeln: [11, 14, 17, 20] }, s3: { von: 0, bis: 69, tafeln: [21, 46, 58, 61, 69] }, s4: { von: 70, bis: 100, tafeln: [71, { ch: 80 }, 92, 100] }, s5: { von: 0, bis: 100, tafeln: [{ geld: 350 }, { telefon: [45, 67, 89] }] }, s6: { von: 0, bis: 100, tafeln: [{ ch: 87 }, { geld: 9950 }, { telefon: [21, 34, 56, 78] }], ziel: true } } },
   id: "nombres-rallye",
   einleitung: "Nombres-Rallye! Un, deux, trois … Hör gut zu und finde die Zahl. Achtung bei soixante-dix: Das ist 60 + 10!",
   hilfe: "Hör die Zahl oder lies das Wort. Dann tippst du die Zahl ein oder tippst die passende Antwort an. Mit „🔊 nochmal“ hörst du es noch einmal.",

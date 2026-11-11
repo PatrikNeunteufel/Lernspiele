@@ -188,9 +188,6 @@ function tippsFuer(stufe) {
 
 LS.spiel({
   id: "wortarten-sortierer",
-  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "sammeln", bilder: "wortkoerbe", ziele: { s1: { koerbe: [1, 1, 1], aus: "karte" }, s2: { koerbe: [2, 2, 1], aus: "karte" }, s3: { koerbe: [2, 2, 2], aus: "satz" },
-    s4: { koerbe: [3, 3, 2], aus: "satz" }, s5: { koerbe: [3, 3, 3], aus: "satz" }, s6: { koerbe: [4, 3, 3], aus: "satz", jeSatz: 3 } } },
   einleitung: "Jedes Wort gehört in einen Korb: Nomen, Verb oder Adjektiv. Weisst du, wohin?",
   hilfe: stufe => (stufe === "s6"
     ? "Im Satz sind mehrere Wörter markiert. Tipp für das hervorgehobene Wort auf den Korb mit seiner Wortart — dann kommt das nächste dran."

@@ -481,13 +481,6 @@ const SCHRITT_NAME = { gleichung: "Gleichung wählen", umkehr: "Umkehrrechnung w
 
 LS.spiel({
   id: ID,
-  // Abschluss-Animation (feier.js, Block M4, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "sammeln", bilder: "platzhalter", ziele: { s1: { gleichungen: [{ gl: [7, "+", 5, "=", "?"], wert: 12 }] },
-    s2: { gleichungen: [{ gl: [28, "+", "?", "=", 50], wert: 22, umkehr: [50, "−", 28] }] },
-    s3: { gleichungen: [{ gl: ["?", "−", 15, "=", 27], wert: 42, umkehr: [27, "+", 15] }] },
-    s4: { gleichungen: [{ gl: ["?", "·", 8, "=", 320], wert: 40, umkehr: [320, ":", 8] }] },
-    s5: { gleichungen: [{ gl: [945, ":", "?", "=", 7], wert: 135, umkehr: [945, ":", 7] }] },
-    s6: { gleichungen: [{ gl: [3, "·", "?", "=", 240], wert: 80 }, { gl: ["?", "+", 80, "=", 500], wert: 420 }] } } },
   einleitung: "In jeder Geschichte fehlt eine Zahl. Mit der Umkehrrechnung findest du sie — und die Probe zeigt, dass sie stimmt!",
   hilfe: stufe => ({
     s1: "Lies oder hör die Geschichte. Darunter steht die Rechnung mit einer Lücke. Rechne aus und tipp die Zahl auf der Tastatur ein.",

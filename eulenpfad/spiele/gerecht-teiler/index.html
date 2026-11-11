@@ -203,9 +203,6 @@ function tippsFuer(p) {
 
 LS.spiel({
   id: "gerecht-teiler",
-  // Abschluss-Animation (feier.js, Block M3, docs/konzept_abschluss_animationen.md 7)
-  feier: { muster: "sammeln", bilder: "teller", ziele: { s1: { teller: [4, 2] }, s2: { teller: [7, 3] }, s3: { teller: [6, 2, 4] },
-    s4: { teller: [8, 4] }, s5: { teller: [15, 0], schale: 0 }, s6: { teller: [8, 5, 7, 4], schale: 5 } } },
   hilfe: stufe => (stufe === "s4" ? "Zähl die Teller und tipp auf die Zahl: So viele musst du hinüberlegen."
     : stufe === "s1" || stufe === "s2" ? "Tipp auf ein Ding: Es hüpft auf den anderen Teller. Ist es gerecht, tipp auf ✓. Mit ↺ fängst du von vorn an."
       : "Tipp zuerst auf ein Ding, dann auf den Teller oder die Schale, wo es hin soll. Ist es gerecht, tipp auf ✓. Mit ↺ fängst du von vorn an."),
